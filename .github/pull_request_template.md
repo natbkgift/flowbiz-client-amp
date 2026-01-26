@@ -35,7 +35,7 @@ Closes #<!-- issue number -->
 - [ ] All tests pass (`pytest -q`)
 - [ ] Linting passes (`ruff check .`)
 - [ ] Type checking passes (`mypy apps packages`)
-- [ ] Test coverage maintained (> 70%)
+- [ ] Test coverage meets documented target (see docs/AMP_ARCHITECTURE_BLUEPRINT.md)
 
 ## Security
 - [ ] No secrets in code or committed files
