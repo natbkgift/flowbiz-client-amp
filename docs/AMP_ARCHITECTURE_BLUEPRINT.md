@@ -674,7 +674,7 @@ ruff check .
        └─────────┘
 ```
 
-**Test Coverage Target:** > 80%
+**Test Coverage Target:** ≥ 70%
 
 ### CI/CD Pipeline
 
