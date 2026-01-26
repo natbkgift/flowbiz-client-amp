@@ -1,351 +1,433 @@
-# Google Ads Checklist
+# Google Ads Checklist - AMP
 
-> ✅ Checklist การตั้งค่าและจัดการ Google Ads สำหรับ AMP Real Estate
+> 📢 Checklist สำหรับการตั้งค่าและจัดการ Google Ads สำหรับธุรกิจอสังหาริมทรัพย์
 
 ## Overview
 
-เอกสารนี้เป็น comprehensive checklist สำหรับการตั้งค่า Google Ads ตั้งแต่เริ่มต้นจนถึงการ optimize แคมเปญ ครอบคลุมทั้ง Search Ads และ Display Ads สำหรับธุรกิจอสังหาริมทรัพย์
+เอกสารนี้เป็น checklist สำหรับการตั้งค่าและจัดการ Google Ads campaigns สำหรับ Asset Management Property (AMP) ในตลาดอสังหาริมทรัพย์พัทยา
+
+### Campaign Types
+
+| Campaign Type | Purpose | Priority |
+|---------------|---------|----------|
+| Search | จับ intent ผู้ค้นหา property | High |
+| Display | Brand awareness, Remarketing | Medium |
+| YouTube | Video ads, Property tours | Medium |
+| Performance Max | Automated multi-channel | High |
 
 ---
 
-## Phase 1: Account Setup & Configuration
+## Phase 1: Account Setup
 
-### Google Ads Account Setup
-- [ ] สร้าง Google Ads Account ใหม่หรือเข้าถึง Account ที่มีอยู่
-- [ ] เชื่อมต่อบัญชีธนาคารสำหรับการชำระเงิน
-- [ ] ตั้งค่า Billing information และ payment method
-- [ ] ตั้งค่า Time zone และ Currency (THB)
-- [ ] กำหนด Budget ประจำวัน/เดือนตาม Phase 0 budget
+### 1.1 Google Ads Account
 
-### Google Analytics & Tag Manager Integration
-- [ ] สร้างและเชื่อมต่อ GA4 property
-- [ ] ลิงก์ Google Ads กับ GA4
-- [ ] ตั้งค่า Conversion tracking goals ใน GA4
-- [ ] สร้าง Google Tag Manager container (ถ้ายังไม่มี)
-- [ ] ติดตั้ง Google Ads Conversion Tag ผ่าน GTM
+- [ ] สร้าง Google Ads account (หรือใช้ account ที่มีอยู่)
+- [ ] ยืนยันข้อมูลธุรกิจ (Business information)
+- [ ] ตั้งค่า billing method (Credit card / Bank transfer)
+- [ ] เลือก currency: THB (Thai Baht)
+- [ ] ตั้งค่า timezone: Asia/Bangkok (GMT+7)
 
-### Conversion Tracking Setup
-- [ ] กำหนด conversion actions ที่สำคัญ:
-  - [ ] Lead Form Submission
-  - [ ] Phone Call Click
-  - [ ] LINE/WhatsApp Click
-  - [ ] Property Inquiry
-  - [ ] Site Visit Duration > 3 min
-- [ ] ติดตั้ง Conversion tracking code บนทุกหน้า Landing Page
-- [ ] ทดสอบ Conversion tracking ด้วย Google Tag Assistant
-- [ ] Import Conversion จาก GA4 (optional)
+### 1.2 Google Tag Manager (GTM)
 
-### Audience & Remarketing Setup
-- [ ] สร้าง Remarketing audiences:
-  - [ ] Site visitors (ทุกคน)
-  - [ ] Property viewers (คนดูรายละเอียดทรัพย์สิน)
-  - [ ] Lead form starters (เริ่มกรอกฟอร์มแต่ไม่ส่ง)
-  - [ ] Converters (คนที่ส่งฟอร์มแล้ว - for exclusion)
-- [ ] ตั้งค่า Audience duration (30-90 days)
-- [ ] เชื่อมต่อ Google Analytics audiences
+- [ ] สร้าง GTM Container สำหรับ AMP website
+- [ ] ติดตั้ง GTM code บน website (head และ body)
+- [ ] ยืนยันว่า GTM ทำงานถูกต้อง (Preview mode)
+- [ ] สร้าง Workspace สำหรับ development
 
----
+**GTM Container Checklist:**
+```
+Container Name: AMP-GTM-Production
+Container ID: GTM-XXXXXXX
+Website: assetamp.net (or your domain)
+```
 
-## Phase 2: Campaign Structure Planning
+### 1.3 Google Analytics 4 (GA4)
 
-### Campaign Strategy Definition
-- [ ] กำหนด Campaign objectives ตาม business goals
-- [ ] วางแผน Campaign structure:
-  - [ ] Brand Campaign (branded keywords)
-  - [ ] Generic Search Campaign (คำทั่วไป)
-  - [ ] Competitor Campaign (competitor keywords)
-  - [ ] Display Remarketing Campaign
-  - [ ] Discovery/Demand Gen Campaign (optional)
-- [ ] กำหนด Budget allocation ระหว่างแคมเปญ
+- [ ] สร้าง GA4 Property
+- [ ] เชื่อมต่อ GA4 กับ GTM
+- [ ] ตั้งค่า Enhanced Measurement
+- [ ] สร้าง Data Streams (Web)
+- [ ] เชื่อมต่อ Google Ads กับ GA4
 
-### Keyword Research & Planning
-- [ ] Research keywords ใน 3 categories:
-  - [ ] **Branded:** "Asset Management Property", "AMP Pattaya"
-  - [ ] **Generic:** "คอนโด พัทยา", "บ้านเช่า พัทยา", "pattaya condo for sale"
-  - [ ] **Competitor:** competitor brand names (ระวังเรื่อง trademark)
-- [ ] ใช้ Google Keyword Planner หา search volume และ CPC
-- [ ] จัดกลุ่ม keywords ตาม themes/ad groups
-- [ ] สร้าง Negative keyword list (irrelevant terms)
+**GA4 Configuration:**
+```
+Property Name: AMP - Asset Management Property
+Property ID: XXXXXXXXX
+Data Stream: Web - assetamp.net
+```
 
-### Ad Copy Planning
-- [ ] เตรียม Headlines (3-15 options) สำหรับ Responsive Search Ads
-- [ ] เตรียม Descriptions (2-4 options)
-- [ ] เตรียม Display URLs และ Final URLs
-- [ ] เขียน Ad Copy ทั้ง Thai และ English versions
-- [ ] รวม USPs: Location, Price range, Amenities, Investment ROI
+### 1.4 Conversion Tracking Setup
+
+- [ ] สร้าง Conversion Actions ใน Google Ads:
+
+| Conversion Action | Type | Value | Count |
+|-------------------|------|-------|-------|
+| Lead Form Submit | Lead | ฿500 | Every |
+| Phone Call (60s+) | Call | ฿300 | Every |
+| WhatsApp Click | Click | ฿100 | Every |
+| LINE Add Friend | Click | ฿200 | Every |
+| Property View | Page View | ฿50 | One |
+
+- [ ] ติดตั้ง Conversion Tags ผ่าน GTM
+- [ ] ทดสอบ Conversion Tracking (Tag Assistant)
+- [ ] ยืนยัน Conversions ใน Google Ads dashboard
 
 ---
 
-## Phase 3: Search Campaign Setup
+## Phase 2: Campaign Structure
 
-### Campaign Configuration
-- [ ] สร้าง Search Campaign ใหม่
-- [ ] เลือก Goal: "Leads" หรือ "Website traffic"
-- [ ] ตั้งค่า Campaign name ตามโครงสร้าง: `[AMP] Search - [Theme]`
-- [ ] เลือก Networks: Search Network only (ปิด Display Network)
-- [ ] ตั้งค่า Locations: Thailand (หรือ Bangkok, Pattaya ถ้าต้องการ specific)
-- [ ] ตั้งค่า Languages: Thai + English
-- [ ] กำหนด Daily budget
-- [ ] เลือก Bidding strategy:
-  - [ ] Manual CPC (ระยะแรก)
-  - [ ] หรือ Maximize Conversions (ถ้ามีข้อมูลเพียงพอ)
+### 2.1 Account Structure
 
-### Ad Groups & Keywords
-- [ ] สร้าง Ad Groups ตาม keyword themes
-- [ ] ใส่ keywords ในแต่ละ Ad Group (5-20 keywords/group)
-- [ ] ตั้งค่า Match types:
-  - [ ] Exact match `[keyword]` - high intent
-  - [ ] Phrase match `"keyword"` - moderate intent
-  - [ ] Broad match `keyword` - ใช้อย่างระมัดระวัง
-- [ ] กำหนด keyword bids ตาม estimated CPC
+```
+AMP Google Ads Account
+│
+├── 📁 Campaign: [Search] Pattaya Condo Buy
+│   ├── Ad Group: Branded Keywords
+│   ├── Ad Group: Condo + Location
+│   ├── Ad Group: Investment Keywords
+│   └── Ad Group: Competitor Keywords
+│
+├── 📁 Campaign: [Search] Pattaya Condo Rent
+│   ├── Ad Group: Rental Keywords
+│   ├── Ad Group: Expat Rental
+│   └── Ad Group: Long-term Rental
+│
+├── 📁 Campaign: [Search] Pattaya Villa
+│   ├── Ad Group: Villa Buy
+│   ├── Ad Group: Pool Villa
+│   └── Ad Group: Luxury Villa
+│
+├── 📁 Campaign: [Display] Remarketing
+│   ├── Ad Group: Website Visitors
+│   ├── Ad Group: Lead Form Abandonment
+│   └── Ad Group: Property Viewers
+│
+├── 📁 Campaign: [YouTube] Property Tours
+│   ├── Ad Group: Condo Tours
+│   ├── Ad Group: Villa Tours
+│   └── Ad Group: Area Guides
+│
+└── 📁 Campaign: [PMax] All Properties
+    └── Asset Groups by Property Type
+```
 
-### Responsive Search Ads (RSA)
-- [ ] สร้าง RSA อย่างน้อย 2-3 ads ต่อ Ad Group
-- [ ] ใส่ Headlines (3-15 options):
-  - [ ] รวม keywords หลัก
-  - [ ] รวม Call-to-Action
-  - [ ] รวม Unique Selling Points
-  - [ ] Pin headline 1 ถ้าจำเป็น (brand name)
-- [ ] ใส่ Descriptions (2-4 options)
-- [ ] ตั้งค่า Display path (optional)
-- [ ] เพิ่ม Ad URL options (tracking parameters)
+### 2.2 Campaign Setup Checklist
 
-### Ad Extensions
-- [ ] **Sitelink Extensions:** 
-  - [ ] "ดูคอนโดทั้งหมด"
-  - [ ] "วิลล่า พูลวิลล่า"
-  - [ ] "ติดต่อเรา"
-  - [ ] "เกี่ยวกับเรา"
-- [ ] **Callout Extensions:**
-  - [ ] "ทำเลใจกลางพัทยา"
-  - [ ] "ผ่อน 0% นาน 12 เดือน"
-  - [ ] "ฟรีค่าโอน"
-  - [ ] "ROI 6-8% ต่อปี"
-- [ ] **Call Extensions:** เบอร์โทรหลักของ AMP
-- [ ] **Location Extensions:** เชื่อมต่อ Google My Business
-- [ ] **Structured Snippet Extensions:** Property Types, Amenities
-- [ ] **Price Extensions:** แสดงราคาช่วง (ถ้าเหมาะสม)
+For each campaign:
 
----
+- [ ] ตั้งชื่อ Campaign ตาม naming convention
+- [ ] เลือก Campaign Type (Search/Display/YouTube/PMax)
+- [ ] ตั้งค่า Campaign Goal (Leads/Sales/Traffic)
+- [ ] เลือก Networks (Search/Display partners)
+- [ ] ตั้งค่า Location targeting: Pattaya, Chonburi, Bangkok
+- [ ] ตั้งค่า Language: Thai, English
+- [ ] ตั้งค่า Budget (Daily/Monthly)
+- [ ] เลือก Bidding Strategy
 
-## Phase 4: Display Campaign Setup
+**Bidding Strategy Recommendations:**
 
-### Display Remarketing Campaign
-- [ ] สร้าง Display Campaign ใหม่
-- [ ] เลือก Goal: "Sales" หรือ "Leads"
-- [ ] ตั้งค่า Campaign name: `[AMP] Display - Remarketing`
-- [ ] เลือก Campaign subtype: "Standard Display"
-- [ ] ตั้งค่า Locations และ Languages
-- [ ] กำหนด Daily budget (10-20% ของ total budget)
-- [ ] เลือก Bidding: Target CPA หรือ Manual CPC
-
-### Targeting & Audiences
-- [ ] เลือก Audience targeting:
-  - [ ] Remarketing audiences (ที่สร้างไว้แล้ว)
-  - [ ] Similar audiences (lookalike)
-- [ ] ตั้งค่า Audience exclusions:
-  - [ ] Exclude converters (คนที่ส่งฟอร์มแล้ว)
-- [ ] (Optional) เพิ่ม Demographic targeting
-- [ ] (Optional) เพิ่ม In-market audiences: Real Estate
-
-### Responsive Display Ads
-- [ ] สร้าง Responsive Display Ads
-- [ ] Upload images:
-  - [ ] Landscape (1200x628) - อย่างน้อย 1 รูป
-  - [ ] Square (1200x1200) - อย่างน้อย 1 รูป
-  - [ ] Logo (1200x1200 และ 1200x300)
-- [ ] เขียน Headlines (สั้น + ยาว)
-- [ ] เขียน Descriptions
-- [ ] ใช้ Brand name และ Call-to-Action ที่ชัดเจน
-- [ ] ตั้งค่า Final URL
+| Campaign Type | Starting Strategy | After 30 Conversions |
+|---------------|-------------------|----------------------|
+| Search | Manual CPC / Maximize Clicks | Target CPA |
+| Display | Maximize Conversions | Target CPA |
+| YouTube | Maximum CPV | Target CPA |
+| PMax | Maximize Conversions | Target CPA |
 
 ---
 
-## Phase 5: Quality Score & Optimization
+## Phase 3: Keyword Research
 
-### Pre-Launch Quality Checks
-- [ ] ตรวจสอบ Ad approval status (ไม่มี disapprovals)
-- [ ] ตรวจสอบ Landing pages loading speed (< 3 seconds)
-- [ ] ตรวจสอบ Landing pages mobile-friendly
-- [ ] ตรวจสอบ Conversion tracking ทำงานได้
-- [ ] ตรวจสอบ Budget และ Bids ตามแผน
-- [ ] Review keywords และ negative keywords
-- [ ] ตรวจสอบ Ad extensions ครบถ้วน
+### 3.1 Keyword Categories
 
-### Campaign Launch
-- [ ] Enable campaigns
-- [ ] ตรวจสอบ Impressions และ Clicks ใน 24 ชั่วโมงแรก
-- [ ] Monitor ใน 3-7 วันแรกอย่างใกล้ชิด
-- [ ] ตรวจสอบ Search terms report หา negative keywords
-- [ ] บันทึก Initial performance metrics
+#### Buy Intent Keywords (Thai)
+```
+คอนโดพัทยา ขาย
+ซื้อคอนโดพัทยา
+คอนโดติดทะเลพัทยา
+คอนโดวิวทะเลพัทยา
+คอนโดใกล้หาดพัทยา
+บ้านพัทยา ขาย
+วิลล่าพัทยา ขาย
+พูลวิลล่าพัทยา
+```
 
----
+#### Buy Intent Keywords (English)
+```
+pattaya condo for sale
+buy condo pattaya
+pattaya beachfront condo
+pattaya sea view condo
+pattaya villa for sale
+pattaya pool villa
+invest pattaya property
+pattaya real estate
+```
 
-## Phase 6: Ongoing Optimization (Weekly)
+#### Rent Intent Keywords
+```
+เช่าคอนโดพัทยา
+คอนโดพัทยา ให้เช่า
+rent condo pattaya
+pattaya condo for rent
+long term rental pattaya
+expat rental pattaya
+```
 
-### Performance Monitoring
-- [ ] ตรวจสอบ Key metrics:
-  - [ ] CTR (Click-Through Rate) - target > 3-5%
-  - [ ] CPC (Cost Per Click)
-  - [ ] Conversion Rate - target > 2-5%
-  - [ ] Cost Per Conversion/CPA
-  - [ ] ROAS/ROI
-  - [ ] Quality Score (target 7-10)
-- [ ] ดู Top performing ads และ keywords
-- [ ] ดู Poor performing ads และ keywords
+#### Location Keywords
+```
+คอนโดจอมเทียน
+คอนโดนาจอมเทียน
+คอนโดบางแสน
+คอนโดพระตำหนัก
+jomtien condo
+na jomtien condo
+pratumnak condo
+```
 
-### Keyword Optimization
-- [ ] Review Search Terms Report
-- [ ] เพิ่ม high-performing search terms เป็น keywords
-- [ ] เพิ่ม irrelevant search terms ใน negative keyword list
-- [ ] Adjust bids ตาม keyword performance:
-  - [ ] เพิ่ม bids สำหรับ high-performing keywords
-  - [ ] ลด bids สำหรับ low-performing keywords
-  - [ ] Pause keywords ที่ไม่ perform เลย
+### 3.2 Keyword Research Checklist
 
-### Ad Copy Optimization
-- [ ] Review Ad performance (CTR, Conversion rate)
-- [ ] Pause underperforming ads (CTR < 2%)
-- [ ] Create new ad variations สำหรับ A/B testing
-- [ ] Test different:
-  - [ ] Headlines
-  - [ ] Descriptions
-  - [ ] Call-to-Actions
-  - [ ] Offers/Promotions
+- [ ] ใช้ Google Keyword Planner หา keywords
+- [ ] วิเคราะห์ Search Volume และ Competition
+- [ ] แยก keywords ตาม intent (Buy/Rent/Research)
+- [ ] สร้าง Negative Keyword List
+- [ ] จัดกลุ่ม keywords ใส่ Ad Groups
 
-### Budget & Bid Optimization
-- [ ] ตรวจสอบว่า Budget limit ส่งผลกับ Impressions หรือไม่
-- [ ] Adjust daily budget ถ้า campaigns ถูก limited by budget
-- [ ] Reallocate budget จาก low-performing → high-performing campaigns
-- [ ] Adjust bids ตาม position และ impression share
-
-### Extension & Targeting Optimization
-- [ ] Review Extension performance
-- [ ] Update Sitelinks และ Callouts ตามโปรโมชั่นใหม่
-- [ ] ตรวจสอบ Location performance (ถ้ามี multiple locations)
-- [ ] ตรวจสอบ Device performance (Mobile vs Desktop)
-- [ ] Adjust bid adjustments ตาม device/location performance
-
----
-
-## Phase 7: Monthly Optimization
-
-### Deep Performance Analysis
-- [ ] สร้าง Monthly performance report:
-  - [ ] Impressions, Clicks, CTR
-  - [ ] Conversions, Conversion rate, CPA
-  - [ ] Spend และ Budget utilization
-  - [ ] ROI/ROAS
-- [ ] เปรียบเทียบกับ previous month และ targets
-- [ ] Identify trends และ patterns
-
-### Advanced Optimization
-- [ ] Audience Optimization:
-  - [ ] Review remarketing audience performance
-  - [ ] Adjust audience durations
-  - [ ] Test new audience segments
-- [ ] Ad Schedule Optimization:
-  - [ ] วิเคราะห์ performance ตาม day of week และ time of day
-  - [ ] ตั้งค่า Ad schedule bid adjustments
-- [ ] Geographic Optimization:
-  - [ ] วิเคราะห์ performance ตาม location
-  - [ ] Exclude locations ที่ไม่ perform
-  - [ ] เพิ่ม bid adjustments สำหรับ high-performing locations
-
-### Landing Page Testing
-- [ ] Review Landing page performance (bounce rate, conversion rate)
-- [ ] A/B test different landing page versions
-- [ ] Update landing page content ตาม seasonal offers
-- [ ] Improve page speed และ mobile experience
-
-### Competitive Analysis
-- [ ] ตรวจสอบ Auction Insights Report
-- [ ] วิเคราะห์ competitors' ad copy และ offers
-- [ ] Adjust strategy ตาม competitive landscape
-- [ ] Test bidding on competitor keywords (ถ้าเหมาะสม)
+**Negative Keywords List:**
+```
+ฟรี
+free
+ราคาถูกมาก
+งานก่อสร้าง
+สมัครงาน
+job
+career
+DIY
+how to build
+```
 
 ---
 
-## Conversion & ROI Benchmarks
+## Phase 4: Ad Copy Creation
 
-### Expected Metrics (Real Estate Industry)
+### 4.1 Responsive Search Ads (RSA)
 
-| Metric | Target Range | Notes |
-|--------|--------------|-------|
-| **CTR (Search)** | 3-8% | Higher for branded terms |
-| **CTR (Display)** | 0.5-1.5% | Remarketing usually higher |
-| **CPC** | ฿5-50 | Depends on keywords |
-| **Conversion Rate** | 2-10% | Landing page dependent |
-| **CPA (Cost Per Lead)** | ฿200-1,000 | Budget dependent |
-| **Quality Score** | 7-10 | Aim for 8+ |
+**Headlines (15 required):**
 
-### Budget Allocation Guidelines
-- **Search Campaigns:** 60-70% of total budget
-- **Display/Remarketing:** 20-30% of total budget
-- **Testing/Experiments:** 10% of total budget
+| # | Headline (TH) | Headline (EN) |
+|---|---------------|---------------|
+| 1 | คอนโดพัทยา วิวทะเล | Pattaya Sea View Condo |
+| 2 | ราคาเริ่มต้น 2 ล้านบาท | Starting from 2M THB |
+| 3 | ผ่อนเริ่มต้น 8,000/เดือน | Monthly from ฿8,000 |
+| 4 | ใกล้หาด 5 นาที | 5 Min to Beach |
+| 5 | สระว่ายน้ำ ฟิตเนส ครบ | Pool & Gym Included |
+| 6 | ลงทุนได้ผลตอบแทนดี | High ROI Investment |
+| 7 | ปรึกษาฟรี ไม่มีค่าใช้จ่าย | Free Consultation |
+| 8 | โปรโมชั่นพิเศษ เดือนนี้ | Special Offer This Month |
+| 9 | จองวันนี้ รับส่วนลด | Book Today, Get Discount |
+| 10 | ทีมงานมืออาชีพ | Professional Team |
+| 11 | บริการหลังการขายครบ | Full After-Sales Service |
+| 12 | 10+ ปีประสบการณ์ | 10+ Years Experience |
+| 13 | โครงการคุณภาพ | Quality Projects |
+| 14 | ทำเลดีที่สุด | Best Location |
+| 15 | นัดชมห้องจริงได้เลย | Schedule Viewing Now |
 
----
+**Descriptions (4 required):**
 
-## Troubleshooting Common Issues
+| # | Description |
+|---|-------------|
+| 1 | คอนโดพัทยาคุณภาพ วิวทะเลสวย ทำเลดี ใกล้ชายหาด สิ่งอำนวยความสะดวกครบ ปรึกษาทีมงานมืออาชีพฟรี |
+| 2 | Pattaya condos with stunning sea views. Prime location near the beach. Full amenities. Free consultation with our expert team. |
+| 3 | ลงทุนอสังหาฯพัทยา ผลตอบแทนดี ให้เช่าได้ตลอดปี ทีม AMP ดูแลครบวงจร ตั้งแต่ซื้อจนถึงบริหารการเช่า |
+| 4 | Invest in Pattaya real estate. High rental yields year-round. AMP provides full service from purchase to rental management. |
 
-### Low Impressions
-- [ ] Check if budget is too low
-- [ ] Check if bids are competitive (increase bids)
-- [ ] Expand keyword list (add more keywords)
-- [ ] Broaden match types
-- [ ] Check Location/Language settings
+### 4.2 Ad Copy Checklist
 
-### Low CTR
-- [ ] Improve ad copy (more compelling headlines)
-- [ ] Add/improve ad extensions
-- [ ] Refine keyword targeting (more specific)
-- [ ] Check ad relevance to keywords
-- [ ] Add negative keywords
-
-### Low Conversion Rate
-- [ ] Review landing page (load speed, mobile-friendliness)
-- [ ] Improve landing page copy และ CTA
-- [ ] Check conversion tracking (working correctly?)
-- [ ] Review keyword intent (are they right fit?)
-- [ ] Test different offers
-
-### High CPA
-- [ ] Review keyword quality (pause expensive non-converters)
-- [ ] Improve Quality Score (better ad relevance)
-- [ ] Optimize landing page (increase conversion rate)
-- [ ] Use bid strategies (Target CPA)
-- [ ] Focus budget on best performers
+- [ ] สร้าง Headlines 15 ข้อ (ตาม template)
+- [ ] สร้าง Descriptions 4 ข้อ
+- [ ] ใส่ Keywords ใน Headlines
+- [ ] มี CTA ที่ชัดเจน
+- [ ] Highlight USPs (Unique Selling Points)
+- [ ] A/B Test variations
 
 ---
 
-## Tools & Resources
+## Phase 5: Ad Extensions
 
-### Essential Tools
-- **Google Ads Editor** - Bulk editing และ offline work
-- **Google Keyword Planner** - Keyword research
-- **Google Analytics** - Website และ conversion tracking
-- **Google Tag Manager** - Tag management
-- **Google Ads Scripts** - Automation (advanced)
+### 5.1 Extensions Checklist
 
-### Helpful Chrome Extensions
-- **Google Tag Assistant** - ตรวจสอบ tags
-- **SEOquake** - Competitor research
-- **Keywords Everywhere** - Quick keyword data
+- [ ] **Sitelink Extensions**
+  - [ ] คอนโดพัทยา → /pattaya-condos
+  - [ ] วิลล่าพัทยา → /pattaya-villas
+  - [ ] ทรัพย์ให้เช่า → /rentals
+  - [ ] ติดต่อเรา → /contact
 
-### Learning Resources
-- [Google Ads Help Center](https://support.google.com/google-ads/)
-- [Google Skillshop](https://skillshop.withgoogle.com/) - Free training
-- Google Ads Certification (recommended)
+- [ ] **Callout Extensions**
+  - [ ] ปรึกษาฟรี
+  - [ ] 10+ ปีประสบการณ์
+  - [ ] บริการหลังการขาย
+  - [ ] รับประกันคุณภาพ
+
+- [ ] **Structured Snippets**
+  - [ ] Types: คอนโด, วิลล่า, บ้านเดี่ยว, ทาวน์เฮ้าส์
+  - [ ] Locations: พัทยา, จอมเทียน, นาจอมเทียน, บางแสน
+
+- [ ] **Call Extension**
+  - [ ] เบอร์โทรหลัก: 0XX-XXX-XXXX
+  - [ ] ตั้งเวลา: 9:00 - 20:00
+
+- [ ] **Location Extension**
+  - [ ] เชื่อมต่อ Google Business Profile
+  - [ ] ยืนยันที่อยู่สำนักงาน
+
+- [ ] **Lead Form Extension**
+  - [ ] ตั้งค่า Lead Form
+  - [ ] Fields: ชื่อ, เบอร์โทร, อีเมล, งบประมาณ
+  - [ ] เชื่อมต่อกับ CRM/Google Sheets
 
 ---
 
-## Notes
+## Phase 6: Audiences
 
-- **Quality Score** คือตัวชี้วัดความ relevant ของ ads, keywords, และ landing pages - สูงกว่าดีกว่า
-- **Negative Keywords** สำคัญมากในการลด wasted spend
-- **Ad Extensions** เพิ่ม CTR และให้ข้อมูลมากขึ้นโดยไม่เสียค่าใช้จ่ายเพิ่ม
-- **Remarketing** มักจะมี conversion rate สูงกว่า และ CPA ต่ำกว่า cold traffic
-- ใช้เวลาอย่างน้อย **2-4 สัปดาห์** ก่อนจะมีข้อมูลเพียงพอสำหรับการตัดสินใจ optimize
+### 6.1 Audience Setup
+
+- [ ] **Remarketing Audiences**
+  - [ ] All Website Visitors (30 days)
+  - [ ] Property Page Viewers (14 days)
+  - [ ] Lead Form Visitors (No Submit)
+  - [ ] Converters (Exclude from prospecting)
+
+- [ ] **Custom Audiences**
+  - [ ] Interest: Real Estate Investment
+  - [ ] Interest: Property in Thailand
+  - [ ] Interest: Expat Life in Thailand
+  - [ ] In-Market: Residential Properties
+
+- [ ] **Similar Audiences**
+  - [ ] Similar to Converters
+  - [ ] Similar to High-Value Leads
+
+### 6.2 Audience Configuration
+
+```
+Audience: Website Visitors - All
+Membership Duration: 30 days
+Source: Google Ads Tag / GTM
+
+Audience: Property Viewers
+Membership Duration: 14 days
+Source: URL contains /property/ OR /condo/ OR /villa/
+
+Audience: Lead Form Abandonment
+Membership Duration: 7 days
+Source: Visited /contact but no conversion
+```
+
+---
+
+## Phase 7: Daily Management
+
+### 7.1 Daily Checklist (15-30 min)
+
+- [ ] Check yesterday's spend vs budget
+- [ ] Review conversion numbers
+- [ ] Check for disapproved ads
+- [ ] Review Search Terms Report (add negatives)
+- [ ] Check for any alerts/notifications
+- [ ] Respond to lead form submissions
+
+### 7.2 Weekly Checklist (1-2 hours)
+
+- [ ] Review performance by campaign
+- [ ] Analyze CPL (Cost Per Lead) by ad group
+- [ ] Adjust bids based on performance
+- [ ] Pause underperforming keywords (CTR < 1%)
+- [ ] Add new keywords from Search Terms
+- [ ] Update negative keyword list
+- [ ] Test new ad variations
+- [ ] Review audience performance
+
+### 7.3 Monthly Checklist (2-4 hours)
+
+- [ ] Full performance review
+- [ ] Compare month-over-month metrics
+- [ ] Adjust budget allocation
+- [ ] Review and update ad copy
+- [ ] Analyze landing page performance
+- [ ] Competitor analysis
+- [ ] Strategy adjustment meeting
+
+---
+
+## Phase 8: Reporting
+
+### 8.1 Key Metrics to Track
+
+| Metric | Target | Alert Threshold |
+|--------|--------|-----------------|
+| CTR (Search) | > 3% | < 2% |
+| CTR (Display) | > 0.5% | < 0.3% |
+| Conversion Rate | > 5% | < 3% |
+| Cost Per Lead | < ฿500 | > ฿800 |
+| Quality Score | > 7 | < 5 |
+| Impression Share | > 50% | < 30% |
+
+### 8.2 Reporting Dashboard
+
+- [ ] ตั้งค่า Google Ads Dashboard
+- [ ] เชื่อมต่อ Looker Studio
+- [ ] สร้าง automated weekly report
+- [ ] ตั้งค่า email alerts สำหรับ anomalies
+
+**Report Template Columns:**
+```
+Campaign | Impressions | Clicks | CTR | Cost | Conversions | CPL | Conv Rate
+```
+
+---
+
+## Budget Guidelines
+
+### Recommended Monthly Budget
+
+| Campaign Type | Min Budget | Recommended | Max Budget |
+|---------------|------------|-------------|------------|
+| Search - Buy | ฿15,000 | ฿25,000 | ฿40,000 |
+| Search - Rent | ฿5,000 | ฿10,000 | ฿15,000 |
+| Display - Remarketing | ฿5,000 | ฿10,000 | ฿15,000 |
+| YouTube | ฿5,000 | ฿10,000 | ฿15,000 |
+| **Total** | **฿30,000** | **฿55,000** | **฿85,000** |
+
+### Budget Allocation by Week
+
+```
+Week 1: Learning phase - Start with 70% of target budget
+Week 2: Optimization - Adjust to 90% based on performance
+Week 3: Scale - Full budget on performing campaigns
+Week 4: Maintain and optimize
+```
+
+---
+
+## Troubleshooting
+
+### Common Issues
+
+| Issue | Possible Cause | Solution |
+|-------|----------------|----------|
+| Low impressions | Budget too low, Keywords too narrow | Increase budget, Add keywords |
+| High CPC | High competition, Low Quality Score | Improve QS, Adjust bids |
+| Low CTR | Poor ad copy, Irrelevant keywords | Test new ads, Refine keywords |
+| No conversions | Tracking issue, Landing page | Check tracking, Improve LP |
+| Disapproved ads | Policy violation | Review policy, Edit ad |
+
+---
+
+## Related Documents
+
+- [Facebook Ads Checklist](FACEBOOK_ADS_CHECKLIST.md)
+- [Landing Page Checklist](../landing/LANDING_PAGE_CHECKLIST.md)
+- [Analytics Setup Guide](../tracking/ANALYTICS_SETUP_GUIDE.md)
+- [AMP Business Lens](../../AMP_BUSINESS_LENS.md)
 
 ---
 
