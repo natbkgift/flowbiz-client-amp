@@ -289,8 +289,9 @@ Format: Background #FFFFCC (Light Yellow), Text #000000
 
 **Response Time (Column D):**
 ```
-=IF(AND(B2<>"",C2<>""), [Calculate from first response timestamp], "")
-Note: Requires timestamp tracking
+Manual entry recommended for accuracy
+Note: Calculate minutes between lead_time and first response time
+Alternative: Use Apps Script for automatic timestamp tracking
 ```
 
 **Qualification Score (Column W):**
@@ -298,7 +299,7 @@ Note: Requires timestamp tracking
 =IF(A2<>"",
   (IF(T2>10000000,20,IF(T2>5000000,15,IF(T2>3000000,10,IF(T2>1000000,5,0)))))
   + (IF(U2="Immediate",20,IF(U2="1 Month",15,IF(U2="3 Months",10,5))))
-  + (IF(COUNTIF(I2:K2,"<>"),15,10))
+  + (IF(COUNTA(I2:K2)>=3,15,IF(COUNTA(I2:K2)>=2,10,5)))
   + (IF(LEN(R2)>0,15,0)),
   "")
 ```

@@ -208,16 +208,16 @@ status:             New
 
 2. **Send Private DM (Within 1 hour):**
 ```
-สวัสดีครับคุณ John 
+สวัสดีครับคุณ [LEAD_NAME] 
 
-เห็นว่าสนใจคอนโด 2BR ในจอมเทียนนะครับ 
-ผมชื่อ Nat จาก AMP Property 
+เห็นว่าสนใจ[PROPERTY_INTEREST]นะครับ 
+ผมชื่อ [SALES_NAME] จาก AMP Property 
 
 ผมมี properties ที่ตรงกับที่คุณหาอยู่ครับ
 สะดวกให้โทรคุยรายละเอียดไหมครับ?
 
-LINE: nat_amp
-Phone: 081-234-5678
+LINE: [LINE_ID]
+Phone: [PHONE]
 ```
 
 3. **Add to Lead Tracking Sheet:**

@@ -264,7 +264,8 @@ Format: Number → Currency → THB
 ```
 =IF(A2<>"", NOW(), "")
 Format: Date time
-Note: This updates on any sheet change
+Note: Updates when spreadsheet is recalculated or reopened
+For true change tracking, consider using Apps Script with onEdit trigger
 ```
 
 **Commission Amount:**
