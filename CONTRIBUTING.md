@@ -124,44 +124,48 @@ Before committing:
 ### Branch Types
 
 ```
-main (protected)
-  ├─ develop (integration)
-  │   ├─ feature/[issue-number]-[short-name]
-  │   ├─ agent/[agent-name]-[feature]
-  │   ├─ fix/[issue-number]-[short-name]
-  │   └─ docs/[topic]
-  └─ hotfix/[issue-number]-[short-name]
+main (protected - production)
+│
+└── develop (integration branch)
+    │
+    ├── feature/pr-001-master-foundation
+    ├── feature/pr-002-ops-os-pack
+    ├── feature/pr-008-lead-router-agent
+    ├── feature/pr-009-ai-sale-chat-agent
+    └── ...
 ```
 
-### Branch Naming Rules
+### Branch Naming Convention
 
-**Format:** `type/[issue-number]-short-description`
+| Type | Pattern | Example |
+|------|---------|---------|
+| Feature | `feature/pr-XXX-<description>` | `feature/pr-008-lead-router-agent` |
+| Bugfix | `bugfix/issue-XXX-<description>` | `bugfix/issue-42-chat-timeout` |
+| Hotfix | `hotfix/<description>` | `hotfix/critical-line-webhook` |
 
-**Types:**
-- `feature/` - New features
-- `agent/` - AI agent development
-- `fix/` - Bug fixes
-- `docs/` - Documentation only
-- `hotfix/` - Critical production fixes
-- `refactor/` - Code refactoring
-- `test/` - Test improvements
-- `chore/` - Maintenance tasks
+**Additional Types:**
+- `agent/pr-XXX-<description>` - AI agent development
+- `docs/pr-XXX-<description>` - Documentation changes
+- `refactor/pr-XXX-<description>` - Code refactoring
+- `test/pr-XXX-<description>` - Test improvements
+- `chore/pr-XXX-<description>` - Maintenance tasks
 
 **Examples:**
 ```bash
-feature/123-listing-agent-ddproperty
-agent/comms-line-webhook
-fix/456-lead-score-calculation
-docs/architecture-update
-hotfix/789-critical-auth-bug
-refactor/database-queries
-test/integration-listing-sync
-chore/update-dependencies
+feature/pr-001-master-foundation
+feature/pr-008-lead-router-agent
+agent/pr-009-ai-sale-chat-agent
+bugfix/issue-42-chat-timeout
+hotfix/critical-line-webhook
+docs/pr-015-architecture-update
+refactor/pr-020-database-queries
+test/pr-025-integration-listing-sync
+chore/pr-030-update-dependencies
 ```
 
 **Rules:**
 - Use lowercase and hyphens
-- Include issue number (if applicable)
+- Features use PR numbers (`pr-XXX`), bugs use issue numbers (`issue-XXX`)
 - Keep description short (< 40 chars)
 - Be descriptive and specific
 
@@ -178,6 +182,53 @@ chore/update-dependencies
 - ✅ Require pull request reviews
 - ✅ Require status checks to pass
 - ⚠️  Can be force-pushed by maintainers (use carefully)
+
+---
+
+## 📝 PR Naming Convention
+
+Pull requests should follow a clear, consistent naming pattern that indicates the type of change and references the relevant issue or PR number.
+
+### Format
+
+```
+PR-XXX: <brief description>
+```
+
+or
+
+```
+[Type] <brief description> (closes #issue-number)
+```
+
+### Examples
+
+**Using PR Numbers:**
+```
+PR-001: Master foundation setup
+PR-008: Lead router agent implementation
+PR-009: AI sale chat agent with LINE integration
+PR-015: Update architecture documentation
+PR-042: Fix chat timeout issue
+```
+
+**Using Type Tags:**
+```
+[Feature] Add multi-platform listing sync (closes #123)
+[Bug Fix] Correct lead scoring algorithm (closes #456)
+[Agent] Communication agent with LINE integration (closes #789)
+[Docs] Update contributing guidelines (closes #101)
+[Security] Implement rate limiting on login endpoint (closes #202)
+```
+
+### Guidelines
+
+- Keep PR titles concise but descriptive
+- Reference the issue number if applicable (using `closes #XXX`)
+- Use PR numbers (PR-XXX) for planned features in the roadmap
+- Use issue numbers for bug fixes and unplanned work
+- Start with a capital letter
+- Don't end with a period
 
 ---
 
@@ -209,10 +260,15 @@ chore/update-dependencies
 
 ### Pull Requests
 
-**Format:** `[Type] Brief description (closes #issue-number)`
+**Format:** 
+
+- `PR-XXX: <brief description>` - For planned features
+- `[Type] <brief description> (closes #issue-number)` - For issues
 
 **Examples:**
 ```
+PR-001: Master foundation setup
+PR-008: Lead router agent implementation
 [Feature] Add multi-platform listing sync (closes #123)
 [Bug Fix] Correct lead scoring algorithm (closes #456)
 [Agent] Communication agent with LINE integration (closes #789)
