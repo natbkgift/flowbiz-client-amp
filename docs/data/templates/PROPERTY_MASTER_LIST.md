@@ -1,620 +1,445 @@
-# 🏠 Property Master List Template
+# Property Master List Template - AMP
 
-> Schema และ Template สำหรับ Property Database (Google Sheets)
+> 📊 Schema สำหรับ Property Master List Database
 
 ## Overview
 
-**Property Master List** คือ Database หลักสำหรับจัดเก็บข้อมูล Properties ทั้งหมดที่ AMP จัดการ ใช้ Google Sheets เป็นฐานข้อมูลใน Phase 0
+Property Master List คือ database หลักสำหรับเก็บข้อมูล property ทั้งหมดของ AMP รวมทั้ง projects ใหม่, ทรัพย์มือสอง, และทรัพย์ให้เช่า
 
-### Key Features
-- ✅ Schema ครอบคลุมข้อมูล Property ทุกมิติ
-- ✅ Formulas สำหรับคำนวณอัตโนมัติ
-- ✅ Data Validation และ Dropdown menus
-- ✅ Color Coding สำหรับ Status
-- ✅ Filter และ Sort capabilities
-- ✅ Export-ready สำหรับ Marketing
+### Use Cases
 
----
-
-## 📊 Sheet Structure
-
-### Sheet 1: MASTER_LIST (Main Database)
-
-**Columns Schema:**
-
-| Column | Field Name | Type | Required | Description | Example |
-|--------|-----------|------|----------|-------------|---------|
-| A | `property_id` | Text | ✅ | Unique ID | PROP-0001 |
-| B | `property_type` | Dropdown | ✅ | Condo/Villa/House/Land/Commercial | Condo |
-| C | `property_subtype` | Dropdown | - | Studio/1BR/2BR/3BR/etc | 1BR |
-| D | `project_name` | Text | ✅ | Project/Building name | The Base Central Pattaya |
-| E | `location_area` | Dropdown | ✅ | Pattaya City/Jomtien/etc | Pattaya City |
-| F | `location_subarea` | Text | - | Soi/Street detail | Pattaya Sai 2 |
-| G | `floor_number` | Number | - | Floor (for condos) | 15 |
-| H | `unit_number` | Text | - | Unit/Room number | 1502 |
-| I | `size_sqm` | Number | ✅ | Size in SQM | 35.5 |
-| J | `bedrooms` | Number | - | Number of bedrooms | 1 |
-| K | `bathrooms` | Number | - | Number of bathrooms | 1 |
-| L | `price_thb` | Number | ✅ | Price in THB | 3500000 |
-| M | `price_per_sqm` | Formula | - | Auto-calc price/sqm | =L2/I2 |
-| N | `listing_type` | Dropdown | ✅ | Sale/Rent/Both | Sale |
-| O | `rental_price_month` | Number | - | Monthly rent (if rental) | 15000 |
-| P | `status` | Dropdown | ✅ | Available/Reserved/Sold/Rented | Available |
-| Q | `ownership_type` | Dropdown | ✅ | Freehold/Leasehold | Freehold |
-| R | `foreign_quota` | Dropdown | - | Yes/No | Yes |
-| S | `furnishing` | Dropdown | ✅ | Fully/Partial/Unfurnished | Fully Furnished |
-| T | `features` | Text | - | Key features (comma-sep) | Pool View, Balcony, Parking |
-| U | `facilities` | Text | - | Project facilities | Pool, Gym, Security |
-| V | `owner_name` | Text | - | Owner/Contact person | Khun Somchai |
-| W | `owner_contact` | Text | - | Phone/LINE | 081-234-5678 |
-| X | `commission_rate` | Percentage | - | Commission % | 3% |
-| Y | `added_date` | Date | ✅ | Date added to list | 2026-01-15 |
-| Z | `last_updated` | Formula | - | Auto timestamp | =NOW() |
-| AA | `assigned_sales` | Dropdown | - | Assigned salesperson | Nat |
-| AB | `view_count` | Number | - | How many clients viewed | 5 |
-| AC | `inquiry_count` | Number | - | Number of inquiries | 3 |
-| AD | `photos_link` | URL | - | Google Drive folder link | [Link] |
-| AE | `video_link` | URL | - | Video tour link | [Link] |
-| AF | `listing_link` | URL | - | Website listing URL | [Link] |
-| AG | `notes` | Text | - | Additional notes | Seller motivated |
+- Central property inventory
+- Quick property search
+- Marketing material reference
+- Sales team reference
+- Reporting and analytics
 
 ---
 
-### Sheet 2: DROPDOWN_VALUES
+## Spreadsheet Structure
 
-**Purpose:** Define values for dropdown menus
+### Master Tabs
 
 ```
-[property_type]
-Condo
-Villa
-House
-Land
-Commercial
+📊 Property_Master_List.xlsx
 
-[property_subtype_condo]
-Studio
-1BR
-2BR
-3BR
-4BR
-Penthouse
+Tabs:
+├── 📄 01_All_Properties      # Main comprehensive list
+├── 📄 02_Projects_New        # New development projects
+├── 📄 03_Resale_Secondary    # Secondary market properties
+├── 📄 04_Rental_Long_Term    # Long-term rentals
+├── 📄 05_Rental_Short_Term   # Short-term/vacation rentals
+├── 📄 06_Sold_Rented         # Archive of completed
+├── 📄 07_Pending             # Reserved/In process
+└── 📄 README                 # Instructions
+```
 
-[property_subtype_villa]
-Pool Villa
-Beach Villa
-Garden Villa
+---
 
-[property_subtype_house]
-Single House
-Townhouse
-Twin House
+## Column Schema
 
-[property_subtype_land]
-Residential Land
-Commercial Land
-Agricultural Land
+### Tab: 01_All_Properties
 
-[property_subtype_commercial]
-Shophouse
-Office
-Hotel
-Resort
+| Column | Data Type | Description | Example | Required | Formula/Validation |
+|--------|-----------|-------------|---------|----------|-------------------|
+| **A: Property_ID** | Text | Unique identifier | PROP-2026-001 | ✅ | Auto-generated |
+| **B: Status** | Dropdown | Current status | Available | ✅ | Available, Reserved, Sold, Rented, Pending, Off Market |
+| **C: Category** | Dropdown | Property category | Project | ✅ | Project, Resale, Rental-LT, Rental-ST |
+| **D: Type** | Dropdown | Property type | Condo | ✅ | Condo, Villa, House, Townhouse, Land |
+| **E: Project_Name** | Text | Project/Building name | The Riviera Jomtien | ✅ | - |
+| **F: Unit_Number** | Text | Unit number (if applicable) | A205 | - | - |
+| **G: Location_Area** | Dropdown | General area | Jomtien | ✅ | Pattaya, Jomtien, Na Jomtien, etc. |
+| **H: Location_Sub** | Text | Specific location | Jomtien Beach Road | - | - |
+| **I: Address** | Text | Full address | 123 Jomtien Beach Rd | - | - |
+| **J: Latitude** | Number | GPS latitude | 12.XXXXX | - | Decimal format |
+| **K: Longitude** | Number | GPS longitude | 100.XXXXX | - | Decimal format |
+| **L: Price_Sale** | Number | Sale price (THB) | 2500000 | * | - |
+| **M: Price_Rent** | Number | Monthly rent (THB) | 15000 | * | - |
+| **N: Currency** | Dropdown | Currency code | THB | ✅ | THB, USD, EUR |
+| **O: Price_Per_SQM** | Formula | Price per square meter | 62500 | - | =L2/V2 |
+| **P: Negotiable** | Dropdown | Price negotiable? | Yes | - | Yes, No |
+| **Q: Commission_Rate** | Percent | Commission % | 3% | - | - |
+| **R: Owner_Type** | Dropdown | Owner type | Freehold | - | Freehold, Leasehold, Company |
+| **S: Foreign_Quota** | Dropdown | Foreign ownership? | Yes | - | Yes, No, N/A |
+| **T: Bedrooms** | Number | Number of bedrooms | 1 | ✅ | 0 (Studio), 1, 2, 3, 4+ |
+| **U: Bathrooms** | Number | Number of bathrooms | 1 | ✅ | - |
+| **V: Size_SQM** | Number | Size in square meters | 40 | ✅ | - |
+| **W: Size_SQW** | Formula | Size in square wah | 25 | - | =V2/4 |
+| **X: Floor_Level** | Text | Floor number | 12 | - | - |
+| **Y: View** | Text | View description | Sea view | - | - |
+| **Z: Furnishing** | Dropdown | Furnishing status | Fully Furnished | - | Unfurnished, Partly, Fully Furnished |
+| **AA: Parking** | Number | Parking spaces | 1 | - | - |
+| **AB: Facilities** | Text | Key facilities | Pool, Gym, 24h Security | - | Comma-separated |
+| **AC: Condition** | Dropdown | Property condition | Excellent | - | New, Excellent, Good, Fair, Renovation |
+| **AD: Year_Built** | Number | Year of construction | 2023 | - | YYYY |
+| **AE: Year_Renovated** | Number | Last renovation year | 2025 | - | YYYY |
+| **AF: Title_Deed** | Text | Title deed number | 12345/6789 | - | - |
+| **AG: Developer** | Text | Developer name | ABC Development | - | - |
+| **AH: Photos_Link** | URL | Google Drive photos folder | [URL] | ✅ | Hyperlink |
+| **AI: Video_Link** | URL | Property video link | [URL] | - | Hyperlink |
+| **AJ: Brochure_Link** | URL | Brochure PDF link | [URL] | - | Hyperlink |
+| **AK: Virtual_Tour** | URL | 360° tour link | [URL] | - | Hyperlink |
+| **AL: Listing_URL** | URL | Website listing page | [URL] | - | Hyperlink |
+| **AM: Source** | Dropdown | How we got this listing | Owner Direct | ✅ | Owner Direct, Agent, LINE Group, Website |
+| **AN: Source_Contact** | Text | Contact at source | John Doe, 0XX-XXX-XXXX | - | - |
+| **AO: Assigned_Agent** | Dropdown | Agent responsible | Somchai S. | ✅ | List of agents |
+| **AP: Priority** | Dropdown | Marketing priority | High | - | Low, Medium, High |
+| **AQ: Featured** | Dropdown | Feature on website? | Yes | - | Yes, No |
+| **AR: Active_Marketing** | Dropdown | Currently marketing? | Yes | ✅ | Yes, No |
+| **AS: Date_Added** | Date | Date added to system | 2026-01-26 | ✅ | YYYY-MM-DD |
+| **AT: Date_Updated** | Date | Last update date | 2026-01-26 | ✅ | Manual entry - update when row is edited |
+| **AU: Date_Available** | Date | Available from date | 2026-02-01 | - | YYYY-MM-DD |
+| **AV: Views_Count** | Number | Number of online listing page views | 15 | - | Manual count |
+| **AW: Viewings_Count** | Number | Physical viewings done | 3 | - | Manual count |
+| **AX: Notes_Internal** | Text | Internal notes | Good deal, motivated seller | - | - |
+| **AY: Tags** | Text | Search tags | sea view, investment, new | - | Comma-separated |
+| **AZ: Language** | Text | Listing languages | TH, EN | - | TH, EN, CN, RU |
 
-[location_area]
-Pattaya City
-Jomtien
-Na Jomtien
-Pratumnak
-Bang Saray
-Sattahip
+**Legend:**
+- ✅ = Required field
+- * = Required based on category (Sale or Rent)
+- Formula = Auto-calculated
+- Dropdown = Data validation list
 
-[listing_type]
-Sale
-Rent
-Both
+---
 
-[status]
+## Data Validation Rules
+
+### Dropdown Lists
+
+Create named ranges for these dropdowns:
+
+**Status_List:**
+```
 Available
 Reserved
 Sold
 Rented
+Pending
 Off Market
+```
 
-[ownership_type]
-Freehold
-Leasehold
-Chanote
+**Category_List:**
+```
+Project
+Resale
+Rental-LT
+Rental-ST
+```
 
-[foreign_quota]
+**Type_List:**
+```
+Condo
+Villa
+House
+Townhouse
+Land
+Commercial
+```
+
+**Location_Area_List:**
+```
+Pattaya City
+Jomtien
+Na Jomtien
+Pratumnak
+Wongamat
+Bang Saray
+Huay Yai
+East Pattaya
+Other
+```
+
+**Furnishing_List:**
+```
+Unfurnished
+Partly Furnished
+Fully Furnished
+```
+
+**Condition_List:**
+```
+New
+Excellent
+Good
+Fair
+Needs Renovation
+```
+
+**Source_List:**
+```
+Owner Direct
+Agent
+LINE Group
+Facebook
+Website
+Walk-in
+Referral
+```
+
+**Priority_List:**
+```
+Low
+Medium
+High
+```
+
+**Yes_No_List:**
+```
 Yes
 No
-Limited
+N/A
+```
 
-[furnishing]
-Fully Furnished
-Partially Furnished
-Unfurnished
+### Conditional Formatting
 
-[assigned_sales]
-Nat
-Som
-John
-Mary
-(Add team members)
+**Status-based coloring:**
+```
+Available: Green background
+Reserved: Yellow background
+Sold: Gray background
+Rented: Blue background
+Pending: Orange background
+Off Market: Light gray background
+```
+
+**Priority-based:**
+```
+High: Red text
+Medium: Orange text
+Low: Gray text
+```
+
+**Date-based:**
+```
+Date_Added > 90 days old: Light red (needs review)
+Date_Updated > 30 days old: Light yellow (needs update)
 ```
 
 ---
 
-### Sheet 3: SUMMARY_DASHBOARD
+## Formula Examples
 
-**Purpose:** Overview statistics และ KPIs
-
-**Key Metrics:**
-
-| Metric | Formula | Description |
-|--------|---------|-------------|
-| Total Properties | `=COUNTA(MASTER_LIST!A:A)-1` | Total count |
-| Available | `=COUNTIF(MASTER_LIST!P:P,"Available")` | Available now |
-| Reserved | `=COUNTIF(MASTER_LIST!P:P,"Reserved")` | Under reservation |
-| Sold | `=COUNTIF(MASTER_LIST!P:P,"Sold")` | Sold this period |
-| Avg Price | `=AVERAGE(MASTER_LIST!L:L)` | Average price |
-| Total Value | `=SUM(MASTER_LIST!L:L)` | Total inventory value |
-
-**By Type Breakdown:**
-
+### Price Per SQM (Column O)
 ```
-Property Type | Count | Avg Price | Total Value
-Condo         | =COUNTIF(MASTER_LIST!B:B,"Condo")
-Villa         | =COUNTIF(MASTER_LIST!B:B,"Villa")
-House         | =COUNTIF(MASTER_LIST!B:B,"House")
-Land          | =COUNTIF(MASTER_LIST!B:B,"Land")
-Commercial    | =COUNTIF(MASTER_LIST!B:B,"Commercial")
+=IF(AND(L2>0, V2>0), L2/V2, "N/A")
+
+Logic:
+- If Sale Price > 0 AND Size > 0
+- Calculate Price / Size
+- Else show "N/A"
 ```
 
-**By Location:**
-
+### Size in Square Wah (Column W)
 ```
-Location      | Count | Avg Price
-Pattaya City  | =COUNTIF(MASTER_LIST!E:E,"Pattaya City")
-Jomtien       | =COUNTIF(MASTER_LIST!E:E,"Jomtien")
-Pratumnak     | =COUNTIF(MASTER_LIST!E:E,"Pratumnak")
-Na Jomtien    | =COUNTIF(MASTER_LIST!E:E,"Na Jomtien")
-Bang Saray    | =COUNTIF(MASTER_LIST!E:E,"Bang Saray")
+=IF(V2>0, V2/4, "")
+
+Logic:
+- 1 Square Wah = 4 Square Meters
 ```
 
----
-
-## 🔧 Google Sheets Setup
-
-### 1. Data Validation Rules
-
-**Property Type (Column B):**
+### Days on Market (Additional column)
 ```
-Data → Data validation
-Criteria: List from range
-Range: DROPDOWN_VALUES!A2:A6
-Show dropdown list in cell: ✓
-Reject input: ✓
+=IF(AS2<>"", TODAY()-AS2, "")
+
+Logic:
+- Today's date minus Date_Added
 ```
 
-**Status (Column P):**
+### Auto Property ID (Column A)
 ```
-Data → Data validation
-Criteria: List from range
-Range: DROPDOWN_VALUES!D2:D6
-Show dropdown list in cell: ✓
-Reject input: ✓
+=IF($AS2<>"", "PROP-"&TEXT(YEAR($AS2),"0000")&"-"&TEXT(ROW()-1,"000"), "")
 
-Custom formatting:
-- Available → Green background
-- Reserved → Yellow background
-- Sold → Red background
-- Rented → Blue background
-```
+Result: PROP-2026-001
 
-**Price (Column L):**
-```
-Data → Data validation
-Criteria: Number → Greater than → 0
-Show validation help text: "Enter price in THB"
-Reject input: ✓
-```
-
-### 2. Conditional Formatting
-
-**Status Colors:**
-```
-Format → Conditional formatting
-
-Rule 1: Status = "Available"
-Format: Background color #00FF00 (Green), Text color #000000
-
-Rule 2: Status = "Reserved"
-Format: Background color #FFFF00 (Yellow), Text color #000000
-
-Rule 3: Status = "Sold"
-Format: Background color #FF0000 (Red), Text color #FFFFFF
-
-Rule 4: Status = "Rented"
-Format: Background color #0000FF (Blue), Text color #FFFFFF
-
-Rule 5: Status = "Off Market"
-Format: Background color #CCCCCC (Gray), Text color #666666
-```
-
-**Price per SQM (Above/Below Market):**
-```
-Rule 1: Price/SQM > 150000
-Format: Background color #FFE6E6 (Light Red) → Above market
-
-Rule 2: Price/SQM < 80000
-Format: Background color #E6FFE6 (Light Green) → Below market
-```
-
-### 3. Formulas
-
-**Price per SQM (Column M):**
-```
-=IF(I2>0, L2/I2, "")
-Format: Number → Currency → THB
-```
-
-**Last Updated Timestamp (Column Z):**
-```
-=IF(A2<>"", NOW(), "")
-Format: Date time
-Note: Updates when spreadsheet is recalculated or reopened
-For true change tracking, consider using Apps Script with onEdit trigger
-```
-
-**Commission Amount:**
-```
-Add new column: commission_amount
-Formula: =IF(X2<>"", L2*X2, "")
-Format: Currency → THB
-```
-
-### 4. Filters และ Views
-
-**Create Filter Views:**
-
-**View 1: Available Properties**
-```
-Data → Create a filter view
-Name: "Available Only"
-Filter: Status = "Available"
-Sort: Added Date (Newest first)
-```
-
-**View 2: Hot Deals (Below Market)**
-```
-Name: "Hot Deals"
-Filter: Status = "Available"
-Filter: Price per SQM < 100000
-Sort: Price per SQM (Ascending)
-```
-
-**View 3: Luxury Properties**
-```
-Name: "Luxury"
-Filter: Status = "Available"
-Filter: Price > 10000000
-Sort: Price (Descending)
-```
-
-**View 4: By Assigned Sales**
-```
-Name: "My Properties - [Name]"
-Filter: Assigned Sales = "[Name]"
-Sort: Last Updated (Newest first)
+Logic:
+- Uses the year from Date_Added (column AS) for stable IDs
+- If Date_Added is empty, ID remains empty
+- Once Date_Added is set, the year is locked to that date
 ```
 
 ---
 
-## 📝 Usage Examples
+## Tab: 02_Projects_New
 
-### Example 1: Adding a New Condo
+Filtered view of `01_All_Properties` where:
+- Category = "Project"
+- Status = "Available" or "Reserved"
 
-```
-property_id:        PROP-0001
-property_type:      Condo
-property_subtype:   1BR
-project_name:       The Base Central Pattaya
-location_area:      Pattaya City
-location_subarea:   Pattaya Sai 2
-floor_number:       15
-unit_number:        1502
-size_sqm:           35.5
-bedrooms:           1
-bathrooms:          1
-price_thb:          3,500,000
-price_per_sqm:      =L2/I2 (Auto: 98,592)
-listing_type:       Sale
-rental_price_month: -
-status:             Available
-ownership_type:     Freehold
-foreign_quota:      Yes
-furnishing:         Fully Furnished
-features:           Pool View, Balcony, Modern Kitchen
-facilities:         Pool, Gym, Security 24/7, Parking
-owner_name:         Khun Somchai
-owner_contact:      081-234-5678
-commission_rate:    3%
-added_date:         2026-01-15
-assigned_sales:     Nat
-photos_link:        [Google Drive Link]
-notes:              Seller motivated, quick sale possible
-```
+**Additional Columns:**
 
-### Example 2: Adding a Villa
+| Column | Description | Example |
+|--------|-------------|---------|
+| Total_Units | Total units in project | 200 |
+| Units_Available | Available units | 45 |
+| Transfer_Date | Expected transfer | 2027-06-30 |
+| Payment_Plan | Payment terms | 10% down, 90% on transfer |
+| Installment_Available | Installment option? | Yes |
 
-```
-property_id:        PROP-0025
-property_type:      Villa
-property_subtype:   Pool Villa
-project_name:       Private Villa Na Jomtien
-location_area:      Na Jomtien
-location_subarea:   Soi 23
-floor_number:       -
-unit_number:        -
-size_sqm:           250
-bedrooms:           3
-bathrooms:          3
-price_thb:          15,000,000
-price_per_sqm:      =L2/I2 (Auto: 60,000)
-listing_type:       Both
-rental_price_month: 80,000
-status:             Available
-ownership_type:     Chanote
-foreign_quota:      No
-furnishing:         Fully Furnished
-features:           Private Pool, Garden, Sea View, 2 Parking
-facilities:         Private, Gated Community, Security
-owner_name:         Mr. John Smith
-owner_contact:      LINE: johnsmith_th
-commission_rate:    5%
-added_date:         2026-01-15
-assigned_sales:     John
-photos_link:        [Google Drive Link]
-video_link:         [YouTube Link]
-notes:              Negotiable, owner relocating
-```
-
-### Example 3: Searching for Properties
-
-**Scenario: Client wants 2BR Condo in Jomtien, Budget 4-6M**
-
-1. Open Property Master List
-2. Apply filters:
-   - property_type = "Condo"
-   - property_subtype = "2BR"
-   - location_area = "Jomtien"
-   - price_thb between 4,000,000 and 6,000,000
-   - status = "Available"
-3. Sort by: price_per_sqm (Ascending) → find best value
-4. Export filtered results → Send to client
+**Note:** Use the existing `Developer` column (AG) from the base schema for developer information.
 
 ---
 
-## 🔄 Maintenance Workflow
+## Tab: 03_Resale_Secondary
 
-### Daily Tasks
+Filtered view where:
+- Category = "Resale"
 
-**Morning (09:00):**
-- [ ] Check for new properties from overnight
-- [ ] Update status changes from yesterday
-- [ ] Respond to "Reserved" properties from walk-ins
+**Additional Columns:**
 
-**Throughout Day:**
-- [ ] Add new properties immediately when received
-- [ ] Update inquiry_count when client asks about property
-- [ ] Update view_count after showing
-
-**Evening (18:00):**
-- [ ] Review all "Reserved" → Update if expired (>48hrs)
-- [ ] Update notes with any changes
-- [ ] Prepare tomorrow's hot properties list
-
-### Weekly Tasks (Every Friday)
-
-- [ ] Clean up duplicate entries
-- [ ] Verify all "Available" are still valid
-- [ ] Update prices if changed
-- [ ] Archive "Sold" properties older than 30 days
-- [ ] Review and update commission rates
-- [ ] Check all links (photos, videos) still working
-- [ ] Generate weekly summary report
-
-### Monthly Tasks (1st of month)
-
-- [ ] Full data audit
-- [ ] Export backup CSV
-- [ ] Update market prices (avg_price per area)
-- [ ] Review property performance (view vs inquiry ratio)
-- [ ] Archive properties older than 6 months
-- [ ] Update dropdown values if needed
-- [ ] Generate monthly analytics report
+| Column | Description | Example |
+|--------|-------------|---------|
+| Owner_Contact | Owner name & phone | John Doe, 0XX-XXX-XXXX |
+| Reason_Selling | Why selling? | Relocating |
+| Occupancy | Current occupancy | Vacant / Rented |
+| Flexibility | Negotiation flexibility | High / Medium / Low |
 
 ---
 
-## 📊 Analytics & Reports
+## Tab: 04_Rental_Long_Term
 
-### Key Metrics to Track
+Filtered view where:
+- Category = "Rental-LT"
 
-**Inventory Metrics:**
+**Additional Columns:**
+
+| Column | Description | Example |
+|--------|-------------|---------|
+| Min_Contract | Minimum rental period | 6 months |
+| Utilities_Included | What's included? | Water, Internet |
+| Pets_Allowed | Pets allowed? | No |
+| Available_From | Available date | 2026-02-01 |
+
+---
+
+## Tab: 05_Rental_Short_Term
+
+Filtered view where:
+- Category = "Rental-ST"
+
+**Additional Columns:**
+
+| Column | Description | Example |
+|--------|-------------|---------|
+| Min_Nights | Minimum stay | 7 nights |
+| Price_High_Season | High season rate | ฿2,500/night |
+| Price_Low_Season | Low season rate | ฿1,800/night |
+| Cleaning_Fee | Cleaning fee | ฿1,500 |
+| Booking_Platforms | Listed on | Airbnb, Booking.com |
+
+---
+
+## Usage Guidelines
+
+### Adding New Property
+
+1. **Go to `01_All_Properties` tab**
+2. **Insert new row** (right-click > Insert row below)
+3. **Fill required fields** (marked ✅)
+4. **Property_ID auto-generates** (or manual if needed)
+5. **Select dropdowns** (don't type)
+6. **Add photos link** from Google Drive
+7. **Assign to agent**
+8. **Set Status = Available**
+9. **Save and verify** data
+
+### Updating Existing Property
+
+1. **Find property** (Ctrl+F or Filter)
+2. **Update relevant fields**
+3. **Update Date_Updated** (should auto-update)
+4. **Add notes** in Notes_Internal if significant change
+
+### Marking as Sold/Rented
+
+1. **Change Status** to "Sold" or "Rented"
+2. **Add final price** (if different from asking)
+3. **Add Date_Sold/Rented** (custom field)
+4. **Move to archive tab** (optional)
+
+---
+
+## Search & Filter Tips
+
+### Quick Filters
+
+**Available condos in Jomtien under 3M:**
 ```
-- Total active listings
-- Days on market (average)
-- Price reductions count
-- Conversion rate (inquiry to viewing)
+Column C (Category) = Project OR Resale
+Column B (Status) = Available
+Column D (Type) = Condo
+Column G (Location) = Jomtien
+Column L (Price) &lt;= 3000000
 ```
 
-**Performance Metrics:**
+**Sea view properties:**
 ```
-- Properties added this week/month
-- Properties sold this week/month
-- Average time to sell
-- Most viewed properties
+Column Y (View) contains "sea"
 ```
 
-**Market Metrics:**
+**High priority properties:**
 ```
-- Average price by type
-- Average price by location
-- Price per SQM trends
-- Foreign vs Thai buyer ratio
+Column AP (Priority) = High
+Column AR (Active_Marketing) = Yes
 ```
 
-### Monthly Report Template
+### Using Google Sheets Query
 
-**Executive Summary:**
 ```
-Total Properties:        150
-Available:               120
-Reserved:                15
-Sold This Month:         10
-New Listings:            15
-
-Avg Price:              ฿5.2M
-Total Inventory Value:  ฿780M
-Avg Days on Market:     45 days
-```
-
-**Top Performers:**
-```
-Most Viewed:
-1. PROP-0123 - The Base 2BR (25 views)
-2. PROP-0045 - Villa Jomtien (18 views)
-3. PROP-0089 - Condo Pratumnak (15 views)
-
-Quick Sales (< 30 days):
-1. PROP-0234 - Sold in 12 days
-2. PROP-0156 - Sold in 18 days
-3. PROP-0198 - Sold in 25 days
+=QUERY('01_All_Properties'!A:AZ, 
+  "SELECT A, E, G, L, T, U, V 
+   WHERE D='Condo' AND G='Jomtien' AND L&lt;=3000000 AND B='Available'
+   ORDER BY L ASC")
 ```
 
 ---
 
-## 🔒 Data Quality Standards
+## Data Quality Checks
 
-### Required Field Validation
+### Weekly Checklist
 
-**Before Adding Property:**
-- [ ] property_id follows format: PROP-XXXX
-- [ ] property_type selected from dropdown
-- [ ] price_thb is valid number > 0
-- [ ] location_area selected from dropdown
-- [ ] status selected from dropdown
-- [ ] ownership_type selected from dropdown
-- [ ] added_date is today's date
+- [ ] No blank required fields
+- [ ] All Property_IDs unique
+- [ ] All photos links working
+- [ ] Prices reasonable (not obvious errors)
+- [ ] Dates in correct format
+- [ ] Status accurate
+- [ ] Date_Updated current
 
-### Data Completeness Check
+### Monthly Audit
 
-**Minimum for Publishing:**
-- ✅ Basic Info: ID, Type, Location, Price, Status
-- ✅ Property Details: Size, Bedrooms, Bathrooms
-- ✅ Ownership: Type, Foreign Quota
-- ✅ Media: At least 3 photos
-- ⚠️  Nice to have: Video, Virtual Tour
-
-### Common Errors to Avoid
-
-```
-❌ property_id = "001" (Missing prefix)
-✅ property_id = "PROP-0001"
-
-❌ price_thb = "3.5M" (Text format)
-✅ price_thb = 3500000
-
-❌ size_sqm = "35.5 sqm" (Contains unit)
-✅ size_sqm = 35.5
-
-❌ status = "available" (Wrong case)
-✅ status = "Available"
-
-❌ photos_link = "no photos yet" (Invalid)
-✅ photos_link = [Leave empty if no photos]
-```
+- [ ] Review properties > 90 days (still relevant?)
+- [ ] Update prices if market changed
+- [ ] Verify sold/rented properties moved to archive
+- [ ] Check for duplicate listings
+- [ ] Update agent assignments
 
 ---
 
-## 🔗 Integration Points
+## Integration Points
 
-### Export to Marketing
+### Connected Systems
 
-**For Facebook Ads:**
-```
-Export columns: property_id, project_name, location_area, 
-                size_sqm, bedrooms, price_thb, photos_link
-
-Format: CSV
-Use for: Creating ad campaigns
-```
-
-**For Website:**
-```
-Export columns: All fields except owner_contact, commission_rate, notes
-Format: JSON/CSV
-Use for: Website property listings
-```
-
-### Import from Partners
-
-**From Other Agencies:**
-```
-1. Download their Excel file
-2. Map their columns to our schema
-3. Generate new property_id
-4. Validate all required fields
-5. Import to MASTER_LIST
-6. Mark source in notes: "Source: [Agency Name]"
-```
+| System | Integration | Direction |
+|--------|-------------|-----------|
+| Website | API/Export | Master List → Website |
+| CRM | Manual/Import | Bi-directional |
+| Marketing | Query/Reference | Master List → Ads |
+| LINE Summary | Manual Entry | LINE → Master List |
+| Analytics | Export | Master List → Reports |
 
 ---
 
-## 📱 Mobile Usage
+## Example Row
 
-### Google Sheets App Tips
-
-**Quick Add Property (On-site):**
-1. Open Sheets app → Property Master List
-2. Scroll to last row
-3. Fill essential fields only:
-   - property_id (Auto-generate next number)
-   - property_type, location_area, price_thb, status
-4. Add photos_link placeholder
-5. Complete details later at office
-
-**Quick Update Status:**
-1. Open Sheets app
-2. Use Search: property_id
-3. Jump to column P (Status)
-4. Update from dropdown
-5. Auto-saves
-
-**Offline Mode:**
-1. Star Property Master List
-2. Enable "Available offline"
-3. Can view/edit offline
-4. Syncs when back online
+| A | B | C | D | E | F | G | H | L | T | U | V | AH | AO | AS |
+|---|---|---|---|---|---|---|---|---|---|---|---|----|----|-----|
+| PROP-2026-001 | Available | Project | Condo | The Riviera | A1205 | Jomtien | Jomtien Beach Rd | 2,500,000 | 1 | 1 | 40 | [Drive Link] | Somchai | 2026-01-26 |
 
 ---
 
-## 📞 Support
+## Related Documents
 
-### Template Issues
-- **Missing Dropdown:** Check DROPDOWN_VALUES sheet
-- **Formula Error:** Verify cell references
-- **Slow Performance:** Archive old data, create new sheet
-
-### Need Help?
-- Slack: #amp-data-support
-- Email: admin@amp-property.com
-- Training: See 09_TRAINING/SOPs/Property_Listing_SOP.pdf
-
----
-
-**Last Updated:** 2026-01-26  
-**Version:** 1.0.0  
-**Maintained by:** AMP Data Team
+- [Google Drive Structure](../structure/GOOGLE_DRIVE_STRUCTURE.md)
+- [Lead Tracking Template](LEAD_TRACKING_TEMPLATE.md)
+- [Data Naming Convention](../standards/DATA_NAMING_CONVENTION.md)
