@@ -1,84 +1,91 @@
-# Ops OS - AMP Operations System
+# AMP Operations OS (Ops OS)
 
-> 📋 ระบบเทมเพลตและ Checklist สำหรับการดำเนินงาน Marketing & Advertising
+> 📋 ศูนย์รวมเอกสารปฏิบัติการสำหรับ Asset Management Property
 
 ## Overview
 
-**Ops OS (Operations Operating System)** เป็นชุดเอกสารสำหรับจัดการการทำงานด้าน Marketing และ Advertising ของ AMP ประกอบด้วย Templates, Checklists, และ SOPs ที่ช่วยให้ทีมสามารถดำเนินงาน Phase 0 ได้อย่างมีประสิทธิภาพและสม่ำเสมอ
+Ops OS คือชุดเอกสาร templates, checklists และ SOPs สำหรับการดำเนินงานด้าน Marketing และ Operations ของ AMP
 
-## Document Structure
+## Directory Structure
 
 ```
 docs/ops/
-├── README.md                           # Ops OS overview (this file)
-├── ads/                                # Advertising Operations
-│   ├── GOOGLE_ADS_CHECKLIST.md        # Google Ads setup & management
-│   └── FACEBOOK_ADS_CHECKLIST.md      # Facebook/IG Ads setup & management
-├── social/                             # Social Media Operations
-│   ├── SOCIAL_MEDIA_SOP.md            # Social media management SOP
-│   └── CONTENT_CALENDAR_TEMPLATE.md   # Content calendar template
-├── landing/                            # Landing Page Operations
-│   └── LANDING_PAGE_CHECKLIST.md      # Landing page creation checklist
-└── tracking/                           # Analytics & Tracking
-    └── ANALYTICS_SETUP_GUIDE.md       # GA4, Pixel, GTM setup guide
+├── README.md                    # This file
+├── ads/
+│   ├── GOOGLE_ADS_CHECKLIST.md  # Google Ads setup & management
+│   └── FACEBOOK_ADS_CHECKLIST.md # Facebook/IG Ads setup & management
+├── social/
+│   ├── SOCIAL_MEDIA_SOP.md      # Social media management SOP
+│   └── CONTENT_CALENDAR_TEMPLATE.md # Content calendar template
+├── landing/
+│   └── LANDING_PAGE_CHECKLIST.md # Landing page creation checklist
+└── tracking/
+    └── ANALYTICS_SETUP_GUIDE.md  # GA4, Pixel, GTM setup guide
 ```
 
-## Quick Navigation
+## Quick Links
 
-### 🎯 Advertising Operations
-- **[Google Ads Checklist](ads/GOOGLE_ADS_CHECKLIST.md)** - การตั้งค่าและจัดการ Google Ads ตั้งแต่ setup account จนถึง optimization
-- **[Facebook Ads Checklist](ads/FACEBOOK_ADS_CHECKLIST.md)** - การตั้งค่าและจัดการ Facebook/Instagram Ads รวมถึง Pixel และ Audiences
+### 📢 Advertising
+- [Google Ads Checklist](ads/GOOGLE_ADS_CHECKLIST.md) - Setup, keywords, ad copy, optimization
+- [Facebook/IG Ads Checklist](ads/FACEBOOK_ADS_CHECKLIST.md) - Pixel, audiences, campaigns
 
-### 📱 Social Media Operations
-- **[Social Media SOP](social/SOCIAL_MEDIA_SOP.md)** - มาตรฐานการจัดการ Social Media ทุกแพลตฟอร์ม (FB, IG, TikTok, LINE, YouTube)
-- **[Content Calendar Template](social/CONTENT_CALENDAR_TEMPLATE.md)** - เทมเพลตวางแผนเนื้อหา Social Media
+### 📱 Social Media
+- [Social Media SOP](social/SOCIAL_MEDIA_SOP.md) - Platform guidelines, response templates
+- [Content Calendar Template](social/CONTENT_CALENDAR_TEMPLATE.md) - Weekly planning, content pillars
 
-### 🌐 Landing Page Operations
-- **[Landing Page Checklist](landing/LANDING_PAGE_CHECKLIST.md)** - Checklist การสร้าง Landing Page ที่มี Conversion สูง
+### 🎯 Landing Pages
+- [Landing Page Checklist](landing/LANDING_PAGE_CHECKLIST.md) - Design, content, conversion optimization
 
-### 📊 Analytics & Tracking
-- **[Analytics Setup Guide](tracking/ANALYTICS_SETUP_GUIDE.md)** - คู่มือติดตั้ง GA4, Facebook Pixel, และ Google Tag Manager
+### 📊 Tracking & Analytics
+- [Analytics Setup Guide](tracking/ANALYTICS_SETUP_GUIDE.md) - GTM, GA4, Facebook Pixel, Google Ads
 
-## How to Use
+## Usage
 
-### For Marketing Team
-1. เลือก checklist หรือ template ที่ต้องการใช้จาก Quick Navigation
-2. ทำตาม checklist ทีละขั้นตอนเพื่อให้แน่ใจว่าไม่มีขั้นตอนใดหลุด
-3. ติ๊กถูก `[x]` ในแต่ละขั้นตอนที่ทำเสร็จแล้ว
-4. บันทึกปัญหาหรือข้อสังเกตสำหรับการปรับปรุงในอนาคต
+### For New Team Members
+1. อ่าน README นี้ก่อน
+2. ศึกษา checklist ตามหน้าที่ที่รับผิดชอบ
+3. ใช้ templates เป็นแนวทางในการทำงาน
 
-### For Managers
-1. ใช้ checklist เหล่านี้เป็นมาตรฐานในการ Review งานของทีม
-2. ตรวจสอบว่าทุกขั้นตอนถูกทำครบถ้วนก่อน Launch แคมเปญ
-3. ใช้เป็น Onboarding material สำหรับสมาชิกใหม่
+### For Daily Operations
+- [ ] ตรวจสอบ ad performance ทุกเช้า
+- [ ] ตอบ comments/messages ภายใน 1 ชั่วโมง
+- [ ] อัพเดท content calendar
+- [ ] ติดตาม leads และ follow up
 
-## Phase 0 Operations Focus
+### For Reporting
+- Weekly: รวบรวมข้อมูลตาม KPIs
+- Monthly: สรุป performance และวางแผน
 
-เอกสารในชุดนี้เน้นการดำเนินงานใน **Phase 0** ซึ่งเป็น Foundation phase ของโปรเจค:
+## Key KPIs
 
-- ✅ Manual processes ที่ต้องทำให้ถูกต้องและสม่ำเสมอ
-- ✅ การตั้งค่าระบบ tracking และ analytics
-- ✅ การสร้าง content และ creative assets
-- ✅ การจัดการแคมเปญโฆษณาและ social media
-- ✅ การวัดผลและ optimization
+| Metric | Target | Owner |
+|--------|--------|-------|
+| Leads/Month | 200+ | Marketing |
+| Cost Per Lead | < ฿500 | Marketing |
+| Lead Response Time | < 30 min | Sales |
+| Social Engagement | > 3% | Social |
+| Landing Page Conversion | > 5% | Marketing |
 
-ในอนาคต Phase ถัดไป จะมีการนำ AI Agents มาช่วยทำงานบางส่วนอัตโนมัติ โดยใช้ Ops OS นี้เป็น foundation
+## Budget Summary
 
-## Contributing
-
-หากพบว่า checklist หรือ template ใดต้องการปรับปรุง:
-1. สร้าง Issue ระบุปัญหาหรือข้อเสนอแนะ
-2. หรือสร้าง Pull Request พร้อม explanation ว่าทำไมต้องเปลี่ยน
-3. ทีมจะ Review และ Merge เข้าระบบ
+| Category | Monthly Budget |
+|----------|----------------|
+| Google Ads | ฿30,000 - ฿80,000 |
+| Facebook/IG Ads | ฿20,000 - ฿60,000 |
+| LINE Ads | ฿5,000 - ฿30,000 |
+| TikTok Ads | ฿10,000 - ฿30,000 |
+| Tools & Software | ~฿15,000 |
+| Content Creation | ฿10,000 - ฿20,000 |
+| **Total** | **฿100,000 - ฿235,000** |
 
 ## Related Documents
 
-- [AMP Business Lens](../AMP_BUSINESS_LENS.md) - Business model และ strategy
-- [AMP Architecture Blueprint](../AMP_ARCHITECTURE_BLUEPRINT.md) - System architecture
-- [AMP MVP Scope](../AMP_MVP_SCOPE.md) - MVP scope และ roadmap
+- [AMP Business Lens](../AMP_BUSINESS_LENS.md)
+- [AMP MVP Scope](../AMP_MVP_SCOPE.md)
+- [Contributing Guide](../../CONTRIBUTING.md)
 
----
+## Changelog
 
-**Last Updated:** 2026-01-26  
-**Version:** 1.0.0  
-**Maintained by:** AMP Operations Team
+| Date | Change | Author |
+|------|--------|--------|
+| 2026-01-26 | Initial creation | AI Agent |
