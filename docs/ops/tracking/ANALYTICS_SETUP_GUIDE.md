@@ -1,62 +1,62 @@
-# Analytics Setup Guide
+# Analytics & Tracking Setup Guide - AMP
 
-> 📊 คู่มือติดตั้งและตั้งค่า Analytics & Tracking สำหรับ AMP Real Estate
+> 📊 คู่มือการตั้งค่า Analytics และ Tracking สำหรับ AMP
 
 ## Overview
 
-เอกสารนี้เป็นคู่มือการติดตั้งและตั้งค่า Analytics ครบวงจร ครอบคลุม Google Analytics 4 (GA4), Facebook Pixel, และ Google Tag Manager (GTM) เพื่อให้สามารถ track และวัดผลแคมเปญได้อย่างถูกต้องและครบถ้วน
+เอกสารนี้เป็นคู่มือการตั้งค่า tracking และ analytics สำหรับ Asset Management Property (AMP) เพื่อวัดผลการตลาดและปรับปรุงประสิทธิภาพ
 
----
-
-## Why Analytics Matters
-
-Analytics ช่วยให้เรา:
-- 📈 วัดผลแคมเปญ Marketing (ROI)
-- 👥 เข้าใจพฤติกรรมผู้ใช้
-- 🎯 ปรับกลยุทธ์ให้ตรงกลุ่มเป้าหมาย
-- 💰 ลด Cost Per Acquisition (CPA)
-- 🔄 ปรับปรุง Conversion Rate
-
----
-
-## Architecture Overview
+### Tracking Stack
 
 ```
-Website/Landing Pages
-        ↓
-Google Tag Manager (GTM) ← Central Hub
-        ↓
-    ┌───┴───┐
-    ↓       ↓
-  GA4   Facebook Pixel
+┌─────────────────────────────────────────────────────────────┐
+│                    TRACKING ARCHITECTURE                    │
+├─────────────────────────────────────────────────────────────┤
+│                                                             │
+│  ┌─────────────┐     ┌─────────────────────────────────┐   │
+│  │   Website   │────▶│    Google Tag Manager (GTM)     │   │
+│  └─────────────┘     └─────────────┬───────────────────┘   │
+│                                    │                       │
+│                    ┌───────────────┼───────────────┐       │
+│                    │               │               │       │
+│                    ▼               ▼               ▼       │
+│            ┌───────────┐   ┌───────────┐   ┌───────────┐  │
+│            │   GA4     │   │  FB Pixel │   │Google Ads │  │
+│            │           │   │  + CAPI   │   │Conversion │  │
+│            └───────────┘   └───────────┘   └───────────┘  │
+│                    │               │               │       │
+│                    └───────────────┼───────────────┘       │
+│                                    │                       │
+│                                    ▼                       │
+│                        ┌─────────────────────┐             │
+│                        │   Looker Studio     │             │
+│                        │   (Reporting)       │             │
+│                        └─────────────────────┘             │
+│                                                             │
+└─────────────────────────────────────────────────────────────┘
 ```
-
-**GTM เป็นตัวกลาง** ที่จัดการ tags ทั้งหมด ทำให้:
-- ติดตั้ง/แก้ไข tags ได้โดยไม่ต้องแก้ code
-- จัดการ tags หลายตัวในที่เดียว
-- ทดสอบก่อน publish ได้
 
 ---
 
-## Phase 1: Google Tag Manager (GTM) Setup
+## Phase 1: Google Tag Manager (GTM)
 
-### Step 1.1: Create GTM Account & Container
+### 1.1 Container Setup
 
-- [ ] ไปที่ [tagmanager.google.com](https://tagmanager.google.com)
-- [ ] คลิก "Create Account"
-- [ ] กรอกข้อมูล:
-  - **Account Name:** "AMP Property" หรือชื่อบริษัท
-  - **Country:** Thailand
-  - **Container Name:** amp-property.com หรือ domain ของคุณ
-  - **Target Platform:** Web
-- [ ] ยอมรับ Terms of Service
-- [ ] คลิก "Create"
+- [ ] สร้าง GTM Account (ถ้ายังไม่มี)
+- [ ] สร้าง Container สำหรับ AMP website
+- [ ] ตั้งชื่อ: `AMP - Production`
+- [ ] เลือก Target platform: Web
 
-### Step 1.2: Install GTM Code
+**Container Details:**
+```
+Account: Asset Management Property
+Container Name: AMP - Production
+Container ID: GTM-XXXXXXX
+```
 
-GTM จะให้ code snippet 2 ส่วน:
+### 1.2 GTM Installation
 
-**ส่วนที่ 1: ใส่ใน `<head>` (ใกล้บนสุดเท่าที่เป็นไปได้):**
+**Install on Website:**
 ```html
 <!-- Google Tag Manager -->
 <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
@@ -65,147 +65,193 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
 })(window,document,'script','dataLayer','GTM-XXXXXXX');</script>
 <!-- End Google Tag Manager -->
-```
 
-**ส่วนที่ 2: ใส่หลัง `<body>` opening tag:**
-```html
 <!-- Google Tag Manager (noscript) -->
 <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-XXXXXXX"
 height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <!-- End Google Tag Manager (noscript) -->
 ```
 
-**Checklist:**
-- [ ] คัดลอก GTM code ทั้ง 2 ส่วน
-- [ ] ใส่ส่วนที่ 1 ใน `<head>` ของทุกหน้า
-- [ ] ใส่ส่วนที่ 2 หลัง `<body>` ของทุกหน้า
-- [ ] บันทึกและ deploy changes
-- [ ] Refresh website และตรวจสอบ GTM ติดตั้งสำเร็จ
+### 1.3 Verify Installation
 
-### Step 1.3: Verify GTM Installation
+- [ ] ติดตั้ง GTM Tag Assistant Extension
+- [ ] เปิด Preview mode ใน GTM
+- [ ] เข้า website และ verify ว่า GTM ทำงาน
+- [ ] Check Console ว่าไม่มี errors
 
-**ใช้ Google Tag Assistant:**
-- [ ] ติดตั้ง [Tag Assistant Companion](https://chrome.google.com/webstore/detail/tag-assistant-companion/kejbdjndbnbjgmefkgdddjlbokphdefk) (Chrome extension)
-- [ ] เปิดเว็บไซต์ของคุณ
-- [ ] คลิก Tag Assistant icon
-- [ ] ตรวจสอบว่าเห็น "Google Tag Manager" ติดตั้งอยู่และสถานะเป็น "Working"
+### 1.4 Built-in Variables
 
-**หรือใช้ GTM Preview Mode:**
-- [ ] ใน GTM interface, คลิก "Preview"
-- [ ] ใส่ URL ของเว็บไซต์
-- [ ] ตรวจสอบว่า GTM container loads successfully
+Enable these built-in variables:
 
----
+**Pages:**
+- [ ] Page URL
+- [ ] Page Hostname
+- [ ] Page Path
+- [ ] Referrer
 
-## Phase 2: Google Analytics 4 (GA4) Setup
+**Clicks:**
+- [ ] Click Element
+- [ ] Click Classes
+- [ ] Click ID
+- [ ] Click URL
+- [ ] Click Text
 
-### Step 2.1: Create GA4 Property
+**Forms:**
+- [ ] Form Element
+- [ ] Form Classes
+- [ ] Form ID
+- [ ] Form Target
+- [ ] Form URL
+- [ ] Form Text
 
-- [ ] ไปที่ [analytics.google.com](https://analytics.google.com)
-- [ ] คลิก "Admin" (ล้อเฟือง)
-- [ ] เลือก "Create Property"
-- [ ] กรอกข้อมูล:
-  - **Property Name:** "AMP Property Website"
-  - **Reporting Time Zone:** (GMT+07:00) Bangkok
-  - **Currency:** Thai Baht (THB)
-- [ ] คลิก "Next"
-- [ ] เลือก Industry: Real Estate
-- [ ] เลือก Business size
-- [ ] เลือก Objective: "Generate leads"
-- [ ] คลิก "Create"
-- [ ] ยอมรับ Terms of Service
-
-### Step 2.2: Get GA4 Measurement ID
-
-- [ ] หลังสร้าง Property แล้ว จะอยู่ที่ "Data Streams" setup
-- [ ] เลือก Platform: "Web"
-- [ ] กรอก:
-  - **Website URL:** https://amp-property.com
-  - **Stream name:** AMP Property Website
-- [ ] คลิก "Create stream"
-- [ ] จดบันทึก **Measurement ID** (รูปแบบ G-XXXXXXXXXX)
-
-### Step 2.3: Install GA4 via GTM
-
-**สร้าง GA4 Configuration Tag:**
-- [ ] ใน GTM, ไปที่ "Tags" → "New"
-- [ ] กำหนดชื่อ Tag: "GA4 - Configuration"
-- [ ] เลือก Tag Type: "Google Analytics: GA4 Configuration"
-- [ ] ใส่ **Measurement ID** (G-XXXXXXXXXX)
-- [ ] ตั้งค่า Triggering: "All Pages"
-- [ ] คลิก "Save"
-
-### Step 2.4: Test GA4 Installation
-
-- [ ] ใน GTM, คลิก "Preview"
-- [ ] เปิดเว็บไซต์ในโหมด Preview
-- [ ] ตรวจสอบว่า GA4 Configuration tag fires
-- [ ] ไปที่ GA4 → Reports → Realtime
-- [ ] ตรวจสอบว่าเห็น Active Users (ตัวคุณเอง)
-
-### Step 2.5: Configure GA4 Settings
-
-**Enhanced Measurement (auto-tracking):**
-- [ ] ใน GA4, ไปที่ Admin → Data Streams → เลือก Stream
-- [ ] คลิก "Enhanced measurement"
-- [ ] เปิด/ปิด events ตามต้องการ:
-  - [x] Page views (เปิดอยู่แล้ว)
-  - [ ] Scrolls (ปิดไว้ถ้าต้องการใช้ custom scroll tracking ผ่าน GTM)
-  - [x] Outbound clicks
-  - [x] Site search (ถ้ามี search)
-  - [x] Video engagement (ถ้ามีวิดีโอ)
-  - [x] File downloads (PDF, etc.)
-- [ ] คลิก "Save"
-
-**Data Retention:**
-- [ ] ไปที่ Admin → Data Settings → Data Retention
-- [ ] เลือก "14 months" (maximum)
-- [ ] คลิก "Save"
-
-### Step 2.6: Set Up Conversions (Goals)
-
-**Define Key Conversions:**
-- [ ] ไปที่ Admin → Events
-- [ ] สร้าง Custom Events สำหรับ conversions:
-
-**Conversion 1: Lead Form Submission**
-- [ ] Event name: `generate_lead`
-- [ ] Mark as Conversion: Yes
-
-**Conversion 2: Phone Click**
-- [ ] Event name: `phone_click`
-- [ ] Mark as Conversion: Yes
-
-**Conversion 3: LINE/WhatsApp Click**
-- [ ] Event name: `contact_click`
-- [ ] Mark as Conversion: Yes
-
-*(เราจะสร้าง GTM tags สำหรับส่ง events เหล่านี้ในขั้นตอนถัดไป)*
+**Utilities:**
+- [ ] Event
+- [ ] Container ID
+- [ ] Debug Mode
+- [ ] Random Number
 
 ---
 
-## Phase 3: Facebook Pixel Setup
+## Phase 2: Google Analytics 4 (GA4)
 
-### Step 3.1: Create Facebook Pixel
+### 2.1 Property Setup
 
-- [ ] ไปที่ [Facebook Business Manager](https://business.facebook.com)
-- [ ] ไปที่ "Events Manager" → "Data Sources"
-- [ ] คลิก "Add" → "Facebook Pixel"
-- [ ] กำหนดชื่อ: "AMP Property Pixel"
+- [ ] สร้าง GA4 Property
+- [ ] Property Name: `AMP - Asset Management Property`
+- [ ] Timezone: Thailand (GMT+7)
+- [ ] Currency: THB
+
+### 2.2 Data Stream
+
+- [ ] สร้าง Web Data Stream
 - [ ] ใส่ Website URL
-- [ ] คลิก "Continue"
-- [ ] จดบันทึก **Pixel ID** (เลขหลายหลัก)
+- [ ] Enable Enhanced Measurement:
+  - [ ] Page views
+  - [ ] Scrolls
+  - [ ] Outbound clicks
+  - [ ] Site search
+  - [ ] Video engagement
+  - [ ] File downloads
 
-### Step 3.2: Install Facebook Pixel via GTM
+### 2.3 GTM - GA4 Configuration Tag
 
-**สร้าง Pixel Base Code Tag:**
-- [ ] ใน GTM, ไปที่ "Tags" → "New"
-- [ ] กำหนดชื่อ: "Facebook Pixel - Base Code"
-- [ ] เลือก Tag Type: "Custom HTML"
-- [ ] วาง Pixel base code:
+**Tag Name:** `GA4 - Configuration`
+**Tag Type:** Google Analytics: GA4 Configuration
+**Measurement ID:** `G-XXXXXXXXXX`
+**Trigger:** All Pages
+
+```
+Tag Configuration:
+- Measurement ID: G-XXXXXXXXXX
+- Send page view: ✅
+- Fields to Set:
+  - debug_mode: true (สำหรับ development)
+```
+
+### 2.4 Custom Events
+
+**Lead Form Submission:**
+
+*Trigger:*
+```
+Name: Form Submission - Lead Form
+Type: Form Submission
+Conditions: Form ID contains "lead" OR Form Classes contains "lead-form"
+```
+
+*Tag:*
+```
+Name: GA4 - Event - generate_lead
+Type: GA4 Event
+Event Name: generate_lead
+Parameters:
+- form_name: {{Form ID}}
+- page_location: {{Page URL}}
+```
+
+**Property View:**
+
+*Trigger:*
+```
+Name: Page View - Property Detail
+Type: Page View
+Conditions: Page Path contains "/property/" OR Page Path contains "/condo/"
+```
+
+*Tag:*
+```
+Name: GA4 - Event - view_item
+Type: GA4 Event
+Event Name: view_item
+Parameters:
+- content_type: property
+- content_id: {{property_id}} (from dataLayer)
+```
+
+**Click to Call:**
+
+*Trigger:*
+```
+Name: Click - Phone Number
+Type: Click - Just Links
+Conditions: Click URL starts with "tel:"
+```
+
+*Tag:*
+```
+Name: GA4 - Event - click_call
+Type: GA4 Event
+Event Name: click_call
+Parameters:
+- phone_number: {{Click URL}}
+```
+
+**Click LINE:**
+
+*Trigger:*
+```
+Name: Click - LINE
+Type: Click - All Elements
+Conditions: Click URL contains "line.me" OR Click Classes contains "line-btn"
+```
+
+*Tag:*
+```
+Name: GA4 - Event - click_line
+Type: GA4 Event
+Event Name: click_line
+```
+
+### 2.5 GA4 Recommended Events
+
+| Event | When to Fire | Parameters |
+|-------|--------------|------------|
+| `page_view` | Automatic | - |
+| `scroll` | Automatic (90%) | - |
+| `view_item` | Property detail page | content_type, content_id, price |
+| `view_item_list` | Property listing page | item_list_name |
+| `select_item` | Click on property | content_type, content_id |
+| `generate_lead` | Lead form submit | form_name |
+| `search` | Property search | search_term |
+| `click_call` | Phone click | phone_number |
+| `click_line` | LINE click | - |
+
+---
+
+## Phase 3: Facebook Pixel
+
+### 3.1 Pixel Creation
+
+- [ ] สร้าง Facebook Pixel ใน Events Manager
+- [ ] Pixel Name: `AMP - Facebook Pixel`
+- [ ] Copy Pixel ID
+
+### 3.2 GTM - Facebook Pixel Base Tag
+
+**Tag Name:** `FB Pixel - Base`
+**Tag Type:** Custom HTML
 
 ```html
-<!-- Facebook Pixel Code -->
 <script>
 !function(f,b,e,v,n,t,s)
 {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
@@ -221,547 +267,372 @@ fbq('track', 'PageView');
 <noscript><img height="1" width="1" style="display:none"
 src="https://www.facebook.com/tr?id=YOUR_PIXEL_ID&ev=PageView&noscript=1"
 /></noscript>
-<!-- End Facebook Pixel Code -->
 ```
 
-- [ ] แทนที่ `YOUR_PIXEL_ID` ด้วย Pixel ID จริง
-- [ ] Triggering: "All Pages"
-- [ ] คลิก "Save"
+**Trigger:** All Pages
 
-### Step 3.3: Test Facebook Pixel
+### 3.3 Facebook Pixel Events
 
-- [ ] ติดตั้ง [Facebook Pixel Helper](https://chrome.google.com/webstore/detail/facebook-pixel-helper/fdgfkebogiimcoedlicjlajpkdmockpc) (Chrome extension)
-- [ ] ใน GTM Preview mode, เปิดเว็บไซต์
-- [ ] คลิก Pixel Helper icon
-- [ ] ตรวจสอบว่าเห็น Pixel firing และ PageView event
-- [ ] ใน Events Manager → Test Events, ตรวจสอบว่าเห็น activities
+**Lead Event:**
 
-### Step 3.4: Set Up Facebook Standard Events
+*Tag Name:* `FB Pixel - Lead`
+*Tag Type:* Custom HTML
 
-เราจะสร้าง GTM tags สำหรับ standard events:
-
-**Event 1: ViewContent (ดูรายละเอียดทรัพย์สิน)**
-
-*สร้าง Trigger:*
-- [ ] ใน GTM, ไปที่ "Triggers" → "New"
-- [ ] ชื่อ: "Page View - Property Detail"
-- [ ] Type: "Page View"
-- [ ] Trigger fires on: Some Page Views
-- [ ] Condition: Page Path contains `/property/` (หรือ pattern ที่ใช้)
-- [ ] Save
-
-*สร้าง Tag:*
-- [ ] Tags → "New"
-- [ ] ชื่อ: "Facebook Pixel - ViewContent"
-- [ ] Type: "Custom HTML"
-- [ ] Code:
 ```html
 <script>
-// Ensure Facebook Pixel base code has loaded before tracking.
-// In GTM, use Tag Sequencing to fire the base Pixel tag before this event tag.
-if (typeof fbq === 'function') {
-  fbq('track', 'ViewContent', {
-    content_name: '{{Page Title}}',
-    content_category: 'Property',
-    content_type: 'product'
-  });
-}
+fbq('track', 'Lead');
 </script>
 ```
-- [ ] Triggering: "Page View - Property Detail"
-- [ ] Save
 
-**Event 2: Lead (Form Submission)**
+*Trigger:* Form Submission - Lead Form
 
-*สร้าง Trigger:*
-- [ ] Triggers → "New"
-- [ ] ชื่อ: "Form Submission - Lead"
-- [ ] Type: "Form Submission"
-- [ ] Check Validation: Wait for Tags (2000ms)
-- [ ] Trigger fires on: All Forms (หรือ specific forms)
-- [ ] Save
+**ViewContent Event:**
 
-*สร้าง Tag:*
-- [ ] Tags → "New"
-- [ ] ชื่อ: "Facebook Pixel - Lead"
-- [ ] Type: "Custom HTML"
-- [ ] Code:
+*Tag Name:* `FB Pixel - ViewContent`
+*Tag Type:* Custom HTML
+
 ```html
 <script>
-// Ensure Facebook Pixel base code has loaded before tracking.
-// In GTM, use Tag Sequencing to fire the base Pixel tag before this event tag.
-if (typeof fbq === 'function') {
-  fbq('track', 'Lead', {
-    content_name: 'Lead Form',
-    content_category: 'Contact'
-  });
-}
+fbq('track', 'ViewContent', {
+  content_type: 'property',
+  content_name: '{{Page Title}}'
+});
 </script>
 ```
-- [ ] Triggering: "Form Submission - Lead"
-- [ ] Save
 
-**Event 3: Contact (Phone/LINE/WhatsApp Clicks)**
+*Trigger:* Page View - Property Detail
 
-*สร้าง Trigger:*
-- [ ] Triggers → "New"
-- [ ] ชื่อ: "Click - Contact Buttons"
-- [ ] Type: "Click - All Elements"
-- [ ] Trigger fires on: Some Clicks
-- [ ] Conditions:
-  - Click URL contains `tel:` OR
-  - Click URL contains `line.me` OR
-  - Click URL contains `wa.me`
-- [ ] Save
+**Search Event:**
 
-*สร้าง Tag:*
-- [ ] Tags → "New"
-- [ ] ชื่อ: "Facebook Pixel - Contact"
-- [ ] Type: "Custom HTML"
-- [ ] Code:
+*Tag Name:* `FB Pixel - Search`
+*Tag Type:* Custom HTML
+
 ```html
 <script>
-// Ensure Facebook Pixel base code has loaded before tracking.
-// In GTM, use Tag Sequencing to fire the base Pixel tag before this event tag.
-if (typeof fbq === 'function') {
-  fbq('track', 'Contact', {
-    content_name: 'Contact Button'
-  });
-}
+fbq('track', 'Search', {
+  search_string: '{{Search Term}}'
+});
 </script>
 ```
-- [ ] Triggering: "Click - Contact Buttons"
-- [ ] Save
 
-### Step 3.5: Configure Conversion API (CAPI)
+*Trigger:* Property Search Action
 
-Facebook Pixel อาจมีข้อจำกัดจาก iOS 14.5+ ใช้ Conversions API เพื่อเพิ่มความแม่นยำ:
+### 3.4 Conversions API (CAPI)
 
-**Option A: GTM Server-Side (Advanced)**
-- Requires server-side GTM container
-- Best for accuracy but complex setup
+**Why CAPI:**
+- Bypass ad blockers
+- iOS 14+ tracking
+- Better data accuracy
+- Required for best performance
 
-**Option B: Facebook Conversions API Gateway (Recommended)**
-- [ ] ใน Events Manager, ไปที่ Pixel → Settings
-- [ ] คลิก "Set up Conversions API"
-- [ ] เลือก Partner Integration: "Google Tag Manager"
-- [ ] Follow setup instructions
-- [ ] Test events via Events Manager → Test Events
+**CAPI Setup Options:**
 
-**Option C: CMS Plugin (ถ้าใช้ WordPress, etc.)**
-- Install official Facebook plugin
-- Configure Pixel ID และ Access Token
+1. **Partner Integration** (Easiest)
+   - Shopify, WordPress plugins
+   - One-click setup
+
+2. **Manual Integration**
+   - Server-side implementation
+   - Use Facebook's API
+
+3. **GTM Server-Side**
+   - More complex but powerful
+   - Requires GTM Server container
 
 ---
 
-## Phase 4: Advanced Tracking Setup
+## Phase 4: Google Ads Conversion Tracking
 
-### Step 4.1: Enhanced Conversion Tracking in GA4
+### 4.1 Conversion Actions
 
-**Track Scrolling Depth:**
-- [ ] ใน GTM, เปิดใช้งาน Built-in Variables สำหรับ Scroll:
-  - ไปที่เมนู "Variables" → คลิก "Configure" ในส่วน Built-in Variables
-  - ติ๊กเลือก "Scroll Depth Threshold" (และ "Scroll Depth Direction" ถ้าต้องการ)
-- [ ] สร้าง Trigger:
-  - Type: "Scroll Depth"
-  - Percentages: 25, 50, 75, 90
-- [ ] สร้าง Tag:
-  - Type: "GA4 Event"
-  - Configuration Tag: (เลือก GA4 Configuration tag)
-  - Event Name: `scroll_depth`
-  - Event Parameters:
-    - `percent_scrolled`: {{Scroll Depth Threshold}}
-  - Triggering: Scroll Depth trigger
-- [ ] Save
+Create conversions in Google Ads:
 
-**Note:** ใช้ event name `scroll_depth` แทน `scroll` เพื่อหลีกเลี่ยงความสับสนกับ GA4 Enhanced Measurement scroll event
+| Conversion Name | Category | Value | Count |
+|-----------------|----------|-------|-------|
+| Lead Form Submit | Lead | ฿500 | Every |
+| Phone Call (60s+) | Lead | ฿300 | Every |
+| LINE Click | Lead | ฿200 | Every |
+| WhatsApp Click | Lead | ฿200 | Every |
+| Property View | Lead | ฿50 | One |
 
-**Track Video Views:**
-- [ ] สร้าง Trigger:
-  - Type: "YouTube Video"
-  - Capture: Start, Progress (25%, 50%, 75%), Complete
-- [ ] สร้าง Tag:
-  - Type: "GA4 Event"
-  - Event Name: `video_{{Video Status}}`
-  - Event Parameters:
-    - `video_url`: {{Video URL}}
-    - `video_title`: {{Video Title}}
-    - `video_percent`: {{Video Percent}}
-  - Triggering: YouTube Video trigger
-- [ ] Save
+### 4.2 GTM - Google Ads Conversion Tags
 
-**Track Outbound Links:**
-- [ ] สร้าง Trigger:
-  - Type: "Click - All Elements"
-  - Fires on: Some Clicks
-  - Condition: Click URL does NOT contain `amp-property.com`
-- [ ] สร้าง Tag:
-  - Type: "GA4 Event"
-  - Event Name: `click_outbound`
-  - Event Parameters:
-    - `link_url`: {{Click URL}}
-  - Triggering: Outbound Links trigger
-- [ ] Save
+**Tag Name:** `Google Ads - Lead Conversion`
+**Tag Type:** Google Ads Conversion Tracking
 
-### Step 4.2: Track Phone Clicks
-
-- [ ] สร้าง Trigger (ถ้ายังไม่มี):
-  - Type: "Click - All Elements"
-  - Fires on: Some Clicks
-  - Condition: Click URL contains `tel:`
-- [ ] สร้าง GA4 Tag:
-  - Event Name: `phone_click`
-  - Event Parameters:
-    - `phone_number`: {{Click URL}}
-  - Triggering: Phone Click trigger
-- [ ] สร้าง Facebook Pixel Tag (ถ้ายังไม่มี - ดูข้างบน)
-- [ ] Save both
-
-### Step 4.3: Track LINE/WhatsApp Clicks
-
-- [ ] สร้าง Trigger:
-  - Type: "Click - All Elements"
-  - Fires on: Some Clicks
-  - Conditions:
-    - Click URL contains `line.me` OR
-    - Click URL contains `wa.me`
-- [ ] สร้าง GA4 Tag:
-  - Event Name: `contact_click`
-  - Event Parameters:
-    - `contact_type`: {{Click URL}}
-  - Triggering: Contact Click trigger
-- [ ] สร้าง Facebook Pixel Tag
-- [ ] Save both
-
-### Step 4.4: UTM Parameter Tracking
-
-UTM parameters ช่วยติดตามว่า traffic มาจาก source ไหน
-
-**UTM Structure:**
 ```
-https://amp-property.com/landing-page?utm_source=facebook&utm_medium=cpc&utm_campaign=condo-pattaya-jan2026&utm_content=beachfront-2br&utm_term=pattaya-condo
+Conversion ID: AW-XXXXXXXXXX
+Conversion Label: XXXXXXXXXXXXXXXX
+Conversion Value: 500
+Currency Code: THB
 ```
 
-**Parameters:**
-- `utm_source`: แหล่งที่มา (facebook, google, line, email)
-- `utm_medium`: ประเภท (cpc, social, email, referral)
-- `utm_campaign`: ชื่อแคมเปญ
-- `utm_content`: ระบุ ad/creative variant (A/B testing)
-- `utm_term`: keywords (สำหรับ paid search)
+**Trigger:** Form Submission - Lead Form
 
-**Best Practices:**
-- [ ] ใช้ lowercase ทั้งหมด
-- [ ] ใช้ hyphens แทน spaces (`-`)
-- [ ] มีความสม่ำเสมอในการตั้งชื่อ
-- [ ] ใช้ [Campaign URL Builder](https://ga-dev-tools.google/campaign-url-builder/) ในการสร้าง
+### 4.3 Google Ads Remarketing Tag
 
-**GA4 จะ capture UTM automatically** แต่ควร:
-- [ ] สร้าง Custom Dimension สำหรับ utm_content (ถ้าต้องการ detailed reporting)
+**Tag Name:** `Google Ads - Remarketing`
+**Tag Type:** Google Ads Remarketing
 
----
+```
+Conversion ID: AW-XXXXXXXXXX
+Enable Dynamic Remarketing: ✅
+Parameters:
+- ecomm_prodid: {{property_id}}
+- ecomm_pagetype: {{page_type}}
+- ecomm_totalvalue: {{property_price}}
+```
 
-## Phase 5: Testing & Quality Assurance
-
-### Step 5.1: GTM Preview & Debug
-
-- [ ] ใน GTM, คลิก "Preview"
-- [ ] ใส่ URL ของเว็บไซต์
-- [ ] ทดสอบแต่ละ scenario:
-  - [ ] Page load (GTM, GA4, FB Pixel base)
-  - [ ] Form submission (Lead events)
-  - [ ] Phone click (Contact events)
-  - [ ] LINE/WhatsApp click (Contact events)
-  - [ ] Scroll (Scroll events)
-  - [ ] Video play (Video events - ถ้ามี)
-- [ ] ตรวจสอบว่าทุก Tag fires correctly
-- [ ] ตรวจสอบว่าไม่มี Tags ที่ควร fire แต่ไม่ fire
-
-### Step 5.2: GA4 DebugView
-
-- [ ] ใน GA4, ไปที่ Admin → DebugView
-- [ ] หรือ Configure → DebugView
-- [ ] เปิดเว็บไซต์ใน GTM Preview mode
-- [ ] ตรวจสอบว่าเห็น Events ส่งมา:
-  - [ ] page_view
-  - [ ] generate_lead
-  - [ ] phone_click
-  - [ ] contact_click
-  - [ ] scroll (ถ้าตั้งค่า)
-  - [ ] video_start (ถ้ามี)
-- [ ] ตรวจสอบ Event parameters ถูกต้อง
-
-### Step 5.3: Facebook Pixel Testing
-
-- [ ] ใช้ Facebook Pixel Helper (Chrome extension)
-- [ ] เปิดเว็บไซต์
-- [ ] ตรวจสอบ Pixel firing:
-  - [ ] PageView
-  - [ ] ViewContent (บนหน้า property detail)
-  - [ ] Lead (เมื่อส่ง form)
-  - [ ] Contact (เมื่อคลิก contact buttons)
-- [ ] ใน Events Manager → Test Events:
-  - [ ] ตั้งค่า Test Event Code
-  - [ ] เปิดเว็บไซต์พร้อม test code
-  - [ ] ทดสอบแต่ละ event
-  - [ ] ตรวจสอบ Event Match Quality score (target > 6.0)
-
-### Step 5.4: Cross-Device Testing
-
-- [ ] ทดสอบบน Desktop (Chrome, Safari, Firefox)
-- [ ] ทดสอบบน Mobile (iOS Safari, Android Chrome)
-- [ ] ทดสอบบน Tablet
-- [ ] ตรวจสอบว่า tracking works ทุก device และ browser
-
-### Step 5.5: End-to-End Testing
-
-**Scenario 1: New Visitor → Lead**
-- [ ] เปิดเว็บไซต์ (Incognito/Private mode)
-- [ ] Browse หน้าต่างๆ
-- [ ] ดูหน้า property detail
-- [ ] กรอกและส่ง lead form
-- [ ] ตรวจสอบว่า events ทุกขั้นตอนถูก tracked
-
-**Scenario 2: Returning Visitor → Phone Contact**
-- [ ] เปิดเว็บไซต์อีกครั้ง (ไม่ใช่ Incognito)
-- [ ] คลิก phone number
-- [ ] ตรวจสอบ event tracking
-
-**Scenario 3: From Ads**
-- [ ] เปิด Landing Page จาก Ads (พร้อม UTM)
-- [ ] ตรวจสอบว่า UTM parameters captured
-- [ ] ทำ action (form submit หรือ contact)
-- [ ] ตรวจสอบ conversion attribution ถูกต้อง
+**Trigger:** All Pages
 
 ---
 
-## Phase 6: Reporting & Dashboards
+## Phase 5: LINE Tag (Optional)
 
-### Step 6.1: GA4 Custom Reports
+### 5.1 LINE Tag Setup
 
-**สร้าง Acquisition Report:**
-- [ ] ใน GA4, ไปที่ Explore
-- [ ] สร้าง Blank exploration
-- [ ] Dimensions: Session source/medium, Campaign name
-- [ ] Metrics: Sessions, Conversions, Conversion rate
-- [ ] Save report: "Acquisition Overview"
+If running LINE Ads:
 
-**สร้าง Landing Page Performance Report:**
-- [ ] Dimensions: Landing page, Session source/medium
-- [ ] Metrics: Sessions, Bounce rate, Conversions, Conversion rate
-- [ ] Save report: "Landing Page Performance"
+- [ ] Get LINE Tag ID from LINE Ads Manager
+- [ ] สร้าง Base Tag ใน GTM
 
-**สร้าง Event Tracking Report:**
-- [ ] Dimensions: Event name
-- [ ] Metrics: Event count, Total users
-- [ ] Save report: "Event Tracking"
+**Tag Name:** `LINE Tag - Base`
+**Tag Type:** Custom HTML
 
-### Step 6.2: Facebook Ads Manager Reports
+```html
+<script>
+!function(t,e,n,a,o,s,i,m){t[o]||((i=t[o]=function(){i.process?i.process.apply(i,arguments):i.queue.push(arguments)}).queue=[],i.t=1*new Date,(m=e.createElement(n)).async=1,m.src=a+"?v="+~~(i.t/86400000),e.getElementsByTagName("head")[0].appendChild(m))}(window,document,"script","https://static.line-scdn.net/tag/v1/lt.js","_lt");_lt('init',{customerType:'lap',tagId:'YOUR_TAG_ID'});_lt('send','pv');
+</script>
+```
 
-**Custom Columns:**
-- [ ] ใน Ads Manager, สร้าง Custom columns
-- [ ] เพิ่ม metrics:
-  - [ ] Impressions, Reach, Frequency
-  - [ ] Link Clicks, CTR (Link)
-  - [ ] Cost per result
-  - [ ] Conversions (Lead, Contact)
-  - [ ] Cost per conversion
-  - [ ] ROAS (ถ้าตั้ง value)
-- [ ] Save preset: "AMP Performance"
+### 5.2 LINE Conversion Events
 
-### Step 6.3: Monthly Report Template
+**Tag Name:** `LINE Tag - Conversion`
+**Tag Type:** Custom HTML
 
-สร้าง Monthly Report Template ใน Google Sheets หรือ Data Studio:
+```html
+<script>
+_lt('send', 'cv', {
+  type: 'Conversion'
+});
+</script>
+```
 
-**Sections:**
-1. **Executive Summary**
-   - Total Spend
-   - Total Conversions
-   - Cost per Conversion
-   - Month-over-Month changes
-
-2. **Traffic Sources**
-   - Sessions by Source/Medium
-   - Conversions by Source/Medium
-   - Bounce Rate by Source
-
-3. **Campaign Performance**
-   - Google Ads: Impressions, Clicks, CTR, Conversions, CPA
-   - Facebook Ads: Same metrics
-   - Comparison: Which performs better?
-
-4. **Landing Page Performance**
-   - Top landing pages by conversions
-   - Bounce rate analysis
-   - Conversion rate analysis
-
-5. **Conversion Funnel**
-   - Page Views → Property Views → Form Opens → Form Submits
-   - Drop-off rates at each stage
-
-6. **Goals Progress**
-   - Target vs Actual (Leads, CPA, ROAS)
+**Trigger:** Form Submission - Lead Form
 
 ---
 
-## Phase 7: Optimization & Maintenance
+## Phase 6: DataLayer Implementation
 
-### Weekly Tasks
-- [ ] ตรวจสอบ GA4 Realtime (spot check)
-- [ ] ตรวจสอบ Conversion tracking ทำงานถูกต้อง
-- [ ] Review top converting campaigns/sources
-- [ ] ตรวจสอบ bounce rates และ problematic pages
+### 6.1 DataLayer Setup
 
-### Monthly Tasks
-- [ ] สร้าง Monthly performance report
-- [ ] วิเคราะห์ trends และ patterns
-- [ ] Identify optimization opportunities
-- [ ] Review และปรับปรุง tracking setup (ถ้าจำเป็น)
-- [ ] Test new tracking features/events
+Add to website pages:
 
-### Quarterly Tasks
-- [ ] Deep dive analysis (3-month trends)
-- [ ] Audit tracking setup (มี tags ที่ไม่ใช้?)
-- [ ] Review และอัพเดท conversion definitions
-- [ ] Benchmark against industry standards
+**Base DataLayer (All pages):**
+```javascript
+<script>
+window.dataLayer = window.dataLayer || [];
+dataLayer.push({
+  'page_type': 'homepage', // or 'property_listing', 'property_detail', etc.
+  'user_id': '', // if user is logged in
+  'user_type': 'guest' // or 'member'
+});
+</script>
+```
 
----
+**Property Detail Page:**
+```javascript
+<script>
+dataLayer.push({
+  'page_type': 'property_detail',
+  'property_id': 'PROP-12345',
+  'property_name': 'Luxury Condo in Pattaya',
+  'property_type': 'condo',
+  'property_price': 5500000,
+  'property_location': 'Pattaya',
+  'property_bedrooms': 2,
+  'property_bathrooms': 2
+});
+</script>
+```
 
-## Troubleshooting Common Issues
+**Property Listing Page:**
+```javascript
+<script>
+dataLayer.push({
+  'page_type': 'property_listing',
+  'listing_category': 'condo',
+  'listing_location': 'Pattaya',
+  'total_results': 48
+});
+</script>
+```
 
-### GA4 Not Tracking
+**Form Submission Event:**
+```javascript
+<script>
+dataLayer.push({
+  'event': 'form_submission',
+  'form_name': 'lead_form',
+  'form_type': 'contact',
+  'page_location': window.location.href
+});
+</script>
+```
 
-**Issue:** ไม่เห็นข้อมูลใน GA4 Realtime
+### 6.2 GTM DataLayer Variables
 
-**Solutions:**
-- [ ] ตรวจสอบ GTM container published
-- [ ] ตรวจสอบ GA4 tag firing (GTM Preview)
-- [ ] ตรวจสอบ Measurement ID ถูกต้อง
-- [ ] ตรวจสอบ Ad blockers ปิดอยู่
-- [ ] รอ 24-48 ชม. สำหรับ historical reports
+Create these DataLayer variables in GTM:
 
-### Facebook Pixel Not Firing
-
-**Issue:** Pixel Helper แสดงว่าไม่มี Pixel
-
-**Solutions:**
-- [ ] ตรวจสอบ GTM published
-- [ ] ตรวจสอบ Pixel base code tag firing
-- [ ] ตรวจสอบ Pixel ID ถูกต้อง
-- [ ] Clear browser cache
-- [ ] ทดสอบใน Incognito mode
-
-### Events Not Triggering
-
-**Issue:** Custom events ไม่ fire
-
-**Solutions:**
-- [ ] ตรวจสอบ Trigger conditions ถูกต้อง
-- [ ] ใช้ GTM Preview เพื่อ debug
-- [ ] ตรวจสอบ DOM elements (form IDs, button classes)
-- [ ] ทดสอบ manually (click, submit, etc.)
-- [ ] ตรวจสอบ Tag firing order (dependencies)
-
-### Conversion Attribution Issues
-
-**Issue:** Conversions ไม่ attributed ถูก source
-
-**Solutions:**
-- [ ] ตรวจสอบ UTM parameters ถูกต้อง
-- [ ] ตรวจสอบ Cross-domain tracking (ถ้ามีหลาย domains)
-- [ ] ตรวจสอบ Referrer exclusions
-- [ ] ใช้ attribution models ที่เหมาะสม
-
----
-
-## Data Privacy & Compliance
-
-### PDPA Compliance (Thailand)
-
-- [ ] มี Privacy Policy ชัดเจน
-- [ ] แจ้ง users ว่ามีการเก็บ cookies/tracking
-- [ ] ให้ option opt-out (ถ้าจำเป็น)
-- [ ] ไม่เก็บข้อมูลส่วนบุคคลที่ระบุตัวตนได้โดยไม่ได้รับอนุญาต
-- [ ] มี Cookie Consent banner (recommended)
-
-### GA4 Data Collection
-
-- [ ] ปิด "Google signals" ถ้าไม่ต้องการ cross-device tracking
-- [ ] ตั้งค่า Data Retention เป็น 14 months
-- [ ] ไม่ส่ง PII (Personally Identifiable Information) ใน events
-
-### Facebook Pixel Best Practices
-
-- [ ] ใช้ Advanced Matching (hashed emails) เฉพาะเมื่อได้รับ consent
-- [ ] ตั้งค่า Limited Data Use (LDU) ถ้าจำเป็น
-- [ ] Disclose การใช้ Pixel ใน Privacy Policy
+| Variable Name | DataLayer Variable Name |
+|---------------|-------------------------|
+| `DL - Property ID` | property_id |
+| `DL - Property Name` | property_name |
+| `DL - Property Price` | property_price |
+| `DL - Property Type` | property_type |
+| `DL - Page Type` | page_type |
+| `DL - Form Name` | form_name |
 
 ---
 
-## Tools & Resources
+## Phase 7: Testing & Debugging
 
-### Essential Tools
+### 7.1 Testing Tools
 
-**Testing:**
-- **Google Tag Assistant** - ตรวจสอบ tags
-- **Facebook Pixel Helper** - ตรวจสอบ Pixel
-- **GA Debugger** - Chrome extension
-- **GTM Preview Mode** - Built-in debugging
+| Tool | Purpose | URL |
+|------|---------|-----|
+| GTM Preview | Test GTM tags | GTM Interface |
+| GA4 DebugView | Real-time GA4 events | GA4 Admin |
+| FB Pixel Helper | Test Facebook Pixel | Chrome Extension |
+| Tag Assistant | Google tag debugging | Chrome Extension |
 
-**Campaign Tracking:**
-- **Campaign URL Builder** - สร้าง UTM parameters
-- **Bitly** - Shorten tracked URLs
+### 7.2 Testing Checklist
 
-**Reporting:**
-- **Google Looker Studio (Data Studio)** - Free dashboards
-- **Supermetrics** - Export data (paid)
-- **Google Sheets** - Custom reports
+- [ ] GTM Preview mode enabled
+- [ ] All pages fire PageView
+- [ ] Property pages fire ViewContent/view_item
+- [ ] Form submission fires Lead event
+- [ ] Phone clicks tracked
+- [ ] LINE clicks tracked
+- [ ] Search events firing
+- [ ] No duplicate events
+- [ ] No console errors
 
-### Learning Resources
+### 7.3 Common Issues
 
-- [Google Analytics Academy](https://analytics.google.com/analytics/academy/) - Free GA4 courses
-- [Google Tag Manager Fundamentals](https://skillshop.withgoogle.com) - Free course
-- [Facebook Blueprint](https://www.facebook.com/business/learn) - Facebook advertising courses
-- [Measure School](https://measureschool.com) - GTM/GA tutorials (YouTube)
-
----
-
-## Checklist Summary
-
-### Must Complete Before Launch ✅
-
-**GTM:**
-- [ ] GTM container created
-- [ ] GTM code installed on all pages
-- [ ] GTM tested and working
-
-**GA4:**
-- [ ] GA4 property created
-- [ ] Measurement ID configured in GTM
-- [ ] PageView tracking working
-- [ ] Conversions defined
-- [ ] Enhanced Measurement enabled
-
-**Facebook Pixel:**
-- [ ] Pixel created
-- [ ] Pixel base code in GTM
-- [ ] PageView tracking working
-- [ ] Standard events (Lead, Contact) setup
-- [ ] Conversions API configured (optional but recommended)
-
-**Testing:**
-- [ ] All tags tested in Preview mode
-- [ ] Events firing correctly
-- [ ] Conversions tracked
-- [ ] UTM parameters captured
-- [ ] Cross-device/browser tested
-
-**Reporting:**
-- [ ] Custom reports created
-- [ ] Dashboard setup (optional)
-- [ ] Report schedule planned
+| Issue | Cause | Solution |
+|-------|-------|----------|
+| Tags not firing | Trigger misconfigured | Check trigger conditions |
+| Duplicate events | Multiple tags for same event | Use tag exclusion |
+| Missing data | DataLayer not pushed | Verify dataLayer code |
+| Pixel not recognized | Code error | Check for typos |
 
 ---
 
-**Last Updated:** 2026-01-26  
-**Version:** 1.0.0  
-**Maintained by:** AMP Technical Team
+## Phase 8: Reporting Setup
+
+### 8.1 GA4 Reports
+
+**Key Reports:**
+- [ ] Real-time overview
+- [ ] Acquisition overview
+- [ ] Engagement events
+- [ ] Conversion paths
+- [ ] Landing pages
+
+**Custom Reports:**
+- [ ] Lead sources by channel
+- [ ] Property views by type
+- [ ] Form completion by page
+
+### 8.2 Looker Studio Dashboard
+
+**Recommended Visualizations:**
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                    AMP Marketing Dashboard                  │
+├─────────────────────────────────────────────────────────────┤
+│                                                             │
+│  ┌─────────────┐ ┌─────────────┐ ┌─────────────┐           │
+│  │  Leads      │ │  Sessions   │ │  Conv Rate  │           │
+│  │  This Month │ │  This Month │ │  This Month │           │
+│  │    150      │ │   5,234     │ │    2.86%    │           │
+│  └─────────────┘ └─────────────┘ └─────────────┘           │
+│                                                             │
+│  ┌─────────────────────────────────────────────────────┐   │
+│  │          Lead Trend (Line Chart)                    │   │
+│  │          Last 30 Days                               │   │
+│  └─────────────────────────────────────────────────────┘   │
+│                                                             │
+│  ┌─────────────────────┐  ┌─────────────────────────────┐  │
+│  │  Leads by Source    │  │  Top Performing Pages       │  │
+│  │  (Pie Chart)        │  │  (Table)                    │  │
+│  └─────────────────────┘  └─────────────────────────────┘  │
+│                                                             │
+│  ┌─────────────────────────────────────────────────────┐   │
+│  │          Ad Performance Comparison                  │   │
+│  │          Google vs Facebook (Bar Chart)             │   │
+│  └─────────────────────────────────────────────────────┘   │
+│                                                             │
+└─────────────────────────────────────────────────────────────┘
+```
+
+### 8.3 Weekly Report Template
+
+```
+AMP Marketing Weekly Report
+Week: [Date Range]
+
+## Summary
+- Total Leads: XX
+- Total Sessions: X,XXX
+- Conversion Rate: X.XX%
+- Cost Per Lead: ฿XXX
+
+## By Channel
+| Channel | Leads | Cost | CPL |
+|---------|-------|------|-----|
+| Google Ads | XX | ฿XX,XXX | ฿XXX |
+| Facebook | XX | ฿XX,XXX | ฿XXX |
+| Organic | XX | - | - |
+| Direct | XX | - | - |
+
+## Top Performing
+- Best ad: [Name]
+- Best landing page: [URL]
+- Best property: [ID]
+
+## Action Items
+1. [Item 1]
+2. [Item 2]
+```
+
+---
+
+## Maintenance Checklist
+
+### Weekly
+- [ ] Check for tracking errors
+- [ ] Verify conversions in platforms
+- [ ] Review real-time data
+
+### Monthly
+- [ ] Audit all tags firing correctly
+- [ ] Check for new pages needing tracking
+- [ ] Update conversion values if needed
+- [ ] Review and clean up GTM workspace
+
+### Quarterly
+- [ ] Full tracking audit
+- [ ] Review event schema
+- [ ] Update documentation
+- [ ] Test all integrations
+
+---
+
+## Related Documents
+
+- [Google Ads Checklist](../ads/GOOGLE_ADS_CHECKLIST.md)
+- [Facebook Ads Checklist](../ads/FACEBOOK_ADS_CHECKLIST.md)
+- [Landing Page Checklist](../landing/LANDING_PAGE_CHECKLIST.md)
