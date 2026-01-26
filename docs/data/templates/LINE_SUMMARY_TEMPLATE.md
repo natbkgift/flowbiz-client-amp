@@ -1,657 +1,583 @@
-# 💬 LINE Group Summary System
+# LINE Group Summary System - AMP
 
-> Workflow และ Template สำหรับสรุปบทสนทนา LINE Groups ประจำวัน
+> 📱 ระบบสรุปข้อมูลทรัพย์จาก LINE Groups
 
 ## Overview
 
-**LINE Group Summary System** คือระบบสำหรับทำ Daily Summary จาก LINE Groups เพื่อ:
-- จับ Hot Leads ที่ซ่อนอยู่ในกลุ่ม
-- ติดตาม Action Items และ Tasks
-- วิเคราะห์ Customer Sentiment
-- สร้าง Weekly/Monthly Reports
+LINE Group Summary System คือกระบวนการรวบรวมและจัดการข้อมูล property listings ที่โพสต์ใน LINE groups ต่างๆ เพื่อนำมาเป็น inventory ของ AMP
 
-### Why This Matters
+### Why LINE Groups?
 
-LINE Groups มักมีข้อมูลสำคัญที่หลุดลอดไป:
-- ❌ Leads ไม่ได้รับการติดตาม
-- ❌ Customer questions ไม่ได้รับคำตอบ
-- ❌ Action items ถูกลืม
-- ❌ Hot opportunities หลุดมือไป
+```
+✅ Real-time property updates
+✅ Direct from owners/agents
+✅ Competitive prices
+✅ Exclusive deals
+✅ Market intelligence
+```
 
-**Solution:** Daily LINE Summary Workflow
+### Key LINE Groups
+
+| Group Name | Type | Members | Activity | Priority |
+|------------|------|---------|----------|----------|
+| Pattaya Property Market | Mixed | 5,000+ | High | High |
+| Jomtien Condos For Sale | Sale | 3,000+ | Medium | High |
+| Pattaya Rentals | Rental | 2,500+ | High | Medium |
+| Thailand Property Investors | Mixed | 10,000+ | Medium | Medium |
+| Pattaya Real Estate Agents | B2B | 1,200+ | Low | Low |
 
 ---
 
-## 📋 Daily Workflow
-
-### Timeline: 18:00 - 19:00 ทุกวัน
+## Spreadsheet Structure
 
 ```
-18:00 → Export LINE chats
-18:10 → Review และ categorize
-18:30 → Identify hot leads
-18:45 → Create action items
-18:50 → Update tracking sheet
-19:00 → Share summary to team
-```
-
----
-
-## 📊 Sheet Structure
-
-### Sheet 1: DAILY_SUMMARY
-
-**Template Structure:**
-
-| Column | Field Name | Type | Description | Example |
-|--------|-----------|------|-------------|---------|
-| A | `summary_date` | Date | วันที่สรุป | 2026-01-15 |
-| B | `group_name` | Dropdown | ชื่อกลุ่ม LINE | AMP Buyers Group |
-| C | `total_messages` | Number | จำนวนข้อความทั้งหมด | 127 |
-| D | `active_members` | Number | สมาชิกที่โพสต์วันนี้ | 23 |
-| E | `hot_leads_count` | Number | จำนวน Hot Leads | 3 |
-| F | `hot_leads_names` | Text | ชื่อ Hot Leads | John, Anna, Peter |
-| G | `questions_count` | Number | คำถามที่ยังไม่ได้ตอบ | 2 |
-| H | `action_items_count` | Number | Tasks ที่ต้องทำ | 5 |
-| I | `key_topics` | Text | หัวข้อหลักที่คุยกัน | New projects, Price inquiry |
-| J | `sentiment` | Dropdown | Positive/Neutral/Negative | Positive |
-| K | `summary_by` | Dropdown | ผู้สรุป | Nat |
-| L | `notes` | Text | บันทึกเพิ่มเติม | Very active today |
-| M | `summary_link` | URL | Link to detailed summary | [Google Doc] |
-
-### Sheet 2: HOT_LEADS_DETAIL
-
-**Purpose:** Track hot leads identified from LINE
-
-| Column | Field Name | Type | Description |
-|--------|-----------|------|-------------|
-| A | `date_identified` | Date | วันที่พบ |
-| B | `lead_name` | Text | ชื่อ/Nickname |
-| C | `line_id` | Text | LINE ID (if available) |
-| D | `group_name` | Dropdown | มาจากกลุ่มไหน |
-| E | `interest_signals` | Text | สัญญาณความสนใจ |
-| F | `messages_summary` | Text | สรุปข้อความ |
-| G | `property_interest` | Text | Property ที่สนใจ |
-| H | `urgency_level` | Dropdown | High/Medium/Low |
-| I | `action_taken` | Dropdown | DM Sent/Called/Added to CRM |
-| J | `assigned_to` | Dropdown | มอบหมายให้ sales |
-| K | `followup_date` | Date | นัดติดตาม |
-| L | `status` | Dropdown | New/Contacted/Converted/Lost |
-| M | `conversion_result` | Text | ผลลัพธ์ |
-
-### Sheet 3: ACTION_ITEMS
-
-**Purpose:** Track tasks from LINE conversations
-
-| Column | Field Name | Type | Description |
-|--------|-----------|------|-------------|
-| A | `date_created` | Date | วันที่สร้าง task |
-| B | `group_name` | Dropdown | มาจากกลุ่มไหน |
-| C | `action_type` | Dropdown | Answer Question/Send Info/Follow-up |
-| D | `description` | Text | รายละเอียด task |
-| E | `priority` | Dropdown | High/Medium/Low |
-| F | `assigned_to` | Dropdown | มอบหมายให้ |
-| G | `due_date` | Date | ต้องทำภายใน |
-| H | `status` | Dropdown | Pending/In Progress/Done |
-| I | `completed_date` | Date | วันที่เสร็จ |
-| J | `notes` | Text | บันทึก |
-
-### Sheet 4: WEEKLY_SUMMARY
-
-**Purpose:** Aggregate weekly stats
-
-| Column | Field Name | Formula | Description |
-|--------|-----------|---------|-------------|
-| A | `week_start` | - | วันเริ่มสัปดาห์ |
-| B | `week_end` | - | วันสิ้นสุดสัปดาห์ |
-| C | `total_messages` | SUM | ข้อความทั้งหมด |
-| D | `avg_messages_day` | AVERAGE | ค่าเฉลี่ยต่อวัน |
-| E | `hot_leads_found` | SUM | Hot leads ที่เจอ |
-| F | `leads_converted` | COUNT | ที่ convert แล้ว |
-| G | `conversion_rate` | % | % conversion |
-| H | `action_items_created` | COUNT | Tasks สร้าง |
-| I | `action_items_completed` | COUNT | Tasks เสร็จ |
-| J | `completion_rate` | % | % completion |
-| K | `key_insights` | Text | Insights สำคัญ |
-
----
-
-## 🔧 Daily Summary Process
-
-### Step 1: Export LINE Chats (18:00)
-
-**How to Export:**
-
-**Option A: Manual Export (LINE Desktop)**
-```
-1. เปิด LINE Desktop
-2. เลือกกลุ่มที่ต้องการ export
-3. คลิกที่ Menu (☰) → Settings → Export chat history
-4. เลือกรูปแบบ: Text file
-5. บันทึกเป็น: YYYY-MM-DD_GROUP_NAME_Export.txt
-6. Save to: 03_LINE_CONVERSATIONS/2026/MM_MONTH/CHAT_EXPORTS/
-```
-
-**Option B: Screenshot Important Parts**
-```
-1. เลื่อนดูข้อความทั้งหมดวันนี้
-2. Screenshot sections สำคัญ
-3. บันทึกเป็น: YYYY-MM-DD_GROUP_NAME_01.jpg
-4. รวม screenshots ใน folder เดียวกัน
-```
-
-**LINE Groups to Monitor:**
-
-| Group Name | Purpose | Priority | Export Time |
-|------------|---------|----------|-------------|
-| AMP Buyers Group | Potential buyers community | High | Daily 18:00 |
-| AMP Investors Club | Investment focused | High | Daily 18:00 |
-| Pattaya Expats | General expat community | Medium | Daily 18:00 |
-| AMP Owners Group | Current clients | Medium | 2x/week |
-| AMP VIP Clients | High-value clients | High | Daily 18:00 |
-
-### Step 2: Review & Categorize (18:10)
-
-**Read Through Messages and Tag:**
-
-**🔥 Hot Lead Indicators:**
-- "I'm looking to buy..."
-- "What's the price of..."
-- "Can I view this property?"
-- "I'm interested in..."
-- "My budget is..."
-- "I need to move by..."
-- Shares budget/timeline info
-- Asks specific property questions
-- Mentions urgency
-
-**❓ Questions to Answer:**
-- Questions without replies
-- Incomplete information
-- Pricing inquiries
-- Area/location questions
-- Legal/process questions
-
-**✅ Action Items:**
-- Someone asks for info → Send info
-- Viewing request → Schedule viewing
-- Price question → Send price list
-- Document request → Prepare documents
-
-**💡 Key Topics:**
-- New project discussions
-- Market conditions
-- Area recommendations
-- Price comparisons
-- Success stories
-
-### Step 3: Identify Hot Leads (18:30)
-
-**For Each Hot Lead Found:**
-
-1. **Create Entry in HOT_LEADS_DETAIL:**
-```
-date_identified:     2026-01-15
-lead_name:          John (johnline123)
-line_id:            johnline123
-group_name:         AMP Buyers Group
-interest_signals:   "Looking for 2BR condo in Jomtien, budget 4-5M"
-messages_summary:   Asked about The Base, interested in sea view, 
-                    moving in March, first time buyer
-property_interest:  Condo, 2BR, Jomtien, Sea View
-urgency_level:      High (Moving in March = 2 months)
-action_taken:       DM Sent
-assigned_to:        Nat
-followup_date:      2026-01-16
-status:             New
-```
-
-2. **Send Private DM (Within 1 hour):**
-```
-สวัสดีครับคุณ [LEAD_NAME] 
-
-เห็นว่าสนใจ[PROPERTY_INTEREST]นะครับ 
-ผมชื่อ [SALES_NAME] จาก AMP Property 
-
-ผมมี properties ที่ตรงกับที่คุณหาอยู่ครับ
-สะดวกให้โทรคุยรายละเอียดไหมครับ?
-
-LINE: [LINE_ID]
-Phone: [PHONE]
-```
-
-3. **Add to Lead Tracking Sheet:**
-```
-- Create new lead in LEAD_TRACKING
-- Reference: From LINE Group - AMP Buyers
-- All details from HOT_LEADS_DETAIL
-```
-
-### Step 4: Create Action Items (18:45)
-
-**For Each Action Needed:**
-
-```
-date_created:    2026-01-15
-group_name:      AMP Buyers Group
-action_type:     Answer Question
-description:     Anna asked about foreign quota at The Base
-priority:        Medium
-assigned_to:     Nat
-due_date:        2026-01-16
-status:          Pending
-```
-
-**Priority Guidelines:**
-- **High:** Hot lead follow-up, urgent questions
-- **Medium:** General inquiries, info requests
-- **Low:** General discussion follow-ups
-
-### Step 5: Update Tracking Sheet (18:50)
-
-**Fill DAILY_SUMMARY:**
-
-```
-summary_date:        2026-01-15
-group_name:          AMP Buyers Group
-total_messages:      127
-active_members:      23
-hot_leads_count:     3
-hot_leads_names:     John, Anna, Peter
-questions_count:     2
-action_items_count:  5
-key_topics:          The Base project, Jomtien prices, Foreign ownership
-sentiment:           Positive
-summary_by:          Nat
-notes:               Very active day, several serious buyers
-```
-
-### Step 6: Share to Team (19:00)
-
-**Create Daily Summary Message:**
-
-```
-📊 LINE Summary: 2026-01-15
-
-🔥 HOT LEADS (3):
-1. John - 2BR Condo Jomtien, 4-5M (Assigned: Nat)
-2. Anna - Studio Pattaya City, 3M (Assigned: Som)
-3. Peter - Villa Na Jomtien, 10-15M (Assigned: John)
-
-❓ QUESTIONS TO ANSWER (2):
-1. Foreign quota availability at The Base
-2. Financing options for expats
-
-✅ ACTION ITEMS (5):
-1. [High] Follow up John - due today 19:00 (Nat)
-2. [High] Send Anna price list - due tomorrow (Som)
-3. [Medium] Prepare documents for Peter - due tomorrow (John)
-4. [Low] Share market report to group - due this week (Marketing)
-5. [Low] Update FAQ about financing - due this week (Admin)
-
-💡 KEY INSIGHTS:
-- High interest in Jomtien area
-- Many questions about foreign ownership
-- Budget range mostly 3-5M
-
-🔗 Full Summary: [Link to Google Doc]
-
----
-Summary by: Nat | Time: 19:00
-```
-
-**Share to:**
-- Slack: #amp-daily-summary
-- LINE: AMP Team Group
-- Email: team@amp-property.com (for management)
-
----
-
-## 📱 Tools & Templates
-
-### Google Doc Template: Daily Detail Summary
-
-```markdown
-# LINE Summary: [Group Name] - [Date]
-
-## 📈 Stats
-- Total Messages: [X]
-- Active Members: [X]
-- Hot Leads Found: [X]
-- Questions: [X]
-- Action Items: [X]
-
-## 🔥 Hot Leads Detail
-
-### 1. [Name/Nickname]
-**Interest:** [What they want]
-**Budget:** [Budget range]
-**Urgency:** [Timeline]
-**Messages:**
-> [Quote relevant messages]
-
-**Action:** [What we did]
-**Assigned to:** [Sales person]
-
-### 2. [Next lead]...
-
-## 💬 Key Conversations
-
-### Topic 1: [Topic Name]
-**Participants:** [Names]
-**Summary:** [What was discussed]
-**Takeaway:** [Key points]
-
-### Topic 2: [Next topic]...
-
-## ❓ Questions & Answers
-
-### Q1: [Question]
-**Asked by:** [Name]
-**Answer:** [Our answer if provided]
-**Status:** Answered / Pending
-**Action:** [Follow-up needed]
-
-## ✅ Action Items
-
-1. **[Priority] [Task]**
-   - Assigned: [Name]
-   - Due: [Date]
-   - Status: [Status]
-
-## 💡 Insights & Observations
-
-- [Key insight 1]
-- [Key insight 2]
-- [Trend noticed]
-
-## 🎯 Follow-up Plan
-
-Tomorrow:
-- [ ] [Action 1]
-- [ ] [Action 2]
-
-This Week:
-- [ ] [Action 1]
-- [ ] [Action 2]
-
----
-Summarized by: [Name]
-Date: [Date] [Time]
-```
-
-### Slack Summary Template
-
-```
-📊 *LINE SUMMARY* 📊
-Group: [Group Name]
-Date: [Date]
-
-🔥 *HOT LEADS:* [X]
-[Name 1] - [Interest] → @[assigned-sales]
-[Name 2] - [Interest] → @[assigned-sales]
-
-❓ *QUESTIONS:* [X]
-✅ *ACTIONS:* [X]
-
-💡 *KEY INSIGHT:*
-[Main takeaway from today]
-
-🔗 Details: [Link]
+📊 Daily_Summary_[YYYY-MM].xlsx
+
+Tabs:
+├── 📄 01_Daily_Entries       # Raw daily entries
+├── 📄 02_Processed           # Cleaned and categorized
+├── 📄 03_To_Contact          # Properties to follow up
+├── 📄 04_Added_to_Master     # Transferred to master list
+├── 📄 05_Rejected            # Not suitable
+└── 📄 README                 # Instructions
 ```
 
 ---
 
-## 📊 Weekly Summary Process
+## Column Schema
 
-### Every Friday 17:00
+### Tab: 01_Daily_Entries
 
-**Generate WEEKLY_SUMMARY:**
+| Column | Data Type | Description | Example | Required |
+|--------|-----------|-------------|---------|----------|
+| **A: Entry_ID** | Text | Unique entry ID | LINE-2026-01-26-001 | ✅ |
+| **B: Date** | Date | Date found | 2026-01-26 | ✅ |
+| **C: Time** | Time | Time found | 09:30 | ✅ |
+| **D: Session** | Dropdown | Morning/Afternoon/Evening | Morning | ✅ |
+| **E: Group_Name** | Dropdown | LINE group name | Pattaya Property Market | ✅ |
+| **F: Poster_Name** | Text | Person who posted | John Agent | ✅ |
+| **G: Poster_Contact** | Text | Contact (if available) | Line ID: johnagent | - |
+| **H: Post_Screenshot** | URL | Link to screenshot | [Drive Link] | - |
+| **I: Property_Type** | Dropdown | Type of property | Condo | ✅ |
+| **J: Transaction_Type** | Dropdown | Sale or Rent | Sale | ✅ |
+| **K: Location** | Text | Location mentioned | Jomtien, near beach | ✅ |
+| **L: Price** | Text | Price as posted | 2.5M / 2,500,000 | ✅ |
+| **M: Price_Standardized** | Number | Price in THB | 2500000 | - |
+| **N: Size** | Text | Size as posted | 40 sqm | - |
+| **O: Size_Standardized** | Number | Size in sqm | 40 | - |
+| **P: Bedrooms** | Text | Bedrooms mentioned | 1BR / 1 bedroom | - |
+| **Q: Key_Features** | Text | Features mentioned | Sea view, pool, gym | - |
+| **R: Full_Text** | Text | Complete post text | [Full message] | ✅ |
+| **S: Status** | Dropdown | Processing status | New | ✅ |
+| **T: Priority** | Dropdown | Follow-up priority | High | - |
+| **U: Reason_Interest** | Text | Why interesting | Good price, good location | - |
+| **V: Processed_By** | Dropdown | Staff who processed | Somchai | - |
+| **W: Date_Processed** | Date | When processed | 2026-01-26 | - |
+| **X: Action_Taken** | Dropdown | What was done | Contacted | - |
+| **Y: Notes** | Text | Additional notes | Called, no answer | - |
 
-1. **Calculate Stats:**
+**Session_List:**
 ```
-Week: Jan 13-19, 2026
-Total Messages: 634
-Avg Messages/Day: 91
-Hot Leads Found: 12
-Leads Converted: 3
-Conversion Rate: 25%
-Action Items Created: 28
-Action Items Completed: 24
-Completion Rate: 86%
-```
-
-2. **Analyze Trends:**
-```
-Top Topics:
-1. New projects (mentioned 45 times)
-2. Jomtien area (mentioned 38 times)
-3. Prices (mentioned 52 times)
-
-Most Active Days:
-1. Wednesday (142 messages)
-2. Tuesday (128 messages)
-3. Monday (115 messages)
-
-Sentiment: 80% Positive, 15% Neutral, 5% Negative
-```
-
-3. **Key Insights:**
-```
-- Increased interest in Jomtien vs Pattaya City
-- More questions about foreign ownership
-- Budget range shifting up (avg 5M vs 4M last week)
-- Response time improved: 3min avg (was 8min)
+Morning (6:00-12:00)
+Afternoon (12:00-18:00)
+Evening (18:00-24:00)
 ```
 
-4. **Recommendations:**
+**Status_List:**
 ```
-- Focus marketing on Jomtien properties
-- Create FAQ about foreign ownership
-- Prepare more mid-range (4-6M) options
-- Continue quick response strategy
+New
+Reviewed
+Contacted
+Added to Master
+Rejected
+On Hold
 ```
 
-5. **Share Weekly Report:**
-- Email to Management
-- Present in Monday team meeting
-- Post summary in Slack
+**Priority_List:**
+```
+High (Excellent deal)
+Medium (Potential)
+Low (Monitor)
+```
 
----
-
-## 📈 Monthly Summary
-
-### First Monday of Each Month
-
-**MONTHLY_REPORT Contents:**
-
-```markdown
-# LINE Summary Monthly Report: [Month Year]
-
-## Executive Summary
-- Total Groups Monitored: [X]
-- Total Messages: [X]
-- Hot Leads Identified: [X]
-- Leads Converted: [X]
-- Conversion Rate: [X]%
-- Revenue Generated: [X] THB
-
-## Performance by Group
-
-| Group | Messages | Hot Leads | Converted | Conv % |
-|-------|----------|-----------|-----------|--------|
-| Buyers | 2,450 | 42 | 8 | 19% |
-| Investors | 1,823 | 28 | 6 | 21% |
-| Expats | 3,156 | 15 | 2 | 13% |
-
-## Trends Analysis
-
-### Topics
-[Chart: Topic frequency over time]
-
-### Lead Quality
-[Chart: Hot vs Warm vs Cold leads]
-
-### Response Time
-[Chart: Avg response time by week]
-
-## Success Stories
-
-### Case 1: [Lead Name]
-- Found: [Date]
-- Group: [Group Name]
-- Initial Interest: [What they wanted]
-- Journey: [How we helped]
-- Result: Closed ฿X deal in Y days
-
-## Challenges & Solutions
-
-### Challenge 1: [Issue]
-- Impact: [What happened]
-- Solution: [What we did]
-- Result: [Outcome]
-
-## Recommendations
-
-1. [Recommendation 1]
-2. [Recommendation 2]
-3. [Recommendation 3]
-
-## Next Month Focus
-
-- [Goal 1]
-- [Goal 2]
-- [Goal 3]
+**Action_List:**
+```
+Contacted
+Waiting Response
+Added to Master
+Rejected - Price High
+Rejected - Wrong Location
+Rejected - Sold Already
+Rejected - Duplicate
+On Hold
 ```
 
 ---
 
-## 🎯 Best Practices
+## Daily Workflow
 
-### Do's ✅
+### Schedule
 
-- ✅ Export chats EVERY day without fail
-- ✅ Read ALL messages, don't skim
-- ✅ Respond to hot leads within 1 hour
-- ✅ Document everything in sheets
-- ✅ Follow up on action items
-- ✅ Share insights with team
-- ✅ Update lead status regularly
+**Total Time: 5-6 hours per day** (varies based on activity volume)
 
-### Don'ts ❌
-
-- ❌ Skip days (you'll miss hot leads)
-- ❌ Only read @mentions
-- ❌ Delay hot lead follow-ups
-- ❌ Forget to assign action items
-- ❌ Keep insights to yourself
-- ❌ Let questions go unanswered
-- ❌ Ignore sentiment changes
-
-### Tips for Efficiency
-
-**1. Use Keywords Search:**
 ```
-- Search: "buy", "looking", "budget", "interested"
-- Quickly find potential leads
-- Don't miss buried opportunities
+┌─────────────────────────────────────────────────────────────┐
+│               DAILY LINE MONITORING SCHEDULE                │
+├─────────────────────────────────────────────────────────────┤
+│                                                             │
+│  09:00 - 10:00   Morning Scan                               │
+│  ├── Check all groups                                       │
+│  ├── Screenshot new posts                                   │
+│  ├── Record in sheet                                        │
+│  └── Flag high-priority items                               │
+│                                                             │
+│  10:00 - 11:00   Morning Processing                         │
+│  ├── Review flagged items                                   │
+│  ├── Contact posters (urgent)                               │
+│  └── Add to Master List                                     │
+│                                                             │
+│  14:00 - 15:00   Afternoon Scan                             │
+│  ├── Check all groups                                       │
+│  ├── Screenshot new posts                                   │
+│  └── Record in sheet                                        │
+│                                                             │
+│  15:00 - 16:00   Afternoon Processing                       │
+│  ├── Review and categorize                                  │
+│  ├── Contact posters                                        │
+│  └── Follow up morning contacts                             │
+│                                                             │
+│  17:00 - 18:00   Evening Scan                               │
+│  ├── Final check of day                                     │
+│  ├── Record any new posts                                   │
+│  └── Plan tomorrow's follow-ups                             │
+│                                                             │
+│  18:00 - 18:30   Daily Summary                              │
+│  ├── Count entries                                          │
+│  ├── Review priorities                                      │
+│  └── Update dashboard                                       │
+│                                                             │
+└─────────────────────────────────────────────────────────────┘
 ```
 
-**2. Create Templates:**
+**Note:** Scheduled blocks total 5.5 hours. Additional time (0.5-1 hour) is spent on follow-up activities throughout the day as needed.
+
+---
+
+## Step-by-Step Guide
+
+### Step 1: Scanning LINE Groups (30-45 min per session)
+
+**What to Look For:**
+
 ```
-- DM templates for common scenarios
-- Copy-paste for speed
-- Personalize key details
+✅ High Priority:
+- Properties with prices (concrete numbers)
+- Clear locations (specific projects/areas)
+- Contact information provided
+- Photos included
+- Owner direct (not agent repost)
+- New posts (within 24 hours)
+
+⚠️ Medium Priority:
+- Reposted by agents
+- Vague pricing ("call for price")
+- Old posts resurface
+
+❌ Skip:
+- Looking to buy/rent (demand, not supply)
+- Scam-looking posts
+- Off-topic discussions
 ```
 
-**3. Set Daily Reminder:**
+**Scanning Process:**
+
+1. **Open LINE group**
+2. **Scroll to last checked position** (bookmark/note)
+3. **Identify relevant posts**
+4. **For each relevant post:**
+   - Take screenshot (full post + poster name)
+   - Save to `06_LINE_Group_Summary/Screenshots/[YYYY-MM-DD]/`
+   - Name: `[Group]_[Time]_[PropertyType].jpg`
+   - Example: `PattayaMarket_0930_Condo_SeaView.jpg`
+
+### Step 2: Recording to Sheet (10-15 min per session)
+
+1. **Open `Daily_Summary_[YYYY-MM].xlsx`**
+2. **Go to `01_Daily_Entries` tab**
+3. **Insert new row**
+4. **Fill fields:**
+   - Entry_ID: Auto-generate `LINE-[DATE]-[###]`
+   - Date: Today's date
+   - Time: Approximate time
+   - Session: Morning/Afternoon/Evening
+   - Group_Name: Select from dropdown
+   - Poster_Name: Copy from LINE
+   - Property_Type: Select
+   - Transaction_Type: Sale or Rent
+   - Location: Copy exact text
+   - Price: Copy exact text
+   - Full_Text: Copy entire message
+   - Status: New
+   - Link screenshot in Post_Screenshot column
+
+### Step 3: Standardization & Processing (30-45 min per session)
+
+**Standardize Price:**
 ```
-- Calendar: "LINE Summary" at 18:00
-- Never forget
-- Build the habit
+Examples:
+"2.5M" → 2500000
+"2,500,000" → 2500000
+"2.5 ล้าน" → 2500000
+"15K/month" → 15000
+"฿15,000" → 15000
 ```
 
-**4. Batch Similar Tasks:**
+**Standardize Size:**
 ```
-- Export all groups at once
-- Review all hot leads together
-- Send all DMs in one session
+"40 sqm" → 40
+"40 ตรม." → 40
+"10 ตร.ว." → 40 (convert wah to sqm: 10*4)
+```
+
+**Extract Bedrooms:**
+```
+"1BR" → 1
+"2 bedroom" → 2
+"Studio" → 0
+"ห้องนอน 2" → 2
+```
+
+**Set Priority:**
+- **High:** Price below market by 10%+, Prime location, Owner direct
+- **Medium:** Fair price, Good location, Agent post
+- **Low:** Above market price, Need more info
+
+### Step 4: Contact & Follow-up (1-2 hours per day)
+
+**Contact Template (Thai):**
+```
+สวัสดีครับ/ค่ะ
+
+เห็นโพสต์ทรัพย์ใน LINE Group [Group Name] ครับ/ค่ะ
+
+สนใจ [Property Type] ที่ [Location] ราคา [Price]
+สามารถขอรายละเอียดเพิ่มเติมได้ไหมครับ/ค่ะ
+
+- ห้องยังว่างอยู่ใช่ไหมครับ/ค่ะ?
+- มีรูปเพิ่มเติมไหมครับ/ค่ะ?
+- สามารถนัดชมได้เมื่อไหร่ครับ/ค่ะ?
+
+ขอบคุณครับ/ค่ะ
+[Your Name]
+Asset Management Property
+[Your Contact]
+```
+
+**Contact Template (English):**
+```
+Hello,
+
+I saw your property post in [Group Name].
+
+I'm interested in the [Property Type] at [Location] for [Price].
+Could you provide more details?
+
+- Is it still available?
+- Do you have more photos?
+- When can we schedule a viewing?
+
+Thank you,
+[Your Name]
+Asset Management Property
+[Your Contact]
+```
+
+**Update Action:**
+- Status → "Contacted"
+- Action_Taken → "Contacted"
+- Date_Processed → Today
+- Notes → "Sent LINE message"
+
+### Step 5: Adding to Master List (15-30 min per day)
+
+**Criteria to Add:**
+
+```
+✅ Must have:
+- Price confirmed
+- Location confirmed
+- Size known
+- Photos available
+- Contact responsive
+
+✅ Bonus:
+- Owner direct
+- Exclusive listing
+- Good deal
+```
+
+**Process:**
+
+1. **Gather all information** from LINE conversation
+2. **Open Property_Master_List.xlsx**
+3. **Add new row** in appropriate tab
+4. **Fill all available fields**
+5. **Upload photos** to Google Drive
+6. **Link photos** in master list
+7. **In LINE Summary sheet:**
+   - Status → "Added to Master"
+   - Action_Taken → "Added to Master"
+   - Note Property_ID from master list
+
+---
+
+## Tab: 02_Processed
+
+Filter of `01_Daily_Entries` where:
+- Status = "Reviewed", "Contacted", "Added to Master", "Rejected"
+
+**Additional Columns:**
+- Property_ID (if added to master)
+- Master_List_Link
+
+---
+
+## Tab: 03_To_Contact
+
+Filter where:
+- Status = "New" or "Reviewed"
+- Priority = "High" or "Medium"
+- Action_Taken = blank or "Waiting Response"
+
+**Sort by:**
+- Priority (High first)
+- Date (oldest first)
+
+---
+
+## Tab: 04_Added_to_Master
+
+Filter where:
+- Action_Taken = "Added to Master"
+
+**Columns:**
+- Entry_ID
+- Date
+- Property_Type
+- Location
+- Price
+- Property_ID (in master)
+- Poster_Contact
+
+---
+
+## Tab: 05_Rejected
+
+Filter where:
+- Status = "Rejected"
+
+**Include Rejection Reasons:**
+- Price too high
+- Wrong location
+- Poor condition
+- Already sold
+- Duplicate
+- Scam suspected
+- Not responsive
+
+**Note:** When setting Action_Taken to any "Rejected - *" value (e.g., "Rejected - Price High", "Rejected - Wrong Location"), ensure the Status field is also set to "Rejected" so the entry appears in this tab.
+
+---
+
+## Quality Checks
+
+### Daily Checklist
+
+- [ ] All 3 scanning sessions completed
+- [ ] All new posts recorded
+- [ ] High-priority items contacted within 2 hours
+- [ ] Screenshots saved and organized
+- [ ] Prices standardized
+- [ ] Statuses updated
+
+### Weekly Review
+
+- [ ] Move processed entries to archive
+- [ ] Follow up on "Waiting Response"
+- [ ] Review rejected items (still relevant?)
+- [ ] Count properties added to master
+- [ ] Update LINE group list (join new groups)
+
+### Monthly Analysis
+
+- [ ] Best performing groups
+- [ ] Total entries found
+- [ ] Conversion rate to master list
+- [ ] Best deals secured
+- [ ] Group activity trends
+
+---
+
+## Metrics Dashboard
+
+### Daily Metrics
+
+```
+📊 LINE Summary - Daily Report
+
+Date: 2026-01-26
+
+Entries Today:        25
+├── Morning:          12
+├── Afternoon:         8
+└── Evening:           5
+
+By Type:
+├── Condo:            18
+├── Villa:             5
+├── House:             2
+
+By Transaction:
+├── Sale:             20
+├── Rent:              5
+
+By Priority:
+├── High:              8
+├── Medium:           12
+├── Low:               5
+
+Actions:
+├── Contacted:        10
+├── Added to Master:   3
+├── Rejected:          5
+├── Pending:           7
+
+Response Rate:        60%
+Conversion Rate:      12%
+```
+
+### Monthly Summary
+
+```
+Month: January 2026
+
+Total Entries:       650
+Properties Added:     78 (12%)
+Average per Day:      21
+
+Top Groups:
+1. Pattaya Property Market: 280 entries
+2. Jomtien Condos: 150 entries
+3. Pattaya Rentals: 120 entries
+
+Best Deals:
+1. 2BR Condo Jomtien - 2.3M (market 2.8M)
+2. Pool Villa Na Jomtien - 8M (market 9.5M)
+3. Beachfront Condo - 3.5M (market 4.2M)
 ```
 
 ---
 
-## 🚨 Alert Triggers
+## Tips & Best Practices
 
-### Immediate Action Required
-
-**Hot Lead Alert:**
-```
-Trigger: Someone mentions budget > 5M
-Action: DM within 15 minutes
-Notify: Assigned sales + manager
-```
-
-**Urgent Question:**
-```
-Trigger: "urgent", "ASAP", "today"
-Action: Answer within 30 minutes
-Escalate if can't answer
-```
-
-**Negative Sentiment:**
-```
-Trigger: Complaints, negative feedback
-Action: Address immediately
-Loop in customer service
-Document for improvement
-```
-
----
-
-## 📞 Support
-
-### Questions?
-- Slack: #amp-line-support
-- Training: See LINE Management SOP
-- Technical Issues: @admin
-
-### Feedback
-- What's working well?
-- What can improve?
-- Feature requests?
-→ Share in #amp-feedback
-
----
-
-## 📚 Appendix
-
-### LINE Group Etiquette
-
-**Do:**
-- Be helpful and responsive
-- Share valuable content
-- Welcome new members
-- Thank people for participation
-
-**Don't:**
-- Spam promotional messages
-- Ignore questions
-- Be pushy sales
-- Share confidential info
-
-### Common LINE Abbreviations
+### Scanning Tips
 
 ```
-5555 = Laughing (Thai: ฮ่าๆๆๆ)
-krub/ka = Polite particles (Thai)
-naka = na ka (Thai feminine polite)
-pls = please
-thx/tx = thanks
-asap = as soon as possible
+✅ Do:
+- Scan at consistent times daily
+- Use LINE search for keywords
+- Follow active posters
+- Engage in groups (build presence)
+- Keep track of regular posters
+
+❌ Don't:
+- Skip sessions (miss opportunities)
+- Spam groups (get banned)
+- Copy-paste blatantly
+- Ignore group rules
+- Post competitor listings
+```
+
+### Contact Tips
+
+```
+✅ Do:
+- Respond quickly (within 2 hours)
+- Be professional and friendly
+- Ask qualifying questions
+- Request more photos
+- Build relationship
+
+❌ Don't:
+- Lowball immediately
+- Be pushy
+- Share client info
+- Make promises you can't keep
+```
+
+### Data Entry Tips
+
+```
+✅ Do:
+- Copy exact text (don't paraphrase)
+- Save screenshots immediately
+- Standardize consistently
+- Add context in notes
+- Link related entries
+
+❌ Don't:
+- Assume information
+- Skip fields
+- Delete entries (archive instead)
+- Forget to link screenshots
 ```
 
 ---
 
-**Last Updated:** 2026-01-26  
-**Version:** 1.0.0  
-**Maintained by:** AMP Operations Team
+## AI Assistance (Future Enhancement)
+
+### Potential AI Features
+
+```
+Phase 1 (MVP - Manual):
+- Manual scanning
+- Manual entry
+- Manual categorization
+
+Phase 2 (Semi-automated):
+- AI text extraction from screenshots (OCR)
+- Auto-categorization
+- Price/size extraction
+- Duplicate detection
+
+Phase 3 (Fully automated):
+- AI monitors LINE groups
+- Auto-entry to sheet
+- Auto-qualification
+- Auto-contact (initial message)
+- Priority scoring
+```
+
+---
+
+## Troubleshooting
+
+### Common Issues
+
+| Issue | Solution |
+|-------|----------|
+| Missed posts | Set reminders for scan times |
+| Screenshot storage full | Compress images, archive old |
+| Duplicate entries | Use Entry_ID check |
+| Lost in sheet | Use filters, freeze panes |
+| No responses | Try different contact method |
+| Wrong group | Remove from monitoring list |
+
+---
+
+## Related Documents
+
+- [Property Master List Template](PROPERTY_MASTER_LIST.md)
+- [Lead Tracking Template](LEAD_TRACKING_TEMPLATE.md)
+- [Google Drive Structure](../structure/GOOGLE_DRIVE_STRUCTURE.md)
+- [Data Naming Convention](../standards/DATA_NAMING_CONVENTION.md)
