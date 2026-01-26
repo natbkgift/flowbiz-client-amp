@@ -283,6 +283,6 @@ This project is maintained by the FlowBiz AI Core team for AMP (Asset Management
 
 ## 🔗 Links
 
-- <a href="https://github.com/natbkgift/flowbiz-ai-core">FlowBiz AI Core</a>
-- <a>Documentation</a>
-- <a href="https://github.com/natbkgift/flowbiz-client-amp/issues">Issues</a>
+- [FlowBiz AI Core](https://github.com/natbkgift/flowbiz-ai-core)
+- Documentation
+- [Issues](https://github.com/natbkgift/flowbiz-client-amp/issues)
