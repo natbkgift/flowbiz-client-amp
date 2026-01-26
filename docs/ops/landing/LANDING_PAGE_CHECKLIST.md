@@ -458,3 +458,9 @@ LINE: ?utm_source=line&utm_medium=broadcast&utm_campaign=new_listing
 - [Google Ads Checklist](../ads/GOOGLE_ADS_CHECKLIST.md)
 - [Facebook Ads Checklist](../ads/FACEBOOK_ADS_CHECKLIST.md)
 - [Analytics Setup Guide](../tracking/ANALYTICS_SETUP_GUIDE.md)
+
+---
+
+**Last Updated:** 2026-01-26  
+**Version:** 1.0.0  
+**Maintained by:** AMP Marketing Team
