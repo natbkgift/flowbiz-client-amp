@@ -135,6 +135,8 @@ main (protected - production)
     └── ...
 ```
 
+*Note: PR numbers may be non-sequential as they're assigned based on project milestones and roadmap planning.*
+
 ### Branch Naming Convention
 
 | Type | Pattern | Example |
@@ -165,9 +167,14 @@ chore/pr-030-update-dependencies
 
 **Rules:**
 - Use lowercase and hyphens
-- Features use PR numbers (`pr-XXX`), bugs use issue numbers (`issue-XXX`)
+- **Features/planned work** use PR numbers (`pr-XXX`) - assigned from project roadmap
+- **Bugs/unplanned work** use issue numbers (`issue-XXX`) - created from GitHub issues
 - Keep description short (< 40 chars)
 - Be descriptive and specific
+
+**When to use PR numbers vs Issue numbers:**
+- **PR numbers** (`pr-XXX`): For planned features in the project roadmap or milestone plan
+- **Issue numbers** (`issue-XXX`): For bug fixes, reported issues, or unplanned work tracked in GitHub Issues
 
 ### Branch Protection
 
@@ -225,10 +232,15 @@ PR-042: Fix chat timeout issue
 
 - Keep PR titles concise but descriptive
 - Reference the issue number if applicable (using `closes #XXX`)
-- Use PR numbers (PR-XXX) for planned features in the roadmap
-- Use issue numbers for bug fixes and unplanned work
+- **Use PR numbers (PR-XXX)** for planned features tracked in the project roadmap/milestone
+- **Use issue numbers** for bug fixes and unplanned work tracked in GitHub Issues
 - Start with a capital letter
 - Don't end with a period
+
+**How to know which to use:**
+- Check if your work corresponds to a planned PR number in the project's milestone or roadmap
+- If working on a reported bug or unplanned feature, use the GitHub issue number
+- When in doubt, use the issue number format `[Type] description (closes #XXX)`
 
 ---
 
