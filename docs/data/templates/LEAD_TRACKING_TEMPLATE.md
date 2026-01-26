@@ -296,10 +296,12 @@ Score < 40: Red
   (IF(X2="Buy",20,10)) +                    // Interest Type: Buy=20, Rent=10 (max 20)
   (IF(AB2>0,20,0)) +                        // Budget Confirmed: Yes=20 (max 20)
   (IF(AE2="ASAP (within 1 month)",25,
-      IF(AE2="1-3 months",15,5))) +         // Timeline: ASAP=25, 1-3mo=15 (max 25)
-  (IF(M2>=2,15,5)) +                        // Engagement: 2+ contacts=15 (max 15)
-  (IF(K2<=7,10,IF(K2<=30,5,0))) +          // Recency: <=7 days=10, <=30=5 (max 10)
-  (IF(AM2<>"",20,0))                        // Viewing: Viewed=20 (max 20)
+      IF(AE2="1-3 months",15,
+        IF(AE2="3-6 months",10,
+          IF(AE2="6-12 months",5,0))))) +   // Timeline: ASAP=25, 1-3mo=15, 3-6mo=10, 6-12mo=5 (max 25)
+  (IF(M2>=2,15,IF(M2>=1,5,0))) +            // Engagement: 2+ contacts=15, 1 contact=5, 0 contacts=0 (max 15)
+  (IF(K2<=7,10,IF(K2<=30,5,0))) +          // Recency: <=7 days=10, <=30=5, >30=0 (max 10)
+  (IF(AM2<>"",20,IF(AN2<>"",10,0)))         // Viewing: Viewed=20, Scheduled=10, No=0 (max 20)
 )
 
 Maximum Score: 100 (20+20+25+15+10+20)
@@ -654,6 +656,10 @@ Summary metrics and charts.
   "SELECT Col1, COUNT(Col2) 
    WHERE Col2 = 'Converted' 
    GROUP BY Col1")
+
+// Note: For large datasets (>1000 rows), consider using limited ranges:
+// =QUERY({Active_Leads!AK2:AK1000, Active_Leads!B2:B1000}, ...) 
+// to improve performance
 ```
 
 ---
