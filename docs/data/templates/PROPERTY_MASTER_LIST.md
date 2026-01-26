@@ -43,7 +43,7 @@ Tabs:
 | Column | Data Type | Description | Example | Required | Formula/Validation |
 |--------|-----------|-------------|---------|----------|-------------------|
 | **A: Property_ID** | Text | Unique identifier | PROP-2026-001 | ✅ | Auto-generated |
-| **B: Status** | Dropdown | Current status | Available | ✅ | Available, Reserved, Sold, Rented, Pending |
+| **B: Status** | Dropdown | Current status | Available | ✅ | Available, Reserved, Sold, Rented, Pending, Off Market |
 | **C: Category** | Dropdown | Property category | Project | ✅ | Project, Resale, Rental-LT, Rental-ST |
 | **D: Type** | Dropdown | Property type | Condo | ✅ | Condo, Villa, House, Townhouse, Land |
 | **E: Project_Name** | Text | Project/Building name | The Riviera Jomtien | ✅ | - |
@@ -87,9 +87,9 @@ Tabs:
 | **AQ: Featured** | Dropdown | Feature on website? | Yes | - | Yes, No |
 | **AR: Active_Marketing** | Dropdown | Currently marketing? | Yes | ✅ | Yes, No |
 | **AS: Date_Added** | Date | Date added to system | 2026-01-26 | ✅ | YYYY-MM-DD |
-| **AT: Date_Updated** | Date | Last update date | 2026-01-26 | ✅ | =TODAY() |
+| **AT: Date_Updated** | Date | Last update date | 2026-01-26 | ✅ | Manual entry - update when row is edited |
 | **AU: Date_Available** | Date | Available from date | 2026-02-01 | - | YYYY-MM-DD |
-| **AV: Views_Count** | Number | Number of inquiries | 15 | - | Manual count |
+| **AV: Views_Count** | Number | Number of online listing page views | 15 | - | Manual count |
 | **AW: Viewings_Count** | Number | Physical viewings done | 3 | - | Manual count |
 | **AX: Notes_Internal** | Text | Internal notes | Good deal, motivated seller | - | - |
 | **AY: Tags** | Text | Search tags | sea view, investment, new | - | Comma-separated |
@@ -200,6 +200,7 @@ Reserved: Yellow background
 Sold: Gray background
 Rented: Blue background
 Pending: Orange background
+Off Market: Light gray background
 ```
 
 **Priority-based:**
@@ -247,9 +248,14 @@ Logic:
 
 ### Auto Property ID (Column A)
 ```
-="PROP-"&TEXT(YEAR(TODAY()),"0000")&"-"&TEXT(ROW()-1,"000")
+=IF($AS2<>"", "PROP-"&TEXT(YEAR($AS2),"0000")&"-"&TEXT(ROW()-1,"000"), "")
 
 Result: PROP-2026-001
+
+Logic:
+- Uses the year from Date_Added (column AS) for stable IDs
+- If Date_Added is empty, ID remains empty
+- Once Date_Added is set, the year is locked to that date
 ```
 
 ---
@@ -264,12 +270,13 @@ Filtered view of `01_All_Properties` where:
 
 | Column | Description | Example |
 |--------|-------------|---------|
-| Developer_Name | Developer company | ABC Development Co. |
 | Total_Units | Total units in project | 200 |
 | Units_Available | Available units | 45 |
 | Transfer_Date | Expected transfer | 2027-06-30 |
 | Payment_Plan | Payment terms | 10% down, 90% on transfer |
 | Installment_Available | Installment option? | Yes |
+
+**Note:** Use the existing `Developer` column (AG) from the base schema for developer information.
 
 ---
 
@@ -379,7 +386,7 @@ Column AR (Active_Marketing) = Yes
 ### Using Google Sheets Query
 
 ```
-=QUERY(All_Properties!A:AZ, 
+=QUERY('01_All_Properties'!A:AZ, 
   "SELECT A, E, G, L, T, U, V 
    WHERE D='Condo' AND G='Jomtien' AND L&lt;=3000000 AND B='Available'
    ORDER BY L ASC")
