@@ -293,16 +293,17 @@ Score < 40: Red
 
 ```
 =MIN(100, 
-  (IF(X2="Buy",20,10)) +                    // Buy=20, Rent=10
-  (IF(AB2>0,20,0)) +                        // Has budget=20
+  (IF(X2="Buy",20,10)) +                    // Interest Type: Buy=20, Rent=10 (max 20)
+  (IF(AB2>0,20,0)) +                        // Budget Confirmed: Yes=20 (max 20)
   (IF(AE2="ASAP (within 1 month)",25,
-      IF(AE2="1-3 months",15,5))) +         // Urgent=25
-  (IF(M2>=2,15,5)) +                        // Contact count
-  (IF(K2<=7,10,IF(K2<=30,5,0))) +          // Recency
-  (IF(AM2<>"",20,0))                        // Viewed property=20
+      IF(AE2="1-3 months",15,5))) +         // Timeline: ASAP=25, 1-3mo=15 (max 25)
+  (IF(M2>=2,15,5)) +                        // Engagement: 2+ contacts=15 (max 15)
+  (IF(K2<=7,10,IF(K2<=30,5,0))) +          // Recency: <=7 days=10, <=30=5 (max 10)
+  (IF(AM2<>"",20,0))                        // Viewing: Viewed=20 (max 20)
 )
 
-Maximum Score: 100
+Maximum Score: 100 (20+20+25+15+10+20)
+Note: See "Lead Scoring Model" section for detailed weight breakdown
 ```
 
 ### Days Since Created (Column K)
@@ -317,9 +318,12 @@ Maximum Score: 100
 
 ### Full Name (Column P)
 ```
-=IF(AND(N2<>"", O2<>""), N2&" "&O2, 
-   IF(N2<>"", N2, 
-   IF(O2<>"", O2, "No Name")))
+=TEXTJOIN(" ", TRUE, N2, O2)
+
+// Alternative for older Google Sheets versions:
+// =IF(AND(N2<>"", O2<>""), N2&" "&O2, 
+//    IF(N2<>"", N2, 
+//    IF(O2<>"", O2, "No Name")))
 ```
 
 ### Commission Estimate (Column AU)
@@ -636,7 +640,7 @@ Summary metrics and charts.
 ### Leads by Source (This Month)
 
 ```
-=QUERY(Active_Leads!A:E,
+=QUERY(Active_Leads!A:H,
   "SELECT E, COUNT(A) 
    WHERE H >= date '"&TEXT(DATE(YEAR(TODAY()),MONTH(TODAY()),1),"yyyy-mm-dd")&"' 
    GROUP BY E 
@@ -646,10 +650,10 @@ Summary metrics and charts.
 ### Conversion Rate by Agent
 
 ```
-=QUERY(Active_Leads!AK:AK&Active_Leads!B:B,
-  "SELECT AK, COUNT(B) 
-   WHERE B = 'Converted' 
-   GROUP BY AK")
+=QUERY({Active_Leads!AK:AK, Active_Leads!B:B},
+  "SELECT Col1, COUNT(Col2) 
+   WHERE Col2 = 'Converted' 
+   GROUP BY Col1")
 ```
 
 ---
