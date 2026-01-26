@@ -415,7 +415,7 @@ Campaign | Reach | Impressions | Frequency | Clicks | CTR | CPM | CPC | Leads | 
 ```
 - เริ่มต้นด้วย ฿500-1,000/day per ad set
 - รอ 3-5 days ก่อนปรับ budget
-- Scale ทีละ 20% (ไม่เกิน)
+- Scale budget ขึ้นทีละไม่เกิน 20% ต่อครั้ง และไม่เกิน 2 ครั้งต่อสัปดาห์
 - ใช้ CBO เมื่อมี ad sets 3+ ที่ทำงานดี
 ```
 
@@ -438,7 +438,7 @@ Campaign | Reach | Impressions | Frequency | Clicks | CTR | CPM | CPC | Leads | 
 
 ⚠️ **Important:** Real estate ads have special restrictions
 
-- [ ] ไม่ใช้ Special Ad Category (Housing) ถ้าไม่จำเป็น
+- [ ] ตั้งค่า Special Ad Category: **Housing** สำหรับโฆษณาอสังหาริมทรัพย์ทุกครั้ง และปฏิบัติตามข้อจำกัดการ targeting ที่ Meta กำหนด (เช่น age, gender, detailed targeting บางประเภท, location แบบละเอียดเกินไป ฯลฯ)
 - [ ] หลีกเลี่ยงการ discriminate by demographics
 - [ ] ไม่ claim ผลตอบแทนที่เกินจริง
 - [ ] แสดงข้อมูลที่ถูกต้องเกี่ยวกับ property
@@ -451,3 +451,9 @@ Campaign | Reach | Impressions | Frequency | Clicks | CTR | CPM | CPC | Leads | 
 - [Landing Page Checklist](../landing/LANDING_PAGE_CHECKLIST.md)
 - [Analytics Setup Guide](../tracking/ANALYTICS_SETUP_GUIDE.md)
 - [Social Media SOP](../social/SOCIAL_MEDIA_SOP.md)
+
+---
+
+**Last Updated:** 2026-01-26  
+**Version:** 1.0.0  
+**Maintained by:** AMP Marketing Team
