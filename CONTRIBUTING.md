@@ -53,16 +53,13 @@ pip install -e ".[dev]"
 cp .env.example .env
 # Edit .env with your configuration
 
-# 5. Start development services
-docker compose up -d postgres redis
+# 5. (Optional) Start supporting services defined in docker-compose.yml
+docker compose up -d
 
-# 6. Run database migrations
-alembic upgrade head
-
-# 7. Run application
+# 6. Run application
 python apps/api/main.py
 
-# 8. Verify setup
+# 7. Verify setup
 curl http://127.0.0.1:8000/healthz
 ```
 
