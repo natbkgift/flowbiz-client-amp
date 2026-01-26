@@ -58,8 +58,8 @@
 │  Human Handover                   │ ✅  │      │      │        │
 ├───────────────────────────────────┼─────┼──────┼──────┼────────┤
 │  Facebook Messenger               │     │ ✅   │      │        │
-│  Ads Agent                        │     │ ✅   │      │        │
-│  Content Agent                    │     │ ✅   │      │        │
+│  Ads/Promotion Agent              │     │ ✅   │      │        │
+│  Content/Branding Agent           │     │ ✅   │      │        │
 ├───────────────────────────────────┼─────┼──────┼──────┼────────┤
 │  Analytics Dashboard              │     │      │ ✅   │        │
 │  Predictive Analytics             │     │      │ ✅   │        │
@@ -83,7 +83,6 @@
 | Ads/Promotion Agent | Focus on lead handling first |
 | Content/Branding Agent | Manual content is acceptable initially |
 | Facebook Messenger | LINE is primary channel |
-| WhatsApp Business | Lower priority for Pattaya market |
 
 ### Deferred to v1.2
 
@@ -188,9 +187,9 @@
 │  Week 2  │████████│ Templates + Ops Pack (PR-002, PR-003, PR-004)  │
 │  Week 3  │████████│ Core Schemas (PR-005)                          │
 │  Week 4  │████████│ LINE Integration (PR-006)                      │
-│  Week 5  │████████│ Lead Router Agent (PR-008)                     │
-│  Week 6  │████████│ AI Sale Chat Agent - Core (PR-009)             │
-│  Week 7  │████████│ AI Sale Chat Agent - RAG (PR-009)              │
+│  Week 5  │████████│ Lead Router Agent (PR-007)                     │
+│  Week 6  │████████│ AI Sale Chat Agent - Core (PR-008)             │
+│  Week 7  │████████│ AI Sale Chat Agent - RAG (PR-008)              │
 │  Week 8  │████████│ Integration + Testing                          │
 │                                                                     │
 │  ──────────────────────────────────────────────────────────────    │
@@ -233,13 +232,11 @@
 - [ ] Dashboard
 - [ ] Ops/Document Agent
 
-### v1.3 (Week 17-20)
+### v2.0 (Week 17+)
 - [ ] Chinese language support
 - [ ] Russian language support
-- [ ] Advanced ML predictions
-
-### v2.0 (Week 21+)
 - [ ] WhatsApp Business
+- [ ] Advanced ML predictions
 - [ ] Full automation suite
 - [ ] Custom ML models
 
