@@ -1,242 +1,500 @@
-# 📊 Data OS - AMP Data Management System
+# AMP Data OS (Data Operating System)
 
-> ระบบจัดการข้อมูลสำหรับ Asset Management Property (Phase 0)
+> 📊 ระบบจัดการข้อมูลแบบครบวงจร สำหรับ Asset Management Property
 
 ## Overview
 
-**Data OS** คือระบบการจัดการข้อมูลสำหรับ AMP ในระยะ Phase 0 ก่อนที่จะมีระบบ Database แบบเต็มรูปแบบ โดยใช้ Google Drive และ Google Sheets เป็นฐานข้อมูลหลัก เพื่อให้ทีมสามารถจัดเก็บ ค้นหา และวิเคราะห์ข้อมูลได้อย่างมีประสิทธิภาพ
+Data OS คือชุดเอกสาร templates, schemas และมาตรฐานสำหรับการจัดการข้อมูลทั้งหมดของ AMP ตั้งแต่ properties, leads, LINE group summaries ไปจนถึงการตั้งชื่อไฟล์และโฟลเดอร์
 
-### Core Principles
+### What is Data OS?
 
-1. **Structured Data** - ข้อมูลทุกชิ้นต้องมีโครงสร้างที่ชัดเจน
-2. **Easy Access** - ทีมทุกคนหาข้อมูลได้ง่ายภายใน 30 วินาที
-3. **Consistent Naming** - ใช้ Naming Convention เดียวกันทั้งองค์กร
-4. **Daily Updates** - Update ข้อมูลทุกวันเพื่อความแม่นยำ
-5. **Scalable** - ออกแบบให้รองรับการเติบโตในอนาคต
-
----
-
-## 📁 Data OS Components
-
-### 1. Google Drive Structure
-> โครงสร้าง Folder และการจัดเก็บไฟล์
-
-ระบบ Folder ที่จัดระเบียบสำหรับเก็บข้อมูลทุกประเภท ตั้งแต่ Property Listings, Lead Data, LINE Conversations จนถึง Marketing Materials
-
-📖 **อ่านเพิ่มเติม:** [structure/GOOGLE_DRIVE_STRUCTURE.md](structure/GOOGLE_DRIVE_STRUCTURE.md)
-
-### 2. Property Master List
-> Database หลักของ Properties ทั้งหมด
-
-Google Sheets Template สำหรับบันทึกข้อมูล Properties ครอบคลุมทั้ง Condos, Villas, Houses, Land และ Commercial
-
-**Key Features:**
-- Schema ครอบคลุมข้อมูล Property ทุกมิติ
-- Formula สำหรับคำนวณอัตโนมัติ
-- Data Validation และ Dropdown
-- Color Coding สำหรับ Status
-
-📖 **อ่านเพิ่มเติม:** [templates/PROPERTY_MASTER_LIST.md](templates/PROPERTY_MASTER_LIST.md)
-
-### 3. Lead Tracking Template
-> ระบบติดตาม Leads และ Qualification
-
-Template สำหรับบันทึกและติดตาม Leads ตั้งแต่ First Contact จนถึง Closing Deal
-
-**Key Features:**
-- Lead Qualification Matrix
-- Response Time Tracking
-- Follow-up Schedule
-- Conversion Funnel
-
-📖 **อ่านเพิ่มเติม:** [templates/LEAD_TRACKING_TEMPLATE.md](templates/LEAD_TRACKING_TEMPLATE.md)
-
-### 4. LINE Group Summary System
-> Workflow สำหรับสรุปบทสนทนา LINE ประจำวัน
-
-ระบบสำหรับทำ Daily Summary จาก LINE Groups เพื่อจับ Hot Leads และติดตาม Action Items
-
-**Key Features:**
-- Daily Workflow Checklist
-- Hot Lead Identification
-- Action Items Tracking
-- Weekly Summary Report
-
-📖 **อ่านเพิ่มเติม:** [templates/LINE_SUMMARY_TEMPLATE.md](templates/LINE_SUMMARY_TEMPLATE.md)
-
-### 5. Data Naming Convention
-> มาตรฐานการตั้งชื่อไฟล์และ Folder
-
-กฎและ Convention สำหรับการตั้งชื่อไฟล์, Folder, และข้อมูลต่างๆ ให้สอดคล้องกันทั้งองค์กร
-
-**Key Features:**
-- File Naming Rules
-- Folder Naming Standards
-- Property ID Convention
-- Date Format Standards
-
-📖 **อ่านเพิ่มเติม:** [standards/DATA_NAMING_CONVENTION.md](standards/DATA_NAMING_CONVENTION.md)
-
----
-
-## 🎯 Use Cases
-
-### For Sales Team
 ```
-1. เช็ค Property ที่มี → เปิด Property Master List
-2. เพิ่ม Lead ใหม่ → ใช้ Lead Tracking Template
-3. สรุป LINE วันนี้ → ใช้ LINE Summary Workflow
-4. ส่งข้อมูลลูกค้า → ตั้งชื่อไฟล์ตาม Naming Convention
-```
-
-### For Management
-```
-1. ดูภาพรวม Properties → Property Master List Dashboard
-2. เช็ค Conversion Rate → Lead Tracking Report
-3. ดู Hot Leads วันนี้ → LINE Summary Report
-4. วิเคราะห์ Performance → Monthly Summary Sheets
-```
-
-### For Marketing
-```
-1. หา Property สำหรับโฆษณา → Filter Property Master List
-2. เช็ค Lead Source → Lead Tracking Analytics
-3. ดู Popular Properties → Property View Count
-4. ส่งออกข้อมูลสำหรับ Campaign → Export ตาม Template
+┌─────────────────────────────────────────────────────────────┐
+│                      DATA OS ECOSYSTEM                      │
+├─────────────────────────────────────────────────────────────┤
+│                                                             │
+│  ┌──────────────────┐  ┌──────────────────┐                │
+│  │   Structure      │  │    Templates     │                │
+│  │   (Where)        │  │    (What)        │                │
+│  │                  │  │                  │                │
+│  │ • Folder org     │  │ • Property DB    │                │
+│  │ • Drive setup    │  │ • Lead tracking  │                │
+│  │ • Access control │  │ • LINE summary   │                │
+│  └──────────────────┘  └──────────────────┘                │
+│                                                             │
+│  ┌──────────────────┐                                      │
+│  │    Standards     │                                      │
+│  │    (How)         │                                      │
+│  │                  │                                      │
+│  │ • Naming rules   │                                      │
+│  │ • ID formats     │                                      │
+│  │ • Conventions    │                                      │
+│  └──────────────────┘                                      │
+│                                                             │
+└─────────────────────────────────────────────────────────────┘
 ```
 
 ---
 
-## 🚀 Quick Start
+## Directory Structure
 
-### สำหรับทีมใหม่
-
-1. **อ่านเอกสารตามลำดับ:**
-   ```
-   1. README.md (หน้านี้) - Overview
-   2. GOOGLE_DRIVE_STRUCTURE.md - โครงสร้าง Folder
-   3. DATA_NAMING_CONVENTION.md - Naming Rules
-   4. Templates ที่เกี่ยวข้องกับงานของคุณ
-   ```
-
-2. **ขอ Access Google Drive:**
-   - ติดต่อ Admin เพื่อขอสิทธิ์เข้าถึง AMP Drive
-   - Bookmark Folder หลักที่ใช้บ่อย
-
-3. **ทำความเข้าใจ Workflow:**
-   - Sales → Property Master List + Lead Tracking
-   - Admin → LINE Summary System
-   - Marketing → Property Master List (Read-only)
-
-4. **เริ่มใช้งาน:**
-   - Copy Template ที่ต้องการ
-   - ตั้งชื่อไฟล์ตาม Naming Convention
-   - บันทึกใน Folder ที่ถูกต้อง
+```
+docs/data/
+├── README.md                              # This file
+│
+├── structure/
+│   └── GOOGLE_DRIVE_STRUCTURE.md          # Folder organization guide
+│
+├── templates/
+│   ├── PROPERTY_MASTER_LIST.md            # Property database schema
+│   ├── LEAD_TRACKING_TEMPLATE.md          # Lead CRM schema
+│   └── LINE_SUMMARY_TEMPLATE.md           # LINE group system
+│
+└── standards/
+    └── DATA_NAMING_CONVENTION.md          # Naming standards
+```
 
 ---
 
-## 📋 Daily Operations
+## Quick Links
 
-### Morning Routine (09:00)
-- [ ] เปิด Property Master List
-- [ ] เช็ค Lead ใหม่จาก Lead Tracking
-- [ ] อ่าน LINE Summary จากเมื่อวาน
+### 📁 Structure
+- **[Google Drive Structure](structure/GOOGLE_DRIVE_STRUCTURE.md)** - Complete folder hierarchy and organization
 
-### Throughout Day
-- [ ] Log Lead ใหม่ทันทีที่ได้
-- [ ] Update Property Status เมื่อมีการเปลี่ยนแปลง
-- [ ] Reply ลูกค้าภายใน 30 วินาที
+### 📊 Templates
+- **[Property Master List](templates/PROPERTY_MASTER_LIST.md)** - Central property database schema
+- **[Lead Tracking Template](templates/LEAD_TRACKING_TEMPLATE.md)** - CRM and lead management
+- **[LINE Summary Template](templates/LINE_SUMMARY_TEMPLATE.md)** - LINE group monitoring system
 
-### Evening Routine (18:00)
-- [ ] สรุป LINE Groups ประจำวัน
-- [ ] Update Lead Status และ Notes
-- [ ] Plan Follow-ups สำหรับวันพรุ่งนี้
+### 📐 Standards
+- **[Data Naming Convention](standards/DATA_NAMING_CONVENTION.md)** - Naming rules for everything
 
 ---
 
-## 🔒 Data Security
+## Use Cases
+
+### I want to...
+
+| Task | Document |
+|------|----------|
+| Set up Google Drive | [Google Drive Structure](structure/GOOGLE_DRIVE_STRUCTURE.md) |
+| Add a new property | [Property Master List](templates/PROPERTY_MASTER_LIST.md) |
+| Track a new lead | [Lead Tracking Template](templates/LEAD_TRACKING_TEMPLATE.md) |
+| Process LINE posts | [LINE Summary Template](templates/LINE_SUMMARY_TEMPLATE.md) |
+| Name a file correctly | [Data Naming Convention](standards/DATA_NAMING_CONVENTION.md) |
+| Find property photos | [Google Drive Structure](structure/GOOGLE_DRIVE_STRUCTURE.md) → Photos |
+| Create Property ID | [Data Naming Convention](standards/DATA_NAMING_CONVENTION.md) → Property ID |
+
+---
+
+## Getting Started
+
+### For New Team Members
+
+**Day 1: Understanding Structure**
+1. Read [Google Drive Structure](structure/GOOGLE_DRIVE_STRUCTURE.md)
+2. Get access to shared drive
+3. Familiarize with folder locations
+
+**Day 2: Learning Templates**
+1. Review [Property Master List](templates/PROPERTY_MASTER_LIST.md)
+2. Review [Lead Tracking Template](templates/LEAD_TRACKING_TEMPLATE.md)
+3. Practice data entry
+
+**Day 3: Standards**
+1. Study [Data Naming Convention](standards/DATA_NAMING_CONVENTION.md)
+2. Practice naming files
+3. Understand ID formats
+
+**Day 4-5: Hands-on**
+1. Add test property
+2. Create test lead
+3. Process LINE summary
+
+### For Existing Team
+
+**When you need to:**
+
+```
+📁 Organize files?
+→ Check Google Drive Structure
+
+📊 Add property data?
+→ Check Property Master List
+
+📞 Track a lead?
+→ Check Lead Tracking Template
+
+📱 Process LINE groups?
+→ Check LINE Summary Template
+
+🏷️ Name something?
+→ Check Data Naming Convention
+```
+
+---
+
+## Data Flow Overview
+
+### Property Data Flow
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                    PROPERTY DATA FLOW                       │
+├─────────────────────────────────────────────────────────────┤
+│                                                             │
+│  1. SOURCE                                                  │
+│     ├── Owner Direct                                        │
+│     ├── LINE Groups                                         │
+│     ├── Other Agents                                        │
+│     └── Developer                                           │
+│                                                             │
+│  2. CAPTURE                                                 │
+│     ├── LINE Summary (if from LINE)                         │
+│     ├── Direct entry                                        │
+│     └── Import                                              │
+│                                                             │
+│  3. MASTER DATABASE                                         │
+│     └── Property_Master_List.xlsx                           │
+│                                                             │
+│  4. USAGE                                                   │
+│     ├── Marketing (ads, website)                            │
+│     ├── Lead matching                                       │
+│     ├── Sales presentation                                  │
+│     └── Reporting                                           │
+│                                                             │
+└─────────────────────────────────────────────────────────────┘
+```
+
+### Lead Data Flow
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                     LEAD DATA FLOW                          │
+├─────────────────────────────────────────────────────────────┤
+│                                                             │
+│  1. LEAD SOURCE                                             │
+│     ├── Facebook Ads                                        │
+│     ├── Google Ads                                          │
+│     ├── LINE OA                                             │
+│     ├── Website                                             │
+│     └── Walk-in/Call                                        │
+│                                                             │
+│  2. LEAD CAPTURE                                            │
+│     └── Lead_Tracking.xlsx                                  │
+│                                                             │
+│  3. QUALIFICATION                                           │
+│     ├── Contact lead                                        │
+│     ├── Score lead                                          │
+│     └── Assign priority                                     │
+│                                                             │
+│  4. MATCHING                                                │
+│     └── Find properties from Master List                    │
+│                                                             │
+│  5. FOLLOW-UP                                               │
+│     ├── Send options                                        │
+│     ├── Schedule viewing                                    │
+│     └── Negotiate                                           │
+│                                                             │
+│  6. CONVERSION                                              │
+│     └── Close deal                                          │
+│                                                             │
+└─────────────────────────────────────────────────────────────┘
+```
+
+---
+
+## Key Databases
+
+### 1. Property Master List
+
+**Purpose:** Central inventory of all properties
+
+**Location:** `01_Properties/Property_Master_List.xlsx`
+
+**Contains:**
+- All properties (projects, resale, rental)
+- Complete property details
+- Pricing and availability
+- Photos and documents links
+- Agent assignments
+
+**Key Fields:**
+- Property_ID (PROP-2026-001)
+- Type, Location, Price
+- Bedrooms, Size
+- Status (Available/Sold/Rented)
+
+**Users:** Everyone
+
+---
+
+### 2. Lead Tracking
+
+**Purpose:** CRM for all leads
+
+**Location:** `04_Leads_CRM/Lead_Tracking.xlsx`
+
+**Contains:**
+- All leads from all sources
+- Contact information
+- Qualification status
+- Follow-up schedule
+- Properties matched
+- Conversion tracking
+
+**Key Fields:**
+- Lead_ID (LEAD-2026-001)
+- Name, Contact
+- Budget, Requirements
+- Status, Stage
+- Next_Follow_Up
+
+**Users:** Sales team, Managers
+
+---
+
+### 3. LINE Group Summary
+
+**Purpose:** Daily monitoring of LINE groups for properties
+
+**Location:** `06_LINE_Group_Summary/Daily_Summary_[YYYY-MM].xlsx`
+
+**Contains:**
+- Daily entries from LINE groups
+- Property details extracted
+- Contact information
+- Processing status
+
+**Key Fields:**
+- Entry_ID (LINE-2026-01-26-001)
+- Group, Poster
+- Property details
+- Status (New/Contacted/Added)
+
+**Users:** Data entry team
+
+---
+
+## Data Quality Standards
+
+### The 5 C's of Data Quality
+
+```
+1. COMPLETE
+   ✅ All required fields filled
+   ✅ No missing critical information
+
+2. CONSISTENT
+   ✅ Same format across entries
+   ✅ Standard naming used
+
+3. CURRENT
+   ✅ Updated regularly
+   ✅ Outdated data archived
+
+4. CORRECT
+   ✅ Accurate information
+   ✅ Verified when possible
+
+5. CONNECTED
+   ✅ Proper linking between systems
+   ✅ References maintained
+```
+
+### Daily Quality Checks
+
+- [ ] No blank required fields
+- [ ] All dates in YYYY-MM-DD format
+- [ ] All Property_IDs unique
+- [ ] All Lead_IDs unique
+- [ ] Photos links working
+- [ ] Prices reasonable (no obvious errors)
+
+---
+
+## Common Tasks
+
+### Add New Property
+
+1. **Gather information** (photos, details, pricing)
+2. **Open** `Property_Master_List.xlsx`
+3. **Go to** appropriate tab (Projects/Resale/Rental)
+4. **Generate** Property_ID: `PROP-YYYY-###`
+5. **Fill** all required fields (marked with ✅)
+6. **Upload photos** to Drive folder
+7. **Link** photos in spreadsheet
+8. **Assign** to agent
+9. **Set** Status = Available
+
+📖 [Detailed guide](templates/PROPERTY_MASTER_LIST.md)
+
+---
+
+### Add New Lead
+
+1. **Receive** lead (form, call, message)
+2. **Open** `Lead_Tracking.xlsx`
+3. **Go to** `01_Active_Leads` tab
+4. **Generate** Lead_ID: `LEAD-YYYY-###`
+5. **Fill** all required fields
+6. **Record** source and campaign
+7. **Assign** to agent
+8. **Schedule** first follow-up (within 1 hour)
+9. **Attempt** first contact
+
+📖 [Detailed guide](templates/LEAD_TRACKING_TEMPLATE.md)
+
+---
+
+### Process LINE Groups
+
+**Morning (9:00 AM):**
+1. **Open** LINE groups
+2. **Screenshot** new property posts
+3. **Save** to `Screenshots/[YYYY-MM-DD]/`
+4. **Record** in `Daily_Summary.xlsx`
+5. **Flag** high-priority items
+6. **Contact** posters for urgent items
+
+**Afternoon (2:00 PM):**
+7. **Review** and categorize entries
+8. **Standardize** prices and sizes
+9. **Contact** remaining posters
+10. **Add** qualified properties to Master List
+
+📖 [Detailed guide](templates/LINE_SUMMARY_TEMPLATE.md)
+
+---
+
+## Integration Map
+
+### How Data Connects
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                    DATA INTEGRATION MAP                     │
+├─────────────────────────────────────────────────────────────┤
+│                                                             │
+│  Property Master List ←→ Lead Tracking                      │
+│  (Properties)              (Match to leads)                 │
+│                                                             │
+│  LINE Summary → Property Master List                        │
+│  (New finds)    (Add to inventory)                          │
+│                                                             │
+│  Lead Tracking → Follow-Up Log                              │
+│  (Leads)         (Daily tasks)                              │
+│                                                             │
+│  Property Master List → Website/Marketing                   │
+│  (Inventory)              (Public listings)                 │
+│                                                             │
+│  All Systems → Reporting Dashboard                          │
+│  (Data)         (Analytics)                                 │
+│                                                             │
+└─────────────────────────────────────────────────────────────┘
+```
+
+---
+
+## KPIs & Metrics
+
+### Data Quality KPIs
+
+| Metric | Target | Frequency |
+|--------|--------|-----------|
+| Missing required fields | 0% | Weekly |
+| Duplicate entries | 0 | Weekly |
+| Broken links | 0 | Weekly |
+| Outdated data (>30 days) | < 5% | Monthly |
+| Data entry lag | < 24 hours | Daily |
+
+### Usage Metrics
+
+| Metric | Current | Target |
+|--------|---------|--------|
+| Properties in database | - | 500+ |
+| Active leads | - | 200+ |
+| LINE entries/day | - | 20+ |
+| Conversion rate (LINE → Master) | - | 10%+ |
+| Lead response time | - | < 30 min |
+
+---
+
+## Backup & Security
+
+### Backup Schedule
+
+```
+Daily:
+├── Critical files auto-backup (Google Drive)
+└── Export Lead_Tracking.xlsx
+
+Weekly:
+├── Export Property_Master_List.xlsx
+├── Archive LINE summaries
+└── Backup to external drive
+
+Monthly:
+└── Full drive snapshot
+```
 
 ### Access Control
-- **Full Access:** Sales Team, Management
-- **Edit Access:** Sales Team (Own data only)
-- **View Access:** Marketing, Support
-- **No Access:** External parties
 
-### Backup Policy
-- Google Drive มี Auto-backup
-- Export ข้อมูลสำคัญเป็น CSV ทุกสัปดาห์
-- เก็บ Backup ใน separate Drive
-
-### Privacy Guidelines
-- อย่าแชร์ข้อมูลลูกค้าออกนอกทีม
-- อย่า Download ลง Personal Device
-- ใช้ Google Drive App บน Mobile แทน
+| Data Type | Access Level |
+|-----------|--------------|
+| Property Master List | All team (Edit) |
+| Lead Tracking | Sales team (Edit) |
+| LINE Summary | Data entry (Edit) |
+| Contracts | Admin only (Edit) |
+| Finance | Owner + Admin (View) |
 
 ---
 
-## 📊 Data Quality Standards
+## Support & Training
 
-### Required Fields
-- **Property Master List:** Property ID, Type, Location, Price, Status
-- **Lead Tracking:** Lead Name, Contact, Source, Date, Assigned Sales
-- **LINE Summary:** Date, Group Name, Hot Leads Count, Action Items
+### Training Resources
 
-### Update Frequency
-- **Property Master List:** Update ทันทีเมื่อมีการเปลี่ยนแปลง
-- **Lead Tracking:** Update ภายใน 1 ชั่วโมงหลังได้ Lead
-- **LINE Summary:** ทำทุกวันภายใน 19:00
+- **Video tutorials:** (To be created)
+- **Weekly Q&A sessions:** Every Friday 4pm
+- **Documentation:** This Data OS
 
-### Validation Rules
-- ตรวจสอบ Data Completeness ทุกวันศุกร์
-- Clean up Duplicate entries ทุกสัปดาห์
-- Archive Old data ทุกเดือน
+### Getting Help
 
----
+```
+🤔 General questions?
+→ Check README (this file)
 
-## 🔄 Migration Path
+📊 Spreadsheet questions?
+→ Check specific template docs
 
-### Phase 0 (Current) - Google Sheets
-- ใช้ Google Drive + Sheets
-- Manual data entry
-- Basic formulas
-- **Timeline:** Now - Month 3
+🏷️ Naming questions?
+→ Check Data Naming Convention
 
-### Phase 1 - Airtable/Notion
-- Migrate to Database platform
-- API integration
-- Automation workflows
-- **Timeline:** Month 4-6
+🐛 Found an error?
+→ Report to data admin
 
-### Phase 2 - Custom Database
-- PostgreSQL/MongoDB
-- Full AI integration
-- Real-time sync
-- **Timeline:** Month 6+
+💡 Suggestion?
+→ Submit via team chat
+```
 
 ---
 
-## 📞 Support
+## Changelog
 
-### Questions?
-- **Slack:** #amp-data-support
-- **Email:** admin@amp-property.com
-- **Google Drive:** Comment ใน Sheet โดยตรง
-
-### Report Issues
-- Data errors → Tag @admin in Sheet
-- Access issues → Email admin
-- Template requests → Slack #amp-data-support
+| Version | Date | Changes | Author |
+|---------|------|---------|--------|
+| 1.0 | 2026-01-26 | Initial Data OS creation | AI Agent |
 
 ---
 
-## 📚 Related Documentation
+## Related Documents
 
-- [AMP Business Lens](../AMP_BUSINESS_LENS.md) - Business model และ strategy
-- [AMP MVP Scope](../AMP_MVP_SCOPE.md) - MVP features และ timeline
-- [AMP Architecture Blueprint](../AMP_ARCHITECTURE_BLUEPRINT.md) - Technical architecture
+### AMP Project Docs
+- [AMP Business Lens](../AMP_BUSINESS_LENS.md)
+- [AMP Architecture Blueprint](../AMP_ARCHITECTURE_BLUEPRINT.md)
+- [AMP MVP Scope](../AMP_MVP_SCOPE.md)
 
----
-
-**Last Updated:** 2026-01-26  
-**Version:** 1.0.0  
-**Maintained by:** AMP Data Team
+### Ops Docs
+- [Ops OS](../ops/README.md)
+- [Google Ads Checklist](../ops/ads/GOOGLE_ADS_CHECKLIST.md)
+- [Social Media SOP](../ops/social/SOCIAL_MEDIA_SOP.md)
