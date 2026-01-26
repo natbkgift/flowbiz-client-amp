@@ -1,591 +1,460 @@
-# Landing Page Checklist
+# Landing Page Checklist - AMP
 
-> ✅ Checklist การสร้าง Landing Page ที่มี Conversion สูงสำหรับ AMP Real Estate
+> 🎯 Checklist สำหรับการสร้าง Landing Page ที่มีประสิทธิภาพ
 
 ## Overview
 
-Landing Page ที่ดีต้องทำงาน 3 อย่าง: ดึงดูดความสนใจ (Attract), สื่อสารคุณค่า (Communicate Value), และชักจูงให้ทำ action (Convert)
+เอกสารนี้เป็น checklist สำหรับการสร้าง landing pages สำหรับ Asset Management Property (AMP) เพื่อให้ได้ conversion rate สูงสุด
 
-เอกสารนี้เป็น comprehensive checklist สำหรับการสร้าง Landing Page ที่มีอัตรา conversion สูง ครอบคลุมทั้ง UX, Content, Design, และ Technical aspects
+### Landing Page Types
 
----
-
-## Phase 1: Planning & Strategy
-
-### Define Objectives
-- [ ] กำหนด Primary goal ของ Landing Page:
-  - [ ] Lead Generation (form submission)
-  - [ ] Phone Call
-  - [ ] Schedule Viewing
-  - [ ] Download Brochure
-  - [ ] Live Chat
-- [ ] กำหนด Target audience persona
-- [ ] กำหนด Key Message และ Value Proposition
-- [ ] วิเคราะห์ competitors' landing pages
-
-### Campaign Alignment
-- [ ] เชื่อมโยง Landing Page กับ Ad Campaign:
-  - [ ] Google Ads
-  - [ ] Facebook/Instagram Ads
-  - [ ] LINE OA links
-  - [ ] Email campaigns
-- [ ] ตรวจสอบ Message match (Ad → Landing Page consistency)
-- [ ] วางแผน Traffic sources และ volumes
+| Type | Purpose | Target Conversion |
+|------|---------|-------------------|
+| Project Showcase | แสดงรายละเอียดโครงการ | Lead form submission |
+| Lead Capture | เก็บข้อมูลลูกค้า | Form submission |
+| Property Search | ค้นหาทรัพย์ | Search + Lead |
+| Investment Guide | Content สำหรับนักลงทุน | Download + Lead |
+| Rental Guide | Content สำหรับผู้เช่า | Contact + Lead |
 
 ---
 
-## Phase 2: Content Planning
+## Phase 1: Planning
 
-### Above the Fold (ส่วนบนสุดที่เห็นก่อน scroll)
+### 1.1 Define Objectives
 
-**Headline**
-- [ ] เขียน Headline ที่ชัดเจน น่าสนใจ (6-12 words)
-- [ ] รวม Unique Selling Proposition (USP)
-- [ ] ตอบคำถาม "What's in it for me?" ทันที
-- [ ] ใช้ keywords จาก Ads (message match)
+- [ ] กำหนด Primary Goal (Lead gen / Sales / Awareness)
+- [ ] กำหนด Target Audience
+- [ ] กำหนด Traffic Source (Ads / SEO / Social)
+- [ ] กำหนด Key Message / USP
+- [ ] กำหนด Conversion Action (Form / Call / Chat)
 
-**Sub-headline**
-- [ ] เขียน Sub-headline ขยายความ Headline (10-20 words)
-- [ ] เพิ่มรายละเอียดสำคัญเพิ่มเติม
-- [ ] Support ข้อความหลัก
+### 1.2 Competitor Research
 
-**Hero Image/Video**
-- [ ] เลือก high-quality visual ที่สื่อถึง offering
-  - Property image (exterior/interior)
-  - Lifestyle image
-  - Area/location image
-  - Video tour (preferred)
-- [ ] ใช้ภาพที่ตรงกับ target audience
-- [ ] ใช้ภาพจริง (ไม่ใช่ stock photo ทั่วไป)
+- [ ] วิเคราะห์ landing pages ของคู่แข่ง
+- [ ] สังเกต layout และ structure
+- [ ] Note จุดเด่นและจุดด้อย
+- [ ] หา inspiration จาก industry leaders
 
-**Call-to-Action (CTA) - Primary**
-- [ ] ใส่ CTA Button เด่นชัด สะดุดตา
-- [ ] ใช้ Action-oriented text (e.g., "ดูรายละเอียดเต็ม", "จองชมห้อง", "รับใบเสนอราคา")
-- [ ] ใช้ Contrasting color (โดดเด่นจาก background)
-- [ ] Size ใหญ่พอ (clickable area > 44x44px)
+### 1.3 Content Planning
 
-### Body Content (เนื้อหาหลัก)
-
-**Value Proposition Section**
-- [ ] อธิบายชัดเจนว่า "ได้อะไร" และ "ทำไมต้องเลือกเรา"
-- [ ] ใช้ bullet points (3-5 points) สำหรับ key benefits
-- [ ] เน้น Benefits มากกว่า Features
-- [ ] ใช้ภาษาง่าย เข้าใจง่าย
-
-**Property Features & Benefits**
-- [ ] จัดเรียง Features ตามความสำคัญ
-- [ ] แสดง Key Features:
-  - [ ] Location (ทำเล)
-  - [ ] Size (ขนาด)
-  - [ ] Bedrooms/Bathrooms
-  - [ ] Price Range
-  - [ ] Amenities (สิ่งอำนวยความสะดวก)
-  - [ ] Special Features (วิวทะเล, Pool access, etc.)
-- [ ] ใช้ icons/visuals ประกอบ
-- [ ] ระบุ Benefits ของแต่ละ Feature
-
-**Social Proof (ความน่าเชื่อถือ)**
-- [ ] เพิ่ม Testimonials (2-3 reviews จากลูกค้าจริง)
-- [ ] เพิ่ม Case Studies (Success stories)
-- [ ] แสดง Trust badges:
-  - [ ] จำนวนลูกค้าที่เคยใช้บริการ
-  - [ ] ปีที่ก่อตั้ง/ประสบการณ์
-  - [ ] Awards/Certifications
-  - [ ] Media mentions
-- [ ] แสดง Star ratings หรือ review scores (ถ้ามี)
-- [ ] เพิ่มรูปภาพลูกค้าจริง (พร้อมชื่อ) เพื่อเพิ่มความน่าเชื่อถือ
-
-**Property Gallery/Visual Showcase**
-- [ ] เพิ่ม Photo Gallery (6-12 รูป):
-  - Exterior
-  - Living room
-  - Bedrooms
-  - Kitchen/Bathroom
-  - View
-  - Amenities (Pool, Gym, etc.)
-- [ ] หรือเพิ่ม Video Tour (ดีกว่า)
-- [ ] หรือ 360° Virtual Tour (ดีที่สุด)
-- [ ] ใช้ high-quality professional photos
-- [ ] เพิ่ม captions อธิบายแต่ละรูป
-
-**Location & Area Information**
-- [ ] แสดง Map/Location (Google Maps embed)
-- [ ] ระบุ Nearby Landmarks:
-  - [ ] Beach distance
-  - [ ] Shopping centers
-  - [ ] Restaurants
-  - [ ] Hospitals
-  - [ ] Schools (ถ้า target family)
-  - [ ] Airport/Transportation
-- [ ] ใช้ Icons + distance/time
-
-**Pricing & Offers (ถ้าเหมาะสม)**
-- [ ] แสดงราคา (ช่วงราคาหรือราคาเริ่มต้น)
-- [ ] แสดง Special offers/promotions:
-  - [ ] ส่วนลด
-  - [ ] ฟรีค่าโอน
-  - [ ] ผ่อน 0%
-  - [ ] Early bird discount
-- [ ] ใช้ Urgency/Scarcity (e.g., "เหลือ 3 ยูนิตสุดท้าย!", "โปรโมชั่นถึง 31 ม.ค.")
-- [ ] แสดง Payment options (ถ้ามี)
-
-### Lead Capture Form
-
-**Form Placement**
-- [ ] ใส่ Form above the fold (ส่วนบน) - สำหรับ Hot traffic
-- [ ] หรือใส่ Form หลังจากให้ข้อมูลครบ (middle/bottom) - สำหรับ Cold traffic
-- [ ] หรือทั้งสองที่ (top + bottom)
-
-**Form Fields**
-- [ ] เก็บข้อมูลเท่าที่จำเป็นจริงๆ (ยิ่งน้อยยิ่งดี):
-  - [ ] Name (required)
-  - [ ] Email (required)
-  - [ ] Phone (required)
-  - [ ] Property Type/Interest (dropdown - optional)
-  - [ ] Budget Range (dropdown - optional)
-  - [ ] Message/Notes (textarea - optional)
-- [ ] ใช้ Smart defaults และ placeholders
-- [ ] Mark required fields ชัดเจน (*)
-
-**Form Design**
-- [ ] ใช้ Single column layout (ง่ายต่อการกรอก)
-- [ ] ใช้ Input field ขนาดใหญ่พอ (mobile-friendly)
-- [ ] ใช้ Proper input types (email, tel, number)
-- [ ] เพิ่ม Visual cues (labels, placeholders, icons)
-- [ ] แสดง Validation errors ชัดเจน
-
-**CTA Button (Submit)**
-- [ ] ใช้ Action-oriented text (e.g., "ส่งข้อมูล", "รับข้อมูลเพิ่มเติม", "จองชมห้อง")
-- [ ] ใช้สีโดดเด่น (contrasting)
-- [ ] ขนาดใหญ่ชัดเจน
-- [ ] แสดง Loading state เมื่อกด submit
-
-**Trust Elements near Form**
-- [ ] Privacy assurance ("เราเคารพความเป็นส่วนตัว ไม่แชร์ข้อมูล")
-- [ ] Response time ("เราจะติดต่อกลับภายใน 30 นาที")
-- [ ] No-spam promise ("ไม่มี spam emails")
-
-### Footer Section
-
-**Secondary CTAs**
-- [ ] เพิ่ม Alternative CTAs:
-  - [ ] Phone number (clickable)
-  - [ ] LINE contact button
-  - [ ] WhatsApp button
-  - [ ] Live Chat (ถ้ามี)
-  - [ ] Schedule a viewing
-
-**Trust & Legal**
-- [ ] เพิ่ม Company information
-- [ ] เพิ่ม Privacy Policy link (required)
-- [ ] เพิ่ม Terms & Conditions link
-- [ ] เพิ่ม Contact information
-
-**Social Proof (Optional)**
-- [ ] Social media links
-- [ ] Recent activities ("5 คนเพิ่งดูห้องนี้")
+- [ ] ร่าง Headlines (3-5 variations)
+- [ ] ร่าง Subheadlines
+- [ ] List key benefits (5-7 points)
+- [ ] Prepare testimonials/social proof
+- [ ] Prepare images/videos needed
 
 ---
 
-## Phase 3: Design & UX
+## Phase 2: Design & Structure
 
-### Visual Design Checklist
+### 2.1 Above the Fold (First View)
 
-**Layout**
-- [ ] ใช้ Single column layout (ไม่มี sidebar)
-- [ ] ใช้ F-pattern หรือ Z-pattern layout
-- [ ] ใช้ White space เพียงพอ (ไม่แน่น)
-- [ ] มี Visual hierarchy ชัดเจน (สำคัญ → น้อยสำคัญ)
-- [ ] มี Directional cues (arrows, images pointing to CTA)
+**Must Have Elements:**
+- [ ] Clear, compelling headline
+- [ ] Subheadline with value proposition
+- [ ] Hero image/video (high quality)
+- [ ] Primary CTA button (contrasting color)
+- [ ] Trust indicators (logos, badges)
 
-**Colors**
-- [ ] ใช้ Brand colors สม่ำเสมอ
-- [ ] ใช้ Contrasting color สำหรับ CTA
-- [ ] ไม่เกิน 3-4 สีหลัก
-- [ ] สีสอดคล้องกับ Brand identity
+**Headline Formula:**
+```
+[Benefit] + [Specific] + [Timeframe/Location]
 
-**Typography**
-- [ ] ใช้ Font ไม่เกิน 2-3 fonts
-- [ ] Font size อ่านง่าย (body text > 16px)
-- [ ] Headline ใหญ่เด่นชัด (32-48px+)
-- [ ] เว้นระยะบรรทัดเพียงพอ (line-height 1.5-1.8)
-- [ ] Mobile-responsive font sizes
+Examples:
+- "คอนโดวิวทะเลพัทยา เริ่มต้น 2.5 ล้าน"
+- "Find Your Dream Condo in Pattaya Today"
+- "ลงทุนคอนโดพัทยา ผลตอบแทน 8%/ปี"
+```
 
-**Images & Media**
-- [ ] ใช้ high-quality images (ไม่เบลอ)
-- [ ] Optimize images (file size < 200KB ต่อรูป)
-- [ ] ใช้ modern formats (WebP) ถ้าเป็นไปได้
-- [ ] เพิ่ม Alt text ทุกรูป (SEO + Accessibility)
-- [ ] Lazy loading สำหรับรูป below the fold
+### 2.2 Page Structure
 
-**CTA Buttons**
-- [ ] เห็นชัดเจน สะดุดตา
-- [ ] มี Hover states
-- [ ] มี Click/Tap feedback
-- [ ] ใช้สี contrasting
-- [ ] มี white space รอบๆ
+```
+┌─────────────────────────────────────────┐
+│           HEADER (Sticky)               │
+│  Logo │ Phone │ LINE │ CTA Button       │
+├─────────────────────────────────────────┤
+│           HERO SECTION                  │
+│  Headline + Subheadline + CTA          │
+│  Hero Image/Video                       │
+├─────────────────────────────────────────┤
+│           BENEFITS/FEATURES             │
+│  Icon + Title + Description (3-6)       │
+├─────────────────────────────────────────┤
+│           PROPERTY SHOWCASE             │
+│  Featured properties / Gallery          │
+├─────────────────────────────────────────┤
+│           SOCIAL PROOF                  │
+│  Testimonials / Reviews / Logos         │
+├─────────────────────────────────────────┤
+│           LEAD FORM                     │
+│  Form fields + Submit button            │
+├─────────────────────────────────────────┤
+│           FAQ                           │
+│  Common questions (Accordion)           │
+├─────────────────────────────────────────┤
+│           FOOTER                        │
+│  Contact info + Links + Legal           │
+└─────────────────────────────────────────┘
+```
 
-### User Experience (UX) Checklist
+### 2.3 Visual Design Checklist
 
-**Navigation**
-- [ ] ไม่มี Navigation menu (หรือมีแค่ minimal)
-- [ ] ไม่มี external links ที่ไม่จำเป็น (ลด distraction)
-- [ ] มี Sticky CTA button (ติดข้างบน) สำหรับ scroll ยาว
-- [ ] มี "Back to top" button (ถ้าหน้ายาว)
+- [ ] Consistent with brand colors
+- [ ] Clean, uncluttered layout
+- [ ] Plenty of white space
+- [ ] High-quality images (optimized)
+- [ ] Readable fonts (16px minimum body)
+- [ ] Visual hierarchy (headings, body, captions)
+- [ ] Mobile-first design
 
-**Content Flow**
-- [ ] มี Logical flow: Attention → Interest → Desire → Action
-- [ ] มี Clear progression (step by step)
-- [ ] ไม่มีส่วนที่ซ้ำซ้อน
-- [ ] แต่ละ section มี clear purpose
-
-**Clarity & Simplicity**
-- [ ] Message ชัดเจน เข้าใจง่าย
-- [ ] ไม่มี jargon หรือ technical terms มากเกินไป
-- [ ] ไม่มี clutter (เยอะเกินไป)
-- [ ] มี One clear primary action per section
-
-**Trust & Credibility**
-- [ ] แสดง Real photos (ไม่ใช่ stock photos เกินไป)
-- [ ] แสดง Contact information ชัดเจน
-- [ ] มี Company/Brand information
-- [ ] มี Privacy Policy
-- [ ] มี SSL Certificate (HTTPS)
-
-**Accessibility**
-- [ ] สามารถใช้งานด้วย Keyboard ได้
-- [ ] มี Alt text สำหรับรูปภาพ
-- [ ] มี Color contrast เพียงพอ (WCAG AA)
-- [ ] Font size อ่านง่าย
-- [ ] Form labels ชัดเจน
-
----
-
-## Phase 4: Mobile Optimization
-
-### Mobile-Responsive Design
-- [ ] ทดสอบบน Mobile devices (iOS + Android)
-- [ ] ทดสอบหลาย screen sizes (320px - 768px)
-- [ ] ใช้ Responsive layout (fluid grid)
-- [ ] Font sizes ปรับตาม screen size
-- [ ] Images scale properly
-- [ ] Buttons ขนาดใหญ่พอสำหรับ Touch (44x44px minimum)
-
-### Mobile-Specific Optimizations
-- [ ] Click-to-call phone numbers (tel: links)
-- [ ] Click-to-message LINE/WhatsApp buttons
-- [ ] Simplify form (ยิ่งน้อยยิ่งดีบน Mobile)
-- [ ] ใช้ Mobile-friendly input types (tel, email)
-- [ ] ใช้ Autofill attributes (name, email, tel)
-- [ ] Sticky CTA button (always visible)
-
-### Mobile Performance
-- [ ] Page load < 3 seconds on 3G
-- [ ] Optimize images สำหรับ mobile (ขนาดเล็กลง)
-- [ ] ลด unnecessary scripts
-- [ ] Use browser caching
-- [ ] Minify CSS/JS
+**Color Guidelines:**
+```
+Primary CTA: Contrasting color (Orange, Green, Blue)
+Secondary CTA: Outlined or lighter shade
+Background: White or light gray
+Text: Dark gray (#333) not pure black
+Accent: Brand color for highlights
+```
 
 ---
 
-## Phase 5: Technical Implementation
+## Phase 3: Content Elements
 
-### Technical Setup Checklist
+### 3.1 Headlines
 
-**Domain & Hosting**
-- [ ] เลือก URL ที่สั้น เข้าใจง่าย memorable
-  - Good: `amp-property.com/pattaya-condo`
-  - Bad: `amp-property.com/page?id=12345&campaign=xyz`
-- [ ] ตั้งค่า SSL Certificate (HTTPS)
-- [ ] ตรวจสอบ Hosting performance (uptime, speed)
+- [ ] Clear and specific
+- [ ] Include benefit or result
+- [ ] Use numbers when possible
+- [ ] Create urgency (if appropriate)
+- [ ] Test 3-5 variations
 
-**Page Speed Optimization**
-- [ ] Compress images (TinyPNG, ImageOptim)
-- [ ] Use modern image formats (WebP)
-- [ ] Minify HTML, CSS, JavaScript
-- [ ] Enable browser caching
-- [ ] Use CDN (Content Delivery Network)
-- [ ] Lazy load images below fold
-- [ ] Remove unused CSS/JS
-- [ ] Target PageSpeed score > 90
+**Headline Examples:**
+```
+Thai:
+• "คอนโดติดทะเลพัทยา เริ่มต้น 2.5 ล้านบาท"
+• "พบ 50+ คอนโดวิวทะเล พร้อมโปรโมชั่นพิเศษ"
+• "ลงทุนอสังหาพัทยา ผลตอบแทนสูงถึง 8%/ปี"
 
-**Meta Tags & SEO**
-- [ ] เพิ่ม Page Title (50-60 characters)
-- [ ] เพิ่ม Meta Description (150-160 characters)
-- [ ] เพิ่ม Open Graph tags (FB/Social sharing):
-  - [ ] og:title
-  - [ ] og:description
-  - [ ] og:image (1200x630px)
-  - [ ] og:url
-- [ ] เพิ่ม Favicon
-- [ ] เพิ่ม Canonical URL
-- [ ] Add Schema markup (ถ้าเหมาะสม)
+English:
+• "Sea View Condos in Pattaya from ฿2.5M"
+• "Find Your Perfect Pattaya Property Today"
+• "Invest in Pattaya Real Estate - Up to 8% ROI"
+```
 
-**Analytics & Tracking**
-- [ ] ติดตั้ง Google Analytics (GA4)
-- [ ] ติดตั้ง Google Tag Manager
-- [ ] ติดตั้ง Facebook Pixel
-- [ ] ตั้งค่า Conversion tracking:
-  - [ ] Form submission event
-  - [ ] Phone click event
-  - [ ] Button clicks
-- [ ] ตั้งค่า Goals ใน GA4
-- [ ] ตั้งค่า UTM parameters สำหรับ traffic sources
+### 3.2 Benefits Section
 
-**Form Functionality**
-- [ ] ทดสอบ Form submission (success case)
-- [ ] ทดสอบ Form validation (error cases)
-- [ ] ตั้งค่า Thank You page/message
-- [ ] ตั้งค่า Email notification:
-  - [ ] ส่งไปยังทีม sales
-  - [ ] Auto-reply ไปยังผู้ส่ง (confirmation)
-- [ ] เก็บ Lead data ใน CRM/Database
-- [ ] ตั้งค่า Spam protection (CAPTCHA หรือ honeypot)
+- [ ] Focus on customer benefits (not features)
+- [ ] Use icons for visual appeal
+- [ ] Keep descriptions concise
+- [ ] 3-6 benefits maximum
 
-**Error Handling**
-- [ ] Custom 404 page
-- [ ] Form error messages ชัดเจน
-- [ ] Offline message (ถ้า server down)
-- [ ] Browser compatibility warnings (ถ้าจำเป็น)
+**Benefits Template:**
+```
+Icon | Benefit Title | Description
 
----
+🏖️ | Prime Location | Walk to the beach in 5 minutes
+🏊 | Full Amenities | Pool, gym, and rooftop included
+📈 | High ROI | 6-8% rental yield year-round
+🔑 | Freehold Option | Foreign ownership available
+🛎️ | Full Service | From purchase to rental management
+```
 
-## Phase 6: Testing & QA
+### 3.3 Social Proof
 
-### Cross-Browser Testing
-- [ ] Chrome (latest)
-- [ ] Safari (latest)
-- [ ] Firefox (latest)
-- [ ] Edge (latest)
-- [ ] Mobile Safari (iOS)
-- [ ] Chrome Mobile (Android)
+- [ ] Customer testimonials (with photos)
+- [ ] Review ratings (Google, Facebook)
+- [ ] Number of customers served
+- [ ] Partner/Developer logos
+- [ ] Media mentions (if any)
 
-### Device Testing
-- [ ] Desktop (1920x1080, 1366x768)
-- [ ] Tablet (768x1024)
-- [ ] Mobile (375x667, 414x896, 360x640)
-- [ ] Test orientation (portrait + landscape)
+**Testimonial Template:**
+```
+"[Quote from customer - specific and believable]"
 
-### Functional Testing
-- [ ] ทดสอบทุก Links (internal + external)
-- [ ] ทดสอบ Form submission (submit real test data)
-- [ ] ทดสอบ Validation (empty fields, invalid emails, etc.)
-- [ ] ทดสอบ Thank you page/redirect
-- [ ] ทดสอบ Email notifications (ได้รับหรือไม่)
-- [ ] ทดสอบ Phone/LINE/WhatsApp buttons (click-to-action)
-- [ ] ทดสอบ Video/Gallery playback
+- [Name], [Location]
+  [Brief context: e.g., "Bought 2BR condo in 2023"]
+  ⭐⭐⭐⭐⭐
+```
 
-### Performance Testing
-- [ ] Google PageSpeed Insights (score > 90)
-- [ ] GTmetrix (score A)
-- [ ] Test loading time (< 3 seconds)
-- [ ] Test on slow connections (3G)
-- [ ] Check image loading (lazy load working?)
+### 3.4 FAQ Section
 
-### Analytics Testing
-- [ ] ทดสอบ GA4 tracking (pageviews)
-- [ ] ทดสอบ Conversion events firing
-- [ ] ทดสอบ Facebook Pixel (using Pixel Helper)
-- [ ] ทดสอบ GTM tags firing correctly
-- [ ] ทดสอบ UTM parameters captured
+- [ ] 5-8 most common questions
+- [ ] Clear, helpful answers
+- [ ] Use accordion format
+- [ ] Include CTA in answers where relevant
 
-### Usability Testing
-- [ ] Ask 3-5 people to test (ได้ feedback)
-- [ ] ดู heatmaps (Hotjar, Crazy Egg) หลังจาก launch
-- [ ] ดู session recordings
-- [ ] Check if users can find CTA easily
-- [ ] Check if users understand the offer
+**FAQ Examples:**
+```
+Q: Can foreigners buy property in Thailand?
+A: Yes! Foreigners can own condominiums freehold (up to 49% of building).
+   For houses/villas, leasehold or Thai company structures are common.
+   Contact us for detailed advice on your situation.
+
+Q: What's the buying process?
+A: 1. Property search and viewing
+   2. Reservation and deposit
+   3. Contract review
+   4. Transfer at Land Office
+   The entire process typically takes 30-60 days.
+
+Q: Do you help with rental management?
+A: Yes! We offer full rental management services including...
+```
 
 ---
 
-## Phase 7: Launch & Monitor
+## Phase 4: Lead Capture Form
 
-### Pre-Launch Checklist
-- [ ] ทบทวน checklist ทั้งหมดอีกครั้ง
-- [ ] ทดสอบบน production URL จริง
-- [ ] ตรวจสอบ tracking ทำงานถูกต้อง
-- [ ] เตรียม Backup plan (ถ้ามีปัญหา)
-- [ ] Brief ทีม sales (แจ้งว่า Landing Page เปิดแล้ว)
-- [ ] เตรียม Response templates สำหรับ leads
+### 4.1 Form Design
 
-### Launch Day
-- [ ] Launch page
-- [ ] เชื่อม Ads campaigns ไปยัง Landing Page
-- [ ] ตรวจสอบ Traffic เข้ามา
-- [ ] ตรวจสอบ Conversions tracking correctly
-- [ ] Monitor initial performance (first 24 hours)
-- [ ] ตรวจสอบ Form submissions และ lead quality
-- [ ] แจ้งทีมถ้ามีปัญหา
+- [ ] Minimal fields (fewer = higher conversion)
+- [ ] Clear field labels
+- [ ] Placeholder text for guidance
+- [ ] Required field indicators
+- [ ] Error messages that help
+- [ ] Submit button with action text
 
-### First Week Monitoring
-- [ ] ตรวจสอบ Analytics daily:
-  - [ ] Sessions/Users
-  - [ ] Bounce Rate (target < 40-60%)
-  - [ ] Average Time on Page (target > 1-2 min)
-  - [ ] Conversion Rate (target > 2-10%)
-- [ ] ตรวจสอบ Heatmaps/Recordings (ถ้ามี)
-- [ ] รวบรวม Feedback จาก Sales team
-- [ ] บันทึกปัญหาที่พบ
+**Form Fields (Recommended):**
+```
+Essential (Always):
+• Name (First name only is fine)
+• Phone Number
+• Email (optional for Thai market)
 
----
+Optional (Based on need):
+• Budget range (Dropdown)
+• Property type interest (Dropdown)
+• Preferred contact method
+• Message/Notes
+```
 
-## Phase 8: Optimization & A/B Testing
+### 4.2 Form Best Practices
 
-### Conversion Rate Optimization (CRO)
+- [ ] Keep form above fold (or sticky)
+- [ ] Use progress indicator for multi-step
+- [ ] Auto-format phone numbers
+- [ ] Show privacy assurance
+- [ ] Submit button = action verb ("ส่งข้อมูล" not "Submit")
 
-**Elements to Test:**
-- [ ] Headlines (different value propositions)
-- [ ] CTA button:
-  - [ ] Text (wording)
-  - [ ] Color
-  - [ ] Size
-  - [ ] Position
-- [ ] Form length (fields count)
-- [ ] Form position (top vs bottom)
-- [ ] Images/Videos (different visuals)
-- [ ] Social proof placement
-- [ ] Urgency/Scarcity messaging
-- [ ] Pricing display (show vs hide)
+**CTA Button Examples:**
+```
+✅ "รับข้อมูลโครงการ"
+✅ "นัดชมห้องตัวอย่าง"
+✅ "Get Property List"
+✅ "Schedule Viewing"
 
-**A/B Testing Best Practices:**
-- Test ONE element at a time
-- Run test จนได้ statistical significance (usually 100+ conversions)
-- Test high-impact elements first (headline, CTA)
-- Document results
+❌ "Submit"
+❌ "ส่ง"
+❌ "Click Here"
+```
 
-### Based on Data
+### 4.3 Thank You Page
 
-**If Bounce Rate is High (>60%):**
-- [ ] Check page load speed (too slow?)
-- [ ] Check message match (Ad → LP consistency?)
-- [ ] Improve above-the-fold content
-- [ ] Simplify design (too complex?)
+- [ ] Confirm submission received
+- [ ] Set expectation for follow-up
+- [ ] Provide additional value
+- [ ] Track conversion
 
-**If Time on Page is Low (<30 seconds):**
-- [ ] Improve headline/hook
-- [ ] Add engaging content (video?)
-- [ ] Check mobile experience
-- [ ] Improve readability
+**Thank You Page Content:**
+```
+✅ ขอบคุณสำหรับความสนใจ!
 
-**If Conversion Rate is Low (<2%):**
-- [ ] Simplify form (too many fields?)
-- [ ] Strengthen CTA
-- [ ] Add more trust elements
-- [ ] Improve value proposition
-- [ ] Add urgency/scarcity
-- [ ] Test different offers
+เราได้รับข้อมูลของคุณเรียบร้อยแล้ว
+ทีมงานจะติดต่อกลับภายใน 30 นาที
+
+ระหว่างรอ:
+📖 อ่านคู่มือการซื้อคอนโดในพัทยา [Link]
+📱 Add LINE เพื่อรับข้อมูลเพิ่มเติม [LINE QR]
+```
 
 ---
 
-## Conversion Rate Benchmarks
+## Phase 5: Technical Setup
 
-### Industry Standards (Real Estate)
+### 5.1 Performance
+
+- [ ] Page load time < 3 seconds
+- [ ] Images optimized (WebP, compressed)
+- [ ] Lazy loading for below-fold images
+- [ ] Minified CSS/JS
+- [ ] CDN for assets
+- [ ] Mobile page speed score > 80
+
+**Image Guidelines:**
+```
+Hero Image: Max 200KB, 1920x1080
+Property Photos: Max 100KB each, 800x600
+Icons: SVG or small PNG
+Thumbnails: Max 30KB, 400x300
+```
+
+### 5.2 Mobile Responsiveness
+
+- [ ] Test on multiple devices
+- [ ] Touch-friendly buttons (min 44x44px)
+- [ ] Readable text without zooming
+- [ ] Forms easy to fill on mobile
+- [ ] Click-to-call enabled
+- [ ] No horizontal scrolling
+
+### 5.3 SEO Basics
+
+- [ ] Meta title (50-60 characters)
+- [ ] Meta description (150-160 characters)
+- [ ] H1 tag (one per page)
+- [ ] Alt text for images
+- [ ] Clean URL structure
+- [ ] Schema markup (optional)
+
+**Meta Examples:**
+```
+Title: คอนโดพัทยา วิวทะเล | ราคาเริ่ม 2.5 ล้าน | AMP Property
+
+Description: พบคอนโดติดทะเลพัทยา กว่า 50 โครงการ ราคาเริ่มต้น 2.5 ล้านบาท 
+สระว่ายน้ำ ฟิตเนส ครบ ปรึกษาฟรี โทร 0XX-XXX-XXXX
+```
+
+---
+
+## Phase 6: Tracking Setup
+
+### 6.1 Required Tracking
+
+- [ ] Google Analytics 4 (GA4)
+- [ ] Facebook Pixel
+- [ ] Google Ads Conversion Tag (if running ads)
+- [ ] LINE Tag (if running LINE ads)
+- [ ] Google Tag Manager (for easy management)
+
+### 6.2 Events to Track
+
+| Event | Trigger | Parameters |
+|-------|---------|------------|
+| page_view | Page load | page_title, page_location |
+| scroll | 25%, 50%, 75%, 90% | percent_scrolled |
+| form_start | First form interaction | form_name |
+| form_submit | Form submission | form_name, form_destination |
+| click_cta | CTA button click | button_text, button_location |
+| click_phone | Phone number click | - |
+| click_line | LINE button click | - |
+
+### 6.3 UTM Parameters
+
+- [ ] Use UTM parameters for all traffic sources
+- [ ] Consistent naming convention
+
+**UTM Structure:**
+```
+?utm_source=[source]&utm_medium=[medium]&utm_campaign=[campaign]&utm_content=[content]
+
+Examples:
+Google Ads: ?utm_source=google&utm_medium=cpc&utm_campaign=pattaya_condo&utm_content=search_ad
+Facebook: ?utm_source=facebook&utm_medium=paid&utm_campaign=lead_gen&utm_content=carousel
+LINE: ?utm_source=line&utm_medium=broadcast&utm_campaign=new_listing
+```
+
+---
+
+## Phase 7: Testing & Launch
+
+### 7.1 Pre-Launch Checklist
+
+**Content:**
+- [ ] All text proofread (no typos)
+- [ ] All links working
+- [ ] Contact information correct
+- [ ] Legal/Privacy links present
+- [ ] Images loading correctly
+
+**Technical:**
+- [ ] Form submission working
+- [ ] Thank you page displays
+- [ ] Leads received in CRM/Sheet
+- [ ] Tracking firing correctly
+- [ ] Mobile display correct
+- [ ] Page speed acceptable
+
+**Cross-Browser Testing:**
+- [ ] Chrome
+- [ ] Safari
+- [ ] Firefox
+- [ ] Mobile Chrome
+- [ ] Mobile Safari
+- [ ] LINE in-app browser
+
+### 7.2 A/B Testing Ideas
+
+| Element | Test Variations |
+|---------|-----------------|
+| Headline | Benefit vs Feature vs Question |
+| CTA Button | Color, Text, Position |
+| Form | Number of fields, Layout |
+| Hero Image | Property vs Lifestyle vs Video |
+| Social Proof | Testimonials vs Stats vs Logos |
+
+### 7.3 Post-Launch Monitoring
+
+**Week 1:**
+- [ ] Check conversion rate daily
+- [ ] Monitor form submissions
+- [ ] Fix any technical issues
+- [ ] Review user behavior (heatmaps)
+
+**Ongoing:**
+- [ ] Weekly performance review
+- [ ] Monthly A/B tests
+- [ ] Quarterly content refresh
+
+---
+
+## Landing Page Templates
+
+### Template 1: Project Showcase
+
+```
+[Header with CTA]
+[Hero: Project name + Key selling point + Video/Image]
+[Quick facts: Price, Location, Size, Type]
+[Gallery: Property images slider]
+[Features: 6 key features with icons]
+[Floor plans: Unit types available]
+[Location: Map + Nearby amenities]
+[Developer info: Track record, Other projects]
+[Testimonials: 2-3 buyer reviews]
+[Lead form: Compact, right side]
+[FAQ: 5 questions]
+[Footer]
+```
+
+### Template 2: Lead Capture
+
+```
+[Header minimal]
+[Hero: Strong headline + Compelling offer]
+[Lead form: Center, prominent]
+[3 Benefits: Quick bullet points]
+[Trust badges: Developer logos]
+[Testimonial: 1 strong quote]
+[FAQ: 3 questions]
+[Footer minimal]
+```
+
+---
+
+## Performance Benchmarks
 
 | Metric | Good | Great | Excellent |
 |--------|------|-------|-----------|
-| **Bounce Rate** | 40-60% | 30-40% | <30% |
-| **Avg. Time on Page** | 1-2 min | 2-3 min | >3 min |
-| **Conversion Rate** | 2-5% | 5-10% | >10% |
-| **Form Completion Rate** | 30-50% | 50-70% | >70% |
-
-*Note: Benchmarks vary by traffic source, targeting, and offer*
-
----
-
-## Common Mistakes to Avoid
-
-### Design Mistakes
-- ❌ Too much text (information overload)
-- ❌ Too many CTAs (confusing)
-- ❌ Poor mobile experience
-- ❌ Slow loading speed
-- ❌ Using low-quality images
-- ❌ No clear visual hierarchy
-
-### Content Mistakes
-- ❌ Weak/generic headline
-- ❌ No clear value proposition
-- ❌ Focusing on features instead of benefits
-- ❌ No social proof
-- ❌ Missing trust elements
-- ❌ Poor copywriting (boring, too salesy)
-
-### Form Mistakes
-- ❌ Too many form fields
-- ❌ No privacy assurance
-- ❌ Confusing labels
-- ❌ Generic CTA button text
-- ❌ Form not mobile-friendly
-
-### Technical Mistakes
-- ❌ No conversion tracking
-- ❌ Broken links or buttons
-- ❌ No thank you page
-- ❌ Not HTTPS (insecure)
-- ❌ No error handling
+| Page Load Time | < 4s | < 3s | < 2s |
+| Bounce Rate | < 70% | < 50% | < 40% |
+| Conversion Rate | > 3% | > 5% | > 8% |
+| Mobile Conversion | > 2% | > 4% | > 6% |
+| Form Completion | > 40% | > 60% | > 80% |
 
 ---
 
-## Tools & Resources
+## Related Documents
 
-### Design Tools
-- **Canva** - Quick designs
-- **Figma** - Professional design
-- **Adobe XD** - UI/UX design
-- **Unbounce** - Landing page builder
-- **Instapage** - Landing page builder
-- **Leadpages** - Landing page builder
-
-### Testing Tools
-- **Google PageSpeed Insights** - Performance
-- **GTmetrix** - Performance
-- **Google Mobile-Friendly Test** - Mobile check
-- **BrowserStack** - Cross-browser testing
-- **Google Optimize** - A/B testing (being sunset, use alternatives)
-
-### Analytics Tools
-- **Google Analytics 4** - Web analytics
-- **Hotjar** - Heatmaps, recordings
-- **Crazy Egg** - Heatmaps
-- **Microsoft Clarity** - Free heatmaps, recordings
-
-### Form Tools
-- **Google Forms** - Simple forms
-- **Typeform** - Beautiful forms
-- **Formspree** - Form backend
-- **EmailJS** - Send form to email
-- **Netlify Forms** - Easy form handling
-
----
-
-## Checklist Summary
-
-Before Launch, ตรวจสอบว่าทำครบทุกข้อหรือไม่:
-
-### Must-Have ✅
-- [ ] Clear, compelling headline
-- [ ] Strong value proposition
-- [ ] High-quality images/video
-- [ ] Prominent CTA button(s)
-- [ ] Simple, short form
-- [ ] Social proof (testimonials/reviews)
-- [ ] Mobile-responsive
-- [ ] Fast loading (<3 sec)
-- [ ] Conversion tracking setup
-- [ ] Form submission working
-- [ ] HTTPS enabled
-
-### Nice-to-Have 🎁
-- [ ] Video tour
-- [ ] Live chat
-- [ ] Exit-intent popup
-- [ ] Countdown timer (urgency)
-- [ ] Customer logos
-- [ ] Comparison table
-- [ ] FAQ section
-
----
-
-**Last Updated:** 2026-01-26  
-**Version:** 1.0.0  
-**Maintained by:** AMP Marketing Team
+- [Google Ads Checklist](../ads/GOOGLE_ADS_CHECKLIST.md)
+- [Facebook Ads Checklist](../ads/FACEBOOK_ADS_CHECKLIST.md)
+- [Analytics Setup Guide](../tracking/ANALYTICS_SETUP_GUIDE.md)
