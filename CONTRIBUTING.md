@@ -216,7 +216,7 @@ PR-001: Master foundation setup
 PR-008: Lead router agent implementation
 PR-009: AI sale chat agent with LINE integration
 PR-015: Update architecture documentation
-PR-042: Fix chat timeout issue
+PR-042: Implement chat session timeout feature
 ```
 
 **Using Type Tags:**
