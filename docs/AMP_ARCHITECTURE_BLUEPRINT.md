@@ -171,3 +171,22 @@
 
 ```
 apps/agents/
+```
+
+---
+
+## Quality Standards
+
+### Testing & Coverage
+
+AMP follows a comprehensive testing strategy with defined coverage targets:
+
+- **Overall minimum coverage:** 70%
+- **Business logic:** 90%+
+- **API endpoints:** 80%+
+- **Agents:** 90%+
+- **Utilities:** 70%+
+
+Testing follows a pyramid approach (60% unit, 30% integration, 10% E2E).
+
+For detailed testing guidelines, test organization, and fixture patterns, see [CONTRIBUTING.md](../CONTRIBUTING.md#testing-requirements).
