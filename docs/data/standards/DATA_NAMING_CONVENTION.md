@@ -580,8 +580,8 @@ Documents:
 
 Spreadsheets:
 .xlsx    → Microsoft Excel
-.gsheet  → Google Sheets (link)
 .csv     → CSV export
+.ods     → OpenDocument Spreadsheet
 
 Images:
 .jpg     → Photos (compressed)
@@ -707,14 +707,19 @@ Validation:
 ```
 =IF(
   AND(
-    NOT(ISNUMBER(SEARCH(" ", A2))),     // No spaces
-    LEN(A2)<=255,                        // Under limit
-    ISNUMBER(SEARCH("_", A2))            // Has underscore
+    NOT(ISNUMBER(SEARCH(" ", A2))),
+    LEN(A2)<=255,
+    ISNUMBER(SEARCH("_", A2))
   ),
   "Valid",
   "Invalid"
 )
 ```
+
+**Notes:**
+- Checks for no spaces in file name
+- Ensures name is under 255 characters
+- Verifies underscore is present
 
 ---
 
