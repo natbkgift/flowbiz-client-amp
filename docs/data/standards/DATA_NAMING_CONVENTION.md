@@ -1,759 +1,780 @@
-# 📝 Data Naming Convention
+# Data Naming Convention - AMP
 
-> มาตรฐานการตั้งชื่อไฟล์ Folder และข้อมูลสำหรับ AMP
+> 📐 มาตรฐานการตั้งชื่อข้อมูลสำหรับ Asset Management Property
 
 ## Overview
 
-**Data Naming Convention** กำหนดกฎและมาตรฐานการตั้งชื่อทุกอย่างใน AMP เพื่อให้:
-- 🎯 หาข้อมูลได้ง่ายและรวดเร็ว
-- 🔄 เรียงลำดับไฟล์อัตโนมัติ
-- 🤝 ทีมเข้าใจตรงกัน
-- 📊 Export/Import ข้อมูลได้สะดวก
+เอกสารนี้กำหนดมาตรฐานการตั้งชื่อทั้งหมดใน AMP เพื่อให้ข้อมูลมีความสอดคล้อง ค้นหาง่าย และจัดการได้อย่างมีประสิทธิภาพ
 
----
-
-## 🎯 General Principles
-
-### 1. Consistency is Key
-ใช้รูปแบบเดียวกันทั้งองค์กร - ทุกคน ทุกไฟล์ ทุกเวลา
-
-### 2. Human + Machine Readable
-ตั้งชื่อให้ทั้งคนและระบบอ่านง่าย
-
-### 3. Date First, Details After
-วันที่ขึ้นหน้าสำหรับเรียงลำดับ
-
-### 4. No Spaces, Use Underscores
-ใช้ underscore (_) แทนช่องว่าง
-
-### 5. UPPERCASE for Folders
-Folder ใช้ตัวพิมพ์ใหญ่ทั้งหมด
-
-### 6. Title_Case for Files
-ไฟล์ใช้ Title Case คั่นด้วย underscore
-
----
-
-## 📅 Date Format Standards
-
-### Standard Format: YYYY-MM-DD
-
-**Always use ISO 8601 format:**
+### Design Principles
 
 ```
-✅ Good:  2026-01-15
-❌ Bad:   15/01/2026
-❌ Bad:   01-15-2026
-❌ Bad:   15-Jan-2026
-❌ Bad:   Jan 15, 2026
-```
-
-**Why?**
-- Sorts chronologically automatically
-- Internationally recognized
-- No ambiguity (MM/DD vs DD/MM)
-- System-friendly
-
-### Date + Time Format
-
-**When timestamp needed:**
-```
-Format: YYYY-MM-DD_HHMM
-Example: 2026-01-15_1430
-```
-
-### Date Ranges
-
-**Format:** `YYYY-MM-DD_to_YYYY-MM-DD`
-```
-Example: 2026-01-01_to_2026-01-31
-```
-
-### Month Only
-
-**Format:** `YYYY-MM`
-```
-Example: 2026-01
-```
-
-### Quarter Format
-
-**Format:** `YYYY_QX`
-```
-Examples:
-2026_Q1 (Jan-Mar)
-2026_Q2 (Apr-Jun)
-2026_Q3 (Jul-Sep)
-2026_Q4 (Oct-Dec)
+1. Consistency - ใช้รูปแบบเดียวกันทั้งระบบ
+2. Clarity - ชื่อสื่อความหมายชัดเจน
+3. Sortability - สามารถเรียงลำดับได้ตามต้องการ
+4. Searchability - ค้นหาได้ง่าย
+5. Scalability - รองรับการเติบโต
 ```
 
 ---
 
-## 🏠 Property Naming
+## 1. Folder Naming
 
-### Property ID Format
+### General Rules
 
-**Format:** `PROP-XXXX` (4 digits, zero-padded)
+```
+Format: [##_]Category_Name
+
+Rules:
+✅ Use numbers prefix (01-99) for sorting
+✅ Use underscore (_) for spaces
+✅ Use PascalCase (capitalize each word)
+✅ Keep under 50 characters
+✅ No special characters (!@#$%^&*()+=)
+✅ No trailing spaces
+✅ English only (for compatibility)
+```
+
+### Examples
 
 ```
 ✅ Good:
-PROP-0001
-PROP-0023
-PROP-0456
-PROP-1234
+01_Properties
+02_Resale_Secondary
+05_Marketing
+10_Admin
+Property_Details
+Ad_Creatives
 
 ❌ Bad:
-PROP-1
-PROP01
-property-001
-P-0001
+properties (no number prefix)
+Property details (space)
+05 Marketing (space instead of underscore)
+property-details (dash)
+Tài sản (non-English)
+Properties!!! (special chars)
 ```
 
-**Numbering System:**
-- 0001-0999: Condos
-- 1000-1999: Villas
-- 2000-2999: Houses
-- 3000-3999: Land
-- 4000-4999: Commercial
+### Special Folders
 
-### Property File Names
-
-**Format:** `PROP-XXXX_Type_Size_Details.ext`
-
+**Archive Folders:**
 ```
+Format: _Archive
+
+Always prefix with underscore to sort to bottom
 Examples:
-PROP-0001_1BR_35SQM_Info.pdf
-PROP-0001_1BR_35SQM_Floorplan.pdf
-PROP-0025_Villa_250SQM_Contract.pdf
-PROP-1234_Condo_Studio_28SQM.xlsx
+- _Archive
+- _Old
+- _Backup
 ```
+
+**Temporary Folders:**
+```
+Format: _Temp_[Description]
+
+Examples:
+- _Temp_Import
+- _Temp_Processing
+- _Temp_Review
+```
+
+---
+
+## 2. File Naming
+
+### General Format
+
+```
+[Type]_[Description]_[Date]_[Version].[ext]
+
+Components:
+- Type: Document type or category
+- Description: What it is (use underscores)
+- Date: YYYY-MM-DD (optional)
+- Version: v1, v2, v1.1 (optional)
+- Extension: File type
+```
+
+### Examples by Category
+
+**Documents:**
+```
+✅ Contract_Sale_Template_v2.docx
+✅ Property_Info_Jomtien_Condo_2026-01-26.docx
+✅ SOP_Lead_Management_v1.pdf
+✅ Checklist_Property_Viewing.xlsx
+```
+
+**Spreadsheets:**
+```
+✅ Property_Master_List.xlsx
+✅ Lead_Tracking_2026-01.xlsx
+✅ Daily_Summary_2026-01-26.xlsx
+✅ Commission_Report_2026-Q1.xlsx
+```
+
+**Images:**
+```
+✅ Property_Exterior_01.jpg
+✅ Unit_2BR_Living_Room_01.jpg
+✅ Pool_Aerial_View.jpg
+✅ Logo_AMP_Primary.png
+```
+
+**Videos:**
+```
+✅ Property_Tour_Full_Version.mp4
+✅ Property_Tour_Short_30s.mp4
+✅ Drone_Footage_Jomtien_Project.mp4
+```
+
+**Marketing Assets:**
+```
+✅ Ad_Copy_Google_Search_Condo_2026-01.docx
+✅ Banner_Facebook_1200x628_SeaView.jpg
+✅ Post_Instagram_Feed_Property_Feature.jpg
+```
+
+---
+
+## 3. Date Format
+
+### Standard Format
+
+```
+YYYY-MM-DD
+
+Examples:
+✅ 2026-01-26
+✅ 2026-12-31
+
+❌ 26-01-2026
+❌ 01/26/2026
+❌ 26 Jan 2026
+❌ January 26, 2026
+```
+
+### Why This Format?
+
+```
+✅ Sorts correctly (chronological)
+✅ ISO 8601 standard
+✅ No ambiguity (US vs UK dates)
+✅ Works across systems
+✅ Easy to parse programmatically
+```
+
+### Usage Examples
+
+**File Names:**
+```
+Report_2026-01-26.pdf
+Lead_Export_2026-01-26.xlsx
+Screenshot_2026-01-26_Morning.jpg
+```
+
+**Folder Names:**
+```
+Contracts/2026/2026-01/
+Screenshots/2026-01-26/
+Reports/2026_Q1/
+```
+
+**In Spreadsheets:**
+```
+Column: Date_Created
+Value: 2026-01-26
+
+Column: Date_Updated
+Value: 2026-01-26
+```
+
+---
+
+## 4. Version Control
+
+### Version Format
+
+```
+v[Major].[Minor]
+
+Major: Significant changes (v1, v2, v3)
+Minor: Small edits (v1.1, v1.2, v1.3)
+```
+
+### Examples
+
+```
+Contract_Template_v1.docx       → Initial version
+Contract_Template_v1.1.docx     → Minor edit (typo fix)
+Contract_Template_v1.2.docx     → Minor update (clause added)
+Contract_Template_v2.docx       → Major revision (restructure)
+```
+
+### When to Increment
+
+**Major Version (v1 → v2):**
+- Major restructure
+- New sections added
+- Significant content change
+- Policy change
+
+**Minor Version (v1.1 → v1.2):**
+- Typo fixes
+- Minor wording changes
+- Formatting updates
+- Small additions
+
+### Version History
+
+**Keep version history in file name or notes:**
+```
+Changelog:
+v1.0 (2026-01-15) - Initial version
+v1.1 (2026-01-20) - Fixed typos in section 3
+v1.2 (2026-01-25) - Added payment terms
+v2.0 (2026-02-01) - Complete restructure
+```
+
+---
+
+## 5. Property ID Format
+
+### Format
+
+```
+PROP-[YYYY]-[###]
+
+Components:
+- PROP: Fixed prefix
+- YYYY: Year added
+- ###: Sequential number (3 digits)
+```
+
+### Examples
+
+```
+PROP-2026-001    First property in 2026
+PROP-2026-002    Second property in 2026
+PROP-2026-150    150th property in 2026
+PROP-2027-001    First property in 2027 (resets)
+```
+
+### Special Cases
+
+**Resale Properties:**
+```
+PROP-2026-001-R    (R = Resale)
+```
+
+**Rental Properties:**
+```
+PROP-2026-001-LT   (LT = Long-term rental)
+PROP-2026-001-ST   (ST = Short-term rental)
+```
+
+**Project Units:**
+```
+PROP-2026-001-A205  (A205 = Unit number)
+```
+
+### Where Used
+
+```
+✅ Property Master List (primary key)
+✅ Lead Tracking (properties shown)
+✅ Marketing materials
+✅ Internal references
+✅ File folders
+✅ Photos folder names
+```
+
+---
+
+## 6. Lead ID Format
+
+### Format
+
+```
+LEAD-[YYYY]-[###]
+
+Components:
+- LEAD: Fixed prefix
+- YYYY: Year received
+- ###: Sequential number (3 digits)
+```
+
+### Examples
+
+```
+LEAD-2026-001    First lead in 2026
+LEAD-2026-150    150th lead in 2026
+```
+
+### Alternative by Source
+
+**Optional: Include source code:**
+```
+LEAD-FB-2026-001    Facebook lead
+LEAD-GA-2026-001    Google Ads lead
+LEAD-LN-2026-001    LINE lead
+LEAD-WB-2026-001    Website lead
+LEAD-RF-2026-001    Referral lead
+```
+
+---
+
+## 7. LINE Entry ID Format
+
+### Format
+
+```
+LINE-[YYYY-MM-DD]-[###]
+
+Components:
+- LINE: Fixed prefix
+- YYYY-MM-DD: Date found
+- ###: Sequential number for the day
+```
+
+### Examples
+
+```
+LINE-2026-01-26-001    First entry on Jan 26, 2026
+LINE-2026-01-26-025    25th entry on Jan 26, 2026
+LINE-2026-01-27-001    First entry on Jan 27 (resets)
+```
+
+---
+
+## 8. Image Naming
 
 ### Property Photos
 
-**Format:** `PROP-XXXX_Location_Number.jpg`
-
 ```
+Format: [Location]_[Type]_[Number].jpg
+
 Examples:
-PROP-0001_Bedroom_01.jpg
-PROP-0001_Bedroom_02.jpg
-PROP-0001_Kitchen_01.jpg
-PROP-0001_Bathroom_01.jpg
-PROP-0001_View_01.jpg
-PROP-0001_Exterior_01.jpg
+Exterior_Front_View_01.jpg
+Exterior_Building_Side_02.jpg
+Common_Pool_01.jpg
+Common_Gym_01.jpg
+Common_Lobby_01.jpg
+Unit_1BR_Living_Room_01.jpg
+Unit_1BR_Bedroom_01.jpg
+Unit_1BR_Kitchen_01.jpg
+Unit_1BR_Bathroom_01.jpg
+View_Sea_01.jpg
+View_City_01.jpg
 ```
 
-**Location Tags:**
+### Number Suffix
+
 ```
-Bedroom
-Kitchen
-Bathroom
-Living_Room
-Balcony
-View
-Exterior
-Building
-Pool
-Gym
-Common_Area
-Parking
+Always use 2-digit numbers:
+01, 02, 03, ..., 10, 11, ...
+
+Not: 1, 2, 3, ...
+Why: Sorts correctly (01, 02, 10 vs 1, 10, 2)
 ```
 
-**Numbering:**
-- Always 2 digits: 01, 02, 03...
-- Start from 01 for each location
-- Order by importance
+### Dimensions in File Name
 
-### Property Folders
+```
+For marketing assets with specific dimensions:
 
-**Format:** `PROJECT_NAME_LOCATION`
+Banner_Facebook_1200x628_SeaView.jpg
+Ad_Google_Display_300x250_Condo.jpg
+Story_Instagram_1080x1920_Property.jpg
+```
+
+---
+
+## 9. Spreadsheet Tab Naming
+
+### Format
+
+```
+[##_]Tab_Name
+
+Rules:
+✅ Prefix with number for ordering
+✅ Use underscores for spaces
+✅ Keep under 31 characters (Excel limit)
+✅ Descriptive and clear
+```
+
+### Examples
+
+```
+✅ 01_All_Properties
+✅ 02_Projects_New
+✅ 03_Resale_Secondary
+✅ 07_Follow_Up_Log
+✅ 08_Dashboard
+✅ README
+
+❌ Sheet1 (not descriptive)
+❌ properties (no number)
+❌ All Properties (space)
+❌ This is a very long tab name that exceeds limit (too long)
+```
+
+---
+
+## 10. Column Naming (Spreadsheets)
+
+### Format
+
+```
+Category_Descriptor
+
+Rules:
+✅ Use PascalCase or Underscore_Case
+✅ No spaces (use underscore)
+✅ Descriptive
+✅ Consistent across sheets
+✅ Avoid abbreviations (unless standard)
+```
+
+### Examples
 
 ```
 ✅ Good:
-THE_BASE_CENTRAL_PATTAYA
-PARK_BEACH_JOMTIEN
-ANANYA_RESIDENCE_NA_JOMTIEN
+Property_ID
+Date_Created
+Price_Sale
+Location_Area
+Assigned_Agent
+Next_Follow_Up
 
 ❌ Bad:
-the base central
-Park Beach, Jomtien
-Ananya-residence
+id (not descriptive)
+Property ID (space)
+price (inconsistent case)
+PropID (abbreviation)
+date_created (inconsistent case)
+agent (ambiguous)
+```
+
+### Standard Prefixes
+
+```
+Date_*       → Date fields (Date_Created, Date_Updated)
+Price_*      → Price fields (Price_Sale, Price_Rent)
+Size_*       → Size fields (Size_SQM, Size_SQW)
+Location_*   → Location fields (Location_Area, Location_Sub)
+Is_*         → Boolean fields (Is_Featured, Is_Active)
+Has_*        → Boolean fields (Has_Pool, Has_Parking)
+Count_*      → Count fields (Count_Views, Count_Contacts)
 ```
 
 ---
 
-## 👥 Lead Naming
+## 11. Campaign Naming (Ads)
 
-### Lead ID Format
+### Google Ads
 
-**Format:** `LEAD-YYYYMMDD-XXX` (3 digits, zero-padded)
+```
+Format: [Type]_[Location]_[PropertyType]_[Target]_[Month]
+
+Examples:
+Search_Pattaya_Condo_Buy_2026-01
+Search_Jomtien_Villa_Rent_2026-01
+Display_Retargeting_All_2026-01
+PMax_AllProperties_2026-01
+YouTube_PropertyTours_2026-01
+```
+
+### Facebook Ads
+
+```
+Format: [Objective]_[Audience]_[Creative]_[Month]
+
+Examples:
+Lead_Lookalike_SeaView_2026-01
+Lead_Interest_Investment_2026-01
+Traffic_Website_Retargeting_2026-01
+Video_Views_PropertyTours_2026-01
+```
+
+---
+
+## 12. Document Templates
+
+### Standard Document Names
+
+```
+Template_[Type]_[Language]_[Version].[ext]
+
+Examples:
+Template_Sale_Contract_TH_v2.docx
+Template_Sale_Contract_EN_v2.docx
+Template_Rental_Agreement_TH_v1.docx
+Template_Rental_Agreement_EN_v1.docx
+Template_Commission_Agreement_v1.docx
+Template_Property_Info_Sheet_v1.docx
+```
+
+---
+
+## 13. URL Slugs (Website)
+
+### Format
+
+```
+/category/property-name-location
+
+Rules:
+✅ All lowercase
+✅ Use hyphens (not underscores)
+✅ Remove special characters
+✅ Keep short and descriptive
+✅ Include keywords
+```
+
+### Examples
 
 ```
 ✅ Good:
-LEAD-20260115-001
-LEAD-20260115-002
-LEAD-20260126-001
+/properties/condo-jomtien-sea-view
+/properties/villa-na-jomtien-pool
+/rentals/pattaya-condo-1-bedroom
+/projects/the-riviera-jomtien
 
 ❌ Bad:
-LEAD-001
-LEAD-2026-01-15-1
-L-20260115-001
-```
-
-**Components:**
-- `LEAD-` prefix (required)
-- `YYYYMMDD` date received (8 digits)
-- `-` separator
-- `XXX` sequence number (3 digits, starts fresh each day)
-
-### Lead File Names
-
-**Format:** `LEAD-YYYYMMDD-XXX_Name_Type.ext`
-
-```
-Examples:
-LEAD-20260115-001_John_Smith_Profile.pdf
-LEAD-20260115-001_John_Smith_Contract.pdf
-LEAD-20260115-002_Anna_Johnson_Passport.jpg
-LEAD-20260115-003_Somchai_Jaidee_Documents.zip
-```
-
-### Lead Notes Files
-
-**Format:** `YYYYMMDD_Lead_Name_Notes.txt`
-
-```
-Examples:
-2026-01-15_John_Smith_Meeting_Notes.txt
-2026-01-16_Anna_Johnson_Call_Notes.txt
+/property?id=123 (not SEO friendly)
+/p/prop-2026-001 (not descriptive)
+/condo_jomtien_seaview (underscores)
+/Condo-Jomtien (mixed case)
 ```
 
 ---
 
-## 💬 LINE Summary Naming
+## 14. Email Subject Lines (Internal)
 
-### Daily Summary Files
-
-**Format:** `YYYY-MM-DD_LINE_Summary_GroupName.xlsx`
+### Format
 
 ```
+[Category] Subject - Date/Reference
+
 Examples:
-2026-01-15_LINE_Summary_Buyers_Group.xlsx
-2026-01-15_LINE_Summary_Investors_Club.xlsx
-2026-01-16_LINE_Summary_All_Groups.xlsx
-```
-
-### Weekly Summary
-
-**Format:** `YYYY-MM_Week_XX_Summary.pdf`
-
-```
-Examples:
-2026-01_Week_03_Summary.pdf
-2026-01_Week_04_Summary.pdf
-```
-
-### Monthly Summary
-
-**Format:** `YYYY-MM_Monthly_Summary.pdf`
-
-```
-Examples:
-2026-01_Monthly_Summary.pdf
-2026-02_Monthly_Summary.pdf
-```
-
-### Chat Export Files
-
-**Format:** `YYYY-MM-DD_GROUP_Name_Export.txt`
-
-```
-Examples:
-2026-01-15_GROUP_Buyers_Export.txt
-2026-01-15_GROUP_Investors_Export.txt
-2026-01-15_GROUP_Expats_Export.txt
+[LEAD] New high-priority lead - John Smith
+[PROPERTY] Price drop alert - PROP-2026-045
+[VIEWING] Scheduled viewing - 2026-01-28
+[CONTRACT] Review needed - PROP-2026-012
+[REPORT] Weekly summary - 2026-01-26
 ```
 
 ---
 
-## 📁 Folder Naming
+## 15. Quick Reference
 
-### Root Level Folders
-
-**Format:** `NN_CATEGORY_NAME` (2-digit prefix for sorting)
+### File Types by Extension
 
 ```
-✅ Good:
-01_PROPERTIES
-02_LEADS
-03_LINE_CONVERSATIONS
-04_MARKETING
-05_SALES
+Documents:
+.docx    → Microsoft Word documents
+.pdf     → PDF documents (final/signed)
+.txt     → Plain text notes
 
-❌ Bad:
-1_properties
-Properties
-props
-01-Properties
+Spreadsheets:
+.xlsx    → Microsoft Excel
+.gsheet  → Google Sheets (link)
+.csv     → CSV export
+
+Images:
+.jpg     → Photos (compressed)
+.png     → Graphics, logos (transparency)
+.webp    → Web-optimized images
+
+Videos:
+.mp4     → Standard video format
+.mov     → Apple video format
+
+Other:
+.zip     → Compressed archive
+.pptx    → Presentations
 ```
 
-### Date-based Folders
-
-**Year Folders:** `YYYY`
-```
-Examples:
-2026
-2025
-2024
-```
-
-**Month Folders:** `MM_MONTH_NAME`
-```
-Examples:
-01_JANUARY
-02_FEBRUARY
-03_MARCH
-...
-12_DECEMBER
-```
-
-**Quarter Folders:** `QX`
-```
-Examples:
-Q1
-Q2
-Q3
-Q4
-```
-
-### Category Folders
-
-**Always UPPERCASE, Use underscores:**
+### Character Restrictions
 
 ```
-✅ Good:
-CONTRACTS
-PROPOSALS
-PRESENTATIONS
-DAILY_REPORTS
-WEEKLY_REPORTS
+✅ Allowed:
+- Letters: A-Z, a-z
+- Numbers: 0-9
+- Underscore: _
+- Hyphen: - (for URLs)
+- Period: . (for extensions)
 
-❌ Bad:
-contracts
-Contracts
-contract-files
-Daily Reports
+❌ Not allowed:
+- Spaces (use underscore)
+- Special chars: !@#$%^&*()+=[]{}|;:'",<>?/\
+- Thai characters (in file/folder names)
 ```
 
 ---
 
-## 📄 Document Naming
+## 16. Validation Checklist
 
-### Contracts
+### Before Naming Any File/Folder
 
-**Format:** `CONTRACT-YYYYMMDD-XXX_Client_Name.pdf`
-
-```
-Examples:
-CONTRACT-20260115-001_John_Smith.pdf
-CONTRACT-20260115-002_Anna_Johnson.pdf
-```
-
-### Proposals
-
-**Format:** `PROPOSAL-YYYYMMDD-XXX_Client_Property.pdf`
-
-```
-Examples:
-PROPOSAL-20260115-001_John_PROP-0001.pdf
-PROPOSAL-20260116-001_Anna_PROP-0025.pdf
-```
-
-### Reports
-
-**Daily:** `YYYY-MM-DD_Daily_Report.pdf`
-```
-Example: 2026-01-15_Daily_Report.pdf
-```
-
-**Weekly:** `YYYY-MM_Week_XX_Report.pdf`
-```
-Example: 2026-01_Week_03_Report.pdf
-```
-
-**Monthly:** `YYYY-MM_Monthly_Report.pdf`
-```
-Example: 2026-01_Monthly_Report.pdf
-```
-
-**Quarterly:** `YYYY_QX_Quarterly_Report.pdf`
-```
-Example: 2026_Q1_Quarterly_Report.pdf
-```
-
-### Meeting Notes
-
-**Format:** `YYYY-MM-DD_Meeting_Topic.pdf`
-
-```
-Examples:
-2026-01-15_Weekly_Team_Meeting.pdf
-2026-01-15_Client_Meeting_John_Smith.pdf
-2026-01-16_Property_Site_Visit.pdf
-```
-
----
-
-## 📊 Spreadsheet Naming
-
-### Master Lists
-
-**Format:** `CATEGORY_Master_List.xlsx`
-
-```
-Examples:
-Property_Master_List.xlsx
-Lead_Master_List.xlsx
-Client_Master_List.xlsx
-```
-
-### Working Sheets
-
-**Format:** `YYYY-MM_Category_Name.xlsx`
-
-```
-Examples:
-2026-01_Weekly_Leads.xlsx
-2026-01_Property_Updates.xlsx
-2026-01_Sales_Pipeline.xlsx
-```
-
-### Exports
-
-**Format:** `YYYY-MM-DD_Export_Source_Data.csv`
-
-```
-Examples:
-2026-01-15_Export_Properties_Available.csv
-2026-01-15_Export_Leads_Hot.csv
-2026-01-15_Export_Sales_Monthly.csv
-```
-
----
-
-## 🎨 Marketing Material Naming
-
-### Campaign Files
-
-**Format:** `YYYY-MM_Campaign_Name_Type.ext`
-
-```
-Examples:
-2026-01_New_Year_Sale_Banner.jpg
-2026-01_New_Year_Sale_Copy.txt
-2026-02_Valentine_Promo_Video.mp4
-```
-
-### Social Media
-
-**Format:** `YYYY-MM-DD_Platform_Content_Type.ext`
-
-```
-Examples:
-2026-01-15_Facebook_Post_Image.jpg
-2026-01-15_Instagram_Story.jpg
-2026-01-15_LINE_OA_Broadcast.jpg
-```
-
-### Ad Creatives
-
-**Format:** `YYYY-MM_Ad_Set_Name_Size.ext`
-
-```
-Examples:
-2026-01_Facebook_Condo_Sale_1200x628.jpg
-2026-01_Google_Display_Villa_300x250.jpg
-```
-
----
-
-## 🎬 Media Naming
-
-### Photos
-
-**Format:** `PROP-XXXX_Location_NN.jpg`
-```
-Already covered in Property Photos section
-```
-
-### Videos
-
-**Format:** `YYYY-MM-DD_Video_Type_Subject.mp4`
-
-```
-Examples:
-2026-01-15_Property_Tour_PROP-0001.mp4
-2026-01-15_Testimonial_John_Smith.mp4
-2026-01-15_Area_Guide_Jomtien.mp4
-```
-
-### Virtual Tours
-
-**Format:** `PROP-XXXX_Virtual_Tour.ext`
-
-```
-Examples:
-PROP-0001_Virtual_Tour.html
-PROP-0001_Virtual_Tour_Link.txt
-```
-
----
-
-## 📧 Email Attachments
-
-### Format Guidelines
-
-**Keep it short but descriptive:**
-
-```
-✅ Good:
-AMP_Price_List_2026-01.pdf
-Property_Brochure_PROP-0001.pdf
-Contract_John_Smith.pdf
-
-❌ Bad:
-document.pdf
-file_final.pdf
-untitled.pdf
-attachment.pdf
-```
-
-### Include Sender Name (Optional)
-
-```
-AMP_Proposal_John_Smith_2026-01-15.pdf
-AMP_Contract_Anna_Johnson_2026-01-15.pdf
-```
-
----
-
-## 🔢 Version Control
-
-### Version Numbering
-
-**Format:** `_vX.Y` suffix
-
-```
-Examples:
-Contract_John_Smith_v1.0.pdf
-Contract_John_Smith_v1.1.pdf
-Contract_John_Smith_v2.0.pdf
-
-Property_Brochure_v1.0.pdf
-Property_Brochure_v2.0.pdf
-```
-
-**Version Rules:**
-- `v1.0` → Initial version
-- `v1.1` → Minor change (typo fix)
-- `v2.0` → Major change (content update)
-
-### Date + Version
-
-**For important documents:**
-
-```
-Contract_John_Smith_2026-01-15_v1.0.pdf
-Contract_John_Smith_2026-01-16_v2.0.pdf
-```
-
-### Avoid Version Words
-
-```
-❌ Bad:
-Document_final.pdf
-Document_final_v2.pdf
-Document_final_FINAL.pdf
-Document_final_FINAL_v2.pdf
-Document_final_FINAL_really_final.pdf
-
-✅ Good:
-Document_v1.0.pdf
-Document_v2.0.pdf
-Document_v3.0.pdf
-```
-
----
-
-## 🚫 What to Avoid
-
-### Characters to NEVER Use
-
-```
-❌ Spaces (use _ instead)
-❌ Special characters: / \ : * ? " < > |
-❌ Dots (except for file extension)
-❌ Brackets: [ ] ( )
-❌ Ampersands: &
-❌ Percent: %
-❌ At: @
-❌ Hash: #
-```
-
-### Bad Practices
-
-```
-❌ Vague names: "document.pdf", "file1.xlsx"
-❌ Personal naming: "johns_property.pdf"
-❌ Random naming: "image001.jpg", "scan0001.pdf"
-❌ No dates: "report.pdf" (which month?)
-❌ Inconsistent casing: "ProPeRtY_LiSt.xlsx"
-❌ Long names: "This_is_a_very_long_filename_that_nobody_wants_to_type_ever.pdf"
-```
-
-### Length Limits
-
-**Keep names under 50 characters:**
-
-```
-✅ Good (35 chars):
-2026-01-15_Meeting_John_Smith.pdf
-
-❌ Too Long (78 chars):
-2026-01-15_Meeting_Notes_With_John_Smith_Regarding_Property_Purchase_Discussion.pdf
-
-✅ Better:
-2026-01-15_Meeting_John_Property_Discuss.pdf
-```
-
----
-
-## 📚 Common Abbreviations
-
-### Approved Abbreviations
-
-Use these to keep names shorter:
-
-```
-PROP     = Property
-SQM      = Square Meter
-BR       = Bedroom
-BA       = Bathroom
-THB      = Thai Baht
-No       = Number
-Qty      = Quantity
-Amt      = Amount
-Doc      = Document
-Info     = Information
-Intl     = International
-Mgmt     = Management
-```
-
-### Area Abbreviations
-
-```
-PTY      = Pattaya City
-JTN      = Jomtien
-NJT      = Na Jomtien
-PTK      = Pratumnak
-BSY      = Bang Saray
-```
-
-### Property Type Abbreviations
-
-```
-APT      = Apartment
-CONDO    = Condominium
-VIL      = Villa
-HSE      = House
-TWN      = Townhouse
-LND      = Land
-COM      = Commercial
-```
-
----
-
-## ✅ Quick Reference
-
-### Template Cheat Sheet
-
-```
-Property ID:         PROP-0001
-Lead ID:             LEAD-20260115-001
-Contract:            CONTRACT-20260115-001_Name.pdf
-Proposal:            PROPOSAL-20260115-001_Name.pdf
-Meeting Notes:       2026-01-15_Meeting_Topic.pdf
-Daily Report:        2026-01-15_Daily_Report.pdf
-Weekly Report:       2026-01_Week_03_Report.pdf
-Monthly Report:      2026-01_Monthly_Report.pdf
-LINE Summary:        2026-01-15_LINE_Summary.xlsx
-Property Photo:      PROP-0001_Bedroom_01.jpg
-Property Folder:     PROJECT_NAME_LOCATION
-Date Format:         YYYY-MM-DD
-Time Format:         HHMM
-Version:             _v1.0
-```
-
-### When in Doubt
-
-1. **Check existing files** - Follow the same pattern
-2. **Use the templates** - Copy from 07_TEMPLATES/
-3. **Ask the team** - Slack: #amp-data-support
-4. **Document why** - If you create new pattern, explain it
-
----
-
-## 🔄 Renaming Files
-
-### How to Rename Safely
-
-**DO NOT rename directly in Google Drive!**
-
-Instead:
-1. Download the file
-2. Rename locally following convention
-3. Upload with new name
-4. Delete old file
-5. Update any links/references
-
-### Batch Renaming
-
-**For multiple files:**
-1. Make list of old → new names
-2. Share with team for review
-3. Schedule rename (off-hours)
-4. Rename all at once
-5. Update documentation
-
----
-
-## 📞 Support
-
-### Questions?
-- **Which format to use?** → Check this document
-- **Special case?** → Ask in #amp-data-support
-- **New pattern needed?** → Propose to Data Team
-
-### Reporting Issues
-- Found files not following convention?
-- Report in #amp-data-support
-- Include file path and issue
-
----
-
-## 📋 Checklist
-
-### Before Saving Any File
-
-- [ ] File name follows convention?
-- [ ] Date format is YYYY-MM-DD?
-- [ ] No spaces (using underscores)?
+- [ ] Follows format for its type?
+- [ ] Uses correct date format (YYYY-MM-DD)?
+- [ ] No spaces (uses underscores)?
 - [ ] No special characters?
-- [ ] Version included if needed?
-- [ ] Name under 50 characters?
-- [ ] Will I find this in 6 months?
+- [ ] Under character limit?
+- [ ] Descriptive and clear?
+- [ ] Consistent with existing names?
+- [ ] Will sort correctly?
 
 ---
 
-**Last Updated:** 2026-01-26  
-**Version:** 1.0.0  
-**Maintained by:** AMP Data Team
+## 17. Migration Guide
+
+### Renaming Existing Files
+
+**Step 1: Backup**
+```
+Create backup of folder before mass renaming
+```
+
+**Step 2: Document Current State**
+```
+List all files that need renaming
+Note current names
+```
+
+**Step 3: Create Mapping**
+```
+Old Name → New Name mapping
+Example:
+property info.docx → Property_Info_PROP-2026-001.docx
+```
+
+**Step 4: Rename**
+```
+Use batch renaming tool or manual
+Update all references
+```
+
+**Step 5: Verify**
+```
+Check all links still work
+Verify sorting
+Test searches
+```
+
+---
+
+## 18. Common Mistakes
+
+### Top 10 Mistakes
+
+| Mistake | Wrong | Right |
+|---------|-------|-------|
+| Spaces in names | `Property Info.docx` | `Property_Info.docx` |
+| Wrong date format | `26-01-2026` | `2026-01-26` |
+| Inconsistent case | `propertyInfo` | `Property_Info` |
+| Special characters | `Property!!!.docx` | `Property_Special.docx` |
+| No version | `Contract.docx` | `Contract_v1.docx` |
+| Thai characters | `ทรัพย์สิน.xlsx` | `Property_List.xlsx` |
+| Too long | `This_Is_A_Very_Long_File_Name_That_Should_Be_Shorter.docx` | `Summary_2026-01.docx` |
+| No date | `Report.pdf` | `Report_2026-01-26.pdf` |
+| Ambiguous | `Doc1.docx` | `Contract_Sale_v1.docx` |
+| Not sortable | `1, 10, 2` | `01, 02, 10` |
+
+---
+
+## 19. Tools & Automation
+
+### Recommended Tools
+
+```
+Batch Renaming:
+- Windows: PowerRename (PowerToys)
+- Mac: Automator
+- Cross-platform: Bulk Rename Utility
+
+Validation:
+- Excel formulas to check naming
+- Google Apps Script for validation
+- Python scripts for bulk operations
+```
+
+### Excel Formula to Validate File Names
+
+```
+=IF(
+  AND(
+    NOT(ISNUMBER(SEARCH(" ", A2))),     // No spaces
+    LEN(A2)<=255,                        // Under limit
+    ISNUMBER(SEARCH("_", A2))            // Has underscore
+  ),
+  "Valid",
+  "Invalid"
+)
+```
+
+---
+
+## 20. Examples by Use Case
+
+### New Property Listing
+
+```
+Files to create:
+1. Property_Info_PROP-2026-100.docx
+2. Photos folder: PROP-2026-100_Photos/
+   ├── Exterior_Front_01.jpg
+   ├── Common_Pool_01.jpg
+   └── Unit_1BR_Living_Room_01.jpg
+3. Brochure_PROP-2026-100.pdf
+4. Row in Property_Master_List.xlsx
+
+Naming:
+- Property_ID: PROP-2026-100
+- Folder: 01_Properties/Condo/[Project_Name]/
+- Photos: PROP-2026-100_Photos/
+```
+
+### New Lead
+
+```
+Files to create:
+1. Row in Lead_Tracking.xlsx
+2. Lead folder: 04_Leads_CRM/Lead_Details/LEAD-2026-050/
+   ├── Lead_Profile_John_Smith.docx
+   ├── Communications/
+   └── Documents/
+
+Naming:
+- Lead_ID: LEAD-2026-050
+- Folder: LEAD-2026-050/
+- Files: Lead_Profile_John_Smith.docx
+```
+
+### Marketing Campaign
+
+```
+Files to create:
+1. Campaign plan: Campaign_Plan_Condo_SeaView_2026-01.docx
+2. Ad creatives folder: 05_Marketing/Ad_Creatives/2026-01_Condo_SeaView/
+   ├── Ad_Copy_Google_v1.docx
+   ├── Banner_Facebook_1200x628_v1.jpg
+   └── Video_Property_Tour_30s.mp4
+
+Naming:
+- Campaign: Search_Pattaya_Condo_2026-01
+- Folder: 2026-01_Condo_SeaView/
+- Files: Ad_Copy_Google_v1.docx
+```
+
+---
+
+## Related Documents
+
+- [Google Drive Structure](../structure/GOOGLE_DRIVE_STRUCTURE.md)
+- [Property Master List Template](../templates/PROPERTY_MASTER_LIST.md)
+- [Lead Tracking Template](../templates/LEAD_TRACKING_TEMPLATE.md)
+- [LINE Summary Template](../templates/LINE_SUMMARY_TEMPLATE.md)
