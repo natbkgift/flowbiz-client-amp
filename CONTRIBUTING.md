@@ -1013,8 +1013,8 @@ Add relevant info
 
 **Found a security issue?**
 - DO NOT open a public issue
-- Email: security@flowbiz.example
-- Include detailed report
+- Contact repository maintainers privately
+- Include detailed report with steps to reproduce
 
 ---
 

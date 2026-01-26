@@ -796,6 +796,7 @@ Send Response → LINE API
 **Platform Adapters:**
 Each platform has a dedicated adapter implementing:
 ```python
+# Conceptual interface (not implementation code)
 class PlatformAdapter:
     async def create_listing(data: ListingData) -> str
     async def update_listing(id: str, data: ListingData) -> bool
