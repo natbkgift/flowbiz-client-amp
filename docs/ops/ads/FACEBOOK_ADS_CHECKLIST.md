@@ -308,7 +308,7 @@
 - [ ] Add Instant Form (ถ้าใช้)
 - [ ] ตั้งค่า Pixel tracking event
 - [ ] Preview ads ทุก placements
-- [ ] ตรวจสอบไม่มี text overlay > 20% (optional)
+- [ ] ตรวจสอบให้ภาพไม่มีข้อความมากเกินไป (หลีกเลี่ยงภาพที่มีข้อความหนาแน่น เพราะอาจลดการแสดงผลโฆษณา) (optional)
 
 ---
 

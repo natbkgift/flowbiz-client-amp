@@ -85,7 +85,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 ### Step 1.3: Verify GTM Installation
 
 **ใช้ Google Tag Assistant:**
-- [ ] ติดตั้ง [Tag Assistant Legacy](https://chrome.google.com/webstore) (Chrome extension)
+- [ ] ติดตั้ง [Tag Assistant Companion](https://chrome.google.com/webstore/detail/tag-assistant-companion/kejbdjndbnbjgmefkgdddjlbokphdefk) (Chrome extension)
 - [ ] เปิดเว็บไซต์ของคุณ
 - [ ] คลิก Tag Assistant icon
 - [ ] ตรวจสอบว่าเห็น "Google Tag Manager" ติดตั้งอยู่และสถานะเป็น "Working"
@@ -150,7 +150,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 - [ ] คลิก "Enhanced measurement"
 - [ ] เปิด/ปิด events ตามต้องการ:
   - [x] Page views (เปิดอยู่แล้ว)
-  - [x] Scrolls (เลื่อนหน้าถึง 90%)
+  - [ ] Scrolls (ปิดไว้ถ้าต้องการใช้ custom scroll tracking ผ่าน GTM)
   - [x] Outbound clicks
   - [x] Site search (ถ้ามี search)
   - [x] Video engagement (ถ้ามีวิดีโอ)
@@ -230,7 +230,7 @@ src="https://www.facebook.com/tr?id=YOUR_PIXEL_ID&ev=PageView&noscript=1"
 
 ### Step 3.3: Test Facebook Pixel
 
-- [ ] ติดตั้ง [Facebook Pixel Helper](https://chrome.google.com/webstore) (Chrome extension)
+- [ ] ติดตั้ง [Facebook Pixel Helper](https://chrome.google.com/webstore/detail/facebook-pixel-helper/fdgfkebogiimcoedlicjlajpkdmockpc) (Chrome extension)
 - [ ] ใน GTM Preview mode, เปิดเว็บไซต์
 - [ ] คลิก Pixel Helper icon
 - [ ] ตรวจสอบว่าเห็น Pixel firing และ PageView event
@@ -257,11 +257,15 @@ src="https://www.facebook.com/tr?id=YOUR_PIXEL_ID&ev=PageView&noscript=1"
 - [ ] Code:
 ```html
 <script>
-fbq('track', 'ViewContent', {
-  content_name: '{{Page Title}}',
-  content_category: 'Property',
-  content_type: 'product'
-});
+// Ensure Facebook Pixel base code has loaded before tracking.
+// In GTM, use Tag Sequencing to fire the base Pixel tag before this event tag.
+if (typeof fbq === 'function') {
+  fbq('track', 'ViewContent', {
+    content_name: '{{Page Title}}',
+    content_category: 'Property',
+    content_type: 'product'
+  });
+}
 </script>
 ```
 - [ ] Triggering: "Page View - Property Detail"
@@ -284,10 +288,14 @@ fbq('track', 'ViewContent', {
 - [ ] Code:
 ```html
 <script>
-fbq('track', 'Lead', {
-  content_name: 'Lead Form',
-  content_category: 'Contact'
-});
+// Ensure Facebook Pixel base code has loaded before tracking.
+// In GTM, use Tag Sequencing to fire the base Pixel tag before this event tag.
+if (typeof fbq === 'function') {
+  fbq('track', 'Lead', {
+    content_name: 'Lead Form',
+    content_category: 'Contact'
+  });
+}
 </script>
 ```
 - [ ] Triggering: "Form Submission - Lead"
@@ -313,9 +321,13 @@ fbq('track', 'Lead', {
 - [ ] Code:
 ```html
 <script>
-fbq('track', 'Contact', {
-  content_name: 'Contact Button'
-});
+// Ensure Facebook Pixel base code has loaded before tracking.
+// In GTM, use Tag Sequencing to fire the base Pixel tag before this event tag.
+if (typeof fbq === 'function') {
+  fbq('track', 'Contact', {
+    content_name: 'Contact Button'
+  });
+}
 </script>
 ```
 - [ ] Triggering: "Click - Contact Buttons"
@@ -347,20 +359,22 @@ Facebook Pixel อาจมีข้อจำกัดจาก iOS 14.5+ ใช
 ### Step 4.1: Enhanced Conversion Tracking in GA4
 
 **Track Scrolling Depth:**
-- [ ] ใน GTM, สร้าง Variable:
-  - Name: "Scroll Depth Threshold"
-  - Type: "Scroll Depth Threshold"
+- [ ] ใน GTM, เปิดใช้งาน Built-in Variables สำหรับ Scroll:
+  - ไปที่เมนู "Variables" → คลิก "Configure" ในส่วน Built-in Variables
+  - ติ๊กเลือก "Scroll Depth Threshold" (และ "Scroll Depth Direction" ถ้าต้องการ)
 - [ ] สร้าง Trigger:
   - Type: "Scroll Depth"
   - Percentages: 25, 50, 75, 90
 - [ ] สร้าง Tag:
   - Type: "GA4 Event"
   - Configuration Tag: (เลือก GA4 Configuration tag)
-  - Event Name: `scroll`
+  - Event Name: `scroll_depth`
   - Event Parameters:
     - `percent_scrolled`: {{Scroll Depth Threshold}}
   - Triggering: Scroll Depth trigger
 - [ ] Save
+
+**Note:** ใช้ event name `scroll_depth` แทน `scroll` เพื่อหลีกเลี่ยงความสับสนกับ GA4 Enhanced Measurement scroll event
 
 **Track Video Views:**
 - [ ] สร้าง Trigger:

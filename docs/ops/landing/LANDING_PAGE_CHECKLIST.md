@@ -488,7 +488,7 @@ Landing Page ที่ดีต้องทำงาน 3 อย่าง: ด�
 | **Conversion Rate** | 2-5% | 5-10% | >10% |
 | **Form Completion Rate** | 30-50% | 50-70% | >70% |
 
-*Note: Benchmarks vary by traffic source, targeting, and offer
+*Note: Benchmarks vary by traffic source, targeting, and offer*
 
 ---
 
