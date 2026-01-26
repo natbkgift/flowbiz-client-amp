@@ -1,450 +1,257 @@
-# Content Calendar Template
+# Content Calendar Template - AMP
 
-> 📅 เทมเพลตวางแผนเนื้อหา Social Media สำหรับ AMP Real Estate
+> 📅 Template ปฏิทินคอนเทนต์สำหรับ Social Media
 
-## Overview
+## Monthly Calendar Structure
 
-Content Calendar ช่วยให้ทีม Marketing วางแผนและจัดการเนื้อหา Social Media อย่างเป็นระบบ มีความสม่ำเสมอ และครอบคลุมทุกแพลตฟอร์ม
+### Week Template
 
----
-
-## Monthly Content Planning Framework
-
-### Content Themes by Week
-
-แต่ละเดือนแบ่งเป็น 4 weeks โดยแต่ละสัปดาห์มี theme หลัก:
-
-| Week | Theme | Focus | Example Content |
-|------|-------|-------|-----------------|
-| **Week 1** | Property Showcase | แสดงทรัพย์สินใหม่หรือ highlight | Listings, Property tours, Features |
-| **Week 2** | Lifestyle & Area | พื้นที่, ชุมชน, ไลฟ์สไตล์ | Area guides, Amenities, Local spots |
-| **Week 3** | Educational | Tips, Insights, How-tos | Investment tips, Buying process, Market trends |
-| **Week 4** | Engagement & Community | สร้าง engagement กับ audience | Q&A, Polls, User stories, Behind-the-scenes |
-
-### Content Mix (60-30-10 Rule)
-
-- **60% Educational/Value** - เนื้อหาที่ให้คุณค่า ความรู้
-- **30% Engagement/Entertainment** - เนื้อหาสร้าง engagement
-- **10% Promotional** - ขายตรง, โปรโมชั่น
+| Day | Facebook | Instagram Feed | IG Stories | TikTok | LINE | YouTube |
+|-----|----------|----------------|------------|--------|------|---------|
+| **Mon** | Property Listing | Property Photo | BTS + Poll | Quick Tour | - | - |
+| **Tue** | Market Tip | Carousel: Tips | Q&A | Tips Video | Broadcast | - |
+| **Wed** | Project Review | Lifestyle | Property Peek | Trending | - | Property Tour |
+| **Thu** | Property Listing | Property Photo | Testimonial | Quick Tour | - | - |
+| **Fri** | Weekend Promo | Reel: Tour | Poll + CTA | Tips Video | Broadcast | - |
+| **Sat** | Lifestyle | Lifestyle | Behind Scenes | Property Tour | - | Area Guide |
+| **Sun** | Week Recap | Engagement Post | Recap | Recap/Trend | - | - |
 
 ---
 
-## Weekly Content Calendar Template
+## Content Pillars
 
-### Week of: [DD/MM/YYYY - DD/MM/YYYY]
-**Theme:** [Theme ของสัปดาห์นี้]
-**Goal:** [เป้าหมายหลัก เช่น Increase engagement, Generate leads]
+### Pillar 1: Property Showcase (40%)
+```
+- New listings
+- Featured properties
+- Price drops
+- Virtual tours
+- Before/After
+```
 
----
+### Pillar 2: Educational (25%)
+```
+- Buying tips
+- Rental guides
+- Investment advice
+- Legal info
+- Market updates
+```
 
-#### Monday, [Date]
+### Pillar 3: Lifestyle (20%)
+```
+- Pattaya living
+- Area highlights
+- Restaurants/Cafes
+- Beach life
+- Expat stories
+```
 
-| Platform | Time | Content Type | Topic/Caption | Visual | Status | Notes |
-|----------|------|--------------|---------------|--------|--------|-------|
-| Facebook | 10:00 AM | Image Post | "5 เหตุผลทำไมต้องลงทุนคอนโดพัทยา 2026" | Infographic | 📝 Draft | Use beach condo image |
-| Instagram | 11:00 AM | Feed Post | Same as FB + IG-specific hashtags | Same image | 📝 Draft | Post as carousel? |
-| Instagram | Throughout | Stories (3-5) | Morning: Team intro, Noon: Property teaser, Evening: Poll | Multiple | ⏰ Scheduled | Use poll sticker |
-| LINE OA | - | As needed | Respond to inquiries only | - | - | No broadcast today |
+### Pillar 4: Engagement (10%)
+```
+- Polls
+- Questions
+- Quizzes
+- User-generated content
+- Giveaways
+```
 
-**Key Tasks:**
-- [ ] Create infographic
-- [ ] Write caption (Thai + English versions)
-- [ ] Schedule posts
-- [ ] Prepare Stories content
-
----
-
-#### Tuesday, [Date]
-
-| Platform | Time | Content Type | Topic/Caption | Visual | Status | Notes |
-|----------|------|--------------|---------------|--------|--------|-------|
-| Facebook | 7:00 PM | Video Post | Property tour - 2BR Sea View Condo | 2-min video tour | 🎬 Production | Need voiceover |
-| Instagram | 7:00 PM | Reels | Same property tour (shorter 60sec) | Same video (edited) | 🎬 Production | Add trending audio |
-| TikTok | 8:00 PM | Video | Quick property tour (30sec) | Same video (re-edit) | 📝 Draft | More dynamic cuts |
-
-**Key Tasks:**
-- [ ] Film property tour
-- [ ] Edit 3 versions (FB, IG Reels, TikTok)
-- [ ] Add captions/subtitles
-- [ ] Schedule posts
-
----
-
-#### Wednesday, [Date]
-
-| Platform | Time | Content Type | Topic/Caption | Visual | Status | Notes |
-|----------|------|--------------|---------------|--------|--------|-------|
-| Facebook | 10:00 AM | Link Post | "Jomtien Beach Area Guide: Where to Eat, Shop, Relax" | Custom link preview | 📝 Draft | Link to blog post |
-| Instagram | 11:00 AM | Feed Post | Carousel (5 slides) of Jomtien area | 5 photos | ⏰ Scheduled | Locations tagged |
-| YouTube | 3:00 PM | Video Upload | "Jomtien Beach Living: Complete Area Guide 2026" | 10-min video | 🎬 Production | Need B-roll footage |
-
-**Key Tasks:**
-- [ ] Write blog post (if not ready)
-- [ ] Create carousel images
-- [ ] Film/edit YouTube video
-- [ ] Optimize YouTube SEO
+### Pillar 5: Promotional (5%)
+```
+- Special offers
+- Events
+- Limited deals
+- Seasonal promos
+```
 
 ---
 
-#### Thursday, [Date]
+## Monthly Theme Ideas
 
-| Platform | Time | Content Type | Topic/Caption | Visual | Status | Notes |
-|----------|------|--------------|---------------|--------|--------|-------|
-| Facebook | 10:00 AM | Image Post | Customer testimonial + Success story | Photo with quote | 📝 Draft | Get permission from customer |
-| Instagram | 11:00 AM | Feed Post | Same testimonial | Same image | 📝 Draft | Add to Highlights |
-| Instagram | Throughout | Stories | Share testimonial + behind story | Multiple slides | ⏰ Scheduled | Use question sticker |
-| TikTok | 8:00 PM | Video | "Day in the life of real estate agent" | Casual BTS video | 💡 Idea | Fun, authentic |
-
-**Key Tasks:**
-- [ ] Get customer testimonial and photo
-- [ ] Design testimonial graphic
-- [ ] Film TikTok BTS content
-- [ ] Schedule posts
-
----
-
-#### Friday, [Date]
-
-| Platform | Time | Content Type | Topic/Caption | Visual | Status | Notes |
-|----------|------|--------------|---------------|--------|--------|-------|
-| Facebook | 10:00 AM | Image Post | "Weekend Getaway Inspiration: Properties near Beach" | Multi-property collage | ⏰ Scheduled | Weekend vibe |
-| Instagram | 11:00 AM | Reels | Beach lifestyle montage | Beach clips + music | 🎬 Production | Feel-good content |
-| LINE OA | 12:00 PM | Broadcast | Weekend special: "New listings just added!" | Rich message + images | 📝 Draft | Include 3-4 properties |
-
-**Key Tasks:**
-- [ ] Select and prepare property images
-- [ ] Create beach lifestyle reel
-- [ ] Prepare LINE broadcast message
-- [ ] Schedule weekend content
+| Month | Theme | Content Focus |
+|-------|-------|---------------|
+| January | New Year, New Home | New listings, Fresh starts |
+| February | Love Your Home | Romantic properties, Couples |
+| March | Summer Ready | Pool villas, Beach condos |
+| April | Songkran Special | Thai culture, Promotions |
+| May | Investment Month | ROI, Market analysis |
+| June | Rainy Season | Indoor amenities, Cozy homes |
+| July | Mid-Year Review | Market updates, Best deals |
+| August | Family Focus | Family-friendly properties |
+| September | Back to Business | Office/Work spaces |
+| October | Spooky Deals | Halloween promos, Unique properties |
+| November | Loy Krathong | Sea view, Water features |
+| December | Year End Deals | Best of year, Promotions |
 
 ---
 
-#### Saturday, [Date]
+## Content Templates
 
-| Platform | Time | Content Type | Topic/Caption | Visual | Status | Notes |
-|----------|------|--------------|---------------|--------|--------|-------|
-| Facebook | 11:00 AM | Image Post | "Saturday Inspiration: Dream homes by the sea" | Lifestyle image | 📝 Draft | Aspirational content |
-| Instagram | 11:00 AM | Feed Post | Same content | Same image | 📝 Draft | Use trending hashtags |
-| Instagram | Throughout | Stories | Weekend activity, Property visits | Real-time content | - | Post spontaneously |
+### Property Listing Post
 
-**Key Tasks:**
-- [ ] Prepare inspirational content
-- [ ] Monitor and respond to weekend inquiries
-- [ ] Post Stories throughout the day
+**Facebook/Instagram:**
+```
+🏠 [NEW/HOT/REDUCED] [Property Type] in [Location]
 
----
+📍 Location: [Area, Pattaya]
+🛏️ Bedrooms: [X]
+🚿 Bathrooms: [X]  
+📐 Size: [X] sqm
+💰 Price: [฿X,XXX,XXX] / [฿XX,XXX/month]
 
-#### Sunday, [Date]
+✨ Highlights:
+• [Feature 1]
+• [Feature 2]
+• [Feature 3]
 
-| Platform | Time | Content Type | Topic/Caption | Visual | Status | Notes |
-|----------|------|--------------|---------------|--------|--------|-------|
-| Facebook | 10:00 AM | Image/Quote | Motivational quote about investment/dreams | Quote graphic | 📝 Draft | Lighter content for Sunday |
-| Instagram | 10:00 AM | Feed Post | Same quote | Same graphic | 📝 Draft | - |
-| TikTok | 7:00 PM | Video | "Sunday Reset: Plan your property investment journey" | Casual, vlog-style | 💡 Idea | Educational but light |
+📲 สนใจทักมาเลย!
+🔗 [Link to listing]
 
-**Key Tasks:**
-- [ ] Design quote graphic
-- [ ] Film Sunday TikTok content
-- [ ] Plan next week's content
-- [ ] Review this week's performance
+#PattayaCondo #[Location] #PropertyForSale #AMP
+```
 
----
+### Tips Post
 
-## Content Status Legend
+**Facebook/Instagram:**
+```
+💡 [Number] Tips for [Topic]
 
-| Icon | Status | Meaning |
-|------|--------|---------|
-| 💡 | Idea | มีไอเดียแล้ว ยังไม่ได้เริ่มสร้าง |
-| 📝 | Draft | กำลังสร้าง/เขียน content |
-| 🎬 | Production | กำลังถ่าย/edit video/image |
-| ⏰ | Scheduled | Schedule แล้ว รอ publish |
-| ✅ | Published | เผยแพร่แล้ว |
-| 🔄 | Rescheduled | เลื่อนโพสต์ไปใหม่ |
-| ❌ | Cancelled | ยกเลิก |
+1️⃣ [Tip 1]
+   → [Brief explanation]
 
----
+2️⃣ [Tip 2]
+   → [Brief explanation]
 
-## Content Idea Bank
+3️⃣ [Tip 3]
+   → [Brief explanation]
 
-### Property Content Ideas
-- [ ] Virtual property tours (video)
-- [ ] Before/After renovations
-- [ ] Property of the Week highlight
-- [ ] 360° virtual tours
-- [ ] Drone footage of area/property
-- [ ] Room-by-room walkthroughs
-- [ ] Investment ROI calculations showcase
-- [ ] Price comparison (location A vs B)
+💬 มีคำถามเพิ่มเติม? คอมเมนต์ได้เลย!
 
-### Educational Content Ideas
-- [ ] "How to buy property in Thailand" (foreigner guide)
-- [ ] "First-time home buyer mistakes to avoid"
-- [ ] "5 things to check before buying condo"
-- [ ] "Property investment ROI explained"
-- [ ] "Pattaya area comparison guide"
-- [ ] "Rental yield: What's good for Pattaya?"
-- [ ] "Financing options for property purchase"
-- [ ] "Hidden costs of buying property"
+#PattayaRealEstate #PropertyTips #RealEstateTips
+```
 
-### Lifestyle Content Ideas
-- [ ] "Best coffee shops near [Property Area]"
-- [ ] "Top 5 restaurants in Jomtien"
-- [ ] "Weekend activities in Pattaya"
-- [ ] "Beach access: Properties near best beaches"
-- [ ] "Expat life in Pattaya: Pros and Cons"
-- [ ] "Digital nomad guide to Pattaya"
-- [ ] "Fitness and wellness near [Area]"
-- [ ] "International schools near properties"
-
-### Engagement Content Ideas
-- [ ] "Poll: Which property feature is most important to you?"
-- [ ] "Caption this property photo"
-- [ ] "Q&A: Ask us anything about Pattaya real estate"
-- [ ] "Share: What's your dream home like?"
-- [ ] "Quiz: What type of property suits your lifestyle?"
-- [ ] "Behind-the-scenes: A day with our team"
-- [ ] "Client success story"
-- [ ] "Meet the team: Agent spotlight"
-
-### Seasonal/Event Content Ideas
-- [ ] New Year: "New year, new home resolutions"
-- [ ] Songkran: "Waterfront properties for Songkran"
-- [ ] High season (Nov-Mar): "Peak season property deals"
-- [ ] Low season (Apr-Oct): "Off-season investment opportunities"
-- [ ] Monthly market updates
-- [ ] Public holidays: Special offers/greetings
-
----
-
-## Monthly Content Planning Checklist
-
-### Last Week of Previous Month
-- [ ] Review previous month performance (reach, engagement, leads)
-- [ ] Identify top performing content types
-- [ ] Set goals for next month (engagement rate, leads, followers)
-- [ ] Brainstorm content themes for each week
-- [ ] Check for upcoming events/holidays
-- [ ] Plan major campaigns or promotions
-
-### First Week of Current Month
-- [ ] Create detailed weekly calendar (Week 1 & 2)
-- [ ] Assign content creation tasks to team
-- [ ] Brief on content themes and goals
-- [ ] Schedule confirmed content
-- [ ] Prepare content assets (bulk photo shoots, video filming)
-
-### Mid-Month Review (Week 2)
-- [ ] Review Weeks 1-2 performance
-- [ ] Adjust strategy if needed
-- [ ] Create detailed calendar for Weeks 3 & 4
-- [ ] Continue content production
-
-### End-of-Month Review (Week 4)
-- [ ] Compile monthly performance report
-- [ ] Analyze: What worked? What didn't?
-- [ ] Collect learnings for next month
-- [ ] Start planning next month
-
----
-
-## Platform-Specific Posting Schedule
-
-### Optimal Posting Times (Thailand Time)
+### Market Update Post
 
 **Facebook:**
-- Weekdays: 10:00 AM (morning break), 7:00 PM (after work)
-- Weekends: 11:00 AM - 1:00 PM
+```
+📊 Pattaya Real Estate Update - [Month Year]
 
-**Instagram:**
-- Weekdays: 11:00 AM, 7:00 PM
-- Weekends: 11:00 AM, 6:00 PM
+🔺 [Key metric 1]
+🔻 [Key metric 2]
+➡️ [Key trend]
 
-**TikTok:**
-- Weekdays: 7-9 AM (commute), 12-1 PM (lunch), 7-10 PM (evening)
-- Weekends: 9 AM-12 PM, 7-10 PM
+💡 What this means for you:
+[Brief analysis]
 
-**LINE OA Broadcasts:**
-- Weekdays: 12:00 PM (lunch), 7:00 PM (evening)
-- Weekends: 11:00 AM
+📖 อ่านรายงานฉบับเต็ม: [Link]
 
-**YouTube:**
-- Upload: Morning (algorithm indexes)
-- Premiere: 7-8 PM (peak viewing time)
-
-### Posting Frequency Guidelines
-
-| Platform | Frequency | Notes |
-|----------|-----------|-------|
-| Facebook Feed | 1-2x/day | Consistency is key |
-| Instagram Feed | 1x/day | Quality over quantity |
-| Instagram Stories | 3-7x/day | Throughout the day |
-| Instagram Reels | 2-4x/week | When have good content |
-| TikTok | 3-5x/week | Minimum 3x for algorithm |
-| LINE Broadcast | 1-2x/week | Don't overdo (high unfollow) |
-| YouTube | 1-2x/week | High production value |
+#MarketUpdate #PattayaProperty #RealEstateNews
+```
 
 ---
 
-## Content Creation Workflow
+## Hashtag Library
 
-### 1. Ideation (Brainstorm)
-- Team meeting ทุก Monday
-- ใช้ Content Idea Bank
-- พิจารณา seasonal trends
+### Thai Hashtags
+```
+#คอนโดพัทยา #อสังหาริมทรัพย์ #บ้านพัทยา
+#คอนโดติดทะเล #วิลล่าพัทยา #ลงทุนอสังหา
+#คอนโดให้เช่า #บ้านให้เช่า #อสังหาพัทยา
+#คอนโดวิวทะเล #พัทยา #จอมเทียน
+```
 
-### 2. Planning (Schedule)
-- กรอก Content Calendar
-- Assign tasks และ deadlines
-- เตรียม assets ที่ต้องใช้
+### English Hashtags
+```
+#PattayaCondo #PattayaRealEstate #ThailandProperty
+#CondoForSale #SeaViewCondo #PattayaLife
+#PropertyInvestment #BeachfrontCondo #PattayaVilla
+#ThailandRealEstate #PattayaLiving #ExpatThailand
+```
 
-### 3. Production (Create)
-- เขียน copy
-- ถ่ายรูป/วิดีโอ
-- Design graphics
-- Edit videos
-
-### 4. Approval (Review)
-- ตรวจสอบ typos, accuracy
-- ตรวจสอบ brand consistency
-- Approve by manager
-
-### 5. Scheduling (Queue)
-- Schedule ผ่าน scheduling tools
-- ตั้ง reminders
-- เตรียม backup content
-
-### 6. Publishing (Post)
-- ตรวจสอบ live posts
-- Monitor initial engagement
-- Respond to early comments
-
-### 7. Engagement (Interact)
-- ตอบ comments ภายใน 1-2 ชม.
-- Like และ reply
-- Monitor mentions
-
-### 8. Analysis (Measure)
-- Track performance metrics
-- Compare against goals
-- Document learnings
+### Location Hashtags
+```
+#Pattaya #Jomtien #NaJomtien #Pratumnak
+#BangSaray #WongamatBeach #PattayaCity
+#EasternSeaboard #Chonburi #Thailand
+```
 
 ---
 
-## Emergency/Backup Content
+## Posting Schedule
 
-เตรียม Evergreen content ไว้สำหรับ emergencies:
+### Optimal Posting Times (Thailand)
 
-**Evergreen Content Ideas:**
-- Property highlights (always relevant)
-- Educational tips (timeless)
-- Area guides (don't expire quickly)
-- Testimonials (reusable)
-- Behind-the-scenes (always interesting)
+| Platform | Best Times | Avoid |
+|----------|------------|-------|
+| Facebook | 9-10 AM, 6-8 PM | 1-4 AM |
+| Instagram | 11 AM-1 PM, 7-9 PM | 3-6 AM |
+| TikTok | 7-9 AM, 12-3 PM, 7-11 PM | 1-5 AM |
+| LINE | 10 AM, 6 PM | After 9 PM |
+| YouTube | 2-4 PM (Sat/Sun) | Weekday mornings |
 
-**Backup Content Bank:**
-- 5-10 pre-made graphics/images
-- 3-5 pre-written captions (generic)
-- 2-3 evergreen videos
-- Template stories
+### Weekly Schedule Template
 
-**When to Use:**
-- Team member sick/unavailable
-- Production delay
-- Last-minute schedule change
-- Low-performing post needs replacement
+```
+MONDAY
+├── 09:00 - Facebook: Property Listing
+├── 11:00 - Instagram: Property Photo
+├── 12:00 - IG Story: Behind the scenes
+├── 19:00 - TikTok: Quick property tour
+└── 20:00 - IG Story: Poll
+
+TUESDAY
+├── 09:00 - Facebook: Tips/Educational
+├── 11:00 - Instagram: Carousel Tips
+├── 12:00 - IG Story: Q&A
+├── 15:00 - LINE Broadcast: New listings
+└── 19:00 - TikTok: Tips video
+
+[Continue for each day...]
+```
 
 ---
 
-## Collaboration & Tools
-
-### Team Roles
-- **Content Strategist:** Plans calendar and themes
-- **Copywriter:** Writes captions, scripts
-- **Designer:** Creates graphics, edits images
-- **Videographer:** Films and edits videos
-- **Community Manager:** Schedules and engages
+## Tools & Resources
 
 ### Recommended Tools
-- **Planning:** Google Sheets, Trello, Asana, Notion
-- **Scheduling:** Meta Business Suite, Later, Hootsuite
-- **Design:** Canva, Adobe Creative Suite
-- **Video:** CapCut, Adobe Premiere Pro
-- **Collaboration:** Google Drive, Dropbox, Slack
 
-### Content Calendar Template (Google Sheets)
-Create a shared Google Sheet with columns:
-- Date
-- Day of Week
-- Platform
-- Post Time
-- Content Type
-- Topic/Caption
-- Visual Description
-- Status
-- Assigned To
-- Notes
-- Performance (fill after posting)
+| Tool | Purpose | Cost |
+|------|---------|------|
+| Canva Pro | Design | ฿350/month |
+| Later | Scheduling (IG/FB/TikTok) | ฿500/month |
+| CapCut | Video editing | Free |
+| Notion | Content planning | Free |
+| Google Sheets | Calendar tracking | Free |
 
----
+### Content Creation Workflow
 
-## Performance Tracking
+```
+1. Weekly Planning (Friday)
+   └── Review next week's calendar
+   └── Assign content to create
 
-### Weekly Quick Check
-- Total Posts published
-- Avg. Engagement rate
-- Top performing post
-- Lowest performing post
+2. Content Creation (Mon-Wed)
+   └── Photos/Videos
+   └── Captions
+   └── Graphics
 
-### Monthly Deep Dive
-- Total Reach/Impressions
-- Engagement rate by platform
-- Content type performance
-- Best posting times validation
-- Follower/Friend growth
-- Lead generation from social
+3. Scheduling (Thursday)
+   └── Schedule all posts
+   └── Prepare stories
 
-### KPIs to Track
+4. Publishing & Engagement (Daily)
+   └── Monitor scheduled posts
+   └── Respond to comments/DMs
 
-| Metric | Target | Notes |
-|--------|--------|-------|
-| **Post Consistency** | 95%+ of planned posts | Did we stick to calendar? |
-| **Engagement Rate** | 3-5%+ | Varies by platform |
-| **Response Time** | < 1-2 hours | During working hours |
-| **Content Mix** | 60-30-10 | Educational-Engagement-Promo |
-| **Lead Generation** | [Set target] | Leads from social channels |
+5. Review (Friday)
+   └── Check weekly performance
+   └── Plan next week
+```
 
 ---
 
-## Tips for Success
+## Related Documents
 
-### DO's ✅
-- Plan at least 1-2 weeks in advance
-- Mix content types (image, video, carousel, etc.)
-- Repurpose content across platforms (adapt, don't copy-paste)
-- Track performance and adjust
-- Engage with audience (respond, like, comment)
-- Stay consistent with posting schedule
-- Use data to inform decisions
-- Keep it authentic and human
-
-### DON'Ts ❌
-- Don't overpost (quality > quantity)
-- Don't ignore comments or messages
-- Don't post promotional content only
-- Don't forget to proofread
-- Don't post without strategy
-- Don't copy competitors exactly
-- Don't forget to measure results
-- Don't give up if something doesn't work
-
----
-
-## Example: One-Month Content Calendar
-
-[See separate detailed monthly calendar template with all dates filled in]
-
----
-
-**Last Updated:** 2026-01-26  
-**Version:** 1.0.0  
-**Maintained by:** AMP Marketing Team
+- [Social Media SOP](SOCIAL_MEDIA_SOP.md)
+- [Facebook Ads Checklist](../ads/FACEBOOK_ADS_CHECKLIST.md)
+- [AMP Business Lens](../../AMP_BUSINESS_LENS.md)
