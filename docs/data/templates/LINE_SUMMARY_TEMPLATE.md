@@ -118,6 +118,8 @@ On Hold
 
 ### Schedule
 
+**Total Time: 5-6 hours per day** (varies based on activity volume)
+
 ```
 ┌─────────────────────────────────────────────────────────────┐
 │               DAILY LINE MONITORING SCHEDULE                │
@@ -156,6 +158,8 @@ On Hold
 │                                                             │
 └─────────────────────────────────────────────────────────────┘
 ```
+
+**Note:** Scheduled blocks total 5.5 hours. Additional time (0.5-1 hour) is spent on follow-up activities throughout the day as needed.
 
 ---
 
@@ -358,7 +362,7 @@ Filter where:
 
 **Columns:**
 - Entry_ID
-- Date_Found
+- Date
 - Property_Type
 - Location
 - Price
@@ -380,6 +384,8 @@ Filter where:
 - Duplicate
 - Scam suspected
 - Not responsive
+
+**Note:** When setting Action_Taken to any "Rejected - *" value (e.g., "Rejected - Price High", "Rejected - Wrong Location"), ensure the Status field is also set to "Rejected" so the entry appears in this tab.
 
 ---
 
