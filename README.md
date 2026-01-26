@@ -197,8 +197,8 @@ pytest tests/test_health.py -v
 
 ### Development
 - [Contributing Guide](CONTRIBUTING.md)
-- [Project Contract](PROJECT_CONTRACT.md)
-- [Deployment Guide](DEPLOYMENT_GUIDE.md)
+- [Project Contract](docs/PROJECT_CONTRACT.md)
+- [Deployment Guide](docs/DEPLOYMENT.md)
 
 ## 🛡️ Guardrails
 
@@ -284,5 +284,5 @@ This project is maintained by the FlowBiz AI Core team for AMP (Asset Management
 ## 🔗 Links
 
 - [FlowBiz AI Core](https://github.com/natbkgift/flowbiz-ai-core)
-- Documentation
+- [Documentation](docs/)
 - [Issues](https://github.com/natbkgift/flowbiz-client-amp/issues)
