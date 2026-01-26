@@ -1,3 +1,13 @@
+<!-- 
+PR Title Format:
+- For planned features: PR-XXX: <brief description>
+- For issues: [Type] <brief description> (closes #issue-number)
+
+Examples:
+- PR-008: Lead router agent implementation
+- [Bug Fix] Fix chat timeout (closes #42)
+-->
+
 ## Summary
 <!-- Describe what this PR does and why. Be specific about the business value. -->
 
