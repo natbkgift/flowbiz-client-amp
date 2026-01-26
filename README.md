@@ -186,19 +186,19 @@ pytest tests/test_health.py -v
 ## 📚 Documentation
 
 ### AMP-Specific
-- **<a>AMP Business Lens</a>** - Business model และ KPIs
-- **<a>AMP Architecture Blueprint</a>** - System architecture
-- **<a>AMP MVP Scope</a>** - MVP definition และ timeline
+- **[AMP Business Lens](docs/AMP_BUSINESS_LENS.md)** - Business model และ KPIs
+- **[AMP Architecture Blueprint](docs/AMP_ARCHITECTURE_BLUEPRINT.md)** - System architecture
+- **[AMP MVP Scope](docs/AMP_MVP_SCOPE.md)** - MVP definition และ timeline
 
 ### Infrastructure (MANDATORY)
-- **<a>ADR: System Nginx</a>** - ⚠️ MANDATORY
-- **<a>New Project Checklist</a>** - ⚠️ MANDATORY
-- **<a>Agent Behavior Lock</a>** - ⚠️ MANDATORY
+- **[ADR: System Nginx](docs/ADR_SYSTEM_NGINX.md)** - ⚠️ MANDATORY
+- **[New Project Checklist](docs/AGENT_NEW_PROJECT_CHECKLIST.md)** - ⚠️ MANDATORY
+- **[Agent Behavior Lock](docs/AGENT_BEHAVIOR_LOCK.md)** - ⚠️ MANDATORY
 
 ### Development
-- <a>Contributing Guide</a>
-- <a>Project Contract</a>
-- <a>Deployment Guide</a>
+- [Contributing Guide](CONTRIBUTING.md)
+- [Project Contract](PROJECT_CONTRACT.md)
+- [Deployment Guide](DEPLOYMENT_GUIDE.md)
 
 ## 🛡️ Guardrails
 
