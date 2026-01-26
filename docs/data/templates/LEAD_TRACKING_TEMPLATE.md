@@ -545,7 +545,7 @@ Summary metrics and charts.
 | **Interest Type** | 20 | Buy=20, Rent=10 |
 | **Budget Confirmed** | 20 | Yes=20, No=0 |
 | **Timeline** | 25 | ASAP=25, 1-3mo=15, 3-6mo=10, 6-12mo=5 |
-| **Engagement** | 15 | 2+ contacts=15, 1 contact=5 |
+| **Engagement** | 15 | 2+ contacts=15, 1 contact=5, 0 contacts=0 |
 | **Recency** | 10 | <=7 days=10, <=30=5, >30=0 |
 | **Viewing** | 20 | Viewed=20, Scheduled=10, No=0 |
 
