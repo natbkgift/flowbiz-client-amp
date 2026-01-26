@@ -29,15 +29,15 @@
 │   │   │   ├── 📊 Unit_Pricing.xlsx
 │   │   │   ├── 📑 Brochure.pdf
 │   │   │   ├── 📁 Photos/
-│   │   │   │   ├── Exterior/
-│   │   │   │   ├── Common_Areas/
-│   │   │   │   ├── Units/
-│   │   │   │   └── Amenities/
+│   │   │   │   ├── 01_Exterior/
+│   │   │   │   ├── 02_Common_Areas/
+│   │   │   │   ├── 03_Units/
+│   │   │   │   └── 04_Views/
 │   │   │   ├── 📁 Videos/
 │   │   │   ├── 📁 Floor_Plans/
 │   │   │   └── 📁 Documents/
 │   │   │       ├── Contract_Templates/
-│   │   │       └── Terms_and_Conditions/
+│   │   │       └── Terms_And_Conditions/
 │   │   └── 📁 [Another Project]/
 │   │
 │   ├── 📁 Villa/
@@ -193,11 +193,13 @@
 ### Format Rules
 
 ```
-1. Prefix with numbers (01, 02, ...) for sorting
+1. Prefix with numbers (01, 02, ...) for sorting (required for primary organizational folders; optional for sub-folders if alphabetical sorting is acceptable)
 2. Use underscores (_) not spaces
-3. Use PascalCase for multi-word names
+3. Use PascalCase for multi-word names (capitalize first letter of each word)
 4. Keep names under 50 characters
 5. Avoid special characters (!@#$%^&*)
+
+Note: Type-level folders (e.g., Condo, Villa, House, Land) may omit numeric prefixes as they are sorted alphabetically by property type.
 ```
 
 ### Examples
@@ -330,7 +332,9 @@ When adding a new property, create this structure:
 | Marketing | ✅ | ✅ | View | ✅ | - |
 | LINE Summary | ✅ | ✅ | View | View | - |
 | Contracts | ✅ | ✅ | View | - | - |
+| Operations | ✅ | ✅ | View | - | - |
 | Finance | ✅ | View | - | - | - |
+| Admin | ✅ | ✅ | - | - | - |
 
 **Access Legend:**
 - ✅ = Full Edit
@@ -403,16 +407,16 @@ Archive (Monthly):
 ### Top 10 Most Used Files
 
 ```
-1. 📊 Properties/Property_Master_List.xlsx
-2. 📊 Leads_CRM/Lead_Tracking.xlsx
-3. 📊 LINE_Group_Summary/Daily_Summary.xlsx
-4. 📊 Rental/Rental_Master_List.xlsx
-5. 📁 Marketing/Ad_Creatives/
-6. 📁 Properties/Photos/
-7. 📄 Contracts/Templates/
-8. 📊 Marketing/Reports/
-9. 📁 Operations/SOPs/
-10. 📁 Brand_Assets/
+1. 📊 01_Properties/Property_Master_List.xlsx
+2. 📊 04_Leads_CRM/Lead_Tracking.xlsx
+3. 📊 06_LINE_Group_Summary/Daily_Summary.xlsx
+4. 📊 03_Rental/Rental_Master_List.xlsx
+5. 📁 05_Marketing/Ad_Creatives/
+6. 📁 01_Properties/Photos/
+7. 📄 07_Contracts_Legal/Templates/
+8. 📊 05_Marketing/Reports/
+9. 📁 08_Operations/SOPs/
+10. 📁 05_Marketing/Brand_Assets/
 ```
 
 ### Common Tasks Shortcuts
