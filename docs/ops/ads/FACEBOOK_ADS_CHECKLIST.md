@@ -1,536 +1,456 @@
-# Facebook & Instagram Ads Checklist
+# Facebook & Instagram Ads Checklist - AMP
 
-> ✅ Checklist การตั้งค่าและจัดการ Facebook/Instagram Ads สำหรับ AMP Real Estate
+> 📘 Checklist สำหรับการตั้งค่าและจัดการ Facebook/Instagram Ads
 
 ## Overview
 
-เอกสารนี้เป็น comprehensive checklist สำหรับการตั้งค่า Facebook และ Instagram Ads ตั้งแต่เริ่มต้นจนถึงการ optimize แคมเปญ ครอบคลุมทั้ง Facebook Pixel, Custom Audiences, และ Campaign management สำหรับธุรกิจอสังหาริมทรัพย์
+เอกสารนี้เป็น checklist สำหรับการตั้งค่าและจัดการ Meta Ads (Facebook & Instagram) สำหรับ Asset Management Property (AMP)
+
+### Campaign Objectives
+
+| Objective | Use Case | Priority |
+|-----------|----------|----------|
+| Lead Generation | Collect leads directly on Facebook | High |
+| Traffic | Drive to landing page | Medium |
+| Conversions | Website conversions | High |
+| Engagement | Brand awareness, Post engagement | Low |
+| Video Views | Property tour videos | Medium |
 
 ---
 
-## Phase 1: Account & Business Manager Setup
+## Phase 1: Account Setup
 
-### Facebook Business Manager Setup
-- [ ] สร้าง Facebook Business Manager account (business.facebook.com)
-- [ ] เพิ่ม Business information (ชื่อบริษัท, ที่อยู่, เบอร์ติดต่อ)
-- [ ] Verify business (ตาม requirement ของ Facebook)
-- [ ] เพิ่ม payment method สำหรับ Ads
-- [ ] ตั้งค่า Billing information
+### 1.1 Facebook Business Manager
 
-### Assets Setup
-- [ ] สร้างหรือเพิ่ม Facebook Page ใน Business Manager
-- [ ] สร้างหรือเพิ่ม Instagram Business Account
-- [ ] เชื่อมต่อ Instagram กับ Facebook Page
-- [ ] สร้าง Ad Account ใหม่ใน Business Manager
-- [ ] กำหนด Ad Account currency (THB)
-- [ ] กำหนด Time zone
+- [ ] สร้างหรือเข้าถึง Business Manager (business.facebook.com)
+- [ ] ยืนยันธุรกิจ (Business Verification)
+- [ ] เพิ่ม Facebook Page "Asset Management Property"
+- [ ] เพิ่ม Instagram Business Account
+- [ ] เพิ่ม Ad Account
+- [ ] ตั้งค่า Payment Method
+- [ ] เพิ่ม Team Members และกำหนด Roles
 
-### Team Access & Roles
-- [ ] เพิ่มสมาชิกทีมใน Business Manager
-- [ ] กำหนด Roles และ Permissions:
-  - [ ] Admin - Full access
-  - [ ] Advertiser - Campaign management
-  - [ ] Analyst - Reporting only
-- [ ] ตั้งค่า Two-Factor Authentication (2FA) สำหรับความปลอดภัย
+**Business Manager Structure:**
+```
+AMP Business Manager
+├── Pages
+│   ├── Asset Management Property (FB)
+│   └── @assetamp (IG)
+├── Ad Accounts
+│   └── AMP Ads Account
+├── Pixels
+│   └── AMP Facebook Pixel
+└── Product Catalogs (optional)
+    └── Property Listings
+```
 
----
+### 1.2 Facebook Pixel Setup
 
-## Phase 2: Facebook Pixel & Conversion Setup
-
-### Facebook Pixel Installation
 - [ ] สร้าง Facebook Pixel ใน Events Manager
-- [ ] คัดลอก Pixel ID และ code
-- [ ] ติดตั้ง Pixel ผ่าน Google Tag Manager หรือ direct code:
-  - [ ] Option A: ติดตั้งผ่าน GTM (recommended)
-  - [ ] Option B: เพิ่ม base code ใน `<head>` ของทุกหน้า
-- [ ] ตรวจสอบ Pixel ทำงานด้วย Facebook Pixel Helper (Chrome extension)
+- [ ] ติดตั้ง Pixel Base Code ผ่าน GTM
+- [ ] ตั้งค่า Standard Events:
 
-### Standard Events Setup
-- [ ] ตั้งค่า Standard Events สำคัญ:
-  - [ ] **PageView** - ทุกหน้าของ website
-  - [ ] **ViewContent** - หน้าแสดงรายละเอียดทรัพย์สิน
-  - [ ] **Lead** - เมื่อมีการส่งฟอร์ม inquiry
-  - [ ] **Contact** - เมื่อกด contact buttons (โทร, LINE, etc.)
-  - [ ] **InitiateCheckout** - เมื่อเริ่มกระบวนการ (optional)
-  - [ ] **CompleteRegistration** - เมื่อลงทะเบียน (optional)
-- [ ] ตั้งค่า Event parameters (value, currency, content_name, etc.)
-- [ ] ทดสอบ Events firing correctly ใน Events Manager > Test Events
+| Event | Trigger | Parameters |
+|-------|---------|------------|
+| PageView | All pages | - |
+| ViewContent | Property pages | content_name, content_type, value |
+| Lead | Form submission | - |
+| Contact | Click to call/LINE/WhatsApp | - |
+| Search | Property search | search_string |
 
-### Conversion API (CAPI) Setup
-- [ ] ตั้งค่า Conversions API (recommended for iOS 14.5+):
-  - [ ] ใช้ Partner integration (GTM Server-side หรือ CMS plugin)
-  - [ ] หรือติดตั้งผ่าน custom server-side code
-- [ ] Match Event IDs ระหว่าง Pixel และ CAPI (deduplication)
-- [ ] ทดสอบ CAPI events ใน Events Manager
-- [ ] ตั้งค่า Event Match Quality score (target > 6.0)
+- [ ] ทดสอบด้วย Facebook Pixel Helper
+- [ ] ยืนยัน Events ใน Events Manager
 
-### Custom Conversions
-- [ ] สร้าง Custom Conversions สำหรับ specific actions:
-  - [ ] "Property Inquiry - Condo"
-  - [ ] "Property Inquiry - Villa"  
-  - [ ] "Phone Call Click"
-  - [ ] "LINE Contact Click"
-  - [ ] "Brochure Download"
-- [ ] ใช้ URL rules หรือ Event + parameters
+### 1.3 Conversions API (CAPI) Setup
+
+- [ ] ตั้งค่า Conversions API (Server-side tracking)
+- [ ] เชื่อมต่อผ่าน Partner Integration หรือ Manual Setup
+- [ ] ทดสอบ Event Match Quality
+- [ ] Deduplicate events (Pixel + CAPI)
+
+**CAPI Benefits:**
+- Bypass ad blockers
+- Better data accuracy
+- iOS 14+ compatibility
+- Improved attribution
 
 ---
 
-## Phase 3: Audience & Targeting Setup
+## Phase 2: Audience Building
 
-### Custom Audiences - Website Traffic
-- [ ] สร้าง Website Custom Audiences:
-  - [ ] **All Website Visitors** (ทุกคน) - 30 days
-  - [ ] **Recent Website Visitors** - 7 days
-  - [ ] **Property Detail Viewers** - 14 days
-  - [ ] **Lead Form Starters** (not completed) - 14 days
-  - [ ] **Converters** (Form submitted) - 180 days
-  - [ ] **High Value Visitors** (time on site > 3 min) - 30 days
-- [ ] ตั้งค่า Audience duration ตามความเหมาะสม
-- [ ] ทดสอบว่า Audiences กำลัง populate
+### 2.1 Custom Audiences
 
-### Custom Audiences - Engagement
-- [ ] สร้าง Engagement Audiences:
-  - [ ] **Video Viewers** - ดูวิดีโอ 25%, 50%, 75%, 95%
-  - [ ] **Instagram Profile Visitors**
-  - [ ] **Facebook Page Engaged** - Like, Comment, Share, Save
-  - [ ] **Instagram Account Engaged**
-  - [ ] **Lead Form Openers** (opened but not submitted)
-- [ ] ตั้งค่า duration 30-90 days
+- [ ] **Website Custom Audiences**
 
-### Custom Audiences - Customer List
-- [ ] เตรียม Customer list (email, phone) ตาม Facebook format
-- [ ] Upload Customer list:
-  - [ ] Existing customers (for exclusion)
-  - [ ] High-value leads (for lookalike)
-- [ ] ตรวจสอบ Match rate (> 30% is good)
-- [ ] สร้าง Lookalike Audiences จาก Customer lists
+| Audience Name | Source | Duration | Size Est. |
+|---------------|--------|----------|-----------|
+| All Website Visitors | Pixel | 180 days | Base |
+| Property Viewers | URL contains /property | 30 days | Medium |
+| High Intent Visitors | Viewed 3+ properties | 14 days | Small |
+| Lead Form Visitors | URL = /contact | 7 days | Small |
 
-### Lookalike Audiences
-- [ ] สร้าง Lookalike Audiences จาก best sources:
-  - [ ] Lookalike 1-3% - Converters (Lead form submitted)
-  - [ ] Lookalike 1-5% - Property detail viewers
-  - [ ] Lookalike 1-5% - Video viewers (high engagement)
-  - [ ] Lookalike 1% - Customer list
-- [ ] เลือก Location: Thailand หรือ specific regions
-- [ ] สร้าง multiple % tiers (1%, 2-3%, 4-5%) สำหรับ testing
+- [ ] **Engagement Custom Audiences**
 
-### Saved Audiences - Interest & Behavior
-- [ ] สร้าง Saved Audiences ตาม demographics และ interests:
-  - [ ] **Thai Property Investors:**
-    - Age: 30-55
-    - Location: Thailand (หรือ Bangkok Metro)
-    - Interests: Real estate, Property investment, Financial planning
-    - Behaviors: Frequent travelers, High-income
-  - [ ] **Foreign Property Buyers:**
-    - Age: 35-65
-    - Location: Expats in Thailand, or international
-    - Interests: Thailand, Real estate investing, Retirement planning
-    - Language: English
-  - [ ] **Rental Seekers:**
-    - Age: 25-45
-    - Interests: Pattaya, Digital nomad, Remote work
-    - Behaviors: Recently moved
+| Audience Name | Source | Duration |
+|---------------|--------|----------|
+| FB Page Engagers | Page | 365 days |
+| IG Profile Engagers | IG Account | 365 days |
+| Video Viewers (50%+) | Videos | 365 days |
+| Lead Form Openers | Lead Forms | 90 days |
 
----
+- [ ] **Customer List Audiences**
+  - [ ] อัพโหลด CRM leads list
+  - [ ] อัพโหลด Past customers list
+  - [ ] อัพโหลด High-value customers list
 
-## Phase 4: Campaign Structure Planning
+### 2.2 Lookalike Audiences
 
-### Campaign Objectives Selection
-- [ ] วางแผน Campaign objectives ตาม funnel:
-  - [ ] **Awareness:** Reach, Brand Awareness
-  - [ ] **Consideration:** Traffic, Engagement, Video Views
-  - [ ] **Conversion:** Leads, Conversions
-- [ ] กำหนด primary objective: **Leads** (recommended for Phase 0)
+- [ ] สร้าง Lookalike จาก:
 
-### Campaign Architecture
-- [ ] วางโครงสร้าง Campaigns:
-  - [ ] **Prospecting Campaign** - Cold audiences (Lookalike + Interests)
-  - [ ] **Retargeting Campaign** - Warm audiences (Website visitors)
-  - [ ] **Engagement Retargeting** - Social engagement audiences
-  - [ ] **Brand Awareness Campaign** - Video views (optional)
-- [ ] กำหนด Budget allocation:
-  - Prospecting: 50-60%
-  - Retargeting: 30-40%
-  - Awareness: 10-20%
+| Source Audience | Lookalike % | Use Case |
+|-----------------|-------------|----------|
+| Converters (Leads) | 1% | Best quality |
+| Converters (Leads) | 1-3% | Expansion |
+| High-Value Customers | 1% | Premium targeting |
+| Video Viewers 75%+ | 2% | Awareness |
+| Website Visitors | 3% | Broad reach |
 
-### Ad Set Planning per Campaign
-- [ ] วางแผน Ad Sets ตาม audiences:
-  - **Prospecting:**
-    - [ ] Lookalike 1% - Converters
-    - [ ] Lookalike 1% - Property viewers
-    - [ ] Interest - Thai investors
-    - [ ] Interest - Foreign buyers
-  - **Retargeting:**
-    - [ ] Website visitors (exclude converters)
-    - [ ] Property detail viewers
-    - [ ] Video viewers (75%+)
+### 2.3 Interest-Based Audiences
+
+**Real Estate Interests:**
+```
+- Real estate investing
+- Property investment
+- Residential real estate
+- Luxury real estate
+- Vacation home
+- Investment property
+```
+
+**Pattaya/Thailand Interests:**
+```
+- Pattaya
+- Thailand tourism
+- Living in Thailand
+- Expat life
+- Retirement abroad
+- Digital nomad
+```
+
+**Demographics:**
+```
+Age: 30-65
+Income: Top 10-25% (where available)
+Location: Thailand, Singapore, Hong Kong, UK, Germany, Russia, China
+```
 
 ---
 
-## Phase 5: Lead Generation Campaign Setup
+## Phase 3: Campaign Structure
 
-### Campaign Level Setup
-- [ ] สร้าง Campaign ใหม่
-- [ ] เลือก Objective: **Leads**
-- [ ] Campaign name: `[AMP] Leads - Prospecting` หรือ `[AMP] Leads - Retargeting`
-- [ ] เลือก Special Ad Category: **Housing** (สำคัญมาก!)
-- [ ] ตั้งค่า Campaign Budget Optimization (CBO): ON/OFF ตามกลยุทธ์
-- [ ] กำหนด Campaign Budget (Daily หรือ Lifetime)
+### 3.1 Campaign Architecture
 
-### Ad Set Configuration - Prospecting
-- [ ] สร้าง Ad Set
-- [ ] Ad Set name: `[AMP] Leads - LAL 1% Converters`
-- [ ] Conversion location: Website หรือ Instant Forms
-- [ ] Conversion event: Lead (from Pixel)
+```
+AMP Meta Ads Account
+│
+├── 📁 Campaign: [Leads] Property Inquiry - Thai
+│   ├── Ad Set: Interest - Real Estate TH
+│   ├── Ad Set: LAL 1% - Converters
+│   └── Ad Set: Retargeting - Website
+│
+├── 📁 Campaign: [Leads] Property Inquiry - English
+│   ├── Ad Set: Interest - Expats
+│   ├── Ad Set: LAL 1% - Converters EN
+│   └── Ad Set: Retargeting - Engaged
+│
+├── 📁 Campaign: [Traffic] Landing Page
+│   ├── Ad Set: Broad - Thailand
+│   └── Ad Set: LAL 3% - Website Visitors
+│
+├── 📁 Campaign: [Conversions] Website Leads
+│   ├── Ad Set: LAL 1% - High Value
+│   └── Ad Set: Retargeting - Property Viewers
+│
+├── 📁 Campaign: [Video Views] Property Tours
+│   ├── Ad Set: Interest - Property
+│   └── Ad Set: LAL - Video Viewers
+│
+└── 📁 Campaign: [Engagement] Brand Awareness
+    └── Ad Set: Broad - Pattaya Interest
+```
 
-**Budget & Schedule:**
-- [ ] ตั้งค่า Daily budget (ถ้าไม่ใช้ CBO)
-- [ ] เลือก Schedule: Run ads continuously หรือ Set a schedule
-- [ ] ไม่ต้องตั้ง End date (ใช้ ongoing optimization)
+### 3.2 Campaign Setup Checklist
 
-**Audience:**
-- [ ] เลือก Lookalike audience หรือ Saved audience
-- [ ] กำหนด Location: Thailand (หรือ specific provinces)
-- [ ] กำหนด Age: 25-65+ (ปรับตาม target)
-- [ ] กำหนด Gender: All (ปล่อยให้ algorithm optimize)
-- [ ] Detail Targeting: เพิ่ม interests/behaviors (ถ้าต้องการ narrow)
-- [ ] Languages: Thai และ/หรือ English
+For each campaign:
 
-**Placements:**
-- [ ] เลือก Automatic Placements (recommended แรกๆ)
-- [ ] หรือ Manual Placements:
-  - [ ] Facebook Feed
-  - [ ] Instagram Feed
-  - [ ] Facebook Marketplace
-  - [ ] Facebook Right Column (optional)
-  - [ ] Instagram Explore
-  - [ ] Facebook Stories, Instagram Stories (if have vertical creative)
+- [ ] เลือก Campaign Objective
+- [ ] ตั้งชื่อ Campaign ตาม naming convention
+- [ ] เปิด Campaign Budget Optimization (CBO) หรือ Ad Set Budget
+- [ ] ตั้งค่า A/B Test (optional)
+- [ ] เลือก Advantage+ หรือ Manual
 
-**Optimization & Delivery:**
-- [ ] Optimization for: Leads หรือ Conversions
-- [ ] Delivery: Highest value (หรือ Highest volume)
-- [ ] Bid Strategy: Lowest cost (ระยะแรก) หรือ Cost per result goal (ถ้ามีข้อมูล)
-- [ ] Conversion window: 7-day click, 1-day view (default)
+### 3.3 Ad Set Setup Checklist
 
-### Ad Set Configuration - Retargeting
-- [ ] สร้าง Retargeting Ad Set
-- [ ] Ad Set name: `[AMP] Leads - Website Visitors`
-- [ ] เลือก Custom Audience: Website visitors (exclude converters)
-- [ ] Placements, Budget, Optimization เหมือน Prospecting
-- [ ] อาจใช้ Cost cap หรือ Bid cap (ถ้ามีข้อมูล CPA)
+For each ad set:
+
+- [ ] ตั้งชื่อ Ad Set (Audience type - Description)
+- [ ] เลือก Conversion Event (Lead, Purchase, etc.)
+- [ ] ตั้งค่า Budget (Daily/Lifetime)
+- [ ] ตั้งค่า Schedule
+- [ ] เลือก Audience (Custom/Lookalike/Interest)
+- [ ] ตั้งค่า Placements:
+
+**Recommended Placements:**
+```
+✅ Facebook Feed
+✅ Instagram Feed
+✅ Instagram Stories
+✅ Instagram Reels
+✅ Facebook Stories
+✅ Facebook Reels
+⚠️ Audience Network (test carefully)
+❌ Messenger (usually low quality for real estate)
+```
+
+- [ ] ตั้งค่า Optimization & Delivery
 
 ---
 
-## Phase 6: Ad Creative Setup
+## Phase 4: Creative Production
 
-### Creative Strategy
-- [ ] วางแผน Creative themes:
-  - [ ] Property showcases (photos/videos)
-  - [ ] Lifestyle/aspirational content
-  - [ ] Investment ROI highlights
-  - [ ] Testimonials/social proof
-  - [ ] Limited offers/promotions
-- [ ] เตรียม creative assets ทั้ง Thai และ English
+### 4.1 Ad Formats
 
-### Image/Carousel Ads
-- [ ] เตรียม images:
-  - [ ] ความละเอียด: 1080x1080 (square) หรือ 1200x628 (landscape)
-  - [ ] รูปถ่ายคุณภาพสูงของทรัพย์สิน
-  - [ ] รูป lifestyle (pool, gym, sea view)
-  - [ ] รูป location/amenities
-- [ ] สำหรับ Carousel:
-  - [ ] 3-10 cards แสดง multiple properties หรือ features
-  - [ ] แต่ละ card มี unique image + headline
+| Format | Best For | Specs |
+|--------|----------|-------|
+| Single Image | Quick launch, Testing | 1080x1080 or 1200x628 |
+| Carousel | Multiple properties | 1080x1080, 2-10 cards |
+| Video | Property tours | 1080x1080 or 9:16, <60s |
+| Collection | Catalog showcase | Cover + products |
+| Stories/Reels | Engagement | 1080x1920 (9:16) |
 
-### Video Ads
-- [ ] สร้าง video content:
-  - [ ] Property tours (15-60 seconds)
-  - [ ] Drone shots (sea view, location)
-  - [ ] Lifestyle videos
+### 4.2 Creative Checklist
+
+- [ ] **Images**
+  - [ ] High-quality property photos
+  - [ ] Lifestyle images
+  - [ ] Before/After comparisons
+  - [ ] Infographics (price, location, amenities)
+
+- [ ] **Videos**
+  - [ ] Property tour videos (30-60s)
+  - [ ] Drone footage
   - [ ] Customer testimonials
-- [ ] Specs:
-  - [ ] Format: MP4, MOV
-  - [ ] Ratio: 1:1 (square) หรือ 9:16 (Stories), 16:9 (landscape)
-  - [ ] Duration: 15-60 seconds (shorter is better for ads)
-  - [ ] Captions: เพิ่ม text overlay หรือ subtitles (คนดูโดยไม่เปิดเสียง)
+  - [ ] Area guides
 
-### Ad Copy
-- [ ] **Primary Text** (125 characters แสดง, 500+ ทั้งหมด):
-  - [ ] Hook ที่น่าสนใจในบรรทัดแรก
-  - [ ] Benefits และ Features หลักๆ
-  - [ ] Call-to-Action ชัดเจน
-  - [ ] Emojis (ใช้อย่างเหมาะสม)
-- [ ] **Headline** (40 characters):
-  - [ ] สั้น กระชับ น่าสนใจ
-  - [ ] "คอนโดพัทยา วิวทะเล เริ่ม 2.5 ล้าน"
-  - [ ] "Beachfront Condo Pattaya | ROI 7%"
-- [ ] **Description** (optional, 30 characters):
-  - [ ] ข้อมูลเพิ่มเติมสั้นๆ
-  - [ ] "ฟรีค่าโอน | ผ่อน 0%"
+- [ ] **Copy Templates**
 
-### Call-to-Action (CTA)
-- [ ] เลือก CTA button:
-  - [ ] **Learn More** - ดูรายละเอียด (general)
-  - [ ] **Get Quote** - ขอใบเสนอราคา
-  - [ ] **Sign Up** - ลงทะเบียน
-  - [ ] **Send Message** - ส่งข้อความ (direct to Messenger)
-  - [ ] **Contact Us** - ติดต่อเรา
+**Primary Text (Thai):**
+```
+🏠 คอนโดพัทยา วิวทะเลสุดปัง!
 
-### Landing Page / Lead Form
-**Option A: Website Landing Page**
-- [ ] เตรียม dedicated landing page
-- [ ] ใส่ Final URL ใน Ad
-- [ ] ตรวจสอบ landing page mobile-friendly
-- [ ] ตรวจสอบ loading speed < 3 seconds
-- [ ] มี clear CTA และ lead form
+✨ ไฮไลท์:
+• วิวทะเลพาโนรามา 180°
+• ห่างหาด 300 เมตร
+• สระว่ายน้ำ ฟิตเนส ครบ
+• ราคาเริ่มต้น 2.5 ล้านบาท
 
-**Option B: Facebook Instant Form (recommended)**
-- [ ] สร้าง Instant Form ใน Ads Manager
-- [ ] Form Type: More volume หรือ Higher intent
-- [ ] Intro: อธิบายสั้นๆ ว่าได้อะไร
-- [ ] Questions:
-  - [ ] Name (full name)
-  - [ ] Email
-  - [ ] Phone number
-  - [ ] Property Type (dropdown: Condo, Villa, House)
-  - [ ] Budget Range (dropdown)
-  - [ ] Custom question: "สนใจพื้นที่ไหน?" (optional)
-- [ ] Privacy Policy: ใส่ link privacy policy (required)
-- [ ] Thank you screen: ขอบคุณ + next steps
+💬 ปรึกษาฟรี! ไม่มีค่าใช้จ่าย
+📲 กดลงทะเบียนรับข้อมูลเพิ่มเติม
+```
 
-### Ad Creation
-- [ ] สร้าง Ads (2-3 per Ad Set):
-  - [ ] ใช้ different creative หรือ copy สำหรับ A/B testing
-- [ ] Upload media (images/videos)
-- [ ] เขียน Primary text, Headline, Description
-- [ ] เลือก CTA button
-- [ ] ตั้งค่า URL parameters สำหรับ tracking (utm_source, utm_campaign, etc.)
-- [ ] Add Instant Form (ถ้าใช้)
-- [ ] ตั้งค่า Pixel tracking event
-- [ ] Preview ads ทุก placements
-- [ ] ตรวจสอบให้ภาพไม่มีข้อความมากเกินไป (หลีกเลี่ยงภาพที่มีข้อความหนาแน่น เพราะอาจลดการแสดงผลโฆษณา) (optional)
+**Primary Text (English):**
+```
+🏠 Stunning Sea View Condo in Pattaya!
+
+✨ Highlights:
+• 180° Panoramic sea view
+• 300m from the beach
+• Pool, gym, full amenities
+• Starting from 2.5M THB
+
+💬 Free consultation!
+📲 Register for more information
+```
+
+**Headlines:**
+```
+TH: คอนโดพัทยา วิวทะเล | ปรึกษาฟรี | ราคาพิเศษ
+EN: Pattaya Sea View Condo | Free Consult | Special Price
+```
+
+### 4.3 Creative Best Practices
+
+- [ ] ใช้ภาพคุณภาพสูง (High resolution)
+- [ ] แสดงราคาหรือ starting price
+- [ ] มี CTA ที่ชัดเจน
+- [ ] ทดสอบ 3-5 variations ต่อ ad set
+- [ ] Video: Hook ใน 3 วินาทีแรก
+- [ ] ใช้ Text Overlay น้อยกว่า 20%
 
 ---
 
-## Phase 7: Campaign Launch & Monitoring
+## Phase 5: Lead Form Setup
 
-### Pre-Launch Checklist
-- [ ] Pixel ติดตั้งและทำงานถูกต้อง
-- [ ] Conversion events tracking correctly
-- [ ] Audiences populated (มีขนาดเพียงพอ > 1,000)
-- [ ] Payment method active
-- [ ] Ad copy ไม่มี typos หรือ errors
-- [ ] Landing page/Instant Form ทำงานได้
-- [ ] Privacy policy และ Terms accessible
-- [ ] Ad complies with Facebook policies (Housing special category)
+### 5.1 Instant Form Configuration
 
-### Campaign Launch
-- [ ] Publish campaigns
-- [ ] ตรวจสอบ Ads enter "In Review" status
-- [ ] รอ approval (usually 24 hours)
-- [ ] ตรวจสอบ Ads approved และเริ่ม deliver
+- [ ] สร้าง Lead Form ใน Ads Manager
+- [ ] เลือก Form Type: More Volume / Higher Intent
+- [ ] ตั้งค่า Questions:
 
-### First 24-48 Hours Monitoring
-- [ ] ตรวจสอบ Delivery status (Running, Learning, Not delivering)
-- [ ] ตรวจสอบ Spend และ Budget pacing
-- [ ] ตรวจสอบ Frequency (ควร < 2 ในระยะแรก)
-- [ ] ดู Initial metrics:
-  - [ ] Impressions
-  - [ ] Reach
-  - [ ] CTR (Link Click-Through Rate)
-  - [ ] CPC (Cost Per Click)
-- [ ] ตรวจสอบว่ามี Leads เข้ามาและ Pixel firing correctly
+**Recommended Questions:**
+```
+1. Full Name (Pre-filled)
+2. Phone Number (Required)
+3. Email (Pre-filled)
+4. Custom: งบประมาณ (Budget)
+   - ต่ำกว่า 3 ล้าน
+   - 3-5 ล้าน
+   - 5-10 ล้าน
+   - มากกว่า 10 ล้าน
+5. Custom: ประเภททรัพย์ที่สนใจ
+   - คอนโด
+   - วิลล่า
+   - บ้านเดี่ยว
+   - อื่นๆ
+```
 
----
+- [ ] ตั้งค่า Privacy Policy link
+- [ ] ตั้งค่า Thank You screen
+- [ ] เชื่อมต่อ CRM Integration (Zapier/Make)
 
-## Phase 8: Ongoing Optimization (Weekly)
+### 5.2 Lead Form Integration
 
-### Performance Review
-- [ ] ดู Key Metrics:
-  - [ ] **Reach & Frequency** - ไม่ให้ frequency สูงเกิน 3-4
-  - [ ] **CPM** (Cost Per 1,000 Impressions)
-  - [ ] **CTR (Link CTR)** - target > 1-2%
-  - [ ] **CPC (Cost Per Link Click)** - target < ฿10-30
-  - [ ] **Lead Form Open Rate** - target > 10%
-  - [ ] **Cost Per Lead (CPL)** - target < ฿100-500
-  - [ ] **Lead Quality** - อัตราการติดต่อกลับได้
+- [ ] ตั้งค่า Lead Download automation
+- [ ] เชื่อมต่อกับ Google Sheets
+- [ ] ตั้งค่า Email notification
+- [ ] เชื่อมต่อกับ LINE Notify (optional)
 
-### Ad Set Optimization
-- [ ] ตรวจสอบ Ad Sets out of Learning phase (> 50 conversions)
-- [ ] Pause poor performing Ad Sets:
-  - [ ] CPL สูงกว่า benchmark 50%+
-  - [ ] CTR ต่ำมาก (< 0.5%)
-  - [ ] ไม่มี conversions หลังจาก spend ไปพอสมควร
-- [ ] Scale winning Ad Sets:
-  - [ ] เพิ่ม budget 20% ทีละครั้ง (ไม่เกินวันละครั้ง)
-  - [ ] Duplicate Ad Set และ test new audiences
-- [ ] Test new audiences:
-  - [ ] Lookalike % tiers
-  - [ ] Different interest combinations
-  - [ ] Broader vs narrower targeting
-
-### Creative Optimization
-- [ ] Review Ad performance:
-  - [ ] CTR, Engagement rate
-  - [ ] CPL (Cost Per Lead)
-  - [ ] Relevance score / Quality ranking
-- [ ] Pause underperforming ads (CTR < 0.5%)
-- [ ] Create new ad variations:
-  - [ ] Test different images/videos
-  - [ ] Test different ad copy angles
-  - [ ] Test different headlines
-  - [ ] Test different CTAs
-- [ ] Refresh creative ทุก 2-4 สัปดาห์ (ad fatigue)
-
-### Budget Reallocation
-- [ ] ย้าย budget จาก low-performing → high-performing campaigns
-- [ ] เพิ่ม budget สำหรับ retargeting ถ้า performance ดี
-- [ ] ลด/หยุด campaigns ที่ CPL สูงเกินไป
-
-### Audience Expansion
-- [ ] Test broader Lookalike % (3-5%, 5-10%)
-- [ ] Test Advantage+ Audience (Facebook's automated targeting)
-- [ ] Add new interest/behavior targeting
-- [ ] Test different locations (expand or narrow)
+**Zapier/Make Integration:**
+```
+Trigger: New Facebook Lead
+Actions:
+1. Add row to Google Sheets
+2. Send LINE Notify to sales team
+3. Send auto-reply email to lead
+4. Create task in CRM
+```
 
 ---
 
-## Phase 9: Monthly Deep Optimization
+## Phase 6: Daily Management
 
-### Comprehensive Performance Analysis
-- [ ] สร้าง Monthly report:
-  - [ ] Total Spend, Reach, Impressions
-  - [ ] Total Leads, CPL
-  - [ ] CTR, CPC trends
-  - [ ] Frequency distribution
-  - [ ] Lead quality และ conversion to sales
-- [ ] เปรียบเทียบ month-over-month
+### 6.1 Daily Checklist (15-30 min)
 
-### Creative Fatigue Analysis
-- [ ] ตรวจสอบ Frequency ของแต่ละ Ad
-- [ ] ดู CTR decline over time (sign of fatigue)
-- [ ] Refresh หรือ replace creative ที่ frequency > 4-5
-- [ ] Plan และสร้าง new creative ทุกเดือน
+- [ ] ตรวจสอบ spend vs budget
+- [ ] Review new leads (respond within 1 hour)
+- [ ] Check for rejected ads
+- [ ] Monitor ad comments (respond/hide spam)
+- [ ] Review CPL by ad set
+- [ ] Check frequency (should be < 3)
 
-### Audience Performance Deep Dive
-- [ ] วิเคราะห์ performance by:
-  - [ ] Age groups
-  - [ ] Gender
-  - [ ] Location (city, province)
-  - [ ] Placements (Feed vs Stories vs others)
-  - [ ] Devices (Mobile vs Desktop)
-- [ ] Adjust targeting และ placements ตามข้อมูล
+### 6.2 Weekly Checklist (1-2 hours)
 
-### Landing Page / Lead Form Optimization
-- [ ] Review Instant Form analytics:
-  - [ ] Opens
-  - [ ] Completions
-  - [ ] Completion rate
-- [ ] A/B test form variations:
-  - [ ] จำนวน questions (more vs fewer)
-  - [ ] Form type (More volume vs Higher intent)
-  - [ ] Intro copy
-- [ ] Improve thank you screen (add next steps, expectations)
+- [ ] Review performance by campaign
+- [ ] Analyze CPL and conversion rates
+- [ ] Pause underperforming ad sets (CPL > 2x target)
+- [ ] Scale performing ad sets (+20% budget)
+- [ ] Refresh creative (if frequency > 3)
+- [ ] Test new audiences
+- [ ] Update Custom Audiences
+- [ ] A/B test new ad variations
 
-### Attribution & ROI Analysis
-- [ ] ตรวจสอบ Attribution windows (1-day, 7-day click)
-- [ ] เปรียบเทียบ Facebook attribution กับ GA4
-- [ ] คำนวณ ROI/ROAS จาก leads ที่แปลงเป็น sales
-- [ ] Adjust strategy ตาม true ROI
+### 6.3 Monthly Checklist (2-4 hours)
+
+- [ ] Full account audit
+- [ ] Review audience performance
+- [ ] Update Lookalike audiences
+- [ ] Create new creative batch
+- [ ] Analyze funnel conversion rates
+- [ ] Competitor ad research (Facebook Ad Library)
+- [ ] Strategy review meeting
 
 ---
 
-## Performance Benchmarks (Real Estate)
+## Phase 7: Reporting
 
-### Expected Metrics
+### 7.1 Key Metrics
 
-| Metric | Target Range | Notes |
-|--------|--------------|-------|
-| **CPM** | ฿50-200 | Higher for narrow audiences |
-| **CTR (Link)** | 1-3% | Higher for retargeting |
-| **CPC (Link Click)** | ฿5-30 | Depends on targeting |
-| **Lead Form Open Rate** | 10-30% | Good creative = higher |
-| **Lead Form Complete Rate** | 30-60% | Fewer questions = higher |
-| **Cost Per Lead** | ฿50-500 | Budget dependent |
-| **Frequency** | < 3-4 | Too high = ad fatigue |
+| Metric | Target | Alert Threshold |
+|--------|--------|-----------------|
+| CPM | < ฿150 | > ฿250 |
+| CTR (Link) | > 1% | < 0.5% |
+| CPC | < ฿15 | > ฿30 |
+| CPL | < ฿400 | > ฿600 |
+| Lead Quality Rate | > 30% | < 20% |
+| Frequency | < 3 | > 5 |
+| ROAS (if tracking sales) | > 3x | < 2x |
 
-### Budget Allocation
-- **Prospecting:** 50-60% of budget
-- **Retargeting:** 30-40% of budget
-- **Testing:** 10% of budget
+### 7.2 Reporting Dashboard
 
----
+- [ ] ตั้งค่า Custom Dashboard ใน Ads Manager
+- [ ] สร้าง Scheduled Report (Weekly)
+- [ ] เชื่อมต่อ Looker Studio (optional)
 
-## Troubleshooting Common Issues
-
-### Low Delivery (Not Spending Budget)
-- [ ] Check if Ad Sets are in Learning phase (wait)
-- [ ] Increase budget (minimum ฿100-200/day per Ad Set)
-- [ ] Broaden targeting (larger audience)
-- [ ] Increase bid (use bid cap or cost cap higher)
-- [ ] Check Audience size (ควรมากกว่า 100K)
-
-### High CPM
-- [ ] Avoid narrow targeting (audience too small)
-- [ ] Change placements (include more placements)
-- [ ] Improve Ad relevance (better creative)
-- [ ] Avoid peak seasons/competition
-- [ ] Test different audiences
-
-### Low CTR
-- [ ] Improve creative (more eye-catching images)
-- [ ] Improve ad copy (stronger hook)
-- [ ] Test different headlines
-- [ ] Change CTA button
-- [ ] Refresh creative (ad fatigue)
-
-### High CPL (Cost Per Lead)
-- [ ] Improve targeting (more qualified audiences)
-- [ ] Improve creative and copy (increase CTR)
-- [ ] Simplify lead form (reduce friction)
-- [ ] Test "More volume" form type
-- [ ] Pause poor performing Ad Sets
-
-### Low Lead Quality
-- [ ] Use "Higher intent" form type
-- [ ] Add qualifying questions to form
-- [ ] Improve ad copy clarity (manage expectations)
-- [ ] Narrow targeting (exclude irrelevant audiences)
-- [ ] Add budget range question to form
-
-### Ad Disapprovals
-- [ ] Check Special Ad Category is set to **Housing**
-- [ ] Avoid discriminatory language (age, gender, etc.)
-- [ ] Follow Community Standards และ Advertising Policies
-- [ ] Appeal if disapproval seems wrong
+**Report Columns:**
+```
+Campaign | Reach | Impressions | Frequency | Clicks | CTR | CPM | CPC | Leads | CPL | Amount Spent
+```
 
 ---
 
-## Tools & Resources
+## Budget Guidelines
 
-### Essential Tools
-- **Facebook Business Manager** - Central hub
-- **Ads Manager** - Campaign management
-- **Events Manager** - Pixel และ conversion tracking
-- **Facebook Pixel Helper** - Chrome extension for testing
-- **Creative Hub** - Mockup ads before launching
+### Recommended Monthly Budget
 
-### Learning Resources
-- [Facebook Blueprint](https://www.facebook.com/business/learn) - Free courses
-- [Facebook Ads Guide](https://www.facebook.com/business/ads-guide) - Ad formats
-- [Facebook for Business](https://www.facebook.com/business) - Best practices
-- Facebook Ads Library - Competitor research
+| Campaign Type | Min Budget | Recommended | Max Budget |
+|---------------|------------|-------------|------------|
+| Lead Gen - Thai | ฿10,000 | ฿20,000 | ฿30,000 |
+| Lead Gen - English | ฿5,000 | ฿10,000 | ฿15,000 |
+| Retargeting | ฿3,000 | ฿5,000 | ฿10,000 |
+| Video Views | ฿2,000 | ฿5,000 | ฿10,000 |
+| **Total** | **฿20,000** | **฿40,000** | **฿65,000** |
+
+### Budget Tips
+
+```
+- เริ่มต้นด้วย ฿500-1,000/day per ad set
+- รอ 3-5 days ก่อนปรับ budget
+- Scale budget ขึ้นทีละไม่เกิน 20% ต่อครั้ง และไม่เกิน 2 ครั้งต่อสัปดาห์
+- ใช้ CBO เมื่อมี ad sets 3+ ที่ทำงานดี
+```
 
 ---
 
-## Important Notes
+## Troubleshooting
 
-- **Special Ad Category: Housing** - ต้องเลือกให้ถูกต้องสำหรับอสังหาริมทรัพย์ มีข้อจำกัดด้าน targeting
-- **iOS 14.5+ Impact** - Privacy changes ทำให้ tracking ยากขึ้น ใช้ CAPI ร่วมกับ Pixel
-- **Learning Phase** - ใช้เวลา ~50 conversions หรือ 7 days กว่า algorithm จะ optimize ได้ดี
-- **Frequency Management** - ไม่ควรเกิน 3-4 ต่อสัปดาห์ มิฉะนั้นจะเกิด ad fatigue
-- **Creative Refresh** - ควร refresh creative ทุก 2-4 สัปดาห์
-- **Lead Quality** - CPL ต่ำไม่ได้หมายความว่าดี ต้องดู lead quality และ conversion to sales ด้วย
+### Common Issues
+
+| Issue | Possible Cause | Solution |
+|-------|----------------|----------|
+| Ad rejected | Policy violation | Review policy, edit ad |
+| High CPL | Poor targeting, Creative fatigue | Test new audiences, Refresh creative |
+| Low reach | Audience too small, Budget too low | Expand audience, Increase budget |
+| High frequency | Audience saturated | Expand audience, Pause ad set |
+| Low CTR | Irrelevant creative, Wrong audience | Test new creative, Refine targeting |
+| Form abandonment | Too many questions | Simplify form, Use pre-fill |
+
+### Facebook Ad Policies for Real Estate
+
+⚠️ **Important:** Real estate ads have special restrictions
+
+- [ ] ตั้งค่า Special Ad Category: **Housing** สำหรับโฆษณาอสังหาริมทรัพย์ทุกครั้ง และปฏิบัติตามข้อจำกัดการ targeting ที่ Meta กำหนด (เช่น age, gender, detailed targeting บางประเภท, location แบบละเอียดเกินไป ฯลฯ)
+- [ ] หลีกเลี่ยงการ discriminate by demographics
+- [ ] ไม่ claim ผลตอบแทนที่เกินจริง
+- [ ] แสดงข้อมูลที่ถูกต้องเกี่ยวกับ property
+
+---
+
+## Related Documents
+
+- [Google Ads Checklist](GOOGLE_ADS_CHECKLIST.md)
+- [Landing Page Checklist](../landing/LANDING_PAGE_CHECKLIST.md)
+- [Analytics Setup Guide](../tracking/ANALYTICS_SETUP_GUIDE.md)
+- [Social Media SOP](../social/SOCIAL_MEDIA_SOP.md)
 
 ---
 
