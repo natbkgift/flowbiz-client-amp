@@ -112,8 +112,16 @@ function applyFilters() {
     }
     
     // Beds filter
-    if (currentFilters.beds !== null && property.beds !== currentFilters.beds) {
-      return false;
+    if (currentFilters.beds !== null) {
+      // For 4+ selection, treat as "at least" this many beds
+      if (currentFilters.beds >= 4) {
+        if (property.beds < currentFilters.beds) {
+          return false;
+        }
+      } else if (property.beds !== currentFilters.beds) {
+        // For studio, 1, 2, 3, require exact match
+        return false;
+      }
     }
     
     // Price filter
@@ -149,7 +157,7 @@ function sortProperties(properties, sortBy) {
       sorted.sort((a, b) => new Date(b.updated) - new Date(a.updated));
       break;
     case 'newest':
-      sorted.sort((a, b) => a.id.localeCompare(b.id));
+      sorted.sort((a, b) => b.id.localeCompare(a.id));
       break;
     case 'price-low':
       sorted.sort((a, b) => a.price - b.price);

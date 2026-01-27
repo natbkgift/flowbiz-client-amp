@@ -148,7 +148,16 @@ function setupSearchForm() {
     e.preventDefault();
     
     // Get form values
-    const intent = this.querySelector('[name="intent"]')?.value || '';
+    let intent = this.querySelector('[name="intent"]')?.value || '';
+    
+    // Fallback: read intent from the active toggle button's data-value
+    if (!intent) {
+      const activeIntentToggle = this.querySelector('[data-value].active');
+      if (activeIntentToggle) {
+        intent = activeIntentToggle.getAttribute('data-value') || '';
+      }
+    }
+    
     const type = this.querySelector('[name="type"]')?.value || '';
     const area = this.querySelector('[name="area"]')?.value || '';
     

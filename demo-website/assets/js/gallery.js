@@ -118,7 +118,10 @@ function initGalleryThumbnails() {
     
     // Update counter
     if (counter) {
-      counter.textContent = `${index + 1} / ${thumbnails.length}`;
+      const totalImages = (window.gallery && Array.isArray(window.gallery.images))
+        ? window.gallery.images.length
+        : thumbnails.length;
+      counter.textContent = `${index + 1} / ${totalImages}`;
     }
   }
   
