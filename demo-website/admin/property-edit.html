@@ -1,0 +1,625 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Property - FlowBiz Admin</title>
+    <link rel="stylesheet" href="../assets/css/admin.css">
+</head>
+<body>
+    <div class="admin-layout">
+        <!-- Sidebar -->
+        <aside class="admin-sidebar">
+            <div class="sidebar-header">
+                <img src="../assets/logo-white.svg" alt="FlowBiz" class="sidebar-logo">
+            </div>
+            
+            <nav class="sidebar-nav">
+                <a href="dashboard.html" class="nav-item">
+                    <i data-lucide="layout-dashboard"></i>
+                    <span data-i18n="admin.nav.dashboard">Dashboard</span>
+                </a>
+                <a href="properties.html" class="nav-item active">
+                    <i data-lucide="building-2"></i>
+                    <span data-i18n="admin.nav.properties">Properties</span>
+                    <span class="badge">24</span>
+                </a>
+                <a href="leads.html" class="nav-item">
+                    <i data-lucide="users"></i>
+                    <span data-i18n="admin.nav.leads">Leads</span>
+                    <span class="badge badge-new">5</span>
+                </a>
+                <a href="qa-report.html" class="nav-item">
+                    <i data-lucide="file-text"></i>
+                    <span data-i18n="admin.nav.qa_report">QA Report</span>
+                    <span class="badge badge-warn">3</span>
+                </a>
+                <a href="settings.html" class="nav-item">
+                    <i data-lucide="settings"></i>
+                    <span data-i18n="admin.nav.settings">Settings</span>
+                </a>
+            </nav>
+            
+            <div class="sidebar-footer">
+                <a href="../index.html" class="nav-item">
+                    <i data-lucide="external-link"></i>
+                    <span data-i18n="admin.nav.view_site">View Site</span>
+                </a>
+                <a href="login.html" class="nav-item text-danger">
+                    <i data-lucide="log-out"></i>
+                    <span data-i18n="admin.nav.logout">Logout</span>
+                </a>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="admin-main">
+            <!-- Topbar -->
+            <header class="admin-topbar">
+                <div class="topbar-left">
+                    <button class="sidebar-toggle" id="sidebarToggle">
+                        <i data-lucide="menu"></i>
+                    </button>
+                    <button class="btn btn-icon" onclick="window.location.href='properties.html'">
+                        <i data-lucide="arrow-left"></i>
+                    </button>
+                    <h1 data-i18n="admin.property_edit.title">Edit Property</h1>
+                </div>
+                <div class="topbar-right">
+                    <span class="property-id-badge" id="propertyIdBadge"></span>
+                </div>
+            </header>
+
+            <!-- Content -->
+            <div class="admin-content">
+                <form id="propertyEditForm">
+                    <!-- Basic Information -->
+                    <div class="form-section">
+                        <h2 class="form-section-title" data-i18n="admin.property_edit.basic_info">Basic Information</h2>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label" data-i18n="admin.property_edit.property_id">Property ID</label>
+                                <input type="text" class="form-input" id="propertyId" readonly>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label required" data-i18n="admin.property_edit.status">Status</label>
+                                <select class="form-select" id="status" required>
+                                    <option value="active" data-i18n="admin.property_edit.status_active">Active</option>
+                                    <option value="inactive" data-i18n="admin.property_edit.status_inactive">Inactive</option>
+                                    <option value="draft" data-i18n="admin.property_edit.status_draft">Draft</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label required" data-i18n="admin.property_edit.intent">Intent</label>
+                                <select class="form-select" id="intent" required>
+                                    <option value="rent" data-i18n="admin.property_edit.intent_rent">Rent</option>
+                                    <option value="sale" data-i18n="admin.property_edit.intent_sale">Sale</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label required" data-i18n="admin.property_edit.type">Type</label>
+                                <select class="form-select" id="type" required>
+                                    <option value="condo" data-i18n="admin.property_edit.type_condo">Condo</option>
+                                    <option value="house" data-i18n="admin.property_edit.type_house">House</option>
+                                    <option value="villa" data-i18n="admin.property_edit.type_villa">Villa</option>
+                                    <option value="townhouse" data-i18n="admin.property_edit.type_townhouse">Townhouse</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Location -->
+                    <div class="form-section">
+                        <h2 class="form-section-title" data-i18n="admin.property_edit.location">Location</h2>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label required" data-i18n="admin.property_edit.area">Area</label>
+                                <select class="form-select" id="area" required>
+                                    <option value="Pattaya">Pattaya</option>
+                                    <option value="Jomtien">Jomtien</option>
+                                    <option value="Pratumnak">Pratumnak</option>
+                                    <option value="Na Jomtien">Na Jomtien</option>
+                                    <option value="Bang Saray">Bang Saray</option>
+                                    <option value="East Pattaya">East Pattaya</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label" data-i18n="admin.property_edit.latitude">Latitude</label>
+                                <input type="number" class="form-input" id="latitude" step="0.000001" placeholder="12.927560">
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label" data-i18n="admin.property_edit.longitude">Longitude</label>
+                                <input type="number" class="form-input" id="longitude" step="0.000001" placeholder="100.887680">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Content -->
+                    <div class="form-section">
+                        <h2 class="form-section-title" data-i18n="admin.property_edit.content">Content</h2>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label required" data-i18n="admin.property_edit.title_th">Title (Thai)</label>
+                                <input type="text" class="form-input" id="titleTh" required>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label required" data-i18n="admin.property_edit.title_en">Title (English)</label>
+                                <input type="text" class="form-input" id="titleEn" required>
+                            </div>
+                        </div>
+                        <div class="form-row full">
+                            <div class="form-group">
+                                <label class="form-label required" data-i18n="admin.property_edit.description_th">Description (Thai)</label>
+                                <textarea class="form-textarea" id="descriptionTh" rows="4" required></textarea>
+                            </div>
+                        </div>
+                        <div class="form-row full">
+                            <div class="form-group">
+                                <label class="form-label required" data-i18n="admin.property_edit.description_en">Description (English)</label>
+                                <textarea class="form-textarea" id="descriptionEn" rows="4" required></textarea>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Specifications -->
+                    <div class="form-section">
+                        <h2 class="form-section-title" data-i18n="admin.property_edit.specifications">Specifications</h2>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label required" data-i18n="admin.property_edit.bedrooms">Bedrooms</label>
+                                <input type="number" class="form-input" id="bedrooms" min="0" required>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label required" data-i18n="admin.property_edit.bathrooms">Bathrooms</label>
+                                <input type="number" class="form-input" id="bathrooms" min="0" step="0.5" required>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label required" data-i18n="admin.property_edit.size">Size (sqm)</label>
+                                <input type="number" class="form-input" id="size" min="0" required>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label required" data-i18n="admin.property_edit.furnishing">Furnishing</label>
+                                <select class="form-select" id="furnishing" required>
+                                    <option value="Fully Furnished" data-i18n="admin.property_edit.furnishing_full">Fully Furnished</option>
+                                    <option value="Partially Furnished" data-i18n="admin.property_edit.furnishing_partial">Partially Furnished</option>
+                                    <option value="Unfurnished" data-i18n="admin.property_edit.furnishing_unfurnished">Unfurnished</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Pricing -->
+                    <div class="form-section">
+                        <h2 class="form-section-title" data-i18n="admin.property_edit.pricing">Pricing</h2>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label" data-i18n="admin.property_edit.rent_price">Rent Price</label>
+                                <input type="number" class="form-input" id="rentPrice" min="0">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label" data-i18n="admin.property_edit.sale_price">Sale Price</label>
+                                <input type="number" class="form-input" id="salePrice" min="0">
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label required" data-i18n="admin.property_edit.currency">Currency</label>
+                                <select class="form-select" id="currency" required>
+                                    <option value="THB">THB (฿)</option>
+                                    <option value="USD">USD ($)</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Media -->
+                    <div class="form-section">
+                        <h2 class="form-section-title" data-i18n="admin.property_edit.media">Media</h2>
+                        <div class="form-row full">
+                            <div class="form-group">
+                                <label class="form-label" data-i18n="admin.property_edit.photos">Photos</label>
+                                <div class="upload-area" id="uploadArea">
+                                    <i data-lucide="upload-cloud"></i>
+                                    <p data-i18n="admin.property_edit.upload_text">Drop files here or click to upload</p>
+                                    <span class="upload-hint" data-i18n="admin.property_edit.upload_hint">Supported formats: JPG, PNG, WebP (Max 10MB each)</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-row full">
+                            <div class="form-group">
+                                <label class="form-label" data-i18n="admin.property_edit.current_images">Current Images</label>
+                                <div class="image-preview-grid" id="imagePreviewGrid">
+                                    <!-- Images will be loaded here -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- SEO -->
+                    <div class="form-section">
+                        <h2 class="form-section-title" data-i18n="admin.property_edit.seo">SEO</h2>
+                        <div class="form-row full">
+                            <div class="form-group">
+                                <label class="form-label" data-i18n="admin.property_edit.slug">Slug</label>
+                                <div class="slug-preview">
+                                    <span class="slug-base">https://flowbiz.com/property/</span>
+                                    <span class="slug-generated" id="slugGenerated">property-slug</span>
+                                </div>
+                                <span class="form-help" data-i18n="admin.property_edit.slug_help">Auto-generated from English title</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Action Bar -->
+                    <div class="action-bar">
+                        <button type="button" class="btn btn-secondary" onclick="window.location.href='properties.html'">
+                            <i data-lucide="x"></i>
+                            <span data-i18n="admin.property_edit.cancel">Cancel</span>
+                        </button>
+                        <button type="submit" class="btn btn-primary">
+                            <i data-lucide="save"></i>
+                            <span data-i18n="admin.property_edit.save">Save Changes</span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </main>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="../assets/js/i18n.js"></script>
+    <script src="../assets/js/mock-data.js"></script>
+    <script>
+        // Initialize Lucide icons
+        lucide.createIcons();
+
+        // Mobile sidebar toggle
+        const sidebarToggle = document.getElementById('sidebarToggle');
+        const adminLayout = document.querySelector('.admin-layout');
+        
+        sidebarToggle.addEventListener('click', () => {
+            adminLayout.classList.toggle('sidebar-open');
+        });
+
+        // Get property ID from URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const propertyId = urlParams.get('id');
+
+        if (!propertyId) {
+            alert('No property ID specified');
+            window.location.href = 'properties.html';
+        }
+
+        // Load property data
+        const property = ALL_PROPERTIES.find(p => p.id === propertyId);
+
+        if (!property) {
+            alert(`Property ${propertyId} not found`);
+            window.location.href = 'properties.html';
+        }
+
+        // Helper function to get property status
+        function getPropertyStatus(property) {
+            const statuses = ['active', 'active', 'active', 'inactive', 'draft'];
+            const index = parseInt(property.id.split('-').pop()) % statuses.length;
+            return statuses[index];
+        }
+
+        // Populate form with property data
+        function loadPropertyData() {
+            document.getElementById('propertyIdBadge').textContent = property.id;
+            document.getElementById('propertyId').value = property.id;
+            document.getElementById('status').value = getPropertyStatus(property);
+            document.getElementById('intent').value = property.intent;
+            document.getElementById('type').value = property.type;
+            document.getElementById('area').value = property.area;
+            document.getElementById('titleTh').value = property.title_th;
+            document.getElementById('titleEn').value = property.title_en;
+            document.getElementById('descriptionTh').value = property.description_th;
+            document.getElementById('descriptionEn').value = property.description_en;
+            document.getElementById('bedrooms').value = property.beds;
+            document.getElementById('bathrooms').value = property.baths;
+            document.getElementById('size').value = property.sqm;
+            document.getElementById('furnishing').value = property.furnishing;
+            document.getElementById('currency').value = property.currency;
+
+            // Set prices based on intent
+            if (property.intent === 'rent') {
+                document.getElementById('rentPrice').value = property.price;
+                document.getElementById('salePrice').value = '';
+            } else {
+                document.getElementById('rentPrice').value = '';
+                document.getElementById('salePrice').value = property.price;
+            }
+
+            // Load images
+            loadImages();
+
+            // Update slug
+            updateSlug();
+        }
+
+        // Load images
+        function loadImages() {
+            const grid = document.getElementById('imagePreviewGrid');
+            const images = property.images || [property.image, property.image, property.image];
+            
+            grid.innerHTML = images.map((img, index) => `
+                <div class="image-preview-item">
+                    <img src="${img}" alt="Property image ${index + 1}">
+                    <button type="button" class="image-remove-btn" onclick="removeImage(${index})">
+                        <i data-lucide="x"></i>
+                    </button>
+                </div>
+            `).join('');
+
+            lucide.createIcons();
+        }
+
+        // Remove image (mock)
+        function removeImage(index) {
+            alert(`Remove image ${index + 1} (mock action)`);
+            // In real app, would remove from array and reload
+        }
+
+        // Update slug from title
+        function updateSlug() {
+            const titleEn = document.getElementById('titleEn').value;
+            const slug = titleEn
+                .toLowerCase()
+                .replace(/[^a-z0-9]+/g, '-')
+                .replace(/^-+|-+$/g, '');
+            document.getElementById('slugGenerated').textContent = slug || 'property-slug';
+        }
+
+        // Add event listener to title for slug update
+        document.getElementById('titleEn').addEventListener('input', updateSlug);
+
+        // Handle form submission
+        document.getElementById('propertyEditForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            
+            // Collect form data
+            const formData = {
+                id: document.getElementById('propertyId').value,
+                status: document.getElementById('status').value,
+                intent: document.getElementById('intent').value,
+                type: document.getElementById('type').value,
+                area: document.getElementById('area').value,
+                title_th: document.getElementById('titleTh').value,
+                title_en: document.getElementById('titleEn').value,
+                description_th: document.getElementById('descriptionTh').value,
+                description_en: document.getElementById('descriptionEn').value,
+                beds: parseInt(document.getElementById('bedrooms').value),
+                baths: parseFloat(document.getElementById('bathrooms').value),
+                sqm: parseInt(document.getElementById('size').value),
+                furnishing: document.getElementById('furnishing').value,
+                rentPrice: document.getElementById('rentPrice').value,
+                salePrice: document.getElementById('salePrice').value,
+                currency: document.getElementById('currency').value,
+                latitude: document.getElementById('latitude').value,
+                longitude: document.getElementById('longitude').value
+            };
+
+            console.log('Saving property:', formData);
+            
+            // Show success message
+            alert('Property updated successfully! (Mock action)');
+            
+            // Redirect back to properties list
+            window.location.href = 'properties.html';
+        });
+
+        // Upload area click handler (mock)
+        document.getElementById('uploadArea').addEventListener('click', () => {
+            alert('File upload dialog would open here (mock action)');
+        });
+
+        // Initialize form
+        loadPropertyData();
+    </script>
+
+    <style>
+        .btn-icon {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            border: none;
+            border-radius: 8px;
+            background: var(--admin-gray-100);
+            color: var(--admin-gray-700);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-icon:hover {
+            background: var(--admin-gray-200);
+        }
+
+        .property-id-badge {
+            padding: 6px 12px;
+            background: var(--admin-gray-100);
+            color: var(--admin-gray-700);
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 600;
+            font-family: monospace;
+        }
+
+        .upload-area {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 48px 24px;
+            border: 2px dashed var(--admin-gray-300);
+            border-radius: 12px;
+            background: var(--admin-gray-50);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .upload-area:hover {
+            border-color: var(--admin-primary);
+            background: rgba(23, 68, 190, 0.05);
+        }
+
+        .upload-area i {
+            width: 48px;
+            height: 48px;
+            color: var(--admin-gray-400);
+            margin-bottom: 12px;
+        }
+
+        .upload-area p {
+            font-size: 16px;
+            font-weight: 500;
+            color: var(--admin-gray-700);
+            margin: 0 0 4px 0;
+        }
+
+        .upload-hint {
+            font-size: 13px;
+            color: var(--admin-gray-500);
+        }
+
+        .image-preview-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 16px;
+        }
+
+        .image-preview-item {
+            position: relative;
+            border-radius: 8px;
+            overflow: hidden;
+            aspect-ratio: 4/3;
+            background: var(--admin-gray-100);
+        }
+
+        .image-preview-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .image-remove-btn {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            width: 28px;
+            height: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(220, 38, 38, 0.9);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+
+        .image-preview-item:hover .image-remove-btn {
+            opacity: 1;
+        }
+
+        .image-remove-btn i {
+            width: 16px;
+            height: 16px;
+        }
+
+        .slug-preview {
+            display: flex;
+            align-items: center;
+            padding: 10px 12px;
+            background: var(--admin-gray-50);
+            border: 1px solid var(--admin-gray-300);
+            border-radius: 6px;
+            font-size: 14px;
+            font-family: monospace;
+        }
+
+        .slug-base {
+            color: var(--admin-gray-500);
+        }
+
+        .slug-generated {
+            color: var(--admin-primary);
+            font-weight: 600;
+        }
+
+        .action-bar {
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+            padding: 24px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            margin-top: 24px;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn i {
+            width: 18px;
+            height: 18px;
+        }
+
+        .btn-primary {
+            background: var(--admin-primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #1236a0;
+        }
+
+        .btn-secondary {
+            background: var(--admin-gray-100);
+            color: var(--admin-gray-700);
+        }
+
+        .btn-secondary:hover {
+            background: var(--admin-gray-200);
+        }
+
+        @media (max-width: 768px) {
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+
+            .action-bar {
+                flex-direction: column-reverse;
+            }
+
+            .btn {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+    </style>
+</body>
+</html>
