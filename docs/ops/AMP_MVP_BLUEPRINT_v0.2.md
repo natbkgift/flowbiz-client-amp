@@ -113,82 +113,110 @@
 flowbiz-client-amp/
 ├── apps/
 │   ├── api/                          # FastAPI application
-│   │   ├── main.py                   # App entrypoint
+│   │   ├── main.py                   # EXISTING
 │   │   ├── routes/
-│   │   │   ├── health.py             # /healthz (existing)
+│   │   │   ├── __init__.py           # EXISTING
+│   │   │   ├── health.py             # EXISTING - /healthz
 │   │   │   └── v1/
-│   │   │       ├── meta.py           # /v1/meta (existing)
-│   │   │       ├── public.py         # /v1/public/* (NEW)
-│   │   │       ├── admin.py          # /v1/admin/* (NEW)
-│   │   │       ├── leads.py          # /v1/leads (NEW)
-│   │   │       ├── events.py         # /v1/events (NEW)
-│   │   │       └── line.py           # /v1/line/* (NEW)
-│   │   ├── domain/                   # Business logic (NEW)
-│   │   │   ├── publish_gate.py       # Validation rules
+│   │   │       ├── __init__.py       # EXISTING
+│   │   │       ├── meta.py           # EXISTING - /v1/meta
+│   │   │       ├── public.py         # NEW - /v1/public/*
+│   │   │       ├── admin.py          # NEW - /v1/admin/*
+│   │   │       ├── leads.py          # NEW - /v1/leads
+│   │   │       ├── events.py         # NEW - /v1/events
+│   │   │       └── line.py           # NEW - /v1/line/*
+│   │   ├── domain/                   # NEW - Business logic
+│   │   │   ├── __init__.py
+│   │   │   ├── publish_gate.py       # Property validation rules
 │   │   │   ├── slug.py               # Slug generation
 │   │   │   ├── dedupe.py             # Lead deduplication
 │   │   │   └── filters.py            # Property filtering
-│   │   ├── repos/                    # Database access (NEW)
+│   │   ├── repos/                    # NEW - Database repositories
+│   │   │   ├── __init__.py
 │   │   │   ├── properties.py
 │   │   │   ├── leads.py
 │   │   │   ├── events.py
 │   │   │   └── sync_runs.py
-│   │   └── deps.py                   # Dependency injection (NEW)
+│   │   └── deps.py                   # NEW - Dependency injection
 │   │
-│   ├── services/                     # External integrations (NEW)
-│   │   ├── google_sheets.py
-│   │   ├── line_messaging.py
-│   │   └── email_sender.py
+│   ├── services/                     # NEW - External integrations
+│   │   ├── __init__.py
+│   │   ├── google_sheets.py          # Google Sheets API
+│   │   ├── line_messaging.py         # LINE OA Messaging
+│   │   └── email_sender.py           # SMTP Email
 │   │
-│   └── jobs/                         # Background jobs (NEW)
-│       ├── sync_sheet.py
+│   └── jobs/                         # NEW - Background jobs
+│       ├── __init__.py
+│       ├── sync_sheet.py             # Sheet sync job
 │       └── generator/
-│           ├── render.py
-│           └── deploy.py
+│           ├── __init__.py
+│           ├── render.py             # HTML rendering
+│           └── deploy.py             # Deploy to Hostinger
 │
 ├── packages/
 │   └── core/
-│       ├── config.py                 # Settings (existing, extend)
-│       ├── logging.py                # Logging (existing)
-│       ├── database.py               # DB connection (NEW)
+│       ├── config.py                 # EXISTING - extend with new vars
+│       ├── logging.py                # EXISTING
+│       ├── database.py               # NEW - DB connection
 │       ├── schemas/
-│       │   ├── base.py               # (existing)
-│       │   ├── health.py             # (existing)
-│       │   ├── error.py              # (existing)
-│       │   ├── properties.py         # (NEW)
-│       │   ├── leads.py              # (NEW)
-│       │   ├── events.py             # (NEW)
-│       │   ├── sync.py               # (NEW)
-│       │   └── enums.py              # (NEW)
-│       └── models/                   # SQLAlchemy models (NEW)
+│       │   ├── __init__.py           # EXISTING
+│       │   ├── base.py               # EXISTING
+│       │   ├── health.py             # EXISTING
+│       │   ├── error.py              # EXISTING
+│       │   ├── enums.py              # NEW - All enums
+│       │   ├── properties.py         # NEW - Property schemas
+│       │   ├── leads.py              # NEW - Lead schemas
+│       │   ├── events.py             # NEW - Event schemas
+│       │   └── sync.py               # NEW - Sync schemas
+│       └── models/                   # NEW - SQLAlchemy models
+│           ├── __init__.py
 │           ├── base.py
 │           ├── property.py
 │           ├── lead.py
 │           ├── event.py
 │           └── sync_run.py
 │
-├── migrations/                       # Alembic migrations (NEW)
+├── migrations/                       # NEW - Alembic migrations
 │   ├── alembic.ini
+│   ├── env.py
 │   └── versions/
 │
-├── templates/                        # HTML templates (NEW)
+├── templates/                        # NEW - Jinja2 HTML templates
 │   ├── base.html
 │   ├── home.html
 │   ├── listing.html
 │   ├── detail.html
 │   └── thank-you.html
 │
-├── static/                           # Static assets (NEW)
+├── static/                           # NEW - Static assets
 │   ├── css/
+│   │   └── site.css
 │   ├── js/
+│   │   ├── config.js
+│   │   ├── lead.js
+│   │   └── events.js
 │   └── img/
 │
 └── tests/
-    ├── test_health.py                # (existing)
-    ├── test_public.py                # (NEW)
-    ├── test_leads.py                 # (NEW)
-    └── test_sync.py                  # (NEW)
+    ├── test_health.py                # EXISTING
+    ├── test_public.py                # NEW
+    ├── test_leads.py                 # NEW
+    └── test_sync.py                  # NEW
 ```
+
+### Path Migration Reference
+
+| Blueprint v0.1 Reference | Actual Codebase Path | Status |
+|--------------------------|----------------------|--------|
+| `api/routers/public.py` | `apps/api/routes/v1/public.py` | NEW |
+| `domain/publish_gate.py` | `apps/api/domain/publish_gate.py` | NEW |
+| `services/google_sheets.py` | `apps/services/google_sheets.py` | NEW |
+| `repos/properties.py` | `apps/api/repos/properties.py` | NEW |
+| `jobs/sync_sheet.py` | `apps/jobs/sync_sheet.py` | NEW |
+| `schemas/properties.py` | `packages/core/schemas/properties.py` | NEW |
+| `schemas/enums.py` | `packages/core/schemas/enums.py` | NEW |
+| `models/property.py` | `packages/core/models/property.py` | NEW |
+| `ops/config.py` | `packages/core/config.py` | EXISTING - extend |
 
 ---
 
@@ -1298,67 +1326,194 @@ body.keyboard-open .sticky-cta {
 
 ### 11.1 Input Validation
 
-| Field | Validation |
-|-------|------------|
-| `name` | 1-100 chars, trim whitespace |
-| `phone` | Thai format: `/^(\+66\|0)[0-9]{8,9}$/` |
-| `message` | Max 2000 chars, sanitize HTML |
-| `property_id` | Alphanumeric + dash only |
-| `utm_*` | Max 100 chars each |
-| `hp` (honeypot) | Must be empty |
+All user inputs must be validated before processing:
+
+| Field | Type | Validation Rules | Error Response |
+|-------|------|------------------|----------------|
+| `name` | string | Required, 1-100 chars, trim whitespace | `{"error": "validation_error", "field": "name", "detail": "Name is required (1-100 characters)"}` |
+| `phone` | string | Required, Thai format: `^(\+66\|0)[0-9]{8,9}$` | `{"error": "validation_error", "field": "phone", "detail": "Invalid phone format"}` |
+| `message` | string | Optional, max 2000 chars, strip HTML tags | `{"error": "validation_error", "field": "message", "detail": "Message too long"}` |
+| `property_id` | string | Optional, alphanumeric + dash only | `{"error": "validation_error", "field": "property_id", "detail": "Invalid property ID"}` |
+| `lang` | string | Required, must be "th" or "en" | `{"error": "validation_error", "field": "lang", "detail": "Language must be th or en"}` |
+| `utm_*` | string | Optional, max 100 chars each | `{"error": "validation_error", "field": "utm_source", "detail": "UTM parameter too long"}` |
+| `hp` | string | Must be empty (honeypot) | `{"error": "invalid_request"}` |
+
+#### Phone Number Examples
+
+**Valid:**
+- `0891234567`
+- `+66891234567`
+- `0612345678`
+
+**Invalid:**
+- `891234567` (missing prefix)
+- `+1234567890` (non-Thai)
+- `08912345` (too short)
+
+#### Phone Normalization
+
+All phone numbers normalized to +66 format:
+- "089-123-4567" → "+66891234567"
+- "0891234567" → "+66891234567"
+- "+66891234567" → "+66891234567"
 
 ### 11.2 Rate Limiting
 
-| Endpoint | Limit | Window |
-|----------|-------|--------|
-| `POST /v1/leads` | 5 requests | per IP per hour |
-| `POST /v1/events` | 100 requests | per IP per minute |
-| `POST /v1/admin/*` | 10 requests | per API key per minute |
+| Endpoint Pattern | Limit | Window | Scope | HTTP Status |
+|------------------|-------|--------|-------|-------------|
+| `POST /v1/leads` | 5 requests | 1 hour | Per IP | 429 |
+| `POST /v1/events` | 100 requests | 1 minute | Per IP | 429 |
+| `GET /v1/public/*` | 60 requests | 1 minute | Per IP | 429 |
+| `POST /v1/admin/*` | 10 requests | 1 minute | Per API Key | 429 |
+| `GET /v1/admin/*` | 30 requests | 1 minute | Per API Key | 429 |
 
-### 11.3 Anti-Spam
+#### Rate Limit Response
 
-1. **Honeypot Field**: Hidden `hp` input must be empty
-2. **Rate Limiting**: IP-based limits (see above)
-3. **Deduplication**: Same phone + property_id within 10 min → update, not insert
-4. **IP Hashing**: Store SHA256(IP + salt), not raw IP
-
-### 11.4 CORS Configuration
-
-```python
-# apps/api/main.py
-
-from fastapi.middleware.cors import CORSMiddleware
-
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=[
-        "https://amppattaya.com",
-        "https://www.amppattaya.com",
-    ],
-    allow_methods=["GET", "POST"],
-    allow_headers=["Content-Type", "X-API-Key"],
-)
+```json
+{
+  "error": "rate_limit_exceeded",
+  "detail": "Too many requests. Please try again later.",
+  "retry_after": 2700
+}
 ```
 
-### 11.5 LINE Webhook Verification
+#### Rate Limit Headers
+
+```
+X-RateLimit-Limit: 5
+X-RateLimit-Remaining: 3
+X-RateLimit-Reset: 1706356800
+```
+
+### 11.3 Anti-Spam Measures
+
+#### Honeypot Field
+
+HTML Implementation:
+```html
+<input type="text" name="hp" class="honeypot" tabindex="-1" autocomplete="off">
+```
+
+CSS:
+```css
+.honeypot {
+    position: absolute;
+    left: -9999px;
+    width: 1px;
+    height: 1px;
+}
+```
+
+Validation:
+- If `hp` field contains any value → reject request
+- Log attempt with IP hash for monitoring
+- Return generic 400 error (don't reveal honeypot detection)
+
+#### Lead Deduplication
+
+| Dedupe Key | Window | Behavior |
+|------------|--------|----------|
+| `SHA256(phone + property_id)` | 10 minutes | Update existing lead |
+| `SHA256(phone + "general")` | 10 minutes | Update existing (no property) |
+
+When duplicate detected:
+1. Find existing lead by dedupe_key
+2. Update `message` field
+3. Update `updated_at` timestamp
+4. Return same `lead_id`
+5. Do NOT send duplicate notifications
+
+### 11.4 IP Address Privacy
+
+**Never store raw IP addresses**
+
+Hashing Method:
+- Algorithm: SHA256
+- Salt: Environment variable `IP_HASH_SALT`
+- Format: `SHA256(ip_address + salt)`
+- Stored as 64-character hex string
+
+### 11.5 CORS Configuration
+
+#### Allowed Origins
+
+| Environment | Allowed Origins |
+|-------------|-----------------|
+| Production | `https://amppattaya.com`, `https://www.amppattaya.com` |
+| Staging | `https://staging.amppattaya.com` |
+| Development | `http://localhost:3000`, `http://127.0.0.1:3000` |
+
+#### CORS Settings
 
 ```python
-# apps/api/routes/v1/line.py
-
-import hashlib
-import hmac
-
-def verify_line_signature(body: bytes, signature: str) -> bool:
-    hash = hmac.new(
-        settings.line_channel_secret.encode(),
-        body,
-        hashlib.sha256
-    ).digest()
-    return hmac.compare_digest(
-        base64.b64encode(hash).decode(),
-        signature
-    )
+allow_origins: [from CORS_ORIGINS env var]
+allow_methods: ["GET", "POST", "OPTIONS"]
+allow_headers: ["Content-Type", "X-API-Key", "X-Request-ID"]
+allow_credentials: false
+max_age: 86400  # 24 hours preflight cache
 ```
+
+### 11.6 Admin API Authentication
+
+All `/v1/admin/*` endpoints require API key:
+
+**Request Header:**
+```
+X-API-Key: {your_admin_api_key}
+```
+
+**Error Responses:**
+
+Missing header:
+```json
+{"error": "unauthorized", "detail": "API key required"}
+```
+
+Invalid key:
+```json
+{"error": "unauthorized", "detail": "Invalid API key"}
+```
+
+**Key Generation:**
+```bash
+openssl rand -hex 32
+```
+
+### 11.7 LINE Webhook Signature Verification
+
+All LINE webhook requests must have valid signatures:
+
+**Verification Process:**
+1. Get `X-Line-Signature` header
+2. Get raw request body (bytes)
+3. Compute HMAC-SHA256 using channel secret
+4. Base64 encode result
+5. Compare with signature (constant-time)
+
+**Reject if:**
+- Missing signature header
+- Signature mismatch
+- Empty body
+
+**Response on failure:**
+```json
+{"error": "invalid_signature"}
+```
+
+### 11.8 Security Environment Variables
+
+| Variable | Description | Generation |
+|----------|-------------|------------|
+| `ADMIN_API_KEY` | API key for admin endpoints | `openssl rand -hex 32` |
+| `IP_HASH_SALT` | Salt for IP hashing | `openssl rand -hex 16` |
+| `CORS_ORIGINS` | Allowed CORS origins | Manual (comma-separated) |
+| `LINE_CHANNEL_SECRET` | LINE webhook verification | LINE Developer Console |
+
+**Security Rules:**
+1. Never commit actual values to repository
+2. Use different values per environment
+3. Rotate keys quarterly
+4. Store securely (use secrets manager in production)
 
 ---
 
@@ -1547,6 +1702,22 @@ IP_HASH_SALT=xxx
 - [ ] LINE webhook captures groupId successfully
 - [ ] Failed notifications don't block lead save
 
+### 14.5 Security Checklist
+
+- [ ] Input validation on all lead fields
+- [ ] Phone number validation and normalization working
+- [ ] Honeypot field implemented and rejecting spam
+- [ ] Rate limiting active on all endpoints
+- [ ] Rate limit headers present in responses
+- [ ] Lead deduplication preventing duplicates within 10 min
+- [ ] IP addresses hashed before storage (never store raw)
+- [ ] CORS configured for production domains only
+- [ ] Admin endpoints require valid API key
+- [ ] Invalid API key returns 401
+- [ ] LINE webhook signature verification working
+- [ ] All security env vars documented
+- [ ] No secrets in codebase or logs
+
 ---
 
 ## Changelog
@@ -1554,7 +1725,7 @@ IP_HASH_SALT=xxx
 | Version | Date | Changes |
 |---------|------|---------|
 | 0.1 | 2026-01-26 | Initial blueprints (5 separate docs) |
-| 0.2 | 2026-01-27 | Consolidated, aligned with codebase structure |
+| 0.2 | 2026-01-27 | **Consolidated blueprint** - Merged 5 docs, aligned folder structure with `apps/`/`packages/`, added comprehensive security specs (input validation, rate limiting, anti-spam, CORS, admin auth, LINE webhook verification) |
 
 ---
 
