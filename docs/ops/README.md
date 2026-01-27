@@ -19,8 +19,17 @@ docs/ops/
 │   └── CONTENT_CALENDAR_TEMPLATE.md # Content calendar template
 ├── landing/
 │   └── LANDING_PAGE_CHECKLIST.md # Landing page creation checklist
-└── tracking/
-    └── ANALYTICS_SETUP_GUIDE.md  # GA4, Pixel, GTM setup guide
+├── tracking/
+│   └── ANALYTICS_SETUP_GUIDE.md  # GA4, Pixel, GTM setup guide
+└── templates/
+    ├── PROPERTY_ONE_SHEET_TEMPLATE.md # Property advertising one-sheet
+    ├── PRESENTATION_STRUCTURE.md      # Ad plan presentation template
+    ├── BUDGET_CALCULATOR_TEMPLATE.md  # Budget allocation & tracking
+    ├── AI_PROMPT_LIBRARY.md           # AI prompts for ad content
+    └── examples/
+        ├── THE_EMBASSY_LIFE_ONE_SHEET.md    # Example: Residential & Wellness
+        ├── RIVIERA_PALM_BEACH_ONE_SHEET.md  # Example: Luxury & Prime Location
+        └── COPACABANA_CORAL_REEF_ONE_SHEET.md # Example: Investor & Confidence
 ```
 
 ## Quick Links
@@ -38,6 +47,17 @@ docs/ops/
 
 ### 📊 Tracking & Analytics
 - [Analytics Setup Guide](tracking/ANALYTICS_SETUP_GUIDE.md) - GTM, GA4, Facebook Pixel, Google Ads
+
+### 📑 Templates
+- [Property One Sheet Template](templates/PROPERTY_ONE_SHEET_TEMPLATE.md) - สรุปโฆษณา 1 หน้าต่อโครงการ
+- [Presentation Structure](templates/PRESENTATION_STRUCTURE.md) - โครงสร้างนำเสนอแผนโฆษณา
+- [Budget Calculator Template](templates/BUDGET_CALCULATOR_TEMPLATE.md) - คำนวณและจัดสรรงบประมาณ
+- [AI Prompt Library](templates/AI_PROMPT_LIBRARY.md) - AI prompts สำหรับสร้างคอนเทนต์
+
+### 📋 Examples
+- [The Embassy Life One Sheet](templates/examples/THE_EMBASSY_LIFE_ONE_SHEET.md) - Residential & Wellness Category
+- [Riviera Palm Beach One Sheet](templates/examples/RIVIERA_PALM_BEACH_ONE_SHEET.md) - Luxury & Prime Location
+- [Copacabana Coral Reef One Sheet](templates/examples/COPACABANA_CORAL_REEF_ONE_SHEET.md) - Investor & Confidence
 
 ## Usage
 
@@ -88,4 +108,5 @@ docs/ops/
 
 | Date | Change | Author |
 |------|--------|--------|
+| 2026-01-27 | Added Templates & Examples section | AI Agent |
 | 2026-01-26 | Initial creation | AI Agent |
