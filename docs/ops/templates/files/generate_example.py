@@ -2,17 +2,27 @@
 """
 Budget Calculator Example Generator
 สร้างตัวอย่างการใช้งาน Budget Calculator สำหรับโครงการ The Embassy Life
+
+Requirements:
+- This script requires the 'openpyxl' package.
+  Install it with: pip install openpyxl
 """
 
+try:
+    from openpyxl import load_workbook
+    from openpyxl.workbook.workbook import Workbook
+except ImportError as exc:
+    raise SystemExit(
+        "This script requires the 'openpyxl' package. "
+        "Install it with: pip install openpyxl"
+    ) from exc
 
-from openpyxl import load_workbook
 
-
-def create_example_budget():
+def create_example_budget() -> str:
     """Create an example budget for The Embassy Life project"""
 
     # Load the template
-    wb = load_workbook("AMP_Budget_Calculator_Template.xlsx")
+    wb: Workbook = load_workbook("AMP_Budget_Calculator_Template.xlsx")
 
     # Fill Project Summary
     ws_summary = wb["📋 Project Summary"]

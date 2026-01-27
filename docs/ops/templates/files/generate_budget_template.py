@@ -2,14 +2,27 @@
 """
 Budget Calculator Template Generator
 สร้าง Excel template สำหรับวางแผนงบประมาณโฆษณาอสังหาริมทรัพย์
+
+# Dependencies:
+#   This script requires the `openpyxl` package to generate Excel files.
+#   Install it before running this script, for example:
+#       pip install openpyxl
+#   or, if using Poetry:
+#       poetry add --group docs openpyxl
 """
 
+try:
+    from openpyxl import Workbook
+    from openpyxl.styles import Alignment, Border, Font, PatternFill, Side
+    from openpyxl.workbook.workbook import Workbook as WorkbookType
+except ImportError as exc:
+    raise SystemExit(
+        "This script requires the 'openpyxl' package. "
+        "Install it with: pip install openpyxl"
+    ) from exc
 
-from openpyxl import Workbook
-from openpyxl.styles import Alignment, Border, Font, PatternFill, Side
 
-
-def create_budget_template():
+def create_budget_template() -> str:
     """Create comprehensive budget calculator Excel template"""
 
     wb = Workbook()
@@ -32,7 +45,7 @@ def create_budget_template():
     return filename
 
 
-def create_project_summary_sheet(wb):
+def create_project_summary_sheet(wb: WorkbookType) -> None:
     """Sheet 1: Project Summary"""
     ws = wb.create_sheet("📋 Project Summary")
 
@@ -110,7 +123,7 @@ def create_project_summary_sheet(wb):
     apply_borders(ws, 'A3:C19')
 
 
-def create_monthly_budget_sheet(wb):
+def create_monthly_budget_sheet(wb: WorkbookType) -> None:
     """Sheet 2: Monthly Budget Breakdown"""
     ws = wb.create_sheet("💵 Monthly Budget")
 
@@ -198,7 +211,7 @@ def create_monthly_budget_sheet(wb):
     apply_borders(ws, f'A3:F{total_row}')
 
 
-def create_channel_allocation_sheet(wb):
+def create_channel_allocation_sheet(wb: WorkbookType) -> None:
     """Sheet 3: Channel Budget Allocation"""
     ws = wb.create_sheet("🎯 Channel Allocation")
 
@@ -272,7 +285,7 @@ def create_channel_allocation_sheet(wb):
     apply_borders(ws, 'A9:D13')
 
 
-def create_production_tools_sheet(wb):
+def create_production_tools_sheet(wb: WorkbookType) -> None:
     """Sheet 4: Production & Tools Budget"""
     ws = wb.create_sheet("🎬 Production & Tools")
 
@@ -344,7 +357,7 @@ def create_production_tools_sheet(wb):
     apply_borders(ws, f'A3:D{current_row}')
 
 
-def create_weekly_tracking_sheet(wb):
+def create_weekly_tracking_sheet(wb: WorkbookType) -> None:
     """Sheet 5: Weekly Budget Tracking"""
     ws = wb.create_sheet("📅 Weekly Tracking")
 
@@ -403,7 +416,7 @@ def create_weekly_tracking_sheet(wb):
     apply_borders(ws, 'A3:H8')
 
 
-def create_roi_calculator_sheet(wb):
+def create_roi_calculator_sheet(wb: WorkbookType) -> None:
     """Sheet 6: ROI Calculator"""
     ws = wb.create_sheet("📊 ROI Calculator")
 
@@ -509,7 +522,7 @@ def create_roi_calculator_sheet(wb):
     apply_borders(ws, 'A19:B24')
 
 
-def apply_borders(ws, cell_range):
+def apply_borders(ws, cell_range: str) -> None:
     """Apply borders to a range of cells"""
     thin_border = Border(
         left=Side(style='thin'),
