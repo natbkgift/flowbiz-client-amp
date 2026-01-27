@@ -6,12 +6,36 @@
   <title>Property Listings | Asset Management Property</title>
   <meta name="description" content="Browse all properties available for rent or sale in Pattaya">
   
+  <!-- Open Graph -->
+  <meta property="og:title" content="Property Listings | Asset Management Property">
+  <meta property="og:description" content="Browse all properties available for rent or sale in Pattaya">
+  <meta property="og:image" content="https://via.placeholder.com/1200x630/1744BE/FFFFFF?text=AMP+Pattaya">
+  <meta property="og:url" content="https://amppattaya.com/listing.html">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Asset Management Property">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Property Listings | Asset Management Property">
+  <meta name="twitter:description" content="Browse all properties available for rent or sale in Pattaya">
+  <meta name="twitter:image" content="https://via.placeholder.com/1200x630/1744BE/FFFFFF?text=AMP+Pattaya">
+
+  <!-- Canonical URL -->
+  <link rel="canonical" href="https://amppattaya.com/listing.html">
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='6' fill='%231744BE'/><text x='16' y='22' text-anchor='middle' fill='white' font-family='Arial' font-size='14' font-weight='bold'>AMP</text></svg>">
+  <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'><rect width='180' height='180' rx='20' fill='%231744BE'/><text x='90' y='115' text-anchor='middle' fill='white' font-family='Arial' font-size='60' font-weight='bold'>AMP</text></svg>">
+  
   <!-- Stylesheets -->
   <link rel="stylesheet" href="assets/css/main.css">
   <link rel="stylesheet" href="assets/css/components.css">
   <link rel="stylesheet" href="assets/css/responsive.css">
 </head>
 <body>
+  <!-- Skip Link for Accessibility -->
+  <a href="#main-content" class="skip-link">Skip to main content</a>
+  
   <!-- Header -->
   <header class="header">
     <div class="header-content">
@@ -32,7 +56,7 @@
       
       <div class="header-actions">
         <button class="lang-switch" onclick="switchLanguage()">TH</button>
-        <button class="hamburger mobile-only" onclick="toggleMobileMenu()" aria-label="Menu">
+        <button class="hamburger mobile-only" onclick="toggleMobileMenu()" aria-label="Menu" aria-expanded="false">
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <line x1="3" y1="12" x2="21" y2="12"></line>
             <line x1="3" y1="6" x2="21" y2="6"></line>
@@ -52,7 +76,7 @@
   </div>
   
   <!-- Main Content -->
-  <div class="section">
+  <div class="section" id="main-content">
     <div class="container">
       <!-- Mobile Filter Toggle Button -->
       <button class="btn btn-primary mobile-only mb-lg" id="filter-toggle-btn" onclick="toggleFilterSidebar()" style="width: 100%;">

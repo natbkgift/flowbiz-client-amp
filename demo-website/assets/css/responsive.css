@@ -164,7 +164,25 @@
 
 /* Dark Mode Support (Optional) */
 @media (prefers-color-scheme: dark) {
-  /* Currently not implemented, but ready for future enhancement */
+  :root {
+    --color-white: #1E293B;
+    --color-text: #F8FAFC;
+    --color-gray-50: #0F172A;
+    --color-gray-100: #1E293B;
+    --color-gray-300: #475569;
+    --color-gray-600: #94A3B8;
+  }
+  
+  .property-card,
+  .filter-sidebar,
+  .agent-card,
+  .inquiry-form {
+    background: #1E293B;
+  }
+  
+  .header {
+    background: #0F172A;
+  }
 }
 
 /* Touch Device Optimizations */
