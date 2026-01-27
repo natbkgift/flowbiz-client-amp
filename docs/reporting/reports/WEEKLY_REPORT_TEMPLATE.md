@@ -48,9 +48,7 @@ Meeting: Monday standup (10:30 AM)
 
 ## 📊 Executive Summary
 
-
-
-- ✅ Strong week with 42 new leads (+12% vs last week)
+- ✅ Strong week with 42 new leads (+13.5% vs last week)
 - ⚠️ CPL increased to ฿485 due to Facebook campaign test
 - 🎯 Closed 2 deals worth ฿6.8M (commission: ฿204K)
 - 📈 LINE group processing yielded 8 new listings
@@ -418,10 +416,10 @@ Best,
 **Use Google Sheets formulas:**
 ```
 Weekly Lead Count:
-=COUNTIFS(Lead_Tracking!H:H, ">=date", Lead_Tracking!H:H, "<=date")
+=COUNTIFS(Lead_Tracking!H:H, ">="&DATE(2026,1,20), Lead_Tracking!H:H, "<="&DATE(2026,1,26))
 
 Weekly Spend:
-=SUMIFS(Budget!C:C, Budget!A:A, ">=date", Budget!A:A, "<=date")
+=SUMIFS(Budget!C:C, Budget!A:A, ">="&DATE(2026,1,20), Budget!A:A, "<="&DATE(2026,1,26))
 
 Average CPL:
 =Weekly_Spend / Weekly_Leads
