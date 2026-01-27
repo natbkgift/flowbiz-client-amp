@@ -1,841 +1,497 @@
-# KPI Dashboard Specification
+# KPI Dashboard Specification - AMP
 
-> 📊 ระบบวัดผลและติดตาม KPIs สำหรับ AMP - ครอบคลุมทุกมิติของธุรกิจ
+> 📊 Key Performance Indicators สำหรับ Asset Management Property
 
 ## Overview
 
-เอกสารนี้กำหนด KPIs ทั้งหมดที่ AMP ใช้ในการวัดผลการดำเนินงาน รวมถึงสูตรการคำนวณ, เป้าหมาย, และวิธีการติดตาม
+เอกสารนี้กำหนด KPIs ทั้งหมดสำหรับการวัดผลและติดตามประสิทธิภาพของ AMP ครอบคลุมทุก Phase จาก Phase 0 (Operations) จนถึง Phase 4 (Full Automation)
 
----
-
-## KPI Categories
+### Dashboard Hierarchy
 
 ```
-┌──────────────────────────────────────────────────────┐
-│                 AMP KPI FRAMEWORK                    │
-├──────────────────────────────────────────────────────┤
-│                                                      │
-│  🎯 MARKETING KPIs (Lead Generation)                │
-│     ├── Cost per Lead (CPL)                         │
-│     ├── Click-through Rate (CTR)                    │
-│     ├── Conversion Rate                             │
-│     └── Return on Ad Spend (ROAS)                   │
-│                                                      │
-│  💼 SALES KPIs (Conversion)                         │
-│     ├── Lead Response Time                          │
-│     ├── Lead Qualification Rate                     │
-│     ├── Viewing Conversion Rate                     │
-│     └── Close Rate                                  │
-│                                                      │
-│  📊 OPERATIONS KPIs (Efficiency)                    │
-│     ├── Active Listings Count                       │
-│     ├── Listing Freshness                           │
-│     ├── LINE Response Rate                          │
-│     └── Data Quality Score                          │
-│                                                      │
-│  💰 FINANCIAL KPIs (Business Health)                │
-│     ├── Total Revenue                               │
-│     ├── Revenue per Deal                            │
-│     ├── Marketing ROI                               │
-│     └── Cost per Acquisition (CPA)                  │
-│                                                      │
-└──────────────────────────────────────────────────────┘
+┌─────────────────────────────────────────────────────────────┐
+│                   EXECUTIVE DASHBOARD                       │
+│              (High-level business metrics)                  │
+└────────────────────────┬────────────────────────────────────┘
+                         │
+         ┌───────────────┼───────────────┬──────────────┐
+         │               │               │              │
+         ▼               ▼               ▼              ▼
+    ┌────────┐    ┌──────────┐    ┌─────────┐    ┌─────────┐
+    │Marketing│    │  Sales   │    │ Operations│   │ Finance │
+    │Dashboard│    │Dashboard │    │ Dashboard │   │Dashboard│
+    └────────┘    └──────────┘    └─────────┘    └─────────┘
 ```
 
 ---
 
-## 🎯 Marketing KPIs
+## Phase 0: Foundation KPIs (Current - Operations)
 
-### 1. Cost per Lead (CPL)
+### Marketing Performance
 
-**คำอธิบาย:** ต้นทุนเฉลี่ยในการได้ lead 1 ราย
+#### 1. Lead Generation Metrics
 
-**สูตร:**
+| KPI | Formula | Target | Data Source | Update Frequency |
+|-----|---------|--------|-------------|------------------|
+| **Total Leads (Monthly)** | COUNT(Leads) WHERE Month = Current | 200+ | Lead_Tracking.xlsx | Daily |
+| **New Leads (Daily)** | COUNT(Leads) WHERE Date = Today | 7+ | Lead_Tracking.xlsx | Daily |
+| **Leads by Source** | COUNT(Leads) GROUP BY Source | - | Lead_Tracking.xlsx | Daily |
+| **Lead Growth Rate** | (This Month - Last Month) / Last Month * 100 | +10% MoM | Lead_Tracking.xlsx | Monthly |
+
+**Visualization:**
 ```
-CPL = Total Marketing Spend / Total Leads Generated
-
-Example:
-Spend: ฿50,000
-Leads: 100
-CPL = 50,000 / 100 = ฿500 per lead
+📊 Lead Generation Trend (Line Chart)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+│                                          ╱╲    
+│                                    ╱╲   ╱  ╲   
+│                              ╱╲   ╱  ╲╱    ╲  
+│                        ╱╲   ╱  ╲╱           ╲ 
+│                  ╱╲   ╱  ╲╱                  ╲
+│            ╱╲   ╱  ╲╱                         
+│      ╱╲   ╱  ╲╱                               
+│ ╱╲  ╱  ╲╱                                     
+└────────────────────────────────────────────────
+  W1  W2  W3  W4  W5  W6  W7  W8
 ```
 
-**Target:**
-- **Excellent:** < ฿300
-- **Good:** ฿300-500
-- **Acceptable:** ฿500-800
-- **Needs Improvement:** > ฿800
+#### 2. Cost Efficiency Metrics
 
-**Data Sources:**
-- Marketing spend: Budget tracking sheet
-- Leads: Lead tracking sheet
+| KPI | Formula | Target | Alert Threshold |
+|-----|---------|--------|-----------------|
+| **Cost Per Lead (CPL)** | Total Ad Spend / Total Leads | < ฿500 | > ฿800 |
+| **CPL by Source** | Source Spend / Source Leads | Varies | - |
+| **Return on Ad Spend (ROAS)** | Revenue / Ad Spend | > 3:1 | < 2:1 |
+| **Budget Utilization** | Spent / Budgeted * 100 | 90-100% | > 105% |
 
-**Tracking Frequency:** Daily
-
-**Looker Studio Formula:**
+**CPL Benchmark by Source:**
 ```
-SUM(Marketing_Spend) / COUNT(DISTINCT Lead_ID)
+Target CPL:
+├── Facebook Ads:     < ฿400
+├── Google Ads:       < ฿600
+├── LINE Ads:         < ฿350
+├── TikTok Ads:       < ฿450
+└── Organic/Referral: ฿0
+```
+
+#### 3. Conversion Metrics
+
+| KPI | Formula | Target | Measurement |
+|-----|---------|--------|-------------|
+| **Landing Page Conversion Rate** | Form Submits / Page Views * 100 | > 5% | Google Analytics |
+| **Ad Click-Through Rate (CTR)** | Clicks / Impressions * 100 | > 2% | Ads Manager |
+| **Lead Form Completion Rate** | Completed / Started * 100 | > 60% | Google Analytics |
+
+#### 4. Engagement Metrics
+
+| KPI | Formula | Target | Platform |
+|-----|---------|--------|----------|
+| **Social Media Engagement Rate** | (Likes + Comments + Shares) / Followers * 100 | > 3% | Facebook, IG |
+| **Average Post Reach** | Total Reach / Post Count | > 2,000 | Facebook Insights |
+| **Story View Rate** | Story Views / Followers * 100 | > 15% | Instagram |
+| **Website Session Duration** | AVG(Session Duration) | > 2 min | Google Analytics |
+
+---
+
+### Sales Performance
+
+#### 5. Lead Management Metrics
+
+| KPI | Formula | Target | Alert Threshold |
+|-----|---------|--------|-----------------|
+| **Lead Response Time** | AVG(First Contact - Lead Created) | < 30 min | > 2 hours |
+| **Lead-to-Contact Rate** | Contacted / Total Leads * 100 | > 95% | < 80% |
+| **Lead Qualification Rate** | Qualified / Total Leads * 100 | 20-30% | < 15% |
+| **Hot Lead Percentage** | Hot Leads / Total Leads * 100 | > 20% | < 10% |
+
+**Lead Response Time Distribution:**
+```
+Target: < 30 minutes
+
+< 30 min:  ████████████████████████████ 70%
+30-60 min: ██████████ 20%
+1-2 hours: ████ 7%
+> 2 hours: █ 3%
+```
+
+#### 6. Sales Pipeline Metrics
+
+| KPI | Formula | Target | Data Source |
+|-----|---------|--------|-------------|
+| **Total Pipeline Value** | SUM(Expected_Value) WHERE Stage NOT IN (Won, Lost) | ฿10M+ | Lead_Tracking.xlsx |
+| **Average Deal Size** | SUM(Converted Value) / COUNT(Converted) | ฿3M+ | Lead_Tracking.xlsx |
+| **Win Rate** | Won / (Won + Lost) * 100 | > 30% | Lead_Tracking.xlsx |
+| **Sales Cycle Length** | AVG(Date_Won - Date_Created) | < 60 days | Lead_Tracking.xlsx |
+
+**Sales Funnel:**
+```
+┌─────────────────────────────────────────────────────────────┐
+│                     SALES FUNNEL                            │
+├─────────────────────────────────────────────────────────────┤
+│                                                             │
+│  New Leads:         200  ████████████████████████████████   │
+│                          (100%)                             │
+│                                                             │
+│  Contacted:         190  ███████████████████████████        │
+│                          (95%)                              │
+│                                                             │
+│  Qualified:          60  █████████                          │
+│                          (30%)                              │
+│                                                             │
+│  Proposal Sent:      30  ████                               │
+│                          (15%)                              │
+│                                                             │
+│  Viewing Scheduled:  20  ███                                │
+│                          (10%)                              │
+│                                                             │
+│  Negotiation:        12  ██                                 │
+│                          (6%)                               │
+│                                                             │
+│  Won:                 8  █                                  │
+│                          (4%)                               │
+│                                                             │
+└─────────────────────────────────────────────────────────────┘
+```
+
+#### 7. Agent Performance Metrics
+
+| KPI | Formula | Target | Per Agent |
+|-----|---------|--------|-----------|
+| **Leads Assigned** | COUNT(Leads) WHERE Agent = X | Balanced | - |
+| **Leads Converted** | COUNT(Won) WHERE Agent = X | - | - |
+| **Conversion Rate by Agent** | Won / Assigned * 100 | > 3% | - |
+| **Average Response Time** | AVG(Response Time) WHERE Agent = X | < 30 min | - |
+| **Properties Shown** | COUNT(Viewings) WHERE Agent = X | - | - |
+
+---
+
+### Operations Metrics
+
+#### 8. Data Management
+
+| KPI | Formula | Target | Check Frequency |
+|-----|---------|--------|-----------------|
+| **Properties in Database** | COUNT(Properties) WHERE Status = Active | 500+ | Weekly |
+| **New Properties Added (Monthly)** | COUNT(Properties) WHERE Date_Added = This Month | 50+ | Daily |
+| **LINE Entries Processed** | COUNT(LINE Entries) WHERE Date = Today | 20+ | Daily |
+| **LINE-to-Master Conversion** | Added to Master / Total Entries * 100 | > 10% | Weekly |
+| **Data Quality Score** | (Complete Fields / Total Fields) * 100 | > 95% | Weekly |
+
+#### 9. Content & Social Media
+
+| KPI | Formula | Target | Platform |
+|-----|---------|--------|----------|
+| **Posts Published (Weekly)** | COUNT(Posts) WHERE Week = Current | 21+ | All |
+| **Content Calendar Fill Rate** | Scheduled / Planned * 100 | > 90% | Internal |
+| **Follower Growth Rate** | (New - Unfollowed) / Total * 100 | +5% MoM | All |
+| **Average Engagement per Post** | Total Engagement / Posts | Varies | Platform-specific |
+
+---
+
+### Financial Metrics
+
+#### 10. Revenue & Commission
+
+| KPI | Formula | Target | Update Frequency |
+|-----|---------|--------|------------------|
+| **Monthly Revenue** | SUM(Deal Value) WHERE Closed = This Month | ฿5M+ | Daily |
+| **Commission Earned** | SUM(Commission) WHERE Paid = This Month | ฿150K+ | Daily |
+| **Average Commission per Deal** | Total Commission / Deals Closed | ฿30K+ | Monthly |
+| **Revenue Growth Rate** | (This Month - Last Month) / Last Month * 100 | +10% MoM | Monthly |
+
+#### 11. Budget Management
+
+| KPI | Formula | Target | Alert Threshold |
+|-----|---------|--------|-----------------|
+| **Total Marketing Spend** | SUM(All Marketing Costs) | ฿100-200K | > ฿250K |
+| **Budget vs Actual** | (Actual - Budget) / Budget * 100 | ±5% | > ±15% |
+| **Cost per Acquisition (CPA)** | Total Spend / Customers Won | < ฿5,000 | > ฿8,000 |
+| **Marketing ROI** | (Revenue - Spend) / Spend * 100 | > 300% | < 200% |
+
+---
+
+## Phase 1-4: Advanced KPIs (AI Agent Era)
+
+### Phase 1: Core Infrastructure (Weeks 1-4)
+
+| KPI | Description | Target |
+|-----|-------------|--------|
+| **System Uptime** | Percentage of time APIs are available | > 99% |
+| **API Response Time** | Average response time for API calls | < 200ms |
+| **Error Rate** | Percentage of failed requests | < 1% |
+
+### Phase 2: AI Agents (Weeks 5-12)
+
+| KPI | Description | Target |
+|-----|-------------|--------|
+| **AI Response Time** | Time for AI to respond to lead | < 5 seconds |
+| **AI Accuracy Rate** | Correct responses / Total responses | > 95% |
+| **Human Handover Rate** | AI escalates to human | < 10% |
+| **Lead Auto-Qualification Rate** | Leads auto-qualified by AI | > 70% |
+
+### Phase 3: Integration (Weeks 13-16)
+
+| KPI | Description | Target |
+|-----|-------------|--------|
+| **End-to-End Processing Time** | Lead received → First response | < 30 seconds |
+| **Integration Success Rate** | Successful data sync | > 99% |
+| **Automation Coverage** | Tasks automated / Total tasks | > 60% |
+
+### Phase 4: Launch & Optimization (Weeks 17-20)
+
+| KPI | Description | Target |
+|-----|-------------|--------|
+| **Full Automation Rate** | Fully automated interactions | > 80% |
+| **Customer Satisfaction Score** | CSAT from leads | > 4.5/5 |
+| **Team Efficiency Gain** | Time saved vs baseline | +50% |
+| **Lead Response Time** | Fully automated response | < 30 seconds |
+
+---
+
+## KPI Categories & Weights
+
+### Executive Scorecard
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                  EXECUTIVE SCORECARD                        │
+├─────────────────────────────────────────────────────────────┤
+│                                                             │
+│  Category            Weight    Score    Status             │
+│  ─────────────────────────────────────────────────────────  │
+│  📈 Revenue          30%       85/100    ████████▌ Good    │
+│  💰 Profitability    20%       78/100    ███████▊  OK      │
+│  📊 Lead Generation  20%       92/100    █████████▏ Great  │
+│  🎯 Conversion       15%       70/100    ███████   OK      │
+│  ⚙️  Operations      10%       88/100    ████████▊ Good    │
+│  😊 Satisfaction     5%        95/100    █████████▌ Great  │
+│                                                             │
+│  Overall Score:      82/100    ████████▏ Good              │
+│                                                             │
+└─────────────────────────────────────────────────────────────┘
 ```
 
 ---
 
-### 2. Click-through Rate (CTR)
+## Dashboard Layouts
 
-**คำอธิบาย:** เปอร์เซ็นต์ของคนที่เห็นโฆษณาและคลิก
+### 1. Executive Dashboard
 
-**สูตร:**
+**Top Metrics (Big Numbers):**
 ```
-CTR = (Total Clicks / Total Impressions) × 100%
-
-Example:
-Clicks: 500
-Impressions: 20,000
-CTR = (500 / 20,000) × 100% = 2.5%
+┌─────────────────────────────────────────────────────────────┐
+│                                                             │
+│   ฿4.5M              158               ฿425              4.2│
+│   Revenue          Leads This         Cost Per          Days│
+│   This Month       Month              Lead              Sales│
+│                                                          Cycle│
+│   ↑ 12%            ↑ 8%              ↓ 5%              ↓ 2  │
+│   vs Last Month    vs Last Month     vs Target         Days │
+│                                                             │
+└─────────────────────────────────────────────────────────────┘
 ```
 
-**Target:**
-- **Excellent:** > 3%
-- **Good:** 2-3%
-- **Acceptable:** 1-2%
-- **Needs Improvement:** < 1%
+**Charts:**
+- Revenue Trend (Line chart, last 12 months)
+- Lead Source Breakdown (Pie chart)
+- Sales Funnel (Funnel chart)
+- Top Performing Agents (Bar chart)
 
-**Data Sources:**
-- Google Ads dashboard
-- Facebook Ads Manager
+### 2. Marketing Dashboard
 
-**Tracking Frequency:** Daily
+**Key Sections:**
+1. Campaign Performance
+2. Cost Analysis
+3. Lead Quality
+4. Channel Performance
+5. Content Performance
 
-**Notes:**
-- CTR varies by platform (Google typically higher)
-- Benchmark against industry average (real estate: 1.5-2%)
+**Example Metrics Card:**
+```
+┌───────────────────────────────────┐
+│ Facebook Ads - January            │
+├───────────────────────────────────┤
+│ Spend:        ฿45,000             │
+│ Leads:        112                 │
+│ CPL:          ฿402                │
+│ CTR:          2.3%                │
+│ Conv Rate:    5.8%                │
+│ Status:       ✅ On Target        │
+└───────────────────────────────────┘
+```
+
+### 3. Sales Dashboard
+
+**Key Sections:**
+1. Pipeline Overview
+2. Lead Status
+3. Agent Performance
+4. Conversion Funnel
+5. Deal Velocity
+
+**Pipeline View:**
+```
+Stage              Value         Count    Avg Days in Stage
+────────────────────────────────────────────────────────────
+New                ฿2.5M         85       1
+Contacted          ฿2.2M         72       2
+Qualified          ฿5.8M         48       5
+Proposal           ฿4.2M         22       7
+Negotiation        ฿3.5M         15       10
+Closing            ฿2.8M         8        5
+────────────────────────────────────────────────────────────
+TOTAL PIPELINE     ฿21.0M        250      -
+```
+
+### 4. Operations Dashboard
+
+**Key Sections:**
+1. Data Quality
+2. LINE Group Activity
+3. Property Inventory
+4. Task Completion
+5. System Health
 
 ---
 
-### 3. Conversion Rate (Lead Conversion)
+## Data Sources & Integration
 
-**คำอธิบาย:** เปอร์เซ็นต์ของคนที่คลิกโฆษณาและกลายเป็น lead
+### Google Sheets Integration
 
-**สูตร:**
+**Sheets Required:**
 ```
-Conversion Rate = (Total Leads / Total Clicks) × 100%
+1. Property_Master_List.xlsx
+   → Total properties, New adds, Status distribution
 
-Example:
-Leads: 100
-Clicks: 2,000
-Conversion Rate = (100 / 2,000) × 100% = 5%
-```
+2. Lead_Tracking.xlsx
+   → Lead counts, Conversion rates, Response times
 
-**Target:**
-- **Excellent:** > 8%
-- **Good:** 5-8%
-- **Acceptable:** 3-5%
-- **Needs Improvement:** < 3%
+3. Daily_Summary_LINE.xlsx
+   → LINE entries, Processing status
 
-**Data Sources:**
-- Leads: Lead tracking sheet
-- Clicks: Ad platforms
+4. Budget_Tracking.xlsx
+   → Spend by category, Budget vs Actual
 
-**Tracking Frequency:** Daily
-
-**Optimization Tips:**
-- Improve landing page
-- Better targeting
-- Clear call-to-action
-- Mobile optimization
-
----
-
-### 4. Return on Ad Spend (ROAS)
-
-**คำอธิบาย:** รายได้ที่ได้กลับมาจากแต่ละบาทที่ใช้ในโฆษณา
-
-**สูตร:**
-```
-ROAS = Revenue from Ads / Ad Spend
-
-Example:
-Revenue: ฿250,000
-Ad Spend: ฿50,000
-ROAS = 250,000 / 50,000 = 5 (5x or 500%)
+5. Commission_Tracking.xlsx
+   → Revenue, Commission earned
 ```
 
-**Target:**
-- **Excellent:** > 8x
-- **Good:** 5-8x
-- **Acceptable:** 3-5x
-- **Needs Improvement:** < 3x
+### Looker Studio Connection
 
-**Data Sources:**
-- Revenue: Closed deals from ad sources
-- Ad spend: Budget tracking
-
-**Tracking Frequency:** Weekly/Monthly
-
-**Notes:**
-- Attribution window: 30 days
-- Include assisted conversions
-- Consider lifetime value for long sales cycles
-
----
-
-## 💼 Sales KPIs
-
-### 5. Lead Response Time
-
-**คำอธิบาย:** เวลาเฉลี่ยในการติดต่อ lead ครั้งแรก
-
-**สูตร:**
+**Data Source Setup:**
 ```
-Avg Response Time = SUM(Time to First Contact) / COUNT(Leads)
+1. Connect Google Sheets
+   - Authorize Google Sheets connector
+   - Select workbook
+   - Choose sheets
 
-Example:
-Lead 1: 5 minutes
-Lead 2: 10 minutes
-Lead 3: 15 minutes
-Avg = (5 + 10 + 15) / 3 = 10 minutes
+2. Blend Data Sources
+   - Join Lead_Tracking + Property_Master
+   - Join Budget + Commission
+
+3. Create Calculated Fields
+   - CPL = Total_Spend / Total_Leads
+   - Conversion_Rate = Won / Total * 100
+   - ROI = (Revenue - Spend) / Spend * 100
+
+4. Set Refresh Schedule
+   - Hourly for critical metrics
+   - Daily for reports
 ```
 
-**Target:**
-- **Excellent:** < 5 min
-- **Good:** 5-15 min
-- **Acceptable:** 15-30 min
-- **Needs Improvement:** > 30 min
+### Google Analytics 4
 
-**Data Sources:**
-- Lead tracking sheet (timestamp columns)
-
-**Tracking Frequency:** Daily
-
-**Impact:**
-- Response within 5 min = 10x higher conversion
-- After 30 min, conversion drops 80%
-
----
-
-### 6. Lead Qualification Rate
-
-**คำอธิบาย:** เปอร์เซ็นต์ของ lead ที่ผ่านการคัดกรอง (qualified)
-
-**สูตร:**
+**Events to Track:**
 ```
-Qualification Rate = (Qualified Leads / Total Leads) × 100%
-
-Example:
-Qualified: 60
-Total Leads: 100
-Rate = (60 / 100) × 100% = 60%
-```
-
-**Qualified Lead Criteria:**
-- Has budget (defined range)
-- Has timeline (< 6 months)
-- Reachable contact info
-- Genuine interest (not competitor research)
-
-**Target:**
-- **Excellent:** > 70%
-- **Good:** 50-70%
-- **Acceptable:** 30-50%
-- **Needs Improvement:** < 30%
-
-**Data Sources:**
-- Lead tracking sheet (Qualification_Status column)
-
-**Tracking Frequency:** Weekly
-
----
-
-### 7. Lead-to-Viewing Conversion Rate
-
-**คำอธิบาย:** เปอร์เซ็นต์ของ qualified leads ที่จัดชมทรัพย์
-
-**สูตร:**
-```
-Viewing Rate = (Viewing Scheduled / Qualified Leads) × 100%
-
-Example:
-Viewings: 30
-Qualified Leads: 60
-Rate = (30 / 60) × 100% = 50%
-```
-
-**Target:**
-- **Excellent:** > 40%
-- **Good:** 30-40%
-- **Acceptable:** 20-30%
-- **Needs Improvement:** < 20%
-
-**Data Sources:**
-- Lead tracking sheet (Status = "Viewing Scheduled")
-
-**Tracking Frequency:** Weekly
-
----
-
-### 8. Viewing-to-Offer Conversion Rate
-
-**คำอธิบาย:** เปอร์เซ็นต์ของการชมที่กลายเป็น offer
-
-**สูตร:**
-```
-Offer Rate = (Offers Made / Viewings Completed) × 100%
-
-Example:
-Offers: 12
-Viewings: 30
-Rate = (12 / 30) × 100% = 40%
-```
-
-**Target:**
-- **Excellent:** > 40%
-- **Good:** 30-40%
-- **Acceptable:** 20-30%
-- **Needs Improvement:** < 20%
-
-**Data Sources:**
-- Lead tracking sheet (Status = "Offer Made")
-
-**Tracking Frequency:** Weekly
-
----
-
-### 9. Close Rate (Offer-to-Close)
-
-**คำอธิบาย:** เปอร์เซ็นต์ของ offer ที่ปิดการขายสำเร็จ
-
-**สูตร:**
-```
-Close Rate = (Closed Deals / Offers Made) × 100%
-
-Example:
-Closed: 6
-Offers: 12
-Rate = (6 / 12) × 100% = 50%
-```
-
-**Target:**
-- **Excellent:** > 60%
-- **Good:** 50-60%
-- **Acceptable:** 40-50%
-- **Needs Improvement:** < 40%
-
-**Data Sources:**
-- Lead tracking sheet (Status = "Closed")
-
-**Tracking Frequency:** Weekly/Monthly
-
----
-
-### 10. Overall Lead-to-Close Rate
-
-**คำอธิบาย:** เปอร์เซ็นต์ของ lead ทั้งหมดที่ปิดการขาย
-
-**สูตร:**
-```
-Overall Close Rate = (Closed Deals / Total Leads) × 100%
-
-Example:
-Closed: 6
-Total Leads: 100
-Rate = (6 / 100) × 100% = 6%
-```
-
-**Target:**
-- **Excellent:** > 8%
-- **Good:** 5-8%
-- **Acceptable:** 3-5%
-- **Needs Improvement:** < 3%
-
-**Data Sources:**
-- Lead tracking sheet
-
-**Tracking Frequency:** Monthly
-
-**Calculation Breakdown:**
-```
-If:
-- Qualification Rate: 60%
-- Viewing Rate: 50%
-- Offer Rate: 40%
-- Close Rate: 50%
-
-Then:
-Overall = 0.60 × 0.50 × 0.40 × 0.50 = 0.06 = 6%
+- page_view (all pages)
+- lead_form_start
+- lead_form_submit
+- property_view
+- click_call
+- click_line
+- search (property search)
 ```
 
 ---
 
-## 📊 Operations KPIs
-
-### 11. Active Listings Count
-
-**คำอธิบาย:** จำนวนทรัพย์ที่พร้อมขาย/ให้เช่า
-
-**สูตร:**
-```
-Active Listings = COUNT(Properties WHERE Status = "Available")
-
-Example:
-Available Properties: 450
-Active Listings = 450
-```
-
-**Target:**
-- **Excellent:** > 500
-- **Good:** 300-500
-- **Acceptable:** 150-300
-- **Needs Improvement:** < 150
-
-**Data Sources:**
-- Property Master List (Status = "Available")
-
-**Tracking Frequency:** Weekly
-
----
-
-### 12. Listing Freshness (Update Rate)
-
-**คำอธิบาย:** เปอร์เซ็นต์ของ listings ที่อัพเดตภายใน 7 วัน
-
-**สูตร:**
-```
-Freshness = (Updated Within 7 Days / Total Listings) × 100%
-
-Example:
-Updated: 400
-Total: 450
-Freshness = (400 / 450) × 100% = 88.9%
-```
-
-**Target:**
-- **Excellent:** > 90%
-- **Good:** 75-90%
-- **Acceptable:** 60-75%
-- **Needs Improvement:** < 60%
-
-**Data Sources:**
-- Property Master List (Last_Updated column)
-
-**Tracking Frequency:** Weekly
-
----
-
-### 13. LINE Response Rate
-
-**คำอธิบาย:** เปอร์เซ็นต์ของข้อความใน LINE ที่ได้รับการตอบกลับ
-
-**สูตร:**
-```
-Response Rate = (Messages Responded / Total Messages) × 100%
-
-Example:
-Responded: 90
-Total: 100
-Rate = (90 / 100) × 100% = 90%
-```
-
-**Target:**
-- **Excellent:** > 95%
-- **Good:** 85-95%
-- **Acceptable:** 75-85%
-- **Needs Improvement:** < 75%
-
-**Data Sources:**
-- LINE OA dashboard
-- Manual tracking
-
-**Tracking Frequency:** Daily
-
----
-
-### 14. Data Quality Score
-
-**คำอธิบาย:** คะแนนรวมของคุณภาพข้อมูล
-
-**สูตร:**
-```
-Quality Score = (Complete Required Fields / Total Required Fields) × 100%
-
-Components:
-1. Completeness (40%): All required fields filled
-2. Accuracy (30%): Data validation passed
-3. Timeliness (20%): Updated within SLA
-4. Consistency (10%): Follows naming conventions
-
-Example:
-Completeness: 95%
-Accuracy: 90%
-Timeliness: 100%
-Consistency: 85%
-
-Score = (0.95 × 0.4) + (0.90 × 0.3) + (1.0 × 0.2) + (0.85 × 0.1)
-Score = 0.38 + 0.27 + 0.20 + 0.085 = 93.5%
-```
-
-**Target:**
-- **Excellent:** > 95%
-- **Good:** 85-95%
-- **Acceptable:** 75-85%
-- **Needs Improvement:** < 75%
-
-**Data Sources:**
-- Property Master List
-- Lead Tracking
-- Data validation scripts
-
-**Tracking Frequency:** Weekly
-
----
-
-## 💰 Financial KPIs
-
-### 15. Total Revenue
-
-**คำอธิบาย:** รายได้รวมจากค่าคอมมิชชั่น
-
-**สูตร:**
-```
-Total Revenue = SUM(Commission from Closed Deals)
-
-Example Deal:
-Property Value: ฿5,000,000
-Commission Rate: 3%
-Commission: ฿5,000,000 × 0.03 = ฿150,000
-
-Monthly Revenue = SUM of all closed deals in month
-```
-
-**Target:**
-- **Monthly Goal:** ฿500,000+
-- **Quarterly Goal:** ฿1,500,000+
-- **Annual Goal:** ฿6,000,000+
-
-**Data Sources:**
-- Lead tracking sheet (Closed_Deals)
-- Finance tracking
-
-**Tracking Frequency:** Daily/Monthly
-
----
-
-### 16. Revenue per Deal
-
-**คำอธิบาย:** ค่าเฉลี่ยรายได้ต่อดีลที่ปิด
-
-**สูตร:**
-```
-Avg Revenue per Deal = Total Revenue / Number of Closed Deals
-
-Example:
-Revenue: ฿500,000
-Deals: 10
-Avg = ฿500,000 / 10 = ฿50,000 per deal
-```
-
-**Target:**
-- **Excellent:** > ฿80,000
-- **Good:** ฿50,000-80,000
-- **Acceptable:** ฿30,000-50,000
-- **Needs Improvement:** < ฿30,000
-
-**Data Sources:**
-- Lead tracking sheet
-
-**Tracking Frequency:** Monthly
-
-**Insights:**
-- Higher = focusing on luxury properties
-- Lower = more volume, lower-value deals
-
----
-
-### 17. Marketing ROI
-
-**คำอธิบาย:** ผลตอบแทนจากการลงทุนในการตลาด
-
-**สูตร:**
-```
-Marketing ROI = ((Revenue - Marketing Cost) / Marketing Cost) × 100%
-
-Example:
-Revenue: ฿500,000
-Marketing Cost: ฿100,000
-ROI = ((500,000 - 100,000) / 100,000) × 100% = 400%
-```
-
-**Target:**
-- **Excellent:** > 500%
-- **Good:** 300-500%
-- **Acceptable:** 200-300%
-- **Needs Improvement:** < 200%
-
-**Data Sources:**
-- Revenue: Closed deals
-- Cost: Budget tracking
-
-**Tracking Frequency:** Monthly
-
-**Attribution:**
-- Track lead source on all deals
-- Use first-touch attribution for simplicity
-- Consider multi-touch for maturity
-
----
-
-### 18. Cost per Acquisition (CPA)
-
-**คำอธิบาย:** ต้นทุนรวมในการได้ลูกค้า 1 ราย
-
-**สูตร:**
-```
-CPA = (Total Marketing + Sales Cost) / Number of Customers Acquired
-
-Example:
-Marketing: ฿100,000
-Sales: ฿50,000
-Customers: 10
-CPA = (100,000 + 50,000) / 10 = ฿15,000 per customer
-```
-
-**Target:**
-- **Excellent:** < ฿10,000
-- **Good:** ฿10,000-20,000
-- **Acceptable:** ฿20,000-30,000
-- **Needs Improvement:** > ฿30,000
-
-**Data Sources:**
-- Costs: Budget tracking
-- Customers: Closed deals
-
-**Tracking Frequency:** Monthly
-
-**Benchmark:**
-- CPA should be < 20% of Avg Revenue per Deal
-- If Avg Revenue = ฿50,000, then CPA should be < ฿10,000
-
----
-
-## Sales Funnel Metrics
-
-### Complete Funnel View
-
-```
-┌────────────────────────────────────────────────────────┐
-│              AMP SALES FUNNEL METRICS                  │
-├────────────────────────────────────────────────────────┤
-│                                                        │
-│  Impressions: 100,000                                  │
-│       ↓ (CTR: 2%)                                      │
-│  Clicks: 2,000                                         │
-│       ↓ (Conversion: 5%)                               │
-│  Leads: 100                                            │
-│       ↓ (Qualification: 60%)                           │
-│  Qualified: 60                                         │
-│       ↓ (Viewing: 50%)                                 │
-│  Viewings: 30                                          │
-│       ↓ (Offer: 40%)                                   │
-│  Offers: 12                                            │
-│       ↓ (Close: 50%)                                   │
-│  Closed: 6                                             │
-│                                                        │
-│  Overall Conversion: 6/100 = 6%                        │
-│                                                        │
-└────────────────────────────────────────────────────────┘
-```
-
-### Funnel Metrics Table
-
-| Stage | Count | Conversion from Previous | Cumulative Conversion |
-|-------|-------|-------------------------|----------------------|
-| Impressions | 100,000 | - | 100% |
-| Clicks | 2,000 | 2% | 2% |
-| Leads | 100 | 5% | 0.1% |
-| Qualified | 60 | 60% | 0.06% |
-| Viewings | 30 | 50% | 0.03% |
-| Offers | 12 | 40% | 0.012% |
-| Closed | 6 | 50% | 0.006% |
-
----
-
-## Dashboard Layout Recommendations
-
-### Real-time Dashboard (Looker Studio)
-
-**Layout:**
-```
-┌─────────────────────────────────────────────────────┐
-│  AMP KPI DASHBOARD - Real-time                     │
-├─────────────────────────────────────────────────────┤
-│                                                     │
-│  TODAY'S SNAPSHOT                                   │
-│  ┌────────────┐ ┌────────────┐ ┌────────────┐    │
-│  │ Leads: 5   │ │ Spend: ฿1K │ │ CPL: ฿200 │    │
-│  │ ↑ 25%      │ │ ↓ 10%      │ │ ↓ 28%      │    │
-│  └────────────┘ └────────────┘ └────────────┘    │
-│                                                     │
-│  CAMPAIGNS PERFORMANCE                              │
-│  [Line chart: Daily leads last 30 days]            │
-│                                                     │
-│  FUNNEL STATUS                                      │
-│  [Funnel visualization with current numbers]        │
-│                                                     │
-│  TOP PERFORMING CAMPAIGNS                           │
-│  [Table: Top 5 by ROAS]                            │
-│                                                     │
-│  ALERTS                                             │
-│  [Red flags: Budget overspend, low CTR, etc.]      │
-│                                                     │
-└─────────────────────────────────────────────────────┘
-```
-
-### Monthly Dashboard
-
-**Layout:**
-```
-┌─────────────────────────────────────────────────────┐
-│  AMP KPI DASHBOARD - Monthly Review                │
-├─────────────────────────────────────────────────────┤
-│                                                     │
-│  OVERVIEW                                           │
-│  ┌──────────────────┐ ┌──────────────────┐        │
-│  │ Revenue: ฿500K   │ │ ROI: 400%        │        │
-│  │ Target: ฿500K ✓  │ │ Target: 300% ✓   │        │
-│  └──────────────────┘ └──────────────────┘        │
-│                                                     │
-│  MARKETING METRICS                                  │
-│  [Table: All marketing KPIs with targets]          │
-│                                                     │
-│  SALES METRICS                                      │
-│  [Table: All sales KPIs with targets]              │
-│                                                     │
-│  TRENDS                                             │
-│  [Line charts: 6-month trends for key metrics]     │
-│                                                     │
-│  INSIGHTS                                           │
-│  [Automated insights and recommendations]           │
-│                                                     │
-└─────────────────────────────────────────────────────┘
-```
-
----
-
-## Data Collection Setup
-
-### Google Sheets Structure
-
-**Sheet 1: Marketing Data**
-```
-| Date | Platform | Campaign | Impressions | Clicks | Cost | Leads |
-|------|----------|----------|-------------|--------|------|-------|
-```
-
-**Sheet 2: Sales Pipeline**
-```
-| Lead_ID | Source | Stage | Date_In_Stage | Next_Action |
-|---------|--------|-------|---------------|-------------|
-```
-
-**Sheet 3: KPI Calculations**
-```
-| KPI_Name | Formula | Current | Target | Status |
-|----------|---------|---------|--------|--------|
-```
-
-### Looker Studio Data Sources
-
-1. **Google Ads** (Native connector)
-   - Campaign performance
-   - Cost, clicks, conversions
-
-2. **Facebook Ads** (Native connector)
-   - Ad performance
-   - Reach, engagement, leads
-
-3. **Google Analytics** (Native connector)
-   - Website traffic
-   - User behavior
-
-4. **Google Sheets** (Native connector)
-   - Lead tracking
-   - Property database
-   - Custom calculations
-
----
-
-## Alerting Rules
+## Alert Thresholds
 
 ### Critical Alerts (Immediate Action)
 
-| Alert | Condition | Action |
-|-------|-----------|--------|
-| High CPL | CPL > ฿800 | Pause low-performing campaigns |
-| Low CTR | CTR < 1% for 3 days | Review ad creative |
-| Slow Response | Avg > 1 hour | Check team availability |
-| Budget Overspend | Spend > 110% of budget | Pause campaigns |
+| Metric | Threshold | Action |
+|--------|-----------|--------|
+| Lead Response Time | > 2 hours | Notify manager |
+| CPL | > ฿800 | Pause campaigns |
+| Budget Overspend | > 15% | Urgent review |
+| System Downtime | > 5 minutes | Tech emergency |
+| Win Rate Drop | < 20% | Strategy review |
 
-### Warning Alerts (Review Soon)
+### Warning Alerts (Review Needed)
 
-| Alert | Condition | Action |
-|-------|-----------|--------|
-| Conversion Drop | 20% decrease week-over-week | Investigate funnel |
-| Listing Staleness | 30% not updated in 14 days | Schedule updates |
-| Low Close Rate | < 40% for 2 weeks | Sales training |
-
----
-
-## Benchmarks & Industry Standards
-
-### Real Estate Marketing (Thailand)
-
-| Metric | AMP Target | Industry Avg |
-|--------|-----------|--------------|
-| CPL | < ฿500 | ฿600-1,000 |
-| CTR | > 2% | 1.5-2% |
-| Conversion Rate | > 5% | 3-5% |
-| Lead Response | < 30 min | 2-4 hours |
-| Overall Close | > 5% | 2-3% |
-
-### Sources
-- Thailand Real Estate Marketing Report 2024
-- Facebook Ads Benchmark (Real Estate Vertical)
-- Google Ads Industry Benchmarks
+| Metric | Threshold | Action |
+|--------|-----------|--------|
+| CPL | > ฿600 | Review campaigns |
+| Conversion Rate | < 3% | Optimize funnel |
+| Lead Quality | < 20% qualified | Review sources |
+| Engagement Rate | < 2% | Review content |
 
 ---
 
-## Maintenance & Updates
+## Reporting Schedule
 
-### Weekly Tasks
-- [ ] Update all KPI values
-- [ ] Check data quality
-- [ ] Review alerts
-- [ ] Update dashboards
+### Real-Time Monitoring
+```
+🔴 Live Dashboards (24/7):
+- Lead volume
+- System status
+- Campaign spend
+```
 
-### Monthly Tasks
-- [ ] Review targets
-- [ ] Analyze trends
-- [ ] Update benchmarks
-- [ ] Strategic adjustments
+### Daily Reports (9 AM)
+```
+📊 Yesterday's Summary:
+- New leads count
+- CPL by source
+- Response time
+- Budget status
+```
 
-### Quarterly Tasks
-- [ ] Comprehensive review
-- [ ] Industry benchmarking
-- [ ] Target recalibration
-- [ ] New KPI evaluation
+### Weekly Reports (Monday 10 AM)
+```
+📈 Last Week Performance:
+- Lead generation
+- Sales pipeline
+- Content published
+- Budget review
+```
+
+### Monthly Reports (1st of Month)
+```
+📊 Full Month Analysis:
+- Revenue & commission
+- ROI by channel
+- Agent performance
+- Strategic recommendations
+```
 
 ---
 
-## Changelog
+## Benchmarking
 
-| Version | Date | Changes | Author |
-|---------|------|---------|--------|
-| 1.0 | 2026-01-27 | Initial KPI Dashboard specification | AI Agent |
+### Industry Benchmarks (Real Estate)
+
+| Metric | Our Target | Industry Average | Top Performers |
+|--------|-----------|------------------|----------------|
+| CPL | < ฿500 | ฿600-800 | < ฿400 |
+| Lead-to-Customer | 3-5% | 2-3% | 5-8% |
+| Sales Cycle | 45-60 days | 60-90 days | 30-45 days |
+| ROAS | > 3:1 | 2-3:1 | > 5:1 |
+| Response Time | < 30 min | 2-4 hours | < 15 min |
 
 ---
 
 ## Related Documents
 
-- [Reporting Pack Overview](../README.md)
 - [Budget Tracking Template](../budget/BUDGET_TRACKING_TEMPLATE.md)
 - [Weekly Report Template](../reports/WEEKLY_REPORT_TEMPLATE.md)
 - [Monthly Report Template](../reports/MONTHLY_REPORT_TEMPLATE.md)
-- [Data OS](../../data/README.md)
+- [AMP Business Lens](../../AMP_BUSINESS_LENS.md)
