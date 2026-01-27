@@ -4,8 +4,10 @@
 // Mobile menu toggle
 function toggleMobileMenu() {
   const mobileMenu = document.getElementById('mobile-menu');
-  if (mobileMenu) {
-    mobileMenu.classList.toggle('active');
+  const hamburger = document.querySelector('.hamburger');
+  if (mobileMenu && hamburger) {
+    const isOpen = mobileMenu.classList.toggle('active');
+    hamburger.setAttribute('aria-expanded', isOpen.toString());
   }
 }
 
@@ -87,6 +89,18 @@ function setupFormValidation() {
         alert('Please enter your phone number');
         phone.focus();
         return;
+      }
+      
+      // Thai phone validation pattern: starts with 0 or +66, 9-10 digits
+      const phonePattern = /^(\+66|0)[0-9]{8,9}$/;
+      
+      if (phone && phone.value.trim()) {
+        const cleanPhone = phone.value.replace(/[-\s]/g, '');
+        if (!phonePattern.test(cleanPhone)) {
+          alert('Please enter a valid Thai phone number (e.g., 0891234567 or +66891234567)');
+          phone.focus();
+          return;
+        }
       }
       
       // In demo, just show success message

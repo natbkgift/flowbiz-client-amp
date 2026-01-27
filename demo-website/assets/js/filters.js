@@ -177,6 +177,9 @@ function renderPropertyGrid(properties) {
   const grid = document.getElementById('property-grid');
   if (!grid) return;
   
+  // Show loading state briefly for better UX
+  grid.classList.add('loading');
+  
   if (properties.length === 0) {
     grid.innerHTML = `
       <div style="grid-column: 1/-1; text-align: center; padding: 48px 0;">
@@ -189,10 +192,12 @@ function renderPropertyGrid(properties) {
         </button>
       </div>
     `;
+    grid.classList.remove('loading');
     return;
   }
   
   grid.innerHTML = properties.map(property => createPropertyCard(property)).join('');
+  grid.classList.remove('loading');
 }
 
 // Create property card HTML
