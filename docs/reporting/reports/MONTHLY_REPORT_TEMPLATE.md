@@ -60,7 +60,7 @@ January 2026 was a **strong start to the year** with significant improvements ac
 - ✅ **Average CPL ฿425** (Target: < ฿500) - **15% better than target**
 - ✅ **8 deals closed** - Total value ฿28.5M, Commission ฿855K
 - ✅ **50+ new properties** added to database
-- ✅ **ROI 3.5:1** on marketing spend
+- ✅ **ROI 8.4:1** on marketing spend
 
 **Areas for Improvement:**
 - ⚠️ TikTok advertising underperforming (CPL ฿850 vs target ฿450)
