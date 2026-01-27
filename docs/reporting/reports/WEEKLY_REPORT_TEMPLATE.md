@@ -1,728 +1,441 @@
-# Weekly Report Template
+# Weekly Report Template - AMP
 
-> 📝 รายงานสัปดาห์สำหรับ AMP - รวดเร็ว กระชับ พร้อม action items
+> 📅 Template รายงานประจำสัปดาห์
 
 ## Overview
 
-Weekly Report เป็นรายงานสั้นๆ ที่ช่วยให้ทีมติดตามความคืบหน้า ระบุปัญหา และวางแผนสัปดาห์หน้า ใช้เวลาเตรียม 15-30 นาที
+Weekly Report เป็นรายงานสรุปสั้น ๆ สำหรับทีม ให้เห็นภาพรวมของสัปดาห์ที่ผ่านมา ปัญหาที่เกิดขึ้น และแผนสัปดาห์หน้า
 
----
-
-## Report Format
+### Report Schedule
 
 ```
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-    AMP WEEKLY REPORT
-    Week of [Start Date] - [End Date]
-    Prepared by: [Name]
-    Date: [YYYY-MM-DD]
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-📊 1. KEY METRICS SNAPSHOT
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-[Quick overview of critical KPIs]
-
-✨ 2. HIGHLIGHTS & WINS
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-[What went well this week]
-
-⚠️ 3. CHALLENGES & BLOCKERS
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-[Issues that need attention]
-
-🎯 4. NEXT WEEK'S FOCUS
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-[Top 3-5 priorities]
-
-💡 5. HELP NEEDED
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-[Support or resources needed]
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Frequency: Weekly (Every Monday 10:00 AM)
+Covers: Previous week (Mon-Sun)
+Distribution: Email to all team + Shared drive
+Meeting: Monday standup (10:30 AM)
 ```
 
 ---
 
-## Section-by-Section Guide
-
-### 📊 Section 1: Key Metrics Snapshot
-
-**Purpose:** Give quick health check of the business
-
-**Format:**
-```
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-📊 KEY METRICS SNAPSHOT
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-Marketing
-├─ Leads: 28 (↑ 12% vs last week)
-├─ CPL: ฿520 (↓ 8% vs last week)
-├─ Ad Spend: ฿14,500 (on pace for ฿60K monthly)
-└─ CTR: 2.3% (target: 2%)
-
-Sales
-├─ New Leads: 28
-├─ Qualified: 18 (64% qualification rate)
-├─ Viewings: 8 (scheduled or completed)
-├─ Offers: 3 (new this week)
-└─ Closed: 2 deals (฿120K revenue)
-
-Operations
-├─ Active Listings: 465 (↑ 15 new)
-├─ Properties Updated: 380 (82%)
-└─ LINE Response Rate: 92%
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-```
-
-**Tips:**
-- Include comparison (vs. last week or target)
-- Use arrows (↑↓) for quick visual
-- Focus on 8-12 key metrics only
-- Show progress toward monthly goals
-
----
-
-### ✨ Section 2: Highlights & Wins
-
-**Purpose:** Celebrate successes and build momentum
-
-**Format:**
-```
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-✨ HIGHLIGHTS & WINS
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-🎉 Closed 2 deals (฿120K commission)
-   • 1-bedroom condo in Jomtien (฿4.5M sale)
-   • Studio rental in Central Pattaya (฿15K/mo)
-   • Both from Google Ads leads
-
-📈 Best performing campaign so far
-   • "Pattaya Sea View Condos" campaign
-   • CTR: 3.8% (vs 2% average)
-   • CPL: ฿280 (vs ฿520 average)
-   • 12 leads, 2 already qualified
-
-🏆 Excellent lead response time
-   • Average: 8 minutes (target: <30 min)
-   • 95% leads contacted within 15 min
-   • Great feedback from leads
-
-📱 LINE response rate improved
-   • From 85% to 92% this week
-   • Implemented auto-reply for common questions
-   • Faster team coordination
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-```
-
-**Tips:**
-- Start with biggest wins
-- Include numbers/impact
-- Give context (why it matters)
-- Credit team members when relevant
-- 3-5 highlights is ideal
-
----
-
-### ⚠️ Section 3: Challenges & Blockers
-
-**Purpose:** Identify issues early and get help
-
-**Format:**
-```
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-⚠️ CHALLENGES & BLOCKERS
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-🔴 HIGH PRIORITY
-
-1. Facebook Ads CPL too high (฿980)
-   • 45% higher than target (฿520)
-   • Ad fatigue suspected (running for 4 weeks)
-   • Action: Need new creative assets
-   • Help needed: Budget for photographer
-
-2. 3 hot leads not responding
-   • All from last week, initially interested
-   • Not answering calls or LINE messages
-   • May need different approach
-   • Action: Try email, then mark cold
-
-⚠️ MEDIUM PRIORITY
-
-3. Property data updates falling behind
-   • Only 82% updated (target: 90%+)
-   • 80 properties not updated in 2 weeks
-   • Reason: Team focused on closing deals
-   • Action: Schedule catch-up session this weekend
-
-4. Website traffic down 15%
-   • Not sure why (seasonality? SEO issue?)
-   • Need to investigate Google Analytics
-   • Action: Review this week
-
-🟡 WATCHING
-
-5. LINE group activity quieter than usual
-   • Only 12 new posts this week (avg: 20)
-   • May be normal variation
-   • Continue monitoring
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-```
-
-**Tips:**
-- Be honest about problems
-- Include root cause if known
-- Prioritize: Red (urgent), Yellow (monitor)
-- Propose solutions
-- Ask for help when needed
-- 3-5 challenges is typical
-
----
-
-### 🎯 Section 4: Next Week's Focus
-
-**Purpose:** Set clear priorities for the coming week
-
-**Format:**
-```
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-🎯 NEXT WEEK'S FOCUS
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-TOP PRIORITIES (Must Do)
-
-1. 🎨 Launch new Facebook ad creative
-   • Owner: Marketing Team
-   • Tasks: Photo shoot (Mon), Design (Tue), Launch (Wed)
-   • Goal: Reduce CPL from ฿980 to <฿600
-
-2. 📞 Follow up on 8 viewing prospects
-   • Owner: Sales Team
-   • Goal: Convert 3+ to offers
-
-3. 🏠 Property data catch-up
-   • Owner: Operations
-   • Goal: Update all 80 outdated listings
-   • Time: Saturday morning sprint
-
-SECONDARY (Should Do)
-
-4. 📊 Website traffic analysis
-   • Investigate 15% drop
-   • Check Google Search Console
-   • Adjust SEO if needed
-
-5. 🧪 Test LINE Ads for new campaign
-   • Budget: ฿5,000
-   • Target: New project in Na Jomtien
-   • Goal: Learn and assess
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-```
-
-**Tips:**
-- Limit to 3-5 items (focus!)
-- Assign owner for each
-- Set specific goals
-- Mix quick wins with longer efforts
-- Connect to challenges from section 3
-
----
-
-### 💡 Section 5: Help Needed
-
-**Purpose:** Request resources or support
-
-**Format:**
-```
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-💡 HELP NEEDED
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-💰 Budget Approval
-   Request: Additional ฿5,000 for photo shoot
-   Reason: Current Facebook ads fatigued
-   Expected: CPL reduction ฿980 → ฿600
-   ROI: Should pay back in 1 week (8-9 leads)
-
-🎓 Training Need
-   Request: Facebook Ads optimization training
-   Reason: Want to improve in-house capabilities
-   Options: Online course (฿3,000) or consultant (฿10,000)
-   Timeline: Flexible, this month
-
-🤝 Partnership Discussion
-   Request: Meeting with top developer
-   Reason: Exclusive listing opportunity
-   Value: Could add 50+ units to inventory
-   Next step: Introduction via LINE
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-```
-
-**Tips:**
-- Be specific about what you need
-- Explain why (context)
-- Quantify value/impact when possible
-- Suggest timeline
-- Make it easy to say yes
-
----
-
-## Complete Example Report
+## Report Structure
 
 ```
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-    AMP WEEKLY REPORT
-    Week of 2026-01-20 to 2026-01-26
-    Prepared by: Sales Manager
-    Date: 2026-01-26
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-📊 1. KEY METRICS SNAPSHOT
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-Marketing Performance
-├─ Total Leads: 28 (↑ 12% vs last week)
-├─ Cost per Lead: ฿520 (↓ 8% vs last week)
-├─ Weekly Spend: ฿14,560 (on track)
-└─ Google CTR: 2.4% ✅  |  Facebook CTR: 1.8% ⚠️
-
-Sales Pipeline
-├─ New Leads: 28
-├─ Qualified: 18 (64% rate)
-├─ Viewings: 8 scheduled
-├─ Offers: 3 new
-└─ Closed: 2 deals (฿120,000 revenue)
-
-Operations Health
-├─ Active Listings: 465 (↑ 15 new)
-├─ Updated This Week: 380 (82% - target: 90%)
-└─ LINE Response Rate: 92% ✅
-
-Budget Status
-├─ MTD Spend: ฿58,240 (83% of monthly budget)
-├─ Remaining: ฿11,760
-└─ On Track: ✅ Yes
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-✨ 2. HIGHLIGHTS & WINS
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-🎉 Two deals closed totaling ฿120K commission
-   • Jomtien 1BR condo - ฿4.5M (฿90K commission)
-   • Pattaya studio rental - ฿15K/mo (฿30K first year)
-   • Both clients came from Google Ads
-
-📈 "Pattaya Sea View" campaign crushing it
-   • 3.8% CTR (vs 2% average)
-   • ฿280 CPL (vs ฿520 average)
-   • 12 high-quality leads
-   • 2 already qualified and scheduled viewings
-
-🏆 Exceptional response times maintained
-   • Average: 8 minutes to first contact
-   • 95% responded within 15 minutes
-   • Multiple positive reviews on Google
-
-📱 LINE automation paying off
-   • Response rate up from 85% → 92%
-   • Auto-replies handling 40% of basic questions
-   • Team can focus on serious inquiries
-
-🏢 15 new properties added to database
-   • Mix of condos and houses
-   • 3 exclusive listings from LINE groups
-   • All photographed and listed within 48 hours
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-⚠️ 3. CHALLENGES & BLOCKERS
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-🔴 HIGH PRIORITY
-
-1. Facebook Ads CPL spike to ฿980
-   • Target: ฿520, Current: ฿980 (88% over)
-   • Issue: Ad creative fatigue (running 4 weeks)
-   • Same ads, declining performance
-   • Need: New photos and ad variations
-   • Budget impact: ฿7,000 extra spent this week
-
-2. Three high-potential leads gone cold
-   • All showed strong interest initially
-   • Now not responding to calls/LINE
-   • May have bought elsewhere or lost interest
-   • Plan: Final email attempt, then archive
-
-⚠️ MEDIUM PRIORITY
-
-3. Property updates falling behind
-   • 82% updated (target: 90%)
-   • 80 properties not touched in 14+ days
-   • Reason: Team prioritizing active leads
-   • Risk: Outdated info → bad customer experience
-
-4. Website organic traffic down 15%
-   • Week-over-week decline
-   • Unclear if temporary or trend
-   • Need to check Google Search Console
-   • May impact lead volume going forward
-
-🟡 WATCHING CLOSELY
-
-5. LINE group quieter than normal
-   • 12 posts this week vs 20 average
-   • May be natural fluctuation
-   • Continue monitoring
-
-6. One competitor launched in Jomtien
-   • New agency with aggressive pricing
-   • Haven't seen impact yet
-   • Keeping eye on market
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-🎯 4. NEXT WEEK'S FOCUS
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-TOP 3 PRIORITIES
-
-1. 🎨 Launch fresh Facebook ad campaign
-   Owner: Marketing
-   Actions:
-   ├─ Monday: Photo shoot (5 properties)
-   ├─ Tuesday: Design 5 new ad variations
-   ├─ Wednesday: Launch and monitor
-   └─ Goal: Reduce CPL to <฿600 within 3 days
-
-2. 📞 Convert viewing prospects to offers
-   Owner: Sales Team
-   Actions:
-   ├─ 8 viewings scheduled
-   ├─ Prepare property packages
-   ├─ Follow-up within 24h of each viewing
-   └─ Goal: Minimum 3 offers
-
-3. 🏠 Property database spring cleaning
-   Owner: Operations
-   Actions:
-   ├─ Saturday morning: Team sprint
-   ├─ Update all 80 outdated properties
-   ├─ Verify photos and prices
-   └─ Goal: 95%+ freshness by Monday
-
-SECONDARY GOALS
-
-4. 📊 Diagnose website traffic drop
-   • Check Google Search Console
-   • Review recent Google algorithm updates
-   • Fix any technical SEO issues
-   • Timeline: By Wednesday
-
-5. 🧪 Test LINE Ads (small budget)
-   • ฿5,000 test budget
-   • Promote Na Jomtien project
-   • Learn platform, measure results
-   • Timeline: Launch Thursday
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-💡 5. HELP NEEDED
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-💰 Budget Request: ฿5,000 for photo shoot
-   Urgency: This week
-   Reason: Facebook ad refresh
-   Expected Impact: ฿7,000+ savings in CPL
-   ROI: Should break even in 1 week
-
-🎓 Training Request: Facebook Ads optimization
-   Urgency: This month
-   Options:
-   ├─ Online course: ฿3,000 (Udemy/Skillshare)
-   └─ Consultant: ฿10,000 (3-hour session)
-   Goal: Improve in-house capabilities
-
-🤝 Partnership Discussion Needed
-   Opportunity: Exclusive listing from major developer
-   Potential: 50+ units in new project
-   Next Step: Owner introduction via LINE
-   Timeline: ASAP (they're talking to others)
-
-📱 Tool Evaluation: CRM system
-   Current: Google Sheets (working but manual)
-   Proposed: Pipedrive or HubSpot
-   Need: Demo/trial approval
-   Timeline: Non-urgent, next month OK
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-                    END OF REPORT
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+┌─────────────────────────────────────────────────────────────┐
+│           WEEKLY REPORT - Week of [Date Range]              │
+├─────────────────────────────────────────────────────────────┤
+│                                                             │
+│  1. Executive Summary (3-4 bullets)                         │
+│  2. Key Metrics                                             │
+│  3. Marketing Performance                                   │
+│  4. Sales Performance                                       │
+│  5. Operations Highlights                                   │
+│  6. Wins & Challenges                                       │
+│  7. Next Week Priorities                                    │
+│  8. Action Items                                            │
+│                                                             │
+└─────────────────────────────────────────────────────────────┘
 ```
 
 ---
 
-## Preparation Checklist
+## Template
 
-### Before You Start (5 min)
-
-- [ ] Gather data sources
-  - [ ] Google Ads dashboard
-  - [ ] Facebook Ads Manager
-  - [ ] Lead Tracking sheet
-  - [ ] Property Master List
-- [ ] Review last week's report
-- [ ] Check team updates
-
-### Writing the Report (20 min)
-
-- [ ] Section 1: Pull key metrics (5 min)
-- [ ] Section 2: List wins (5 min)
-- [ ] Section 3: Identify challenges (5 min)
-- [ ] Section 4: Set priorities (3 min)
-- [ ] Section 5: List help needed (2 min)
-
-### Before Submitting (5 min)
-
-- [ ] Proofread for clarity
-- [ ] Check all numbers accurate
-- [ ] Verify links work (if any)
-- [ ] Format consistently
-- [ ] Send to team
-
-**Total Time: ~30 minutes**
+```markdown
+# AMP Weekly Report
+## Week of January 20-26, 2026
 
 ---
 
-## Best Practices
+## 📊 Executive Summary
 
-### Do's ✅
-
-**Be Concise**
-- One page ideal, two pages max
-- Use bullet points, not paragraphs
-- Include only essential details
-
-**Be Honest**
-- Report both good and bad
-- Don't hide problems
-- Ask for help when needed
-
-**Be Specific**
-- Use numbers, not adjectives
-- "28 leads" not "many leads"
-- "฿520 CPL" not "low CPL"
-
-**Be Actionable**
-- Every challenge has a plan
-- Every priority has an owner
-- Clear next steps
-
-**Be Consistent**
-- Same format every week
-- Same day/time submission
-- Track trends over time
+- ✅ Strong week with 42 new leads (+13.5% vs last week)
+- ⚠️ CPL increased to ฿485 due to Facebook campaign test
+- 🎯 Closed 2 deals worth ฿6.8M (commission: ฿204K)
+- 📈 LINE group processing yielded 8 new listings
 
 ---
 
-### Don'ts ❌
+## 📈 Key Metrics
 
-**Don't:**
-- Write long paragraphs
-- Include every tiny detail
-- Make excuses for problems
-- Set too many priorities (focus!)
-- Wait until last minute
-- Copy/paste without updating
+| Metric | This Week | Last Week | Change | Target | Status |
+|--------|-----------|-----------|--------|--------|--------|
+| **New Leads** | 42 | 37 | +13.5% | 35+ | ✅ |
+| **Total Ad Spend** | ฿28,500 | ฿26,800 | +6.3% | ฿30,000 | ✅ |
+| **Cost Per Lead** | ฿485 | ฿425 | +14.1% | < ฿500 | ⚠️ |
+| **Lead Response Time** | 28 min | 32 min | -12.5% | < 30 min | ✅ |
+| **Deals Closed** | 2 | 1 | +100% | 2+ | ✅ |
+| **Revenue Generated** | ฿6.8M | ฿3.2M | +112% | ฿5M+ | ✅ |
+| **Properties Added** | 12 | 10 | +20% | 10+ | ✅ |
 
----
-
-## Report Variations
-
-### For Solo Agent (Simplified)
-
-```
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-    MY WEEK - [DATE]
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-📊 NUMBERS
-Leads: 12
-Viewings: 4
-Offers: 1
-Closed: 1 (฿50K)
-Spend: ฿6,500
-
-✨ WINS
-• Closed my first rental deal!
-• Best response time yet (avg 6 min)
-
-⚠️ ISSUES
-• CPL creeping up (฿540 → ฿720)
-• Need new ad creative
-
-🎯 NEXT WEEK
-1. Refresh ads with new photos
-2. Follow up on 3 hot leads
-3. Update 30 old listings
-
-💡 NEED
-• Budget OK for photo shoot? (฿3K)
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-```
-
-### For Large Team (Detailed)
-
-Add sections:
-- **Team Performance** (by agent)
-- **Regional Breakdown** (Pattaya vs Jomtien etc.)
-- **Property Type Analysis** (condos vs houses)
-- **Client Feedback** (reviews, testimonials)
+**Overall Performance:** 🟢 Excellent Week
 
 ---
 
-## Automation Tips
+## 🎯 Marketing Performance
 
-### Google Sheets Formula for Auto-Pull
+### Lead Generation
 
-**Weekly Leads Count:**
+**By Source:**
 ```
-=COUNTIFS(Lead_Date, ">="&TODAY()-7, Lead_Date, "<"&TODAY())
-```
-
-**Weekly Spend:**
-```
-=SUMIFS(Spend, Date, ">="&TODAY()-7, Date, "<"&TODAY())
-```
-
-**Average CPL:**
-```
-=Weekly_Spend / Weekly_Leads
+Facebook Ads:     18 leads (43%)  ████████████████████████
+Google Ads:       12 leads (29%)  ███████████████
+LINE OA:           7 leads (17%)  █████████
+Website:           3 leads (7%)   ████
+Referral:          2 leads (5%)   ██
 ```
 
-### Looker Studio Report
+**Campaign Highlights:**
+- ✅ **Facebook Lookalike campaign:** Best performer - 18 leads @ ฿367 CPL
+- ⚠️ **TikTok video ads:** Underperforming - 2 leads @ ฿850 CPL (paused)
+- ✅ **Google Search - Jomtien:** Consistent - 6 leads @ ฿550 CPL
 
-**Weekly Dashboard:**
-1. Create date filter (Last 7 days)
-2. Add scorecard for key metrics
-3. Add week-over-week comparison
-4. Schedule email every Monday
+**Top Performing Content:**
+- 📱 Instagram Reel: Condo tour (15K views, 450 likes, 3 leads)
+- 📘 Facebook Post: Investment guide (8K reach, 95 shares)
+- 📹 YouTube: Area guide - Na Jomtien (2.5K views)
+
+### Budget Status
+
+| Channel | Budget | Spent | Remaining | % Used |
+|---------|--------|-------|-----------|--------|
+| Google Ads | ฿12,500 | ฿11,200 | ฿1,300 | 90% |
+| Facebook/IG | ฿10,000 | ฿9,800 | ฿200 | 98% |
+| LINE | ฿3,750 | ฿3,500 | ฿250 | 93% |
+| TikTok | ฿5,000 | ฿4,000 | ฿1,000 | 80% |
+| **Total** | **฿31,250** | **฿28,500** | **฿2,750** | **91%** |
 
 ---
 
-## Submitting Your Report
+## 💼 Sales Performance
 
-### Distribution
+### Pipeline Overview
 
-**Who Gets It:**
-- Team members (all)
-- Manager/Owner
-- Key stakeholders
-- File in Google Drive
+**Current Pipeline Value:** ฿18.5M (48 active leads)
 
-**How to Send:**
-- Primary: Google Doc (collaborative)
-- Alternative: Email (if preferred)
-- Backup: LINE group (link to doc)
+**Stage Breakdown:**
+```
+New (15):          ฿4.2M   ██████████
+Contacted (12):    ฿3.8M   ████████
+Qualified (10):    ฿4.5M   ██████████
+Proposal (6):      ฿3.2M   ███████
+Negotiation (5):   ฿2.8M   ██████
+```
 
-**When to Send:**
-- Deadline: Every Monday 10:00 AM
-- Covers: Previous week (Mon-Sun)
-- Allow: 30 min for team review
+### Conversions This Week
+
+**Closed Deals:**
+
+1. **Deal #1 - PROP-2026-045**
+   - Type: 2BR Condo, Jomtien
+   - Price: ฿3.5M
+   - Commission: ฿105K
+   - Agent: Somchai
+   - Source: Facebook Ads (Nov 2025 lead)
+   - Cycle: 67 days
+
+2. **Deal #2 - PROP-2026-078**
+   - Type: Pool Villa, Na Jomtien
+   - Price: ฿3.3M
+   - Commission: ฿99K
+   - Agent: Nittaya
+   - Source: Referral
+   - Cycle: 42 days
+
+### Agent Performance
+
+| Agent | Leads Assigned | Contacted | Qualified | Deals Closed | Commission |
+|-------|---------------|-----------|-----------|--------------|------------|
+| Somchai | 15 | 14 (93%) | 5 (33%) | 1 | ฿105K |
+| Nittaya | 13 | 13 (100%) | 6 (46%) | 1 | ฿99K |
+| David | 14 | 12 (86%) | 4 (29%) | 0 | - |
+| **Total** | **42** | **39 (93%)** | **15 (36%)** | **2** | **฿204K** |
+
+**Top Performer:** 🏆 Nittaya (100% contact rate, 1 conversion)
 
 ---
 
-## Report Meeting Agenda (Optional)
+## ⚙️ Operations Highlights
 
-### 15-Minute Weekly Sync
+### Data Management
 
-**Agenda:**
+- **Properties in database:** 487 (↑ 12 from last week)
+- **LINE entries processed:** 58 entries, 8 added to master (13.8% conversion)
+- **Database quality score:** 96% (↑ 1%)
+
+### LINE Group Summary
+
+**Top Groups This Week:**
+1. Pattaya Property Market: 25 entries, 4 high-priority
+2. Jomtien Condos For Sale: 18 entries, 2 high-priority
+3. Thailand Property Investors: 15 entries, 2 high-priority
+
+**Best Finds:**
+- ✅ 2BR Sea view condo - ฿2.3M (market: ฿2.8M) - **Contacted, viewing scheduled**
+- ✅ Pool villa Na Jomtien - ฿7.5M (market: ฿9M) - **Added to master**
+
+### Content Production
+
+- 📸 Photoshoot: 3 properties completed
+- 📹 Video production: 2 property tours edited
+- 📱 Social posts: 14 created, 14 published (100%)
+
+---
+
+## 🎉 Wins & 🚧 Challenges
+
+### Wins
+
+✅ **Two major deals closed** - Best week for closings in Q1
+✅ **Strong lead volume** - 13% increase over last week
+✅ **Improved response time** - Average now under 30 minutes
+✅ **High-quality LINE finds** - 8 new properties added
+
+### Challenges
+
+⚠️ **TikTok campaign underperforming** - High CPL, low conversions
+   → *Action: Paused campaign, reviewing creative*
+
+⚠️ **Facebook CPL increased** - Testing new audiences affected average
+   → *Action: Scaling back tests, focusing on proven audiences*
+
+⚠️ **One agent below target** - David's conversion rate lagging
+   → *Action: One-on-one training scheduled*
+
+---
+
+## 🎯 Next Week Priorities
+
+### Week of January 27 - February 2, 2026
+
+**Marketing:**
+1. 🎯 Launch new Google Ads campaign targeting villa buyers
+2. 📱 Create 5 Instagram Reels (property tours)
+3. 📧 Send LINE broadcast - Chinese New Year promotion
+4. 🔄 Refresh Facebook creative (current ads 3 weeks old)
+
+**Sales:**
+5. 📞 Follow up 8 hot leads (proposal stage)
+6. 🏠 Schedule 4 property viewings
+7. 📝 Send proposals to 3 qualified leads
+8. 🤝 Close pending negotiation (PROP-2026-092)
+
+**Operations:**
+9. 📊 Update Q1 property inventory
+10. 📱 Process LINE backlog (35 pending entries)
+11. 📸 Photography session for 4 new listings
+12. 🎓 Team training: Handling objections
+
+---
+
+## ✅ Action Items
+
+| # | Action | Owner | Deadline | Status |
+|---|--------|-------|----------|--------|
+| 1 | Revise TikTok ad strategy | Marketing | Jan 28 | 🟡 In Progress |
+| 2 | Schedule training with David | Manager | Jan 27 | 🔴 Pending |
+| 3 | Launch villa campaign | Marketing | Jan 29 | 🟢 Ready |
+| 4 | Follow up PROP-2026-092 | Somchai | Jan 27 | 🟢 Scheduled |
+| 5 | Send CNY LINE broadcast | Marketing | Feb 1 | 🔴 Pending |
+| 6 | Update property database | Operations | Jan 30 | 🟡 In Progress |
+
+---
+
+## 📎 Attachments
+
+- Detailed lead list: [Link to Google Sheet]
+- Campaign performance: [Link to dashboard]
+- Sales pipeline: [Link to CRM]
+
+---
+
+**Report prepared by:** [Your Name]
+**Date:** January 27, 2026
+**Next report:** February 3, 2026
 ```
-0-3 min: Quick wins round
-Everyone shares one win
 
-3-8 min: Challenges discussion
-Biggest blocker, solutions?
+---
 
-8-12 min: Next week priorities
-Align on top 3 goals
+## Quick Fill Guide
 
-12-15 min: Help needed
-Resource requests, approvals
+### Section-by-Section Guide
+
+**1. Executive Summary (5 min)**
+- Write this LAST after completing all sections
+- Pick 3-4 most important points
+- Use emoji for visual clarity: ✅ ⚠️ 🎯 📈
+
+**2. Key Metrics (10 min)**
+- Pull from Lead_Tracking.xlsx
+- Calculate week-over-week changes
+- Use status indicators: ✅ ⚠️ 🔴
+
+**3. Marketing Performance (15 min)**
+- Export data from Ads Manager
+- Group leads by source
+- Highlight best and worst performers
+- Update budget table
+
+**4. Sales Performance (15 min)**
+- Count leads by stage from CRM
+- List closed deals with details
+- Calculate agent performance
+- Identify top performer
+
+**5. Operations (10 min)**
+- Count properties added
+- Summarize LINE processing
+- List content produced
+
+**6. Wins & Challenges (10 min)**
+- List 3-5 wins (be specific)
+- List 2-4 challenges with actions
+
+**7. Next Week Priorities (10 min)**
+- List 10-12 concrete tasks
+- Assign to teams
+- Be specific and actionable
+
+**8. Action Items (5 min)**
+- Carry over incomplete items from last week
+- Add new critical actions
+- Assign owners and deadlines
+
+**Total time:** ~80 minutes
+
+---
+
+## Data Sources
+
+### Where to Get the Numbers
+
+| Metric | Source | Tab/Location |
+|--------|--------|--------------|
+| New Leads | Lead_Tracking.xlsx | 01_Active_Leads (Date filter) |
+| Ad Spend | Budget_Tracking.xlsx | 02_Advertising (Week sum) |
+| CPL | Calculate | Ad Spend / Leads |
+| Response Time | Lead_Tracking.xlsx | AVG(Date_First_Contact - Date_Created) |
+| Deals Closed | Lead_Tracking.xlsx | 05_Converted (Week filter) |
+| Properties Added | Property_Master_List.xlsx | Date_Added filter |
+| LINE Entries | LINE_Summary.xlsx | 01_Daily_Entries (Week filter) |
+
+---
+
+## Formatting Tips
+
+### Visual Hierarchy
+
+```
+# Level 1: Main sections
+## Level 2: Subsections
+### Level 3: Details
+
+Use these consistently
+```
+
+### Tables
+
+```markdown
+| Column 1 | Column 2 | Column 3 |
+|----------|----------|----------|
+| Data     | Data     | Data     |
+```
+
+### ASCII Charts
+
+```
+For proportions/percentages:
+
+Facebook:  18 leads (43%)  ████████████████████████
+Google:    12 leads (29%)  ███████████████
+
+One █ = ~2%
+```
+
+### Status Indicators
+
+```
+✅ Green/Success
+⚠️ Yellow/Warning
+🔴 Red/Critical
+🟢 Ready
+🟡 In Progress
+🔴 Pending
+🏆 Winner/Top
 ```
 
 ---
 
 ## Common Mistakes to Avoid
 
-### Mistake #1: Too Much Detail
-❌ Bad: "On Tuesday at 2:47 PM, we received a lead from Google Ads Campaign #12345 for a 1-bedroom condo..."
-✅ Good: "28 leads this week, Google Ads performing best"
+❌ **Too much detail** - Weekly report should be scannable
+✅ **Keep it concise** - Details can be in attachments
 
-### Mistake #2: No Context
-❌ Bad: "CPL is ฿520"
-✅ Good: "CPL is ฿520 (↓8% vs last week, target met)"
+❌ **Only numbers** - Numbers without context are meaningless
+✅ **Add context** - Explain what the numbers mean
 
-### Mistake #3: Only Good News
-❌ Bad: Only listing wins, hiding problems
-✅ Good: Balanced view of wins and challenges
+❌ **No action items** - Report without next steps is useless
+✅ **Clear action items** - Who, what, when
 
-### Mistake #4: No Action Plan
-❌ Bad: "Facebook ads not performing"
-✅ Good: "Facebook CPL high (฿980). Plan: New creative by Wed to reduce to <฿600"
+❌ **Blame language** - "X failed because..."
+✅ **Solution focus** - "Challenge with X, action is..."
 
-### Mistake #5: Too Many Priorities
-❌ Bad: 10 top priorities for next week
-✅ Good: 3 must-dos, 2 should-dos
+❌ **Late delivery** - Monday 3pm
+✅ **On time** - Monday 10am
 
 ---
 
-## Templates for Different Scenarios
+## Email Distribution Template
 
-### After a Great Week
+```
+To: team@assetamp.com
+Subject: 📊 AMP Weekly Report - Week of Jan 20-26, 2026
 
-Emphasize:
-- What worked (so you can repeat)
-- Lessons learned
-- How to sustain momentum
+Hi Team,
 
-### After a Tough Week
+Please find this week's performance report below.
 
-Emphasize:
-- Root causes of problems
-- Clear recovery plan
-- What you learned
-- Support needed
+Key Highlights:
+• Strong lead week: 42 new leads (+13%)
+• 2 deals closed: ฿6.8M revenue
+• CPL slightly up due to campaign testing
 
-### During Slow Season
+Full report: [Link to Google Drive]
 
-Emphasize:
-- Preparation for busy season
-- Process improvements
-- Testing new strategies
-- Cost optimization
+See you at standup (10:30 AM) to discuss.
+
+Best,
+[Your Name]
+```
 
 ---
 
-## Changelog
+## Automation Ideas
 
-| Version | Date | Changes | Author |
-|---------|------|---------|--------|
-| 1.0 | 2026-01-27 | Initial Weekly Report Template | AI Agent |
+### Semi-Automated Reporting
+
+**Use Google Sheets formulas:**
+```
+Weekly Lead Count:
+=COUNTIFS(Lead_Tracking!H:H, ">="&DATE(2026,1,20), Lead_Tracking!H:H, "<="&DATE(2026,1,26))
+
+Weekly Spend:
+=SUMIFS(Budget!C:C, Budget!A:A, ">="&DATE(2026,1,20), Budget!A:A, "<="&DATE(2026,1,26))
+
+Average CPL:
+=Weekly_Spend / Weekly_Leads
+```
+
+**Future: Full Automation (Phase 2+)**
+- AI generates report draft from databases
+- Auto-calculates all metrics
+- Identifies trends automatically
+- Generates insights and recommendations
 
 ---
 
 ## Related Documents
 
-- [Reporting Pack Overview](../README.md)
 - [KPI Dashboard Spec](../kpis/KPI_DASHBOARD_SPEC.md)
-- [Budget Tracking Template](../budget/BUDGET_TRACKING_TEMPLATE.md)
 - [Monthly Report Template](MONTHLY_REPORT_TEMPLATE.md)
+- [Budget Tracking Template](../budget/BUDGET_TRACKING_TEMPLATE.md)
+- [Lead Tracking Template](../../data/templates/LEAD_TRACKING_TEMPLATE.md)
