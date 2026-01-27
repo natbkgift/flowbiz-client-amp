@@ -1,0 +1,14 @@
+<svg width="200" height="60" viewBox="0 0 200 60" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Roof Icon -->
+  <path d="M20 35L30 20L40 35H20Z" fill="#E8734A"/>
+  <rect x="22" y="35" width="16" height="15" fill="#E8734A"/>
+  
+  <!-- "Asset" Text -->
+  <text x="55" y="40" font-family="Arial, sans-serif" font-size="24" font-weight="700" fill="#1744BE">Asset</text>
+  
+  <!-- "Management" Text -->
+  <text x="55" y="55" font-family="Arial, sans-serif" font-size="20" font-weight="600" fill="#E8734A">Management</text>
+  
+  <!-- "Property" Text -->
+  <text x="165" y="55" font-family="Arial, sans-serif" font-size="20" font-weight="600" fill="#1744BE">Property</text>
+</svg>
