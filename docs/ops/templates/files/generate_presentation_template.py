@@ -15,6 +15,7 @@ Usage:
 
 from pptx import Presentation
 from pptx.dml.color import RGBColor
+from pptx.enum.shapes import MSO_SHAPE
 from pptx.enum.text import PP_ALIGN
 from pptx.util import Inches, Pt
 
@@ -339,9 +340,9 @@ def create_presentation_template():
 
 def add_slide_header(slide, text, bg_color, text_color):
     """Add a header bar to a slide."""
-    # Add header background
+    # Add header background (Rectangle shape)
     header_bg = slide.shapes.add_shape(
-        1,  # Rectangle
+        MSO_SHAPE.RECTANGLE,
         Inches(0), Inches(0),
         Inches(10), Inches(1)
     )
@@ -360,13 +361,24 @@ def add_slide_header(slide, text, bg_color, text_color):
 
 
 def add_bullet_point(text_frame, text, font_size, color, bold=False):
-    """Add a bullet point to a text frame."""
+    """Add a bullet point to a text frame.
+
+    Args:
+        text_frame: The text frame to add the paragraph to
+        text: The text content of the bullet point
+        font_size: Font size in points
+        color: RGB color for the text
+        bold: Whether to make the text bold
+
+    Returns:
+        The created paragraph object
+    """
     p = text_frame.add_paragraph()
     p.text = text
     p.font.size = Pt(font_size)
     p.font.color.rgb = color
     p.font.bold = bold
-    p.level = 0
+    p.level = 0  # Base indentation level (no indent)
     return p
 
 
