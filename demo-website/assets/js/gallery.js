@@ -153,4 +153,4 @@ if (document.readyState === 'loading') {
 }
 
 // Global gallery instance (will be created when needed)
-let gallery = null;
+var gallery = null;

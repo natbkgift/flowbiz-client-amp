@@ -258,7 +258,7 @@
       document.getElementById('property-facts').innerHTML = factsHTML;
       
       // Badges
-      const badgesHTML = property.badges.map(badge => {
+      let badgesHTML = property.badges.map(badge => {
         const badgeClass = badge === 'Featured' ? 'badge-featured' : 
                          badge === 'Available Now' ? 'badge-available' : 'badge-updated';
         return `<span class="badge ${badgeClass}">${badge}</span>`;
