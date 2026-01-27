@@ -24,13 +24,16 @@
   <link rel="canonical" href="https://amppattaya.com/detail.html">
 
   <!-- Favicon -->
-  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='6' fill='%231744BE'/><text x='16' y='22' text-anchor='middle' fill='white' font-family='Arial' font-size='14' font-weight='bold'>AMP</text></svg>">
-  <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'><rect width='180' height='180' rx='20' fill='%231744BE'/><text x='90' y='115' text-anchor='middle' fill='white' font-family='Arial' font-size='60' font-weight='bold'>AMP</text></svg>">
+  <link rel="icon" type="image/svg+xml" href="assets/images/favicon.svg">
+  <link rel="apple-touch-icon" href="assets/images/favicon.svg">
   
   <!-- Stylesheets -->
   <link rel="stylesheet" href="assets/css/main.css">
   <link rel="stylesheet" href="assets/css/components.css">
   <link rel="stylesheet" href="assets/css/responsive.css">
+  
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
 </head>
 <body>
   <!-- Skip Link for Accessibility -->
@@ -40,28 +43,22 @@
   <header class="header">
     <div class="header-content">
       <a href="index.html" class="logo">
-        <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
-          <rect width="32" height="32" rx="6" fill="#1744BE"/>
-          <text x="16" y="22" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="14" font-weight="bold">AMP</text>
-        </svg>
-        <span>AMP</span>
+        <img src="assets/images/logo-amp.svg" alt="AMP Logo" height="40">
       </a>
       
       <nav class="nav desktop-only">
-        <a href="index.html">Home</a>
-        <a href="listing.html?intent=rent">Rent</a>
-        <a href="listing.html?intent=sale">Buy</a>
-        <a href="index.html#contact">Contact</a>
+        <a href="index.html"><i data-lucide="home"></i> <span data-i18n="nav.home">Home</span></a>
+        <a href="listing.html?intent=rent"><i data-lucide="key"></i> <span data-i18n="nav.rent">Rent</span></a>
+        <a href="listing.html?intent=sale"><i data-lucide="home"></i> <span data-i18n="nav.buy">Buy</span></a>
+        <a href="index.html#contact"><i data-lucide="mail"></i> <span data-i18n="nav.contact">Contact</span></a>
       </nav>
       
       <div class="header-actions">
-        <button class="lang-switch" onclick="switchLanguage()">TH</button>
+        <button class="lang-switch" onclick="toggleLanguage()">
+          <span id="lang-display">TH</span>
+        </button>
         <button class="hamburger mobile-only" onclick="toggleMobileMenu()" aria-label="Menu" aria-expanded="false">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <line x1="3" y1="12" x2="21" y2="12"></line>
-            <line x1="3" y1="6" x2="21" y2="6"></line>
-            <line x1="3" y1="18" x2="21" y2="18"></line>
-          </svg>
+          <i data-lucide="menu"></i>
         </button>
       </div>
     </div>
@@ -69,10 +66,10 @@
   
   <!-- Mobile Menu -->
   <div class="mobile-menu" id="mobile-menu">
-    <a href="index.html">Home</a>
-    <a href="listing.html?intent=rent">Rent</a>
-    <a href="listing.html?intent=sale">Buy</a>
-    <a href="index.html#contact">Contact</a>
+    <a href="index.html"><i data-lucide="home"></i> <span data-i18n="nav.home">Home</span></a>
+    <a href="listing.html?intent=rent"><i data-lucide="key"></i> <span data-i18n="nav.rent">Rent</span></a>
+    <a href="listing.html?intent=sale"><i data-lucide="home"></i> <span data-i18n="nav.buy">Buy</span></a>
+    <a href="index.html#contact"><i data-lucide="mail"></i> <span data-i18n="nav.contact">Contact</span></a>
   </div>
   
   <!-- Main Content -->
@@ -95,8 +92,8 @@
           <!-- Property Header -->
           <div class="property-header">
             <div class="property-title">
-              <h1 id="property-title">Loading...</h1>
-              <p class="property-location" id="property-location">📍 Loading...</p>
+              <h1 id="property-title" data-i18n="detail.loading">Loading...</h1>
+              <p class="property-location" id="property-location"><i data-lucide="map-pin"></i> <span data-i18n="detail.loading">Loading...</span></p>
             </div>
             <div class="property-price" id="property-price">฿0</div>
           </div>
@@ -113,22 +110,22 @@
           
           <!-- Description -->
           <div style="background: var(--color-white); padding: 24px; border-radius: 12px; margin-bottom: 24px;">
-            <h2 class="mb-md">Description</h2>
+            <h2 class="mb-md" data-i18n="detail.description">Description</h2>
             <div class="lang-tabs">
               <button class="lang-tab active" data-lang="th">ไทย</button>
               <button class="lang-tab" data-lang="en">English</button>
             </div>
             <div class="tab-content active" data-lang="th" id="description-th">
-              <p>Loading...</p>
+              <p data-i18n="detail.loading">Loading...</p>
             </div>
             <div class="tab-content" data-lang="en" id="description-en">
-              <p>Loading...</p>
+              <p data-i18n="detail.loading">Loading...</p>
             </div>
           </div>
           
           <!-- Amenities -->
           <div style="background: var(--color-white); padding: 24px; border-radius: 12px; margin-bottom: 24px;">
-            <h2 class="mb-md">Amenities</h2>
+            <h2 class="mb-md" data-i18n="detail.amenities">Amenities</h2>
             <div class="amenities-grid" id="amenities-grid">
               <!-- Amenities will be rendered here -->
             </div>
@@ -136,16 +133,16 @@
           
           <!-- Location -->
           <div style="background: var(--color-white); padding: 24px; border-radius: 12px; margin-bottom: 24px;">
-            <h2 class="mb-md">Location</h2>
+            <h2 class="mb-md" data-i18n="detail.location">Location</h2>
             <div style="background: var(--color-gray-100); height: 300px; border-radius: 8px; display: flex; align-items: center; justify-content: center; margin-bottom: 16px;">
-              <p style="color: var(--color-gray-600);">Map Placeholder</p>
+              <p style="color: var(--color-gray-600);" data-i18n="detail.mapPlaceholder">Map Placeholder</p>
             </div>
-            <p id="location-description" style="color: var(--color-gray-600);">Loading...</p>
+            <p id="location-description" style="color: var(--color-gray-600);" data-i18n="detail.loading">Loading...</p>
           </div>
           
           <!-- Similar Properties -->
           <div>
-            <h2 class="mb-lg">Similar Properties</h2>
+            <h2 class="mb-lg" data-i18n="detail.similarProperties">Similar Properties</h2>
             <div class="grid grid-2" id="similar-properties">
               <!-- Similar properties will be rendered here -->
             </div>
@@ -162,36 +159,36 @@
                 <text x="32" y="42" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="20" font-weight="bold">AMP</text>
               </svg>
               <div class="agent-info">
-                <h3>AMP Pattaya</h3>
-                <p>Professional Property Management</p>
+                <h3 data-i18n="agent.name">AMP Pattaya</h3>
+                <p data-i18n="agent.title">Professional Property Management</p>
               </div>
             </div>
             <div class="agent-actions">
               <a href="https://line.me/ti/p/~@amppattaya" class="btn btn-primary btn-block">
-                💬 LINE Chat
+                <i data-lucide="message-circle"></i> <span data-i18n="agent.lineChat">LINE Chat</span>
               </a>
               <a href="tel:+66891234567" class="btn btn-secondary btn-block">
-                📞 Call: 089-123-4567
+                <i data-lucide="phone-call"></i> <span data-i18n="agent.call">Call: 089-123-4567</span>
               </a>
             </div>
           </div>
           
           <!-- Inquiry Form -->
           <form class="inquiry-form" style="margin-top: 24px;">
-            <h3>สนใจทรัพย์นี้?</h3>
-            <p style="color: var(--color-gray-600); margin-bottom: 24px; font-size: 14px;">
+            <h3 data-i18n="form.interestedTitle">สนใจทรัพย์นี้?</h3>
+            <p style="color: var(--color-gray-600); margin-bottom: 24px; font-size: 14px;" data-i18n="form.interestedSubtitle">
               Interested in this property?
             </p>
             <div class="form-group">
-              <input type="text" name="name" class="form-input" placeholder="Your Name" required>
+              <input type="text" name="name" class="form-input" data-i18n-placeholder="form.name" placeholder="Your Name" required>
             </div>
             <div class="form-group">
-              <input type="tel" name="phone" class="form-input" placeholder="Phone Number" required>
+              <input type="tel" name="phone" class="form-input" data-i18n-placeholder="form.phone" placeholder="Phone Number" required>
             </div>
             <div class="form-group">
-              <textarea name="message" class="form-textarea" placeholder="Message (optional)"></textarea>
+              <textarea name="message" class="form-textarea" data-i18n-placeholder="form.message" placeholder="Message (optional)"></textarea>
             </div>
-            <button type="submit" class="btn btn-accent btn-block">Send Inquiry</button>
+            <button type="submit" class="btn btn-accent btn-block" data-i18n="form.submit">Send Inquiry</button>
           </form>
         </aside>
       </div>
@@ -201,10 +198,10 @@
   <!-- Sticky CTA (Mobile) -->
   <div class="sticky-cta">
     <a href="https://line.me/ti/p/~@amppattaya" class="btn btn-primary">
-      💬 LINE
+      <i data-lucide="message-circle"></i> <span data-i18n="cta.line">LINE</span>
     </a>
     <a href="tel:+66891234567" class="btn btn-accent">
-      📞 Call
+      <i data-lucide="phone-call"></i> <span data-i18n="cta.call">Call</span>
     </a>
   </div>
   
@@ -213,32 +210,32 @@
     <div class="container">
       <div class="footer-content">
         <div>
-          <h3>Asset Management Property</h3>
-          <p>Professional property management in Pattaya</p>
+          <h3 data-i18n="footer.companyName">Asset Management Property</h3>
+          <p data-i18n="footer.tagline">Professional property management in Pattaya</p>
           <p style="margin-top: 16px;">
-            <strong>Office Hours:</strong><br>
-            Mon - Sun: 9:00 AM - 6:00 PM
+            <strong data-i18n="footer.officeHours">Office Hours:</strong><br>
+            <span data-i18n="footer.hours">Mon - Sun: 9:00 AM - 6:00 PM</span>
           </p>
         </div>
         
         <div>
-          <h3>Contact Us</h3>
-          <a href="tel:+66891234567">📞 +66 89-123-4567</a>
-          <a href="mailto:info@amppattaya.com">📧 info@amppattaya.com</a>
-          <a href="https://line.me/ti/p/~@amppattaya">💬 LINE: @amppattaya</a>
+          <h3 data-i18n="footer.contactUs">Contact Us</h3>
+          <a href="tel:+66891234567"><i data-lucide="phone"></i> +66 89-123-4567</a>
+          <a href="mailto:info@amppattaya.com"><i data-lucide="mail"></i> info@amppattaya.com</a>
+          <a href="https://line.me/ti/p/~@amppattaya"><i data-lucide="message-circle"></i> LINE: @amppattaya</a>
         </div>
         
         <div>
-          <h3>Quick Links</h3>
-          <a href="listing.html?intent=rent">Properties for Rent</a>
-          <a href="listing.html?intent=sale">Properties for Sale</a>
-          <a href="index.html#contact">Contact Us</a>
-          <a href="#">About Us</a>
+          <h3 data-i18n="footer.quickLinks">Quick Links</h3>
+          <a href="listing.html?intent=rent" data-i18n="footer.forRent">Properties for Rent</a>
+          <a href="listing.html?intent=sale" data-i18n="footer.forSale">Properties for Sale</a>
+          <a href="index.html#contact" data-i18n="footer.contact">Contact Us</a>
+          <a href="#" data-i18n="footer.about">About Us</a>
         </div>
       </div>
       
       <div class="footer-bottom">
-        <p>&copy; 2026 Asset Management Property. All rights reserved. | Demo Website</p>
+        <p data-i18n="footer.copyright">&copy; 2026 Asset Management Property. All rights reserved. | Demo Website</p>
       </div>
     </div>
   </footer>
@@ -246,6 +243,7 @@
   <!-- Scripts -->
   <script src="assets/js/mock-data.js"></script>
   <script src="assets/js/gallery.js"></script>
+  <script src="assets/js/i18n.js"></script>
   <script src="assets/js/main.js"></script>
   
   <!-- JSON-LD Structured Data -->
@@ -271,16 +269,16 @@
       
       // Title and price
       document.getElementById('property-title').textContent = title;
-      document.getElementById('property-location').textContent = `📍 ${property.area}, Pattaya`;
+      document.getElementById('property-location').innerHTML = `<i data-lucide="map-pin"></i> ${property.area}, Pattaya`;
       document.getElementById('property-price').innerHTML = `฿${property.price.toLocaleString()}<span>${priceLabel}</span>`;
       document.title = `${title} | Asset Management Property`;
       
       // Facts
       const factsHTML = `
-        ${property.beds !== null ? `<div class="fact">🛏️ <strong>${property.beds === 0 ? 'Studio' : property.beds}</strong> ${property.beds === 1 ? 'Bedroom' : 'Bedrooms'}</div>` : ''}
-        ${property.baths !== null ? `<div class="fact">🚿 <strong>${property.baths}</strong> ${property.baths === 1 ? 'Bathroom' : 'Bathrooms'}</div>` : ''}
-        <div class="fact">📐 <strong>${property.sqm}</strong> m²</div>
-        <div class="fact">📅 Available: <strong>${new Date(property.available_date).toLocaleDateString()}</strong></div>
+        ${property.beds !== null ? `<div class="fact"><i data-lucide="bed-double"></i> <strong>${property.beds === 0 ? 'Studio' : property.beds}</strong> ${property.beds === 1 ? 'Bedroom' : 'Bedrooms'}</div>` : ''}
+        ${property.baths !== null ? `<div class="fact"><i data-lucide="bath"></i> <strong>${property.baths}</strong> ${property.baths === 1 ? 'Bathroom' : 'Bathrooms'}</div>` : ''}
+        <div class="fact"><i data-lucide="square"></i> <strong>${property.sqm}</strong> m²</div>
+        <div class="fact"><i data-lucide="calendar"></i> Available: <strong>${new Date(property.available_date).toLocaleDateString()}</strong></div>
       `;
       document.getElementById('property-facts').innerHTML = factsHTML;
       
@@ -299,32 +297,32 @@
       
       // Amenities
       const amenitiesIcons = {
-        'Pool': '🏊',
-        'Gym': '💪',
-        'Parking': '🚗',
-        '24/7 Security': '🔒',
-        'Elevator': '🛗',
-        'WiFi': '📶',
-        'Cable TV': '📺',
-        'Air Conditioning': '❄️',
-        'Garden': '🌳',
-        'Private Pool': '🏊',
-        'Sala': '🏡',
-        'Security System': '🔐',
-        'Maid Service': '🧹',
-        'Home Theater': '🎬',
-        'Playground': '🎡',
-        'Sea View': '🌊',
-        'Road Access': '🛣️',
-        'Electricity Available': '⚡',
-        'Water Supply': '💧'
+        'Pool': 'waves',
+        'Gym': 'dumbbell',
+        'Parking': 'car',
+        '24/7 Security': 'shield-check',
+        'Elevator': 'move-vertical',
+        'WiFi': 'wifi',
+        'Cable TV': 'tv',
+        'Air Conditioning': 'wind',
+        'Garden': 'trees',
+        'Private Pool': 'waves',
+        'Sala': 'home',
+        'Security System': 'shield',
+        'Maid Service': 'sparkles',
+        'Home Theater': 'film',
+        'Playground': 'circle-play',
+        'Sea View': 'waves',
+        'Road Access': 'route',
+        'Electricity Available': 'zap',
+        'Water Supply': 'droplets'
       };
       
       const amenitiesHTML = property.amenities.map(amenity => {
-        const icon = amenitiesIcons[amenity] || '✓';
+        const icon = amenitiesIcons[amenity] || 'check';
         return `
           <div class="amenity-item">
-            <div class="amenity-icon">${icon}</div>
+            <div class="amenity-icon"><i data-lucide="${icon}"></i></div>
             <div class="amenity-label">${amenity}</div>
           </div>
         `;
@@ -368,11 +366,11 @@
               <div class="card-price">฿${p.price.toLocaleString()}<span>${priceLabel}</span></div>
               <h3 class="card-title">${title}</h3>
               <div class="card-facts">
-                ${p.beds !== null ? `<span>🛏️ ${bedsLabel}</span>` : ''}
-                ${p.baths !== null ? `<span>🚿 ${bathsLabel}</span>` : ''}
-                <span>📐 ${p.sqm} m²</span>
+                ${p.beds !== null ? `<span><i data-lucide="bed-double"></i> ${bedsLabel}</span>` : ''}
+                ${p.baths !== null ? `<span><i data-lucide="bath"></i> ${bathsLabel}</span>` : ''}
+                <span><i data-lucide="square"></i> ${p.sqm} m²</span>
               </div>
-              <div class="card-location">📍 ${p.area}</div>
+              <div class="card-location"><i data-lucide="map-pin"></i> ${p.area}</div>
               <div class="card-actions">
                 <a href="detail.html?id=${p.id}" class="btn btn-primary btn-sm">View Details</a>
               </div>
@@ -409,6 +407,18 @@
       };
       
       document.getElementById('schema-jsonld').textContent = JSON.stringify(jsonLd, null, 2);
+      
+      // Initialize Lucide icons
+      if (typeof lucide !== 'undefined') {
+        lucide.createIcons();
+      }
+    }
+  </script>
+  
+  <!-- Initialize Lucide Icons -->
+  <script>
+    if (typeof lucide !== 'undefined') {
+      lucide.createIcons();
     }
   </script>
 </body>

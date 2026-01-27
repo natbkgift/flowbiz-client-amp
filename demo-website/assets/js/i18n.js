@@ -121,6 +121,13 @@ const TRANSLATIONS = {
     common_edit: 'แก้ไข',
     common_delete: 'ลบ',
     common_close: 'ปิด',
+    
+    // Thank You Page
+    thank_you_title: 'ขอบคุณที่ติดต่อเรา!',
+    thank_you_message: 'เราได้รับข้อมูลของคุณแล้ว ทีมงานจะติดต่อกลับโดยเร็วที่สุด<br>โดยปกติภายใน 24 ชั่วโมง',
+    back_to_home: 'กลับหน้าหลัก',
+    view_properties: 'ดูอสังหา',
+    need_urgent_help: 'ต้องการความช่วยเหลือด่วน?',
   },
   en: {
     // Navigation
@@ -241,6 +248,13 @@ const TRANSLATIONS = {
     common_edit: 'Edit',
     common_delete: 'Delete',
     common_close: 'Close',
+    
+    // Thank You Page
+    thank_you_title: 'Thank You for Contacting Us!',
+    thank_you_message: 'We have received your information. Our team will get back to you as soon as possible,<br>typically within 24 hours',
+    back_to_home: 'Back to Home',
+    view_properties: 'View Properties',
+    need_urgent_help: 'Need Urgent Help?',
   }
 };
 
