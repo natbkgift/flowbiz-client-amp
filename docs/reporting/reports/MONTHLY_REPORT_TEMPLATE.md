@@ -345,8 +345,8 @@ Monthly Revenue Breakdown:
 Total Revenue:      ฿28.5M
 Total Commission:   ฿855K (3% avg)
 Marketing Cost:     ฿101,500
-Operations Cost:    ฿58,000
-Net Profit:         ฿695.5K
+Operations Cost:    ฿26,800
+Net Profit:         ฿698,050
 ROI:                7.0:1
 ```
 
