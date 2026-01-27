@@ -2,11 +2,13 @@
 :root {
     /* Colors */
     --color-primary: #1744BE;
+    --color-primary-dark: #0f2d8a;
     --color-accent: #F05A43;
     --color-white: #FFFFFF;
     --color-text: #0F172A;
     --color-gray-100: #F1F5F9;
     --color-gray-600: #475569;
+    --color-success: #16A34A;
     
     /* Spacing */
     --space-xs: 8px;
@@ -133,7 +135,7 @@ body {
 }
 
 .btn-primary:hover {
-    background: #0f2d8a;
+    background: var(--color-primary-dark);
     transform: translateY(-2px);
     box-shadow: 0 4px 12px rgba(23, 68, 190, 0.3);
 }
@@ -231,6 +233,10 @@ body {
 .success-message {
     text-align: center;
     padding: var(--space-lg);
+}
+
+.hidden {
+    display: none;
 }
 
 .success-message svg {

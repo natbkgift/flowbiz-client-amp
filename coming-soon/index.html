@@ -11,6 +11,7 @@
     <meta property="og:description" content="บริการอสังหาริมทรัพย์ในพัทยา เร็วๆ นี้">
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://amppattaya.com">
+    <meta property="og:image" content="https://amppattaya.com/og-image.jpg">
     
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -52,12 +53,14 @@
         <section class="cta-section">
             <div class="container">
                 <div class="cta-buttons">
+                    <!-- TODO: Update LINE ID before production deployment -->
                     <a href="https://line.me/ti/p/~@amppattaya" target="_blank" rel="noopener noreferrer" class="btn btn-primary">
                         <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
                             <path d="M10 0C4.477 0 0 3.848 0 8.579c0 4.239 3.755 7.789 8.829 8.472.343.074.81.227.928.522.107.267.07.686.034 1.058l-.146.875c-.044.264-.206 1.034.906.564 1.112-.47 6.003-3.535 8.191-6.054C20.098 12.448 20 10.544 20 8.579 20 3.848 15.523 0 10 0z" fill="currentColor"/>
                         </svg>
                         ติดต่อผ่าน LINE
                     </a>
+                    <!-- TODO: Update phone number before production deployment -->
                     <a href="tel:+66891234567" class="btn btn-secondary">
                         <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
                             <path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z" fill="currentColor"/>
@@ -107,9 +110,9 @@
                         >
                         <button type="submit" class="btn btn-primary btn-block">แจ้งให้ฉันทราบ</button>
                     </form>
-                    <div id="successMessage" class="success-message" style="display: none;">
-                        <svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <circle cx="24" cy="24" r="24" fill="#16A34A"/>
+                    <div id="successMessage" class="success-message hidden" role="status" aria-live="polite">
+                        <svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                            <circle cx="24" cy="24" r="24" fill="var(--color-success)"/>
                             <path d="M16 24l6 6 12-12" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
                         </svg>
                         <h3>ขอบคุณที่ให้ความสนใจ!</h3>

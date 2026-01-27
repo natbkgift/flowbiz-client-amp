@@ -4,51 +4,60 @@ console.log('Coming Soon Page Loaded', {
     page: 'coming_soon_page'
 });
 
-// DOM Elements
-const leadForm = document.getElementById('leadForm');
-const successMessage = document.getElementById('successMessage');
+// DOM Elements and Event Handlers
+document.addEventListener('DOMContentLoaded', function() {
+    const leadForm = document.getElementById('leadForm');
+    const successMessage = document.getElementById('successMessage');
 
-// Lead Form Submission Handler
-leadForm.addEventListener('submit', function(e) {
-    e.preventDefault();
-    
-    // Get form data
-    const formData = new FormData(leadForm);
-    const honeypot = formData.get('hp');
-    
-    // Anti-Spam: Check honeypot field
-    if (honeypot) {
-        console.warn('Spam submission detected', {
-            timestamp: new Date().toISOString(),
-            honeypot: honeypot
+    if (!leadForm || !successMessage) {
+        console.warn('Lead form or success message element not found', {
+            timestamp: new Date().toISOString()
         });
-        // Silently reject spam - don't show any error to the bot
         return;
     }
-    
-    // Collect lead data
-    const leadData = {
-        name: formData.get('name'),
-        phone: formData.get('phone'),
-        source: 'coming_soon_page',
-        timestamp: new Date().toISOString()
-    };
-    
-    try {
-        // Store lead in localStorage
-        storeLead(leadData);
+
+    // Lead Form Submission Handler
+    leadForm.addEventListener('submit', function(e) {
+        e.preventDefault();
         
-        // Hide form and show success message
-        leadForm.style.display = 'none';
-        successMessage.style.display = 'block';
+        // Get form data
+        const formData = new FormData(leadForm);
+        const honeypot = formData.get('hp');
         
-        // Log successful submission
-        console.log('Lead captured successfully', leadData);
+        // Anti-Spam: Check honeypot field
+        if (honeypot) {
+            console.warn('Spam submission detected', {
+                timestamp: new Date().toISOString(),
+                honeypot: honeypot
+            });
+            // Silently reject spam - don't show any error to the bot
+            return;
+        }
         
-    } catch (error) {
-        console.error('Error storing lead', error);
-        alert('เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง');
-    }
+        // Collect lead data
+        const leadData = {
+            name: formData.get('name'),
+            phone: formData.get('phone'),
+            source: 'coming_soon_page',
+            timestamp: new Date().toISOString()
+        };
+        
+        try {
+            // Store lead in localStorage
+            storeLead(leadData);
+            
+            // Hide form and show success message
+            leadForm.classList.add('hidden');
+            successMessage.classList.remove('hidden');
+            
+            // Log successful submission (without sensitive data in production)
+            console.log('Lead captured successfully');
+            
+        } catch (error) {
+            console.error('Error storing lead', error);
+            alert('เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง');
+        }
+    });
 });
 
 // Store lead in localStorage
@@ -73,7 +82,13 @@ function storeLead(leadData) {
     leads.push(leadData);
     
     // Store back to localStorage
-    localStorage.setItem('early_leads', JSON.stringify(leads));
+    try {
+        localStorage.setItem('early_leads', JSON.stringify(leads));
+    } catch (error) {
+        console.error('Error writing leads to localStorage', error);
+        throw error;
+    }
     
     console.log('Total leads stored:', leads.length);
 }
+
