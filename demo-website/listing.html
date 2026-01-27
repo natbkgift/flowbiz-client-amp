@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Property Listings | Asset Management Property</title>
+  <meta name="description" content="Browse all properties available for rent or sale in Pattaya">
+  
+  <!-- Stylesheets -->
+  <link rel="stylesheet" href="assets/css/main.css">
+  <link rel="stylesheet" href="assets/css/components.css">
+  <link rel="stylesheet" href="assets/css/responsive.css">
+</head>
+<body>
+  <!-- Header -->
+  <header class="header">
+    <div class="header-content">
+      <a href="index.html" class="logo">
+        <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
+          <rect width="32" height="32" rx="6" fill="#1744BE"/>
+          <text x="16" y="22" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="14" font-weight="bold">AMP</text>
+        </svg>
+        <span>AMP</span>
+      </a>
+      
+      <nav class="nav desktop-only">
+        <a href="index.html">Home</a>
+        <a href="listing.html?intent=rent">Rent</a>
+        <a href="listing.html?intent=sale">Buy</a>
+        <a href="index.html#contact">Contact</a>
+      </nav>
+      
+      <div class="header-actions">
+        <button class="lang-switch" onclick="switchLanguage()">TH</button>
+        <button class="hamburger mobile-only" onclick="toggleMobileMenu()" aria-label="Menu">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="3" y1="12" x2="21" y2="12"></line>
+            <line x1="3" y1="6" x2="21" y2="6"></line>
+            <line x1="3" y1="18" x2="21" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </header>
+  
+  <!-- Mobile Menu -->
+  <div class="mobile-menu" id="mobile-menu">
+    <a href="index.html">Home</a>
+    <a href="listing.html?intent=rent">Rent</a>
+    <a href="listing.html?intent=sale">Buy</a>
+    <a href="index.html#contact">Contact</a>
+  </div>
+  
+  <!-- Main Content -->
+  <div class="section">
+    <div class="container">
+      <!-- Mobile Filter Toggle Button -->
+      <button class="btn btn-primary mobile-only mb-lg" id="filter-toggle-btn" onclick="toggleFilterSidebar()" style="width: 100%;">
+        🔍 Filters & Sort
+      </button>
+      
+      <div class="listing-layout">
+        <!-- Filter Sidebar -->
+        <aside class="filter-sidebar">
+          <h3 style="margin-bottom: 24px;">Filters</h3>
+          
+          <!-- Intent Filter -->
+          <div class="filter-section">
+            <h3>Looking to</h3>
+            <div class="toggle-group">
+              <button type="button" class="toggle-option" data-value="">All</button>
+              <button type="button" class="toggle-option" data-value="rent">Rent</button>
+              <button type="button" class="toggle-option" data-value="sale">Buy</button>
+            </div>
+          </div>
+          
+          <!-- Type Filter -->
+          <div class="filter-section">
+            <h3>Property Type</h3>
+            <div class="checkbox-group">
+              <label class="checkbox-label">
+                <input type="checkbox" name="type" value="condo">
+                <span>Condo</span>
+              </label>
+              <label class="checkbox-label">
+                <input type="checkbox" name="type" value="house">
+                <span>House</span>
+              </label>
+              <label class="checkbox-label">
+                <input type="checkbox" name="type" value="villa">
+                <span>Villa</span>
+              </label>
+              <label class="checkbox-label">
+                <input type="checkbox" name="type" value="townhome">
+                <span>Townhome</span>
+              </label>
+              <label class="checkbox-label">
+                <input type="checkbox" name="type" value="land">
+                <span>Land</span>
+              </label>
+            </div>
+          </div>
+          
+          <!-- Area Filter -->
+          <div class="filter-section">
+            <h3>Area</h3>
+            <div class="checkbox-group">
+              <label class="checkbox-label">
+                <input type="checkbox" name="area" value="Pattaya">
+                <span>Pattaya</span>
+              </label>
+              <label class="checkbox-label">
+                <input type="checkbox" name="area" value="Jomtien">
+                <span>Jomtien</span>
+              </label>
+              <label class="checkbox-label">
+                <input type="checkbox" name="area" value="Na Jomtien">
+                <span>Na Jomtien</span>
+              </label>
+              <label class="checkbox-label">
+                <input type="checkbox" name="area" value="Bang Saray">
+                <span>Bang Saray</span>
+              </label>
+              <label class="checkbox-label">
+                <input type="checkbox" name="area" value="Pratumnak">
+                <span>Pratumnak</span>
+              </label>
+              <label class="checkbox-label">
+                <input type="checkbox" name="area" value="Huay Yai">
+                <span>Huay Yai</span>
+              </label>
+            </div>
+          </div>
+          
+          <!-- Bedrooms Filter -->
+          <div class="filter-section">
+            <h3>Bedrooms</h3>
+            <div class="chips-group">
+              <button type="button" class="chip" data-beds="studio">Studio</button>
+              <button type="button" class="chip" data-beds="1">1</button>
+              <button type="button" class="chip" data-beds="2">2</button>
+              <button type="button" class="chip" data-beds="3">3</button>
+              <button type="button" class="chip" data-beds="4">4+</button>
+            </div>
+          </div>
+          
+          <!-- Price Range Filter -->
+          <div class="filter-section">
+            <h3>Price Range (THB)</h3>
+            <div class="form-group">
+              <input type="number" id="price-min" class="form-input" placeholder="Min" min="0">
+            </div>
+            <div class="form-group">
+              <input type="number" id="price-max" class="form-input" placeholder="Max" min="0">
+            </div>
+          </div>
+          
+          <!-- Filter Actions -->
+          <div class="filter-actions">
+            <button class="btn btn-primary btn-block" onclick="applyFilters()">Apply</button>
+            <button class="btn btn-secondary btn-block" onclick="resetFilters()">Reset</button>
+          </div>
+        </aside>
+        
+        <!-- Results Section -->
+        <main>
+          <!-- Results Header -->
+          <div class="results-header">
+            <div class="results-count" id="results-count">24 Properties Found</div>
+            <div class="sort-dropdown">
+              <label for="sort-by">Sort by:</label>
+              <select id="sort-by" class="form-select" style="width: auto;">
+                <option value="updated">Recently Updated</option>
+                <option value="newest">Newest</option>
+                <option value="price-low">Price: Low to High</option>
+                <option value="price-high">Price: High to Low</option>
+              </select>
+            </div>
+          </div>
+          
+          <!-- Property Grid -->
+          <div class="grid grid-3" id="property-grid">
+            <!-- Properties will be rendered here by JavaScript -->
+          </div>
+          
+          <!-- Pagination -->
+          <div class="pagination">
+            <button class="btn btn-secondary" disabled>Previous</button>
+            <span class="pagination-info">Page 1 of 1</span>
+            <button class="btn btn-secondary" disabled>Next</button>
+          </div>
+        </main>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-content">
+        <div>
+          <h3>Asset Management Property</h3>
+          <p>Professional property management in Pattaya</p>
+          <p style="margin-top: 16px;">
+            <strong>Office Hours:</strong><br>
+            Mon - Sun: 9:00 AM - 6:00 PM
+          </p>
+        </div>
+        
+        <div>
+          <h3>Contact Us</h3>
+          <a href="tel:+66891234567">📞 +66 89-123-4567</a>
+          <a href="mailto:info@amppattaya.com">📧 info@amppattaya.com</a>
+          <a href="https://line.me/ti/p/~@amppattaya">💬 LINE: @amppattaya</a>
+        </div>
+        
+        <div>
+          <h3>Quick Links</h3>
+          <a href="listing.html?intent=rent">Properties for Rent</a>
+          <a href="listing.html?intent=sale">Properties for Sale</a>
+          <a href="index.html#contact">Contact Us</a>
+          <a href="#">About Us</a>
+        </div>
+      </div>
+      
+      <div class="footer-bottom">
+        <p>&copy; 2026 Asset Management Property. All rights reserved. | Demo Website</p>
+      </div>
+    </div>
+  </footer>
+  
+  <!-- Scripts -->
+  <script src="assets/js/mock-data.js"></script>
+  <script src="assets/js/filters.js"></script>
+  <script src="assets/js/main.js"></script>
+</body>
+</html>

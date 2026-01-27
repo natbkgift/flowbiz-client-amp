@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Asset Management Property | Find Properties in Pattaya</title>
+  <meta name="description" content="Professional property management in Pattaya. Find condos, houses, and villas for rent or sale.">
+  
+  <!-- Stylesheets -->
+  <link rel="stylesheet" href="assets/css/main.css">
+  <link rel="stylesheet" href="assets/css/components.css">
+  <link rel="stylesheet" href="assets/css/responsive.css">
+</head>
+<body>
+  <!-- Header -->
+  <header class="header">
+    <div class="header-content">
+      <a href="index.html" class="logo">
+        <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
+          <rect width="32" height="32" rx="6" fill="#1744BE"/>
+          <text x="16" y="22" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="14" font-weight="bold">AMP</text>
+        </svg>
+        <span>AMP</span>
+      </a>
+      
+      <nav class="nav desktop-only">
+        <a href="index.html">Home</a>
+        <a href="listing.html?intent=rent">Rent</a>
+        <a href="listing.html?intent=sale">Buy</a>
+        <a href="#contact">Contact</a>
+      </nav>
+      
+      <div class="header-actions">
+        <button class="lang-switch" onclick="switchLanguage()">TH</button>
+        <button class="hamburger mobile-only" onclick="toggleMobileMenu()" aria-label="Menu">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="3" y1="12" x2="21" y2="12"></line>
+            <line x1="3" y1="6" x2="21" y2="6"></line>
+            <line x1="3" y1="18" x2="21" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </header>
+  
+  <!-- Mobile Menu -->
+  <div class="mobile-menu" id="mobile-menu">
+    <a href="index.html">Home</a>
+    <a href="listing.html?intent=rent">Rent</a>
+    <a href="listing.html?intent=sale">Buy</a>
+    <a href="#contact">Contact</a>
+  </div>
+  
+  <!-- Hero Section -->
+  <section class="hero">
+    <div class="container">
+      <h1>ค้นหาทรัพย์สินในพัทยา</h1>
+      <p class="hero-subtitle">Find Properties in Pattaya</p>
+      <p class="hero-subtitle">ข้อมูลชัด ตอบไว ดูแลครบ</p>
+      
+      <!-- Search Form -->
+      <form class="search-form" id="search-form">
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Looking to</label>
+            <div class="toggle-group">
+              <button type="button" class="toggle-option active" data-value="rent">Rent</button>
+              <button type="button" class="toggle-option" data-value="sale">Buy</button>
+            </div>
+          </div>
+          
+          <div class="form-group">
+            <label class="form-label">Property Type</label>
+            <select name="type" class="form-select">
+              <option value="">All Types</option>
+              <option value="condo">Condo</option>
+              <option value="house">House</option>
+              <option value="villa">Villa</option>
+              <option value="townhome">Townhome</option>
+              <option value="land">Land</option>
+            </select>
+          </div>
+          
+          <div class="form-group">
+            <label class="form-label">Area</label>
+            <select name="area" class="form-select">
+              <option value="">All Areas</option>
+              <option value="Pattaya">Pattaya</option>
+              <option value="Jomtien">Jomtien</option>
+              <option value="Na Jomtien">Na Jomtien</option>
+              <option value="Bang Saray">Bang Saray</option>
+              <option value="Pratumnak">Pratumnak</option>
+              <option value="Huay Yai">Huay Yai</option>
+            </select>
+          </div>
+          
+          <div class="form-group">
+            <label class="form-label">&nbsp;</label>
+            <button type="submit" class="btn btn-accent btn-block">Search Properties</button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </section>
+  
+  <!-- Featured Properties Section -->
+  <section class="section">
+    <div class="container">
+      <div class="section-header">
+        <h2 class="section-title">แนะนำพิเศษ / Featured Properties</h2>
+        <p class="section-subtitle">Handpicked properties for you</p>
+      </div>
+      
+      <div class="grid grid-3" id="featured-properties">
+        <!-- Properties will be rendered here by JavaScript -->
+      </div>
+      
+      <div style="text-align: center; margin-top: 32px;">
+        <a href="listing.html" class="btn btn-primary">View All Properties</a>
+      </div>
+    </div>
+  </section>
+  
+  <!-- Popular Areas Section -->
+  <section class="section" style="background: var(--color-white);">
+    <div class="container">
+      <div class="section-header">
+        <h2 class="section-title">พื้นที่ยอดนิยม / Popular Areas</h2>
+        <p class="section-subtitle">Explore properties by location</p>
+      </div>
+      
+      <div class="grid grid-3" id="popular-areas">
+        <!-- Areas will be rendered here by JavaScript -->
+      </div>
+    </div>
+  </section>
+  
+  <!-- Footer -->
+  <footer class="footer" id="contact">
+    <div class="container">
+      <div class="footer-content">
+        <div>
+          <h3>Asset Management Property</h3>
+          <p>Professional property management in Pattaya</p>
+          <p style="margin-top: 16px;">
+            <strong>Office Hours:</strong><br>
+            Mon - Sun: 9:00 AM - 6:00 PM
+          </p>
+        </div>
+        
+        <div>
+          <h3>Contact Us</h3>
+          <a href="tel:+66891234567">📞 +66 89-123-4567</a>
+          <a href="mailto:info@amppattaya.com">📧 info@amppattaya.com</a>
+          <a href="https://line.me/ti/p/~@amppattaya">💬 LINE: @amppattaya</a>
+        </div>
+        
+        <div>
+          <h3>Quick Links</h3>
+          <a href="listing.html?intent=rent">Properties for Rent</a>
+          <a href="listing.html?intent=sale">Properties for Sale</a>
+          <a href="#contact">Contact Us</a>
+          <a href="#">About Us</a>
+        </div>
+      </div>
+      
+      <div class="footer-bottom">
+        <p>&copy; 2026 Asset Management Property. All rights reserved. | Demo Website</p>
+      </div>
+    </div>
+  </footer>
+  
+  <!-- Scripts -->
+  <script src="assets/js/mock-data.js"></script>
+  <script src="assets/js/main.js"></script>
+  
+  <script>
+    // Render featured properties
+    function renderFeaturedProperties() {
+      const container = document.getElementById('featured-properties');
+      if (!container) return;
+      
+      const html = FEATURED_PROPERTIES.map(property => {
+        const currentLang = document.documentElement.lang || 'en';
+        const title = currentLang === 'th' ? property.title_th : property.title_en;
+        const priceLabel = property.intent === 'rent' ? '/month' : '';
+        const bedsLabel = property.beds === 0 ? 'Studio' : `${property.beds} ${property.beds === 1 ? 'Bed' : 'Beds'}`;
+        const bathsLabel = `${property.baths} ${property.baths === 1 ? 'Bath' : 'Baths'}`;
+        
+        const badges = property.badges.map(badge => {
+          const badgeClass = badge === 'Featured' ? 'badge-featured' : 
+                           badge === 'Available Now' ? 'badge-available' : 'badge-updated';
+          return `<span class="badge ${badgeClass}">${badge}</span>`;
+        }).join('');
+        
+        return `
+          <div class="property-card">
+            <div class="card-image">
+              <img src="${property.image}" alt="${title}">
+              ${badges ? `<div class="card-badges">${badges}</div>` : ''}
+            </div>
+            <div class="card-content">
+              <div class="card-price">฿${property.price.toLocaleString()}<span>${priceLabel}</span></div>
+              <h3 class="card-title">${title}</h3>
+              <div class="card-facts">
+                ${property.beds !== null ? `<span>🛏️ ${bedsLabel}</span>` : ''}
+                ${property.baths !== null ? `<span>🚿 ${bathsLabel}</span>` : ''}
+                <span>📐 ${property.sqm} m²</span>
+              </div>
+              <div class="card-location">📍 ${property.area}</div>
+              <div class="card-actions">
+                <a href="detail.html?id=${property.id}" class="btn btn-primary btn-sm">View Details</a>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+      
+      container.innerHTML = html;
+    }
+    
+    // Render popular areas
+    function renderPopularAreas() {
+      const container = document.getElementById('popular-areas');
+      if (!container) return;
+      
+      const html = POPULAR_AREAS.map(area => {
+        const currentLang = document.documentElement.lang || 'en';
+        const name = currentLang === 'th' ? area.name_th : area.name;
+        
+        return `
+          <div class="area-card" data-area="${area.name}">
+            <img src="${area.image}" alt="${name}">
+            <div class="area-card-overlay">
+              <h3 class="area-card-title">${name}</h3>
+            </div>
+          </div>
+        `;
+      }).join('');
+      
+      container.innerHTML = html;
+    }
+    
+    // Initialize
+    renderFeaturedProperties();
+    renderPopularAreas();
+  </script>
+</body>
+</html>

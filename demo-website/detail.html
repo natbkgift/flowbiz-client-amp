@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Property Details | Asset Management Property</title>
+  <meta name="description" content="View property details and contact us for more information">
+  
+  <!-- Stylesheets -->
+  <link rel="stylesheet" href="assets/css/main.css">
+  <link rel="stylesheet" href="assets/css/components.css">
+  <link rel="stylesheet" href="assets/css/responsive.css">
+</head>
+<body>
+  <!-- Header -->
+  <header class="header">
+    <div class="header-content">
+      <a href="index.html" class="logo">
+        <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
+          <rect width="32" height="32" rx="6" fill="#1744BE"/>
+          <text x="16" y="22" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="14" font-weight="bold">AMP</text>
+        </svg>
+        <span>AMP</span>
+      </a>
+      
+      <nav class="nav desktop-only">
+        <a href="index.html">Home</a>
+        <a href="listing.html?intent=rent">Rent</a>
+        <a href="listing.html?intent=sale">Buy</a>
+        <a href="index.html#contact">Contact</a>
+      </nav>
+      
+      <div class="header-actions">
+        <button class="lang-switch" onclick="switchLanguage()">TH</button>
+        <button class="hamburger mobile-only" onclick="toggleMobileMenu()" aria-label="Menu">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="3" y1="12" x2="21" y2="12"></line>
+            <line x1="3" y1="6" x2="21" y2="6"></line>
+            <line x1="3" y1="18" x2="21" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </header>
+  
+  <!-- Mobile Menu -->
+  <div class="mobile-menu" id="mobile-menu">
+    <a href="index.html">Home</a>
+    <a href="listing.html?intent=rent">Rent</a>
+    <a href="listing.html?intent=sale">Buy</a>
+    <a href="index.html#contact">Contact</a>
+  </div>
+  
+  <!-- Main Content -->
+  <div class="section">
+    <div class="container">
+      <div class="detail-layout">
+        <!-- Main Content -->
+        <div class="detail-main">
+          <!-- Gallery -->
+          <div id="gallery-section">
+            <div class="gallery-main" id="gallery-main-container">
+              <img id="gallery-main-image" src="" alt="Property">
+              <div class="gallery-counter" id="gallery-counter">1 / 12</div>
+            </div>
+            <div class="gallery-thumbnails" id="gallery-thumbnails">
+              <!-- Thumbnails will be rendered here -->
+            </div>
+          </div>
+          
+          <!-- Property Header -->
+          <div class="property-header">
+            <div class="property-title">
+              <h1 id="property-title">Loading...</h1>
+              <p class="property-location" id="property-location">📍 Loading...</p>
+            </div>
+            <div class="property-price" id="property-price">฿0</div>
+          </div>
+          
+          <!-- Property Facts -->
+          <div class="property-facts" id="property-facts">
+            <!-- Facts will be rendered here -->
+          </div>
+          
+          <!-- Badges -->
+          <div class="property-badges mb-lg" id="property-badges">
+            <!-- Badges will be rendered here -->
+          </div>
+          
+          <!-- Description -->
+          <div style="background: var(--color-white); padding: 24px; border-radius: 12px; margin-bottom: 24px;">
+            <h2 class="mb-md">Description</h2>
+            <div class="lang-tabs">
+              <button class="lang-tab active" data-lang="th">ไทย</button>
+              <button class="lang-tab" data-lang="en">English</button>
+            </div>
+            <div class="tab-content active" data-lang="th" id="description-th">
+              <p>Loading...</p>
+            </div>
+            <div class="tab-content" data-lang="en" id="description-en">
+              <p>Loading...</p>
+            </div>
+          </div>
+          
+          <!-- Amenities -->
+          <div style="background: var(--color-white); padding: 24px; border-radius: 12px; margin-bottom: 24px;">
+            <h2 class="mb-md">Amenities</h2>
+            <div class="amenities-grid" id="amenities-grid">
+              <!-- Amenities will be rendered here -->
+            </div>
+          </div>
+          
+          <!-- Location -->
+          <div style="background: var(--color-white); padding: 24px; border-radius: 12px; margin-bottom: 24px;">
+            <h2 class="mb-md">Location</h2>
+            <div style="background: var(--color-gray-100); height: 300px; border-radius: 8px; display: flex; align-items: center; justify-content: center; margin-bottom: 16px;">
+              <p style="color: var(--color-gray-600);">Map Placeholder</p>
+            </div>
+            <p id="location-description" style="color: var(--color-gray-600);">Loading...</p>
+          </div>
+          
+          <!-- Similar Properties -->
+          <div>
+            <h2 class="mb-lg">Similar Properties</h2>
+            <div class="grid grid-2" id="similar-properties">
+              <!-- Similar properties will be rendered here -->
+            </div>
+          </div>
+        </div>
+        
+        <!-- Sidebar -->
+        <aside class="detail-sidebar">
+          <!-- Agent Card -->
+          <div class="agent-card">
+            <div class="agent-header">
+              <svg class="agent-avatar" width="64" height="64" viewBox="0 0 64 64" style="border-radius: 50%;">
+                <rect width="64" height="64" fill="#1744BE"/>
+                <text x="32" y="42" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="20" font-weight="bold">AMP</text>
+              </svg>
+              <div class="agent-info">
+                <h3>AMP Pattaya</h3>
+                <p>Professional Property Management</p>
+              </div>
+            </div>
+            <div class="agent-actions">
+              <a href="https://line.me/ti/p/~@amppattaya" class="btn btn-primary btn-block">
+                💬 LINE Chat
+              </a>
+              <a href="tel:+66891234567" class="btn btn-secondary btn-block">
+                📞 Call: 089-123-4567
+              </a>
+            </div>
+          </div>
+          
+          <!-- Inquiry Form -->
+          <form class="inquiry-form" style="margin-top: 24px;">
+            <h3>สนใจทรัพย์นี้?</h3>
+            <p style="color: var(--color-gray-600); margin-bottom: 24px; font-size: 14px;">
+              Interested in this property?
+            </p>
+            <div class="form-group">
+              <input type="text" name="name" class="form-input" placeholder="Your Name" required>
+            </div>
+            <div class="form-group">
+              <input type="tel" name="phone" class="form-input" placeholder="Phone Number" required>
+            </div>
+            <div class="form-group">
+              <textarea name="message" class="form-textarea" placeholder="Message (optional)"></textarea>
+            </div>
+            <button type="submit" class="btn btn-accent btn-block">Send Inquiry</button>
+          </form>
+        </aside>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Sticky CTA (Mobile) -->
+  <div class="sticky-cta">
+    <a href="https://line.me/ti/p/~@amppattaya" class="btn btn-primary">
+      💬 LINE
+    </a>
+    <a href="tel:+66891234567" class="btn btn-accent">
+      📞 Call
+    </a>
+  </div>
+  
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-content">
+        <div>
+          <h3>Asset Management Property</h3>
+          <p>Professional property management in Pattaya</p>
+          <p style="margin-top: 16px;">
+            <strong>Office Hours:</strong><br>
+            Mon - Sun: 9:00 AM - 6:00 PM
+          </p>
+        </div>
+        
+        <div>
+          <h3>Contact Us</h3>
+          <a href="tel:+66891234567">📞 +66 89-123-4567</a>
+          <a href="mailto:info@amppattaya.com">📧 info@amppattaya.com</a>
+          <a href="https://line.me/ti/p/~@amppattaya">💬 LINE: @amppattaya</a>
+        </div>
+        
+        <div>
+          <h3>Quick Links</h3>
+          <a href="listing.html?intent=rent">Properties for Rent</a>
+          <a href="listing.html?intent=sale">Properties for Sale</a>
+          <a href="index.html#contact">Contact Us</a>
+          <a href="#">About Us</a>
+        </div>
+      </div>
+      
+      <div class="footer-bottom">
+        <p>&copy; 2026 Asset Management Property. All rights reserved. | Demo Website</p>
+      </div>
+    </div>
+  </footer>
+  
+  <!-- Scripts -->
+  <script src="assets/js/mock-data.js"></script>
+  <script src="assets/js/gallery.js"></script>
+  <script src="assets/js/main.js"></script>
+  
+  <script>
+    // Get property ID from URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const propertyId = urlParams.get('id');
+    
+    // Find property
+    const property = ALL_PROPERTIES.find(p => p.id === propertyId);
+    
+    if (!property) {
+      // Redirect to listing if property not found
+      window.location.href = 'listing.html';
+    } else {
+      // Render property details
+      const currentLang = document.documentElement.lang || 'en';
+      const title = currentLang === 'th' ? property.title_th : property.title_en;
+      const description = currentLang === 'th' ? property.description_th : property.description_en;
+      const priceLabel = property.intent === 'rent' ? '/month' : '';
+      
+      // Title and price
+      document.getElementById('property-title').textContent = title;
+      document.getElementById('property-location').textContent = `📍 ${property.area}, Pattaya`;
+      document.getElementById('property-price').innerHTML = `฿${property.price.toLocaleString()}<span>${priceLabel}</span>`;
+      document.title = `${title} | Asset Management Property`;
+      
+      // Facts
+      const factsHTML = `
+        ${property.beds !== null ? `<div class="fact">🛏️ <strong>${property.beds === 0 ? 'Studio' : property.beds}</strong> ${property.beds === 1 ? 'Bedroom' : 'Bedrooms'}</div>` : ''}
+        ${property.baths !== null ? `<div class="fact">🚿 <strong>${property.baths}</strong> ${property.baths === 1 ? 'Bathroom' : 'Bathrooms'}</div>` : ''}
+        <div class="fact">📐 <strong>${property.sqm}</strong> m²</div>
+        <div class="fact">📅 Available: <strong>${new Date(property.available_date).toLocaleDateString()}</strong></div>
+      `;
+      document.getElementById('property-facts').innerHTML = factsHTML;
+      
+      // Badges
+      const badgesHTML = property.badges.map(badge => {
+        const badgeClass = badge === 'Featured' ? 'badge-featured' : 
+                         badge === 'Available Now' ? 'badge-available' : 'badge-updated';
+        return `<span class="badge ${badgeClass}">${badge}</span>`;
+      }).join('');
+      badgesHTML += `<span class="badge badge-updated">Updated ${new Date(property.updated).toLocaleDateString()}</span>`;
+      document.getElementById('property-badges').innerHTML = badgesHTML;
+      
+      // Description
+      document.getElementById('description-th').innerHTML = `<p>${property.description_th}</p>`;
+      document.getElementById('description-en').innerHTML = `<p>${property.description_en}</p>`;
+      
+      // Amenities
+      const amenitiesIcons = {
+        'Pool': '🏊',
+        'Gym': '💪',
+        'Parking': '🚗',
+        '24/7 Security': '🔒',
+        'Elevator': '🛗',
+        'WiFi': '📶',
+        'Cable TV': '📺',
+        'Air Conditioning': '❄️',
+        'Garden': '🌳',
+        'Private Pool': '🏊',
+        'Sala': '🏡',
+        'Security System': '🔐',
+        'Maid Service': '🧹',
+        'Home Theater': '🎬',
+        'Playground': '🎡',
+        'Sea View': '🌊',
+        'Road Access': '🛣️',
+        'Electricity Available': '⚡',
+        'Water Supply': '💧'
+      };
+      
+      const amenitiesHTML = property.amenities.map(amenity => {
+        const icon = amenitiesIcons[amenity] || '✓';
+        return `
+          <div class="amenity-item">
+            <div class="amenity-icon">${icon}</div>
+            <div class="amenity-label">${amenity}</div>
+          </div>
+        `;
+      }).join('');
+      document.getElementById('amenities-grid').innerHTML = amenitiesHTML;
+      
+      // Location description
+      document.getElementById('location-description').textContent = `Located in ${property.area}, one of Pattaya's most sought-after areas. Easy access to beaches, shopping, restaurants, and entertainment.`;
+      
+      // Gallery
+      const mainImage = document.getElementById('gallery-main-image');
+      mainImage.src = property.images[0];
+      
+      const thumbnailsHTML = property.images.slice(0, 6).map((img, index) => `
+        <div class="gallery-thumbnail ${index === 0 ? 'active' : ''}">
+          <img src="${img}" alt="Property image ${index + 1}" data-large="${img}">
+        </div>
+      `).join('');
+      document.getElementById('gallery-thumbnails').innerHTML = thumbnailsHTML;
+      
+      // Initialize gallery
+      gallery = new Gallery(property.images);
+      
+      // Similar properties (same area or same type)
+      const similarProperties = ALL_PROPERTIES
+        .filter(p => p.id !== property.id && (p.area === property.area || p.type === property.type))
+        .slice(0, 4);
+      
+      const similarHTML = similarProperties.map(p => {
+        const title = currentLang === 'th' ? p.title_th : p.title_en;
+        const priceLabel = p.intent === 'rent' ? '/month' : '';
+        const bedsLabel = p.beds === 0 ? 'Studio' : `${p.beds} ${p.beds === 1 ? 'Bed' : 'Beds'}`;
+        const bathsLabel = `${p.baths} ${p.baths === 1 ? 'Bath' : 'Baths'}`;
+        
+        return `
+          <div class="property-card">
+            <div class="card-image">
+              <img src="${p.image}" alt="${title}">
+            </div>
+            <div class="card-content">
+              <div class="card-price">฿${p.price.toLocaleString()}<span>${priceLabel}</span></div>
+              <h3 class="card-title">${title}</h3>
+              <div class="card-facts">
+                ${p.beds !== null ? `<span>🛏️ ${bedsLabel}</span>` : ''}
+                ${p.baths !== null ? `<span>🚿 ${bathsLabel}</span>` : ''}
+                <span>📐 ${p.sqm} m²</span>
+              </div>
+              <div class="card-location">📍 ${p.area}</div>
+              <div class="card-actions">
+                <a href="detail.html?id=${p.id}" class="btn btn-primary btn-sm">View Details</a>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+      document.getElementById('similar-properties').innerHTML = similarHTML;
+    }
+  </script>
+</body>
+</html>
