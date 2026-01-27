@@ -151,12 +151,12 @@ Conversion Rate = (100 / 2,000) × 100% = 5%
 
 **สูตร:**
 ```
-ROAS = (Revenue from Ads / Ad Spend) × 100%
+ROAS = Revenue from Ads / Ad Spend
 
 Example:
 Revenue: ฿250,000
 Ad Spend: ฿50,000
-ROAS = (250,000 / 50,000) = 5x or 500%
+ROAS = 250,000 / 50,000 = 5 (5x or 500%)
 ```
 
 **Target:**

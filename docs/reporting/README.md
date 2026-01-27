@@ -222,7 +222,7 @@ docs/reporting/
 | Metric | Target | Current |
 |--------|--------|---------|
 | Active Listings | > 500 | - |
-| Listing Update Time | < 24h | - |
+| Listing Freshness | > 90% updated in 7 days | - |
 | LINE Response Rate | > 90% | - |
 | Data Quality Score | > 95% | - |
 
@@ -235,19 +235,22 @@ docs/reporting/
 ### Monthly Budget Allocation (Example)
 
 ```
-Total Marketing Budget: ฿100,000/month
+Total Budget: ฿100,000/month (Marketing Budget: ฿80,000/month)
 
 ┌─────────────────────────────────────┐
-│ Google Ads (40%)     ฿40,000        │
+│ Google Ads (40%)     ฿32,000        │
 ├─────────────────────────────────────┤
-│ Facebook Ads (30%)   ฿30,000        │
+│ Facebook Ads (30%)   ฿24,000        │
 ├─────────────────────────────────────┤
-│ LINE OA (10%)        ฿10,000        │
+│ LINE OA (10%)        ฿8,000         │
 ├─────────────────────────────────────┤
-│ Content (10%)        ฿10,000        │
+│ Content (10%)        ฿8,000         │
 ├─────────────────────────────────────┤
-│ Tools (10%)          ฿10,000        │
+│ Tools (10%)          ฿8,000         │
 └─────────────────────────────────────┘
+
+Note: Percentages shown are of marketing budget (฿80,000).
+Operations (฿15,000) and Technology (฿5,000) are additional.
 ```
 
 ### ROI Tracking

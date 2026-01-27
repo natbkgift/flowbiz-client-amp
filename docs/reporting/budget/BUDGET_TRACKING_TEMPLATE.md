@@ -111,18 +111,18 @@
 
 ---
 
-### Tab 4: ROI Calculation
+### Tab 4: Marketing ROI Calculation
 
-| Month | Marketing Cost | Deals Closed | Total Revenue | Net Profit | ROI | ROAS |
-|-------|---------------|--------------|---------------|------------|-----|------|
+| Month | Marketing Cost | Deals Closed | Total Revenue | Net Profit | Marketing ROI | ROAS |
+|-------|---------------|--------------|---------------|------------|---------------|------|
 | Jan 2026 | ฿80,000 | 8 | ฿400,000 | ฿320,000 | 400% | 5.0x |
 | Feb 2026 | ฿85,000 | 10 | ฿550,000 | ฿465,000 | 547% | 6.5x |
 | Mar 2026 | ฿90,000 | 12 | ฿600,000 | ฿510,000 | 567% | 6.7x |
 
-**Formulas:**
+**Formulas (Marketing-Only):**
 ```
 Net Profit = Total Revenue - Marketing Cost
-ROI = (Net Profit / Marketing Cost) × 100%
+Marketing ROI = (Net Profit / Marketing Cost) × 100%
 ROAS = Total Revenue / Marketing Cost
 ```
 
@@ -242,16 +242,27 @@ Week 4 Target: ฿35,000 (100% of monthly)
 ### Basic ROI Formula
 
 ```
-ROI = ((Revenue - Cost) / Cost) × 100%
+Overall ROI = ((Revenue - Total Cost) / Total Cost) × 100%
 
 Components:
 - Revenue: Total commission from closed deals
-- Cost: All marketing + sales costs
+- Total Cost: All costs (marketing + operations + technology)
 
 Example:
 Revenue: ฿500,000 (10 deals × ฿50,000 avg commission)
-Cost: ฿100,000 (marketing + ops)
-ROI = ((500,000 - 100,000) / 100,000) × 100% = 400%
+Total Cost: ฿100,000 (marketing + ops + tech)
+Overall ROI = ((500,000 - 100,000) / 100,000) × 100% = 400%
+```
+
+### Marketing ROI (Marketing-Only)
+
+```
+Marketing ROI = ((Revenue - Marketing Cost) / Marketing Cost) × 100%
+
+Example:
+Revenue: ฿500,000
+Marketing Cost: ฿80,000
+Marketing ROI = ((500,000 - 80,000) / 80,000) × 100% = 525%
 ```
 
 ### Channel-Specific ROI

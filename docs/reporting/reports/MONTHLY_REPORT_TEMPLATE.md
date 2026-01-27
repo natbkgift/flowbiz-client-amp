@@ -70,7 +70,8 @@ Monthly Report เป็นรายงานเชิงกลยุทธ์�
 January 2026 was a strong month for AMP, exceeding revenue 
 targets while maintaining disciplined spending. We closed 10 
 deals totaling ฿500,000 in commission revenue (goal: ฿500K), 
-with an overall ROI of 424% on ฿95,500 in marketing spend.
+with an overall ROI of 424% on ฿95,500 in total spend (marketing, 
+operations, and technology).
 
 Key highlights include our best-performing Google Ads campaign 
 to date (฿450 CPL, 600% ROI) and successful implementation of 
@@ -151,7 +152,7 @@ allocated: ฿105,000 with expected 12 deals closed.
 | Total Revenue | ฿500K | ฿500K | ✅ 100% | +฿80K (+19%) |
 | Deals Closed | 10 | 10 | ✅ 100% | +2 (+25%) |
 | Avg Revenue/Deal | ฿50K | ฿50K | ✅ 100% | -฿2.5K (-5%) |
-| Marketing ROI | >300% | 424% | ✅ +41% | +45pp |
+| Overall ROI | >300% | 424% | ✅ +41% | +45pp |
 | Cost per Acquisition | <฿20K | ฿9,550 | ✅ -52% | -฿850 |
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -231,8 +232,8 @@ Total Cost: ฿95,500
 Net Profit: ฿404,500
 Overall ROI: 424%
 
-Return on Ad Spend (ROAS): 5.2x
-(Revenue ฿500K / Ad Spend ฿95.5K)
+Return on Ad Spend (ROAS): 6.5x
+(Revenue ฿500K / Marketing Spend ฿76.4K)
 
 CHANNEL EFFICIENCY
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
