@@ -14,9 +14,10 @@
 | **ประเภท** | High-rise Condominium |
 | **ทำเล** | Central Pattaya |
 | **ระยะห่างจากทะเล** | 1.5 km (5 นาที) |
-| **Developer** | [Developer Name] |
+| **Developer** | [Developer Name - placeholder for template demonstration] |
 | **สถานะโครงการ** | Ready to Move |
 | **ปีที่แล้วเสร็จ** | 2024 |
+| **เริ่มเข้าอยู่อาศัย** | Q1 2024 (ระบุเดือน/ปีที่เริ่มจริง หากต่างจากปีแล้วเสร็จ) |
 | **จำนวนชั้น** | 35 ชั้น |
 | **จำนวนยูนิต** | 800+ units |
 

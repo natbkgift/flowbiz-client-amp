@@ -16,10 +16,10 @@
 | **ระยะห่างจากทะเล** | 100 เมตร (2 นาที เดิน) |
 | **Developer** | Heights Holdings |
 | **สถานะโครงการ** | Under Construction - ก่อสร้างถึงชั้น 38/55 |
-| **ปีที่คาดว่าแล้วเสร็จ** | Q2 2026 |
+| **ปีที่คาดว่าแล้วเสร็จ** | Q2 2026 _(อัปเดตให้ตรงตามแผนโครงการล่าสุด)_ |
 | **จำนวนชั้น** | 55 ชั้น (Tallest in Jomtien) |
 | **จำนวนยูนิต** | 1,200+ units |
-| **Construction Progress** | 70% Complete (Jan 2026) |
+| **Construction Progress** | 70% Complete (January 2026) |
 
 ### ราคาและขนาด
 

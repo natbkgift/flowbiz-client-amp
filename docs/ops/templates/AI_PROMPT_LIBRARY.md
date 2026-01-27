@@ -194,6 +194,8 @@ shot with Canon EOS R5, 24-70mm lens,
 ultra detailed, 8k, --ar 16:9 --v 6
 ```
 
+> **Note:** Version parameter `--v 6` refers to Midjourney v6. Check Midjourney's current documentation for the latest version syntax as this may have been updated.
+
 **Variations:**
 
 **Day Shot:**
@@ -694,6 +696,8 @@ Content mix: [Social posts/Ads/PR/Events]
 | **DALL-E** | Quick images | $15/115 images | Fast, integrated |
 | **Stable Diffusion** | Custom models | Free - varies | Open source |
 | **Runway** | Video generation | $12-76/mo | AI video editing |
+
+> ℹ️ **Note:** Pricing shown here is approximate and for reference only. AI tool plans and costs change frequently—please verify the latest pricing and tiers with each provider before making decisions.
 
 ---
 
