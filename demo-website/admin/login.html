@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Login - AMP Demo</title>
+  
+  <!-- CSS -->
+  <link rel="stylesheet" href="../assets/css/main.css">
+  <link rel="stylesheet" href="../assets/css/components.css">
+  <link rel="stylesheet" href="../assets/css/admin.css">
+  
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body>
+  <div class="login-container">
+    <div class="login-card">
+      <!-- Logo -->
+      <div class="login-logo">
+        <img src="../assets/images/logo-amp.svg" alt="AMP Logo">
+      </div>
+      
+      <!-- Title -->
+      <div class="login-header">
+        <h1 data-i18n="admin_welcome_back">Welcome Back</h1>
+        <p data-i18n="admin_login_subtitle">Sign in to manage your properties and leads</p>
+      </div>
+      
+      <!-- Login Form -->
+      <form class="login-form" id="loginForm">
+        <!-- Email Input -->
+        <div class="form-group">
+          <label for="email" style="display: none;">Email</label>
+          <div class="input-with-icon">
+            <i data-lucide="mail" class="input-icon"></i>
+            <input 
+              type="email" 
+              id="email" 
+              name="email" 
+              class="form-control"
+              data-i18n-placeholder="admin_email"
+              placeholder="Email"
+              required
+              autocomplete="email"
+            >
+          </div>
+        </div>
+        
+        <!-- Password Input -->
+        <div class="form-group">
+          <label for="password" style="display: none;">Password</label>
+          <div class="input-with-icon">
+            <i data-lucide="lock" class="input-icon"></i>
+            <input 
+              type="password" 
+              id="password" 
+              name="password" 
+              class="form-control"
+              data-i18n-placeholder="admin_password"
+              placeholder="Password"
+              required
+              autocomplete="current-password"
+            >
+            <button type="button" class="password-toggle" id="togglePassword">
+              <i data-lucide="eye" id="eyeIcon"></i>
+            </button>
+          </div>
+        </div>
+        
+        <!-- Remember Me & Forgot Password -->
+        <div class="login-actions">
+          <div class="form-checkbox">
+            <input type="checkbox" id="remember" name="remember">
+            <label for="remember" data-i18n="admin_remember_me">Remember me</label>
+          </div>
+          <a href="#" class="login-forgot" data-i18n="admin_forgot_password">Forgot password?</a>
+        </div>
+        
+        <!-- Login Button -->
+        <button type="submit" class="btn btn-primary btn-block" data-i18n="admin_login">Login</button>
+      </form>
+    </div>
+  </div>
+  
+  <!-- JavaScript -->
+  <script src="../assets/js/i18n.js"></script>
+  <script>
+    // Initialize Lucide icons
+    lucide.createIcons();
+    
+    // Password toggle functionality
+    const togglePassword = document.getElementById('togglePassword');
+    const passwordInput = document.getElementById('password');
+    const eyeIcon = document.getElementById('eyeIcon');
+    
+    togglePassword.addEventListener('click', function() {
+      const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+      passwordInput.setAttribute('type', type);
+      
+      // Update icon
+      eyeIcon.setAttribute('data-lucide', type === 'password' ? 'eye' : 'eye-off');
+      lucide.createIcons();
+    });
+    
+    // Form validation and submission
+    const loginForm = document.getElementById('loginForm');
+    
+    loginForm.addEventListener('submit', function(e) {
+      e.preventDefault();
+      
+      const email = document.getElementById('email').value.trim();
+      const password = document.getElementById('password').value;
+      
+      // Simple validation
+      if (!email) {
+        alert('Please enter your email address');
+        return;
+      }
+      
+      if (!validateEmail(email)) {
+        alert('Please enter a valid email address');
+        return;
+      }
+      
+      if (!password) {
+        alert('Please enter your password');
+        return;
+      }
+      
+      if (password.length < 6) {
+        alert('Password must be at least 6 characters');
+        return;
+      }
+      
+      // Success - redirect to dashboard
+      window.location.href = 'dashboard.html';
+    });
+    
+    // Email validation helper
+    function validateEmail(email) {
+      const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      return re.test(email);
+    }
+  </script>
+  
+  <style>
+    /* Additional styles for input with icon */
+    .input-with-icon {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+    
+    .input-icon {
+      position: absolute;
+      left: 16px;
+      width: 20px;
+      height: 20px;
+      color: #9CA3AF;
+      pointer-events: none;
+      z-index: 1;
+    }
+    
+    .input-with-icon .form-control {
+      padding-left: 48px;
+      padding-right: 48px;
+      width: 100%;
+    }
+    
+    .password-toggle {
+      position: absolute;
+      right: 16px;
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #9CA3AF;
+      transition: color 0.2s ease;
+    }
+    
+    .password-toggle:hover {
+      color: #6B7280;
+    }
+    
+    .password-toggle i {
+      width: 20px;
+      height: 20px;
+    }
+    
+    .login-header {
+      text-align: center;
+      margin-bottom: 32px;
+    }
+    
+    .login-header h1 {
+      font-size: 28px;
+      font-weight: 700;
+      color: #111827;
+      margin: 0 0 8px 0;
+    }
+    
+    .login-header p {
+      color: #6B7280;
+      font-size: 14px;
+      margin: 0;
+    }
+    
+    .form-group {
+      margin-bottom: 0;
+    }
+    
+    .form-control {
+      height: 48px;
+      border: 1px solid #D1D5DB;
+      border-radius: 8px;
+      font-size: 14px;
+      transition: all 0.2s ease;
+    }
+    
+    .form-control:focus {
+      outline: none;
+      border-color: var(--admin-primary);
+      box-shadow: 0 0 0 3px rgba(23, 68, 190, 0.1);
+    }
+    
+    .btn-block {
+      width: 100%;
+      height: 48px;
+      font-size: 16px;
+      font-weight: 600;
+      margin-top: 8px;
+    }
+  </style>
+</body>
+</html>
