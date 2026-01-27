@@ -1310,7 +1310,7 @@ body.keyboard-open .sticky-cta {
 | Field | Validation | Error |
 |-------|------------|-------|
 | `name` | 1-100 chars | "Name required" |
-| `phone` | Thai format: `^(\+66\|0)[0-9]{8,9}$` | "Invalid phone" |
+| `phone` | Thai format: `^(\+66|0)[0-9]{8,9}$` | "Invalid phone" |
 | `message` | Max 2000 chars | "Message too long" |
 | `hp` | Must be empty (honeypot) | "Invalid request" |
 
