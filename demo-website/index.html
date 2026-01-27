@@ -24,13 +24,16 @@
   <link rel="canonical" href="https://amppattaya.com/">
 
   <!-- Favicon -->
-  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='6' fill='%231744BE'/><text x='16' y='22' text-anchor='middle' fill='white' font-family='Arial' font-size='14' font-weight='bold'>AMP</text></svg>">
-  <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'><rect width='180' height='180' rx='20' fill='%231744BE'/><text x='90' y='115' text-anchor='middle' fill='white' font-family='Arial' font-size='60' font-weight='bold'>AMP</text></svg>">
+  <link rel="icon" href="assets/images/favicon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="assets/images/logo-amp.svg">
   
   <!-- Stylesheets -->
   <link rel="stylesheet" href="assets/css/main.css">
   <link rel="stylesheet" href="assets/css/components.css">
   <link rel="stylesheet" href="assets/css/responsive.css">
+  
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
 </head>
 <body>
   <!-- Skip Link for Accessibility -->
@@ -40,22 +43,20 @@
   <header class="header">
     <div class="header-content">
       <a href="index.html" class="logo">
-        <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
-          <rect width="32" height="32" rx="6" fill="#1744BE"/>
-          <text x="16" y="22" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="14" font-weight="bold">AMP</text>
-        </svg>
-        <span>AMP</span>
+        <img src="assets/images/logo-amp.svg" alt="Asset Management Property" height="40">
       </a>
       
       <nav class="nav desktop-only">
-        <a href="index.html">Home</a>
-        <a href="listing.html?intent=rent">Rent</a>
-        <a href="listing.html?intent=sale">Buy</a>
-        <a href="#contact">Contact</a>
+        <a href="index.html" data-i18n="nav_home"><i data-lucide="home"></i> Home</a>
+        <a href="listing.html?intent=rent" data-i18n="nav_rent"><i data-lucide="key"></i> Rent</a>
+        <a href="listing.html?intent=sale" data-i18n="nav_buy"><i data-lucide="building"></i> Buy</a>
+        <a href="#contact" data-i18n="nav_contact"><i data-lucide="mail"></i> Contact</a>
       </nav>
       
       <div class="header-actions">
-        <button class="lang-switch" onclick="switchLanguage()">TH</button>
+        <button class="lang-switch" onclick="toggleLanguage()">
+          <span>TH</span>
+        </button>
         <button class="hamburger mobile-only" onclick="toggleMobileMenu()" aria-label="Menu" aria-expanded="false">
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <line x1="3" y1="12" x2="21" y2="12"></line>
@@ -69,34 +70,33 @@
   
   <!-- Mobile Menu -->
   <div class="mobile-menu" id="mobile-menu">
-    <a href="index.html">Home</a>
-    <a href="listing.html?intent=rent">Rent</a>
-    <a href="listing.html?intent=sale">Buy</a>
-    <a href="#contact">Contact</a>
+    <a href="index.html" data-i18n="nav_home"><i data-lucide="home"></i> Home</a>
+    <a href="listing.html?intent=rent" data-i18n="nav_rent"><i data-lucide="key"></i> Rent</a>
+    <a href="listing.html?intent=sale" data-i18n="nav_buy"><i data-lucide="building"></i> Buy</a>
+    <a href="#contact" data-i18n="nav_contact"><i data-lucide="mail"></i> Contact</a>
   </div>
   
   <!-- Hero Section -->
   <section class="hero" id="main-content">
     <div class="container">
-      <h1>ค้นหาทรัพย์สินในพัทยา</h1>
-      <p class="hero-subtitle">Find Properties in Pattaya</p>
-      <p class="hero-subtitle">ข้อมูลชัด ตอบไว ดูแลครบ</p>
+      <h1 data-i18n="hero_title">ค้นหาทรัพย์สินในพัทยา</h1>
+      <p class="hero-subtitle" data-i18n="hero_subtitle">Find Properties in Pattaya</p>
       
       <!-- Search Form -->
       <form class="search-form" id="search-form">
         <div class="form-row">
           <div class="form-group">
-            <label class="form-label">Looking to</label>
+            <label class="form-label" data-i18n="search_looking_to">Looking to</label>
             <div class="toggle-group">
-              <button type="button" class="toggle-option active" data-value="rent">Rent</button>
-              <button type="button" class="toggle-option" data-value="sale">Buy</button>
+              <button type="button" class="toggle-option active" data-value="rent" data-i18n="search_intent_rent">Rent</button>
+              <button type="button" class="toggle-option" data-value="sale" data-i18n="search_intent_buy">Buy</button>
             </div>
           </div>
           
           <div class="form-group">
-            <label class="form-label">Property Type</label>
+            <label class="form-label" data-i18n="search_property_type">Property Type</label>
             <select name="type" class="form-select">
-              <option value="">All Types</option>
+              <option value="" data-i18n="search_all_types">All Types</option>
               <option value="condo">Condo</option>
               <option value="house">House</option>
               <option value="villa">Villa</option>
@@ -106,9 +106,9 @@
           </div>
           
           <div class="form-group">
-            <label class="form-label">Area</label>
+            <label class="form-label" data-i18n="search_area">Area</label>
             <select name="area" class="form-select">
-              <option value="">All Areas</option>
+              <option value="" data-i18n="search_all_areas">All Areas</option>
               <option value="Pattaya">Pattaya</option>
               <option value="Jomtien">Jomtien</option>
               <option value="Na Jomtien">Na Jomtien</option>
@@ -120,7 +120,7 @@
           
           <div class="form-group">
             <label class="form-label">&nbsp;</label>
-            <button type="submit" class="btn btn-accent btn-block">Search Properties</button>
+            <button type="submit" class="btn btn-accent btn-block" data-i18n="search_button">Search Properties</button>
           </div>
         </div>
       </form>
@@ -131,7 +131,7 @@
   <section class="section">
     <div class="container">
       <div class="section-header">
-        <h2 class="section-title">แนะนำพิเศษ / Featured Properties</h2>
+        <h2 class="section-title" data-i18n="section_featured">แนะนำพิเศษ / Featured Properties</h2>
         <p class="section-subtitle">Handpicked properties for you</p>
       </div>
       
@@ -149,7 +149,7 @@
   <section class="section" style="background: var(--color-white);">
     <div class="container">
       <div class="section-header">
-        <h2 class="section-title">พื้นที่ยอดนิยม / Popular Areas</h2>
+        <h2 class="section-title" data-i18n="section_popular_areas">พื้นที่ยอดนิยม / Popular Areas</h2>
         <p class="section-subtitle">Explore properties by location</p>
       </div>
       
@@ -196,6 +196,7 @@
   
   <!-- Scripts -->
   <script src="assets/js/mock-data.js"></script>
+  <script src="assets/js/i18n.js"></script>
   <script src="assets/js/main.js"></script>
   
   <script>
@@ -214,7 +215,9 @@
         const badges = property.badges.map(badge => {
           const badgeClass = badge === 'Featured' ? 'badge-featured' : 
                            badge === 'Available Now' ? 'badge-available' : 'badge-updated';
-          return `<span class="badge ${badgeClass}">${badge}</span>`;
+          const badgeI18n = badge === 'Featured' ? 'prop_featured' : 
+                           badge === 'Available Now' ? 'prop_available' : '';
+          return `<span class="badge ${badgeClass}" ${badgeI18n ? `data-i18n="${badgeI18n}"` : ''}>${badge}</span>`;
         }).join('');
         
         return `
@@ -224,16 +227,16 @@
               ${badges ? `<div class="card-badges">${badges}</div>` : ''}
             </div>
             <div class="card-content">
-              <div class="card-price">฿${property.price.toLocaleString()}<span>${priceLabel}</span></div>
+              <div class="card-price">฿${property.price.toLocaleString()}<span data-i18n="prop_per_month">${priceLabel}</span></div>
               <h3 class="card-title">${title}</h3>
               <div class="card-facts">
-                ${property.beds !== null ? `<span>🛏️ ${bedsLabel}</span>` : ''}
-                ${property.baths !== null ? `<span>🚿 ${bathsLabel}</span>` : ''}
-                <span>📐 ${property.sqm} m²</span>
+                ${property.beds !== null ? `<span>🛏️ <span data-i18n="prop_beds">${bedsLabel}</span></span>` : ''}
+                ${property.baths !== null ? `<span>🚿 <span data-i18n="prop_baths">${bathsLabel}</span></span>` : ''}
+                <span>📐 ${property.sqm} <span data-i18n="prop_sqm">m²</span></span>
               </div>
               <div class="card-location">📍 ${property.area}</div>
               <div class="card-actions">
-                <a href="detail.html?id=${property.id}" class="btn btn-primary btn-sm">View Details</a>
+                <a href="detail.html?id=${property.id}" class="btn btn-primary btn-sm" data-i18n="prop_view_detail">View Details</a>
               </div>
             </div>
           </div>
@@ -268,6 +271,12 @@
     // Initialize
     renderFeaturedProperties();
     renderPopularAreas();
+  </script>
+  
+  <script>
+    if (typeof lucide !== 'undefined') {
+      lucide.createIcons();
+    }
   </script>
 </body>
 </html>

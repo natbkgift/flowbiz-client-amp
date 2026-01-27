@@ -183,11 +183,11 @@ function renderPropertyGrid(properties) {
   if (properties.length === 0) {
     grid.innerHTML = `
       <div style="grid-column: 1/-1; text-align: center; padding: 48px 0;">
-        <h3>ไม่พบทรัพย์สินที่ตรงกับเงื่อนไข</h3>
-        <p style="color: var(--color-gray-600); margin-top: 16px;">
+        <h3 data-i18n="no_results">ไม่พบทรัพย์สินที่ตรงกับเงื่อนไข</h3>
+        <p style="color: var(--color-gray-600); margin-top: 16px;" data-i18n="no_results_hint">
           ลองปรับเปลี่ยนตัวกรองเพื่อค้นหาทรัพย์สินอื่นๆ
         </p>
-        <button class="btn btn-primary" onclick="resetFilters()" style="margin-top: 24px;">
+        <button class="btn btn-primary" onclick="resetFilters()" style="margin-top: 24px;" data-i18n="filter_reset">
           รีเซ็ตตัวกรอง
         </button>
       </div>
@@ -198,6 +198,11 @@ function renderPropertyGrid(properties) {
   
   grid.innerHTML = properties.map(property => createPropertyCard(property)).join('');
   grid.classList.remove('loading');
+  
+  // Reinitialize Lucide icons for dynamically added content
+  if (typeof lucide !== 'undefined') {
+    lucide.createIcons();
+  }
 }
 
 // Create property card HTML
@@ -211,7 +216,9 @@ function createPropertyCard(property) {
   const badges = property.badges.map(badge => {
     const badgeClass = badge === 'Featured' ? 'badge-featured' : 
                        badge === 'Available Now' ? 'badge-available' : 'badge-updated';
-    return `<span class="badge ${badgeClass}">${badge}</span>`;
+    const badgeI18n = badge === 'Featured' ? 'prop_featured' : 
+                      badge === 'Available Now' ? 'prop_available' : '';
+    return `<span class="badge ${badgeClass}" ${badgeI18n ? `data-i18n="${badgeI18n}"` : ''}>${badge}</span>`;
   }).join('');
   
   return `
@@ -221,16 +228,16 @@ function createPropertyCard(property) {
         ${badges ? `<div class="card-badges">${badges}</div>` : ''}
       </div>
       <div class="card-content">
-        <div class="card-price">฿${property.price.toLocaleString()}<span>${priceLabel}</span></div>
+        <div class="card-price">฿${property.price.toLocaleString()}<span data-i18n="prop_per_month">${priceLabel}</span></div>
         <h3 class="card-title">${title}</h3>
         <div class="card-facts">
-          ${property.beds !== null ? `<span>🛏️ ${bedsLabel}</span>` : ''}
-          ${property.baths !== null ? `<span>🚿 ${bathsLabel}</span>` : ''}
-          <span>📐 ${property.sqm} m²</span>
+          ${property.beds !== null ? `<span><i data-lucide="bed-double"></i> <span data-i18n="prop_beds">${bedsLabel}</span></span>` : ''}
+          ${property.baths !== null ? `<span><i data-lucide="bath"></i> <span data-i18n="prop_baths">${bathsLabel}</span></span>` : ''}
+          <span><i data-lucide="square"></i> ${property.sqm} <span data-i18n="prop_sqm">m²</span></span>
         </div>
-        <div class="card-location">📍 ${property.area}</div>
+        <div class="card-location"><i data-lucide="map-pin"></i> ${property.area}</div>
         <div class="card-actions">
-          <a href="detail.html?id=${property.id}" class="btn btn-primary btn-sm">View Details</a>
+          <a href="detail.html?id=${property.id}" class="btn btn-primary btn-sm" data-i18n="prop_view_detail">View Details</a>
           <button class="btn btn-secondary btn-icon" title="LINE" aria-label="Contact via LINE">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>

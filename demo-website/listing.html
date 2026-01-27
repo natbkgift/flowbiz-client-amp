@@ -24,13 +24,16 @@
   <link rel="canonical" href="https://amppattaya.com/listing.html">
 
   <!-- Favicon -->
-  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='6' fill='%231744BE'/><text x='16' y='22' text-anchor='middle' fill='white' font-family='Arial' font-size='14' font-weight='bold'>AMP</text></svg>">
-  <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'><rect width='180' height='180' rx='20' fill='%231744BE'/><text x='90' y='115' text-anchor='middle' fill='white' font-family='Arial' font-size='60' font-weight='bold'>AMP</text></svg>">
+  <link rel="icon" href="assets/images/favicon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="assets/images/logo-amp.svg">
   
   <!-- Stylesheets -->
   <link rel="stylesheet" href="assets/css/main.css">
   <link rel="stylesheet" href="assets/css/components.css">
   <link rel="stylesheet" href="assets/css/responsive.css">
+  
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
 </head>
 <body>
   <!-- Skip Link for Accessibility -->
@@ -40,22 +43,20 @@
   <header class="header">
     <div class="header-content">
       <a href="index.html" class="logo">
-        <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
-          <rect width="32" height="32" rx="6" fill="#1744BE"/>
-          <text x="16" y="22" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="14" font-weight="bold">AMP</text>
-        </svg>
-        <span>AMP</span>
+        <img src="assets/images/logo-amp.svg" alt="Asset Management Property" height="40">
       </a>
       
       <nav class="nav desktop-only">
-        <a href="index.html">Home</a>
-        <a href="listing.html?intent=rent">Rent</a>
-        <a href="listing.html?intent=sale">Buy</a>
-        <a href="index.html#contact">Contact</a>
+        <a href="index.html" data-i18n="nav_home"><i data-lucide="home"></i> Home</a>
+        <a href="listing.html?intent=rent" data-i18n="nav_rent"><i data-lucide="key"></i> Rent</a>
+        <a href="listing.html?intent=sale" data-i18n="nav_buy"><i data-lucide="building"></i> Buy</a>
+        <a href="index.html#contact" data-i18n="nav_contact"><i data-lucide="mail"></i> Contact</a>
       </nav>
       
       <div class="header-actions">
-        <button class="lang-switch" onclick="switchLanguage()">TH</button>
+        <button class="lang-switch" onclick="toggleLanguage()">
+          <span>TH</span>
+        </button>
         <button class="hamburger mobile-only" onclick="toggleMobileMenu()" aria-label="Menu" aria-expanded="false">
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <line x1="3" y1="12" x2="21" y2="12"></line>
@@ -69,65 +70,65 @@
   
   <!-- Mobile Menu -->
   <div class="mobile-menu" id="mobile-menu">
-    <a href="index.html">Home</a>
-    <a href="listing.html?intent=rent">Rent</a>
-    <a href="listing.html?intent=sale">Buy</a>
-    <a href="index.html#contact">Contact</a>
+    <a href="index.html" data-i18n="nav_home"><i data-lucide="home"></i> Home</a>
+    <a href="listing.html?intent=rent" data-i18n="nav_rent"><i data-lucide="key"></i> Rent</a>
+    <a href="listing.html?intent=sale" data-i18n="nav_buy"><i data-lucide="building"></i> Buy</a>
+    <a href="index.html#contact" data-i18n="nav_contact"><i data-lucide="mail"></i> Contact</a>
   </div>
   
   <!-- Main Content -->
   <div class="section" id="main-content">
     <div class="container">
       <!-- Mobile Filter Toggle Button -->
-      <button class="btn btn-primary mobile-only mb-lg" id="filter-toggle-btn" onclick="toggleFilterSidebar()" style="width: 100%;">
+      <button class="btn btn-primary mobile-only mb-lg" id="filter-toggle-btn" onclick="toggleFilterSidebar()" style="width: 100%;" data-i18n="filter_toggle">
         🔍 Filters & Sort
       </button>
       
       <div class="listing-layout">
         <!-- Filter Sidebar -->
         <aside class="filter-sidebar">
-          <h3 style="margin-bottom: 24px;">Filters</h3>
+          <h3 style="margin-bottom: 24px;" data-i18n="filter_title">Filters</h3>
           
           <!-- Intent Filter -->
           <div class="filter-section">
-            <h3>Looking to</h3>
+            <h3><i data-lucide="home"></i> <span data-i18n="filter_looking_to">Looking to</span></h3>
             <div class="toggle-group">
-              <button type="button" class="toggle-option" data-value="">All</button>
-              <button type="button" class="toggle-option" data-value="rent">Rent</button>
-              <button type="button" class="toggle-option" data-value="sale">Buy</button>
+              <button type="button" class="toggle-option" data-value="" data-i18n="filter_all">All</button>
+              <button type="button" class="toggle-option" data-value="rent" data-i18n="filter_rent">Rent</button>
+              <button type="button" class="toggle-option" data-value="sale" data-i18n="filter_buy">Buy</button>
             </div>
           </div>
           
           <!-- Type Filter -->
           <div class="filter-section">
-            <h3>Property Type</h3>
+            <h3><i data-lucide="building"></i> <span data-i18n="filter_property_type">Property Type</span></h3>
             <div class="checkbox-group">
               <label class="checkbox-label">
                 <input type="checkbox" name="type" value="condo">
-                <span>Condo</span>
+                <span data-i18n="prop_type_condo">Condo</span>
               </label>
               <label class="checkbox-label">
                 <input type="checkbox" name="type" value="house">
-                <span>House</span>
+                <span data-i18n="prop_type_house">House</span>
               </label>
               <label class="checkbox-label">
                 <input type="checkbox" name="type" value="villa">
-                <span>Villa</span>
+                <span data-i18n="prop_type_villa">Villa</span>
               </label>
               <label class="checkbox-label">
                 <input type="checkbox" name="type" value="townhome">
-                <span>Townhome</span>
+                <span data-i18n="prop_type_townhome">Townhome</span>
               </label>
               <label class="checkbox-label">
                 <input type="checkbox" name="type" value="land">
-                <span>Land</span>
+                <span data-i18n="prop_type_land">Land</span>
               </label>
             </div>
           </div>
           
           <!-- Area Filter -->
           <div class="filter-section">
-            <h3>Area</h3>
+            <h3><i data-lucide="map-pin"></i> <span data-i18n="filter_area">Area</span></h3>
             <div class="checkbox-group">
               <label class="checkbox-label">
                 <input type="checkbox" name="area" value="Pattaya">
@@ -158,9 +159,9 @@
           
           <!-- Bedrooms Filter -->
           <div class="filter-section">
-            <h3>Bedrooms</h3>
+            <h3><i data-lucide="bed-double"></i> <span data-i18n="filter_bedrooms">Bedrooms</span></h3>
             <div class="chips-group">
-              <button type="button" class="chip" data-beds="studio">Studio</button>
+              <button type="button" class="chip" data-beds="studio" data-i18n="filter_studio">Studio</button>
               <button type="button" class="chip" data-beds="1">1</button>
               <button type="button" class="chip" data-beds="2">2</button>
               <button type="button" class="chip" data-beds="3">3</button>
@@ -170,19 +171,19 @@
           
           <!-- Price Range Filter -->
           <div class="filter-section">
-            <h3>Price Range (THB)</h3>
+            <h3 data-i18n="filter_price_range">Price Range (THB)</h3>
             <div class="form-group">
-              <input type="number" id="price-min" class="form-input" placeholder="Min" min="0">
+              <input type="number" id="price-min" class="form-input" placeholder="Min" min="0" data-i18n-placeholder="filter_min">
             </div>
             <div class="form-group">
-              <input type="number" id="price-max" class="form-input" placeholder="Max" min="0">
+              <input type="number" id="price-max" class="form-input" placeholder="Max" min="0" data-i18n-placeholder="filter_max">
             </div>
           </div>
           
           <!-- Filter Actions -->
           <div class="filter-actions">
-            <button class="btn btn-primary btn-block" onclick="applyFilters()">Apply</button>
-            <button class="btn btn-secondary btn-block" onclick="resetFilters()">Reset</button>
+            <button class="btn btn-primary btn-block" onclick="applyFilters()" data-i18n="filter_apply">Apply</button>
+            <button class="btn btn-secondary btn-block" onclick="resetFilters()" data-i18n="filter_reset">Reset</button>
           </div>
         </aside>
         
@@ -190,14 +191,14 @@
         <main>
           <!-- Results Header -->
           <div class="results-header">
-            <div class="results-count" id="results-count">24 Properties Found</div>
+            <div class="results-count" id="results-count" data-i18n="results_count">24 Properties Found</div>
             <div class="sort-dropdown">
-              <label for="sort-by">Sort by:</label>
+              <label for="sort-by" data-i18n="sort_by">Sort by:</label>
               <select id="sort-by" class="form-select" style="width: auto;">
-                <option value="updated">Recently Updated</option>
-                <option value="newest">Newest</option>
-                <option value="price-low">Price: Low to High</option>
-                <option value="price-high">Price: High to Low</option>
+                <option value="updated" data-i18n="sort_updated">Recently Updated</option>
+                <option value="newest" data-i18n="sort_newest">Newest</option>
+                <option value="price-low" data-i18n="sort_price_low">Price: Low to High</option>
+                <option value="price-high" data-i18n="sort_price_high">Price: High to Low</option>
               </select>
             </div>
           </div>
@@ -209,9 +210,9 @@
           
           <!-- Pagination -->
           <div class="pagination">
-            <button class="btn btn-secondary" disabled>Previous</button>
-            <span class="pagination-info">Page 1 of 1</span>
-            <button class="btn btn-secondary" disabled>Next</button>
+            <button class="btn btn-secondary" disabled data-i18n="pagination_previous">Previous</button>
+            <span class="pagination-info" data-i18n="pagination_info">Page 1 of 1</span>
+            <button class="btn btn-secondary" disabled data-i18n="pagination_next">Next</button>
           </div>
         </main>
       </div>
@@ -255,7 +256,14 @@
   
   <!-- Scripts -->
   <script src="assets/js/mock-data.js"></script>
+  <script src="assets/js/i18n.js"></script>
   <script src="assets/js/filters.js"></script>
   <script src="assets/js/main.js"></script>
+  
+  <script>
+    if (typeof lucide !== 'undefined') {
+      lucide.createIcons();
+    }
+  </script>
 </body>
 </html>
