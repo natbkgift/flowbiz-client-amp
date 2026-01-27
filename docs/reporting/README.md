@@ -1,35 +1,24 @@
 # AMP Reporting Pack
 
-> 📊 ระบบรายงานและติดตามผลการดำเนินงานแบบครบวงจร สำหรับ Asset Management Property
+> 📊 ระบบรายงานและติดตามผลลัพธ์ สำหรับ Asset Management Property
 
 ## Overview
 
-Reporting Pack คือชุดเอกสารสำหรับการติดตามผลการดำเนินงาน ครอบคลุม KPIs, งบประมาณ, และรายงานประจำสัปดาห์/เดือน เพื่อการตัดสินใจที่อ้างอิงข้อมูล
+Reporting Pack คือชุดเอกสาร templates และมาตรฐานสำหรับการวัดผล ติดตาม KPIs และรายงานประสิทธิภาพทั้งหมดของ AMP ตั้งแต่ระดับ daily monitoring จนถึง strategic monthly review
 
-### What is Reporting Pack?
+### Why Reporting Matters
 
 ```
+📊 DATA-DRIVEN DECISION MAKING
+
 ┌─────────────────────────────────────────────────────────────┐
-│                   REPORTING PACK ECOSYSTEM                  │
-├─────────────────────────────────────────────────────────────┤
 │                                                             │
-│  ┌──────────────────┐  ┌──────────────────┐                │
-│  │   KPI Dashboard  │  │      Budget      │                │
-│  │   (Performance)  │  │   (Financial)    │                │
-│  │                  │  │                  │                │
-│  │ • Marketing KPIs │  │ • Marketing cost │                │
-│  │ • Sales KPIs     │  │ • Ops cost       │                │
-│  │ • Operations KPIs│  │ • ROI tracking   │                │
-│  └──────────────────┘  └──────────────────┘                │
+│  "คุณจะปรับปรุงในสิ่งที่คุณไม่ได้วัดไม่ได้"                    │
+│  "You can't improve what you don't measure"                 │
 │                                                             │
-│  ┌──────────────────┐  ┌──────────────────┐                │
-│  │  Weekly Reports  │  │ Monthly Reports  │                │
-│  │  (Tactical)      │  │  (Strategic)     │                │
-│  │                  │  │                  │                │
-│  │ • Task updates   │  │ • Trend analysis │                │
-│  │ • Quick wins     │  │ • Strategic plan │                │
-│  │ • Blockers       │  │ • Forecasting    │                │
-│  └──────────────────┘  └──────────────────┘                │
+│  ────────────────────────────────────────────────────────── │
+│                                                             │
+│  ✅ Track → 📊 Measure → 💡 Analyze → 🎯 Improve → 🔄 Repeat │
 │                                                             │
 └─────────────────────────────────────────────────────────────┘
 ```
@@ -43,154 +32,64 @@ docs/reporting/
 ├── README.md                              # This file
 │
 ├── kpis/
-│   └── KPI_DASHBOARD_SPEC.md              # KPI definitions and targets
+│   └── KPI_DASHBOARD_SPEC.md              # KPI definitions &amp; targets
 │
 ├── budget/
-│   └── BUDGET_TRACKING_TEMPLATE.md         # Budget management template
+│   └── BUDGET_TRACKING_TEMPLATE.md        # Budget management
 │
 └── reports/
-    ├── WEEKLY_REPORT_TEMPLATE.md           # Weekly report format
-    └── MONTHLY_REPORT_TEMPLATE.md          # Monthly report format
+    ├── WEEKLY_REPORT_TEMPLATE.md          # Weekly team updates
+    └── MONTHLY_REPORT_TEMPLATE.md         # Monthly strategic review
 ```
 
 ---
 
 ## Quick Links
 
-### 📊 KPIs
-- **[KPI Dashboard Spec](kpis/KPI_DASHBOARD_SPEC.md)** - All performance metrics and targets
+### 📈 KPIs & Metrics
+- **[KPI Dashboard Spec](kpis/KPI_DASHBOARD_SPEC.md)** - All KPI definitions, targets, and dashboard layouts
 
-### 💰 Budget
-- **[Budget Tracking Template](budget/BUDGET_TRACKING_TEMPLATE.md)** - Financial planning and tracking
+### 💰 Budget Management
+- **[Budget Tracking Template](budget/BUDGET_TRACKING_TEMPLATE.md)** - Expense tracking and variance analysis
 
-### 📝 Reports
-- **[Weekly Report Template](reports/WEEKLY_REPORT_TEMPLATE.md)** - Weekly team updates
-- **[Monthly Report Template](reports/MONTHLY_REPORT_TEMPLATE.md)** - Monthly strategy reviews
-
----
-
-## Use Cases
-
-### I want to...
-
-| Task | Document |
-|------|----------|
-| Check marketing performance | [KPI Dashboard](kpis/KPI_DASHBOARD_SPEC.md) → Marketing KPIs |
-| Track ad spending | [Budget Tracking](budget/BUDGET_TRACKING_TEMPLATE.md) → Marketing Budget |
-| Prepare weekly update | [Weekly Report](reports/WEEKLY_REPORT_TEMPLATE.md) |
-| Analyze monthly trends | [Monthly Report](reports/MONTHLY_REPORT_TEMPLATE.md) |
-| Set new KPI targets | [KPI Dashboard](kpis/KPI_DASHBOARD_SPEC.md) → Target Setting |
-| Calculate ROI | [Budget Tracking](budget/BUDGET_TRACKING_TEMPLATE.md) → ROI Section |
+### 📋 Reports
+- **[Weekly Report Template](reports/WEEKLY_REPORT_TEMPLATE.md)** - Concise weekly team updates
+- **[Monthly Report Template](reports/MONTHLY_REPORT_TEMPLATE.md)** - Comprehensive monthly analysis
 
 ---
 
-## Getting Started
-
-### For New Team Members
-
-**Day 1: Understanding KPIs**
-1. Read [KPI Dashboard Spec](kpis/KPI_DASHBOARD_SPEC.md)
-2. Understand key metrics
-3. Learn target values
-
-**Day 2: Budget Awareness**
-1. Review [Budget Tracking Template](budget/BUDGET_TRACKING_TEMPLATE.md)
-2. Understand cost categories
-3. Learn ROI calculations
-
-**Day 3: Reporting Rhythm**
-1. Review [Weekly Report Template](reports/WEEKLY_REPORT_TEMPLATE.md)
-2. Review [Monthly Report Template](reports/MONTHLY_REPORT_TEMPLATE.md)
-3. Understand reporting schedule
-
-**Day 4-5: Practice**
-1. Access dashboards
-2. Review past reports
-3. Prepare sample report
-
-### For Existing Team
-
-**When you need to:**
-
-```
-📊 Check performance?
-→ Check KPI Dashboard
-
-💰 Track spending?
-→ Check Budget Tracking
-
-📝 Create weekly update?
-→ Use Weekly Report Template
-
-📈 Analyze trends?
-→ Use Monthly Report Template
-
-🎯 Set targets?
-→ Update KPI Dashboard
-
-💡 Justify budget?
-→ Show ROI from Budget Tracking
-```
-
----
-
-## Reporting Rhythm
-
-### Daily
-- Monitor lead volume and response times
-- Check ad performance (clicks, cost)
-- Track conversion metrics
-
-### Weekly
-- **Every Monday 10:00 AM**: Weekly report submission
-- KPI review with team
-- Budget vs. actual check
-- Quick wins and blockers
-
-### Monthly
-- **Last Friday of month**: Monthly report submission
-- Strategic review meeting
-- Budget planning for next month
-- Target adjustments if needed
-
-### Quarterly
-- Comprehensive performance review
-- Annual plan progress check
-- Major strategy pivots if needed
-
----
-
-## Data Flow
-
-### How Data Flows to Reports
+## Reporting Hierarchy
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
-│                    REPORTING DATA FLOW                      │
+│                    REPORTING HIERARCHY                      │
 ├─────────────────────────────────────────────────────────────┤
 │                                                             │
-│  1. DATA SOURCES                                            │
-│     ├── Google Ads (cost, clicks, conversions)             │
-│     ├── Facebook Ads (reach, engagement, leads)            │
-│     ├── Google Analytics (traffic, behavior)               │
-│     ├── Lead Tracking Sheet (leads, conversions)           │
-│     ├── Property Database (inventory, listings)            │
-│     └── LINE OA (messages, responses)                      │
+│  Level 1: REAL-TIME MONITORING (24/7)                       │
+│  ├── Live Dashboards (Looker Studio)                        │
+│  ├── Ad spend alerts                                        │
+│  └── Lead notifications                                     │
 │                                                             │
-│  2. DATA COLLECTION                                         │
-│     └── Aggregate to Google Sheets / Looker Studio         │
+│  Level 2: DAILY CHECK (Every Morning 9 AM)                  │
+│  ├── Yesterday's leads                                      │
+│  ├── Ad performance                                         │
+│  └── Response time check                                    │
 │                                                             │
-│  3. KPI CALCULATION                                         │
-│     └── Apply formulas from KPI Dashboard Spec             │
+│  Level 3: WEEKLY REPORT (Every Monday 10 AM)                │
+│  ├── 7-day performance summary                              │
+│  ├── Wins and challenges                                    │
+│  └── Next week priorities                                   │
 │                                                             │
-│  4. REPORT GENERATION                                       │
-│     ├── Weekly Report (operational)                        │
-│     └── Monthly Report (strategic)                         │
+│  Level 4: MONTHLY REPORT (1st of Month)                     │
+│  ├── Full month analysis                                    │
+│  ├── Strategic insights                                     │
+│  ├── Financial review                                       │
+│  └── Next month strategy                                    │
 │                                                             │
-│  5. DECISION MAKING                                         │
-│     ├── Adjust campaigns                                   │
-│     ├── Reallocate budget                                  │
-│     └── Set new targets                                    │
+│  Level 5: QUARTERLY REVIEW (Every 3 Months)                 │
+│  ├── Trend analysis                                         │
+│  ├── Goal revision                                          │
+│  └── Strategic planning                                     │
 │                                                             │
 └─────────────────────────────────────────────────────────────┘
 ```
@@ -199,215 +98,389 @@ docs/reporting/
 
 ## Key Metrics Overview
 
-### Marketing KPIs
+### Phase 0 Primary KPIs (Current)
 
-| Metric | Target | Current |
-|--------|--------|---------|
-| Lead Cost (CPL) | < ฿500 | - |
-| Click-through Rate (CTR) | > 2% | - |
-| Conversion Rate | > 5% | - |
-| ROAS (Return on Ad Spend) | > 5x | - |
+| Category | KPI | Target | Priority |
+|----------|-----|--------|----------|
+| **Lead Gen** | Total Leads (Monthly) | 200+ | 🔴 Critical |
+| **Lead Gen** | Cost Per Lead (CPL) | < ฿500 | 🔴 Critical |
+| **Sales** | Lead Response Time | < 30 min | 🔴 Critical |
+| **Sales** | Conversion Rate | > 3% | 🟡 High |
+| **Sales** | Deals Closed (Monthly) | 6+ | 🟡 High |
+| **Revenue** | Monthly Revenue | ฿20M+ | 🔴 Critical |
+| **Budget** | Budget Utilization | 90-100% | 🟡 High |
+| **Ops** | Properties Added (Monthly) | 50+ | 🟢 Medium |
 
-### Sales KPIs
+### Visual KPI Overview
 
-| Metric | Target | Current |
-|--------|--------|---------|
-| Lead Response Time | < 30 min | - |
-| Lead-to-Viewing Conversion | > 20% | - |
-| Viewing-to-Offer Conversion | > 30% | - |
-| Offer-to-Close Conversion | > 50% | - |
-
-### Operations KPIs
-
-| Metric | Target | Current |
-|--------|--------|---------|
-| Active Listings | > 500 | - |
-| Listing Freshness | > 90% updated in 7 days | - |
-| LINE Response Rate | > 90% | - |
-| Data Quality Score | > 95% | - |
-
-📖 [Full KPI specifications](kpis/KPI_DASHBOARD_SPEC.md)
+```
+┌─────────────────────────────────────────────────────────────┐
+│                    KPI STATUS DASHBOARD                     │
+├─────────────────────────────────────────────────────────────┤
+│                                                             │
+│   📊 LEADS       💰 CPL        ⏱️ RESPONSE    🎯 CONVERSION │
+│                                                             │
+│     158           ฿425          26 min         5.1%        │
+│   ▲ +8%         ▼ -15%        ▼ -13%         ▲ +70%       │
+│   Target:150    Target:&lt;500   Target:&lt;30     Target:&gt;3%   │
+│   ✅ ON TRACK   ✅ EXCELLENT  ✅ ON TRACK    ✅ EXCELLENT  │
+│                                                             │
+│   💼 DEALS       📈 REVENUE    💵 ROI        📁 PROPERTIES │
+│                                                             │
+│      8           ฿28.5M        3.5:1           52          │
+│   ▲ +33%        ▲ +43%       ▲ +17%         ▲ +4%        │
+│   Target:6+     Target:20M+   Target:&gt;3:1    Target:50+   │
+│   ✅ EXCELLENT  ✅ EXCELLENT  ✅ ON TRACK    ✅ ON TRACK   │
+│                                                             │
+└─────────────────────────────────────────────────────────────┘
+```
 
 ---
 
-## Budget Overview
+## Reporting Calendar
 
-### Monthly Budget Allocation (Example)
+### Monthly Schedule
 
 ```
-Total Budget: ฿100,000/month (Marketing Budget: ฿80,000/month)
-
-┌─────────────────────────────────────┐
-│ Google Ads (40%)     ฿32,000        │
-├─────────────────────────────────────┤
-│ Facebook Ads (30%)   ฿24,000        │
-├─────────────────────────────────────┤
-│ LINE OA (10%)        ฿8,000         │
-├─────────────────────────────────────┤
-│ Content (10%)        ฿8,000         │
-├─────────────────────────────────────┤
-│ Tools (10%)          ฿8,000         │
-└─────────────────────────────────────┘
-
-Note: Percentages shown are of marketing budget (฿80,000).
-Operations (฿15,000) and Technology (฿5,000) are additional.
+┌─────────────────────────────────────────────────────────────┐
+│                   REPORTING CALENDAR                        │
+├─────────────────────────────────────────────────────────────┤
+│                                                             │
+│  Week 1:                                                    │
+│  ├── Mon: Weekly Report + Monthly Report (1st)              │
+│  ├── Tue: Monthly strategy meeting                          │
+│  └── Fri: Weekly check-in                                   │
+│                                                             │
+│  Week 2:                                                    │
+│  ├── Mon: Weekly Report                                     │
+│  └── Fri: Budget review (mid-month)                         │
+│                                                             │
+│  Week 3:                                                    │
+│  ├── Mon: Weekly Report                                     │
+│  └── Thu: Agent performance review                          │
+│                                                             │
+│  Week 4:                                                    │
+│  ├── Mon: Weekly Report                                     │
+│  ├── Wed: Month-end data collection                         │
+│  └── Fri: Prepare monthly report                            │
+│                                                             │
+└─────────────────────────────────────────────────────────────┘
 ```
 
-### ROI Tracking
+### Key Dates
 
-**Formula:**
-```
-ROI = (Revenue - Cost) / Cost × 100%
+| Date | Activity | Owner | Output |
+|------|----------|-------|--------|
+| Every Monday 10 AM | Weekly Report | Marketing Lead | Email + Meeting |
+| 1st of Month 10 AM | Monthly Report | Manager | Email + Full meeting |
+| 15th of Month | Mid-month Budget Review | Finance | Dashboard update |
+| Last Friday | Month-end Data Prep | Operations | Clean data |
 
-Commission Revenue = Closed Deals × Commission Rate
-Cost = Total Marketing + Operations Spend
+---
+
+## Report Distribution
+
+### Weekly Report
+
+```
+Recipients:
+├── All Team Members (To)
+├── Manager (To)
+└── Owner (CC - summary only)
+
+Format:
+├── Email with key highlights
+├── Full report attached (Google Doc)
+└── Links to dashboards
+
+Meeting:
+├── When: Monday 10:30 AM
+├── Duration: 30 minutes
+└── Focus: Priorities &amp; blockers
 ```
 
-**Example:**
-```
-Revenue: ฿500,000 (10 deals × ฿50,000 commission)
-Cost: ฿100,000 (marketing + ops)
-ROI: (500,000 - 100,000) / 100,000 × 100% = 400%
-```
+### Monthly Report
 
-💰 [Full budget template](budget/BUDGET_TRACKING_TEMPLATE.md)
+```
+Recipients:
+├── Manager (To)
+├── Owner (To)
+├── All Team Members (To)
+└── External stakeholders (if any) (BCC)
+
+Format:
+├── Executive summary email
+├── Full report (Google Doc/PDF)
+├── Supporting dashboards
+└── Financial appendix
+
+Meeting:
+├── When: 1st or 2nd of month
+├── Duration: 2 hours
+├── Focus: Strategy &amp; planning
+```
 
 ---
 
 ## Dashboard Integration
 
-### Recommended Tools
+### Looker Studio Setup
 
-#### Primary: Looker Studio (Google Data Studio)
-- **Why:** Free, integrates with Google Sheets/Ads
-- **Setup:** Connect data sources → Build dashboard → Share
-- **Update:** Real-time or scheduled refresh
+```
+Recommended Dashboards:
 
-#### Alternative: Google Sheets
-- **Why:** Simple, familiar, collaborative
-- **Setup:** Create sheet → Add formulas → Create charts
-- **Update:** Manual or Google Apps Script
+1. Executive Dashboard
+   ├── Data: All sources blended
+   ├── Refresh: Daily
+   └── Access: Management
 
-### Dashboard Components
+2. Marketing Dashboard
+   ├── Data: Ads Manager + GA4
+   ├── Refresh: Hourly
+   └── Access: Marketing team
 
-**Real-time Dashboard:**
-- Today's leads
-- Current ad spend
-- Active campaigns
-- Response times
+3. Sales Dashboard
+   ├── Data: Lead_Tracking.xlsx
+   ├── Refresh: Daily
+   └── Access: Sales team
 
-**Weekly Dashboard:**
-- Week's performance
-- Budget utilization
-- Top performers
-- Alerts and anomalies
+4. Operations Dashboard
+   ├── Data: Property + LINE sheets
+   ├── Refresh: Daily
+   └── Access: Operations team
+```
 
-**Monthly Dashboard:**
-- Month trends
-- Budget vs. actual
-- YoY comparison
-- Forecasting
+### Data Sources Connection
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                    DATA FLOW TO DASHBOARDS                  │
+├─────────────────────────────────────────────────────────────┤
+│                                                             │
+│  Google Sheets                                              │
+│  ├── Lead_Tracking.xlsx ────────┐                          │
+│  ├── Property_Master.xlsx ──────┼───▶ Looker Studio        │
+│  ├── Budget_Tracking.xlsx ──────┤     Dashboards           │
+│  └── LINE_Summary.xlsx ─────────┘                          │
+│                                                             │
+│  Ad Platforms                                               │
+│  ├── Google Ads API ────────────┐                          │
+│  ├── Facebook Ads API ──────────┼───▶ Marketing            │
+│  └── LINE Ads ──────────────────┘     Dashboard            │
+│                                                             │
+│  Analytics                                                  │
+│  └── Google Analytics 4 ────────────▶ Website              │
+│                                        Dashboard            │
+│                                                             │
+└─────────────────────────────────────────────────────────────┘
+```
 
 ---
 
-## Report Templates
+## Use Cases
 
-### Weekly Report
-📝 **Purpose:** Tactical updates, quick wins, blockers
+### I want to...
 
-**Sections:**
-1. KPI highlights (3-5 metrics)
-2. What went well
-3. What needs attention
-4. Next week's focus
-5. Help needed
-
-⏱️ **Time to complete:** 15-30 minutes
-
-🔗 [Full template](reports/WEEKLY_REPORT_TEMPLATE.md)
+| Task | Document | Section |
+|------|----------|---------|
+| Know what KPIs to track | [KPI Dashboard Spec](kpis/KPI_DASHBOARD_SPEC.md) | All |
+| Track marketing spend | [Budget Tracking](budget/BUDGET_TRACKING_TEMPLATE.md) | Tab 02 |
+| Write weekly report | [Weekly Report](reports/WEEKLY_REPORT_TEMPLATE.md) | Template |
+| Prepare monthly review | [Monthly Report](reports/MONTHLY_REPORT_TEMPLATE.md) | Template |
+| Set up alerts | [KPI Dashboard Spec](kpis/KPI_DASHBOARD_SPEC.md) | Alert section |
+| Calculate ROI | [Budget Tracking](budget/BUDGET_TRACKING_TEMPLATE.md) | Tab 06 |
+| Compare performance | [KPI Dashboard Spec](kpis/KPI_DASHBOARD_SPEC.md) | Trends |
 
 ---
 
-### Monthly Report
-📊 **Purpose:** Strategic analysis, trends, planning
+## Getting Started
 
-**Sections:**
-1. Executive summary
-2. All KPIs performance
-3. Budget analysis
-4. Trend analysis
-5. Insights and recommendations
-6. Next month's plan
+### For New Team Members
 
-⏱️ **Time to complete:** 1-2 hours
+**Day 1: Understanding Metrics**
+1. Read [KPI Dashboard Spec](kpis/KPI_DASHBOARD_SPEC.md) - Overview section
+2. Understand what we measure and why
+3. Get access to dashboards
 
-🔗 [Full template](reports/MONTHLY_REPORT_TEMPLATE.md)
+**Day 2: Reports**
+1. Review last [Weekly Report](reports/WEEKLY_REPORT_TEMPLATE.md)
+2. Review last [Monthly Report](reports/MONTHLY_REPORT_TEMPLATE.md)
+3. Understand report structure
+
+**Day 3: Budget**
+1. Review [Budget Tracking](budget/BUDGET_TRACKING_TEMPLATE.md)
+2. Understand cost categories
+3. Know where to find numbers
+
+**Day 4-5: Practice**
+1. Pull key metrics yourself
+2. Try filling weekly report template
+3. Ask questions!
+
+### For Report Writers
+
+**Weekly Report Checklist:**
+```
+□ Pull lead numbers from Lead_Tracking.xlsx
+□ Export ad spend from platforms
+□ Calculate CPL (Spend / Leads)
+□ Get response time average
+□ List closed deals
+□ Identify wins and challenges
+□ Set next week priorities
+□ Review before sending
+```
+
+**Monthly Report Checklist:**
+```
+□ Complete all weekly data
+□ Calculate month totals
+□ Analyze trends vs last month
+□ Deep dive on marketing performance
+□ Review sales pipeline
+□ Financial analysis
+□ Identify strategic insights
+□ Draft recommendations
+□ Manager review
+□ Final distribution
+```
+
+---
+
+## Alert System
+
+### When to Escalate
+
+| Alert Level | Condition | Action | Timeline |
+|-------------|-----------|--------|----------|
+| 🔴 **Critical** | CPL > ฿800 for 3+ days | Pause campaigns, notify manager | Immediate |
+| 🔴 **Critical** | Response time > 2 hours | Notify sales lead | Within 30 min |
+| 🔴 **Critical** | Budget overspend > 15% | Stop all non-essential spend | Immediate |
+| 🟡 **Warning** | CPL > ฿600 | Review campaigns | Within 24 hours |
+| 🟡 **Warning** | Leads < 5/day | Check campaigns status | Within 24 hours |
+| 🟢 **Info** | Great performance | Share win with team | End of day |
+
+### Alert Channels
+
+```
+Critical Alerts:
+├── SMS to manager
+├── Email to team
+└── Dashboard banner
+
+Warning Alerts:
+├── Email to responsible person
+└── Dashboard notification
+
+Info Alerts:
+└── Team chat
+```
+
+---
+
+## Metrics Glossary
+
+### Common Terms
+
+| Term | Definition | Formula |
+|------|------------|---------|
+| **CPL** | Cost Per Lead | Total Ad Spend / Total Leads |
+| **CTR** | Click-Through Rate | Clicks / Impressions × 100 |
+| **ROAS** | Return on Ad Spend | Revenue / Ad Spend |
+| **ROI** | Return on Investment | (Gain - Cost) / Cost × 100 |
+| **CAC** | Customer Acquisition Cost | Total Cost / Customers Won |
+| **LTV** | Lifetime Value | Avg Purchase × Avg Repeat |
+| **MoM** | Month over Month | (This - Last) / Last × 100 |
+| **WoW** | Week over Week | (This - Last) / Last × 100 |
+| **Conv Rate** | Conversion Rate | Conversions / Leads × 100 |
+| **Pipeline** | Total potential value | Sum of all active deals |
+
+### KPI Categories
+
+```
+1. LEAD GENERATION KPIs
+   → Measure marketing effectiveness
+   → Examples: Leads, CPL, CTR
+
+2. SALES KPIs
+   → Measure sales team effectiveness
+   → Examples: Conversion, Response Time, Deals
+
+3. FINANCIAL KPIs
+   → Measure business health
+   → Examples: Revenue, ROI, Commission
+
+4. OPERATIONAL KPIs
+   → Measure process efficiency
+   → Examples: Data Quality, Properties Added
+
+5. CUSTOMER KPIs
+   → Measure customer satisfaction
+   → Examples: CSAT, Reviews, Referrals
+```
 
 ---
 
 ## Best Practices
 
-### Data Quality
-- ✅ Verify numbers before reporting
-- ✅ Use consistent date ranges
-- ✅ Document data sources
-- ✅ Highlight estimates vs. actuals
+### Reporting Do's ✅
 
-### Reporting
-- ✅ Focus on actionable insights
-- ✅ Use visuals (charts, tables)
-- ✅ Compare to targets and previous periods
-- ✅ Explain anomalies
-- ✅ Include recommendations
+```
+✅ Be consistent - Same format, same time
+✅ Be accurate - Double-check numbers
+✅ Be concise - Executive summary first
+✅ Be actionable - Recommend next steps
+✅ Be visual - Use charts and graphs
+✅ Be timely - Never late
+✅ Be honest - Report bad news too
+```
 
-### Communication
-- ✅ Know your audience (team vs. management)
-- ✅ Start with key takeaways
-- ✅ Use clear language
-- ✅ Provide context
-- ✅ Follow up on action items
+### Reporting Don'ts ❌
 
----
-
-## Common Pitfalls to Avoid
-
-### ❌ Data Issues
-- Missing data points
-- Inconsistent definitions
-- Mixing time periods
-- Not accounting for seasonality
-
-### ❌ Analysis Issues
-- Reporting without insights
-- Focusing on vanity metrics
-- Ignoring context
-- Not connecting to goals
-
-### ❌ Communication Issues
-- Too much detail, no summary
-- No clear action items
-- Late submissions
-- Inconsistent formatting
+```
+❌ Don't bury important info
+❌ Don't use jargon without explanation
+❌ Don't report without context
+❌ Don't skip negative results
+❌ Don't make excuses without solutions
+❌ Don't send without review
+❌ Don't delay bad news
+```
 
 ---
 
-## Tools & Resources
+## Automation Roadmap
 
-### Data Collection
-- Google Ads API
-- Facebook Ads Manager
-- Google Analytics
-- Google Sheets (Lead Tracking)
+### Current State (Phase 0)
 
-### Visualization
-- Looker Studio (Primary)
-- Google Sheets (Backup)
-- ASCII charts (Documentation)
+```
+Manual:
+├── Data collection from sources
+├── Calculation of metrics
+├── Report writing
+└── Distribution
+```
 
-### Collaboration
-- Google Drive (Storage)
-- Google Docs (Reports)
-- LINE (Quick updates)
+### Future State (Phase 2+)
+
+```
+Automated:
+├── Real-time data sync
+├── Auto-calculated KPIs
+├── AI-generated insights
+├── Auto-distributed reports
+└── Predictive analytics
+```
+
+### Automation Priorities
+
+| Priority | Automation | Benefit | Target Phase |
+|----------|------------|---------|--------------|
+| 1 | Dashboard real-time sync | Live metrics | Phase 1 |
+| 2 | Alert automation | Faster response | Phase 1 |
+| 3 | Report data pre-fill | Time savings | Phase 2 |
+| 4 | AI insights generation | Better analysis | Phase 2 |
+| 5 | Predictive forecasting | Proactive planning | Phase 3 |
 
 ---
 
@@ -416,21 +489,29 @@ ROI: (500,000 - 100,000) / 100,000 × 100% = 400%
 ### Getting Help
 
 ```
-📊 KPI questions?
-→ Check KPI Dashboard Spec
+📊 Dashboard issues?
+→ Check data source connections
+→ Contact: Operations team
 
-💰 Budget questions?
-→ Check Budget Tracking Template
+📈 KPI questions?
+→ Refer to KPI Dashboard Spec
+→ Contact: Manager
 
-📝 Report format questions?
-→ Check relevant template
+📝 Report templates?
+→ Check examples in templates
+→ Contact: Marketing Lead
 
-🐛 Data issues?
-→ Report to data admin
-
-💡 Dashboard issues?
-→ Contact tech team
+🔢 Number discrepancies?
+→ Verify source data
+→ Cross-check calculations
+→ Contact: Data team
 ```
+
+### Training Resources
+
+- **Video:** "How to Read the Dashboard" (coming)
+- **Doc:** This README and linked templates
+- **Live:** Weekly office hours (Friday 4pm)
 
 ---
 
@@ -444,17 +525,17 @@ ROI: (500,000 - 100,000) / 100,000 × 100% = 400%
 
 ## Related Documents
 
-### AMP Project Docs
+### AMP Project
 - [AMP Business Lens](../AMP_BUSINESS_LENS.md)
 - [AMP Architecture Blueprint](../AMP_ARCHITECTURE_BLUEPRINT.md)
 - [AMP MVP Scope](../AMP_MVP_SCOPE.md)
 
-### Data Docs
-- [Data OS](../data/README.md)
+### Data OS
+- [Data OS Overview](../data/README.md)
+- [Lead Tracking Template](../data/templates/LEAD_TRACKING_TEMPLATE.md)
 - [Property Master List](../data/templates/PROPERTY_MASTER_LIST.md)
-- [Lead Tracking](../data/templates/LEAD_TRACKING_TEMPLATE.md)
 
-### Ops Docs
-- [Ops OS](../ops/README.md)
+### Ops OS
+- [Ops OS Overview](../ops/README.md)
 - [Google Ads Checklist](../ops/ads/GOOGLE_ADS_CHECKLIST.md)
-- [Analytics Setup](../ops/tracking/ANALYTICS_SETUP_GUIDE.md)
+- [Analytics Setup Guide](../ops/tracking/ANALYTICS_SETUP_GUIDE.md)
