@@ -1,0 +1,7 @@
+<svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background -->
+  <rect width="32" height="32" fill="#1744BE"/>
+  <!-- Roof Icon (centered and scaled) -->
+  <path d="M8 20L16 8L24 20H8Z" fill="#E8734A"/>
+  <rect x="10" y="20" width="12" height="8" fill="#E8734A"/>
+</svg>

@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ขอบคุณ | Asset Management Property</title>
+  <meta name="description" content="ขอบคุณที่ติดต่อ Asset Management Property เราจะติดต่อกลับโดยเร็วที่สุด">
+  
+  <!-- Favicon -->
+  <link rel="icon" href="assets/images/favicon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="assets/images/logo-amp.svg">
+  
+  <!-- Stylesheets -->
+  <link rel="stylesheet" href="assets/css/main.css">
+  <link rel="stylesheet" href="assets/css/components.css">
+  <link rel="stylesheet" href="assets/css/responsive.css">
+  
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+</head>
+<body>
+  <!-- Header -->
+  <header class="header">
+    <div class="header-content">
+      <a href="index.html" class="logo">
+        <img src="assets/images/logo-amp.svg" alt="Asset Management Property" height="40">
+      </a>
+      
+      <nav class="nav desktop-only">
+        <a href="index.html"><i data-lucide="home"></i> <span data-i18n="nav_home">หน้าหลัก</span></a>
+        <a href="listing.html?intent=rent"><i data-lucide="key"></i> <span data-i18n="nav_rent">เช่า</span></a>
+        <a href="listing.html?intent=sale"><i data-lucide="home"></i> <span data-i18n="nav_buy">ซื้อ</span></a>
+        <a href="about.html"><i data-lucide="info"></i> <span data-i18n="nav_about">เกี่ยวกับเรา</span></a>
+        <a href="contact.html"><i data-lucide="phone"></i> <span data-i18n="nav_contact">ติดต่อเรา</span></a>
+      </nav>
+      
+      <div class="header-actions">
+        <button class="lang-switch" onclick="toggleLanguage()">
+          <span>TH</span>
+        </button>
+        <button class="hamburger mobile-only" onclick="toggleMobileMenu()" aria-label="Menu" aria-expanded="false">
+          <i data-lucide="menu"></i>
+        </button>
+      </div>
+    </div>
+  </header>
+  
+  <!-- Mobile Menu -->
+  <div class="mobile-menu" id="mobile-menu">
+    <a href="index.html"><i data-lucide="home"></i> <span data-i18n="nav_home">หน้าหลัก</span></a>
+    <a href="listing.html?intent=rent"><i data-lucide="key"></i> <span data-i18n="nav_rent">เช่า</span></a>
+    <a href="listing.html?intent=sale"><i data-lucide="home"></i> <span data-i18n="nav_buy">ซื้อ</span></a>
+    <a href="about.html"><i data-lucide="info"></i> <span data-i18n="nav_about">เกี่ยวกับเรา</span></a>
+    <a href="contact.html"><i data-lucide="phone"></i> <span data-i18n="nav_contact">ติดต่อเรา</span></a>
+  </div>
+  
+  <!-- Thank You Content -->
+  <main class="container" style="padding: 80px 24px; text-align: center; min-height: 60vh; display: flex; flex-direction: column; align-items: center; justify-content: center;">
+    <div style="max-width: 600px; margin: 0 auto;">
+      <div style="width: 96px; height: 96px; background: rgba(22, 163, 74, 0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 32px;">
+        <i data-lucide="check-circle" style="width: 56px; height: 56px; color: #16A34A;"></i>
+      </div>
+      
+      <h1 style="font-size: 36px; font-weight: 700; color: #1F2937; margin-bottom: 16px;" data-i18n="thank_you_title">
+        ขอบคุณที่ติดต่อเรา!
+      </h1>
+      
+      <p style="font-size: 18px; color: #4B5563; margin-bottom: 32px; line-height: 1.6;" data-i18n="thank_you_message">
+        เราได้รับข้อมูลของคุณแล้ว ทีมงานจะติดต่อกลับโดยเร็วที่สุด<br>
+        โดยปกติภายใน 24 ชั่วโมง
+      </p>
+      
+      <div style="display: flex; gap: 16px; justify-content: center; flex-wrap: wrap;">
+        <a href="index.html" class="btn btn-primary" style="text-decoration: none;">
+          <i data-lucide="home"></i>
+          <span data-i18n="back_to_home">กลับหน้าหลัก</span>
+        </a>
+        <a href="listing.html" class="btn btn-outline" style="text-decoration: none;">
+          <i data-lucide="building"></i>
+          <span data-i18n="view_properties">ดูอสังหา</span>
+        </a>
+      </div>
+      
+      <div style="margin-top: 48px; padding: 24px; background: #F9FAFB; border-radius: 12px; text-align: left;">
+        <h3 style="font-size: 18px; font-weight: 600; color: #1F2937; margin-bottom: 16px;" data-i18n="need_urgent_help">
+          ต้องการความช่วยเหลือด่วน?
+        </h3>
+        <div style="display: flex; flex-direction: column; gap: 12px;">
+          <a href="https://line.me/ti/p/@amppattaya" target="_blank" rel="noopener noreferrer" style="display: flex; align-items: center; gap: 12px; color: #16A34A; text-decoration: none; font-weight: 500;">
+            <i data-lucide="message-circle" style="width: 24px; height: 24px;"></i>
+            <span>LINE: @amppattaya</span>
+          </a>
+          <a href="tel:+66812345678" style="display: flex; align-items: center; gap: 12px; color: #1744BE; text-decoration: none; font-weight: 500;">
+            <i data-lucide="phone" style="width: 24px; height: 24px;"></i>
+            <span>Tel: +66 (0) 81-234-5678</span>
+          </a>
+          <a href="mailto:info@amppattaya.com" style="display: flex; align-items: center; gap: 12px; color: #4B5563; text-decoration: none; font-weight: 500;">
+            <i data-lucide="mail" style="width: 24px; height: 24px;"></i>
+            <span>Email: info@amppattaya.com</span>
+          </a>
+        </div>
+      </div>
+    </div>
+  </main>
+  
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-section">
+          <img src="assets/images/logo-amp-white.svg" alt="AMP" height="36" style="margin-bottom: 16px;">
+          <p class="footer-text">
+            Asset Management Property<br>
+            บริษัทบริหารและจัดการอสังหาริมทรัพย์ชั้นนำในพัทยา
+          </p>
+        </div>
+        
+        <div class="footer-section">
+          <h4 class="footer-title" data-i18n="footer_quick_links">ลิงก์ด่วน</h4>
+          <ul class="footer-links">
+            <li><a href="index.html" data-i18n="nav_home">หน้าหลัก</a></li>
+            <li><a href="listing.html?intent=rent" data-i18n="nav_rent">เช่า</a></li>
+            <li><a href="listing.html?intent=sale" data-i18n="nav_buy">ซื้อ</a></li>
+            <li><a href="about.html" data-i18n="nav_about">เกี่ยวกับเรา</a></li>
+          </ul>
+        </div>
+        
+        <div class="footer-section">
+          <h4 class="footer-title" data-i18n="footer_contact">ติดต่อเรา</h4>
+          <ul class="footer-links">
+            <li><i data-lucide="phone"></i> +66 (0) 81-234-5678</li>
+            <li><i data-lucide="mail"></i> info@amppattaya.com</li>
+            <li><i data-lucide="message-circle"></i> LINE: @amppattaya</li>
+            <li><i data-lucide="map-pin"></i> Pattaya, Thailand</li>
+          </ul>
+        </div>
+      </div>
+      
+      <div class="footer-bottom">
+        <p data-i18n="footer_copyright">© 2026 Asset Management Property. สงวนลิขสิทธิ์.</p>
+      </div>
+    </div>
+  </footer>
+  
+  <!-- Scripts -->
+  <script src="assets/js/main.js"></script>
+  <script src="assets/js/i18n.js"></script>
+  <script>
+    // Initialize Lucide icons
+    if (typeof lucide !== 'undefined') {
+      lucide.createIcons();
+    }
+  </script>
+</body>
+</html>

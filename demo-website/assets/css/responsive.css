@@ -1,0 +1,228 @@
+/* AMP Demo Website - Responsive CSS */
+/* Mobile breakpoints and responsive utilities */
+
+/* Mobile-First Responsive Adjustments */
+
+/* Extra Small: 320-359px */
+@media (max-width: 359px) {
+  .hero h1 {
+    font-size: 24px;
+  }
+  
+  .card-price {
+    font-size: 20px;
+  }
+  
+  .property-card {
+    font-size: 14px;
+  }
+}
+
+/* Small: 360-389px */
+@media (min-width: 360px) and (max-width: 389px) {
+  /* Optimized for most Android phones */
+}
+
+/* Medium: 390-430px */
+@media (min-width: 390px) and (max-width: 430px) {
+  /* Optimized for iPhone 13/14/15 */
+}
+
+/* Mobile Only (< 768px) */
+@media (max-width: 767px) {
+  .desktop-only {
+    display: none !important;
+  }
+  
+  .filter-sidebar {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    top: auto;
+    border-radius: var(--radius-md) var(--radius-md) 0 0;
+    max-height: 80vh;
+    overflow-y: auto;
+    transform: translateY(100%);
+    transition: transform 0.3s ease;
+    z-index: 101;
+  }
+  
+  .filter-sidebar.active {
+    transform: translateY(0);
+  }
+  
+  .property-header {
+    flex-direction: column;
+  }
+  
+  .gallery-thumbnails {
+    display: none;
+  }
+}
+
+/* Tablet: 768-1023px */
+@media (min-width: 768px) and (max-width: 1023px) {
+  .mobile-only {
+    display: none !important;
+  }
+  
+  .container {
+    padding: 0 var(--space-lg);
+  }
+  
+  .grid-3 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* Desktop: 1024px+ */
+@media (min-width: 1024px) {
+  .mobile-only {
+    display: none !important;
+  }
+  
+  .container {
+    padding: 0 var(--space-xl);
+  }
+  
+  /* Two-column layout for listing page */
+  .listing-layout {
+    display: grid;
+    grid-template-columns: 280px 1fr;
+    gap: var(--space-xl);
+  }
+  
+  .filter-sidebar {
+    position: sticky;
+    top: 80px;
+  }
+  
+  /* Property detail layout */
+  .detail-layout {
+    display: grid;
+    grid-template-columns: 1fr 320px;
+    gap: var(--space-xl);
+  }
+  
+  .detail-main {
+    min-width: 0;
+  }
+  
+  .detail-sidebar {
+    position: sticky;
+    top: 80px;
+    align-self: start;
+  }
+}
+
+/* Large Desktop: 1280px+ */
+@media (min-width: 1280px) {
+  .listing-layout {
+    grid-template-columns: 320px 1fr;
+  }
+  
+  .detail-layout {
+    grid-template-columns: 1fr 360px;
+  }
+}
+
+/* Print Styles */
+@media print {
+  .header,
+  .footer,
+  .sticky-cta,
+  .filter-sidebar,
+  .btn,
+  .agent-actions {
+    display: none !important;
+  }
+  
+  .property-card {
+    break-inside: avoid;
+  }
+}
+
+/* Accessibility */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* High Contrast Mode */
+@media (prefers-contrast: high) {
+  .btn,
+  .property-card,
+  .form-input,
+  .form-select {
+    border: 2px solid currentColor;
+  }
+}
+
+/* Dark Mode Support (Optional) */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-white: #1E293B;
+    --color-text: #F8FAFC;
+    --color-gray-50: #0F172A;
+    --color-gray-100: #1E293B;
+    --color-gray-300: #475569;
+    --color-gray-600: #94A3B8;
+  }
+  
+  .property-card,
+  .filter-sidebar,
+  .agent-card,
+  .inquiry-form {
+    background: #1E293B;
+  }
+  
+  .header {
+    background: #0F172A;
+  }
+}
+
+/* Touch Device Optimizations */
+@media (hover: none) and (pointer: coarse) {
+  /* Larger touch targets on touch devices */
+  .btn,
+  .chip,
+  .toggle-option {
+    min-height: var(--tap-target-min);
+  }
+}
+
+/* Landscape Mobile */
+@media (max-width: 767px) and (orientation: landscape) {
+  .hero {
+    padding: var(--space-lg) 0;
+  }
+  
+  .lightbox-content {
+    max-height: 80vh;
+  }
+}
+
+/* Tablet Landscape */
+@media (min-width: 768px) and (max-width: 1023px) and (orientation: landscape) {
+  .grid-3 {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+/* Safe Area Insets (iOS Notch Support) */
+@supports (padding: max(0px)) {
+  .header-content,
+  .footer,
+  .sticky-cta {
+    padding-left: max(var(--container-padding), env(safe-area-inset-left));
+    padding-right: max(var(--container-padding), env(safe-area-inset-right));
+  }
+  
+  .sticky-cta {
+    padding-bottom: max(12px, env(safe-area-inset-bottom));
+  }
+}
