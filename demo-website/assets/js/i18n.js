@@ -141,6 +141,7 @@ const TRANSLATIONS = {
     contact_hours: 'เวลาทำการ',
     contact_form_title: 'ส่งข้อความถึงเรา',
     contact_address: 'ที่อยู่',
+    contact_property_interest: 'สนใจอสังหาประเภท',
     
     // Property Types
     type_condo: 'คอนโด',
@@ -306,6 +307,7 @@ const TRANSLATIONS = {
     contact_hours: 'Business Hours',
     contact_form_title: 'Send Us a Message',
     contact_address: 'Address',
+    contact_property_interest: 'Property Interest',
     
     // Property Types
     type_condo: 'Condo',
