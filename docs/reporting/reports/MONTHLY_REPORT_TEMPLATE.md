@@ -63,8 +63,8 @@ January 2026 was a **strong start to the year** with significant improvements ac
 - ✅ **ROI 3.5:1** on marketing spend
 
 **Areas for Improvement:**
-- ⚠️ TikTok advertising underperforming (CPL ฿768 vs target ฿450)
-- ⚠️ Sales cycle still averaging 58 days (target: < 50 days)
+- ⚠️ TikTok advertising underperforming (CPL ฿850 vs target ฿450)
+- ⚠️ Sales cycle at 50 days (meeting target but not improving)
 - ⚠️ Agent performance variance (top to bottom: 3.2x difference)
 
 **Overall Grade: A- (85/100)**
@@ -171,7 +171,7 @@ Referral            4 (3%)   █
 **Insights:**
 - ✅ Facebook is clear winner: Lowest CPL, highest conversion
 - ⚠️ Google Ads: Higher cost but quality leads
-- 🔴 LINE OA: High cost, no conversions (need review)
+- 🔴 LINE OA: High cost, no conversions yet (15 leads still in pipeline)
 
 #### Campaign Performance
 
@@ -216,6 +216,7 @@ Referral            4 (3%)   █
 
 ❌ **TikTok_Video_Ads**
 - Leads: 3
+- Spend: ฿2,550
 - CPL: ฿850
 - Status: Paused Jan 22
 - Reason: Too expensive, low quality
@@ -262,13 +263,13 @@ Referral            4 (3%)   █
 | Google Ads | ฿50,000 | ฿48,500 | -฿1,500 | 97% |
 | Facebook Ads | ฿40,000 | ฿38,200 | -฿1,800 | 96% |
 | LINE Ads | ฿15,000 | ฿14,800 | -฿200 | 99% |
-| TikTok Ads | ฿20,000 | ฿18,500 | -฿1,500 | 93% |
+| TikTok Ads | ฿20,000 | ฿2,550 | -฿17,450 | 13% |
 | Tools | ฿14,450 | ฿14,450 | ฿0 | 100% |
 | Content | ฿15,000 | ฿14,200 | -฿800 | 95% |
 | Operations | ฿27,000 | ฿26,800 | -฿200 | 99% |
-| **Total** | **฿181,450** | **฿175,450** | **-฿6,000** | **97%** |
+| **Total** | **฿181,450** | **฿159,500** | **-฿21,950** | **88%** |
 
-**Budget Efficiency: Excellent (97%)**
+**Budget Efficiency: Good (88%)** - Paused TikTok campaign saved budget
 
 ---
 
@@ -290,7 +291,7 @@ Referral            4 (3%)   █
 | 8 | Villa 3BR Na Jomtien | ฿6.9M | ฿207K | Somchai | LINE | 55 |
 
 **Average Deal Size:** ฿3.56M
-**Average Sales Cycle:** 50 days (vs target 50 days) ✅
+**Average Sales Cycle:** 50 days (meeting target of 50 days) ✅
 
 ### Current Pipeline
 
@@ -343,9 +344,10 @@ Monthly Revenue Breakdown:
 
 Total Revenue:      ฿28.5M
 Total Commission:   ฿855K (3% avg)
-Marketing Cost:     ฿101.5K
-Net Profit:         ฿753.5K
-ROI:                7.4:1
+Marketing Cost:     ฿101,500
+Operations Cost:    ฿58,000
+Net Profit:         ฿695.5K
+ROI:                7.0:1
 ```
 
 **Revenue by Property Type:**
@@ -379,7 +381,7 @@ ROI:                7.4:1
 | Operations | ฿26,800 | 0.09% | 106:1 |
 | **Total** | **฿157,050** | **0.55%** | **181:1** |
 
-**Gross Margin: 88%**
+**Gross Margin: 81% (after all costs)**
 
 ---
 
@@ -476,8 +478,8 @@ ROI:                7.4:1
 ### Challenge 1: TikTok Underperformance
 
 **Issue:**
-- CPL ฿768 (vs target ฿450)
-- Only 3 leads from ฿18,500 spend
+- CPL ฿850 (vs target ฿450)
+- Only 3 leads from ฿2,550 spend (before pausing)
 - Low-quality leads (no conversions)
 
 **Root Cause:**
@@ -490,11 +492,12 @@ ROI:                7.4:1
 - 🔄 Researching TikTok best practices
 - 📅 Restart with new strategy in Feb (lower budget)
 
-### Challenge 2: Sales Cycle Length
+### Challenge 2: Sales Cycle Still Not Improving
 
 **Issue:**
-- Average 50 days (at target but not improving)
+- Average 50 days (meeting target but want to improve further)
 - Some deals taking 60+ days
+- No improvement trend despite efforts
 
 **Root Cause:**
 - Financing delays (for some buyers)
@@ -502,9 +505,9 @@ ROI:                7.4:1
 - Competition from other agents
 
 **Solution:**
-- 🎯 Pre-qualify financing earlier
+- 🎯 Pre-qualify financing earlier (partner with banks)
 - 🏠 Limit property options (3-5 max initially)
-- ⚡ Create urgency (limited time offers)
+- ⚡ Create urgency (limited time offers, market insights)
 - 📊 Target: Reduce to 45 days by March
 
 ### Challenge 3: Agent Performance Variance
