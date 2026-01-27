@@ -190,6 +190,15 @@ flowbiz-client-amp/
     └── test_sync.py                  # (NEW)
 ```
 
+### Path Migration Reference
+
+| Blueprint v0.1 | Actual Codebase | Status |
+|----------------|-----------------|--------|
+| `api/routers/public.py` | `apps/api/routes/v1/public.py` | NEW |
+| `domain/publish_gate.py` | `apps/api/domain/publish_gate.py` | NEW |
+| `services/google_sheets.py` | `apps/services/google_sheets.py` | NEW |
+| `schemas/enums.py` | `packages/core/schemas/enums.py` | NEW |
+
 ---
 
 ## 4. Data Contracts
@@ -1298,67 +1307,56 @@ body.keyboard-open .sticky-cta {
 
 ### 11.1 Input Validation
 
-| Field | Validation |
-|-------|------------|
-| `name` | 1-100 chars, trim whitespace |
-| `phone` | Thai format: `/^(\+66\|0)[0-9]{8,9}$/` |
-| `message` | Max 2000 chars, sanitize HTML |
-| `property_id` | Alphanumeric + dash only |
-| `utm_*` | Max 100 chars each |
-| `hp` (honeypot) | Must be empty |
+| Field | Validation | Error |
+|-------|------------|-------|
+| `property_id` | Required; string, max 64 chars; must match configured property IDs (e.g. UUID or numeric ID) | "Invalid property" |
+| `lang` | Optional; 2–5 char locale code; allowed: `en`, `th` (extend as needed) | "Unsupported language" |
+| `page_url` | Optional; valid `http`/`https` URL; max 2000 chars | "Invalid page URL" |
+| `referrer` | Optional; valid `http`/`https` URL; max 2000 chars | "Invalid referrer URL" |
+| `utm_source` / `utm_medium` / `utm_campaign` / `utm_term` / `utm_content` | Optional; each max 255 chars; URL-safe text (`[A-Za-z0-9_\-+.]+` and spaces) | "Invalid tracking parameter" |
+| `name` | Required; 1-100 chars | "Name required" |
+| `phone` | Required; Thai format: `^(\+66\|0)[0-9]{8,9}$` | "Invalid phone" |
+| `message` | Optional; max 2000 chars | "Message too long" |
+| `hp` | Must be empty (honeypot) | "Invalid request" |
 
 ### 11.2 Rate Limiting
 
 | Endpoint | Limit | Window |
 |----------|-------|--------|
-| `POST /v1/leads` | 5 requests | per IP per hour |
-| `POST /v1/events` | 100 requests | per IP per minute |
-| `POST /v1/admin/*` | 10 requests | per API key per minute |
+| `POST /v1/leads` | 5 requests | 1 hour per IP |
+| `POST /v1/events` | 100 requests | 1 minute per IP |
+| `POST /v1/admin/*` | 10 requests | 1 minute per API Key |
 
 ### 11.3 Anti-Spam
 
-1. **Honeypot Field**: Hidden `hp` input must be empty
-2. **Rate Limiting**: IP-based limits (see above)
-3. **Deduplication**: Same phone + property_id within 10 min → update, not insert
-4. **IP Hashing**: Store SHA256(IP + salt), not raw IP
+**Honeypot:** Hidden `hp` field must be empty
+
+**Deduplication:** Same phone + property within 10 min → update existing
+
+**IP Hashing:** Store SHA256(ip + salt), never raw IP
 
 ### 11.4 CORS Configuration
 
-```python
-# apps/api/main.py
+**Production:** `https://amppattaya.com`, `https://www.amppattaya.com`
 
-from fastapi.middleware.cors import CORSMiddleware
+### 11.5 Admin Authentication
 
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=[
-        "https://amppattaya.com",
-        "https://www.amppattaya.com",
-    ],
-    allow_methods=["GET", "POST"],
-    allow_headers=["Content-Type", "X-API-Key"],
-)
-```
+**Header:** `X-API-Key: {key}`
 
-### 11.5 LINE Webhook Verification
+**Generation:** `openssl rand -hex 32`
 
-```python
-# apps/api/routes/v1/line.py
+### 11.6 LINE Webhook Verification
 
-import hashlib
-import hmac
+Verify `X-Line-Signature` using HMAC-SHA256 with channel secret
 
-def verify_line_signature(body: bytes, signature: str) -> bool:
-    hash = hmac.new(
-        settings.line_channel_secret.encode(),
-        body,
-        hashlib.sha256
-    ).digest()
-    return hmac.compare_digest(
-        base64.b64encode(hash).decode(),
-        signature
-    )
-```
+### 11.7 Security Environment Variables
+
+| Variable | Purpose | Generation |
+|----------|---------|------------|
+| `ADMIN_API_KEY` | Admin endpoints | `openssl rand -hex 32` |
+| `IP_HASH_SALT` | IP anonymization | `openssl rand -hex 16` |
+| `CORS_ORIGINS` | Allowed origins | Manual |
+| `LINE_CHANNEL_SECRET` | Webhook verification | LINE Console |
 
 ---
 
@@ -1547,14 +1545,26 @@ IP_HASH_SALT=xxx
 - [ ] LINE webhook captures groupId successfully
 - [ ] Failed notifications don't block lead save
 
+### 14.5 Security Checklist
+
+- [ ] Input validation on all fields
+- [ ] Phone format validation
+- [ ] Honeypot spam prevention
+- [ ] Rate limiting active
+- [ ] IP hashing (not raw storage)
+- [ ] CORS configured
+- [ ] Admin API key required
+- [ ] LINE signature verification
+- [ ] No secrets in code
+
 ---
 
 ## Changelog
 
 | Version | Date | Changes |
 |---------|------|---------|
-| 0.1 | 2026-01-26 | Initial blueprints (5 separate docs) |
-| 0.2 | 2026-01-27 | Consolidated, aligned with codebase structure |
+| 0.1 | 2026-01-26 | Initial blueprints (5 docs) |
+| 0.2 | 2026-01-27 | Consolidated, aligned structure, added security specs |
 
 ---
 
