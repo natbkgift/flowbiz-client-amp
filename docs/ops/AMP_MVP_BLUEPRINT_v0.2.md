@@ -1309,9 +1309,14 @@ body.keyboard-open .sticky-cta {
 
 | Field | Validation | Error |
 |-------|------------|-------|
-| `name` | 1-100 chars | "Name required" |
-| `phone` | Thai format: `^(\+66|0)[0-9]{8,9}$` | "Invalid phone" |
-| `message` | Max 2000 chars | "Message too long" |
+| `property_id` | Required; string, max 64 chars; must match configured property IDs (e.g. UUID or numeric ID) | "Invalid property" |
+| `lang` | Optional; 2–5 char locale code; allowed: `en`, `th` (extend as needed) | "Unsupported language" |
+| `page_url` | Optional; valid `http`/`https` URL; max 2000 chars | "Invalid page URL" |
+| `referrer` | Optional; valid `http`/`https` URL; max 2000 chars | "Invalid referrer URL" |
+| `utm_source` / `utm_medium` / `utm_campaign` / `utm_term` / `utm_content` | Optional; each max 255 chars; URL-safe text (`[A-Za-z0-9_\-+.]+` and spaces) | "Invalid tracking parameter" |
+| `name` | Required; 1-100 chars | "Name required" |
+| `phone` | Required; Thai format: `^(\+66\|0)[0-9]{8,9}$` | "Invalid phone" |
+| `message` | Optional; max 2000 chars | "Message too long" |
 | `hp` | Must be empty (honeypot) | "Invalid request" |
 
 ### 11.2 Rate Limiting
