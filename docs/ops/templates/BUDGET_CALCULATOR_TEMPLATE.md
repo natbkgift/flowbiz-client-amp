@@ -6,6 +6,27 @@
 
 Template นี้ช่วยคำนวณและติดตามงบประมาณโฆษณาแยกตามโครงการ ช่องทาง และหมวดหมู่ พร้อมเปรียบเทียบกับ benchmark และติดตาม ROI
 
+## 📥 Download Template
+
+**📊 Excel/Google Sheets Template พร้อมใช้งาน:**
+
+➡️ **[ดาวน์โหลด AMP_Budget_Calculator_Template.xlsx](files/AMP_Budget_Calculator_Template.xlsx)**
+
+Template ประกอบด้วย 6 sheets:
+1. 📋 Project Summary - สรุปข้อมูลโครงการ
+2. 💵 Monthly Budget - รายละเอียดงบรายเดือน
+3. 🎯 Channel Allocation - การจัดสรรงบตามช่องทาง
+4. 🎬 Production & Tools - งบผลิตและเครื่องมือ
+5. 📅 Weekly Tracking - ติดตามรายสัปดาห์
+6. 📊 ROI Calculator - คำนวณผลตอบแทน
+
+**วิธีใช้:**
+- **Microsoft Excel:** ดาวน์โหลดและเปิดไฟล์ .xlsx โดยตรง
+- **Google Sheets:** File > Import > Upload ไฟล์ .xlsx
+- **LibreOffice/Numbers:** เปิดไฟล์ .xlsx ได้เลย
+
+📖 **[ดูคู่มือการใช้งานแบบละเอียด](files/README.md)**
+
 ---
 
 ## 📋 Project Budget Summary
@@ -389,9 +410,14 @@ Break-even sales = Total Investment / Commission per sale
 
 ## 🔗 Related Documents
 
+**Templates & Downloads:**
+- **[📥 Download Excel Template](files/AMP_Budget_Calculator_Template.xlsx)** - พร้อมใช้งาน!
+- [📖 Template Usage Guide](files/README.md) - คู่มือการใช้งาน
 - [Property One Sheet Template](PROPERTY_ONE_SHEET_TEMPLATE.md)
 - [Presentation Structure](PRESENTATION_STRUCTURE.md)
 - [AI Prompt Library](AI_PROMPT_LIBRARY.md)
+
+**Checklists:**
 - [Google Ads Checklist](../ads/GOOGLE_ADS_CHECKLIST.md)
 - [Facebook Ads Checklist](../ads/FACEBOOK_ADS_CHECKLIST.md)
 
