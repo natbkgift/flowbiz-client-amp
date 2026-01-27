@@ -53,14 +53,14 @@ Meeting: Monthly strategy review (Full team, 2 hours)
 
 ### Performance Overview
 
-January 2026 was a **strong start to the year** with significant improvements across all key metrics. We exceeded lead generation targets, improved cost efficiency, and closed deals worth ฿28.5M.
+January 2026 was a **strong start to the year** with significant improvements across all key metrics. We exceeded lead generation targets, improved cost efficiency, and closed deals worth ฿38.5M.
 
 **Key Achievements:**
 - ✅ **158 leads generated** (Target: 150+) - **105% of target**
 - ✅ **Average CPL ฿425** (Target: < ฿500) - **15% better than target**
-- ✅ **8 deals closed** - Total value ฿28.5M, Commission ฿855K
+- ✅ **8 deals closed** - Total value ฿38.5M, Commission ฿1,155K
 - ✅ **50+ new properties** added to database
-- ✅ **ROI 8.4:1** on marketing spend
+- ✅ **ROI 11.4:1** on marketing spend
 
 **Areas for Improvement:**
 - ⚠️ TikTok advertising underperforming (CPL ฿850 vs target ฿450)
@@ -76,9 +76,9 @@ January 2026 was a **strong start to the year** with significant improvements ac
 ### Top Wins
 
 1. **Record Revenue Month** 🏆
-   - ฿28.5M in closed deals
+   - ฿38.5M in closed deals
    - Highest single-month revenue in company history
-   - 42% above target
+   - 93% above target
 
 2. **Facebook Ads Optimization Success** 📱
    - CPL dropped from ฿520 to ฿402 (23% improvement)
@@ -122,8 +122,8 @@ January 2026 was a **strong start to the year** with significant improvements ac
 │  Cost Per Lead       ฿425      <฿500     -15%      ✅      │
 │  Conversion Rate     5.1%      >3%       +70%      ✅      │
 │  Deals Closed        8         6+        +33%      ✅      │
-│  Revenue             ฿28.5M    ฿20M+     +43%      ✅      │
-│  Budget Used         93%       90-100%   -7%       ✅      │
+│  Revenue             ฿38.5M    ฿20M+     +93%      ✅      │
+│  Budget Used         88%       90-100%   -12%      ✅      │
 │  Response Time       26 min    <30 min   -13%      ✅      │
 │  Properties Added    52        50+       +4%       ✅      │
 │                                                             │
@@ -137,7 +137,7 @@ January 2026 was a **strong start to the year** with significant improvements ac
 | Leads | 128 | 145 | 158 | ↗️ +9% MoM |
 | CPL | ฿502 | ฿468 | ฿425 | ↘️ -9% MoM |
 | Deals | 5 | 7 | 8 | ↗️ +14% MoM |
-| Revenue | ฿18.2M | ฿24.5M | ฿28.5M | ↗️ +16% MoM |
+| Revenue | ฿18.2M | ฿24.5M | ฿38.5M | ↗️ +57% MoM |
 
 **Observation:** Consistent upward trend across all metrics. Q1 projected to exceed targets.
 
@@ -161,17 +161,20 @@ Referral            4 (3%)   █
 
 | Source | Leads | Spend | CPL | Conv Rate | Deals | CAC |
 |--------|-------|-------|-----|-----------|-------|-----|
-| Facebook | 95 | ฿38,200 | ฿402 | 6.3% | 6 | ฿6,367 |
-| Google | 38 | ฿48,500 | ฿571 | 5.3% | 2 | ฿12,125 |
-| LINE OA | 15 | ฿14,800 | ฿987 | 0% | 0 | - |
-| Website | 6 | ฿0 | ฿0 | 0% | 0 | - |
-| Referral | 4 | ฿0 | ฿0 | 0% | 0 | - |
-| **Total** | **158** | **฿101,500** | **฿425** | **5.1%** | **8** | **฿8,438** |
+| Facebook | 95 | ฿38,200 | ฿402 | 3.2% | 3 | ฿12,733 |
+| Google | 38 | ฿48,500 | ฿571 | 5.3% | 2 | ฿24,250 |
+| LINE OA | 15 | ฿14,800 | ฿987 | 6.7% | 1 | ฿14,800 |
+| Website | 6 | ฿0 | ฿0 | 16.7% | 1 | ฿0 |
+| Referral | 4 | ฿0 | ฿0 | 25.0% | 1 | ฿0 |
+| **Total** | **158** | **฿101,500** | **฿425** | **5.1%** | **8** | **฿16,917*** |
 
 **Insights:**
-- ✅ Facebook is clear winner: Lowest CPL, highest conversion
-- ⚠️ Google Ads: Higher cost but quality leads
-- 🔴 LINE OA: High cost, no conversions yet (15 leads still in pipeline)
+- ✅ Facebook is top volume channel: Lowest CPL, best for lead generation
+- ✅ Google Ads: Highest conversion rate (5.3%), quality leads despite higher CPL
+- ✅ LINE OA: Strong conversion rate (6.7%), 1 deal from 15 leads
+- 💡 Organic channels (Website, Referral) show excellent conversion rates
+
+*Average CAC for paid channels only (6 deals from Facebook, Google, LINE)
 
 #### Campaign Performance
 
@@ -277,7 +280,7 @@ Referral            4 (3%)   █
 
 ### Closed Deals Summary
 
-**8 Deals Closed - Total Value: ฿28.5M - Commission: ฿855K**
+**8 Deals Closed - Total Value: ฿38.5M - Commission: ฿1,155K**
 
 | Deal # | Property | Price | Commission | Agent | Source | Cycle (Days) |
 |--------|----------|-------|------------|-------|--------|--------------|
@@ -290,7 +293,7 @@ Referral            4 (3%)   █
 | 7 | Condo Studio Jomtien | ฿1.2M | ฿36K | Ploy | Website | 38 |
 | 8 | Villa 3BR Na Jomtien | ฿6.9M | ฿207K | Somchai | LINE | 55 |
 
-**Average Deal Size:** ฿3.56M
+**Average Deal Size:** ฿4.81M
 **Average Sales Cycle:** 50 days (meeting target of 50 days) ✅
 
 ### Current Pipeline
@@ -320,7 +323,7 @@ Closing → Won:       67%
 
 | Agent | Leads | Contacted | Qualified | Deals | Conv % | Revenue | Comm |
 |-------|-------|-----------|-----------|-------|--------|---------|------|
-| Somchai | 52 | 48 (92%) | 18 (35%) | 3 | 5.8% | ฿12.9M | ฿387K |
+| Somchai | 52 | 48 (92%) | 18 (35%) | 3 | 5.8% | ฿24.9M | ฿747K |
 | Nittaya | 45 | 45 (100%) | 16 (36%) | 2 | 4.4% | ฿6.1M | ฿183K |
 | David | 38 | 34 (89%) | 12 (32%) | 2 | 5.3% | ฿6.3M | ฿189K |
 | Ploy (New) | 23 | 20 (87%) | 6 (26%) | 1 | 4.3% | ฿1.2M | ฿36K |
@@ -342,46 +345,46 @@ Closing → Won:       67%
 ```
 Monthly Revenue Breakdown:
 
-Total Revenue:      ฿28.5M
-Total Commission:   ฿855K (3% avg)
+Total Revenue:      ฿38.5M
+Total Commission:   ฿1,155K (3% avg)
 Marketing Cost:     ฿101,500
 Operations Cost:    ฿26,800
-Net Profit:         ฿698,050
-ROI:                4.4:1 (Net Profit / Total Costs)
+Net Profit:         ฿998.1K
+ROI:                6.4:1
 ```
 
 **Revenue by Property Type:**
-- Villas: ฿18.9M (66%)
-- Condos: ฿8.4M (29%)
-- Townhouse: ฿1.2M (4%)
+- Villas: ฿24.9M (65%)
+- Condos: ฿10.1M (26%)
+- Townhouse: ฿3.5M (9%)
 
 **Revenue by Location:**
-- Na Jomtien: ฿19.4M (68%)
-- Jomtien: ฿6.1M (21%)
-- Pattaya: ฿3.0M (11%)
+- Na Jomtien: ฿19.4M (50%)
+- Jomtien: ฿7.3M (19%)
+- Pattaya: ฿6.3M (16%)
+- Huay Yai: ฿5.5M (14%)
 
 ### Commission Analysis
 
 **Commission per Agent:**
-- Somchai: ฿387K (45%)
-- David: ฿189K (22%)
-- Nittaya: ฿183K (21%)
-- Ploy: ฿36K (4%)
-- Company retained: ฿60K (7%)
+- Somchai: ฿747K (65%)
+- David: ฿189K (16%)
+- Nittaya: ฿183K (16%)
+- Ploy: ฿36K (3%)
 
-**Average Commission per Deal:** ฿106,875
+**Average Commission per Deal:** ฿144,375
 
 ### Cost Analysis
 
 | Category | Cost | % of Revenue | ROI |
 |----------|------|--------------|-----|
-| Marketing | ฿101,500 | 0.36% | 28:1 |
-| Tools | ฿14,450 | 0.05% | 197:1 |
-| Content | ฿14,200 | 0.05% | 201:1 |
-| Operations | ฿26,800 | 0.09% | 106:1 |
-| **Total** | **฿157,050** | **0.55%** | **181:1** |
+| Marketing | ฿101,500 | 0.26% | 11.4:1 |
+| Tools | ฿14,450 | 0.04% | 79.9:1 |
+| Content | ฿14,200 | 0.04% | 81.3:1 |
+| Operations | ฿26,800 | 0.07% | 43.1:1 |
+| **Total** | **฿156,950** | **0.41%** | **7.4:1** |
 
-**Gross Margin: 81% (after all costs)**
+**Gross Margin: 86.4% (after all costs)**
 
 ---
 
