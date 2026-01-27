@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Properties - AMP Admin</title>
+    <link rel="stylesheet" href="../assets/css/admin.css">
+</head>
+<body>
+    <div class="admin-layout">
+        <!-- Sidebar -->
+        <aside class="admin-sidebar">
+            <div class="sidebar-header">
+                <img src="../assets/images/logo-amp-white.svg" alt="AMP" class="sidebar-logo">
+            </div>
+            
+            <nav class="sidebar-nav">
+                <a href="dashboard.html" class="nav-item">
+                    <i data-lucide="layout-dashboard"></i>
+                    <span data-i18n="admin.nav.dashboard">Dashboard</span>
+                </a>
+                <a href="properties.html" class="nav-item active">
+                    <i data-lucide="building-2"></i>
+                    <span data-i18n="admin.nav.properties">Properties</span>
+                    <span class="badge">24</span>
+                </a>
+                <a href="leads.html" class="nav-item">
+                    <i data-lucide="users"></i>
+                    <span data-i18n="admin.nav.leads">Leads</span>
+                    <span class="badge badge-new">5</span>
+                </a>
+                <a href="qa-report.html" class="nav-item">
+                    <i data-lucide="file-text"></i>
+                    <span data-i18n="admin.nav.qa_report">QA Report</span>
+                    <span class="badge badge-warn">3</span>
+                </a>
+                <a href="settings.html" class="nav-item">
+                    <i data-lucide="settings"></i>
+                    <span data-i18n="admin.nav.settings">Settings</span>
+                </a>
+            </nav>
+            
+            <div class="sidebar-footer">
+                <a href="../index.html" class="nav-item">
+                    <i data-lucide="external-link"></i>
+                    <span data-i18n="admin.nav.view_site">View Site</span>
+                </a>
+                <a href="login.html" class="nav-item text-danger">
+                    <i data-lucide="log-out"></i>
+                    <span data-i18n="admin.nav.logout">Logout</span>
+                </a>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="admin-main">
+            <!-- Topbar -->
+            <header class="admin-topbar">
+                <div class="topbar-left">
+                    <button class="sidebar-toggle" id="sidebarToggle">
+                        <i data-lucide="menu"></i>
+                    </button>
+                    <h1 data-i18n="admin.properties.title">Properties</h1>
+                </div>
+                <div class="topbar-right">
+                    <button class="btn btn-primary">
+                        <i data-lucide="plus"></i>
+                        <span data-i18n="admin.properties.add_property">Add Property</span>
+                    </button>
+                </div>
+            </header>
+
+            <!-- Content -->
+            <div class="admin-content">
+                <!-- Filters -->
+                <div class="card">
+                    <div class="card-body">
+                        <div class="filters-bar">
+                            <div class="filter-group">
+                                <label data-i18n="admin.properties.filter.status">Status</label>
+                                <select class="form-select" id="filterStatus">
+                                    <option value="all" data-i18n="admin.properties.filter.all">All</option>
+                                    <option value="active" data-i18n="admin.properties.filter.active">Active</option>
+                                    <option value="inactive" data-i18n="admin.properties.filter.inactive">Inactive</option>
+                                    <option value="draft" data-i18n="admin.properties.filter.draft">Draft</option>
+                                </select>
+                            </div>
+                            
+                            <div class="filter-group">
+                                <label data-i18n="admin.properties.filter.type">Type</label>
+                                <select class="form-select" id="filterType">
+                                    <option value="all" data-i18n="admin.properties.filter.all">All</option>
+                                    <option value="condo" data-i18n="admin.properties.filter.condo">Condo</option>
+                                    <option value="house" data-i18n="admin.properties.filter.house">House</option>
+                                    <option value="villa" data-i18n="admin.properties.filter.villa">Villa</option>
+                                    <option value="townhouse" data-i18n="admin.properties.filter.townhouse">Townhouse</option>
+                                </select>
+                            </div>
+                            
+                            <div class="filter-group">
+                                <label data-i18n="admin.properties.filter.area">Area</label>
+                                <select class="form-select" id="filterArea">
+                                    <option value="all" data-i18n="admin.properties.filter.all">All</option>
+                                    <option value="Pattaya">Pattaya</option>
+                                    <option value="Jomtien">Jomtien</option>
+                                    <option value="Pratumnak">Pratumnak</option>
+                                    <option value="Na Jomtien">Na Jomtien</option>
+                                    <option value="Bang Saray">Bang Saray</option>
+                                    <option value="East Pattaya">East Pattaya</option>
+                                </select>
+                            </div>
+                            
+                            <div class="filter-group filter-search">
+                                <label data-i18n="admin.properties.filter.search">Search</label>
+                                <div class="search-input">
+                                    <i data-lucide="search"></i>
+                                    <input type="text" id="filterSearch" placeholder="Search by ID, title..." data-i18n-placeholder="admin.properties.filter.search_placeholder">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Properties Table -->
+                <div class="card">
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th data-i18n="admin.properties.table.image">Image</th>
+                                        <th data-i18n="admin.properties.table.id">ID</th>
+                                        <th data-i18n="admin.properties.table.title">Title (TH)</th>
+                                        <th data-i18n="admin.properties.table.type">Type</th>
+                                        <th data-i18n="admin.properties.table.area">Area</th>
+                                        <th data-i18n="admin.properties.table.price">Price</th>
+                                        <th data-i18n="admin.properties.table.beds_baths">Beds/Baths</th>
+                                        <th data-i18n="admin.properties.table.status">Status</th>
+                                        <th data-i18n="admin.properties.table.actions">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="propertiesTableBody">
+                                    <!-- Properties will be loaded here -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Pagination -->
+                <div class="pagination">
+                    <button class="pagination-btn" id="prevPage" disabled>
+                        <i data-lucide="chevron-left"></i>
+                    </button>
+                    <div class="pagination-numbers" id="paginationNumbers">
+                        <button class="pagination-btn active">1</button>
+                        <button class="pagination-btn">2</button>
+                        <button class="pagination-btn">3</button>
+                    </div>
+                    <button class="pagination-btn" id="nextPage">
+                        <i data-lucide="chevron-right"></i>
+                    </button>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="../assets/js/i18n.js"></script>
+    <script src="../assets/js/mock-data.js"></script>
+    <script>
+        // Initialize Lucide icons
+        lucide.createIcons();
+
+        // Mobile sidebar toggle
+        const sidebarToggle = document.getElementById('sidebarToggle');
+        const adminLayout = document.querySelector('.admin-layout');
+        
+        sidebarToggle.addEventListener('click', () => {
+            adminLayout.classList.toggle('sidebar-open');
+        });
+
+        // Pagination state
+        let currentPage = 1;
+        const itemsPerPage = 10;
+        let filteredProperties = [...ALL_PROPERTIES];
+
+        // Helper function to get property status
+        function getPropertyStatus(property) {
+            // Randomly assign statuses for demo purposes
+            const statuses = ['active', 'active', 'active', 'inactive', 'draft'];
+            const index = parseInt(property.id.split('-').pop()) % statuses.length;
+            return statuses[index];
+        }
+
+        // Helper function to format price
+        function formatPrice(price, currency) {
+            if (currency === 'THB') {
+                return `฿${price.toLocaleString()}`;
+            } else if (currency === 'USD') {
+                return `$${price.toLocaleString()}`;
+            }
+            return `${price.toLocaleString()} ${currency}`;
+        }
+
+        // Render properties table
+        function renderProperties() {
+            const tableBody = document.getElementById('propertiesTableBody');
+            const startIndex = (currentPage - 1) * itemsPerPage;
+            const endIndex = startIndex + itemsPerPage;
+            const pageProperties = filteredProperties.slice(startIndex, endIndex);
+
+            tableBody.innerHTML = pageProperties.map(property => {
+                const status = getPropertyStatus(property);
+                const statusText = status.charAt(0).toUpperCase() + status.slice(1);
+                
+                return `
+                    <tr>
+                        <td>
+                            <img src="${property.image}" alt="${property.title_th}" class="property-thumbnail">
+                        </td>
+                        <td><strong>${property.id}</strong></td>
+                        <td>${property.title_th}</td>
+                        <td><span class="capitalize">${property.type}</span></td>
+                        <td>${property.area}</td>
+                        <td><strong>${formatPrice(property.price, property.currency)}</strong></td>
+                        <td>${property.beds} / ${property.baths}</td>
+                        <td>
+                            <span class="status-badge status-${status}">${statusText}</span>
+                        </td>
+                        <td>
+                            <div class="action-buttons">
+                                <button class="btn-icon" onclick="editProperty('${property.id}')" title="Edit">
+                                    <i data-lucide="pencil"></i>
+                                </button>
+                                <button class="btn-icon danger" onclick="deleteProperty('${property.id}')" title="Delete">
+                                    <i data-lucide="trash-2"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+
+            lucide.createIcons();
+            updatePagination();
+        }
+
+        // Update pagination
+        function updatePagination() {
+            const totalPages = Math.ceil(filteredProperties.length / itemsPerPage);
+            const paginationNumbers = document.getElementById('paginationNumbers');
+            const prevBtn = document.getElementById('prevPage');
+            const nextBtn = document.getElementById('nextPage');
+
+            // Update prev/next buttons
+            prevBtn.disabled = currentPage === 1;
+            nextBtn.disabled = currentPage === totalPages;
+
+            // Generate page numbers
+            let pagesHtml = '';
+            for (let i = 1; i <= totalPages; i++) {
+                if (i === 1 || i === totalPages || (i >= currentPage - 1 && i <= currentPage + 1)) {
+                    pagesHtml += `<button class="pagination-btn ${i === currentPage ? 'active' : ''}" onclick="goToPage(${i})">${i}</button>`;
+                } else if (i === currentPage - 2 || i === currentPage + 2) {
+                    pagesHtml += `<span class="pagination-dots">...</span>`;
+                }
+            }
+            paginationNumbers.innerHTML = pagesHtml;
+
+            lucide.createIcons();
+        }
+
+        // Go to page
+        function goToPage(page) {
+            currentPage = page;
+            renderProperties();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // Pagination navigation
+        document.getElementById('prevPage').addEventListener('click', () => {
+            if (currentPage > 1) {
+                goToPage(currentPage - 1);
+            }
+        });
+
+        document.getElementById('nextPage').addEventListener('click', () => {
+            const totalPages = Math.ceil(filteredProperties.length / itemsPerPage);
+            if (currentPage < totalPages) {
+                goToPage(currentPage + 1);
+            }
+        });
+
+        // Filter functionality
+        function applyFilters() {
+            const statusFilter = document.getElementById('filterStatus').value;
+            const typeFilter = document.getElementById('filterType').value;
+            const areaFilter = document.getElementById('filterArea').value;
+            const searchFilter = document.getElementById('filterSearch').value.toLowerCase();
+
+            filteredProperties = ALL_PROPERTIES.filter(property => {
+                const status = getPropertyStatus(property);
+                const matchesStatus = statusFilter === 'all' || status === statusFilter;
+                const matchesType = typeFilter === 'all' || property.type === typeFilter;
+                const matchesArea = areaFilter === 'all' || property.area === areaFilter;
+                const matchesSearch = searchFilter === '' || 
+                    property.id.toLowerCase().includes(searchFilter) ||
+                    property.title_th.toLowerCase().includes(searchFilter) ||
+                    property.title_en.toLowerCase().includes(searchFilter);
+
+                return matchesStatus && matchesType && matchesArea && matchesSearch;
+            });
+
+            currentPage = 1;
+            renderProperties();
+        }
+
+        // Add event listeners to filters
+        document.getElementById('filterStatus').addEventListener('change', applyFilters);
+        document.getElementById('filterType').addEventListener('change', applyFilters);
+        document.getElementById('filterArea').addEventListener('change', applyFilters);
+        document.getElementById('filterSearch').addEventListener('input', applyFilters);
+
+        // Edit property
+        function editProperty(id) {
+            window.location.href = `property-edit.html?id=${id}`;
+        }
+
+        // Delete property
+        function deleteProperty(id) {
+            if (confirm(`Are you sure you want to delete property ${id}?`)) {
+                // In a real app, this would make an API call
+                const index = filteredProperties.findIndex(p => p.id === id);
+                if (index !== -1) {
+                    filteredProperties.splice(index, 1);
+                    const allIndex = ALL_PROPERTIES.findIndex(p => p.id === id);
+                    if (allIndex !== -1) {
+                        ALL_PROPERTIES.splice(allIndex, 1);
+                    }
+                    renderProperties();
+                }
+            }
+        }
+
+        // Initialize
+        renderProperties();
+    </script>
+
+    <style>
+        .property-thumbnail {
+            width: 60px;
+            height: 45px;
+            object-fit: cover;
+            border-radius: 6px;
+        }
+
+        .capitalize {
+            text-transform: capitalize;
+        }
+
+        .filters-bar {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            align-items: end;
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .filter-group label {
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--admin-gray-700);
+        }
+
+        .form-select {
+            padding: 0.5rem 0.75rem;
+            border: 1px solid var(--admin-border);
+            border-radius: 6px;
+            background: white;
+            font-size: 14px;
+            color: var(--admin-gray-900);
+            cursor: pointer;
+        }
+
+        .form-select:focus {
+            outline: none;
+            border-color: var(--admin-primary);
+        }
+
+        .search-input {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .search-input i {
+            position: absolute;
+            left: 0.75rem;
+            width: 16px;
+            height: 16px;
+            color: var(--admin-gray-400);
+        }
+
+        .search-input input {
+            width: 100%;
+            padding: 0.5rem 0.75rem 0.5rem 2.5rem;
+            border: 1px solid var(--admin-border);
+            border-radius: 6px;
+            font-size: 14px;
+            color: var(--admin-gray-900);
+        }
+
+        .search-input input:focus {
+            outline: none;
+            border-color: var(--admin-primary);
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .pagination {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            margin-top: 2rem;
+        }
+
+        .pagination-numbers {
+            display: flex;
+            gap: 0.25rem;
+        }
+
+        .pagination-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 36px;
+            height: 36px;
+            padding: 0 0.75rem;
+            border: 1px solid var(--admin-border);
+            border-radius: 6px;
+            background: white;
+            color: var(--admin-gray-700);
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .pagination-btn:hover:not(:disabled) {
+            background: var(--admin-gray-50);
+            border-color: var(--admin-gray-300);
+        }
+
+        .pagination-btn.active {
+            background: var(--admin-primary);
+            border-color: var(--admin-primary);
+            color: white;
+        }
+
+        .pagination-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .pagination-dots {
+            display: flex;
+            align-items: center;
+            padding: 0 0.5rem;
+            color: var(--admin-gray-400);
+        }
+
+        @media (max-width: 768px) {
+            .filters-bar {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</body>
+</html>

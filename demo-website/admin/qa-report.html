@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QA Report - AMP Admin</title>
+    <link rel="stylesheet" href="../assets/css/admin.css">
+</head>
+<body>
+    <div class="admin-layout">
+        <!-- Sidebar -->
+        <aside class="admin-sidebar">
+            <div class="sidebar-header">
+                <img src="../assets/images/logo-amp-white.svg" alt="AMP" class="sidebar-logo">
+            </div>
+            
+            <nav class="sidebar-nav">
+                <a href="dashboard.html" class="nav-item">
+                    <i data-lucide="layout-dashboard"></i>
+                    <span data-i18n="admin.nav.dashboard">Dashboard</span>
+                </a>
+                <a href="properties.html" class="nav-item">
+                    <i data-lucide="building-2"></i>
+                    <span data-i18n="admin.nav.properties">Properties</span>
+                    <span class="badge">24</span>
+                </a>
+                <a href="leads.html" class="nav-item">
+                    <i data-lucide="users"></i>
+                    <span data-i18n="admin.nav.leads">Leads</span>
+                    <span class="badge badge-new">5</span>
+                </a>
+                <a href="qa-report.html" class="nav-item active">
+                    <i data-lucide="file-text"></i>
+                    <span data-i18n="admin.nav.qa_report">QA Report</span>
+                    <span class="badge badge-warn">3</span>
+                </a>
+                <a href="settings.html" class="nav-item">
+                    <i data-lucide="settings"></i>
+                    <span data-i18n="admin.nav.settings">Settings</span>
+                </a>
+            </nav>
+            
+            <div class="sidebar-footer">
+                <a href="../index.html" class="nav-item">
+                    <i data-lucide="external-link"></i>
+                    <span data-i18n="admin.nav.view_site">View Site</span>
+                </a>
+                <a href="login.html" class="nav-item text-danger">
+                    <i data-lucide="log-out"></i>
+                    <span data-i18n="admin.nav.logout">Logout</span>
+                </a>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="admin-main">
+            <!-- Topbar -->
+            <header class="admin-topbar">
+                <div class="topbar-left">
+                    <button class="sidebar-toggle" id="sidebarToggle">
+                        <i data-lucide="menu"></i>
+                    </button>
+                    <h1 data-i18n="admin.qa_report.title">QA Report</h1>
+                </div>
+                <div class="topbar-right">
+                    <button class="btn btn-primary" id="resyncBtn">
+                        <i data-lucide="refresh-cw"></i>
+                        <span data-i18n="admin.qa_report.resync">Re-sync</span>
+                    </button>
+                </div>
+            </header>
+
+            <!-- Content -->
+            <div class="admin-content">
+                <!-- Last Sync Info -->
+                <div class="card">
+                    <div class="card-body">
+                        <div class="sync-info">
+                            <div class="sync-info-item">
+                                <i data-lucide="clock"></i>
+                                <div>
+                                    <div class="sync-info-label" data-i18n="admin.qa_report.last_sync">Last Sync</div>
+                                    <div class="sync-info-value" id="lastSyncTime">2026-01-27 08:00:00</div>
+                                </div>
+                            </div>
+                            <div class="sync-info-item">
+                                <i data-lucide="database"></i>
+                                <div>
+                                    <div class="sync-info-label" data-i18n="admin.qa_report.total_checked">Total Properties Checked</div>
+                                    <div class="sync-info-value" id="totalChecked">24</div>
+                                </div>
+                            </div>
+                            <div class="sync-info-item">
+                                <i data-lucide="zap"></i>
+                                <div>
+                                    <div class="sync-info-label" data-i18n="admin.qa_report.duration">Duration</div>
+                                    <div class="sync-info-value" id="syncDuration">2.3 seconds</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Summary Stats Cards -->
+                <div class="stats-grid">
+                    <div class="stat-card stat-card-danger">
+                        <div class="stat-icon">
+                            <i data-lucide="x-circle"></i>
+                        </div>
+                        <div class="stat-content">
+                            <div class="stat-label" data-i18n="admin.qa_report.blockers">Blockers</div>
+                            <div class="stat-value" id="blockersCount">2</div>
+                            <div class="stat-subtitle" data-i18n="admin.qa_report.issues">issues</div>
+                        </div>
+                    </div>
+
+                    <div class="stat-card stat-card-warning">
+                        <div class="stat-icon">
+                            <i data-lucide="alert-triangle"></i>
+                        </div>
+                        <div class="stat-content">
+                            <div class="stat-label" data-i18n="admin.qa_report.warnings">Warnings</div>
+                            <div class="stat-value" id="warningsCount">3</div>
+                            <div class="stat-subtitle" data-i18n="admin.qa_report.issues">issues</div>
+                        </div>
+                    </div>
+
+                    <div class="stat-card stat-card-success">
+                        <div class="stat-icon">
+                            <i data-lucide="check-circle"></i>
+                        </div>
+                        <div class="stat-content">
+                            <div class="stat-label" data-i18n="admin.qa_report.passed">Passed</div>
+                            <div class="stat-value" id="passedCount">19</div>
+                            <div class="stat-subtitle" data-i18n="admin.qa_report.properties">properties</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Issues Table -->
+                <div class="card">
+                    <div class="card-header">
+                        <h2 data-i18n="admin.qa_report.issues_found">Issues Found</h2>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th data-i18n="admin.qa_report.property_id">Property ID</th>
+                                        <th data-i18n="admin.qa_report.reason_code">Reason Code</th>
+                                        <th data-i18n="admin.qa_report.severity">Severity</th>
+                                        <th data-i18n="admin.qa_report.message">Message</th>
+                                        <th data-i18n="admin.qa_report.detected_at">Detected At</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="issuesTableBody">
+                                    <!-- Issues will be loaded here -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Re-sync Button -->
+                <div class="card">
+                    <div class="card-body text-center">
+                        <button class="btn btn-primary btn-lg" id="resyncBottomBtn">
+                            <i data-lucide="refresh-cw"></i>
+                            <span data-i18n="admin.qa_report.trigger_new_check">Trigger New QA Check</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="../assets/js/i18n.js"></script>
+    <script src="../assets/js/admin-mock-data.js"></script>
+    <script>
+        // Initialize Lucide icons
+        lucide.createIcons();
+
+        // Mobile sidebar toggle
+        const sidebarToggle = document.getElementById('sidebarToggle');
+        const adminLayout = document.querySelector('.admin-layout');
+        
+        sidebarToggle.addEventListener('click', () => {
+            adminLayout.classList.toggle('sidebar-open');
+        });
+
+        // Format date/time
+        function formatDateTime(isoString) {
+            const date = new Date(isoString);
+            return date.toLocaleString('en-US', {
+                year: 'numeric',
+                month: '2-digit',
+                day: '2-digit',
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit',
+                hour12: false
+            }).replace(',', '');
+        }
+
+        // Render issues table
+        function renderIssuesTable() {
+            const tableBody = document.getElementById('issuesTableBody');
+            
+            tableBody.innerHTML = MOCK_QA_ISSUES.map(issue => {
+                const severityClass = issue.severity === 'blocker' ? 'badge-danger' : 'badge-warning';
+                const severityIcon = issue.severity === 'blocker' ? 'x-circle' : 'alert-triangle';
+                const severityText = issue.severity.charAt(0).toUpperCase() + issue.severity.slice(1);
+                
+                return `
+                    <tr>
+                        <td>
+                            <a href="property-edit.html?id=${issue.property_id}" class="property-link">
+                                ${issue.property_id}
+                            </a>
+                        </td>
+                        <td><code>${issue.reason_code}</code></td>
+                        <td>
+                            <span class="severity-badge ${severityClass}">
+                                <i data-lucide="${severityIcon}"></i>
+                                ${severityText}
+                            </span>
+                        </td>
+                        <td>${issue.message}</td>
+                        <td>${formatDateTime(issue.detected_at)}</td>
+                    </tr>
+                `;
+            }).join('');
+
+            lucide.createIcons();
+        }
+
+        // Update summary stats
+        function updateStats() {
+            const blockerIssues = MOCK_QA_ISSUES.filter(issue => issue.severity === 'blocker');
+            const warningIssues = MOCK_QA_ISSUES.filter(issue => issue.severity === 'warn');
+            const totalChecked = 24;
+            const totalIssues = MOCK_QA_ISSUES.length;
+            const passedCount = totalChecked - totalIssues;
+
+            document.getElementById('blockersCount').textContent = blockerIssues.length;
+            document.getElementById('warningsCount').textContent = warningIssues.length;
+            document.getElementById('passedCount').textContent = passedCount;
+        }
+
+        // Re-sync button handler
+        function handleResync() {
+            alert('QA sync triggered! In a real application, this would:\n\n' +
+                  '1. Fetch latest property data from Google Sheets\n' +
+                  '2. Run quality checks on all properties\n' +
+                  '3. Update the QA report with new findings\n' +
+                  '4. Send notifications for critical issues');
+        }
+
+        document.getElementById('resyncBtn').addEventListener('click', handleResync);
+        document.getElementById('resyncBottomBtn').addEventListener('click', handleResync);
+
+        // Initialize
+        updateStats();
+        renderIssuesTable();
+    </script>
+
+    <style>
+        .sync-info {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+        }
+
+        .sync-info-item {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .sync-info-item i {
+            width: 40px;
+            height: 40px;
+            color: var(--admin-primary);
+            flex-shrink: 0;
+        }
+
+        .sync-info-label {
+            font-size: 14px;
+            color: var(--admin-gray-600);
+            margin-bottom: 0.25rem;
+        }
+
+        .sync-info-value {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--admin-gray-800);
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+            padding: 1.5rem;
+            background: white;
+            border-radius: 12px;
+            border: 1px solid var(--admin-border);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+
+        .stat-card-danger {
+            border-left: 4px solid #dc2626;
+        }
+
+        .stat-card-warning {
+            border-left: 4px solid #f59e0b;
+        }
+
+        .stat-card-success {
+            border-left: 4px solid #10b981;
+        }
+
+        .stat-icon {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 56px;
+            height: 56px;
+            border-radius: 12px;
+            flex-shrink: 0;
+        }
+
+        .stat-card-danger .stat-icon {
+            background: #fee2e2;
+            color: #dc2626;
+        }
+
+        .stat-card-warning .stat-icon {
+            background: #fef3c7;
+            color: #f59e0b;
+        }
+
+        .stat-card-success .stat-icon {
+            background: #d1fae5;
+            color: #10b981;
+        }
+
+        .stat-icon i {
+            width: 28px;
+            height: 28px;
+        }
+
+        .stat-content {
+            flex: 1;
+        }
+
+        .stat-label {
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--admin-gray-600);
+            margin-bottom: 0.25rem;
+        }
+
+        .stat-value {
+            font-size: 32px;
+            font-weight: 700;
+            color: var(--admin-gray-800);
+            line-height: 1;
+            margin-bottom: 0.25rem;
+        }
+
+        .stat-subtitle {
+            font-size: 13px;
+            color: var(--admin-gray-500);
+        }
+
+        .property-link {
+            color: var(--admin-primary);
+            font-weight: 600;
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+
+        .property-link:hover {
+            color: var(--admin-primary-dark);
+            text-decoration: underline;
+        }
+
+        .severity-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.375rem 0.75rem;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        .severity-badge i {
+            width: 16px;
+            height: 16px;
+        }
+
+        .badge-danger {
+            background: #fee2e2;
+            color: #dc2626;
+        }
+
+        .badge-warning {
+            background: #fef3c7;
+            color: #d97706;
+        }
+
+        code {
+            padding: 0.25rem 0.5rem;
+            background: var(--admin-gray-100);
+            border: 1px solid var(--admin-border);
+            border-radius: 4px;
+            font-size: 13px;
+            font-family: 'Courier New', monospace;
+            color: var(--admin-gray-700);
+        }
+
+        .text-center {
+            text-align: center;
+        }
+
+        .btn-lg {
+            padding: 0.875rem 2rem;
+            font-size: 16px;
+        }
+
+        @media (max-width: 768px) {
+            .sync-info {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .stat-card {
+                padding: 1.25rem;
+            }
+
+            .stat-icon {
+                width: 48px;
+                height: 48px;
+            }
+
+            .stat-icon i {
+                width: 24px;
+                height: 24px;
+            }
+
+            .stat-value {
+                font-size: 28px;
+            }
+        }
+    </style>
+</body>
+</html>
