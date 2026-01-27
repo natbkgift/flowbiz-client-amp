@@ -347,7 +347,7 @@ Total Commission:   ฿855K (3% avg)
 Marketing Cost:     ฿101,500
 Operations Cost:    ฿26,800
 Net Profit:         ฿698,050
-ROI:                7.0:1
+ROI:                4.4:1 (Net Profit / Total Costs)
 ```
 
 **Revenue by Property Type:**
