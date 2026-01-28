@@ -94,6 +94,15 @@ Tabs:
 | **AX: Notes_Internal** | Text | Internal notes | Good deal, motivated seller | - | - |
 | **AY: Tags** | Text | Search tags | sea view, investment, new | - | Comma-separated |
 | **AZ: Language** | Text | Listing languages | TH, EN | - | TH, EN, CN, RU |
+| **BA: WhatsApp_Message** | Text | Pre-formatted WhatsApp message | Hello, I'm interested in Property PROP-2026-001 | - | URL-encoded for QR |
+| **BB: QR_Code_URL** | URL | Generated wa.me link with Property_ID | https://wa.me/66XXX?text=... | - | Auto-generated |
+| **BC: Print_Status** | Dropdown | Currently printed? | Yes | - | Yes, No |
+| **BD: Print_Slot** | Number | Slot number if printed | 5 | - | 1-18 |
+| **BE: FB_Posted_Date** | Date | Last Facebook post date | 2026-01-26 | - | YYYY-MM-DD |
+| **BF: FB_Post_Link** | URL | Link to Facebook post | [URL] | - | Hyperlink |
+| **BG: Website_Listed** | Dropdown | Listed on website? | Yes | - | Yes, No |
+| **BH: Website_URL** | URL | Property page URL | [URL] | - | Hyperlink |
+| **BI: Marketing_Priority** | Dropdown | Marketing priority level | High | - | Low, Medium, High |
 
 **Legend:**
 - ✅ = Required field
@@ -184,6 +193,25 @@ Medium
 High
 ```
 
+**Marketing_Priority_List:**
+```
+Low
+Medium
+High
+```
+
+**Print_Status_List:**
+```
+Yes
+No
+```
+
+**Website_Listed_List:**
+```
+Yes
+No
+```
+
 **Yes_No_List:**
 ```
 Yes
@@ -256,6 +284,29 @@ Logic:
 - Uses the year from Date_Added (column AS) for stable IDs
 - If Date_Added is empty, ID remains empty
 - Once Date_Added is set, the year is locked to that date
+```
+
+### WhatsApp Message (Column BA)
+```
+="Hello, I'm interested in Property "&A2
+
+Result: Hello, I'm interested in Property PROP-2026-001
+
+Logic:
+- Concatenates fixed text with Property_ID
+- Used for QR code generation
+```
+
+### QR Code URL (Column BB)
+```
+="https://wa.me/66XXXXXXXXX?text="&ENCODEURL("Hello, I'm interested in Property "&A2)
+
+Result: https://wa.me/66XXXXXXXXX?text=Hello%2C%20I'm%20interested%20in%20Property%20PROP-2026-001
+
+Logic:
+- Generates WhatsApp link with pre-filled message
+- ENCODEURL converts spaces and special characters
+- Replace 66XXXXXXXXX with your WhatsApp Business number
 ```
 
 ---
