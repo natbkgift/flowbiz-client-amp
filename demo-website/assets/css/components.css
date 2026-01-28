@@ -155,8 +155,10 @@
   flex-wrap: wrap;
 }
 
-.badge + .badge {
-  margin-top: 4px; /* Fallback for browsers that don't support gap */
+@supports not (gap: 1px) {
+  .badge + .badge {
+    margin-top: 8px; /* Fallback for browsers that don't support gap */
+  }
 }
 
 .card-content {
