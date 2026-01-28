@@ -65,9 +65,16 @@ docs/data/
 - **[Property Master List](templates/PROPERTY_MASTER_LIST.md)** - Central property database schema
 - **[Lead Tracking Template](templates/LEAD_TRACKING_TEMPLATE.md)** - CRM and lead management
 - **[LINE Summary Template](templates/LINE_SUMMARY_TEMPLATE.md)** - LINE group monitoring system
+- **[Print Queue Template](templates/PRINT_QUEUE_TEMPLATE.md)** - 18-slot print display management
 
 ### 📐 Standards
 - **[Data Naming Convention](standards/DATA_NAMING_CONVENTION.md)** - Naming rules for everything
+
+### 📢 Marketing Operations
+- **[Marketing Ops Overview](../ops/marketing/README.md)** - Complete marketing system
+- **[Print QR Operations](../ops/marketing/PRINT_QR_OPERATIONS.md)** - Print materials with QR codes
+- **[Facebook Posting SOP](../ops/marketing/FACEBOOK_POSTING_SOP.md)** - Social media procedures
+- **[Lead Integration Guide](../ops/marketing/LEAD_INTEGRATION_GUIDE.md)** - Automation setup
 
 ---
 
@@ -84,6 +91,10 @@ docs/data/
 | Name a file correctly | [Data Naming Convention](standards/DATA_NAMING_CONVENTION.md) |
 | Find property photos | [Google Drive Structure](structure/GOOGLE_DRIVE_STRUCTURE.md) → Photos |
 | Create Property ID | [Data Naming Convention](standards/DATA_NAMING_CONVENTION.md) → Property ID |
+| Set up print materials | [Print QR Operations](../ops/marketing/PRINT_QR_OPERATIONS.md) |
+| Post on Facebook | [Facebook Posting SOP](../ops/marketing/FACEBOOK_POSTING_SOP.md) |
+| Manage print display | [Print Queue Template](templates/PRINT_QUEUE_TEMPLATE.md) |
+| Integrate lead capture | [Lead Integration Guide](../ops/marketing/LEAD_INTEGRATION_GUIDE.md) |
 
 ---
 
@@ -158,10 +169,52 @@ docs/data/
 │     └── Property_Master_List.xlsx                           │
 │                                                             │
 │  4. USAGE                                                   │
-│     ├── Marketing (ads, website)                            │
-│     ├── Lead matching                                       │
-│     ├── Sales presentation                                  │
-│     └── Reporting                                           │
+│     ├── Marketing Operations                                │
+│     │   ├── Print QR (18-slot display)                       │
+│     │   ├── Facebook (Page, Groups, Marketplace)             │
+│     │   ├── Google Ads (Search, Display)                     │
+│     │   └── Website listings                                 │
+│     ├── Lead matching                                        │
+│     ├── Sales presentation                                   │
+│     └── Reporting                                            │
+│                                                             │
+└─────────────────────────────────────────────────────────────┘
+```
+
+### Marketing Operations Flow
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│              MARKETING OPERATIONS FLOW                      │
+├─────────────────────────────────────────────────────────────┤
+│                                                             │
+│  1. PROPERTY INPUT                                          │
+│     └── Property_Master_List.xlsx                           │
+│                                                             │
+│  2. MARKETING CHANNELS                                      │
+│     ├── Print QR (18 slots at office)                       │
+│     ├── Facebook Organic (Posts, Groups)                    │
+│     ├── Facebook Ads (Paid campaigns)                       │
+│     └── Google Ads + Website                                │
+│                                                             │
+│  3. LEAD SOURCES                                            │
+│     ├── WhatsApp (QR code scans)                            │
+│     ├── Facebook Messenger                                  │
+│     ├── Facebook Lead Forms                                 │
+│     ├── Website Contact Forms                               │
+│     └── Phone/Walk-in                                       │
+│                                                             │
+│  4. AUTOMATION (Make.com)                                   │
+│     ├── Capture lead data                                   │
+│     ├── Send auto-reply                                     │
+│     ├── Add to Lead_Tracking                                │
+│     └── Notify assigned agent                               │
+│                                                             │
+│  5. LEAD MANAGEMENT                                         │
+│     └── Lead_Tracking.xlsx                                  │
+│                                                             │
+│  6. CONVERSION                                              │
+│     └── Sale/Rental closed                                  │
 │                                                             │
 └─────────────────────────────────────────────────────────────┘
 ```
@@ -174,11 +227,13 @@ docs/data/
 ├─────────────────────────────────────────────────────────────┤
 │                                                             │
 │  1. LEAD SOURCE                                             │
-│     ├── Facebook Ads                                        │
+│     ├── QR_Print (WhatsApp from QR codes)                   │
+│     ├── Facebook Messenger                                  │
+│     ├── Facebook Lead Form                                  │
+│     ├── Website_Form                                        │
 │     ├── Google Ads                                          │
-│     ├── LINE OA                                             │
-│     ├── Website                                             │
-│     └── Walk-in/Call                                        │
+│     ├── LINE Official                                       │
+│     └── Walk-in/Phone Call                                  │
 │                                                             │
 │  2. LEAD CAPTURE                                            │
 │     └── Lead_Tracking.xlsx                                  │
@@ -388,6 +443,12 @@ docs/data/
 │  Property Master List → Website/Marketing                   │
 │  (Inventory)              (Public listings)                 │
 │                                                             │
+│  Property Master List → Print Queue                         │
+│  (Inventory)              (18-slot display)                 │
+│                                                             │
+│  Marketing Channels → Lead Tracking                         │
+│  (QR, FB, Website)    (Lead capture)                        │
+│                                                             │
 │  All Systems → Reporting Dashboard                          │
 │  (Data)         (Analytics)                                 │
 │                                                             │
@@ -417,6 +478,23 @@ docs/data/
 | LINE entries/day | - | 20+ |
 | Conversion rate (LINE → Master) | - | 10%+ |
 | Lead response time | - | < 30 min |
+
+### Marketing Operations KPIs
+
+| Channel | Metric | Target |
+|---------|--------|--------|
+| **Print QR** | Scans per week | 50-80 |
+| **Print QR** | Inquiry rate | 60%+ |
+| **Print QR** | Cost per lead | < 100 THB |
+| **Facebook Organic** | Reach per post | 1,000+ |
+| **Facebook Organic** | Engagement rate | 2-4% |
+| **Facebook Organic** | Leads per month | 40-50 |
+| **Facebook Ads** | Cost per lead | 300-500 THB |
+| **Facebook Ads** | CTR | 2-4% |
+| **Google Ads** | Cost per lead | 400-800 THB |
+| **Google Ads** | CTR | 2-4% |
+| **Overall** | Total leads/month | 150-200 |
+| **Overall** | Lead→Sale conversion | 2-5% |
 
 ---
 
