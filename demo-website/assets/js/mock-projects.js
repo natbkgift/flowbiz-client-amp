@@ -48,7 +48,7 @@ const MOCK_PROJECTS = [
       'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=800'
     ],
     description: {
-      th: 'โครงการคอนโดหรูติดชายหาดวงอมาด ออกแบบโดยสถาปนิกชั่วโมง พร้อมวิวทะเลพาโนรามา',
+      th: 'โครงการคอนโดหรูติดชายหาดวงอมาด ออกแบบโดยสถาปนิกชื่อดัง พร้อมวิวทะเลพาโนรามา',
       en: 'Luxury beachfront condo in Wong Amat designed by award-winning architects with panoramic sea views'
     }
   },

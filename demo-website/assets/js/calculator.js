@@ -2,6 +2,9 @@
 // ROI and yield calculation logic
 
 function calculateInvestment() {
+  // Get current language for error messages
+  const lang = document.documentElement.lang || 'th';
+  
   // Get input values
   const propertyPrice = parseFloat(document.getElementById('property-price')?.value) || 0;
   const downPayment = parseFloat(document.getElementById('down-payment')?.value) || 30;
@@ -10,14 +13,34 @@ function calculateInvestment() {
   const monthlyRent = parseFloat(document.getElementById('monthly-rent')?.value) || 0;
   const monthlyExpense = parseFloat(document.getElementById('monthly-expense')?.value) || 0;
   
-  // Validation
+  // Validation with i18n error messages
   if (propertyPrice <= 0) {
-    alert('Please enter a valid property price');
+    alert(t('calc_error_invalid_price'));
+    return;
+  }
+  
+  if (downPayment < 0 || downPayment > 100) {
+    alert(t('calc_error_invalid_down_payment'));
+    return;
+  }
+  
+  if (interestRate < 0) {
+    alert(t('calc_error_negative_value'));
+    return;
+  }
+  
+  if (loanTerm <= 0) {
+    alert(t('calc_error_negative_value'));
     return;
   }
   
   if (monthlyRent <= 0) {
-    alert('Please enter a valid monthly rent');
+    alert(t('calc_error_invalid_rent'));
+    return;
+  }
+  
+  if (monthlyExpense < 0) {
+    alert(t('calc_error_negative_value'));
     return;
   }
   

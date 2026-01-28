@@ -82,7 +82,6 @@ function displayProjects(projects, lang) {
 
 function createProjectCard(project, lang) {
   const name = project.name[lang] || project.name.en;
-  const description = project.description[lang] || project.description.en;
   const statusText = getStatusText(project.status, lang);
   const statusClass = project.status.replace('_', '-');
   
@@ -133,8 +132,8 @@ function createProjectCard(project, lang) {
         </div>
         
         <div class="project-card-actions">
-          <a href="projects/detail.html?id=${project.project_id}" class="btn btn-primary btn-block">
-            ${lang === 'th' ? 'ดูรายละเอียด' : 'View Details'}
+          <a href="#${project.project_id}" class="btn btn-primary btn-block">
+            ${lang === 'th' ? 'ดูข้อมูล' : 'View Info'}
           </a>
         </div>
       </div>

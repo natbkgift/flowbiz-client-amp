@@ -92,7 +92,7 @@ function showQuestion(step) {
       <div class="quiz-options">
         ${question.options.map(option => `
           <button class="quiz-option ${quizAnswers[question.id] === option.value ? 'selected' : ''}" 
-                  onclick="selectOption('${question.id}', '${option.value}')">
+                  onclick="selectOption('${question.id}', '${option.value}', event)">
             <div class="quiz-option-title">${option[lang]}</div>
           </button>
         `).join('')}
@@ -121,7 +121,7 @@ function showQuestion(step) {
   }
 }
 
-function selectOption(questionId, value) {
+function selectOption(questionId, value, event) {
   quizAnswers[questionId] = value;
   
   // Update button states
@@ -214,8 +214,8 @@ function showResults() {
               <p class="quiz-recommendation-description">
                 ${project.location} • ฿${(project.pricing.min / 1000000).toFixed(1)}M - ฿${(project.pricing.max / 1000000).toFixed(1)}M
               </p>
-              <a href="projects/detail.html?id=${project.project_id}" class="btn btn-sm btn-primary" style="margin-top: 8px;">
-                ${lang === 'th' ? 'ดูรายละเอียด' : 'View Details'}
+              <a href="projects/index.html#${project.project_id}" class="btn btn-sm btn-primary" style="margin-top: 8px;">
+                ${lang === 'th' ? 'ดูโครงการ' : 'View Project'}
               </a>
             </div>
           `).join('')}
