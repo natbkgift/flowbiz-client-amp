@@ -9,16 +9,16 @@
 สร้างโครงสร้างโฟลเดอร์ตามที่ระบุใน `docs/data/structure/GOOGLE_DRIVE_STRUCTURE.md`:
 
 **โฟลเดอร์หลัก 10 โฟลเดอร์:**
-1. ✅ 01_Properties - พร้อมโฟลเดอร์ย่อย Condo, Villa, House, Land และ Template
-2. ✅ 02_Resale_Secondary - พร้อมโฟลเดอร์ Property_Details และ Archive
-3. ✅ 03_Rental - พร้อมโฟลเดอร์ Long_Term, Short_Term และ Archive
-4. ✅ 04_Leads_CRM - พร้อมโฟลเดอร์ Lead_Details, Converted และ Archive
+1. ✅ 01_Properties - พร้อมโฟลเดอร์ย่อย Condo, Villa, House, Land และ _Archive
+2. ✅ 02_Resale_Secondary - พร้อมโฟลเดอร์ Property_Details และ _Archive
+3. ✅ 03_Rental - พร้อมโฟลเดอร์ Long_Term, Short_Term และ _Archive
+4. ✅ 04_Leads_CRM - พร้อมโฟลเดอร์ Lead_Details, Converted และ _Archive
 5. ✅ 05_Marketing - พร้อมโครงสร้างครบทั้งหมด (Ad_Creatives, Brand_Assets, etc.)
 6. ✅ 06_LINE_Group_Summary - พร้อมโฟลเดอร์ Monthly_Archives, Screenshots, Processed
 7. ✅ 07_Contracts_Legal - พร้อมโฟลเดอร์ Templates, Executed_Contracts, Legal_Documents
 8. ✅ 08_Operations - พร้อมโฟลเดอร์ SOPs, Checklists, Training, Meeting_Notes
 9. ✅ 09_Finance - พร้อมโฟลเดอร์ Invoices และ Receipts
-10. ✅ 10_Admin - พร้อมโฟลเดอร์ Team, Vendors_Partners และ Archive
+10. ✅ 10_Admin - พร้อมโฟลเดอร์ Team, Vendors_Partners และ _Archive
 
 **จำนวนโฟลเดอร์รวม:** 67 directories
 
@@ -27,7 +27,7 @@
 **1. README.md ในโฟลเดอร์หลัก (15 ไฟล์)**
 - Main README.md (ภาพรวมทั้งหมด)
 - 01_Properties/README.md (คำแนะนำการเพิ่ม property)
-- Property Templates/README.md (4 ไฟล์ - Condo, Villa, House, Land)
+- 01_Properties/[Type]/_Template/README.md (4 ไฟล์ - Condo, Villa, House, Land)
 - 02_Resale_Secondary/README.md (คำแนะนำการจัดการ resale)
 - 03_Rental/README.md (คำแนะนำการจัดการ rental)
 - 04_Leads_CRM/README.md (คำแนะนำการจัดการ leads)
@@ -38,9 +38,10 @@
 - 09_Finance/README.md (คำแนะนำการจัดการการเงิน)
 - 10_Admin/README.md (คำแนะนำการจัดการ admin)
 
-**2. คู่มือการใช้งาน (2 ไฟล์)**
-- UPLOAD_GUIDE.md - คู่มือการอัพโหลดไป Google Drive (ภาษาไทย)
-- SETUP_CHECKLIST.md - Checklist การเริ่มใช้งาน (ภาษาไทย)
+**2. คู่มือการใช้งาน (3 ไฟล์)**
+- README.md - สรุปและภาพรวม (ภาษาไทย)
+- UPLOAD_GUIDE.md - คู่มือการอัปโหลดไป Google Drive (ภาษาไทย)
+- SETUP_CHECKLIST.md - Checklist การเริ่มใช้งาน (ภาษาอังกฤษ/ไทย)
 
 ### ✅ Property Templates
 
@@ -56,15 +57,15 @@
 ## ขนาดและสถิติ
 
 - **จำนวนโฟลเดอร์:** 67 directories
-- **จำนวนไฟล์เอกสาร:** 17 files (15 READMEs + 2 guides)
-- **ขนาดรวม:** ~616 KB (เบา พร้อมอัพโหลด)
+- **จำนวนไฟล์เอกสาร:** 18 files (15 folder READMEs + 3 top-level docs)
+- **ขนาดรวม:** ~616 KB (เบา พร้อมอัปโหลด)
 - **โครงสร้างตรงตาม spec:** 100%
 
 ---
 
 ## วิธีใช้งาน
 
-### 1. อัพโหลดไป Google Drive
+### 1. อัปโหลดไป Google Drive
 
 อ่านคู่มือ: `UPLOAD_GUIDE.md`
 
@@ -73,7 +74,7 @@
 1. เปิด Google Drive (drive.google.com)
 2. สร้าง Shared Drive ชื่อ "AMP - Asset Management Property" (แนะนำ)
 3. ลากโฟลเดอร์ "AMP - Asset Management Property" ทั้งหมดไปวาง
-4. รอให้อัพโหลดเสร็จ
+4. รอให้อัปโหลดเสร็จ
 5. ตั้งค่าสิทธิ์การเข้าถึงตามคู่มือ
 ```
 
@@ -94,7 +95,7 @@
 
 ```
 google-drive-structure/
-├── UPLOAD_GUIDE.md          ← อ่านนี้ก่อน! (คู่มืออัพโหลด)
+├── UPLOAD_GUIDE.md          ← อ่านนี้ก่อน! (คู่มืออัปโหลด)
 ├── SETUP_CHECKLIST.md       ← Checklist การเริ่มใช้งาน
 └── AMP - Asset Management Property/
     ├── README.md            ← ภาพรวมทั้งหมด
@@ -169,7 +170,7 @@ google-drive-structure/
 - `docs/data/templates/` - Templates ต่าง ๆ
 
 **ที่สร้างใหม่:**
-- `google-drive-structure/UPLOAD_GUIDE.md` - วิธีอัพโหลด
+- `google-drive-structure/UPLOAD_GUIDE.md` - วิธีอัปโหลด
 - `google-drive-structure/SETUP_CHECKLIST.md` - Checklist การเริ่มใช้งาน
 - `google-drive-structure/AMP - Asset Management Property/README.md` - คู่มือหลัก
 - `google-drive-structure/AMP - Asset Management Property/[Folder]/README.md` - คู่มือแต่ละโฟลเดอร์
@@ -181,7 +182,7 @@ google-drive-structure/
 ### Immediate (ทำทันที)
 1. ✅ โครงสร้างสร้างเสร็จแล้ว
 2. ⏭️ **อ่าน UPLOAD_GUIDE.md**
-3. ⏭️ **อัพโหลดไป Google Drive**
+3. ⏭️ **อัปโหลดไป Google Drive**
 4. ⏭️ **ตั้งค่าสิทธิ์การเข้าถึง**
 
 ### Short-term (สัปดาห์แรก)
@@ -212,7 +213,7 @@ google-drive-structure/
 ## ต้องการความช่วยเหลือ?
 
 1. **อ่านเอกสารก่อน:**
-   - UPLOAD_GUIDE.md (วิธีอัพโหลด)
+   - UPLOAD_GUIDE.md (วิธีอัปโหลด)
    - SETUP_CHECKLIST.md (Checklist)
    - README.md ในโฟลเดอร์ที่เกี่ยวข้อง
 
@@ -239,11 +240,11 @@ google-drive-structure/
 
 ✅ **โครงสร้างสร้างเสร็จสมบูรณ์แล้ว!**
 
-ทุกอย่างพร้อมสำหรับการอัพโหลดไป Google Drive ตามที่คุณต้องการ
+ทุกอย่างพร้อมสำหรับการอัปโหลดไป Google Drive ตามที่คุณต้องการ
 
 **ขั้นตอนถัดไปของคุณ:**
 1. อ่าน `UPLOAD_GUIDE.md`
-2. อัพโหลดโฟลเดอร์ `AMP - Asset Management Property` ไป Google Drive
+2. อัปโหลดโฟลเดอร์ `AMP - Asset Management Property` ไป Google Drive
 3. ตั้งค่าสิทธิ์การเข้าถึง
 4. ทำตาม `SETUP_CHECKLIST.md`
 5. เริ่มใช้งาน!
