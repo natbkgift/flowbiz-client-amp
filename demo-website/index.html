@@ -531,8 +531,8 @@
         typeLabelMap[item.type] = currentLang === 'th' ? item.type_th : item.type.charAt(0).toUpperCase() + item.type.slice(1);
       });
 
-      // Display Net yields for each property type
-      ['condo', 'house', 'villa'].forEach(type => {
+      // Display Net yields for each property type, derived from avg_price_by_type
+      stats.avg_price_by_type.map(item => item.type).forEach(type => {
         const typeLabel = typeLabelMap[type] || type;
         const yields = stats.rental_yields[type];
         
