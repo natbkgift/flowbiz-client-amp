@@ -1,11 +1,12 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Property Details | Asset Management Property</title>
   <meta name="description" content="View property details and contact us for more information">
-  
+
   <!-- Open Graph -->
   <meta property="og:title" content="Property Details | Asset Management Property">
   <meta property="og:description" content="View property details and contact us for more information">
@@ -26,33 +27,34 @@
   <!-- Favicon -->
   <link rel="icon" type="image/svg+xml" href="assets/images/favicon.svg">
   <link rel="apple-touch-icon" href="assets/images/favicon.svg">
-  
+
   <!-- Stylesheets -->
   <link rel="stylesheet" href="assets/css/main.css">
   <link rel="stylesheet" href="assets/css/components.css">
   <link rel="stylesheet" href="assets/css/responsive.css">
-  
+
   <!-- Lucide Icons -->
   <script src="https://unpkg.com/lucide@latest"></script>
 </head>
+
 <body>
   <!-- Skip Link for Accessibility -->
   <a href="#main-content" class="skip-link">Skip to main content</a>
-  
+
   <!-- Header -->
   <header class="header">
     <div class="header-content">
       <a href="index.html" class="logo">
         <img src="assets/images/logo-amp.svg" alt="AMP Logo" height="40">
       </a>
-      
+
       <nav class="nav desktop-only">
         <a href="index.html"><i data-lucide="home"></i> <span data-i18n="nav.home">Home</span></a>
         <a href="listing.html?intent=rent"><i data-lucide="key"></i> <span data-i18n="nav.rent">Rent</span></a>
         <a href="listing.html?intent=sale"><i data-lucide="home"></i> <span data-i18n="nav.buy">Buy</span></a>
         <a href="index.html#contact"><i data-lucide="mail"></i> <span data-i18n="nav.contact">Contact</span></a>
       </nav>
-      
+
       <div class="header-actions">
         <button class="lang-switch" onclick="toggleLanguage()">
           <span id="lang-display">TH</span>
@@ -63,7 +65,7 @@
       </div>
     </div>
   </header>
-  
+
   <!-- Mobile Menu -->
   <div class="mobile-menu" id="mobile-menu">
     <a href="index.html"><i data-lucide="home"></i> <span data-i18n="nav.home">Home</span></a>
@@ -71,7 +73,7 @@
     <a href="listing.html?intent=sale"><i data-lucide="home"></i> <span data-i18n="nav.buy">Buy</span></a>
     <a href="index.html#contact"><i data-lucide="mail"></i> <span data-i18n="nav.contact">Contact</span></a>
   </div>
-  
+
   <!-- Main Content -->
   <div class="section" id="main-content">
     <div class="container">
@@ -88,26 +90,27 @@
               <!-- Thumbnails will be rendered here -->
             </div>
           </div>
-          
+
           <!-- Property Header -->
           <div class="property-header">
             <div class="property-title">
               <h1 id="property-title" data-i18n="detail.loading">Loading...</h1>
-              <p class="property-location" id="property-location"><i data-lucide="map-pin"></i> <span data-i18n="detail.loading">Loading...</span></p>
+              <p class="property-location" id="property-location"><i data-lucide="map-pin"></i> <span
+                  data-i18n="detail.loading">Loading...</span></p>
             </div>
             <div class="property-price" id="property-price">฿0</div>
           </div>
-          
+
           <!-- Property Facts -->
           <div class="property-facts" id="property-facts">
             <!-- Facts will be rendered here -->
           </div>
-          
+
           <!-- Badges -->
           <div class="property-badges mb-lg" id="property-badges">
             <!-- Badges will be rendered here -->
           </div>
-          
+
           <!-- Description -->
           <div style="background: var(--color-white); padding: 24px; border-radius: 12px; margin-bottom: 24px;">
             <h2 class="mb-md" data-i18n="detail.description">Description</h2>
@@ -122,7 +125,7 @@
               <p data-i18n="detail.loading">Loading...</p>
             </div>
           </div>
-          
+
           <!-- Amenities -->
           <div style="background: var(--color-white); padding: 24px; border-radius: 12px; margin-bottom: 24px;">
             <h2 class="mb-md" data-i18n="detail.amenities">Amenities</h2>
@@ -130,16 +133,17 @@
               <!-- Amenities will be rendered here -->
             </div>
           </div>
-          
+
           <!-- Location -->
           <div style="background: var(--color-white); padding: 24px; border-radius: 12px; margin-bottom: 24px;">
             <h2 class="mb-md" data-i18n="detail.location">Location</h2>
-            <div style="background: var(--color-gray-100); height: 300px; border-radius: 8px; display: flex; align-items: center; justify-content: center; margin-bottom: 16px;">
+            <div
+              style="background: var(--color-gray-100); height: 300px; border-radius: 8px; display: flex; align-items: center; justify-content: center; margin-bottom: 16px;">
               <p style="color: var(--color-gray-600);" data-i18n="detail.mapPlaceholder">Map Placeholder</p>
             </div>
             <p id="location-description" style="color: var(--color-gray-600);" data-i18n="detail.loading">Loading...</p>
           </div>
-          
+
           <!-- Similar Properties -->
           <div>
             <h2 class="mb-lg" data-i18n="detail.similarProperties">Similar Properties</h2>
@@ -148,15 +152,16 @@
             </div>
           </div>
         </div>
-        
+
         <!-- Sidebar -->
         <aside class="detail-sidebar">
           <!-- Agent Card -->
           <div class="agent-card">
             <div class="agent-header">
               <svg class="agent-avatar" width="64" height="64" viewBox="0 0 64 64" style="border-radius: 50%;">
-                <rect width="64" height="64" fill="#1744BE"/>
-                <text x="32" y="42" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="20" font-weight="bold">AMP</text>
+                <rect width="64" height="64" fill="#1744BE" />
+                <text x="32" y="42" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="20"
+                  font-weight="bold">AMP</text>
               </svg>
               <div class="agent-info">
                 <h3 data-i18n="agent.name">AMP Pattaya</h3>
@@ -164,29 +169,33 @@
               </div>
             </div>
             <div class="agent-actions">
-              <a href="https://line.me/ti/p/~@amppattaya" class="btn btn-primary btn-block">
+              <a href="https://line.me/ti/p/~@554dksqb" class="btn btn-primary btn-block">
                 <i data-lucide="message-circle"></i> <span data-i18n="agent.lineChat">LINE Chat</span>
               </a>
-              <a href="tel:+66891234567" class="btn btn-secondary btn-block">
-                <i data-lucide="phone-call"></i> <span data-i18n="agent.call">Call: 089-123-4567</span>
+              <a href="tel:+66634533526" class="btn btn-secondary btn-block">
+                <i data-lucide="phone-call"></i> <span data-i18n="agent.call">Call: 063-453-3526</span>
               </a>
             </div>
           </div>
-          
+
           <!-- Inquiry Form -->
           <form class="inquiry-form" style="margin-top: 24px;">
             <h3 data-i18n="form.interestedTitle">สนใจทรัพย์นี้?</h3>
-            <p style="color: var(--color-gray-600); margin-bottom: 24px; font-size: 14px;" data-i18n="form.interestedSubtitle">
+            <p style="color: var(--color-gray-600); margin-bottom: 24px; font-size: 14px;"
+              data-i18n="form.interestedSubtitle">
               Interested in this property?
             </p>
             <div class="form-group">
-              <input type="text" name="name" class="form-input" data-i18n-placeholder="form.name" placeholder="Your Name" required>
+              <input type="text" name="name" class="form-input" data-i18n-placeholder="form.name"
+                placeholder="Your Name" required>
             </div>
             <div class="form-group">
-              <input type="tel" name="phone" class="form-input" data-i18n-placeholder="form.phone" placeholder="Phone Number" required>
+              <input type="tel" name="phone" class="form-input" data-i18n-placeholder="form.phone"
+                placeholder="Phone Number" required>
             </div>
             <div class="form-group">
-              <textarea name="message" class="form-textarea" data-i18n-placeholder="form.message" placeholder="Message (optional)"></textarea>
+              <textarea name="message" class="form-textarea" data-i18n-placeholder="form.message"
+                placeholder="Message (optional)"></textarea>
             </div>
             <button type="submit" class="btn btn-accent btn-block" data-i18n="form.submit">Send Inquiry</button>
           </form>
@@ -194,17 +203,17 @@
       </div>
     </div>
   </div>
-  
+
   <!-- Sticky CTA (Mobile) -->
   <div class="sticky-cta">
-    <a href="https://line.me/ti/p/~@amppattaya" class="btn btn-primary">
+    <a href="https://line.me/ti/p/~@554dksqb" class="btn btn-primary">
       <i data-lucide="message-circle"></i> <span data-i18n="cta.line">LINE</span>
     </a>
-    <a href="tel:+66891234567" class="btn btn-accent">
+    <a href="tel:+66634533526" class="btn btn-accent">
       <i data-lucide="phone-call"></i> <span data-i18n="cta.call">Call</span>
     </a>
   </div>
-  
+
   <!-- Footer -->
   <footer class="footer">
     <div class="container">
@@ -217,14 +226,14 @@
             <span data-i18n="footer.hours">Mon - Sun: 9:00 AM - 6:00 PM</span>
           </p>
         </div>
-        
+
         <div>
           <h3 data-i18n="footer.contactUs">Contact Us</h3>
-          <a href="tel:+66891234567"><i data-lucide="phone"></i> +66 89-123-4567</a>
+          <a href="tel:+66634533526"><i data-lucide="phone"></i> +66 63-453-3526</a>
           <a href="mailto:info@amppattaya.com"><i data-lucide="mail"></i> info@amppattaya.com</a>
-          <a href="https://line.me/ti/p/~@amppattaya"><i data-lucide="message-circle"></i> LINE: @amppattaya</a>
+          <a href="https://line.me/ti/p/~@554dksqb"><i data-lucide="message-circle"></i> LINE: @554dksqb</a>
         </div>
-        
+
         <div>
           <h3 data-i18n="footer.quickLinks">Quick Links</h3>
           <a href="listing.html?intent=rent" data-i18n="footer.forRent">Properties for Rent</a>
@@ -233,31 +242,31 @@
           <a href="#" data-i18n="footer.about">About Us</a>
         </div>
       </div>
-      
+
       <div class="footer-bottom">
         <p data-i18n="footer.copyright">&copy; 2026 Asset Management Property. All rights reserved. | Demo Website</p>
       </div>
     </div>
   </footer>
-  
+
   <!-- Scripts -->
   <script src="assets/js/mock-data.js"></script>
   <script src="assets/js/gallery.js"></script>
   <script src="assets/js/i18n.js"></script>
   <script src="assets/js/main.js"></script>
-  
+
   <!-- JSON-LD Structured Data -->
   <script type="application/ld+json" id="schema-jsonld">
   </script>
-  
+
   <script>
     // Get property ID from URL
     const urlParams = new URLSearchParams(window.location.search);
     const propertyId = urlParams.get('id');
-    
+
     // Find property
     const property = ALL_PROPERTIES.find(p => p.id === propertyId);
-    
+
     if (!property) {
       // Redirect to listing if property not found
       window.location.href = 'listing.html';
@@ -266,13 +275,13 @@
       const currentLang = document.documentElement.lang || 'en';
       const title = currentLang === 'th' ? property.title_th : property.title_en;
       const priceLabel = property.intent === 'rent' ? '/month' : '';
-      
+
       // Title and price
       document.getElementById('property-title').textContent = title;
       document.getElementById('property-location').innerHTML = `<i data-lucide="map-pin"></i> ${property.area}, Pattaya`;
       document.getElementById('property-price').innerHTML = `฿${property.price.toLocaleString()}<span>${priceLabel}</span>`;
       document.title = `${title} | Asset Management Property`;
-      
+
       // Facts
       const factsHTML = `
         ${property.beds !== null ? `<div class="fact"><i data-lucide="bed-double"></i> <strong>${property.beds === 0 ? 'Studio' : property.beds}</strong> ${property.beds === 1 ? 'Bedroom' : 'Bedrooms'}</div>` : ''}
@@ -281,20 +290,20 @@
         <div class="fact"><i data-lucide="calendar"></i> Available: <strong>${new Date(property.available_date).toLocaleDateString()}</strong></div>
       `;
       document.getElementById('property-facts').innerHTML = factsHTML;
-      
+
       // Badges
       let badgesHTML = property.badges.map(badge => {
-        const badgeClass = badge === 'Featured' ? 'badge-featured' : 
-                         badge === 'Available Now' ? 'badge-available' : 'badge-updated';
+        const badgeClass = badge === 'Featured' ? 'badge-featured' :
+          badge === 'Available Now' ? 'badge-available' : 'badge-updated';
         return `<span class="badge ${badgeClass}">${badge}</span>`;
       }).join('');
       badgesHTML += `<span class="badge badge-updated">Updated ${new Date(property.updated).toLocaleDateString()}</span>`;
       document.getElementById('property-badges').innerHTML = badgesHTML;
-      
+
       // Description
       document.getElementById('description-th').innerHTML = `<p>${property.description_th}</p>`;
       document.getElementById('description-en').innerHTML = `<p>${property.description_en}</p>`;
-      
+
       // Amenities
       const amenitiesIcons = {
         'Pool': 'waves',
@@ -317,7 +326,7 @@
         'Electricity Available': 'zap',
         'Water Supply': 'droplets'
       };
-      
+
       const amenitiesHTML = property.amenities.map(amenity => {
         const icon = amenitiesIcons[amenity] || 'check';
         return `
@@ -328,35 +337,35 @@
         `;
       }).join('');
       document.getElementById('amenities-grid').innerHTML = amenitiesHTML;
-      
+
       // Location description
       document.getElementById('location-description').textContent = `Located in ${property.area}, one of Pattaya's most sought-after areas. Easy access to beaches, shopping, restaurants, and entertainment.`;
-      
+
       // Gallery
       const mainImage = document.getElementById('gallery-main-image');
       mainImage.src = property.images[0];
-      
+
       const thumbnailsHTML = property.images.slice(0, 6).map((img, index) => `
         <div class="gallery-thumbnail ${index === 0 ? 'active' : ''}">
           <img src="${img}" alt="Property image ${index + 1}" data-large="${img}">
         </div>
       `).join('');
       document.getElementById('gallery-thumbnails').innerHTML = thumbnailsHTML;
-      
+
       // Initialize gallery
       gallery = new Gallery(property.images);
-      
+
       // Similar properties (same area or same type)
       const similarProperties = ALL_PROPERTIES
         .filter(p => p.id !== property.id && (p.area === property.area || p.type === property.type))
         .slice(0, 4);
-      
+
       const similarHTML = similarProperties.map(p => {
         const title = currentLang === 'th' ? p.title_th : p.title_en;
         const priceLabel = p.intent === 'rent' ? '/month' : '';
         const bedsLabel = p.beds === 0 ? 'Studio' : `${p.beds} ${p.beds === 1 ? 'Bed' : 'Beds'}`;
         const bathsLabel = `${p.baths} ${p.baths === 1 ? 'Bath' : 'Baths'}`;
-        
+
         return `
           <div class="property-card">
             <div class="card-image">
@@ -379,7 +388,7 @@
         `;
       }).join('');
       document.getElementById('similar-properties').innerHTML = similarHTML;
-      
+
       // Generate JSON-LD structured data
       const jsonLd = {
         "@context": "https://schema.org",
@@ -405,16 +414,16 @@
         "image": property.images[0],
         "dateModified": property.updated
       };
-      
+
       document.getElementById('schema-jsonld').textContent = JSON.stringify(jsonLd, null, 2);
-      
+
       // Initialize Lucide icons
       if (typeof lucide !== 'undefined') {
         lucide.createIcons();
       }
     }
   </script>
-  
+
   <!-- Initialize Lucide Icons -->
   <script>
     if (typeof lucide !== 'undefined') {
@@ -422,4 +431,5 @@
     }
   </script>
 </body>
+
 </html>

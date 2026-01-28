@@ -1,14 +1,16 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Contact Us | Asset Management Property</title>
   <meta name="description" content="Get in touch with AMP Pattaya. We're here to help with all your property needs.">
-  
+
   <!-- Open Graph -->
   <meta property="og:title" content="Contact Us | Asset Management Property">
-  <meta property="og:description" content="Get in touch with AMP Pattaya. We're here to help with all your property needs.">
+  <meta property="og:description"
+    content="Get in touch with AMP Pattaya. We're here to help with all your property needs.">
   <meta property="og:image" content="https://via.placeholder.com/1200x630/1744BE/FFFFFF?text=AMP+Contact">
   <meta property="og:url" content="https://amppattaya.com/contact.html">
   <meta property="og:type" content="website">
@@ -17,7 +19,8 @@
   <!-- Twitter Card -->
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="Contact Us | Asset Management Property">
-  <meta name="twitter:description" content="Get in touch with AMP Pattaya. We're here to help with all your property needs.">
+  <meta name="twitter:description"
+    content="Get in touch with AMP Pattaya. We're here to help with all your property needs.">
   <meta name="twitter:image" content="https://via.placeholder.com/1200x630/1744BE/FFFFFF?text=AMP+Contact">
 
   <!-- Canonical URL -->
@@ -26,15 +29,15 @@
   <!-- Favicon -->
   <link rel="icon" href="assets/images/favicon.svg" type="image/svg+xml">
   <link rel="apple-touch-icon" href="assets/images/logo-amp.svg">
-  
+
   <!-- Stylesheets -->
   <link rel="stylesheet" href="assets/css/main.css">
   <link rel="stylesheet" href="assets/css/components.css">
   <link rel="stylesheet" href="assets/css/responsive.css">
-  
+
   <!-- Lucide Icons -->
   <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
-  
+
   <style>
     .contact-grid {
       display: grid;
@@ -42,37 +45,37 @@
       gap: 40px;
       margin-bottom: 60px;
     }
-    
+
     .contact-form {
       background: var(--color-white);
       padding: 32px;
       border-radius: 12px;
-      box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+      box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
     }
-    
+
     .contact-form h3 {
       margin-top: 0;
       margin-bottom: 24px;
       color: var(--color-primary);
       font-size: 24px;
     }
-    
+
     .form-group {
       margin-bottom: 20px;
     }
-    
+
     .form-label {
       display: block;
       margin-bottom: 8px;
       font-weight: 500;
       color: var(--color-text);
     }
-    
+
     .form-label .required {
       color: #e74c3c;
       margin-left: 2px;
     }
-    
+
     .form-input,
     .form-select,
     .form-textarea {
@@ -84,35 +87,35 @@
       font-family: inherit;
       transition: border-color 0.3s ease;
     }
-    
+
     .form-input:focus,
     .form-select:focus,
     .form-textarea:focus {
       outline: none;
       border-color: var(--color-primary);
     }
-    
+
     .form-textarea {
       min-height: 120px;
       resize: vertical;
     }
-    
+
     .contact-info {
       display: flex;
       flex-direction: column;
       gap: 20px;
     }
-    
+
     .info-card {
       background: var(--color-white);
       padding: 24px;
       border-radius: 12px;
-      box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+      box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
       display: flex;
       align-items: flex-start;
       gap: 16px;
     }
-    
+
     .info-card-icon {
       width: 48px;
       height: 48px;
@@ -124,78 +127,79 @@
       color: white;
       flex-shrink: 0;
     }
-    
+
     .info-card-content h4 {
       margin: 0 0 8px 0;
       font-size: 18px;
       color: var(--color-text);
     }
-    
+
     .info-card-content p {
       margin: 0;
       color: var(--color-text-light);
       line-height: 1.6;
     }
-    
+
     .info-card-content a {
       color: var(--color-primary);
       text-decoration: none;
       font-weight: 500;
     }
-    
+
     .info-card-content a:hover {
       text-decoration: underline;
     }
-    
+
     .map-container {
       margin-top: 40px;
       border-radius: 12px;
       overflow: hidden;
-      box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+      box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
     }
-    
+
     .map-container iframe {
       width: 100%;
       height: 450px;
       border: 0;
       display: block;
     }
-    
+
     @media (max-width: 768px) {
       .contact-grid {
         grid-template-columns: 1fr;
         gap: 32px;
       }
-      
+
       .contact-form,
       .info-card {
         padding: 24px;
       }
-      
+
       .map-container iframe {
         height: 350px;
       }
     }
   </style>
 </head>
+
 <body>
   <!-- Skip Link for Accessibility -->
   <a href="#main-content" class="skip-link">Skip to main content</a>
-  
+
   <!-- Header -->
   <header class="header">
     <div class="header-content">
       <a href="index.html" class="logo">
         <img src="assets/images/logo-amp.svg" alt="Asset Management Property" height="40">
       </a>
-      
+
       <nav class="nav desktop-only">
         <a href="index.html" data-i18n="nav_home"><i data-lucide="home"></i> Home</a>
         <a href="listing.html?intent=rent" data-i18n="nav_rent"><i data-lucide="key"></i> Rent</a>
         <a href="listing.html?intent=sale" data-i18n="nav_buy"><i data-lucide="building"></i> Buy</a>
         <a href="contact.html" class="active" data-i18n="nav_contact"><i data-lucide="mail"></i> Contact</a>
       </nav>
-      
+
       <div class="header-actions">
         <button class="lang-switch" onclick="toggleLanguage()">
           <span>TH</span>
@@ -210,7 +214,7 @@
       </div>
     </div>
   </header>
-  
+
   <!-- Mobile Menu -->
   <div class="mobile-menu" id="mobile-menu">
     <a href="index.html" data-i18n="nav_home"><i data-lucide="home"></i> Home</a>
@@ -218,7 +222,7 @@
     <a href="listing.html?intent=sale" data-i18n="nav_buy"><i data-lucide="building"></i> Buy</a>
     <a href="contact.html" class="active" data-i18n="nav_contact"><i data-lucide="mail"></i> Contact</a>
   </div>
-  
+
   <!-- Hero Section -->
   <section class="hero" id="main-content" style="padding: 60px 0;">
     <div class="container">
@@ -226,7 +230,7 @@
       <p class="hero-subtitle" data-i18n="contact_subtitle">We are here to help and answer your questions</p>
     </div>
   </section>
-  
+
   <!-- Contact Section -->
   <section class="section">
     <div class="container">
@@ -242,7 +246,7 @@
               </label>
               <input type="text" name="name" class="form-input" required data-i18n-placeholder="form_name">
             </div>
-            
+
             <div class="form-group">
               <label class="form-label">
                 <span data-i18n="form_phone">Phone Number</span>
@@ -250,12 +254,12 @@
               </label>
               <input type="tel" name="phone" class="form-input" required data-i18n-placeholder="form_phone">
             </div>
-            
+
             <div class="form-group">
               <label class="form-label" data-i18n="form_email">Email</label>
               <input type="email" name="email" class="form-input" data-i18n-placeholder="form_email">
             </div>
-            
+
             <div class="form-group">
               <label class="form-label">
                 <span data-i18n="contact_property_interest">Property Interest</span>
@@ -265,16 +269,16 @@
                 <option value="sale" data-i18n="search_intent_buy">Buy</option>
               </select>
             </div>
-            
+
             <div class="form-group">
               <label class="form-label" data-i18n="form_message">Message</label>
               <textarea name="message" class="form-textarea" data-i18n-placeholder="form_message"></textarea>
             </div>
-            
+
             <button type="submit" class="btn btn-accent btn-block" data-i18n="form_submit">Submit</button>
           </form>
         </div>
-        
+
         <!-- Contact Information -->
         <div class="contact-info">
           <!-- Phone Card -->
@@ -284,10 +288,10 @@
             </div>
             <div class="info-card-content">
               <h4 data-i18n="about_location_phone_title">Phone</h4>
-              <p><a href="tel:+66812345678">+66 (0) 81-234-5678</a></p>
+              <p><a href="tel:+66634533526">+66 (0) 63-453-3526</a></p>
             </div>
           </div>
-          
+
           <!-- Email Card -->
           <div class="info-card">
             <div class="info-card-icon">
@@ -298,7 +302,7 @@
               <p><a href="mailto:info@amppattaya.com">info@amppattaya.com</a></p>
             </div>
           </div>
-          
+
           <!-- LINE Card -->
           <div class="info-card">
             <div class="info-card-icon">
@@ -306,10 +310,10 @@
             </div>
             <div class="info-card-content">
               <h4>LINE</h4>
-              <p><a href="https://line.me/ti/p/@amppattaya" target="_blank" rel="noopener noreferrer">@amppattaya</a></p>
+              <p><a href="https://line.me/ti/p/~@554dksqb" target="_blank" rel="noopener noreferrer">@554dksqb</a></p>
             </div>
           </div>
-          
+
           <!-- Address Card -->
           <div class="info-card">
             <div class="info-card-icon">
@@ -320,7 +324,7 @@
               <p data-i18n="about_location_address">123/45 Pattaya Beach Road<br>Pattaya, Chonburi 20150<br>Thailand</p>
             </div>
           </div>
-          
+
           <!-- Office Hours Card -->
           <div class="info-card">
             <div class="info-card-icon">
@@ -333,20 +337,18 @@
           </div>
         </div>
       </div>
-      
+
       <!-- Google Maps -->
       <div class="map-container">
         <iframe
           src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3876.892942827149!2d100.88031231531837!3d12.927545218496543!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3102820e68c21e1b%3A0x3e18c07428e1a1a8!2sPattaya%20Beach%20Road!5e0!3m2!1sen!2sth!4v1635000000000!5m2!1sen!2sth"
-          allowfullscreen=""
-          loading="lazy"
-          referrerpolicy="no-referrer-when-downgrade"
+          allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"
           title="AMP Pattaya Office Location">
         </iframe>
       </div>
     </div>
   </section>
-  
+
   <!-- Footer -->
   <footer class="footer">
     <div class="container">
@@ -359,14 +361,14 @@
             <span data-i18n="about_location_hours">Monday - Sunday: 9:00 AM - 6:00 PM</span>
           </p>
         </div>
-        
+
         <div>
           <h3 data-i18n="footer_contact">Contact Us</h3>
-          <a href="tel:+66812345678">📞 +66 (0) 81-234-5678</a>
+          <a href="tel:+66634533526">📞 +66 (0) 63-453-3526</a>
           <a href="mailto:info@amppattaya.com">📧 info@amppattaya.com</a>
-          <a href="https://line.me/ti/p/@amppattaya" target="_blank" rel="noopener noreferrer">💬 LINE: @amppattaya</a>
+          <a href="https://line.me/ti/p/~@554dksqb" target="_blank" rel="noopener noreferrer">💬 LINE: @554dksqb</a>
         </div>
-        
+
         <div>
           <h3 data-i18n="footer_quick_links">Quick Links</h3>
           <a href="listing.html?intent=rent">Properties for Rent</a>
@@ -375,25 +377,26 @@
           <a href="contact.html" class="active">Contact Us</a>
         </div>
       </div>
-      
+
       <div class="footer-bottom">
         <p>&copy; 2026 Asset Management Property. All rights reserved. | Demo Website</p>
       </div>
     </div>
   </footer>
-  
+
   <!-- Scripts -->
   <script src="assets/js/i18n.js"></script>
   <script src="assets/js/main.js"></script>
-  
+
   <script>
     // Setup form validation
     setupFormValidation();
-    
+
     // Initialize Lucide icons
     if (typeof lucide !== 'undefined') {
       lucide.createIcons();
     }
   </script>
 </body>
+
 </html>

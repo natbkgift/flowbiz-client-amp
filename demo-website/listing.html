@@ -1,11 +1,12 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Property Listings | Asset Management Property</title>
   <meta name="description" content="Browse all properties available for rent or sale in Pattaya">
-  
+
   <!-- Open Graph -->
   <meta property="og:title" content="Property Listings | Asset Management Property">
   <meta property="og:description" content="Browse all properties available for rent or sale in Pattaya">
@@ -26,33 +27,34 @@
   <!-- Favicon -->
   <link rel="icon" href="assets/images/favicon.svg" type="image/svg+xml">
   <link rel="apple-touch-icon" href="assets/images/logo-amp.svg">
-  
+
   <!-- Stylesheets -->
   <link rel="stylesheet" href="assets/css/main.css">
   <link rel="stylesheet" href="assets/css/components.css">
   <link rel="stylesheet" href="assets/css/responsive.css">
-  
+
   <!-- Lucide Icons -->
   <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
 </head>
+
 <body>
   <!-- Skip Link for Accessibility -->
   <a href="#main-content" class="skip-link">Skip to main content</a>
-  
+
   <!-- Header -->
   <header class="header">
     <div class="header-content">
       <a href="index.html" class="logo">
         <img src="assets/images/logo-amp.svg" alt="Asset Management Property" height="40">
       </a>
-      
+
       <nav class="nav desktop-only">
         <a href="index.html" data-i18n="nav_home"><i data-lucide="home"></i> Home</a>
         <a href="listing.html?intent=rent" data-i18n="nav_rent"><i data-lucide="key"></i> Rent</a>
         <a href="listing.html?intent=sale" data-i18n="nav_buy"><i data-lucide="building"></i> Buy</a>
         <a href="index.html#contact" data-i18n="nav_contact"><i data-lucide="mail"></i> Contact</a>
       </nav>
-      
+
       <div class="header-actions">
         <button class="lang-switch" onclick="toggleLanguage()">
           <span>TH</span>
@@ -67,7 +69,7 @@
       </div>
     </div>
   </header>
-  
+
   <!-- Mobile Menu -->
   <div class="mobile-menu" id="mobile-menu">
     <a href="index.html" data-i18n="nav_home"><i data-lucide="home"></i> Home</a>
@@ -75,20 +77,21 @@
     <a href="listing.html?intent=sale" data-i18n="nav_buy"><i data-lucide="building"></i> Buy</a>
     <a href="index.html#contact" data-i18n="nav_contact"><i data-lucide="mail"></i> Contact</a>
   </div>
-  
+
   <!-- Main Content -->
   <div class="section" id="main-content">
     <div class="container">
       <!-- Mobile Filter Toggle Button -->
-      <button class="btn btn-primary mobile-only mb-lg" id="filter-toggle-btn" onclick="toggleFilterSidebar()" style="width: 100%;" data-i18n="filter_toggle">
+      <button class="btn btn-primary mobile-only mb-lg" id="filter-toggle-btn" onclick="toggleFilterSidebar()"
+        style="width: 100%;" data-i18n="filter_toggle">
         🔍 Filters & Sort
       </button>
-      
+
       <div class="listing-layout">
         <!-- Filter Sidebar -->
         <aside class="filter-sidebar">
           <h3 style="margin-bottom: 24px;" data-i18n="filter_title">Filters</h3>
-          
+
           <!-- Intent Filter -->
           <div class="filter-section">
             <h3><i data-lucide="home"></i> <span data-i18n="filter_looking_to">Looking to</span></h3>
@@ -98,7 +101,7 @@
               <button type="button" class="toggle-option" data-value="sale" data-i18n="filter_buy">Buy</button>
             </div>
           </div>
-          
+
           <!-- Type Filter -->
           <div class="filter-section">
             <h3><i data-lucide="building"></i> <span data-i18n="filter_property_type">Property Type</span></h3>
@@ -125,7 +128,7 @@
               </label>
             </div>
           </div>
-          
+
           <!-- Area Filter -->
           <div class="filter-section">
             <h3><i data-lucide="map-pin"></i> <span data-i18n="filter_area">Area</span></h3>
@@ -156,7 +159,7 @@
               </label>
             </div>
           </div>
-          
+
           <!-- Bedrooms Filter -->
           <div class="filter-section">
             <h3><i data-lucide="bed-double"></i> <span data-i18n="filter_bedrooms">Bedrooms</span></h3>
@@ -168,25 +171,27 @@
               <button type="button" class="chip" data-beds="4">4+</button>
             </div>
           </div>
-          
+
           <!-- Price Range Filter -->
           <div class="filter-section">
             <h3 data-i18n="filter_price_range">Price Range (THB)</h3>
             <div class="form-group">
-              <input type="number" id="price-min" class="form-input" placeholder="Min" min="0" data-i18n-placeholder="filter_min">
+              <input type="number" id="price-min" class="form-input" placeholder="Min" min="0"
+                data-i18n-placeholder="filter_min">
             </div>
             <div class="form-group">
-              <input type="number" id="price-max" class="form-input" placeholder="Max" min="0" data-i18n-placeholder="filter_max">
+              <input type="number" id="price-max" class="form-input" placeholder="Max" min="0"
+                data-i18n-placeholder="filter_max">
             </div>
           </div>
-          
+
           <!-- Filter Actions -->
           <div class="filter-actions">
             <button class="btn btn-primary btn-block" onclick="applyFilters()" data-i18n="filter_apply">Apply</button>
             <button class="btn btn-secondary btn-block" onclick="resetFilters()" data-i18n="filter_reset">Reset</button>
           </div>
         </aside>
-        
+
         <!-- Results Section -->
         <main>
           <!-- Results Header -->
@@ -202,12 +207,12 @@
               </select>
             </div>
           </div>
-          
+
           <!-- Property Grid -->
           <div class="grid grid-3" id="property-grid">
             <!-- Properties will be rendered here by JavaScript -->
           </div>
-          
+
           <!-- Pagination -->
           <div class="pagination">
             <button class="btn btn-secondary" disabled data-i18n="pagination_previous">Previous</button>
@@ -218,7 +223,7 @@
       </div>
     </div>
   </div>
-  
+
   <!-- Footer -->
   <footer class="footer">
     <div class="container">
@@ -231,14 +236,14 @@
             Mon - Sun: 9:00 AM - 6:00 PM
           </p>
         </div>
-        
+
         <div>
           <h3>Contact Us</h3>
-          <a href="tel:+66891234567">📞 +66 89-123-4567</a>
+          <a href="tel:+66634533526">📞 +66 63-453-3526</a>
           <a href="mailto:info@amppattaya.com">📧 info@amppattaya.com</a>
-          <a href="https://line.me/ti/p/~@amppattaya">💬 LINE: @amppattaya</a>
+          <a href="https://line.me/ti/p/~@554dksqb">💬 LINE: @554dksqb</a>
         </div>
-        
+
         <div>
           <h3>Quick Links</h3>
           <a href="listing.html?intent=rent">Properties for Rent</a>
@@ -247,23 +252,24 @@
           <a href="#">About Us</a>
         </div>
       </div>
-      
+
       <div class="footer-bottom">
         <p>&copy; 2026 Asset Management Property. All rights reserved. | Demo Website</p>
       </div>
     </div>
   </footer>
-  
+
   <!-- Scripts -->
   <script src="assets/js/mock-data.js"></script>
   <script src="assets/js/i18n.js"></script>
   <script src="assets/js/filters.js"></script>
   <script src="assets/js/main.js"></script>
-  
+
   <script>
     if (typeof lucide !== 'undefined') {
       lucide.createIcons();
     }
   </script>
 </body>
+
 </html>
