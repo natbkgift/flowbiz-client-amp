@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pattaya Projects | Asset Management Property</title>
+  <meta name="description" content="Discover new and developing real estate projects in Pattaya. Pre-Sale, Under Construction, and Ready to Move properties.">
+  
+  <!-- Favicon -->
+  <link rel="icon" href="../assets/images/favicon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="../assets/images/logo-amp.svg">
+  
+  <!-- Stylesheets -->
+  <link rel="stylesheet" href="../assets/css/main.css">
+  <link rel="stylesheet" href="../assets/css/components.css">
+  <link rel="stylesheet" href="../assets/css/projects.css">
+  <link rel="stylesheet" href="../assets/css/responsive.css">
+  
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+</head>
+<body>
+  <!-- Skip Link for Accessibility -->
+  <a href="#main-content" class="skip-link">Skip to main content</a>
+  
+  <!-- Header -->
+  <header class="header">
+    <div class="header-content">
+      <a href="../index.html" class="logo">
+        <img src="../assets/images/logo-amp.svg" alt="Asset Management Property" height="40">
+      </a>
+      
+      <nav class="nav desktop-only">
+        <a href="../index.html" data-i18n="nav_home"><i data-lucide="home"></i> Home</a>
+        <a href="../listing.html?intent=rent" data-i18n="nav_rent"><i data-lucide="key"></i> Rent</a>
+        <a href="../listing.html?intent=sale" data-i18n="nav_buy"><i data-lucide="building"></i> Buy</a>
+        <a href="index.html" class="active" data-i18n="nav_projects"><i data-lucide="layers"></i> Projects</a>
+        <a href="../invest/index.html" data-i18n="nav_invest"><i data-lucide="trending-up"></i> Invest</a>
+        <a href="../contact.html" data-i18n="nav_contact"><i data-lucide="mail"></i> Contact</a>
+      </nav>
+      
+      <div class="header-actions">
+        <button class="lang-switch" onclick="toggleLanguage()">
+          <span>TH</span>
+        </button>
+        <button class="hamburger mobile-only" onclick="toggleMobileMenu()" aria-label="Menu" aria-expanded="false">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="3" y1="12" x2="21" y2="12"></line>
+            <line x1="3" y1="6" x2="21" y2="6"></line>
+            <line x1="3" y1="18" x2="21" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </header>
+  
+  <!-- Mobile Menu -->
+  <div class="mobile-menu" id="mobile-menu">
+    <a href="../index.html" data-i18n="nav_home"><i data-lucide="home"></i> Home</a>
+    <a href="../listing.html?intent=rent" data-i18n="nav_rent"><i data-lucide="key"></i> Rent</a>
+    <a href="../listing.html?intent=sale" data-i18n="nav_buy"><i data-lucide="building"></i> Buy</a>
+    <a href="index.html" data-i18n="nav_projects"><i data-lucide="layers"></i> Projects</a>
+    <a href="../invest/index.html" data-i18n="nav_invest"><i data-lucide="trending-up"></i> Invest</a>
+    <a href="../contact.html" data-i18n="nav_contact"><i data-lucide="mail"></i> Contact</a>
+  </div>
+  
+  <!-- Hero Section -->
+  <section class="hero" id="main-content" style="padding: 60px 0 40px;">
+    <div class="container">
+      <h1 data-i18n="projects_title">โครงการพัทยา</h1>
+      <p class="hero-subtitle" data-i18n="projects_subtitle">ค้นหาโครงการใหม่และโครงการกำลังพัฒนา</p>
+    </div>
+  </section>
+  
+  <!-- Filters Section -->
+  <section class="section" style="padding-top: 0;">
+    <div class="container">
+      <div class="project-filters">
+        <div class="filter-group">
+          <label class="filter-label" data-i18n="project_status">สถานะโครงการ</label>
+          <div class="filter-buttons">
+            <button class="filter-btn active" data-status="all" data-i18n="project_all">All</button>
+            <button class="filter-btn" data-status="pre-sale" data-i18n="project_pre_sale">Pre-Sale</button>
+            <button class="filter-btn" data-status="under-construction" data-i18n="project_under_construction">Under Construction</button>
+            <button class="filter-btn" data-status="ready-to-move" data-i18n="project_ready_to_move">Ready to Move</button>
+          </div>
+        </div>
+        
+        <div class="filter-group">
+          <label class="filter-label" data-i18n="project_type">ประเภท</label>
+          <div class="filter-buttons">
+            <button class="filter-btn active" data-type="all" data-i18n="project_all">All</button>
+            <button class="filter-btn" data-type="condo" data-i18n="project_condo">Condo</button>
+            <button class="filter-btn" data-type="villa" data-i18n="project_villa">Villa/House</button>
+          </div>
+        </div>
+        
+        <div class="filter-group">
+          <label class="filter-label" data-i18n="project_area">พื้นที่</label>
+          <div class="filter-buttons">
+            <button class="filter-btn active" data-area="all" data-i18n="project_all">All</button>
+            <button class="filter-btn" data-area="Pattaya">Pattaya</button>
+            <button class="filter-btn" data-area="Jomtien">Jomtien</button>
+            <button class="filter-btn" data-area="Na Jomtien">Na Jomtien</button>
+            <button class="filter-btn" data-area="Pratumnak">Pratumnak</button>
+            <button class="filter-btn" data-area="Wong Amat">Wong Amat</button>
+            <button class="filter-btn" data-area="Huay Yai">Huay Yai</button>
+          </div>
+        </div>
+        
+        <div class="filter-group">
+          <label class="filter-label" data-i18n="project_price_range">ช่วงราคา</label>
+          <div class="filter-buttons">
+            <button class="filter-btn active" data-price="all" data-i18n="project_all">All</button>
+            <button class="filter-btn" data-price="under2">< 2M</button>
+            <button class="filter-btn" data-price="2to5">2-5M</button>
+            <button class="filter-btn" data-price="5to10">5-10M</button>
+            <button class="filter-btn" data-price="over10">> 10M</button>
+          </div>
+        </div>
+      </div>
+      
+      <div style="margin: 24px 0; text-align: right;">
+        <span id="project-count" style="font-weight: 600; color: var(--color-gray-600);"></span>
+      </div>
+      
+      <!-- Projects Grid -->
+      <div class="projects-grid" id="projects-grid">
+        <!-- Projects will be rendered here by JavaScript -->
+      </div>
+    </div>
+  </section>
+  
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-content">
+        <div>
+          <h3>Asset Management Property</h3>
+          <p>Professional property management in Pattaya</p>
+          <p style="margin-top: 16px;">
+            <strong>Office Hours:</strong><br>
+            Mon - Sun: 9:00 AM - 6:00 PM
+          </p>
+        </div>
+        
+        <div>
+          <h3>Contact Us</h3>
+          <a href="tel:+66634533526">📞 +66 63-453-3526</a>
+          <a href="mailto:info@amppattaya.com">📧 info@amppattaya.com</a>
+          <a href="https://line.me/ti/p/~@554dksqb">💬 LINE: @554dksqb</a>
+        </div>
+        
+        <div>
+          <h3>Quick Links</h3>
+          <a href="../listing.html?intent=rent">Properties for Rent</a>
+          <a href="../listing.html?intent=sale">Properties for Sale</a>
+          <a href="index.html">Projects</a>
+          <a href="../invest/index.html">Investment Hub</a>
+          <a href="../about.html">About Us</a>
+        </div>
+      </div>
+      
+      <div class="footer-bottom">
+        <p>&copy; 2026 Asset Management Property. All rights reserved. | Demo Website</p>
+      </div>
+    </div>
+  </footer>
+  
+  <!-- Scripts -->
+  <script src="../assets/js/mock-projects.js"></script>
+  <script src="../assets/js/i18n.js"></script>
+  <script src="../assets/js/main.js"></script>
+  <script src="../assets/js/projects.js"></script>
+  
+  <script>
+    if (typeof lucide !== 'undefined') {
+      lucide.createIcons();
+    }
+  </script>
+</body>
+</html>

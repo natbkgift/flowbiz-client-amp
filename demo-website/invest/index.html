@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Investment Hub | Asset Management Property</title>
+  <meta name="description" content="Investment opportunities in Pattaya real estate. Learn about yields, market trends, and rental management services.">
+  
+  <!-- Favicon -->
+  <link rel="icon" href="../assets/images/favicon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="../assets/images/logo-amp.svg">
+  
+  <!-- Stylesheets -->
+  <link rel="stylesheet" href="../assets/css/main.css">
+  <link rel="stylesheet" href="../assets/css/components.css">
+  <link rel="stylesheet" href="../assets/css/projects.css">
+  <link rel="stylesheet" href="../assets/css/responsive.css">
+  
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+</head>
+<body>
+  <!-- Skip Link for Accessibility -->
+  <a href="#main-content" class="skip-link">Skip to main content</a>
+  
+  <!-- Header -->
+  <header class="header">
+    <div class="header-content">
+      <a href="../index.html" class="logo">
+        <img src="../assets/images/logo-amp.svg" alt="Asset Management Property" height="40">
+      </a>
+      
+      <nav class="nav desktop-only">
+        <a href="../index.html" data-i18n="nav_home"><i data-lucide="home"></i> Home</a>
+        <a href="../listing.html?intent=rent" data-i18n="nav_rent"><i data-lucide="key"></i> Rent</a>
+        <a href="../listing.html?intent=sale" data-i18n="nav_buy"><i data-lucide="building"></i> Buy</a>
+        <a href="../projects/index.html" data-i18n="nav_projects"><i data-lucide="layers"></i> Projects</a>
+        <a href="index.html" class="active" data-i18n="nav_invest"><i data-lucide="trending-up"></i> Invest</a>
+        <a href="../contact.html" data-i18n="nav_contact"><i data-lucide="mail"></i> Contact</a>
+      </nav>
+      
+      <div class="header-actions">
+        <button class="lang-switch" onclick="toggleLanguage()">
+          <span>TH</span>
+        </button>
+        <button class="hamburger mobile-only" onclick="toggleMobileMenu()" aria-label="Menu" aria-expanded="false">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="3" y1="12" x2="21" y2="12"></line>
+            <line x1="3" y1="6" x2="21" y2="6"></line>
+            <line x1="3" y1="18" x2="21" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </header>
+  
+  <!-- Mobile Menu -->
+  <div class="mobile-menu" id="mobile-menu">
+    <a href="../index.html" data-i18n="nav_home"><i data-lucide="home"></i> Home</a>
+    <a href="../listing.html?intent=rent" data-i18n="nav_rent"><i data-lucide="key"></i> Rent</a>
+    <a href="../listing.html?intent=sale" data-i18n="nav_buy"><i data-lucide="building"></i> Buy</a>
+    <a href="../projects/index.html" data-i18n="nav_projects"><i data-lucide="layers"></i> Projects</a>
+    <a href="index.html" data-i18n="nav_invest"><i data-lucide="trending-up"></i> Invest</a>
+    <a href="../contact.html" data-i18n="nav_contact"><i data-lucide="mail"></i> Contact</a>
+  </div>
+  
+  <!-- Hero Section -->
+  <section class="hero" id="main-content">
+    <div class="container" style="text-align: center;">
+      <h1 data-i18n="invest_title">ลงทุนอสังหาพัทยา</h1>
+      <p class="hero-subtitle" data-i18n="invest_subtitle">ข้อมูลครบ เริ่มต้นง่าย ผลตอบแทนดี</p>
+    </div>
+  </section>
+  
+  <!-- Why Invest Section -->
+  <section class="section">
+    <div class="container">
+      <div class="section-header" style="text-align: center;">
+        <h2 class="section-title" data-i18n="invest_why_pattaya">ทำไมต้องลงทุนพัทยา</h2>
+      </div>
+      
+      <div class="grid grid-3">
+        <div class="info-box">
+          <div style="text-align: center; font-size: 48px; margin-bottom: 16px;">📈</div>
+          <h3 class="info-box-title" style="text-align: center;">High Rental Yield</h3>
+          <p style="text-align: center; color: var(--color-gray-600);">ผลตอบแทนค่าเช่า 6-8% ต่อปี สูงกว่ากรุงเทพฯ</p>
+        </div>
+        
+        <div class="info-box">
+          <div style="text-align: center; font-size: 48px; margin-bottom: 16px;">🌴</div>
+          <h3 class="info-box-title" style="text-align: center;">Tourism Hub</h3>
+          <p style="text-align: center; color: var(--color-gray-600);">นักท่องเที่ยวนับล้านคนต่อปี ความต้องการเช่าสูง</p>
+        </div>
+        
+        <div class="info-box">
+          <div style="text-align: center; font-size: 48px; margin-bottom: 16px;">🏗️</div>
+          <h3 class="info-box-title" style="text-align: center;">EEC Development</h3>
+          <p style="text-align: center; color: var(--color-gray-600);">พื้นที่เขตพัฒนาพิเศษภาคตะวันออก โครงสร้างพื้นฐานดี</p>
+        </div>
+      </div>
+    </div>
+  </section>
+  
+  <!-- Investment Tools Section -->
+  <section class="section" style="background: var(--color-white);">
+    <div class="container">
+      <div class="section-header" style="text-align: center;">
+        <h2 class="section-title" data-i18n="invest_guides">คู่มือการลงทุน</h2>
+      </div>
+      
+      <div class="grid grid-3">
+        <a href="calculator.html" class="area-card" style="text-decoration: none;">
+          <div class="area-card-header" style="background: linear-gradient(135deg, #1744BE, #F05A43);">
+            <div style="text-align: center; font-size: 48px; margin-bottom: 8px;">🧮</div>
+            <h3 class="area-card-title" style="text-align: center;" data-i18n="nav_calculator">คำนวณผลตอบแทน</h3>
+          </div>
+          <div class="area-card-content">
+            <p class="area-card-description">คำนวณ Yield, ROI และกระแสเงินสดจากการลงทุน</p>
+          </div>
+        </a>
+        
+        <a href="thai-investor.html" class="area-card" style="text-decoration: none;">
+          <div class="area-card-header" style="background: linear-gradient(135deg, #16A34A, #1744BE);">
+            <div style="text-align: center; font-size: 48px; margin-bottom: 8px;">🇹🇭</div>
+            <h3 class="area-card-title" style="text-align: center;" data-i18n="nav_thai_investor">นักลงทุนไทย</h3>
+          </div>
+          <div class="area-card-content">
+            <p class="area-card-description">ขั้นตอนการลงทุน เทคนิค และข้อมูลสำหรับคนไทย</p>
+          </div>
+        </a>
+        
+        <a href="foreign-investor.html" class="area-card" style="text-decoration: none;">
+          <div class="area-card-header" style="background: linear-gradient(135deg, #F59E0B, #DC2626);">
+            <div style="text-align: center; font-size: 48px; margin-bottom: 8px;">🌍</div>
+            <h3 class="area-card-title" style="text-align: center;" data-i18n="nav_foreign_investor">Foreign Investors</h3>
+          </div>
+          <div class="area-card-content">
+            <p class="area-card-description">Ownership rules, visa options, and transfer guide</p>
+          </div>
+        </a>
+      </div>
+    </div>
+  </section>
+  
+  <!-- Market Stats Section -->
+  <section class="section">
+    <div class="container">
+      <div class="info-box">
+        <h3 class="info-box-title">📊 ตลาดอสังหาพัทยา 2026</h3>
+        <div class="grid grid-3" style="margin-top: 24px;">
+          <div style="text-align: center;">
+            <div style="font-size: 32px; font-weight: 700; color: var(--color-primary); margin-bottom: 8px;">6.5%</div>
+            <div style="color: var(--color-gray-600);">Avg Rental Yield</div>
+          </div>
+          <div style="text-align: center;">
+            <div style="font-size: 32px; font-weight: 700; color: var(--color-primary); margin-bottom: 8px;">฿72,000</div>
+            <div style="color: var(--color-gray-600);">Avg Price/sqm</div>
+          </div>
+          <div style="text-align: center;">
+            <div style="font-size: 32px; font-weight: 700; color: var(--color-success); margin-bottom: 8px;">+8.2%</div>
+            <div style="color: var(--color-gray-600);">YoY Growth</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+  
+  <!-- CTA Section -->
+  <section class="section" style="background: var(--color-white);">
+    <div class="container" style="text-align: center;">
+      <h2 style="margin-bottom: 16px;">พร้อมเริ่มต้นลงทุนแล้วหรือยัง?</h2>
+      <p style="color: var(--color-gray-600); margin-bottom: 32px;">ติดต่อเราเพื่อรับคำปรึกษาฟรี</p>
+      <div style="display: flex; gap: 16px; justify-content: center; flex-wrap: wrap;">
+        <a href="../projects/index.html" class="btn btn-primary">ดูโครงการทั้งหมด</a>
+        <a href="../contact.html" class="btn btn-secondary">ติดต่อเรา</a>
+      </div>
+    </div>
+  </section>
+  
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-content">
+        <div>
+          <h3>Asset Management Property</h3>
+          <p>Professional property management in Pattaya</p>
+          <p style="margin-top: 16px;">
+            <strong>Office Hours:</strong><br>
+            Mon - Sun: 9:00 AM - 6:00 PM
+          </p>
+        </div>
+        
+        <div>
+          <h3>Contact Us</h3>
+          <a href="tel:+66634533526">📞 +66 63-453-3526</a>
+          <a href="mailto:info@amppattaya.com">📧 info@amppattaya.com</a>
+          <a href="https://line.me/ti/p/~@554dksqb">💬 LINE: @554dksqb</a>
+        </div>
+        
+        <div>
+          <h3>Quick Links</h3>
+          <a href="../listing.html?intent=rent">Properties for Rent</a>
+          <a href="../listing.html?intent=sale">Properties for Sale</a>
+          <a href="../projects/index.html">Projects</a>
+          <a href="index.html">Investment Hub</a>
+          <a href="../about.html">About Us</a>
+        </div>
+      </div>
+      
+      <div class="footer-bottom">
+        <p>&copy; 2026 Asset Management Property. All rights reserved. | Demo Website</p>
+      </div>
+    </div>
+  </footer>
+  
+  <!-- Scripts -->
+  <script src="../assets/js/i18n.js"></script>
+  <script src="../assets/js/main.js"></script>
+  
+  <script>
+    if (typeof lucide !== 'undefined') {
+      lucide.createIcons();
+    }
+  </script>
+</body>
+</html>

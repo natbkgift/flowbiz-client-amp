@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>คู่มือนักลงทุนไทย | Asset Management Property</title>
+  <meta name="description" content="คู่มือครบถ้วนสำหรับนักลงทุนไทยที่ต้องการลงทุนอสังหาในพัทยา ขั้นตอน เคล็ดลับ และข้อมูลสำคัญ">
+  
+  <!-- Favicon -->
+  <link rel="icon" href="../assets/images/favicon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="../assets/images/logo-amp.svg">
+  
+  <!-- Stylesheets -->
+  <link rel="stylesheet" href="../assets/css/main.css">
+  <link rel="stylesheet" href="../assets/css/components.css">
+  <link rel="stylesheet" href="../assets/css/projects.css">
+  <link rel="stylesheet" href="../assets/css/responsive.css">
+  
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+</head>
+<body>
+  <!-- Skip Link for Accessibility -->
+  <a href="#main-content" class="skip-link">Skip to main content</a>
+  
+  <!-- Header -->
+  <header class="header">
+    <div class="header-content">
+      <a href="../index.html" class="logo">
+        <img src="../assets/images/logo-amp.svg" alt="Asset Management Property" height="40">
+      </a>
+      
+      <nav class="nav desktop-only">
+        <a href="../index.html" data-i18n="nav_home"><i data-lucide="home"></i> Home</a>
+        <a href="../listing.html?intent=rent" data-i18n="nav_rent"><i data-lucide="key"></i> Rent</a>
+        <a href="../listing.html?intent=sale" data-i18n="nav_buy"><i data-lucide="building"></i> Buy</a>
+        <a href="../projects/index.html" data-i18n="nav_projects"><i data-lucide="layers"></i> Projects</a>
+        <a href="index.html" class="active" data-i18n="nav_invest"><i data-lucide="trending-up"></i> Invest</a>
+        <a href="../contact.html" data-i18n="nav_contact"><i data-lucide="mail"></i> Contact</a>
+      </nav>
+      
+      <div class="header-actions">
+        <button class="lang-switch" onclick="toggleLanguage()">
+          <span>TH</span>
+        </button>
+        <button class="hamburger mobile-only" onclick="toggleMobileMenu()" aria-label="Menu" aria-expanded="false">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="3" y1="12" x2="21" y2="12"></line>
+            <line x1="3" y1="6" x2="21" y2="6"></line>
+            <line x1="3" y1="18" x2="21" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </header>
+  
+  <!-- Mobile Menu -->
+  <div class="mobile-menu" id="mobile-menu">
+    <a href="../index.html" data-i18n="nav_home"><i data-lucide="home"></i> Home</a>
+    <a href="../listing.html?intent=rent" data-i18n="nav_rent"><i data-lucide="key"></i> Rent</a>
+    <a href="../listing.html?intent=sale" data-i18n="nav_buy"><i data-lucide="building"></i> Buy</a>
+    <a href="../projects/index.html" data-i18n="nav_projects"><i data-lucide="layers"></i> Projects</a>
+    <a href="index.html" data-i18n="nav_invest"><i data-lucide="trending-up"></i> Invest</a>
+    <a href="../contact.html" data-i18n="nav_contact"><i data-lucide="mail"></i> Contact</a>
+  </div>
+  
+  <!-- Hero Section -->
+  <section class="hero" id="main-content" style="padding: 60px 0 40px;">
+    <div class="container">
+      <h1 data-i18n="thai_investor_title">คู่มือนักลงทุนไทย</h1>
+      <p class="hero-subtitle" data-i18n="thai_investor_subtitle">ข้อมูลครบถ้วนสำหรับการลงทุนอสังหาในพัทยา</p>
+    </div>
+  </section>
+  
+  <!-- Investment Steps Section -->
+  <section class="section" style="padding-top: 0;">
+    <div class="container">
+      <div class="info-box">
+        <h2 class="info-box-title" data-i18n="thai_investor_steps">📋 ขั้นตอนการลงทุน</h2>
+        <ul class="info-box-list">
+          <li>กำหนดงบประมาณและวัตถุประสงค์การลงทุน (อยู่เอง/ให้เช่า/ขายต่อ)</li>
+          <li>ศึกษาตลาดและเลือกทำเล (พัทยากลาง/จอมเทียน/นาจอมเทียน/ฯลฯ)</li>
+          <li>เลือกโครงการและยูนิตที่เหมาะสม</li>
+          <li>ตรวจสอบเอกสารและสิทธิ์ (โอนกรรมสิทธิ์/สัญญาเช่า/ฯลฯ)</li>
+          <li>จองและชำระเงินมัดจำ (โดยปกติ 50,000-100,000 บาท)</li>
+          <li>ผ่อนชำระตามกำหนด (สำหรับโครงการ Pre-Sale/Under Construction)</li>
+          <li>โอนกรรมสิทธิ์และรับมอบทรัพย์</li>
+          <li>จัดหาผู้เช่า หรือใช้บริการบริหารจัดการ (ถ้าต้องการให้เช่า)</li>
+        </ul>
+      </div>
+      
+      <div class="info-box">
+        <h2 class="info-box-title" data-i18n="thai_investor_benefits">✨ ข้อดีของการลงทุน</h2>
+        <div class="grid grid-2" style="gap: 16px; margin-top: 16px;">
+          <div style="padding: 16px; background: var(--color-gray-50); border-radius: 8px;">
+            <h3 style="margin-bottom: 8px;">💰 ผลตอบแทนสูง</h3>
+            <p style="color: var(--color-gray-600); font-size: 14px;">Gross Yield 6-8% ต่อปี สูงกว่ากรุงเทพฯ (4-5%)</p>
+          </div>
+          <div style="padding: 16px; background: var(--color-gray-50); border-radius: 8px;">
+            <h3 style="margin-bottom: 8px;">🌍 นักท่องเที่ยวเยอะ</h3>
+            <p style="color: var(--color-gray-600); font-size: 14px;">พัทยามีนักท่องเที่ยวนับล้านคนต่อปี ความต้องการเช่าสูง</p>
+          </div>
+          <div style="padding: 16px; background: var(--color-gray-50); border-radius: 8px;">
+            <h3 style="margin-bottom: 8px;">🏗️ EEC Development</h3>
+            <p style="color: var(--color-gray-600); font-size: 14px;">พัฒนาโครงสร้างพื้นฐาน รถไฟความเร็วสูง ท่าเรือน้ำลึก</p>
+          </div>
+          <div style="padding: 16px; background: var(--color-gray-50); border-radius: 8px;">
+            <h3 style="margin-bottom: 8px;">📈 ราคาเติบโต</h3>
+            <p style="color: var(--color-gray-600); font-size: 14px;">ราคาอสังหาเติบโตเฉลี่ย 7-10% ต่อปี</p>
+          </div>
+        </div>
+      </div>
+      
+      <div class="info-box">
+        <h2 class="info-box-title" data-i18n="thai_investor_tips">💡 เทคนิคสำหรับมือใหม่</h2>
+        <ul class="info-box-list">
+          <li>เริ่มต้นจากคอนโดขนาดเล็ก (Studio/1 Bedroom) ราคา 1.5-3 ล้านบาท</li>
+          <li>เลือกทำเลใกล้แหล่งท่องเที่ยว หาดทะเล หรือถนนสายหลัก</li>
+          <li>ตรวจสอบค่าส่วนกลาง (Common Fee) และค่าใช้จ่ายประจำปี</li>
+          <li>พิจารณาโครงการที่มี Guaranteed Rental หรือ Buy-back Option</li>
+          <li>ใช้บริการบริหารการให้เช่า (Rental Management) ถ้าไม่มีเวลาดูแลเอง</li>
+          <li>ทำประกันอาคารและทรัพย์สิน</li>
+          <li>เก็บเงินสำรองไว้ 10-15% สำหรับค่าซ่อมแซมและค่าใช้จ่ายฉุกเฉิน</li>
+        </ul>
+      </div>
+      
+      <div class="info-box">
+        <h2 class="info-box-title" data-i18n="thai_investor_faq">❓ คำถามที่พบบ่อย</h2>
+        <div style="margin-top: 16px;">
+          <div style="padding: 16px; border-left: 4px solid var(--color-primary); background: var(--color-gray-50); margin-bottom: 16px;">
+            <h3 style="margin-bottom: 8px;">ควรลงทุนคอนโดหรือบ้านดี?</h3>
+            <p style="color: var(--color-gray-600); font-size: 14px;">
+              คอนโด: บำรุงรักษาง่าย, ผลตอบแทนสูง, เหมาะกับนักลงทุนมือใหม่<br>
+              บ้าน/วิลล่า: พื้นที่ส่วนตัว, เหมาะกับครอบครัว, ราคาถูกกว่าต่อตารางเมตร
+            </p>
+          </div>
+          
+          <div style="padding: 16px; border-left: 4px solid var(--color-primary); background: var(--color-gray-50); margin-bottom: 16px;">
+            <h3 style="margin-bottom: 8px;">ผลตอบแทนเท่าไหร่ถึงจะดี?</h3>
+            <p style="color: var(--color-gray-600); font-size: 14px;">
+              Gross Yield 6-8% ถือว่าดี, Net Yield 4-6% หลังหักค่าใช้จ่ายถือว่าดีมาก
+            </p>
+          </div>
+          
+          <div style="padding: 16px; border-left: 4px solid var(--color-primary); background: var(--color-gray-50); margin-bottom: 16px;">
+            <h3 style="margin-bottom: 8px;">สามารถกู้เงินซื้อได้ไหม?</h3>
+            <p style="color: var(--color-gray-600); font-size: 14px;">
+              ได้ โดยปกติธนาคารอนุมัติสินเชื่อได้สูงสุด 80-90% ของมูลค่าทรัพย์<br>
+              อัตราดอกเบี้ย MRR+1-2% (ประมาณ 4.5-5.5% ต่อปี)
+            </p>
+          </div>
+        </div>
+      </div>
+      
+      <div style="text-align: center; margin-top: 40px;">
+        <h2 style="margin-bottom: 16px;">สนใจเริ่มต้นลงทุน?</h2>
+        <p style="color: var(--color-gray-600); margin-bottom: 24px;">ติดต่อเราเพื่อรับคำปรึกษาฟรี</p>
+        <div style="display: flex; gap: 16px; justify-content: center; flex-wrap: wrap;">
+          <a href="../projects/index.html" class="btn btn-primary">ดูโครงการทั้งหมด</a>
+          <a href="calculator.html" class="btn btn-secondary">คำนวณผลตอบแทน</a>
+        </div>
+      </div>
+    </div>
+  </section>
+  
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-content">
+        <div>
+          <h3>Asset Management Property</h3>
+          <p>Professional property management in Pattaya</p>
+          <p style="margin-top: 16px;">
+            <strong>Office Hours:</strong><br>
+            Mon - Sun: 9:00 AM - 6:00 PM
+          </p>
+        </div>
+        
+        <div>
+          <h3>Contact Us</h3>
+          <a href="tel:+66634533526">📞 +66 63-453-3526</a>
+          <a href="mailto:info@amppattaya.com">📧 info@amppattaya.com</a>
+          <a href="https://line.me/ti/p/~@554dksqb">💬 LINE: @554dksqb</a>
+        </div>
+        
+        <div>
+          <h3>Quick Links</h3>
+          <a href="../listing.html?intent=rent">Properties for Rent</a>
+          <a href="../listing.html?intent=sale">Properties for Sale</a>
+          <a href="../projects/index.html">Projects</a>
+          <a href="index.html">Investment Hub</a>
+          <a href="../about.html">About Us</a>
+        </div>
+      </div>
+      
+      <div class="footer-bottom">
+        <p>&copy; 2026 Asset Management Property. All rights reserved. | Demo Website</p>
+      </div>
+    </div>
+  </footer>
+  
+  <!-- Scripts -->
+  <script src="../assets/js/i18n.js"></script>
+  <script src="../assets/js/main.js"></script>
+  
+  <script>
+    if (typeof lucide !== 'undefined') {
+      lucide.createIcons();
+    }
+  </script>
+</body>
+</html>

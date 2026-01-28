@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Investment ROI Calculator | Asset Management Property</title>
+  <meta name="description" content="Calculate investment returns and rental yields for Pattaya real estate properties.">
+  
+  <!-- Favicon -->
+  <link rel="icon" href="../assets/images/favicon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="../assets/images/logo-amp.svg">
+  
+  <!-- Stylesheets -->
+  <link rel="stylesheet" href="../assets/css/main.css">
+  <link rel="stylesheet" href="../assets/css/components.css">
+  <link rel="stylesheet" href="../assets/css/projects.css">
+  <link rel="stylesheet" href="../assets/css/responsive.css">
+  
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+</head>
+<body>
+  <!-- Skip Link for Accessibility -->
+  <a href="#main-content" class="skip-link">Skip to main content</a>
+  
+  <!-- Header -->
+  <header class="header">
+    <div class="header-content">
+      <a href="../index.html" class="logo">
+        <img src="../assets/images/logo-amp.svg" alt="Asset Management Property" height="40">
+      </a>
+      
+      <nav class="nav desktop-only">
+        <a href="../index.html" data-i18n="nav_home"><i data-lucide="home"></i> Home</a>
+        <a href="../listing.html?intent=rent" data-i18n="nav_rent"><i data-lucide="key"></i> Rent</a>
+        <a href="../listing.html?intent=sale" data-i18n="nav_buy"><i data-lucide="building"></i> Buy</a>
+        <a href="../projects/index.html" data-i18n="nav_projects"><i data-lucide="layers"></i> Projects</a>
+        <a href="index.html" class="active" data-i18n="nav_invest"><i data-lucide="trending-up"></i> Invest</a>
+        <a href="../contact.html" data-i18n="nav_contact"><i data-lucide="mail"></i> Contact</a>
+      </nav>
+      
+      <div class="header-actions">
+        <button class="lang-switch" onclick="toggleLanguage()">
+          <span>TH</span>
+        </button>
+        <button class="hamburger mobile-only" onclick="toggleMobileMenu()" aria-label="Menu" aria-expanded="false">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="3" y1="12" x2="21" y2="12"></line>
+            <line x1="3" y1="6" x2="21" y2="6"></line>
+            <line x1="3" y1="18" x2="21" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </header>
+  
+  <!-- Mobile Menu -->
+  <div class="mobile-menu" id="mobile-menu">
+    <a href="../index.html" data-i18n="nav_home"><i data-lucide="home"></i> Home</a>
+    <a href="../listing.html?intent=rent" data-i18n="nav_rent"><i data-lucide="key"></i> Rent</a>
+    <a href="../listing.html?intent=sale" data-i18n="nav_buy"><i data-lucide="building"></i> Buy</a>
+    <a href="../projects/index.html" data-i18n="nav_projects"><i data-lucide="layers"></i> Projects</a>
+    <a href="index.html" data-i18n="nav_invest"><i data-lucide="trending-up"></i> Invest</a>
+    <a href="../contact.html" data-i18n="nav_contact"><i data-lucide="mail"></i> Contact</a>
+  </div>
+  
+  <!-- Hero Section -->
+  <section class="hero" id="main-content" style="padding: 60px 0 40px;">
+    <div class="container">
+      <h1 data-i18n="calc_title">เครื่องคำนวณผลตอบแทนการลงทุน</h1>
+      <p class="hero-subtitle" data-i18n="calc_subtitle">คำนวณผลตอบแทนจากการลงทุนอสังหาฯ</p>
+    </div>
+  </section>
+  
+  <!-- Calculator Section -->
+  <section class="section" style="padding-top: 0;">
+    <div class="container" style="max-width: 900px;">
+      <div class="calculator-container">
+        <div class="calculator-form">
+          <div class="calculator-input-group">
+            <label class="calculator-label" data-i18n="calc_property_price">ราคาอสังหา (บาท)</label>
+            <input type="number" id="property-price" class="calculator-input" placeholder="3000000" value="3000000" step="100000" min="0">
+          </div>
+          
+          <div class="calculator-input-group">
+            <label class="calculator-label" data-i18n="calc_down_payment">เงินดาวน์ (%)</label>
+            <input type="number" id="down-payment" class="calculator-input" placeholder="30" value="30" step="5" min="0" max="100">
+          </div>
+          
+          <div class="calculator-input-group">
+            <label class="calculator-label" data-i18n="calc_interest_rate">อัตราดอกเบี้ย (%/ปี)</label>
+            <input type="number" id="interest-rate" class="calculator-input" placeholder="4.5" value="4.5" step="0.1" min="0" max="20">
+          </div>
+          
+          <div class="calculator-input-group">
+            <label class="calculator-label" data-i18n="calc_loan_term">ระยะเวลาผ่อน (ปี)</label>
+            <input type="number" id="loan-term" class="calculator-input" placeholder="20" value="20" step="1" min="1" max="30">
+          </div>
+          
+          <div class="calculator-input-group">
+            <label class="calculator-label" data-i18n="calc_monthly_rent">ค่าเช่ารายเดือน (บาท)</label>
+            <input type="number" id="monthly-rent" class="calculator-input" placeholder="15000" value="15000" step="1000" min="0">
+          </div>
+          
+          <div class="calculator-input-group">
+            <label class="calculator-label" data-i18n="calc_monthly_expense">ค่าใช้จ่ายรายเดือน (บาท)</label>
+            <input type="number" id="monthly-expense" class="calculator-input" placeholder="3000" value="3000" step="500" min="0">
+          </div>
+          
+          <button class="btn btn-primary btn-block" id="calculate-btn" data-i18n="calc_calculate">คำนวณ</button>
+        </div>
+        
+        <div class="calculator-results" id="calculator-results" style="display: none;">
+          <h3 style="text-align: center; margin-bottom: 24px; font-size: 22px;" data-i18n="calc_results">ผลการคำนวณ</h3>
+          
+          <div class="calculator-result-item">
+            <span class="calculator-result-label" data-i18n="calc_gross_yield">ผลตอบแทนขั้นต้น (Gross Yield)</span>
+            <span class="calculator-result-value" id="result-gross-yield">0%</span>
+          </div>
+          
+          <div class="calculator-result-item">
+            <span class="calculator-result-label" data-i18n="calc_net_yield">ผลตอบแทนสุทธิ (Net Yield)</span>
+            <span class="calculator-result-value" id="result-net-yield">0%</span>
+          </div>
+          
+          <div class="calculator-result-item">
+            <span class="calculator-result-label" data-i18n="calc_monthly_cash_flow">กระแสเงินสดรายเดือน</span>
+            <span class="calculator-result-value" id="result-cash-flow">฿0</span>
+          </div>
+          
+          <div class="calculator-result-item">
+            <span class="calculator-result-label" data-i18n="calc_payback_period">ระยะเวลาคืนทุน</span>
+            <span class="calculator-result-value" id="result-payback">0 years</span>
+          </div>
+        </div>
+        
+        <div style="text-align: center; margin-top: 24px;">
+          <button class="btn btn-secondary" id="download-pdf-btn" data-i18n="calc_download_pdf">ดาวน์โหลด PDF</button>
+        </div>
+      </div>
+      
+      <!-- Info Box -->
+      <div class="info-box" style="margin-top: 32px;">
+        <h3 class="info-box-title">💡 เคล็ดลับการใช้งาน / Tips</h3>
+        <div class="info-box-content">
+          <ul class="info-box-list">
+            <li>ผลตอบแทนขั้นต้น (Gross Yield) = รายได้ค่าเช่าต่อปี / ราคาอสังหา × 100</li>
+            <li>ผลตอบแทนสุทธิ (Net Yield) = (รายได้ค่าเช่าต่อปี - ค่าใช้จ่ายต่อปี) / ราคาอสังหา × 100</li>
+            <li>ผลตอบแทนที่ดีในพัทยา: Gross Yield 6-8%, Net Yield 4-6%</li>
+            <li>ค่าใช้จ่ายรายเดือนรวม: ค่าส่วนกลาง, ภาษี, ประกัน, ค่าซ่อมบำรุง</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+  
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-content">
+        <div>
+          <h3>Asset Management Property</h3>
+          <p>Professional property management in Pattaya</p>
+          <p style="margin-top: 16px;">
+            <strong>Office Hours:</strong><br>
+            Mon - Sun: 9:00 AM - 6:00 PM
+          </p>
+        </div>
+        
+        <div>
+          <h3>Contact Us</h3>
+          <a href="tel:+66634533526">📞 +66 63-453-3526</a>
+          <a href="mailto:info@amppattaya.com">📧 info@amppattaya.com</a>
+          <a href="https://line.me/ti/p/~@554dksqb">💬 LINE: @554dksqb</a>
+        </div>
+        
+        <div>
+          <h3>Quick Links</h3>
+          <a href="../listing.html?intent=rent">Properties for Rent</a>
+          <a href="../listing.html?intent=sale">Properties for Sale</a>
+          <a href="../projects/index.html">Projects</a>
+          <a href="index.html">Investment Hub</a>
+          <a href="../about.html">About Us</a>
+        </div>
+      </div>
+      
+      <div class="footer-bottom">
+        <p>&copy; 2026 Asset Management Property. All rights reserved. | Demo Website</p>
+      </div>
+    </div>
+  </footer>
+  
+  <!-- Scripts -->
+  <script src="../assets/js/i18n.js"></script>
+  <script src="../assets/js/main.js"></script>
+  <script src="../assets/js/calculator.js"></script>
+  
+  <script>
+    if (typeof lucide !== 'undefined') {
+      lucide.createIcons();
+    }
+  </script>
+</body>
+</html>
