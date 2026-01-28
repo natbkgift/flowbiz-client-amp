@@ -97,6 +97,8 @@ Tabs:
 | **AZ: Notes** | Text | Internal notes | Very motivated | - | - |
 | **BA: Tags** | Text | Search tags | urgent, expat, sea-view | - | Comma-separated |
 | **BB: Attachments_Link** | URL | Google Drive folder | [URL] | - | Link to lead folder |
+| **BC: Property_Interested** | Text | Property that lead came from | PROP-2026-045 | - | Property ID |
+| **BD: WhatsApp_Thread_ID** | Text | WhatsApp conversation ID | +66812345678 | - | For tracking conversation |
 
 **Legend:**
 - ✅ = Required field
@@ -142,11 +144,13 @@ LINE Official
 LINE Group
 Website Contact
 Website Chat
+Website Form
 Phone Call
 Walk-in
 Referral
 Email
 WhatsApp
+QR_Print
 TikTok
 ```
 
