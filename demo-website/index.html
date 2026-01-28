@@ -410,7 +410,7 @@
         return `
           <div class="property-card">
             <div class="card-image">
-              <img src="${property.image}" alt="${title}">
+              <img src="${property.image}" alt="${title}" loading="lazy">
               ${badges ? `<div class="card-badges">${badges}</div>` : ''}
             </div>
             <div class="card-content">
@@ -444,7 +444,7 @@
 
         return `
           <div class="area-card" data-area="${area.name}">
-            <img src="${area.image}" alt="${name}">
+            <img src="${area.image}" alt="${name}" loading="lazy">
             <div class="area-card-overlay">
               <h3 class="area-card-title">${name}</h3>
             </div>
@@ -484,6 +484,7 @@
         photo.className = 'testimonial-photo';
         photo.src = testimonial.photo || '';
         photo.alt = testimonial.name || '';
+        photo.loading = 'lazy';
 
         const info = document.createElement('div');
         info.className = 'testimonial-info';
