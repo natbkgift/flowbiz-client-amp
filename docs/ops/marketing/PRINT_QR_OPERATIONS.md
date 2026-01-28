@@ -348,7 +348,7 @@ AMP Property Team
 
 ### Link to Print Queue Sheet
 
-Reference: [PRINT_QUEUE_TEMPLATE.md](../data/templates/PRINT_QUEUE_TEMPLATE.md)
+Reference: [PRINT_QUEUE_TEMPLATE.md](../../data/templates/PRINT_QUEUE_TEMPLATE.md)
 
 **Update when printing:**
 1. Open Print_Queue.xlsx
