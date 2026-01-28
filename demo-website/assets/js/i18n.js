@@ -608,9 +608,9 @@ function setLanguage(lang) {
   updatePageText();
 
   // Update language toggle button
-  const langButton = document.querySelector('.btn-lang span, .lang-switch');
-  if (langButton) {
-    langButton.textContent = lang === 'th' ? 'EN' : 'TH';
+  const langText = document.querySelector('.lang-switch span, #lang-text');
+  if (langText) {
+    langText.textContent = lang === 'th' ? 'EN' : 'TH';
   }
 }
 
@@ -662,9 +662,9 @@ function initI18n() {
   updatePageText();
 
   // Update language toggle button
-  const langButton = document.querySelector('.btn-lang span, .lang-switch');
-  if (langButton) {
-    langButton.textContent = savedLang === 'th' ? 'EN' : 'TH';
+  const langText = document.querySelector('.lang-switch span, #lang-text');
+  if (langText) {
+    langText.textContent = savedLang === 'th' ? 'EN' : 'TH';
   }
 }
 
