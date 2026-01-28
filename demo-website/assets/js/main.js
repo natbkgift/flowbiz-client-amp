@@ -20,9 +20,9 @@ function switchLanguage(lang) {
   document.documentElement.lang = newLang;
   
   // Update language switch button text
-  const langSwitch = document.querySelector('.lang-switch');
-  if (langSwitch) {
-    langSwitch.textContent = newLang === 'th' ? 'EN' : 'TH';
+  const langText = document.querySelector('#lang-text');
+  if (langText) {
+    langText.textContent = newLang === 'th' ? 'EN' : 'TH';
   }
   
   // In a real implementation, this would reload content in the new language
@@ -246,10 +246,10 @@ function init() {
   setupLazyLoading();
   
   // Set initial language
-  const langSwitch = document.querySelector('.lang-switch');
-  if (langSwitch) {
+  const langText = document.querySelector('#lang-text');
+  if (langText) {
     const currentLang = document.documentElement.lang || 'en';
-    langSwitch.textContent = currentLang === 'th' ? 'EN' : 'TH';
+    langText.textContent = currentLang === 'th' ? 'EN' : 'TH';
   }
 }
 
