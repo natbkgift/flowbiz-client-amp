@@ -148,7 +148,7 @@
         <p class="section-subtitle">Handpicked properties for you</p>
       </div>
 
-      <div class="grid grid-3" id="featured-properties">
+      <div class="grid grid-3" id="featured-properties" aria-busy="true" aria-label="Loading featured properties">
         <!-- Skeleton placeholders -->
         <div class="property-card skeleton-card skeleton"></div>
         <div class="property-card skeleton-card skeleton"></div>
@@ -169,7 +169,7 @@
         <p class="section-subtitle">Explore properties by location</p>
       </div>
 
-      <div class="grid grid-3" id="popular-areas">
+      <div class="grid grid-3" id="popular-areas" aria-busy="true" aria-label="Loading popular areas">
         <!-- Skeleton placeholders -->
         <div class="area-card skeleton-area skeleton"></div>
         <div class="area-card skeleton-area skeleton"></div>
@@ -245,7 +245,7 @@
       <h2 class="section-title" data-i18n="market_title">ข้อมูลตลาด</h2>
       <p class="section-subtitle" data-i18n="market_subtitle">Latest market trends and statistics</p>
 
-      <div id="market-stats-grid" class="stats-grid">
+      <div id="market-stats-grid" class="stats-grid" aria-busy="true" aria-label="Loading market statistics">
         <!-- Skeleton placeholders -->
         <div class="stat-card skeleton-stat skeleton"></div>
         <div class="stat-card skeleton-stat skeleton"></div>
@@ -266,7 +266,7 @@
       <h2 class="section-title" data-i18n="testimonial_title">ความคิดเห็นจากลูกค้า</h2>
       <p class="section-subtitle" data-i18n="testimonial_subtitle">Real reviews from real customers</p>
 
-      <div class="testimonials-grid" id="testimonials-grid">
+      <div class="testimonials-grid" id="testimonials-grid" aria-busy="true" aria-label="Loading testimonials">
         <!-- Skeleton placeholders -->
         <div class="testimonial-card skeleton-testimonial skeleton"></div>
         <div class="testimonial-card skeleton-testimonial skeleton"></div>
@@ -382,6 +382,8 @@
       }).join('');
 
       container.innerHTML = html;
+      // Remove loading state
+      container.removeAttribute('aria-busy');
     }
 
     // Render popular areas
@@ -404,6 +406,8 @@
       }).join('');
 
       container.innerHTML = html;
+      // Remove loading state
+      container.removeAttribute('aria-busy');
     }
 
     // Initialize
@@ -565,6 +569,9 @@
       });
 
       container.appendChild(rentalYieldCard);
+      
+      // Remove loading state
+      container.removeAttribute('aria-busy');
     }
 
     // Render testimonials
@@ -623,6 +630,9 @@
         card.appendChild(commentEl);
         container.appendChild(card);
       });
+      
+      // Remove loading state
+      container.removeAttribute('aria-busy');
     }
 
     // Call render functions
