@@ -155,6 +155,10 @@
   flex-wrap: wrap;
 }
 
+.badge + .badge {
+  margin-left: 4px; /* Fallback for browsers that don't support gap */
+}
+
 .card-content {
   padding: var(--space-lg);
   flex: 1;
