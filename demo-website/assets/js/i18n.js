@@ -9,12 +9,14 @@ const TRANSLATIONS = {
     nav_buy: 'ซื้อ',
     nav_about: 'เกี่ยวกับเรา',
     nav_contact: 'ติดต่อเรา',
+    nav_projects: 'โครงการ',
+    nav_invest: 'ลงทุน',
     nav_admin: 'แอดมิน',
-    
+
     // Hero
     hero_title: 'ค้นหาทรัพย์สินในพัทยา',
     hero_subtitle: 'ข้อมูลชัด ตอบไว ดูแลครบ',
-    
+
     // Search
     search_intent_rent: 'เช่า',
     search_intent_buy: 'ซื้อ',
@@ -27,7 +29,7 @@ const TRANSLATIONS = {
     search_property_type: 'ประเภททรัพย์สิน',
     search_all_types: 'ทุกประเภท',
     search_all_areas: 'ทุกพื้นที่',
-    
+
     // Property
     prop_beds: 'ห้องนอน',
     prop_baths: 'ห้องน้ำ',
@@ -38,12 +40,12 @@ const TRANSLATIONS = {
     prop_new: 'ใหม่',
     prop_per_month: '/เดือน',
     prop_month: 'เดือน',
-    
+
     // Sections
     section_featured: 'อสังหาแนะนำ',
     section_popular_areas: 'พื้นที่ยอดนิยม',
     section_latest: 'ประกาศล่าสุด',
-    
+
     // Lead Form
     form_name: 'ชื่อ-นามสกุล',
     form_phone: 'เบอร์โทรศัพท์',
@@ -52,7 +54,7 @@ const TRANSLATIONS = {
     form_submit: 'ส่งข้อมูล',
     form_success: 'ส่งข้อมูลสำเร็จ!',
     form_send: 'ส่ง',
-    
+
     // Footer
     footer_contact: 'ติดต่อเรา',
     footer_quick_links: 'ลิงก์ด่วน',
@@ -62,7 +64,7 @@ const TRANSLATIONS = {
     footer_properties: 'รายการอสังหา',
     footer_services: 'บริการ',
     footer_contact_us: 'ติดต่อเรา',
-    
+
     // Admin
     admin_login: 'เข้าสู่ระบบ',
     admin_email: 'อีเมล',
@@ -87,7 +89,7 @@ const TRANSLATIONS = {
     admin_forgot_password: 'ลืมรหัสผ่าน?',
     admin_welcome_back: 'ยินดีต้อนรับกลับ',
     admin_login_subtitle: 'เข้าสู่ระบบเพื่อจัดการอสังหาและลีด',
-    
+
     // About Page
     about_title: 'เกี่ยวกับเรา',
     about_subtitle: 'บริษัทจัดการอสังหาที่คุณไว้ใจ',
@@ -133,7 +135,7 @@ const TRANSLATIONS = {
     about_location_email_title: 'อีเมล',
     about_location_hours_title: 'เวลาทำการ',
     about_location_hours: 'จันทร์ - อาทิตย์<br>9:00 - 18:00 น.',
-    
+
     // Contact Page
     contact_title: 'ติดต่อเรา',
     contact_subtitle: 'เราพร้อมให้บริการและตอบคำถามของคุณ',
@@ -142,13 +144,13 @@ const TRANSLATIONS = {
     contact_form_title: 'ส่งข้อความถึงเรา',
     contact_address: 'ที่อยู่',
     contact_property_interest: 'สนใจอสังหาประเภท',
-    
+
     // Property Types
     type_condo: 'คอนโด',
     type_house: 'บ้าน',
     type_villa: 'วิลล่า',
     type_townhouse: 'ทาวน์เฮาส์',
-    
+
     // Common
     common_view_all: 'ดูทั้งหมด',
     common_loading: 'กำลังโหลด...',
@@ -160,14 +162,14 @@ const TRANSLATIONS = {
     common_edit: 'แก้ไข',
     common_delete: 'ลบ',
     common_close: 'ปิด',
-    
+
     // Thank You Page
     thank_you_title: 'ขอบคุณที่ติดต่อเรา!',
     thank_you_message: 'เราได้รับข้อมูลของคุณแล้ว ทีมงานจะติดต่อกลับโดยเร็วที่สุด<br>โดยปกติภายใน 24 ชั่วโมง',
     back_to_home: 'กลับหน้าหลัก',
     view_properties: 'ดูอสังหา',
     need_urgent_help: 'ต้องการความช่วยเหลือด่วน?',
-    
+
     // Projects
     nav_projects: 'โครงการ',
     nav_all_projects: 'โครงการทั้งหมด',
@@ -198,7 +200,7 @@ const TRANSLATIONS = {
     project_location: 'ทำเล',
     project_view_detail: 'ดูรายละเอียด',
     project_contact: 'ติดต่อสอบถาม',
-    
+
     // Investment
     nav_invest: 'การลงทุน',
     nav_invest_hub: 'Investment Hub',
@@ -243,7 +245,7 @@ const TRANSLATIONS = {
     foreign_investor_money_transfer: 'Money Transfer Guide',
     rental_mgmt_title: 'บริการบริหารการให้เช่า',
     rental_mgmt_subtitle: 'ให้เราดูแลอสังหาของคุณ รับเงินค่าเช่าทุกเดือน',
-    
+
     // Area Guide
     nav_area_guide: 'คู่มือพื้นที่',
     area_guide_title: 'คู่มือพื้นที่พัทยา',
@@ -255,7 +257,7 @@ const TRANSLATIONS = {
     area_cons: 'ข้อเสีย',
     area_projects_in_area: 'โครงการในพื้นที่',
     area_explore: 'สำรวจพื้นที่',
-    
+
     // Quiz
     quiz_title: 'ค้นหาอสังหาที่ใช่สำหรับคุณ',
     quiz_subtitle: 'ตอบคำถาม 5 ข้อ เพื่อรับคำแนะนำที่เหมาะกับคุณ',
@@ -302,12 +304,14 @@ const TRANSLATIONS = {
     nav_buy: 'Buy',
     nav_about: 'About',
     nav_contact: 'Contact',
+    nav_projects: 'Projects',
+    nav_invest: 'Invest',
     nav_admin: 'Admin',
-    
+
     // Hero
     hero_title: 'Find Properties in Pattaya',
     hero_subtitle: 'Clear Info, Fast Response, Full Service',
-    
+
     // Search
     search_intent_rent: 'Rent',
     search_intent_buy: 'Buy',
@@ -320,7 +324,7 @@ const TRANSLATIONS = {
     search_property_type: 'Property Type',
     search_all_types: 'All Types',
     search_all_areas: 'All Areas',
-    
+
     // Property
     prop_beds: 'Beds',
     prop_baths: 'Baths',
@@ -331,12 +335,12 @@ const TRANSLATIONS = {
     prop_new: 'New',
     prop_per_month: '/month',
     prop_month: 'month',
-    
+
     // Sections
     section_featured: 'Featured Properties',
     section_popular_areas: 'Popular Areas',
     section_latest: 'Latest Listings',
-    
+
     // Lead Form
     form_name: 'Full Name',
     form_phone: 'Phone Number',
@@ -345,7 +349,7 @@ const TRANSLATIONS = {
     form_submit: 'Submit',
     form_success: 'Submitted Successfully!',
     form_send: 'Send',
-    
+
     // Footer
     footer_contact: 'Contact Us',
     footer_quick_links: 'Quick Links',
@@ -355,7 +359,7 @@ const TRANSLATIONS = {
     footer_properties: 'Properties',
     footer_services: 'Services',
     footer_contact_us: 'Contact Us',
-    
+
     // Admin
     admin_login: 'Login',
     admin_email: 'Email',
@@ -380,7 +384,7 @@ const TRANSLATIONS = {
     admin_forgot_password: 'Forgot password?',
     admin_welcome_back: 'Welcome Back',
     admin_login_subtitle: 'Sign in to manage properties and leads',
-    
+
     // About Page
     about_title: 'About Us',
     about_subtitle: 'Your Trusted Property Management Company',
@@ -426,7 +430,7 @@ const TRANSLATIONS = {
     about_location_email_title: 'Email',
     about_location_hours_title: 'Office Hours',
     about_location_hours: 'Monday - Sunday<br>9:00 AM - 6:00 PM',
-    
+
     // Contact Page
     contact_title: 'Contact Us',
     contact_subtitle: 'We are here to help and answer your questions',
@@ -435,13 +439,13 @@ const TRANSLATIONS = {
     contact_form_title: 'Send Us a Message',
     contact_address: 'Address',
     contact_property_interest: 'Property Interest',
-    
+
     // Property Types
     type_condo: 'Condo',
     type_house: 'House',
     type_villa: 'Villa',
     type_townhouse: 'Townhouse',
-    
+
     // Common
     common_view_all: 'View All',
     common_loading: 'Loading...',
@@ -453,14 +457,14 @@ const TRANSLATIONS = {
     common_edit: 'Edit',
     common_delete: 'Delete',
     common_close: 'Close',
-    
+
     // Thank You Page
     thank_you_title: 'Thank You for Contacting Us!',
     thank_you_message: 'We have received your information. Our team will get back to you as soon as possible,<br>typically within 24 hours',
     back_to_home: 'Back to Home',
     view_properties: 'View Properties',
     need_urgent_help: 'Need Urgent Help?',
-    
+
     // Projects
     nav_projects: 'Projects',
     nav_all_projects: 'All Projects',
@@ -491,7 +495,7 @@ const TRANSLATIONS = {
     project_location: 'Location',
     project_view_detail: 'View Details',
     project_contact: 'Contact Us',
-    
+
     // Investment
     nav_invest: 'Invest',
     nav_invest_hub: 'Investment Hub',
@@ -536,7 +540,7 @@ const TRANSLATIONS = {
     foreign_investor_money_transfer: 'Money Transfer Guide',
     rental_mgmt_title: 'Rental Management Services',
     rental_mgmt_subtitle: 'Let us manage your property and receive monthly rental income',
-    
+
     // Area Guide
     nav_area_guide: 'Area Guide',
     area_guide_title: 'Pattaya Area Guide',
@@ -548,7 +552,7 @@ const TRANSLATIONS = {
     area_cons: 'Cons',
     area_projects_in_area: 'Projects in Area',
     area_explore: 'Explore Area',
-    
+
     // Quiz
     quiz_title: 'Find Your Perfect Property',
     quiz_subtitle: 'Answer 5 questions to get personalized recommendations',
@@ -602,7 +606,7 @@ function setLanguage(lang) {
   localStorage.setItem('lang', lang);
   document.documentElement.lang = lang;
   updatePageText();
-  
+
   // Update language toggle button
   const langButton = document.querySelector('.btn-lang span, .lang-switch');
   if (langButton) {
@@ -619,7 +623,7 @@ function updatePageText() {
   document.querySelectorAll('[data-i18n]').forEach(el => {
     const key = el.getAttribute('data-i18n');
     const translation = t(key);
-    
+
     // Check if element is an input/button value
     if (el.tagName === 'INPUT' && (el.type === 'submit' || el.type === 'button')) {
       el.value = translation;
@@ -627,19 +631,19 @@ function updatePageText() {
       el.textContent = translation;
     }
   });
-  
+
   // Update placeholders
   document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
     const key = el.getAttribute('data-i18n-placeholder');
     el.placeholder = t(key);
   });
-  
+
   // Update titles
   document.querySelectorAll('[data-i18n-title]').forEach(el => {
     const key = el.getAttribute('data-i18n-title');
     el.title = t(key);
   });
-  
+
   // Update aria-labels
   document.querySelectorAll('[data-i18n-aria]').forEach(el => {
     const key = el.getAttribute('data-i18n-aria');
@@ -653,10 +657,10 @@ function initI18n() {
   const savedLang = localStorage.getItem('lang') || 'th';
   currentLang = savedLang;
   document.documentElement.lang = savedLang;
-  
+
   // Update all text on page
   updatePageText();
-  
+
   // Update language toggle button
   const langButton = document.querySelector('.btn-lang span, .lang-switch');
   if (langButton) {

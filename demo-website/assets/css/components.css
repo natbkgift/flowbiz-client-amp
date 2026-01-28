@@ -152,6 +152,7 @@
   flex-direction: column;
   gap: var(--space-sm);
   align-items: flex-start;
+  flex-wrap: wrap;
 }
 
 .card-content {
