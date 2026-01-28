@@ -901,3 +901,439 @@ const POPULAR_AREAS = [
     count: ALL_PROPERTIES.filter(p => p.area === 'Huay Yai').length
   }
 ];
+
+// Area Guides - Comprehensive information about 6 Pattaya areas
+const AREA_GUIDES = {
+  'pattaya': {
+    name: { th: 'พัทยากลาง', en: 'Central Pattaya' },
+    description: {
+      th: 'ใจกลางเมืองพัทยา เต็มไปด้วยแหล่งบันเทิง ร้านอาหาร และห้างสรรพสินค้า เหมาะสำหรับผู้ที่ชื่นชอบไลฟ์สไตล์เมือง',
+      en: 'Heart of Pattaya city filled with entertainment, restaurants, and shopping malls. Perfect for those who enjoy urban lifestyle.'
+    },
+    avg_price_sqm: 85000,
+    price_trend_yoy: 8.5,
+    residents: {
+      th: 'นักท่องเที่ยว, นักลงทุน, ชาวต่างชาติ',
+      en: 'Tourists, Investors, Expats'
+    },
+    highlights: {
+      th: ['ใกล้ Walking Street', 'ห้างสรรพสินค้าหลายแห่ง', 'ชายหาดพัทยา', 'ร้านอาหารนานาชาติ', 'ชีวิตกลางคืนที่คึกคัก'],
+      en: ['Near Walking Street', 'Multiple Shopping Malls', 'Pattaya Beach', 'International Restaurants', 'Vibrant Nightlife']
+    },
+    nearby: {
+      th: {
+        hospital: 'โรงพยาบาลพัทยา - 2 กม.',
+        mall: 'เซ็นทรัลพัทยา - 0.5 กม.',
+        airport: 'สนามบินอู่ตะเภา - 35 กม.'
+      },
+      en: {
+        hospital: 'Pattaya Hospital - 2 km',
+        mall: 'Central Pattaya - 0.5 km',
+        airport: 'U-Tapao Airport - 35 km'
+      }
+    }
+  },
+  'jomtien': {
+    name: { th: 'จอมเทียน', en: 'Jomtien' },
+    description: {
+      th: 'ชายหาดเงียบสงบ เหมาะสำหรับครอบครัวและผู้เกษียณ มีสิ่งอำนวยความสะดวกครบครัน ไม่วุ่นวายเหมือนพัทยากลาง',
+      en: 'Peaceful beach area suitable for families and retirees. Well-equipped facilities without the hustle of Central Pattaya.'
+    },
+    avg_price_sqm: 75000,
+    price_trend_yoy: 7.2,
+    residents: {
+      th: 'ครอบครัว, ผู้เกษียณ, Long-stay tourists',
+      en: 'Families, Retirees, Long-stay tourists'
+    },
+    highlights: {
+      th: ['ชายหาดยาว 6 กม.', 'บรรยากาศเงียบสงบ', 'ร้านอาหารริมทะเล', 'ตลาดสดและห้างสรรพสินค้า', 'กิจกรรมทางน้ำ'],
+      en: ['6 km Long Beach', 'Peaceful Atmosphere', 'Beachfront Restaurants', 'Fresh Markets and Malls', 'Water Sports']
+    },
+    nearby: {
+      th: {
+        hospital: 'โรงพยาบาลกรุงเทพพัทยา - 5 กม.',
+        mall: 'Harbor Pattaya - 3 กม.',
+        airport: 'สนามบินอู่ตะเภา - 30 กม.'
+      },
+      en: {
+        hospital: 'Bangkok Hospital Pattaya - 5 km',
+        mall: 'Harbor Pattaya - 3 km',
+        airport: 'U-Tapao Airport - 30 km'
+      }
+    }
+  },
+  'na-jomtien': {
+    name: { th: 'นาจอมเทียน', en: 'Na Jomtien' },
+    description: {
+      th: 'พื้นที่เงียบสงบที่สุดในพัทยา บรรยากาศธรรมชาติ เหมาะสำหรับผู้ต้องการความเป็นส่วนตัวและพักผ่อน',
+      en: 'The most peaceful area in Pattaya with natural atmosphere. Perfect for those seeking privacy and relaxation.'
+    },
+    avg_price_sqm: 65000,
+    price_trend_yoy: 9.1,
+    residents: {
+      th: 'ผู้เกษียณ, นักลงทุนระยะยาว',
+      en: 'Retirees, Long-term investors'
+    },
+    highlights: {
+      th: ['ชายหาดสะอาด', 'ราคาย่อมเยา', 'พื้นที่กว้างขวาง', 'โครงการใหม่หลายแห่ง', 'น้อยคน ไม่แออัด'],
+      en: ['Clean Beach', 'Affordable Prices', 'Spacious Areas', 'Many New Projects', 'Less Crowded']
+    },
+    nearby: {
+      th: {
+        hospital: 'โรงพยาบาลกรุงเทพพัทยา - 10 กม.',
+        mall: 'Harbor Pattaya - 8 กม.',
+        airport: 'สนามบินอู่ตะเภา - 25 กม.'
+      },
+      en: {
+        hospital: 'Bangkok Hospital Pattaya - 10 km',
+        mall: 'Harbor Pattaya - 8 km',
+        airport: 'U-Tapao Airport - 25 km'
+      }
+    }
+  },
+  'pratumnak': {
+    name: { th: 'พระตำหนัก', en: 'Pratumnak' },
+    description: {
+      th: 'พื้นที่พรีเมียม วิวทะเลสวยงาม ระหว่างพัทยาและจอมเทียน เหมาะสำหรับผู้มีกำลังซื้อสูง',
+      en: 'Premium area with beautiful sea views between Pattaya and Jomtien. Ideal for high-net-worth individuals.'
+    },
+    avg_price_sqm: 120000,
+    price_trend_yoy: 6.8,
+    residents: {
+      th: 'นักลงทุนต่างชาติ, Executive expats',
+      en: 'Foreign investors, Executive expats'
+    },
+    highlights: {
+      th: ['วิวทะเลพาโนรามา', 'โครงการหรูหรา', 'บิ๊กพุทธา', 'ติดเขา เย็นสบาย', 'ร้านอาหารชั้นนำ'],
+      en: ['Panoramic Sea View', 'Luxury Projects', 'Big Buddha', 'Hill Location - Cool', 'Top Restaurants']
+    },
+    nearby: {
+      th: {
+        hospital: 'โรงพยาบาลพัทยา - 4 กม.',
+        mall: 'Terminal 21 - 5 กม.',
+        airport: 'สนามบินอู่ตะเภา - 32 กม.'
+      },
+      en: {
+        hospital: 'Pattaya Hospital - 4 km',
+        mall: 'Terminal 21 - 5 km',
+        airport: 'U-Tapao Airport - 32 km'
+      }
+    }
+  },
+  'wong-amat': {
+    name: { th: 'วงศ์อมาตย์', en: 'Wong Amat' },
+    description: {
+      th: 'ชายหาดสวยที่สุดในพัทยา เงียบสงบ มีโครงการคอนโดหรู เหมาะสำหรับผู้ต้องการ Luxury lifestyle',
+      en: 'The most beautiful beach in Pattaya. Peaceful with luxury condos. Perfect for luxury lifestyle seekers.'
+    },
+    avg_price_sqm: 110000,
+    price_trend_yoy: 7.5,
+    residents: {
+      th: 'นักลงทุนต่างชาติ, ผู้บริหาร',
+      en: 'Foreign investors, Executives'
+    },
+    highlights: {
+      th: ['หาดทรายขาวสะอาด', 'โครงการคอนโดหรู', 'ร้านอาหารริมทะเล', 'ไกลจากความวุ่นวาย', 'สนามกอล์ฟใกล้เคียง'],
+      en: ['White Sandy Beach', 'Luxury Condos', 'Beachfront Dining', 'Away from Crowds', 'Nearby Golf Courses']
+    },
+    nearby: {
+      th: {
+        hospital: 'โรงพยาบาลพัทยา - 6 กม.',
+        mall: 'เซ็นทรัลพัทยา - 7 กม.',
+        airport: 'สนามบินอู่ตะเภา - 40 กม.'
+      },
+      en: {
+        hospital: 'Pattaya Hospital - 6 km',
+        mall: 'Central Pattaya - 7 km',
+        airport: 'U-Tapao Airport - 40 km'
+      }
+    }
+  },
+  'bang-saray': {
+    name: { th: 'บางเสร่', en: 'Bang Saray' },
+    description: {
+      th: 'หมู่บ้านชาวประมงสงบ ห่างจากตัวเมือง เหมาะสำหรับผู้ต้องการหนีความวุ่นวาย ราคาย่อมเยา',
+      en: 'Peaceful fishing village away from the city. Perfect for those escaping the hustle. Affordable prices.'
+    },
+    avg_price_sqm: 55000,
+    price_trend_yoy: 10.2,
+    residents: {
+      th: 'ผู้เกษียณ, นักลงทุนระยะยาว',
+      en: 'Retirees, Long-term investors'
+    },
+    highlights: {
+      th: ['บรรยากาศชนบท', 'ราคาที่ดินถูก', 'ใกล้สนามกอล์ฟ', 'ร้านอาหารซีฟู้ดสด', 'เติบโตรวดเร็ว'],
+      en: ['Rural Atmosphere', 'Cheap Land Prices', 'Near Golf Courses', 'Fresh Seafood', 'Fast Growing']
+    },
+    nearby: {
+      th: {
+        hospital: 'โรงพยาบาลกรุงเทพพัทยา - 15 กม.',
+        mall: 'Harbor Pattaya - 12 กม.',
+        airport: 'สนามบินอู่ตะเภา - 20 กม.'
+      },
+      en: {
+        hospital: 'Bangkok Hospital Pattaya - 15 km',
+        mall: 'Harbor Pattaya - 12 km',
+        airport: 'U-Tapao Airport - 20 km'
+      }
+    }
+  }
+};
+
+// Developer Profiles - Top 5 developers in Pattaya
+const DEVELOPERS = [
+  {
+    id: 'dev-001',
+    name: 'Sansiri',
+    logo: 'https://via.placeholder.com/120x60/1744BE/FFFFFF?text=Sansiri',
+    rating: 4.8,
+    projects_delivered: 45,
+    projects_ongoing: 3,
+    established_year: 1988,
+    description: {
+      th: 'ผู้พัฒนาอสังหาริมทรัพย์ชั้นนำของไทย มีประสบการณ์กว่า 35 ปี',
+      en: 'Leading Thai property developer with over 35 years of experience'
+    },
+    specialties: {
+      th: ['คอนโดหรู', 'บ้านเดี่ยว', 'โครงการพัทยา'],
+      en: ['Luxury Condos', 'Single Houses', 'Pattaya Projects']
+    },
+    reviews_count: 1250,
+    avg_rating: 4.8
+  },
+  {
+    id: 'dev-002',
+    name: 'Raimon Land',
+    logo: 'https://via.placeholder.com/120x60/F05A43/FFFFFF?text=Raimon',
+    rating: 4.7,
+    projects_delivered: 12,
+    projects_ongoing: 2,
+    established_year: 2004,
+    description: {
+      th: 'ผู้เชี่ยวชาญด้านคอนโดหรูในพัทยา มุ่งเน้นคุณภาพและดีไซน์',
+      en: 'Luxury condo specialist in Pattaya focused on quality and design'
+    },
+    specialties: {
+      th: ['คอนโดริมทะเล', 'ดีไซน์โมเดิร์น', 'วิวทะเล'],
+      en: ['Beachfront Condos', 'Modern Design', 'Sea Views']
+    },
+    reviews_count: 580,
+    avg_rating: 4.7
+  },
+  {
+    id: 'dev-003',
+    name: 'Heights Holdings',
+    logo: 'https://via.placeholder.com/120x60/16A34A/FFFFFF?text=Heights',
+    rating: 4.6,
+    projects_delivered: 8,
+    projects_ongoing: 2,
+    established_year: 2012,
+    description: {
+      th: 'พัฒนาคอนโดระดับไฮเอนด์ในพัทยา มีชื่อเสียงด้านการส่งมอบตรงเวลา',
+      en: 'High-end condo developer in Pattaya known for on-time delivery'
+    },
+    specialties: {
+      th: ['คอนโดหรู', 'สระว่ายน้ำสวย', 'สิ่งอำนวยความสะดวกครบ'],
+      en: ['Luxury Condos', 'Beautiful Pools', 'Full Facilities']
+    },
+    reviews_count: 420,
+    avg_rating: 4.6
+  },
+  {
+    id: 'dev-004',
+    name: 'Nova Group',
+    logo: 'https://via.placeholder.com/120x60/1744BE/FFFFFF?text=Nova',
+    rating: 4.5,
+    projects_delivered: 15,
+    projects_ongoing: 4,
+    established_year: 2009,
+    description: {
+      th: 'ผู้พัฒนาที่หลากหลาย ตั้งแต่คอนโดราคาประหยัดถึงโครงการหรู',
+      en: 'Versatile developer from budget condos to luxury projects'
+    },
+    specialties: {
+      th: ['คอนโดราคาประหยัด', 'โครงการขนาดใหญ่', 'ทำเลดี'],
+      en: ['Affordable Condos', 'Large Projects', 'Prime Locations']
+    },
+    reviews_count: 890,
+    avg_rating: 4.5
+  },
+  {
+    id: 'dev-005',
+    name: 'Laguna Property',
+    logo: 'https://via.placeholder.com/120x60/F05A43/FFFFFF?text=Laguna',
+    rating: 4.7,
+    projects_delivered: 6,
+    projects_ongoing: 1,
+    established_year: 2015,
+    description: {
+      th: 'เชี่ยวชาญด้านโครงการริมทะเล มุ่งเน้นไลฟ์สไตล์รีสอร์ท',
+      en: 'Beachfront project specialist focused on resort lifestyle'
+    },
+    specialties: {
+      th: ['โครงการริมทะเล', 'สไตล์รีสอร์ท', 'สระว่ายน้ำใหญ่'],
+      en: ['Beachfront Projects', 'Resort Style', 'Large Pools']
+    },
+    reviews_count: 320,
+    avg_rating: 4.7
+  }
+];
+
+// Market Statistics - Price trends and insights
+const MARKET_STATS = {
+  avg_price_by_type: [
+    { type: 'condo', type_th: 'คอนโด', avg_price_sqm: 85000, yoy_change: 7.5 },
+    { type: 'house', type_th: 'บ้าน', avg_price_sqm: 65000, yoy_change: 6.2 },
+    { type: 'villa', type_th: 'วิลล่า', avg_price_sqm: 95000, yoy_change: 8.1 }
+  ],
+  hot_areas: [
+    { area: 'Na Jomtien', area_th: 'นาจอมเทียน', growth: 10.2, reason_th: 'โครงการใหม่หลายแห่ง', reason_en: 'Many new projects' },
+    { area: 'Bang Saray', area_th: 'บางเสร่', growth: 9.8, reason_th: 'ใกล้สนามบิน', reason_en: 'Near airport' },
+    { area: 'Pattaya', area_th: 'พัทยากลาง', growth: 8.5, reason_th: 'ความต้องการสูง', reason_en: 'High demand' }
+  ],
+  rental_yields: {
+    condo: { gross: 6.5, net: 4.8 },
+    villa: { gross: 5.2, net: 3.5 },
+    house: { gross: 5.8, net: 4.0 }
+  },
+  occupancy_rates: {
+    short_term: 72,
+    long_term: 85,
+    annual: 78
+  }
+};
+
+// Testimonials - Customer reviews
+const TESTIMONIALS = [
+  {
+    id: 'test-001',
+    name: 'John Miller',
+    nationality: 'USA',
+    photo: 'https://i.pravatar.cc/150?img=12',
+    rating: 5,
+    comment: {
+      th: 'บริการยอดเยี่ยม! ทีมงานช่วยเหลือดีมากตั้งแต่ต้นจนจบ พบทรัพย์ที่ใช่ภายใน 2 สัปดาห์',
+      en: 'Excellent service! The team was very helpful from start to finish. Found my perfect property within 2 weeks.'
+    },
+    property_type: 'Condo',
+    date: '2025-12-15'
+  },
+  {
+    id: 'test-002',
+    name: 'สมชาย วงศ์ใหญ่',
+    nationality: 'Thailand',
+    photo: 'https://i.pravatar.cc/150?img=33',
+    rating: 5,
+    comment: {
+      th: 'ขอบคุณครับที่ช่วยหาคอนโดให้ลูกค้า ROI ดีมาก คุ้มค่าที่ลงทุน แนะนำเลยครับ',
+      en: 'Thank you for helping me find a great investment condo. Excellent ROI, worth the investment. Highly recommended.'
+    },
+    property_type: 'Condo',
+    date: '2026-01-10'
+  },
+  {
+    id: 'test-003',
+    name: 'Emma Thompson',
+    nationality: 'UK',
+    photo: 'https://i.pravatar.cc/150?img=45',
+    rating: 5,
+    comment: {
+      th: 'ตัวแทนมืออาชีพมาก อธิบายทุกขั้นตอนชัดเจน ช่วยเรื่องเอกสารและกฎหมายด้วย',
+      en: 'Very professional agents. Clear explanations of every step. Helped with documents and legal matters.'
+    },
+    property_type: 'Villa',
+    date: '2025-11-22'
+  },
+  {
+    id: 'test-004',
+    name: 'Hans Schmidt',
+    nationality: 'Germany',
+    photo: 'https://i.pravatar.cc/150?img=52',
+    rating: 4,
+    comment: {
+      th: 'ประทับใจบริการหลังการขาย ช่วยดูแลอสังหาและหาผู้เช่าให้ พอใจมากครับ',
+      en: 'Impressed with after-sales service. They help manage the property and find tenants. Very satisfied.'
+    },
+    property_type: 'Condo',
+    date: '2025-10-05'
+  },
+  {
+    id: 'test-005',
+    name: 'Wei Chen',
+    nationality: 'China',
+    photo: 'https://i.pravatar.cc/150?img=68',
+    rating: 5,
+    comment: {
+      th: 'ทีมงานพูดภาษาจีนได้ ทำให้สื่อสารสะดวก บริการดีเยี่ยม แนะนำเพื่อนมาหลายคน',
+      en: 'Team speaks Chinese which made communication easy. Excellent service. Recommended to many friends.'
+    },
+    property_type: 'House',
+    date: '2025-12-28'
+  },
+  {
+    id: 'test-006',
+    name: 'นิภา ศรีสวัสดิ์',
+    nationality: 'Thailand',
+    photo: 'https://i.pravatar.cc/150?img=47',
+    rating: 5,
+    comment: {
+      th: 'ซื้อคอนโดเป็นของขวัญเกษียณให้ตัวเอง บริการดีมาก ช่วยจัดการทุกอย่าง ขอบคุณค่ะ',
+      en: 'Bought a condo as a retirement gift for myself. Great service, handled everything. Thank you.'
+    },
+    property_type: 'Condo',
+    date: '2026-01-18'
+  },
+  {
+    id: 'test-007',
+    name: 'Alexey Petrov',
+    nationality: 'Russia',
+    photo: 'https://i.pravatar.cc/150?img=59',
+    rating: 4,
+    comment: {
+      th: 'ทีมงานพูดภาษารัสเซียได้ เข้าใจความต้องการดี แนะนำอสังหาที่เหมาะสมมาก',
+      en: 'Team speaks Russian. Understood my needs well. Recommended very suitable properties.'
+    },
+    property_type: 'Villa',
+    date: '2025-11-30'
+  },
+  {
+    id: 'test-008',
+    name: 'Sarah Johnson',
+    nationality: 'Australia',
+    photo: 'https://i.pravatar.cc/150?img=26',
+    rating: 5,
+    comment: {
+      th: 'บริการหลังการขายดีมาก ช่วยดูแลบ้านตอนที่ไม่อยู่ ไว้วางใจได้ ขอบคุณค่ะ',
+      en: 'Excellent after-sales service. They take care of my house when I\'m away. Very trustworthy. Thank you.'
+    },
+    property_type: 'House',
+    date: '2026-01-05'
+  }
+];
+
+// Trust Signals - Company credentials and achievements
+const TRUST_SIGNALS = {
+  license: {
+    th: 'ได้รับใบอนุญาตจากกรมที่ดิน',
+    en: 'Licensed by Department of Lands'
+  },
+  experience_years: 10,
+  properties_sold: 500,
+  languages: ['TH', 'EN', 'RU', 'CN'],
+  google_rating: 4.9,
+  google_reviews: 450,
+  achievements: [
+    { th: 'รางวัลตัวแทนอสังหายอดเยี่ยม 2024', en: 'Best Real Estate Agent Award 2024' },
+    { th: 'สมาชิก AREA (สมาคมตัวแทนอสังหาฯ)', en: 'AREA Member (Real Estate Agent Association)' }
+  ]
+};
+
+// Make data globally available
+if (typeof window !== 'undefined') {
+  window.AMP = window.AMP || {};
+  window.AMP.areaData = AREA_GUIDES;
+  window.AMP.developers = DEVELOPERS;
+  window.AMP.marketStats = MARKET_STATS;
+  window.AMP.testimonials = TESTIMONIALS;
+  window.AMP.trustSignals = TRUST_SIGNALS;
+}
