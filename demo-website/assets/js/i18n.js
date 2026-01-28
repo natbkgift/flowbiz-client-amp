@@ -608,7 +608,7 @@ function setLanguage(lang) {
   updatePageText();
 
   // Update language toggle button
-  const langText = document.querySelector('.lang-switch span, #lang-text');
+  const langText = document.querySelector('#lang-text');
   if (langText) {
     langText.textContent = lang === 'th' ? 'EN' : 'TH';
   }
@@ -662,7 +662,7 @@ function initI18n() {
   updatePageText();
 
   // Update language toggle button
-  const langText = document.querySelector('.lang-switch span, #lang-text');
+  const langText = document.querySelector('#lang-text');
   if (langText) {
     langText.textContent = savedLang === 'th' ? 'EN' : 'TH';
   }
