@@ -9,6 +9,7 @@
   <link rel="stylesheet" href="../assets/css/main.css">
   <link rel="stylesheet" href="../assets/css/components.css">
   <link rel="stylesheet" href="../assets/css/projects.css">
+  <link rel="stylesheet" href="../assets/css/marketing.css">
   <link rel="stylesheet" href="../assets/css/responsive.css">
   <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
 </head>
@@ -81,6 +82,7 @@
       </div>
     </div>
   </footer>
+  <script src="../assets/js/mock-data.js"></script>
   <script src="../assets/js/mock-projects.js"></script>
   <script src="../assets/js/i18n.js"></script>
   <script src="../assets/js/main.js"></script>
@@ -91,23 +93,46 @@
       const lang = document.documentElement.lang || 'en';
       container.innerHTML = Object.entries(areaData).map(([key, area]) => {
         const name = area.name[lang] || area.name.en;
-        return `<a href="${key}.html" class="area-card" style="text-decoration: none;">
-          <div class="area-card-header">
-            <h3 class="area-card-title">${name}</h3>
-            <div class="area-card-stats">
-              <div class="area-card-stat">
-                <span class="area-card-stat-value">฿${(area.avg_price_sqm / 1000).toFixed(0)}K</span>
-                <span class="area-card-stat-label">/sqm</span>
-              </div>
-              <div class="area-card-stat">
-                <span class="area-card-stat-value trend-badge">+${area.trend}%</span>
+        const description = area.description[lang] || area.description.en;
+        const yoyChange = area.price_trend_yoy >= 0 ? `+${area.price_trend_yoy}%` : `${area.price_trend_yoy}%`;
+        
+        return `
+          <div class="area-card">
+            <div class="area-card-header">
+              <h3 class="area-card-title">${name}</h3>
+              <div class="area-card-stats">
+                <div class="area-card-stat">
+                  <span class="area-card-stat-value">฿${(area.avg_price_sqm / 1000).toFixed(0)}K</span>
+                  <span class="area-card-stat-label" data-i18n="area_avg_price">/sqm</span>
+                </div>
+                <div class="area-card-stat">
+                  <span class="area-card-stat-value">${yoyChange}</span>
+                  <span class="area-card-stat-label" data-i18n="area_price_trend">YoY</span>
+                </div>
               </div>
             </div>
+            <div class="area-card-body">
+              <p class="area-card-description">${description}</p>
+              <div style="margin: 16px 0;">
+                <strong data-i18n="area_highlights">Highlights:</strong>
+                <ul class="area-card-highlights">
+                  ${area.highlights[lang].slice(0, 5).map(h => `<li>${h}</li>`).join('')}
+                </ul>
+              </div>
+              <div style="margin-top: 16px;">
+                <strong data-i18n="area_nearby">Nearby:</strong>
+                <div style="font-size: 14px; color: #6c757d; margin-top: 8px;">
+                  <div>🏥 ${area.nearby[lang].hospital}</div>
+                  <div>🛍️ ${area.nearby[lang].mall}</div>
+                  <div>✈️ ${area.nearby[lang].airport}</div>
+                </div>
+              </div>
+              <a href="../listing.html?area=${key}" class="btn btn-primary btn-sm" style="margin-top: 16px; display: inline-block;" data-i18n="area_view_properties">
+                View Properties
+              </a>
+            </div>
           </div>
-          <div class="area-card-content">
-            <p class="area-card-description">${area.description[lang]}</p>
-          </div>
-        </a>`;
+        `;
       }).join('');
     }
     if (typeof lucide !== 'undefined') lucide.createIcons();

@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Market Report | Asset Management Property</title>
+  <meta name="description" content="Latest market insights and trends for Pattaya real estate.">
+  
+  <link rel="icon" href="../assets/images/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="../assets/css/main.css">
+  <link rel="stylesheet" href="../assets/css/components.css">
+  <link rel="stylesheet" href="../assets/css/projects.css">
+  <link rel="stylesheet" href="../assets/css/marketing.css">
+  <link rel="stylesheet" href="../assets/css/responsive.css">
+  
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+</head>
+<body>
+  <a href="#main-content" class="skip-link">Skip to main content</a>
+  
+  <header class="header">
+    <div class="header-content">
+      <a href="../index.html" class="logo">
+        <img src="../assets/images/logo-amp.svg" alt="Asset Management Property" height="40">
+      </a>
+      
+      <nav class="nav desktop-only">
+        <a href="../index.html" data-i18n="nav_home"><i data-lucide="home"></i> Home</a>
+        <a href="../listing.html?intent=rent" data-i18n="nav_rent"><i data-lucide="key"></i> Rent</a>
+        <a href="../listing.html?intent=sale" data-i18n="nav_buy"><i data-lucide="building"></i> Buy</a>
+        <a href="../projects/index.html" data-i18n="nav_projects"><i data-lucide="layers"></i> Projects</a>
+        <a href="index.html" class="active" data-i18n="nav_invest"><i data-lucide="trending-up"></i> Invest</a>
+        <a href="../contact.html" data-i18n="nav_contact"><i data-lucide="mail"></i> Contact</a>
+      </nav>
+      
+      <div class="header-actions">
+        <button class="lang-switch" onclick="toggleLanguage()">
+          <span>TH</span>
+        </button>
+        <button class="hamburger mobile-only" onclick="toggleMobileMenu()">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="3" y1="12" x2="21" y2="12"></line>
+            <line x1="3" y1="6" x2="21" y2="6"></line>
+            <line x1="3" y1="18" x2="21" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <div class="mobile-menu" id="mobile-menu">
+    <a href="../index.html" data-i18n="nav_home"><i data-lucide="home"></i> Home</a>
+    <a href="../listing.html?intent=rent" data-i18n="nav_rent"><i data-lucide="key"></i> Rent</a>
+    <a href="../listing.html?intent=sale" data-i18n="nav_buy"><i data-lucide="building"></i> Buy</a>
+    <a href="../projects/index.html" data-i18n="nav_projects"><i data-lucide="layers"></i> Projects</a>
+    <a href="index.html" data-i18n="nav_invest"><i data-lucide="trending-up"></i> Invest</a>
+    <a href="../contact.html" data-i18n="nav_contact"><i data-lucide="mail"></i> Contact</a>
+  </div>
+
+  <section class="hero" id="main-content" style="padding: 60px 0 40px;">
+    <div class="container" style="text-align: center;">
+      <h1 data-i18n="market_title">Pattaya Real Estate Market Report 2026</h1>
+      <p class="hero-subtitle" data-i18n="market_subtitle">Latest market trends and statistics</p>
+    </div>
+  </section>
+
+  <section class="section" style="padding-top: 0;">
+    <div class="container">
+      <!-- Market Overview -->
+      <div style="margin-bottom: 60px;">
+        <h2 class="section-title">Market Overview</h2>
+        <div class="investment-highlights" style="background: linear-gradient(135deg, #1744BE 0%, #2563eb 100%); border-radius: 12px; padding: 48px;">
+          <div class="highlights-grid">
+            <div class="highlight-item">
+              <div class="highlight-value">฿85K</div>
+              <div class="highlight-label">Avg Price/sqm</div>
+            </div>
+            <div class="highlight-item">
+              <div class="highlight-value">+7.8%</div>
+              <div class="highlight-label">YoY Growth</div>
+            </div>
+            <div class="highlight-item">
+              <div class="highlight-value">6.5%</div>
+              <div class="highlight-label">Avg Rental Yield</div>
+            </div>
+            <div class="highlight-item">
+              <div class="highlight-value">78%</div>
+              <div class="highlight-label">Occupancy Rate</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Price by Type -->
+      <div style="margin-bottom: 60px;">
+        <h2 class="section-title" data-i18n="market_avg_price_by_type">Average Price by Type</h2>
+        <div class="stats-grid">
+          <div class="stat-card">
+            <h3>Condo</h3>
+            <div class="stat-item">
+              <span class="stat-label">Average Price/sqm</span>
+              <span class="stat-value">฿85,000</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-label" data-i18n="market_yoy_change">YoY Change</span>
+              <span class="stat-value">
+                <span class="stat-change positive">+7.5%</span>
+              </span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-label">Price Range</span>
+              <span class="stat-value">฿50K - ฿150K</span>
+            </div>
+          </div>
+
+          <div class="stat-card">
+            <h3>House</h3>
+            <div class="stat-item">
+              <span class="stat-label">Average Price/sqm</span>
+              <span class="stat-value">฿65,000</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-label" data-i18n="market_yoy_change">YoY Change</span>
+              <span class="stat-value">
+                <span class="stat-change positive">+6.2%</span>
+              </span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-label">Price Range</span>
+              <span class="stat-value">฿40K - ฿100K</span>
+            </div>
+          </div>
+
+          <div class="stat-card">
+            <h3>Villa</h3>
+            <div class="stat-item">
+              <span class="stat-label">Average Price/sqm</span>
+              <span class="stat-value">฿95,000</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-label" data-i18n="market_yoy_change">YoY Change</span>
+              <span class="stat-value">
+                <span class="stat-change positive">+8.1%</span>
+              </span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-label">Price Range</span>
+              <span class="stat-value">฿60K - ฿200K</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Hot Areas -->
+      <div style="margin-bottom: 60px;">
+        <h2 class="section-title" data-i18n="market_hot_areas">Hot Areas - Fastest Growing</h2>
+        <div class="area-guide-grid" id="hot-areas-grid">
+          <!-- Will be rendered by JavaScript -->
+        </div>
+      </div>
+
+      <!-- Rental Yields -->
+      <div style="margin-bottom: 60px;">
+        <h2 class="section-title" data-i18n="market_rental_yield">Rental Yields by Property Type</h2>
+        <div style="max-width: 800px; margin: 0 auto;">
+          <div style="background: white; padding: 32px; border-radius: 12px; box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);">
+            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 24px; text-align: center; margin-bottom: 24px;">
+              <div>
+                <div style="font-size: 14px; color: #6c757d; margin-bottom: 8px;">Condo</div>
+                <div style="font-size: 36px; font-weight: bold; color: #16A34A;">6.5%</div>
+                <div style="font-size: 12px; color: #6c757d;">Gross Yield</div>
+              </div>
+              <div>
+                <div style="font-size: 14px; color: #6c757d; margin-bottom: 8px;">House</div>
+                <div style="font-size: 36px; font-weight: bold; color: #16A34A;">5.8%</div>
+                <div style="font-size: 12px; color: #6c757d;">Gross Yield</div>
+              </div>
+              <div>
+                <div style="font-size: 14px; color: #6c757d; margin-bottom: 8px;">Villa</div>
+                <div style="font-size: 36px; font-weight: bold; color: #16A34A;">5.2%</div>
+                <div style="font-size: 12px; color: #6c757d;">Gross Yield</div>
+              </div>
+            </div>
+            <div style="background: #f8f9fa; padding: 16px; border-radius: 8px; text-align: center;">
+              <div style="font-size: 14px; color: #6c757d;">Net yields are approximately 1.5-2% lower after expenses</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- CTA -->
+      <div style="text-align: center; padding: 48px; background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); border-radius: 12px;">
+        <h3 style="margin-bottom: 16px;">Want the full detailed report?</h3>
+        <p style="color: #6c757d; margin-bottom: 24px;">
+          Get comprehensive market analysis, future projections, and investment recommendations.
+        </p>
+        <div style="display: flex; gap: 16px; justify-content: center; flex-wrap: wrap;">
+          <button class="btn btn-primary" onclick="downloadReport()">
+            <i data-lucide="download" style="width: 18px; height: 18px; margin-right: 8px;"></i>
+            Download Full Report (PDF)
+          </button>
+          <a href="../contact.html" class="btn btn-secondary">Contact for Consultation</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-content">
+        <div>
+          <h3>Asset Management Property</h3>
+          <p>Professional property management in Pattaya</p>
+        </div>
+        <div>
+          <h3>Contact Us</h3>
+          <a href="tel:+66634533526">📞 +66 63-453-3526</a>
+          <a href="mailto:info@amppattaya.com">📧 info@amppattaya.com</a>
+        </div>
+        <div>
+          <h3>Quick Links</h3>
+          <a href="../projects/index.html">Projects</a>
+          <a href="index.html">Investment Hub</a>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <p>&copy; 2026 Asset Management Property</p>
+      </div>
+    </div>
+  </footer>
+
+  <script src="../assets/js/mock-data.js"></script>
+  <script src="../assets/js/i18n.js"></script>
+  <script src="../assets/js/main.js"></script>
+  
+  <script>
+    function renderHotAreas() {
+      const container = document.getElementById('hot-areas-grid');
+      if (!container || !window.AMP || !window.AMP.marketStats) return;
+
+      const hotAreas = window.AMP.marketStats.hot_areas;
+      const areaGuides = window.AMP.areaData;
+      const lang = document.documentElement.lang || 'en';
+
+      const html = hotAreas.map(hot => {
+        const areaKey = hot.area.toLowerCase().replace(/ /g, '-');
+        const areaInfo = areaGuides[areaKey];
+        if (!areaInfo) return '';
+
+        const name = areaInfo.name[lang];
+        const description = areaInfo.description[lang];
+
+        return `
+          <div class="area-card">
+            <div class="area-card-header">
+              <h3 class="area-card-title">${name}</h3>
+              <div class="area-card-stats">
+                <div class="area-card-stat">
+                  <span class="area-card-stat-value">฿${(areaInfo.avg_price_sqm / 1000).toFixed(0)}K</span>
+                  <span class="area-card-stat-label">/sqm</span>
+                </div>
+                <div class="area-card-stat">
+                  <span class="area-card-stat-value stat-change positive">+${hot.growth}%</span>
+                  <span class="area-card-stat-label">Growth</span>
+                </div>
+              </div>
+            </div>
+            <div class="area-card-body">
+              <p class="area-card-description">${description}</p>
+              <div style="margin-top: 16px; padding: 12px; background: #e7f0ff; border-radius: 6px;">
+                <strong>Why it's hot:</strong> ${hot['reason_' + lang]}
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      container.innerHTML = html;
+    }
+
+    function downloadReport() {
+      const lang = document.documentElement.lang || 'th';
+      const message = lang === 'th' 
+        ? 'ฟีเจอร์ดาวน์โหลดรายงานจะพร้อมใช้งานเร็วๆ นี้'
+        : 'Full report download feature coming soon';
+      alert(message);
+    }
+
+    renderHotAreas();
+
+    if (typeof lucide !== 'undefined') {
+      lucide.createIcons();
+    }
+  </script>
+</body>
+</html>
