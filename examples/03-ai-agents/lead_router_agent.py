@@ -11,8 +11,8 @@ Based on AMP's business requirements for real estate in Pattaya.
 
 from enum import Enum
 from typing import Literal
-from pydantic import BaseModel, Field
 
+from pydantic import BaseModel, Field
 
 # ========================================
 # Data Models / โมเดลข้อมูล
@@ -81,20 +81,20 @@ class LeadRouterAgent:
     AI Agent for scoring and routing leads
     AI Agent สำหรับให้คะแนนและจัดการ leads
     """
-    
+
     # Scoring weights / น้ำหนักคะแนน
     BUDGET_THRESHOLDS = {
         "premium": 10_000_000,  # 10M+ THB
         "standard": 3_000_000,  # 3M+ THB
     }
-    
+
     def score_budget(self, lead: Lead) -> int:
         """
         Score based on budget / ให้คะแนนตามงบประมาณ
         Max 40 points
         """
         avg_budget = (lead.budget_min + lead.budget_max) / 2
-        
+
         if avg_budget >= self.BUDGET_THRESHOLDS["premium"]:
             return 40
         elif avg_budget >= self.BUDGET_THRESHOLDS["standard"]:
@@ -103,7 +103,7 @@ class LeadRouterAgent:
             return 20
         else:
             return 10
-    
+
     def score_source(self, lead: Lead) -> int:
         """
         Score based on lead source / ให้คะแนนตามแหล่งที่มา
@@ -117,53 +117,53 @@ class LeadRouterAgent:
             LeadSource.FACEBOOK: 10,    # Need qualification
         }
         return source_scores.get(lead.source, 10)
-    
+
     def score_engagement(self, lead: Lead) -> int:
         """
         Score based on engagement indicators / ให้คะแนนตามความสนใจ
         Max 20 points
         """
         score = 0
-        
+
         # Has email (can follow up)
         if lead.email:
             score += 5
-        
+
         # Clear budget range (knows what they want)
         if lead.budget_max - lead.budget_min < 5_000_000:
             score += 5
-        
+
         # Detailed message (serious inquiry)
         if lead.message and len(lead.message) > 50:
             score += 5
-        
+
         # Is investor (repeat business potential)
         if lead.is_investor:
             score += 5
-        
+
         return min(score, 20)
-    
+
     def score_urgency(self, lead: Lead) -> int:
         """
         Score based on urgency indicators / ให้คะแนนตามความเร่งด่วน
         Max 20 points
         """
         score = 0
-        
+
         # Walk-in or referral = urgent
         if lead.source in [LeadSource.WALK_IN, LeadSource.REFERRAL]:
             score += 10
-        
+
         # Looking for rental (quick decision)
         if lead.property_type == PropertyType.CONDO and lead.budget_max < 3_000_000:
             score += 5
-        
+
         # Foreigner (may have time constraints)
         if lead.is_foreigner:
             score += 5
-        
+
         return min(score, 20)
-    
+
     def calculate_total_score(self, lead: Lead) -> LeadScore:
         """
         Calculate total lead score / คำนวณคะแนนรวม
@@ -172,9 +172,9 @@ class LeadRouterAgent:
         source_score = self.score_source(lead)
         engagement_score = self.score_engagement(lead)
         urgency_score = self.score_urgency(lead)
-        
+
         total_score = budget_score + source_score + engagement_score + urgency_score
-        
+
         # Determine priority / กำหนดลำดับความสำคัญ
         if total_score >= 70:
             priority = "high"
@@ -182,14 +182,14 @@ class LeadRouterAgent:
             priority = "medium"
         else:
             priority = "low"
-        
+
         # Assign to team / มอบหมายให้ทีม
         assigned_team = self.assign_to_team(lead, total_score)
-        
+
         # Generate reasoning / สร้างเหตุผล
-        reasoning = self.generate_reasoning(lead, budget_score, source_score, 
+        reasoning = self.generate_reasoning(lead, budget_score, source_score,
                                            engagement_score, urgency_score)
-        
+
         return LeadScore(
             lead_id=lead.id,
             total_score=total_score,
@@ -201,37 +201,37 @@ class LeadRouterAgent:
             assigned_team=assigned_team,
             reasoning=reasoning,
         )
-    
+
     def assign_to_team(self, lead: Lead, total_score: int) -> SalesTeam:
         """
         Assign lead to appropriate sales team
         มอบหมาย lead ให้ทีมขายที่เหมาะสม
         """
         avg_budget = (lead.budget_min + lead.budget_max) / 2
-        
+
         # Investment team for investors
         if lead.is_investor and avg_budget >= 5_000_000:
             return SalesTeam.INVESTMENT
-        
+
         # Premium team for high-budget clients
         if avg_budget >= self.BUDGET_THRESHOLDS["premium"]:
             return SalesTeam.PREMIUM
-        
+
         # Rental team for lower budgets (likely rentals)
         if avg_budget < 3_000_000:
             return SalesTeam.RENTAL
-        
+
         # Standard team for everyone else
         return SalesTeam.STANDARD
-    
-    def generate_reasoning(self, lead: Lead, budget_score: int, 
+
+    def generate_reasoning(self, lead: Lead, budget_score: int,
                           source_score: int, engagement_score: int,
                           urgency_score: int) -> str:
         """
         Generate human-readable reasoning / สร้างคำอธิบายที่อ่านง่าย
         """
         reasons = []
-        
+
         # Budget analysis
         avg_budget = (lead.budget_min + lead.budget_max) / 2
         if avg_budget >= 10_000_000:
@@ -240,23 +240,23 @@ class LeadRouterAgent:
             reasons.append(f"Good budget ({avg_budget/1_000_000:.1f}M THB)")
         else:
             reasons.append(f"Budget {avg_budget/1_000_000:.1f}M THB - likely rental/starter")
-        
+
         # Source quality
         if lead.source == LeadSource.REFERRAL:
             reasons.append("Referral lead - high quality")
         elif lead.source == LeadSource.WALK_IN:
             reasons.append("Walk-in - immediate interest")
-        
+
         # Special attributes
         if lead.is_investor:
             reasons.append("Investor - repeat business potential")
         if lead.is_foreigner:
             reasons.append("Foreign buyer - may need extra support")
-        
+
         # Engagement
         if lead.email and lead.message:
             reasons.append("Good engagement - provided details")
-        
+
         return "; ".join(reasons)
 
 
@@ -272,10 +272,10 @@ def main():
     print("FlowBiz AMP - Lead Router Agent Demo")
     print("ตัวอย่าง Agent สำหรับจัดการ Leads")
     print("=" * 70 + "\n")
-    
+
     # Create agent instance
     agent = LeadRouterAgent()
-    
+
     # Example leads / ตัวอย่าง leads
     leads = [
         Lead(
@@ -319,17 +319,17 @@ def main():
             message="Investment property for rental income",
         ),
     ]
-    
+
     # Score and route each lead
     for lead in leads:
         print(f"\n📋 Lead #{lead.id}: {lead.name}")
         print(f"   Phone: {lead.phone}")
         print(f"   Source: {lead.source.value}")
         print(f"   Budget: {lead.budget_min/1_000_000:.1f}M - {lead.budget_max/1_000_000:.1f}M THB")
-        
+
         # Calculate score
         score = agent.calculate_total_score(lead)
-        
+
         print(f"\n   🎯 SCORE: {score.total_score}/100 ({score.priority.upper()} priority)")
         print(f"      Budget: {score.budget_score}/40")
         print(f"      Source: {score.source_score}/20")
@@ -338,7 +338,7 @@ def main():
         print(f"\n   👥 Assigned to: {score.assigned_team.value.upper()} team")
         print(f"   💡 Reasoning: {score.reasoning}")
         print("\n" + "-" * 70)
-    
+
     print("\n✅ Lead routing complete! / จัดการ leads เสร็จสิ้น!")
     print("\n💡 Next steps:")
     print("   1. Integrate with real lead database")

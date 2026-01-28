@@ -12,8 +12,8 @@ To use: Copy relevant parts to your endpoint files
 from enum import Enum
 from typing import Annotated
 
-from fastapi import APIRouter, HTTPException, Query, Path, Body, status
-from pydantic import BaseModel, Field, field_validator, EmailStr
+from fastapi import APIRouter, Body, HTTPException, Path, Query, status
+from pydantic import BaseModel, EmailStr, Field, field_validator
 
 router = APIRouter(prefix="/v1/leads", tags=["leads"])
 
@@ -47,7 +47,7 @@ class LeadStatus(str, Enum):
 
 class LeadCreate(BaseModel):
     """Model for creating a lead with validation"""
-    
+
     name: str = Field(
         ...,
         min_length=2,
@@ -55,12 +55,12 @@ class LeadCreate(BaseModel):
         description="Lead's full name",
         examples=["John Smith", "สมชาย ใจดี"]
     )
-    
+
     email: EmailStr = Field(
         ...,
         description="Valid email address"
     )
-    
+
     phone: str = Field(
         ...,
         pattern=r"^\+?[\d\s\-()]+$",
@@ -69,30 +69,30 @@ class LeadCreate(BaseModel):
         description="Phone number",
         examples=["+66812345678", "081-234-5678"]
     )
-    
+
     source: LeadSource = Field(
         ...,
         description="Where the lead came from"
     )
-    
+
     budget_min: float = Field(
         ...,
         ge=0,
         description="Minimum budget in THB"
     )
-    
+
     budget_max: float = Field(
         ...,
         gt=0,
         description="Maximum budget in THB"
     )
-    
+
     message: str | None = Field(
         None,
         max_length=1000,
         description="Optional message from lead"
     )
-    
+
     @field_validator("budget_max")
     @classmethod
     def validate_budget_range(cls, budget_max, info):
@@ -104,7 +104,7 @@ class LeadCreate(BaseModel):
         if budget_max <= budget_min:
             raise ValueError("budget_max must be greater than budget_min")
         return budget_max
-    
+
     @field_validator("phone")
     @classmethod
     def validate_phone(cls, phone):
@@ -168,7 +168,7 @@ async def create_lead(lead_data: LeadCreate):
     """
     Create a new lead with validation
     สร้าง lead ใหม่พร้อมตรวจสอบข้อมูล
-    
+
     Validations:
     - Name: 2-100 characters
     - Email: Valid email format
@@ -177,13 +177,13 @@ async def create_lead(lead_data: LeadCreate):
     """
     # Generate new ID
     new_id = len(leads_db) + 1
-    
+
     # Create lead
     new_lead = Lead(
         id=new_id,
         **lead_data.model_dump()
     )
-    
+
     leads_db.append(new_lead)
     return new_lead
 
@@ -214,16 +214,16 @@ async def list_leads(
     แสดงรายการ lead พร้อมตัวกรอง
     """
     results = leads_db.copy()
-    
+
     if status:
         results = [lead for lead in results if lead.status == status]
-    
+
     if source:
         results = [lead for lead in results if lead.source == source]
-    
+
     if min_score is not None:
         results = [lead for lead in results if lead.score >= min_score]
-    
+
     return results
 
 
@@ -247,7 +247,7 @@ async def get_lead(
     for lead in leads_db:
         if lead.id == lead_id:
             return lead
-    
+
     raise HTTPException(
         status_code=status.HTTP_404_NOT_FOUND,
         detail={
@@ -285,7 +285,7 @@ async def update_lead_status(
         if lead.id == lead_id:
             lead.status = new_status
             return lead
-    
+
     raise HTTPException(
         status_code=status.HTTP_404_NOT_FOUND,
         detail=f"Lead with ID {lead_id} not found"
@@ -307,7 +307,7 @@ async def validation_demo(
     """
     Demo endpoint showing automatic validation
     endpoint ตัวอย่างแสดงการตรวจสอบอัตโนมัติ
-    
+
     Try sending:
     - Value < 1 (error: too small)
     - Value > 100 (error: too large)
@@ -329,17 +329,17 @@ To test this example:
    app.include_router(leads.router)
 
 3. Test validation errors:
-   
+
    # Invalid email
    curl -X POST http://127.0.0.1:8000/v1/leads \
      -H "Content-Type: application/json" \
      -d '{"name":"Test","email":"invalid","phone":"081234","source":"facebook","budget_min":1000000,"budget_max":2000000}'
-   
+
    # Budget max < budget min
    curl -X POST http://127.0.0.1:8000/v1/leads \
      -H "Content-Type: application/json" \
      -d '{"name":"Test","email":"test@example.com","phone":"0812345678","source":"facebook","budget_min":2000000,"budget_max":1000000}'
-   
+
 4. Test valid request:
    curl -X POST http://127.0.0.1:8000/v1/leads \
      -H "Content-Type: application/json" \
@@ -347,7 +347,7 @@ To test this example:
 
 5. View automatic API docs:
    http://127.0.0.1:8000/docs
-   
+
    FastAPI automatically shows:
    - All validation rules
    - Example values

@@ -39,7 +39,7 @@ class PropertyCreate(PropertyBase):
 class Property(PropertyBase):
     """Full property model with ID / โมเดล property แบบเต็ม"""
     id: int = Field(..., description="Property ID")
-    
+
     class Config:
         json_schema_extra = {
             "example": {
@@ -97,24 +97,24 @@ async def list_properties(
     """
     List all properties with optional filters
     แสดงรายการ property ทั้งหมด พร้อมตัวกรอง (optional)
-    
+
     Query Parameters:
     - property_type: Filter by type (condo, house, villa)
     - min_price: Minimum price in THB
     - max_price: Maximum price in THB
     """
     results = properties_db.copy()
-    
+
     # Apply filters / ใช้ตัวกรอง
     if property_type:
         results = [p for p in results if p.property_type == property_type]
-    
+
     if min_price is not None:
         results = [p for p in results if p.price >= min_price]
-    
+
     if max_price is not None:
         results = [p for p in results if p.price <= max_price]
-    
+
     return results
 
 
@@ -123,14 +123,14 @@ async def get_property(property_id: int):
     """
     Get a specific property by ID
     ดึงข้อมูล property ตาม ID
-    
+
     Path Parameters:
     - property_id: Property ID to retrieve
     """
     for prop in properties_db:
         if prop.id == property_id:
             return prop
-    
+
     raise HTTPException(
         status_code=404,
         detail=f"Property with ID {property_id} not found"
@@ -142,19 +142,19 @@ async def create_property(property_data: PropertyCreate):
     """
     Create a new property listing
     สร้าง property ใหม่
-    
+
     Request Body:
     - Property data following PropertyCreate schema
     """
     # Generate new ID / สร้าง ID ใหม่
     new_id = max(p.id for p in properties_db) + 1 if properties_db else 1
-    
+
     # Create new property / สร้าง property ใหม่
     new_property = Property(
         id=new_id,
         **property_data.model_dump()
     )
-    
+
     properties_db.append(new_property)
     return new_property
 
@@ -164,7 +164,7 @@ async def delete_property(property_id: int):
     """
     Delete a property by ID
     ลบ property ตาม ID
-    
+
     Path Parameters:
     - property_id: Property ID to delete
     """
@@ -172,7 +172,7 @@ async def delete_property(property_id: int):
         if prop.id == property_id:
             properties_db.pop(i)
             return
-    
+
     raise HTTPException(
         status_code=404,
         detail=f"Property with ID {property_id} not found"
@@ -187,21 +187,21 @@ async def delete_property(property_id: int):
 1. Copy this file to: apps/api/routes/properties.py
 
 2. In apps/api/main.py, add:
-   
+
    from apps.api.routes import properties
    app.include_router(properties.router)
 
 3. Restart the service:
    docker compose restart
-   
+
    OR
-   
+
    python apps/api/main.py
 
 4. Test the endpoints:
    curl http://127.0.0.1:8000/v1/properties
    curl http://127.0.0.1:8000/v1/properties/1
-   
+
 5. View API docs:
    http://127.0.0.1:8000/docs
 """

@@ -22,20 +22,20 @@ def check_health():
     """
     print("🔍 Checking service health...")
     print("   กำลังตรวจสอบสถานะ service...\n")
-    
+
     try:
         response = httpx.get("http://127.0.0.1:8000/healthz")
         response.raise_for_status()
-        
+
         data = response.json()
-        print(f"✅ Service is healthy!")
+        print("✅ Service is healthy!")
         print(f"   Status: {data['status']}")
         print(f"   Service: {data['service']}")
         print(f"   Version: {data['version']}\n")
         return True
     except Exception as e:
         print(f"❌ Service is not available: {e}")
-        print(f"   กรุณาเริ่ม service ก่อน: docker compose up --build\n")
+        print("   กรุณาเริ่ม service ก่อน: docker compose up --build\n")
         return False
 
 
@@ -45,13 +45,13 @@ def get_metadata():
     """
     print("📋 Getting service metadata...")
     print("   กำลังดึงข้อมูล metadata...\n")
-    
+
     try:
         response = httpx.get("http://127.0.0.1:8000/v1/meta")
         response.raise_for_status()
-        
+
         data = response.json()
-        print(f"✅ Metadata received!")
+        print("✅ Metadata received!")
         print(f"   Service: {data['service']}")
         print(f"   Environment: {data['environment']}")
         print(f"   Version: {data['version']}")
@@ -70,7 +70,7 @@ def main():
     print("FlowBiz AMP - Simple Client Example")
     print("ตัวอย่างการใช้งาน Client อย่างง่าย")
     print("=" * 60 + "\n")
-    
+
     # Check if service is running / ตรวจสอบว่า service ทำงานหรือไม่
     if not check_health():
         print("💡 Tip: Start the service first with:")
@@ -78,10 +78,10 @@ def main():
         print("   OR")
         print("   python apps/api/main.py")
         return
-    
+
     # Get service metadata / ดึงข้อมูล metadata
     metadata = get_metadata()
-    
+
     if metadata:
         print("=" * 60)
         print("✨ Success! You can now build on top of this API.")

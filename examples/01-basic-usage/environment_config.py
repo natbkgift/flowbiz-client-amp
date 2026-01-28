@@ -20,7 +20,7 @@ def show_current_config():
     """
     print("\n📋 Current Environment Configuration:")
     print("   ค่า Configuration ปัจจุบัน:\n")
-    
+
     env_vars = {
         "APP_ENV": os.getenv("APP_ENV", "dev"),
         "APP_HOST": os.getenv("APP_HOST", "0.0.0.0"),
@@ -30,10 +30,10 @@ def show_current_config():
         "FLOWBIZ_VERSION": os.getenv("FLOWBIZ_VERSION", "0.1.0"),
         "FLOWBIZ_BUILD_SHA": os.getenv("FLOWBIZ_BUILD_SHA", "local"),
     }
-    
+
     for key, value in env_vars.items():
         print(f"   {key}: {value}")
-    
+
     print()
 
 
@@ -43,7 +43,7 @@ def create_example_env_file():
     """
     print("\n📝 Creating example .env file...")
     print("   กำลังสร้างไฟล์ .env ตัวอย่าง...\n")
-    
+
     env_content = """# FlowBiz AMP Environment Configuration
 # ตั้งค่า Environment สำหรับ FlowBiz AMP
 
@@ -99,10 +99,10 @@ FLOWBIZ_BUILD_SHA=local
 #
 # APP_PORT=8080
 """
-    
+
     example_file = Path("example.env")
     example_file.write_text(env_content)
-    
+
     print(f"✅ Created: {example_file.absolute()}")
     print("\n💡 To use this file / การใช้ไฟล์นี้:")
     print("   1. Copy to .env: cp example.env .env")
@@ -119,7 +119,7 @@ def show_environment_examples():
     print("Environment Configuration Examples")
     print("ตัวอย่างการตั้งค่าสำหรับสภาพแวดล้อมต่างๆ")
     print("=" * 60)
-    
+
     configs = {
         "Development (Local)": {
             "APP_ENV": "dev",
@@ -140,7 +140,7 @@ def show_environment_examples():
             "APP_LOG_LEVEL": "info",
         },
     }
-    
+
     for env_name, config in configs.items():
         print(f"\n📌 {env_name}:")
         for key, value in config.items():
@@ -155,16 +155,16 @@ def main():
     print("FlowBiz AMP - Environment Configuration Example")
     print("ตัวอย่างการตั้งค่า Environment Variables")
     print("=" * 60)
-    
+
     # Show current configuration
     show_current_config()
-    
+
     # Show examples for different environments
     show_environment_examples()
-    
+
     # Create example .env file
     create_example_env_file()
-    
+
     print("=" * 60)
     print("✅ Done! Check the example.env file created.")
     print("   เสร็จแล้ว! ตรวจสอบไฟล์ example.env ที่สร้างขึ้น")

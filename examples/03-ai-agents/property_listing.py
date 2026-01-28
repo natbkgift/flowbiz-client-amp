@@ -11,9 +11,8 @@ Based on AMP's real estate business in Pattaya.
 
 from datetime import datetime
 from enum import Enum
-from typing import Literal
-from pydantic import BaseModel, Field
 
+from pydantic import BaseModel, Field
 
 # ========================================
 # Data Models / โมเดลข้อมูล
@@ -194,56 +193,56 @@ class PropertyAgent:
     Agent for managing property listings and recommendations
     Agent สำหรับจัดการและแนะนำ properties
     """
-    
+
     def __init__(self, properties: list[Property]):
         self.properties = properties
-    
+
     def search(self, criteria: SearchCriteria) -> list[Property]:
         """
         Search properties based on criteria / ค้นหา properties ตามเกณฑ์
         """
         results = self.properties.copy()
-        
+
         # Filter by property type
         if criteria.property_type:
             results = [p for p in results if p.property_type == criteria.property_type]
-        
+
         # Filter by location
         if criteria.location:
             results = [p for p in results if p.location == criteria.location]
-        
+
         # Filter by price range
         if criteria.min_price is not None:
             results = [p for p in results if p.price >= criteria.min_price]
         if criteria.max_price is not None:
             results = [p for p in results if p.price <= criteria.max_price]
-        
+
         # Filter by bedrooms
         if criteria.min_bedrooms is not None:
             results = [p for p in results if p.bedrooms >= criteria.min_bedrooms]
-        
+
         # Filter by area
         if criteria.min_area_sqm is not None:
             results = [p for p in results if p.area_sqm >= criteria.min_area_sqm]
-        
+
         # Filter by features
         if criteria.must_have_sea_view:
             results = [p for p in results if p.has_sea_view]
-        
+
         if criteria.must_have_pool:
             results = [p for p in results if p.has_pool]
-        
+
         # Filter by beach distance
         if criteria.max_distance_to_beach_m is not None:
             results = [
-                p for p in results 
-                if p.distance_to_beach_m is not None 
+                p for p in results
+                if p.distance_to_beach_m is not None
                 and p.distance_to_beach_m <= criteria.max_distance_to_beach_m
             ]
-        
+
         return results
-    
-    def recommend_for_budget(self, budget: float, 
+
+    def recommend_for_budget(self, budget: float,
                             property_type: PropertyType | None = None) -> list[Property]:
         """
         Recommend properties within budget / แนะนำ properties ตามงบประมาณ
@@ -251,35 +250,35 @@ class PropertyAgent:
         # Find properties within 90% to 110% of budget
         min_price = budget * 0.9
         max_price = budget * 1.1
-        
+
         criteria = SearchCriteria(
             property_type=property_type,
             min_price=min_price,
             max_price=max_price,
         )
-        
+
         results = self.search(criteria)
-        
+
         # Sort by how close to budget (closer is better)
         results.sort(key=lambda p: abs(p.price - budget))
-        
+
         return results[:3]  # Top 3 recommendations
-    
+
     def get_premium_properties(self) -> list[Property]:
         """
         Get premium properties (high-end listings) / ดึง properties ระดับพรีเมี่ยม
         """
         premium = [
-            p for p in self.properties 
-            if p.price >= 10_000_000 
+            p for p in self.properties
+            if p.price >= 10_000_000
             or (p.has_sea_view and p.price >= 5_000_000)
         ]
-        
+
         # Sort by price descending
         premium.sort(key=lambda p: p.price, reverse=True)
-        
+
         return premium
-    
+
     def get_investment_opportunities(self) -> list[Property]:
         """
         Find good investment properties / หา properties ที่เหมาะลงทุน
@@ -288,7 +287,7 @@ class PropertyAgent:
         # - Condos near beach (good for rental)
         # - Price under 6M (good ROI potential)
         # - Furnished (ready to rent)
-        
+
         opportunities = [
             p for p in self.properties
             if p.property_type == PropertyType.CONDO
@@ -297,12 +296,12 @@ class PropertyAgent:
             and p.distance_to_beach_m is not None
             and p.distance_to_beach_m <= 500
         ]
-        
+
         # Sort by value (price per sqm)
         opportunities.sort(key=lambda p: p.price / p.area_sqm)
-        
+
         return opportunities
-    
+
     def calculate_price_per_sqm(self, property_id: int) -> float | None:
         """
         Calculate price per square meter / คำนวณราคาต่อตารางเมตร
@@ -327,7 +326,7 @@ def print_property(prop: Property, price_per_sqm: float | None = None):
     else:
         print()
     print(f"   Size: {prop.area_sqm} sqm | Bed: {prop.bedrooms} | Bath: {prop.bathrooms}")
-    
+
     features = []
     if prop.has_sea_view:
         features.append("Sea view")
@@ -347,10 +346,10 @@ def main():
     print("FlowBiz AMP - Property Listing Agent Demo")
     print("ตัวอย่าง Agent สำหรับจัดการ Property")
     print("=" * 70 + "\n")
-    
+
     # Create agent
     agent = PropertyAgent(SAMPLE_PROPERTIES)
-    
+
     # Example 1: Search for sea view condos
     print("\n🔍 Example 1: Sea View Condos in Jomtien")
     print("-" * 70)
@@ -364,7 +363,7 @@ def main():
     for prop in results:
         price_per_sqm = agent.calculate_price_per_sqm(prop.id)
         print_property(prop, price_per_sqm)
-    
+
     # Example 2: Budget recommendations
     print("\n\n💰 Example 2: Recommendations for 3M THB budget")
     print("-" * 70)
@@ -372,7 +371,7 @@ def main():
     print(f"Top {len(recommendations)} recommendations:")
     for prop in recommendations:
         print_property(prop)
-    
+
     # Example 3: Premium properties
     print("\n\n⭐ Example 3: Premium Properties")
     print("-" * 70)
@@ -380,7 +379,7 @@ def main():
     print(f"Found {len(premium)} premium properties:")
     for prop in premium:
         print_property(prop)
-    
+
     # Example 4: Investment opportunities
     print("\n\n📈 Example 4: Investment Opportunities")
     print("-" * 70)
@@ -389,7 +388,7 @@ def main():
     for prop in investments:
         price_per_sqm = agent.calculate_price_per_sqm(prop.id)
         print_property(prop, price_per_sqm)
-    
+
     print("\n" + "=" * 70)
     print("✅ Property search demo complete!")
     print("\n💡 Next steps:")
