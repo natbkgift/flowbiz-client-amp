@@ -208,9 +208,10 @@
         
         // Better star representation with half-stars
         const maxStars = 5;
-        const fullStars = Math.floor(dev.rating);
-        const fraction = dev.rating - fullStars;
+        const rawFullStars = Math.floor(dev.rating);
+        const fraction = dev.rating - rawFullStars;
         const hasHalfStar = fraction >= 0.25 && fraction < 0.75;
+        const fullStars = fraction >= 0.75 ? rawFullStars + 1 : rawFullStars;
         const emptyStars = Math.max(0, maxStars - fullStars - (hasHalfStar ? 1 : 0));
         const stars = '⭐'.repeat(Math.max(0, Math.min(maxStars, fullStars))) +
                      (hasHalfStar ? '⭑' : '') +

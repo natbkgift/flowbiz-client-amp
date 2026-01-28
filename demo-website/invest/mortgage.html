@@ -175,6 +175,15 @@
       const rate = parseFloat(document.getElementById('mortgage-rate').value) || 0;
       const term = parseFloat(document.getElementById('mortgage-term').value) || 0;
 
+      // Format currency helper
+      const formatCurrency = (num) => {
+        return new Intl.NumberFormat('th-TH', {
+          style: 'currency',
+          currency: 'THB',
+          minimumFractionDigits: 0
+        }).format(num);
+      };
+
       // Better validation with specific error messages
       const errors = [];
       const lang = document.documentElement.lang || 'th';
@@ -228,14 +237,6 @@
 
       totalPayment = monthlyPayment * numPayments;
       totalInterest = totalPayment - loanAmount;
-
-      const formatCurrency = (num) => {
-        return new Intl.NumberFormat('th-TH', {
-          style: 'currency',
-          currency: 'THB',
-          minimumFractionDigits: 0
-        }).format(num);
-      };
 
       document.getElementById('result-monthly-payment').textContent = formatCurrency(monthlyPayment);
       document.getElementById('result-total-interest').textContent = formatCurrency(totalInterest);
