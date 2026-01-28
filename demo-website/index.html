@@ -1,14 +1,17 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Asset Management Property | Find Properties in Pattaya</title>
-  <meta name="description" content="Professional property management in Pattaya. Find condos, houses, and villas for rent or sale.">
-  
+  <meta name="description"
+    content="Professional property management in Pattaya. Find condos, houses, and villas for rent or sale.">
+
   <!-- Open Graph -->
   <meta property="og:title" content="Asset Management Property | Find Properties in Pattaya">
-  <meta property="og:description" content="Professional property management in Pattaya. Find condos, houses, and villas for rent or sale.">
+  <meta property="og:description"
+    content="Professional property management in Pattaya. Find condos, houses, and villas for rent or sale.">
   <meta property="og:image" content="https://via.placeholder.com/1200x630/1744BE/FFFFFF?text=AMP+Pattaya">
   <meta property="og:url" content="https://amppattaya.com/">
   <meta property="og:type" content="website">
@@ -17,7 +20,8 @@
   <!-- Twitter Card -->
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="Asset Management Property | Find Properties in Pattaya">
-  <meta name="twitter:description" content="Professional property management in Pattaya. Find condos, houses, and villas for rent or sale.">
+  <meta name="twitter:description"
+    content="Professional property management in Pattaya. Find condos, houses, and villas for rent or sale.">
   <meta name="twitter:image" content="https://via.placeholder.com/1200x630/1744BE/FFFFFF?text=AMP+Pattaya">
 
   <!-- Canonical URL -->
@@ -26,33 +30,36 @@
   <!-- Favicon -->
   <link rel="icon" href="assets/images/favicon.svg" type="image/svg+xml">
   <link rel="apple-touch-icon" href="assets/images/logo-amp.svg">
-  
+
   <!-- Stylesheets -->
   <link rel="stylesheet" href="assets/css/main.css">
   <link rel="stylesheet" href="assets/css/components.css">
   <link rel="stylesheet" href="assets/css/responsive.css">
-  
+
   <!-- Lucide Icons -->
   <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
 </head>
+
 <body>
   <!-- Skip Link for Accessibility -->
   <a href="#main-content" class="skip-link">Skip to main content</a>
-  
+
   <!-- Header -->
   <header class="header">
     <div class="header-content">
       <a href="index.html" class="logo">
         <img src="assets/images/logo-amp.svg" alt="Asset Management Property" height="40">
       </a>
-      
+
       <nav class="nav desktop-only">
         <a href="index.html" data-i18n="nav_home"><i data-lucide="home"></i> Home</a>
         <a href="listing.html?intent=rent" data-i18n="nav_rent"><i data-lucide="key"></i> Rent</a>
         <a href="listing.html?intent=sale" data-i18n="nav_buy"><i data-lucide="building"></i> Buy</a>
+        <a href="projects/index.html" data-i18n="nav_projects"><i data-lucide="layers"></i> Projects</a>
+        <a href="invest/index.html" data-i18n="nav_invest"><i data-lucide="trending-up"></i> Invest</a>
         <a href="#contact" data-i18n="nav_contact"><i data-lucide="mail"></i> Contact</a>
       </nav>
-      
+
       <div class="header-actions">
         <button class="lang-switch" onclick="toggleLanguage()">
           <span>TH</span>
@@ -67,32 +74,35 @@
       </div>
     </div>
   </header>
-  
+
   <!-- Mobile Menu -->
   <div class="mobile-menu" id="mobile-menu">
     <a href="index.html" data-i18n="nav_home"><i data-lucide="home"></i> Home</a>
     <a href="listing.html?intent=rent" data-i18n="nav_rent"><i data-lucide="key"></i> Rent</a>
     <a href="listing.html?intent=sale" data-i18n="nav_buy"><i data-lucide="building"></i> Buy</a>
+    <a href="projects/index.html" data-i18n="nav_projects"><i data-lucide="layers"></i> Projects</a>
+    <a href="invest/index.html" data-i18n="nav_invest"><i data-lucide="trending-up"></i> Invest</a>
     <a href="#contact" data-i18n="nav_contact"><i data-lucide="mail"></i> Contact</a>
   </div>
-  
+
   <!-- Hero Section -->
   <section class="hero" id="main-content">
     <div class="container">
       <h1 data-i18n="hero_title">ค้นหาทรัพย์สินในพัทยา</h1>
       <p class="hero-subtitle" data-i18n="hero_subtitle">Find Properties in Pattaya</p>
-      
+
       <!-- Search Form -->
       <form class="search-form" id="search-form">
         <div class="form-row">
           <div class="form-group">
             <label class="form-label" data-i18n="search_looking_to">Looking to</label>
             <div class="toggle-group">
-              <button type="button" class="toggle-option active" data-value="rent" data-i18n="search_intent_rent">Rent</button>
+              <button type="button" class="toggle-option active" data-value="rent"
+                data-i18n="search_intent_rent">Rent</button>
               <button type="button" class="toggle-option" data-value="sale" data-i18n="search_intent_buy">Buy</button>
             </div>
           </div>
-          
+
           <div class="form-group">
             <label class="form-label" data-i18n="search_property_type">Property Type</label>
             <select name="type" class="form-select">
@@ -104,7 +114,7 @@
               <option value="land">Land</option>
             </select>
           </div>
-          
+
           <div class="form-group">
             <label class="form-label" data-i18n="search_area">Area</label>
             <select name="area" class="form-select">
@@ -117,7 +127,7 @@
               <option value="Huay Yai">Huay Yai</option>
             </select>
           </div>
-          
+
           <div class="form-group">
             <label class="form-label">&nbsp;</label>
             <button type="submit" class="btn btn-accent btn-block" data-i18n="search_button">Search Properties</button>
@@ -126,7 +136,7 @@
       </form>
     </div>
   </section>
-  
+
   <!-- Featured Properties Section -->
   <section class="section">
     <div class="container">
@@ -134,17 +144,17 @@
         <h2 class="section-title" data-i18n="section_featured">แนะนำพิเศษ / Featured Properties</h2>
         <p class="section-subtitle">Handpicked properties for you</p>
       </div>
-      
+
       <div class="grid grid-3" id="featured-properties">
         <!-- Properties will be rendered here by JavaScript -->
       </div>
-      
+
       <div style="text-align: center; margin-top: 32px;">
         <a href="listing.html" class="btn btn-primary">View All Properties</a>
       </div>
     </div>
   </section>
-  
+
   <!-- Popular Areas Section -->
   <section class="section" style="background: var(--color-white);">
     <div class="container">
@@ -152,13 +162,13 @@
         <h2 class="section-title" data-i18n="section_popular_areas">พื้นที่ยอดนิยม / Popular Areas</h2>
         <p class="section-subtitle">Explore properties by location</p>
       </div>
-      
+
       <div class="grid grid-3" id="popular-areas">
         <!-- Areas will be rendered here by JavaScript -->
       </div>
     </div>
   </section>
-  
+
   <!-- Footer -->
   <footer class="footer" id="contact">
     <div class="container">
@@ -171,55 +181,57 @@
             Mon - Sun: 9:00 AM - 6:00 PM
           </p>
         </div>
-        
+
         <div>
           <h3>Contact Us</h3>
           <a href="tel:+66634533526">📞 +66 63-453-3526</a>
           <a href="mailto:info@amppattaya.com">📧 info@amppattaya.com</a>
           <a href="https://line.me/ti/p/~@554dksqb">💬 LINE: @554dksqb</a>
         </div>
-        
+
         <div>
           <h3>Quick Links</h3>
           <a href="listing.html?intent=rent">Properties for Rent</a>
           <a href="listing.html?intent=sale">Properties for Sale</a>
+          <a href="projects/index.html">Projects</a>
+          <a href="invest/index.html">Investment Hub</a>
           <a href="about.html">About Us</a>
           <a href="#contact">Contact Us</a>
         </div>
       </div>
-      
+
       <div class="footer-bottom">
         <p>&copy; 2026 Asset Management Property. All rights reserved. | Demo Website</p>
       </div>
     </div>
   </footer>
-  
+
   <!-- Scripts -->
   <script src="assets/js/mock-data.js"></script>
   <script src="assets/js/i18n.js"></script>
   <script src="assets/js/main.js"></script>
-  
+
   <script>
     // Render featured properties
     function renderFeaturedProperties() {
       const container = document.getElementById('featured-properties');
       if (!container) return;
-      
+
       const html = FEATURED_PROPERTIES.map(property => {
         const currentLang = document.documentElement.lang || 'en';
         const title = currentLang === 'th' ? property.title_th : property.title_en;
         const priceLabel = property.intent === 'rent' ? '/month' : '';
         const bedsLabel = property.beds === 0 ? 'Studio' : `${property.beds} ${property.beds === 1 ? 'Bed' : 'Beds'}`;
         const bathsLabel = `${property.baths} ${property.baths === 1 ? 'Bath' : 'Baths'}`;
-        
+
         const badges = property.badges.map(badge => {
-          const badgeClass = badge === 'Featured' ? 'badge-featured' : 
-                           badge === 'Available Now' ? 'badge-available' : 'badge-updated';
-          const badgeI18n = badge === 'Featured' ? 'prop_featured' : 
-                           badge === 'Available Now' ? 'prop_available' : '';
+          const badgeClass = badge === 'Featured' ? 'badge-featured' :
+            badge === 'Available Now' ? 'badge-available' : 'badge-updated';
+          const badgeI18n = badge === 'Featured' ? 'prop_featured' :
+            badge === 'Available Now' ? 'prop_available' : '';
           return `<span class="badge ${badgeClass}" ${badgeI18n ? `data-i18n="${badgeI18n}"` : ''}>${badge}</span>`;
         }).join('');
-        
+
         return `
           <div class="property-card">
             <div class="card-image">
@@ -242,19 +254,19 @@
           </div>
         `;
       }).join('');
-      
+
       container.innerHTML = html;
     }
-    
+
     // Render popular areas
     function renderPopularAreas() {
       const container = document.getElementById('popular-areas');
       if (!container) return;
-      
+
       const html = POPULAR_AREAS.map(area => {
         const currentLang = document.documentElement.lang || 'en';
         const name = currentLang === 'th' ? area.name_th : area.name;
-        
+
         return `
           <div class="area-card" data-area="${area.name}">
             <img src="${area.image}" alt="${name}">
@@ -264,19 +276,20 @@
           </div>
         `;
       }).join('');
-      
+
       container.innerHTML = html;
     }
-    
+
     // Initialize
     renderFeaturedProperties();
     renderPopularAreas();
   </script>
-  
+
   <script>
     if (typeof lucide !== 'undefined') {
       lucide.createIcons();
     }
   </script>
 </body>
+
 </html>
