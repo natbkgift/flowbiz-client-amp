@@ -407,9 +407,9 @@
       const currentLang = document.documentElement.lang || 'en';
 
       // Helper function to get translation
-      const t = (key) => {
-        if (typeof window.t === 'function') {
-          return window.t(key);
+      const translate = (key) => {
+        if (typeof t === 'function') {
+          return t(key);
         }
         return key;
       };
@@ -427,8 +427,7 @@
       avgPriceCard.className = 'stat-card';
 
       const avgPriceTitle = document.createElement('h3');
-      avgPriceTitle.setAttribute('data-i18n', 'market_avg_price_by_type');
-      avgPriceTitle.textContent = t('market_avg_price_by_type');
+      avgPriceTitle.textContent = translate('market_avg_price_by_type');
       avgPriceCard.appendChild(avgPriceTitle);
 
       stats.avg_price_by_type.forEach(item => {
@@ -443,8 +442,13 @@
 
         const value = document.createElement('span');
         value.className = 'stat-value';
-        value.innerHTML = `฿${formatNumber(item.avg_price_sqm)}/${t('market_price_per_sqm')}
-          <span class="stat-change positive">+${item.yoy_change}%</span>`;
+        
+        // Handle positive/negative changes
+        const changeSign = item.yoy_change >= 0 ? '+' : '';
+        const changeClass = item.yoy_change >= 0 ? 'positive' : 'negative';
+        
+        value.innerHTML = `฿${formatNumber(item.avg_price_sqm)}/${translate('market_price_per_sqm')}
+          <span class="stat-change ${changeClass}">${changeSign}${item.yoy_change}%</span>`;
 
         statItem.appendChild(label);
         statItem.appendChild(value);
@@ -458,8 +462,7 @@
       hotAreasCard.className = 'stat-card';
 
       const hotAreasTitle = document.createElement('h3');
-      hotAreasTitle.setAttribute('data-i18n', 'market_hot_areas');
-      hotAreasTitle.textContent = t('market_hot_areas');
+      hotAreasTitle.textContent = translate('market_hot_areas');
       hotAreasCard.appendChild(hotAreasTitle);
 
       stats.hot_areas.forEach(area => {
@@ -474,7 +477,12 @@
 
         const value = document.createElement('span');
         value.className = 'stat-value';
-        value.innerHTML = `<span class="stat-change positive">+${area.growth}%</span>`;
+        
+        // Handle positive/negative growth
+        const growthSign = area.growth >= 0 ? '+' : '';
+        const growthClass = area.growth >= 0 ? 'positive' : 'negative';
+        
+        value.innerHTML = `<span class="stat-change ${growthClass}">${growthSign}${area.growth}%</span>`;
 
         statItem.appendChild(label);
         statItem.appendChild(value);
@@ -488,16 +496,18 @@
       rentalYieldCard.className = 'stat-card';
 
       const rentalYieldTitle = document.createElement('h3');
-      rentalYieldTitle.setAttribute('data-i18n', 'market_rental_yield');
-      rentalYieldTitle.textContent = t('market_rental_yield');
+      rentalYieldTitle.textContent = translate('market_rental_yield');
       rentalYieldCard.appendChild(rentalYieldTitle);
+
+      // Create a map for property type labels from avg_price_by_type
+      const typeLabelMap = {};
+      stats.avg_price_by_type.forEach(item => {
+        typeLabelMap[item.type] = currentLang === 'th' ? item.type_th : item.type.charAt(0).toUpperCase() + item.type.slice(1);
+      });
 
       // Display Net yields for each property type
       ['condo', 'house', 'villa'].forEach(type => {
-        const typeLabel = currentLang === 'th' ? 
-          (type === 'condo' ? 'คอนโด' : type === 'house' ? 'บ้าน' : 'วิลล่า') :
-          type.charAt(0).toUpperCase() + type.slice(1);
-        
+        const typeLabel = typeLabelMap[type] || type;
         const yields = stats.rental_yields[type];
         
         const statItem = document.createElement('div');
@@ -505,7 +515,7 @@
 
         const label = document.createElement('span');
         label.className = 'stat-label';
-        label.textContent = `${typeLabel} (${t('market_net')})`;
+        label.textContent = `${typeLabel} (${translate('market_net')})`;
 
         const value = document.createElement('span');
         value.className = 'stat-value';
