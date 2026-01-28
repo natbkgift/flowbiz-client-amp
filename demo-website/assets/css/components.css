@@ -110,6 +110,11 @@
   color: var(--color-white);
 }
 
+/* Badge spacing fallback for browsers that don't support gap */
+.badge + .badge {
+  margin-left: 4px;
+}
+
 /* Property Card */
 .property-card {
   background: var(--color-white);
