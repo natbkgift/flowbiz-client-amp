@@ -3,7 +3,7 @@
 Property Master List Template Generator
 สร้าง Excel template สำหรับจัดการข้อมูล property ทั้งหมดของ AMP
 
-This script generates the Property_Master_List.xlsx file according to the 
+This script generates the Property_Master_List.xlsx file according to the
 specifications defined in PROPERTY_MASTER_LIST.md
 
 # Dependencies:
@@ -15,11 +15,11 @@ specifications defined in PROPERTY_MASTER_LIST.md
 """
 
 try:
+    from datetime import date
+
     from openpyxl import Workbook
     from openpyxl.styles import Alignment, Border, Font, PatternFill, Side
-    from openpyxl.utils import get_column_letter
     from openpyxl.worksheet.datavalidation import DataValidation
-    from openpyxl.workbook.workbook import Workbook as WorkbookType
     from openpyxl.worksheet.worksheet import Worksheet
 except ImportError as exc:
     raise SystemExit(
@@ -30,13 +30,13 @@ except ImportError as exc:
 
 def create_property_master_list() -> str:
     """Create the Property Master List Excel template"""
-    
+
     wb = Workbook()
-    
+
     # Remove default sheet
     if 'Sheet' in wb.sheetnames:
         wb.remove(wb['Sheet'])
-    
+
     # Create all tabs
     ws_all = wb.create_sheet("01_All_Properties")
     ws_projects = wb.create_sheet("02_Projects_New")
@@ -46,7 +46,7 @@ def create_property_master_list() -> str:
     ws_sold = wb.create_sheet("06_Sold_Rented")
     ws_pending = wb.create_sheet("07_Pending")
     ws_readme = wb.create_sheet("README")
-    
+
     # Define column headers for main tab (01_All_Properties)
     headers = [
         ("A", "Property_ID", "Text", "Unique identifier", "PROP-2026-001"),
@@ -98,11 +98,14 @@ def create_property_master_list() -> str:
         ("AU", "Date_Available", "Date", "Available from date", "2026-02-01"),
         ("AV", "Views_Count", "Number", "Number of online views", "15"),
         ("AW", "Viewings_Count", "Number", "Physical viewings done", "3"),
-        ("AX", "Notes_Internal", "Text", "Internal notes", "Good deal, motivated seller"),
+        ("AX", "Notes_Internal", "Text", "Internal notes",
+         "Good deal, motivated seller"),
         ("AY", "Tags", "Text", "Search tags", "sea view, investment, new"),
         ("AZ", "Language", "Text", "Listing languages", "TH, EN"),
-        ("BA", "WhatsApp_Message", "Text", "Pre-formatted message", "Hello, I'm interested in Property PROP-2026-001"),
-        ("BB", "QR_Code_URL", "URL", "Generated wa.me link", "https://wa.me/66XXX?text=..."),
+        ("BA", "WhatsApp_Message", "Text", "Pre-formatted message",
+         "Hello, I'm interested in Property PROP-2026-001"),
+        ("BB", "QR_Code_URL", "URL", "Generated wa.me link",
+         "https://wa.me/66XXX?text=..."),
         ("BC", "Print_Status", "Dropdown", "Currently printed?", "Yes"),
         ("BD", "Print_Slot", "Number", "Slot number if printed", "5"),
         ("BE", "FB_Posted_Date", "Date", "Last Facebook post date", "2026-01-26"),
@@ -111,10 +114,10 @@ def create_property_master_list() -> str:
         ("BH", "Website_URL", "URL", "Property page URL", "[URL]"),
         ("BI", "Marketing_Priority", "Dropdown", "Marketing priority level", "High"),
     ]
-    
+
     # Setup main tab
     setup_main_tab(ws_all, headers)
-    
+
     # Setup other tabs (Projects, Resale, etc.) with their headers
     setup_projects_tab(ws_projects, headers)
     setup_resale_tab(ws_resale, headers)
@@ -123,7 +126,7 @@ def create_property_master_list() -> str:
     setup_sold_rented_tab(ws_sold, headers)
     setup_pending_tab(ws_pending, headers)
     setup_readme_tab(ws_readme)
-    
+
     # Save the workbook
     filename = "Property_Master_List.xlsx"
     wb.save(filename)
@@ -131,15 +134,14 @@ def create_property_master_list() -> str:
     return filename
 
 
-def setup_main_tab(ws: Worksheet, headers: list) -> None:
-    """Setup the main 01_All_Properties tab with all columns and validations"""
-    
+def setup_base_tab(ws: Worksheet, headers: list, header_color: str = "366092") -> None:
+    """Setup base columns, widths, and validations for a tab"""
     # Set up headers
-    for idx, (col, name, dtype, desc, example) in enumerate(headers, 1):
+    for idx, (_col, name, _dtype, _desc, _example) in enumerate(headers, 1):
         cell = ws.cell(row=1, column=idx)
         cell.value = name
         cell.font = Font(bold=True, size=11, color="FFFFFF")
-        cell.fill = PatternFill(start_color="366092", end_color="366092", fill_type="solid")
+        cell.fill = PatternFill(start_color=header_color, end_color=header_color, fill_type="solid")
         cell.alignment = Alignment(horizontal="center", vertical="center", wrap_text=True)
         cell.border = Border(
             left=Side(style='thin'),
@@ -147,7 +149,7 @@ def setup_main_tab(ws: Worksheet, headers: list) -> None:
             top=Side(style='thin'),
             bottom=Side(style='thin')
         )
-    
+
     # Set column widths
     column_widths = {
         'A': 15, 'B': 12, 'C': 12, 'D': 12, 'E': 25, 'F': 12, 'G': 15, 'H': 20,
@@ -160,38 +162,37 @@ def setup_main_tab(ws: Worksheet, headers: list) -> None:
         'BA': 40, 'BB': 40, 'BC': 12, 'BD': 10, 'BE': 12, 'BF': 15, 'BG': 12,
         'BH': 15, 'BI': 15
     }
-    
+
     for col, width in column_widths.items():
         ws.column_dimensions[col].width = width
-    
-    # Add formulas to row 2 as examples
-    ws['A2'] = '=IF($AS2<>"", "PROP-"&TEXT(YEAR($AS2),"0000")&"-"&TEXT(ROW()-1,"000"), "")'
-    ws['O2'] = '=IF(AND(L2>0, V2>0), L2/V2, "N/A")'
-    ws['W2'] = '=IF(V2>0, V2/4, "")'
-    ws['BA2'] = '="Hello, I\'m interested in Property "&A2'
-    ws['BB2'] = '="https://wa.me/66XXXXXXXXX?text="&ENCODEURL("Hello, I\'m interested in Property "&A2)'
-    
+
     # Create data validation lists
     validations = {
         'Status': ['Available', 'Reserved', 'Sold', 'Rented', 'Pending', 'Off Market'],
         'Category': ['Project', 'Resale', 'Rental-LT', 'Rental-ST'],
         'Type': ['Condo', 'Villa', 'House', 'Townhouse', 'Land', 'Commercial'],
-        'Location_Area': ['Pattaya City', 'Jomtien', 'Na Jomtien', 'Pratumnak', 'Wongamat', 
+        'Location_Area': ['Pattaya City', 'Jomtien', 'Na Jomtien', 'Pratumnak', 'Wongamat',
                           'Bang Saray', 'Huay Yai', 'East Pattaya', 'Other'],
         'Currency': ['THB', 'USD', 'EUR'],
         'Owner_Type': ['Freehold', 'Leasehold', 'Company'],
         'Furnishing': ['Unfurnished', 'Partly Furnished', 'Fully Furnished'],
         'Condition': ['New', 'Excellent', 'Good', 'Fair', 'Needs Renovation'],
-        'Source': ['Owner Direct', 'Agent', 'LINE Group', 'Facebook', 'Website', 'Walk-in', 'Referral'],
+        'Source': [
+            'Owner Direct', 'Agent', 'LINE Group', 'Facebook',
+            'Website', 'Walk-in', 'Referral'
+        ],
+        'Assigned_Agent': [
+            'Somchai S.', 'Napat K.', 'John D.', 'Sarah M.', 'Unassigned'
+        ],
         'Priority': ['Low', 'Medium', 'High'],
         'Yes_No': ['Yes', 'No', 'N/A'],
         'Yes_No_Simple': ['Yes', 'No'],
     }
-    
+
     # Apply data validation
     validation_columns = {
         'B': 'Status',
-        'C': 'Category', 
+        'C': 'Category',
         'D': 'Type',
         'G': 'Location_Area',
         'N': 'Currency',
@@ -201,6 +202,7 @@ def setup_main_tab(ws: Worksheet, headers: list) -> None:
         'Z': 'Furnishing',
         'AC': 'Condition',
         'AM': 'Source',
+        'AO': 'Assigned_Agent',
         'AP': 'Priority',
         'AQ': 'Yes_No_Simple',
         'AR': 'Yes_No_Simple',
@@ -208,11 +210,11 @@ def setup_main_tab(ws: Worksheet, headers: list) -> None:
         'BG': 'Yes_No_Simple',
         'BI': 'Priority',
     }
-    
+
     for col, val_type in validation_columns.items():
         dv = DataValidation(
-            type="list", 
-            formula1=f'"{",".join(validations[val_type])}"', 
+            type="list",
+            formula1=f'"{",".join(validations[val_type])}"',
             allow_blank=True
         )
         dv.error = 'Invalid value'
@@ -220,10 +222,27 @@ def setup_main_tab(ws: Worksheet, headers: list) -> None:
         ws.add_data_validation(dv)
         # Apply to first 1000 rows
         dv.add(f'{col}2:{col}1000')
-    
+
     # Freeze panes (freeze first row and first column)
     ws.freeze_panes = 'B2'
-    
+
+
+def setup_main_tab(ws: Worksheet, headers: list) -> None:
+    """Setup the main 01_All_Properties tab with all columns and validations"""
+
+    # Use the base setup function
+    setup_base_tab(ws, headers)
+
+    # Add formulas to row 2 as examples
+    ws['A2'] = '=IF($AS2<>"", "PROP-"&TEXT(YEAR($AS2),"0000")&"-"&TEXT(ROW()-1,"000"), "")'
+    ws['O2'] = '=IF(AND(L2>0, V2>0), L2/V2, 0)'
+    ws['W2'] = '=IF(V2>0, V2/4, "")'
+    ws['BA2'] = '="Hello, I\'m interested in Property "&A2'
+    ws['BB2'] = (
+        '="https://wa.me/66XXXXXXXXX?text="&ENCODEURL'
+        '("Hello, I\'m interested in Property "&A2)'
+    )
+
     # Add a sample data row (row 2 with some example values)
     sample_data = {
         'B2': 'Available',
@@ -255,8 +274,6 @@ def setup_main_tab(ws: Worksheet, headers: list) -> None:
         'AP2': 'High',
         'AQ2': 'Yes',
         'AR2': 'Yes',
-        'AS2': '2026-01-26',
-        'AT2': '2026-01-26',
         'AV2': 15,
         'AW2': 3,
         'AX2': 'Good deal, motivated seller',
@@ -266,21 +283,22 @@ def setup_main_tab(ws: Worksheet, headers: list) -> None:
         'BG2': 'Yes',
         'BI2': 'High',
     }
-    
+
     for cell_ref, value in sample_data.items():
         ws[cell_ref] = value
+
+    # Set date values with proper date objects and formatting
+    ws['AS2'] = date(2026, 1, 26)
+    ws['AS2'].number_format = 'YYYY-MM-DD'
+    ws['AT2'] = date(2026, 1, 26)
+    ws['AT2'].number_format = 'YYYY-MM-DD'
 
 
 def setup_projects_tab(ws: Worksheet, base_headers: list) -> None:
     """Setup 02_Projects_New tab with additional columns"""
-    # Copy base headers
-    for idx, (col, name, dtype, desc, example) in enumerate(base_headers, 1):
-        cell = ws.cell(row=1, column=idx)
-        cell.value = name
-        cell.font = Font(bold=True, size=11, color="FFFFFF")
-        cell.fill = PatternFill(start_color="366092", end_color="366092", fill_type="solid")
-        cell.alignment = Alignment(horizontal="center", vertical="center", wrap_text=True)
-    
+    # Setup base columns with validations
+    setup_base_tab(ws, base_headers)
+
     # Add additional columns for Projects
     additional_cols = [
         "Total_Units",
@@ -289,7 +307,7 @@ def setup_projects_tab(ws: Worksheet, base_headers: list) -> None:
         "Payment_Plan",
         "Installment_Available"
     ]
-    
+
     start_col = len(base_headers) + 1
     for idx, name in enumerate(additional_cols, start_col):
         cell = ws.cell(row=1, column=idx)
@@ -297,26 +315,20 @@ def setup_projects_tab(ws: Worksheet, base_headers: list) -> None:
         cell.font = Font(bold=True, size=11, color="FFFFFF")
         cell.fill = PatternFill(start_color="366092", end_color="366092", fill_type="solid")
         cell.alignment = Alignment(horizontal="center", vertical="center", wrap_text=True)
-    
-    ws.freeze_panes = 'B2'
 
 
 def setup_resale_tab(ws: Worksheet, base_headers: list) -> None:
     """Setup 03_Resale_Secondary tab with additional columns"""
-    for idx, (col, name, dtype, desc, example) in enumerate(base_headers, 1):
-        cell = ws.cell(row=1, column=idx)
-        cell.value = name
-        cell.font = Font(bold=True, size=11, color="FFFFFF")
-        cell.fill = PatternFill(start_color="366092", end_color="366092", fill_type="solid")
-        cell.alignment = Alignment(horizontal="center", vertical="center", wrap_text=True)
-    
+    # Setup base columns with validations
+    setup_base_tab(ws, base_headers)
+
     additional_cols = [
         "Owner_Contact",
         "Reason_Selling",
         "Occupancy",
         "Flexibility"
     ]
-    
+
     start_col = len(base_headers) + 1
     for idx, name in enumerate(additional_cols, start_col):
         cell = ws.cell(row=1, column=idx)
@@ -324,26 +336,20 @@ def setup_resale_tab(ws: Worksheet, base_headers: list) -> None:
         cell.font = Font(bold=True, size=11, color="FFFFFF")
         cell.fill = PatternFill(start_color="366092", end_color="366092", fill_type="solid")
         cell.alignment = Alignment(horizontal="center", vertical="center", wrap_text=True)
-    
-    ws.freeze_panes = 'B2'
 
 
 def setup_rental_lt_tab(ws: Worksheet, base_headers: list) -> None:
     """Setup 04_Rental_Long_Term tab with additional columns"""
-    for idx, (col, name, dtype, desc, example) in enumerate(base_headers, 1):
-        cell = ws.cell(row=1, column=idx)
-        cell.value = name
-        cell.font = Font(bold=True, size=11, color="FFFFFF")
-        cell.fill = PatternFill(start_color="366092", end_color="366092", fill_type="solid")
-        cell.alignment = Alignment(horizontal="center", vertical="center", wrap_text=True)
-    
+    # Setup base columns with validations
+    setup_base_tab(ws, base_headers)
+
     additional_cols = [
         "Min_Contract",
         "Utilities_Included",
         "Pets_Allowed",
         "Available_From"
     ]
-    
+
     start_col = len(base_headers) + 1
     for idx, name in enumerate(additional_cols, start_col):
         cell = ws.cell(row=1, column=idx)
@@ -351,19 +357,13 @@ def setup_rental_lt_tab(ws: Worksheet, base_headers: list) -> None:
         cell.font = Font(bold=True, size=11, color="FFFFFF")
         cell.fill = PatternFill(start_color="366092", end_color="366092", fill_type="solid")
         cell.alignment = Alignment(horizontal="center", vertical="center", wrap_text=True)
-    
-    ws.freeze_panes = 'B2'
 
 
 def setup_rental_st_tab(ws: Worksheet, base_headers: list) -> None:
     """Setup 05_Rental_Short_Term tab with additional columns"""
-    for idx, (col, name, dtype, desc, example) in enumerate(base_headers, 1):
-        cell = ws.cell(row=1, column=idx)
-        cell.value = name
-        cell.font = Font(bold=True, size=11, color="FFFFFF")
-        cell.fill = PatternFill(start_color="366092", end_color="366092", fill_type="solid")
-        cell.alignment = Alignment(horizontal="center", vertical="center", wrap_text=True)
-    
+    # Setup base columns with validations
+    setup_base_tab(ws, base_headers)
+
     additional_cols = [
         "Min_Nights",
         "Price_High_Season",
@@ -371,7 +371,7 @@ def setup_rental_st_tab(ws: Worksheet, base_headers: list) -> None:
         "Cleaning_Fee",
         "Booking_Platforms"
     ]
-    
+
     start_col = len(base_headers) + 1
     for idx, name in enumerate(additional_cols, start_col):
         cell = ws.cell(row=1, column=idx)
@@ -379,39 +379,25 @@ def setup_rental_st_tab(ws: Worksheet, base_headers: list) -> None:
         cell.font = Font(bold=True, size=11, color="FFFFFF")
         cell.fill = PatternFill(start_color="366092", end_color="366092", fill_type="solid")
         cell.alignment = Alignment(horizontal="center", vertical="center", wrap_text=True)
-    
-    ws.freeze_panes = 'B2'
 
 
 def setup_sold_rented_tab(ws: Worksheet, base_headers: list) -> None:
     """Setup 06_Sold_Rented archive tab"""
-    for idx, (col, name, dtype, desc, example) in enumerate(base_headers, 1):
-        cell = ws.cell(row=1, column=idx)
-        cell.value = name
-        cell.font = Font(bold=True, size=11, color="FFFFFF")
-        cell.fill = PatternFill(start_color="666666", end_color="666666", fill_type="solid")
-        cell.alignment = Alignment(horizontal="center", vertical="center", wrap_text=True)
-    
-    ws.freeze_panes = 'B2'
+    # Setup base columns with validations (using gray header color)
+    setup_base_tab(ws, base_headers, header_color="666666")
 
 
 def setup_pending_tab(ws: Worksheet, base_headers: list) -> None:
     """Setup 07_Pending tab"""
-    for idx, (col, name, dtype, desc, example) in enumerate(base_headers, 1):
-        cell = ws.cell(row=1, column=idx)
-        cell.value = name
-        cell.font = Font(bold=True, size=11, color="FFFFFF")
-        cell.fill = PatternFill(start_color="FFA500", end_color="FFA500", fill_type="solid")
-        cell.alignment = Alignment(horizontal="center", vertical="center", wrap_text=True)
-    
-    ws.freeze_panes = 'B2'
+    # Setup base columns with validations (using orange header color)
+    setup_base_tab(ws, base_headers, header_color="FFA500")
 
 
 def setup_readme_tab(ws: Worksheet) -> None:
     """Setup README tab with instructions"""
     ws['A1'] = 'PROPERTY MASTER LIST - README'
     ws['A1'].font = Font(bold=True, size=16, color="366092")
-    
+
     readme_content = [
         '',
         'Welcome to the AMP Property Master List!',
@@ -474,14 +460,14 @@ def setup_readme_tab(ws: Worksheet) -> None:
         'Created: 2026-01-26',
         'Version: 1.0',
     ]
-    
+
     for idx, line in enumerate(readme_content, 2):
         ws[f'A{idx}'] = line
         if line.startswith('•'):
             ws[f'A{idx}'].font = Font(size=10)
         elif line.startswith(('📋', '🔧', '📝', '🔍', '📊', '💡')):
             ws[f'A{idx}'].font = Font(bold=True, size=12, color="366092")
-    
+
     ws.column_dimensions['A'].width = 80
 
 
