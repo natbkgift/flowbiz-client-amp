@@ -1099,7 +1099,6 @@ const DEVELOPERS = [
       en: ['Luxury Condos', 'Single Houses', 'Pattaya Projects']
     },
     reviews_count: 1250,
-    avg_rating: 4.8
   },
   {
     id: 'dev-002',
@@ -1118,7 +1117,6 @@ const DEVELOPERS = [
       en: ['Beachfront Condos', 'Modern Design', 'Sea Views']
     },
     reviews_count: 580,
-    avg_rating: 4.7
   },
   {
     id: 'dev-003',
@@ -1137,7 +1135,6 @@ const DEVELOPERS = [
       en: ['Luxury Condos', 'Beautiful Pools', 'Full Facilities']
     },
     reviews_count: 420,
-    avg_rating: 4.6
   },
   {
     id: 'dev-004',
@@ -1156,7 +1153,6 @@ const DEVELOPERS = [
       en: ['Affordable Condos', 'Large Projects', 'Prime Locations']
     },
     reviews_count: 890,
-    avg_rating: 4.5
   },
   {
     id: 'dev-005',
@@ -1174,8 +1170,7 @@ const DEVELOPERS = [
       th: ['โครงการริมทะเล', 'สไตล์รีสอร์ท', 'สระว่ายน้ำใหญ่'],
       en: ['Beachfront Projects', 'Resort Style', 'Large Pools']
     },
-    reviews_count: 320,
-    avg_rating: 4.7
+    reviews_count: 320
   }
 ];
 

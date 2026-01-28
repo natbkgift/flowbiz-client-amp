@@ -338,7 +338,7 @@
       <i>🧮</i>
       <span data-i18n="mobile_calculate">Calculate</span>
     </a>
-    <button class="save-btn">
+    <button class="save-btn" aria-label="Save property" onclick="alert(document.documentElement.lang === 'th' ? 'ฟีเจอร์บันทึกจะพร้อมใช้งานเร็วๆ นี้' : 'Save feature coming soon');">
       <i>❤️</i>
       <span data-i18n="mobile_save">Save</span>
     </button>
@@ -467,26 +467,53 @@
       const testimonials = window.AMP.testimonials.slice(0, 6); // Show first 6
       const currentLang = document.documentElement.lang || 'en';
 
-      const html = testimonials.map(testimonial => {
-        const comment = testimonial.comment[currentLang];
-        const stars = '⭐'.repeat(testimonial.rating);
+      // Clear existing content
+      container.innerHTML = '';
 
-        return `
-          <div class="testimonial-card">
-            <div class="testimonial-header">
-              <img src="${testimonial.photo}" alt="${testimonial.name}" class="testimonial-photo">
-              <div class="testimonial-info">
-                <div class="testimonial-name">${testimonial.name}</div>
-                <div class="testimonial-meta">${testimonial.nationality} • ${testimonial.property_type}</div>
-              </div>
-            </div>
-            <div class="testimonial-rating">${stars}</div>
-            <div class="testimonial-comment">${comment}</div>
-          </div>
-        `;
-      }).join('');
+      testimonials.forEach(testimonial => {
+        const comment = testimonial.comment && testimonial.comment[currentLang] ? testimonial.comment[currentLang] : '';
+        const stars = '⭐'.repeat(testimonial.rating || 0);
 
-      container.innerHTML = html;
+        const card = document.createElement('div');
+        card.className = 'testimonial-card';
+
+        const header = document.createElement('div');
+        header.className = 'testimonial-header';
+
+        const photo = document.createElement('img');
+        photo.className = 'testimonial-photo';
+        photo.src = testimonial.photo || '';
+        photo.alt = testimonial.name || '';
+
+        const info = document.createElement('div');
+        info.className = 'testimonial-info';
+
+        const nameEl = document.createElement('div');
+        nameEl.className = 'testimonial-name';
+        nameEl.textContent = testimonial.name || '';
+
+        const metaEl = document.createElement('div');
+        metaEl.className = 'testimonial-meta';
+        metaEl.textContent = (testimonial.nationality || '') + (testimonial.nationality && testimonial.property_type ? ' • ' : '') + (testimonial.property_type || '');
+
+        info.appendChild(nameEl);
+        info.appendChild(metaEl);
+        header.appendChild(photo);
+        header.appendChild(info);
+
+        const ratingEl = document.createElement('div');
+        ratingEl.className = 'testimonial-rating';
+        ratingEl.textContent = stars;
+
+        const commentEl = document.createElement('div');
+        commentEl.className = 'testimonial-comment';
+        commentEl.textContent = comment;
+
+        card.appendChild(header);
+        card.appendChild(ratingEl);
+        card.appendChild(commentEl);
+        container.appendChild(card);
+      });
     }
 
     // Call render testimonials

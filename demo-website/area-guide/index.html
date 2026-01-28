@@ -91,49 +91,125 @@
     if (areaData) {
       const container = document.getElementById('area-guide-grid');
       const lang = document.documentElement.lang || 'en';
-      container.innerHTML = Object.entries(areaData).map(([key, area]) => {
-        const name = area.name[lang] || area.name.en;
-        const description = area.description[lang] || area.description.en;
+      container.innerHTML = '';
+      
+      Object.entries(areaData).forEach(([key, area]) => {
+        const name = (area.name && area.name[lang]) || (area.name && area.name.en) || '';
+        const description = (area.description && area.description[lang]) || (area.description && area.description.en) || '';
         const yoyChange = area.price_trend_yoy >= 0 ? `+${area.price_trend_yoy}%` : `${area.price_trend_yoy}%`;
-        
-        return `
-          <div class="area-card">
-            <div class="area-card-header">
-              <h3 class="area-card-title">${name}</h3>
-              <div class="area-card-stats">
-                <div class="area-card-stat">
-                  <span class="area-card-stat-value">฿${(area.avg_price_sqm / 1000).toFixed(0)}K</span>
-                  <span class="area-card-stat-label" data-i18n="area_avg_price">/sqm</span>
-                </div>
-                <div class="area-card-stat">
-                  <span class="area-card-stat-value">${yoyChange}</span>
-                  <span class="area-card-stat-label" data-i18n="area_price_trend">YoY</span>
-                </div>
-              </div>
-            </div>
-            <div class="area-card-body">
-              <p class="area-card-description">${description}</p>
-              <div style="margin: 16px 0;">
-                <strong data-i18n="area_highlights">Highlights:</strong>
-                <ul class="area-card-highlights">
-                  ${area.highlights[lang].slice(0, 5).map(h => `<li>${h}</li>`).join('')}
-                </ul>
-              </div>
-              <div style="margin-top: 16px;">
-                <strong data-i18n="area_nearby">Nearby:</strong>
-                <div style="font-size: 14px; color: #6c757d; margin-top: 8px;">
-                  <div>🏥 ${area.nearby[lang].hospital}</div>
-                  <div>🛍️ ${area.nearby[lang].mall}</div>
-                  <div>✈️ ${area.nearby[lang].airport}</div>
-                </div>
-              </div>
-              <a href="../listing.html?area=${key}" class="btn btn-primary btn-sm" style="margin-top: 16px; display: inline-block;" data-i18n="area_view_properties">
-                View Properties
-              </a>
-            </div>
-          </div>
-        `;
-      }).join('');
+        const highlights = (area.highlights && area.highlights[lang]) || (area.highlights && area.highlights.en) || [];
+        const nearby = (area.nearby && area.nearby[lang]) || (area.nearby && area.nearby.en) || {};
+
+        const card = document.createElement('div');
+        card.className = 'area-card';
+
+        const header = document.createElement('div');
+        header.className = 'area-card-header';
+
+        const titleH3 = document.createElement('h3');
+        titleH3.className = 'area-card-title';
+        titleH3.textContent = name;
+
+        const statsDiv = document.createElement('div');
+        statsDiv.className = 'area-card-stats';
+
+        const stat1 = document.createElement('div');
+        stat1.className = 'area-card-stat';
+        const stat1Value = document.createElement('span');
+        stat1Value.className = 'area-card-stat-value';
+        stat1Value.textContent = `฿${(area.avg_price_sqm / 1000).toFixed(0)}K`;
+        const stat1Label = document.createElement('span');
+        stat1Label.className = 'area-card-stat-label';
+        stat1Label.setAttribute('data-i18n', 'area_avg_price');
+        stat1Label.textContent = '/sqm';
+        stat1.appendChild(stat1Value);
+        stat1.appendChild(stat1Label);
+
+        const stat2 = document.createElement('div');
+        stat2.className = 'area-card-stat';
+        const stat2Value = document.createElement('span');
+        stat2Value.className = 'area-card-stat-value';
+        stat2Value.textContent = yoyChange;
+        const stat2Label = document.createElement('span');
+        stat2Label.className = 'area-card-stat-label';
+        stat2Label.setAttribute('data-i18n', 'area_price_trend');
+        stat2Label.textContent = 'YoY';
+        stat2.appendChild(stat2Value);
+        stat2.appendChild(stat2Label);
+
+        statsDiv.appendChild(stat1);
+        statsDiv.appendChild(stat2);
+        header.appendChild(titleH3);
+        header.appendChild(statsDiv);
+
+        const body = document.createElement('div');
+        body.className = 'area-card-body';
+
+        const descP = document.createElement('p');
+        descP.className = 'area-card-description';
+        descP.textContent = description;
+
+        const highlightsContainer = document.createElement('div');
+        highlightsContainer.style.margin = '16px 0';
+
+        const highlightsStrong = document.createElement('strong');
+        highlightsStrong.setAttribute('data-i18n', 'area_highlights');
+        highlightsStrong.textContent = 'Highlights:';
+
+        const highlightsUl = document.createElement('ul');
+        highlightsUl.className = 'area-card-highlights';
+        highlights.slice(0, 5).forEach(h => {
+          const li = document.createElement('li');
+          li.textContent = h;
+          highlightsUl.appendChild(li);
+        });
+
+        highlightsContainer.appendChild(highlightsStrong);
+        highlightsContainer.appendChild(highlightsUl);
+
+        const nearbyContainer = document.createElement('div');
+        nearbyContainer.style.marginTop = '16px';
+
+        const nearbyStrong = document.createElement('strong');
+        nearbyStrong.setAttribute('data-i18n', 'area_nearby');
+        nearbyStrong.textContent = 'Nearby:';
+
+        const nearbyDiv = document.createElement('div');
+        nearbyDiv.style.fontSize = '14px';
+        nearbyDiv.style.color = '#6c757d';
+        nearbyDiv.style.marginTop = '8px';
+
+        const hospitalDiv = document.createElement('div');
+        hospitalDiv.textContent = '🏥 ' + (nearby.hospital || 'N/A');
+        const mallDiv = document.createElement('div');
+        mallDiv.textContent = '🛍️ ' + (nearby.mall || 'N/A');
+        const airportDiv = document.createElement('div');
+        airportDiv.textContent = '✈️ ' + (nearby.airport || 'N/A');
+
+        nearbyDiv.appendChild(hospitalDiv);
+        nearbyDiv.appendChild(mallDiv);
+        nearbyDiv.appendChild(airportDiv);
+
+        nearbyContainer.appendChild(nearbyStrong);
+        nearbyContainer.appendChild(nearbyDiv);
+
+        const link = document.createElement('a');
+        link.href = `../listing.html?area=${key}`;
+        link.className = 'btn btn-primary btn-sm';
+        link.style.marginTop = '16px';
+        link.style.display = 'inline-block';
+        link.setAttribute('data-i18n', 'area_view_properties');
+        link.textContent = 'View Properties';
+
+        body.appendChild(descP);
+        body.appendChild(highlightsContainer);
+        body.appendChild(nearbyContainer);
+        body.appendChild(link);
+
+        card.appendChild(header);
+        card.appendChild(body);
+        container.appendChild(card);
+      });
     }
     if (typeof lucide !== 'undefined') lucide.createIcons();
   </script>

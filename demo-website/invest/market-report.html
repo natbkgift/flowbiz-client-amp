@@ -242,40 +242,87 @@
       const areaGuides = window.AMP.areaData;
       const lang = document.documentElement.lang || 'en';
 
-      const html = hotAreas.map(hot => {
+      // Clear existing content
+      container.innerHTML = '';
+
+      hotAreas.forEach(hot => {
         const areaKey = hot.area.toLowerCase().replace(/ /g, '-');
         const areaInfo = areaGuides[areaKey];
-        if (!areaInfo) return '';
+        
+        if (!areaInfo) {
+          console.warn(`Area guide not found for: ${hot.area}`);
+          return;
+        }
 
-        const name = areaInfo.name[lang];
-        const description = areaInfo.description[lang];
+        const name = (areaInfo.name && areaInfo.name[lang]) || (areaInfo.name && areaInfo.name.en) || hot.area;
+        const description = (areaInfo.description && areaInfo.description[lang]) || (areaInfo.description && areaInfo.description.en) || '';
+        const reason = hot['reason_' + lang] || hot.reason_en || 'N/A';
 
-        return `
-          <div class="area-card">
-            <div class="area-card-header">
-              <h3 class="area-card-title">${name}</h3>
-              <div class="area-card-stats">
-                <div class="area-card-stat">
-                  <span class="area-card-stat-value">฿${(areaInfo.avg_price_sqm / 1000).toFixed(0)}K</span>
-                  <span class="area-card-stat-label">/sqm</span>
-                </div>
-                <div class="area-card-stat">
-                  <span class="area-card-stat-value stat-change positive">+${hot.growth}%</span>
-                  <span class="area-card-stat-label">Growth</span>
-                </div>
-              </div>
-            </div>
-            <div class="area-card-body">
-              <p class="area-card-description">${description}</p>
-              <div style="margin-top: 16px; padding: 12px; background: #e7f0ff; border-radius: 6px;">
-                <strong>Why it's hot:</strong> ${hot['reason_' + lang]}
-              </div>
-            </div>
-          </div>
-        `;
-      }).join('');
+        const card = document.createElement('div');
+        card.className = 'area-card';
 
-      container.innerHTML = html;
+        const header = document.createElement('div');
+        header.className = 'area-card-header';
+
+        const titleH3 = document.createElement('h3');
+        titleH3.className = 'area-card-title';
+        titleH3.textContent = name;
+
+        const statsDiv = document.createElement('div');
+        statsDiv.className = 'area-card-stats';
+
+        const stat1 = document.createElement('div');
+        stat1.className = 'area-card-stat';
+        const stat1Value = document.createElement('span');
+        stat1Value.className = 'area-card-stat-value';
+        stat1Value.textContent = `฿${(areaInfo.avg_price_sqm / 1000).toFixed(0)}K`;
+        const stat1Label = document.createElement('span');
+        stat1Label.className = 'area-card-stat-label';
+        stat1Label.textContent = '/sqm';
+        stat1.appendChild(stat1Value);
+        stat1.appendChild(stat1Label);
+
+        const stat2 = document.createElement('div');
+        stat2.className = 'area-card-stat';
+        const stat2Value = document.createElement('span');
+        stat2Value.className = 'area-card-stat-value stat-change positive';
+        stat2Value.textContent = `+${hot.growth}%`;
+        const stat2Label = document.createElement('span');
+        stat2Label.className = 'area-card-stat-label';
+        stat2Label.textContent = 'Growth';
+        stat2.appendChild(stat2Value);
+        stat2.appendChild(stat2Label);
+
+        statsDiv.appendChild(stat1);
+        statsDiv.appendChild(stat2);
+        header.appendChild(titleH3);
+        header.appendChild(statsDiv);
+
+        const body = document.createElement('div');
+        body.className = 'area-card-body';
+
+        const descP = document.createElement('p');
+        descP.className = 'area-card-description';
+        descP.textContent = description;
+
+        const reasonDiv = document.createElement('div');
+        reasonDiv.style.marginTop = '16px';
+        reasonDiv.style.padding = '12px';
+        reasonDiv.style.background = '#e7f0ff';
+        reasonDiv.style.borderRadius = '6px';
+
+        const reasonStrong = document.createElement('strong');
+        reasonStrong.textContent = 'Why it\'s hot: ';
+        reasonDiv.appendChild(reasonStrong);
+        reasonDiv.appendChild(document.createTextNode(reason));
+
+        body.appendChild(descP);
+        body.appendChild(reasonDiv);
+
+        card.appendChild(header);
+        card.appendChild(body);
+        container.appendChild(card);
+      });
     }
 
     function downloadReport() {

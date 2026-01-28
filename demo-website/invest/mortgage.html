@@ -175,8 +175,25 @@
       const rate = parseFloat(document.getElementById('mortgage-rate').value) || 0;
       const term = parseFloat(document.getElementById('mortgage-term').value) || 0;
 
-      if (price <= 0 || downPercent < 0 || downPercent > 100 || rate < 0 || term <= 0) {
-        alert('Please enter valid values');
+      // Better validation with specific error messages
+      const errors = [];
+      const lang = document.documentElement.lang || 'th';
+
+      if (price <= 0) {
+        errors.push(lang === 'th' ? 'ราคาอสังหาต้องมากกว่า 0' : 'Property price must be greater than 0');
+      }
+      if (downPercent < 0 || downPercent > 100) {
+        errors.push(lang === 'th' ? 'เงินดาวน์ต้องอยู่ระหว่าง 0-100%' : 'Down payment must be between 0% and 100%');
+      }
+      if (rate < 0) {
+        errors.push(lang === 'th' ? 'อัตราดอกเบี้ยต้องไม่ติดลบ' : 'Interest rate cannot be negative');
+      }
+      if (term <= 0) {
+        errors.push(lang === 'th' ? 'ระยะเวลากู้ต้องมากกว่า 0 ปี' : 'Loan term must be greater than 0 years');
+      }
+
+      if (errors.length > 0) {
+        alert(errors.join('\n'));
         return;
       }
 
@@ -186,6 +203,18 @@
       const numPayments = term * 12;
 
       let monthlyPayment = 0;
+      let totalInterest = 0;
+      let totalPayment = 0;
+
+      // Handle 100% down payment case
+      if (downPercent === 100) {
+        document.getElementById('result-monthly-payment').textContent = lang === 'th' ? 'ไม่ต้องกู้ (จ่ายเต็ม)' : 'No loan needed (Paid in full)';
+        document.getElementById('result-total-interest').textContent = formatCurrency(0);
+        document.getElementById('result-total-payment').textContent = formatCurrency(0);
+        document.getElementById('mortgage-results').style.display = 'block';
+        return;
+      }
+
       if (loanAmount > 0) {
         if (monthlyRate > 0) {
           monthlyPayment = loanAmount * 
@@ -197,8 +226,8 @@
         }
       }
 
-      const totalPayment = monthlyPayment * numPayments;
-      const totalInterest = totalPayment - loanAmount;
+      totalPayment = monthlyPayment * numPayments;
+      totalInterest = totalPayment - loanAmount;
 
       const formatCurrency = (num) => {
         return new Intl.NumberFormat('th-TH', {

@@ -381,6 +381,18 @@ const TRANSLATIONS = {
     saved_daily: 'รายวัน',
     saved_weekly: 'รายสัปดาห์',
     saved_coming_soon: 'เร็วๆ นี้',
+    saved_description: 'บันทึกเกณฑ์การค้นหาและรับการแจ้งเตือนเมื่อมีอสังหาใหม่ที่ตรงกัน',
+    saved_example1_title: 'คอนโดในจอมเทียน 2 ห้องนอน ต่ำกว่า 3 ล้าน',
+    saved_example1_alert: 'แจ้งเตือน: รายวัน',
+    saved_example2_title: 'วิลล่าในพระตำหนัก วิวทะเล',
+    saved_example2_alert: 'แจ้งเตือน: ทันที',
+    saved_edit: 'แก้ไข',
+
+    // Compare Properties  
+    compare_property_1: 'อสังหา 1',
+    compare_property_2: 'อสังหา 2',
+    compare_property_3: 'อสังหา 3',
+    compare_property_metrics: 'ราคา, ขนาด, ผลตอบแทน',
 
     // Mobile
     mobile_line: 'LINE',
@@ -734,10 +746,6 @@ const TRANSLATIONS = {
     mortgage_recommended_banks: 'Recommended Banks',
 
     // Area Guide
-    area_guide_title: 'Pattaya Area Guide',
-    area_guide_subtitle: 'Choose the right location for you',
-    area_avg_price: 'Avg Price/sqm',
-    area_price_trend: 'Price Trend YoY',
     area_description: 'Description',
     area_residents: 'Residents',
     area_highlights: 'Highlights',
@@ -792,6 +800,18 @@ const TRANSLATIONS = {
     saved_daily: 'Daily',
     saved_weekly: 'Weekly',
     saved_coming_soon: 'Coming Soon',
+    saved_description: 'Save your search criteria and get notified when new properties match',
+    saved_example1_title: 'Condo in Jomtien, 2BR, Under 3M',
+    saved_example1_alert: 'Alert: Daily',
+    saved_example2_title: 'Villa in Pratumnak, Sea View',
+    saved_example2_alert: 'Alert: Immediately',
+    saved_edit: 'Edit',
+
+    // Compare Properties
+    compare_property_1: 'Property 1',
+    compare_property_2: 'Property 2',
+    compare_property_3: 'Property 3',
+    compare_property_metrics: 'Price, Size, Yield',
 
     // Mobile
     mobile_line: 'LINE',
