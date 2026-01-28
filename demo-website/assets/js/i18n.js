@@ -358,6 +358,8 @@ const TRANSLATIONS = {
     market_download_report: 'ดาวน์โหลดรายงานฉบับเต็ม',
     market_price_per_sqm: 'ต่อ ตร.ม.',
     market_yoy_change: 'เปลี่ยนแปลง YoY',
+    market_gross: 'ขั้นต้น',
+    market_net: 'สุทธิ',
 
     // Testimonials
     testimonial_title: 'ความคิดเห็นจากลูกค้า',
@@ -777,6 +779,8 @@ const TRANSLATIONS = {
     market_download_report: 'Download Full Report',
     market_price_per_sqm: 'per sqm',
     market_yoy_change: 'YoY Change',
+    market_gross: 'Gross',
+    market_net: 'Net',
 
     // Testimonials
     testimonial_title: 'What Our Clients Say',
@@ -860,6 +864,9 @@ function setLanguage(lang) {
   if (langText) {
     langText.textContent = lang === 'th' ? 'EN' : 'TH';
   }
+
+  // Dispatch event for dynamic content to re-render
+  document.dispatchEvent(new Event('languageChanged'));
 }
 
 function toggleLanguage() {

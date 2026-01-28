@@ -239,69 +239,8 @@
       <h2 class="section-title" data-i18n="market_title">ข้อมูลตลาด</h2>
       <p class="section-subtitle" data-i18n="market_subtitle">Latest market trends and statistics</p>
 
-      <div class="stats-grid">
-        <div class="stat-card">
-          <h3 data-i18n="market_avg_price_by_type">Average Price by Type</h3>
-          <div class="stat-item">
-            <span class="stat-label">Condo</span>
-            <span class="stat-value">
-              ฿85,000/sqm
-              <span class="stat-change positive">+7.5%</span>
-            </span>
-          </div>
-          <div class="stat-item">
-            <span class="stat-label">House</span>
-            <span class="stat-value">
-              ฿65,000/sqm
-              <span class="stat-change positive">+6.2%</span>
-            </span>
-          </div>
-          <div class="stat-item">
-            <span class="stat-label">Villa</span>
-            <span class="stat-value">
-              ฿95,000/sqm
-              <span class="stat-change positive">+8.1%</span>
-            </span>
-          </div>
-        </div>
-
-        <div class="stat-card">
-          <h3 data-i18n="market_hot_areas">Hot Areas</h3>
-          <div class="stat-item">
-            <span class="stat-label">Na Jomtien</span>
-            <span class="stat-value">
-              <span class="stat-change positive">+10.2%</span>
-            </span>
-          </div>
-          <div class="stat-item">
-            <span class="stat-label">Bang Saray</span>
-            <span class="stat-value">
-              <span class="stat-change positive">+9.8%</span>
-            </span>
-          </div>
-          <div class="stat-item">
-            <span class="stat-label">Pattaya</span>
-            <span class="stat-value">
-              <span class="stat-change positive">+8.5%</span>
-            </span>
-          </div>
-        </div>
-
-        <div class="stat-card">
-          <h3 data-i18n="market_rental_yield">Rental Yield</h3>
-          <div class="stat-item">
-            <span class="stat-label">Condo (Net)</span>
-            <span class="stat-value">4.8%</span>
-          </div>
-          <div class="stat-item">
-            <span class="stat-label">House (Net)</span>
-            <span class="stat-value">4.0%</span>
-          </div>
-          <div class="stat-item">
-            <span class="stat-label">Villa (Net)</span>
-            <span class="stat-value">3.5%</span>
-          </div>
-        </div>
+      <div id="market-stats-grid" class="stats-grid">
+        <!-- Market stats will be rendered dynamically by JavaScript -->
       </div>
 
       <div style="text-align: center; margin-top: 32px;">
@@ -459,6 +398,127 @@
     renderFeaturedProperties();
     renderPopularAreas();
 
+    // Render Market Stats
+    function renderMarketStats() {
+      const container = document.getElementById('market-stats-grid');
+      if (!container || typeof window.AMP === 'undefined' || !window.AMP.marketStats) return;
+
+      const stats = window.AMP.marketStats;
+      const currentLang = document.documentElement.lang || 'en';
+
+      // Helper function to get translation
+      const t = (key) => {
+        if (typeof window.t === 'function') {
+          return window.t(key);
+        }
+        return key;
+      };
+
+      // Helper function to format number with commas
+      const formatNumber = (num) => {
+        return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+      };
+
+      // Clear existing content
+      container.innerHTML = '';
+
+      // 1. Average Price by Type Card
+      const avgPriceCard = document.createElement('div');
+      avgPriceCard.className = 'stat-card';
+
+      const avgPriceTitle = document.createElement('h3');
+      avgPriceTitle.setAttribute('data-i18n', 'market_avg_price_by_type');
+      avgPriceTitle.textContent = t('market_avg_price_by_type');
+      avgPriceCard.appendChild(avgPriceTitle);
+
+      stats.avg_price_by_type.forEach(item => {
+        const typeLabel = currentLang === 'th' ? item.type_th : item.type.charAt(0).toUpperCase() + item.type.slice(1);
+        
+        const statItem = document.createElement('div');
+        statItem.className = 'stat-item';
+
+        const label = document.createElement('span');
+        label.className = 'stat-label';
+        label.textContent = typeLabel;
+
+        const value = document.createElement('span');
+        value.className = 'stat-value';
+        value.innerHTML = `฿${formatNumber(item.avg_price_sqm)}/${t('market_price_per_sqm')}
+          <span class="stat-change positive">+${item.yoy_change}%</span>`;
+
+        statItem.appendChild(label);
+        statItem.appendChild(value);
+        avgPriceCard.appendChild(statItem);
+      });
+
+      container.appendChild(avgPriceCard);
+
+      // 2. Hot Areas Card
+      const hotAreasCard = document.createElement('div');
+      hotAreasCard.className = 'stat-card';
+
+      const hotAreasTitle = document.createElement('h3');
+      hotAreasTitle.setAttribute('data-i18n', 'market_hot_areas');
+      hotAreasTitle.textContent = t('market_hot_areas');
+      hotAreasCard.appendChild(hotAreasTitle);
+
+      stats.hot_areas.forEach(area => {
+        const areaLabel = currentLang === 'th' ? area.area_th : area.area;
+        
+        const statItem = document.createElement('div');
+        statItem.className = 'stat-item';
+
+        const label = document.createElement('span');
+        label.className = 'stat-label';
+        label.textContent = areaLabel;
+
+        const value = document.createElement('span');
+        value.className = 'stat-value';
+        value.innerHTML = `<span class="stat-change positive">+${area.growth}%</span>`;
+
+        statItem.appendChild(label);
+        statItem.appendChild(value);
+        hotAreasCard.appendChild(statItem);
+      });
+
+      container.appendChild(hotAreasCard);
+
+      // 3. Rental Yield Card
+      const rentalYieldCard = document.createElement('div');
+      rentalYieldCard.className = 'stat-card';
+
+      const rentalYieldTitle = document.createElement('h3');
+      rentalYieldTitle.setAttribute('data-i18n', 'market_rental_yield');
+      rentalYieldTitle.textContent = t('market_rental_yield');
+      rentalYieldCard.appendChild(rentalYieldTitle);
+
+      // Display Net yields for each property type
+      ['condo', 'house', 'villa'].forEach(type => {
+        const typeLabel = currentLang === 'th' ? 
+          (type === 'condo' ? 'คอนโด' : type === 'house' ? 'บ้าน' : 'วิลล่า') :
+          type.charAt(0).toUpperCase() + type.slice(1);
+        
+        const yields = stats.rental_yields[type];
+        
+        const statItem = document.createElement('div');
+        statItem.className = 'stat-item';
+
+        const label = document.createElement('span');
+        label.className = 'stat-label';
+        label.textContent = `${typeLabel} (${t('market_net')})`;
+
+        const value = document.createElement('span');
+        value.className = 'stat-value';
+        value.textContent = `${yields.net}%`;
+
+        statItem.appendChild(label);
+        statItem.appendChild(value);
+        rentalYieldCard.appendChild(statItem);
+      });
+
+      container.appendChild(rentalYieldCard);
+    }
+
     // Render testimonials
     function renderTestimonials() {
       const container = document.getElementById('testimonials-grid');
@@ -517,11 +577,13 @@
       });
     }
 
-    // Call render testimonials
+    // Call render functions
+    renderMarketStats();
     renderTestimonials();
 
     // Re-render on language change
     document.addEventListener('languageChanged', function() {
+      renderMarketStats();
       renderTestimonials();
     });
   </script>
