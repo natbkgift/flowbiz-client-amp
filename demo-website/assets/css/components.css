@@ -112,7 +112,7 @@
 
 /* Badge spacing fallback for browsers that don't support gap */
 .badge + .badge {
-  margin-left: 4px;
+  margin-top: 4px;
 }
 
 /* Property Card */
