@@ -186,10 +186,15 @@
       const numPayments = term * 12;
 
       let monthlyPayment = 0;
-      if (loanAmount > 0 && monthlyRate > 0) {
-        monthlyPayment = loanAmount * 
-          (monthlyRate * Math.pow(1 + monthlyRate, numPayments)) / 
-          (Math.pow(1 + monthlyRate, numPayments) - 1);
+      if (loanAmount > 0) {
+        if (monthlyRate > 0) {
+          monthlyPayment = loanAmount * 
+            (monthlyRate * Math.pow(1 + monthlyRate, numPayments)) / 
+            (Math.pow(1 + monthlyRate, numPayments) - 1);
+        } else {
+          // Zero interest rate - simple division
+          monthlyPayment = loanAmount / numPayments;
+        }
       }
 
       const totalPayment = monthlyPayment * numPayments;

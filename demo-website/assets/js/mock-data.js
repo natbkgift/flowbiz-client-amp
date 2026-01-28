@@ -1304,7 +1304,7 @@ const TESTIMONIALS = [
     rating: 5,
     comment: {
       th: 'บริการหลังการขายดีมาก ช่วยดูแลบ้านตอนที่ไม่อยู่ ไว้วางใจได้ ขอบคุณค่ะ',
-      en: 'Excellent after-sales service. They take care of my house when I\'m away. Very trustworthy. Thank you.'
+      en: 'Excellent after-sales service. They take care of my house when I am away. Very trustworthy. Thank you.'
     },
     property_type: 'House',
     date: '2026-01-05'

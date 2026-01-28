@@ -462,7 +462,7 @@
     // Render testimonials
     function renderTestimonials() {
       const container = document.getElementById('testimonials-grid');
-      if (!container || typeof window.AMP === 'undefined' || !window.AMP.testimonials) return;
+      if (!container || typeof window.AMP === 'undefined' || !window.AMP.testimonials || !Array.isArray(window.AMP.testimonials)) return;
 
       const testimonials = window.AMP.testimonials.slice(0, 6); // Show first 6
       const currentLang = document.documentElement.lang || 'en';
