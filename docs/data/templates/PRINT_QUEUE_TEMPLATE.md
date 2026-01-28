@@ -229,7 +229,6 @@ Scoring Breakdown:
 - Conversion rate: Up to 20 points (10% = 2 points)
 - Freshness: Up to 20 points (decreases over time)
 - Slot position: 10-20 points
-- Display consistency: Up to 20 points
 
 Maximum Score: 100
 Good Performance: 60+
