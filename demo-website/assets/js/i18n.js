@@ -296,6 +296,130 @@ const TRANSLATIONS = {
     quiz_recommended_projects: 'โครงการแนะนำ',
     quiz_restart: 'ทำใหม่อีกครั้ง',
     quiz_contact_us: 'ติดต่อเราเพื่อคำแนะนำเพิ่มเติม',
+
+    // Investment Calculator
+    calc_title: 'เครื่องคำนวณ ROI การลงทุน',
+    calc_subtitle: 'คำนวณผลตอบแทนที่คาดหวัง',
+    calc_property_price: 'ราคาอสังหา (฿)',
+    calc_down_payment: 'เงินดาวน์ (%)',
+    calc_interest_rate: 'ดอกเบี้ย (%/ปี)',
+    calc_loan_term: 'ระยะเวลากู้ (ปี)',
+    calc_monthly_rent: 'ค่าเช่าต่อเดือน (฿)',
+    calc_monthly_expense: 'ค่าใช้จ่ายต่อเดือน (฿)',
+    calc_calculate: 'คำนวณ',
+    calc_gross_yield: 'Gross Yield',
+    calc_net_yield: 'Net Yield',
+    calc_cash_flow: 'กระแสเงินสดต่อเดือน',
+    calc_payback_period: 'ระยะเวลาคืนทุน',
+    calc_download_pdf: 'ดาวน์โหลดรายงาน PDF',
+    calc_consult: 'ปรึกษาผู้เชี่ยวชาญ',
+    calc_error_invalid_price: 'กรุณากรอกราคาอสังหาที่ถูกต้อง',
+    calc_error_invalid_down_payment: 'เงินดาวน์ต้องอยู่ระหว่าง 0-100%',
+    calc_error_invalid_rent: 'กรุณากรอกค่าเช่าต่อเดือนที่ถูกต้อง',
+    calc_error_negative_value: 'ค่าต้องไม่ติดลบ',
+
+    // Mortgage Calculator
+    mortgage_title: 'เครื่องคำนวณสินเชื่อบ้าน',
+    mortgage_subtitle: 'คำนวณยอดผ่อนต่อเดือน',
+    mortgage_monthly_payment: 'ผ่อนต่อเดือน',
+    mortgage_total_interest: 'ดอกเบี้ยรวม',
+    mortgage_total_payment: 'ยอดชำระรวม',
+    mortgage_recommended_banks: 'ธนาคารที่แนะนำ',
+
+    // Area Guide
+    area_description: 'คำอธิบาย',
+    area_residents: 'กลุ่มผู้อยู่อาศัย',
+    area_highlights: 'จุดเด่น',
+    area_nearby: 'สถานที่ใกล้เคียง',
+    area_hospital: 'โรงพยาบาล',
+    area_mall: 'ห้างสรรพสินค้า',
+    area_airport: 'สนามบิน',
+    area_view_properties: 'ดูอสังหาในพื้นที่นี้',
+
+    // Trust Signals
+    trust_licensed: 'ได้รับใบอนุญาตจากกรมที่ดิน',
+    trust_experience: 'ปีของประสบการณ์',
+    trust_properties_sold: 'ทรัพย์ที่ขายสำเร็จ',
+    trust_languages: 'ภาษา',
+    trust_google_rating: 'คะแนน Google',
+    trust_reviews: 'รีวิว',
+    trust_why_amp: 'ทำไมต้องเลือก AMP',
+    trust_professional: 'ทีมมืออาชีพ',
+    trust_multilingual: 'รองรับหลายภาษา',
+    trust_full_service: 'บริการครบวงจร',
+
+    // Market Stats
+    market_title: 'ข้อมูลตลาด',
+    market_subtitle: 'แนวโน้มและสถิติตลาดล่าสุด',
+    market_avg_price_by_type: 'ราคาเฉลี่ยตามประเภท',
+    market_hot_areas: 'พื้นที่ฮอต',
+    market_rental_yield: 'ผลตอบแทนจากการเช่า',
+    market_occupancy_rate: 'อัตราการเข้าพัก',
+    market_download_report: 'ดาวน์โหลดรายงานฉบับเต็ม',
+    market_price_per_sqm: 'ต่อ ตร.ม.',
+    market_yoy_change: 'เปลี่ยนแปลง YoY',
+
+    // Testimonials
+    testimonial_title: 'ความคิดเห็นจากลูกค้า',
+    testimonial_subtitle: 'รีวิวจริงจากลูกค้าจริง',
+    testimonial_verified: 'ซื้อยืนยันแล้ว',
+
+    // Compare Properties
+    compare_title: 'เปรียบเทียบอสังหา',
+    compare_add: 'เพิ่มเพื่อเปรียบเทียบ',
+    compare_remove: 'ลบออกจากการเปรียบเทียบ',
+    compare_view: 'ดูการเปรียบเทียบ',
+    compare_coming_soon: 'เร็วๆ นี้',
+    compare_max_3: 'เปรียบเทียบได้สูงสุด 3 ทรัพย์',
+
+    // Saved Searches
+    saved_title: 'การค้นหาที่บันทึก',
+    saved_create: 'บันทึกการค้นหานี้',
+    saved_alerts: 'รับการแจ้งเตือน',
+    saved_frequency: 'ความถี่การแจ้งเตือน',
+    saved_immediately: 'ทันที',
+    saved_daily: 'รายวัน',
+    saved_weekly: 'รายสัปดาห์',
+    saved_coming_soon: 'เร็วๆ นี้',
+    saved_description: 'บันทึกเกณฑ์การค้นหาและรับการแจ้งเตือนเมื่อมีอสังหาใหม่ที่ตรงกัน',
+    saved_example1_title: 'คอนโดในจอมเทียน 2 ห้องนอน ต่ำกว่า 3 ล้าน',
+    saved_example1_alert: 'แจ้งเตือน: รายวัน',
+    saved_example2_title: 'วิลล่าในพระตำหนัก วิวทะเล',
+    saved_example2_alert: 'แจ้งเตือน: ทันที',
+    saved_edit: 'แก้ไข',
+
+    // Compare Properties  
+    compare_property_1: 'อสังหา 1',
+    compare_property_2: 'อสังหา 2',
+    compare_property_3: 'อสังหา 3',
+    compare_property_metrics: 'ราคา, ขนาด, ผลตอบแทน',
+
+    // Mobile
+    mobile_line: 'LINE',
+    mobile_call: 'โทร',
+    mobile_calculate: 'คำนวณ',
+    mobile_save: 'บันทึก',
+
+    // Rental Management
+    rental_title: 'บริการบริหารการเช่า',
+    rental_subtitle: 'เราดูแลอสังหาของคุณแทนคุณ',
+    rental_services: 'บริการของเรา',
+    rental_tenant_finding: 'หาผู้เช่า',
+    rental_maintenance: 'ซ่อมบำรุง',
+    rental_collection: 'เก็บค่าเช่า',
+    rental_reporting: 'รายงานรายเดือน',
+    rental_pricing: 'ค่าบริการ',
+    rental_performance: 'ผลงานของเรา',
+    rental_occupancy: 'อัตราการเช่าเฉลี่ย',
+    rental_response_time: 'เวลาตอบกลับเฉลี่ย',
+
+    // Developer Profiles
+    developer_rating: 'คะแนน',
+    developer_delivered: 'โครงการที่ส่งมอบแล้ว',
+    developer_ongoing: 'โครงการที่กำลังดำเนินการ',
+    developer_established: 'ก่อตั้ง',
+    developer_specialties: 'ความเชี่ยวชาญ',
+    developer_reviews: 'รีวิวจากลูกค้า',
   },
   en: {
     // Navigation
@@ -591,6 +715,130 @@ const TRANSLATIONS = {
     quiz_recommended_projects: 'Recommended Projects',
     quiz_restart: 'Start Over',
     quiz_contact_us: 'Contact us for more advice',
+
+    // Investment Calculator
+    calc_title: 'Investment ROI Calculator',
+    calc_subtitle: 'Calculate your potential returns',
+    calc_property_price: 'Property Price (฿)',
+    calc_down_payment: 'Down Payment (%)',
+    calc_interest_rate: 'Interest Rate (%/year)',
+    calc_loan_term: 'Loan Term (years)',
+    calc_monthly_rent: 'Monthly Rent (฿)',
+    calc_monthly_expense: 'Monthly Expenses (฿)',
+    calc_calculate: 'Calculate',
+    calc_gross_yield: 'Gross Yield',
+    calc_net_yield: 'Net Yield',
+    calc_cash_flow: 'Monthly Cash Flow',
+    calc_payback_period: 'Payback Period',
+    calc_download_pdf: 'Download PDF Report',
+    calc_consult: 'Consult Expert',
+    calc_error_invalid_price: 'Please enter a valid property price',
+    calc_error_invalid_down_payment: 'Down payment must be between 0-100%',
+    calc_error_invalid_rent: 'Please enter a valid monthly rent',
+    calc_error_negative_value: 'Value cannot be negative',
+
+    // Mortgage Calculator
+    mortgage_title: 'Mortgage Calculator',
+    mortgage_subtitle: 'Calculate your monthly payments',
+    mortgage_monthly_payment: 'Monthly Payment',
+    mortgage_total_interest: 'Total Interest',
+    mortgage_total_payment: 'Total Payment',
+    mortgage_recommended_banks: 'Recommended Banks',
+
+    // Area Guide
+    area_description: 'Description',
+    area_residents: 'Residents',
+    area_highlights: 'Highlights',
+    area_nearby: 'Nearby',
+    area_hospital: 'Hospital',
+    area_mall: 'Shopping Mall',
+    area_airport: 'Airport',
+    area_view_properties: 'View Properties in this Area',
+
+    // Trust Signals
+    trust_licensed: 'Licensed by Department of Lands',
+    trust_experience: 'Years of Experience',
+    trust_properties_sold: 'Properties Sold',
+    trust_languages: 'Languages',
+    trust_google_rating: 'Google Rating',
+    trust_reviews: 'Reviews',
+    trust_why_amp: 'Why Choose AMP',
+    trust_professional: 'Professional Team',
+    trust_multilingual: 'Multilingual Support',
+    trust_full_service: 'Full Service',
+
+    // Market Stats
+    market_title: 'Market Insights',
+    market_subtitle: 'Latest market trends and statistics',
+    market_avg_price_by_type: 'Average Price by Type',
+    market_hot_areas: 'Hot Areas',
+    market_rental_yield: 'Rental Yield',
+    market_occupancy_rate: 'Occupancy Rate',
+    market_download_report: 'Download Full Report',
+    market_price_per_sqm: 'per sqm',
+    market_yoy_change: 'YoY Change',
+
+    // Testimonials
+    testimonial_title: 'What Our Clients Say',
+    testimonial_subtitle: 'Real reviews from real customers',
+    testimonial_verified: 'Verified Purchase',
+
+    // Compare Properties
+    compare_title: 'Compare Properties',
+    compare_add: 'Add to Compare',
+    compare_remove: 'Remove from Compare',
+    compare_view: 'View Comparison',
+    compare_coming_soon: 'Coming Soon',
+    compare_max_3: 'Compare up to 3 properties',
+
+    // Saved Searches
+    saved_title: 'Saved Searches',
+    saved_create: 'Save this Search',
+    saved_alerts: 'Get Alerts',
+    saved_frequency: 'Alert Frequency',
+    saved_immediately: 'Immediately',
+    saved_daily: 'Daily',
+    saved_weekly: 'Weekly',
+    saved_coming_soon: 'Coming Soon',
+    saved_description: 'Save your search criteria and get notified when new properties match',
+    saved_example1_title: 'Condo in Jomtien, 2BR, Under 3M',
+    saved_example1_alert: 'Alert: Daily',
+    saved_example2_title: 'Villa in Pratumnak, Sea View',
+    saved_example2_alert: 'Alert: Immediately',
+    saved_edit: 'Edit',
+
+    // Compare Properties
+    compare_property_1: 'Property 1',
+    compare_property_2: 'Property 2',
+    compare_property_3: 'Property 3',
+    compare_property_metrics: 'Price, Size, Yield',
+
+    // Mobile
+    mobile_line: 'LINE',
+    mobile_call: 'Call',
+    mobile_calculate: 'Calculate',
+    mobile_save: 'Save',
+
+    // Rental Management
+    rental_title: 'Rental Management Services',
+    rental_subtitle: 'We manage your property so you don\'t have to',
+    rental_services: 'Our Services',
+    rental_tenant_finding: 'Tenant Finding',
+    rental_maintenance: 'Maintenance',
+    rental_collection: 'Rent Collection',
+    rental_reporting: 'Monthly Reporting',
+    rental_pricing: 'Service Fee',
+    rental_performance: 'Our Performance',
+    rental_occupancy: 'Average Occupancy Rate',
+    rental_response_time: 'Average Response Time',
+
+    // Developer Profiles
+    developer_rating: 'Rating',
+    developer_delivered: 'Projects Delivered',
+    developer_ongoing: 'Ongoing Projects',
+    developer_established: 'Established',
+    developer_specialties: 'Specialties',
+    developer_reviews: 'Customer Reviews',
   }
 };
 
@@ -608,9 +856,9 @@ function setLanguage(lang) {
   updatePageText();
 
   // Update language toggle button
-  const langButton = document.querySelector('.btn-lang span, .lang-switch');
-  if (langButton) {
-    langButton.textContent = lang === 'th' ? 'EN' : 'TH';
+  const langText = document.querySelector('#lang-text');
+  if (langText) {
+    langText.textContent = lang === 'th' ? 'EN' : 'TH';
   }
 }
 
@@ -662,9 +910,9 @@ function initI18n() {
   updatePageText();
 
   // Update language toggle button
-  const langButton = document.querySelector('.btn-lang span, .lang-switch');
-  if (langButton) {
-    langButton.textContent = savedLang === 'th' ? 'EN' : 'TH';
+  const langText = document.querySelector('#lang-text');
+  if (langText) {
+    langText.textContent = savedLang === 'th' ? 'EN' : 'TH';
   }
 }
 

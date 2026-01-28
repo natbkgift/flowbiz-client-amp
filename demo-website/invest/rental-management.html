@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Rental Management Services | Asset Management Property</title>
+  <meta name="description" content="Professional rental management services for your investment property in Pattaya.">
+  
+  <link rel="icon" href="../assets/images/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="../assets/css/main.css">
+  <link rel="stylesheet" href="../assets/css/components.css">
+  <link rel="stylesheet" href="../assets/css/projects.css">
+  <link rel="stylesheet" href="../assets/css/marketing.css">
+  <link rel="stylesheet" href="../assets/css/responsive.css">
+  
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+</head>
+<body>
+  <a href="#main-content" class="skip-link">Skip to main content</a>
+  
+  <header class="header">
+    <div class="header-content">
+      <a href="../index.html" class="logo">
+        <img src="../assets/images/logo-amp.svg" alt="Asset Management Property" height="40">
+      </a>
+      
+      <nav class="nav desktop-only">
+        <a href="../index.html" data-i18n="nav_home"><i data-lucide="home"></i> Home</a>
+        <a href="../listing.html?intent=rent" data-i18n="nav_rent"><i data-lucide="key"></i> Rent</a>
+        <a href="../listing.html?intent=sale" data-i18n="nav_buy"><i data-lucide="building"></i> Buy</a>
+        <a href="../projects/index.html" data-i18n="nav_projects"><i data-lucide="layers"></i> Projects</a>
+        <a href="index.html" class="active" data-i18n="nav_invest"><i data-lucide="trending-up"></i> Invest</a>
+        <a href="../contact.html" data-i18n="nav_contact"><i data-lucide="mail"></i> Contact</a>
+      </nav>
+      
+      <div class="header-actions">
+        <button class="lang-switch" onclick="toggleLanguage()">
+          <span>TH</span>
+        </button>
+        <button class="hamburger mobile-only" onclick="toggleMobileMenu()">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="3" y1="12" x2="21" y2="12"></line>
+            <line x1="3" y1="6" x2="21" y2="6"></line>
+            <line x1="3" y1="18" x2="21" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <div class="mobile-menu" id="mobile-menu">
+    <a href="../index.html" data-i18n="nav_home"><i data-lucide="home"></i> Home</a>
+    <a href="../listing.html?intent=rent" data-i18n="nav_rent"><i data-lucide="key"></i> Rent</a>
+    <a href="../listing.html?intent=sale" data-i18n="nav_buy"><i data-lucide="building"></i> Buy</a>
+    <a href="../projects/index.html" data-i18n="nav_projects"><i data-lucide="layers"></i> Projects</a>
+    <a href="index.html" data-i18n="nav_invest"><i data-lucide="trending-up"></i> Invest</a>
+    <a href="../contact.html" data-i18n="nav_contact"><i data-lucide="mail"></i> Contact</a>
+  </div>
+
+  <section class="hero" id="main-content" style="padding: 60px 0 40px;">
+    <div class="container" style="text-align: center;">
+      <h1 data-i18n="rental_title">บริการบริหารการเช่า</h1>
+      <p class="hero-subtitle" data-i18n="rental_subtitle">เราดูแลอสังหาของคุณแทนคุณ</p>
+    </div>
+  </section>
+
+  <section class="section" style="padding-top: 0;">
+    <div class="container">
+      <!-- Services Grid -->
+      <div style="margin-bottom: 60px;">
+        <h2 class="section-title" data-i18n="rental_services">Our Services</h2>
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div style="font-size: 48px; text-align: center; margin-bottom: 16px;">🔍</div>
+            <h3 data-i18n="rental_tenant_finding">Tenant Finding</h3>
+            <p style="color: #6c757d; margin-top: 12px;">
+              Professional marketing, screening, and selection of quality tenants for your property.
+            </p>
+          </div>
+
+          <div class="stat-card">
+            <div style="font-size: 48px; text-align: center; margin-bottom: 16px;">🔧</div>
+            <h3 data-i18n="rental_maintenance">Maintenance</h3>
+            <p style="color: #6c757d; margin-top: 12px;">
+              24/7 emergency response, regular inspections, and coordination with contractors.
+            </p>
+          </div>
+
+          <div class="stat-card">
+            <div style="font-size: 48px; text-align: center; margin-bottom: 16px;">💰</div>
+            <h3 data-i18n="rental_collection">Rent Collection</h3>
+            <p style="color: #6c757d; margin-top: 12px;">
+              Timely collection, financial reporting, and direct deposit to your account.
+            </p>
+          </div>
+
+          <div class="stat-card">
+            <div style="font-size: 48px; text-align: center; margin-bottom: 16px;">📊</div>
+            <h3 data-i18n="rental_reporting">Monthly Reporting</h3>
+            <p style="color: #6c757d; margin-top: 12px;">
+              Detailed financial statements, occupancy reports, and property condition updates.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Pricing -->
+      <div style="margin-bottom: 60px;">
+        <h2 class="section-title" data-i18n="rental_pricing">Service Fee</h2>
+        <div style="max-width: 600px; margin: 0 auto;">
+          <div style="background: white; padding: 48px; border-radius: 12px; box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08); text-align: center;">
+            <div style="font-size: 64px; font-weight: bold; color: #1744BE; margin-bottom: 16px;">10%</div>
+            <div style="font-size: 24px; margin-bottom: 24px;">of Monthly Rental Income</div>
+            <div style="text-align: left; background: #f8f9fa; padding: 24px; border-radius: 8px;">
+              <div style="font-weight: bold; margin-bottom: 12px;">Included Services:</div>
+              <ul style="list-style: none; padding: 0; margin: 0;">
+                <li style="padding: 8px 0; border-bottom: 1px solid #dee2e6;">✓ Tenant Screening & Selection</li>
+                <li style="padding: 8px 0; border-bottom: 1px solid #dee2e6;">✓ Contract Management</li>
+                <li style="padding: 8px 0; border-bottom: 1px solid #dee2e6;">✓ Rent Collection</li>
+                <li style="padding: 8px 0; border-bottom: 1px solid #dee2e6;">✓ Property Inspections</li>
+                <li style="padding: 8px 0; border-bottom: 1px solid #dee2e6;">✓ Maintenance Coordination</li>
+                <li style="padding: 8px 0;">✓ Financial Reporting</li>
+              </ul>
+            </div>
+            <a href="../contact.html" class="btn btn-primary" style="margin-top: 24px;">Get Started</a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Performance -->
+      <div>
+        <h2 class="section-title" data-i18n="rental_performance">Our Performance</h2>
+        <div class="investment-highlights" style="background: linear-gradient(135deg, #1744BE 0%, #2563eb 100%); border-radius: 12px; padding: 48px; margin-top: 32px;">
+          <div class="highlights-grid">
+            <div class="highlight-item">
+              <div class="highlight-value">85%</div>
+              <div class="highlight-label" data-i18n="rental_occupancy">Average Occupancy Rate</div>
+            </div>
+            <div class="highlight-item">
+              <div class="highlight-value"><2h</div>
+              <div class="highlight-label" data-i18n="rental_response_time">Response Time</div>
+            </div>
+            <div class="highlight-item">
+              <div class="highlight-value">200+</div>
+              <div class="highlight-label">Properties Managed</div>
+            </div>
+            <div class="highlight-item">
+              <div class="highlight-value">98%</div>
+              <div class="highlight-label">Owner Satisfaction</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- CTA -->
+      <div style="text-align: center; margin-top: 60px; padding: 48px; background: #f8f9fa; border-radius: 12px;">
+        <h3 style="margin-bottom: 16px;">Ready to maximize your rental income?</h3>
+        <p style="color: #6c757d; margin-bottom: 24px;">
+          Let our experts handle everything while you enjoy passive income.
+        </p>
+        <div style="display: flex; gap: 16px; justify-content: center; flex-wrap: wrap;">
+          <a href="../contact.html" class="btn btn-primary">Contact Us</a>
+          <a href="calculator.html" class="btn btn-secondary">Calculate ROI</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-content">
+        <div>
+          <h3>Asset Management Property</h3>
+          <p>Professional property management in Pattaya</p>
+        </div>
+        <div>
+          <h3>Contact Us</h3>
+          <a href="tel:+66634533526">📞 +66 63-453-3526</a>
+          <a href="mailto:info@amppattaya.com">📧 info@amppattaya.com</a>
+        </div>
+        <div>
+          <h3>Quick Links</h3>
+          <a href="../projects/index.html">Projects</a>
+          <a href="index.html">Investment Hub</a>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <p>&copy; 2026 Asset Management Property</p>
+      </div>
+    </div>
+  </footer>
+
+  <script src="../assets/js/mock-data.js"></script>
+  <script src="../assets/js/i18n.js"></script>
+  <script src="../assets/js/main.js"></script>
+  
+  <script>
+    if (typeof lucide !== 'undefined') {
+      lucide.createIcons();
+    }
+  </script>
+</body>
+</html>

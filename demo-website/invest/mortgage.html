@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mortgage Calculator | Asset Management Property</title>
+  <meta name="description" content="Calculate your monthly mortgage payments for properties in Pattaya.">
+  
+  <link rel="icon" href="../assets/images/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="../assets/css/main.css">
+  <link rel="stylesheet" href="../assets/css/components.css">
+  <link rel="stylesheet" href="../assets/css/projects.css">
+  <link rel="stylesheet" href="../assets/css/marketing.css">
+  <link rel="stylesheet" href="../assets/css/responsive.css">
+  
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+</head>
+<body>
+  <a href="#main-content" class="skip-link">Skip to main content</a>
+  
+  <header class="header">
+    <div class="header-content">
+      <a href="../index.html" class="logo">
+        <img src="../assets/images/logo-amp.svg" alt="Asset Management Property" height="40">
+      </a>
+      
+      <nav class="nav desktop-only">
+        <a href="../index.html" data-i18n="nav_home"><i data-lucide="home"></i> Home</a>
+        <a href="../listing.html?intent=rent" data-i18n="nav_rent"><i data-lucide="key"></i> Rent</a>
+        <a href="../listing.html?intent=sale" data-i18n="nav_buy"><i data-lucide="building"></i> Buy</a>
+        <a href="../projects/index.html" data-i18n="nav_projects"><i data-lucide="layers"></i> Projects</a>
+        <a href="index.html" class="active" data-i18n="nav_invest"><i data-lucide="trending-up"></i> Invest</a>
+        <a href="../contact.html" data-i18n="nav_contact"><i data-lucide="mail"></i> Contact</a>
+      </nav>
+      
+      <div class="header-actions">
+        <button class="lang-switch" onclick="toggleLanguage()">
+          <span>TH</span>
+        </button>
+        <button class="hamburger mobile-only" onclick="toggleMobileMenu()">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="3" y1="12" x2="21" y2="12"></line>
+            <line x1="3" y1="6" x2="21" y2="6"></line>
+            <line x1="3" y1="18" x2="21" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <div class="mobile-menu" id="mobile-menu">
+    <a href="../index.html" data-i18n="nav_home"><i data-lucide="home"></i> Home</a>
+    <a href="../listing.html?intent=rent" data-i18n="nav_rent"><i data-lucide="key"></i> Rent</a>
+    <a href="../listing.html?intent=sale" data-i18n="nav_buy"><i data-lucide="building"></i> Buy</a>
+    <a href="../projects/index.html" data-i18n="nav_projects"><i data-lucide="layers"></i> Projects</a>
+    <a href="index.html" data-i18n="nav_invest"><i data-lucide="trending-up"></i> Invest</a>
+    <a href="../contact.html" data-i18n="nav_contact"><i data-lucide="mail"></i> Contact</a>
+  </div>
+
+  <section class="hero" id="main-content" style="padding: 60px 0 40px;">
+    <div class="container" style="text-align: center;">
+      <h1 data-i18n="mortgage_title">เครื่องคำนวณสินเชื่อบ้าน</h1>
+      <p class="hero-subtitle" data-i18n="mortgage_subtitle">คำนวณยอดผ่อนต่อเดือน</p>
+    </div>
+  </section>
+
+  <section class="section" style="padding-top: 0;">
+    <div class="container">
+      <div class="calculator-container">
+        <div class="calculator-form">
+          <div class="calculator-input-group">
+            <label for="mortgage-price" data-i18n="calc_property_price">Property Price (฿)</label>
+            <input type="number" id="mortgage-price" class="calculator-input" placeholder="5000000" value="5000000">
+          </div>
+
+          <div class="calculator-input-group">
+            <label for="mortgage-down" data-i18n="calc_down_payment">Down Payment (%)</label>
+            <input type="number" id="mortgage-down" class="calculator-input" placeholder="30" value="30" min="0" max="100">
+          </div>
+
+          <div class="calculator-input-group">
+            <label for="mortgage-rate" data-i18n="calc_interest_rate">Interest Rate (%/year)</label>
+            <input type="number" id="mortgage-rate" class="calculator-input" placeholder="4.5" value="4.5" step="0.1">
+          </div>
+
+          <div class="calculator-input-group">
+            <label for="mortgage-term" data-i18n="calc_loan_term">Loan Term (years)</label>
+            <input type="number" id="mortgage-term" class="calculator-input" placeholder="20" value="20" min="1" max="30">
+          </div>
+
+          <button class="btn btn-primary" style="width: 100%;" onclick="calculateMortgage()" data-i18n="calc_calculate">
+            Calculate
+          </button>
+        </div>
+
+        <div class="calculator-results" id="mortgage-results">
+          <h3 data-i18n="mortgage_title">Mortgage Calculation Results</h3>
+          
+          <div class="results-grid">
+            <div class="result-item">
+              <div class="result-label" data-i18n="mortgage_monthly_payment">Monthly Payment</div>
+              <div class="calculator-result-value" id="result-monthly-payment">-</div>
+            </div>
+
+            <div class="result-item">
+              <div class="result-label" data-i18n="mortgage_total_interest">Total Interest</div>
+              <div class="calculator-result-value" id="result-total-interest">-</div>
+            </div>
+
+            <div class="result-item">
+              <div class="result-label" data-i18n="mortgage_total_payment">Total Payment</div>
+              <div class="calculator-result-value" id="result-total-payment">-</div>
+            </div>
+          </div>
+
+          <div style="background: #f8f9fa; padding: 24px; border-radius: 8px; margin-top: 24px;">
+            <h4 style="margin-bottom: 16px;" data-i18n="mortgage_recommended_banks">Recommended Banks</h4>
+            <div style="display: grid; gap: 12px;">
+              <div style="display: flex; justify-content: space-between; align-items: center; padding: 12px; background: white; border-radius: 6px;">
+                <span>Bangkok Bank</span>
+                <span style="color: #1744BE; font-weight: bold;">3.99% - 5.25%</span>
+              </div>
+              <div style="display: flex; justify-content: space-between; align-items: center; padding: 12px; background: white; border-radius: 6px;">
+                <span>Kasikorn Bank</span>
+                <span style="color: #1744BE; font-weight: bold;">4.25% - 5.50%</span>
+              </div>
+              <div style="display: flex; justify-content: space-between; align-items: center; padding: 12px; background: white; border-radius: 6px;">
+                <span>SCB</span>
+                <span style="color: #1744BE; font-weight: bold;">4.10% - 5.35%</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="calculator-actions">
+            <a href="../contact.html" class="btn btn-primary" data-i18n="calc_consult">Consult Expert</a>
+            <a href="calculator.html" class="btn btn-secondary">ROI Calculator</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-content">
+        <div>
+          <h3>Asset Management Property</h3>
+          <p>Professional property management in Pattaya</p>
+        </div>
+        <div>
+          <h3>Contact Us</h3>
+          <a href="tel:+66634533526">📞 +66 63-453-3526</a>
+          <a href="mailto:info@amppattaya.com">📧 info@amppattaya.com</a>
+        </div>
+        <div>
+          <h3>Quick Links</h3>
+          <a href="../projects/index.html">Projects</a>
+          <a href="index.html">Investment Hub</a>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <p>&copy; 2026 Asset Management Property</p>
+      </div>
+    </div>
+  </footer>
+
+  <script src="../assets/js/mock-data.js"></script>
+  <script src="../assets/js/i18n.js"></script>
+  <script src="../assets/js/main.js"></script>
+  
+  <script>
+    function calculateMortgage() {
+      const price = parseFloat(document.getElementById('mortgage-price').value) || 0;
+      const downPercent = parseFloat(document.getElementById('mortgage-down').value) || 0;
+      const rate = parseFloat(document.getElementById('mortgage-rate').value) || 0;
+      const term = parseFloat(document.getElementById('mortgage-term').value) || 0;
+
+      // Format currency helper
+      const formatCurrency = (num) => {
+        return new Intl.NumberFormat('th-TH', {
+          style: 'currency',
+          currency: 'THB',
+          minimumFractionDigits: 0
+        }).format(num);
+      };
+
+      // Better validation with specific error messages
+      const errors = [];
+      const lang = document.documentElement.lang || 'th';
+
+      if (price <= 0) {
+        errors.push(lang === 'th' ? 'ราคาอสังหาต้องมากกว่า 0' : 'Property price must be greater than 0');
+      }
+      if (downPercent < 0 || downPercent > 100) {
+        errors.push(lang === 'th' ? 'เงินดาวน์ต้องอยู่ระหว่าง 0-100%' : 'Down payment must be between 0% and 100%');
+      }
+      if (rate < 0) {
+        errors.push(lang === 'th' ? 'อัตราดอกเบี้ยต้องไม่ติดลบ' : 'Interest rate cannot be negative');
+      }
+      if (term <= 0) {
+        errors.push(lang === 'th' ? 'ระยะเวลากู้ต้องมากกว่า 0 ปี' : 'Loan term must be greater than 0 years');
+      }
+
+      if (errors.length > 0) {
+        alert(errors.join('\n'));
+        return;
+      }
+
+      const downPayment = price * (downPercent / 100);
+      const loanAmount = price - downPayment;
+      const monthlyRate = rate / 100 / 12;
+      const numPayments = term * 12;
+
+      let monthlyPayment = 0;
+      let totalInterest = 0;
+      let totalPayment = 0;
+
+      // Handle 100% down payment case
+      if (downPercent === 100) {
+        document.getElementById('result-monthly-payment').textContent = lang === 'th' ? 'ไม่ต้องกู้ (จ่ายเต็ม)' : 'No loan needed (Paid in full)';
+        document.getElementById('result-total-interest').textContent = formatCurrency(0);
+        document.getElementById('result-total-payment').textContent = formatCurrency(0);
+        document.getElementById('mortgage-results').style.display = 'block';
+        return;
+      }
+
+      if (loanAmount > 0) {
+        if (monthlyRate > 0) {
+          monthlyPayment = loanAmount * 
+            (monthlyRate * Math.pow(1 + monthlyRate, numPayments)) / 
+            (Math.pow(1 + monthlyRate, numPayments) - 1);
+        } else {
+          // Zero interest rate - simple division
+          monthlyPayment = loanAmount / numPayments;
+        }
+      }
+
+      totalPayment = monthlyPayment * numPayments;
+      totalInterest = totalPayment - loanAmount;
+
+      document.getElementById('result-monthly-payment').textContent = formatCurrency(monthlyPayment);
+      document.getElementById('result-total-interest').textContent = formatCurrency(totalInterest);
+      document.getElementById('result-total-payment').textContent = formatCurrency(totalPayment);
+
+      document.getElementById('mortgage-results').style.display = 'block';
+    }
+
+    if (typeof lucide !== 'undefined') {
+      lucide.createIcons();
+    }
+  </script>
+</body>
+</html>

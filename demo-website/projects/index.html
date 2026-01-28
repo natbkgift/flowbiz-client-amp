@@ -14,6 +14,7 @@
   <link rel="stylesheet" href="../assets/css/main.css">
   <link rel="stylesheet" href="../assets/css/components.css">
   <link rel="stylesheet" href="../assets/css/projects.css">
+  <link rel="stylesheet" href="../assets/css/marketing.css">
   <link rel="stylesheet" href="../assets/css/responsive.css">
   
   <!-- Lucide Icons -->
@@ -42,7 +43,7 @@
       
       <div class="header-actions">
         <button class="lang-switch" onclick="toggleLanguage()">
-          <span>TH</span>
+          <span id="lang-text">EN</span>
         </button>
         <button class="hamburger mobile-only" onclick="toggleMobileMenu()" aria-label="Menu" aria-expanded="false">
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -132,6 +133,18 @@
       </div>
     </div>
   </section>
+
+  <!-- Featured Developers Section -->
+  <section class="section" style="background: #f8f9fa;">
+    <div class="container">
+      <h2 class="section-title">Featured Developers</h2>
+      <p class="section-subtitle">Trusted developers in Pattaya</p>
+      
+      <div class="developer-grid" id="developer-grid">
+        <!-- Developers will be rendered here by JavaScript -->
+      </div>
+    </div>
+  </section>
   
   <!-- Footer -->
   <footer class="footer">
@@ -171,12 +184,165 @@
   </footer>
   
   <!-- Scripts -->
+  <script src="../assets/js/mock-data.js"></script>
   <script src="../assets/js/mock-projects.js"></script>
   <script src="../assets/js/i18n.js"></script>
   <script src="../assets/js/main.js"></script>
   <script src="../assets/js/projects.js"></script>
   
   <script>
+    // Render featured developers
+    function renderDevelopers() {
+      const container = document.getElementById('developer-grid');
+      const developers = window.AMP?.developers;
+      if (!container || !Array.isArray(developers) || developers.length === 0) return;
+
+      const lang = document.documentElement.lang || 'en';
+
+      // Clear existing content
+      container.innerHTML = '';
+
+      developers.forEach(dev => {
+        const description = dev.description && dev.description[lang] ? dev.description[lang] : '';
+        const specialties = dev.specialties && dev.specialties[lang] ? dev.specialties[lang] : [];
+        
+        // Better star representation with half-stars
+        const maxStars = 5;
+        const rawFullStars = Math.floor(dev.rating);
+        const fraction = dev.rating - rawFullStars;
+        const hasHalfStar = fraction >= 0.25 && fraction < 0.75;
+        const fullStars = fraction >= 0.75 ? rawFullStars + 1 : rawFullStars;
+        const emptyStars = Math.max(0, maxStars - fullStars - (hasHalfStar ? 1 : 0));
+        const stars = '⭐'.repeat(Math.max(0, Math.min(maxStars, fullStars))) +
+                     (hasHalfStar ? '⭑' : '') +
+                     '☆'.repeat(emptyStars);
+
+        const card = document.createElement('div');
+        card.className = 'developer-card';
+
+        const header = document.createElement('div');
+        header.className = 'developer-header';
+
+        const logo = document.createElement('img');
+        logo.className = 'developer-logo';
+        logo.src = dev.logo || '';
+        logo.alt = dev.name || '';
+        logo.loading = 'lazy';
+
+        const ratingDiv = document.createElement('div');
+        ratingDiv.className = 'developer-rating';
+
+        const ratingValue = document.createElement('span');
+        ratingValue.className = 'developer-rating-value';
+        ratingValue.textContent = String(dev.rating || '0');
+
+        const starsDiv = document.createElement('div');
+        starsDiv.textContent = stars;
+
+        ratingDiv.appendChild(ratingValue);
+        ratingDiv.appendChild(starsDiv);
+        header.appendChild(logo);
+        header.appendChild(ratingDiv);
+
+        const nameH3 = document.createElement('h3');
+        nameH3.style.marginBottom = '12px';
+        nameH3.textContent = dev.name || '';
+
+        const descP = document.createElement('p');
+        descP.className = 'developer-description';
+        descP.textContent = description;
+
+        const statsDiv = document.createElement('div');
+        statsDiv.className = 'developer-stats';
+
+        const stat1 = document.createElement('div');
+        stat1.className = 'developer-stat';
+        const stat1Value = document.createElement('span');
+        stat1Value.className = 'developer-stat-value';
+        stat1Value.textContent = String(dev.projects_delivered || '0');
+        const stat1Label = document.createElement('span');
+        stat1Label.className = 'developer-stat-label';
+        stat1Label.setAttribute('data-i18n', 'developer_delivered');
+        stat1Label.textContent = 'Delivered';
+        stat1.appendChild(stat1Value);
+        stat1.appendChild(stat1Label);
+
+        const stat2 = document.createElement('div');
+        stat2.className = 'developer-stat';
+        const stat2Value = document.createElement('span');
+        stat2Value.className = 'developer-stat-value';
+        stat2Value.textContent = String(dev.projects_ongoing || '0');
+        const stat2Label = document.createElement('span');
+        stat2Label.className = 'developer-stat-label';
+        stat2Label.setAttribute('data-i18n', 'developer_ongoing');
+        stat2Label.textContent = 'Ongoing';
+        stat2.appendChild(stat2Value);
+        stat2.appendChild(stat2Label);
+
+        statsDiv.appendChild(stat1);
+        statsDiv.appendChild(stat2);
+
+        const specialtiesContainer = document.createElement('div');
+        specialtiesContainer.style.marginTop = '16px';
+        specialtiesContainer.style.paddingTop = '16px';
+        specialtiesContainer.style.borderTop = '1px solid #e9ecef';
+
+        const specialtiesLabel = document.createElement('div');
+        specialtiesLabel.style.fontSize = '12px';
+        specialtiesLabel.style.color = '#6c757d';
+        specialtiesLabel.style.marginBottom = '8px';
+        specialtiesLabel.setAttribute('data-i18n', 'developer_specialties');
+        specialtiesLabel.textContent = 'Specialties:';
+
+        const specialtiesDiv = document.createElement('div');
+        specialtiesDiv.className = 'developer-specialties';
+        specialties.forEach(s => {
+          const tag = document.createElement('span');
+          tag.className = 'specialty-tag';
+          tag.textContent = s;
+          specialtiesDiv.appendChild(tag);
+        });
+
+        specialtiesContainer.appendChild(specialtiesLabel);
+        specialtiesContainer.appendChild(specialtiesDiv);
+
+        const metaDiv = document.createElement('div');
+        metaDiv.style.marginTop = '12px';
+        metaDiv.style.fontSize = '12px';
+        metaDiv.style.color = '#6c757d';
+        metaDiv.style.textAlign = 'center';
+
+        const estSpan = document.createElement('span');
+        estSpan.setAttribute('data-i18n', 'developer_established');
+        estSpan.textContent = 'Established';
+
+        const reviewsSpan = document.createElement('span');
+        reviewsSpan.setAttribute('data-i18n', 'developer_reviews');
+        reviewsSpan.textContent = 'reviews';
+
+        metaDiv.appendChild(estSpan);
+        metaDiv.appendChild(document.createTextNode(': ' + (dev.established_year || '') + ' • ' + (dev.reviews_count || '0') + ' '));
+        metaDiv.appendChild(reviewsSpan);
+
+        card.appendChild(header);
+        card.appendChild(nameH3);
+        card.appendChild(descP);
+        card.appendChild(statsDiv);
+        card.appendChild(specialtiesContainer);
+        card.appendChild(metaDiv);
+
+        container.appendChild(card);
+      });
+    }
+
+    // Render on page load
+    renderDevelopers();
+
+    // Re-render on language change
+    document.addEventListener('languageChanged', function() {
+      renderDevelopers();
+    });
+
     if (typeof lucide !== 'undefined') {
       lucide.createIcons();
     }
