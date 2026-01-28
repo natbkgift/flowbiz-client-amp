@@ -163,6 +163,73 @@ const TRANSLATIONS = {
     common_delete: 'ลบ',
     common_close: 'ปิด',
 
+    // Filters & Sort
+    filter_title: 'ตัวกรอง',
+    filter_toggle: 'ตัวกรอง & เรียงลำดับ',
+    filter_looking_to: 'ต้องการ',
+    filter_all: 'ทั้งหมด',
+    filter_rent: 'เช่า',
+    filter_buy: 'ซื้อ',
+    filter_property_type: 'ประเภททรัพย์สิน',
+    prop_type_condo: 'คอนโด',
+    prop_type_house: 'บ้าน',
+    prop_type_villa: 'วิลล่า',
+    prop_type_townhome: 'ทาวน์โฮม',
+    prop_type_land: 'ที่ดิน',
+    filter_area: 'พื้นที่',
+    filter_price_range: 'ช่วงราคา (บาท)',
+    filter_min: 'ต่ำสุด',
+    filter_max: 'สูงสุด',
+    filter_apply: 'ใช้ตัวกรอง',
+    filter_reset: 'ล้างค่า',
+    results_count: 'รายการที่พบ',
+    sort_by: 'เรียงตาม:',
+    sort_updated: 'อัปเดตล่าสุด',
+    sort_newest: 'ใหม่ล่าสุด',
+    sort_price_low: 'ราคา: ต่ำ -> สูง',
+    sort_price_high: 'ราคา: สูง -> ต่ำ',
+    pagination_previous: 'ก่อนหน้า',
+    pagination_next: 'ถัดไป',
+    pagination_info: 'หน้า 1 จาก 1',
+    no_results: 'ไม่พบทรัพย์สินที่ตรงกับเงื่อนไข',
+    no_results_hint: 'ลองปรับเปลี่ยนตัวกรองเพื่อค้นหาทรัพย์สินอื่นๆ',
+
+    // Listing specific
+    filter_bedrooms: 'จำนวนห้องนอน',
+    filter_studio: 'สตูดิโอ',
+
+    // Detail Page
+    detail_loading: 'กำลังโหลด...',
+    detail_description: 'รายละเอียด',
+    detail_amenities: 'สิ่งอำนวยความสะดวก',
+    detail_location: 'ทำเลที่ตั้ง',
+    detail_mapPlaceholder: 'แผนที่',
+    detail_similarProperties: 'ทรัพย์สินที่คล้ายกัน',
+
+    // Agent
+    agent_name: 'AMP พัทยา',
+    agent_title: 'บริหารจัดการอสังหาริมทรัพย์มืออาชีพ',
+    agent_lineChat: 'แชทไลน์',
+    agent_call: 'โทร: 063-453-3526',
+
+    // Inquiry Form
+    form_interestedTitle: 'สนใจทรัพย์นี้?',
+    form_interestedSubtitle: 'หากคุณสนใจทรัพย์สินนี้ กรุณากรอกแบบฟอร์มด้านล่าง',
+
+    // CTA
+    cta_line: 'ไลน์',
+    cta_call: 'โทร',
+
+    // Footer specific
+    footer_companyName: 'Asset Management Property',
+    footer_tagline: 'บริหารจัดการอสังหาริมทรัพย์มืออาชีพในพัทยา',
+    footer_officeHours: 'เวลาทำการ:',
+    footer_hours: 'จันทร์ - อาทิตย์: 9:00 - 18:00 น.',
+    footer_contactUs: 'ติดต่อเรา',
+    footer_quickLinks: 'เมนูลัด',
+    footer_forRent: 'สำหรับเช่า',
+    footer_forSale: 'สำหรับขาย',
+
     // Thank You Page
     thank_you_title: 'ขอบคุณที่ติดต่อเรา!',
     thank_you_message: 'เราได้รับข้อมูลของคุณแล้ว ทีมงานจะติดต่อกลับโดยเร็วที่สุด<br>โดยปกติภายใน 24 ชั่วโมง',
@@ -581,6 +648,73 @@ const TRANSLATIONS = {
     common_edit: 'Edit',
     common_delete: 'Delete',
     common_close: 'Close',
+
+    // Filters & Sort
+    filter_title: 'Filters',
+    filter_toggle: 'Filters & Sort',
+    filter_looking_to: 'Looking to',
+    filter_all: 'All',
+    filter_rent: 'Rent',
+    filter_buy: 'Buy',
+    filter_property_type: 'Property Type',
+    prop_type_condo: 'Condo',
+    prop_type_house: 'House',
+    prop_type_villa: 'Villa',
+    prop_type_townhome: 'Townhome',
+    prop_type_land: 'Land',
+    filter_area: 'Area',
+    filter_price_range: 'Price Range (THB)',
+    filter_min: 'Min',
+    filter_max: 'Max',
+    filter_apply: 'Apply Filters',
+    filter_reset: 'Reset',
+    results_count: 'Properties Found',
+    sort_by: 'Sort by:',
+    sort_updated: 'Recently Updated',
+    sort_newest: 'Newest',
+    sort_price_low: 'Price: Low to High',
+    sort_price_high: 'Price: High to Low',
+    pagination_previous: 'Previous',
+    pagination_next: 'Next',
+    pagination_info: 'Page 1 of 1',
+    no_results: 'No properties found',
+    no_results_hint: 'Try adjusting your filters to find other properties',
+
+    // Listing specific
+    filter_bedrooms: 'Bedrooms',
+    filter_studio: 'Studio',
+
+    // Detail Page
+    detail_loading: 'Loading...',
+    detail_description: 'Description',
+    detail_amenities: 'Amenities',
+    detail_location: 'Location',
+    detail_mapPlaceholder: 'Map Placeholder',
+    detail_similarProperties: 'Similar Properties',
+
+    // Agent
+    agent_name: 'AMP Pattaya',
+    agent_title: 'Professional Property Management',
+    agent_lineChat: 'LINE Chat',
+    agent_call: 'Call: 063-453-3526',
+
+    // Inquiry Form
+    form_interestedTitle: 'Interested in this property?',
+    form_interestedSubtitle: 'If you are interested in this property, please fill out the form below.',
+
+    // CTA
+    cta_line: 'LINE',
+    cta_call: 'Call',
+
+    // Footer specific
+    footer_companyName: 'Asset Management Property',
+    footer_tagline: 'Professional property management in Pattaya',
+    footer_officeHours: 'Office Hours:',
+    footer_hours: 'Mon - Sun: 9:00 AM - 6:00 PM',
+    footer_contactUs: 'Contact Us',
+    footer_quickLinks: 'Quick Links',
+    footer_forRent: 'Properties for Rent',
+    footer_forSale: 'Properties for Sale',
 
     // Thank You Page
     thank_you_title: 'Thank You for Contacting Us!',
