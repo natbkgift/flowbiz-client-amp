@@ -815,7 +815,7 @@ Talk soon!
 ```
 
 **Use:** When lead goes quiet
-**Tone:** Friendly, respectful, giving out
+**Tone:** Friendly, respectful, giving up
 
 ---
 
