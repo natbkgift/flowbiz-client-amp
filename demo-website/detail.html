@@ -104,9 +104,8 @@
           <!-- Property Header -->
           <div class="property-header">
             <div class="property-title">
-              <h1 id="property-title" data-i18n="detail.loading">Loading...</h1>
-              <p class="property-location" id="property-location"><i data-lucide="map-pin"></i> <span
-                  data-i18n="detail.loading">Loading...</span></p>
+              <h1 id="property-title">Loading...</h1>
+              <p class="property-location" id="property-location"><i data-lucide="map-pin"></i> <span>Loading...</span></p>
             </div>
             <div class="property-price" id="property-price">฿0</div>
           </div>
@@ -123,15 +122,15 @@
 
           <!-- Description -->
           <div style="background: var(--color-white); padding: 24px; border-radius: 12px; margin-bottom: 24px;">
-            <h2 class="mb-md" data-i18n="detail.description">Description</h2>
+            <h2 class="mb-md" data-i18n="detail_description">Description</h2>
             <div id="property-description">
-              <p data-i18n="detail.loading">Loading...</p>
+              <p>Loading...</p>
             </div>
           </div>
 
           <!-- Amenities -->
           <div style="background: var(--color-white); padding: 24px; border-radius: 12px; margin-bottom: 24px;">
-            <h2 class="mb-md" data-i18n="detail.amenities">Amenities</h2>
+            <h2 class="mb-md" data-i18n="detail_amenities">Amenities</h2>
             <div class="amenities-grid" id="amenities-grid">
               <!-- Amenities will be rendered here -->
             </div>
@@ -139,17 +138,17 @@
 
           <!-- Location -->
           <div style="background: var(--color-white); padding: 24px; border-radius: 12px; margin-bottom: 24px;">
-            <h2 class="mb-md" data-i18n="detail.location">Location</h2>
+            <h2 class="mb-md" data-i18n="detail_location">Location</h2>
             <div
               style="background: var(--color-gray-100); height: 300px; border-radius: 8px; display: flex; align-items: center; justify-content: center; margin-bottom: 16px;">
-              <p style="color: var(--color-gray-600);" data-i18n="detail.mapPlaceholder">Map Placeholder</p>
+              <p style="color: var(--color-gray-600);" data-i18n="detail_mapPlaceholder">Map Placeholder</p>
             </div>
-            <p id="location-description" style="color: var(--color-gray-600);" data-i18n="detail.loading">Loading...</p>
+            <p id="location-description" style="color: var(--color-gray-600);">Loading...</p>
           </div>
 
           <!-- Similar Properties -->
           <div>
-            <h2 class="mb-lg" data-i18n="detail.similarProperties">Similar Properties</h2>
+            <h2 class="mb-lg" data-i18n="detail_similarProperties">Similar Properties</h2>
             <div class="grid grid-2" id="similar-properties">
               <!-- Similar properties will be rendered here -->
             </div>
@@ -167,40 +166,40 @@
                   font-weight="bold">AMP</text>
               </svg>
               <div class="agent-info">
-                <h3 data-i18n="agent.name">AMP Pattaya</h3>
-                <p data-i18n="agent.title">Professional Property Management</p>
+                <h3 data-i18n="agent_name">AMP Pattaya</h3>
+                <p data-i18n="agent_title">Professional Property Management</p>
               </div>
             </div>
             <div class="agent-actions">
               <a href="https://line.me/ti/p/~@554dksqb" class="btn btn-primary btn-block">
-                <i data-lucide="message-circle"></i> <span data-i18n="agent.lineChat">LINE Chat</span>
+                <i data-lucide="message-circle"></i> <span data-i18n="agent_lineChat">LINE Chat</span>
               </a>
               <a href="tel:+66634533526" class="btn btn-secondary btn-block">
-                <i data-lucide="phone-call"></i> <span data-i18n="agent.call">Call: 063-453-3526</span>
+                <i data-lucide="phone-call"></i> <span data-i18n="agent_call">Call: 063-453-3526</span>
               </a>
             </div>
           </div>
 
           <!-- Inquiry Form -->
           <form class="inquiry-form" style="margin-top: 24px;">
-            <h3 data-i18n="form.interestedTitle">สนใจทรัพย์นี้?</h3>
+            <h3 data-i18n="form_interestedTitle">สนใจทรัพย์นี้?</h3>
             <p style="color: var(--color-gray-600); margin-bottom: 24px; font-size: 14px;"
-              data-i18n="form.interestedSubtitle">
+              data-i18n="form_interestedSubtitle">
               Interested in this property?
             </p>
             <div class="form-group">
-              <input type="text" name="name" class="form-input" data-i18n-placeholder="form.name"
+              <input type="text" name="name" class="form-input" data-i18n-placeholder="form_name"
                 placeholder="Your Name" required>
             </div>
             <div class="form-group">
-              <input type="tel" name="phone" class="form-input" data-i18n-placeholder="form.phone"
+              <input type="tel" name="phone" class="form-input" data-i18n-placeholder="form_phone"
                 placeholder="Phone Number" required>
             </div>
             <div class="form-group">
-              <textarea name="message" class="form-textarea" data-i18n-placeholder="form.message"
+              <textarea name="message" class="form-textarea" data-i18n-placeholder="form_message"
                 placeholder="Message (optional)"></textarea>
             </div>
-            <button type="submit" class="btn btn-accent btn-block" data-i18n="form.submit">Send Inquiry</button>
+            <button type="submit" class="btn btn-accent btn-block" data-i18n="form_submit">Send Inquiry</button>
           </form>
         </aside>
       </div>
@@ -210,10 +209,10 @@
   <!-- Sticky CTA (Mobile) -->
   <div class="sticky-cta">
     <a href="https://line.me/ti/p/~@554dksqb" class="btn btn-primary">
-      <i data-lucide="message-circle"></i> <span data-i18n="cta.line">LINE</span>
+      <i data-lucide="message-circle"></i> <span data-i18n="cta_line">LINE</span>
     </a>
     <a href="tel:+66634533526" class="btn btn-accent">
-      <i data-lucide="phone-call"></i> <span data-i18n="cta.call">Call</span>
+      <i data-lucide="phone-call"></i> <span data-i18n="cta_call">Call</span>
     </a>
   </div>
 
@@ -222,34 +221,34 @@
     <div class="container">
       <div class="footer-content">
         <div>
-          <h3 data-i18n="footer.companyName">Asset Management Property</h3>
-          <p data-i18n="footer.tagline">Professional property management in Pattaya</p>
+          <h3 data-i18n="footer_companyName">Asset Management Property</h3>
+          <p data-i18n="footer_tagline">Professional property management in Pattaya</p>
           <p style="margin-top: 16px;">
-            <strong data-i18n="footer.officeHours">Office Hours:</strong><br>
-            <span data-i18n="footer.hours">Mon - Sun: 9:00 AM - 6:00 PM</span>
+            <strong data-i18n="footer_officeHours">Office Hours:</strong><br>
+            <span data-i18n="footer_hours">Mon - Sun: 9:00 AM - 6:00 PM</span>
           </p>
         </div>
 
         <div>
-          <h3 data-i18n="footer.contactUs">Contact Us</h3>
+          <h3 data-i18n="footer_contactUs">Contact Us</h3>
           <a href="tel:+66634533526"><i data-lucide="phone"></i> +66 63-453-3526</a>
           <a href="mailto:info@amppattaya.com"><i data-lucide="mail"></i> info@amppattaya.com</a>
           <a href="https://line.me/ti/p/~@554dksqb"><i data-lucide="message-circle"></i> LINE: @554dksqb</a>
         </div>
 
         <div>
-          <h3 data-i18n="footer.quickLinks">Quick Links</h3>
-          <a href="listing.html?intent=rent" data-i18n="footer.forRent">Properties for Rent</a>
-          <a href="listing.html?intent=sale" data-i18n="footer.forSale">Properties for Sale</a>
-          <a href="projects/index.html" data-i18n="footer.projects">Projects</a>
+          <h3 data-i18n="footer_quickLinks">Quick Links</h3>
+          <a href="listing.html?intent=rent" data-i18n="footer_forRent">Properties for Rent</a>
+          <a href="listing.html?intent=sale" data-i18n="footer_forSale">Properties for Sale</a>
+          <a href="projects/index.html" data-i18n="nav_projects">Projects</a>
           <a href="invest/index.html" data-i18n="nav_invest_hub">Investment Hub</a>
-          <a href="about.html" data-i18n="footer.about">About Us</a>
-          <a href="contact.html" data-i18n="footer.contact">Contact Us</a>
+          <a href="about.html" data-i18n="footer_about_us">About Us</a>
+          <a href="contact.html" data-i18n="footer_contact">Contact Us</a>
         </div>
       </div>
 
       <div class="footer-bottom">
-        <p data-i18n="footer.copyright">&copy; 2026 Asset Management Property. All rights reserved. | Demo Website</p>
+        <p data-i18n="footer_copyright">&copy; 2026 Asset Management Property. All rights reserved. | Demo Website</p>
       </div>
     </div>
   </footer>
