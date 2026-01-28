@@ -505,7 +505,10 @@
         const growthSign = area.growth >= 0 ? '+' : '';
         const growthClass = area.growth >= 0 ? 'positive' : 'negative';
         
-        value.innerHTML = `<span class="stat-change ${growthClass}">${growthSign}${area.growth}%</span>`;
+        const growthSpan = document.createElement('span');
+        growthSpan.className = 'stat-change ' + growthClass;
+        growthSpan.textContent = growthSign + area.growth + '%';
+        value.appendChild(growthSpan);
 
         statItem.appendChild(label);
         statItem.appendChild(value);
