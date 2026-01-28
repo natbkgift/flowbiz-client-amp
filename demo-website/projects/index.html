@@ -14,6 +14,7 @@
   <link rel="stylesheet" href="../assets/css/main.css">
   <link rel="stylesheet" href="../assets/css/components.css">
   <link rel="stylesheet" href="../assets/css/projects.css">
+  <link rel="stylesheet" href="../assets/css/marketing.css">
   <link rel="stylesheet" href="../assets/css/responsive.css">
   
   <!-- Lucide Icons -->
@@ -132,6 +133,18 @@
       </div>
     </div>
   </section>
+
+  <!-- Featured Developers Section -->
+  <section class="section" style="background: #f8f9fa;">
+    <div class="container">
+      <h2 class="section-title">Featured Developers</h2>
+      <p class="section-subtitle">Trusted developers in Pattaya</p>
+      
+      <div class="developer-grid" id="developer-grid">
+        <!-- Developers will be rendered here by JavaScript -->
+      </div>
+    </div>
+  </section>
   
   <!-- Footer -->
   <footer class="footer">
@@ -171,12 +184,71 @@
   </footer>
   
   <!-- Scripts -->
+  <script src="../assets/js/mock-data.js"></script>
   <script src="../assets/js/mock-projects.js"></script>
   <script src="../assets/js/i18n.js"></script>
   <script src="../assets/js/main.js"></script>
   <script src="../assets/js/projects.js"></script>
   
   <script>
+    // Render featured developers
+    function renderDevelopers() {
+      const container = document.getElementById('developer-grid');
+      if (!container || !window.AMP || !window.AMP.developers) return;
+
+      const developers = window.AMP.developers;
+      const lang = document.documentElement.lang || 'en';
+
+      const html = developers.map(dev => {
+        const description = dev.description[lang];
+        const specialties = dev.specialties[lang];
+        const stars = '⭐'.repeat(Math.floor(dev.rating));
+
+        return `
+          <div class="developer-card">
+            <div class="developer-header">
+              <img src="${dev.logo}" alt="${dev.name}" class="developer-logo">
+              <div class="developer-rating">
+                <span class="developer-rating-value">${dev.rating}</span>
+                <div>${stars}</div>
+              </div>
+            </div>
+            <h3 style="margin-bottom: 12px;">${dev.name}</h3>
+            <p class="developer-description">${description}</p>
+            <div class="developer-stats">
+              <div class="developer-stat">
+                <span class="developer-stat-value">${dev.projects_delivered}</span>
+                <span class="developer-stat-label" data-i18n="developer_delivered">Delivered</span>
+              </div>
+              <div class="developer-stat">
+                <span class="developer-stat-value">${dev.projects_ongoing}</span>
+                <span class="developer-stat-label" data-i18n="developer_ongoing">Ongoing</span>
+              </div>
+            </div>
+            <div style="margin-top: 16px; padding-top: 16px; border-top: 1px solid #e9ecef;">
+              <div style="font-size: 12px; color: #6c757d; margin-bottom: 8px;" data-i18n="developer_specialties">Specialties:</div>
+              <div class="developer-specialties">
+                ${specialties.map(s => `<span class="specialty-tag">${s}</span>`).join('')}
+              </div>
+            </div>
+            <div style="margin-top: 12px; font-size: 12px; color: #6c757d; text-align: center;">
+              <span data-i18n="developer_established">Established</span>: ${dev.established_year} • ${dev.reviews_count} <span data-i18n="developer_reviews">reviews</span>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      container.innerHTML = html;
+    }
+
+    // Render on page load
+    renderDevelopers();
+
+    // Re-render on language change
+    document.addEventListener('languageChanged', function() {
+      renderDevelopers();
+    });
+
     if (typeof lucide !== 'undefined') {
       lucide.createIcons();
     }
