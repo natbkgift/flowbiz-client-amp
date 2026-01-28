@@ -124,14 +124,7 @@
           <!-- Description -->
           <div style="background: var(--color-white); padding: 24px; border-radius: 12px; margin-bottom: 24px;">
             <h2 class="mb-md" data-i18n="detail.description">Description</h2>
-            <div class="lang-tabs">
-              <button class="lang-tab active" data-lang="th">ไทย</button>
-              <button class="lang-tab" data-lang="en">English</button>
-            </div>
-            <div class="tab-content active" data-lang="th" id="description-th">
-              <p data-i18n="detail.loading">Loading...</p>
-            </div>
-            <div class="tab-content" data-lang="en" id="description-en">
+            <div id="property-description">
               <p data-i18n="detail.loading">Loading...</p>
             </div>
           </div>
@@ -313,8 +306,64 @@
       document.getElementById('property-badges').innerHTML = badgesHTML;
 
       // Description
-      document.getElementById('description-th').innerHTML = `<p>${property.description_th}</p>`;
-      document.getElementById('description-en').innerHTML = `<p>${property.description_en}</p>`;
+      function updateDescription() {
+        const currentLang = document.documentElement.lang || 'en';
+        const description = currentLang === 'th' ? property.description_th : property.description_en;
+        document.getElementById('property-description').innerHTML = `<p>${description}</p>`;
+      }
+
+      updateDescription();
+
+      // Listen for language changes (custom event from i18n.js would be ideal, 
+      // but for now we'll hook into the global updatePageText if possible, 
+      // or rely on a MutationObserver on the html lang attribute)
+      const observer = new MutationObserver(function (mutations) {
+        mutations.forEach(function (mutation) {
+          if (mutation.type === "attributes" && mutation.attributeName === "lang") {
+            updateDescription();
+
+            // Also update other dynamic elements
+            const currentLang = document.documentElement.lang || 'en';
+            document.getElementById('property-title').textContent = currentLang === 'th' ? property.title_th : property.title_en;
+
+            // Re-render similar properties to update their titles
+            const similarHTML = similarProperties.map(p => {
+              const title = currentLang === 'th' ? p.title_th : p.title_en;
+              const priceLabel = p.intent === 'rent' ? (currentLang === 'th' ? '/เดือน' : '/month') : '';
+              const bedsLabel = p.beds === 0 ? 'Studio' : `${p.beds} ${p.beds === 1 ? (currentLang === 'th' ? 'ห้องนอน' : 'Bed') : (currentLang === 'th' ? 'ห้องนอน' : 'Beds')}`;
+              const bathsLabel = `${p.baths} ${p.baths === 1 ? (currentLang === 'th' ? 'ห้องน้ำ' : 'Bath') : (currentLang === 'th' ? 'ห้องน้ำ' : 'Baths')}`;
+
+              return `
+                <div class="property-card">
+                  <div class="card-image">
+                    <img src="${p.image}" alt="${title}">
+                  </div>
+                  <div class="card-content">
+                    <div class="card-price">฿${p.price.toLocaleString()}<span>${priceLabel}</span></div>
+                    <h3 class="card-title">${title}</h3>
+                    <div class="card-facts">
+                      ${p.beds !== null ? `<span><i data-lucide="bed-double"></i> ${bedsLabel}</span>` : ''}
+                      ${p.baths !== null ? `<span><i data-lucide="bath"></i> ${bathsLabel}</span>` : ''}
+                      <span><i data-lucide="square"></i> ${p.sqm} m²</span>
+                    </div>
+                    <div class="card-location"><i data-lucide="map-pin"></i> ${p.area}</div>
+                    <div class="card-actions">
+                      <a href="detail.html?id=${p.id}" class="btn btn-primary btn-sm" data-i18n="prop_view_detail">View Details</a>
+                    </div>
+                  </div>
+                </div>
+              `;
+            }).join('');
+            document.getElementById('similar-properties').innerHTML = similarHTML;
+            updatePageText(); // Ensure static keys are updated
+            if (typeof lucide !== 'undefined') lucide.createIcons();
+          }
+        });
+      });
+
+      observer.observe(document.documentElement, {
+        attributes: true //configure it to listen to attribute changes
+      });
 
       // Amenities
       const amenitiesIcons = {

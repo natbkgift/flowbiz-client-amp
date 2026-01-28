@@ -14,35 +14,35 @@ let currentFilters = {
 // Initialize filters from URL params
 function initFilters() {
   const params = new URLSearchParams(window.location.search);
-  
+
   if (params.get('intent')) {
     currentFilters.intent = params.get('intent');
     setIntentToggle(currentFilters.intent);
   }
-  
+
   if (params.get('type')) {
     currentFilters.types = params.get('type').split(',');
     setTypeCheckboxes(currentFilters.types);
   }
-  
+
   if (params.get('area')) {
     currentFilters.areas = params.get('area').split(',');
     setAreaCheckboxes(currentFilters.areas);
   }
-  
+
   if (params.get('beds')) {
     currentFilters.beds = parseInt(params.get('beds'));
     setBedChips(currentFilters.beds);
   }
-  
+
   if (params.get('priceMin')) {
     currentFilters.priceMin = parseInt(params.get('priceMin'));
   }
-  
+
   if (params.get('priceMax')) {
     currentFilters.priceMax = parseInt(params.get('priceMax'));
   }
-  
+
   applyFilters();
 }
 
@@ -76,7 +76,7 @@ function getSelectedBeds() {
 function getPriceRange() {
   const minInput = document.getElementById('price-min');
   const maxInput = document.getElementById('price-max');
-  
+
   return {
     min: minInput ? parseInt(minInput.value) || 0 : 0,
     max: maxInput ? parseInt(maxInput.value) || 100000000 : 100000000
@@ -93,24 +93,24 @@ function applyFilters() {
   const priceRange = getPriceRange();
   currentFilters.priceMin = priceRange.min;
   currentFilters.priceMax = priceRange.max;
-  
+
   // Filter properties
   let filtered = ALL_PROPERTIES.filter(property => {
     // Intent filter
     if (currentFilters.intent && property.intent !== currentFilters.intent) {
       return false;
     }
-    
+
     // Type filter
     if (currentFilters.types.length > 0 && !currentFilters.types.includes(property.type)) {
       return false;
     }
-    
+
     // Area filter
     if (currentFilters.areas.length > 0 && !currentFilters.areas.includes(property.area)) {
       return false;
     }
-    
+
     // Beds filter
     if (currentFilters.beds !== null) {
       // For 4+ selection, treat as "at least" this many beds
@@ -123,24 +123,24 @@ function applyFilters() {
         return false;
       }
     }
-    
+
     // Price filter
     if (property.price < currentFilters.priceMin || property.price > currentFilters.priceMax) {
       return false;
     }
-    
+
     return true;
   });
-  
+
   // Apply sorting
   const sortBy = document.getElementById('sort-by')?.value || 'updated';
   filtered = sortProperties(filtered, sortBy);
-  
+
   // Render results
   renderPropertyGrid(filtered);
   updateResultsCount(filtered.length);
   updateURL();
-  
+
   // Close mobile filter
   const filterSidebar = document.querySelector('.filter-sidebar');
   if (filterSidebar) {
@@ -151,7 +151,7 @@ function applyFilters() {
 // Sort properties
 function sortProperties(properties, sortBy) {
   const sorted = [...properties];
-  
+
   switch (sortBy) {
     case 'updated':
       sorted.sort((a, b) => new Date(b.updated) - new Date(a.updated));
@@ -168,7 +168,7 @@ function sortProperties(properties, sortBy) {
     default:
       break;
   }
-  
+
   return sorted;
 }
 
@@ -176,10 +176,10 @@ function sortProperties(properties, sortBy) {
 function renderPropertyGrid(properties) {
   const grid = document.getElementById('property-grid');
   if (!grid) return;
-  
+
   // Show loading state briefly for better UX
   grid.classList.add('loading');
-  
+
   if (properties.length === 0) {
     grid.innerHTML = `
       <div style="grid-column: 1/-1; text-align: center; padding: 48px 0;">
@@ -195,10 +195,10 @@ function renderPropertyGrid(properties) {
     grid.classList.remove('loading');
     return;
   }
-  
+
   grid.innerHTML = properties.map(property => createPropertyCard(property)).join('');
   grid.classList.remove('loading');
-  
+
   // Reinitialize Lucide icons for dynamically added content
   if (typeof lucide !== 'undefined') {
     lucide.createIcons();
@@ -209,18 +209,24 @@ function renderPropertyGrid(properties) {
 function createPropertyCard(property) {
   const currentLang = document.documentElement.lang || 'en';
   const title = currentLang === 'th' ? property.title_th : property.title_en;
-  const priceLabel = property.intent === 'rent' ? '/month' : '';
-  const bedsLabel = property.beds === 0 ? 'Studio' : `${property.beds} ${property.beds === 1 ? 'Bed' : 'Beds'}`;
-  const bathsLabel = `${property.baths} ${property.baths === 1 ? 'Bath' : 'Baths'}`;
-  
+
+  // Localized Labels
+  const priceLabel = property.intent === 'rent' ? (currentLang === 'th' ? '/เดือน' : '/month') : '';
+  const bedUnit = currentLang === 'th' ? 'ห้องนอน' : (property.beds === 1 ? 'Bed' : 'Beds');
+  const bedsLabel = property.beds === 0 ? 'Studio' : `${property.beds} ${bedUnit}`;
+  const bathUnit = currentLang === 'th' ? 'ห้องน้ำ' : (property.baths === 1 ? 'Bath' : 'Baths');
+  const bathsLabel = `${property.baths} ${bathUnit}`;
+
   const badges = property.badges.map(badge => {
-    const badgeClass = badge === 'Featured' ? 'badge-featured' : 
-                       badge === 'Available Now' ? 'badge-available' : 'badge-updated';
-    const badgeI18n = badge === 'Featured' ? 'prop_featured' : 
-                      badge === 'Available Now' ? 'prop_available' : '';
-    return `<span class="badge ${badgeClass}" ${badgeI18n ? `data-i18n="${badgeI18n}"` : ''}>${badge}</span>`;
+    const badgeClass = badge === 'Featured' ? 'badge-featured' :
+      badge === 'Available Now' ? 'badge-available' : 'badge-updated';
+    const badgeI18n = badge === 'Featured' ? 'prop_featured' :
+      badge === 'Available Now' ? 'prop_available' : '';
+    // If no i18n key, display badge text as is (or map if needed)
+    const displayText = badgeI18n ? '' : badge;
+    return `<span class="badge ${badgeClass}" ${badgeI18n ? `data-i18n="${badgeI18n}"` : ''}>${displayText}</span>`;
   }).join('');
-  
+
   return `
     <div class="property-card">
       <div class="card-image">
@@ -228,11 +234,11 @@ function createPropertyCard(property) {
         ${badges ? `<div class="card-badges">${badges}</div>` : ''}
       </div>
       <div class="card-content">
-        <div class="card-price">฿${property.price.toLocaleString()}<span data-i18n="prop_per_month">${priceLabel}</span></div>
+        <div class="card-price">฿${property.price.toLocaleString()}<span>${priceLabel}</span></div>
         <h3 class="card-title">${title}</h3>
         <div class="card-facts">
-          ${property.beds !== null ? `<span><i data-lucide="bed-double"></i> <span data-i18n="prop_beds">${bedsLabel}</span></span>` : ''}
-          ${property.baths !== null ? `<span><i data-lucide="bath"></i> <span data-i18n="prop_baths">${bathsLabel}</span></span>` : ''}
+          ${property.beds !== null ? `<span><i data-lucide="bed-double"></i> ${bedsLabel}</span>` : ''}
+          ${property.baths !== null ? `<span><i data-lucide="bath"></i> ${bathsLabel}</span>` : ''}
           <span><i data-lucide="square"></i> ${property.sqm} <span data-i18n="prop_sqm">m²</span></span>
         </div>
         <div class="card-location"><i data-lucide="map-pin"></i> ${property.area}</div>
@@ -259,8 +265,8 @@ function updateResultsCount(count) {
   const countElement = document.getElementById('results-count');
   if (countElement) {
     const currentLang = document.documentElement.lang || 'en';
-    countElement.textContent = currentLang === 'th' 
-      ? `พบ ${count} ทรัพย์สิน` 
+    countElement.textContent = currentLang === 'th'
+      ? `พบ ${count} ทรัพย์สิน`
       : `${count} Properties Found`;
   }
 }
@@ -268,31 +274,31 @@ function updateResultsCount(count) {
 // Update URL with filter params
 function updateURL() {
   const params = new URLSearchParams();
-  
+
   if (currentFilters.intent) {
     params.set('intent', currentFilters.intent);
   }
-  
+
   if (currentFilters.types.length > 0) {
     params.set('type', currentFilters.types.join(','));
   }
-  
+
   if (currentFilters.areas.length > 0) {
     params.set('area', currentFilters.areas.join(','));
   }
-  
+
   if (currentFilters.beds !== null) {
     params.set('beds', currentFilters.beds.toString());
   }
-  
+
   if (currentFilters.priceMin > 0) {
     params.set('priceMin', currentFilters.priceMin.toString());
   }
-  
+
   if (currentFilters.priceMax < 100000000) {
     params.set('priceMax', currentFilters.priceMax.toString());
   }
-  
+
   const newURL = params.toString() ? `?${params.toString()}` : window.location.pathname;
   window.history.replaceState({}, '', newURL);
 }
@@ -307,17 +313,17 @@ function resetFilters() {
     priceMin: 0,
     priceMax: 100000000
   };
-  
+
   // Reset UI
   document.querySelectorAll('.toggle-option').forEach(btn => btn.classList.remove('active'));
   document.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = false);
   document.querySelectorAll('.chip').forEach(chip => chip.classList.remove('active'));
-  
+
   const minInput = document.getElementById('price-min');
   const maxInput = document.getElementById('price-max');
   if (minInput) minInput.value = '';
   if (maxInput) maxInput.value = '';
-  
+
   applyFilters();
 }
 
