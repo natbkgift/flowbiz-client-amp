@@ -156,7 +156,7 @@
 }
 
 .badge + .badge {
-  margin-left: 4px; /* Fallback for browsers that don't support gap */
+  margin-top: 4px; /* Fallback for browsers that don't support gap */
 }
 
 .card-content {
