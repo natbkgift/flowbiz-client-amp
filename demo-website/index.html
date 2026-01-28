@@ -404,6 +404,25 @@
       if (!container || typeof window.AMP === 'undefined' || !window.AMP.marketStats) return;
 
       const stats = window.AMP.marketStats;
+
+      // Validate stats structure before proceeding
+      if (!stats || typeof stats !== 'object') {
+        console.error('AMP Market Stats: stats object is missing or invalid', stats);
+        return;
+      }
+
+      if (!Array.isArray(stats.avg_price_by_type) || !Array.isArray(stats.hot_areas)) {
+        console.error('AMP Market Stats: avg_price_by_type or hot_areas is not an array', {
+          avg_price_by_type: stats.avg_price_by_type,
+          hot_areas: stats.hot_areas
+        });
+        return;
+      }
+
+      if (!stats.rental_yields || typeof stats.rental_yields !== 'object') {
+        console.error('AMP Market Stats: rental_yields is missing or not an object', stats.rental_yields);
+        return;
+      }
       const currentLang = document.documentElement.lang || 'en';
 
       // Helper function to get translation
