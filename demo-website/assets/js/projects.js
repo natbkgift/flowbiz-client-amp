@@ -9,30 +9,31 @@ let currentFilters = {
 };
 
 function applyProjectFilters() {
-  if (typeof MOCK_PROJECTS === 'undefined') {
-    console.error('MOCK_PROJECTS not loaded');
+  const projectsData = window.AMP?.projects || [];
+  if (!projectsData.length) {
+    console.error('AMP projects data not loaded');
     return;
   }
-  
+
   const lang = document.documentElement.lang || 'th';
-  
+
   // Filter projects
-  let filteredProjects = MOCK_PROJECTS.filter(project => {
+  let filteredProjects = projectsData.filter(project => {
     // Status filter
     if (currentFilters.status !== 'all' && project.status !== currentFilters.status) {
       return false;
     }
-    
+
     // Type filter
     if (currentFilters.type !== 'all' && project.type !== currentFilters.type) {
       return false;
     }
-    
+
     // Area filter
-    if (currentFilters.area !== 'all' && project.location !== currentFilters.area) {
+    if (currentFilters.area !== 'all' && project.location.toLowerCase() !== currentFilters.area.toLowerCase()) {
       return false;
     }
-    
+
     // Price range filter
     if (currentFilters.priceRange !== 'all') {
       const minPrice = project.pricing.min;
@@ -51,13 +52,13 @@ function applyProjectFilters() {
           break;
       }
     }
-    
+
     return true;
   });
-  
+
   // Display projects
   displayProjects(filteredProjects, lang);
-  
+
   // Update count
   updateProjectCount(filteredProjects.length);
 }
@@ -65,7 +66,7 @@ function applyProjectFilters() {
 function displayProjects(projects, lang) {
   const container = document.getElementById('projects-grid');
   if (!container) return;
-  
+
   if (projects.length === 0) {
     container.innerHTML = `
       <div style="grid-column: 1/-1; text-align: center; padding: 40px;">
@@ -76,7 +77,7 @@ function displayProjects(projects, lang) {
     `;
     return;
   }
-  
+
   container.innerHTML = projects.map(project => createProjectCard(project, lang)).join('');
 }
 
@@ -84,11 +85,11 @@ function createProjectCard(project, lang) {
   const name = project.name[lang] || project.name.en;
   const statusText = getStatusText(project.status, lang);
   const statusClass = project.status.replace('_', '-');
-  
+
   const priceText = formatPrice(project.pricing.min, project.pricing.max, lang);
   const yieldText = project.estimated_yield ? `${project.estimated_yield}%` : 'N/A';
-  
-  const progressBar = project.status === 'under-construction' 
+
+  const progressBar = project.status === 'under-construction'
     ? `
       <div class="progress-bar">
         <div class="progress-bar-fill" style="width: ${project.timeline.progress}%"></div>
@@ -97,9 +98,9 @@ function createProjectCard(project, lang) {
         <span>${lang === 'th' ? 'ความคืบหน้า' : 'Progress'}</span>
         <span>${project.timeline.progress}%</span>
       </div>
-    ` 
+    `
     : '';
-  
+
   return `
     <div class="project-card">
       <div class="project-card-image">
@@ -111,6 +112,15 @@ function createProjectCard(project, lang) {
         <div class="project-card-location">
           <i data-lucide="map-pin" style="width: 16px; height: 16px;"></i>
           <span>${project.location}</span>
+        </div>
+        
+        <div class="project-card-developer" style="font-size: 13px; color: var(--color-gray-500); margin-top: 4px; display: flex; align-items: center; gap: 4px;">
+           <i data-lucide="hard-hat" style="width: 14px; height: 14px;"></i>
+           <span>${project.developer.name}</span>
+           <span style="color: #F59E0B; display: flex; align-items: center; gap: 2px;">
+             <i data-lucide="star" style="width: 12px; height: 12px; fill: currentColor;"></i>
+             ${project.developer.rating}
+           </span>
         </div>
         
         ${progressBar}
@@ -157,7 +167,7 @@ function formatPrice(min, max, lang) {
     }
     return (num / 1000).toFixed(0) + (lang === 'th' ? ' พัน' : 'K');
   };
-  
+
   return `฿${formatNumber(min)} - ฿${formatNumber(max)}`;
 }
 
@@ -165,8 +175,8 @@ function updateProjectCount(count) {
   const countEl = document.getElementById('project-count');
   if (countEl) {
     const lang = document.documentElement.lang || 'th';
-    countEl.textContent = lang === 'th' 
-      ? `${count} โครงการ` 
+    countEl.textContent = lang === 'th'
+      ? `${count} โครงการ`
       : `${count} Projects`;
   }
 }
@@ -174,7 +184,7 @@ function updateProjectCount(count) {
 function setupProjectFilters() {
   // Status filters
   document.querySelectorAll('.filter-btn[data-status]').forEach(btn => {
-    btn.addEventListener('click', function() {
+    btn.addEventListener('click', function () {
       // Remove active from siblings
       this.parentElement.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
       // Add active to clicked
@@ -184,30 +194,30 @@ function setupProjectFilters() {
       applyProjectFilters();
     });
   });
-  
+
   // Type filters
   document.querySelectorAll('.filter-btn[data-type]').forEach(btn => {
-    btn.addEventListener('click', function() {
+    btn.addEventListener('click', function () {
       this.parentElement.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
       this.classList.add('active');
       currentFilters.type = this.dataset.type;
       applyProjectFilters();
     });
   });
-  
+
   // Area filters
   document.querySelectorAll('.filter-btn[data-area]').forEach(btn => {
-    btn.addEventListener('click', function() {
+    btn.addEventListener('click', function () {
       this.parentElement.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
       this.classList.add('active');
       currentFilters.area = this.dataset.area;
       applyProjectFilters();
     });
   });
-  
+
   // Price range filters
   document.querySelectorAll('.filter-btn[data-price]').forEach(btn => {
-    btn.addEventListener('click', function() {
+    btn.addEventListener('click', function () {
       this.parentElement.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
       this.classList.add('active');
       currentFilters.priceRange = this.dataset.price;
@@ -219,15 +229,15 @@ function setupProjectFilters() {
 function initProjects() {
   // Set up filters
   setupProjectFilters();
-  
+
   // Initial display
   applyProjectFilters();
-  
+
   // Re-apply on language change
   const observer = new MutationObserver(() => {
     applyProjectFilters();
   });
-  
+
   observer.observe(document.documentElement, {
     attributes: true,
     attributeFilter: ['lang']

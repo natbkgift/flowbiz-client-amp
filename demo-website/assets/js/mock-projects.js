@@ -1,7 +1,8 @@
 // AMP Demo Website - Mock Projects Data
 // Mock data for Project Showcase feature
 
-const MOCK_PROJECTS = [
+window.AMP = window.AMP || {};
+window.AMP.projects = [
   // Pre-Sale Projects
   {
     project_id: 'proj_001',
@@ -246,7 +247,7 @@ const MOCK_PROJECTS = [
       en: '5-star luxury condo on Pratumnak Hill with spectacular sea views'
     }
   },
-  
+
   // Under Construction Projects
   {
     project_id: 'proj_006',
@@ -488,7 +489,7 @@ const MOCK_PROJECTS = [
       en: 'Luxury condo on Pratumnak with panoramic views, near Cosy Beach'
     }
   },
-  
+
   // Ready to Move Projects
   {
     project_id: 'proj_011',
@@ -733,7 +734,7 @@ const MOCK_PROJECTS = [
 ];
 
 // Area data with market statistics
-const AREA_DATA = {
+window.AMP.areaData = {
   'pattaya': {
     name: {
       th: 'พัทยากลาง',

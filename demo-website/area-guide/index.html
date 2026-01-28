@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -11,10 +12,11 @@
   <link rel="stylesheet" href="../assets/css/responsive.css">
   <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
 </head>
+
 <body>
   <!-- Skip Link for Accessibility -->
   <a href="#main-content" class="skip-link">Skip to main content</a>
-  
+
   <header class="header">
     <div class="header-content">
       <a href="../index.html" class="logo"><img src="../assets/images/logo-amp.svg" alt="AMP" height="40"></a>
@@ -36,7 +38,7 @@
       </div>
     </div>
   </header>
-  
+
   <!-- Mobile Menu -->
   <div class="mobile-menu" id="mobile-menu">
     <a href="../index.html"><i data-lucide="home"></i> Home</a>
@@ -44,7 +46,7 @@
     <a href="../invest/index.html"><i data-lucide="trending-up"></i> Invest</a>
     <a href="../contact.html"><i data-lucide="mail"></i> Contact</a>
   </div>
-  
+
   <section class="hero" id="main-content" style="padding: 60px 0 40px;">
     <div class="container">
       <h1>Pattaya Area Guide</h1>
@@ -59,21 +61,31 @@
   <footer class="footer">
     <div class="container">
       <div class="footer-content">
-        <div><h3>Asset Management Property</h3></div>
-        <div><h3>Contact Us</h3><a href="tel:+66634533526">📞 +66 63-453-3526</a></div>
-        <div><h3>Quick Links</h3><a href="../projects/index.html">Projects</a><a href="../invest/index.html">Investment Hub</a></div>
+        <div>
+          <h3>Asset Management Property</h3>
+        </div>
+        <div>
+          <h3>Contact Us</h3><a href="tel:+66634533526">📞 +66 63-453-3526</a>
+        </div>
+        <div>
+          <h3>Quick Links</h3><a href="../projects/index.html">Projects</a><a href="../invest/index.html">Investment
+            Hub</a>
+        </div>
       </div>
-      <div class="footer-bottom"><p>&copy; 2026 Asset Management Property</p></div>
+      <div class="footer-bottom">
+        <p>&copy; 2026 Asset Management Property</p>
+      </div>
     </div>
   </footer>
   <script src="../assets/js/mock-projects.js"></script>
   <script src="../assets/js/i18n.js"></script>
   <script src="../assets/js/main.js"></script>
   <script>
-    if (typeof AREA_DATA !== 'undefined') {
+    const areaData = window.AMP?.areaData;
+    if (areaData) {
       const container = document.getElementById('area-guide-grid');
       const lang = document.documentElement.lang || 'en';
-      container.innerHTML = Object.entries(AREA_DATA).map(([key, area]) => {
+      container.innerHTML = Object.entries(areaData).map(([key, area]) => {
         const name = area.name[lang] || area.name.en;
         return `<a href="${key}.html" class="area-card" style="text-decoration: none;">
           <div class="area-card-header">
@@ -97,4 +109,5 @@
     if (typeof lucide !== 'undefined') lucide.createIcons();
   </script>
 </body>
+
 </html>
