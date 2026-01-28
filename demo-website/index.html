@@ -466,8 +466,12 @@
         const changeSign = item.yoy_change >= 0 ? '+' : '';
         const changeClass = item.yoy_change >= 0 ? 'positive' : 'negative';
         
-        value.innerHTML = `฿${formatNumber(item.avg_price_sqm)}/${translate('market_price_per_sqm')}
-          <span class="stat-change ${changeClass}">${changeSign}${item.yoy_change}%</span>`;
+        // Set base text and append stat-change span without using innerHTML
+        value.textContent = `฿${formatNumber(item.avg_price_sqm)}/${translate('market_price_per_sqm')} `;
+        const changeSpan = document.createElement('span');
+        changeSpan.className = `stat-change ${changeClass}`;
+        changeSpan.textContent = `${changeSign}${item.yoy_change}%`;
+        value.appendChild(changeSpan);
 
         statItem.appendChild(label);
         statItem.appendChild(value);
