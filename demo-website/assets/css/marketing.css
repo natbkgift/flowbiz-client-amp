@@ -181,6 +181,11 @@
   }
 }
 
+@media (prefers-reduced-motion: reduce) {
+  .testimonial-card.fade-in {
+    animation: none;
+  }
+}
 .testimonial-header {
   display: flex;
   align-items: center;
