@@ -5,6 +5,10 @@
 
 /* Extra Small: 320-359px */
 @media (max-width: 359px) {
+  .container {
+    padding: 0 12px;
+  }
+  
   .card-price {
     font-size: 20px;
   }
@@ -119,8 +123,7 @@
   }
   
   .form-row > * {
-    flex: 1 1 calc(50% - var(--space-md) / 2);
-    min-width: 200px;
+    flex: 1 1 200px;
   }
   
   .trust-signals-grid {
@@ -152,7 +155,7 @@
 }
 
 /* ========================================
-   DESKTOP/PC (1024px+)
+   DESKTOP (1024px+)
    ======================================== */
 @media (min-width: 1024px) {
   /* Container */
