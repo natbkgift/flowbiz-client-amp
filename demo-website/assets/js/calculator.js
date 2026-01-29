@@ -6,84 +6,27 @@ function calculateInvestment() {
   const lang = document.documentElement.lang || 'th';
   
   // Get input values
-  const propertyPrice = parseFloat(document.getElementById('property-price')?.value) || 0;
-  const downPayment = parseFloat(document.getElementById('down-payment')?.value) || 30;
-  const interestRate = parseFloat(document.getElementById('interest-rate')?.value) || 4.5;
-  const loanTerm = parseFloat(document.getElementById('loan-term')?.value) || 20;
-  const monthlyRent = parseFloat(document.getElementById('monthly-rent')?.value) || 0;
-  const monthlyExpense = parseFloat(document.getElementById('monthly-expense')?.value) || 0;
+  const inputs = {
+    propertyPrice: parseFloat(document.getElementById('property-price')?.value) || 0,
+    downPayment: parseFloat(document.getElementById('down-payment')?.value) || 30,
+    interestRate: parseFloat(document.getElementById('interest-rate')?.value) || 4.5,
+    loanTerm: parseFloat(document.getElementById('loan-term')?.value) || 20,
+    monthlyRent: parseFloat(document.getElementById('monthly-rent')?.value) || 0,
+    monthlyExpense: parseFloat(document.getElementById('monthly-expense')?.value) || 0
+  };
   
-  // Validation with i18n error messages
-  if (propertyPrice <= 0) {
-    alert(t('calc_error_invalid_price'));
+  // Use the core calculation function
+  const result = calculateInvestmentMetrics(inputs);
+  
+  // Handle validation errors
+  if (!result.success) {
+    const errorMessage = result.errors.join('\n');
+    alert(errorMessage);
     return;
   }
-  
-  if (downPayment < 0 || downPayment > 100) {
-    alert(t('calc_error_invalid_down_payment'));
-    return;
-  }
-  
-  if (interestRate < 0) {
-    alert(t('calc_error_negative_value'));
-    return;
-  }
-  
-  if (loanTerm <= 0) {
-    alert(t('calc_error_negative_value'));
-    return;
-  }
-  
-  if (monthlyRent <= 0) {
-    alert(t('calc_error_invalid_rent'));
-    return;
-  }
-  
-  if (monthlyExpense < 0) {
-    alert(t('calc_error_negative_value'));
-    return;
-  }
-  
-  // Calculate loan amount
-  const downPaymentAmount = propertyPrice * (downPayment / 100);
-  const loanAmount = propertyPrice - downPaymentAmount;
-  
-  // Calculate monthly payment using the amortization formula
-  const monthlyInterestRate = interestRate / 100 / 12;
-  const numberOfPayments = loanTerm * 12;
-  
-  let monthlyPayment = 0;
-  if (loanAmount > 0 && monthlyInterestRate > 0) {
-    monthlyPayment = loanAmount * 
-      (monthlyInterestRate * Math.pow(1 + monthlyInterestRate, numberOfPayments)) / 
-      (Math.pow(1 + monthlyInterestRate, numberOfPayments) - 1);
-  }
-  
-  // Calculate annual rent
-  const annualRent = monthlyRent * 12;
-  const annualExpense = monthlyExpense * 12;
-  
-  // Calculate yields
-  const grossYield = (annualRent / propertyPrice) * 100;
-  const netYield = ((annualRent - annualExpense) / propertyPrice) * 100;
-  
-  // Calculate monthly cash flow
-  const monthlyCashFlow = monthlyRent - monthlyExpense - monthlyPayment;
-  
-  // Calculate payback period (simple calculation based on down payment and net annual income)
-  const netAnnualIncome = annualRent - annualExpense - (monthlyPayment * 12);
-  const paybackPeriod = netAnnualIncome > 0 ? downPaymentAmount / netAnnualIncome : 0;
   
   // Display results
-  displayResults({
-    grossYield,
-    netYield,
-    monthlyCashFlow,
-    paybackPeriod,
-    monthlyPayment,
-    downPaymentAmount,
-    loanAmount
-  });
+  displayResults(result.results);
 }
 
 function displayResults(results) {
