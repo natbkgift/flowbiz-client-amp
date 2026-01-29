@@ -274,7 +274,7 @@
       </div>
 
       <div class="testimonials-show-more" id="testimonials-show-more" style="display: none;">
-        <button class="btn btn-primary" onclick="toggleShowMoreTestimonials()" id="testimonials-toggle-btn">
+        <button class="btn btn-primary" onclick="toggleShowMoreTestimonials()" id="testimonials-toggle-btn" aria-expanded="false">
           <span data-i18n="testimonial_show_more">Show More</span>
         </button>
       </div>
@@ -582,10 +582,7 @@
 
     // Render testimonials
     let showingAllTestimonials = false;
-
-    function getInitialTestimonialCount() {
-      return window.innerWidth < 768 ? 3 : 6;
-    }
+    const INITIAL_TESTIMONIAL_COUNT = window.innerWidth < 768 ? 3 : 6; // Fixed count at page load
 
     function renderTestimonials() {
       const container = document.getElementById('testimonials-grid');
@@ -593,10 +590,10 @@
       const toggleBtn = document.getElementById('testimonials-toggle-btn');
       
       if (!container || typeof window.AMP === 'undefined' || !window.AMP.testimonials || !Array.isArray(window.AMP.testimonials)) return;
+      if (!showMoreContainer || !toggleBtn) return; // Ensure button elements exist
 
       const allTestimonials = window.AMP.testimonials;
-      const initialCount = getInitialTestimonialCount();
-      const displayCount = showingAllTestimonials ? allTestimonials.length : initialCount;
+      const displayCount = showingAllTestimonials ? allTestimonials.length : INITIAL_TESTIMONIAL_COUNT;
       const testimonials = allTestimonials.slice(0, displayCount);
       const currentLang = document.documentElement.lang || 'en';
 
@@ -610,7 +607,7 @@
         const card = document.createElement('div');
         card.className = 'testimonial-card';
         // Add fade-in animation for newly revealed items
-        if (index >= initialCount && showingAllTestimonials) {
+        if (index >= INITIAL_TESTIMONIAL_COUNT && showingAllTestimonials) {
           card.classList.add('fade-in');
         }
 
@@ -656,21 +653,22 @@
       });
       
       // Show/hide the "Show More" button
-      if (allTestimonials.length > initialCount) {
+      if (allTestimonials.length > INITIAL_TESTIMONIAL_COUNT) {
         showMoreContainer.style.display = 'block';
         
-        // Update button text based on state
-        if (toggleBtn) {
-          const btnText = toggleBtn.querySelector('[data-i18n]');
-          if (btnText) {
-            const key = showingAllTestimonials ? 'testimonial_show_less' : 'testimonial_show_more';
-            btnText.setAttribute('data-i18n', key);
-            // Update text immediately
-            if (typeof t === 'function') {
-              btnText.textContent = t(key);
-            }
+        // Update button text and aria-expanded based on state
+        const btnText = toggleBtn.querySelector('[data-i18n]');
+        if (btnText) {
+          const key = showingAllTestimonials ? 'testimonial_show_less' : 'testimonial_show_more';
+          btnText.setAttribute('data-i18n', key);
+          // Update text immediately
+          if (typeof t === 'function') {
+            btnText.textContent = t(key);
           }
         }
+        
+        // Update aria-expanded for accessibility
+        toggleBtn.setAttribute('aria-expanded', showingAllTestimonials ? 'true' : 'false');
       } else {
         showMoreContainer.style.display = 'none';
       }
