@@ -582,7 +582,7 @@
 
     // Render testimonials
     let showingAllTestimonials = false;
-    const INITIAL_TESTIMONIAL_COUNT = window.innerWidth < 768 ? 3 : 6; // Fixed count at page load
+    const INITIAL_TESTIMONIAL_COUNT = window.matchMedia('(max-width: 768px)').matches ? 3 : 6; // Fixed count at page load
 
     function renderTestimonials() {
       const container = document.getElementById('testimonials-grid');
