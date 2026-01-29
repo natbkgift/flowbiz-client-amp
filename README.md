@@ -18,6 +18,16 @@
 Production-ready AI-powered property management service for Asset Management Property (AMP), 
 specializing in Pattaya real estate market.
 
+## 📚 Examples / ตัวอย่างการใช้งาน
+
+**New!** ✨ Check out our [**examples/**](examples/) directory with real, working code examples:
+- 🎯 [Basic Usage](examples/01-basic-usage/) - Simple client examples and configuration
+- 🔧 [API Development](examples/02-api-development/) - How to create new endpoints
+- 🤖 [AI Agents](examples/03-ai-agents/) - Lead routing and property management examples
+- 🐳 [Docker Examples](examples/04-docker/) - Running and testing with Docker
+
+👉 **[View all examples →](examples/README.md)**
+
 ## 🏠 About AMP
 
 **Asset Management Property (AMP)** คือระบบ AI Agent Automation สำหรับธุรกิจอสังหาริมทรัพย์ในพัทยา
