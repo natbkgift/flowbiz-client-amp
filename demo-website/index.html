@@ -272,6 +272,12 @@
         <div class="testimonial-card skeleton-testimonial skeleton"></div>
         <div class="testimonial-card skeleton-testimonial skeleton"></div>
       </div>
+
+      <div class="testimonials-show-more" id="testimonials-show-more" style="display: none;">
+        <button class="btn btn-primary" onclick="toggleShowMoreTestimonials()" id="testimonials-toggle-btn">
+          <span data-i18n="testimonial_show_more">Show More</span>
+        </button>
+      </div>
     </div>
   </section>
 
@@ -575,22 +581,38 @@
     }
 
     // Render testimonials
+    let showingAllTestimonials = false;
+
+    function getInitialTestimonialCount() {
+      return window.innerWidth < 768 ? 3 : 6;
+    }
+
     function renderTestimonials() {
       const container = document.getElementById('testimonials-grid');
+      const showMoreContainer = document.getElementById('testimonials-show-more');
+      const toggleBtn = document.getElementById('testimonials-toggle-btn');
+      
       if (!container || typeof window.AMP === 'undefined' || !window.AMP.testimonials || !Array.isArray(window.AMP.testimonials)) return;
 
-      const testimonials = window.AMP.testimonials.slice(0, 6); // Show first 6
+      const allTestimonials = window.AMP.testimonials;
+      const initialCount = getInitialTestimonialCount();
+      const displayCount = showingAllTestimonials ? allTestimonials.length : initialCount;
+      const testimonials = allTestimonials.slice(0, displayCount);
       const currentLang = document.documentElement.lang || 'en';
 
       // Clear existing content
       container.innerHTML = '';
 
-      testimonials.forEach(testimonial => {
+      testimonials.forEach((testimonial, index) => {
         const comment = testimonial.comment && testimonial.comment[currentLang] ? testimonial.comment[currentLang] : '';
         const stars = '⭐'.repeat(testimonial.rating || 0);
 
         const card = document.createElement('div');
         card.className = 'testimonial-card';
+        // Add fade-in animation for newly revealed items
+        if (index >= initialCount && showingAllTestimonials) {
+          card.classList.add('fade-in');
+        }
 
         const header = document.createElement('div');
         header.className = 'testimonial-header';
@@ -633,8 +655,33 @@
         container.appendChild(card);
       });
       
+      // Show/hide the "Show More" button
+      if (allTestimonials.length > initialCount) {
+        showMoreContainer.style.display = 'block';
+        
+        // Update button text based on state
+        if (toggleBtn) {
+          const btnText = toggleBtn.querySelector('[data-i18n]');
+          if (btnText) {
+            const key = showingAllTestimonials ? 'testimonial_show_less' : 'testimonial_show_more';
+            btnText.setAttribute('data-i18n', key);
+            // Update text immediately
+            if (typeof t === 'function') {
+              btnText.textContent = t(key);
+            }
+          }
+        }
+      } else {
+        showMoreContainer.style.display = 'none';
+      }
+      
       // Remove loading state
       container.removeAttribute('aria-busy');
+    }
+
+    function toggleShowMoreTestimonials() {
+      showingAllTestimonials = !showingAllTestimonials;
+      renderTestimonials();
     }
 
     // Call render functions

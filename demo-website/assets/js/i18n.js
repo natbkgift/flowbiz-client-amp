@@ -432,6 +432,8 @@ const TRANSLATIONS = {
     testimonial_title: 'ความคิดเห็นจากลูกค้า',
     testimonial_subtitle: 'รีวิวจริงจากลูกค้าจริง',
     testimonial_verified: 'ซื้อยืนยันแล้ว',
+    testimonial_show_more: 'ดูเพิ่มเติม',
+    testimonial_show_less: 'แสดงน้อยลง',
 
     // Compare Properties
     compare_title: 'เปรียบเทียบอสังหา',
@@ -920,6 +922,8 @@ const TRANSLATIONS = {
     testimonial_title: 'What Our Clients Say',
     testimonial_subtitle: 'Real reviews from real customers',
     testimonial_verified: 'Verified Purchase',
+    testimonial_show_more: 'Show More',
+    testimonial_show_less: 'Show Less',
 
     // Compare Properties
     compare_title: 'Compare Properties',
