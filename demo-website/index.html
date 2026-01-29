@@ -186,22 +186,22 @@
 
       <div class="trust-signals-grid">
         <div class="trust-signal-card">
-          <div class="trust-signal-icon" role="img" aria-label="Trophy icon">🏆</div>
+          <div class="trust-signal-icon" role="img" aria-label="Achievement award">🏆</div>
           <div class="trust-signal-value">10+</div>
           <div class="trust-signal-label" data-i18n="trust_experience">Years Experience</div>
         </div>
         <div class="trust-signal-card">
-          <div class="trust-signal-icon" role="img" aria-label="House icon">🏠</div>
+          <div class="trust-signal-icon" role="img" aria-label="Property sales">🏠</div>
           <div class="trust-signal-value">500+</div>
           <div class="trust-signal-label" data-i18n="trust_properties_sold">Properties Sold</div>
         </div>
         <div class="trust-signal-card">
-          <div class="trust-signal-icon" role="img" aria-label="Globe icon">🌍</div>
+          <div class="trust-signal-icon" role="img" aria-label="Languages supported">🌍</div>
           <div class="trust-signal-value">4</div>
           <div class="trust-signal-label" data-i18n="trust_languages">Languages: TH/EN/RU/CN</div>
         </div>
         <div class="trust-signal-card">
-          <div class="trust-signal-icon" role="img" aria-label="Star icon">⭐</div>
+          <div class="trust-signal-icon" role="img" aria-label="Customer rating">⭐</div>
           <div class="trust-signal-value">4.9</div>
           <div class="trust-signal-label" data-i18n="trust_google_rating">Google Rating (450 reviews)</div>
         </div>
@@ -278,19 +278,19 @@
   <!-- Mobile Sticky Bar -->
   <div class="mobile-sticky-bar">
     <a href="https://line.me/ti/p/~@554dksqb">
-      <i role="img" aria-label="LINE icon">💚</i>
+      <i role="img" aria-label="Contact via LINE">💚</i>
       <span data-i18n="mobile_line">LINE</span>
     </a>
     <a href="tel:+66634533526">
-      <i role="img" aria-label="Phone icon">📞</i>
+      <i role="img" aria-label="Phone call">📞</i>
       <span data-i18n="mobile_call">Call</span>
     </a>
     <a href="invest/calculator.html">
-      <i role="img" aria-label="Calculator icon">🧮</i>
+      <i role="img" aria-label="Calculator">🧮</i>
       <span data-i18n="mobile_calculate">Calculate</span>
     </a>
     <button class="save-btn" aria-label="Save property" onclick="alert(document.documentElement.lang === 'th' ? 'ฟีเจอร์บันทึกจะพร้อมใช้งานเร็วๆ นี้' : 'Save feature coming soon');">
-      <i role="img" aria-label="Heart icon">❤️</i>
+      <i aria-hidden="true">❤️</i>
       <span data-i18n="mobile_save">Save</span>
     </button>
   </div>
@@ -310,9 +310,9 @@
 
         <div>
           <h3>Contact Us</h3>
-          <a href="tel:+66634533526"><span role="img" aria-label="Phone">📞</span> +66 63-453-3526</a>
-          <a href="mailto:info@amppattaya.com"><span role="img" aria-label="Email">📧</span> info@amppattaya.com</a>
-          <a href="https://line.me/ti/p/~@554dksqb"><span role="img" aria-label="LINE">💬</span> LINE: @554dksqb</a>
+          <a href="tel:+66634533526"><span aria-hidden="true">📞</span> +66 63-453-3526</a>
+          <a href="mailto:info@amppattaya.com"><span aria-hidden="true">📧</span> info@amppattaya.com</a>
+          <a href="https://line.me/ti/p/~@554dksqb"><span aria-hidden="true">💬</span> LINE: @554dksqb</a>
         </div>
 
         <div>
@@ -368,11 +368,11 @@
               <div class="card-price">฿${property.price.toLocaleString()}<span data-i18n="prop_per_month">${priceLabel}</span></div>
               <h3 class="card-title">${title}</h3>
               <div class="card-facts">
-                ${property.beds !== null ? `<span><span role="img" aria-label="Beds">🛏️</span> <span data-i18n="prop_beds">${bedsLabel}</span></span>` : ''}
-                ${property.baths !== null ? `<span><span role="img" aria-label="Bathrooms">🚿</span> <span data-i18n="prop_baths">${bathsLabel}</span></span>` : ''}
-                <span><span role="img" aria-label="Area">📐</span> ${property.sqm} <span data-i18n="prop_sqm">m²</span></span>
+                ${property.beds !== null ? `<span><span aria-hidden="true">🛏️</span> <span data-i18n="prop_beds">${bedsLabel}</span></span>` : ''}
+                ${property.baths !== null ? `<span><span aria-hidden="true">🚿</span> <span data-i18n="prop_baths">${bathsLabel}</span></span>` : ''}
+                <span><span aria-hidden="true">📐</span> ${property.sqm} <span data-i18n="prop_sqm">m²</span></span>
               </div>
-              <div class="card-location"><span role="img" aria-label="Location">📍</span> ${property.area}</div>
+              <div class="card-location"><span aria-hidden="true">📍</span> ${property.area}</div>
               <div class="card-actions">
                 <a href="detail.html?id=${property.id}" class="btn btn-primary btn-sm" data-i18n="prop_view_detail">View Details</a>
               </div>
