@@ -1,0 +1,4 @@
+<?php
+ include_once("config.php"); $conn = null; if (!tryConnect()) { die(); } $name = @mysqli_real_escape_string($conn, $_GET["name"]); $primary = @mysqli_real_escape_string($conn, $_GET["primary"]); $primaryValue = @mysqli_real_escape_string($conn, $_GET["primaryValue"]); $conn->query("CREATE TEMPORARY TABLE temp_tbl SELECT * FROM $name WHERE $primary = '$primaryValue';"); $result = $conn->query("SELECT @maxId := MAX($primary) + 1 FROM $name;"); $r = $result->fetch_array(MYSQLI_NUM); $lastId = $r[0]; $conn->query("UPDATE temp_tbl SET $primary = @maxId;"); $conn->query("INSERT INTO $name SELECT * FROM temp_tbl;"); $conn->query("DROP TABLE temp_tbl;"); ?><script>
+  editRow('<?php echo $name?>', '<?php echo $primary?>', <?php echo $lastId?>);
+</script>

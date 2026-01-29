@@ -49,3 +49,4 @@ htmlcov/
 .DS_Store
 Thumbs.db
 demo-website/skeleton-test.html
+*.har

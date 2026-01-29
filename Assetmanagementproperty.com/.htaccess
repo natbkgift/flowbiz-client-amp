@@ -1,0 +1,10 @@
+
+# Prevent directory listing
+Options -Indexes
+
+# Cache images for 6 months
+<FilesMatch "\.(jpg|jpeg|png|gif)$">
+  Header set Cache-Control "max-age=15768000, public, must-revalidate"
+</FilesMatch>
+
+
