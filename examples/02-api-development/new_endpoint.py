@@ -11,7 +11,7 @@ To use this example:
 """
 
 from fastapi import APIRouter, HTTPException
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 
 router = APIRouter(prefix="/v1/properties", tags=["properties"])
 
@@ -40,8 +40,8 @@ class Property(PropertyBase):
     """Full property model with ID / โมเดล property แบบเต็ม"""
     id: int = Field(..., description="Property ID")
 
-    class Config:
-        json_schema_extra = {
+    model_config = ConfigDict(
+        json_schema_extra={
             "example": {
                 "id": 1,
                 "name": "Luxury Sea View Condo",
@@ -53,6 +53,7 @@ class Property(PropertyBase):
                 "area_sqm": 85.5,
             }
         }
+    )
 
 
 # ========================================

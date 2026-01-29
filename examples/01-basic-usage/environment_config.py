@@ -56,7 +56,7 @@ APP_ENV=dev
 
 # Host to bind to (use 127.0.0.1 for VPS deployment)
 # โฮสต์ที่จะ bind (ใช้ 127.0.0.1 สำหรับ VPS)
-APP_HOST=0.0.0.0
+APP_HOST=127.0.0.1
 
 # Port to listen on
 # พอร์ตที่จะฟัง
@@ -123,7 +123,7 @@ def show_environment_examples():
     configs = {
         "Development (Local)": {
             "APP_ENV": "dev",
-            "APP_HOST": "0.0.0.0",
+            "APP_HOST": "127.0.0.1",
             "APP_PORT": "8000",
             "APP_LOG_LEVEL": "debug",
         },
@@ -135,7 +135,7 @@ def show_environment_examples():
         },
         "Custom Development": {
             "APP_ENV": "dev",
-            "APP_HOST": "0.0.0.0",
+            "APP_HOST": "127.0.0.1",
             "APP_PORT": "8080",  # Different port
             "APP_LOG_LEVEL": "info",
         },

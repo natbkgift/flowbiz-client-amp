@@ -35,9 +35,8 @@ python simple_client.py
 ตัวอย่างการพัฒนา API endpoints ใหม่ เหมาะสำหรับนักพัฒนา
 
 ### Examples:
-- **[new_endpoint.py](02-api-development/new_endpoint.py)** - สร้าง endpoint ใหม่
+- **[new_endpoint.py](02-api-development/new_endpoint.py)** - สร้าง endpoint ใหม่ (CRUD operations)
 - **[with_validation.py](02-api-development/with_validation.py)** - Validation และ Error Handling
-- **[crud_example/](02-api-development/crud_example/)** - ตัวอย่าง CRUD operations
 
 ### วิธีรัน:
 ```bash
@@ -54,7 +53,6 @@ python new_endpoint.py
 ### Examples:
 - **[lead_router_agent.py](03-ai-agents/lead_router_agent.py)** - จัดการและ route leads
 - **[property_listing.py](03-ai-agents/property_listing.py)** - จัดการข้อมูล property
-- **[chat_agent_basic.py](03-ai-agents/chat_agent_basic.py)** - Chatbot ตอบคำถามพื้นฐาน
 
 ### วิธีรัน:
 ```bash
@@ -71,7 +69,6 @@ python lead_router_agent.py
 ### Examples:
 - **[run_local.sh](04-docker/run_local.sh)** - รัน service ใน Docker
 - **[test_in_docker.sh](04-docker/test_in_docker.sh)** - ทดสอบใน Docker environment
-- **[docker-compose-example.yml](04-docker/docker-compose-example.yml)** - Custom Docker Compose
 
 ### วิธีรัน:
 ```bash
