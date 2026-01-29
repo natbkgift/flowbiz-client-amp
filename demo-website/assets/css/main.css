@@ -153,6 +153,9 @@ select {
 }
 
 /* Container */
+/* Base max-width: 1300px provides comfortable reading width on standard desktops (1024-1439px)
+ * At 1440px+, responsive.css increases to 1400px for larger screens
+ * This progressive approach prevents excessive line lengths while maximizing viewport usage */
 .container {
   max-width: 1300px;
   margin: 0 auto;
