@@ -44,46 +44,21 @@ function calculateInvestment() {
     return;
   }
   
-  // Calculate loan amount
-  const downPaymentAmount = propertyPrice * (downPayment / 100);
-  const loanAmount = propertyPrice - downPaymentAmount;
+  // Prepare inputs for calculation
+  const inputs = {
+    propertyPrice,
+    downPayment,
+    interestRate,
+    loanTerm,
+    monthlyRent,
+    monthlyExpense
+  };
   
-  // Calculate monthly payment using the amortization formula
-  const monthlyInterestRate = interestRate / 100 / 12;
-  const numberOfPayments = loanTerm * 12;
-  
-  let monthlyPayment = 0;
-  if (loanAmount > 0 && monthlyInterestRate > 0) {
-    monthlyPayment = loanAmount * 
-      (monthlyInterestRate * Math.pow(1 + monthlyInterestRate, numberOfPayments)) / 
-      (Math.pow(1 + monthlyInterestRate, numberOfPayments) - 1);
-  }
-  
-  // Calculate annual rent
-  const annualRent = monthlyRent * 12;
-  const annualExpense = monthlyExpense * 12;
-  
-  // Calculate yields
-  const grossYield = (annualRent / propertyPrice) * 100;
-  const netYield = ((annualRent - annualExpense) / propertyPrice) * 100;
-  
-  // Calculate monthly cash flow
-  const monthlyCashFlow = monthlyRent - monthlyExpense - monthlyPayment;
-  
-  // Calculate payback period (simple calculation based on down payment and net annual income)
-  const netAnnualIncome = annualRent - annualExpense - (monthlyPayment * 12);
-  const paybackPeriod = netAnnualIncome > 0 ? downPaymentAmount / netAnnualIncome : 0;
+  // Use the core calculation function
+  const results = calculateInvestmentMetrics(inputs);
   
   // Display results
-  displayResults({
-    grossYield,
-    netYield,
-    monthlyCashFlow,
-    paybackPeriod,
-    monthlyPayment,
-    downPaymentAmount,
-    loanAmount
-  });
+  displayResults(results);
 }
 
 function displayResults(results) {

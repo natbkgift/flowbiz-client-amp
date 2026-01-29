@@ -1,0 +1,23 @@
+{
+  "name": "flowbiz-client-amp",
+  "version": "0.1.0",
+  "description": "FlowBiz Client AMP - Asset Management Property",
+  "scripts": {
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage"
+  },
+  "jest": {
+    "testEnvironment": "node",
+    "coverageDirectory": "coverage",
+    "collectCoverageFrom": [
+      "demo-website/assets/js/calculator-core.js"
+    ],
+    "testMatch": [
+      "**/tests/js/**/*.test.js"
+    ]
+  },
+  "devDependencies": {
+    "jest": "^29.7.0"
+  }
+}
