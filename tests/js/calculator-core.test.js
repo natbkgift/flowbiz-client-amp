@@ -2,7 +2,6 @@
 // Testing investment calculation logic with edge cases
 
 const {
-  validateInputs,
   calculateMonthlyPayment,
   calculateGrossYield,
   calculateNetYield,
@@ -10,128 +9,6 @@ const {
   calculatePaybackPeriod,
   calculateInvestmentMetrics
 } = require('../../demo-website/assets/js/calculator-core.js');
-
-describe('validateInputs', () => {
-  test('should return valid for correct inputs', () => {
-    const inputs = {
-      propertyPrice: 3000000,
-      downPayment: 30,
-      interestRate: 4.5,
-      loanTerm: 20,
-      monthlyRent: 15000,
-      monthlyExpense: 3000
-    };
-    
-    const result = validateInputs(inputs);
-    expect(result.isValid).toBe(true);
-    expect(result.errors).toHaveLength(0);
-  });
-  
-  test('should reject zero property price', () => {
-    const inputs = {
-      propertyPrice: 0,
-      downPayment: 30,
-      interestRate: 4.5,
-      loanTerm: 20,
-      monthlyRent: 15000,
-      monthlyExpense: 3000
-    };
-    
-    const result = validateInputs(inputs);
-    expect(result.isValid).toBe(false);
-    expect(result.errors).toContain('Property price must be greater than 0');
-  });
-  
-  test('should reject negative property price', () => {
-    const inputs = {
-      propertyPrice: -1000,
-      downPayment: 30,
-      interestRate: 4.5,
-      loanTerm: 20,
-      monthlyRent: 15000,
-      monthlyExpense: 3000
-    };
-    
-    const result = validateInputs(inputs);
-    expect(result.isValid).toBe(false);
-    expect(result.errors).toContain('Property price must be greater than 0');
-  });
-  
-  test('should reject down payment over 100%', () => {
-    const inputs = {
-      propertyPrice: 3000000,
-      downPayment: 150,
-      interestRate: 4.5,
-      loanTerm: 20,
-      monthlyRent: 15000,
-      monthlyExpense: 3000
-    };
-    
-    const result = validateInputs(inputs);
-    expect(result.isValid).toBe(false);
-    expect(result.errors).toContain('Down payment must be between 0 and 100');
-  });
-  
-  test('should reject negative down payment', () => {
-    const inputs = {
-      propertyPrice: 3000000,
-      downPayment: -10,
-      interestRate: 4.5,
-      loanTerm: 20,
-      monthlyRent: 15000,
-      monthlyExpense: 3000
-    };
-    
-    const result = validateInputs(inputs);
-    expect(result.isValid).toBe(false);
-    expect(result.errors).toContain('Down payment must be between 0 and 100');
-  });
-  
-  test('should reject negative interest rate', () => {
-    const inputs = {
-      propertyPrice: 3000000,
-      downPayment: 30,
-      interestRate: -1,
-      loanTerm: 20,
-      monthlyRent: 15000,
-      monthlyExpense: 3000
-    };
-    
-    const result = validateInputs(inputs);
-    expect(result.isValid).toBe(false);
-    expect(result.errors).toContain('Interest rate cannot be negative');
-  });
-  
-  test('should reject negative monthly rent', () => {
-    const inputs = {
-      propertyPrice: 3000000,
-      downPayment: 30,
-      interestRate: 4.5,
-      loanTerm: 20,
-      monthlyRent: -1000,
-      monthlyExpense: 3000
-    };
-    
-    const result = validateInputs(inputs);
-    expect(result.isValid).toBe(false);
-    expect(result.errors).toContain('Monthly rent cannot be negative');
-  });
-  
-  test('should reject negative monthly expense', () => {
-    const inputs = {
-      propertyPrice: 3000000,
-      downPayment: 30,
-      interestRate: 4.5,
-      loanTerm: 20,
-      monthlyRent: 15000,
-      monthlyExpense: -500
-    };
-    
-    const result = validateInputs(inputs);
-    expect(result.isValid).toBe(false);
-    expect(result.errors).toContain('Monthly expense cannot be negative');
-  });
-});
 
 describe('calculateMonthlyPayment', () => {
   test('should calculate correct monthly payment for standard loan', () => {
@@ -180,6 +57,30 @@ describe('calculateMonthlyPayment', () => {
     
     const payment = calculateMonthlyPayment(loanAmount, interestRate, loanTerm);
     expect(payment).toBeGreaterThan(20000); // Higher than normal
+  });
+  
+  test('should handle zero loan term edge case', () => {
+    // Note: This is an edge case that should be validated by the caller
+    // The function will attempt to calculate but result in Infinity or NaN
+    const loanAmount = 2100000;
+    const interestRate = 4.5;
+    const loanTerm = 0;
+    
+    const payment = calculateMonthlyPayment(loanAmount, interestRate, loanTerm);
+    expect(isFinite(payment)).toBe(false); // Will be Infinity or NaN
+  });
+  
+  test('should handle negative loan term edge case', () => {
+    // Note: This is an edge case that should be validated by the caller
+    // With negative loan term, the calculation produces unexpected results
+    const loanAmount = 2100000;
+    const interestRate = 4.5;
+    const loanTerm = -5;
+    
+    const payment = calculateMonthlyPayment(loanAmount, interestRate, loanTerm);
+    // The function will return a value but it's mathematically meaningless
+    // Validation should prevent negative loan terms from reaching here
+    expect(typeof payment).toBe('number');
   });
 });
 
@@ -323,17 +224,16 @@ describe('calculateInvestmentMetrics - Integration Tests', () => {
     
     const result = calculateInvestmentMetrics(inputs);
     
-    expect(result.success).toBe(true);
-    expect(result.results).toBeDefined();
-    expect(result.results.grossYield).toBeCloseTo(6, 1);
-    expect(result.results.netYield).toBeCloseTo(4.8, 1);
+    expect(result).toBeDefined();
+    expect(result.grossYield).toBeCloseTo(6, 1);
+    expect(result.netYield).toBeCloseTo(4.8, 1);
     // Monthly payment for 2.1M loan at 4.5% over 20 years is ~13,285 THB
     // Cash flow = 15000 - 3000 - 13285 = -1285 (negative)
-    expect(result.results.monthlyCashFlow).toBeLessThan(0);
+    expect(result.monthlyCashFlow).toBeLessThan(0);
     // Payback period is 0 because net income is negative
-    expect(result.results.paybackPeriod).toBe(0);
-    expect(result.results.downPaymentAmount).toBe(900000);
-    expect(result.results.loanAmount).toBe(2100000);
+    expect(result.paybackPeriod).toBe(0);
+    expect(result.downPaymentAmount).toBe(900000);
+    expect(result.loanAmount).toBe(2100000);
   });
   
   test('should handle 100% down payment edge case', () => {
@@ -348,11 +248,10 @@ describe('calculateInvestmentMetrics - Integration Tests', () => {
     
     const result = calculateInvestmentMetrics(inputs);
     
-    expect(result.success).toBe(true);
-    expect(result.results.loanAmount).toBe(0);
-    expect(result.results.monthlyPayment).toBe(0);
-    expect(result.results.monthlyCashFlow).toBe(12000); // rent - expense
-    expect(result.results.grossYield).toBeCloseTo(6, 1);
+    expect(result.loanAmount).toBe(0);
+    expect(result.monthlyPayment).toBe(0);
+    expect(result.monthlyCashFlow).toBe(12000); // rent - expense
+    expect(result.grossYield).toBeCloseTo(6, 1);
   });
   
   test('should handle zero interest rate edge case', () => {
@@ -367,9 +266,8 @@ describe('calculateInvestmentMetrics - Integration Tests', () => {
     
     const result = calculateInvestmentMetrics(inputs);
     
-    expect(result.success).toBe(true);
-    expect(result.results.monthlyPayment).toBeCloseTo(8750, 0); // 2100000 / 240
-    expect(result.results.monthlyCashFlow).toBeCloseTo(3250, 0);
+    expect(result.monthlyPayment).toBeCloseTo(8750, 0); // 2100000 / 240
+    expect(result.monthlyCashFlow).toBeCloseTo(3250, 0);
   });
   
   test('should handle 0% down payment', () => {
@@ -384,27 +282,9 @@ describe('calculateInvestmentMetrics - Integration Tests', () => {
     
     const result = calculateInvestmentMetrics(inputs);
     
-    expect(result.success).toBe(true);
-    expect(result.results.downPaymentAmount).toBe(0);
-    expect(result.results.loanAmount).toBe(3000000);
-    expect(result.results.monthlyPayment).toBeGreaterThan(0);
-  });
-  
-  test('should return errors for invalid inputs', () => {
-    const inputs = {
-      propertyPrice: -1000,
-      downPayment: 150,
-      interestRate: -5,
-      loanTerm: 20,
-      monthlyRent: 15000,
-      monthlyExpense: 3000
-    };
-    
-    const result = calculateInvestmentMetrics(inputs);
-    
-    expect(result.success).toBe(false);
-    expect(result.errors).toBeDefined();
-    expect(result.errors.length).toBeGreaterThan(0);
+    expect(result.downPaymentAmount).toBe(0);
+    expect(result.loanAmount).toBe(3000000);
+    expect(result.monthlyPayment).toBeGreaterThan(0);
   });
   
   test('should handle zero rent (property with no income)', () => {
@@ -419,10 +299,9 @@ describe('calculateInvestmentMetrics - Integration Tests', () => {
     
     const result = calculateInvestmentMetrics(inputs);
     
-    expect(result.success).toBe(true);
-    expect(result.results.grossYield).toBe(0);
-    expect(result.results.netYield).toBeCloseTo(-1.2, 1); // negative due to expenses
-    expect(result.results.monthlyCashFlow).toBeLessThan(0);
+    expect(result.grossYield).toBe(0);
+    expect(result.netYield).toBeCloseTo(-1.2, 1); // negative due to expenses
+    expect(result.monthlyCashFlow).toBeLessThan(0);
   });
   
   test('should handle very high interest rate', () => {
@@ -437,9 +316,8 @@ describe('calculateInvestmentMetrics - Integration Tests', () => {
     
     const result = calculateInvestmentMetrics(inputs);
     
-    expect(result.success).toBe(true);
-    expect(result.results.monthlyPayment).toBeGreaterThan(20000);
-    expect(result.results.monthlyCashFlow).toBeLessThan(0); // Will be negative
+    expect(result.monthlyPayment).toBeGreaterThan(20000);
+    expect(result.monthlyCashFlow).toBeLessThan(0); // Will be negative
   });
   
   test('should handle minimal values', () => {
@@ -454,9 +332,8 @@ describe('calculateInvestmentMetrics - Integration Tests', () => {
     
     const result = calculateInvestmentMetrics(inputs);
     
-    expect(result.success).toBe(true);
-    expect(result.results).toBeDefined();
-    expect(result.results.loanAmount).toBe(90000);
-    expect(result.results.downPaymentAmount).toBe(10000);
+    expect(result).toBeDefined();
+    expect(result.loanAmount).toBe(90000);
+    expect(result.downPaymentAmount).toBe(10000);
   });
 });

@@ -1,50 +1,7 @@
 // AMP Demo Website - Pure Calculation Functions
 // This module contains pure functions for investment calculations
 // These functions are framework-agnostic and can be tested independently
-
-/**
- * Validates calculation input parameters
- * @param {Object} inputs - The calculation inputs
- * @param {number} inputs.propertyPrice - Property price in currency
- * @param {number} inputs.downPayment - Down payment percentage (0-100)
- * @param {number} inputs.interestRate - Annual interest rate percentage
- * @param {number} inputs.loanTerm - Loan term in years
- * @param {number} inputs.monthlyRent - Monthly rental income
- * @param {number} inputs.monthlyExpense - Monthly expenses
- * @returns {Object} Validation result with isValid boolean and errors array
- */
-function validateInputs(inputs) {
-  const errors = [];
-  
-  if (inputs.propertyPrice <= 0) {
-    errors.push('Property price must be greater than 0');
-  }
-  
-  if (inputs.downPayment < 0 || inputs.downPayment > 100) {
-    errors.push('Down payment must be between 0 and 100');
-  }
-  
-  if (inputs.interestRate < 0) {
-    errors.push('Interest rate cannot be negative');
-  }
-  
-  if (inputs.loanTerm <= 0) {
-    errors.push('Loan term must be greater than 0');
-  }
-  
-  if (inputs.monthlyRent < 0) {
-    errors.push('Monthly rent cannot be negative');
-  }
-  
-  if (inputs.monthlyExpense < 0) {
-    errors.push('Monthly expense cannot be negative');
-  }
-  
-  return {
-    isValid: errors.length === 0,
-    errors
-  };
-}
+// Note: Input validation is handled in calculator.js where i18n is available
 
 /**
  * Calculates monthly loan payment using amortization formula
@@ -141,18 +98,10 @@ function calculatePaybackPeriod(downPaymentAmount, annualRent, annualExpense, an
  * @param {number} inputs.loanTerm - Loan term in years
  * @param {number} inputs.monthlyRent - Monthly rental income
  * @param {number} inputs.monthlyExpense - Monthly expenses
- * @returns {Object} Calculation results or validation errors
+ * @returns {Object} Calculation results
+ * @note Input validation should be performed by the caller before calling this function
  */
 function calculateInvestmentMetrics(inputs) {
-  // Validate inputs
-  const validation = validateInputs(inputs);
-  if (!validation.isValid) {
-    return {
-      success: false,
-      errors: validation.errors
-    };
-  }
-  
   // Calculate loan details
   const downPaymentAmount = inputs.propertyPrice * (inputs.downPayment / 100);
   const loanAmount = inputs.propertyPrice - downPaymentAmount;
@@ -189,23 +138,19 @@ function calculateInvestmentMetrics(inputs) {
   );
   
   return {
-    success: true,
-    results: {
-      grossYield,
-      netYield,
-      monthlyCashFlow,
-      paybackPeriod,
-      monthlyPayment,
-      downPaymentAmount,
-      loanAmount
-    }
+    grossYield,
+    netYield,
+    monthlyCashFlow,
+    paybackPeriod,
+    monthlyPayment,
+    downPaymentAmount,
+    loanAmount
   };
 }
 
 // Export for use in other modules (CommonJS for Node.js/Jest)
 if (typeof module !== 'undefined' && module.exports) {
   module.exports = {
-    validateInputs,
     calculateMonthlyPayment,
     calculateGrossYield,
     calculateNetYield,

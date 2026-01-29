@@ -6,27 +6,59 @@ function calculateInvestment() {
   const lang = document.documentElement.lang || 'th';
   
   // Get input values
-  const inputs = {
-    propertyPrice: parseFloat(document.getElementById('property-price')?.value) || 0,
-    downPayment: parseFloat(document.getElementById('down-payment')?.value) || 30,
-    interestRate: parseFloat(document.getElementById('interest-rate')?.value) || 4.5,
-    loanTerm: parseFloat(document.getElementById('loan-term')?.value) || 20,
-    monthlyRent: parseFloat(document.getElementById('monthly-rent')?.value) || 0,
-    monthlyExpense: parseFloat(document.getElementById('monthly-expense')?.value) || 0
-  };
+  const propertyPrice = parseFloat(document.getElementById('property-price')?.value) || 0;
+  const downPayment = parseFloat(document.getElementById('down-payment')?.value) || 30;
+  const interestRate = parseFloat(document.getElementById('interest-rate')?.value) || 4.5;
+  const loanTerm = parseFloat(document.getElementById('loan-term')?.value) || 20;
+  const monthlyRent = parseFloat(document.getElementById('monthly-rent')?.value) || 0;
+  const monthlyExpense = parseFloat(document.getElementById('monthly-expense')?.value) || 0;
   
-  // Use the core calculation function
-  const result = calculateInvestmentMetrics(inputs);
-  
-  // Handle validation errors
-  if (!result.success) {
-    const errorMessage = result.errors.join('\n');
-    alert(errorMessage);
+  // Validation with i18n error messages
+  if (propertyPrice <= 0) {
+    alert(t('calc_error_invalid_price'));
     return;
   }
   
+  if (downPayment < 0 || downPayment > 100) {
+    alert(t('calc_error_invalid_down_payment'));
+    return;
+  }
+  
+  if (interestRate < 0) {
+    alert(t('calc_error_negative_value'));
+    return;
+  }
+  
+  if (loanTerm <= 0) {
+    alert(t('calc_error_negative_value'));
+    return;
+  }
+  
+  if (monthlyRent <= 0) {
+    alert(t('calc_error_invalid_rent'));
+    return;
+  }
+  
+  if (monthlyExpense < 0) {
+    alert(t('calc_error_negative_value'));
+    return;
+  }
+  
+  // Prepare inputs for calculation
+  const inputs = {
+    propertyPrice,
+    downPayment,
+    interestRate,
+    loanTerm,
+    monthlyRent,
+    monthlyExpense
+  };
+  
+  // Use the core calculation function
+  const results = calculateInvestmentMetrics(inputs);
+  
   // Display results
-  displayResults(result.results);
+  displayResults(results);
 }
 
 function displayResults(results) {
