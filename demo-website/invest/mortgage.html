@@ -226,11 +226,13 @@
 
       if (loanAmount > 0) {
         if (monthlyRate > 0) {
+          // Amortization formula:
+          // payment = P * r(1+r)^n / ((1+r)^n - 1)
           monthlyPayment = loanAmount * 
             (monthlyRate * Math.pow(1 + monthlyRate, numPayments)) / 
             (Math.pow(1 + monthlyRate, numPayments) - 1);
         } else {
-          // Zero interest rate - simple division
+          // Zero interest rate - principal divided by total months
           monthlyPayment = loanAmount / numPayments;
         }
       }
