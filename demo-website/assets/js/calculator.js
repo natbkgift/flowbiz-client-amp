@@ -331,9 +331,6 @@ function initCalculator() {
     }
   });
 
-  calculatorFields.forEach(field => {
-    updateFieldStatus(field, 'neutral');
-  });
   validateCalculatorForm();
 }
 
