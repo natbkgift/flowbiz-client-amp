@@ -279,6 +279,26 @@
   border-color: var(--color-primary);
 }
 
+.calculator-input.status-neutral {
+  border-color: var(--color-gray-300);
+  background-color: var(--color-white);
+}
+
+.calculator-input.status-valid {
+  border-color: var(--color-success);
+}
+
+.calculator-input.status-invalid {
+  border-color: var(--color-error);
+}
+
+.calculator-error {
+  min-height: 18px;
+  margin-top: 6px;
+  font-size: 13px;
+  color: var(--color-error);
+}
+
 .calculator-results {
   background: var(--color-gray-50);
   border-radius: var(--radius-md);
