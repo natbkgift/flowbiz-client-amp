@@ -1369,7 +1369,6 @@ const TRUST_SIGNALS = {
 // Make data globally available
 if (typeof window !== 'undefined') {
   window.AMP = window.AMP || {};
-  window.AMP.areaGuideData = AREA_GUIDES;
   window.AMP.areaData = AREA_GUIDES;
   window.AMP.developers = DEVELOPERS;
   window.AMP.marketStats = MARKET_STATS;

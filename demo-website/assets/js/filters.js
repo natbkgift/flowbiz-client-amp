@@ -164,8 +164,7 @@ function applyFilters() {
         }
       }
     }
-    const areaSource = window.AMP?.areaGuideData || window.AMP?.areaData;
-    const areaOgImage = selectedAreaKey && areaSource?.[selectedAreaKey]?.og_image;
+    const areaOgImage = selectedAreaKey && window.AMP?.areaData?.[selectedAreaKey]?.og_image;
     if (areaOgImage) {
       if (ogImage) ogImage.setAttribute('content', areaOgImage);
       if (twitterImage) twitterImage.setAttribute('content', areaOgImage);

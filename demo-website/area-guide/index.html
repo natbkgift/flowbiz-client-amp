@@ -105,7 +105,7 @@
   <script src="../assets/js/i18n.js"></script>
   <script src="../assets/js/main.js"></script>
   <script>
-    const areaData = window.AMP?.areaGuideData || window.AMP?.areaData;
+    const areaData = window.AMP?.areaData;
     const ogImage = document.querySelector('meta[property="og:image"]');
     const twitterImage = document.querySelector('meta[name="twitter:image"]');
     const canonicalLink = document.querySelector('link[rel="canonical"]');
@@ -130,9 +130,8 @@
       const entries = areaKey && areaData[areaKey] ? [[areaKey, areaData[areaKey]]] : Object.entries(areaData);
       const selectedArea = areaKey ? areaData[areaKey] : null;
       if (selectedArea) {
-        const areaInfo = selectedArea;
-        const name = (areaInfo.name && areaInfo.name[lang]) || (areaInfo.name && areaInfo.name.en) || '';
-        const description = (areaInfo.description && areaInfo.description[lang]) || (areaInfo.description && areaInfo.description.en) || '';
+        const name = (selectedArea.name && selectedArea.name[lang]) || (selectedArea.name && selectedArea.name.en) || '';
+        const description = (selectedArea.description && selectedArea.description[lang]) || (selectedArea.description && selectedArea.description.en) || '';
         const heroTitle = document.querySelector('.hero h1');
         const heroSubtitle = document.querySelector('.hero .hero-subtitle');
         if (heroTitle && name) {
