@@ -10,65 +10,123 @@ function formatCurrency(num) {
   }).format(num);
 }
 
-function calculateInvestment() {
-  // Get current language for error messages
-  const lang = document.documentElement.lang || 'th';
-  
-  // Get input values
-  const propertyPrice = parseFloat(document.getElementById('property-price')?.value) || 0;
-  const downPayment = parseFloat(document.getElementById('down-payment')?.value) || 30;
-  const interestRate = parseFloat(document.getElementById('interest-rate')?.value) || 4.5;
-  const loanTerm = parseFloat(document.getElementById('loan-term')?.value) || 20;
-  const monthlyRent = parseFloat(document.getElementById('monthly-rent')?.value) || 0;
-  const monthlyExpense = parseFloat(document.getElementById('monthly-expense')?.value) || 0;
-  
-  // Validation with i18n error messages
-  if (propertyPrice <= 0) {
-    alert(t('calc_error_invalid_price'));
+const calculatorFieldRules = [
+  {
+    inputId: 'property-price',
+    errorId: 'error-property-price',
+    defaultValue: 3000000,
+    errorKey: 'calc_error_invalid_price',
+    isInvalid: (value) => value <= 0
+  },
+  {
+    inputId: 'down-payment',
+    errorId: 'error-down-payment',
+    defaultValue: 30,
+    errorKey: 'calc_error_invalid_down_payment',
+    isInvalid: (value) => value < 0 || value > 100
+  },
+  {
+    inputId: 'interest-rate',
+    errorId: 'error-interest-rate',
+    defaultValue: 4.5,
+    errorKey: 'calc_error_negative_value',
+    isInvalid: (value) => value < 0
+  },
+  {
+    inputId: 'loan-term',
+    errorId: 'error-loan-term',
+    defaultValue: 20,
+    errorKey: 'calc_error_negative_value',
+    isInvalid: (value) => value <= 0
+  },
+  {
+    inputId: 'monthly-rent',
+    errorId: 'error-monthly-rent',
+    defaultValue: 15000,
+    errorKey: 'calc_error_invalid_rent',
+    isInvalid: (value) => value <= 0
+  },
+  {
+    inputId: 'monthly-expense',
+    errorId: 'error-monthly-expense',
+    defaultValue: 3000,
+    errorKey: 'calc_error_negative_value',
+    isInvalid: (value) => value < 0
+  }
+];
+
+const calculatorFields = calculatorFieldRules.map(rule => ({
+  ...rule,
+  input: document.getElementById(rule.inputId),
+  error: document.getElementById(rule.errorId)
+}));
+
+function updateCalculateButtonState(isFormValid) {
+  const calculateBtn = document.getElementById('calculate-btn');
+  if (calculateBtn) {
+    calculateBtn.disabled = !isFormValid;
+  }
+}
+
+function updateFieldStatus(field, status) {
+  if (!field?.input) {
     return;
   }
-  
-  if (downPayment < 0 || downPayment > 100) {
-    alert(t('calc_error_invalid_down_payment'));
-    return;
+  field.input.classList.remove('status-neutral', 'status-valid', 'status-invalid');
+  field.input.classList.add(`status-${status}`);
+}
+
+function validateField(field) {
+  if (!field?.input) {
+    return true;
   }
-  
-  if (interestRate < 0) {
-    alert(t('calc_error_negative_value'));
-    return;
+  const value = parseFloat(field.input.value);
+  const hasValue = !Number.isNaN(value);
+  const isInvalid = !hasValue || field.isInvalid(value);
+  if (field.error) {
+    field.error.textContent = isInvalid ? t(field.errorKey) : '';
   }
-  
-  if (loanTerm <= 0) {
-    alert(t('calc_error_negative_value'));
-    return;
-  }
-  
-  if (monthlyRent <= 0) {
-    alert(t('calc_error_invalid_rent'));
-    return;
-  }
-  
-  if (monthlyExpense < 0) {
-    alert(t('calc_error_negative_value'));
-    return;
-  }
-  
-  // Prepare inputs for calculation
-  const inputs = {
-    propertyPrice,
-    downPayment,
-    interestRate,
-    loanTerm,
-    monthlyRent,
-    monthlyExpense
+  updateFieldStatus(field, isInvalid ? 'invalid' : 'valid');
+  return !isInvalid;
+}
+
+function validateCalculatorForm() {
+  let isFormValid = true;
+  calculatorFields.forEach(field => {
+    if (!validateField(field)) {
+      isFormValid = false;
+    }
+  });
+  updateCalculateButtonState(isFormValid);
+  return isFormValid;
+}
+
+function readCalculatorInputs() {
+  const values = {};
+  calculatorFields.forEach(field => {
+    values[field.inputId] = parseFloat(field?.input?.value);
+  });
+  return {
+    propertyPrice: values['property-price'] ?? 0,
+    downPayment: values['down-payment'] ?? 0,
+    interestRate: values['interest-rate'] ?? 0,
+    loanTerm: values['loan-term'] ?? 0,
+    monthlyRent: values['monthly-rent'] ?? 0,
+    monthlyExpense: values['monthly-expense'] ?? 0
   };
-  
-  // Use the core calculation function
+}
+
+function calculateInvestment() {
+  if (!validateCalculatorForm()) {
+    return;
+  }
+
+  const inputs = readCalculatorInputs();
+
   const results = calculateInvestmentMetrics(inputs);
   const projection = generateCashFlowProjection(inputs, 10);
   lastProjection = projection;
-  
-  // Display results
+
   displayResults(results, projection);
 }
 
@@ -259,9 +317,11 @@ function initCalculator() {
         calculateInvestment();
       }
     });
+    input.addEventListener('input', validateCalculatorForm);
   });
 
   document.addEventListener('languageChanged', () => {
+    validateCalculatorForm();
     if (cashFlowChartInstance) {
       cashFlowChartInstance.destroy();
       cashFlowChartInstance = null;
@@ -270,6 +330,11 @@ function initCalculator() {
       renderCashFlowProjection(lastProjection);
     }
   });
+
+  calculatorFields.forEach(field => {
+    updateFieldStatus(field, 'neutral');
+  });
+  validateCalculatorForm();
 }
 
 // Run on page load
