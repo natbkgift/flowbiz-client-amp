@@ -10,7 +10,7 @@
   <!-- Open Graph -->
   <meta property="og:title" content="Property Details | Asset Management Property">
   <meta property="og:description" content="View property details and contact us for more information">
-  <meta property="og:image" content="https://via.placeholder.com/1200x630/1744BE/FFFFFF?text=AMP+Pattaya">
+  <meta property="og:image" content="https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=1200&h=630&fit=crop">
   <meta property="og:url" content="https://amppattaya.com/detail.html">
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="Asset Management Property">
@@ -19,7 +19,7 @@
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="Property Details | Asset Management Property">
   <meta name="twitter:description" content="View property details and contact us for more information">
-  <meta name="twitter:image" content="https://via.placeholder.com/1200x630/1744BE/FFFFFF?text=AMP+Pattaya">
+  <meta name="twitter:image" content="https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=1200&h=630&fit=crop">
 
   <!-- Canonical URL -->
   <link rel="canonical" href="https://amppattaya.com/detail.html">
@@ -287,6 +287,13 @@
       document.getElementById('property-location').innerHTML = `<i data-lucide="map-pin"></i> ${property.area}, Pattaya`;
       document.getElementById('property-price').innerHTML = `฿${property.price.toLocaleString()}<span>${priceLabel}</span>`;
       document.title = `${title} | Asset Management Property`;
+      const ogImage = document.querySelector('meta[property="og:image"]');
+      const twitterImage = document.querySelector('meta[name="twitter:image"]');
+      if (property.images && property.images.length > 0) {
+        const ogImageValue = property.images[0];
+        if (ogImage) ogImage.setAttribute('content', ogImageValue);
+        if (twitterImage) twitterImage.setAttribute('content', ogImageValue);
+      }
 
       // Facts
       const factsHTML = `

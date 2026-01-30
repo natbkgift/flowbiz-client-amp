@@ -12,7 +12,7 @@
   <meta property="og:title" content="Asset Management Property | Find Properties in Pattaya">
   <meta property="og:description"
     content="Professional property management in Pattaya. Find condos, houses, and villas for rent or sale.">
-  <meta property="og:image" content="https://via.placeholder.com/1200x630/1744BE/FFFFFF?text=AMP+Pattaya">
+  <meta property="og:image" content="https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=1200&h=630&fit=crop">
   <meta property="og:url" content="https://amppattaya.com/">
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="Asset Management Property">
@@ -22,7 +22,7 @@
   <meta name="twitter:title" content="Asset Management Property | Find Properties in Pattaya">
   <meta name="twitter:description"
     content="Professional property management in Pattaya. Find condos, houses, and villas for rent or sale.">
-  <meta name="twitter:image" content="https://via.placeholder.com/1200x630/1744BE/FFFFFF?text=AMP+Pattaya">
+  <meta name="twitter:image" content="https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=1200&h=630&fit=crop">
 
   <!-- Canonical URL -->
   <link rel="canonical" href="https://amppattaya.com/">
@@ -419,6 +419,13 @@
     // Initialize
     renderFeaturedProperties();
     renderPopularAreas();
+    const homeOgImage = AREA_GUIDES?.pattaya?.og_image || POPULAR_AREAS.find(area => area.name === 'Pattaya')?.image;
+    if (homeOgImage) {
+      const ogImage = document.querySelector('meta[property="og:image"]');
+      const twitterImage = document.querySelector('meta[name="twitter:image"]');
+      if (ogImage) ogImage.setAttribute('content', homeOgImage);
+      if (twitterImage) twitterImage.setAttribute('content', homeOgImage);
+    }
 
     // Render Market Stats
     function renderMarketStats() {

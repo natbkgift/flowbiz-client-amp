@@ -5,6 +5,24 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Pattaya Area Guide | Asset Management Property</title>
+  <meta name="description" content="Explore Pattaya area guides with highlights, nearby landmarks, and market trends.">
+
+  <!-- Open Graph -->
+  <meta property="og:title" content="Pattaya Area Guide | Asset Management Property">
+  <meta property="og:description" content="Explore Pattaya area guides with highlights, nearby landmarks, and market trends.">
+  <meta property="og:image" content="https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=1200&h=630&fit=crop">
+  <meta property="og:url" content="https://amppattaya.com/area-guide/index.html">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Asset Management Property">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Pattaya Area Guide | Asset Management Property">
+  <meta name="twitter:description" content="Explore Pattaya area guides with highlights, nearby landmarks, and market trends.">
+  <meta name="twitter:image" content="https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=1200&h=630&fit=crop">
+
+  <!-- Canonical URL -->
+  <link rel="canonical" href="https://amppattaya.com/area-guide/index.html">
   <link rel="icon" href="../assets/images/favicon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="../assets/css/main.css">
   <link rel="stylesheet" href="../assets/css/components.css">
@@ -87,13 +105,55 @@
   <script src="../assets/js/i18n.js"></script>
   <script src="../assets/js/main.js"></script>
   <script>
-    const areaData = window.AMP?.areaData;
+    const areaData = window.AMP?.areaGuideData || window.AMP?.areaData;
+    const ogImage = document.querySelector('meta[property="og:image"]');
+    const twitterImage = document.querySelector('meta[name="twitter:image"]');
+    const canonicalLink = document.querySelector('link[rel="canonical"]');
+    const metaDescription = document.querySelector('meta[name="description"]');
+    const ogTitle = document.querySelector('meta[property="og:title"]');
+    const ogDescription = document.querySelector('meta[property="og:description"]');
+    const twitterTitle = document.querySelector('meta[name="twitter:title"]');
+    const twitterDescription = document.querySelector('meta[name="twitter:description"]');
+    const urlParams = new URLSearchParams(window.location.search);
+    const areaKey = urlParams.get('area');
+    if (areaData && areaKey && areaData[areaKey]?.og_image) {
+      const areaOgImage = areaData[areaKey].og_image;
+      if (ogImage) ogImage.setAttribute('content', areaOgImage);
+      if (twitterImage) twitterImage.setAttribute('content', areaOgImage);
+      if (canonicalLink) {
+        canonicalLink.setAttribute('href', `https://amppattaya.com/area-guide/index.html?area=${encodeURIComponent(areaKey)}`);
+      }
+    }
     if (areaData) {
       const container = document.getElementById('area-guide-grid');
       const lang = document.documentElement.lang || 'en';
+      const entries = areaKey && areaData[areaKey] ? [[areaKey, areaData[areaKey]]] : Object.entries(areaData);
+      const selectedArea = areaKey ? areaData[areaKey] : null;
+      if (selectedArea) {
+        const areaInfo = selectedArea;
+        const name = (areaInfo.name && areaInfo.name[lang]) || (areaInfo.name && areaInfo.name.en) || '';
+        const description = (areaInfo.description && areaInfo.description[lang]) || (areaInfo.description && areaInfo.description.en) || '';
+        const heroTitle = document.querySelector('.hero h1');
+        const heroSubtitle = document.querySelector('.hero .hero-subtitle');
+        if (heroTitle && name) {
+          heroTitle.textContent = `${name} Area Guide`;
+        }
+        if (heroSubtitle && description) {
+          heroSubtitle.textContent = description;
+        }
+        if (name) {
+          document.title = `${name} Area Guide | Asset Management Property`;
+          if (ogTitle) ogTitle.setAttribute('content', `${name} Area Guide | Asset Management Property`);
+          if (twitterTitle) twitterTitle.setAttribute('content', `${name} Area Guide | Asset Management Property`);
+        }
+        if (description) {
+          if (metaDescription) metaDescription.setAttribute('content', description);
+          if (ogDescription) ogDescription.setAttribute('content', description);
+          if (twitterDescription) twitterDescription.setAttribute('content', description);
+        }
+      }
       container.innerHTML = '';
-      
-      Object.entries(areaData).forEach(([key, area]) => {
+      entries.forEach(([key, area]) => {
         const name = (area.name && area.name[lang]) || (area.name && area.name.en) || '';
         const description = (area.description && area.description[lang]) || (area.description && area.description.en) || '';
         const yoyChange = area.price_trend_yoy >= 0 ? `+${area.price_trend_yoy}%` : `${area.price_trend_yoy}%`;
@@ -144,6 +204,17 @@
 
         const body = document.createElement('div');
         body.className = 'area-card-body';
+
+        if (area.image) {
+          const imageWrap = document.createElement('div');
+          imageWrap.className = 'area-card-image';
+          const imageEl = document.createElement('img');
+          imageEl.src = area.image;
+          imageEl.alt = name;
+          imageEl.loading = 'lazy';
+          imageWrap.appendChild(imageEl);
+          body.appendChild(imageWrap);
+        }
 
         const descP = document.createElement('p');
         descP.className = 'area-card-description';
