@@ -16,15 +16,17 @@ function calculateMonthlyPayment(loanAmount, annualInterestRate, loanTermYears) 
     return 0;
   }
   
+  const numberOfPayments = loanTermYears * 12;
+  const monthlyInterestRate = annualInterestRate / 100 / 12;
+  
   // Edge case: Zero interest rate (interest-free loan)
-  if (annualInterestRate === 0) {
-    const numberOfPayments = loanTermYears * 12;
+  // Monthly payment is principal divided equally by total months
+  if (monthlyInterestRate === 0) {
     return loanAmount / numberOfPayments;
   }
   
-  // Standard amortization formula
-  const monthlyInterestRate = annualInterestRate / 100 / 12;
-  const numberOfPayments = loanTermYears * 12;
+  // Standard amortization formula:
+  // payment = P * r(1+r)^n / ((1+r)^n - 1)
   
   const monthlyPayment = loanAmount * 
     (monthlyInterestRate * Math.pow(1 + monthlyInterestRate, numberOfPayments)) / 
