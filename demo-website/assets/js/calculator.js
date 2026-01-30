@@ -14,42 +14,36 @@ const calculatorFieldRules = [
   {
     inputId: 'property-price',
     errorId: 'error-property-price',
-    defaultValue: 3000000,
     errorKey: 'calc_error_invalid_price',
     isInvalid: (value) => value <= 0
   },
   {
     inputId: 'down-payment',
     errorId: 'error-down-payment',
-    defaultValue: 30,
     errorKey: 'calc_error_invalid_down_payment',
     isInvalid: (value) => value < 0 || value > 100
   },
   {
     inputId: 'interest-rate',
     errorId: 'error-interest-rate',
-    defaultValue: 4.5,
     errorKey: 'calc_error_negative_value',
     isInvalid: (value) => value < 0 || value > 20
   },
   {
     inputId: 'loan-term',
     errorId: 'error-loan-term',
-    defaultValue: 20,
     errorKey: 'calc_error_negative_value',
     isInvalid: (value) => value <= 0 || value > 30
   },
   {
     inputId: 'monthly-rent',
     errorId: 'error-monthly-rent',
-    defaultValue: 15000,
     errorKey: 'calc_error_invalid_rent',
     isInvalid: (value) => value <= 0
   },
   {
     inputId: 'monthly-expense',
     errorId: 'error-monthly-expense',
-    defaultValue: 3000,
     errorKey: 'calc_error_negative_value',
     isInvalid: (value) => value < 0
   }
