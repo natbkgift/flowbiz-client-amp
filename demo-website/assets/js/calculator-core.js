@@ -150,6 +150,42 @@ function calculateInvestmentMetrics(inputs) {
   };
 }
 
+/**
+ * Generates monthly cash flow projection for a given number of years
+ * @param {Object} inputs - The calculation inputs
+ * @param {number} projectionYears - Number of years to project
+ * @returns {Array} Monthly projection data
+ */
+function generateCashFlowProjection(inputs, projectionYears = 10) {
+  const downPaymentAmount = inputs.propertyPrice * (inputs.downPayment / 100);
+  const loanAmount = inputs.propertyPrice - downPaymentAmount;
+  const monthlyPayment = calculateMonthlyPayment(
+    loanAmount,
+    inputs.interestRate,
+    inputs.loanTerm
+  );
+  const projectionMonths = Math.max(0, Math.round(projectionYears * 12));
+  const loanTermMonths = inputs.loanTerm * 12;
+
+  return Array.from({ length: projectionMonths }, (_, index) => {
+    const month = index + 1;
+    const loanPayment = month <= loanTermMonths ? monthlyPayment : 0;
+    const netCashFlow = calculateMonthlyCashFlow(
+      inputs.monthlyRent,
+      inputs.monthlyExpense,
+      loanPayment
+    );
+
+    return {
+      month,
+      income: inputs.monthlyRent,
+      expenses: inputs.monthlyExpense,
+      loanPayment,
+      netCashFlow
+    };
+  });
+}
+
 // Export for use in other modules (CommonJS for Node.js/Jest)
 if (typeof module !== 'undefined' && module.exports) {
   module.exports = {
@@ -158,6 +194,7 @@ if (typeof module !== 'undefined' && module.exports) {
     calculateNetYield,
     calculateMonthlyCashFlow,
     calculatePaybackPeriod,
-    calculateInvestmentMetrics
+    calculateInvestmentMetrics,
+    generateCashFlowProjection
   };
 }

@@ -18,6 +18,7 @@
   
   <!-- Lucide Icons -->
   <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 </head>
 <body>
   <!-- Skip Link for Accessibility -->
@@ -131,6 +132,33 @@
           <div class="calculator-result-item">
             <span class="calculator-result-label" data-i18n="calc_payback_period">ระยะเวลาคืนทุน</span>
             <span class="calculator-result-value" id="result-payback">0 years</span>
+          </div>
+        </div>
+
+        <div class="calculator-results" id="cash-flow-projection" style="display: none;">
+          <h3 class="calculator-section-title" data-i18n="calc_projection_title">ประมาณการกระแสเงินสด (10 ปี)</h3>
+          <p class="calculator-section-subtitle" data-i18n="calc_projection_subtitle">แสดงกระแสเงินสดรายเดือนหลังหักค่าใช้จ่าย</p>
+          <div class="info-box calculator-assumptions">
+            <p data-i18n="calc_projection_assumptions">
+              สมมติว่าอัตราค่าเช่าและค่าใช้จ่ายคงที่ตลอดช่วงเวลา และยอดผ่อนหนี้สิ้นสุดเมื่อครบกำหนดสัญญา
+            </p>
+          </div>
+          <div class="calculator-chart-wrapper">
+            <canvas id="cash-flow-chart" height="120" aria-label="Cash flow projection chart" role="img"></canvas>
+          </div>
+          <div class="calculator-table-wrapper">
+            <table class="calculator-table">
+              <thead>
+                <tr>
+                  <th data-i18n="calc_projection_month">เดือน</th>
+                  <th data-i18n="calc_projection_income">รายรับ</th>
+                  <th data-i18n="calc_projection_expenses">รายจ่าย</th>
+                  <th data-i18n="calc_projection_loan_payment">ยอดผ่อน</th>
+                  <th data-i18n="calc_projection_net_cash_flow">กระแสเงินสดสุทธิ</th>
+                </tr>
+              </thead>
+              <tbody id="cash-flow-table-body"></tbody>
+            </table>
           </div>
         </div>
         
