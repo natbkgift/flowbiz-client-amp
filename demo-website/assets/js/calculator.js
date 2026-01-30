@@ -1,6 +1,15 @@
 // AMP Demo Website - Investment Calculator
 // ROI and yield calculation logic
 
+function formatCurrency(num) {
+  return new Intl.NumberFormat('th-TH', {
+    style: 'currency',
+    currency: 'THB',
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0
+  }).format(num);
+}
+
 function calculateInvestment() {
   // Get current language for error messages
   const lang = document.documentElement.lang || 'th';
@@ -56,22 +65,14 @@ function calculateInvestment() {
   
   // Use the core calculation function
   const results = calculateInvestmentMetrics(inputs);
+  const projection = generateCashFlowProjection(inputs, 10);
+  lastProjection = projection;
   
   // Display results
-  displayResults(results);
+  displayResults(results, projection);
 }
 
-function displayResults(results) {
-  // Format currency
-  const formatCurrency = (num) => {
-    return new Intl.NumberFormat('th-TH', {
-      style: 'currency',
-      currency: 'THB',
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0
-    }).format(num);
-  };
-  
+function displayResults(results, projection) {
   // Format percentage
   const formatPercent = (num) => {
     return num.toFixed(2) + '%';
@@ -133,6 +134,8 @@ function displayResults(results) {
   if (resultsSection) {
     resultsSection.style.display = 'block';
   }
+
+  renderCashFlowProjection(projection);
 }
 
 function downloadPDF() {
@@ -142,6 +145,99 @@ function downloadPDF() {
     : 'PDF download feature coming soon';
   alert(message);
 }
+
+let cashFlowChartInstance = null;
+let lastProjection = null;
+
+function renderCashFlowProjection(projection) {
+  if (!projection || projection.length === 0) {
+    return;
+  }
+  const projectionSection = document.getElementById('cash-flow-projection');
+  if (!projectionSection) {
+    return;
+  }
+
+  projectionSection.style.display = 'block';
+
+  const tableBody = document.getElementById('cash-flow-table-body');
+  if (tableBody) {
+    tableBody.innerHTML = projection.map(entry => {
+      return `
+        <tr>
+          <td>${entry.month}</td>
+          <td>${formatCurrency(entry.income)}</td>
+          <td>${formatCurrency(entry.expenses)}</td>
+          <td>${formatCurrency(entry.loanPayment)}</td>
+          <td class="${entry.netCashFlow >= 0 ? 'positive' : 'negative'}">${formatCurrency(entry.netCashFlow)}</td>
+        </tr>
+      `;
+    }).join('');
+  }
+
+  renderCashFlowChart(projection);
+}
+
+function renderCashFlowChart(projection) {
+  const chartCanvas = document.getElementById('cash-flow-chart');
+  if (!chartCanvas || typeof Chart === 'undefined') {
+    return;
+  }
+
+  const labels = projection.map(entry => entry.month);
+  const dataPoints = projection.map(entry => Math.round(entry.netCashFlow));
+  const chartLabel = t('calc_projection_chart_label');
+
+  if (cashFlowChartInstance) {
+    cashFlowChartInstance.destroy();
+  }
+
+  cashFlowChartInstance = new Chart(chartCanvas, {
+    type: 'line',
+    data: {
+      labels,
+      datasets: [
+        {
+          label: chartLabel,
+          data: dataPoints,
+          borderColor: '#1E4DB7',
+          backgroundColor: 'rgba(30, 77, 183, 0.15)',
+          borderWidth: 2,
+          pointRadius: 0,
+          tension: 0.25,
+          fill: true
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      scales: {
+        x: {
+          ticks: {
+            maxTicksLimit: 12
+          }
+        },
+        y: {
+          ticks: {
+            callback: (value) => formatCurrency(value)
+          }
+        }
+      },
+      plugins: {
+        legend: {
+          display: false
+        },
+        tooltip: {
+          callbacks: {
+            label: (context) => `${chartLabel}: ${formatCurrency(context.parsed.y)}`
+          }
+        }
+      }
+    }
+  });
+}
+
 
 // Initialize calculator on page load
 function initCalculator() {
@@ -163,6 +259,16 @@ function initCalculator() {
         calculateInvestment();
       }
     });
+  });
+
+  document.addEventListener('languageChanged', () => {
+    if (cashFlowChartInstance) {
+      cashFlowChartInstance.destroy();
+      cashFlowChartInstance = null;
+    }
+    if (lastProjection) {
+      renderCashFlowProjection(lastProjection);
+    }
   });
 }
 

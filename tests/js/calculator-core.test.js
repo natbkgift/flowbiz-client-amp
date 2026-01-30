@@ -7,7 +7,8 @@ const {
   calculateNetYield,
   calculateMonthlyCashFlow,
   calculatePaybackPeriod,
-  calculateInvestmentMetrics
+  calculateInvestmentMetrics,
+  generateCashFlowProjection
 } = require('../../demo-website/assets/js/calculator-core.js');
 
 describe('calculateMonthlyPayment', () => {
@@ -335,5 +336,49 @@ describe('calculateInvestmentMetrics - Integration Tests', () => {
     expect(result).toBeDefined();
     expect(result.loanAmount).toBe(90000);
     expect(result.downPaymentAmount).toBe(10000);
+  });
+});
+
+describe('generateCashFlowProjection', () => {
+  test('should project monthly cash flow for cash purchase', () => {
+    const inputs = {
+      propertyPrice: 2000000,
+      downPayment: 100,
+      interestRate: 4,
+      loanTerm: 20,
+      monthlyRent: 12000,
+      monthlyExpense: 2000
+    };
+
+    const projection = generateCashFlowProjection(inputs, 1);
+
+    expect(projection).toHaveLength(12);
+    projection.forEach((entry, index) => {
+      expect(entry.month).toBe(index + 1);
+      expect(entry.loanPayment).toBe(0);
+      expect(entry.netCashFlow).toBe(10000);
+    });
+  });
+
+  test('should stop loan payments after loan term ends', () => {
+    const inputs = {
+      propertyPrice: 3000000,
+      downPayment: 30,
+      interestRate: 5,
+      loanTerm: 1,
+      monthlyRent: 15000,
+      monthlyExpense: 3000
+    };
+
+    const projection = generateCashFlowProjection(inputs, 2);
+    const expectedPayment = calculateMonthlyPayment(2100000, 5, 1);
+
+    expect(projection).toHaveLength(24);
+    projection.slice(0, 12).forEach(entry => {
+      expect(entry.loanPayment).toBeCloseTo(expectedPayment, 2);
+    });
+    projection.slice(12).forEach(entry => {
+      expect(entry.loanPayment).toBe(0);
+    });
   });
 });
