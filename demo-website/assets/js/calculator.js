@@ -30,14 +30,14 @@ const calculatorFieldRules = [
     errorId: 'error-interest-rate',
     defaultValue: 4.5,
     errorKey: 'calc_error_negative_value',
-    isInvalid: (value) => value < 0
+    isInvalid: (value) => value < 0 || value > 20
   },
   {
     inputId: 'loan-term',
     errorId: 'error-loan-term',
     defaultValue: 20,
     errorKey: 'calc_error_negative_value',
-    isInvalid: (value) => value <= 0
+    isInvalid: (value) => value <= 0 || value > 30
   },
   {
     inputId: 'monthly-rent',
@@ -55,11 +55,15 @@ const calculatorFieldRules = [
   }
 ];
 
-const calculatorFields = calculatorFieldRules.map(rule => ({
-  ...rule,
-  input: document.getElementById(rule.inputId),
-  error: document.getElementById(rule.errorId)
-}));
+let calculatorFields = [];
+
+function initializeCalculatorFields() {
+  calculatorFields = calculatorFieldRules.map(rule => ({
+    ...rule,
+    input: document.getElementById(rule.inputId),
+    error: document.getElementById(rule.errorId)
+  }));
+}
 
 function updateCalculateButtonState(isFormValid) {
   const calculateBtn = document.getElementById('calculate-btn');
@@ -104,7 +108,8 @@ function validateCalculatorForm() {
 function readCalculatorInputs() {
   const values = {};
   calculatorFields.forEach(field => {
-    values[field.inputId] = parseFloat(field?.input?.value);
+    const parsedValue = parseFloat(field?.input?.value);
+    values[field.inputId] = Number.isNaN(parsedValue) ? 0 : parsedValue;
   });
   return {
     propertyPrice: values['property-price'] ?? 0,
@@ -299,6 +304,7 @@ function renderCashFlowChart(projection) {
 
 // Initialize calculator on page load
 function initCalculator() {
+  initializeCalculatorFields();
   const calculateBtn = document.getElementById('calculate-btn');
   if (calculateBtn) {
     calculateBtn.addEventListener('click', calculateInvestment);
