@@ -155,6 +155,19 @@
   <script src="../../assets/js/i18n.js"></script>
   <script src="../../assets/js/main.js"></script>
 
+  <style>
+    /* Card hover effects for better accessibility */
+    .card {
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    
+    .card:hover,
+    .card:focus-within {
+      transform: translateY(-4px);
+      box-shadow: 0 8px 24px rgba(0,0,0,0.12) !important;
+    }
+  </style>
+
   <script>
     // Initialize the areas grid
     function initAreasGrid() {
@@ -178,13 +191,14 @@
       areasGrid.innerHTML = areaKeys.map(areaKey => {
         const area = AREA_GUIDES[areaKey];
         const propertyCount = propertyCountByArea[areaKey] || 0;
+        const propertyLabel = currentLang === 'th' ? 'ทรัพย์สิน' : (propertyCount === 1 ? 'Property' : 'Properties');
         
         return `
-          <div class="card" style="overflow: hidden; transition: transform 0.3s ease, box-shadow 0.3s ease;" onmouseover="this.style.transform='translateY(-4px)'; this.style.boxShadow='0 8px 24px rgba(0,0,0,0.12)';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 2px 8px rgba(0,0,0,0.08)';">
+          <div class="card" style="overflow: hidden; transition: transform 0.3s ease, box-shadow 0.3s ease;">
             <div style="position: relative; height: 200px; overflow: hidden;">
               <img src="${area.image}" alt="${area.name[currentLang]}" style="width: 100%; height: 100%; object-fit: cover;">
               <div style="position: absolute; top: 12px; right: 12px; background: white; padding: 6px 12px; border-radius: 20px; font-size: 0.85rem; font-weight: 600; box-shadow: 0 2px 8px rgba(0,0,0,0.15);">
-                ${propertyCount} <span data-i18n="area_properties_count">Properties</span>
+                ${propertyCount} ${propertyLabel}
               </div>
             </div>
             
