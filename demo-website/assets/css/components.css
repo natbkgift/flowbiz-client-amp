@@ -237,6 +237,8 @@
   height: 200px;
   cursor: pointer;
   transition: transform 0.2s;
+  display: block;
+  text-decoration: none;
 }
 
 .area-card:hover {
