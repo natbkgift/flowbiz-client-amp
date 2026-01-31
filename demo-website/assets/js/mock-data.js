@@ -867,45 +867,47 @@ const POPULAR_AREAS = [
   {
     name: 'Pattaya',
     name_th: 'พัทยา',
-    image: 'https://via.placeholder.com/400x300/1744BE/FFFFFF?text=Pattaya',
+    image: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=800',
     count: ALL_PROPERTIES.filter(p => p.area === 'Pattaya').length
   },
   {
     name: 'Jomtien',
     name_th: 'จอมเทียน',
-    image: 'https://via.placeholder.com/400x300/F05A43/FFFFFF?text=Jomtien',
+    image: 'https://images.unsplash.com/photo-1493558103817-58b2924bce98?w=800',
     count: ALL_PROPERTIES.filter(p => p.area === 'Jomtien').length
   },
   {
     name: 'Na Jomtien',
     name_th: 'นาจอมเทียน',
-    image: 'https://via.placeholder.com/400x300/16A34A/FFFFFF?text=Na+Jomtien',
+    image: 'https://images.unsplash.com/photo-1500375592092-40eb2168fd21?w=800',
     count: ALL_PROPERTIES.filter(p => p.area === 'Na Jomtien').length
   },
   {
     name: 'Bang Saray',
     name_th: 'บางเสร่',
-    image: 'https://via.placeholder.com/400x300/1744BE/FFFFFF?text=Bang+Saray',
+    image: 'https://images.unsplash.com/photo-1500534314209-a25ddb2bd429?w=800',
     count: ALL_PROPERTIES.filter(p => p.area === 'Bang Saray').length
   },
   {
     name: 'Pratumnak',
     name_th: 'พระตำหนัก',
-    image: 'https://via.placeholder.com/400x300/F05A43/FFFFFF?text=Pratumnak',
+    image: 'https://images.unsplash.com/photo-1501785888041-af3ef285b470?w=800',
     count: ALL_PROPERTIES.filter(p => p.area === 'Pratumnak').length
   },
   {
     name: 'Huay Yai',
     name_th: 'ห้วยใหญ่',
-    image: 'https://via.placeholder.com/400x300/16A34A/FFFFFF?text=Huay+Yai',
+    image: 'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=800',
     count: ALL_PROPERTIES.filter(p => p.area === 'Huay Yai').length
   }
 ];
 
-// Area Guides - Comprehensive information about 6 Pattaya areas
+// Area Guides - Comprehensive information about Pattaya areas
 const AREA_GUIDES = {
   'pattaya': {
     name: { th: 'พัทยากลาง', en: 'Central Pattaya' },
+    image: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=800',
+    og_image: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=1200&h=630&fit=crop',
     description: {
       th: 'ใจกลางเมืองพัทยา เต็มไปด้วยแหล่งบันเทิง ร้านอาหาร และห้างสรรพสินค้า เหมาะสำหรับผู้ที่ชื่นชอบไลฟ์สไตล์เมือง',
       en: 'Heart of Pattaya city filled with entertainment, restaurants, and shopping malls. Perfect for those who enjoy urban lifestyle.'
@@ -935,6 +937,8 @@ const AREA_GUIDES = {
   },
   'jomtien': {
     name: { th: 'จอมเทียน', en: 'Jomtien' },
+    image: 'https://images.unsplash.com/photo-1493558103817-58b2924bce98?w=800',
+    og_image: 'https://images.unsplash.com/photo-1493558103817-58b2924bce98?w=1200&h=630&fit=crop',
     description: {
       th: 'ชายหาดเงียบสงบ เหมาะสำหรับครอบครัวและผู้เกษียณ มีสิ่งอำนวยความสะดวกครบครัน ไม่วุ่นวายเหมือนพัทยากลาง',
       en: 'Peaceful beach area suitable for families and retirees. Well-equipped facilities without the hustle of Central Pattaya.'
@@ -964,6 +968,8 @@ const AREA_GUIDES = {
   },
   'na-jomtien': {
     name: { th: 'นาจอมเทียน', en: 'Na Jomtien' },
+    image: 'https://images.unsplash.com/photo-1500375592092-40eb2168fd21?w=800',
+    og_image: 'https://images.unsplash.com/photo-1500375592092-40eb2168fd21?w=1200&h=630&fit=crop',
     description: {
       th: 'พื้นที่เงียบสงบที่สุดในพัทยา บรรยากาศธรรมชาติ เหมาะสำหรับผู้ต้องการความเป็นส่วนตัวและพักผ่อน',
       en: 'The most peaceful area in Pattaya with natural atmosphere. Perfect for those seeking privacy and relaxation.'
@@ -993,6 +999,8 @@ const AREA_GUIDES = {
   },
   'pratumnak': {
     name: { th: 'พระตำหนัก', en: 'Pratumnak' },
+    image: 'https://images.unsplash.com/photo-1501785888041-af3ef285b470?w=800',
+    og_image: 'https://images.unsplash.com/photo-1501785888041-af3ef285b470?w=1200&h=630&fit=crop',
     description: {
       th: 'พื้นที่พรีเมียม วิวทะเลสวยงาม ระหว่างพัทยาและจอมเทียน เหมาะสำหรับผู้มีกำลังซื้อสูง',
       en: 'Premium area with beautiful sea views between Pattaya and Jomtien. Ideal for high-net-worth individuals.'
@@ -1022,6 +1030,8 @@ const AREA_GUIDES = {
   },
   'wong-amat': {
     name: { th: 'วงศ์อมาตย์', en: 'Wong Amat' },
+    image: 'https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?w=800',
+    og_image: 'https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?w=1200&h=630&fit=crop',
     description: {
       th: 'ชายหาดสวยที่สุดในพัทยา เงียบสงบ มีโครงการคอนโดหรู เหมาะสำหรับผู้ต้องการ Luxury lifestyle',
       en: 'The most beautiful beach in Pattaya. Peaceful with luxury condos. Perfect for luxury lifestyle seekers.'
@@ -1049,8 +1059,41 @@ const AREA_GUIDES = {
       }
     }
   },
+  'huay-yai': {
+    name: { th: 'ห้วยใหญ่', en: 'Huay Yai' },
+    image: 'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=800',
+    og_image: 'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=1200&h=630&fit=crop',
+    description: {
+      th: 'พื้นที่สีเขียวเงียบสงบ เหมาะสำหรับครอบครัวและผู้ต้องการบ้านพื้นที่กว้าง',
+      en: 'Green and peaceful area ideal for families and those seeking spacious homes.'
+    },
+    avg_price_sqm: 52000,
+    price_trend_yoy: 9.8,
+    residents: {
+      th: 'ครอบครัวไทย, ผู้เกษียณ, นักลงทุนระยะยาว',
+      en: 'Thai families, Retirees, Long-term investors'
+    },
+    highlights: {
+      th: ['พื้นที่สีเขียว', 'บ้านเดี่ยวหลายโครงการ', 'บรรยากาศชานเมือง', 'เหมาะกับครอบครัว', 'เดินทางสะดวก'],
+      en: ['Green spaces', 'Single house projects', 'Suburban vibe', 'Family-friendly', 'Convenient access']
+    },
+    nearby: {
+      th: {
+        hospital: 'โรงพยาบาลพัทยา - 12 กม.',
+        mall: 'Big C South Pattaya - 10 กม.',
+        airport: 'สนามบินอู่ตะเภา - 28 กม.'
+      },
+      en: {
+        hospital: 'Pattaya Hospital - 12 km',
+        mall: 'Big C South Pattaya - 10 km',
+        airport: 'U-Tapao Airport - 28 km'
+      }
+    }
+  },
   'bang-saray': {
     name: { th: 'บางเสร่', en: 'Bang Saray' },
+    image: 'https://images.unsplash.com/photo-1500534314209-a25ddb2bd429?w=800',
+    og_image: 'https://images.unsplash.com/photo-1500534314209-a25ddb2bd429?w=1200&h=630&fit=crop',
     description: {
       th: 'หมู่บ้านชาวประมงสงบ ห่างจากตัวเมือง เหมาะสำหรับผู้ต้องการหนีความวุ่นวาย ราคาย่อมเยา',
       en: 'Peaceful fishing village away from the city. Perfect for those escaping the hustle. Affordable prices.'

@@ -146,6 +146,35 @@ function applyFilters() {
   if (filterSidebar) {
     filterSidebar.classList.remove('active');
   }
+
+  // Update OG image based on selected area when possible
+  const ogImage = document.querySelector('meta[property="og:image"]');
+  const twitterImage = document.querySelector('meta[name="twitter:image"]');
+  if (ogImage || twitterImage) {
+    const defaultOgImage = ogImage?.dataset.default;
+    const defaultTwitterImage = twitterImage?.dataset.default;
+    let selectedAreaKey = null;
+    if (currentFilters.areas.length === 1) {
+      selectedAreaKey = currentFilters.areas[0].toLowerCase().replace(/ /g, '-');
+    } else if (currentFilters.areas.length === 0) {
+      const params = new URLSearchParams(window.location.search);
+      const areaParam = params.get('area');
+      if (areaParam) {
+        const normalized = areaParam.split(',')[0].trim();
+        if (normalized) {
+          selectedAreaKey = normalized.toLowerCase().replace(/ /g, '-');
+        }
+      }
+    }
+    const areaOgImage = selectedAreaKey && window.AMP?.areaData?.[selectedAreaKey]?.og_image;
+    if (areaOgImage) {
+      if (ogImage) ogImage.setAttribute('content', areaOgImage);
+      if (twitterImage) twitterImage.setAttribute('content', areaOgImage);
+    } else {
+      if (ogImage && defaultOgImage) ogImage.setAttribute('content', defaultOgImage);
+      if (twitterImage && defaultTwitterImage) twitterImage.setAttribute('content', defaultTwitterImage);
+    }
+  }
 }
 
 // Sort properties
