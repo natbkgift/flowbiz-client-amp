@@ -326,6 +326,11 @@ const TRANSLATIONS = {
     nav_area_guide: 'คู่มือพื้นที่',
     area_guide_title: 'คู่มือพื้นที่พัทยา',
     area_guide_subtitle: 'เลือกทำเลที่เหมาะกับคุณ',
+    areas_index_title: 'พื้นที่ยอดนิยมในพัทยา',
+    areas_index_subtitle: 'เลือกทำเลที่เหมาะกับไลฟ์สไตล์และงบประมาณของคุณ',
+    areas_index_hero_title: 'พื้นที่พัทยา - เลือกทำเลที่ใช่สำหรับคุณ',
+    areas_index_hero_desc: 'พัทยาแบ่งออกเป็นหลายพื้นที่ แต่ละพื้นที่มีเอกลักษณ์และข้อดีแตกต่างกัน ไม่ว่าคุณจะมองหาทำเลใจกลางเมือง ชายหาดเงียบสงบ หรือพื้นที่ธรรมชาติ เรามีข้อมูลครบให้คุณเลือกได้อย่างมั่นใจ',
+    areas_index_cta: 'สำรวจตามพื้นที่',
     area_avg_price: 'ราคาเฉลี่ย/ตร.ม.',
     area_price_trend: 'แนวโน้มราคา',
     area_demographics: 'กลุ่มคนอยู่',
@@ -333,6 +338,8 @@ const TRANSLATIONS = {
     area_cons: 'ข้อเสีย',
     area_projects_in_area: 'โครงการในพื้นที่',
     area_explore: 'สำรวจพื้นที่',
+    area_properties_count: 'ทรัพย์สิน',
+    area_view_details: 'ดูรายละเอียด',
 
     // Quiz
     quiz_title: 'ค้นหาอสังหาที่ใช่สำหรับคุณ',
@@ -834,6 +841,11 @@ const TRANSLATIONS = {
     nav_area_guide: 'Area Guide',
     area_guide_title: 'Pattaya Area Guide',
     area_guide_subtitle: 'Choose the right location for you',
+    areas_index_title: 'Popular Areas in Pattaya',
+    areas_index_subtitle: 'Choose the location that fits your lifestyle and budget',
+    areas_index_hero_title: 'Pattaya Areas - Find Your Perfect Location',
+    areas_index_hero_desc: 'Pattaya is divided into several distinct areas, each with unique characteristics and advantages. Whether you\'re looking for a city center location, peaceful beachfront, or natural surroundings, we have comprehensive information to help you choose confidently.',
+    areas_index_cta: 'Explore by Area',
     area_avg_price: 'Avg Price/sqm',
     area_price_trend: 'Price Trend',
     area_demographics: 'Demographics',
@@ -841,6 +853,8 @@ const TRANSLATIONS = {
     area_cons: 'Cons',
     area_projects_in_area: 'Projects in Area',
     area_explore: 'Explore Area',
+    area_properties_count: 'Properties',
+    area_view_details: 'View Details',
 
     // Quiz
     quiz_title: 'Find Your Perfect Property',
