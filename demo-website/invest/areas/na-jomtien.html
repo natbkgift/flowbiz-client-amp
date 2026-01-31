@@ -337,10 +337,20 @@
       const currentLang = document.documentElement.lang || 'en';
       const propertiesGrid = document.getElementById('properties-grid');
       
-      // Filter properties by area (normalize area names for matching)
-      const areaName = AREA_GUIDES[AREA_KEY].name.en;
+      // Map area keys to property area names
+      const areaNameMap = {
+        'pattaya': 'Pattaya',
+        'jomtien': 'Jomtien',
+        'na-jomtien': 'Na Jomtien',
+        'pratumnak': 'Pratumnak',
+        'wong-amat': 'Wong Amat',
+        'bang-saray': 'Bang Saray'
+      };
+      
+      // Filter properties by area
+      const propertyAreaName = areaNameMap[AREA_KEY];
       const areaProperties = ALL_PROPERTIES.filter(p => 
-        p.area && p.area.toLowerCase().replace(/\s+/g, '') === areaName.toLowerCase().replace(/\s+/g, '')
+        p.area && p.area === propertyAreaName
       ).slice(0, 6); // Show max 6 properties
       
       if (areaProperties.length === 0) {
