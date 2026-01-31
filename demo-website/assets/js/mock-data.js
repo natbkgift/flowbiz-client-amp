@@ -1366,6 +1366,17 @@ const TRUST_SIGNALS = {
   ]
 };
 
+// Map area keys to property area names (for filtering ALL_PROPERTIES)
+const AREA_NAME_MAP = {
+  'pattaya': 'Pattaya',
+  'jomtien': 'Jomtien',
+  'na-jomtien': 'Na Jomtien',
+  'pratumnak': 'Pratumnak',
+  'wong-amat': 'Wong Amat',
+  'bang-saray': 'Bang Saray',
+  'huay-yai': 'Huay Yai'
+};
+
 // Make data globally available
 if (typeof window !== 'undefined') {
   window.AMP = window.AMP || {};
@@ -1373,5 +1384,6 @@ if (typeof window !== 'undefined') {
   window.AMP.developers = DEVELOPERS;
   window.AMP.marketStats = MARKET_STATS;
   window.AMP.testimonials = TESTIMONIALS;
+  window.AMP.areaNameMap = AREA_NAME_MAP;
   window.AMP.trustSignals = TRUST_SIGNALS;
 }

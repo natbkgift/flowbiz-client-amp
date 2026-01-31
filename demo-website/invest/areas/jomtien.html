@@ -259,10 +259,27 @@
         return;
       }
 
-      // Update page title and meta
+      // Update page title and meta tags
       const areaName = areaData.name[currentLang];
       const areaDesc = areaData.description[currentLang];
       
+      // Update document title
+      document.title = `${areaName} Area Guide | Investment & Properties | Asset Management Property`;
+      
+      // Update meta tags
+      const metaDescription = document.querySelector('meta[name="description"]');
+      const ogTitle = document.querySelector('meta[property="og:title"]');
+      const ogDescription = document.querySelector('meta[property="og:description"]');
+      const twitterTitle = document.querySelector('meta[name="twitter:title"]');
+      const twitterDescription = document.querySelector('meta[name="twitter:description"]');
+      
+      if (metaDescription) metaDescription.setAttribute('content', `Explore ${areaName} - ${areaDesc}. Average price ฿${areaData.avg_price_sqm.toLocaleString()}/sqm. View properties and investment opportunities.`);
+      if (ogTitle) ogTitle.setAttribute('content', `${areaName} Area Guide | Asset Management Property`);
+      if (ogDescription) ogDescription.setAttribute('content', areaDesc);
+      if (twitterTitle) twitterTitle.setAttribute('content', `${areaName} Area Guide | Asset Management Property`);
+      if (twitterDescription) twitterDescription.setAttribute('content', areaDesc);
+      
+      // Update in-page elements
       document.getElementById('area-title').textContent = areaName;
       document.getElementById('area-description').textContent = areaDesc;
       document.getElementById('area-name-breadcrumb').textContent = areaName;
@@ -337,8 +354,8 @@
       const currentLang = document.documentElement.lang || 'en';
       const propertiesGrid = document.getElementById('properties-grid');
       
-      // Map area keys to property area names
-      const areaNameMap = {
+      // Use shared area name mapping from mock-data.js
+      const areaNameMap = window.AMP?.areaNameMap || {
         'pattaya': 'Pattaya',
         'jomtien': 'Jomtien',
         'na-jomtien': 'Na Jomtien',
