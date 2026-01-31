@@ -91,7 +91,7 @@
     <div class="container">
       <div class="section-header" style="text-align: center; margin-bottom: 48px;">
         <h2 class="section-title" data-i18n="areas_index_title">Popular Areas in Pattaya</h2>
-        <p style="color: var(--color-gray-600); margin-top: 12px; max-width: 600px; margin-left: auto; margin-right: auto;">
+        <p style="color: var(--color-gray-600); margin-top: 12px; max-width: 600px; margin-left: auto; margin-right: auto;" data-i18n="areas_index_intro">
           Compare prices, trends, and amenities across all major areas
         </p>
       </div>
@@ -137,9 +137,9 @@
         <div class="footer-section">
           <h3 data-i18n="footer_follow">Follow Us</h3>
           <div class="social-links" style="display: flex; gap: 12px; margin-top: 12px;">
-            <a href="#" aria-label="Facebook" style="font-size: 24px;">📘</a>
-            <a href="#" aria-label="Instagram" style="font-size: 24px;">📷</a>
-            <a href="#" aria-label="Line" style="font-size: 24px;">💬</a>
+            <span aria-disabled="true" tabindex="-1" aria-label="Facebook" style="font-size: 24px; opacity: 0.5; cursor: not-allowed;">📘</span>
+            <span aria-disabled="true" tabindex="-1" aria-label="Instagram" style="font-size: 24px; opacity: 0.5; cursor: not-allowed;">📷</span>
+            <span aria-disabled="true" tabindex="-1" aria-label="Line" style="font-size: 24px; opacity: 0.5; cursor: not-allowed;">💬</span>
           </div>
         </div>
       </div>
@@ -191,12 +191,12 @@
       areasGrid.innerHTML = areaKeys.map(areaKey => {
         const area = AREA_GUIDES[areaKey];
         const propertyCount = propertyCountByArea[areaKey] || 0;
-        const propertyLabel = currentLang === 'th' ? 'ทรัพย์สิน' : (propertyCount === 1 ? 'Property' : 'Properties');
+        const propertyLabel = t('area_properties_count');
         
         return `
           <div class="card" style="overflow: hidden; transition: transform 0.3s ease, box-shadow 0.3s ease;">
             <div style="position: relative; height: 200px; overflow: hidden;">
-              <img src="${area.image}" alt="${area.name[currentLang]}" style="width: 100%; height: 100%; object-fit: cover;">
+              <img src="${area.image}" alt="${area.name[currentLang]}" loading="lazy" style="width: 100%; height: 100%; object-fit: cover;">
               <div style="position: absolute; top: 12px; right: 12px; background: white; padding: 6px 12px; border-radius: 20px; font-size: 0.85rem; font-weight: 600; box-shadow: 0 2px 8px rgba(0,0,0,0.15);">
                 ${propertyCount} ${propertyLabel}
               </div>
@@ -237,7 +237,7 @@
                 </div>
               </div>
               
-              <a href="${areaKey}.html" class="btn btn-primary" style="width: 100%; text-align: center; display: block; text-decoration: none;">
+              <a href="../../area-guide/index.html?area=${areaKey}" class="btn btn-primary" style="width: 100%; text-align: center; display: block; text-decoration: none;">
                 <span data-i18n="area_view_details">View Details</span> →
               </a>
             </div>
