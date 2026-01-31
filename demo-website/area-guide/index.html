@@ -101,14 +101,12 @@
     </div>
   </footer>
   <script src="../assets/js/mock-data.js"></script>
-  <script src="../assets/js/mock-projects.js"></script>
   <script src="../assets/js/i18n.js"></script>
   <script src="../assets/js/main.js"></script>
   <script>
     const areaData = window.AMP?.areaData;
     const ogImage = document.querySelector('meta[property="og:image"]');
     const twitterImage = document.querySelector('meta[name="twitter:image"]');
-    const canonicalLink = document.querySelector('link[rel="canonical"]');
     const metaDescription = document.querySelector('meta[name="description"]');
     const ogTitle = document.querySelector('meta[property="og:title"]');
     const ogDescription = document.querySelector('meta[property="og:description"]');
@@ -120,9 +118,6 @@
       const areaOgImage = areaData[areaKey].og_image;
       if (ogImage) ogImage.setAttribute('content', areaOgImage);
       if (twitterImage) twitterImage.setAttribute('content', areaOgImage);
-      if (canonicalLink) {
-        canonicalLink.setAttribute('href', `https://amppattaya.com/area-guide/index.html?area=${encodeURIComponent(areaKey)}`);
-      }
     }
     if (areaData) {
       const container = document.getElementById('area-guide-grid');

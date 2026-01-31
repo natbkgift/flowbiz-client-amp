@@ -151,6 +151,8 @@ function applyFilters() {
   const ogImage = document.querySelector('meta[property="og:image"]');
   const twitterImage = document.querySelector('meta[name="twitter:image"]');
   if (ogImage || twitterImage) {
+    const defaultOgImage = ogImage?.dataset.default;
+    const defaultTwitterImage = twitterImage?.dataset.default;
     let selectedAreaKey = null;
     if (currentFilters.areas.length === 1) {
       selectedAreaKey = currentFilters.areas[0].toLowerCase().replace(/ /g, '-');
@@ -168,6 +170,9 @@ function applyFilters() {
     if (areaOgImage) {
       if (ogImage) ogImage.setAttribute('content', areaOgImage);
       if (twitterImage) twitterImage.setAttribute('content', areaOgImage);
+    } else {
+      if (ogImage && defaultOgImage) ogImage.setAttribute('content', defaultOgImage);
+      if (twitterImage && defaultTwitterImage) twitterImage.setAttribute('content', defaultTwitterImage);
     }
   }
 }
