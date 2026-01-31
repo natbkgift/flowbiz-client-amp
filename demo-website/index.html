@@ -406,7 +406,7 @@
         const currentLang = document.documentElement.lang || 'en';
         const name = currentLang === 'th' ? area.name_th : area.name;
         const slug = areaNameToSlug(area.name);
-        const areaDetailUrl = `/invest/areas/${slug}.html`;
+        const areaDetailUrl = `invest/areas/${slug}.html`;
 
         return `
           <a href="${areaDetailUrl}" class="area-card" data-area="${area.name}">
