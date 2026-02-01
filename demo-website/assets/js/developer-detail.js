@@ -164,15 +164,17 @@
       ? `
              <span style="color: var(--color-warning); display: flex; align-items: center; gap: 2px;">
                <i data-lucide="star" style="width: 12px; height: 12px; fill: currentColor;"></i>
-               ${developerRating}
+               ${escapeHtml(developerRating)}
              </span>
         `
       : '';
 
+    const safeImage = escapeHtml(project.images[0] || '');
+
     return `
       <div class="project-card">
         <div class="project-card-image">
-          <img src="${project.images[0]}" alt="${safeName}" loading="lazy">
+          <img src="${safeImage}" alt="${safeName}" loading="lazy">
           <div class="project-status-badge ${statusClass}">${statusText}</div>
         </div>
         <div class="project-card-content">
