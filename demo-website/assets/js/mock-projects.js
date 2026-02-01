@@ -10,8 +10,9 @@ window.AMP.projects = [
       th: 'เดอะ โอเชี่ยน พาราไดซ์',
       en: 'The Ocean Paradise'
     },
+    developer_id: 'dev-001',
     developer: {
-      name: 'Paradise Property Group',
+      name: 'Sansiri',
       rating: 4.8
     },
     type: 'condo',
@@ -59,9 +60,10 @@ window.AMP.projects = [
       th: 'บลิส เรสซิเดนซ์',
       en: 'Bliss Residence'
     },
+    developer_id: 'dev-002',
     developer: {
-      name: 'Green Living Development',
-      rating: 4.6
+      name: 'Raimon Land',
+      rating: 4.7
     },
     type: 'villa',
     status: 'pre-sale',
@@ -108,9 +110,10 @@ window.AMP.projects = [
       th: 'ซัมเมอร์ บรีซ คอนโด',
       en: 'Summer Breeze Condo'
     },
+    developer_id: 'dev-003',
     developer: {
-      name: 'Breeze Development',
-      rating: 4.5
+      name: 'Heights Holdings',
+      rating: 4.6
     },
     type: 'condo',
     status: 'pre-sale',
@@ -156,9 +159,10 @@ window.AMP.projects = [
       th: 'โกลเด้น วิลล่า เรสซิเดนซ์',
       en: 'Golden Villa Residence'
     },
+    developer_id: 'dev-004',
     developer: {
-      name: 'Golden Properties',
-      rating: 4.7
+      name: 'Nova Group',
+      rating: 4.5
     },
     type: 'villa',
     status: 'pre-sale',
@@ -204,9 +208,10 @@ window.AMP.projects = [
       th: 'เดอะ เพรสทีจ พัทยา',
       en: 'The Prestige Pattaya'
     },
+    developer_id: 'dev-005',
     developer: {
-      name: 'Prestige Group',
-      rating: 4.9
+      name: 'Laguna Property',
+      rating: 4.7
     },
     type: 'condo',
     status: 'pre-sale',
@@ -255,9 +260,10 @@ window.AMP.projects = [
       th: 'มาริน่า เบย์ รีสอร์ท',
       en: 'Marina Bay Resort'
     },
+    developer_id: 'dev-001',
     developer: {
-      name: 'Bay Development Co.',
-      rating: 4.6
+      name: 'Sansiri',
+      rating: 4.8
     },
     type: 'condo',
     status: 'under-construction',
@@ -303,9 +309,10 @@ window.AMP.projects = [
       th: 'ทรอปิคัล พาราไดซ์ วิลล่า',
       en: 'Tropical Paradise Villa'
     },
+    developer_id: 'dev-002',
     developer: {
-      name: 'Paradise Living',
-      rating: 4.5
+      name: 'Raimon Land',
+      rating: 4.7
     },
     type: 'villa',
     status: 'under-construction',
@@ -351,9 +358,10 @@ window.AMP.projects = [
       th: 'เดอะ ริเวอร์ไซด์',
       en: 'The Riverside'
     },
+    developer_id: 'dev-003',
     developer: {
-      name: 'Riverside Development',
-      rating: 4.7
+      name: 'Heights Holdings',
+      rating: 4.6
     },
     type: 'condo',
     status: 'under-construction',
@@ -399,9 +407,10 @@ window.AMP.projects = [
       th: 'เซเรนิตี้ วิลล่า',
       en: 'Serenity Villa'
     },
+    developer_id: 'dev-004',
     developer: {
-      name: 'Serenity Homes',
-      rating: 4.8
+      name: 'Nova Group',
+      rating: 4.5
     },
     type: 'villa',
     status: 'under-construction',
@@ -447,9 +456,10 @@ window.AMP.projects = [
       th: 'สกายไลน์ เรสซิเดนซ์',
       en: 'Skyline Residence'
     },
+    developer_id: 'dev-005',
     developer: {
-      name: 'Skyline Group',
-      rating: 4.6
+      name: 'Laguna Property',
+      rating: 4.7
     },
     type: 'condo',
     status: 'under-construction',
@@ -497,9 +507,10 @@ window.AMP.projects = [
       th: 'โอเชี่ยน วิว คอนโด',
       en: 'Ocean View Condo'
     },
+    developer_id: 'dev-001',
     developer: {
-      name: 'Ocean Development',
-      rating: 4.7
+      name: 'Sansiri',
+      rating: 4.8
     },
     type: 'condo',
     status: 'ready-to-move',
@@ -545,9 +556,10 @@ window.AMP.projects = [
       th: 'การ์เด้น โฮม วิลล่า',
       en: 'Garden Home Villa'
     },
+    developer_id: 'dev-002',
     developer: {
-      name: 'Garden Living',
-      rating: 4.5
+      name: 'Raimon Land',
+      rating: 4.7
     },
     type: 'villa',
     status: 'ready-to-move',
@@ -593,9 +605,10 @@ window.AMP.projects = [
       th: 'บีช ฟร้อนท์ คอนโด',
       en: 'Beach Front Condo'
     },
+    developer_id: 'dev-003',
     developer: {
-      name: 'Beach Properties',
-      rating: 4.8
+      name: 'Heights Holdings',
+      rating: 4.6
     },
     type: 'condo',
     status: 'ready-to-move',
@@ -641,9 +654,10 @@ window.AMP.projects = [
       th: 'โมเดิร์น วิลล่า',
       en: 'Modern Villa'
     },
+    developer_id: 'dev-004',
     developer: {
-      name: 'Modern Homes',
-      rating: 4.6
+      name: 'Nova Group',
+      rating: 4.5
     },
     type: 'villa',
     status: 'ready-to-move',
@@ -689,9 +703,10 @@ window.AMP.projects = [
       th: 'เดอะ วิสต้า',
       en: 'The Vista'
     },
+    developer_id: 'dev-005',
     developer: {
-      name: 'Vista Development',
-      rating: 4.9
+      name: 'Laguna Property',
+      rating: 4.7
     },
     type: 'condo',
     status: 'ready-to-move',

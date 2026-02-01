@@ -217,8 +217,10 @@
                      (hasHalfStar ? '⭑' : '') +
                      '☆'.repeat(emptyStars);
 
-        const card = document.createElement('div');
+        const card = document.createElement('a');
         card.className = 'developer-card';
+        card.href = `../developers/detail.html?id=${encodeURIComponent(dev.id)}`;
+        card.setAttribute('aria-label', `View details for ${dev.name || 'this developer'}`);
 
         const header = document.createElement('div');
         header.className = 'developer-header';

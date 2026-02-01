@@ -1,0 +1,133 @@
+/* AMP Demo Website - Developer Detail Page */
+
+.developer-hero {
+  padding: 40px 0;
+  background: var(--color-white);
+  border-bottom: 1px solid var(--color-gray-100);
+}
+
+.developer-hero-content {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 24px;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.developer-hero-info {
+  display: flex;
+  gap: 20px;
+  align-items: center;
+  flex: 1;
+}
+
+.developer-hero-logo {
+  width: 120px;
+  height: 60px;
+  object-fit: contain;
+  background: var(--color-gray-50);
+  border-radius: var(--radius-sm);
+  padding: 8px;
+}
+
+.developer-hero-title {
+  font-size: 32px;
+  font-weight: 700;
+  margin-bottom: 8px;
+  color: var(--color-text);
+}
+
+.developer-rating {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--color-warning);
+  font-weight: 600;
+}
+
+.developer-hero-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  color: var(--color-gray-600);
+  font-size: 14px;
+}
+
+.developer-stat-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+  margin-top: 24px;
+}
+
+.developer-stat-card {
+  background: var(--color-gray-50);
+  border-radius: var(--radius-sm);
+  padding: 16px;
+  text-align: center;
+}
+
+.developer-stat-value {
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--color-primary);
+  margin-bottom: 4px;
+}
+
+.developer-stat-label {
+  font-size: 13px;
+  color: var(--color-gray-600);
+}
+
+.developer-description {
+  font-size: 15px;
+  line-height: 1.8;
+  color: var(--color-gray-700);
+}
+
+.developer-specialties {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.developer-projects-header {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 24px;
+}
+
+.developer-projects-subtitle {
+  color: var(--color-gray-600);
+  font-size: 15px;
+}
+
+.developer-contact-card {
+  background: linear-gradient(135deg, var(--color-primary) 0%, #0F2D7A 100%);
+  color: var(--color-white);
+  border-radius: var(--radius-md);
+  padding: 32px;
+  text-align: center;
+}
+
+.developer-contact-card p {
+  margin: 12px 0 20px;
+  opacity: 0.9;
+}
+
+@media (max-width: 768px) {
+  .developer-hero-content,
+  .developer-hero-info {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .developer-stat-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .developer-hero-title {
+    font-size: 24px;
+  }
+}
