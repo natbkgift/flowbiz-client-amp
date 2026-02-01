@@ -47,7 +47,9 @@
   }
 
   function getAreaChartData(chartKeys, lang) {
-    const guideData = typeof AREA_GUIDES === 'undefined' ? window.AMP?.areaData : AREA_GUIDES;
+    const guideData = (typeof AREA_GUIDES === 'undefined' ? null : AREA_GUIDES)
+      ?? window.AMP?.areaData
+      ?? null;
     if (!Array.isArray(chartKeys) || !guideData) return [];
     return chartKeys
       .map(key => ({ key, data: guideData?.[key] }))
@@ -216,7 +218,6 @@
 
     if (chartStore[chartKey]?.price?.destroy) chartStore[chartKey].price.destroy();
     if (chartStore[chartKey]?.trend?.destroy) chartStore[chartKey].trend.destroy();
-    delete chartStore[chartKey];
 
     const nextCharts = {};
     try {
@@ -231,6 +232,8 @@
 
     if (Object.keys(nextCharts).length) {
       chartStore[chartKey] = nextCharts;
+    } else {
+      delete chartStore[chartKey];
     }
 
     updateHighlights(areaData, { priceHighEl, priceLowEl, trendHighEl, trendLowEl });
