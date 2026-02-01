@@ -44,7 +44,7 @@
       .map(item => ({
         key: item.key,
         name: item.data.name?.[lang] || item.data.name?.en || item.key,
-        // Convert mock data snake_case properties into camelCase chart values.
+        // Mock data uses snake_case; convert into camelCase chart values.
         avgPrice: Number(item.data.avg_price_sqm),
         trend: Number(item.data.price_trend_yoy)
       }))
