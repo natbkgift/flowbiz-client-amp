@@ -6,6 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Pattaya Area Guide | Asset Management Property</title>
   <meta name="description" content="Explore Pattaya area guides with highlights, nearby landmarks, and market trends.">
+  <meta name="robots" content="noindex, nofollow">
 
   <!-- Open Graph -->
   <meta property="og:title" content="Pattaya Area Guide | Asset Management Property">
@@ -29,6 +30,7 @@
   <link rel="stylesheet" href="../assets/css/projects.css">
   <link rel="stylesheet" href="../assets/css/marketing.css">
   <link rel="stylesheet" href="../assets/css/responsive.css">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="anonymous">
   <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
 </head>
 
@@ -78,6 +80,10 @@
   </section>
   <section class="section" style="padding-top: 0;">
     <div class="container">
+      <div class="area-map-section">
+        <h2 class="section-title" style="margin-bottom: 16px;">Explore Areas on the Map</h2>
+        <div class="area-map-container" id="area-guide-map"></div>
+      </div>
       <div class="area-guide-grid" id="area-guide-grid"></div>
     </div>
   </section>
@@ -103,8 +109,22 @@
   <script src="../assets/js/mock-data.js"></script>
   <script src="../assets/js/i18n.js"></script>
   <script src="../assets/js/main.js"></script>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin="anonymous"></script>
   <script>
     const areaData = window.AMP?.areaData;
+    const mapContainer = document.getElementById('area-guide-map');
+    if (mapContainer && areaData && typeof L !== 'undefined') {
+      const map = L.map(mapContainer, { scrollWheelZoom: false }).setView([12.9006, 100.8825], 12);
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; OpenStreetMap contributors'
+      }).addTo(map);
+      Object.entries(areaData).forEach(([key, area]) => {
+        if (!area.coordinates) return;
+        const detailUrl = `../invest/areas/${key}.html`;
+        const popupContent = `<a href="${detailUrl}">${area.name?.en || 'View area'}</a>`;
+        L.marker([area.coordinates.lat, area.coordinates.lng]).addTo(map).bindPopup(popupContent);
+      });
+    }
     const ogImage = document.querySelector('meta[property="og:image"]');
     const twitterImage = document.querySelector('meta[name="twitter:image"]');
     const metaDescription = document.querySelector('meta[name="description"]');

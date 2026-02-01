@@ -6,6 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Pattaya Areas Guide | Asset Management Property</title>
   <meta name="description" content="Explore all major areas in Pattaya - from Central Pattaya to Jomtien, Pratumnak, and more. Find the perfect location for your property investment.">
+  <meta name="robots" content="noindex, nofollow">
 
   <!-- Open Graph -->
   <meta property="og:title" content="Pattaya Areas Guide | Asset Management Property">
@@ -29,6 +30,7 @@
   <link rel="stylesheet" href="../../assets/css/projects.css">
   <link rel="stylesheet" href="../../assets/css/marketing.css">
   <link rel="stylesheet" href="../../assets/css/responsive.css">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="anonymous">
   <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
 </head>
 
@@ -95,6 +97,10 @@
           Compare prices, trends, and amenities across all major areas
         </p>
       </div>
+      <div class="area-map-section">
+        <h3 style="text-align: center; margin-bottom: 16px;">Area Map Overview</h3>
+        <div class="area-map-container" id="areas-overview-map"></div>
+      </div>
 
       <!-- Areas Grid -->
       <div class="grid grid-3" id="areas-grid" style="gap: 24px;">
@@ -154,6 +160,7 @@
   <script src="../../assets/js/mock-data.js"></script>
   <script src="../../assets/js/i18n.js"></script>
   <script src="../../assets/js/main.js"></script>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin="anonymous"></script>
 
   <style>
     /* Card hover effects for better accessibility */
@@ -176,6 +183,20 @@
       
       // Get all areas from AREA_GUIDES
       const areaKeys = Object.keys(AREA_GUIDES);
+      const mapContainer = document.getElementById('areas-overview-map');
+      if (mapContainer && typeof L !== 'undefined') {
+        const map = L.map(mapContainer, { scrollWheelZoom: false }).setView([12.9006, 100.8825], 12);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+          attribution: '&copy; OpenStreetMap contributors'
+        }).addTo(map);
+        areaKeys.forEach(areaKey => {
+          const area = AREA_GUIDES[areaKey];
+          if (!area?.coordinates) return;
+          const detailUrl = `./${areaKey}.html`;
+          const popupContent = `<a href="${detailUrl}">${area.name?.[currentLang] || area.name?.en || 'View area'}</a>`;
+          L.marker([area.coordinates.lat, area.coordinates.lng]).addTo(map).bindPopup(popupContent);
+        });
+      }
       
       // Count properties per area (mock data for now)
       const propertyCountByArea = {

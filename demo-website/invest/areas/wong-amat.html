@@ -6,6 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Wong Amat Area Guide | Investment & Properties | Asset Management Property</title>
   <meta name="description" content="Explore Wong Amat - The most beautiful beach in Pattaya with luxury condos. Average price ฿110,000/sqm. View properties and investment opportunities.">
+  <meta name="robots" content="noindex, nofollow">
 
   <!-- Open Graph -->
   <meta property="og:title" content="Wong Amat Area Guide | Asset Management Property">
@@ -29,6 +30,7 @@
   <link rel="stylesheet" href="../../assets/css/projects.css">
   <link rel="stylesheet" href="../../assets/css/marketing.css">
   <link rel="stylesheet" href="../../assets/css/responsive.css">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="anonymous">
   <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
 </head>
 
@@ -145,6 +147,14 @@
       </div>
     </div>
   </section>
+  <section class="section" style="padding-top: 0;">
+    <div class="container">
+      <div class="area-map-section">
+        <h2 style="font-size: 1.8rem; margin-bottom: 16px;">Area Map & Landmarks</h2>
+        <div class="area-map-container" id="area-detail-map"></div>
+      </div>
+    </div>
+  </section>
 
   <!-- Properties in This Area -->
   <section class="section" style="background: var(--color-gray-50);">
@@ -244,6 +254,7 @@
   <script src="../../assets/js/mock-data.js"></script>
   <script src="../../assets/js/i18n.js"></script>
   <script src="../../assets/js/main.js"></script>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin="anonymous"></script>
 
   <script>
     // Area key for this page
@@ -289,6 +300,22 @@
       if (areaData.image) {
         document.getElementById('area-hero-image').src = areaData.image;
         document.getElementById('area-hero-image').alt = areaName;
+      }
+      
+      if (areaData.coordinates && typeof L !== 'undefined') {
+        const mapContainer = document.getElementById('area-detail-map');
+        if (mapContainer) {
+          const map = L.map(mapContainer, { scrollWheelZoom: false }).setView([areaData.coordinates.lat, areaData.coordinates.lng], 13);
+          L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; OpenStreetMap contributors'
+          }).addTo(map);
+          const areaMarker = L.marker([areaData.coordinates.lat, areaData.coordinates.lng]).addTo(map);
+          areaMarker.bindPopup(areaName);
+          (areaData.landmarks || []).forEach(landmark => {
+            L.marker([landmark.lat, landmark.lng]).addTo(map)
+              .bindPopup(landmark.name?.[currentLang] || landmark.name?.en || 'Landmark');
+          });
+        }
       }
 
       // Update stats
