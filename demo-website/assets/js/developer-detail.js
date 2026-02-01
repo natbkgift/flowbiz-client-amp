@@ -142,7 +142,10 @@
       return;
     }
 
-    grid.innerHTML = projects.map(project => createProjectCard(project, lang, developer)).join('');
+    grid.innerHTML = '';
+    projects.forEach(project => {
+      grid.appendChild(createProjectCard(project, lang, developer));
+    });
 
     if (typeof lucide !== 'undefined') {
       lucide.createIcons();
@@ -151,65 +154,131 @@
 
   function createProjectCard(project, lang, developer) {
     const name = project.name[lang] || project.name.en;
-    const safeName = escapeHtml(name);
-    const safeLocation = escapeHtml(project.location);
     const developerName = developer?.name || '';
-    const safeDeveloperName = escapeHtml(developerName);
     const statusText = getStatusText(project.status, lang);
     const statusClass = project.status.replace('_', '-');
     const priceText = formatPrice(project.pricing.min, project.pricing.max, lang);
     const yieldText = project.estimated_yield ? `${project.estimated_yield}%` : 'N/A';
-    const developerRating = typeof developer?.rating === 'number' ? developer.rating.toFixed(1) : '';
-    const ratingMarkup = developerRating
-      ? `
-             <span style="color: var(--color-warning); display: flex; align-items: center; gap: 2px;">
-               <i data-lucide="star" style="width: 12px; height: 12px; fill: currentColor;"></i>
-               ${escapeHtml(developerRating)}
-             </span>
-        `
-      : '';
+    const developerRating = developer && typeof developer.rating === 'number' ? developer.rating.toFixed(1) : '';
+    const rawImage = project.images?.[0] || '';
+    const safeImage = /^https?:\/\//i.test(rawImage) ? encodeURI(rawImage) : '';
 
-    const safeImage = escapeHtml(project.images[0] || '');
+    const card = document.createElement('div');
+    card.className = 'project-card';
 
-    return `
-      <div class="project-card">
-        <div class="project-card-image">
-          <img src="${safeImage}" alt="${safeName}" loading="lazy">
-          <div class="project-status-badge ${statusClass}">${statusText}</div>
-        </div>
-        <div class="project-card-content">
-          <h3 class="project-card-title">${safeName}</h3>
-          <div class="project-card-location">
-            <i data-lucide="map-pin" style="width: 16px; height: 16px;"></i>
-            <span>${safeLocation}</span>
-          </div>
-          <div class="project-card-developer" style="font-size: 13px; color: var(--color-gray-500); margin-top: 4px; display: flex; align-items: center; gap: 4px;">
-             <i data-lucide="hard-hat" style="width: 14px; height: 14px;"></i>
-             <span>${safeDeveloperName}</span>
-             ${ratingMarkup}
-          </div>
-          <div class="project-card-meta">
-            <div class="project-card-meta-item">
-              <span class="project-card-meta-label">${lang === 'th' ? 'ยูนิตว่าง' : 'Available'}</span>
-              <span class="project-card-meta-value">${project.units.available}/${project.units.total}</span>
-            </div>
-            <div class="project-card-meta-item">
-              <span class="project-card-meta-label">${lang === 'th' ? 'ผลตอบแทน' : 'Yield'}</span>
-              <span class="project-card-meta-value">${yieldText}</span>
-            </div>
-          </div>
-          <div class="project-card-price">${priceText}</div>
-          <div class="project-card-price-range">
-            ${project.size.min}-${project.size.max} ${lang === 'th' ? 'ตร.ม.' : 'sqm'}
-          </div>
-          <div class="project-card-actions">
-            <a href="../projects/detail.html?id=${project.project_id}" class="btn btn-primary btn-block">
-              ${lang === 'th' ? 'ดูข้อมูล' : 'View Info'}
-            </a>
-          </div>
-        </div>
-      </div>
-    `;
+    const imageWrap = document.createElement('div');
+    imageWrap.className = 'project-card-image';
+
+    const image = document.createElement('img');
+    image.src = safeImage;
+    image.alt = name;
+    image.loading = 'lazy';
+
+    const statusBadge = document.createElement('div');
+    statusBadge.className = `project-status-badge ${statusClass}`;
+    statusBadge.textContent = statusText;
+
+    imageWrap.appendChild(image);
+    imageWrap.appendChild(statusBadge);
+
+    const content = document.createElement('div');
+    content.className = 'project-card-content';
+
+    const title = document.createElement('h3');
+    title.className = 'project-card-title';
+    title.textContent = name;
+
+    const location = document.createElement('div');
+    location.className = 'project-card-location';
+    const locationIcon = document.createElement('i');
+    locationIcon.setAttribute('data-lucide', 'map-pin');
+    locationIcon.style.width = '16px';
+    locationIcon.style.height = '16px';
+    const locationText = document.createElement('span');
+    locationText.textContent = project.location;
+    location.appendChild(locationIcon);
+    location.appendChild(locationText);
+
+    const developerInfo = document.createElement('div');
+    developerInfo.className = 'project-card-developer';
+    const developerIcon = document.createElement('i');
+    developerIcon.setAttribute('data-lucide', 'hard-hat');
+    developerIcon.style.width = '14px';
+    developerIcon.style.height = '14px';
+    const developerText = document.createElement('span');
+    developerText.textContent = developerName;
+    developerInfo.appendChild(developerIcon);
+    developerInfo.appendChild(developerText);
+
+    if (developerRating) {
+      const rating = document.createElement('span');
+      rating.className = 'project-card-developer-rating';
+      const ratingIcon = document.createElement('i');
+      ratingIcon.setAttribute('data-lucide', 'star');
+      ratingIcon.style.width = '12px';
+      ratingIcon.style.height = '12px';
+      ratingIcon.style.fill = 'currentColor';
+      rating.appendChild(ratingIcon);
+      rating.appendChild(document.createTextNode(developerRating));
+      developerInfo.appendChild(rating);
+    }
+
+    const meta = document.createElement('div');
+    meta.className = 'project-card-meta';
+
+    const availableItem = document.createElement('div');
+    availableItem.className = 'project-card-meta-item';
+    const availableLabel = document.createElement('span');
+    availableLabel.className = 'project-card-meta-label';
+    availableLabel.textContent = lang === 'th' ? 'ยูนิตว่าง' : 'Available';
+    const availableValue = document.createElement('span');
+    availableValue.className = 'project-card-meta-value';
+    availableValue.textContent = `${project.units.available}/${project.units.total}`;
+    availableItem.appendChild(availableLabel);
+    availableItem.appendChild(availableValue);
+
+    const yieldItem = document.createElement('div');
+    yieldItem.className = 'project-card-meta-item';
+    const yieldLabel = document.createElement('span');
+    yieldLabel.className = 'project-card-meta-label';
+    yieldLabel.textContent = lang === 'th' ? 'ผลตอบแทน' : 'Yield';
+    const yieldValue = document.createElement('span');
+    yieldValue.className = 'project-card-meta-value';
+    yieldValue.textContent = yieldText;
+    yieldItem.appendChild(yieldLabel);
+    yieldItem.appendChild(yieldValue);
+
+    meta.appendChild(availableItem);
+    meta.appendChild(yieldItem);
+
+    const price = document.createElement('div');
+    price.className = 'project-card-price';
+    price.textContent = priceText;
+
+    const sizeRange = document.createElement('div');
+    sizeRange.className = 'project-card-price-range';
+    sizeRange.textContent = `${project.size.min}-${project.size.max} ${lang === 'th' ? 'ตร.ม.' : 'sqm'}`;
+
+    const actions = document.createElement('div');
+    actions.className = 'project-card-actions';
+    const link = document.createElement('a');
+    link.href = `../projects/detail.html?id=${project.project_id}`;
+    link.className = 'btn btn-primary btn-block';
+    link.textContent = lang === 'th' ? 'ดูข้อมูล' : 'View Info';
+    actions.appendChild(link);
+
+    content.appendChild(title);
+    content.appendChild(location);
+    content.appendChild(developerInfo);
+    content.appendChild(meta);
+    content.appendChild(price);
+    content.appendChild(sizeRange);
+    content.appendChild(actions);
+
+    card.appendChild(imageWrap);
+    card.appendChild(content);
+
+    return card;
   }
 
   function getStatusText(status, lang) {
@@ -230,18 +299,6 @@
     };
 
     return `฿${formatNumber(min)} - ฿${formatNumber(max)}`;
-  }
-
-  function escapeHtml(value) {
-    if (value === null || value === undefined) {
-      return '';
-    }
-    return String(value)
-      .replace(/&/g, '&amp;')
-      .replace(/</g, '&lt;')
-      .replace(/>/g, '&gt;')
-      .replace(/"/g, '&quot;')
-      .replace(/'/g, '&#39;');
   }
 
   if (document.readyState === 'loading') {

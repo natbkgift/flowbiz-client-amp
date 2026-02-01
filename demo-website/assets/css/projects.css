@@ -80,6 +80,22 @@
   border-bottom: 1px solid var(--color-gray-100);
 }
 
+.project-card-developer {
+  font-size: 13px;
+  color: var(--color-gray-500);
+  margin-top: 4px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.project-card-developer-rating {
+  color: var(--color-warning);
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
 .project-card-meta-item {
   text-align: center;
 }
