@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title id="page-title">Project Detail | Asset Management Property</title>
+  <meta name="description" id="meta-description" content="View detailed information about real estate projects in Pattaya">
+  
+  <!-- Open Graph -->
+  <meta property="og:title" id="og-title" content="Project Detail | Asset Management Property">
+  <meta property="og:description" id="og-description" content="View detailed information about real estate projects in Pattaya">
+  <meta property="og:image" id="og-image" content="https://images.unsplash.com/photo-1567496898669-ee935f5f647a?w=1200&h=630&fit=crop">
+  <meta property="og:url" content="https://amppattaya.com/projects/detail.html">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Asset Management Property">
+  
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" id="twitter-title" content="Project Detail | Asset Management Property">
+  <meta name="twitter:description" id="twitter-description" content="View detailed information about real estate projects in Pattaya">
+  <meta name="twitter:image" id="twitter-image" content="https://images.unsplash.com/photo-1567496898669-ee935f5f647a?w=1200&h=630&fit=crop">
+  
+  <!-- Favicon -->
+  <link rel="icon" href="../assets/images/favicon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="../assets/images/logo-amp.svg">
+  
+  <!-- Stylesheets -->
+  <link rel="stylesheet" href="../assets/css/main.css">
+  <link rel="stylesheet" href="../assets/css/components.css">
+  <link rel="stylesheet" href="../assets/css/projects.css">
+  <link rel="stylesheet" href="../assets/css/project-detail.css">
+  <link rel="stylesheet" href="../assets/css/responsive.css">
+  
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+</head>
+<body>
+  <!-- Skip Link for Accessibility -->
+  <a href="#main-content" class="skip-link">Skip to main content</a>
+  
+  <!-- Header -->
+  <header class="header">
+    <div class="header-content">
+      <a href="../index.html" class="logo">
+        <img src="../assets/images/logo-amp.svg" alt="Asset Management Property" height="40">
+      </a>
+      
+      <nav class="nav desktop-only">
+        <a href="../index.html" data-i18n="nav_home"><i data-lucide="home"></i> Home</a>
+        <a href="../listing.html?intent=rent" data-i18n="nav_rent"><i data-lucide="key"></i> Rent</a>
+        <a href="../listing.html?intent=sale" data-i18n="nav_buy"><i data-lucide="building"></i> Buy</a>
+        <a href="index.html" class="active" data-i18n="nav_projects"><i data-lucide="layers"></i> Projects</a>
+        <a href="../invest/index.html" data-i18n="nav_invest"><i data-lucide="trending-up"></i> Invest</a>
+        <a href="../about.html" data-i18n="nav_about"><i data-lucide="info"></i> About</a>
+        <a href="../contact.html" data-i18n="nav_contact"><i data-lucide="mail"></i> Contact</a>
+      </nav>
+      
+      <div class="header-actions">
+        <button class="lang-switch" onclick="toggleLanguage()">
+          <span id="lang-text">EN</span>
+        </button>
+        <button class="hamburger mobile-only" onclick="toggleMobileMenu()" aria-label="Menu" aria-expanded="false">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="3" y1="12" x2="21" y2="12"></line>
+            <line x1="3" y1="6" x2="21" y2="6"></line>
+            <line x1="3" y1="18" x2="21" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </header>
+  
+  <!-- Mobile Menu -->
+  <div class="mobile-menu" id="mobile-menu">
+    <a href="../index.html" data-i18n="nav_home"><i data-lucide="home"></i> Home</a>
+    <a href="../listing.html?intent=rent" data-i18n="nav_rent"><i data-lucide="key"></i> Rent</a>
+    <a href="../listing.html?intent=sale" data-i18n="nav_buy"><i data-lucide="building"></i> Buy</a>
+    <a href="index.html" data-i18n="nav_projects"><i data-lucide="layers"></i> Projects</a>
+    <a href="../invest/index.html" data-i18n="nav_invest"><i data-lucide="trending-up"></i> Invest</a>
+    <a href="../about.html" data-i18n="nav_about"><i data-lucide="info"></i> About</a>
+    <a href="../contact.html" data-i18n="nav_contact"><i data-lucide="mail"></i> Contact</a>
+  </div>
+  
+  <!-- Main Content -->
+  <main id="main-content">
+    <!-- Loading State -->
+    <div id="loading-state" class="section" style="text-align: center; padding: 60px 0;">
+      <div class="container">
+        <p data-i18n="common_loading">Loading...</p>
+      </div>
+    </div>
+    
+    <!-- Not Found State -->
+    <div id="not-found-state" class="section" style="display: none; text-align: center; padding: 60px 0;">
+      <div class="container">
+        <h1 data-i18n="project_detail_not_found">Project Not Found</h1>
+        <p style="margin: 24px 0;">The project you are looking for does not exist or has been removed.</p>
+        <a href="index.html" class="btn btn-primary" data-i18n="project_detail_back_to_projects">Back to Projects</a>
+      </div>
+    </div>
+    
+    <!-- Project Detail Content -->
+    <div id="project-detail-content" style="display: none;">
+      <!-- Hero Section with Image Gallery -->
+      <section class="project-hero">
+        <div class="project-hero-gallery" id="hero-gallery">
+          <!-- Images will be rendered here -->
+        </div>
+        <div class="project-hero-info">
+          <div class="container">
+            <div class="project-hero-header">
+              <div>
+                <h1 id="project-name" class="project-hero-title">Project Name</h1>
+                <div class="project-hero-location">
+                  <i data-lucide="map-pin"></i>
+                  <span id="project-location">Location</span>
+                </div>
+              </div>
+              <div id="project-status-badge" class="project-status-badge">Status</div>
+            </div>
+          </div>
+        </div>
+      </section>
+      
+      <!-- Main Content Area -->
+      <div class="section">
+        <div class="container">
+          <div class="project-detail-layout">
+            <!-- Main Column -->
+            <div class="project-detail-main">
+              <!-- Info Section -->
+              <div class="detail-card">
+                <h2 data-i18n="project_detail_info">Project Info</h2>
+                <div class="project-info-grid">
+                  <div class="info-item">
+                    <div class="info-label">
+                      <i data-lucide="hard-hat"></i>
+                      <span data-i18n="project_developer">Developer</span>
+                    </div>
+                    <div class="info-value" id="project-developer">Developer Name</div>
+                  </div>
+                  <div class="info-item">
+                    <div class="info-label">
+                      <i data-lucide="map-pin"></i>
+                      <span data-i18n="project_location">Location</span>
+                    </div>
+                    <div class="info-value" id="project-area">Location</div>
+                  </div>
+                  <div class="info-item">
+                    <div class="info-label">
+                      <i data-lucide="building"></i>
+                      <span data-i18n="project_type">Type</span>
+                    </div>
+                    <div class="info-value" id="project-type">Type</div>
+                  </div>
+                  <div class="info-item">
+                    <div class="info-label">
+                      <i data-lucide="calendar"></i>
+                      <span data-i18n="project_detail_completion">Completion</span>
+                    </div>
+                    <div class="info-value" id="project-completion">2027-Q4</div>
+                  </div>
+                </div>
+                
+                <!-- Timeline -->
+                <div class="project-timeline" id="project-timeline-section">
+                  <h3 data-i18n="project_detail_timeline">Timeline</h3>
+                  <div class="timeline-grid">
+                    <div class="timeline-item">
+                      <span class="timeline-label" data-i18n="project_detail_launch">Launch</span>
+                      <span class="timeline-value" id="timeline-launch">-</span>
+                    </div>
+                    <div class="timeline-item">
+                      <span class="timeline-label" data-i18n="project_detail_construction_start">Construction Start</span>
+                      <span class="timeline-value" id="timeline-start">-</span>
+                    </div>
+                    <div class="timeline-item">
+                      <span class="timeline-label" data-i18n="project_detail_completion">Completion</span>
+                      <span class="timeline-value" id="timeline-completion">-</span>
+                    </div>
+                  </div>
+                  
+                  <!-- Progress Bar (for under construction) -->
+                  <div id="progress-section" style="display: none; margin-top: 16px;">
+                    <div class="progress-bar">
+                      <div class="progress-bar-fill" id="progress-fill" style="width: 0%"></div>
+                    </div>
+                    <div class="progress-label">
+                      <span data-i18n="project_progress">Progress</span>
+                      <span id="progress-text">0%</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              <!-- Pricing Section -->
+              <div class="detail-card">
+                <h2 data-i18n="project_detail_pricing">Pricing & Finance</h2>
+                <div class="pricing-grid">
+                  <div class="pricing-item">
+                    <div class="pricing-label" data-i18n="project_detail_min_price">Starting From</div>
+                    <div class="pricing-value" id="price-min">฿0</div>
+                  </div>
+                  <div class="pricing-item">
+                    <div class="pricing-label" data-i18n="project_detail_max_price">Up To</div>
+                    <div class="pricing-value" id="price-max">฿0</div>
+                  </div>
+                  <div class="pricing-item">
+                    <div class="pricing-label" data-i18n="project_detail_price_per_sqm">Price/sqm</div>
+                    <div class="pricing-value" id="price-sqm">฿0</div>
+                  </div>
+                  <div class="pricing-item">
+                    <div class="pricing-label" data-i18n="project_detail_est_yield">Est. Yield</div>
+                    <div class="pricing-value" id="est-yield">0%</div>
+                  </div>
+                </div>
+              </div>
+              
+              <!-- Units Section -->
+              <div class="detail-card">
+                <h2 data-i18n="project_detail_units_info">Units Information</h2>
+                <div class="units-grid">
+                  <div class="unit-stat">
+                    <div class="unit-stat-value" id="total-units">0</div>
+                    <div class="unit-stat-label" data-i18n="project_detail_total_units">Total Units</div>
+                  </div>
+                  <div class="unit-stat">
+                    <div class="unit-stat-value" id="available-units">0</div>
+                    <div class="unit-stat-label" data-i18n="project_detail_available_units">Available</div>
+                  </div>
+                  <div class="unit-stat">
+                    <div class="unit-stat-value" id="size-range">0-0</div>
+                    <div class="unit-stat-label" data-i18n="project_detail_size_range">Size Range (sqm)</div>
+                  </div>
+                </div>
+                <div id="foreign-quota" class="foreign-quota-badge">
+                  <i data-lucide="globe"></i>
+                  <span data-i18n="project_detail_foreign_quota_available">Foreign Quota Available</span>
+                </div>
+              </div>
+              
+              <!-- Facilities -->
+              <div class="detail-card">
+                <h2 data-i18n="project_facilities">Facilities</h2>
+                <div class="facilities-grid" id="facilities-grid">
+                  <!-- Facilities will be rendered here -->
+                </div>
+              </div>
+              
+              <!-- Promotions -->
+              <div class="detail-card" id="promotions-section">
+                <h2 data-i18n="project_detail_current_promotions">Current Promotions</h2>
+                <div id="promotions-list">
+                  <!-- Promotions will be rendered here -->
+                </div>
+              </div>
+              
+              <!-- Description -->
+              <div class="detail-card">
+                <h2 data-i18n="project_detail_description">Project Description</h2>
+                <p id="project-description" class="project-description-text">
+                  Project description will appear here.
+                </p>
+              </div>
+              
+              <!-- Location Map -->
+              <div class="detail-card">
+                <h2 data-i18n="project_detail_location_map">Location Map</h2>
+                <div class="map-placeholder">
+                  <i data-lucide="map"></i>
+                  <p data-i18n="detail_mapPlaceholder">Map Placeholder</p>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Sidebar -->
+            <aside class="project-detail-sidebar">
+              <!-- CTA Card -->
+              <div class="sidebar-card sticky-sidebar">
+                <h3 data-i18n="form_interestedTitle">Interested in this project?</h3>
+                <p style="color: var(--color-gray-600); margin-bottom: 24px; font-size: 14px;" data-i18n="form_interestedSubtitle">
+                  Fill out the form below
+                </p>
+                
+                <!-- Inquiry Form -->
+                <form class="inquiry-form" data-integration="true" data-source="Project_Inquiry">
+                  <div class="form-group">
+                    <input type="text" name="name" class="form-input" data-i18n-placeholder="form_name" placeholder="Your Name" required>
+                  </div>
+                  <div class="form-group">
+                    <input type="tel" name="phone" class="form-input" data-i18n-placeholder="form_phone" placeholder="Phone Number" required>
+                  </div>
+                  <div class="form-group">
+                    <input type="email" name="email" class="form-input" data-i18n-placeholder="form_email" placeholder="Email">
+                  </div>
+                  <div class="form-group">
+                    <textarea name="message" class="form-textarea" data-i18n-placeholder="form_message" placeholder="Message (optional)" rows="3"></textarea>
+                  </div>
+                  <button type="submit" class="btn btn-accent btn-block" data-i18n="project_detail_contact_inquiry">Contact for Inquiry</button>
+                </form>
+                
+                <div class="sidebar-cta-buttons">
+                  <button class="btn btn-primary btn-block" data-i18n="project_detail_schedule_visit">
+                    <i data-lucide="calendar"></i> Schedule a Visit
+                  </button>
+                  <button class="btn btn-secondary btn-block" data-i18n="project_detail_download_brochure">
+                    <i data-lucide="download"></i> Download Brochure
+                  </button>
+                </div>
+                
+                <!-- Contact Info -->
+                <div class="sidebar-contact">
+                  <div class="contact-item">
+                    <i data-lucide="phone"></i>
+                    <a href="tel:+66634533526">+66 63-453-3526</a>
+                  </div>
+                  <div class="contact-item">
+                    <i data-lucide="message-circle"></i>
+                    <a href="https://line.me/ti/p/~@554dksqb" target="_blank">LINE: @554dksqb</a>
+                  </div>
+                </div>
+              </div>
+            </aside>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Related Projects -->
+      <section class="section" style="background: #f8f9fa;">
+        <div class="container">
+          <h2 class="section-title" data-i18n="project_detail_related_projects">Related Projects</h2>
+          <div class="projects-grid" id="related-projects-grid">
+            <!-- Related projects will be rendered here -->
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+  
+  <!-- Sticky CTA (Mobile) -->
+  <div class="sticky-cta">
+    <a href="https://line.me/ti/p/~@554dksqb" class="btn btn-primary">
+      <i data-lucide="message-circle"></i> <span data-i18n="cta_line">LINE</span>
+    </a>
+    <a href="tel:+66634533526" class="btn btn-accent">
+      <i data-lucide="phone-call"></i> <span data-i18n="cta_call">Call</span>
+    </a>
+  </div>
+  
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-content">
+        <div>
+          <h3 data-i18n="footer_companyName">Asset Management Property</h3>
+          <p data-i18n="footer_tagline">Professional property management in Pattaya</p>
+          <p style="margin-top: 16px;">
+            <strong data-i18n="footer_officeHours">Office Hours:</strong><br>
+            <span data-i18n="footer_hours">Mon - Sun: 9:00 AM - 6:00 PM</span>
+          </p>
+        </div>
+        
+        <div>
+          <h3 data-i18n="footer_contactUs">Contact Us</h3>
+          <a href="tel:+66634533526">📞 +66 63-453-3526</a>
+          <a href="mailto:info@amppattaya.com">📧 info@amppattaya.com</a>
+          <a href="https://line.me/ti/p/~@554dksqb">💬 LINE: @554dksqb</a>
+        </div>
+        
+        <div>
+          <h3 data-i18n="footer_quickLinks">Quick Links</h3>
+          <a href="../listing.html?intent=rent" data-i18n="footer_forRent">Properties for Rent</a>
+          <a href="../listing.html?intent=sale" data-i18n="footer_forSale">Properties for Sale</a>
+          <a href="index.html" data-i18n="nav_projects">Projects</a>
+          <a href="../invest/index.html" data-i18n="nav_invest_hub">Investment Hub</a>
+          <a href="../about.html" data-i18n="footer_about_us">About Us</a>
+          <a href="../contact.html" data-i18n="footer_contact">Contact Us</a>
+        </div>
+      </div>
+      
+      <div class="footer-bottom">
+        <p data-i18n="footer_copyright">&copy; 2026 Asset Management Property. All rights reserved. | Demo Website</p>
+      </div>
+    </div>
+  </footer>
+  
+  <!-- Scripts -->
+  <script src="../assets/js/mock-data.js"></script>
+  <script src="../assets/js/mock-projects.js"></script>
+  <script src="../assets/js/i18n.js"></script>
+  <script src="../assets/js/main.js"></script>
+  <script src="../assets/js/project-detail.js"></script>
+  <script src="../assets/js/lead-integration.js"></script>
+  
+  <!-- Initialize Lucide Icons -->
+  <script>
+    if (typeof lucide !== 'undefined') {
+      lucide.createIcons();
+    }
+  </script>
+</body>
+</html>

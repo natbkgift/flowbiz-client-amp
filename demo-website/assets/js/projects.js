@@ -142,7 +142,7 @@ function createProjectCard(project, lang) {
         </div>
         
         <div class="project-card-actions">
-          <a href="#${project.project_id}" class="btn btn-primary btn-block">
+          <a href="detail.html?id=${project.project_id}" class="btn btn-primary btn-block">
             ${lang === 'th' ? 'ดูข้อมูล' : 'View Info'}
           </a>
         </div>
