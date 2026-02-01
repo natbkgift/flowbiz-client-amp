@@ -159,7 +159,9 @@
     const statusClass = project.status.replace('_', '-');
     const priceText = formatPrice(project.pricing.min, project.pricing.max, lang);
     const yieldText = project.estimated_yield ? `${project.estimated_yield}%` : 'N/A';
-    const developerRating = developer && typeof developer.rating === 'number' ? developer.rating.toFixed(1) : '';
+    const developerRating = developer && typeof developer.rating === 'number'
+      ? (Number.isInteger(developer.rating) ? developer.rating.toString() : developer.rating.toFixed(1))
+      : '';
     const rawImage = project.images?.[0] || '';
     const safeImage = getSafeImageUrl(rawImage);
 
