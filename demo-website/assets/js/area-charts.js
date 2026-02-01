@@ -1,7 +1,7 @@
 // Area charts helpers for area index and detail pages
 (function () {
   const chartStore = {};
-  const defaultKeys = ['pratumnak', 'wong-amat', 'pattaya', 'jomtien', 'na-jomtien', 'bang-saray'];
+  const defaultKeys = window.AMP?.areaGuideChartKeys || [];
 
   const chartPalettes = {
     index: {
@@ -30,7 +30,8 @@
 
   function getTranslation(key, fallback) {
     if (typeof t === 'function') {
-      return t(key);
+      const value = t(key);
+      return value && value !== key ? value : (fallback || key);
     }
     return fallback || key;
   }

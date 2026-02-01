@@ -305,7 +305,7 @@
     function initAreaDetailPage() {
       const lang = pageLang();
       const areaData = AREA_GUIDES[AREA_KEY];
-      const chartKeys = window.AMP?.areaGuideChartKeys || ['pratumnak', 'wong-amat', 'pattaya', 'jomtien', 'na-jomtien', 'bang-saray'];
+      const chartKeys = window.AMP?.areaGuideChartKeys || [];
       
       if (!areaData) {
         console.error('Area data not found for:', AREA_KEY);

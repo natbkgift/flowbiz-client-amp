@@ -216,7 +216,7 @@
     function initAreasGrid() {
       const areasGrid = document.getElementById('areas-grid');
       const lang = document.documentElement.lang || 'en';
-      const chartKeys = window.AMP?.areaGuideChartKeys || ['pratumnak', 'wong-amat', 'pattaya', 'jomtien', 'na-jomtien', 'bang-saray'];
+      const chartKeys = window.AMP?.areaGuideChartKeys || [];
       
       // Get all areas from AREA_GUIDES
       const areaKeys = Object.keys(AREA_GUIDES);
