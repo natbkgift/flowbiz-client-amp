@@ -32,6 +32,7 @@
   <link rel="stylesheet" href="../../assets/css/responsive.css">
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="anonymous">
   <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js" integrity="sha384-Ys4Lf8bC8KzQuI7tVmznwZAIoe+g7C3IAPNRf2YhU3gA1dINyGeXmBfAZ7jDC97o" crossorigin="anonymous"></script>
 </head>
 
 <body>
@@ -114,6 +115,43 @@
         <div class="card" style="text-align: center; padding: 32px 24px;">
           <div style="font-size: 0.9rem; color: var(--color-gray-600); margin-bottom: 8px;" data-i18n="area_residents">Residents</div>
           <div id="area-residents" style="font-size: 1.3rem; font-weight: 600; color: var(--color-gray-900); line-height: 1.4; margin-top: 12px;">Tourists, Investors, Expats</div>
+        </div>
+      </div>
+    </div>
+  </section>
+  <section class="section" style="padding-top: 0;">
+    <div class="container">
+      <div class="card" style="padding: 32px;">
+        <div style="text-align: center; margin-bottom: 24px;">
+          <h2 style="font-size: 1.8rem; margin-bottom: 8px;" data-i18n="area_charts_title">Area Price Comparison</h2>
+          <p style="color: var(--color-gray-600);" data-i18n="area_charts_subtitle">Compare average prices and year-on-year growth across key Pattaya areas.</p>
+        </div>
+        <div class="grid grid-2" style="gap: 24px;">
+          <div class="card" style="padding: 24px;">
+            <h3 style="margin-bottom: 16px; font-size: 1.1rem;" data-i18n="area_chart_price_title">Average Price per sqm</h3>
+            <div style="min-height: 240px; height: 40vh; max-height: 360px;">
+              <canvas id="area-detail-price-chart" data-i18n-aria="area_chart_price_aria" aria-label="Area average price per square meter chart" role="img"></canvas>
+            </div>
+            <div style="display: flex; justify-content: space-between; margin-top: 12px; font-size: 0.85rem; color: var(--color-gray-600);">
+              <span id="area-detail-price-high"></span>
+              <span id="area-detail-price-low"></span>
+            </div>
+          </div>
+          <div class="card" style="padding: 24px;">
+            <h3 style="margin-bottom: 16px; font-size: 1.1rem;" data-i18n="area_chart_trend_title">YoY Price Growth</h3>
+            <div style="min-height: 240px; height: 40vh; max-height: 360px;">
+              <canvas id="area-detail-trend-chart" data-i18n-aria="area_chart_trend_aria" aria-label="Area year-on-year price trend chart" role="img"></canvas>
+            </div>
+            <div style="display: flex; justify-content: space-between; margin-top: 12px; font-size: 0.85rem; color: var(--color-gray-600);">
+              <span id="area-detail-trend-high"></span>
+              <span id="area-detail-trend-low"></span>
+            </div>
+          </div>
+        </div>
+        <div style="display: flex; flex-wrap: wrap; gap: 16px; justify-content: center; margin-top: 20px; font-size: 0.85rem; color: var(--color-gray-500);">
+          <span data-i18n="area_chart_legend_price">Avg Price/sqm (฿)</span>
+          <span data-i18n="area_chart_legend_trend">YoY Trend (%)</span>
+          <span data-i18n="area_chart_source">Source: AMP area guide data (mock)</span>
         </div>
       </div>
     </div>
@@ -253,6 +291,7 @@
 
   <!-- Scripts -->
   <script src="../../assets/js/mock-data.js"></script>
+  <script src="../../assets/js/area-charts.js"></script>
   <script src="../../assets/js/i18n.js"></script>
   <script src="../../assets/js/main.js"></script>
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin="anonymous"></script>
@@ -266,6 +305,7 @@
     function initAreaDetailPage() {
       const lang = pageLang();
       const areaData = AREA_GUIDES[AREA_KEY];
+      const chartKeys = window.AMP?.areaGuideChartKeys || [];
       
       if (!areaData) {
         console.error('Area data not found for:', AREA_KEY);
@@ -372,6 +412,10 @@
 
       // Load properties for this area
       loadAreaProperties();
+
+      if (window.AMP?.initAreaDetailCharts) {
+        window.AMP.initAreaDetailCharts({ chartKeys, lang, areaKey: AREA_KEY });
+      }
       
       // Re-apply translations
       updatePageText();
