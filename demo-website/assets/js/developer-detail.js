@@ -122,12 +122,22 @@
 
   function getDeveloperProjects(developer) {
     const projects = window.AMP?.projects || [];
-    const missingDeveloperIds = projects.filter(project => !project.developer_id);
-    if (missingDeveloperIds.length > 0) {
-      const missingIds = missingDeveloperIds.map(project => project.project_id || project.name || 'unknown');
+    const missingIds = [];
+    const matches = [];
+
+    projects.forEach(project => {
+      if (!project.developer_id) {
+        missingIds.push(project.project_id || project.name || 'unknown');
+      }
+      if (project.developer_id === developer.id) {
+        matches.push(project);
+      }
+    });
+
+    if (missingIds.length > 0) {
       console.warn('Developer detail: projects missing developer_id', missingIds);
     }
-    return projects.filter(project => project.developer_id === developer.id);
+    return matches;
   }
 
   function renderProjects(developer) {
@@ -313,8 +323,14 @@
       return '';
     }
     try {
-      if (typeof url === 'string' && url.startsWith('/')) {
+      if (typeof url !== 'string') {
+        return '';
+      }
+      if (url.startsWith('/')) {
         return url;
+      }
+      if (!/^https?:\/\//i.test(url)) {
+        return '';
       }
       const parsed = new URL(url);
       if (parsed.protocol === 'http:' || parsed.protocol === 'https:') {
