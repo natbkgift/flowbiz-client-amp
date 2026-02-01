@@ -540,6 +540,16 @@ const TRANSLATIONS = {
     developer_established: 'ก่อตั้ง',
     developer_specialties: 'ความเชี่ยวชาญ',
     developer_reviews: 'รีวิวจากลูกค้า',
+    developer_about: 'เกี่ยวกับผู้พัฒนา',
+    developer_projects_title: 'โครงการของผู้พัฒนา',
+    developer_projects_subtitle: 'รวมโครงการทั้งหมดจากผู้พัฒนานี้',
+    developer_projects_empty: 'ยังไม่มีโครงการที่ตรงกับผู้พัฒนานี้',
+    developer_contact_title: 'ปรึกษาโครงการกับผู้เชี่ยวชาญ',
+    developer_contact_subtitle: 'ให้ทีมของเราช่วยคุณเลือกโครงการที่เหมาะสม',
+    developer_contact_cta: 'ติดต่อเรา',
+    developer_not_found: 'ไม่พบข้อมูลผู้พัฒนา',
+    developer_not_found_desc: 'ไม่พบผู้พัฒนาที่คุณกำลังค้นหา หรือถูกลบออกจากระบบแล้ว',
+    developer_back_to_projects: 'กลับไปที่รายการโครงการ',
 
     // Project Detail Page
     project_detail_overview: 'ภาพรวม',
@@ -1110,6 +1120,16 @@ const TRANSLATIONS = {
     developer_established: 'Established',
     developer_specialties: 'Specialties',
     developer_reviews: 'Customer Reviews',
+    developer_about: 'About the Developer',
+    developer_projects_title: 'Developer Projects',
+    developer_projects_subtitle: 'Browse all projects from this developer',
+    developer_projects_empty: 'No projects are available for this developer yet',
+    developer_contact_title: 'Talk to a Project Specialist',
+    developer_contact_subtitle: 'Let our team help you choose the right project',
+    developer_contact_cta: 'Contact Us',
+    developer_not_found: 'Developer Not Found',
+    developer_not_found_desc: 'The developer you are looking for does not exist or has been removed.',
+    developer_back_to_projects: 'Back to Projects',
 
     // Project Detail Page
     project_detail_overview: 'Overview',

@@ -217,8 +217,9 @@
                      (hasHalfStar ? '⭑' : '') +
                      '☆'.repeat(emptyStars);
 
-        const card = document.createElement('div');
+        const card = document.createElement('a');
         card.className = 'developer-card';
+        card.href = `../developers/detail.html?id=${encodeURIComponent(dev.id)}`;
 
         const header = document.createElement('div');
         header.className = 'developer-header';
