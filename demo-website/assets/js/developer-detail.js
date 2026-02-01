@@ -122,6 +122,9 @@
 
   function getDeveloperProjects(developer) {
     const projects = window.AMP?.projects || [];
+    if (projects.some(project => !project.developer_id)) {
+      console.warn('Developer detail: project missing developer_id.');
+    }
     return projects.filter(project => project.developer_id === developer.id);
   }
 
@@ -313,6 +316,7 @@
         return parsed.toString();
       }
     } catch (error) {
+      console.warn('Developer detail: invalid image URL', url);
       return '';
     }
     return '';
