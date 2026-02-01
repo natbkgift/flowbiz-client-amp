@@ -48,8 +48,7 @@
 
   function getAreaChartData(chartKeys, lang) {
     const guideData = (typeof AREA_GUIDES === 'undefined' ? null : AREA_GUIDES)
-      ?? window.AMP?.areaData
-      ?? null;
+      ?? window.AMP?.areaData;
     if (!Array.isArray(chartKeys) || !guideData) return [];
     return chartKeys
       .map(key => ({ key, data: guideData?.[key] }))
@@ -216,8 +215,8 @@
     const prices = areaData.map(item => item.avgPrice);
     const trends = areaData.map(item => item.trend);
 
-    if (chartStore[chartKey]?.price?.destroy) chartStore[chartKey].price.destroy();
-    if (chartStore[chartKey]?.trend?.destroy) chartStore[chartKey].trend.destroy();
+    chartStore[chartKey]?.price?.destroy?.();
+    chartStore[chartKey]?.trend?.destroy?.();
 
     const nextCharts = {};
     try {
