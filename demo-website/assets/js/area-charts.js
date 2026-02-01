@@ -131,10 +131,16 @@
     const baseItem = areaData[0];
     if (!baseItem) return;
 
-    const priceHigh = areaData.reduce((max, item) => item.avgPrice > max.avgPrice ? item : max, baseItem);
-    const priceLow = areaData.reduce((min, item) => item.avgPrice < min.avgPrice ? item : min, baseItem);
-    const trendHigh = areaData.reduce((max, item) => item.trend > max.trend ? item : max, baseItem);
-    const trendLow = areaData.reduce((min, item) => item.trend < min.trend ? item : min, baseItem);
+    let priceHigh = baseItem;
+    let priceLow = baseItem;
+    let trendHigh = baseItem;
+    let trendLow = baseItem;
+    areaData.forEach(item => {
+      if (item.avgPrice > priceHigh.avgPrice) priceHigh = item;
+      if (item.avgPrice < priceLow.avgPrice) priceLow = item;
+      if (item.trend > trendHigh.trend) trendHigh = item;
+      if (item.trend < trendLow.trend) trendLow = item;
+    });
 
     const priceHighEl = document.getElementById(ids.priceHighId);
     const priceLowEl = document.getElementById(ids.priceLowId);
