@@ -161,7 +161,7 @@
     const yieldText = project.estimated_yield ? `${project.estimated_yield}%` : 'N/A';
     const developerRating = developer && typeof developer.rating === 'number' ? developer.rating.toFixed(1) : '';
     const rawImage = project.images?.[0] || '';
-    const safeImage = /^https?:\/\//i.test(rawImage) ? encodeURI(rawImage) : '';
+    const safeImage = getSafeImageUrl(rawImage);
 
     const card = document.createElement('div');
     card.className = 'project-card';
@@ -262,7 +262,7 @@
     const actions = document.createElement('div');
     actions.className = 'project-card-actions';
     const link = document.createElement('a');
-    link.href = `../projects/detail.html?id=${project.project_id}`;
+    link.href = `../projects/detail.html?id=${encodeURIComponent(project.project_id)}`;
     link.className = 'btn btn-primary btn-block';
     link.textContent = lang === 'th' ? 'ดูข้อมูล' : 'View Info';
     actions.appendChild(link);
@@ -299,6 +299,21 @@
     };
 
     return `฿${formatNumber(min)} - ฿${formatNumber(max)}`;
+  }
+
+  function getSafeImageUrl(url) {
+    if (!url) {
+      return '';
+    }
+    try {
+      const parsed = new URL(url, window.location.origin);
+      if (parsed.protocol === 'http:' || parsed.protocol === 'https:') {
+        return parsed.toString();
+      }
+    } catch (error) {
+      return '';
+    }
+    return '';
   }
 
   if (document.readyState === 'loading') {
