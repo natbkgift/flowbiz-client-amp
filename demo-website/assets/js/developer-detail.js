@@ -160,6 +160,14 @@
     const priceText = formatPrice(project.pricing.min, project.pricing.max, lang);
     const yieldText = project.estimated_yield ? `${project.estimated_yield}%` : 'N/A';
     const developerRating = typeof developer?.rating === 'number' ? developer.rating.toFixed(1) : '';
+    const ratingMarkup = developerRating
+      ? `
+             <span style="color: var(--color-warning); display: flex; align-items: center; gap: 2px;">
+               <i data-lucide="star" style="width: 12px; height: 12px; fill: currentColor;"></i>
+               ${developerRating}
+             </span>
+        `
+      : '';
 
     return `
       <div class="project-card">
@@ -176,10 +184,7 @@
           <div class="project-card-developer" style="font-size: 13px; color: var(--color-gray-500); margin-top: 4px; display: flex; align-items: center; gap: 4px;">
              <i data-lucide="hard-hat" style="width: 14px; height: 14px;"></i>
              <span>${safeDeveloperName}</span>
-             <span style="color: var(--color-warning); display: flex; align-items: center; gap: 2px;">
-               <i data-lucide="star" style="width: 12px; height: 12px; fill: currentColor;"></i>
-               ${developerRating}
-             </span>
+             ${ratingMarkup}
           </div>
           <div class="project-card-meta">
             <div class="project-card-meta-item">
