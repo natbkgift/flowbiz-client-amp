@@ -174,9 +174,7 @@
     const statusClass = project.status.replace('_', '-');
     const priceText = formatPrice(project.pricing.min, project.pricing.max, lang);
     const yieldText = project.estimated_yield ? `${project.estimated_yield}%` : 'N/A';
-    const developerRating = developer && typeof developer.rating === 'number'
-      ? (Number.isInteger(developer.rating) ? developer.rating.toString() : developer.rating.toFixed(1))
-      : '';
+    const developerRating = formatDeveloperRating(developer);
     const rawImage = project.images?.[0] || '';
     const safeImage = getSafeImageUrl(rawImage);
 
@@ -333,14 +331,21 @@
         return '';
       }
       const parsed = new URL(url);
-      if (parsed.protocol === 'http:' || parsed.protocol === 'https:') {
-        return parsed.toString();
-      }
+      return parsed.toString();
     } catch (error) {
       console.warn('Developer detail: invalid image URL', url);
       return '';
     }
     return '';
+  }
+
+  function formatDeveloperRating(developer) {
+    if (!developer || typeof developer.rating !== 'number') {
+      return '';
+    }
+    return Number.isInteger(developer.rating)
+      ? developer.rating.toString()
+      : developer.rating.toFixed(1);
   }
 
   if (document.readyState === 'loading') {
