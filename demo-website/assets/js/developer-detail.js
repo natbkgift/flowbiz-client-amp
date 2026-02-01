@@ -122,8 +122,10 @@
 
   function getDeveloperProjects(developer) {
     const projects = window.AMP?.projects || [];
-    if (projects.some(project => !project.developer_id)) {
-      console.warn('Developer detail: project missing developer_id.');
+    const missingDeveloperIds = projects.filter(project => !project.developer_id);
+    if (missingDeveloperIds.length > 0) {
+      const missingIds = missingDeveloperIds.map(project => project.project_id || project.name || 'unknown');
+      console.warn('Developer detail: projects missing developer_id', missingIds);
     }
     return projects.filter(project => project.developer_id === developer.id);
   }
@@ -311,7 +313,10 @@
       return '';
     }
     try {
-      const parsed = new URL(url, window.location.origin);
+      if (typeof url === 'string' && url.startsWith('/')) {
+        return url;
+      }
+      const parsed = new URL(url);
       if (parsed.protocol === 'http:' || parsed.protocol === 'https:') {
         return parsed.toString();
       }
