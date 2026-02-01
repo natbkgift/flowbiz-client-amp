@@ -291,6 +291,7 @@
 
   <!-- Scripts -->
   <script src="../../assets/js/mock-data.js"></script>
+  <script src="../../assets/js/area-charts.js"></script>
   <script src="../../assets/js/i18n.js"></script>
   <script src="../../assets/js/main.js"></script>
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin="anonymous"></script>
@@ -412,7 +413,9 @@
       // Load properties for this area
       loadAreaProperties();
 
-      initAreaDetailCharts(chartKeys, lang);
+      if (window.AMP?.initAreaDetailCharts) {
+        window.AMP.initAreaDetailCharts({ chartKeys, lang, areaKey: AREA_KEY });
+      }
       
       // Re-apply translations
       updatePageText();
@@ -496,120 +499,6 @@
       }
     }
 
-    let areaDetailPriceChart;
-    let areaDetailTrendChart;
-
-    function initAreaDetailCharts(chartKeys, lang) {
-      const priceCanvas = document.getElementById('area-detail-price-chart');
-      const trendCanvas = document.getElementById('area-detail-trend-chart');
-      if (!priceCanvas || !trendCanvas || typeof Chart === 'undefined') return;
-
-      const areaData = chartKeys
-        .map(key => ({ key, data: AREA_GUIDES[key] }))
-        .filter(item => item.data)
-        .map(item => ({
-          key: item.key,
-          name: item.data.name?.[lang] || item.data.name?.en || item.key,
-          avgPrice: Number(item.data.avg_price_sqm),
-          trend: Number(item.data.price_trend_yoy)
-        }))
-        .filter(item => Number.isFinite(item.avgPrice) && Number.isFinite(item.trend));
-
-      if (!areaData.length) return;
-      const baseItem = areaData[0];
-      if (!baseItem) return;
-
-      const labels = areaData.map(item => item.name);
-      const prices = areaData.map(item => item.avgPrice);
-      const trends = areaData.map(item => item.trend);
-
-      if (areaDetailPriceChart) areaDetailPriceChart.destroy();
-      if (areaDetailTrendChart) areaDetailTrendChart.destroy();
-
-      areaDetailPriceChart = new Chart(priceCanvas, {
-        type: 'bar',
-        data: {
-          labels,
-          datasets: [{
-            label: t('area_chart_legend_price'),
-            data: prices,
-            backgroundColor: 'rgba(99, 102, 241, 0.6)',
-            borderColor: 'rgba(99, 102, 241, 1)',
-            borderWidth: 1,
-            borderRadius: 6
-          }]
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          plugins: {
-            legend: { display: false },
-            tooltip: {
-              callbacks: {
-                label: context => `฿${context.parsed.y.toLocaleString()}`
-              }
-            }
-          },
-          scales: {
-            y: {
-              ticks: {
-                callback: value => `฿${Number(value).toLocaleString()}`
-              }
-            }
-          }
-        }
-      });
-
-      areaDetailTrendChart = new Chart(trendCanvas, {
-        type: 'line',
-        data: {
-          labels,
-          datasets: [{
-            label: t('area_chart_legend_trend'),
-            data: trends,
-            borderColor: 'rgba(14, 116, 144, 1)',
-            backgroundColor: 'rgba(14, 116, 144, 0.2)',
-            pointBackgroundColor: 'rgba(14, 116, 144, 1)',
-            pointRadius: 4,
-            tension: 0.3,
-            fill: true
-          }]
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          plugins: {
-            legend: { display: false },
-            tooltip: {
-              callbacks: {
-                label: context => `${context.parsed.y}%`
-              }
-            }
-          },
-          scales: {
-            y: {
-              ticks: {
-                callback: value => `${value}%`
-              }
-            }
-          }
-        }
-      });
-
-      const priceHigh = areaData.reduce((max, item) => item.avgPrice > max.avgPrice ? item : max, baseItem);
-      const priceLow = areaData.reduce((min, item) => item.avgPrice < min.avgPrice ? item : min, baseItem);
-      const trendHigh = areaData.reduce((max, item) => item.trend > max.trend ? item : max, baseItem);
-      const trendLow = areaData.reduce((min, item) => item.trend < min.trend ? item : min, baseItem);
-
-      const priceHighEl = document.getElementById('area-detail-price-high');
-      const priceLowEl = document.getElementById('area-detail-price-low');
-      const trendHighEl = document.getElementById('area-detail-trend-high');
-      const trendLowEl = document.getElementById('area-detail-trend-low');
-      if (priceHighEl) priceHighEl.textContent = `${t('area_chart_high_label')}: ${priceHigh.name} (฿${priceHigh.avgPrice.toLocaleString()})`;
-      if (priceLowEl) priceLowEl.textContent = `${t('area_chart_low_label')}: ${priceLow.name} (฿${priceLow.avgPrice.toLocaleString()})`;
-      if (trendHighEl) trendHighEl.textContent = `${t('area_chart_high_label')}: ${trendHigh.name} (${trendHigh.trend >= 0 ? '+' : ''}${trendHigh.trend}%)`;
-      if (trendLowEl) trendLowEl.textContent = `${t('area_chart_low_label')}: ${trendLow.name} (${trendLow.trend >= 0 ? '+' : ''}${trendLow.trend}%)`;
-    }
 
     // Initialize when DOM is loaded
     if (document.readyState === 'loading') {
