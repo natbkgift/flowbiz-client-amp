@@ -515,7 +515,9 @@
         }))
         .filter(item => Number.isFinite(item.avgPrice) && Number.isFinite(item.trend));
 
-      if (areaData.length === 0) return;
+      if (!areaData.length) return;
+      const baseItem = areaData[0];
+      if (!baseItem) return;
 
       const labels = areaData.map(item => item.name);
       const prices = areaData.map(item => item.avgPrice);
@@ -594,10 +596,10 @@
         }
       });
 
-      const priceHigh = areaData.reduce((max, item) => item.avgPrice > max.avgPrice ? item : max, areaData[0]);
-      const priceLow = areaData.reduce((min, item) => item.avgPrice < min.avgPrice ? item : min, areaData[0]);
-      const trendHigh = areaData.reduce((max, item) => item.trend > max.trend ? item : max, areaData[0]);
-      const trendLow = areaData.reduce((min, item) => item.trend < min.trend ? item : min, areaData[0]);
+      const priceHigh = areaData.reduce((max, item) => item.avgPrice > max.avgPrice ? item : max, baseItem);
+      const priceLow = areaData.reduce((min, item) => item.avgPrice < min.avgPrice ? item : min, baseItem);
+      const trendHigh = areaData.reduce((max, item) => item.trend > max.trend ? item : max, baseItem);
+      const trendLow = areaData.reduce((min, item) => item.trend < min.trend ? item : min, baseItem);
 
       const priceHighEl = document.getElementById('area-detail-price-high');
       const priceLowEl = document.getElementById('area-detail-price-low');
