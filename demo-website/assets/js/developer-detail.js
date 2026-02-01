@@ -77,6 +77,13 @@
       document.getElementById('og-image').setAttribute('content', developer.logo);
       document.getElementById('twitter-image').setAttribute('content', developer.logo);
     }
+    const canonicalUrl = new URL(window.location.href);
+    canonicalUrl.searchParams.set('id', developer.id);
+    const canonicalLink = document.querySelector('link[rel="canonical"]');
+    if (canonicalLink) {
+      canonicalLink.setAttribute('href', canonicalUrl.toString());
+    }
+    document.getElementById('og-url').setAttribute('content', canonicalUrl.toString());
 
     const logo = document.getElementById('developer-logo');
     logo.src = developer.logo || '';
@@ -93,7 +100,13 @@
     descriptionEl.textContent = description;
 
     const specialtiesContainer = document.getElementById('developer-specialties');
-    specialtiesContainer.innerHTML = specialties.map(tag => `<span class="specialty-tag">${tag}</span>`).join('');
+    specialtiesContainer.innerHTML = '';
+    specialties.forEach(function(tag) {
+      const span = document.createElement('span');
+      span.className = 'specialty-tag';
+      span.textContent = tag;
+      specialtiesContainer.appendChild(span);
+    });
 
     const projectCount = getDeveloperProjects(developer).length;
     document.getElementById('developer-projects-total').textContent = projectCount;
@@ -109,12 +122,7 @@
 
   function getDeveloperProjects(developer) {
     const projects = window.AMP?.projects || [];
-    return projects.filter(project => {
-      if (project.developer_id) {
-        return project.developer_id === developer.id;
-      }
-      return project.developer?.name === developer.name;
-    });
+    return projects.filter(project => project.developer_id === developer.id);
   }
 
   function renderProjects(developer) {
@@ -125,9 +133,7 @@
     if (projects.length === 0) {
       grid.innerHTML = `
         <div style="grid-column: 1/-1; text-align: center; padding: 40px;">
-          <p style="font-size: 16px; color: var(--color-gray-600);" data-i18n="developer_projects_empty">
-            ${lang === 'th' ? 'ยังไม่มีโครงการที่ตรงกับผู้พัฒนานี้' : 'No projects are available for this developer yet'}
-          </p>
+          <p style="font-size: 16px; color: var(--color-gray-600);" data-i18n="developer_projects_empty"></p>
         </div>
       `;
       if (typeof updatePageText === 'function') {
@@ -136,31 +142,44 @@
       return;
     }
 
-    grid.innerHTML = projects.map(project => createProjectCard(project, lang)).join('');
+    grid.innerHTML = projects.map(project => createProjectCard(project, lang, developer)).join('');
 
     if (typeof lucide !== 'undefined') {
       lucide.createIcons();
     }
   }
 
-  function createProjectCard(project, lang) {
+  function createProjectCard(project, lang, developer) {
     const name = project.name[lang] || project.name.en;
+    const safeName = escapeHtml(name);
+    const safeLocation = escapeHtml(project.location);
+    const developerName = developer?.name || '';
+    const safeDeveloperName = escapeHtml(developerName);
     const statusText = getStatusText(project.status, lang);
     const statusClass = project.status.replace('_', '-');
     const priceText = formatPrice(project.pricing.min, project.pricing.max, lang);
     const yieldText = project.estimated_yield ? `${project.estimated_yield}%` : 'N/A';
+    const developerRating = developer?.rating ? developer.rating.toFixed(1) : '';
 
     return `
       <div class="project-card">
         <div class="project-card-image">
-          <img src="${project.images[0]}" alt="${name}" loading="lazy">
+          <img src="${project.images[0]}" alt="${safeName}" loading="lazy">
           <div class="project-status-badge ${statusClass}">${statusText}</div>
         </div>
         <div class="project-card-content">
-          <h3 class="project-card-title">${name}</h3>
+          <h3 class="project-card-title">${safeName}</h3>
           <div class="project-card-location">
             <i data-lucide="map-pin" style="width: 16px; height: 16px;"></i>
-            <span>${project.location}</span>
+            <span>${safeLocation}</span>
+          </div>
+          <div class="project-card-developer" style="font-size: 13px; color: var(--color-gray-500); margin-top: 4px; display: flex; align-items: center; gap: 4px;">
+             <i data-lucide="hard-hat" style="width: 14px; height: 14px;"></i>
+             <span>${safeDeveloperName}</span>
+             <span style="color: var(--color-warning); display: flex; align-items: center; gap: 2px;">
+               <i data-lucide="star" style="width: 12px; height: 12px; fill: currentColor;"></i>
+               ${developerRating}
+             </span>
           </div>
           <div class="project-card-meta">
             <div class="project-card-meta-item">
@@ -204,6 +223,15 @@
     };
 
     return `฿${formatNumber(min)} - ฿${formatNumber(max)}`;
+  }
+
+  function escapeHtml(value) {
+    return String(value)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
   }
 
   if (document.readyState === 'loading') {
