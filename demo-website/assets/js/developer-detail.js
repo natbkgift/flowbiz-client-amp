@@ -327,7 +327,7 @@
       if (url.startsWith('/')) {
         return url;
       }
-      if (!/^https?:\/\//i.test(url)) {
+      if (!/^https:\/\//i.test(url)) {
         return '';
       }
       const parsed = new URL(url);
@@ -336,7 +336,6 @@
       console.warn('Developer detail: invalid image URL', url);
       return '';
     }
-    return '';
   }
 
   function formatDeveloperRating(developer) {
