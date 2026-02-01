@@ -43,6 +43,7 @@
       .map(item => ({
         key: item.key,
         name: item.data.name?.[lang] || item.data.name?.en || item.key,
+        // Map mock data snake_case to camelCase for chart rendering.
         avgPrice: Number(item.data.avg_price_sqm),
         trend: Number(item.data.price_trend_yoy)
       }))
@@ -50,6 +51,7 @@
   }
 
   function buildBarChart(canvas, labels, data, colors) {
+    if (typeof Chart === 'undefined') return null;
     return new Chart(canvas, {
       type: 'bar',
       data: {
@@ -86,6 +88,7 @@
   }
 
   function buildLineChart(canvas, labels, data, colors) {
+    if (typeof Chart === 'undefined') return null;
     return new Chart(canvas, {
       type: 'line',
       data: {
