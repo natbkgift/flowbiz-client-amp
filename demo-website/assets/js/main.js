@@ -202,6 +202,10 @@ function setupSortDropdown() {
 function setupAreaCards() {
   const areaCards = document.querySelectorAll('.area-card');
   areaCards.forEach(card => {
+    // Skip anchor elements - they should use native navigation
+    if (card.tagName.toLowerCase() === 'a') {
+      return;
+    }
     card.addEventListener('click', function () {
       const area = this.dataset.area;
       if (area) {

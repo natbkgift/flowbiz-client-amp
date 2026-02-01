@@ -392,6 +392,11 @@
       container.removeAttribute('aria-busy');
     }
 
+    // Helper function to convert area name to slug
+    function areaNameToSlug(name) {
+      return name.toLowerCase().replace(/\s+/g, '-');
+    }
+
     // Render popular areas
     function renderPopularAreas() {
       const container = document.getElementById('popular-areas');
@@ -400,14 +405,16 @@
       const html = POPULAR_AREAS.map(area => {
         const currentLang = document.documentElement.lang || 'en';
         const name = currentLang === 'th' ? area.name_th : area.name;
+        const slug = areaNameToSlug(area.name);
+        const areaDetailUrl = `invest/areas/${slug}.html`;
 
         return `
-          <div class="area-card" data-area="${area.name}">
+          <a href="${areaDetailUrl}" class="area-card" data-area="${area.name}">
             <img src="${area.image}" alt="${name}" loading="lazy">
             <div class="area-card-overlay">
               <h3 class="area-card-title">${name}</h3>
             </div>
-          </div>
+          </a>
         `;
       }).join('');
 
