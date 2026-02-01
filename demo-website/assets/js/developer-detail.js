@@ -342,7 +342,7 @@
     if (!developer || typeof developer.rating !== 'number' || !Number.isFinite(developer.rating)) {
       return '';
     }
-    return Number.isInteger(developer.rating)
+    return developer.rating % 1 === 0
       ? developer.rating.toString()
       : developer.rating.toFixed(1);
   }
