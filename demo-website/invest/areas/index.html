@@ -32,6 +32,7 @@
   <link rel="stylesheet" href="../../assets/css/responsive.css">
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="anonymous">
   <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 </head>
 
 <body>
@@ -96,6 +97,39 @@
         <p style="color: var(--color-gray-600); margin-top: 12px; max-width: 600px; margin-left: auto; margin-right: auto;" data-i18n="areas_index_intro">
           Compare prices, trends, and amenities across all major areas
         </p>
+      </div>
+      <div class="card" style="padding: 32px; margin-bottom: 40px;">
+        <div style="text-align: center; margin-bottom: 24px;">
+          <h3 style="font-size: 1.6rem; margin-bottom: 8px;" data-i18n="area_charts_title">Area Price Comparison</h3>
+          <p style="color: var(--color-gray-600);" data-i18n="area_charts_subtitle">Compare average prices and year-on-year growth across key Pattaya areas.</p>
+        </div>
+        <div class="grid grid-2" style="gap: 24px;">
+          <div class="card" style="padding: 24px;">
+            <h4 style="margin-bottom: 16px; font-size: 1.1rem;" data-i18n="area_chart_price_title">Average Price per sqm</h4>
+            <div style="height: 280px;">
+              <canvas id="area-index-price-chart" data-i18n-aria="area_chart_price_aria" aria-label="Area average price per square meter chart" role="img"></canvas>
+            </div>
+            <div style="display: flex; justify-content: space-between; margin-top: 12px; font-size: 0.85rem; color: var(--color-gray-600);">
+              <span id="area-index-price-high"></span>
+              <span id="area-index-price-low"></span>
+            </div>
+          </div>
+          <div class="card" style="padding: 24px;">
+            <h4 style="margin-bottom: 16px; font-size: 1.1rem;" data-i18n="area_chart_trend_title">YoY Price Growth</h4>
+            <div style="height: 280px;">
+              <canvas id="area-index-trend-chart" data-i18n-aria="area_chart_trend_aria" aria-label="Area year-on-year price trend chart" role="img"></canvas>
+            </div>
+            <div style="display: flex; justify-content: space-between; margin-top: 12px; font-size: 0.85rem; color: var(--color-gray-600);">
+              <span id="area-index-trend-high"></span>
+              <span id="area-index-trend-low"></span>
+            </div>
+          </div>
+        </div>
+        <div style="display: flex; flex-wrap: wrap; gap: 16px; justify-content: center; margin-top: 20px; font-size: 0.85rem; color: var(--color-gray-500);">
+          <span data-i18n="area_chart_legend_price">Avg Price/sqm (฿)</span>
+          <span data-i18n="area_chart_legend_trend">YoY Trend (%)</span>
+          <span data-i18n="area_chart_source">Source: AMP area guide data (mock)</span>
+        </div>
       </div>
       <div class="area-map-section">
         <h3 id="areas-overview-map-title" style="text-align: center; margin-bottom: 16px;">Area Map Overview</h3>
@@ -181,6 +215,7 @@
     function initAreasGrid() {
       const areasGrid = document.getElementById('areas-grid');
       const lang = document.documentElement.lang || 'en';
+      const chartKeys = window.AMP?.areaGuideChartKeys || ['pratumnak', 'wong-amat', 'pattaya', 'jomtien', 'na-jomtien', 'bang-saray'];
       
       // Get all areas from AREA_GUIDES
       const areaKeys = Object.keys(AREA_GUIDES);
@@ -278,6 +313,123 @@
       
       // Re-apply translations
       updatePageText();
+
+      initAreaIndexCharts(chartKeys, lang);
+    }
+
+    let areaIndexPriceChart;
+    let areaIndexTrendChart;
+
+    function initAreaIndexCharts(chartKeys, lang) {
+      const priceCanvas = document.getElementById('area-index-price-chart');
+      const trendCanvas = document.getElementById('area-index-trend-chart');
+      if (!priceCanvas || !trendCanvas || typeof Chart === 'undefined') return;
+
+      const areaData = chartKeys
+        .map(key => ({ key, data: AREA_GUIDES[key] }))
+        .filter(item => item.data)
+        .map(item => ({
+          key: item.key,
+          name: item.data.name?.[lang] || item.data.name?.en || item.key,
+          avgPrice: item.data.avg_price_sqm,
+          trend: item.data.price_trend_yoy
+        }));
+
+      if (areaData.length === 0) return;
+
+      const labels = areaData.map(item => item.name);
+      const prices = areaData.map(item => item.avgPrice);
+      const trends = areaData.map(item => item.trend);
+
+      if (areaIndexPriceChart) areaIndexPriceChart.destroy();
+      if (areaIndexTrendChart) areaIndexTrendChart.destroy();
+
+      areaIndexPriceChart = new Chart(priceCanvas, {
+        type: 'bar',
+        data: {
+          labels,
+          datasets: [{
+            label: t('area_chart_legend_price'),
+            data: prices,
+            backgroundColor: 'rgba(59, 130, 246, 0.6)',
+            borderColor: 'rgba(59, 130, 246, 1)',
+            borderWidth: 1,
+            borderRadius: 6
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              callbacks: {
+                label: context => `฿${context.parsed.y.toLocaleString()}`
+              }
+            }
+          },
+          scales: {
+            y: {
+              ticks: {
+                callback: value => `฿${Number(value).toLocaleString()}`
+              }
+            }
+          }
+        }
+      });
+
+      areaIndexTrendChart = new Chart(trendCanvas, {
+        type: 'line',
+        data: {
+          labels,
+          datasets: [{
+            label: t('area_chart_legend_trend'),
+            data: trends,
+            borderColor: 'rgba(16, 185, 129, 1)',
+            backgroundColor: 'rgba(16, 185, 129, 0.2)',
+            pointBackgroundColor: 'rgba(16, 185, 129, 1)',
+            pointRadius: 4,
+            tension: 0.3,
+            fill: true
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              callbacks: {
+                label: context => `${context.parsed.y}%`
+              }
+            }
+          },
+          scales: {
+            y: {
+              ticks: {
+                callback: value => `${value}%`
+              }
+            }
+          }
+        }
+      });
+
+      const priceHigh = areaData.reduce((max, item) => item.avgPrice > max.avgPrice ? item : max, areaData[0]);
+      const priceLow = areaData.reduce((min, item) => item.avgPrice < min.avgPrice ? item : min, areaData[0]);
+      const trendHigh = areaData.reduce((max, item) => item.trend > max.trend ? item : max, areaData[0]);
+      const trendLow = areaData.reduce((min, item) => item.trend < min.trend ? item : min, areaData[0]);
+
+      const priceHighEl = document.getElementById('area-index-price-high');
+      const priceLowEl = document.getElementById('area-index-price-low');
+      const trendHighEl = document.getElementById('area-index-trend-high');
+      const trendLowEl = document.getElementById('area-index-trend-low');
+
+      if (priceHighEl) priceHighEl.textContent = `${t('area_chart_high_label')}: ${priceHigh.name} (฿${priceHigh.avgPrice.toLocaleString()})`;
+      if (priceLowEl) priceLowEl.textContent = `${t('area_chart_low_label')}: ${priceLow.name} (฿${priceLow.avgPrice.toLocaleString()})`;
+      const trendHighLabel = `${trendHigh.trend >= 0 ? '+' : ''}${trendHigh.trend}%`;
+      const trendLowLabel = `${trendLow.trend >= 0 ? '+' : ''}${trendLow.trend}%`;
+      if (trendHighEl) trendHighEl.textContent = `${t('area_chart_high_label')}: ${trendHigh.name} (${trendHighLabel})`;
+      if (trendLowEl) trendLowEl.textContent = `${t('area_chart_low_label')}: ${trendLow.name} (${trendLowLabel})`;
     }
 
     // Initialize when DOM is loaded

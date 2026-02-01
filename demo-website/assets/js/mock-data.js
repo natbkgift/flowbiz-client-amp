@@ -1423,6 +1423,7 @@ const AREA_NAME_MAP = {
 if (typeof window !== 'undefined') {
   window.AMP = window.AMP || {};
   window.AMP.areaData = AREA_GUIDES;
+  window.AMP.areaGuideChartKeys = ['pratumnak', 'wong-amat', 'pattaya', 'jomtien', 'na-jomtien', 'bang-saray'];
   window.AMP.developers = DEVELOPERS;
   window.AMP.marketStats = MARKET_STATS;
   window.AMP.testimonials = TESTIMONIALS;
