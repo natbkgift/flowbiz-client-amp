@@ -912,6 +912,12 @@ const AREA_GUIDES = {
       th: 'ใจกลางเมืองพัทยา เต็มไปด้วยแหล่งบันเทิง ร้านอาหาร และห้างสรรพสินค้า เหมาะสำหรับผู้ที่ชื่นชอบไลฟ์สไตล์เมือง',
       en: 'Heart of Pattaya city filled with entertainment, restaurants, and shopping malls. Perfect for those who enjoy urban lifestyle.'
     },
+    coordinates: { lat: 12.9276, lng: 100.8771 },
+    landmarks: [
+      { name: { th: 'ถนนคนเดิน', en: 'Walking Street' }, lat: 12.9273, lng: 100.8687 },
+      { name: { th: 'เซ็นทรัลเฟสติวัลพัทยา', en: 'Central Festival Pattaya' }, lat: 12.9345, lng: 100.8836 },
+      { name: { th: 'หาดพัทยา', en: 'Pattaya Beach' }, lat: 12.9332, lng: 100.8802 }
+    ],
     avg_price_sqm: 85000,
     price_trend_yoy: 8.5,
     residents: {
@@ -943,6 +949,12 @@ const AREA_GUIDES = {
       th: 'ชายหาดเงียบสงบ เหมาะสำหรับครอบครัวและผู้เกษียณ มีสิ่งอำนวยความสะดวกครบครัน ไม่วุ่นวายเหมือนพัทยากลาง',
       en: 'Peaceful beach area suitable for families and retirees. Well-equipped facilities without the hustle of Central Pattaya.'
     },
+    coordinates: { lat: 12.8873, lng: 100.8826 },
+    landmarks: [
+      { name: { th: 'หาดจอมเทียน', en: 'Jomtien Beach' }, lat: 12.8826, lng: 100.8824 },
+      { name: { th: 'ตลาดกลางคืนจอมเทียน', en: 'Jomtien Night Market' }, lat: 12.8896, lng: 100.8828 },
+      { name: { th: 'ตลาดน้ำพัทยา', en: 'Pattaya Floating Market' }, lat: 12.8402, lng: 100.9023 }
+    ],
     avg_price_sqm: 75000,
     price_trend_yoy: 7.2,
     residents: {
@@ -974,6 +986,12 @@ const AREA_GUIDES = {
       th: 'พื้นที่เงียบสงบที่สุดในพัทยา บรรยากาศธรรมชาติ เหมาะสำหรับผู้ต้องการความเป็นส่วนตัวและพักผ่อน',
       en: 'The most peaceful area in Pattaya with natural atmosphere. Perfect for those seeking privacy and relaxation.'
     },
+    coordinates: { lat: 12.8166, lng: 100.9133 },
+    landmarks: [
+      { name: { th: 'โอเชียนมารีน่ายอช์ทคลับ', en: 'Ocean Marina Yacht Club' }, lat: 12.8097, lng: 100.9056 },
+      { name: { th: 'สวนนงนุช', en: 'Nong Nooch Tropical Garden' }, lat: 12.7669, lng: 100.9356 },
+      { name: { th: 'เขาชีจรรย์', en: 'Khao Chi Chan' }, lat: 12.7658, lng: 100.9572 }
+    ],
     avg_price_sqm: 65000,
     price_trend_yoy: 9.1,
     residents: {
@@ -1005,6 +1023,12 @@ const AREA_GUIDES = {
       th: 'พื้นที่พรีเมียม วิวทะเลสวยงาม ระหว่างพัทยาและจอมเทียน เหมาะสำหรับผู้มีกำลังซื้อสูง',
       en: 'Premium area with beautiful sea views between Pattaya and Jomtien. Ideal for high-net-worth individuals.'
     },
+    coordinates: { lat: 12.9154, lng: 100.8606 },
+    landmarks: [
+      { name: { th: 'พระใหญ่', en: 'Big Buddha Temple' }, lat: 12.9163, lng: 100.8669 },
+      { name: { th: 'จุดชมวิวพระตำหนัก', en: 'Pratumnak Viewpoint' }, lat: 12.9178, lng: 100.8589 },
+      { name: { th: 'หาดดงตาล', en: 'Dongtan Beach' }, lat: 12.9058, lng: 100.8619 }
+    ],
     avg_price_sqm: 120000,
     price_trend_yoy: 6.8,
     residents: {
@@ -1036,6 +1060,12 @@ const AREA_GUIDES = {
       th: 'ชายหาดสวยที่สุดในพัทยา เงียบสงบ มีโครงการคอนโดหรู เหมาะสำหรับผู้ต้องการ Luxury lifestyle',
       en: 'The most beautiful beach in Pattaya. Peaceful with luxury condos. Perfect for luxury lifestyle seekers.'
     },
+    coordinates: { lat: 12.9596, lng: 100.8876 },
+    landmarks: [
+      { name: { th: 'หาดวงศ์อมาตย์', en: 'Wong Amat Beach' }, lat: 12.9611, lng: 100.8859 },
+      { name: { th: 'ปราสาทสัจธรรม', en: 'Sanctuary of Truth' }, lat: 12.9722, lng: 100.8950 },
+      { name: { th: 'เทอร์มินอล 21 พัทยา', en: 'Terminal 21 Pattaya' }, lat: 12.9559, lng: 100.8899 }
+    ],
     avg_price_sqm: 110000,
     price_trend_yoy: 7.5,
     residents: {
@@ -1067,6 +1097,12 @@ const AREA_GUIDES = {
       th: 'พื้นที่สีเขียวเงียบสงบ เหมาะสำหรับครอบครัวและผู้ต้องการบ้านพื้นที่กว้าง',
       en: 'Green and peaceful area ideal for families and those seeking spacious homes.'
     },
+    coordinates: { lat: 12.8408, lng: 100.9351 },
+    landmarks: [
+      { name: { th: 'สนามกอล์ฟฟีนิกซ์โกลด์', en: 'Phoenix Gold Golf Club' }, lat: 12.8349, lng: 100.9370 },
+      { name: { th: 'หาดบ้านอำเภอ', en: 'Baan Amphur Beach' }, lat: 12.8083, lng: 100.9187 },
+      { name: { th: 'ซิลเวอร์เลค', en: 'Silverlake Vineyard' }, lat: 12.7605, lng: 100.9588 }
+    ],
     avg_price_sqm: 52000,
     price_trend_yoy: 9.8,
     residents: {
@@ -1098,6 +1134,12 @@ const AREA_GUIDES = {
       th: 'หมู่บ้านชาวประมงสงบ ห่างจากตัวเมือง เหมาะสำหรับผู้ต้องการหนีความวุ่นวาย ราคาย่อมเยา',
       en: 'Peaceful fishing village away from the city. Perfect for those escaping the hustle. Affordable prices.'
     },
+    coordinates: { lat: 12.7627, lng: 100.9019 },
+    landmarks: [
+      { name: { th: 'หาดบางเสร่', en: 'Bang Saray Beach' }, lat: 12.7598, lng: 100.9024 },
+      { name: { th: 'เลเจนด์สยาม', en: 'Legend Siam' }, lat: 12.8051, lng: 100.9069 },
+      { name: { th: 'สนามบินอู่ตะเภา', en: 'U-Tapao Airport' }, lat: 12.6799, lng: 101.0051 }
+    ],
     avg_price_sqm: 55000,
     price_trend_yoy: 10.2,
     residents: {

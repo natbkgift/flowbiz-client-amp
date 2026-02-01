@@ -563,6 +563,35 @@
   margin-bottom: var(--space-xl);
 }
 
+.area-map-section {
+  margin-bottom: var(--space-xl);
+}
+
+.area-map-container {
+  width: 100%;
+  height: clamp(280px, 50vh, 480px);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  box-shadow: var(--shadow-card);
+}
+
+.area-map-container .leaflet-container {
+  width: 100%;
+  height: 100%;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
 @media (min-width: 768px) {
   .area-guide-grid {
     grid-template-columns: repeat(2, 1fr);

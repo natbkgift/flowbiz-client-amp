@@ -6,6 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Pattaya Areas Guide | Asset Management Property</title>
   <meta name="description" content="Explore all major areas in Pattaya - from Central Pattaya to Jomtien, Pratumnak, and more. Find the perfect location for your property investment.">
+  <meta name="robots" content="noindex, nofollow">
 
   <!-- Open Graph -->
   <meta property="og:title" content="Pattaya Areas Guide | Asset Management Property">
@@ -29,6 +30,7 @@
   <link rel="stylesheet" href="../../assets/css/projects.css">
   <link rel="stylesheet" href="../../assets/css/marketing.css">
   <link rel="stylesheet" href="../../assets/css/responsive.css">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="anonymous">
   <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
 </head>
 
@@ -95,6 +97,11 @@
           Compare prices, trends, and amenities across all major areas
         </p>
       </div>
+      <div class="area-map-section">
+        <h3 id="areas-overview-map-title" style="text-align: center; margin-bottom: 16px;">Area Map Overview</h3>
+        <p id="areas-overview-map-desc" class="sr-only">Interactive map overview of Pattaya area guides. Select a marker to open the area guide.</p>
+        <div class="area-map-container" id="areas-overview-map" role="region" aria-labelledby="areas-overview-map-title" aria-describedby="areas-overview-map-desc"></div>
+      </div>
 
       <!-- Areas Grid -->
       <div class="grid grid-3" id="areas-grid" style="gap: 24px;">
@@ -154,6 +161,7 @@
   <script src="../../assets/js/mock-data.js"></script>
   <script src="../../assets/js/i18n.js"></script>
   <script src="../../assets/js/main.js"></script>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin="anonymous"></script>
 
   <style>
     /* Card hover effects for better accessibility */
@@ -172,10 +180,28 @@
     // Initialize the areas grid
     function initAreasGrid() {
       const areasGrid = document.getElementById('areas-grid');
-      const currentLang = document.documentElement.lang || 'en';
+      const lang = document.documentElement.lang || 'en';
       
       // Get all areas from AREA_GUIDES
       const areaKeys = Object.keys(AREA_GUIDES);
+      const mapContainer = document.getElementById('areas-overview-map');
+      if (mapContainer && typeof L !== 'undefined') {
+        try {
+          const map = L.map(mapContainer, { scrollWheelZoom: false }).setView([12.9006, 100.8825], 12);
+          L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; OpenStreetMap contributors'
+          }).addTo(map);
+          areaKeys.forEach(areaKey => {
+            const area = AREA_GUIDES[areaKey];
+            if (!area?.coordinates) return;
+            const detailUrl = `./${areaKey}.html`;
+            const popupContent = `<a href="${detailUrl}">${area.name?.[lang] || area.name?.en || 'View area'}</a>`;
+            L.marker([area.coordinates.lat, area.coordinates.lng]).addTo(map).bindPopup(popupContent);
+          });
+        } catch (error) {
+          console.error('Failed to initialize Leaflet map:', error);
+        }
+      }
       
       // Count properties per area (mock data for now)
       const propertyCountByArea = {
@@ -196,7 +222,7 @@
         return `
           <div class="card" style="overflow: hidden; transition: transform 0.3s ease, box-shadow 0.3s ease;">
             <div style="position: relative; height: 200px; overflow: hidden;">
-              <img src="${area.image}" alt="${area.name[currentLang]}" loading="lazy" style="width: 100%; height: 100%; object-fit: cover;">
+              <img src="${area.image}" alt="${area.name[lang]}" loading="lazy" style="width: 100%; height: 100%; object-fit: cover;">
               <div style="position: absolute; top: 12px; right: 12px; background: white; padding: 6px 12px; border-radius: 20px; font-size: 0.85rem; font-weight: 600; box-shadow: 0 2px 8px rgba(0,0,0,0.15);">
                 ${propertyCount} ${propertyLabel}
               </div>
@@ -204,11 +230,11 @@
             
             <div style="padding: 20px;">
               <h3 style="margin: 0 0 12px 0; font-size: 1.4rem; color: var(--color-gray-900);">
-                ${area.name[currentLang]}
+                ${area.name[lang]}
               </h3>
               
               <p style="color: var(--color-gray-600); font-size: 0.95rem; line-height: 1.5; margin-bottom: 16px; min-height: 60px;">
-                ${area.description[currentLang]}
+                ${area.description[lang]}
               </p>
               
               <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px; padding: 16px; background: var(--color-gray-50); border-radius: 8px;">
@@ -229,7 +255,7 @@
               <div style="margin-bottom: 16px;">
                 <div style="font-size: 0.85rem; color: var(--color-gray-500); margin-bottom: 8px;" data-i18n="area_highlights">Highlights</div>
                 <div style="display: flex; flex-wrap: wrap; gap: 6px;">
-                  ${area.highlights[currentLang].slice(0, 3).map(highlight => `
+                  ${area.highlights[lang].slice(0, 3).map(highlight => `
                     <span style="font-size: 0.8rem; padding: 4px 10px; background: var(--color-primary-light); color: var(--color-primary); border-radius: 12px;">
                       ${highlight}
                     </span>
