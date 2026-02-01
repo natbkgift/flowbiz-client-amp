@@ -350,6 +350,7 @@ const TRANSLATIONS = {
     area_chart_source: 'ที่มา: ข้อมูลคู่มือพื้นที่ AMP (จำลอง)',
     area_chart_legend_price: 'ราคาเฉลี่ย/ตร.ม. (บาท)',
     area_chart_legend_trend: 'แนวโน้ม YoY (%)',
+    area_chart_currency_symbol: '฿',
     area_chart_price_aria: 'กราฟราคาเฉลี่ยต่อ ตร.ม. ของพื้นที่',
     area_chart_trend_aria: 'กราฟแนวโน้มราคาเทียบปีต่อปีของพื้นที่',
 
@@ -888,6 +889,7 @@ const TRANSLATIONS = {
     area_chart_source: 'Source: AMP area guide data (mock)',
     area_chart_legend_price: 'Avg Price/sqm (฿)',
     area_chart_legend_trend: 'YoY Trend (%)',
+    area_chart_currency_symbol: '฿',
     area_chart_price_aria: 'Area average price per square meter chart',
     area_chart_trend_aria: 'Area year-on-year price trend chart',
 

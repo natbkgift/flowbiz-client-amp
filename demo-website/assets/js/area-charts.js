@@ -36,15 +36,26 @@
     return fallback || key;
   }
 
+  function getCurrencySymbol() {
+    return getTranslation('area_chart_currency_symbol', '฿');
+  }
+
+  function formatPrice(value) {
+    const numeric = Number(value);
+    const formatted = Number.isFinite(numeric) ? numeric.toLocaleString() : '0';
+    return `${getCurrencySymbol()}${formatted}`;
+  }
+
   function getAreaChartData(chartKeys, lang) {
-    if (!Array.isArray(chartKeys)) return [];
+    const guideData = typeof AREA_GUIDES === 'undefined' ? window.AMP?.areaData : AREA_GUIDES;
+    if (!Array.isArray(chartKeys) || !guideData) return [];
     return chartKeys
-      .map(key => ({ key, data: AREA_GUIDES?.[key] }))
+      .map(key => ({ key, data: guideData?.[key] }))
       .filter(item => item.data)
       .map(item => ({
         key: item.key,
         name: item.data.name?.[lang] || item.data.name?.en || item.key,
-        // Mock data uses snake_case; convert into camelCase chart values.
+        // Area guide data uses snake_case fields (avg_price_sqm, price_trend_yoy); map into camelCase values.
         avgPrice: Number(item.data.avg_price_sqm),
         trend: Number(item.data.price_trend_yoy)
       }))
@@ -58,7 +69,7 @@
       data: {
         labels,
         datasets: [{
-          label: getTranslation('area_chart_legend_price', 'Avg Price/sqm (฿)'),
+          label: getTranslation('area_chart_legend_price', `Avg Price/sqm (${getCurrencySymbol()})`),
           data,
           backgroundColor: colors.background,
           borderColor: colors.border,
@@ -73,14 +84,14 @@
           legend: { display: false },
           tooltip: {
             callbacks: {
-              label: context => `฿${context.parsed.y.toLocaleString()}`
+              label: context => formatPrice(context.parsed.y)
             }
           }
         },
         scales: {
           y: {
             ticks: {
-              callback: value => `฿${Number(value).toLocaleString()}`
+              callback: value => formatPrice(value)
             }
           }
         }
@@ -127,7 +138,7 @@
     });
   }
 
-  function updateHighlights(areaData, ids) {
+  function updateHighlights(areaData, elements) {
     if (!areaData.length) return;
     const baseItem = areaData[0];
 
@@ -142,17 +153,19 @@
       if (item.trend < trendLow.trend) trendLow = item;
     });
 
-    const priceHighEl = document.getElementById(ids.priceHighId);
-    const priceLowEl = document.getElementById(ids.priceLowId);
-    const trendHighEl = document.getElementById(ids.trendHighId);
-    const trendLowEl = document.getElementById(ids.trendLowId);
+    const {
+      priceHighEl,
+      priceLowEl,
+      trendHighEl,
+      trendLowEl
+    } = elements;
 
     const highLabel = getTranslation('area_chart_high_label', 'Highest');
     const lowLabel = getTranslation('area_chart_low_label', 'Lowest');
     const formatTrend = value => `${value >= 0 ? '+' : ''}${value}%`;
 
-    if (priceHighEl) priceHighEl.textContent = `${highLabel}: ${priceHigh.name} (฿${priceHigh.avgPrice.toLocaleString()})`;
-    if (priceLowEl) priceLowEl.textContent = `${lowLabel}: ${priceLow.name} (฿${priceLow.avgPrice.toLocaleString()})`;
+    if (priceHighEl) priceHighEl.textContent = `${highLabel}: ${priceHigh.name} (${formatPrice(priceHigh.avgPrice)})`;
+    if (priceLowEl) priceLowEl.textContent = `${lowLabel}: ${priceLow.name} (${formatPrice(priceLow.avgPrice)})`;
     if (trendHighEl) trendHighEl.textContent = `${highLabel}: ${trendHigh.name} (${formatTrend(trendHigh.trend)})`;
     if (trendLowEl) trendLowEl.textContent = `${lowLabel}: ${trendLow.name} (${formatTrend(trendLow.trend)})`;
   }
@@ -171,9 +184,28 @@
       palette
     } = options;
 
+    if (typeof Chart === 'undefined') {
+      console.warn('Area charts: Chart.js is not available.');
+      return;
+    }
+
     const priceCanvas = document.getElementById(priceCanvasId);
     const trendCanvas = document.getElementById(trendCanvasId);
-    if (!priceCanvas || !trendCanvas || typeof Chart === 'undefined') return;
+    const priceHighEl = document.getElementById(priceHighId);
+    const priceLowEl = document.getElementById(priceLowId);
+    const trendHighEl = document.getElementById(trendHighId);
+    const trendLowEl = document.getElementById(trendLowId);
+    const missingElements = [];
+    if (!priceCanvas) missingElements.push(priceCanvasId);
+    if (!trendCanvas) missingElements.push(trendCanvasId);
+    if (!priceHighEl) missingElements.push(priceHighId);
+    if (!priceLowEl) missingElements.push(priceLowId);
+    if (!trendHighEl) missingElements.push(trendHighId);
+    if (!trendLowEl) missingElements.push(trendLowId);
+    if (missingElements.length) {
+      console.warn(`Area charts: missing required elements (${missingElements.join(', ')})`);
+      return;
+    }
 
     const areaData = getAreaChartData(chartKeys, lang);
     if (!areaData.length) return;
@@ -182,15 +214,26 @@
     const prices = areaData.map(item => item.avgPrice);
     const trends = areaData.map(item => item.trend);
 
-    if (chartStore[chartKey]?.price) chartStore[chartKey].price.destroy();
-    if (chartStore[chartKey]?.trend) chartStore[chartKey].trend.destroy();
+    if (chartStore[chartKey]?.price?.destroy) chartStore[chartKey].price.destroy();
+    if (chartStore[chartKey]?.trend?.destroy) chartStore[chartKey].trend.destroy();
+    delete chartStore[chartKey];
 
-    chartStore[chartKey] = {
-      price: buildBarChart(priceCanvas, labels, prices, palette.price),
-      trend: buildLineChart(trendCanvas, labels, trends, palette.trend)
-    };
+    const nextCharts = {};
+    try {
+      const priceChart = buildBarChart(priceCanvas, labels, prices, palette.price);
+      const trendChart = buildLineChart(trendCanvas, labels, trends, palette.trend);
+      if (priceChart) nextCharts.price = priceChart;
+      if (trendChart) nextCharts.trend = trendChart;
+    } catch (error) {
+      console.warn('Area charts: failed to render charts.', error);
+      return;
+    }
 
-    updateHighlights(areaData, { priceHighId, priceLowId, trendHighId, trendLowId });
+    if (Object.keys(nextCharts).length) {
+      chartStore[chartKey] = nextCharts;
+    }
+
+    updateHighlights(areaData, { priceHighEl, priceLowEl, trendHighEl, trendLowEl });
   }
 
   function initAreaIndexCharts({ chartKeys = defaultKeys, lang = 'en' } = {}) {
