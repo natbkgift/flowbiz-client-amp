@@ -327,7 +327,7 @@
       if (url.startsWith('/')) {
         return url;
       }
-      if (!/^https:\/\//i.test(url)) {
+      if (!/^https?:\/\//i.test(url)) {
         return '';
       }
       const parsed = new URL(url);
@@ -339,7 +339,7 @@
   }
 
   function formatDeveloperRating(developer) {
-    if (!developer || typeof developer.rating !== 'number') {
+    if (!developer || typeof developer.rating !== 'number' || !Number.isFinite(developer.rating)) {
       return '';
     }
     return Number.isInteger(developer.rating)
