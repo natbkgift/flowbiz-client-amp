@@ -426,10 +426,8 @@
 
       if (priceHighEl) priceHighEl.textContent = `${t('area_chart_high_label')}: ${priceHigh.name} (฿${priceHigh.avgPrice.toLocaleString()})`;
       if (priceLowEl) priceLowEl.textContent = `${t('area_chart_low_label')}: ${priceLow.name} (฿${priceLow.avgPrice.toLocaleString()})`;
-      const trendHighLabel = `${trendHigh.trend >= 0 ? '+' : ''}${trendHigh.trend}%`;
-      const trendLowLabel = `${trendLow.trend >= 0 ? '+' : ''}${trendLow.trend}%`;
-      if (trendHighEl) trendHighEl.textContent = `${t('area_chart_high_label')}: ${trendHigh.name} (${trendHighLabel})`;
-      if (trendLowEl) trendLowEl.textContent = `${t('area_chart_low_label')}: ${trendLow.name} (${trendLowLabel})`;
+      if (trendHighEl) trendHighEl.textContent = `${t('area_chart_high_label')}: ${trendHigh.name} (${trendHigh.trend >= 0 ? '+' : ''}${trendHigh.trend}%)`;
+      if (trendLowEl) trendLowEl.textContent = `${t('area_chart_low_label')}: ${trendLow.name} (${trendLow.trend >= 0 ? '+' : ''}${trendLow.trend}%)`;
     }
 
     // Initialize when DOM is loaded
