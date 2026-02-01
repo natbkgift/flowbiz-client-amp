@@ -159,7 +159,7 @@
     const statusClass = project.status.replace('_', '-');
     const priceText = formatPrice(project.pricing.min, project.pricing.max, lang);
     const yieldText = project.estimated_yield ? `${project.estimated_yield}%` : 'N/A';
-    const developerRating = developer?.rating ? developer.rating.toFixed(1) : '';
+    const developerRating = typeof developer?.rating === 'number' ? developer.rating.toFixed(1) : '';
 
     return `
       <div class="project-card">
@@ -226,6 +226,9 @@
   }
 
   function escapeHtml(value) {
+    if (value === null || value === undefined) {
+      return '';
+    }
     return String(value)
       .replace(/&/g, '&amp;')
       .replace(/</g, '&lt;')
