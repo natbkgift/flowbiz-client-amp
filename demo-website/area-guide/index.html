@@ -30,7 +30,7 @@
   <link rel="stylesheet" href="../assets/css/projects.css">
   <link rel="stylesheet" href="../assets/css/marketing.css">
   <link rel="stylesheet" href="../assets/css/responsive.css">
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="anonymous">
   <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
 </head>
 
@@ -81,8 +81,9 @@
   <section class="section" style="padding-top: 0;">
     <div class="container">
       <div class="area-map-section">
-        <h2 class="section-title" style="margin-bottom: 16px;">Explore Areas on the Map</h2>
-        <div class="area-map-container" id="area-guide-map"></div>
+        <h2 class="section-title" id="area-guide-map-title" style="margin-bottom: 16px;">Explore Areas on the Map</h2>
+        <p id="area-guide-map-desc" class="sr-only">Interactive map showing Pattaya areas. Select a marker to open the area guide.</p>
+        <div class="area-map-container" id="area-guide-map" role="region" aria-labelledby="area-guide-map-title" aria-describedby="area-guide-map-desc"></div>
       </div>
       <div class="area-guide-grid" id="area-guide-grid"></div>
     </div>
@@ -109,21 +110,26 @@
   <script src="../assets/js/mock-data.js"></script>
   <script src="../assets/js/i18n.js"></script>
   <script src="../assets/js/main.js"></script>
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin="anonymous"></script>
   <script>
     const areaData = window.AMP?.areaData;
+    const lang = document.documentElement.lang || 'en';
     const mapContainer = document.getElementById('area-guide-map');
     if (mapContainer && areaData && typeof L !== 'undefined') {
-      const map = L.map(mapContainer, { scrollWheelZoom: false }).setView([12.9006, 100.8825], 12);
-      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '&copy; OpenStreetMap contributors'
-      }).addTo(map);
-      Object.entries(areaData).forEach(([key, area]) => {
-        if (!area.coordinates) return;
-        const detailUrl = `../invest/areas/${key}.html`;
-        const popupContent = `<a href="${detailUrl}">${area.name?.en || 'View area'}</a>`;
-        L.marker([area.coordinates.lat, area.coordinates.lng]).addTo(map).bindPopup(popupContent);
-      });
+      try {
+        const map = L.map(mapContainer, { scrollWheelZoom: false }).setView([12.9006, 100.8825], 12);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+          attribution: '&copy; OpenStreetMap contributors'
+        }).addTo(map);
+        Object.entries(areaData).forEach(([key, area]) => {
+          if (!area.coordinates) return;
+          const detailUrl = `../invest/areas/${key}.html`;
+          const popupContent = `<a href="${detailUrl}">${area.name?.[lang] || area.name?.en || 'View area'}</a>`;
+          L.marker([area.coordinates.lat, area.coordinates.lng]).addTo(map).bindPopup(popupContent);
+        });
+      } catch (error) {
+        console.error('Failed to initialize Leaflet map:', error);
+      }
     }
     const ogImage = document.querySelector('meta[property="og:image"]');
     const twitterImage = document.querySelector('meta[name="twitter:image"]');
@@ -141,7 +147,6 @@
     }
     if (areaData) {
       const container = document.getElementById('area-guide-grid');
-      const lang = document.documentElement.lang || 'en';
       const entries = areaKey && areaData[areaKey] ? [[areaKey, areaData[areaKey]]] : Object.entries(areaData);
       const selectedArea = areaKey ? areaData[areaKey] : null;
       if (selectedArea) {

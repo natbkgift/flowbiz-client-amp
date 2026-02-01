@@ -30,7 +30,7 @@
   <link rel="stylesheet" href="../../assets/css/projects.css">
   <link rel="stylesheet" href="../../assets/css/marketing.css">
   <link rel="stylesheet" href="../../assets/css/responsive.css">
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="anonymous">
   <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
 </head>
 
@@ -150,8 +150,9 @@
   <section class="section" style="padding-top: 0;">
     <div class="container">
       <div class="area-map-section">
-        <h2 style="font-size: 1.8rem; margin-bottom: 16px;">Area Map & Landmarks</h2>
-        <div class="area-map-container" id="area-detail-map"></div>
+        <h2 id="area-map-heading" style="font-size: 1.8rem; margin-bottom: 16px;">Area Map & Landmarks</h2>
+        <p id="area-map-description" class="sr-only">Interactive map showing Na Jomtien landmarks and nearby points of interest.</p>
+        <div class="area-map-container" id="area-detail-map" role="region" aria-labelledby="area-map-heading" aria-describedby="area-map-description"></div>
       </div>
     </div>
   </section>
@@ -254,15 +255,16 @@
   <script src="../../assets/js/mock-data.js"></script>
   <script src="../../assets/js/i18n.js"></script>
   <script src="../../assets/js/main.js"></script>
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin="anonymous"></script>
 
   <script>
     // Area key for this page
     const AREA_KEY = 'na-jomtien';
+    const pageLang = () => document.documentElement.lang || 'en';
     
     // Initialize page with area data
     function initAreaDetailPage() {
-      const currentLang = document.documentElement.lang || 'en';
+      const lang = pageLang();
       const areaData = AREA_GUIDES[AREA_KEY];
       
       if (!areaData) {
@@ -271,8 +273,8 @@
       }
 
       // Update page title and meta tags
-      const areaName = areaData.name[currentLang];
-      const areaDesc = areaData.description[currentLang];
+      const areaName = areaData.name[lang];
+      const areaDesc = areaData.description[lang];
       
       // Update document title
       document.title = `${areaName} Area Guide | Investment & Properties | Asset Management Property`;
@@ -305,16 +307,20 @@
       if (areaData.coordinates && typeof L !== 'undefined') {
         const mapContainer = document.getElementById('area-detail-map');
         if (mapContainer) {
-          const map = L.map(mapContainer, { scrollWheelZoom: false }).setView([areaData.coordinates.lat, areaData.coordinates.lng], 13);
-          L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            attribution: '&copy; OpenStreetMap contributors'
-          }).addTo(map);
-          const areaMarker = L.marker([areaData.coordinates.lat, areaData.coordinates.lng]).addTo(map);
-          areaMarker.bindPopup(areaName);
-          (areaData.landmarks || []).forEach(landmark => {
-            L.marker([landmark.lat, landmark.lng]).addTo(map)
-              .bindPopup(landmark.name?.[currentLang] || landmark.name?.en || 'Landmark');
-          });
+          try {
+            const map = L.map(mapContainer, { scrollWheelZoom: false }).setView([areaData.coordinates.lat, areaData.coordinates.lng], 13);
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+              attribution: '&copy; OpenStreetMap contributors'
+            }).addTo(map);
+            const areaMarker = L.marker([areaData.coordinates.lat, areaData.coordinates.lng]).addTo(map);
+            areaMarker.bindPopup(areaName);
+            (areaData.landmarks || []).forEach(landmark => {
+              L.marker([landmark.lat, landmark.lng]).addTo(map)
+                .bindPopup(landmark.name?.[lang] || landmark.name?.en || 'Landmark');
+            });
+          } catch (error) {
+            console.error('Failed to initialize Leaflet map for area:', areaName, error);
+          }
         }
       }
 
@@ -326,11 +332,11 @@
       trendEl.textContent = `${trend >= 0 ? '↗' : '↘'} ${trend >= 0 ? '+' : ''}${trend}%`;
       trendEl.style.color = trend >= 0 ? '#10b981' : '#ef4444';
       
-      document.getElementById('area-residents').textContent = areaData.residents[currentLang];
+      document.getElementById('area-residents').textContent = areaData.residents[lang];
 
       // Populate highlights
       const highlightsList = document.getElementById('area-highlights-list');
-      highlightsList.innerHTML = areaData.highlights[currentLang].map(highlight => `
+      highlightsList.innerHTML = areaData.highlights[lang].map(highlight => `
         <li style="padding: 12px 0; border-bottom: 1px solid var(--color-gray-200); display: flex; align-items: start; gap: 12px;">
           <span style="color: var(--color-primary); font-size: 1.2rem; flex-shrink: 0;">✓</span>
           <span style="color: var(--color-gray-700); line-height: 1.5;">${highlight}</span>
@@ -339,7 +345,7 @@
 
       // Populate nearby places
       const nearbyList = document.getElementById('area-nearby-list');
-      const nearby = areaData.nearby[currentLang];
+      const nearby = areaData.nearby[lang];
       nearbyList.innerHTML = `
         <div style="display: flex; align-items: start; gap: 12px; padding: 12px; background: var(--color-gray-50); border-radius: 8px;">
           <span style="font-size: 1.5rem;">🏥</span>
@@ -378,7 +384,7 @@
 
     // Load and display properties for this area
     function loadAreaProperties() {
-      const currentLang = document.documentElement.lang || 'en';
+      const lang = pageLang();
       const propertiesGrid = document.getElementById('properties-grid');
       
       // Use shared area name mapping from mock-data.js
@@ -407,7 +413,7 @@
       }
 
       propertiesGrid.innerHTML = areaProperties.map(property => {
-        const title = currentLang === 'th' ? property.title_th : property.title_en;
+        const title = lang === 'th' ? property.title_th : property.title_en;
         const price = property.price.toLocaleString();
         const priceUnit = property.intent === 'rent' ? '/mo' : '';
         
