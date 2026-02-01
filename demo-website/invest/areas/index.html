@@ -331,9 +331,10 @@
         .map(item => ({
           key: item.key,
           name: item.data.name?.[lang] || item.data.name?.en || item.key,
-          avgPrice: item.data.avg_price_sqm,
-          trend: item.data.price_trend_yoy
-        }));
+          avgPrice: Number(item.data.avg_price_sqm),
+          trend: Number(item.data.price_trend_yoy)
+        }))
+        .filter(item => Number.isFinite(item.avgPrice) && Number.isFinite(item.trend));
 
       if (areaData.length === 0) return;
 
