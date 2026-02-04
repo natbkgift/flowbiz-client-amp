@@ -144,7 +144,7 @@ class LeadWebhookPayload(BaseModel):
     last_name: Optional[str] = None
     email: Optional[EmailStr] = None
     phone: str
-    language: Optional[str] = "en"
+    language: Optional[str] = "en"  # Webhook leads default to English; local LeadContact defaults to "th"
 
     # Qualification
     budget: Optional[str] = None
