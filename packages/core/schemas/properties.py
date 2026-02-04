@@ -133,6 +133,7 @@ class PropertyUpdate(BaseModel):
     pricing: Optional[PropertyPricing] = None
     media: Optional[list[PropertyMedia]] = None
     marketing: Optional[PropertyMarketingConfig] = None
+    date_available: Optional[datetime] = None
 
 
 class PropertyResponse(PropertyBase, BaseResponse):
