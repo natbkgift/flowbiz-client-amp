@@ -51,7 +51,7 @@ class PropertySpecs(BaseModel):
 
     bedrooms: Optional[int] = None
     bathrooms: Optional[int] = None
-    size_sqm: Optional[Decimal] = None
+    size_sqm: Optional[Decimal] = Field(default=None, gt=0)
     floor: Optional[int] = None
     total_floors: Optional[int] = None
     furnishing: Optional[str] = None  # furnished, unfurnished, partially
