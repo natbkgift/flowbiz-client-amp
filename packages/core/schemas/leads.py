@@ -46,7 +46,7 @@ class LeadQualification(BaseModel):
     purpose: Optional[str] = None  # investment, residence, both
     property_type_preference: Optional[str] = None
     area_preference: Optional[str] = None
-    bedrooms_preference: Optional[int] = None
+    bedrooms_preference: Optional[int] = Field(default=None, ge=0)
 
 
 class LeadNotificationStatus(BaseModel):
