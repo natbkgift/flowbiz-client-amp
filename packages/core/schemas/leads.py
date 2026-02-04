@@ -111,6 +111,7 @@ class LeadUpdate(BaseModel):
     assigned_agent: Optional[str] = None
     notes: Optional[str] = None
     next_follow_up: Optional[datetime] = None
+    contact: Optional[LeadContact] = None
     qualification: Optional[LeadQualification] = None
 
 
