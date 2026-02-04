@@ -141,7 +141,7 @@ class LeadWebhookPayload(BaseModel):
     # Contact info
     first_name: str
     last_name: Optional[str] = None
-    email: Optional[str] = None
+    email: Optional[EmailStr] = None
     phone: str
     language: Optional[str] = "en"
 
