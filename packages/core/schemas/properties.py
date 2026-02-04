@@ -42,8 +42,8 @@ class PropertyLocation(BaseModel):
     sub_area: Optional[str] = None
     project_name: Optional[str] = None
     address: Optional[str] = None
-    lat: Optional[float] = None
-    lng: Optional[float] = None
+    lat: Optional[float] = Field(default=None, ge=-90, le=90)
+    lng: Optional[float] = Field(default=None, ge=-180, le=180)
 
 
 class PropertySpecs(BaseModel):
