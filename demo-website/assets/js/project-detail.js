@@ -311,7 +311,7 @@
             </div>
             
             <div class="project-card-actions">
-              <a href="detail.html?id=${project.project_id}" class="btn btn-primary btn-block">
+              <a href="/projects/detail.html?id=${project.project_id}" class="btn btn-primary btn-block">
                 ${lang === 'th' ? 'ดูข้อมูล' : 'View Info'}
               </a>
             </div>
