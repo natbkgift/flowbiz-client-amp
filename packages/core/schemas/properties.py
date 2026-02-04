@@ -61,9 +61,9 @@ class PropertySpecs(BaseModel):
 class PropertyPricing(BaseModel):
     """Pricing information for a property."""
 
-    price_sale: Optional[Decimal] = None
-    price_rent_monthly: Optional[Decimal] = None
-    price_rent_daily: Optional[Decimal] = None
+    price_sale: Optional[Decimal] = Field(default=None, gt=0)
+    price_rent_monthly: Optional[Decimal] = Field(default=None, gt=0)
+    price_rent_daily: Optional[Decimal] = Field(default=None, gt=0)
     currency: str = "THB"
     price_negotiable: bool = True
     transfer_fee_split: Optional[str] = "50/50"
