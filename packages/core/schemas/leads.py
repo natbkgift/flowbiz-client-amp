@@ -2,17 +2,21 @@
 Lead schemas for AMP Property Marketing System.
 """
 
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Optional
 
 from pydantic import BaseModel, EmailStr, Field
 
 from packages.core.schemas.base import BaseResponse
 from packages.core.schemas.enums import (
+    ContactPreference,
+    Language,
     LeadPriority,
     LeadSource,
     LeadStatus,
     PropertyIntent,
+    Purpose,
+    Timeline,
 )
 
 
@@ -23,8 +27,8 @@ class LeadContact(BaseModel):
     last_name: Optional[str] = None
     email: Optional[EmailStr] = None
     phone: str
-    preferred_contact: str = "phone"  # phone, email, line, whatsapp
-    language: str = "th"  # th, en, zh, ru
+    preferred_contact: ContactPreference = ContactPreference.PHONE
+    language: Language = Language.THAI
 
 
 class LeadUTM(BaseModel):
@@ -40,10 +44,10 @@ class LeadUTM(BaseModel):
 class LeadQualification(BaseModel):
     """Lead qualification data."""
 
-    budget_min: Optional[int] = None
-    budget_max: Optional[int] = None
-    timeline: Optional[str] = None  # immediate, 1-3months, 3-6months, 6months+
-    purpose: Optional[str] = None  # investment, residence, both
+    budget_min: Optional[int] = Field(default=None, ge=0)
+    budget_max: Optional[int] = Field(default=None, ge=0)
+    timeline: Optional[Timeline] = None
+    purpose: Optional[Purpose] = None
     property_type_preference: Optional[str] = None
     area_preference: Optional[str] = None
     bedrooms_preference: Optional[int] = Field(default=None, ge=0)
@@ -92,8 +96,8 @@ class LeadBase(BaseModel):
     notes: Optional[str] = None
 
     # Timestamps
-    created_at: datetime = Field(default_factory=datetime.utcnow)
-    updated_at: datetime = Field(default_factory=datetime.utcnow)
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    updated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     next_follow_up: Optional[datetime] = None
 
 
@@ -144,7 +148,8 @@ class LeadWebhookPayload(BaseModel):
     last_name: Optional[str] = None
     email: Optional[EmailStr] = None
     phone: str
-    language: Optional[str] = "en"  # Webhook leads default to English; local LeadContact defaults to "th"
+    # Webhook leads default to English; local LeadContact defaults to "th"
+    language: Optional[str] = "en"
 
     # Qualification
     budget: Optional[str] = None

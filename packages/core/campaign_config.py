@@ -8,6 +8,7 @@ from packages.core.schemas.enums import (
     ContentFormat,
     LeadFormType,
     LeadPriority,
+    NotificationChannel,
     TargetAudience,
 )
 
@@ -42,7 +43,7 @@ CAMPAIGN_MATRIX = {
         },
         "target_cpl_thb": 500,
         "follow_up_hours": 1,
-        "notifications": ["email", "line_notify"],
+        "notifications": [NotificationChannel.EMAIL, NotificationChannel.LINE_NOTIFY],
     },
     "sale_resale": {
         "name": "Resale Property Campaign",
@@ -72,7 +73,7 @@ CAMPAIGN_MATRIX = {
         },
         "target_cpl_thb": 200,
         "follow_up_hours": 2,
-        "notifications": ["email", "line_notify"],
+        "notifications": [NotificationChannel.EMAIL, NotificationChannel.LINE_NOTIFY],
     },
     "rent_long": {
         "name": "Long-term Rental Campaign",
@@ -100,7 +101,7 @@ CAMPAIGN_MATRIX = {
         },
         "target_cpl_thb": 100,
         "follow_up_hours": 4,
-        "notifications": ["email", "line_notify"],
+        "notifications": [NotificationChannel.EMAIL, NotificationChannel.LINE_NOTIFY],
     },
     "rent_short": {
         "name": "Short-term Rental Campaign",
@@ -127,7 +128,7 @@ CAMPAIGN_MATRIX = {
         },
         "target_cpl_thb": 150,
         "follow_up_hours": 1,
-        "notifications": ["email", "whatsapp"],
+        "notifications": [NotificationChannel.EMAIL, NotificationChannel.WHATSAPP],
     },
 }
 

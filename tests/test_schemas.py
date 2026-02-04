@@ -5,6 +5,7 @@ Tests for core schemas and enums.
 from decimal import Decimal
 
 import pytest
+from pydantic import ValidationError
 
 from packages.core.campaign_config import get_campaign_config, get_hashtags
 from packages.core.schemas.enums import (
@@ -40,6 +41,7 @@ class TestEnums:
         assert LeadPriority.HOT.value == "hot"
         assert LeadPriority.WARM.value == "warm"
         assert LeadPriority.COLD.value == "cold"
+        assert LeadPriority.DEAD.value == "dead"
 
 
 class TestPropertySchemas:
@@ -58,7 +60,7 @@ class TestPropertySchemas:
         assert property_data.intent == PropertyIntent.SALE_NEW
 
     def test_property_id_pattern_invalid(self):
-        with pytest.raises(ValueError):
+        with pytest.raises(ValidationError):
             PropertyCreate(
                 property_id="INVALID-ID",
                 intent=PropertyIntent.SALE_NEW,

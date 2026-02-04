@@ -2,7 +2,7 @@
 Property schemas for AMP Property Marketing System.
 """
 
-from datetime import datetime
+from datetime import datetime, timezone
 from decimal import Decimal
 from typing import Optional
 
@@ -12,10 +12,13 @@ from packages.core.schemas.base import BaseResponse
 from packages.core.schemas.enums import (
     AdChannel,
     ContentFormat,
+    FurnishingType,
+    MediaType,
     PropertyIntent,
     PropertyStatus,
     PropertyType,
     TargetAudience,
+    ViewType,
 )
 
 
@@ -23,7 +26,7 @@ class PropertyMedia(BaseModel):
     """Media item for a property."""
 
     url: HttpUrl
-    type: str = "photo"  # photo, video, virtual_tour
+    type: MediaType = MediaType.PHOTO
     is_primary: bool = False
     sort_order: Optional[int] = Field(
         default=None,
@@ -51,11 +54,11 @@ class PropertySpecs(BaseModel):
 
     bedrooms: Optional[int] = Field(default=None, ge=0)
     bathrooms: Optional[int] = Field(default=None, ge=0)
-    size_sqm: Optional[Decimal] = None
+    size_sqm: Optional[Decimal] = Field(default=None, gt=0)
     floor: Optional[int] = Field(default=None, ge=1)
     total_floors: Optional[int] = Field(default=None, ge=1)
-    furnishing: Optional[str] = None  # furnished, unfurnished, partially
-    view: Optional[str] = None  # sea_view, city_view, pool_view, garden_view
+    furnishing: Optional[FurnishingType] = None
+    view: Optional[ViewType] = None
 
 
 class PropertyPricing(BaseModel):
@@ -108,8 +111,8 @@ class PropertyBase(BaseModel):
 
     # Timestamps
     date_available: Optional[datetime] = None
-    date_added: datetime = Field(default_factory=datetime.utcnow)
-    date_updated: datetime = Field(default_factory=datetime.utcnow)
+    date_added: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    date_updated: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
 
 class PropertyCreate(PropertyBase):
@@ -133,6 +136,7 @@ class PropertyUpdate(BaseModel):
     pricing: Optional[PropertyPricing] = None
     media: Optional[list[PropertyMedia]] = None
     marketing: Optional[PropertyMarketingConfig] = None
+    date_available: Optional[datetime] = None
     date_available: Optional[datetime] = None
 
 

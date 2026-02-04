@@ -140,3 +140,64 @@ class NotificationChannel(str, Enum):
     SLACK = "slack"
     WHATSAPP = "whatsapp"
     SMS = "sms"
+
+
+class MediaType(str, Enum):
+    """Media content types for property listings."""
+
+    PHOTO = "photo"
+    VIDEO = "video"
+    VIRTUAL_TOUR = "virtual_tour"
+
+
+class FurnishingType(str, Enum):
+    """Property furnishing status."""
+
+    FURNISHED = "furnished"
+    UNFURNISHED = "unfurnished"
+    PARTIALLY = "partially"
+
+
+class ViewType(str, Enum):
+    """Property view types."""
+
+    SEA_VIEW = "sea_view"
+    CITY_VIEW = "city_view"
+    POOL_VIEW = "pool_view"
+    GARDEN_VIEW = "garden_view"
+    MOUNTAIN_VIEW = "mountain_view"
+
+
+class Language(str, Enum):
+    """Supported languages for communication."""
+
+    THAI = "th"
+    ENGLISH = "en"
+    CHINESE = "zh"
+    RUSSIAN = "ru"
+
+
+class ContactPreference(str, Enum):
+    """Preferred contact method."""
+
+    PHONE = "phone"
+    EMAIL = "email"
+    LINE = "line"
+    WHATSAPP = "whatsapp"
+
+
+class Timeline(str, Enum):
+    """Lead timeline for purchase/rental."""
+
+    IMMEDIATE = "immediate"
+    ONE_TO_THREE_MONTHS = "1-3months"
+    THREE_TO_SIX_MONTHS = "3-6months"
+    SIX_MONTHS_PLUS = "6months+"
+
+
+class Purpose(str, Enum):
+    """Lead purpose for property."""
+
+    INVESTMENT = "investment"
+    RESIDENCE = "residence"
+    BOTH = "both"
