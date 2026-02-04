@@ -49,11 +49,11 @@ class PropertyLocation(BaseModel):
 class PropertySpecs(BaseModel):
     """Property specifications."""
 
-    bedrooms: Optional[int] = None
-    bathrooms: Optional[int] = None
-    size_sqm: Optional[Decimal] = Field(default=None, gt=0)
-    floor: Optional[int] = None
-    total_floors: Optional[int] = None
+    bedrooms: Optional[int] = Field(default=None, ge=0)
+    bathrooms: Optional[int] = Field(default=None, ge=0)
+    size_sqm: Optional[Decimal] = None
+    floor: Optional[int] = Field(default=None, ge=1)
+    total_floors: Optional[int] = Field(default=None, ge=1)
     furnishing: Optional[str] = None  # furnished, unfurnished, partially
     view: Optional[str] = None  # sea_view, city_view, pool_view, garden_view
 
