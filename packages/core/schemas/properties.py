@@ -25,7 +25,14 @@ class PropertyMedia(BaseModel):
     url: HttpUrl
     type: str = "photo"  # photo, video, virtual_tour
     is_primary: bool = False
-    sort_order: int = 0
+    sort_order: Optional[int] = Field(
+        default=None,
+        description=(
+            "Display order for this media item. "
+            "If omitted, application logic should assign sort_order "
+            "to ensure a consistent primary image and carousel ordering."
+        ),
+    )
 
 
 class PropertyLocation(BaseModel):
