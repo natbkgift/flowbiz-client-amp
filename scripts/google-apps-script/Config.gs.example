@@ -1,0 +1,269 @@
+/**
+ * Config.gs.example
+ * 
+ * Configuration example for Lead Tracking Automation
+ * 
+ * HOW TO USE:
+ * 1. Copy this file content to a new file named "Config.gs" in Apps Script Editor
+ * 2. DO NOT hardcode sensitive values here
+ * 3. Use Script Properties instead (see instructions below)
+ * 
+ * SETTING UP SCRIPT PROPERTIES:
+ * 1. In Apps Script Editor, click ⚙️ Project Settings
+ * 2. Scroll to "Script Properties" section
+ * 3. Click "Add script property"
+ * 4. Add the following properties:
+ *    - LINE_CHANNEL_ACCESS_TOKEN: your_token_here
+ *    - LINE_GROUP_ID: your_group_id_here
+ *    - SPREADSHEET_URL: (optional) your_spreadsheet_url
+ */
+
+/**
+ * Configuration object for the application
+ * Loads settings from Script Properties
+ */
+const CONFIG = {
+  // LINE Messaging API Configuration
+  LINE: {
+    // Channel Access Token - stored in Script Properties
+    // Get from LINE Developers Console: https://developers.line.biz/
+    CHANNEL_ACCESS_TOKEN: null, // DO NOT hardcode - set via Script Properties
+    
+    // LINE Group/User ID to send reports to
+    // Get this by adding bot to group and checking webhook logs
+    GROUP_ID: null, // DO NOT hardcode - set via Script Properties
+    
+    // LINE API Endpoint
+    API_ENDPOINT: 'https://api.line.me/v2/bot/message/push'
+  },
+  
+  // Google Sheets Configuration
+  SHEETS: {
+    // Tab names (must match exactly - case sensitive)
+    ACTIVE_LEADS: '01_Active_Leads',
+    HOT_LEADS: '02_Hot_Leads',
+    WARM_LEADS: '03_Warm_Leads',
+    COLD_LEADS: '04_Cold_Leads',
+    CONVERTED: '05_Converted',
+    LOST_UNQUALIFIED: '06_Lost_Unqualified',
+    FOLLOW_UP_LOG: '07_Follow_Up_Log',
+    DASHBOARD: '08_Dashboard',
+    
+    // Column indices (0-based for array access)
+    COLUMNS: {
+      LEAD_ID: 0,           // A
+      STATUS: 1,            // B
+      PRIORITY: 2,          // C
+      SCORE: 3,             // D
+      SOURCE: 4,            // E
+      DATE_CREATED: 7,      // H
+      DATE_LAST_CONTACT: 9, // J
+      DAYS_SINCE_CONTACT: 11, // L
+      CONTACT_COUNT: 12,    // M
+      FIRST_NAME: 13,       // N
+      FULL_NAME: 15,        // P
+      PHONE: 17,            // R
+      INTEREST_TYPE: 23,    // X
+      BUDGET_MAX: 27,       // AB
+      ASSIGNED_AGENT: 36,   // AK
+      NEXT_FOLLOW_UP: 40,   // AO
+      FOLLOW_UP_ACTION: 41, // AP
+      STAGE: 42,            // AQ
+    }
+  },
+  
+  // Report Configuration
+  REPORTS: {
+    // Timezone for date formatting
+    TIMEZONE: 'Asia/Bangkok',
+    
+    // Report schedule (informational - actual schedule set via Triggers)
+    SCHEDULE: {
+      DAILY_REPORT: '09:00',     // 9:00 AM
+      WEEKLY_REPORT: 'Mon 09:00', // Monday 9:00 AM
+      OVERDUE_CHECK: '08:00'      // 8:00 AM
+    },
+    
+    // Thresholds for alerts
+    THRESHOLDS: {
+      HOT_LEAD_SCORE: 75,           // Score >= 75 is Hot
+      OVERDUE_HOT_DAYS: 0,          // Hot leads overdue > 0 days
+      OVERDUE_WARM_DAYS: 3,         // Warm leads overdue > 3 days
+      OVERDUE_ALL_DAYS: 7,          // All leads overdue > 7 days
+      DAYS_SINCE_CONTACT_ALERT: 7   // Alert if no contact > 7 days
+    }
+  },
+  
+  // Formatting Configuration
+  FORMAT: {
+    CURRENCY: 'THB',
+    DATE_FORMAT: 'dd MMM yyyy',
+    DATETIME_FORMAT: 'dd MMM yyyy HH:mm',
+    NUMBER_FORMAT: '#,##0'
+  },
+  
+  // Feature Flags
+  FEATURES: {
+    ENABLE_DAILY_REPORTS: true,
+    ENABLE_WEEKLY_REPORTS: true,
+    ENABLE_OVERDUE_ALERTS: true,
+    ENABLE_ERROR_NOTIFICATIONS: true,
+    DEBUG_MODE: false  // Set to true for verbose logging
+  }
+};
+
+/**
+ * Load configuration from Script Properties
+ * This function is called by other scripts to get config values
+ * 
+ * @returns {Object} Configuration object with values from Script Properties
+ */
+function loadConfig() {
+  const props = PropertiesService.getScriptProperties();
+  
+  // Load LINE configuration from Script Properties
+  CONFIG.LINE.CHANNEL_ACCESS_TOKEN = props.getProperty('LINE_CHANNEL_ACCESS_TOKEN');
+  CONFIG.LINE.GROUP_ID = props.getProperty('LINE_GROUP_ID');
+  
+  // Optionally load spreadsheet URL (if not using active spreadsheet)
+  const spreadsheetUrl = props.getProperty('SPREADSHEET_URL');
+  if (spreadsheetUrl) {
+    CONFIG.SHEETS.SPREADSHEET_URL = spreadsheetUrl;
+  }
+  
+  // Validate required properties
+  if (!CONFIG.LINE.CHANNEL_ACCESS_TOKEN) {
+    throw new Error('LINE_CHANNEL_ACCESS_TOKEN not set in Script Properties');
+  }
+  
+  if (!CONFIG.LINE.GROUP_ID) {
+    throw new Error('LINE_GROUP_ID not set in Script Properties');
+  }
+  
+  return CONFIG;
+}
+
+/**
+ * Get the spreadsheet object
+ * Uses SPREADSHEET_URL if set, otherwise uses active spreadsheet
+ * 
+ * @returns {Spreadsheet} Spreadsheet object
+ */
+function getSpreadsheet() {
+  if (CONFIG.SHEETS.SPREADSHEET_URL) {
+    return SpreadsheetApp.openByUrl(CONFIG.SHEETS.SPREADSHEET_URL);
+  }
+  return SpreadsheetApp.getActiveSpreadsheet();
+}
+
+/**
+ * Helper function to check if debug mode is enabled
+ * 
+ * @returns {boolean} True if debug mode is enabled
+ */
+function isDebugMode() {
+  return CONFIG.FEATURES.DEBUG_MODE;
+}
+
+/**
+ * Helper function for debug logging
+ * Only logs if debug mode is enabled
+ * 
+ * @param {string} message - Message to log
+ * @param {*} data - Optional data to log
+ */
+function debugLog(message, data) {
+  if (isDebugMode()) {
+    Logger.log('[DEBUG] ' + message);
+    if (data !== undefined) {
+      Logger.log(JSON.stringify(data, null, 2));
+    }
+  }
+}
+
+/**
+ * TEST FUNCTION: Display current configuration
+ * Run this to verify your configuration is loaded correctly
+ */
+function testConfig() {
+  try {
+    loadConfig();
+    
+    Logger.log('=== Configuration Test ===');
+    Logger.log('✓ LINE Token: ' + (CONFIG.LINE.CHANNEL_ACCESS_TOKEN ? 'Set' : 'NOT SET'));
+    Logger.log('✓ LINE Group ID: ' + (CONFIG.LINE.GROUP_ID ? 'Set' : 'NOT SET'));
+    Logger.log('✓ Timezone: ' + CONFIG.REPORTS.TIMEZONE);
+    Logger.log('✓ Active Leads Tab: ' + CONFIG.SHEETS.ACTIVE_LEADS);
+    
+    // Test spreadsheet access
+    const ss = getSpreadsheet();
+    Logger.log('✓ Spreadsheet: ' + ss.getName());
+    
+    // Test sheet access
+    const activeLeadsSheet = ss.getSheetByName(CONFIG.SHEETS.ACTIVE_LEADS);
+    if (activeLeadsSheet) {
+      Logger.log('✓ Active Leads Sheet found with ' + activeLeadsSheet.getLastRow() + ' rows');
+    } else {
+      Logger.log('✗ Active Leads Sheet NOT FOUND');
+    }
+    
+    Logger.log('Configuration test completed successfully!');
+    return true;
+  } catch (error) {
+    Logger.log('✗ Configuration test FAILED: ' + error.message);
+    return false;
+  }
+}
+
+/**
+ * SETUP FUNCTION: Set Script Properties programmatically
+ * Use this as an alternative to manually setting properties in UI
+ * 
+ * WARNING: Never commit actual tokens to version control!
+ * 
+ * @param {string} lineToken - LINE Channel Access Token
+ * @param {string} lineGroupId - LINE Group ID
+ * @param {string} spreadsheetUrl - (Optional) Spreadsheet URL
+ */
+function setupScriptProperties(lineToken, lineGroupId, spreadsheetUrl) {
+  const props = PropertiesService.getScriptProperties();
+  
+  if (lineToken) {
+    props.setProperty('LINE_CHANNEL_ACCESS_TOKEN', lineToken);
+    Logger.log('✓ LINE_CHANNEL_ACCESS_TOKEN set');
+  }
+  
+  if (lineGroupId) {
+    props.setProperty('LINE_GROUP_ID', lineGroupId);
+    Logger.log('✓ LINE_GROUP_ID set');
+  }
+  
+  if (spreadsheetUrl) {
+    props.setProperty('SPREADSHEET_URL', spreadsheetUrl);
+    Logger.log('✓ SPREADSHEET_URL set');
+  }
+  
+  Logger.log('Script Properties updated successfully!');
+}
+
+/**
+ * UTILITY FUNCTION: List all Script Properties (without revealing values)
+ * Useful for debugging configuration issues
+ */
+function listScriptProperties() {
+  const props = PropertiesService.getScriptProperties();
+  const allProps = props.getProperties();
+  
+  Logger.log('=== Script Properties ===');
+  Object.keys(allProps).forEach(key => {
+    const value = allProps[key];
+    // Mask sensitive values
+    const maskedValue = value.length > 10 
+      ? value.substring(0, 5) + '...' + value.substring(value.length - 5)
+      : '***';
+    Logger.log(key + ': ' + maskedValue);
+  });
+}
+
+// Export CONFIG for use in other files
+// Note: Apps Script doesn't have formal exports, but other files can access this
