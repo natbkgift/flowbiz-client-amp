@@ -10,7 +10,7 @@ requires Google Sheets API credentials which should not be committed.
 import os
 from abc import ABC, abstractmethod
 from typing import List, Optional
-from datetime import datetime, date
+from datetime import date
 
 from .schemas.lead import Lead
 
