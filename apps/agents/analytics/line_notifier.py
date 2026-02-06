@@ -5,7 +5,6 @@ Module for sending notifications via LINE Messaging API.
 """
 
 import os
-import json
 from typing import Optional, Dict, Any
 import httpx
 
