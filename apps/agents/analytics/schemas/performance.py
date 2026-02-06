@@ -6,7 +6,6 @@ Data models for sales performance metrics and analytics.
 
 from dataclasses import dataclass, field
 from datetime import date
-from typing import Optional
 
 
 @dataclass
