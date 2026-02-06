@@ -9,7 +9,7 @@ import json
 from typing import Optional, Dict, Any
 import httpx
 
-from .schemas.performance import SalesPerformance, TeamPerformance
+from .schemas.performance import SalesPerformance
 
 
 class LINENotifier:
