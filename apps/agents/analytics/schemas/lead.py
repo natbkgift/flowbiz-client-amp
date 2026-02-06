@@ -188,7 +188,8 @@ class Lead:
             try:
                 interest_type = InterestType(data['interest_type'])
             except ValueError:
-                pass
+                # If an invalid interest_type is provided, treat it as unspecified
+                interest_type = None
         
         # Parse tags
         tags = data.get('tags', [])
