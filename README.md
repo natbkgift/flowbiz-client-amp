@@ -48,9 +48,121 @@ specializing in Pattaya real estate market.
 | **AI Sale Chat Agent** | Chatbot ตอบคำถาม Thai/English 24/7 | 🔲 Planned |
 | **Listing/Project Agent** | จัดการข้อมูล property และ auto-tagging | 🔲 Planned |
 | **Ads/Promotion Agent** | สร้าง ad copy และวิเคราะห์แคมเปญ | 🔲 Planned |
-| **Content/Branding Agent** | สร้าง content และรักษา brand consistency | 🔲 Planned |
+| **Content/Branding Agent** | สร้าง content และรักษา brand consistency | ✅ **Active** |
 | **Analytics Agent** | Dashboard, reports, และ predictions | 🔲 Planned |
 | **Ops/Document Agent** | สร้างเอกสารและ checklist อัตโนมัติ | 🔲 Planned |
+
+## 📱 Content Automation System
+
+**Status:** ✅ **Active** | **Language:** Node.js/Express
+
+ระบบ Content Automation สำหรับ Facebook Page ที่ทำงานอัตโนมัติทั้งระบบ:
+
+### 🎯 Features
+
+- **LINE Integration** - รับข้อมูล property จากกลุ่มไลน์ (Developer, Resale, Rent)
+- **AI Classification** - ใช้ GPT-4o วิเคราะห์และแยกประเภททรัพย์อัตโนมัติ
+- **Multi-Language Content** - สร้างเนื้อหาภาษาไทย, English, Chinese, Russian
+- **Auto-Publishing** - โพสต์อัตโนมัติตามเวลาที่เหมาะสมกับแต่ละกลุ่มเป้าหมาย
+- **Analytics Tracking** - ติดตามผลและวิเคราะห์ประสิทธิภาพโพสต์
+
+### 📊 Content Calendar (Weekly Plan)
+
+| Day | Category | Target | Languages |
+|-----|----------|--------|-----------|
+| Monday | 🏠 Sale/Resale | Buyers Thai+Foreign | TH/EN |
+| Tuesday | 🔑 Rent | Expats, Tourists | TH/EN/RU |
+| Wednesday | 📚 Knowledge | Investors, First-time buyers | TH/EN |
+| Thursday | 🏗️ New Projects | Investors, Developers | TH/EN/CN |
+| Friday | ⚖️ Legal & Investment | Foreign Investors | TH/EN/CN |
+| Saturday | 📰 News & Events | Everyone | TH/EN |
+| Sunday | 💡 Lifestyle & Tips | Everyone | TH/EN |
+
+### 🎨 Content Mix Strategy
+
+- **80% Value Content:** Knowledge, News, Tips, Legal, Lifestyle
+- **20% Sales Content:** Listings, Rentals, Promotions
+
+### 📈 Target KPIs
+
+- **Reach:** +20% Month-over-Month
+- **Engagement Rate:** > 3%
+- **Page Followers Growth:** +500/month
+- **Leads (LINE Add / Inbox):** > 50/month
+- **Post Frequency:** 28-35 posts/month
+- **English Content:** > 40% of total
+
+### 🚀 Quick Start (Content System)
+
+```bash
+# Install Node.js dependencies
+npm install
+
+# Copy and configure environment variables
+cp .env.example .env
+# Edit .env with your credentials
+
+# Start the content automation system
+npm start
+
+# For development with auto-reload
+npm run dev
+```
+
+### 🔧 Content System Configuration
+
+Add these environment variables to your `.env`:
+
+```bash
+# Node.js Server
+PORT=3000
+NODE_ENV=production
+
+# MongoDB
+MONGODB_URI=mongodb://localhost:27017/amp-content-automation
+
+# LINE Bot
+LINE_CHANNEL_SECRET=your_line_channel_secret
+LINE_CHANNEL_ACCESS_TOKEN=your_line_access_token
+LINE_GROUP_DEVELOPER_ID=your_developer_group_id
+LINE_GROUP_RESALE_ID=your_resale_group_id
+LINE_GROUP_RENT_ID=your_rent_group_id
+
+# OpenAI
+OPENAI_API_KEY=your_openai_api_key
+
+# Facebook
+FB_PAGE_ID=your_facebook_page_id
+FB_PAGE_ACCESS_TOKEN=your_facebook_page_access_token
+```
+
+### 📐 System Architecture
+
+```
+DATA SOURCES (LINE Groups: Developer, Resale, Rent)
+         │
+         ▼
+LINE Webhook (src/line-webhook/receiver.js)
+         │
+         ▼
+AI ENGINE (GPT-4o Classifier + Content Generator)
+         │
+         ▼
+CONTENT DB (MongoDB: Property + ContentPost)
+         │
+         ▼
+AUTO PUBLISHER (Facebook Graph API + Scheduler)
+         │
+         ▼
+ANALYTICS TRACKER (Facebook Insights)
+```
+
+### ⏰ Optimal Posting Times by Audience
+
+- **Thai Audience:** 18:00 (6 PM) - After work hours
+- **European Audience:** 15:00 (3 PM) - Afternoon in Europe
+- **Chinese Audience:** 11:00 (11 AM) - Lunch time in China
+- **Russian Audience:** 13:00 (1 PM) - Afternoon in Russia
 
 ## 🚀 Quick Start
 
