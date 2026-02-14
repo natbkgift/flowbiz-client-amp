@@ -11,6 +11,7 @@
   - `SubmitLead` (form submit)
   - `ClickWhatsApp` (WhatsApp click)
 - Anti-duplicate: form uses short in-memory guard (`data-tracked`) to avoid duplicate submit firing
+- Deploy config: set real Google Ads values via `window.AMP_GOOGLE_ADS_ID`, `window.AMP_SUBMITLEAD_LABEL`, `window.AMP_CLICKWHATSAPP_LABEL`
 
 ### QA Checklist
 - Submit test lead from mobile + desktop
@@ -28,7 +29,7 @@
   - condo for sale pattaya
   - foreign quota condo pattaya
   - buy apartment pattaya
-- Budget guide: `~2,000 THB/day` (from 60K THB/month)
+- Budget guide: `~2,000 THB/day` (from 60K THB/month, assuming 30 days)
 - Bid strategy: Manual CPC (first 14 days)
 
 ## 4) Sales SLA Protocol

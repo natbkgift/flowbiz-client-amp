@@ -17,12 +17,21 @@
   <!-- Google tag (gtag.js) -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-FJ83X0LCB7"></script>
   <script>
+    const TRACKING_CONFIG = {
+      ga4MeasurementId: 'G-FJ83X0LCB7',
+      googleAdsId: window.AMP_GOOGLE_ADS_ID || 'AW-XXXXXXXXXX',
+      submitLeadLabel: window.AMP_SUBMITLEAD_LABEL || 'SUBMITLEAD_LABEL',
+      clickWhatsAppLabel: window.AMP_CLICKWHATSAPP_LABEL || 'CLICKWHATSAPP_LABEL'
+    };
+    const PLACEHOLDER_ADS_ID_TOKEN = 'XXXXXXXXXX';
+    const PLACEHOLDER_LABEL_TOKEN = 'LABEL';
+
     window.dataLayer = window.dataLayer || [];
     function gtag() { dataLayer.push(arguments); }
     gtag('js', new Date());
 
-    gtag('config', 'G-FJ83X0LCB7');
-    gtag('config', 'AW-XXXXXXXXXX');
+    gtag('config', TRACKING_CONFIG.ga4MeasurementId);
+    gtag('config', TRACKING_CONFIG.googleAdsId);
   </script>
 
   <style>
@@ -250,17 +259,31 @@
       lucide.createIcons();
     }
 
+    function sendAdsConversion(label) {
+      if (
+        typeof gtag !== 'function' ||
+        !TRACKING_CONFIG.googleAdsId ||
+        TRACKING_CONFIG.googleAdsId.includes(PLACEHOLDER_ADS_ID_TOKEN) ||
+        !label ||
+        label.includes(PLACEHOLDER_LABEL_TOKEN)
+      ) {
+        return;
+      }
+
+      gtag('event', 'conversion', {
+        send_to: `${TRACKING_CONFIG.googleAdsId}/${label}`,
+        value: 1.0,
+        currency: 'THB'
+      });
+    }
+
     function trackWhatsAppClick(location) {
       if (typeof gtag !== 'function') return;
       gtag('event', 'ClickWhatsApp', {
         event_category: 'engagement',
         event_label: location
       });
-      gtag('event', 'conversion', {
-        send_to: 'AW-XXXXXXXXXX/CLICKWHATSAPP_LABEL',
-        value: 1.0,
-        currency: 'THB'
-      });
+      sendAdsConversion(TRACKING_CONFIG.clickWhatsAppLabel);
     }
 
     function trackSubmitLead(formData) {
@@ -270,11 +293,7 @@
         event_label: 'buy_condo_pattaya',
         budget_range: formData.get('budget') || 'unknown'
       });
-      gtag('event', 'conversion', {
-        send_to: 'AW-XXXXXXXXXX/SUBMITLEAD_LABEL',
-        value: 1.0,
-        currency: 'THB'
-      });
+      sendAdsConversion(TRACKING_CONFIG.submitLeadLabel);
     }
 
     document.querySelectorAll('[data-track-whatsapp="true"]').forEach((element, index) => {
