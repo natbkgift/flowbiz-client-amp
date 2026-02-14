@@ -202,19 +202,8 @@
       return;
     }
 
-    const typeMap = {
-      'Studio': { th: 'สตูดิโอ', en: 'Studio' },
-      '1 Bedroom': { th: '1 ห้องนอน', en: '1 Bedroom' },
-      '2 Bedroom': { th: '2 ห้องนอน', en: '2 Bedroom' },
-      '3 Bedroom': { th: '3 ห้องนอน', en: '3 Bedroom' },
-      'Pool Villa': { th: 'พูลวิลล่า', en: 'Pool Villa' },
-      'Garden Villa': { th: 'การ์เด้นวิลล่า', en: 'Garden Villa' },
-      'Luxury Villa': { th: 'ลักชัวรี่วิลล่า', en: 'Luxury Villa' },
-      'Penthouse': { th: 'เพนท์เฮาส์', en: 'Penthouse' }
-    };
-
     tableBody.innerHTML = unitTypes.map(unit => {
-      const unitType = typeMap[unit.type]?.[lang] || unit.type;
+      const unitType = getUnitTypeLabel(unit.type);
       return `
         <tr>
           <td>${unitType}</td>
@@ -224,6 +213,16 @@
         </tr>
       `;
     }).join('');
+  }
+
+  function getUnitTypeLabel(type) {
+    const key = `unit_type_${sanitizeTranslationKey(type)}`;
+    const translated = typeof t === 'function' ? t(key) : key;
+    return translated === key ? type : translated;
+  }
+
+  function sanitizeTranslationKey(value) {
+    return String(value).toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_+|_+$/g, '');
   }
 
   // Render facilities

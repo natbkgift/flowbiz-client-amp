@@ -570,6 +570,7 @@ const TRANSLATIONS = {
     project_detail_est_yield: 'ผลตอบแทนประมาณ',
     project_detail_total_units: 'ยูนิตทั้งหมด',
     project_detail_available_units: 'ยูนิตว่าง',
+    project_detail_available_units_header: 'ยูนิตว่าง',
     project_detail_foreign_quota_available: 'โควต้าต่างชาติพร้อม',
     project_detail_no_foreign_quota: 'ไม่มีโควต้าต่างชาติ',
     project_detail_size_range: 'ช่วงขนาด',
@@ -584,6 +585,14 @@ const TRANSLATIONS = {
     project_detail_related_projects: 'โครงการที่เกี่ยวข้อง',
     project_detail_not_found: 'ไม่พบโครงการ',
     project_detail_back_to_projects: 'กลับไปที่รายการโครงการ',
+    unit_type_studio: 'สตูดิโอ',
+    unit_type_1_bedroom: '1 ห้องนอน',
+    unit_type_2_bedroom: '2 ห้องนอน',
+    unit_type_3_bedroom: '3 ห้องนอน',
+    unit_type_pool_villa: 'พูลวิลล่า',
+    unit_type_garden_villa: 'การ์เด้นวิลล่า',
+    unit_type_luxury_villa: 'ลักชัวรี่วิลล่า',
+    unit_type_penthouse: 'เพนท์เฮาส์',
   },
   en: {
     // Navigation
@@ -1153,6 +1162,7 @@ const TRANSLATIONS = {
     project_detail_est_yield: 'Est. Yield',
     project_detail_total_units: 'Total Units',
     project_detail_available_units: 'Available',
+    project_detail_available_units_header: 'Available units',
     project_detail_foreign_quota_available: 'Foreign Quota Available',
     project_detail_no_foreign_quota: 'No Foreign Quota',
     project_detail_size_range: 'Size Range',
@@ -1167,6 +1177,14 @@ const TRANSLATIONS = {
     project_detail_related_projects: 'Related Projects',
     project_detail_not_found: 'Project Not Found',
     project_detail_back_to_projects: 'Back to Projects',
+    unit_type_studio: 'Studio',
+    unit_type_1_bedroom: '1 Bedroom',
+    unit_type_2_bedroom: '2 Bedroom',
+    unit_type_3_bedroom: '3 Bedroom',
+    unit_type_pool_villa: 'Pool Villa',
+    unit_type_garden_villa: 'Garden Villa',
+    unit_type_luxury_villa: 'Luxury Villa',
+    unit_type_penthouse: 'Penthouse',
   }
 };
 
