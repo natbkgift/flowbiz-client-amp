@@ -393,6 +393,7 @@
 
     const leadForm = document.getElementById('buy-lead-form');
     const leadFeedback = document.getElementById('lead-feedback');
+    const SUBMIT_DUPLICATE_GUARD_MS = 1500;
     if (leadForm) {
       leadForm.addEventListener('submit', (event) => {
         event.preventDefault();
@@ -404,21 +405,24 @@
 
         if (leadForm.dataset.tracked === 'true') return;
 
-        const formData = new FormData(leadForm);
-        trackSubmitLead(formData);
         leadForm.dataset.tracked = 'true';
+        try {
+          const formData = new FormData(leadForm);
+          trackSubmitLead(formData);
 
-        if (leadFeedback) {
-          // Clarify that this is a demo form and no server-side submission occurs
-          leadFeedback.textContent = 'Thank you for your interest. This is a demo form; your details have not been sent to a server.';
-          leadFeedback.style.display = 'block';
+          if (leadFeedback) {
+            // Clarify that this is a demo form and no server-side submission occurs
+            leadFeedback.textContent = 'Thank you for your interest. This is a demo form; your details have not been sent to a server.';
+            leadFeedback.style.display = 'block';
+          }
+
+          leadForm.reset();
+        } finally {
+          // Prevent rapid double firing, while still allowing valid retry attempts.
+          setTimeout(() => {
+            leadForm.dataset.tracked = 'false';
+          }, SUBMIT_DUPLICATE_GUARD_MS);
         }
-
-        leadForm.reset();
-
-        setTimeout(() => {
-          leadForm.dataset.tracked = 'false';
-        }, 1500);
       });
     }
   </script>
