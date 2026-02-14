@@ -379,7 +379,16 @@
     }
 
     document.querySelectorAll('[data-track-whatsapp="true"]').forEach((element, index) => {
-      element.addEventListener('click', () => trackWhatsAppClick(`whatsapp_${index + 1}`));
+      element.addEventListener('click', () => {
+        if (element.dataset.whatsappTracked === 'true') return;
+
+        element.dataset.whatsappTracked = 'true';
+        trackWhatsAppClick(`whatsapp_${index + 1}`);
+
+        setTimeout(() => {
+          element.dataset.whatsappTracked = 'false';
+        }, 1500);
+      });
     });
 
     const leadForm = document.getElementById('buy-lead-form');
