@@ -164,11 +164,13 @@ function startAutoPublisher() {
       console.log('⏰ Running scheduled publishing check...');
       
       // Find approved posts ready to publish
+      // Limit to 5 posts per run to avoid queue buildup while maintaining reasonable throughput
+      // (5 posts × 5s delay = ~25s processing time, allowing up to 20 posts/hour if needed)
       const now = new Date();
       const posts = await ContentPost.find({
         status: 'approved',
         suggested_publish_time: { $lte: now }
-      }).sort({ suggested_publish_time: 1 }).limit(10);
+      }).sort({ suggested_publish_time: 1 }).limit(5);
       
       if (posts.length === 0) {
         console.log('📭 No posts ready to publish');
