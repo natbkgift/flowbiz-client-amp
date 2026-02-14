@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="120" height="60" viewBox="0 0 120 60" role="img" aria-labelledby="title">
+  <title>Raimon Land</title>
+  <rect x="10" y="18" width="12" height="24" fill="#F05A43"/>
+  <rect x="26" y="14" width="12" height="28" fill="#F05A43"/>
+  <text x="44" y="28" fill="#F05A43" font-family="Arial, sans-serif" font-size="13" font-weight="700">Raimon</text>
+  <text x="44" y="41" fill="#475569" font-family="Arial, sans-serif" font-size="12" font-weight="600">Land</text>
+</svg>
