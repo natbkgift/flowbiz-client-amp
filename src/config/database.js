@@ -8,10 +8,7 @@ async function connectDB() {
   try {
     const mongoUri = process.env.MONGODB_URI || 'mongodb://localhost:27017/amp-content-automation';
     
-    await mongoose.connect(mongoUri, {
-      // These options are no longer needed in Mongoose 6+
-      // but keeping for compatibility
-    });
+    await mongoose.connect(mongoUri);
     
     console.log('✅ MongoDB connected successfully');
     console.log(`📍 Database: ${mongoose.connection.name}`);
