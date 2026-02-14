@@ -168,18 +168,31 @@
       <div class="lead-box">
         <h2 class="mb-md">Request Shortlist / Free Consultation</h2>
         <form id="buy-lead-form" data-integration="true">
-          <div class="form-group"><input class="form-input" type="text" name="name" placeholder="Full name" required></div>
-          <div class="form-group"><input class="form-input" type="tel" name="phone" placeholder="Phone / WhatsApp" required></div>
-          <div class="form-group"><input class="form-input" type="email" name="email" placeholder="Email"></div>
           <div class="form-group">
-            <select class="form-select" name="budget" required>
+            <label class="form-label" for="buy-name">Full name</label>
+            <input class="form-input" type="text" id="buy-name" name="name" placeholder="Full name" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="buy-phone">Phone / WhatsApp</label>
+            <input class="form-input" type="tel" id="buy-phone" name="phone" placeholder="Phone / WhatsApp" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="buy-email">Email</label>
+            <input class="form-input" type="email" id="buy-email" name="email" placeholder="Email">
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="buy-budget">Budget range</label>
+            <select class="form-select" id="buy-budget" name="budget" required>
               <option value="">Budget range</option>
               <option value="2-4m">2M - 4M THB</option>
               <option value="4-8m">4M - 8M THB</option>
               <option value="8m+">8M+ THB</option>
             </select>
           </div>
-          <div class="form-group"><textarea class="form-textarea" name="purpose" placeholder="Purpose (Own stay / Investment) and timeline"></textarea></div>
+          <div class="form-group">
+            <label class="form-label" for="buy-purpose">Purpose and timeline</label>
+            <textarea class="form-textarea" id="buy-purpose" name="purpose" placeholder="Purpose (Own stay / Investment) and timeline"></textarea>
+          </div>
           <button type="submit" class="btn btn-accent btn-block">Submit Lead</button>
         </form>
         <p class="mb-0 mt-md" id="lead-feedback" style="display:none;color:var(--color-success);font-weight:600;">Thank you! We will contact you shortly.</p>
