@@ -1,14 +1,6 @@
 // AMP Demo Website - Projects Filtering and Display
 // Filter and display project listings
 
-let currentFilters = {
-  status: 'all',
-  type: 'all',
-  area: 'all',
-  priceRange: 'all',
-  sortBy: 'completion-nearest'
-};
-
 const defaultFilters = {
   status: 'all',
   type: 'all',
@@ -16,6 +8,8 @@ const defaultFilters = {
   priceRange: 'all',
   sortBy: 'completion-nearest'
 };
+
+let currentFilters = { ...defaultFilters };
 
 function getFiltersFromSearch(search = '') {
   const params = new URLSearchParams(search);
@@ -42,7 +36,9 @@ function setActiveButton(selector, value) {
   const buttons = document.querySelectorAll(selector);
   if (!buttons.length) return value;
   buttons.forEach(btn => btn.classList.remove('active'));
-  const key = selector.match(/data-(\w+)/)[1];
+  const selectorMatch = selector.match(/data-(\w+)/);
+  const key = selectorMatch && selectorMatch[1];
+  if (!key) return value;
   const normalized = String(value || '').toLowerCase();
   const target = Array.from(buttons).find(btn => String(btn.dataset[key] || '').toLowerCase() === normalized);
   const fallback = Array.from(buttons).find(btn => String(btn.dataset[key] || '') === 'all');
@@ -387,6 +383,7 @@ if (typeof module !== 'undefined' && module.exports) {
     getCompletionSortValue,
     sortProjects,
     getFiltersFromSearch,
-    buildSearchFromFilters
+    buildSearchFromFilters,
+    updateURLFromFilters
   };
 }
