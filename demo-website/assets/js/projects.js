@@ -19,9 +19,9 @@ function sortProjects(projects, sortBy) {
   const sortedProjects = [...projects];
   switch (sortBy) {
     case 'price-low':
-      return sortedProjects.sort((a, b) => a.pricing.min - b.pricing.min);
+      return sortedProjects.sort((a, b) => (a.pricing?.min || 0) - (b.pricing?.min || 0));
     case 'price-high':
-      return sortedProjects.sort((a, b) => b.pricing.min - a.pricing.min);
+      return sortedProjects.sort((a, b) => (b.pricing?.min || 0) - (a.pricing?.min || 0));
     case 'yield-high':
       return sortedProjects.sort((a, b) => (b.estimated_yield || 0) - (a.estimated_yield || 0));
     case 'units-available':
