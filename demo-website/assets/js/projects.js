@@ -1,13 +1,87 @@
 // AMP Demo Website - Projects Filtering and Display
 // Filter and display project listings
 
-let currentFilters = {
+const defaultFilters = {
   status: 'all',
   type: 'all',
   area: 'all',
   priceRange: 'all',
   sortBy: 'completion-nearest'
 };
+
+let currentFilters = { ...defaultFilters };
+
+function getFiltersFromSearch(search = '') {
+  const params = new URLSearchParams(search);
+  return {
+    status: params.get('status') || defaultFilters.status,
+    type: params.get('type') || defaultFilters.type,
+    area: params.get('area') || defaultFilters.area,
+    priceRange: params.get('price') || defaultFilters.priceRange,
+    sortBy: params.get('sort') || defaultFilters.sortBy
+  };
+}
+
+function buildSearchFromFilters(filters) {
+  const params = new URLSearchParams();
+  if (filters.status && filters.status !== defaultFilters.status) params.set('status', filters.status);
+  if (filters.type && filters.type !== defaultFilters.type) params.set('type', filters.type);
+  if (filters.area && filters.area !== defaultFilters.area) params.set('area', filters.area);
+  if (filters.priceRange && filters.priceRange !== defaultFilters.priceRange) params.set('price', filters.priceRange);
+  if (filters.sortBy && filters.sortBy !== defaultFilters.sortBy) params.set('sort', filters.sortBy);
+  return params.toString();
+}
+
+function setActiveButton(selector, value) {
+  const buttons = document.querySelectorAll(selector);
+  if (!buttons.length) return value;
+  buttons.forEach(btn => btn.classList.remove('active'));
+  const selectorMatch = selector.match(/data-(\w+)/);
+  const key = selectorMatch && selectorMatch[1];
+  if (!key) return value;
+  const normalized = String(value || '').toLowerCase();
+  const target = Array.from(buttons).find(btn => String(btn.dataset[key] || '').toLowerCase() === normalized);
+  const fallback = Array.from(buttons).find(btn => String(btn.dataset[key] || '') === 'all');
+  const activeButton = target || fallback || buttons[0];
+  activeButton.classList.add('active');
+  return activeButton.dataset[key];
+}
+
+function syncFilterControls() {
+  currentFilters.status = setActiveButton('.filter-btn[data-status]', currentFilters.status);
+  currentFilters.type = setActiveButton('.filter-btn[data-type]', currentFilters.type);
+  currentFilters.area = setActiveButton('.filter-btn[data-area]', currentFilters.area);
+  currentFilters.priceRange = setActiveButton('.filter-btn[data-price]', currentFilters.priceRange);
+
+  const sortSelect = document.getElementById('project-sort');
+  if (sortSelect) {
+    const hasOption = Array.from(sortSelect.options).some(option => option.value === currentFilters.sortBy);
+    currentFilters.sortBy = hasOption ? currentFilters.sortBy : defaultFilters.sortBy;
+    sortSelect.value = currentFilters.sortBy;
+  }
+}
+
+function applyFiltersFromURL() {
+  if (typeof window === 'undefined') return;
+  currentFilters = {
+    ...currentFilters,
+    ...getFiltersFromSearch(window.location.search)
+  };
+  syncFilterControls();
+}
+
+function updateURLFromFilters(replace = false) {
+  if (typeof window === 'undefined' || typeof history === 'undefined') return;
+  const query = buildSearchFromFilters(currentFilters);
+  const newUrl = query ? `${window.location.pathname}?${query}` : window.location.pathname;
+  const currentUrl = `${window.location.pathname}${window.location.search}`;
+  if (newUrl === currentUrl) return;
+  if (replace) {
+    history.replaceState(null, '', newUrl);
+  } else {
+    history.pushState(null, '', newUrl);
+  }
+}
 
 function getCompletionSortValue(completion) {
   const match = String(completion || '').match(/^(\d{4})-Q([1-4])$/);
@@ -221,6 +295,7 @@ function setupProjectFilters() {
       this.classList.add('active');
       // Update filter
       currentFilters.status = this.dataset.status;
+      updateURLFromFilters();
       applyProjectFilters();
     });
   });
@@ -231,6 +306,7 @@ function setupProjectFilters() {
       this.parentElement.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
       this.classList.add('active');
       currentFilters.type = this.dataset.type;
+      updateURLFromFilters();
       applyProjectFilters();
     });
   });
@@ -241,6 +317,7 @@ function setupProjectFilters() {
       this.parentElement.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
       this.classList.add('active');
       currentFilters.area = this.dataset.area;
+      updateURLFromFilters();
       applyProjectFilters();
     });
   });
@@ -251,6 +328,7 @@ function setupProjectFilters() {
       this.parentElement.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
       this.classList.add('active');
       currentFilters.priceRange = this.dataset.price;
+      updateURLFromFilters();
       applyProjectFilters();
     });
   });
@@ -260,17 +338,26 @@ function setupProjectFilters() {
     sortSelect.value = currentFilters.sortBy;
     sortSelect.addEventListener('change', function () {
       currentFilters.sortBy = this.value;
+      updateURLFromFilters();
       applyProjectFilters();
     });
   }
 }
 
 function initProjects() {
+  applyFiltersFromURL();
+  updateURLFromFilters(true);
+
   // Set up filters
   setupProjectFilters();
 
   // Initial display
   applyProjectFilters();
+
+  window.addEventListener('popstate', () => {
+    applyFiltersFromURL();
+    applyProjectFilters();
+  });
 
   // Re-apply on language change
   const observer = new MutationObserver(() => {
@@ -295,6 +382,9 @@ if (typeof document !== 'undefined') {
 if (typeof module !== 'undefined' && module.exports) {
   module.exports = {
     getCompletionSortValue,
-    sortProjects
+    sortProjects,
+    getFiltersFromSearch,
+    buildSearchFromFilters,
+    updateURLFromFilters
   };
 }
