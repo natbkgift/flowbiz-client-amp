@@ -43,4 +43,26 @@ describe('Projects query params', () => {
     });
     expect(query).toBe('');
   });
+
+  test('normalizes invalid status and sort query params to defaults', () => {
+    const filters = getFiltersFromSearch('?status=invalid-status&type=condo&area=Jomtien&price=2to5&sort=unknown-sort');
+    expect(filters).toEqual({
+      status: 'all',
+      type: 'condo',
+      area: 'Jomtien',
+      priceRange: '2to5',
+      sortBy: 'completion-nearest'
+    });
+  });
+
+  test('ignores completely unknown query params and keeps defaults', () => {
+    const filters = getFiltersFromSearch('?status=all&type=all&area=all&price=all&sort=completion-nearest&foo=bar&baz=qux');
+    expect(filters).toEqual({
+      status: 'all',
+      type: 'all',
+      area: 'all',
+      priceRange: 'all',
+      sortBy: 'completion-nearest'
+    });
+  });
 });
