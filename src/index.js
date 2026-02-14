@@ -85,11 +85,11 @@ function validateEnv() {
   const missing = required.filter(key => !process.env[key]);
   
   if (missing.length > 0) {
-    console.warn(`⚠️  Missing environment variables: ${missing.join(', ')}`);
-    console.warn('⚠️  Some features may not work correctly');
+    throw new Error(`Missing required environment variables: ${missing.join(', ')}`);
   }
   
   // Check optional but recommended
+  const optional = [
   const optional = [
     'LINE_GROUP_DEVELOPER_ID',
     'LINE_GROUP_RESALE_ID',
