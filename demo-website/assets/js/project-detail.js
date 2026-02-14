@@ -149,6 +149,9 @@
       foreignQuotaBadge.querySelector('span').setAttribute('data-i18n', 'project_detail_no_foreign_quota');
     }
 
+    // Unit types
+    renderUnitTypes(project.unit_types || [], lang);
+
     // Facilities
     renderFacilities(project.facilities);
 
@@ -187,6 +190,40 @@
         `).join('')}
       </div>
     `;
+  }
+
+  // Render unit types table
+  function renderUnitTypes(unitTypes, lang) {
+    const tableBody = document.getElementById('unit-types-body');
+    if (!tableBody) return;
+
+    if (!unitTypes.length) {
+      tableBody.innerHTML = '';
+      return;
+    }
+
+    const typeMap = {
+      'Studio': { th: 'สตูดิโอ', en: 'Studio' },
+      '1 Bedroom': { th: '1 ห้องนอน', en: '1 Bedroom' },
+      '2 Bedroom': { th: '2 ห้องนอน', en: '2 Bedroom' },
+      '3 Bedroom': { th: '3 ห้องนอน', en: '3 Bedroom' },
+      'Pool Villa': { th: 'พูลวิลล่า', en: 'Pool Villa' },
+      'Garden Villa': { th: 'การ์เด้นวิลล่า', en: 'Garden Villa' },
+      'Luxury Villa': { th: 'ลักชัวรี่วิลล่า', en: 'Luxury Villa' },
+      'Penthouse': { th: 'เพนท์เฮาส์', en: 'Penthouse' }
+    };
+
+    tableBody.innerHTML = unitTypes.map(unit => {
+      const unitType = typeMap[unit.type]?.[lang] || unit.type;
+      return `
+        <tr>
+          <td>${unitType}</td>
+          <td>${unit.size_min}-${unit.size_max} ${lang === 'th' ? 'ตร.ม.' : 'sqm'}</td>
+          <td>${formatPrice(unit.price_min)} - ${formatPrice(unit.price_max)}</td>
+          <td>${unit.available.toLocaleString()}</td>
+        </tr>
+      `;
+    }).join('');
   }
 
   // Render facilities
