@@ -325,26 +325,93 @@
       sendAdsConversion(TRACKING_CONFIG.submitLeadLabel);
     }
 
+    /**
+     * Basic client-side validation for the lead form.
+     * Validates email and phone number formats and reports errors via the feedback element.
+     */
+    function validateLeadForm(form, feedbackElement) {
+      var errors = [];
+
+      if (!form) {
+        return true;
+      }
+
+      var emailInput = form.querySelector('input[type="email"]');
+      if (emailInput && emailInput.value) {
+        // Simple but robust email validation pattern
+        var emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailPattern.test(emailInput.value.trim())) {
+          errors.push('Please enter a valid email address.');
+        }
+      }
+
+      var phoneInput = form.querySelector('input[type="tel"]');
+      if (phoneInput && phoneInput.value) {
+        // Allow optional leading +, digits, spaces, hyphens, and parentheses; require at least 7 digits
+        var phoneValue = phoneInput.value.replace(/[^\d]/g, '');
+        var phonePattern = /^\+?[0-9\s\-()]{7,}$/;
+        if (phoneValue.length < 7 || !phonePattern.test(phoneInput.value.trim())) {
+          errors.push('Please enter a valid phone number with at least 7 digits.');
+        }
+      }
+
+      if (feedbackElement) {
+        feedbackElement.setAttribute('role', 'alert');
+        feedbackElement.setAttribute('aria-live', 'polite');
+      }
+
+      if (errors.length > 0) {
+        if (feedbackElement) {
+          feedbackElement.textContent = errors.join(' ');
+          feedbackElement.style.display = 'block';
+        } else {
+          alert(errors.join(' '));
+        }
+        return false;
+      }
+
+      // Clear previous error messages before showing success
+      if (feedbackElement) {
+        feedbackElement.textContent = '';
+      }
+
+      return true;
+    }
+
     document.querySelectorAll('[data-track-whatsapp="true"]').forEach((element, index) => {
       element.addEventListener('click', () => trackWhatsAppClick(`whatsapp_${index + 1}`));
     });
 
     const leadForm = document.getElementById('buy-lead-form');
     const leadFeedback = document.getElementById('lead-feedback');
-    leadForm.addEventListener('submit', (event) => {
-      event.preventDefault();
-      if (leadForm.dataset.tracked === 'true') return;
+    if (leadForm) {
+      leadForm.addEventListener('submit', (event) => {
+        event.preventDefault();
 
-      const formData = new FormData(leadForm);
-      trackSubmitLead(formData);
-      leadForm.dataset.tracked = 'true';
-      leadFeedback.style.display = 'block';
-      leadForm.reset();
+        // Perform basic client-side validation for email and phone fields
+        if (!validateLeadForm(leadForm, leadFeedback)) {
+          return;
+        }
 
-      setTimeout(() => {
-        leadForm.dataset.tracked = 'false';
-      }, 5000);
-    });
+        if (leadForm.dataset.tracked === 'true') return;
+
+        const formData = new FormData(leadForm);
+        trackSubmitLead(formData);
+        leadForm.dataset.tracked = 'true';
+
+        if (leadFeedback) {
+          // Clarify that this is a demo form and no server-side submission occurs
+          leadFeedback.textContent = 'Thank you for your interest. This is a demo form; your details have not been sent to a server.';
+          leadFeedback.style.display = 'block';
+        }
+
+        leadForm.reset();
+
+        setTimeout(() => {
+          leadForm.dataset.tracked = 'false';
+        }, 1500);
+      });
+    }
   </script>
 </body>
 
