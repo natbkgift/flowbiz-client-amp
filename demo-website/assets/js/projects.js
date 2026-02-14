@@ -79,7 +79,7 @@ function updateURLFromFilters(replace = false) {
   if (replace) {
     history.replaceState(null, '', newUrl);
   } else {
-    history.pushState(null, '', newUrl);
+    history.replaceState(null, '', newUrl);
   }
 }
 
