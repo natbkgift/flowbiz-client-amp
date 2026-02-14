@@ -5,8 +5,36 @@ let currentFilters = {
   status: 'all',
   type: 'all',
   area: 'all',
-  priceRange: 'all'
+  priceRange: 'all',
+  sortBy: 'completion-nearest'
 };
+
+function getCompletionSortValue(completion) {
+  const match = String(completion || '').match(/^(\d{4})-Q([1-4])$/);
+  if (!match) return Number.MAX_SAFE_INTEGER;
+  return (parseInt(match[1], 10) * 10) + parseInt(match[2], 10);
+}
+
+function sortProjects(projects, sortBy) {
+  const sortedProjects = [...projects];
+  switch (sortBy) {
+    case 'price-low':
+      return sortedProjects.sort((a, b) => a.pricing.min - b.pricing.min);
+    case 'price-high':
+      return sortedProjects.sort((a, b) => b.pricing.min - a.pricing.min);
+    case 'yield-high':
+      return sortedProjects.sort((a, b) => (b.estimated_yield || 0) - (a.estimated_yield || 0));
+    case 'units-available':
+      return sortedProjects.sort((a, b) => (b.units?.available || 0) - (a.units?.available || 0));
+    case 'completion-nearest':
+    default:
+      return sortedProjects.sort((a, b) => {
+        const aCompletion = getCompletionSortValue(a.timeline?.completion);
+        const bCompletion = getCompletionSortValue(b.timeline?.completion);
+        return aCompletion - bCompletion;
+      });
+  }
+}
 
 function applyProjectFilters() {
   const projectsData = window.AMP?.projects || [];
@@ -56,11 +84,13 @@ function applyProjectFilters() {
     return true;
   });
 
+  const sortedProjects = sortProjects(filteredProjects, currentFilters.sortBy);
+
   // Display projects
-  displayProjects(filteredProjects, lang);
+  displayProjects(sortedProjects, lang);
 
   // Update count
-  updateProjectCount(filteredProjects.length);
+  updateProjectCount(sortedProjects.length);
 }
 
 function displayProjects(projects, lang) {
@@ -224,6 +254,15 @@ function setupProjectFilters() {
       applyProjectFilters();
     });
   });
+
+  const sortSelect = document.getElementById('project-sort');
+  if (sortSelect) {
+    sortSelect.value = currentFilters.sortBy;
+    sortSelect.addEventListener('change', function () {
+      currentFilters.sortBy = this.value;
+      applyProjectFilters();
+    });
+  }
 }
 
 function initProjects() {
@@ -245,8 +284,17 @@ function initProjects() {
 }
 
 // Run on page load
-if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', initProjects);
-} else {
-  initProjects();
+if (typeof document !== 'undefined') {
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initProjects);
+  } else {
+    initProjects();
+  }
+}
+
+if (typeof module !== 'undefined' && module.exports) {
+  module.exports = {
+    getCompletionSortValue,
+    sortProjects
+  };
 }
