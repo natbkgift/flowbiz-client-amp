@@ -764,7 +764,12 @@ const UNIT_TYPES_BY_PROPERTY = {
 
 window.AMP.projects = window.AMP.projects.map((project) => ({
   ...project,
-  unit_types: (UNIT_TYPES_BY_PROPERTY[project.type] || []).map((unitType) => ({ ...unitType }))
+  unit_types: (UNIT_TYPES_BY_PROPERTY[project.type] || []).map((unitType) => ({ ...unitType })),
+  floor_plans: (UNIT_TYPES_BY_PROPERTY[project.type] || []).slice(0, 3).map((unitType, index) => ({
+    type: unitType.type,
+    image: `https://images.unsplash.com/photo-1600607688969-a5bfcd646154?w=1200&auto=format&fit=crop&q=80&sig=${project.project_id}-${index}`,
+    size: `${unitType.size_min}-${unitType.size_max} sqm`
+  }))
 }));
 
 // Area data with market statistics

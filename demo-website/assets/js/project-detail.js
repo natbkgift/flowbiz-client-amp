@@ -151,6 +151,7 @@
 
     // Unit types
     renderUnitTypes(project.unit_types || [], lang);
+    renderFloorPlans(project.floor_plans || []);
 
     // Facilities
     renderFacilities(project.facilities);
@@ -223,6 +224,96 @@
 
   function sanitizeTranslationKey(value) {
     return String(value).toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_+|_+$/g, '');
+  }
+
+  function renderFloorPlans(floorPlans) {
+    const section = document.getElementById('floor-plans-section');
+    const grid = document.getElementById('floor-plans-grid');
+    if (!section || !grid) return;
+
+    if (!floorPlans.length) {
+      section.style.display = 'none';
+      return;
+    }
+
+    section.style.display = 'block';
+    grid.innerHTML = '';
+
+    floorPlans.forEach((plan) => {
+      const card = document.createElement('div');
+      card.className = 'floor-plan-card';
+
+      const imageButton = document.createElement('button');
+      imageButton.type = 'button';
+      imageButton.className = 'floor-plan-image-btn';
+      imageButton.setAttribute('aria-label', `View ${plan.type} floor plan`);
+
+      const image = document.createElement('img');
+      image.className = 'floor-plan-image';
+      image.src = plan.image;
+      image.alt = `${plan.type} floor plan`;
+      image.loading = 'lazy';
+      imageButton.appendChild(image);
+
+      imageButton.addEventListener('click', () => openFloorPlanLightbox(plan.image, image.alt));
+
+      const meta = document.createElement('div');
+      meta.className = 'floor-plan-meta';
+
+      const title = document.createElement('h3');
+      title.className = 'floor-plan-type';
+      title.textContent = plan.type;
+
+      const size = document.createElement('p');
+      size.className = 'floor-plan-size';
+      size.textContent = plan.size;
+
+      meta.appendChild(title);
+      meta.appendChild(size);
+
+      card.appendChild(imageButton);
+      card.appendChild(meta);
+      grid.appendChild(card);
+    });
+  }
+
+  function openFloorPlanLightbox(imageSrc, imageAlt) {
+    let lightbox = document.getElementById('floor-plan-lightbox');
+    if (!lightbox) {
+      lightbox = document.createElement('div');
+      lightbox.id = 'floor-plan-lightbox';
+      lightbox.className = 'lightbox';
+      lightbox.innerHTML = `
+        <div class="lightbox-content">
+          <button class="lightbox-close" type="button" aria-label="Close">×</button>
+          <img class="lightbox-image" src="" alt="">
+        </div>
+      `;
+      document.body.appendChild(lightbox);
+
+      lightbox.addEventListener('click', (e) => {
+        if (e.target === lightbox || e.target.classList.contains('lightbox-close')) {
+          closeFloorPlanLightbox(lightbox);
+        }
+      });
+
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && lightbox.classList.contains('active')) {
+          closeFloorPlanLightbox(lightbox);
+        }
+      });
+    }
+
+    const image = lightbox.querySelector('.lightbox-image');
+    image.src = imageSrc;
+    image.alt = imageAlt;
+    lightbox.classList.add('active');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeFloorPlanLightbox(lightbox) {
+    lightbox.classList.remove('active');
+    document.body.style.overflow = '';
   }
 
   // Render facilities

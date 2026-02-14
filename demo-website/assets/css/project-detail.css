@@ -287,6 +287,51 @@
   font-weight: 600;
 }
 
+/* Floor Plans */
+.floor-plans-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.floor-plan-card {
+  border: 1px solid var(--color-gray-100);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  background: var(--color-white);
+}
+
+.floor-plan-image-btn {
+  display: block;
+  width: 100%;
+  border: 0;
+  padding: 0;
+  background: none;
+  cursor: zoom-in;
+}
+
+.floor-plan-image {
+  width: 100%;
+  height: 220px;
+  object-fit: cover;
+  display: block;
+}
+
+.floor-plan-meta {
+  padding: 12px;
+}
+
+.floor-plan-type {
+  margin: 0 0 4px;
+  font-size: 16px;
+}
+
+.floor-plan-size {
+  margin: 0;
+  color: var(--color-gray-600);
+  font-size: 13px;
+}
+
 /* Facilities Grid */
 .facilities-grid {
   display: grid;
@@ -469,6 +514,10 @@
   .projects-grid {
     grid-template-columns: repeat(2, 1fr);
   }
+
+  .floor-plans-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
 }
 
 @media (max-width: 768px) {
@@ -521,6 +570,10 @@
   .unit-types-table td {
     font-size: 13px;
     padding: 10px;
+  }
+
+  .floor-plans-grid {
+    grid-template-columns: 1fr;
   }
 }
 
