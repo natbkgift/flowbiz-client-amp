@@ -54,4 +54,36 @@ describe('Projects sorting', () => {
     expect(getCompletionSortValue('2027-Q1')).toBeLessThan(getCompletionSortValue('2027-Q4'));
     expect(getCompletionSortValue('invalid')).toBe(Number.MAX_SAFE_INTEGER);
   });
+
+  test('handles empty project array', () => {
+    expect(sortProjects([], 'price-low')).toEqual([]);
+    expect(sortProjects([], 'completion-nearest')).toEqual([]);
+  });
+
+  test('handles missing pricing, yield, and units fields safely', () => {
+    const incompleteProjects = [
+      { project_id: 'm1', timeline: { completion: '2027-Q2' } },
+      { project_id: 'm2', pricing: { min: 2000000 }, estimated_yield: 6.2, units: { available: 10 }, timeline: { completion: '2027-Q1' } },
+      { project_id: 'm3', pricing: {}, estimated_yield: undefined, units: {}, timeline: { completion: '2028-Q1' } }
+    ];
+
+    expect(() => sortProjects(incompleteProjects, 'price-low')).not.toThrow();
+    expect(() => sortProjects(incompleteProjects, 'yield-high')).not.toThrow();
+    expect(() => sortProjects(incompleteProjects, 'units-available')).not.toThrow();
+
+    expect(sortProjects(incompleteProjects, 'price-high').map(p => p.project_id)).toEqual(['m2', 'm1', 'm3']);
+    expect(sortProjects(incompleteProjects, 'yield-high').map(p => p.project_id)).toEqual(['m2', 'm1', 'm3']);
+    expect(sortProjects(incompleteProjects, 'units-available').map(p => p.project_id)).toEqual(['m2', 'm1', 'm3']);
+  });
+
+  test('sorts mixed valid and invalid completion dates with valid dates first', () => {
+    const mixedCompletionProjects = [
+      { project_id: 'c1', timeline: { completion: 'invalid' } },
+      { project_id: 'c2', timeline: { completion: '2026-Q4' } },
+      { project_id: 'c3', timeline: { completion: '2025-Q3' } },
+      { project_id: 'c4', timeline: {} }
+    ];
+
+    expect(sortProjects(mixedCompletionProjects, 'completion-nearest').map(p => p.project_id)).toEqual(['c3', 'c2', 'c1', 'c4']);
+  });
 });
