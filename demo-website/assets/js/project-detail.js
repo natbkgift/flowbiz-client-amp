@@ -291,10 +291,15 @@
       `;
       document.body.appendChild(lightbox);
 
-      lightbox.addEventListener('click', function(e) {
+      lightbox.addEventListener('click', (e) => {
         if (e.target === lightbox || e.target.classList.contains('lightbox-close')) {
-          lightbox.classList.remove('active');
-          document.body.style.overflow = '';
+          closeFloorPlanLightbox(lightbox);
+        }
+      });
+
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && lightbox.classList.contains('active')) {
+          closeFloorPlanLightbox(lightbox);
         }
       });
     }
@@ -304,6 +309,11 @@
     image.alt = imageAlt;
     lightbox.classList.add('active');
     document.body.style.overflow = 'hidden';
+  }
+
+  function closeFloorPlanLightbox(lightbox) {
+    lightbox.classList.remove('active');
+    document.body.style.overflow = '';
   }
 
   // Render facilities
