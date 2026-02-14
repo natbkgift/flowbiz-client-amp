@@ -44,7 +44,7 @@ async function classifyAndStore(messageData) {
     
     // Check if this is a priority property (new launch or hot deal)
     const isPriority = property.is_new_launch || 
-                      (property.confidence_score > 0.8 && property.price.amount);
+                      (property.confidence_score > 0.8 && property.price?.amount);
     
     if (isPriority) {
       console.log('🚀 Priority property detected - triggering content generation');
