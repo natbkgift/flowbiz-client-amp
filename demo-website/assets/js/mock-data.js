@@ -1170,7 +1170,7 @@ const DEVELOPERS = [
   {
     id: 'dev-001',
     name: 'Sansiri',
-    logo: 'https://via.placeholder.com/120x60/1744BE/FFFFFF?text=Sansiri',
+    logo: '../assets/images/developers/sansiri-logo.svg',
     rating: 4.8,
     projects_delivered: 45,
     projects_ongoing: 3,
@@ -1188,7 +1188,7 @@ const DEVELOPERS = [
   {
     id: 'dev-002',
     name: 'Raimon Land',
-    logo: 'https://via.placeholder.com/120x60/F05A43/FFFFFF?text=Raimon',
+    logo: '../assets/images/developers/raimon-land-logo.svg',
     rating: 4.7,
     projects_delivered: 12,
     projects_ongoing: 2,
@@ -1206,7 +1206,7 @@ const DEVELOPERS = [
   {
     id: 'dev-003',
     name: 'Heights Holdings',
-    logo: 'https://via.placeholder.com/120x60/16A34A/FFFFFF?text=Heights',
+    logo: '../assets/images/developers/heights-holdings-logo.svg',
     rating: 4.6,
     projects_delivered: 8,
     projects_ongoing: 2,
@@ -1224,7 +1224,7 @@ const DEVELOPERS = [
   {
     id: 'dev-004',
     name: 'Nova Group',
-    logo: 'https://via.placeholder.com/120x60/1744BE/FFFFFF?text=Nova',
+    logo: '../assets/images/developers/nova-group-logo.svg',
     rating: 4.5,
     projects_delivered: 15,
     projects_ongoing: 4,
@@ -1242,7 +1242,7 @@ const DEVELOPERS = [
   {
     id: 'dev-005',
     name: 'Laguna Property',
-    logo: 'https://via.placeholder.com/120x60/F05A43/FFFFFF?text=Laguna',
+    logo: '../assets/images/developers/laguna-property-logo.svg',
     rating: 4.7,
     projects_delivered: 6,
     projects_ongoing: 1,

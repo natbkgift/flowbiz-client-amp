@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="120" height="60" viewBox="0 0 120 60" role="img" aria-labelledby="title">
+  <title>Heights Holdings</title>
+  <path d="M10 42 V18 H16 V42 Z M19 42 V14 H25 V42 Z M28 42 V22 H34 V42 Z" fill="#16A34A"/>
+  <text x="40" y="28" fill="#16A34A" font-family="Arial, sans-serif" font-size="13" font-weight="700">Heights</text>
+  <text x="40" y="41" fill="#334155" font-family="Arial, sans-serif" font-size="11" font-weight="600">Holdings</text>
+</svg>
