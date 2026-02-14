@@ -149,6 +149,9 @@
       foreignQuotaBadge.querySelector('span').setAttribute('data-i18n', 'project_detail_no_foreign_quota');
     }
 
+    // Unit types
+    renderUnitTypes(project.unit_types || [], lang);
+
     // Facilities
     renderFacilities(project.facilities);
 
@@ -187,6 +190,39 @@
         `).join('')}
       </div>
     `;
+  }
+
+  // Render unit types table
+  function renderUnitTypes(unitTypes, lang) {
+    const tableBody = document.getElementById('unit-types-body');
+    if (!tableBody) return;
+
+    if (!unitTypes.length) {
+      tableBody.innerHTML = '';
+      return;
+    }
+
+    tableBody.innerHTML = unitTypes.map(unit => {
+      const unitType = getUnitTypeLabel(unit.type);
+      return `
+        <tr>
+          <td>${unitType}</td>
+          <td>${unit.size_min}-${unit.size_max} ${lang === 'th' ? 'ตร.ม.' : 'sqm'}</td>
+          <td>${formatPrice(unit.price_min)} - ${formatPrice(unit.price_max)}</td>
+          <td>${unit.available.toLocaleString()}</td>
+        </tr>
+      `;
+    }).join('');
+  }
+
+  function getUnitTypeLabel(type) {
+    const key = `unit_type_${sanitizeTranslationKey(type)}`;
+    const translated = typeof t === 'function' ? t(key) : key;
+    return translated === key ? type : translated;
+  }
+
+  function sanitizeTranslationKey(value) {
+    return String(value).toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_+|_+$/g, '');
   }
 
   // Render facilities

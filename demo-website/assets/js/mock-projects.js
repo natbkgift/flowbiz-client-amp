@@ -748,6 +748,25 @@ window.AMP.projects = [
   }
 ];
 
+const UNIT_TYPES_BY_PROPERTY = {
+  condo: [
+    { type: 'Studio', size_min: 26, size_max: 30, price_min: 1800000, price_max: 2200000, available: 45 },
+    { type: '1 Bedroom', size_min: 35, size_max: 42, price_min: 2500000, price_max: 3500000, available: 80 },
+    { type: '2 Bedroom', size_min: 55, size_max: 70, price_min: 4500000, price_max: 6500000, available: 35 },
+    { type: 'Penthouse', size_min: 95, size_max: 120, price_min: 9000000, price_max: 15000000, available: 8 }
+  ],
+  villa: [
+    { type: 'Pool Villa', size_min: 120, size_max: 160, price_min: 4500000, price_max: 6500000, available: 18 },
+    { type: 'Garden Villa', size_min: 150, size_max: 190, price_min: 6200000, price_max: 8200000, available: 14 },
+    { type: 'Luxury Villa', size_min: 190, size_max: 250, price_min: 8500000, price_max: 15000000, available: 6 }
+  ]
+};
+
+window.AMP.projects = window.AMP.projects.map((project) => ({
+  ...project,
+  unit_types: (UNIT_TYPES_BY_PROPERTY[project.type] || []).map((unitType) => ({ ...unitType }))
+}));
+
 // Area data with market statistics
 window.AMP.areaData = {
   'pattaya': {

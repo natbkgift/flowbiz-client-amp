@@ -262,6 +262,31 @@
   height: 18px;
 }
 
+/* Unit Types Table */
+.unit-types-table-wrapper {
+  overflow-x: auto;
+}
+
+.unit-types-table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 560px;
+}
+
+.unit-types-table th,
+.unit-types-table td {
+  padding: 12px;
+  border-bottom: 1px solid var(--color-gray-100);
+  text-align: left;
+  font-size: 14px;
+}
+
+.unit-types-table th {
+  background: var(--color-gray-50);
+  color: var(--color-gray-700);
+  font-weight: 600;
+}
+
 /* Facilities Grid */
 .facilities-grid {
   display: grid;
@@ -490,6 +515,12 @@
 
   .projects-grid {
     grid-template-columns: 1fr;
+  }
+
+  .unit-types-table th,
+  .unit-types-table td {
+    font-size: 13px;
+    padding: 10px;
   }
 }
 
