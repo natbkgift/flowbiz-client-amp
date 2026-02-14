@@ -347,10 +347,10 @@ function calculatePublishTime(language) {
  */
 function formatPrice(price) {
   if (!price || !price.amount) return 'Price on request';
-  
-  const amount = price.amount.toLocaleString();
+
   const currency = price.currency || 'THB';
-  
+  const locale = currency === 'THB' ? 'th-TH' : 'en-US';
+  const amount = price.amount.toLocaleString(locale);
   return `${amount} ${currency}`;
 }
 
