@@ -497,6 +497,9 @@ const TRANSLATIONS = {
     compare_view: 'ดูการเปรียบเทียบ',
     compare_coming_soon: 'เร็วๆ นี้',
     compare_max_3: 'เปรียบเทียบได้สูงสุด 3 ทรัพย์',
+    compare_projects_title: 'เปรียบเทียบโครงการ',
+    compare_empty_message: 'กรุณาเลือกโครงการอย่างน้อย 2 โครงการเพื่อเปรียบเทียบ',
+    compare_back_to_projects: 'กลับไปหน้าโครงการ',
 
     // Saved Searches
     saved_title: 'การค้นหาที่บันทึก',
@@ -1095,6 +1098,9 @@ const TRANSLATIONS = {
     compare_view: 'View Comparison',
     compare_coming_soon: 'Coming Soon',
     compare_max_3: 'Compare up to 3 properties',
+    compare_projects_title: 'Compare Projects',
+    compare_empty_message: 'Please select at least 2 projects to compare',
+    compare_back_to_projects: 'Back to Projects',
 
     // Saved Searches
     saved_title: 'Saved Searches',
