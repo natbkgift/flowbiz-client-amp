@@ -74,6 +74,11 @@ Demo website for **Asset Management Property** (amppattaya.com) with real brandi
    - Quick contact options
    - Navigation links
 
+7. **buy-condo-pattaya/index.html** - English buy funnel landing page
+   - High-intent foreign buyer messaging
+   - Curated listings + CTA form + WhatsApp tracking
+   - 4-step process, FAQ, and reviews block
+
 ### Admin Pages
 
 1. **admin/login.html** - Admin login
