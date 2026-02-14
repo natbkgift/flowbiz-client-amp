@@ -83,8 +83,10 @@ function parseInsights(insights, postData) {
         analytics.clicks = value;
         break;
       case 'post_reactions_by_type_total':
-        // Sum all reaction types
-        analytics.reactions = Object.values(value).reduce((sum, count) => sum + count, 0);
+        // Sum all reaction types, guarding against non-object values
+        analytics.reactions = (typeof value === 'object' && value)
+          ? Object.values(value).reduce((sum, count) => sum + count, 0)
+          : 0;
         break;
     }
   });
