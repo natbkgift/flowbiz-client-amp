@@ -44,14 +44,14 @@ describe('Projects query params', () => {
     expect(query).toBe('');
   });
 
-  test('normalizes invalid status and sort query params to defaults', () => {
+  test('reads invalid status and sort query params as-is before UI normalization', () => {
     const filters = getFiltersFromSearch('?status=invalid-status&type=condo&area=Jomtien&price=2to5&sort=unknown-sort');
     expect(filters).toEqual({
-      status: 'all',
+      status: 'invalid-status',
       type: 'condo',
       area: 'Jomtien',
       priceRange: '2to5',
-      sortBy: 'completion-nearest'
+      sortBy: 'unknown-sort'
     });
   });
 

@@ -79,7 +79,7 @@ function updateURLFromFilters(replace = false) {
   if (replace) {
     history.replaceState(null, '', newUrl);
   } else {
-    history.replaceState(null, '', newUrl);
+    history.pushState(null, '', newUrl);
   }
 }
 
@@ -346,6 +346,7 @@ function setupProjectFilters() {
 
 function initProjects() {
   applyFiltersFromURL();
+  updateURLFromFilters(true);
 
   // Set up filters
   setupProjectFilters();
