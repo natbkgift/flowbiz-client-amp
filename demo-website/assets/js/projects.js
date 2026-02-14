@@ -10,6 +10,67 @@ const defaultFilters = {
 };
 
 let currentFilters = { ...defaultFilters };
+const COMPARE_STORAGE_KEY = 'amp_compare_projects';
+const COMPARE_MAX_ITEMS = 3;
+const COMPARE_MIN_ITEMS = 2;
+
+function getCompareLabel(lang, key) {
+  const fallbackMap = {
+    compare_add: lang === 'th' ? 'เพิ่มเพื่อเปรียบเทียบ' : 'Add to Compare',
+    compare_remove: lang === 'th' ? 'ลบออกจากการเปรียบเทียบ' : 'Remove from Compare',
+    compare_view: lang === 'th' ? 'ดูการเปรียบเทียบ' : 'View Comparison',
+    compare_projects_title: lang === 'th' ? 'เปรียบเทียบโครงการ' : 'Compare Projects',
+    compare_max_3: lang === 'th' ? 'เลือกเปรียบเทียบได้สูงสุด 3 โครงการ' : 'You can compare up to 3 projects'
+  };
+  if (typeof window !== 'undefined' && typeof window.t === 'function') {
+    const translated = window.t(key);
+    if (translated && translated !== key) return translated;
+  }
+  return fallbackMap[key] || key;
+}
+
+function sanitizeCompareList(list) {
+  if (!Array.isArray(list)) return [];
+  return [...new Set(list.filter(Boolean).map(String))].slice(0, COMPARE_MAX_ITEMS);
+}
+
+function toggleCompareProjectId(list, projectId) {
+  const nextList = sanitizeCompareList(list);
+  const normalizedProjectId = String(projectId || '');
+  if (!normalizedProjectId) {
+    return { list: nextList, added: false, maxReached: false };
+  }
+  const existingIndex = nextList.indexOf(normalizedProjectId);
+  if (existingIndex >= 0) {
+    nextList.splice(existingIndex, 1);
+    return { list: nextList, added: false, maxReached: false };
+  }
+  if (nextList.length >= COMPARE_MAX_ITEMS) {
+    return { list: nextList, added: false, maxReached: true };
+  }
+  nextList.push(normalizedProjectId);
+  return { list: nextList, added: true, maxReached: false };
+}
+
+function readCompareList(storage) {
+  try {
+    const storageRef = storage || (typeof localStorage !== 'undefined' ? localStorage : null);
+    if (!storageRef) return [];
+    const storedValue = storageRef.getItem(COMPARE_STORAGE_KEY);
+    return sanitizeCompareList(storedValue ? JSON.parse(storedValue) : []);
+  } catch (error) {
+    return [];
+  }
+}
+
+function writeCompareList(list, storage) {
+  const sanitized = sanitizeCompareList(list);
+  const storageRef = storage || (typeof localStorage !== 'undefined' ? localStorage : null);
+  if (storageRef) {
+    storageRef.setItem(COMPARE_STORAGE_KEY, JSON.stringify(sanitized));
+  }
+  return sanitized;
+}
 
 function getFiltersFromSearch(search = '') {
   const params = new URLSearchParams(search);
@@ -183,12 +244,14 @@ function displayProjects(projects, lang) {
   }
 
   container.innerHTML = projects.map(project => createProjectCard(project, lang)).join('');
+  updateCompareUI(lang);
 }
 
 function createProjectCard(project, lang) {
   const name = project.name[lang] || project.name.en;
   const statusText = getStatusText(project.status, lang);
   const statusClass = project.status.replace('_', '-');
+  const isCompared = isProjectCompared(project.project_id);
 
   const priceText = formatPrice(project.pricing.min, project.pricing.max, lang);
   const yieldText = project.estimated_yield ? `${project.estimated_yield}%` : 'N/A';
@@ -246,12 +309,143 @@ function createProjectCard(project, lang) {
         </div>
         
         <div class="project-card-actions">
+          <button class="btn btn-secondary btn-block project-compare-btn ${isCompared ? 'active' : ''}" data-project-id="${project.project_id}" type="button">
+            ${isCompared ? getCompareLabel(lang, 'compare_remove') : getCompareLabel(lang, 'compare_add')}
+          </button>
           <a href="/projects/detail.html?id=${project.project_id}" class="btn btn-primary btn-block">
             ${lang === 'th' ? 'ดูข้อมูล' : 'View Info'}
           </a>
         </div>
       </div>
     </div>
+  `;
+}
+
+function isProjectCompared(projectId) {
+  return readCompareList().includes(String(projectId || ''));
+}
+
+function updateCompareUI(lang) {
+  if (typeof document === 'undefined') return;
+  const compareList = readCompareList();
+  document.querySelectorAll('.project-compare-btn').forEach(button => {
+    const isSelected = compareList.includes(button.dataset.projectId);
+    button.classList.toggle('active', isSelected);
+    button.textContent = isSelected ? getCompareLabel(lang, 'compare_remove') : getCompareLabel(lang, 'compare_add');
+  });
+  updateCompareBar(compareList.length, lang);
+}
+
+function updateCompareBar(count, lang) {
+  const compareBar = document.getElementById('compare-bar');
+  if (!compareBar) return;
+  const compareCount = document.getElementById('compare-count');
+  const compareViewButton = document.getElementById('compare-view-btn');
+  const compareText = getCompareLabel(lang, 'compare_projects_title');
+  if (compareCount) compareCount.textContent = `${compareText} (${count})`;
+  if (compareViewButton) {
+    compareViewButton.textContent = getCompareLabel(lang, 'compare_view');
+    compareViewButton.disabled = count < COMPARE_MIN_ITEMS;
+  }
+  compareBar.classList.toggle('active', count > 0);
+}
+
+function setupCompareButtons() {
+  const projectsGrid = document.getElementById('projects-grid');
+  if (projectsGrid) {
+    projectsGrid.addEventListener('click', event => {
+      const compareButton = event.target.closest('.project-compare-btn');
+      if (!compareButton) return;
+      const result = toggleCompareProjectId(readCompareList(), compareButton.dataset.projectId);
+      if (result.maxReached) {
+        const lang = document.documentElement.lang || 'th';
+        window.alert(getCompareLabel(lang, 'compare_max_3'));
+        return;
+      }
+      writeCompareList(result.list);
+      updateCompareUI(document.documentElement.lang || 'th');
+    });
+  }
+
+  const compareViewButton = document.getElementById('compare-view-btn');
+  if (compareViewButton) {
+    compareViewButton.addEventListener('click', () => {
+      if (readCompareList().length >= COMPARE_MIN_ITEMS) {
+        window.location.href = '/projects/compare.html';
+      }
+    });
+  }
+}
+
+function getProjectById(projectId) {
+  const projectsData = window.AMP?.projects || [];
+  return projectsData.find(project => project.project_id === projectId);
+}
+
+function initComparePage() {
+  const tableContainer = document.getElementById('compare-table-container');
+  if (!tableContainer) return;
+  const lang = document.documentElement.lang || 'th';
+  const compareIds = readCompareList();
+  const projects = compareIds.map(getProjectById).filter(Boolean);
+  const emptyMessage = document.getElementById('compare-empty-message');
+  if (projects.length < COMPARE_MIN_ITEMS) {
+    if (emptyMessage) emptyMessage.style.display = 'block';
+    tableContainer.innerHTML = '';
+    return;
+  }
+  if (emptyMessage) emptyMessage.style.display = 'none';
+
+  const labels = {
+    price: lang === 'th' ? 'ราคา' : 'Price',
+    size: lang === 'th' ? 'ขนาด' : 'Size',
+    yield: lang === 'th' ? 'ผลตอบแทน' : 'Yield',
+    units: lang === 'th' ? 'ยูนิตว่าง' : 'Units available',
+    foreignQuota: lang === 'th' ? 'โควต้าต่างชาติ' : 'Foreign quota',
+    facilities: lang === 'th' ? 'สิ่งอำนวยความสะดวก' : 'Facilities',
+    completionDate: lang === 'th' ? 'วันที่แล้วเสร็จ' : 'Completion date',
+    notAvailable: lang === 'th' ? 'ไม่มีข้อมูล' : 'N/A'
+  };
+
+  tableContainer.innerHTML = `
+    <table class="compare-table">
+      <thead>
+        <tr>
+          <th>${lang === 'th' ? 'รายการ' : 'Item'}</th>
+          ${projects.map(project => `<th>${project.name[lang] || project.name.en}</th>`).join('')}
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>${labels.price}</td>
+          ${projects.map(project => `<td>${formatPrice(project.pricing?.min || 0, project.pricing?.max || 0, lang)}</td>`).join('')}
+        </tr>
+        <tr>
+          <td>${labels.size}</td>
+          ${projects.map(project => `<td>${project.size?.min || 0}-${project.size?.max || 0} ${lang === 'th' ? 'ตร.ม.' : 'sqm'}</td>`).join('')}
+        </tr>
+        <tr>
+          <td>${labels.yield}</td>
+          ${projects.map(project => `<td>${Number.isFinite(project.estimated_yield) ? `${project.estimated_yield}` + '%' : labels.notAvailable}</td>`).join('')}
+        </tr>
+        <tr>
+          <td>${labels.units}</td>
+          ${projects.map(project => `<td>${project.units?.available || 0}/${project.units?.total || 0}</td>`).join('')}
+        </tr>
+        <tr>
+          <td>${labels.foreignQuota}</td>
+          ${projects.map(project => `<td>${project.units?.foreign_quota !== undefined && project.units?.foreign_quota !== null ? project.units.foreign_quota : labels.notAvailable}</td>`).join('')}
+        </tr>
+        <tr>
+          <td>${labels.facilities}</td>
+          ${projects.map(project => `<td>${(project.facilities || []).join(', ') || labels.notAvailable}</td>`).join('')}
+        </tr>
+        <tr>
+          <td>${labels.completionDate}</td>
+          ${projects.map(project => `<td>${project.timeline?.completion || labels.notAvailable}</td>`).join('')}
+        </tr>
+      </tbody>
+    </table>
   `;
 }
 
@@ -345,11 +539,13 @@ function setupProjectFilters() {
 }
 
 function initProjects() {
+  initComparePage();
   applyFiltersFromURL();
   updateURLFromFilters(true);
 
   // Set up filters
   setupProjectFilters();
+  setupCompareButtons();
 
   // Initial display
   applyProjectFilters();
@@ -362,6 +558,7 @@ function initProjects() {
   // Re-apply on language change
   const observer = new MutationObserver(() => {
     applyProjectFilters();
+    initComparePage();
   });
 
   observer.observe(document.documentElement, {
@@ -385,6 +582,10 @@ if (typeof module !== 'undefined' && module.exports) {
     sortProjects,
     getFiltersFromSearch,
     buildSearchFromFilters,
-    updateURLFromFilters
+    updateURLFromFilters,
+    sanitizeCompareList,
+    toggleCompareProjectId,
+    readCompareList,
+    writeCompareList
   };
 }
