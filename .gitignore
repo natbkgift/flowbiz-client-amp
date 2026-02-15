@@ -61,3 +61,5 @@ yarn-error.log*
 Thumbs.db
 demo-website/skeleton-test.html
 *.har
+
+alembic_verify.db
