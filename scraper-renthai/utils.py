@@ -94,7 +94,7 @@ def load_robots_txt(base_site: str) -> urllib.robotparser.RobotFileParser:
     rp.set_url(robots_url)
     try:
         rp.read()
-    except Exception:
+    except urllib.error.URLError:
         # Fail-safe: if robots cannot be fetched, treat as disallow-all.
         rp.parse(["User-agent: *", "Disallow: /"])
     return rp
