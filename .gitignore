@@ -68,3 +68,6 @@ demo-website/skeleton-test.html
 flowbiz-client-amp-deploy.*
 
 alembic_verify.db
+
+# Scraper artifacts
+scraper-renthai/storage/

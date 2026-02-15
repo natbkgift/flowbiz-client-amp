@@ -69,5 +69,18 @@ services:
       - admin-app
     restart: unless-stopped
 
+  scraper-renthai:
+    build:
+      context: ./scraper-renthai
+      dockerfile: Dockerfile
+    environment:
+      - API_BASE=http://nginx/api
+      - ADMIN_TOKEN=${ADMIN_TOKEN}
+    depends_on:
+      - nginx
+    profiles:
+      - scraper
+    restart: "no"
+
 volumes:
   postgres_data:
