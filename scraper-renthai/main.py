@@ -136,7 +136,7 @@ def main() -> int:
         submit_bytes = csv_bytes
         submit_filename = "import.csv"
         if args.dry_run:
-            submit_bytes = csv_bytes.replace(b",", b", ")
+            submit_bytes = csv_bytes + b'\n'
             submit_filename = "import_dry_run.csv"
 
         import_result = post_import(
