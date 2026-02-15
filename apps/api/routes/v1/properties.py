@@ -27,7 +27,7 @@ async def list_properties(
     sort: str | None = Query(default=None, pattern=r"^(price_asc|price_desc|newest|oldest)$"),
     db: Session = Depends(get_db),
 ) -> PropertyListResponse:
-    base_query: Select[tuple[Property]] = select(Property)
+    base_query: Select[tuple[Property]] = select(Property).where(Property.status == "active")
 
     if type is not None:
         base_query = base_query.where(Property.type == type)
