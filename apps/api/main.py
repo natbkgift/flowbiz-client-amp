@@ -2,6 +2,7 @@ from fastapi import FastAPI
 
 from apps.api.routes import health
 from apps.api.routes.v1 import meta
+from apps.api.routes.v1.phase1 import router as phase1_router
 from packages.core.config import settings
 from packages.core.logging import setup_logging
 
@@ -16,6 +17,7 @@ app = FastAPI(
 
 app.include_router(health.router)
 app.include_router(meta.router)
+app.include_router(phase1_router)
 
 
 if __name__ == "__main__":
