@@ -116,7 +116,7 @@ export default function PublicPropertyDetailPage({ params }: { params: { id: str
           <div className="flex gap-2 overflow-x-auto">
             {images.map((url, idx) => (
               <button
-                key={url + idx}
+                key={url}
                 className={`border rounded ${idx === activeImageIndex ? 'border-slate-900' : 'border-transparent'}`}
                 onClick={() => setActiveImageIndex(idx)}
                 aria-label={`View image ${idx + 1}`}
