@@ -18,18 +18,7 @@ async def list_leads(
     _admin: User = Depends(get_current_admin),
 ) -> list[LeadAdminItem]:
     leads = db.scalars(select(Lead).order_by(desc(Lead.created_at)).limit(200)).all()
-    return [
-        LeadAdminItem(
-            id=lead.id,
-            name=lead.name,
-            email=lead.email,
-            phone=lead.phone,
-            score=lead.score,
-            status=lead.status,
-            created_at=lead.created_at,
-        )
-        for lead in leads
-    ]
+    return [LeadAdminItem.model_validate(lead) for lead in leads]
 
 
 @router.get("/leads/{lead_id}", response_model=LeadAdminItem)
@@ -42,15 +31,7 @@ async def get_lead(
     if lead is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Lead not found")
 
-    return LeadAdminItem(
-        id=lead.id,
-        name=lead.name,
-        email=lead.email,
-        phone=lead.phone,
-        score=lead.score,
-        status=lead.status,
-        created_at=lead.created_at,
-    )
+    return LeadAdminItem.model_validate(lead)
 
 
 @router.patch("/leads/{lead_id}", response_model=LeadAdminItem)
@@ -69,12 +50,4 @@ async def update_lead_status(
     db.commit()
     db.refresh(lead)
 
-    return LeadAdminItem(
-        id=lead.id,
-        name=lead.name,
-        email=lead.email,
-        phone=lead.phone,
-        score=lead.score,
-        status=lead.status,
-        created_at=lead.created_at,
-    )
+    return LeadAdminItem.model_validate(lead)

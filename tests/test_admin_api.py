@@ -1,12 +1,8 @@
-from fastapi.testclient import TestClient
 from sqlalchemy import select
 
-from apps.api.main import app
 from packages.core.auth import hash_password
 from packages.core.database import SessionLocal
 from packages.core.models import User
-
-client = TestClient(app)
 
 
 def _ensure_admin_user() -> None:
@@ -30,7 +26,7 @@ def _ensure_admin_user() -> None:
         db.close()
 
 
-def _login_token() -> str:
+def _login_token(client) -> str:
     _ensure_admin_user()
     response = client.post(
         "/v1/auth/login",
@@ -40,7 +36,7 @@ def _login_token() -> str:
     return response.json()["access_token"]
 
 
-def _create_lead() -> str:
+def _create_lead(client) -> str:
     response = client.post(
         "/v1/phase1/score",
         json={
@@ -59,9 +55,9 @@ def _create_lead() -> str:
     return response.json()["lead_id"]
 
 
-def test_admin_list_and_update_lead():
-    token = _login_token()
-    lead_id = _create_lead()
+def test_admin_list_and_update_lead(client):
+    token = _login_token(client)
+    lead_id = _create_lead(client)
     headers = {"Authorization": f"Bearer {token}"}
 
     list_response = client.get("/admin/leads", headers=headers)

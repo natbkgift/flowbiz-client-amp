@@ -51,10 +51,6 @@ async def startup_event() -> None:
     init_db()
     bootstrap_admin_user()
 
-
-init_db()
-bootstrap_admin_user()
-
 static_dir = Path(__file__).resolve().parents[2] / "demo-website"
 if static_dir.exists():
     app.mount("/", StaticFiles(directory=static_dir, html=True), name="site")

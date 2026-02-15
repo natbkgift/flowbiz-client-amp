@@ -3,8 +3,8 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 
-import { apiRequest } from '../../../lib/api';
-import { getToken, setToken } from '../../../lib/auth-store';
+import { apiRequest, handleUnauthorizedError } from '../../../lib/api';
+import { getToken } from '../../../lib/auth-store';
 
 type Lead = {
   id: string;
@@ -34,9 +34,7 @@ export default function LeadDetailPage({ params }: { params: { id: string } }) {
         setStatus(data.status);
       })
       .catch((err: Error) => {
-        if (err.message === 'UNAUTHORIZED') {
-          setToken(null);
-          router.push('/login');
+        if (handleUnauthorizedError(err, router)) {
           return;
         }
         setError('Unable to load lead detail');
@@ -51,9 +49,7 @@ export default function LeadDetailPage({ params }: { params: { id: string } }) {
       });
       setLead(updated);
     } catch (err) {
-      if (err instanceof Error && err.message === 'UNAUTHORIZED') {
-        setToken(null);
-        router.push('/login');
+      if (handleUnauthorizedError(err, router)) {
         return;
       }
       setError('Unable to update status');

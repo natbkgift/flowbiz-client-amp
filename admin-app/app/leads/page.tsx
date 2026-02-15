@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 
-import { apiRequest } from '../../lib/api';
+import { apiRequest, handleUnauthorizedError } from '../../lib/api';
 import { getToken, setToken } from '../../lib/auth-store';
 
 type Lead = {
@@ -31,9 +31,7 @@ export default function LeadsPage() {
     apiRequest<Lead[]>('/admin/leads')
       .then(setLeads)
       .catch((err: Error) => {
-        if (err.message === 'UNAUTHORIZED') {
-          setToken(null);
-          router.push('/login');
+          if (handleUnauthorizedError(err, router)) {
           return;
         }
         setError('Unable to load leads');
