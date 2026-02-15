@@ -74,10 +74,10 @@ services:
       context: ./scraper-renthai
       dockerfile: Dockerfile
     environment:
-      - API_BASE=http://nginx/api
+      - API_BASE=http://api:8000
       - ADMIN_TOKEN=${ADMIN_TOKEN}
     depends_on:
-      - nginx
+      - api
     profiles:
       - scraper
     restart: "no"

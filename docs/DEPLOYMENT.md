@@ -21,8 +21,8 @@
 
 ### 1. Clone Repository
 ```bash
-git clone https://github.com/natbkgift/flowbiz-template-service.git
-cd flowbiz-template-service
+git clone https://github.com/natbkgift/flowbiz-client-amp.git
+cd flowbiz-client-amp
 ```
 
 ### 2. Configure Environment
@@ -74,8 +74,13 @@ sudo usermod -aG docker $USER
 
 ### 2. Deploy Application
 ```bash
-git clone https://github.com/natbkgift/flowbiz-template-service.git
-cd flowbiz-template-service
+# Client projects MUST live under /opt/flowbiz/clients/<service-name>/
+# Example for this repo:
+sudo mkdir -p /opt/flowbiz/clients/flowbiz-client-amp
+sudo chown -R "$USER":"$USER" /opt/flowbiz/clients/flowbiz-client-amp
+
+cd /opt/flowbiz/clients/flowbiz-client-amp
+git clone https://github.com/natbkgift/flowbiz-client-amp.git .
 
 # Create production environment file
 cp .env.example .env

@@ -66,6 +66,7 @@ demo-website/skeleton-test.html
 
 # Local deploy artifacts
 flowbiz-client-amp-deploy.*
+flowbiz-client-amp-deploy-*
 
 alembic_verify.db
 
