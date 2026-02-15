@@ -11,6 +11,7 @@
  * - Leads_Master
  * - Dashboard
  * - Campaign_Performance
+ * - Campaign_Cost
  */
 function setupPhase0LeadTrackingSheets() {
   const ss = SpreadsheetApp.getActiveSpreadsheet();
@@ -18,10 +19,12 @@ function setupPhase0LeadTrackingSheets() {
   const leadsSheet = getOrCreateSheet_(ss, 'Leads_Master');
   const dashboardSheet = getOrCreateSheet_(ss, 'Dashboard');
   const campaignSheet = getOrCreateSheet_(ss, 'Campaign_Performance');
+  const campaignCostSheet = getOrCreateSheet_(ss, 'Campaign_Cost');
 
   setupLeadsMasterSheet_(leadsSheet);
   setupDashboardSheet_(dashboardSheet);
   setupCampaignPerformanceSheet_(campaignSheet);
+  setupCampaignCostSheet_(campaignCostSheet);
 
   SpreadsheetApp.flush();
   Logger.log('✅ Phase 0 lead tracking sheets are ready');
@@ -133,6 +136,45 @@ function setupCampaignPerformanceSheet_(sheet) {
   sheet.getRange('A1').setFontWeight('bold');
   sheet.getRange('D1').setFontWeight('bold');
   sheet.autoResizeColumns(1, 6);
+}
+
+function setupCampaignCostSheet_(sheet) {
+  sheet.clear();
+
+  const headers = [
+    'Campaign',
+    'Spend THB',
+    'Leads',
+    'Qualified Leads',
+    'Revenue',
+    'Cost per Lead',
+    'Cost per Qualified',
+    'ROAS'
+  ];
+
+  const campaigns = [['Buy'], ['Invest'], ['Rent'], ['Brand']];
+
+  sheet.getRange(1, 1, 1, headers.length).setValues([headers]);
+  sheet.getRange(2, 1, campaigns.length, 1).setValues(campaigns);
+
+  for (let row = 2; row <= campaigns.length + 1; row += 1) {
+    sheet.getRange(`C${row}`).setFormula(`=COUNTIF(Leads_Master!G:G,A${row})`);
+    sheet.getRange(`D${row}`).setFormula(`=COUNTIFS(Leads_Master!G:G,A${row},Leads_Master!L:L,"Yes")`);
+    sheet.getRange(`E${row}`).setFormula(`=SUMIFS(Leads_Master!R:R,Leads_Master!G:G,A${row},Leads_Master!Q:Q,"Yes")`);
+    sheet.getRange(`F${row}`).setFormula(`=IF(C${row}=0,"",B${row}/C${row})`);
+    sheet.getRange(`G${row}`).setFormula(`=IF(D${row}=0,"",B${row}/D${row})`);
+    sheet.getRange(`H${row}`).setFormula(`=IF(B${row}=0,"",E${row}/B${row})`);
+  }
+
+  sheet.getRange('A1:H1').setFontWeight('bold');
+  sheet.setFrozenRows(1);
+
+  sheet.getRange('B2:B').setNumberFormat('#,##0');
+  sheet.getRange('C2:D').setNumberFormat('0');
+  sheet.getRange('E2:G').setNumberFormat('#,##0.00');
+  sheet.getRange('H2:H').setNumberFormat('0.00');
+
+  sheet.autoResizeColumns(1, headers.length);
 }
 
 function getOrCreateSheet_(spreadsheet, sheetName) {

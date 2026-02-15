@@ -15,7 +15,7 @@ Google Apps Script modules สำหรับสร้างรายงาน�
 | **Utils.gs** | Helper functions ที่ใช้ร่วมกัน | ✅ |
 | **LineIntegration.gs** | LINE Messaging API integration | ✅ |
 | **AutoReport.gs** | สร้างและส่งรายงานอัตโนมัติ | ✅ |
-| **LeadSheetSetup.gs** | สร้างชีต `Leads_Master` / `Dashboard` / `Campaign_Performance` อัตโนมัติ | 🟡 Optional |
+| **LeadSheetSetup.gs** | สร้างชีต `Leads_Master` / `Dashboard` / `Campaign_Performance` / `Campaign_Cost` อัตโนมัติ | 🟡 Optional |
 
 ## การติดตั้ง
 
@@ -173,6 +173,7 @@ setupPhase0LeadTrackingSheets()
 - `Leads_Master`
 - `Dashboard`
 - `Campaign_Performance`
+- `Campaign_Cost`
 
 พร้อมหัวตาราง, สูตร, และ dropdown ตามสเปกในเอกสาร reporting
 

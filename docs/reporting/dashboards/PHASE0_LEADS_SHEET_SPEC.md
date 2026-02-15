@@ -109,18 +109,29 @@ label sum(R) 'Revenue'")
 
 ---
 
-## Optional: `Campaign_Cost`
+## Sheet 4: `Campaign_Cost`
 
-สร้างชีตเพิ่มสำหรับบันทึกต้นทุน
+ชีตนี้ถูกสร้างอัตโนมัติโดย `setupPhase0LeadTrackingSheets()`
 
-| Campaign | Spend THB |
-|---|---|
+| Col | Field | Type |
+|---|---|---|
+| A | Campaign | Text (Buy / Invest / Rent / Brand) |
+| B | Spend THB | Number (manual input) |
+| C | Leads | Formula |
+| D | Qualified Leads | Formula |
+| E | Revenue | Formula |
+| F | Cost per Lead | Formula |
+| G | Cost per Qualified | Formula |
+| H | ROAS | Formula |
 
-สูตรที่ใช้วิเคราะห์:
+สูตรที่ใช้ในแต่ละแถว:
 
-- Cost per Lead = `Spend/Leads`
-- Cost per Qualified = `Spend/Qualified`
-- ROAS = `Revenue/Spend`
+- Leads = `=COUNTIF(Leads_Master!G:G,A2)`
+- Qualified Leads = `=COUNTIFS(Leads_Master!G:G,A2,Leads_Master!L:L,"Yes")`
+- Revenue = `=SUMIFS(Leads_Master!R:R,Leads_Master!G:G,A2,Leads_Master!Q:Q,"Yes")`
+- Cost per Lead = `=IF(C2=0,"",B2/C2)`
+- Cost per Qualified = `=IF(D2=0,"",B2/D2)`
+- ROAS = `=IF(B2=0,"",E2/B2)`
 
 ---
 
