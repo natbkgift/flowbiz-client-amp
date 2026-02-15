@@ -18,8 +18,10 @@ from pydantic import BaseModel, Field
 # Data Models / โมเดลข้อมูล
 # ========================================
 
+
 class LeadSource(str, Enum):
     """Lead source / แหล่งที่มาของ lead"""
+
     FACEBOOK = "facebook"
     LINE = "line"
     WEBSITE = "website"
@@ -29,6 +31,7 @@ class LeadSource(str, Enum):
 
 class PropertyType(str, Enum):
     """Property type preference / ประเภทอสังหาฯ ที่สนใจ"""
+
     CONDO = "condo"
     HOUSE = "house"
     VILLA = "villa"
@@ -37,14 +40,16 @@ class PropertyType(str, Enum):
 
 class SalesTeam(str, Enum):
     """Sales team assignments / ทีมขายที่รับผิดชอบ"""
-    PREMIUM = "premium"      # High-budget clients
-    STANDARD = "standard"    # Medium-budget clients
-    RENTAL = "rental"        # Rental inquiries
+
+    PREMIUM = "premium"  # High-budget clients
+    STANDARD = "standard"  # Medium-budget clients
+    RENTAL = "rental"  # Rental inquiries
     INVESTMENT = "investment"  # Investment opportunities
 
 
 class Lead(BaseModel):
     """Lead data model"""
+
     id: int
     name: str
     phone: str
@@ -61,6 +66,7 @@ class Lead(BaseModel):
 
 class LeadScore(BaseModel):
     """Lead scoring result / ผลการให้คะแนน lead"""
+
     lead_id: int
     total_score: int = Field(..., ge=0, le=100)
     budget_score: int = Field(..., ge=0, le=40)
@@ -75,6 +81,7 @@ class LeadScore(BaseModel):
 # ========================================
 # Lead Router Agent / Agent สำหรับจัดการ Leads
 # ========================================
+
 
 class LeadRouterAgent:
     """
@@ -110,11 +117,11 @@ class LeadRouterAgent:
         Max 20 points
         """
         source_scores = {
-            LeadSource.REFERRAL: 20,    # Highest quality
-            LeadSource.WALK_IN: 18,     # Direct interest
-            LeadSource.WEBSITE: 15,     # Organic interest
-            LeadSource.LINE: 12,        # Easy to convert
-            LeadSource.FACEBOOK: 10,    # Need qualification
+            LeadSource.REFERRAL: 20,  # Highest quality
+            LeadSource.WALK_IN: 18,  # Direct interest
+            LeadSource.WEBSITE: 15,  # Organic interest
+            LeadSource.LINE: 12,  # Easy to convert
+            LeadSource.FACEBOOK: 10,  # Need qualification
         }
         return source_scores.get(lead.source, 10)
 
@@ -187,8 +194,9 @@ class LeadRouterAgent:
         assigned_team = self.assign_to_team(lead, total_score)
 
         # Generate reasoning / สร้างเหตุผล
-        reasoning = self.generate_reasoning(lead, budget_score, source_score,
-                                           engagement_score, urgency_score)
+        reasoning = self.generate_reasoning(
+            lead, budget_score, source_score, engagement_score, urgency_score
+        )
 
         return LeadScore(
             lead_id=lead.id,
@@ -224,9 +232,14 @@ class LeadRouterAgent:
         # Standard team for everyone else
         return SalesTeam.STANDARD
 
-    def generate_reasoning(self, lead: Lead, budget_score: int,
-                          source_score: int, engagement_score: int,
-                          urgency_score: int) -> str:
+    def generate_reasoning(
+        self,
+        lead: Lead,
+        budget_score: int,
+        source_score: int,
+        engagement_score: int,
+        urgency_score: int,
+    ) -> str:
         """
         Generate human-readable reasoning / สร้างคำอธิบายที่อ่านง่าย
         """
@@ -235,11 +248,11 @@ class LeadRouterAgent:
         # Budget analysis
         avg_budget = (lead.budget_min + lead.budget_max) / 2
         if avg_budget >= 10_000_000:
-            reasons.append(f"High budget ({avg_budget/1_000_000:.1f}M THB) - premium client")
+            reasons.append(f"High budget ({avg_budget / 1_000_000:.1f}M THB) - premium client")
         elif avg_budget >= 3_000_000:
-            reasons.append(f"Good budget ({avg_budget/1_000_000:.1f}M THB)")
+            reasons.append(f"Good budget ({avg_budget / 1_000_000:.1f}M THB)")
         else:
-            reasons.append(f"Budget {avg_budget/1_000_000:.1f}M THB - likely rental/starter")
+            reasons.append(f"Budget {avg_budget / 1_000_000:.1f}M THB - likely rental/starter")
 
         # Source quality
         if lead.source == LeadSource.REFERRAL:
@@ -263,6 +276,7 @@ class LeadRouterAgent:
 # ========================================
 # Example Usage / ตัวอย่างการใช้งาน
 # ========================================
+
 
 def main():
     """
@@ -325,7 +339,9 @@ def main():
         print(f"\n📋 Lead #{lead.id}: {lead.name}")
         print(f"   Phone: {lead.phone}")
         print(f"   Source: {lead.source.value}")
-        print(f"   Budget: {lead.budget_min/1_000_000:.1f}M - {lead.budget_max/1_000_000:.1f}M THB")
+        budget_min_m = lead.budget_min / 1_000_000
+        budget_max_m = lead.budget_max / 1_000_000
+        print(f"   Budget: {budget_min_m:.1f}M - {budget_max_m:.1f}M THB")
 
         # Calculate score
         score = agent.calculate_total_score(lead)
