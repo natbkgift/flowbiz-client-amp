@@ -80,7 +80,7 @@ def get_latest_audit(cfg: ScraperConfig) -> dict | None:
             if isinstance(items, list) and items:
                 return items[0]
             return None
-    except Exception:
+    except (urllib.error.URLError, json.JSONDecodeError):
         return None
 
 
