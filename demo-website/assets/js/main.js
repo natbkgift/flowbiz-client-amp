@@ -3,12 +3,53 @@
 
 const AMP_PLACEHOLDER_ADS_TOKEN = 'XXXXXXXXXX';
 const AMP_ANALYTICS_EVENTS = '__AMP_ANALYTICS_EVENTS__';
+const AMP_GA_STORAGE_KEY = 'amp_ga_measurement_id';
+const AMP_LEAD_ID_FIRED_KEY = '__AMP_LEAD_ID_FIRED__';
+
+function getQueryParam(name) {
+  try {
+    return new URLSearchParams(window.location.search).get(name);
+  } catch (_error) {
+    return null;
+  }
+}
+
+function isDebugMode() {
+  return String(getQueryParam('debug_mode') || '').toLowerCase() === 'true';
+}
+
+function maybePersistGaIdFromDebugUrl() {
+  if (!isDebugMode()) {
+    return;
+  }
+
+  const gaIdFromUrl = (getQueryParam('ga_measurement_id') || '').trim();
+  if (!gaIdFromUrl) {
+    return;
+  }
+
+  try {
+    window.localStorage.setItem(AMP_GA_STORAGE_KEY, gaIdFromUrl);
+  } catch (_error) {
+    // Ignore storage failures.
+  }
+}
 
 function getGaMeasurementId() {
+  maybePersistGaIdFromDebugUrl();
+
+  let storedGaId = '';
+  try {
+    storedGaId = window.localStorage.getItem(AMP_GA_STORAGE_KEY) || '';
+  } catch (_error) {
+    storedGaId = '';
+  }
+
   const runtimeValue =
     window.GA_MEASUREMENT_ID ||
     window.AMP_GA_MEASUREMENT_ID ||
     window.TRACKING_CONFIG?.ga4MeasurementId ||
+    storedGaId ||
     document.documentElement?.dataset?.gaMeasurementId ||
     '';
 
@@ -63,7 +104,10 @@ function configureGa4() {
   ensureGtag();
 
   window.gtag('js', new Date());
-  window.gtag('config', gaMeasurementId, { send_page_view: false });
+  window.gtag('config', gaMeasurementId, {
+    send_page_view: false,
+    debug_mode: isDebugMode()
+  });
 
   const adsId = window.TRACKING_CONFIG?.googleAdsId;
   if (adsId && !adsId.includes(AMP_PLACEHOLDER_ADS_TOKEN)) {
@@ -82,7 +126,8 @@ function trackPageView() {
     page_location: window.location.href,
     page_path: window.location.pathname,
     page_title: document.title,
-    timestamp: new Date().toISOString()
+    timestamp: new Date().toISOString(),
+    debug_mode: isDebugMode()
   };
 
   window.gtag('event', 'page_view', payload);
@@ -94,10 +139,19 @@ function trackLeadSubmit(leadId) {
     return;
   }
 
+  const leadIdText = String(leadId);
+  window[AMP_LEAD_ID_FIRED_KEY] = window[AMP_LEAD_ID_FIRED_KEY] || new Set();
+  if (window[AMP_LEAD_ID_FIRED_KEY].has(leadIdText)) {
+    return;
+  }
+  window[AMP_LEAD_ID_FIRED_KEY].add(leadIdText);
+
   const payload = {
-    lead_id: String(leadId),
+    lead_id: leadIdText,
     page_location: window.location.href,
-    timestamp: new Date().toISOString()
+    page_path: window.location.pathname,
+    timestamp: new Date().toISOString(),
+    debug_mode: isDebugMode()
   };
 
   window.gtag('event', 'lead_submit', payload);
