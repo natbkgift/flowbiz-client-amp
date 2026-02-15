@@ -5,8 +5,10 @@ from fastapi.staticfiles import StaticFiles
 from sqlalchemy import select
 
 from apps.api.routes import admin, health
+from apps.api.routes.admin_properties import router as admin_properties_router
 from apps.api.routes.v1 import auth, meta
 from apps.api.routes.v1.phase1 import router as phase1_router
+from apps.api.routes.v1.properties import router as properties_router
 from packages.core.auth import hash_password
 from packages.core.config import settings
 from packages.core.database import SessionLocal, init_db
@@ -27,6 +29,8 @@ app.include_router(meta.router)
 app.include_router(auth.router)
 app.include_router(admin.router)
 app.include_router(phase1_router)
+app.include_router(properties_router)
+app.include_router(admin_properties_router)
 
 
 def bootstrap_admin_user() -> None:
