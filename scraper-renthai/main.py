@@ -17,6 +17,14 @@ from utils import Progress, StopScrapeError, ensure_dir, load_robots_txt
 from config import load_config
 
 
+def determine_listing_type(*, url: str, rent_urls: set[str], sale_urls: set[str]) -> str:
+    if url in rent_urls:
+        return "rent"
+    if url in sale_urls:
+        return "sale"
+    return "sale"
+
+
 def parse_args() -> argparse.Namespace:
     p = argparse.ArgumentParser(description="Production-safe Renthai scraper -> FlowBiz import")
     p.add_argument("--dry-run", action="store_true")
@@ -88,6 +96,9 @@ def main() -> int:
                     unit["fetched_at"] = time.time()
                     unit["url"] = url
                     unit["source_id"] = url
+                    unit["listing_type"] = determine_listing_type(
+                        url=url, rent_urls=rent_urls, sale_urls=sale_urls
+                    )
                     write_raw_json(raw_path, unit)
                 except StopScrapeError:
                     raise
@@ -97,13 +108,12 @@ def main() -> int:
                     crawled += 1
                     continue
 
-            # Deterministic type decision based on discovery source.
-            if url in rent_urls:
-                listing_type = "rent"
-            elif url in sale_urls:
-                listing_type = "sale"
-            else:
-                listing_type = "sale"
+            # Deterministic type decision; in --resume mode prefer persisted value.
+            listing_type = unit.get("listing_type")
+            if listing_type not in {"rent", "sale"}:
+                listing_type = determine_listing_type(
+                    url=url, rent_urls=rent_urls, sale_urls=sale_urls
+                )
             normalized = normalize_unit(unit, listing_type=listing_type)
 
             if normalized.row is None:
@@ -136,6 +146,13 @@ def main() -> int:
         print(dict(drop_reasons))
         drop_ratio = (sum(drop_reasons.values()) / units_discovered) if units_discovered else 0.0
         print(f"Drop ratio: {drop_ratio:.2%}")
+
+        if args.confirm and drop_ratio > 0.5:
+            print(
+                "[STOP] Drop ratio > 50% (likely parser/layout drift). "
+                "Refusing to run --confirm. Re-run with --dry-run and review artifacts."
+            )
+            return 4
 
         # Phase 6: import
         # IMPORTANT: Avoid blocking future real import due to C2 sha idempotency.
