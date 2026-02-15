@@ -58,7 +58,7 @@ def post_import(cfg: ScraperConfig, *, csv_bytes: bytes, filename: str, dry_run:
         raw = exc.read().decode("utf-8", errors="ignore")
         try:
             parsed = json.loads(raw)
-        except Exception:
+        except json.JSONDecodeError:
             parsed = {"raw": raw[:500]}
         return {"status": exc.code, "body": parsed}
 
