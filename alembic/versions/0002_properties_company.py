@@ -81,6 +81,12 @@ def upgrade() -> None:
         sa.Column("meta_title", sa.String(length=255), nullable=True),
         sa.Column("meta_description", sa.String(length=500), nullable=True),
         sa.Column(
+            "created_at",
+            sa.DateTime(timezone=True),
+            server_default=sa.text("CURRENT_TIMESTAMP"),
+            nullable=False,
+        ),
+        sa.Column(
             "updated_at",
             sa.DateTime(timezone=True),
             server_default=sa.text("CURRENT_TIMESTAMP"),

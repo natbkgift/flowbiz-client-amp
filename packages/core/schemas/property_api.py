@@ -5,10 +5,11 @@ Kept separate from the existing AMP schemas to avoid modifying existing contract
 
 from datetime import datetime
 from decimal import Decimal
+from enum import Enum
 from typing import Optional
 from uuid import UUID
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict
 
 
 class PaginationMeta(BaseModel):
@@ -17,17 +18,28 @@ class PaginationMeta(BaseModel):
     total: int
 
 
+class PropertyType(str, Enum):
+    NEW = "new"
+    RESALE = "resale"
+    RENT = "rent"
+
+
+class PropertyStatus(str, Enum):
+    ACTIVE = "active"
+    INACTIVE = "inactive"
+
+
 class PropertyListItem(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
     id: UUID
     source_id: str
     title: str
-    type: str
+    type: PropertyType
     price: Decimal
     city: str
     images: list[str] | None = None
-    status: str
+    status: PropertyStatus
     slug: str | None = None
 
 
@@ -38,7 +50,7 @@ class PropertyDetail(BaseModel):
     source_id: str
     title: str
     description: str | None = None
-    type: str
+    type: PropertyType
     price: Decimal
     bedrooms: int | None = None
     bathrooms: int | None = None
@@ -46,7 +58,7 @@ class PropertyDetail(BaseModel):
     address: str
     city: str
     images: list[str] | None = None
-    status: str
+    status: PropertyStatus
     slug: str | None = None
     created_at: datetime
     updated_at: datetime
@@ -56,7 +68,7 @@ class PropertyCreate(BaseModel):
     source_id: str
     title: str
     description: str | None = None
-    type: str = Field(..., pattern=r"^(new|resale|rent)$")
+    type: PropertyType
     price: Decimal
     bedrooms: int | None = None
     bathrooms: int | None = None
@@ -64,14 +76,14 @@ class PropertyCreate(BaseModel):
     address: str
     city: str
     images: list[str] | None = None
-    status: str = Field(default="active", pattern=r"^(active|inactive)$")
+    status: PropertyStatus = PropertyStatus.ACTIVE
     slug: str | None = None
 
 
 class PropertyUpdate(BaseModel):
     title: Optional[str] = None
     description: Optional[str] = None
-    type: Optional[str] = Field(default=None, pattern=r"^(new|resale|rent)$")
+    type: Optional[PropertyType] = None
     price: Optional[Decimal] = None
     bedrooms: Optional[int | None] = None
     bathrooms: Optional[int | None] = None
@@ -79,7 +91,7 @@ class PropertyUpdate(BaseModel):
     address: Optional[str] = None
     city: Optional[str] = None
     images: Optional[list[str] | None] = None
-    status: Optional[str] = Field(default=None, pattern=r"^(active|inactive)$")
+    status: Optional[PropertyStatus] = None
     slug: Optional[str | None] = None
 
 
@@ -97,6 +109,7 @@ class CompanyInfoItem(BaseModel):
     content: str
     meta_title: str | None = None
     meta_description: str | None = None
+    created_at: datetime
     updated_at: datetime
 
 

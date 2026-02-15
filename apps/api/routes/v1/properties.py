@@ -13,6 +13,8 @@ from packages.core.schemas.property_api import (
     PropertyDetail,
     PropertyListItem,
     PropertyListResponse,
+    PropertyStatus,
+    PropertyType,
 )
 
 router = APIRouter(prefix="/v1", tags=["properties", "company"])
@@ -22,12 +24,14 @@ router = APIRouter(prefix="/v1", tags=["properties", "company"])
 async def list_properties(
     page: int = Query(1, ge=1),
     limit: int = Query(20, ge=1, le=100),
-    type: str | None = Query(default=None, pattern=r"^(new|resale|rent)$"),
+    type: PropertyType | None = None,
     search: str | None = None,
     sort: str | None = Query(default=None, pattern=r"^(price_asc|price_desc|newest|oldest)$"),
     db: Session = Depends(get_db),
 ) -> PropertyListResponse:
-    base_query: Select[tuple[Property]] = select(Property).where(Property.status == "active")
+    base_query: Select[tuple[Property]] = select(Property).where(
+        Property.status == PropertyStatus.ACTIVE.value
+    )
 
     if type is not None:
         base_query = base_query.where(Property.type == type)
@@ -67,7 +71,7 @@ async def get_property(
     db: Session = Depends(get_db),
 ) -> PropertyDetail:
     prop = db.get(Property, property_id)
-    if prop is None or prop.status != "active":
+    if prop is None or prop.status != PropertyStatus.ACTIVE.value:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Property not found")
     return PropertyDetail.model_validate(prop)
 

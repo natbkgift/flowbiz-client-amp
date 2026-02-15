@@ -2,6 +2,7 @@ from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy import select
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from apps.api.dependencies.auth import get_current_admin
@@ -19,6 +20,14 @@ from packages.core.schemas.property_api import (
 router = APIRouter(prefix="/admin", tags=["admin"])
 
 
+def _commit_or_conflict(db: Session, *, detail: str) -> None:
+    try:
+        db.commit()
+    except IntegrityError as exc:
+        db.rollback()
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=detail) from exc
+
+
 @router.post("/properties", response_model=PropertyDetail, status_code=status.HTTP_201_CREATED)
 async def create_property(
     payload: PropertyCreate,
@@ -27,7 +36,7 @@ async def create_property(
 ) -> PropertyDetail:
     prop = Property(**payload.model_dump())
     db.add(prop)
-    db.commit()
+    _commit_or_conflict(db, detail="A property with this slug already exists.")
     db.refresh(prop)
     return PropertyDetail.model_validate(prop)
 
@@ -47,7 +56,7 @@ async def update_property(
         setattr(prop, field, value)
 
     db.add(prop)
-    db.commit()
+    _commit_or_conflict(db, detail="A property with this slug already exists.")
     db.refresh(prop)
     return PropertyDetail.model_validate(prop)
 
@@ -74,7 +83,7 @@ async def create_company_info(
 ) -> CompanyInfoItem:
     info = CompanyInfo(**payload.model_dump())
     db.add(info)
-    db.commit()
+    _commit_or_conflict(db, detail="Company info with this slug already exists.")
     db.refresh(info)
     return CompanyInfoItem.model_validate(info)
 
@@ -94,6 +103,6 @@ async def update_company_info(
         setattr(info, field, value)
 
     db.add(info)
-    db.commit()
+    _commit_or_conflict(db, detail="Company info with this slug already exists.")
     db.refresh(info)
     return CompanyInfoItem.model_validate(info)
