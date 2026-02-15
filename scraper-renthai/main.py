@@ -49,6 +49,8 @@ def main() -> int:
     ensure_dir("storage/raw/units")
     ensure_dir("storage/processed")
 
+    units_index_path = "storage/raw/units/index.json"
+
     robots = load_robots_txt(cfg.base_site)
     progress = Progress(log_every=cfg.log_every_n_requests)
     crawler = Crawler(cfg=cfg, robots=robots, progress=progress)
@@ -65,12 +67,29 @@ def main() -> int:
             },
         )
 
-        # Phase 2: discover unit URLs
-        sale_urls = discover_unit_urls_from_pages(crawler, [cfg.start_sale])
-        rent_urls = discover_unit_urls_from_pages(crawler, [cfg.start_rent])
-        project_unit_urls = discover_unit_urls_from_pages(crawler, project_urls)
+        if args.resume and os.path.exists(units_index_path):
+            with open(units_index_path, "r", encoding="utf-8") as f:
+                idx = json.load(f)
+            unit_url_list = idx.get("urls") if isinstance(idx, dict) else None
+            if not isinstance(unit_url_list, list) or not all(
+                isinstance(u, str) for u in unit_url_list
+            ):
+                raise RuntimeError(
+                    "Invalid units index.json; delete it and re-run without --resume"
+                )
 
-        unit_urls = set(sale_urls) | set(rent_urls) | set(project_unit_urls)
+            # In resume mode, discovery is intentionally skipped.
+            sale_urls: set[str] = set()
+            rent_urls: set[str] = set()
+            unit_urls = list(dict.fromkeys(unit_url_list))
+        else:
+            # Phase 2: discover unit URLs
+            sale_urls = discover_unit_urls_from_pages(crawler, [cfg.start_sale])
+            rent_urls = discover_unit_urls_from_pages(crawler, [cfg.start_rent])
+            project_unit_urls = discover_unit_urls_from_pages(crawler, project_urls)
+
+            unit_urls_set = set(sale_urls) | set(rent_urls) | set(project_unit_urls)
+            unit_urls = sorted(unit_urls_set)
 
         units_discovered = len(unit_urls)
 
@@ -79,9 +98,12 @@ def main() -> int:
         drop_reasons: Counter[str] = Counter()
 
         crawled = 0
-        for url in sorted(unit_urls):
+        processed_urls: list[str] = []
+        for url in unit_urls:
             if crawled >= args.limit:
                 break
+
+            processed_urls.append(url)
 
             slug = url.rstrip("/").split("/")[-1]
             raw_path = f"storage/raw/units/{slug}.json"
@@ -122,6 +144,11 @@ def main() -> int:
                 units_valid_rows.append(normalized.row)
 
             crawled += 1
+
+        # Persist the exact processed URL list for deterministic --resume runs.
+        if processed_urls:
+            with open(units_index_path, "w", encoding="utf-8") as f:
+                json.dump({"urls": processed_urls}, f, ensure_ascii=False, indent=2)
 
         # Phase 4+5: export
         csv_bytes = write_csv("storage/processed/import.csv", units_valid_rows)
