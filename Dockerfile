@@ -8,6 +8,7 @@ COPY pyproject.toml ./
 # Install Python dependencies directly
 RUN pip install --no-cache-dir \
     fastapi>=0.104.0 \
+    python-multipart>=0.0.9 \
     uvicorn[standard]>=0.24.0 \
     pydantic>=2.4.0 \
     email-validator>=2.1.0 \
