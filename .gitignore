@@ -40,6 +40,8 @@ htmlcov/
 coverage/
 flowbiz.db
 flowbiz_test.db
+test_flowbiz.db*
+alembic_verify.db*
 
 # Node.js
 node_modules/
