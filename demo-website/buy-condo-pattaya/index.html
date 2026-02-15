@@ -30,11 +30,9 @@
   <link rel="stylesheet" href="../assets/css/responsive.css">
   <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
 
-  <!-- Google tag (gtag.js) -->
-  <script async src="https://www.googletagmanager.com/gtag/js?id=G-FJ83X0LCB7"></script>
   <script>
     const TRACKING_CONFIG = {
-      ga4MeasurementId: 'G-FJ83X0LCB7',
+      ga4MeasurementId: window.GA_MEASUREMENT_ID || window.AMP_GA_MEASUREMENT_ID || '',
       googleAdsId: window.AMP_GOOGLE_ADS_ID || 'AW-XXXXXXXXXX',
       submitLeadLabel: window.AMP_SUBMITLEAD_LABEL || 'SUBMITLEAD_LABEL',
       clickWhatsAppLabel: window.AMP_CLICKWHATSAPP_LABEL || 'CLICKWHATSAPP_LABEL'
@@ -42,18 +40,22 @@
     const API_BASE = window.AMP_API_BASE_URL || '';
     const PLACEHOLDER_ADS_ID_TOKEN = 'XXXXXXXXXX';
     const PLACEHOLDER_LABEL_TOKEN = 'LABEL';
-
-    window.dataLayer = window.dataLayer || [];
-    function gtag() { dataLayer.push(arguments); }
-    gtag('js', new Date());
-
-    gtag('config', TRACKING_CONFIG.ga4MeasurementId);
-    gtag('config', TRACKING_CONFIG.googleAdsId);
   </script>
 
   <style>
     .hero { padding: 70px 0; }
     .hero .btn { margin-right: 10px; margin-bottom: 10px; }
+    .trust-strip {
+      margin-top: 12px;
+      display: inline-block;
+      background: #f8fbff;
+      border: 1px solid #dbeafe;
+      border-radius: 999px;
+      padding: 8px 14px;
+      font-size: 14px;
+      font-weight: 600;
+      color: #0f172a;
+    }
     .section-light { background: var(--color-white); }
     .listing-grid { display: grid; gap: 16px; grid-template-columns: 1fr; }
     .listing-card { background: var(--color-white); border-radius: 12px; box-shadow: var(--shadow-card); overflow: hidden; }
@@ -81,6 +83,16 @@
       .listing-grid { grid-template-columns: repeat(2, 1fr); }
       .steps { grid-template-columns: repeat(2, 1fr); }
       .reviews { grid-template-columns: repeat(2, 1fr); }
+    }
+
+    @media (max-width: 767px) {
+      .hero {
+        padding: 36px 0 18px;
+      }
+
+      #lead-form {
+        padding-top: 10px;
+      }
     }
   </style>
 </head>
@@ -116,11 +128,48 @@
 
   <section class="hero" id="main-content">
     <div class="container">
-      <h1>Buy a Condo in Pattaya — With Full Foreign Ownership Support</h1>
-      <p class="hero-subtitle">Get legal due diligence, foreign quota checks, and transfer support from shortlisting to handover.</p>
+      <h1>Buy a Pattaya Condo Safely — Quota Checked, Legally Guided, Price-Transparent</h1>
+      <p class="hero-subtitle">Get legal due diligence, foreign quota checks, and transfer support from shortlist to handover.</p>
       <p><strong>Licensed Pattaya agency</strong> • English-first process for foreign buyers</p>
       <a href="#lead-form" class="btn btn-accent">Request Shortlist</a>
-      <a href="#lead-form" class="btn btn-primary">Free Consultation</a>
+      <p class="trust-strip">Trusted process • Fast response via WhatsApp • English legal coordination</p>
+    </div>
+  </section>
+
+  <section class="section section-light" id="lead-form">
+    <div class="container">
+      <div class="lead-box">
+        <h2 class="mb-md">Request Shortlist / Free Consultation</h2>
+        <form id="buy-lead-form" data-integration="true">
+          <div class="form-group">
+            <label class="form-label" for="buy-name">Full name</label>
+            <input class="form-input" type="text" id="buy-name" name="name" placeholder="Full name" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="buy-phone">Phone / WhatsApp</label>
+            <input class="form-input" type="tel" id="buy-phone" name="phone" placeholder="Phone / WhatsApp" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="buy-email">Email</label>
+            <input class="form-input" type="email" id="buy-email" name="email" placeholder="Email">
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="buy-budget">Budget range</label>
+            <select class="form-select" id="buy-budget" name="budget" required>
+              <option value="">Budget range</option>
+              <option value="2-4m">2M - 4M THB</option>
+              <option value="4-8m">4M - 8M THB</option>
+              <option value="8m+">8M+ THB</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="buy-purpose">Purpose and timeline</label>
+            <textarea class="form-textarea" id="buy-purpose" name="purpose" placeholder="Purpose (Own stay / Investment) and timeline"></textarea>
+          </div>
+          <button type="submit" class="btn btn-accent btn-block">Submit Lead</button>
+        </form>
+        <p class="mb-0 mt-md" id="lead-feedback" style="display:none;color:var(--color-success);font-weight:600;">Thank you! We will contact you shortly.</p>
+      </div>
     </div>
   </section>
 
@@ -190,43 +239,6 @@
         <div class="step"><strong>2) Get shortlist in 24 hours</strong><p>3–5 matching condos with legal status and foreign quota note.</p></div>
         <div class="step"><strong>3) Viewing + legal check</strong><p>Online/offline viewing, title check, and transfer cost estimation.</p></div>
         <div class="step"><strong>4) Reserve and transfer</strong><p>Negotiation, reservation agreement, and Land Office transfer support.</p></div>
-      </div>
-    </div>
-  </section>
-
-  <section class="section section-light" id="lead-form">
-    <div class="container">
-      <div class="lead-box">
-        <h2 class="mb-md">Request Shortlist / Free Consultation</h2>
-        <form id="buy-lead-form" data-integration="true">
-          <div class="form-group">
-            <label class="form-label" for="buy-name">Full name</label>
-            <input class="form-input" type="text" id="buy-name" name="name" placeholder="Full name" required>
-          </div>
-          <div class="form-group">
-            <label class="form-label" for="buy-phone">Phone / WhatsApp</label>
-            <input class="form-input" type="tel" id="buy-phone" name="phone" placeholder="Phone / WhatsApp" required>
-          </div>
-          <div class="form-group">
-            <label class="form-label" for="buy-email">Email</label>
-            <input class="form-input" type="email" id="buy-email" name="email" placeholder="Email">
-          </div>
-          <div class="form-group">
-            <label class="form-label" for="buy-budget">Budget range</label>
-            <select class="form-select" id="buy-budget" name="budget" required>
-              <option value="">Budget range</option>
-              <option value="2-4m">2M - 4M THB</option>
-              <option value="4-8m">4M - 8M THB</option>
-              <option value="8m+">8M+ THB</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label class="form-label" for="buy-purpose">Purpose and timeline</label>
-            <textarea class="form-textarea" id="buy-purpose" name="purpose" placeholder="Purpose (Own stay / Investment) and timeline"></textarea>
-          </div>
-          <button type="submit" class="btn btn-accent btn-block">Submit Lead</button>
-        </form>
-        <p class="mb-0 mt-md" id="lead-feedback" style="display:none;color:var(--color-success);font-weight:600;">Thank you! We will contact you shortly.</p>
       </div>
     </div>
   </section>
@@ -330,13 +342,7 @@
       sendAdsConversion(TRACKING_CONFIG.clickWhatsAppLabel);
     }
 
-    function trackSubmitLead(formData) {
-      if (typeof gtag !== 'function') return;
-      gtag('event', 'SubmitLead', {
-        event_category: 'lead',
-        event_label: 'buy_condo_pattaya',
-        budget_range: formData.get('budget') || 'unknown'
-      });
+    function trackSubmitLeadSuccess() {
       sendAdsConversion(TRACKING_CONFIG.submitLeadLabel);
     }
 
@@ -423,7 +429,6 @@
         leadForm.dataset.tracked = 'true';
         try {
           const formData = new FormData(leadForm);
-          trackSubmitLead(formData);
 
           const fullName = (formData.get('name') || '').toString().trim();
           const firstName = fullName.split(' ')[0] || fullName;
@@ -444,10 +449,17 @@
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(payload)
           });
+          const responseData = await response.json().catch(() => null);
 
           if (!response.ok) {
             throw new Error(`Lead API returned ${response.status}`);
           }
+
+          if (!responseData || !responseData.lead_id) {
+            throw new Error('Lead API response missing lead_id');
+          }
+
+          trackSubmitLeadSuccess();
 
           if (leadFeedback) {
             leadFeedback.textContent = 'Thank you. Your request was received. Our team will contact you shortly.';

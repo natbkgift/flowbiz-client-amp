@@ -7,24 +7,23 @@
   <title>Pattaya Condo Investment | Asset Management Property</title>
   <meta name="description" content="Invest in Pattaya condos with verified yield data, foreign ownership support, and full acquisition guidance.">
   <link rel="canonical" href="https://amppattaya.com/pattaya-condo-investment">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Pattaya Condo Investment | Asset Management Property">
+  <meta property="og:description" content="Invest in Pattaya condos with verified yield data, foreign ownership support, and full acquisition guidance.">
+  <meta property="og:url" content="https://amppattaya.com/pattaya-condo-investment">
+  <meta property="og:image" content="https://amppattaya.com/assets/images/favicon.svg">
   <link rel="icon" href="../assets/images/favicon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="../assets/css/main.css">
   <link rel="stylesheet" href="../assets/css/components.css">
   <link rel="stylesheet" href="../assets/css/responsive.css">
-  <script async src="https://www.googletagmanager.com/gtag/js?id=G-FJ83X0LCB7"></script>
   <script>
     const TRACKING_CONFIG = {
-      ga4MeasurementId: 'G-FJ83X0LCB7',
+      ga4MeasurementId: window.GA_MEASUREMENT_ID || window.AMP_GA_MEASUREMENT_ID || '',
       googleAdsId: window.AMP_GOOGLE_ADS_ID || 'AW-XXXXXXXXXX',
       submitLeadLabel: window.AMP_SUBMITLEAD_LABEL || 'SUBMITLEAD_LABEL',
       clickWhatsAppLabel: window.AMP_CLICKWHATSAPP_LABEL || 'CLICKWHATSAPP_LABEL'
     };
     const API_BASE = window.AMP_API_BASE_URL || '';
-    window.dataLayer = window.dataLayer || [];
-    function gtag() { dataLayer.push(arguments); }
-    gtag('js', new Date());
-    gtag('config', TRACKING_CONFIG.ga4MeasurementId);
-    gtag('config', TRACKING_CONFIG.googleAdsId);
   </script>
   <style>
     .hero { padding: 70px 0; }
@@ -50,7 +49,6 @@
       <p class="hero-subtitle">We source investment-grade condos with market-rate yield analysis, foreign quota pre-verification, and complete acquisition support.</p>
       <p><strong>Data-backed analysis</strong> • Not developer-projected numbers</p>
       <a href="#lead-form" class="btn btn-accent">See Current Investment Opportunities</a>
-      <a href="#lead-form" class="btn btn-primary">Request Yield Report</a>
     </div>
   </section>
 
@@ -154,6 +152,7 @@
   <footer class="footer"><div class="container"><div class="footer-bottom"><p>&copy; 2026 Asset Management Property. All rights reserved.</p></div></div></footer>
   <a class="whatsapp-float" href="https://wa.me/66634533526" target="_blank" rel="noopener noreferrer" data-track-whatsapp="true" aria-label="Chat on WhatsApp">💬</a>
 
+  <script src="../assets/js/main.js"></script>
   <script>
     function sendAdsConversion(label) {
       if (typeof gtag !== 'function' || !TRACKING_CONFIG.googleAdsId || TRACKING_CONFIG.googleAdsId.includes('XXXXXXXXXX') || !label || label.includes('LABEL')) return;
@@ -161,7 +160,9 @@
     }
     document.querySelectorAll('[data-track-whatsapp="true"]').forEach((element) => {
       element.addEventListener('click', () => {
-        gtag('event', 'ClickWhatsApp', { event_category: 'engagement', event_label: 'investment_whatsapp' });
+        if (typeof gtag === 'function') {
+          gtag('event', 'ClickWhatsApp', { event_category: 'engagement', event_label: 'investment_whatsapp' });
+        }
         sendAdsConversion(TRACKING_CONFIG.clickWhatsAppLabel);
       });
     });
@@ -174,8 +175,6 @@
         leadForm.dataset.tracked = 'true';
         try {
           const formData = new FormData(leadForm);
-          gtag('event', 'SubmitLead', { event_category: 'lead', event_label: 'pattaya_condo_investment', budget_range: formData.get('budget') || 'unknown' });
-          sendAdsConversion(TRACKING_CONFIG.submitLeadLabel);
 
           const fullName = (formData.get('name') || '').toString().trim();
           const firstName = fullName.split(' ')[0] || fullName;
@@ -195,10 +194,17 @@
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(payload)
           });
+          const responseData = await response.json().catch(() => null);
 
           if (!response.ok) {
             throw new Error(`Lead API returned ${response.status}`);
           }
+
+          if (!responseData || !responseData.lead_id) {
+            throw new Error('Lead API response missing lead_id');
+          }
+
+          sendAdsConversion(TRACKING_CONFIG.submitLeadLabel);
 
           leadFeedback.textContent = 'Thank you. Your request was received. Our team will contact you shortly.';
           leadFeedback.style.color = 'var(--color-success)';

@@ -1,6 +1,165 @@
 // AMP Demo Website - Main JS
 // Site-wide JavaScript functionality
 
+const AMP_PLACEHOLDER_ADS_TOKEN = 'XXXXXXXXXX';
+const AMP_ANALYTICS_EVENTS = '__AMP_ANALYTICS_EVENTS__';
+
+function getGaMeasurementId() {
+  const runtimeValue =
+    window.GA_MEASUREMENT_ID ||
+    window.AMP_GA_MEASUREMENT_ID ||
+    window.TRACKING_CONFIG?.ga4MeasurementId ||
+    document.documentElement?.dataset?.gaMeasurementId ||
+    '';
+
+  return String(runtimeValue).trim();
+}
+
+function recordAnalyticsEvent(eventName, payload) {
+  window[AMP_ANALYTICS_EVENTS] = window[AMP_ANALYTICS_EVENTS] || [];
+  window[AMP_ANALYTICS_EVENTS].push({
+    event_name: eventName,
+    payload,
+    recorded_at: new Date().toISOString()
+  });
+}
+
+function ensureGtag() {
+  if (typeof window.gtag === 'function') {
+    return;
+  }
+
+  window.dataLayer = window.dataLayer || [];
+  window.gtag = function gtag() {
+    window.dataLayer.push(arguments);
+  };
+}
+
+function ensureGaScript(gaMeasurementId) {
+  if (!gaMeasurementId) {
+    return false;
+  }
+
+  const existingScript = document.querySelector('script[data-amp-ga4="true"]');
+  if (existingScript) {
+    return true;
+  }
+
+  const script = document.createElement('script');
+  script.async = true;
+  script.dataset.ampGa4 = 'true';
+  script.src = `https://www.googletagmanager.com/gtag/js?id=${encodeURIComponent(gaMeasurementId)}`;
+  document.head.appendChild(script);
+  return true;
+}
+
+function configureGa4() {
+  const gaMeasurementId = getGaMeasurementId();
+  if (!gaMeasurementId) {
+    return false;
+  }
+
+  ensureGaScript(gaMeasurementId);
+  ensureGtag();
+
+  window.gtag('js', new Date());
+  window.gtag('config', gaMeasurementId, { send_page_view: false });
+
+  const adsId = window.TRACKING_CONFIG?.googleAdsId;
+  if (adsId && !adsId.includes(AMP_PLACEHOLDER_ADS_TOKEN)) {
+    window.gtag('config', adsId);
+  }
+
+  return true;
+}
+
+function trackPageView() {
+  if (typeof window.gtag !== 'function') {
+    return;
+  }
+
+  const payload = {
+    page_location: window.location.href,
+    page_path: window.location.pathname,
+    page_title: document.title,
+    timestamp: new Date().toISOString()
+  };
+
+  window.gtag('event', 'page_view', payload);
+  recordAnalyticsEvent('page_view', payload);
+}
+
+function trackLeadSubmit(leadId) {
+  if (!leadId || typeof window.gtag !== 'function') {
+    return;
+  }
+
+  const payload = {
+    lead_id: String(leadId),
+    page_location: window.location.href,
+    timestamp: new Date().toISOString()
+  };
+
+  window.gtag('event', 'lead_submit', payload);
+  recordAnalyticsEvent('lead_submit', payload);
+}
+
+function isPhase1ScoreRequest(url, options) {
+  if (!url || !String(url).includes('/v1/phase1/score')) {
+    return false;
+  }
+
+  const method = (options?.method || 'GET').toUpperCase();
+  return method === 'POST';
+}
+
+function installLeadSubmitFetchHook() {
+  if (window.__ampLeadSubmitHookInstalled === true || typeof window.fetch !== 'function') {
+    return;
+  }
+
+  const originalFetch = window.fetch.bind(window);
+  window.fetch = async function patchedFetch(input, init) {
+    const requestUrl = typeof input === 'string' ? input : input?.url;
+    const isLeadSubmitCall = isPhase1ScoreRequest(requestUrl, init);
+    const response = await originalFetch(input, init);
+
+    if (!isLeadSubmitCall || !response.ok) {
+      return response;
+    }
+
+    try {
+      const body = await response.clone().json();
+      if (body?.lead_id) {
+        trackLeadSubmit(body.lead_id);
+      }
+    } catch (_error) {
+      // Ignore non-JSON responses silently.
+    }
+
+    return response;
+  };
+
+  window.__ampLeadSubmitHookInstalled = true;
+}
+
+function initAnalytics() {
+  const gaConfigured = configureGa4();
+  installLeadSubmitFetchHook();
+
+  if (!gaConfigured) {
+    return;
+  }
+
+  trackPageView();
+}
+
+window.AMPAnalytics = {
+  init: initAnalytics,
+  trackLeadSubmit,
+  trackPageView
+};
+
 // Mobile menu toggle
 function toggleMobileMenu() {
   const mobileMenu = document.getElementById('mobile-menu');
@@ -239,6 +398,7 @@ function setupLazyLoading() {
 
 // Initialize all functionality
 function init() {
+  initAnalytics();
   setupIntentToggle();
   setupChips();
   setupFormValidation();
