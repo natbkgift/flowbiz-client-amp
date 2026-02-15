@@ -3,28 +3,8 @@
 import Link from 'next/link';
 import { useEffect, useMemo, useState } from 'react';
 
-const API_BASE = process.env.NEXT_PUBLIC_API_BASE ?? '/api';
-
-type PropertyListItem = {
-  id: string;
-  source_id: string;
-  title: string;
-  type: 'new' | 'resale' | 'rent' | string;
-  price: number;
-  city: string;
-  images: string[] | null;
-  status: string;
-  slug: string | null;
-};
-
-type PropertyListResponse = {
-  data: PropertyListItem[];
-  meta: {
-    page: number;
-    limit: number;
-    total: number;
-  };
-};
+import { API_BASE } from '../_shared/api';
+import type { PropertyListItem, PropertyListResponse } from '../_shared/types';
 
 const SORT_WHITELIST = ['newest', 'oldest', 'price_asc', 'price_desc'] as const;
 type SortValue = (typeof SORT_WHITELIST)[number];
@@ -153,43 +133,44 @@ export default function PublicPropertiesPage() {
         </div>
       </section>
 
-      {loading ? <p>Loading...</p> : null}
-      {error ? <p className="text-red-600">{error}</p> : null}
+      {(() => {
+        if (loading) return <p>Loading...</p>;
+        if (error) return <p className="text-red-600">{error}</p>;
+        if (items.length === 0) return <p>No properties found</p>;
 
-      {!loading && !error && items.length === 0 ? <p>No properties found</p> : null}
-
-      {!loading && !error && items.length > 0 ? (
-        <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {items.map((p) => {
-            const thumbnail = p.images?.[0] ?? null;
-            return (
-              <Link
-                key={p.id}
-                href={`/public/properties/${p.id}`}
-                className="bg-white rounded-lg shadow-sm hover:shadow-md transition overflow-hidden"
-              >
-                {thumbnail ? (
-                  <img src={thumbnail} alt={p.title} className="h-44 w-full object-cover" />
-                ) : (
-                  <div className="h-44 w-full bg-slate-200" />
-                )}
-                <div className="p-4 space-y-1">
-                  <div className="flex items-start justify-between gap-2">
-                    <h2 className="font-semibold leading-snug line-clamp-2">{p.title}</h2>
-                    <span className="shrink-0 text-xs px-2 py-0.5 rounded bg-slate-100 text-slate-700">
-                      {p.type}
-                    </span>
+        return (
+          <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {items.map((p) => {
+              const thumbnail = p.images?.[0] ?? null;
+              return (
+                <Link
+                  key={p.id}
+                  href={`/public/properties/${p.id}`}
+                  className="bg-white rounded-lg shadow-sm hover:shadow-md transition overflow-hidden"
+                >
+                  {thumbnail ? (
+                    <img src={thumbnail} alt={p.title} className="h-44 w-full object-cover" />
+                  ) : (
+                    <div className="h-44 w-full bg-slate-200" />
+                  )}
+                  <div className="p-4 space-y-1">
+                    <div className="flex items-start justify-between gap-2">
+                      <h2 className="font-semibold leading-snug line-clamp-2">{p.title}</h2>
+                      <span className="shrink-0 text-xs px-2 py-0.5 rounded bg-slate-100 text-slate-700">
+                        {p.type}
+                      </span>
+                    </div>
+                    <p className="text-lg font-bold text-slate-900">
+                      {Number(p.price).toLocaleString()} THB
+                    </p>
+                    <p className="text-sm text-slate-600">{p.city}</p>
                   </div>
-                  <p className="text-lg font-bold text-slate-900">
-                    {Number(p.price).toLocaleString()} THB
-                  </p>
-                  <p className="text-sm text-slate-600">{p.city}</p>
-                </div>
-              </Link>
-            );
-          })}
-        </section>
-      ) : null}
+                </Link>
+              );
+            })}
+          </section>
+        );
+      })()}
 
       <section className="flex items-center justify-between text-sm">
         <span className="text-slate-600">Total: {total}</span>

@@ -3,21 +3,8 @@
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 
-const API_BASE = process.env.NEXT_PUBLIC_API_BASE ?? '/api';
-
-type CompanyInfoItem = {
-  id: string;
-  slug: string;
-  title: string;
-  content: string;
-  meta_title: string | null;
-  meta_description: string | null;
-  updated_at: string;
-};
-
-type CompanyListResponse = {
-  data: CompanyInfoItem[];
-};
+import { API_BASE } from '../_shared/api';
+import type { CompanyInfoItem, CompanyListResponse } from '../_shared/types';
 
 export default function PublicCompanyPage() {
   const [loading, setLoading] = useState(true);
@@ -57,24 +44,26 @@ export default function PublicCompanyPage() {
         <p className="text-slate-600">Learn more about us.</p>
       </header>
 
-      {loading ? <p>Loading...</p> : null}
-      {error ? <p className="text-red-600">{error}</p> : null}
-      {!loading && !error && items.length === 0 ? <p>No company sections found</p> : null}
+      {(() => {
+        if (loading) return <p>Loading...</p>;
+        if (error) return <p className="text-red-600">{error}</p>;
+        if (items.length === 0) return <p>No company sections found</p>;
 
-      {!loading && !error && items.length > 0 ? (
-        <section className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          {items.map((item) => (
-            <Link
-              key={item.id}
-              href={`/public/company/${item.slug}`}
-              className="bg-white rounded-lg shadow-sm hover:shadow-md transition p-5"
-            >
-              <h2 className="text-lg font-semibold">{item.title}</h2>
-              <p className="text-sm text-slate-600 mt-1">/{item.slug}</p>
-            </Link>
-          ))}
-        </section>
-      ) : null}
+        return (
+          <section className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {items.map((item) => (
+              <Link
+                key={item.id}
+                href={`/public/company/${item.slug}`}
+                className="bg-white rounded-lg shadow-sm hover:shadow-md transition p-5"
+              >
+                <h2 className="text-lg font-semibold">{item.title}</h2>
+                <p className="text-sm text-slate-600 mt-1">/{item.slug}</p>
+              </Link>
+            ))}
+          </section>
+        );
+      })()}
     </main>
   );
 }

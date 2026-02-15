@@ -1,32 +1,18 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 
-const API_BASE = process.env.NEXT_PUBLIC_API_BASE ?? '/api';
-
-type PropertyDetail = {
-  id: string;
-  source_id: string;
-  title: string;
-  description: string | null;
-  type: 'new' | 'resale' | 'rent' | string;
-  price: number;
-  bedrooms: number | null;
-  bathrooms: number | null;
-  size: number | null;
-  address: string;
-  city: string;
-  images: string[] | null;
-  status: string;
-};
+import { API_BASE } from '../../_shared/api';
+import type { PropertyDetail } from '../../_shared/types';
 
 export default function PublicPropertyDetailPage({ params }: { params: { id: string } }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [notFound, setNotFound] = useState(false);
 
   const [property, setProperty] = useState<PropertyDetail | null>(null);
   const [activeImageIndex, setActiveImageIndex] = useState(0);
+
+  const contactRef = useRef<HTMLElement | null>(null);
 
   const images = useMemo(() => property?.images ?? [], [property]);
   const activeImage = images[activeImageIndex] ?? null;
@@ -35,12 +21,11 @@ export default function PublicPropertyDetailPage({ params }: { params: { id: str
     const controller = new AbortController();
     setLoading(true);
     setError(null);
-    setNotFound(false);
+    setProperty(null);
 
     fetch(`${API_BASE}/v1/properties/${params.id}`, { signal: controller.signal })
       .then(async (res) => {
         if (res.status === 404) {
-          setNotFound(true);
           return null;
         }
         if (!res.ok) {
@@ -49,9 +34,10 @@ export default function PublicPropertyDetailPage({ params }: { params: { id: str
         return (await res.json()) as PropertyDetail;
       })
       .then((data) => {
-        if (!data) return;
-        setProperty(data);
-        setActiveImageIndex(0);
+        if (data) {
+          setProperty(data);
+          setActiveImageIndex(0);
+        }
       })
       .catch((err: unknown) => {
         if (err instanceof DOMException && err.name === 'AbortError') {
@@ -67,15 +53,11 @@ export default function PublicPropertyDetailPage({ params }: { params: { id: str
   }, [params.id]);
 
   function scrollToContact() {
-    document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' });
+    contactRef.current?.scrollIntoView({ behavior: 'smooth' });
   }
 
   if (loading) {
     return <main className="max-w-4xl mx-auto p-6">Loading...</main>;
-  }
-
-  if (notFound) {
-    return <main className="max-w-4xl mx-auto p-6">Property not found</main>;
   }
 
   if (error) {
@@ -160,7 +142,7 @@ export default function PublicPropertyDetailPage({ params }: { params: { id: str
         </button>
       </section>
 
-      <section id="contact" className="bg-white rounded-lg shadow-sm p-6 space-y-2">
+      <section ref={contactRef} id="contact" className="bg-white rounded-lg shadow-sm p-6 space-y-2">
         <h2 className="text-xl font-semibold">Contact</h2>
         <p className="text-slate-700">Please contact our team for availability and details.</p>
       </section>

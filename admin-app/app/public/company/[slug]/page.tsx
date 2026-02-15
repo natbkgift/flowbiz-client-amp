@@ -1,35 +1,29 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import DOMPurify from 'dompurify';
+import { useEffect, useMemo, useState } from 'react';
 
-const API_BASE = process.env.NEXT_PUBLIC_API_BASE ?? '/api';
-
-type CompanyInfoItem = {
-  id: string;
-  slug: string;
-  title: string;
-  content: string;
-  meta_title: string | null;
-  meta_description: string | null;
-  updated_at: string;
-};
+import { API_BASE } from '../../_shared/api';
+import type { CompanyInfoItem } from '../../_shared/types';
 
 export default function PublicCompanyDetailPage({ params }: { params: { slug: string } }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [notFound, setNotFound] = useState(false);
   const [info, setInfo] = useState<CompanyInfoItem | null>(null);
+
+  const safeContentHtml = useMemo(() => {
+    return info ? DOMPurify.sanitize(info.content) : '';
+  }, [info]);
 
   useEffect(() => {
     const controller = new AbortController();
     setLoading(true);
     setError(null);
-    setNotFound(false);
+    setInfo(null);
 
     fetch(`${API_BASE}/v1/company/${params.slug}`, { signal: controller.signal })
       .then(async (res) => {
         if (res.status === 404) {
-          setNotFound(true);
           return null;
         }
         if (!res.ok) {
@@ -38,7 +32,6 @@ export default function PublicCompanyDetailPage({ params }: { params: { slug: st
         return (await res.json()) as CompanyInfoItem;
       })
       .then((data) => {
-        if (!data) return;
         setInfo(data);
       })
       .catch((err: unknown) => {
@@ -54,10 +47,6 @@ export default function PublicCompanyDetailPage({ params }: { params: { slug: st
 
   if (loading) {
     return <main className="max-w-4xl mx-auto p-6">Loading...</main>;
-  }
-
-  if (notFound) {
-    return <main className="max-w-4xl mx-auto p-6">Not found</main>;
   }
 
   if (error) {
@@ -80,7 +69,7 @@ export default function PublicCompanyDetailPage({ params }: { params: { slug: st
       </header>
 
       <section className="bg-white rounded-lg shadow-sm p-6">
-        <div dangerouslySetInnerHTML={{ __html: info.content }} />
+        <div dangerouslySetInnerHTML={{ __html: safeContentHtml }} />
       </section>
 
       <section className="bg-slate-900 text-white rounded-lg p-6 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
