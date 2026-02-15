@@ -7,7 +7,7 @@ import time
 from collections import Counter
 
 from crawler import Crawler
-from exporter import write_csv, write_raw_json, write_report
+from exporter import render_csv_bytes, write_csv, write_raw_json, write_report
 from importer import get_latest_audit, post_import, print_import_summary
 from normalizer import normalize_unit
 from parser import parse_unit_detail
@@ -98,7 +98,12 @@ def main() -> int:
                     continue
 
             # Deterministic type decision based on discovery source.
-            listing_type = "rent" if url in rent_urls else "sale"
+            if url in rent_urls:
+                listing_type = "rent"
+            elif url in sale_urls:
+                listing_type = "sale"
+            else:
+                listing_type = "sale"
             normalized = normalize_unit(unit, listing_type=listing_type)
 
             if normalized.row is None:
@@ -129,6 +134,8 @@ def main() -> int:
             print(r)
         print("=== DROP REASONS ===")
         print(dict(drop_reasons))
+        drop_ratio = (sum(drop_reasons.values()) / units_discovered) if units_discovered else 0.0
+        print(f"Drop ratio: {drop_ratio:.2%}")
 
         # Phase 6: import
         # IMPORTANT: Avoid blocking future real import due to C2 sha idempotency.
@@ -136,7 +143,8 @@ def main() -> int:
         submit_bytes = csv_bytes
         submit_filename = "import.csv"
         if args.dry_run:
-            submit_bytes = csv_bytes + b'\n'
+            # Guaranteed SHA divergence while keeping identical data semantics.
+            submit_bytes = render_csv_bytes(units_valid_rows, lineterminator="\n")
             submit_filename = "import_dry_run.csv"
 
         import_result = post_import(
