@@ -91,7 +91,8 @@ def main() -> int:
                     write_raw_json(raw_path, unit)
                 except StopScrapeError:
                     raise
-                except Exception:
+                except Exception as exc:
+                    print(f"[WARNING] Failed to process {url}: {exc!r}")
                     drop_reasons["fetch_or_parse_error"] += 1
                     crawled += 1
                     continue
