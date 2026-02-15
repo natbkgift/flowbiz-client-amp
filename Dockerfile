@@ -10,6 +10,7 @@ RUN pip install --no-cache-dir \
     fastapi>=0.104.0 \
     uvicorn[standard]>=0.24.0 \
     pydantic>=2.4.0 \
+    email-validator>=2.1.0 \
     pydantic-settings>=2.0.0 \
     sqlalchemy>=2.0.0 \
     alembic>=1.13.0 \
