@@ -153,11 +153,14 @@ function setupCampaignCostSheet_(sheet) {
   ];
 
   const campaigns = [['Buy'], ['Invest'], ['Rent'], ['Brand']];
+  const startRow = 2;
+  const endRow = startRow + campaigns.length - 1;
+  const totalRow = endRow + 1;
 
   sheet.getRange(1, 1, 1, headers.length).setValues([headers]);
-  sheet.getRange(2, 1, campaigns.length, 1).setValues(campaigns);
+  sheet.getRange(startRow, 1, campaigns.length, 1).setValues(campaigns);
 
-  for (let row = 2; row <= campaigns.length + 1; row += 1) {
+  for (let row = startRow; row <= endRow; row += 1) {
     sheet.getRange(`C${row}`).setFormula(`=COUNTIF(Leads_Master!G:G,A${row})`);
     sheet.getRange(`D${row}`).setFormula(`=COUNTIFS(Leads_Master!G:G,A${row},Leads_Master!L:L,"Yes")`);
     sheet.getRange(`E${row}`).setFormula(`=SUMIFS(Leads_Master!R:R,Leads_Master!G:G,A${row},Leads_Master!Q:Q,"Yes")`);
@@ -166,7 +169,17 @@ function setupCampaignCostSheet_(sheet) {
     sheet.getRange(`H${row}`).setFormula(`=IF(B${row}=0,"",E${row}/B${row})`);
   }
 
+  sheet.getRange(`A${totalRow}`).setValue('Total');
+  sheet.getRange(`B${totalRow}`).setFormula(`=SUM(B${startRow}:B${endRow})`);
+  sheet.getRange(`C${totalRow}`).setFormula(`=SUM(C${startRow}:C${endRow})`);
+  sheet.getRange(`D${totalRow}`).setFormula(`=SUM(D${startRow}:D${endRow})`);
+  sheet.getRange(`E${totalRow}`).setFormula(`=SUM(E${startRow}:E${endRow})`);
+  sheet.getRange(`F${totalRow}`).setFormula(`=IF(C${totalRow}=0,"",B${totalRow}/C${totalRow})`);
+  sheet.getRange(`G${totalRow}`).setFormula(`=IF(D${totalRow}=0,"",B${totalRow}/D${totalRow})`);
+  sheet.getRange(`H${totalRow}`).setFormula(`=IF(B${totalRow}=0,"",E${totalRow}/B${totalRow})`);
+
   sheet.getRange('A1:H1').setFontWeight('bold');
+  sheet.getRange(`A${totalRow}:H${totalRow}`).setFontWeight('bold');
   sheet.setFrozenRows(1);
 
   sheet.getRange('B2:B').setNumberFormat('#,##0');

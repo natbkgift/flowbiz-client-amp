@@ -133,6 +133,12 @@ label sum(R) 'Revenue'")
 - Cost per Qualified = `=IF(D2=0,"",B2/D2)`
 - ROAS = `=IF(B2=0,"",E2/B2)`
 
+แถวสุดท้ายเป็น `Total` (auto):
+
+- Spend รวม = `=SUM(B2:B5)`
+- Revenue รวม = `=SUM(E2:E5)`
+- ROAS รวมทั้งพอร์ต = `=IF(B6=0,"",E6/B6)`
+
 ---
 
 ## Daily Operation Rule
