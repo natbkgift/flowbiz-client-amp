@@ -31,6 +31,12 @@ Reporting Pack คือชุดเอกสาร templates และมาต
 docs/reporting/
 ├── README.md                              # This file
 │
+├── dashboards/
+│   ├── SALES_DASHBOARD_SPEC.md            # Sales dashboard architecture
+│   ├── LOOKER_STUDIO_SETUP.md             # Looker Studio setup guide
+│   ├── DATA_SOURCE_CONFIG.md              # Data source mappings
+│   └── PHASE0_LEADS_SHEET_SPEC.md         # Google Sheets tracking spec (Phase 0)
+│
 ├── kpis/
 │   └── KPI_DASHBOARD_SPEC.md              # KPI definitions & targets
 │
@@ -48,6 +54,9 @@ docs/reporting/
 
 ### 📈 KPIs & Metrics
 - **[KPI Dashboard Spec](kpis/KPI_DASHBOARD_SPEC.md)** - All KPI definitions, targets, and dashboard layouts
+
+### 🧾 Lead Tracking Sheet
+- **[Phase 0 Leads Sheet Spec](dashboards/PHASE0_LEADS_SHEET_SPEC.md)** - Exact columns, formulas, and operations for `Leads_Master`, `Dashboard`, and `Campaign_Performance`
 
 ### 💰 Budget Management
 - **[Budget Tracking Template](budget/BUDGET_TRACKING_TEMPLATE.md)** - Expense tracking and variance analysis
