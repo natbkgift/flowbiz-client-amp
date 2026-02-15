@@ -6,6 +6,8 @@ import os
 import subprocess
 import sys
 import tempfile
+import threading
+import time
 from uuid import uuid4
 
 from fastapi.testclient import TestClient
@@ -655,21 +657,284 @@ def test_duplicate_file_sha256_allowed_and_detectable(client: TestClient) -> Non
         ]
     )
 
-    headers, _admin_email = _make_admin_headers_and_email()
-    for _ in range(2):
-        resp = client.post(
-            "/admin/properties/import",
-            headers=headers,
-            files={"file": ("props.csv", content, "text/csv")},
-        )
-        assert resp.status_code == 200
+    headers, admin_email = _make_admin_headers_and_email()
+    resp1 = client.post(
+        "/admin/properties/import",
+        headers=headers,
+        files={"file": ("props.csv", content, "text/csv")},
+    )
+    assert resp1.status_code == 200
+
+    resp2 = client.post(
+        "/admin/properties/import",
+        headers=headers,
+        files={"file": ("props.csv", content, "text/csv")},
+    )
+    assert resp2.status_code == 409
+    body2 = resp2.json()
+    assert body2["errors"] == ["File already imported successfully"]
+    assert body2["inserted"] == 0
+    assert body2["updated"] == 0
+    assert body2["total_rows"] == 0
 
     sha = hashlib.sha256(content).hexdigest()
     with SessionLocal() as db:
         count = db.scalar(
             select(func.count())
             .select_from(PropertyImportAudit)
+            .where(PropertyImportAudit.admin_email == admin_email)
             .where(PropertyImportAudit.file_sha256 == sha)
+            .where(PropertyImportAudit.status == "success")
         )
-        assert count is not None
-        assert count >= 2
+        assert count == 1
+
+
+def test_import_idempotency_conflict(client: TestClient) -> None:
+    sid = f"src-{uuid4()}"
+    content = _csv_bytes(
+        [
+            {
+                "source_id": sid,
+                "title": "T1",
+                "type": "new",
+                "price": "1",
+                "address": "A",
+                "city": "C",
+                "status": "active",
+                "bedrooms": "",
+                "bathrooms": "",
+                "size": "",
+                "slug": f"slug-{uuid4()}",
+            }
+        ]
+    )
+
+    headers = _make_admin_headers()
+    r1 = client.post(
+        "/admin/properties/import",
+        headers=headers,
+        files={"file": ("props.csv", content, "text/csv")},
+    )
+    assert r1.status_code == 200
+
+    r2 = client.post(
+        "/admin/properties/import",
+        headers=headers,
+        files={"file": ("props.csv", content, "text/csv")},
+    )
+    assert r2.status_code == 409
+
+
+def test_on_conflict_upsert_no_duplicate_rows(client: TestClient) -> None:
+    sid = f"src-{uuid4()}"
+    headers = _make_admin_headers()
+
+    c1 = _csv_bytes(
+        [
+            {
+                "source_id": sid,
+                "title": "T1",
+                "type": "new",
+                "price": "1",
+                "address": "A",
+                "city": "C",
+                "status": "active",
+                "bedrooms": "",
+                "bathrooms": "",
+                "size": "",
+                "slug": f"slug-{uuid4()}",
+            }
+        ]
+    )
+    r1 = client.post(
+        "/admin/properties/import",
+        headers=headers,
+        files={"file": ("props.csv", c1, "text/csv")},
+    )
+    assert r1.status_code == 200
+
+    c2 = _csv_bytes(
+        [
+            {
+                "source_id": sid,
+                "title": "T2",
+                "type": "resale",
+                "price": "2",
+                "address": "A2",
+                "city": "C2",
+                "status": "inactive",
+                "bedrooms": "",
+                "bathrooms": "",
+                "size": "",
+                "slug": f"slug-{uuid4()}",
+            }
+        ]
+    )
+    r2 = client.post(
+        "/admin/properties/import",
+        headers=headers,
+        files={"file": ("props.csv", c2, "text/csv")},
+    )
+    assert r2.status_code == 200
+
+    with SessionLocal() as db:
+        count = db.scalar(
+            select(func.count()).select_from(Property).where(Property.source_id == sid)
+        )
+        assert count == 1
+        prop = db.scalar(select(Property).where(Property.source_id == sid))
+        assert prop is not None
+        assert prop.title == "T2"
+
+
+def test_concurrent_import_lock() -> None:
+    from apps.api.main import app
+
+    finish_order: list[str] = []
+    finish_lock = threading.Lock()
+
+    headers = _make_admin_headers()
+
+    rows_t1 = [
+        {
+            "source_id": f"src-t1-{i}-{uuid4()}",
+            "title": "T",
+            "type": "new",
+            "price": "1",
+            "address": "A",
+            "city": "C",
+            "status": "active",
+            "bedrooms": "",
+            "bathrooms": "",
+            "size": "",
+            "slug": "",
+        }
+        for i in range(5000)
+    ]
+    content_t1 = _csv_bytes(rows_t1)
+
+    content_t2 = _csv_bytes(
+        [
+            {
+                "source_id": f"src-t2-{uuid4()}",
+                "title": "T",
+                "type": "new",
+                "price": "1",
+                "address": "A",
+                "city": "C",
+                "status": "active",
+                "bedrooms": "",
+                "bathrooms": "",
+                "size": "",
+                "slug": "",
+            }
+        ]
+    )
+
+    def run_import(content: bytes, out: dict, key: str) -> None:
+        with TestClient(app) as c:
+            resp = c.post(
+                "/admin/properties/import",
+                headers=headers,
+                files={"file": (f"{key}.csv", content, "text/csv")},
+            )
+            out[key] = {
+                "status": resp.status_code,
+            }
+
+        with finish_lock:
+            finish_order.append(key)
+
+    results: dict[str, dict] = {}
+
+    t1 = threading.Thread(target=run_import, args=(content_t1, results, "t1"))
+    t2 = threading.Thread(target=run_import, args=(content_t2, results, "t2"))
+
+    t1.start()
+    time.sleep(0.01)
+    t2.start()
+    t1.join()
+    t2.join()
+
+    assert results["t1"]["status"] == 200
+    assert results["t2"]["status"] == 200
+    # With a global lock, t2 (tiny import) should not complete before t1 (large import).
+    assert finish_order == ["t1", "t2"]
+
+
+def test_sha_unique_constraint_db_level() -> None:
+    with tempfile.TemporaryDirectory(ignore_cleanup_errors=True) as tmp:
+        db_path = os.path.join(tmp, "sha_unique.db")
+        db_url = f"sqlite:///{db_path}"
+
+        env = os.environ.copy()
+        env["DATABASE_URL"] = db_url
+
+        up = subprocess.run(
+            [sys.executable, "-m", "alembic", "-c", "alembic.ini", "upgrade", "head"],
+            env=env,
+            capture_output=True,
+            text=True,
+        )
+        assert up.returncode == 0, up.stderr
+
+        import sqlite3
+        from uuid import uuid4
+
+        sha = "deadbeef" * 8
+        with sqlite3.connect(db_path) as conn:
+            conn.execute(
+                """
+                INSERT INTO property_import_audits (
+                    id, admin_email, filename, file_sha256, file_size_bytes,
+                    rows_total, rows_created, rows_updated, rows_errors,
+                    dry_run, status, duration_ms, error_summary
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                """,
+                (
+                    str(uuid4()),
+                    "a@example.test",
+                    "f.csv",
+                    sha,
+                    1,
+                    1,
+                    1,
+                    0,
+                    0,
+                    0,
+                    "success",
+                    1,
+                    None,
+                ),
+            )
+            conn.commit()
+
+            try:
+                conn.execute(
+                    """
+                    INSERT INTO property_import_audits (
+                        id, admin_email, filename, file_sha256, file_size_bytes,
+                        rows_total, rows_created, rows_updated, rows_errors,
+                        dry_run, status, duration_ms, error_summary
+                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    """,
+                    (
+                        str(uuid4()),
+                        "b@example.test",
+                        "f.csv",
+                        sha,
+                        1,
+                        1,
+                        1,
+                        0,
+                        0,
+                        0,
+                        "success",
+                        1,
+                        None,
+                    ),
+                )
+                conn.commit()
+                raise AssertionError("Expected unique constraint failure")
+            except sqlite3.IntegrityError:
+                pass
