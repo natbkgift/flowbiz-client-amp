@@ -4,5 +4,12 @@ services:
   api:
     environment:
       - APP_ENV=prod
+    ports:
+      - "127.0.0.1:${VPS_API_PORT:-8001}:8000"
     volumes: []
+    restart: always
+
+  admin-app:
+    ports:
+      - "127.0.0.1:${VPS_ADMIN_PORT:-8002}:3000"
     restart: always

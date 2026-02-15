@@ -83,15 +83,15 @@ Before ANY deployment to shared FlowBiz VPS:
 
 ### Docker
 - [ ] `docker compose up` starts successfully
-- [ ] Services bind to localhost (127.0.0.1) only
+- [ ] Host-published ports bind to localhost (127.0.0.1) only
 - [ ] Services can communicate internally
 - [ ] Logs are visible with `docker compose logs`
 - [ ] NO nginx service in docker-compose files
 
 ### Ports
 - [ ] API runs on internal port 8000 (or assigned port)
-- [ ] Port binds to 127.0.0.1 (localhost) only
-- [ ] NO public binding (0.0.0.0)
+- [ ] Host port publish uses 127.0.0.1 (localhost) only
+- [ ] NO host publish to 0.0.0.0
 - [ ] NO port conflicts
 - [ ] Port documented in PROJECT_CONTRACT.md
 

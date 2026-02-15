@@ -240,7 +240,7 @@ Copy `.env.example` to `.env` and configure:
 
 **Runtime (APP_*)**
 - `APP_ENV`: Environment (`dev`|`prod`)
-- `APP_HOST`: Bind host (default: `127.0.0.1`) ⚠️ MUST be localhost for VPS
+- `APP_HOST`: Bind host inside container (default: `0.0.0.0`)
 - `APP_PORT`: Bind port (default: `8000`)
 - `APP_LOG_LEVEL`: Log level (default: `info`)
 
@@ -254,18 +254,21 @@ Copy `.env.example` to `.env` and configure:
 ### Development
 ```bash
 docker compose up --build
+
+# Verify local access
+curl http://127.0.0.1:8000/healthz
 ```
 
 ### Production
 ```bash
 docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d --build
 
-# Verify local access (service binds to localhost only)
-curl http://127.0.0.1:8000/healthz
+# Verify local access (published to localhost only)
+curl http://127.0.0.1:${VPS_API_PORT:-8001}/healthz
 ```
 
 **⚠️ Important:** 
-- Service binds to `127.0.0.1` (localhost) only
+- Host-published ports MUST bind to `127.0.0.1` (localhost) only
 - NO nginx included in docker-compose (managed by system-level nginx)
 - See [docs/ADR_SYSTEM_NGINX.md](docs/ADR_SYSTEM_NGINX.md) for architecture
 - Public HTTPS access configured by infrastructure team
