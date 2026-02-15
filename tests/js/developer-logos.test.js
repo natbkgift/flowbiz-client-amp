@@ -4,13 +4,8 @@ const path = require('path');
 describe('Developer logos in mock data', () => {
   const mockDataPath = path.join(__dirname, '../../demo-website/assets/js/mock-data.js');
   const source = fs.readFileSync(mockDataPath, 'utf8');
-  const startMarker = 'const DEVELOPERS = [';
-  const endMarker = '\n];\n\n// Market Statistics';
-  const startIndex = source.indexOf(startMarker);
-  const endIndex = source.indexOf(endMarker);
-  const developersBlock = startIndex >= 0 && endIndex > startIndex
-    ? source.slice(startIndex, endIndex)
-    : '';
+  const developersMatch = source.match(/const DEVELOPERS = \[(?<block>[\s\S]*?)\];\r?\n\r?\n\/\/ Market Statistics/);
+  const developersBlock = developersMatch?.groups?.block || '';
   const expectedDeveloperLogoCount = 5;
 
   test('uses local SVG logo assets for all 5 developers', () => {
