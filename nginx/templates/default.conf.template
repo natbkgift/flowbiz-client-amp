@@ -2,11 +2,41 @@ upstream backend {
     server ${BACKEND_HOST}:${BACKEND_PORT};
 }
 
+upstream admin_app {
+    server ${ADMIN_HOST}:${ADMIN_PORT};
+}
+
 server {
     listen 80;
     server_name _;
 
     client_max_body_size 10M;
+
+    location /api/ {
+        rewrite ^/api/(.*)$ /$1 break;
+        proxy_pass http://backend;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+
+        include /etc/nginx/snippets/security_headers.conf;
+    }
+
+    location /admin/ {
+        rewrite ^/admin/(.*)$ /$1 break;
+        proxy_pass http://admin_app;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+
+        include /etc/nginx/snippets/security_headers.conf;
+    }
+
+    location = /admin {
+        return 301 /admin/;
+    }
 
     location / {
         proxy_pass http://backend;
@@ -14,7 +44,7 @@ server {
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
         proxy_set_header X-Forwarded-Proto $scheme;
-        
+
         include /etc/nginx/snippets/security_headers.conf;
     }
 }

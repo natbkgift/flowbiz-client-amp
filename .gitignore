@@ -38,6 +38,8 @@ ENV/
 htmlcov/
 .ruff_cache/
 coverage/
+flowbiz.db
+flowbiz_test.db
 
 # Node.js
 node_modules/

@@ -14,3 +14,8 @@ async def health_check() -> HealthResponse:
         service=settings.flowbiz_service_name,
         version=settings.flowbiz_version,
     )
+
+
+@router.get("/health", response_model=HealthResponse)
+async def health_check_alias() -> HealthResponse:
+    return await health_check()

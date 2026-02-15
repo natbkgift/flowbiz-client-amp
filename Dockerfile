@@ -10,11 +10,17 @@ RUN pip install --no-cache-dir \
     fastapi>=0.104.0 \
     uvicorn[standard]>=0.24.0 \
     pydantic>=2.4.0 \
-    pydantic-settings>=2.0.0
+    pydantic-settings>=2.0.0 \
+    sqlalchemy>=2.0.0 \
+    alembic>=1.13.0 \
+    psycopg2-binary>=2.9.0 \
+    python-jose[cryptography]>=3.3.0 \
+    bcrypt>=5.0.0
 
 # Copy application code
 COPY apps/ ./apps/
 COPY packages/ ./packages/
+COPY demo-website/ ./demo-website/
 
 # Create non-root user
 RUN useradd -m -u 1000 appuser && chown -R appuser:appuser /app

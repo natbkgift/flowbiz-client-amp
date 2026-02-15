@@ -17,5 +17,17 @@ class Settings(BaseSettings):
     flowbiz_version: str = "0.1.0"
     flowbiz_build_sha: str = "local"
 
+    # Database
+    database_url: str = "sqlite:///./flowbiz.db"
+
+    # Auth
+    jwt_secret_key: str = "change-me-in-production"
+    jwt_algorithm: str = "HS256"
+    jwt_expire_minutes: int = 120
+
+    # Admin bootstrap user
+    admin_bootstrap_email: str = "admin@local.dev"
+    admin_bootstrap_password: str = "admin123"
+
 
 settings = Settings()

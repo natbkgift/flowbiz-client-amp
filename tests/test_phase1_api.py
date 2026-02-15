@@ -22,6 +22,8 @@ def test_phase1_score_endpoint():
     )
     assert response.status_code == 200
     data = response.json()
+    assert "lead_id" in data
+    assert data["lead_id"]
     assert "lead_score" in data
     assert data["lead_temp"] in {"cold", "warm", "hot", "fire"}
     assert data["scoring_version"] == "1.0.0"

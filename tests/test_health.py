@@ -11,6 +11,11 @@ def test_health_check_returns_200():
     assert response.status_code == 200
 
 
+def test_health_alias_returns_200():
+    response = client.get("/health")
+    assert response.status_code == 200
+
+
 def test_health_check_response_structure():
     """Test that health check returns correct JSON structure."""
     response = client.get("/healthz")

@@ -90,7 +90,6 @@ function validateEnv() {
   
   // Check optional but recommended
   const optional = [
-  const optional = [
     'LINE_GROUP_DEVELOPER_ID',
     'LINE_GROUP_RESALE_ID',
     'LINE_GROUP_RENT_ID'
