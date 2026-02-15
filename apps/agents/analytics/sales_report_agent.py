@@ -32,7 +32,7 @@ class SalesReportAgent:
         self,
         data_fetcher: Optional[DataFetcher] = None,
         line_notifier: Optional[LINENotifier] = None,
-        use_mock_data: bool = False
+        use_mock_data: bool = False,
     ):
         """
         Initialize Sales Report Agent
@@ -46,7 +46,7 @@ class SalesReportAgent:
         if data_fetcher:
             self.data_fetcher = data_fetcher
         else:
-            fetcher_type = 'mock' if use_mock_data else 'google_sheets'
+            fetcher_type = "mock" if use_mock_data else "google_sheets"
             self.data_fetcher = get_data_fetcher(fetcher_type)
 
         # Initialize LINE notifier
@@ -125,12 +125,14 @@ class SalesReportAgent:
             performance = generator.generate_sales_performance(
                 period_start=last_monday,
                 period_end=last_sunday,
-                period_name=f"Week of {last_monday.strftime('%d/%m')}"
+                period_name=f"Week of {last_monday.strftime('%d/%m')}",
             )
 
-            print(f"Performance: {performance.new_leads} new leads, "
-                  f"{performance.converted_leads} converted, "
-                  f"{performance.conversion_rate:.1f}% conversion rate")
+            print(
+                f"Performance: {performance.new_leads} new leads, "
+                f"{performance.converted_leads} converted, "
+                f"{performance.conversion_rate:.1f}% conversion rate"
+            )
 
             # Send to LINE
             if self.line_notifier:
@@ -169,23 +171,27 @@ class SalesReportAgent:
             # Prepare alert data
             alert_data = []
             for lead in overdue_leads:
-                alert_data.append({
-                    'name': lead.full_name,
-                    'priority': lead.priority.value,
-                    'agent': lead.assigned_agent,
-                    'daysOverdue': lead.days_overdue
-                })
+                alert_data.append(
+                    {
+                        "name": lead.full_name,
+                        "priority": lead.priority.value,
+                        "agent": lead.assigned_agent,
+                        "daysOverdue": lead.days_overdue,
+                    }
+                )
 
             # Sort by priority and days overdue
             alert_data.sort(
                 key=lambda x: (
-                    0 if x['priority'] == 'Hot' else 1 if x['priority'] == 'Warm' else 2,
-                    -x['daysOverdue']
+                    0 if x["priority"] == "Hot" else 1 if x["priority"] == "Warm" else 2,
+                    -x["daysOverdue"],
                 )
             )
 
-            print(f"Top overdue: {alert_data[0]['name']} "
-                  f"({alert_data[0]['priority']}, {alert_data[0]['daysOverdue']} days)")
+            print(
+                f"Top overdue: {alert_data[0]['name']} "
+                f"({alert_data[0]['priority']}, {alert_data[0]['daysOverdue']} days)"
+            )
 
             # Send alert
             if self.line_notifier:
@@ -204,10 +210,7 @@ class SalesReportAgent:
             return False
 
     def generate_performance_report(
-        self,
-        start_date: date,
-        end_date: date,
-        period_name: str = ""
+        self, start_date: date, end_date: date, period_name: str = ""
     ) -> SalesPerformance:
         """
         Generate performance report for a custom time period
@@ -223,16 +226,10 @@ class SalesReportAgent:
         leads = self.data_fetcher.fetch_all_leads()
         generator = ReportGenerator(leads)
         return generator.generate_sales_performance(
-            period_start=start_date,
-            period_end=end_date,
-            period_name=period_name
+            period_start=start_date, period_end=end_date, period_name=period_name
         )
 
-    def generate_team_report(
-        self,
-        start_date: date,
-        end_date: date
-    ) -> TeamPerformance:
+    def generate_team_report(self, start_date: date, end_date: date) -> TeamPerformance:
         """
         Generate team performance report
 
@@ -245,10 +242,7 @@ class SalesReportAgent:
         """
         leads = self.data_fetcher.fetch_all_leads()
         generator = ReportGenerator(leads)
-        return generator.generate_team_performance(
-            period_start=start_date,
-            period_end=end_date
-        )
+        return generator.generate_team_performance(period_start=start_date, period_end=end_date)
 
     def test_system(self) -> bool:
         """
@@ -324,19 +318,19 @@ def main():
     # Create agent (will use environment variables for configuration)
     agent = SalesReportAgent()
 
-    if command == 'daily':
+    if command == "daily":
         success = agent.send_daily_report()
         sys.exit(0 if success else 1)
 
-    elif command == 'weekly':
+    elif command == "weekly":
         success = agent.send_weekly_report()
         sys.exit(0 if success else 1)
 
-    elif command == 'overdue':
+    elif command == "overdue":
         success = agent.check_overdue_followups()
         sys.exit(0 if success else 1)
 
-    elif command == 'test':
+    elif command == "test":
         success = agent.test_system()
         sys.exit(0 if success else 1)
 
@@ -346,5 +340,5 @@ def main():
         sys.exit(1)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

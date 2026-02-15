@@ -7,6 +7,9 @@
 **Market:** English-speaking foreign buyers & renters — Pattaya, Thailand
 **Phase Scope:** Foundational market structure ONLY. No automation. No AI.
 
+**Mandatory Addendum:** [PHASE_0_HARDENING_ADDENDUM_v1.1.md](PHASE_0_HARDENING_ADDENDUM_v1.1.md)
+**Launch Execution Checklist:** [PHASE_0_LAUNCH_CHECKLIST_60_DAYS.md](PHASE_0_LAUNCH_CHECKLIST_60_DAYS.md)
+
 ---
 
 ## SECTION 1 — MARKET POSITIONING

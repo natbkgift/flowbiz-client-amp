@@ -22,8 +22,10 @@ router = APIRouter(prefix="/v1/leads", tags=["leads"])
 # Enums for validation / Enum สำหรับตรวจสอบข้อมูล
 # ========================================
 
+
 class LeadSource(str, Enum):
     """Valid lead sources / แหล่งที่มาของ lead ที่ถูกต้อง"""
+
     FACEBOOK = "facebook"
     LINE = "line"
     WEBSITE = "website"
@@ -33,6 +35,7 @@ class LeadSource(str, Enum):
 
 class LeadStatus(str, Enum):
     """Valid lead statuses / สถานะของ lead ที่ถูกต้อง"""
+
     NEW = "new"
     CONTACTED = "contacted"
     QUALIFIED = "qualified"
@@ -45,6 +48,7 @@ class LeadStatus(str, Enum):
 # โมเดลข้อมูลพร้อมการตรวจสอบ
 # ========================================
 
+
 class LeadCreate(BaseModel):
     """Model for creating a lead with validation"""
 
@@ -53,13 +57,10 @@ class LeadCreate(BaseModel):
         min_length=2,
         max_length=100,
         description="Lead's full name",
-        examples=["John Smith", "สมชาย ใจดี"]
+        examples=["John Smith", "สมชาย ใจดี"],
     )
 
-    email: EmailStr = Field(
-        ...,
-        description="Valid email address"
-    )
+    email: EmailStr = Field(..., description="Valid email address")
 
     phone: str = Field(
         ...,
@@ -67,31 +68,16 @@ class LeadCreate(BaseModel):
         min_length=8,
         max_length=20,
         description="Phone number",
-        examples=["+66812345678", "081-234-5678"]
+        examples=["+66812345678", "081-234-5678"],
     )
 
-    source: LeadSource = Field(
-        ...,
-        description="Where the lead came from"
-    )
+    source: LeadSource = Field(..., description="Where the lead came from")
 
-    budget_min: float = Field(
-        ...,
-        ge=0,
-        description="Minimum budget in THB"
-    )
+    budget_min: float = Field(..., ge=0, description="Minimum budget in THB")
 
-    budget_max: float = Field(
-        ...,
-        gt=0,
-        description="Maximum budget in THB"
-    )
+    budget_max: float = Field(..., gt=0, description="Maximum budget in THB")
 
-    message: str | None = Field(
-        None,
-        max_length=1000,
-        description="Optional message from lead"
-    )
+    message: str | None = Field(None, max_length=1000, description="Optional message from lead")
 
     @field_validator("budget_max")
     @classmethod
@@ -121,6 +107,7 @@ class LeadCreate(BaseModel):
 
 class Lead(LeadCreate):
     """Full lead model with additional fields"""
+
     id: int
     status: LeadStatus = Field(default=LeadStatus.NEW)
     score: int = Field(default=0, ge=0, le=100, description="Lead score 0-100")
@@ -131,8 +118,10 @@ class Lead(LeadCreate):
 # โมเดลสำหรับตอบกลับ error
 # ========================================
 
+
 class ErrorDetail(BaseModel):
     """Detailed error information"""
+
     field: str | None = None
     message: str
     code: str | None = None
@@ -140,6 +129,7 @@ class ErrorDetail(BaseModel):
 
 class ErrorResponse(BaseModel):
     """Standard error response"""
+
     error: str
     details: list[ErrorDetail] | None = None
 
@@ -155,6 +145,7 @@ leads_db: list[Lead] = []
 # API Endpoints with Validation
 # ========================================
 
+
 @router.post(
     "/",
     response_model=Lead,
@@ -162,7 +153,7 @@ leads_db: list[Lead] = []
     responses={
         400: {"model": ErrorResponse, "description": "Validation error"},
         422: {"model": ErrorResponse, "description": "Invalid data"},
-    }
+    },
 )
 async def create_lead(lead_data: LeadCreate):
     """
@@ -179,10 +170,7 @@ async def create_lead(lead_data: LeadCreate):
     new_id = len(leads_db) + 1
 
     # Create lead
-    new_lead = Lead(
-        id=new_id,
-        **lead_data.model_dump()
-    )
+    new_lead = Lead(id=new_id, **lead_data.model_dump())
 
     leads_db.append(new_lead)
     return new_lead
@@ -193,21 +181,12 @@ async def create_lead(lead_data: LeadCreate):
     response_model=list[Lead],
     responses={
         200: {"description": "List of leads"},
-    }
+    },
 )
 async def list_leads(
-    status: Annotated[
-        LeadStatus | None,
-        Query(description="Filter by status")
-    ] = None,
-    source: Annotated[
-        LeadSource | None,
-        Query(description="Filter by source")
-    ] = None,
-    min_score: Annotated[
-        int | None,
-        Query(ge=0, le=100, description="Minimum lead score")
-    ] = None,
+    status: Annotated[LeadStatus | None, Query(description="Filter by status")] = None,
+    source: Annotated[LeadSource | None, Query(description="Filter by source")] = None,
+    min_score: Annotated[int | None, Query(ge=0, le=100, description="Minimum lead score")] = None,
 ):
     """
     List leads with optional filters
@@ -232,14 +211,9 @@ async def list_leads(
     response_model=Lead,
     responses={
         404: {"model": ErrorResponse, "description": "Lead not found"},
-    }
+    },
 )
-async def get_lead(
-    lead_id: Annotated[
-        int,
-        Path(gt=0, description="Lead ID")
-    ]
-):
+async def get_lead(lead_id: Annotated[int, Path(gt=0, description="Lead ID")]):
     """
     Get a specific lead by ID
     ดึงข้อมูล lead ตาม ID
@@ -256,10 +230,10 @@ async def get_lead(
                 {
                     "field": "lead_id",
                     "message": f"Lead with ID {lead_id} does not exist",
-                    "code": "LEAD_NOT_FOUND"
+                    "code": "LEAD_NOT_FOUND",
                 }
-            ]
-        }
+            ],
+        },
     )
 
 
@@ -268,14 +242,11 @@ async def get_lead(
     response_model=Lead,
     responses={
         404: {"model": ErrorResponse, "description": "Lead not found"},
-    }
+    },
 )
 async def update_lead_status(
     lead_id: Annotated[int, Path(gt=0)],
-    new_status: Annotated[
-        LeadStatus,
-        Body(..., embed=True, description="New status for the lead")
-    ]
+    new_status: Annotated[LeadStatus, Body(..., embed=True, description="New status for the lead")],
 ):
     """
     Update lead status
@@ -287,8 +258,7 @@ async def update_lead_status(
             return lead
 
     raise HTTPException(
-        status_code=status.HTTP_404_NOT_FOUND,
-        detail=f"Lead with ID {lead_id} not found"
+        status_code=status.HTTP_404_NOT_FOUND, detail=f"Lead with ID {lead_id} not found"
     )
 
 
@@ -297,12 +267,10 @@ async def update_lead_status(
 # ตัวอย่างการจัดการ error
 # ========================================
 
+
 @router.post("/validate-demo")
 async def validation_demo(
-    value: Annotated[
-        int,
-        Body(..., ge=1, le=100, description="Value between 1-100")
-    ]
+    value: Annotated[int, Body(..., ge=1, le=100, description="Value between 1-100")],
 ):
     """
     Demo endpoint showing automatic validation
@@ -333,17 +301,20 @@ To test this example:
    # Invalid email
    curl -X POST http://127.0.0.1:8000/v1/leads \
      -H "Content-Type: application/json" \
-     -d '{"name":"Test","email":"invalid","phone":"081234","source":"facebook","budget_min":1000000,"budget_max":2000000}'
+    -d '{"name":"Test","email":"invalid","phone":"081234",\
+"source":"facebook","budget_min":1000000,"budget_max":2000000}'
 
    # Budget max < budget min
    curl -X POST http://127.0.0.1:8000/v1/leads \
      -H "Content-Type: application/json" \
-     -d '{"name":"Test","email":"test@example.com","phone":"0812345678","source":"facebook","budget_min":2000000,"budget_max":1000000}'
+    -d '{"name":"Test","email":"test@example.com",\
+"phone":"0812345678","source":"facebook","budget_min":2000000,"budget_max":1000000}'
 
 4. Test valid request:
    curl -X POST http://127.0.0.1:8000/v1/leads \
      -H "Content-Type: application/json" \
-     -d '{"name":"John Smith","email":"john@example.com","phone":"0812345678","source":"facebook","budget_min":1000000,"budget_max":5000000}'
+    -d '{"name":"John Smith","email":"john@example.com",\
+"phone":"0812345678","source":"facebook","budget_min":1000000,"budget_max":5000000}'
 
 5. View automatic API docs:
    http://127.0.0.1:8000/docs
