@@ -35,7 +35,7 @@ export default function PublicPropertiesPage() {
 
   const [items, setItems] = useState<PropertyListItem[]>([]);
   const [page, setPage] = useState(1);
-  const [limit] = useState(12);
+  const limit = 12;
   const [total, setTotal] = useState(0);
 
   const [type, setType] = useState<string>('');
