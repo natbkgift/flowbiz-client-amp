@@ -198,7 +198,7 @@ def extract_json_ld(html_bytes: bytes) -> list[dict]:
             continue
         try:
             data = json.loads(b)
-        except Exception:
+        except json.JSONDecodeError:
             continue
         if isinstance(data, dict):
             out.append(data)
