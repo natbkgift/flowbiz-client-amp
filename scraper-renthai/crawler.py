@@ -50,12 +50,13 @@ class Crawler:
             consecutive_403=self.consecutive_403,
         )
 
-    def iter_paginated(self, start_url: str, *, max_pages: int = 50) -> list[FetchResult]:
+    def iter_paginated(self, start_url: str, *, max_pages: int | None = None) -> list[FetchResult]:
         seen: set[str] = set()
         results: list[FetchResult] = []
 
         url = start_url
-        for _ in range(max_pages):
+        page_limit = self.cfg.pagination_max_pages if max_pages is None else max_pages
+        for _ in range(page_limit):
             if url in seen:
                 break
             seen.add(url)

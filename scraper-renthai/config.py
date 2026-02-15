@@ -15,6 +15,8 @@ class ScraperConfig:
     max_requests_per_second: float = 1.0
     max_retries: int = 3
 
+    pagination_max_pages: int = 50
+
     stop_consecutive_403: int = 3
 
     log_every_n_requests: int = 50

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import csv
+import io
 import json
 import os
 from collections import Counter
@@ -28,18 +29,24 @@ def write_raw_json(path: str, data: dict) -> None:
         json.dump(data, f, ensure_ascii=False, indent=2)
 
 
-def write_csv(path: str, rows: list[dict[str, str]]) -> bytes:
-    ensure_dir(os.path.dirname(path))
+def render_csv_bytes(rows: list[dict[str, str]], *, lineterminator: str = "\r\n") -> bytes:
     rows_sorted = sorted(rows, key=lambda r: r["source_id"])
 
-    with open(path, "w", encoding="utf-8", newline="") as f:
-        w = csv.DictWriter(f, fieldnames=EXPECTED_HEADER)
-        w.writeheader()
-        for r in rows_sorted:
-            w.writerow({k: r.get(k, "") for k in EXPECTED_HEADER})
+    string_io = io.StringIO(newline="")
+    w = csv.DictWriter(string_io, fieldnames=EXPECTED_HEADER, lineterminator=lineterminator)
+    w.writeheader()
+    for r in rows_sorted:
+        w.writerow({k: r.get(k, "") for k in EXPECTED_HEADER})
 
-    with open(path, "rb") as f:
-        return f.read()
+    return string_io.getvalue().encode("utf-8")
+
+
+def write_csv(path: str, rows: list[dict[str, str]]) -> bytes:
+    ensure_dir(os.path.dirname(path))
+    csv_bytes = render_csv_bytes(rows)
+    with open(path, "wb") as f:
+        f.write(csv_bytes)
+    return csv_bytes
 
 
 def write_report(
