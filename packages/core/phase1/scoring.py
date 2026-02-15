@@ -5,6 +5,8 @@ from packages.core.phase1.schemas import (
     Purpose,
 )
 
+PHASE1_SCORING_VERSION = "1.0.0"
+
 PIPELINE_BY_PURPOSE = {
     Purpose.BUY_LIVE: "Purchase — Owner Occupier",
     Purpose.BUY_INVEST: "Purchase — Investor",
@@ -111,6 +113,7 @@ def calculate_lead_score(payload: Phase1LeadPayload) -> Phase1ScoreResult:
     return Phase1ScoreResult(
         lead_score=bounded,
         lead_temp=temp,
+        scoring_version=PHASE1_SCORING_VERSION,
         assigned_pipeline=PIPELINE_BY_PURPOSE[payload.purpose],
         tags=tags,
         priority_flag=("10m_plus" in payload.budget_range) or bounded >= 46,

@@ -16,6 +16,7 @@ def test_score_threshold_cold():
     result = calculate_lead_score(payload)
     assert result.lead_score <= 20
     assert result.lead_temp.value == "cold"
+    assert result.scoring_version == "1.0.0"
 
 
 def test_score_threshold_fire():
@@ -36,3 +37,4 @@ def test_score_threshold_fire():
     assert result.lead_score >= 71
     assert result.lead_temp.value == "fire"
     assert result.line_notification_mode == "urgent"
+    assert result.scoring_version == "1.0.0"

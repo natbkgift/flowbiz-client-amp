@@ -24,6 +24,7 @@ def test_phase1_score_endpoint():
     data = response.json()
     assert "lead_score" in data
     assert data["lead_temp"] in {"cold", "warm", "hot", "fire"}
+    assert data["scoring_version"] == "1.0.0"
 
 
 def test_phase1_next_state_endpoint():
