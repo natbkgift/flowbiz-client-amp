@@ -67,7 +67,7 @@ async def get_property(
     db: Session = Depends(get_db),
 ) -> PropertyDetail:
     prop = db.get(Property, property_id)
-    if prop is None:
+    if prop is None or prop.status != "active":
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Property not found")
     return PropertyDetail.model_validate(prop)
 
