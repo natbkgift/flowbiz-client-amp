@@ -39,6 +39,7 @@
       submitLeadLabel: window.AMP_SUBMITLEAD_LABEL || 'SUBMITLEAD_LABEL',
       clickWhatsAppLabel: window.AMP_CLICKWHATSAPP_LABEL || 'CLICKWHATSAPP_LABEL'
     };
+    const API_BASE = window.AMP_API_BASE_URL || '';
     const PLACEHOLDER_ADS_ID_TOKEN = 'XXXXXXXXXX';
     const PLACEHOLDER_LABEL_TOKEN = 'LABEL';
 
@@ -289,7 +290,7 @@
         </div>
       </div>
       <div class="footer-bottom">
-        <p>&copy; 2026 Asset Management Property. All rights reserved. | Demo Website</p>
+        <p>&copy; 2026 Asset Management Property. All rights reserved.</p>
       </div>
     </div>
   </footer>
@@ -409,7 +410,7 @@
     const leadFeedback = document.getElementById('lead-feedback');
     const SUBMIT_DUPLICATE_GUARD_MS = 1500;
     if (leadForm) {
-      leadForm.addEventListener('submit', (event) => {
+      leadForm.addEventListener('submit', async (event) => {
         event.preventDefault();
 
         // Perform basic client-side validation for email and phone fields
@@ -424,13 +425,43 @@
           const formData = new FormData(leadForm);
           trackSubmitLead(formData);
 
+          const fullName = (formData.get('name') || '').toString().trim();
+          const firstName = fullName.split(' ')[0] || fullName;
+          const payload = {
+            source_page: 'buy-condo-pattaya',
+            purpose: 'buy_live',
+            budget_range: (formData.get('budget') || 'unknown').toString(),
+            timeline: 'within_3_months',
+            investment_goal: (formData.get('purpose') || '').toString() || null,
+            first_name: firstName || 'Lead',
+            preferred_channel: 'whatsapp',
+            contact_value: (formData.get('phone') || '').toString(),
+            country: 'unknown'
+          };
+
+          const response = await fetch(`${API_BASE}/v1/phase1/score`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+          });
+
+          if (!response.ok) {
+            throw new Error(`Lead API returned ${response.status}`);
+          }
+
           if (leadFeedback) {
-            // Clarify that this is a demo form and no server-side submission occurs
-            leadFeedback.textContent = 'Thank you for your interest. This is a demo form; your details have not been sent to a server.';
+            leadFeedback.textContent = 'Thank you. Your request was received. Our team will contact you shortly.';
+            leadFeedback.style.color = 'var(--color-success)';
             leadFeedback.style.display = 'block';
           }
 
           leadForm.reset();
+        } catch (error) {
+          if (leadFeedback) {
+            leadFeedback.textContent = 'We could not submit your request right now. Please try again or contact us on WhatsApp.';
+            leadFeedback.style.color = 'var(--color-danger)';
+            leadFeedback.style.display = 'block';
+          }
         } finally {
           // Prevent rapid double firing, while still allowing valid retry attempts.
           setTimeout(() => {

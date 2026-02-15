@@ -1,11 +1,4 @@
-from fastapi.testclient import TestClient
-
-from apps.api.main import app
-
-client = TestClient(app)
-
-
-def test_phase1_score_endpoint():
+def test_phase1_score_endpoint(client):
     response = client.post(
         "/v1/phase1/score",
         json={
@@ -22,12 +15,14 @@ def test_phase1_score_endpoint():
     )
     assert response.status_code == 200
     data = response.json()
+    assert "lead_id" in data
+    assert data["lead_id"]
     assert "lead_score" in data
     assert data["lead_temp"] in {"cold", "warm", "hot", "fire"}
     assert data["scoring_version"] == "1.0.0"
 
 
-def test_phase1_next_state_endpoint():
+def test_phase1_next_state_endpoint(client):
     response = client.post(
         "/v1/phase1/chat/next-state",
         json={
@@ -41,7 +36,7 @@ def test_phase1_next_state_endpoint():
     assert response.json()["next_state"] == "2a_buyer"
 
 
-def test_phase1_classification_endpoint():
+def test_phase1_classification_endpoint(client):
     response = client.post(
         "/v1/phase1/chat/classify",
         json={"target": "purpose", "text": "I want rental for 6 months"},

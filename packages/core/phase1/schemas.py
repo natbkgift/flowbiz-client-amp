@@ -70,6 +70,7 @@ class Phase1LeadPayload(BaseModel):
 
 
 class Phase1ScoreResult(BaseModel):
+    lead_id: str | None = None
     lead_score: int = Field(ge=0, le=100)
     lead_temp: LeadTemperature
     scoring_version: str

@@ -1,5 +1,8 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends
+from sqlalchemy.orm import Session
 
+from packages.core.database import get_db
+from packages.core.models import Lead
 from packages.core.phase1.classification import (
     ClassificationResult,
     ClassificationTarget,
@@ -13,8 +16,27 @@ router = APIRouter(prefix="/v1/phase1", tags=["phase1"])
 
 
 @router.post("/score", response_model=Phase1ScoreResult)
-async def score_phase1_lead(payload: Phase1LeadPayload) -> Phase1ScoreResult:
-    return calculate_lead_score(payload)
+async def score_phase1_lead(
+    payload: Phase1LeadPayload,
+    db: Session = Depends(get_db),
+) -> Phase1ScoreResult:
+    score_result = calculate_lead_score(payload)
+
+    contact_value = payload.contact_value.strip()
+    email = contact_value if "@" in contact_value else None
+    phone = contact_value if "@" not in contact_value else None
+
+    lead = Lead(
+        name=payload.first_name,
+        email=email,
+        phone=phone,
+        score=score_result.lead_score,
+    )
+    db.add(lead)
+    db.commit()
+    db.refresh(lead)
+
+    return score_result.model_copy(update={"lead_id": str(lead.id)})
 
 
 @router.post("/chat/next-state")

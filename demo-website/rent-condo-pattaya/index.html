@@ -19,6 +19,7 @@
       submitLeadLabel: window.AMP_SUBMITLEAD_LABEL || 'SUBMITLEAD_LABEL',
       clickWhatsAppLabel: window.AMP_CLICKWHATSAPP_LABEL || 'CLICKWHATSAPP_LABEL'
     };
+    const API_BASE = window.AMP_API_BASE_URL || '';
     window.dataLayer = window.dataLayer || [];
     function gtag() { dataLayer.push(arguments); }
     gtag('js', new Date());
@@ -141,7 +142,7 @@
     </div>
   </section>
 
-  <footer class="footer"><div class="container"><div class="footer-bottom"><p>&copy; 2026 Asset Management Property. All rights reserved. | Demo Website</p></div></div></footer>
+  <footer class="footer"><div class="container"><div class="footer-bottom"><p>&copy; 2026 Asset Management Property. All rights reserved.</p></div></div></footer>
   <a class="whatsapp-float" href="https://wa.me/66634533526" target="_blank" rel="noopener noreferrer" data-track-whatsapp="true" aria-label="Chat on WhatsApp">💬</a>
 
   <script>
@@ -158,17 +159,49 @@
     const leadForm = document.getElementById('rental-lead-form');
     const leadFeedback = document.getElementById('lead-feedback');
     if (leadForm) {
-      leadForm.addEventListener('submit', (event) => {
+      leadForm.addEventListener('submit', async (event) => {
         event.preventDefault();
         if (leadForm.dataset.tracked === 'true') return;
         leadForm.dataset.tracked = 'true';
-        const formData = new FormData(leadForm);
-        gtag('event', 'SubmitLead', { event_category: 'lead', event_label: 'rent_condo_pattaya', budget_range: formData.get('budget') || 'unknown' });
-        sendAdsConversion(TRACKING_CONFIG.submitLeadLabel);
-        leadFeedback.textContent = 'Thank you for your interest. This is a demo form; your details have not been sent to a server.';
-        leadFeedback.style.display = 'block';
-        leadForm.reset();
-        setTimeout(() => { leadForm.dataset.tracked = 'false'; }, 1500);
+        try {
+          const formData = new FormData(leadForm);
+          gtag('event', 'SubmitLead', { event_category: 'lead', event_label: 'rent_condo_pattaya', budget_range: formData.get('budget') || 'unknown' });
+          sendAdsConversion(TRACKING_CONFIG.submitLeadLabel);
+
+          const fullName = (formData.get('name') || '').toString().trim();
+          const firstName = fullName.split(' ')[0] || fullName;
+          const payload = {
+            source_page: 'rent-condo-pattaya',
+            purpose: 'rent',
+            budget_range: (formData.get('budget') || 'unknown').toString(),
+            timeline: 'within_3_months',
+            first_name: firstName || 'Lead',
+            preferred_channel: 'whatsapp',
+            contact_value: (formData.get('phone') || '').toString(),
+            country: 'unknown'
+          };
+
+          const response = await fetch(`${API_BASE}/v1/phase1/score`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+          });
+
+          if (!response.ok) {
+            throw new Error(`Lead API returned ${response.status}`);
+          }
+
+          leadFeedback.textContent = 'Thank you. Your request was received. Our team will contact you shortly.';
+          leadFeedback.style.color = 'var(--color-success)';
+          leadFeedback.style.display = 'block';
+          leadForm.reset();
+        } catch (error) {
+          leadFeedback.textContent = 'We could not submit your request right now. Please try again or contact us on WhatsApp.';
+          leadFeedback.style.color = 'var(--color-danger)';
+          leadFeedback.style.display = 'block';
+        } finally {
+          setTimeout(() => { leadForm.dataset.tracked = 'false'; }, 1500);
+        }
       });
     }
   </script>
