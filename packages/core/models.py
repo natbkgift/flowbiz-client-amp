@@ -54,7 +54,12 @@ class Property(Base):
     __tablename__ = "properties"
 
     id: Mapped[UUID] = mapped_column(primary_key=True, default=uuid4)
-    source_id: Mapped[str] = mapped_column(String(255), nullable=False, index=True)
+    source_id: Mapped[str] = mapped_column(
+        String(255),
+        nullable=False,
+        unique=True,
+        index=True,
+    )
     title: Mapped[str] = mapped_column(String(500), nullable=False)
     description: Mapped[str | None] = mapped_column(Text, nullable=True)
     type: Mapped[str] = mapped_column(property_type_enum, nullable=False)

@@ -76,12 +76,12 @@ async def import_properties(
             dry_run=dry_run,
         )
 
-    raw = await file.read()
+    raw = await file.read(MAX_BYTES + 1)
     if len(raw) > MAX_BYTES:
         return PropertyImportResult(
             inserted=0,
             updated=0,
-            errors=["File too large: max 5MB"],
+            errors=["File exceeds maximum size limit"],
             total_rows=0,
             dry_run=dry_run,
         )
@@ -178,10 +178,9 @@ async def import_properties(
             for r in rows_sorted:
                 existing = db.scalar(select(Property).where(Property.source_id == r.source_id))
 
-                payload = {
+                payload_common = {
                     "source_id": r.source_id,
                     "title": r.title,
-                    "description": None,
                     "type": r.type,
                     "price": r.price,
                     "bedrooms": r.bedrooms,
@@ -189,16 +188,22 @@ async def import_properties(
                     "size": r.size,
                     "address": r.address,
                     "city": r.city,
-                    "images": None,
                     "slug": r.slug,
                     "status": r.status,
                 }
 
                 if existing is None:
-                    db.add(Property(**payload))
+                    payload_insert = {
+                        **payload_common,
+                        "description": None,
+                        "images": None,
+                    }
+                    db.add(Property(**payload_insert))
                     inserted += 1
                 else:
-                    for field, value in payload.items():
+                    # Preserve non-CSV fields (do not wipe existing data)
+                    # Only update fields present in CSV
+                    for field, value in payload_common.items():
                         setattr(existing, field, value)
                     db.add(existing)
                     updated += 1
