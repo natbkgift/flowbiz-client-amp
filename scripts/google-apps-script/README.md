@@ -15,6 +15,7 @@ Google Apps Script modules สำหรับสร้างรายงาน�
 | **Utils.gs** | Helper functions ที่ใช้ร่วมกัน | ✅ |
 | **LineIntegration.gs** | LINE Messaging API integration | ✅ |
 | **AutoReport.gs** | สร้างและส่งรายงานอัตโนมัติ | ✅ |
+| **LeadSheetSetup.gs** | สร้างชีต `Leads_Master` / `Dashboard` / `Campaign_Performance` / `Campaign_Cost` อัตโนมัติ | 🟡 Optional |
 
 ## การติดตั้ง
 
@@ -47,6 +48,11 @@ Google Apps Script modules สำหรับสร้างรายงาน�
    - คลิก **+ → Script**
    - ตั้งชื่อ: `AutoReport`
    - Copy code จากไฟล์ `AutoReport.gs`
+
+5. **LeadSheetSetup.gs** (Optional แต่แนะนำ)
+   - คลิก **+ → Script**
+   - ตั้งชื่อ: `LeadSheetSetup`
+   - Copy code จากไฟล์ `LeadSheetSetup.gs`
 
 ### ขั้นตอนที่ 3: ตั้งค่า Script Properties
 
@@ -153,6 +159,23 @@ setupAllTriggers()
 ```
 
 จะสร้าง triggers ทั้งหมดในครั้งเดียว
+
+## Setup Lead Tracking Sheets (Phase 0)
+
+ถ้าต้องการสร้างโครงชีตมาตรฐานแบบอัตโนมัติ ให้รัน:
+
+```javascript
+setupPhase0LeadTrackingSheets()
+```
+
+ฟังก์ชันนี้จะสร้าง/อัปเดตชีตเหล่านี้:
+
+- `Leads_Master`
+- `Dashboard`
+- `Campaign_Performance`
+- `Campaign_Cost`
+
+พร้อมหัวตาราง, สูตร, และ dropdown ตามสเปกในเอกสาร reporting
 
 ## API Functions
 

@@ -17,8 +17,7 @@ try:
     from openpyxl.workbook.workbook import Workbook as WorkbookType
 except ImportError as exc:
     raise SystemExit(
-        "This script requires the 'openpyxl' package. "
-        "Install it with: pip install openpyxl"
+        "This script requires the 'openpyxl' package. Install it with: pip install openpyxl"
     ) from exc
 
 
@@ -56,17 +55,17 @@ def create_project_summary_sheet(wb: WorkbookType) -> None:
     label_font = Font(bold=True, size=11)
 
     # Title
-    ws.merge_cells('A1:D1')
-    ws['A1'] = "📋 งบประมาณโครงการ (Project Budget Summary)"
-    ws['A1'].font = header_font
-    ws['A1'].fill = header_fill
-    ws['A1'].alignment = Alignment(horizontal='center', vertical='center')
+    ws.merge_cells("A1:D1")
+    ws["A1"] = "📋 งบประมาณโครงการ (Project Budget Summary)"
+    ws["A1"].font = header_font
+    ws["A1"].fill = header_fill
+    ws["A1"].alignment = Alignment(horizontal="center", vertical="center")
     ws.row_dimensions[1].height = 30
 
     # Project Information
-    ws['A3'] = "ข้อมูลโครงการ (Project Information)"
-    ws['A3'].font = label_font
-    ws['A3'].fill = label_fill
+    ws["A3"] = "ข้อมูลโครงการ (Project Information)"
+    ws["A3"].font = label_font
+    ws["A3"].fill = label_fill
 
     info_fields = [
         ("A5", "ชื่อโครงการ (Project Name)", "B5"),
@@ -86,14 +85,14 @@ def create_project_summary_sheet(wb: WorkbookType) -> None:
         )
 
     # Budget Summary
-    ws['A12'] = "สรุปงบประมาณรวม (Grand Total Summary)"
-    ws['A12'].font = label_font
-    ws['A12'].fill = label_fill
+    ws["A12"] = "สรุปงบประมาณรวม (Grand Total Summary)"
+    ws["A12"].font = label_font
+    ws["A12"].fill = label_fill
 
-    ws['A14'] = "หมวดหมู่"
-    ws['B14'] = "จำนวนเงิน (THB)"
-    ws['C14'] = "% ของงบรวม"
-    for cell in ['A14', 'B14', 'C14']:
+    ws["A14"] = "หมวดหมู่"
+    ws["B14"] = "จำนวนเงิน (THB)"
+    ws["C14"] = "% ของงบรวม"
+    for cell in ["A14", "B14", "C14"]:
         ws[cell].font = Font(bold=True)
         ws[cell].fill = label_fill
 
@@ -105,22 +104,22 @@ def create_project_summary_sheet(wb: WorkbookType) -> None:
     ]
 
     for idx, category in enumerate(categories, start=15):
-        ws[f'A{idx}'] = category
-        ws[f'B{idx}'] = 0
-        ws[f'C{idx}'] = "0%"
+        ws[f"A{idx}"] = category
+        ws[f"B{idx}"] = 0
+        ws[f"C{idx}"] = "0%"
 
-    ws['A19'] = "งบประมาณรวมทั้งหมด (Grand Total)"
-    ws['A19'].font = Font(bold=True, size=12)
-    ws['B19'].font = Font(bold=True, size=12)
-    ws['C19'].font = Font(bold=True, size=12)
+    ws["A19"] = "งบประมาณรวมทั้งหมด (Grand Total)"
+    ws["A19"].font = Font(bold=True, size=12)
+    ws["B19"].font = Font(bold=True, size=12)
+    ws["C19"].font = Font(bold=True, size=12)
 
     # Set column widths
-    ws.column_dimensions['A'].width = 40
-    ws.column_dimensions['B'].width = 25
-    ws.column_dimensions['C'].width = 20
-    ws.column_dimensions['D'].width = 15
+    ws.column_dimensions["A"].width = 40
+    ws.column_dimensions["B"].width = 25
+    ws.column_dimensions["C"].width = 20
+    ws.column_dimensions["D"].width = 15
 
-    apply_borders(ws, 'A3:C19')
+    apply_borders(ws, "A3:C19")
 
 
 def create_monthly_budget_sheet(wb: WorkbookType) -> None:
@@ -132,29 +131,33 @@ def create_monthly_budget_sheet(wb: WorkbookType) -> None:
     label_fill = PatternFill(start_color="D9E1F2", end_color="D9E1F2", fill_type="solid")
 
     # Title
-    ws.merge_cells('A1:F1')
-    ws['A1'] = "💵 รายละเอียดงบประมาณรายเดือน (Monthly Budget Breakdown)"
-    ws['A1'].font = header_font
-    ws['A1'].fill = header_fill
-    ws['A1'].alignment = Alignment(horizontal='center', vertical='center')
+    ws.merge_cells("A1:F1")
+    ws["A1"] = "💵 รายละเอียดงบประมาณรายเดือน (Monthly Budget Breakdown)"
+    ws["A1"].font = header_font
+    ws["A1"].fill = header_fill
+    ws["A1"].alignment = Alignment(horizontal="center", vertical="center")
     ws.row_dimensions[1].height = 30
 
     # Advertising Channels Header
-    ws['A3'] = "ช่องทางโฆษณา (Advertising Channels)"
-    ws['A3'].font = Font(bold=True, size=12)
-    ws['A3'].fill = label_fill
+    ws["A3"] = "ช่องทางโฆษณา (Advertising Channels)"
+    ws["A3"].font = Font(bold=True, size=12)
+    ws["A3"].fill = label_fill
 
     # Column headers
     headers = [
-        "Channel/Campaign", "Budget (THB)", "% of Total",
-        "Est. Clicks", "Est. CPL", "Est. Leads"
+        "Channel/Campaign",
+        "Budget (THB)",
+        "% of Total",
+        "Est. Clicks",
+        "Est. CPL",
+        "Est. Leads",
     ]
     for idx, header in enumerate(headers, start=1):
         cell = ws.cell(row=4, column=idx)
         cell.value = header
         cell.font = Font(bold=True)
         cell.fill = label_fill
-        cell.alignment = Alignment(horizontal='center')
+        cell.alignment = Alignment(horizontal="center")
 
     # Channel data
     channels = [
@@ -179,36 +182,36 @@ def create_monthly_budget_sheet(wb: WorkbookType) -> None:
 
     current_row = 5
     for channel, is_category in channels:
-        ws[f'A{current_row}'] = channel
+        ws[f"A{current_row}"] = channel
         if is_category:
-            ws[f'A{current_row}'].font = Font(bold=True)
+            ws[f"A{current_row}"].font = Font(bold=True)
         else:
-            ws[f'B{current_row}'] = 0
-            ws[f'C{current_row}'] = "0%"
-            ws[f'D{current_row}'] = 0
-            ws[f'E{current_row}'] = 0
-            ws[f'F{current_row}'] = 0
+            ws[f"B{current_row}"] = 0
+            ws[f"C{current_row}"] = "0%"
+            ws[f"D{current_row}"] = 0
+            ws[f"E{current_row}"] = 0
+            ws[f"F{current_row}"] = 0
         current_row += 1
 
     # Total row
     total_row = current_row
-    ws[f'A{total_row}'] = "รวมค่าโฆษณา (Total Ad Spend)"
-    ws[f'A{total_row}'].font = Font(bold=True, size=11)
-    for col in ['B', 'C', 'D', 'E', 'F']:
-        ws[f'{col}{total_row}'].font = Font(bold=True)
-        ws[f'{col}{total_row}'].fill = PatternFill(
+    ws[f"A{total_row}"] = "รวมค่าโฆษณา (Total Ad Spend)"
+    ws[f"A{total_row}"].font = Font(bold=True, size=11)
+    for col in ["B", "C", "D", "E", "F"]:
+        ws[f"{col}{total_row}"].font = Font(bold=True)
+        ws[f"{col}{total_row}"].fill = PatternFill(
             start_color="E2EFDA", end_color="E2EFDA", fill_type="solid"
         )
 
     # Set column widths
-    ws.column_dimensions['A'].width = 35
-    ws.column_dimensions['B'].width = 18
-    ws.column_dimensions['C'].width = 15
-    ws.column_dimensions['D'].width = 15
-    ws.column_dimensions['E'].width = 15
-    ws.column_dimensions['F'].width = 15
+    ws.column_dimensions["A"].width = 35
+    ws.column_dimensions["B"].width = 18
+    ws.column_dimensions["C"].width = 15
+    ws.column_dimensions["D"].width = 15
+    ws.column_dimensions["E"].width = 15
+    ws.column_dimensions["F"].width = 15
 
-    apply_borders(ws, f'A3:F{total_row}')
+    apply_borders(ws, f"A3:F{total_row}")
 
 
 def create_channel_allocation_sheet(wb: WorkbookType) -> None:
@@ -220,17 +223,17 @@ def create_channel_allocation_sheet(wb: WorkbookType) -> None:
     label_fill = PatternFill(start_color="D9E1F2", end_color="D9E1F2", fill_type="solid")
 
     # Title
-    ws.merge_cells('A1:E1')
-    ws['A1'] = "🎯 การจัดสรรงบตามช่องทาง (Channel Budget Allocation)"
-    ws['A1'].font = header_font
-    ws['A1'].fill = header_fill
-    ws['A1'].alignment = Alignment(horizontal='center', vertical='center')
+    ws.merge_cells("A1:E1")
+    ws["A1"] = "🎯 การจัดสรรงบตามช่องทาง (Channel Budget Allocation)"
+    ws["A1"].font = header_font
+    ws["A1"].fill = header_fill
+    ws["A1"].alignment = Alignment(horizontal="center", vertical="center")
     ws.row_dimensions[1].height = 30
 
     # By Marketing Funnel
-    ws['A3'] = "การจัดสรรตาม Marketing Funnel"
-    ws['A3'].font = Font(bold=True, size=11)
-    ws['A3'].fill = label_fill
+    ws["A3"] = "การจัดสรรตาม Marketing Funnel"
+    ws["A3"].font = Font(bold=True, size=11)
+    ws["A3"].fill = label_fill
 
     headers = ["Funnel Stage", "Budget %", "Channels", "Objective"]
     for idx, header in enumerate(headers, start=1):
@@ -246,15 +249,15 @@ def create_channel_allocation_sheet(wb: WorkbookType) -> None:
     ]
 
     for idx, (stage, budget, channels, objective) in enumerate(funnel_data, start=5):
-        ws[f'A{idx}'] = stage
-        ws[f'B{idx}'] = budget
-        ws[f'C{idx}'] = channels
-        ws[f'D{idx}'] = objective
+        ws[f"A{idx}"] = stage
+        ws[f"B{idx}"] = budget
+        ws[f"C{idx}"] = channels
+        ws[f"D{idx}"] = objective
 
     # By Audience Type
-    ws['A9'] = "การจัดสรรตามประเภทผู้ชม (Audience Type)"
-    ws['A9'].font = Font(bold=True, size=11)
-    ws['A9'].fill = label_fill
+    ws["A9"] = "การจัดสรรตามประเภทผู้ชม (Audience Type)"
+    ws["A9"].font = Font(bold=True, size=11)
+    ws["A9"].fill = label_fill
 
     headers2 = ["Audience Type", "Budget %", "Description", "Channels"]
     for idx, header in enumerate(headers2, start=1):
@@ -270,19 +273,19 @@ def create_channel_allocation_sheet(wb: WorkbookType) -> None:
     ]
 
     for idx, (aud_type, budget, desc, channels) in enumerate(audience_data, start=11):
-        ws[f'A{idx}'] = aud_type
-        ws[f'B{idx}'] = budget
-        ws[f'C{idx}'] = desc
-        ws[f'D{idx}'] = channels
+        ws[f"A{idx}"] = aud_type
+        ws[f"B{idx}"] = budget
+        ws[f"C{idx}"] = desc
+        ws[f"D{idx}"] = channels
 
     # Set column widths
-    ws.column_dimensions['A'].width = 20
-    ws.column_dimensions['B'].width = 15
-    ws.column_dimensions['C'].width = 35
-    ws.column_dimensions['D'].width = 40
+    ws.column_dimensions["A"].width = 20
+    ws.column_dimensions["B"].width = 15
+    ws.column_dimensions["C"].width = 35
+    ws.column_dimensions["D"].width = 40
 
-    apply_borders(ws, 'A3:D7')
-    apply_borders(ws, 'A9:D13')
+    apply_borders(ws, "A3:D7")
+    apply_borders(ws, "A9:D13")
 
 
 def create_production_tools_sheet(wb: WorkbookType) -> None:
@@ -294,11 +297,11 @@ def create_production_tools_sheet(wb: WorkbookType) -> None:
     label_fill = PatternFill(start_color="D9E1F2", end_color="D9E1F2", fill_type="solid")
 
     # Title
-    ws.merge_cells('A1:D1')
-    ws['A1'] = "🎬 งบผลิตและเครื่องมือ (Production & Tools Budget)"
-    ws['A1'].font = header_font
-    ws['A1'].fill = header_fill
-    ws['A1'].alignment = Alignment(horizontal='center', vertical='center')
+    ws.merge_cells("A1:D1")
+    ws["A1"] = "🎬 งบผลิตและเครื่องมือ (Production & Tools Budget)"
+    ws["A1"].font = header_font
+    ws["A1"].fill = header_fill
+    ws["A1"].alignment = Alignment(horizontal="center", vertical="center")
     ws.row_dimensions[1].height = 30
 
     # Column headers
@@ -333,28 +336,28 @@ def create_production_tools_sheet(wb: WorkbookType) -> None:
     current_row = 4
     for item, budget, frequency, notes in items:
         if item and not item.startswith("  -") and item != "":
-            ws[f'A{current_row}'].font = Font(bold=True)
-        ws[f'A{current_row}'] = item
-        ws[f'B{current_row}'] = budget if budget != "" else ""
-        ws[f'C{current_row}'] = frequency
-        ws[f'D{current_row}'] = notes
+            ws[f"A{current_row}"].font = Font(bold=True)
+        ws[f"A{current_row}"] = item
+        ws[f"B{current_row}"] = budget if budget != "" else ""
+        ws[f"C{current_row}"] = frequency
+        ws[f"D{current_row}"] = notes
         current_row += 1
 
     # Total
-    ws[f'A{current_row}'] = "รวมงบผลิตและเครื่องมือ (Total)"
-    ws[f'A{current_row}'].font = Font(bold=True, size=11)
-    ws[f'B{current_row}'].font = Font(bold=True)
-    ws[f'B{current_row}'].fill = PatternFill(
+    ws[f"A{current_row}"] = "รวมงบผลิตและเครื่องมือ (Total)"
+    ws[f"A{current_row}"].font = Font(bold=True, size=11)
+    ws[f"B{current_row}"].font = Font(bold=True)
+    ws[f"B{current_row}"].fill = PatternFill(
         start_color="E2EFDA", end_color="E2EFDA", fill_type="solid"
     )
 
     # Set column widths
-    ws.column_dimensions['A'].width = 35
-    ws.column_dimensions['B'].width = 18
-    ws.column_dimensions['C'].width = 15
-    ws.column_dimensions['D'].width = 40
+    ws.column_dimensions["A"].width = 35
+    ws.column_dimensions["B"].width = 18
+    ws.column_dimensions["C"].width = 15
+    ws.column_dimensions["D"].width = 40
 
-    apply_borders(ws, f'A3:D{current_row}')
+    apply_borders(ws, f"A3:D{current_row}")
 
 
 def create_weekly_tracking_sheet(wb: WorkbookType) -> None:
@@ -366,54 +369,60 @@ def create_weekly_tracking_sheet(wb: WorkbookType) -> None:
     label_fill = PatternFill(start_color="D9E1F2", end_color="D9E1F2", fill_type="solid")
 
     # Title
-    ws.merge_cells('A1:H1')
-    ws['A1'] = "📅 ติดตามงบรายสัปดาห์ (Weekly Budget Tracking)"
-    ws['A1'].font = header_font
-    ws['A1'].fill = header_fill
-    ws['A1'].alignment = Alignment(horizontal='center', vertical='center')
+    ws.merge_cells("A1:H1")
+    ws["A1"] = "📅 ติดตามงบรายสัปดาห์ (Weekly Budget Tracking)"
+    ws["A1"].font = header_font
+    ws["A1"].fill = header_fill
+    ws["A1"].alignment = Alignment(horizontal="center", vertical="center")
     ws.row_dimensions[1].height = 30
 
     # Column headers
     headers = [
-        "Week", "Ad Spend (THB)", "Clicks", "CTR (%)",
-        "Leads", "CPL (THB)", "Budget Used %", "Pace"
+        "Week",
+        "Ad Spend (THB)",
+        "Clicks",
+        "CTR (%)",
+        "Leads",
+        "CPL (THB)",
+        "Budget Used %",
+        "Pace",
     ]
     for idx, header in enumerate(headers, start=1):
         cell = ws.cell(row=3, column=idx)
         cell.value = header
         cell.font = Font(bold=True)
         cell.fill = label_fill
-        cell.alignment = Alignment(horizontal='center')
+        cell.alignment = Alignment(horizontal="center")
 
     # Week rows
     for week in range(1, 5):
         row = 3 + week
-        ws[f'A{row}'] = f"Week {week}"
-        for col in ['B', 'C', 'D', 'E', 'F', 'G', 'H']:
-            ws[f'{col}{row}'] = 0 if col in ['B', 'C', 'E', 'F'] else ""
+        ws[f"A{row}"] = f"Week {week}"
+        for col in ["B", "C", "D", "E", "F", "G", "H"]:
+            ws[f"{col}{row}"] = 0 if col in ["B", "C", "E", "F"] else ""
 
     # Total row
-    ws['A8'] = "Total"
-    ws['A8'].font = Font(bold=True)
-    for col in ['B', 'C', 'D', 'E', 'F', 'G']:
-        ws[f'{col}8'].font = Font(bold=True)
-        ws[f'{col}8'].fill = PatternFill(
+    ws["A8"] = "Total"
+    ws["A8"].font = Font(bold=True)
+    for col in ["B", "C", "D", "E", "F", "G"]:
+        ws[f"{col}8"].font = Font(bold=True)
+        ws[f"{col}8"].fill = PatternFill(
             start_color="E2EFDA", end_color="E2EFDA", fill_type="solid"
         )
 
     # Budget pacing guide
-    ws['A10'] = "Budget Pacing Guide:"
-    ws['A10'].font = Font(bold=True, size=11)
-    ws['A11'] = "On track: ~25% per week"
-    ws['A12'] = "Under pace: < 20% per week"
-    ws['A13'] = "Over pace: > 30% per week"
+    ws["A10"] = "Budget Pacing Guide:"
+    ws["A10"].font = Font(bold=True, size=11)
+    ws["A11"] = "On track: ~25% per week"
+    ws["A12"] = "Under pace: < 20% per week"
+    ws["A13"] = "Over pace: > 30% per week"
 
     # Set column widths
-    ws.column_dimensions['A'].width = 12
-    for col in ['B', 'C', 'D', 'E', 'F', 'G', 'H']:
+    ws.column_dimensions["A"].width = 12
+    for col in ["B", "C", "D", "E", "F", "G", "H"]:
         ws.column_dimensions[col].width = 15
 
-    apply_borders(ws, 'A3:H8')
+    apply_borders(ws, "A3:H8")
 
 
 def create_roi_calculator_sheet(wb: WorkbookType) -> None:
@@ -427,17 +436,17 @@ def create_roi_calculator_sheet(wb: WorkbookType) -> None:
     result_fill = PatternFill(start_color="E2EFDA", end_color="E2EFDA", fill_type="solid")
 
     # Title
-    ws.merge_cells('A1:C1')
-    ws['A1'] = "📊 เครื่องคำนวณ ROI (ROI Calculator)"
-    ws['A1'].font = header_font
-    ws['A1'].fill = header_fill
-    ws['A1'].alignment = Alignment(horizontal='center', vertical='center')
+    ws.merge_cells("A1:C1")
+    ws["A1"] = "📊 เครื่องคำนวณ ROI (ROI Calculator)"
+    ws["A1"].font = header_font
+    ws["A1"].fill = header_fill
+    ws["A1"].alignment = Alignment(horizontal="center", vertical="center")
     ws.row_dimensions[1].height = 30
 
     # Input Costs
-    ws['A3'] = "ต้นทุนการลงทุน (Input Costs)"
-    ws['A3'].font = Font(bold=True, size=12)
-    ws['A3'].fill = label_fill
+    ws["A3"] = "ต้นทุนการลงทุน (Input Costs)"
+    ws["A3"].font = Font(bold=True, size=12)
+    ws["A3"].fill = label_fill
 
     costs = [
         ("Total Ad Spend (THB)", "B5"),
@@ -447,21 +456,21 @@ def create_roi_calculator_sheet(wb: WorkbookType) -> None:
 
     row = 5
     for label, value_cell in costs:
-        ws[f'A{row}'] = label
-        ws[f'A{row}'].font = Font(bold=True)
+        ws[f"A{row}"] = label
+        ws[f"A{row}"].font = Font(bold=True)
         ws[value_cell] = 0
         ws[value_cell].fill = value_fill
         row += 1
 
-    ws['A8'] = "Total Investment (THB)"
-    ws['A8'].font = Font(bold=True, size=11)
-    ws['B8'].font = Font(bold=True)
-    ws['B8'].fill = result_fill
+    ws["A8"] = "Total Investment (THB)"
+    ws["A8"].font = Font(bold=True, size=11)
+    ws["B8"].font = Font(bold=True)
+    ws["B8"].fill = result_fill
 
     # Output Results
-    ws['A10'] = "ผลลัพธ์ (Output Results)"
-    ws['A10'].font = Font(bold=True, size=12)
-    ws['A10'].fill = label_fill
+    ws["A10"] = "ผลลัพธ์ (Output Results)"
+    ws["A10"].font = Font(bold=True, size=12)
+    ws["A10"].fill = label_fill
 
     results = [
         ("Total Leads", "B12"),
@@ -473,21 +482,21 @@ def create_roi_calculator_sheet(wb: WorkbookType) -> None:
 
     row = 12
     for label, value_cell in results:
-        ws[f'A{row}'] = label
-        ws[f'A{row}'].font = Font(bold=True)
+        ws[f"A{row}"] = label
+        ws[f"A{row}"].font = Font(bold=True)
         ws[value_cell] = 0
         ws[value_cell].fill = value_fill
         row += 1
 
-    ws['A17'] = "Total Revenue (THB)"
-    ws['A17'].font = Font(bold=True, size=11)
-    ws['B17'].font = Font(bold=True)
-    ws['B17'].fill = result_fill
+    ws["A17"] = "Total Revenue (THB)"
+    ws["A17"].font = Font(bold=True, size=11)
+    ws["B17"].font = Font(bold=True)
+    ws["B17"].fill = result_fill
 
     # ROI Metrics
-    ws['A19'] = "ตัวชี้วัด ROI (ROI Metrics)"
-    ws['A19'].font = Font(bold=True, size=12)
-    ws['A19'].fill = label_fill
+    ws["A19"] = "ตัวชี้วัด ROI (ROI Metrics)"
+    ws["A19"].font = Font(bold=True, size=12)
+    ws["A19"].fill = label_fill
 
     roi_metrics = [
         ("Net Profit (THB)", "B21"),
@@ -498,37 +507,37 @@ def create_roi_calculator_sheet(wb: WorkbookType) -> None:
 
     row = 21
     for label, value_cell in roi_metrics:
-        ws[f'A{row}'] = label
-        ws[f'A{row}'].font = Font(bold=True)
+        ws[f"A{row}"] = label
+        ws[f"A{row}"].font = Font(bold=True)
         ws[value_cell] = 0
         ws[value_cell].fill = result_fill
         ws[value_cell].font = Font(bold=True, color="0070C0")
         row += 1
 
     # ROI Formula
-    ws['A26'] = "สูตรคำนวณ (Formula):"
-    ws['A26'].font = Font(bold=True, size=11)
-    ws['A27'] = "ROI % = (Revenue - Investment) / Investment × 100%"
-    ws['A28'] = "ROI Ratio = Revenue / Investment"
-    ws['A29'] = "Break-even = Total Investment / Commission per Sale"
+    ws["A26"] = "สูตรคำนวณ (Formula):"
+    ws["A26"].font = Font(bold=True, size=11)
+    ws["A27"] = "ROI % = (Revenue - Investment) / Investment × 100%"
+    ws["A28"] = "ROI Ratio = Revenue / Investment"
+    ws["A29"] = "Break-even = Total Investment / Commission per Sale"
 
     # Set column widths
-    ws.column_dimensions['A'].width = 35
-    ws.column_dimensions['B'].width = 25
-    ws.column_dimensions['C'].width = 20
+    ws.column_dimensions["A"].width = 35
+    ws.column_dimensions["B"].width = 25
+    ws.column_dimensions["C"].width = 20
 
-    apply_borders(ws, 'A3:B8')
-    apply_borders(ws, 'A10:B17')
-    apply_borders(ws, 'A19:B24')
+    apply_borders(ws, "A3:B8")
+    apply_borders(ws, "A10:B17")
+    apply_borders(ws, "A19:B24")
 
 
 def apply_borders(ws, cell_range: str) -> None:
     """Apply borders to a range of cells"""
     thin_border = Border(
-        left=Side(style='thin'),
-        right=Side(style='thin'),
-        top=Side(style='thin'),
-        bottom=Side(style='thin')
+        left=Side(style="thin"),
+        right=Side(style="thin"),
+        top=Side(style="thin"),
+        bottom=Side(style="thin"),
     )
 
     for row in ws[cell_range]:

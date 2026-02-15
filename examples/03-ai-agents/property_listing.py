@@ -18,8 +18,10 @@ from pydantic import BaseModel, Field
 # Data Models / โมเดลข้อมูล
 # ========================================
 
+
 class PropertyType(str, Enum):
     """Property types / ประเภทอสังหาฯ"""
+
     CONDO = "condo"
     HOUSE = "house"
     VILLA = "villa"
@@ -29,6 +31,7 @@ class PropertyType(str, Enum):
 
 class PropertyStatus(str, Enum):
     """Property availability status / สถานะความพร้อม"""
+
     AVAILABLE = "available"
     RESERVED = "reserved"
     SOLD = "sold"
@@ -37,6 +40,7 @@ class PropertyStatus(str, Enum):
 
 class Location(str, Enum):
     """Pattaya area locations / พื้นที่ในพัทยา"""
+
     PATTAYA_CENTRAL = "pattaya_central"
     PATTAYA_NORTH = "pattaya_north"
     PATTAYA_SOUTH = "pattaya_south"
@@ -47,6 +51,7 @@ class Location(str, Enum):
 
 class Property(BaseModel):
     """Property listing model / โมเดล property listing"""
+
     id: int
     name: str
     property_type: PropertyType
@@ -70,6 +75,7 @@ class Property(BaseModel):
 
 class SearchCriteria(BaseModel):
     """Search criteria for finding properties"""
+
     property_type: PropertyType | None = None
     location: Location | None = None
     min_price: float | None = None
@@ -188,6 +194,7 @@ SAMPLE_PROPERTIES = [
 # Agent สำหรับจัดการ Property
 # ========================================
 
+
 class PropertyAgent:
     """
     Agent for managing property listings and recommendations
@@ -235,15 +242,17 @@ class PropertyAgent:
         # Filter by beach distance
         if criteria.max_distance_to_beach_m is not None:
             results = [
-                p for p in results
+                p
+                for p in results
                 if p.distance_to_beach_m is not None
                 and p.distance_to_beach_m <= criteria.max_distance_to_beach_m
             ]
 
         return results
 
-    def recommend_for_budget(self, budget: float,
-                            property_type: PropertyType | None = None) -> list[Property]:
+    def recommend_for_budget(
+        self, budget: float, property_type: PropertyType | None = None
+    ) -> list[Property]:
         """
         Recommend properties within budget / แนะนำ properties ตามงบประมาณ
         """
@@ -269,9 +278,9 @@ class PropertyAgent:
         Get premium properties (high-end listings) / ดึง properties ระดับพรีเมี่ยม
         """
         premium = [
-            p for p in self.properties
-            if p.price >= 10_000_000
-            or (p.has_sea_view and p.price >= 5_000_000)
+            p
+            for p in self.properties
+            if p.price >= 10_000_000 or (p.has_sea_view and p.price >= 5_000_000)
         ]
 
         # Sort by price descending
@@ -289,7 +298,8 @@ class PropertyAgent:
         # - Furnished (ready to rent)
 
         opportunities = [
-            p for p in self.properties
+            p
+            for p in self.properties
             if p.property_type == PropertyType.CONDO
             and p.price < 6_000_000
             and p.furnished
@@ -316,11 +326,12 @@ class PropertyAgent:
 # Example Usage / ตัวอย่างการใช้งาน
 # ========================================
 
+
 def print_property(prop: Property, price_per_sqm: float | None = None):
     """Helper to print property details / แสดงรายละเอียด property"""
     print(f"\n🏠 {prop.name} (ID: {prop.id})")
     print(f"   Type: {prop.property_type.value} | Location: {prop.location.value}")
-    print(f"   Price: {prop.price/1_000_000:.2f}M THB", end="")
+    print(f"   Price: {prop.price / 1_000_000:.2f}M THB", end="")
     if price_per_sqm:
         print(f" ({price_per_sqm:,.0f} THB/sqm)")
     else:

@@ -29,9 +29,9 @@ def create_presentation_template():
     # Define color scheme
     brand_primary = RGBColor(41, 128, 185)  # Blue
     brand_secondary = RGBColor(52, 73, 94)  # Dark Blue
-    accent_color = RGBColor(231, 76, 60)    # Red
-    text_dark = RGBColor(44, 62, 80)        # Dark Gray
-    text_light = RGBColor(236, 240, 241)    # Light Gray
+    accent_color = RGBColor(231, 76, 60)  # Red
+    text_dark = RGBColor(44, 62, 80)  # Dark Gray
+    text_light = RGBColor(236, 240, 241)  # Light Gray
 
     # Slide 1: Title Slide
     slide1 = prs.slides.add_slide(prs.slide_layouts[6])  # Blank layout
@@ -117,8 +117,7 @@ def create_presentation_template():
     # Slide 4: Message & Creative Direction
     slide4 = prs.slides.add_slide(prs.slide_layouts[6])
     add_slide_header(
-        slide4, "3. Message & Creative Direction / แนวคิดและสื่อสาร",
-        brand_primary, text_light
+        slide4, "3. Message & Creative Direction / แนวคิดและสื่อสาร", brand_primary, text_light
     )
 
     content_box = slide4.shapes.add_textbox(Inches(1), Inches(1.5), Inches(8), Inches(5))
@@ -132,22 +131,16 @@ def create_presentation_template():
 
     add_bullet_point(tf, "🎨 Creative Direction / ทิศทางครีเอทีฟ", 24, text_dark, True)
     add_bullet_point(
-        tf, "• Visual Style: [e.g., Luxury & Premium, Modern & Clean]",
-        18, text_dark, False
+        tf, "• Visual Style: [e.g., Luxury & Premium, Modern & Clean]", 18, text_dark, False
     )
     add_bullet_point(
-        tf, "• Tone of Voice: [e.g., Professional, Aspirational]",
-        18, text_dark, False
+        tf, "• Tone of Voice: [e.g., Professional, Aspirational]", 18, text_dark, False
     )
-    add_bullet_point(
-        tf, "• Key Visual Elements: [สี, ฟอนต์, สไตล์ภาพ]",
-        18, text_dark, False
-    )
+    add_bullet_point(tf, "• Key Visual Elements: [สี, ฟอนต์, สไตล์ภาพ]", 18, text_dark, False)
     add_bullet_point(tf, "", 12, text_dark, False)
 
     add_bullet_point(
-        tf, "🎯 Key Messages by Audience / ข้อความตามกลุ่มเป้าหมาย",
-        20, brand_secondary, True
+        tf, "🎯 Key Messages by Audience / ข้อความตามกลุ่มเป้าหมาย", 20, brand_secondary, True
     )
     add_bullet_point(tf, "• Audience 1: [Message]", 18, text_dark, False)
     add_bullet_point(tf, "• Audience 2: [Message]", 18, text_dark, False)
@@ -249,8 +242,7 @@ def create_presentation_template():
 
     add_bullet_point(tf, "Tools & Platforms:", 20, brand_secondary, True)
     add_bullet_point(
-        tf, "• Google Analytics 4: Website traffic & conversions",
-        18, text_dark, False
+        tf, "• Google Analytics 4: Website traffic & conversions", 18, text_dark, False
     )
     add_bullet_point(tf, "• Google Tag Manager: Event tracking", 18, text_dark, False)
     add_bullet_point(tf, "• Meta Pixel: Facebook/Instagram tracking", 18, text_dark, False)
@@ -261,8 +253,7 @@ def create_presentation_template():
     add_bullet_point(tf, "📅 Reporting Schedule / กำหนดการรายงาน", 20, brand_secondary, True)
     add_bullet_point(tf, "• Weekly: Quick performance dashboard", 18, text_dark, False)
     add_bullet_point(
-        tf, "• Monthly: Full report with insights & recommendations",
-        18, text_dark, False
+        tf, "• Monthly: Full report with insights & recommendations", 18, text_dark, False
     )
     add_bullet_point(tf, "• Quarterly: Strategic review & planning", 18, text_dark, False)
 
@@ -342,9 +333,7 @@ def add_slide_header(slide, text, bg_color, text_color):
     """Add a header bar to a slide."""
     # Add header background (Rectangle shape)
     header_bg = slide.shapes.add_shape(
-        MSO_SHAPE.RECTANGLE,
-        Inches(0), Inches(0),
-        Inches(10), Inches(1)
+        MSO_SHAPE.RECTANGLE, Inches(0), Inches(0), Inches(10), Inches(1)
     )
     header_bg.fill.solid()
     header_bg.fill.fore_color.rgb = bg_color

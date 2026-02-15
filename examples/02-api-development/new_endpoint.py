@@ -20,8 +20,10 @@ router = APIRouter(prefix="/v1/properties", tags=["properties"])
 # Data Models / โมเดลข้อมูล
 # ========================================
 
+
 class PropertyBase(BaseModel):
     """Base property model / โมเดลพื้นฐานของ property"""
+
     name: str = Field(..., description="Property name", min_length=1, max_length=200)
     property_type: str = Field(..., description="Type: condo, house, villa")
     location: str = Field(..., description="Location in Pattaya")
@@ -33,11 +35,13 @@ class PropertyBase(BaseModel):
 
 class PropertyCreate(PropertyBase):
     """Model for creating a property / โมเดลสำหรับสร้าง property"""
+
     pass
 
 
 class Property(PropertyBase):
     """Full property model with ID / โมเดล property แบบเต็ม"""
+
     id: int = Field(..., description="Property ID")
 
     model_config = ConfigDict(
@@ -89,6 +93,7 @@ properties_db = [
 # API Endpoints
 # ========================================
 
+
 @router.get("/", response_model=list[Property])
 async def list_properties(
     property_type: str | None = None,
@@ -132,10 +137,7 @@ async def get_property(property_id: int):
         if prop.id == property_id:
             return prop
 
-    raise HTTPException(
-        status_code=404,
-        detail=f"Property with ID {property_id} not found"
-    )
+    raise HTTPException(status_code=404, detail=f"Property with ID {property_id} not found")
 
 
 @router.post("/", response_model=Property, status_code=201)
@@ -151,10 +153,7 @@ async def create_property(property_data: PropertyCreate):
     new_id = max(p.id for p in properties_db) + 1 if properties_db else 1
 
     # Create new property / สร้าง property ใหม่
-    new_property = Property(
-        id=new_id,
-        **property_data.model_dump()
-    )
+    new_property = Property(id=new_id, **property_data.model_dump())
 
     properties_db.append(new_property)
     return new_property
@@ -174,10 +173,7 @@ async def delete_property(property_id: int):
             properties_db.pop(i)
             return
 
-    raise HTTPException(
-        status_code=404,
-        detail=f"Property with ID {property_id} not found"
-    )
+    raise HTTPException(status_code=404, detail=f"Property with ID {property_id} not found")
 
 
 # ========================================
