@@ -1,16 +1,19 @@
 import csv
+import hashlib
 import io
+import time
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, Query, UploadFile, status
 from fastapi.params import File
-from sqlalchemy import select
+from pydantic import BaseModel
+from sqlalchemy import func, select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from apps.api.dependencies.auth import get_current_admin
 from packages.core.database import get_db
-from packages.core.models import CompanyInfo, Property, User
+from packages.core.models import CompanyInfo, Property, PropertyImportAudit, User
 from packages.core.schemas.property_api import (
     CompanyInfoCreate,
     CompanyInfoItem,
@@ -54,6 +57,74 @@ def _commit_or_conflict(db: Session, *, detail: str) -> None:
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=detail) from exc
 
 
+def _summarize_errors(errors: list[str]) -> str | None:
+    if not errors:
+        return None
+    return "\n".join(errors[:5])
+
+
+class PropertyImportAuditItem(BaseModel):
+    id: UUID
+    admin_email: str
+    filename: str
+    rows_total: int
+    rows_created: int
+    rows_updated: int
+    status: str
+    duration_ms: int
+    created_at: str
+
+
+class PropertyImportAuditListResponse(BaseModel):
+    items: list[PropertyImportAuditItem]
+    total: int
+
+
+@router.get("/properties/imports", response_model=PropertyImportAuditListResponse)
+async def list_property_imports(
+    limit: int = Query(20, ge=1, le=100),
+    page: int = Query(1, ge=1),
+    status_filter: str | None = Query(None, alias="status"),
+    dry_run: bool | None = Query(None),
+    db: Session = Depends(get_db),
+    _admin: User = Depends(get_current_admin),
+) -> PropertyImportAuditListResponse:
+    base = select(PropertyImportAudit)
+
+    if status_filter is not None:
+        base = base.where(PropertyImportAudit.status == status_filter)
+    if dry_run is not None:
+        base = base.where(PropertyImportAudit.dry_run == dry_run)
+
+    total = db.scalar(select(func.count()).select_from(base.subquery())) or 0
+
+    offset = (page - 1) * limit
+    audits = list(
+        db.scalars(
+            base.order_by(PropertyImportAudit.created_at.desc(), PropertyImportAudit.id.desc())
+            .offset(offset)
+            .limit(limit)
+        ).all()
+    )
+
+    items = [
+        PropertyImportAuditItem(
+            id=a.id,
+            admin_email=a.admin_email,
+            filename=a.filename,
+            rows_total=a.rows_total,
+            rows_created=a.rows_created,
+            rows_updated=a.rows_updated,
+            status=str(a.status),
+            duration_ms=a.duration_ms,
+            created_at=a.created_at.isoformat(),
+        )
+        for a in audits
+    ]
+
+    return PropertyImportAuditListResponse(items=items, total=total)
+
+
 @router.post("/properties/import", response_model=PropertyImportResult)
 async def import_properties(
     file: UploadFile = File(...),
@@ -61,55 +132,111 @@ async def import_properties(
     db: Session = Depends(get_db),
     _admin: User = Depends(get_current_admin),
 ) -> PropertyImportResult:
+    t0 = time.perf_counter()
     errors: list[str] = []
+    result: PropertyImportResult
 
     # get_current_admin performs DB reads and can start a transaction on this session.
     # We want a single, clean transaction boundary for the import.
     db.rollback()
 
+    raw = await file.read(MAX_BYTES + 1)
+    file_size_bytes = len(raw)
+    file_sha256 = hashlib.sha256(raw).hexdigest()
+
+    audit = PropertyImportAudit(
+        admin_email=_admin.email,
+        filename=file.filename or "unknown",
+        file_sha256=file_sha256,
+        file_size_bytes=file_size_bytes,
+        rows_total=0,
+        rows_created=0,
+        rows_updated=0,
+        rows_errors=0,
+        dry_run=dry_run,
+        status="pending",
+        duration_ms=0,
+        error_summary=None,
+    )
+
+    # Audit record must be committed even if the import fails.
+    db.add(audit)
+    db.commit()
+
+    # SQLAlchemy sessions autobegin a new transaction on SELECT/refresh.
+    # Ensure a clean transaction boundary for the import.
+    db.rollback()
+
     if file.content_type != "text/csv":
-        return PropertyImportResult(
+        result = PropertyImportResult(
             inserted=0,
             updated=0,
             errors=["Invalid content-type: expected text/csv"],
             total_rows=0,
             dry_run=dry_run,
         )
+        audit.status = "partial"
+        audit.rows_errors = len(result.errors)
+        audit.error_summary = _summarize_errors(result.errors)
+        audit.duration_ms = max(1, int((time.perf_counter() - t0) * 1000))
+        db.add(audit)
+        db.commit()
+        return result
 
-    raw = await file.read(MAX_BYTES + 1)
-    if len(raw) > MAX_BYTES:
-        return PropertyImportResult(
+    if file_size_bytes > MAX_BYTES:
+        result = PropertyImportResult(
             inserted=0,
             updated=0,
             errors=["File exceeds maximum size limit"],
             total_rows=0,
             dry_run=dry_run,
         )
+        audit.status = "partial"
+        audit.rows_errors = len(result.errors)
+        audit.error_summary = _summarize_errors(result.errors)
+        audit.duration_ms = max(1, int((time.perf_counter() - t0) * 1000))
+        db.add(audit)
+        db.commit()
+        return result
 
     try:
         text = raw.decode("utf-8-sig")
     except UnicodeDecodeError:
-        return PropertyImportResult(
+        result = PropertyImportResult(
             inserted=0,
             updated=0,
             errors=["Invalid encoding: expected UTF-8"],
             total_rows=0,
             dry_run=dry_run,
         )
+        audit.status = "partial"
+        audit.rows_errors = len(result.errors)
+        audit.error_summary = _summarize_errors(result.errors)
+        audit.duration_ms = max(1, int((time.perf_counter() - t0) * 1000))
+        db.add(audit)
+        db.commit()
+        return result
 
     reader = csv.DictReader(io.StringIO(text))
     header = reader.fieldnames
     if header is None:
-        return PropertyImportResult(
+        result = PropertyImportResult(
             inserted=0,
             updated=0,
             errors=["Missing CSV header"],
             total_rows=0,
             dry_run=dry_run,
         )
+        audit.status = "partial"
+        audit.rows_errors = len(result.errors)
+        audit.error_summary = _summarize_errors(result.errors)
+        audit.duration_ms = max(1, int((time.perf_counter() - t0) * 1000))
+        db.add(audit)
+        db.commit()
+        return result
 
     if list(header) != EXPECTED_HEADER:
-        return PropertyImportResult(
+        result = PropertyImportResult(
             inserted=0,
             updated=0,
             errors=[
@@ -118,6 +245,13 @@ async def import_properties(
             total_rows=0,
             dry_run=dry_run,
         )
+        audit.status = "partial"
+        audit.rows_errors = len(result.errors)
+        audit.error_summary = _summarize_errors(result.errors)
+        audit.duration_ms = max(1, int((time.perf_counter() - t0) * 1000))
+        db.add(audit)
+        db.commit()
+        return result
 
     rows: list[PropertyImportRow] = []
     seen_source_ids: set[str] = set()
@@ -159,13 +293,21 @@ async def import_properties(
 
     total_rows = len(rows)
     if errors:
-        return PropertyImportResult(
+        result = PropertyImportResult(
             inserted=0,
             updated=0,
             errors=errors,
             total_rows=total_rows,
             dry_run=dry_run,
         )
+        audit.status = "partial"
+        audit.rows_total = result.total_rows
+        audit.rows_errors = len(result.errors)
+        audit.error_summary = _summarize_errors(result.errors)
+        audit.duration_ms = max(1, int((time.perf_counter() - t0) * 1000))
+        db.add(audit)
+        db.commit()
+        return result
 
     inserted = 0
     updated = 0
@@ -214,30 +356,64 @@ async def import_properties(
                 raise _DryRunRollbackError()
 
     except _DryRunRollbackError:
-        return PropertyImportResult(
+        result = PropertyImportResult(
             inserted=inserted,
             updated=updated,
             errors=[],
             total_rows=total_rows,
             dry_run=True,
         )
+        audit.status = "success"
+        audit.rows_total = result.total_rows
+        audit.rows_created = result.inserted
+        audit.rows_updated = result.updated
+        audit.rows_errors = 0
+        audit.error_summary = None
+        audit.duration_ms = max(1, int((time.perf_counter() - t0) * 1000))
+        db.add(audit)
+        db.commit()
+        return result
     except Exception as exc:
         # Transaction is rolled back on exception.
-        return PropertyImportResult(
+        # Ensure the session is usable and does not revert audit updates.
+        db.rollback()
+        result = PropertyImportResult(
             inserted=0,
             updated=0,
             errors=[f"Database error: {type(exc).__name__}"],
             total_rows=total_rows,
             dry_run=dry_run,
         )
+        audit.status = "failed"
+        audit.rows_total = result.total_rows
+        audit.rows_created = 0
+        audit.rows_updated = 0
+        audit.rows_errors = len(result.errors)
+        audit.error_summary = _summarize_errors(result.errors)
+        audit.duration_ms = max(1, int((time.perf_counter() - t0) * 1000))
+        db.add(audit)
+        db.commit()
+        return result
 
-    return PropertyImportResult(
+    result = PropertyImportResult(
         inserted=inserted,
         updated=updated,
         errors=[],
         total_rows=total_rows,
         dry_run=False,
     )
+
+    audit.status = "success"
+    audit.rows_total = result.total_rows
+    audit.rows_created = result.inserted
+    audit.rows_updated = result.updated
+    audit.rows_errors = 0
+    audit.error_summary = None
+    audit.duration_ms = max(1, int((time.perf_counter() - t0) * 1000))
+    db.add(audit)
+    db.commit()
+
+    return result
 
 
 @router.post("/properties", response_model=PropertyDetail, status_code=status.HTTP_201_CREATED)

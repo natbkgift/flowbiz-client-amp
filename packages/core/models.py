@@ -2,7 +2,7 @@ from datetime import datetime
 from decimal import Decimal
 from uuid import UUID, uuid4
 
-from sqlalchemy import JSON, DateTime, Integer, Numeric, String, Text, func
+from sqlalchemy import JSON, Boolean, DateTime, Integer, Numeric, String, Text, func
 from sqlalchemy import Enum as SAEnum
 from sqlalchemy.orm import Mapped, mapped_column
 
@@ -45,6 +45,17 @@ property_status_enum = SAEnum(
     "active",
     "inactive",
     name="property_status_enum",
+    native_enum=False,
+    create_constraint=True,
+)
+
+
+property_import_audit_status_enum = SAEnum(
+    "pending",
+    "success",
+    "partial",
+    "failed",
+    name="property_import_audit_status_enum",
     native_enum=False,
     create_constraint=True,
 )
@@ -100,4 +111,36 @@ class CompanyInfo(Base):
         nullable=False,
         server_default=func.now(),
         onupdate=func.now(),
+    )
+
+
+class PropertyImportAudit(Base):
+    __tablename__ = "property_import_audits"
+
+    id: Mapped[UUID] = mapped_column(primary_key=True, default=uuid4)
+
+    admin_email: Mapped[str] = mapped_column(String(255), nullable=False, index=True)
+    filename: Mapped[str] = mapped_column(String(500), nullable=False)
+
+    file_sha256: Mapped[str] = mapped_column(String(64), nullable=False, index=True)
+    file_size_bytes: Mapped[int] = mapped_column(Integer, nullable=False)
+
+    rows_total: Mapped[int] = mapped_column(Integer, nullable=False)
+    rows_created: Mapped[int] = mapped_column(Integer, nullable=False)
+    rows_updated: Mapped[int] = mapped_column(Integer, nullable=False)
+    rows_errors: Mapped[int] = mapped_column(Integer, nullable=False)
+
+    dry_run: Mapped[bool] = mapped_column(Boolean, nullable=False)
+
+    status: Mapped[str] = mapped_column(property_import_audit_status_enum, nullable=False)
+
+    duration_ms: Mapped[int] = mapped_column(Integer, nullable=False)
+
+    error_summary: Mapped[str | None] = mapped_column(Text, nullable=True)
+
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        nullable=False,
+        server_default=func.now(),
+        index=True,
     )

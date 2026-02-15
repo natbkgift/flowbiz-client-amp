@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import hashlib
 import io
 import os
 import subprocess
@@ -8,20 +9,44 @@ import tempfile
 from uuid import uuid4
 
 from fastapi.testclient import TestClient
-from sqlalchemy import select
+from sqlalchemy import func, select
 
 from packages.core.auth import create_access_token, hash_password
 from packages.core.database import SessionLocal
-from packages.core.models import Property, User
+from packages.core.models import Property, PropertyImportAudit, User
 
 
 def _make_admin_headers() -> dict[str, str]:
+    headers, _email = _make_admin_headers_and_email()
+    return headers
+
+
+def _make_admin_headers_and_email() -> tuple[dict[str, str], str]:
     email = f"admin-{uuid4()}@example.test"
     with SessionLocal() as db:
         db.add(User(email=email, password_hash=hash_password("pw"), role="admin"))
         db.commit()
     token = create_access_token(subject=email, role="admin")
-    return {"Authorization": f"Bearer {token}"}
+    return {"Authorization": f"Bearer {token}"}, email
+
+
+def _latest_audit(db) -> PropertyImportAudit | None:
+    return db.scalar(
+        select(PropertyImportAudit).order_by(
+            PropertyImportAudit.created_at.desc(),
+            PropertyImportAudit.id.desc(),
+        )
+    )
+
+
+def _audit_for_upload(db, *, admin_email: str, file_bytes: bytes) -> PropertyImportAudit | None:
+    sha = hashlib.sha256(file_bytes).hexdigest()
+    return db.scalar(
+        select(PropertyImportAudit)
+        .where(PropertyImportAudit.admin_email == admin_email)
+        .where(PropertyImportAudit.file_sha256 == sha)
+        .order_by(PropertyImportAudit.created_at.desc())
+    )
 
 
 def _csv_bytes(rows: list[dict[str, str]]) -> bytes:
@@ -67,10 +92,11 @@ def test_valid_csv_inserts_new_rows(client: TestClient) -> None:
         ]
     )
 
+    headers, admin_email = _make_admin_headers_and_email()
     resp = client.post(
         "/admin/properties/import",
         params={"dry_run": "false"},
-        headers=_make_admin_headers(),
+        headers=headers,
         files={"file": ("props.csv", content, "text/csv")},
     )
     assert resp.status_code == 200
@@ -84,6 +110,21 @@ def test_valid_csv_inserts_new_rows(client: TestClient) -> None:
     with SessionLocal() as db:
         prop = db.scalar(select(Property).where(Property.source_id == sid))
         assert prop is not None
+
+        audit = _audit_for_upload(db, admin_email=admin_email, file_bytes=content)
+        assert audit is not None
+        assert audit.admin_email == admin_email
+        assert audit.filename == "props.csv"
+        assert audit.file_sha256 == hashlib.sha256(content).hexdigest()
+        assert audit.file_size_bytes == len(content)
+        assert audit.rows_total == 1
+        assert audit.rows_created == 1
+        assert audit.rows_updated == 0
+        assert audit.rows_errors == 0
+        assert str(audit.status) == "success"
+        assert audit.dry_run is False
+        assert audit.duration_ms > 0
+        assert audit.error_summary is None
 
 
 def test_valid_csv_updates_existing_rows(client: TestClient) -> None:
@@ -126,9 +167,10 @@ def test_valid_csv_updates_existing_rows(client: TestClient) -> None:
         ]
     )
 
+    headers, _admin_email = _make_admin_headers_and_email()
     resp = client.post(
         "/admin/properties/import",
-        headers=_make_admin_headers(),
+        headers=headers,
         files={"file": ("props.csv", content, "text/csv")},
     )
     assert resp.status_code == 200
@@ -165,10 +207,11 @@ def test_dry_run_does_not_persist(client: TestClient) -> None:
         ]
     )
 
+    headers, _admin_email = _make_admin_headers_and_email()
     resp = client.post(
         "/admin/properties/import",
         params={"dry_run": "true"},
-        headers=_make_admin_headers(),
+        headers=headers,
         files={"file": ("props.csv", content, "text/csv")},
     )
     assert resp.status_code == 200
@@ -179,6 +222,14 @@ def test_dry_run_does_not_persist(client: TestClient) -> None:
     with SessionLocal() as db:
         prop = db.scalar(select(Property).where(Property.source_id == sid))
         assert prop is None
+
+        audit = _audit_for_upload(db, admin_email=_admin_email, file_bytes=content)
+        assert audit is not None
+        assert str(audit.status) == "success"
+        assert audit.dry_run is True
+        assert audit.rows_created == 1
+        assert audit.rows_updated == 0
+        assert audit.duration_ms > 0
 
 
 def test_invalid_enum_rejects_entire_import(client: TestClient) -> None:
@@ -200,9 +251,10 @@ def test_invalid_enum_rejects_entire_import(client: TestClient) -> None:
         ]
     )
 
+    headers, _admin_email = _make_admin_headers_and_email()
     resp = client.post(
         "/admin/properties/import",
-        headers=_make_admin_headers(),
+        headers=headers,
         files={"file": ("props.csv", content, "text/csv")},
     )
     assert resp.status_code == 200
@@ -211,14 +263,22 @@ def test_invalid_enum_rejects_entire_import(client: TestClient) -> None:
     assert body["updated"] == 0
     assert body["errors"]
 
+    with SessionLocal() as db:
+        audit = _audit_for_upload(db, admin_email=_admin_email, file_bytes=content)
+        assert audit is not None
+        assert str(audit.status) == "partial"
+        assert audit.rows_errors > 0
+        assert audit.duration_ms > 0
+
 
 def test_missing_required_column_rejects(client: TestClient) -> None:
     header = "source_id,title,type,price,address,status,bedrooms,bathrooms,size,slug\n"
     content = (header + "a,T,new,1,Addr,active,,,,\n").encode("utf-8")
 
+    headers, _admin_email = _make_admin_headers_and_email()
     resp = client.post(
         "/admin/properties/import",
-        headers=_make_admin_headers(),
+        headers=headers,
         files={"file": ("props.csv", content, "text/csv")},
     )
     assert resp.status_code == 200
@@ -259,9 +319,10 @@ def test_duplicate_source_id_inside_csv_rejects(client: TestClient) -> None:
         ]
     )
 
+    headers, _admin_email = _make_admin_headers_and_email()
     resp = client.post(
         "/admin/properties/import",
-        headers=_make_admin_headers(),
+        headers=headers,
         files={"file": ("props.csv", content, "text/csv")},
     )
     assert resp.status_code == 200
@@ -271,9 +332,10 @@ def test_duplicate_source_id_inside_csv_rejects(client: TestClient) -> None:
 
 def test_oversized_file_rejected(client: TestClient) -> None:
     content = b"x" * (5 * 1024 * 1024 + 1)
+    headers, _admin_email = _make_admin_headers_and_email()
     resp = client.post(
         "/admin/properties/import",
-        headers=_make_admin_headers(),
+        headers=headers,
         files={"file": ("props.csv", content, "text/csv")},
     )
     assert resp.status_code == 200
@@ -301,9 +363,10 @@ def test_row_count_gt_5000_rejected(client: TestClient) -> None:
         )
     content = _csv_bytes(rows)
 
+    headers, _admin_email = _make_admin_headers_and_email()
     resp = client.post(
         "/admin/properties/import",
-        headers=_make_admin_headers(),
+        headers=headers,
         files={"file": ("props.csv", content, "text/csv")},
     )
     assert resp.status_code == 200
@@ -378,9 +441,10 @@ def test_update_preserves_description_and_images(client: TestClient) -> None:
         ]
     )
 
+    headers, _admin_email = _make_admin_headers_and_email()
     resp = client.post(
         "/admin/properties/import",
-        headers=_make_admin_headers(),
+        headers=headers,
         files={"file": ("props.csv", content, "text/csv")},
     )
     assert resp.status_code == 200
@@ -510,3 +574,102 @@ def test_alembic_migration_aborts_when_duplicate_source_id_exists() -> None:
         )
         assert upgrade_head.returncode != 0
         assert "Cannot enforce UNIQUE on source_id" in (upgrade_head.stdout + upgrade_head.stderr)
+
+
+def test_failed_import_still_creates_audit_row(client: TestClient) -> None:
+    # Force a DB error by violating the unique slug constraint.
+    existing_slug = f"dup-slug-{uuid4()}"
+    with SessionLocal() as db:
+        db.add(
+            Property(
+                source_id=f"src-{uuid4()}",
+                title="Existing",
+                description=None,
+                type="new",
+                price=1,
+                bedrooms=None,
+                bathrooms=None,
+                size=None,
+                address="Addr",
+                city="City",
+                images=None,
+                slug=existing_slug,
+                status="active",
+            )
+        )
+        db.commit()
+
+    content = _csv_bytes(
+        [
+            {
+                "source_id": f"src-{uuid4()}",
+                "title": "T1",
+                "type": "new",
+                "price": "10",
+                "address": "A",
+                "city": "C",
+                "status": "active",
+                "bedrooms": "",
+                "bathrooms": "",
+                "size": "",
+                "slug": existing_slug,
+            }
+        ]
+    )
+
+    headers, admin_email = _make_admin_headers_and_email()
+    resp = client.post(
+        "/admin/properties/import",
+        headers=headers,
+        files={"file": ("props.csv", content, "text/csv")},
+    )
+    assert resp.status_code == 200
+    body = resp.json()
+    assert body["errors"]
+
+    with SessionLocal() as db:
+        audit = _audit_for_upload(db, admin_email=admin_email, file_bytes=content)
+        assert audit is not None
+        assert str(audit.status) == "failed"
+        assert audit.rows_errors > 0
+        assert audit.duration_ms > 0
+
+
+def test_duplicate_file_sha256_allowed_and_detectable(client: TestClient) -> None:
+    sid = f"src-{uuid4()}"
+    content = _csv_bytes(
+        [
+            {
+                "source_id": sid,
+                "title": "T1",
+                "type": "new",
+                "price": "1",
+                "address": "A",
+                "city": "C",
+                "status": "active",
+                "bedrooms": "",
+                "bathrooms": "",
+                "size": "",
+                "slug": f"slug-{uuid4()}",
+            }
+        ]
+    )
+
+    headers, _admin_email = _make_admin_headers_and_email()
+    for _ in range(2):
+        resp = client.post(
+            "/admin/properties/import",
+            headers=headers,
+            files={"file": ("props.csv", content, "text/csv")},
+        )
+        assert resp.status_code == 200
+
+    sha = hashlib.sha256(content).hexdigest()
+    with SessionLocal() as db:
+        count = db.scalar(
+            select(func.count())
+            .select_from(PropertyImportAudit)
+            .where(PropertyImportAudit.file_sha256 == sha)
+        )
+        assert count is not None
+        assert count >= 2
