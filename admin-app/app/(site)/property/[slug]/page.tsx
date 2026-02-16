@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import Image from 'next/image';
 
 import { Container } from '../../../../components/layout/Container';
+import { LeadForm } from '../../../../components/forms/LeadForm';
 import { fetchPropertyBySlug } from '../../../_lib/public-api-server';
 import { resolveImageUrl } from '../../../_lib/public-api-shared';
 
@@ -153,20 +154,13 @@ export default async function PropertyPage({ params }: PageProps) {
               </div>
             </div>
 
-            <form className="inquiry-form" style={{ marginTop: 24 }}>
-              <h3>Interested in this property?</h3>
-              <p style={{ color: 'var(--color-gray-600)', marginBottom: 24, fontSize: 14 }}>
-                Send us your details and we will contact you.
-              </p>
-              <div style={{ display: 'grid', gap: 12 }}>
-                <input className="form-input" name="name" placeholder="Your Name" />
-                <input className="form-input" name="phone" placeholder="Phone Number" />
-                <textarea className="form-textarea" name="message" placeholder="Message" />
-                <button type="button" className="btn btn-primary btn-block">
-                  Submit
-                </button>
-              </div>
-            </form>
+            <div style={{ marginTop: 24 }}>
+              <LeadForm
+                heading="Interested in this property?"
+                propertyId={property.id}
+                defaultMessage={`I'm interested in ${property.title}. Please contact me.`}
+              />
+            </div>
           </aside>
         </div>
       </Container>
