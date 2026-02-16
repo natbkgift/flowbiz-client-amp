@@ -257,9 +257,9 @@ Slots:
 
 # 10) Deliverables (P0)
 
-1. Template set: `home.html`, `listing.html`, `detail.html`, `thankyou.html`
-2. Static assets: `site.css`, `lead.js`, `events.js`, icons
-3. Generator hooks: placeholder slots + data attributes สำหรับ alt language URL
+1. Next.js pages: `/rent`, `/buy`, `/projects`, `/property/[slug]`
+2. UI assets: Tailwind-based styles (no static HTML templates)
+3. SEO hooks: canonical + OG metadata in Next.js
 4. Tracking spec: event names + payload schema
 
 ---

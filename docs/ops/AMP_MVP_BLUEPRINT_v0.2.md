@@ -171,17 +171,12 @@ flowbiz-client-amp/
 │   ├── alembic.ini
 │   └── versions/
 │
-├── templates/                        # HTML templates (NEW)
-│   ├── base.html
-│   ├── home.html
-│   ├── listing.html
-│   ├── detail.html
-│   └── thank-you.html
-│
-├── static/                           # Static assets (NEW)
-│   ├── css/
-│   ├── js/
-│   └── img/
+├── admin-app/                        # Next.js frontend
+│   └── app/                          # App Router pages
+│       ├── rent/
+│       ├── buy/
+│       ├── projects/
+│       └── property/[slug]/
 │
 └── tests/
     ├── test_health.py                # (existing)

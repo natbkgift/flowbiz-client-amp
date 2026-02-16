@@ -105,14 +105,14 @@
 
 | Issue # | หัวข้อ | รายละเอียด |
 |---------|--------|-----------|
-| 57 | Base HTML template (`templates/base.html`) | Header, footer, sticky CTA |
-| 58 | Home template (`templates/home.html`) | Hero, search, featured |
-| 59 | Listing template (`templates/listing.html`) | Filters, grid, pagination |
-| 60 | Detail template (`templates/detail.html`) | Gallery, form, JSON-LD |
-| 61 | Thank-you template (`templates/thank-you.html`) | Confirmation page |
-| 62 | CSS design tokens (`static/css/site.css`) | Colors, typography, spacing |
-| 63 | Lead form JS (`static/js/lead.js`) | Form submission + validation |
-| 64 | Event tracking JS (`static/js/events.js`) | Track view_detail, clicks |
+| 57 | Next.js public shell | Header, footer, sticky CTA |
+| 58 | Clean routes | `/rent`, `/buy`, `/projects`, `/property/[slug]` |
+| 59 | Client-side filters | Sidebar filters + sort + responsive collapse |
+| 60 | Property detail | Gallery, inquiry CTA, related properties |
+| 61 | SEO metadata | Canonical + OG on Next.js pages |
+| 62 | UI tokens | Tailwind spacing scale + consistent container |
+| 63 | Leads integration | Use existing leads flow (no static JS) |
+| 64 | Event tracking | Future work (no static HTML dependency) |
 
 ---
 

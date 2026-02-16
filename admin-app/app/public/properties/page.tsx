@@ -5,7 +5,7 @@ import { useEffect, useMemo, useState } from 'react';
 
 import { API_BASE } from '../_shared/api';
 import type { PropertyListItem, PropertyListResponse } from '../_shared/types';
-import { toPropertyHref } from '../../_lib/public-api';
+import { toPropertyHref } from '../../_lib/public-api-shared';
 
 const SORT_WHITELIST = ['newest', 'oldest', 'price_asc', 'price_desc'] as const;
 type SortValue = (typeof SORT_WHITELIST)[number];

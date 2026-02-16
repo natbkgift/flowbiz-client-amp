@@ -71,9 +71,7 @@ def parse_unit_detail(url: str, html: bytes) -> dict:
     if og_title:
         data["title"] = og_title
 
-    og_desc = find_first_text(
-        html, [r"<meta property=\"og:description\" content=\"([^\"]+)\""]
-    )
+    og_desc = find_first_text(html, [r"<meta property=\"og:description\" content=\"([^\"]+)\""])
     if isinstance(og_desc, str):
         # Example:
         # "For rent Condo 1 beds. 39 sq.m., price: 25000 thb, location: The Riviera Monaco, ..."
