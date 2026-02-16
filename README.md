@@ -253,7 +253,7 @@ Copy `.env.example` to `.env` and configure:
 
 ### Development
 ```bash
-docker compose up --build
+docker compose -f docker-compose.yml -f docker-compose.dev.yml up --build
 
 # Verify local access
 curl http://127.0.0.1:8000/healthz

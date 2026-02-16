@@ -4,9 +4,9 @@ services:
   postgres:
     image: postgres:16-alpine
     environment:
-      - POSTGRES_DB=flowbiz
-      - POSTGRES_USER=flowbiz
-      - POSTGRES_PASSWORD=flowbiz
+      - POSTGRES_DB=${POSTGRES_DB:-flowbiz}
+      - POSTGRES_USER=${POSTGRES_USER:-flowbiz}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-flowbiz}
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
@@ -20,8 +20,8 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    ports:
-      - "127.0.0.1:${DEV_API_PORT:-8000}:8000"
+    expose:
+      - "8000"
     environment:
       - APP_ENV=dev
       - APP_HOST=0.0.0.0
@@ -30,7 +30,7 @@ services:
       - FLOWBIZ_SERVICE_NAME=flowbiz-template-service
       - FLOWBIZ_VERSION=0.1.0
       - FLOWBIZ_BUILD_SHA=local
-      - DATABASE_URL=postgresql+psycopg2://flowbiz:flowbiz@postgres:5432/flowbiz
+      - DATABASE_URL=${DATABASE_URL:-postgresql+psycopg2://flowbiz:flowbiz@postgres:5432/flowbiz}
       - JWT_SECRET_KEY=change-me-in-production
       - JWT_ALGORITHM=HS256
       - JWT_EXPIRE_MINUTES=120
@@ -45,8 +45,8 @@ services:
     build:
       context: ./admin-app
       dockerfile: Dockerfile
-    ports:
-      - "127.0.0.1:${DEV_ADMIN_PORT:-3000}:3000"
+    expose:
+      - "3000"
     environment:
       - NEXT_PUBLIC_API_BASE=/api
     restart: unless-stopped
