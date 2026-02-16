@@ -5,8 +5,16 @@ from fastapi.staticfiles import StaticFiles
 from sqlalchemy import select
 
 from apps.api.routes import admin, health
+from apps.api.routes.admin_crm import router as admin_crm_router
+from apps.api.routes.admin_domain import router as admin_domain_router
 from apps.api.routes.admin_properties import router as admin_properties_router
+from apps.api.routes.auth_me import router as auth_me_router
 from apps.api.routes.v1 import auth, meta
+from apps.api.routes.v1.analytics import router as analytics_router
+from apps.api.routes.v1.compare import router as compare_router
+from apps.api.routes.v1.crm import router as crm_router
+from apps.api.routes.v1.domain import router as domain_router
+from apps.api.routes.v1.investment import router as investment_router
 from apps.api.routes.v1.phase1 import router as phase1_router
 from apps.api.routes.v1.properties import router as properties_router
 from packages.core.auth import hash_password
@@ -27,9 +35,17 @@ app = FastAPI(
 app.include_router(health.router)
 app.include_router(meta.router)
 app.include_router(auth.router)
+app.include_router(auth_me_router)
 app.include_router(admin.router)
+app.include_router(admin_crm_router)
+app.include_router(admin_domain_router)
 app.include_router(phase1_router)
 app.include_router(properties_router)
+app.include_router(crm_router)
+app.include_router(compare_router)
+app.include_router(analytics_router)
+app.include_router(domain_router)
+app.include_router(investment_router)
 app.include_router(admin_properties_router)
 
 

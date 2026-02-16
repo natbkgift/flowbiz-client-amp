@@ -1,0 +1,15 @@
+{
+  "baseline": "docs/contracts/jwt_payload_keys.baseline.json",
+  "baseline_keys": [
+    "exp",
+    "role",
+    "sub"
+  ],
+  "breaking": false,
+  "current": "docs/contracts/jwt_payload_keys.phaseF.json",
+  "current_keys": [
+    "exp",
+    "role",
+    "sub"
+  ]
+}

@@ -42,6 +42,7 @@ flowbiz.db
 flowbiz_test.db
 test_flowbiz.db*
 alembic_verify.db*
+alembic_dryrun.db*
 
 # Node.js
 node_modules/
@@ -54,6 +55,9 @@ yarn-error.log*
 # Environment
 .env
 .env.local
+
+# Local secrets (never commit)
+secret-notuptogithub/
 
 # Docker
 *.log
