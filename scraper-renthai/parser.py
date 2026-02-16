@@ -62,8 +62,36 @@ def parse_unit_detail(url: str, html: bytes) -> dict:
         "size": None,
     }
 
-    # Strategy 1: JSON-LD
+    # Prefer page-level metadata first (Renthai JSON-LD is often Organization-only).
+    og_title = find_first_text(html, [r"<meta property=\"og:title\" content=\"([^\"]+)\""])
+    if og_title:
+        data["title"] = og_title
+
+    og_desc = find_first_text(
+        html, [r"<meta property=\"og:description\" content=\"([^\"]+)\""]
+    )
+    if isinstance(og_desc, str):
+        # Example:
+        # "For rent Condo 1 beds. 39 sq.m., price: 25000 thb, location: The Riviera Monaco, ..."
+        if data["price"] is None:
+            m = re.search(r"price:\s*([0-9][0-9,]+(?:\.[0-9]+)?)\s*thb", og_desc, re.I)
+            if m:
+                data["price"] = _parse_price(m.group(1))
+
+        if not data["address"]:
+            m = re.search(r"location:\s*([^,]+)", og_desc, re.I)
+            if m:
+                loc = m.group(1).strip()
+                if loc:
+                    data["address"] = loc
+                    data["project_name"] = loc
+
+    # Strategy 1: JSON-LD (only use listing-like blocks; ignore Organization-only blocks)
     for block in extract_json_ld(html):
+        t = block.get("@type")
+        if isinstance(t, str) and t.lower() in {"organization", "realestateagent"}:
+            continue
+
         name = block.get("name")
         if isinstance(name, str) and not data["title"]:
             data["title"] = name.strip()
@@ -92,6 +120,18 @@ def parse_unit_detail(url: str, html: bytes) -> dict:
     if data["price"] is None:
         data["price"] = _parse_price(
             find_first_text(html, [r"Price\s*</[^>]+>\s*<[^>]+>\s*([^<]+)"])  # best-effort
+        )
+
+    # Renthai detail pages often show rent price like: "฿ 25,000" under "For rent".
+    if data["price"] is None:
+        data["price"] = _parse_price(
+            find_first_text(
+                html,
+                [
+                    r"For\s+rent\s*</[^>]+>\s*<[^>]+>\s*([^<]+)",
+                    r"฿\s*([0-9][0-9,]+)",
+                ],
+            )
         )
 
     if not data["address"]:
