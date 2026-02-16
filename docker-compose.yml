@@ -58,6 +58,8 @@ services:
     environment:
       - API_BASE=http://api:8000
       - ADMIN_TOKEN=${ADMIN_TOKEN}
+    volumes:
+      - ./scraper-renthai/storage:/app/storage
     depends_on:
       - api
     profiles:
