@@ -3,6 +3,7 @@ from pathlib import Path
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 from sqlalchemy import select
+from starlette.requests import Request
 
 from apps.api.routes import admin, health
 from apps.api.routes.admin_crm import router as admin_crm_router
@@ -31,6 +32,15 @@ app = FastAPI(
     docs_url="/docs" if settings.app_env == "dev" else None,
     redoc_url="/redoc" if settings.app_env == "dev" else None,
 )
+
+
+@app.middleware("http")
+async def add_security_headers(request: Request, call_next):
+    response = await call_next(request)
+    response.headers.setdefault("X-Content-Type-Options", "nosniff")
+    response.headers.setdefault("X-Frame-Options", "DENY")
+    response.headers.setdefault("Referrer-Policy", "no-referrer")
+    return response
 
 app.include_router(health.router)
 app.include_router(meta.router)
