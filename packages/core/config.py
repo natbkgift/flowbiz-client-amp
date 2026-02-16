@@ -1,4 +1,23 @@
+from __future__ import annotations
+
+from pathlib import Path
+
+from pydantic import AliasChoices, Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
+
+
+def _read_pyproject_version(default: str = "0.1.0") -> str:
+    try:
+        pyproject_path = Path(__file__).resolve().parents[2] / "pyproject.toml"
+        if not pyproject_path.exists():
+            return default
+
+        import tomllib
+
+        data = tomllib.loads(pyproject_path.read_text(encoding="utf-8"))
+        return str(data.get("project", {}).get("version") or default)
+    except Exception:
+        return default
 
 
 class Settings(BaseSettings):
@@ -14,8 +33,14 @@ class Settings(BaseSettings):
 
     # Metadata (FLOWBIZ_*)
     flowbiz_service_name: str = "flowbiz-template-service"
-    flowbiz_version: str = "0.1.0"
-    flowbiz_build_sha: str = "local"
+    flowbiz_version: str = Field(
+        default=_read_pyproject_version(),
+        validation_alias=AliasChoices("FLOWBIZ_VERSION", "VERSION"),
+    )
+    flowbiz_build_sha: str = Field(
+        default="local",
+        validation_alias=AliasChoices("FLOWBIZ_BUILD_SHA", "BUILD_SHA", "GIT_SHA", "GITHUB_SHA"),
+    )
 
     # Database
     database_url: str = "sqlite:///./flowbiz.db"
