@@ -213,5 +213,8 @@ def find_first_text(html_bytes: bytes, patterns: list[str]) -> str | None:
     for p in patterns:
         m = re.search(p, html, flags=re.IGNORECASE)
         if m:
-            return unescape(m.group(1)).strip()
+            # Some patterns use a capture group for the desired text, while others
+            # are simple matches (no groups). Prefer group(1) when present.
+            text = m.group(1) if m.lastindex else m.group(0)
+            return unescape(text).strip()
     return None
