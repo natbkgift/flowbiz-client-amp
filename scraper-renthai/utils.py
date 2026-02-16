@@ -43,7 +43,6 @@ def is_cloudflare_challenge(body: bytes) -> bool:
     text = body[:200_000].decode("utf-8", errors="ignore").lower()
     needles = [
         "attention required",
-        "cloudflare",
         "cf-challenge",
         "challenge-platform",
         "just a moment",
