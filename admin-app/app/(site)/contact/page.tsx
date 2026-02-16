@@ -1,5 +1,6 @@
 import { Container } from '../../../components/layout/Container';
 import { LeadForm } from '../../../components/forms/LeadForm';
+import { CTA } from '../../_lib/public-cta';
 
 export default function ContactPage() {
   return (
@@ -14,13 +15,13 @@ export default function ContactPage() {
       <section className="section">
         <Container>
           <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', marginBottom: 24 }}>
-            <a className="btn btn-primary" href="https://line.me/ti/p/~@554dksqb" target="_blank" rel="noreferrer">
+            <a className="btn btn-primary" href={CTA.lineUrl} target="_blank" rel="noreferrer">
               LINE Chat
             </a>
-            <a className="btn btn-secondary" href="https://wa.me/66634533526" target="_blank" rel="noreferrer">
+            <a className="btn btn-secondary" href={CTA.whatsAppUrl} target="_blank" rel="noreferrer">
               ClickWhatsApp
             </a>
-            <a className="btn btn-secondary" href="tel:+66634533526">
+            <a className="btn btn-secondary" href={CTA.phoneTel}>
               Call: 063-453-3526
             </a>
           </div>

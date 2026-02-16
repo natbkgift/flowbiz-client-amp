@@ -17,7 +17,7 @@ from __future__ import annotations
 from collections.abc import Sequence
 
 import sqlalchemy as sa
-from sqlalchemy import text
+from sqlalchemy import inspect, text
 
 from alembic import op
 
@@ -30,16 +30,25 @@ depends_on: str | Sequence[str] | None = None
 
 def _pg_regclass_exists(qualified_name: str) -> bool:
     bind = op.get_bind()
+    if bind.dialect.name != "postgresql":
+        return False
+
     result = bind.execute(text("SELECT to_regclass(:name)"), {"name": qualified_name}).scalar()
     return result is not None
 
 
 def _table_exists(table_name: str) -> bool:
-    return _pg_regclass_exists(f"public.{table_name}")
+    bind = op.get_bind()
+    if bind.dialect.name == "postgresql":
+        return _pg_regclass_exists(f"public.{table_name}")
+    return inspect(bind).has_table(table_name)
 
 
 def _index_exists(index_name: str) -> bool:
-    return _pg_regclass_exists(f"public.{index_name}")
+    bind = op.get_bind()
+    if bind.dialect.name == "postgresql":
+        return _pg_regclass_exists(f"public.{index_name}")
+    return False
 
 
 def upgrade() -> None:

@@ -56,5 +56,8 @@ class Settings(BaseSettings):
     admin_bootstrap_email: str = "admin@local.dev"
     admin_bootstrap_password: str = "admin123"
 
+    # Abuse mitigation
+    inquiries_rate_limit_per_minute: int = 20
+
 
 settings = Settings()

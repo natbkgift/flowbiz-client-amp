@@ -7,12 +7,16 @@ from pydantic import BaseModel, ConfigDict, EmailStr, Field, model_validator
 
 
 class InquiryCreate(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
     property_id: UUID | None = None
     name: str = Field(min_length=1, max_length=200)
     email: EmailStr | None = None
     phone: str | None = Field(default=None, max_length=50)
     message: str = Field(min_length=1, max_length=2000)
     source_page: str | None = Field(default=None, max_length=500)
+    # Honeypot field: real users should never fill this.
+    website: str | None = Field(default=None, max_length=200)
 
     @model_validator(mode="after")
     def _require_contact(self) -> "InquiryCreate":

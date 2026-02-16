@@ -4,6 +4,7 @@ import Image from 'next/image';
 import { Container } from '../../../../components/layout/Container';
 import { LeadForm } from '../../../../components/forms/LeadForm';
 import { fetchPropertyBySlug } from '../../../_lib/public-api-server';
+import { CTA } from '../../../_lib/public-cta';
 import { resolveImageUrl } from '../../../_lib/public-api-shared';
 
 type PageProps = { params: { slug: string } };
@@ -145,10 +146,10 @@ export default async function PropertyPage({ params }: PageProps) {
               </div>
 
               <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-                <a href="https://line.me/ti/p/~@554dksqb" className="btn btn-primary btn-block">
+                <a href={CTA.lineUrl} className="btn btn-primary btn-block" target="_blank" rel="noreferrer">
                   LINE Chat
                 </a>
-                <a href="tel:+66634533526" className="btn btn-secondary btn-block">
+                <a href={CTA.phoneTel} className="btn btn-secondary btn-block">
                   Call: 063-453-3526
                 </a>
               </div>

@@ -2,6 +2,8 @@
 
 import { useMemo, useState } from 'react';
 
+import { CTA } from '../../app/_lib/public-cta';
+
 type LeadFormProps = {
   heading?: string;
   propertyId?: string | null;
@@ -19,6 +21,7 @@ export function LeadForm({ heading, propertyId, defaultMessage }: LeadFormProps)
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
   const [message, setMessage] = useState(defaultMessage ?? '');
+  const [website, setWebsite] = useState('');
   const [status, setStatus] = useState<LeadFormStatus>({ state: 'idle' });
 
   const canSubmit = useMemo(() => {
@@ -27,6 +30,33 @@ export function LeadForm({ heading, propertyId, defaultMessage }: LeadFormProps)
     if (!email.trim() && !phone.trim()) return false;
     return status.state !== 'submitting';
   }, [email, message, name, phone, status.state]);
+
+  function safeSourcePage(): string | null {
+    if (typeof window === 'undefined') return null;
+    const url = window.location.href;
+    if (url.length <= 500) return url;
+    return url.slice(0, 500);
+  }
+
+  function formatApiError(bodyText: string): string {
+    try {
+      const parsed = JSON.parse(bodyText) as { detail?: unknown };
+      const detail = (parsed as any)?.detail;
+
+      if (typeof detail === 'string') return detail;
+      if (Array.isArray(detail)) {
+        // FastAPI / Pydantic validation errors
+        const messages = detail
+          .map((d) => (typeof d?.msg === 'string' ? d.msg : null))
+          .filter(Boolean);
+        if (messages.length) return messages.join(' | ');
+      }
+    } catch {
+      // ignore
+    }
+
+    return bodyText || 'Request failed';
+  }
 
   async function onSubmit() {
     if (!canSubmit) return;
@@ -43,13 +73,14 @@ export function LeadForm({ heading, propertyId, defaultMessage }: LeadFormProps)
           email: email.trim() || null,
           phone: phone.trim() || null,
           message,
-          source_page: typeof window !== 'undefined' ? window.location.href : null,
+          source_page: safeSourcePage(),
+          website: website.trim() || null,
         }),
       });
 
       const text = await res.text();
       if (!res.ok) {
-        throw new Error(text || `HTTP ${res.status}`);
+        throw new Error(formatApiError(text) || `HTTP ${res.status}`);
       }
 
       let id: string | undefined;
@@ -77,6 +108,17 @@ export function LeadForm({ heading, propertyId, defaultMessage }: LeadFormProps)
       </p>
 
       <div style={{ display: 'grid', gap: 12 }}>
+        {/* Honeypot field (must remain hidden). */}
+        <input
+          type="text"
+          name="website"
+          value={website}
+          onChange={(e) => setWebsite(e.target.value)}
+          tabIndex={-1}
+          autoComplete="off"
+          style={{ display: 'none' }}
+        />
+
         <input
           className="form-input"
           name="name"
@@ -121,13 +163,13 @@ export function LeadForm({ heading, propertyId, defaultMessage }: LeadFormProps)
         <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
           <a
             className="btn btn-secondary"
-            href="https://wa.me/66634533526"
+            href={CTA.whatsAppUrl}
             target="_blank"
             rel="noreferrer"
           >
             ClickWhatsApp
           </a>
-          <a className="btn btn-secondary" href="https://line.me/ti/p/~@554dksqb" target="_blank" rel="noreferrer">
+          <a className="btn btn-secondary" href={CTA.lineUrl} target="_blank" rel="noreferrer">
             LINE Chat
           </a>
         </div>
