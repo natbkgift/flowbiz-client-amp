@@ -18,6 +18,7 @@ from __future__ import annotations
 from collections.abc import Sequence
 
 import sqlalchemy as sa
+from sqlalchemy import text
 
 from alembic import op
 
@@ -28,65 +29,90 @@ branch_labels: str | Sequence[str] | None = None
 depends_on: str | Sequence[str] | None = None
 
 
+def _pg_regclass_exists(qualified_name: str) -> bool:
+    bind = op.get_bind()
+    result = bind.execute(text("SELECT to_regclass(:name)"), {"name": qualified_name}).scalar()
+    return result is not None
+
+
+def _table_exists(table_name: str) -> bool:
+    return _pg_regclass_exists(f"public.{table_name}")
+
+
+def _index_exists(index_name: str) -> bool:
+    return _pg_regclass_exists(f"public.{index_name}")
+
+
 def upgrade() -> None:
-    op.create_table(
-        "areas",
-        sa.Column("id", sa.Uuid(), nullable=False),
-        sa.Column("name", sa.String(length=200), nullable=False),
-        sa.Column("slug", sa.String(length=200), nullable=False),
-        sa.Column("city", sa.String(length=200), nullable=True),
-        sa.Column(
-            "created_at",
-            sa.DateTime(timezone=True),
-            server_default=sa.text("CURRENT_TIMESTAMP"),
-            nullable=False,
-        ),
-        sa.PrimaryKeyConstraint("id"),
-        sa.UniqueConstraint("slug", name="uq_areas_slug"),
-    )
-    op.create_index(op.f("ix_areas_slug"), "areas", ["slug"], unique=True)
+    if not _table_exists("areas"):
+        op.create_table(
+            "areas",
+            sa.Column("id", sa.Uuid(), nullable=False),
+            sa.Column("name", sa.String(length=200), nullable=False),
+            sa.Column("slug", sa.String(length=200), nullable=False),
+            sa.Column("city", sa.String(length=200), nullable=True),
+            sa.Column(
+                "created_at",
+                sa.DateTime(timezone=True),
+                server_default=sa.text("CURRENT_TIMESTAMP"),
+                nullable=False,
+            ),
+            sa.PrimaryKeyConstraint("id"),
+            sa.UniqueConstraint("slug", name="uq_areas_slug"),
+        )
+    if _table_exists("areas") and not _index_exists("ix_areas_slug"):
+        op.execute(text("CREATE UNIQUE INDEX IF NOT EXISTS ix_areas_slug ON areas (slug)"))
 
-    op.create_table(
-        "developers",
-        sa.Column("id", sa.Uuid(), nullable=False),
-        sa.Column("name", sa.String(length=200), nullable=False),
-        sa.Column("slug", sa.String(length=200), nullable=False),
-        sa.Column("website", sa.String(length=500), nullable=True),
-        sa.Column(
-            "created_at",
-            sa.DateTime(timezone=True),
-            server_default=sa.text("CURRENT_TIMESTAMP"),
-            nullable=False,
-        ),
-        sa.PrimaryKeyConstraint("id"),
-        sa.UniqueConstraint("slug", name="uq_developers_slug"),
-    )
-    op.create_index(op.f("ix_developers_slug"), "developers", ["slug"], unique=True)
+    if not _table_exists("developers"):
+        op.create_table(
+            "developers",
+            sa.Column("id", sa.Uuid(), nullable=False),
+            sa.Column("name", sa.String(length=200), nullable=False),
+            sa.Column("slug", sa.String(length=200), nullable=False),
+            sa.Column("website", sa.String(length=500), nullable=True),
+            sa.Column(
+                "created_at",
+                sa.DateTime(timezone=True),
+                server_default=sa.text("CURRENT_TIMESTAMP"),
+                nullable=False,
+            ),
+            sa.PrimaryKeyConstraint("id"),
+            sa.UniqueConstraint("slug", name="uq_developers_slug"),
+        )
+    if _table_exists("developers") and not _index_exists("ix_developers_slug"):
+        op.execute(
+            text(
+                "CREATE UNIQUE INDEX IF NOT EXISTS ix_developers_slug "
+                "ON developers (slug)"
+            )
+        )
 
-    op.create_table(
-        "agents",
-        sa.Column("id", sa.Uuid(), nullable=False),
-        sa.Column("name", sa.String(length=200), nullable=False),
-        sa.Column("email", sa.String(length=255), nullable=True),
-        sa.Column("phone", sa.String(length=50), nullable=True),
-        sa.Column("line_id", sa.String(length=100), nullable=True),
-        sa.Column(
-            "created_at",
-            sa.DateTime(timezone=True),
-            server_default=sa.text("CURRENT_TIMESTAMP"),
-            nullable=False,
-        ),
-        sa.PrimaryKeyConstraint("id"),
-    )
-    op.create_index(op.f("ix_agents_email"), "agents", ["email"], unique=False)
+    if not _table_exists("agents"):
+        op.create_table(
+            "agents",
+            sa.Column("id", sa.Uuid(), nullable=False),
+            sa.Column("name", sa.String(length=200), nullable=False),
+            sa.Column("email", sa.String(length=255), nullable=True),
+            sa.Column("phone", sa.String(length=50), nullable=True),
+            sa.Column("line_id", sa.String(length=100), nullable=True),
+            sa.Column(
+                "created_at",
+                sa.DateTime(timezone=True),
+                server_default=sa.text("CURRENT_TIMESTAMP"),
+                nullable=False,
+            ),
+            sa.PrimaryKeyConstraint("id"),
+        )
+    if _table_exists("agents") and not _index_exists("ix_agents_email"):
+        op.execute(text("CREATE INDEX IF NOT EXISTS ix_agents_email ON agents (email)"))
 
 
 def downgrade() -> None:
-    op.drop_index(op.f("ix_agents_email"), table_name="agents")
-    op.drop_table("agents")
+    op.execute(text("DROP INDEX IF EXISTS ix_agents_email"))
+    op.execute(text("DROP TABLE IF EXISTS agents"))
 
-    op.drop_index(op.f("ix_developers_slug"), table_name="developers")
-    op.drop_table("developers")
+    op.execute(text("DROP INDEX IF EXISTS ix_developers_slug"))
+    op.execute(text("DROP TABLE IF EXISTS developers"))
 
-    op.drop_index(op.f("ix_areas_slug"), table_name="areas")
-    op.drop_table("areas")
+    op.execute(text("DROP INDEX IF EXISTS ix_areas_slug"))
+    op.execute(text("DROP TABLE IF EXISTS areas"))
