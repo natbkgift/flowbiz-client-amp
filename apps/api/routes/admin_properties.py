@@ -183,10 +183,9 @@ async def import_properties(
             select(PropertyImportAudit.id).where(
                 PropertyImportAudit.file_sha256 == file_sha256,
                 PropertyImportAudit.status == "success",
-                PropertyImportAudit.dry_run.is_(False),
             )
         )
-        if existing_success is not None and not dry_run:
+        if existing_success is not None:
             conflict = PropertyImportResult(
                 inserted=0,
                 updated=0,
