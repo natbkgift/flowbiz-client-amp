@@ -179,7 +179,9 @@ def fetch_url(
             last_exc = exc
             if attempt < max_retries:
                 continue
-            raise
+            raise StopScrapeError(
+                f"[STOP] fetch failed after {max_retries} attempts: {type(exc).__name__}"
+            ) from exc
 
     raise RuntimeError(f"fetch failed unexpectedly: {last_exc}")
 
