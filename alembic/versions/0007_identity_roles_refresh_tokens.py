@@ -1,7 +1,7 @@
 """Platform V2 (Phase A / V2-0003): identity roles + refresh tokens
 
 Revision ID: 0007_identity_roles_refresh_tokens
-Revises: 0006_property_local_media
+Revises: 0007_property_images_table
 Create Date: 2026-02-16
 
 Non-breaking, additive migration.
@@ -23,7 +23,7 @@ from alembic import op
 
 # revision identifiers, used by Alembic.
 revision: str = "0007_identity_roles_refresh_tokens"
-down_revision: str | None = "0006_property_local_media"
+down_revision: str | None = "0007_property_images_table"
 branch_labels: str | Sequence[str] | None = None
 depends_on: str | Sequence[str] | None = None
 
