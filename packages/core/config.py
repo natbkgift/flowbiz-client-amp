@@ -25,6 +25,8 @@ class Settings(BaseSettings):
     jwt_algorithm: str = "HS256"
     jwt_expire_minutes: int = 120
 
+    refresh_token_expire_days: int = 30
+
     # Admin bootstrap user
     admin_bootstrap_email: str = "admin@local.dev"
     admin_bootstrap_password: str = "admin123"
