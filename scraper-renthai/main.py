@@ -4,6 +4,7 @@ import argparse
 import json
 import os
 import time
+import urllib.parse
 from collections import Counter
 
 from crawler import Crawler
@@ -15,6 +16,15 @@ from project_crawler import discover_project_urls, discover_unit_urls_from_pages
 from utils import Progress, StopScrapeError, ensure_dir, load_robots_txt
 
 from config import load_config
+
+
+def unit_raw_cache_path(url: str) -> str:
+    parsed = urllib.parse.urlparse(url)
+    path = (parsed.path or "").strip("/")
+    if not path:
+        path = "root"
+    safe = path.replace("/", "__")
+    return f"storage/raw/units/{safe}.json"
 
 
 def determine_listing_type(*, url: str, rent_urls: set[str], sale_urls: set[str]) -> str:
@@ -105,8 +115,7 @@ def main() -> int:
 
             processed_urls.append(url)
 
-            slug = url.rstrip("/").split("/")[-1]
-            raw_path = f"storage/raw/units/{slug}.json"
+            raw_path = unit_raw_cache_path(url)
 
             if args.resume and os.path.exists(raw_path):
                 with open(raw_path, "r", encoding="utf-8") as f:

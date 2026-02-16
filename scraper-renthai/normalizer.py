@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import re
+import urllib.parse
 from dataclasses import dataclass
 
 
@@ -17,8 +19,19 @@ def normalize_unit(unit: dict, *, listing_type: str) -> NormalizeResult:
     if not source_id:
         source_id = str(unit.get("slug") or "").strip()
 
-    slug = str(unit.get("slug") or "").strip()
+    slug_raw = str(unit.get("slug") or "").strip()
     title = str(unit.get("title") or "").strip()
+
+    # IMPORTANT: `properties.slug` is UNIQUE in the API DB.
+    # Renthai IDs can exist in both rent and sale paths; using the raw numeric id
+    # would collide across different source_id values. Prefix by normalized type.
+    parsed = urllib.parse.urlparse(source_id)
+    path = (parsed.path or "").strip("/")
+    if not path:
+        path = slug_raw or "item"
+    # Stable + URL-unique slug; keep it conservative for DB constraints.
+    safe_path = re.sub(r"[^a-zA-Z0-9]+", "-", path).strip("-").lower()
+    slug = f"{utype}-{safe_path}" if safe_path else f"{utype}-{slug_raw or 'item'}"
 
     price = unit.get("price")
     address = str(unit.get("address") or "").strip()
