@@ -45,10 +45,13 @@ async def create_inquiry(
     rl = _get_inquiry_rate_limiter().check(f"ip:{client_ip}")
     response.headers["X-RateLimit-Remaining"] = str(rl.remaining)
     if not rl.allowed:
-        response.headers["Retry-After"] = str(rl.retry_after_seconds)
         raise HTTPException(
             status_code=status.HTTP_429_TOO_MANY_REQUESTS,
             detail="Too many requests",
+            headers={
+                "Retry-After": str(rl.retry_after_seconds),
+                "X-RateLimit-Remaining": str(rl.remaining),
+            },
         )
 
     # Honeypot: bots often fill hidden fields.
