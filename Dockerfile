@@ -22,7 +22,6 @@ RUN pip install --no-cache-dir \
 # Copy application code
 COPY apps/ ./apps/
 COPY packages/ ./packages/
-COPY demo-website/ ./demo-website/
 COPY alembic.ini ./
 COPY alembic/ ./alembic/
 
