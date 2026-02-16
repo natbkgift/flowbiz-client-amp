@@ -11,7 +11,7 @@ type ProjectRow = { name: string; count: number };
 
 export default async function ProjectsPage() {
   // No DB/API change: derive project_name from address.
-  const res = await fetchProperties({ limit: 200, sort: 'newest' });
+  const res = await fetchProperties({ limit: 100, sort: 'newest' });
 
   const byName = new Map<string, number>();
   for (const p of res.data ?? []) {

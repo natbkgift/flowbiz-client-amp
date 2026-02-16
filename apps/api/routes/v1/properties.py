@@ -20,6 +20,43 @@ from packages.core.schemas.property_api import (
 router = APIRouter(prefix="/v1", tags=["properties", "company"])
 
 
+def _normalize_public_images(images: list[str] | None) -> list[str]:
+    """Normalize image paths for public responses.
+
+    Requirements:
+    - Must not hotlink remote URLs.
+    - Public site expects local-only paths under /images/.
+
+    Current ingest may store local paths under /media/...; map those to /images/... .
+    """
+
+    out: list[str] = []
+    for u in images or []:
+        if not isinstance(u, str):
+            continue
+        u = u.strip()
+        if not u:
+            continue
+
+        if u.startswith("/images/"):
+            out.append(u)
+        elif u.startswith("/media/"):
+            out.append("/images/" + u[len("/media/") :].lstrip("/"))
+        else:
+            # Drop absolute URLs or unknown prefixes.
+            continue
+
+    # de-dup while preserving order
+    seen: set[str] = set()
+    deduped: list[str] = []
+    for u in out:
+        if u in seen:
+            continue
+        seen.add(u)
+        deduped.append(u)
+    return deduped
+
+
 @router.get("/properties", response_model=PropertyListResponse)
 async def list_properties(
     page: int = Query(1, ge=1),
@@ -59,10 +96,16 @@ async def list_properties(
 
     items = db.scalars(base_query.order_by(*order_by).offset((page - 1) * limit).limit(limit)).all()
 
-    return PropertyListResponse(
-        data=[PropertyListItem.model_validate(item) for item in items],
-        meta=PaginationMeta(page=page, limit=limit, total=total),
-    )
+    data: list[PropertyListItem] = []
+    for item in items:
+        m = PropertyListItem.model_validate(item)
+        imgs = _normalize_public_images(list(m.images or []))
+        m.images = imgs
+        m.local_images = imgs
+        m.cover_image = imgs[0] if imgs else None
+        data.append(m)
+
+    return PropertyListResponse(data=data, meta=PaginationMeta(page=page, limit=limit, total=total))
 
 
 @router.get("/properties/{property_id}", response_model=PropertyDetail)
@@ -73,7 +116,12 @@ async def get_property(
     prop = db.get(Property, property_id)
     if prop is None or prop.status != PropertyStatus.ACTIVE.value:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Property not found")
-    return PropertyDetail.model_validate(prop)
+    m = PropertyDetail.model_validate(prop)
+    imgs = _normalize_public_images(list(m.images or []))
+    m.images = imgs
+    m.local_images = imgs
+    m.cover_image = imgs[0] if imgs else None
+    return m
 
 
 @router.get("/properties/slug/{slug}", response_model=PropertyDetail)
@@ -84,7 +132,12 @@ async def get_property_by_slug(
     prop = db.scalar(select(Property).where(Property.slug == slug))
     if prop is None or prop.status != PropertyStatus.ACTIVE.value:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Property not found")
-    return PropertyDetail.model_validate(prop)
+    m = PropertyDetail.model_validate(prop)
+    imgs = _normalize_public_images(list(m.images or []))
+    m.images = imgs
+    m.local_images = imgs
+    m.cover_image = imgs[0] if imgs else None
+    return m
 
 
 @router.get("/company", response_model=CompanyListResponse)
