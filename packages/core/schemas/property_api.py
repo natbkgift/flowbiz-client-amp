@@ -37,8 +37,11 @@ class PropertyListItem(BaseModel):
     title: str
     type: PropertyType
     price: Decimal
+    address: str
     city: str
     images: list[str] | None = None
+    local_images: list[str] | None = None
+    cover_image: str | None = None
     status: PropertyStatus
     slug: str | None = None
 
@@ -58,6 +61,8 @@ class PropertyDetail(BaseModel):
     address: str
     city: str
     images: list[str] | None = None
+    local_images: list[str] | None = None
+    cover_image: str | None = None
     status: PropertyStatus
     slug: str | None = None
     created_at: datetime

@@ -81,6 +81,8 @@ class Property(Base):
     address: Mapped[str] = mapped_column(String(500), nullable=False)
     city: Mapped[str] = mapped_column(String(200), nullable=False)
     images: Mapped[list[str] | None] = mapped_column(JSON, nullable=True)
+    local_images: Mapped[list[str] | None] = mapped_column(JSON, nullable=True)
+    cover_image: Mapped[str | None] = mapped_column(String(500), nullable=True)
     slug: Mapped[str | None] = mapped_column(String(500), nullable=True, unique=True, index=True)
     status: Mapped[str] = mapped_column(property_status_enum, nullable=False, default="active")
     created_at: Mapped[datetime] = mapped_column(

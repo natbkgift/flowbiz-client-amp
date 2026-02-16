@@ -63,6 +63,34 @@ def post_import(cfg: ScraperConfig, *, csv_bytes: bytes, filename: str, dry_run:
         return {"status": exc.code, "body": parsed}
 
 
+def post_media_sync(cfg: ScraperConfig, *, items: list[dict[str, object]]) -> dict:
+    endpoint = cfg.api_base.rstrip("/") + "/admin/properties/media"
+
+    payload = json.dumps({"items": items}).encode("utf-8")
+    req = urllib.request.Request(
+        endpoint,
+        method="POST",
+        data=payload,
+        headers={
+            "Authorization": f"Bearer {cfg.admin_token}",
+            "Content-Type": "application/json",
+            "Accept": "application/json",
+        },
+    )
+
+    try:
+        with urllib.request.urlopen(req, timeout=30) as resp:
+            raw = resp.read().decode("utf-8")
+            return {"status": resp.status, "body": json.loads(raw)}
+    except urllib.error.HTTPError as exc:
+        raw = exc.read().decode("utf-8", errors="ignore")
+        try:
+            parsed = json.loads(raw)
+        except json.JSONDecodeError:
+            parsed = {"raw": raw[:500]}
+        return {"status": exc.code, "body": parsed}
+
+
 def get_latest_audit(cfg: ScraperConfig) -> dict | None:
     url = cfg.api_base.rstrip("/") + "/admin/properties/imports?limit=1&page=1"
     req = urllib.request.Request(

@@ -113,6 +113,21 @@ class PropertyImportAuditListResponse(BaseModel):
     total: int
 
 
+class PropertyMediaSyncItem(BaseModel):
+    source_id: str
+    local_images: list[str]
+    cover_image: str | None = None
+
+
+class PropertyMediaSyncRequest(BaseModel):
+    items: list[PropertyMediaSyncItem]
+
+
+class PropertyMediaSyncResponse(BaseModel):
+    updated: int
+    missing: int
+
+
 @router.get("/properties/imports", response_model=PropertyImportAuditListResponse)
 async def list_property_imports(
     limit: int = Query(20, ge=1, le=100),
@@ -502,6 +517,53 @@ async def import_properties(
         return result
     finally:
         _release_import_lock(db, lock_mode)
+
+
+@router.post("/properties/media", response_model=PropertyMediaSyncResponse)
+async def sync_property_media(
+    payload: PropertyMediaSyncRequest,
+    db: Session = Depends(get_db),
+    _admin: User = Depends(get_current_admin),
+) -> PropertyMediaSyncResponse:
+    updated = 0
+    missing = 0
+
+    for item in payload.items:
+        # Hard rule: no external hotlink URLs.
+        if any(("://" in p) for p in item.local_images):
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="local_images must be local paths (no http/https)",
+            )
+        if any((not p.startswith("/media/")) for p in item.local_images):
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="local_images must start with /media/",
+            )
+        if item.cover_image and (
+            "://" in item.cover_image or not item.cover_image.startswith("/media/")
+        ):
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="cover_image must be a local /media/ path",
+            )
+
+        prop = db.scalar(select(Property).where(Property.source_id == item.source_id))
+        if prop is None:
+            missing += 1
+            continue
+
+        prop.local_images = item.local_images
+        prop.cover_image = item.cover_image or (item.local_images[0] if item.local_images else None)
+
+        # Backward compatibility for existing clients.
+        prop.images = item.local_images
+
+        db.add(prop)
+        updated += 1
+
+    db.commit()
+    return PropertyMediaSyncResponse(updated=updated, missing=missing)
 
 
 @router.post("/properties", response_model=PropertyDetail, status_code=status.HTTP_201_CREATED)

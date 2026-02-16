@@ -14,15 +14,27 @@ export default function PublicPropertiesPage() {
   const [error, setError] = useState<string | null>(null);
 
   const [items, setItems] = useState<PropertyListItem[]>([]);
-  const [page, setPage] = useState(1);
+  const initial = useMemo(() => {
+    if (typeof window === 'undefined') {
+      return { page: 1, type: '', sort: 'newest' as SortValue, search: '' };
+    }
+    const qs = new URLSearchParams(window.location.search);
+    const page = Number(qs.get('page') || '1') || 1;
+    const type = qs.get('type') || '';
+    const sort = (qs.get('sort') || 'newest') as SortValue;
+    const search = (qs.get('search') || '').trim();
+    return { page: Math.max(1, page), type, sort, search };
+  }, []);
+
+  const [page, setPage] = useState(initial.page);
   const limit = 12;
   const [total, setTotal] = useState(0);
 
-  const [type, setType] = useState<string>('');
-  const [sort, setSort] = useState<SortValue>('newest');
+  const [type, setType] = useState<string>(initial.type);
+  const [sort, setSort] = useState<SortValue>(initial.sort);
 
   const [searchDraft, setSearchDraft] = useState('');
-  const [search, setSearch] = useState('');
+  const [search, setSearch] = useState(initial.search);
 
   const safeSort: SortValue = useMemo(() => {
     return SORT_WHITELIST.includes(sort) ? sort : 'newest';
@@ -141,7 +153,7 @@ export default function PublicPropertiesPage() {
         return (
           <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {items.map((p) => {
-              const thumbnail = p.images?.[0] ?? null;
+              const thumbnail = p.cover_image ?? p.local_images?.[0] ?? p.images?.[0] ?? null;
               return (
                 <Link
                   key={p.id}

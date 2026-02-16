@@ -18,8 +18,11 @@ export type PropertyListItem = {
   title: string;
   type: 'new' | 'resale' | 'rent' | string;
   price: number;
+  address: string;
   city: string;
   images: string[] | null;
+  local_images?: string[] | null;
+  cover_image?: string | null;
   status: string;
   slug: string | null;
 };
@@ -46,5 +49,7 @@ export type PropertyDetail = {
   address: string;
   city: string;
   images: string[] | null;
+  local_images?: string[] | null;
+  cover_image?: string | null;
   status: string;
 };

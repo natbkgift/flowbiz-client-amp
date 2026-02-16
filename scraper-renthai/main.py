@@ -10,6 +10,7 @@ from collections import Counter
 from crawler import Crawler
 from exporter import render_csv_bytes, write_csv, write_raw_json, write_report
 from importer import get_latest_audit, post_import, print_import_summary
+from media import download_images
 from normalizer import normalize_unit
 from parser import parse_unit_detail
 from project_crawler import discover_project_urls, discover_unit_urls_from_pages
@@ -52,6 +53,9 @@ def main() -> int:
         return 2
 
     cfg = load_config()
+
+    media_root = os.getenv("MEDIA_ROOT", "/media").rstrip("/")
+    media_prefix = os.getenv("MEDIA_URL_PREFIX", "/media").strip("/")
 
     t0 = time.perf_counter()
 
@@ -105,6 +109,7 @@ def main() -> int:
 
         # Phase 3: crawl unit detail pages (bounded by --limit)
         units_valid_rows: list[dict[str, str]] = []
+        media_updates: list[dict[str, object]] = []
         drop_reasons: Counter[str] = Counter()
 
         crawled = 0
@@ -151,6 +156,30 @@ def main() -> int:
                 drop_reasons[normalized.drop_reason or "unknown"] += 1
             else:
                 units_valid_rows.append(normalized.row)
+
+                # Media ingestion is only performed on --confirm.
+                if args.confirm:
+                    row = normalized.row
+                    slug = row.get("slug") or ""
+                    category = "rent" if row.get("type") == "rent" else "buy"
+
+                    image_urls = unit.get("image_urls")
+                    if isinstance(image_urls, list) and all(isinstance(x, str) for x in image_urls):
+                        local_images, cover_image = download_images(
+                            image_urls,
+                            media_root=media_root,
+                            media_prefix=media_prefix,
+                            category=category,
+                            slug=slug,
+                        )
+                        if local_images:
+                            media_updates.append(
+                                {
+                                    "source_id": row.get("source_id"),
+                                    "local_images": local_images,
+                                    "cover_image": cover_image,
+                                }
+                            )
 
             crawled += 1
 
@@ -207,6 +236,23 @@ def main() -> int:
             dry_run=args.dry_run,
         )
         print_import_summary(import_result=import_result, csv_bytes=submit_bytes)
+
+        # After confirm import, sync local media paths into DB (idempotent).
+        if args.confirm and media_updates:
+            try:
+                from importer import post_media_sync
+
+                media_result = post_media_sync(cfg, items=media_updates)
+                print(
+                    "media_sync_status="
+                    + str(media_result.get("status"))
+                    + " updated="
+                    + str(media_result.get("body", {}).get("updated"))
+                    + " missing="
+                    + str(media_result.get("body", {}).get("missing"))
+                )
+            except Exception as exc:
+                print(f"[WARNING] media sync failed: {exc!r}")
 
         latest = get_latest_audit(cfg)
         if latest and isinstance(latest, dict):

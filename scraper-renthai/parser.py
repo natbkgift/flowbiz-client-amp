@@ -3,6 +3,7 @@ from __future__ import annotations
 import re
 import urllib.parse
 
+from media import extract_image_urls
 from utils import extract_json_ld, find_first_text
 
 _price_re = re.compile(r"([0-9][0-9,]+(?:\.[0-9]+)?)")
@@ -60,7 +61,10 @@ def parse_unit_detail(url: str, html: bytes) -> dict:
         "bedrooms": None,
         "bathrooms": None,
         "size": None,
+        "image_urls": [],
     }
+
+    data["image_urls"] = extract_image_urls(html, base_url=url)
 
     # Prefer page-level metadata first (Renthai JSON-LD is often Organization-only).
     og_title = find_first_text(html, [r"<meta property=\"og:title\" content=\"([^\"]+)\""])
