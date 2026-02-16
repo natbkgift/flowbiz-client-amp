@@ -1,3 +1,5 @@
+import os
+from pathlib import Path
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
@@ -20,41 +22,35 @@ from packages.core.schemas.property_api import (
 router = APIRouter(prefix="/v1", tags=["properties", "company"])
 
 
-def _normalize_public_images(images: list[str] | None) -> list[str]:
-    """Normalize image paths for public responses.
+_IMAGE_STORAGE_ROOT = Path("/opt/flowbiz/storage/property-images")
+_PUBLIC_PREFIX = "/images"
+_ALLOWED_EXTS = {".jpg", ".jpeg", ".png", ".webp"}
 
-    Requirements:
-    - Must not hotlink remote URLs.
-    - Public site expects local-only paths under /images/.
 
-    Current ingest may store local paths under /media/...; map those to /images/... .
+def _list_local_images(property_id: UUID) -> list[str]:
+    """Return public /images/... URLs by listing storage folder.
+
+    - No hotlinking: returns only local /images paths.
+    - No DB schema change: derives file list from disk.
     """
 
+    folder = _IMAGE_STORAGE_ROOT / str(property_id)
+    try:
+        if not folder.is_dir():
+            return []
+        names = sorted(os.listdir(folder))
+    except OSError:
+        return []
+
     out: list[str] = []
-    for u in images or []:
-        if not isinstance(u, str):
+    for name in names:
+        p = folder / name
+        if not p.is_file():
             continue
-        u = u.strip()
-        if not u:
+        if p.suffix.lower() not in _ALLOWED_EXTS:
             continue
-
-        if u.startswith("/images/"):
-            out.append(u)
-        elif u.startswith("/media/"):
-            out.append("/images/" + u[len("/media/") :].lstrip("/"))
-        else:
-            # Drop absolute URLs or unknown prefixes.
-            continue
-
-    # de-dup while preserving order
-    seen: set[str] = set()
-    deduped: list[str] = []
-    for u in out:
-        if u in seen:
-            continue
-        seen.add(u)
-        deduped.append(u)
-    return deduped
+        out.append(f"{_PUBLIC_PREFIX}/{property_id}/{name}")
+    return out
 
 
 @router.get("/properties", response_model=PropertyListResponse)
@@ -99,7 +95,7 @@ async def list_properties(
     data: list[PropertyListItem] = []
     for item in items:
         m = PropertyListItem.model_validate(item)
-        imgs = _normalize_public_images(list(m.images or []))
+        imgs = _list_local_images(m.id)
         m.images = imgs
         m.local_images = imgs
         m.cover_image = imgs[0] if imgs else None
@@ -117,7 +113,7 @@ async def get_property(
     if prop is None or prop.status != PropertyStatus.ACTIVE.value:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Property not found")
     m = PropertyDetail.model_validate(prop)
-    imgs = _normalize_public_images(list(m.images or []))
+    imgs = _list_local_images(m.id)
     m.images = imgs
     m.local_images = imgs
     m.cover_image = imgs[0] if imgs else None
@@ -133,7 +129,7 @@ async def get_property_by_slug(
     if prop is None or prop.status != PropertyStatus.ACTIVE.value:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Property not found")
     m = PropertyDetail.model_validate(prop)
-    imgs = _normalize_public_images(list(m.images or []))
+    imgs = _list_local_images(m.id)
     m.images = imgs
     m.local_images = imgs
     m.cover_image = imgs[0] if imgs else None
