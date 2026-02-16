@@ -28,8 +28,8 @@ services:
       - APP_PORT=8000
       - APP_LOG_LEVEL=info
       - FLOWBIZ_SERVICE_NAME=flowbiz-template-service
-      - FLOWBIZ_VERSION=0.1.0
-      - FLOWBIZ_BUILD_SHA=local
+      - FLOWBIZ_VERSION=${FLOWBIZ_VERSION:-0.1.0}
+      - FLOWBIZ_BUILD_SHA=${BUILD_SHA:-local}
       - DATABASE_URL=${DATABASE_URL:-postgresql+psycopg2://flowbiz:flowbiz@postgres:5432/flowbiz}
       - JWT_SECRET_KEY=change-me-in-production
       - JWT_ALGORITHM=HS256
