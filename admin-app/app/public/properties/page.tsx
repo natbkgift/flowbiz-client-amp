@@ -5,6 +5,7 @@ import { useEffect, useMemo, useState } from 'react';
 
 import { API_BASE } from '../_shared/api';
 import type { PropertyListItem, PropertyListResponse } from '../_shared/types';
+import { toPropertyHref } from '../../_lib/public-api';
 
 const SORT_WHITELIST = ['newest', 'oldest', 'price_asc', 'price_desc'] as const;
 type SortValue = (typeof SORT_WHITELIST)[number];
@@ -157,7 +158,7 @@ export default function PublicPropertiesPage() {
               return (
                 <Link
                   key={p.id}
-                  href={`/public/properties/${p.id}`}
+                  href={toPropertyHref(p)}
                   className="bg-white rounded-lg shadow-sm hover:shadow-md transition overflow-hidden"
                 >
                   {thumbnail ? (

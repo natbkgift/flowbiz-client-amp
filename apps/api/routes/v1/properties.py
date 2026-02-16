@@ -76,6 +76,17 @@ async def get_property(
     return PropertyDetail.model_validate(prop)
 
 
+@router.get("/properties/slug/{slug}", response_model=PropertyDetail)
+async def get_property_by_slug(
+    slug: str,
+    db: Session = Depends(get_db),
+) -> PropertyDetail:
+    prop = db.scalar(select(Property).where(Property.slug == slug))
+    if prop is None or prop.status != PropertyStatus.ACTIVE.value:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Property not found")
+    return PropertyDetail.model_validate(prop)
+
+
 @router.get("/company", response_model=CompanyListResponse)
 async def list_company_info(
     db: Session = Depends(get_db),
