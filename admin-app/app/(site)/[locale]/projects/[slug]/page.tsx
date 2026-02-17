@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import Link from 'next/link';
 
 import { Container } from '@/components/layout/Container';
 import { TrackedLink } from '@/components/analytics/TrackedLink';
@@ -73,15 +74,13 @@ export default async function ProjectDetailPage({
             <p className="card-subtitle">{locale === 'th' ? 'ไปยังหน้าสำคัญอื่น ๆ' : 'Navigate to key pages'}</p>
             <div className="card-actions">
               {internalLinks.map((it) => (
-                <TrackedLink
+                <Link
                   key={it.href}
                   className={it.variant === 'secondary' ? 'btn btn-secondary' : 'btn btn-tertiary'}
                   href={it.href}
-                  eventType={it.eventType}
-                  eventPayload={it.eventPayload}
                 >
                   {it.label}
-                </TrackedLink>
+                </Link>
               ))}
             </div>
           </div>
@@ -167,15 +166,13 @@ export default async function ProjectDetailPage({
           <p className="card-subtitle">{locale === 'th' ? 'ไปยังหน้าสำคัญอื่น ๆ' : 'Navigate to key pages'}</p>
           <div className="card-actions">
             {internalLinks.map((it) => (
-              <TrackedLink
+              <Link
                 key={it.href}
                 className={it.variant === 'secondary' ? 'btn btn-secondary' : 'btn btn-tertiary'}
                 href={it.href}
-                eventType={it.eventType}
-                eventPayload={it.eventPayload}
               >
                 {it.label}
-              </TrackedLink>
+              </Link>
             ))}
           </div>
         </div>
