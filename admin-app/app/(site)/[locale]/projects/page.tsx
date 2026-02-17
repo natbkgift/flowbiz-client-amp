@@ -4,10 +4,37 @@ import { Container } from '@/components/layout/Container';
 import { ProjectCard } from '@/components/project/ProjectCard';
 import { fetchProjects, fetchProperties } from '@/app/_lib/public-api-server';
 
-export const metadata: Metadata = {
-  title: 'Projects | Asset Management Property',
-  description: 'Explore projects grouped by name.',
-};
+import { normalizeLocale } from '@/app/_lib/i18n/get-dictionary';
+
+export async function generateMetadata({
+  params,
+}: {
+  params: { locale: string };
+}): Promise<Metadata> {
+  const locale = normalizeLocale(params.locale);
+  const canonical = `/${locale}/projects`;
+  const title = 'Projects | AMP Pattaya';
+  const description = 'Explore published projects in Pattaya.';
+  return {
+    title,
+    description,
+    alternates: {
+      canonical,
+      languages: {
+        en: '/en/projects',
+        th: '/th/projects',
+      },
+    },
+    openGraph: {
+      type: 'website',
+      url: canonical,
+      title,
+      description,
+      siteName: 'AMP Pattaya',
+      locale: locale === 'th' ? 'th_TH' : 'en_US',
+    },
+  };
+}
 
 type ProjectRow = { name: string; count: number };
 

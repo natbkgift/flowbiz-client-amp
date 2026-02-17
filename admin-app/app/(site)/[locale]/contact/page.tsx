@@ -12,9 +12,25 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const locale = normalizeLocale(params.locale);
   const dict = getDictionary(locale);
+  const canonical = `/${locale}/contact`;
   return {
     title: `${dict.nav.contact} | ${dict.brand.name}`,
     description: dict.contact.subtitle,
+    alternates: {
+      canonical,
+      languages: {
+        en: '/en/contact',
+        th: '/th/contact',
+      },
+    },
+    openGraph: {
+      type: 'website',
+      url: canonical,
+      title: `${dict.nav.contact} | ${dict.brand.name}`,
+      description: dict.contact.subtitle,
+      siteName: dict.brand.name,
+      locale: locale === 'th' ? 'th_TH' : 'en_US',
+    },
   };
 }
 

@@ -5,12 +5,38 @@ import { LeadForm } from '@/components/forms/LeadForm';
 import { Container } from '@/components/layout/Container';
 import { fetchProperties } from '@/app/_lib/public-api-server';
 
-export const metadata: Metadata = {
-  title: 'Rent | Asset Management Property',
-  description: 'Browse properties for rent in Pattaya.',
-};
+import { getDictionary, normalizeLocale } from '@/app/_lib/i18n/get-dictionary';
 
-export default async function RentPage() {
+export async function generateMetadata({
+  params,
+}: {
+  params: { locale: string };
+}): Promise<Metadata> {
+  const locale = normalizeLocale(params.locale);
+  const dict = getDictionary(locale);
+  const canonical = `/${locale}/rent`;
+  return {
+    title: `${dict.nav.live} | ${dict.brand.name}`,
+    description: dict.home.pathLive.desc,
+    alternates: {
+      canonical,
+      languages: {
+        en: '/en/rent',
+        th: '/th/rent',
+      },
+    },
+    openGraph: {
+      type: 'website',
+      url: canonical,
+      title: `${dict.nav.live} | ${dict.brand.name}`,
+      description: dict.home.pathLive.desc,
+      siteName: dict.brand.name,
+      locale: locale === 'th' ? 'th_TH' : 'en_US',
+    },
+  };
+}
+
+export default async function RentPage({ params }: { params: { locale: string } }) {
   const res = await fetchProperties({ type: 'rent', limit: 60, sort: 'newest' });
 
   return (
