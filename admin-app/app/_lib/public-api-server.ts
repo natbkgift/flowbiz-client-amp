@@ -1,6 +1,5 @@
 import 'server-only';
 
-import { headers } from 'next/headers';
 import type { PropertyDetail, PropertyListResponse } from '../public/_shared/types';
 
 export type ProjectItem = {
@@ -14,12 +13,12 @@ export type ProjectItem = {
   updated_at: string;
 };
 
-function getOriginFromHeaders(): string {
-  const h = headers();
-  const host = h.get('x-forwarded-host') ?? h.get('host');
-  const proto = h.get('x-forwarded-proto') ?? 'https';
-  if (!host) return 'https://www.amppattaya.com';
-  return `${proto}://${host}`;
+const DEFAULT_SITE_ORIGIN = 'https://amppattaya.com';
+
+function getOrigin(): string {
+  const env = process.env.NEXT_PUBLIC_SITE_URL;
+  if (env && env.startsWith('http')) return env;
+  return DEFAULT_SITE_ORIGIN;
 }
 
 function apiBase(): string {
@@ -34,7 +33,7 @@ export async function fetchProperties(params: {
   search?: string;
   sort?: 'price_asc' | 'price_desc' | 'newest' | 'oldest';
 }): Promise<PropertyListResponse> {
-  const origin = getOriginFromHeaders();
+  const origin = getOrigin();
   const base = apiBase();
 
   const url = new URL(`${base}/v1/properties`, origin);
@@ -47,7 +46,7 @@ export async function fetchProperties(params: {
 
   const res = await fetch(url.toString(), {
     // Public pages: allow caching but keep it reasonably fresh.
-    next: { revalidate: 60 },
+    next: { revalidate: 300 },
   });
 
   if (!res.ok) {
@@ -58,13 +57,13 @@ export async function fetchProperties(params: {
 }
 
 export async function fetchPropertyBySlug(slug: string): Promise<PropertyDetail | null> {
-  const origin = getOriginFromHeaders();
+  const origin = getOrigin();
   const base = apiBase();
 
   const url = new URL(`${base}/v1/properties/slug/${encodeURIComponent(slug)}`, origin);
 
   const res = await fetch(url.toString(), {
-    next: { revalidate: 60 },
+    next: { revalidate: 300 },
   });
 
   if (res.status === 404) return null;
@@ -74,23 +73,23 @@ export async function fetchPropertyBySlug(slug: string): Promise<PropertyDetail 
 }
 
 export async function fetchProjects(params?: { limit?: number }): Promise<ProjectItem[]> {
-  const origin = getOriginFromHeaders();
+  const origin = getOrigin();
   const base = apiBase();
 
   const url = new URL(`${base}/v1/projects`, origin);
   if (params?.limit) url.searchParams.set('limit', String(params.limit));
 
-  const res = await fetch(url.toString(), { next: { revalidate: 60 } });
+  const res = await fetch(url.toString(), { next: { revalidate: 300 } });
   if (!res.ok) throw new Error(`Failed to fetch projects (${res.status})`);
   return (await res.json()) as ProjectItem[];
 }
 
 export async function fetchProjectBySlug(slug: string): Promise<ProjectItem | null> {
-  const origin = getOriginFromHeaders();
+  const origin = getOrigin();
   const base = apiBase();
 
   const url = new URL(`${base}/v1/projects/slug/${encodeURIComponent(slug)}`, origin);
-  const res = await fetch(url.toString(), { next: { revalidate: 60 } });
+  const res = await fetch(url.toString(), { next: { revalidate: 300 } });
   if (res.status === 404) return null;
   if (!res.ok) throw new Error(`Failed to fetch project (${res.status})`);
   return (await res.json()) as ProjectItem;
@@ -118,7 +117,7 @@ export type MarketplaceItemItem = {
 };
 
 export async function fetchMarketplaceCategories(): Promise<MarketplaceCategoryItem[]> {
-  const origin = getOriginFromHeaders();
+  const origin = getOrigin();
   const base = apiBase();
 
   const url = new URL(`${base}/v1/marketplace/categories`, origin);
@@ -128,7 +127,7 @@ export async function fetchMarketplaceCategories(): Promise<MarketplaceCategoryI
 }
 
 export async function fetchMarketplaceItems(params?: { category?: string }): Promise<MarketplaceItemItem[]> {
-  const origin = getOriginFromHeaders();
+  const origin = getOrigin();
   const base = apiBase();
 
   const url = new URL(`${base}/v1/marketplace/items`, origin);

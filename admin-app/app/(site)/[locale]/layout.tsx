@@ -3,6 +3,7 @@ import type { ReactNode } from 'react';
 import { Footer } from '@/components/layout/Footer';
 import { Header } from '@/components/layout/Header';
 import { SiteAnalytics } from '@/components/analytics/SiteAnalytics';
+import { LinkClickTracker } from '@/components/analytics/LinkClickTracker';
 import { FloatingWhatsAppCTA } from '@/components/ux/FloatingWhatsAppCTA';
 import { StickyMobileCTA } from '@/components/ux/StickyMobileCTA';
 import { ScrollReveal } from '@/components/ux/ScrollReveal';
@@ -48,6 +49,7 @@ export default function SiteLayout({
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLd }} />
       <Header locale={locale} dict={dict} />
       <SiteAnalytics />
+      <LinkClickTracker />
       <ScrollReveal />
       {children}
       <Footer locale={locale} dict={dict} />

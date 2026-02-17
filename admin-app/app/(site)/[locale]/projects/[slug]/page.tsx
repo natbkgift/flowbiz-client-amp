@@ -78,6 +78,8 @@ export default async function ProjectDetailPage({
                   key={it.href}
                   className={it.variant === 'secondary' ? 'btn btn-secondary' : 'btn btn-tertiary'}
                   href={it.href}
+                  data-amp-event-type={it.eventType}
+                  data-amp-event-payload={JSON.stringify(it.eventPayload)}
                 >
                   {it.label}
                 </Link>
@@ -170,6 +172,8 @@ export default async function ProjectDetailPage({
                 key={it.href}
                 className={it.variant === 'secondary' ? 'btn btn-secondary' : 'btn btn-tertiary'}
                 href={it.href}
+                data-amp-event-type={it.eventType}
+                data-amp-event-payload={JSON.stringify(it.eventPayload)}
               >
                 {it.label}
               </Link>
