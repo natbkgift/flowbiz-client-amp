@@ -476,6 +476,59 @@ class FinderIntent(Base):
     )
 
 
+booking_status_enum = SAEnum(
+    "requested",
+    "confirmed",
+    "cancelled",
+    name="booking_status_enum",
+    native_enum=False,
+    create_constraint=True,
+)
+
+
+class Booking(Base):
+    __tablename__ = "bookings"
+
+    id: Mapped[UUID] = mapped_column(primary_key=True, default=uuid4)
+
+    property_id: Mapped[UUID | None] = mapped_column(
+        ForeignKey("properties.id", ondelete="SET NULL"),
+        nullable=True,
+        index=True,
+    )
+    inquiry_id: Mapped[UUID | None] = mapped_column(
+        ForeignKey("inquiries.id", ondelete="SET NULL"),
+        nullable=True,
+        index=True,
+    )
+
+    idempotency_key: Mapped[str | None] = mapped_column(
+        String(80),
+        nullable=True,
+        unique=True,
+        index=True,
+    )
+
+    start_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False, index=True)
+    end_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    guests: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    notes: Mapped[str | None] = mapped_column(String(500), nullable=True)
+    status: Mapped[str] = mapped_column(booking_status_enum, nullable=False, default="requested")
+
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        nullable=False,
+        server_default=func.now(),
+        index=True,
+    )
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        nullable=False,
+        server_default=func.now(),
+        onupdate=func.now(),
+    )
+
+
 property_type_enum = SAEnum(
     "new",
     "resale",

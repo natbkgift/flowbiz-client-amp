@@ -16,6 +16,7 @@ from apps.api.routes.admin_seller import router as admin_seller_router
 from apps.api.routes.auth_me import router as auth_me_router
 from apps.api.routes.v1 import auth, meta
 from apps.api.routes.v1.analytics import router as analytics_router
+from apps.api.routes.v1.booking import router as booking_router
 from apps.api.routes.v1.compare import router as compare_router
 from apps.api.routes.v1.crm import router as crm_router
 from apps.api.routes.v1.domain import router as domain_router
@@ -72,6 +73,7 @@ app.include_router(properties_router)
 app.include_router(crm_router)
 app.include_router(compare_router)
 app.include_router(analytics_router)
+app.include_router(booking_router)
 app.include_router(domain_router)
 app.include_router(finder_router)
 app.include_router(investment_router)
