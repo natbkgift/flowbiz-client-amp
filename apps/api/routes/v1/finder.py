@@ -73,14 +73,11 @@ async def finder_search(
     else:
         order_by = (desc(Property.created_at), desc(Property.id))
 
-    rows = (
-        db.scalars(
-            base_query.order_by(*order_by)
-            .offset((payload.page - 1) * payload.limit)
-            .limit(payload.limit)
-        )
-        .all()
-    )
+    rows = db.scalars(
+        base_query.order_by(*order_by)
+        .offset((payload.page - 1) * payload.limit)
+        .limit(payload.limit)
+    ).all()
 
     # Phase 2: intent log (table is additive). Fail closed only on DB errors.
     try:

@@ -4,16 +4,14 @@ import argparse
 import datetime as _dt
 import hashlib
 import json
+import os
 import re
 import subprocess
-import os
+import urllib.error
+import urllib.request
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Iterable
-
-import urllib.request
-import urllib.error
-
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 BASELINE_ROOT = REPO_ROOT / "docs" / "phase_reports" / "baseline"
@@ -85,7 +83,9 @@ def _write_bytes(path: Path, data: bytes) -> str:
     return _sha256_bytes(data)
 
 
-def _http_get(url: str, *, timeout_s: int = 20, user_agent: str = "AMP-BaselineIntegrity/1.0") -> dict[str, Any]:
+def _http_get(
+    url: str, *, timeout_s: int = 20, user_agent: str = "AMP-BaselineIntegrity/1.0"
+) -> dict[str, Any]:
     req = urllib.request.Request(url, headers={"User-Agent": user_agent})
     try:
         with urllib.request.urlopen(req, timeout=timeout_s) as resp:
@@ -347,7 +347,9 @@ JSON_LD = re.compile(
 def _extract_html_meta(html: str) -> dict[str, Any]:
     title_m = META_TITLE.search(html)
     meta_name = {m.group("name").lower(): m.group("content") for m in META_NAME.finditer(html)}
-    meta_prop = {m.group("property").lower(): m.group("content") for m in META_PROPERTY.finditer(html)}
+    meta_prop = {
+        m.group("property").lower(): m.group("content") for m in META_PROPERTY.finditer(html)
+    }
     links = {m.group("rel").lower(): m.group("href") for m in LINK_REL.finditer(html)}
     json_ld_payloads = [m.group("json").strip() for m in JSON_LD.finditer(html)]
     return {
@@ -435,7 +437,9 @@ def cache_key_map() -> dict[str, Any]:
     return {"files": matches}
 
 
-def regression_surface_map(*, routes: list[Route], api_routes: list[Route], db: dict[str, Any]) -> dict[str, Any]:
+def regression_surface_map(
+    *, routes: list[Route], api_routes: list[Route], db: dict[str, Any]
+) -> dict[str, Any]:
     return {
         "web_route_count": len([r for r in routes if r.method == "GET"]),
         "api_endpoint_count": len(api_routes),
@@ -518,7 +522,9 @@ def _md_table(rows: Iterable[tuple[str, str]]) -> str:
     return "\n".join(out)
 
 
-def write_markdown_report(*, hashes: dict[str, str], git: dict[str, Any], regression: dict[str, Any]) -> None:
+def write_markdown_report(
+    *, hashes: dict[str, str], git: dict[str, Any], regression: dict[str, Any]
+) -> None:
     report_path = BASELINE_ROOT / "BASELINE_INTEGRITY_REPORT.md"
     lines: list[str] = []
     lines.append("# BASELINE INTEGRITY REPORT")
@@ -552,29 +558,35 @@ def _openapi_to_routes(openapi: dict[str, Any]) -> list[dict[str, str]]:
             if method.lower() not in {"get", "post", "put", "delete", "patch", "options", "head"}:
                 continue
             tags = spec.get("tags") if isinstance(spec, dict) else None
-            out.append({"method": method.upper(), "path": path, "tags": ",".join(tags) if tags else ""})
+            out.append(
+                {"method": method.upper(), "path": path, "tags": ",".join(tags) if tags else ""}
+            )
     out.sort(key=lambda r: (r["path"], r["method"], r.get("tags") or ""))
     return out
 
 
 def live_vps_snapshots(*, host_alias: str, deploy_path: str) -> dict[str, Any]:
-    """Collect live snapshots from VPS (api openapi, db schema-only dump, compose ps, metrics probe)."""
+    """Collect live snapshots from VPS.
+
+    Includes: api openapi, db schema-only dump, compose ps, metrics probe.
+    """
 
     base_cmd = f"set -e; cd {deploy_path}"
 
-    ps = _ssh_run(host_alias, base_cmd + "; docker compose -f docker-compose.yml -f docker-compose.prod.yml ps")
+    ps = _ssh_run(
+        host_alias,
+        base_cmd + "; docker compose -f docker-compose.yml -f docker-compose.prod.yml ps",
+    )
 
     openapi = _ssh_run(
         host_alias,
-        base_cmd
-        + "; curl -sS http://127.0.0.1:8001/openapi.json",
+        base_cmd + "; curl -sS http://127.0.0.1:8001/openapi.json",
         timeout_s=120,
     )
 
     metrics = _ssh_run(
         host_alias,
-        base_cmd
-        + "; curl -sS -i http://127.0.0.1:8001/metrics | sed -n '1,20p'",
+        base_cmd + "; curl -sS -i http://127.0.0.1:8001/metrics | sed -n '1,20p'",
         timeout_s=60,
     )
 
@@ -591,9 +603,20 @@ def live_vps_snapshots(*, host_alias: str, deploy_path: str) -> dict[str, Any]:
         host_alias,
         base_cmd
         + "; "
-        + "echo 'alertmanager_ready='; docker compose -f docker-compose.yml -f docker-compose.prod.yml exec -T alertmanager wget -qO- http://localhost:9093/-/ready || true; echo; "
-        + "echo 'prometheus_ready='; docker compose -f docker-compose.yml -f docker-compose.prod.yml exec -T prometheus wget -qO- http://localhost:9090/-/ready || true; echo; "
-        + "echo 'grafana_health='; curl -sS http://127.0.0.1:9001/api/health || true; echo",
+        + "".join(
+            [
+                "echo 'alertmanager_ready='; ",
+                "docker compose -f docker-compose.yml -f docker-compose.prod.yml ",
+                "exec -T alertmanager ",
+                "wget -qO- http://localhost:9093/-/ready || true; echo; ",
+                "echo 'prometheus_ready='; ",
+                "docker compose -f docker-compose.yml -f docker-compose.prod.yml ",
+                "exec -T prometheus ",
+                "wget -qO- http://localhost:9090/-/ready || true; echo; ",
+                "echo 'grafana_health='; ",
+                "curl -sS http://127.0.0.1:9001/api/health || true; echo",
+            ]
+        ),
         timeout_s=120,
     )
 
@@ -630,10 +653,18 @@ def live_public_seo_snapshots(*, base_url: str, paths: list[str]) -> dict[str, A
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description="AMP Baseline Integrity Engine (repo + optional live snapshots)")
-    parser.add_argument("--out", default=None, help="Output directory (default: docs/phase_reports/baseline/<timestamp>)")
+    parser = argparse.ArgumentParser(
+        description="AMP Baseline Integrity Engine (repo + optional live snapshots)"
+    )
+    parser.add_argument(
+        "--out",
+        default=None,
+        help="Output directory (default: docs/phase_reports/baseline/<timestamp>)",
+    )
     parser.add_argument("--vps", default=None, help="SSH host alias for VPS, e.g. flowbiz-vps")
-    parser.add_argument("--vps-path", default="/opt/flowbiz/clients/flowbiz-client-amp", help="Deploy path on VPS")
+    parser.add_argument(
+        "--vps-path", default="/opt/flowbiz/clients/flowbiz-client-amp", help="Deploy path on VPS"
+    )
     parser.add_argument("--public-base", default="https://amppattaya.com", help="Public base URL")
     args = parser.parse_args()
 
@@ -648,14 +679,18 @@ def main() -> int:
     routes_hash = _write_json(run_dir / "route_signature.json", [r.__dict__ for r in web_routes])
 
     api_repo = api_routes_fastapi()
-    api_repo_hash = _write_json(run_dir / "api_contract_snapshot_repo.json", [r.__dict__ for r in api_repo])
+    api_repo_hash = _write_json(
+        run_dir / "api_contract_snapshot_repo.json", [r.__dict__ for r in api_repo]
+    )
 
     db_repo = db_schema_snapshot()
     db_repo_hash = _write_json(run_dir / "db_schema_snapshot_repo.json", db_repo)
 
     seo_struct_repo = seo_and_structured_data_snapshot()
     seo_repo_hash = _write_json(run_dir / "seo_metadata_snapshot_repo.json", seo_struct_repo["seo"])
-    structured_repo_hash = _write_json(run_dir / "structured_data_snapshot_repo.json", seo_struct_repo["structured"])
+    structured_repo_hash = _write_json(
+        run_dir / "structured_data_snapshot_repo.json", seo_struct_repo["structured"]
+    )
 
     crm_repo = crm_payload_snapshot(api_repo)
     crm_repo_hash = _write_json(run_dir / "crm_payload_snapshot_repo.json", crm_repo)
@@ -664,24 +699,34 @@ def main() -> int:
     cache_repo_hash = _write_json(run_dir / "cache_key_map_repo.json", cache_repo)
 
     observability_repo = observability_readiness_snapshot()
-    observability_repo_hash = _write_json(run_dir / "observability_readiness_repo.json", observability_repo)
+    observability_repo_hash = _write_json(
+        run_dir / "observability_readiness_repo.json", observability_repo
+    )
 
     metric_baseline_repo = metric_baseline_state_snapshot()
-    metric_baseline_repo_hash = _write_json(run_dir / "metric_baseline_state_repo.json", metric_baseline_repo)
+    metric_baseline_repo_hash = _write_json(
+        run_dir / "metric_baseline_state_repo.json", metric_baseline_repo
+    )
 
     live_hashes: dict[str, str] = {}
     live_regression_overrides: dict[str, Any] = {}
 
     if args.vps:
         live = live_vps_snapshots(host_alias=args.vps, deploy_path=args.vps_path)
-        live_hashes["vps_compose_ps.json"] = _write_json(run_dir / "vps_compose_ps.json", live["compose_ps"])
+        live_hashes["vps_compose_ps.json"] = _write_json(
+            run_dir / "vps_compose_ps.json", live["compose_ps"]
+        )
 
         openapi_raw = live["api_openapi"]
-        live_hashes["vps_api_openapi_raw.json"] = _write_json(run_dir / "vps_api_openapi_raw.json", openapi_raw)
+        live_hashes["vps_api_openapi_raw.json"] = _write_json(
+            run_dir / "vps_api_openapi_raw.json", openapi_raw
+        )
         if openapi_raw.get("exit_code") == 0 and openapi_raw.get("stdout"):
             try:
                 openapi = json.loads(openapi_raw["stdout"])
-                live_hashes["api_openapi_live.json"] = _write_json(run_dir / "api_openapi_live.json", openapi)
+                live_hashes["api_openapi_live.json"] = _write_json(
+                    run_dir / "api_openapi_live.json", openapi
+                )
                 live_routes = _openapi_to_routes(openapi)
                 live_hashes["api_contract_snapshot_live.json"] = _write_json(
                     run_dir / "api_contract_snapshot_live.json", live_routes
@@ -697,7 +742,9 @@ def main() -> int:
         )
 
         db_dump = live["db_schema_dump"]
-        live_hashes["vps_db_schema_dump_raw.json"] = _write_json(run_dir / "vps_db_schema_dump_raw.json", db_dump)
+        live_hashes["vps_db_schema_dump_raw.json"] = _write_json(
+            run_dir / "vps_db_schema_dump_raw.json", db_dump
+        )
         if db_dump.get("exit_code") == 0 and db_dump.get("stdout"):
             live_hashes["db_schema_dump.sql"] = _write_bytes(
                 run_dir / "db_schema_dump.sql", db_dump["stdout"].encode("utf-8")
@@ -784,7 +831,12 @@ def main() -> int:
         lines.append(f"- {k}: `{v}`")
     lines.append("")
     lines.append("## Gate Notes")
-    lines.append("- Observability/metrics runtime gates must be validated on VPS per docs/governance/observability.md and docs/governance/metrics.yaml")
+    lines.append(
+        (
+            "- Observability/metrics runtime gates must be validated on VPS per "
+            "docs/governance/observability.md and docs/governance/metrics.yaml"
+        )
+    )
     if args.vps:
         lines.append(f"- VPS live snapshots: attempted via ssh alias `{args.vps}`")
     else:

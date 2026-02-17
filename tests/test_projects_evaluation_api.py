@@ -6,7 +6,7 @@ from fastapi.testclient import TestClient
 
 from packages.core.auth import create_access_token, hash_password
 from packages.core.database import SessionLocal
-from packages.core.models import Project, User
+from packages.core.models import User
 
 
 def _make_admin_headers() -> dict[str, str]:

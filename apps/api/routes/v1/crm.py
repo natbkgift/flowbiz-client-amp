@@ -257,7 +257,11 @@ async def create_inquiry(
     )
 
     # Preserve continuity: if this inquiry is linked to a prior inquiry with an advisor, keep it.
-    if inquiry.advisor_user_id is None and duplicate_of is not None and duplicate_of.advisor_user_id is not None:
+    if (
+        inquiry.advisor_user_id is None
+        and duplicate_of is not None
+        and duplicate_of.advisor_user_id is not None
+    ):
         inquiry.advisor_user_id = duplicate_of.advisor_user_id
 
     if bool(settings.crm_auto_assign_enabled) and inquiry.advisor_user_id is None:

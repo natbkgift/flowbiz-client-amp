@@ -4,7 +4,7 @@ from datetime import datetime
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, Header, HTTPException, Response, status
-from sqlalchemy import and_, or_, select
+from sqlalchemy import and_, select
 from sqlalchemy.orm import Session
 
 from packages.core.database import get_db
@@ -41,32 +41,16 @@ async def get_availability(
     if prop is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Property not found")
 
-    conflicts = (
-        db.scalar(
-            select(Booking.id)
-            .where(
-                Booking.property_id == property_id,
-                Booking.status.in_(["requested", "confirmed"]),
-                _overlap_filter(start_at=start_at, end_at=end_at),
-            )
-            .limit(1000)
-        )
-        is not None
-    )
-
     # We only need a boolean + count. Compute count deterministically.
-    conflict_count = (
-        db.scalars(
-            select(Booking.id)
-            .where(
-                Booking.property_id == property_id,
-                Booking.status.in_(["requested", "confirmed"]),
-                _overlap_filter(start_at=start_at, end_at=end_at),
-            )
-            .order_by(Booking.start_at.asc(), Booking.id.asc())
+    conflict_count = db.scalars(
+        select(Booking.id)
+        .where(
+            Booking.property_id == property_id,
+            Booking.status.in_(["requested", "confirmed"]),
+            _overlap_filter(start_at=start_at, end_at=end_at),
         )
-        .all()
-    )
+        .order_by(Booking.start_at.asc(), Booking.id.asc())
+    ).all()
 
     return AvailabilityResponse(
         property_id=property_id,

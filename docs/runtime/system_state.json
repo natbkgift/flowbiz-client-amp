@@ -1,0 +1,71 @@
+{
+  "system": {
+    "name": "AMP Platform",
+    "mode": "standby",
+    "agent_status": "awaiting_command",
+    "last_boot": null
+  },
+
+  "execution": {
+    "current_phase": null,
+    "phase_status": "idle",
+    "phase_started_at": null,
+    "phase_completed_at": null,
+    "last_successful_phase": 4
+  },
+
+  "deployment": {
+    "last_deploy_sha": null,
+    "last_deploy_time": null,
+    "environment": "production",
+    "deployment_status": "stable"
+  },
+
+  "observability": {
+    "logs": "healthy",
+    "metrics": "healthy",
+    "tracing": "healthy",
+    "alerts": "armed",
+    "dashboards": "healthy",
+    "last_check": null
+  },
+
+  "metrics": {
+    "conversion_status": "stable",
+    "performance_status": "stable",
+    "crm_ingestion_status": "unknown",
+    "seo_integrity_status": "stable",
+    "ai_inference_status": "unknown",
+    "reliability_status": "stable",
+    "last_evaluated": null
+  },
+
+  "integrity": {
+    "baseline_completed": true,
+    "contracts_loaded": true,
+    "architecture_locked": true,
+    "experience_locked": true,
+    "brand_locked": true
+  },
+
+  "failures": {
+    "last_error": null,
+    "error_count": 0,
+    "last_rollback": null,
+    "rollback_reason": null
+  },
+
+  "planner": {
+    "next_action": null,
+    "priority": "none",
+    "blocked": false,
+    "block_reason": null
+  },
+
+  "runtime": {
+    "loop_interval_seconds": 60,
+    "max_parallel_actions": 1,
+    "deterministic_mode": true,
+    "allow_human_override": true
+  }
+}

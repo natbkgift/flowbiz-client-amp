@@ -7,7 +7,6 @@ from pydantic import BaseModel, Field
 from packages.core.schemas.enums import PropertyIntent
 from packages.core.schemas.property_api import PropertyType
 
-
 FinderSort = Literal["price_asc", "price_desc", "newest", "oldest"]
 
 

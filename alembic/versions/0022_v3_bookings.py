@@ -81,9 +81,13 @@ def upgrade() -> None:
         )
 
     if _table_exists("bookings") and not _index_exists("ix_bookings_property_id"):
-        op.execute(text("CREATE INDEX IF NOT EXISTS ix_bookings_property_id ON bookings (property_id)"))
+        op.execute(
+            text("CREATE INDEX IF NOT EXISTS ix_bookings_property_id ON bookings (property_id)")
+        )
     if _table_exists("bookings") and not _index_exists("ix_bookings_inquiry_id"):
-        op.execute(text("CREATE INDEX IF NOT EXISTS ix_bookings_inquiry_id ON bookings (inquiry_id)"))
+        op.execute(
+            text("CREATE INDEX IF NOT EXISTS ix_bookings_inquiry_id ON bookings (inquiry_id)")
+        )
     if _table_exists("bookings") and not _index_exists("ix_bookings_start_at"):
         op.execute(text("CREATE INDEX IF NOT EXISTS ix_bookings_start_at ON bookings (start_at)"))
     if _table_exists("bookings") and not _index_exists("ix_bookings_status"):

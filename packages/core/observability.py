@@ -55,14 +55,14 @@ def _configure_tracing(app: FastAPI) -> None:
         from opentelemetry.sdk.trace import TracerProvider
         from opentelemetry.sdk.trace.export import BatchSpanProcessor
 
-        service_name = os.getenv("OTEL_SERVICE_NAME") or os.getenv("FLOWBIZ_SERVICE_NAME") or "amp-api"
+        service_name = (
+            os.getenv("OTEL_SERVICE_NAME") or os.getenv("FLOWBIZ_SERVICE_NAME") or "amp-api"
+        )
         resource = Resource.create({"service.name": service_name})
         provider = TracerProvider(resource=resource)
         trace.set_tracer_provider(provider)
 
-        endpoint = os.getenv(
-            "OTEL_EXPORTER_OTLP_ENDPOINT", "http://otel-collector:4318/v1/traces"
-        )
+        endpoint = os.getenv("OTEL_EXPORTER_OTLP_ENDPOINT", "http://otel-collector:4318/v1/traces")
         # OTLP HTTP exporter expects full signal path.
         if endpoint.endswith("/"):
             endpoint = endpoint[:-1]
