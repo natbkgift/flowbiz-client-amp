@@ -2,11 +2,13 @@ import type { Metadata } from 'next';
 import Image from 'next/image';
 
 import { Container } from '@/components/layout/Container';
+import { TrackedLink } from '@/components/analytics/TrackedLink';
 import { LeadForm } from '@/components/forms/LeadForm';
 import { fetchPropertyBySlug } from '@/app/_lib/public-api-server';
 import { CTA } from '@/app/_lib/public-cta';
 import { resolveImageUrl } from '@/app/_lib/public-api-shared';
 import { getDictionary, normalizeLocale } from '@/app/_lib/i18n/get-dictionary';
+import { getInternalLinks } from '@/app/_lib/internal-links';
 
 type PageProps = { params: { locale: string; slug: string } };
 
@@ -144,6 +146,8 @@ export default async function PropertyPage({ params }: PageProps) {
     0
   );
 
+  const internalLinks = getInternalLinks(locale, dict, { from: 'property_detail', includeProjects: true });
+
   return (
     <main className="section" id="main-content">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLd }} />
@@ -204,6 +208,24 @@ export default async function PropertyPage({ params }: PageProps) {
             <div style={{ background: 'var(--color-white)', padding: 24, borderRadius: 12, marginBottom: 24 }}>
               <h2 style={{ marginBottom: 16 }}>Description</h2>
               <p style={{ marginBottom: 0 }}>{property.description ?? '—'}</p>
+            </div>
+
+            <div className="card reveal" style={{ marginBottom: 24 }}>
+              <h2 className="card-title">{locale === 'th' ? 'ไปต่อที่' : 'Next steps'}</h2>
+              <p className="card-subtitle">{locale === 'th' ? 'ลิงก์ภายในที่เกี่ยวข้อง' : 'Explore related pages'}</p>
+              <div className="card-actions">
+                {internalLinks.map((it) => (
+                  <TrackedLink
+                    key={it.href}
+                    className={it.variant === 'secondary' ? 'btn btn-secondary' : 'btn btn-tertiary'}
+                    href={it.href}
+                    eventType={it.eventType}
+                    eventPayload={it.eventPayload}
+                  >
+                    {it.label}
+                  </TrackedLink>
+                ))}
+              </div>
             </div>
 
             <div>

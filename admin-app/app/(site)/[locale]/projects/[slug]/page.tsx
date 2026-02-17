@@ -5,6 +5,7 @@ import { TrackedLink } from '@/components/analytics/TrackedLink';
 import { getDictionary, normalizeLocale } from '@/app/_lib/i18n/get-dictionary';
 import { withLocale } from '@/app/_lib/i18n/routing';
 import { fetchProjectBySlug } from '@/app/_lib/public-api-server';
+import { getInternalLinks } from '@/app/_lib/internal-links';
 
 export async function generateMetadata({
   params,
@@ -114,6 +115,8 @@ export default async function ProjectDetailPage({
     0
   );
 
+  const internalLinks = getInternalLinks(locale, dict, { from: 'project_detail', includeProjects: true });
+
   return (
     <main className="section" id="main-content">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLd }} />
@@ -140,6 +143,24 @@ export default async function ProjectDetailPage({
           >
             {dict.nav.buy}
           </TrackedLink>
+        </div>
+
+        <div className="card reveal" style={{ marginTop: 24 }}>
+          <h2 className="card-title">{locale === 'th' ? 'ลิงก์ที่เกี่ยวข้อง' : 'Explore more'}</h2>
+          <p className="card-subtitle">{locale === 'th' ? 'ไปยังหน้าสำคัญอื่น ๆ' : 'Navigate to key pages'}</p>
+          <div className="card-actions">
+            {internalLinks.map((it) => (
+              <TrackedLink
+                key={it.href}
+                className={it.variant === 'secondary' ? 'btn btn-secondary' : 'btn btn-tertiary'}
+                href={it.href}
+                eventType={it.eventType}
+                eventPayload={it.eventPayload}
+              >
+                {it.label}
+              </TrackedLink>
+            ))}
+          </div>
         </div>
       </Container>
     </main>
