@@ -23,7 +23,8 @@ async def list_projects(
     q = select(Project)
     if status_filter:
         q = q.where(Project.status == status_filter)
-    rows = db.scalars(q.order_by(desc(Project.created_at)).limit(limit)).all()
+    # Determinism: add a stable tie-breaker so identical timestamps cannot reshuffle results.
+    rows = db.scalars(q.order_by(desc(Project.created_at), desc(Project.id)).limit(limit)).all()
     return [ProjectItem.model_validate(r) for r in rows]
 
 
