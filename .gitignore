@@ -76,3 +76,7 @@ alembic_verify.db
 
 # Scraper artifacts
 scraper-renthai/storage/
+
+# Baseline integrity outputs (generated)
+docs/phase_reports/baseline/*/
+docs/phase_reports/baseline/LATEST.txt
