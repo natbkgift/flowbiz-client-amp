@@ -244,7 +244,9 @@ def upgrade() -> None:
             ("duplicate_of_inquiry_id", sa.Uuid(), True, None),
             ("advisor_user_id", sa.Uuid(), True, None),
             ("score", sa.Integer(), False, "0"),
-            ("updated_at", sa.DateTime(timezone=True), False, None),
+            # NOTE: updated_at must be backfillable on existing prod DBs.
+            # Add it nullable with a default first, then backfill + enforce NOT NULL.
+            ("updated_at", sa.DateTime(timezone=True), True, sa.func.now()),
         ]:
             if not _column_exists("inquiries", col):
                 if col in {"duplicate_of_inquiry_id", "advisor_user_id"}:
@@ -302,6 +304,17 @@ def upgrade() -> None:
                 "CURRENT_TIMESTAMP)"
             )
         )
+
+        # Enforce NOT NULL for updated_at after backfill (Postgres best-effort).
+        # For SQLite, altering nullability is not supported; app layer default covers it.
+        if dialect == "postgresql" and _column_exists("inquiries", "updated_at"):
+            op.alter_column(
+                "inquiries",
+                "updated_at",
+                existing_type=sa.DateTime(timezone=True),
+                nullable=False,
+                server_default=sa.func.now(),
+            )
 
 
 def downgrade() -> None:
