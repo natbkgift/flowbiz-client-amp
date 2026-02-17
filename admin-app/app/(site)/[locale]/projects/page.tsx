@@ -4,7 +4,7 @@ import { Container } from '@/components/layout/Container';
 import { ProjectCard } from '@/components/project/ProjectCard';
 import { fetchProjects, fetchProperties } from '@/app/_lib/public-api-server';
 
-import { normalizeLocale } from '@/app/_lib/i18n/get-dictionary';
+import { getDictionary, normalizeLocale } from '@/app/_lib/i18n/get-dictionary';
 
 export async function generateMetadata({
   params,
@@ -40,10 +40,38 @@ type ProjectRow = { name: string; count: number };
 
 export default async function ProjectsPage({ params }: { params: { locale: string } }) {
   const locale = params.locale === 'th' ? 'th' : 'en';
+  const dict = getDictionary(locale);
+  const siteUrl = 'https://amppattaya.com';
+  const canonicalUrl = `${siteUrl}/${locale}/projects`;
+
   const projects = await fetchProjects({ limit: 100 });
   if (projects.length) {
+    const sorted = [...projects].sort((a, b) => (a.name ?? '').localeCompare(b.name ?? '') || (a.slug ?? '').localeCompare(b.slug ?? ''));
+    const jsonLd = JSON.stringify(
+      {
+        '@context': 'https://schema.org',
+        '@type': 'ItemList',
+        name: locale === 'th' ? 'โครงการ' : 'Projects',
+        url: canonicalUrl,
+        itemListElement: sorted.slice(0, 20).map((p, idx) => ({
+          '@type': 'ListItem',
+          position: idx + 1,
+          name: p.name,
+          url: `${siteUrl}/${locale}/projects/${encodeURIComponent(p.slug)}`,
+        })),
+        isPartOf: {
+          '@type': 'WebSite',
+          name: dict.brand.name,
+          url: siteUrl,
+        },
+      },
+      null,
+      0
+    );
+
     return (
       <main className="section" id="main-content">
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLd }} />
         <Container>
           <div className="section-header" style={{ marginBottom: 24 }}>
             <h1 className="section-title">Projects</h1>
@@ -79,8 +107,25 @@ export default async function ProjectsPage({ params }: { params: { locale: strin
     .map(([name, count]) => ({ name, count }))
     .sort((a, b) => b.count - a.count || a.name.localeCompare(b.name));
 
+  const jsonLd = JSON.stringify(
+    {
+      '@context': 'https://schema.org',
+      '@type': 'CollectionPage',
+      name: locale === 'th' ? 'โครงการ' : 'Projects',
+      url: canonicalUrl,
+      isPartOf: {
+        '@type': 'WebSite',
+        name: dict.brand.name,
+        url: siteUrl,
+      },
+    },
+    null,
+    0
+  );
+
   return (
     <main className="section" id="main-content">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLd }} />
       <Container>
         <div className="section-header" style={{ marginBottom: 24 }}>
           <h1 className="section-title">Projects</h1>
