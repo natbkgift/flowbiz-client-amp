@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from datetime import datetime
+from decimal import Decimal
 from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field
@@ -35,3 +36,23 @@ class ProjectUpdate(BaseModel):
     developer_id: UUID | None = None
     area_id: UUID | None = None
     status: str | None = Field(default=None, max_length=32)
+
+
+class TrustBadge(BaseModel):
+    key: str = Field(min_length=1, max_length=64)
+    label: str = Field(min_length=1, max_length=120)
+
+
+class AreaStatisticsSnapshot(BaseModel):
+    area_id: UUID
+    avg_price: Decimal | None = None
+    avg_rent: Decimal | None = None
+    roi_percent: Decimal | None = None
+    as_of: datetime
+
+
+class ProjectEvaluationResponse(BaseModel):
+    evaluation_version: str = "v1"
+    project: ProjectItem
+    area_statistics: AreaStatisticsSnapshot | None = None
+    badges: list[TrustBadge] = []
