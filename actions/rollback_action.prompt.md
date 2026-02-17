@@ -43,40 +43,9 @@ No human approval required.
 
 # ROLLBACK LEVELS
 
-## LEVEL 1 — CODE ROLLBACK
-
-Revert:
-
-previous commit SHA
-
-Then:
-
-rebuild container  
-redeploy services  
-
----
-
-## LEVEL 2 — MIGRATION ROLLBACK
-
-If migration involved:
-
-alembic downgrade
-
-Then:
-
-rebuild  
-redeploy  
-validate schema integrity  
-
----
-
-## LEVEL 3 — DATABASE RESTORE
-
-If data integrity risk:
-
-stop API  
-restore DB from backup  
-restart services  
+LEVEL 1 — CODE ROLLBACK
+LEVEL 2 — MIGRATION ROLLBACK
+LEVEL 3 — DATABASE RESTORE
 
 ---
 
@@ -102,34 +71,3 @@ You must never:
 - remove migrations
 - bypass validation
 - skip redeploy verification
-
----
-
-# POST ROLLBACK STABILIZATION
-
-After rollback:
-
-monitor:
-
-error rate  
-latency  
-conversion signals  
-CRM ingestion  
-SEO integrity  
-
-If stable:
-
-return control to planner.
-
----
-
-# OUTPUT
-
-Rollback must produce:
-
-rollback_id  
-rollback_reason  
-rollback_level  
-previous_sha  
-recovery_status  
-validation_report

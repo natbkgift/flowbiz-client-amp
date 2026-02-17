@@ -62,9 +62,9 @@ For the current phase:
 
 Each execution slice must respect:
 
-≤10 files changed  
-≤800 LOC  
-≤1 migration  
+≤10 files changed  \
+≤800 LOC  \
+≤1 migration
 
 Additive changes only.
 
@@ -72,40 +72,14 @@ No destructive actions.
 
 ---
 
-# CONTRACT PROTECTION
-
-You must not:
-
-- change CRM schema
-- change SEO schema
-- remove routes
-- restructure modules
-- alter architecture layers
-
-Violation → rollback immediately.
-
----
-
-# DETERMINISM LAW
-
-Identical input must produce identical output.
-
-Ranking must remain stable.
-
-Cache keys must remain complete.
-
-No randomness allowed.
-
----
-
 # OBSERVABILITY GATE
 
 Before production deploy:
 
-logs must flow  
-metrics must be active  
-traces must exist  
-alerts must be armed  
+logs must flow  \
+metrics must be active  \
+traces must exist  \
+alerts must be armed
 
 If any missing:
 
@@ -155,14 +129,3 @@ Then:
 Update system_state:
 
 phase_status = completed
-
----
-
-# OUTPUT
-
-Execution must produce:
-
-- slice logs
-- deploy traces
-- validation artifacts
-- phase completion signal

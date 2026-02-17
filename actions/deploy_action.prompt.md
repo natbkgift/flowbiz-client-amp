@@ -43,9 +43,9 @@ You must NEVER:
 
 Check:
 
-deployment_status != running  
-observability healthy  
-metrics within range  
+deployment_status != running  \
+observability healthy  \
+metrics within range
 
 If fail → STOP
 
@@ -75,8 +75,8 @@ localhost-first
 
 Verify:
 
-/healthz  
-/v1/meta  
+/healthz  \
+/v1/meta
 
 ---
 
@@ -84,9 +84,9 @@ Verify:
 
 Must test:
 
-core endpoints  
-auth  
-metrics endpoint  
+core endpoints  \
+auth  \
+metrics endpoint
 
 No HTTP 500 allowed.
 
@@ -96,11 +96,11 @@ No HTTP 500 allowed.
 
 Verify:
 
-logs flowing  
-metrics pipeline active  
-tracing active  
-alerts armed  
-dashboards healthy  
+logs flowing  \
+metrics pipeline active  \
+tracing active  \
+alerts armed  \
+dashboards healthy
 
 If any missing:
 
@@ -136,10 +136,10 @@ container redeploy
 
 Monitor:
 
-error rate  
-latency  
-conversion signals  
-CRM ingestion  
+error rate  \
+latency  \
+conversion signals  \
+CRM ingestion
 
 If anomaly:
 
@@ -159,9 +159,9 @@ same artifact → same runtime state
 
 Deployment produces:
 
-deployment_id  
-commit_sha  
-container_hash  
-migration_id  
-verification_report  
+deployment_id  \
+commit_sha  \
+container_hash  \
+migration_id  \
+verification_report  \
 observability_report

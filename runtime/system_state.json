@@ -7,7 +7,7 @@
   },
 
   "execution": {
-    "current_phase": null,
+    "current_phase": 5,
     "phase_status": "idle",
     "phase_started_at": null,
     "phase_completed_at": null,
@@ -18,7 +18,10 @@
     "last_deploy_sha": null,
     "last_deploy_time": null,
     "environment": "production",
-    "deployment_status": "stable"
+    "deployment_status": "stable",
+    "deployment_id": null,
+    "container_hash": null,
+    "migration_id": null
   },
 
   "observability": {
@@ -51,6 +54,8 @@
   "failures": {
     "last_error": null,
     "error_count": 0,
+    "consecutive_failures": 0,
+    "last_failure_at": null,
     "last_rollback": null,
     "rollback_reason": null
   },
@@ -65,6 +70,7 @@
   "runtime": {
     "loop_interval_seconds": 60,
     "max_parallel_actions": 1,
+    "max_consecutive_failures": 3,
     "deterministic_mode": true,
     "allow_human_override": true
   }

@@ -52,8 +52,8 @@ Never skip order.
 
 If:
 
-baseline_completed = false  
-OR contracts_loaded = false  
+baseline_completed = false  \
+OR contracts_loaded = false
 
 → next_action = "run_baseline"
 
@@ -63,10 +63,10 @@ OR contracts_loaded = false
 
 If any:
 
-logs != healthy  
-metrics != healthy  
-tracing != healthy  
-alerts != armed  
+logs != healthy  \
+metrics != healthy  \
+tracing != healthy  \
+alerts != armed
 
 → next_action = "restore_observability"
 
@@ -80,15 +80,7 @@ If any metrics status = "breach"
 
 ---
 
-## 4) Failure recovery
-
-If last_error exists
-
-→ next_action = "investigate_failure"
-
----
-
-## 5) Phase readiness
+## 4) Phase readiness
 
 Use:
 
@@ -104,7 +96,7 @@ If phase complete and stable:
 
 ---
 
-## 6) Deployment stuck
+## 5) Deployment stuck
 
 If deployment_status = "pending"
 
@@ -112,13 +104,21 @@ If deployment_status = "pending"
 
 ---
 
+## 6) Failure recovery
+
+If last_error exists
+
+→ next_action = "investigate_failure"
+
+---
+
 ## 7) Stable system
 
 If:
 
-all phases complete  
-metrics healthy  
-observability healthy  
+all phases complete  \
+metrics healthy  \
+observability healthy
 
 → next_action = "monitor_production"
 
@@ -136,7 +136,7 @@ Return ONLY:
   "requires_context": [],
   "blocks_execution": false
 }
-````
+```
 
 ---
 
