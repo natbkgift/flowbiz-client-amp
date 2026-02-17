@@ -6,6 +6,7 @@ Gate rules (Platform V2 Layer 2):
 
 This is a heuristic/static check; it is designed to catch accidental drift.
 """
+
 from __future__ import annotations
 
 import argparse
