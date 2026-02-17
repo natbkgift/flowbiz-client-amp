@@ -57,7 +57,7 @@ Confirm:
 * CSV: additive-only
 * JWT keys unchanged (sub, role, exp)
 * PDD: no drift
-* MDS: PASS through 0012
+* MDS: PASS through current Alembic head (currently: `0020_v3_media_image_urls`)
 
 If fail → STOP
 
@@ -171,9 +171,10 @@ docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d
 ```bash
 docker compose exec api alembic upgrade head
 docker compose exec api alembic current
+docker compose exec api alembic heads
 ```
 
-Expected: `0012`
+Expected: `alembic current` matches `alembic heads` (no drift)
 
 If fail → follow ROLLBACK_RUNBOOK.md Level 2
 
@@ -251,7 +252,7 @@ Deployment complete when:
 
 * CI green
 * Merge completed
-* Alembic at 0012
+* Alembic current matches Alembic head (no drift)
 * Localhost verification PASS
 * Public verification PASS
 * Logs clean 3+ minutes
