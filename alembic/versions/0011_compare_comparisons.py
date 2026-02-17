@@ -67,10 +67,7 @@ def upgrade() -> None:
 
     if _table_exists("comparisons") and not _index_exists("ix_comparisons_created_at"):
         op.execute(
-            text(
-                "CREATE INDEX IF NOT EXISTS ix_comparisons_created_at "
-                "ON comparisons (created_at)"
-            )
+            text("CREATE INDEX IF NOT EXISTS ix_comparisons_created_at ON comparisons (created_at)")
         )
 
 

@@ -33,6 +33,7 @@ def _get_inquiry_rate_limiter() -> SlidingWindowRateLimiter:
         _inquiry_rate_limiter_limit = limit
     return _inquiry_rate_limiter
 
+
 router = APIRouter(prefix="/v1", tags=["crm"])
 
 

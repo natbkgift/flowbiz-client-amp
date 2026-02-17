@@ -284,17 +284,11 @@ def upgrade() -> None:
         # Best-effort indexes for postgres.
         if not _index_exists("ix_inquiries_email_hash"):
             op.execute(
-                text(
-                    "CREATE INDEX IF NOT EXISTS ix_inquiries_email_hash "
-                    "ON inquiries (email_hash)"
-                )
+                text("CREATE INDEX IF NOT EXISTS ix_inquiries_email_hash ON inquiries (email_hash)")
             )
         if not _index_exists("ix_inquiries_phone_hash"):
             op.execute(
-                text(
-                    "CREATE INDEX IF NOT EXISTS ix_inquiries_phone_hash "
-                    "ON inquiries (phone_hash)"
-                )
+                text("CREATE INDEX IF NOT EXISTS ix_inquiries_phone_hash ON inquiries (phone_hash)")
             )
 
         # Ensure updated_at is populated for existing rows (postgres + sqlite safe).

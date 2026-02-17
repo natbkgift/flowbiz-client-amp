@@ -25,9 +25,8 @@ async def list_items(
 ) -> list[MarketplaceItemItem]:
     q = select(MarketplaceItem).where(MarketplaceItem.status == "published")
     if category:
-        q = (
-            q.join(MarketplaceCategory, MarketplaceCategory.id == MarketplaceItem.category_id)
-            .where(MarketplaceCategory.slug == category)
-        )
+        q = q.join(
+            MarketplaceCategory, MarketplaceCategory.id == MarketplaceItem.category_id
+        ).where(MarketplaceCategory.slug == category)
     rows = db.scalars(q.order_by(asc(MarketplaceItem.name)).limit(limit)).all()
     return [MarketplaceItemItem.model_validate(r) for r in rows]

@@ -50,6 +50,7 @@ async def add_security_headers(request: Request, call_next):
     response.headers.setdefault("Referrer-Policy", "no-referrer")
     return response
 
+
 app.include_router(health.router)
 app.include_router(meta.router)
 app.include_router(auth.router)
@@ -73,6 +74,16 @@ app.include_router(projects_router)
 app.include_router(seller_router)
 app.include_router(marketplace_router)
 app.include_router(admin_properties_router)
+
+# Compatibility: allow admin APIs under /v1/admin/* (behind nginx: /api/v1/admin/*)
+app.include_router(admin_seller_router, prefix="/v1")
+app.include_router(admin_marketplace_router, prefix="/v1")
+app.include_router(admin.router, prefix="/v1")
+app.include_router(admin_crm_router, prefix="/v1")
+app.include_router(admin_analytics_router, prefix="/v1")
+app.include_router(admin_domain_router, prefix="/v1")
+app.include_router(admin_rbac_router, prefix="/v1")
+app.include_router(admin_properties_router, prefix="/v1")
 
 
 def bootstrap_admin_user() -> None:

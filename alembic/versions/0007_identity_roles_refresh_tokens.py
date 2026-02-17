@@ -117,9 +117,7 @@ def upgrade() -> None:
 
     if _table_exists("refresh_tokens") and not _index_exists("ix_refresh_tokens_user_id"):
         op.execute(
-            text(
-                "CREATE INDEX IF NOT EXISTS ix_refresh_tokens_user_id ON refresh_tokens (user_id)"
-            )
+            text("CREATE INDEX IF NOT EXISTS ix_refresh_tokens_user_id ON refresh_tokens (user_id)")
         )
     if _table_exists("refresh_tokens") and not _index_exists("ix_refresh_tokens_expires_at"):
         op.execute(

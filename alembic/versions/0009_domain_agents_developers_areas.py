@@ -90,10 +90,7 @@ def upgrade() -> None:
         )
     if _table_exists("developers") and not _index_exists("ix_developers_slug"):
         op.execute(
-            text(
-                "CREATE UNIQUE INDEX IF NOT EXISTS ix_developers_slug "
-                "ON developers (slug)"
-            )
+            text("CREATE UNIQUE INDEX IF NOT EXISTS ix_developers_slug ON developers (slug)")
         )
 
     if not _table_exists("agents"):

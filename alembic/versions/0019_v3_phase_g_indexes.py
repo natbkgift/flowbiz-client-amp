@@ -65,26 +65,17 @@ def upgrade() -> None:
 
         if not _index_exists("ix_inquiries_email_hash"):
             op.execute(
-                text(
-                    "CREATE INDEX IF NOT EXISTS ix_inquiries_email_hash "
-                    "ON inquiries (email_hash)"
-                )
+                text("CREATE INDEX IF NOT EXISTS ix_inquiries_email_hash ON inquiries (email_hash)")
             )
 
         if not _index_exists("ix_inquiries_phone_hash"):
             op.execute(
-                text(
-                    "CREATE INDEX IF NOT EXISTS ix_inquiries_phone_hash "
-                    "ON inquiries (phone_hash)"
-                )
+                text("CREATE INDEX IF NOT EXISTS ix_inquiries_phone_hash ON inquiries (phone_hash)")
             )
 
         if not _index_exists("ix_inquiries_created_at"):
             op.execute(
-                text(
-                    "CREATE INDEX IF NOT EXISTS ix_inquiries_created_at "
-                    "ON inquiries (created_at)"
-                )
+                text("CREATE INDEX IF NOT EXISTS ix_inquiries_created_at ON inquiries (created_at)")
             )
 
     if _table_exists("lead_assignments") and not _index_exists(
@@ -102,15 +93,10 @@ def upgrade() -> None:
 
     if _table_exists("properties") and not _index_exists("ix_properties_project_id"):
         op.execute(
-            text(
-                "CREATE INDEX IF NOT EXISTS ix_properties_project_id "
-                "ON properties (project_id)"
-            )
+            text("CREATE INDEX IF NOT EXISTS ix_properties_project_id ON properties (project_id)")
         )
 
-    if _table_exists("seller_submissions") and not _index_exists(
-        "ix_seller_submissions_status"
-    ):
+    if _table_exists("seller_submissions") and not _index_exists("ix_seller_submissions_status"):
         op.execute(
             text(
                 "CREATE INDEX IF NOT EXISTS ix_seller_submissions_status "

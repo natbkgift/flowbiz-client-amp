@@ -75,19 +75,13 @@ def upgrade() -> None:
 
     if _table_exists("inquiries") and not _index_exists("ix_inquiries_property_id"):
         op.execute(
-            text(
-                "CREATE INDEX IF NOT EXISTS ix_inquiries_property_id "
-                "ON inquiries (property_id)"
-            )
+            text("CREATE INDEX IF NOT EXISTS ix_inquiries_property_id ON inquiries (property_id)")
         )
     if _table_exists("inquiries") and not _index_exists("ix_inquiries_email"):
         op.execute(text("CREATE INDEX IF NOT EXISTS ix_inquiries_email ON inquiries (email)"))
     if _table_exists("inquiries") and not _index_exists("ix_inquiries_created_at"):
         op.execute(
-            text(
-                "CREATE INDEX IF NOT EXISTS ix_inquiries_created_at "
-                "ON inquiries (created_at)"
-            )
+            text("CREATE INDEX IF NOT EXISTS ix_inquiries_created_at ON inquiries (created_at)")
         )
 
     if not _table_exists("viewings"):
@@ -110,17 +104,11 @@ def upgrade() -> None:
 
     if _table_exists("viewings") and not _index_exists("ix_viewings_inquiry_id"):
         op.execute(
-            text(
-                "CREATE INDEX IF NOT EXISTS ix_viewings_inquiry_id "
-                "ON viewings (inquiry_id)"
-            )
+            text("CREATE INDEX IF NOT EXISTS ix_viewings_inquiry_id ON viewings (inquiry_id)")
         )
     if _table_exists("viewings") and not _index_exists("ix_viewings_scheduled_at"):
         op.execute(
-            text(
-                "CREATE INDEX IF NOT EXISTS ix_viewings_scheduled_at "
-                "ON viewings (scheduled_at)"
-            )
+            text("CREATE INDEX IF NOT EXISTS ix_viewings_scheduled_at ON viewings (scheduled_at)")
         )
 
 

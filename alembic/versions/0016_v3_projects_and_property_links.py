@@ -134,10 +134,7 @@ def upgrade() -> None:
 
         if not _index_exists("ix_properties_area_id"):
             op.execute(
-                text(
-                    "CREATE INDEX IF NOT EXISTS ix_properties_area_id "
-                    "ON properties (area_id)"
-                )
+                text("CREATE INDEX IF NOT EXISTS ix_properties_area_id ON properties (area_id)")
             )
         if not _index_exists("ix_properties_developer_id"):
             op.execute(
@@ -149,8 +146,7 @@ def upgrade() -> None:
         if not _index_exists("ix_properties_project_id"):
             op.execute(
                 text(
-                    "CREATE INDEX IF NOT EXISTS ix_properties_project_id "
-                    "ON properties (project_id)"
+                    "CREATE INDEX IF NOT EXISTS ix_properties_project_id ON properties (project_id)"
                 )
             )
 

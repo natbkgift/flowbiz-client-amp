@@ -85,9 +85,7 @@ async def refresh(payload: RefreshRequest, db: Session = Depends(get_db)) -> Tok
     refresh_hash = hash_refresh_token(payload.refresh_token)
 
     token_row = db.scalar(
-        select(RefreshToken)
-        .where(RefreshToken.token_hash == refresh_hash)
-        .with_for_update()
+        select(RefreshToken).where(RefreshToken.token_hash == refresh_hash).with_for_update()
     )
     if token_row is None or token_row.revoked_at is not None:
         raise HTTPException(
