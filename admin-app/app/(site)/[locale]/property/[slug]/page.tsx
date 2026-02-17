@@ -6,15 +6,57 @@ import { LeadForm } from '@/components/forms/LeadForm';
 import { fetchPropertyBySlug } from '@/app/_lib/public-api-server';
 import { CTA } from '@/app/_lib/public-cta';
 import { resolveImageUrl } from '@/app/_lib/public-api-shared';
+import { getDictionary, normalizeLocale } from '@/app/_lib/i18n/get-dictionary';
 
-type PageProps = { params: { slug: string } };
+type PageProps = { params: { locale: string; slug: string } };
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+  const locale = normalizeLocale(params.locale);
+  const dict = getDictionary(locale);
+  const canonical = `/${locale}/property/${encodeURIComponent(params.slug)}`;
+
   const p = await fetchPropertyBySlug(params.slug);
-  if (!p) return { title: 'Property Not Found | Asset Management Property' };
+  if (!p) {
+    const title = `${dict.brand.name} | Property`;
+    return {
+      title,
+      alternates: {
+        canonical,
+        languages: {
+          en: `/en/property/${encodeURIComponent(params.slug)}`,
+          th: `/th/property/${encodeURIComponent(params.slug)}`,
+        },
+      },
+      openGraph: {
+        type: 'website',
+        url: canonical,
+        title,
+        siteName: dict.brand.name,
+        locale: locale === 'th' ? 'th_TH' : 'en_US',
+      },
+    };
+  }
+
+  const title = `${p.title} | ${dict.brand.name}`;
+  const description = `${p.address}, ${p.city}`;
   return {
-    title: `${p.title} | Asset Management Property`,
-    description: `${p.address}, ${p.city}`,
+    title,
+    description,
+    alternates: {
+      canonical,
+      languages: {
+        en: `/en/property/${encodeURIComponent(params.slug)}`,
+        th: `/th/property/${encodeURIComponent(params.slug)}`,
+      },
+    },
+    openGraph: {
+      type: 'website',
+      url: canonical,
+      title,
+      description,
+      siteName: dict.brand.name,
+      locale: locale === 'th' ? 'th_TH' : 'en_US',
+    },
   };
 }
 
@@ -24,6 +66,8 @@ function formatPriceTHB(price: number): string {
 }
 
 export default async function PropertyPage({ params }: PageProps) {
+  const locale = normalizeLocale(params.locale);
+  const dict = getDictionary(locale);
   const property = await fetchPropertyBySlug(params.slug);
   if (!property) {
     return (
@@ -35,6 +79,9 @@ export default async function PropertyPage({ params }: PageProps) {
     );
   }
 
+  const siteUrl = 'https://amppattaya.com';
+  const canonicalUrl = `${siteUrl}/${locale}/property/${encodeURIComponent(params.slug)}`;
+
   const images = (property.local_images ?? property.images ?? [])
     .map((u) => resolveImageUrl(u))
     .filter((v): v is string => Boolean(v));
@@ -43,8 +90,63 @@ export default async function PropertyPage({ params }: PageProps) {
   const gallery = cover ? [cover, ...images.filter((u) => u !== cover)] : images;
   const main = gallery[0] ?? null;
 
+  const priceNumber = Number(property.price);
+  const priceValue = Number.isFinite(priceNumber) ? Math.round(priceNumber) : undefined;
+
+  const jsonLd = JSON.stringify(
+    [
+      {
+        '@context': 'https://schema.org',
+        '@type': 'Product',
+        name: property.title,
+        description: property.description ?? undefined,
+        sku: property.id,
+        url: canonicalUrl,
+        image: gallery.slice(0, 8),
+        brand: {
+          '@type': 'Brand',
+          name: dict.brand.name,
+        },
+        offers: {
+          '@type': 'Offer',
+          url: canonicalUrl,
+          priceCurrency: 'THB',
+          price: priceValue,
+          availability: 'https://schema.org/InStock',
+        },
+      },
+      {
+        '@context': 'https://schema.org',
+        '@type': 'BreadcrumbList',
+        itemListElement: [
+          {
+            '@type': 'ListItem',
+            position: 1,
+            name: locale === 'th' ? 'หน้าแรก' : 'Home',
+            item: `${siteUrl}/${locale}`,
+          },
+          {
+            '@type': 'ListItem',
+            position: 2,
+            name: dict.nav.buy,
+            item: `${siteUrl}/${locale}/buy`,
+          },
+          {
+            '@type': 'ListItem',
+            position: 3,
+            name: property.title,
+            item: canonicalUrl,
+          },
+        ],
+      },
+    ],
+    null,
+    0
+  );
+
   return (
     <main className="section" id="main-content">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLd }} />
       <Container>
         <div className="detail-layout">
           <div className="detail-main">
