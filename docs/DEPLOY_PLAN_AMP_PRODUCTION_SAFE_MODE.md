@@ -137,14 +137,16 @@ cd /opt/flowbiz/clients/flowbiz-client-amp
 ```bash
 docker compose ps
 docker compose exec <db_service> printenv POSTGRES_DB
+docker compose exec <db_service> printenv POSTGRES_USER
+mkdir -p backups
 docker compose exec <db_service> \
-  pg_dump -U postgres -Fc <DB_NAME> > backup_pre_v2.dump
+  pg_dump -U <DB_USER> -Fc <DB_NAME> > backups/backup_pre_v2.dump
 ```
 
 Verify:
 
 ```bash
-ls -lh backup_pre_v2.dump
+ls -lh backups/backup_pre_v2.dump
 ```
 
 ---
