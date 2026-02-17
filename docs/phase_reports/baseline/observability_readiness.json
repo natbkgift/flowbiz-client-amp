@@ -1,0 +1,30 @@
+{
+  "contracts_present": {
+    "metrics_contract": true,
+    "observability_contract": true
+  },
+  "integration_keyword_hits": {
+    "scripts/baseline_integrity.py": [
+      "datadog",
+      "loguru",
+      "newrelic",
+      "opentelemetry",
+      "otel",
+      "pino",
+      "prometheus",
+      "sentry",
+      "statsd",
+      "structlog",
+      "winston"
+    ]
+  },
+  "repo_detection_only": true,
+  "runtime_validation": {
+    "alerts": "unknown",
+    "dashboards": "unknown",
+    "gate_pass": false,
+    "logs": "unknown",
+    "metrics_pipeline": "unknown",
+    "traces": "unknown"
+  }
+}

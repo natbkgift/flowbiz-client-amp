@@ -1,9 +1,9 @@
 # BASELINE INTEGRITY REPORT
 
 ## Git
-- head: `1b31a9f66846aa8bc006d809616f669b78018ae5`
+- head: `b35bfb5b36d35005f73a7853b0fa52a70c3f6964`
 - branch: `main`
-- status_porcelain_lines: `5`
+- status_porcelain_lines: `1`
 - diff_vs_origin_main_lines: `0`
 
 ## Snapshot Hashes
@@ -13,7 +13,9 @@
 | cache_key_map.json | `98c4dd41ce4655bbb11986388f7130004695bf4cc66814d573e8d641af43296b` |
 | crm_payload_snapshot.json | `f94329dacaf0ef223c28bd0d3666861635e8ac2eca500181aea46686ba5c7328` |
 | db_schema_snapshot.json | `2700f905506df7ded1afef1ca59d9b6035995a6d9c559fc5de97560c3fd84ac4` |
-| git_state.json | `3bf5987b29c306ae89db24ddcafed7ce2c186c444dbbadb1a01fc033730aa4ff` |
+| git_state.json | `7fa90e99f1a3f200544e00f1ae483d3b0c5f6037f9ba1650a663bc6442ece253` |
+| metric_baseline_state.json | `c36548b2d6df7210af096cf00768c321063c4f8fe4726707c65cc5030359144b` |
+| observability_readiness.json | `a908de839687b0b59a6b52c8d0bb63e41326ebeebba08eea4a2fdbb737b54083` |
 | regression_surface_map.json | `3fe431ed4af6f07a6da6acb3658b89deeed13bca8e945ecf8d5423ce702afe60` |
 | route_signature.json | `2349528603987b27ab90e3b34158f08173c1110bfd8606a0d8c9991a9247fbb5` |
 | seo_metadata_snapshot.json | `359386c9940be7e96c3b52b81f70233aac09296b453d5b7d1fdd11d23208ad6a` |

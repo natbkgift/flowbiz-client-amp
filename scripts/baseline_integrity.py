@@ -381,6 +381,72 @@ def regression_surface_map(*, routes: list[Route], api_routes: list[Route], db: 
     }
 
 
+def observability_readiness_snapshot() -> dict[str, Any]:
+    """Repo-only best-effort: detect presence of common observability integrations.
+
+    This does NOT validate runtime pipelines, alerts, or dashboards.
+    """
+
+    keywords = [
+        "opentelemetry",
+        "otel",
+        "sentry",
+        "datadog",
+        "newrelic",
+        "prometheus",
+        "statsd",
+        "pino",
+        "winston",
+        "structlog",
+        "loguru",
+    ]
+    rx = re.compile(r"(" + "|".join(re.escape(k) for k in keywords) + r")", re.IGNORECASE)
+
+    hits: dict[str, list[str]] = {}
+    for path in _iter_files_with_suffixes(REPO_ROOT, (".py", ".ts", ".tsx", ".js", ".jsx")):
+        text = _read_text_safe(path)
+        found = sorted({m.group(1).lower() for m in rx.finditer(text)})
+        if found:
+            hits[_rel(path)] = found
+
+    # Contract presence (docs) is a gate too.
+    contract_docs = {
+        "metrics_contract": (REPO_ROOT / "docs" / "governance" / "metrics.yaml").exists(),
+        "observability_contract": (REPO_ROOT / "docs" / "governance" / "observability.md").exists(),
+    }
+
+    return {
+        "repo_detection_only": True,
+        "contracts_present": contract_docs,
+        "integration_keyword_hits": hits,
+        "runtime_validation": {
+            "logs": "unknown",
+            "traces": "unknown",
+            "metrics_pipeline": "unknown",
+            "alerts": "unknown",
+            "dashboards": "unknown",
+            "gate_pass": False,
+        },
+    }
+
+
+def metric_baseline_state_snapshot() -> dict[str, Any]:
+    """Repo-only placeholder: runtime baselines require staging/prod telemetry."""
+
+    metrics_path = REPO_ROOT / "docs" / "governance" / "metrics.yaml"
+    metrics_contract_sha = None
+    if metrics_path.exists():
+        metrics_contract_sha = _sha256_bytes(metrics_path.read_bytes())
+
+    return {
+        "repo_detection_only": True,
+        "metrics_contract_sha256": metrics_contract_sha,
+        "baseline_window_days": 14,
+        "runtime_baseline": "unavailable_in_repo_context",
+        "gate_pass": False,
+    }
+
+
 def _md_table(rows: Iterable[tuple[str, str]]) -> str:
     out = ["| Artifact | SHA256 |", "|---|---|"]
     for name, h in rows:
@@ -440,6 +506,12 @@ def main() -> int:
     cache = cache_key_map()
     cache_hash = _write_json(OUT_DIR / "cache_key_map.json", cache)
 
+    observability = observability_readiness_snapshot()
+    observability_hash = _write_json(OUT_DIR / "observability_readiness.json", observability)
+
+    metric_baseline = metric_baseline_state_snapshot()
+    metric_baseline_hash = _write_json(OUT_DIR / "metric_baseline_state.json", metric_baseline)
+
     regression = regression_surface_map(routes=web_routes, api_routes=api, db=db)
     regression_hash = _write_json(OUT_DIR / "regression_surface_map.json", regression)
 
@@ -452,6 +524,8 @@ def main() -> int:
         "structured_data_snapshot.json": structured_hash,
         "crm_payload_snapshot.json": crm_hash,
         "cache_key_map.json": cache_hash,
+        "observability_readiness.json": observability_hash,
+        "metric_baseline_state.json": metric_baseline_hash,
         "regression_surface_map.json": regression_hash,
     }
 
