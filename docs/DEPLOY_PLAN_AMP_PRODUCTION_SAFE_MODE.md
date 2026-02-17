@@ -162,8 +162,16 @@ git pull origin main
 ## 6.3 Build Stack
 
 ```bash
+export BUILD_SHA=$(git rev-parse --short HEAD)
 docker compose -f docker-compose.yml -f docker-compose.prod.yml build
+docker compose -f docker-compose.yml -f docker-compose.prod.yml build --build-arg GIT_SHA=$BUILD_SHA
 docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d
+```
+
+Observability services (localhost only):
+
+```bash
+curl -sS http://127.0.0.1:9001/api/health
 ```
 
 ---
