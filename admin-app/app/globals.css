@@ -209,6 +209,25 @@ select {
   color: var(--color-text);
 }
 
+.nav-link {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+.nav-link--cta {
+  padding: 8px 12px;
+  border-radius: 999px;
+  background: var(--brand-gold);
+  color: #0b1220;
+  border: 1px solid rgba(0, 0, 0, 0.12);
+}
+
+.nav-link--cta:hover {
+  background: var(--brand-gold-hover);
+  color: #0b1220;
+}
+
 .nav a:hover {
   color: var(--color-primary);
 }

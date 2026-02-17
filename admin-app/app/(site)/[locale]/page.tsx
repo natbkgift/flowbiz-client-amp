@@ -34,7 +34,6 @@ export default function HomePage({ params }: { params: { locale: string } }) {
         <Container>
           <div className="hero-grid">
             <div>
-              <p className="eyebrow">{dict.brand.tagline}</p>
               <h1 className="headline">{dict.home.heroTitle}</h1>
               <p className="subhead">{dict.home.heroSubtitle}</p>
               <div className="cta-row">
@@ -118,18 +117,6 @@ export default function HomePage({ params }: { params: { locale: string } }) {
               <li key={b}>{b}</li>
             ))}
           </ul>
-
-          <div className="cta-strip reveal">
-            <div className="cta-strip__text">{dict.home.premiumCtaBody}</div>
-            <TrackedLink
-              className="btn btn-cta"
-              href={withLocale(locale, '/contact')}
-              eventType="cta_click"
-              eventPayload={{ cta: 'speak_to_advisor', from: 'home_trust_strip' }}
-            >
-              {dict.cta.speakToAdvisor}
-            </TrackedLink>
-          </div>
         </Container>
       </section>
 

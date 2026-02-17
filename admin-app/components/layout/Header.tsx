@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 
 import type { Dictionary, Locale } from '../../app/_lib/i18n/types';
 import { switchLocaleInPathname, withLocale } from '../../app/_lib/i18n/routing';
@@ -26,7 +26,6 @@ export function Header({ locale, dict }: { locale: Locale; dict: Dictionary }) {
 
   const items: NavItem[] = useMemo(
     () => [
-      { href: '/', label: dict.nav.home },
       { href: '/invest', label: dict.nav.invest },
       { href: '/buy', label: dict.nav.buy },
       { href: '/area-guide', label: dict.nav.areaGuide },
@@ -36,6 +35,11 @@ export function Header({ locale, dict }: { locale: Locale; dict: Dictionary }) {
   );
 
   const langLabel = locale === 'th' ? dict.common.thai : dict.common.english;
+
+  useEffect(() => {
+    // Close mobile menu on navigation.
+    setMobileOpen(false);
+  }, [pathname]);
 
   return (
     <>
@@ -52,7 +56,11 @@ export function Header({ locale, dict }: { locale: Locale; dict: Dictionary }) {
 
           <nav className="nav desktop-only" aria-label="Main">
             {items.map((it) => (
-              <Link key={it.href} href={withLocale(locale, it.href)}>
+              <Link
+                key={it.href}
+                href={withLocale(locale, it.href)}
+                className={it.href === '/contact' ? 'nav-link nav-link--cta' : 'nav-link'}
+              >
                 {it.label}
               </Link>
             ))}
@@ -77,6 +85,7 @@ export function Header({ locale, dict }: { locale: Locale; dict: Dictionary }) {
               className="hamburger mobile-only"
               onClick={() => setMobileOpen((v) => !v)}
               aria-label="Menu"
+              aria-controls="mobile-menu"
               aria-expanded={mobileOpen}
             >
               <HamburgerIcon />
@@ -91,6 +100,7 @@ export function Header({ locale, dict }: { locale: Locale; dict: Dictionary }) {
             key={it.href}
             href={withLocale(locale, it.href)}
             onClick={() => setMobileOpen(false)}
+            className={it.href === '/contact' ? 'nav-link nav-link--cta' : 'nav-link'}
           >
             {it.label}
           </Link>

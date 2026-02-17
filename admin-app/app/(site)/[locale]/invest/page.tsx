@@ -26,7 +26,6 @@ export default function InvestPage({ params }: { params: { locale: string } }) {
     <main id="main-content">
       <section className="hero hero--page">
         <Container>
-          <p className="eyebrow">{dict.brand.tagline}</p>
           <h1 className="headline">{dict.invest.title}</h1>
           <p className="subhead">{dict.invest.subtitle}</p>
           <div className="cta-row">

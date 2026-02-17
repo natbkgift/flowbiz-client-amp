@@ -29,7 +29,6 @@ export default async function BuyPage({ params }: { params: { locale: string } }
     <main id="main-content">
       <section className="hero hero--page">
         <Container>
-          <p className="eyebrow">{dict.brand.tagline}</p>
           <h1 className="headline">{dict.buy.title}</h1>
           <p className="subhead">{dict.buy.subtitle}</p>
           <div className="cta-row">

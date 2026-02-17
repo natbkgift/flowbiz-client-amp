@@ -27,7 +27,13 @@ export function middleware(req: NextRequest) {
   if (pathname.startsWith('/api/')) return NextResponse.next();
 
   // Ignore admin routes (keep existing URLs stable).
-  if (pathname.startsWith('/login') || pathname.startsWith('/leads') || pathname.startsWith('/public')) {
+  if (
+    pathname.startsWith('/login') ||
+    pathname.startsWith('/leads') ||
+    pathname.startsWith('/inquiries') ||
+    pathname.startsWith('/analytics') ||
+    pathname.startsWith('/public')
+  ) {
     return NextResponse.next();
   }
 

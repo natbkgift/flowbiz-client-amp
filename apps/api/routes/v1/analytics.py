@@ -9,7 +9,11 @@ from packages.core.abuse import SlidingWindowRateLimiter
 from packages.core.config import settings
 from packages.core.database import get_db
 from packages.core.models import AnalyticsEvent
-from packages.core.schemas.analytics import AnalyticsEventCreate, AnalyticsEventResponse, EventCreateV2
+from packages.core.schemas.analytics import (
+    AnalyticsEventCreate,
+    AnalyticsEventResponse,
+    EventCreateV2,
+)
 
 router = APIRouter(prefix="/v1", tags=["analytics"])
 
@@ -43,7 +47,10 @@ def _enforce_payload_size(payload: dict | None) -> None:
     except Exception:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid payload")
     if size > int(settings.events_max_payload_bytes):
-        raise HTTPException(status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE, detail="Payload too large")
+        raise HTTPException(
+            status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
+            detail="Payload too large",
+        )
 
 
 @router.post(

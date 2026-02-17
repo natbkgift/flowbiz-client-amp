@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 
 import { Container } from '@/components/layout/Container';
 import { ProjectCard } from '@/components/project/ProjectCard';
-import { fetchProperties } from '@/app/_lib/public-api-server';
+import { fetchProjects, fetchProperties } from '@/app/_lib/public-api-server';
 
 export const metadata: Metadata = {
   title: 'Projects | Asset Management Property',
@@ -11,7 +11,34 @@ export const metadata: Metadata = {
 
 type ProjectRow = { name: string; count: number };
 
-export default async function ProjectsPage() {
+export default async function ProjectsPage({ params }: { params: { locale: string } }) {
+  const locale = params.locale === 'th' ? 'th' : 'en';
+  const projects = await fetchProjects({ limit: 100 });
+  if (projects.length) {
+    return (
+      <main className="section" id="main-content">
+        <Container>
+          <div className="section-header" style={{ marginBottom: 24 }}>
+            <h1 className="section-title">Projects</h1>
+            <p className="section-subtitle">Published projects</p>
+          </div>
+
+          <div className="grid grid-3">
+            {projects.map((p) => (
+              <ProjectCard
+                key={p.id}
+                name={p.name}
+                count={0}
+                slug={p.slug}
+                locale={locale}
+              />
+            ))}
+          </div>
+        </Container>
+      </main>
+    );
+  }
+
   const res = await fetchProperties({ limit: 100, sort: 'newest' });
 
   const byName = new Map<string, number>();

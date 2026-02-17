@@ -22,9 +22,6 @@ export function Footer({ locale, dict }: { locale: Locale; dict: Dictionary }) {
             <p>
               <Link href={withLocale(locale, '/buy')}>{dict.nav.buy}</Link>
             </p>
-            <p>
-              <Link href={withLocale(locale, '/area-guide')}>{dict.nav.areaGuide}</Link>
-            </p>
           </div>
 
           <div>

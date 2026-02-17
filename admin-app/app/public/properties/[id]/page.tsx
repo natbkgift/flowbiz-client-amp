@@ -89,7 +89,13 @@ export default function PublicPropertyDetailPage({ params }: { params: { id: str
 
       <section className="space-y-3">
         {activeImage ? (
-          <img src={activeImage} alt={property.title} className="w-full h-80 object-cover rounded-lg" />
+          <img
+            src={activeImage}
+            alt={property.title}
+            className="w-full h-80 object-cover rounded-lg"
+            loading="lazy"
+            decoding="async"
+          />
         ) : (
           <div className="w-full h-80 bg-slate-200 rounded-lg" />
         )}
@@ -103,7 +109,13 @@ export default function PublicPropertyDetailPage({ params }: { params: { id: str
                 onClick={() => setActiveImageIndex(idx)}
                 aria-label={`View image ${idx + 1}`}
               >
-                <img src={url} alt="" className="h-16 w-24 object-cover rounded" />
+                <img
+                  src={url}
+                  alt=""
+                  className="h-16 w-24 object-cover rounded"
+                  loading="lazy"
+                  decoding="async"
+                />
               </button>
             ))}
           </div>
