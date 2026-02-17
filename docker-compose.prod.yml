@@ -2,6 +2,9 @@ services:
   api:
     environment:
       - APP_ENV=prod
+      - OTEL_ENABLED=${OTEL_ENABLED:-false}
+      - OTEL_EXPORTER_OTLP_ENDPOINT=${OTEL_EXPORTER_OTLP_ENDPOINT:-http://otel-collector:4318}
+      - OTEL_SERVICE_NAME=${OTEL_SERVICE_NAME:-flowbiz-client-amp-api}
     ports:
       - "127.0.0.1:${VPS_API_PORT:-8001}:8000"
     volumes:
@@ -13,6 +16,45 @@ services:
       - "127.0.0.1:${VPS_ADMIN_PORT:-8002}:3000"
     restart: always
 
+  prometheus:
+    image: prom/prometheus:v2.51.2
+    command:
+      - "--config.file=/etc/prometheus/prometheus.yml"
+      - "--storage.tsdb.path=/prometheus"
+    volumes:
+      - ./observability/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - ./observability/alerts.yml:/etc/prometheus/alerts.yml:ro
+      - prometheus_data:/prometheus
+    restart: always
+
+  alertmanager:
+    image: prom/alertmanager:v0.27.0
+    command:
+      - "--config.file=/etc/alertmanager/alertmanager.yml"
+    volumes:
+      - ./observability/alertmanager.yml:/etc/alertmanager/alertmanager.yml:ro
+    restart: always
+
+  grafana:
+    image: grafana/grafana:10.4.2
+    environment:
+      - GF_SECURITY_ADMIN_USER=${GRAFANA_ADMIN_USER:-admin}
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_ADMIN_PASSWORD:-admin}
+      - GF_USERS_ALLOW_SIGN_UP=false
+    volumes:
+      - ./observability/grafana-datasources.yml:/etc/grafana/provisioning/datasources/datasources.yml:ro
+      - grafana_data:/var/lib/grafana
+    ports:
+      - "127.0.0.1:${VPS_GRAFANA_PORT:-9001}:3000"
+    restart: always
+
+  otel-collector:
+    image: otel/opentelemetry-collector-contrib:0.96.0
+    command: ["--config=/etc/otelcol/config.yml"]
+    volumes:
+      - ./observability/otel-collector.yml:/etc/otelcol/config.yml:ro
+    restart: always
+
   scraper-renthai:
     volumes:
       - ./scraper-renthai/storage:/app/storage
@@ -20,3 +62,7 @@ services:
     environment:
       - MEDIA_ROOT=/media
       - MEDIA_URL_PREFIX=/media
+
+volumes:
+  prometheus_data:
+  grafana_data:

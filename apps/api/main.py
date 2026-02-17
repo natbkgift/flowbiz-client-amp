@@ -31,6 +31,7 @@ from packages.core.config import settings
 from packages.core.database import SessionLocal, init_db
 from packages.core.logging import setup_logging
 from packages.core.models import User
+from packages.core.observability import configure_observability
 
 setup_logging()
 
@@ -40,6 +41,9 @@ app = FastAPI(
     docs_url="/docs" if settings.app_env == "dev" else None,
     redoc_url="/redoc" if settings.app_env == "dev" else None,
 )
+
+
+configure_observability(app)
 
 
 @app.middleware("http")

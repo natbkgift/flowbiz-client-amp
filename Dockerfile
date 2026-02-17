@@ -13,11 +13,21 @@ RUN pip install --no-cache-dir \
     "pydantic>=2.4.0" \
     "email-validator>=2.1.0" \
     "pydantic-settings>=2.0.0" \
+    "prometheus-fastapi-instrumentator>=6.1.0" \
+    "opentelemetry-api>=1.22.0" \
+    "opentelemetry-sdk>=1.22.0" \
+    "opentelemetry-exporter-otlp-proto-http>=1.22.0" \
+    "opentelemetry-instrumentation-fastapi>=0.43b0" \
+    "opentelemetry-instrumentation-requests>=0.43b0" \
     "sqlalchemy>=2.0.0" \
     "alembic>=1.13.0" \
     "psycopg2-binary>=2.9.0" \
     "python-jose[cryptography]>=3.3.0" \
     "bcrypt>=5.0.0"
+
+# Optional build metadata (used by /v1/meta when FLOWBIZ_BUILD_SHA not explicitly set)
+ARG GIT_SHA=local
+ENV GIT_SHA=${GIT_SHA}
 
 # Copy application code
 COPY apps/ ./apps/
