@@ -13,9 +13,36 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const locale = normalizeLocale(params.locale);
   const dict = getDictionary(locale);
+  const canonical = `/${locale}/projects/${encodeURIComponent(params.slug)}`;
+
+  let projectName: string | null = null;
+  try {
+    const project = await fetchProjectBySlug(params.slug);
+    projectName = project?.name ?? null;
+  } catch {
+    projectName = null;
+  }
+
+  const title = projectName ? `${projectName} | ${dict.brand.name}` : `${dict.brand.name} | Project`;
+  const description = 'Project overview with advisory guidance for international buyers.';
   return {
-    title: `${dict.brand.name} | Project`,
-    description: 'Project detail',
+    title,
+    description,
+    alternates: {
+      canonical,
+      languages: {
+        en: `/en/projects/${encodeURIComponent(params.slug)}`,
+        th: `/th/projects/${encodeURIComponent(params.slug)}`,
+      },
+    },
+    openGraph: {
+      type: 'website',
+      url: canonical,
+      title,
+      description,
+      siteName: dict.brand.name,
+      locale: locale === 'th' ? 'th_TH' : 'en_US',
+    },
   };
 }
 
@@ -29,6 +56,9 @@ export default async function ProjectDetailPage({
 
   const project = await fetchProjectBySlug(params.slug);
 
+  const siteUrl = 'https://amppattaya.com';
+  const canonicalUrl = `${siteUrl}/${locale}/projects/${encodeURIComponent(params.slug)}`;
+
   if (!project) {
     return (
       <main className="section" id="main-content">
@@ -40,8 +70,53 @@ export default async function ProjectDetailPage({
     );
   }
 
+  const jsonLd = JSON.stringify(
+    [
+      {
+        '@context': 'https://schema.org',
+        '@type': 'ApartmentComplex',
+        name: project.name,
+        url: canonicalUrl,
+        identifier: project.slug,
+        inLanguage: locale,
+        isPartOf: {
+          '@type': 'WebSite',
+          name: dict.brand.name,
+          url: siteUrl,
+        },
+      },
+      {
+        '@context': 'https://schema.org',
+        '@type': 'BreadcrumbList',
+        itemListElement: [
+          {
+            '@type': 'ListItem',
+            position: 1,
+            name: locale === 'th' ? 'หน้าแรก' : 'Home',
+            item: `${siteUrl}/${locale}`,
+          },
+          {
+            '@type': 'ListItem',
+            position: 2,
+            name: 'Projects',
+            item: `${siteUrl}/${locale}/projects`,
+          },
+          {
+            '@type': 'ListItem',
+            position: 3,
+            name: project.name,
+            item: canonicalUrl,
+          },
+        ],
+      },
+    ],
+    null,
+    0
+  );
+
   return (
     <main className="section" id="main-content">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLd }} />
       <Container>
         <div className="section-header">
           <h1 className="section-title">{project.name}</h1>
