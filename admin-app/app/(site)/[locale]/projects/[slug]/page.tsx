@@ -55,6 +55,8 @@ export default async function ProjectDetailPage({
   const locale = normalizeLocale(params.locale);
   const dict = getDictionary(locale);
 
+  const internalLinks = getInternalLinks(locale, dict, { from: 'project_detail', includeProjects: true });
+
   const project = await fetchProjectBySlug(params.slug);
 
   const siteUrl = 'https://amppattaya.com';
@@ -66,6 +68,23 @@ export default async function ProjectDetailPage({
         <Container>
           <h1 className="section-title">Project not found</h1>
           <p className="section-subtitle">This project may be unpublished.</p>
+          <div className="card reveal" style={{ marginTop: 24 }}>
+            <h2 className="card-title">{locale === 'th' ? 'ลิงก์ที่เกี่ยวข้อง' : 'Explore more'}</h2>
+            <p className="card-subtitle">{locale === 'th' ? 'ไปยังหน้าสำคัญอื่น ๆ' : 'Navigate to key pages'}</p>
+            <div className="card-actions">
+              {internalLinks.map((it) => (
+                <TrackedLink
+                  key={it.href}
+                  className={it.variant === 'secondary' ? 'btn btn-secondary' : 'btn btn-tertiary'}
+                  href={it.href}
+                  eventType={it.eventType}
+                  eventPayload={it.eventPayload}
+                >
+                  {it.label}
+                </TrackedLink>
+              ))}
+            </div>
+          </div>
         </Container>
       </main>
     );
@@ -114,8 +133,6 @@ export default async function ProjectDetailPage({
     null,
     0
   );
-
-  const internalLinks = getInternalLinks(locale, dict, { from: 'project_detail', includeProjects: true });
 
   return (
     <main className="section" id="main-content">
