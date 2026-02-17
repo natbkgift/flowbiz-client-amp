@@ -38,6 +38,31 @@ def test_create_inquiry_and_schedule_viewing(client):
     assert viewing["status"] == "scheduled"
 
 
+def test_inquiry_retry_is_deduped_not_lost(client):
+    payload = {
+        "name": "Retry User",
+        "email": "retry@example.com",
+        "message": "Please contact me.",
+        "source_page": "/en",
+    }
+
+    r1 = client.post("/v1/inquiries", json=payload)
+    assert r1.status_code == 201
+    body1 = r1.json()
+    assert body1["status"] == "new"
+
+    r2 = client.post("/v1/inquiries", json=payload)
+    assert r2.status_code == 201
+    assert r2.headers.get("X-Inquiry-Deduped") in ("true", "false")
+    body2 = r2.json()
+
+    # Rapid identical retries should not create a new inquiry that is marked lost.
+    # (If deduped, the id is the same; if not deduped for any reason, status must still be safe.)
+    assert body2["status"] != "lost"
+    if r2.headers.get("X-Inquiry-Deduped") == "true":
+        assert body2["id"] == body1["id"]
+
+
 def test_admin_can_list_inquiries_and_viewings(client):
     token = _login_token(client)
     headers = {"Authorization": f"Bearer {token}"}

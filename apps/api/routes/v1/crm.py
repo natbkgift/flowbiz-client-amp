@@ -22,6 +22,10 @@ logger = logging.getLogger(__name__)
 _inquiry_rate_limiter: SlidingWindowRateLimiter | None = None
 _inquiry_rate_limiter_limit: int | None = None
 
+# Conversion safety: treat rapid repeat submits as an idempotent retry.
+# This prevents lead loss on client/network retries without changing CRM schema.
+_DUPLICATE_RETRY_WINDOW_SECONDS = 10 * 60
+
 
 def _get_inquiry_rate_limiter() -> SlidingWindowRateLimiter:
     global _inquiry_rate_limiter
@@ -35,6 +39,34 @@ def _get_inquiry_rate_limiter() -> SlidingWindowRateLimiter:
 
 
 router = APIRouter(prefix="/v1", tags=["crm"])
+
+
+def _is_retry_duplicate(*, existing: Inquiry, payload: InquiryCreate) -> bool:
+    """Heuristic: classify as a retry if the user re-submits the same inquiry shortly after.
+
+    This is intentionally conservative: we only dedupe when the submission is highly likely
+    to be a network/UX retry, not a genuine new request.
+    """
+
+    try:
+        now = datetime.now(UTC)
+        created_at = existing.created_at
+        if created_at.tzinfo is None:
+            created_at = created_at.replace(tzinfo=UTC)
+        age_s = (now - created_at).total_seconds()
+    except Exception:
+        return False
+
+    if age_s < 0 or age_s > _DUPLICATE_RETRY_WINDOW_SECONDS:
+        return False
+
+    # Keep the retry condition tight: same property target and same message text.
+    if existing.property_id != payload.property_id:
+        return False
+    if (existing.message or "").strip() != (payload.message or "").strip():
+        return False
+
+    return True
 
 
 def _choose_round_robin_advisor(db: Session) -> User | None:
@@ -128,6 +160,55 @@ async def create_inquiry(
             select(Inquiry).where(or_(*dup_filters)).order_by(Inquiry.created_at.desc())
         )
 
+    # If this looks like a retry, treat it as idempotent: update the existing inquiry and return it.
+    if duplicate_of is not None and _is_retry_duplicate(existing=duplicate_of, payload=payload):
+        # Best-effort enrichment on retry (do not overwrite existing meaningful data).
+        if duplicate_of.source_page is None and payload.source_page:
+            duplicate_of.source_page = payload.source_page
+        if duplicate_of.referrer is None and payload.referrer:
+            duplicate_of.referrer = payload.referrer
+        if duplicate_of.device is None and payload.device:
+            duplicate_of.device = payload.device
+        if duplicate_of.utm_source is None and payload.utm_source:
+            duplicate_of.utm_source = payload.utm_source
+        if duplicate_of.utm_medium is None and payload.utm_medium:
+            duplicate_of.utm_medium = payload.utm_medium
+        if duplicate_of.utm_campaign is None and payload.utm_campaign:
+            duplicate_of.utm_campaign = payload.utm_campaign
+        if duplicate_of.utm_content is None and payload.utm_content:
+            duplicate_of.utm_content = payload.utm_content
+        if duplicate_of.first_touch_timestamp is None and payload.first_touch_timestamp:
+            duplicate_of.first_touch_timestamp = payload.first_touch_timestamp
+        if duplicate_of.submit_timestamp is None and payload.submit_timestamp:
+            duplicate_of.submit_timestamp = payload.submit_timestamp
+
+        db.add(duplicate_of)
+        write_audit_log(
+            db,
+            actor_user_id=None,
+            entity_type="inquiry",
+            entity_id=str(duplicate_of.id),
+            action="retry_deduped",
+            diff={"deduped": True, "window_seconds": _DUPLICATE_RETRY_WINDOW_SECONDS},
+            user_agent=request.headers.get("user-agent"),
+        )
+        db.commit()
+        db.refresh(duplicate_of)
+        response.headers["X-Inquiry-Deduped"] = "true"
+        logger.info(
+            "inquiry_retry_deduped",
+            extra={
+                "inquiry_id": str(duplicate_of.id),
+                "property_id": str(duplicate_of.property_id) if duplicate_of.property_id else None,
+                "client_ip": client_ip,
+                "has_email": bool(duplicate_of.email),
+                "has_phone": bool(duplicate_of.phone),
+            },
+        )
+        return InquiryItem.model_validate(duplicate_of)
+
+    response.headers["X-Inquiry-Deduped"] = "false"
+
     inquiry = Inquiry(
         property_id=payload.property_id,
         name=payload.name,
@@ -153,7 +234,9 @@ async def create_inquiry(
             budget_band=payload.budget_band,
             timeline=payload.timeline,
         ),
-        status="lost" if duplicate_of is not None else "new",
+        # If a previous inquiry exists, keep linkage but do NOT auto-drop the new submission.
+        # Marking as lost here risks lead loss when the user is legitimately re-engaging.
+        status="new",
         duplicate_of_inquiry_id=duplicate_of.id if duplicate_of is not None else None,
     )
     db.add(inquiry)
@@ -173,7 +256,11 @@ async def create_inquiry(
         user_agent=request.headers.get("user-agent"),
     )
 
-    if inquiry.status != "lost" and bool(settings.crm_auto_assign_enabled):
+    # Preserve continuity: if this inquiry is linked to a prior inquiry with an advisor, keep it.
+    if inquiry.advisor_user_id is None and duplicate_of is not None and duplicate_of.advisor_user_id is not None:
+        inquiry.advisor_user_id = duplicate_of.advisor_user_id
+
+    if bool(settings.crm_auto_assign_enabled) and inquiry.advisor_user_id is None:
         advisor = _choose_round_robin_advisor(db)
         if advisor is not None:
             inquiry.advisor_user_id = advisor.id
