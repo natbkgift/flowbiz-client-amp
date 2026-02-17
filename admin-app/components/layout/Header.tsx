@@ -28,10 +28,11 @@ export function Header({ locale, dict }: { locale: Locale; dict: Dictionary }) {
     () => [
       { href: '/invest', label: dict.nav.invest },
       { href: '/buy', label: dict.nav.buy },
+      { href: '/projects', label: locale === 'th' ? 'โครงการ' : 'Projects' },
       { href: '/area-guide', label: dict.nav.areaGuide },
       { href: '/contact', label: dict.nav.contact },
     ],
-    [dict]
+    [dict, locale]
   );
 
   const langLabel = locale === 'th' ? dict.common.thai : dict.common.english;

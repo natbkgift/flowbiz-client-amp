@@ -1,8 +1,8 @@
 import type { Metadata } from 'next';
+import Link from 'next/link';
 import Image from 'next/image';
 
 import { Container } from '@/components/layout/Container';
-import { TrackedLink } from '@/components/analytics/TrackedLink';
 import { LeadForm } from '@/components/forms/LeadForm';
 import { fetchPropertyBySlug } from '@/app/_lib/public-api-server';
 import { CTA } from '@/app/_lib/public-cta';
@@ -70,12 +70,28 @@ function formatPriceTHB(price: number): string {
 export default async function PropertyPage({ params }: PageProps) {
   const locale = normalizeLocale(params.locale);
   const dict = getDictionary(locale);
+  const internalLinks = getInternalLinks(locale, dict, { from: 'property_detail', includeProjects: true });
   const property = await fetchPropertyBySlug(params.slug);
   if (!property) {
     return (
       <main className="section" id="main-content">
         <Container>
           <h1>Property not found</h1>
+          <div className="card reveal" style={{ marginTop: 24 }}>
+            <h2 className="card-title">{locale === 'th' ? 'ไปต่อที่' : 'Next steps'}</h2>
+            <p className="card-subtitle">{locale === 'th' ? 'ลิงก์ภายในที่เกี่ยวข้อง' : 'Explore related pages'}</p>
+            <div className="card-actions">
+              {internalLinks.map((it) => (
+                <Link
+                  key={it.href}
+                  className={it.variant === 'secondary' ? 'btn btn-secondary' : 'btn btn-tertiary'}
+                  href={it.href}
+                >
+                  {it.label}
+                </Link>
+              ))}
+            </div>
+          </div>
         </Container>
       </main>
     );
@@ -146,7 +162,6 @@ export default async function PropertyPage({ params }: PageProps) {
     0
   );
 
-  const internalLinks = getInternalLinks(locale, dict, { from: 'property_detail', includeProjects: true });
 
   return (
     <main className="section" id="main-content">
@@ -215,15 +230,13 @@ export default async function PropertyPage({ params }: PageProps) {
               <p className="card-subtitle">{locale === 'th' ? 'ลิงก์ภายในที่เกี่ยวข้อง' : 'Explore related pages'}</p>
               <div className="card-actions">
                 {internalLinks.map((it) => (
-                  <TrackedLink
+                  <Link
                     key={it.href}
                     className={it.variant === 'secondary' ? 'btn btn-secondary' : 'btn btn-tertiary'}
                     href={it.href}
-                    eventType={it.eventType}
-                    eventPayload={it.eventPayload}
                   >
                     {it.label}
-                  </TrackedLink>
+                  </Link>
                 ))}
               </div>
             </div>
