@@ -19,6 +19,7 @@ from apps.api.routes.v1.analytics import router as analytics_router
 from apps.api.routes.v1.compare import router as compare_router
 from apps.api.routes.v1.crm import router as crm_router
 from apps.api.routes.v1.domain import router as domain_router
+from apps.api.routes.v1.finder import router as finder_router
 from apps.api.routes.v1.investment import router as investment_router
 from apps.api.routes.v1.marketplace import router as marketplace_router
 from apps.api.routes.v1.members import router as members_router
@@ -72,6 +73,7 @@ app.include_router(crm_router)
 app.include_router(compare_router)
 app.include_router(analytics_router)
 app.include_router(domain_router)
+app.include_router(finder_router)
 app.include_router(investment_router)
 app.include_router(members_router)
 app.include_router(projects_router)

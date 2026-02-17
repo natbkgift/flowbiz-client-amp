@@ -460,6 +460,22 @@ class AnalyticsEvent(Base):
     )
 
 
+class FinderIntent(Base):
+    __tablename__ = "finder_intents"
+
+    id: Mapped[UUID] = mapped_column(primary_key=True, default=uuid4)
+    session_id: Mapped[str | None] = mapped_column(String(64), nullable=True, index=True)
+    intent: Mapped[str | None] = mapped_column(String(32), nullable=True)
+    query_hash: Mapped[str] = mapped_column(String(64), nullable=False, index=True)
+    request: Mapped[dict | None] = mapped_column(JSON, nullable=True)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        nullable=False,
+        server_default=func.now(),
+        index=True,
+    )
+
+
 property_type_enum = SAEnum(
     "new",
     "resale",
