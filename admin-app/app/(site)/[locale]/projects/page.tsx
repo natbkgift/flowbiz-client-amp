@@ -79,7 +79,7 @@ export default async function ProjectsPage({ params }: { params: { locale: strin
           </div>
 
           <div className="grid grid-3">
-            {projects.map((p) => (
+            {sorted.map((p) => (
               <ProjectCard
                 key={p.id}
                 name={p.name}
