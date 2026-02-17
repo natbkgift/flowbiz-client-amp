@@ -12,7 +12,7 @@ from packages.core.auth import (
 )
 from packages.core.config import settings
 from packages.core.database import get_db
-from packages.core.models import RefreshToken, User
+from packages.core.models import Member, RefreshToken, User
 from packages.core.schemas.admin_api import LoginRequest, LoginResponse
 from packages.core.schemas.auth import RefreshRequest, TokenPairResponse
 
@@ -36,6 +36,12 @@ async def login(payload: LoginRequest, db: Session = Depends(get_db)) -> LoginRe
             detail="Invalid email or password",
         )
 
+    # Ensure membership profile exists (core-only for V3).
+    existing_member = db.scalar(select(Member).where(Member.user_id == user.id))
+    if existing_member is None:
+        db.add(Member(user_id=user.id, member_type="free"))
+        db.commit()
+
     token = create_access_token(subject=user.email, role=user.role)
     return LoginResponse(access_token=token)
 
@@ -51,6 +57,11 @@ async def login_with_refresh(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid email or password",
         )
+
+    existing_member = db.scalar(select(Member).where(Member.user_id == user.id))
+    if existing_member is None:
+        db.add(Member(user_id=user.id, member_type="free"))
+        db.commit()
 
     access_token = create_access_token(subject=user.email, role=user.role)
     refresh_token = generate_refresh_token()

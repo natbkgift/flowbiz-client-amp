@@ -162,7 +162,13 @@ export default function PublicPropertiesPage() {
                   className="bg-white rounded-lg shadow-sm hover:shadow-md transition overflow-hidden"
                 >
                   {thumbnail ? (
-                    <img src={thumbnail} alt={p.title} className="h-44 w-full object-cover" />
+                    <img
+                      src={thumbnail}
+                      alt={p.title}
+                      className="h-44 w-full object-cover"
+                      loading="lazy"
+                      decoding="async"
+                    />
                   ) : (
                     <div className="h-44 w-full bg-slate-200" />
                   )}

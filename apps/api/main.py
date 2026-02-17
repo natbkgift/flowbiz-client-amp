@@ -6,9 +6,13 @@ from sqlalchemy import select
 from starlette.requests import Request
 
 from apps.api.routes import admin, health
+from apps.api.routes.admin_analytics_v2 import router as admin_analytics_router
 from apps.api.routes.admin_crm import router as admin_crm_router
 from apps.api.routes.admin_domain import router as admin_domain_router
+from apps.api.routes.admin_marketplace import router as admin_marketplace_router
 from apps.api.routes.admin_properties import router as admin_properties_router
+from apps.api.routes.admin_rbac import router as admin_rbac_router
+from apps.api.routes.admin_seller import router as admin_seller_router
 from apps.api.routes.auth_me import router as auth_me_router
 from apps.api.routes.v1 import auth, meta
 from apps.api.routes.v1.analytics import router as analytics_router
@@ -16,8 +20,12 @@ from apps.api.routes.v1.compare import router as compare_router
 from apps.api.routes.v1.crm import router as crm_router
 from apps.api.routes.v1.domain import router as domain_router
 from apps.api.routes.v1.investment import router as investment_router
+from apps.api.routes.v1.marketplace import router as marketplace_router
+from apps.api.routes.v1.members import router as members_router
 from apps.api.routes.v1.phase1 import router as phase1_router
+from apps.api.routes.v1.projects import router as projects_router
 from apps.api.routes.v1.properties import router as properties_router
+from apps.api.routes.v1.seller import router as seller_router
 from packages.core.auth import hash_password
 from packages.core.config import settings
 from packages.core.database import SessionLocal, init_db
@@ -45,10 +53,14 @@ async def add_security_headers(request: Request, call_next):
 app.include_router(health.router)
 app.include_router(meta.router)
 app.include_router(auth.router)
+app.include_router(admin_seller_router)
 app.include_router(auth_me_router)
+app.include_router(admin_marketplace_router)
 app.include_router(admin.router)
 app.include_router(admin_crm_router)
+app.include_router(admin_analytics_router)
 app.include_router(admin_domain_router)
+app.include_router(admin_rbac_router)
 app.include_router(phase1_router)
 app.include_router(properties_router)
 app.include_router(crm_router)
@@ -56,6 +68,10 @@ app.include_router(compare_router)
 app.include_router(analytics_router)
 app.include_router(domain_router)
 app.include_router(investment_router)
+app.include_router(members_router)
+app.include_router(projects_router)
+app.include_router(seller_router)
+app.include_router(marketplace_router)
 app.include_router(admin_properties_router)
 
 

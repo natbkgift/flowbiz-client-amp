@@ -52,12 +52,23 @@ class Settings(BaseSettings):
 
     refresh_token_expire_days: int = 30
 
+    # PII hashing (for duplicate detection). Safe default keeps behavior unchanged.
+    pii_hash_pepper: str = Field(default="", validation_alias=AliasChoices("PII_HASH_PEPPER"))
+
+    # CRM behavior toggles
+    crm_auto_assign_enabled: bool = Field(
+        default=False,
+        validation_alias=AliasChoices("CRM_AUTO_ASSIGN_ENABLED"),
+    )
+
     # Admin bootstrap user
     admin_bootstrap_email: str = "admin@local.dev"
     admin_bootstrap_password: str = "admin123"
 
     # Abuse mitigation
     inquiries_rate_limit_per_minute: int = 20
+    events_rate_limit_per_minute: int = 120
+    events_max_payload_bytes: int = 8192
 
 
 settings = Settings()

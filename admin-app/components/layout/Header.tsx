@@ -1,7 +1,11 @@
 'use client';
 
 import Link from 'next/link';
-import { useMemo, useState } from 'react';
+import { usePathname, useRouter } from 'next/navigation';
+import { useEffect, useMemo, useState } from 'react';
+
+import type { Dictionary, Locale } from '../../app/_lib/i18n/types';
+import { switchLocaleInPathname, withLocale } from '../../app/_lib/i18n/routing';
 
 type NavItem = { href: string; label: string };
 
@@ -15,22 +19,27 @@ function HamburgerIcon() {
   );
 }
 
-export function Header() {
+export function Header({ locale, dict }: { locale: Locale; dict: Dictionary }) {
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [lang, setLang] = useState<'EN' | 'TH'>('EN');
+  const router = useRouter();
+  const pathname = usePathname();
 
   const items: NavItem[] = useMemo(
     () => [
-      { href: '/', label: 'Home' },
-      { href: '/rent', label: 'Listings' },
-      { href: '/projects', label: 'Projects' },
-      { href: '/invest', label: 'Invest' },
-      { href: '/area-guide', label: 'Area Guide' },
-      { href: '/about', label: 'About' },
-      { href: '/contact', label: 'Contact' },
+      { href: '/invest', label: dict.nav.invest },
+      { href: '/buy', label: dict.nav.buy },
+      { href: '/area-guide', label: dict.nav.areaGuide },
+      { href: '/contact', label: dict.nav.contact },
     ],
-    []
+    [dict]
   );
+
+  const langLabel = locale === 'th' ? dict.common.thai : dict.common.english;
+
+  useEffect(() => {
+    // Close mobile menu on navigation.
+    setMobileOpen(false);
+  }, [pathname]);
 
   return (
     <>
@@ -40,13 +49,18 @@ export function Header() {
 
       <header className="header">
         <div className="header-content">
-          <Link href="/" className="logo" aria-label="Asset Management Property">
-            <span>AMP</span>
+          <Link href={withLocale(locale, '/')} className="logo" aria-label={dict.brand.name}>
+            <span className="logo-mark">AMP</span>
+            <span className="logo-name">{dict.brand.name}</span>
           </Link>
 
           <nav className="nav desktop-only" aria-label="Main">
             {items.map((it) => (
-              <Link key={it.href} href={it.href}>
+              <Link
+                key={it.href}
+                href={withLocale(locale, it.href)}
+                className={it.href === '/contact' ? 'nav-link nav-link--cta' : 'nav-link'}
+              >
                 {it.label}
               </Link>
             ))}
@@ -56,10 +70,14 @@ export function Header() {
             <button
               type="button"
               className="lang-switch"
-              onClick={() => setLang((v) => (v === 'EN' ? 'TH' : 'EN'))}
-              aria-label="Toggle language"
+              onClick={() => {
+                const next = locale === 'en' ? 'th' : 'en';
+                const nextPath = switchLocaleInPathname(pathname ?? '/', next);
+                router.push(nextPath);
+              }}
+              aria-label={dict.common.language}
             >
-              <span>{lang}</span>
+              <span>{langLabel}</span>
             </button>
 
             <button
@@ -67,6 +85,7 @@ export function Header() {
               className="hamburger mobile-only"
               onClick={() => setMobileOpen((v) => !v)}
               aria-label="Menu"
+              aria-controls="mobile-menu"
               aria-expanded={mobileOpen}
             >
               <HamburgerIcon />
@@ -77,7 +96,12 @@ export function Header() {
 
       <div className={mobileOpen ? 'mobile-menu active' : 'mobile-menu'} id="mobile-menu">
         {items.map((it) => (
-          <Link key={it.href} href={it.href} onClick={() => setMobileOpen(false)}>
+          <Link
+            key={it.href}
+            href={withLocale(locale, it.href)}
+            onClick={() => setMobileOpen(false)}
+            className={it.href === '/contact' ? 'nav-link nav-link--cta' : 'nav-link'}
+          >
             {it.label}
           </Link>
         ))}

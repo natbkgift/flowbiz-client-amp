@@ -3,6 +3,17 @@ import 'server-only';
 import { headers } from 'next/headers';
 import type { PropertyDetail, PropertyListResponse } from '../public/_shared/types';
 
+export type ProjectItem = {
+  id: string;
+  slug: string;
+  name: string;
+  developer_id?: string | null;
+  area_id?: string | null;
+  status: string;
+  created_at: string;
+  updated_at: string;
+};
+
 function getOriginFromHeaders(): string {
   const h = headers();
   const host = h.get('x-forwarded-host') ?? h.get('host');
@@ -60,4 +71,69 @@ export async function fetchPropertyBySlug(slug: string): Promise<PropertyDetail 
   if (!res.ok) throw new Error(`Failed to fetch property (${res.status})`);
 
   return (await res.json()) as PropertyDetail;
+}
+
+export async function fetchProjects(params?: { limit?: number }): Promise<ProjectItem[]> {
+  const origin = getOriginFromHeaders();
+  const base = apiBase();
+
+  const url = new URL(`${base}/v1/projects`, origin);
+  if (params?.limit) url.searchParams.set('limit', String(params.limit));
+
+  const res = await fetch(url.toString(), { next: { revalidate: 60 } });
+  if (!res.ok) throw new Error(`Failed to fetch projects (${res.status})`);
+  return (await res.json()) as ProjectItem[];
+}
+
+export async function fetchProjectBySlug(slug: string): Promise<ProjectItem | null> {
+  const origin = getOriginFromHeaders();
+  const base = apiBase();
+
+  const url = new URL(`${base}/v1/projects/slug/${encodeURIComponent(slug)}`, origin);
+  const res = await fetch(url.toString(), { next: { revalidate: 60 } });
+  if (res.status === 404) return null;
+  if (!res.ok) throw new Error(`Failed to fetch project (${res.status})`);
+  return (await res.json()) as ProjectItem;
+}
+
+export type MarketplaceCategoryItem = {
+  id: string;
+  slug: string;
+  title: string;
+  created_at: string;
+};
+
+export type MarketplaceItemItem = {
+  id: string;
+  category_id: string;
+  slug: string;
+  name: string;
+  summary?: string | null;
+  image_url?: string | null;
+  vetting_notes?: string | null;
+  sponsor_tier?: string | null;
+  status: string;
+  created_at: string;
+  updated_at: string;
+};
+
+export async function fetchMarketplaceCategories(): Promise<MarketplaceCategoryItem[]> {
+  const origin = getOriginFromHeaders();
+  const base = apiBase();
+
+  const url = new URL(`${base}/v1/marketplace/categories`, origin);
+  const res = await fetch(url.toString(), { next: { revalidate: 300 } });
+  if (!res.ok) throw new Error(`Failed to fetch marketplace categories (${res.status})`);
+  return (await res.json()) as MarketplaceCategoryItem[];
+}
+
+export async function fetchMarketplaceItems(params?: { category?: string }): Promise<MarketplaceItemItem[]> {
+  const origin = getOriginFromHeaders();
+  const base = apiBase();
+
+  const url = new URL(`${base}/v1/marketplace/items`, origin);
+  if (params?.category) url.searchParams.set('category', params.category);
+  const res = await fetch(url.toString(), { next: { revalidate: 300 } });
+  if (!res.ok) throw new Error(`Failed to fetch marketplace items (${res.status})`);
+  return (await res.json()) as MarketplaceItemItem[];
 }
