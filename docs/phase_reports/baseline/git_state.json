@@ -1,0 +1,13 @@
+{
+  "branch": "main",
+  "diff_name_status_origin_main": [],
+  "diff_stat_origin_main": [],
+  "head": "1b31a9f66846aa8bc006d809616f669b78018ae5",
+  "status_porcelain": [
+    "?? docs/architecture/",
+    "?? docs/directive/",
+    "?? docs/governance/",
+    "?? docs/phase_reports/baseline/",
+    "?? scripts/baseline_integrity.py"
+  ]
+}

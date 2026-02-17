@@ -1,0 +1,132 @@
+{
+  "alembic_ini_present": true,
+  "alembic_versions_dir": "alembic/versions",
+  "revisions": [
+    {
+      "down_revision_raw": null,
+      "file": "alembic/versions/0001_initial_leads_users.py",
+      "revision": null,
+      "sha256": "82057a279d774255ceb2d5b3b8be1feecc936001031266bd5f674d4055676fb0"
+    },
+    {
+      "down_revision_raw": null,
+      "file": "alembic/versions/0002_properties_company.py",
+      "revision": null,
+      "sha256": "53544919b6791ca698c581fe8c707ed16e129a8c4094b58cb81f5bddb600fba7"
+    },
+    {
+      "down_revision_raw": null,
+      "file": "alembic/versions/0003_enforce_unique_source_id.py",
+      "revision": null,
+      "sha256": "0b75f2fe4f15ffa841040049a82f17e102a5a66901ef4208d514003dc43d7298"
+    },
+    {
+      "down_revision_raw": null,
+      "file": "alembic/versions/0004_property_import_audits.py",
+      "revision": null,
+      "sha256": "3ef06617fb764dd9731efca0c9752adc12f02c3d974813beb22003e1f72b55bf"
+    },
+    {
+      "down_revision_raw": null,
+      "file": "alembic/versions/0005_import_sha_unique.py",
+      "revision": null,
+      "sha256": "ad4d90b5e204c1e90255003e258d33f68425f98b3575d4d1916047ba335e5408"
+    },
+    {
+      "down_revision_raw": null,
+      "file": "alembic/versions/0006_property_local_media.py",
+      "revision": null,
+      "sha256": "3665e8fc9946484d1b481873da748e464a685f6931f9d00820382d66409ffd69"
+    },
+    {
+      "down_revision_raw": null,
+      "file": "alembic/versions/0007_identity_roles_refresh_tokens.py",
+      "revision": null,
+      "sha256": "fd05af12452bfa452911c9dbd467033e71ab3faab81e8713105a72b7fdf5a3c6"
+    },
+    {
+      "down_revision_raw": null,
+      "file": "alembic/versions/0007_property_images_table.py",
+      "revision": null,
+      "sha256": "1eaf8699bd1a98c5343f964031017718899c924c1157186b38702d93ba9a0966"
+    },
+    {
+      "down_revision_raw": null,
+      "file": "alembic/versions/0008_crm_inquiries_viewings.py",
+      "revision": null,
+      "sha256": "94ac71ca8cee7f51d6412f43c8b84ecd18dd95df8b7f9a473c2affb4174a22a7"
+    },
+    {
+      "down_revision_raw": null,
+      "file": "alembic/versions/0009_domain_agents_developers_areas.py",
+      "revision": null,
+      "sha256": "9910d6b63edf48e5278c64a67ddf060c92279593d596149ae64bf29d4f449fdc"
+    },
+    {
+      "down_revision_raw": null,
+      "file": "alembic/versions/0010_investment_area_statistics.py",
+      "revision": null,
+      "sha256": "5b35f854459b61cb34b16d482442c5b4dc290d535bd25d7d9c90d9dfaf8133a6"
+    },
+    {
+      "down_revision_raw": null,
+      "file": "alembic/versions/0011_compare_comparisons.py",
+      "revision": null,
+      "sha256": "fa8aed6838e673010d9359c90eae4d81db6d238081697358b258cd0c38f21d31"
+    },
+    {
+      "down_revision_raw": null,
+      "file": "alembic/versions/0012_analytics_events.py",
+      "revision": null,
+      "sha256": "63784b02101ce8e25d11a0a88e904461f3436e57342f223e3ae2dbc53cb456e7"
+    },
+    {
+      "down_revision_raw": null,
+      "file": "alembic/versions/0013_inquiries_events_enrichment.py",
+      "revision": null,
+      "sha256": "d9f235e2a020823fb28d9771cf77320bc9b0fd22e985bd2a8bc7dadfbd5a89ab"
+    },
+    {
+      "down_revision_raw": null,
+      "file": "alembic/versions/0014_v3_foundation_rbac_membership_crm.py",
+      "revision": null,
+      "sha256": "43a5fa95ff00f1168e491b56b52aa325d610fdaab16cad196a142911e90768ae"
+    },
+    {
+      "down_revision_raw": null,
+      "file": "alembic/versions/0015_v3_inquiry_scoring_fields.py",
+      "revision": null,
+      "sha256": "09ed66a6a28a7dea02f0cac26e3f762e5a6698dac3d0199d69a7445982f087bc"
+    },
+    {
+      "down_revision_raw": null,
+      "file": "alembic/versions/0016_v3_projects_and_property_links.py",
+      "revision": null,
+      "sha256": "f1cb3926bd2ffd8f54926387bf2832036fc04891286f11ff67178e52d692da8a"
+    },
+    {
+      "down_revision_raw": null,
+      "file": "alembic/versions/0017_v3_seller_submissions.py",
+      "revision": null,
+      "sha256": "a906fe3fa4a6e44f4a3d9a8100f9ba23d8024fcf3f3cef796a08d1307b4ba48d"
+    },
+    {
+      "down_revision_raw": null,
+      "file": "alembic/versions/0018_v3_marketplace_base.py",
+      "revision": null,
+      "sha256": "c985e4dc56023a160415cbe402edc0a56ab62e54629231214bfebae36820730f"
+    },
+    {
+      "down_revision_raw": null,
+      "file": "alembic/versions/0019_v3_phase_g_indexes.py",
+      "revision": null,
+      "sha256": "afb9a25a5c900664bb9f11e5b6b18109f16f17d63be458b549b9ef6e8b64d01c"
+    },
+    {
+      "down_revision_raw": null,
+      "file": "alembic/versions/0020_v3_media_image_urls.py",
+      "revision": null,
+      "sha256": "56edbea956ddd56eb0655078fe871612946110dd66d7c47cb3bcd33c922e6a15"
+    }
+  ]
+}

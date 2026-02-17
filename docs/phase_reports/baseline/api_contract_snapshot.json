@@ -1,0 +1,434 @@
+[
+  {
+    "method": "GET",
+    "path": "/agents",
+    "source": "apps/api/routes/admin_domain.py",
+    "surface": "api:fastapi"
+  },
+  {
+    "method": "GET",
+    "path": "/agents",
+    "source": "apps/api/routes/v1/domain.py",
+    "surface": "api:fastapi"
+  },
+  {
+    "method": "POST",
+    "path": "/agents",
+    "source": "apps/api/routes/admin_domain.py",
+    "surface": "api:fastapi"
+  },
+  {
+    "method": "POST",
+    "path": "/analytics/events",
+    "source": "apps/api/routes/v1/analytics.py",
+    "surface": "api:fastapi"
+  },
+  {
+    "method": "GET",
+    "path": "/analytics/summary",
+    "source": "apps/api/routes/admin_analytics_v2.py",
+    "surface": "api:fastapi"
+  },
+  {
+    "method": "GET",
+    "path": "/areas",
+    "source": "apps/api/routes/admin_domain.py",
+    "surface": "api:fastapi"
+  },
+  {
+    "method": "GET",
+    "path": "/areas",
+    "source": "apps/api/routes/v1/domain.py",
+    "surface": "api:fastapi"
+  },
+  {
+    "method": "POST",
+    "path": "/areas",
+    "source": "apps/api/routes/admin_domain.py",
+    "surface": "api:fastapi"
+  },
+  {
+    "method": "GET",
+    "path": "/auth/me",
+    "source": "apps/api/routes/auth_me.py",
+    "surface": "api:fastapi"
+  },
+  {
+    "method": "GET",
+    "path": "/categories",
+    "source": "apps/api/routes/v1/marketplace.py",
+    "surface": "api:fastapi"
+  },
+  {
+    "method": "POST",
+    "path": "/chat/classify",
+    "source": "apps/api/routes/v1/phase1.py",
+    "surface": "api:fastapi"
+  },
+  {
+    "method": "POST",
+    "path": "/chat/next-state",
+    "source": "apps/api/routes/v1/phase1.py",
+    "surface": "api:fastapi"
+  },
+  {
+    "method": "GET",
+    "path": "/company",
+    "source": "apps/api/routes/v1/properties.py",
+    "surface": "api:fastapi"
+  },
+  {
+    "method": "POST",
+    "path": "/company",
+    "source": "apps/api/routes/admin_properties.py",
+    "surface": "api:fastapi"
+  },
+  {
+    "method": "GET",
+    "path": "/company/{slug}",
+    "source": "apps/api/routes/v1/properties.py",
+    "surface": "api:fastapi"
+  },
+  {
+    "method": "PATCH",
+    "path": "/company/{slug}",
+    "source": "apps/api/routes/admin_properties.py",
+    "surface": "api:fastapi"
+  },
+  {
+    "method": "POST",
+    "path": "/compare",
+    "source": "apps/api/routes/v1/compare.py",
+    "surface": "api:fastapi"
+  },
+  {
+    "method": "GET",
+    "path": "/developers",
+    "source": "apps/api/routes/admin_domain.py",
+    "surface": "api:fastapi"
+  },
+  {
+    "method": "GET",
+    "path": "/developers",
+    "source": "apps/api/routes/v1/domain.py",
+    "surface": "api:fastapi"
+  },
+  {
+    "method": "POST",
+    "path": "/developers",
+    "source": "apps/api/routes/admin_domain.py",
+    "surface": "api:fastapi"
+  },
+  {
+    "method": "POST",
+    "path": "/events",
+    "source": "apps/api/routes/v1/analytics.py",
+    "surface": "api:fastapi"
+  },
+  {
+    "method": "GET",
+    "path": "/health",
+    "source": "apps/api/routes/health.py",
+    "surface": "api:fastapi"
+  },
+  {
+    "method": "GET",
+    "path": "/healthz",
+    "source": "apps/api/routes/health.py",
+    "surface": "api:fastapi"
+  },
+  {
+    "method": "GET",
+    "path": "/inquiries",
+    "source": "apps/api/routes/admin_crm.py",
+    "surface": "api:fastapi"
+  },
+  {
+    "method": "POST",
+    "path": "/inquiries",
+    "source": "apps/api/routes/v1/crm.py",
+    "surface": "api:fastapi"
+  },
+  {
+    "method": "GET",
+    "path": "/inquiries/{inquiry_id}",
+    "source": "apps/api/routes/admin_crm.py",
+    "surface": "api:fastapi"
+  },
+  {
+    "method": "PATCH",
+    "path": "/inquiries/{inquiry_id}",
+    "source": "apps/api/routes/admin_crm.py",
+    "surface": "api:fastapi"
+  },
+  {
+    "method": "POST",
+    "path": "/inquiries/{inquiry_id}/assign",
+    "source": "apps/api/routes/admin_crm.py",
+    "surface": "api:fastapi"
+  },
+  {
+    "method": "GET",
+    "path": "/inquiries/{inquiry_id}/assignments",
+    "source": "apps/api/routes/admin_crm.py",
+    "surface": "api:fastapi"
+  },
+  {
+    "method": "GET",
+    "path": "/items",
+    "source": "apps/api/routes/v1/marketplace.py",
+    "surface": "api:fastapi"
+  },
+  {
+    "method": "GET",
+    "path": "/leads",
+    "source": "apps/api/routes/admin.py",
+    "surface": "api:fastapi"
+  },
+  {
+    "method": "GET",
+    "path": "/leads/{lead_id}",
+    "source": "apps/api/routes/admin.py",
+    "surface": "api:fastapi"
+  },
+  {
+    "method": "PATCH",
+    "path": "/leads/{lead_id}",
+    "source": "apps/api/routes/admin.py",
+    "surface": "api:fastapi"
+  },
+  {
+    "method": "POST",
+    "path": "/login",
+    "source": "apps/api/routes/v1/auth.py",
+    "surface": "api:fastapi"
+  },
+  {
+    "method": "POST",
+    "path": "/login-with-refresh",
+    "source": "apps/api/routes/v1/auth.py",
+    "surface": "api:fastapi"
+  },
+  {
+    "method": "GET",
+    "path": "/marketplace/categories",
+    "source": "apps/api/routes/admin_marketplace.py",
+    "surface": "api:fastapi"
+  },
+  {
+    "method": "POST",
+    "path": "/marketplace/categories",
+    "source": "apps/api/routes/admin_marketplace.py",
+    "surface": "api:fastapi"
+  },
+  {
+    "method": "GET",
+    "path": "/marketplace/items",
+    "source": "apps/api/routes/admin_marketplace.py",
+    "surface": "api:fastapi"
+  },
+  {
+    "method": "POST",
+    "path": "/marketplace/items",
+    "source": "apps/api/routes/admin_marketplace.py",
+    "surface": "api:fastapi"
+  },
+  {
+    "method": "PATCH",
+    "path": "/marketplace/items/{item_id}",
+    "source": "apps/api/routes/admin_marketplace.py",
+    "surface": "api:fastapi"
+  },
+  {
+    "method": "GET",
+    "path": "/me",
+    "source": "apps/api/routes/v1/members.py",
+    "surface": "api:fastapi"
+  },
+  {
+    "method": "GET",
+    "path": "/meta",
+    "source": "apps/api/routes/v1/meta.py",
+    "surface": "api:fastapi"
+  },
+  {
+    "method": "POST",
+    "path": "/mortgage",
+    "source": "apps/api/routes/v1/investment.py",
+    "surface": "api:fastapi"
+  },
+  {
+    "method": "GET",
+    "path": "/permissions",
+    "source": "apps/api/routes/admin_rbac.py",
+    "surface": "api:fastapi"
+  },
+  {
+    "method": "POST",
+    "path": "/permissions",
+    "source": "apps/api/routes/admin_rbac.py",
+    "surface": "api:fastapi"
+  },
+  {
+    "method": "GET",
+    "path": "/projects",
+    "source": "apps/api/routes/v1/projects.py",
+    "surface": "api:fastapi"
+  },
+  {
+    "method": "POST",
+    "path": "/projects",
+    "source": "apps/api/routes/v1/projects.py",
+    "surface": "api:fastapi"
+  },
+  {
+    "method": "GET",
+    "path": "/projects/slug/{slug}",
+    "source": "apps/api/routes/v1/projects.py",
+    "surface": "api:fastapi"
+  },
+  {
+    "method": "GET",
+    "path": "/projects/{project_id}",
+    "source": "apps/api/routes/v1/projects.py",
+    "surface": "api:fastapi"
+  },
+  {
+    "method": "PATCH",
+    "path": "/projects/{project_id}",
+    "source": "apps/api/routes/v1/projects.py",
+    "surface": "api:fastapi"
+  },
+  {
+    "method": "GET",
+    "path": "/properties",
+    "source": "apps/api/routes/v1/properties.py",
+    "surface": "api:fastapi"
+  },
+  {
+    "method": "POST",
+    "path": "/properties",
+    "source": "apps/api/routes/admin_properties.py",
+    "surface": "api:fastapi"
+  },
+  {
+    "method": "POST",
+    "path": "/properties/import",
+    "source": "apps/api/routes/admin_properties.py",
+    "surface": "api:fastapi"
+  },
+  {
+    "method": "GET",
+    "path": "/properties/imports",
+    "source": "apps/api/routes/admin_properties.py",
+    "surface": "api:fastapi"
+  },
+  {
+    "method": "POST",
+    "path": "/properties/media",
+    "source": "apps/api/routes/admin_properties.py",
+    "surface": "api:fastapi"
+  },
+  {
+    "method": "GET",
+    "path": "/properties/slug/{slug}",
+    "source": "apps/api/routes/v1/properties.py",
+    "surface": "api:fastapi"
+  },
+  {
+    "method": "DELETE",
+    "path": "/properties/{property_id}",
+    "source": "apps/api/routes/admin_properties.py",
+    "surface": "api:fastapi"
+  },
+  {
+    "method": "GET",
+    "path": "/properties/{property_id}",
+    "source": "apps/api/routes/v1/properties.py",
+    "surface": "api:fastapi"
+  },
+  {
+    "method": "PATCH",
+    "path": "/properties/{property_id}",
+    "source": "apps/api/routes/admin_properties.py",
+    "surface": "api:fastapi"
+  },
+  {
+    "method": "POST",
+    "path": "/refresh",
+    "source": "apps/api/routes/v1/auth.py",
+    "surface": "api:fastapi"
+  },
+  {
+    "method": "POST",
+    "path": "/roi",
+    "source": "apps/api/routes/v1/investment.py",
+    "surface": "api:fastapi"
+  },
+  {
+    "method": "GET",
+    "path": "/roles",
+    "source": "apps/api/routes/admin_rbac.py",
+    "surface": "api:fastapi"
+  },
+  {
+    "method": "POST",
+    "path": "/roles",
+    "source": "apps/api/routes/admin_rbac.py",
+    "surface": "api:fastapi"
+  },
+  {
+    "method": "PUT",
+    "path": "/roles/{role_id}/permissions",
+    "source": "apps/api/routes/admin_rbac.py",
+    "surface": "api:fastapi"
+  },
+  {
+    "method": "POST",
+    "path": "/score",
+    "source": "apps/api/routes/v1/phase1.py",
+    "surface": "api:fastapi"
+  },
+  {
+    "method": "GET",
+    "path": "/seller-submissions",
+    "source": "apps/api/routes/admin_seller.py",
+    "surface": "api:fastapi"
+  },
+  {
+    "method": "PATCH",
+    "path": "/seller-submissions/{submission_id}",
+    "source": "apps/api/routes/admin_seller.py",
+    "surface": "api:fastapi"
+  },
+  {
+    "method": "POST",
+    "path": "/seller-submissions/{submission_id}/approve",
+    "source": "apps/api/routes/admin_seller.py",
+    "surface": "api:fastapi"
+  },
+  {
+    "method": "POST",
+    "path": "/submit",
+    "source": "apps/api/routes/v1/seller.py",
+    "surface": "api:fastapi"
+  },
+  {
+    "method": "GET",
+    "path": "/viewings",
+    "source": "apps/api/routes/admin_crm.py",
+    "surface": "api:fastapi"
+  },
+  {
+    "method": "POST",
+    "path": "/viewings",
+    "source": "apps/api/routes/v1/crm.py",
+    "surface": "api:fastapi"
+  },
+  {
+    "method": "PATCH",
+    "path": "/viewings/{viewing_id}",
+    "source": "apps/api/routes/admin_crm.py",
+    "surface": "api:fastapi"
+  }
+]

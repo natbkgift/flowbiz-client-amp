@@ -1,0 +1,61 @@
+{
+  "crm_like_endpoints": [
+    {
+      "method": "GET",
+      "path": "/leads",
+      "source": "apps/api/routes/admin.py",
+      "surface": "api:fastapi"
+    },
+    {
+      "method": "GET",
+      "path": "/leads/{lead_id}",
+      "source": "apps/api/routes/admin.py",
+      "surface": "api:fastapi"
+    },
+    {
+      "method": "PATCH",
+      "path": "/leads/{lead_id}",
+      "source": "apps/api/routes/admin.py",
+      "surface": "api:fastapi"
+    }
+  ],
+  "model_mentions": {
+    "apps/agents/analytics/data_fetcher.py": [
+      "Lead"
+    ],
+    "apps/agents/analytics/line_notifier.py": [
+      "Lead"
+    ],
+    "apps/agents/analytics/report_generator.py": [
+      "Lead"
+    ],
+    "apps/agents/analytics/schemas/__init__.py": [
+      "Lead"
+    ],
+    "apps/agents/analytics/schemas/lead.py": [
+      "Contact",
+      "Lead"
+    ],
+    "apps/agents/analytics/schemas/performance.py": [
+      "Lead"
+    ],
+    "apps/api/routes/admin.py": [
+      "Lead"
+    ],
+    "apps/api/routes/admin_analytics_v2.py": [
+      "Inquiry",
+      "Lead"
+    ],
+    "apps/api/routes/admin_crm.py": [
+      "Inquiry",
+      "Lead"
+    ],
+    "apps/api/routes/v1/crm.py": [
+      "Inquiry",
+      "Lead"
+    ],
+    "apps/api/routes/v1/phase1.py": [
+      "Lead"
+    ]
+  }
+}
