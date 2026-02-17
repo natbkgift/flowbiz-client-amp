@@ -1,5 +1,8 @@
 import type { Metadata } from 'next';
 
+export const dynamic = 'force-static';
+export const revalidate = 300;
+
 import { Container } from '@/components/layout/Container';
 import { ProjectCard } from '@/components/project/ProjectCard';
 import { fetchProjects, fetchProperties } from '@/app/_lib/public-api-server';
