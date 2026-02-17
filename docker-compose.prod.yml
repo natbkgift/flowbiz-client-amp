@@ -3,7 +3,7 @@ services:
     environment:
       - APP_ENV=prod
       - OTEL_ENABLED=${OTEL_ENABLED:-false}
-      - OTEL_EXPORTER_OTLP_ENDPOINT=${OTEL_EXPORTER_OTLP_ENDPOINT:-http://otel-collector:4318}
+      - OTEL_EXPORTER_OTLP_ENDPOINT=${OTEL_EXPORTER_OTLP_ENDPOINT:-http://otel-collector:4318/v1/traces}
       - OTEL_SERVICE_NAME=${OTEL_SERVICE_NAME:-flowbiz-client-amp-api}
     ports:
       - "127.0.0.1:${VPS_API_PORT:-8001}:8000"

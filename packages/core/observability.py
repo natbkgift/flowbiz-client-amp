@@ -60,7 +60,15 @@ def _configure_tracing(app: FastAPI) -> None:
         provider = TracerProvider(resource=resource)
         trace.set_tracer_provider(provider)
 
-        endpoint = os.getenv("OTEL_EXPORTER_OTLP_ENDPOINT", "http://otel-collector:4318")
+        endpoint = os.getenv(
+            "OTEL_EXPORTER_OTLP_ENDPOINT", "http://otel-collector:4318/v1/traces"
+        )
+        # OTLP HTTP exporter expects full signal path.
+        if endpoint.endswith("/"):
+            endpoint = endpoint[:-1]
+        if not endpoint.endswith("/v1/traces"):
+            endpoint = endpoint + "/v1/traces"
+
         exporter = OTLPSpanExporter(endpoint=endpoint)
         provider.add_span_processor(BatchSpanProcessor(exporter))
 
