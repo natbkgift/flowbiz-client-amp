@@ -3,7 +3,7 @@ from __future__ import annotations
 from datetime import datetime
 from uuid import UUID
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 
 
 class BookingCreateRequest(BaseModel):
@@ -16,6 +16,8 @@ class BookingCreateRequest(BaseModel):
 
 
 class BookingItem(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     id: UUID
     property_id: UUID | None = None
     inquiry_id: UUID | None = None
