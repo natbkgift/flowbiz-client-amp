@@ -1,0 +1,166 @@
+import type { Dictionary } from './types';
+
+export const en: Dictionary = {
+  brand: {
+    name: 'AMP Pattaya',
+    tagline: 'International Property Investment Authority',
+  },
+  nav: {
+    home: 'Home',
+    invest: 'Invest',
+    buy: 'Buy as Foreigner',
+    live: 'Live',
+    areaGuide: 'Area Guide',
+    contact: 'Contact',
+  },
+  cta: {
+    exploreInvestment: 'Explore Investment Opportunities',
+    speakToAdvisor: 'Speak to an Advisor',
+    whatsapp: 'WhatsApp',
+    line: 'LINE',
+  },
+  home: {
+    heroTitle: 'Invest or Buy Property in Pattaya with Confidence.',
+    heroSubtitle:
+      'A trusted platform for international buyers seeking secure property ownership and strong investment potential in Thailand.',
+    pathInvest: {
+      title: 'Invest',
+      desc: 'Evaluate rental demand, yield positioning, and risk factors with clear assumptions.',
+    },
+    pathBuy: {
+      title: 'Buy as Foreigner',
+      desc: 'Understand foreign quota, due diligence, and the steps that protect your purchase.',
+    },
+    pathLive: {
+      title: 'Live',
+      desc: 'Find a lifestyle fit—areas, commute, and amenities—with investment awareness built in.',
+    },
+    trustTitle: 'Why International Buyers Trust Us',
+    trustBullets: [
+      'Process-led guidance with documented steps and clear next actions',
+      'Local market context, presented in plain language',
+      'Privacy-respecting first‑party analytics (no third‑party tracking)',
+    ],
+    featuredTitle: 'Featured Developments',
+    featuredSubtitle: 'A curated starting point for international buyers.',
+    insightTitle: 'Market Insight',
+    insightSubtitle: 'How we think about demand, fees, and assumptions.',
+    insightCards: [
+      { title: 'Demand signals', body: 'Occupancy, seasonality, and unit fit.' },
+      { title: 'Costs & fees', body: 'Holding costs, transfer fees, and management.' },
+      { title: 'Risk framing', body: 'Liquidity, timelines, and exit options.' },
+    ],
+    testimonialsTitle: 'Testimonials',
+    testimonialsSubtitle: 'What clients value most.',
+    premiumCtaTitle: 'Ready for a shortlist built around your criteria?',
+    premiumCtaBody:
+      'Share your target budget, timeline, and preferred areas. We respond with a focused shortlist and viewing plan.',
+    pathSectionTitle: 'Choose your path',
+    pathSectionSubtitle: 'Invest, buy as a foreigner, or live in Pattaya.',
+    trustSubtitle: 'Authority-first, process-led, and transparent.',
+    heroPanelTitle: 'Pattaya',
+    heroPanelMeta: 'Investment context • Ownership clarity • Advisory',
+  },
+  buy: {
+    title: 'Buy Property in Pattaya',
+    subtitle: 'Clear steps, foreign quota context, and practical legal guidance.',
+    processTitle: 'Buying Process (High-Level)',
+    processSubtitle: 'From criteria → shortlist → due diligence → closing.',
+    processCards: [
+      { title: 'Criteria & shortlist', body: 'Define budget, timeline, areas, and constraints.' },
+      { title: 'Due diligence', body: 'Documents, fees, terms, and ownership clarity.' },
+      { title: 'Closing & next steps', body: 'Transfer process, timelines, and handover planning.' },
+    ],
+    quotaTitle: 'Foreign Quota (Condo Ownership)',
+    quotaSubtitle: 'Quota checks help avoid surprises.',
+    quotaCards: [
+      { title: 'What it means', body: 'Condo ownership rules differ from many countries.' },
+      { title: 'What we confirm', body: 'Quota availability, fees, and document readiness.' },
+    ],
+    legalTitle: 'Legal Guidance & Due Diligence',
+    legalSubtitle: 'Practical checks to reduce avoidable risk.',
+    legalBullets: ['Contract clarity and fee breakdown', 'Title and unit details verification', 'Timeline expectations and next actions'],
+    featuredTitle: 'Featured Listings',
+    featuredSubtitle: 'Current inventory (sample view).',
+    advisoryCtaTitle: 'Advisory CTA',
+    advisoryCtaBody:
+      'Send your criteria and we will propose a shortlist that fits both lifestyle and investment priorities.',
+  },
+  invest: {
+    title: 'Invest in Pattaya Property',
+    subtitle: 'Rental demand, yield positioning, and risk explained without hype.',
+    whyTitle: 'Why Pattaya',
+    whySubtitle: 'A high-level frame for international investors.',
+    whyCards: [
+      { title: 'Demand', body: 'Who rents, when, and why certain units outperform.' },
+      { title: 'Costs', body: 'Fees, management, and holding costs that affect net yield.' },
+      { title: 'Liquidity', body: 'Timelines and realistic exit paths.' },
+    ],
+    demandTitle: 'Rental Demand',
+    demandSubtitle: 'What we look for when modeling rent ranges.',
+    demandBullets: ['Unit type fit (layout, size, furnishing)', 'Location constraints and access', 'Seasonality and practical vacancy assumptions'],
+    yieldTitle: 'Yield Positioning',
+    yieldSubtitle: 'Yield positioning based on net assumptions.',
+    yieldCards: [
+      { title: 'Gross vs net', body: 'We separate headline rent from actual net returns.' },
+      { title: 'Comparable framing', body: 'Use realistic comps rather than brochure targets.' },
+    ],
+    riskTitle: 'Risk & Assumptions',
+    riskSubtitle: 'No hype—just constraints and trade-offs.',
+    riskBullets: ['Occupancy and pricing variability', 'Maintenance and renewal costs', 'Liquidity and timeline constraints'],
+    reportCtaTitle: 'Request a Yield Report',
+    reportCtaBody:
+      'We will outline assumptions, comparable demand signals, and practical constraints—then recommend next steps.',
+  },
+  areaGuide: {
+    title: 'Pattaya Area Guide',
+    subtitle: 'Lifestyle and investment context—side by side.',
+    areasTitle: 'Areas',
+    areasSubtitle: 'Lifestyle and investment context—side by side.',
+    mapTitle: 'Map-Style Overview',
+    mapSubtitle: 'A clean overview to start the conversation.',
+    mapLabels: { lifestyle: 'Lifestyle', investment: 'Investment' },
+  },
+  contact: {
+    title: 'Contact',
+    subtitle: 'Advisor-led guidance for international buyers.',
+    advisoryTitle: 'Speak with an Advisor',
+    advisoryBody:
+      'Tell us what you are considering (buy vs invest), your timeline, and preferred areas. We reply with clear next steps.',
+    formTitle: 'Send your request',
+    trustTitle: 'Trust Markers',
+    trustBullets: ['Clear process', 'No third‑party tracking', 'Fast response on WhatsApp or LINE'],
+    channelsTitle: 'Message us',
+  },
+  common: {
+    language: 'Language',
+    english: 'English',
+    thai: 'ไทย',
+    leadForm: {
+      headingDefault: 'Tell us what you need',
+      description: 'We reply quickly. Leave email or phone so we can reach you.',
+      namePlaceholder: 'Your name',
+      emailPlaceholder: 'Email (optional if phone provided)',
+      phonePlaceholder: 'Phone (optional if email provided)',
+      messagePlaceholder: 'Message',
+      submit: 'Submit',
+      submitting: 'Submitting…',
+      success: 'Thanks — we received your request.',
+      errorPrefix: 'Failed:',
+    },
+    testimonials: [
+      {
+        quote: 'Clear process and realistic expectations. We understood what to do next at each step.',
+        name: 'International buyer',
+        context: 'Condo purchase, Pattaya',
+      },
+      {
+        quote: 'Helpful market context without sales pressure. The shortlist matched our criteria.',
+        name: 'Investor',
+        context: 'Yield-focused shortlist',
+      },
+    ],
+    footerDisclaimer:
+      'Information is provided for general guidance and does not constitute legal advice. Always verify ownership structure and contracts with qualified professionals.',
+  },
+};

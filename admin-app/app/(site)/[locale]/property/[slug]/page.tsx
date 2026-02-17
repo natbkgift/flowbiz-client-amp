@@ -1,11 +1,11 @@
 import type { Metadata } from 'next';
 import Image from 'next/image';
 
-import { Container } from '../../../../components/layout/Container';
-import { LeadForm } from '../../../../components/forms/LeadForm';
-import { fetchPropertyBySlug } from '../../../_lib/public-api-server';
-import { CTA } from '../../../_lib/public-cta';
-import { resolveImageUrl } from '../../../_lib/public-api-shared';
+import { Container } from '@/components/layout/Container';
+import { LeadForm } from '@/components/forms/LeadForm';
+import { fetchPropertyBySlug } from '@/app/_lib/public-api-server';
+import { CTA } from '@/app/_lib/public-cta';
+import { resolveImageUrl } from '@/app/_lib/public-api-shared';
 
 type PageProps = { params: { slug: string } };
 

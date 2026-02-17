@@ -70,6 +70,14 @@ async def create_inquiry(
         phone=(payload.phone.strip() if payload.phone else None),
         message=payload.message,
         source_page=payload.source_page,
+        utm_source=payload.utm_source,
+        utm_medium=payload.utm_medium,
+        utm_campaign=payload.utm_campaign,
+        utm_content=payload.utm_content,
+        referrer=payload.referrer,
+        device=payload.device,
+        first_touch_timestamp=payload.first_touch_timestamp,
+        submit_timestamp=payload.submit_timestamp,
         status="new",
     )
     db.add(inquiry)

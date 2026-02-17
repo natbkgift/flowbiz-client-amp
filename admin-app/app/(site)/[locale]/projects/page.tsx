@@ -1,8 +1,8 @@
 import type { Metadata } from 'next';
 
-import { Container } from '../../../components/layout/Container';
-import { ProjectCard } from '../../../components/project/ProjectCard';
-import { fetchProperties } from '../../_lib/public-api-server';
+import { Container } from '@/components/layout/Container';
+import { ProjectCard } from '@/components/project/ProjectCard';
+import { fetchProperties } from '@/app/_lib/public-api-server';
 
 export const metadata: Metadata = {
   title: 'Projects | Asset Management Property',

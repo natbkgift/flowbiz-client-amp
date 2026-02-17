@@ -1,9 +1,9 @@
 import type { Metadata } from 'next';
 
-import { ListingGrid } from '../../../components/listing/ListingGrid';
-import { LeadForm } from '../../../components/forms/LeadForm';
-import { Container } from '../../../components/layout/Container';
-import { fetchProperties } from '../../_lib/public-api-server';
+import { ListingGrid } from '@/components/listing/ListingGrid';
+import { LeadForm } from '@/components/forms/LeadForm';
+import { Container } from '@/components/layout/Container';
+import { fetchProperties } from '@/app/_lib/public-api-server';
 
 export const metadata: Metadata = {
   title: 'Rent | Asset Management Property',

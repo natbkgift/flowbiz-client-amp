@@ -114,6 +114,16 @@ class Inquiry(Base):
     phone: Mapped[str | None] = mapped_column(String(50), nullable=True)
     message: Mapped[str] = mapped_column(Text, nullable=False)
     source_page: Mapped[str | None] = mapped_column(String(500), nullable=True)
+
+    utm_source: Mapped[str | None] = mapped_column(String(200), nullable=True)
+    utm_medium: Mapped[str | None] = mapped_column(String(200), nullable=True)
+    utm_campaign: Mapped[str | None] = mapped_column(String(200), nullable=True)
+    utm_content: Mapped[str | None] = mapped_column(String(200), nullable=True)
+    referrer: Mapped[str | None] = mapped_column(String(500), nullable=True)
+    device: Mapped[str | None] = mapped_column(String(80), nullable=True)
+    first_touch_timestamp: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    submit_timestamp: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+
     status: Mapped[str] = mapped_column(String(32), nullable=False, default="new")
 
     created_at: Mapped[datetime] = mapped_column(
@@ -231,6 +241,9 @@ class AnalyticsEvent(Base):
 
     id: Mapped[UUID] = mapped_column(primary_key=True, default=uuid4)
     event_type: Mapped[str] = mapped_column(String(64), nullable=False, index=True)
+    page: Mapped[str | None] = mapped_column(String(500), nullable=True)
+    session_id: Mapped[str | None] = mapped_column(String(64), nullable=True, index=True)
+    user_agent: Mapped[str | None] = mapped_column(String(300), nullable=True)
     payload: Mapped[dict | None] = mapped_column(JSON, nullable=True)
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),

@@ -58,6 +58,8 @@ class Settings(BaseSettings):
 
     # Abuse mitigation
     inquiries_rate_limit_per_minute: int = 20
+    events_rate_limit_per_minute: int = 120
+    events_max_payload_bytes: int = 8192
 
 
 settings = Settings()

@@ -18,6 +18,15 @@ class InquiryCreate(BaseModel):
     # Honeypot field: real users should never fill this.
     website: str | None = Field(default=None, max_length=200)
 
+    utm_source: str | None = Field(default=None, max_length=200)
+    utm_medium: str | None = Field(default=None, max_length=200)
+    utm_campaign: str | None = Field(default=None, max_length=200)
+    utm_content: str | None = Field(default=None, max_length=200)
+    referrer: str | None = Field(default=None, max_length=500)
+    device: str | None = Field(default=None, max_length=80)
+    first_touch_timestamp: datetime | None = None
+    submit_timestamp: datetime | None = None
+
     @model_validator(mode="after")
     def _require_contact(self) -> "InquiryCreate":
         if self.email is None and (self.phone is None or not self.phone.strip()):
