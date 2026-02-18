@@ -56,7 +56,7 @@ export default async function RentPage({ params }: { params: { locale: string } 
         ? 'ยังไม่แน่ใจว่าจะอยู่ที่ไหน? ใช้คู่มือทำเลของเราแล้วบอกลำดับความสำคัญของคุณ'
         : 'Not sure where to live? Use our quick area guide and tell us your priorities.',
     featuredTitle: locale === 'th' ? 'คอนโดเช่าแนะนำ' : 'Featured Rentals',
-    includedTitle: locale === 'th' ? 'ทุกรายการเช่ารวมอะไรบ้าง' : 'What's Included in Every Rental',
+    includedTitle: locale === 'th' ? 'ทุกรายการเช่ารวมอะไรบ้าง' : "What's Included in Every Rental",
     includedDesc:
       locale === 'th'
         ? 'ข้อกำหนดย้ายเข้าชัดเจน • จัดการชมห้อง • ค่าใช้จ่ายโปร่งใส'
@@ -64,14 +64,14 @@ export default async function RentPage({ params }: { params: { locale: string } 
     trustTitle: locale === 'th' ? 'ทำไมต้องเลือกเรา' : 'Why Rent Through AMP',
     trustDesc:
       locale === 'th'
-        ? 'ทีมท้องถิ่น • นัดชมเร็ว • ยืนยันว่ว่างก่อนนัดทุกครั้ง'
+        ? 'ทีมท้องถิ่น • นัดชมเร็ว • ยืนยันว่างก่อนนัดทุกครั้ง'
         : 'Local team • fast scheduling • we confirm availability before you waste time.',
     faqTitle: locale === 'th' ? 'คำถามที่พบบ่อย' : 'Frequently Asked Questions',
     faqDesc:
       locale === 'th'
         ? 'สัญญาเช่าทั่วไป เงินมัดจำ และกรอบเวลา — ถามได้เลย'
         : 'Typical lease terms, deposits, and timelines — ask us anything.',
-    formTitle: locale === 'th' ? 'บอกเราว่าคุณต้องการอะไร' : 'Tell Us What You're Looking For',
+    formTitle: locale === 'th' ? 'บอกเราว่าคุณต้องการอะไร' : "Tell Us What You're Looking For",
     formDefault:
       locale === 'th'
         ? 'ผมสนใจเช่าคอนโดพัทยา งบประมาณและทำเลที่ต้องการคือ...'

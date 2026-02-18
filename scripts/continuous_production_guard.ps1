@@ -9,6 +9,10 @@ param(
 $ErrorActionPreference = 'Stop'
 Set-StrictMode -Version Latest
 
+if ($AllowDirty) {
+  Write-Warning "AllowDirty is ignored by this guard. A clean working directory is always enforced to prevent accidental deployments of uncommitted changes."
+}
+
 function Invoke-Cmd {
   param(
     [Parameter(Mandatory = $true)][string]$Command,
@@ -73,8 +77,8 @@ function New-GuardReport {
     }
     Drift = [ordered]@{
       Detected = $null
-      Type     = $null
-      Details  = @()
+      Type = $null
+      Details = @()
     }
     Actions = [ordered]@{
       GitReset          = "NO"
@@ -208,7 +212,7 @@ PY
   if ($src.branch -eq 'HEAD') {
     throw 'Detached HEAD detected on VPS source repo. Aborting.'
   }
-  if (-not $AllowDirty -and -not [string]::IsNullOrWhiteSpace($src.dirty)) {
+  if (-not [string]::IsNullOrWhiteSpace($src.dirty)) {
     $report.Source.Dirty = $true
     $report.Source.DirtyDetail = $src.dirty
     $report.Actions.Aborted = $true
@@ -244,8 +248,8 @@ if [ -n "$cid" ]; then
 
   cur=$(${compose} exec -T api alembic current 2>/dev/null || true)
   heads=$(${compose} exec -T api alembic heads 2>/dev/null || true)
-  echo "ALEMBIC_CURRENT_B64=$(printf '%s' "$cur" | base64 | tr -d '\n')"
-  echo "ALEMBIC_HEADS_B64=$(printf '%s' "$heads" | base64 | tr -d '\n')"
+  echo "ALEMBIC_CURRENT=$cur"
+  echo "ALEMBIC_HEADS=$heads"
 
   base="http://127.0.0.1:__VPS_API_PORT__"
   echo "API_HEALTHZ_CODE=$(curl -sS -o /dev/null -w '%{http_code}' $base/healthz || true)"
@@ -281,11 +285,11 @@ echo "PUBLIC_HEALTH_CODE=$(curl -sS -o /dev/null -w '%{http_code}' $pub/health |
       $report.VpsBefore.ApiHealthzCode = $kvAbort['API_HEALTHZ_CODE']
       $report.VpsBefore.PublicHealthCode = $kvAbort['PUBLIC_HEALTH_CODE']
 
-      if ($kvAbort.ContainsKey('ALEMBIC_CURRENT_B64')) {
-        try { $report.VpsBefore.AlembicCurrent = [Text.Encoding]::UTF8.GetString([Convert]::FromBase64String($kvAbort['ALEMBIC_CURRENT_B64'])) } catch {}
+      if ($kvAbort.ContainsKey('ALEMBIC_CURRENT')) {
+        $report.VpsBefore.AlembicCurrent = $kvAbort['ALEMBIC_CURRENT']
       }
-      if ($kvAbort.ContainsKey('ALEMBIC_HEADS_B64')) {
-        try { $report.VpsBefore.AlembicHeads = [Text.Encoding]::UTF8.GetString([Convert]::FromBase64String($kvAbort['ALEMBIC_HEADS_B64'])) } catch {}
+      if ($kvAbort.ContainsKey('ALEMBIC_HEADS')) {
+        $report.VpsBefore.AlembicHeads = $kvAbort['ALEMBIC_HEADS']
       }
     }
 

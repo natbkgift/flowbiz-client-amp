@@ -23,6 +23,8 @@
   --color-accent: #B08D57;
   --color-accent-hover: #C9A46C;
 
+  --font-sans: 'Inter', 'Nunito Sans', system-ui, -apple-system, 'Segoe UI', Roboto, Arial, sans-serif;
+
   --color-white: #FFFFFF;
   --color-bg: #FFFFFF;
   --color-surface: #F7F9FC;

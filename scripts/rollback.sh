@@ -29,7 +29,19 @@ $COMPOSE down --timeout 30
 while IFS= read -r img; do
   [[ -z "$img" ]] && continue
   echo "Restoring: $img"
-  docker tag "$img" "$(echo "$img" | sed 's/:.*/:latest/')" 2>/dev/null || true
+  # Compute image reference with :latest tag without breaking registry ports
+  base="${img%%@*}"          # strip any digest (left side of '@')
+  digest_suffix="${img#"$base"}"  # keep '@digest' if present, or empty
+  name_part="${base##*/}"    # part after last '/'
+  if [[ "$name_part" == *:* ]]; then
+    # There is already a tag after the last '/', replace it with :latest
+    ref_without_tag="${base%:*}"
+    target_img="${ref_without_tag}:latest${digest_suffix}"
+  else
+    # No tag after the last '/', just append :latest
+    target_img="${base}:latest${digest_suffix}"
+  fi
+  docker tag "$img" "$target_img" 2>/dev/null || true
 done < "$PREVIOUS_IMAGES"
 
 # Bring services back up
@@ -41,8 +53,10 @@ echo "Rollback complete. Running quick health check..."
 sleep 10
 
 # Quick verification
-API_STATUS=$(curl -s -o /dev/null -w "%{http_code}" --max-time 10 http://127.0.0.1:8001/api/v1/health || echo "000")
-APP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" --max-time 10 http://127.0.0.1:8002 || echo "000")
+VPS_API_PORT="${VPS_API_PORT:-8001}"
+VPS_ADMIN_PORT="${VPS_ADMIN_PORT:-8002}"
+API_STATUS=$(curl -s -o /dev/null -w "%{http_code}" --max-time 10 "http://127.0.0.1:${VPS_API_PORT}/api/v1/health" || echo "000")
+APP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" --max-time 10 "http://127.0.0.1:${VPS_ADMIN_PORT}" || echo "000")
 
 echo "  API:  $API_STATUS"
 echo "  App:  $APP_STATUS"

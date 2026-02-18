@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 
 import { Container } from '@/components/layout/Container';
 import { TrackedLink } from '@/components/analytics/TrackedLink';
+import { IconCheck, IconShield, IconTrendingUp, IconUsers } from '@/components/icons/SvgIcons';
 import { getDictionary, normalizeLocale } from '@/app/_lib/i18n/get-dictionary';
 import { withLocale } from '@/app/_lib/i18n/routing';
 
@@ -72,7 +73,7 @@ export default function AboutPage({
           <div className="grid grid-3">
             <div className="card reveal">
               <div className="premium-highlight__icon" style={{ marginBottom: 16 }}>
-                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" /><path d="m9 12 2 2 4-4" /></svg>
+                <IconShield />
               </div>
               <h3 className="card-title">
                 {locale === 'th' ? 'ข้อมูลตรวจสอบแล้ว' : 'Verified Data'}
@@ -85,7 +86,7 @@ export default function AboutPage({
             </div>
             <div className="card reveal">
               <div className="premium-highlight__icon" style={{ marginBottom: 16 }}>
-                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M22 21v-2a4 4 0 0 0-3-3.87" /><path d="M16 3.13a4 4 0 0 1 0 7.75" /></svg>
+                <IconUsers />
               </div>
               <h3 className="card-title">
                 {locale === 'th' ? 'ทีมท้องถิ่น' : 'Local Expertise'}
@@ -98,7 +99,7 @@ export default function AboutPage({
             </div>
             <div className="card reveal">
               <div className="premium-highlight__icon" style={{ marginBottom: 16 }}>
-                <svg viewBox="0 0 24 24" aria-hidden="true"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18" /><polyline points="17 6 23 6 23 12" /></svg>
+                <IconTrendingUp />
               </div>
               <h3 className="card-title">
                 {locale === 'th' ? 'กลยุทธ์การลงทุน' : 'Investment Strategy'}
@@ -169,8 +170,8 @@ export default function AboutPage({
               },
             ].map((item) => (
               <div key={item.en} className="feature-item" style={{ padding: '16px 20px' }}>
-                <span className="icon" style={{ color: 'var(--color-primary)' }}>
-                  <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 6 9 17l-5-5" /></svg>
+                <span style={{ color: 'var(--color-primary)' }}>
+                  <IconCheck size="sm" />
                 </span>
                 <span>{locale === 'th' ? item.th : item.en}</span>
               </div>
