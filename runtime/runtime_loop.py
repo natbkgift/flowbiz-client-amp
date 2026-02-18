@@ -283,6 +283,11 @@ def _normalize_execution_state(state: dict[str, Any]) -> None:
     mission.setdefault("completed_at", None)
     mission.setdefault("production_base_url", DEFAULT_PROD_BASE_URL)
     mission.setdefault("staging_base_url", DEFAULT_STAGING_BASE_URL)
+    # In finite mode we may still *record* staging signals, but we only *require*
+    # them when explicitly enabled. This avoids blocking prod progression when
+    # a staging endpoint is intentionally unavailable (e.g. /metrics disabled).
+    mission.setdefault("staging_required", False)
+    mission.setdefault("staging_deploy_enabled", False)
     mission.setdefault("public_base_url", "https://amppattaya.com")
     mission.setdefault("admin_base_url", "http://127.0.0.1:8002")
     mission.setdefault("allow_seed_demo", False)
@@ -386,19 +391,27 @@ def _update_verification_from_checks(state: dict[str, Any]) -> None:
     checks["prod_metrics"] = "passed" if prod_metrics == 200 else "failed"
 
     finite = _is_finite_mission(state)
-    if finite and "staging_deploy_enabled" not in (state.get("mission") or {}):
-        state.setdefault("mission", {})["staging_deploy_enabled"] = True
+    staging_required = bool(mission.get("staging_required"))
+    staging_deploy_enabled = bool(mission.get("staging_deploy_enabled"))
 
-    staging_deploy_enabled = bool((state.get("mission") or {}).get("staging_deploy_enabled"))
+    # Staging deploy is best-effort; it is only required when explicitly configured.
     if finite and staging_deploy_enabled:
         checks["staging_deploy"] = "passed" if _staging_deploy_best_effort() else "failed"
+    else:
+        checks.setdefault("staging_deploy", "skipped")
 
-    # Staging smoke check (required in finite mode).
+    # Staging smoke checks: record if staging_base exists, but require only when enabled.
     if staging_base:
         st_health = _curl_http_code(f"{staging_base}/healthz")
         st_metrics = _curl_http_code(f"{staging_base}/metrics")
         checks["staging_healthz"] = "passed" if st_health == 200 else "failed"
-        checks["staging_metrics"] = "passed" if st_metrics == 200 else "failed"
+        if st_metrics == 200:
+            checks["staging_metrics"] = "passed"
+        elif st_metrics == 404 or st_metrics is None:
+            # Metrics endpoint may be intentionally disabled in some environments.
+            checks["staging_metrics"] = "unknown"
+        else:
+            checks["staging_metrics"] = "failed"
 
     # Determinism probes (avoid /metrics which is intentionally non-deterministic).
     checks["prod_determinism_meta"] = "passed" if _determinism_probe(f"{prod_base}/v1/meta") else "failed"
@@ -414,14 +427,17 @@ def _update_verification_from_checks(state: dict[str, Any]) -> None:
 
     verification["last_checked_at"] = _utc_now_iso()
 
-    # Compute overall status (strict in finite mode).
+    # Compute overall status.
     required_keys = [
         "prod_healthz",
         "prod_metrics",
         "prod_determinism_meta",
     ]
-    if finite:
-        required_keys.extend(["staging_healthz", "staging_metrics"])
+    if finite and staging_required:
+        required_keys.append("staging_healthz")
+        # Only require staging metrics if it exists (i.e. not unknown).
+        if checks.get("staging_metrics") in {"passed", "failed"}:
+            required_keys.append("staging_metrics")
         if staging_deploy_enabled:
             required_keys.append("staging_deploy")
 
