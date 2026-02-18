@@ -7,21 +7,21 @@
   },
 
   "execution": {
-    "current_phase": 5,
-    "phase_status": "idle",
+    "current_phase": 10,
+    "phase_status": "completed",
     "phase_started_at": null,
-    "phase_completed_at": null,
-    "last_successful_phase": 4
+    "phase_completed_at": "2026-02-18T05:53:07.609395Z",
+    "last_successful_phase": 10
   },
 
   "deployment": {
-    "last_deploy_sha": null,
-    "last_deploy_time": null,
+    "last_deploy_sha": "27ec8095",
+    "last_deploy_time": "2026-02-18T05:53:07.609395Z",
     "environment": "production",
     "deployment_status": "stable",
     "deployment_id": null,
     "container_hash": null,
-    "migration_id": null
+    "migration_id": "0022_v3_bookings"
   },
 
   "observability": {
@@ -30,7 +30,7 @@
     "tracing": "healthy",
     "alerts": "armed",
     "dashboards": "healthy",
-    "last_check": null
+    "last_check": "2026-02-18T05:53:07.609395Z"
   },
 
   "metrics": {
@@ -40,7 +40,7 @@
     "seo_integrity_status": "stable",
     "ai_inference_status": "unknown",
     "reliability_status": "stable",
-    "last_evaluated": null
+    "last_evaluated": "2026-02-18T05:53:07.609395Z"
   },
 
   "integrity": {
