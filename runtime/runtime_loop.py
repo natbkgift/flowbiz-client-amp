@@ -654,7 +654,9 @@ def _run_phase_work(state: dict[str, Any], phase: int) -> PhaseWorkResult:
         # Design system engine: enforce admin UI availability.
         admin_base = str((state.get("mission") or {}).get("admin_base_url") or "http://127.0.0.1:8002").rstrip("/")
         code = _curl_http_code(admin_base, timeout_seconds=10)
-        ok = code == 200
+        # Next.js commonly redirects (307/308) to canonical paths (e.g. trailing slash)
+        # or auth routes; treat any 2xx/3xx as "available".
+        ok = code is not None and 200 <= int(code) < 400
         details.append(f"admin_http_code={code}")
         return PhaseWorkResult(ok, "design_system" if ok else "design_system_failed", details)
 
@@ -728,6 +730,7 @@ def execute_action(action: str, state: dict[str, Any]) -> None:
                 retry[str(phase)] = int(retry.get(str(phase)) or 0) + 1
                 write_phase_report(state, phase, f"phase_work_failed_retry_{retry[str(phase)]}")
                 if int(retry.get(str(phase)) or 0) >= 2:
+                    state.setdefault("failures", {})["last_error"] = "phase_work_failed_twice"
                     execute_action("rollback_last_slice", state)
                 return
 
@@ -778,12 +781,16 @@ def execute_action(action: str, state: dict[str, Any]) -> None:
         # Safety-first rollback: mark mission failed and stop; no destructive deployment actions.
         execution = state.setdefault("execution", {})
         phase = int(execution.get("current_phase") or 0)
-        state.setdefault("failures", {})["last_error"] = "verification_failed_twice"
+        failures = state.setdefault("failures", {})
+        failures.setdefault("last_error", "rollback_triggered")
         mission = state.setdefault("mission", {})
         mission["status"] = "failed"
         mission["completed_at"] = _utc_now_iso()
         write_phase_report(state, phase, "rollback_triggered")
-        write_mission_final_report(state, "failed_verification")
+        outcome = "failed_verification"
+        if str(failures.get("last_error") or "").startswith("phase_work_"):
+            outcome = "failed_phase_work"
+        write_mission_final_report(state, outcome)
         if mission.get("stop_when_complete"):
             _attempt_stop_service()
 
