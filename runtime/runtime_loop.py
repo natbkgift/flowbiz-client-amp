@@ -22,7 +22,6 @@ RUNTIME_DIR = APP_DIR / "runtime"
 STATE_FILE = RUNTIME_DIR / "system_state.json"
 LOCK_FILE = RUNTIME_DIR / "system_state.lock"
 LOG_FILE = RUNTIME_DIR / "runtime_loop.log"
-
 REPORTS_DIR = RUNTIME_DIR / "reports"
 
 
@@ -38,6 +37,95 @@ def log(msg: str) -> None:
     RUNTIME_DIR.mkdir(parents=True, exist_ok=True)
     with open(LOG_FILE, "a", encoding="utf-8") as f:
         f.write(f"{_utc_now_iso()} | {msg}\n")
+
+
+def _ensure_reports_dir() -> None:
+    REPORTS_DIR.mkdir(parents=True, exist_ok=True)
+
+
+def _report_ts() -> str:
+    return datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
+
+
+def _write_text(path: Path, content: str) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(content, encoding="utf-8")
+
+
+def _write_json(path: Path, payload: dict[str, Any]) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps(payload, indent=2, sort_keys=True), encoding="utf-8")
+
+
+def _phase_report_payload(state: dict[str, Any], phase: int, outcome: str) -> dict[str, Any]:
+    return {
+        "timestamp": _utc_now_iso(),
+        "phase": phase,
+        "outcome": outcome,
+        "mission": state.get("mission"),
+        "execution": state.get("execution"),
+        "verification": state.get("verification"),
+        "observability": state.get("observability"),
+        "metrics": state.get("metrics"),
+        "failures": state.get("failures"),
+        "note": "Phase completion is governed by runtime verification gates; no additional phase executor is configured.",
+    }
+
+
+def write_phase_report(state: dict[str, Any], phase: int, outcome: str) -> None:
+    _ensure_reports_dir()
+    ts = _report_ts()
+    base = REPORTS_DIR / f"phase_{phase}" / ts
+    payload = _phase_report_payload(state, phase, outcome)
+    _write_json(base / "PHASE_REPORT.json", payload)
+    _write_text(
+        base / "PHASE_REPORT.md",
+        "\n".join(
+            [
+                f"# PHASE {phase} REPORT",
+                "",
+                f"- Timestamp: {payload['timestamp']}",
+                f"- Outcome: {outcome}",
+                f"- Phase status: {(state.get('execution') or {}).get('phase_status')}",
+                f"- Verification status: {(state.get('verification') or {}).get('status')}",
+            ]
+        )
+        + "\n",
+    )
+    _write_text(REPORTS_DIR / f"phase_{phase}" / "LATEST.txt", ts + "\n")
+
+
+def write_mission_final_report(state: dict[str, Any], outcome: str) -> None:
+    _ensure_reports_dir()
+    ts = _report_ts()
+    base = REPORTS_DIR / "mission_final" / ts
+    payload = {
+        "timestamp": _utc_now_iso(),
+        "outcome": outcome,
+        "mission": state.get("mission"),
+        "execution": state.get("execution"),
+        "verification": state.get("verification"),
+        "observability": state.get("observability"),
+        "metrics": state.get("metrics"),
+        "failures": state.get("failures"),
+    }
+    _write_json(base / "MISSION_FINAL_REPORT.json", payload)
+    _write_text(
+        base / "MISSION_FINAL_REPORT.md",
+        "\n".join(
+            [
+                "# MISSION FINAL REPORT",
+                "",
+                f"- Timestamp: {payload['timestamp']}",
+                f"- Outcome: {outcome}",
+                f"- Current phase: {(state.get('execution') or {}).get('current_phase')}",
+                f"- Phase status: {(state.get('execution') or {}).get('phase_status')}",
+                f"- Verification status: {(state.get('verification') or {}).get('status')}",
+            ]
+        )
+        + "\n",
+    )
+    _write_text(base.parent / "LATEST.txt", ts + "\n")
 
 
 def _lock_exclusive(fd: int) -> None:
@@ -65,23 +153,6 @@ def _atomic_write_json(path: Path, data: dict[str, Any]) -> None:
     ) as tf:
         tmp_name = tf.name
         tf.write(payload)
-        tf.flush()
-        os.fsync(tf.fileno())
-    os.replace(tmp_name, path)
-
-
-def _atomic_write_text(path: Path, content: str) -> None:
-    path.parent.mkdir(parents=True, exist_ok=True)
-    with NamedTemporaryFile(
-        mode="w",
-        encoding="utf-8",
-        dir=str(path.parent),
-        prefix=path.name + ".",
-        suffix=".tmp",
-        delete=False,
-    ) as tf:
-        tmp_name = tf.name
-        tf.write(content)
         tf.flush()
         os.fsync(tf.fileno())
     os.replace(tmp_name, path)
@@ -195,16 +266,17 @@ def _normalize_execution_state(state: dict[str, Any]) -> None:
     mission.setdefault("mode", "infinite")
     mission.setdefault("target_final_phase", None)
     mission.setdefault("stop_when_complete", False)
+    mission.setdefault("status", "running")
+    mission.setdefault("started_at", None)
+    mission.setdefault("completed_at", None)
     mission.setdefault("production_base_url", DEFAULT_PROD_BASE_URL)
     mission.setdefault("staging_base_url", DEFAULT_STAGING_BASE_URL)
-    mission.setdefault("status", "active")
 
     verification.setdefault("phase", None)
     verification.setdefault("status", "unknown")
     verification.setdefault("checks", {})
     verification.setdefault("last_checked_at", None)
-    verification.setdefault("attempts", 0)
-    verification.setdefault("last_result", None)
+    verification.setdefault("retry_count", 0)
 
     failures.setdefault("consecutive_failures", 0)
     failures.setdefault("error_count", 0)
@@ -231,173 +303,6 @@ def _verification_passed_for_phase(state: dict[str, Any], phase: int) -> bool:
     if v.get("phase") != phase:
         return False
     return (v.get("status") or "").lower() == "passed"
-
-
-def _mission_complete(state: dict[str, Any]) -> bool:
-    if not _is_finite_mission(state):
-        return False
-    mission = state.get("mission") or {}
-    execution = state.get("execution") or {}
-    target = _mission_target_phase(state)
-    if target is None:
-        return False
-    current_phase = int(execution.get("current_phase") or 0)
-    phase_status = (execution.get("phase_status") or "").lower()
-    if current_phase != target or phase_status != "completed":
-        return False
-    return _verification_passed_for_phase(state, target)
-
-
-def _set_mission_dormant(state: dict[str, Any], reason: str) -> None:
-    mission = state.setdefault("mission", {})
-    mission["status"] = "completed"
-    planner = state.setdefault("planner", {})
-    planner["next_action"] = "monitor_production"
-    planner["priority"] = "low"
-    planner["blocked"] = True
-    planner["block_reason"] = reason
-    # Make the loop effectively stop doing work while still running under systemd.
-    runtime = state.setdefault("runtime", {})
-    runtime["loop_interval_seconds"] = int(runtime.get("loop_interval_seconds") or 60)
-    runtime["loop_interval_seconds"] = max(runtime["loop_interval_seconds"], 3600)
-
-
-def _render_phase_report(state: dict[str, Any], phase: int) -> str:
-    mission = state.get("mission") or {}
-    verification = state.get("verification") or {}
-    execution = state.get("execution") or {}
-    observability = state.get("observability") or {}
-    metrics = state.get("metrics") or {}
-    failures = state.get("failures") or {}
-
-    lines: list[str] = []
-    lines.append(f"# PHASE {phase} REPORT")
-    lines.append("")
-    lines.append(f"generated_at_utc: {_utc_now_iso()}")
-    lines.append(f"mission_mode: {mission.get('mode')}")
-    lines.append(f"target_final_phase: {mission.get('target_final_phase')}")
-    lines.append(f"production_base_url: {mission.get('production_base_url')}")
-    lines.append(f"staging_base_url: {mission.get('staging_base_url')}")
-    lines.append("")
-    lines.append("## execution")
-    lines.append(json.dumps(execution, indent=2, sort_keys=True))
-    lines.append("")
-    lines.append("## verification")
-    lines.append(json.dumps(verification, indent=2, sort_keys=True))
-    lines.append("")
-    lines.append("## observability")
-    lines.append(json.dumps(observability, indent=2, sort_keys=True))
-    lines.append("")
-    lines.append("## metrics")
-    lines.append(json.dumps(metrics, indent=2, sort_keys=True))
-    lines.append("")
-    lines.append("## failures")
-    lines.append(json.dumps(failures, indent=2, sort_keys=True))
-    lines.append("")
-    return "\n".join(lines)
-
-
-def _write_phase_report(state: dict[str, Any], phase: int) -> None:
-    REPORTS_DIR.mkdir(parents=True, exist_ok=True)
-    ts = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
-    path = REPORTS_DIR / f"phase_{phase:02d}_{ts}.md"
-    _atomic_write_text(path, _render_phase_report(state, phase))
-
-
-def _render_mission_final_report(state: dict[str, Any]) -> str:
-    mission = state.get("mission") or {}
-    execution = state.get("execution") or {}
-    verification = state.get("verification") or {}
-
-    lines: list[str] = []
-    lines.append("# MISSION_FINAL_REPORT")
-    lines.append("")
-    lines.append(f"generated_at_utc: {_utc_now_iso()}")
-    lines.append("")
-    lines.append("## mission")
-    lines.append(json.dumps(mission, indent=2, sort_keys=True))
-    lines.append("")
-    lines.append("## execution")
-    lines.append(json.dumps(execution, indent=2, sort_keys=True))
-    lines.append("")
-    lines.append("## verification")
-    lines.append(json.dumps(verification, indent=2, sort_keys=True))
-    lines.append("")
-    return "\n".join(lines)
-
-
-def _write_mission_final_report(state: dict[str, Any]) -> None:
-    REPORTS_DIR.mkdir(parents=True, exist_ok=True)
-    ts = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
-    path = REPORTS_DIR / f"MISSION_FINAL_REPORT_{ts}.md"
-    _atomic_write_text(path, _render_mission_final_report(state))
-
-
-def _record_rollback(state: dict[str, Any], reason: str) -> None:
-    failures = state.setdefault("failures", {})
-    failures["last_rollback"] = _utc_now_iso()
-    failures["rollback_reason"] = reason
-    failures["last_error"] = f"rollback:{reason}"
-
-
-def _handle_verification_failure(state: dict[str, Any], phase: int) -> None:
-    verification = state.setdefault("verification", {})
-    attempts = int(verification.get("attempts") or 0)
-    verification["attempts"] = attempts + 1
-    verification["last_result"] = "failed"
-
-    # Retry once; on second failure, rollback (safe state-only) and stop mission.
-    if attempts == 0:
-        planner = state.setdefault("planner", {})
-        planner["blocked"] = True
-        planner["block_reason"] = "verification_failed_retry_once"
-        planner["next_action"] = "monitor_production"
-        planner["priority"] = "high"
-        log(f"verification_failed phase={phase} retry=1")
-        return
-
-    log(f"verification_failed phase={phase} rollback=1")
-    _record_rollback(state, f"verification_failed_phase_{phase}")
-    _set_mission_dormant(state, "verification_failed_rollback")
-
-
-def _maybe_execute_phase(state: dict[str, Any]) -> None:
-    if not _is_finite_mission(state):
-        return
-
-    mission = state.get("mission") or {}
-    if (mission.get("status") or "").lower() != "active":
-        return
-
-    execution = state.setdefault("execution", {})
-    phase_status = (execution.get("phase_status") or "").lower()
-    current_phase = int(execution.get("current_phase") or 0)
-
-    target = _mission_target_phase(state)
-    if target is not None and current_phase > target:
-        _set_mission_dormant(state, "mission_complete")
-        return
-
-    # Execute phase by running required verification checks; mark completed only when passed.
-    if phase_status == "running":
-        state.setdefault("verification", {})["phase"] = current_phase
-        _update_verification_from_checks(state)
-        if _verification_passed_for_phase(state, current_phase):
-            execution["phase_status"] = "completed"
-            execution["phase_completed_at"] = _utc_now_iso()
-            execution["last_successful_phase"] = current_phase
-            state.setdefault("verification", {})["attempts"] = 0
-            state.setdefault("verification", {})["last_result"] = "passed"
-            _write_phase_report(state, current_phase)
-            log(f"phase_completed phase={current_phase}")
-        else:
-            _handle_verification_failure(state, current_phase)
-
-    # If mission is complete at target phase, finalize.
-    if _mission_complete(state):
-        _write_phase_report(state, int((state.get("execution") or {}).get("current_phase") or 0))
-        _write_mission_final_report(state)
-        _set_mission_dormant(state, "mission_complete")
 
 
 def _update_verification_from_checks(state: dict[str, Any]) -> None:
@@ -448,6 +353,21 @@ def _update_verification_from_checks(state: dict[str, Any]) -> None:
     verification["status"] = "passed" if all_required_passed else "failed"
 
 
+def _phase_can_complete(state: dict[str, Any]) -> bool:
+    # A minimal phase "executor": complete a phase only when core runtime checks pass.
+    # This does not implement feature work; it only enforces operational gates.
+    _update_verification_from_checks(state)
+    return (state.get("verification") or {}).get("status") == "passed"
+
+
+def _attempt_stop_service() -> None:
+    try:
+        # Best-effort: stop the service that runs this loop.
+        subprocess.run(["systemctl", "stop", "amp-agent.service"], timeout=10, check=False)
+    except Exception:
+        pass
+
+
 @dataclass(frozen=True)
 class Decision:
     action: str
@@ -490,6 +410,12 @@ def decide_next_action(state: dict[str, Any]) -> Decision:
     finite = (mission.get("mode") or "").lower() == "finite"
     target = _mission_target_phase(state) if finite else None
 
+    if finite and mission.get("status") == "completed":
+        return Decision("monitor_production", "mission_already_completed", "low")
+
+    if finite and mission.get("status") == "failed":
+        return Decision("monitor_production", "mission_failed", "high")
+
     if finite and target is not None and current_phase >= target and phase_status == "completed":
         return Decision("monitor_production", "mission_complete_at_target_phase", "low")
 
@@ -499,8 +425,14 @@ def decide_next_action(state: dict[str, Any]) -> Decision:
     if phase_status == "completed":
         if finite and target is not None:
             # In finite mode, require a verification pass for this phase before advancing.
-            if verification.get("phase") != current_phase or (verification.get("status") or "").lower() != "passed":
-                return Decision("monitor_production", "verification_required_before_advance", "high")
+            if verification.get("phase") != current_phase:
+                return Decision("verify_phase", "verification_required_before_advance", "high")
+            status = (verification.get("status") or "").lower()
+            if status != "passed":
+                retry_count = int(verification.get("retry_count") or 0)
+                if retry_count < 1:
+                    return Decision("verify_phase", "verification_retry", "high")
+                return Decision("rollback_last_slice", "verification_failed_twice", "high")
         return Decision("advance_phase", "phase_completed", "medium")
 
     # 5) Deployment state
@@ -544,15 +476,68 @@ def execute_action(action: str, state: dict[str, Any]) -> None:
         state.setdefault("failures", {})["last_error"] = None
 
     elif action == "continue_phase":
-        state.setdefault("execution", {})["phase_status"] = "running"
+        execution = state.setdefault("execution", {})
+        execution["phase_status"] = "running"
+
+        # Minimal executor: when in finite mission, attempt to complete the phase based on gates.
+        if _is_finite_mission(state):
+            phase = int(execution.get("current_phase") or 0)
+            v = state.setdefault("verification", {})
+            v["phase"] = phase
+            v["retry_count"] = 0
+            if _phase_can_complete(state):
+                execution["phase_status"] = "completed"
+                execution["last_successful_phase"] = phase
+                write_phase_report(state, phase, "completed")
+            else:
+                write_phase_report(state, phase, "running_checks_failed")
+
+    elif action == "verify_phase":
+        execution = state.setdefault("execution", {})
+        phase = int(execution.get("current_phase") or 0)
+        v = state.setdefault("verification", {})
+        v["phase"] = phase
+        v["retry_count"] = int(v.get("retry_count") or 0)
+
+        _update_verification_from_checks(state)
+        if (v.get("status") or "").lower() != "passed":
+            v["retry_count"] = int(v.get("retry_count") or 0) + 1
+            write_phase_report(state, phase, f"verification_failed_retry_{v['retry_count']}")
+        else:
+            v["retry_count"] = 0
+            write_phase_report(state, phase, "verification_passed")
 
     elif action == "advance_phase":
         execution = state.setdefault("execution", {})
         execution["current_phase"] = int(execution.get("current_phase") or 0) + 1
         execution["phase_status"] = "running"
 
-    elif action in {"rollback_last_slice", "resume_deploy", "monitor_production"}:
-        # No-op in skeleton.
+        # Reset verification for next phase.
+        v = state.setdefault("verification", {})
+        v["phase"] = int(execution.get("current_phase") or 0)
+        v["status"] = "unknown"
+        v["checks"] = {}
+        v["retry_count"] = 0
+
+        # Mission start marker.
+        mission = state.setdefault("mission", {})
+        if not mission.get("started_at"):
+            mission["started_at"] = _utc_now_iso()
+
+    elif action == "rollback_last_slice":
+        # Safety-first rollback: mark mission failed and stop; no destructive deployment actions.
+        execution = state.setdefault("execution", {})
+        phase = int(execution.get("current_phase") or 0)
+        state.setdefault("failures", {})["last_error"] = "verification_failed_twice"
+        mission = state.setdefault("mission", {})
+        mission["status"] = "failed"
+        mission["completed_at"] = _utc_now_iso()
+        write_phase_report(state, phase, "rollback_triggered")
+        write_mission_final_report(state, "failed_verification")
+        if mission.get("stop_when_complete"):
+            _attempt_stop_service()
+
+    elif action in {"resume_deploy", "monitor_production"}:
         pass
 
     else:
@@ -568,13 +553,6 @@ def loop_once() -> None:
         try:
             state = load_state()
             _normalize_execution_state(state)
-
-            # Finite mission: execute current phase (via verification-driven completion).
-            try:
-                _maybe_execute_phase(state)
-            except Exception as e:
-                log(f"phase_execute_failed: {type(e).__name__} {e}")
-                _record_failure(state, f"phase_execute_failed:{type(e).__name__}")
 
             # Refresh verification checks before planning, so phase advancement decisions
             # are made using up-to-date verification status.
@@ -609,9 +587,15 @@ def loop_once() -> None:
                 planner["blocked"] = True
                 planner["block_reason"] = "mission_complete"
 
-            # If mission is completed, keep loop dormant.
-            if _mission_complete(state):
-                _set_mission_dormant(state, "mission_complete")
+                # Finalize mission and stop.
+                mission = state.setdefault("mission", {})
+                mission["status"] = "completed"
+                mission["completed_at"] = _utc_now_iso()
+                write_mission_final_report(state, "completed")
+                if mission.get("stop_when_complete"):
+                    save_state(state)
+                    _attempt_stop_service()
+                    raise SystemExit(0)
 
             ok = health_check()
             log(f"health_check ok={ok}")
