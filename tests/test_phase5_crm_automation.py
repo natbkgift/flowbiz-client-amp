@@ -73,9 +73,9 @@ def test_phase5_dry_run_does_not_mutate_db(client):
         assert inquiry2.advisor_user_id == before_advisor
 
         after_assignments = (
-            db.execute(
-                select(LeadAssignment).where(LeadAssignment.inquiry_id == inquiry_id)
-            ).scalars().all()
+            db.execute(select(LeadAssignment).where(LeadAssignment.inquiry_id == inquiry_id))
+            .scalars()
+            .all()
         )
         assert len(after_assignments) == before_assignments
     finally:
@@ -117,9 +117,9 @@ def test_phase5_real_run_promotes_and_assigns(client):
         assert inquiry2.advisor_user_id is not None
 
         assignments = (
-            db.execute(
-                select(LeadAssignment).where(LeadAssignment.inquiry_id == inquiry_id)
-            ).scalars().all()
+            db.execute(select(LeadAssignment).where(LeadAssignment.inquiry_id == inquiry_id))
+            .scalars()
+            .all()
         )
         assert any(a.reason == "phase5_auto_assignment" for a in assignments)
     finally:
