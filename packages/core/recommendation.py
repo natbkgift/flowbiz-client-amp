@@ -89,7 +89,11 @@ def recommend_properties(
         key=lambda r: (
             -r.score,
             # created_at may be None in extreme cases; treat None as oldest.
-            -(r.property.created_at.timestamp() if getattr(r.property, "created_at", None) else 0.0),
+            -(
+                r.property.created_at.timestamp()
+                if getattr(r.property, "created_at", None)
+                else 0.0
+            ),
             str(r.property.id),
         )
     )

@@ -88,9 +88,7 @@ def run(*, qualify_score_threshold: int = 60, reminder_age_hours: int = 24) -> P
 
         # 2) Assignment automation: ensure qualified inquiries are assigned to an advisor.
         qualified: list[Inquiry] = db.scalars(
-            select(Inquiry)
-            .where(Inquiry.status == "qualified")
-            .order_by(Inquiry.created_at.asc())
+            select(Inquiry).where(Inquiry.status == "qualified").order_by(Inquiry.created_at.asc())
         ).all()
         for inquiry in qualified:
             if inquiry.advisor_user_id is not None:
@@ -129,7 +127,8 @@ def run(*, qualify_score_threshold: int = 60, reminder_age_hours: int = 24) -> P
         ).all()
 
         for inquiry in stale_qualified:
-            has_viewing = db.scalar(select(Viewing.id).where(Viewing.inquiry_id == inquiry.id)) is not None
+            viewing_id = db.scalar(select(Viewing.id).where(Viewing.inquiry_id == inquiry.id))
+            has_viewing = viewing_id is not None
             if has_viewing:
                 continue
 

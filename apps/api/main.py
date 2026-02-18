@@ -22,12 +22,12 @@ from apps.api.routes.v1.crm import router as crm_router
 from apps.api.routes.v1.domain import router as domain_router
 from apps.api.routes.v1.finder import router as finder_router
 from apps.api.routes.v1.investment import router as investment_router
-from apps.api.routes.v1.recommendations import router as recommendations_router
 from apps.api.routes.v1.marketplace import router as marketplace_router
 from apps.api.routes.v1.members import router as members_router
 from apps.api.routes.v1.phase1 import router as phase1_router
 from apps.api.routes.v1.projects import router as projects_router
 from apps.api.routes.v1.properties import router as properties_router
+from apps.api.routes.v1.recommendations import router as recommendations_router
 from apps.api.routes.v1.seller import router as seller_router
 from packages.core.auth import hash_password
 from packages.core.config import settings

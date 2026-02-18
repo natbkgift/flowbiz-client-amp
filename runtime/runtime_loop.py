@@ -29,6 +29,78 @@ DEFAULT_PROD_BASE_URL = "http://127.0.0.1:8001"
 DEFAULT_STAGING_BASE_URL = "http://127.0.0.1:8101"
 
 
+CONSTITUTION_PATH = APP_DIR / "docs" / "directive" / "AMP_MASTER_EXECUTION_DIRECTIVE_V4.md"
+REQUIRED_GOVERNANCE_ARTIFACTS: list[Path] = [
+    APP_DIR / "docs" / "DEPLOY_PLAN_AMP_PRODUCTION_SAFE_MODE.md",
+    CONSTITUTION_PATH,
+    APP_DIR / "docs" / "governance" / "metrics.yaml",
+    APP_DIR / "docs" / "governance" / "observability.md",
+    APP_DIR / "docs" / "governance" / "phase-dependency.md",
+    APP_DIR / "docs" / "architecture" / "platform-architecture.md",
+    APP_DIR / "docs" / "architecture" / "experience-system.md",
+    APP_DIR / "docs" / "architecture" / "brand-system.md",
+]
+
+
+def _system_integrity_reports_dir() -> Path:
+    return APP_DIR / "docs" / "phase_reports" / "system_integrity"
+
+
+def write_system_integrity_report(*, missing: list[str], unreadable: list[str]) -> None:
+    base_root = _system_integrity_reports_dir()
+    ts = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
+    base = base_root / ts
+    base.mkdir(parents=True, exist_ok=True)
+    (base_root / "LATEST.txt").write_text(ts + "\n", encoding="utf-8")
+
+    payload = {
+        "timestamp": _utc_now_iso(),
+        "missing": missing,
+        "unreadable": unreadable,
+        "required": [p.relative_to(APP_DIR).as_posix() for p in REQUIRED_GOVERNANCE_ARTIFACTS],
+    }
+    (base / "SYSTEM_INTEGRITY_REPORT.json").write_text(
+        json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8"
+    )
+    lines = [
+        "# SYSTEM INTEGRITY REPORT",
+        "",
+        f"- Timestamp: {payload['timestamp']}",
+        f"- Missing artifacts: {len(missing)}",
+        f"- Unreadable artifacts: {len(unreadable)}",
+    ]
+    if missing:
+        lines.append("")
+        lines.append("## Missing")
+        lines.extend([f"- {m}" for m in missing])
+    if unreadable:
+        lines.append("")
+        lines.append("## Unreadable")
+        lines.extend([f"- {u}" for u in unreadable])
+    (base / "SYSTEM_INTEGRITY_REPORT.md").write_text("\n".join(lines) + "\n", encoding="utf-8")
+
+
+def _check_system_integrity_or_stop() -> None:
+    missing: list[str] = []
+    unreadable: list[str] = []
+    for p in REQUIRED_GOVERNANCE_ARTIFACTS:
+        rel = p.relative_to(APP_DIR).as_posix()
+        if not p.exists():
+            missing.append(rel)
+            continue
+        try:
+            # Read a small prefix to ensure file is readable.
+            with open(p, "r", encoding="utf-8") as f:
+                _ = f.read(256)
+        except Exception:
+            unreadable.append(rel)
+
+    if missing or unreadable:
+        write_system_integrity_report(missing=missing, unreadable=unreadable)
+        log(f"system_integrity_failed missing={len(missing)} unreadable={len(unreadable)}")
+        raise SystemExit(2)
+
+
 @dataclass(frozen=True)
 class PhaseWorkResult:
     ok: bool
@@ -78,7 +150,10 @@ def _phase_report_payload(state: dict[str, Any], phase: int, outcome: str) -> di
         "observability": state.get("observability"),
         "metrics": state.get("metrics"),
         "failures": state.get("failures"),
-        "note": "Phase completion is governed by runtime verification gates; no additional phase executor is configured.",
+        "note": (
+            "Phase completion is governed by runtime verification gates; "
+            "no additional phase executor is configured."
+        ),
     }
 
 
@@ -292,6 +367,13 @@ def _normalize_execution_state(state: dict[str, Any]) -> None:
     mission.setdefault("admin_base_url", "http://127.0.0.1:8002")
     mission.setdefault("allow_seed_demo", False)
 
+    # Optional: baseline runner inputs (used when in mission/finite mode).
+    mission.setdefault(
+        "baseline_public_base", mission.get("public_base_url") or "https://amppattaya.com"
+    )
+    mission.setdefault("baseline_vps_host", None)
+    mission.setdefault("baseline_vps_path", "/opt/flowbiz/clients/flowbiz-client-amp")
+
     verification.setdefault("phase", None)
     verification.setdefault("status", "unknown")
     verification.setdefault("checks", {})
@@ -307,7 +389,12 @@ def _normalize_execution_state(state: dict[str, Any]) -> None:
 
 def _is_finite_mission(state: dict[str, Any]) -> bool:
     mode = (state.get("mission") or {}).get("mode")
-    return isinstance(mode, str) and mode.lower() == "finite"
+    return isinstance(mode, str) and mode.lower() in {"finite", "mission"}
+
+
+def _is_standby_mode(state: dict[str, Any]) -> bool:
+    mode = ((state.get("mission") or {}).get("mode") or "").lower()
+    return mode in {"standby"}
 
 
 def _mission_target_phase(state: dict[str, Any]) -> int | None:
@@ -335,9 +422,20 @@ def _update_verification_from_checks(state: dict[str, Any]) -> None:
 
     def _run(cmd: list[str], timeout_seconds: int) -> bool:
         try:
-            r = subprocess.run(cmd, capture_output=True, text=True, timeout=timeout_seconds, check=False)
+            r = subprocess.run(
+                cmd,
+                capture_output=True,
+                text=True,
+                timeout=timeout_seconds,
+                check=False,
+            )
             if r.returncode != 0:
-                log(f"cmd_failed rc={r.returncode} cmd={' '.join(cmd)} stderr={(r.stderr or '').strip()[:300]}")
+                log(
+                    "cmd_failed "
+                    f"rc={r.returncode} "
+                    f"cmd={' '.join(cmd)} "
+                    f"stderr={(r.stderr or '').strip()[:300]}"
+                )
             return r.returncode == 0
         except Exception as e:
             log(f"cmd_exception cmd={' '.join(cmd)} err={type(e).__name__}")
@@ -414,13 +512,18 @@ def _update_verification_from_checks(state: dict[str, Any]) -> None:
             checks["staging_metrics"] = "failed"
 
     # Determinism probes (avoid /metrics which is intentionally non-deterministic).
-    checks["prod_determinism_meta"] = "passed" if _determinism_probe(f"{prod_base}/v1/meta") else "failed"
+    checks["prod_determinism_meta"] = (
+        "passed" if _determinism_probe(f"{prod_base}/v1/meta") else "failed"
+    )
 
-    # Optional: properties endpoint may not exist in very early phases; treat non-200 as failed only in finite mode.
+    # Optional: properties endpoint may not exist in very early phases; treat non-200
+    # as failed only in finite mode.
     code_props = _curl_http_code(f"{prod_base}/v1/properties?page=1&limit=5")
     if code_props == 200:
         checks["prod_determinism_properties"] = (
-            "passed" if _determinism_probe(f"{prod_base}/v1/properties?page=1&limit=5") else "failed"
+            "passed"
+            if _determinism_probe(f"{prod_base}/v1/properties?page=1&limit=5")
+            else "failed"
         )
     else:
         checks["prod_determinism_properties"] = "unknown"
@@ -477,8 +580,13 @@ def decide_next_action(state: dict[str, Any]) -> Decision:
     mission = state.get("mission") or {}
     verification = state.get("verification") or {}
 
-    # 1) Integrity (backward compatible: only enforce keys that exist)
-    if integrity.get("baseline_completed") is False:
+    # 1) Integrity
+    # Baseline is required for execution modes (mission/finite). Standby must not auto-execute.
+    if (
+        not _is_standby_mode(state)
+        and _is_finite_mission(state)
+        and integrity.get("baseline_completed") is False
+    ):
         return Decision("run_baseline", "integrity_gate_failed:baseline", "high")
     if "contracts_loaded" in integrity and integrity.get("contracts_loaded") is False:
         return Decision("run_baseline", "integrity_gate_failed:contracts", "high")
@@ -554,7 +662,9 @@ def _record_success(state: dict[str, Any]) -> None:
 
 def _run_cmd_capture(cmd: list[str], timeout_seconds: int) -> tuple[int, str, str]:
     try:
-        r = subprocess.run(cmd, capture_output=True, text=True, timeout=timeout_seconds, check=False)
+        r = subprocess.run(
+            cmd, capture_output=True, text=True, timeout=timeout_seconds, check=False
+        )
         return r.returncode, (r.stdout or ""), (r.stderr or "")
     except Exception as e:
         return 99, "", f"{type(e).__name__}: {e}"
@@ -631,20 +741,43 @@ def _run_phase_work(state: dict[str, Any], phase: int) -> PhaseWorkResult:
 
     if phase == 7:
         # Validate the recommendation endpoint exists and is deterministic.
-        base = str((state.get("mission") or {}).get("production_base_url") or DEFAULT_PROD_BASE_URL).rstrip("/")
+        base = str(
+            (state.get("mission") or {}).get("production_base_url") or DEFAULT_PROD_BASE_URL
+        ).rstrip("/")
         ok = True
-        ok = ok and _run(["curl", "-sS", "-o", "/dev/null", "-w", "%{http_code}", f"{base}/v1/recommendations?limit=5"], 15)
+        ok = ok and _run(
+            [
+                "curl",
+                "-sS",
+                "-o",
+                "/dev/null",
+                "-w",
+                "%{http_code}",
+                f"{base}/v1/recommendations?limit=5",
+            ],
+            15,
+        )
         ok = ok and _determinism_probe(f"{base}/v1/recommendations?limit=5", runs=3)
         if not ok:
             details.append("recommendations_endpoint_missing_or_nondeterministic")
-        return PhaseWorkResult(ok, "ai_recommendation" if ok else "ai_recommendation_failed", details)
+        return PhaseWorkResult(
+            ok, "ai_recommendation" if ok else "ai_recommendation_failed", details
+        )
 
     if phase == 8:
         # Public SEO integrity surfaces: robots.txt and sitemap.xml must be reachable.
-        public_base = str((state.get("mission") or {}).get("public_base_url") or "https://amppattaya.com").rstrip("/")
+        public_base = str(
+            (state.get("mission") or {}).get("public_base_url") or "https://amppattaya.com"
+        ).rstrip("/")
         ok = True
-        ok = ok and _run(["curl", "-sS", "-o", "/dev/null", "-w", "%{http_code}", f"{public_base}/robots.txt"], 15)
-        ok = ok and _run(["curl", "-sS", "-o", "/dev/null", "-w", "%{http_code}", f"{public_base}/sitemap.xml"], 15)
+        ok = ok and _run(
+            ["curl", "-sS", "-o", "/dev/null", "-w", "%{http_code}", f"{public_base}/robots.txt"],
+            15,
+        )
+        ok = ok and _run(
+            ["curl", "-sS", "-o", "/dev/null", "-w", "%{http_code}", f"{public_base}/sitemap.xml"],
+            15,
+        )
         if ok:
             ok = ok and _determinism_probe(f"{public_base}/robots.txt", runs=2)
             ok = ok and _determinism_probe(f"{public_base}/sitemap.xml", runs=2)
@@ -652,7 +785,9 @@ def _run_phase_work(state: dict[str, Any], phase: int) -> PhaseWorkResult:
 
     if phase == 9:
         # Design system engine: enforce admin UI availability.
-        admin_base = str((state.get("mission") or {}).get("admin_base_url") or "http://127.0.0.1:8002").rstrip("/")
+        admin_base = str(
+            (state.get("mission") or {}).get("admin_base_url") or "http://127.0.0.1:8002"
+        ).rstrip("/")
         code = _curl_http_code(admin_base, timeout_seconds=10)
         # Next.js commonly redirects (307/308) to canonical paths (e.g. trailing slash)
         # or auth routes; treat any 2xx/3xx as "available".
@@ -666,21 +801,28 @@ def _run_phase_work(state: dict[str, Any], phase: int) -> PhaseWorkResult:
         allow = bool((state.get("mission") or {}).get("allow_seed_demo"))
 
         if not allow:
+            seed_protection_script = (
+                "import os,sys; os.environ.pop('AMP_ALLOW_SEED', None); "
+                "from packages.core.phase_work.phase_10_seed_demo import run; "
+                "\ntry: run()"
+                "\nexcept SystemExit as e: print('seed_blocked_ok', str(e)); sys.exit(0)"
+                "\nelse: print('seed_block_failed'); sys.exit(1)"
+            )
             ok = _run(
                 _compose_exec_cmd(
                     service="api",
                     argv=[
                         "python",
                         "-c",
-                        "import os,sys; os.environ.pop('AMP_ALLOW_SEED', None); "
-                        "from packages.core.phase_work.phase_10_seed_demo import run; "
-                        "\ntry: run();\nexcept SystemExit as e: print('seed_blocked_ok', str(e)); sys.exit(0)\nelse: print('seed_block_failed'); sys.exit(1)",
+                        seed_protection_script,
                     ],
                     state=state,
                 ),
                 timeout_seconds=60,
             )
-            return PhaseWorkResult(ok, "seed_demo_protection" if ok else "seed_demo_protection_failed", details)
+            return PhaseWorkResult(
+                ok, "seed_demo_protection" if ok else "seed_demo_protection_failed", details
+            )
 
         ok = _run(
             _compose_exec_cmd(
@@ -696,12 +838,47 @@ def _run_phase_work(state: dict[str, Any], phase: int) -> PhaseWorkResult:
         )
         return PhaseWorkResult(ok, "seed_demo" if ok else "seed_demo_failed", details)
 
-    return PhaseWorkResult(False, "no_phase_work_defined", [f"No executable work defined for phase={phase}"])
+    return PhaseWorkResult(
+        False, "no_phase_work_defined", [f"No executable work defined for phase={phase}"]
+    )
 
 
 def execute_action(action: str, state: dict[str, Any]) -> None:
     # This file is an infra loop skeleton; actual execution engines live in /actions.
     if action == "run_baseline":
+        # Constitution baseline: run the baseline integrity engine and only then
+        # mark baseline_completed.
+        mission = state.get("mission") or {}
+        public_base = str(
+            mission.get("baseline_public_base")
+            or mission.get("public_base_url")
+            or "https://amppattaya.com"
+        )
+        vps_host = mission.get("baseline_vps_host")
+        vps_path = str(
+            mission.get("baseline_vps_path") or "/opt/flowbiz/clients/flowbiz-client-amp"
+        )
+
+        cmd = [
+            "python3",
+            str(APP_DIR / "scripts" / "baseline_integrity.py"),
+            "--public-base",
+            public_base,
+        ]
+        if isinstance(vps_host, str) and vps_host.strip():
+            cmd.extend(["--vps", vps_host.strip(), "--vps-path", vps_path])
+
+        rc, out, err = _run_cmd_capture(cmd, timeout_seconds=900)
+        log(
+            "baseline_integrity "
+            f"rc={rc} "
+            f"stdout={(out or '').strip()[:300]} "
+            f"stderr={(err or '').strip()[:300]}"
+        )
+        if rc != 0:
+            state.setdefault("failures", {})["last_error"] = "baseline_failed"
+            return
+
         state.setdefault("integrity", {})["baseline_completed"] = True
 
     elif action == "restore_observability":
@@ -808,6 +985,9 @@ def loop_once() -> None:
     with open(LOCK_FILE, "r+", encoding="utf-8") as lockf:
         _lock_exclusive(lockf.fileno())
         try:
+            # Constitution hard gate: required artifacts must exist and be readable.
+            _check_system_integrity_or_stop()
+
             state = load_state()
             _normalize_execution_state(state)
 
@@ -833,7 +1013,9 @@ def loop_once() -> None:
             exec_state = state.get("execution") or {}
             if exec_state.get("phase_status") == "completed" and _is_finite_mission(state):
                 try:
-                    state.setdefault("verification", {})["phase"] = int(exec_state.get("current_phase") or 0)
+                    state.setdefault("verification", {})["phase"] = int(
+                        exec_state.get("current_phase") or 0
+                    )
                     _update_verification_from_checks(state)
                 except Exception as e:
                     log(f"verification_update_failed: {type(e).__name__} {e}")
@@ -854,7 +1036,9 @@ def loop_once() -> None:
             planner = state.setdefault("planner", {})
             planner["blocked"] = False
             planner["block_reason"] = None
-            if decision.action == "monitor_production" and decision.reason.startswith("verification_required"):
+            if decision.action == "monitor_production" and decision.reason.startswith(
+                "verification_required"
+            ):
                 planner["blocked"] = True
                 planner["block_reason"] = "verification_required_before_advance"
             if decision.reason == "mission_complete_at_target_phase":

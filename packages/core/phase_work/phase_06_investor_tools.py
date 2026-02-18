@@ -18,7 +18,12 @@ def run() -> None:
     if roi.net_yield_percent <= 0:
         raise SystemExit("ROI net_yield_percent must be > 0")
 
-    mort = calc_mortgage_amortization(principal=3_000_000, annual_rate_percent=6.5, years=20, payments_per_year=12)
+    mort = calc_mortgage_amortization(
+        principal=3_000_000,
+        annual_rate_percent=6.5,
+        years=20,
+        payments_per_year=12,
+    )
     if mort.periods != 240:
         raise SystemExit(f"Unexpected mortgage periods: {mort.periods}")
     if mort.payment_per_period <= 0:

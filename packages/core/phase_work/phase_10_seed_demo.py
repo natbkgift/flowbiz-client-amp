@@ -73,7 +73,9 @@ def ensure_user(db: Session, email: str, password: str, role: str) -> User:
 
 
 def ensure_user_role(db: Session, user_id: UUID, role_id: UUID) -> None:
-    existing = db.scalar(select(UserRole).where(UserRole.user_id == user_id, UserRole.role_id == role_id))
+    existing = db.scalar(
+        select(UserRole).where(UserRole.user_id == user_id, UserRole.role_id == role_id)
+    )
     if existing is None:
         db.add(
             UserRole(
@@ -133,7 +135,20 @@ def run() -> SeedResult:
         )
 
         # Properties (3 deterministic)
-        def ensure_property(key: str, *, title: str, type_: str, price: Decimal, city: str, address: str, project_id: UUID | None, developer_id: UUID | None, area_id: UUID | None, status: str, slug: str) -> None:
+        def ensure_property(
+            key: str,
+            *,
+            title: str,
+            type_: str,
+            price: Decimal,
+            city: str,
+            address: str,
+            project_id: UUID | None,
+            developer_id: UUID | None,
+            area_id: UUID | None,
+            status: str,
+            slug: str,
+        ) -> None:
             source_id = f"seed:{key}"
             row = db.scalar(select(Property).where(Property.source_id == source_id))
             if row is not None:
@@ -224,4 +239,13 @@ def run() -> SeedResult:
 if __name__ == "__main__":
     # Print a small summary for logs.
     r = run()
-    print("phase_10_ok", {"areas": r.areas, "developers": r.developers, "projects": r.projects, "properties": r.properties, "users": r.users})
+    print(
+        "phase_10_ok",
+        {
+            "areas": r.areas,
+            "developers": r.developers,
+            "projects": r.projects,
+            "properties": r.properties,
+            "users": r.users,
+        },
+    )
