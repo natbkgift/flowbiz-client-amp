@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import os
 from dataclasses import dataclass
 from datetime import UTC, datetime, timedelta
 from uuid import UUID
@@ -55,7 +56,12 @@ def _choose_round_robin_advisor(db: Session, advisor_ids: set[UUID]) -> UUID | N
     return sorted(advisor_ids, key=lambda uid: (last_by_user.get(uid, min_dt), str(uid)))[0]
 
 
-def run(*, qualify_score_threshold: int = 60, reminder_age_hours: int = 24) -> Phase05Result:
+def run(
+    *,
+    qualify_score_threshold: int = 60,
+    reminder_age_hours: int = 24,
+    dry_run: bool = False,
+) -> Phase05Result:
     """Phase 5: CRM automation.
 
     Implements:
@@ -64,6 +70,10 @@ def run(*, qualify_score_threshold: int = 60, reminder_age_hours: int = 24) -> P
     - Reminders: write audit-log reminders for stale qualified inquiries with no viewing.
 
     Idempotent: safe to rerun.
+
+    dry_run:
+    - When True, computes counters but does NOT write lifecycle/assignment/reminder changes.
+    - Safe for production validation.
     """
 
     db = SessionLocal()
@@ -83,8 +93,13 @@ def run(*, qualify_score_threshold: int = 60, reminder_age_hours: int = 24) -> P
         for inquiry in inquiries:
             scored += 1
             if int(inquiry.score or 0) >= int(qualify_score_threshold):
-                inquiry.status = "qualified"
+                if not dry_run:
+                    inquiry.status = "qualified"
                 promoted += 1
+
+        if not dry_run:
+            # Make lifecycle updates visible to subsequent queries in this run.
+            db.flush()
 
         # 2) Assignment automation: ensure qualified inquiries are assigned to an advisor.
         qualified: list[Inquiry] = db.scalars(
@@ -98,23 +113,24 @@ def run(*, qualify_score_threshold: int = 60, reminder_age_hours: int = 24) -> P
             if chosen is None:
                 continue
 
-            inquiry.advisor_user_id = chosen
-            db.add(
-                LeadAssignment(
-                    inquiry_id=inquiry.id,
-                    assigned_user_id=chosen,
-                    assigned_by_user_id=None,
-                    reason="phase5_auto_assignment",
+            if not dry_run:
+                inquiry.advisor_user_id = chosen
+                db.add(
+                    LeadAssignment(
+                        inquiry_id=inquiry.id,
+                        assigned_user_id=chosen,
+                        assigned_by_user_id=None,
+                        reason="phase5_auto_assignment",
+                    )
                 )
-            )
-            write_audit_log(
-                db,
-                actor_user_id=None,
-                entity_type="inquiry",
-                entity_id=str(inquiry.id),
-                action="auto_assigned",
-                diff={"advisor_user_id": str(chosen), "reason": "phase5_auto_assignment"},
-            )
+                write_audit_log(
+                    db,
+                    actor_user_id=None,
+                    entity_type="inquiry",
+                    entity_id=str(inquiry.id),
+                    action="auto_assigned",
+                    diff={"advisor_user_id": str(chosen), "reason": "phase5_auto_assignment"},
+                )
             assigned += 1
 
         # 3) Reminders: for qualified inquiries older than threshold with no viewing scheduled.
@@ -132,36 +148,40 @@ def run(*, qualify_score_threshold: int = 60, reminder_age_hours: int = 24) -> P
             if has_viewing:
                 continue
 
-            # Prevent repeated reminders: if we already emitted reminder_due today, skip.
-            reminder_key = f"reminder_due:{inquiry.id}:{now.strftime('%Y-%m-%d')}"
-            existing = db.scalar(
-                select(func.count())
-                .select_from(LeadAssignment)
-                .where(LeadAssignment.reason == reminder_key)
-            )
-            if int(existing or 0) > 0:
-                continue
-
-            # Store a lightweight marker as a lead assignment with a unique reason key.
-            db.add(
-                LeadAssignment(
-                    inquiry_id=inquiry.id,
-                    assigned_user_id=inquiry.advisor_user_id,
-                    assigned_by_user_id=None,
-                    reason=reminder_key,
+            if not dry_run:
+                # Prevent repeated reminders: if we already emitted reminder_due today, skip.
+                reminder_key = f"reminder_due:{inquiry.id}:{now.strftime('%Y-%m-%d')}"
+                existing = db.scalar(
+                    select(func.count())
+                    .select_from(LeadAssignment)
+                    .where(LeadAssignment.reason == reminder_key)
                 )
-            )
-            write_audit_log(
-                db,
-                actor_user_id=None,
-                entity_type="inquiry",
-                entity_id=str(inquiry.id),
-                action="reminder_due",
-                diff={"age_hours": reminder_age_hours, "has_viewing": False},
-            )
+                if int(existing or 0) > 0:
+                    continue
+
+                # Store a lightweight marker as a lead assignment with a unique reason key.
+                db.add(
+                    LeadAssignment(
+                        inquiry_id=inquiry.id,
+                        assigned_user_id=inquiry.advisor_user_id,
+                        assigned_by_user_id=None,
+                        reason=reminder_key,
+                    )
+                )
+                write_audit_log(
+                    db,
+                    actor_user_id=None,
+                    entity_type="inquiry",
+                    entity_id=str(inquiry.id),
+                    action="reminder_due",
+                    diff={"age_hours": reminder_age_hours, "has_viewing": False},
+                )
             reminders += 1
 
-        db.commit()
+        if dry_run:
+            db.rollback()
+        else:
+            db.commit()
         return Phase05Result(
             inquiries_scored=scored,
             inquiries_promoted_to_qualified=promoted,
@@ -173,7 +193,8 @@ def run(*, qualify_score_threshold: int = 60, reminder_age_hours: int = 24) -> P
 
 
 def _main() -> int:
-    r = run()
+    dry_run = os.environ.get("AMP_PHASE5_DRY_RUN", "").strip() == "1"
+    r = run(dry_run=dry_run)
     print(
         "phase_05_ok",
         {
@@ -181,6 +202,7 @@ def _main() -> int:
             "inquiries_promoted_to_qualified": r.inquiries_promoted_to_qualified,
             "inquiries_assigned": r.inquiries_assigned,
             "reminders_written": r.reminders_written,
+            "dry_run": dry_run,
         },
     )
     return 0
