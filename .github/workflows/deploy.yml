@@ -1,0 +1,172 @@
+name: Deploy Production
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+  packages: write
+
+concurrency:
+  group: production-deploy
+  cancel-in-progress: false
+
+env:
+  REGISTRY: ghcr.io
+  API_IMAGE: ghcr.io/${{ github.repository }}/api
+  ADMIN_IMAGE: ghcr.io/${{ github.repository }}/admin-app
+
+jobs:
+  # ── Stage 1: Lint & Test ───────────────────────────────────
+  lint-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install Python dependencies
+        run: pip install -e ".[dev]"
+
+      - name: Ruff lint
+        run: ruff check .
+
+      - name: Pytest
+        run: pytest -q --tb=short
+
+      - name: Set up Node 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install admin-app dependencies
+        working-directory: admin-app
+        run: npm ci
+
+      - name: Next.js lint
+        working-directory: admin-app
+        run: npx next lint
+        continue-on-error: true
+
+      - name: TypeScript check
+        working-directory: admin-app
+        run: npx tsc --noEmit
+        continue-on-error: true
+
+  # ── Stage 2: Build & Push Docker Images ────────────────────
+  build:
+    needs: lint-test
+    runs-on: ubuntu-latest
+    outputs:
+      sha_tag: ${{ steps.meta.outputs.sha_tag }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set image tag
+        id: meta
+        run: echo "sha_tag=sha-${GITHUB_SHA::8}" >> "$GITHUB_OUTPUT"
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build & push API image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: true
+          tags: |
+            ${{ env.API_IMAGE }}:${{ steps.meta.outputs.sha_tag }}
+            ${{ env.API_IMAGE }}:latest
+          build-args: |
+            GIT_SHA=${{ github.sha }}
+
+      - name: Build & push Admin-App image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./admin-app
+          push: true
+          tags: |
+            ${{ env.ADMIN_IMAGE }}:${{ steps.meta.outputs.sha_tag }}
+            ${{ env.ADMIN_IMAGE }}:latest
+
+  # ── Stage 3: Deploy to VPS ─────────────────────────────────
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          script: |
+            set -euo pipefail
+            cd /opt/flowbiz/flowbiz-client-amp
+
+            # Save current image tags for rollback
+            docker compose -f docker-compose.yml -f docker-compose.prod.yml \
+              ps --format '{{.Image}}' > /tmp/previous_images.txt || true
+
+            # Pull latest images
+            docker pull ${{ env.API_IMAGE }}:${{ needs.build.outputs.sha_tag }}
+            docker pull ${{ env.ADMIN_IMAGE }}:${{ needs.build.outputs.sha_tag }}
+
+            # Tag as latest locally
+            docker tag ${{ env.API_IMAGE }}:${{ needs.build.outputs.sha_tag }} ${{ env.API_IMAGE }}:latest
+            docker tag ${{ env.ADMIN_IMAGE }}:${{ needs.build.outputs.sha_tag }} ${{ env.ADMIN_IMAGE }}:latest
+
+            # Rolling restart
+            docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d --remove-orphans
+
+            echo "Deployed ${{ needs.build.outputs.sha_tag }}"
+
+  # ── Stage 4: Smoke Test & Auto-Rollback ────────────────────
+  smoke-test:
+    needs: [build, deploy]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Wait for services to stabilize
+        run: sleep 15
+
+      - name: Smoke tests
+        id: smoke
+        continue-on-error: true
+        env:
+          SITE_URL: ${{ secrets.SITE_URL || 'https://amppattaya.com' }}
+        run: |
+          bash scripts/smoke-test.sh "$SITE_URL"
+
+      - name: Auto-rollback on failure
+        if: steps.smoke.outcome == 'failure'
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          script: |
+            set -euo pipefail
+            cd /opt/flowbiz/flowbiz-client-amp
+
+            echo "⚠️  Smoke test failed — rolling back..."
+            bash scripts/rollback.sh
+            echo "✅ Rollback complete"
+
+      - name: Fail pipeline if smoke tests failed
+        if: steps.smoke.outcome == 'failure'
+        run: |
+          echo "::error::Smoke tests failed. Automatic rollback executed."
+          exit 1

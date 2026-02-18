@@ -29,9 +29,27 @@ jobs:
       - name: Run ruff
         run: |
           ruff check .
-        continue-on-error: true
 
       - name: Run pytest
         run: |
-          pytest -q
-        continue-on-error: true
+          pytest -q --tb=short
+
+  admin-app:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Node 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        working-directory: admin-app
+        run: npm ci
+
+      - name: Next.js build
+        working-directory: admin-app
+        run: npm run build

@@ -92,7 +92,7 @@ export function SidebarFilter({
         <h3>Price Range</h3>
         <div style={{ display: 'grid', gap: 12 }}>
           <label>
-            <div style={{ fontSize: 14, color: 'var(--color-gray-600)', marginBottom: 6 }}>Min</div>
+            <div style={{ fontSize: 14, color: 'var(--color-text-secondary)', marginBottom: 6 }}>Min</div>
             <input
               className="form-input"
               inputMode="numeric"
@@ -101,7 +101,7 @@ export function SidebarFilter({
             />
           </label>
           <label>
-            <div style={{ fontSize: 14, color: 'var(--color-gray-600)', marginBottom: 6 }}>Max</div>
+            <div style={{ fontSize: 14, color: 'var(--color-text-secondary)', marginBottom: 6 }}>Max</div>
             <input
               className="form-input"
               inputMode="numeric"

@@ -5,6 +5,7 @@ import { useMemo, useState } from 'react';
 import type { PropertyListItem } from '../../app/public/_shared/types';
 import { PropertyCard } from '../cards/PropertyCard';
 import { SidebarFilter } from './SidebarFilter';
+import { IconFilter } from '../icons/SvgIcons';
 
 type SortKey = 'newest' | 'price_asc' | 'price_desc';
 
@@ -28,7 +29,7 @@ export function ListingGrid({ items }: { items: PropertyListItem[] }) {
         style={{ width: '100%', marginBottom: 24 }}
         onClick={() => setFiltersOpen(true)}
       >
-        🔍 Filters & Sort
+        <IconFilter size="sm" /> Filters &amp; Sort
       </button>
 
       <div className="listing-layout">
@@ -43,7 +44,7 @@ export function ListingGrid({ items }: { items: PropertyListItem[] }) {
           <div className="results-header">
             <div className="results-count">{sorted.length} Results</div>
             <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-              <label style={{ fontSize: 14, color: 'var(--color-gray-600)' }}>Sort:</label>
+              <label style={{ fontSize: 14, color: 'var(--color-text-secondary)' }}>Sort:</label>
               <select
                 className="form-select"
                 value={sort}

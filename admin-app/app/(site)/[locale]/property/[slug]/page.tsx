@@ -4,6 +4,7 @@ import Image from 'next/image';
 
 import { Container } from '@/components/layout/Container';
 import { LeadForm } from '@/components/forms/LeadForm';
+import { IconBed, IconBath, IconArea } from '@/components/icons/SvgIcons';
 import { fetchPropertyBySlug } from '@/app/_lib/public-api-server';
 import { CTA } from '@/app/_lib/public-cta';
 import { resolveImageUrl } from '@/app/_lib/public-api-shared';
@@ -208,17 +209,32 @@ export default async function PropertyPage({ params }: PageProps) {
             </div>
 
             <div className="property-facts">
-              <div>
-                <strong>{property.bedrooms ?? '-'}</strong>
-                <div style={{ fontSize: 14, color: 'var(--color-gray-600)' }}>Bedrooms</div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <IconBed size="sm" />
+                <div>
+                  <strong>{property.bedrooms ?? '-'}</strong>
+                  <div style={{ fontSize: 14, color: 'var(--color-text-secondary)' }}>
+                    {locale === 'th' ? 'ห้องนอน' : 'Bedrooms'}
+                  </div>
+                </div>
               </div>
-              <div>
-                <strong>{property.bathrooms ?? '-'}</strong>
-                <div style={{ fontSize: 14, color: 'var(--color-gray-600)' }}>Bathrooms</div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <IconBath size="sm" />
+                <div>
+                  <strong>{property.bathrooms ?? '-'}</strong>
+                  <div style={{ fontSize: 14, color: 'var(--color-text-secondary)' }}>
+                    {locale === 'th' ? 'ห้องน้ำ' : 'Bathrooms'}
+                  </div>
+                </div>
               </div>
-              <div>
-                <strong>{property.size ?? '-'}</strong>
-                <div style={{ fontSize: 14, color: 'var(--color-gray-600)' }}>Sqm</div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <IconArea size="sm" />
+                <div>
+                  <strong>{property.size ?? '-'}</strong>
+                  <div style={{ fontSize: 14, color: 'var(--color-text-secondary)' }}>
+                    {locale === 'th' ? 'ตร.ม.' : 'Sqm'}
+                  </div>
+                </div>
               </div>
             </div>
 
@@ -280,7 +296,7 @@ export default async function PropertyPage({ params }: PageProps) {
                 </div>
                 <div>
                   <h3 style={{ marginBottom: 4 }}>AMP Pattaya</h3>
-                  <p style={{ marginBottom: 0, color: 'var(--color-gray-600)', fontSize: 14 }}>
+                  <p style={{ marginBottom: 0, color: 'var(--color-text-secondary)', fontSize: 14 }}>
                     Professional Property Management
                   </p>
                 </div>
