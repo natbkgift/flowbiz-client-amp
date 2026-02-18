@@ -4,6 +4,7 @@ import argparse
 import json
 import os
 import subprocess
+import sys
 import time
 from dataclasses import dataclass
 from datetime import datetime, timezone
@@ -367,6 +368,14 @@ def _normalize_execution_state(state: dict[str, Any]) -> None:
     mission.setdefault("admin_base_url", "http://127.0.0.1:8002")
     mission.setdefault("allow_seed_demo", False)
 
+    # Optional: self-fix engine (host-side). Disabled by default.
+    mission.setdefault("self_fix_enabled", False)
+    mission.setdefault("self_fix_max_attempts", 1)
+    mission.setdefault("self_fix_auto_commit", False)
+    mission.setdefault("self_fix_auto_deploy", False)
+    mission.setdefault("self_fix_vps_host", None)
+    mission.setdefault("self_fix_vps_path", "/opt/flowbiz/clients/flowbiz-client-amp")
+
     # Optional: baseline runner inputs (used when in mission/finite mode).
     mission.setdefault(
         "baseline_public_base", mission.get("public_base_url") or "https://amppattaya.com"
@@ -383,6 +392,7 @@ def _normalize_execution_state(state: dict[str, Any]) -> None:
     failures.setdefault("consecutive_failures", 0)
     failures.setdefault("error_count", 0)
     failures.setdefault("last_error", None)
+    failures.setdefault("self_fix_attempts", {})
     runtime.setdefault("loop_interval_seconds", 60)
     runtime.setdefault("max_consecutive_failures", 3)
 
@@ -604,10 +614,16 @@ def decide_next_action(state: dict[str, Any]) -> Decision:
     if _metrics_breached(metrics):
         return Decision("rollback_last_slice", "metrics_breach", "high")
 
-    # 4) Phase continuation/readiness
+    # 4) Failure recovery (before phase progression)
+    if failures.get("last_error"):
+        if bool(mission.get("self_fix_enabled")):
+            return Decision("attempt_self_fix", "failure_present", "high")
+        return Decision("investigate_failure", "failure_present", "high")
+
+    # 5) Phase continuation/readiness
     phase_status = execution.get("phase_status")
     current_phase = int(execution.get("current_phase") or 0)
-    finite = (mission.get("mode") or "").lower() == "finite"
+    finite = _is_finite_mission(state)
     target = _mission_target_phase(state) if finite else None
 
     if finite and mission.get("status") == "completed":
@@ -623,25 +639,17 @@ def decide_next_action(state: dict[str, Any]) -> Decision:
         return Decision("continue_phase", "phase_running", "medium")
 
     if phase_status == "completed":
-        if finite and target is not None:
-            # In finite mode, require a verification pass for this phase before advancing.
+        if finite:
+            # In finite mode, every phase must pass verification gates before advancing.
             if verification.get("phase") != current_phase:
                 return Decision("verify_phase", "verification_required_before_advance", "high")
-            status = (verification.get("status") or "").lower()
-            if status != "passed":
-                retry_count = int(verification.get("retry_count") or 0)
-                if retry_count < 1:
-                    return Decision("verify_phase", "verification_retry", "high")
-                return Decision("rollback_last_slice", "verification_failed_twice", "high")
+            if (verification.get("status") or "").lower() != "passed":
+                return Decision("verify_phase", "verification_retry_or_fail", "high")
         return Decision("advance_phase", "phase_completed", "medium")
 
     # 5) Deployment state
     if deployment.get("deployment_status") == "pending":
         return Decision("resume_deploy", "deployment_pending", "high")
-
-    # 6) Failure recovery
-    if failures.get("last_error"):
-        return Decision("investigate_failure", "failure_present", "high")
 
     # 7) Stable system
     return Decision("monitor_production", "stable", "low")
@@ -668,6 +676,73 @@ def _run_cmd_capture(cmd: list[str], timeout_seconds: int) -> tuple[int, str, st
         return r.returncode, (r.stdout or ""), (r.stderr or "")
     except Exception as e:
         return 99, "", f"{type(e).__name__}: {e}"
+
+
+def _host_python() -> str:
+    """Return a stable Python executable for running host-side tools.
+
+    Prefer the workspace .venv interpreter when available.
+    """
+
+    venv = APP_DIR / ".venv"
+    if os.name == "nt":
+        candidate = venv / "Scripts" / "python.exe"
+    else:
+        candidate = venv / "bin" / "python"
+    if candidate.exists():
+        return str(candidate)
+    return sys.executable or "python"
+
+
+def _run_host_python_module(
+    module: str, args: list[str], *, timeout_seconds: int
+) -> tuple[int, str, str]:
+    return _run_cmd_capture([_host_python(), "-m", module, *args], timeout_seconds=timeout_seconds)
+
+
+def _determinism_probe_post_json(url: str, payload_json: str, runs: int = 3) -> bool:
+    import hashlib
+
+    hashes: list[str] = []
+    for _ in range(max(1, runs)):
+        r = subprocess.run(
+            [
+                "curl",
+                "-sS",
+                "-H",
+                "Content-Type: application/json",
+                "-d",
+                payload_json,
+                url,
+            ],
+            capture_output=True,
+            text=True,
+            timeout=15,
+            check=False,
+        )
+        if r.returncode != 0:
+            return False
+        hashes.append(hashlib.sha256((r.stdout or "").encode("utf-8")).hexdigest())
+    return len(set(hashes)) == 1
+
+
+def _curl_headers_and_body(
+    url: str,
+    *,
+    method: str = "GET",
+    data: str | None = None,
+    headers: list[str] | None = None,
+) -> str | None:
+    cmd = ["curl", "-sS", "-i", "-X", method]
+    for h in headers or []:
+        cmd.extend(["-H", h])
+    if data is not None:
+        cmd.extend(["-H", "Content-Type: application/json", "-d", data])
+    cmd.append(url)
+    rc, out, _err = _run_cmd_capture(cmd, timeout_seconds=20)
+    if rc != 0:
+        return None
+    return out
 
 
 def _compose_exec_cmd(*, service: str, argv: list[str], state: dict[str, Any]) -> list[str]:
@@ -707,8 +782,167 @@ def _run_phase_work(state: dict[str, Any], phase: int) -> PhaseWorkResult:
             details.append("stderr=" + err.strip()[:800])
         return rc == 0
 
+    def _expect_http(url: str, *, ok_codes: set[int]) -> bool:
+        code = _curl_http_code(url, timeout_seconds=15)
+        details.append(f"http url={url} code={code}")
+        return code in ok_codes
+
+    def _post_http_code(url: str, payload_json: str) -> int | None:
+        rc, out, err = _run_cmd_capture(
+            [
+                "curl",
+                "-sS",
+                "-o",
+                "/dev/null",
+                "-w",
+                "%{http_code}",
+                "-H",
+                "Content-Type: application/json",
+                "-d",
+                payload_json,
+                url,
+            ],
+            timeout_seconds=20,
+        )
+        details.append(
+            f"post_http url={url} rc={rc} out={out.strip()[:50]} err={err.strip()[:120]}"
+        )
+        s = (out or "").strip()
+        return int(s) if s.isdigit() else None
+
     # Phase work is executed inside the running API container when possible.
     # This keeps DB connectivity consistent and avoids host dependency drift.
+    if phase == 0:
+        mission = state.get("mission") or {}
+        public_base = str(mission.get("public_base_url") or "https://amppattaya.com").rstrip("/")
+        prod_base = str(mission.get("production_base_url") or DEFAULT_PROD_BASE_URL).rstrip("/")
+        ok = True
+        ok = ok and _expect_http(f"{public_base}/health", ok_codes={200})
+        ok = ok and _expect_http(f"{public_base}/api/v1/meta", ok_codes={200, 301, 302, 307, 308})
+        ok = ok and _expect_http(f"{prod_base}/healthz", ok_codes={200})
+        ok = ok and _determinism_probe(f"{prod_base}/v1/meta", runs=2)
+        if not ok:
+            details.append("phase0_foundation_probe_failed")
+        return PhaseWorkResult(ok, "foundation" if ok else "foundation_failed", details)
+
+    if phase == 1:
+        mission = state.get("mission") or {}
+        prod_base = str(mission.get("production_base_url") or DEFAULT_PROD_BASE_URL).rstrip("/")
+        ok = True
+        ok = ok and _expect_http(f"{prod_base}/metrics", ok_codes={200})
+        ok = ok and _expect_http(f"{prod_base}/openapi.json", ok_codes={200})
+        ok = ok and _determinism_probe(f"{prod_base}/v1/meta", runs=3)
+        return PhaseWorkResult(ok, "observability" if ok else "observability_failed", details)
+
+    if phase == 2:
+        mission = state.get("mission") or {}
+        prod_base = str(mission.get("production_base_url") or DEFAULT_PROD_BASE_URL).rstrip("/")
+        url = f"{prod_base}/v1/finder/search"
+        payload = json.dumps(
+            {
+                "page": 1,
+                "limit": 5,
+                "session_id": "runtime-phase2",
+                "intent": "sale_new",
+                "search": "",
+                "sort": "newest",
+            },
+            separators=(",", ":"),
+            sort_keys=True,
+        )
+        code = _post_http_code(url, payload)
+        ok = code == 200
+        ok = ok and _determinism_probe_post_json(url, payload, runs=3)
+        if not ok:
+            details.append("finder_search_missing_or_nondeterministic")
+        return PhaseWorkResult(ok, "finder_engine" if ok else "finder_engine_failed", details)
+
+    if phase == 3:
+        mission = state.get("mission") or {}
+        prod_base = str(mission.get("production_base_url") or DEFAULT_PROD_BASE_URL).rstrip("/")
+        url = f"{prod_base}/v1/members/me"
+        code = _curl_http_code(url, timeout_seconds=10)
+        details.append(f"members_me_http_code={code}")
+        # No auth header => should return 401 Unauthorized.
+        ok = code in {401, 403}
+        return PhaseWorkResult(ok, "authz_contract" if ok else "authz_contract_failed", details)
+
+    if phase == 4:
+        mission = state.get("mission") or {}
+        prod_base = str(mission.get("production_base_url") or DEFAULT_PROD_BASE_URL).rstrip("/")
+        booking_url = f"{prod_base}/v1/bookings"
+        availability_url = (
+            f"{prod_base}/v1/availability"
+            "?property_id=00000000-0000-0000-0000-000000000000"
+            "&start_at=2026-02-19T12:00:00Z"
+            "&end_at=2026-02-20T12:00:00Z"
+        )
+        idem = f"runtime-phase4-{int(time.time())}"
+        payload = json.dumps(
+            {
+                "property_id": None,
+                "start_at": "2026-02-19T12:00:00Z",
+                "end_at": "2026-02-20T12:00:00Z",
+                "guests": 2,
+                "notes": "runtime-probe",
+            },
+            separators=(",", ":"),
+            sort_keys=True,
+        )
+
+        raw1 = _curl_headers_and_body(
+            booking_url,
+            method="POST",
+            data=payload,
+            headers=[f"Idempotency-Key: {idem}"],
+        )
+        raw2 = _curl_headers_and_body(
+            booking_url,
+            method="POST",
+            data=payload,
+            headers=[f"Idempotency-Key: {idem}"],
+        )
+        if raw1 is None or raw2 is None:
+            return PhaseWorkResult(False, "booking_probe_failed", details + ["curl_failed"])
+
+        def _parse(raw: str) -> tuple[int | None, str | None, str | None]:
+            cleaned = raw.replace("\r\n", "\n")
+            if "\n\n" not in cleaned:
+                return None, None, None
+            header_block, body = cleaned.split("\n\n", 1)
+            lines = header_block.splitlines()
+            code: int | None = None
+            if lines:
+                parts = (lines[0] or "").split()
+                if len(parts) >= 2 and parts[1].isdigit():
+                    code = int(parts[1])
+            idempotent: str | None = None
+            for line in lines[1:]:
+                if line.lower().startswith("x-booking-idempotent:"):
+                    idempotent = line.split(":", 1)[1].strip().lower()
+                    break
+            booking_id: str | None = None
+            try:
+                obj = json.loads(body)
+                if isinstance(obj, dict):
+                    booking_id = obj.get("id")
+            except Exception:
+                booking_id = None
+            return code, idempotent, booking_id
+
+        code1, idem1, id1 = _parse(raw1)
+        code2, idem2, id2 = _parse(raw2)
+        details.append(f"booking_code1={code1} booking_id1={id1} idempotent1={idem1}")
+        details.append(f"booking_code2={code2} booking_id2={id2} idempotent2={idem2}")
+
+        ok = True
+        ok = ok and (code1 == 201)
+        ok = ok and (code2 in {200, 201})
+        ok = ok and (id1 is not None and id1 == id2)
+        ok = ok and (idem2 == "true")
+        ok = ok and _expect_http(availability_url, ok_codes={404})
+        return PhaseWorkResult(ok, "booking_system" if ok else "booking_system_failed", details)
+
     if phase == 5:
         ok = _run(
             _compose_exec_cmd(
@@ -744,19 +978,7 @@ def _run_phase_work(state: dict[str, Any], phase: int) -> PhaseWorkResult:
         base = str(
             (state.get("mission") or {}).get("production_base_url") or DEFAULT_PROD_BASE_URL
         ).rstrip("/")
-        ok = True
-        ok = ok and _run(
-            [
-                "curl",
-                "-sS",
-                "-o",
-                "/dev/null",
-                "-w",
-                "%{http_code}",
-                f"{base}/v1/recommendations?limit=5",
-            ],
-            15,
-        )
+        ok = _expect_http(f"{base}/v1/recommendations?limit=5", ok_codes={200})
         ok = ok and _determinism_probe(f"{base}/v1/recommendations?limit=5", runs=3)
         if not ok:
             details.append("recommendations_endpoint_missing_or_nondeterministic")
@@ -770,14 +992,8 @@ def _run_phase_work(state: dict[str, Any], phase: int) -> PhaseWorkResult:
             (state.get("mission") or {}).get("public_base_url") or "https://amppattaya.com"
         ).rstrip("/")
         ok = True
-        ok = ok and _run(
-            ["curl", "-sS", "-o", "/dev/null", "-w", "%{http_code}", f"{public_base}/robots.txt"],
-            15,
-        )
-        ok = ok and _run(
-            ["curl", "-sS", "-o", "/dev/null", "-w", "%{http_code}", f"{public_base}/sitemap.xml"],
-            15,
-        )
+        ok = ok and _expect_http(f"{public_base}/robots.txt", ok_codes={200})
+        ok = ok and _expect_http(f"{public_base}/sitemap.xml", ok_codes={200})
         if ok:
             ok = ok and _determinism_probe(f"{public_base}/robots.txt", runs=2)
             ok = ok and _determinism_probe(f"{public_base}/sitemap.xml", runs=2)
@@ -843,6 +1059,157 @@ def _run_phase_work(state: dict[str, Any], phase: int) -> PhaseWorkResult:
     )
 
 
+def _attempt_self_fix(state: dict[str, Any]) -> tuple[bool, list[str]]:
+    mission = state.get("mission") or {}
+    failures = state.setdefault("failures", {})
+    execution = state.get("execution") or {}
+
+    current_phase = int(execution.get("current_phase") or 0)
+    err = str(failures.get("last_error") or "unknown")
+    max_attempts = int(mission.get("self_fix_max_attempts") or 1)
+    attempts: dict[str, Any] = failures.setdefault("self_fix_attempts", {})
+    key = f"phase={current_phase}|error={err}"
+    count = int(attempts.get(key) or 0)
+    if count >= max_attempts:
+        return False, [f"self_fix_exhausted key={key} max_attempts={max_attempts}"]
+    attempts[key] = count + 1
+
+    details: list[str] = [f"self_fix_attempt={attempts[key]} key={key}"]
+
+    # 0) Infra recovery first (best-effort): restart api + migrate when health/verification fails.
+    infra_errors = {
+        "health_check_failed",
+        "verification_failed",
+        "verification_failed_twice",
+        "deployment_pending",
+    }
+    if any(token in err for token in infra_errors) or err.startswith("loop_exception:"):
+        prod_override = APP_DIR / "docker-compose.prod.yml"
+        compose = ["docker", "compose"]
+        if prod_override.exists():
+            compose.extend(["-f", str(APP_DIR / "docker-compose.yml"), "-f", str(prod_override)])
+        rc, out, e = _run_cmd_capture([*compose, "up", "-d", "--force-recreate", "api"], 300)
+        details.append(f"compose_recreate_api rc={rc}")
+        if out.strip():
+            details.append("compose_stdout=" + out.strip()[:250])
+        if e.strip():
+            details.append("compose_stderr=" + e.strip()[:250])
+        if rc == 0:
+            mig_rc, _mig_out, mig_err = _run_cmd_capture(
+                [*compose, "exec", "-T", "api", "alembic", "upgrade", "head"],
+                300,
+            )
+            details.append(f"alembic_upgrade rc={mig_rc}")
+            if mig_err.strip():
+                details.append("alembic_stderr=" + mig_err.strip()[:250])
+
+            prod_base = str((mission.get("production_base_url") or DEFAULT_PROD_BASE_URL)).rstrip(
+                "/"
+            )
+            code = _curl_http_code(f"{prod_base}/healthz", timeout_seconds=10)
+            details.append(f"post_recreate_healthz={code}")
+            if code == 200:
+                failures["self_fix_last"] = {"ok": True, "details": details}
+                return True, details
+
+    # 1) Try auto-format + lint fixes (safe and deterministic)
+    rc, out, e = _run_host_python_module("ruff", ["format"], timeout_seconds=300)
+    details.append(f"ruff_format rc={rc}")
+    if out.strip():
+        details.append("ruff_format_stdout=" + out.strip()[:400])
+    if e.strip():
+        details.append("ruff_format_stderr=" + e.strip()[:400])
+    if rc != 0:
+        failures["self_fix_last"] = {"ok": False, "details": details}
+        return False, details
+
+    rc, out, e = _run_host_python_module("ruff", ["check", "--fix"], timeout_seconds=300)
+    details.append(f"ruff_check_fix rc={rc}")
+    if out.strip():
+        details.append("ruff_check_stdout=" + out.strip()[:400])
+    if e.strip():
+        details.append("ruff_check_stderr=" + e.strip()[:400])
+    if rc != 0:
+        failures["self_fix_last"] = {"ok": False, "details": details}
+        return False, details
+
+    # 2) Run tests
+    rc, out, e = _run_host_python_module("pytest", ["-q"], timeout_seconds=900)
+    details.append(f"pytest rc={rc}")
+    if out.strip():
+        details.append("pytest_stdout=" + out.strip()[:400])
+    if e.strip():
+        details.append("pytest_stderr=" + e.strip()[:400])
+    if rc != 0:
+        failures["self_fix_last"] = {"ok": False, "details": details}
+        return False, details
+
+    # 3) Optional: auto-commit & push
+    if bool(mission.get("self_fix_auto_commit")):
+        rc, out, e = _run_cmd_capture(["git", "status", "--porcelain=v1"], timeout_seconds=30)
+        dirty = rc == 0 and bool((out or "").strip())
+        details.append(f"git_dirty={dirty}")
+        if dirty:
+            ok = True
+            ok = ok and _run_cmd_capture(["git", "add", "-A"], timeout_seconds=60)[0] == 0
+            msg = f"auto-fix: {err} (phase {current_phase})"
+            commit_rc, commit_out, commit_err = _run_cmd_capture(
+                ["git", "commit", "-m", msg], timeout_seconds=60
+            )
+            details.append(f"git_commit rc={commit_rc}")
+            if commit_out.strip():
+                details.append("git_commit_stdout=" + commit_out.strip()[:250])
+            if commit_err.strip():
+                details.append("git_commit_stderr=" + commit_err.strip()[:250])
+
+            push_rc, push_out, push_err = _run_cmd_capture(
+                ["git", "push", "origin", "main"], timeout_seconds=180
+            )
+            details.append(f"git_push rc={push_rc}")
+            if push_out.strip():
+                details.append("git_push_stdout=" + push_out.strip()[:250])
+            if push_err.strip():
+                details.append("git_push_stderr=" + push_err.strip()[:250])
+
+            if not ok or push_rc != 0:
+                failures["self_fix_last"] = {"ok": False, "details": details}
+                return False, details
+
+    # 4) Optional: auto-deploy to VPS
+    if bool(mission.get("self_fix_auto_deploy")):
+        vps_host = mission.get("self_fix_vps_host")
+        vps_path = str(mission.get("self_fix_vps_path") or "").strip()
+        if isinstance(vps_host, str) and vps_host.strip() and vps_path:
+            remote = (
+                "set -e; "
+                f"cd {vps_path}; "
+                "git pull --ff-only origin main; "
+                "export BUILD_SHA=$(git rev-parse --short HEAD); "
+                "export OTEL_ENABLED=true; "
+                'echo "DEPLOY BUILD_SHA=$BUILD_SHA"; '
+                "docker compose -f docker-compose.yml -f docker-compose.prod.yml build "
+                "--build-arg GIT_SHA=$BUILD_SHA api; "
+                "docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d "
+                "--force-recreate api otel-collector; "
+                "docker compose -f docker-compose.yml -f docker-compose.prod.yml exec -T api "
+                "alembic upgrade head; "
+                "curl -sS -o /dev/null -w '%{http_code}' http://127.0.0.1:8001/healthz"
+            )
+            rc, out, e = _run_cmd_capture(
+                ["ssh", "-o", "BatchMode=yes", vps_host.strip(), remote],
+                timeout_seconds=1200,
+            )
+            details.append(f"vps_deploy rc={rc} out={out.strip()[:60]} err={e.strip()[:120]}")
+            if rc != 0 or (out or "").strip() != "200":
+                failures["self_fix_last"] = {"ok": False, "details": details}
+                return False, details
+        else:
+            details.append("vps_deploy_skipped_missing_config")
+
+    failures["self_fix_last"] = {"ok": True, "details": details}
+    return True, details
+
+
 def execute_action(action: str, state: dict[str, Any]) -> None:
     # This file is an infra loop skeleton; actual execution engines live in /actions.
     if action == "run_baseline":
@@ -860,7 +1227,7 @@ def execute_action(action: str, state: dict[str, Any]) -> None:
         )
 
         cmd = [
-            "python3",
+            _host_python(),
             str(APP_DIR / "scripts" / "baseline_integrity.py"),
             "--public-base",
             public_base,
@@ -891,13 +1258,35 @@ def execute_action(action: str, state: dict[str, Any]) -> None:
     elif action == "investigate_failure":
         state.setdefault("failures", {})["last_error"] = None
 
+    elif action == "attempt_self_fix":
+        failures = state.setdefault("failures", {})
+        previous_error = str(failures.get("last_error") or "unknown")
+        ok, details = _attempt_self_fix(state)
+        log("self_fix " + ("ok" if ok else "failed") + " " + " | ".join(details[:8]))
+        if ok:
+            failures["last_error"] = None
+            failures["consecutive_failures"] = 0
+            execution = state.get("execution") or {}
+            phase = int(execution.get("current_phase") or 0)
+            (execution.setdefault("phase_work_retry", {}))[str(phase)] = 0
+            v = state.setdefault("verification", {})
+            v["retry_count"] = 0
+        else:
+            # Keep original error for stable retry keys, but rollback if exhausted.
+            failures["last_error"] = previous_error
+            if any("self_fix_exhausted" in d for d in details):
+                execute_action("rollback_last_slice", state)
+
     elif action == "continue_phase":
         execution = state.setdefault("execution", {})
         execution["phase_status"] = "running"
 
-        # Finite executor: run real phase work, then require verification gates.
+        # Finite executor: run real phase work (idempotent) and then run
+        # verification gates as a separate step.
         if _is_finite_mission(state):
             phase = int(execution.get("current_phase") or 0)
+            mission = state.get("mission") or {}
+            self_fix_enabled = bool(mission.get("self_fix_enabled"))
 
             # 1) Phase work (idempotent). Retry once; then rollback.
             work = _run_phase_work(state, phase)
@@ -905,22 +1294,25 @@ def execute_action(action: str, state: dict[str, Any]) -> None:
             if not work.ok:
                 retry = execution.setdefault("phase_work_retry", {})
                 retry[str(phase)] = int(retry.get(str(phase)) or 0) + 1
+                state.setdefault("failures", {})["last_error"] = "phase_work_failed"
                 write_phase_report(state, phase, f"phase_work_failed_retry_{retry[str(phase)]}")
                 if int(retry.get(str(phase)) or 0) >= 2:
                     state.setdefault("failures", {})["last_error"] = "phase_work_failed_twice"
-                    execute_action("rollback_last_slice", state)
+                    if not self_fix_enabled:
+                        execute_action("rollback_last_slice", state)
                 return
 
-            # 2) Verification gates.
+            # Mark phase work completed; verification is handled by verify_phase.
+            state.setdefault("failures", {})["last_error"] = None
+            execution["phase_status"] = "completed"
+            execution["last_successful_phase"] = phase
+
             v = state.setdefault("verification", {})
             v["phase"] = phase
+            v["status"] = "unknown"
+            v["checks"] = {}
             v["retry_count"] = 0
-            if _phase_can_complete(state):
-                execution["phase_status"] = "completed"
-                execution["last_successful_phase"] = phase
-                write_phase_report(state, phase, "completed")
-            else:
-                write_phase_report(state, phase, "running_checks_failed")
+            write_phase_report(state, phase, "phase_work_completed")
 
     elif action == "verify_phase":
         execution = state.setdefault("execution", {})
@@ -929,13 +1321,23 @@ def execute_action(action: str, state: dict[str, Any]) -> None:
         v["phase"] = phase
         v["retry_count"] = int(v.get("retry_count") or 0)
 
+        mission = state.get("mission") or {}
+        self_fix_enabled = bool(mission.get("self_fix_enabled"))
+
         _update_verification_from_checks(state)
         if (v.get("status") or "").lower() != "passed":
             v["retry_count"] = int(v.get("retry_count") or 0) + 1
+            state.setdefault("failures", {})["last_error"] = "verification_failed"
             write_phase_report(state, phase, f"verification_failed_retry_{v['retry_count']}")
-        else:
-            v["retry_count"] = 0
-            write_phase_report(state, phase, "verification_passed")
+            if int(v.get("retry_count") or 0) >= 2:
+                state.setdefault("failures", {})["last_error"] = "verification_failed_twice"
+                if not self_fix_enabled:
+                    execute_action("rollback_last_slice", state)
+            return
+
+        v["retry_count"] = 0
+        state.setdefault("failures", {})["last_error"] = None
+        write_phase_report(state, phase, "verification_passed")
 
     elif action == "advance_phase":
         execution = state.setdefault("execution", {})
