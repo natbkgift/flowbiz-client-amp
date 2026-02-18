@@ -1,9 +1,12 @@
 from __future__ import annotations
 
+import logging
 from pathlib import Path
 
-from pydantic import AliasChoices, Field
+from pydantic import AliasChoices, Field, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
+
+_logger = logging.getLogger(__name__)
 
 
 def _read_pyproject_version(default: str = "0.1.0") -> str:
@@ -69,6 +72,27 @@ class Settings(BaseSettings):
     inquiries_rate_limit_per_minute: int = 20
     events_rate_limit_per_minute: int = 120
     events_max_payload_bytes: int = 8192
+
+    @model_validator(mode="after")
+    def _check_production_secrets(self) -> "Settings":
+        """Refuse to start with dangerous defaults outside dev/test."""
+        if self.app_env not in ("dev", "test"):
+            if self.jwt_secret_key == "change-me-in-production":
+                raise ValueError(
+                    "CRITICAL: JWT_SECRET_KEY must be set to a secure value in "
+                    f"'{self.app_env}' environment. Refusing to start with default."
+                )
+            if self.admin_bootstrap_password == "admin123":
+                _logger.warning(
+                    "SECURITY: ADMIN_BOOTSTRAP_PASSWORD is using the default value. "
+                    "Set a strong password via ADMIN_BOOTSTRAP_PASSWORD env var."
+                )
+            if not self.pii_hash_pepper:
+                _logger.warning(
+                    "SECURITY: PII_HASH_PEPPER is empty. "
+                    "PII dedup hashing has zero additional entropy."
+                )
+        return self
 
 
 settings = Settings()
