@@ -7,7 +7,7 @@ Spec Reference: docs/governance/phase-dependency.md, docs/governance/metrics.yam
 Status: Completed (minimal slice)
 
 - generated_utc: `20260218T054536Z`
-- deployed_sha: `27ec8095`
+- deployed_sha: `ed8a3e6`
 
 ---
 
