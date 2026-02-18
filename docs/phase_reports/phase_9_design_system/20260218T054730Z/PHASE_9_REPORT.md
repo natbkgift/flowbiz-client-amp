@@ -7,7 +7,7 @@ Spec Reference: docs/governance/phase-dependency.md, docs/architecture/experienc
 Status: Completed (minimal slice)
 
 - generated_utc: `20260218T054730Z`
-- deployed_sha: `7fc019d3`
+- deployed_sha: `52660d4`
 
 ---
 
