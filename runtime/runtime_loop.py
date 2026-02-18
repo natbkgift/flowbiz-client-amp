@@ -313,12 +313,72 @@ def _update_verification_from_checks(state: dict[str, Any]) -> None:
     prod_base = str(mission.get("production_base_url") or DEFAULT_PROD_BASE_URL).rstrip("/")
     staging_base = str(mission.get("staging_base_url") or "").rstrip("/")
 
+    def _run(cmd: list[str], timeout_seconds: int) -> bool:
+        try:
+            r = subprocess.run(cmd, capture_output=True, text=True, timeout=timeout_seconds, check=False)
+            if r.returncode != 0:
+                log(f"cmd_failed rc={r.returncode} cmd={' '.join(cmd)} stderr={(r.stderr or '').strip()[:300]}")
+            return r.returncode == 0
+        except Exception as e:
+            log(f"cmd_exception cmd={' '.join(cmd)} err={type(e).__name__}")
+            return False
+
+    def _staging_deploy_best_effort() -> bool:
+        staging_dir = Path("/opt/flowbiz/clients/flowbiz-client-amp-staging")
+        if not staging_dir.exists():
+            return False
+        ok = True
+        ok = ok and _run(["git", "-C", str(staging_dir), "pull", "--ff-only", "origin", "main"], 90)
+
+        # Compose may not exist in minimal environments.
+        if _run(["docker", "compose", "version"], 15):
+            ok = ok and _run(
+                [
+                    "docker",
+                    "compose",
+                    "-f",
+                    str(staging_dir / "docker-compose.yml"),
+                    "-f",
+                    str(staging_dir / "docker-compose.prod.yml"),
+                    "up",
+                    "-d",
+                    "--remove-orphans",
+                ],
+                300,
+            )
+            ok = ok and _run(
+                [
+                    "docker",
+                    "compose",
+                    "-f",
+                    str(staging_dir / "docker-compose.yml"),
+                    "-f",
+                    str(staging_dir / "docker-compose.prod.yml"),
+                    "exec",
+                    "-T",
+                    "api",
+                    "alembic",
+                    "upgrade",
+                    "head",
+                ],
+                300,
+            )
+        return ok
+
     prod_health = _curl_http_code(f"{prod_base}/healthz")
     prod_metrics = _curl_http_code(f"{prod_base}/metrics")
     checks["prod_healthz"] = "passed" if prod_health == 200 else "failed"
     checks["prod_metrics"] = "passed" if prod_metrics == 200 else "failed"
 
-    # Best-effort staging check (only required in finite mode; a missing staging stack will fail).
+    finite = _is_finite_mission(state)
+    if finite and "staging_deploy_enabled" not in (state.get("mission") or {}):
+        state.setdefault("mission", {})["staging_deploy_enabled"] = True
+
+    staging_deploy_enabled = bool((state.get("mission") or {}).get("staging_deploy_enabled"))
+    if finite and staging_deploy_enabled:
+        checks["staging_deploy"] = "passed" if _staging_deploy_best_effort() else "failed"
+
+    # Staging smoke check (required in finite mode).
     if staging_base:
         st_health = _curl_http_code(f"{staging_base}/healthz")
         st_metrics = _curl_http_code(f"{staging_base}/metrics")
@@ -340,7 +400,6 @@ def _update_verification_from_checks(state: dict[str, Any]) -> None:
     verification["last_checked_at"] = _utc_now_iso()
 
     # Compute overall status (strict in finite mode).
-    finite = _is_finite_mission(state)
     required_keys = [
         "prod_healthz",
         "prod_metrics",
@@ -348,6 +407,8 @@ def _update_verification_from_checks(state: dict[str, Any]) -> None:
     ]
     if finite:
         required_keys.extend(["staging_healthz", "staging_metrics"])
+        if staging_deploy_enabled:
+            required_keys.append("staging_deploy")
 
     all_required_passed = all((checks.get(k) == "passed") for k in required_keys)
     verification["status"] = "passed" if all_required_passed else "failed"
