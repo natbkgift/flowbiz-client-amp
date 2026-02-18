@@ -16,11 +16,13 @@ export const th: Dictionary = {
   cta: {
     exploreInvestment: 'สำรวจโอกาสการลงทุน',
     speakToAdvisor: 'คุยกับที่ปรึกษา',
+    bookPrivateTour: 'จองทัวร์ส่วนตัว',
+    getInvestmentPlan: 'ขอแผนการลงทุน',
     whatsapp: 'WhatsApp',
     line: 'LINE',
   },
   home: {
-    heroTitle: 'ลงทุนหรือซื้ออสังหาฯ ในพัทยาอย่างมั่นใจ',
+    heroTitle: 'ค้นหาอสังหาฯ ที่ใช่ในพัทยาใน 60 วินาที',
     heroSubtitle:
       'แพลตฟอร์มที่น่าเชื่อถือสำหรับผู้ซื้อชาวต่างชาติ ที่ต้องการความมั่นคงในการถือครอง และศักยภาพการลงทุนในประเทศไทย',
     pathInvest: {

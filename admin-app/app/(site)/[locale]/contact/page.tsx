@@ -34,9 +34,19 @@ export async function generateMetadata({
   };
 }
 
-export default function ContactPage({ params }: { params: { locale: string } }) {
+export default function ContactPage({
+  params,
+  searchParams,
+}: {
+  params: { locale: string };
+  searchParams?: Record<string, string | string[] | undefined>;
+}) {
   const locale = normalizeLocale(params.locale);
   const dict = getDictionary(locale);
+  const msg =
+    (typeof searchParams?.msg === 'string' ? searchParams.msg : Array.isArray(searchParams?.msg) ? searchParams?.msg[0] : null) ??
+    null;
+  const defaultMessage = msg ? `${msg}` : dict.contact.advisoryBody;
 
   return (
     <main id="main-content">
@@ -78,7 +88,7 @@ export default function ContactPage({ params }: { params: { locale: string } }) 
             </aside>
 
             <div className="split__main">
-              <LeadForm heading={dict.contact.formTitle} defaultMessage={dict.contact.advisoryBody} />
+              <LeadForm heading={dict.contact.formTitle} defaultMessage={defaultMessage} />
             </div>
           </div>
         </Container>

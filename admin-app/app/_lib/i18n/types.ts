@@ -16,6 +16,8 @@ export type Dictionary = {
   cta: {
     exploreInvestment: string;
     speakToAdvisor: string;
+    bookPrivateTour: string;
+    getInvestmentPlan: string;
     whatsapp: string;
     line: string;
   };

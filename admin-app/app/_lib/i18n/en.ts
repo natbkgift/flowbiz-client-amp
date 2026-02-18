@@ -16,11 +16,13 @@ export const en: Dictionary = {
   cta: {
     exploreInvestment: 'Explore Investment Opportunities',
     speakToAdvisor: 'Speak to an Advisor',
+    bookPrivateTour: 'Book Private Tour',
+    getInvestmentPlan: 'Get Investment Plan',
     whatsapp: 'WhatsApp',
     line: 'LINE',
   },
   home: {
-    heroTitle: 'Invest or Buy Property in Pattaya with Confidence.',
+    heroTitle: 'Find the right Pattaya property in 60 seconds',
     heroSubtitle:
       'A trusted platform for international buyers seeking secure property ownership and strong investment potential in Thailand.',
     pathInvest: {
