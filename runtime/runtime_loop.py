@@ -29,6 +29,16 @@ DEFAULT_PROD_BASE_URL = "http://127.0.0.1:8001"
 DEFAULT_STAGING_BASE_URL = "http://127.0.0.1:8101"
 
 
+@dataclass(frozen=True)
+class PhaseWorkResult:
+    ok: bool
+    summary: str
+    details: list[str]
+
+    def to_dict(self) -> dict[str, Any]:
+        return {"ok": self.ok, "summary": self.summary, "details": self.details}
+
+
 def _utc_now_iso() -> str:
     return datetime.now(timezone.utc).isoformat()
 
@@ -249,6 +259,8 @@ def _normalize_execution_state(state: dict[str, Any]) -> None:
         execution["current_phase"] = (int(last_ok) + 1) if last_ok is not None else 0
 
     execution.setdefault("phase_status", "idle")
+    execution.setdefault("phase_work", {})
+    execution.setdefault("phase_work_retry", {})
 
     # Keep legacy/minimal schemas working: only enforce keys when explicitly present.
     integrity.setdefault("baseline_completed", False)
@@ -271,6 +283,9 @@ def _normalize_execution_state(state: dict[str, Any]) -> None:
     mission.setdefault("completed_at", None)
     mission.setdefault("production_base_url", DEFAULT_PROD_BASE_URL)
     mission.setdefault("staging_base_url", DEFAULT_STAGING_BASE_URL)
+    mission.setdefault("public_base_url", "https://amppattaya.com")
+    mission.setdefault("admin_base_url", "http://127.0.0.1:8002")
+    mission.setdefault("allow_seed_demo", False)
 
     verification.setdefault("phase", None)
     verification.setdefault("status", "unknown")
@@ -521,6 +536,135 @@ def _record_success(state: dict[str, Any]) -> None:
     failures["consecutive_failures"] = 0
 
 
+def _run_cmd_capture(cmd: list[str], timeout_seconds: int) -> tuple[int, str, str]:
+    try:
+        r = subprocess.run(cmd, capture_output=True, text=True, timeout=timeout_seconds, check=False)
+        return r.returncode, (r.stdout or ""), (r.stderr or "")
+    except Exception as e:
+        return 99, "", f"{type(e).__name__}: {e}"
+
+
+def _compose_exec_cmd(*, service: str, argv: list[str], state: dict[str, Any]) -> list[str]:
+    """Build a docker compose exec command.
+
+    Uses docker-compose.prod.yml when present to match production runtime.
+    """
+
+    app_dir = Path(__file__).resolve().parents[1]
+    prod_override = app_dir / "docker-compose.prod.yml"
+    base = ["docker", "compose"]
+    if prod_override.exists():
+        base.extend(["-f", str(app_dir / "docker-compose.yml"), "-f", str(prod_override)])
+    return base + ["exec", "-T", service] + argv
+
+
+def _run_phase_work(state: dict[str, Any], phase: int) -> PhaseWorkResult:
+    """Execute concrete, idempotent phase work.
+
+    This function is intentionally strict: if a phase has no executable work, it fails.
+    """
+
+    execution = state.setdefault("execution", {})
+    phase_work: dict[str, Any] = execution.setdefault("phase_work", {})
+    existing = phase_work.get(str(phase))
+    if isinstance(existing, dict) and existing.get("ok") is True:
+        return PhaseWorkResult(True, "already_completed", ["phase_work_cached_ok"])
+
+    details: list[str] = []
+
+    def _run(cmd: list[str], timeout_seconds: int = 300) -> bool:
+        rc, out, err = _run_cmd_capture(cmd, timeout_seconds=timeout_seconds)
+        details.append(f"cmd={' '.join(cmd)} rc={rc}")
+        if out.strip():
+            details.append("stdout=" + out.strip()[:800])
+        if err.strip():
+            details.append("stderr=" + err.strip()[:800])
+        return rc == 0
+
+    # Phase work is executed inside the running API container when possible.
+    # This keeps DB connectivity consistent and avoids host dependency drift.
+    if phase == 5:
+        ok = _run(
+            _compose_exec_cmd(
+                service="api",
+                argv=[
+                    "python",
+                    "-c",
+                    "from packages.core.phase_work.phase_05_crm_automation import run; run()",
+                ],
+                state=state,
+            ),
+            timeout_seconds=300,
+        )
+        return PhaseWorkResult(ok, "crm_automation" if ok else "crm_automation_failed", details)
+
+    if phase == 6:
+        ok = _run(
+            _compose_exec_cmd(
+                service="api",
+                argv=[
+                    "python",
+                    "-c",
+                    "from packages.core.phase_work.phase_06_investor_tools import run; run()",
+                ],
+                state=state,
+            ),
+            timeout_seconds=120,
+        )
+        return PhaseWorkResult(ok, "investor_tools" if ok else "investor_tools_failed", details)
+
+    if phase == 7:
+        # Validate the recommendation endpoint exists and is deterministic.
+        base = str((state.get("mission") or {}).get("production_base_url") or DEFAULT_PROD_BASE_URL).rstrip("/")
+        ok = True
+        ok = ok and _run(["curl", "-sS", "-o", "/dev/null", "-w", "%{http_code}", f"{base}/v1/recommendations?limit=5"], 15)
+        ok = ok and _determinism_probe(f"{base}/v1/recommendations?limit=5", runs=3)
+        if not ok:
+            details.append("recommendations_endpoint_missing_or_nondeterministic")
+        return PhaseWorkResult(ok, "ai_recommendation" if ok else "ai_recommendation_failed", details)
+
+    if phase == 8:
+        # Public SEO integrity surfaces: robots.txt and sitemap.xml must be reachable.
+        public_base = str((state.get("mission") or {}).get("public_base_url") or "https://amppattaya.com").rstrip("/")
+        ok = True
+        ok = ok and _run(["curl", "-sS", "-o", "/dev/null", "-w", "%{http_code}", f"{public_base}/robots.txt"], 15)
+        ok = ok and _run(["curl", "-sS", "-o", "/dev/null", "-w", "%{http_code}", f"{public_base}/sitemap.xml"], 15)
+        if ok:
+            ok = ok and _determinism_probe(f"{public_base}/robots.txt", runs=2)
+            ok = ok and _determinism_probe(f"{public_base}/sitemap.xml", runs=2)
+        return PhaseWorkResult(ok, "seo_authority" if ok else "seo_authority_failed", details)
+
+    if phase == 9:
+        # Design system engine: enforce admin UI availability.
+        admin_base = str((state.get("mission") or {}).get("admin_base_url") or "http://127.0.0.1:8002").rstrip("/")
+        code = _curl_http_code(admin_base, timeout_seconds=10)
+        ok = code == 200
+        details.append(f"admin_http_code={code}")
+        return PhaseWorkResult(ok, "design_system" if ok else "design_system_failed", details)
+
+    if phase == 10:
+        # Seed/demo engine is development-only unless explicitly allowed.
+        allow = bool((state.get("mission") or {}).get("allow_seed_demo"))
+        if not allow:
+            return PhaseWorkResult(False, "seed_demo_disallowed", ["Set mission.allow_seed_demo=true to enable phase 10 seeding"])
+
+        ok = _run(
+            _compose_exec_cmd(
+                service="api",
+                argv=[
+                    "python",
+                    "-c",
+                    "from packages.core.phase_work.phase_10_seed_demo import run; run()",
+                ],
+                state=state,
+            ),
+            timeout_seconds=300,
+        )
+        return PhaseWorkResult(ok, "seed_demo" if ok else "seed_demo_failed", details)
+
+    return PhaseWorkResult(False, "no_phase_work_defined", [f"No executable work defined for phase={phase}"])
+
+
 def execute_action(action: str, state: dict[str, Any]) -> None:
     # This file is an infra loop skeleton; actual execution engines live in /actions.
     if action == "run_baseline":
@@ -540,9 +684,22 @@ def execute_action(action: str, state: dict[str, Any]) -> None:
         execution = state.setdefault("execution", {})
         execution["phase_status"] = "running"
 
-        # Minimal executor: when in finite mission, attempt to complete the phase based on gates.
+        # Finite executor: run real phase work, then require verification gates.
         if _is_finite_mission(state):
             phase = int(execution.get("current_phase") or 0)
+
+            # 1) Phase work (idempotent). Retry once; then rollback.
+            work = _run_phase_work(state, phase)
+            execution.setdefault("phase_work", {})[str(phase)] = work.to_dict()
+            if not work.ok:
+                retry = execution.setdefault("phase_work_retry", {})
+                retry[str(phase)] = int(retry.get(str(phase)) or 0) + 1
+                write_phase_report(state, phase, f"phase_work_failed_retry_{retry[str(phase)]}")
+                if int(retry.get(str(phase)) or 0) >= 2:
+                    execute_action("rollback_last_slice", state)
+                return
+
+            # 2) Verification gates.
             v = state.setdefault("verification", {})
             v["phase"] = phase
             v["retry_count"] = 0
