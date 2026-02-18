@@ -55,7 +55,7 @@ sleep 10
 # Quick verification
 VPS_API_PORT="${VPS_API_PORT:-8001}"
 VPS_ADMIN_PORT="${VPS_ADMIN_PORT:-8002}"
-API_STATUS=$(curl -s -o /dev/null -w "%{http_code}" --max-time 10 "http://127.0.0.1:${VPS_API_PORT}/api/v1/health" || echo "000")
+API_STATUS=$(curl -s -o /dev/null -w "%{http_code}" --max-time 10 "http://127.0.0.1:${VPS_API_PORT}/healthz" || echo "000")
 APP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" --max-time 10 "http://127.0.0.1:${VPS_ADMIN_PORT}" || echo "000")
 
 echo "  API:  $API_STATUS"

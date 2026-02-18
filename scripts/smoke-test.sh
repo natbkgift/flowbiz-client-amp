@@ -38,7 +38,7 @@ check "Contact page"        "$SITE_URL/en/contact"
 check "Projects page"       "$SITE_URL/en/projects"
 
 # API health
-check "API health"          "$SITE_URL/api/v1/health"
+check "API health"          "$SITE_URL/api/healthz"
 check "API meta"            "$SITE_URL/api/v1/meta"
 
 # Static assets
