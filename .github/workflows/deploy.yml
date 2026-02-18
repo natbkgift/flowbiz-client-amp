@@ -51,12 +51,10 @@ jobs:
       - name: Next.js lint
         working-directory: admin-app
         run: npx next lint
-        continue-on-error: true
 
       - name: TypeScript check
         working-directory: admin-app
         run: npx tsc --noEmit
-        continue-on-error: true
 
   # ── Stage 2: Build & Push Docker Images ────────────────────
   build:

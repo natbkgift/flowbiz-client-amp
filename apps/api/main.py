@@ -1,3 +1,4 @@
+from contextlib import asynccontextmanager
 from pathlib import Path
 
 from fastapi import FastAPI
@@ -39,11 +40,21 @@ from packages.core.observability import configure_observability
 
 setup_logging()
 
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    """Modern lifespan handler — replaces deprecated @app.on_event."""
+    init_db()
+    bootstrap_admin_user()
+    yield
+
+
 app = FastAPI(
     title=settings.flowbiz_service_name,
     version=settings.flowbiz_version,
     docs_url="/docs" if settings.app_env == "dev" else None,
     redoc_url="/redoc" if settings.app_env == "dev" else None,
+    lifespan=lifespan,
 )
 
 
@@ -113,12 +124,6 @@ def bootstrap_admin_user() -> None:
             db.commit()
     finally:
         db.close()
-
-
-@app.on_event("startup")
-async def startup_event() -> None:
-    init_db()
-    bootstrap_admin_user()
 
 
 static_dir = Path(__file__).resolve().parents[2] / "demo-website"
