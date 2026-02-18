@@ -158,6 +158,18 @@ jobs:
           echo "host=$ssh_host" >> "$GITHUB_OUTPUT"
           echo "user=$ssh_user" >> "$GITHUB_OUTPUT"
 
+      - name: Check SSH reachability
+        env:
+          SSH_HOST: ${{ steps.sshmeta.outputs.host }}
+          SSH_PORT: ${{ secrets.VPS_PORT }}
+        run: |
+          set -euo pipefail
+          echo "Checking TCP reachability: ${SSH_HOST}:${SSH_PORT}"
+          timeout 10 bash -c "</dev/tcp/${SSH_HOST}/${SSH_PORT}" >/dev/null 2>&1 || {
+            echo "::error::Cannot reach ${SSH_HOST}:${SSH_PORT} from GitHub Actions runner. Check VPS_PORT (SSH port) and firewall/security groups."
+            exit 1
+          }
+
       - name: Deploy via SSH
         uses: appleboy/ssh-action@v1
         with:
