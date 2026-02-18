@@ -3,6 +3,7 @@ name: Deploy Production
 on:
   push:
     branches: [main]
+  workflow_dispatch: {}
 
 permissions:
   contents: read
@@ -124,6 +125,10 @@ jobs:
             echo "::error::Missing required secret: VPS_PORT"
             exit 1
           fi
+          if [[ -z "${{ secrets.GHCR_TOKEN }}" ]]; then
+            echo "::error::Missing required secret: GHCR_TOKEN (PAT with read:packages for pulling private GHCR images on VPS)"
+            exit 1
+          fi
 
           ssh_host=""
           ssh_user=""
@@ -167,6 +172,9 @@ jobs:
           script: |
             set -euo pipefail
             cd /opt/flowbiz/clients/flowbiz-client-amp
+
+            # Authenticate to GHCR on the VPS so docker pull can access private images
+            echo "${{ secrets.GHCR_TOKEN }}" | docker login ghcr.io -u "${{ github.repository_owner }}" --password-stdin
 
             # Save current image tags for rollback
             docker compose -f docker-compose.yml -f docker-compose.prod.yml \
