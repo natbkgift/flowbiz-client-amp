@@ -29,6 +29,7 @@ from apps.api.routes.v1.projects import router as projects_router
 from apps.api.routes.v1.properties import router as properties_router
 from apps.api.routes.v1.recommendations import router as recommendations_router
 from apps.api.routes.v1.seller import router as seller_router
+from apps.api.routes.v1.smart_finder import router as smart_finder_router
 from packages.core.auth import hash_password
 from packages.core.config import settings
 from packages.core.database import SessionLocal, init_db
@@ -77,6 +78,7 @@ app.include_router(analytics_router)
 app.include_router(booking_router)
 app.include_router(domain_router)
 app.include_router(finder_router)
+app.include_router(smart_finder_router)
 app.include_router(investment_router)
 app.include_router(recommendations_router)
 app.include_router(members_router)
