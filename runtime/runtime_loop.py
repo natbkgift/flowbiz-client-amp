@@ -380,15 +380,8 @@ def loop_once() -> None:
             state = load_state()
             _normalize_execution_state(state)
 
-            decision = decide_next_action(state)
-            log(
-                "decision "
-                f"action={decision.action} "
-                f"priority={decision.priority} "
-                f"reason={decision.reason}"
-            )
-
-            # If a phase is marked completed, refresh verification checks (best-effort) so advancement is gated.
+            # Refresh verification checks before planning, so phase advancement decisions
+            # are made using up-to-date verification status.
             exec_state = state.get("execution") or {}
             if exec_state.get("phase_status") == "completed" and _is_finite_mission(state):
                 try:
@@ -396,6 +389,14 @@ def loop_once() -> None:
                     _update_verification_from_checks(state)
                 except Exception as e:
                     log(f"verification_update_failed: {type(e).__name__} {e}")
+
+            decision = decide_next_action(state)
+            log(
+                "decision "
+                f"action={decision.action} "
+                f"priority={decision.priority} "
+                f"reason={decision.reason}"
+            )
 
             execute_action(decision.action, state)
             state.setdefault("planner", {})["next_action"] = decision.action
