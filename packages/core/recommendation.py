@@ -52,7 +52,8 @@ def _score_property(
         score += 1.0
         reasons.append("active")
 
-    # Deterministic tie-breaking is handled by query ordering.
+    # Keep reasons ordering deterministic for stable API outputs.
+    reasons.sort()
     return score, reasons
 
 
@@ -84,7 +85,7 @@ def recommend_properties(
         )
         recs.append(Recommendation(property=p, score=float(s), reasons=reasons))
 
-    # Deterministic sort: score desc, created_at desc, id desc.
+    # Deterministic sort: score desc, created_at desc, id (string) asc.
     recs.sort(
         key=lambda r: (
             -r.score,
