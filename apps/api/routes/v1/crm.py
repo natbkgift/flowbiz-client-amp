@@ -11,6 +11,7 @@ from sqlalchemy.orm import Session
 from packages.core.abuse import SlidingWindowRateLimiter
 from packages.core.audit import write_audit_log
 from packages.core.config import settings
+from packages.core.crm_tagging import enrich_inquiry
 from packages.core.crm_scoring import score_inquiry
 from packages.core.database import get_db
 from packages.core.models import Inquiry, LeadAssignment, Property, Role, User, UserRole, Viewing
@@ -162,6 +163,14 @@ async def create_inquiry(
 
     # If this looks like a retry, treat it as idempotent: update the existing inquiry and return it.
     if duplicate_of is not None and _is_retry_duplicate(existing=duplicate_of, payload=payload):
+        enrichment = enrich_inquiry(
+            message=payload.message,
+            source_page=payload.source_page or duplicate_of.source_page,
+            persona=(duplicate_of.persona or payload.persona),
+            budget_band=(duplicate_of.budget_band or payload.budget_band),
+            timeline=(duplicate_of.timeline or payload.timeline),
+        )
+
         # Best-effort enrichment on retry (do not overwrite existing meaningful data).
         if duplicate_of.source_page is None and payload.source_page:
             duplicate_of.source_page = payload.source_page
@@ -182,6 +191,28 @@ async def create_inquiry(
         if duplicate_of.submit_timestamp is None and payload.submit_timestamp:
             duplicate_of.submit_timestamp = payload.submit_timestamp
 
+        enriched_fields: dict[str, str] = {}
+        if duplicate_of.persona is None and enrichment.persona is not None:
+            duplicate_of.persona = enrichment.persona
+            enriched_fields["persona"] = enrichment.persona
+        if duplicate_of.budget_band is None and enrichment.budget_band is not None:
+            duplicate_of.budget_band = enrichment.budget_band
+            enriched_fields["budget_band"] = enrichment.budget_band
+        if duplicate_of.timeline is None and enrichment.timeline is not None:
+            duplicate_of.timeline = enrichment.timeline
+            enriched_fields["timeline"] = enrichment.timeline
+
+        if duplicate_of.tags is None and enrichment.tags:
+            duplicate_of.tags = list(enrichment.tags)
+            enriched_fields["tags"] = ",".join(enrichment.tags)
+
+        if enriched_fields:
+            duplicate_of.score = score_inquiry(
+                persona=duplicate_of.persona,
+                budget_band=duplicate_of.budget_band,
+                timeline=duplicate_of.timeline,
+            )
+
         db.add(duplicate_of)
         write_audit_log(
             db,
@@ -189,7 +220,11 @@ async def create_inquiry(
             entity_type="inquiry",
             entity_id=str(duplicate_of.id),
             action="retry_deduped",
-            diff={"deduped": True, "window_seconds": _DUPLICATE_RETRY_WINDOW_SECONDS},
+            diff={
+                "deduped": True,
+                "window_seconds": _DUPLICATE_RETRY_WINDOW_SECONDS,
+                "enriched": enriched_fields or None,
+            },
             user_agent=request.headers.get("user-agent"),
         )
         db.commit()
@@ -209,6 +244,24 @@ async def create_inquiry(
 
     response.headers["X-Inquiry-Deduped"] = "false"
 
+    enrichment = enrich_inquiry(
+        message=payload.message,
+        source_page=payload.source_page,
+        persona=payload.persona,
+        budget_band=payload.budget_band,
+        timeline=payload.timeline,
+    )
+
+    enriched_diff: dict[str, str] = {}
+    if payload.persona is None and enrichment.persona is not None:
+        enriched_diff["persona"] = enrichment.persona
+    if payload.budget_band is None and enrichment.budget_band is not None:
+        enriched_diff["budget_band"] = enrichment.budget_band
+    if payload.timeline is None and enrichment.timeline is not None:
+        enriched_diff["timeline"] = enrichment.timeline
+    if enrichment.tags:
+        enriched_diff["tags"] = ",".join(enrichment.tags)
+
     inquiry = Inquiry(
         property_id=payload.property_id,
         name=payload.name,
@@ -226,13 +279,14 @@ async def create_inquiry(
         device=payload.device,
         first_touch_timestamp=payload.first_touch_timestamp,
         submit_timestamp=payload.submit_timestamp,
-        persona=payload.persona,
-        budget_band=payload.budget_band,
-        timeline=payload.timeline,
+        persona=enrichment.persona,
+        budget_band=enrichment.budget_band,
+        timeline=enrichment.timeline,
+        tags=list(enrichment.tags) if enrichment.tags else None,
         score=score_inquiry(
-            persona=payload.persona,
-            budget_band=payload.budget_band,
-            timeline=payload.timeline,
+            persona=enrichment.persona,
+            budget_band=enrichment.budget_band,
+            timeline=enrichment.timeline,
         ),
         # If a previous inquiry exists, keep linkage but do NOT auto-drop the new submission.
         # Marking as lost here risks lead loss when the user is legitimately re-engaging.
@@ -252,6 +306,7 @@ async def create_inquiry(
             "status": inquiry.status,
             "property_id": str(inquiry.property_id) if inquiry.property_id else None,
             "duplicate_of": str(duplicate_of.id) if duplicate_of is not None else None,
+            "enriched": enriched_diff or None,
         },
         user_agent=request.headers.get("user-agent"),
     )

@@ -212,6 +212,10 @@ class Inquiry(Base):
     budget_band: Mapped[str | None] = mapped_column(String(32), nullable=True)
     timeline: Mapped[str | None] = mapped_column(String(32), nullable=True)
 
+    # Phase 5 (Lead Intelligence Layer): derived tags for routing/automation.
+    # Stored as JSON array for portability across sqlite/postgres.
+    tags: Mapped[list[str] | None] = mapped_column(JSON, nullable=True)
+
     utm_source: Mapped[str | None] = mapped_column(String(200), nullable=True)
     utm_medium: Mapped[str | None] = mapped_column(String(200), nullable=True)
     utm_campaign: Mapped[str | None] = mapped_column(String(200), nullable=True)
