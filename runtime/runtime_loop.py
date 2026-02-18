@@ -554,6 +554,23 @@ def loop_once() -> None:
             state = load_state()
             _normalize_execution_state(state)
 
+            # Terminal mission handling: if already completed/failed and stop_when_complete is set,
+            # finalize timestamps, emit final report, and stop the service.
+            mission = state.get("mission") or {}
+            if _is_finite_mission(state) and mission.get("stop_when_complete"):
+                status = (mission.get("status") or "").lower()
+                if status in {"completed", "failed"}:
+                    m = state.setdefault("mission", {})
+                    if not m.get("completed_at"):
+                        m["completed_at"] = _utc_now_iso()
+                    try:
+                        write_mission_final_report(state, status)
+                    except Exception as e:
+                        log(f"final_report_failed: {type(e).__name__} {e}")
+                    save_state(state)
+                    _attempt_stop_service()
+                    raise SystemExit(0)
+
             # Refresh verification checks before planning, so phase advancement decisions
             # are made using up-to-date verification status.
             exec_state = state.get("execution") or {}
