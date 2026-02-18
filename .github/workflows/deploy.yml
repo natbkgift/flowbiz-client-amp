@@ -182,9 +182,10 @@ jobs:
             # Authenticate to GHCR on the VPS so docker pull can access private images
             echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u "${{ github.actor }}" --password-stdin
 
-            # Save current image tags for rollback
+            # Save current image tags for rollback (persistent path)
+            mkdir -p /opt/flowbiz/clients/flowbiz-client-amp/.deploy
             docker compose -f docker-compose.yml -f docker-compose.prod.yml \
-              ps --format '{{.Image}}' > /tmp/previous_images.txt || true
+              ps --format '{{.Image}}' > /opt/flowbiz/clients/flowbiz-client-amp/.deploy/previous_images.txt || true
 
             # Pull latest images
             docker pull ${{ env.API_IMAGE }}:${{ needs.build.outputs.sha_tag }}

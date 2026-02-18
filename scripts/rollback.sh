@@ -8,7 +8,9 @@
 # ──────────────────────────────────────────────────────────────
 set -euo pipefail
 
-PREVIOUS_IMAGES="/tmp/previous_images.txt"
+DEPLOY_STATE_DIR="/opt/flowbiz/clients/flowbiz-client-amp/.deploy"
+mkdir -p "$DEPLOY_STATE_DIR"
+PREVIOUS_IMAGES="${DEPLOY_STATE_DIR}/previous_images.txt"
 COMPOSE="docker compose -f docker-compose.yml -f docker-compose.prod.yml"
 
 if [[ ! -f "$PREVIOUS_IMAGES" ]]; then
