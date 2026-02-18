@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from datetime import datetime
+from decimal import Decimal
 from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, EmailStr, Field
@@ -20,6 +21,19 @@ class AreaItem(BaseModel):
     slug: str
     city: str | None
     created_at: datetime
+
+
+class AreaStatisticsSnapshot(BaseModel):
+    area_id: UUID
+    avg_price: Decimal | None = None
+    avg_rent: Decimal | None = None
+    roi_percent: Decimal | None = None
+    as_of: datetime
+
+
+class AreaStatisticsResponse(BaseModel):
+    area: AreaItem
+    statistics: AreaStatisticsSnapshot | None = None
 
 
 class DeveloperCreate(BaseModel):

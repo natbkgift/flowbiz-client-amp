@@ -5,8 +5,9 @@ import { Container } from '@/components/layout/Container';
 import { TrackedLink } from '@/components/analytics/TrackedLink';
 import { getDictionary, normalizeLocale } from '@/app/_lib/i18n/get-dictionary';
 import { withLocale } from '@/app/_lib/i18n/routing';
-import { fetchProjectBySlug } from '@/app/_lib/public-api-server';
+import { fetchProjectBySlug, fetchProjectEvaluation } from '@/app/_lib/public-api-server';
 import { getInternalLinks } from '@/app/_lib/internal-links';
+import { ProjectDeepReview } from '@/components/projects/ProjectDeepReview';
 
 export async function generateMetadata({
   params,
@@ -90,6 +91,8 @@ export default async function ProjectDetailPage({
       </main>
     );
   }
+
+  const evaluation = await fetchProjectEvaluation(project.id);
 
   const jsonLd = JSON.stringify(
     [
@@ -180,6 +183,8 @@ export default async function ProjectDetailPage({
             ))}
           </div>
         </div>
+
+        {evaluation ? <ProjectDeepReview locale={locale} evaluation={evaluation} /> : null}
       </Container>
     </main>
   );

@@ -213,3 +213,27 @@ export async function fetchProjectEvaluation(projectId: string): Promise<Project
   if (!res.ok) throw new Error(`Failed to fetch project evaluation (${res.status})`);
   return (await res.json()) as ProjectEvaluationResponse;
 }
+
+export type AreaItem = {
+  id: string;
+  name: string;
+  slug: string;
+  city: string | null;
+  created_at: string;
+};
+
+export type AreaStatisticsResponse = {
+  area: AreaItem;
+  statistics: AreaStatisticsSnapshot | null;
+};
+
+export async function fetchAreaStatisticsBySlug(slug: string): Promise<AreaStatisticsResponse | null> {
+  const origin = getOrigin();
+  const base = apiBase();
+
+  const url = new URL(`${base}/v1/areas/${encodeURIComponent(slug)}/statistics`, origin);
+  const res = await fetch(url.toString(), { next: { revalidate: 300 } });
+  if (res.status === 404) return null;
+  if (!res.ok) throw new Error(`Failed to fetch area statistics (${res.status})`);
+  return (await res.json()) as AreaStatisticsResponse;
+}
