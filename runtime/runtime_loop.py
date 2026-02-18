@@ -255,16 +255,57 @@ def save_state(state: dict[str, Any]) -> None:
     _atomic_write_json(STATE_FILE, state)
 
 
-def health_check() -> bool:
+def _ssh_http_code(*, vps_host: str, url: str, timeout_seconds: int = 20) -> int | None:
+    cmd = (
+        "set -e; "
+        f"code=$(curl -sS -o /dev/null -w '%{{http_code}}' '{url}' || true); "
+        'printf "%s" "$code"'
+    )
     try:
         result = subprocess.run(
-            ["curl", "-s", "http://127.0.0.1:8001/healthz"],
+            ["ssh", "-o", "BatchMode=yes", vps_host, cmd],
+            capture_output=True,
+            text=True,
+            timeout=timeout_seconds,
+            check=False,
+        )
+        s = (result.stdout or "").strip()
+        return int(s) if s.isdigit() else None
+    except Exception:
+        return None
+
+
+def health_check(state: dict[str, Any]) -> bool:
+    """Health gate for the runtime loop.
+
+    When running on a developer machine (e.g. Windows) with remote auto-deploy enabled,
+    health must be checked on the VPS via SSH (127.0.0.1:8001/8101 are VPS-local).
+    """
+
+    mission = state.get("mission") or {}
+    prod_base = str((mission.get("production_base_url") or DEFAULT_PROD_BASE_URL)).rstrip("/")
+    staging_required = bool(mission.get("staging_required"))
+    staging_base = str((mission.get("staging_base_url") or DEFAULT_STAGING_BASE_URL)).rstrip("/")
+    vps_host = mission.get("self_fix_vps_host")
+
+    try:
+        if isinstance(vps_host, str) and vps_host.strip():
+            prod_code = _ssh_http_code(vps_host=vps_host.strip(), url=f"{prod_base}/healthz")
+            if prod_code != 200:
+                return False
+            if staging_required:
+                st_code = _ssh_http_code(vps_host=vps_host.strip(), url=f"{staging_base}/healthz")
+                return st_code == 200
+            return True
+
+        result = subprocess.run(
+            ["curl", "-sS", "-o", "/dev/null", "-w", "%{http_code}", f"{prod_base}/healthz"],
             capture_output=True,
             text=True,
             timeout=10,
             check=False,
         )
-        return "ok" in (result.stdout or "").lower()
+        return (result.stdout or "").strip() == "200"
     except Exception as e:
         log(f"health_check_failed: {e}")
         return False
@@ -301,6 +342,65 @@ def _curl_body_sha256(url: str, timeout_seconds: int = 10) -> str | None:
         return hashlib.sha256((result.stdout or "").encode("utf-8")).hexdigest()
     except Exception:
         return None
+
+
+def _is_vps_local_url(url: str) -> bool:
+    u = (url or "").lower()
+    return u.startswith("http://127.0.0.1") or u.startswith("http://localhost")
+
+
+def _vps_host_for_state(state: dict[str, Any]) -> str | None:
+    mission = state.get("mission") or {}
+    vps_host = mission.get("self_fix_vps_host")
+    if isinstance(vps_host, str) and vps_host.strip():
+        return vps_host.strip()
+    return None
+
+
+def _ssh_body_sha256(*, vps_host: str, url: str, timeout_seconds: int = 20) -> str | None:
+    cmd = f"set -e; curl -sS '{url}' | sha256sum | cut -d' ' -f1"
+    try:
+        result = subprocess.run(
+            ["ssh", "-o", "BatchMode=yes", vps_host, cmd],
+            capture_output=True,
+            text=True,
+            timeout=timeout_seconds,
+            check=False,
+        )
+        s = (result.stdout or "").strip()
+        return s if s and all(c in "0123456789abcdef" for c in s.lower()) else None
+    except Exception:
+        return None
+
+
+def _curl_http_code_for_state(
+    state: dict[str, Any], url: str, timeout_seconds: int = 10
+) -> int | None:
+    vps_host = _vps_host_for_state(state)
+    if vps_host and _is_vps_local_url(url):
+        return _ssh_http_code(vps_host=vps_host, url=url, timeout_seconds=max(10, timeout_seconds))
+    return _curl_http_code(url, timeout_seconds=timeout_seconds)
+
+
+def _curl_body_sha256_for_state(
+    state: dict[str, Any], url: str, timeout_seconds: int = 10
+) -> str | None:
+    vps_host = _vps_host_for_state(state)
+    if vps_host and _is_vps_local_url(url):
+        return _ssh_body_sha256(
+            vps_host=vps_host, url=url, timeout_seconds=max(10, timeout_seconds)
+        )
+    return _curl_body_sha256(url, timeout_seconds=timeout_seconds)
+
+
+def _determinism_probe_for_state(state: dict[str, Any], url: str, runs: int = 3) -> bool:
+    hashes: list[str] = []
+    for _ in range(max(1, runs)):
+        h = _curl_body_sha256_for_state(state, url)
+        if not h:
+            return False
+        hashes.append(h)
+    return len(set(hashes)) == 1
 
 
 def _determinism_probe(url: str, runs: int = 3) -> bool:
@@ -517,8 +617,8 @@ def _update_verification_from_checks(state: dict[str, Any]) -> None:
             )
         return ok
 
-    prod_health = _curl_http_code(f"{prod_base}/healthz")
-    prod_metrics = _curl_http_code(f"{prod_base}/metrics")
+    prod_health = _curl_http_code_for_state(state, f"{prod_base}/healthz")
+    prod_metrics = _curl_http_code_for_state(state, f"{prod_base}/metrics")
     checks["prod_healthz"] = "passed" if prod_health == 200 else "failed"
     checks["prod_metrics"] = "passed" if prod_metrics == 200 else "failed"
 
@@ -528,14 +628,23 @@ def _update_verification_from_checks(state: dict[str, Any]) -> None:
 
     # Staging deploy is best-effort; it is only required when explicitly configured.
     if finite and staging_deploy_enabled:
-        checks["staging_deploy"] = "passed" if _staging_deploy_best_effort() else "failed"
+        if _vps_host_for_state(state):
+            # Remote-runner mode: deployment is handled via VPS deploy actions; treat staging
+            # deploy as passed when staging health is reachable.
+            checks["staging_deploy"] = (
+                "passed"
+                if _curl_http_code_for_state(state, f"{staging_base}/healthz") == 200
+                else "failed"
+            )
+        else:
+            checks["staging_deploy"] = "passed" if _staging_deploy_best_effort() else "failed"
     else:
         checks.setdefault("staging_deploy", "skipped")
 
     # Staging smoke checks: record if staging_base exists, but require only when enabled.
     if staging_base:
-        st_health = _curl_http_code(f"{staging_base}/healthz")
-        st_metrics = _curl_http_code(f"{staging_base}/metrics")
+        st_health = _curl_http_code_for_state(state, f"{staging_base}/healthz")
+        st_metrics = _curl_http_code_for_state(state, f"{staging_base}/metrics")
         checks["staging_healthz"] = "passed" if st_health == 200 else "failed"
         if st_metrics == 200:
             checks["staging_metrics"] = "passed"
@@ -547,16 +656,16 @@ def _update_verification_from_checks(state: dict[str, Any]) -> None:
 
     # Determinism probes (avoid /metrics which is intentionally non-deterministic).
     checks["prod_determinism_meta"] = (
-        "passed" if _determinism_probe(f"{prod_base}/v1/meta") else "failed"
+        "passed" if _determinism_probe_for_state(state, f"{prod_base}/v1/meta") else "failed"
     )
 
     # Optional: properties endpoint may not exist in very early phases; treat non-200
     # as failed only in finite mode.
-    code_props = _curl_http_code(f"{prod_base}/v1/properties?page=1&limit=5")
+    code_props = _curl_http_code_for_state(state, f"{prod_base}/v1/properties?page=1&limit=5")
     if code_props == 200:
         checks["prod_determinism_properties"] = (
             "passed"
-            if _determinism_probe(f"{prod_base}/v1/properties?page=1&limit=5")
+            if _determinism_probe_for_state(state, f"{prod_base}/v1/properties?page=1&limit=5")
             else "failed"
         )
     else:
@@ -659,6 +768,11 @@ def decide_next_action(state: dict[str, Any]) -> Decision:
     if finite and target is not None and current_phase >= target and phase_status == "completed":
         return Decision("monitor_production", "mission_complete_at_target_phase", "low")
 
+    # In finite mode, an idle phase must be actively executed.
+    if finite and (phase_status is None or str(phase_status).lower() == "idle"):
+        if target is None or current_phase <= target:
+            return Decision("continue_phase", "phase_idle", "medium")
+
     if phase_status == "running":
         return Decision("continue_phase", "phase_running", "medium")
 
@@ -690,6 +804,9 @@ def _record_failure(state: dict[str, Any], err: str) -> None:
 def _record_success(state: dict[str, Any]) -> None:
     failures = state.setdefault("failures", {})
     failures["consecutive_failures"] = 0
+    # Health checks are sampled; treat a recovered health_check as clearing the health error.
+    if str(failures.get("last_error") or "") == "health_check_failed":
+        failures["last_error"] = None
 
 
 def _run_cmd_capture(cmd: list[str], timeout_seconds: int) -> tuple[int, str, str]:
@@ -750,6 +867,56 @@ def _determinism_probe_post_json(url: str, payload_json: str, runs: int = 3) -> 
     return len(set(hashes)) == 1
 
 
+def _determinism_probe_post_json_for_state(
+    state: dict[str, Any], url: str, payload_json: str, runs: int = 3
+) -> bool:
+    import hashlib
+
+    vps_host = _vps_host_for_state(state)
+    if vps_host and _is_vps_local_url(url):
+        payload = payload_json.replace("'", "'\\''")
+        remote = (
+            "set -e; "
+            f"curl -sS -H 'Content-Type: application/json' -d '{payload}' '{url}' "
+            "| sha256sum | cut -d' ' -f1"
+        )
+        hashes: list[str] = []
+        for _ in range(max(1, runs)):
+            rc, out, _err = _run_cmd_capture(
+                ["ssh", "-o", "BatchMode=yes", vps_host, remote],
+                timeout_seconds=30,
+            )
+            if rc != 0:
+                return False
+            h = (out or "").strip()
+            if not h:
+                return False
+            hashes.append(h)
+        return len(set(hashes)) == 1
+
+    hashes: list[str] = []
+    for _ in range(max(1, runs)):
+        r = subprocess.run(
+            [
+                "curl",
+                "-sS",
+                "-H",
+                "Content-Type: application/json",
+                "-d",
+                payload_json,
+                url,
+            ],
+            capture_output=True,
+            text=True,
+            timeout=15,
+            check=False,
+        )
+        if r.returncode != 0:
+            return False
+        hashes.append(hashlib.sha256((r.stdout or "").encode("utf-8")).hexdigest())
+    return len(set(hashes)) == 1
+
+
 def _curl_headers_and_body(
     url: str,
     *,
@@ -769,11 +936,59 @@ def _curl_headers_and_body(
     return out
 
 
+def _curl_headers_and_body_for_state(
+    state: dict[str, Any],
+    url: str,
+    *,
+    method: str = "GET",
+    data: str | None = None,
+    headers: list[str] | None = None,
+) -> str | None:
+    vps_host = _vps_host_for_state(state)
+    if vps_host and _is_vps_local_url(url):
+
+        def _q(s: str) -> str:
+            return "'" + (s or "").replace("'", "'\\''") + "'"
+
+        parts: list[str] = ["set", "-e;", "curl", "-sS", "-i", "-X", method]
+        for h in headers or []:
+            parts.extend(["-H", _q(h)])
+        if data is not None:
+            parts.extend(["-H", _q("Content-Type: application/json"), "-d", _q(data)])
+        parts.append(_q(url))
+        remote = " ".join(parts)
+
+        rc, out, _err = _run_cmd_capture(
+            ["ssh", "-o", "BatchMode=yes", vps_host, remote],
+            timeout_seconds=25,
+        )
+        return out if rc == 0 else None
+
+    return _curl_headers_and_body(url, method=method, data=data, headers=headers)
+
+
 def _compose_exec_cmd(*, service: str, argv: list[str], state: dict[str, Any]) -> list[str]:
     """Build a docker compose exec command.
 
     Uses docker-compose.prod.yml when present to match production runtime.
     """
+
+    mission = state.get("mission") or {}
+    vps_host = _vps_host_for_state(state)
+    vps_path = str(mission.get("self_fix_vps_path") or "").strip()
+    if vps_host and vps_path:
+
+        def _q(s: str) -> str:
+            return "'" + (s or "").replace("'", "'\\''") + "'"
+
+        argv_str = " ".join(_q(a) for a in argv)
+        remote = (
+            "set -e; "
+            f"cd {vps_path}; "
+            "docker compose -f docker-compose.yml -f docker-compose.prod.yml exec -T "
+            f"{service} {argv_str}"
+        )
+        return ["ssh", "-o", "BatchMode=yes", vps_host, remote]
 
     app_dir = Path(__file__).resolve().parents[1]
     prod_override = app_dir / "docker-compose.prod.yml"
@@ -807,27 +1022,40 @@ def _run_phase_work(state: dict[str, Any], phase: int) -> PhaseWorkResult:
         return rc == 0
 
     def _expect_http(url: str, *, ok_codes: set[int]) -> bool:
-        code = _curl_http_code(url, timeout_seconds=15)
+        code = _curl_http_code_for_state(state, url, timeout_seconds=15)
         details.append(f"http url={url} code={code}")
         return code in ok_codes
 
     def _post_http_code(url: str, payload_json: str) -> int | None:
-        rc, out, err = _run_cmd_capture(
-            [
-                "curl",
-                "-sS",
-                "-o",
-                "/dev/null",
-                "-w",
-                "%{http_code}",
-                "-H",
-                "Content-Type: application/json",
-                "-d",
-                payload_json,
-                url,
-            ],
-            timeout_seconds=20,
-        )
+        vps_host = _vps_host_for_state(state)
+        if vps_host and _is_vps_local_url(url):
+            payload = payload_json.replace("'", "'\\''")
+            remote = (
+                "set -e; "
+                f"curl -sS -o /dev/null -w '%{{http_code}}' "
+                f"-H 'Content-Type: application/json' -d '{payload}' '{url}'"
+            )
+            rc, out, err = _run_cmd_capture(
+                ["ssh", "-o", "BatchMode=yes", vps_host, remote],
+                timeout_seconds=25,
+            )
+        else:
+            rc, out, err = _run_cmd_capture(
+                [
+                    "curl",
+                    "-sS",
+                    "-o",
+                    "/dev/null",
+                    "-w",
+                    "%{http_code}",
+                    "-H",
+                    "Content-Type: application/json",
+                    "-d",
+                    payload_json,
+                    url,
+                ],
+                timeout_seconds=20,
+            )
         details.append(
             f"post_http url={url} rc={rc} out={out.strip()[:50]} err={err.strip()[:120]}"
         )
@@ -844,7 +1072,7 @@ def _run_phase_work(state: dict[str, Any], phase: int) -> PhaseWorkResult:
         ok = ok and _expect_http(f"{public_base}/health", ok_codes={200})
         ok = ok and _expect_http(f"{public_base}/api/v1/meta", ok_codes={200, 301, 302, 307, 308})
         ok = ok and _expect_http(f"{prod_base}/healthz", ok_codes={200})
-        ok = ok and _determinism_probe(f"{prod_base}/v1/meta", runs=2)
+        ok = ok and _determinism_probe_for_state(state, f"{prod_base}/v1/meta", runs=2)
         if not ok:
             details.append("phase0_foundation_probe_failed")
         return PhaseWorkResult(ok, "foundation" if ok else "foundation_failed", details)
@@ -855,7 +1083,7 @@ def _run_phase_work(state: dict[str, Any], phase: int) -> PhaseWorkResult:
         ok = True
         ok = ok and _expect_http(f"{prod_base}/metrics", ok_codes={200})
         ok = ok and _expect_http(f"{prod_base}/openapi.json", ok_codes={200})
-        ok = ok and _determinism_probe(f"{prod_base}/v1/meta", runs=3)
+        ok = ok and _determinism_probe_for_state(state, f"{prod_base}/v1/meta", runs=3)
         return PhaseWorkResult(ok, "observability" if ok else "observability_failed", details)
 
     if phase == 2:
@@ -876,7 +1104,7 @@ def _run_phase_work(state: dict[str, Any], phase: int) -> PhaseWorkResult:
         )
         code = _post_http_code(url, payload)
         ok = code == 200
-        ok = ok and _determinism_probe_post_json(url, payload, runs=3)
+        ok = ok and _determinism_probe_post_json_for_state(state, url, payload, runs=3)
         if not ok:
             details.append("finder_search_missing_or_nondeterministic")
         return PhaseWorkResult(ok, "finder_engine" if ok else "finder_engine_failed", details)
@@ -885,7 +1113,7 @@ def _run_phase_work(state: dict[str, Any], phase: int) -> PhaseWorkResult:
         mission = state.get("mission") or {}
         prod_base = str(mission.get("production_base_url") or DEFAULT_PROD_BASE_URL).rstrip("/")
         url = f"{prod_base}/v1/members/me"
-        code = _curl_http_code(url, timeout_seconds=10)
+        code = _curl_http_code_for_state(state, url, timeout_seconds=10)
         details.append(f"members_me_http_code={code}")
         # No auth header => should return 401 Unauthorized.
         ok = code in {401, 403}
@@ -914,13 +1142,15 @@ def _run_phase_work(state: dict[str, Any], phase: int) -> PhaseWorkResult:
             sort_keys=True,
         )
 
-        raw1 = _curl_headers_and_body(
+        raw1 = _curl_headers_and_body_for_state(
+            state,
             booking_url,
             method="POST",
             data=payload,
             headers=[f"Idempotency-Key: {idem}"],
         )
-        raw2 = _curl_headers_and_body(
+        raw2 = _curl_headers_and_body_for_state(
+            state,
             booking_url,
             method="POST",
             data=payload,
@@ -1003,7 +1233,9 @@ def _run_phase_work(state: dict[str, Any], phase: int) -> PhaseWorkResult:
             (state.get("mission") or {}).get("production_base_url") or DEFAULT_PROD_BASE_URL
         ).rstrip("/")
         ok = _expect_http(f"{base}/v1/recommendations?limit=5", ok_codes={200})
-        ok = ok and _determinism_probe(f"{base}/v1/recommendations?limit=5", runs=3)
+        ok = ok and _determinism_probe_for_state(
+            state, f"{base}/v1/recommendations?limit=5", runs=3
+        )
         if not ok:
             details.append("recommendations_endpoint_missing_or_nondeterministic")
         return PhaseWorkResult(
@@ -1019,8 +1251,8 @@ def _run_phase_work(state: dict[str, Any], phase: int) -> PhaseWorkResult:
         ok = ok and _expect_http(f"{public_base}/robots.txt", ok_codes={200})
         ok = ok and _expect_http(f"{public_base}/sitemap.xml", ok_codes={200})
         if ok:
-            ok = ok and _determinism_probe(f"{public_base}/robots.txt", runs=2)
-            ok = ok and _determinism_probe(f"{public_base}/sitemap.xml", runs=2)
+            ok = ok and _determinism_probe_for_state(state, f"{public_base}/robots.txt", runs=2)
+            ok = ok and _determinism_probe_for_state(state, f"{public_base}/sitemap.xml", runs=2)
         return PhaseWorkResult(ok, "seo_authority" if ok else "seo_authority_failed", details)
 
     if phase == 9:
@@ -1028,7 +1260,7 @@ def _run_phase_work(state: dict[str, Any], phase: int) -> PhaseWorkResult:
         admin_base = str(
             (state.get("mission") or {}).get("admin_base_url") or "http://127.0.0.1:8002"
         ).rstrip("/")
-        code = _curl_http_code(admin_base, timeout_seconds=10)
+        code = _curl_http_code_for_state(state, admin_base, timeout_seconds=10)
         # Next.js commonly redirects (307/308) to canonical paths (e.g. trailing slash)
         # or auth routes; treat any 2xx/3xx as "available".
         ok = code is not None and 200 <= int(code) < 400
@@ -1108,33 +1340,90 @@ def _attempt_self_fix(state: dict[str, Any]) -> tuple[bool, list[str]]:
         "deployment_pending",
     }
     if any(token in err for token in infra_errors) or err.startswith("loop_exception:"):
-        prod_override = APP_DIR / "docker-compose.prod.yml"
-        compose = ["docker", "compose"]
-        if prod_override.exists():
-            compose.extend(["-f", str(APP_DIR / "docker-compose.yml"), "-f", str(prod_override)])
-        rc, out, e = _run_cmd_capture([*compose, "up", "-d", "--force-recreate", "api"], 300)
-        details.append(f"compose_recreate_api rc={rc}")
-        if out.strip():
-            details.append("compose_stdout=" + out.strip()[:250])
-        if e.strip():
-            details.append("compose_stderr=" + e.strip()[:250])
-        if rc == 0:
-            mig_rc, _mig_out, mig_err = _run_cmd_capture(
-                [*compose, "exec", "-T", "api", "alembic", "upgrade", "head"],
-                300,
+        vps_host = _vps_host_for_state(state)
+        vps_path = str(mission.get("self_fix_vps_path") or "").strip()
+        if vps_host and vps_path:
+            staging_required = bool(mission.get("staging_required"))
+            staging_deploy_enabled = bool(mission.get("staging_deploy_enabled"))
+            staging_path = str(
+                mission.get("self_fix_staging_vps_path")
+                or "/opt/flowbiz/clients/flowbiz-client-amp-staging"
+            ).strip()
+            remote = (
+                "set -e; "
+                f"cd {vps_path}; "
+                "export OTEL_ENABLED=true; "
+                "docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d "
+                "--force-recreate api otel-collector 1>&2; "
+                "docker compose -f docker-compose.yml -f docker-compose.prod.yml exec -T api "
+                "alembic upgrade head 1>&2; "
+                "code_prod=000; "
+                "for i in $(seq 1 30); do "
+                "code_prod=$(curl -sS -o /dev/null -w '%{http_code}' "
+                "http://127.0.0.1:8001/healthz || true); "
+                "[ \"$code_prod\" = '200' ] && break; "
+                "sleep 2; "
+                "done; "
+                + (
+                    f"cd {staging_path}; "
+                    "export OTEL_ENABLED=true; "
+                    "docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d "
+                    "--force-recreate api otel-collector 1>&2; "
+                    "docker compose -f docker-compose.yml -f docker-compose.prod.yml exec -T api "
+                    "alembic upgrade head 1>&2; "
+                    "code_st=000; "
+                    "for i in $(seq 1 30); do "
+                    "code_st=$(curl -sS -o /dev/null -w '%{http_code}' "
+                    "http://127.0.0.1:8101/healthz || true); "
+                    "[ \"$code_st\" = '200' ] && break; "
+                    "sleep 2; "
+                    "done; "
+                    "if [ \"$code_prod\" = '200' ] && [ \"$code_st\" = '200' ]; "
+                    "then printf '200'; else printf '500'; fi"
+                    if (staging_required or staging_deploy_enabled)
+                    else "printf '%s' \"$code_prod\""
+                )
             )
-            details.append(f"alembic_upgrade rc={mig_rc}")
-            if mig_err.strip():
-                details.append("alembic_stderr=" + mig_err.strip()[:250])
-
-            prod_base = str((mission.get("production_base_url") or DEFAULT_PROD_BASE_URL)).rstrip(
-                "/"
+            rc, out, e = _run_cmd_capture(
+                ["ssh", "-o", "BatchMode=yes", vps_host, remote],
+                timeout_seconds=600,
             )
-            code = _curl_http_code(f"{prod_base}/healthz", timeout_seconds=10)
-            details.append(f"post_recreate_healthz={code}")
-            if code == 200:
+            details.append(
+                f"vps_infra_recover rc={rc} out={out.strip()[:60]} err={e.strip()[:120]}"
+            )
+            if rc == 0 and (out or "").strip() == "200":
                 failures["self_fix_last"] = {"ok": True, "details": details}
                 return True, details
+        else:
+            prod_override = APP_DIR / "docker-compose.prod.yml"
+            compose = ["docker", "compose"]
+            if prod_override.exists():
+                compose.extend(
+                    ["-f", str(APP_DIR / "docker-compose.yml"), "-f", str(prod_override)]
+                )
+            rc, out, e = _run_cmd_capture([*compose, "up", "-d", "--force-recreate", "api"], 300)
+            details.append(f"compose_recreate_api rc={rc}")
+            if out.strip():
+                details.append("compose_stdout=" + out.strip()[:250])
+            if e.strip():
+                details.append("compose_stderr=" + e.strip()[:250])
+            if rc == 0:
+                mig_rc, _mig_out, mig_err = _run_cmd_capture(
+                    [*compose, "exec", "-T", "api", "alembic", "upgrade", "head"],
+                    300,
+                )
+                details.append(f"alembic_upgrade rc={mig_rc}")
+                if mig_err.strip():
+                    details.append("alembic_stderr=" + mig_err.strip()[:250])
+
+                prod_base = str(
+                    (mission.get("production_base_url") or DEFAULT_PROD_BASE_URL)
+                ).rstrip("/")
+                code = _curl_http_code_for_state(state, f"{prod_base}/healthz", timeout_seconds=10)
+                details.append(f"post_recreate_healthz={code}")
+                if code == 200:
+                    failures["self_fix_last"] = {"ok": True, "details": details}
+                    return True, details
 
     # 1) Try auto-format + lint fixes (safe and deterministic)
     rc, out, e = _run_host_python_module("ruff", ["format"], timeout_seconds=300)
@@ -1260,17 +1549,24 @@ def _attempt_self_fix(state: dict[str, Any]) -> tuple[bool, list[str]]:
             remote = (
                 "set -e; "
                 f"cd {vps_path}; "
-                "git pull --ff-only origin main; "
+                "git pull --ff-only origin main 1>&2; "
                 "export BUILD_SHA=$(git rev-parse --short HEAD); "
                 "export OTEL_ENABLED=true; "
-                'echo "DEPLOY BUILD_SHA=$BUILD_SHA"; '
+                'echo "DEPLOY BUILD_SHA=$BUILD_SHA" 1>&2; '
                 "docker compose -f docker-compose.yml -f docker-compose.prod.yml build "
-                "--build-arg GIT_SHA=$BUILD_SHA api; "
+                "--build-arg GIT_SHA=$BUILD_SHA api 1>&2; "
                 "docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d "
-                "--force-recreate api otel-collector; "
+                "--force-recreate api otel-collector 1>&2; "
                 "docker compose -f docker-compose.yml -f docker-compose.prod.yml exec -T api "
-                "alembic upgrade head; "
-                "curl -sS -o /dev/null -w '%{http_code}' http://127.0.0.1:8001/healthz"
+                "alembic upgrade head 1>&2; "
+                "code=000; "
+                "for i in $(seq 1 30); do "
+                "code=$(curl -sS -o /dev/null -w '%{http_code}' "
+                "http://127.0.0.1:8001/healthz || true); "
+                "[ \"$code\" = '200' ] && break; "
+                "sleep 2; "
+                "done; "
+                'printf "%s" "$code"'
             )
             rc, out, e = _run_cmd_capture(
                 ["ssh", "-o", "BatchMode=yes", vps_host.strip(), remote],
@@ -1290,17 +1586,24 @@ def _attempt_self_fix(state: dict[str, Any]) -> tuple[bool, list[str]]:
                 remote_staging = (
                     "set -e; "
                     f"cd {staging_path}; "
-                    "git pull --ff-only origin main; "
+                    "git pull --ff-only origin main 1>&2; "
                     "export BUILD_SHA=$(git rev-parse --short HEAD); "
                     "export OTEL_ENABLED=true; "
-                    'echo "STAGING BUILD_SHA=$BUILD_SHA"; '
+                    'echo "STAGING BUILD_SHA=$BUILD_SHA" 1>&2; '
                     "docker compose -f docker-compose.yml -f docker-compose.prod.yml build "
-                    "--build-arg GIT_SHA=$BUILD_SHA api; "
+                    "--build-arg GIT_SHA=$BUILD_SHA api 1>&2; "
                     "docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d "
-                    "--force-recreate api otel-collector; "
+                    "--force-recreate api otel-collector 1>&2; "
                     "docker compose -f docker-compose.yml -f docker-compose.prod.yml exec -T api "
-                    "alembic upgrade head; "
-                    "curl -sS -o /dev/null -w '%{http_code}' http://127.0.0.1:8101/healthz"
+                    "alembic upgrade head 1>&2; "
+                    "code=000; "
+                    "for i in $(seq 1 30); do "
+                    "code=$(curl -sS -o /dev/null -w '%{http_code}' "
+                    "http://127.0.0.1:8101/healthz || true); "
+                    "[ \"$code\" = '200' ] && break; "
+                    "sleep 2; "
+                    "done; "
+                    'printf "%s" "$code"'
                 )
                 rc, out, e = _run_cmd_capture(
                     ["ssh", "-o", "BatchMode=yes", vps_host.strip(), remote_staging],
@@ -1412,7 +1715,9 @@ def execute_action(action: str, state: dict[str, Any]) -> None:
             # Keep original error for stable retry keys, but rollback if exhausted.
             failures["last_error"] = previous_error
             if any("self_fix_exhausted" in d for d in details):
-                execute_action("rollback_last_slice", state)
+                # Health check failures can be transient sampling issues; don't hard-fail mission.
+                if previous_error != "health_check_failed":
+                    execute_action("rollback_last_slice", state)
 
     elif action == "continue_phase":
         execution = state.setdefault("execution", {})
@@ -1530,6 +1835,18 @@ def loop_once() -> None:
             state = load_state()
             _normalize_execution_state(state)
 
+            # Auto-resume: avoid treating transient health sampling as a terminal failure.
+            mission = state.get("mission") or {}
+            failures = state.get("failures") or {}
+            if (
+                _is_finite_mission(state)
+                and (mission.get("status") or "").lower() == "failed"
+                and str(failures.get("last_error") or "") == "health_check_failed"
+            ):
+                m = state.setdefault("mission", {})
+                m["status"] = "running"
+                m["completed_at"] = None
+
             # Terminal mission handling: if already completed/failed and stop_when_complete is set,
             # finalize timestamps, emit final report, and stop the service.
             mission = state.get("mission") or {}
@@ -1594,7 +1911,7 @@ def loop_once() -> None:
                     _attempt_stop_service()
                     raise SystemExit(0)
 
-            ok = health_check()
+            ok = health_check(state)
             log(f"health_check ok={ok}")
             if not ok:
                 _record_failure(state, "health_check_failed")

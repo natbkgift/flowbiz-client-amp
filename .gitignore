@@ -80,3 +80,7 @@ scraper-renthai/storage/
 # Baseline integrity outputs (generated)
 docs/phase_reports/baseline/*/
 docs/phase_reports/baseline/LATEST.txt
+
+# Runtime artifacts (generated)
+runtime/reports/
+runtime/system_state.lock
