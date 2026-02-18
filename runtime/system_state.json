@@ -67,6 +67,21 @@
     "block_reason": null
   },
 
+  "mission": {
+    "mode": "infinite",
+    "target_final_phase": null,
+    "stop_when_complete": false,
+    "production_base_url": "http://127.0.0.1:8001",
+    "staging_base_url": "http://127.0.0.1:8101"
+  },
+
+  "verification": {
+    "phase": null,
+    "status": "unknown",
+    "checks": {},
+    "last_checked_at": null
+  },
+
   "runtime": {
     "loop_interval_seconds": 60,
     "max_parallel_actions": 1,

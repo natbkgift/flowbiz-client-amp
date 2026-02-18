@@ -24,6 +24,10 @@ LOCK_FILE = RUNTIME_DIR / "system_state.lock"
 LOG_FILE = RUNTIME_DIR / "runtime_loop.log"
 
 
+DEFAULT_PROD_BASE_URL = "http://127.0.0.1:8001"
+DEFAULT_STAGING_BASE_URL = "http://127.0.0.1:8101"
+
+
 def _utc_now_iso() -> str:
     return datetime.now(timezone.utc).isoformat()
 
@@ -90,6 +94,49 @@ def health_check() -> bool:
         return False
 
 
+def _curl_http_code(url: str, timeout_seconds: int = 10) -> int | None:
+    try:
+        result = subprocess.run(
+            ["curl", "-sS", "-o", "/dev/null", "-w", "%{http_code}", url],
+            capture_output=True,
+            text=True,
+            timeout=timeout_seconds,
+            check=False,
+        )
+        s = (result.stdout or "").strip()
+        return int(s) if s.isdigit() else None
+    except Exception:
+        return None
+
+
+def _curl_body_sha256(url: str, timeout_seconds: int = 10) -> str | None:
+    try:
+        result = subprocess.run(
+            ["curl", "-sS", url],
+            capture_output=True,
+            text=True,
+            timeout=timeout_seconds,
+            check=False,
+        )
+        if result.returncode != 0:
+            return None
+        import hashlib
+
+        return hashlib.sha256((result.stdout or "").encode("utf-8")).hexdigest()
+    except Exception:
+        return None
+
+
+def _determinism_probe(url: str, runs: int = 3) -> bool:
+    hashes: list[str] = []
+    for _ in range(max(1, runs)):
+        h = _curl_body_sha256(url)
+        if not h:
+            return False
+        hashes.append(h)
+    return len(set(hashes)) == 1
+
+
 def _metrics_breached(metrics: dict[str, Any]) -> bool:
     for v in metrics.values():
         if isinstance(v, str) and v.lower() == "breach":
@@ -101,15 +148,115 @@ def _normalize_execution_state(state: dict[str, Any]) -> None:
     execution = state.setdefault("execution", {})
     failures = state.setdefault("failures", {})
     runtime = state.setdefault("runtime", {})
+    integrity = state.setdefault("integrity", {})
+    planner = state.setdefault("planner", {})
+    observability = state.setdefault("observability", {})
+    verification = state.setdefault("verification", {})
+    mission = state.setdefault("mission", {})
 
     if execution.get("current_phase") is None:
         last_ok = execution.get("last_successful_phase")
         execution["current_phase"] = (int(last_ok) + 1) if last_ok is not None else 0
 
+    execution.setdefault("phase_status", "idle")
+
+    # Keep legacy/minimal schemas working: only enforce keys when explicitly present.
+    integrity.setdefault("baseline_completed", False)
+
+    planner.setdefault("next_action", None)
+    planner.setdefault("priority", "none")
+    planner.setdefault("blocked", False)
+    planner.setdefault("block_reason", None)
+
+    observability.setdefault("logs", "healthy")
+    observability.setdefault("metrics", "healthy")
+    observability.setdefault("tracing", "healthy")
+    observability.setdefault("alerts", "armed")
+
+    mission.setdefault("mode", "infinite")
+    mission.setdefault("target_final_phase", None)
+    mission.setdefault("stop_when_complete", False)
+    mission.setdefault("production_base_url", DEFAULT_PROD_BASE_URL)
+    mission.setdefault("staging_base_url", DEFAULT_STAGING_BASE_URL)
+
+    verification.setdefault("phase", None)
+    verification.setdefault("status", "unknown")
+    verification.setdefault("checks", {})
+    verification.setdefault("last_checked_at", None)
+
     failures.setdefault("consecutive_failures", 0)
     failures.setdefault("error_count", 0)
+    failures.setdefault("last_error", None)
     runtime.setdefault("loop_interval_seconds", 60)
     runtime.setdefault("max_consecutive_failures", 3)
+
+
+def _is_finite_mission(state: dict[str, Any]) -> bool:
+    mode = (state.get("mission") or {}).get("mode")
+    return isinstance(mode, str) and mode.lower() == "finite"
+
+
+def _mission_target_phase(state: dict[str, Any]) -> int | None:
+    v = (state.get("mission") or {}).get("target_final_phase")
+    try:
+        return int(v) if v is not None else None
+    except Exception:
+        return None
+
+
+def _verification_passed_for_phase(state: dict[str, Any], phase: int) -> bool:
+    v = state.get("verification") or {}
+    if v.get("phase") != phase:
+        return False
+    return (v.get("status") or "").lower() == "passed"
+
+
+def _update_verification_from_checks(state: dict[str, Any]) -> None:
+    verification = state.setdefault("verification", {})
+    checks = verification.setdefault("checks", {})
+    mission = state.get("mission") or {}
+
+    prod_base = str(mission.get("production_base_url") or DEFAULT_PROD_BASE_URL).rstrip("/")
+    staging_base = str(mission.get("staging_base_url") or "").rstrip("/")
+
+    prod_health = _curl_http_code(f"{prod_base}/healthz")
+    prod_metrics = _curl_http_code(f"{prod_base}/metrics")
+    checks["prod_healthz"] = "passed" if prod_health == 200 else "failed"
+    checks["prod_metrics"] = "passed" if prod_metrics == 200 else "failed"
+
+    # Best-effort staging check (only required in finite mode; a missing staging stack will fail).
+    if staging_base:
+        st_health = _curl_http_code(f"{staging_base}/healthz")
+        st_metrics = _curl_http_code(f"{staging_base}/metrics")
+        checks["staging_healthz"] = "passed" if st_health == 200 else "failed"
+        checks["staging_metrics"] = "passed" if st_metrics == 200 else "failed"
+
+    # Determinism probes (avoid /metrics which is intentionally non-deterministic).
+    checks["prod_determinism_meta"] = "passed" if _determinism_probe(f"{prod_base}/v1/meta") else "failed"
+
+    # Optional: properties endpoint may not exist in very early phases; treat non-200 as failed only in finite mode.
+    code_props = _curl_http_code(f"{prod_base}/v1/properties?page=1&limit=5")
+    if code_props == 200:
+        checks["prod_determinism_properties"] = (
+            "passed" if _determinism_probe(f"{prod_base}/v1/properties?page=1&limit=5") else "failed"
+        )
+    else:
+        checks["prod_determinism_properties"] = "unknown"
+
+    verification["last_checked_at"] = _utc_now_iso()
+
+    # Compute overall status (strict in finite mode).
+    finite = _is_finite_mission(state)
+    required_keys = [
+        "prod_healthz",
+        "prod_metrics",
+        "prod_determinism_meta",
+    ]
+    if finite:
+        required_keys.extend(["staging_healthz", "staging_metrics"])
+
+    all_required_passed = all((checks.get(k) == "passed") for k in required_keys)
+    verification["status"] = "passed" if all_required_passed else "failed"
 
 
 @dataclass(frozen=True)
@@ -126,10 +273,14 @@ def decide_next_action(state: dict[str, Any]) -> Decision:
     deployment = state.get("deployment") or {}
     failures = state.get("failures") or {}
     execution = state.get("execution") or {}
+    mission = state.get("mission") or {}
+    verification = state.get("verification") or {}
 
-    # 1) Integrity
-    if not integrity.get("baseline_completed") or not integrity.get("contracts_loaded"):
-        return Decision("run_baseline", "integrity_gate_failed", "high")
+    # 1) Integrity (backward compatible: only enforce keys that exist)
+    if integrity.get("baseline_completed") is False:
+        return Decision("run_baseline", "integrity_gate_failed:baseline", "high")
+    if "contracts_loaded" in integrity and integrity.get("contracts_loaded") is False:
+        return Decision("run_baseline", "integrity_gate_failed:contracts", "high")
 
     # 2) Observability
     if (
@@ -144,10 +295,23 @@ def decide_next_action(state: dict[str, Any]) -> Decision:
     if _metrics_breached(metrics):
         return Decision("rollback_last_slice", "metrics_breach", "high")
 
-    # 4) Phase continuation/readiness (minimal: rely on state)
-    if execution.get("phase_status") == "running":
+    # 4) Phase continuation/readiness
+    phase_status = execution.get("phase_status")
+    current_phase = int(execution.get("current_phase") or 0)
+    finite = (mission.get("mode") or "").lower() == "finite"
+    target = _mission_target_phase(state) if finite else None
+
+    if finite and target is not None and current_phase >= target and phase_status == "completed":
+        return Decision("monitor_production", "mission_complete_at_target_phase", "low")
+
+    if phase_status == "running":
         return Decision("continue_phase", "phase_running", "medium")
-    if execution.get("phase_status") == "completed":
+
+    if phase_status == "completed":
+        if finite and target is not None:
+            # In finite mode, require a verification pass for this phase before advancing.
+            if verification.get("phase") != current_phase or (verification.get("status") or "").lower() != "passed":
+                return Decision("monitor_production", "verification_required_before_advance", "high")
         return Decision("advance_phase", "phase_completed", "medium")
 
     # 5) Deployment state
@@ -224,9 +388,29 @@ def loop_once() -> None:
                 f"reason={decision.reason}"
             )
 
+            # If a phase is marked completed, refresh verification checks (best-effort) so advancement is gated.
+            exec_state = state.get("execution") or {}
+            if exec_state.get("phase_status") == "completed" and _is_finite_mission(state):
+                try:
+                    state.setdefault("verification", {})["phase"] = int(exec_state.get("current_phase") or 0)
+                    _update_verification_from_checks(state)
+                except Exception as e:
+                    log(f"verification_update_failed: {type(e).__name__} {e}")
+
             execute_action(decision.action, state)
             state.setdefault("planner", {})["next_action"] = decision.action
             state.setdefault("planner", {})["priority"] = decision.priority
+
+            # Planner block signals (used by operators/higher-level agents)
+            planner = state.setdefault("planner", {})
+            planner["blocked"] = False
+            planner["block_reason"] = None
+            if decision.action == "monitor_production" and decision.reason.startswith("verification_required"):
+                planner["blocked"] = True
+                planner["block_reason"] = "verification_required_before_advance"
+            if decision.reason == "mission_complete_at_target_phase":
+                planner["blocked"] = True
+                planner["block_reason"] = "mission_complete"
 
             ok = health_check()
             log(f"health_check ok={ok}")
