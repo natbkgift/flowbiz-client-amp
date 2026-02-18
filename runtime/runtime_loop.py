@@ -375,6 +375,9 @@ def _normalize_execution_state(state: dict[str, Any]) -> None:
     mission.setdefault("self_fix_auto_deploy", False)
     mission.setdefault("self_fix_vps_host", None)
     mission.setdefault("self_fix_vps_path", "/opt/flowbiz/clients/flowbiz-client-amp")
+    mission.setdefault(
+        "self_fix_staging_vps_path", "/opt/flowbiz/clients/flowbiz-client-amp-staging"
+    )
 
     # Optional: baseline runner inputs (used when in mission/finite mode).
     mission.setdefault(
@@ -1179,6 +1182,59 @@ def _attempt_self_fix(state: dict[str, Any]) -> tuple[bool, list[str]]:
     if bool(mission.get("self_fix_auto_deploy")):
         vps_host = mission.get("self_fix_vps_host")
         vps_path = str(mission.get("self_fix_vps_path") or "").strip()
+        staging_required = bool(mission.get("staging_required"))
+        staging_deploy_enabled = bool(mission.get("staging_deploy_enabled"))
+
+        def _local_deploy(*, path: Path) -> bool:
+            prod_override = path / "docker-compose.prod.yml"
+            compose = ["docker", "compose"]
+            if prod_override.exists():
+                compose.extend(["-f", str(path / "docker-compose.yml"), "-f", str(prod_override)])
+            sha_rc, sha_out, sha_err = _run_cmd_capture(
+                ["git", "-C", str(path), "rev-parse", "--short", "HEAD"],
+                timeout_seconds=30,
+            )
+            details.append(
+                f"deploy_sha rc={sha_rc} "
+                f"out={(sha_out or '').strip()} "
+                f"err={(sha_err or '').strip()[:120]}"
+            )
+            build_sha = (sha_out or "").strip() or "unknown"
+            build_rc, _build_out, build_err = _run_cmd_capture(
+                [
+                    *compose,
+                    "build",
+                    "--build-arg",
+                    f"GIT_SHA={build_sha}",
+                    "api",
+                ],
+                timeout_seconds=900,
+            )
+            details.append(f"compose_build_api rc={build_rc}")
+            if build_err.strip():
+                details.append("compose_build_stderr=" + build_err.strip()[:250])
+            if build_rc != 0:
+                return False
+
+            up_rc, _up_out, up_err = _run_cmd_capture(
+                [*compose, "up", "-d", "--force-recreate", "api", "otel-collector"],
+                timeout_seconds=300,
+            )
+            details.append(f"compose_up rc={up_rc}")
+            if up_err.strip():
+                details.append("compose_up_stderr=" + up_err.strip()[:250])
+            if up_rc != 0:
+                return False
+
+            mig_rc, _mig_out, mig_err = _run_cmd_capture(
+                [*compose, "exec", "-T", "api", "alembic", "upgrade", "head"],
+                timeout_seconds=300,
+            )
+            details.append(f"alembic_upgrade rc={mig_rc}")
+            if mig_err.strip():
+                details.append("alembic_stderr=" + mig_err.strip()[:250])
+            return mig_rc == 0
+
         if isinstance(vps_host, str) and vps_host.strip() and vps_path:
             remote = (
                 "set -e; "
@@ -1203,8 +1259,68 @@ def _attempt_self_fix(state: dict[str, Any]) -> tuple[bool, list[str]]:
             if rc != 0 or (out or "").strip() != "200":
                 failures["self_fix_last"] = {"ok": False, "details": details}
                 return False, details
+
+            # Optional staging deploy (remote host) when enabled.
+            if staging_deploy_enabled:
+                staging_path = str(
+                    mission.get("self_fix_staging_vps_path")
+                    or "/opt/flowbiz/clients/flowbiz-client-amp-staging"
+                )
+                remote_staging = (
+                    "set -e; "
+                    f"cd {staging_path}; "
+                    "git pull --ff-only origin main; "
+                    "export BUILD_SHA=$(git rev-parse --short HEAD); "
+                    "export OTEL_ENABLED=true; "
+                    'echo "STAGING BUILD_SHA=$BUILD_SHA"; '
+                    "docker compose -f docker-compose.yml -f docker-compose.prod.yml build "
+                    "--build-arg GIT_SHA=$BUILD_SHA api; "
+                    "docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d "
+                    "--force-recreate api otel-collector; "
+                    "docker compose -f docker-compose.yml -f docker-compose.prod.yml exec -T api "
+                    "alembic upgrade head; "
+                    "curl -sS -o /dev/null -w '%{http_code}' http://127.0.0.1:8101/healthz"
+                )
+                rc, out, e = _run_cmd_capture(
+                    ["ssh", "-o", "BatchMode=yes", vps_host.strip(), remote_staging],
+                    timeout_seconds=1200,
+                )
+                details.append(
+                    f"vps_staging_deploy rc={rc} out={out.strip()[:60]} err={e.strip()[:120]}"
+                )
+                if staging_required and (rc != 0 or (out or "").strip() != "200"):
+                    failures["self_fix_last"] = {"ok": False, "details": details}
+                    return False, details
         else:
-            details.append("vps_deploy_skipped_missing_config")
+            # Local deploy path (common when runtime loop runs on the VPS itself).
+            details.append("deploy_mode=local")
+            if not _local_deploy(path=APP_DIR):
+                failures["self_fix_last"] = {"ok": False, "details": details}
+                return False, details
+
+            # Optional staging local deploy.
+            if staging_deploy_enabled:
+                staging_dir = Path("/opt/flowbiz/clients/flowbiz-client-amp-staging")
+                if staging_dir.exists():
+                    ok_st = _local_deploy(path=staging_dir)
+                    details.append(f"staging_local_deploy_ok={ok_st}")
+                    if staging_required and not ok_st:
+                        failures["self_fix_last"] = {"ok": False, "details": details}
+                        return False, details
+                else:
+                    details.append("staging_local_deploy_skipped_missing_dir")
+                    if staging_required:
+                        failures["self_fix_last"] = {"ok": False, "details": details}
+                        return False, details
+
+            prod_base = str((mission.get("production_base_url") or DEFAULT_PROD_BASE_URL)).rstrip(
+                "/"
+            )
+            code = _curl_http_code(f"{prod_base}/healthz", timeout_seconds=10)
+            details.append(f"local_deploy_healthz={code}")
+            if code != 200:
+                failures["self_fix_last"] = {"ok": False, "details": details}
+                return False, details
 
     failures["self_fix_last"] = {"ok": True, "details": details}
     return True, details
