@@ -643,10 +643,26 @@ def _run_phase_work(state: dict[str, Any], phase: int) -> PhaseWorkResult:
         return PhaseWorkResult(ok, "design_system" if ok else "design_system_failed", details)
 
     if phase == 10:
-        # Seed/demo engine is development-only unless explicitly allowed.
+        # Phase 10 is defined as development-only.
+        # In production, the "real" work is enforcing protection (seeding must be blocked).
         allow = bool((state.get("mission") or {}).get("allow_seed_demo"))
+
         if not allow:
-            return PhaseWorkResult(False, "seed_demo_disallowed", ["Set mission.allow_seed_demo=true to enable phase 10 seeding"])
+            ok = _run(
+                _compose_exec_cmd(
+                    service="api",
+                    argv=[
+                        "python",
+                        "-c",
+                        "import os,sys; os.environ.pop('AMP_ALLOW_SEED', None); "
+                        "from packages.core.phase_work.phase_10_seed_demo import run; "
+                        "\ntry: run();\nexcept SystemExit as e: print('seed_blocked_ok', str(e)); sys.exit(0)\nelse: print('seed_block_failed'); sys.exit(1)",
+                    ],
+                    state=state,
+                ),
+                timeout_seconds=60,
+            )
+            return PhaseWorkResult(ok, "seed_demo_protection" if ok else "seed_demo_protection_failed", details)
 
         ok = _run(
             _compose_exec_cmd(
