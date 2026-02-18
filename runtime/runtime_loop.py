@@ -463,6 +463,27 @@ def _update_verification_from_checks(state: dict[str, Any]) -> None:
 
         # Compose may not exist in minimal environments.
         if _run(["docker", "compose", "version"], 15):
+            # Ensure staging actually rebuilds with latest code.
+            sha_rc, sha_out, _sha_err = _run_cmd_capture(
+                ["git", "-C", str(staging_dir), "rev-parse", "--short", "HEAD"],
+                timeout_seconds=30,
+            )
+            build_sha = (sha_out or "").strip() if sha_rc == 0 else "unknown"
+            ok = ok and _run(
+                [
+                    "docker",
+                    "compose",
+                    "-f",
+                    str(staging_dir / "docker-compose.yml"),
+                    "-f",
+                    str(staging_dir / "docker-compose.prod.yml"),
+                    "build",
+                    "--build-arg",
+                    f"GIT_SHA={build_sha}",
+                    "api",
+                ],
+                600,
+            )
             ok = ok and _run(
                 [
                     "docker",
