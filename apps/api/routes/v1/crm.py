@@ -11,8 +11,8 @@ from sqlalchemy.orm import Session
 from packages.core.abuse import SlidingWindowRateLimiter
 from packages.core.audit import write_audit_log
 from packages.core.config import settings
-from packages.core.crm_tagging import enrich_inquiry
 from packages.core.crm_scoring import score_inquiry
+from packages.core.crm_tagging import enrich_inquiry
 from packages.core.database import get_db
 from packages.core.models import Inquiry, LeadAssignment, Property, Role, User, UserRole, Viewing
 from packages.core.pii import normalize_email, normalize_phone, sha256_hex

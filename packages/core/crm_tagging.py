@@ -6,7 +6,6 @@ from urllib.parse import parse_qs, urlparse
 
 from packages.core.schemas.crm import InquiryBudgetBand, InquiryPersona, InquiryTimeline
 
-
 _TAG_INVESTOR: Final[str] = "investor"
 _TAG_OWN_STAY: Final[str] = "own_stay"
 _TAG_HIGH_BUDGET: Final[str] = "high_budget"
@@ -140,7 +139,11 @@ def _derive_tags(
 ) -> tuple[str, ...]:
     tags: set[str] = set()
 
-    if persona == "investor" or topic == "investment_plan" or (goal and goal.strip().lower() == "invest"):
+    if (
+        persona == "investor"
+        or topic == "investment_plan"
+        or (goal and goal.strip().lower() == "invest")
+    ):
         tags.add(_TAG_INVESTOR)
 
     if topic == "private_tour":
