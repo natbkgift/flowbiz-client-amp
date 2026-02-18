@@ -3,8 +3,7 @@ from __future__ import annotations
 from datetime import UTC, datetime, timedelta
 from uuid import UUID
 
-from sqlalchemy import func
-from sqlalchemy import select
+from sqlalchemy import func, select
 
 from packages.core.database import SessionLocal
 from packages.core.models import Inquiry, LeadAssignment, User

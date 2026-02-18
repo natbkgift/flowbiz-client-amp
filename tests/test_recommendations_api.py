@@ -29,7 +29,13 @@ def _make_admin_headers() -> dict[str, str]:
 
 
 def _admin_create_property(
-    client: TestClient, *, title: str, slug: str, status: str = "active", price: int = 1000000, type_: str = "new"
+    client: TestClient,
+    *,
+    title: str,
+    slug: str,
+    status: str = "active",
+    price: int = 1000000,
+    type_: str = "new",
 ) -> dict:
     payload = {
         "source_id": f"src-{uuid4()}",
@@ -73,7 +79,7 @@ def test_recommendations_are_deterministic_and_emit_query_hash(client: TestClien
 
     url = (
         "/v1/recommendations"
-        f"?limit=5&intent=sale_new&budget_min=2000000&budget_max=5000000&property_type=new"
+        "?limit=5&intent=sale_new&budget_min=2000000&budget_max=5000000&property_type=new"
     )
 
     r1 = client.get(url)

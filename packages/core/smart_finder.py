@@ -33,7 +33,11 @@ def _budget_midpoint_thb(budget: SmartFinderBudget) -> Decimal | None:
     return None
 
 
-def _budget_fit_points(*, budget: SmartFinderBudget, avg_price: Decimal | None) -> tuple[int, str | None]:
+def _budget_fit_points(
+    *,
+    budget: SmartFinderBudget,
+    avg_price: Decimal | None,
+) -> tuple[int, str | None]:
     """Returns (points, reason). Max 20."""
 
     if budget == "not_sure":
@@ -56,7 +60,12 @@ def _budget_fit_points(*, budget: SmartFinderBudget, avg_price: Decimal | None) 
     return raw, f"Budget fit (area avg price snapshot): +{raw}"
 
 
-def _purpose_points(*, purpose: SmartFinderPurpose, roi_percent: Decimal | None, avg_rent: Decimal | None) -> tuple[int, list[str]]:
+def _purpose_points(
+    *,
+    purpose: SmartFinderPurpose,
+    roi_percent: Decimal | None,
+    avg_rent: Decimal | None,
+) -> tuple[int, list[str]]:
     reasons: list[str] = []
 
     if purpose in ("invest", "flip"):
@@ -78,7 +87,11 @@ def _purpose_points(*, purpose: SmartFinderPurpose, roi_percent: Decimal | None,
     return pts, reasons
 
 
-def _risk_points(*, risk_tolerance: SmartFinderRiskTolerance, has_any_snapshot: bool) -> tuple[int, str]:
+def _risk_points(
+    *,
+    risk_tolerance: SmartFinderRiskTolerance,
+    has_any_snapshot: bool,
+) -> tuple[int, str]:
     """Returns (points, reason). Missing data is treated as higher risk."""
 
     if has_any_snapshot:
