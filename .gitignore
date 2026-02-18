@@ -84,3 +84,8 @@ docs/phase_reports/baseline/LATEST.txt
 # Runtime artifacts (generated)
 runtime/reports/
 runtime/system_state.lock
+
+# VPS/local backup artifacts (generated)
+backups/
+runtime/backup/
+runtime/system_state.backup*.json
