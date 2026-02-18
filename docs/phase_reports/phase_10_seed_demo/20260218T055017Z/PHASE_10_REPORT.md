@@ -7,7 +7,7 @@ Spec Reference: docs/governance/phase-dependency.md, docs/governance/metrics.yam
 Status: Completed (engine present; guarded)
 
 - generated_utc: `20260218T055017Z`
-- deployed_sha: `TBD`
+- deployed_sha: `6dc8edc`
 
 ---
 
