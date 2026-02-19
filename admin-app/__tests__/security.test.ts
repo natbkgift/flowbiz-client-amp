@@ -37,12 +37,14 @@ describe('next.config.js security & performance settings', () => {
   });
 
   it('supports AVIF and WebP image formats', () => {
-    expect(config.images.formats).toContain('image/avif');
-    expect(config.images.formats).toContain('image/webp');
+    const c = config as any;
+    expect(c.images?.formats).toContain('image/avif');
+    expect(c.images?.formats).toContain('image/webp');
   });
 
   it('has optimizePackageImports configured', () => {
-    expect(config.experimental.optimizePackageImports).toEqual(
+    const c = config as any;
+    expect(c.experimental?.optimizePackageImports).toEqual(
       expect.arrayContaining(['@heroicons/react']),
     );
   });

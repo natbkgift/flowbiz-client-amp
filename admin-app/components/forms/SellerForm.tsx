@@ -44,13 +44,18 @@ export function SellerForm({ heading }: SellerFormProps) {
   function formatApiError(bodyText: string): string {
     try {
       const parsed = JSON.parse(bodyText) as { detail?: unknown };
-      const detail = (parsed as { detail?: string })?.detail;
+      const detail = parsed.detail;
 
       if (typeof detail === 'string') return detail;
       if (Array.isArray(detail)) {
         const messages = detail
-          .map((d) => (typeof d?.msg === 'string' ? d.msg : null))
-          .filter(Boolean);
+          .map((item) => {
+            if (!item || typeof item !== 'object') return null;
+            if (!('msg' in item)) return null;
+            const msg = (item as { msg?: unknown }).msg;
+            return typeof msg === 'string' ? msg : null;
+          })
+          .filter((m): m is string => Boolean(m));
         if (messages.length) return messages.join(' | ');
       }
     } catch {
