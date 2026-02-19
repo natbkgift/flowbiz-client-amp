@@ -9,6 +9,8 @@
  * - Client-side assignment persistence (localStorage)
  */
 
+import type { EventType } from './analytics';
+
 // ---------------------------------------------------------------------------
 // Types
 // ---------------------------------------------------------------------------
@@ -380,7 +382,7 @@ export function getOrAssignVariant(
 export function trackExperimentOutcomes(
   metric: string,
   value: number,
-  trackFn: (eventType: string, page: string, payload?: Record<string, unknown>) => void,
+  trackFn: (eventType: EventType, page: string, payload?: Record<string, unknown>) => void | Promise<void>,
   page: string,
 ): void {
   const assignments = getAssignments();

@@ -41,7 +41,7 @@ export default async function BuyPage({ params }: { params: { locale: string } }
     <main id="main-content">
       <Breadcrumbs
         items={[
-          { label: dict.common?.home ?? 'Home', href: `/${locale}` },
+          { label: dict.nav.home, href: `/${locale}` },
           { label: dict.nav.buy, href: `/${locale}/buy` },
         ]}
       />

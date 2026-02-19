@@ -40,7 +40,7 @@ export default function ContactPage({
     <main id="main-content">
       <Breadcrumbs
         items={[
-          { label: dict.common?.home ?? 'Home', href: `/${locale}` },
+          { label: dict.nav.home, href: `/${locale}` },
           { label: dict.nav.contact, href: `/${locale}/contact` },
         ]}
       />

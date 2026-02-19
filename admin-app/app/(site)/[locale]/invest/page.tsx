@@ -32,7 +32,7 @@ export default function InvestPage({ params }: { params: { locale: string } }) {
     <main id="main-content">
       <Breadcrumbs
         items={[
-          { label: dict.common?.home ?? 'Home', href: `/${locale}` },
+          { label: dict.nav.home, href: `/${locale}` },
           { label: dict.nav.invest, href: `/${locale}/invest` },
         ]}
       />
