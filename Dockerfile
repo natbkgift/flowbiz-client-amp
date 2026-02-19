@@ -23,6 +23,7 @@ RUN pip install --no-cache-dir \
     "alembic>=1.13.0" \
     "psycopg2-binary>=2.9.0" \
     "python-jose[cryptography]>=3.3.0" \
+    "PyJWT>=2.8.0" \
     "bcrypt>=5.0.0"
 
 # Optional build metadata (used by /v1/meta when FLOWBIZ_BUILD_SHA not explicitly set)
