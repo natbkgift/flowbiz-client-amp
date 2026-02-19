@@ -6,6 +6,7 @@ import { Footer } from '@/components/layout/Footer';
 import { Header } from '@/components/layout/Header';
 import { SiteAnalytics } from '@/components/analytics/SiteAnalytics';
 import { LinkClickTracker } from '@/components/analytics/LinkClickTracker';
+import { ExperimentProvider } from '@/components/analytics/ExperimentProvider';
 import { getDictionary, normalizeLocale } from '@/app/_lib/i18n/get-dictionary';
 import { SUPPORTED_LOCALES } from '@/app/_lib/i18n/routing';
 
@@ -24,6 +25,10 @@ const StickyMobileCTA = dynamic(
 );
 const ScrollReveal = dynamic(
   () => import('@/components/ux/ScrollReveal').then((m) => m.ScrollReveal),
+  { ssr: false },
+);
+const CookieConsent = dynamic(
+  () => import('@/components/ux/CookieConsent').then((m) => m.CookieConsent),
   { ssr: false },
 );
 
@@ -70,11 +75,14 @@ export default function SiteLayout({
         <SiteAnalytics />
       </Suspense>
       <LinkClickTracker />
+      <ExperimentProvider />
       <ScrollReveal />
       {children}
       <Footer locale={locale} dict={dict} />
+      <div aria-live="polite" aria-atomic="true" id="amp-live-region" className="sr-only" />
       <FloatingWhatsAppCTA />
       <StickyMobileCTA />
+      <CookieConsent />
     </>
   );
 }

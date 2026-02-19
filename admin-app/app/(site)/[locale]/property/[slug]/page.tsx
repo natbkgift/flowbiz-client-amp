@@ -4,6 +4,7 @@ import Image from 'next/image';
 import dynamic from 'next/dynamic';
 
 import { Container } from '@/components/layout/Container';
+import { Breadcrumbs } from '@/components/layout/Breadcrumbs';
 
 const LeadForm = dynamic(
   () => import('@/components/forms/LeadForm').then((m) => m.LeadForm),
@@ -179,6 +180,13 @@ export default async function PropertyPage({ params }: PageProps) {
     <main className="section" id="main-content">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLd }} />
       <Container>
+        <Breadcrumbs
+          items={[
+            { label: dict.property.breadcrumbHome, href: `/${locale}` },
+            { label: dict.nav.buy, href: `/${locale}/buy` },
+            { label: property.title, href: `/${locale}/property/${encodeURIComponent(params.slug)}` },
+          ]}
+        />
         <div className="detail-layout">
           <div className="detail-main">
             <div id="gallery-section">

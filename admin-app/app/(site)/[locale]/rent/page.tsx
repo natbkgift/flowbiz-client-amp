@@ -1,5 +1,6 @@
 import dynamic from 'next/dynamic';
 import { Container } from '@/components/layout/Container';
+import { Breadcrumbs } from '@/components/layout/Breadcrumbs';
 import { fetchProperties } from '@/app/_lib/public-api-server';
 import { getDictionary, normalizeLocale } from '@/app/_lib/i18n/get-dictionary';
 import { makePageMetadata } from '@/app/_lib/i18n/metadata';
@@ -37,6 +38,12 @@ export default async function RentPage({ params }: { params: { locale: string } 
 
   return (
     <main id="main-content">
+      <Breadcrumbs
+        items={[
+          { label: dict.common?.home ?? 'Home', href: `/${locale}` },
+          { label: dict.nav.live, href: `/${locale}/rent` },
+        ]}
+      />
       <section className="hero hero--page">
         <Container>
           <h1 className="headline">{dict.rent.heroTitle}</h1>

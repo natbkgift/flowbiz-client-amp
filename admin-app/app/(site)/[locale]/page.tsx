@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 
 import { Container } from '@/components/layout/Container';
 import { TrackedLink } from '@/components/analytics/TrackedLink';
-import { CTA } from '@/app/_lib/public-cta';
+import { CTA, buildWhatsAppUrl } from '@/app/_lib/public-cta';
 import { getDictionary, normalizeLocale } from '@/app/_lib/i18n/get-dictionary';
 import { withLocale } from '@/app/_lib/i18n/routing';
 import { makePageMetadata } from '@/app/_lib/i18n/metadata';
@@ -30,7 +30,7 @@ export default function HomePage({
   const locale = normalizeLocale(params.locale);
   const dict = getDictionary(locale);
 
-  type GuidedStep = 'goal' | 'budget' | 'timeline' | 'contact';
+  type GuidedStep = 'goal' | 'budget' | 'contact';
   type GuidedGoal = 'buy' | 'rent' | 'invest';
 
   function pickParam(value: unknown): string | null {
@@ -40,7 +40,7 @@ export default function HomePage({
   }
 
   function normalizeGuidedStep(step: string | null): GuidedStep {
-    if (step === 'goal' || step === 'budget' || step === 'timeline' || step === 'contact') return step;
+    if (step === 'goal' || step === 'budget' || step === 'contact') return step;
     return 'goal';
   }
 
@@ -56,16 +56,7 @@ export default function HomePage({
     return url.pathname + url.search;
   }
 
-  function appendWhatsAppText(baseUrl: string, text: string): string {
-    try {
-      const url = new URL(baseUrl);
-      url.searchParams.set('text', text);
-      return url.toString();
-    } catch {
-      // Best-effort: if the base URL cannot be parsed, fall back to raw.
-      return baseUrl;
-    }
-  }
+  // WhatsApp URL builder extracted to shared utility: @/app/_lib/public-cta
 
   const featured = [
     { title: dict.home.featuredCentralTitle, subtitle: dict.home.featuredCentralSubtitle },
@@ -100,7 +91,7 @@ export default function HomePage({
   const whatsAppText = summaryText
     ? `${dict.home.whatsAppGreeting} — ${summaryText}`
     : dict.home.whatsAppFallback;
-  const whatsAppHref = appendWhatsAppText(CTA.whatsAppUrl, whatsAppText);
+  const whatsAppHref = buildWhatsAppUrl(whatsAppText);
 
   const closeHref = withLocale(locale, '/');
 
@@ -132,46 +123,6 @@ export default function HomePage({
               <h1 className="headline">{dict.home.heroTitle}</h1>
               <p className="subhead">{dict.home.heroSubtitle}</p>
 
-              {/* Phase 1: Smart Entry CTA block (above-the-fold; additive). */}
-              <div className="guided-grid" aria-label="Smart entry">
-                <div className="guided-row">
-                  <TrackedLink
-                    className="btn btn-cta"
-                    href={withLocale(
-                      locale,
-                      hrefWithQuery('/', { guided: '1', step: 'budget', goal: 'buy' })
-                    )}
-                    eventType="cta_click"
-                    eventPayload={{ cta: 'smart_entry_buy', from: 'home_hero' }}
-                  >
-                    {smartLabels.buy}
-                  </TrackedLink>
-                  <TrackedLink
-                    className="btn btn-secondary"
-                    href={withLocale(
-                      locale,
-                      hrefWithQuery('/', { guided: '1', step: 'budget', goal: 'rent' })
-                    )}
-                    eventType="cta_click"
-                    eventPayload={{ cta: 'smart_entry_rent', from: 'home_hero' }}
-                  >
-                    {smartLabels.rent}
-                  </TrackedLink>
-                  <TrackedLink
-                    className="btn btn-secondary"
-                    href={withLocale(
-                      locale,
-                      hrefWithQuery('/', { guided: '1', step: 'budget', goal: 'invest' })
-                    )}
-                    eventType="cta_click"
-                    eventPayload={{ cta: 'smart_entry_invest', from: 'home_hero' }}
-                  >
-                    {smartLabels.invest}
-                  </TrackedLink>
-                </div>
-                <p className="guided-dialog__step">{dict.guided.stepProgress}</p>
-              </div>
-
               <div className="cta-row">
                 <TrackedLink
                   className="btn btn-cta"
@@ -190,6 +141,14 @@ export default function HomePage({
                   {dict.cta.speakToAdvisor}
                 </TrackedLink>
               </div>
+              <TrackedLink
+                className="hero-guided-trigger"
+                href={withLocale(locale, hrefWithQuery('/', { guided: '1', step: 'goal' }))}
+                eventType="cta_click"
+                eventPayload={{ cta: 'open_guided_finder', from: 'home_hero' }}
+              >
+                {dict.guided.heroTrigger ?? 'Not sure where to start? Let us guide you →'}
+              </TrackedLink>
             </div>
 
             <div className="hero-panel" aria-hidden="true">
@@ -205,18 +164,16 @@ export default function HomePage({
       {/* Phase 1: Guided Goal Modal (server-rendered via query params; no-JS friendly). */}
       {guidedOpen ? (
         <div className="guided-overlay" role="presentation">
-          <dialog className="guided-dialog" open>
+          <dialog className="guided-dialog" open aria-modal="true" aria-labelledby="guided-dialog-title">
             <div className="guided-dialog__header">
               <div>
-                <div className="guided-dialog__title">{dict.guided.title}</div>
+                <div className="guided-dialog__title" id="guided-dialog-title">{dict.guided.title}</div>
                 <div className="guided-dialog__step">
                   {effectiveStep === 'goal'
                     ? dict.guided.stepGoal
                     : effectiveStep === 'budget'
                       ? dict.guided.stepBudget
-                      : effectiveStep === 'timeline'
-                        ? dict.guided.stepTimeline
-                        : dict.guided.stepContact}
+                      : dict.guided.stepContact}
                   {'  '}•{'  '}{dict.guided.stepProgress}
                 </div>
               </div>
@@ -247,7 +204,7 @@ export default function HomePage({
               {effectiveStep === 'budget' ? (
                 <form method="GET" action={withLocale(locale, '/')} className="guided-grid">
                   <input type="hidden" name="guided" value="1" />
-                  <input type="hidden" name="step" value="timeline" />
+                  <input type="hidden" name="step" value="contact" />
                   <input type="hidden" name="goal" value={goal ?? 'buy'} />
 
                   <label>
@@ -278,47 +235,6 @@ export default function HomePage({
                 </form>
               ) : null}
 
-              {effectiveStep === 'timeline' ? (
-                <form method="GET" action={withLocale(locale, '/')} className="guided-grid">
-                  <input type="hidden" name="guided" value="1" />
-                  <input type="hidden" name="step" value="contact" />
-                  <input type="hidden" name="goal" value={goal ?? 'buy'} />
-                  <input type="hidden" name="budget" value={budget ?? ''} />
-
-                  <label>
-                    <div className="font-semibold">{dict.guided.timelineLabel}</div>
-                    <select className="form-input" name="timeline" defaultValue={timeline ?? ''}>
-                      <option value="" disabled>
-                        {dict.guided.timelineSelect}
-                      </option>
-                      <option value="0-3m">{dict.guided.timeline0to3m}</option>
-                      <option value="3-6m">{dict.guided.timeline3to6m}</option>
-                      <option value="6-12m">{dict.guided.timeline6to12m}</option>
-                      <option value="12m+">{dict.guided.timeline12mPlus}</option>
-                    </select>
-                  </label>
-
-                  <div className="cta-row">
-                    <button className="btn btn-cta" type="submit">
-                      {dict.guided.next}
-                    </button>
-                    <a
-                      className="btn btn-secondary"
-                      href={withLocale(
-                        locale,
-                        hrefWithQuery('/', {
-                          guided: '1',
-                          step: 'budget',
-                          goal: goal ?? 'buy',
-                        })
-                      )}
-                    >
-                      {dict.guided.back}
-                    </a>
-                  </div>
-                </form>
-              ) : null}
-
               {effectiveStep === 'contact' ? (
                 <div className="guided-grid">
                   <div className="font-semibold">{dict.guided.summary}</div>
@@ -340,12 +256,12 @@ export default function HomePage({
                       href={withLocale(
                         locale,
                         hrefWithQuery('/contact', {
-                          topic: 'private_tour',
+                          topic: 'private_consultation',
                           msg: whatsAppText,
                         })
                       )}
                       eventType="cta_click"
-                      eventPayload={{ cta: 'book_private_tour', from: 'home_guided' }}
+                      eventPayload={{ cta: 'book_consultation', from: 'home_guided' }}
                     >
                       {dict.cta.bookPrivateTour}
                     </TrackedLink>
@@ -353,21 +269,6 @@ export default function HomePage({
                     <a className="btn btn-secondary" href={whatsAppHref} target="_blank" rel="noreferrer">
                       {dict.cta.whatsapp}
                     </a>
-
-                    <TrackedLink
-                      className="btn btn-secondary"
-                      href={withLocale(
-                        locale,
-                        hrefWithQuery('/contact', {
-                          topic: 'investment_plan',
-                          msg: whatsAppText,
-                        })
-                      )}
-                      eventType="cta_click"
-                      eventPayload={{ cta: 'get_investment_plan', from: 'home_guided' }}
-                    >
-                      {dict.cta.getInvestmentPlan}
-                    </TrackedLink>
                   </div>
 
                   <div className="cta-row">
@@ -377,13 +278,13 @@ export default function HomePage({
                         locale,
                         hrefWithQuery('/', {
                           guided: '1',
-                          step: 'timeline',
+                          step: 'budget',
                           goal: goal ?? 'buy',
                           budget: budget ?? '',
                         })
                       )}
                     >
-                      {dict.guided.editTimeline}
+                      {dict.guided.back}
                     </a>
                     <a className="btn btn-secondary" href={closeHref}>
                       {dict.guided.close}
@@ -459,7 +360,7 @@ export default function HomePage({
 
           <div className="grid grid-3">
             {featured.map((it) => (
-              <div key={it.title} className="card reveal">
+              <div key={it.title} className="card reveal" role="article">
                 <h3 className="card-title">{it.title}</h3>
                 <p className="card-subtitle">{it.subtitle}</p>
                 <div className="card-actions">
@@ -501,18 +402,9 @@ export default function HomePage({
               </div>
             ))}
           </div>
-        </Container>
-      </section>
 
-      <section className="section">
-        <Container>
-          <div className="section-header">
-            <h2 className="section-title">{dict.home.testimonialsTitle}</h2>
-            <p className="section-subtitle">{dict.home.testimonialsSubtitle}</p>
-          </div>
-
-          <div className="grid grid-2">
-            {dict.common.testimonials.map((t) => (
+          <div className="testimonial-strip">
+            {dict.common.testimonials.slice(0, 2).map((t) => (
               <figure key={t.quote} className="testimonial reveal">
                 <blockquote>“{t.quote}”</blockquote>
                 <figcaption>

@@ -213,6 +213,7 @@ export type Dictionary = {
     stepTimeline: string;
     stepContact: string;
     stepProgress: string;
+    heroTrigger: string;
   };
   smartFinder: {
     title: string;
@@ -357,6 +358,7 @@ export type Dictionary = {
       submitting: string;
       success: string;
       errorPrefix: string;
+      consentText: string;
     };
     sellerForm: {
       headingDefault: string;
@@ -370,6 +372,10 @@ export type Dictionary = {
     };
     testimonials: { quote: string; name: string; context: string }[];
     footerDisclaimer: string;
+    legalHeading: string;
+    privacyPolicy: string;
+    termsOfService: string;
+    pdpaNotice: string;
   };
   listing: {
     filtersAndSort: string;
@@ -386,6 +392,7 @@ export type Dictionary = {
     projectsSubtitle: string;
     publishedProjects: string;
     exploreProjectsDesc: string;
+    startingFrom: string;
   };
   filters: {
     heading: string;

@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { checkRateLimit } from './lib/rate-limiter';
 
 const LOCALES = ['en', 'th'] as const;
 type Locale = (typeof LOCALES)[number];
@@ -29,6 +30,33 @@ export function middleware(req: NextRequest) {
     PUBLIC_FILE.test(pathname)
   ) {
     return NextResponse.next();
+  }
+
+  // Rate-limit form submission endpoints before general API skip.
+  if (pathname === '/api/v1/inquiries' && req.method === 'POST') {
+    const clientIp = req.headers.get('x-forwarded-for')?.split(',')[0]?.trim()
+      ?? req.headers.get('x-real-ip')
+      ?? 'unknown';
+    const { allowed, remaining, retryAfterMs } = checkRateLimit(
+      `inquiries:${clientIp}`,
+      5,       // max 5 submissions
+      60_000,  // per 60-second window
+    );
+    if (!allowed) {
+      return NextResponse.json(
+        { detail: 'Too many submissions. Please try again later.' },
+        {
+          status: 429,
+          headers: {
+            'Retry-After': String(Math.ceil(retryAfterMs / 1000)),
+            'X-RateLimit-Remaining': '0',
+          },
+        },
+      );
+    }
+    const response = NextResponse.next();
+    response.headers.set('X-RateLimit-Remaining', String(remaining));
+    return response;
   }
 
   // Ignore API routes served by backend via nginx (/api/*).
@@ -64,7 +92,7 @@ export function middleware(req: NextRequest) {
   return NextResponse.redirect(url);
 }
 
-/** Attach all security response headers (8 total, incl. CSP). */
+/** Attach all security response headers (9 total, incl. CSP + rate-limit hint). */
 function setSecurityHeaders(res: NextResponse) {
   res.headers.set('X-Content-Type-Options', 'nosniff');
   res.headers.set('X-Frame-Options', 'DENY');
@@ -73,13 +101,15 @@ function setSecurityHeaders(res: NextResponse) {
   res.headers.set('Permissions-Policy', 'camera=(), microphone=(), geolocation=()');
   res.headers.set('Strict-Transport-Security', 'max-age=63072000; includeSubDomains; preload');
   res.headers.set('X-XSS-Protection', '1; mode=block');
+  // Rate-limit hint for upstream proxy (nginx/CDN enforces actual limits)
+  res.headers.set('X-RateLimit-Policy', '60;w=60;comment="form submissions"');
   res.headers.set(
     'Content-Security-Policy',
     [
       "default-src 'self'",
       "script-src 'self' 'unsafe-inline'",
-      "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
-      "font-src 'self' https://fonts.gstatic.com",
+      "style-src 'self' 'unsafe-inline'",
+      "font-src 'self'",
       "img-src 'self' data: blob: https:",
       "connect-src 'self' https:",
       "frame-ancestors 'none'",

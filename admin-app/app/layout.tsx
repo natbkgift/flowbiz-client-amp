@@ -45,9 +45,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang={lang} dir="ltr" className={`${sans.variable} ${serif.variable}`}>
       <head>
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <link rel="dns-prefetch" href="https://fonts.googleapis.com" />
+        {/* Fonts self-hosted by next/font/google at build time — no external requests needed */}
       </head>
       <body>
         <a

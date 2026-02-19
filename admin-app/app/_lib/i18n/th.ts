@@ -273,7 +273,8 @@ export const th: Dictionary = {
     stepBudget: 'งบประมาณ',
     stepTimeline: 'ระยะเวลา',
     stepContact: 'ติดต่อ',
-    stepProgress: 'เป้าหมาย → งบประมาณ → ระยะเวลา → ติดต่อ',
+    stepProgress: 'เป้าหมาย → งบประมาณ → ติดต่อ',
+    heroTrigger: 'ยังไม่แน่ใจ? ให้เราช่วยแนะนำ →',
   },
   smartFinder: {
     title: 'Smart Finder',
@@ -429,6 +430,7 @@ export const th: Dictionary = {
       submitting: 'กำลังส่ง…',
       success: 'ขอบคุณครับ/ค่ะ เราได้รับข้อมูลแล้ว',
       errorPrefix: 'ไม่สำเร็จ:',
+      consentText: 'ข้าพเจ้ายินยอมให้ประมวลผลข้อมูลส่วนบุคคลตามนโยบายความเป็นส่วนตัว (PDPA/GDPR)',
     },
     sellerForm: {
       headingDefault: 'ขายกับเรา',
@@ -454,6 +456,10 @@ export const th: Dictionary = {
     ],
     footerDisclaimer:
       'ข้อมูลนี้เป็นแนวทางทั่วไป ไม่ใช่คำปรึกษาทางกฎหมาย กรุณาตรวจสอบรูปแบบการถือครองและสัญญากับผู้เชี่ยวชาญก่อนตัดสินใจ',
+    legalHeading: 'ข้อกฎหมาย',
+    privacyPolicy: 'นโยบายความเป็นส่วนตัว',
+    termsOfService: 'ข้อกำหนดการใช้บริการ',
+    pdpaNotice: 'สอดคล้องกับ PDPA และ GDPR',
   },
   listing: {
     filtersAndSort: 'ตัวกรองและจัดเรียง',
@@ -470,6 +476,7 @@ export const th: Dictionary = {
     projectsSubtitle: 'จัดกลุ่มตามโครงการ / ชื่ออาคาร',
     publishedProjects: 'โครงการที่เผยแพร่แล้ว',
     exploreProjectsDesc: 'สำรวจโครงการที่เผยแพร่ในพัทยา',
+    startingFrom: 'เริ่มต้น',
   },
   filters: {
     heading: 'ตัวกรอง',

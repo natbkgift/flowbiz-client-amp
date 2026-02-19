@@ -1,6 +1,7 @@
 import dynamic from 'next/dynamic';
 
 import { Container } from '@/components/layout/Container';
+import { Breadcrumbs } from '@/components/layout/Breadcrumbs';
 
 const LeadForm = dynamic(
   () => import('@/components/forms/LeadForm').then((m) => m.LeadForm),
@@ -29,6 +30,12 @@ export default function InvestPage({ params }: { params: { locale: string } }) {
 
   return (
     <main id="main-content">
+      <Breadcrumbs
+        items={[
+          { label: dict.common?.home ?? 'Home', href: `/${locale}` },
+          { label: dict.nav.invest, href: `/${locale}/invest` },
+        ]}
+      />
       <section className="hero hero--page">
         <Container>
           <h1 className="headline">{dict.invest.title}</h1>

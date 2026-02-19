@@ -8,7 +8,7 @@ import { en } from '../../app/_lib/i18n/en';
 import { th } from '../../app/_lib/i18n/th';
 import { localeFromPathname } from '../../app/_lib/i18n/routing';
 import { trackEvent } from '../../lib/analytics';
-import { readAttribution } from '../../lib/attribution';
+import { trackExperimentOutcomes } from '../../lib/experiments';
 
 type LeadFormProps = {
   heading?: string;
@@ -34,14 +34,16 @@ export function LeadForm({ heading, propertyId, defaultMessage }: LeadFormProps)
   const [phone, setPhone] = useState('');
   const [message, setMessage] = useState(defaultMessage ?? '');
   const [website, setWebsite] = useState('');
+  const [consent, setConsent] = useState(false);
   const [status, setStatus] = useState<LeadFormStatus>({ state: 'idle' });
 
   const canSubmit = useMemo(() => {
     if (!name.trim()) return false;
     if (!message.trim()) return false;
     if (!email.trim() && !phone.trim()) return false;
+    if (!consent) return false;
     return status.state !== 'submitting';
-  }, [email, message, name, phone, status.state]);
+  }, [email, message, name, phone, consent, status.state]);
 
   function safeSourcePage(): string | null {
     if (typeof window === 'undefined') return null;
@@ -79,7 +81,6 @@ export function LeadForm({ heading, propertyId, defaultMessage }: LeadFormProps)
     if (!canSubmit) return;
 
     const submitIso = new Date().toISOString();
-    const attribution = readAttribution();
 
     trackEvent('form_submit', pathname, {
       property_id: propertyId ?? null,
@@ -94,20 +95,16 @@ export function LeadForm({ heading, propertyId, defaultMessage }: LeadFormProps)
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          property_id: propertyId ?? null,
+          // Core 5 data fields (PDPA/GDPR minimization)
           name,
           email: email.trim() || null,
           phone: phone.trim() || null,
           message,
+          consent_given: true,
+          // Operational metadata (not user PII)
+          property_id: propertyId ?? null,
           source_page: safeSourcePage(),
           website: website.trim() || null,
-          utm_source: attribution.utm_source ?? null,
-          utm_medium: attribution.utm_medium ?? null,
-          utm_campaign: attribution.utm_campaign ?? null,
-          utm_content: attribution.utm_content ?? null,
-          referrer: attribution.referrer ?? null,
-          device: attribution.device ?? null,
-          first_touch_timestamp: attribution.first_touch_timestamp ?? null,
           submit_timestamp: submitIso,
         }),
       });
@@ -127,6 +124,8 @@ export function LeadForm({ heading, propertyId, defaultMessage }: LeadFormProps)
 
       setStatus({ state: 'success', id });
       trackEvent('form_success', pathname, { property_id: propertyId ?? null });
+      // Attribute conversion to active experiments
+      trackExperimentOutcomes('form_submit', 1, trackEvent, pathname);
     } catch (err) {
       trackEvent('form_error', pathname, {
         property_id: propertyId ?? null,
@@ -220,6 +219,18 @@ export function LeadForm({ heading, propertyId, defaultMessage }: LeadFormProps)
           onChange={(e) => setMessage(e.target.value)}
           rows={4}
         />
+
+        <label className="form-consent">
+          <input
+            type="checkbox"
+            checked={consent}
+            onChange={(e) => setConsent(e.target.checked)}
+            aria-required="true"
+          />
+          <span className="form-consent__text">
+            {dict.common.leadForm.consentText ?? 'I agree to the processing of my personal data in accordance with the Privacy Policy (PDPA/GDPR).'}
+          </span>
+        </label>
 
         <button
           type="button"

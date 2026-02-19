@@ -1,5 +1,6 @@
 import dynamic from 'next/dynamic';
 import { Container } from '@/components/layout/Container';
+import { Breadcrumbs } from '@/components/layout/Breadcrumbs';
 import { fetchProperties } from '@/app/_lib/public-api-server';
 import { getDictionary, normalizeLocale } from '@/app/_lib/i18n/get-dictionary';
 import { makePageMetadata } from '@/app/_lib/i18n/metadata';
@@ -38,6 +39,12 @@ export default async function BuyPage({ params }: { params: { locale: string } }
 
   return (
     <main id="main-content">
+      <Breadcrumbs
+        items={[
+          { label: dict.common?.home ?? 'Home', href: `/${locale}` },
+          { label: dict.nav.buy, href: `/${locale}/buy` },
+        ]}
+      />
       <section className="hero hero--page">
         <Container>
           <h1 className="headline">{dict.buy.title}</h1>
@@ -92,6 +99,103 @@ export default async function BuyPage({ params }: { params: { locale: string } }
                 <p className="card-subtitle">{c.body}</p>
               </div>
             ))}
+          </div>
+        </Container>
+      </section>
+
+      {/* Installment & Transfer Cost Guide (TH-prioritized, but visible to all) */}
+      <section className="section">
+        <Container>
+          <div className="section-header">
+            <h2 className="section-title">
+              {locale === 'th' ? 'ตารางผ่อนชำระ & ค่าโอน' : 'Payment Plans & Transfer Costs'}
+            </h2>
+            <p className="section-subtitle">
+              {locale === 'th'
+                ? 'ข้อมูลค่าใช้จ่ายสำคัญที่ผู้ซื้อควรทราบก่อนตัดสินใจ'
+                : 'Key cost information every buyer should know before committing'}
+            </p>
+          </div>
+
+          <div className="grid grid-2">
+            <div className="card">
+              <h3 className="card-title">
+                {locale === 'th' ? 'การผ่อนชำระ (ตัวอย่าง)' : 'Installment Plans (Example)'}
+              </h3>
+                <table className="info-table">
+                  <thead>
+                    <tr>
+                      <th>{locale === 'th' ? 'งวด' : 'Phase'}</th>
+                      <th>{locale === 'th' ? 'เงื่อนไข' : 'Condition'}</th>
+                      <th>{locale === 'th' ? 'สัดส่วน' : 'Percentage'}</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td>{locale === 'th' ? 'จอง' : 'Booking'}</td>
+                      <td>{locale === 'th' ? 'เงินจองเริ่มต้น' : 'Initial reservation'}</td>
+                      <td>฿50,000–200,000</td>
+                    </tr>
+                    <tr>
+                      <td>{locale === 'th' ? 'ทำสัญญา' : 'Contract'}</td>
+                      <td>{locale === 'th' ? 'ภายใน 7–30 วัน' : 'Within 7–30 days'}</td>
+                      <td>20–30%</td>
+                    </tr>
+                    <tr>
+                      <td>{locale === 'th' ? 'ผ่อนระหว่างสร้าง' : 'Construction'}</td>
+                      <td>{locale === 'th' ? 'รายเดือน/รายไตรมาส' : 'Monthly/Quarterly'}</td>
+                      <td>30–40%</td>
+                    </tr>
+                    <tr>
+                      <td>{locale === 'th' ? 'โอนกรรมสิทธิ์' : 'Transfer'}</td>
+                      <td>{locale === 'th' ? 'วันรับมอบห้อง' : 'Handover day'}</td>
+                      <td>30–40%</td>
+                    </tr>
+                  </tbody>
+                </table>
+                <p className="text-caption">
+                  {locale === 'th'
+                    ? '* เงื่อนไขแตกต่างตามโครงการ กรุณาสอบถามเพื่อรับข้อมูลเฉพาะ'
+                    : '* Terms vary by project. Contact us for specific payment plans.'}
+                </p>
+            </div>
+
+            <div className="card">
+              <h3 className="card-title">
+                {locale === 'th' ? 'ค่าโอน & ค่าใช้จ่ายปิดการซื้อ' : 'Transfer & Closing Costs'}
+              </h3>
+                <table className="info-table">
+                  <thead>
+                    <tr>
+                      <th>{locale === 'th' ? 'รายการ' : 'Item'}</th>
+                      <th>{locale === 'th' ? 'อัตรา' : 'Rate'}</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td>{locale === 'th' ? 'ค่าธรรมเนียมโอน' : 'Transfer fee'}</td>
+                      <td>2%</td>
+                    </tr>
+                    <tr>
+                      <td>{locale === 'th' ? 'ภาษีธุรกิจเฉพาะ' : 'Specific business tax'}</td>
+                      <td>3.3%</td>
+                    </tr>
+                    <tr>
+                      <td>{locale === 'th' ? 'อากรแสตมป์' : 'Stamp duty'}</td>
+                      <td>0.5%</td>
+                    </tr>
+                    <tr>
+                      <td>{locale === 'th' ? 'ค่าจดจำนอง' : 'Mortgage registration'}</td>
+                      <td>1%</td>
+                    </tr>
+                  </tbody>
+                </table>
+                <p className="text-caption">
+                  {locale === 'th'
+                    ? '* การแบ่งค่าใช้จ่ายระหว่างผู้ซื้อ/ผู้ขายขึ้นอยู่กับการเจรจา'
+                    : '* Buyer/seller cost split depends on negotiation. Consult your advisor.'}
+                </p>
+            </div>
           </div>
         </Container>
       </section>

@@ -34,6 +34,19 @@ export function Footer({ locale, dict }: { locale: Locale; dict: Dictionary }) {
               <Link href={withLocale(locale, '/contact')}>{dict.nav.contact}</Link>
             </p>
           </div>
+
+          <div>
+            <h3>{dict.common.legalHeading ?? 'Legal'}</h3>
+            <p>
+              <Link href={withLocale(locale, '/privacy')}>{dict.common.privacyPolicy ?? 'Privacy Policy'}</Link>
+            </p>
+            <p>
+              <Link href={withLocale(locale, '/terms')}>{dict.common.termsOfService ?? 'Terms of Service'}</Link>
+            </p>
+            <p className="text-muted-on-dark footer-compliance">
+              {dict.common.pdpaNotice ?? 'PDPA & GDPR Compliant'}
+            </p>
+          </div>
         </div>
 
         <p className="footer-meta">© {new Date().getFullYear()} {dict.brand.name}</p>

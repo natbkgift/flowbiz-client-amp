@@ -280,7 +280,8 @@ export const en: Dictionary = {
     stepBudget: 'Budget',
     stepTimeline: 'Timeline',
     stepContact: 'Contact',
-    stepProgress: 'Goal → Budget → Timeline → Contact',
+    stepProgress: 'Goal → Budget → Contact',
+    heroTrigger: 'Not sure where to start? Let us guide you →',
   },
   smartFinder: {
     title: 'Smart Finder',
@@ -436,6 +437,7 @@ export const en: Dictionary = {
       submitting: 'Submitting…',
       success: 'Thanks — we received your request.',
       errorPrefix: 'Failed:',
+      consentText: 'I agree to the processing of my personal data in accordance with the Privacy Policy (PDPA/GDPR).',
     },
     sellerForm: {
       headingDefault: 'Sell with us',
@@ -461,6 +463,10 @@ export const en: Dictionary = {
     ],
     footerDisclaimer:
       'Information is provided for general guidance and does not constitute legal advice. Always verify ownership structure and contracts with qualified professionals.',
+    legalHeading: 'Legal',
+    privacyPolicy: 'Privacy Policy',
+    termsOfService: 'Terms of Service',
+    pdpaNotice: 'PDPA & GDPR Compliant',
   },
   listing: {
     filtersAndSort: 'Filters & Sort',
@@ -477,6 +483,7 @@ export const en: Dictionary = {
     projectsSubtitle: 'Grouped by project / building name',
     publishedProjects: 'Published projects',
     exploreProjectsDesc: 'Explore published projects in Pattaya.',
+    startingFrom: 'From',
   },
   filters: {
     heading: 'Filters',

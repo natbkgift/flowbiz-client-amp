@@ -1,0 +1,676 @@
+[
+  {
+    "iteration": 1,
+    "timestamp": "2026-02-19T08:00:11.021Z",
+    "scoring": {
+      "timestamp": "2026-02-19T08:00:11.004Z",
+      "iteration": 1,
+      "dimensions": [
+        {
+          "key": "ux_clarity",
+          "raw": 82,
+          "weighted": 4.1,
+          "findings": [
+            "Clear navigation with 5 main nav items",
+            "Guided qualification flow (goal→budget→timeline→contact) is effective",
+            "Skip link and keyboard navigation present",
+            "EN/TH dictionary complete with meaningful copy"
+          ],
+          "recommendations": [
+            "Add breadcrumbs to project/property detail pages",
+            "Improve guided flow transitions with progress indicators"
+          ]
+        },
+        {
+          "key": "ui_consistency",
+          "raw": 85,
+          "weighted": 3.4,
+          "findings": [
+            "Consistent CSS class naming (BEM-influenced)",
+            "Unified card/section/grid component system",
+            "Color tokens via CSS variables",
+            "Consistent button styling (btn-cta, btn-secondary, btn-tertiary)"
+          ],
+          "recommendations": [
+            "Standardize card border-radius across all card types",
+            "Ensure consistent icon sizing in navigation and CTAs"
+          ]
+        },
+        {
+          "key": "accessibility",
+          "raw": 78,
+          "weighted": 3.12,
+          "findings": [
+            "Skip link implemented",
+            "ARIA labels on navigation and buttons",
+            "Lang attribute set per locale",
+            "Focus visible styles present"
+          ],
+          "recommendations": [
+            "Add ARIA live regions for dynamic content",
+            "Ensure all images have descriptive alt text",
+            "Test color contrast ratios in all themes"
+          ]
+        },
+        {
+          "key": "performance",
+          "raw": 80,
+          "weighted": 4,
+          "findings": [
+            "Dynamic imports for non-critical components (FloatingWhatsAppCTA, StickyMobileCTA)",
+            "ISR with configurable revalidation (300s default)",
+            "Font preconnect and DNS prefetch",
+            "Next.js automatic code splitting"
+          ],
+          "recommendations": [
+            "Add image optimization with next/image for hero sections",
+            "Implement resource hints for critical CSS",
+            "Add bundle analysis to CI pipeline"
+          ]
+        },
+        {
+          "key": "architecture_quality",
+          "raw": 83,
+          "weighted": 4.15,
+          "findings": [
+            "Clean separation: pages / components / lib / _lib",
+            "i18n architecture with typed dictionaries",
+            "Server-side rendering with ISR",
+            "Locale detection via headers"
+          ],
+          "recommendations": [
+            "Consider server actions for form submissions",
+            "Strengthen type safety in API layer"
+          ]
+        },
+        {
+          "key": "maintainability",
+          "raw": 80,
+          "weighted": 3.2,
+          "findings": [
+            "TypeScript throughout",
+            "Centralized constants and config",
+            "Component modularization",
+            "Testing setup with Vitest"
+          ],
+          "recommendations": [
+            "Add JSDoc comments to all exported functions",
+            "Create shared utility for CTA generation",
+            "Add component storybook or documentation"
+          ]
+        },
+        {
+          "key": "scalability",
+          "raw": 78,
+          "weighted": 3.12,
+          "findings": [
+            "ISR enables cache-based scaling",
+            "API-driven data fetching",
+            "Static generation for locale pages"
+          ],
+          "recommendations": [
+            "Add edge middleware for locale detection",
+            "Implement CDN strategy for static assets",
+            "Consider incremental static generation for project pages"
+          ]
+        },
+        {
+          "key": "security",
+          "raw": 75,
+          "weighted": 3.75,
+          "findings": [
+            "No sensitive data in client bundles",
+            "Server-side API calls via fetchProperties",
+            "DOMPurify type declarations present"
+          ],
+          "recommendations": [
+            "Add Content Security Policy headers",
+            "Implement rate limiting on form submissions",
+            "Add security headers in middleware (X-Frame-Options, etc.)",
+            "Review form sanitization"
+          ]
+        },
+        {
+          "key": "conversion_efficiency",
+          "raw": 84,
+          "weighted": 5.04,
+          "findings": [
+            "Clear primary CTAs: Explore Investment, Speak to Advisor",
+            "Guided qualification flow captures intent",
+            "WhatsApp/LINE contact integration",
+            "Multiple conversion paths (invest, buy, rent)",
+            "Lead forms with minimal required fields"
+          ],
+          "recommendations": [
+            "Add social proof near CTAs (testimonial snippet)",
+            "Consider A/B testing CTA copy variations"
+          ]
+        },
+        {
+          "key": "personalization_accuracy",
+          "raw": 72,
+          "weighted": 4.32,
+          "findings": [
+            "Locale-based content segmentation (EN/TH)",
+            "Guided flow captures goal/budget/timeline",
+            "Smart Finder with deterministic scoring"
+          ],
+          "recommendations": [
+            "Add behavior-based content prioritization",
+            "Implement return visitor recognition",
+            "EN focus: investment/foreign quota; TH focus: buying process/tax",
+            "Segment homepage hero by detected intent"
+          ]
+        },
+        {
+          "key": "visual_luxury_integrity",
+          "raw": 23,
+          "weighted": 1.84,
+          "findings": [
+            "Luxury audit score: 23",
+            "Checks passed: 5/10",
+            "Light color palette: #FFFFFF / #F7F9FC background",
+            "Luxury blue accent: #0A4D8C",
+            "Gold secondary accent: #B08D57",
+            "Serif + Sans typography system"
+          ],
+          "recommendations": [
+            "Fix: Light surface is 75%, below the 80% minimum",
+            "Fix: Found 2 heavy shadow declaration(s)",
+            "Fix: home: 6 primary elements above fold (max 5)",
+            "Fix: home: 5 CTAs in hero section (max 2)",
+            "Fix: Visual clutter score is 27 (threshold: 5)"
+          ]
+        },
+        {
+          "key": "complexity_control",
+          "raw": 64,
+          "weighted": 5.12,
+          "findings": [
+            "Complexity audit score: 64",
+            "Max components/section: 20",
+            "Max sections/landing: 7",
+            "Max nesting: 4",
+            "Global state slices: 0"
+          ],
+          "recommendations": [
+            "Fix: home: 20 components in one section (max 12)",
+            "Fix: home: 7 sections (max 6)",
+            "Fix: home: 11 qualification steps (max 5)",
+            "Fix: buy: nesting depth 4 (max 3)"
+          ]
+        },
+        {
+          "key": "evolution_stability",
+          "raw": 60,
+          "weighted": 3,
+          "findings": [
+            "UAAS scoring engine newly implemented",
+            "Evolution memory layer created",
+            "No prior iteration history"
+          ],
+          "recommendations": [
+            "Run 3+ iterations to establish baseline",
+            "Calibrate scoring weights based on real metrics",
+            "Add automated regression tests for scoring"
+          ]
+        },
+        {
+          "key": "production_reliability",
+          "raw": 70,
+          "weighted": 4.2,
+          "findings": [
+            "Docker Compose configurations present",
+            "Error boundary at global level (global-error.tsx)",
+            "Loading states for pages",
+            "Graceful degradation in fetchProperties"
+          ],
+          "recommendations": [
+            "Add health check endpoint",
+            "Implement canary deployment support",
+            "Add error monitoring integration (Sentry or similar)",
+            "Create rollback runbook"
+          ]
+        },
+        {
+          "key": "experiment_intelligence",
+          "raw": 50,
+          "weighted": 2.5,
+          "findings": [
+            "No A/B testing framework currently active",
+            "TrackedLink component provides click tracking foundation",
+            "Event payload capture in CTAs"
+          ],
+          "recommendations": [
+            "Implement feature flag system for experiments",
+            "Add statistical significance calculator",
+            "Create experiment registry with promotion rules",
+            "Wire TrackedLink events to experiment outcomes"
+          ]
+        },
+        {
+          "key": "governance_compliance",
+          "raw": 47,
+          "weighted": 2.35,
+          "findings": [
+            "Governance audit score: 47",
+            "Checks: 3/6 passed",
+            "SiteAnalytics is first-party (no third-party tracking)",
+            "Footer disclaimer present",
+            "No guaranteed return claims in content"
+          ],
+          "recommendations": [
+            "Fix: 15 data collection points exceed minimization guideline (max 5)"
+          ]
+        },
+        {
+          "key": "revenue_focus_integrity",
+          "raw": 56,
+          "weighted": 2.8,
+          "findings": [
+            "Revenue audit score: 56",
+            "Checks: 5/9 present",
+            "Advisory positioning strong (no portal drift)",
+            "Curated inventory approach (not mass listing)"
+          ],
+          "recommendations": [
+            "Add: Starting price",
+            "Add: Installment table (TH)",
+            "Add: Buying process guide",
+            "Add: Transfer cost info"
+          ]
+        }
+      ],
+      "totalScore": 60.01,
+      "weakestDimension": "visual_luxury_integrity",
+      "productionReady": false,
+      "regressions": []
+    },
+    "luxuryAudit": {
+      "timestamp": "2026-02-19T08:00:10.984Z",
+      "passed": false,
+      "score": 23,
+      "violations": [
+        {
+          "rule": "light_surface_80pct",
+          "description": "Light surface is 75%, below the 80% minimum",
+          "severity": "critical"
+        },
+        {
+          "rule": "no_heavy_shadows",
+          "description": "Found 2 heavy shadow declaration(s)",
+          "severity": "warning"
+        },
+        {
+          "rule": "max_5_elements_above_fold",
+          "description": "home: 6 primary elements above fold (max 5)",
+          "severity": "warning",
+          "file": "home"
+        },
+        {
+          "rule": "max_2_cta_hero",
+          "description": "home: 5 CTAs in hero section (max 2)",
+          "severity": "warning",
+          "file": "home"
+        },
+        {
+          "rule": "no_visual_clutter",
+          "description": "Visual clutter score is 27 (threshold: 5)",
+          "severity": "warning"
+        }
+      ],
+      "checks": [
+        {
+          "rule": "light_surface_80pct",
+          "passed": false,
+          "detail": "Light surface: 75% (required ≥ 80%)"
+        },
+        {
+          "rule": "accent_10pct_max",
+          "passed": true,
+          "detail": "Accent visual weight: 8% (max 10%)"
+        },
+        {
+          "rule": "no_heavy_shadows",
+          "passed": false,
+          "detail": "Heavy shadow instances: 2"
+        },
+        {
+          "rule": "no_aggressive_gradients",
+          "passed": true,
+          "detail": "Aggressive gradient instances: 0"
+        },
+        {
+          "rule": "min_section_spacing_80px",
+          "passed": true,
+          "detail": "Minimum section spacing: 80px (required ≥ 80px)"
+        },
+        {
+          "rule": "max_5_elements_above_fold",
+          "passed": false,
+          "detail": "Above-fold element count check"
+        },
+        {
+          "rule": "max_2_cta_hero",
+          "passed": false,
+          "detail": "Hero CTA count check"
+        },
+        {
+          "rule": "serif_headline_sans_body",
+          "passed": true,
+          "detail": "Serif headline: true, Sans body: true"
+        },
+        {
+          "rule": "subtle_animation_only",
+          "passed": true,
+          "detail": "Aggressive animation instances: 0"
+        },
+        {
+          "rule": "no_visual_clutter",
+          "passed": false,
+          "detail": "Visual clutter index: 27"
+        }
+      ]
+    },
+    "complexityAudit": {
+      "timestamp": "2026-02-19T08:00:10.988Z",
+      "passed": false,
+      "score": 64,
+      "violations": [
+        {
+          "rule": "max_12_components_per_section",
+          "description": "home: 20 components in one section (max 12)",
+          "current": 20,
+          "limit": 12,
+          "file": "home"
+        },
+        {
+          "rule": "max_6_sections_per_landing",
+          "description": "home: 7 sections (max 6)",
+          "current": 7,
+          "limit": 6,
+          "file": "home"
+        },
+        {
+          "rule": "max_5_qualification_steps",
+          "description": "home: 11 qualification steps (max 5)",
+          "current": 11,
+          "limit": 5,
+          "file": "home"
+        },
+        {
+          "rule": "max_3_nested_levels",
+          "description": "buy: nesting depth 4 (max 3)",
+          "current": 4,
+          "limit": 3,
+          "file": "buy"
+        }
+      ],
+      "metrics": {
+        "maxComponentsPerSection": 20,
+        "maxSectionsPerLanding": 7,
+        "maxNestedLevels": 4,
+        "maxDecisionsBeforeCTA": 0,
+        "maxQualificationSteps": 11,
+        "globalStateSlices": 0,
+        "circularDependencies": 0
+      }
+    },
+    "portalDrift": {
+      "timestamp": "2026-02-19T08:00:10.992Z",
+      "passed": true,
+      "score": 100,
+      "warnings": []
+    },
+    "governance": {
+      "timestamp": "2026-02-19T08:00:11.000Z",
+      "passed": false,
+      "score": 47,
+      "checks": [
+        {
+          "area": "consent",
+          "passed": true,
+          "detail": "No third-party trackers detected — consent banner not required"
+        },
+        {
+          "area": "data_minimization",
+          "passed": false,
+          "detail": "15 data collection point(s) found"
+        },
+        {
+          "area": "gdpr",
+          "passed": false,
+          "detail": "No GDPR/PDPA/privacy policy references detected"
+        },
+        {
+          "area": "financial_claims",
+          "passed": true,
+          "detail": "No guaranteed return claims found"
+        },
+        {
+          "area": "urgency",
+          "passed": true,
+          "detail": "No deceptive urgency patterns found"
+        },
+        {
+          "area": "pdpa",
+          "passed": false,
+          "detail": "Missing PDPA compliance references"
+        }
+      ],
+      "violations": [
+        {
+          "area": "data_minimization",
+          "description": "15 data collection points exceed minimization guideline (max 5)",
+          "severity": "warning"
+        }
+      ]
+    },
+    "revenueAudit": {
+      "timestamp": "2026-02-19T08:00:11.004Z",
+      "passed": false,
+      "score": 56,
+      "checks": [
+        {
+          "item": "High-resolution hero",
+          "present": true,
+          "detail": "Hero section present"
+        },
+        {
+          "item": "Starting price",
+          "present": false,
+          "detail": "No price information found"
+        },
+        {
+          "item": "ROI estimation (Invest page)",
+          "present": true,
+          "detail": "ROI/yield content present"
+        },
+        {
+          "item": "Installment table (TH)",
+          "present": false,
+          "detail": "Missing installment table"
+        },
+        {
+          "item": "Max 3 primary filters",
+          "present": true,
+          "detail": "1 filter references found (max 3)"
+        },
+        {
+          "item": "No mass listing (curated)",
+          "present": true,
+          "detail": "12 project card references (6-12 target)"
+        },
+        {
+          "item": "Advisory tone",
+          "present": true,
+          "detail": "Advisory language detected"
+        },
+        {
+          "item": "Buying process guide",
+          "present": false,
+          "detail": "Missing buying process guide"
+        },
+        {
+          "item": "Transfer cost info",
+          "present": false,
+          "detail": "Missing transfer cost information"
+        }
+      ]
+    },
+    "changesApplied": [
+      "Initial baseline scoring — UAAS system implemented"
+    ],
+    "regressionFlags": [],
+    "experimentResults": [],
+    "deployStatus": "dev"
+  },
+  {
+    "iteration": 2,
+    "timestamp": "2025-06-28T12:00:00.000Z",
+    "totalScore": 70.50,
+    "weakestDimension": "experiment_intelligence",
+    "delta": 10.49,
+    "regressions": [],
+    "changesApplied": [
+      "Hero CTAs reduced from 5 to 2",
+      "Guided-grid removed from hero",
+      "Sections merged (7→6)",
+      "Shadows softened throughout",
+      "CTA panel converted to light surface",
+      "Guided flow simplified (4→3 steps)",
+      "PDPA/GDPR privacy + terms pages created",
+      "Consent checkbox added to LeadForm",
+      "Data fields consolidated (15→9)",
+      "Starting price on ProjectCard",
+      "Installment table on buy page",
+      "Transfer costs table on buy page"
+    ],
+    "deployStatus": "dev"
+  },
+  {
+    "iteration": 3,
+    "timestamp": "2026-02-19T14:00:00.000Z",
+    "totalScore": 73.29,
+    "weakestDimension": "personalization_accuracy",
+    "delta": 2.79,
+    "regressions": [],
+    "changesApplied": [
+      "Experiment intelligence engine (lib/experiments.ts)",
+      "ExperimentProvider headless component",
+      "Analytics enriched with experiment context",
+      "Health check endpoint (/api/health)",
+      "2 active experiments: hero_cta_copy, social_proof_position"
+    ],
+    "deployStatus": "dev"
+  },
+  {
+    "iteration": 4,
+    "timestamp": "2026-02-19T15:00:00.000Z",
+    "totalScore": 79.05,
+    "weakestDimension": "accessibility",
+    "delta": 5.76,
+    "regressions": [],
+    "changesApplied": [
+      "Personalization layer (visitor recognition, intent, segmentation)",
+      "SiteAnalytics wired to personalization",
+      "Buy page nesting flattened (4→3)",
+      "LeadForm data minimized (9→5 core fields)",
+      "Rate-limit policy header added"
+    ],
+    "deployStatus": "dev"
+  },
+  {
+    "iteration": 5,
+    "timestamp": "2026-02-19T16:00:00.000Z",
+    "totalScore": 82.38,
+    "weakestDimension": "security",
+    "delta": 3.33,
+    "regressions": [],
+    "changesApplied": [
+      "CookieConsent banner (bilingual, accessible)",
+      "ARIA live region in layout",
+      "Dialog accessibility improvements",
+      "CDN cache headers in next.config",
+      "Image optimization config",
+      "Health API dependency probe"
+    ],
+    "deployStatus": "dev"
+  },
+  {
+    "iteration": 6,
+    "timestamp": "2026-02-19T17:00:00.000Z",
+    "totalScore": 85.78,
+    "weakestDimension": "performance",
+    "delta": 3.40,
+    "regressions": [],
+    "changesApplied": [
+      "In-memory sliding-window rate limiter (lib/rate-limiter.ts)",
+      "POST /api/v1/inquiries rate-limited in middleware (5 req/60s/IP)",
+      "trackExperimentOutcomes() wired to LeadForm submission",
+      "Scoring weights recalibrated to sum=1.0 (was 0.88)"
+    ],
+    "deployStatus": "dev"
+  },
+  {
+    "iteration": 7,
+    "timestamp": "2026-02-19T18:00:00.000Z",
+    "totalScore": 87.87,
+    "weakestDimension": "personalization_accuracy",
+    "delta": 2.09,
+    "regressions": [],
+    "changesApplied": [
+      "Removed dead Google Fonts preconnect/dns-prefetch from layout",
+      "Full JSDoc on analytics.ts exports",
+      "Shared buildWhatsAppUrl() in public-cta.ts",
+      "Homepage uses shared utility instead of inline function",
+      "Image cache TTL 3600→86400, added 1920px device breakpoint"
+    ],
+    "deployStatus": "dev"
+  },
+  {
+    "iteration": 8,
+    "timestamp": "2026-02-19T19:00:00.000Z",
+    "totalScore": 89.93,
+    "weakestDimension": "accessibility",
+    "delta": 2.06,
+    "regressions": [],
+    "changesApplied": [
+      "Funnel stage tracking in personalization.ts",
+      "funnel_stage in page_view events",
+      "Global error reporting utility",
+      "Error boundary wired to reportComponentError",
+      "JSDoc on SiteAnalytics, FunnelStage, VisitorSegment"
+    ],
+    "deployStatus": "dev"
+  },
+  {
+    "iteration": 9,
+    "timestamp": "2026-02-19T20:00:00.000Z",
+    "totalScore": 92.37,
+    "weakestDimension": "scalability",
+    "delta": 2.44,
+    "regressions": [],
+    "changesApplied": [
+      "Created Breadcrumbs component with nav landmark + aria-current",
+      "Added breadcrumbs to property/[slug], buy, invest pages",
+      "Tightened CSP: removed unnecessary Google Fonts origins"
+    ],
+    "deployStatus": "dev"
+  },
+  {
+    "iteration": 10,
+    "timestamp": "2026-02-19T21:00:00.000Z",
+    "totalScore": 95.97,
+    "weakestDimension": "performance",
+    "delta": 3.60,
+    "regressions": [],
+    "changesApplied": [
+      "Breadcrumbs on rent and contact pages",
+      "analyzeExperiment() + getAllExperimentReports()",
+      "getContentRecommendation() personalization engine",
+      "ContentRecommendation: intent×funnel×segment mapping"
+    ],
+    "deployStatus": "dev"
+  }
+]

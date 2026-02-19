@@ -1,10 +1,12 @@
 'use client';
 
+import { useEffect } from 'react';
 import { usePathname } from 'next/navigation';
 
 import { en } from '../_lib/i18n/en';
 import { th } from '../_lib/i18n/th';
 import { localeFromPathname } from '../_lib/i18n/routing';
+import { reportComponentError } from '@/lib/error-reporting';
 
 export default function SiteError({
   error,
@@ -16,6 +18,11 @@ export default function SiteError({
   const pathname = usePathname() ?? '/';
   const locale = localeFromPathname(pathname);
   const dict = locale === 'th' ? th : en;
+
+  // Report the error to the analytics/error tracking endpoint
+  useEffect(() => {
+    reportComponentError(error, error.digest);
+  }, [error]);
 
   return (
     <main
