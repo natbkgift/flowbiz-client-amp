@@ -39,7 +39,7 @@ export function AdminLayout({ children }: { children: ReactNode }) {
         </div>
 
         <nav className="flex-1 py-4">
-          <ul className="space-y-1 px-2" role="list">
+          <ul className="space-y-1 px-2">
             {NAV_ITEMS.map((item) => {
               const isActive =
                 pathname === item.href || pathname?.startsWith(item.href + '/');
