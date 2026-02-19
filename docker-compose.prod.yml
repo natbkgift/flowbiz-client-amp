@@ -4,6 +4,7 @@ services:
       - .env
     environment:
       - APP_ENV=prod
+      - JWT_SECRET_KEY=${JWT_SECRET_KEY}
       - OTEL_ENABLED=${OTEL_ENABLED:-false}
       - OTEL_EXPORTER_OTLP_ENDPOINT=${OTEL_EXPORTER_OTLP_ENDPOINT:-http://otel-collector:4318/v1/traces}
       - OTEL_SERVICE_NAME=${OTEL_SERVICE_NAME:-flowbiz-client-amp-api}
