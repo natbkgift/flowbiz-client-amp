@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react';
+import { Suspense } from 'react';
 import dynamic from 'next/dynamic';
 
 import { Footer } from '@/components/layout/Footer';
@@ -65,7 +66,9 @@ export default function SiteLayout({
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLd }} />
       <Header locale={locale} dict={dict} />
-      <SiteAnalytics />
+      <Suspense fallback={null}>
+        <SiteAnalytics />
+      </Suspense>
       <LinkClickTracker />
       <ScrollReveal />
       {children}
