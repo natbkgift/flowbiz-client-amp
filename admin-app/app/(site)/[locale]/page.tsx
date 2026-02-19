@@ -5,6 +5,10 @@ import { TrackedLink } from '@/components/analytics/TrackedLink';
 import { CTA } from '@/app/_lib/public-cta';
 import { getDictionary, normalizeLocale } from '@/app/_lib/i18n/get-dictionary';
 import { withLocale } from '@/app/_lib/i18n/routing';
+import { makePageMetadata } from '@/app/_lib/i18n/metadata';
+import { PAGE_REVALIDATE_SECONDS } from '@/app/_lib/constants';
+
+export const revalidate = PAGE_REVALIDATE_SECONDS;
 
 export async function generateMetadata({
   params,
@@ -13,26 +17,7 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const locale = normalizeLocale(params.locale);
   const dict = getDictionary(locale);
-  const canonical = `/${locale}`;
-  return {
-    title: `${dict.brand.name} | ${dict.home.heroTitle}`,
-    description: dict.home.heroSubtitle,
-    alternates: {
-      canonical,
-      languages: {
-        en: '/en',
-        th: '/th',
-      },
-    },
-    openGraph: {
-      type: 'website',
-      url: canonical,
-      title: `${dict.brand.name} | ${dict.home.heroTitle}`,
-      description: dict.home.heroSubtitle,
-      siteName: dict.brand.name,
-      locale: locale === 'th' ? 'th_TH' : 'en_US',
-    },
-  };
+  return makePageMetadata(locale, '', `${dict.brand.name} | ${dict.home.heroTitle}`, dict.home.heroSubtitle, dict.brand.name);
 }
 
 export default function HomePage({
@@ -83,15 +68,16 @@ export default function HomePage({
   }
 
   const featured = [
-    { title: 'Central Pattaya', subtitle: 'New-build and resale options' },
-    { title: 'Jomtien', subtitle: 'Rental demand and lifestyle access' },
-    { title: 'Pratumnak', subtitle: 'Quiet pockets with strong appeal' },
+    { title: dict.home.featuredCentralTitle, subtitle: dict.home.featuredCentralSubtitle },
+    { title: dict.home.featuredJomtienTitle, subtitle: dict.home.featuredJomtienSubtitle },
+    { title: dict.home.featuredPratumnakTitle, subtitle: dict.home.featuredPratumnakSubtitle },
   ];
 
-  const smartLabels =
-    locale === 'th'
-      ? { buy: 'ซื้อ', rent: 'เช่า', invest: 'ลงทุน' }
-      : { buy: 'Buy', rent: 'Rent', invest: 'Invest' };
+  const smartLabels = {
+    buy: dict.guided.buy,
+    rent: dict.guided.rent,
+    invest: dict.guided.invest,
+  };
 
   const guidedOpen = pickParam(searchParams?.guided) === '1';
   const step = normalizeGuidedStep(pickParam(searchParams?.step));
@@ -106,20 +92,39 @@ export default function HomePage({
     : 'goal';
 
   const summaryLines = [
-    goal ? `Goal: ${goal}` : null,
-    budget ? `Budget: ${budget}` : null,
-    timeline ? `Timeline: ${timeline}` : null,
+    goal ? `${dict.home.goalPrefix}: ${goal}` : null,
+    budget ? `${dict.home.budgetPrefix}: ${budget}` : null,
+    timeline ? `${dict.home.timelinePrefix}: ${timeline}` : null,
   ].filter(Boolean) as string[];
   const summaryText = summaryLines.join(' | ');
   const whatsAppText = summaryText
-    ? `Hi AMP Pattaya — ${summaryText}`
-    : 'Hi AMP Pattaya — I want help choosing the right Pattaya property.';
+    ? `${dict.home.whatsAppGreeting} — ${summaryText}`
+    : dict.home.whatsAppFallback;
   const whatsAppHref = appendWhatsAppText(CTA.whatsAppUrl, whatsAppText);
 
   const closeHref = withLocale(locale, '/');
 
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://amppattaya.com';
+
+  const jsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'RealEstateAgent',
+    name: dict.brand.name,
+    url: siteUrl,
+    description: dict.home.heroSubtitle,
+    areaServed: {
+      '@type': 'City',
+      name: 'Pattaya',
+      containedInPlace: { '@type': 'Country', name: 'Thailand' },
+    },
+  };
+
   return (
     <main id="main-content">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       <section className="hero hero--premium">
         <Container>
           <div className="hero-grid">
@@ -164,7 +169,7 @@ export default function HomePage({
                     {smartLabels.invest}
                   </TrackedLink>
                 </div>
-                <p className="guided-dialog__step">Goal → Budget → Timeline → Contact</p>
+                <p className="guided-dialog__step">{dict.guided.stepProgress}</p>
               </div>
 
               <div className="cta-row">
@@ -203,19 +208,19 @@ export default function HomePage({
           <dialog className="guided-dialog" open>
             <div className="guided-dialog__header">
               <div>
-                <div className="guided-dialog__title">{locale === 'th' ? 'เริ่มต้นแบบมีไกด์' : 'Guided Shortlist'}</div>
+                <div className="guided-dialog__title">{dict.guided.title}</div>
                 <div className="guided-dialog__step">
                   {effectiveStep === 'goal'
-                    ? 'Goal'
+                    ? dict.guided.stepGoal
                     : effectiveStep === 'budget'
-                      ? 'Budget'
+                      ? dict.guided.stepBudget
                       : effectiveStep === 'timeline'
-                        ? 'Timeline'
-                        : 'Contact'}
-                  {'  '}•{'  '}Goal → Budget → Timeline → Contact
+                        ? dict.guided.stepTimeline
+                        : dict.guided.stepContact}
+                  {'  '}•{'  '}{dict.guided.stepProgress}
                 </div>
               </div>
-              <a className="guided-dialog__close" href={closeHref} aria-label="Close">
+              <a className="guided-dialog__close" href={closeHref} aria-label={dict.common.close}>
                 ✕
               </a>
             </div>
@@ -246,28 +251,28 @@ export default function HomePage({
                   <input type="hidden" name="goal" value={goal ?? 'buy'} />
 
                   <label>
-                    <div style={{ fontWeight: 600 }}>{locale === 'th' ? 'งบประมาณ' : 'Budget'}</div>
+                    <div className="font-semibold">{dict.guided.budgetLabel}</div>
                     <select className="form-input" name="budget" defaultValue={budget ?? ''}>
                       <option value="" disabled>
-                        {locale === 'th' ? 'เลือกงบประมาณ' : 'Select a budget'}
+                        {dict.guided.budgetSelect}
                       </option>
-                      <option value="<3m">{locale === 'th' ? 'ต่ำกว่า 3M THB' : 'Under 3M THB'}</option>
-                      <option value="3-5m">{locale === 'th' ? '3–5M THB' : '3–5M THB'}</option>
-                      <option value="5-8m">{locale === 'th' ? '5–8M THB' : '5–8M THB'}</option>
-                      <option value="8m+">{locale === 'th' ? '8M+ THB' : '8M+ THB'}</option>
-                      <option value="not_sure">{locale === 'th' ? 'ยังไม่แน่ใจ' : 'Not sure yet'}</option>
+                      <option value="<3m">{dict.guided.budgetUnder3m}</option>
+                      <option value="3-5m">{dict.guided.budget3to5m}</option>
+                      <option value="5-8m">{dict.guided.budget5to8m}</option>
+                      <option value="8m+">{dict.guided.budget8mPlus}</option>
+                      <option value="not_sure">{dict.guided.budgetNotSure}</option>
                     </select>
                   </label>
 
                   <div className="cta-row">
                     <button className="btn btn-cta" type="submit">
-                      {locale === 'th' ? 'ถัดไป' : 'Next'}
+                      {dict.guided.next}
                     </button>
                     <a
                       className="btn btn-secondary"
                       href={withLocale(locale, hrefWithQuery('/', { guided: '1', step: 'goal' }))}
                     >
-                      {locale === 'th' ? 'เปลี่ยนเป้าหมาย' : 'Change goal'}
+                      {dict.guided.changeGoal}
                     </a>
                   </div>
                 </form>
@@ -281,21 +286,21 @@ export default function HomePage({
                   <input type="hidden" name="budget" value={budget ?? ''} />
 
                   <label>
-                    <div style={{ fontWeight: 600 }}>{locale === 'th' ? 'ไทม์ไลน์' : 'Timeline'}</div>
+                    <div className="font-semibold">{dict.guided.timelineLabel}</div>
                     <select className="form-input" name="timeline" defaultValue={timeline ?? ''}>
                       <option value="" disabled>
-                        {locale === 'th' ? 'เลือกไทม์ไลน์' : 'Select a timeline'}
+                        {dict.guided.timelineSelect}
                       </option>
-                      <option value="0-3m">{locale === 'th' ? '0–3 เดือน' : '0–3 months'}</option>
-                      <option value="3-6m">{locale === 'th' ? '3–6 เดือน' : '3–6 months'}</option>
-                      <option value="6-12m">{locale === 'th' ? '6–12 เดือน' : '6–12 months'}</option>
-                      <option value="12m+">{locale === 'th' ? '12+ เดือน / ยืดหยุ่น' : '12+ months / flexible'}</option>
+                      <option value="0-3m">{dict.guided.timeline0to3m}</option>
+                      <option value="3-6m">{dict.guided.timeline3to6m}</option>
+                      <option value="6-12m">{dict.guided.timeline6to12m}</option>
+                      <option value="12m+">{dict.guided.timeline12mPlus}</option>
                     </select>
                   </label>
 
                   <div className="cta-row">
                     <button className="btn btn-cta" type="submit">
-                      {locale === 'th' ? 'ถัดไป' : 'Next'}
+                      {dict.guided.next}
                     </button>
                     <a
                       className="btn btn-secondary"
@@ -308,7 +313,7 @@ export default function HomePage({
                         })
                       )}
                     >
-                      {locale === 'th' ? 'ย้อนกลับ' : 'Back'}
+                      {dict.guided.back}
                     </a>
                   </div>
                 </form>
@@ -316,7 +321,7 @@ export default function HomePage({
 
               {effectiveStep === 'contact' ? (
                 <div className="guided-grid">
-                  <div style={{ fontWeight: 600 }}>{locale === 'th' ? 'สรุป' : 'Summary'}</div>
+                  <div className="font-semibold">{dict.guided.summary}</div>
                   <div className="guided-summary">
                     {summaryLines.length ? (
                       <ul className="bullet-list">
@@ -325,7 +330,7 @@ export default function HomePage({
                         ))}
                       </ul>
                     ) : (
-                      <div>{locale === 'th' ? 'ยังไม่มีข้อมูล' : 'No selections yet.'}</div>
+                      <div>{dict.guided.noSelections}</div>
                     )}
                   </div>
 
@@ -378,10 +383,10 @@ export default function HomePage({
                         })
                       )}
                     >
-                      {locale === 'th' ? 'แก้ไขไทม์ไลน์' : 'Edit timeline'}
+                      {dict.guided.editTimeline}
                     </a>
                     <a className="btn btn-secondary" href={closeHref}>
-                      {locale === 'th' ? 'ปิด' : 'Close'}
+                      {dict.guided.close}
                     </a>
                   </div>
                 </div>

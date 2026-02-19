@@ -2,32 +2,40 @@ from __future__ import annotations
 
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, HTTPException, status
-from sqlalchemy import desc, select
+from fastapi import APIRouter, Depends, HTTPException, Query, status
+from sqlalchemy import desc, func, select
 from sqlalchemy.orm import Session
 
 from apps.api.dependencies.auth import get_current_admin
 from packages.core.database import get_db
 from packages.core.models import Property, SellerSubmission, User
+from packages.core.schemas.pagination import PaginatedResponse, PaginationMeta
 from packages.core.schemas.property_api import PropertyStatus, PropertyType
 from packages.core.schemas.seller import SellerStatusUpdate, SellerSubmissionItem
 
 router = APIRouter(prefix="/admin", tags=["admin"])
 
 
-@router.get("/seller-submissions", response_model=list[SellerSubmissionItem])
-async def list_submissions(
+@router.get("/seller-submissions", response_model=PaginatedResponse[SellerSubmissionItem])
+def list_submissions(
+    page: int = Query(1, ge=1),
+    limit: int = Query(50, ge=1, le=200),
     db: Session = Depends(get_db),
     _admin: User = Depends(get_current_admin),
-) -> list[SellerSubmissionItem]:
+) -> PaginatedResponse[SellerSubmissionItem]:
+    base = select(SellerSubmission)
+    total = db.scalar(select(func.count()).select_from(base.subquery())) or 0
     rows = db.scalars(
-        select(SellerSubmission).order_by(desc(SellerSubmission.created_at)).limit(200)
+        base.order_by(desc(SellerSubmission.created_at)).offset((page - 1) * limit).limit(limit)
     ).all()
-    return [SellerSubmissionItem.model_validate(r) for r in rows]
+    return PaginatedResponse(
+        data=[SellerSubmissionItem.model_validate(r) for r in rows],
+        meta=PaginationMeta(page=page, limit=limit, total=total),
+    )
 
 
 @router.patch("/seller-submissions/{submission_id}", response_model=SellerSubmissionItem)
-async def update_submission(
+def update_submission(
     submission_id: UUID,
     payload: SellerStatusUpdate,
     db: Session = Depends(get_db),
@@ -44,7 +52,7 @@ async def update_submission(
 
 
 @router.post("/seller-submissions/{submission_id}/approve", status_code=status.HTTP_201_CREATED)
-async def approve_submission(
+def approve_submission(
     submission_id: UUID,
     db: Session = Depends(get_db),
     _admin: User = Depends(get_current_admin),

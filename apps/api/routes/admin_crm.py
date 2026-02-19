@@ -2,8 +2,8 @@ from __future__ import annotations
 
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, HTTPException, status
-from sqlalchemy import desc, select
+from fastapi import APIRouter, Depends, HTTPException, Query, status
+from sqlalchemy import desc, func, select
 from sqlalchemy.orm import Session
 
 from apps.api.dependencies.auth import get_current_admin
@@ -17,21 +17,22 @@ from packages.core.schemas.crm import (
     ViewingUpdate,
 )
 from packages.core.schemas.crm_admin import LeadAssignmentItem, LeadAssignRequest
+from packages.core.schemas.pagination import PaginatedResponse, PaginationMeta
 
 router = APIRouter(prefix="/admin", tags=["admin"])
 
 
 @router.get("/inquiries", response_model=list[InquiryItem])
-async def list_inquiries(
+def list_inquiries(
     db: Session = Depends(get_db),
     _admin: User = Depends(get_current_admin),
 ) -> list[InquiryItem]:
-    inquiries = db.scalars(select(Inquiry).order_by(desc(Inquiry.created_at)).limit(200)).all()
+    inquiries = db.scalars(select(Inquiry).order_by(desc(Inquiry.created_at))).all()
     return [InquiryItem.model_validate(i) for i in inquiries]
 
 
 @router.get("/inquiries/{inquiry_id}", response_model=InquiryItem)
-async def get_inquiry(
+def get_inquiry(
     inquiry_id: UUID,
     db: Session = Depends(get_db),
     _admin: User = Depends(get_current_admin),
@@ -43,7 +44,7 @@ async def get_inquiry(
 
 
 @router.patch("/inquiries/{inquiry_id}", response_model=InquiryItem)
-async def update_inquiry_status(
+def update_inquiry_status(
     inquiry_id: UUID,
     payload: InquiryStatusUpdate,
     db: Session = Depends(get_db),
@@ -71,23 +72,27 @@ async def update_inquiry_status(
     return InquiryItem.model_validate(inquiry)
 
 
-@router.get("/inquiries/{inquiry_id}/assignments", response_model=list[LeadAssignmentItem])
-async def list_inquiry_assignments(
+@router.get("/inquiries/{inquiry_id}/assignments")
+def list_inquiry_assignments(
     inquiry_id: UUID,
+    page: int = Query(1, ge=1),
+    limit: int = Query(50, ge=1, le=200),
     db: Session = Depends(get_db),
     _admin: User = Depends(get_current_admin),
-) -> list[LeadAssignmentItem]:
+) -> PaginatedResponse[LeadAssignmentItem]:
+    base = select(LeadAssignment).where(LeadAssignment.inquiry_id == inquiry_id)
+    total = db.scalar(select(func.count()).select_from(base.subquery())) or 0
     rows = db.scalars(
-        select(LeadAssignment)
-        .where(LeadAssignment.inquiry_id == inquiry_id)
-        .order_by(desc(LeadAssignment.created_at))
-        .limit(200)
+        base.order_by(desc(LeadAssignment.created_at)).offset((page - 1) * limit).limit(limit)
     ).all()
-    return [LeadAssignmentItem.model_validate(r) for r in rows]
+    return PaginatedResponse(
+        data=[LeadAssignmentItem.model_validate(r) for r in rows],
+        meta=PaginationMeta(page=page, limit=limit, total=total),
+    )
 
 
 @router.post("/inquiries/{inquiry_id}/assign", response_model=InquiryItem)
-async def assign_inquiry(
+def assign_inquiry(
     inquiry_id: UUID,
     payload: LeadAssignRequest,
     db: Session = Depends(get_db),
@@ -128,16 +133,16 @@ async def assign_inquiry(
 
 
 @router.get("/viewings", response_model=list[ViewingItem])
-async def list_viewings(
+def list_viewings(
     db: Session = Depends(get_db),
     _admin: User = Depends(get_current_admin),
 ) -> list[ViewingItem]:
-    viewings = db.scalars(select(Viewing).order_by(desc(Viewing.scheduled_at)).limit(200)).all()
+    viewings = db.scalars(select(Viewing).order_by(desc(Viewing.scheduled_at))).all()
     return [ViewingItem.model_validate(v) for v in viewings]
 
 
 @router.patch("/viewings/{viewing_id}", response_model=ViewingItem)
-async def update_viewing(
+def update_viewing(
     viewing_id: UUID,
     payload: ViewingUpdate,
     db: Session = Depends(get_db),

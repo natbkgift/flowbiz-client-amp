@@ -17,7 +17,7 @@ router = APIRouter(prefix="/v1", tags=["smart-finder"])
 
 
 @router.post("/smart-finder", response_model=SmartFinderResponse)
-async def smart_finder(
+def smart_finder(
     payload: SmartFinderRequest,
     response: Response,
     db: Session = Depends(get_db),

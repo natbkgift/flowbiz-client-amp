@@ -104,7 +104,7 @@ def _choose_round_robin_advisor(db: Session) -> User | None:
 
 
 @router.post("/inquiries", response_model=InquiryItem, status_code=status.HTTP_201_CREATED)
-async def create_inquiry(
+def create_inquiry(
     payload: InquiryCreate,
     request: Request,
     response: Response,
@@ -358,7 +358,7 @@ async def create_inquiry(
 
 
 @router.post("/viewings", response_model=ViewingItem, status_code=status.HTTP_201_CREATED)
-async def schedule_viewing(payload: ViewingCreate, db: Session = Depends(get_db)) -> ViewingItem:
+def schedule_viewing(payload: ViewingCreate, db: Session = Depends(get_db)) -> ViewingItem:
     inquiry = db.get(Inquiry, payload.inquiry_id)
     if inquiry is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Inquiry not found")

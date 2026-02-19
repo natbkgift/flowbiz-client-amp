@@ -21,7 +21,7 @@ router = APIRouter(prefix="/admin", tags=["admin"])
 
 
 @router.get("/analytics/summary")
-async def analytics_summary(
+def analytics_summary(
     db: Session = Depends(get_db),
     _admin: User = Depends(get_current_admin),
 ) -> dict:

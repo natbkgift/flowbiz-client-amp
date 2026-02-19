@@ -3,12 +3,13 @@ from __future__ import annotations
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
-from sqlalchemy import desc, select
+from sqlalchemy import desc, func, select
 from sqlalchemy.orm import Session
 
 from apps.api.dependencies.auth import get_current_admin
 from packages.core.database import get_db
 from packages.core.models import AreaStatistic, Project, User
+from packages.core.schemas.pagination import PaginatedResponse, PaginationMeta
 from packages.core.schemas.projects import (
     AreaStatisticsSnapshot,
     ProjectCreate,
@@ -21,22 +22,31 @@ from packages.core.schemas.projects import (
 router = APIRouter(prefix="/v1", tags=["projects"])
 
 
-@router.get("/projects", response_model=list[ProjectItem])
-async def list_projects(
+@router.get("/projects", response_model=PaginatedResponse[ProjectItem])
+def list_projects(
     status_filter: str | None = Query(default="published"),
-    limit: int = Query(default=100, ge=1, le=200),
+    page: int = Query(default=1, ge=1),
+    limit: int = Query(default=20, ge=1, le=200),
     db: Session = Depends(get_db),
-) -> list[ProjectItem]:
+) -> PaginatedResponse[ProjectItem]:
     q = select(Project)
     if status_filter:
         q = q.where(Project.status == status_filter)
+    total = db.scalar(select(func.count()).select_from(q.subquery())) or 0
     # Determinism: add a stable tie-breaker so identical timestamps cannot reshuffle results.
-    rows = db.scalars(q.order_by(desc(Project.created_at), desc(Project.id)).limit(limit)).all()
-    return [ProjectItem.model_validate(r) for r in rows]
+    rows = db.scalars(
+        q.order_by(desc(Project.created_at), desc(Project.id))
+        .offset((page - 1) * limit)
+        .limit(limit)
+    ).all()
+    return PaginatedResponse(
+        data=[ProjectItem.model_validate(r) for r in rows],
+        meta=PaginationMeta(page=page, limit=limit, total=total),
+    )
 
 
 @router.get("/projects/{project_id}", response_model=ProjectItem)
-async def get_project(project_id: UUID, db: Session = Depends(get_db)) -> ProjectItem:
+def get_project(project_id: UUID, db: Session = Depends(get_db)) -> ProjectItem:
     row = db.get(Project, project_id)
     if row is None or row.status != "published":
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Project not found")
@@ -44,7 +54,7 @@ async def get_project(project_id: UUID, db: Session = Depends(get_db)) -> Projec
 
 
 @router.get("/projects/slug/{slug}", response_model=ProjectItem)
-async def get_project_by_slug(slug: str, db: Session = Depends(get_db)) -> ProjectItem:
+def get_project_by_slug(slug: str, db: Session = Depends(get_db)) -> ProjectItem:
     row = db.scalar(select(Project).where(Project.slug == slug))
     if row is None or row.status != "published":
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Project not found")
@@ -72,7 +82,7 @@ def _compute_project_trust_badges(
 
 
 @router.get("/projects/{project_id}/evaluation", response_model=ProjectEvaluationResponse)
-async def get_project_evaluation(
+def get_project_evaluation(
     project_id: UUID,
     db: Session = Depends(get_db),
 ) -> ProjectEvaluationResponse:
@@ -103,7 +113,7 @@ async def get_project_evaluation(
 
 
 @router.post("/projects", response_model=ProjectItem, status_code=status.HTTP_201_CREATED)
-async def create_project(
+def create_project(
     payload: ProjectCreate,
     db: Session = Depends(get_db),
     _admin: User = Depends(get_current_admin),
@@ -127,7 +137,7 @@ async def create_project(
 
 
 @router.patch("/projects/{project_id}", response_model=ProjectItem)
-async def update_project(
+def update_project(
     project_id: UUID,
     payload: ProjectUpdate,
     db: Session = Depends(get_db),

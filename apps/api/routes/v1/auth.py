@@ -1,9 +1,11 @@
+import logging
 from datetime import UTC, datetime, timedelta
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Request, status
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
+from packages.core.abuse import SlidingWindowRateLimiter
 from packages.core.auth import (
     create_access_token,
     generate_refresh_token,
@@ -16,7 +18,22 @@ from packages.core.models import Member, RefreshToken, User
 from packages.core.schemas.admin_api import LoginRequest, LoginResponse
 from packages.core.schemas.auth import RefreshRequest, TokenPairResponse
 
+logger = logging.getLogger(__name__)
+
 router = APIRouter(prefix="/v1/auth", tags=["auth"])
+
+_login_limiter = SlidingWindowRateLimiter(limit=10, window_seconds=60)
+
+
+def _rate_limit_login(request: Request) -> None:
+    key = request.client.host if request.client else "unknown"
+    result = _login_limiter.check(key)
+    if not result.allowed:
+        raise HTTPException(
+            status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+            detail=f"Too many login attempts. Retry after {result.retry_after_seconds}s.",
+            headers={"Retry-After": str(result.retry_after_seconds)},
+        )
 
 
 def _as_utc(dt: datetime) -> datetime:
@@ -28,9 +45,19 @@ def _as_utc(dt: datetime) -> datetime:
 
 
 @router.post("/login", response_model=LoginResponse)
-async def login(payload: LoginRequest, db: Session = Depends(get_db)) -> LoginResponse:
+def login(
+    payload: LoginRequest,
+    request: Request,
+    db: Session = Depends(get_db),
+) -> LoginResponse:
+    _rate_limit_login(request)
     user = db.scalar(select(User).where(User.email == payload.email))
     if user is None or not verify_password(payload.password, user.password_hash):
+        logger.warning(
+            "auth_login_failed email=%s ip=%s",
+            payload.email,
+            request.client.host if request.client else "unknown",
+        )
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid email or password",
@@ -43,16 +70,28 @@ async def login(payload: LoginRequest, db: Session = Depends(get_db)) -> LoginRe
         db.commit()
 
     token = create_access_token(subject=user.email, role=user.role)
+    logger.info(
+        "auth_login_success email=%s ip=%s",
+        user.email,
+        request.client.host if request.client else "unknown",
+    )
     return LoginResponse(access_token=token)
 
 
 @router.post("/login-with-refresh", response_model=TokenPairResponse)
-async def login_with_refresh(
+def login_with_refresh(
     payload: LoginRequest,
+    request: Request,
     db: Session = Depends(get_db),
 ) -> TokenPairResponse:
+    _rate_limit_login(request)
     user = db.scalar(select(User).where(User.email == payload.email))
     if user is None or not verify_password(payload.password, user.password_hash):
+        logger.warning(
+            "auth_login_failed email=%s ip=%s",
+            payload.email,
+            request.client.host if request.client else "unknown",
+        )
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid email or password",
@@ -64,6 +103,11 @@ async def login_with_refresh(
         db.commit()
 
     access_token = create_access_token(subject=user.email, role=user.role)
+    logger.info(
+        "auth_login_with_refresh_success email=%s ip=%s",
+        user.email,
+        request.client.host if request.client else "unknown",
+    )
     refresh_token = generate_refresh_token()
     refresh_hash = hash_refresh_token(refresh_token)
     expires_at = datetime.now(UTC) + timedelta(days=settings.refresh_token_expire_days)
@@ -81,13 +125,17 @@ async def login_with_refresh(
 
 
 @router.post("/refresh", response_model=TokenPairResponse)
-async def refresh(payload: RefreshRequest, db: Session = Depends(get_db)) -> TokenPairResponse:
+def refresh(payload: RefreshRequest, db: Session = Depends(get_db)) -> TokenPairResponse:
     refresh_hash = hash_refresh_token(payload.refresh_token)
 
     token_row = db.scalar(
         select(RefreshToken).where(RefreshToken.token_hash == refresh_hash).with_for_update()
     )
     if token_row is None or token_row.revoked_at is not None:
+        logger.warning(
+            "auth_refresh_invalid revoked=%s",
+            token_row.revoked_at is not None if token_row else "missing",
+        )
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid refresh token",
@@ -95,6 +143,7 @@ async def refresh(payload: RefreshRequest, db: Session = Depends(get_db)) -> Tok
 
     now = datetime.now(UTC)
     if _as_utc(token_row.expires_at) <= now:
+        logger.warning("auth_refresh_expired user_id=%s", token_row.user_id)
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Refresh token expired",

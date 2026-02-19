@@ -16,7 +16,7 @@ router = APIRouter(prefix="/v1/phase1", tags=["phase1"])
 
 
 @router.post("/score", response_model=Phase1ScoreResult)
-async def score_phase1_lead(
+def score_phase1_lead(
     payload: Phase1LeadPayload,
     db: Session = Depends(get_db),
 ) -> Phase1ScoreResult:

@@ -6,7 +6,7 @@ import { withLocale } from '../../app/_lib/i18n/routing';
 
 export function Footer({ locale, dict }: { locale: Locale; dict: Dictionary }) {
   return (
-    <footer className="footer">
+    <footer className="footer" role="contentinfo">
       <Container>
         <div className="footer-content">
           <div>
@@ -14,8 +14,8 @@ export function Footer({ locale, dict }: { locale: Locale; dict: Dictionary }) {
             <p className="text-muted-on-dark">{dict.brand.tagline}</p>
           </div>
 
-          <div>
-            <h3>Quick Links</h3>
+          <nav aria-label={dict.common.footerNavigation}>
+            <h3>{dict.common.quickLinks}</h3>
             <p>
               <Link href={withLocale(locale, '/invest')}>{dict.nav.invest}</Link>
             </p>
@@ -23,12 +23,12 @@ export function Footer({ locale, dict }: { locale: Locale; dict: Dictionary }) {
               <Link href={withLocale(locale, '/buy')}>{dict.nav.buy}</Link>
             </p>
             <p>
-              <Link href={withLocale(locale, '/projects')}>{locale === 'th' ? 'โครงการ' : 'Projects'}</Link>
+              <Link href={withLocale(locale, '/projects')}>{dict.nav.projects}</Link>
             </p>
-          </div>
+          </nav>
 
           <div>
-            <h3>Contact</h3>
+            <h3>{dict.common.contactHeading}</h3>
             <p className="text-muted-on-dark">info@amppattaya.com</p>
             <p>
               <Link href={withLocale(locale, '/contact')}>{dict.nav.contact}</Link>

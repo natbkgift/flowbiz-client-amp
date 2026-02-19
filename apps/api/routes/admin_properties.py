@@ -129,7 +129,7 @@ class PropertyMediaSyncResponse(BaseModel):
 
 
 @router.get("/properties/imports", response_model=PropertyImportAuditListResponse)
-async def list_property_imports(
+def list_property_imports(
     limit: int = Query(20, ge=1, le=100),
     page: int = Query(1, ge=1),
     status_filter: str | None = Query(None, alias="status"),
@@ -174,7 +174,7 @@ async def list_property_imports(
 
 
 @router.post("/properties/import", response_model=PropertyImportResult)
-async def import_properties(
+def import_properties(
     file: UploadFile = File(...),
     dry_run: bool = Query(False),
     db: Session = Depends(get_db),
@@ -190,7 +190,7 @@ async def import_properties(
 
     lock_mode = _acquire_import_lock(db)
     try:
-        raw = await file.read(MAX_BYTES + 1)
+        raw = file.file.read(MAX_BYTES + 1)
         file_size_bytes = len(raw)
         file_sha256 = hashlib.sha256(raw).hexdigest()
 
@@ -520,7 +520,7 @@ async def import_properties(
 
 
 @router.post("/properties/media", response_model=PropertyMediaSyncResponse)
-async def sync_property_media(
+def sync_property_media(
     payload: PropertyMediaSyncRequest,
     db: Session = Depends(get_db),
     _admin: User = Depends(get_current_admin),
@@ -567,7 +567,7 @@ async def sync_property_media(
 
 
 @router.post("/properties", response_model=PropertyDetail, status_code=status.HTTP_201_CREATED)
-async def create_property(
+def create_property(
     payload: PropertyCreate,
     db: Session = Depends(get_db),
     _admin: User = Depends(get_current_admin),
@@ -580,7 +580,7 @@ async def create_property(
 
 
 @router.patch("/properties/{property_id}", response_model=PropertyDetail)
-async def update_property(
+def update_property(
     property_id: UUID,
     payload: PropertyUpdate,
     db: Session = Depends(get_db),
@@ -600,7 +600,7 @@ async def update_property(
 
 
 @router.delete("/properties/{property_id}", status_code=status.HTTP_204_NO_CONTENT)
-async def delete_property(
+def delete_property(
     property_id: UUID,
     db: Session = Depends(get_db),
     _admin: User = Depends(get_current_admin),
@@ -614,7 +614,7 @@ async def delete_property(
 
 
 @router.post("/company", response_model=CompanyInfoItem, status_code=status.HTTP_201_CREATED)
-async def create_company_info(
+def create_company_info(
     payload: CompanyInfoCreate,
     db: Session = Depends(get_db),
     _admin: User = Depends(get_current_admin),
@@ -627,7 +627,7 @@ async def create_company_info(
 
 
 @router.patch("/company/{slug}", response_model=CompanyInfoItem)
-async def update_company_info(
+def update_company_info(
     slug: str,
     payload: CompanyInfoUpdate,
     db: Session = Depends(get_db),

@@ -1,8 +1,12 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
+import { usePathname } from 'next/navigation';
 
 import type { PropertyListItem } from '../../app/public/_shared/types';
+import { en } from '../../app/_lib/i18n/en';
+import { th } from '../../app/_lib/i18n/th';
+import { localeFromPathname } from '../../app/_lib/i18n/routing';
 
 function parseBedroomsFromTitle(title: string): number | null {
   const t = (title || '').trim();
@@ -84,15 +88,19 @@ export function SidebarFilter({
     setAreas(new Set());
   }
 
+  const pathname = usePathname() ?? '/';
+  const locale = localeFromPathname(pathname);
+  const dict = locale === 'th' ? th : en;
+
   return (
-    <aside className={isOpen ? 'filter-sidebar active' : 'filter-sidebar'} aria-label="Filters">
-      <h3 style={{ marginBottom: 24 }}>Filters</h3>
+    <aside className={isOpen ? 'filter-sidebar active' : 'filter-sidebar'} aria-label={dict.filters.heading}>
+      <h3 className="mb-6">{dict.filters.heading}</h3>
 
       <div className="filter-section">
-        <h3>Price Range</h3>
-        <div style={{ display: 'grid', gap: 12 }}>
+        <h3>{dict.filters.priceRange}</h3>
+        <div className="grid gap-3">
           <label>
-            <div style={{ fontSize: 14, color: 'var(--color-text-secondary)', marginBottom: 6 }}>Min</div>
+            <div className="text-sm text-[var(--color-text-secondary)] mb-1.5">{dict.filters.min}</div>
             <input
               className="form-input"
               inputMode="numeric"
@@ -101,7 +109,7 @@ export function SidebarFilter({
             />
           </label>
           <label>
-            <div style={{ fontSize: 14, color: 'var(--color-text-secondary)', marginBottom: 6 }}>Max</div>
+            <div className="text-sm text-[var(--color-text-secondary)] mb-1.5">{dict.filters.max}</div>
             <input
               className="form-input"
               inputMode="numeric"
@@ -113,7 +121,7 @@ export function SidebarFilter({
       </div>
 
       <div className="filter-section">
-        <h3>Bedrooms</h3>
+        <h3>{dict.filters.bedrooms}</h3>
         <div className="chips-group">
           {bedOptions.map((b) => {
             const active = beds.has(b);
@@ -131,7 +139,7 @@ export function SidebarFilter({
                   });
                 }}
               >
-                {b === 0 ? 'Studio' : b}
+                {b === 0 ? dict.filters.studio : b}
               </button>
             );
           })}
@@ -139,7 +147,7 @@ export function SidebarFilter({
       </div>
 
       <div className="filter-section">
-        <h3>Area</h3>
+        <h3>{dict.filters.area}</h3>
         <div className="checkbox-group">
           {areaOptions.slice(0, 12).map((a) => (
             <label key={a} className="checkbox-label">
@@ -161,12 +169,12 @@ export function SidebarFilter({
         </div>
       </div>
 
-      <div style={{ display: 'flex', gap: 12 }}>
+      <div className="flex gap-3">
         <button type="button" className="btn btn-secondary btn-block" onClick={clear}>
-          Clear
+          {dict.filters.clear}
         </button>
         <button type="button" className="btn btn-primary btn-block mobile-only" onClick={onClose}>
-          Close
+          {dict.filters.close}
         </button>
       </div>
     </aside>

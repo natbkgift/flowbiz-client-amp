@@ -22,7 +22,7 @@ export function getOrCreateSessionId(): string {
     const existing = w.localStorage.getItem(SESSION_KEY);
     if (existing && existing.length >= 8) return existing;
 
-    const id = (w.crypto as any)?.randomUUID?.() ?? `${Date.now()}-${Math.random()}`;
+    const id = w.crypto?.randomUUID?.() ?? `${Date.now()}-${Math.random()}`;
     w.localStorage.setItem(SESSION_KEY, id);
     return id;
   } catch {

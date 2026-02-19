@@ -1,7 +1,9 @@
 import type { Metadata } from 'next';
+import { makePageMetadata } from '@/app/_lib/i18n/metadata';
+import { PAGE_REVALIDATE_SECONDS } from '@/app/_lib/constants';
 
 export const dynamic = 'force-static';
-export const revalidate = 300;
+export const revalidate = PAGE_REVALIDATE_SECONDS;
 
 import { Container } from '@/components/layout/Container';
 import { ProjectCard } from '@/components/project/ProjectCard';
@@ -15,46 +17,31 @@ export async function generateMetadata({
   params: { locale: string };
 }): Promise<Metadata> {
   const locale = normalizeLocale(params.locale);
-  const canonical = `/${locale}/projects`;
-  const title = 'Projects | AMP Pattaya';
-  const description = 'Explore published projects in Pattaya.';
-  return {
-    title,
-    description,
-    alternates: {
-      canonical,
-      languages: {
-        en: '/en/projects',
-        th: '/th/projects',
-      },
-    },
-    openGraph: {
-      type: 'website',
-      url: canonical,
-      title,
-      description,
-      siteName: 'AMP Pattaya',
-      locale: locale === 'th' ? 'th_TH' : 'en_US',
-    },
-  };
+  const dict = getDictionary(locale);
+  return makePageMetadata(locale, 'projects', dict.nav.projects, dict.listing.exploreProjectsDesc, dict.brand.name);
 }
 
 type ProjectRow = { name: string; count: number };
 
 export default async function ProjectsPage({ params }: { params: { locale: string } }) {
-  const locale = params.locale === 'th' ? 'th' : 'en';
+  const locale = normalizeLocale(params.locale);
   const dict = getDictionary(locale);
   const siteUrl = 'https://amppattaya.com';
   const canonicalUrl = `${siteUrl}/${locale}/projects`;
 
-  const projects = await fetchProjects({ limit: 100 });
+  let projects: Awaited<ReturnType<typeof fetchProjects>>;
+  try {
+    projects = await fetchProjects({ limit: 100 });
+  } catch {
+    projects = [];  // graceful degradation
+  }
   if (projects.length) {
     const sorted = [...projects].sort((a, b) => (a.name ?? '').localeCompare(b.name ?? '') || (a.slug ?? '').localeCompare(b.slug ?? ''));
     const jsonLd = JSON.stringify(
       {
         '@context': 'https://schema.org',
         '@type': 'ItemList',
-        name: locale === 'th' ? 'โครงการ' : 'Projects',
+        name: dict.nav.projects,
         url: canonicalUrl,
         itemListElement: sorted.slice(0, 20).map((p, idx) => ({
           '@type': 'ListItem',
@@ -76,9 +63,9 @@ export default async function ProjectsPage({ params }: { params: { locale: strin
       <main className="section" id="main-content">
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLd }} />
         <Container>
-          <div className="section-header" style={{ marginBottom: 24 }}>
-            <h1 className="section-title">Projects</h1>
-            <p className="section-subtitle">Published projects</p>
+          <div className="section-header mb-6">
+            <h1 className="section-title">{dict.nav.projects}</h1>
+            <p className="section-subtitle">{dict.listing.publishedProjects}</p>
           </div>
 
           <div className="grid grid-3">
@@ -89,6 +76,7 @@ export default async function ProjectsPage({ params }: { params: { locale: strin
                 count={0}
                 slug={p.slug}
                 locale={locale}
+                dict={dict}
               />
             ))}
           </div>
@@ -114,7 +102,7 @@ export default async function ProjectsPage({ params }: { params: { locale: strin
     {
       '@context': 'https://schema.org',
       '@type': 'CollectionPage',
-      name: locale === 'th' ? 'โครงการ' : 'Projects',
+      name: dict.nav.projects,
       url: canonicalUrl,
       isPartOf: {
         '@type': 'WebSite',
@@ -130,19 +118,19 @@ export default async function ProjectsPage({ params }: { params: { locale: strin
     <main className="section" id="main-content">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLd }} />
       <Container>
-        <div className="section-header" style={{ marginBottom: 24 }}>
-          <h1 className="section-title">Projects</h1>
-          <p className="section-subtitle">Grouped by project/building name</p>
+        <div className="section-header mb-6">
+          <h1 className="section-title">{dict.nav.projects}</h1>
+          <p className="section-subtitle">{dict.listing.projectsSubtitle}</p>
         </div>
 
         {rows.length ? (
           <div className="grid grid-3">
             {rows.map((r) => (
-              <ProjectCard key={r.name} name={r.name} count={r.count} />
+              <ProjectCard key={r.name} name={r.name} count={r.count} dict={dict} />
             ))}
           </div>
         ) : (
-          <p>No projects found</p>
+          <p>{dict.listing.noProperties}</p>
         )}
       </Container>
     </main>

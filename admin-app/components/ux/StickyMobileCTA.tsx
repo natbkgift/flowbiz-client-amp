@@ -14,7 +14,7 @@ export function StickyMobileCTA() {
   const dict = locale === 'th' ? th : en;
 
   return (
-    <div className="mobile-cta" role="region" aria-label="CTA">
+    <div className="mobile-cta" role="region" aria-label={dict.common.ctaRegion}>
       <Link
         className="btn btn-cta mobile-cta__btn"
         href={withLocale(locale, '/contact?topic=private_tour')}

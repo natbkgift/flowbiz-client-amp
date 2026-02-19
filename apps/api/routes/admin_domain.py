@@ -6,6 +6,7 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from apps.api.dependencies.auth import get_current_admin
+from packages.core.cache import response_cache
 from packages.core.database import get_db
 from packages.core.models import Agent, Area, Developer, User
 from packages.core.schemas.domain import (
@@ -29,7 +30,7 @@ def _commit_or_409(db: Session, *, detail: str) -> None:
 
 
 @router.post("/areas", response_model=AreaItem, status_code=status.HTTP_201_CREATED)
-async def create_area(
+def create_area(
     payload: AreaCreate,
     db: Session = Depends(get_db),
     _admin: User = Depends(get_current_admin),
@@ -37,12 +38,13 @@ async def create_area(
     area = Area(name=payload.name, slug=payload.slug, city=payload.city)
     db.add(area)
     _commit_or_409(db, detail="Area slug already exists")
+    response_cache.invalidate("areas_list")
     db.refresh(area)
     return AreaItem.model_validate(area)
 
 
 @router.get("/areas", response_model=list[AreaItem])
-async def admin_list_areas(
+def admin_list_areas(
     db: Session = Depends(get_db),
     _admin: User = Depends(get_current_admin),
 ) -> list[AreaItem]:
@@ -51,7 +53,7 @@ async def admin_list_areas(
 
 
 @router.post("/developers", response_model=DeveloperItem, status_code=status.HTTP_201_CREATED)
-async def create_developer(
+def create_developer(
     payload: DeveloperCreate,
     db: Session = Depends(get_db),
     _admin: User = Depends(get_current_admin),
@@ -59,12 +61,13 @@ async def create_developer(
     developer = Developer(name=payload.name, slug=payload.slug, website=payload.website)
     db.add(developer)
     _commit_or_409(db, detail="Developer slug already exists")
+    response_cache.invalidate("developers_list")
     db.refresh(developer)
     return DeveloperItem.model_validate(developer)
 
 
 @router.get("/developers", response_model=list[DeveloperItem])
-async def admin_list_developers(
+def admin_list_developers(
     db: Session = Depends(get_db),
     _admin: User = Depends(get_current_admin),
 ) -> list[DeveloperItem]:
@@ -73,7 +76,7 @@ async def admin_list_developers(
 
 
 @router.post("/agents", response_model=AgentItem, status_code=status.HTTP_201_CREATED)
-async def create_agent(
+def create_agent(
     payload: AgentCreate,
     db: Session = Depends(get_db),
     _admin: User = Depends(get_current_admin),
@@ -86,12 +89,13 @@ async def create_agent(
     )
     db.add(agent)
     db.commit()
+    response_cache.invalidate("agents_list")
     db.refresh(agent)
     return AgentItem.model_validate(agent)
 
 
 @router.get("/agents", response_model=list[AgentItem])
-async def admin_list_agents(
+def admin_list_agents(
     db: Session = Depends(get_db),
     _admin: User = Depends(get_current_admin),
 ) -> list[AgentItem]:

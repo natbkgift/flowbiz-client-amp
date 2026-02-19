@@ -7,6 +7,33 @@
   Bright Luxury Theme — AMP Pattaya
   =============================
   Light, airy, high-conversion real estate design.
+
+  CSS Architecture Index:
+  ─────────────────────────────
+  L102   BASE RESET
+  L110   FOCUS VISIBLE
+  L177   SKIP LINK
+  L196   CONTAINER
+  L204   SECTIONS
+  L224   GRID
+  L251   HEADER
+  L388   MOBILE MENU
+  L434   HERO
+  L528   TYPOGRAPHY HELPERS
+  L562   SECTION HEADER
+  L594   CARDS
+  L654   BUTTONS
+  L738   CTA STRIP / PANEL
+  L784   PROPERTY CARD
+  L834   LISTING LAYOUT
+  L875   FORMS
+  L945   MOBILE FILTER
+  L1043  DETAIL PAGE
+  L1148  FOOTER
+  L1201  BULLET LIST
+  L1553+ REDUCED MOTION
+  ─────────────────────────────
+
   Color palette:
     Background:  #FFFFFF / #F7F9FC
     Text:        #1A1A1A
@@ -19,9 +46,15 @@
 :root {
   --color-primary: #0A4D8C;
   --color-primary-dark: #083D6F;
+  --color-primary-darker: #042D54;
   --color-primary-light: #E8F1F8;
-  --color-accent: #B08D57;
-  --color-accent-hover: #C9A46C;
+
+  --color-success-text: #065f46;
+  --color-success-bg: #ecfdf5;
+  --color-error-text: #991b1b;
+  --color-error-bg: #fef2f2;
+  --color-accent: #8B6E2F;
+  --color-accent-hover: #7D6229;
 
   --font-sans: 'Inter', 'Nunito Sans', system-ui, -apple-system, 'Segoe UI', Roboto, Arial, sans-serif;
 
@@ -46,15 +79,28 @@
   --font-h1: 32px;
   --font-h2: 24px;
   --font-h3: 20px;
+  --font-lg: 18px;
   --font-body: 16px;
+  --font-nav: 15px;
+  --font-sm: 14px;
   --font-caption: 13px;
+  --font-xs: 12px;
   --font-price: 26px;
+  --font-xl: 22px;
+  --font-2xl: 28px;
+  --font-3xl: 36px;
+  --font-4xl: 48px;
+  --font-footer-heading: 17px;
   --line-height: 1.6;
 
   --space-1: 4px;
+  --space-1-5: 6px;
   --space-2: 8px;
+  --space-2-5: 10px;
   --space-3: 16px;
+  --space-3-5: 12px;
   --space-4: 24px;
+  --space-4-5: 18px;
   --space-5: 32px;
   --space-6: 48px;
   --space-7: 64px;
@@ -105,6 +151,18 @@
   margin: 0;
   padding: 0;
   box-sizing: border-box;
+}
+
+/* ======================== FOCUS VISIBLE ======================== */
+/* Global focus ring for keyboard users — WCAG 2.1 AA §2.4.7       */
+
+:focus-visible {
+  outline: 3px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+:focus:not(:focus-visible) {
+  outline: none;
 }
 
 html {
@@ -159,7 +217,7 @@ a:hover {
 input,
 textarea,
 select {
-  font-size: 16px;
+  font-size: var(--font-body);
 }
 
 /* ======================== SKIP LINK ======================== */
@@ -170,7 +228,7 @@ select {
   left: 0;
   background: var(--color-primary);
   color: var(--color-white);
-  padding: 8px 16px;
+  padding: var(--space-2) var(--space-3);
   z-index: 1000;
   text-decoration: none;
   border-radius: 0 0 var(--radius-sm) 0;
@@ -260,7 +318,7 @@ select {
 }
 
 .logo {
-  font-size: 24px;
+  font-size: var(--font-h2);
   font-weight: 700;
   color: var(--color-primary);
   display: flex;
@@ -280,7 +338,7 @@ select {
 }
 
 .logo-name {
-  font-size: 14px;
+  font-size: var(--font-sm);
   font-weight: 500;
   letter-spacing: 0.2px;
   color: var(--color-text-secondary);
@@ -301,7 +359,7 @@ select {
   font-weight: 500;
   color: var(--color-text);
   transition: color 0.2s ease, transform 0.2s ease;
-  font-size: 15px;
+  font-size: var(--font-nav);
 }
 
 .nav a:hover {
@@ -313,7 +371,7 @@ select {
   display: inline-flex;
   align-items: center;
   gap: var(--space-sm);
-  padding: 6px 2px;
+  padding: var(--space-1-5) 2px;
 }
 
 .nav-link--cta {
@@ -346,7 +404,7 @@ select {
   cursor: pointer;
   transition: all 0.2s;
   color: var(--color-text);
-  font-size: 14px;
+  font-size: var(--font-sm);
 }
 
 .lang-switch:hover {
@@ -395,7 +453,7 @@ select {
 .mobile-menu a {
   display: block;
   padding: var(--space-3);
-  font-size: 18px;
+  font-size: var(--font-lg);
   font-weight: 500;
   border-bottom: 1px solid var(--color-gray-100);
   color: var(--color-text);
@@ -452,13 +510,13 @@ select {
 }
 
 .hero-subtitle {
-  font-size: 18px;
+  font-size: var(--font-lg);
   margin-bottom: var(--space-xl);
   opacity: 0.9;
 }
 
 .hero.hero--premium {
-  background: linear-gradient(135deg, #0A4D8C 0%, #063A6B 50%, #042D54 100%);
+  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-dark) 50%, var(--color-primary-darker) 100%);
   padding: var(--space-8) 0 var(--space-7);
 }
 
@@ -475,7 +533,7 @@ select {
 }
 
 .hero.hero--page {
-  background: linear-gradient(135deg, #0A4D8C 0%, #083D6F 100%);
+  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-dark) 100%);
   padding: var(--space-7) 0 var(--space-6);
 }
 
@@ -503,13 +561,13 @@ select {
 .hero-panel__title {
   color: var(--color-white);
   font-weight: 700;
-  font-size: 22px;
+  font-size: var(--font-xl);
   margin-bottom: var(--space-2);
 }
 
 .hero-panel__meta {
   color: rgba(255, 255, 255, 0.75);
-  font-size: 14px;
+  font-size: var(--font-sm);
   line-height: 1.5;
 }
 
@@ -518,7 +576,7 @@ select {
 .eyebrow {
   text-transform: uppercase;
   letter-spacing: 0.16em;
-  font-size: 12px;
+  font-size: var(--font-xs);
   font-weight: 600;
   color: var(--color-primary);
   margin-bottom: var(--space-2);
@@ -527,7 +585,7 @@ select {
 .headline {
   font-family: var(--font-serif), Georgia, 'Times New Roman', serif;
   color: var(--color-white);
-  font-size: 36px;
+  font-size: var(--font-3xl);
   line-height: 1.1;
   max-width: 22ch;
   letter-spacing: -0.02em;
@@ -537,13 +595,13 @@ select {
   color: rgba(255, 255, 255, 0.85);
   margin-top: var(--space-3);
   max-width: 70ch;
-  font-size: 18px;
+  font-size: var(--font-lg);
   line-height: 1.6;
 }
 
 @media (min-width: 768px) {
   .headline {
-    font-size: 48px;
+    font-size: var(--font-4xl);
   }
 }
 
@@ -565,7 +623,7 @@ select {
 .section-subtitle {
   color: var(--color-text-secondary);
   margin: 0;
-  font-size: 16px;
+  font-size: var(--font-body);
   max-width: 65ch;
   margin-left: auto;
   margin-right: auto;
@@ -621,7 +679,7 @@ select {
 }
 
 .card-title {
-  font-size: 18px;
+  font-size: var(--font-lg);
   font-weight: 600;
   margin-bottom: var(--space-2);
   color: var(--color-text);
@@ -646,7 +704,7 @@ select {
   align-items: center;
   justify-content: center;
   min-height: var(--tap-target-min);
-  padding: 12px 24px;
+  padding: var(--space-3-5) var(--space-4);
   border: none;
   border-radius: var(--radius-sm);
   font-size: var(--font-body);
@@ -655,7 +713,7 @@ select {
   cursor: pointer;
   transition: all 0.2s ease;
   text-decoration: none;
-  gap: 8px;
+  gap: var(--space-2);
 }
 
 .btn:hover {
@@ -759,7 +817,7 @@ select {
 
 .cta-title {
   color: var(--color-white);
-  font-size: 28px;
+  font-size: var(--font-2xl);
   font-weight: 700;
   margin-bottom: var(--space-2);
 }
@@ -811,7 +869,7 @@ select {
 }
 
 .card-location {
-  font-size: 14px;
+  font-size: var(--font-sm);
   color: var(--color-text-secondary);
   margin-bottom: var(--space-md);
   display: flex;
@@ -869,7 +927,7 @@ select {
   padding: 12px 16px;
   border: 2px solid var(--color-gray-200);
   border-radius: var(--radius-sm);
-  font-size: 16px;
+  font-size: var(--font-body);
   transition: border-color 0.2s, box-shadow 0.2s;
   background: var(--color-white);
   color: var(--color-text);
@@ -891,7 +949,7 @@ select {
 .form-desc {
   color: var(--color-text-secondary);
   margin: 0 0 var(--space-3);
-  font-size: 14px;
+  font-size: var(--font-sm);
 }
 
 .form-grid {
@@ -915,18 +973,18 @@ select {
 }
 
 .form-success {
-  color: #065f46;
+  color: var(--color-success-text);
   font-weight: 600;
-  padding: 12px;
-  background: #ecfdf5;
+  padding: var(--space-3-5);
+  background: var(--color-success-bg);
   border-radius: var(--radius-sm);
 }
 
 .form-error {
-  color: #991b1b;
+  color: var(--color-error-text);
   font-weight: 600;
   padding: 12px;
-  background: #fef2f2;
+  background: var(--color-error-bg);
   border-radius: var(--radius-sm);
 }
 
@@ -957,7 +1015,7 @@ select {
   border: none;
   background: transparent;
   border-radius: var(--radius-sm);
-  font-size: 14px;
+  font-size: var(--font-sm);
   font-weight: 500;
   cursor: pointer;
   transition: all 0.2s;
@@ -980,7 +1038,7 @@ select {
   padding: 8px 16px;
   border: 2px solid var(--color-gray-200);
   border-radius: var(--radius-sm);
-  font-size: 14px;
+  font-size: var(--font-sm);
   font-weight: 500;
   cursor: pointer;
   transition: all 0.2s;
@@ -1023,7 +1081,7 @@ select {
 }
 
 .results-count {
-  font-size: 18px;
+  font-size: var(--font-lg);
   font-weight: 600;
   color: var(--color-text);
 }
@@ -1065,7 +1123,7 @@ select {
   color: var(--color-white);
   padding: var(--space-sm) var(--space-md);
   border-radius: var(--radius-sm);
-  font-size: 13px;
+  font-size: var(--font-caption);
   font-weight: 500;
 }
 
@@ -1136,7 +1194,7 @@ select {
 /* ======================== FOOTER ======================== */
 
 .footer {
-  background: #1A202C;
+  background: var(--color-gray-800);
   color: var(--color-white);
   padding: var(--space-6) 0 var(--space-4);
   margin-top: auto;
@@ -1157,7 +1215,7 @@ select {
 .footer h3 {
   color: var(--color-white);
   margin-bottom: var(--space-md);
-  font-size: 16px;
+  font-size: var(--font-body);
   font-weight: 600;
 }
 
@@ -1176,12 +1234,12 @@ select {
 
 .footer-meta {
   color: rgba(255, 255, 255, 0.6);
-  font-size: 14px;
+  font-size: var(--font-sm);
 }
 
 .footer-disclaimer {
-  color: rgba(255, 255, 255, 0.48);
-  font-size: 13px;
+  color: rgba(255, 255, 255, 0.6);
+  font-size: var(--font-caption);
   margin-top: var(--space-2);
   max-width: 90ch;
 }
@@ -1219,7 +1277,7 @@ select {
   color: var(--color-text);
   margin-bottom: var(--space-3);
   font-style: italic;
-  font-size: 17px;
+  font-size: var(--font-footer-heading);
   line-height: 1.6;
 }
 
@@ -1230,27 +1288,27 @@ select {
 
 .testimonial__context {
   color: var(--color-text-secondary);
-  font-size: 14px;
+  font-size: var(--font-sm);
 }
 
 /* ======================== FLOATING / STICKY CTAs ======================== */
 
 .floating-cta {
   position: fixed;
-  right: 16px;
+  right: var(--space-3);
   bottom: 88px;
   z-index: 120;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding: 12px 18px;
+  padding: var(--space-3-5) var(--space-4-5);
   border-radius: var(--radius-full);
   background: var(--color-primary);
   color: var(--color-white);
   box-shadow: 0 4px 16px rgba(10, 77, 140, 0.3);
   transition: transform 0.2s ease, background 0.2s ease;
   font-weight: 600;
-  font-size: 14px;
+  font-size: var(--font-sm);
 }
 
 .floating-cta:hover {
@@ -1271,14 +1329,14 @@ select {
   box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.06);
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 10px;
+  gap: var(--space-2-5);
 }
 
 .mobile-cta__btn {
   width: 100%;
   justify-content: center;
-  font-size: 13px;
-  padding: 10px 8px;
+  font-size: var(--font-caption);
+  padding: var(--space-2-5) var(--space-2);
 }
 
 @media (min-width: 768px) {
@@ -1355,7 +1413,7 @@ select {
 
 .guided-dialog__step {
   color: var(--color-text-secondary);
-  font-size: 14px;
+  font-size: var(--font-sm);
   margin-top: 6px;
 }
 
@@ -1368,7 +1426,7 @@ select {
 .guided-row {
   display: grid;
   grid-template-columns: 1fr;
-  gap: 10px;
+  gap: var(--space-2-5);
 }
 
 @media (min-width: 640px) {
@@ -1475,7 +1533,7 @@ select {
   border-radius: var(--radius-sm);
   background: var(--color-surface);
   border: 1px solid var(--color-gray-100);
-  font-size: 14px;
+  font-size: var(--font-sm);
   color: var(--color-text-secondary);
 }
 
@@ -1498,13 +1556,13 @@ select {
 }
 
 .social-proof-number {
-  font-size: 28px;
+  font-size: var(--font-2xl);
   font-weight: 700;
   color: var(--color-primary);
 }
 
 .social-proof-label {
-  font-size: 14px;
+  font-size: var(--font-sm);
   color: var(--color-text-secondary);
   margin-top: 4px;
 }
@@ -1537,4 +1595,18 @@ select {
   stroke: currentColor;
   stroke-width: 1.5;
   fill: none;
+}
+
+/* ======================== REDUCED MOTION ======================== */
+/* WCAG 2.1 AA §2.3.3  — respect user's motion preferences          */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }

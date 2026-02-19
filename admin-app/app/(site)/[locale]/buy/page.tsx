@@ -1,45 +1,40 @@
-import type { Metadata } from 'next';
-
-import { ListingGrid } from '@/components/listing/ListingGrid';
-import { LeadForm } from '@/components/forms/LeadForm';
+import dynamic from 'next/dynamic';
 import { Container } from '@/components/layout/Container';
 import { fetchProperties } from '@/app/_lib/public-api-server';
 import { getDictionary, normalizeLocale } from '@/app/_lib/i18n/get-dictionary';
+import { makePageMetadata } from '@/app/_lib/i18n/metadata';
 import { withLocale } from '@/app/_lib/i18n/routing';
+import { PAGE_REVALIDATE_SECONDS } from '@/app/_lib/constants';
+
+const ListingGrid = dynamic(() => import('@/components/listing/ListingGrid').then(m => m.ListingGrid), {
+  loading: () => <div className="animate-pulse h-96 rounded bg-slate-100" />,
+});
+const LeadForm = dynamic(() => import('@/components/forms/LeadForm').then(m => m.LeadForm), {
+  loading: () => <div className="animate-pulse h-48 rounded bg-slate-100" />,
+});
+
+export const revalidate = PAGE_REVALIDATE_SECONDS;
 
 export async function generateMetadata({
   params,
 }: {
   params: { locale: string };
-}): Promise<Metadata> {
+}) {
   const locale = normalizeLocale(params.locale);
   const dict = getDictionary(locale);
-  const canonical = `/${locale}/buy`;
-  return {
-    title: `${dict.nav.buy} | ${dict.brand.name}`,
-    description: dict.buy.subtitle,
-    alternates: {
-      canonical,
-      languages: {
-        en: '/en/buy',
-        th: '/th/buy',
-      },
-    },
-    openGraph: {
-      type: 'website',
-      url: canonical,
-      title: `${dict.nav.buy} | ${dict.brand.name}`,
-      description: dict.buy.subtitle,
-      siteName: dict.brand.name,
-      locale: locale === 'th' ? 'th_TH' : 'en_US',
-    },
-  };
+  return makePageMetadata(locale, 'buy', dict.nav.buy, dict.buy.subtitle, dict.brand.name);
 }
 
 export default async function BuyPage({ params }: { params: { locale: string } }) {
   const locale = normalizeLocale(params.locale);
   const dict = getDictionary(locale);
-  const res = await fetchProperties({ type: 'resale', limit: 60, sort: 'newest' });
+
+  let res: Awaited<ReturnType<typeof fetchProperties>>;
+  try {
+    res = await fetchProperties({ type: 'resale', limit: 60, sort: 'newest' });
+  } catch {
+    res = { data: [], meta: { page: 1, limit: 60, total: 0 } };  // graceful degradation
+  }
 
   return (
     <main id="main-content">

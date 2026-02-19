@@ -1,4 +1,5 @@
 import os
+import time as _time
 from pathlib import Path
 from uuid import UUID
 
@@ -6,6 +7,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy import Select, asc, desc, func, or_, select
 from sqlalchemy.orm import Session
 
+from packages.core.cache import response_cache
 from packages.core.database import get_db
 from packages.core.models import CompanyInfo, Property
 from packages.core.schemas.property_api import (
@@ -26,20 +28,31 @@ _IMAGE_STORAGE_ROOT = Path("/opt/flowbiz/storage/property-images")
 _PUBLIC_PREFIX = "/images"
 _ALLOWED_EXTS = {".jpg", ".jpeg", ".png", ".webp"}
 
+# In-memory cache for image listings — avoids disk I/O per property on every request.
+# TTL-based: entries expire after _IMAGE_CACHE_TTL seconds.
+_image_cache: dict[str, tuple[float, list[str]]] = {}
+_IMAGE_CACHE_TTL = 60  # seconds
+
 
 def _list_local_images(property_id: UUID) -> list[str]:
-    """Return public /images/... URLs by listing storage folder.
+    """Return public /images/... URLs by listing storage folder (cached)."""
+    cache_key = str(property_id)
+    now = _time.monotonic()
 
-    - No hotlinking: returns only local /images paths.
-    - No DB schema change: derives file list from disk.
-    """
+    cached = _image_cache.get(cache_key)
+    if cached is not None:
+        ts, imgs = cached
+        if now - ts < _IMAGE_CACHE_TTL:
+            return imgs
 
-    folder = _IMAGE_STORAGE_ROOT / str(property_id)
+    folder = _IMAGE_STORAGE_ROOT / cache_key
     try:
         if not folder.is_dir():
+            _image_cache[cache_key] = (now, [])
             return []
         names = sorted(os.listdir(folder))
     except OSError:
+        _image_cache[cache_key] = (now, [])
         return []
 
     out: list[str] = []
@@ -50,11 +63,13 @@ def _list_local_images(property_id: UUID) -> list[str]:
         if p.suffix.lower() not in _ALLOWED_EXTS:
             continue
         out.append(f"{_PUBLIC_PREFIX}/{property_id}/{name}")
+
+    _image_cache[cache_key] = (now, out)
     return out
 
 
 @router.get("/properties", response_model=PropertyListResponse)
-async def list_properties(
+def list_properties(
     page: int = Query(1, ge=1),
     limit: int = Query(20, ge=1, le=100),
     type: PropertyType | None = None,
@@ -105,7 +120,7 @@ async def list_properties(
 
 
 @router.get("/properties/{property_id}", response_model=PropertyDetail)
-async def get_property(
+def get_property(
     property_id: UUID,
     db: Session = Depends(get_db),
 ) -> PropertyDetail:
@@ -121,7 +136,7 @@ async def get_property(
 
 
 @router.get("/properties/slug/{slug}", response_model=PropertyDetail)
-async def get_property_by_slug(
+def get_property_by_slug(
     slug: str,
     db: Session = Depends(get_db),
 ) -> PropertyDetail:
@@ -137,17 +152,22 @@ async def get_property_by_slug(
 
 
 @router.get("/company", response_model=CompanyListResponse)
-async def list_company_info(
+def list_company_info(
     db: Session = Depends(get_db),
 ) -> CompanyListResponse:
+    cached = response_cache.get("company_list")
+    if cached is not None:
+        return cached
     items = db.scalars(
         select(CompanyInfo).order_by(asc(CompanyInfo.title), asc(CompanyInfo.id))
     ).all()
-    return CompanyListResponse(data=[CompanyInfoItem.model_validate(item) for item in items])
+    result = CompanyListResponse(data=[CompanyInfoItem.model_validate(item) for item in items])
+    response_cache.set("company_list", result, ttl=600)
+    return result
 
 
 @router.get("/company/{slug}", response_model=CompanyInfoItem)
-async def get_company_info(
+def get_company_info(
     slug: str,
     db: Session = Depends(get_db),
 ) -> CompanyInfoItem:

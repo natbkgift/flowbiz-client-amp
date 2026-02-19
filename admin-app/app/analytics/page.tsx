@@ -4,7 +4,8 @@ import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 
 import { apiRequest, handleUnauthorizedError } from '../../lib/api';
-import { getToken, setToken } from '../../lib/auth-store';
+import { getToken } from '../../lib/auth-store';
+import { AdminLayout } from '../../components/layout/AdminLayout';
 
 type Summary = {
   generated_at: string;
@@ -55,22 +56,12 @@ export default function AnalyticsPage() {
   }, [data?.inquiries_by_status]);
 
   return (
-    <main className="max-w-6xl mx-auto p-6 space-y-6">
-      <div className="flex items-center justify-between">
+    <AdminLayout>
+      <main id="main-content" className="max-w-6xl mx-auto p-6 space-y-6">
         <h1 className="text-2xl font-semibold">Analytics</h1>
-        <button
-          className="text-sm underline"
-          onClick={() => {
-            setToken(null);
-            router.push('/login');
-          }}
-        >
-          Logout
-        </button>
-      </div>
 
-      {error ? <p className="text-red-600">{error}</p> : null}
-      {!data ? <p>Loading...</p> : null}
+      {error ? <p className="text-red-600" role="alert">{error}</p> : null}
+      {!data && !error ? <p aria-live="polite">Loading...</p> : null}
 
       {data ? (
         <>
@@ -121,13 +112,14 @@ export default function AnalyticsPage() {
               <h2 className="text-lg font-semibold">Advisor performance</h2>
               {data.advisor_metrics.length ? (
                 <div className="overflow-auto">
-                  <table className="w-full text-sm">
+                  <table className="w-full text-sm" aria-label="Advisor performance metrics">
+                    <caption className="sr-only">Advisor metrics: assigned, closed, and conversion ratio</caption>
                     <thead className="bg-slate-100">
                       <tr>
-                        <th className="text-left p-2">Advisor</th>
-                        <th className="text-right p-2">Assigned</th>
-                        <th className="text-right p-2">Closed</th>
-                        <th className="text-right p-2">Conv.</th>
+                        <th scope="col" className="text-left p-2">Advisor</th>
+                        <th scope="col" className="text-right p-2">Assigned</th>
+                        <th scope="col" className="text-right p-2">Closed</th>
+                        <th scope="col" className="text-right p-2">Conv.</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -186,11 +178,12 @@ export default function AnalyticsPage() {
             <h2 className="text-lg font-semibold">Top projects (by inquiries)</h2>
             {data.top_projects.length ? (
               <div className="overflow-auto">
-                <table className="w-full text-sm">
+                <table className="w-full text-sm" aria-label="Top projects by inquiry count">
+                  <caption className="sr-only">Projects ranked by number of inquiries</caption>
                   <thead className="bg-slate-100">
                     <tr>
-                      <th className="text-left p-2">Project</th>
-                      <th className="text-right p-2">Inquiries</th>
+                      <th scope="col" className="text-left p-2">Project</th>
+                      <th scope="col" className="text-right p-2">Inquiries</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -209,6 +202,7 @@ export default function AnalyticsPage() {
           </section>
         </>
       ) : null}
-    </main>
+      </main>
+    </AdminLayout>
   );
 }

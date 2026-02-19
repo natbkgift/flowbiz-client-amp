@@ -24,15 +24,23 @@ jobs:
 
       - name: Install dependencies
         run: |
-          pip install -e ".[dev]"
+          pip install -e ".[dev]" pip-audit
+
+      - name: Dependency vulnerability scan
+        run: |
+          pip-audit --strict --desc
 
       - name: Run ruff
         run: |
           ruff check .
 
-      - name: Run pytest
+      - name: Run mypy
         run: |
-          pytest -q --tb=short
+          mypy apps packages --ignore-missing-imports --no-strict-optional
+
+      - name: Run pytest with coverage
+        run: |
+          pytest -q --tb=short --cov=apps --cov=packages --cov-report=term-missing --cov-fail-under=50
 
   admin-app:
     runs-on: ubuntu-latest
@@ -49,6 +57,18 @@ jobs:
       - name: Install dependencies
         working-directory: admin-app
         run: npm ci
+
+      - name: npm audit
+        working-directory: admin-app
+        run: npm audit --audit-level=high
+
+      - name: ESLint (a11y)
+        working-directory: admin-app
+        run: npx next lint
+
+      - name: Vitest
+        working-directory: admin-app
+        run: npx vitest run
 
       - name: Next.js build
         working-directory: admin-app

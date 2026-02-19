@@ -1,8 +1,9 @@
 from __future__ import annotations
 
+import logging
 from uuid import uuid4
 
-from fastapi import APIRouter, Depends, HTTPException, Response, status
+from fastapi import APIRouter, Depends, Response
 from sqlalchemy import Select, asc, desc, func, or_, select
 from sqlalchemy.orm import Session
 
@@ -21,7 +22,7 @@ router = APIRouter(prefix="/v1", tags=["finder"])
 
 
 @router.post("/finder/search", response_model=PropertyListResponse)
-async def finder_search(
+def finder_search(
     payload: FinderSearchRequest,
     response: Response,
     db: Session = Depends(get_db),
@@ -79,7 +80,7 @@ async def finder_search(
         .limit(payload.limit)
     ).all()
 
-    # Phase 2: intent log (table is additive). Fail closed only on DB errors.
+    # Phase 2: intent log (table is additive). Fail-open — never block search results.
     try:
         intent_row = FinderIntent(
             id=uuid4(),
@@ -92,9 +93,10 @@ async def finder_search(
         db.commit()
     except Exception:
         db.rollback()
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Failed to log finder intent",
+        logging.getLogger(__name__).warning(
+            "finder_intent_log_failed session_id=%s",
+            payload.session_id,
+            exc_info=True,
         )
 
     return PropertyListResponse(

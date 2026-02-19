@@ -1,13 +1,16 @@
 import type { MetadataRoute } from 'next';
 
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://amppattaya.com';
+
 export default function robots(): MetadataRoute.Robots {
   return {
     rules: [
       {
         userAgent: '*',
         allow: '/',
+        disallow: ['/api/', '/login', '/leads', '/inquiries', '/analytics', '/public'],
       },
     ],
-    sitemap: 'https://amppattaya.com/sitemap.xml',
+    sitemap: `${SITE_URL.replace(/\/+$/, '')}/sitemap.xml`,
   };
 }

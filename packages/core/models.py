@@ -7,6 +7,7 @@ from sqlalchemy import (
     Boolean,
     DateTime,
     ForeignKey,
+    Index,
     Integer,
     Numeric,
     String,
@@ -179,6 +180,7 @@ inquiry_status_enum = SAEnum(
 
 class Inquiry(Base):
     __tablename__ = "inquiries"
+    __table_args__ = (Index("ix_inquiries_status_created", "status", "created_at"),)
 
     id: Mapped[UUID] = mapped_column(primary_key=True, default=uuid4)
     property_id: Mapped[UUID | None] = mapped_column(
@@ -492,6 +494,7 @@ booking_status_enum = SAEnum(
 
 class Booking(Base):
     __tablename__ = "bookings"
+    __table_args__ = (Index("ix_bookings_prop_status_start", "property_id", "status", "start_at"),)
 
     id: Mapped[UUID] = mapped_column(primary_key=True, default=uuid4)
 
@@ -564,6 +567,7 @@ property_import_audit_status_enum = SAEnum(
 
 class Property(Base):
     __tablename__ = "properties"
+    __table_args__ = (Index("ix_properties_status_type_created", "status", "type", "created_at"),)
 
     id: Mapped[UUID] = mapped_column(primary_key=True, default=uuid4)
     source_id: Mapped[str] = mapped_column(

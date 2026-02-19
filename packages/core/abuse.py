@@ -5,6 +5,9 @@ from collections import deque
 from dataclasses import dataclass
 from threading import Lock
 
+_MAX_KEYS = 10_000  # Maximum tracked keys before forced eviction.
+_EVICTION_INTERVAL = 300  # Seconds between full eviction sweeps.
+
 
 @dataclass(frozen=True)
 class RateLimitResult:
@@ -19,12 +22,25 @@ class SlidingWindowRateLimiter:
         self._window_seconds = max(1, int(window_seconds))
         self._events: dict[str, deque[float]] = {}
         self._lock = Lock()
+        self._last_eviction: float = time.time()
+
+    def _maybe_evict(self, now: float) -> None:
+        """Remove stale keys periodically to prevent unbounded memory growth."""
+        if now - self._last_eviction < _EVICTION_INTERVAL and len(self._events) < _MAX_KEYS:
+            return
+        window_start = now - self._window_seconds
+        stale_keys = [k for k, q in self._events.items() if not q or q[-1] < window_start]
+        for k in stale_keys:
+            del self._events[k]
+        self._last_eviction = now
 
     def check(self, key: str) -> RateLimitResult:
         now = time.time()
         window_start = now - self._window_seconds
 
         with self._lock:
+            self._maybe_evict(now)
+
             q = self._events.get(key)
             if q is None:
                 q = deque()

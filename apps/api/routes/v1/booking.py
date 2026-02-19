@@ -28,7 +28,7 @@ def _overlap_filter(*, start_at: datetime, end_at: datetime):
 
 
 @router.get("/availability", response_model=AvailabilityResponse)
-async def get_availability(
+def get_availability(
     property_id: UUID,
     start_at: datetime,
     end_at: datetime,
@@ -62,7 +62,7 @@ async def get_availability(
 
 
 @router.post("/bookings", response_model=BookingItem, status_code=status.HTTP_201_CREATED)
-async def create_booking(
+def create_booking(
     payload: BookingCreateRequest,
     response: Response,
     idempotency_key: str | None = Header(default=None, alias="Idempotency-Key"),
@@ -82,6 +82,8 @@ async def create_booking(
             return BookingItem.model_validate(existing)
 
     # Minimal availability guard: do not allow overlapping bookings for same property.
+    # Use FOR UPDATE to acquire row-level locks, preventing TOCTOU race between
+    # the overlap check and insert in concurrent requests.
     if payload.property_id is not None:
         overlap = db.scalar(
             select(Booking)
@@ -92,6 +94,7 @@ async def create_booking(
             )
             .order_by(Booking.start_at.asc(), Booking.id.asc())
             .limit(1)
+            .with_for_update()
         )
         if overlap is not None:
             raise HTTPException(
@@ -135,7 +138,7 @@ async def create_booking(
 
 
 @router.get("/bookings/{booking_id}", response_model=BookingItem)
-async def get_booking(booking_id: UUID, db: Session = Depends(get_db)) -> BookingItem:
+def get_booking(booking_id: UUID, db: Session = Depends(get_db)) -> BookingItem:
     row = db.get(Booking, booking_id)
     if row is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Booking not found")

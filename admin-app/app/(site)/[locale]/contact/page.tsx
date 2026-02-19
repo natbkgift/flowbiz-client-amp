@@ -1,37 +1,24 @@
-import type { Metadata } from 'next';
+import dynamic from 'next/dynamic';
 
 import { Container } from '@/components/layout/Container';
-import { LeadForm } from '@/components/forms/LeadForm';
+const LeadForm = dynamic(() => import('@/components/forms/LeadForm').then(m => m.LeadForm), {
+  loading: () => <div className="animate-pulse h-48 rounded bg-slate-100" />,
+});
 import { CTA } from '@/app/_lib/public-cta';
 import { getDictionary, normalizeLocale } from '@/app/_lib/i18n/get-dictionary';
+import { makePageMetadata } from '@/app/_lib/i18n/metadata';
+import { PAGE_REVALIDATE_SECONDS } from '@/app/_lib/constants';
+
+export const revalidate = PAGE_REVALIDATE_SECONDS;
 
 export async function generateMetadata({
   params,
 }: {
   params: { locale: string };
-}): Promise<Metadata> {
+}) {
   const locale = normalizeLocale(params.locale);
   const dict = getDictionary(locale);
-  const canonical = `/${locale}/contact`;
-  return {
-    title: `${dict.nav.contact} | ${dict.brand.name}`,
-    description: dict.contact.subtitle,
-    alternates: {
-      canonical,
-      languages: {
-        en: '/en/contact',
-        th: '/th/contact',
-      },
-    },
-    openGraph: {
-      type: 'website',
-      url: canonical,
-      title: `${dict.nav.contact} | ${dict.brand.name}`,
-      description: dict.contact.subtitle,
-      siteName: dict.brand.name,
-      locale: locale === 'th' ? 'th_TH' : 'en_US',
-    },
-  };
+  return makePageMetadata(locale, 'contact', dict.nav.contact, dict.contact.subtitle, dict.brand.name);
 }
 
 export default function ContactPage({

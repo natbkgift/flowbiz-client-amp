@@ -1,6 +1,52 @@
 import 'server-only';
 
 import type { PropertyDetail, PropertyListResponse } from '../public/_shared/types';
+import { PAGE_REVALIDATE_SECONDS } from './constants';
+
+/** Maximum retries for transient server / network errors. */
+const MAX_RETRIES = 2;
+/** Base delay (ms) between retries — doubled on each attempt. */
+const RETRY_BASE_MS = 500;
+/** Per-request timeout (ms) to prevent SSR hangs. */
+const REQUEST_TIMEOUT_MS = 10_000;
+
+/**
+ * fetch() wrapper with exponential back-off for transient failures.
+ * Retries on 5xx status codes and network errors only.
+ * 4xx responses are returned immediately (caller decides).
+ * Each attempt is guarded by a 10 s timeout via AbortSignal.
+ */
+async function fetchWithRetry(
+  input: string,
+  init?: RequestInit & { next?: { revalidate?: number } },
+): Promise<Response> {
+  let lastError: unknown;
+  for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
+    try {
+      const res = await fetch(input, { ...init, signal: controller.signal });
+      clearTimeout(timeoutId);
+      // Only retry on server errors (5xx). Client errors (4xx) are intentional.
+      if (res.status >= 500 && attempt < MAX_RETRIES) {
+        await delay(RETRY_BASE_MS * 2 ** attempt);
+        continue;
+      }
+      return res;
+    } catch (err) {
+      clearTimeout(timeoutId);
+      lastError = err;
+      if (attempt < MAX_RETRIES) {
+        await delay(RETRY_BASE_MS * 2 ** attempt);
+      }
+    }
+  }
+  throw lastError;
+}
+
+function delay(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
 
 export type ProjectItem = {
   id: string;
@@ -44,9 +90,9 @@ export async function fetchProperties(params: {
   if (params.search) url.searchParams.set('search', params.search);
   if (params.sort) url.searchParams.set('sort', params.sort);
 
-  const res = await fetch(url.toString(), {
+  const res = await fetchWithRetry(url.toString(), {
     // Public pages: allow caching but keep it reasonably fresh.
-    next: { revalidate: 300 },
+    next: { revalidate: PAGE_REVALIDATE_SECONDS },
   });
 
   if (!res.ok) {
@@ -62,8 +108,8 @@ export async function fetchPropertyBySlug(slug: string): Promise<PropertyDetail 
 
   const url = new URL(`${base}/v1/properties/slug/${encodeURIComponent(slug)}`, origin);
 
-  const res = await fetch(url.toString(), {
-    next: { revalidate: 300 },
+  const res = await fetchWithRetry(url.toString(), {
+    next: { revalidate: PAGE_REVALIDATE_SECONDS },
   });
 
   if (res.status === 404) return null;
@@ -79,7 +125,7 @@ export async function fetchProjects(params?: { limit?: number }): Promise<Projec
   const url = new URL(`${base}/v1/projects`, origin);
   if (params?.limit) url.searchParams.set('limit', String(params.limit));
 
-  const res = await fetch(url.toString(), { next: { revalidate: 300 } });
+  const res = await fetchWithRetry(url.toString(), { next: { revalidate: PAGE_REVALIDATE_SECONDS } });
   if (!res.ok) throw new Error(`Failed to fetch projects (${res.status})`);
   return (await res.json()) as ProjectItem[];
 }
@@ -89,7 +135,7 @@ export async function fetchProjectBySlug(slug: string): Promise<ProjectItem | nu
   const base = apiBase();
 
   const url = new URL(`${base}/v1/projects/slug/${encodeURIComponent(slug)}`, origin);
-  const res = await fetch(url.toString(), { next: { revalidate: 300 } });
+  const res = await fetchWithRetry(url.toString(), { next: { revalidate: PAGE_REVALIDATE_SECONDS } });
   if (res.status === 404) return null;
   if (!res.ok) throw new Error(`Failed to fetch project (${res.status})`);
   return (await res.json()) as ProjectItem;
@@ -121,7 +167,7 @@ export async function fetchMarketplaceCategories(): Promise<MarketplaceCategoryI
   const base = apiBase();
 
   const url = new URL(`${base}/v1/marketplace/categories`, origin);
-  const res = await fetch(url.toString(), { next: { revalidate: 300 } });
+  const res = await fetchWithRetry(url.toString(), { next: { revalidate: PAGE_REVALIDATE_SECONDS } });
   if (!res.ok) throw new Error(`Failed to fetch marketplace categories (${res.status})`);
   return (await res.json()) as MarketplaceCategoryItem[];
 }
@@ -132,7 +178,7 @@ export async function fetchMarketplaceItems(params?: { category?: string }): Pro
 
   const url = new URL(`${base}/v1/marketplace/items`, origin);
   if (params?.category) url.searchParams.set('category', params.category);
-  const res = await fetch(url.toString(), { next: { revalidate: 300 } });
+  const res = await fetchWithRetry(url.toString(), { next: { revalidate: PAGE_REVALIDATE_SECONDS } });
   if (!res.ok) throw new Error(`Failed to fetch marketplace items (${res.status})`);
   return (await res.json()) as MarketplaceItemItem[];
 }
@@ -171,7 +217,7 @@ export async function fetchSmartFinder(payload: SmartFinderRequest): Promise<Sma
   const base = apiBase();
 
   const url = new URL(`${base}/v1/smart-finder`, origin);
-  const res = await fetch(url.toString(), {
+  const res = await fetchWithRetry(url.toString(), {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(payload),
@@ -207,7 +253,7 @@ export async function fetchProjectEvaluation(projectId: string): Promise<Project
   const base = apiBase();
 
   const url = new URL(`${base}/v1/projects/${encodeURIComponent(projectId)}/evaluation`, origin);
-  const res = await fetch(url.toString(), { next: { revalidate: 300 } });
+  const res = await fetchWithRetry(url.toString(), { next: { revalidate: PAGE_REVALIDATE_SECONDS } });
 
   if (res.status === 404) return null;
   if (!res.ok) throw new Error(`Failed to fetch project evaluation (${res.status})`);
@@ -232,7 +278,7 @@ export async function fetchAreaStatisticsBySlug(slug: string): Promise<AreaStati
   const base = apiBase();
 
   const url = new URL(`${base}/v1/areas/${encodeURIComponent(slug)}/statistics`, origin);
-  const res = await fetch(url.toString(), { next: { revalidate: 300 } });
+  const res = await fetchWithRetry(url.toString(), { next: { revalidate: PAGE_REVALIDATE_SECONDS } });
   if (res.status === 404) return null;
   if (!res.ok) throw new Error(`Failed to fetch area statistics (${res.status})`);
   return (await res.json()) as AreaStatisticsResponse;

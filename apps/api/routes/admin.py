@@ -13,16 +13,16 @@ router = APIRouter(prefix="/admin", tags=["admin"])
 
 
 @router.get("/leads", response_model=list[LeadAdminItem])
-async def list_leads(
+def list_leads(
     db: Session = Depends(get_db),
     _admin: User = Depends(get_current_admin),
 ) -> list[LeadAdminItem]:
-    leads = db.scalars(select(Lead).order_by(desc(Lead.created_at)).limit(200)).all()
+    leads = db.scalars(select(Lead).order_by(desc(Lead.created_at))).all()
     return [LeadAdminItem.model_validate(lead) for lead in leads]
 
 
 @router.get("/leads/{lead_id}", response_model=LeadAdminItem)
-async def get_lead(
+def get_lead(
     lead_id: UUID,
     db: Session = Depends(get_db),
     _admin: User = Depends(get_current_admin),
@@ -35,7 +35,7 @@ async def get_lead(
 
 
 @router.patch("/leads/{lead_id}", response_model=LeadAdminItem)
-async def update_lead_status(
+def update_lead_status(
     lead_id: UUID,
     payload: LeadStatusUpdate,
     db: Session = Depends(get_db),

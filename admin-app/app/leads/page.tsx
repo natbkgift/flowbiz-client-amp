@@ -5,7 +5,8 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 
 import { apiRequest, handleUnauthorizedError } from '../../lib/api';
-import { getToken, setToken } from '../../lib/auth-store';
+import { getToken } from '../../lib/auth-store';
+import { AdminLayout } from '../../components/layout/AdminLayout';
 
 type Lead = {
   id: string;
@@ -39,42 +40,40 @@ export default function LeadsPage() {
   }, [router]);
 
   return (
-    <main className="max-w-5xl mx-auto p-6 space-y-4">
-      <div className="flex items-center justify-between">
+    <AdminLayout>
+      <main id="main-content" className="max-w-6xl mx-auto p-6 space-y-4">
         <h1 className="text-2xl font-semibold">Leads</h1>
-        <button className="text-sm underline" onClick={() => { setToken(null); router.push('/login'); }}>
-          Logout
-        </button>
-      </div>
-      {error ? <p className="text-red-600">{error}</p> : null}
-      <div className="bg-white rounded-lg shadow-sm overflow-hidden">
-        <table className="w-full text-sm">
-          <thead className="bg-slate-100">
-            <tr>
-              <th className="text-left p-3">Name</th>
-              <th className="text-left p-3">Contact</th>
-              <th className="text-left p-3">Score</th>
-              <th className="text-left p-3">Status</th>
-              <th className="text-left p-3">Action</th>
-            </tr>
-          </thead>
-          <tbody>
-            {leads.map((lead) => (
-              <tr key={lead.id} className="border-t">
-                <td className="p-3">{lead.name}</td>
-                <td className="p-3">{lead.email ?? lead.phone ?? '-'}</td>
-                <td className="p-3">{lead.score}</td>
-                <td className="p-3">{lead.status}</td>
-                <td className="p-3">
-                  <Link className="underline" href={`/leads/${lead.id}`}>
-                    Open
-                  </Link>
-                </td>
+        {error ? <p className="text-red-600" role="alert">{error}</p> : null}
+        <div className="bg-white rounded-lg shadow-sm overflow-hidden" role="region" aria-label="Leads table">
+          <table className="w-full text-sm" aria-label="Leads list">
+            <caption className="sr-only">List of all leads with contact info, score, and status</caption>
+            <thead className="bg-slate-100">
+              <tr>
+                <th scope="col" className="text-left p-3">Name</th>
+                <th scope="col" className="text-left p-3">Contact</th>
+                <th scope="col" className="text-left p-3">Score</th>
+                <th scope="col" className="text-left p-3">Status</th>
+                <th scope="col" className="text-left p-3">Action</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-    </main>
+            </thead>
+            <tbody>
+              {leads.map((lead) => (
+                <tr key={lead.id} className="border-t">
+                  <td className="p-3">{lead.name}</td>
+                  <td className="p-3">{lead.email ?? lead.phone ?? '-'}</td>
+                  <td className="p-3">{lead.score}</td>
+                  <td className="p-3">{lead.status}</td>
+                  <td className="p-3">
+                    <Link className="underline" href={`/leads/${lead.id}`}>
+                      Open
+                    </Link>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </main>
+    </AdminLayout>
   );
 }

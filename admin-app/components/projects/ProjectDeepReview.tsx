@@ -2,6 +2,8 @@ import Link from 'next/link';
 
 import type { ProjectEvaluationResponse } from '@/app/_lib/public-api-server';
 import { withLocale } from '@/app/_lib/i18n/routing';
+import type { Dictionary } from '@/app/_lib/i18n/types';
+import { getDictionary } from '@/app/_lib/i18n/get-dictionary';
 
 function riskScore(ev: ProjectEvaluationResponse): number {
   let score = 0;
@@ -18,20 +20,20 @@ function riskScore(ev: ProjectEvaluationResponse): number {
   return Math.min(100, Math.max(0, score));
 }
 
-function prosCons(ev: ProjectEvaluationResponse): { pros: string[]; cons: string[] } {
+function prosCons(ev: ProjectEvaluationResponse, dict: Dictionary): { pros: string[]; cons: string[] } {
   const keys = new Set(ev.badges.map((b) => b.key));
 
   const pros: string[] = [];
   const cons: string[] = [];
 
-  if (keys.has('roi_snapshot')) pros.push('ROI snapshot available');
-  else cons.push('ROI snapshot missing');
+  if (keys.has('roi_snapshot')) pros.push(dict.compare.roiAvailable);
+  else cons.push(dict.compare.roiMissing);
 
-  if (keys.has('area_stats_available')) pros.push('Area statistics snapshot available');
-  else cons.push('Area statistics snapshot missing');
+  if (keys.has('area_stats_available')) pros.push(dict.compare.areaStatsAvailable);
+  else cons.push(dict.compare.areaStatsMissing);
 
-  if (keys.has('has_cover_image')) pros.push('Cover image available');
-  else cons.push('Cover image missing');
+  if (keys.has('has_cover_image')) pros.push(dict.compare.coverImageAvailable);
+  else cons.push(dict.compare.coverImageMissing);
 
   // Keep output deterministic even if all are present.
   if (!cons.length) cons.push('—');
@@ -46,33 +48,30 @@ export function ProjectDeepReview({
   locale: 'en' | 'th';
   evaluation: ProjectEvaluationResponse;
 }) {
-  const { pros, cons } = prosCons(evaluation);
+  const dict = getDictionary(locale);
+  const { pros, cons } = prosCons(evaluation, dict);
   const score = riskScore(evaluation);
 
   const invLines: string[] = [];
-  if (evaluation.area_statistics?.avg_price) invLines.push(`avg_price snapshot: ${evaluation.area_statistics.avg_price}`);
-  if (evaluation.area_statistics?.avg_rent) invLines.push(`avg_rent snapshot: ${evaluation.area_statistics.avg_rent}`);
-  if (evaluation.area_statistics?.roi_percent) invLines.push(`roi_percent snapshot: ${evaluation.area_statistics.roi_percent}`);
-  if (evaluation.area_statistics?.as_of) invLines.push(`as_of: ${evaluation.area_statistics.as_of}`);
-  if (!invLines.length) invLines.push(locale === 'th' ? 'ยังไม่มี snapshot' : 'No snapshots available yet.');
+  if (evaluation.area_statistics?.avg_price) invLines.push(`${dict.deepReview.avgPriceSnapshot}: ${evaluation.area_statistics.avg_price}`);
+  if (evaluation.area_statistics?.avg_rent) invLines.push(`${dict.deepReview.avgRentSnapshot}: ${evaluation.area_statistics.avg_rent}`);
+  if (evaluation.area_statistics?.roi_percent) invLines.push(`${dict.deepReview.roiPercentSnapshot}: ${evaluation.area_statistics.roi_percent}`);
+  if (evaluation.area_statistics?.as_of) invLines.push(`${dict.deepReview.asOfLabel}: ${evaluation.area_statistics.as_of}`);
+  if (!invLines.length) invLines.push(dict.deepReview.noSnapshots);
 
-  const riskLabel = score >= 70 ? 'High' : score >= 35 ? 'Medium' : 'Low';
+  const riskLabel = score >= 70 ? dict.compare.riskHigh : score >= 35 ? dict.compare.riskMedium : dict.compare.riskLow;
 
   return (
     <section className="section section--alt">
       <div className="section-header">
-        <h2 className="section-title">{locale === 'th' ? 'Deep review' : 'Deep review'}</h2>
-        <p className="section-subtitle">
-          {locale === 'th'
-            ? 'สรุปแบบ conservative จากข้อมูล snapshot ที่มี (ไม่ใช่คำรับประกันผลตอบแทน)'
-            : 'Conservative summary from available snapshots (not a guarantee of returns).'}
-        </p>
+        <h2 className="section-title">{dict.deepReview.title}</h2>
+        <p className="section-subtitle">{dict.deepReview.subtitle}</p>
       </div>
 
       <div className="grid grid-3">
         <div className="card reveal">
-          <h3 className="card-title">{locale === 'th' ? 'Pros' : 'Pros'}</h3>
-          <ul className="bullet-list" style={{ marginTop: 12 }}>
+          <h3 className="card-title">{dict.deepReview.pros}</h3>
+          <ul className="bullet-list mt-3">
             {pros.map((p) => (
               <li key={p}>{p}</li>
             ))}
@@ -80,8 +79,8 @@ export function ProjectDeepReview({
         </div>
 
         <div className="card reveal">
-          <h3 className="card-title">{locale === 'th' ? 'Cons' : 'Cons'}</h3>
-          <ul className="bullet-list" style={{ marginTop: 12 }}>
+          <h3 className="card-title">{dict.deepReview.cons}</h3>
+          <ul className="bullet-list mt-3">
             {cons.map((c) => (
               <li key={c}>{c}</li>
             ))}
@@ -89,33 +88,27 @@ export function ProjectDeepReview({
         </div>
 
         <div className="card reveal">
-          <h3 className="card-title">{locale === 'th' ? 'Risk score' : 'Risk score'}</h3>
-          <p className="card-subtitle">
-            {locale === 'th' ? 'ยิ่งสูง = ข้อมูลจำกัด/ความไม่แน่นอนมากขึ้น' : 'Higher = more uncertainty / less data.'}
-          </p>
-          <div style={{ marginTop: 12, fontWeight: 700, fontSize: 20 }}>{score}/100 ({riskLabel})</div>
+          <h3 className="card-title">{dict.deepReview.riskScore}</h3>
+          <p className="card-subtitle">{dict.deepReview.riskExplain}</p>
+          <div className="mt-3 font-bold text-xl">{score}/100 ({riskLabel})</div>
         </div>
       </div>
 
-      <div className="card reveal" style={{ marginTop: 16 }}>
-        <h3 className="card-title">{locale === 'th' ? 'Investment analysis (snapshot)' : 'Investment analysis (snapshot)'}</h3>
-        <p className="card-subtitle">
-          {locale === 'th'
-            ? 'แสดงเฉพาะข้อมูลที่มีในระบบ ณ ตอนนี้'
-            : 'Shows only the data currently available in the system.'}
-        </p>
-        <ul className="bullet-list" style={{ marginTop: 12 }}>
+      <div className="card reveal mt-4">
+        <h3 className="card-title">{dict.deepReview.investTitle}</h3>
+        <p className="card-subtitle">{dict.deepReview.investSubtitle}</p>
+        <ul className="bullet-list mt-3">
           {invLines.map((l) => (
             <li key={l}>{l}</li>
           ))}
         </ul>
 
-        <div className="cta-row" style={{ marginTop: 12 }}>
+        <div className="cta-row mt-3">
           <Link className="btn btn-cta" href={withLocale(locale, '/contact?topic=investment_plan')}>
-            {locale === 'th' ? 'ขอแผนการลงทุน' : 'Get Investment Plan'}
+            {dict.deepReview.getInvestmentPlan}
           </Link>
           <Link className="btn btn-secondary" href={withLocale(locale, '/compare')}>
-            {locale === 'th' ? 'ไปหน้า Compare' : 'Go to Compare'}
+            {dict.deepReview.goToCompare}
           </Link>
         </div>
       </div>

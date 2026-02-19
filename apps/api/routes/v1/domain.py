@@ -4,6 +4,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy import asc, select
 from sqlalchemy.orm import Session
 
+from packages.core.cache import response_cache
 from packages.core.database import get_db
 from packages.core.models import Agent, Area, AreaStatistic, Developer
 from packages.core.schemas.domain import (
@@ -18,13 +19,18 @@ router = APIRouter(prefix="/v1", tags=["domain"])
 
 
 @router.get("/areas", response_model=list[AreaItem])
-async def list_areas(db: Session = Depends(get_db)) -> list[AreaItem]:
+def list_areas(db: Session = Depends(get_db)) -> list[AreaItem]:
+    cached = response_cache.get("areas_list")
+    if cached is not None:
+        return cached
     items = db.scalars(select(Area).order_by(asc(Area.slug))).all()
-    return [AreaItem.model_validate(i) for i in items]
+    result = [AreaItem.model_validate(i) for i in items]
+    response_cache.set("areas_list", result, ttl=600)
+    return result
 
 
 @router.get("/areas/{slug}/statistics", response_model=AreaStatisticsResponse)
-async def get_area_statistics(slug: str, db: Session = Depends(get_db)) -> AreaStatisticsResponse:
+def get_area_statistics(slug: str, db: Session = Depends(get_db)) -> AreaStatisticsResponse:
     area = db.scalar(select(Area).where(Area.slug == slug))
     if area is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Area not found")
@@ -46,12 +52,22 @@ async def get_area_statistics(slug: str, db: Session = Depends(get_db)) -> AreaS
 
 
 @router.get("/developers", response_model=list[DeveloperItem])
-async def list_developers(db: Session = Depends(get_db)) -> list[DeveloperItem]:
+def list_developers(db: Session = Depends(get_db)) -> list[DeveloperItem]:
+    cached = response_cache.get("developers_list")
+    if cached is not None:
+        return cached
     items = db.scalars(select(Developer).order_by(asc(Developer.slug))).all()
-    return [DeveloperItem.model_validate(i) for i in items]
+    result = [DeveloperItem.model_validate(i) for i in items]
+    response_cache.set("developers_list", result, ttl=600)
+    return result
 
 
 @router.get("/agents", response_model=list[AgentItem])
-async def list_agents(db: Session = Depends(get_db)) -> list[AgentItem]:
+def list_agents(db: Session = Depends(get_db)) -> list[AgentItem]:
+    cached = response_cache.get("agents_list")
+    if cached is not None:
+        return cached
     items = db.scalars(select(Agent).order_by(asc(Agent.name))).all()
-    return [AgentItem.model_validate(i) for i in items]
+    result = [AgentItem.model_validate(i) for i in items]
+    response_cache.set("agents_list", result, ttl=600)
+    return result

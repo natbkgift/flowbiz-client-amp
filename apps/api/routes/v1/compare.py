@@ -19,7 +19,7 @@ def _sorted_unique(ids: list[UUID]) -> list[UUID]:
 
 
 @router.post("/compare")
-async def compare_properties(
+def compare_properties(
     payload: CompareRequest,
     db: Session = Depends(get_db),
 ) -> dict:

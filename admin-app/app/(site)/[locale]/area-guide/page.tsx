@@ -1,37 +1,26 @@
-import type { Metadata } from 'next';
+import dynamic from 'next/dynamic';
 
 import { Container } from '@/components/layout/Container';
-import { LeadForm } from '@/components/forms/LeadForm';
+
+const LeadForm = dynamic(
+  () => import('@/components/forms/LeadForm').then((m) => m.LeadForm),
+  { ssr: false },
+);
 import { getDictionary, normalizeLocale } from '@/app/_lib/i18n/get-dictionary';
+import { makePageMetadata } from '@/app/_lib/i18n/metadata';
 import { withLocale } from '@/app/_lib/i18n/routing';
+import { PAGE_REVALIDATE_SECONDS } from '@/app/_lib/constants';
+
+export const revalidate = PAGE_REVALIDATE_SECONDS;
 
 export async function generateMetadata({
   params,
 }: {
   params: { locale: string };
-}): Promise<Metadata> {
+}) {
   const locale = normalizeLocale(params.locale);
   const dict = getDictionary(locale);
-  const canonical = `/${locale}/area-guide`;
-  return {
-    title: `${dict.nav.areaGuide} | ${dict.brand.name}`,
-    description: dict.areaGuide.subtitle,
-    alternates: {
-      canonical,
-      languages: {
-        en: '/en/area-guide',
-        th: '/th/area-guide',
-      },
-    },
-    openGraph: {
-      type: 'website',
-      url: canonical,
-      title: `${dict.nav.areaGuide} | ${dict.brand.name}`,
-      description: dict.areaGuide.subtitle,
-      siteName: dict.brand.name,
-      locale: locale === 'th' ? 'th_TH' : 'en_US',
-    },
-  };
+  return makePageMetadata(locale, 'area-guide', dict.nav.areaGuide, dict.areaGuide.subtitle, dict.brand.name);
 }
 
 export default function AreaGuidePage({ params }: { params: { locale: string } }) {
@@ -40,19 +29,19 @@ export default function AreaGuidePage({ params }: { params: { locale: string } }
 
   const areas = [
     {
-      title: 'Central Pattaya',
-      lifestyle: 'Walkability and access to amenities.',
-      investment: 'High liquidity, varies by building and unit fit.',
+      title: dict.areaGuide.centralTitle,
+      lifestyle: dict.areaGuide.centralLifestyle,
+      investment: dict.areaGuide.centralInvestment,
     },
     {
-      title: 'Jomtien',
-      lifestyle: 'Beach access with quieter pockets.',
-      investment: 'Broad rental demand, depends on location and management.',
+      title: dict.areaGuide.jomtienTitle,
+      lifestyle: dict.areaGuide.jomtienLifestyle,
+      investment: dict.areaGuide.jomtienInvestment,
     },
     {
-      title: 'Pratumnak',
-      lifestyle: 'Residential feel between Pattaya and Jomtien.',
-      investment: 'Selective demand—unit fit matters.',
+      title: dict.areaGuide.pratumnakTitle,
+      lifestyle: dict.areaGuide.pratumnakLifestyle,
+      investment: dict.areaGuide.pratumnakInvestment,
     },
   ];
 

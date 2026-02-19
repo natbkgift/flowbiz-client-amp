@@ -1,13 +1,21 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
+import dynamic from 'next/dynamic';
 
 import { Container } from '@/components/layout/Container';
 import { TrackedLink } from '@/components/analytics/TrackedLink';
 import { getDictionary, normalizeLocale } from '@/app/_lib/i18n/get-dictionary';
-import { withLocale } from '@/app/_lib/i18n/routing';
+import { withLocale, ogLocale } from '@/app/_lib/i18n/routing';
 import { fetchProjectBySlug, fetchProjectEvaluation } from '@/app/_lib/public-api-server';
 import { getInternalLinks } from '@/app/_lib/internal-links';
-import { ProjectDeepReview } from '@/components/projects/ProjectDeepReview';
+
+const ProjectDeepReview = dynamic(
+  () => import('@/components/projects/ProjectDeepReview').then((m) => m.ProjectDeepReview),
+  { ssr: false },
+);
+import { PAGE_REVALIDATE_SECONDS } from '@/app/_lib/constants';
+
+export const revalidate = PAGE_REVALIDATE_SECONDS;
 
 export async function generateMetadata({
   params,
@@ -26,8 +34,8 @@ export async function generateMetadata({
     projectName = null;
   }
 
-  const title = projectName ? `${projectName} | ${dict.brand.name}` : `${dict.brand.name} | Project`;
-  const description = 'Project overview with advisory guidance for international buyers.';
+  const title = projectName ? `${projectName} | ${dict.brand.name}` : `${dict.brand.name} | ${dict.nav.projects}`;
+  const description = dict.property.projectMetaDescription;
   return {
     title,
     description,
@@ -44,7 +52,7 @@ export async function generateMetadata({
       title,
       description,
       siteName: dict.brand.name,
-      locale: locale === 'th' ? 'th_TH' : 'en_US',
+      locale: ogLocale(locale),
     },
   };
 }
@@ -68,11 +76,11 @@ export default async function ProjectDetailPage({
     return (
       <main className="section" id="main-content">
         <Container>
-          <h1 className="section-title">Project not found</h1>
-          <p className="section-subtitle">This project may be unpublished.</p>
-          <div className="card reveal" style={{ marginTop: 24 }}>
-            <h2 className="card-title">{locale === 'th' ? 'ลิงก์ที่เกี่ยวข้อง' : 'Explore more'}</h2>
-            <p className="card-subtitle">{locale === 'th' ? 'ไปยังหน้าสำคัญอื่น ๆ' : 'Navigate to key pages'}</p>
+          <h1 className="section-title">{dict.property.projectNotFound}</h1>
+          <p className="section-subtitle">{dict.property.projectMayBeUnpublished}</p>
+          <div className="card reveal mt-6">
+            <h2 className="card-title">{dict.property.exploreMore}</h2>
+            <p className="card-subtitle">{dict.property.navigateToKeyPages}</p>
             <div className="card-actions">
               {internalLinks.map((it) => (
                 <Link
@@ -116,13 +124,13 @@ export default async function ProjectDetailPage({
           {
             '@type': 'ListItem',
             position: 1,
-            name: locale === 'th' ? 'หน้าแรก' : 'Home',
+            name: dict.property.breadcrumbHome,
             item: `${siteUrl}/${locale}`,
           },
           {
             '@type': 'ListItem',
             position: 2,
-            name: 'Projects',
+            name: dict.nav.projects,
             item: `${siteUrl}/${locale}/projects`,
           },
           {
@@ -144,7 +152,7 @@ export default async function ProjectDetailPage({
       <Container>
         <div className="section-header">
           <h1 className="section-title">{project.name}</h1>
-          <p className="section-subtitle">International buyer guidance with clear next steps.</p>
+          <p className="section-subtitle">{dict.property.projectSubtitle}</p>
         </div>
 
         <div className="cta-row">
@@ -166,9 +174,9 @@ export default async function ProjectDetailPage({
           </TrackedLink>
         </div>
 
-        <div className="card reveal" style={{ marginTop: 24 }}>
-          <h2 className="card-title">{locale === 'th' ? 'ลิงก์ที่เกี่ยวข้อง' : 'Explore more'}</h2>
-          <p className="card-subtitle">{locale === 'th' ? 'ไปยังหน้าสำคัญอื่น ๆ' : 'Navigate to key pages'}</p>
+        <div className="card reveal mt-6">
+          <h2 className="card-title">{dict.property.exploreMore}</h2>
+          <p className="card-subtitle">{dict.property.navigateToKeyPages}</p>
           <div className="card-actions">
             {internalLinks.map((it) => (
               <Link

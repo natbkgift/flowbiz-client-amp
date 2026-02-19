@@ -1,15 +1,24 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import Image from 'next/image';
+import dynamic from 'next/dynamic';
 
 import { Container } from '@/components/layout/Container';
-import { LeadForm } from '@/components/forms/LeadForm';
+
+const LeadForm = dynamic(
+  () => import('@/components/forms/LeadForm').then((m) => m.LeadForm),
+  { ssr: false },
+);
 import { IconBed, IconBath, IconArea } from '@/components/icons/SvgIcons';
 import { fetchPropertyBySlug } from '@/app/_lib/public-api-server';
 import { CTA } from '@/app/_lib/public-cta';
 import { resolveImageUrl } from '@/app/_lib/public-api-shared';
 import { getDictionary, normalizeLocale } from '@/app/_lib/i18n/get-dictionary';
+import { ogLocale } from '@/app/_lib/i18n/routing';
 import { getInternalLinks } from '@/app/_lib/internal-links';
+import { PAGE_REVALIDATE_SECONDS } from '@/app/_lib/constants';
+
+export const revalidate = PAGE_REVALIDATE_SECONDS;
 
 type PageProps = { params: { locale: string; slug: string } };
 
@@ -20,7 +29,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
   const p = await fetchPropertyBySlug(params.slug);
   if (!p) {
-    const title = `${dict.brand.name} | Property`;
+    const title = `${dict.brand.name} | ${dict.nav.buy}`;
     return {
       title,
       alternates: {
@@ -35,7 +44,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
         url: canonical,
         title,
         siteName: dict.brand.name,
-        locale: locale === 'th' ? 'th_TH' : 'en_US',
+        locale: ogLocale(locale),
       },
     };
   }
@@ -58,7 +67,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
       title,
       description,
       siteName: dict.brand.name,
-      locale: locale === 'th' ? 'th_TH' : 'en_US',
+      locale: ogLocale(locale),
     },
   };
 }
@@ -77,10 +86,10 @@ export default async function PropertyPage({ params }: PageProps) {
     return (
       <main className="section" id="main-content">
         <Container>
-          <h1>Property not found</h1>
-          <div className="card reveal" style={{ marginTop: 24 }}>
-            <h2 className="card-title">{locale === 'th' ? 'ไปต่อที่' : 'Next steps'}</h2>
-            <p className="card-subtitle">{locale === 'th' ? 'ลิงก์ภายในที่เกี่ยวข้อง' : 'Explore related pages'}</p>
+          <h1>{dict.property.notFound}</h1>
+          <div className="card reveal mt-6">
+            <h2 className="card-title">{dict.property.nextSteps}</h2>
+            <p className="card-subtitle">{dict.property.exploreRelated}</p>
             <div className="card-actions">
               {internalLinks.map((it) => (
                 <Link
@@ -143,7 +152,7 @@ export default async function PropertyPage({ params }: PageProps) {
           {
             '@type': 'ListItem',
             position: 1,
-            name: locale === 'th' ? 'หน้าแรก' : 'Home',
+            name: dict.property.breadcrumbHome,
             item: `${siteUrl}/${locale}`,
           },
           {
@@ -180,7 +189,7 @@ export default async function PropertyPage({ params }: PageProps) {
                     alt={property.title}
                     fill
                     sizes="(min-width: 1024px) 70vw, 100vw"
-                    style={{ objectFit: 'cover' }}
+                    className="object-cover"
                     priority
                   />
                 ) : null}
@@ -191,7 +200,7 @@ export default async function PropertyPage({ params }: PageProps) {
                 <div className="gallery-thumbnails">
                   {gallery.slice(0, 12).map((src, idx) => (
                     <div key={src} className={idx === 0 ? 'gallery-thumbnail active' : 'gallery-thumbnail'}>
-                      <Image src={src} alt="" width={80} height={60} style={{ objectFit: 'cover' }} loading="lazy" />
+                      <Image src={src} alt={`${dict.property.galleryPhoto} ${idx + 1}`} width={80} height={60} className="object-cover" loading="lazy" />
                     </div>
                   ))}
                 </div>
@@ -209,43 +218,43 @@ export default async function PropertyPage({ params }: PageProps) {
             </div>
 
             <div className="property-facts">
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <div className="flex items-center gap-2">
                 <IconBed size="sm" />
                 <div>
                   <strong>{property.bedrooms ?? '-'}</strong>
-                  <div style={{ fontSize: 14, color: 'var(--color-text-secondary)' }}>
-                    {locale === 'th' ? 'ห้องนอน' : 'Bedrooms'}
+                  <div className="text-sm text-[var(--color-text-secondary)]">
+                    {dict.property.bedrooms}
                   </div>
                 </div>
               </div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <div className="flex items-center gap-2">
                 <IconBath size="sm" />
                 <div>
                   <strong>{property.bathrooms ?? '-'}</strong>
-                  <div style={{ fontSize: 14, color: 'var(--color-text-secondary)' }}>
-                    {locale === 'th' ? 'ห้องน้ำ' : 'Bathrooms'}
+                  <div className="text-sm text-[var(--color-text-secondary)]">
+                    {dict.property.bathrooms}
                   </div>
                 </div>
               </div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <div className="flex items-center gap-2">
                 <IconArea size="sm" />
                 <div>
                   <strong>{property.size ?? '-'}</strong>
-                  <div style={{ fontSize: 14, color: 'var(--color-text-secondary)' }}>
-                    {locale === 'th' ? 'ตร.ม.' : 'Sqm'}
+                  <div className="text-sm text-[var(--color-text-secondary)]">
+                    {dict.property.sqm}
                   </div>
                 </div>
               </div>
             </div>
 
-            <div style={{ background: 'var(--color-white)', padding: 24, borderRadius: 12, marginBottom: 24 }}>
-              <h2 style={{ marginBottom: 16 }}>Description</h2>
-              <p style={{ marginBottom: 0 }}>{property.description ?? '—'}</p>
+            <div className="bg-[var(--color-white)] p-6 rounded-xl mb-6">
+              <h2 className="mb-4">{dict.property.description}</h2>
+              <p className="mb-0">{property.description ?? '—'}</p>
             </div>
 
-            <div className="card reveal" style={{ marginBottom: 24 }}>
-              <h2 className="card-title">{locale === 'th' ? 'ไปต่อที่' : 'Next steps'}</h2>
-              <p className="card-subtitle">{locale === 'th' ? 'ลิงก์ภายในที่เกี่ยวข้อง' : 'Explore related pages'}</p>
+            <div className="card reveal mb-6">
+              <h2 className="card-title">{dict.property.nextSteps}</h2>
+              <p className="card-subtitle">{dict.property.exploreRelated}</p>
               <div className="card-actions">
                 {internalLinks.map((it) => (
                   <Link
@@ -262,13 +271,13 @@ export default async function PropertyPage({ params }: PageProps) {
             </div>
 
             <div>
-              <h2 style={{ marginBottom: 24 }}>Similar Properties</h2>
+              <h2 className="mb-6">{dict.property.similarProperties}</h2>
               <div className="grid grid-2">
                 <div className="property-card">
                   <div className="card-content">
-                    <div className="card-title">Coming soon</div>
-                    <div className="card-location" style={{ marginBottom: 0 }}>
-                      Similar properties will appear here.
+                    <div className="card-title">{dict.property.comingSoon}</div>
+                    <div className="card-location mb-0">
+                      {dict.property.similarComingSoonText}
                     </div>
                   </div>
                 </div>
@@ -278,45 +287,33 @@ export default async function PropertyPage({ params }: PageProps) {
 
           <aside className="detail-sidebar">
             <div className="agent-card">
-              <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 16 }}>
-                <div
-                  style={{
-                    width: 64,
-                    height: 64,
-                    borderRadius: '50%',
-                    background: 'var(--color-primary)',
-                    color: 'white',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    fontWeight: 700,
-                  }}
-                >
-                  AMP
+              <div className="flex items-center gap-4 mb-4">
+                <div className="w-16 h-16 rounded-full bg-[var(--color-primary)] text-white flex items-center justify-center font-bold">
+                  {dict.brand.shortName}
                 </div>
                 <div>
-                  <h3 style={{ marginBottom: 4 }}>AMP Pattaya</h3>
-                  <p style={{ marginBottom: 0, color: 'var(--color-text-secondary)', fontSize: 14 }}>
-                    Professional Property Management
+                  <h3 className="mb-1">{dict.property.agentName}</h3>
+                  <p className="mb-0 text-[var(--color-text-secondary)] text-sm">
+                    {dict.property.agentRole}
                   </p>
                 </div>
               </div>
 
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+              <div className="flex flex-col gap-2">
                 <a href={CTA.lineUrl} className="btn btn-primary btn-block" target="_blank" rel="noreferrer">
-                  LINE Chat
+                  {dict.property.lineChat}
                 </a>
                 <a href={CTA.phoneTel} className="btn btn-secondary btn-block">
-                  Call: 063-453-3526
+                  {dict.property.callAgent}
                 </a>
               </div>
             </div>
 
-            <div style={{ marginTop: 24 }}>
+            <div className="mt-6">
               <LeadForm
-                heading="Interested in this property?"
+                heading={dict.property.interestedHeading}
                 propertyId={property.id}
-                defaultMessage={`I'm interested in ${property.title}. Please contact me.`}
+                defaultMessage={dict.property.interestedMessage}
               />
             </div>
           </aside>

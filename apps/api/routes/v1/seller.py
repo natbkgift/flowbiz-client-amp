@@ -31,7 +31,7 @@ def _get_sell_rate_limiter() -> SlidingWindowRateLimiter:
     response_model=SellerSubmissionItem,
     status_code=status.HTTP_201_CREATED,
 )
-async def submit(
+def submit(
     payload: SellerSubmissionCreate,
     request: Request,
     response: Response,

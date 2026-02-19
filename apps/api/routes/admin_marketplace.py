@@ -2,8 +2,8 @@ from __future__ import annotations
 
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, HTTPException, status
-from sqlalchemy import asc, desc, select
+from fastapi import APIRouter, Depends, HTTPException, Query, status
+from sqlalchemy import asc, desc, func, select
 from sqlalchemy.orm import Session
 
 from apps.api.dependencies.auth import get_current_admin
@@ -16,12 +16,13 @@ from packages.core.schemas.marketplace import (
     MarketplaceItemItem,
     MarketplaceItemUpdate,
 )
+from packages.core.schemas.pagination import PaginatedResponse, PaginationMeta
 
 router = APIRouter(prefix="/admin", tags=["admin"])
 
 
 @router.get("/marketplace/categories", response_model=list[MarketplaceCategoryItem])
-async def admin_list_categories(
+def admin_list_categories(
     db: Session = Depends(get_db),
     _admin: User = Depends(get_current_admin),
 ) -> list[MarketplaceCategoryItem]:
@@ -34,7 +35,7 @@ async def admin_list_categories(
     response_model=MarketplaceCategoryItem,
     status_code=status.HTTP_201_CREATED,
 )
-async def admin_create_category(
+def admin_create_category(
     payload: MarketplaceCategoryCreate,
     db: Session = Depends(get_db),
     _admin: User = Depends(get_current_admin),
@@ -52,15 +53,22 @@ async def admin_create_category(
     return MarketplaceCategoryItem.model_validate(row)
 
 
-@router.get("/marketplace/items", response_model=list[MarketplaceItemItem])
-async def admin_list_items(
+@router.get("/marketplace/items", response_model=PaginatedResponse[MarketplaceItemItem])
+def admin_list_items(
+    page: int = Query(1, ge=1),
+    limit: int = Query(50, ge=1, le=200),
     db: Session = Depends(get_db),
     _admin: User = Depends(get_current_admin),
-) -> list[MarketplaceItemItem]:
+) -> PaginatedResponse[MarketplaceItemItem]:
+    base = select(MarketplaceItem)
+    total = db.scalar(select(func.count()).select_from(base.subquery())) or 0
     rows = db.scalars(
-        select(MarketplaceItem).order_by(desc(MarketplaceItem.created_at)).limit(200)
+        base.order_by(desc(MarketplaceItem.created_at)).offset((page - 1) * limit).limit(limit)
     ).all()
-    return [MarketplaceItemItem.model_validate(r) for r in rows]
+    return PaginatedResponse(
+        data=[MarketplaceItemItem.model_validate(r) for r in rows],
+        meta=PaginationMeta(page=page, limit=limit, total=total),
+    )
 
 
 @router.post(
@@ -68,7 +76,7 @@ async def admin_list_items(
     response_model=MarketplaceItemItem,
     status_code=status.HTTP_201_CREATED,
 )
-async def admin_create_item(
+def admin_create_item(
     payload: MarketplaceItemCreate,
     db: Session = Depends(get_db),
     _admin: User = Depends(get_current_admin),
@@ -94,7 +102,7 @@ async def admin_create_item(
 
 
 @router.patch("/marketplace/items/{item_id}", response_model=MarketplaceItemItem)
-async def admin_update_item(
+def admin_update_item(
     item_id: UUID,
     payload: MarketplaceItemUpdate,
     db: Session = Depends(get_db),

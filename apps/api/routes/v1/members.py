@@ -13,7 +13,7 @@ router = APIRouter(prefix="/v1/members", tags=["members"])
 
 
 @router.get("/me", response_model=MemberMeResponse)
-async def me(
+def me(
     user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ) -> MemberMeResponse:

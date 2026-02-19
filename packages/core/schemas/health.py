@@ -1,3 +1,5 @@
+from typing import Optional
+
 from packages.core.schemas.base import BaseResponse
 
 
@@ -7,6 +9,7 @@ class HealthResponse(BaseResponse):
     status: str
     service: str
     version: str
+    db: Optional[str] = None
 
 
 class MetaResponse(BaseResponse):

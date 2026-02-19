@@ -53,7 +53,7 @@ export function LeadForm({ heading, propertyId, defaultMessage }: LeadFormProps)
   function formatApiError(bodyText: string): string {
     try {
       const parsed = JSON.parse(bodyText) as { detail?: unknown };
-      const detail = (parsed as any)?.detail;
+      const detail = (parsed as { detail?: string })?.detail;
 
       if (typeof detail === 'string') return detail;
       if (Array.isArray(detail)) {
@@ -67,7 +67,7 @@ export function LeadForm({ heading, propertyId, defaultMessage }: LeadFormProps)
       // ignore
     }
 
-    return bodyText || 'Request failed';
+    return bodyText || dict.errors.requestFailed;
   }
 
   async function onSubmit() {
@@ -129,7 +129,7 @@ export function LeadForm({ heading, propertyId, defaultMessage }: LeadFormProps)
       });
       setStatus({
         state: 'error',
-        message: err instanceof Error ? err.message : 'Failed to submit lead',
+        message: err instanceof Error ? err.message : dict.errors.failedToSubmit,
       });
     }
   }
@@ -158,33 +158,59 @@ export function LeadForm({ heading, propertyId, defaultMessage }: LeadFormProps)
           className="form-honeypot"
         />
 
+        <label htmlFor="lead-name" className="sr-only">
+          {dict.common.leadForm.namePlaceholder}
+        </label>
         <input
+          id="lead-name"
           className="form-input"
           name="name"
           placeholder={dict.common.leadForm.namePlaceholder}
+          aria-required="true"
           value={name}
           onChange={(e) => setName(e.target.value)}
         />
         <div className="form-grid-2">
-          <input
-            className="form-input"
-            name="email"
-            placeholder={dict.common.leadForm.emailPlaceholder}
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-          />
-          <input
-            className="form-input"
-            name="phone"
-            placeholder={dict.common.leadForm.phonePlaceholder}
-            value={phone}
-            onChange={(e) => setPhone(e.target.value)}
-          />
+          <div>
+            <label htmlFor="lead-email" className="sr-only">
+              {dict.common.leadForm.emailPlaceholder}
+            </label>
+            <input
+              id="lead-email"
+              className="form-input"
+              name="email"
+              type="email"
+              placeholder={dict.common.leadForm.emailPlaceholder}
+              aria-required="true"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+            />
+          </div>
+          <div>
+            <label htmlFor="lead-phone" className="sr-only">
+              {dict.common.leadForm.phonePlaceholder}
+            </label>
+            <input
+              id="lead-phone"
+              className="form-input"
+              name="phone"
+              type="tel"
+              placeholder={dict.common.leadForm.phonePlaceholder}
+              aria-required="true"
+              value={phone}
+              onChange={(e) => setPhone(e.target.value)}
+            />
+          </div>
         </div>
+        <label htmlFor="lead-message" className="sr-only">
+          {dict.common.leadForm.messagePlaceholder}
+        </label>
         <textarea
+          id="lead-message"
           className="form-textarea"
           name="message"
           placeholder={dict.common.leadForm.messagePlaceholder}
+          aria-required="true"
           value={message}
           onChange={(e) => setMessage(e.target.value)}
           rows={4}
@@ -195,6 +221,7 @@ export function LeadForm({ heading, propertyId, defaultMessage }: LeadFormProps)
           className="btn btn-primary btn-block"
           onClick={onSubmit}
           disabled={!canSubmit}
+          aria-describedby="lead-form-status"
         >
           {status.state === 'submitting' ? dict.common.leadForm.submitting : dict.common.leadForm.submit}
         </button>
@@ -213,13 +240,15 @@ export function LeadForm({ heading, propertyId, defaultMessage }: LeadFormProps)
           </a>
         </div>
 
-        {status.state === 'success' ? (
-          <p className="form-success">{dict.common.leadForm.success}{status.id ? ` (id: ${status.id})` : ''}</p>
-        ) : null}
+        <div id="lead-form-status" aria-live="assertive" aria-atomic="true">
+          {status.state === 'success' ? (
+            <p className="form-success" role="status">{dict.common.leadForm.success}{status.id ? ` (id: ${status.id})` : ''}</p>
+          ) : null}
 
-        {status.state === 'error' ? (
-          <p className="form-error">{dict.common.leadForm.errorPrefix} {status.message}</p>
-        ) : null}
+          {status.state === 'error' ? (
+            <p className="form-error" role="alert">{dict.common.leadForm.errorPrefix} {status.message}</p>
+          ) : null}
+        </div>
       </div>
     </form>
   );

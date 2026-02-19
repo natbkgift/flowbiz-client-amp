@@ -1,37 +1,26 @@
-import type { Metadata } from 'next';
+import dynamic from 'next/dynamic';
 
 import { Container } from '@/components/layout/Container';
-import { LeadForm } from '@/components/forms/LeadForm';
+
+const LeadForm = dynamic(
+  () => import('@/components/forms/LeadForm').then((m) => m.LeadForm),
+  { ssr: false },
+);
 import { getDictionary, normalizeLocale } from '@/app/_lib/i18n/get-dictionary';
+import { makePageMetadata } from '@/app/_lib/i18n/metadata';
 import { withLocale } from '@/app/_lib/i18n/routing';
+import { PAGE_REVALIDATE_SECONDS } from '@/app/_lib/constants';
+
+export const revalidate = PAGE_REVALIDATE_SECONDS;
 
 export async function generateMetadata({
   params,
 }: {
   params: { locale: string };
-}): Promise<Metadata> {
+}) {
   const locale = normalizeLocale(params.locale);
   const dict = getDictionary(locale);
-  const canonical = `/${locale}/invest`;
-  return {
-    title: `${dict.nav.invest} | ${dict.brand.name}`,
-    description: dict.invest.subtitle,
-    alternates: {
-      canonical,
-      languages: {
-        en: '/en/invest',
-        th: '/th/invest',
-      },
-    },
-    openGraph: {
-      type: 'website',
-      url: canonical,
-      title: `${dict.nav.invest} | ${dict.brand.name}`,
-      description: dict.invest.subtitle,
-      siteName: dict.brand.name,
-      locale: locale === 'th' ? 'th_TH' : 'en_US',
-    },
-  };
+  return makePageMetadata(locale, 'invest', dict.nav.invest, dict.invest.subtitle, dict.brand.name);
 }
 
 export default function InvestPage({ params }: { params: { locale: string } }) {

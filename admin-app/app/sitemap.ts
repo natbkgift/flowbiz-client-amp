@@ -8,15 +8,45 @@ function joinUrl(baseUrl: string, path: string): string {
   return `${b}${p}`;
 }
 
+type PageEntry = {
+  path: string;
+  changeFrequency: 'daily' | 'weekly' | 'monthly';
+  priority: number;
+};
+
+const pages: PageEntry[] = [
+  { path: '', changeFrequency: 'daily', priority: 1.0 },
+  { path: '/invest', changeFrequency: 'weekly', priority: 0.9 },
+  { path: '/buy', changeFrequency: 'weekly', priority: 0.9 },
+  { path: '/rent', changeFrequency: 'weekly', priority: 0.9 },
+  { path: '/sell', changeFrequency: 'monthly', priority: 0.7 },
+  { path: '/area-guide', changeFrequency: 'weekly', priority: 0.8 },
+  { path: '/area-guide/jomtien', changeFrequency: 'weekly', priority: 0.7 },
+  { path: '/area-guide/pratumnak', changeFrequency: 'weekly', priority: 0.7 },
+  { path: '/area-guide/wongamat', changeFrequency: 'weekly', priority: 0.7 },
+  { path: '/projects', changeFrequency: 'daily', priority: 0.9 },
+  { path: '/smart-finder', changeFrequency: 'monthly', priority: 0.8 },
+  { path: '/compare', changeFrequency: 'monthly', priority: 0.6 },
+  { path: '/contact', changeFrequency: 'monthly', priority: 0.5 },
+  { path: '/marketplace', changeFrequency: 'weekly', priority: 0.7 },
+  { path: '/about', changeFrequency: 'monthly', priority: 0.6 },
+  { path: '/area-guide/central', changeFrequency: 'weekly', priority: 0.7 },
+  { path: '/areas/jomtien', changeFrequency: 'weekly', priority: 0.6 },
+  { path: '/areas/pratumnak', changeFrequency: 'weekly', priority: 0.6 },
+  { path: '/areas/wongamat', changeFrequency: 'weekly', priority: 0.6 },
+  { path: '/areas/central', changeFrequency: 'weekly', priority: 0.6 },
+];
+
 export default function sitemap(): MetadataRoute.Sitemap {
   const locales = ['en', 'th'] as const;
-  const paths = ['', '/invest', '/buy', '/rent', '/area-guide', '/contact', '/projects'];
+  const now = new Date();
 
-  const urls = locales.flatMap((locale) =>
-    paths.map((p) => ({
-      url: joinUrl(SITE_URL, `/${locale}${p}`),
+  return locales.flatMap((locale) =>
+    pages.map(({ path, changeFrequency, priority }) => ({
+      url: joinUrl(SITE_URL, `/${locale}${path}`),
+      lastModified: now,
+      changeFrequency,
+      priority,
     }))
   );
-
-  return urls;
 }

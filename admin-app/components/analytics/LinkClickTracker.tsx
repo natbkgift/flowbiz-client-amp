@@ -36,7 +36,7 @@ export function LinkClickTracker() {
     };
 
     document.addEventListener('click', handler, { capture: true });
-    return () => document.removeEventListener('click', handler, { capture: true } as any);
+    return () => document.removeEventListener('click', handler, { capture: true });
   }, []);
 
   return null;

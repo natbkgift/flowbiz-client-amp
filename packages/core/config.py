@@ -47,6 +47,10 @@ class Settings(BaseSettings):
 
     # Database
     database_url: str = "sqlite:///./flowbiz.db"
+    db_pool_size: int = 10
+    db_max_overflow: int = 20
+    db_pool_recycle: int = 1800
+    db_pool_timeout: int = 30
 
     # Auth
     jwt_secret_key: str = "change-me-in-production"
@@ -67,6 +71,12 @@ class Settings(BaseSettings):
     # Admin bootstrap user
     admin_bootstrap_email: str = "admin@local.dev"
     admin_bootstrap_password: str = "admin123"
+
+    # CORS
+    cors_allowed_origins: str = Field(
+        default="http://localhost:3000,http://localhost:3001",
+        validation_alias=AliasChoices("CORS_ALLOWED_ORIGINS"),
+    )
 
     # Abuse mitigation
     inquiries_rate_limit_per_minute: int = 20

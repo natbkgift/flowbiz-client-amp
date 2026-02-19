@@ -58,7 +58,7 @@ def _enforce_payload_size(payload: dict | None) -> None:
     response_model=AnalyticsEventResponse,
     status_code=status.HTTP_201_CREATED,
 )
-async def create_event(
+def create_event(
     payload: AnalyticsEventCreate,
     request: Request,
     response: Response,
@@ -96,7 +96,7 @@ async def create_event(
     response_model=AnalyticsEventResponse,
     status_code=status.HTTP_201_CREATED,
 )
-async def create_event_v2(
+def create_event_v2(
     payload: EventCreateV2,
     request: Request,
     response: Response,

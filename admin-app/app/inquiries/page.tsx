@@ -5,7 +5,8 @@ import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 
 import { apiRequest, handleUnauthorizedError } from '../../lib/api';
-import { getToken, setToken } from '../../lib/auth-store';
+import { getToken } from '../../lib/auth-store';
+import { AdminLayout } from '../../components/layout/AdminLayout';
 
 type Inquiry = {
   id: string;
@@ -92,31 +93,23 @@ export default function InquiriesPage() {
   ];
 
   return (
-    <main className="max-w-6xl mx-auto p-6 space-y-4">
-      <div className="flex items-center justify-between">
+    <AdminLayout>
+      <main id="main-content" className="max-w-6xl mx-auto p-6 space-y-4">
         <div className="flex items-baseline gap-4">
           <h1 className="text-2xl font-semibold">Inquiries</h1>
           <Link className="text-sm underline" href="/leads">Legacy Leads</Link>
         </div>
-        <button
-          className="text-sm underline"
-          onClick={() => {
-            setToken(null);
-            router.push('/login');
-          }}
-        >
-          Logout
-        </button>
-      </div>
 
-      {error ? <p className="text-red-600">{error}</p> : null}
+      {error ? <p className="text-red-600" role="alert">{error}</p> : null}
 
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <div className="flex flex-wrap items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2" role="radiogroup" aria-label="Filter by status">
           {FILTERS.map((f) => (
             <button
               key={f.key}
               type="button"
+              role="radio"
+              aria-checked={filter === f.key}
               onClick={() => setFilter(f.key)}
               className={
                 filter === f.key
@@ -133,14 +126,16 @@ export default function InquiriesPage() {
           <span className="text-slate-600">Sort</span>
           <button
             type="button"
+            aria-pressed={sort === 'created_at'}
             className={sort === 'created_at' ? 'underline font-medium' : 'underline'}
             onClick={() => setSort('created_at')}
           >
             Created
           </button>
-          <span className="text-slate-300">|</span>
+          <span className="text-slate-300" aria-hidden="true">|</span>
           <button
             type="button"
+            aria-pressed={sort === 'score'}
             className={sort === 'score' ? 'underline font-medium' : 'underline'}
             onClick={() => setSort('score')}
           >
@@ -149,16 +144,17 @@ export default function InquiriesPage() {
         </div>
       </div>
 
-      <div className="bg-white rounded-lg shadow-sm overflow-hidden">
-        <table className="w-full text-sm">
+      <div className="bg-white rounded-lg shadow-sm overflow-hidden" role="region" aria-label="Inquiries table">
+        <table className="w-full text-sm" aria-label="Inquiries list">
+          <caption className="sr-only">List of inquiries with contact, score, status, and assignment</caption>
           <thead className="bg-slate-100">
             <tr>
-              <th className="text-left p-3">Name</th>
-              <th className="text-left p-3">Contact</th>
-              <th className="text-left p-3">Score</th>
-              <th className="text-left p-3">Status</th>
-              <th className="text-left p-3">Assigned</th>
-              <th className="text-left p-3">Action</th>
+              <th scope="col" className="text-left p-3">Name</th>
+              <th scope="col" className="text-left p-3">Contact</th>
+              <th scope="col" className="text-left p-3">Score</th>
+              <th scope="col" className="text-left p-3">Status</th>
+              <th scope="col" className="text-left p-3">Assigned</th>
+              <th scope="col" className="text-left p-3">Action</th>
             </tr>
           </thead>
           <tbody>
@@ -200,6 +196,7 @@ export default function InquiriesPage() {
           </tbody>
         </table>
       </div>
-    </main>
+      </main>
+    </AdminLayout>
   );
 }

@@ -44,7 +44,7 @@ export function SellerForm({ heading }: SellerFormProps) {
   function formatApiError(bodyText: string): string {
     try {
       const parsed = JSON.parse(bodyText) as { detail?: unknown };
-      const detail = (parsed as any)?.detail;
+      const detail = (parsed as { detail?: string })?.detail;
 
       if (typeof detail === 'string') return detail;
       if (Array.isArray(detail)) {
@@ -57,7 +57,7 @@ export function SellerForm({ heading }: SellerFormProps) {
       // ignore
     }
 
-    return bodyText || 'Request failed';
+    return bodyText || dict.errors.requestFailed;
   }
 
   function parseAskingPrice(value: string): number | null {
@@ -123,15 +123,15 @@ export function SellerForm({ heading }: SellerFormProps) {
       });
       setStatus({
         state: 'error',
-        message: err instanceof Error ? err.message : 'Failed to submit',
+        message: err instanceof Error ? err.message : dict.errors.failedToSubmit,
       });
     }
   }
 
   return (
     <form className="inquiry-form" onSubmit={(e) => e.preventDefault()}>
-      <h3>{heading ?? 'Sell with us'}</h3>
-      <p className="form-desc">Submit your property details for review by our team.</p>
+      <h3>{heading ?? dict.common.sellerForm.headingDefault}</h3>
+      <p className="form-desc">{dict.common.sellerForm.description}</p>
 
       <div
         className="form-grid"
@@ -152,61 +152,88 @@ export function SellerForm({ heading }: SellerFormProps) {
           className="form-honeypot"
         />
 
+        <label htmlFor="seller-name" className="sr-only">{dict.common.leadForm.namePlaceholder}</label>
         <input
           className="form-input"
+          id="seller-name"
           name="name"
           placeholder={dict.common.leadForm.namePlaceholder}
+          aria-required="true"
           value={name}
           onChange={(e) => setName(e.target.value)}
         />
 
         <div className="form-grid-2">
-          <input
-            className="form-input"
-            name="email"
-            placeholder={dict.common.leadForm.emailPlaceholder}
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-          />
-          <input
-            className="form-input"
-            name="phone"
-            placeholder={dict.common.leadForm.phonePlaceholder}
-            value={phone}
-            onChange={(e) => setPhone(e.target.value)}
-          />
+          <div>
+            <label htmlFor="seller-email" className="sr-only">{dict.common.leadForm.emailPlaceholder}</label>
+            <input
+              className="form-input"
+              id="seller-email"
+              name="email"
+              type="email"
+              placeholder={dict.common.leadForm.emailPlaceholder}
+              aria-required="true"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+            />
+          </div>
+          <div>
+            <label htmlFor="seller-phone" className="sr-only">{dict.common.leadForm.phonePlaceholder}</label>
+            <input
+              className="form-input"
+              id="seller-phone"
+              name="phone"
+              type="tel"
+              placeholder={dict.common.leadForm.phonePlaceholder}
+              aria-required="true"
+              value={phone}
+              onChange={(e) => setPhone(e.target.value)}
+            />
+          </div>
         </div>
 
         <div className="form-grid-2">
-          <input
-            className="form-input"
-            name="property_type"
-            placeholder="Property type (condo / house / land)"
-            value={propertyType}
-            onChange={(e) => setPropertyType(e.target.value)}
-          />
-          <input
-            className="form-input"
-            name="location"
-            placeholder="Location"
-            value={location}
-            onChange={(e) => setLocation(e.target.value)}
-          />
+          <div>
+            <label htmlFor="seller-property-type" className="sr-only">{dict.common.sellerForm.propertyTypePlaceholder}</label>
+            <input
+              className="form-input"
+              id="seller-property-type"
+              name="property_type"
+              placeholder={dict.common.sellerForm.propertyTypePlaceholder}
+              value={propertyType}
+              onChange={(e) => setPropertyType(e.target.value)}
+            />
+          </div>
+          <div>
+            <label htmlFor="seller-location" className="sr-only">{dict.common.sellerForm.locationPlaceholder}</label>
+            <input
+              className="form-input"
+              id="seller-location"
+              name="location"
+              placeholder={dict.common.sellerForm.locationPlaceholder}
+              value={location}
+              onChange={(e) => setLocation(e.target.value)}
+            />
+          </div>
         </div>
 
+        <label htmlFor="seller-price" className="sr-only">{dict.common.sellerForm.askingPricePlaceholder}</label>
         <input
           className="form-input"
+          id="seller-price"
           name="asking_price"
           inputMode="numeric"
-          placeholder="Asking price (THB)"
+          placeholder={dict.common.sellerForm.askingPricePlaceholder}
           value={askingPrice}
           onChange={(e) => setAskingPrice(e.target.value)}
         />
 
+        <label htmlFor="seller-notes" className="sr-only">{dict.common.sellerForm.notesPlaceholder}</label>
         <textarea
           className="form-textarea"
+          id="seller-notes"
           name="notes"
-          placeholder="Notes / details"
+          placeholder={dict.common.sellerForm.notesPlaceholder}
           value={notes}
           onChange={(e) => setNotes(e.target.value)}
           rows={4}
@@ -217,21 +244,24 @@ export function SellerForm({ heading }: SellerFormProps) {
           className="btn btn-primary btn-block"
           onClick={onSubmit}
           disabled={!canSubmit}
+          aria-describedby="seller-form-status"
         >
-          {status.state === 'submitting' ? dict.common.leadForm.submitting : 'Submit for review'}
+          {status.state === 'submitting' ? dict.common.leadForm.submitting : dict.common.sellerForm.submit}
         </button>
 
-        {status.state === 'success' ? (
-          <p className="form-success">
-            Thanks — your submission was received.{status.id ? ` (id: ${status.id})` : ''}
-          </p>
-        ) : null}
+        <div id="seller-form-status" aria-live="assertive" aria-atomic="true">
+          {status.state === 'success' ? (
+            <p className="form-success" role="status">
+              {dict.common.sellerForm.success}{status.id ? ` (id: ${status.id})` : ''}
+            </p>
+          ) : null}
 
-        {status.state === 'error' ? (
-          <p className="form-error">
-            {dict.common.leadForm.errorPrefix} {status.message}
-          </p>
-        ) : null}
+          {status.state === 'error' ? (
+            <p className="form-error" role="alert">
+              {dict.common.leadForm.errorPrefix} {status.message}
+            </p>
+          ) : null}
+        </div>
       </div>
     </form>
   );

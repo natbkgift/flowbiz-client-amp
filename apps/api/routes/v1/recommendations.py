@@ -17,7 +17,7 @@ RECOMMENDATION_VERSION = "v1"
 
 
 @router.get("/recommendations", response_model=list[RecommendationItem])
-async def get_recommendations(
+def get_recommendations(
     response: Response,
     limit: int = Query(default=10, ge=1, le=50),
     intent: str | None = None,

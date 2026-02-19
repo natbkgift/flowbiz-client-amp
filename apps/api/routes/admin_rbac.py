@@ -21,7 +21,7 @@ router = APIRouter(prefix="/admin/rbac", tags=["admin"])
 
 
 @router.get("/roles", response_model=list[RoleItem])
-async def list_roles(
+def list_roles(
     db: Session = Depends(get_db),
     _admin: User = Depends(get_current_admin),
 ) -> list[RoleItem]:
@@ -30,7 +30,7 @@ async def list_roles(
 
 
 @router.post("/roles", response_model=RoleItem, status_code=status.HTTP_201_CREATED)
-async def create_role(
+def create_role(
     payload: RoleCreate,
     db: Session = Depends(get_db),
     _admin: User = Depends(get_current_admin),
@@ -47,7 +47,7 @@ async def create_role(
 
 
 @router.get("/permissions", response_model=list[PermissionItem])
-async def list_permissions(
+def list_permissions(
     db: Session = Depends(get_db),
     _admin: User = Depends(get_current_admin),
 ) -> list[PermissionItem]:
@@ -56,7 +56,7 @@ async def list_permissions(
 
 
 @router.post("/permissions", response_model=PermissionItem, status_code=status.HTTP_201_CREATED)
-async def create_permission(
+def create_permission(
     payload: PermissionCreate,
     db: Session = Depends(get_db),
     _admin: User = Depends(get_current_admin),
@@ -76,7 +76,7 @@ async def create_permission(
 
 
 @router.put("/roles/{role_id}/permissions", response_model=RoleItem)
-async def set_role_permissions(
+def set_role_permissions(
     role_id: UUID,
     payload: RolePermissionUpdate,
     db: Session = Depends(get_db),

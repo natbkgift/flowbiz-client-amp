@@ -12,7 +12,7 @@ router = APIRouter(tags=["auth"])
 
 
 @router.get("/auth/me", response_model=MeResponse)
-async def me(
+def me(
     user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ) -> MeResponse:

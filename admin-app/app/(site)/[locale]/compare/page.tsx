@@ -1,38 +1,23 @@
-import type { Metadata } from 'next';
 import Link from 'next/link';
 
 import { Container } from '@/components/layout/Container';
 import { getDictionary, normalizeLocale } from '@/app/_lib/i18n/get-dictionary';
+import { makePageMetadata } from '@/app/_lib/i18n/metadata';
 import { withLocale } from '@/app/_lib/i18n/routing';
+import type { Dictionary } from '@/app/_lib/i18n/types';
 import { fetchProjectEvaluation, type ProjectEvaluationResponse } from '@/app/_lib/public-api-server';
+import { PAGE_REVALIDATE_SECONDS } from '@/app/_lib/constants';
+
+export const revalidate = PAGE_REVALIDATE_SECONDS;
 
 export async function generateMetadata({
   params,
 }: {
   params: { locale: string };
-}): Promise<Metadata> {
+}) {
   const locale = normalizeLocale(params.locale);
   const dict = getDictionary(locale);
-  const canonical = `/${locale}/compare`;
-  return {
-    title: `${dict.brand.name} | Compare`,
-    description: 'Compare 2–3 projects side by side (read-only).',
-    alternates: {
-      canonical,
-      languages: {
-        en: '/en/compare',
-        th: '/th/compare',
-      },
-    },
-    openGraph: {
-      type: 'website',
-      url: canonical,
-      title: `${dict.brand.name} | Compare`,
-      description: 'Compare 2–3 projects side by side (read-only).',
-      siteName: dict.brand.name,
-      locale: locale === 'th' ? 'th_TH' : 'en_US',
-    },
-  };
+  return makePageMetadata(locale, 'compare', dict.compare.title, dict.compare.metaDescription, dict.brand.name);
 }
 
 function pickParam(value: unknown): string | null {
@@ -61,32 +46,32 @@ function parseIds(raw: string | null): string[] {
   return out.slice(0, 3);
 }
 
-function riskLevel(ev: ProjectEvaluationResponse): string {
+function riskLevel(ev: ProjectEvaluationResponse, dict: Dictionary): string {
   const roi = ev.area_statistics?.roi_percent;
   const avgPrice = ev.area_statistics?.avg_price;
   const avgRent = ev.area_statistics?.avg_rent;
 
-  if (roi) return 'Low';
-  if (avgPrice || avgRent) return 'Medium';
-  return 'High';
+  if (roi) return dict.compare.riskLow;
+  if (avgPrice || avgRent) return dict.compare.riskMedium;
+  return dict.compare.riskHigh;
 }
 
-function strengths(ev: ProjectEvaluationResponse): string[] {
+function strengths(ev: ProjectEvaluationResponse, dict: Dictionary): string[] {
   const keys = new Set(ev.badges.map((b) => b.key));
   const out: string[] = [];
-  if (keys.has('roi_snapshot')) out.push('ROI snapshot available');
-  if (keys.has('area_stats_available')) out.push('Area statistics available');
-  if (keys.has('has_cover_image')) out.push('Cover image available');
-  if (!out.length) out.push('Limited snapshot data');
+  if (keys.has('roi_snapshot')) out.push(dict.compare.roiAvailable);
+  if (keys.has('area_stats_available')) out.push(dict.compare.areaStatsAvailable);
+  if (keys.has('has_cover_image')) out.push(dict.compare.coverImageAvailable);
+  if (!out.length) out.push(dict.compare.limitedData);
   return out;
 }
 
-function weaknesses(ev: ProjectEvaluationResponse): string[] {
+function weaknesses(ev: ProjectEvaluationResponse, dict: Dictionary): string[] {
   const keys = new Set(ev.badges.map((b) => b.key));
   const out: string[] = [];
-  if (!keys.has('area_stats_available')) out.push('Area statistics missing');
-  if (!keys.has('roi_snapshot')) out.push('ROI snapshot missing');
-  if (!keys.has('has_cover_image')) out.push('Cover image missing');
+  if (!keys.has('area_stats_available')) out.push(dict.compare.areaStatsMissing);
+  if (!keys.has('roi_snapshot')) out.push(dict.compare.roiMissing);
+  if (!keys.has('has_cover_image')) out.push(dict.compare.coverImageMissing);
   if (!out.length) out.push('—');
   return out;
 }
@@ -99,6 +84,7 @@ export default async function ComparePage({
   searchParams?: Record<string, string | string[] | undefined>;
 }) {
   const locale = normalizeLocale(params.locale);
+  const dict = getDictionary(locale);
 
   const rawIds = pickParam(searchParams?.ids);
   const ids = parseIds(rawIds);
@@ -108,11 +94,9 @@ export default async function ComparePage({
       <main id="main-content">
         <section className="hero hero--page">
           <Container>
-            <h1 className="headline">{locale === 'th' ? 'เปรียบเทียบโครงการ' : 'Compare Projects'}</h1>
+            <h1 className="headline">{dict.compare.title}</h1>
             <p className="subhead">
-              {locale === 'th'
-                ? 'ต้องมีอย่างน้อย 2 โครงการ เช่น /compare?ids=&lt;id1&gt;,&lt;id2&gt;'
-                : 'Requires at least 2 projects, e.g. /compare?ids=<id1>,<id2>'}
+              {dict.compare.requiresTwo}
             </p>
           </Container>
         </section>
@@ -120,18 +104,16 @@ export default async function ComparePage({
         <section className="section">
           <Container>
             <div className="card reveal">
-              <h2 className="card-title">{locale === 'th' ? 'เริ่มต้น' : 'Get started'}</h2>
+              <h2 className="card-title">{dict.compare.getStarted}</h2>
               <p className="card-subtitle">
-                {locale === 'th'
-                  ? 'ไปหน้า Smart Finder เพื่อเลือก top projects แล้วกด Compare'
-                  : 'Use Smart Finder to generate top projects and click Compare.'}
+                {dict.compare.getStartedDesc}
               </p>
               <div className="cta-row">
                 <Link className="btn btn-cta" href={withLocale(locale, '/smart-finder')}>
-                  {locale === 'th' ? 'ไป Smart Finder' : 'Go to Smart Finder'}
+                  {dict.compare.goToSmartFinder}
                 </Link>
                 <Link className="btn btn-secondary" href={withLocale(locale, '/projects')}>
-                  {locale === 'th' ? 'ดู Projects' : 'Browse Projects'}
+                  {dict.compare.browseProjects}
                 </Link>
               </div>
             </div>
@@ -149,11 +131,9 @@ export default async function ComparePage({
     <main id="main-content">
       <section className="hero hero--page">
         <Container>
-          <h1 className="headline">{locale === 'th' ? 'เปรียบเทียบโครงการ' : 'Compare Projects'}</h1>
+          <h1 className="headline">{dict.compare.title}</h1>
           <p className="subhead">
-            {locale === 'th'
-              ? 'ตารางนี้อ่านอย่างเดียว และอ้างอิงจาก dataset ปัจจุบัน'
-              : 'Read-only table based on current dataset snapshots.'}
+            {dict.compare.readOnlyDesc}
           </p>
         </Container>
       </section>
@@ -161,19 +141,20 @@ export default async function ComparePage({
       <section className="section">
         <Container>
           {missing.length ? (
-            <div className="trust-box" style={{ marginBottom: 16 }}>
-              <h2 className="trust-box__title">{locale === 'th' ? 'บางโครงการไม่พบ' : 'Some projects not found'}</h2>
+            <div className="trust-box mb-4">
+              <h2 className="trust-box__title">{dict.compare.someNotFound}</h2>
               <p className="section-subtitle">ids: {missing.join(', ')}</p>
             </div>
           ) : null}
 
           <div className="card reveal">
-            <h2 className="card-title">{locale === 'th' ? 'ตารางเปรียบเทียบ' : 'Comparison table'}</h2>
-            <div style={{ overflowX: 'auto', marginTop: 12 }}>
-              <table className="compare-table">
+            <h2 className="card-title">{dict.compare.comparisonTable}</h2>
+            <div className="overflow-x-auto mt-3">
+              <table className="compare-table" aria-label={dict.compare.comparisonTable}>
+                <caption className="sr-only">{dict.compare.comparisonTable}</caption>
                 <thead>
                   <tr>
-                    <th>{locale === 'th' ? 'หัวข้อ' : 'Field'}</th>
+                    <th>{dict.compare.field}</th>
                     {items.map((ev) => (
                       <th key={ev.project.id}>
                         <Link href={withLocale(locale, `/projects/${encodeURIComponent(ev.project.slug)}`)}>
@@ -185,29 +166,29 @@ export default async function ComparePage({
                 </thead>
                 <tbody>
                   <tr>
-                    <td>{locale === 'th' ? 'Price range' : 'Price range'}</td>
+                    <td>{dict.compare.priceRange}</td>
                     {items.map((ev) => (
                       <td key={ev.project.id + ':price'}>{ev.area_statistics?.avg_price ?? '—'}</td>
                     ))}
                   </tr>
                   <tr>
-                    <td>{locale === 'th' ? 'Expected yield' : 'Expected yield'}</td>
+                    <td>{dict.compare.expectedYield}</td>
                     {items.map((ev) => (
                       <td key={ev.project.id + ':yield'}>{ev.area_statistics?.roi_percent ?? '—'}</td>
                     ))}
                   </tr>
                   <tr>
-                    <td>{locale === 'th' ? 'Completion year' : 'Completion year'}</td>
+                    <td>{dict.compare.completionYear}</td>
                     {items.map((ev) => (
                       <td key={ev.project.id + ':completion'}>—</td>
                     ))}
                   </tr>
                   <tr>
-                    <td>{locale === 'th' ? 'Strength' : 'Strength'}</td>
+                    <td>{dict.compare.strength}</td>
                     {items.map((ev) => (
                       <td key={ev.project.id + ':strength'}>
                         <ul className="bullet-list">
-                          {strengths(ev).map((s) => (
+                          {strengths(ev, dict).map((s) => (
                             <li key={s}>{s}</li>
                           ))}
                         </ul>
@@ -215,11 +196,11 @@ export default async function ComparePage({
                     ))}
                   </tr>
                   <tr>
-                    <td>{locale === 'th' ? 'Weakness' : 'Weakness'}</td>
+                    <td>{dict.compare.weakness}</td>
                     {items.map((ev) => (
                       <td key={ev.project.id + ':weakness'}>
                         <ul className="bullet-list">
-                          {weaknesses(ev).map((w) => (
+                          {weaknesses(ev, dict).map((w) => (
                             <li key={w}>{w}</li>
                           ))}
                         </ul>
@@ -227,28 +208,26 @@ export default async function ComparePage({
                     ))}
                   </tr>
                   <tr>
-                    <td>{locale === 'th' ? 'Risk level' : 'Risk level'}</td>
+                    <td>{dict.compare.riskLevel}</td>
                     {items.map((ev) => (
-                      <td key={ev.project.id + ':risk'}>{riskLevel(ev)}</td>
+                      <td key={ev.project.id + ':risk'}>{riskLevel(ev, dict)}</td>
                     ))}
                   </tr>
                 </tbody>
               </table>
             </div>
 
-            <div className="cta-row" style={{ marginTop: 16 }}>
+            <div className="cta-row mt-4">
               <Link className="btn btn-secondary" href={withLocale(locale, '/smart-finder')}>
-                {locale === 'th' ? 'กลับไป Smart Finder' : 'Back to Smart Finder'}
+                {dict.compare.backToSmartFinder}
               </Link>
               <Link className="btn btn-cta" href={withLocale(locale, '/contact?topic=investment_plan')}>
-                {locale === 'th' ? 'ขอแผนการลงทุน' : 'Get Investment Plan'}
+                {dict.compare.getInvestmentPlan}
               </Link>
             </div>
 
-            <p className="guided-dialog__step" style={{ marginTop: 10 }}>
-              {locale === 'th'
-                ? 'หมายเหตุ: completion year ยังไม่มีใน dataset (แสดงเป็น —)'
-                : 'Note: completion year is not yet in the dataset (shown as —).'}
+            <p className="guided-dialog__step mt-2.5">
+              {dict.compare.completionNote}
             </p>
           </div>
         </Container>

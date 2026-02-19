@@ -1,32 +1,37 @@
-import type { Metadata } from 'next';
+import dynamic from 'next/dynamic';
 
-import { SellerForm } from '@/components/forms/SellerForm';
+const SellerForm = dynamic(
+  () => import('@/components/forms/SellerForm').then((m) => m.SellerForm),
+  { ssr: false },
+);
 import { Container } from '@/components/layout/Container';
 import { getDictionary, normalizeLocale } from '@/app/_lib/i18n/get-dictionary';
+import { makePageMetadata } from '@/app/_lib/i18n/metadata';
+import { PAGE_REVALIDATE_SECONDS } from '@/app/_lib/constants';
+
+export const revalidate = PAGE_REVALIDATE_SECONDS;
 
 export async function generateMetadata({
   params,
 }: {
   params: { locale: string };
-}): Promise<Metadata> {
+}) {
   const locale = normalizeLocale(params.locale);
   const dict = getDictionary(locale);
-  return {
-    title: `Sell | ${dict.brand.name}`,
-    description: 'Submit your property for review.',
-  };
+  return makePageMetadata(locale, 'sell', dict.sell.eyebrow, dict.sell.metaDescription, dict.brand.name);
 }
 
 export default function SellPage({ params }: { params: { locale: string } }) {
-  normalizeLocale(params.locale);
+  const locale = normalizeLocale(params.locale);
+  const dict = getDictionary(locale);
 
   return (
     <main id="main-content">
       <section className="hero hero--page">
         <Container>
-          <p className="eyebrow">Sell</p>
-          <h1 className="headline">List your property</h1>
-          <p className="subhead">Submit your details and we’ll review it for listing.</p>
+          <p className="eyebrow">{dict.sell.eyebrow}</p>
+          <h1 className="headline">{dict.sell.headline}</h1>
+          <p className="subhead">{dict.sell.subhead}</p>
         </Container>
       </section>
 
@@ -34,16 +39,16 @@ export default function SellPage({ params }: { params: { locale: string } }) {
         <Container>
           <div className="split">
             <aside className="split__aside">
-              <h2 className="section-title">What happens next</h2>
+              <h2 className="section-title">{dict.sell.whatHappensNext}</h2>
               <ul className="bullet-list">
-                <li>We review your submission.</li>
-                <li>If approved, we create a draft listing for you.</li>
-                <li>Our team follows up to confirm details.</li>
+                {dict.sell.steps.map((step, i) => (
+                  <li key={i}>{step}</li>
+                ))}
               </ul>
             </aside>
 
             <div className="split__main">
-              <SellerForm heading="Seller submission" />
+              <SellerForm heading={dict.sell.formHeading} />
             </div>
           </div>
         </Container>
