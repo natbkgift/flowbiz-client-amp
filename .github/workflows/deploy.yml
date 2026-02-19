@@ -200,75 +200,23 @@ jobs:
 
             echo "Deployed ${{ needs.build.outputs.sha_tag }}"
 
-  # ── Stage 4: Smoke Test & Auto-Rollback ────────────────────
-  smoke-test:
-    needs: [build, deploy]
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Resolve SSH target
-        id: sshmeta
-        env:
-          VPS_HOST: ${{ secrets.VPS_HOST }}
-          VPS_PORT: ${{ secrets.VPS_PORT }}
-          VPS_SSH_KEY: ${{ secrets.VPS_SSH_KEY }}
-          VPS_USER: ${{ secrets.VPS_USER }}
-          VPS_URL: ${{ secrets.VPS_URL }}
-        run: |
-          set -euo pipefail
-
-          if [[ -z "${VPS_SSH_KEY:-}" ]]; then
-            echo "::error::Missing required secret: VPS_SSH_KEY"
-            exit 1
-          fi
-          if [[ -z "${VPS_PORT:-}" ]]; then
-            echo "::error::Missing required secret: VPS_PORT"
-            exit 1
-          fi
-
-          ssh_host=""
-          ssh_user=""
-
-          if [[ -n "${VPS_HOST:-}" && -n "${VPS_USER:-}" ]]; then
-            ssh_host="$VPS_HOST"
-            ssh_user="$VPS_USER"
-          elif [[ -n "${VPS_URL:-}" ]]; then
-            raw="$VPS_URL"
-            raw="${raw#ssh://}"
-            raw="${raw%%/*}"
-
-            if [[ "$raw" == *"@"* ]]; then
-              ssh_user="${raw%%@*}"
-              ssh_host="${raw#*@}"
-              ssh_host="${ssh_host%%:*}"
-            else
-              echo "::error::VPS_URL must include username, e.g. 'deploy@1.2.3.4' or set VPS_HOST + VPS_USER"
-              exit 1
-            fi
-          else
-            echo "::error::Missing SSH target secrets. Provide VPS_HOST+VPS_USER or VPS_URL (user@host)."
-            exit 1
-          fi
-
-          if [[ -z "$ssh_host" || -z "$ssh_user" ]]; then
-            echo "::error::Could not resolve SSH host/user"
-            exit 1
-          fi
-
-          echo "host=$ssh_host" >> "$GITHUB_OUTPUT"
-          echo "user=$ssh_user" >> "$GITHUB_OUTPUT"
-
       - name: Wait for services to stabilize
         run: sleep 15
 
-      - name: Smoke tests
+      - name: Smoke tests (from VPS)
         id: smoke
         continue-on-error: true
-        env:
-          SITE_URL: ${{ secrets.SITE_URL || 'https://amppattaya.com' }}
-        run: |
-          bash scripts/smoke-test.sh "$SITE_URL"
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ steps.sshmeta.outputs.host }}
+          username: ${{ steps.sshmeta.outputs.user }}
+          port: ${{ secrets.VPS_PORT }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          script: |
+            set -euo pipefail
+            cd /opt/flowbiz/clients/flowbiz-client-amp
+
+            bash scripts/smoke-test.sh "${{ secrets.SITE_URL || 'https://amppattaya.com' }}"
 
       - name: Auto-rollback on failure
         if: steps.smoke.outcome == 'failure'
