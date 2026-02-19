@@ -182,18 +182,31 @@ jobs:
             # Authenticate to GHCR on the VPS so docker pull can access private images
             echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u "${{ github.actor }}" --password-stdin
 
-            # Save current image tags for rollback (persistent path)
-            mkdir -p /opt/flowbiz/clients/flowbiz-client-amp/.deploy
-            docker compose -f docker-compose.yml -f docker-compose.prod.yml \
-              ps --format '{{.Image}}' > /opt/flowbiz/clients/flowbiz-client-amp/.deploy/previous_images.txt || true
+            # Save current running image IDs for rollback (persistent path)
+            # Using image IDs (sha256:...) ensures rollback works even if tags move.
+            DEPLOY_STATE_DIR="/opt/flowbiz/clients/flowbiz-client-amp/.deploy"
+            mkdir -p "$DEPLOY_STATE_DIR"
+
+            COMPOSE="docker compose -f docker-compose.yml -f docker-compose.prod.yml"
+            API_CID=$($COMPOSE ps -q api 2>/dev/null | head -n 1 || true)
+            ADMIN_CID=$($COMPOSE ps -q admin-app 2>/dev/null | head -n 1 || true)
+            API_IMAGE_ID=$(docker inspect --format '{{.Image}}' "$API_CID" 2>/dev/null || true)
+            ADMIN_IMAGE_ID=$(docker inspect --format '{{.Image}}' "$ADMIN_CID" 2>/dev/null || true)
+
+            {
+              echo "API_IMAGE_ID=${API_IMAGE_ID}"
+              echo "ADMIN_IMAGE_ID=${ADMIN_IMAGE_ID}"
+            } > "$DEPLOY_STATE_DIR/previous_image_ids.env"
 
             # Pull latest images
             docker pull ${{ env.API_IMAGE }}:${{ needs.build.outputs.sha_tag }}
             docker pull ${{ env.ADMIN_IMAGE }}:${{ needs.build.outputs.sha_tag }}
 
-            # Tag as latest locally
+            # Tag as :latest (registry) and to the local image names used by docker-compose.yml
             docker tag ${{ env.API_IMAGE }}:${{ needs.build.outputs.sha_tag }} ${{ env.API_IMAGE }}:latest
             docker tag ${{ env.ADMIN_IMAGE }}:${{ needs.build.outputs.sha_tag }} ${{ env.ADMIN_IMAGE }}:latest
+            docker tag ${{ env.API_IMAGE }}:${{ needs.build.outputs.sha_tag }} flowbiz-client-amp-api:latest
+            docker tag ${{ env.ADMIN_IMAGE }}:${{ needs.build.outputs.sha_tag }} flowbiz-client-amp-admin-app:latest
 
             # Rolling restart
             docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d --remove-orphans
@@ -207,16 +220,65 @@ jobs:
         id: smoke
         continue-on-error: true
         uses: appleboy/ssh-action@v1
+        env:
+          SITE_URL: ${{ secrets.SITE_URL }}
         with:
           host: ${{ steps.sshmeta.outputs.host }}
           username: ${{ steps.sshmeta.outputs.user }}
           port: ${{ secrets.VPS_PORT }}
           key: ${{ secrets.VPS_SSH_KEY }}
+          envs: SITE_URL
           script: |
             set -euo pipefail
-            cd /opt/flowbiz/clients/flowbiz-client-amp
 
-            bash scripts/smoke-test.sh "${{ secrets.SITE_URL || 'https://amppattaya.com' }}"
+            if [[ -z "${SITE_URL:-}" ]]; then
+              SITE_URL="https://amppattaya.com"
+            fi
+
+            FAIL=0
+
+            check() {
+              local label="$1"
+              local url="$2"
+              local expect_status="${3:-200}"
+
+              status=$(curl -s -o /dev/null -w "%{http_code}" --max-time 15 "$url" || echo "000")
+
+              if [[ "$status" == "$expect_status" ]]; then
+                echo "  OK   $label ($status)"
+              else
+                echo "  FAIL $label (got $status, expected $expect_status)"
+                FAIL=1
+              fi
+            }
+
+            echo "=== Smoke Tests — $SITE_URL ==="
+
+            # Core public pages
+            check "Homepage (EN)"       "$SITE_URL/en"
+            check "Homepage (TH)"       "$SITE_URL/th"
+            check "Buy page"            "$SITE_URL/en/buy"
+            check "Rent page"           "$SITE_URL/en/rent"
+            check "Invest page"         "$SITE_URL/en/invest"
+            check "About page"          "$SITE_URL/en/about"
+            check "Contact page"        "$SITE_URL/en/contact"
+            check "Projects page"       "$SITE_URL/en/projects"
+
+            # API health
+            check "API health"          "$SITE_URL/api/healthz"
+            check "API meta"            "$SITE_URL/api/v1/meta"
+
+            # Static assets
+            check "Favicon"             "$SITE_URL/favicon.ico"
+
+            echo ""
+            if [[ "$FAIL" -eq 0 ]]; then
+              echo "=== All smoke tests passed ==="
+              exit 0
+            else
+              echo "=== SMOKE TEST FAILURE ==="
+              exit 1
+            fi
 
       - name: Auto-rollback on failure
         if: steps.smoke.outcome == 'failure'
@@ -230,9 +292,37 @@ jobs:
             set -euo pipefail
             cd /opt/flowbiz/clients/flowbiz-client-amp
 
-            echo "⚠️  Smoke test failed — rolling back..."
-            bash scripts/rollback.sh
-            echo "✅ Rollback complete"
+            echo "Smoke test failed — rolling back..."
+
+            DEPLOY_STATE_DIR="/opt/flowbiz/clients/flowbiz-client-amp/.deploy"
+            PREVIOUS_IDS_FILE="$DEPLOY_STATE_DIR/previous_image_ids.env"
+            COMPOSE="docker compose -f docker-compose.yml -f docker-compose.prod.yml"
+
+            if [[ ! -f "$PREVIOUS_IDS_FILE" ]]; then
+              echo "ERROR: No previous image IDs found at $PREVIOUS_IDS_FILE"
+              exit 1
+            fi
+
+            # shellcheck disable=SC1090
+            source "$PREVIOUS_IDS_FILE"
+
+            if [[ -z "${API_IMAGE_ID:-}" || -z "${ADMIN_IMAGE_ID:-}" ]]; then
+              echo "ERROR: Missing previous image IDs (API_IMAGE_ID/ADMIN_IMAGE_ID)."
+              echo "Cannot auto-rollback safely."
+              exit 1
+            fi
+
+            echo "Previous API image ID:   $API_IMAGE_ID"
+            echo "Previous Admin image ID: $ADMIN_IMAGE_ID"
+
+            $COMPOSE down --timeout 30 || true
+
+            docker image tag "$API_IMAGE_ID" flowbiz-client-amp-api:latest
+            docker image tag "$ADMIN_IMAGE_ID" flowbiz-client-amp-admin-app:latest
+
+            $COMPOSE up -d --remove-orphans
+
+            echo "Rollback complete"
 
       - name: Fail pipeline if smoke tests failed
         if: steps.smoke.outcome == 'failure'
