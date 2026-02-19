@@ -1,5 +1,7 @@
 services:
   api:
+    env_file:
+      - .env
     environment:
       - APP_ENV=prod
       - OTEL_ENABLED=${OTEL_ENABLED:-false}
