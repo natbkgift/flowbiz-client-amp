@@ -1,15 +1,12 @@
 import type { Metadata } from 'next';
 import { makePageMetadata } from '@/app/_lib/i18n/metadata';
-import { PAGE_REVALIDATE_SECONDS } from '@/app/_lib/constants';
-
-export const dynamic = 'force-static';
-export const revalidate = PAGE_REVALIDATE_SECONDS;
-
 import { Container } from '@/components/layout/Container';
 import { ProjectCard } from '@/components/project/ProjectCard';
 import { fetchProjects, fetchProperties } from '@/app/_lib/public-api-server';
 
 import { getDictionary, normalizeLocale } from '@/app/_lib/i18n/get-dictionary';
+
+export const dynamic = 'force-dynamic';
 
 export async function generateMetadata({
   params,
@@ -30,9 +27,12 @@ export default async function ProjectsPage({ params }: { params: { locale: strin
   const canonicalUrl = `${siteUrl}/${locale}/projects`;
 
   let projects: Awaited<ReturnType<typeof fetchProjects>>;
+  let projectsFetchOk = true;
+  const startedAt = Date.now();
   try {
     projects = await fetchProjects({ limit: 100 });
   } catch {
+    projectsFetchOk = false;
     projects = [];  // graceful degradation
   }
   if (projects.length) {
@@ -85,7 +85,15 @@ export default async function ProjectsPage({ params }: { params: { locale: strin
     );
   }
 
-  const res = await fetchProperties({ limit: 100, sort: 'newest' });
+  const projectsElapsedMs = Date.now() - startedAt;
+  const shouldAttemptPropertyFallback = projectsFetchOk && projectsElapsedMs < 20_000;
+
+  const res: Awaited<ReturnType<typeof fetchProperties>> = shouldAttemptPropertyFallback
+    ? await fetchProperties({ limit: 100, sort: 'newest' }).catch(() => ({
+        data: [],
+        meta: { page: 1, limit: 100, total: 0 },
+      }))
+    : { data: [], meta: { page: 1, limit: 100, total: 0 } };
 
   const byName = new Map<string, number>();
   for (const p of res.data ?? []) {

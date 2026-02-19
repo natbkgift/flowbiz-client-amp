@@ -86,7 +86,12 @@ export default async function AreaPage({
   }
 
   const areaCopy = dict.area.areas[params.slug];
-  const stats = await fetchAreaStatisticsBySlug(params.slug);
+  let stats: Awaited<ReturnType<typeof fetchAreaStatisticsBySlug>>;
+  try {
+    stats = await fetchAreaStatisticsBySlug(params.slug);
+  } catch {
+    stats = null;
+  }
 
   const title = areaCopy.title;
   const buyerTypes = areaCopy.buyerTypes;
