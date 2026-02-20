@@ -6,9 +6,9 @@ import { CTA, buildWhatsAppUrl } from '@/app/_lib/public-cta';
 import { getDictionary, normalizeLocale } from '@/app/_lib/i18n/get-dictionary';
 import { withLocale } from '@/app/_lib/i18n/routing';
 import { makePageMetadata } from '@/app/_lib/i18n/metadata';
-import { PAGE_REVALIDATE_SECONDS } from '@/app/_lib/constants';
+ 
 
-export const revalidate = PAGE_REVALIDATE_SECONDS;
+export const revalidate = 300;
 
 export async function generateMetadata({
   params,

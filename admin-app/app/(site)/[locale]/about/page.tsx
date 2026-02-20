@@ -4,9 +4,9 @@ import { IconCheck, IconShield, IconTrendingUp, IconUsers } from '@/components/i
 import { getDictionary, normalizeLocale } from '@/app/_lib/i18n/get-dictionary';
 import { makePageMetadata } from '@/app/_lib/i18n/metadata';
 import { withLocale } from '@/app/_lib/i18n/routing';
-import { PAGE_REVALIDATE_SECONDS } from '@/app/_lib/constants';
+ 
 
-export const revalidate = PAGE_REVALIDATE_SECONDS;
+export const revalidate = 300;
 
 export async function generateMetadata({
   params,

@@ -1,16 +1,12 @@
-import dynamic from 'next/dynamic';
-
 import { Container } from '@/components/layout/Container';
 import { Breadcrumbs } from '@/components/layout/Breadcrumbs';
-const LeadForm = dynamic(() => import('@/components/forms/LeadForm').then(m => m.LeadForm), {
-  loading: () => <div className="animate-pulse h-48 rounded bg-slate-100" />,
-});
+import { LeadForm } from '@/components/forms/LeadForm';
 import { CTA } from '@/app/_lib/public-cta';
 import { getDictionary, normalizeLocale } from '@/app/_lib/i18n/get-dictionary';
 import { makePageMetadata } from '@/app/_lib/i18n/metadata';
-import { PAGE_REVALIDATE_SECONDS } from '@/app/_lib/constants';
+ 
 
-export const revalidate = PAGE_REVALIDATE_SECONDS;
+export const revalidate = 300;
 
 export async function generateMetadata({
   params,

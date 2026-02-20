@@ -1,12 +1,15 @@
 import type { ReactNode } from 'react';
 import { Suspense } from 'react';
-import dynamic from 'next/dynamic';
 
 import { Footer } from '@/components/layout/Footer';
 import { Header } from '@/components/layout/Header';
 import { SiteAnalytics } from '@/components/analytics/SiteAnalytics';
 import { LinkClickTracker } from '@/components/analytics/LinkClickTracker';
 import { ExperimentProvider } from '@/components/analytics/ExperimentProvider';
+import { FloatingWhatsAppCTA } from '@/components/ux/FloatingWhatsAppCTA';
+import { StickyMobileCTA } from '@/components/ux/StickyMobileCTA';
+import { ScrollReveal } from '@/components/ux/ScrollReveal';
+import { CookieConsent } from '@/components/ux/CookieConsent';
 import { getDictionary, normalizeLocale } from '@/app/_lib/i18n/get-dictionary';
 import { SUPPORTED_LOCALES } from '@/app/_lib/i18n/routing';
 
@@ -15,31 +18,18 @@ export function generateStaticParams() {
   return SUPPORTED_LOCALES.map((locale) => ({ locale }));
 }
 
-const FloatingWhatsAppCTA = dynamic(
-  () => import('@/components/ux/FloatingWhatsAppCTA').then((m) => m.FloatingWhatsAppCTA),
-  { ssr: false },
-);
-const StickyMobileCTA = dynamic(
-  () => import('@/components/ux/StickyMobileCTA').then((m) => m.StickyMobileCTA),
-  { ssr: false },
-);
-const ScrollReveal = dynamic(
-  () => import('@/components/ux/ScrollReveal').then((m) => m.ScrollReveal),
-  { ssr: false },
-);
-const CookieConsent = dynamic(
-  () => import('@/components/ux/CookieConsent').then((m) => m.CookieConsent),
-  { ssr: false },
-);
+ 
 
 export default function SiteLayout({
   children,
   params,
 }: {
   children: ReactNode;
-  params: { locale: string };
+  params: Promise<{ locale: string }>;
 }) {
-  const locale = normalizeLocale(params.locale);
+  // Next 16 route params are typed as a Promise in generated route types.
+  // Layouts can be async, so we await params for compatibility.
+  const locale = normalizeLocale((params as unknown as { locale: string }).locale);
   const dict = getDictionary(locale);
 
   const siteUrl = 'https://amppattaya.com';

@@ -5,9 +5,9 @@ import { Container } from '@/components/layout/Container';
 import { getDictionary, normalizeLocale } from '@/app/_lib/i18n/get-dictionary';
 import { withLocale, ogLocale } from '@/app/_lib/i18n/routing';
 import { fetchAreaStatisticsBySlug } from '@/app/_lib/public-api-server';
-import { PAGE_REVALIDATE_SECONDS } from '@/app/_lib/constants';
+ 
 
-export const revalidate = PAGE_REVALIDATE_SECONDS;
+export const revalidate = 300;
 
 const AREA_SLUGS = ['jomtien', 'pratumnak', 'wongamat', 'central'] as const;
 
