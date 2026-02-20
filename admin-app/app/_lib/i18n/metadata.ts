@@ -24,7 +24,7 @@ export function makePageMetadata(
     description,
     alternates: {
       canonical,
-      languages: { en: enAlt, th: thAlt },
+      languages: { en: enAlt, th: thAlt, 'x-default': enAlt },
     },
     openGraph: {
       type: 'website',
