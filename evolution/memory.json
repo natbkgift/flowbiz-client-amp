@@ -1,12 +1,12 @@
 {
-  "currentIteration": 17,
-  "lastScore": 99.03,
+  "currentIteration": 18,
+  "lastScore": 99.53,
   "weakestDimension": "ui_consistency",
-  "lastPatchSummary": "Iteration 17: Reduced homepage sections 8→6 by merging Paths+Segmentation and Trust+Insights (governance max met). Score +0.50.",
+  "lastPatchSummary": "Iteration 18: Replaced homepage inline styles with reusable CSS rules (cta-row centering + intra-section spacing). Score +0.50.",
   "regressionStatus": "clean",
   "productionStatus": "dev",
   "stagnationCount": 0,
   "strictnessBoundary": {},
   "createdAt": "2026-02-19T08:00:11.018Z",
-  "updatedAt": "2026-02-20T13:30:00.000Z"
+  "updatedAt": "2026-02-20T14:00:00.000Z"
 }

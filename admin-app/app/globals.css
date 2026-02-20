@@ -797,6 +797,9 @@ select {
   gap: var(--space-2);
   flex-wrap: wrap;
 }
+.cta-row--center {
+  justify-content: center;
+}
 
 /* ======================== CTA STRIP / PANEL ======================== */
 
@@ -814,6 +817,15 @@ select {
 
 .cta-strip__text {
   color: var(--color-text-secondary);
+}
+
+/* When multiple content groups exist inside one section, keep spacing consistent */
+.grid + .section-header {
+  margin-top: var(--space-7);
+}
+
+.bullet-list + .section-header {
+  margin-top: var(--space-7);
 }
 
 .cta-panel {

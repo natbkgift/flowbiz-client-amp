@@ -198,7 +198,7 @@ export default function HomePage({
                       {smartLabels.invest}
                     </button>
                   </div>
-                  <div className="cta-row" style={{ justifyContent: 'center' }}>
+                  <div className="cta-row cta-row--center">
                     <a
                       className="btn btn-tertiary"
                       href={withLocale(
@@ -345,7 +345,7 @@ export default function HomePage({
             </TrackedLink>
           </div>
 
-          <div className="section-header" style={{ marginTop: 'var(--space-7)' }}>
+          <div className="section-header">
             <h2 className="section-title">{dict.homepageSegmentation.sectionTitle}</h2>
             <p className="section-subtitle">{dict.homepageSegmentation.sectionSubtitle}</p>
           </div>
@@ -409,7 +409,7 @@ export default function HomePage({
             <p className="section-subtitle">{dict.home.trustSubtitle}</p>
           </div>
 
-          <ul className="bullet-list" style={{ marginBottom: 'var(--space-7)' }}>
+          <ul className="bullet-list">
             {dict.home.trustBullets.map((b) => (
               <li key={b}>{b}</li>
             ))}
