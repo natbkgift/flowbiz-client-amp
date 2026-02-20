@@ -162,15 +162,28 @@ if ($BlueprintDir) {
 
 # Optional: if a previous session completed the queue, reset it so the loop can run again.
 if ($ResetQueueIfAllDone) {
+  $debug = [ordered]@{
+    timestamp_utc = (Get-Date).ToUniversalTime().ToString('o')
+    queue_path = $QueuePath
+    stop_condition = $StopCondition
+    queue_exists = (Test-Path -LiteralPath $QueuePath)
+    entered = $true
+  }
+  $debug | ConvertTo-Json -Depth 6 | Out-File -FilePath (Join-Path $OutDirAbs 'reset_queue.debug.json') -Encoding utf8
+
   if (Test-Path -LiteralPath $QueuePath) {
     try {
       $existing = Get-Content -LiteralPath $QueuePath -Raw | ConvertFrom-Json
       $items = @($existing.items)
+
+      $debug.item_count = $items.Count
+      $debug.first_status = (if ($items.Count -gt 0) { $items[0].status } else { $null })
       if ($items.Count -gt 0) {
         $allDone = $true
         foreach ($it in $items) {
           if (-not $it.status -or $it.status -ne 'done') { $allDone = $false; break }
         }
+        $debug.all_done = $allDone
         if ($allDone) {
           foreach ($it in $items) {
             $it.status = 'pending'
@@ -183,9 +196,20 @@ if ($ResetQueueIfAllDone) {
           $existing.stop_condition = $StopCondition
           $existing.items = $items
           Write-JsonNoBom -Path $QueuePath -Object $existing
+
+          $applied = [ordered]@{
+            timestamp_utc = (Get-Date).ToUniversalTime().ToString('o')
+            queue_path = $QueuePath
+            applied = $true
+          }
+          $applied | ConvertTo-Json -Depth 6 | Out-File -FilePath (Join-Path $OutDirAbs 'reset_queue.applied.json') -Encoding utf8
         }
       }
+
+      $debug | ConvertTo-Json -Depth 6 | Out-File -FilePath (Join-Path $OutDirAbs 'reset_queue.debug.json') -Encoding utf8
     } catch {
+      $debug.error = $_.Exception.Message
+      $debug | ConvertTo-Json -Depth 6 | Out-File -FilePath (Join-Path $OutDirAbs 'reset_queue.debug.json') -Encoding utf8
       # If queue.json is malformed, ignore reset and proceed (other steps may regenerate it).
     }
   }
