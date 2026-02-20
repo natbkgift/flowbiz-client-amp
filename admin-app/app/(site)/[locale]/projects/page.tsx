@@ -5,9 +5,9 @@ import { ProjectCard } from '@/components/project/ProjectCard';
 import { fetchProjects, fetchProperties } from '@/app/_lib/public-api-server';
 
 import { getDictionary, normalizeLocale } from '@/app/_lib/i18n/get-dictionary';
-import { PAGE_REVALIDATE_SECONDS } from '@/app/_lib/constants';
+ 
 
-export const revalidate = PAGE_REVALIDATE_SECONDS;
+export const revalidate = 300;
 
 export async function generateMetadata({
   params,

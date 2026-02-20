@@ -1,21 +1,16 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import dynamic from 'next/dynamic';
 
 import { Container } from '@/components/layout/Container';
 import { TrackedLink } from '@/components/analytics/TrackedLink';
+import { ProjectDeepReview } from '@/components/projects/ProjectDeepReview';
 import { getDictionary, normalizeLocale } from '@/app/_lib/i18n/get-dictionary';
 import { withLocale, ogLocale } from '@/app/_lib/i18n/routing';
 import { fetchProjectBySlug, fetchProjectEvaluation } from '@/app/_lib/public-api-server';
 import { getInternalLinks } from '@/app/_lib/internal-links';
+ 
 
-const ProjectDeepReview = dynamic(
-  () => import('@/components/projects/ProjectDeepReview').then((m) => m.ProjectDeepReview),
-  { ssr: false },
-);
-import { PAGE_REVALIDATE_SECONDS } from '@/app/_lib/constants';
-
-export const revalidate = PAGE_REVALIDATE_SECONDS;
+export const revalidate = 300;
 
 export async function generateMetadata({
   params,

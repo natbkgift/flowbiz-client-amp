@@ -28,9 +28,9 @@ export const metadata: Metadata = {
   },
 };
 
-function detectLocale(): string {
+async function detectLocale(): Promise<string> {
   try {
-    const headerList = headers();
+    const headerList = await headers();
     const pathname = headerList.get('x-next-pathname') ?? headerList.get('x-invoke-path') ?? '';
     const match = pathname.match(/^\/(th|en)(\/|$)/);
     return match ? match[1] : 'en';
@@ -39,8 +39,8 @@ function detectLocale(): string {
   }
 }
 
-export default function RootLayout({ children }: { children: ReactNode }) {
-  const lang = detectLocale();
+export default async function RootLayout({ children }: { children: ReactNode }) {
+  const lang = await detectLocale();
   const dict = getDictionary(normalizeLocale(lang));
   return (
     <html lang={lang} dir="ltr" className={`${sans.variable} ${serif.variable}`}>

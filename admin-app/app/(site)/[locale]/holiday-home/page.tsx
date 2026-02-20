@@ -1,19 +1,13 @@
-import dynamic from 'next/dynamic';
-
 import { Container } from '@/components/layout/Container';
 import { Breadcrumbs } from '@/components/layout/Breadcrumbs';
 import { TransferFeesBreakdown } from '@/components/knowledge/TransferFeesBreakdown';
-
-const LeadForm = dynamic(
-  () => import('@/components/forms/LeadForm').then((m) => m.LeadForm),
-  { ssr: false },
-);
+import { LeadForm } from '@/components/forms/LeadForm';
 import { getDictionary, normalizeLocale } from '@/app/_lib/i18n/get-dictionary';
 import { makePageMetadata } from '@/app/_lib/i18n/metadata';
 import { withLocale } from '@/app/_lib/i18n/routing';
-import { PAGE_REVALIDATE_SECONDS } from '@/app/_lib/constants';
+ 
 
-export const revalidate = PAGE_REVALIDATE_SECONDS;
+export const revalidate = 300;
 
 export async function generateMetadata({ params }: { params: { locale: string } }) {
   const locale = normalizeLocale(params.locale);

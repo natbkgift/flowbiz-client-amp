@@ -6,13 +6,13 @@
     "dev": "next dev -p 3000",
     "build": "next build",
     "start": "next start -p 3000",
-    "lint": "next lint",
+    "lint": "eslint .",
     "test": "vitest run",
     "test:watch": "vitest"
   },
   "dependencies": {
-    "dompurify": "3.1.6",
-    "next": "14.2.12",
+    "dompurify": "3.3.1",
+    "next": "16.1.6",
     "react": "18.3.1",
     "react-dom": "18.3.1"
   },
@@ -23,8 +23,8 @@
     "@types/react": "18.3.12",
     "@vitejs/plugin-react": "4.3.4",
     "autoprefixer": "10.4.20",
-    "eslint": "8.57.0",
-    "eslint-config-next": "14.2.12",
+    "eslint": "9.39.2",
+    "eslint-config-next": "16.1.6",
     "eslint-plugin-jsx-a11y": "6.10.2",
     "jsdom": "25.0.1",
     "postcss": "8.4.47",

@@ -1,11 +1,7 @@
 /**
  * Shared ISR revalidation interval (in seconds).
  *
- * All public pages import this constant so the value can be tuned in
- * one place.  Override at deploy time via `NEXT_PUBLIC_REVALIDATE_SECONDS`.
- *
- * Default: 300 seconds (5 minutes).
+ * NOTE: In Next.js 16, segment config exports (like `export const revalidate = ...`)
+ * must be statically analyzable. Avoid env-based computation here.
  */
-export const PAGE_REVALIDATE_SECONDS: number = Number(
-  process.env.NEXT_PUBLIC_REVALIDATE_SECONDS ?? 300,
-);
+export const PAGE_REVALIDATE_SECONDS = 300;

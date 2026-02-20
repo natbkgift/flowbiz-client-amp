@@ -31,7 +31,7 @@ jobs:
           python-version: '3.11'
 
       - name: Install Python dependencies
-        run: pip install -e ".[dev]"
+        run: pip install ".[dev]"
 
       - name: Ruff lint
         run: ruff check .
@@ -50,7 +50,7 @@ jobs:
 
       - name: Next.js lint
         working-directory: admin-app
-        run: npx next lint
+        run: npm run lint
 
       - name: TypeScript check
         working-directory: admin-app

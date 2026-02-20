@@ -37,6 +37,8 @@ REQUIRED_GOVERNANCE_ARTIFACTS: list[Path] = [
     APP_DIR / "docs" / "governance" / "metrics.yaml",
     APP_DIR / "docs" / "governance" / "observability.md",
     APP_DIR / "docs" / "governance" / "phase-dependency.md",
+    APP_DIR / "docs" / "governance" / "phase-dependency.blueprint.md",
+    APP_DIR / "docs" / "governance" / "phases.yaml",
     APP_DIR / "docs" / "architecture" / "platform-architecture.md",
     APP_DIR / "docs" / "architecture" / "experience-system.md",
     APP_DIR / "docs" / "architecture" / "brand-system.md",

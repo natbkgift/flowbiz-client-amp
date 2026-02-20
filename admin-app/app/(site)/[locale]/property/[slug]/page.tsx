@@ -1,15 +1,10 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import Image from 'next/image';
-import dynamic from 'next/dynamic';
 
 import { Container } from '@/components/layout/Container';
 import { Breadcrumbs } from '@/components/layout/Breadcrumbs';
-
-const LeadForm = dynamic(
-  () => import('@/components/forms/LeadForm').then((m) => m.LeadForm),
-  { ssr: false },
-);
+import { LeadForm } from '@/components/forms/LeadForm';
 import { IconBed, IconBath, IconArea } from '@/components/icons/SvgIcons';
 import { fetchPropertyBySlug } from '@/app/_lib/public-api-server';
 import { CTA } from '@/app/_lib/public-cta';
@@ -17,9 +12,9 @@ import { resolveImageUrl } from '@/app/_lib/public-api-shared';
 import { getDictionary, normalizeLocale } from '@/app/_lib/i18n/get-dictionary';
 import { ogLocale } from '@/app/_lib/i18n/routing';
 import { getInternalLinks } from '@/app/_lib/internal-links';
-import { PAGE_REVALIDATE_SECONDS } from '@/app/_lib/constants';
+ 
 
-export const revalidate = PAGE_REVALIDATE_SECONDS;
+export const revalidate = 300;
 
 type PageProps = { params: { locale: string; slug: string } };
 

@@ -11,6 +11,19 @@ Examples:
 ## Summary
 <!-- Describe what this PR does and why. Be specific about the business value. -->
 
+## Blueprint Reference
+
+- Phase: <!-- Phase number -->
+- Documents: <!-- List blueprint docs implemented -->
+
+## Dependencies
+
+- [ ] <!-- List PRs that must be merged first -->
+
+## Rollback Plan
+
+<!-- How to revert if this PR causes issues -->
+
 ## Related Issue
 Closes #<!-- issue number -->
 

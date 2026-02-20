@@ -18,7 +18,9 @@ Before execution you must read:
 
 /runtime/system_state.json
 
+docs/governance/phases.yaml
 docs/governance/phase-dependency.md
+docs/governance/phase-dependency.blueprint.md
 docs/governance/metrics.yaml
 docs/governance/observability.md
 
@@ -32,10 +34,13 @@ docs/directive/AMP_MASTER_EXECUTION_DIRECTIVE_V4.md
 
 # PHASE ORDER (MANDATORY)
 
-Phase 0 → Phase 1 → Phase 2 → Phase 3 → Phase 4 → Phase 5 → Phase 6 → Phase 7 → Phase 8 → Phase 9 → Phase 10
+Use the active phase framework from state:
+
+- `/runtime/system_state.json` → `execution.phase_framework` (default: `blueprint_v1`)
+
+Phase order is defined by `docs/governance/phases.yaml`.
 
 No skipping.
-
 No batching.
 
 ---

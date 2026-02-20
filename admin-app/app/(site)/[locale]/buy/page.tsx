@@ -1,20 +1,14 @@
-import dynamic from 'next/dynamic';
 import { Container } from '@/components/layout/Container';
 import { Breadcrumbs } from '@/components/layout/Breadcrumbs';
+import { ListingGrid } from '@/components/listing/ListingGrid';
+import { LeadForm } from '@/components/forms/LeadForm';
 import { fetchProperties } from '@/app/_lib/public-api-server';
 import { getDictionary, normalizeLocale } from '@/app/_lib/i18n/get-dictionary';
 import { makePageMetadata } from '@/app/_lib/i18n/metadata';
 import { withLocale } from '@/app/_lib/i18n/routing';
-import { PAGE_REVALIDATE_SECONDS } from '@/app/_lib/constants';
+ 
 
-const ListingGrid = dynamic(() => import('@/components/listing/ListingGrid').then(m => m.ListingGrid), {
-  loading: () => <div className="animate-pulse h-96 rounded bg-slate-100" />,
-});
-const LeadForm = dynamic(() => import('@/components/forms/LeadForm').then(m => m.LeadForm), {
-  loading: () => <div className="animate-pulse h-48 rounded bg-slate-100" />,
-});
-
-export const revalidate = PAGE_REVALIDATE_SECONDS;
+export const revalidate = 300;
 
 export async function generateMetadata({
   params,

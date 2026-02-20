@@ -1,92 +1,105 @@
 {
-  "system": {
-    "name": "AMP Platform",
-    "mode": "standby",
-    "agent_status": "awaiting_command",
-    "last_boot": null
-  },
-
-  "execution": {
-    "current_phase": 10,
-    "phase_status": "completed",
-    "phase_started_at": null,
-    "phase_completed_at": "2026-02-18T05:53:07.609395Z",
-    "last_successful_phase": 10
-  },
-
   "deployment": {
+    "container_hash": null,
+    "deployment_id": null,
+    "deployment_status": "stable",
+    "environment": "production",
     "last_deploy_sha": "27ec8095",
     "last_deploy_time": "2026-02-18T05:53:07.609395Z",
-    "environment": "production",
-    "deployment_status": "stable",
-    "deployment_id": null,
-    "container_hash": null,
     "migration_id": "0022_v3_bookings"
   },
-
-  "observability": {
-    "logs": "healthy",
-    "metrics": "healthy",
-    "tracing": "healthy",
-    "alerts": "armed",
-    "dashboards": "healthy",
-    "last_check": "2026-02-18T05:53:07.609395Z"
+  "execution": {
+    "current_phase": 0,
+    "last_successful_phase": 0,
+    "phase_completed_at": null,
+    "phase_framework": "blueprint_v1",
+    "phase_started_at": null,
+    "phase_status": "idle",
+    "phase_work": {},
+    "phase_work_retry": {}
   },
-
-  "metrics": {
-    "conversion_status": "stable",
-    "performance_status": "stable",
-    "crm_ingestion_status": "unknown",
-    "seo_integrity_status": "stable",
-    "ai_inference_status": "unknown",
-    "reliability_status": "stable",
-    "last_evaluated": "2026-02-18T05:53:07.609395Z"
-  },
-
-  "integrity": {
-    "baseline_completed": true,
-    "contracts_loaded": true,
-    "architecture_locked": true,
-    "experience_locked": true,
-    "brand_locked": true
-  },
-
   "failures": {
-    "last_error": null,
-    "error_count": 0,
     "consecutive_failures": 0,
+    "error_count": 0,
+    "last_error": null,
     "last_failure_at": null,
     "last_rollback": null,
-    "rollback_reason": null
+    "rollback_reason": null,
+    "self_fix_attempts": {}
   },
-
-  "planner": {
-    "next_action": null,
-    "priority": "none",
-    "blocked": false,
-    "block_reason": null
+  "integrity": {
+    "architecture_locked": true,
+    "baseline_completed": true,
+    "brand_locked": true,
+    "contracts_loaded": true,
+    "experience_locked": true
   },
-
+  "metrics": {
+    "ai_inference_status": "unknown",
+    "conversion_status": "stable",
+    "crm_ingestion_status": "unknown",
+    "last_evaluated": "2026-02-18T05:53:07.609395Z",
+    "performance_status": "stable",
+    "reliability_status": "stable",
+    "seo_integrity_status": "stable"
+  },
   "mission": {
-    "mode": "infinite",
-    "target_final_phase": null,
-    "stop_when_complete": false,
+    "admin_base_url": "http://127.0.0.1:8002",
+    "allow_seed_demo": false,
+    "baseline_public_base": "https://amppattaya.com",
+    "baseline_vps_host": null,
+    "baseline_vps_path": "/opt/flowbiz/clients/flowbiz-client-amp",
+    "completed_at": null,
+    "mode": "finite",
     "production_base_url": "http://127.0.0.1:8001",
-    "staging_base_url": "http://127.0.0.1:8101"
+    "public_base_url": "https://amppattaya.com",
+    "self_fix_auto_commit": false,
+    "self_fix_auto_deploy": false,
+    "self_fix_enabled": false,
+    "self_fix_max_attempts": 1,
+    "self_fix_staging_vps_path": "/opt/flowbiz/clients/flowbiz-client-amp-staging",
+    "self_fix_vps_host": null,
+    "self_fix_vps_path": "/opt/flowbiz/clients/flowbiz-client-amp",
+    "staging_base_url": "http://127.0.0.1:8101",
+    "staging_deploy_enabled": false,
+    "staging_required": false,
+    "started_at": null,
+    "status": "running",
+    "stop_when_complete": false,
+    "target_final_phase": 6
   },
-
-  "verification": {
-    "phase": null,
-    "status": "unknown",
-    "checks": {},
-    "last_checked_at": null
+  "observability": {
+    "alerts": "armed",
+    "dashboards": "healthy",
+    "last_check": "2026-02-18T05:53:07.609395Z",
+    "logs": "healthy",
+    "metrics": "healthy",
+    "tracing": "healthy"
   },
-
+  "planner": {
+    "block_reason": null,
+    "blocked": false,
+    "next_action": null,
+    "priority": "none"
+  },
   "runtime": {
-    "loop_interval_seconds": 60,
-    "max_parallel_actions": 1,
-    "max_consecutive_failures": 3,
+    "allow_human_override": true,
     "deterministic_mode": true,
-    "allow_human_override": true
+    "loop_interval_seconds": 60,
+    "max_consecutive_failures": 3,
+    "max_parallel_actions": 1
+  },
+  "system": {
+    "agent_status": "running",
+    "last_boot": null,
+    "mode": "continuous",
+    "name": "AMP Platform"
+  },
+  "verification": {
+    "checks": {},
+    "last_checked_at": null,
+    "phase": null,
+    "retry_count": 0,
+    "status": "unknown"
   }
 }
