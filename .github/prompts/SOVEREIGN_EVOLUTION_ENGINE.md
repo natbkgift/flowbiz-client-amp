@@ -320,6 +320,10 @@ Writes verbose logs to `output/**` and keeps console output minimal.
 
 For artifact-only operation, the script stages inputs under `output/inputs/**`.
 
+Safety: PR/merge/deploy automation is **opt-in**. By default the script will run gates + write artifacts only.
+- Artifact-only run: add `-SkipCommit`
+- Enable auto-merge / auto-deploy: set `AUTOMATION_AUTHORIZED=true`, `ALLOW_AUTO_MERGE=true`, `ALLOW_AUTO_DEPLOY=true` in your shell environment
+
 ```powershell
 pwsh -NoProfile -ExecutionPolicy Bypass -File scripts/governance/sovereign_pr_loop.ps1 \
     -Base main \
