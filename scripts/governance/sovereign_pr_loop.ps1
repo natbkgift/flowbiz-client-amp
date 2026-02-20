@@ -194,7 +194,7 @@ if ($ResetQueueIfAllDone) {
             if ($it.PSObject.Properties.Name -contains 'notes') { $it.PSObject.Properties.Remove('notes') }
           }
           if ($existing.PSObject.Properties.Name -contains 'completed_at_utc') { $existing.PSObject.Properties.Remove('completed_at_utc') }
-          $existing.reset_at_utc = (Get-Date).ToUniversalTime().ToString('o')
+          Add-Member -InputObject $existing -NotePropertyName 'reset_at_utc' -NotePropertyValue ((Get-Date).ToUniversalTime().ToString('o')) -Force
           $existing.created_at_utc = (Get-Date).ToUniversalTime().ToString('o')
           $existing.stop_condition = $StopCondition
           $existing.items = $items
