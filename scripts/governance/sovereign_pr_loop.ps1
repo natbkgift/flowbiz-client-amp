@@ -38,10 +38,17 @@ $LogsDir = Join-Path $OutDirAbs 'logs'
 $GovDir = Join-Path $OutDirAbs 'governance'
 $EvoDir = Join-Path $OutDirAbs 'evolution'
 $InputsDir = Join-Path $OutDirAbs 'inputs'
+$QueuePath = Join-Path $OutDirAbs 'queue.json'
 New-Item -ItemType Directory -Force -Path $LogsDir,$GovDir,$EvoDir,$InputsDir | Out-Null
 
 $Transcript = Join-Path $LogsDir "run.$ts.log"
 Start-Transcript -Path $Transcript -Append | Out-Null
+
+function Write-JsonNoBom([string]$Path, $Object) {
+  $json = ($Object | ConvertTo-Json -Depth 12)
+  $utf8NoBom = New-Object System.Text.UTF8Encoding($false)
+  [System.IO.File]::WriteAllText($Path, $json + "`n", $utf8NoBom)
+}
 
 # Safety: SkipCommit is intended for artifact-only prompt test runs.
 # It must not create PRs, merge, or deploy.
@@ -123,49 +130,41 @@ if ($BlueprintDir) {
   $StagedBlueprintDir = (Join-Path $InputsDir 'blueprint')
   Copy-Item -Recurse -Force -LiteralPath $BlueprintDir -Destination $StagedBlueprintDir
 
-  # Seed an ordered queue based on docs/blueprint/README.md index
-  $queue = [ordered]@{
-    created_at_utc = (Get-Date).ToUniversalTime().ToString('o')
-    stop_condition = $StopCondition
-    items = @(
-      @{ id = 'BP-00'; path = 'blueprint/00_strategy/00_MASTER_BLUEPRINT.md'; status = 'pending' },
-      @{ id = 'BP-01'; path = 'blueprint/01_architecture/01_MASTER_SITEMAP.md'; status = 'pending' },
-      @{ id = 'BP-02'; path = 'blueprint/01_architecture/02_URL_STRUCTURE_GUIDELINE.md'; status = 'pending' },
-      @{ id = 'BP-03'; path = 'blueprint/01_architecture/03_INDEX_MATRIX.md'; status = 'pending' },
-      @{ id = 'BP-04'; path = 'blueprint/01_architecture/04_XML_SITEMAP_STRATEGY.md'; status = 'pending' },
-      @{ id = 'BP-05'; path = 'blueprint/02_data/05_DATABASE_SCHEMA.md'; status = 'pending' },
-      @{ id = 'BP-06'; path = 'blueprint/02_data/06_PROPERTY_TYPE_STANDARD.md'; status = 'pending' },
-      @{ id = 'BP-07'; path = 'blueprint/02_data/07_PRODUCT_TEMPLATE_SPEC.md'; status = 'pending' },
-      @{ id = 'BP-08'; path = 'blueprint/03_seo/08_CONTENT_PILLAR_MAP.md'; status = 'pending' },
-      @{ id = 'BP-09'; path = 'blueprint/03_seo/09_INTERNAL_LINKING_BLUEPRINT.md'; status = 'pending' },
-      @{ id = 'BP-10'; path = 'blueprint/03_seo/10_SCHEMA_MARKUP_PLAN.md'; status = 'pending' },
-      @{ id = 'BP-11'; path = 'blueprint/03_seo/11_CRAWL_OPTIMIZATION_PLAN.md'; status = 'pending' },
-      @{ id = 'BP-12'; path = 'blueprint/04_conversion/12_FUNNEL_DESIGN.md'; status = 'pending' },
-      @{ id = 'BP-13'; path = 'blueprint/04_conversion/13_CTA_STANDARD.md'; status = 'pending' },
-      @{ id = 'BP-14'; path = 'blueprint/05_data_population/14_DATA_IMPORT_SEQUENCE.md'; status = 'pending' },
-      @{ id = 'BP-15'; path = 'blueprint/05_data_population/15_CONTENT_STANDARD.md'; status = 'pending' },
-      @{ id = 'BP-16'; path = 'blueprint/06_release/16_QA_CHECKLIST.md'; status = 'pending' },
-      @{ id = 'BP-17'; path = 'blueprint/06_release/17_RELEASE_PROTOCOL.md'; status = 'pending' }
-    )
+  # Seed an ordered queue only if one does not already exist.
+  if (-not (Test-Path -LiteralPath $QueuePath)) {
+    $queue = [ordered]@{
+      created_at_utc = (Get-Date).ToUniversalTime().ToString('o')
+      stop_condition = $StopCondition
+      items = @(
+        @{ id = 'BP-00'; path = 'blueprint/00_strategy/00_MASTER_BLUEPRINT.md'; status = 'pending' },
+        @{ id = 'BP-01'; path = 'blueprint/01_architecture/01_MASTER_SITEMAP.md'; status = 'pending' },
+        @{ id = 'BP-02'; path = 'blueprint/01_architecture/02_URL_STRUCTURE_GUIDELINE.md'; status = 'pending' },
+        @{ id = 'BP-03'; path = 'blueprint/01_architecture/03_INDEX_MATRIX.md'; status = 'pending' },
+        @{ id = 'BP-04'; path = 'blueprint/01_architecture/04_XML_SITEMAP_STRATEGY.md'; status = 'pending' },
+        @{ id = 'BP-05'; path = 'blueprint/02_data/05_DATABASE_SCHEMA.md'; status = 'pending' },
+        @{ id = 'BP-06'; path = 'blueprint/02_data/06_PROPERTY_TYPE_STANDARD.md'; status = 'pending' },
+        @{ id = 'BP-07'; path = 'blueprint/02_data/07_PRODUCT_TEMPLATE_SPEC.md'; status = 'pending' },
+        @{ id = 'BP-08'; path = 'blueprint/03_seo/08_CONTENT_PILLAR_MAP.md'; status = 'pending' },
+        @{ id = 'BP-09'; path = 'blueprint/03_seo/09_INTERNAL_LINKING_BLUEPRINT.md'; status = 'pending' },
+        @{ id = 'BP-10'; path = 'blueprint/03_seo/10_SCHEMA_MARKUP_PLAN.md'; status = 'pending' },
+        @{ id = 'BP-11'; path = 'blueprint/03_seo/11_CRAWL_OPTIMIZATION_PLAN.md'; status = 'pending' },
+        @{ id = 'BP-12'; path = 'blueprint/04_conversion/12_FUNNEL_DESIGN.md'; status = 'pending' },
+        @{ id = 'BP-13'; path = 'blueprint/04_conversion/13_CTA_STANDARD.md'; status = 'pending' },
+        @{ id = 'BP-14'; path = 'blueprint/05_data_population/14_DATA_IMPORT_SEQUENCE.md'; status = 'pending' },
+        @{ id = 'BP-15'; path = 'blueprint/05_data_population/15_CONTENT_STANDARD.md'; status = 'pending' },
+        @{ id = 'BP-16'; path = 'blueprint/06_release/16_QA_CHECKLIST.md'; status = 'pending' },
+        @{ id = 'BP-17'; path = 'blueprint/06_release/17_RELEASE_PROTOCOL.md'; status = 'pending' }
+      )
+    }
+    Write-JsonNoBom -Path $QueuePath -Object $queue
   }
-  # Write queue.json as UTF-8 *without* BOM so Python's json loader can read it reliably.
-  $queueJson = ($queue | ConvertTo-Json -Depth 6)
-  $utf8NoBom = New-Object System.Text.UTF8Encoding($false)
-  [System.IO.File]::WriteAllText((Join-Path $OutDirAbs 'queue.json'), $queueJson + "`n", $utf8NoBom)
-}
-
-function Write-JsonNoBom([string]$Path, $Object) {
-  $json = ($Object | ConvertTo-Json -Depth 12)
-  $utf8NoBom = New-Object System.Text.UTF8Encoding($false)
-  [System.IO.File]::WriteAllText($Path, $json + "`n", $utf8NoBom)
 }
 
 # Optional: if a previous session completed the queue, reset it so the loop can run again.
 if ($ResetQueueIfAllDone) {
-  $queuePath = (Join-Path $OutDirAbs 'queue.json')
-  if (Test-Path -LiteralPath $queuePath) {
+  if (Test-Path -LiteralPath $QueuePath) {
     try {
-      $existing = Get-Content -LiteralPath $queuePath -Raw | ConvertFrom-Json
+      $existing = Get-Content -LiteralPath $QueuePath -Raw | ConvertFrom-Json
       $items = @($existing.items)
       if ($items.Count -gt 0) {
         $allDone = $true
@@ -179,10 +178,11 @@ if ($ResetQueueIfAllDone) {
             if ($it.PSObject.Properties.Name -contains 'notes') { $it.PSObject.Properties.Remove('notes') }
           }
           if ($existing.PSObject.Properties.Name -contains 'completed_at_utc') { $existing.PSObject.Properties.Remove('completed_at_utc') }
+          $existing.reset_at_utc = (Get-Date).ToUniversalTime().ToString('o')
           $existing.created_at_utc = (Get-Date).ToUniversalTime().ToString('o')
           $existing.stop_condition = $StopCondition
           $existing.items = $items
-          Write-JsonNoBom -Path $queuePath -Object $existing
+          Write-JsonNoBom -Path $QueuePath -Object $existing
         }
       }
     } catch {
