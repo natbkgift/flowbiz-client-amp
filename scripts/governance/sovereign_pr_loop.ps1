@@ -177,7 +177,10 @@ if ($ResetQueueIfAllDone) {
       $items = @($existing.items)
 
       $debug.item_count = $items.Count
-      $debug.first_status = (if ($items.Count -gt 0) { $items[0].status } else { $null })
+      $debug.first_status = $null
+      if ($items.Count -gt 0) {
+        $debug.first_status = $items[0].status
+      }
       if ($items.Count -gt 0) {
         $allDone = $true
         foreach ($it in $items) {
