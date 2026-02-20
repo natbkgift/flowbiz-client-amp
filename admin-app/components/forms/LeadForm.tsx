@@ -9,6 +9,7 @@ import { th } from '../../app/_lib/i18n/th';
 import { localeFromPathname } from '../../app/_lib/i18n/routing';
 import { trackEvent } from '../../lib/analytics';
 import { trackExperimentOutcomes } from '../../lib/experiments';
+import { calculateLeadScore } from '../../lib/lead-scoring';
 
 type LeadFormProps = {
   heading?: string;
@@ -88,6 +89,15 @@ export function LeadForm({ heading, propertyId, defaultMessage }: LeadFormProps)
       has_phone: Boolean(phone.trim()),
     });
 
+    // Compute lead quality score for CRM enrichment
+    const leadScore = calculateLeadScore({
+      name,
+      email: email.trim() || undefined,
+      phone: phone.trim() || undefined,
+      message,
+      propertyId: propertyId ?? undefined,
+    });
+
     setStatus({ state: 'submitting' });
 
     try {
@@ -106,6 +116,9 @@ export function LeadForm({ heading, propertyId, defaultMessage }: LeadFormProps)
           source_page: safeSourcePage(),
           website: website.trim() || null,
           submit_timestamp: submitIso,
+          // Lead quality score (0–100 + tier)
+          lead_score: leadScore.total,
+          lead_tier: leadScore.tier,
         }),
       });
 
