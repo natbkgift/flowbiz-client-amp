@@ -94,4 +94,5 @@ runtime/backup/
 runtime/system_state.backup*.json
 # Claude temp files
 tmpclaude-*
-nultest_output.txt
+nul
+test_output.txt

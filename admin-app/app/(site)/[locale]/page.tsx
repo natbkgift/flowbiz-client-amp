@@ -344,12 +344,8 @@ export default function HomePage({
               <p>{dict.home.pathLive.desc}</p>
             </TrackedLink>
           </div>
-        </Container>
-      </section>
 
-      <section className="section">
-        <Container>
-          <div className="section-header">
+          <div className="section-header" style={{ marginTop: 'var(--space-7)' }}>
             <h2 className="section-title">{dict.homepageSegmentation.sectionTitle}</h2>
             <p className="section-subtitle">{dict.homepageSegmentation.sectionSubtitle}</p>
           </div>
@@ -367,21 +363,6 @@ export default function HomePage({
               </TrackedLink>
             ))}
           </div>
-        </Container>
-      </section>
-
-      <section className="section section--alt">
-        <Container>
-          <div className="section-header">
-            <h2 className="section-title">{dict.home.trustTitle}</h2>
-            <p className="section-subtitle">{dict.home.trustSubtitle}</p>
-          </div>
-
-          <ul className="bullet-list">
-            {dict.home.trustBullets.map((b) => (
-              <li key={b}>{b}</li>
-            ))}
-          </ul>
         </Container>
       </section>
 
@@ -423,6 +404,17 @@ export default function HomePage({
 
       <section className="section section--alt">
         <Container>
+          <div className="section-header">
+            <h2 className="section-title">{dict.home.trustTitle}</h2>
+            <p className="section-subtitle">{dict.home.trustSubtitle}</p>
+          </div>
+
+          <ul className="bullet-list" style={{ marginBottom: 'var(--space-7)' }}>
+            {dict.home.trustBullets.map((b) => (
+              <li key={b}>{b}</li>
+            ))}
+          </ul>
+
           <div className="section-header">
             <h2 className="section-title">{dict.home.insightTitle}</h2>
             <p className="section-subtitle">{dict.home.insightSubtitle}</p>
