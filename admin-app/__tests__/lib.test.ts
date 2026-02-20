@@ -142,3 +142,78 @@ describe('api – handleUnauthorizedError', () => {
     expect(result).toBe(false);
   });
 });
+
+/* ---------- lead-scoring.ts ---------- */
+describe('lead-scoring', () => {
+  beforeEach(() => {
+    localStorage.clear();
+    vi.resetModules();
+  });
+
+  it('calculateLeadScore returns a score between 0 and 100', async () => {
+    const { calculateLeadScore } = await import('@/lib/lead-scoring');
+    const result = calculateLeadScore({
+      name: 'Test User',
+      email: 'test@example.com',
+      message: 'I want to invest in a Bangkok condo',
+    });
+    expect(result.total).toBeGreaterThanOrEqual(0);
+    expect(result.total).toBeLessThanOrEqual(100);
+    expect(['hot', 'warm', 'cool', 'cold']).toContain(result.tier);
+    expect(result.scoredAt).toBeTruthy();
+  });
+
+  it('calculateLeadScore scores higher with more form data', async () => {
+    const { calculateLeadScore } = await import('@/lib/lead-scoring');
+    const minimal = calculateLeadScore({ name: 'A' });
+    const full = calculateLeadScore({
+      name: 'John Doe',
+      email: 'john@example.com',
+      phone: '+66891234567',
+      message: 'I am interested in purchasing a luxury condo in Bangkok for investment purposes',
+      propertyId: 'prop-123',
+    });
+    expect(full.total).toBeGreaterThan(minimal.total);
+  });
+
+  it('calculateLeadScore returns all dimension scores', async () => {
+    const { calculateLeadScore } = await import('@/lib/lead-scoring');
+    const result = calculateLeadScore({ name: 'Test' });
+    expect(result.dimensions).toHaveProperty('intentClarity');
+    expect(result.dimensions).toHaveProperty('engagementDepth');
+    expect(result.dimensions).toHaveProperty('formCompleteness');
+    expect(result.dimensions).toHaveProperty('funnelProgress');
+    expect(result.dimensions).toHaveProperty('recencySignal');
+  });
+
+  it('getIntentScore returns numeric score and confidence', async () => {
+    const { getIntentScore } = await import('@/lib/lead-scoring');
+    const result = getIntentScore();
+    expect(typeof result.intentScore).toBe('number');
+    expect(result.intentScore).toBeGreaterThanOrEqual(0);
+    expect(result.intentScore).toBeLessThanOrEqual(100);
+    expect(['high', 'medium', 'low']).toContain(result.confidence);
+  });
+
+  it('computeIntentScore returns higher score for invest intent', async () => {
+    const { computeIntentScore } = await import('@/lib/lead-scoring');
+    const investProfile = {
+      visitorId: 'v-1',
+      firstVisitAt: new Date().toISOString(),
+      lastVisitAt: new Date().toISOString(),
+      sessionCount: 3,
+      intent: 'invest' as const,
+      segment: 'returning' as const,
+      recentPages: ['/en/invest', '/en/projects/sukhumvit', '/en/invest'],
+      preferredLocale: 'en',
+    };
+    const exploreProfile = {
+      ...investProfile,
+      intent: 'explore' as const,
+      recentPages: ['/en', '/en/about'],
+    };
+    const investResult = computeIntentScore(investProfile);
+    const exploreResult = computeIntentScore(exploreProfile);
+    expect(investResult.intentScore).toBeGreaterThan(exploreResult.intentScore);
+  });
+});
