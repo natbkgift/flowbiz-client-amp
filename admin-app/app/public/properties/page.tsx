@@ -6,6 +6,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { API_BASE } from '../_shared/api';
 import type { PropertyListItem, PropertyListResponse } from '../_shared/types';
 import { toPropertyHref } from '../../_lib/public-api-shared';
+import { RemoteImage } from '../../../components/media/RemoteImage';
 
 const SORT_WHITELIST = ['newest', 'oldest', 'price_asc', 'price_desc'] as const;
 type SortValue = (typeof SORT_WHITELIST)[number];
@@ -162,12 +163,12 @@ export default function PublicPropertiesPage() {
                   className="bg-white rounded-lg shadow-sm hover:shadow-md transition overflow-hidden"
                 >
                   {thumbnail ? (
-                    <img
+                    <RemoteImage
                       src={thumbnail}
                       alt={p.title}
                       className="h-44 w-full object-cover"
-                      loading="lazy"
-                      decoding="async"
+                      width={384}
+                      height={176}
                     />
                   ) : (
                     <div className="h-44 w-full bg-slate-200" />

@@ -4,6 +4,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 
 import { API_BASE } from '../../_shared/api';
 import type { PropertyDetail } from '../../_shared/types';
+import { RemoteImage } from '../../../../components/media/RemoteImage';
 
 export default function PublicPropertyDetailPage({ params }: { params: { id: string } }) {
   const [loading, setLoading] = useState(true);
@@ -89,12 +90,12 @@ export default function PublicPropertyDetailPage({ params }: { params: { id: str
 
       <section className="space-y-3">
         {activeImage ? (
-          <img
+          <RemoteImage
             src={activeImage}
             alt={property.title}
             className="w-full h-80 object-cover rounded-lg"
-            loading="lazy"
-            decoding="async"
+            width={1080}
+            height={320}
           />
         ) : (
           <div className="w-full h-80 bg-slate-200 rounded-lg" />
@@ -109,12 +110,12 @@ export default function PublicPropertyDetailPage({ params }: { params: { id: str
                 onClick={() => setActiveImageIndex(idx)}
                 aria-label={`View image ${idx + 1}`}
               >
-                <img
+                <RemoteImage
                   src={url}
                   alt=""
                   className="h-16 w-24 object-cover rounded"
-                  loading="lazy"
-                  decoding="async"
+                  width={96}
+                  height={64}
                 />
               </button>
             ))}
