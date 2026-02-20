@@ -64,7 +64,9 @@ run_baseline → load baseline_action.prompt.md
 restore_observability → load observability_action.prompt.md  
 rollback_last_slice → load rollback_action.prompt.md  
 investigate_failure → load diagnostics_action.prompt.md  
+attempt_self_fix → load diagnostics_action.prompt.md  
 continue_phase → load phase_executor.prompt.md  
+verify_phase → load phase_executor.prompt.md  
 advance_phase → load phase_transition.prompt.md  
 resume_deploy → load deploy_action.prompt.md  
 monitor_production → load monitoring_action.prompt.md  

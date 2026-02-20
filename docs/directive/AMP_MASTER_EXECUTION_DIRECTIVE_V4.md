@@ -43,8 +43,13 @@ Agent may operate in one of the following modes:
 - Stop when mission complete
 
 ### 3) Continuous Mode
-- Autonomous evolution
-- Not used unless explicitly enabled
+- Autonomous evolution loop
+- Enabled ONLY when `/runtime/system_state.json` sets `system.mode = "continuous"`
+- Must respect:
+	- `runtime.loop_interval_seconds`
+	- `runtime.max_parallel_actions`
+	- `runtime.max_consecutive_failures`
+- If governance gates fail or metrics breach occurs → halt slice and rollback per ROLLBACK LAW
 
 ---
 
@@ -129,6 +134,8 @@ Agent must bind to:
 docs/governance/metrics.yaml
 docs/governance/observability.md
 docs/governance/phase-dependency.md
+docs/governance/phase-dependency.blueprint.md
+docs/governance/phases.yaml
 
 docs/architecture/platform-architecture.md
 docs/architecture/experience-system.md
@@ -141,21 +148,13 @@ If missing or inconsistent → execution forbidden.
 
 # PHASE FRAMEWORK
 
-Execution must follow:
+Execution phases are defined by the phase registry:
 
-```
-Phase 0 → Baseline Integrity
-Phase 1 → Conversion Core
-Phase 2 → Finder Engine
-Phase 3 → Listing Layer
-Phase 4 → Booking System
-Phase 5 → CRM Automation
-Phase 6 → Investor Tools
-Phase 7 → AI Recommendation
-Phase 8 → SEO Authority
-Phase 9 → Design System
-Phase 10 → Seed + Demo
-```
+- `docs/governance/phases.yaml`
+
+Active phase framework is selected by state:
+
+- `/runtime/system_state.json` → `execution.phase_framework` (default: `blueprint_v1`)
 
 No skipping.
 No parallelization.
@@ -178,6 +177,8 @@ For each phase:
 9) metric validation  
 10) production deploy  
 11) monitoring  
+
+In Continuous Mode, the agent performs self-review via deterministic automated gates (CI/QA/metrics/observability). Human review is not required, but blind deploy remains forbidden.
 
 ---
 
@@ -288,13 +289,13 @@ Agent must:
 - produce FINAL REPORT
 - continue monitoring and self-healing loop
 
-Autonomous continuation is required.
+If `system.mode = continuous` and `mission.stop_when_complete = false`, autonomous continuation may run indefinitely, bounded by `runtime.max_consecutive_failures`.
 
 ---
 
 # HUMAN OVERRIDE
 
-Human override is disabled in autonomous governance mode.
+Human override is controlled by state (`runtime.allow_human_override`).
 
 ---
 

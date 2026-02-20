@@ -18,7 +18,9 @@ You must read:
 
 /runtime/system_state.json
 
+docs/governance/phases.yaml
 docs/governance/phase-dependency.md
+docs/governance/phase-dependency.blueprint.md
 docs/governance/metrics.yaml
 docs/governance/observability.md
 
@@ -84,7 +86,10 @@ If any metrics status = "breach"
 
 Use:
 
-docs/governance/phase-dependency.md
+- `docs/governance/phases.yaml` to determine the active phase framework
+- Use dependency matrix based on state:
+  - if `execution.phase_framework == "blueprint_v1"` → `docs/governance/phase-dependency.blueprint.md`
+  - otherwise → `docs/governance/phase-dependency.md`
 
 If current_phase incomplete:
 
@@ -146,7 +151,9 @@ run_baseline
 restore_observability
 rollback_last_slice
 investigate_failure
+attempt_self_fix
 continue_phase
+verify_phase
 advance_phase
 resume_deploy
 monitor_production
