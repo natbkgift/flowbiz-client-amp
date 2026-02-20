@@ -274,6 +274,7 @@ export const th: Dictionary = {
     stepTimeline: 'ระยะเวลา',
     stepContact: 'ติดต่อ',
     stepProgress: 'เป้าหมาย → งบประมาณ → ติดต่อ',
+    skipToContact: 'ข้าม — พูดคุยกับที่ปรึกษาเลย →',
     heroTrigger: 'ยังไม่แน่ใจ? ให้เราช่วยแนะนำ →',
   },
   smartFinder: {

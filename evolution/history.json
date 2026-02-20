@@ -730,5 +730,20 @@
       "Tokenized .mobile-cta hardcoded padding (10px 12px → var tokens), lightened shadow 0.06→0.04"
     ],
     "deployStatus": "dev"
+  },
+  {
+    "iteration": 15,
+    "timestamp": "2026-02-20T12:30:00.000Z",
+    "totalScore": 98.03,
+    "weakestDimension": "visual_luxury_integrity",
+    "delta": 0.5,
+    "regressions": [],
+    "changesApplied": [
+      "Removed dead CSS: .toggle-group (5 lines), .toggle-option* (15 lines), .social-proof* (17 lines) = 37 lines",
+      "Removed unused npm dependency 'flowbiz-client-amp: file:..'",
+      "Added skip-to-contact shortcut in guided dialog goal step (max clicks 4→2)",
+      "Added skipToContact i18n keys in EN and TH dictionaries"
+    ],
+    "deployStatus": "dev"
   }
 ]

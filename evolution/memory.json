@@ -1,12 +1,12 @@
 {
-  "currentIteration": 14,
-  "lastScore": 97.53,
-  "weakestDimension": "complexity_control",
-  "lastPatchSummary": "Iteration 14: Strict 8pt grid alignment (3 off-grid spacing tokens fixed), single elevation policy (2 heavy inline shadows replaced with design tokens, max opacity 0.3→0.08), mobile CTA padding tokenized. Score +0.50.",
+  "currentIteration": 15,
+  "lastScore": 98.03,
+  "weakestDimension": "visual_luxury_integrity",
+  "lastPatchSummary": "Iteration 15: Removed 37 lines dead CSS (3 class families), removed unused npm dependency, added skip-to-contact shortcut reducing guided finder clicks 4→2. Score +0.50.",
   "regressionStatus": "clean",
   "productionStatus": "dev",
   "stagnationCount": 0,
   "strictnessBoundary": {},
   "createdAt": "2026-02-19T08:00:11.018Z",
-  "updatedAt": "2026-02-20T12:00:00.000Z"
+  "updatedAt": "2026-02-20T12:30:00.000Z"
 }

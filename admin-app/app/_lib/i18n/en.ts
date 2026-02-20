@@ -281,6 +281,7 @@ export const en: Dictionary = {
     stepTimeline: 'Timeline',
     stepContact: 'Contact',
     stepProgress: 'Goal → Budget → Contact',
+    skipToContact: 'Skip — speak to an advisor now →',
     heroTrigger: 'Not sure where to start? Let us guide you →',
   },
   smartFinder: {

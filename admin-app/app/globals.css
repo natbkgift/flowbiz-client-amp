@@ -945,13 +945,6 @@ select {
   padding-bottom: 0;
 }
 
-.toggle-group {
-  display: inline-flex;
-  background: var(--color-gray-100);
-  border-radius: var(--radius-sm);
-  padding: 4px;
-}
-
 /* ======================== FORMS ======================== */
 
 .form-input,
@@ -1095,24 +1088,6 @@ select {
   .filter-sidebar.active {
     transform: translateY(0);
   }
-}
-
-.toggle-option {
-  padding: 8px 24px;
-  border: none;
-  background: transparent;
-  border-radius: var(--radius-sm);
-  font-size: var(--font-sm);
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.2s;
-  color: var(--color-text);
-}
-
-.toggle-option.active {
-  background: var(--color-white);
-  color: var(--color-primary);
-  box-shadow: var(--shadow-card);
 }
 
 .chips-group {
@@ -1662,32 +1637,6 @@ select {
 
 .feature-item .icon {
   color: var(--color-primary);
-}
-
-/* ======================== SOCIAL PROOF BAR ======================== */
-
-.social-proof {
-  display: flex;
-  gap: var(--space-5);
-  flex-wrap: wrap;
-  justify-content: center;
-  padding: var(--space-4) 0;
-}
-
-.social-proof-item {
-  text-align: center;
-}
-
-.social-proof-number {
-  font-size: var(--font-2xl);
-  font-weight: 700;
-  color: var(--color-primary);
-}
-
-.social-proof-label {
-  font-size: var(--font-sm);
-  color: var(--color-text-secondary);
-  margin-top: 4px;
 }
 
 /* ======================== PREMIUM HIGHLIGHTS ======================== */

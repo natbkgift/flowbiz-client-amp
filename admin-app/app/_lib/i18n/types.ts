@@ -213,6 +213,7 @@ export type Dictionary = {
     stepTimeline: string;
     stepContact: string;
     stepProgress: string;
+    skipToContact: string;
     heroTrigger: string;
   };
   smartFinder: {

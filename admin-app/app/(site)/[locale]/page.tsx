@@ -198,6 +198,17 @@ export default function HomePage({
                       {smartLabels.invest}
                     </button>
                   </div>
+                  <div className="cta-row" style={{ justifyContent: 'center' }}>
+                    <a
+                      className="btn btn-tertiary"
+                      href={withLocale(
+                        locale,
+                        hrefWithQuery('/', { guided: '1', step: 'contact' })
+                      )}
+                    >
+                      {dict.guided.skipToContact}
+                    </a>
+                  </div>
                 </form>
               ) : null}
 
