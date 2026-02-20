@@ -11,6 +11,7 @@
  * - `form_success`        — LeadForm submission succeeded.
  * - `experiment_exposure`  — User was shown an experiment variant.
  * - `experiment_outcome`   — Conversion attributed to an experiment.
+ * - `segment_entry_click`  — User clicks a buyer-segment entry card.
  */
 export type EventType =
   | 'page_view'
@@ -22,7 +23,8 @@ export type EventType =
   | 'form_error'
   | 'form_success'
   | 'experiment_exposure'
-  | 'experiment_outcome';
+  | 'experiment_outcome'
+  | 'segment_entry_click';
 
 const SESSION_KEY = 'amp_session_id_v1';
 
