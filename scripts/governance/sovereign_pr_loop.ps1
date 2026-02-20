@@ -14,6 +14,7 @@ param(
   [string]$StopCondition = "queue_empty",
   [switch]$RequirePromptPath,
   [int]$MaxMinutes = 45,
+  [switch]$ResetQueueIfAllDone,
   [switch]$SkipCommit,
   [switch]$SkipPr,
   [switch]$SkipMerge,
@@ -153,10 +154,41 @@ if ($BlueprintDir) {
   [System.IO.File]::WriteAllText((Join-Path $OutDirAbs 'queue.json'), $queueJson + "`n", $utf8NoBom)
 }
 
-# If queue_empty is the desired stop condition, finalize queue status deterministically.
-if ($StopCondition -eq 'queue_empty') {
-  & $Python .\scripts\governance\finalize_blueprint_queue.py --out-dir $EffectiveArtifactsDir
-  if ($LASTEXITCODE -ne 0) { Stop-Transcript | Out-Null; throw "finalize_blueprint_queue failed" }
+function Write-JsonNoBom([string]$Path, $Object) {
+  $json = ($Object | ConvertTo-Json -Depth 12)
+  $utf8NoBom = New-Object System.Text.UTF8Encoding($false)
+  [System.IO.File]::WriteAllText($Path, $json + "`n", $utf8NoBom)
+}
+
+# Optional: if a previous session completed the queue, reset it so the loop can run again.
+if ($ResetQueueIfAllDone) {
+  $queuePath = (Join-Path $OutDirAbs 'queue.json')
+  if (Test-Path -LiteralPath $queuePath) {
+    try {
+      $existing = Get-Content -LiteralPath $queuePath -Raw | ConvertFrom-Json
+      $items = @($existing.items)
+      if ($items.Count -gt 0) {
+        $allDone = $true
+        foreach ($it in $items) {
+          if (-not $it.status -or $it.status -ne 'done') { $allDone = $false; break }
+        }
+        if ($allDone) {
+          foreach ($it in $items) {
+            $it.status = 'pending'
+            if ($it.PSObject.Properties.Name -contains 'result') { $it.PSObject.Properties.Remove('result') }
+            if ($it.PSObject.Properties.Name -contains 'notes') { $it.PSObject.Properties.Remove('notes') }
+          }
+          if ($existing.PSObject.Properties.Name -contains 'completed_at_utc') { $existing.PSObject.Properties.Remove('completed_at_utc') }
+          $existing.created_at_utc = (Get-Date).ToUniversalTime().ToString('o')
+          $existing.stop_condition = $StopCondition
+          $existing.items = $items
+          Write-JsonNoBom -Path $queuePath -Object $existing
+        }
+      }
+    } catch {
+      # If queue.json is malformed, ignore reset and proceed (other steps may regenerate it).
+    }
+  }
 }
 
 # Record session settings under output/** (no prompt content is copied)
@@ -317,6 +349,13 @@ if ($EvidenceOut) {
 
 if ($SkipCommit) {
   git restore --source=HEAD --worktree --staged evolution/evidence.json evolution/memory.json 2>$null
+}
+
+# If queue_empty is the desired stop condition, finalize queue status deterministically
+# at the end of the run (after gates/scoring/deploy), so queue resets can take effect.
+if ($StopCondition -eq 'queue_empty') {
+  & $Python .\scripts\governance\finalize_blueprint_queue.py --out-dir $EffectiveArtifactsDir
+  if ($LASTEXITCODE -ne 0) { Stop-Transcript | Out-Null; throw "finalize_blueprint_queue failed" }
 }
 
 $summary = [ordered]@{
