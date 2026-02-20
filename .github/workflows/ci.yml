@@ -73,7 +73,8 @@ jobs:
 
       - name: Run pytest with coverage
         run: |
-          pytest -q --tb=short --cov=apps --cov=packages --cov-report=term-missing --cov-fail-under=50
+          python -m coverage run --source=apps,packages -m pytest -q --tb=short
+          python -m coverage report --show-missing --fail-under=50
 
   admin-app:
     runs-on: ubuntu-latest
