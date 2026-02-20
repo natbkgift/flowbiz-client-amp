@@ -50,6 +50,10 @@ jobs:
         with:
           python-version: '3.11'
 
+      - name: Upgrade pip tooling
+        run: |
+          python -m pip install --upgrade pip setuptools
+
       - name: Install dependencies
         run: |
           pip install ".[dev]" pip-audit
