@@ -42,6 +42,14 @@ New-Item -ItemType Directory -Force -Path $LogsDir,$GovDir,$EvoDir,$InputsDir | 
 $Transcript = Join-Path $LogsDir "run.$ts.log"
 Start-Transcript -Path $Transcript -Append | Out-Null
 
+# Safety: SkipCommit is intended for artifact-only prompt test runs.
+# It must not create PRs, merge, or deploy.
+if ($SkipCommit) {
+  $SkipPr = $true
+  $SkipMerge = $true
+  $SkipDeploy = $true
+}
+
 # PromptPath behavior:
 # - Default: optional. If missing, record artifact and continue using blueprint.
 # - Strict: when -RequirePromptPath is set, missing PromptPath stops the run.
@@ -168,10 +176,17 @@ $settings = [ordered]@{
 }
 $settings | ConvertTo-Json -Depth 6 | Out-File -FilePath (Join-Path $OutDirAbs 'session_settings.json') -Encoding utf8
 
-# Required env flags (consumed by higher-level agents / policies)
-$env:AUTOMATION_AUTHORIZED = "true"
-$env:ALLOW_AUTO_MERGE = "true"
-$env:ALLOW_AUTO_DEPLOY = "true"
+# Env flags are opt-in and must be provided by the caller.
+# Default missing values to 'false' and never override an explicit setting.
+if (-not $env:AUTOMATION_AUTHORIZED) { $env:AUTOMATION_AUTHORIZED = 'false' }
+if (-not $env:ALLOW_AUTO_MERGE) { $env:ALLOW_AUTO_MERGE = 'false' }
+if (-not $env:ALLOW_AUTO_DEPLOY) { $env:ALLOW_AUTO_DEPLOY = 'false' }
+
+if ($SkipCommit) {
+  $env:AUTOMATION_AUTHORIZED = 'false'
+  $env:ALLOW_AUTO_MERGE = 'false'
+  $env:ALLOW_AUTO_DEPLOY = 'false'
+}
 $env:GOVERNANCE_OUT_DIR = (Resolve-Path $GovDir).Path
 
 if (-not $Branch) {
