@@ -129,8 +129,10 @@ def score_phase_1() -> PhaseResult:
     atomic_count = count_files("components")
     atomic_score = min(atomic_count / 12, 1) * 5
 
-    # Shadow policy: count raw shadow declarations vs token-based ones
-    raw_shadows = grep_count(r"box-shadow:\s*(?!var\()", "app/globals.css")
+    # Shadow policy: count raw shadow declarations (non-tokenized)
+    total_shadows = grep_count(r"box-shadow:\s", "app/globals.css")
+    var_shadows = grep_count(r"box-shadow:\s*var\(", "app/globals.css")
+    raw_shadows = total_shadows - var_shadows
     shadow_score = 4 if raw_shadows <= ALLOWED_SHADOW_LIMIT else 0
 
     total = tokens_score + typography_score + atomic_score + shadow_score

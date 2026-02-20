@@ -126,6 +126,10 @@
   --shadow-glass: 0 2px 12px rgba(0, 0, 0, 0.03);
   --shadow-elevated: 0 8px 32px rgba(0, 0, 0, 0.06);
   --shadow-float: 0 4px 16px rgba(10, 77, 140, 0.08);
+  --shadow-menu: 0 2px 12px rgba(0, 0, 0, 0.04);
+  --shadow-glass-panel: 0 4px 16px rgba(0, 0, 0, 0.06);
+  --shadow-focus-ring: 0 0 0 3px rgba(10, 77, 140, 0.12);
+  --shadow-bar: 0 -2px 8px rgba(0, 0, 0, 0.04);
 
   --tap-target-min: 44px;
   --maxw: 1240px;
@@ -454,7 +458,7 @@ select {
   background: var(--color-white);
   padding: var(--space-lg);
   z-index: 99;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
+  box-shadow: var(--shadow-menu);
 }
 
 .mobile-menu.active {
@@ -571,7 +575,7 @@ select {
   border: 1px solid rgba(255, 255, 255, 0.18);
   border-radius: var(--radius-lg);
   padding: var(--space-5);
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+  box-shadow: var(--shadow-glass-panel);
   backdrop-filter: blur(8px);
 }
 
@@ -992,7 +996,7 @@ select {
 .form-textarea:focus {
   outline: none;
   border-color: var(--color-primary);
-  box-shadow: 0 0 0 3px rgba(10, 77, 140, 0.12);
+  box-shadow: var(--shadow-focus-ring);
 }
 
 .form-textarea {
@@ -1451,7 +1455,7 @@ select {
   padding: var(--space-2-5) var(--space-3-5);
   background: var(--color-white);
   border-top: 1px solid var(--color-gray-200);
-  box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.04);
+  box-shadow: var(--shadow-bar);
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: var(--space-2-5);
