@@ -21,7 +21,9 @@ def _utc_now_iso() -> str:
 
 
 def _read_json(path: Path) -> dict[str, Any]:
-    return json.loads(path.read_text(encoding="utf-8"))
+    # Windows PowerShell's `Out-File -Encoding utf8` writes UTF-8 with BOM.
+    # Accept both BOM and non-BOM JSON to keep the queue finalizer robust.
+    return json.loads(path.read_text(encoding="utf-8-sig"))
 
 
 def _write_json(path: Path, payload: dict[str, Any]) -> None:

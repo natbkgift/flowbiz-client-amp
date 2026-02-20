@@ -139,7 +139,10 @@ if ($BlueprintDir) {
       @{ id = 'BP-17'; path = 'blueprint/06_release/17_RELEASE_PROTOCOL.md'; status = 'pending' }
     )
   }
-  $queue | ConvertTo-Json -Depth 6 | Out-File -FilePath (Join-Path $OutDirAbs 'queue.json') -Encoding utf8
+  # Write queue.json as UTF-8 *without* BOM so Python's json loader can read it reliably.
+  $queueJson = ($queue | ConvertTo-Json -Depth 6)
+  $utf8NoBom = New-Object System.Text.UTF8Encoding($false)
+  [System.IO.File]::WriteAllText((Join-Path $OutDirAbs 'queue.json'), $queueJson + "`n", $utf8NoBom)
 }
 
 # If queue_empty is the desired stop condition, finalize queue status deterministically.
