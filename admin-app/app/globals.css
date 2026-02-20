@@ -94,13 +94,13 @@
   --line-height: 1.6;
 
   --space-1: 4px;
-  --space-1-5: 6px;
+  --space-1-5: 8px;
   --space-2: 8px;
-  --space-2-5: 10px;
+  --space-2-5: 12px;
   --space-3: 16px;
   --space-3-5: 12px;
   --space-4: 24px;
-  --space-4-5: 18px;
+  --space-4-5: 20px;
   --space-5: 32px;
   --space-6: 48px;
   --space-7: 64px;
@@ -124,6 +124,8 @@
   --shadow-hover: 0 4px 16px rgba(10, 77, 140, 0.07);
   --shadow-sticky: 0 1px 8px rgba(0, 0, 0, 0.04);
   --shadow-glass: 0 2px 12px rgba(0, 0, 0, 0.03);
+  --shadow-elevated: 0 8px 32px rgba(0, 0, 0, 0.06);
+  --shadow-float: 0 4px 16px rgba(10, 77, 140, 0.08);
 
   --tap-target-min: 44px;
   --maxw: 1240px;
@@ -1426,7 +1428,7 @@ select {
   border-radius: var(--radius-full);
   background: var(--color-primary);
   color: var(--color-white);
-  box-shadow: 0 4px 16px rgba(10, 77, 140, 0.3);
+  box-shadow: var(--shadow-float);
   transition: transform 0.2s ease, background 0.2s ease;
   font-weight: 600;
   font-size: var(--font-sm);
@@ -1444,10 +1446,10 @@ select {
   right: 0;
   bottom: 0;
   z-index: 110;
-  padding: 10px 12px;
+  padding: var(--space-2-5) var(--space-3-5);
   background: var(--color-white);
   border-top: 1px solid var(--color-gray-200);
-  box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.06);
+  box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.04);
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: var(--space-2-5);
@@ -1489,7 +1491,7 @@ select {
   border: 1px solid var(--color-gray-200);
   border-radius: var(--radius-lg);
   background: var(--color-white);
-  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.12);
+  box-shadow: var(--shadow-elevated);
   padding: 0;
 }
 

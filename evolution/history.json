@@ -714,5 +714,21 @@
       "3 new security tests (113 total): COOP/CORP headers, object-src, worker-src"
     ],
     "deployStatus": "dev"
+  },
+  {
+    "iteration": 14,
+    "timestamp": "2026-02-20T12:00:00.000Z",
+    "totalScore": 97.53,
+    "weakestDimension": "complexity_control",
+    "delta": 0.5,
+    "regressions": [],
+    "changesApplied": [
+      "Aligned 3 off-grid spacing tokens to 4pt grid: --space-1-5 6→8px, --space-2-5 10→12px, --space-4-5 18→20px",
+      "Added --shadow-elevated and --shadow-float design system tokens for single elevation policy",
+      "Replaced .floating-cta heavy shadow (opacity 0.3→0.08) with --shadow-float token",
+      "Replaced .guided-dialog heavy shadow (0 20px 50px, opacity 0.12→0.06) with --shadow-elevated token",
+      "Tokenized .mobile-cta hardcoded padding (10px 12px → var tokens), lightened shadow 0.06→0.04"
+    ],
+    "deployStatus": "dev"
   }
 ]

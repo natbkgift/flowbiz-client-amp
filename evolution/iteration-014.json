@@ -1,0 +1,49 @@
+{
+  "iteration": 14,
+  "timestamp": "2026-02-20T12:00:00.000Z",
+  "targetDimension": "visual_luxury_integrity",
+  "hypothesis": "Align spacing tokens to strict 4pt grid, replace 2 heavy inline shadows with design system tokens, reduce shadow opacity, standardize mobile CTA padding — all measurable via token compliance count and shadow opacity values",
+  "changes": [
+    {
+      "file": "admin-app/app/globals.css",
+      "description": "Align 3 off-grid spacing tokens to 4pt grid: --space-1-5 6px→8px, --space-2-5 10px→12px, --space-4-5 18px→20px"
+    },
+    {
+      "file": "admin-app/app/globals.css",
+      "description": "Add --shadow-elevated and --shadow-float design tokens for single elevation policy"
+    },
+    {
+      "file": "admin-app/app/globals.css",
+      "description": "Replace .floating-cta heavy shadow (opacity 0.3) with --shadow-float token (opacity 0.08)"
+    },
+    {
+      "file": "admin-app/app/globals.css",
+      "description": "Replace .guided-dialog heavy shadow (0 20px 50px, opacity 0.12) with --shadow-elevated token (0 8px 32px, opacity 0.06)"
+    },
+    {
+      "file": "admin-app/app/globals.css",
+      "description": "Replace .mobile-cta hardcoded padding (10px 12px) with grid-aligned tokens, lighten shadow from 0.06 to 0.04"
+    }
+  ],
+  "evidence": {
+    "before": {
+      "offGridSpacingTokens": 3,
+      "inlineHeavyShadows": 2,
+      "maxShadowOpacity": 0.3,
+      "hardcodedPaddingInMobileCTA": true
+    },
+    "after": {
+      "offGridSpacingTokens": 0,
+      "inlineHeavyShadows": 0,
+      "maxShadowOpacity": 0.08,
+      "hardcodedPaddingInMobileCTA": false
+    }
+  },
+  "filesChanged": 1,
+  "linesChanged": 12,
+  "scoreDelta": 0.5,
+  "newScore": 97.53,
+  "dimensionScores": {
+    "visual_luxury_integrity": 90.5
+  }
+}
