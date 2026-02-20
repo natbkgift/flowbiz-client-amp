@@ -369,13 +369,12 @@ Coverage metrics:
 
 ## 🛡️ Guardrails
 
-This project uses **non-blocking** CI guardrails:
+This project uses **blocking**, deterministic CI guardrails:
 - Linting with `ruff`
 - Testing with `pytest`
-- Scope validation
-- PR template requirements
+- Deterministic governance gates (`scripts/governance/run_ci_gates.py`)
 
-Violations surface as warnings, not failures. Human judgment is final.
+If gates pass, the pipeline enables auto-merge and deploy on `main` via GitHub Actions.
 
 ## 📦 Project Structure
 

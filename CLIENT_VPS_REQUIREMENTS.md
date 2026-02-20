@@ -207,6 +207,10 @@ FLOWBIZ_API_KEY=... # ห้าม commit
 - เก็บ `VPS_HOST`, `VPS_USER`, `VPS_SSH_KEY`, `VPS_PORT` ใน Secrets (ไม่เก็บใน repo)
 - deploy ไปที่ `/opt/flowbiz/clients/<service-name>`
 
+นอกจากนี้ repo นี้มีสคริปต์ deploy แบบรันจากเครื่อง dev ผ่าน SSH alias `flowbiz-vps`:
+- Windows: `scripts/deploy_prod.ps1`
+- Linux/macOS: `scripts/deploy_prod.sh`
+
 ---
 
 ## 10) Verification (Definition of Done)
