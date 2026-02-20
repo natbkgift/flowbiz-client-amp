@@ -211,6 +211,11 @@ if ($EvidenceOut) {
   Copy-Item -Force -ErrorAction SilentlyContinue .\evolution\evidence.json $dest
 }
 
+# Artifact-only prompt tests should not leave the working tree dirty.
+if ($SkipCommit) {
+  git restore --source=HEAD --worktree --staged evolution/evidence.json evolution/memory.json 2>$null
+}
+
 if (-not $SkipCommit) {
   # Commit + push (single commit)
   git show-ref --verify --quiet "refs/heads/$Branch"
@@ -290,6 +295,10 @@ if ($EvidenceOut) {
   $dest = Join-Path $RepoRoot $EvidenceOut
   New-Item -ItemType Directory -Force -Path (Split-Path -Parent $dest) | Out-Null
   Copy-Item -Force -ErrorAction SilentlyContinue .\evolution\evidence.json $dest
+}
+
+if ($SkipCommit) {
+  git restore --source=HEAD --worktree --staged evolution/evidence.json evolution/memory.json 2>$null
 }
 
 $summary = [ordered]@{
