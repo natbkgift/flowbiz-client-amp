@@ -41,7 +41,7 @@ export default async function DeveloperDetailPage({
     projects = [];
   }
 
-  const related = (projects ?? []).filter((p) => (p.developer_id || '').trim() === params.slug);
+  const related = (projects ?? []).filter((p) => String(p.developer_id ?? '').trim() === params.slug);
 
   return (
     <main id="main-content">

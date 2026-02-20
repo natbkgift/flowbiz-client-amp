@@ -127,7 +127,18 @@ export async function fetchProjects(params?: { limit?: number }): Promise<Projec
 
   const res = await fetchWithRetry(url.toString(), { next: { revalidate: PAGE_REVALIDATE_SECONDS } });
   if (!res.ok) throw new Error(`Failed to fetch projects (${res.status})`);
-  return (await res.json()) as ProjectItem[];
+
+  // Some environments return a bare array, others return an envelope.
+  // Normalize to a list so pages can render safely during static generation.
+  const payload = (await res.json()) as unknown;
+  if (Array.isArray(payload)) return payload as ProjectItem[];
+  if (payload && typeof payload === 'object') {
+    const maybe = payload as { data?: unknown; items?: unknown };
+    if (Array.isArray(maybe.data)) return maybe.data as ProjectItem[];
+    if (Array.isArray(maybe.items)) return maybe.items as ProjectItem[];
+  }
+
+  return [];
 }
 
 export async function fetchProjectBySlug(slug: string): Promise<ProjectItem | null> {

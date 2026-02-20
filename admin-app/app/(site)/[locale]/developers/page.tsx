@@ -37,7 +37,7 @@ export default async function DevelopersIndexPage({ params }: { params: { locale
   }
 
   const ids = Array.from(
-    new Set((projects ?? []).map((p) => (p.developer_id || '').trim()).filter(Boolean))
+    new Set((projects ?? []).map((p) => String(p.developer_id ?? '').trim()).filter(Boolean))
   ).slice(0, 30);
 
   return (
