@@ -168,7 +168,7 @@
 |------|----------|----------|
 | Unit Tests | Coverage > 70% | Yes |
 | Integration Tests | All endpoints tested | Yes |
-| Manual Testing | QA sign-off | Yes |
+| Post-Deploy Validation | Health + smoke + rollback verified | Yes |
 | Security | No critical vulnerabilities | Yes |
 | Documentation | All features documented | Yes |
 

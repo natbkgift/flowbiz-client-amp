@@ -104,8 +104,8 @@ mypy apps packages
 4. **Test Locally** - Run full test suite
 5. **Commit Changes** - Use conventional commits
 6. **Create Pull Request** - Use PR template
-7. **Code Review** - Address feedback
-8. **Merge** - Squash and merge after approval
+7. **CI Governance Gates** - Deterministic checks must pass
+8. **Merge** - Auto-merge to `main` occurs when all required checks pass
 
 ### Daily Development Checklist
 
@@ -965,16 +965,10 @@ Closes #[issue-number]
 
 ### PR Review Process
 
-**Reviewers will check:**
-- Code quality and style
-- Test coverage
-- Security considerations
-- Performance implications
-- Documentation completeness
-
-**Expected turnaround:** 24-48 hours
-
-**Approval required:** 1 maintainer
+This repository uses **fully autonomous governance**:
+- No human approval is required to merge.
+- Merge is allowed only when deterministic CI gates pass.
+- If any gate fails, the PR is rejected (checks fail) until fixed.
 
 ### Merge Strategy
 

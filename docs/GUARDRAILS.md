@@ -1,58 +1,61 @@
 # Guardrails
 
 ## Philosophy
-Guardrails are **non-blocking** guidance mechanisms that surface violations through CI comments. The human developer remains in control and may override when appropriate.
+Guardrails are **blocking, deterministic governance gates** enforced by CI/CD.
+No human approval, sign-off, or manual merge/deploy control exists in this repo's governance model.
 
 ## Principles
 
-### 1. Non-Blocking by Design
-- CI checks **do not** fail builds
-- Violations are surfaced as warnings
-- Human judgment is the final arbiter
+### 1. Blocking by Design
+- CI checks **fail the build** on violations
+- Violations are rejected automatically
+- The gate outcome is determined only by machine-verifiable checks
 
 ### 2. Scope Protection
 - Detect out-of-scope features
 - Prevent architectural drift
 - Maintain template purity
 
-### 3. Developer Autonomy
-- Developers can proceed despite warnings
-- Context-aware overrides permitted
-- Trust over enforcement
+### 3. Autonomy
+- Merge and deploy decisions are made by the pipeline
+- If gates pass → auto-merge / auto-deploy
+- If gates fail → reject / rollback / revert
 
 ## Automated Checks
+
+### Governance Gates (Deterministic)
+The following are enforced by CI before merge:
+- Tests pass
+- Lint/type checks pass
+- ARSL ≤ 20
+- PDD ≤ 1.5× baseline
+- No destructive migrations
+- Contract snapshot unchanged OR backward compatible
+- Observability contract verified
 
 ### Linting (Ruff)
 ```bash
 ruff check .
 ```
-**Status:** Non-blocking
+**Status:** Blocking
 **Purpose:** Code style consistency
 
 ### Testing (Pytest)
 ```bash
 pytest -q
 ```
-**Status:** Non-blocking
+**Status:** Blocking
 **Purpose:** Ensure functionality
 
-### Scope Validation
-**Patterns Flagged:**
-- Authentication code
-- Database models
-- Billing logic
-- Queue/worker systems
-- Admin UI code
-
-**Status:** Warning only
-**Action:** Review and justify if necessary
+### Contract/Migration Safety
+These checks are strict and blocking:
+- Any contract-breaking drift (removed operations or baseline I/O schema drift) fails the gate.
+- Any destructive migration pattern in `upgrade()` fails the gate.
 
 ## PR Requirements
 
-### Mandatory Sections
-- **Summary**: What and why
-- **Testing**: How verified
-- **Checklist**: Scope, docs, security
+### Required Content
+PR descriptions are optional. Governance is enforced by CI.
 
 ### Persona Labels
 Tag PRs with affected areas:
@@ -85,14 +88,8 @@ See `docs/CODEX_PREFLIGHT.md` for complete list.
 - External service calls (beyond health checks)
 - Admin dashboards
 
-## Override Protocol
-
-If you must override a guardrail:
-
-1. **Document Reason**: Explain in PR description
-2. **Tag Appropriately**: Add `override:justified` label
-3. **Seek Review**: Request maintainer approval
-4. **Update Docs**: Reflect changes in documentation
+## Overrides
+Overrides are not supported. If a change is needed, update the deterministic gate logic.
 
 ## Example Workflow
 
@@ -118,33 +115,19 @@ git checkout -b feature/add-caching
 ruff check .  # ⚠️ Warning: new dependency detected
 pytest -q     # ✅ Pass
 
-# Review warning
-# Add justification to PR description
-# Create PR with explanation
+# Create PR
 gh pr create
 ```
 
-### Override Path
-```bash
-# Make changes that violate scope
-git checkout -b hotfix/critical-security
-
-# Check flags violation
-# Document in PR:
-# - Why override necessary
-# - Security impact
-# - Alternative considered
-
-gh pr create --label "override:justified"
-```
+### Rejection Path
+If gates fail, CI blocks the merge. Fix forward in a new commit/PR.
 
 ## Maintenance
 
 ### Updating Guardrails
-1. Propose changes in issue
-2. Discuss with maintainers
-3. Update CI workflows
-4. Document in this file
+1. Update deterministic gate scripts under `scripts/governance/`
+2. Update CI workflows under `.github/workflows/`
+3. Keep this doc aligned with actual enforced gates
 
 ### False Positives
 If guardrails trigger incorrectly:

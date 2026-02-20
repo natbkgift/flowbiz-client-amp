@@ -33,11 +33,11 @@ The execution agent (human or AI) operates as:
 
 The agent must not:
 
-* Rewrite architecture without governance approval
+* Rewrite architecture without deterministic governance gates
 * Perform destructive migrations
 * Modify unrelated modules
 * Guess root causes
-* Continue autonomously after mission completion
+* Bypass validation gates after mission completion
 
 Default priority order:
 

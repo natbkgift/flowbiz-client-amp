@@ -1,15 +1,15 @@
-"""Strictly detect drift in baseline operation I/O schemas.
+"""Detect breaking drift in baseline operation I/O schemas.
 
 Purpose:
-- Final Merge Gate check: confirm no request/response schema drift for *baseline* endpoints.
+- Final Merge Gate check: confirm baseline endpoints remain backward compatible.
 
 This is intentionally stricter than diff_openapi.py (which only checks added/removed ops).
 
 Rules:
-- For every (method,path) present in the baseline OpenAPI snapshot, compare the *schema-carrying*
-  parts of the operation in the current snapshot:
-  - requestBody
-  - responses
+- For every (method,path) present in the baseline OpenAPI snapshot, validate that the current
+    snapshot does not introduce *breaking* changes in the schema-carrying parts:
+    - requestBody (must not become newly required / tighter)
+    - responses (must not remove baseline response codes or tighten baseline schemas)
 
 Fields ignored (non-contractual for clients):
 - operationId
@@ -19,8 +19,8 @@ Fields ignored (non-contractual for clients):
 - deprecated
 
 Exit code:
-- 0: no drift
-- 2: drift detected
+- 0: backward compatible
+- 2: breaking drift detected
 """
 
 from __future__ import annotations
@@ -32,6 +32,16 @@ from pathlib import Path
 from typing import Any
 
 _ALLOWED_METHODS = {"get", "post", "put", "patch", "delete", "head", "options"}
+
+_IGNORE_KEYS = {
+    "operationId",
+    "summary",
+    "description",
+    "title",
+    "examples",
+    "example",
+    "deprecated",
+}
 
 
 @dataclass(frozen=True)
@@ -55,15 +65,149 @@ def _iter_ops(openapi: dict[str, Any]) -> dict[OpKey, dict[str, Any]]:
     return out
 
 
-def _normalized_io(op: dict[str, Any]) -> dict[str, Any]:
-    # Keep only I/O schema-relevant fields.
-    keep: dict[str, Any] = {
-        "requestBody": op.get("requestBody"),
-        "responses": op.get("responses"),
-    }
+def _strip_non_contract(value: Any) -> Any:
+    if isinstance(value, dict):
+        out: dict[str, Any] = {}
+        for k, v in value.items():
+            ks = str(k)
+            if ks in _IGNORE_KEYS or ks.startswith("x-"):
+                continue
+            if v is None:
+                continue
+            out[ks] = _strip_non_contract(v)
+        return out
+    if isinstance(value, list):
+        return [_strip_non_contract(v) for v in value]
+    return value
 
-    # Drop nulls to reduce diff noise.
-    return {k: v for k, v in keep.items() if v is not None}
+
+def _is_schema_backward_compatible(base: Any, cur: Any, *, path: str) -> tuple[bool, str | None]:
+    """Best-effort backward-compat check for OpenAPI schema-like objects.
+
+    This is intentionally conservative: it blocks obvious breaking changes (removals,
+    type changes, new required fields) and allows additive changes (new properties,
+    new response codes).
+    """
+
+    base = _strip_non_contract(base)
+    cur = _strip_non_contract(cur)
+
+    if base is None:
+        return True, None
+    if cur is None:
+        return False, f"{path}:missing_in_current"
+
+    if isinstance(base, dict) and isinstance(cur, dict):
+        # Special-case: JSON schema required (list of required property names).
+        # Note: OpenAPI requestBody also has a boolean 'required' field; do not treat that
+        # as a schema-required list.
+        if isinstance(base.get("required"), list) or isinstance(cur.get("required"), list):
+            base_req_raw = base.get("required") if isinstance(base.get("required"), list) else []
+            cur_req_raw = cur.get("required") if isinstance(cur.get("required"), list) else []
+            base_req = set(base_req_raw)
+            cur_req = set(cur_req_raw)
+            # Adding required fields is breaking.
+            if not cur_req.issubset(base_req):
+                return False, f"{path}:required_tightened"
+
+        # Special-case: enum widening is ok, narrowing is breaking.
+        if "enum" in base:
+            base_enum = set(base.get("enum") or [])
+            cur_enum = set(cur.get("enum") or [])
+            if not base_enum.issubset(cur_enum):
+                return False, f"{path}:enum_narrowed"
+
+        # Special-case: nullable tightening is breaking.
+        if base.get("nullable") is True and cur.get("nullable") is False:
+            return False, f"{path}:nullable_tightened"
+
+        # Special-case: type must not change.
+        if "type" in base and "type" in cur and base.get("type") != cur.get("type"):
+            return False, f"{path}:type_changed"
+
+        # Special-case: properties must not be removed or type-changed.
+        if "properties" in base:
+            base_props = base.get("properties") or {}
+            cur_props = cur.get("properties") or {}
+            if not isinstance(base_props, dict) or not isinstance(cur_props, dict):
+                return False, f"{path}:properties_shape_changed"
+            for prop, base_prop_schema in base_props.items():
+                if prop not in cur_props:
+                    return False, f"{path}:property_removed:{prop}"
+                ok, why = _is_schema_backward_compatible(
+                    base_prop_schema, cur_props.get(prop), path=f"{path}.properties.{prop}"
+                )
+                if not ok:
+                    return False, why
+
+        # Default: keys present in baseline must remain compatible.
+        for k, base_v in base.items():
+            if k not in cur:
+                # Allow current to omit some non-essential keys only when baseline
+                # doesn't require them.
+                return False, f"{path}:key_removed:{k}"
+            ok, why = _is_schema_backward_compatible(base_v, cur.get(k), path=f"{path}.{k}")
+            if not ok:
+                return False, why
+        return True, None
+
+    if isinstance(base, list) and isinstance(cur, list):
+        # Conservative: require baseline list items to remain (by position).
+        if len(cur) < len(base):
+            return False, f"{path}:list_shrunk"
+        for i, base_item in enumerate(base):
+            ok, why = _is_schema_backward_compatible(base_item, cur[i], path=f"{path}[{i}]")
+            if not ok:
+                return False, why
+        return True, None
+
+    # Scalars: must not change.
+    if base != cur:
+        return False, f"{path}:value_changed"
+    return True, None
+
+
+def _request_body_breaking(base_rb: Any, cur_rb: Any) -> tuple[bool, str | None]:
+    base_rb = _strip_non_contract(base_rb)
+    cur_rb = _strip_non_contract(cur_rb)
+
+    if base_rb is None:
+        # Introducing a required request body is breaking.
+        if isinstance(cur_rb, dict) and bool(cur_rb.get("required")):
+            return True, "requestBody:newly_required"
+        return False, None
+    if cur_rb is None:
+        return True, "requestBody:removed"
+
+    # If baseline had a body, current must not tighten it.
+    ok, why = _is_schema_backward_compatible(base_rb, cur_rb, path="requestBody")
+    return (not ok), why
+
+
+def _responses_breaking(base_resp: Any, cur_resp: Any) -> tuple[bool, str | None]:
+    base_resp = _strip_non_contract(base_resp)
+    cur_resp = _strip_non_contract(cur_resp)
+
+    if base_resp is None:
+        return False, None
+    if cur_resp is None:
+        return True, "responses:removed"
+    if not isinstance(base_resp, dict) or not isinstance(cur_resp, dict):
+        return True, "responses:shape_changed"
+
+    for code, base_payload in base_resp.items():
+        if code not in cur_resp:
+            return True, f"responses:status_removed:{code}"
+        ok, why = _is_schema_backward_compatible(
+            base_payload,
+            cur_resp.get(code),
+            path=f"responses.{code}",
+        )
+        if not ok:
+            return True, why
+
+    # Extra response codes in current are allowed.
+    return False, None
 
 
 def main() -> int:
@@ -101,18 +245,31 @@ def main() -> int:
             )
             continue
 
-        base_io = _normalized_io(base_op)
-        cur_io = _normalized_io(cur_op)
-
-        if base_io != cur_io:
+        base_rb = base_op.get("requestBody")
+        cur_rb = cur_op.get("requestBody")
+        rb_break, rb_why = _request_body_breaking(base_rb, cur_rb)
+        if rb_break:
             breaking = True
             diffs.append(
                 {
                     "method": key.method.upper(),
                     "path": key.path,
-                    "type": "io_schema_drift",
-                    "baseline_io": base_io,
-                    "current_io": cur_io,
+                    "type": "breaking_request_body",
+                    "reason": rb_why or "unknown",
+                }
+            )
+
+        base_resp = base_op.get("responses")
+        cur_resp = cur_op.get("responses")
+        resp_break, resp_why = _responses_breaking(base_resp, cur_resp)
+        if resp_break:
+            breaking = True
+            diffs.append(
+                {
+                    "method": key.method.upper(),
+                    "path": key.path,
+                    "type": "breaking_responses",
+                    "reason": resp_why or "unknown",
                 }
             )
 

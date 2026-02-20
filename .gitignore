@@ -85,6 +85,9 @@ docs/phase_reports/baseline/LATEST.txt
 runtime/reports/
 runtime/system_state.lock
 
+# Local temp artifacts (generated)
+.tmp/
+
 # VPS deploy state (generated)
 .deploy/
 

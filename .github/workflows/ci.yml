@@ -10,12 +10,40 @@ permissions:
   contents: read
 
 jobs:
+  governance-gates:
+    name: Governance Gates
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          pip install -e ".[dev]"
+
+      - name: Run autonomous governance gates
+        env:
+          GOV_BASE: ${{ github.event.pull_request.base.sha || github.event.before }}
+          GOV_HEAD: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: |
+          python scripts/governance/run_ci_gates.py --base "$GOV_BASE" --head "$GOV_HEAD" --out-dir .tmp/governance
+
   lint-and-test:
     runs-on: ubuntu-latest
     
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -48,6 +76,8 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Set up Node 20
         uses: actions/setup-node@v4

@@ -1,43 +1,35 @@
-name: Guardrails
+name: Governance (Deterministic)
 
 on:
   pull_request:
+    branches: [main]
     types: [opened, synchronize, reopened]
 
 permissions:
   contents: read
 
 jobs:
-  check-guardrails:
+  governance:
     runs-on: ubuntu-latest
     
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
-      - name: Check PR description
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          pip install -e ".[dev]"
+
+      - name: Run autonomous governance gates
         env:
-          PR_BODY: ${{ github.event.pull_request.body }}
+          GOV_BASE: ${{ github.event.pull_request.base.sha }}
+          GOV_HEAD: ${{ github.event.pull_request.head.sha }}
         run: |
-          if [[ -z "$PR_BODY" ]]; then
-            echo "⚠️ Warning: PR description is empty"
-            echo "Please include:"
-            echo "- Summary section"
-            echo "- Testing section"
-            exit 0
-          fi
-          echo "✅ PR description present"
-
-      - name: Check for scope creep
-        run: |
-          echo "🔍 Checking for out-of-scope patterns..."
-          
-          # Check for common scope violations
-          SCOPE_VIOLATIONS=$(git diff origin/main... | grep -iE "(auth|billing|database|queue|cron)" || true)
-          if [ -n "$SCOPE_VIOLATIONS" ]; then
-            echo "⚠️ Warning: Potential scope creep detected"
-            echo "Please review changes for out-of-scope features"
-          else
-            echo "✅ No obvious scope violations detected"
-          fi
-        continue-on-error: true
+          python scripts/governance/run_ci_gates.py --base "$GOV_BASE" --head "$GOV_HEAD" --out-dir .tmp/governance

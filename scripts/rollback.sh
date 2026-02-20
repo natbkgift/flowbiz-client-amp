@@ -15,7 +15,7 @@ COMPOSE="docker compose -f docker-compose.yml -f docker-compose.prod.yml"
 
 if [[ ! -f "$PREVIOUS_IMAGES" ]]; then
   echo "ERROR: No previous image list found at $PREVIOUS_IMAGES"
-  echo "Cannot auto-rollback. Please redeploy manually."
+  echo "Cannot auto-rollback safely (missing previous image state)."
   exit 1
 fi
 

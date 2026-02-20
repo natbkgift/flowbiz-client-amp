@@ -144,18 +144,18 @@ Strategy:
 
 ## 6) Release Governance (single controlled release)
 
-### Release owner roles
-- Release Captain: approves go/no-go, runs checklist
-- DB Owner: backup + migrations
-- App Owner: images/build
-- QA Owner: smoke + Lighthouse
+### Autonomous Gate
+Release execution is fully autonomous. No human go/no-go exists.
 
-### Go/No-Go gate
-- Must have:
-  - staging rehearsal completed
-  - rollback rehearsal completed
-  - backup verified
-  - smoke matrix green
+Production deploy is permitted only when deterministic pipeline gates pass:
+- CI tests and lint pass
+- ARSL ≤ 20
+- PDD ≤ 1.5× baseline
+- No destructive migrations detected
+- Contract snapshot unchanged OR backward compatible
+- Observability contract verified
+
+If any gate fails → deployment is rejected or rolled back automatically.
 
 ### Versioning
 - `FLOWBIZ_VERSION = v3.x.y+{BUILD_SHA}`

@@ -78,7 +78,12 @@ def get_json(path: str) -> dict:
 
 def _core_public_api_checks() -> None:
     # These endpoints are validated by production guard and should be reachable publicly.
-    for path in ["/api/v1/properties", "/api/v1/projects", "/api/v1/recommendations", "/api/v1/meta"]:
+    for path in [
+        "/api/v1/properties",
+        "/api/v1/projects",
+        "/api/v1/recommendations",
+        "/api/v1/meta",
+    ]:
         _ = get_json(path)
 
 

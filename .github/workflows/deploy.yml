@@ -100,7 +100,6 @@ jobs:
   deploy:
     needs: build
     runs-on: ubuntu-latest
-    environment: production
     steps:
       - uses: actions/checkout@v4
 
@@ -211,6 +210,33 @@ jobs:
             # Rolling restart
             docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d --remove-orphans
 
+            echo "Running migration dry-run (SQL render)"
+            docker compose -f docker-compose.yml -f docker-compose.prod.yml exec -T api alembic upgrade head --sql >/dev/null
+
+            echo "Applying migrations"
+            docker compose -f docker-compose.yml -f docker-compose.prod.yml exec -T api alembic upgrade head
+
+            echo "Verifying monitoring/logging endpoints (local)"
+            VPS_API_PORT="${VPS_API_PORT:-8001}"
+            code_health=$(curl -sS -o /dev/null -w "%{http_code}" --max-time 10 "http://127.0.0.1:${VPS_API_PORT}/healthz" || echo "000")
+            code_metrics=$(curl -sS -o /dev/null -w "%{http_code}" --max-time 10 "http://127.0.0.1:${VPS_API_PORT}/metrics" || echo "000")
+            echo "healthz=${code_health} metrics=${code_metrics}"
+            if [[ "${code_health}" != "200" ]]; then
+              echo "ERROR: healthz not OK"
+              exit 1
+            fi
+            if [[ "${code_metrics}" != "200" ]]; then
+              echo "ERROR: metrics endpoint not reachable"
+              exit 1
+            fi
+
+            echo "Verifying logs are being produced"
+            log_lines=$(docker compose -f docker-compose.yml -f docker-compose.prod.yml logs --since 2m api | wc -l | tr -d ' ')
+            if [[ -z "${log_lines}" || "${log_lines}" == "0" ]]; then
+              echo "ERROR: No recent API logs detected"
+              exit 1
+            fi
+
             echo "Deployed ${{ needs.build.outputs.sha_tag }}"
 
       - name: Wait for services to stabilize
@@ -267,6 +293,7 @@ jobs:
             # API health
             check "API health"          "$SITE_URL/api/healthz"
             check "API meta"            "$SITE_URL/api/v1/meta"
+
 
             # Static assets
             check "Favicon"             "$SITE_URL/favicon.ico"

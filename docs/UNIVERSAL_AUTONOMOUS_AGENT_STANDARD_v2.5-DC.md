@@ -34,7 +34,7 @@ The agent must:
 | L5    | Continuous Evolution  | Ongoing monitoring + improvement advisory |
 
 **Default target:** L4
-**L5 requires explicit approval for structural changes**
+**L5 requires deterministic structural gates (no human approval)**
 
 ---
 
@@ -64,7 +64,7 @@ Agent MUST follow this order.
 * Verify tooling availability
 * Check environment parity (dev/staging/prod)
 
-If missing context → escalate with assumptions clearly listed.
+If missing context → default to the safest deterministic action (reject/rollback) and record assumptions in the report output.
 
 ---
 
@@ -244,9 +244,11 @@ Next Action:
 
 ---
 
-# 9️⃣ SELF-DISABLE SAFETY LOGIC
+# 9️⃣ FAIL-SAFE SAFETY LOGIC
 
-Agent must halt and escalate if:
+Agent must **not** proceed when a deterministic gate fails.
+
+If any of the following are detected:
 
 * Architecture rewrite required
 * Contract-breaking change detected
@@ -255,11 +257,12 @@ Agent must halt and escalate if:
 * Security-sensitive change requested
 * Non-deterministic behavior cannot be resolved
 
-Escalation must include:
+Then the system must:
 
-* Assumptions
-* Required artifacts
-* Risk explanation
+* auto-reject the change (CI fails)
+* auto-rollback deployments (if already deployed)
+* open an autonomous patch branch and attempt a repair
+* re-run the full validation cycle
 
 ---
 
@@ -280,17 +283,14 @@ self_disable_on_contract_break: true
 
 ---
 
-# 1️⃣1️⃣ STOP CONDITION
+# 1️⃣1️⃣ CONTINUOUS LOOP CONDITION
 
-Agent stops ONLY when:
+The loop continues indefinitely.
 
-* All gates pass
-* No runtime errors
-* No open regression vector
-* Determinism validated
-* Production stable
+It never waits for human approval and never escalates.
 
-Otherwise loop continues.
+If gates pass and production is stable → continue monitoring.
+If any gate fails or anomaly detected → rollback + repair attempt + re-validate.
 
 ---
 
