@@ -5,7 +5,8 @@
 # Usage:  bash scripts/smoke-test.sh [SITE_URL]
 # Exit 0 = all green, Exit 1 = one or more checks failed
 # ──────────────────────────────────────────────────────────────
-set -euo pipefail
+set -eu
+set -o pipefail
 
 SITE_URL="${1:-https://amppattaya.com}"
 FAIL=0
