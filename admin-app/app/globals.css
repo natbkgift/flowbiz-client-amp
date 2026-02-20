@@ -189,6 +189,7 @@ h1 {
   line-height: 1.15;
   color: var(--color-text);
   letter-spacing: -0.02em;
+  font-family: var(--font-serif), Georgia, 'Times New Roman', serif;
 }
 
 h2 {
@@ -197,6 +198,7 @@ h2 {
   line-height: 1.25;
   color: var(--color-text);
   letter-spacing: -0.01em;
+  font-family: var(--font-serif), Georgia, 'Times New Roman', serif;
 }
 
 h3 {
@@ -204,6 +206,7 @@ h3 {
   font-weight: 600;
   line-height: 1.35;
   color: var(--color-text);
+  font-family: var(--font-serif), Georgia, 'Times New Roman', serif;
 }
 
 a {
@@ -258,6 +261,12 @@ select {
 @media (min-width: 768px) {
   .section {
     padding: var(--space-7) 0;
+  }
+}
+
+@media (min-width: 1024px) {
+  .section {
+    padding: var(--space-8) 0;
   }
 }
 
@@ -492,6 +501,12 @@ select {
 @media (min-width: 768px) {
   .hero {
     padding: var(--space-7) 0;
+  }
+}
+
+@media (min-width: 1024px) {
+  .hero {
+    padding: var(--space-8) 0;
   }
 }
 

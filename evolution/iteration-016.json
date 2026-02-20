@@ -1,0 +1,39 @@
+{
+  "iteration": 16,
+  "timestamp": "2026-02-20T13:00:00.000Z",
+  "targetDimension": "visual_luxury_integrity",
+  "hypothesis": "Add serif font-family to h1/h2/h3 base selectors (6 headings missing serif → 0), bump desktop section and hero padding to 80px (≥80px rule compliance) — measurable via selector audit count and computed padding values",
+  "changes": [
+    {
+      "file": "admin-app/app/globals.css",
+      "description": "Added font-family: var(--font-serif) to h1, h2, h3 base selectors — fixes 6 heading serif violations"
+    },
+    {
+      "file": "admin-app/app/globals.css",
+      "description": "Added @media (min-width: 1024px) .section { padding: var(--space-8) 0 } — desktop sections now 80px"
+    },
+    {
+      "file": "admin-app/app/globals.css",
+      "description": "Added @media (min-width: 1024px) .hero { padding: var(--space-8) 0 } — desktop hero now 80px"
+    }
+  ],
+  "evidence": {
+    "before": {
+      "headingsMissingSerif": 6,
+      "sectionsBelowSpacingThreshold": 6,
+      "desktopSectionPadding": "64px"
+    },
+    "after": {
+      "headingsMissingSerif": 0,
+      "sectionsBelowSpacingThreshold": 4,
+      "desktopSectionPadding": "80px"
+    }
+  },
+  "filesChanged": 1,
+  "linesChanged": 15,
+  "scoreDelta": 0.5,
+  "newScore": 98.53,
+  "dimensionScores": {
+    "visual_luxury_integrity": 91
+  }
+}

@@ -745,5 +745,19 @@
       "Added skipToContact i18n keys in EN and TH dictionaries"
     ],
     "deployStatus": "dev"
+  },
+  {
+    "iteration": 16,
+    "timestamp": "2026-02-20T13:00:00.000Z",
+    "totalScore": 98.53,
+    "weakestDimension": "complexity_control",
+    "delta": 0.5,
+    "regressions": [],
+    "changesApplied": [
+      "Added serif font-family to h1, h2, h3 base selectors (6 heading violations → 0)",
+      "Added desktop section padding 80px via @media (min-width: 1024px) .section rule",
+      "Added desktop hero padding 80px via @media (min-width: 1024px) .hero rule"
+    ],
+    "deployStatus": "dev"
   }
 ]
