@@ -190,6 +190,19 @@ describe('middleware security headers', () => {
     }
   });
 
+  it('sets cross-origin isolation headers', () => {
+    expect(src).toContain('Cross-Origin-Opener-Policy');
+    expect(src).toContain('Cross-Origin-Resource-Policy');
+  });
+
+  it('CSP blocks plugin-based content', () => {
+    expect(src).toContain("object-src 'none'");
+  });
+
+  it('CSP restricts workers to same origin', () => {
+    expect(src).toContain("worker-src 'self'");
+  });
+
   it('sets cache headers with stale-while-revalidate', () => {
     expect(src).toContain('Cache-Control');
     expect(src).toContain('stale-while-revalidate');
@@ -310,8 +323,7 @@ describe('layout.tsx source', () => {
     expect(layoutSrc).toContain('theme-color');
   });
 
-  it('has preconnect for Google Fonts', () => {
-    expect(layoutSrc).toContain('preconnect');
-    expect(layoutSrc).toContain('fonts.googleapis.com');
+  it('does not preconnect to external font CDNs (fonts are self-hosted)', () => {
+    expect(layoutSrc).not.toContain('fonts.googleapis.com');
   });
 });

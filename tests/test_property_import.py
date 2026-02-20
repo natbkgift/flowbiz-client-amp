@@ -8,6 +8,7 @@ import sys
 import tempfile
 import threading
 import time
+from pathlib import Path
 from uuid import uuid4
 
 from fastapi.testclient import TestClient
@@ -16,6 +17,22 @@ from sqlalchemy import func, select
 from packages.core.auth import create_access_token, hash_password
 from packages.core.database import SessionLocal
 from packages.core.models import Property, PropertyImportAudit, User
+
+
+def _venv_python() -> str:
+    """Return the Python executable from the project venv.
+
+    When pytest is launched via the system Python (not the venv
+    interpreter), ``sys.executable`` may point outside the venv, causing
+    subprocesses that need venv-installed packages (e.g. alembic) to fail.
+    This helper resolves the venv Python reliably.
+    """
+    venv_dir = Path(__file__).resolve().parent.parent / ".venv"
+    if (venv_dir / "Scripts" / "python.exe").exists():
+        return str(venv_dir / "Scripts" / "python.exe")
+    if (venv_dir / "bin" / "python").exists():
+        return str(venv_dir / "bin" / "python")
+    return sys.executable
 
 
 def _make_admin_headers() -> dict[str, str]:
@@ -472,7 +489,7 @@ def test_alembic_migration_aborts_when_duplicate_source_id_exists() -> None:
         # Bring schema up to 0002 (no UNIQUE on source_id)
         up_to_0002 = subprocess.run(
             [
-                sys.executable,
+                _venv_python(),
                 "-m",
                 "alembic",
                 "-c",
@@ -569,7 +586,7 @@ def test_alembic_migration_aborts_when_duplicate_source_id_exists() -> None:
 
         # Upgrade to head should fail at 0003 with a RuntimeError
         upgrade_head = subprocess.run(
-            [sys.executable, "-m", "alembic", "-c", "alembic.ini", "upgrade", "head"],
+            [_venv_python(), "-m", "alembic", "-c", "alembic.ini", "upgrade", "head"],
             env=env,
             capture_output=True,
             text=True,
@@ -871,7 +888,7 @@ def test_sha_unique_constraint_db_level() -> None:
         env["DATABASE_URL"] = db_url
 
         up = subprocess.run(
-            [sys.executable, "-m", "alembic", "-c", "alembic.ini", "upgrade", "head"],
+            [_venv_python(), "-m", "alembic", "-c", "alembic.ini", "upgrade", "head"],
             env=env,
             capture_output=True,
             text=True,

@@ -92,3 +92,6 @@ runtime/system_state.lock
 backups/
 runtime/backup/
 runtime/system_state.backup*.json
+# Claude temp files
+tmpclaude-*
+nultest_output.txt

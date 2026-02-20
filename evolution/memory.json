@@ -1,12 +1,12 @@
 {
-  "currentIteration": 11,
-  "lastScore": 96.30,
-  "weakestDimension": "scalability",
-  "lastPatchSummary": "Iteration 11: Replace raw <img> tags in admin property pages with RemoteImage component for Next.js image optimization (WebP/AVIF, responsive sizing, CDN caching). Score +0.33.",
+  "currentIteration": 13,
+  "lastScore": 97.03,
+  "weakestDimension": "visual_luxury_integrity",
+  "lastPatchSummary": "Iteration 13: Tighten CSP with object-src none + worker-src self, add Cross-Origin-Opener-Policy and Cross-Origin-Resource-Policy headers, add 3 security tests (113 total). Score +0.33.",
   "regressionStatus": "clean",
   "productionStatus": "dev",
   "stagnationCount": 0,
   "strictnessBoundary": {},
   "createdAt": "2026-02-19T08:00:11.018Z",
-  "updatedAt": "2026-02-20T10:00:00.000Z"
+  "updatedAt": "2026-02-20T11:17:00.000Z"
 }

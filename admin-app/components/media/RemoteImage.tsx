@@ -44,6 +44,8 @@ export function RemoteImage({
       src={src}
       alt={alt}
       className={className}
+      width={width}
+      height={height}
       loading="lazy"
       decoding="async"
     />

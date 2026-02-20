@@ -92,7 +92,7 @@ export function middleware(req: NextRequest) {
   return NextResponse.redirect(url);
 }
 
-/** Attach all security response headers (9 total, incl. CSP + rate-limit hint). */
+/** Attach all security response headers (incl. CSP + cross-origin isolation). */
 function setSecurityHeaders(res: NextResponse) {
   res.headers.set('X-Content-Type-Options', 'nosniff');
   res.headers.set('X-Frame-Options', 'DENY');
@@ -101,6 +101,9 @@ function setSecurityHeaders(res: NextResponse) {
   res.headers.set('Permissions-Policy', 'camera=(), microphone=(), geolocation=()');
   res.headers.set('Strict-Transport-Security', 'max-age=63072000; includeSubDomains; preload');
   res.headers.set('X-XSS-Protection', '1; mode=block');
+  // Cross-origin isolation headers
+  res.headers.set('Cross-Origin-Opener-Policy', 'same-origin-allow-popups');
+  res.headers.set('Cross-Origin-Resource-Policy', 'same-origin');
   // Rate-limit hint for upstream proxy (nginx/CDN enforces actual limits)
   res.headers.set('X-RateLimit-Policy', '60;w=60;comment="form submissions"');
   res.headers.set(
@@ -112,6 +115,8 @@ function setSecurityHeaders(res: NextResponse) {
       "font-src 'self'",
       "img-src 'self' data: blob: https:",
       "connect-src 'self' https:",
+      "object-src 'none'",
+      "worker-src 'self'",
       "frame-ancestors 'none'",
       "base-uri 'self'",
       "form-action 'self'",

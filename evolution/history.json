@@ -672,5 +672,47 @@
       "ContentRecommendation: intent×funnel×segment mapping"
     ],
     "deployStatus": "dev"
+  },
+  {
+    "iteration": 11,
+    "timestamp": "2026-02-20T10:00:00.000Z",
+    "totalScore": 96.30,
+    "weakestDimension": "scalability",
+    "delta": 0.33,
+    "regressions": [],
+    "changesApplied": [
+      "Replace raw <img> tags in admin property pages with RemoteImage component",
+      "Next.js image optimization: WebP/AVIF, responsive sizing, CDN caching"
+    ],
+    "deployStatus": "dev"
+  },
+  {
+    "iteration": 12,
+    "timestamp": "2026-02-20T11:05:00.000Z",
+    "totalScore": 96.70,
+    "weakestDimension": "security",
+    "delta": 0.40,
+    "regressions": [],
+    "changesApplied": [
+      "Projects page: replaced force-dynamic with ISR revalidate (enables CDN caching)",
+      "RemoteImage: added width/height to fallback <img> tag (fixes CLS)",
+      "Fixed stale Google Fonts preconnect test (110/110 tests pass)"
+    ],
+    "deployStatus": "dev"
+  },
+  {
+    "iteration": 13,
+    "timestamp": "2026-02-20T11:17:00.000Z",
+    "totalScore": 97.03,
+    "weakestDimension": "visual_luxury_integrity",
+    "delta": 0.33,
+    "regressions": [],
+    "changesApplied": [
+      "CSP tightened: added object-src 'none' and worker-src 'self'",
+      "Added Cross-Origin-Opener-Policy: same-origin-allow-popups",
+      "Added Cross-Origin-Resource-Policy: same-origin",
+      "3 new security tests (113 total): COOP/CORP headers, object-src, worker-src"
+    ],
+    "deployStatus": "dev"
   }
 ]
