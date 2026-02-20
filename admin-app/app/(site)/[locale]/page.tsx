@@ -6,6 +6,7 @@ import { CTA, buildWhatsAppUrl } from '@/app/_lib/public-cta';
 import { getDictionary, normalizeLocale } from '@/app/_lib/i18n/get-dictionary';
 import { withLocale } from '@/app/_lib/i18n/routing';
 import { makePageMetadata } from '@/app/_lib/i18n/metadata';
+import { getContentRecommendation } from '@/lib/personalization';
  
 
 export const revalidate = 300;
@@ -95,6 +96,8 @@ export default function HomePage({
 
   const closeHref = withLocale(locale, '/');
 
+  const recommendation = getContentRecommendation();
+
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://amppattaya.com';
 
   const jsonLd = {
@@ -111,7 +114,7 @@ export default function HomePage({
   };
 
   return (
-    <main id="main-content">
+    <main id="main-content" data-emphasis={recommendation.emphasis}>
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
