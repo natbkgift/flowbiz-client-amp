@@ -142,6 +142,12 @@ if ($BlueprintDir) {
   $queue | ConvertTo-Json -Depth 6 | Out-File -FilePath (Join-Path $OutDirAbs 'queue.json') -Encoding utf8
 }
 
+# If queue_empty is the desired stop condition, finalize queue status deterministically.
+if ($StopCondition -eq 'queue_empty') {
+  & $Python .\scripts\governance\finalize_blueprint_queue.py --out-dir $EffectiveArtifactsDir
+  if ($LASTEXITCODE -ne 0) { Stop-Transcript | Out-Null; throw "finalize_blueprint_queue failed" }
+}
+
 # Record session settings under output/** (no prompt content is copied)
 $settings = [ordered]@{
   timestamp_utc = (Get-Date).ToUniversalTime().ToString('o')
