@@ -14,6 +14,7 @@ param(
   [string]$StopCondition = "queue_empty",
   [switch]$RequirePromptPath,
   [int]$MaxMinutes = 45,
+  [switch]$SkipCommit,
   [switch]$SkipPr,
   [switch]$SkipMerge,
   [switch]$SkipDeploy
@@ -204,25 +205,32 @@ if ($EvidenceOut) {
   Copy-Item -Force -ErrorAction SilentlyContinue .\evolution\evidence.json $dest
 }
 
-# Commit + push (single commit)
-git show-ref --verify --quiet "refs/heads/$Branch"
-if ($LASTEXITCODE -eq 0) {
-  git checkout $Branch
-} else {
-  git checkout -b $Branch
+if (-not $SkipCommit) {
+  # Commit + push (single commit)
+  git show-ref --verify --quiet "refs/heads/$Branch"
+  if ($LASTEXITCODE -eq 0) {
+    git checkout $Branch
+  } else {
+    git checkout -b $Branch
+  }
+  if ($LASTEXITCODE -ne 0) { Stop-Transcript | Out-Null; throw "git checkout failed" }
+  git add -A
+  if ($LASTEXITCODE -ne 0) { Stop-Transcript | Out-Null; throw "git add failed" }
+  git diff --cached --quiet
+  if ($LASTEXITCODE -eq 0) {
+    # Nothing to commit (prompt-test / no changes). Continue without failing.
+  } else {
+    git commit -m $CommitMessage
+    if ($LASTEXITCODE -ne 0) { Stop-Transcript | Out-Null; throw "git commit failed" }
+    git push -u origin $Branch
+    if ($LASTEXITCODE -ne 0) { Stop-Transcript | Out-Null; throw "git push failed" }
+  }
 }
-if ($LASTEXITCODE -ne 0) { Stop-Transcript | Out-Null; throw "git checkout failed" }
-git add -A
-if ($LASTEXITCODE -ne 0) { Stop-Transcript | Out-Null; throw "git add failed" }
-git commit -m $CommitMessage
-if ($LASTEXITCODE -ne 0) { Stop-Transcript | Out-Null; throw "git commit failed" }
-git push -u origin $Branch
-if ($LASTEXITCODE -ne 0) { Stop-Transcript | Out-Null; throw "git push failed" }
 
 $prNumber = $null
 $prUrl = $null
 
-if (-not $SkipPr) {
+if ((-not $SkipCommit) -and (-not $SkipPr)) {
   if ($PrBody) {
     gh pr create --base $Base --head $Branch --title $PrTitle --body $PrBody
   } else {
