@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-02-20T16:21:09.413285+00:00",
+  "timestamp": "2026-02-20T19:15:49.931639+00:00",
   "total_score": 100.0,
   "max_score": 100,
   "weakest_phase": 1,
@@ -41,8 +41,8 @@
       "max": 15,
       "pct": 100.0,
       "details": {
-        "en_routes": 21,
-        "th_routes": 21,
+        "en_routes": 23,
+        "th_routes": 23,
         "route_parity": 1.0,
         "en_keys": 520,
         "th_keys": 520,
@@ -102,7 +102,7 @@
         "has_sitemap": true,
         "has_robots": true,
         "has_canonical": true,
-        "internal_links": 70,
+        "internal_links": 90,
         "link_density_ratio": 1
       }
     }
