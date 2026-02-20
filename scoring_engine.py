@@ -129,8 +129,10 @@ def score_phase_1() -> PhaseResult:
     atomic_count = count_files("components")
     atomic_score = min(atomic_count / 12, 1) * 5
 
-    # Shadow policy: count raw shadow declarations vs token-based ones
-    raw_shadows = grep_count(r"box-shadow:\s*(?!var\()", "app/globals.css")
+    # Shadow policy: count raw shadow declarations (non-tokenized)
+    total_shadows = grep_count(r"box-shadow:\s", "app/globals.css")
+    var_shadows = grep_count(r"box-shadow:\s*var\(", "app/globals.css")
+    raw_shadows = total_shadows - var_shadows
     shadow_score = 4 if raw_shadows <= ALLOWED_SHADOW_LIMIT else 0
 
     total = tokens_score + typography_score + atomic_score + shadow_score
@@ -204,11 +206,12 @@ def score_phase_3() -> PhaseResult:
     else:
         parity = 0.0
 
-    # Translation coverage: compare key counts
+    # Translation coverage: compare property-key counts (indented keys only,
+    # excludes matches inside string values)
     en_text = read_text("app/_lib/i18n/en.ts")
     th_text = read_text("app/_lib/i18n/th.ts")
-    en_keys = len(re.findall(r"\w+\s*:", en_text))
-    th_keys = len(re.findall(r"\w+\s*:", th_text))
+    en_keys = len(re.findall(r"^\s+\w+\s*:", en_text, re.MULTILINE))
+    th_keys = len(re.findall(r"^\s+\w+\s*:", th_text, re.MULTILINE))
     coverage = th_keys / max(en_keys, 1)
 
     en_score = 4 if en_exists else 0

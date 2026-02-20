@@ -62,6 +62,43 @@ This service follows the **system-level nginx** architecture (see [ADR_SYSTEM_NG
 
 ---
 
+### SSH Alias (Recommended)
+
+Local automation in this repo assumes an SSH host alias named `flowbiz-vps`.
+
+Create or edit `~/.ssh/config` (Windows: `%USERPROFILE%\.ssh\config`) and add:
+
+```sshconfig
+Host flowbiz-vps
+  HostName <VPS_IP_OR_HOSTNAME>
+  User <VPS_USER>
+  IdentityFile ~/.ssh/<keyfile>
+  IdentitiesOnly yes
+```
+
+Verify:
+```bash
+ssh -o BatchMode=yes flowbiz-vps "echo ok"
+```
+
+---
+
+### One-Command Deploy (Using This Repo)
+
+These scripts deploy the service stack under `/opt/flowbiz/clients/flowbiz-client-amp/` and verify `GET /healthz` on localhost.
+
+Windows (PowerShell):
+```powershell
+pwsh -NoProfile -ExecutionPolicy Bypass -File scripts/deploy_prod.ps1 -VpsHost flowbiz-vps
+```
+
+Linux/macOS:
+```bash
+bash scripts/deploy_prod.sh --vps-host flowbiz-vps
+```
+
+---
+
 ### 1. Server Setup
 ```bash
 # SSH into your VPS

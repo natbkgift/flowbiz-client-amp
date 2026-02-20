@@ -106,6 +106,14 @@ pytest -q
 gh pr create
 ```
 
+### Autonomous Local Ops (Optional)
+
+If you use GitHub CLI (`gh`) and SSH alias `flowbiz-vps`, you can run the end-to-end loop locally:
+
+```powershell
+pwsh -NoProfile -ExecutionPolicy Bypass -File scripts/governance/autopilot.ps1 loop <PR_NUMBER>
+```
+
 ### Warning Path
 ```bash
 # Make changes

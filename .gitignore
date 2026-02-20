@@ -88,6 +88,9 @@ runtime/system_state.lock
 # Local temp artifacts (generated)
 .tmp/
 
+# Loop artifacts (generated)
+output/
+
 # VPS deploy state (generated)
 .deploy/
 
