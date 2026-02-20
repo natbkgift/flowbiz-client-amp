@@ -415,4 +415,109 @@ export type Dictionary = {
     requestFailed: string;
     failedToSubmit: string;
   };
+  segments: {
+    investment: {
+      heroTitle: string;
+      heroSubtitle: string;
+      ownershipTitle: string;
+      ownershipSubtitle: string;
+      ownershipCards: { title: string; body: string }[];
+      roiTitle: string;
+      roiSubtitle: string;
+      roiBullets: string[];
+      quotaTitle: string;
+      quotaSubtitle: string;
+      quotaBullets: string[];
+      ctaTitle: string;
+      ctaBody: string;
+    };
+    european: {
+      heroTitle: string;
+      heroSubtitle: string;
+      euConcernsTitle: string;
+      euConcernsSubtitle: string;
+      euConcernsCards: { title: string; body: string }[];
+      legalComparisonTitle: string;
+      legalComparisonSubtitle: string;
+      legalComparisonBullets: string[];
+      ctaTitle: string;
+      ctaBody: string;
+    };
+    holidayHome: {
+      heroTitle: string;
+      heroSubtitle: string;
+      lifestyleTitle: string;
+      lifestyleSubtitle: string;
+      lifestyleCards: { title: string; body: string }[];
+      rentalYieldTitle: string;
+      rentalYieldSubtitle: string;
+      rentalYieldBullets: string[];
+      managementTitle: string;
+      managementSubtitle: string;
+      managementBullets: string[];
+      ctaTitle: string;
+      ctaBody: string;
+    };
+    luxury: {
+      heroTitle: string;
+      heroSubtitle: string;
+      premiumTitle: string;
+      premiumSubtitle: string;
+      premiumCards: { title: string; body: string }[];
+      exclusiveTitle: string;
+      exclusiveSubtitle: string;
+      exclusiveBullets: string[];
+      ctaTitle: string;
+      ctaBody: string;
+    };
+    thaiInvestor: {
+      heroTitle: string;
+      heroSubtitle: string;
+      yieldCompareTitle: string;
+      yieldCompareSubtitle: string;
+      yieldCompareCards: { title: string; body: string }[];
+      portfolioTitle: string;
+      portfolioSubtitle: string;
+      portfolioBullets: string[];
+      ctaTitle: string;
+      ctaBody: string;
+    };
+    general: {
+      heroTitle: string;
+      heroSubtitle: string;
+      firstHomeTitle: string;
+      firstHomeSubtitle: string;
+      firstHomeCards: { title: string; body: string }[];
+      familyTitle: string;
+      familySubtitle: string;
+      familyBullets: string[];
+      ctaTitle: string;
+      ctaBody: string;
+    };
+  };
+  knowledge: {
+    foreignQuota: {
+      title: string;
+      subtitle: string;
+      bullets: string[];
+      disclaimer: string;
+    };
+    transferFees: {
+      title: string;
+      subtitle: string;
+      rows: { item: string; rate: string; note: string }[];
+      disclaimer: string;
+    };
+    ownershipComparison: {
+      title: string;
+      subtitle: string;
+      options: { type: string; description: string; pros: string[]; cons: string[] }[];
+      disclaimer: string;
+    };
+  };
+  homepageSegmentation: {
+    sectionTitle: string;
+    sectionSubtitle: string;
+    cards: { title: string; desc: string; href: string }[];
+  };
 };

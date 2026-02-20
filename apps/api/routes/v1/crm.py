@@ -71,14 +71,14 @@ def _is_retry_duplicate(*, existing: Inquiry, payload: InquiryCreate) -> bool:
 
 
 def _choose_round_robin_advisor(db: Session) -> User | None:
-    advisor_ids: set[UUID] = set(db.scalars(select(User.id).where(User.role == "advisor")).all())
-
-    rbac_ids: list[UUID] = db.scalars(
+    # Single query: UNION of legacy role column and RBAC roles.
+    legacy_q = select(User.id).where(User.role == "advisor")
+    rbac_q = (
         select(UserRole.user_id)
         .join(Role, Role.id == UserRole.role_id)
         .where(Role.name == "advisor")
-    ).all()
-    advisor_ids.update(rbac_ids)
+    )
+    advisor_ids: set[UUID] = set(db.scalars(legacy_q.union(rbac_q)).all())
 
     if not advisor_ids:
         return None

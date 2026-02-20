@@ -66,12 +66,19 @@ def recommend_properties(
     budget_max: Decimal | None = None,
     property_type: str | None = None,
 ) -> list[Recommendation]:
+    # Push budget and type filtering into SQL to reduce rows fetched.
+    stmt = select(Property).where(Property.status == "active")
+
+    if budget_min is not None:
+        stmt = stmt.where(Property.price >= budget_min)
+    if budget_max is not None:
+        stmt = stmt.where(Property.price <= budget_max)
+    if property_type:
+        stmt = stmt.where(Property.type == property_type)
+
     # Keep result ordering deterministic by using stable SQL ordering for the base set.
     rows: list[Property] = db.scalars(
-        select(Property)
-        .where(Property.status == "active")
-        .order_by(desc(Property.created_at), desc(Property.id))
-        .limit(500)
+        stmt.order_by(desc(Property.created_at), desc(Property.id)).limit(200)
     ).all()
 
     recs: list[Recommendation] = []

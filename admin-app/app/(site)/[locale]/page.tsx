@@ -336,6 +336,29 @@ export default function HomePage({
         </Container>
       </section>
 
+      <section className="section">
+        <Container>
+          <div className="section-header">
+            <h2 className="section-title">{dict.homepageSegmentation.sectionTitle}</h2>
+            <p className="section-subtitle">{dict.homepageSegmentation.sectionSubtitle}</p>
+          </div>
+          <div className="grid grid-3">
+            {dict.homepageSegmentation.cards.map((card) => (
+              <TrackedLink
+                key={card.href}
+                className="path-card reveal"
+                href={withLocale(locale, card.href)}
+                eventType="segment_entry_click"
+                eventPayload={{ segment: card.href.replace('/', '') }}
+              >
+                <h3>{card.title}</h3>
+                <p>{card.desc}</p>
+              </TrackedLink>
+            ))}
+          </div>
+        </Container>
+      </section>
+
       <section className="section section--alt">
         <Container>
           <div className="section-header">

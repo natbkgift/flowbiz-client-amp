@@ -66,4 +66,4 @@ class TTLCache:
 
 
 # Shared cache instances for common read-heavy data.
-response_cache = TTLCache(default_ttl=300, max_keys=200)
+response_cache = TTLCache(default_ttl=300, max_keys=1000)

@@ -41,14 +41,17 @@ def smart_finder(
     if not projects:
         return SmartFinderResponse(query_hash=query_hash, items=[])
 
-    # One query per area_stat is acceptable at MVP size; keep deterministic.
-    # (If this becomes hot, we can batch-fetch by area_id.)
+    # Batch-fetch area statistics to avoid N+1 queries.
+    area_ids = {p.area_id for p in projects if p.area_id is not None}
+    area_map: dict[int, AreaStatistic] = {}
+    if area_ids:
+        stats = db.scalars(select(AreaStatistic).where(AreaStatistic.area_id.in_(area_ids))).all()
+        area_map = {stat.area_id: stat for stat in stats}
+
     recs: list[tuple[str, int, SmartFinderProjectRecommendation]] = []
 
     for p in projects:
-        area_stat: AreaStatistic | None = None
-        if p.area_id is not None:
-            area_stat = db.scalar(select(AreaStatistic).where(AreaStatistic.area_id == p.area_id))
+        area_stat = area_map.get(p.area_id) if p.area_id is not None else None
 
         signals = SmartFinderSignals(
             has_cover_image=bool(p.cover_image_url),

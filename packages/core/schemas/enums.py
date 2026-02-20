@@ -50,6 +50,10 @@ class TargetAudience(str, Enum):
     TOURIST = "tourist"
     CHINESE_INVESTOR = "chinese_investor"
     RUSSIAN_BUYER = "russian_buyer"
+    EUROPEAN_BUYER = "european_buyer"
+    HOLIDAY_HOME_SEEKER = "holiday_home_seeker"
+    THAI_LUXURY_BUYER = "thai_luxury_buyer"
+    THAI_GENERAL_BUYER = "thai_general_buyer"
 
 
 class AdChannel(str, Enum):

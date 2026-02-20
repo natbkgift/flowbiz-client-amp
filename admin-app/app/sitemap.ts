@@ -35,6 +35,12 @@ const pages: PageEntry[] = [
   { path: '/areas/pratumnak', changeFrequency: 'weekly', priority: 0.6 },
   { path: '/areas/wongamat', changeFrequency: 'weekly', priority: 0.6 },
   { path: '/areas/central', changeFrequency: 'weekly', priority: 0.6 },
+  { path: '/investment', changeFrequency: 'weekly', priority: 0.8 },
+  { path: '/european', changeFrequency: 'weekly', priority: 0.8 },
+  { path: '/holiday-home', changeFrequency: 'weekly', priority: 0.8 },
+  { path: '/luxury', changeFrequency: 'weekly', priority: 0.8 },
+  { path: '/investor', changeFrequency: 'weekly', priority: 0.8 },
+  { path: '/general', changeFrequency: 'weekly', priority: 0.8 },
 ];
 
 export default function sitemap(): MetadataRoute.Sitemap {

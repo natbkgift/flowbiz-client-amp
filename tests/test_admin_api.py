@@ -62,7 +62,7 @@ def test_admin_list_and_update_lead(client):
 
     list_response = client.get("/admin/leads", headers=headers)
     assert list_response.status_code == 200
-    assert any(item["id"] == lead_id for item in list_response.json())
+    assert any(item["id"] == lead_id for item in list_response.json()["data"])
 
     detail_response = client.get(f"/admin/leads/{lead_id}", headers=headers)
     assert detail_response.status_code == 200

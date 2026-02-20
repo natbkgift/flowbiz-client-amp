@@ -1,7 +1,7 @@
 from __future__ import annotations
 
-from fastapi import APIRouter, Depends, HTTPException, status
-from sqlalchemy import asc, select
+from fastapi import APIRouter, Depends, HTTPException, Query, status
+from sqlalchemy import asc, func, select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
@@ -17,6 +17,7 @@ from packages.core.schemas.domain import (
     DeveloperCreate,
     DeveloperItem,
 )
+from packages.core.schemas.pagination import PaginatedResponse, PaginationMeta
 
 router = APIRouter(prefix="/admin", tags=["admin"])
 
@@ -43,13 +44,20 @@ def create_area(
     return AreaItem.model_validate(area)
 
 
-@router.get("/areas", response_model=list[AreaItem])
+@router.get("/areas", response_model=PaginatedResponse[AreaItem])
 def admin_list_areas(
+    page: int = Query(1, ge=1),
+    limit: int = Query(50, ge=1, le=200),
     db: Session = Depends(get_db),
     _admin: User = Depends(get_current_admin),
-) -> list[AreaItem]:
-    items = db.scalars(select(Area).order_by(asc(Area.slug))).all()
-    return [AreaItem.model_validate(i) for i in items]
+) -> PaginatedResponse[AreaItem]:
+    base = select(Area)
+    total = db.scalar(select(func.count()).select_from(base.subquery())) or 0
+    rows = db.scalars(base.order_by(asc(Area.slug)).offset((page - 1) * limit).limit(limit)).all()
+    return PaginatedResponse(
+        data=[AreaItem.model_validate(i) for i in rows],
+        meta=PaginationMeta(page=page, limit=limit, total=total),
+    )
 
 
 @router.post("/developers", response_model=DeveloperItem, status_code=status.HTTP_201_CREATED)
@@ -66,13 +74,22 @@ def create_developer(
     return DeveloperItem.model_validate(developer)
 
 
-@router.get("/developers", response_model=list[DeveloperItem])
+@router.get("/developers", response_model=PaginatedResponse[DeveloperItem])
 def admin_list_developers(
+    page: int = Query(1, ge=1),
+    limit: int = Query(50, ge=1, le=200),
     db: Session = Depends(get_db),
     _admin: User = Depends(get_current_admin),
-) -> list[DeveloperItem]:
-    items = db.scalars(select(Developer).order_by(asc(Developer.slug))).all()
-    return [DeveloperItem.model_validate(i) for i in items]
+) -> PaginatedResponse[DeveloperItem]:
+    base = select(Developer)
+    total = db.scalar(select(func.count()).select_from(base.subquery())) or 0
+    rows = db.scalars(
+        base.order_by(asc(Developer.slug)).offset((page - 1) * limit).limit(limit)
+    ).all()
+    return PaginatedResponse(
+        data=[DeveloperItem.model_validate(i) for i in rows],
+        meta=PaginationMeta(page=page, limit=limit, total=total),
+    )
 
 
 @router.post("/agents", response_model=AgentItem, status_code=status.HTTP_201_CREATED)
@@ -94,10 +111,17 @@ def create_agent(
     return AgentItem.model_validate(agent)
 
 
-@router.get("/agents", response_model=list[AgentItem])
+@router.get("/agents", response_model=PaginatedResponse[AgentItem])
 def admin_list_agents(
+    page: int = Query(1, ge=1),
+    limit: int = Query(50, ge=1, le=200),
     db: Session = Depends(get_db),
     _admin: User = Depends(get_current_admin),
-) -> list[AgentItem]:
-    items = db.scalars(select(Agent).order_by(asc(Agent.name))).all()
-    return [AgentItem.model_validate(i) for i in items]
+) -> PaginatedResponse[AgentItem]:
+    base = select(Agent)
+    total = db.scalar(select(func.count()).select_from(base.subquery())) or 0
+    rows = db.scalars(base.order_by(asc(Agent.name)).offset((page - 1) * limit).limit(limit)).all()
+    return PaginatedResponse(
+        data=[AgentItem.model_validate(i) for i in rows],
+        meta=PaginationMeta(page=page, limit=limit, total=total),
+    )

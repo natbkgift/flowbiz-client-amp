@@ -29,8 +29,8 @@ export default function LeadsPage() {
       return;
     }
 
-    apiRequest<Lead[]>('/admin/leads')
-      .then(setLeads)
+    apiRequest<{ data: Lead[]; meta: { page: number; limit: number; total: number } }>('/admin/leads')
+      .then((res) => setLeads(res.data))
       .catch((err: Error) => {
           if (handleUnauthorizedError(err, router)) {
           return;

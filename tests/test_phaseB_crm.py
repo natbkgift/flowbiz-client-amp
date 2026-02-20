@@ -79,7 +79,7 @@ def test_admin_can_list_inquiries_and_viewings(client):
 
     inquiries = client.get("/admin/inquiries", headers=headers)
     assert inquiries.status_code == 200
-    assert isinstance(inquiries.json(), list)
+    assert isinstance(inquiries.json()["data"], list)
 
     viewings = client.get("/admin/viewings", headers=headers)
     assert viewings.status_code == 200

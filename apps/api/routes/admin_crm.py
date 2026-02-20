@@ -22,13 +22,22 @@ from packages.core.schemas.pagination import PaginatedResponse, PaginationMeta
 router = APIRouter(prefix="/admin", tags=["admin"])
 
 
-@router.get("/inquiries", response_model=list[InquiryItem])
+@router.get("/inquiries", response_model=PaginatedResponse[InquiryItem])
 def list_inquiries(
+    page: int = Query(1, ge=1),
+    limit: int = Query(50, ge=1, le=200),
     db: Session = Depends(get_db),
     _admin: User = Depends(get_current_admin),
-) -> list[InquiryItem]:
-    inquiries = db.scalars(select(Inquiry).order_by(desc(Inquiry.created_at))).all()
-    return [InquiryItem.model_validate(i) for i in inquiries]
+) -> PaginatedResponse[InquiryItem]:
+    base = select(Inquiry)
+    total = db.scalar(select(func.count()).select_from(base.subquery())) or 0
+    rows = db.scalars(
+        base.order_by(desc(Inquiry.created_at)).offset((page - 1) * limit).limit(limit)
+    ).all()
+    return PaginatedResponse(
+        data=[InquiryItem.model_validate(i) for i in rows],
+        meta=PaginationMeta(page=page, limit=limit, total=total),
+    )
 
 
 @router.get("/inquiries/{inquiry_id}", response_model=InquiryItem)

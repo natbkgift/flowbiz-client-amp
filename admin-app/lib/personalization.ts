@@ -50,6 +50,12 @@ const INTENT_PATTERNS: Array<{ pattern: RegExp; intent: VisitorIntent }> = [
   { pattern: /\/projects?\//i, intent: 'invest' },
   { pattern: /\/property\//i, intent: 'buy' },
   { pattern: /\/smart-finder/i, intent: 'explore' },
+  { pattern: /\/investment/i, intent: 'invest' },
+  { pattern: /\/investor/i, intent: 'invest' },
+  { pattern: /\/european/i, intent: 'buy' },
+  { pattern: /\/holiday-home/i, intent: 'buy' },
+  { pattern: /\/luxury/i, intent: 'buy' },
+  { pattern: /\/general/i, intent: 'buy' },
 ];
 
 // ---------------------------------------------------------------------------
