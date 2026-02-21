@@ -33,7 +33,6 @@ METRIC_BLUEPRINT_MAP: dict[str, str] = {
     "route_parity": "docs/blueprint/01_architecture/02_URL_STRUCTURE_GUIDELINE.md",
     "translation_coverage": "docs/blueprint/05_data_population/15_CONTENT_STANDARD.md",
     "i18n_metadata": "docs/blueprint/03_seo/08_CONTENT_PILLAR_MAP.md",
-    "no_placeholder_content": "docs/blueprint/05_data_population/15_CONTENT_STANDARD.md",
     # Phase 4 — Conversion & Funnel
     "above_fold_cta": "docs/blueprint/04_conversion/13_CTA_STANDARD.md",
     "qualification_form": "docs/blueprint/04_conversion/12_FUNNEL_DESIGN.md",
@@ -67,6 +66,21 @@ METRIC_BLUEPRINT_MAP: dict[str, str] = {
     "structured_data": "docs/blueprint/03_seo/10_SCHEMA_MARKUP_PLAN.md",
     "og_meta_tags": "docs/blueprint/03_seo/08_CONTENT_PILLAR_MAP.md",
     "multi_sitemap": "docs/blueprint/01_architecture/04_XML_SITEMAP_STRATEGY.md",
+    # Phase 8 — Content & Property Completeness
+    "property_listing": "docs/blueprint/02_data/07_PRODUCT_TEMPLATE_SPEC.md",
+    "property_detail": "docs/blueprint/02_data/07_PRODUCT_TEMPLATE_SPEC.md",
+    "project_pages": "docs/blueprint/05_data_population/15_CONTENT_STANDARD.md",
+    "developer_pages": "docs/blueprint/05_data_population/15_CONTENT_STANDARD.md",
+    "gallery_component": "docs/blueprint/02_data/07_PRODUCT_TEMPLATE_SPEC.md",
+    "floorplan_display": "docs/blueprint/02_data/07_PRODUCT_TEMPLATE_SPEC.md",
+    "map_integration": "docs/blueprint/02_data/07_PRODUCT_TEMPLATE_SPEC.md",
+    "customer_reviews": "docs/blueprint/05_data_population/15_CONTENT_STANDARD.md",
+    "team_about_page": "docs/blueprint/05_data_population/15_CONTENT_STANDARD.md",
+    "area_guide_content": "docs/blueprint/05_data_population/15_CONTENT_STANDARD.md",
+    "blog_real_content": "docs/blueprint/05_data_population/15_CONTENT_STANDARD.md",
+    "media_assets_volume": "docs/blueprint/02_data/07_PRODUCT_TEMPLATE_SPEC.md",
+    "content_depth": "docs/blueprint/05_data_population/15_CONTENT_STANDARD.md",
+    "image_component_quality": "docs/blueprint/02_data/07_PRODUCT_TEMPLATE_SPEC.md",
 }
 
 
