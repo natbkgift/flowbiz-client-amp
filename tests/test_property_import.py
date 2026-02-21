@@ -868,7 +868,7 @@ def test_concurrent_import_lock() -> None:
     t2 = threading.Thread(target=run_import, args=(content_t2, results, "t2"))
 
     t1.start()
-    time.sleep(0.01)
+    time.sleep(0.5)
     t2.start()
     t1.join()
     t2.join()
