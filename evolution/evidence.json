@@ -1,12 +1,13 @@
 {
-  "timestamp": "2026-02-21T05:10:12.832750+00:00",
+  "timestamp": "2026-02-21T10:23:53.203054+00:00",
   "mode": "raw",
-  "total_score": 100.0,
+  "scoring_engine_version": "v2",
+  "total_score": 96.0,
   "max_score": 100,
-  "weakest_phase": 1,
-  "weakest_phase_name": "Brand & Design System",
-  "weakest_phase_pct": 100.0,
-  "termination_eligible": true,
+  "weakest_phase": 6,
+  "weakest_phase_name": "Copy & Persuasion",
+  "weakest_phase_pct": 70.0,
+  "termination_eligible": false,
   "phases": [
     {
       "phase": 1,
@@ -15,15 +16,27 @@
       "max": 15,
       "pct": 100.0,
       "details": {
-        "tokens_file": false,
         "css_var_count": 86,
-        "tokens_score": 3,
-        "typography": true,
-        "typography_score": 3.0,
+        "tokens_score": 2,
+        "has_typography": true,
+        "typography_score": 1.5,
+        "color_categories": 6,
+        "color_score": 2,
         "atomic_components": 25,
-        "atomic_score": 5,
+        "atomic_score": 2.5,
+        "component_categories": 11,
+        "diversity_score": 2,
         "raw_shadow_count": 0,
-        "shadow_score": 4.0
+        "shadow_score": 2.0,
+        "responsive": {
+          "media_queries": 25,
+          "has_screens": false,
+          "responsive_classes": 13,
+          "ok": true
+        },
+        "responsive_score": 1.5,
+        "has_font_loading": true,
+        "font_score": 1.5
       },
       "gaps": []
     },
@@ -35,35 +48,88 @@
       "pct": 100.0,
       "details": {
         "section_count": 5,
-        "section_score": 4.0,
-        "density_valid": true,
-        "density_score": 4.0,
+        "section_score": 2.5,
+        "hero": {
+          "has_hero": true,
+          "has_cta": true,
+          "has_headings": true,
+          "has_wizard": true
+        },
+        "hero_score": 2.5,
         "has_sticky_cta": true,
-        "sticky_score": 4.0,
+        "sticky_score": 2.0,
         "has_sitemap": true,
-        "hierarchy_score": 3.0
+        "hierarchy_score": 2.0,
+        "error_handling": {
+          "global_error": true,
+          "site_error": true,
+          "not_found": true
+        },
+        "error_score": 2.0,
+        "breadcrumbs": {
+          "exists": true,
+          "usage_count": 19
+        },
+        "breadcrumb_score": 2.0,
+        "layout": {
+          "header": true,
+          "footer": true,
+          "container": true
+        },
+        "layout_score": 2.0
       },
       "gaps": []
     },
     {
       "phase": 3,
       "name": "Multilingual Architecture",
-      "score": 15.0,
+      "score": 14.0,
       "max": 15,
-      "pct": 100.0,
+      "pct": 93.3,
       "details": {
         "en_routes": 24,
         "th_routes": 24,
-        "en_score": 4,
-        "th_score": 4,
+        "en_score": 3,
+        "th_score": 3,
         "route_parity": 1.0,
-        "parity_score": 4.0,
+        "parity_score": 2.5,
         "en_keys": 524,
         "th_keys": 524,
         "translation_coverage": 1.0,
-        "coverage_score": 3.0
+        "coverage_score": 2.5,
+        "i18n_metadata": {
+          "has_alternates": true,
+          "has_canonical": true,
+          "has_og": true
+        },
+        "meta_score": 2.0,
+        "placeholder_content": {
+          "violations": [
+            {
+              "file": "app\\(site)\\[locale]\\blog\\page.tsx",
+              "pattern": "coming_soon"
+            },
+            {
+              "file": "app\\(site)\\[locale]\\blog\\[slug]\\page.tsx",
+              "pattern": "coming_soon"
+            }
+          ],
+          "count": 2
+        },
+        "placeholder_score": 1.0
       },
-      "gaps": []
+      "gaps": [
+        {
+          "metric": "no_placeholder_content",
+          "current": 1.0,
+          "max": 2.0,
+          "gap": 1.0,
+          "action": "Remove placeholder content from 2 pages (app\\(site)\\[locale]\\blog\\page.tsx, app\\(site)\\[locale]\\blog\\[slug]\\page.tsx). Replace 'Coming soon' with real content.",
+          "file_path": "admin-app/app/(site)/[locale]/",
+          "phase": 3,
+          "phase_name": "Multilingual Architecture"
+        }
+      ]
     },
     {
       "phase": 4,
@@ -73,13 +139,19 @@
       "pct": 100.0,
       "details": {
         "has_hero_cta": true,
-        "cta_score": 4.0,
-        "has_qualification_form": true,
-        "form_score": 4.0,
+        "cta_score": 2.5,
+        "has_form": true,
+        "form_score": 2.5,
+        "form_inputs": 10,
+        "form_completeness": 2,
         "has_lead_scoring": true,
-        "scoring_score": 4.0,
-        "has_crm_endpoint": true,
-        "crm_score": 3.0
+        "scoring_score": 2.5,
+        "has_crm": true,
+        "crm_score": 2.0,
+        "funnel_paths": 4,
+        "funnel_score": 1.5,
+        "has_seller_form": true,
+        "seller_score": 2.0
       },
       "gaps": []
     },
@@ -91,38 +163,90 @@
       "pct": 100.0,
       "details": {
         "has_tracking": true,
-        "tracking_score": 5.0,
+        "tracking_score": 3.5,
+        "event_types": 8,
+        "event_score": 2,
         "has_classification": true,
-        "classification_score": 5.0,
+        "classification_score": 3.5,
         "has_intent_score": true,
-        "intent_score_val": 4.0,
-        "has_dynamic_rendering": true,
-        "dynamic_rendering_used": true,
-        "dynamic_score": 4.0,
-        "has_repeat_visitor": true,
-        "repeat_score": 2.0
+        "intent_score_val": 3.0,
+        "has_dynamic": true,
+        "dynamic_used": true,
+        "dynamic_score": 3.0,
+        "has_repeat": true,
+        "repeat_score": 2.0,
+        "has_cookie_consent": true,
+        "cookie_score": 1.5,
+        "has_experiment": true,
+        "experiment_score": 1.5
       },
       "gaps": []
     },
     {
       "phase": 6,
       "name": "Copy & Persuasion",
-      "score": 10.0,
+      "score": 7.0,
       "max": 10,
-      "pct": 100.0,
+      "pct": 70.0,
       "details": {
         "en_word_count": 3933,
         "en_threshold": 2000,
-        "en_score": 3,
+        "en_score": 1.5,
         "th_word_count": 4590,
         "th_threshold": 1000,
-        "th_score": 3,
+        "th_score": 1.5,
         "has_legal_disclaimer": true,
-        "legal_score": 2.0,
+        "legal_score": 1.0,
         "has_risk_reassurance": true,
-        "risk_score": 2.0
+        "risk_score": 0.5,
+        "public_media_assets": {
+          "raster": 0,
+          "svg": 0,
+          "total": 0
+        },
+        "media_score": 0.0,
+        "placeholder_content": {
+          "violations": [
+            {
+              "file": "app\\(site)\\[locale]\\blog\\page.tsx",
+              "pattern": "coming_soon"
+            },
+            {
+              "file": "app\\(site)\\[locale]\\blog\\[slug]\\page.tsx",
+              "pattern": "coming_soon"
+            }
+          ],
+          "count": 2
+        },
+        "placeholder_score": 1.0,
+        "alt_text": {
+          "total": 9,
+          "with_alt": 9
+        },
+        "alt_score": 1.5
       },
-      "gaps": []
+      "gaps": [
+        {
+          "metric": "media_assets",
+          "current": 0.0,
+          "max": 2.0,
+          "gap": 2.0,
+          "action": "Add real media assets (0 raster images, need 3+) under admin-app/public/ (e.g. public/images/hero.webp)",
+          "file_path": "admin-app/public/",
+          "phase": 6,
+          "phase_name": "Copy & Persuasion"
+        },
+        {
+          "metric": "no_placeholder_copy",
+          "current": 1.0,
+          "max": 2.0,
+          "gap": 1.0,
+          "action": "Remove placeholder content from 2 pages (app\\(site)\\[locale]\\blog\\page.tsx, app\\(site)\\[locale]\\blog\\[slug]\\page.tsx). Replace 'Coming soon' with real content.",
+          "file_path": "admin-app/app/(site)/[locale]/",
+          "phase": 6,
+          "phase_name": "Copy & Persuasion"
+        }
+      ]
     },
     {
       "phase": 7,
@@ -132,17 +256,56 @@
       "pct": 100.0,
       "details": {
         "has_sitemap": true,
-        "sitemap_score": 3.0,
+        "sitemap_score": 1.5,
         "has_robots": true,
-        "robots_score": 2.0,
+        "robots_score": 1.0,
         "has_canonical": true,
-        "canonical_score": 2.0,
+        "canonical_score": 1.5,
         "internal_links": 92,
         "link_density_ratio": 1,
-        "link_score": 3
+        "link_score": 2,
+        "structured_data": {
+          "files_with_jsonld": 6
+        },
+        "sd_score": 1.5,
+        "has_og_tags": true,
+        "og_score": 1.5,
+        "sitemap_segments": 7,
+        "multi_score": 1.0
       },
       "gaps": []
     }
   ],
-  "gap_recommendations": []
+  "gap_recommendations": [
+    {
+      "metric": "media_assets",
+      "current": 0.0,
+      "max": 2.0,
+      "gap": 2.0,
+      "action": "Add real media assets (0 raster images, need 3+) under admin-app/public/ (e.g. public/images/hero.webp)",
+      "file_path": "admin-app/public/",
+      "phase": 6,
+      "phase_name": "Copy & Persuasion"
+    },
+    {
+      "metric": "no_placeholder_content",
+      "current": 1.0,
+      "max": 2.0,
+      "gap": 1.0,
+      "action": "Remove placeholder content from 2 pages (app\\(site)\\[locale]\\blog\\page.tsx, app\\(site)\\[locale]\\blog\\[slug]\\page.tsx). Replace 'Coming soon' with real content.",
+      "file_path": "admin-app/app/(site)/[locale]/",
+      "phase": 3,
+      "phase_name": "Multilingual Architecture"
+    },
+    {
+      "metric": "no_placeholder_copy",
+      "current": 1.0,
+      "max": 2.0,
+      "gap": 1.0,
+      "action": "Remove placeholder content from 2 pages (app\\(site)\\[locale]\\blog\\page.tsx, app\\(site)\\[locale]\\blog\\[slug]\\page.tsx). Replace 'Coming soon' with real content.",
+      "file_path": "admin-app/app/(site)/[locale]/",
+      "phase": 6,
+      "phase_name": "Copy & Persuasion"
+    }
+  ]
 }

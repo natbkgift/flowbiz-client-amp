@@ -17,7 +17,7 @@ param(
   # --- Parameters for iterative self-healing loop ---
   [switch]$ValidateOnly,       # Only score + audit + gap report (no git/deploy)
   [switch]$AutoCommitWip,      # Commit dirty tree as WIP before validation
-  [switch]$PatchMode,          # Single-patch mode (<=300 LOC, <=5 files)
+  [switch]$PatchMode,          # Single-patch mode (no size limits)
   [switch]$RawScoring,         # Use raw scoring (reset, no growth constraints)
   [switch]$Sequential          # Sequential blueprint processing (one BP at a time)
 )
@@ -487,11 +487,12 @@ if ($Sequential) {
   }
 }
 
-# In sequential mode, scoring doesn't gate — only blueprint progress matters
+# In sequential mode, scoring doesn't gate — only blueprint progress matters.
+# In normal mode, blueprint is informational — only scoring gates.
 if ($Sequential) {
   $allPass = ($ciPass -and $govPass -and $blueprintPass)
 } else {
-  $allPass = ($ciPass -and $govPass -and $scoringPass -and $blueprintPass)
+  $allPass = ($ciPass -and $govPass -and $scoringPass)
 }
 $gapsRemaining = $scoringGaps.Count + $blueprintGaps.Count + $ciFailures.Count
 

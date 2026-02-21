@@ -10,36 +10,63 @@ REPO_ROOT = Path(__file__).resolve().parents[2]
 
 # Mapping from scoring metric names to blueprint documents for agent reference.
 METRIC_BLUEPRINT_MAP: dict[str, str] = {
+    # Phase 1 — Brand & Design System
     "design_tokens": "docs/blueprint/01_architecture/01_MASTER_SITEMAP.md",
     "typography": "docs/blueprint/01_architecture/01_MASTER_SITEMAP.md",
+    "color_system": "docs/blueprint/01_architecture/01_MASTER_SITEMAP.md",
     "atomic_components": "docs/blueprint/01_architecture/01_MASTER_SITEMAP.md",
+    "component_diversity": "docs/blueprint/01_architecture/01_MASTER_SITEMAP.md",
     "shadow_policy": "docs/blueprint/01_architecture/01_MASTER_SITEMAP.md",
+    "responsive_design": "docs/blueprint/01_architecture/01_MASTER_SITEMAP.md",
+    "font_loading": "docs/blueprint/01_architecture/01_MASTER_SITEMAP.md",
+    # Phase 2 — Structure & Layout
     "section_count": "docs/blueprint/01_architecture/02_URL_STRUCTURE_GUIDELINE.md",
-    "component_density": "docs/blueprint/01_architecture/02_URL_STRUCTURE_GUIDELINE.md",
+    "hero_section_quality": "docs/blueprint/04_conversion/13_CTA_STANDARD.md",
     "sticky_cta": "docs/blueprint/04_conversion/12_FUNNEL_DESIGN.md",
     "hierarchy_parity": "docs/blueprint/01_architecture/03_INDEX_MATRIX.md",
+    "error_handling": "docs/blueprint/06_release/16_QA_CHECKLIST.md",
+    "breadcrumb_nav": "docs/blueprint/03_seo/09_INTERNAL_LINKING_BLUEPRINT.md",
+    "layout_completeness": "docs/blueprint/01_architecture/01_MASTER_SITEMAP.md",
+    # Phase 3 — Multilingual
     "en_routes": "docs/blueprint/01_architecture/02_URL_STRUCTURE_GUIDELINE.md",
     "th_routes": "docs/blueprint/01_architecture/02_URL_STRUCTURE_GUIDELINE.md",
     "route_parity": "docs/blueprint/01_architecture/02_URL_STRUCTURE_GUIDELINE.md",
     "translation_coverage": "docs/blueprint/05_data_population/15_CONTENT_STANDARD.md",
+    "i18n_metadata": "docs/blueprint/03_seo/08_CONTENT_PILLAR_MAP.md",
+    "no_placeholder_content": "docs/blueprint/05_data_population/15_CONTENT_STANDARD.md",
+    # Phase 4 — Conversion & Funnel
     "above_fold_cta": "docs/blueprint/04_conversion/13_CTA_STANDARD.md",
     "qualification_form": "docs/blueprint/04_conversion/12_FUNNEL_DESIGN.md",
+    "form_completeness": "docs/blueprint/04_conversion/12_FUNNEL_DESIGN.md",
     "lead_scoring": "docs/blueprint/04_conversion/12_FUNNEL_DESIGN.md",
     "crm_endpoint": "docs/blueprint/02_data/05_DATABASE_SCHEMA.md",
+    "funnel_depth": "docs/blueprint/04_conversion/12_FUNNEL_DESIGN.md",
+    "seller_form": "docs/blueprint/04_conversion/12_FUNNEL_DESIGN.md",
+    # Phase 5 — Behavioral Personalization
     "tracking_events": "docs/blueprint/04_conversion/12_FUNNEL_DESIGN.md",
+    "event_diversity": "docs/blueprint/04_conversion/12_FUNNEL_DESIGN.md",
     "classification_engine": "docs/blueprint/04_conversion/12_FUNNEL_DESIGN.md",
     "intent_scoring": "docs/blueprint/04_conversion/12_FUNNEL_DESIGN.md",
     "dynamic_rendering": "docs/blueprint/04_conversion/12_FUNNEL_DESIGN.md",
     "repeat_visitor": "docs/blueprint/04_conversion/12_FUNNEL_DESIGN.md",
+    "cookie_consent": "docs/blueprint/06_release/16_QA_CHECKLIST.md",
+    "experiment_framework": "docs/blueprint/04_conversion/12_FUNNEL_DESIGN.md",
+    # Phase 6 — Copy & Persuasion
     "en_word_count": "docs/blueprint/05_data_population/15_CONTENT_STANDARD.md",
     "th_word_count": "docs/blueprint/05_data_population/15_CONTENT_STANDARD.md",
     "legal_disclaimer": "docs/blueprint/05_data_population/15_CONTENT_STANDARD.md",
     "risk_reassurance": "docs/blueprint/05_data_population/15_CONTENT_STANDARD.md",
     "media_assets": "docs/blueprint/02_data/07_PRODUCT_TEMPLATE_SPEC.md",
+    "no_placeholder_copy": "docs/blueprint/05_data_population/15_CONTENT_STANDARD.md",
+    "alt_text_coverage": "docs/blueprint/02_data/07_PRODUCT_TEMPLATE_SPEC.md",
+    # Phase 7 — SEO & Traffic
     "sitemap": "docs/blueprint/03_seo/08_CONTENT_PILLAR_MAP.md",
     "robots": "docs/blueprint/03_seo/11_CRAWL_OPTIMIZATION_PLAN.md",
     "canonical_tags": "docs/blueprint/03_seo/08_CONTENT_PILLAR_MAP.md",
     "internal_link_density": "docs/blueprint/03_seo/09_INTERNAL_LINKING_BLUEPRINT.md",
+    "structured_data": "docs/blueprint/03_seo/10_SCHEMA_MARKUP_PLAN.md",
+    "og_meta_tags": "docs/blueprint/03_seo/08_CONTENT_PILLAR_MAP.md",
+    "multi_sitemap": "docs/blueprint/01_architecture/04_XML_SITEMAP_STRATEGY.md",
 }
 
 
