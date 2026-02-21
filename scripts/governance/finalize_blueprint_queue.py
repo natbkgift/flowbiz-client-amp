@@ -1047,7 +1047,288 @@ def _build_recommendation(bp_id: str, notes: str) -> dict[str, Any]:
     return rec
 
 
-def finalize_queue(*, out_dir: Path) -> None:
+_CHECKS: dict[str, tuple[str, Callable[[], CheckResult]]] = {
+    "BP-00": ("bp00", check_bp00),
+    "BP-01": ("bp01", check_bp01),
+    "BP-02": ("bp02", check_bp02),
+    "BP-03": ("bp03", check_bp03),
+    "BP-04": ("bp04", check_bp04),
+    "BP-05": ("bp05", check_bp05),
+    "BP-06": ("bp06", check_bp06),
+    "BP-07": ("bp07", check_bp07_full),
+    "BP-08": ("bp08", check_bp08_full),
+    "BP-09": ("bp09", check_bp09),
+    "BP-10": ("bp10", check_bp10),
+    "BP-11": ("bp11", check_bp11),
+    "BP-12": ("bp12", check_bp12),
+    "BP-13": ("bp13", check_bp13),
+    "BP-14": ("bp14", check_bp14),
+    "BP-15": ("bp15", check_bp15),
+    "BP-16": ("bp16", check_bp16),
+    "BP-17": ("bp17", check_bp17),
+}
+
+
+def _run_all_checks() -> dict[str, CheckResult]:
+    results: dict[str, CheckResult] = {}
+    for bp_id, (_key, fn) in _CHECKS.items():
+        try:
+            results[bp_id] = fn()
+        except Exception as e:  # pragma: no cover
+            results[bp_id] = CheckResult(False, f"check crashed: {type(e).__name__}: {e}")
+    return results
+
+
+# ---------------------------------------------------------------------------
+# Sequential Mode — process ONE blueprint at a time
+# ---------------------------------------------------------------------------
+
+
+def _process_sequential(
+    queue_path: Path,
+    queue: dict[str, Any],
+    items: list[dict[str, Any]],
+    results: dict[str, CheckResult],
+    out_dir: Path,
+) -> bool:
+    """Process one BP at a time using a 2-step cycle.
+
+    State machine per item:
+      pending      → in_progress  (first encounter: present BP to agent)
+      in_progress  → done         (second encounter: check passes → advance)
+      in_progress  → in_progress  (second encounter: check fails → stay, report gaps)
+
+    This ensures the agent must READ the blueprint doc and IMPLEMENT its
+    requirements before the BP can advance, even if the minimal check
+    already passes on first encounter.
+
+    Returns True when ALL items are done.
+    """
+
+    completed_count = sum(1 for it in items if str(it.get("status") or "").lower() == "done")
+
+    # Find the first non-done item
+    pending_idx = -1
+    for i, item in enumerate(items):
+        status = str(item.get("status") or "").lower()
+        if status != "done":
+            pending_idx = i
+            break
+
+    if pending_idx == -1:
+        # All done
+        queue["completed_at_utc"] = _utc_now_iso()
+        queue["items"] = items
+        _write_json(queue_path, queue)
+        _write_json(
+            out_dir / "current_bp.json",
+            {
+                "timestamp_utc": _utc_now_iso(),
+                "all_done": True,
+                "current_bp": None,
+                "work_on_bp": None,
+                "blueprint_doc": None,
+                "completed_count": completed_count,
+                "total_count": len(items),
+                "progress_pct": 100,
+                "recommendation": None,
+            },
+        )
+        _write_json(
+            out_dir / "repair_plan.json",
+            {
+                "timestamp_utc": _utc_now_iso(),
+                "total_gaps": 0,
+                "all_passed": True,
+                "current_bp": None,
+                "repairs": [],
+            },
+        )
+        return True
+
+    current = items[pending_idx]
+    item_id = str(current.get("id") or "")
+    item_status = str(current.get("status") or "").lower()
+    blueprint_doc = str(current.get("path") or "")
+    r = results.get(item_id)
+    check_passed = r.ok if r else False
+    notes = r.notes if r else "no deterministic check implemented"
+    rec = _build_recommendation(item_id, notes)
+
+    if item_status == "pending":
+        # --- STEP 1: First encounter ---
+        # Mark as in_progress and present BP to agent for implementation.
+        # DO NOT check or advance — agent must implement first.
+        current["status"] = "in_progress"
+        current["result"] = "needs_implementation"
+        current["notes"] = f"Agent must read and implement: {blueprint_doc}"
+        current["recommendation"] = rec
+
+        _write_json(
+            out_dir / "current_bp.json",
+            {
+                "timestamp_utc": _utc_now_iso(),
+                "all_done": False,
+                "current_bp": item_id,
+                "work_on_bp": item_id,
+                "blueprint_doc": blueprint_doc,
+                "completed_count": completed_count,
+                "total_count": len(items),
+                "progress_pct": round(completed_count / len(items) * 100, 1),
+                "phase": "implement",
+                "instruction": (
+                    f"Read docs/{blueprint_doc} and implement ALL requirements. "
+                    "After implementation, commit your changes, then run validation again."
+                ),
+                "recommendation": rec,
+                "check_status": "pass" if check_passed else "gap",
+                "check_notes": notes,
+            },
+        )
+        _write_json(
+            out_dir / "repair_plan.json",
+            {
+                "timestamp_utc": _utc_now_iso(),
+                "total_gaps": 1,
+                "all_passed": False,
+                "current_bp": item_id,
+                "phase": "implement",
+                "repairs": [{"id": item_id, **rec}],
+            },
+        )
+
+    elif item_status == "in_progress":
+        # --- STEP 2: Agent has implemented, now validate ---
+        if check_passed:
+            # Check passes → mark done, advance
+            current["status"] = "done"
+            current["result"] = "pass"
+            current["notes"] = notes
+            current.pop("recommendation", None)
+            completed_count += 1
+
+            # Find next pending item
+            next_idx = -1
+            for i in range(pending_idx + 1, len(items)):
+                if str(items[i].get("status") or "").lower() != "done":
+                    next_idx = i
+                    break
+
+            if next_idx == -1:
+                # All done now
+                queue["completed_at_utc"] = _utc_now_iso()
+                queue["items"] = items
+                _write_json(queue_path, queue)
+                _write_json(
+                    out_dir / "current_bp.json",
+                    {
+                        "timestamp_utc": _utc_now_iso(),
+                        "all_done": True,
+                        "current_bp": None,
+                        "work_on_bp": None,
+                        "blueprint_doc": None,
+                        "completed_count": completed_count,
+                        "total_count": len(items),
+                        "progress_pct": 100,
+                        "recommendation": None,
+                        "just_completed": item_id,
+                    },
+                )
+                _write_json(
+                    out_dir / "repair_plan.json",
+                    {
+                        "timestamp_utc": _utc_now_iso(),
+                        "total_gaps": 0,
+                        "all_passed": True,
+                        "current_bp": None,
+                        "repairs": [],
+                    },
+                )
+                queue["items"] = items
+                _write_json(queue_path, queue)
+                return True
+
+            # Present the NEXT item (still as pending → will become
+            # in_progress on the next run)
+            next_item = items[next_idx]
+            next_id = str(next_item.get("id") or "")
+            next_doc = str(next_item.get("path") or "")
+            next_r = results.get(next_id)
+            next_notes = next_r.notes if next_r else "no check implemented"
+            next_rec = _build_recommendation(next_id, next_notes)
+
+            _write_json(
+                out_dir / "current_bp.json",
+                {
+                    "timestamp_utc": _utc_now_iso(),
+                    "all_done": False,
+                    "current_bp": next_id,
+                    "work_on_bp": next_id,
+                    "blueprint_doc": next_doc,
+                    "completed_count": completed_count,
+                    "total_count": len(items),
+                    "progress_pct": round(completed_count / len(items) * 100, 1),
+                    "phase": "pending",
+                    "recommendation": next_rec,
+                    "just_completed": item_id,
+                },
+            )
+            _write_json(
+                out_dir / "repair_plan.json",
+                {
+                    "timestamp_utc": _utc_now_iso(),
+                    "total_gaps": 0,
+                    "all_passed": False,
+                    "current_bp": next_id,
+                    "repairs": [],
+                    "just_completed": item_id,
+                },
+            )
+        else:
+            # Check fails → stay in_progress, report gaps
+            current["result"] = "gap"
+            current["notes"] = notes
+            current["recommendation"] = rec
+
+            _write_json(
+                out_dir / "current_bp.json",
+                {
+                    "timestamp_utc": _utc_now_iso(),
+                    "all_done": False,
+                    "current_bp": item_id,
+                    "work_on_bp": item_id,
+                    "blueprint_doc": blueprint_doc,
+                    "completed_count": completed_count,
+                    "total_count": len(items),
+                    "progress_pct": round(completed_count / len(items) * 100, 1),
+                    "phase": "fix_gaps",
+                    "instruction": (
+                        f"Check for {item_id} FAILED. Fix the gaps and run validation again."
+                    ),
+                    "recommendation": rec,
+                    "gap_notes": notes,
+                },
+            )
+            _write_json(
+                out_dir / "repair_plan.json",
+                {
+                    "timestamp_utc": _utc_now_iso(),
+                    "total_gaps": 1,
+                    "all_passed": False,
+                    "current_bp": item_id,
+                    "phase": "fix_gaps",
+                    "repairs": [{"id": item_id, **rec}],
+                },
+            )
+
+    queue["items"] = items
+    queue.pop("completed_at_utc", None)
+    _write_json(queue_path, queue)
+
+    return completed_count == len(items)
+
+
+def finalize_queue(*, out_dir: Path, sequential: bool = False) -> None:
     queue_path = out_dir / "queue.json"
     if not queue_path.exists():
         raise SystemExit(f"queue.json not found at {queue_path}")
@@ -1055,27 +1336,14 @@ def finalize_queue(*, out_dir: Path) -> None:
     queue = _read_json(queue_path)
     items: list[dict[str, Any]] = list(queue.get("items") or [])
 
-    checks: dict[str, tuple[str, Callable[[], CheckResult]]] = {
-        "BP-00": ("bp00", check_bp00),
-        "BP-01": ("bp01", check_bp01),
-        "BP-02": ("bp02", check_bp02),
-        "BP-03": ("bp03", check_bp03),
-        "BP-04": ("bp04", check_bp04),
-        "BP-05": ("bp05", check_bp05),
-        "BP-06": ("bp06", check_bp06),
-        "BP-07": ("bp07", check_bp07_full),
-        "BP-08": ("bp08", check_bp08_full),
-        "BP-09": ("bp09", check_bp09),
-        "BP-10": ("bp10", check_bp10),
-        "BP-11": ("bp11", check_bp11),
-        "BP-12": ("bp12", check_bp12),
-        "BP-13": ("bp13", check_bp13),
-        "BP-14": ("bp14", check_bp14),
-        "BP-15": ("bp15", check_bp15),
-        "BP-16": ("bp16", check_bp16),
-        "BP-17": ("bp17", check_bp17),
-    }
+    results = _run_all_checks()
 
+    # --- Sequential mode: process one BP at a time ---
+    if sequential:
+        _process_sequential(queue_path, queue, items, results, out_dir)
+        return
+
+    # --- Batch mode (original): process all BPs at once ---
     audit: dict[str, Any] = {
         "timestamp_utc": _utc_now_iso(),
         "queue_path": str(queue_path.relative_to(REPO_ROOT)),
@@ -1084,14 +1352,6 @@ def finalize_queue(*, out_dir: Path) -> None:
         "gaps": [],
         "results": {},
     }
-
-    # Run all checks once; store by BP id.
-    results: dict[str, CheckResult] = {}
-    for bp_id, (key, fn) in checks.items():
-        try:
-            results[bp_id] = fn()
-        except Exception as e:  # pragma: no cover
-            results[bp_id] = CheckResult(False, f"check crashed: {type(e).__name__}: {e}")
 
     repair_items: list[dict[str, Any]] = []
 
@@ -1122,7 +1382,7 @@ def finalize_queue(*, out_dir: Path) -> None:
             repair_items.append({"id": item_id, **item["recommendation"]})
 
     # Store detailed results keyed by bpXX for readability.
-    for bp_id, (key, _fn) in checks.items():
+    for bp_id, (key, _fn) in _CHECKS.items():
         r = results.get(bp_id)
         if r is None:
             continue
@@ -1168,16 +1428,31 @@ def main() -> int:
     parser.add_argument(
         "--out-dir", default="output", help="Artifacts directory containing queue.json"
     )
+    parser.add_argument(
+        "--sequential",
+        action="store_true",
+        help="Process one BP at a time (sequential mode for agent loop)",
+    )
     args = parser.parse_args()
 
     out_dir = (REPO_ROOT / args.out_dir).resolve()
-    finalize_queue(out_dir=out_dir)
+    finalize_queue(out_dir=out_dir, sequential=args.sequential)
 
     # If gaps remain, exit non-zero to block gated runs.
     queue_path = out_dir / "queue.json"
     queue = _read_json(queue_path)
     items: list[dict[str, Any]] = list(queue.get("items") or [])
     all_done = all(str(it.get("status") or "").lower() == "done" for it in items)
+
+    # In sequential mode, also check current_bp.json
+    if args.sequential:
+        bp_file = out_dir / "current_bp.json"
+        if bp_file.exists():
+            bp_data = _read_json(bp_file)
+            if bp_data.get("all_done"):
+                return 0
+        return 2  # More work to do
+
     return 0 if all_done else 2
 
 

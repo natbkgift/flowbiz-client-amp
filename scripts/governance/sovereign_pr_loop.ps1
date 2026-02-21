@@ -22,7 +22,8 @@ param(
   # --- New parameters for iterative self-healing loop ---
   [switch]$ValidateOnly,       # Only score + audit + gap report (no git/PR/deploy)
   [switch]$AutoCommitWip,      # Commit dirty tree as WIP before validation
-  [switch]$RawScoring          # Use raw scoring (reset, no growth constraints)
+  [switch]$RawScoring,         # Use raw scoring (reset, no growth constraints)
+  [switch]$Sequential          # Sequential blueprint processing (one BP at a time)
 )
 
 $ErrorActionPreference = 'Stop'
@@ -249,6 +250,7 @@ $settings = [ordered]@{
   validate_only = [bool]$ValidateOnly
   auto_commit_wip = [bool]$AutoCommitWip
   raw_scoring = [bool]$RawScoring
+  sequential = [bool]$Sequential
 }
 $settings | ConvertTo-Json -Depth 6 | Out-File -FilePath (Join-Path $OutDirAbs 'session_settings.json') -Encoding utf8
 
@@ -402,8 +404,11 @@ $blueprintPass = $true
 $blueprintGaps = @()
 
 if ($StopCondition -eq 'queue_empty') {
-  Write-Host "[governance] Blueprint gate: auditing BP-00..BP-17" -ForegroundColor Cyan
-  & $Python .\scripts\governance\finalize_blueprint_queue.py --out-dir $EffectiveArtifactsDir
+  $bpArgs = @(".\scripts\governance\finalize_blueprint_queue.py", "--out-dir", $EffectiveArtifactsDir)
+  if ($Sequential) { $bpArgs += "--sequential" }
+  $seqLabel = if ($Sequential) { " (SEQUENTIAL)" } else { "" }
+  Write-Host "[governance] Blueprint gate: auditing BP-00..BP-17$seqLabel" -ForegroundColor Cyan
+  & $Python @bpArgs
   if ($LASTEXITCODE -ne 0) {
     $blueprintPass = $false
 
@@ -429,7 +434,39 @@ if ($StopCondition -eq 'queue_empty') {
 # ---------------------------------------------------------------------------
 # Consolidated gap report + iteration status (for agent consumption)
 # ---------------------------------------------------------------------------
-$allPass = ($ciPass -and $govPass -and $scoringPass -and $blueprintPass)
+
+# In Sequential mode, read current_bp.json for per-BP status
+$currentBp = $null
+$currentBpId = $null
+$bpProgressPct = 0
+$bpCompletedCount = 0
+$bpTotalCount = 18
+if ($Sequential) {
+  $currentBpPath = Join-Path $OutDirAbs 'current_bp.json'
+  if (Test-Path -LiteralPath $currentBpPath) {
+    try {
+      $currentBp = Get-Content -LiteralPath $currentBpPath -Raw | ConvertFrom-Json
+      $currentBpId = $currentBp.current_bp
+      $bpProgressPct = if ($currentBp.progress_pct) { $currentBp.progress_pct } else { 0 }
+      $bpCompletedCount = if ($currentBp.completed_count) { $currentBp.completed_count } else { 0 }
+      $bpTotalCount = if ($currentBp.total_count) { $currentBp.total_count } else { 18 }
+      if ($currentBp.all_done) {
+        $blueprintPass = $true
+      } else {
+        $blueprintPass = $false
+      }
+    } catch {
+      Write-Host "[sequential] Failed to parse current_bp.json" -ForegroundColor DarkYellow
+    }
+  }
+}
+
+# In sequential mode, scoring doesn't gate — only blueprint progress matters
+if ($Sequential) {
+  $allPass = ($ciPass -and $govPass -and $blueprintPass)
+} else {
+  $allPass = ($ciPass -and $govPass -and $scoringPass -and $blueprintPass)
+}
 $gapsRemaining = $scoringGaps.Count + $blueprintGaps.Count + $ciFailures.Count
 
 # Determine action required
@@ -437,6 +474,8 @@ $actionRequired = "ready_for_deploy"
 if (-not $allPass) {
   if (-not $ciPass) {
     $actionRequired = "fix_ci_failures"
+  } elseif ($Sequential -and -not $blueprintPass) {
+    $actionRequired = "implement_current_bp"
   } elseif (-not $blueprintPass) {
     $actionRequired = "implement_blueprint_fixes"
   } elseif (-not $scoringPass) {
@@ -450,6 +489,11 @@ if (-not $allPass) {
 $gapReport = [ordered]@{
   timestamp_utc = (Get-Date).ToUniversalTime().ToString('o')
   all_pass = $allPass
+  sequential = [bool]$Sequential
+  current_bp = $currentBpId
+  bp_progress_pct = $bpProgressPct
+  bp_completed = $bpCompletedCount
+  bp_total = $bpTotalCount
   ci_pass = $ciPass
   ci_failures = $ciFailures
   governance_pass = $govPass
@@ -467,6 +511,11 @@ Write-JsonNoBom -Path (Join-Path $OutDirAbs 'gap_report.json') -Object $gapRepor
 $iterationStatus = [ordered]@{
   timestamp_utc = (Get-Date).ToUniversalTime().ToString('o')
   validate_only = [bool]$ValidateOnly
+  sequential = [bool]$Sequential
+  current_bp = $currentBpId
+  bp_progress_pct = $bpProgressPct
+  bp_completed = $bpCompletedCount
+  bp_total = $bpTotalCount
   ci_pass = $ciPass
   governance_pass = $govPass
   scoring_pass = $scoringPass
@@ -486,7 +535,11 @@ Write-Host "============================================================" -Foreg
 Write-Host "  CI:          $(if ($ciPass) { 'PASS' } else { 'FAIL' })" -ForegroundColor $(if ($ciPass) { 'Green' } else { 'Red' })
 Write-Host "  Governance:  $(if ($govPass) { 'PASS' } else { 'FAIL' })" -ForegroundColor $(if ($govPass) { 'Green' } else { 'Red' })
 Write-Host "  Scoring:     $totalScore / 100 $(if ($scoringPass) { 'PASS' } else { 'BELOW THRESHOLD' })" -ForegroundColor $(if ($scoringPass) { 'Green' } else { 'Yellow' })
-Write-Host "  Blueprint:   $(if ($blueprintPass) { 'ALL PASS' } else { 'GAPS REMAIN' })" -ForegroundColor $(if ($blueprintPass) { 'Green' } else { 'Yellow' })
+if ($Sequential) {
+  Write-Host "  Blueprint:   $bpCompletedCount / $bpTotalCount ($bpProgressPct%) $(if ($blueprintPass) { 'ALL DONE' } else { "WORKING ON $currentBpId" })" -ForegroundColor $(if ($blueprintPass) { 'Green' } else { 'Yellow' })
+} else {
+  Write-Host "  Blueprint:   $(if ($blueprintPass) { 'ALL PASS' } else { 'GAPS REMAIN' })" -ForegroundColor $(if ($blueprintPass) { 'Green' } else { 'Yellow' })
+}
 Write-Host "  Gaps:        $gapsRemaining remaining" -ForegroundColor $(if ($gapsRemaining -eq 0) { 'Green' } else { 'Yellow' })
 Write-Host "  Action:      $actionRequired" -ForegroundColor Cyan
 Write-Host "============================================================" -ForegroundColor Cyan
