@@ -863,12 +863,18 @@ def test_concurrent_import_lock() -> None:
             finish_order.append(key)
 
     results: dict[str, dict] = {}
+    t1_started = threading.Event()
 
-    t1 = threading.Thread(target=run_import, args=(content_t1, results, "t1"))
+    def t1_target() -> None:
+        t1_started.set()
+        run_import(content_t1, results, "t1")
+
+    t1 = threading.Thread(target=t1_target)
     t2 = threading.Thread(target=run_import, args=(content_t2, results, "t2"))
 
     t1.start()
-    time.sleep(0.5)
+    assert t1_started.wait(timeout=5), "t1 failed to start within timeout"
+    time.sleep(0.05)  # brief pause so t1 can acquire the import lock before t2
     t2.start()
     t1.join()
     t2.join()
