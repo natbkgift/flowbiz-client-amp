@@ -8,6 +8,40 @@ from typing import Any
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 
+# Mapping from scoring metric names to blueprint documents for agent reference.
+METRIC_BLUEPRINT_MAP: dict[str, str] = {
+    "design_tokens": "docs/blueprint/01_architecture/01_MASTER_SITEMAP.md",
+    "typography": "docs/blueprint/01_architecture/01_MASTER_SITEMAP.md",
+    "atomic_components": "docs/blueprint/01_architecture/01_MASTER_SITEMAP.md",
+    "shadow_policy": "docs/blueprint/01_architecture/01_MASTER_SITEMAP.md",
+    "section_count": "docs/blueprint/01_architecture/02_URL_STRUCTURE_GUIDELINE.md",
+    "component_density": "docs/blueprint/01_architecture/02_URL_STRUCTURE_GUIDELINE.md",
+    "sticky_cta": "docs/blueprint/04_conversion/12_FUNNEL_DESIGN.md",
+    "hierarchy_parity": "docs/blueprint/01_architecture/03_INDEX_MATRIX.md",
+    "en_routes": "docs/blueprint/01_architecture/02_URL_STRUCTURE_GUIDELINE.md",
+    "th_routes": "docs/blueprint/01_architecture/02_URL_STRUCTURE_GUIDELINE.md",
+    "route_parity": "docs/blueprint/01_architecture/02_URL_STRUCTURE_GUIDELINE.md",
+    "translation_coverage": "docs/blueprint/05_data_population/15_CONTENT_STANDARD.md",
+    "above_fold_cta": "docs/blueprint/04_conversion/13_CTA_STANDARD.md",
+    "qualification_form": "docs/blueprint/04_conversion/12_FUNNEL_DESIGN.md",
+    "lead_scoring": "docs/blueprint/04_conversion/12_FUNNEL_DESIGN.md",
+    "crm_endpoint": "docs/blueprint/02_data/05_DATABASE_SCHEMA.md",
+    "tracking_events": "docs/blueprint/04_conversion/12_FUNNEL_DESIGN.md",
+    "classification_engine": "docs/blueprint/04_conversion/12_FUNNEL_DESIGN.md",
+    "intent_scoring": "docs/blueprint/04_conversion/12_FUNNEL_DESIGN.md",
+    "dynamic_rendering": "docs/blueprint/04_conversion/12_FUNNEL_DESIGN.md",
+    "repeat_visitor": "docs/blueprint/04_conversion/12_FUNNEL_DESIGN.md",
+    "en_word_count": "docs/blueprint/05_data_population/15_CONTENT_STANDARD.md",
+    "th_word_count": "docs/blueprint/05_data_population/15_CONTENT_STANDARD.md",
+    "legal_disclaimer": "docs/blueprint/05_data_population/15_CONTENT_STANDARD.md",
+    "risk_reassurance": "docs/blueprint/05_data_population/15_CONTENT_STANDARD.md",
+    "media_assets": "docs/blueprint/02_data/07_PRODUCT_TEMPLATE_SPEC.md",
+    "sitemap": "docs/blueprint/03_seo/08_CONTENT_PILLAR_MAP.md",
+    "robots": "docs/blueprint/03_seo/11_CRAWL_OPTIMIZATION_PLAN.md",
+    "canonical_tags": "docs/blueprint/03_seo/08_CONTENT_PILLAR_MAP.md",
+    "internal_link_density": "docs/blueprint/03_seo/09_INTERNAL_LINKING_BLUEPRINT.md",
+}
+
 
 def _utc_now_iso() -> str:
     return datetime.now(timezone.utc).isoformat()
@@ -41,6 +75,10 @@ def _sorted_scoring_gaps(evidence: dict[str, Any] | None) -> list[dict[str, Any]
     out: list[dict[str, Any]] = []
     for g in gaps:
         if isinstance(g, dict):
+            # Enrich with blueprint_ref mapping if available
+            metric = g.get("metric", "")
+            if metric in METRIC_BLUEPRINT_MAP:
+                g["blueprint_ref"] = METRIC_BLUEPRINT_MAP[metric]
             out.append(g)
     out.sort(key=gap_val, reverse=True)
     return out
@@ -60,6 +98,7 @@ def _blueprint_repairs(repair_plan: dict[str, Any] | None) -> list[dict[str, Any
 
 
 def build_patch_directive(out_dir: Path) -> dict[str, Any]:
+    out_dir = out_dir.resolve()
     evo_evidence = _read_json(out_dir / "evolution" / "evidence.json")
     iteration_status = _read_json(out_dir / "iteration_status.json")
     gap_report = _read_json(out_dir / "gap_report.json")
@@ -112,6 +151,11 @@ def build_patch_directive(out_dir: Path) -> dict[str, Any]:
         instruction = (
             "No gaps remaining and termination is eligible. Skip patch implementation. "
             "Proceed to verification (and deploy only if there are real code changes)."
+        )
+    elif termination_eligible is True and gaps_remaining and gaps_remaining > 0:
+        instruction = (
+            "Termination is eligible but minor gaps remain. "
+            "Implement the top gap if feasible, or deploy as-is."
         )
     elif action_required == "fix_ci_failures":
         instruction = "Fix CI failures first (ruff/pytest), then re-run validation."

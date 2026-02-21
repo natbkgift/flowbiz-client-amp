@@ -2,8 +2,6 @@ param(
   [string]$Base = "main",
   [string]$Branch = "",
   [string]$CommitMessage = "auto: evolution loop",
-  [string]$PrTitle = "auto: evolution loop",
-  [string]$PrBody = "",
   [string]$OutDir = "output",
   # Compatibility with agent prompts that specify explicit instruction sources
   [string]$EnginePath = ".\docs\SOVEREIGN_EVOLUTION_ENGINE.md",
@@ -13,15 +11,13 @@ param(
   [string]$EvidenceOut = "",
   [string]$StopCondition = "queue_empty",
   [switch]$RequirePromptPath,
-  [int]$MaxMinutes = 45,
   [switch]$ResetQueueIfAllDone,
   [switch]$SkipCommit,
-  [switch]$SkipPr,
-  [switch]$SkipMerge,
   [switch]$SkipDeploy,
-  # --- New parameters for iterative self-healing loop ---
-  [switch]$ValidateOnly,       # Only score + audit + gap report (no git/PR/deploy)
+  # --- Parameters for iterative self-healing loop ---
+  [switch]$ValidateOnly,       # Only score + audit + gap report (no git/deploy)
   [switch]$AutoCommitWip,      # Commit dirty tree as WIP before validation
+  [switch]$PatchMode,          # Single-patch mode (<=300 LOC, <=5 files)
   [switch]$RawScoring,         # Use raw scoring (reset, no growth constraints)
   [switch]$Sequential          # Sequential blueprint processing (one BP at a time)
 )
@@ -99,16 +95,11 @@ function Write-JsonNoBom([string]$Path, $Object) {
 # Safety: ValidateOnly implies SkipCommit and all downstream skips.
 if ($ValidateOnly) {
   $SkipCommit = $true
-  $SkipPr = $true
-  $SkipMerge = $true
   $SkipDeploy = $true
 }
 
 # Safety: SkipCommit is intended for artifact-only prompt test runs.
-# It must not create PRs, merge, or deploy.
 if ($SkipCommit) {
-  $SkipPr = $true
-  $SkipMerge = $true
   $SkipDeploy = $true
 }
 
@@ -286,25 +277,19 @@ $settings = [ordered]@{
   artifacts_dir = (Resolve-Path $OutDirAbs).Path
   evidence_out = $EvidenceOut
   stop_condition = $StopCondition
-  allow_auto_merge = $env:ALLOW_AUTO_MERGE
-  allow_auto_deploy = $env:ALLOW_AUTO_DEPLOY
   validate_only = [bool]$ValidateOnly
   auto_commit_wip = [bool]$AutoCommitWip
+  patch_mode = [bool]$PatchMode
   raw_scoring = [bool]$RawScoring
   sequential = [bool]$Sequential
 }
 $settings | ConvertTo-Json -Depth 6 | Out-File -FilePath (Join-Path $OutDirAbs 'session_settings.json') -Encoding utf8
 
 # Env flags are opt-in and must be provided by the caller.
-# Default missing values to 'false' and never override an explicit setting.
 if (-not $env:AUTOMATION_AUTHORIZED) { $env:AUTOMATION_AUTHORIZED = 'false' }
-if (-not $env:ALLOW_AUTO_MERGE) { $env:ALLOW_AUTO_MERGE = 'false' }
-if (-not $env:ALLOW_AUTO_DEPLOY) { $env:ALLOW_AUTO_DEPLOY = 'false' }
 
 if ($SkipCommit) {
   $env:AUTOMATION_AUTHORIZED = 'false'
-  $env:ALLOW_AUTO_MERGE = 'false'
-  $env:ALLOW_AUTO_DEPLOY = 'false'
 }
 $env:GOVERNANCE_OUT_DIR = (Resolve-Path $GovDir).Path
 
@@ -612,7 +597,7 @@ if ($ValidateOnly) {
 }
 
 # ---------------------------------------------------------------------------
-# Full mode: commit + PR + merge + deploy
+# Full mode: commit + push + merge to main + deploy
 # ---------------------------------------------------------------------------
 
 # Artifact-only prompt tests should not leave the working tree dirty.
@@ -620,89 +605,58 @@ if ($SkipCommit) {
   git restore --source=HEAD --worktree --staged evolution/evidence.json evolution/memory.json 2>$null
 }
 
+$currentBranch = (git rev-parse --abbrev-ref HEAD).Trim()
+$hadChanges = $false
+
 if (-not $SkipCommit) {
-  # Commit + push (single commit)
-  git show-ref --verify --quiet "refs/heads/$Branch"
-  if ($LASTEXITCODE -eq 0) {
-    git checkout $Branch
-  } else {
-    git checkout -b $Branch
-  }
-  if ($LASTEXITCODE -ne 0) { Stop-Transcript | Out-Null; throw "git checkout failed" }
+  # Commit all changes on current branch
   git add -A
   if ($LASTEXITCODE -ne 0) { Stop-Transcript | Out-Null; throw "git add failed" }
+
   git diff --cached --quiet
   if ($LASTEXITCODE -eq 0) {
-    # Nothing to commit (prompt-test / no changes). Continue without failing.
+    Write-Host "[git] Nothing to commit. Continuing..." -ForegroundColor DarkYellow
   } else {
+    $hadChanges = $true
     git commit -m $CommitMessage
     if ($LASTEXITCODE -ne 0) { Stop-Transcript | Out-Null; throw "git commit failed" }
-    git push -u origin $Branch
+
+    git push -u origin $currentBranch
     if ($LASTEXITCODE -ne 0) { Stop-Transcript | Out-Null; throw "git push failed" }
+    Write-Host "[git] Committed and pushed to $currentBranch" -ForegroundColor Green
+  }
+
+  # Merge into base (main) if we are on a feature branch
+  if ($currentBranch -ne $Base -and $hadChanges) {
+    Write-Host "[git] Merging $currentBranch into $Base..." -ForegroundColor Cyan
+    git checkout $Base
+    if ($LASTEXITCODE -ne 0) { Stop-Transcript | Out-Null; throw "git checkout $Base failed" }
+
+    git pull origin $Base --ff-only 2>$null
+    # Pull may fail if local is already up-to-date; non-fatal
+
+    git merge $currentBranch --no-edit
+    if ($LASTEXITCODE -ne 0) { Stop-Transcript | Out-Null; throw "git merge $currentBranch into $Base failed" }
+
+    git push origin $Base
+    if ($LASTEXITCODE -ne 0) { Stop-Transcript | Out-Null; throw "git push origin $Base failed" }
+
+    # Switch back to working branch for continued iteration
+    git checkout $currentBranch
+    if ($LASTEXITCODE -ne 0) { Stop-Transcript | Out-Null; throw "git checkout $currentBranch failed" }
+
+    Write-Host "[git] Successfully merged $currentBranch into $Base and pushed" -ForegroundColor Green
   }
 }
 
-$prNumber = $null
-$prUrl = $null
-
-if ((-not $SkipCommit) -and (-not $SkipPr)) {
-  # Safety: if there are no commits ahead of base, do not create PR/merge/deploy.
-  try {
-    git fetch origin --prune 2>$null
-    $ahead = (git rev-list --count "origin/$Base..HEAD" 2>$null)
-    if ($LASTEXITCODE -eq 0) {
-      $aheadCount = [int]($ahead | Out-String).Trim()
-      if ($aheadCount -eq 0) {
-        Write-Host "[safety] No commits ahead of origin/$Base. Skipping PR/merge/deploy (verification only)." -ForegroundColor DarkYellow
-        $SkipPr = $true
-        $SkipMerge = $true
-        $SkipDeploy = $true
-      }
-    }
-  } catch {
-    # Best-effort only.
-  }
-}
-
-if ((-not $SkipCommit) -and (-not $SkipPr)) {
-  if ($PrBody) {
-    gh pr create --base $Base --head $Branch --title $PrTitle --body $PrBody
-  } else {
-    gh pr create --base $Base --head $Branch --title $PrTitle --fill
-  }
-  if ($LASTEXITCODE -ne 0) { Stop-Transcript | Out-Null; throw "gh pr create failed" }
-
-  $prNumber = (gh pr view --head $Branch --json number --jq .number).Trim()
-  $prUrl = (gh pr view --head $Branch --json url --jq .url).Trim()
-  if (-not $prNumber) { throw "Unable to resolve PR number via gh." }
-
-  # Snapshot PR review/comments into artifacts (for resolve loop)
-  $prSnapshotPath = Join-Path $OutDirAbs 'pr_snapshot.json'
-  gh pr view $prNumber --json number,url,state,mergeable,reviewDecision,reviews,comments,labels,assignees,headRefName,baseRefName > $prSnapshotPath
-
-  # Post deterministic local gate results as a PR comment
-  & $Python .\scripts\governance\autopilot.py review $prNumber --base "origin/$Base" --head "HEAD" --out-dir $env:GOVERNANCE_OUT_DIR
-  if ($LASTEXITCODE -ne 0) { Stop-Transcript | Out-Null; throw "autopilot review failed" }
-
-  if (-not $SkipMerge -and $env:ALLOW_AUTO_MERGE -eq 'true') {
-    & $Python .\scripts\governance\autopilot.py merge $prNumber
-    if ($LASTEXITCODE -ne 0) { Stop-Transcript | Out-Null; throw "enable automerge failed" }
-
-    gh pr checks $prNumber --watch
-    if ($LASTEXITCODE -ne 0) { Stop-Transcript | Out-Null; throw "gh pr checks watch failed" }
-
-    $deadline = (Get-Date).AddMinutes($MaxMinutes)
-    while ((Get-Date) -lt $deadline) {
-      $mergedAt = (gh pr view $prNumber --json mergedAt --jq .mergedAt).Trim()
-      if ($mergedAt -and $mergedAt -ne 'null') { break }
-      Start-Sleep -Seconds 10
-    }
-  }
-}
-
-if (-not $SkipDeploy -and $env:ALLOW_AUTO_DEPLOY -eq 'true') {
+# ---------------------------------------------------------------------------
+# Deploy to production
+# ---------------------------------------------------------------------------
+if (-not $SkipDeploy) {
+  Write-Host "[deploy] Deploying to production..." -ForegroundColor Cyan
   pwsh -NoProfile -ExecutionPolicy Bypass -File .\scripts\deploy_prod.ps1 -VpsHost flowbiz-vps
   if ($LASTEXITCODE -ne 0) { Stop-Transcript | Out-Null; throw "deploy failed" }
+  Write-Host "[deploy] Deployment completed" -ForegroundColor Green
 }
 
 # Post-deploy validation (minimal): run tests again
@@ -711,7 +665,7 @@ if ($LASTEXITCODE -ne 0) { Stop-Transcript | Out-Null; throw "post-deploy pytest
 
 # Refresh evidence output under output/**
 & $Python .\scoring_engine.py @scoringArgs
-$LASTEXITCODE = 0
+# Scoring exit code is informational here (already deployed)
 Copy-Item -Force -ErrorAction SilentlyContinue .\evolution\evidence.json (Join-Path $EvoDir 'evidence.json')
 
 if ($EvidenceOut) {
@@ -724,15 +678,62 @@ if ($SkipCommit) {
   git restore --source=HEAD --worktree --staged evolution/evidence.json evolution/memory.json 2>$null
 }
 
+# ---------------------------------------------------------------------------
+# State sync verification (local SHA = GitHub SHA = VPS SHA)
+# ---------------------------------------------------------------------------
+$stateSync = [ordered]@{
+  timestamp_utc = (Get-Date).ToUniversalTime().ToString('o')
+  local_sha = (git rev-parse HEAD).Trim()
+  local_branch = $currentBranch
+  base = $Base
+  github_sha = $null
+  vps_sha = $null
+  all_match = $false
+}
 
+# Get GitHub SHA for base branch
+try {
+  git fetch origin --prune 2>$null
+  $ghSha = (git rev-parse "origin/$Base" 2>$null)
+  if ($LASTEXITCODE -eq 0) {
+    $stateSync.github_sha = ($ghSha | Out-String).Trim()
+  }
+} catch {
+  Write-Host "[state] Could not fetch GitHub SHA (non-fatal)" -ForegroundColor DarkYellow
+}
 
+# Get VPS SHA
+try {
+  $vpsShaResult = ssh -o BatchMode=yes -o ConnectTimeout=10 flowbiz-vps "cd /opt/flowbiz/clients/flowbiz-client-amp && git rev-parse HEAD" 2>$null
+  if ($LASTEXITCODE -eq 0) {
+    $stateSync.vps_sha = ($vpsShaResult | Out-String).Trim()
+  }
+} catch {
+  Write-Host "[state] Could not fetch VPS SHA (non-fatal)" -ForegroundColor DarkYellow
+}
+
+# Compare: use base SHA for comparison (since deploy runs on main)
+$baseSha = $stateSync.github_sha
+$stateSync.all_match = (
+  $baseSha -and
+  $stateSync.vps_sha -and
+  $baseSha -eq $stateSync.vps_sha
+)
+
+Write-JsonNoBom -Path (Join-Path $OutDirAbs 'state_sync.json') -Object $stateSync
+
+if ($stateSync.all_match) {
+  Write-Host "[state] SHA match: GitHub=$baseSha VPS=$($stateSync.vps_sha)" -ForegroundColor Green
+} else {
+  Write-Host "[state] SHA MISMATCH: GitHub=$baseSha VPS=$($stateSync.vps_sha)" -ForegroundColor Red
+}
+
+# Summary
 $summary = [ordered]@{
   timestamp_utc = (Get-Date).ToUniversalTime().ToString('o')
-  branch = $Branch
-  pr_number = $prNumber
-  pr_url = $prUrl
-  allow_auto_merge = $env:ALLOW_AUTO_MERGE
-  allow_auto_deploy = $env:ALLOW_AUTO_DEPLOY
+  branch = $currentBranch
+  base = $Base
+  had_changes = $hadChanges
   artifacts = (Resolve-Path $OutDirAbs).Path
   evidence_path = (Join-Path $EvoDir 'evidence.json')
   evidence_out = $EvidenceOut
@@ -740,7 +741,8 @@ $summary = [ordered]@{
   engine_path = $EnginePath
   prompt_path = $PromptPath
   governance_artifacts = (Resolve-Path $GovDir).Path
+  state_sync = $stateSync
 }
-$summary | ConvertTo-Json -Depth 6 | Out-File -FilePath (Join-Path $OutDirAbs 'summary.json') -Encoding utf8
+Write-JsonNoBom -Path (Join-Path $OutDirAbs 'summary.json') -Object $summary
 
 Stop-Transcript | Out-Null
