@@ -23,6 +23,9 @@ class PropertyType(str, Enum):
     VILLA = "villa"
     TOWNHOME = "townhome"
     LAND = "land"
+    HOTEL = "hotel"
+    SHOP = "shop"
+    OFFICE = "office"
     COMMERCIAL = "commercial"
     OTHER = "other"
 

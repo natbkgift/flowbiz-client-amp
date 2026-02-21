@@ -30,6 +30,8 @@ export function Header({ locale, dict }: { locale: Locale; dict: Dictionary }) {
     () => [
       { href: '/invest', label: dict.nav.invest },
       { href: '/buy', label: dict.nav.buy },
+      { href: '/rent', label: dict.nav.rent ?? 'Rent' },
+      { href: '/sell', label: dict.nav.sell ?? 'Sell' },
       { href: '/projects', label: dict.nav.projects },
       { href: '/area-guide', label: dict.nav.areaGuide },
       { href: '/contact', label: dict.nav.contact },

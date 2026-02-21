@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 
 import { Breadcrumbs } from '@/components/layout/Breadcrumbs';
 import { Container } from '@/components/layout/Container';
+import { LeadForm } from '@/components/forms/LeadForm';
 import { ProjectCard } from '@/components/project/ProjectCard';
 import { fetchProjects } from '@/app/_lib/public-api-server';
 import { getDictionary, normalizeLocale } from '@/app/_lib/i18n/get-dictionary';
@@ -114,6 +115,24 @@ export default async function DeveloperDetailPage({
               </div>
             </div>
           )}
+        </Container>
+      </section>
+
+      <section className="section section--cta">
+        <Container>
+          <div className="cta-panel">
+            <div>
+              <h2 className="cta-title">{locale === 'th' ? 'ขอคำแนะนำจากที่ปรึกษา' : 'Request Advice'}</h2>
+              <p className="cta-body">
+                {locale === 'th'
+                  ? 'บอกงบ + ทำเล + สิ่งที่ต้องการ แล้วเราจะตอบกลับพร้อม shortlist'
+                  : 'Share budget, area, and preferences. We will reply with a shortlist.'}
+              </p>
+            </div>
+            <div className="cta-panel__form">
+              <LeadForm defaultMessage={`Developer: ${params.slug}`} />
+            </div>
+          </div>
         </Container>
       </section>
     </main>

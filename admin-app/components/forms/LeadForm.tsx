@@ -1,6 +1,6 @@
 'use client';
 
-import { usePathname } from 'next/navigation';
+import { usePathname, useSearchParams } from 'next/navigation';
 import { useMemo, useState } from 'react';
 
 import { CTA } from '../../app/_lib/public-cta';
@@ -25,8 +25,23 @@ type LeadFormStatus =
 
 export function LeadForm({ heading, propertyId, defaultMessage }: LeadFormProps) {
   const pathname = usePathname() ?? '/';
+  const searchParams = useSearchParams();
   const locale = localeFromPathname(pathname);
   const dict = locale === 'th' ? th : en;
+
+  const utm = useMemo(() => {
+    const get = (key: string) => {
+      const v = searchParams?.get(key);
+      return v && v.trim() ? v.trim().slice(0, 200) : null;
+    };
+    return {
+      utm_source: get('utm_source'),
+      utm_medium: get('utm_medium'),
+      utm_campaign: get('utm_campaign'),
+      utm_term: get('utm_term'),
+      utm_content: get('utm_content'),
+    };
+  }, [searchParams]);
 
   const [didStart, setDidStart] = useState(false);
 
@@ -114,6 +129,11 @@ export function LeadForm({ heading, propertyId, defaultMessage }: LeadFormProps)
           // Operational metadata (not user PII)
           property_id: propertyId ?? null,
           source_page: safeSourcePage(),
+          utm_source: utm.utm_source,
+          utm_medium: utm.utm_medium,
+          utm_campaign: utm.utm_campaign,
+          utm_term: utm.utm_term,
+          utm_content: utm.utm_content,
           website: website.trim() || null,
           submit_timestamp: submitIso,
           // Lead quality score (0–100 + tier)
@@ -174,6 +194,13 @@ export function LeadForm({ heading, propertyId, defaultMessage }: LeadFormProps)
           autoComplete="off"
           className="form-honeypot"
         />
+
+        {/* UTM capture (for attribution). */}
+        <input type="hidden" name="utm_source" value={utm.utm_source ?? ''} />
+        <input type="hidden" name="utm_medium" value={utm.utm_medium ?? ''} />
+        <input type="hidden" name="utm_campaign" value={utm.utm_campaign ?? ''} />
+        <input type="hidden" name="utm_term" value={utm.utm_term ?? ''} />
+        <input type="hidden" name="utm_content" value={utm.utm_content ?? ''} />
 
         <label htmlFor="lead-name" className="sr-only">
           {dict.common.leadForm.namePlaceholder}

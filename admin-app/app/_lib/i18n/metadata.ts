@@ -2,6 +2,25 @@ import type { Metadata } from 'next';
 import type { Locale } from './types';
 import { ogLocale } from './routing';
 
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://amppattaya.com';
+
+function stripTrailingSlashes(url: string): string {
+  return url.replace(/\/+$/, '');
+}
+
+function ensureLeadingSlash(path: string): string {
+  return path.startsWith('/') ? path : `/${path}`;
+}
+
+export function ensureTrailingSlash(url: string): string {
+  return url.endsWith('/') ? url : `${url}/`;
+}
+
+function absoluteUrl(path: string): string {
+  const base = stripTrailingSlashes(SITE_URL);
+  return ensureTrailingSlash(`${base}${ensureLeadingSlash(path)}`);
+}
+
 /**
  * Build standard page metadata with OG tags and alternates.
  *
@@ -15,10 +34,11 @@ export function makePageMetadata(
   description: string,
   brandName: string,
 ): Metadata {
-  const canonical = slug ? `/${locale}/${slug}` : `/${locale}`;
+  const canonicalPath = slug ? `/${locale}/${slug}` : `/${locale}`;
+  const canonical = absoluteUrl(canonicalPath);
   const fullTitle = `${title} | ${brandName}`;
-  const enAlt = slug ? `/en/${slug}` : '/en';
-  const thAlt = slug ? `/th/${slug}` : '/th';
+  const enAlt = absoluteUrl(slug ? `/en/${slug}` : '/en');
+  const thAlt = absoluteUrl(slug ? `/th/${slug}` : '/th');
   return {
     title: fullTitle,
     description,

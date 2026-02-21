@@ -123,6 +123,13 @@ export default async function PropertyPage({ params }: PageProps) {
     [
       {
         '@context': 'https://schema.org',
+        '@type': 'RealEstateListing',
+        name: property.title,
+        url: canonicalUrl,
+        inLanguage: locale,
+      },
+      {
+        '@context': 'https://schema.org',
         '@type': 'Product',
         name: property.title,
         description: property.description ?? undefined,

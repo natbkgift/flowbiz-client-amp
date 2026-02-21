@@ -43,8 +43,28 @@ export default function GuideArticlePage({
     ? 'บทความนี้เป็นโครงแบบ (template) สำหรับ cluster guides ตาม Content Pillar Map — เราจะขยายเนื้อหาเชิงลึกในรอบถัดไป'
     : 'This is a template page for cluster guides per the Content Pillar Map. We will expand with deeper content in a next iteration.';
 
+  const siteUrl = 'https://amppattaya.com';
+  const canonicalUrl = `${siteUrl}/${locale}/guides/${encodeURIComponent(params.slug)}`;
+  const jsonLd = JSON.stringify(
+    {
+      '@context': 'https://schema.org',
+      '@type': 'Article',
+      headline: h1,
+      inLanguage: locale,
+      url: canonicalUrl,
+      publisher: {
+        '@type': 'Organization',
+        name: dict.brand.name,
+        url: siteUrl,
+      },
+    },
+    null,
+    0,
+  );
+
   return (
     <main id="main-content">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLd }} />
       <Breadcrumbs
         items={[
           { label: dict.nav.home, href: `/${locale}` },

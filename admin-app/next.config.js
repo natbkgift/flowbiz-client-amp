@@ -7,6 +7,7 @@ const imageHosts = (process.env.NEXT_PUBLIC_IMAGE_HOSTS ?? '')
 const nextConfig = {
   reactStrictMode: true,
   output: 'standalone',
+  trailingSlash: true,
   poweredByHeader: false,
   compress: true,
   images: {

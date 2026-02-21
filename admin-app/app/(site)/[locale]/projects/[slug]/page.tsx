@@ -1,9 +1,11 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 
+import { Breadcrumbs } from '@/components/layout/Breadcrumbs';
 import { Container } from '@/components/layout/Container';
 import { TrackedLink } from '@/components/analytics/TrackedLink';
 import { ProjectDeepReview } from '@/components/projects/ProjectDeepReview';
+import { LeadForm } from '@/components/forms/LeadForm';
 import { getDictionary, normalizeLocale } from '@/app/_lib/i18n/get-dictionary';
 import { withLocale, ogLocale } from '@/app/_lib/i18n/routing';
 import { fetchProjectBySlug, fetchProjectEvaluation } from '@/app/_lib/public-api-server';
@@ -101,6 +103,13 @@ export default async function ProjectDetailPage({
     [
       {
         '@context': 'https://schema.org',
+        '@type': 'RealEstateListing',
+        name: project.name,
+        url: canonicalUrl,
+        inLanguage: locale,
+      },
+      {
+        '@context': 'https://schema.org',
         '@type': 'ApartmentComplex',
         name: project.name,
         url: canonicalUrl,
@@ -145,6 +154,13 @@ export default async function ProjectDetailPage({
     <main className="section" id="main-content">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLd }} />
       <Container>
+        <Breadcrumbs
+          items={[
+            { label: dict.property.breadcrumbHome, href: `/${locale}` },
+            { label: dict.nav.projects, href: `/${locale}/projects` },
+            { label: project.name, href: `/${locale}/projects/${encodeURIComponent(params.slug)}` },
+          ]}
+        />
         <div className="section-header">
           <h1 className="section-title">{project.name}</h1>
           <p className="section-subtitle">{dict.property.projectSubtitle}</p>
@@ -185,6 +201,12 @@ export default async function ProjectDetailPage({
               </Link>
             ))}
           </div>
+        </div>
+
+        <div className="card reveal mt-6">
+          <h2 className="card-title">{dict.cta.requestShortlist ?? 'Request a Shortlist'}</h2>
+          <p className="card-subtitle">{dict.cta.shortlistHelpText ?? dict.property.navigateToKeyPages}</p>
+          <LeadForm defaultMessage={`Project: ${project.name}`} />
         </div>
 
         {evaluation ? <ProjectDeepReview locale={locale} evaluation={evaluation} /> : null}
