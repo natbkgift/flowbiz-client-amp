@@ -10,9 +10,13 @@ export type Dictionary = {
     home: string;
     invest: string;
     buy: string;
+    rent: string;
+    sell: string;
     live: string;
     projects: string;
     areaGuide: string;
+    marketplace: string;
+    about: string;
     contact: string;
   };
   cta: {

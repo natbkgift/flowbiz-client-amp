@@ -10,9 +10,13 @@ export const th: Dictionary = {
     home: 'หน้าแรก',
     invest: 'ลงทุน',
     buy: 'ซื้อสำหรับชาวต่างชาติ',
+    rent: 'เช่า',
+    sell: 'ขาย',
     live: 'อยู่จริง',
     projects: 'โครงการ',
     areaGuide: 'ไกด์พื้นที่',
+    marketplace: 'มาร์เก็ตเพลส',
+    about: 'เกี่ยวกับเรา',
     contact: 'ติดต่อ',
   },
   cta: {

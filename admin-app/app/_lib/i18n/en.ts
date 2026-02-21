@@ -10,9 +10,13 @@ export const en: Dictionary = {
     home: 'Home',
     invest: 'Invest',
     buy: 'Buy as Foreigner',
+    rent: 'Rent',
+    sell: 'Sell',
     live: 'Live',
     projects: 'Projects',
     areaGuide: 'Area Guide',
+    marketplace: 'Marketplace',
+    about: 'About',
     contact: 'Contact',
   },
   cta: {
