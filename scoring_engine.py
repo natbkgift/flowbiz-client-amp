@@ -97,6 +97,34 @@ def count_words(text: str) -> int:
     return len(re.findall(r"\w+", text))
 
 
+def count_public_media_assets() -> dict[str, int]:
+    """Count media assets under admin-app/public.
+
+    This is a lightweight proxy for "real content" presence. It does NOT guarantee
+    good UX/UI, but helps avoid perfect scores when the site has no images.
+    """
+
+    public_dir = ADMIN_APP / "public"
+    if not public_dir.is_dir():
+        return {"raster": 0, "svg": 0, "total": 0}
+
+    raster_exts = {".png", ".jpg", ".jpeg", ".webp", ".gif"}
+    svg_exts = {".svg"}
+
+    raster = 0
+    svg = 0
+    for p in public_dir.rglob("*"):
+        if not p.is_file():
+            continue
+        suf = p.suffix.lower()
+        if suf in raster_exts:
+            raster += 1
+        elif suf in svg_exts:
+            svg += 1
+
+    return {"raster": raster, "svg": svg, "total": raster + svg}
+
+
 def list_locale_routes() -> tuple[set[str], set[str]]:
     """List route folders under each locale directory."""
     site_dir = ADMIN_APP / "app" / "(site)" / "[locale]"
@@ -745,18 +773,35 @@ def score_phase_6() -> PhaseResult:
 
     # Risk reassurance — binary
     has_risk = grep_count(r"trust|security|safe|guarantee|protect", "app/_lib/i18n/en.ts") >= 2
-    risk_score = 2.0 if has_risk else 0.0
+    risk_score = 1.0 if has_risk else 0.0
     g = _gap(
         "risk_reassurance",
         risk_score,
-        2.0,
+        1.0,
         "Add trust/security reassurance content to i18n EN dictionary (need 2+ mentions)",
         "admin-app/app/_lib/i18n/en.ts",
     )
     if g:
         gaps.append(g.to_dict())
 
-    total = en_score + th_score + legal_score + risk_score
+    # Media assets presence — binary
+    assets = count_public_media_assets()
+    has_media = assets["raster"] >= 3
+    media_score = 1.0 if has_media else 0.0
+    g = _gap(
+        "media_assets",
+        media_score,
+        1.0,
+        (
+            "Add real media assets (at least 3 raster images) under admin-app/public "
+            "(e.g. public/images/*)"
+        ),
+        "admin-app/public/",
+    )
+    if g:
+        gaps.append(g.to_dict())
+
+    total = en_score + th_score + legal_score + risk_score + media_score
     return PhaseResult(
         phase=6,
         name="Copy & Persuasion",
@@ -773,6 +818,11 @@ def score_phase_6() -> PhaseResult:
             "legal_score": legal_score,
             "has_risk_reassurance": has_risk,
             "risk_score": risk_score,
+            "public_media_assets_total": assets["total"],
+            "public_media_assets_raster": assets["raster"],
+            "public_media_assets_svg": assets["svg"],
+            "has_media_assets": has_media,
+            "media_score": media_score,
         },
         gaps=gaps,
     )

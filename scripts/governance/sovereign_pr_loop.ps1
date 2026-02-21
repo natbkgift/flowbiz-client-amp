@@ -36,6 +36,13 @@ $Python = Join-Path $RepoRoot '.venv\Scripts\python.exe'
 if (-not (Test-Path $Python)) { $Python = 'python' }
 
 $ts = (Get-Date).ToUniversalTime().ToString('yyyyMMddTHHmmssZ')
+
+# In full mode, if Branch is not provided, generate a deterministic branch name.
+if (-not $ValidateOnly) {
+  if (-not $Branch) {
+    $Branch = "auto/evolution-$ts"
+  }
+}
 $EffectiveArtifactsDir = $OutDir
 if ($ArtifactsDir) { $EffectiveArtifactsDir = $ArtifactsDir }
 $OutDirAbs = Join-Path $RepoRoot $EffectiveArtifactsDir
@@ -45,6 +52,40 @@ $EvoDir = Join-Path $OutDirAbs 'evolution'
 $InputsDir = Join-Path $OutDirAbs 'inputs'
 $QueuePath = Join-Path $OutDirAbs 'queue.json'
 New-Item -ItemType Directory -Force -Path $LogsDir,$GovDir,$EvoDir,$InputsDir | Out-Null
+
+# Record git state for artifact consumers (branch/sha/dirty/base sha).
+try {
+  $gitState = [ordered]@{
+    timestamp_utc = (Get-Date).ToUniversalTime().ToString('o')
+    repo_root = $RepoRoot
+    branch = (git rev-parse --abbrev-ref HEAD).Trim()
+    head_sha = (git rev-parse HEAD).Trim()
+    dirty = $false
+    dirty_detail = $null
+    base = $Base
+    base_ref = "origin/$Base"
+    base_sha = $null
+  }
+
+  $porcelain = (git status --porcelain=v1)
+  if ($porcelain) {
+    $gitState.dirty = $true
+    $gitState.dirty_detail = ($porcelain | Out-String).TrimEnd()
+  }
+
+  # Best-effort remote base SHA (do not fail if remote is unavailable).
+  git fetch origin --prune 2>$null
+  $baseSha = (git rev-parse "origin/$Base" 2>$null)
+  if ($LASTEXITCODE -eq 0) {
+    $gitState.base_sha = ($baseSha | Out-String).Trim()
+  }
+
+  $gitStateJson = ($gitState | ConvertTo-Json -Depth 12)
+  $utf8NoBom = New-Object System.Text.UTF8Encoding($false)
+  [System.IO.File]::WriteAllText((Join-Path $OutDirAbs 'git_state.json'), $gitStateJson + "`n", $utf8NoBom)
+} catch {
+  # Non-fatal: git_state.json is a convenience artifact.
+}
 
 $Transcript = Join-Path $LogsDir "run.$ts.log"
 Start-Transcript -Path $Transcript -Append | Out-Null
@@ -527,6 +568,13 @@ $iterationStatus = [ordered]@{
 }
 Write-JsonNoBom -Path (Join-Path $OutDirAbs 'iteration_status.json') -Object $iterationStatus
 
+# Build patch_directive.json for agent loops (optional; missing is tolerated).
+try {
+  & $Python .\scripts\governance\build_patch_directive.py --out-dir $EffectiveArtifactsDir
+} catch {
+  Write-Host "[artifacts] patch_directive.json generation failed (non-fatal)" -ForegroundColor DarkYellow
+}
+
 # Print summary
 Write-Host ""
 Write-Host "============================================================" -ForegroundColor Cyan
@@ -596,6 +644,25 @@ if (-not $SkipCommit) {
 
 $prNumber = $null
 $prUrl = $null
+
+if ((-not $SkipCommit) -and (-not $SkipPr)) {
+  # Safety: if there are no commits ahead of base, do not create PR/merge/deploy.
+  try {
+    git fetch origin --prune 2>$null
+    $ahead = (git rev-list --count "origin/$Base..HEAD" 2>$null)
+    if ($LASTEXITCODE -eq 0) {
+      $aheadCount = [int]($ahead | Out-String).Trim()
+      if ($aheadCount -eq 0) {
+        Write-Host "[safety] No commits ahead of origin/$Base. Skipping PR/merge/deploy (verification only)." -ForegroundColor DarkYellow
+        $SkipPr = $true
+        $SkipMerge = $true
+        $SkipDeploy = $true
+      }
+    }
+  } catch {
+    # Best-effort only.
+  }
+}
 
 if ((-not $SkipCommit) -and (-not $SkipPr)) {
   if ($PrBody) {
