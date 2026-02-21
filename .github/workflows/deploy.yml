@@ -17,6 +17,7 @@ env:
   REGISTRY: ghcr.io
   API_IMAGE: ghcr.io/${{ github.repository }}/api
   ADMIN_IMAGE: ghcr.io/${{ github.repository }}/admin-app
+  SITE_URL: https://amppattaya.com
 
 jobs:
   # ── Stage 1: Lint & Test ───────────────────────────────────
@@ -247,7 +248,7 @@ jobs:
         continue-on-error: true
         uses: appleboy/ssh-action@v1
         env:
-          SITE_URL: ${{ secrets.SITE_URL }}
+          SITE_URL: ${{ env.SITE_URL }}
         with:
           host: ${{ steps.sshmeta.outputs.host }}
           username: ${{ steps.sshmeta.outputs.user }}
