@@ -46,18 +46,20 @@ describe('getDictionary', () => {
 });
 
 describe('makePageMetadata', () => {
+  const SITE = 'https://amppattaya.com';
+
   it('builds correct metadata for EN locale', () => {
     const meta = makePageMetadata('en', 'about', 'About Us', 'We are a real estate company.', 'AMP');
 
     expect(meta.title).toBe('About Us | AMP');
     expect(meta.description).toBe('We are a real estate company.');
-    expect(meta.alternates?.canonical).toBe('/en/about');
-    expect((meta.alternates?.languages as Record<string, string>)?.en).toBe('/en/about');
-    expect((meta.alternates?.languages as Record<string, string>)?.th).toBe('/th/about');
+    expect(meta.alternates?.canonical).toBe(`${SITE}/en/about/`);
+    expect((meta.alternates?.languages as Record<string, string>)?.en).toBe(`${SITE}/en/about/`);
+    expect((meta.alternates?.languages as Record<string, string>)?.th).toBe(`${SITE}/th/about/`);
 
     const og = meta.openGraph as Record<string, unknown>;
     expect(og.type).toBe('website');
-    expect(og.url).toBe('/en/about');
+    expect(og.url).toBe(`${SITE}/en/about/`);
     expect(og.title).toBe('About Us | AMP');
     expect(og.locale).toBe('en_US');
     expect(og.siteName).toBe('AMP');
@@ -67,7 +69,7 @@ describe('makePageMetadata', () => {
     const meta = makePageMetadata('th', 'invest', 'ลงทุน', 'โอกาสลงทุนพัทยา', 'AMP Pattaya');
 
     expect(meta.title).toBe('ลงทุน | AMP Pattaya');
-    expect(meta.alternates?.canonical).toBe('/th/invest');
+    expect(meta.alternates?.canonical).toBe(`${SITE}/th/invest/`);
 
     const og = meta.openGraph as Record<string, unknown>;
     expect(og.locale).toBe('th_TH');
@@ -77,16 +79,16 @@ describe('makePageMetadata', () => {
   it('generates correct alternates for any slug', () => {
     const meta = makePageMetadata('en', 'smart-finder', 'Finder', 'Find your condo', 'AMP');
     const langs = meta.alternates?.languages as Record<string, string>;
-    expect(langs.en).toBe('/en/smart-finder');
-    expect(langs.th).toBe('/th/smart-finder');
+    expect(langs.en).toBe(`${SITE}/en/smart-finder/`);
+    expect(langs.th).toBe(`${SITE}/th/smart-finder/`);
   });
 
   it('handles empty slug for home page', () => {
     const meta = makePageMetadata('en', '', 'Home', 'Welcome', 'AMP');
-    expect(meta.alternates?.canonical).toBe('/en');
+    expect(meta.alternates?.canonical).toBe(`${SITE}/en/`);
     const langs = meta.alternates?.languages as Record<string, string>;
-    expect(langs.en).toBe('/en');
-    expect(langs.th).toBe('/th');
+    expect(langs.en).toBe(`${SITE}/en/`);
+    expect(langs.th).toBe(`${SITE}/th/`);
   });
 });
 
