@@ -204,8 +204,8 @@ export default async function ProjectDetailPage({
         </div>
 
         <div className="card reveal mt-6">
-          <h2 className="card-title">{dict.cta.requestShortlist ?? 'Request a Shortlist'}</h2>
-          <p className="card-subtitle">{dict.cta.shortlistHelpText ?? dict.property.navigateToKeyPages}</p>
+          <h2 className="card-title">{'Request a Shortlist'}</h2>
+          <p className="card-subtitle">{dict.property.navigateToKeyPages}</p>
           <LeadForm defaultMessage={`Project: ${project.name}`} />
         </div>
 
