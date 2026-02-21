@@ -116,9 +116,14 @@ def build_patch_directive(out_dir: Path) -> dict[str, Any]:
     elif action_required == "fix_ci_failures":
         instruction = "Fix CI failures first (ruff/pytest), then re-run validation."
     elif action_required in {"implement_current_bp", "implement_blueprint_fixes"}:
-        instruction = "Read the referenced blueprint and implement its requirements, then validate again."
+        instruction = (
+            "Read the referenced blueprint and implement its requirements, then validate again."
+        )
     elif action_required in {"improve_scoring_metrics", "ready_for_deploy"}:
-        instruction = "Implement the top scoring gap (real implementation; no placeholders), then validate again."
+        instruction = (
+            "Implement the top scoring gap (real implementation; no placeholders), "
+            "then validate again."
+        )
     else:
         instruction = "Follow action_required and address the top gap, then validate again."
 
@@ -151,7 +156,9 @@ def build_patch_directive(out_dir: Path) -> dict[str, Any]:
             "current_bp": str((out_dir / "current_bp.json").relative_to(REPO_ROOT))
             if (out_dir / "current_bp.json").exists()
             else None,
-            "git_state": str((out_dir / "git_state.json").relative_to(REPO_ROOT)) if git_state else None,
+            "git_state": str((out_dir / "git_state.json").relative_to(REPO_ROOT))
+            if git_state
+            else None,
         },
     }
 
@@ -169,8 +176,12 @@ def build_patch_directive(out_dir: Path) -> dict[str, Any]:
 
 
 def main() -> int:
-    p = argparse.ArgumentParser(description="Build output/patch_directive.json from existing artifacts")
-    p.add_argument("--out-dir", default="output", help="Artifacts output directory (default: output)")
+    p = argparse.ArgumentParser(
+        description="Build output/patch_directive.json from existing artifacts"
+    )
+    p.add_argument(
+        "--out-dir", default="output", help="Artifacts output directory (default: output)"
+    )
     args = p.parse_args()
 
     out_dir = (REPO_ROOT / args.out_dir).resolve()

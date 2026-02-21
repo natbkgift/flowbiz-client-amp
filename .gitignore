@@ -91,6 +91,10 @@ runtime/system_state.lock
 # Loop artifacts (generated)
 output/
 
+# Scoring engine archives (generated)
+evolution/evidence.*.json
+evolution/memory.*.json
+
 # VPS deploy state (generated)
 .deploy/
 

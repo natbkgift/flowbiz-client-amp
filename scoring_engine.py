@@ -792,7 +792,10 @@ def score_phase_6() -> PhaseResult:
         "media_assets",
         media_score,
         1.0,
-        "Add real media assets (at least 3 raster images) under admin-app/public (e.g. public/images/*)",
+        (
+            "Add real media assets (at least 3 raster images) under admin-app/public "
+            "(e.g. public/images/*)"
+        ),
         "admin-app/public/",
     )
     if g:
