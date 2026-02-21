@@ -80,7 +80,9 @@ try {
     $gitState.base_sha = ($baseSha | Out-String).Trim()
   }
 
-  Write-JsonNoBom -Path (Join-Path $OutDirAbs 'git_state.json') -Object $gitState
+  $gitStateJson = ($gitState | ConvertTo-Json -Depth 12)
+  $utf8NoBom = New-Object System.Text.UTF8Encoding($false)
+  [System.IO.File]::WriteAllText((Join-Path $OutDirAbs 'git_state.json'), $gitStateJson + "`n", $utf8NoBom)
 } catch {
   # Non-fatal: git_state.json is a convenience artifact.
 }
