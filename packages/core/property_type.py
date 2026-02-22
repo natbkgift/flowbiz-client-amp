@@ -37,9 +37,9 @@ class PropertyCatalogType(str, Enum):
 class TransactionType(str, Enum):
     """Doc 06 canonical transaction type (``type`` column)."""
 
-    NEW = "new"        # New development, from developer
+    NEW = "new"  # New development, from developer
     RESALE = "resale"  # Secondary market, from owner
-    RENT = "rent"      # Rental listing
+    RENT = "rent"  # Rental listing
 
 
 class FurnishingStatus(str, Enum):
@@ -120,20 +120,20 @@ FURNISHING_TYPES: frozenset[str] = frozenset({"condo", "villa", "house", "office
 
 # Columns that MUST be non-NULL for a given property_type
 REQUIRED_FIELDS_BY_TYPE: dict[str, list[str]] = {
-    "condo":  ["bedrooms", "bathrooms", "size_sqm"],
-    "villa":  ["bedrooms", "bathrooms", "size_sqm"],
-    "house":  ["bedrooms", "bathrooms", "size_sqm"],
-    "land":   ["size_sqm"],
-    "hotel":  ["size_sqm"],
-    "shop":   ["size_sqm"],
+    "condo": ["bedrooms", "bathrooms", "size_sqm"],
+    "villa": ["bedrooms", "bathrooms", "size_sqm"],
+    "house": ["bedrooms", "bathrooms", "size_sqm"],
+    "land": ["size_sqm"],
+    "hotel": ["size_sqm"],
+    "shop": ["size_sqm"],
     "office": ["size_sqm"],
 }
 
 # Columns that MUST be NULL for a given property_type
 NULL_FIELDS_BY_TYPE: dict[str, list[str]] = {
-    "land":   ["bedrooms", "bathrooms"],
-    "hotel":  ["bedrooms", "bathrooms"],
-    "shop":   ["bedrooms", "bathrooms"],
+    "land": ["bedrooms", "bathrooms"],
+    "hotel": ["bedrooms", "bathrooms"],
+    "shop": ["bedrooms", "bathrooms"],
     "office": ["bedrooms", "bathrooms"],
 }
 
@@ -151,44 +151,68 @@ FEATURES_SCHEMA: dict[str, dict[str, dict[str, Any]]] = {
     "condo": {
         # Features JSONB per spec "Optional Attributes (in features jsonb):"
         # unit_type and view are dedicated columns, not stored in features.
-        "balcony":       {"type": "boolean", "required": False},
-        "bathtub":       {"type": "boolean", "required": False},
-        "parking":       {"type": "boolean", "required": False},
-        "pool_access":   {"type": "boolean", "required": False},
-        "gym_access":    {"type": "boolean", "required": False},
+        "balcony": {"type": "boolean", "required": False},
+        "bathtub": {"type": "boolean", "required": False},
+        "parking": {"type": "boolean", "required": False},
+        "pool_access": {"type": "boolean", "required": False},
+        "gym_access": {"type": "boolean", "required": False},
         "security_24_7": {"type": "boolean", "required": False},
     },
     "villa": {
-        "land_size_sqm": {"type": "number",  "required": True,  "description": "Land area in sqm"},
-        "has_pool":      {"type": "boolean", "required": False},
-        "has_garden":    {"type": "boolean", "required": False},
+        "land_size_sqm": {"type": "number", "required": True, "description": "Land area in sqm"},
+        "has_pool": {"type": "boolean", "required": False},
+        "has_garden": {"type": "boolean", "required": False},
     },
     "house": {
-        "land_size_sqm": {"type": "number",  "required": True,  "description": "Land area in sqm"},
-        "house_type":    {"type": "string",  "required": False, "enum": ["single", "townhouse", "semi-detached"]},
-        "parking":       {"type": "number",  "required": False, "description": "Number of parking spaces"},
+        "land_size_sqm": {"type": "number", "required": True, "description": "Land area in sqm"},
+        "house_type": {
+            "type": "string",
+            "required": False,
+            "enum": ["single", "townhouse", "semi-detached"],
+        },
+        "parking": {"type": "number", "required": False, "description": "Number of parking spaces"},
     },
     "land": {
-        "land_rai":      {"type": "number",  "required": False, "description": "Size in rai; 1 rai = 1,600 sqm"},
-        "zoning":        {"type": "string",  "required": False, "enum": ["residential", "commercial", "mixed", "agricultural"]},
-        "road_access":   {"type": "boolean", "required": False},
-        "title_deed":    {"type": "string",  "required": False, "description": "Chanote/Nor Sor 3/etc."},
+        "land_rai": {
+            "type": "number",
+            "required": False,
+            "description": "Size in rai; 1 rai = 1,600 sqm",
+        },
+        "zoning": {
+            "type": "string",
+            "required": False,
+            "enum": ["residential", "commercial", "mixed", "agricultural"],
+        },
+        "road_access": {"type": "boolean", "required": False},
+        "title_deed": {
+            "type": "string",
+            "required": False,
+            "description": "Chanote/Nor Sor 3/etc.",
+        },
     },
     "hotel": {
-        "rooms":         {"type": "integer", "required": False},
-        "land_size_sqm": {"type": "number",  "required": False},
-        "star_rating":   {"type": "number",  "required": False, "description": "1–5 star rating"},
-        "revenue":       {"type": "number",  "required": False, "description": "Current annual revenue (THB)"},
-        "occupancy":     {"type": "number",  "required": False, "description": "Occupancy rate (0–1)"},
+        "rooms": {"type": "integer", "required": False},
+        "land_size_sqm": {"type": "number", "required": False},
+        "star_rating": {"type": "number", "required": False, "description": "1–5 star rating"},
+        "revenue": {
+            "type": "number",
+            "required": False,
+            "description": "Current annual revenue (THB)",
+        },
+        "occupancy": {"type": "number", "required": False, "description": "Occupancy rate (0–1)"},
     },
     "shop": {
         # floors is a dedicated column (not in features jsonb) — Doc 06 spec table
-        "frontage":   {"type": "number",  "required": False, "description": "Street frontage in metres"},
+        "frontage": {
+            "type": "number",
+            "required": False,
+            "description": "Street frontage in metres",
+        },
         "has_tenant": {"type": "boolean", "required": False},
     },
     "office": {
-        "office_grade":  {"type": "string",  "required": False, "enum": ["A", "B", "C"]},
-        "parking":       {"type": "number",  "required": False, "description": "Number of parking spaces"},
+        "office_grade": {"type": "string", "required": False, "enum": ["A", "B", "C"]},
+        "parking": {"type": "number", "required": False, "description": "Number of parking spaces"},
     },
 }
 
@@ -205,19 +229,20 @@ REQUIRED_FEATURES_BY_TYPE: dict[str, list[str]] = {
 
 FILTER_APPLIES_TO: dict[str, frozenset[str]] = {
     "property_type": PROPERTY_TYPES,
-    "type":          TRANSACTION_TYPES,
-    "price":         PROPERTY_TYPES,
-    "bedrooms":      frozenset({"condo", "villa", "house"}),
-    "bathrooms":     frozenset({"condo", "villa", "house"}),
-    "size_sqm":      PROPERTY_TYPES,
-    "area_id":       PROPERTY_TYPES,
-    "furnishing":    frozenset({"condo", "villa", "house", "office"}),
+    "type": TRANSACTION_TYPES,
+    "price": PROPERTY_TYPES,
+    "bedrooms": frozenset({"condo", "villa", "house"}),
+    "bathrooms": frozenset({"condo", "villa", "house"}),
+    "size_sqm": PROPERTY_TYPES,
+    "area_id": PROPERTY_TYPES,
+    "furnishing": frozenset({"condo", "villa", "house", "office"}),
 }
 
 
 # ---------------------------------------------------------------------------
 # Validation rules
 # ---------------------------------------------------------------------------
+
 
 class PropertyValidationError(ValueError):
     """Raised when a property fails Doc 06 validation."""
@@ -270,11 +295,15 @@ def validate_property_fields(
 
     # Rule 1
     if property_type not in PROPERTY_TYPES:
-        errors.append(f"property_type {property_type!r} is not valid; must be one of {sorted(PROPERTY_TYPES)}")
+        errors.append(
+            f"property_type {property_type!r} is not valid; must be one of {sorted(PROPERTY_TYPES)}"
+        )
 
     # Rule 2
     if transaction_type not in TRANSACTION_TYPES:
-        errors.append(f"type {transaction_type!r} is not valid; must be one of {sorted(TRANSACTION_TYPES)}")
+        errors.append(
+            f"type {transaction_type!r} is not valid; must be one of {sorted(TRANSACTION_TYPES)}"
+        )
 
     # Rule 3
     if price is not None and price <= 0:
@@ -311,9 +340,7 @@ def validate_property_fields(
         if required_keys:
             if not features:
                 for key in required_keys:
-                    errors.append(
-                        f"features.{key} is required for property_type={property_type!r}"
-                    )
+                    errors.append(f"features.{key} is required for property_type={property_type!r}")
             else:
                 for key in required_keys:
                     if features.get(key) is None:

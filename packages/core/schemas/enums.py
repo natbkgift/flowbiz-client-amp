@@ -34,9 +34,9 @@ class PropertyType(str, Enum):
 class TransactionType(str, Enum):
     """Transaction type (properties.type column) -- Blueprint Doc 06."""
 
-    NEW = "new"        # New development from developer
+    NEW = "new"  # New development from developer
     RESALE = "resale"  # Secondary market / owner listing
-    RENT = "rent"      # Rental listing
+    RENT = "rent"  # Rental listing
 
 
 class PropertyStatus(str, Enum):

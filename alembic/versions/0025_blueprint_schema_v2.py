@@ -82,6 +82,7 @@ depends_on: str | Sequence[str] | None = None
 # Introspection helpers
 # ---------------------------------------------------------------------------
 
+
 def _bind():
     return op.get_bind()
 
@@ -123,18 +124,39 @@ def _col_type_name(table_name: str, column_name: str) -> str:
 def _index_exists(index_name: str) -> bool:
     if not _is_postgres():
         return False
-    result = _bind().execute(
-        text(
-            "SELECT 1 FROM pg_indexes WHERE indexname = :n"
-        ),
-        {"n": index_name},
-    ).scalar()
+    result = (
+        _bind()
+        .execute(
+            text("SELECT 1 FROM pg_indexes WHERE indexname = :n"),
+            {"n": index_name},
+        )
+        .scalar()
+    )
     return result is not None
+
+
+def _add_column_safe(table_name: str, col: sa.Column) -> None:
+    """Add a column, stripping FK constraints when not on PostgreSQL.
+
+    SQLite does not support ALTER TABLE ADD CONSTRAINT, so we must omit
+    ForeignKey metadata on that dialect.
+    """
+    if _is_postgres():
+        op.add_column(table_name, col)
+    else:
+        safe = sa.Column(
+            col.name,
+            col.type,
+            nullable=col.nullable,
+            server_default=col.server_default,
+        )
+        op.add_column(table_name, safe)
 
 
 # ---------------------------------------------------------------------------
 # Upgrade
 # ---------------------------------------------------------------------------
+
 
 def upgrade() -> None:
 
@@ -142,9 +164,20 @@ def upgrade() -> None:
 
     if _table_exists("developers"):
         # summary: Text → jsonb
-        if _column_exists("developers", "summary") and _col_type_name("developers", "summary") in ("text", "varchar", "string", "nvarchar"):
+        if (
+            _is_postgres()
+            and _column_exists("developers", "summary")
+            and _col_type_name("developers", "summary")
+            in (
+                "text",
+                "varchar",
+                "string",
+                "nvarchar",
+            )
+        ):
             op.alter_column(
-                "developers", "summary",
+                "developers",
+                "summary",
                 type_=sa.JSON(),
                 existing_type=sa.Text(),
                 postgresql_using="summary::jsonb",
@@ -152,9 +185,14 @@ def upgrade() -> None:
             )
 
         # tier: Integer → text
-        if _column_exists("developers", "tier") and _col_type_name("developers", "tier") == "integer":
+        if (
+            _is_postgres()
+            and _column_exists("developers", "tier")
+            and _col_type_name("developers", "tier") == "integer"
+        ):
             op.alter_column(
-                "developers", "tier",
+                "developers",
+                "tier",
                 type_=sa.String(32),
                 existing_type=sa.Integer(),
                 postgresql_using="tier::text",
@@ -170,9 +208,20 @@ def upgrade() -> None:
 
     if _table_exists("areas"):
         # content: Text → jsonb
-        if _column_exists("areas", "content") and _col_type_name("areas", "content") in ("text", "varchar", "string", "nvarchar"):
+        if (
+            _is_postgres()
+            and _column_exists("areas", "content")
+            and _col_type_name("areas", "content")
+            in (
+                "text",
+                "varchar",
+                "string",
+                "nvarchar",
+            )
+        ):
             op.alter_column(
-                "areas", "content",
+                "areas",
+                "content",
                 type_=sa.JSON(),
                 existing_type=sa.Text(),
                 postgresql_using="content::jsonb",
@@ -202,20 +251,43 @@ def upgrade() -> None:
 
         # Backfill new names from old names (best-effort, PostgreSQL only)
         if _is_postgres():
-            if _column_exists("area_statistics", "avg_price") and _column_exists("area_statistics", "avg_price_sqm"):
-                op.execute("UPDATE area_statistics SET avg_price_sqm = avg_price WHERE avg_price_sqm IS NULL AND avg_price IS NOT NULL")
-            if _column_exists("area_statistics", "avg_rent") and _column_exists("area_statistics", "avg_rent_monthly"):
-                op.execute("UPDATE area_statistics SET avg_rent_monthly = avg_rent WHERE avg_rent_monthly IS NULL AND avg_rent IS NOT NULL")
-            if _column_exists("area_statistics", "roi_percent") and _column_exists("area_statistics", "avg_roi_percent"):
-                op.execute("UPDATE area_statistics SET avg_roi_percent = roi_percent WHERE avg_roi_percent IS NULL AND roi_percent IS NOT NULL")
+            if _column_exists("area_statistics", "avg_price") and _column_exists(
+                "area_statistics", "avg_price_sqm"
+            ):
+                op.execute(
+                    "UPDATE area_statistics SET avg_price_sqm = avg_price WHERE avg_price_sqm IS NULL AND avg_price IS NOT NULL"
+                )
+            if _column_exists("area_statistics", "avg_rent") and _column_exists(
+                "area_statistics", "avg_rent_monthly"
+            ):
+                op.execute(
+                    "UPDATE area_statistics SET avg_rent_monthly = avg_rent WHERE avg_rent_monthly IS NULL AND avg_rent IS NOT NULL"
+                )
+            if _column_exists("area_statistics", "roi_percent") and _column_exists(
+                "area_statistics", "avg_roi_percent"
+            ):
+                op.execute(
+                    "UPDATE area_statistics SET avg_roi_percent = roi_percent WHERE avg_roi_percent IS NULL AND roi_percent IS NOT NULL"
+                )
 
     # ── PROJECTS ─────────────────────────────────────────────────────────────
 
     if _table_exists("projects"):
         # summary: Text → jsonb
-        if _column_exists("projects", "summary") and _col_type_name("projects", "summary") in ("text", "varchar", "string", "nvarchar"):
+        if (
+            _is_postgres()
+            and _column_exists("projects", "summary")
+            and _col_type_name("projects", "summary")
+            in (
+                "text",
+                "varchar",
+                "string",
+                "nvarchar",
+            )
+        ):
             op.alter_column(
-                "projects", "summary",
+                "projects",
+                "summary",
                 type_=sa.JSON(),
                 existing_type=sa.Text(),
                 postgresql_using="summary::jsonb",
@@ -234,7 +306,10 @@ def upgrade() -> None:
             ("unit_count", sa.Column("unit_count", sa.Integer(), nullable=True)),
             ("floors", sa.Column("floors", sa.Integer(), nullable=True)),
             ("year_built", sa.Column("year_built", sa.Integer(), nullable=True)),
-            ("is_featured", sa.Column("is_featured", sa.Boolean(), nullable=False, server_default="false")),
+            (
+                "is_featured",
+                sa.Column("is_featured", sa.Boolean(), nullable=False, server_default="false"),
+            ),
         ]
         for col_name, col_def in new_project_cols:
             if not _column_exists("projects", col_name):
@@ -269,9 +344,15 @@ def upgrade() -> None:
         # Backfill blueprint column names from legacy columns
         if _is_postgres():
             if _column_exists("properties", "size") and _column_exists("properties", "size_sqm"):
-                op.execute("UPDATE properties SET size_sqm = size WHERE size_sqm IS NULL AND size IS NOT NULL")
-            if _column_exists("properties", "cover_image") and _column_exists("properties", "cover_image_url"):
-                op.execute("UPDATE properties SET cover_image_url = cover_image WHERE cover_image_url IS NULL AND cover_image IS NOT NULL")
+                op.execute(
+                    "UPDATE properties SET size_sqm = size WHERE size_sqm IS NULL AND size IS NOT NULL"
+                )
+            if _column_exists("properties", "cover_image") and _column_exists(
+                "properties", "cover_image_url"
+            ):
+                op.execute(
+                    "UPDATE properties SET cover_image_url = cover_image WHERE cover_image_url IS NULL AND cover_image IS NOT NULL"
+                )
 
         if not _index_exists("ix_properties_price"):
             op.create_index("ix_properties_price", "properties", ["price"])
@@ -282,35 +363,46 @@ def upgrade() -> None:
 
     if _table_exists("articles"):
         # title: String → jsonb
-        if _column_exists("articles", "title") and _col_type_name("articles", "title") in ("varchar", "string", "nvarchar"):
+        if _column_exists("articles", "title") and _col_type_name("articles", "title") in (
+            "varchar",
+            "string",
+            "nvarchar",
+        ):
             # Migrate plain string to {"en": "...", "th": "..."}-style JSON
             if _is_postgres():
                 op.execute(
                     "UPDATE articles SET title = jsonb_build_object('en', title, 'th', title) "
                     "WHERE title IS NOT NULL AND title::text NOT LIKE '{%'"
                 )
-            op.alter_column(
-                "articles", "title",
-                type_=sa.JSON(),
-                existing_type=sa.String(500),
-                postgresql_using="title::jsonb",
-                nullable=False,
-            )
+                op.alter_column(
+                    "articles",
+                    "title",
+                    type_=sa.JSON(),
+                    existing_type=sa.String(500),
+                    postgresql_using="title::jsonb",
+                    nullable=False,
+                )
 
         # body_md: Text → jsonb
-        if _column_exists("articles", "body_md") and _col_type_name("articles", "body_md") in ("text", "varchar", "string", "nvarchar"):
+        if _column_exists("articles", "body_md") and _col_type_name("articles", "body_md") in (
+            "text",
+            "varchar",
+            "string",
+            "nvarchar",
+        ):
             if _is_postgres():
                 op.execute(
                     "UPDATE articles SET body_md = jsonb_build_object('en', COALESCE(body_md, ''), 'th', '') "
                     "WHERE body_md IS NULL OR body_md::text NOT LIKE '{%'"
                 )
-            op.alter_column(
-                "articles", "body_md",
-                type_=sa.JSON(),
-                existing_type=sa.Text(),
-                postgresql_using="body_md::jsonb",
-                nullable=False,
-            )
+                op.alter_column(
+                    "articles",
+                    "body_md",
+                    type_=sa.JSON(),
+                    existing_type=sa.Text(),
+                    postgresql_using="body_md::jsonb",
+                    nullable=False,
+                )
 
         new_article_cols = [
             ("excerpt", sa.Column("excerpt", sa.JSON(), nullable=True)),
@@ -354,7 +446,7 @@ def upgrade() -> None:
         ]
         for col_name, col_def in new_article_cols:
             if not _column_exists("articles", col_name):
-                op.add_column("articles", col_def)
+                _add_column_safe("articles", col_def)
 
         if not _index_exists("ix_articles_category_status"):
             op.create_index("ix_articles_category_status", "articles", ["category", "status"])
@@ -369,36 +461,43 @@ def upgrade() -> None:
 
     if _table_exists("team"):
         # bio: Text → jsonb
-        if _column_exists("team", "bio") and _col_type_name("team", "bio") in ("text", "varchar", "string", "nvarchar"):
+        if _column_exists("team", "bio") and _col_type_name("team", "bio") in (
+            "text",
+            "varchar",
+            "string",
+            "nvarchar",
+        ):
             if _is_postgres():
                 op.execute(
                     "UPDATE team SET bio = jsonb_build_object('en', COALESCE(bio, ''), 'th', '') "
                     "WHERE bio IS NULL OR bio::text NOT LIKE '{%'"
                 )
-            op.alter_column(
-                "team", "bio",
-                type_=sa.JSON(),
-                existing_type=sa.Text(),
-                postgresql_using="bio::jsonb",
-                nullable=True,
-            )
+                op.alter_column(
+                    "team",
+                    "bio",
+                    type_=sa.JSON(),
+                    existing_type=sa.Text(),
+                    postgresql_using="bio::jsonb",
+                    nullable=True,
+                )
 
         # role_title: nullable → NOT NULL
         if _column_exists("team", "role_title"):
             if _is_postgres():
                 op.execute("UPDATE team SET role_title = 'Team Member' WHERE role_title IS NULL")
-            op.alter_column("team", "role_title", nullable=False, existing_type=sa.String(200))
+                op.alter_column("team", "role_title", nullable=False, existing_type=sa.String(200))
 
         # display_order: nullable → NOT NULL default 0
         if _column_exists("team", "display_order"):
             if _is_postgres():
                 op.execute("UPDATE team SET display_order = 0 WHERE display_order IS NULL")
-            op.alter_column(
-                "team", "display_order",
-                nullable=False,
-                existing_type=sa.Integer(),
-                server_default="0",
-            )
+                op.alter_column(
+                    "team",
+                    "display_order",
+                    nullable=False,
+                    existing_type=sa.Integer(),
+                    server_default="0",
+                )
 
     # ── TESTIMONIALS ─────────────────────────────────────────────────────────
 
@@ -407,24 +506,29 @@ def upgrade() -> None:
         if _column_exists("testimonials", "persona"):
             if _is_postgres():
                 op.execute("UPDATE testimonials SET persona = 'general' WHERE persona IS NULL")
-            op.alter_column("testimonials", "persona", nullable=False, existing_type=sa.String(100))
+                op.alter_column(
+                    "testimonials", "persona", nullable=False, existing_type=sa.String(100)
+                )
 
         # intent: nullable → NOT NULL
         if _column_exists("testimonials", "intent"):
             if _is_postgres():
                 op.execute("UPDATE testimonials SET intent = 'general' WHERE intent IS NULL")
-            op.alter_column("testimonials", "intent", nullable=False, existing_type=sa.String(100))
+                op.alter_column(
+                    "testimonials", "intent", nullable=False, existing_type=sa.String(100)
+                )
 
         # display_order: nullable → NOT NULL default 0
         if _column_exists("testimonials", "display_order"):
             if _is_postgres():
                 op.execute("UPDATE testimonials SET display_order = 0 WHERE display_order IS NULL")
-            op.alter_column(
-                "testimonials", "display_order",
-                nullable=False,
-                existing_type=sa.Integer(),
-                server_default="0",
-            )
+                op.alter_column(
+                    "testimonials",
+                    "display_order",
+                    nullable=False,
+                    existing_type=sa.Integer(),
+                    server_default="0",
+                )
 
         # Add missing columns
         for col_name, col_def in [
@@ -453,7 +557,7 @@ def upgrade() -> None:
                 ),
             )
         if not _column_exists("inquiries", "project_id"):
-            op.add_column(
+            _add_column_safe(
                 "inquiries",
                 sa.Column(
                     "project_id",
@@ -463,7 +567,7 @@ def upgrade() -> None:
                 ),
             )
         if not _column_exists("inquiries", "area_id"):
-            op.add_column(
+            _add_column_safe(
                 "inquiries",
                 sa.Column(
                     "area_id",
@@ -498,8 +602,13 @@ def downgrade() -> None:
 
     # -- INQUIRIES
     if _table_exists("inquiries"):
-        for ix in ["ix_inquiries_area_id", "ix_inquiries_project_id",
-                   "ix_inquiries_open_leads", "ix_inquiries_phone", "ix_inquiries_intent"]:
+        for ix in [
+            "ix_inquiries_area_id",
+            "ix_inquiries_project_id",
+            "ix_inquiries_open_leads",
+            "ix_inquiries_phone",
+            "ix_inquiries_intent",
+        ]:
             if _index_exists(ix):
                 op.drop_index(ix, table_name="inquiries")
         for col in ["deleted_at", "area_id", "project_id", "intent"]:
@@ -517,11 +626,22 @@ def downgrade() -> None:
 
     # -- ARTICLES
     if _table_exists("articles"):
-        for ix in ["ix_articles_area_id", "ix_articles_pillar_id",
-                   "ix_articles_published_at", "ix_articles_category_status"]:
+        for ix in [
+            "ix_articles_area_id",
+            "ix_articles_pillar_id",
+            "ix_articles_published_at",
+            "ix_articles_category_status",
+        ]:
             if _index_exists(ix):
                 op.drop_index(ix, table_name="articles")
-        for col in ["published_at", "project_id", "area_id", "pillar_id", "author_user_id", "excerpt"]:
+        for col in [
+            "published_at",
+            "project_id",
+            "area_id",
+            "pillar_id",
+            "author_user_id",
+            "excerpt",
+        ]:
             if _column_exists("articles", col):
                 op.drop_column("articles", col)
 
@@ -530,27 +650,56 @@ def downgrade() -> None:
         for ix in ["ix_properties_property_type", "ix_properties_price"]:
             if _index_exists(ix):
                 op.drop_index(ix, table_name="properties")
-        for col in ["cover_image_url", "size_sqm", "features", "fee_notes",
-                    "ownership_notes", "furnishing", "floor_number", "price_period"]:
+        for col in [
+            "cover_image_url",
+            "size_sqm",
+            "features",
+            "fee_notes",
+            "ownership_notes",
+            "furnishing",
+            "floor_number",
+            "price_period",
+        ]:
             if _column_exists("properties", col):
                 op.drop_column("properties", col)
 
     # -- PROJECTS
     if _table_exists("projects"):
-        for ix in ["ix_projects_starting_price", "ix_projects_property_type",
-                   "ix_projects_is_featured"]:
+        for ix in [
+            "ix_projects_starting_price",
+            "ix_projects_property_type",
+            "ix_projects_is_featured",
+        ]:
             if _index_exists(ix):
                 op.drop_index(ix, table_name="projects")
-        for col in ["is_featured", "year_built", "floors", "unit_count", "location",
-                    "investment_snapshot", "amenities", "description", "images",
-                    "hero_image_url", "starting_price", "delivery_date"]:
+        for col in [
+            "is_featured",
+            "year_built",
+            "floors",
+            "unit_count",
+            "location",
+            "investment_snapshot",
+            "amenities",
+            "description",
+            "images",
+            "hero_image_url",
+            "starting_price",
+            "delivery_date",
+        ]:
             if _column_exists("projects", col):
                 op.drop_column("projects", col)
 
     # -- AREA_STATISTICS
     if _table_exists("area_statistics"):
-        for col in ["updated_at", "as_of_date", "total_units", "total_projects",
-                    "avg_roi_percent", "avg_rent_monthly", "avg_price_sqm"]:
+        for col in [
+            "updated_at",
+            "as_of_date",
+            "total_units",
+            "total_projects",
+            "avg_roi_percent",
+            "avg_rent_monthly",
+            "avg_price_sqm",
+        ]:
             if _column_exists("area_statistics", col):
                 op.drop_column("area_statistics", col)
 

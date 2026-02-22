@@ -35,9 +35,7 @@ def _coerce_property_type(v: str) -> str:
     if isinstance(v, str):
         v = v.lower().strip()
     if v not in PROPERTY_TYPES:
-        raise ValueError(
-            f"property_type must be one of {sorted(PROPERTY_TYPES)}, got {v!r}"
-        )
+        raise ValueError(f"property_type must be one of {sorted(PROPERTY_TYPES)}, got {v!r}")
     return v
 
 
@@ -45,9 +43,7 @@ def _coerce_transaction_type(v: str) -> str:
     if isinstance(v, str):
         v = v.lower().strip()
     if v not in TRANSACTION_TYPES:
-        raise ValueError(
-            f"type must be one of {sorted(TRANSACTION_TYPES)}, got {v!r}"
-        )
+        raise ValueError(f"type must be one of {sorted(TRANSACTION_TYPES)}, got {v!r}")
     return v
 
 
@@ -88,19 +84,20 @@ class PropertyWrite(BaseModel):
     price: Decimal = Field(..., gt=0, description="Listing price; must be > 0")
     currency: str = Field(default="THB", max_length=3)
     price_period: str | None = Field(
-        default=None, max_length=20,
-        description="Required for type=rent (e.g. 'monthly', 'daily')"
+        default=None, max_length=20, description="Required for type=rent (e.g. 'monthly', 'daily')"
     )
 
     # --- Physical attributes ---
-    bedrooms: int | None = Field(default=None, ge=0, description="0=studio; required for condo/villa/house")  # noqa: E501
+    bedrooms: int | None = Field(
+        default=None, ge=0, description="0=studio; required for condo/villa/house"
+    )  # noqa: E501
     bathrooms: int | None = Field(default=None, ge=0, description="Required for condo/villa/house")
     size_sqm: Decimal | None = Field(default=None, gt=0, description="Required for all types")
     floor: int | None = Field(default=None, ge=0, description="Unit floor number (condo/office)")
     floors: int | None = Field(default=None, ge=1, description="Story count (villa/house/shop)")
     furnishing: str | None = Field(
         default=None,
-        description="unfurnished | partial | fully_furnished; for condo/villa/house/office"
+        description="unfurnished | partial | fully_furnished; for condo/villa/house/office",
     )
 
     # --- Condo-specific column-level attributes ---
@@ -113,11 +110,13 @@ class PropertyWrite(BaseModel):
         description="View direction: sea | city | garden | pool",
     )
     ownership_notes: str | None = Field(
-        default=None, max_length=500,
+        default=None,
+        max_length=500,
         description="Foreign quota / ownership notes (condo)",
     )
     fee_notes: str | None = Field(
-        default=None, max_length=500,
+        default=None,
+        max_length=500,
         description="Common fee notes, e.g. per sqm/month (condo)",
     )
 

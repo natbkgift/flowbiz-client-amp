@@ -172,6 +172,7 @@ class Member(Base):
 # Domain: Areas
 # ---------------------------------------------------------------------------
 
+
 class Area(Base):
     """
     Blueprint Doc 05 — areas table.
@@ -179,6 +180,7 @@ class Area(Base):
     content: localized jsonb {"en": {...}, "th": {...}}
     city default: Pattaya
     """
+
     __tablename__ = "areas"
     __table_args__ = (
         Index("ix_areas_city", "city"),
@@ -188,9 +190,7 @@ class Area(Base):
     id: Mapped[UUID] = mapped_column(primary_key=True, default=uuid4)
     slug: Mapped[str] = mapped_column(String(200), nullable=False, unique=True, index=True)
     name: Mapped[str] = mapped_column(String(200), nullable=False)
-    city: Mapped[str | None] = mapped_column(
-        String(200), nullable=True, server_default="Pattaya"
-    )
+    city: Mapped[str | None] = mapped_column(String(200), nullable=True, server_default="Pattaya")
     status: Mapped[str] = mapped_column(
         String(50),
         nullable=False,
@@ -219,6 +219,7 @@ class AreaStatistic(Base):
     Blueprint column names (avg_price_sqm etc.) are the primary mapping.
     Legacy columns (avg_price, avg_rent, roi_percent) retained for backward compat.
     """
+
     __tablename__ = "area_statistics"
 
     id: Mapped[UUID] = mapped_column(primary_key=True, default=uuid4)
@@ -257,12 +258,14 @@ class AreaStatistic(Base):
 # Domain: Developers
 # ---------------------------------------------------------------------------
 
+
 class Developer(Base):
     """
     Blueprint Doc 05 — developers table.
     tier: premium | mid | budget
     summary: localized jsonb {"en": "...", "th": "..."}
     """
+
     __tablename__ = "developers"
     __table_args__ = (
         Index("ix_developers_status", "status"),
@@ -313,6 +316,7 @@ class Project(Base):
     summary / description: localized jsonb {"en": {...}, "th": {...}}
     summary is NOT NULL (spec requirement) — defaults to empty object.
     """
+
     __tablename__ = "projects"
     __table_args__ = (
         Index("ix_projects_status", "status"),
@@ -340,9 +344,7 @@ class Project(Base):
         index=True,
     )
     # NOT NULL per Blueprint Doc 05; sentinel default 'condo' for existing rows
-    property_type: Mapped[str] = mapped_column(
-        String(50), nullable=False, server_default="condo"
-    )
+    property_type: Mapped[str] = mapped_column(String(50), nullable=False, server_default="condo")
 
     delivery_date: Mapped[date | None] = mapped_column(Date, nullable=True)
     starting_price: Mapped[Decimal | None] = mapped_column(Numeric(14, 2), nullable=True)
@@ -426,6 +428,7 @@ class Property(Base):
     size_sqm / cover_image_url are the blueprint canonical names;
     legacy 'size' and 'cover_image' columns are retained for backward compat.
     """
+
     __tablename__ = "properties"
     __table_args__ = (
         Index("ix_properties_type_status", "type", "status"),
@@ -434,9 +437,7 @@ class Property(Base):
     )
 
     id: Mapped[UUID] = mapped_column(primary_key=True, default=uuid4)
-    source_id: Mapped[str] = mapped_column(
-        String(255), nullable=False, unique=True, index=True
-    )
+    source_id: Mapped[str] = mapped_column(String(255), nullable=False, unique=True, index=True)
     slug: Mapped[str | None] = mapped_column(String(500), nullable=True, unique=True, index=True)
     title: Mapped[str] = mapped_column(String(500), nullable=False)
     description: Mapped[str | None] = mapped_column(Text, nullable=True)
@@ -507,6 +508,7 @@ class Property(Base):
 # Domain: Articles (guides / blog posts)
 # ---------------------------------------------------------------------------
 
+
 class Article(Base):
     """
     Blueprint Doc 05 — articles table.
@@ -514,6 +516,7 @@ class Article(Base):
     title / excerpt / body_md: localized jsonb {"en": {...}, "th": {...}}
     pillar_id: self-FK for pillar/cluster content architecture
     """
+
     __tablename__ = "articles"
     __table_args__ = (
         Index("ix_articles_category_status", "category", "status"),
@@ -562,11 +565,13 @@ class Article(Base):
 # Domain: Team
 # ---------------------------------------------------------------------------
 
+
 class TeamMember(Base):
     """
     Blueprint Doc 05 — team table.
     bio: localized jsonb {"en": "...", "th": "..."}
     """
+
     __tablename__ = "team"
 
     id: Mapped[UUID] = mapped_column(primary_key=True, default=uuid4)
@@ -599,12 +604,14 @@ class TeamMember(Base):
 # Domain: Testimonials
 # ---------------------------------------------------------------------------
 
+
 class Testimonial(Base):
     """
     Blueprint Doc 05 — testimonials table.
     persona: investor | expat | lifestyle_buyer | seller | co_agent
     intent:  invest | buy | rent | sell
     """
+
     __tablename__ = "testimonials"
     __table_args__ = (
         Index("ix_testimonials_status_persona", "status", "persona"),
@@ -659,6 +666,7 @@ class Inquiry(Base):
     intent: invest | buy | rent | sell | developer | co_agent | general
     status: new | contacted | qualified | viewing_scheduled | closed_won | closed_lost
     """
+
     __tablename__ = "inquiries"
     __table_args__ = (
         Index("ix_inquiries_status_intent", "status", "intent"),

@@ -8,14 +8,14 @@ phases = {
         "Audit_Scoring_Framework",
         "Data_Asset_Inventory",
         "Competitive_Benchmark_Template",
-        "SWOT_Vulnerability_Report"
+        "SWOT_Vulnerability_Report",
     ],
     "Phase2_Roadmap": [
         "01_ROI_Based_Upgrade_Priority_Matrix",
         "02_90_Day_Platform_Improvement_Roadmap",
         "03_Weekly_Sprint_Breakdown",
         "04_90_Day_Revenue_Projection_Model",
-        "05_Quick_Win_Conversion_Optimization"
+        "05_Quick_Win_Conversion_Optimization",
     ],
     "Phase3_Market_Expansion": [
         "01_12_Month_Market_Domination_Strategy",
@@ -24,7 +24,7 @@ phases = {
         "04_Luxury_Pricing_Psychology_Strategy",
         "05_Visual_Aesthetic_Premiumization",
         "06_UHNW_Acquisition_Blueprint",
-        "07_VIP_Concierge_Protocol"
+        "07_VIP_Concierge_Protocol",
     ],
     "Phase4_Financial_Modeling": [
         "01_Detailed_12_Month_Financial_Projection",
@@ -33,7 +33,7 @@ phases = {
         "04_12_Month_Revenue_Compounding_Model",
         "05_Interactive_Boardroom_Dashboard",
         "06_Interactive_Decision_Tree_Model",
-        "07_Core_KPI_Telemetry_Matrix"
+        "07_Core_KPI_Telemetry_Matrix",
     ],
     "Phase5_Institutional_Growth": [
         "01_Investor_Acquisition_Blueprint",
@@ -44,15 +44,28 @@ phases = {
         "06_Capital_Flow_Funnel_Design",
         "07_Multi_Asset_Expansion_Plan",
         "08_Private_Club_Acquisition_Model",
-        "09_Exit_Strategy_Valuation"
-    ]
+        "09_Exit_Strategy_Valuation",
+    ],
 }
 
+
 def generate_skeleton(title, phase_name):
-    clean_title = title.replace('_', ' ').replace('01', '').replace('02', '').replace('03', '').replace('04', '').replace('05', '').replace('06', '').replace('07', '').replace('08', '').replace('09', '').strip()
+    clean_title = (
+        title.replace("_", " ")
+        .replace("01", "")
+        .replace("02", "")
+        .replace("03", "")
+        .replace("04", "")
+        .replace("05", "")
+        .replace("06", "")
+        .replace("07", "")
+        .replace("08", "")
+        .replace("09", "")
+        .strip()
+    )
     return f"""# {clean_title}
 ## Project: AMP Pattaya – Real Estate Intelligence Platform
-**Phase Context:** {phase_name.replace('_', ' ')}
+**Phase Context:** {phase_name.replace("_", " ")}
 
 ---
 
@@ -79,15 +92,16 @@ def generate_skeleton(title, phase_name):
 *Created as part of the AMP Pattaya Master Roadmap.*
 """
 
+
 def main():
     if not os.path.exists(base_path):
         os.makedirs(base_path)
-    
+
     for phase, files in phases.items():
         phase_dir = os.path.join(base_path, phase)
         if not os.path.exists(phase_dir):
             os.makedirs(phase_dir)
-        
+
         for file in files:
             # Check if file exists to prevent overwriting content we already created
             file_path = os.path.join(phase_dir, f"{file}.md")
@@ -97,6 +111,7 @@ def main():
                 print(f"Created Skeleton: {file_path}")
             else:
                 print(f"Skipped, already exists: {file_path}")
+
 
 if __name__ == "__main__":
     main()

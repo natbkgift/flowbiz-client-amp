@@ -40,6 +40,7 @@ depends_on: str | Sequence[str] | None = None
 # Introspection helpers (same pattern as 0025)
 # ---------------------------------------------------------------------------
 
+
 def _bind():
     return op.get_bind()
 
@@ -80,10 +81,14 @@ def _col_type_name(table_name: str, column_name: str) -> str:
 def _index_exists(index_name: str) -> bool:
     if not _is_postgres():
         return False
-    result = _bind().execute(
-        text("SELECT 1 FROM pg_indexes WHERE indexname = :n"),
-        {"n": index_name},
-    ).scalar()
+    result = (
+        _bind()
+        .execute(
+            text("SELECT 1 FROM pg_indexes WHERE indexname = :n"),
+            {"n": index_name},
+        )
+        .scalar()
+    )
     return result is not None
 
 
@@ -97,7 +102,8 @@ def _alter_to_jsonb(table: str, column: str, not_null: bool = False) -> None:
     if current == "jsonb":
         return  # already correct
     op.alter_column(
-        table, column,
+        table,
+        column,
         type_=JSONB(),
         existing_type=sa.JSON(),
         postgresql_using=f"{column}::jsonb",
@@ -108,6 +114,7 @@ def _alter_to_jsonb(table: str, column: str, not_null: bool = False) -> None:
 # ---------------------------------------------------------------------------
 # Upgrade
 # ---------------------------------------------------------------------------
+
 
 def upgrade() -> None:
 
@@ -156,7 +163,8 @@ def upgrade() -> None:
     if _table_exists("projects") and _column_exists("projects", "summary"):
         op.execute("UPDATE projects SET summary = '{}'::jsonb WHERE summary IS NULL")
         op.alter_column(
-            "projects", "summary",
+            "projects",
+            "summary",
             nullable=False,
             existing_type=JSONB(),
             server_default="'{}'::jsonb",
@@ -166,7 +174,8 @@ def upgrade() -> None:
     if _table_exists("projects") and _column_exists("projects", "property_type"):
         op.execute("UPDATE projects SET property_type = 'condo' WHERE property_type IS NULL")
         op.alter_column(
-            "projects", "property_type",
+            "projects",
+            "property_type",
             nullable=False,
             existing_type=sa.String(50),
             server_default="condo",
@@ -176,7 +185,8 @@ def upgrade() -> None:
     if _table_exists("properties") and _column_exists("properties", "property_type"):
         op.execute("UPDATE properties SET property_type = 'condo' WHERE property_type IS NULL")
         op.alter_column(
-            "properties", "property_type",
+            "properties",
+            "property_type",
             nullable=False,
             existing_type=sa.String(50),
             server_default="condo",
@@ -185,18 +195,18 @@ def upgrade() -> None:
     # projects.area_id and developer_id NOT NULL per spec lines 107-108.
     # Only enforces if no orphan rows exist (FK references must be valid).
     if _table_exists("projects"):
-        null_area = _bind().execute(
-            text("SELECT COUNT(*) FROM projects WHERE area_id IS NULL")
-        ).scalar()
+        null_area = (
+            _bind().execute(text("SELECT COUNT(*) FROM projects WHERE area_id IS NULL")).scalar()
+        )
         if null_area == 0 and _column_exists("projects", "area_id"):
             op.alter_column("projects", "area_id", nullable=False, existing_type=sa.Uuid())
-        null_dev = _bind().execute(
-            text("SELECT COUNT(*) FROM projects WHERE developer_id IS NULL")
-        ).scalar()
+        null_dev = (
+            _bind()
+            .execute(text("SELECT COUNT(*) FROM projects WHERE developer_id IS NULL"))
+            .scalar()
+        )
         if null_dev == 0 and _column_exists("projects", "developer_id"):
-            op.alter_column(
-                "projects", "developer_id", nullable=False, existing_type=sa.Uuid()
-            )
+            op.alter_column("projects", "developer_id", nullable=False, existing_type=sa.Uuid())
 
     # articles.body_md NOT NULL guard (in case 0025 ran with nullable=True bug)
     if _table_exists("articles") and _column_exists("articles", "body_md"):
@@ -261,6 +271,7 @@ def upgrade() -> None:
 # Downgrade
 # ---------------------------------------------------------------------------
 
+
 def downgrade() -> None:
     if not _is_postgres():
         return
@@ -299,7 +310,11 @@ def downgrade() -> None:
             op.drop_index(ix_name, table_name="projects")
 
     # Drop FK indexes (properties)
-    for ix_name in ["ix_properties_developer_id", "ix_properties_project_id", "ix_properties_area_id"]:
+    for ix_name in [
+        "ix_properties_developer_id",
+        "ix_properties_project_id",
+        "ix_properties_area_id",
+    ]:
         if _index_exists(ix_name):
             op.drop_index(ix_name, table_name="properties")
 

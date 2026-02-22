@@ -136,6 +136,7 @@ def _resolve_fk(
 
 # ── Step implementations ─────────────────────────────────────────────────
 
+
 def _upsert_by_slug(
     db: Session,
     model: type,
@@ -184,11 +185,16 @@ def import_developers(db: Session, rows: list[dict], *, dry_run: bool) -> StepRe
             result.inserted += 1
             continue
 
-        _, is_new = _upsert_by_slug(db, Developer, slug, {
-            "name": str(row["name"]).strip(),
-            "website": str(row.get("website") or "").strip() or None,
-            "logo_url": str(row.get("logo_url") or "").strip() or None,
-        })
+        _, is_new = _upsert_by_slug(
+            db,
+            Developer,
+            slug,
+            {
+                "name": str(row["name"]).strip(),
+                "website": str(row.get("website") or "").strip() or None,
+                "logo_url": str(row.get("logo_url") or "").strip() or None,
+            },
+        )
         if is_new:
             result.inserted += 1
         else:
@@ -225,10 +231,15 @@ def import_areas(db: Session, rows: list[dict], *, dry_run: bool) -> StepResult:
             result.inserted += 1
             continue
 
-        _, is_new = _upsert_by_slug(db, Area, slug, {
-            "name": str(row["name"]).strip(),
-            "city": str(row.get("city") or "Pattaya").strip(),
-        })
+        _, is_new = _upsert_by_slug(
+            db,
+            Area,
+            slug,
+            {
+                "name": str(row["name"]).strip(),
+                "city": str(row.get("city") or "Pattaya").strip(),
+            },
+        )
         if is_new:
             result.inserted += 1
         else:
@@ -259,15 +270,23 @@ def import_projects(db: Session, rows: list[dict], *, dry_run: bool) -> StepResu
 
         # Resolve FK dependencies
         developer_id, err = _resolve_fk(
-            db, Developer, str(row.get("developer_slug") or "").strip() or None,
-            "developer_slug", label, dry_run=dry_run,
+            db,
+            Developer,
+            str(row.get("developer_slug") or "").strip() or None,
+            "developer_slug",
+            label,
+            dry_run=dry_run,
         )
         if err:
             errs.append(err)
 
         area_id, err = _resolve_fk(
-            db, Area, str(row.get("area_slug") or "").strip() or None,
-            "area_slug", label, dry_run=dry_run,
+            db,
+            Area,
+            str(row.get("area_slug") or "").strip() or None,
+            "area_slug",
+            label,
+            dry_run=dry_run,
         )
         if err:
             errs.append(err)
@@ -284,13 +303,18 @@ def import_projects(db: Session, rows: list[dict], *, dry_run: bool) -> StepResu
         if status not in ("draft", "published", "archived"):
             status = "published"
 
-        _, is_new = _upsert_by_slug(db, Project, slug, {
-            "name": str(row["name"]).strip(),
-            "developer_id": developer_id,
-            "area_id": area_id,
-            "cover_image_url": str(row.get("cover_image_url") or "").strip() or None,
-            "status": status,
-        })
+        _, is_new = _upsert_by_slug(
+            db,
+            Project,
+            slug,
+            {
+                "name": str(row["name"]).strip(),
+                "developer_id": developer_id,
+                "area_id": area_id,
+                "cover_image_url": str(row.get("cover_image_url") or "").strip() or None,
+                "status": status,
+            },
+        )
         if is_new:
             result.inserted += 1
         else:
@@ -342,22 +366,34 @@ def _import_units(
 
         # Resolve FK dependencies (all optional)
         project_id, err = _resolve_fk(
-            db, Project, str(row.get("project_slug") or "").strip() or None,
-            "project_slug", label, dry_run=dry_run,
+            db,
+            Project,
+            str(row.get("project_slug") or "").strip() or None,
+            "project_slug",
+            label,
+            dry_run=dry_run,
         )
         if err:
             errs.append(err)
 
         area_id, err = _resolve_fk(
-            db, Area, str(row.get("area_slug") or "").strip() or None,
-            "area_slug", label, dry_run=dry_run,
+            db,
+            Area,
+            str(row.get("area_slug") or "").strip() or None,
+            "area_slug",
+            label,
+            dry_run=dry_run,
         )
         if err:
             errs.append(err)
 
         developer_id, err = _resolve_fk(
-            db, Developer, str(row.get("developer_slug") or "").strip() or None,
-            "developer_slug", label, dry_run=dry_run,
+            db,
+            Developer,
+            str(row.get("developer_slug") or "").strip() or None,
+            "developer_slug",
+            label,
+            dry_run=dry_run,
         )
         if err:
             errs.append(err)
@@ -505,17 +541,21 @@ def main() -> int:
         description="Data import per Blueprint Doc 14 sequence.",
     )
     parser.add_argument(
-        "--input", default="data/import",
+        "--input",
+        default="data/import",
         help="Directory containing JSON files (developers.json, areas.json, etc.)",
     )
     parser.add_argument(
-        "--dry-run", action="store_true",
+        "--dry-run",
+        action="store_true",
         help="Validate data without writing to DB",
     )
     parser.add_argument(
-        "--step", action="append", dest="steps", default=None,
-        help="Import only specific step(s). Can be repeated. "
-             f"Options: {', '.join(STEP_ORDER)}",
+        "--step",
+        action="append",
+        dest="steps",
+        default=None,
+        help=f"Import only specific step(s). Can be repeated. Options: {', '.join(STEP_ORDER)}",
     )
     args = parser.parse_args()
 
@@ -554,7 +594,12 @@ def main() -> int:
     log.info("Input dir : %s", input_dir.resolve())
     log.info("Dry-run   : %s", dry_run)
     log.info("Steps     : %s", ", ".join(steps_to_run))
-    log.info("DB        : %s", settings.database_url[:50] + "..." if len(settings.database_url) > 50 else settings.database_url)
+    log.info(
+        "DB        : %s",
+        settings.database_url[:50] + "..."
+        if len(settings.database_url) > 50
+        else settings.database_url,
+    )
     log.info("=" * 60)
 
     all_results: list[StepResult] = []
@@ -584,7 +629,8 @@ def main() -> int:
             if result.errors:
                 log.error(
                     "[%s] VALIDATION FAILED — %d error(s):",
-                    step, len(result.errors),
+                    step,
+                    len(result.errors),
                 )
                 for err in result.errors:
                     log.error("  - %s", err)
@@ -597,7 +643,10 @@ def main() -> int:
             else:
                 log.info(
                     "[%s] OK — inserted=%d  updated=%d  (%.1fs)",
-                    step, result.inserted, result.updated, elapsed,
+                    step,
+                    result.inserted,
+                    result.updated,
+                    elapsed,
                 )
                 all_results.append(result)
 
@@ -637,7 +686,11 @@ def main() -> int:
             status = "SKIP"
         log.info(
             "  %-14s  %s  inserted=%-4d  updated=%-4d  errors=%d",
-            r.step, status, r.inserted, r.updated, len(r.errors),
+            r.step,
+            status,
+            r.inserted,
+            r.updated,
+            len(r.errors),
         )
         total_inserted += r.inserted
         total_updated += r.updated
@@ -646,7 +699,9 @@ def main() -> int:
     log.info("-" * 60)
     log.info(
         "  TOTAL           inserted=%-4d  updated=%-4d  errors=%d",
-        total_inserted, total_updated, total_errors,
+        total_inserted,
+        total_updated,
+        total_errors,
     )
     log.info("=" * 60)
 

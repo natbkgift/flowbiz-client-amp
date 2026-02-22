@@ -87,9 +87,7 @@ def upgrade() -> None:
     if _is_postgres() and _column_exists("properties", "city"):
         op.execute("ALTER TABLE properties ALTER COLUMN city SET DEFAULT 'Pattaya'")
         # Backfill NULL city rows with the default value
-        op.execute(
-            "UPDATE properties SET city = 'Pattaya' WHERE city IS NULL OR city = ''"
-        )
+        op.execute("UPDATE properties SET city = 'Pattaya' WHERE city IS NULL OR city = ''")
 
 
 # ---------------------------------------------------------------------------
