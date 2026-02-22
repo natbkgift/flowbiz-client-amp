@@ -108,9 +108,4 @@ jobs:
 
       - name: Next.js build
         working-directory: admin-app
-        # TURBOPACK=0 forces webpack (avoids intermittent Turbopack panic in
-        # resource-constrained GitHub Actions runners — Next.js 16+ uses Turbopack
-        # by default but can hit 'Dependency tracking disabled' panics on CI).
-        env:
-          TURBOPACK: '0'
         run: npm run build
