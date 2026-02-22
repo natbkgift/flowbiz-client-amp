@@ -1,13 +1,13 @@
 {
-  "timestamp": "2026-02-21T10:52:35.359311+00:00",
+  "timestamp": "2026-02-21T13:08:07.502860+00:00",
   "mode": "raw",
   "scoring_engine_version": "v3",
-  "total_score": 205.0,
+  "total_score": 250.0,
   "max_score": 250,
-  "weakest_phase": 8,
-  "weakest_phase_name": "Content & Property Completeness",
-  "weakest_phase_pct": 61.0,
-  "termination_eligible": false,
+  "weakest_phase": 1,
+  "weakest_phase_name": "Brand & Design System",
+  "weakest_phase_pct": 100.0,
+  "termination_eligible": true,
   "phases": [
     {
       "phase": 1,
@@ -22,7 +22,7 @@
         "typography_score": 4.5,
         "color_categories": 6,
         "color_score": 6,
-        "atomic_components": 25,
+        "atomic_components": 29,
         "atomic_score": 7.5,
         "component_categories": 11,
         "diversity_score": 6,
@@ -171,9 +171,9 @@
     {
       "phase": 6,
       "name": "Copy & Persuasion",
-      "score": 14.0,
+      "score": 20.0,
       "max": 20,
-      "pct": 70.0,
+      "pct": 100.0,
       "details": {
         "en_word_count": 3933,
         "en_score": 3,
@@ -184,53 +184,23 @@
         "has_risk": true,
         "risk_score": 1.0,
         "public_media_assets": {
-          "raster": 0,
+          "raster": 10,
           "svg": 0,
-          "total": 0
+          "total": 10
         },
-        "media_score": 0.0,
+        "media_score": 4.0,
         "placeholder_content": {
-          "violations": [
-            {
-              "file": "app\\(site)\\[locale]\\blog\\page.tsx",
-              "pattern": "coming_soon"
-            },
-            {
-              "file": "app\\(site)\\[locale]\\blog\\[slug]\\page.tsx",
-              "pattern": "coming_soon"
-            }
-          ],
-          "count": 2
+          "violations": [],
+          "count": 0
         },
-        "placeholder_score": 2.0,
+        "placeholder_score": 4.0,
         "alt_text": {
-          "total": 9,
-          "with_alt": 9
+          "total": 13,
+          "with_alt": 13
         },
         "alt_score": 3.0
       },
-      "gaps": [
-        {
-          "metric": "media_assets",
-          "current": 0.0,
-          "max": 4.0,
-          "gap": 4.0,
-          "action": "Add raster images (0, need 3+) under public/",
-          "file_path": "admin-app/public/",
-          "phase": 6,
-          "phase_name": "Copy & Persuasion"
-        },
-        {
-          "metric": "no_placeholder_copy",
-          "current": 2.0,
-          "max": 4.0,
-          "gap": 2.0,
-          "action": "Remove placeholder content from 2 pages (app\\(site)\\[locale]\\blog\\page.tsx, app\\(site)\\[locale]\\blog\\[slug]\\page.tsx)",
-          "file_path": "admin-app/app/(site)/[locale]/",
-          "phase": 6,
-          "phase_name": "Copy & Persuasion"
-        }
-      ]
+      "gaps": []
     },
     {
       "phase": 7,
@@ -245,7 +215,7 @@
         "robots_score": 1.5,
         "has_canonical": true,
         "canonical_score": 2.5,
-        "internal_links": 92,
+        "internal_links": 96,
         "link_score": 3,
         "structured_data": {
           "files_with_jsonld": 6
@@ -261,9 +231,9 @@
     {
       "phase": 8,
       "name": "Content & Property Completeness",
-      "score": 61.0,
+      "score": 100.0,
       "max": 100,
-      "pct": 61.0,
+      "pct": 100.0,
       "details": {
         "property_listing": {
           "buy": true,
@@ -292,31 +262,31 @@
         },
         "developer_score": 7.0,
         "gallery": {
-          "component_exists": false,
+          "component_exists": true,
           "inline_exists": false,
           "used_in_detail": true
         },
-        "gallery_score": 4.0,
+        "gallery_score": 8.0,
         "floorplan": {
-          "component_exists": false,
-          "referenced": false
+          "component_exists": true,
+          "referenced": true
         },
-        "floorplan_score": 0.0,
+        "floorplan_score": 6.0,
         "map": {
-          "component_exists": false,
-          "lib_found": false
+          "component_exists": true,
+          "lib_found": true
         },
-        "map_score": 0.0,
+        "map_score": 8.0,
         "reviews": {
-          "component_exists": false,
+          "component_exists": true,
           "inline_exists": true
         },
-        "review_score": 3.0,
+        "review_score": 8.0,
         "team": {
           "about_exists": true,
-          "has_team_content": false
+          "has_team_content": true
         },
-        "team_score": 3.0,
+        "team_score": 6.0,
         "area_guide": {
           "exists": true,
           "word_count": 387,
@@ -326,217 +296,36 @@
         "area_guide_score": 7.0,
         "blog": {
           "exists": true,
-          "listing_placeholder": true,
+          "listing_placeholder": false,
           "slug_exists": true,
-          "slug_placeholder": true,
-          "has_real_content": false
+          "slug_placeholder": false,
+          "has_real_content": true
         },
-        "blog_score": 2.0,
+        "blog_score": 6.0,
         "media_assets": {
-          "raster": 0,
+          "raster": 10,
           "svg": 0,
-          "total": 0
+          "total": 10
         },
-        "media_volume_score": 0.0,
+        "media_volume_score": 8.0,
         "content_depth": {
-          "total_word_count": 3928,
+          "total_word_count": 4164,
           "target": 500
         },
         "content_depth_score": 5.0,
         "image_quality": {
           "exists": true,
           "has_loading": true,
-          "has_sizes": false,
+          "has_sizes": true,
           "has_alt": true,
-          "has_placeholder_blur": false
+          "has_placeholder_blur": true
         },
-        "image_quality_score": 4.0
+        "image_quality_score": 5.0
       },
-      "gaps": [
-        {
-          "metric": "gallery_component",
-          "current": 4.0,
-          "max": 8.0,
-          "gap": 4.0,
-          "action": "Create reusable Gallery component + use in property detail",
-          "file_path": "admin-app/components/media/Gallery.tsx",
-          "phase": 8,
-          "phase_name": "Content & Property Completeness"
-        },
-        {
-          "metric": "floorplan_display",
-          "current": 0.0,
-          "max": 6.0,
-          "gap": 6.0,
-          "action": "Create FloorPlan component + reference in property detail",
-          "file_path": "admin-app/components/media/FloorPlan.tsx",
-          "phase": 8,
-          "phase_name": "Content & Property Completeness"
-        },
-        {
-          "metric": "map_integration",
-          "current": 0.0,
-          "max": 8.0,
-          "gap": 8.0,
-          "action": "Add Map component with Google Maps / Leaflet integration",
-          "file_path": "admin-app/components/media/MapView.tsx",
-          "phase": 8,
-          "phase_name": "Content & Property Completeness"
-        },
-        {
-          "metric": "customer_reviews",
-          "current": 3.0,
-          "max": 8.0,
-          "gap": 5.0,
-          "action": "Create Reviews/Testimonials component with star ratings",
-          "file_path": "admin-app/components/ux/Reviews.tsx",
-          "phase": 8,
-          "phase_name": "Content & Property Completeness"
-        },
-        {
-          "metric": "team_about_page",
-          "current": 3.0,
-          "max": 6.0,
-          "gap": 3.0,
-          "action": "Enhance about page with team member content",
-          "file_path": "admin-app/app/(site)/[locale]/about/page.tsx",
-          "phase": 8,
-          "phase_name": "Content & Property Completeness"
-        },
-        {
-          "metric": "blog_real_content",
-          "current": 2.0,
-          "max": 6.0,
-          "gap": 4.0,
-          "action": "Blog with real articles (remove 'Coming soon' placeholder)",
-          "file_path": "admin-app/app/(site)/[locale]/blog/page.tsx",
-          "phase": 8,
-          "phase_name": "Content & Property Completeness"
-        },
-        {
-          "metric": "media_assets_volume",
-          "current": 0.0,
-          "max": 8.0,
-          "gap": 8.0,
-          "action": "Add raster images (0, need 8+): hero, property photos, project images, team photos",
-          "file_path": "admin-app/public/images/",
-          "phase": 8,
-          "phase_name": "Content & Property Completeness"
-        },
-        {
-          "metric": "image_component_quality",
-          "current": 4.0,
-          "max": 5.0,
-          "gap": 1.0,
-          "action": "RemoteImage: add loading, sizes, blur placeholder props",
-          "file_path": "admin-app/components/media/RemoteImage.tsx",
-          "phase": 8,
-          "phase_name": "Content & Property Completeness"
-        }
-      ]
+      "gaps": []
     }
   ],
   "gap_recommendations": [
-    {
-      "metric": "map_integration",
-      "current": 0.0,
-      "max": 8.0,
-      "gap": 8.0,
-      "action": "Add Map component with Google Maps / Leaflet integration",
-      "file_path": "admin-app/components/media/MapView.tsx",
-      "phase": 8,
-      "phase_name": "Content & Property Completeness"
-    },
-    {
-      "metric": "media_assets_volume",
-      "current": 0.0,
-      "max": 8.0,
-      "gap": 8.0,
-      "action": "Add raster images (0, need 8+): hero, property photos, project images, team photos",
-      "file_path": "admin-app/public/images/",
-      "phase": 8,
-      "phase_name": "Content & Property Completeness"
-    },
-    {
-      "metric": "floorplan_display",
-      "current": 0.0,
-      "max": 6.0,
-      "gap": 6.0,
-      "action": "Create FloorPlan component + reference in property detail",
-      "file_path": "admin-app/components/media/FloorPlan.tsx",
-      "phase": 8,
-      "phase_name": "Content & Property Completeness"
-    },
-    {
-      "metric": "customer_reviews",
-      "current": 3.0,
-      "max": 8.0,
-      "gap": 5.0,
-      "action": "Create Reviews/Testimonials component with star ratings",
-      "file_path": "admin-app/components/ux/Reviews.tsx",
-      "phase": 8,
-      "phase_name": "Content & Property Completeness"
-    },
-    {
-      "metric": "media_assets",
-      "current": 0.0,
-      "max": 4.0,
-      "gap": 4.0,
-      "action": "Add raster images (0, need 3+) under public/",
-      "file_path": "admin-app/public/",
-      "phase": 6,
-      "phase_name": "Copy & Persuasion"
-    },
-    {
-      "metric": "gallery_component",
-      "current": 4.0,
-      "max": 8.0,
-      "gap": 4.0,
-      "action": "Create reusable Gallery component + use in property detail",
-      "file_path": "admin-app/components/media/Gallery.tsx",
-      "phase": 8,
-      "phase_name": "Content & Property Completeness"
-    },
-    {
-      "metric": "blog_real_content",
-      "current": 2.0,
-      "max": 6.0,
-      "gap": 4.0,
-      "action": "Blog with real articles (remove 'Coming soon' placeholder)",
-      "file_path": "admin-app/app/(site)/[locale]/blog/page.tsx",
-      "phase": 8,
-      "phase_name": "Content & Property Completeness"
-    },
-    {
-      "metric": "team_about_page",
-      "current": 3.0,
-      "max": 6.0,
-      "gap": 3.0,
-      "action": "Enhance about page with team member content",
-      "file_path": "admin-app/app/(site)/[locale]/about/page.tsx",
-      "phase": 8,
-      "phase_name": "Content & Property Completeness"
-    },
-    {
-      "metric": "no_placeholder_copy",
-      "current": 2.0,
-      "max": 4.0,
-      "gap": 2.0,
-      "action": "Remove placeholder content from 2 pages (app\\(site)\\[locale]\\blog\\page.tsx, app\\(site)\\[locale]\\blog\\[slug]\\page.tsx)",
-      "file_path": "admin-app/app/(site)/[locale]/",
-      "phase": 6,
-      "phase_name": "Copy & Persuasion"
-    },
-    {
-      "metric": "image_component_quality",
-      "current": 4.0,
-      "max": 5.0,
-      "gap": 1.0,
-      "action": "RemoteImage: add loading, sizes, blur placeholder props",
-      "file_path": "admin-app/components/media/RemoteImage.tsx",
-      "phase": 8,
-      "phase_name": "Content & Property Completeness"
-    },
     {
       "metric": "error_handling",
       "current": 3.5,
