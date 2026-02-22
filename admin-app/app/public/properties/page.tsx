@@ -16,27 +16,30 @@ export default function PublicPropertiesPage() {
   const [error, setError] = useState<string | null>(null);
 
   const [items, setItems] = useState<PropertyListItem[]>([]);
-  const initial = useMemo(() => {
-    if (typeof window === 'undefined') {
-      return { page: 1, type: '', sort: 'newest' as SortValue, search: '' };
-    }
+  // Safe deterministic hydration
+  const [page, setPage] = useState(1);
+  const [type, setType] = useState<string>('');
+  const [sort, setSort] = useState<SortValue>('newest');
+  const [search, setSearch] = useState('');
+  const [searchDraft, setSearchDraft] = useState('');
+
+  // Hydrate search params safely after first render
+  useEffect(() => {
     const qs = new URLSearchParams(window.location.search);
-    const page = Number(qs.get('page') || '1') || 1;
-    const type = qs.get('type') || '';
-    const sort = (qs.get('sort') || 'newest') as SortValue;
-    const search = (qs.get('search') || '').trim();
-    return { page: Math.max(1, page), type, sort, search };
+    const p = Number(qs.get('page') || '1') || 1;
+    const t = qs.get('type') || '';
+    const s = (qs.get('sort') || 'newest') as SortValue;
+    const sq = (qs.get('search') || '').trim();
+
+    setPage(Math.max(1, p));
+    setType(t);
+    setSort(s);
+    setSearch(sq);
+    setSearchDraft(sq);
   }, []);
 
-  const [page, setPage] = useState(initial.page);
   const limit = 12;
   const [total, setTotal] = useState(0);
-
-  const [type, setType] = useState<string>(initial.type);
-  const [sort, setSort] = useState<SortValue>(initial.sort);
-
-  const [searchDraft, setSearchDraft] = useState('');
-  const [search, setSearch] = useState(initial.search);
 
   const safeSort: SortValue = useMemo(() => {
     return SORT_WHITELIST.includes(sort) ? sort : 'newest';

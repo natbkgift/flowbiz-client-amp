@@ -198,7 +198,7 @@ export default async function PropertyPage({ params }: PageProps) {
   return (
     <main className="section" id="main-content">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLd }} />
-      <Container>
+      <Container variant="full">
         <Breadcrumbs
           items={[
             { label: dict.property.breadcrumbHome, href: `/${locale}` },
