@@ -90,7 +90,7 @@ class PropertyBase(BaseModel):
     property_id: str = Field(..., pattern=r"^PROP-\d{4}-\d{3}$")
     intent: PropertyIntent
     type: PropertyType
-    status: PropertyStatus = PropertyStatus.DRAFT
+    status: PropertyStatus = PropertyStatus.ACTIVE
 
     # Content
     title_th: Optional[str] = None
@@ -136,7 +136,6 @@ class PropertyUpdate(BaseModel):
     pricing: Optional[PropertyPricing] = None
     media: Optional[list[PropertyMedia]] = None
     marketing: Optional[PropertyMarketingConfig] = None
-    date_available: Optional[datetime] = None
     date_available: Optional[datetime] = None
 
 
