@@ -511,6 +511,11 @@ export const en: Dictionary = {
     area: 'Area',
     clear: 'Clear',
     close: 'Close',
+    projectSearchPlaceholder: 'Search projects...',
+    projectSearchButton: 'Search',
+    sortAtoZ: 'Name: A - Z',
+    sortPriceAsc: 'Price: Low to High',
+    sortPriceDesc: 'Price: High to Low',
   },
   errors: {
     somethingWentWrong: 'Something went wrong',

@@ -504,6 +504,11 @@ export const th: Dictionary = {
     area: 'ทำเล',
     clear: 'ล้าง',
     close: 'ปิด',
+    projectSearchPlaceholder: 'ค้นหาชื่อโครงการ...',
+    projectSearchButton: 'ค้นหา',
+    sortAtoZ: 'ชื่อ: ก - ฮ',
+    sortPriceAsc: 'ราคา: ต่ำไปสูง',
+    sortPriceDesc: 'ราคา: สูงไปต่ำ',
   },
   errors: {
     somethingWentWrong: 'มีข้อผิดพลาด',

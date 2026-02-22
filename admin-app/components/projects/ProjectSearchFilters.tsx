@@ -56,12 +56,12 @@ export function ProjectSearchFilters() {
                 <input
                     type="search"
                     className="form-input flex-1"
-                    placeholder={locale === 'th' ? 'ค้นหาชื่อโครงการ...' : 'Search projects...'}
+                    placeholder={dict.filters?.projectSearchPlaceholder ?? 'Search projects...'}
                     value={search}
                     onChange={(e) => setSearch(e.target.value)}
                 />
                 <button type="submit" className="btn btn-primary">
-                    {locale === 'th' ? 'ค้นหา' : 'Search'}
+                    {dict.filters?.projectSearchButton ?? 'Search'}
                 </button>
             </div>
 
@@ -71,9 +71,9 @@ export function ProjectSearchFilters() {
                     value={sort}
                     onChange={(e) => handleSortChange(e.target.value as ProjectSortOption)}
                 >
-                    <option value="a-z">{locale === 'th' ? 'ชื่อ: ก - ฮ' : 'Name: A - Z'}</option>
-                    <option value="price-asc">{locale === 'th' ? 'ราคา: ต่ำไปสูง' : 'Price: Low to High'}</option>
-                    <option value="price-desc">{locale === 'th' ? 'ราคา: สูงไปต่ำ' : 'Price: High to Low'}</option>
+                    <option value="a-z">{dict.filters?.sortAtoZ ?? 'Name: A - Z'}</option>
+                    <option value="price-asc">{dict.filters?.sortPriceAsc ?? 'Price: Low to High'}</option>
+                    <option value="price-desc">{dict.filters?.sortPriceDesc ?? 'Price: High to Low'}</option>
                 </select>
             </div>
         </form>

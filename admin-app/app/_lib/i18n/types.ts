@@ -415,6 +415,11 @@ export type Dictionary = {
     area: string;
     clear: string;
     close: string;
+    projectSearchPlaceholder: string;
+    projectSearchButton: string;
+    sortAtoZ: string;
+    sortPriceAsc: string;
+    sortPriceDesc: string;
   };
   errors: {
     somethingWentWrong: string;
