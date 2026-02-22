@@ -14,21 +14,23 @@ export const revalidate = 300;
 export async function generateMetadata({
   params,
 }: {
-  params: { locale: string };
+  params: Promise<{ locale: string }>;
 }): Promise<Metadata> {
-  const locale = normalizeLocale(params.locale);
+  const { locale: rawLocale } = await params;
+  const locale = normalizeLocale(rawLocale);
   const dict = getDictionary(locale);
   return makePageMetadata(locale, '', `${dict.brand.name} | ${dict.home.heroTitle}`, dict.home.heroSubtitle, dict.brand.name);
 }
 
-export default function HomePage({
+export default async function HomePage({
   params,
   searchParams,
 }: {
-  params: { locale: string };
-  searchParams?: Record<string, string | string[] | undefined>;
+  params: Promise<{ locale: string }>;
+  searchParams?: Promise<Record<string, string | string[] | undefined>>;
 }) {
-  const locale = normalizeLocale(params.locale);
+  const { locale: rawLocale } = await params;
+  const locale = normalizeLocale(rawLocale);
   const dict = getDictionary(locale);
 
   type GuidedStep = 'goal' | 'budget' | 'contact';
@@ -71,11 +73,12 @@ export default function HomePage({
     invest: dict.guided.invest,
   };
 
-  const guidedOpen = pickParam(searchParams?.guided) === '1';
-  const step = normalizeGuidedStep(pickParam(searchParams?.step));
-  const goal = normalizeGoal(pickParam(searchParams?.goal));
-  const budget = pickParam(searchParams?.budget);
-  const timeline = pickParam(searchParams?.timeline);
+  const sp = searchParams ? await searchParams : undefined;
+  const guidedOpen = pickParam(sp?.guided) === '1';
+  const step = normalizeGuidedStep(pickParam(sp?.step));
+  const goal = normalizeGoal(pickParam(sp?.goal));
+  const budget = pickParam(sp?.budget);
+  const timeline = pickParam(sp?.timeline);
 
   const effectiveStep: GuidedStep = guidedOpen
     ? goal

@@ -13,15 +13,17 @@ export const revalidate = 300;
 export async function generateMetadata({
   params,
 }: {
-  params: { locale: string };
+  params: Promise<{ locale: string }>;
 }) {
-  const locale = normalizeLocale(params.locale);
+  const { locale: rawLocale } = await params;
+  const locale = normalizeLocale(rawLocale);
   const dict = getDictionary(locale);
   return makePageMetadata(locale, 'marketplace', dict.marketplace.title, dict.marketplace.subtitle, dict.brand.name);
 }
 
-export default async function MarketplacePage({ params }: { params: { locale: string } }) {
-  const locale = normalizeLocale(params.locale);
+export default async function MarketplacePage({ params }: { params: Promise<{ locale: string }> }) {
+  const { locale: rawLocale } = await params;
+  const locale = normalizeLocale(rawLocale);
   const dict = getDictionary(locale);
 
   let cats: Awaited<ReturnType<typeof fetchMarketplaceCategories>>;

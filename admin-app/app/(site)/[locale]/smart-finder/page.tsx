@@ -21,10 +21,11 @@ export async function generateMetadata({
   params,
   searchParams,
 }: {
-  params: { locale: string };
-  searchParams?: Record<string, string | string[] | undefined>;
+  params: Promise<{ locale: string }>;
+  searchParams?: Promise<Record<string, string | string[] | undefined>>;
 }): Promise<Metadata> {
-  const locale = normalizeLocale(params.locale);
+  const { locale: rawLocale } = await params;
+  const locale = normalizeLocale(rawLocale);
   const dict = getDictionary(locale);
   const base = makePageMetadata(locale, 'smart-finder', dict.smartFinder.title, dict.smartFinder.subtitle, dict.brand.name);
 
@@ -32,8 +33,9 @@ export async function generateMetadata({
   // When step/answer params are present the page shows personalised results
   // which have no unique SEO value.
   const WIZARD_PARAMS = new Set(['purpose', 'budget', 'timeline', 'risk_tolerance', 'foreign_quota', 'step']);
-  const hasWizardParam = searchParams
-    ? Object.keys(searchParams).some((k) => WIZARD_PARAMS.has(k))
+  const resolvedSearchParams = searchParams ? await searchParams : undefined;
+  const hasWizardParam = resolvedSearchParams
+    ? Object.keys(resolvedSearchParams).some((k) => WIZARD_PARAMS.has(k))
     : false;
 
   if (hasWizardParam) {
@@ -87,19 +89,21 @@ export default async function SmartFinderPage({
   params,
   searchParams,
 }: {
-  params: { locale: string };
-  searchParams?: Record<string, string | string[] | undefined>;
+  params: Promise<{ locale: string }>;
+  searchParams?: Promise<Record<string, string | string[] | undefined>>;
 }) {
-  const locale = normalizeLocale(params.locale);
+  const { locale: rawLocale } = await params;
+  const locale = normalizeLocale(rawLocale);
   const dict = getDictionary(locale);
 
-  const requestedStep = normalizeStep(pickParam(searchParams?.step));
+  const sp = searchParams ? await searchParams : undefined;
+  const requestedStep = normalizeStep(pickParam(sp?.step));
 
-  const purpose = normalizePurpose(pickParam(searchParams?.purpose));
-  const budget = normalizeBudget(pickParam(searchParams?.budget));
-  const timeline = normalizeTimeline(pickParam(searchParams?.timeline));
-  const risk = normalizeRisk(pickParam(searchParams?.risk_tolerance));
-  const quota = normalizeQuota(pickParam(searchParams?.foreign_quota));
+  const purpose = normalizePurpose(pickParam(sp?.purpose));
+  const budget = normalizeBudget(pickParam(sp?.budget));
+  const timeline = normalizeTimeline(pickParam(sp?.timeline));
+  const risk = normalizeRisk(pickParam(sp?.risk_tolerance));
+  const quota = normalizeQuota(pickParam(sp?.foreign_quota));
 
   const effectiveStep: Step =
     purpose == null

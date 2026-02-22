@@ -8,14 +8,16 @@ import { withLocale } from '@/app/_lib/i18n/routing';
 
 export const revalidate = 300;
 
-export async function generateMetadata({ params }: { params: { locale: string } }) {
-  const locale = normalizeLocale(params.locale);
+export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }) {
+  const { locale: rawLocale } = await params;
+  const locale = normalizeLocale(rawLocale);
   const dict = getDictionary(locale);
   return makePageMetadata(locale, 'general', dict.segments.general.heroTitle, dict.segments.general.heroSubtitle, dict.brand.name);
 }
 
-export default function GeneralPage({ params }: { params: { locale: string } }) {
-  const locale = normalizeLocale(params.locale);
+export default async function GeneralPage({ params }: { params: Promise<{ locale: string }> }) {
+  const { locale: rawLocale } = await params;
+  const locale = normalizeLocale(rawLocale);
   const dict = getDictionary(locale);
   const seg = dict.segments.general;
 

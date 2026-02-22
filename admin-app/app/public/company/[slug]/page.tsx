@@ -1,12 +1,13 @@
 'use client';
 
 import DOMPurify from 'dompurify';
-import { useEffect, useMemo, useState } from 'react';
+import { use, useEffect, useMemo, useState } from 'react';
 
 import { API_BASE } from '../../_shared/api';
 import type { CompanyInfoItem } from '../../_shared/types';
 
-export default function PublicCompanyDetailPage({ params }: { params: { slug: string } }) {
+export default function PublicCompanyDetailPage({ params }: { params: Promise<{ slug: string }> }) {
+  const { slug } = use(params);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [info, setInfo] = useState<CompanyInfoItem | null>(null);
@@ -21,7 +22,7 @@ export default function PublicCompanyDetailPage({ params }: { params: { slug: st
     setError(null);
     setInfo(null);
 
-    fetch(`${API_BASE}/v1/company/${params.slug}`, { signal: controller.signal })
+    fetch(`${API_BASE}/v1/company/${slug}`, { signal: controller.signal })
       .then(async (res) => {
         if (res.status === 404) {
           return null;
@@ -43,7 +44,7 @@ export default function PublicCompanyDetailPage({ params }: { params: { slug: st
       .finally(() => setLoading(false));
 
     return () => controller.abort();
-  }, [params.slug]);
+  }, [slug]);
 
   if (loading) {
     return <main className="max-w-4xl mx-auto p-6">Loading...</main>;

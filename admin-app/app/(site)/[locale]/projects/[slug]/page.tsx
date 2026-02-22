@@ -17,15 +17,16 @@ export const revalidate = 300;
 export async function generateMetadata({
   params,
 }: {
-  params: { locale: string; slug: string };
+  params: Promise<{ locale: string; slug: string }>;
 }): Promise<Metadata> {
-  const locale = normalizeLocale(params.locale);
+  const { locale: rawLocale, slug } = await params;
+  const locale = normalizeLocale(rawLocale);
   const dict = getDictionary(locale);
-  const canonical = `/${locale}/projects/${encodeURIComponent(params.slug)}`;
+  const canonical = `/${locale}/projects/${encodeURIComponent(slug)}`;
 
   let projectName: string | null = null;
   try {
-    const project = await fetchProjectBySlug(params.slug);
+    const project = await fetchProjectBySlug(slug);
     projectName = project?.name ?? null;
   } catch {
     projectName = null;
@@ -39,8 +40,8 @@ export async function generateMetadata({
     alternates: {
       canonical,
       languages: {
-        en: `/en/projects/${encodeURIComponent(params.slug)}`,
-        th: `/th/projects/${encodeURIComponent(params.slug)}`,
+        en: `/en/projects/${encodeURIComponent(slug)}`,
+        th: `/th/projects/${encodeURIComponent(slug)}`,
       },
     },
     openGraph: {
@@ -57,17 +58,18 @@ export async function generateMetadata({
 export default async function ProjectDetailPage({
   params,
 }: {
-  params: { locale: string; slug: string };
+  params: Promise<{ locale: string; slug: string }>;
 }) {
-  const locale = normalizeLocale(params.locale);
+  const { locale: rawLocale, slug } = await params;
+  const locale = normalizeLocale(rawLocale);
   const dict = getDictionary(locale);
 
   const internalLinks = getInternalLinks(locale, dict, { from: 'project_detail', includeProjects: true });
 
-  const project = await fetchProjectBySlug(params.slug);
+  const project = await fetchProjectBySlug(slug);
 
   const siteUrl = 'https://amppattaya.com';
-  const canonicalUrl = `${siteUrl}/${locale}/projects/${encodeURIComponent(params.slug)}`;
+  const canonicalUrl = `${siteUrl}/${locale}/projects/${encodeURIComponent(slug)}`;
 
   if (!project) {
     return (
@@ -158,7 +160,7 @@ export default async function ProjectDetailPage({
           items={[
             { label: dict.property.breadcrumbHome, href: `/${locale}` },
             { label: dict.nav.projects, href: `/${locale}/projects` },
-            { label: project.name, href: `/${locale}/projects/${encodeURIComponent(params.slug)}` },
+            { label: project.name, href: `/${locale}/projects/${encodeURIComponent(slug)}` },
           ]}
         />
         <div className="section-header">

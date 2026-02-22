@@ -10,13 +10,6 @@ const nextConfig = {
   trailingSlash: true,
   poweredByHeader: false,
   compress: true,
-  // Next.js 16 breaking change: page `params` are now Promise<T> not plain {T}.
-  // All ~40 pages need async params — tracked as follow-up PR (tech debt).
-  // ignoreBuildErrors avoids blocking builds; RUNTIME is unaffected since
-  // TypeScript is compile-time only.
-  typescript: {
-    ignoreBuildErrors: true,
-  },
   images: {
     formats: ['image/avif', 'image/webp'],
     remotePatterns: imageHosts.map((hostname) => ({

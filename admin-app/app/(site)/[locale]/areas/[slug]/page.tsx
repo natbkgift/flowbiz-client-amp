@@ -28,12 +28,11 @@ export function generateStaticParams() {
 export async function generateMetadata({
   params,
 }: {
-  params: { locale: string; slug: string };
+  params: Promise<{ locale: string; slug: string }>;
 }): Promise<Metadata> {
-  const locale = normalizeLocale(params.locale);
+  const { locale: rawLocale, slug } = await params;
+  const locale = normalizeLocale(rawLocale);
   const dict = getDictionary(locale);
-
-  const slug = params.slug;
   const canonical = `/${locale}/areas/${encodeURIComponent(slug)}`;
 
   const titleBase = isAreaSlug(slug)
@@ -64,12 +63,13 @@ export async function generateMetadata({
 export default async function AreaPage({
   params,
 }: {
-  params: { locale: string; slug: string };
+  params: Promise<{ locale: string; slug: string }>;
 }) {
-  const locale = normalizeLocale(params.locale);
+  const { locale: rawLocale, slug } = await params;
+  const locale = normalizeLocale(rawLocale);
   const dict = getDictionary(locale);
 
-  if (!isAreaSlug(params.slug)) {
+  if (!isAreaSlug(slug)) {
     return (
       <main className="section" id="main-content">
         <Container>
@@ -85,10 +85,10 @@ export default async function AreaPage({
     );
   }
 
-  const areaCopy = dict.area.areas[params.slug];
+  const areaCopy = dict.area.areas[slug];
   let stats: Awaited<ReturnType<typeof fetchAreaStatisticsBySlug>>;
   try {
-    stats = await fetchAreaStatisticsBySlug(params.slug);
+    stats = await fetchAreaStatisticsBySlug(slug);
   } catch {
     stats = null;
   }

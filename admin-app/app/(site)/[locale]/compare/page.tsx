@@ -15,15 +15,17 @@ export async function generateMetadata({
   params,
   searchParams,
 }: {
-  params: { locale: string };
-  searchParams?: Record<string, string | string[] | undefined>;
+  params: Promise<{ locale: string }>;
+  searchParams?: Promise<Record<string, string | string[] | undefined>>;
 }): Promise<Metadata> {
-  const locale = normalizeLocale(params.locale);
+  const { locale: rawLocale } = await params;
+  const locale = normalizeLocale(rawLocale);
   const dict = getDictionary(locale);
   const base = makePageMetadata(locale, 'compare', dict.compare.title, dict.compare.metaDescription, dict.brand.name);
 
   // Blueprint doc 03 — INDEX MATRIX: /compare/?ids=a,b → noindex.
-  const hasIds = searchParams?.ids !== undefined;
+  const resolvedSearchParams = searchParams ? await searchParams : undefined;
+  const hasIds = resolvedSearchParams?.ids !== undefined;
   if (hasIds) {
     return { ...base, robots: { index: false, follow: true } };
   }
@@ -91,13 +93,15 @@ export default async function ComparePage({
   params,
   searchParams,
 }: {
-  params: { locale: string };
-  searchParams?: Record<string, string | string[] | undefined>;
+  params: Promise<{ locale: string }>;
+  searchParams?: Promise<Record<string, string | string[] | undefined>>;
 }) {
-  const locale = normalizeLocale(params.locale);
+  const { locale: rawLocale } = await params;
+  const locale = normalizeLocale(rawLocale);
   const dict = getDictionary(locale);
 
-  const rawIds = pickParam(searchParams?.ids);
+  const sp = searchParams ? await searchParams : undefined;
+  const rawIds = pickParam(sp?.ids);
   const ids = parseIds(rawIds);
 
   if (ids.length < 2) {

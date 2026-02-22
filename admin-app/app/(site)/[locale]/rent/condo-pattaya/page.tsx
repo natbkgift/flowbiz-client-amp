@@ -16,20 +16,23 @@ export async function generateMetadata({
   params,
   searchParams,
 }: {
-  params: { locale: string };
-  searchParams?: Record<string, string | string[] | undefined>;
+  params: Promise<{ locale: string }>;
+  searchParams?: Promise<Record<string, string | string[] | undefined>>;
 }): Promise<Metadata> {
-  const locale = normalizeLocale(params.locale);
+  const { locale: rawLocale } = await params;
+  const locale = normalizeLocale(rawLocale);
   const dict = getDictionary(locale);
   const title = locale === 'th' ? 'คอนโดเช่าพัทยา' : 'Condo for Rent in Pattaya';
   const desc = locale === 'th'
     ? 'คอนโดให้เช่าในพัทยา ทั้งรายเดือนและรายปี พร้อมเฟอร์นิเจอร์ครบ'
     : 'Condos for rent in Pattaya — monthly and yearly, fully furnished options.';
-  return makeListingPageMetadata(locale, 'rent/condo-pattaya', title, desc, dict.brand.name, searchParams);
+  const resolvedSearchParams = searchParams ? await searchParams : undefined;
+  return makeListingPageMetadata(locale, 'rent/condo-pattaya', title, desc, dict.brand.name, resolvedSearchParams);
 }
 
-export default async function RentCondoPattayaPage({ params }: { params: { locale: string } }) {
-  const locale = normalizeLocale(params.locale);
+export default async function RentCondoPattayaPage({ params }: { params: Promise<{ locale: string }> }) {
+  const { locale: rawLocale } = await params;
+  const locale = normalizeLocale(rawLocale);
   const dict = getDictionary(locale);
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://amppattaya.com';
 

@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { use, useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 
 import { apiRequest, handleUnauthorizedError } from '../../../lib/api';
@@ -16,7 +16,8 @@ type Lead = {
   created_at: string;
 };
 
-export default function LeadDetailPage({ params }: { params: { id: string } }) {
+export default function LeadDetailPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = use(params);
   const router = useRouter();
   const [lead, setLead] = useState<Lead | null>(null);
   const [status, setStatus] = useState('new');
@@ -28,7 +29,7 @@ export default function LeadDetailPage({ params }: { params: { id: string } }) {
       return;
     }
 
-    apiRequest<Lead>(`/admin/leads/${params.id}`)
+    apiRequest<Lead>(`/admin/leads/${id}`)
       .then((data) => {
         setLead(data);
         setStatus(data.status);
@@ -39,11 +40,11 @@ export default function LeadDetailPage({ params }: { params: { id: string } }) {
         }
         setError('Unable to load lead detail');
       });
-  }, [params.id, router]);
+  }, [id, router]);
 
   async function updateStatus() {
     try {
-      const updated = await apiRequest<Lead>(`/admin/leads/${params.id}`, {
+      const updated = await apiRequest<Lead>(`/admin/leads/${id}`, {
         method: 'PATCH',
         body: JSON.stringify({ status })
       });

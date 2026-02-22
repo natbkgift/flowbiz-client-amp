@@ -14,9 +14,10 @@ export const revalidate = 300;
 export async function generateMetadata({
   params,
 }: {
-  params: { locale: string };
+  params: Promise<{ locale: string }>;
 }): Promise<Metadata> {
-  const locale = normalizeLocale(params.locale);
+  const { locale: rawLocale } = await params;
+  const locale = normalizeLocale(rawLocale);
   const dict = getDictionary(locale);
   const title = locale === 'th'
     ? 'เครื่องคำนวณ ROI อสังหาริมทรัพย์พัทยา'
@@ -27,8 +28,9 @@ export async function generateMetadata({
   return makePageMetadata(locale, 'invest/calculator', title, desc, dict.brand.name);
 }
 
-export default function InvestCalculatorPage({ params }: { params: { locale: string } }) {
-  const locale = normalizeLocale(params.locale);
+export default async function InvestCalculatorPage({ params }: { params: Promise<{ locale: string }> }) {
+  const { locale: rawLocale } = await params;
+  const locale = normalizeLocale(rawLocale);
   const dict = getDictionary(locale);
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://amppattaya.com';
 

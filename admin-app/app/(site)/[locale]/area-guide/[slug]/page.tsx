@@ -72,34 +72,36 @@ function humanize(slug: string): string {
 export async function generateMetadata({
   params,
 }: {
-  params: { locale: string; slug: string };
+  params: Promise<{ locale: string; slug: string }>;
 }): Promise<Metadata> {
-  const locale = normalizeLocale(params.locale);
+  const { locale: rawLocale, slug } = await params;
+  const locale = normalizeLocale(rawLocale);
   const dict = getDictionary(locale);
-  const area = areaData[params.slug];
-  const name = area ? (locale === 'th' ? area.nameTh : area.nameEn) : humanize(params.slug);
+  const area = areaData[slug];
+  const name = area ? (locale === 'th' ? area.nameTh : area.nameEn) : humanize(slug);
   const title = locale === 'th' ? `คู่มือทำเล: ${name}` : `Area Guide: ${name}`;
   const desc = area
     ? (locale === 'th' ? area.descTh.slice(0, 160) : area.descEn.slice(0, 160))
     : (locale === 'th' ? 'สรุปภาพรวมทำเล + ข้อควรรู้' : 'Area overview and key information.');
-  return makePageMetadata(locale, `area-guide/${params.slug}`, title, desc, dict.brand.name);
+  return makePageMetadata(locale, `area-guide/${slug}`, title, desc, dict.brand.name);
 }
 
-export default function AreaGuideSlugPage({
+export default async function AreaGuideSlugPage({
   params,
 }: {
-  params: { locale: string; slug: string };
+  params: Promise<{ locale: string; slug: string }>;
 }) {
-  const locale = normalizeLocale(params.locale);
+  const { locale: rawLocale, slug } = await params;
+  const locale = normalizeLocale(rawLocale);
   const dict = getDictionary(locale);
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://amppattaya.com';
-  const area = areaData[params.slug];
-  const name = area ? (locale === 'th' ? area.nameTh : area.nameEn) : humanize(params.slug);
+  const area = areaData[slug];
+  const name = area ? (locale === 'th' ? area.nameTh : area.nameEn) : humanize(slug);
 
   const breadcrumbItems = [
     { label: dict.nav.home, href: `/${locale}` },
     { label: dict.nav.areaGuide, href: `/${locale}/area-guide` },
-    { label: name, href: `/${locale}/area-guide/${encodeURIComponent(params.slug)}` },
+    { label: name, href: `/${locale}/area-guide/${encodeURIComponent(slug)}` },
   ];
 
   const jsonLd = JSON.stringify([
@@ -110,7 +112,7 @@ export default function AreaGuideSlugPage({
       ? [placeSchema({
           name: area.nameEn,
           description: area.descEn,
-          url: `${siteUrl}/${locale}/area-guide/${params.slug}`,
+          url: `${siteUrl}/${locale}/area-guide/${slug}`,
           lat: area.lat,
           lng: area.lng,
         })]
@@ -181,7 +183,7 @@ export default function AreaGuideSlugPage({
               </p>
             </div>
             <div className="cta-panel__form">
-              <LeadForm defaultMessage={`Area guide: ${params.slug}`} />
+              <LeadForm defaultMessage={`Area guide: ${slug}`} />
             </div>
           </div>
         </Container>

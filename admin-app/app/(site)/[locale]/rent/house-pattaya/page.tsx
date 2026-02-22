@@ -16,20 +16,23 @@ export async function generateMetadata({
   params,
   searchParams,
 }: {
-  params: { locale: string };
-  searchParams?: Record<string, string | string[] | undefined>;
+  params: Promise<{ locale: string }>;
+  searchParams?: Promise<Record<string, string | string[] | undefined>>;
 }): Promise<Metadata> {
-  const locale = normalizeLocale(params.locale);
+  const { locale: rawLocale } = await params;
+  const locale = normalizeLocale(rawLocale);
   const dict = getDictionary(locale);
   const title = locale === 'th' ? 'บ้านเช่าพัทยา' : 'House for Rent in Pattaya';
   const desc = locale === 'th'
     ? 'บ้านเดี่ยวและทาวน์เฮาส์ให้เช่าในพัทยา รายเดือนและรายปี'
     : 'Detached houses and townhouses for rent in Pattaya, monthly and yearly.';
-  return makeListingPageMetadata(locale, 'rent/house-pattaya', title, desc, dict.brand.name, searchParams);
+  const resolvedSearchParams = searchParams ? await searchParams : undefined;
+  return makeListingPageMetadata(locale, 'rent/house-pattaya', title, desc, dict.brand.name, resolvedSearchParams);
 }
 
-export default async function RentHousePattayaPage({ params }: { params: { locale: string } }) {
-  const locale = normalizeLocale(params.locale);
+export default async function RentHousePattayaPage({ params }: { params: Promise<{ locale: string }> }) {
+  const { locale: rawLocale } = await params;
+  const locale = normalizeLocale(rawLocale);
   const dict = getDictionary(locale);
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://amppattaya.com';
 

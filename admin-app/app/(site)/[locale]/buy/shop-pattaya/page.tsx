@@ -16,20 +16,23 @@ export async function generateMetadata({
   params,
   searchParams,
 }: {
-  params: { locale: string };
-  searchParams?: Record<string, string | string[] | undefined>;
+  params: Promise<{ locale: string }>;
+  searchParams?: Promise<Record<string, string | string[] | undefined>>;
 }): Promise<Metadata> {
-  const locale = normalizeLocale(params.locale);
+  const { locale: rawLocale } = await params;
+  const locale = normalizeLocale(rawLocale);
   const dict = getDictionary(locale);
   const title = locale === 'th' ? 'ร้านค้าและอาคารพาณิชย์ขายพัทยา' : 'Shophouse & Retail for Sale in Pattaya';
   const desc = locale === 'th'
     ? 'ร้านค้า อาคารพาณิชย์ และพื้นที่ค้าปลีกพร้อมขายในพัทยา'
     : 'Shophouses, commercial buildings, and retail space for sale in Pattaya.';
-  return makeListingPageMetadata(locale, 'buy/shop-pattaya', title, desc, dict.brand.name, searchParams);
+  const resolvedSearchParams = searchParams ? await searchParams : undefined;
+  return makeListingPageMetadata(locale, 'buy/shop-pattaya', title, desc, dict.brand.name, resolvedSearchParams);
 }
 
-export default async function BuyShopPattayaPage({ params }: { params: { locale: string } }) {
-  const locale = normalizeLocale(params.locale);
+export default async function BuyShopPattayaPage({ params }: { params: Promise<{ locale: string }> }) {
+  const { locale: rawLocale } = await params;
+  const locale = normalizeLocale(rawLocale);
   const dict = getDictionary(locale);
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://amppattaya.com';
 

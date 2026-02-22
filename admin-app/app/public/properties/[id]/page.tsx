@@ -1,12 +1,13 @@
 'use client';
 
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { use, useEffect, useMemo, useRef, useState } from 'react';
 
 import { API_BASE } from '../../_shared/api';
 import type { PropertyDetail } from '../../_shared/types';
 import { RemoteImage } from '../../../../components/media/RemoteImage';
 
-export default function PublicPropertyDetailPage({ params }: { params: { id: string } }) {
+export default function PublicPropertyDetailPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = use(params);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -24,7 +25,7 @@ export default function PublicPropertyDetailPage({ params }: { params: { id: str
     setError(null);
     setProperty(null);
 
-    fetch(`${API_BASE}/v1/properties/${params.id}`, { signal: controller.signal })
+    fetch(`${API_BASE}/v1/properties/${id}`, { signal: controller.signal })
       .then(async (res) => {
         if (res.status === 404) {
           return null;
@@ -51,7 +52,7 @@ export default function PublicPropertyDetailPage({ params }: { params: { id: str
       });
 
     return () => controller.abort();
-  }, [params.id]);
+  }, [id]);
 
   function scrollToContact() {
     contactRef.current?.scrollIntoView({ behavior: 'smooth' });

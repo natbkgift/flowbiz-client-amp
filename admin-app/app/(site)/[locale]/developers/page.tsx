@@ -15,9 +15,10 @@ export const revalidate = 300;
 export async function generateMetadata({
   params,
 }: {
-  params: { locale: string };
+  params: Promise<{ locale: string }>;
 }): Promise<Metadata> {
-  const locale = normalizeLocale(params.locale);
+  const { locale: rawLocale } = await params;
+  const locale = normalizeLocale(rawLocale);
   const dict = getDictionary(locale);
   const title = locale === 'th' ? 'ผู้พัฒนาโครงการ (Developers)' : 'Developers (Pattaya)';
   const desc = locale === 'th'
@@ -26,8 +27,9 @@ export async function generateMetadata({
   return makePageMetadata(locale, 'developers', title, desc, dict.brand.name);
 }
 
-export default async function DevelopersIndexPage({ params }: { params: { locale: string } }) {
-  const locale = normalizeLocale(params.locale);
+export default async function DevelopersIndexPage({ params }: { params: Promise<{ locale: string }> }) {
+  const { locale: rawLocale } = await params;
+  const locale = normalizeLocale(rawLocale);
   const dict = getDictionary(locale);
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://amppattaya.com';
 

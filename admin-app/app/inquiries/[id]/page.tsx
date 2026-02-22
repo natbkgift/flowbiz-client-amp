@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { use, useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 
 import { apiRequest, handleUnauthorizedError } from '../../../lib/api';
@@ -33,7 +33,8 @@ type Assignment = {
 
 const STATUSES = ['new', 'contacted', 'qualified', 'closed', 'lost'] as const;
 
-export default function InquiryDetailPage({ params }: { params: { id: string } }) {
+export default function InquiryDetailPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = use(params);
   const router = useRouter();
   const [inquiry, setInquiry] = useState<Inquiry | null>(null);
   const [assignments, setAssignments] = useState<Assignment[]>([]);
@@ -49,7 +50,7 @@ export default function InquiryDetailPage({ params }: { params: { id: string } }
       return;
     }
 
-    apiRequest<Inquiry>(`/admin/inquiries/${params.id}`)
+    apiRequest<Inquiry>(`/admin/inquiries/${id}`)
       .then((data) => {
         setInquiry(data);
         setStatus(data.status);
@@ -59,16 +60,16 @@ export default function InquiryDetailPage({ params }: { params: { id: string } }
         setError('Unable to load inquiry');
       });
 
-    apiRequest<Assignment[]>(`/admin/inquiries/${params.id}/assignments`)
+    apiRequest<Assignment[]>(`/admin/inquiries/${id}/assignments`)
       .then(setAssignments)
       .catch(() => {
         // non-blocking
       });
-  }, [params.id, router]);
+  }, [id, router]);
 
   async function updateStatus() {
     try {
-      const updated = await apiRequest<Inquiry>(`/admin/inquiries/${params.id}`, {
+      const updated = await apiRequest<Inquiry>(`/admin/inquiries/${id}`, {
         method: 'PATCH',
         body: JSON.stringify({ status }),
       });
@@ -83,12 +84,12 @@ export default function InquiryDetailPage({ params }: { params: { id: string } }
     if (!canAssign) return;
 
     try {
-      const updated = await apiRequest<Inquiry>(`/admin/inquiries/${params.id}/assign`, {
+      const updated = await apiRequest<Inquiry>(`/admin/inquiries/${id}/assign`, {
         method: 'POST',
         body: JSON.stringify({ assigned_user_id: assignee.trim() || null, reason: 'manual' }),
       });
       setInquiry(updated);
-      const rows = await apiRequest<Assignment[]>(`/admin/inquiries/${params.id}/assignments`);
+      const rows = await apiRequest<Assignment[]>(`/admin/inquiries/${id}/assignments`);
       setAssignments(rows);
       setAssignee('');
     } catch (err) {

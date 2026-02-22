@@ -22,14 +22,15 @@ import {
 
 export const revalidate = 300;
 
-type PageProps = { params: { locale: string; slug: string } };
+type PageProps = { params: Promise<{ locale: string; slug: string }> };
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
-  const locale = normalizeLocale(params.locale);
+  const { locale: rawLocale, slug } = await params;
+  const locale = normalizeLocale(rawLocale);
   const dict = getDictionary(locale);
-  const canonical = `/${locale}/property/${encodeURIComponent(params.slug)}`;
+  const canonical = `/${locale}/property/${encodeURIComponent(slug)}`;
 
-  const p = await fetchPropertyBySlug(params.slug);
+  const p = await fetchPropertyBySlug(slug);
   if (!p) {
     const title = `${dict.brand.name} | ${dict.nav.buy}`;
     return {
@@ -37,8 +38,8 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
       alternates: {
         canonical,
         languages: {
-          en: `/en/property/${encodeURIComponent(params.slug)}`,
-          th: `/th/property/${encodeURIComponent(params.slug)}`,
+          en: `/en/property/${encodeURIComponent(slug)}`,
+          th: `/th/property/${encodeURIComponent(slug)}`,
         },
       },
       openGraph: {
@@ -59,8 +60,8 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     alternates: {
       canonical,
       languages: {
-        en: `/en/property/${encodeURIComponent(params.slug)}`,
-        th: `/th/property/${encodeURIComponent(params.slug)}`,
+        en: `/en/property/${encodeURIComponent(slug)}`,
+        th: `/th/property/${encodeURIComponent(slug)}`,
       },
     },
     openGraph: {
@@ -80,10 +81,11 @@ function formatPriceTHB(price: number): string {
 }
 
 export default async function PropertyPage({ params }: PageProps) {
-  const locale = normalizeLocale(params.locale);
+  const { locale: rawLocale, slug } = await params;
+  const locale = normalizeLocale(rawLocale);
   const dict = getDictionary(locale);
   const internalLinks = getInternalLinks(locale, dict, { from: 'property_detail', includeProjects: true });
-  const property = await fetchPropertyBySlug(params.slug);
+  const property = await fetchPropertyBySlug(slug);
   if (!property) {
     return (
       <main className="section" id="main-content">
@@ -112,7 +114,7 @@ export default async function PropertyPage({ params }: PageProps) {
   }
 
   const siteUrl = 'https://amppattaya.com';
-  const canonicalUrl = `${siteUrl}/${locale}/property/${encodeURIComponent(params.slug)}`;
+  const canonicalUrl = `${siteUrl}/${locale}/property/${encodeURIComponent(slug)}`;
 
   const images = (property.local_images ?? property.images ?? [])
     .map((u) => resolveImageUrl(u))
@@ -183,7 +185,7 @@ export default async function PropertyPage({ params }: PageProps) {
           items={[
             { label: dict.property.breadcrumbHome, href: `/${locale}` },
             { label: dict.nav.buy, href: `/${locale}/buy` },
-            { label: property.title, href: `/${locale}/property/${encodeURIComponent(params.slug)}` },
+            { label: property.title, href: `/${locale}/property/${encodeURIComponent(slug)}` },
           ]}
         />
         <div className="detail-layout">

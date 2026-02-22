@@ -20,37 +20,39 @@ function humanize(slug: string): string {
 export async function generateMetadata({
   params,
 }: {
-  params: { locale: string; slug: string };
+  params: Promise<{ locale: string; slug: string }>;
 }): Promise<Metadata> {
-  const locale = normalizeLocale(params.locale);
+  const { locale: rawLocale, slug } = await params;
+  const locale = normalizeLocale(rawLocale);
   const dict = getDictionary(locale);
-  const title = locale === 'th' ? `คู่มือ: ${params.slug}` : `Guide: ${humanize(params.slug)}`;
+  const title = locale === 'th' ? `คู่มือ: ${slug}` : `Guide: ${humanize(slug)}`;
   const desc = locale === 'th'
     ? 'สรุปแนวทาง + เช็กลิสต์ เพื่อช่วยตัดสินใจก่อนคุยกับที่ปรึกษา'
     : 'A practical summary and checklist to prepare before speaking with an advisor.';
-  return makePageMetadata(locale, `guides/${params.slug}`, title, desc, dict.brand.name);
+  return makePageMetadata(locale, `guides/${slug}`, title, desc, dict.brand.name);
 }
 
-export default function GuideArticlePage({
+export default async function GuideArticlePage({
   params,
 }: {
-  params: { locale: string; slug: string };
+  params: Promise<{ locale: string; slug: string }>;
 }) {
-  const locale = normalizeLocale(params.locale);
+  const { locale: rawLocale, slug } = await params;
+  const locale = normalizeLocale(rawLocale);
   const dict = getDictionary(locale);
 
-  const h1 = locale === 'th' ? `คู่มือ: ${params.slug}` : humanize(params.slug);
+  const h1 = locale === 'th' ? `คู่มือ: ${slug}` : humanize(slug);
   const lead = locale === 'th'
     ? 'บทความนี้เป็นโครงแบบ (template) สำหรับ cluster guides ตาม Content Pillar Map — เราจะขยายเนื้อหาเชิงลึกในรอบถัดไป'
     : 'This is a template page for cluster guides per the Content Pillar Map. We will expand with deeper content in a next iteration.';
 
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://amppattaya.com';
-  const canonicalUrl = `${siteUrl}/${locale}/guides/${encodeURIComponent(params.slug)}`;
+  const canonicalUrl = `${siteUrl}/${locale}/guides/${encodeURIComponent(slug)}`;
 
   const breadcrumbItems = [
     { label: dict.nav.home, href: `/${locale}` },
     { label: locale === 'th' ? 'คู่มือ' : 'Guides', href: `/${locale}/guides` },
-    { label: h1, href: `/${locale}/guides/${encodeURIComponent(params.slug)}` },
+    { label: h1, href: `/${locale}/guides/${encodeURIComponent(slug)}` },
   ];
   const breadcrumbJsonLd = breadcrumbSchema(
     breadcrumbItems.map((item) => ({ name: item.label, url: `${siteUrl}${item.href}` }))

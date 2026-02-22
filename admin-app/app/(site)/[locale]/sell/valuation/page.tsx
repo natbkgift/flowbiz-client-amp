@@ -12,9 +12,10 @@ export const revalidate = 300;
 export async function generateMetadata({
   params,
 }: {
-  params: { locale: string };
+  params: Promise<{ locale: string }>;
 }): Promise<Metadata> {
-  const locale = normalizeLocale(params.locale);
+  const { locale: rawLocale } = await params;
+  const locale = normalizeLocale(rawLocale);
   const dict = getDictionary(locale);
   const title = locale === 'th' ? 'ประเมินราคาฟรี' : 'Free Property Valuation';
   const desc =
@@ -24,12 +25,13 @@ export async function generateMetadata({
   return makePageMetadata(locale, 'sell/valuation', title, desc, dict.brand.name);
 }
 
-export default function SellValuationPage({
+export default async function SellValuationPage({
   params,
 }: {
-  params: { locale: string };
+  params: Promise<{ locale: string }>;
 }) {
-  const locale = normalizeLocale(params.locale);
+  const { locale: rawLocale } = await params;
+  const locale = normalizeLocale(rawLocale);
   const dict = getDictionary(locale);
 
   const t = {

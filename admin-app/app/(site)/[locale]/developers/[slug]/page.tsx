@@ -15,32 +15,34 @@ export const revalidate = 300;
 export async function generateMetadata({
   params,
 }: {
-  params: { locale: string; slug: string };
+  params: Promise<{ locale: string; slug: string }>;
 }): Promise<Metadata> {
-  const locale = normalizeLocale(params.locale);
+  const { locale: rawLocale, slug } = await params;
+  const locale = normalizeLocale(rawLocale);
   const dict = getDictionary(locale);
   const title = locale === 'th'
-    ? `ผู้พัฒนาโครงการ: ${params.slug}`
-    : `Developer: ${params.slug}`;
+    ? `ผู้พัฒนาโครงการ: ${slug}`
+    : `Developer: ${slug}`;
   const desc = locale === 'th'
     ? 'ดูโครงการที่เกี่ยวข้องและขอคำแนะนำจากที่ปรึกษา'
     : 'Browse related projects and request advice from an advisor.';
-  return makePageMetadata(locale, `developers/${params.slug}`, title, desc, dict.brand.name);
+  return makePageMetadata(locale, `developers/${slug}`, title, desc, dict.brand.name);
 }
 
 export default async function DeveloperDetailPage({
   params,
 }: {
-  params: { locale: string; slug: string };
+  params: Promise<{ locale: string; slug: string }>;
 }) {
-  const locale = normalizeLocale(params.locale);
+  const { locale: rawLocale, slug } = await params;
+  const locale = normalizeLocale(rawLocale);
   const dict = getDictionary(locale);
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://amppattaya.com';
 
   const breadcrumbItems = [
     { label: dict.nav.home, href: `/${locale}` },
     { label: locale === 'th' ? 'ผู้พัฒนาโครงการ' : 'Developers', href: `/${locale}/developers` },
-    { label: params.slug, href: `/${locale}/developers/${encodeURIComponent(params.slug)}` },
+    { label: slug, href: `/${locale}/developers/${encodeURIComponent(slug)}` },
   ];
   const breadcrumbJsonLd = breadcrumbSchema(
     breadcrumbItems.map((item) => ({ name: item.label, url: `${siteUrl}${item.href}` }))
@@ -53,7 +55,7 @@ export default async function DeveloperDetailPage({
     projects = [];
   }
 
-  const related = (projects ?? []).filter((p) => String(p.developer_id ?? '').trim() === params.slug);
+  const related = (projects ?? []).filter((p) => String(p.developer_id ?? '').trim() === slug);
 
   return (
     <main id="main-content">
@@ -62,7 +64,7 @@ export default async function DeveloperDetailPage({
 
       <section className="hero hero--page">
         <Container>
-          <h1 className="headline">{locale === 'th' ? `ผู้พัฒนาโครงการ: ${params.slug}` : `Developer: ${params.slug}`}</h1>
+          <h1 className="headline">{locale === 'th' ? `ผู้พัฒนาโครงการ: ${slug}` : `Developer: ${slug}`}</h1>
           <p className="subhead">
             {locale === 'th'
               ? 'หน้านี้เป็น template ตาม blueprint (developer page). จะขยายข้อมูล logo/เว็บไซต์/สรุปเมื่อมีข้อมูล developers table'
@@ -136,7 +138,7 @@ export default async function DeveloperDetailPage({
               </p>
             </div>
             <div className="cta-panel__form">
-              <LeadForm defaultMessage={`Developer: ${params.slug}`} />
+              <LeadForm defaultMessage={`Developer: ${slug}`} />
             </div>
           </div>
         </Container>
