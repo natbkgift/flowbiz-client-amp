@@ -476,7 +476,10 @@ select {
   display: block;
 }
 
-/* Legacy link styles — overridden by specific .mobile-nav__* classes below */
+/* Utility visibility classes — mobile-first */
+.desktop-only {
+  display: none;           /* hidden on mobile by default */
+}
 
 .mobile-only {
   display: block;
@@ -486,8 +489,10 @@ select {
   .mobile-only {
     display: none !important;
   }
+  /* desktop-only: remove hide-rule but DO NOT set display here,
+     so element-specific rules (.nav{flex}, etc.) take effect */
   .desktop-only {
-    display: block !important;
+    display: revert;
   }
 }
 
@@ -1115,8 +1120,9 @@ select {
 .cta-row {
   margin-top: var(--space-4);
   display: flex;
-  gap: var(--space-2);
+  gap: var(--space-3);    /* 16px — was 8px, now properly spaced */
   flex-wrap: wrap;
+  align-items: center;
 }
 .cta-row--center {
   justify-content: center;
@@ -1921,21 +1927,25 @@ select {
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
   padding: 16px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  /* Use grid + place-items for reliable centering of <dialog> elements */
+  display: grid;
+  place-items: center;
 }
 
 .guided-dialog {
+  position: relative;     /* override any UA absolute positioning */
+  display: block;         /* ensure block for grid centering */
   width: min(720px, 100%);
   border: 1px solid var(--color-gray-200);
   border-radius: var(--radius-lg);
   background: var(--color-white);
   box-shadow: var(--shadow-elevated);
   padding: 0;
-  margin: 0;            /* prevent UA browser default dialog margin */
+  margin: 0;
   max-height: calc(100vh - 48px);
   overflow-y: auto;
+  justify-self: center;   /* explicit centering within grid */
+  align-self: center;
 }
 
 .guided-dialog::backdrop {
