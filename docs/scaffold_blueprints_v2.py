@@ -1,6 +1,6 @@
 import os
 
-base_path = r"d:\FlowBiz\flowbiz-client-amp\docs\Strategic_Plans"
+base_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "Strategic_Plans")
 
 phases = {
     "Phase1_Foundation": [

@@ -90,7 +90,7 @@ class PropertyBase(BaseModel):
     property_id: str = Field(..., pattern=r"^PROP-\d{4}-\d{3}$")
     intent: PropertyIntent
     type: PropertyType
-    status: PropertyStatus = PropertyStatus.ACTIVE
+    status: PropertyStatus = PropertyStatus.DRAFT
 
     # Content
     title_th: Optional[str] = None
