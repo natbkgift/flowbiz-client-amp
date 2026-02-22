@@ -125,7 +125,7 @@ export default async function HomePage({
 
       {/* Hero Section with Search */}
       <section className="hero hero--premium">
-        <Container>
+        <Container variant="full">
           <div className="hero-grid">
             <div>
               <h1 className="headline">{dict.home.heroTitle}</h1>

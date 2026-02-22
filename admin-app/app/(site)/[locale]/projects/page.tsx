@@ -3,6 +3,7 @@ import { makeListingPageMetadata } from '@/app/_lib/i18n/metadata';
 import { Container } from '@/components/layout/Container';
 import { Breadcrumbs } from '@/components/layout/Breadcrumbs';
 import { ProjectCard } from '@/components/project/ProjectCard';
+import { ProjectSearchFilters } from '@/components/projects/ProjectSearchFilters';
 import { fetchProjects } from '@/app/_lib/public-api-server';
 import { getDictionary, normalizeLocale } from '@/app/_lib/i18n/get-dictionary';
 import { breadcrumbSchema } from '@/app/_lib/schema-markup';
@@ -23,12 +24,21 @@ export async function generateMetadata({
   return makeListingPageMetadata(locale, 'projects', dict.nav.projects, dict.listing.exploreProjectsDesc, dict.brand.name, resolvedSearchParams);
 }
 
-export default async function ProjectsPage({ params }: { params: Promise<{ locale: string }> }) {
+export default async function ProjectsPage({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ locale: string }>;
+  searchParams?: Promise<Record<string, string | string[] | undefined>>;
+}) {
   const { locale: rawLocale } = await params;
   const locale = normalizeLocale(rawLocale);
   const dict = getDictionary(locale);
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://amppattaya.com';
   const canonicalUrl = `${siteUrl}/${locale}/projects`;
+  const resolvedSearchParams = searchParams ? await searchParams : undefined;
+  const querySearch = typeof resolvedSearchParams?.search === 'string' ? resolvedSearchParams.search.toLowerCase() : '';
+  const querySort = typeof resolvedSearchParams?.sort === 'string' ? resolvedSearchParams.sort : 'a-z';
 
   const breadcrumbItems = [
     { label: dict.nav.home, href: `/${locale}` },
@@ -47,9 +57,30 @@ export default async function ProjectsPage({ params }: { params: Promise<{ local
     projects = [];
   }
 
-  const sorted = [...projects].sort((a, b) =>
-    (a.name ?? '').localeCompare(b.name ?? '') || (a.slug ?? '').localeCompare(b.slug ?? '')
-  );
+  let filtered = projects;
+  if (querySearch) {
+    filtered = filtered.filter(p => (p.name ?? '').toLowerCase().includes(querySearch));
+  }
+
+  const sorted = [...filtered].sort((a, b) => {
+    if (querySort === 'price-asc') {
+      const pa = a.starting_price || 0;
+      const pb = b.starting_price || 0;
+      // If one has no price, push it to the bottom
+      if (!pa && pb) return 1;
+      if (pa && !pb) return -1;
+      return pa - pb || (a.name ?? '').localeCompare(b.name ?? '');
+    }
+    if (querySort === 'price-desc') {
+      const pa = a.starting_price || 0;
+      const pb = b.starting_price || 0;
+      // If one has no price, push it to the bottom
+      if (!pa && pb) return 1;
+      if (pa && !pb) return -1;
+      return pb - pa || (a.name ?? '').localeCompare(b.name ?? '');
+    }
+    return (a.name ?? '').localeCompare(b.name ?? '') || (a.slug ?? '').localeCompare(b.slug ?? '');
+  });
 
   const jsonLd = JSON.stringify(
     [
@@ -84,11 +115,13 @@ export default async function ProjectsPage({ params }: { params: Promise<{ local
         <div className="section-header mb-6">
           <h1 className="section-title">{dict.nav.projects}</h1>
           <p className="section-subtitle">
-            {sorted.length
-              ? `${sorted.length} ${dict.listing.publishedProjects}`
+            {projects.length
+              ? `${projects.length} ${dict.listing.publishedProjects}`
               : dict.listing.projectsSubtitle}
           </p>
         </div>
+
+        <ProjectSearchFilters />
 
         {sorted.length ? (
           <div className="grid grid-3">
