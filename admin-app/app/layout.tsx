@@ -9,6 +9,7 @@ const sans = Prompt({
   subsets: ['thai', 'latin'],
   weight: ['400', '500', '600', '700'],
   display: 'swap',
+  preload: true,
   variable: '--font-sans',
 });
 
@@ -16,6 +17,7 @@ const serif = Noto_Serif_Thai({
   subsets: ['thai', 'latin'],
   weight: ['400'],
   display: 'swap',
+  preload: true,
   variable: '--font-serif',
 });
 
