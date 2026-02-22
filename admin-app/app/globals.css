@@ -396,12 +396,23 @@ select {
   color: var(--color-white) !important;
   font-weight: 600;
   border: none;
+  transition: background 0.2s ease, transform 0.2s ease;
 }
 
 .nav-link--cta:hover {
   background: var(--color-primary-dark);
   color: var(--color-white) !important;
   transform: translateY(-1px);
+}
+
+/* Contact button stays white when active (on /contact page) */
+.nav-link--cta.nav-link--active {
+  background: var(--color-primary-dark);
+  color: var(--color-white) !important;
+}
+
+.nav-link--cta.nav-link--active::after {
+  display: none; /* suppress underline indicator — fill bg is the active signal */
 }
 
 .header-actions {
@@ -849,6 +860,19 @@ select {
 .hero.hero--page {
   background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-dark) 100%);
   padding: var(--space-7) 0 var(--space-6);
+}
+
+/* btn-secondary on dark hero background — ghost white style */
+.hero .btn-secondary {
+  border-color: rgba(255, 255, 255, 0.7);
+  color: var(--color-white);
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.hero .btn-secondary:hover {
+  background: rgba(255, 255, 255, 0.2);
+  border-color: var(--color-white);
+  color: var(--color-white);
 }
 
 .hero-grid {
@@ -1909,6 +1933,9 @@ select {
   background: var(--color-white);
   box-shadow: var(--shadow-elevated);
   padding: 0;
+  margin: 0;            /* prevent UA browser default dialog margin */
+  max-height: calc(100vh - 48px);
+  overflow-y: auto;
 }
 
 .guided-dialog::backdrop {
@@ -2239,6 +2266,95 @@ select {
 .article-cta {
   margin-top: var(--space-6);
   margin-bottom: var(--space-5);
+}
+
+/* ======================== BREADCRUMBS ======================== */
+
+.breadcrumbs {
+  padding: var(--space-2-5) 0;
+  border-bottom: 1px solid var(--color-gray-100);
+  background: var(--color-white);
+}
+
+.breadcrumbs-list {
+  max-width: var(--max-width);
+  margin: 0 auto;
+  padding: 0 var(--space-4);
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  list-style: none;
+  flex-wrap: wrap;
+}
+
+.breadcrumbs-item {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+.breadcrumbs-link {
+  font-size: var(--font-sm);
+  color: var(--color-text-secondary);
+  transition: color 0.15s ease;
+  text-decoration: none;
+}
+
+.breadcrumbs-link:hover {
+  color: var(--color-primary);
+  text-decoration: underline;
+}
+
+.breadcrumbs-separator {
+  font-size: var(--font-sm);
+  color: var(--color-gray-300);
+  user-select: none;
+  line-height: 1;
+  padding: 0 2px;
+}
+
+.breadcrumbs-item > span[aria-current="page"] {
+  font-size: var(--font-sm);
+  color: var(--color-text);
+  font-weight: 500;
+}
+
+/* ======================== COOKIE CONSENT ======================== */
+
+.cookie-consent {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 200;
+  background: var(--color-white);
+  border-top: 1px solid var(--color-gray-200);
+  box-shadow: 0 -2px 12px rgba(0, 0, 0, 0.08);
+  padding: var(--space-3) var(--space-4);
+}
+
+.cookie-consent__inner {
+  max-width: var(--max-width);
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  gap: var(--space-6);
+  flex-wrap: wrap;
+}
+
+.cookie-consent__text {
+  flex: 1;
+  min-width: 200px;
+  font-size: var(--font-sm);
+  color: var(--color-text-secondary);
+  margin: 0;
+}
+
+.cookie-consent__actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  flex-shrink: 0;
 }
 
 /* ======================== REDUCED MOTION ======================== */
