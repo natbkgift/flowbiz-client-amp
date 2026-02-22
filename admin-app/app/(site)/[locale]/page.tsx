@@ -7,7 +7,7 @@ import { getDictionary, normalizeLocale } from '@/app/_lib/i18n/get-dictionary';
 import { withLocale } from '@/app/_lib/i18n/routing';
 import { makePageMetadata } from '@/app/_lib/i18n/metadata';
 import { getContentRecommendation } from '@/lib/personalization';
- 
+import { organizationSchema, webSiteSchema, localBusinessSchema } from '@/app/_lib/schema-markup';
 
 export const revalidate = 300;
 
@@ -98,26 +98,17 @@ export default function HomePage({
 
   const recommendation = getContentRecommendation();
 
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://amppattaya.com';
-
-  const jsonLd = {
-    '@context': 'https://schema.org',
-    '@type': 'RealEstateAgent',
-    name: dict.brand.name,
-    url: siteUrl,
-    description: dict.home.heroSubtitle,
-    areaServed: {
-      '@type': 'City',
-      name: 'Pattaya',
-      containedInPlace: { '@type': 'Country', name: 'Thailand' },
-    },
-  };
+  const jsonLd = JSON.stringify([
+    organizationSchema(),
+    webSiteSchema(),
+    localBusinessSchema(),
+  ], null, 0);
 
   return (
     <main id="main-content" data-emphasis={recommendation.emphasis}>
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        dangerouslySetInnerHTML={{ __html: jsonLd }}
       />
       <section className="hero hero--premium">
         <Container>

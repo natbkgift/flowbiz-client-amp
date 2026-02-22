@@ -6,15 +6,18 @@ import { LeadForm } from '@/components/forms/LeadForm';
 import { ListingGrid } from '@/components/listing/ListingGrid';
 import { fetchProperties } from '@/app/_lib/public-api-server';
 import { getDictionary, normalizeLocale } from '@/app/_lib/i18n/get-dictionary';
-import { makePageMetadata } from '@/app/_lib/i18n/metadata';
+import { makeListingPageMetadata } from '@/app/_lib/i18n/metadata';
 import { withLocale } from '@/app/_lib/i18n/routing';
+import { breadcrumbSchema } from '@/app/_lib/schema-markup';
 
 export const revalidate = 300;
 
 export async function generateMetadata({
   params,
+  searchParams,
 }: {
   params: { locale: string };
+  searchParams?: Record<string, string | string[] | undefined>;
 }): Promise<Metadata> {
   const locale = normalizeLocale(params.locale);
   const dict = getDictionary(locale);
@@ -22,12 +25,13 @@ export async function generateMetadata({
   const desc = locale === 'th'
     ? 'รวมคอนโดพร้อมขายในพัทยา + คำแนะนำสำหรับนักลงทุนและผู้ซื้อ'
     : 'Condo listings in Pattaya with a practical buyer + investor guide.';
-  return makePageMetadata(locale, 'buy/condo-pattaya', title, desc, dict.brand.name);
+  return makeListingPageMetadata(locale, 'buy/condo-pattaya', title, desc, dict.brand.name, searchParams);
 }
 
 export default async function CondoPattayaPage({ params }: { params: { locale: string } }) {
   const locale = normalizeLocale(params.locale);
   const dict = getDictionary(locale);
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://amppattaya.com';
 
   let res: Awaited<ReturnType<typeof fetchProperties>>;
   try {
@@ -41,15 +45,19 @@ export default async function CondoPattayaPage({ params }: { params: { locale: s
     ? 'คัดรายการน่าสนใจ พร้อมขั้นตอนซื้อและคำแนะนำสำหรับชาวต่างชาติ'
     : 'Curated listings with a buyer checklist and foreign-ownership guidance.';
 
+  const breadcrumbItems = [
+    { label: dict.nav.home, href: `/${locale}` },
+    { label: dict.nav.buy, href: `/${locale}/buy` },
+    { label: locale === 'th' ? 'คอนโดพัทยา' : 'Condo Pattaya', href: `/${locale}/buy/condo-pattaya` },
+  ];
+  const breadcrumbJsonLd = breadcrumbSchema(
+    breadcrumbItems.map((item) => ({ name: item.label, url: `${siteUrl}${item.href}` }))
+  );
+
   return (
     <main id="main-content">
-      <Breadcrumbs
-        items={[
-          { label: dict.nav.home, href: `/${locale}` },
-          { label: dict.nav.buy, href: `/${locale}/buy` },
-          { label: locale === 'th' ? 'คอนโดพัทยา' : 'Condo Pattaya', href: `/${locale}/buy/condo-pattaya` },
-        ]}
-      />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }} />
+      <Breadcrumbs items={breadcrumbItems} />
 
       <section className="hero hero--page">
         <Container>

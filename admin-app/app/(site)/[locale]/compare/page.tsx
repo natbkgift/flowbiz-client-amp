@@ -1,3 +1,4 @@
+import type { Metadata } from 'next';
 import Link from 'next/link';
 
 import { Container } from '@/components/layout/Container';
@@ -12,12 +13,22 @@ export const revalidate = 300;
 
 export async function generateMetadata({
   params,
+  searchParams,
 }: {
   params: { locale: string };
-}) {
+  searchParams?: Record<string, string | string[] | undefined>;
+}): Promise<Metadata> {
   const locale = normalizeLocale(params.locale);
   const dict = getDictionary(locale);
-  return makePageMetadata(locale, 'compare', dict.compare.title, dict.compare.metaDescription, dict.brand.name);
+  const base = makePageMetadata(locale, 'compare', dict.compare.title, dict.compare.metaDescription, dict.brand.name);
+
+  // Blueprint doc 03 — INDEX MATRIX: /compare/?ids=a,b → noindex.
+  const hasIds = searchParams?.ids !== undefined;
+  if (hasIds) {
+    return { ...base, robots: { index: false, follow: true } };
+  }
+
+  return base;
 }
 
 function pickParam(value: unknown): string | null {

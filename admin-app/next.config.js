@@ -27,6 +27,17 @@ const nextConfig = {
   async headers() {
     return [
       {
+        // Security headers for all routes (Blueprint doc 16)
+        source: '/:path*',
+        headers: [
+          { key: 'Strict-Transport-Security', value: 'max-age=63072000; includeSubDomains; preload' },
+          { key: 'X-Frame-Options', value: 'DENY' },
+          { key: 'X-Content-Type-Options', value: 'nosniff' },
+          { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
+          { key: 'Permissions-Policy', value: 'camera=(), microphone=(), geolocation=(self)' },
+        ],
+      },
+      {
         // CDN + browser caching for static assets
         source: '/_next/static/:path*',
         headers: [
@@ -40,6 +51,45 @@ const nextConfig = {
           { key: 'Cache-Control', value: 'public, s-maxage=3600, stale-while-revalidate=86400' },
         ],
       },
+      // Blueprint doc 03 — INDEX MATRIX: admin/auth pages are always noindex.
+      // These are 'use client' pages that cannot export Next.js metadata, so we
+      // use the X-Robots-Tag response header instead.
+      {
+        source: '/login',
+        headers: [{ key: 'X-Robots-Tag', value: 'noindex, nofollow' }],
+      },
+      {
+        source: '/leads',
+        headers: [{ key: 'X-Robots-Tag', value: 'noindex, nofollow' }],
+      },
+      {
+        source: '/leads/:path*',
+        headers: [{ key: 'X-Robots-Tag', value: 'noindex, nofollow' }],
+      },
+      {
+        source: '/inquiries',
+        headers: [{ key: 'X-Robots-Tag', value: 'noindex, nofollow' }],
+      },
+      {
+        source: '/inquiries/:path*',
+        headers: [{ key: 'X-Robots-Tag', value: 'noindex, nofollow' }],
+      },
+      {
+        source: '/analytics',
+        headers: [{ key: 'X-Robots-Tag', value: 'noindex, nofollow' }],
+      },
+      {
+        source: '/analytics/:path*',
+        headers: [{ key: 'X-Robots-Tag', value: 'noindex, nofollow' }],
+      },
+    ];
+  },
+  // Blueprint doc 02 — URL STRUCTURE: 301 redirects for old/renamed slugs.
+  // Add entries here when a project, area, or page slug changes.
+  async redirects() {
+    return [
+      // Example:
+      // { source: '/:locale/projects/old-project-name/', destination: '/:locale/projects/new-project-name/', permanent: true },
     ];
   },
 };

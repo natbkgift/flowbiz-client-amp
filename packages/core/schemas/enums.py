@@ -16,28 +16,35 @@ class PropertyIntent(str, Enum):
 
 
 class PropertyType(str, Enum):
-    """Type of property."""
+    """Catalog property type -- Blueprint Doc 06 canonical 7 values.
+
+    Used on both projects.property_type and properties.property_type
+    columns (text column, application-level validation, no PostgreSQL ENUM).
+    """
 
     CONDO = "condo"
-    HOUSE = "house"
     VILLA = "villa"
-    TOWNHOME = "townhome"
+    HOUSE = "house"
     LAND = "land"
     HOTEL = "hotel"
     SHOP = "shop"
     OFFICE = "office"
-    COMMERCIAL = "commercial"
-    OTHER = "other"
+
+
+class TransactionType(str, Enum):
+    """Transaction type (properties.type column) -- Blueprint Doc 06."""
+
+    NEW = "new"  # New development from developer
+    RESALE = "resale"  # Secondary market / owner listing
+    RENT = "rent"  # Rental listing
 
 
 class PropertyStatus(str, Enum):
-    """Property listing status."""
+    """Property listing status -- Blueprint Doc 06 canonical values."""
 
     ACTIVE = "active"
     INACTIVE = "inactive"
-    DRAFT = "draft"
-    SOLD = "sold"
-    RENTED = "rented"
+    ARCHIVED = "archived"
 
 
 class TargetAudience(str, Enum):
@@ -158,21 +165,20 @@ class MediaType(str, Enum):
 
 
 class FurnishingType(str, Enum):
-    """Property furnishing status."""
+    """Property furnishing status -- Blueprint Doc 06 canonical values."""
 
-    FURNISHED = "furnished"
     UNFURNISHED = "unfurnished"
-    PARTIALLY = "partially"
+    PARTIAL = "partial"
+    FULLY_FURNISHED = "fully_furnished"
 
 
 class ViewType(str, Enum):
-    """Property view types."""
+    """Property view types -- Blueprint Doc 06 canonical values."""
 
-    SEA_VIEW = "sea_view"
-    CITY_VIEW = "city_view"
-    POOL_VIEW = "pool_view"
-    GARDEN_VIEW = "garden_view"
-    MOUNTAIN_VIEW = "mountain_view"
+    SEA = "sea"
+    CITY = "city"
+    GARDEN = "garden"
+    POOL = "pool"
 
 
 class Language(str, Enum):

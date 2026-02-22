@@ -1,0 +1,171 @@
+{
+  "base": "origin/main",
+  "breaking": true,
+  "changed_files": [
+    "admin-app/__tests__/security.test.ts",
+    "admin-app/app/(site)/[locale]/about/page.tsx",
+    "admin-app/app/(site)/[locale]/area-guide/[slug]/page.tsx",
+    "admin-app/app/(site)/[locale]/area-guide/bang-saray/page.tsx",
+    "admin-app/app/(site)/[locale]/area-guide/central/page.tsx",
+    "admin-app/app/(site)/[locale]/area-guide/jomtien/page.tsx",
+    "admin-app/app/(site)/[locale]/area-guide/na-jomtien/page.tsx",
+    "admin-app/app/(site)/[locale]/area-guide/page.tsx",
+    "admin-app/app/(site)/[locale]/area-guide/pratumnak/page.tsx",
+    "admin-app/app/(site)/[locale]/area-guide/wongamat/page.tsx",
+    "admin-app/app/(site)/[locale]/blog/[slug]/page.tsx",
+    "admin-app/app/(site)/[locale]/blog/page.tsx",
+    "admin-app/app/(site)/[locale]/buy/condo-pattaya/page.tsx",
+    "admin-app/app/(site)/[locale]/buy/hotel-pattaya/page.tsx",
+    "admin-app/app/(site)/[locale]/buy/house-pattaya/page.tsx",
+    "admin-app/app/(site)/[locale]/buy/land-pattaya/page.tsx",
+    "admin-app/app/(site)/[locale]/buy/office-pattaya/page.tsx",
+    "admin-app/app/(site)/[locale]/buy/page.tsx",
+    "admin-app/app/(site)/[locale]/buy/shop-pattaya/page.tsx",
+    "admin-app/app/(site)/[locale]/buy/villa-pattaya/page.tsx",
+    "admin-app/app/(site)/[locale]/co-agent/page.tsx",
+    "admin-app/app/(site)/[locale]/compare/page.tsx",
+    "admin-app/app/(site)/[locale]/contact/page.tsx",
+    "admin-app/app/(site)/[locale]/developers/[slug]/page.tsx",
+    "admin-app/app/(site)/[locale]/developers/page.tsx",
+    "admin-app/app/(site)/[locale]/guides/[slug]/page.tsx",
+    "admin-app/app/(site)/[locale]/guides/page.tsx",
+    "admin-app/app/(site)/[locale]/invest/calculator/page.tsx",
+    "admin-app/app/(site)/[locale]/invest/page.tsx",
+    "admin-app/app/(site)/[locale]/layout.tsx",
+    "admin-app/app/(site)/[locale]/page.tsx",
+    "admin-app/app/(site)/[locale]/privacy/page.tsx",
+    "admin-app/app/(site)/[locale]/projects/page.tsx",
+    "admin-app/app/(site)/[locale]/property/[slug]/page.tsx",
+    "admin-app/app/(site)/[locale]/rent/condo-pattaya/page.tsx",
+    "admin-app/app/(site)/[locale]/rent/hotel-pattaya/page.tsx",
+    "admin-app/app/(site)/[locale]/rent/house-pattaya/page.tsx",
+    "admin-app/app/(site)/[locale]/rent/land-pattaya/page.tsx",
+    "admin-app/app/(site)/[locale]/rent/office-pattaya/page.tsx",
+    "admin-app/app/(site)/[locale]/rent/page.tsx",
+    "admin-app/app/(site)/[locale]/rent/shop-pattaya/page.tsx",
+    "admin-app/app/(site)/[locale]/rent/villa-pattaya/page.tsx",
+    "admin-app/app/(site)/[locale]/sell/list-property/page.tsx",
+    "admin-app/app/(site)/[locale]/sell/page.tsx",
+    "admin-app/app/(site)/[locale]/sell/valuation/page.tsx",
+    "admin-app/app/(site)/[locale]/smart-finder/page.tsx",
+    "admin-app/app/(site)/[locale]/terms/page.tsx",
+    "admin-app/app/_lib/i18n/metadata.ts",
+    "admin-app/app/_lib/schema-markup.ts",
+    "admin-app/app/_lib/sitemap-xml.ts",
+    "admin-app/app/_lib/slugify.ts",
+    "admin-app/app/globals.css",
+    "admin-app/app/robots.ts",
+    "admin-app/app/sitemap-areas.xml/route.ts",
+    "admin-app/app/sitemap-blog.xml/route.ts",
+    "admin-app/app/sitemap-developers.xml/route.ts",
+    "admin-app/app/sitemap-guides.xml/route.ts",
+    "admin-app/app/sitemap-pages.xml/route.ts",
+    "admin-app/app/sitemap-projects.xml/route.ts",
+    "admin-app/app/sitemap-properties.xml/route.ts",
+    "admin-app/app/sitemap.ts",
+    "admin-app/app/sitemap.xml/route.ts",
+    "admin-app/components/forms/NewsletterForm.tsx",
+    "admin-app/components/invest/InvestmentCalculator.tsx",
+    "admin-app/components/layout/Footer.tsx",
+    "admin-app/components/layout/Header.tsx",
+    "admin-app/components/media/FloorPlan.tsx",
+    "admin-app/components/media/Gallery.tsx",
+    "admin-app/components/media/MapView.tsx",
+    "admin-app/components/media/RemoteImage.tsx",
+    "admin-app/components/ux/Reviews.tsx",
+    "admin-app/middleware.ts",
+    "admin-app/next.config.js",
+    "admin-app/public/images/area-guide-pattaya.png",
+    "admin-app/public/images/blog-real-estate.png",
+    "admin-app/public/images/condo-view.png",
+    "admin-app/public/images/hero-banner.png",
+    "admin-app/public/images/project-overview.png",
+    "admin-app/public/images/property-exterior.png",
+    "admin-app/public/images/property-interior.png",
+    "admin-app/public/images/property-pool.png",
+    "admin-app/public/images/team-photo.png",
+    "admin-app/public/images/villa-garden.png",
+    "alembic/versions/0025_blueprint_schema_v2.py",
+    "alembic/versions/0026_blueprint_schema_v3.py",
+    "alembic/versions/0027_doc06_property_columns.py",
+    "data/import/areas.json",
+    "data/import/developers.json",
+    "data/import/projects.json",
+    "data/import/team.json",
+    "data/import/units_buy.json",
+    "data/import/units_rent.json",
+    "docs/Audit/12-Month Market Domination Strategy.md",
+    "docs/Audit/90-Day Platform Improvement Roadmap.md",
+    "docs/Audit/Audit Scoring Framework - Production-Ready.md",
+    "\"docs/Audit/Competitive Benchmark Template \\342\\200\\223 Production Version.md\"",
+    "docs/Audit/Luxury Segment Domination Plan.md",
+    "\"docs/Audit/Master Audit Checklist AMP Pattaya \\342\\200\\223 Real Estate Intelligence Platform.md\"",
+    "docs/Audit/Revenue Forecast Simulator.md",
+    "docs/Audit/Ultra-High-Net-Worth Acquisition Blueprint.md",
+    "docs/Project_Master_Execution_Plan.md",
+    "docs/scaffold_blueprints.py",
+    "docs/scaffold_blueprints_v2.py",
+    "evolution/evidence.json",
+    "packages/core/models.py",
+    "packages/core/property_type.py",
+    "packages/core/schemas/enums.py",
+    "packages/core/schemas/properties.py",
+    "packages/core/schemas/property_validation.py",
+    "pyproject.toml",
+    "scripts/import_seed_data.py"
+  ],
+  "head": "HEAD",
+  "scores": {
+    "auth_impact": {
+      "reasons": [],
+      "score": 0
+    },
+    "contract_break_risk": {
+      "reasons": [
+        "openapi_related_change_detected"
+      ],
+      "score": 1
+    },
+    "coupling_risk": {
+      "reasons": [
+        "top_level_dirs_touched=['\"docs', 'admin-app', 'alembic', 'data', 'evolution', 'packages', 'pyproject.toml', 'scripts']"
+      ],
+      "score": 5
+    },
+    "dependency_spread": {
+      "reasons": [
+        "dependency_files_touched=['pyproject.toml']",
+        "dependency_block_change_detected"
+      ],
+      "score": 4
+    },
+    "migration_conflict_risk": {
+      "reasons": [
+        "migration_present",
+        "multiple_migrations"
+      ],
+      "score": 3
+    },
+    "query_performance_risk": {
+      "reasons": [
+        "orm_join_or_load_pattern_detected"
+      ],
+      "score": 1
+    },
+    "regression_surface": {
+      "reasons": [
+        "changed_files_non_docs=102"
+      ],
+      "score": 5
+    },
+    "schema_complexity": {
+      "reasons": [
+        "migrations_changed=3",
+        "many_migrations"
+      ],
+      "score": 3
+    }
+  },
+  "threshold": 20,
+  "total_risk": 22
+}

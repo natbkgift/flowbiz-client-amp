@@ -11,12 +11,23 @@ function isLocale(value: string | undefined): value is Locale {
 const PUBLIC_FILE = /\.[^/]+$/;
 
 /**
+ * Blueprint doc 02 — URL STRUCTURE: deleted pages return 410 Gone.
+ * Add locale-stripped paths here when a page is permanently removed
+ * (e.g. '/old-page' matches both /en/old-page/ and /th/old-page/).
+ */
+const GONE_PATHS = new Set<string>([
+  // Example: '/projects/discontinued-project'
+]);
+
+/**
  * Next.js Edge Middleware — locale detection, redirect, and security headers.
  *
  * Responsibilities:
  * 1. Skip static assets, API routes, and admin pages.
- * 2. Redirect non-prefixed public paths to `/en` by default.
- * 3. Attach 8 security headers (CSP, HSTS, X-Frame-Options, etc.) to localized responses.
+ * 2. Return 410 Gone for permanently deleted pages.
+ * 3. Enforce lowercase URLs (301 redirect).
+ * 4. Redirect non-prefixed public paths to `/en` by default.
+ * 5. Attach security headers (CSP, HSTS, X-Frame-Options, etc.) to localized responses.
  */
 export function middleware(req: NextRequest) {
   const { pathname, search } = req.nextUrl;
@@ -76,8 +87,24 @@ export function middleware(req: NextRequest) {
   const segments = pathname.split('/').filter(Boolean);
   const first = segments[0];
 
+  // Blueprint doc 02 — URL STRUCTURE: enforce lowercase URLs (301).
+  // Locale prefixes and path segments must always be lowercase.
+  const lowered = pathname.toLowerCase();
+  if (pathname !== lowered) {
+    const url = req.nextUrl.clone();
+    url.pathname = lowered;
+    return NextResponse.redirect(url, 301);
+  }
+
   // Already localized.
   if (isLocale(first)) {
+    // Blueprint doc 02 — 410 Gone for permanently deleted pages.
+    const pathWithoutLocale = '/' + segments.slice(1).join('/');
+    const normalised = pathWithoutLocale.replace(/\/+$/, '') || '/';
+    if (GONE_PATHS.has(normalised)) {
+      return new NextResponse('Gone', { status: 410 });
+    }
+
     const response = NextResponse.next();
     response.headers.set('x-next-pathname', pathname);
     setSecurityHeaders(response);

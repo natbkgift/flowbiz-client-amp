@@ -1,9 +1,10 @@
 import type { Metadata } from 'next';
 
 import { Container } from '@/components/layout/Container';
+import { Breadcrumbs } from '@/components/layout/Breadcrumbs';
 import { getDictionary, normalizeLocale } from '@/app/_lib/i18n/get-dictionary';
 import { makePageMetadata } from '@/app/_lib/i18n/metadata';
- 
+import { breadcrumbSchema } from '@/app/_lib/schema-markup';
 
 export const revalidate = 300;
 
@@ -14,7 +15,7 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const locale = normalizeLocale(params.locale);
   const dict = getDictionary(locale);
-  return makePageMetadata(locale, '/terms', `Terms of Service | ${dict.brand.name}`, 'Terms of Service', dict.brand.name);
+  return makePageMetadata(locale, 'terms', `Terms of Service | ${dict.brand.name}`, 'Terms of Service', dict.brand.name);
 }
 
 export default function TermsPage({
@@ -24,9 +25,26 @@ export default function TermsPage({
 }) {
   const locale = normalizeLocale(params.locale);
   const isTh = locale === 'th';
+  const dict = getDictionary(locale);
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://amppattaya.com';
+
+  const breadcrumbItems = [
+    { label: dict.nav.home, href: `/${locale}` },
+    { label: isTh ? 'ข้อกำหนดการใช้บริการ' : 'Terms of Service', href: `/${locale}/terms` },
+  ];
+
+  const breadcrumbJsonLd = breadcrumbSchema(
+    breadcrumbItems.map((item) => ({ name: item.label, url: `${siteUrl}${item.href}` }))
+  );
 
   return (
     <main id="main-content">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
+      />
+      <Breadcrumbs items={breadcrumbItems} />
+
       <section className="hero hero--page">
         <Container>
           <h1 className="headline">{isTh ? 'ข้อกำหนดการใช้บริการ' : 'Terms of Service'}</h1>

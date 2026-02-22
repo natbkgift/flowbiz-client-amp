@@ -7,6 +7,7 @@ import { Container } from '@/components/layout/Container';
 import { getDictionary, normalizeLocale } from '@/app/_lib/i18n/get-dictionary';
 import { makePageMetadata } from '@/app/_lib/i18n/metadata';
 import { withLocale } from '@/app/_lib/i18n/routing';
+import { breadcrumbSchema } from '@/app/_lib/schema-markup';
 
 export const revalidate = 300;
 
@@ -62,15 +63,24 @@ const guides: GuideLink[] = [
 export default function GuidesIndexPage({ params }: { params: { locale: string } }) {
   const locale = normalizeLocale(params.locale);
   const dict = getDictionary(locale);
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://amppattaya.com';
+
+  const breadcrumbItems = [
+    { label: dict.nav.home, href: `/${locale}` },
+    { label: locale === 'th' ? 'คู่มือ' : 'Guides', href: `/${locale}/guides` },
+  ];
+
+  const breadcrumbJsonLd = breadcrumbSchema(
+    breadcrumbItems.map((item) => ({ name: item.label, url: `${siteUrl}${item.href}` }))
+  );
 
   return (
     <main id="main-content">
-      <Breadcrumbs
-        items={[
-          { label: dict.nav.home, href: `/${locale}` },
-          { label: locale === 'th' ? 'คู่มือ' : 'Guides', href: `/${locale}/guides` },
-        ]}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
       />
+      <Breadcrumbs items={breadcrumbItems} />
 
       <section className="hero hero--page">
         <Container>

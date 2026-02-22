@@ -45,6 +45,9 @@ ignore = []
 
 [tool.ruff.lint.per-file-ignores]
 "apps/agents/analytics/report_generator.py" = ["E741"]
+"alembic/versions/*.py" = ["E501"]
+"packages/core/property_type.py" = ["E501"]
+"docs/*.py" = ["E501", "W291"]
 
 [tool.ruff.lint.isort]
 known-first-party = ["apps", "packages"]

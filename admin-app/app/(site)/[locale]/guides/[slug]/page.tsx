@@ -6,6 +6,7 @@ import { LeadForm } from '@/components/forms/LeadForm';
 import { getDictionary, normalizeLocale } from '@/app/_lib/i18n/get-dictionary';
 import { makePageMetadata } from '@/app/_lib/i18n/metadata';
 import { withLocale } from '@/app/_lib/i18n/routing';
+import { breadcrumbSchema } from '@/app/_lib/schema-markup';
 
 export const revalidate = 300;
 
@@ -43,21 +44,34 @@ export default function GuideArticlePage({
     ? 'บทความนี้เป็นโครงแบบ (template) สำหรับ cluster guides ตาม Content Pillar Map — เราจะขยายเนื้อหาเชิงลึกในรอบถัดไป'
     : 'This is a template page for cluster guides per the Content Pillar Map. We will expand with deeper content in a next iteration.';
 
-  const siteUrl = 'https://amppattaya.com';
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://amppattaya.com';
   const canonicalUrl = `${siteUrl}/${locale}/guides/${encodeURIComponent(params.slug)}`;
+
+  const breadcrumbItems = [
+    { label: dict.nav.home, href: `/${locale}` },
+    { label: locale === 'th' ? 'คู่มือ' : 'Guides', href: `/${locale}/guides` },
+    { label: h1, href: `/${locale}/guides/${encodeURIComponent(params.slug)}` },
+  ];
+  const breadcrumbJsonLd = breadcrumbSchema(
+    breadcrumbItems.map((item) => ({ name: item.label, url: `${siteUrl}${item.href}` }))
+  );
+
   const jsonLd = JSON.stringify(
-    {
-      '@context': 'https://schema.org',
-      '@type': 'Article',
-      headline: h1,
-      inLanguage: locale,
-      url: canonicalUrl,
-      publisher: {
-        '@type': 'Organization',
-        name: dict.brand.name,
-        url: siteUrl,
+    [
+      {
+        '@context': 'https://schema.org',
+        '@type': 'Article',
+        headline: h1,
+        inLanguage: locale,
+        url: canonicalUrl,
+        publisher: {
+          '@type': 'Organization',
+          name: dict.brand.name,
+          url: siteUrl,
+        },
       },
-    },
+      breadcrumbJsonLd,
+    ],
     null,
     0,
   );
@@ -65,13 +79,7 @@ export default function GuideArticlePage({
   return (
     <main id="main-content">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLd }} />
-      <Breadcrumbs
-        items={[
-          { label: dict.nav.home, href: `/${locale}` },
-          { label: locale === 'th' ? 'คู่มือ' : 'Guides', href: `/${locale}/guides` },
-          { label: h1, href: `/${locale}/guides/${encodeURIComponent(params.slug)}` },
-        ]}
-      />
+      <Breadcrumbs items={breadcrumbItems} />
 
       <section className="hero hero--page">
         <Container>

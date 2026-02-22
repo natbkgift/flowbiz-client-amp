@@ -1,22 +1,24 @@
 import type { Metadata } from 'next';
-import { makePageMetadata } from '@/app/_lib/i18n/metadata';
+import { makeListingPageMetadata } from '@/app/_lib/i18n/metadata';
 import { Container } from '@/components/layout/Container';
+import { Breadcrumbs } from '@/components/layout/Breadcrumbs';
 import { ProjectCard } from '@/components/project/ProjectCard';
 import { fetchProjects, fetchProperties } from '@/app/_lib/public-api-server';
-
 import { getDictionary, normalizeLocale } from '@/app/_lib/i18n/get-dictionary';
- 
+import { breadcrumbSchema } from '@/app/_lib/schema-markup';
 
 export const revalidate = 300;
 
 export async function generateMetadata({
   params,
+  searchParams,
 }: {
   params: { locale: string };
+  searchParams?: Record<string, string | string[] | undefined>;
 }): Promise<Metadata> {
   const locale = normalizeLocale(params.locale);
   const dict = getDictionary(locale);
-  return makePageMetadata(locale, 'projects', dict.nav.projects, dict.listing.exploreProjectsDesc, dict.brand.name);
+  return makeListingPageMetadata(locale, 'projects', dict.nav.projects, dict.listing.exploreProjectsDesc, dict.brand.name, searchParams);
 }
 
 type ProjectRow = { name: string; count: number };
@@ -24,8 +26,16 @@ type ProjectRow = { name: string; count: number };
 export default async function ProjectsPage({ params }: { params: { locale: string } }) {
   const locale = normalizeLocale(params.locale);
   const dict = getDictionary(locale);
-  const siteUrl = 'https://amppattaya.com';
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://amppattaya.com';
   const canonicalUrl = `${siteUrl}/${locale}/projects`;
+
+  const breadcrumbItems = [
+    { label: dict.nav.home, href: `/${locale}` },
+    { label: dict.nav.projects, href: `/${locale}/projects` },
+  ];
+  const breadcrumbJsonLd = breadcrumbSchema(
+    breadcrumbItems.map((item) => ({ name: item.label, url: `${siteUrl}${item.href}` }))
+  );
 
   let projects: Awaited<ReturnType<typeof fetchProjects>>;
   let projectsFetchOk = true;
@@ -39,23 +49,26 @@ export default async function ProjectsPage({ params }: { params: { locale: strin
   if (projects.length) {
     const sorted = [...projects].sort((a, b) => (a.name ?? '').localeCompare(b.name ?? '') || (a.slug ?? '').localeCompare(b.slug ?? ''));
     const jsonLd = JSON.stringify(
-      {
-        '@context': 'https://schema.org',
-        '@type': 'ItemList',
-        name: dict.nav.projects,
-        url: canonicalUrl,
-        itemListElement: sorted.slice(0, 20).map((p, idx) => ({
-          '@type': 'ListItem',
-          position: idx + 1,
-          name: p.name,
-          url: `${siteUrl}/${locale}/projects/${encodeURIComponent(p.slug)}`,
-        })),
-        isPartOf: {
-          '@type': 'WebSite',
-          name: dict.brand.name,
-          url: siteUrl,
+      [
+        {
+          '@context': 'https://schema.org',
+          '@type': 'ItemList',
+          name: dict.nav.projects,
+          url: canonicalUrl,
+          itemListElement: sorted.slice(0, 20).map((p, idx) => ({
+            '@type': 'ListItem',
+            position: idx + 1,
+            name: p.name,
+            url: `${siteUrl}/${locale}/projects/${encodeURIComponent(p.slug)}`,
+          })),
+          isPartOf: {
+            '@type': 'WebSite',
+            name: dict.brand.name,
+            url: siteUrl,
+          },
         },
-      },
+        breadcrumbJsonLd,
+      ],
       null,
       0
     );
@@ -63,6 +76,7 @@ export default async function ProjectsPage({ params }: { params: { locale: strin
     return (
       <main className="section" id="main-content">
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLd }} />
+        <Breadcrumbs items={breadcrumbItems} />
         <Container>
           <div className="section-header mb-6">
             <h1 className="section-title">{dict.nav.projects}</h1>
@@ -108,17 +122,20 @@ export default async function ProjectsPage({ params }: { params: { locale: strin
     .sort((a, b) => b.count - a.count || a.name.localeCompare(b.name));
 
   const jsonLd = JSON.stringify(
-    {
-      '@context': 'https://schema.org',
-      '@type': 'CollectionPage',
-      name: dict.nav.projects,
-      url: canonicalUrl,
-      isPartOf: {
-        '@type': 'WebSite',
-        name: dict.brand.name,
-        url: siteUrl,
+    [
+      {
+        '@context': 'https://schema.org',
+        '@type': 'CollectionPage',
+        name: dict.nav.projects,
+        url: canonicalUrl,
+        isPartOf: {
+          '@type': 'WebSite',
+          name: dict.brand.name,
+          url: siteUrl,
+        },
       },
-    },
+      breadcrumbJsonLd,
+    ],
     null,
     0
   );
@@ -126,6 +143,7 @@ export default async function ProjectsPage({ params }: { params: { locale: strin
   return (
     <main className="section" id="main-content">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLd }} />
+      <Breadcrumbs items={breadcrumbItems} />
       <Container>
         <div className="section-header mb-6">
           <h1 className="section-title">{dict.nav.projects}</h1>

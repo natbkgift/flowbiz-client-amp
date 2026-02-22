@@ -1,0 +1,82 @@
+[
+  {
+    "name": "The Riviera Jomtien",
+    "slug": "the-riviera-jomtien",
+    "developer_slug": "the-riviera-group",
+    "area_slug": "jomtien",
+    "cover_image_url": null,
+    "status": "published"
+  },
+  {
+    "name": "The Riviera Monaco",
+    "slug": "the-riviera-monaco",
+    "developer_slug": "the-riviera-group",
+    "area_slug": "na-jomtien",
+    "cover_image_url": null,
+    "status": "published"
+  },
+  {
+    "name": "Copacabana Beach Jomtien",
+    "slug": "copacabana-beach-jomtien",
+    "developer_slug": "heights-holdings",
+    "area_slug": "jomtien",
+    "cover_image_url": null,
+    "status": "published"
+  },
+  {
+    "name": "The Orient Jomtien",
+    "slug": "the-orient-jomtien",
+    "developer_slug": "siam-oriental",
+    "area_slug": "jomtien",
+    "cover_image_url": null,
+    "status": "published"
+  },
+  {
+    "name": "Arcadia Millennium Tower",
+    "slug": "arcadia-millennium-tower",
+    "developer_slug": "global-top-group",
+    "area_slug": "central-pattaya",
+    "cover_image_url": null,
+    "status": "published"
+  },
+  {
+    "name": "City Garden Pratumnak",
+    "slug": "city-garden-pratumnak",
+    "developer_slug": "matrix-developments",
+    "area_slug": "pratumnak",
+    "cover_image_url": null,
+    "status": "published"
+  },
+  {
+    "name": "Wongamat Tower",
+    "slug": "wongamat-tower",
+    "developer_slug": "nova-group",
+    "area_slug": "wongamat",
+    "cover_image_url": null,
+    "status": "published"
+  },
+  {
+    "name": "Dusit Grand Condo View",
+    "slug": "dusit-grand-condo-view",
+    "developer_slug": "baan-dusit",
+    "area_slug": "jomtien",
+    "cover_image_url": null,
+    "status": "published"
+  },
+  {
+    "name": "Grand Solaire",
+    "slug": "grand-solaire",
+    "developer_slug": "heights-holdings",
+    "area_slug": "central-pattaya",
+    "cover_image_url": null,
+    "status": "published"
+  },
+  {
+    "name": "Ocean Horizon",
+    "slug": "ocean-horizon",
+    "developer_slug": "ocean-property",
+    "area_slug": "pratumnak",
+    "cover_image_url": null,
+    "status": "published"
+  }
+]

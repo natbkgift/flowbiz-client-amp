@@ -4,7 +4,7 @@ import { LeadForm } from '@/components/forms/LeadForm';
 import { CTA } from '@/app/_lib/public-cta';
 import { getDictionary, normalizeLocale } from '@/app/_lib/i18n/get-dictionary';
 import { makePageMetadata } from '@/app/_lib/i18n/metadata';
- 
+import { breadcrumbSchema, localBusinessSchema } from '@/app/_lib/schema-markup';
 
 export const revalidate = 300;
 
@@ -27,19 +27,31 @@ export default function ContactPage({
 }) {
   const locale = normalizeLocale(params.locale);
   const dict = getDictionary(locale);
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://amppattaya.com';
   const msg =
     (typeof searchParams?.msg === 'string' ? searchParams.msg : Array.isArray(searchParams?.msg) ? searchParams?.msg[0] : null) ??
     null;
   const defaultMessage = msg ? `${msg}` : dict.contact.advisoryBody;
 
+  const breadcrumbItems = [
+    { label: dict.nav.home, href: `/${locale}` },
+    { label: dict.nav.contact, href: `/${locale}/contact` },
+  ];
+
+  const jsonLd = JSON.stringify([
+    breadcrumbSchema(
+      breadcrumbItems.map((item) => ({ name: item.label, url: `${siteUrl}${item.href}` }))
+    ),
+    localBusinessSchema(),
+  ], null, 0);
+
   return (
     <main id="main-content">
-      <Breadcrumbs
-        items={[
-          { label: dict.nav.home, href: `/${locale}` },
-          { label: dict.nav.contact, href: `/${locale}/contact` },
-        ]}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: jsonLd }}
       />
+      <Breadcrumbs items={breadcrumbItems} />
       <section className="hero hero--page">
         <Container>
           <h1 className="headline">{dict.contact.title}</h1>

@@ -17,18 +17,26 @@ function hostnameOf(src: string): string | null {
   }
 }
 
+/** Tiny 1x1 transparent PNG used as blur placeholder. */
+const blurDataURL =
+  'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mN88P/BfwAJhAPk20jQ5QAAAABJRU5ErkJggg==';
+
 export function RemoteImage({
   src,
   alt,
   className,
   width,
   height,
+  sizes = '(min-width: 1024px) 50vw, 100vw',
+  loading = 'lazy',
 }: {
   src: string;
   alt: string;
   className?: string;
   width: number;
   height: number;
+  sizes?: string;
+  loading?: 'lazy' | 'eager';
 }) {
   const isRemote = /^https?:\/\//i.test(src);
   const hosts = allowedHosts();
@@ -36,7 +44,19 @@ export function RemoteImage({
   const canOptimize = !isRemote || (host ? hosts.has(host) : false);
 
   if (canOptimize) {
-    return <Image src={src} alt={alt} className={className} width={width} height={height} />;
+    return (
+      <Image
+        src={src}
+        alt={alt}
+        className={className}
+        width={width}
+        height={height}
+        sizes={sizes}
+        loading={loading}
+        placeholder="blur"
+        blurDataURL={blurDataURL}
+      />
+    );
   }
 
   return (
@@ -46,7 +66,8 @@ export function RemoteImage({
       className={className}
       width={width}
       height={height}
-      loading="lazy"
+      sizes={sizes}
+      loading={loading}
       decoding="async"
     />
   );
