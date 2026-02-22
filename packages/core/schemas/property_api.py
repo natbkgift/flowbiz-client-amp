@@ -44,6 +44,7 @@ class PropertyListItem(BaseModel):
     cover_image: str | None = None
     status: PropertyStatus
     slug: str | None = None
+    project_id: UUID | None = None
 
 
 class PropertyDetail(BaseModel):
@@ -58,6 +59,7 @@ class PropertyDetail(BaseModel):
     bedrooms: int | None = None
     bathrooms: int | None = None
     size: Decimal | None = None
+    size_sqm: Decimal | None = None
     address: str
     city: str
     images: list[str] | None = None
@@ -65,6 +67,11 @@ class PropertyDetail(BaseModel):
     cover_image: str | None = None
     status: PropertyStatus
     slug: str | None = None
+    project_id: UUID | None = None
+    property_type: str = "condo"
+    furnishing: str | None = None
+    view: str | None = None
+    floor: int | None = None
     created_at: datetime
     updated_at: datetime
 

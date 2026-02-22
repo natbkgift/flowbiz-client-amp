@@ -11,18 +11,33 @@ import { fetchPropertyBySlug } from '@/app/_lib/public-api-server';
 import { CTA } from '@/app/_lib/public-cta';
 import { resolveImageUrl } from '@/app/_lib/public-api-shared';
 import { getDictionary, normalizeLocale } from '@/app/_lib/i18n/get-dictionary';
-import { ogLocale } from '@/app/_lib/i18n/routing';
+import { ogLocale, withLocale } from '@/app/_lib/i18n/routing';
 import { getInternalLinks } from '@/app/_lib/internal-links';
 import {
   realEstateListingSchema,
   residenceSchema,
   breadcrumbSchema,
 } from '@/app/_lib/schema-markup';
- 
 
 export const revalidate = 300;
 
 type PageProps = { params: Promise<{ locale: string; slug: string }> };
+
+/**
+ * Clean property title: strip source IDs, "rentthai" references, and numeric prefixes.
+ */
+function cleanTitle(raw: string): string {
+  let title = raw;
+  // Remove "rentthai" in any case variation
+  title = title.replace(/rentthai/gi, '').trim();
+  // Remove leading property IDs like "RT-12345 -" or "rent-12345-"
+  title = title.replace(/^(RT|rent|sale|resale|new)-?\d+[\s\-–—:]+/i, '').trim();
+  // Remove trailing source IDs
+  title = title.replace(/[\s\-–—]+[A-Z]{2,4}-?\d{3,}$/i, '').trim();
+  // Collapse multiple spaces
+  title = title.replace(/\s{2,}/g, ' ');
+  return title || raw;
+}
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { locale: rawLocale, slug } = await params;
@@ -52,8 +67,9 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     };
   }
 
-  const title = `${p.title} | ${dict.brand.name}`;
-  const description = `${p.address}, ${p.city}`;
+  const cleaned = cleanTitle(p.title);
+  const title = `${cleaned} | ${dict.brand.name}`;
+  const description = `${cleaned} — ${p.address}, ${p.city}`;
   return {
     title,
     description,
@@ -113,6 +129,7 @@ export default async function PropertyPage({ params }: PageProps) {
     );
   }
 
+  const displayTitle = cleanTitle(property.title);
   const siteUrl = 'https://amppattaya.com';
   const canonicalUrl = `${siteUrl}/${locale}/property/${encodeURIComponent(slug)}`;
 
@@ -122,15 +139,16 @@ export default async function PropertyPage({ params }: PageProps) {
 
   const cover = resolveImageUrl(property.cover_image) ?? images[0] ?? null;
   const gallery = cover ? [cover, ...images.filter((u) => u !== cover)] : images;
-  const main = gallery[0] ?? null;
 
   const priceNumber = Number(property.price);
   const priceValue = Number.isFinite(priceNumber) ? Math.round(priceNumber) : undefined;
+  const sizeDisplay = property.size_sqm ?? property.size;
+  const isRent = property.type === 'rent';
 
   const jsonLd = JSON.stringify(
     [
       realEstateListingSchema({
-        name: property.title,
+        name: displayTitle,
         description: property.description ?? `${property.address}, ${property.city}`,
         url: canonicalUrl,
         image: gallery[0],
@@ -140,16 +158,16 @@ export default async function PropertyPage({ params }: PageProps) {
         locality: property.city ?? 'Pattaya',
       }),
       residenceSchema({
-        name: property.title,
+        name: displayTitle,
         description: property.description ?? `${property.address}, ${property.city}`,
-        sizeSqm: property.size ? Number(property.size) : undefined,
+        sizeSqm: sizeDisplay ? Number(sizeDisplay) : undefined,
         bedrooms: property.bedrooms ?? undefined,
         bathrooms: property.bathrooms ?? undefined,
       }),
       {
         '@context': 'https://schema.org',
         '@type': 'Product',
-        name: property.title,
+        name: displayTitle,
         description: property.description ?? undefined,
         sku: property.id,
         url: canonicalUrl,
@@ -168,8 +186,8 @@ export default async function PropertyPage({ params }: PageProps) {
       },
       breadcrumbSchema([
         { name: dict.property.breadcrumbHome, url: `${siteUrl}/${locale}` },
-        { name: dict.nav.buy, url: `${siteUrl}/${locale}/buy` },
-        { name: property.title, url: canonicalUrl },
+        { name: isRent ? dict.nav.rent : dict.nav.buy, url: `${siteUrl}/${locale}/${isRent ? 'rent' : 'buy'}` },
+        { name: displayTitle, url: canonicalUrl },
       ]),
     ],
     null,
@@ -184,32 +202,48 @@ export default async function PropertyPage({ params }: PageProps) {
         <Breadcrumbs
           items={[
             { label: dict.property.breadcrumbHome, href: `/${locale}` },
-            { label: dict.nav.buy, href: `/${locale}/buy` },
-            { label: property.title, href: `/${locale}/property/${encodeURIComponent(slug)}` },
+            { label: isRent ? dict.nav.rent : dict.nav.buy, href: `/${locale}/${isRent ? 'rent' : 'buy'}` },
+            { label: displayTitle, href: `/${locale}/property/${encodeURIComponent(slug)}` },
           ]}
         />
         <div className="detail-layout">
           <div className="detail-main">
             <div id="gallery-section">
               {gallery.length > 0 ? (
-                <Gallery images={gallery} alt={property.title} />
+                <Gallery images={gallery} alt={displayTitle} />
               ) : (
-                <div className="gallery-main">
-                  <div className="gallery-counter">0 / 0</div>
+                <div className="gallery-main" style={{ aspectRatio: '4 / 3', background: 'var(--color-surface)', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <p className="text-sm text-[var(--color-text-secondary)]">
+                    {locale === 'th' ? 'ยังไม่มีรูปภาพ' : 'No images available'}
+                  </p>
                 </div>
               )}
             </div>
 
+            {/* Conversion CTA above fold */}
+            <div className="cta-row mt-4 mb-2">
+              <a href={CTA.lineUrl} className="btn btn-cta" target="_blank" rel="noreferrer">
+                {dict.property.lineChat}
+              </a>
+              <Link className="btn btn-secondary" href={withLocale(locale, '/contact')}>
+                {dict.cta.speakToAdvisor}
+              </Link>
+            </div>
+
             <div className="property-header">
               <div className="property-title">
-                <h1>{property.title}</h1>
+                <h1>{displayTitle}</h1>
                 <p className="property-location">
                   {property.address}, {property.city}
                 </p>
               </div>
-              <div className="property-price">{formatPriceTHB(Number(property.price))}</div>
+              <div className="property-price">
+                {formatPriceTHB(priceNumber)}
+                {isRent ? <span className="text-sm font-normal text-[var(--color-text-secondary)]"> /mo</span> : null}
+              </div>
             </div>
 
+            {/* Enhanced Feature Grid */}
             <div className="property-facts">
               <div className="flex items-center gap-2">
                 <IconBed size="sm" />
@@ -232,12 +266,45 @@ export default async function PropertyPage({ params }: PageProps) {
               <div className="flex items-center gap-2">
                 <IconArea size="sm" />
                 <div>
-                  <strong>{property.size ?? '-'}</strong>
+                  <strong>{sizeDisplay ?? '-'}</strong>
                   <div className="text-sm text-[var(--color-text-secondary)]">
                     {dict.property.sqm}
                   </div>
                 </div>
               </div>
+              {property.floor ? (
+                <div className="flex items-center gap-2">
+                  <span className="icon icon--sm" aria-hidden="true">&#8593;</span>
+                  <div>
+                    <strong>{property.floor}</strong>
+                    <div className="text-sm text-[var(--color-text-secondary)]">
+                      {locale === 'th' ? 'ชั้น' : 'Floor'}
+                    </div>
+                  </div>
+                </div>
+              ) : null}
+              {property.furnishing ? (
+                <div className="flex items-center gap-2">
+                  <span className="icon icon--sm" aria-hidden="true">&#9733;</span>
+                  <div>
+                    <strong className="capitalize">{property.furnishing}</strong>
+                    <div className="text-sm text-[var(--color-text-secondary)]">
+                      {locale === 'th' ? 'เฟอร์นิเจอร์' : 'Furnishing'}
+                    </div>
+                  </div>
+                </div>
+              ) : null}
+              {property.view ? (
+                <div className="flex items-center gap-2">
+                  <span className="icon icon--sm" aria-hidden="true">&#127748;</span>
+                  <div>
+                    <strong className="capitalize">{property.view}</strong>
+                    <div className="text-sm text-[var(--color-text-secondary)]">
+                      {locale === 'th' ? 'วิว' : 'View'}
+                    </div>
+                  </div>
+                </div>
+              ) : null}
             </div>
 
             <div className="bg-[var(--color-white)] p-6 rounded-xl mb-6">
@@ -247,9 +314,11 @@ export default async function PropertyPage({ params }: PageProps) {
 
             {/* FloorPlan section */}
             <div className="bg-[var(--color-white)] p-6 rounded-xl mb-6">
-              <h2 className="mb-4">Floor Plan</h2>
+              <h2 className="mb-4">{locale === 'th' ? 'แปลนห้อง' : 'Floor Plan'}</h2>
               <p className="text-sm text-[var(--color-text-secondary)]">
-                FloorPlan layouts available upon request. Contact our agent for detailed floor plan drawings and unit specifications.
+                {locale === 'th'
+                  ? 'แปลนห้องสามารถขอได้จากเจ้าหน้าที่ ติดต่อเราเพื่อรับข้อมูลเพิ่มเติม'
+                  : 'Floor plan layouts available upon request. Contact our agent for detailed floor plan drawings and unit specifications.'}
               </p>
             </div>
 

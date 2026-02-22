@@ -1,5 +1,6 @@
 import os
 import sys
+from typing import NoReturn
 
 import requests
 
@@ -8,7 +9,7 @@ SCORE_URL = f"{BASE_URL}/v1/phase1/score"
 PHASE1_API_URL = f"{BASE_URL}/v1/phase1/chat/classify"
 
 
-def fail(message: str) -> None:
+def fail(message: str) -> NoReturn:
     print(f"[FAIL] {message}")
     raise SystemExit(1)
 

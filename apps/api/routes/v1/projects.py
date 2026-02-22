@@ -13,6 +13,7 @@ from packages.core.schemas.pagination import PaginatedResponse, PaginationMeta
 from packages.core.schemas.projects import (
     AreaStatisticsSnapshot,
     ProjectCreate,
+    ProjectDetailResponse,
     ProjectEvaluationResponse,
     ProjectItem,
     ProjectUpdate,
@@ -45,20 +46,20 @@ def list_projects(
     )
 
 
-@router.get("/projects/{project_id}", response_model=ProjectItem)
-def get_project(project_id: UUID, db: Session = Depends(get_db)) -> ProjectItem:
+@router.get("/projects/{project_id}", response_model=ProjectDetailResponse)
+def get_project(project_id: UUID, db: Session = Depends(get_db)) -> ProjectDetailResponse:
     row = db.get(Project, project_id)
     if row is None or row.status != "published":
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Project not found")
-    return ProjectItem.model_validate(row)
+    return ProjectDetailResponse.model_validate(row)
 
 
-@router.get("/projects/slug/{slug}", response_model=ProjectItem)
-def get_project_by_slug(slug: str, db: Session = Depends(get_db)) -> ProjectItem:
+@router.get("/projects/slug/{slug}", response_model=ProjectDetailResponse)
+def get_project_by_slug(slug: str, db: Session = Depends(get_db)) -> ProjectDetailResponse:
     row = db.scalar(select(Project).where(Project.slug == slug))
     if row is None or row.status != "published":
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Project not found")
-    return ProjectItem.model_validate(row)
+    return ProjectDetailResponse.model_validate(row)
 
 
 def _compute_project_trust_badges(

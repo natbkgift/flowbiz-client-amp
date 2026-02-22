@@ -5,12 +5,14 @@ import { Breadcrumbs } from '@/components/layout/Breadcrumbs';
 import { Container } from '@/components/layout/Container';
 import { TrackedLink } from '@/components/analytics/TrackedLink';
 import { ProjectDeepReview } from '@/components/projects/ProjectDeepReview';
+import { ProjectUnitTabs } from '@/components/projects/ProjectUnitTabs';
+import { Gallery } from '@/components/media/Gallery';
 import { LeadForm } from '@/components/forms/LeadForm';
 import { getDictionary, normalizeLocale } from '@/app/_lib/i18n/get-dictionary';
 import { withLocale, ogLocale } from '@/app/_lib/i18n/routing';
-import { fetchProjectBySlug, fetchProjectEvaluation } from '@/app/_lib/public-api-server';
+import { fetchProjectBySlug, fetchProjectEvaluation, fetchProperties } from '@/app/_lib/public-api-server';
+import { resolveImageUrl } from '@/app/_lib/public-api-shared';
 import { getInternalLinks } from '@/app/_lib/internal-links';
- 
 
 export const revalidate = 300;
 
@@ -53,6 +55,11 @@ export async function generateMetadata({
       locale: ogLocale(locale),
     },
   };
+}
+
+function formatPriceTHB(price: number): string {
+  if (!Number.isFinite(price)) return '฿-';
+  return `฿${Math.round(price).toLocaleString()}`;
 }
 
 export default async function ProjectDetailPage({
@@ -99,7 +106,32 @@ export default async function ProjectDetailPage({
     );
   }
 
-  const evaluation = await fetchProjectEvaluation(project.id);
+  // Fetch project units and evaluation in parallel
+  const [evaluation, unitsResult] = await Promise.all([
+    fetchProjectEvaluation(project.id).catch(() => null),
+    fetchProperties({ project_id: project.id, limit: 100 }).catch(() => ({
+      data: [],
+      meta: { page: 1, limit: 100, total: 0 },
+    })),
+  ]);
+
+  const units = unitsResult.data ?? [];
+
+  // Project images
+  const projectImages = (project.images ?? [])
+    .map((u: string) => resolveImageUrl(u))
+    .filter((v): v is string => Boolean(v));
+  const coverImg = project.cover_image_url ? resolveImageUrl(project.cover_image_url) : null;
+  const galleryImages = coverImg
+    ? [coverImg, ...projectImages.filter((u) => u !== coverImg)]
+    : projectImages;
+
+  // Localized content
+  const summary = project.summary?.[locale] ?? project.summary?.en ?? '';
+  const description = project.description?.[locale] ?? project.description?.en ?? '';
+  const amenities = project.amenities ?? [];
+  const location = project.location ?? null;
+  const investment = project.investment_snapshot ?? null;
 
   const jsonLd = JSON.stringify(
     [
@@ -109,6 +141,7 @@ export default async function ProjectDetailPage({
         name: project.name,
         url: canonicalUrl,
         inLanguage: locale,
+        ...(project.starting_price ? { price: Number(project.starting_price), priceCurrency: 'THB' } : {}),
       },
       {
         '@context': 'https://schema.org',
@@ -117,6 +150,7 @@ export default async function ProjectDetailPage({
         url: canonicalUrl,
         identifier: project.slug,
         inLanguage: locale,
+        ...(project.unit_count ? { numberOfAccommodationUnits: project.unit_count } : {}),
         isPartOf: {
           '@type': 'WebSite',
           name: dict.brand.name,
@@ -163,12 +197,74 @@ export default async function ProjectDetailPage({
             { label: project.name, href: `/${locale}/projects/${encodeURIComponent(slug)}` },
           ]}
         />
+
+        {/* Gallery */}
+        {galleryImages.length > 0 ? (
+          <div className="mb-6">
+            <Gallery images={galleryImages} alt={project.name} />
+          </div>
+        ) : null}
+
+        {/* Project Header */}
         <div className="section-header">
           <h1 className="section-title">{project.name}</h1>
-          <p className="section-subtitle">{dict.property.projectSubtitle}</p>
+          {summary ? <p className="section-subtitle">{summary}</p> : null}
         </div>
 
-        <div className="cta-row">
+        {/* Project Facts */}
+        <div className="property-facts mb-6">
+          {project.property_type ? (
+            <div className="flex items-center gap-2">
+              <strong className="capitalize">{project.property_type}</strong>
+              <span className="text-sm text-[var(--color-text-secondary)]">
+                {locale === 'th' ? 'ประเภท' : 'Type'}
+              </span>
+            </div>
+          ) : null}
+          {project.unit_count ? (
+            <div className="flex items-center gap-2">
+              <strong>{project.unit_count}</strong>
+              <span className="text-sm text-[var(--color-text-secondary)]">
+                {locale === 'th' ? 'ยูนิต' : 'Units'}
+              </span>
+            </div>
+          ) : null}
+          {project.floors ? (
+            <div className="flex items-center gap-2">
+              <strong>{project.floors}</strong>
+              <span className="text-sm text-[var(--color-text-secondary)]">
+                {locale === 'th' ? 'ชั้น' : 'Floors'}
+              </span>
+            </div>
+          ) : null}
+          {project.year_built ? (
+            <div className="flex items-center gap-2">
+              <strong>{project.year_built}</strong>
+              <span className="text-sm text-[var(--color-text-secondary)]">
+                {locale === 'th' ? 'ปีที่สร้าง' : 'Year Built'}
+              </span>
+            </div>
+          ) : null}
+          {project.starting_price ? (
+            <div className="flex items-center gap-2">
+              <strong>{formatPriceTHB(Number(project.starting_price))}</strong>
+              <span className="text-sm text-[var(--color-text-secondary)]">
+                {locale === 'th' ? 'ราคาเริ่มต้น' : 'Starting From'}
+              </span>
+            </div>
+          ) : null}
+          {project.delivery_date ? (
+            <div className="flex items-center gap-2">
+              <strong>{project.delivery_date}</strong>
+              <span className="text-sm text-[var(--color-text-secondary)]">
+                {locale === 'th' ? 'ส่งมอบ' : 'Delivery'}
+              </span>
+            </div>
+          ) : null}
+        </div>
+
+        {/* CTA Row */}
+        <div className="cta-row mb-6">
           <TrackedLink
             className="btn btn-cta"
             href={withLocale(locale, '/contact')}
@@ -187,6 +283,95 @@ export default async function ProjectDetailPage({
           </TrackedLink>
         </div>
 
+        {/* Description */}
+        {description ? (
+          <div className="bg-[var(--color-white)] p-6 rounded-xl mb-6">
+            <h2 className="mb-4">{locale === 'th' ? 'รายละเอียดโครงการ' : 'About This Project'}</h2>
+            <p className="mb-0">{description}</p>
+          </div>
+        ) : null}
+
+        {/* Amenities */}
+        {amenities.length > 0 ? (
+          <div className="bg-[var(--color-white)] p-6 rounded-xl mb-6">
+            <h2 className="mb-4">{locale === 'th' ? 'สิ่งอำนวยความสะดวก' : 'Amenities'}</h2>
+            <div className="grid grid-3">
+              {amenities.map((a: string) => (
+                <div key={a} className="flex items-center gap-2 py-1">
+                  <span className="text-[var(--color-accent)]" aria-hidden="true">&#10003;</span>
+                  <span>{a}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        ) : null}
+
+        {/* Investment Snapshot */}
+        {investment ? (
+          <div className="bg-[var(--color-white)] p-6 rounded-xl mb-6">
+            <h2 className="mb-4">{locale === 'th' ? 'ข้อมูลการลงทุน' : 'Investment Snapshot'}</h2>
+            <div className="grid grid-3">
+              {investment.avg_roi ? (
+                <div>
+                  <div className="text-2xl font-bold text-[var(--color-primary)]">{String(investment.avg_roi)}%</div>
+                  <div className="text-sm text-[var(--color-text-secondary)]">
+                    {locale === 'th' ? 'ผลตอบแทนเฉลี่ย' : 'Average ROI'}
+                  </div>
+                </div>
+              ) : null}
+              {investment.avg_occupancy ? (
+                <div>
+                  <div className="text-2xl font-bold text-[var(--color-primary)]">{String(investment.avg_occupancy)}%</div>
+                  <div className="text-sm text-[var(--color-text-secondary)]">
+                    {locale === 'th' ? 'อัตราเข้าพัก' : 'Occupancy Rate'}
+                  </div>
+                </div>
+              ) : null}
+              {investment.price_trend ? (
+                <div>
+                  <div className="text-2xl font-bold text-[var(--color-primary)]">{String(investment.price_trend)}</div>
+                  <div className="text-sm text-[var(--color-text-secondary)]">
+                    {locale === 'th' ? 'แนวโน้มราคา' : 'Price Trend'}
+                  </div>
+                </div>
+              ) : null}
+            </div>
+          </div>
+        ) : null}
+
+        {/* Location */}
+        {location && (location as Record<string, unknown>).address ? (
+          <div className="bg-[var(--color-white)] p-6 rounded-xl mb-6">
+            <h2 className="mb-4">{locale === 'th' ? 'ที่ตั้ง' : 'Location'}</h2>
+            <p>{String((location as Record<string, unknown>).address)}</p>
+          </div>
+        ) : null}
+
+        {/* Sell / Rent Unit Tabs */}
+        {units.length > 0 ? (
+          <div className="mb-6">
+            <h2 className="mb-2">{locale === 'th' ? 'ยูนิตในโครงการ' : 'Available Units'}</h2>
+            <ProjectUnitTabs
+              units={units.map((u) => ({
+                id: u.id,
+                title: u.title,
+                type: u.type,
+                price: Number(u.price),
+                address: u.address,
+                slug: u.slug,
+                cover_image: u.cover_image,
+                local_images: u.local_images,
+                images: u.images,
+              }))}
+              locale={locale}
+            />
+          </div>
+        ) : null}
+
+        {/* Deep Review */}
+        {evaluation ? <ProjectDeepReview locale={locale} evaluation={evaluation} /> : null}
+
+        {/* Related Links */}
         <div className="card reveal mt-6">
           <h2 className="card-title">{dict.property.exploreMore}</h2>
           <p className="card-subtitle">{dict.property.navigateToKeyPages}</p>
@@ -205,13 +390,12 @@ export default async function ProjectDetailPage({
           </div>
         </div>
 
+        {/* Advisor CTA */}
         <div className="card reveal mt-6">
-          <h2 className="card-title">{'Request a Shortlist'}</h2>
+          <h2 className="card-title">{locale === 'th' ? 'ขอรายชื่อยูนิต' : 'Request a Shortlist'}</h2>
           <p className="card-subtitle">{dict.property.navigateToKeyPages}</p>
           <LeadForm defaultMessage={`Project: ${project.name}`} />
         </div>
-
-        {evaluation ? <ProjectDeepReview locale={locale} evaluation={evaluation} /> : null}
       </Container>
     </main>
   );

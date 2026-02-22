@@ -340,7 +340,7 @@
           "statistics": {
             "anyOf": [
               {
-                "$ref": "#/components/schemas/AreaStatisticsSnapshot"
+                "$ref": "#/components/schemas/packages__core__schemas__projects__AreaStatisticsSnapshot"
               },
               {
                 "type": "null"
@@ -352,62 +352,6 @@
           "area"
         ],
         "title": "AreaStatisticsResponse",
-        "type": "object"
-      },
-      "AreaStatisticsSnapshot": {
-        "properties": {
-          "area_id": {
-            "format": "uuid",
-            "title": "Area Id",
-            "type": "string"
-          },
-          "as_of": {
-            "format": "date-time",
-            "title": "As Of",
-            "type": "string"
-          },
-          "avg_price": {
-            "anyOf": [
-              {
-                "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Avg Price"
-          },
-          "avg_rent": {
-            "anyOf": [
-              {
-                "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Avg Rent"
-          },
-          "roi_percent": {
-            "anyOf": [
-              {
-                "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Roi Percent"
-          }
-        },
-        "required": [
-          "area_id",
-          "as_of"
-        ],
-        "title": "AreaStatisticsSnapshot",
         "type": "object"
       },
       "AvailabilityResponse": {
@@ -2275,7 +2219,6 @@
                 "type": "number"
               },
               {
-                "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
                 "type": "string"
               }
             ],
@@ -2294,7 +2237,6 @@
                 "type": "number"
               },
               {
-                "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
                 "type": "string"
               }
             ],
@@ -2317,7 +2259,6 @@
       "MortgageResponse": {
         "properties": {
           "payment_per_period": {
-            "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
             "title": "Payment Per Period",
             "type": "string"
           },
@@ -2326,12 +2267,10 @@
             "type": "integer"
           },
           "total_interest": {
-            "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
             "title": "Total Interest",
             "type": "string"
           },
           "total_paid": {
-            "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
             "title": "Total Paid",
             "type": "string"
           }
@@ -2904,12 +2843,231 @@
         "title": "ProjectCreate",
         "type": "object"
       },
+      "ProjectDetailResponse": {
+        "description": "Full project detail schema exposing all DB fields.",
+        "properties": {
+          "amenities": {
+            "anyOf": [
+              {
+                "items": {},
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Amenities"
+          },
+          "area_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Area Id"
+          },
+          "cover_image_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Cover Image Url"
+          },
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "delivery_date": {
+            "anyOf": [
+              {
+                "format": "date",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Delivery Date"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          },
+          "developer_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Developer Id"
+          },
+          "floors": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Floors"
+          },
+          "hero_image_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Hero Image Url"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "images": {
+            "anyOf": [
+              {
+                "items": {},
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Images"
+          },
+          "investment_snapshot": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Investment Snapshot"
+          },
+          "is_featured": {
+            "default": false,
+            "title": "Is Featured",
+            "type": "boolean"
+          },
+          "location": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Location"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "property_type": {
+            "default": "condo",
+            "title": "Property Type",
+            "type": "string"
+          },
+          "slug": {
+            "title": "Slug",
+            "type": "string"
+          },
+          "starting_price": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Starting Price"
+          },
+          "status": {
+            "title": "Status",
+            "type": "string"
+          },
+          "summary": {
+            "additionalProperties": true,
+            "title": "Summary",
+            "type": "object"
+          },
+          "unit_count": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Unit Count"
+          },
+          "updated_at": {
+            "format": "date-time",
+            "title": "Updated At",
+            "type": "string"
+          },
+          "year_built": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Year Built"
+          }
+        },
+        "required": [
+          "id",
+          "slug",
+          "name",
+          "status",
+          "created_at",
+          "updated_at"
+        ],
+        "title": "ProjectDetailResponse",
+        "type": "object"
+      },
       "ProjectEvaluationResponse": {
         "properties": {
           "area_statistics": {
             "anyOf": [
               {
-                "$ref": "#/components/schemas/AreaStatisticsSnapshot"
+                "$ref": "#/components/schemas/packages__core__schemas__projects__AreaStatisticsSnapshot"
               },
               {
                 "type": "null"
@@ -2940,6 +3098,7 @@
         "type": "object"
       },
       "ProjectItem": {
+        "description": "Lightweight schema for project list endpoints.",
         "properties": {
           "area_id": {
             "anyOf": [
@@ -2986,6 +3145,11 @@
             "title": "Id",
             "type": "string"
           },
+          "is_featured": {
+            "default": false,
+            "title": "Is Featured",
+            "type": "boolean"
+          },
           "name": {
             "title": "Name",
             "type": "string"
@@ -2993,6 +3157,17 @@
           "slug": {
             "title": "Slug",
             "type": "string"
+          },
+          "starting_price": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Starting Price"
           },
           "status": {
             "title": "Status",
@@ -3145,7 +3320,6 @@
                 "type": "number"
               },
               {
-                "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
                 "type": "string"
               }
             ],
@@ -3157,7 +3331,6 @@
                 "type": "number"
               },
               {
-                "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
                 "type": "string"
               },
               {
@@ -3263,6 +3436,28 @@
             ],
             "title": "Description"
           },
+          "floor": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Floor"
+          },
+          "furnishing": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Furnishing"
+          },
           "id": {
             "format": "uuid",
             "title": "Id",
@@ -3297,14 +3492,29 @@
             "title": "Local Images"
           },
           "price": {
-            "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
             "title": "Price",
+            "type": "string"
+          },
+          "project_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Project Id"
+          },
+          "property_type": {
+            "default": "condo",
+            "title": "Property Type",
             "type": "string"
           },
           "size": {
             "anyOf": [
               {
-                "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
                 "type": "string"
               },
               {
@@ -3312,6 +3522,17 @@
               }
             ],
             "title": "Size"
+          },
+          "size_sqm": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Size Sqm"
           },
           "slug": {
             "anyOf": [
@@ -3342,6 +3563,17 @@
             "format": "date-time",
             "title": "Updated At",
             "type": "string"
+          },
+          "view": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "View"
           }
         },
         "required": [
@@ -3536,9 +3768,20 @@
             "title": "Local Images"
           },
           "price": {
-            "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
             "title": "Price",
             "type": "string"
+          },
+          "project_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Project Id"
           },
           "slug": {
             "anyOf": [
@@ -3759,7 +4002,6 @@
                 "type": "number"
               },
               {
-                "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
                 "type": "string"
               },
               {
@@ -3774,7 +4016,6 @@
                 "type": "number"
               },
               {
-                "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
                 "type": "string"
               },
               {
@@ -3876,7 +4117,6 @@
             "type": "string"
           },
           "price": {
-            "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
             "title": "Price",
             "type": "string"
           },
@@ -3933,7 +4173,6 @@
                 "type": "number"
               },
               {
-                "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
                 "type": "string"
               }
             ],
@@ -3947,7 +4186,6 @@
                 "type": "number"
               },
               {
-                "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
                 "type": "string"
               }
             ],
@@ -3960,7 +4198,6 @@
                 "type": "number"
               },
               {
-                "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
                 "type": "string"
               }
             ],
@@ -3977,17 +4214,14 @@
       "RoiResponse": {
         "properties": {
           "gross_yield_percent": {
-            "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
             "title": "Gross Yield Percent",
             "type": "string"
           },
           "net_annual_income": {
-            "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
             "title": "Net Annual Income",
             "type": "string"
           },
           "net_yield_percent": {
-            "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
             "title": "Net Yield Percent",
             "type": "string"
           }
@@ -4080,7 +4314,6 @@
                 "type": "number"
               },
               {
-                "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
                 "type": "string"
               },
               {
@@ -4179,7 +4412,6 @@
           "asking_price": {
             "anyOf": [
               {
-                "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
                 "type": "string"
               },
               {
@@ -4611,6 +4843,59 @@
           "total"
         ],
         "title": "PaginationMeta",
+        "type": "object"
+      },
+      "packages__core__schemas__projects__AreaStatisticsSnapshot": {
+        "properties": {
+          "area_id": {
+            "format": "uuid",
+            "title": "Area Id",
+            "type": "string"
+          },
+          "as_of": {
+            "format": "date-time",
+            "title": "As Of",
+            "type": "string"
+          },
+          "avg_price": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Avg Price"
+          },
+          "avg_rent": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Avg Rent"
+          },
+          "roi_percent": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Roi Percent"
+          }
+        },
+        "required": [
+          "area_id",
+          "as_of"
+        ],
+        "title": "AreaStatisticsSnapshot",
         "type": "object"
       },
       "packages__core__schemas__property_api__PaginationMeta": {
@@ -12112,7 +12397,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ProjectItem"
+                  "$ref": "#/components/schemas/ProjectDetailResponse"
                 }
               }
             },
@@ -12175,7 +12460,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ProjectItem"
+                  "$ref": "#/components/schemas/ProjectDetailResponse"
                 }
               }
             },
@@ -12432,6 +12717,23 @@
               ],
               "title": "Sort"
             }
+          },
+          {
+            "in": "query",
+            "name": "project_id",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "format": "uuid",
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Project Id"
+            }
           }
         ],
         "responses": {
@@ -12652,7 +12954,6 @@
                   "type": "number"
                 },
                 {
-                  "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
                   "type": "string"
                 },
                 {
@@ -12672,7 +12973,6 @@
                   "type": "number"
                 },
                 {
-                  "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
                   "type": "string"
                 },
                 {
