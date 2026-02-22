@@ -167,7 +167,7 @@ def upgrade() -> None:
             "summary",
             nullable=False,
             existing_type=JSONB(),
-            server_default="'{}'::jsonb",
+            server_default=sa.text("'{}'::jsonb"),
         )
 
     # projects.property_type NOT NULL (sentinel: condo)
