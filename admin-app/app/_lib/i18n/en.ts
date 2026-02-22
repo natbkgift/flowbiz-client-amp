@@ -9,7 +9,7 @@ export const en: Dictionary = {
   nav: {
     home: 'Home',
     invest: 'Invest',
-    buy: 'Buy as Foreigner',
+    buy: 'Buy',
     rent: 'Rent',
     sell: 'Sell',
     live: 'Live',
@@ -36,7 +36,7 @@ export const en: Dictionary = {
       desc: 'Evaluate rental demand, yield positioning, and risk factors with clear assumptions.',
     },
     pathBuy: {
-      title: 'Buy as Foreigner',
+      title: 'Buy',
       desc: 'Understand foreign quota, due diligence, and the steps that protect your purchase.',
     },
     pathLive: {
