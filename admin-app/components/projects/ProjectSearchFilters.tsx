@@ -68,6 +68,7 @@ export function ProjectSearchFilters() {
             <div className="md:w-64">
                 <select
                     className="form-input w-full"
+                    aria-label="Sort projects"
                     value={sort}
                     onChange={(e) => handleSortChange(e.target.value as ProjectSortOption)}
                 >
