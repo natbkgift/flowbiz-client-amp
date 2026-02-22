@@ -79,6 +79,17 @@ export const en: Dictionary = {
     goalPrefix: 'Goal',
     budgetPrefix: 'Budget',
     timelinePrefix: 'Timeline',
+    searchPlaceholder: 'Search by project name, area, or keyword...',
+    featuredProjectsTitle: 'Featured Projects',
+    featuredProjectsSubtitle: 'Real developments with verified data, updated in real time.',
+    investStatsTitle: 'Why Pattaya',
+    investStatsSubtitle: 'Key market indicators for international property investors.',
+    investStats: [
+      { value: '5–8%', label: 'Average Rental Yield' },
+      { value: '70%+', label: 'Peak Occupancy Rate' },
+      { value: '$2,500', label: 'Avg. Price per sqm' },
+      { value: '3.5M+', label: 'Annual Tourists' },
+    ],
   },
   buy: {
     title: 'Buy Property in Pattaya',

@@ -75,6 +75,7 @@ def list_properties(
     type: PropertyType | None = None,
     search: str | None = None,
     sort: str | None = Query(default=None, pattern=r"^(price_asc|price_desc|newest|oldest)$"),
+    project_id: UUID | None = Query(default=None),
     db: Session = Depends(get_db),
 ) -> PropertyListResponse:
     base_query: Select[tuple[Property]] = select(Property).where(
@@ -83,6 +84,9 @@ def list_properties(
 
     if type is not None:
         base_query = base_query.where(Property.type == type)
+
+    if project_id is not None:
+        base_query = base_query.where(Property.project_id == project_id)
 
     if search:
         pattern = f"%{search.strip()}%"

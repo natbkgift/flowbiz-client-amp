@@ -117,7 +117,6 @@ def _alter_to_jsonb(table: str, column: str, not_null: bool = False) -> None:
 
 
 def upgrade() -> None:
-
     if not _is_postgres():
         return  # All changes are PostgreSQL-specific
 

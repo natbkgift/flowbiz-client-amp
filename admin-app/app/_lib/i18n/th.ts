@@ -75,6 +75,17 @@ export const th: Dictionary = {
     goalPrefix: 'เป้าหมาย',
     budgetPrefix: 'งบประมาณ',
     timelinePrefix: 'ระยะเวลา',
+    searchPlaceholder: 'ค้นหาตามชื่อโครงการ พื้นที่ หรือคำค้น...',
+    featuredProjectsTitle: 'โครงการเด่น',
+    featuredProjectsSubtitle: 'โครงการจริงจากข้อมูลที่ตรวจสอบแล้ว อัปเดตแบบเรียลไทม์',
+    investStatsTitle: 'ทำไมต้องพัทยา',
+    investStatsSubtitle: 'ตัวชี้วัดตลาดสำคัญสำหรับนักลงทุนอสังหาฯ ต่างชาติ',
+    investStats: [
+      { value: '5–8%', label: 'ผลตอบแทนเช่าเฉลี่ย' },
+      { value: '70%+', label: 'อัตราเข้าพักสูงสุด' },
+      { value: '$2,500', label: 'ราคาเฉลี่ย/ตร.ม.' },
+      { value: '3.5M+', label: 'นักท่องเที่ยวต่อปี' },
+    ],
   },
   buy: {
     title: 'ซื้ออสังหาฯ ในพัทยา',

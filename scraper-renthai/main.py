@@ -16,7 +16,7 @@ from parser import parse_unit_detail
 from project_crawler import discover_project_urls, discover_unit_urls_from_pages
 from utils import Progress, StopScrapeError, ensure_dir, load_robots_txt
 
-from config import load_config
+from config import load_config  # type: ignore[attr-defined]
 
 
 def unit_raw_cache_path(url: str) -> str:

@@ -102,10 +102,10 @@ def _is_schema_backward_compatible(base: Any, cur: Any, *, path: str) -> tuple[b
         # Note: OpenAPI requestBody also has a boolean 'required' field; do not treat that
         # as a schema-required list.
         if isinstance(base.get("required"), list) or isinstance(cur.get("required"), list):
-            base_req_raw = base.get("required") if isinstance(base.get("required"), list) else []
-            cur_req_raw = cur.get("required") if isinstance(cur.get("required"), list) else []
-            base_req = set(base_req_raw)
-            cur_req = set(cur_req_raw)
+            base_req_list = base.get("required")
+            cur_req_list = cur.get("required")
+            base_req = set(base_req_list) if isinstance(base_req_list, list) else set()
+            cur_req = set(cur_req_list) if isinstance(cur_req_list, list) else set()
             # Adding required fields is breaking.
             if not cur_req.issubset(base_req):
                 return False, f"{path}:required_tightened"

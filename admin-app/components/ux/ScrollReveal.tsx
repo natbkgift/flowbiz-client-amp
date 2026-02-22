@@ -16,10 +16,19 @@ export function ScrollReveal() {
           }
         }
       },
-      { rootMargin: '0px 0px -10% 0px', threshold: 0.12 }
+      { rootMargin: '50px 0px -5% 0px', threshold: 0.01 }
     );
 
-    for (const el of elements) observer.observe(el);
+    for (const el of elements) {
+      // Elements already in viewport on load (above fold) — reveal immediately
+      const rect = el.getBoundingClientRect();
+      if (rect.top < window.innerHeight && rect.bottom > 0) {
+        el.classList.add('reveal--in');
+      } else {
+        observer.observe(el);
+      }
+    }
+
     return () => observer.disconnect();
   }, []);
 

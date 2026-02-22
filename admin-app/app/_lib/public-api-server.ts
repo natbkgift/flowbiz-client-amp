@@ -55,6 +55,40 @@ export type ProjectItem = {
   developer_id?: string | null;
   area_id?: string | null;
   status: string;
+  cover_image_url?: string | null;
+  starting_price?: number | null;
+  is_featured?: boolean;
+  created_at: string;
+  updated_at: string;
+};
+
+export type ProjectDetail = {
+  id: string;
+  slug: string;
+  name: string;
+  status: string;
+  property_type: string;
+  delivery_date?: string | null;
+  starting_price?: number | null;
+
+  cover_image_url?: string | null;
+  hero_image_url?: string | null;
+  images?: string[] | null;
+
+  summary: Record<string, string>;
+  description?: Record<string, string> | null;
+
+  amenities?: string[] | null;
+  investment_snapshot?: Record<string, unknown> | null;
+  location?: Record<string, unknown> | null;
+  unit_count?: number | null;
+  floors?: number | null;
+  year_built?: number | null;
+  is_featured?: boolean;
+
+  developer_id?: string | null;
+  area_id?: string | null;
+
   created_at: string;
   updated_at: string;
 };
@@ -78,6 +112,7 @@ export async function fetchProperties(params: {
   type?: string;
   search?: string;
   sort?: 'price_asc' | 'price_desc' | 'newest' | 'oldest';
+  project_id?: string;
 }): Promise<PropertyListResponse> {
   const origin = getOrigin();
   const base = apiBase();
@@ -89,6 +124,7 @@ export async function fetchProperties(params: {
   if (params.type) url.searchParams.set('type', params.type);
   if (params.search) url.searchParams.set('search', params.search);
   if (params.sort) url.searchParams.set('sort', params.sort);
+  if (params.project_id) url.searchParams.set('project_id', params.project_id);
 
   const res = await fetchWithRetry(url.toString(), {
     // Public pages: allow caching but keep it reasonably fresh.
@@ -141,7 +177,7 @@ export async function fetchProjects(params?: { limit?: number }): Promise<Projec
   return [];
 }
 
-export async function fetchProjectBySlug(slug: string): Promise<ProjectItem | null> {
+export async function fetchProjectBySlug(slug: string): Promise<ProjectDetail | null> {
   const origin = getOrigin();
   const base = apiBase();
 
@@ -149,7 +185,7 @@ export async function fetchProjectBySlug(slug: string): Promise<ProjectItem | nu
   const res = await fetchWithRetry(url.toString(), { next: { revalidate: PAGE_REVALIDATE_SECONDS } });
   if (res.status === 404) return null;
   if (!res.ok) throw new Error(`Failed to fetch project (${res.status})`);
-  return (await res.json()) as ProjectItem;
+  return (await res.json()) as ProjectDetail;
 }
 
 export type MarketplaceCategoryItem = {

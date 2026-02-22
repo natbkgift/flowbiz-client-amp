@@ -1,13 +1,18 @@
 import type { Metadata } from 'next';
+import Link from 'next/link';
 
 import { Container } from '@/components/layout/Container';
 import { TrackedLink } from '@/components/analytics/TrackedLink';
-import { CTA, buildWhatsAppUrl } from '@/app/_lib/public-cta';
+import { HeroSearch } from '@/components/home/HeroSearch';
+import { FeaturedProjects } from '@/components/home/FeaturedProjects';
+import { LeadForm } from '@/components/forms/LeadForm';
+import { buildWhatsAppUrl } from '@/app/_lib/public-cta';
 import { getDictionary, normalizeLocale } from '@/app/_lib/i18n/get-dictionary';
 import { withLocale } from '@/app/_lib/i18n/routing';
 import { makePageMetadata } from '@/app/_lib/i18n/metadata';
 import { getContentRecommendation } from '@/lib/personalization';
 import { organizationSchema, webSiteSchema, localBusinessSchema } from '@/app/_lib/schema-markup';
+import { fetchProjects } from '@/app/_lib/public-api-server';
 
 export const revalidate = 300;
 
@@ -55,17 +60,8 @@ export default async function HomePage({
   function hrefWithQuery(path: string, query: Record<string, string>): string {
     const url = new URL(path, 'https://amppattaya.com');
     for (const [k, v] of Object.entries(query)) url.searchParams.set(k, v);
-    // Keep it relative.
     return url.pathname + url.search;
   }
-
-  // WhatsApp URL builder extracted to shared utility: @/app/_lib/public-cta
-
-  const featured = [
-    { title: dict.home.featuredCentralTitle, subtitle: dict.home.featuredCentralSubtitle },
-    { title: dict.home.featuredJomtienTitle, subtitle: dict.home.featuredJomtienSubtitle },
-    { title: dict.home.featuredPratumnakTitle, subtitle: dict.home.featuredPratumnakSubtitle },
-  ];
 
   const smartLabels = {
     buy: dict.guided.buy,
@@ -101,6 +97,19 @@ export default async function HomePage({
 
   const recommendation = getContentRecommendation();
 
+  // Fetch real projects for featured section
+  let allProjects: Awaited<ReturnType<typeof fetchProjects>> = [];
+  try {
+    allProjects = await fetchProjects({ limit: 100 });
+  } catch {
+    allProjects = [];
+  }
+
+  // Prefer featured projects, fallback to first 6
+  const featuredProjects = allProjects.filter((p) => p.is_featured).length > 0
+    ? allProjects.filter((p) => p.is_featured).slice(0, 6)
+    : allProjects.slice(0, 6);
+
   const jsonLd = JSON.stringify([
     organizationSchema(),
     webSiteSchema(),
@@ -113,6 +122,8 @@ export default async function HomePage({
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: jsonLd }}
       />
+
+      {/* Hero Section with Search */}
       <section className="hero hero--premium">
         <Container>
           <div className="hero-grid">
@@ -120,24 +131,26 @@ export default async function HomePage({
               <h1 className="headline">{dict.home.heroTitle}</h1>
               <p className="subhead">{dict.home.heroSubtitle}</p>
 
-              <div className="cta-row">
-                <TrackedLink
-                  className="btn btn-cta"
-                  href={withLocale(locale, '/invest')}
-                  eventType="cta_click"
-                  eventPayload={{ cta: 'explore_investment', from: 'home_hero' }}
-                >
-                  {dict.cta.exploreInvestment}
-                </TrackedLink>
-                <TrackedLink
-                  className="btn btn-secondary"
-                  href={withLocale(locale, '/contact')}
-                  eventType="cta_click"
-                  eventPayload={{ cta: 'speak_to_advisor', from: 'home_hero' }}
-                >
-                  {dict.cta.speakToAdvisor}
-                </TrackedLink>
+              <HeroSearch
+                locale={locale}
+                placeholder={dict.home.searchPlaceholder}
+              />
+
+              <div className="hero-chips">
+                <Link className="hero-chip" href={withLocale(locale, '/buy')}>
+                  {dict.nav.buy}
+                </Link>
+                <Link className="hero-chip" href={withLocale(locale, '/rent')}>
+                  {dict.nav.rent}
+                </Link>
+                <Link className="hero-chip" href={withLocale(locale, '/invest')}>
+                  {dict.nav.invest}
+                </Link>
+                <Link className="hero-chip" href={withLocale(locale, '/projects')}>
+                  {dict.nav.projects}
+                </Link>
               </div>
+
               <TrackedLink
                 className="hero-guided-trigger"
                 href={withLocale(locale, hrefWithQuery('/', { guided: '1', step: 'goal' }))}
@@ -158,7 +171,7 @@ export default async function HomePage({
         </Container>
       </section>
 
-      {/* Phase 1: Guided Goal Modal (server-rendered via query params; no-JS friendly). */}
+      {/* Guided Goal Modal */}
       {guidedOpen ? (
         <div className="guided-overlay" role="presentation">
           <dialog className="guided-dialog" open aria-modal="true" aria-labelledby="guided-dialog-title">
@@ -305,6 +318,31 @@ export default async function HomePage({
         </div>
       ) : null}
 
+      {/* Featured Projects — Real Data */}
+      {featuredProjects.length > 0 ? (
+        <section className="section">
+          <Container>
+            <FeaturedProjects
+              projects={featuredProjects}
+              locale={locale}
+              title={dict.home.featuredProjectsTitle}
+              subtitle={dict.home.featuredProjectsSubtitle}
+            />
+            <div className="cta-row cta-row--center" style={{ marginTop: 'var(--space-4)' }}>
+              <TrackedLink
+                className="btn btn-secondary"
+                href={withLocale(locale, '/projects')}
+                eventType="cta_click"
+                eventPayload={{ cta: 'view_all_projects', from: 'home_featured' }}
+              >
+                {locale === 'th' ? 'ดูโครงการทั้งหมด' : 'View All Projects'}
+              </TrackedLink>
+            </div>
+          </Container>
+        </section>
+      ) : null}
+
+      {/* Choose Your Path */}
       <section className="section">
         <Container>
           <div className="section-header">
@@ -363,43 +401,38 @@ export default async function HomePage({
         </Container>
       </section>
 
-      <section className="section">
+      {/* Investment Stats */}
+      <section className="section section--alt">
         <Container>
           <div className="section-header">
-            <h2 className="section-title">{dict.home.featuredTitle}</h2>
-            <p className="section-subtitle">{dict.home.featuredSubtitle}</p>
+            <h2 className="section-title">{dict.home.investStatsTitle}</h2>
+            <p className="section-subtitle">{dict.home.investStatsSubtitle}</p>
           </div>
 
-          <div className="grid grid-3">
-            {featured.map((it) => (
-              <div key={it.title} className="card reveal" role="article">
-                <h3 className="card-title">{it.title}</h3>
-                <p className="card-subtitle">{it.subtitle}</p>
-                <div className="card-actions">
-                  <TrackedLink
-                    className="btn btn-tertiary"
-                    href={withLocale(locale, '/buy')}
-                    eventType="featured_click"
-                    eventPayload={{ featured: it.title, action: 'buy' }}
-                  >
-                    {dict.nav.buy}
-                  </TrackedLink>
-                  <TrackedLink
-                    className="btn btn-secondary"
-                    href={withLocale(locale, '/invest')}
-                    eventType="featured_click"
-                    eventPayload={{ featured: it.title, action: 'invest' }}
-                  >
-                    {dict.nav.invest}
-                  </TrackedLink>
-                </div>
+          <div className="stats-grid">
+            {dict.home.investStats.map((stat) => (
+              <div key={stat.label} className="stat-card reveal">
+                <div className="stat-value">{stat.value}</div>
+                <div className="stat-label">{stat.label}</div>
               </div>
             ))}
+          </div>
+
+          <div className="cta-row cta-row--center" style={{ marginTop: 'var(--space-5)' }}>
+            <TrackedLink
+              className="btn btn-cta"
+              href={withLocale(locale, '/invest')}
+              eventType="cta_click"
+              eventPayload={{ cta: 'explore_investment', from: 'home_stats' }}
+            >
+              {dict.cta.exploreInvestment}
+            </TrackedLink>
           </div>
         </Container>
       </section>
 
-      <section className="section section--alt">
+      {/* Trust & Market Insight */}
+      <section className="section">
         <Container>
           <div className="section-header">
             <h2 className="section-title">{dict.home.trustTitle}</h2>
@@ -429,7 +462,7 @@ export default async function HomePage({
           <div className="testimonial-strip">
             {dict.common.testimonials.slice(0, 2).map((t) => (
               <figure key={t.quote} className="testimonial reveal">
-                <blockquote>“{t.quote}”</blockquote>
+                <blockquote>&ldquo;{t.quote}&rdquo;</blockquote>
                 <figcaption>
                   <div className="testimonial__name">{t.name}</div>
                   <div className="testimonial__context">{t.context}</div>
@@ -440,30 +473,34 @@ export default async function HomePage({
         </Container>
       </section>
 
+      {/* Premium CTA with LeadForm */}
       <section className="section section--cta">
         <Container>
           <div className="cta-panel reveal">
             <div>
               <h2 className="cta-title">{dict.home.premiumCtaTitle}</h2>
               <p className="cta-body">{dict.home.premiumCtaBody}</p>
+              <div className="cta-row">
+                <TrackedLink
+                  className="btn btn-cta"
+                  href={withLocale(locale, '/invest')}
+                  eventType="cta_click"
+                  eventPayload={{ cta: 'explore_investment', from: 'home_premium' }}
+                >
+                  {dict.cta.exploreInvestment}
+                </TrackedLink>
+                <TrackedLink
+                  className="btn btn-secondary"
+                  href={withLocale(locale, '/contact')}
+                  eventType="cta_click"
+                  eventPayload={{ cta: 'speak_to_advisor', from: 'home_premium' }}
+                >
+                  {dict.cta.speakToAdvisor}
+                </TrackedLink>
+              </div>
             </div>
-            <div className="cta-row">
-              <TrackedLink
-                className="btn btn-cta"
-                href={withLocale(locale, '/invest')}
-                eventType="cta_click"
-                eventPayload={{ cta: 'explore_investment', from: 'home_premium' }}
-              >
-                {dict.cta.exploreInvestment}
-              </TrackedLink>
-              <TrackedLink
-                className="btn btn-secondary"
-                href={withLocale(locale, '/contact')}
-                eventType="cta_click"
-                eventPayload={{ cta: 'speak_to_advisor', from: 'home_premium' }}
-              >
-                {dict.cta.speakToAdvisor}
-              </TrackedLink>
+            <div>
+              <LeadForm />
             </div>
           </div>
         </Container>

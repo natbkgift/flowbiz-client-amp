@@ -60,6 +60,12 @@ export type Dictionary = {
     goalPrefix: string;
     budgetPrefix: string;
     timelinePrefix: string;
+    searchPlaceholder: string;
+    featuredProjectsTitle: string;
+    featuredProjectsSubtitle: string;
+    investStatsTitle: string;
+    investStatsSubtitle: string;
+    investStats: { value: string; label: string }[];
   };
   buy: {
     title: string;

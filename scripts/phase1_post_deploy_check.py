@@ -1,3 +1,4 @@
+import http.client
 import json
 import os
 import sys
@@ -14,7 +15,7 @@ class CheckError(Exception):
     pass
 
 
-def _urlopen_follow_redirect(req: urllib.request.Request) -> urllib.response.addinfourl:
+def _urlopen_follow_redirect(req: urllib.request.Request) -> http.client.HTTPResponse:
     """Open a request and follow a single redirect.
 
     Some production proxies return 307/308 for POST endpoints (e.g. adding a

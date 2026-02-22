@@ -25,6 +25,7 @@ export type PropertyListItem = {
   cover_image?: string | null;
   status: string;
   slug: string | null;
+  project_id?: string | null;
 };
 
 export type PropertyListResponse = {
@@ -46,10 +47,17 @@ export type PropertyDetail = {
   bedrooms: number | null;
   bathrooms: number | null;
   size: number | null;
+  size_sqm?: number | null;
   address: string;
   city: string;
   images: string[] | null;
   local_images?: string[] | null;
   cover_image?: string | null;
   status: string;
+  slug?: string | null;
+  project_id?: string | null;
+  property_type?: string;
+  furnishing?: string | null;
+  view?: string | null;
+  floor?: number | null;
 };

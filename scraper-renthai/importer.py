@@ -9,7 +9,7 @@ import uuid
 
 from utils import sha256_hex
 
-from config import ScraperConfig
+from config import ScraperConfig  # type: ignore[attr-defined]
 
 
 def _multipart_form_data(

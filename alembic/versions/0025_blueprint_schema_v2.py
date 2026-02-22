@@ -159,7 +159,6 @@ def _add_column_safe(table_name: str, col: sa.Column) -> None:
 
 
 def upgrade() -> None:
-
     # ── DEVELOPERS ──────────────────────────────────────────────────────────
 
     if _table_exists("developers"):
