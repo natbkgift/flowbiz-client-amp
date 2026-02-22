@@ -1,0 +1,50 @@
+[
+  {
+    "source_id": "rent-001",
+    "title": "1BR - The Riviera Jomtien (Monthly)",
+    "type": "rent",
+    "price": 18000,
+    "address": "Jomtien Second Road",
+    "city": "Pattaya",
+    "bedrooms": 1,
+    "bathrooms": 1,
+    "size_sqm": 45,
+    "project_slug": "the-riviera-jomtien",
+    "area_slug": "jomtien",
+    "developer_slug": "the-riviera-group",
+    "slug": "riviera-jomtien-1br-rent",
+    "status": "active"
+  },
+  {
+    "source_id": "rent-002",
+    "title": "Studio - Wongamat Tower (Long-term)",
+    "type": "rent",
+    "price": 12000,
+    "address": "Wongamat Beach Road",
+    "city": "Pattaya",
+    "bedrooms": 0,
+    "bathrooms": 1,
+    "size_sqm": 32,
+    "project_slug": "wongamat-tower",
+    "area_slug": "wongamat",
+    "developer_slug": "nova-group",
+    "slug": "wongamat-tower-studio-rent",
+    "status": "active"
+  },
+  {
+    "source_id": "rent-003",
+    "title": "2BR Pool Villa - Bang Saray (Yearly)",
+    "type": "rent",
+    "price": 45000,
+    "address": "Bang Saray Beach Road",
+    "city": "Pattaya",
+    "bedrooms": 2,
+    "bathrooms": 2,
+    "size_sqm": 180,
+    "project_slug": null,
+    "area_slug": "bang-saray",
+    "developer_slug": null,
+    "slug": "bang-saray-2br-villa-rent",
+    "status": "active"
+  }
+]

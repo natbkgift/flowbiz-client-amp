@@ -56,3 +56,41 @@ export function makePageMetadata(
     },
   };
 }
+
+/**
+ * Listing pages that accept filter query params (bedrooms, price_max, area,
+ * etc.) must NOT be indexed when filters are active. The canonical always
+ * points to the clean parent URL without query params.
+ *
+ * Blueprint doc 01 — MASTER SITEMAP, §Filtered Views:
+ *   "These dynamic filter URLs are NOT indexed. They canonical back to
+ *    their parent landing page."
+ */
+const FILTER_PARAMS = new Set([
+  'bedrooms', 'bathrooms', 'price_min', 'price_max',
+  'sort', 'page', 'area', 'type', 'furnishing', 'size_min', 'size_max',
+]);
+
+export function makeListingPageMetadata(
+  locale: Locale,
+  slug: string,
+  title: string,
+  description: string,
+  brandName: string,
+  searchParams?: Record<string, string | string[] | undefined>,
+): Metadata {
+  const base = makePageMetadata(locale, slug, title, description, brandName);
+
+  const hasFilterParam = searchParams
+    ? Object.keys(searchParams).some((key) => FILTER_PARAMS.has(key))
+    : false;
+
+  if (hasFilterParam) {
+    return {
+      ...base,
+      robots: { index: false, follow: true },
+    };
+  }
+
+  return base;
+}

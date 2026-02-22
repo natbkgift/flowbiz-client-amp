@@ -1,0 +1,32 @@
+[
+  {
+    "name": "Somchai Kaewprasert",
+    "email": "somchai@amppattaya.com",
+    "phone": "+66-81-234-5678",
+    "line_id": "@somchai_amp"
+  },
+  {
+    "name": "Natthaya Srisuk",
+    "email": "natthaya@amppattaya.com",
+    "phone": "+66-89-876-5432",
+    "line_id": "@natthaya_amp"
+  },
+  {
+    "name": "David Chen",
+    "email": "david@amppattaya.com",
+    "phone": "+66-92-111-2233",
+    "line_id": "@david_amp"
+  },
+  {
+    "name": "Priya Sharma",
+    "email": "priya@amppattaya.com",
+    "phone": "+66-85-444-5566",
+    "line_id": "@priya_amp"
+  },
+  {
+    "name": "Apinya Wongcharoen",
+    "email": "apinya@amppattaya.com",
+    "phone": "+66-86-777-8899",
+    "line_id": "@apinya_amp"
+  }
+]

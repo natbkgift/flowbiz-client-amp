@@ -1,28 +1,42 @@
+import type { Metadata } from 'next';
+
 import { Container } from '@/components/layout/Container';
 import { Breadcrumbs } from '@/components/layout/Breadcrumbs';
 import { ListingGrid } from '@/components/listing/ListingGrid';
 import { LeadForm } from '@/components/forms/LeadForm';
 import { fetchProperties } from '@/app/_lib/public-api-server';
 import { getDictionary, normalizeLocale } from '@/app/_lib/i18n/get-dictionary';
-import { makePageMetadata } from '@/app/_lib/i18n/metadata';
+import { makeListingPageMetadata } from '@/app/_lib/i18n/metadata';
 import { withLocale } from '@/app/_lib/i18n/routing';
- 
+import { breadcrumbSchema } from '@/app/_lib/schema-markup';
 
 export const revalidate = 300;
 
 export async function generateMetadata({
   params,
+  searchParams,
 }: {
   params: { locale: string };
-}) {
+  searchParams?: Record<string, string | string[] | undefined>;
+}): Promise<Metadata> {
   const locale = normalizeLocale(params.locale);
   const dict = getDictionary(locale);
-  return makePageMetadata(locale, 'buy', dict.nav.buy, dict.buy.subtitle, dict.brand.name);
+  return makeListingPageMetadata(locale, 'buy', dict.nav.buy, dict.buy.subtitle, dict.brand.name, searchParams);
 }
 
 export default async function BuyPage({ params }: { params: { locale: string } }) {
   const locale = normalizeLocale(params.locale);
   const dict = getDictionary(locale);
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://amppattaya.com';
+
+  const breadcrumbItems = [
+    { label: dict.nav.home, href: `/${locale}` },
+    { label: dict.nav.buy, href: `/${locale}/buy` },
+  ];
+
+  const breadcrumbJsonLd = breadcrumbSchema(
+    breadcrumbItems.map((item) => ({ name: item.label, url: `${siteUrl}${item.href}` }))
+  );
 
   let res: Awaited<ReturnType<typeof fetchProperties>>;
   try {
@@ -33,12 +47,11 @@ export default async function BuyPage({ params }: { params: { locale: string } }
 
   return (
     <main id="main-content">
-      <Breadcrumbs
-        items={[
-          { label: dict.nav.home, href: `/${locale}` },
-          { label: dict.nav.buy, href: `/${locale}/buy` },
-        ]}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
       />
+      <Breadcrumbs items={breadcrumbItems} />
       <section className="hero hero--page">
         <Container>
           <h1 className="headline">{dict.buy.title}</h1>

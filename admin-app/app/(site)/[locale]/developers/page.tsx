@@ -8,6 +8,7 @@ import { fetchProjects } from '@/app/_lib/public-api-server';
 import { getDictionary, normalizeLocale } from '@/app/_lib/i18n/get-dictionary';
 import { makePageMetadata } from '@/app/_lib/i18n/metadata';
 import { withLocale } from '@/app/_lib/i18n/routing';
+import { breadcrumbSchema } from '@/app/_lib/schema-markup';
 
 export const revalidate = 300;
 
@@ -28,6 +29,7 @@ export async function generateMetadata({
 export default async function DevelopersIndexPage({ params }: { params: { locale: string } }) {
   const locale = normalizeLocale(params.locale);
   const dict = getDictionary(locale);
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://amppattaya.com';
 
   let projects: Awaited<ReturnType<typeof fetchProjects>>;
   try {
@@ -40,14 +42,22 @@ export default async function DevelopersIndexPage({ params }: { params: { locale
     new Set((projects ?? []).map((p) => String(p.developer_id ?? '').trim()).filter(Boolean))
   ).slice(0, 30);
 
+  const breadcrumbItems = [
+    { label: dict.nav.home, href: `/${locale}` },
+    { label: locale === 'th' ? 'ผู้พัฒนาโครงการ' : 'Developers', href: `/${locale}/developers` },
+  ];
+
+  const breadcrumbJsonLd = breadcrumbSchema(
+    breadcrumbItems.map((item) => ({ name: item.label, url: `${siteUrl}${item.href}` }))
+  );
+
   return (
     <main id="main-content">
-      <Breadcrumbs
-        items={[
-          { label: dict.nav.home, href: `/${locale}` },
-          { label: locale === 'th' ? 'ผู้พัฒนาโครงการ' : 'Developers', href: `/${locale}/developers` },
-        ]}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
       />
+      <Breadcrumbs items={breadcrumbItems} />
 
       <section className="hero hero--page">
         <Container>

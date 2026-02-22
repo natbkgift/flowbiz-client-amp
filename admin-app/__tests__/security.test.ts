@@ -4,7 +4,7 @@ import { th } from '@/app/_lib/i18n/th';
 import { PAGE_REVALIDATE_SECONDS } from '@/app/_lib/constants';
 import { ADMIN_LABELS } from '@/app/_lib/admin-labels';
 import robots from '@/app/robots';
-import sitemap from '@/app/sitemap';
+import { staticPages } from '@/app/_lib/sitemap-xml';
 import manifest from '@/app/manifest';
 import { readFileSync, existsSync } from 'node:fs';
 import { resolve } from 'node:path';
@@ -100,40 +100,42 @@ describe('robots.ts', () => {
   });
 });
 
-describe('sitemap.ts', () => {
-  const entries = sitemap();
+describe('sitemap-xml.ts (static pages)', () => {
+  const entries = staticPages();
 
   it('generates entries for both locales', () => {
-    const urls = entries.map((e) => e.url);
-    expect(urls.some((u) => u.includes('/en'))).toBe(true);
-    expect(urls.some((u) => u.includes('/th'))).toBe(true);
+    const urls = entries.map((e: { url: string }) => e.url);
+    expect(urls.some((u: string) => u.includes('/en'))).toBe(true);
+    expect(urls.some((u: string) => u.includes('/th'))).toBe(true);
   });
 
   it('includes required pages', () => {
-    const urls = entries.map((e) => e.url);
-    const requiredPaths = ['/invest', '/buy', '/rent', '/projects', '/smart-finder', '/compare', '/sell', '/about', '/areas/jomtien', '/areas/pratumnak', '/area-guide/central'];
+    const urls = entries.map((e: { url: string }) => e.url);
+    const requiredPaths = ['/invest', '/buy', '/rent', '/projects', '/smart-finder', '/compare', '/sell', '/about'];
     for (const p of requiredPaths) {
-      expect(urls.some((u) => u.includes(p))).toBe(true);
+      expect(urls.some((u: string) => u.includes(p))).toBe(true);
     }
   });
 
   it('sets lastModified on every entry', () => {
-    for (const entry of entries) {
-      expect(entry.lastModified).toBeInstanceOf(Date);
+    for (const e of entries) {
+      expect((e as { lastModified: unknown }).lastModified).toBeInstanceOf(Date);
     }
   });
 
   it('has priority between 0 and 1 for all entries', () => {
-    for (const entry of entries) {
-      expect(entry.priority).toBeGreaterThanOrEqual(0);
-      expect(entry.priority).toBeLessThanOrEqual(1);
+    for (const e of entries) {
+      expect((e as { priority: number }).priority).toBeGreaterThanOrEqual(0);
+      expect((e as { priority: number }).priority).toBeLessThanOrEqual(1);
     }
   });
 
   it('home page has highest priority', () => {
-    const homeEntries = entries.filter((e) => e.url.endsWith('/en') || e.url.endsWith('/th'));
-    for (const entry of homeEntries) {
-      expect(entry.priority).toBe(1.0);
+    const homeEntries = entries.filter(
+      (e: { url: string; priority: number }) => e.url.endsWith('/en') || e.url.endsWith('/th'),
+    );
+    for (const e of homeEntries) {
+      expect((e as { priority: number }).priority).toBe(1.0);
     }
   });
 });

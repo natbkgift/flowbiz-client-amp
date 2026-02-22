@@ -1,3 +1,4 @@
+import type { Metadata } from 'next';
 import Link from 'next/link';
 
 import { Container } from '@/components/layout/Container';
@@ -18,12 +19,28 @@ export const revalidate = 300;
 
 export async function generateMetadata({
   params,
+  searchParams,
 }: {
   params: { locale: string };
-}) {
+  searchParams?: Record<string, string | string[] | undefined>;
+}): Promise<Metadata> {
   const locale = normalizeLocale(params.locale);
   const dict = getDictionary(locale);
-  return makePageMetadata(locale, 'smart-finder', dict.smartFinder.title, dict.smartFinder.subtitle, dict.brand.name);
+  const base = makePageMetadata(locale, 'smart-finder', dict.smartFinder.title, dict.smartFinder.subtitle, dict.brand.name);
+
+  // Blueprint doc 03 — INDEX MATRIX: smart-finder with wizard params is noindex.
+  // When step/answer params are present the page shows personalised results
+  // which have no unique SEO value.
+  const WIZARD_PARAMS = new Set(['purpose', 'budget', 'timeline', 'risk_tolerance', 'foreign_quota', 'step']);
+  const hasWizardParam = searchParams
+    ? Object.keys(searchParams).some((k) => WIZARD_PARAMS.has(k))
+    : false;
+
+  if (hasWizardParam) {
+    return { ...base, robots: { index: false, follow: true } };
+  }
+
+  return base;
 }
 
 type Step = 'purpose' | 'budget' | 'timeline' | 'risk' | 'quota' | 'results';

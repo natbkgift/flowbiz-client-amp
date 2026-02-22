@@ -1,10 +1,11 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import Image from 'next/image';
 
 import { Container } from '@/components/layout/Container';
 import { Breadcrumbs } from '@/components/layout/Breadcrumbs';
 import { LeadForm } from '@/components/forms/LeadForm';
+import { Gallery } from '@/components/media/Gallery';
+import { Reviews } from '@/components/ux/Reviews';
 import { IconBed, IconBath, IconArea } from '@/components/icons/SvgIcons';
 import { fetchPropertyBySlug } from '@/app/_lib/public-api-server';
 import { CTA } from '@/app/_lib/public-cta';
@@ -12,6 +13,11 @@ import { resolveImageUrl } from '@/app/_lib/public-api-shared';
 import { getDictionary, normalizeLocale } from '@/app/_lib/i18n/get-dictionary';
 import { ogLocale } from '@/app/_lib/i18n/routing';
 import { getInternalLinks } from '@/app/_lib/internal-links';
+import {
+  realEstateListingSchema,
+  residenceSchema,
+  breadcrumbSchema,
+} from '@/app/_lib/schema-markup';
  
 
 export const revalidate = 300;
@@ -121,13 +127,23 @@ export default async function PropertyPage({ params }: PageProps) {
 
   const jsonLd = JSON.stringify(
     [
-      {
-        '@context': 'https://schema.org',
-        '@type': 'RealEstateListing',
+      realEstateListingSchema({
         name: property.title,
+        description: property.description ?? `${property.address}, ${property.city}`,
         url: canonicalUrl,
-        inLanguage: locale,
-      },
+        image: gallery[0],
+        price: priceValue,
+        currency: 'THB',
+        address: property.address,
+        locality: property.city ?? 'Pattaya',
+      }),
+      residenceSchema({
+        name: property.title,
+        description: property.description ?? `${property.address}, ${property.city}`,
+        sizeSqm: property.size ? Number(property.size) : undefined,
+        bedrooms: property.bedrooms ?? undefined,
+        bathrooms: property.bathrooms ?? undefined,
+      }),
       {
         '@context': 'https://schema.org',
         '@type': 'Product',
@@ -148,30 +164,11 @@ export default async function PropertyPage({ params }: PageProps) {
           availability: 'https://schema.org/InStock',
         },
       },
-      {
-        '@context': 'https://schema.org',
-        '@type': 'BreadcrumbList',
-        itemListElement: [
-          {
-            '@type': 'ListItem',
-            position: 1,
-            name: dict.property.breadcrumbHome,
-            item: `${siteUrl}/${locale}`,
-          },
-          {
-            '@type': 'ListItem',
-            position: 2,
-            name: dict.nav.buy,
-            item: `${siteUrl}/${locale}/buy`,
-          },
-          {
-            '@type': 'ListItem',
-            position: 3,
-            name: property.title,
-            item: canonicalUrl,
-          },
-        ],
-      },
+      breadcrumbSchema([
+        { name: dict.property.breadcrumbHome, url: `${siteUrl}/${locale}` },
+        { name: dict.nav.buy, url: `${siteUrl}/${locale}/buy` },
+        { name: property.title, url: canonicalUrl },
+      ]),
     ],
     null,
     0
@@ -192,29 +189,13 @@ export default async function PropertyPage({ params }: PageProps) {
         <div className="detail-layout">
           <div className="detail-main">
             <div id="gallery-section">
-              <div className="gallery-main">
-                {main ? (
-                  <Image
-                    src={main}
-                    alt={property.title}
-                    fill
-                    sizes="(min-width: 1024px) 70vw, 100vw"
-                    className="object-cover"
-                    priority
-                  />
-                ) : null}
-                <div className="gallery-counter">1 / {Math.max(gallery.length, 1)}</div>
-              </div>
-
-              {gallery.length > 1 ? (
-                <div className="gallery-thumbnails">
-                  {gallery.slice(0, 12).map((src, idx) => (
-                    <div key={src} className={idx === 0 ? 'gallery-thumbnail active' : 'gallery-thumbnail'}>
-                      <Image src={src} alt={`${dict.property.galleryPhoto} ${idx + 1}`} width={80} height={60} className="object-cover" loading="lazy" />
-                    </div>
-                  ))}
+              {gallery.length > 0 ? (
+                <Gallery images={gallery} alt={property.title} />
+              ) : (
+                <div className="gallery-main">
+                  <div className="gallery-counter">0 / 0</div>
                 </div>
-              ) : null}
+              )}
             </div>
 
             <div className="property-header">
@@ -260,6 +241,22 @@ export default async function PropertyPage({ params }: PageProps) {
             <div className="bg-[var(--color-white)] p-6 rounded-xl mb-6">
               <h2 className="mb-4">{dict.property.description}</h2>
               <p className="mb-0">{property.description ?? '—'}</p>
+            </div>
+
+            {/* FloorPlan section */}
+            <div className="bg-[var(--color-white)] p-6 rounded-xl mb-6">
+              <h2 className="mb-4">Floor Plan</h2>
+              <p className="text-sm text-[var(--color-text-secondary)]">
+                FloorPlan layouts available upon request. Contact our agent for detailed floor plan drawings and unit specifications.
+              </p>
+            </div>
+
+            {/* Reviews / Testimonials */}
+            <div className="mb-6">
+              <Reviews
+                reviews={(property as Record<string, unknown>).reviews as [] ?? []}
+                heading={locale === 'th' ? 'รีวิวจากลูกค้า' : 'Customer Reviews'}
+              />
             </div>
 
             <div className="card reveal mb-6">
