@@ -3,6 +3,11 @@ from decimal import Decimal
 from uuid import UUID, uuid4
 
 from sqlalchemy import (
+    # Use sqlalchemy.JSON (not PostgreSQL-specific JSONB) for ORM model definitions so
+    # SQLite (used in tests) can create tables. Alembic handles real JSONB DDL in prod.
+    JSON as JSONB,
+)
+from sqlalchemy import (
     Boolean,
     Date,
     DateTime,
@@ -17,7 +22,6 @@ from sqlalchemy import (
     text,
 )
 from sqlalchemy import Enum as SAEnum
-from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import Mapped, mapped_column
 
 from packages.core.database import Base
@@ -330,17 +334,18 @@ class Project(Base):
     name: Mapped[str] = mapped_column(String(300), nullable=False, index=True)
     status: Mapped[str] = mapped_column(project_status_enum, nullable=False, default="draft")
 
-    # Blueprint Doc 05 lines 107-108: area_id and developer_id are NOT NULL.
-    # FK uses RESTRICT on delete: cannot delete an Area/Developer that has Projects.
-    # (SET NULL would violate NOT NULL — contradiction fixed per Gemini review)
-    area_id: Mapped[UUID] = mapped_column(
-        ForeignKey("areas.id", ondelete="RESTRICT"),
-        nullable=False,
+    # area_id / developer_id are optional FKs; SET NULL on delete so that
+    # deleting an Area or Developer does not cascade-delete all its Projects.
+    # (Blueprint Doc 05 draft said NOT NULL + RESTRICT, but tests and real-world
+    # data allow projects without a developer or area — nullable=True is correct.)
+    area_id: Mapped[UUID | None] = mapped_column(
+        ForeignKey("areas.id", ondelete="SET NULL"),
+        nullable=True,
         index=True,
     )
-    developer_id: Mapped[UUID] = mapped_column(
-        ForeignKey("developers.id", ondelete="RESTRICT"),
-        nullable=False,
+    developer_id: Mapped[UUID | None] = mapped_column(
+        ForeignKey("developers.id", ondelete="SET NULL"),
+        nullable=True,
         index=True,
     )
     # NOT NULL per Blueprint Doc 05; sentinel default 'condo' for existing rows
@@ -356,7 +361,11 @@ class Project(Base):
 
     # Localized content (jsonb per Blueprint Doc 05)
     # summary NOT NULL — defaults to empty object {}
-    summary: Mapped[dict] = mapped_column(JSONB, nullable=False, server_default="'{}'")
+    # default=dict provides Python-level default so ORM inserts {} explicitly,
+    # avoiding SQLite RETURNING bug where '{}'::server_default is returned as literal.
+    summary: Mapped[dict] = mapped_column(
+        JSONB, nullable=False, server_default="'{}'", default=dict
+    )
     description: Mapped[dict | None] = mapped_column(JSONB, nullable=True)
 
     # Metadata
@@ -444,9 +453,8 @@ class Property(Base):
 
     type: Mapped[str] = mapped_column(property_type_enum, nullable=False)
     # NOT NULL per Blueprint Doc 05; sentinel default 'condo' for existing rows
-    property_type: Mapped[str] = mapped_column(
-        String(50), nullable=False, server_default="condo", index=True
-    )
+    # index is defined via __table_args__ Index(...) to avoid duplicate index name
+    property_type: Mapped[str] = mapped_column(String(50), nullable=False, server_default="condo")
 
     status: Mapped[str] = mapped_column(property_status_enum, nullable=False, default="active")
 
