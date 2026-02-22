@@ -106,9 +106,8 @@ export default async function HomePage({
   }
 
   // Prefer featured projects, fallback to first 6
-  const featuredProjects = allProjects.filter((p) => p.is_featured).length > 0
-    ? allProjects.filter((p) => p.is_featured).slice(0, 6)
-    : allProjects.slice(0, 6);
+  const featured = allProjects.filter((p) => p.is_featured);
+  const featuredProjects = featured.length > 0 ? featured.slice(0, 6) : allProjects.slice(0, 6);
 
   const jsonLd = JSON.stringify([
     organizationSchema(),
