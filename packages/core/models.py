@@ -331,15 +331,15 @@ class Project(Base):
     status: Mapped[str] = mapped_column(project_status_enum, nullable=False, default="draft")
 
     # Blueprint Doc 05 lines 107-108: area_id and developer_id are NOT NULL.
-    # Note: FK uses SET NULL on delete per spec lines 128-129 (logically inconsistent
-    # with NOT NULL, but both constraints are specified; column definition takes precedence).
+    # FK uses RESTRICT on delete: cannot delete an Area/Developer that has Projects.
+    # (SET NULL would violate NOT NULL — contradiction fixed per Gemini review)
     area_id: Mapped[UUID] = mapped_column(
-        ForeignKey("areas.id", ondelete="SET NULL"),
+        ForeignKey("areas.id", ondelete="RESTRICT"),
         nullable=False,
         index=True,
     )
     developer_id: Mapped[UUID] = mapped_column(
-        ForeignKey("developers.id", ondelete="SET NULL"),
+        ForeignKey("developers.id", ondelete="RESTRICT"),
         nullable=False,
         index=True,
     )

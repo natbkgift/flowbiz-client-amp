@@ -7,7 +7,7 @@
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://amppattaya.com';
 const LOGO_URL = `${SITE_URL}/images/logo.png`;
-const PHONE = '+66-33-123-456';
+const PHONE = process.env.NEXT_PUBLIC_PHONE ?? '+66-33-123-456';
 
 // ---------------------------------------------------------------------------
 // 1. Organization (Global — every page)
