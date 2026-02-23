@@ -19,3 +19,13 @@ class MetaResponse(BaseResponse):
     environment: str
     version: str
     build_sha: str
+
+
+class DbStatsResponse(BaseResponse):
+    """Safe DB visibility diagnostics (counts only, no secrets)."""
+
+    db_fingerprint: str
+    projects_total: int
+    projects_published: int
+    properties_total: int
+    properties_active: int

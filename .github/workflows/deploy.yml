@@ -224,14 +224,17 @@ jobs:
               --step developers --step areas --step projects --step units_buy --step units_rent
 
             echo "Verifying seed populated projects"
-            projects_total=$(docker compose -f docker-compose.yml -f docker-compose.prod.yml exec -T api python -c "from sqlalchemy import select, func; from packages.core.database import SessionLocal; from packages.core.models import Project; db=SessionLocal();
-try:
-  print(db.scalar(select(func.count()).select_from(Project)) or 0)
-finally:
-  db.close()" | tr -d '\r' | tail -n 1)
+            projects_total=$(docker compose -f docker-compose.yml -f docker-compose.prod.yml exec -T api \
+              python -c "from sqlalchemy import func, select; from packages.core.database import SessionLocal; from packages.core.models import Project; db=SessionLocal(); print(int(db.scalar(select(func.count()).select_from(Project)) or 0)); db.close()" \
+              | tr -d '\r' | tail -n 1)
+            projects_published=$(docker compose -f docker-compose.yml -f docker-compose.prod.yml exec -T api \
+              python -c "from sqlalchemy import func, select; from packages.core.database import SessionLocal; from packages.core.models import Project; db=SessionLocal(); print(int(db.scalar(select(func.count()).select_from(Project).where(Project.status=='published')) or 0)); db.close()" \
+              | tr -d '\r' | tail -n 1)
             echo "projects_total=${projects_total}"
+            echo "projects_published=${projects_published}"
             if [[ "${projects_total}" == "0" ]]; then
               echo "ERROR: projects_total=0 after seeding. Check DATABASE_URL / migrations / seed input." 
+              echo "TIP: check /api/v1/db-stats for a safe fingerprint + counts"
               exit 1
             fi
 

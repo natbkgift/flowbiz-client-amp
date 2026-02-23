@@ -99,7 +99,8 @@ def _merge_images(*lists: list[str]) -> list[str]:
     return out
 
 
-@router.get("/properties", response_model=PropertyListResponse)
+@router.get("/properties", response_model=PropertyListResponse, include_in_schema=False)
+@router.get("/properties/", response_model=PropertyListResponse)
 def list_properties(
     page: int = Query(1, ge=1),
     limit: int = Query(20, ge=1, le=100),
@@ -171,7 +172,8 @@ def list_properties(
     return PropertyListResponse(data=data, meta=PaginationMeta(page=page, limit=limit, total=total))
 
 
-@router.get("/properties/{property_id}", response_model=PropertyDetail)
+@router.get("/properties/{property_id}", response_model=PropertyDetail, include_in_schema=False)
+@router.get("/properties/{property_id}/", response_model=PropertyDetail)
 def get_property(
     property_id: UUID,
     db: Session = Depends(get_db),
@@ -200,7 +202,8 @@ def get_property(
     return m
 
 
-@router.get("/properties/slug/{slug}", response_model=PropertyDetail)
+@router.get("/properties/slug/{slug}", response_model=PropertyDetail, include_in_schema=False)
+@router.get("/properties/slug/{slug}/", response_model=PropertyDetail)
 def get_property_by_slug(
     slug: str,
     db: Session = Depends(get_db),

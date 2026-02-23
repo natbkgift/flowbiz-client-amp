@@ -16,6 +16,7 @@ from apps.api.routes.v1.analytics import router as analytics_router
 from apps.api.routes.v1.booking import router as booking_router
 from apps.api.routes.v1.compare import router as compare_router
 from apps.api.routes.v1.crm import router as crm_router
+from apps.api.routes.v1.db_stats import router as db_stats_router
 from apps.api.routes.v1.domain import router as domain_router
 from apps.api.routes.v1.finder import router as finder_router
 from apps.api.routes.v1.investment import router as investment_router
@@ -70,6 +71,7 @@ def register_routes(app: FastAPI) -> None:
     app.include_router(projects_router)
     app.include_router(seller_router)
     app.include_router(marketplace_router)
+    app.include_router(db_stats_router)
 
     # Compatibility: mirror admin APIs under /v1/admin/*
     for r in _ADMIN_ROUTERS:

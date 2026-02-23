@@ -47,4 +47,4 @@ EXPOSE 8000
 
 # Run the application
 # Use environment variables for host and port configuration
-CMD uvicorn apps.api.main:app --host ${APP_HOST:-0.0.0.0} --port ${APP_PORT:-8000} --proxy-headers --forwarded-allow-ips='*'
+CMD uvicorn apps.api.main:app --host ${APP_HOST:-0.0.0.0} --port ${APP_PORT:-8000} --proxy-headers --forwarded-allow-ips '*'
