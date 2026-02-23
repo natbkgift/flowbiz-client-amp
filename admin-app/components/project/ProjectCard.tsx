@@ -51,7 +51,7 @@ export function ProjectCard({
           ) : null}
         </div>
       ) : (
-        <div className="card-image" style={{ background: 'var(--color-surface)' }}>
+        <div className="card-image bg-[var(--color-surface)]">
           {typeLabel ? (
             <span className="absolute top-2 left-2 rounded bg-[var(--color-primary)] px-2 py-0.5 text-xs font-semibold text-white">
               {typeLabel}

@@ -53,8 +53,9 @@ export function ListingGrid({ items }: { items: PropertyListItem[] }) {
           <div className="results-header">
             <div className="results-count">{sorted.length} {dict.listing.results}</div>
             <div className="flex gap-2 items-center">
-              <label className="text-sm text-[var(--color-text-secondary)]">{dict.listing.sort}</label>
+              <label htmlFor="sort-select" className="text-sm text-[var(--color-text-secondary)]">{dict.listing.sort}</label>
               <select
+                id="sort-select"
                 className="form-select"
                 value={sort}
                 onChange={(e) => setSort(e.target.value as SortKey)}
@@ -67,7 +68,7 @@ export function ListingGrid({ items }: { items: PropertyListItem[] }) {
           </div>
 
           {sorted.length ? (
-            <div className="grid grid-fluid" role="list" aria-label={dict.listing.results}>
+            <div className="grid grid-fluid" aria-label={dict.listing.results}>
               {sorted.map((p) => (
                 <PropertyCard key={p.id} item={p} dict={dict} />
               ))}

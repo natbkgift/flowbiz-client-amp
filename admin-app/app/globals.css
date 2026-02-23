@@ -375,8 +375,8 @@ select {
 
 .header {
   background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
   border-bottom: 1px solid rgba(10, 77, 140, 0.06);
   box-shadow: var(--shadow-sticky);
   position: sticky;
@@ -988,6 +988,7 @@ select {
   border-radius: var(--radius-lg);
   padding: var(--space-5);
   box-shadow: var(--shadow-glass-panel);
+  -webkit-backdrop-filter: blur(8px);
   backdrop-filter: blur(8px);
 }
 
@@ -2020,8 +2021,8 @@ select {
   inset: 0;
   z-index: 130;
   background: rgba(26, 32, 44, 0.4);
-  backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
   padding: 16px;
   /* Use grid + place-items for reliable centering of <dialog> elements */
   display: grid;
@@ -2469,6 +2470,7 @@ select {
 .breadcrumbs-separator {
   font-size: var(--font-sm);
   color: var(--color-gray-300);
+  -webkit-user-select: none;
   user-select: none;
   line-height: 1;
   padding: 0 2px;

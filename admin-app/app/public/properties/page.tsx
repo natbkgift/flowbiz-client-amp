@@ -110,6 +110,7 @@ export default function PublicPropertiesPage() {
 
       <section className="flex flex-col md:flex-row gap-3">
         <select
+          aria-label="Filter by property type"
           className="border rounded px-3 py-2 text-sm"
           value={type}
           onChange={(e) => onChangeType(e.target.value)}
@@ -121,6 +122,7 @@ export default function PublicPropertiesPage() {
         </select>
 
         <select
+          aria-label="Sort properties"
           className="border rounded px-3 py-2 text-sm"
           value={safeSort}
           onChange={(e) => onChangeSort(e.target.value)}
