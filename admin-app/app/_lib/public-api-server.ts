@@ -117,7 +117,10 @@ export async function fetchProperties(params: {
   const origin = getOrigin();
   const base = apiBase();
 
-  const url = new URL(`${base}/v1/properties`, origin);
+  // Important: Next.js uses `trailingSlash: true` which can 308-redirect
+  // `/api/v1/properties?...` → `/api/v1/properties/?...`.
+  // Use the slash form to avoid redirect edge-cases during SSR.
+  const url = new URL(`${base}/v1/properties/`, origin);
   url.searchParams.set('page', String(params.page ?? 1));
   url.searchParams.set('limit', String(params.limit ?? 60));
 
