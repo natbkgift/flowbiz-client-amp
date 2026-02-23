@@ -3,6 +3,7 @@ import Link from "next/link";
 import { HeroSearch } from "@/components/home/HeroSearch";
 import { TrackedLink } from "@/components/analytics/TrackedLink";
 import { HeroOverlay } from "@/components/home/HeroOverlay";
+import { Container } from "@/components/layout/Container";
 
 export function HomeHero({
     dict,
@@ -45,7 +46,7 @@ export function HomeHero({
 
             {/* Content overlay — absolutely positioned, no layout impact */}
             <div className="absolute inset-0 z-20 flex flex-col justify-center">
-                <div className="w-full max-w-7xl mx-auto px-6 md:px-8 xl:px-16 2xl:px-24">
+                <Container variant="wide">
                     <div className="max-w-[800px]">
                         {/* Headline: weight ~500, tight tracking, 1.1 line-height, max-width 14ch for controlled wrapping */}
                         <h1 className="text-white text-[length:var(--font-h1)] font-medium font-serif mb-6 md:mb-8 leading-[1.1] tracking-tight max-w-[14ch]">
@@ -81,7 +82,7 @@ export function HomeHero({
                             {dict.guided.heroTrigger ?? 'Not sure where to start? Let us guide you →'}
                         </TrackedLink>
                     </div>
-                </div>
+                </Container>
             </div>
         </section>
     );

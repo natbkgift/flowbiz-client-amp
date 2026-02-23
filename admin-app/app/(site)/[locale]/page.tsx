@@ -6,6 +6,7 @@ import { HomeHero } from '@/components/home/HomeHero';
 import { FeaturedProjects } from '@/components/home/FeaturedProjects';
 import { LeadForm } from '@/components/forms/LeadForm';
 import { SafeCoverImage } from '@/components/media/SafeCoverImage';
+import { Container } from '@/components/layout/Container';
 import { buildWhatsAppUrl } from '@/app/_lib/public-cta';
 import { getDictionary, normalizeLocale } from '@/app/_lib/i18n/get-dictionary';
 import { withLocale } from '@/app/_lib/i18n/routing';
@@ -324,7 +325,7 @@ export default async function HomePage({
 
       {/* Explore Opportunities (Combined Flow) */}
       <section className="py-16 md:py-20 xl:py-24 2xl:py-28">
-        <div className="w-full max-w-7xl mx-auto px-6 md:px-8 xl:px-16 2xl:px-24">
+        <Container variant="wide">
           <div className="section-header">
             <h2 className="section-title">{dict.home.pathSectionTitle}</h2>
             <p className="section-subtitle">{dict.home.pathSectionSubtitle}</p>
@@ -378,13 +379,13 @@ export default async function HomePage({
               ))}
             </div>
           </div>
-        </div>
+        </Container>
       </section>
 
       {/* Featured Projects — Real Data */}
       {featuredProjects.length > 0 ? (
         <section className="py-16 md:py-20 xl:py-24 2xl:py-28">
-          <div className="w-full max-w-7xl mx-auto px-6 md:px-8 xl:px-16 2xl:px-24">
+          <Container variant="wide">
             <FeaturedProjects
               projects={featuredProjects}
               locale={locale}
@@ -401,14 +402,14 @@ export default async function HomePage({
                 {locale === 'th' ? `ดูโครงการทั้งหมด ${totalProjectCount} โครงการ` : `View All ${totalProjectCount} Developments`}
               </TrackedLink>
             </div>
-          </div>
+          </Container>
         </section>
       ) : null}
 
       {/* Selected Investment Opportunities — Real Properties */}
       {featuredProperties.length > 0 ? (
         <section className="py-16 md:py-20 xl:py-24 2xl:py-28 bg-surface">
-          <div className="w-full max-w-7xl mx-auto px-6 md:px-8 xl:px-16 2xl:px-24">
+          <Container variant="wide">
             <div className="section-header">
               <h2 className="section-title">{locale === 'th' ? 'อสังหาริมทรัพย์คัดสรร' : 'Selected Investment Opportunities'}</h2>
               <p className="section-subtitle">{locale === 'th' ? 'ห้องชุดคัดเลือกสำหรับนักลงทุนและผู้ซื้อ' : 'Curated units for buyers and investors — sale and rental opportunities.'}</p>
@@ -470,13 +471,13 @@ export default async function HomePage({
                 {locale === 'th' ? 'ดูอสังหาริมทรัพย์ทั้งหมด' : 'Browse All Properties'}
               </TrackedLink>
             </div>
-          </div>
+          </Container>
         </section>
       ) : null}
 
       {/* Investment Stats */}
       <section className="py-16 md:py-20 xl:py-24 2xl:py-28 bg-surface">
-        <div className="w-full max-w-7xl mx-auto px-6 md:px-8 xl:px-16 2xl:px-24">
+        <Container variant="wide">
           <div className="section-header">
             <h2 className="section-title">{dict.home.investStatsTitle}</h2>
             <p className="section-subtitle">{dict.home.investStatsSubtitle}</p>
@@ -507,12 +508,12 @@ export default async function HomePage({
               {dict.cta.exploreInvestment}
             </TrackedLink>
           </div>
-        </div>
+        </Container>
       </section>
 
       {/* Trust & Market Insight */}
       <section className="py-16 md:py-20 xl:py-24 2xl:py-28">
-        <div className="w-full max-w-7xl mx-auto px-6 md:px-8 xl:px-16 2xl:px-24">
+        <Container variant="wide">
           <div className="grid md:grid-cols-2 gap-12 items-center mb-20">
             <div>
               <h2 className="text-3xl md:text-4xl font-bold font-serif mb-6 text-gray-900">{dict.home.trustTitle}</h2>
@@ -576,12 +577,12 @@ export default async function HomePage({
               </div>
             </div>
           ) : null}
-        </div>
+        </Container>
       </section>
 
       {/* Video Authority — Click-to-Load YouTube */}
       <section className="py-16 md:py-20 xl:py-24 2xl:py-28 bg-surface">
-        <div className="w-full max-w-7xl mx-auto px-6 md:px-8 xl:px-16 2xl:px-24">
+        <Container variant="wide">
           <div className="section-header">
             <h2 className="section-title">{locale === 'th' ? 'ดูวิดีโอของเรา' : 'See Our Work'}</h2>
             <p className="section-subtitle">{locale === 'th' ? 'พาชมโครงการและทำความรู้จักทีมงานของเรา' : 'Project walkthroughs and meet our advisory team.'}</p>
@@ -624,12 +625,12 @@ export default async function HomePage({
               {locale === 'th' ? 'ดูช่องของเรา' : 'Explore Our Channel'}
             </a>
           </div>
-        </div>
+        </Container>
       </section>
 
       {/* Premium CTA / Conversion Gate */}
       <section className="py-20 md:py-32 bg-gray-900 text-white mt-8">
-        <div className="w-full max-w-7xl mx-auto px-6 md:px-8 xl:px-16 2xl:px-24">
+        <Container variant="wide">
           <div className="grid lg:grid-cols-2 gap-16 items-center">
             <div className="reveal">
               <h2 className="text-3xl md:text-5xl font-serif font-bold mb-6 leading-tight">{dict.home.premiumCtaTitle}</h2>
@@ -661,7 +662,7 @@ export default async function HomePage({
               </div>
             </div>
           </div>
-        </div>
+        </Container>
       </section>
     </main>
   );

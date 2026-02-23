@@ -2,6 +2,7 @@ import Link from 'next/link';
 
 
 import { NewsletterForm } from '../forms/NewsletterForm';
+import { Container } from './Container';
 import type { Dictionary, Locale } from '../../app/_lib/i18n/types';
 import { withLocale } from '../../app/_lib/i18n/routing';
 
@@ -22,7 +23,7 @@ export function Footer({ locale, dict }: { locale: Locale; dict: Dictionary }) {
 
   return (
     <footer className="bg-white border-t border-gray-100 pt-16 md:pt-20 pb-8" role="contentinfo">
-      <div className="w-full max-w-7xl mx-auto px-6 md:px-8 xl:px-16 2xl:px-24">
+      <Container variant="wide">
         <div className="mb-12 md:mb-16">
           <h3 className="text-xl md:text-2xl font-serif font-medium text-gray-900 mb-2">{dict.brand.name}</h3>
           <p className="text-base text-gray-500 max-w-md">{dict.brand.tagline}</p>
@@ -164,7 +165,7 @@ export function Footer({ locale, dict }: { locale: Locale; dict: Dictionary }) {
             {dict.common.pdpaNotice ?? 'PDPA & GDPR Compliant'}
           </p>
         </div>
-      </div>
+      </Container>
     </footer>
   );
 }
