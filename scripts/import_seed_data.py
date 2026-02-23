@@ -551,6 +551,14 @@ def main() -> int:
         help="Validate data without writing to DB",
     )
     parser.add_argument(
+        "--validate-fk-json",
+        action="store_true",
+        help=(
+            "Validate foreign-key slugs by cross-checking JSON files (developers/areas/projects) "
+            "before touching the database. Useful in --dry-run to catch slug mismatches early."
+        ),
+    )
+    parser.add_argument(
         "--step",
         action="append",
         dest="steps",
@@ -561,6 +569,7 @@ def main() -> int:
 
     input_dir = Path(args.input)
     dry_run: bool = args.dry_run
+    validate_fk_json: bool = args.validate_fk_json
 
     if not input_dir.exists():
         log.error("Input directory does not exist: %s", input_dir)
@@ -589,11 +598,60 @@ def main() -> int:
         "team": "team.json",
     }
 
+    def _slug_set(filename: str) -> set[str]:
+        rows = _load_json(input_dir / filename)
+        out: set[str] = set()
+        for row in rows:
+            slug = str(row.get("slug") or "").strip()
+            if slug:
+                out.add(slug)
+        return out
+
+    def _validate_fk_cross_refs() -> list[str]:
+        """Optional cross-file FK validation based on JSON slug sets."""
+        errs: list[str] = []
+
+        dev_slugs = _slug_set("developers.json")
+        area_slugs = _slug_set("areas.json")
+        project_slugs = _slug_set("projects.json")
+
+        def _check(label: str, field: str, value: str | None, allowed: set[str]) -> None:
+            v = str(value or "").strip()
+            if not v:
+                return
+            if v not in allowed:
+                errs.append(f"{label}: {field} slug '{v}' not found in JSON")
+
+        # projects.json references
+        if "projects" in steps_to_run:
+            rows = _load_json(input_dir / "projects.json")
+            for i, row in enumerate(rows, 1):
+                label = f"projects[{i}]"
+                _check(label, "developer_slug", row.get("developer_slug"), dev_slugs)
+                _check(label, "area_slug", row.get("area_slug"), area_slugs)
+
+        # units_* references
+        for step_name, filename in (
+            ("units_buy", "units_buy.json"),
+            ("units_rent", "units_rent.json"),
+        ):
+            if step_name not in steps_to_run:
+                continue
+            rows = _load_json(input_dir / filename)
+            for i, row in enumerate(rows, 1):
+                label = f"{step_name}[{i}]"
+                _check(label, "project_slug", row.get("project_slug"), project_slugs)
+                _check(label, "developer_slug", row.get("developer_slug"), dev_slugs)
+                _check(label, "area_slug", row.get("area_slug"), area_slugs)
+
+        return errs
+
     log.info("=" * 60)
     log.info("DATA IMPORT — Blueprint Doc 14")
     log.info("Input dir : %s", input_dir.resolve())
     log.info("Dry-run   : %s", dry_run)
     log.info("Steps     : %s", ", ".join(steps_to_run))
+    log.info("Validate FK JSON: %s", validate_fk_json)
     log.info(
         "DB        : %s",
         settings.database_url[:50] + "..."
@@ -601,6 +659,14 @@ def main() -> int:
         else settings.database_url,
     )
     log.info("=" * 60)
+
+    if validate_fk_json:
+        fk_errs = _validate_fk_cross_refs()
+        if fk_errs:
+            log.error("Preflight FK(JSON) validation failed — %d error(s):", len(fk_errs))
+            for err in fk_errs:
+                log.error("  - %s", err)
+            return 1
 
     all_results: list[StepResult] = []
     db = SessionLocal()

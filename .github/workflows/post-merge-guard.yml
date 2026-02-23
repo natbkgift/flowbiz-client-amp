@@ -46,9 +46,9 @@ jobs:
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
           SHA="${GITHUB_SHA}"
-          parents=$(git show -s --format=%P "$SHA" | wc -w | tr -d ' ')
+          parents="$(git show -s --format=%P "$SHA" | wc -w | tr -d ' ')"
 
-          if [[ "$parents" -gt 1 ]]; then
+          if [[ "${parents}" -gt 1 ]]; then
             git revert -m 1 --no-edit "$SHA" || { git revert --abort || true; exit 1; }
           else
             git revert --no-edit "$SHA" || { git revert --abort || true; exit 1; }

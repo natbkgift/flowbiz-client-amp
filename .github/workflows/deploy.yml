@@ -179,6 +179,10 @@ jobs:
             set -euo pipefail
             cd /opt/flowbiz/clients/flowbiz-client-amp
 
+            compose() {
+              docker compose -f docker-compose.yml -f docker-compose.prod.yml "$@"
+            }
+
             # Authenticate to GHCR on the VPS so docker pull can access private images
             echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u "${{ github.actor }}" --password-stdin
 
@@ -187,11 +191,10 @@ jobs:
             DEPLOY_STATE_DIR="/opt/flowbiz/clients/flowbiz-client-amp/.deploy"
             mkdir -p "$DEPLOY_STATE_DIR"
 
-            COMPOSE="docker compose -f docker-compose.yml -f docker-compose.prod.yml"
-            API_CID=$($COMPOSE ps -q api 2>/dev/null | head -n 1 || true)
-            ADMIN_CID=$($COMPOSE ps -q admin-app 2>/dev/null | head -n 1 || true)
-            API_IMAGE_ID=$(docker inspect --format '{{.Image}}' "$API_CID" 2>/dev/null || true)
-            ADMIN_IMAGE_ID=$(docker inspect --format '{{.Image}}' "$ADMIN_CID" 2>/dev/null || true)
+            API_CID="$(compose ps -q api 2>/dev/null | head -n 1 || true)"
+            ADMIN_CID="$(compose ps -q admin-app 2>/dev/null | head -n 1 || true)"
+            API_IMAGE_ID="$(docker inspect --format '{{.Image}}' "$API_CID" 2>/dev/null || true)"
+            ADMIN_IMAGE_ID="$(docker inspect --format '{{.Image}}' "$ADMIN_CID" 2>/dev/null || true)"
 
             {
               echo "API_IMAGE_ID=${API_IMAGE_ID}"
@@ -199,35 +202,69 @@ jobs:
             } > "$DEPLOY_STATE_DIR/previous_image_ids.env"
 
             # Pull latest images
-            docker pull ${{ env.API_IMAGE }}:${{ needs.build.outputs.sha_tag }}
-            docker pull ${{ env.ADMIN_IMAGE }}:${{ needs.build.outputs.sha_tag }}
+            docker pull "${{ env.API_IMAGE }}:${{ needs.build.outputs.sha_tag }}"
+            docker pull "${{ env.ADMIN_IMAGE }}:${{ needs.build.outputs.sha_tag }}"
 
             # Tag as :latest (registry) and to the local image names used by docker-compose.yml
-            docker tag ${{ env.API_IMAGE }}:${{ needs.build.outputs.sha_tag }} ${{ env.API_IMAGE }}:latest
-            docker tag ${{ env.ADMIN_IMAGE }}:${{ needs.build.outputs.sha_tag }} ${{ env.ADMIN_IMAGE }}:latest
-            docker tag ${{ env.API_IMAGE }}:${{ needs.build.outputs.sha_tag }} flowbiz-client-amp-api:latest
-            docker tag ${{ env.ADMIN_IMAGE }}:${{ needs.build.outputs.sha_tag }} flowbiz-client-amp-admin-app:latest
+            docker tag "${{ env.API_IMAGE }}:${{ needs.build.outputs.sha_tag }}" "${{ env.API_IMAGE }}:latest"
+            docker tag "${{ env.ADMIN_IMAGE }}:${{ needs.build.outputs.sha_tag }}" "${{ env.ADMIN_IMAGE }}:latest"
+            docker tag "${{ env.API_IMAGE }}:${{ needs.build.outputs.sha_tag }}" "flowbiz-client-amp-api:latest"
+            docker tag "${{ env.ADMIN_IMAGE }}:${{ needs.build.outputs.sha_tag }}" "flowbiz-client-amp-admin-app:latest"
 
             # Rolling restart
-            docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d --remove-orphans
+            compose up -d --remove-orphans
+
+            echo "Running container images (post-up)"
+            API_CID_AFTER="$(compose ps -q api 2>/dev/null | head -n 1 || true)"
+            ADMIN_CID_AFTER="$(compose ps -q admin-app 2>/dev/null | head -n 1 || true)"
+            echo "api_container_id=${API_CID_AFTER}"
+            echo "admin_container_id=${ADMIN_CID_AFTER}"
+            if [[ -n "${API_CID_AFTER}" ]]; then
+              docker inspect --format 'api_image_ref={{.Config.Image}} api_image_id={{.Image}}' "${API_CID_AFTER}" || true
+            fi
+            if [[ -n "${ADMIN_CID_AFTER}" ]]; then
+              docker inspect --format 'admin_image_ref={{.Config.Image}} admin_image_id={{.Image}}' "${ADMIN_CID_AFTER}" || true
+            fi
 
             echo "Running migration dry-run (SQL render)"
-            docker compose -f docker-compose.yml -f docker-compose.prod.yml exec -T api alembic upgrade head --sql >/dev/null
+            compose exec -T api alembic upgrade head --sql >/dev/null
 
             echo "Applying migrations"
-            docker compose -f docker-compose.yml -f docker-compose.prod.yml exec -T api alembic upgrade head
+            compose exec -T api alembic upgrade head
+
+            echo "DB fingerprint (from api container settings.database_url; redacted+sha256[:12])"
+            compose exec -T api python - <<'PY'
+            import hashlib
+            from packages.core.config import settings
+
+            raw = (settings.database_url or "").strip()
+            if not raw:
+                print("db_fingerprint=missing")
+                raise SystemExit(0)
+
+            redacted = raw
+            if "://" in raw and "@" in raw:
+                prefix, rest = raw.split("://", 1)
+                creds, tail = rest.split("@", 1)
+                if ":" in creds:
+                    user = creds.split(":", 1)[0]
+                    redacted = f"{prefix}://{user}@{tail}"
+
+            digest = hashlib.sha256(redacted.encode("utf-8", errors="ignore")).hexdigest()
+            print("db_fingerprint=" + digest[:12])
+            PY
 
             echo "Seeding public catalog (developers/areas/projects/units)"
             # Idempotent upsert by slug (projects) and source_id (properties).
-            docker compose -f docker-compose.yml -f docker-compose.prod.yml exec -T api \
+            compose exec -T api \
               env AMP_ALLOW_IMPORT=1 python scripts/import_seed_data.py --input data/import \
               --step developers --step areas --step projects --step units_buy --step units_rent
 
             echo "Verifying seed populated projects"
-            projects_total=$(docker compose -f docker-compose.yml -f docker-compose.prod.yml exec -T api \
+            projects_total=$(compose exec -T api \
               python -c "from sqlalchemy import func, select; from packages.core.database import SessionLocal; from packages.core.models import Project; db=SessionLocal(); print(int(db.scalar(select(func.count()).select_from(Project)) or 0)); db.close()" \
               | tr -d '\r' | tail -n 1)
-            projects_published=$(docker compose -f docker-compose.yml -f docker-compose.prod.yml exec -T api \
+            projects_published=$(compose exec -T api \
               python -c "from sqlalchemy import func, select; from packages.core.database import SessionLocal; from packages.core.models import Project; db=SessionLocal(); print(int(db.scalar(select(func.count()).select_from(Project).where(Project.status=='published')) or 0)); db.close()" \
               | tr -d '\r' | tail -n 1)
             echo "projects_total=${projects_total}"
@@ -237,6 +274,28 @@ jobs:
               echo "TIP: check /api/v1/db-stats for a safe fingerprint + counts"
               exit 1
             fi
+
+            echo "DB fingerprint (post-seed; should match pre-seed)"
+            compose exec -T api python - <<'PY'
+            import hashlib
+            from packages.core.config import settings
+
+            raw = (settings.database_url or "").strip()
+            if not raw:
+              print("db_fingerprint=missing")
+              raise SystemExit(0)
+
+            redacted = raw
+            if "://" in raw and "@" in raw:
+              prefix, rest = raw.split("://", 1)
+              creds, tail = rest.split("@", 1)
+              if ":" in creds:
+                user = creds.split(":", 1)[0]
+                redacted = f"{prefix}://{user}@{tail}"
+
+            digest = hashlib.sha256(redacted.encode("utf-8", errors="ignore")).hexdigest()
+            print("db_fingerprint=" + digest[:12])
+            PY
 
             echo "Verifying monitoring/logging endpoints (local)"
             VPS_API_PORT="${VPS_API_PORT:-8001}"
@@ -253,7 +312,7 @@ jobs:
             fi
 
             echo "Verifying logs are being produced"
-            log_lines=$(docker compose -f docker-compose.yml -f docker-compose.prod.yml logs --since 2m api | wc -l | tr -d ' ')
+            log_lines=$(compose logs --since 2m api | wc -l | tr -d ' ')
             if [[ -z "${log_lines}" || "${log_lines}" == "0" ]]; then
               echo "ERROR: No recent API logs detected"
               exit 1
@@ -290,6 +349,7 @@ jobs:
               local url="$2"
               local expect_status="${3:-200}"
 
+              local status
               status=$(curl -s -o /dev/null -w "%{http_code}" --max-time 15 "$url" || echo "000")
 
               if [[ "$status" == "$expect_status" ]]; then
@@ -341,11 +401,14 @@ jobs:
             set -euo pipefail
             cd /opt/flowbiz/clients/flowbiz-client-amp
 
+            compose() {
+              docker compose -f docker-compose.yml -f docker-compose.prod.yml "$@"
+            }
+
             echo "Smoke test failed — rolling back..."
 
             DEPLOY_STATE_DIR="/opt/flowbiz/clients/flowbiz-client-amp/.deploy"
             PREVIOUS_IDS_FILE="$DEPLOY_STATE_DIR/previous_image_ids.env"
-            COMPOSE="docker compose -f docker-compose.yml -f docker-compose.prod.yml"
 
             if [[ ! -f "$PREVIOUS_IDS_FILE" ]]; then
               echo "ERROR: No previous image IDs found at $PREVIOUS_IDS_FILE"
@@ -364,12 +427,12 @@ jobs:
             echo "Previous API image ID:   $API_IMAGE_ID"
             echo "Previous Admin image ID: $ADMIN_IMAGE_ID"
 
-            $COMPOSE down --timeout 30 || true
+            compose down --timeout 30 || true
 
             docker image tag "$API_IMAGE_ID" flowbiz-client-amp-api:latest
             docker image tag "$ADMIN_IMAGE_ID" flowbiz-client-amp-admin-app:latest
 
-            $COMPOSE up -d --remove-orphans
+            compose up -d --remove-orphans
 
             echo "Rollback complete"
 
