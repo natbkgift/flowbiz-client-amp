@@ -44,43 +44,43 @@ export function HomeHero({
             </div>
 
             {/* Content overlay — absolutely positioned, no layout impact */}
-            <div className="absolute inset-0 z-20 flex flex-col justify-center px-6 md:px-8 xl:px-16 2xl:px-24 3xl:px-32">
-                <div className="max-w-[700px]">
-                    <h1 className="text-white text-3xl md:text-6xl font-bold font-serif mb-4 leading-tight tracking-tight">
-                        {dict.home.heroTitle}
-                    </h1>
-                    <p className="text-white/90 text-lg md:text-xl mb-8 font-medium">
-                        {dict.home.heroSubtitle}
-                    </p>
+            <div className="absolute inset-0 z-20 flex flex-col justify-center">
+                <div className="w-full max-w-7xl mx-auto px-6 md:px-8 xl:px-16 2xl:px-24">
+                    <div className="max-w-[800px]">
+                        {/* Headline: weight ~500, tight tracking, 1.1 line-height, max-width 14ch for controlled wrapping */}
+                        <h1 className="text-white text-[length:var(--font-h1)] font-medium font-serif mb-6 md:mb-8 leading-[1.1] tracking-tight max-w-[14ch]">
+                            {dict.home.heroTitle}
+                        </h1>
+                        {/* Subcopy: 18px (text-lg), 1.6 lh, neutral opacity, 24px bottom spacing */}
+                        <p className="text-white/80 text-lg leading-relaxed mb-6 max-w-2xl">
+                            {dict.home.heroSubtitle}
+                        </p>
 
-                    <HeroSearch
-                        locale={locale}
-                        placeholder={dict.home.searchPlaceholder}
-                    />
+                        <div className="flex flex-wrap gap-4">
+                            <Link
+                                className="px-6 py-3 bg-white text-gray-900 rounded-full text-sm font-semibold hover:bg-gray-100 transition-colors"
+                                href={`/${locale}/projects`}
+                            >
+                                {dict.nav?.projects || "Explore Projects"}
+                            </Link>
+                            <Link
+                                className="px-6 py-3 bg-white/10 hover:bg-white/20 backdrop-blur-md rounded-full text-white text-sm font-medium transition-colors border border-white/20"
+                                href={`/${locale}/invest`}
+                            >
+                                {dict.nav?.invest || "Investment Guide"}
+                            </Link>
+                        </div>
 
-                    <div className="flex flex-wrap gap-3 mt-6">
-                        <Link className="px-4 py-2 bg-white/10 hover:bg-white/20 backdrop-blur-md rounded-full text-white text-sm font-medium transition-colors border border-white/20" href={`/${locale}/buy`}>
-                            {dict.nav.buy}
-                        </Link>
-                        <Link className="px-4 py-2 bg-white/10 hover:bg-white/20 backdrop-blur-md rounded-full text-white text-sm font-medium transition-colors border border-white/20" href={`/${locale}/rent`}>
-                            {dict.nav.rent}
-                        </Link>
-                        <Link className="px-4 py-2 bg-white/10 hover:bg-white/20 backdrop-blur-md rounded-full text-white text-sm font-medium transition-colors border border-white/20" href={`/${locale}/invest`}>
-                            {dict.nav.invest}
-                        </Link>
-                        <Link className="px-4 py-2 bg-white/10 hover:bg-white/20 backdrop-blur-md rounded-full text-white text-sm font-medium transition-colors border border-white/20" href={`/${locale}/projects`}>
-                            {dict.nav.projects}
-                        </Link>
+                        {/* 40-56px from CTA group (mt-10 = 40px) */}
+                        <TrackedLink
+                            className="inline-flex items-center gap-2 mt-10 text-white/70 hover:text-white text-sm font-medium transition-colors"
+                            href={guidedHref}
+                            eventType="cta_click"
+                            eventPayload={{ cta: 'open_guided_finder', from: 'home_hero' }}
+                        >
+                            {dict.guided.heroTrigger ?? 'Not sure where to start? Let us guide you →'}
+                        </TrackedLink>
                     </div>
-
-                    <TrackedLink
-                        className="inline-flex items-center gap-2 mt-8 text-white/80 hover:text-white text-sm font-medium transition-colors"
-                        href={guidedHref}
-                        eventType="cta_click"
-                        eventPayload={{ cta: 'open_guided_finder', from: 'home_hero' }}
-                    >
-                        {dict.guided.heroTrigger ?? 'Not sure where to start? Let us guide you →'}
-                    </TrackedLink>
                 </div>
             </div>
         </section>

@@ -275,33 +275,9 @@ export default async function HomePage({
         </div>
       ) : null}
 
-      {/* Featured Projects — Real Data */}
-      {featuredProjects.length > 0 ? (
-        <section className="py-16 md:py-20 xl:py-24 2xl:py-28">
-          <div className="px-6 md:px-8 xl:px-16 2xl:px-24 3xl:px-32">
-            <FeaturedProjects
-              projects={featuredProjects}
-              locale={locale}
-              title={dict.home.featuredProjectsTitle}
-              subtitle={dict.home.featuredProjectsSubtitle}
-            />
-            <div className="cta-row cta-row--center" style={{ marginTop: 'var(--space-4)' }}>
-              <TrackedLink
-                className="btn btn-secondary"
-                href={withLocale(locale, '/projects')}
-                eventType="cta_click"
-                eventPayload={{ cta: 'view_all_projects', from: 'home_featured' }}
-              >
-                {locale === 'th' ? 'ดูโครงการทั้งหมด' : 'View All Projects'}
-              </TrackedLink>
-            </div>
-          </div>
-        </section>
-      ) : null}
-
-      {/* Choose Your Path */}
+      {/* Explore Opportunities (Combined Flow) */}
       <section className="py-16 md:py-20 xl:py-24 2xl:py-28">
-        <div className="px-6 md:px-8 xl:px-16 2xl:px-24 3xl:px-32">
+        <div className="w-full max-w-7xl mx-auto px-6 md:px-8 xl:px-16 2xl:px-24">
           <div className="section-header">
             <h2 className="section-title">{dict.home.pathSectionTitle}</h2>
             <p className="section-subtitle">{dict.home.pathSectionSubtitle}</p>
@@ -337,45 +313,70 @@ export default async function HomePage({
             </TrackedLink>
           </div>
 
-          <div className="section-header">
-            <h2 className="section-title">{dict.homepageSegmentation.sectionTitle}</h2>
-            <p className="section-subtitle">{dict.homepageSegmentation.sectionSubtitle}</p>
-          </div>
-          <div className="grid grid-3">
-            {dict.homepageSegmentation.cards.map((card) => (
-              <TrackedLink
-                key={card.href}
-                className="path-card reveal"
-                href={withLocale(locale, card.href)}
-                eventType="segment_entry_click"
-                eventPayload={{ segment: card.href.replace('/', '') }}
-              >
-                <h3>{card.title}</h3>
-                <p>{card.desc}</p>
-              </TrackedLink>
-            ))}
+          <div className="mt-16 pt-16 border-t border-gray-100">
+            <h3 className="text-2xl font-serif font-bold text-center mb-4">{dict.homepageSegmentation.sectionTitle}</h3>
+            <p className="text-gray-600 text-center mb-10 max-w-2xl mx-auto">{dict.homepageSegmentation.sectionSubtitle}</p>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8">
+              {dict.homepageSegmentation.cards.map((card: any) => (
+                <TrackedLink
+                  key={card.href}
+                  className="path-card reveal bg-gray-50 border-none shadow-sm hover:shadow-md"
+                  href={withLocale(locale, card.href)}
+                  eventType="segment_entry_click"
+                  eventPayload={{ segment: card.href.replace('/', '') }}
+                >
+                  <h4 className="text-lg font-bold mb-2 text-gray-900">{card.title}</h4>
+                  <p className="text-gray-600 text-sm">{card.desc}</p>
+                </TrackedLink>
+              ))}
+            </div>
           </div>
         </div>
       </section>
 
+      {/* Featured Projects — Real Data */}
+      {featuredProjects.length > 0 ? (
+        <section className="py-16 md:py-20 xl:py-24 2xl:py-28">
+          <div className="w-full max-w-7xl mx-auto px-6 md:px-8 xl:px-16 2xl:px-24">
+            <FeaturedProjects
+              projects={featuredProjects}
+              locale={locale}
+              title={dict.home.featuredProjectsTitle}
+              subtitle={dict.home.featuredProjectsSubtitle}
+            />
+            <div className="cta-row cta-row--center mt-6">
+              <TrackedLink
+                className="btn btn-secondary"
+                href={withLocale(locale, '/projects')}
+                eventType="cta_click"
+                eventPayload={{ cta: 'view_all_projects', from: 'home_featured' }}
+              >
+                {locale === 'th' ? 'ดูโครงการทั้งหมด' : 'View All Projects'}
+              </TrackedLink>
+            </div>
+          </div>
+        </section>
+      ) : null}
+
       {/* Investment Stats */}
       <section className="py-16 md:py-20 xl:py-24 2xl:py-28 bg-surface">
-        <div className="px-6 md:px-8 xl:px-16 2xl:px-24 3xl:px-32">
+        <div className="w-full max-w-7xl mx-auto px-6 md:px-8 xl:px-16 2xl:px-24">
           <div className="section-header">
             <h2 className="section-title">{dict.home.investStatsTitle}</h2>
             <p className="section-subtitle">{dict.home.investStatsSubtitle}</p>
           </div>
 
-          <div className="stats-grid">
-            {dict.home.investStats.map((stat) => (
-              <div key={stat.label} className="stat-card reveal">
-                <div className="stat-value">{stat.value}</div>
-                <div className="stat-label">{stat.label}</div>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-12 border-t border-gray-200 pt-12">
+            {dict.home.investStats.map((stat: any) => (
+              <div key={stat.label} className="reveal text-center md:text-left">
+                <div className="text-4xl md:text-5xl font-serif font-bold text-primary mb-3">{stat.value}</div>
+                <div className="text-lg font-semibold text-gray-900 mb-2">{stat.label}</div>
+                <div className="text-sm text-gray-500 leading-relaxed font-medium">Verified current market data, reflecting steady growth and resilient long-term yields.</div>
               </div>
             ))}
           </div>
 
-          <div className="cta-row cta-row--center" style={{ marginTop: 'var(--space-5)' }}>
+          <div className="cta-row cta-row--center mt-8">
             <TrackedLink
               className="btn btn-cta"
               href={withLocale(locale, '/invest')}
@@ -390,17 +391,29 @@ export default async function HomePage({
 
       {/* Trust & Market Insight */}
       <section className="py-16 md:py-20 xl:py-24 2xl:py-28">
-        <div className="px-6 md:px-8 xl:px-16 2xl:px-24 3xl:px-32">
-          <div className="section-header">
-            <h2 className="section-title">{dict.home.trustTitle}</h2>
-            <p className="section-subtitle">{dict.home.trustSubtitle}</p>
+        <div className="w-full max-w-7xl mx-auto px-6 md:px-8 xl:px-16 2xl:px-24">
+          <div className="grid md:grid-cols-2 gap-12 items-center mb-20">
+            <div>
+              <h2 className="text-3xl md:text-4xl font-bold font-serif mb-6 text-gray-900">{dict.home.trustTitle}</h2>
+              <p className="text-lg text-gray-600 mb-8 leading-relaxed">{dict.home.trustSubtitle}</p>
+              <ul className="space-y-4">
+                {dict.home.trustBullets.map((b: string) => (
+                  <li key={b} className="flex items-start gap-3">
+                    <span className="text-primary mt-1 text-xl leading-none">✓</span>
+                    <span className="text-gray-700 font-medium">{b}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+            <div className="bg-gray-50 rounded-2xl p-8 border border-gray-100 shadow-sm relative overflow-hidden">
+              <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-bl-[100px] z-0"></div>
+              <div className="relative z-10">
+                <h3 className="text-xl font-serif font-bold text-gray-900 mb-4">The AMP Pattaya Standard</h3>
+                <p className="text-gray-600 mb-6 leading-relaxed">We protect your investment from day one. Our multi-layered due diligence process ensures every property meets international standards for quality, legal clarity, and long-term value.</p>
+                <Link href={`/${locale}/about`} className="text-primary font-semibold hover:text-primary-dark transition-colors inline-flex items-center gap-2">Discover our approach →</Link>
+              </div>
+            </div>
           </div>
-
-          <ul className="bullet-list">
-            {dict.home.trustBullets.map((b) => (
-              <li key={b}>{b}</li>
-            ))}
-          </ul>
 
           <div className="section-header">
             <h2 className="section-title">{dict.home.insightTitle}</h2>
@@ -430,34 +443,38 @@ export default async function HomePage({
         </div>
       </section>
 
-      {/* Premium CTA with LeadForm */}
-      <section className="py-16 md:py-20 xl:py-24 2xl:py-28 bg-gradient-to-b from-primary-light to-bg">
-        <div className="px-6 md:px-8 xl:px-16 2xl:px-24 3xl:px-32">
-          <div className="cta-panel reveal">
-            <div>
-              <h2 className="cta-title">{dict.home.premiumCtaTitle}</h2>
-              <p className="cta-body">{dict.home.premiumCtaBody}</p>
-              <div className="cta-row">
+      {/* Premium CTA / Conversion Gate */}
+      <section className="py-20 md:py-32 bg-gray-900 text-white mt-8">
+        <div className="w-full max-w-7xl mx-auto px-6 md:px-8 xl:px-16 2xl:px-24">
+          <div className="grid lg:grid-cols-2 gap-16 items-center">
+            <div className="reveal">
+              <h2 className="text-3xl md:text-5xl font-serif font-bold mb-6 leading-tight">{dict.home.premiumCtaTitle}</h2>
+              <p className="text-lg text-white/80 mb-10 max-w-lg leading-relaxed">{dict.home.premiumCtaBody}</p>
+              <div className="flex flex-wrap gap-4">
                 <TrackedLink
-                  className="btn btn-cta"
-                  href={withLocale(locale, '/invest')}
-                  eventType="cta_click"
-                  eventPayload={{ cta: 'explore_investment', from: 'home_premium' }}
-                >
-                  {dict.cta.exploreInvestment}
-                </TrackedLink>
-                <TrackedLink
-                  className="btn btn-secondary"
+                  className="px-6 py-3 bg-white text-gray-900 rounded-full text-sm font-semibold hover:bg-gray-100 transition-colors"
                   href={withLocale(locale, '/contact')}
                   eventType="cta_click"
                   eventPayload={{ cta: 'speak_to_advisor', from: 'home_premium' }}
                 >
                   {dict.cta.speakToAdvisor}
                 </TrackedLink>
+                <TrackedLink
+                  className="px-6 py-3 bg-white/10 hover:bg-white/20 backdrop-blur-md rounded-full text-white text-sm font-medium transition-colors border border-white/20"
+                  href={withLocale(locale, '/invest')}
+                  eventType="cta_click"
+                  eventPayload={{ cta: 'explore_investment', from: 'home_premium' }}
+                >
+                  {dict.cta.exploreInvestment}
+                </TrackedLink>
               </div>
             </div>
-            <div>
-              <LeadForm />
+            <div className="reveal">
+              <div className="bg-white p-8 md:p-10 rounded-2xl shadow-2xl text-gray-900">
+                <h3 className="text-2xl font-bold mb-2">Request a Private Consultation</h3>
+                <p className="text-gray-600 mb-8 text-sm">Tell us about your requirements and we will curate a personalized shortlist.</p>
+                <LeadForm />
+              </div>
             </div>
           </div>
         </div>

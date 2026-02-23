@@ -26,6 +26,9 @@ export function FeaturedProjects({
   return (
     <div>
       <div className="section-header">
+        <div className="inline-block px-3 py-1 bg-gray-100 text-gray-600 text-xs font-medium rounded-full mb-3">
+          Updated Q1 2026
+        </div>
         <h2 className="section-title">{title}</h2>
         <p className="section-subtitle">{subtitle}</p>
       </div>
@@ -53,13 +56,20 @@ export function FeaturedProjects({
                   />
                 ) : null}
               </div>
-              <div className="card-content">
-                <div className="card-title">{p.name}</div>
-                {price ? (
-                  <div className="card-price">
-                    {locale === 'th' ? 'เริ่ม' : 'From'} {price}
+              <div className="card-content flex flex-col h-full p-6">
+                <div className="card-title text-lg font-medium text-gray-900 mb-2">{p.name}</div>
+                <div className="text-sm text-gray-500 mb-4">{locale === 'th' ? 'โดยผู้พัฒนาชั้นนำ' : 'Premium Developer'}</div>
+
+                <div className="flex items-center justify-between mt-auto pt-4 border-t border-gray-100">
+                  {price ? (
+                    <div className="card-price text-gray-900 font-semibold mb-0">
+                      {locale === 'th' ? 'เริ่ม' : 'From'} {price}
+                    </div>
+                  ) : <div />}
+                  <div className="text-xs font-semibold text-emerald-700 bg-emerald-50 px-2 py-1 rounded">
+                    6% Est. Yield
                   </div>
-                ) : null}
+                </div>
               </div>
             </Link>
           );
