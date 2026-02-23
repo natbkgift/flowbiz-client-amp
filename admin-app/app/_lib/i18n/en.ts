@@ -28,9 +28,9 @@ export const en: Dictionary = {
     line: 'LINE',
   },
   home: {
-    heroTitle: 'Find the right Pattaya property in 60 seconds',
+    heroTitle: 'Premium Developments & Curated Investment Properties in Pattaya',
     heroSubtitle:
-      'A trusted platform for international buyers seeking secure property ownership and strong investment potential in Thailand.',
+      'From Wongamat to Jomtien — curated opportunities for buyers and investors.',
     pathInvest: {
       title: 'Invest',
       desc: 'Evaluate rental demand, yield positioning, and risk factors with clear assumptions.',
@@ -85,8 +85,8 @@ export const en: Dictionary = {
     investStatsTitle: 'Why Pattaya',
     investStatsSubtitle: 'Key market indicators for international property investors.',
     investStats: [
-      { value: '5–8%', label: 'Average Rental Yield' },
-      { value: '70%+', label: 'Peak Occupancy Rate' },
+      { value: '6–7%', label: 'Wongamat Gross Yield' },
+      { value: '6.5–7.5%', label: 'Jomtien Gross Yield' },
       { value: '$2,500', label: 'Avg. Price per sqm' },
       { value: '3.5M+', label: 'Annual Tourists' },
     ],
@@ -467,14 +467,19 @@ export const en: Dictionary = {
     },
     testimonials: [
       {
-        quote: 'Clear process and realistic expectations. We understood what to do next at each step.',
-        name: 'International buyer',
-        context: 'Condo purchase, Pattaya',
+        quote: 'Five stars all the way! From start to finish, they made everything so smooth and easy. Always ready to help, incredibly professional.',
+        name: 'Josh Mckinley',
+        context: 'Google Review • ★★★★★',
       },
       {
-        quote: 'Helpful market context without sales pressure. The shortlist matched our criteria.',
-        name: 'Investor',
-        context: 'Yield-focused shortlist',
+        quote: 'Absolutely impressed by this real estate team in Pattaya! Professional, attentive, and genuinely friendly — they made the whole experience smooth and enjoyable.',
+        name: 'Fari Doulou',
+        context: 'Google Review • ★★★★★',
+      },
+      {
+        quote: 'Une équipe au top, professionnelle, chaleureuse et qui parle français ! Merci pour votre sérieux et votre aide précieuse à Pattaya. Je recommande vivement.',
+        name: 'Andréa Kawala',
+        context: 'Google Review • ★★★★★',
       },
     ],
     footerDisclaimer:

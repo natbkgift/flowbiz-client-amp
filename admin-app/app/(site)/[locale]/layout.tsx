@@ -23,14 +23,15 @@ export function generateStaticParams() {
   return SUPPORTED_LOCALES.map((locale) => ({ locale }));
 }
 
-export default function SiteLayout({
+export default async function SiteLayout({
   children,
   params,
 }: {
   children: ReactNode;
   params: Promise<{ locale: string }>;
 }) {
-  const locale = normalizeLocale((params as unknown as { locale: string }).locale);
+  const resolvedParams = await params;
+  const locale = normalizeLocale(resolvedParams.locale);
   const dict = getDictionary(locale);
 
   // Blueprint doc 10 — Schema Markup Plan:

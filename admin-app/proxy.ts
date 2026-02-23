@@ -20,7 +20,7 @@ const GONE_PATHS = new Set<string>([
 ]);
 
 /**
- * Next.js Edge Middleware — locale detection, redirect, and security headers.
+ * Next.js Edge Proxy — locale detection, redirect, and security headers.
  *
  * Responsibilities:
  * 1. Skip static assets, API routes, and admin pages.
@@ -29,7 +29,7 @@ const GONE_PATHS = new Set<string>([
  * 4. Redirect non-prefixed public paths to `/en` by default.
  * 5. Attach security headers (CSP, HSTS, X-Frame-Options, etc.) to localized responses.
  */
-export function middleware(req: NextRequest) {
+export function proxy(req: NextRequest) {
   const { pathname, search } = req.nextUrl;
 
   // Ignore next internals & static assets.

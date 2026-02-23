@@ -120,8 +120,8 @@
 
   /* Luxury subtle shadows (low opacity, wide spread) */
   --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.02);
-  --shadow-card: 0 6px 24px rgba(0, 0, 0, 0.05);
-  --shadow-hover: 0 12px 30px rgba(0, 0, 0, 0.08);
+  --shadow-card: 0 6px 24px rgba(0, 0, 0, 0.07);
+  --shadow-hover: 0 12px 30px rgba(0, 0, 0, 0.10);
   --shadow-sticky: 0 4px 24px rgba(0, 0, 0, 0.03);
   --shadow-glass: 0 8px 32px rgba(0, 0, 0, 0.04);
   --shadow-elevated: 0 16px 48px rgba(0, 0, 0, 0.06);
@@ -203,8 +203,8 @@ body {
 
 h1 {
   font-size: var(--font-h1);
-  font-weight: 700;
-  line-height: 1.15;
+  font-weight: 500;
+  line-height: 1.05;
   color: var(--color-text);
   letter-spacing: -0.02em;
   font-family: var(--font-serif), Georgia, 'Times New Roman', serif;
@@ -212,8 +212,8 @@ h1 {
 
 h2 {
   font-size: var(--font-h2);
-  font-weight: 600;
-  line-height: 1.25;
+  font-weight: 500;
+  line-height: 1.15;
   color: var(--color-text);
   letter-spacing: -0.01em;
   font-family: var(--font-serif), Georgia, 'Times New Roman', serif;
@@ -221,8 +221,8 @@ h2 {
 
 h3 {
   font-size: var(--font-h3);
-  font-weight: 600;
-  line-height: 1.35;
+  font-weight: 500;
+  line-height: 1.2;
   color: var(--color-text);
   font-family: var(--font-serif), Georgia, 'Times New Roman', serif;
 }
@@ -1010,7 +1010,7 @@ select {
 
 .hero-panel__title {
   color: var(--color-white);
-  font-weight: 700;
+  font-weight: 600;
   font-size: var(--font-xl);
   margin-bottom: var(--space-2);
 }
@@ -1069,6 +1069,7 @@ select {
   font-weight: 500;
   margin-bottom: var(--space-3);
   letter-spacing: -0.01em;
+  line-height: 1.15;
 }
 
 .section-subtitle {
@@ -1291,7 +1292,7 @@ select {
 .cta-title {
   color: var(--color-text);
   font-size: var(--font-2xl);
-  font-weight: 700;
+  font-weight: 600;
   margin-bottom: var(--space-2);
 }
 
@@ -1374,7 +1375,7 @@ select {
 
 .card-price {
   font-size: var(--font-price);
-  font-weight: 700;
+  font-weight: 600;
   color: var(--color-primary);
   margin-bottom: var(--space-sm);
 }
@@ -1553,7 +1554,7 @@ select {
 
 .newsletter-form__title {
   font-size: var(--font-lg);
-  font-weight: 700;
+  font-weight: 600;
   margin-bottom: var(--space-2);
 }
 
@@ -1755,7 +1756,7 @@ select {
 
 .property-price {
   font-size: var(--font-price);
-  font-weight: 700;
+  font-weight: 600;
   color: var(--color-primary);
   white-space: nowrap;
 }
@@ -1975,7 +1976,7 @@ select {
 }
 
 .testimonial__name {
-  font-weight: 700;
+  font-weight: 600;
   color: var(--color-text);
 }
 
@@ -2089,7 +2090,7 @@ select {
 }
 
 .guided-dialog__title {
-  font-weight: 700;
+  font-weight: 600;
   color: var(--color-text);
 }
 
@@ -2730,7 +2731,7 @@ select {
 
 .stat-value {
   font-size: var(--font-2xl);
-  font-weight: 700;
+  font-weight: 600;
   color: var(--color-primary);
   line-height: 1.2;
 }
@@ -2739,6 +2740,15 @@ select {
   font-size: var(--font-sm);
   color: var(--color-text-secondary);
   margin-top: var(--space-1);
+}
+
+/* ======================== DATA LABELS (AUTHORITY LAYER) ======================== */
+
+.data-label {
+  font-size: var(--font-xs);
+  font-weight: 500;
+  color: var(--color-gray-600);
+  letter-spacing: 0.01em;
 }
 
 /* ======================== LUXURY MICRO POLISH ======================== */
@@ -2754,61 +2764,6 @@ select {
   stroke-linejoin: round;
   vertical-align: text-bottom;
   transform: translateY(1px);
-  transition: all 0.2s cubic-bezier(0.25, 1, 0.5, 1);
-}
-
-.icon--sm {
-  width: 16px;
-  height: 16px;
-  stroke-width: 2;
-}
-
-.icon--lg {
-  width: 32px;
-  height: 32px;
-  stroke-width: 1.25;
-}
-
-.icon--xl {
-  width: 48px;
-  height: 48px;
-  stroke-width: 1;
-}
-
-/* Micro Animations */
-.hover-lift {
-  transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1), box-shadow 0.4s cubic-bezier(0.25, 1, 0.5, 1);
-}
-
-.hover-lift:hover {
-  transform: translateY(-4px);
-  box-shadow: var(--shadow-hover);
-}
-
-.reveal-subtle {
-  opacity: 0;
-  transform: translateY(16px);
-  animation: revealSubtle 0.8s cubic-bezier(0.25, 1, 0.5, 1) forwards;
-}
-
-@keyframes revealSubtle {
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-/* ======================== LUXURY MICRO POLISH ======================== */
-
-/* Icon Normalization */
-.icon {
-  width: 24px;
-  height: 24px;
-  stroke-width: 1.5;
-  stroke: currentColor;
-  fill: none;
-  stroke-linecap: round;
-  stroke-linejoin: round;
   transition: all 0.2s cubic-bezier(0.25, 1, 0.5, 1);
 }
 

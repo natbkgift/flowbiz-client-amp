@@ -19,10 +19,11 @@ interface GalleryProps {
  * and a responsive thumbnail strip.
  */
 export function Gallery({ images, alt = 'Gallery photo', className = '' }: GalleryProps) {
+  const safeImages = images.map((s) => s.trim()).filter(Boolean);
   const [activeIndex, setActiveIndex] = useState(0);
   const [lightboxOpen, setLightboxOpen] = useState(false);
 
-  const total = images.length;
+  const total = safeImages.length;
   if (total === 0) return null;
 
   const next = useCallback(() => setActiveIndex((i) => (i + 1) % total), [total]);
@@ -45,7 +46,7 @@ export function Gallery({ images, alt = 'Gallery photo', className = '' }: Galle
         onClick={() => setLightboxOpen(true)}
       >
         <Image
-          src={images[activeIndex]}
+          src={safeImages[activeIndex]}
           alt={`${alt} ${activeIndex + 1}`}
           fill
           sizes="(min-width: 1024px) 70vw, 100vw"
@@ -80,9 +81,9 @@ export function Gallery({ images, alt = 'Gallery photo', className = '' }: Galle
       {/* Thumbnails */}
       {total > 1 && (
         <div className="gallery-thumbnails mt-3 flex gap-2 overflow-x-auto">
-          {images.slice(0, 12).map((src, idx) => (
+          {safeImages.slice(0, 12).map((src, idx) => (
             <button
-              key={src}
+              key={`${src}-${idx}`}
               type="button"
               onClick={() => setActiveIndex(idx)}
               className={`gallery-thumbnail relative h-16 w-20 flex-shrink-0 overflow-hidden rounded-lg border-2 transition ${
@@ -114,7 +115,7 @@ export function Gallery({ images, alt = 'Gallery photo', className = '' }: Galle
           </button>
           <div className="relative h-[80vh] w-[90vw]" onClick={(e) => e.stopPropagation()}>
             <Image
-              src={images[activeIndex]}
+              src={safeImages[activeIndex]}
               alt={`${alt} ${activeIndex + 1}`}
               fill
               sizes="90vw"

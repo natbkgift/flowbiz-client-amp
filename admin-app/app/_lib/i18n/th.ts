@@ -28,9 +28,9 @@ export const th: Dictionary = {
     line: 'LINE',
   },
   home: {
-    heroTitle: 'ค้นหาอสังหาฯ ที่ใช่ในพัทยาใน 60 วินาที',
+    heroTitle: 'โครงการพรีเมียมและอสังหาริมทรัพย์คัดสรรเพื่อการลงทุนในพัทยา',
     heroSubtitle:
-      'แพลตฟอร์มที่น่าเชื่อถือสำหรับผู้ซื้อชาวต่างชาติ ที่ต้องการความมั่นคงในการถือครอง และศักยภาพการลงทุนในประเทศไทย',
+      'จากวงศ์อมาตย์ถึงจอมเทียน — โอกาสคัดสรรสำหรับผู้ซื้อและนักลงทุน',
     pathInvest: {
       title: 'ลงทุน',
       desc: 'ดูดีมานด์เช่า แนวโน้มผลตอบแทน และความเสี่ยง ด้วยสมมติฐานที่ชัดเจน',
@@ -81,8 +81,8 @@ export const th: Dictionary = {
     investStatsTitle: 'ทำไมต้องพัทยา',
     investStatsSubtitle: 'ตัวชี้วัดตลาดสำคัญสำหรับนักลงทุนอสังหาฯ ต่างชาติ',
     investStats: [
-      { value: '5–8%', label: 'ผลตอบแทนเช่าเฉลี่ย' },
-      { value: '70%+', label: 'อัตราเข้าพักสูงสุด' },
+      { value: '6–7%', label: 'Gross Yield วงศ์อมาตย์' },
+      { value: '6.5–7.5%', label: 'Gross Yield จอมเทียน' },
       { value: '$2,500', label: 'ราคาเฉลี่ย/ตร.ม.' },
       { value: '3.5M+', label: 'นักท่องเที่ยวต่อปี' },
     ],
@@ -460,14 +460,19 @@ export const th: Dictionary = {
     },
     testimonials: [
       {
-        quote: 'ขั้นตอนชัดเจนและคาดหวังได้จริง รู้ว่าควรทำอะไรต่อในแต่ละช่วง',
-        name: 'ลูกค้าต่างชาติ',
-        context: 'ซื้อคอนโด พัทยา',
+        quote: 'Отличная компания! Всё прошло легко и без лишних забот. Очень профессиональные и всегда готовы помочь. Однозначно рекомендую!',
+        name: 'Wesi Wesi',
+        context: 'รีวิว Google • ★★★★★',
       },
       {
-        quote: 'ให้ข้อมูลตลาดแบบไม่กดดันการขาย shortlist ตรงกับเกณฑ์ที่เราต้องการ',
-        name: 'นักลงทุน',
-        context: 'shortlist โฟกัสผลตอบแทน',
+        quote: 'พนักงานทุกคนน่ารักมากๆค่ะ ดูแลดีมาก',
+        name: 'Focus Chanrakkun',
+        context: 'รีวิว Google • ★★★★★',
+      },
+      {
+        quote: 'Une équipe au top, professionnelle, chaleureuse et qui parle français ! Merci pour votre sérieux et votre aide précieuse à Pattaya. Je recommande vivement.',
+        name: 'Andréa Kawala',
+        context: 'รีวิว Google • ★★★★★',
       },
     ],
     footerDisclaimer:

@@ -362,7 +362,7 @@ export default async function HomePage({
           </div>
 
           <div className="mt-16 pt-16 border-t border-gray-100">
-            <h3 className="text-2xl font-serif font-bold text-center mb-4">{dict.homepageSegmentation.sectionTitle}</h3>
+            <h3 className="text-2xl font-serif font-medium text-center mb-4">{dict.homepageSegmentation.sectionTitle}</h3>
             <p className="text-gray-600 text-center mb-10 max-w-2xl mx-auto">{dict.homepageSegmentation.sectionSubtitle}</p>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8">
               {dict.homepageSegmentation.cards.map((card: any) => (
@@ -373,7 +373,7 @@ export default async function HomePage({
                   eventType="segment_entry_click"
                   eventPayload={{ segment: card.href.replace('/', '') }}
                 >
-                  <h4 className="text-lg font-bold mb-2 text-gray-900">{card.title}</h4>
+                  <h4 className="text-lg font-medium mb-2 text-gray-900">{card.title}</h4>
                   <p className="text-gray-600 text-sm">{card.desc}</p>
                 </TrackedLink>
               ))}
@@ -486,8 +486,8 @@ export default async function HomePage({
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-12 border-t border-gray-200 pt-12">
             {dict.home.investStats.map((stat: any) => (
               <div key={stat.label} className="reveal text-center md:text-left">
-                <div className="text-4xl md:text-5xl font-serif font-bold text-primary mb-3">{stat.value}</div>
-                <div className="text-lg font-semibold text-gray-900 mb-2">{stat.label}</div>
+                <div className="text-4xl md:text-5xl font-serif font-semibold text-primary mb-3">{stat.value}</div>
+                <div className="text-lg font-medium text-gray-900 mb-2">{stat.label}</div>
               </div>
             ))}
           </div>
@@ -516,7 +516,7 @@ export default async function HomePage({
         <Container variant="wide">
           <div className="grid md:grid-cols-2 gap-12 items-center mb-20">
             <div>
-              <h2 className="text-3xl md:text-4xl font-bold font-serif mb-6 text-gray-900">{dict.home.trustTitle}</h2>
+              <h2 className="text-3xl md:text-4xl font-medium font-serif mb-6 text-gray-900">{dict.home.trustTitle}</h2>
               <p className="text-lg text-gray-600 mb-8 leading-relaxed">{dict.home.trustSubtitle}</p>
               <ul className="space-y-4">
                 {dict.home.trustBullets.map((b: string) => (
@@ -530,7 +530,7 @@ export default async function HomePage({
             <div className="bg-gray-50 rounded-2xl p-8 border border-gray-100 shadow-sm relative overflow-hidden">
               <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-bl-[100px] z-0"></div>
               <div className="relative z-10">
-                <h3 className="text-xl font-serif font-bold text-gray-900 mb-4">The AMP Pattaya Standard</h3>
+                <h3 className="text-xl font-serif font-medium text-gray-900 mb-4">The AMP Pattaya Standard</h3>
                 <p className="text-gray-600 mb-6 leading-relaxed">We protect your investment from day one. Our multi-layered due diligence process ensures every property meets international standards for quality, legal clarity, and long-term value.</p>
                 <Link href={`/${locale}/about`} className="text-primary font-semibold hover:text-primary-dark transition-colors inline-flex items-center gap-2">Discover our approach →</Link>
               </div>
@@ -557,7 +557,7 @@ export default async function HomePage({
               <div className="section-header">
                 <div className="flex items-center justify-center gap-2 mb-3">
                   <span className="text-2xl" aria-label="5 stars">⭐⭐⭐⭐⭐</span>
-                  <span className="text-xl font-bold text-gray-900">5.0</span>
+                  <span className="text-xl font-semibold text-gray-900">5.0</span>
                 </div>
                 <h2 className="section-title">{locale === 'th' ? 'รีวิวจากลูกค้า' : 'Client Reviews'}</h2>
                 <p className="section-subtitle text-sm text-gray-500">{locale === 'th' ? 'รีวิวจริงจาก Google' : 'Based on verified Google reviews'}</p>
@@ -633,7 +633,7 @@ export default async function HomePage({
         <Container variant="wide">
           <div className="grid lg:grid-cols-2 gap-16 items-center">
             <div className="reveal">
-              <h2 className="text-3xl md:text-5xl font-serif font-bold mb-6 leading-tight">{dict.home.premiumCtaTitle}</h2>
+              <h2 className="text-3xl md:text-5xl font-serif font-medium mb-6 leading-tight">{dict.home.premiumCtaTitle}</h2>
               <p className="text-lg text-white/80 mb-10 max-w-lg leading-relaxed">{dict.home.premiumCtaBody}</p>
               <div className="flex flex-wrap gap-4">
                 <TrackedLink
@@ -656,7 +656,7 @@ export default async function HomePage({
             </div>
             <div className="reveal">
               <div className="bg-white p-8 md:p-10 rounded-2xl shadow-2xl text-gray-900">
-                <h3 className="text-2xl font-bold mb-2">Request a Private Consultation</h3>
+                <h3 className="text-2xl font-medium mb-2">Request a Private Consultation</h3>
                 <p className="text-gray-600 mb-8 text-sm">Tell us about your requirements and we will curate a personalized shortlist.</p>
                 <LeadForm />
               </div>
