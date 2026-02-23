@@ -1,3 +1,4 @@
+require('../scripts/process-guard');
 require('dotenv').config();
 const express = require('express');
 const { connectDB } = require('./config/database');
@@ -46,24 +47,24 @@ async function init() {
   try {
     console.log('🚀 Starting Content Automation System...');
     console.log(`📍 Environment: ${process.env.NODE_ENV || 'development'}`);
-    
+
     // Validate required environment variables
     validateEnv();
-    
+
     // Connect to MongoDB
     await connectDB();
-    
+
     // Start schedulers
     startAutoPublisher();
     startInsightsTracker();
-    
+
     // Start Express server
     app.listen(PORT, () => {
       console.log(`✅ Server running on port ${PORT}`);
       console.log(`📍 LINE Webhook: http://localhost:${PORT}/webhook/line`);
       console.log(`💚 Health check: http://localhost:${PORT}/health`);
     });
-    
+
   } catch (error) {
     console.error('❌ Initialization failed:', error);
     process.exit(1);
@@ -81,20 +82,20 @@ function validateEnv() {
     'FB_PAGE_ID',
     'FB_PAGE_ACCESS_TOKEN'
   ];
-  
+
   const missing = required.filter(key => !process.env[key]);
-  
+
   if (missing.length > 0) {
     throw new Error(`Missing required environment variables: ${missing.join(', ')}`);
   }
-  
+
   // Check optional but recommended
   const optional = [
     'LINE_GROUP_DEVELOPER_ID',
     'LINE_GROUP_RESALE_ID',
     'LINE_GROUP_RENT_ID'
   ];
-  
+
   const missingOptional = optional.filter(key => !process.env[key]);
   if (missingOptional.length > 0) {
     console.warn(`ℹ️  Optional variables not set: ${missingOptional.join(', ')}`);
