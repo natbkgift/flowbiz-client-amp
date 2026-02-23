@@ -220,7 +220,7 @@ jobs:
             echo "Seeding public catalog (developers/areas/projects/units)"
             # Idempotent upsert by slug (projects) and source_id (properties).
             docker compose -f docker-compose.yml -f docker-compose.prod.yml exec -T api \
-              python scripts/import_seed_data.py --input data/import \
+              env AMP_ALLOW_IMPORT=1 python scripts/import_seed_data.py --input data/import \
               --step developers --step areas --step projects --step units_buy --step units_rent
 
             echo "Verifying monitoring/logging endpoints (local)"
