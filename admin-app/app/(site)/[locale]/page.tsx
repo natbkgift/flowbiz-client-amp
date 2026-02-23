@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
+import { Suspense } from 'react';
 
 import { TrackedLink } from '@/components/analytics/TrackedLink';
 import { HomeHero } from '@/components/home/HomeHero';
@@ -100,63 +101,158 @@ export default async function HomePage({
 
   const recommendation = getContentRecommendation();
 
-  // Fetch real projects for featured section
-  let allProjects: Awaited<ReturnType<typeof fetchProjects>> = [];
-  try {
-    allProjects = await fetchProjects({ limit: 100 });
-  } catch {
-    allProjects = [];
+  async function FeaturedProjectsSection() {
+    let allProjects: Awaited<ReturnType<typeof fetchProjects>> = [];
+    try {
+      allProjects = await fetchProjects({ limit: 100 });
+    } catch {
+      allProjects = [];
+    }
+
+    const PROJECT_PRIORITY = [
+      'the-riviera-jomtien',
+      'the-riviera-monaco',
+      'copacabana-beach-jomtien',
+      'arcadia-millennium-tower',
+      'city-garden-pratumnak',
+      'wongamat-tower',
+      'dusit-grand-condo-view',
+      'grand-solaire',
+    ];
+
+    const sortedProjects = [...allProjects].sort((a, b) => {
+      const aIdx = PROJECT_PRIORITY.indexOf(a.slug);
+      const bIdx = PROJECT_PRIORITY.indexOf(b.slug);
+      if (aIdx === -1 && bIdx === -1) return 0;
+      if (aIdx === -1) return 1;
+      if (bIdx === -1) return -1;
+      return aIdx - bIdx;
+    });
+
+    const featuredProjects = sortedProjects.slice(0, 6);
+    const totalProjectCount = allProjects.length;
+    if (featuredProjects.length === 0) return null;
+
+    return (
+      <section className="py-16 md:py-20 xl:py-24 2xl:py-28">
+        <Container variant="wide">
+          <FeaturedProjects
+            projects={featuredProjects}
+            locale={locale}
+            title={dict.home.featuredProjectsTitle}
+            subtitle={dict.home.featuredProjectsSubtitle}
+          />
+          <div className="cta-row cta-row--center mt-6">
+            <TrackedLink
+              className="btn btn-secondary"
+              href={withLocale(locale, '/projects')}
+              eventType="cta_click"
+              eventPayload={{ cta: 'view_all_projects', from: 'home_featured' }}
+            >
+              {locale === 'th'
+                ? `ดูโครงการทั้งหมด ${totalProjectCount} โครงการ`
+                : `View All ${totalProjectCount} Developments`}
+            </TrackedLink>
+          </div>
+        </Container>
+      </section>
+    );
   }
 
-  // Deterministic curated order via slug priority (Owner-defined)
-  const PROJECT_PRIORITY = [
-    'the-riviera-jomtien',
-    'the-riviera-monaco',
-    'copacabana-beach-jomtien',
-    'arcadia-millennium-tower',
-    'city-garden-pratumnak',
-    'wongamat-tower',
-    'dusit-grand-condo-view',
-    'grand-solaire',
-  ];
-
-  const sortedProjects = [...allProjects].sort((a, b) => {
-    const aIdx = PROJECT_PRIORITY.indexOf(a.slug);
-    const bIdx = PROJECT_PRIORITY.indexOf(b.slug);
-    if (aIdx === -1 && bIdx === -1) return 0;
-    if (aIdx === -1) return 1;
-    if (bIdx === -1) return -1;
-    return aIdx - bIdx;
-  });
-
-  const featuredProjects = sortedProjects.slice(0, 6);
-  const totalProjectCount = allProjects.length;
-
-  // Fetch properties for Featured Properties section (intentional sale/rent mix)
-  let featuredProperties: PropertyListItem[] = [];
-  try {
-    const [saleRes, rentRes] = await Promise.all([
-      fetchPropertiesAPI({ limit: 5, type: 'resale', sort: 'newest' }),
-      fetchPropertiesAPI({ limit: 4, type: 'rent', sort: 'newest' }),
-    ]);
-    // Safe interleave: alternate 2 sale → 1 rent, fallback if either is short
-    const sales = saleRes.data || [];
-    const rents = rentRes.data || [];
-    const mixed: PropertyListItem[] = [];
-    let si = 0, ri = 0;
-    while (mixed.length < 8 && (si < sales.length || ri < rents.length)) {
-      // Push up to 2 sale
-      for (let k = 0; k < 2 && si < sales.length && mixed.length < 8; k++) {
-        mixed.push(sales[si++]);
+  async function FeaturedPropertiesSection() {
+    let featuredProperties: PropertyListItem[] = [];
+    try {
+      const [saleRes, rentRes] = await Promise.all([
+        fetchPropertiesAPI({ limit: 5, type: 'resale', sort: 'newest' }),
+        fetchPropertiesAPI({ limit: 4, type: 'rent', sort: 'newest' }),
+      ]);
+      const sales = saleRes.data || [];
+      const rents = rentRes.data || [];
+      const mixed: PropertyListItem[] = [];
+      let si = 0;
+      let ri = 0;
+      while (mixed.length < 8 && (si < sales.length || ri < rents.length)) {
+        for (let k = 0; k < 2 && si < sales.length && mixed.length < 8; k++) {
+          mixed.push(sales[si++]);
+        }
+        if (ri < rents.length && mixed.length < 8) {
+          mixed.push(rents[ri++]);
+        }
       }
-      // Push 1 rent
-      if (ri < rents.length && mixed.length < 8) {
-        mixed.push(rents[ri++]);
-      }
+      featuredProperties = mixed;
+    } catch {
+      featuredProperties = [];
     }
-    featuredProperties = mixed;
-  } catch {
-    featuredProperties = [];
+
+    if (featuredProperties.length === 0) return null;
+
+    return (
+      <section className="py-16 md:py-20 xl:py-24 2xl:py-28 bg-surface">
+        <Container variant="wide">
+          <div className="section-header">
+            <h2 className="section-title">{locale === 'th' ? 'อสังหาริมทรัพย์คัดสรร' : 'Selected Investment Opportunities'}</h2>
+            <p className="section-subtitle">{locale === 'th' ? 'ห้องชุดคัดเลือกสำหรับนักลงทุนและผู้ซื้อ' : 'Curated units for buyers and investors — sale and rental opportunities.'}</p>
+          </div>
+
+          <div className="grid grid-fluid">
+            {featuredProperties.map((prop) => {
+              const img = prop.cover_image || (prop.local_images?.[0]) || (prop.images?.[0]) || null;
+              const imgSrc = resolveImageUrl(img) ?? '/images/property-placeholder.svg';
+              const priceFormatted = prop.price ? `฿${Math.round(prop.price).toLocaleString()}` : null;
+              const typeBadge = prop.type === 'rent' ? (locale === 'th' ? 'ให้เช่า' : 'For Rent')
+                : prop.type === 'resale' ? (locale === 'th' ? 'ขายต่อ' : 'Resale')
+                  : (locale === 'th' ? 'ขาย' : 'For Sale');
+              const badgeColor = prop.type === 'rent'
+                ? 'bg-blue-50 text-blue-700'
+                : 'bg-emerald-50 text-emerald-700';
+
+              return (
+                <Link
+                  key={prop.id}
+                  href={withLocale(locale, `/properties/${prop.id}`)}
+                  className="property-card reveal"
+                >
+                  <div className="card-image card-image--featured relative">
+                    <SafeCoverImage
+                      src={imgSrc}
+                      alt={prop.title}
+                      sizes="(min-width: 1024px) 33vw, (min-width: 768px) 50vw, 100vw"
+                      className="absolute inset-0 h-full w-full object-cover"
+                      loading="lazy"
+                    />
+                    <span className={`absolute top-3 left-3 text-xs font-semibold px-2.5 py-1 rounded-full ${badgeColor}`}>
+                      {typeBadge}
+                    </span>
+                  </div>
+                  <div className="card-content flex flex-col h-full p-6">
+                    <div className="card-title text-lg font-medium text-gray-900 mb-1 line-clamp-2">{prop.title}</div>
+                    <div className="text-sm text-gray-500 mb-4">{prop.address || prop.city}</div>
+                    <div className="flex items-center justify-between mt-auto pt-4 border-t border-gray-100">
+                      {priceFormatted ? (
+                        <div className="card-price text-gray-900 font-semibold">
+                          {priceFormatted}{prop.type === 'rent' ? (locale === 'th' ? '/เดือน' : '/mo') : ''}
+                        </div>
+                      ) : <div />}
+                    </div>
+                  </div>
+                </Link>
+              );
+            })}
+          </div>
+
+          <div className="cta-row cta-row--center mt-6">
+            <TrackedLink
+              className="btn btn-secondary"
+              href={withLocale(locale, '/buy')}
+              eventType="cta_click"
+              eventPayload={{ cta: 'browse_all_properties', from: 'home_properties' }}
+            >
+              {locale === 'th' ? 'ดูอสังหาริมทรัพย์ทั้งหมด' : 'Browse All Properties'}
+            </TrackedLink>
+          </div>
+        </Container>
+      </section>
+    );
   }
 
   const jsonLd = JSON.stringify([
@@ -384,98 +480,16 @@ export default async function HomePage({
         </Container>
       </section>
 
-      {/* Featured Projects — Real Data */}
-      {featuredProjects.length > 0 ? (
-        <section className="py-16 md:py-20 xl:py-24 2xl:py-28">
-          <Container variant="wide">
-            <FeaturedProjects
-              projects={featuredProjects}
-              locale={locale}
-              title={dict.home.featuredProjectsTitle}
-              subtitle={dict.home.featuredProjectsSubtitle}
-            />
-            <div className="cta-row cta-row--center mt-6">
-              <TrackedLink
-                className="btn btn-secondary"
-                href={withLocale(locale, '/projects')}
-                eventType="cta_click"
-                eventPayload={{ cta: 'view_all_projects', from: 'home_featured' }}
-              >
-                {locale === 'th' ? `ดูโครงการทั้งหมด ${totalProjectCount} โครงการ` : `View All ${totalProjectCount} Developments`}
-              </TrackedLink>
-            </div>
-          </Container>
-        </section>
-      ) : null}
 
-      {/* Selected Investment Opportunities — Real Properties */}
-      {featuredProperties.length > 0 ? (
-        <section className="py-16 md:py-20 xl:py-24 2xl:py-28 bg-surface">
-          <Container variant="wide">
-            <div className="section-header">
-              <h2 className="section-title">{locale === 'th' ? 'อสังหาริมทรัพย์คัดสรร' : 'Selected Investment Opportunities'}</h2>
-              <p className="section-subtitle">{locale === 'th' ? 'ห้องชุดคัดเลือกสำหรับนักลงทุนและผู้ซื้อ' : 'Curated units for buyers and investors — sale and rental opportunities.'}</p>
-            </div>
+      {/* Featured Projects — Real Data (streamed) */}
+      <Suspense fallback={null}>
+        <FeaturedProjectsSection />
+      </Suspense>
 
-            <div className="grid grid-fluid">
-              {featuredProperties.map((prop) => {
-                const img = prop.cover_image || (prop.local_images?.[0]) || (prop.images?.[0]) || null;
-                const imgSrc = resolveImageUrl(img) ?? '/images/property-placeholder.svg';
-                const priceFormatted = prop.price ? `฿${Math.round(prop.price).toLocaleString()}` : null;
-                const typeBadge = prop.type === 'rent' ? (locale === 'th' ? 'ให้เช่า' : 'For Rent')
-                  : prop.type === 'resale' ? (locale === 'th' ? 'ขายต่อ' : 'Resale')
-                    : (locale === 'th' ? 'ขาย' : 'For Sale');
-                const badgeColor = prop.type === 'rent'
-                  ? 'bg-blue-50 text-blue-700'
-                  : 'bg-emerald-50 text-emerald-700';
-
-                return (
-                  <Link
-                    key={prop.id}
-                    href={withLocale(locale, `/properties/${prop.id}`)}
-                    className="property-card reveal"
-                  >
-                    <div className="card-image card-image--featured relative">
-                      <SafeCoverImage
-                        src={imgSrc}
-                        alt={prop.title}
-                        sizes="(min-width: 1024px) 33vw, (min-width: 768px) 50vw, 100vw"
-                        className="absolute inset-0 h-full w-full object-cover"
-                        loading="lazy"
-                      />
-                      <span className={`absolute top-3 left-3 text-xs font-semibold px-2.5 py-1 rounded-full ${badgeColor}`}>
-                        {typeBadge}
-                      </span>
-                    </div>
-                    <div className="card-content flex flex-col h-full p-6">
-                      <div className="card-title text-lg font-medium text-gray-900 mb-1 line-clamp-2">{prop.title}</div>
-                      <div className="text-sm text-gray-500 mb-4">{prop.address || prop.city}</div>
-                      <div className="flex items-center justify-between mt-auto pt-4 border-t border-gray-100">
-                        {priceFormatted ? (
-                          <div className="card-price text-gray-900 font-semibold">
-                            {priceFormatted}{prop.type === 'rent' ? (locale === 'th' ? '/เดือน' : '/mo') : ''}
-                          </div>
-                        ) : <div />}
-                      </div>
-                    </div>
-                  </Link>
-                );
-              })}
-            </div>
-
-            <div className="cta-row cta-row--center mt-6">
-              <TrackedLink
-                className="btn btn-secondary"
-                href={withLocale(locale, '/buy')}
-                eventType="cta_click"
-                eventPayload={{ cta: 'browse_all_properties', from: 'home_properties' }}
-              >
-                {locale === 'th' ? 'ดูอสังหาริมทรัพย์ทั้งหมด' : 'Browse All Properties'}
-              </TrackedLink>
-            </div>
-          </Container>
-        </section>
-      ) : null}
+      {/* Selected Investment Opportunities — Real Properties (streamed) */}
+      <Suspense fallback={null}>
+        <FeaturedPropertiesSection />
+      </Suspense>
 
       {/* Investment Stats */}
       <section className="py-16 md:py-20 xl:py-24 2xl:py-28 bg-surface">
