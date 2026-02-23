@@ -113,9 +113,9 @@
   /* Unified padding matrix (Tailwind parity): px-6 md:px-8 xl:px-16 2xl:px-24 */
   --container-padding: 24px;
 
-  --radius-sm: 6px;
+  --radius-sm: 4px;
   --radius-md: 12px;
-  --radius-lg: 20px;
+  --radius-lg: 24px;
   --radius-full: 999px;
 
   /* Luxury subtle shadows (low opacity, wide spread) */
@@ -162,6 +162,33 @@
 @media (min-width: 1536px) {
   :root {
     --container-padding: 96px;
+  }
+}
+
+/* 4K / Ultra-wide scaling matrix (Audit Category I / II) */
+@media (min-width: 1920px) {
+  :root {
+    --font-body: 17px;
+    --font-nav: 16px;
+    --font-lg: 20px;
+    --font-h1: 68px;
+    --font-h2: 42px;
+    --font-h3: 22px;
+    --font-price: 34px;
+    --container-padding: 112px;
+  }
+}
+
+@media (min-width: 2560px) {
+  :root {
+    --font-body: 18px;
+    --font-nav: 17px;
+    --font-lg: 22px;
+    --font-h1: 78px;
+    --font-h2: 48px;
+    --font-h3: 24px;
+    --font-price: 38px;
+    --container-padding: 128px;
   }
 }
 
@@ -333,25 +360,13 @@ select {
 
 .grid {
   display: grid;
-  /* Progressive gap scaling: 24px -> 32px -> 40px -> 48px */
+  /* Audit gap discipline: 24 / 32 only */
   gap: 24px;
 }
 
 @media (min-width: 768px) {
   .grid {
     gap: 32px;
-  }
-}
-
-@media (min-width: 1280px) {
-  .grid {
-    gap: 40px;
-  }
-}
-
-@media (min-width: 1536px) {
-  .grid {
-    gap: 48px;
   }
 }
 

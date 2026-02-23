@@ -68,6 +68,37 @@ def _list_local_images(property_id: UUID) -> list[str]:
     return out
 
 
+def _coerce_image_list(value: object | None) -> list[str]:
+    if not value:
+        return []
+    if isinstance(value, list):
+        out: list[str] = []
+        for v in value:
+            if isinstance(v, str) and v.strip():
+                out.append(v.strip())
+        return out
+    return []
+
+
+def _merge_images(*lists: list[str]) -> list[str]:
+    """Merge lists, keep order, dedupe, and drop unsafe hotlink URLs."""
+    out: list[str] = []
+    seen: set[str] = set()
+    for lst in lists:
+        for raw in lst:
+            s = raw.strip()
+            if not s:
+                continue
+            # Hard rule: public API should not emit external hotlinks.
+            if "://" in s:
+                continue
+            if s in seen:
+                continue
+            seen.add(s)
+            out.append(s)
+    return out
+
+
 @router.get("/properties", response_model=PropertyListResponse)
 def list_properties(
     page: int = Query(1, ge=1),
@@ -113,11 +144,28 @@ def list_properties(
 
     data: list[PropertyListItem] = []
     for item in items:
+        # Build response using DB fields first (images/local_images/cover_image/cover_image_url)
+        # then fallback to storage folder listing.
         m = PropertyListItem.model_validate(item)
-        imgs = _list_local_images(m.id)
-        m.images = imgs
-        m.local_images = imgs
-        m.cover_image = imgs[0] if imgs else None
+
+        stored_local = _coerce_image_list(getattr(item, "local_images", None))
+        stored_images = _coerce_image_list(getattr(item, "images", None))
+        disk_images = _list_local_images(m.id)
+        merged = _merge_images(stored_local, stored_images, disk_images)
+
+        cover = getattr(item, "cover_image", None)
+        if isinstance(cover, str) and cover.strip() and "://" not in cover:
+            m.cover_image = cover.strip()
+        else:
+            cover_url = getattr(item, "cover_image_url", None)
+            if isinstance(cover_url, str) and cover_url.strip() and "://" not in cover_url:
+                m.cover_image = cover_url.strip()
+            else:
+                m.cover_image = merged[0] if merged else None
+
+        # Keep both fields populated for legacy/front-end compatibility.
+        m.images = merged
+        m.local_images = merged
         data.append(m)
 
     return PropertyListResponse(data=data, meta=PaginationMeta(page=page, limit=limit, total=total))
@@ -132,10 +180,23 @@ def get_property(
     if prop is None or prop.status != PropertyStatus.ACTIVE.value:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Property not found")
     m = PropertyDetail.model_validate(prop)
-    imgs = _list_local_images(m.id)
-    m.images = imgs
-    m.local_images = imgs
-    m.cover_image = imgs[0] if imgs else None
+    stored_local = _coerce_image_list(getattr(prop, "local_images", None))
+    stored_images = _coerce_image_list(getattr(prop, "images", None))
+    disk_images = _list_local_images(m.id)
+    merged = _merge_images(stored_local, stored_images, disk_images)
+
+    cover = getattr(prop, "cover_image", None)
+    if isinstance(cover, str) and cover.strip() and "://" not in cover:
+        m.cover_image = cover.strip()
+    else:
+        cover_url = getattr(prop, "cover_image_url", None)
+        if isinstance(cover_url, str) and cover_url.strip() and "://" not in cover_url:
+            m.cover_image = cover_url.strip()
+        else:
+            m.cover_image = merged[0] if merged else None
+
+    m.images = merged
+    m.local_images = merged
     return m
 
 
@@ -148,10 +209,23 @@ def get_property_by_slug(
     if prop is None or prop.status != PropertyStatus.ACTIVE.value:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Property not found")
     m = PropertyDetail.model_validate(prop)
-    imgs = _list_local_images(m.id)
-    m.images = imgs
-    m.local_images = imgs
-    m.cover_image = imgs[0] if imgs else None
+    stored_local = _coerce_image_list(getattr(prop, "local_images", None))
+    stored_images = _coerce_image_list(getattr(prop, "images", None))
+    disk_images = _list_local_images(m.id)
+    merged = _merge_images(stored_local, stored_images, disk_images)
+
+    cover = getattr(prop, "cover_image", None)
+    if isinstance(cover, str) and cover.strip() and "://" not in cover:
+        m.cover_image = cover.strip()
+    else:
+        cover_url = getattr(prop, "cover_image_url", None)
+        if isinstance(cover_url, str) and cover_url.strip() and "://" not in cover_url:
+            m.cover_image = cover_url.strip()
+        else:
+            m.cover_image = merged[0] if merged else None
+
+    m.images = merged
+    m.local_images = merged
     return m
 
 

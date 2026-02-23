@@ -1,6 +1,5 @@
 import Image from "next/image";
 import Link from "next/link";
-import { HeroSearch } from "@/components/home/HeroSearch";
 import { TrackedLink } from "@/components/analytics/TrackedLink";
 import { HeroOverlay } from "@/components/home/HeroOverlay";
 import { Container } from "@/components/layout/Container";

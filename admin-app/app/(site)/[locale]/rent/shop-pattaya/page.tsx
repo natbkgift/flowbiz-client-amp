@@ -38,7 +38,7 @@ export default async function RentShopPattayaPage({ params }: { params: Promise<
 
   let res: Awaited<ReturnType<typeof fetchProperties>>;
   try {
-    res = await fetchProperties({ type: 'rental', limit: 60, sort: 'newest', search: 'shop' });
+    res = await fetchProperties({ type: 'rent', limit: 60, sort: 'newest', search: 'shop' });
   } catch {
     res = { data: [], meta: { page: 1, limit: 60, total: 0 } };
   }

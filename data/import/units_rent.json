@@ -9,6 +9,11 @@
     "bedrooms": 1,
     "bathrooms": 1,
     "size_sqm": 45,
+    "images": [
+      "/images/condo-view.png",
+      "/images/property-interior.png",
+      "/images/property-pool.png"
+    ],
     "project_slug": "the-riviera-jomtien",
     "area_slug": "jomtien",
     "developer_slug": "the-riviera-group",
@@ -25,6 +30,11 @@
     "bedrooms": 0,
     "bathrooms": 1,
     "size_sqm": 32,
+    "images": [
+      "/images/condo-view.png",
+      "/images/property-interior.png",
+      "/images/property-exterior.png"
+    ],
     "project_slug": "wongamat-tower",
     "area_slug": "wongamat",
     "developer_slug": "nova-group",
@@ -41,6 +51,12 @@
     "bedrooms": 2,
     "bathrooms": 2,
     "size_sqm": 180,
+    "images": [
+      "/images/villa-garden.png",
+      "/images/property-exterior.png",
+      "/images/property-pool.png",
+      "/images/property-interior.png"
+    ],
     "project_slug": null,
     "area_slug": "bang-saray",
     "developer_slug": null,

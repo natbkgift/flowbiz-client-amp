@@ -38,7 +38,7 @@ export default async function RentOfficePattayaPage({ params }: { params: Promis
 
   let res: Awaited<ReturnType<typeof fetchProperties>>;
   try {
-    res = await fetchProperties({ type: 'rental', limit: 60, sort: 'newest', search: 'office' });
+    res = await fetchProperties({ type: 'rent', limit: 60, sort: 'newest', search: 'office' });
   } catch {
     res = { data: [], meta: { page: 1, limit: 60, total: 0 } };
   }

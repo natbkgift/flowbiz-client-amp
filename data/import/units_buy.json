@@ -9,6 +9,11 @@
     "bedrooms": 2,
     "bathrooms": 1,
     "size_sqm": 65,
+    "images": [
+      "/images/condo-view.png",
+      "/images/property-interior.png",
+      "/images/property-pool.png"
+    ],
     "project_slug": "the-riviera-jomtien",
     "area_slug": "jomtien",
     "developer_slug": "the-riviera-group",
@@ -25,6 +30,11 @@
     "bedrooms": 0,
     "bathrooms": 1,
     "size_sqm": 36,
+    "images": [
+      "/images/condo-view.png",
+      "/images/property-interior.png",
+      "/images/property-exterior.png"
+    ],
     "project_slug": "copacabana-beach-jomtien",
     "area_slug": "jomtien",
     "developer_slug": "heights-holdings",
@@ -34,13 +44,18 @@
   {
     "source_id": "buy-003",
     "title": "1BR - Grand Solaire (New Launch)",
-    "type": "new",
+    "type": "resale",
     "price": 3800000,
     "address": "Central Pattaya",
     "city": "Pattaya",
     "bedrooms": 1,
     "bathrooms": 1,
     "size_sqm": 45,
+    "images": [
+      "/images/project-overview.png",
+      "/images/property-interior.png",
+      "/images/property-pool.png"
+    ],
     "project_slug": "grand-solaire",
     "area_slug": "central-pattaya",
     "developer_slug": "heights-holdings",
@@ -57,6 +72,12 @@
     "bedrooms": 3,
     "bathrooms": 3,
     "size_sqm": 280,
+    "images": [
+      "/images/villa-garden.png",
+      "/images/property-exterior.png",
+      "/images/property-pool.png",
+      "/images/property-interior.png"
+    ],
     "project_slug": null,
     "area_slug": "pratumnak",
     "developer_slug": null,
@@ -73,6 +94,11 @@
     "bedrooms": 2,
     "bathrooms": 2,
     "size_sqm": 78,
+    "images": [
+      "/images/property-interior.png",
+      "/images/property-exterior.png",
+      "/images/condo-view.png"
+    ],
     "project_slug": "city-garden-pratumnak",
     "area_slug": "pratumnak",
     "developer_slug": "matrix-developments",

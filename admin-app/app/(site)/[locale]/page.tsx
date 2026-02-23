@@ -110,12 +110,14 @@ export default async function HomePage({
 
   // Deterministic curated order via slug priority (Owner-defined)
   const PROJECT_PRIORITY = [
-    'the-riviera-palm-beach-wongamat',
-    'once-wongamat',
-    'skypark-lucean-jomtien-pattaya',
-    'aquarous-jomtien-pattaya',
-    'the-panora-estuaria',
-    'zenith-pattaya-2',
+    'the-riviera-jomtien',
+    'the-riviera-monaco',
+    'copacabana-beach-jomtien',
+    'arcadia-millennium-tower',
+    'city-garden-pratumnak',
+    'wongamat-tower',
+    'dusit-grand-condo-view',
+    'grand-solaire',
   ];
 
   const sortedProjects = [...allProjects].sort((a, b) => {
