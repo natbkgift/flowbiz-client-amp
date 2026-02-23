@@ -32,7 +32,9 @@ export function SafeCoverImage({
 }) {
   const initial = useMemo(() => normalizeSrc(src), [src]);
   const fallback = useMemo(() => normalizeSrc(fallbackSrc) ?? DEFAULT_FALLBACK_SRC, [fallbackSrc]);
-  const [currentSrc, setCurrentSrc] = useState<string>(initial ?? fallback);
+  // SSR-safe: always render the fallback first so the browser never shows a
+  // broken-image icon before React hydration attaches the onError handler.
+  const [currentSrc, setCurrentSrc] = useState<string>(fallback);
 
   useEffect(() => {
     setCurrentSrc(initial ?? fallback);
