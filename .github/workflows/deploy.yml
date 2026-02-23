@@ -212,7 +212,7 @@ jobs:
             docker tag "${{ env.ADMIN_IMAGE }}:${{ needs.build.outputs.sha_tag }}" "flowbiz-client-amp-admin-app:latest"
 
             # Rolling restart
-            compose up -d --remove-orphans
+            compose up -d --remove-orphans --force-recreate
 
             echo "Running container images (post-up)"
             API_CID_AFTER="$(compose ps -q api 2>/dev/null | head -n 1 || true)"

@@ -1,5 +1,6 @@
 services:
   api:
+    image: flowbiz-client-amp-api:latest
     env_file:
       - .env
     environment:
@@ -15,6 +16,7 @@ services:
     restart: always
 
   admin-app:
+    image: flowbiz-client-amp-admin-app:latest
     ports:
       - "127.0.0.1:${VPS_ADMIN_PORT:-8002}:3000"
     restart: always
