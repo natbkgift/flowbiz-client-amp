@@ -217,6 +217,12 @@ jobs:
             echo "Applying migrations"
             docker compose -f docker-compose.yml -f docker-compose.prod.yml exec -T api alembic upgrade head
 
+            echo "Seeding public catalog (developers/areas/projects/units)"
+            # Idempotent upsert by slug (projects) and source_id (properties).
+            docker compose -f docker-compose.yml -f docker-compose.prod.yml exec -T api \
+              python scripts/import_seed_data.py --input data/import \
+              --step developers --step areas --step projects --step units_buy --step units_rent
+
             echo "Verifying monitoring/logging endpoints (local)"
             VPS_API_PORT="${VPS_API_PORT:-8001}"
             code_health=$(curl -sS -o /dev/null -w "%{http_code}" --max-time 10 "http://127.0.0.1:${VPS_API_PORT}/healthz" || echo "000")
