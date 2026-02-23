@@ -3,10 +3,69 @@ import type { PropertyListItem } from '../public/_shared/types';
 export function resolveImageUrl(image: string | null | undefined): string | null {
   if (!image) return null;
 
-  // Strict: public site must only render local images served via /images/.
-  // Anything else is treated as non-renderable to avoid hotlinking.
-  if (image.startsWith('/images/')) return image;
-  return null;
+  const raw = String(image).trim();
+  if (!raw) return null;
+
+  // Same-origin paths are always allowed (not hotlinking).
+  if (raw.startsWith('/')) return raw;
+
+  // Common backend payloads omit the leading slash (e.g. "uploads/...").
+  if (
+    raw.startsWith('images/') ||
+    raw.startsWith('uploads/') ||
+    raw.startsWith('media/')
+  ) {
+    return `/${raw}`;
+  }
+
+  // Protocol-relative → assume https.
+  if (raw.startsWith('//')) return `https:${raw}`;
+
+  const defaultAllowed = ['amppattaya.com', 'www.amppattaya.com'];
+  const envAllowed = (process.env.NEXT_PUBLIC_IMAGE_HOSTS ?? '')
+    .split(',')
+    .map((h) => h.trim())
+    .filter(Boolean);
+  const allowed = new Set([...defaultAllowed, ...envAllowed]);
+
+  const isDev = process.env.NODE_ENV === 'development';
+  if (isDev) {
+    allowed.add('localhost');
+    allowed.add('127.0.0.1');
+  }
+
+  function hostAllowed(hostname: string): boolean {
+    const h = hostname.toLowerCase();
+    for (const a of allowed) {
+      const aa = a.toLowerCase();
+      if (h === aa) return true;
+      if (h.endsWith(`.${aa}`)) return true;
+    }
+    return false;
+  }
+
+  try {
+    const url = new URL(raw);
+    const protocol = url.protocol.toLowerCase();
+    const hostname = url.hostname;
+
+    if (!hostAllowed(hostname)) return null;
+
+    // Upgrade known domains to https to satisfy next/image remotePatterns and avoid mixed content.
+    if (protocol === 'http:' && (hostname === 'amppattaya.com' || hostname === 'www.amppattaya.com')) {
+      url.protocol = 'https:';
+      return url.toString();
+    }
+
+    // Only allow http in local development.
+    if (protocol === 'http:' && !isDev) return null;
+    if (protocol !== 'http:' && protocol !== 'https:') return null;
+
+    return url.toString();
+  } catch {
+    // Not a valid URL and not a same-origin path.
+    return null;
+  }
 }
 
 export function pickCoverImage(p: {

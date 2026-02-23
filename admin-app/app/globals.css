@@ -1351,6 +1351,11 @@ select {
   background: var(--color-gray-100);
 }
 
+/* Featured Properties: lock thumbnails to 4:3 (UX: no layout jump). */
+.card-image--featured {
+  padding-top: 75%;
+}
+
 .card-content {
   padding: var(--space-lg);
   flex: 1;

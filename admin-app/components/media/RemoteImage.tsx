@@ -6,7 +6,7 @@ function allowedHosts(): Set<string> {
     .split(',')
     .map((h) => h.trim())
     .filter(Boolean);
-  return new Set(hosts);
+  return new Set(['amppattaya.com', 'www.amppattaya.com', ...hosts]);
 }
 
 function hostnameOf(src: string): string | null {
@@ -38,15 +38,18 @@ export function RemoteImage({
   sizes?: string;
   loading?: 'lazy' | 'eager';
 }) {
-  const isRemote = /^https?:\/\//i.test(src);
+  const safeSrc = src.trim();
+  if (!safeSrc) return null;
+
+  const isRemote = /^https?:\/\//i.test(safeSrc);
   const hosts = allowedHosts();
-  const host = isRemote ? hostnameOf(src) : null;
+  const host = isRemote ? hostnameOf(safeSrc) : null;
   const canOptimize = !isRemote || (host ? hosts.has(host) : false);
 
   if (canOptimize) {
     return (
       <Image
-        src={src}
+        src={safeSrc}
         alt={alt}
         className={className}
         width={width}
@@ -61,7 +64,7 @@ export function RemoteImage({
 
   return (
     <img
-      src={src}
+      src={safeSrc}
       alt={alt}
       className={className}
       width={width}
