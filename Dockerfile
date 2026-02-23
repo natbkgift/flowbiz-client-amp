@@ -33,6 +33,8 @@ ENV GIT_SHA=${GIT_SHA}
 # Copy application code
 COPY apps/ ./apps/
 COPY packages/ ./packages/
+COPY scripts/ ./scripts/
+COPY data/ ./data/
 COPY alembic.ini ./
 COPY alembic/ ./alembic/
 
