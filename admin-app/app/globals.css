@@ -350,12 +350,23 @@ select {
   grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
 }
 
-/* Guardrail to cap strictly at 7 columns (for ultrawide 4K+ displays) */
+/* Guardrails to explicitly cap columns on ultra-wide luxury displays */
+@media (min-width: 1920px) {
+
+  .grid-fluid,
+  .grid-2,
+  .grid-3 {
+    /* Limit density to 6 columns at 3xl to maintain premium feel */
+    grid-template-columns: repeat(6, 1fr);
+  }
+}
+
 @media (min-width: 2400px) {
 
   .grid-fluid,
   .grid-2,
   .grid-3 {
+    /* Strict absolute max of 7 columns on 4K+ displays */
     grid-template-columns: repeat(7, 1fr);
   }
 }
