@@ -42,6 +42,11 @@ const config: Config = {
         sans: ['var(--font-sans)'],
         serif: ['var(--font-serif)'],
       },
+      screens: {
+        '2xl': '1536px',
+        '3xl': '1920px',
+        '4xl': '2400px',
+      },
     },
   },
   plugins: [],

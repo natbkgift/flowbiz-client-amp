@@ -7,7 +7,7 @@ export default function SiteLoading() {
         <div className="mb-8 h-5 w-1/2 rounded bg-slate-200" />
 
         {/* Card grid skeleton */}
-        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-6">
           {Array.from({ length: 6 }).map((_, i) => (
             <div
               key={i}

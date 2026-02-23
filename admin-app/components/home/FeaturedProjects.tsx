@@ -30,7 +30,7 @@ export function FeaturedProjects({
         <p className="section-subtitle">{subtitle}</p>
       </div>
 
-      <div className="grid grid-3">
+      <div className="grid grid-fluid">
         {projects.map((p) => {
           const img = resolveImageUrl(p.cover_image_url ?? null);
           const price = p.starting_price ? formatPrice(Number(p.starting_price)) : null;

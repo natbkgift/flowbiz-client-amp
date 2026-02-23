@@ -266,26 +266,39 @@ select {
   padding: 0 var(--container-padding);
 }
 
-/* ======================== SECTIONS ======================== */
+/* ======================== SECTIONS (PHASE 5 FLUID LUXURY SPACING MATRIX) ======================== */
+/* Emulates tailwind progression: py-16 (64px) -> md:py-20 (80px) -> xl:py-24 (96px) -> 2xl:py-28 (112px) */
 
-.section {
-  padding: var(--space-6) 0;
+.section,
+.section--full {
+  padding: 64px 0;
 }
 
 .section--full {
-  padding: var(--space-6) 0;
   width: 100%;
 }
 
 @media (min-width: 768px) {
-  .section {
-    padding: var(--space-7) 0;
+
+  .section,
+  .section--full {
+    padding: 80px 0;
   }
 }
 
-@media (min-width: 1024px) {
-  .section {
-    padding: var(--space-8) 0;
+@media (min-width: 1280px) {
+
+  .section,
+  .section--full {
+    padding: 96px 0;
+  }
+}
+
+@media (min-width: 1536px) {
+
+  .section,
+  .section--full {
+    padding: 112px 0;
   }
 }
 
@@ -299,28 +312,51 @@ select {
 
 /* ======================== GRID ======================== */
 
+/* ======================== GRID (PHASE 5: FLUID LUXURY) ======================== */
+/* Core grid system: Auto-scales up to 7 columns on 4K, guarded by min-w 260px */
+
 .grid {
   display: grid;
-  gap: var(--space-lg);
-}
-
-.grid-2,
-.grid-3 {
-  grid-template-columns: 1fr;
+  /* Progressive gap scaling: 24px -> 32px -> 40px -> 48px */
+  gap: 24px;
 }
 
 @media (min-width: 768px) {
-  .grid-2 {
-    grid-template-columns: repeat(2, 1fr);
-  }
-  .grid-3 {
-    grid-template-columns: repeat(2, 1fr);
+  .grid {
+    gap: 32px;
   }
 }
 
-@media (min-width: 1024px) {
+@media (min-width: 1280px) {
+  .grid {
+    gap: 40px;
+  }
+}
+
+@media (min-width: 1536px) {
+  .grid {
+    gap: 48px;
+  }
+}
+
+/* 
+  Fluid Luxury Auto-Grid:
+  Uses minmax to ensure cards never compress below 260px, preventing marketplace feel.
+  Automatically wraps when screen space is tight. Expands infinitely up to max screen width.
+*/
+.grid-fluid,
+.grid-2,
+.grid-3 {
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+}
+
+/* Guardrail to cap strictly at 7 columns (for ultrawide 4K+ displays) */
+@media (min-width: 2400px) {
+
+  .grid-fluid,
+  .grid-2,
   .grid-3 {
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(7, 1fr);
   }
 }
 
@@ -427,7 +463,8 @@ select {
 }
 
 .nav-link--cta.nav-link--active::after {
-  display: none; /* suppress underline indicator — fill bg is the active signal */
+  display: none;
+  /* suppress underline indicator — fill bg is the active signal */
 }
 
 .header-actions {
@@ -493,7 +530,8 @@ select {
 
 /* Utility visibility classes — mobile-first */
 .desktop-only {
-  display: none;           /* hidden on mobile by default */
+  display: none;
+  /* hidden on mobile by default */
 }
 
 .mobile-only {
@@ -504,6 +542,7 @@ select {
   .mobile-only {
     display: none !important;
   }
+
   /* desktop-only: remove hide-rule but DO NOT set display here,
      so element-specific rules (.nav{flex}, etc.) take effect */
   .desktop-only {
@@ -583,8 +622,15 @@ select {
 }
 
 @keyframes dropdown-in {
-  from { opacity: 0; transform: translateX(-50%) translateY(-6px); }
-  to   { opacity: 1; transform: translateX(-50%) translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(-6px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
 }
 
 .dropdown-panel--mega.dropdown-panel--open {
@@ -592,8 +638,15 @@ select {
 }
 
 @keyframes dropdown-mega-in {
-  from { opacity: 0; transform: translateY(-6px); }
-  to   { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 /* Mega grid: 2 columns for property types */
@@ -664,8 +717,13 @@ select {
 }
 
 @keyframes fade-in {
-  from { opacity: 0; }
-  to   { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
 }
 
 /* Drawer slides in from right */
@@ -689,8 +747,13 @@ select {
 }
 
 @keyframes slide-in {
-  from { transform: translateX(100%); }
-  to   { transform: translateX(0); }
+  from {
+    transform: translateX(100%);
+  }
+
+  to {
+    transform: translateX(0);
+  }
 }
 
 /* Inner padding wrapper */
@@ -810,6 +873,7 @@ select {
   .nav {
     gap: 12px;
   }
+
   .nav-link,
   .nav-group__trigger {
     font-size: 13px;
@@ -1135,10 +1199,12 @@ select {
 .cta-row {
   margin-top: var(--space-4);
   display: flex;
-  gap: var(--space-3);    /* 16px — was 8px, now properly spaced */
+  gap: var(--space-3);
+  /* 16px — was 8px, now properly spaced */
   flex-wrap: wrap;
   align-items: center;
 }
+
 .cta-row--center {
   justify-content: center;
 }
@@ -1162,11 +1228,11 @@ select {
 }
 
 /* When multiple content groups exist inside one section, keep spacing consistent */
-.grid + .section-header {
+.grid+.section-header {
   margin-top: var(--space-7);
 }
 
-.bullet-list + .section-header {
+.bullet-list+.section-header {
   margin-top: var(--space-7);
 }
 
@@ -1237,13 +1303,15 @@ select {
   border-radius: var(--radius-md);
   overflow: hidden;
   box-shadow: var(--shadow-card);
-  transition: transform 0.24s ease, box-shadow 0.24s ease;
+  /* Phase 5 Spec: Strictly 0.3s ease, no bounce */
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
   height: 100%;
   display: flex;
   flex-direction: column;
   border: 1px solid var(--color-gray-100);
 }
 
+/* Phase 5 Spec: Restrained hover (-4px Y), no scaling, no opacity fade-ins on mount */
 .property-card:hover {
   transform: translateY(-4px);
   box-shadow: var(--shadow-hover);
@@ -1578,6 +1646,7 @@ select {
   .detail-layout {
     grid-template-columns: 1fr 340px;
   }
+
   .detail-sidebar {
     position: sticky;
     top: 88px;
@@ -1927,6 +1996,7 @@ select {
   .mobile-cta {
     display: none;
   }
+
   .floating-cta {
     bottom: 24px;
   }
@@ -1948,8 +2018,10 @@ select {
 }
 
 .guided-dialog {
-  position: relative;     /* override any UA absolute positioning */
-  display: block;         /* ensure block for grid centering */
+  position: relative;
+  /* override any UA absolute positioning */
+  display: block;
+  /* ensure block for grid centering */
   width: min(720px, 100%);
   border: 1px solid var(--color-gray-200);
   border-radius: var(--radius-lg);
@@ -1959,7 +2031,8 @@ select {
   margin: 0;
   max-height: calc(100vh - 48px);
   overflow-y: auto;
-  justify-self: center;   /* explicit centering within grid */
+  justify-self: center;
+  /* explicit centering within grid */
   align-self: center;
 }
 
@@ -2077,7 +2150,10 @@ select {
 
 /* Fallback: if JS hasn't initialised after 3s, show all reveal elements */
 @keyframes reveal-fallback {
-  to { opacity: 1; transform: none; }
+  to {
+    opacity: 1;
+    transform: none;
+  }
 }
 
 .reveal:not(.reveal--in) {
@@ -2087,8 +2163,15 @@ select {
 /* ======================== SKELETON LOADING ======================== */
 
 @keyframes skeleton-pulse {
-  0%, 100% { opacity: 0.15; }
-  50% { opacity: 0.25; }
+
+  0%,
+  100% {
+    opacity: 0.15;
+  }
+
+  50% {
+    opacity: 0.25;
+  }
 }
 
 .skeleton {
@@ -2097,10 +2180,25 @@ select {
   animation: skeleton-pulse 1.5s ease-in-out infinite;
 }
 
-.skeleton--text { height: 1em; width: 60%; }
-.skeleton--title { height: 1.5em; width: 80%; }
-.skeleton--image { aspect-ratio: 4 / 3; width: 100%; }
-.skeleton--card { height: 280px; width: 100%; }
+.skeleton--text {
+  height: 1em;
+  width: 60%;
+}
+
+.skeleton--title {
+  height: 1.5em;
+  width: 80%;
+}
+
+.skeleton--image {
+  aspect-ratio: 4 / 3;
+  width: 100%;
+}
+
+.skeleton--card {
+  height: 280px;
+  width: 100%;
+}
 
 /* ======================== SVG ICON UTILITIES ======================== */
 
@@ -2365,7 +2463,7 @@ select {
   padding: 0 2px;
 }
 
-.breadcrumbs-item > span[aria-current="page"] {
+.breadcrumbs-item>span[aria-current="page"] {
   font-size: var(--font-sm);
   color: var(--color-text);
   font-weight: 500;
@@ -2471,7 +2569,9 @@ select {
 }
 
 @keyframes hero-spin {
-  to { transform: rotate(360deg); }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 .hero-search__results {
@@ -2604,6 +2704,7 @@ select {
 /* WCAG 2.1 AA §2.3.3  — respect user's motion preferences          */
 
 @media (prefers-reduced-motion: reduce) {
+
   *,
   *::before,
   *::after {

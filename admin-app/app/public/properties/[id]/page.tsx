@@ -124,7 +124,7 @@ export default function PublicPropertyDetailPage({ params }: { params: Promise<{
         ) : null}
       </section>
 
-      <section className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <section className="grid grid-fluid mt-4">
         <div className="bg-white rounded-lg shadow-sm p-4">
           <p className="text-xs text-slate-500">Bedrooms</p>
           <p className="text-lg font-semibold">{property.bedrooms ?? '-'}</p>

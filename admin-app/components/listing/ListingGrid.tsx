@@ -67,7 +67,7 @@ export function ListingGrid({ items }: { items: PropertyListItem[] }) {
           </div>
 
           {sorted.length ? (
-            <div className="grid grid-3" role="list" aria-label={dict.listing.results}>
+            <div className="grid grid-fluid" role="list" aria-label={dict.listing.results}>
               {sorted.map((p) => (
                 <PropertyCard key={p.id} item={p} dict={dict} />
               ))}

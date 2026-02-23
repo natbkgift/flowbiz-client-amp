@@ -39,9 +39,10 @@ export function ProjectCard({
             src={coverImage}
             alt={name}
             fill
-            sizes="(min-width: 1024px) 33vw, (min-width: 768px) 50vw, 100vw"
+            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, (max-width: 1536px) 33vw, 20vw"
             className="object-cover"
             loading="lazy"
+            decoding="async"
           />
           {typeLabel ? (
             <span className="absolute top-2 left-2 rounded bg-[var(--color-primary)] px-2 py-0.5 text-xs font-semibold text-white">

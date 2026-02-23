@@ -22,7 +22,9 @@ export function PropertyCard({ item, dict }: { item: PropertyListItem; dict: Dic
             src={img}
             alt={item.title}
             fill
-            sizes="(min-width: 1024px) 33vw, (min-width: 768px) 50vw, 100vw"
+            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, (max-width: 1536px) 33vw, 20vw"
+            loading="lazy"
+            decoding="async"
             className="object-cover"
           />
         ) : null}

@@ -7,7 +7,7 @@ export default function SmartFinderLoading() {
         <div className="mx-auto max-w-2xl space-y-6">
           <div className="rounded-xl bg-white p-6 shadow-sm">
             <div className="mb-4 h-6 w-1/2 rounded bg-slate-200" />
-            <div className="grid gap-3 grid-cols-2">
+            <div className="grid grid-fluid">
               <div className="h-10 rounded bg-slate-200" />
               <div className="h-10 rounded bg-slate-200" />
               <div className="h-10 rounded bg-slate-200" />

@@ -156,7 +156,7 @@ export default function PublicPropertiesPage() {
         if (items.length === 0) return <p>No properties found</p>;
 
         return (
-          <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          <section className="grid grid-fluid">
             {items.map((p) => {
               const thumbnail = p.cover_image ?? p.local_images?.[0] ?? p.images?.[0] ?? null;
               return (

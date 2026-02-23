@@ -1,9 +1,8 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 
-import { Container } from '@/components/layout/Container';
 import { TrackedLink } from '@/components/analytics/TrackedLink';
-import { HeroSearch } from '@/components/home/HeroSearch';
+import { HomeHero } from '@/components/home/HomeHero';
 import { FeaturedProjects } from '@/components/home/FeaturedProjects';
 import { LeadForm } from '@/components/forms/LeadForm';
 import { buildWhatsAppUrl } from '@/app/_lib/public-cta';
@@ -123,53 +122,11 @@ export default async function HomePage({
         dangerouslySetInnerHTML={{ __html: jsonLd }}
       />
 
-      {/* Hero Section with Search */}
-      <section className="hero hero--premium">
-        <Container variant="full">
-          <div className="hero-grid">
-            <div>
-              <h1 className="headline">{dict.home.heroTitle}</h1>
-              <p className="subhead">{dict.home.heroSubtitle}</p>
-
-              <HeroSearch
-                locale={locale}
-                placeholder={dict.home.searchPlaceholder}
-              />
-
-              <div className="hero-chips">
-                <Link className="hero-chip" href={withLocale(locale, '/buy')}>
-                  {dict.nav.buy}
-                </Link>
-                <Link className="hero-chip" href={withLocale(locale, '/rent')}>
-                  {dict.nav.rent}
-                </Link>
-                <Link className="hero-chip" href={withLocale(locale, '/invest')}>
-                  {dict.nav.invest}
-                </Link>
-                <Link className="hero-chip" href={withLocale(locale, '/projects')}>
-                  {dict.nav.projects}
-                </Link>
-              </div>
-
-              <TrackedLink
-                className="hero-guided-trigger"
-                href={withLocale(locale, hrefWithQuery('/', { guided: '1', step: 'goal' }))}
-                eventType="cta_click"
-                eventPayload={{ cta: 'open_guided_finder', from: 'home_hero' }}
-              >
-                {dict.guided.heroTrigger ?? 'Not sure where to start? Let us guide you →'}
-              </TrackedLink>
-            </div>
-
-            <div className="hero-panel" aria-hidden="true">
-              <div className="hero-panel__card reveal">
-                <div className="hero-panel__title">{dict.home.heroPanelTitle}</div>
-                <div className="hero-panel__meta">{dict.home.heroPanelMeta}</div>
-              </div>
-            </div>
-          </div>
-        </Container>
-      </section>
+      <HomeHero
+        dict={dict}
+        locale={locale}
+        guidedHref={withLocale(locale, hrefWithQuery('/', { guided: '1', step: 'goal' }))}
+      />
 
       {/* Guided Goal Modal */}
       {guidedOpen ? (
@@ -320,8 +277,8 @@ export default async function HomePage({
 
       {/* Featured Projects — Real Data */}
       {featuredProjects.length > 0 ? (
-        <section className="section">
-          <Container>
+        <section className="py-16 md:py-20 xl:py-24 2xl:py-28">
+          <div className="px-6 md:px-8 xl:px-16 2xl:px-24 3xl:px-32">
             <FeaturedProjects
               projects={featuredProjects}
               locale={locale}
@@ -338,13 +295,13 @@ export default async function HomePage({
                 {locale === 'th' ? 'ดูโครงการทั้งหมด' : 'View All Projects'}
               </TrackedLink>
             </div>
-          </Container>
+          </div>
         </section>
       ) : null}
 
       {/* Choose Your Path */}
-      <section className="section">
-        <Container>
+      <section className="py-16 md:py-20 xl:py-24 2xl:py-28">
+        <div className="px-6 md:px-8 xl:px-16 2xl:px-24 3xl:px-32">
           <div className="section-header">
             <h2 className="section-title">{dict.home.pathSectionTitle}</h2>
             <p className="section-subtitle">{dict.home.pathSectionSubtitle}</p>
@@ -398,12 +355,12 @@ export default async function HomePage({
               </TrackedLink>
             ))}
           </div>
-        </Container>
+        </div>
       </section>
 
       {/* Investment Stats */}
-      <section className="section section--alt">
-        <Container>
+      <section className="py-16 md:py-20 xl:py-24 2xl:py-28 bg-surface">
+        <div className="px-6 md:px-8 xl:px-16 2xl:px-24 3xl:px-32">
           <div className="section-header">
             <h2 className="section-title">{dict.home.investStatsTitle}</h2>
             <p className="section-subtitle">{dict.home.investStatsSubtitle}</p>
@@ -428,12 +385,12 @@ export default async function HomePage({
               {dict.cta.exploreInvestment}
             </TrackedLink>
           </div>
-        </Container>
+        </div>
       </section>
 
       {/* Trust & Market Insight */}
-      <section className="section">
-        <Container>
+      <section className="py-16 md:py-20 xl:py-24 2xl:py-28">
+        <div className="px-6 md:px-8 xl:px-16 2xl:px-24 3xl:px-32">
           <div className="section-header">
             <h2 className="section-title">{dict.home.trustTitle}</h2>
             <p className="section-subtitle">{dict.home.trustSubtitle}</p>
@@ -470,12 +427,12 @@ export default async function HomePage({
               </figure>
             ))}
           </div>
-        </Container>
+        </div>
       </section>
 
       {/* Premium CTA with LeadForm */}
-      <section className="section section--cta">
-        <Container>
+      <section className="py-16 md:py-20 xl:py-24 2xl:py-28 bg-gradient-to-b from-primary-light to-bg">
+        <div className="px-6 md:px-8 xl:px-16 2xl:px-24 3xl:px-32">
           <div className="cta-panel reveal">
             <div>
               <h2 className="cta-title">{dict.home.premiumCtaTitle}</h2>
@@ -503,7 +460,7 @@ export default async function HomePage({
               <LeadForm />
             </div>
           </div>
-        </Container>
+        </div>
       </section>
     </main>
   );
