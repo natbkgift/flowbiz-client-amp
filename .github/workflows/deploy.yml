@@ -57,7 +57,38 @@ jobs:
         working-directory: admin-app
         run: npx tsc --noEmit
 
-  # ── Stage 2: Build & Push Docker Images ────────────────────
+  # ── Stage 2a: Workflow Guard (fast, runs parallel to lint-test) ───────────
+  # Enforces rules that must NEVER be regressed in deploy.yml:
+  #   1. `alembic upgrade head --sql` must NOT appear  (offline-mode crashes)
+  #   2. smoke-test curl must use -L                   (308 redirect follow)
+  guard:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: "GUARD: no alembic --sql in deploy"
+        run: |
+          if grep -qP 'alembic upgrade head\s+--sql' .github/workflows/deploy.yml; then
+            echo "::error file=.github/workflows/deploy.yml::FORBIDDEN: 'alembic upgrade head --sql' detected."
+            echo "Offline/dry-run mode breaks any migration that queries the DB."
+            echo "Remove --sql and keep only: alembic upgrade head"
+            exit 1
+          fi
+          echo "OK: no alembic --sql found"
+
+      - name: "GUARD: smoke-test curl must use -L"
+        run: |
+          # Look for the curl inside the check() helper in deploy.yml.
+          # The line must contain both 'curl' and '-L'.
+          if ! grep -qP 'curl\b.*-L' .github/workflows/deploy.yml; then
+            echo "::error file=.github/workflows/deploy.yml::FORBIDDEN: smoke-test curl is missing -L flag."
+            echo "Without -L, Next.js canonical 308 redirects cause false negatives."
+            echo "Keep: curl -sS -L -o /dev/null ..."
+            exit 1
+          fi
+          echo "OK: curl -L present"
+
+  # ── Stage 2b: Build & Push Docker Images ───────────────────
   build:
     needs: lint-test
     runs-on: ubuntu-latest
@@ -99,7 +130,7 @@ jobs:
 
   # ── Stage 3: Deploy to VPS ─────────────────────────────────
   deploy:
-    needs: build
+    needs: [build, guard]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
