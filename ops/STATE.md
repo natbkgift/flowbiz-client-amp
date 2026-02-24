@@ -1,13 +1,13 @@
 # ops/STATE.md (STATE-LOCK)
 
 - CurrentPhase: A+B=PASS, Phase1=FAIL, Phase2=BLOCKED, Phase3=BLOCKED, Phase4=BLOCKED, Phase5=BLOCKED
-- CurrentIteration: phase1-iter-06 (patch prepared)
+- CurrentIteration: phase1-iter-06 (evidence collected)
 - MainlineStatus: RUNNING
 - LatestEvidence: ops/logs/phase1/
-  - cf-headers.txt (2026-02-24 20:51:36)
-  - lh-mobile.txt + lh-mobile.json (2026-02-24 20:53:14)
-  - lh-desktop.txt + lh-desktop.json (2026-02-24 20:55:00)
-  - hydration.txt (2026-02-24 20:55:00)
+  - cf-headers.txt (2026-02-24 23:13:34)
+  - lh-mobile.txt + lh-mobile.json (2026-02-24 23:25:08)
+  - lh-desktop.txt + lh-desktop.json (2026-02-24 23:26:43)
+  - hydration.txt (2026-02-24 23:26:43)
 - OpenPRsAllowed: 2 (1x Phase1 mainline iteration PR + 1x parallel-prep PR)
 - OpenPRsNow: (none)
 - PRsToClose: (none)
@@ -21,5 +21,5 @@
   - Lighthouse truth model: use simulated LCP (`audits[largest-contentful-paint].numericValue`) as truth; observed is supporting note only
   - Lighthouse gates: mobile>=92, desktop>=97, CLS=0, DOM<900, hydrationSignals=0
   - Avoid evidence bloat: evidence PR should prefer lh-*.{txt,json}, hydration.txt, cf-headers.txt, ops/STATE.md (attempt files only if necessary)
-- NextAction: Open PR for phase1-iter-06 patch (useAfterLCP waits for LCP quiet window), merge+deploy, then collect production evidence (lh-*.{txt,json}, hydration.txt, cf-headers.txt) and update ops/STATE.md in the evidence PR
-- LastResultSummary: Phase1 FAIL (baseline) — suspected culprit: DeferredProviders mounting too early due to first LCP entry; patch changes useAfterLCP to debounce until LCP stabilizes
+- NextAction: phase1-iter-07 — build new Evidence Pack from latest ops/logs/phase1 (simulated LCP truth), propose Options A/B, choose 1 patch ≤300LOC ≤5files, PR → merge+deploy → production lh:gate → evidence PR
+- LastResultSummary: Phase1 FAIL (iter-06 post-deploy) — mobile median perf=77 LCP=5173ms TBT=177ms CLS=0 DOM=687; desktop median perf=91 LCP=1828ms TBT=3ms CLS=0 DOM=687 (fail: mobile perf+lcp; desktop perf)
