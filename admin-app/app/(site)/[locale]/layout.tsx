@@ -2,6 +2,7 @@ import type { ReactNode } from 'react';
 
 import { Footer } from '@/components/layout/Footer';
 import { Header } from '@/components/layout/Header';
+import { PostLCPAnalytics } from '@/components/analytics/PostLCPAnalytics';
 import { DeferredProviders } from '@/components/layout/DeferredProviders';
 import { getDictionary, normalizeLocale } from '@/app/_lib/i18n/get-dictionary';
 import { SUPPORTED_LOCALES } from '@/app/_lib/i18n/routing';
@@ -43,6 +44,7 @@ export default async function SiteLayout({
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLd }} />
       <Header locale={locale} dict={dict} />
+      <PostLCPAnalytics />
       <DeferredProviders />
       {children}
       <Footer locale={locale} dict={dict} />
