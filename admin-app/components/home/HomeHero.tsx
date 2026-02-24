@@ -23,7 +23,7 @@ export function HomeHero({
          *  2. The section height is driven by a relative container wrapping the image
          *  3. The content overlay uses `position:absolute` instead of the image
          */
-        <section className="relative w-full bg-gray-900 overflow-hidden">
+        <section className="relative w-full bg-gray-900 overflow-hidden h-[85vh] md:h-[90vh] min-h-[600px]">
             {/* Image — block-level, position:static → qualifies as Chrome LCP candidate */}
             {/* Next.js optimizer serves viewport-appropriate WebP, reducing mobile payload */}
             <img
@@ -34,7 +34,7 @@ export function HomeHero({
                 loading="eager"
                 decoding="async"
                 fetchPriority="high"
-                className="w-full h-[85vh] md:h-[90vh] min-h-[600px] object-cover block"
+                className="absolute inset-0 w-full h-full object-cover block"
             />
 
             {/* Gradient overlay — absolutely positioned, no layout impact */}
