@@ -1,0 +1,21 @@
+# ops/STATE.md (STATE-LOCK)
+
+- CurrentPhase: A+B=PASS, Phase1=FAIL, Phase2=BLOCKED, Phase3=BLOCKED, Phase4=BLOCKED, Phase5=BLOCKED
+- CurrentIteration: phase1-iter-02-trackedlink-prefetch-off (next patch pending)
+- MainlineStatus: RUNNING
+- LatestEvidence: ops/logs/phase1/
+  - cf-headers.txt (2026-02-24 19:48:23)
+  - lh-mobile.txt + lh-mobile.json (2026-02-24 19:50:03)
+  - lh-desktop.txt + lh-desktop.json (2026-02-24 19:51:34)
+  - hydration.txt (2026-02-24 19:51:34)
+- OpenPRsAllowed: 2 (1x Phase1 mainline iteration PR + 1x parallel-prep PR)
+- PRsToClose: (none)
+- Locks:
+  - Evidence-first only (patch requires Evidence Pack from ops/logs/*)
+  - Phase Gate Contract (no Phase2+ on production path until Phase1 PASS)
+  - One patch per iteration
+  - Patch bounds: ≤300 LOC and ≤5 files per iteration
+  - Cloudflare lock: NO HTML cache; static-only cache rules invariant
+  - Lighthouse gates: mobile>=92, desktop>=97, CLS=0, DOM<900, hydrationSignals=0
+- NextAction: Create branch `phase1-iter-02-trackedlink-prefetch-off`, implement 1 patch (disable Link prefetch default in TrackedLink), build, PR, merge+deploy, re-run CF verify + `npm run lh:gate`
+- LastResultSummary: Phase1 FAIL — mobile median perf=84 LCP=3853ms TBT=237ms CLS=0 DOM=687; desktop median perf=96 LCP=1272ms TBT=4ms CLS=0 DOM=687; hydrationSignals(total)=0
