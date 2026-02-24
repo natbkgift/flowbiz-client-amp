@@ -109,3 +109,6 @@ test_output.txt
 
 # Lighthouse artifacts (generated locally)
 lh-*.json
+
+# Phase evidence logs must be committed
+!ops/logs/**/lh-*.json

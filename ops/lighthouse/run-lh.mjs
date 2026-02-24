@@ -43,6 +43,41 @@ function extractMetrics(json) {
   };
 }
 
+function extractConsoleErrors(json) {
+  const audit = json?.audits?.['errors-in-console'];
+  const items = audit?.details?.items;
+  if (!Array.isArray(items)) return [];
+  return items
+    .map((it) => {
+      const description = typeof it?.description === 'string' ? it.description : '';
+      const url = typeof it?.sourceLocation?.url === 'string' ? it.sourceLocation.url : '';
+      const line = Number.isFinite(it?.sourceLocation?.line) ? it.sourceLocation.line : null;
+      const col = Number.isFinite(it?.sourceLocation?.column) ? it.sourceLocation.column : null;
+      return { description, url, line, col };
+    })
+    .filter((e) => e.description);
+}
+
+function countHydrationSignals(consoleErrors) {
+  const re = /hydration|did not match|text content|server-rendered html|expected server html|hydrating|mismatch/i;
+  return consoleErrors.filter((e) => re.test(e.description)).length;
+}
+
+function upsertPresetBlock(filePath, preset, blockLines) {
+  const start = `### PRESET: ${preset}`;
+  const end = `### END PRESET: ${preset}`;
+  const block = [start, ...blockLines, end].join('\n') + '\n';
+
+  let existing = '';
+  if (existsSync(filePath)) {
+    existing = readFileSync(filePath, 'utf8');
+  }
+
+  const re = new RegExp(`^### PRESET: ${preset}\\n[\\s\\S]*?^### END PRESET: ${preset}\\n?`, 'm');
+  const next = re.test(existing) ? existing.replace(re, block) : (existing + (existing.endsWith('\n') || existing === '' ? '' : '\n') + block);
+  writeFileSync(filePath, next);
+}
+
 function runOne({ url, preset, outPath }) {
   const chromeFlags = ['--headless=new', '--no-sandbox', '--disable-dev-shm-usage'];
   const args = [
@@ -78,6 +113,7 @@ function gateFailReasons(meds, gates) {
   if (meds.tbtMed > gates.tbtMax) reasons.push(`tbt>${gates.tbtMax}`);
   if (meds.clsMed > gates.clsMax) reasons.push(`cls>${gates.clsMax}`);
   if (meds.domMed > gates.domMax) reasons.push(`dom>${gates.domMax}`);
+  if (meds.hydrationSignals > 0) reasons.push('hydration');
   return reasons;
 }
 
@@ -132,7 +168,9 @@ function main() {
       continue;
     }
     const m = extractMetrics(json);
-    perRun.push({ file, status, ...m });
+    const consoleErrors = extractConsoleErrors(json);
+    const hydrationSignals = countHydrationSignals(consoleErrors);
+    perRun.push({ file, status, ...m, consoleErrorsCount: consoleErrors.length, hydrationSignals, consoleErrors });
   }
 
   const valid = perRun.filter((r) => !r.runtimeError && Number.isFinite(r.perfScore) && Number.isFinite(r.lcp) && Number.isFinite(r.tbt) && Number.isFinite(r.cls) && Number.isFinite(r.dom));
@@ -147,6 +185,7 @@ function main() {
     tbtMed: median(valid.map((r) => r.tbt)),
     clsMed: median(valid.map((r) => r.cls)),
     domMed: median(valid.map((r) => r.dom)),
+    hydrationSignals: valid.reduce((sum, r) => sum + (Number.isFinite(r.hydrationSignals) ? r.hydrationSignals : 0), 0),
   };
 
   const reasons = gateFailReasons(meds, gates);
@@ -165,6 +204,25 @@ function main() {
 
   const summaryPath = path.join(outDir, `lh-${preset}.json`);
   writeFileSync(summaryPath, JSON.stringify(summary, null, 2));
+
+  // Hydration evidence (shared file required by Phase 1 gate contract)
+  const hydLines = [];
+  hydLines.push(`timestamp: ${new Date().toISOString()}`);
+  hydLines.push(`url: ${url}`);
+  hydLines.push(`preset: ${preset}`);
+  hydLines.push(`runs: ${runs}`);
+  hydLines.push(`hydrationSignals(total): ${meds.hydrationSignals}`);
+  for (const r of valid) {
+    hydLines.push(`- ${r.file} consoleErrors=${r.consoleErrorsCount ?? 0} hydrationSignals=${r.hydrationSignals ?? 0}`);
+    if (Array.isArray(r.consoleErrors) && r.consoleErrors.length) {
+      for (const e of r.consoleErrors.slice(0, 10)) {
+        const loc = e.url ? ` @ ${e.url}${Number.isFinite(e.line) ? `:${e.line}` : ''}${Number.isFinite(e.col) ? `:${e.col}` : ''}` : '';
+        hydLines.push(`  - ${e.description.replace(/\s+/g, ' ').slice(0, 240)}${loc}`);
+      }
+      if (r.consoleErrors.length > 10) hydLines.push(`  - ... (${r.consoleErrors.length - 10} more)`);
+    }
+  }
+  upsertPresetBlock(path.join(outDir, 'hydration.txt'), preset, hydLines);
 
   const lines = [];
   lines.push(`URL: ${url}`);

@@ -8,7 +8,8 @@
     "dev": "nodemon src/index.js",
     "test": "jest",
     "test:watch": "jest --watch",
-    "test:coverage": "jest --coverage"
+    "test:coverage": "jest --coverage",
+    "lh:gate": "node ops/lighthouse/lh-gate.mjs"
   },
   "jest": {
     "testEnvironment": "node",
