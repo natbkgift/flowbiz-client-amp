@@ -1,13 +1,13 @@
 # ops/STATE.md (STATE-LOCK)
 
 - CurrentPhase: A+B=PASS, Phase1=FAIL, Phase2=BLOCKED, Phase3=BLOCKED, Phase4=BLOCKED, Phase5=BLOCKED
-- CurrentIteration: phase1-iter-10 (patch prepared: option B)
+- CurrentIteration: phase1-iter-10 (evidence collected)
 - MainlineStatus: RUNNING
 - LatestEvidence: ops/logs/phase1/
-  - cf-headers.txt (2026-02-25 06:31:33)
-  - lh-mobile.txt + lh-mobile.json (2026-02-25 06:33:08)
-  - lh-desktop.txt + lh-desktop.json (2026-02-25 06:34:36)
-  - hydration.txt (2026-02-25 06:34:36)
+  - cf-headers.txt (2026-02-25 06:44:12)
+  - lh-mobile.txt + lh-mobile.json (2026-02-25 06:45:49)
+  - lh-desktop.txt + lh-desktop.json (2026-02-25 06:47:15)
+  - hydration.txt (2026-02-25 06:47:15)
 - OpenPRsAllowed: 2 (1x Phase1 mainline iteration PR + 1x parallel-prep PR)
 - OpenPRsNow: (none)
 - PRsToClose: (none)
@@ -21,5 +21,5 @@
   - Lighthouse truth model: use simulated LCP (`audits[largest-contentful-paint].numericValue`) as truth; observed is supporting note only
   - Lighthouse gates: mobile>=92, desktop>=97, CLS=0, DOM<900, hydrationSignals=0
   - Avoid evidence bloat: evidence PR should prefer lh-*.{txt,json}, hydration.txt, cf-headers.txt, ops/STATE.md (attempt files only if necessary)
-- NextAction: Open PR for phase1-iter-10 Option B patch (defer heavy DeferredProviders modules tied to 4bd1/3794 path to post-interaction+idle), merge+deploy, then CF verify + production lh:gate, then evidence-only PR
-- LastResultSummary: Phase1 PARTIAL (iter-09 post-deploy) — desktop median perf=97 LCP=1232ms TBT=0ms (PASS, no-regression achieved); mobile median perf=79 LCP=4635ms TBT=231ms (FAIL: perf<92, lcp>2500, tbt>200). Iter-10 decision: Option B selected (mobile-first with desktop guard)
+- NextAction: phase1-iter-11 — Evidence Pack + A/B options first (STRICT). Priority: recover Desktop to >=97 while preserving Mobile gains from iter-10 (TBT now <=200), then continue reducing Mobile LCP
+- LastResultSummary: Phase1 FAIL (iter-10 post-deploy) — mobile median perf=84 LCP=4090ms TBT=167ms CLS=0 DOM=717 (improved, but perf/lcp still fail); desktop median perf=92 LCP=1779ms TBT=0ms CLS=0 DOM=717 (regressed, fail: perf<97)
