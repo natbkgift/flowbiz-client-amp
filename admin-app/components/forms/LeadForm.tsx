@@ -57,10 +57,15 @@ export function LeadForm(props: LeadFormProps) {
     return () => io.disconnect();
   }, [shouldLoad]);
 
-  // Keep this wrapper layout-neutral; no extra box in the DOM.
   return (
-    <div ref={hostRef} style={{ display: 'contents' }}>
+    <>
+      {/*
+        IntersectionObserver requires a real layout box.
+        `display: contents` elements don't create a box and can cause
+        non-deterministic intersection behavior (early loads offscreen).
+      */}
+      <div ref={hostRef} style={{ height: 1 }} />
       {shouldLoad ? <LeadFormCore {...props} /> : null}
-    </div>
+    </>
   );
 }
