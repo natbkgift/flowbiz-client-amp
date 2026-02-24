@@ -18,6 +18,7 @@ export function StickyMobileCTA() {
       <Link
         className="btn btn-cta mobile-cta__btn"
         href={withLocale(locale, '/contact?topic=private_tour')}
+        prefetch={false}
       >
         {dict.cta.bookPrivateTour}
       </Link>
@@ -32,6 +33,7 @@ export function StickyMobileCTA() {
       <Link
         className="btn btn-secondary mobile-cta__btn"
         href={withLocale(locale, '/contact?topic=investment_plan')}
+        prefetch={false}
       >
         {dict.cta.getInvestmentPlan}
       </Link>
