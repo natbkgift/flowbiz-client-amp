@@ -9,13 +9,17 @@
   - lh-desktop.txt + lh-desktop.json (2026-02-24 20:29:25)
   - hydration.txt (2026-02-24 20:29:25)
 - OpenPRsAllowed: 2 (1x Phase1 mainline iteration PR + 1x parallel-prep PR)
+- OpenPRsNow: (none)
 - PRsToClose: (none)
 - Locks:
   - Evidence-first only (patch requires Evidence Pack from ops/logs/*)
   - Phase Gate Contract (no Phase2+ on production path until Phase1 PASS)
   - One patch per iteration
   - Patch bounds: ≤300 LOC and ≤5 files per iteration
-  - Cloudflare lock: NO HTML cache; static-only cache rules invariant
+  - Cloudflare lock (HARD): HTML not HIT; static HIT; cached assets no Set-Cookie
+  - Cloudflare age check (SOFT): age round2 may decrease; do not treat as invariant failure
+  - Lighthouse truth model: use simulated LCP (`audits[largest-contentful-paint].numericValue`) as truth; observed is supporting note only
   - Lighthouse gates: mobile>=92, desktop>=97, CLS=0, DOM<900, hydrationSignals=0
-- NextAction: Open evidence PR (post-PR #187) to commit updated ops/logs/phase1 + ops/STATE.md, then build Evidence Pack for iter-05 and choose next 1 patch
+  - Avoid evidence bloat: evidence PR should prefer lh-*.{txt,json}, hydration.txt, cf-headers.txt, ops/STATE.md (attempt files only if necessary)
+- NextAction: Build Evidence Pack for phase1-iter-05 from ops/logs/phase1 (main), propose Options A/B, choose 1 patch ≤300LOC ≤5files, build → PR → merge+deploy → production evidence → evidence PR
 - LastResultSummary: Phase1 FAIL — mobile median perf=77 LCP=5007ms TBT=232ms CLS=0 DOM=687; desktop median perf=96 LCP=1335ms TBT=32ms CLS=0 DOM=687 (note: one mobile run had CLS>0 but median CLS=0)
