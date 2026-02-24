@@ -1,4 +1,3 @@
-import Image from "next/image";
 import Link from "next/link";
 import { TrackedLink } from "@/components/analytics/TrackedLink";
 import { HeroOverlay } from "@/components/home/HeroOverlay";
@@ -26,16 +25,16 @@ export function HomeHero({
         <section className="relative w-full bg-gray-900 overflow-hidden">
             {/* Image — block-level, position:static → qualifies as Chrome LCP candidate */}
             {/* Next.js optimizer serves viewport-appropriate WebP, reducing mobile payload */}
-            <Image
+            <img
                 src="/images/hero-banner.webp"
                 alt="AMP Pattaya Real Estate"
                 width={1920}
                 height={1080}
-                priority
-                sizes="100vw"
                 loading="eager"
+                decoding="async"
                 fetchPriority="high"
                 className="w-full h-[85vh] md:h-[90vh] min-h-[600px] object-cover block"
+                style={{ width: '100%', height: 'auto' }}
             />
 
             {/* Gradient overlay — absolutely positioned, no layout impact */}
@@ -64,7 +63,7 @@ export function HomeHero({
                                 {dict.nav?.projects || "Explore Projects"}
                             </Link>
                             <Link
-                                className="px-6 py-3 bg-white/10 hover:bg-white/20 backdrop-blur-md rounded-full text-white text-sm font-medium transition-colors border border-white/20"
+                                className="px-6 py-3 bg-white/10 hover:bg-white/20 rounded-full text-white text-sm font-medium transition-colors border border-white/20"
                                 href={`/${locale}/invest`}
                             >
                                 {dict.nav?.invest || "Investment Guide"}
