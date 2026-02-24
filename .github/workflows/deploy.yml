@@ -59,7 +59,7 @@ jobs:
 
   # ── Stage 2a: Workflow Guard (fast, runs parallel to lint-test) ───────────
   # Enforces rules that must NEVER be regressed in deploy.yml:
-  #   1. `alembic upgrade head --sql` must NOT appear  (offline-mode crashes)
+  #   1. alembic upgrade head with --sql flag must NOT appear  (offline-mode crashes)
   #   2. smoke-test curl must use -L                   (308 redirect follow)
   guard:
     runs-on: ubuntu-latest
@@ -69,7 +69,7 @@ jobs:
       - name: "GUARD: no alembic --sql in deploy"
         run: |
           if grep -qP 'alembic upgrade head\s+--sql' .github/workflows/deploy.yml; then
-            echo "::error file=.github/workflows/deploy.yml::FORBIDDEN: 'alembic upgrade head --sql' detected."
+            echo "::error file=.github/workflows/deploy.yml::FORBIDDEN: alembic --sql flag detected."
             echo "Offline/dry-run mode breaks any migration that queries the DB."
             echo "Remove --sql and keep only: alembic upgrade head"
             exit 1
@@ -278,7 +278,7 @@ jobs:
 
             # ╔══════════════════════════════════════════════════════════════╗
             # ║  PERMANENT: online migration only — DO NOT add --sql flag    ║
-            # ║  `alembic upgrade head --sql` runs in offline/dry-run mode.  ║
+            # ║  The offline/dry-run mode (--sql flag) crashes because       ║
             # ║  Any migration that queries the DB (e.g. duplicate checks)   ║
             # ║  will crash with `AttributeError: 'NoneType' ...` because    ║
             # ║  Alembic's MockConnection returns None from execute().        ║
