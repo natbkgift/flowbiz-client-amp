@@ -1,16 +1,15 @@
 # ops/STATE.md (STATE-LOCK)
 
 - CurrentPhase: A+B=PASS, Phase1=FAIL, Phase2=BLOCKED, Phase3=BLOCKED, Phase4=BLOCKED, Phase5=BLOCKED
-- CurrentIteration: phase1-iter-05-defer-postlcp-analytics (PR #190 open)
+- CurrentIteration: phase1-iter-06 (evidence pending)
 - MainlineStatus: RUNNING
 - LatestEvidence: ops/logs/phase1/
-  - cf-headers.txt (2026-02-24 20:25:41)
-  - lh-mobile.txt + lh-mobile.json (2026-02-24 20:27:26)
-  - lh-desktop.txt + lh-desktop.json (2026-02-24 20:29:25)
-  - hydration.txt (2026-02-24 20:29:25)
+  - cf-headers.txt (2026-02-24 20:51:36)
+  - lh-mobile.txt + lh-mobile.json (2026-02-24 20:53:14)
+  - lh-desktop.txt + lh-desktop.json (2026-02-24 20:55:00)
+  - hydration.txt (2026-02-24 20:55:00)
 - OpenPRsAllowed: 2 (1x Phase1 mainline iteration PR + 1x parallel-prep PR)
-- OpenPRsNow:
-  - #190 https://github.com/natbkgift/flowbiz-client-amp/pull/190 (Phase 1 mainline iteration)
+- OpenPRsNow: (none)
 - PRsToClose: (none)
 - Locks:
   - Evidence-first only (patch requires Evidence Pack from ops/logs/*)
@@ -22,5 +21,5 @@
   - Lighthouse truth model: use simulated LCP (`audits[largest-contentful-paint].numericValue`) as truth; observed is supporting note only
   - Lighthouse gates: mobile>=92, desktop>=97, CLS=0, DOM<900, hydrationSignals=0
   - Avoid evidence bloat: evidence PR should prefer lh-*.{txt,json}, hydration.txt, cf-headers.txt, ops/STATE.md (attempt files only if necessary)
-- NextAction: Merge PR #190 → deploy → run CF verify + `npm run lh:gate` (production) → open evidence-only PR to update ops/logs/phase1/* + ops/STATE.md
-- LastResultSummary: Phase1 FAIL — mobile median perf=77 LCP=5007ms TBT=232ms CLS=0 DOM=687; desktop median perf=96 LCP=1335ms TBT=32ms CLS=0 DOM=687 (note: one mobile run had CLS>0 but median CLS=0)
+- NextAction: Open evidence-only PR (post-PR #190) to update ops/logs/phase1/* + ops/STATE.md on main, then build Evidence Pack for iter-06 and choose next 1 patch
+- LastResultSummary: Phase1 FAIL — mobile median perf=78 LCP=4963ms TBT=210ms CLS=0 DOM=687; desktop median perf=96 LCP=1401ms TBT=1ms CLS=0 DOM=687

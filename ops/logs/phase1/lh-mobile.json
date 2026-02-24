@@ -10,9 +10,9 @@
     "domMax": 900
   },
   "medians": {
-    "perfScoreMed": 77,
-    "lcpMed": 5006.7170000000015,
-    "tbtMed": 232.08100000000013,
+    "perfScoreMed": 78,
+    "lcpMed": 4963.2097,
+    "tbtMed": 209.53305000000046,
     "clsMed": 0,
     "domMed": 687,
     "hydrationSignals": 0
@@ -27,11 +27,11 @@
     {
       "file": "lh-mobile-run01.json",
       "status": 0,
-      "perfScore": 83,
-      "lcp": 4062.431,
-      "tbt": 203.00000000000023,
+      "perfScore": 75,
+      "lcp": 5154.032999999999,
+      "tbt": 270.5,
       "cls": 0,
-      "dom": 687,
+      "dom": 717,
       "consoleErrorsCount": 3,
       "hydrationSignals": 0,
       "consoleErrors": [
@@ -49,7 +49,7 @@
         },
         {
           "description": "Loading the script 'https://static.cloudflareinsights.com/beacon.min.js/vcd15cbe7772f49c399c6a5babf22c1241717689176015' violates the following Content Security Policy directive: \"script-src 'self' 'unsafe-inline'\". Note that 'script-src-elem' was not explicitly set, so 'script-src' is used as a fallback. The action has been blocked.",
-          "url": "https://amppattaya.com/en/?lh=1771939553616",
+          "url": "https://amppattaya.com/en/?lh=1771941103610",
           "line": 0,
           "col": 0
         }
@@ -58,11 +58,11 @@
     {
       "file": "lh-mobile-run02.json",
       "status": 0,
-      "perfScore": 77,
-      "lcp": 5006.7170000000015,
-      "tbt": 232.08100000000013,
+      "perfScore": 76,
+      "lcp": 5757.894,
+      "tbt": 152.50000000000045,
       "cls": 0,
-      "dom": 717,
+      "dom": 687,
       "consoleErrorsCount": 3,
       "hydrationSignals": 0,
       "consoleErrors": [
@@ -80,7 +80,7 @@
         },
         {
           "description": "Loading the script 'https://static.cloudflareinsights.com/beacon.min.js/vcd15cbe7772f49c399c6a5babf22c1241717689176015' violates the following Content Security Policy directive: \"script-src 'self' 'unsafe-inline'\". Note that 'script-src-elem' was not explicitly set, so 'script-src' is used as a fallback. The action has been blocked.",
-          "url": "https://amppattaya.com/en/?lh=1771939571953",
+          "url": "https://amppattaya.com/en/?lh=1771941121931",
           "line": 0,
           "col": 0
         }
@@ -89,9 +89,9 @@
     {
       "file": "lh-mobile-run03.json",
       "status": 0,
-      "perfScore": 76,
-      "lcp": 5098.2660000000005,
-      "tbt": 246.8599999999999,
+      "perfScore": 79,
+      "lcp": 4636.916,
+      "tbt": 239.96800000000007,
       "cls": 0,
       "dom": 687,
       "consoleErrorsCount": 3,
@@ -111,7 +111,7 @@
         },
         {
           "description": "Loading the script 'https://static.cloudflareinsights.com/beacon.min.js/vcd15cbe7772f49c399c6a5babf22c1241717689176015' violates the following Content Security Policy directive: \"script-src 'self' 'unsafe-inline'\". Note that 'script-src-elem' was not explicitly set, so 'script-src' is used as a fallback. The action has been blocked.",
-          "url": "https://amppattaya.com/en/?lh=1771939590683",
+          "url": "https://amppattaya.com/en/?lh=1771941142101",
           "line": 0,
           "col": 0
         }
@@ -120,9 +120,9 @@
     {
       "file": "lh-mobile-run04.json",
       "status": 0,
-      "perfScore": 73,
-      "lcp": 5507.185499999999,
-      "tbt": 290.83774999999923,
+      "perfScore": 82,
+      "lcp": 4603.709000000001,
+      "tbt": 158.5,
       "cls": 0,
       "dom": 687,
       "consoleErrorsCount": 3,
@@ -142,7 +142,7 @@
         },
         {
           "description": "Loading the script 'https://static.cloudflareinsights.com/beacon.min.js/vcd15cbe7772f49c399c6a5babf22c1241717689176015' violates the following Content Security Policy directive: \"script-src 'self' 'unsafe-inline'\". Note that 'script-src-elem' was not explicitly set, so 'script-src' is used as a fallback. The action has been blocked.",
-          "url": "https://amppattaya.com/en/?lh=1771939609200",
+          "url": "https://amppattaya.com/en/?lh=1771941159607",
           "line": 0,
           "col": 0
         }
@@ -151,11 +151,11 @@
     {
       "file": "lh-mobile-run05.json",
       "status": 0,
-      "perfScore": 80,
-      "lcp": 4093.1219999999994,
-      "tbt": 224.99999999999955,
-      "cls": 0.00003717127786647171,
-      "dom": 717,
+      "perfScore": 78,
+      "lcp": 4963.2097,
+      "tbt": 209.53305000000046,
+      "cls": 0,
+      "dom": 687,
       "consoleErrorsCount": 3,
       "hydrationSignals": 0,
       "consoleErrors": [
@@ -173,7 +173,7 @@
         },
         {
           "description": "Loading the script 'https://static.cloudflareinsights.com/beacon.min.js/vcd15cbe7772f49c399c6a5babf22c1241717689176015' violates the following Content Security Policy directive: \"script-src 'self' 'unsafe-inline'\". Note that 'script-src-elem' was not explicitly set, so 'script-src' is used as a fallback. The action has been blocked.",
-          "url": "https://amppattaya.com/en/?lh=1771939627853",
+          "url": "https://amppattaya.com/en/?lh=1771941177175",
           "line": 0,
           "col": 0
         }
