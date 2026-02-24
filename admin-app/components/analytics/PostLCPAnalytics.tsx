@@ -1,8 +1,24 @@
 'use client';
 
-import { SiteAnalytics } from '@/components/analytics/SiteAnalytics';
-import { LinkClickTracker } from '@/components/analytics/LinkClickTracker';
+import dynamic from 'next/dynamic';
+
 import { useAfterLCP } from '@/components/perf/useAfterLCP';
+
+const SiteAnalytics = dynamic(
+  () =>
+    import('@/components/analytics/SiteAnalytics').then((m) => ({
+      default: m.SiteAnalytics,
+    })),
+  { ssr: false }
+);
+
+const LinkClickTracker = dynamic(
+  () =>
+    import('@/components/analytics/LinkClickTracker').then((m) => ({
+      default: m.LinkClickTracker,
+    })),
+  { ssr: false }
+);
 
 /**
  * Mount analytics only after LCP.
