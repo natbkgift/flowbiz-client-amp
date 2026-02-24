@@ -1,33 +1,11 @@
 import type { ReactNode } from 'react';
 import { Suspense } from 'react';
-import dynamic from 'next/dynamic';
 
 import { Footer } from '@/components/layout/Footer';
 import { Header } from '@/components/layout/Header';
 import { SiteAnalytics } from '@/components/analytics/SiteAnalytics';
 import { LinkClickTracker } from '@/components/analytics/LinkClickTracker';
-
-// Defer non-critical client components — reduces main-thread work blocking LCP paint
-const ExperimentProvider = dynamic(
-  () => import('@/components/analytics/ExperimentProvider').then((m) => ({ default: m.ExperimentProvider })),
-  { ssr: false }
-);
-const FloatingWhatsAppCTA = dynamic(
-  () => import('@/components/ux/FloatingWhatsAppCTA').then((m) => ({ default: m.FloatingWhatsAppCTA })),
-  { ssr: false }
-);
-const StickyMobileCTA = dynamic(
-  () => import('@/components/ux/StickyMobileCTA').then((m) => ({ default: m.StickyMobileCTA })),
-  { ssr: false }
-);
-const ScrollReveal = dynamic(
-  () => import('@/components/ux/ScrollReveal').then((m) => ({ default: m.ScrollReveal })),
-  { ssr: false }
-);
-const CookieConsent = dynamic(
-  () => import('@/components/ux/CookieConsent').then((m) => ({ default: m.CookieConsent })),
-  { ssr: false }
-);
+import { DeferredProviders } from '@/components/layout/DeferredProviders';
 import { getDictionary, normalizeLocale } from '@/app/_lib/i18n/get-dictionary';
 import { SUPPORTED_LOCALES } from '@/app/_lib/i18n/routing';
 import {
@@ -72,14 +50,10 @@ export default async function SiteLayout({
         <SiteAnalytics />
       </Suspense>
       <LinkClickTracker />
-      <ExperimentProvider />
-      <ScrollReveal />
+      <DeferredProviders />
       {children}
       <Footer locale={locale} dict={dict} />
       <div aria-live="polite" aria-atomic="true" id="amp-live-region" className="sr-only" />
-      <FloatingWhatsAppCTA />
-      <StickyMobileCTA />
-      <CookieConsent />
     </>
   );
 }

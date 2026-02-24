@@ -1,0 +1,66 @@
+'use client';
+
+/**
+ * DeferredProviders — client-only bundle boundary.
+ *
+ * next/dynamic with ssr:false is only valid inside Client Components.
+ * This wrapper aggregates all non-critical client providers so they can
+ * be loaded after LCP without blocking the main thread during hydration.
+ *
+ * Imported statically from the Server-Component layout so Next.js treats
+ * this module as a normal client boundary; the five inner modules are
+ * code-split into separate chunks and fetched only after initial paint.
+ */
+import dynamic from 'next/dynamic';
+
+const ExperimentProvider = dynamic(
+  () =>
+    import('@/components/analytics/ExperimentProvider').then((m) => ({
+      default: m.ExperimentProvider,
+    })),
+  { ssr: false }
+);
+
+const ScrollReveal = dynamic(
+  () =>
+    import('@/components/ux/ScrollReveal').then((m) => ({
+      default: m.ScrollReveal,
+    })),
+  { ssr: false }
+);
+
+const CookieConsent = dynamic(
+  () =>
+    import('@/components/ux/CookieConsent').then((m) => ({
+      default: m.CookieConsent,
+    })),
+  { ssr: false }
+);
+
+const FloatingWhatsAppCTA = dynamic(
+  () =>
+    import('@/components/ux/FloatingWhatsAppCTA').then((m) => ({
+      default: m.FloatingWhatsAppCTA,
+    })),
+  { ssr: false }
+);
+
+const StickyMobileCTA = dynamic(
+  () =>
+    import('@/components/ux/StickyMobileCTA').then((m) => ({
+      default: m.StickyMobileCTA,
+    })),
+  { ssr: false }
+);
+
+export function DeferredProviders() {
+  return (
+    <>
+      <ExperimentProvider />
+      <ScrollReveal />
+      <FloatingWhatsAppCTA />
+      <StickyMobileCTA />
+      <CookieConsent />
+    </>
+  );
+}
