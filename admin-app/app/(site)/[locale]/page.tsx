@@ -6,8 +6,8 @@ import { TrackedLink } from '@/components/analytics/TrackedLink';
 import { HomeHero } from '@/components/home/HomeHero';
 import { FeaturedProjects } from '@/components/home/FeaturedProjects';
 import { LeadForm } from '@/components/forms/LeadForm';
-import { SafeCoverImage } from '@/components/media/SafeCoverImage';
 import { Container } from '@/components/layout/Container';
+import propertyPlaceholder from '@/public/images/property-placeholder.svg';
 import { buildWhatsAppUrl } from '@/app/_lib/public-cta';
 import { getDictionary, normalizeLocale } from '@/app/_lib/i18n/get-dictionary';
 import { withLocale } from '@/app/_lib/i18n/routing';
@@ -197,7 +197,7 @@ export default async function HomePage({
           <div className="grid grid-fluid">
             {featuredProperties.map((prop) => {
               const img = prop.cover_image || (prop.local_images?.[0]) || (prop.images?.[0]) || null;
-              const imgSrc = resolveImageUrl(img) ?? '/images/property-placeholder.svg';
+              const imgSrc = resolveImageUrl(img) ?? propertyPlaceholder.src;
               const priceFormatted = prop.price ? `฿${Math.round(prop.price).toLocaleString()}` : null;
               const typeBadge = prop.type === 'rent' ? (locale === 'th' ? 'ให้เช่า' : 'For Rent')
                 : prop.type === 'resale' ? (locale === 'th' ? 'ขายต่อ' : 'Resale')
@@ -213,12 +213,13 @@ export default async function HomePage({
                   className="property-card reveal"
                 >
                   <div className="card-image card-image--featured relative">
-                    <SafeCoverImage
+                    <img
                       src={imgSrc}
                       alt={prop.title}
-                      sizes="(min-width: 1024px) 33vw, (min-width: 768px) 50vw, 100vw"
                       className="absolute inset-0 h-full w-full object-cover"
                       loading="lazy"
+                      decoding="async"
+                      sizes="(min-width: 1024px) 33vw, (min-width: 768px) 50vw, 100vw"
                     />
                     <span className={`absolute top-3 left-3 text-xs font-semibold px-2.5 py-1 rounded-full ${badgeColor}`}>
                       {typeBadge}
