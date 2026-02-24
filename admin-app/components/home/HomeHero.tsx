@@ -2,6 +2,7 @@ import Link from "next/link";
 import { TrackedLink } from "@/components/analytics/TrackedLink";
 import { HeroOverlay } from "@/components/home/HeroOverlay";
 import { Container } from "@/components/layout/Container";
+import heroBanner from "@/public/images/hero-banner.webp";
 
 export function HomeHero({
     dict,
@@ -26,15 +27,14 @@ export function HomeHero({
             {/* Image — block-level, position:static → qualifies as Chrome LCP candidate */}
             {/* Next.js optimizer serves viewport-appropriate WebP, reducing mobile payload */}
             <img
-                src="/images/hero-banner.webp"
+                src={heroBanner.src}
                 alt="AMP Pattaya Real Estate"
-                width={1920}
-                height={1080}
+                width={heroBanner.width}
+                height={heroBanner.height}
                 loading="eager"
                 decoding="async"
                 fetchPriority="high"
                 className="w-full h-[85vh] md:h-[90vh] min-h-[600px] object-cover block"
-                style={{ width: '100%', height: 'auto' }}
             />
 
             {/* Gradient overlay — absolutely positioned, no layout impact */}

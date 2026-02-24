@@ -1,4 +1,5 @@
 import { headers } from 'next/headers';
+import heroBanner from '@/public/images/hero-banner.webp';
 
 /**
  * Head tags for public locale pages.
@@ -18,7 +19,7 @@ export default async function Head() {
       <link
         rel="preload"
         as="image"
-        href="/images/hero-banner.webp"
+        href={heroBanner.src}
         type="image/webp"
         fetchPriority="high"
       />

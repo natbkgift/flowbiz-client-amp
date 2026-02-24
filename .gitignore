@@ -106,3 +106,6 @@ runtime/system_state.backup*.json
 tmpclaude-*
 nul
 test_output.txt
+
+# Lighthouse artifacts (generated locally)
+lh-*.json
