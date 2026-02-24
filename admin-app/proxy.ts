@@ -112,6 +112,21 @@ export function proxy(req: NextRequest) {
     return response;
   }
 
+  // Phase A: remove external redirect for the root path.
+  // Serve the default locale content (/en/) at / via internal rewrite so
+  // Lighthouse does not pay a redirect-chain penalty.
+  if (pathname === '/' || pathname === '') {
+    const url = req.nextUrl.clone();
+    url.pathname = '/en/';
+    url.search = search;
+
+    const response = NextResponse.rewrite(url);
+    response.headers.set('x-next-pathname', '/en/');
+    setSecurityHeaders(response);
+    setCacheHeaders(response);
+    return response;
+  }
+
   // Default locale: English.
   const url = req.nextUrl.clone();
   url.pathname = `/en${pathname === '/' ? '' : pathname}`;
