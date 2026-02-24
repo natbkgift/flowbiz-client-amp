@@ -1,13 +1,13 @@
 # ops/STATE.md (STATE-LOCK)
 
 - CurrentPhase: A+B=PASS, Phase1=FAIL, Phase2=BLOCKED, Phase3=BLOCKED, Phase4=BLOCKED, Phase5=BLOCKED
-- CurrentIteration: phase1-iter-08 (patch prepared)
+- CurrentIteration: phase1-iter-08 (evidence collected)
 - MainlineStatus: RUNNING
 - LatestEvidence: ops/logs/phase1/
-  - cf-headers.txt (2026-02-24 23:35:04)
-  - lh-mobile.txt + lh-mobile.json (2026-02-24 23:36:42)
-  - lh-desktop.txt + lh-desktop.json (2026-02-24 23:38:09)
-  - hydration.txt (2026-02-24 23:38:09)
+  - cf-headers.txt (2026-02-24 23:44:47)
+  - lh-mobile.txt + lh-mobile.json (2026-02-24 23:46:34)
+  - lh-desktop.txt + lh-desktop.json (2026-02-24 23:48:13)
+  - hydration.txt (2026-02-24 23:48:13)
 - OpenPRsAllowed: 2 (1x Phase1 mainline iteration PR + 1x parallel-prep PR)
 - OpenPRsNow: (none)
 - PRsToClose: (none)
@@ -21,5 +21,5 @@
   - Lighthouse truth model: use simulated LCP (`audits[largest-contentful-paint].numericValue`) as truth; observed is supporting note only
   - Lighthouse gates: mobile>=92, desktop>=97, CLS=0, DOM<900, hydrationSignals=0
   - Avoid evidence bloat: evidence PR should prefer lh-*.{txt,json}, hydration.txt, cf-headers.txt, ops/STATE.md (attempt files only if necessary)
-- NextAction: Open PR for phase1-iter-08 patch (make .reveal fallback immediate to avoid paint delay when ScrollReveal is deferred), merge+deploy, then run CF verify + `npm run lh:gate` and open evidence-only PR
-- LastResultSummary: Phase1 FAIL (iter-07 post-deploy) — mobile median perf=77 LCP=5042ms TBT=211ms CLS=0 DOM=717; desktop median perf=96 LCP=1349ms TBT=1ms CLS=0 DOM=681 (fail: mobile perf+lcp+tbt; desktop perf)
+- NextAction: phase1-iter-09 — build new Evidence Pack from latest ops/logs/phase1 (simulated LCP truth), propose Options A/B, choose 1 patch ≤300LOC ≤5files, PR → merge+deploy → production lh:gate → evidence PR
+- LastResultSummary: Phase1 FAIL (iter-08 post-deploy) — mobile median perf=78 LCP=4823ms TBT=255ms CLS=0 DOM=687; desktop median perf=94 LCP=1579ms TBT=6ms CLS=0 DOM=687 (fail: mobile perf+lcp+tbt; desktop perf)
