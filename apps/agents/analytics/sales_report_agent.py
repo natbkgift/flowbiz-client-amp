@@ -4,6 +4,7 @@ Sales Report Agent
 Main orchestrator for sales lead analytics and reporting.
 """
 
+import os
 from datetime import date, timedelta
 from typing import Optional
 
@@ -59,6 +60,11 @@ class SalesReportAgent:
                 print(f"Warning: LINE notifier not configured: {e}")
                 self.line_notifier = None
 
+    @property
+    def notifications_disabled(self) -> bool:
+        """Return True if notifications are disabled via NOTIFICATIONS_DISABLED env var."""
+        return os.getenv("NOTIFICATIONS_DISABLED", "").lower() in {"1", "true", "yes"}
+
     def send_daily_report(self) -> bool:
         """
         Generate and send daily lead report
@@ -66,6 +72,9 @@ class SalesReportAgent:
         Returns:
             True if successful
         """
+        if self.notifications_disabled:
+            print("Notifications disabled (NOTIFICATIONS_DISABLED) - skipping daily report")
+            return True
         try:
             print("Generating daily report...")
 
@@ -102,6 +111,9 @@ class SalesReportAgent:
         Returns:
             True if successful
         """
+        if self.notifications_disabled:
+            print("Notifications disabled (NOTIFICATIONS_DISABLED) - skipping weekly report")
+            return True
         try:
             print("Generating weekly report...")
 
@@ -157,6 +169,9 @@ class SalesReportAgent:
         Returns:
             True if successful
         """
+        if self.notifications_disabled:
+            print("Notifications disabled (NOTIFICATIONS_DISABLED) - skipping overdue check")
+            return True
         try:
             print("Checking overdue follow-ups...")
 
@@ -304,16 +319,24 @@ def main():
         daily    - Send daily report
         weekly   - Send weekly report
         overdue  - Check overdue follow-ups
+        stop     - Show how to disable notifications
         test     - Test system
     """
     import sys
 
     if len(sys.argv) < 2:
         print("Usage: python -m apps.agents.analytics.sales_report_agent [command]")
-        print("Commands: daily, weekly, overdue, test")
+        print("Commands: daily, weekly, overdue, stop, test")
         sys.exit(1)
 
     command = sys.argv[1].lower()
+
+    if command == "stop":
+        print("To stop all notifications, set the environment variable:")
+        print("  export NOTIFICATIONS_DISABLED=true")
+        print("To re-enable notifications, unset the variable:")
+        print("  unset NOTIFICATIONS_DISABLED")
+        sys.exit(0)
 
     # Create agent (will use environment variables for configuration)
     agent = SalesReportAgent()
@@ -336,7 +359,7 @@ def main():
 
     else:
         print(f"Unknown command: {command}")
-        print("Commands: daily, weekly, overdue, test")
+        print("Commands: daily, weekly, overdue, stop, test")
         sys.exit(1)
 
 
