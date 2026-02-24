@@ -34,3 +34,21 @@
 [2026-02-24T20:15:27] STATIC round2 url=https://amppattaya.com/_next/static/chunks/4bd1b696-bf5e0dbacfa5baef.js cf=HIT age=5886 server=cloudflare set-cookie=
 [2026-02-24T20:15:27] PASS static age increased on round2
 [2026-02-24T20:15:27] VERIFY end
+[2026-02-24T20:25:16] VERIFY start
+[2026-02-24T20:25:16] HTML /en/ cf=DYNAMIC age= server=cloudflare cache-control=public, s-maxage=300, stale-while-revalidate=3600
+[2026-02-24T20:25:17] HTML /en/ cf=DYNAMIC age= server=cloudflare cache-control=public, s-maxage=300, stale-while-revalidate=3600
+[2026-02-24T20:25:18] HTML /th/ cf=DYNAMIC age= server=cloudflare cache-control=public, s-maxage=300, stale-while-revalidate=3600
+[2026-02-24T20:25:18] HTML /th/ cf=DYNAMIC age= server=cloudflare cache-control=public, s-maxage=300, stale-while-revalidate=3600
+[2026-02-24T20:25:22] STATIC round1 url=https://amppattaya.com/_next/static/chunks/4bd1b696-bf5e0dbacfa5baef.js cf=HIT age=6479 server=cloudflare set-cookie=
+[2026-02-24T20:25:22] STATIC round2 url=https://amppattaya.com/_next/static/chunks/4bd1b696-bf5e0dbacfa5baef.js cf=HIT age=4584 server=cloudflare set-cookie=
+[2026-02-24T20:25:22] FAIL static age did not increase on round2
+[2026-02-24T20:25:22] VERIFY end
+[2026-02-24T20:25:36] VERIFY start
+[2026-02-24T20:25:37] HTML /en/ cf=DYNAMIC age= server=cloudflare cache-control=public, s-maxage=300, stale-while-revalidate=3600
+[2026-02-24T20:25:37] HTML /en/ cf=DYNAMIC age= server=cloudflare cache-control=public, s-maxage=300, stale-while-revalidate=3600
+[2026-02-24T20:25:38] HTML /th/ cf=DYNAMIC age= server=cloudflare cache-control=public, s-maxage=300, stale-while-revalidate=3600
+[2026-02-24T20:25:38] HTML /th/ cf=DYNAMIC age= server=cloudflare cache-control=public, s-maxage=300, stale-while-revalidate=3600
+[2026-02-24T20:25:41] STATIC round1 url=https://amppattaya.com/_next/static/chunks/4bd1b696-bf5e0dbacfa5baef.js cf=HIT age=4601 server=cloudflare set-cookie=
+[2026-02-24T20:25:41] STATIC round2 url=https://amppattaya.com/_next/static/chunks/4bd1b696-bf5e0dbacfa5baef.js cf=HIT age=6501 server=cloudflare set-cookie=
+[2026-02-24T20:25:41] PASS static age increased on round2
+[2026-02-24T20:25:41] VERIFY end
