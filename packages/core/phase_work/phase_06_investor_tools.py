@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import asdict
+from decimal import Decimal
 
 from packages.core.investment import calc_mortgage_amortization, calc_roi
 
@@ -12,14 +13,18 @@ def run() -> None:
     This is a pure compute phase (no DB writes).
     """
 
-    roi = calc_roi(purchase_price=4_200_000, monthly_rent=35_000, annual_expenses=60_000)
+    roi = calc_roi(
+        purchase_price=Decimal("4200000"),
+        monthly_rent=Decimal("35000"),
+        annual_expenses=Decimal("60000"),
+    )
     if roi.gross_yield_percent <= 0:
         raise SystemExit("ROI gross_yield_percent must be > 0")
     if roi.net_yield_percent <= 0:
         raise SystemExit("ROI net_yield_percent must be > 0")
 
     mort = calc_mortgage_amortization(
-        principal=3_000_000,
+        principal=Decimal("3000000"),
         annual_rate_percent=6.5,
         years=20,
         payments_per_year=12,
