@@ -185,6 +185,18 @@ jobs:
 
             # Authenticate to GHCR on the VPS so docker pull can access private images
             echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u "${{ github.actor }}" --password-stdin
+            echo "Syncing repository to deployed commit"
+            echo "target_sha=${{ github.sha }}"
+            if command -v git >/dev/null 2>&1; then
+              git rev-parse --short HEAD || true
+              git fetch origin main --prune
+              git checkout -f main
+              git reset --hard "${{ github.sha }}"
+              git clean -fd
+              echo "repo_head=$(git rev-parse --short HEAD)"
+            else
+              echo "WARNING: git not found on VPS; cannot sync repo. Deploy may use stale compose/migrations."
+            fi
 
             # Save current running image IDs for rollback (persistent path)
             # Using image IDs (sha256:...) ensures rollback works even if tags move.
