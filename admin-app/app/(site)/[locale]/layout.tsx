@@ -1,10 +1,7 @@
 import type { ReactNode } from 'react';
-import { Suspense } from 'react';
 
 import { Footer } from '@/components/layout/Footer';
 import { Header } from '@/components/layout/Header';
-import { SiteAnalytics } from '@/components/analytics/SiteAnalytics';
-import { LinkClickTracker } from '@/components/analytics/LinkClickTracker';
 import { DeferredProviders } from '@/components/layout/DeferredProviders';
 import { getDictionary, normalizeLocale } from '@/app/_lib/i18n/get-dictionary';
 import { SUPPORTED_LOCALES } from '@/app/_lib/i18n/routing';
@@ -46,10 +43,6 @@ export default async function SiteLayout({
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLd }} />
       <Header locale={locale} dict={dict} />
-      <Suspense fallback={null}>
-        <SiteAnalytics />
-      </Suspense>
-      <LinkClickTracker />
       <DeferredProviders />
       {children}
       <Footer locale={locale} dict={dict} />

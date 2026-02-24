@@ -53,9 +53,27 @@ const StickyMobileCTA = dynamic(
   { ssr: false }
 );
 
+const SiteAnalytics = dynamic(
+  () =>
+    import('@/components/analytics/SiteAnalytics').then((m) => ({
+      default: m.SiteAnalytics,
+    })),
+  { ssr: false }
+);
+
+const LinkClickTracker = dynamic(
+  () =>
+    import('@/components/analytics/LinkClickTracker').then((m) => ({
+      default: m.LinkClickTracker,
+    })),
+  { ssr: false }
+);
+
 export function DeferredProviders() {
   return (
     <>
+      <SiteAnalytics />
+      <LinkClickTracker />
       <ExperimentProvider />
       <ScrollReveal />
       <FloatingWhatsAppCTA />

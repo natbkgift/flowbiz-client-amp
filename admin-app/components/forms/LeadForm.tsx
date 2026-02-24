@@ -13,6 +13,7 @@
  * - After hydration the chunk is fetched and the form renders
  * - No CLS risk (form container has fixed min-height in its parent)
  */
+import { useEffect, useRef, useState } from 'react';
 import dynamic from 'next/dynamic';
 
 const LeadFormCore = dynamic(
@@ -27,5 +28,39 @@ export type LeadFormProps = {
 };
 
 export function LeadForm(props: LeadFormProps) {
-  return <LeadFormCore {...props} />;
+  const hostRef = useRef<HTMLDivElement | null>(null);
+  const [shouldLoad, setShouldLoad] = useState(false);
+
+  useEffect(() => {
+    if (shouldLoad) return;
+    const el = hostRef.current;
+    if (!el) return;
+
+    // If IntersectionObserver isn't available, fall back to eager load.
+    if (typeof window === 'undefined' || !('IntersectionObserver' in window)) {
+      setShouldLoad(true);
+      return;
+    }
+
+    const io = new IntersectionObserver(
+      (entries) => {
+        if (entries.some((e) => e.isIntersecting)) {
+          setShouldLoad(true);
+          io.disconnect();
+        }
+      },
+      // Start loading a bit before the form scrolls into view.
+      { rootMargin: '300px 0px' }
+    );
+
+    io.observe(el);
+    return () => io.disconnect();
+  }, [shouldLoad]);
+
+  // Keep this wrapper layout-neutral; no extra box in the DOM.
+  return (
+    <div ref={hostRef} style={{ display: 'contents' }}>
+      {shouldLoad ? <LeadFormCore {...props} /> : null}
+    </div>
+  );
 }
