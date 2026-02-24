@@ -12,33 +12,34 @@
  * If you need click-side effects beyond event tracking, add them to
  * LinkClickTracker (one global listener) instead of per-link hydration.
  */
-import Link, { type LinkProps } from 'next/link';
-import type { ReactNode } from 'react';
+import type { ComponentPropsWithoutRef, ReactNode } from 'react';
 
 import type { EventType } from '../../lib/analytics';
+
+type TrackedLinkProps = Omit<ComponentPropsWithoutRef<'a'>, 'href' | 'children'> & {
+  href: string;
+  eventType: EventType;
+  eventPayload?: Record<string, unknown>;
+  children: ReactNode;
+};
 
 export function TrackedLink({
   eventType,
   eventPayload,
   children,
-  prefetch,
+  href,
   ...props
-}: LinkProps & {
-  eventType: EventType;
-  eventPayload?: Record<string, unknown>;
-  children: ReactNode;
-  className?: string;
-}) {
+}: TrackedLinkProps) {
   return (
-    <Link
+    <a
       {...props}
-      prefetch={prefetch ?? false}
+      href={href}
       data-amp-event-type={eventType}
       data-amp-event-payload={
         eventPayload ? JSON.stringify(eventPayload) : undefined
       }
     >
       {children}
-    </Link>
+    </a>
   );
 }
