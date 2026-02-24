@@ -1,7 +1,7 @@
 # ops/STATE.md (STATE-LOCK)
 
 - CurrentPhase: A+B=PASS, Phase1=FAIL, Phase2=BLOCKED, Phase3=BLOCKED, Phase4=BLOCKED, Phase5=BLOCKED
-- CurrentIteration: phase1-iter-07 (evidence collected)
+- CurrentIteration: phase1-iter-08 (patch prepared)
 - MainlineStatus: RUNNING
 - LatestEvidence: ops/logs/phase1/
   - cf-headers.txt (2026-02-24 23:35:04)
@@ -21,5 +21,5 @@
   - Lighthouse truth model: use simulated LCP (`audits[largest-contentful-paint].numericValue`) as truth; observed is supporting note only
   - Lighthouse gates: mobile>=92, desktop>=97, CLS=0, DOM<900, hydrationSignals=0
   - Avoid evidence bloat: evidence PR should prefer lh-*.{txt,json}, hydration.txt, cf-headers.txt, ops/STATE.md (attempt files only if necessary)
-- NextAction: phase1-iter-08 — build new Evidence Pack from latest ops/logs/phase1 (simulated LCP truth), propose Options A/B, choose 1 patch ≤300LOC ≤5files, PR → merge+deploy → production lh:gate → evidence PR
+- NextAction: Open PR for phase1-iter-08 patch (make .reveal fallback immediate to avoid paint delay when ScrollReveal is deferred), merge+deploy, then run CF verify + `npm run lh:gate` and open evidence-only PR
 - LastResultSummary: Phase1 FAIL (iter-07 post-deploy) — mobile median perf=77 LCP=5042ms TBT=211ms CLS=0 DOM=717; desktop median perf=96 LCP=1349ms TBT=1ms CLS=0 DOM=681 (fail: mobile perf+lcp+tbt; desktop perf)
