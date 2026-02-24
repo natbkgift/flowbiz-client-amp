@@ -1,11 +1,11 @@
 URL: https://amppattaya.com/en/
 Preset: mobile
-Medians: perf=77 lcp=5173 tbt=177 cls=0 dom=687
+Medians: perf=77 lcp=5042 tbt=211 cls=0 dom=717
 Gates: perf>=92 lcp<=2500 tbt<=200 cls<=0 dom<=900
-Result: FAIL (perf<92, lcp>2500)
+Result: FAIL (perf<92, lcp>2500, tbt>200)
 Runs:
-- lh-mobile-run01.json perf=86 lcp=3833 tbt=177 cls=0 dom=687
-- lh-mobile-run02.json perf=77 lcp=5515 tbt=170 cls=0 dom=681
-- lh-mobile-run03.json perf=78 lcp=4843 tbt=206 cls=0 dom=717
-- lh-mobile-run04.json perf=77 lcp=5173 tbt=164 cls=0 dom=717
-- lh-mobile-run05.json perf=75 lcp=5884 tbt=185 cls=0 dom=687
+- lh-mobile-run01.json perf=80 lcp=5042 tbt=106 cls=0 dom=715
+- lh-mobile-run02.json perf=80 lcp=4569 tbt=208 cls=0 dom=681
+- lh-mobile-run03.json perf=75 lcp=5197 tbt=245 cls=0 dom=717
+- lh-mobile-run04.json perf=75 lcp=5318 tbt=215 cls=0 dom=717
+- lh-mobile-run05.json perf=77 lcp=5032 tbt=211 cls=0 dom=717

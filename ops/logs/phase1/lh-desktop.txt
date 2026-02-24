@@ -1,11 +1,11 @@
 URL: https://amppattaya.com/en/
 Preset: desktop
-Medians: perf=91 lcp=1828 tbt=3 cls=0 dom=687
+Medians: perf=96 lcp=1349 tbt=1 cls=0 dom=681
 Gates: perf>=97 lcp<=2500 tbt<=200 cls<=0 dom<=900
 Result: FAIL (perf<97)
 Runs:
-- lh-desktop-run01.json perf=90 lcp=1967 tbt=3 cls=0 dom=687
-- lh-desktop-run02.json perf=91 lcp=1828 tbt=3 cls=0 dom=687
-- lh-desktop-run03.json perf=86 lcp=2053 tbt=7 cls=0 dom=717
-- lh-desktop-run04.json perf=96 lcp=1418 tbt=0 cls=0 dom=681
-- lh-desktop-run05.json perf=94 lcp=1533 tbt=10 cls=0 dom=687
+- lh-desktop-run01.json perf=99 lcp=937 tbt=1 cls=0 dom=681
+- lh-desktop-run02.json perf=91 lcp=1823 tbt=0 cls=0 dom=681
+- lh-desktop-run03.json perf=96 lcp=1349 tbt=5 cls=0 dom=681
+- lh-desktop-run04.json perf=99 lcp=945 tbt=0 cls=0 dom=681
+- lh-desktop-run05.json perf=96 lcp=1369 tbt=14 cls=0 dom=681
