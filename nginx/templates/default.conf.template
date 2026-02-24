@@ -38,6 +38,12 @@ server {
         return 301 /admin/;
     }
 
+    # ✅ Remove external redirect: serve /en/ internally at /
+    # (Reference only — system nginx config lives in /etc/nginx/sites-available/)
+    location = / {
+        rewrite ^ /en/ last;
+    }
+
     location / {
         proxy_pass http://backend;
         proxy_set_header Host $host;
