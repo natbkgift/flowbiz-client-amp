@@ -620,6 +620,12 @@ select {
   color: var(--color-primary);
 }
 
+/* Allow dropdowns to work without JS: show panel on hover/focus-within */
+.nav-group:hover .dropdown-panel,
+.nav-group:focus-within .dropdown-panel {
+  display: block;
+}
+
 /* Active nav link indicator */
 .nav-link--active {
   color: var(--color-primary) !important;
@@ -751,6 +757,7 @@ select {
 
 /* Overlay behind drawer */
 .mobile-overlay {
+  display: none;
   position: fixed;
   inset: 0;
   background: rgba(0, 0, 0, 0.35);
@@ -786,6 +793,21 @@ select {
 .mobile-menu.active {
   display: block;
   animation: slide-in 0.25s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+/* CSS-only mobile drawer toggle (no hydration required) */
+#amp-mobile-menu-toggle:checked ~ .mobile-overlay {
+  display: block;
+}
+
+#amp-mobile-menu-toggle:checked ~ .mobile-menu {
+  display: block;
+  animation: slide-in 0.25s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+/* Prevent background scroll when drawer open (Chrome supports :has). */
+body:has(#amp-mobile-menu-toggle:checked) {
+  overflow: hidden;
 }
 
 @keyframes slide-in {
@@ -846,6 +868,20 @@ select {
 
 .mobile-nav__trigger:hover,
 .mobile-nav__trigger--open {
+  color: var(--color-primary);
+  background: var(--color-primary-light);
+}
+
+/* summary resets for mobile <details> accordion */
+summary.mobile-nav__trigger {
+  list-style: none;
+}
+
+summary.mobile-nav__trigger::-webkit-details-marker {
+  display: none;
+}
+
+.mobile-nav__section[open] > .mobile-nav__trigger {
   color: var(--color-primary);
   background: var(--color-primary-light);
 }
