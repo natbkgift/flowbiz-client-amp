@@ -80,6 +80,22 @@ const nextConfig = {
         ],
       },
       {
+        // Public site pages are safe to edge-cache.
+        // This enables CDN/edge (Cloudflare, nginx microcache) to reduce TTFB,
+        // which is the highest-ROI lever for Lighthouse mobile LCP.
+        source: '/:locale(en|th)/:path*',
+        headers: [
+          { key: 'Cache-Control', value: 'public, s-maxage=60, stale-while-revalidate=600' },
+        ],
+      },
+      {
+        // Ensure the locale root path also gets edge-cache headers.
+        source: '/:locale(en|th)',
+        headers: [
+          { key: 'Cache-Control', value: 'public, s-maxage=60, stale-while-revalidate=600' },
+        ],
+      },
+      {
         // CDN + browser caching for static assets
         source: '/_next/static/:path*',
         headers: [
