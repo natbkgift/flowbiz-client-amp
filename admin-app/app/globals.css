@@ -353,6 +353,17 @@ select {
   background: linear-gradient(180deg, var(--color-primary-light) 0%, var(--color-bg) 100%);
 }
 
+/* ======================== PERFORMANCE HELPERS ======================== */
+
+/*
+  content-visibility reduces render/layout cost for offscreen content.
+  Use on below-the-fold sections only (e.g. home page sections after the hero).
+*/
+.cv-auto {
+  content-visibility: auto;
+  contain-intrinsic-size: 1px 1200px;
+}
+
 /* ======================== GRID ======================== */
 
 /* ======================== GRID (PHASE 5: FLUID LUXURY) ======================== */

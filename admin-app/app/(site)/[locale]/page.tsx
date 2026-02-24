@@ -423,7 +423,7 @@ export default async function HomePage({
       ) : null}
 
       {/* Explore Opportunities (Combined Flow) */}
-      <section className="py-16 md:py-20 xl:py-24 2xl:py-28">
+      <section className="cv-auto py-16 md:py-20 xl:py-24 2xl:py-28">
         <Container variant="wide">
           <div className="section-header">
             <h2 className="section-title">{dict.home.pathSectionTitle}</h2>
@@ -493,7 +493,7 @@ export default async function HomePage({
       </Suspense>
 
       {/* Investment Stats */}
-      <section className="py-16 md:py-20 xl:py-24 2xl:py-28 bg-surface">
+      <section className="cv-auto py-16 md:py-20 xl:py-24 2xl:py-28 bg-surface">
         <Container variant="wide">
           <div className="section-header">
             <h2 className="section-title">{dict.home.investStatsTitle}</h2>
@@ -529,7 +529,7 @@ export default async function HomePage({
       </section>
 
       {/* Trust & Market Insight */}
-      <section className="py-16 md:py-20 xl:py-24 2xl:py-28">
+      <section className="cv-auto py-16 md:py-20 xl:py-24 2xl:py-28">
         <Container variant="wide">
           <div className="grid md:grid-cols-2 gap-12 items-center mb-20">
             <div>
@@ -598,7 +598,7 @@ export default async function HomePage({
       </section>
 
       {/* Video Authority — Click-to-Load YouTube */}
-      <section className="py-16 md:py-20 xl:py-24 2xl:py-28 bg-surface">
+      <section className="cv-auto py-16 md:py-20 xl:py-24 2xl:py-28 bg-surface">
         <Container variant="wide">
           <div className="section-header">
             <h2 className="section-title">{locale === 'th' ? 'ดูวิดีโอของเรา' : 'See Our Work'}</h2>
@@ -646,7 +646,7 @@ export default async function HomePage({
       </section>
 
       {/* Premium CTA / Conversion Gate */}
-      <section className="py-20 md:py-32 bg-gray-900 text-white mt-8">
+      <section className="cv-auto py-20 md:py-32 bg-gray-900 text-white mt-8">
         <Container variant="wide">
           <div className="grid lg:grid-cols-2 gap-16 items-center">
             <div className="reveal">
