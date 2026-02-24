@@ -11,7 +11,7 @@ import { useAfterLCP } from '@/components/perf/useAfterLCP';
  * the LCP window. Analytics is not required for above-the-fold usability.
  */
 export function PostLCPAnalytics() {
-  const afterLcp = useAfterLCP({ fallbackMs: 4500 });
+  const afterLcp = useAfterLCP();
   if (!afterLcp) return null;
 
   return (

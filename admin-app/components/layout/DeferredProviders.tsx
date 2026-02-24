@@ -57,7 +57,7 @@ const StickyMobileCTA = dynamic(
 
 export function DeferredProviders() {
   // Deterministic: only mount after LCP is observed (or a hard fallback).
-  const enabled = useAfterLCP({ fallbackMs: 4500 });
+  const enabled = useAfterLCP();
   if (!enabled) return null;
 
   return (

@@ -13,7 +13,7 @@ type UseAfterLCPOptions = {
  * Purpose: move non-critical client work (analytics, observers, CTAs) out of the
  * LCP window so it cannot block the LCP paint under Lighthouse CPU throttling.
  */
-export function useAfterLCP({ fallbackMs = 4500 }: UseAfterLCPOptions = {}) {
+export function useAfterLCP({ fallbackMs = 15000 }: UseAfterLCPOptions = {}) {
   const [afterLcp, setAfterLcp] = useState(false);
 
   useEffect(() => {
