@@ -1,13 +1,13 @@
 # ops/STATE.md (STATE-LOCK)
 
 - CurrentPhase: A+B=PASS, Phase1=FAIL, Phase2=BLOCKED, Phase3=BLOCKED, Phase4=BLOCKED, Phase5=BLOCKED
-- CurrentIteration: phase1-iter-04 (evidence pending)
+- CurrentIteration: phase1-iter-05 (evidence pending)
 - MainlineStatus: RUNNING
 - LatestEvidence: ops/logs/phase1/
-  - cf-headers.txt (2026-02-24 20:15:27)
-  - lh-mobile.txt + lh-mobile.json (2026-02-24 20:17:27)
-  - lh-desktop.txt + lh-desktop.json (2026-02-24 20:19:20)
-  - hydration.txt (2026-02-24 20:19:20)
+  - cf-headers.txt (2026-02-24 20:25:41)
+  - lh-mobile.txt + lh-mobile.json (2026-02-24 20:27:26)
+  - lh-desktop.txt + lh-desktop.json (2026-02-24 20:29:25)
+  - hydration.txt (2026-02-24 20:29:25)
 - OpenPRsAllowed: 2 (1x Phase1 mainline iteration PR + 1x parallel-prep PR)
 - PRsToClose: (none)
 - Locks:
@@ -17,5 +17,5 @@
   - Patch bounds: ≤300 LOC and ≤5 files per iteration
   - Cloudflare lock: NO HTML cache; static-only cache rules invariant
   - Lighthouse gates: mobile>=92, desktop>=97, CLS=0, DOM<900, hydrationSignals=0
-- NextAction: Open evidence PR (post-PR #185) to commit updated ops/logs/phase1 + ops/STATE.md, then build Evidence Pack for iter-04 and choose next 1 patch
-- LastResultSummary: Phase1 FAIL — mobile median perf=74 LCP=5357ms TBT=269ms CLS=0 DOM=717; desktop median perf=94 LCP=1543ms TBT=13ms CLS=0 DOM=687; hydrationSignals(total)=0 (note: mobile median run shows rscCount reduced to 4)
+- NextAction: Open evidence PR (post-PR #187) to commit updated ops/logs/phase1 + ops/STATE.md, then build Evidence Pack for iter-05 and choose next 1 patch
+- LastResultSummary: Phase1 FAIL — mobile median perf=77 LCP=5007ms TBT=232ms CLS=0 DOM=687; desktop median perf=96 LCP=1335ms TBT=32ms CLS=0 DOM=687 (note: one mobile run had CLS>0 but median CLS=0)
