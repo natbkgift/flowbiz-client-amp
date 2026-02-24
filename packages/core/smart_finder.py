@@ -72,7 +72,7 @@ def _purpose_points(
         if roi_percent is None:
             return 0, ["Purpose: ROI snapshot unavailable"]
         # ROI percent is a snapshot; convert to an integer points scale.
-        pts = int(max(0, min(50, roi_percent)))
+        pts = max(0, min(50, int(roi_percent)))
         reasons.append(f"ROI snapshot: +{pts}")
         return pts, reasons
 
@@ -82,7 +82,7 @@ def _purpose_points(
 
     # Higher avg_rent implies demand; map roughly to points with a cap.
     # Assume avg_rent THB/month; 10k => 10pts, 50k => 50pts.
-    pts = int(max(0, min(50, (avg_rent / Decimal("1000")))))
+    pts = max(0, min(50, int(avg_rent / Decimal("1000"))))
     reasons.append(f"Rental demand (avg rent snapshot): +{pts}")
     return pts, reasons
 

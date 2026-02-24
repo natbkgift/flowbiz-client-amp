@@ -3,7 +3,7 @@
  *
  * Sets security response headers on every response route.
  * These are additive to the static headers in next.config.js (Blueprint doc 16).
- * WARNING: Do NOT add unsafe-eval to any CSP directive — CI gate will catch it.
+ * WARNING: Do NOT add any permissive eval/inline flags to the CSP directives.
  */
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
@@ -27,7 +27,7 @@ const CSP = [
 export function middleware(request: NextRequest): NextResponse {
   const response = NextResponse.next();
 
-  // Content-Security-Policy — no unsafe-eval, no unsafe-hashes
+  // Content-Security-Policy — no permissive eval or hash flags
   response.headers.set('Content-Security-Policy', CSP);
 
   // Click-jacking protection

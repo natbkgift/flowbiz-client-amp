@@ -1,3 +1,5 @@
+from typing import Literal
+
 from packages.core.phase1.schemas import (
     LeadTemperature,
     Phase1LeadPayload,
@@ -65,7 +67,7 @@ def _temperature(score: int) -> LeadTemperature:
     return LeadTemperature.FIRE
 
 
-def _line_mode(score: int) -> str:
+def _line_mode(score: int) -> Literal['urgent', 'priority', 'standard', 'batch']:
     if score >= 71:
         return "urgent"
     if score >= 46:

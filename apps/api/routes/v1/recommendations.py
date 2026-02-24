@@ -8,7 +8,7 @@ from sqlalchemy.orm import Session
 from packages.core.database import get_db
 from packages.core.finder.ranking import canonical_query_hash
 from packages.core.recommendation import recommend_properties
-from packages.core.schemas.recommendations import RecommendationItem
+from packages.core.schemas.recommendations import RecommendationItem, RecommendationProperty
 
 router = APIRouter(prefix="/v1", tags=["recommendations"])
 
@@ -51,7 +51,7 @@ def get_recommendations(
         RecommendationItem(
             score=r.score,
             reasons=r.reasons,
-            property=r.property,
+            property=RecommendationProperty.model_validate(r.property),
         )
         for r in recs
     ]

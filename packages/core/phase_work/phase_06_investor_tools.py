@@ -25,7 +25,7 @@ def run() -> None:
 
     mort = calc_mortgage_amortization(
         principal=Decimal("3000000"),
-        annual_rate_percent=6.5,
+        annual_rate_percent=Decimal("6.5"),
         years=20,
         payments_per_year=12,
     )

@@ -137,9 +137,9 @@ def list_properties(
     elif sort == "price_desc":
         order_by = (desc(Property.price), desc(Property.id))
     elif sort == "oldest":
-        order_by = (asc(Property.created_at), asc(Property.id))
+        order_by = (asc(Property.created_at), asc(Property.id))  # type: ignore[arg-type]
     else:
-        order_by = (desc(Property.created_at), desc(Property.id))
+        order_by = (desc(Property.created_at), desc(Property.id))  # type: ignore[arg-type]
 
     items = db.scalars(base_query.order_by(*order_by).offset((page - 1) * limit).limit(limit)).all()
 
