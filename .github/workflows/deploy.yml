@@ -238,9 +238,6 @@ jobs:
               docker inspect --format 'admin_image_ref={{.Config.Image}} admin_image_id={{.Image}}' "${ADMIN_CID_AFTER}" || true
             fi
 
-            echo "Running migration dry-run (SQL render)"
-            compose exec -T api alembic upgrade head --sql >/dev/null
-
             echo "Applying migrations"
             compose exec -T api alembic upgrade head
 
