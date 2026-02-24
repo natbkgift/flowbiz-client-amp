@@ -1,7 +1,7 @@
 # ops/STATE.md (STATE-LOCK)
 
 - CurrentPhase: A+B=PASS, Phase1=FAIL, Phase2=BLOCKED, Phase3=BLOCKED, Phase4=BLOCKED, Phase5=BLOCKED
-- CurrentIteration: phase1-iter-05 (evidence pending)
+- CurrentIteration: phase1-iter-05-defer-postlcp-analytics (PR #190 open)
 - MainlineStatus: RUNNING
 - LatestEvidence: ops/logs/phase1/
   - cf-headers.txt (2026-02-24 20:25:41)
@@ -9,7 +9,8 @@
   - lh-desktop.txt + lh-desktop.json (2026-02-24 20:29:25)
   - hydration.txt (2026-02-24 20:29:25)
 - OpenPRsAllowed: 2 (1x Phase1 mainline iteration PR + 1x parallel-prep PR)
-- OpenPRsNow: (none)
+- OpenPRsNow:
+  - #190 https://github.com/natbkgift/flowbiz-client-amp/pull/190 (Phase 1 mainline iteration)
 - PRsToClose: (none)
 - Locks:
   - Evidence-first only (patch requires Evidence Pack from ops/logs/*)
@@ -21,5 +22,5 @@
   - Lighthouse truth model: use simulated LCP (`audits[largest-contentful-paint].numericValue`) as truth; observed is supporting note only
   - Lighthouse gates: mobile>=92, desktop>=97, CLS=0, DOM<900, hydrationSignals=0
   - Avoid evidence bloat: evidence PR should prefer lh-*.{txt,json}, hydration.txt, cf-headers.txt, ops/STATE.md (attempt files only if necessary)
-- NextAction: Build Evidence Pack for phase1-iter-05 from ops/logs/phase1 (main), propose Options A/B, choose 1 patch ≤300LOC ≤5files, build → PR → merge+deploy → production evidence → evidence PR
+- NextAction: Merge PR #190 → deploy → run CF verify + `npm run lh:gate` (production) → open evidence-only PR to update ops/logs/phase1/* + ops/STATE.md
 - LastResultSummary: Phase1 FAIL — mobile median perf=77 LCP=5007ms TBT=232ms CLS=0 DOM=687; desktop median perf=96 LCP=1335ms TBT=32ms CLS=0 DOM=687 (note: one mobile run had CLS>0 but median CLS=0)
