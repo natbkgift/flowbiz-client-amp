@@ -5,8 +5,6 @@ import { useEffect, useState } from 'react';
 type UseAfterLCPOptions = {
   /** Hard fallback in case LCP cannot be observed (older browsers / blocked APIs). */
   fallbackMs?: number;
-  /** Debounce window: wait for LCP to stop updating before enabling deferred work. */
-  quietWindowMs?: number;
 };
 
 /**
@@ -15,11 +13,7 @@ type UseAfterLCPOptions = {
  * Purpose: move non-critical client work (analytics, observers, CTAs) out of the
  * LCP window so it cannot block the LCP paint under Lighthouse CPU throttling.
  */
-export function useAfterLCP(options: UseAfterLCPOptions = {}) {
-  const fallbackMs = typeof options.fallbackMs === 'number' ? options.fallbackMs : 15000;
-  const quietWindowMs =
-    typeof options.quietWindowMs === 'number' ? options.quietWindowMs : 1200;
-
+export function useAfterLCP({ fallbackMs = 15000 }: UseAfterLCPOptions = {}) {
   const [afterLcp, setAfterLcp] = useState(false);
 
   useEffect(() => {
@@ -31,20 +25,6 @@ export function useAfterLCP(options: UseAfterLCPOptions = {}) {
     };
 
     const fallbackTimer = setTimeout(mark, fallbackMs);
-    let quietTimer: ReturnType<typeof setTimeout> | null = null;
-
-    const scheduleAfterQuietWindow = (quietWindowMs: number) => {
-      if (done) return;
-      if (quietTimer) clearTimeout(quietTimer);
-      quietTimer = setTimeout(mark, quietWindowMs);
-    };
-
-    const onVisibilityChange = () => {
-      // When the page is hidden, LCP is finalized — safe to enable deferred work.
-      if (document.visibilityState === 'hidden') mark();
-    };
-
-    document.addEventListener('visibilitychange', onVisibilityChange);
 
     // Prefer observing LCP directly.
     try {
@@ -53,9 +33,9 @@ export function useAfterLCP(options: UseAfterLCPOptions = {}) {
           // Any LCP entry means the metric was recorded.
           const entries = list.getEntries();
           if (entries.length > 0) {
-            // LCP can update multiple times; wait for a short quiet window so we
-            // don't enable deferred work during the real (final) LCP window.
-            scheduleAfterQuietWindow(quietWindowMs);
+            // Ensure we run after the entry is processed.
+            setTimeout(mark, 0);
+            po.disconnect();
           }
         });
 
@@ -65,9 +45,7 @@ export function useAfterLCP(options: UseAfterLCPOptions = {}) {
         po.observe({ type: 'largest-contentful-paint', buffered: true } as any);
 
         return () => {
-          document.removeEventListener('visibilitychange', onVisibilityChange);
           clearTimeout(fallbackTimer);
-          if (quietTimer) clearTimeout(quietTimer);
           po.disconnect();
         };
       }
@@ -76,11 +54,9 @@ export function useAfterLCP(options: UseAfterLCPOptions = {}) {
     }
 
     return () => {
-      document.removeEventListener('visibilitychange', onVisibilityChange);
       clearTimeout(fallbackTimer);
-      if (quietTimer) clearTimeout(quietTimer);
     };
-  }, [fallbackMs, quietWindowMs]);
+  }, [fallbackMs]);
 
   return afterLcp;
 }
