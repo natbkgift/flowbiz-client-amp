@@ -2260,7 +2260,7 @@ summary.mobile-nav__trigger::-webkit-details-marker {
 }
 
 .reveal:not(.reveal--in) {
-  animation: reveal-fallback 0s 3s forwards;
+  animation: reveal-fallback 0s 0s forwards;
 }
 
 /* ======================== SKELETON LOADING ======================== */
