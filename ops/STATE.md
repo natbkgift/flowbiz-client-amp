@@ -1,7 +1,7 @@
 # ops/STATE.md (STATE-LOCK)
 
 - CurrentPhase: A+B=PASS, Phase1=FAIL, Phase2=BLOCKED, Phase3=BLOCKED, Phase4=BLOCKED, Phase5=BLOCKED
-- CurrentIteration: phase1-iter-09 (evidence collected)
+- CurrentIteration: phase1-iter-10 (patch prepared: option B)
 - MainlineStatus: RUNNING
 - LatestEvidence: ops/logs/phase1/
   - cf-headers.txt (2026-02-25 06:31:33)
@@ -21,5 +21,5 @@
   - Lighthouse truth model: use simulated LCP (`audits[largest-contentful-paint].numericValue`) as truth; observed is supporting note only
   - Lighthouse gates: mobile>=92, desktop>=97, CLS=0, DOM<900, hydrationSignals=0
   - Avoid evidence bloat: evidence PR should prefer lh-*.{txt,json}, hydration.txt, cf-headers.txt, ops/STATE.md (attempt files only if necessary)
-- NextAction: phase1-iter-10 — Evidence Pack + A/B options first (STRICT), prioritize Mobile TBT<=200 and LCP reduction while holding Desktop median >=97
-- LastResultSummary: Phase1 PARTIAL (iter-09 post-deploy) — desktop median perf=97 LCP=1232ms TBT=0ms (PASS, no-regression achieved); mobile median perf=79 LCP=4635ms TBT=231ms (FAIL: perf<92, lcp>2500, tbt>200)
+- NextAction: Open PR for phase1-iter-10 Option B patch (defer heavy DeferredProviders modules tied to 4bd1/3794 path to post-interaction+idle), merge+deploy, then CF verify + production lh:gate, then evidence-only PR
+- LastResultSummary: Phase1 PARTIAL (iter-09 post-deploy) — desktop median perf=97 LCP=1232ms TBT=0ms (PASS, no-regression achieved); mobile median perf=79 LCP=4635ms TBT=231ms (FAIL: perf<92, lcp>2500, tbt>200). Iter-10 decision: Option B selected (mobile-first with desktop guard)

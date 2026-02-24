@@ -69,6 +69,8 @@ export function DeferredProviders() {
   const afterLcp = useAfterLCP({ postLcpDelayMs: 300 });
   // Stage 2: additional delay gate to move non-critical providers to idle/interaction.
   const [ready, setReady] = useState(false);
+  // Stage 3: heavy modules gate (source path for long tasks / bootup / unused-js hot spots).
+  const [heavyReady, setHeavyReady] = useState(false);
 
   useEffect(() => {
     if (!afterLcp) {
@@ -144,16 +146,91 @@ export function DeferredProviders() {
     };
   }, [afterLcp]);
 
+  useEffect(() => {
+    if (!ready) {
+      setHeavyReady(false);
+      return;
+    }
+
+    let done = false;
+    let interacted = false;
+    let idleReached = false;
+
+    let engageTimeout: ReturnType<typeof setTimeout> | null = null;
+    let idleTimeout: ReturnType<typeof setTimeout> | null = null;
+    let idleId: number | null = null;
+
+    const markHeavyReady = () => {
+      if (done) return;
+      done = true;
+      setHeavyReady(true);
+    };
+
+    const tryHeavyReady = () => {
+      if (done) return;
+      if (interacted && idleReached) {
+        markHeavyReady();
+      }
+    };
+
+    const onInteraction = () => {
+      interacted = true;
+      tryHeavyReady();
+    };
+
+    engageTimeout = setTimeout(() => {
+      interacted = true;
+      tryHeavyReady();
+    }, 6000);
+
+    if ('requestIdleCallback' in window) {
+      idleId = window.requestIdleCallback(
+        () => {
+          idleReached = true;
+          tryHeavyReady();
+        },
+        { timeout: 3500 }
+      );
+    } else {
+      idleTimeout = setTimeout(() => {
+        idleReached = true;
+        tryHeavyReady();
+      }, 1800);
+    }
+
+    window.addEventListener('pointerdown', onInteraction, { once: true, passive: true });
+    window.addEventListener('keydown', onInteraction, { once: true, passive: true });
+    window.addEventListener('touchstart', onInteraction, { once: true, passive: true });
+    window.addEventListener('scroll', onInteraction, { once: true, passive: true });
+
+    return () => {
+      done = true;
+      if (engageTimeout) clearTimeout(engageTimeout);
+      if (idleTimeout) clearTimeout(idleTimeout);
+      if (idleId !== null && 'cancelIdleCallback' in window) {
+        window.cancelIdleCallback(idleId);
+      }
+      window.removeEventListener('pointerdown', onInteraction);
+      window.removeEventListener('keydown', onInteraction);
+      window.removeEventListener('touchstart', onInteraction);
+      window.removeEventListener('scroll', onInteraction);
+    };
+  }, [ready]);
+
   if (!ready) return null;
 
   return (
     <>
-      <PostLCPAnalytics />
-      <ExperimentProvider />
-      <ScrollReveal />
       <FloatingWhatsAppCTA />
       <StickyMobileCTA />
       <CookieConsent />
+      {heavyReady ? (
+        <>
+          <PostLCPAnalytics />
+          <ExperimentProvider />
+          <ScrollReveal />
+        </>
+      ) : null}
     </>
   );
 }
