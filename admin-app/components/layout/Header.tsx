@@ -138,7 +138,7 @@ export async function Header({ locale, dict }: { locale: Locale; dict: Dictionar
 
       <header className="header">
         <div className="header-content">
-          <Link href={withLocale(locale, '/')} className="logo" aria-label={dict.brand.name}>
+          <Link href={withLocale(locale, '/')} prefetch={false} className="logo" aria-label={dict.brand.name}>
             <span className="logo-mark">AMP</span>
             <span className="logo-name">{dict.brand.name}</span>
           </Link>
@@ -164,13 +164,13 @@ export async function Header({ locale, dict }: { locale: Locale; dict: Dictionar
                       {group.isMega ? (
                         <div className="dropdown-mega-grid">
                           {group.href && (
-                            <Link href={withLocale(locale, group.href)} className="dropdown-item dropdown-item--all">
+                            <Link href={withLocale(locale, group.href)} prefetch={false} className="dropdown-item dropdown-item--all">
                               <span className="dropdown-item__label">Browse All</span>
                               <span className="dropdown-item__desc">See all {String(group.label).toLowerCase()} options</span>
                             </Link>
                           )}
                           {group.items.filter((i) => i.href !== group.href).map((item) => (
-                            <Link key={item.href} href={withLocale(locale, item.href)} className="dropdown-item" role="menuitem">
+                            <Link key={item.href} href={withLocale(locale, item.href)} prefetch={false} className="dropdown-item" role="menuitem">
                               <span className="dropdown-item__label">{item.label}</span>
                               {item.desc && <span className="dropdown-item__desc">{item.desc}</span>}
                             </Link>
@@ -179,7 +179,7 @@ export async function Header({ locale, dict }: { locale: Locale; dict: Dictionar
                       ) : (
                         <div className="dropdown-list">
                           {group.items.map((item) => (
-                            <Link key={item.href} href={withLocale(locale, item.href)} className="dropdown-item" role="menuitem">
+                            <Link key={item.href} href={withLocale(locale, item.href)} prefetch={false} className="dropdown-item" role="menuitem">
                               <span className="dropdown-item__label">{item.label}</span>
                               {item.desc && <span className="dropdown-item__desc">{item.desc}</span>}
                             </Link>
@@ -191,6 +191,7 @@ export async function Header({ locale, dict }: { locale: Locale; dict: Dictionar
                 ) : (
                   <Link
                     href={withLocale(locale, group.href ?? '/')}
+                    prefetch={false}
                     className={`nav-link ${group.href && isActive(group.href) ? 'nav-link--active' : ''}`}
                     aria-current={group.href && isActive(group.href) ? 'page' : undefined}
                   >
@@ -201,6 +202,7 @@ export async function Header({ locale, dict }: { locale: Locale; dict: Dictionar
             ))}
             <Link
               href={withLocale(locale, '/contact')}
+              prefetch={false}
               className={`nav-link nav-link--cta ${isActive('/contact') ? 'nav-link--active' : ''}`}
             >
               {dict.nav.contact}
@@ -208,7 +210,7 @@ export async function Header({ locale, dict }: { locale: Locale; dict: Dictionar
           </nav>
 
           <div className="header-actions">
-            <Link href={switchHref} className="lang-switch" aria-label={dict.common.language}>
+            <Link href={switchHref} prefetch={false} className="lang-switch" aria-label={dict.common.language}>
               {langLabel}
             </Link>
 
@@ -249,12 +251,12 @@ export async function Header({ locale, dict }: { locale: Locale; dict: Dictionar
 
                 <div className="mobile-nav__sub">
                   {group.href && (
-                    <Link href={withLocale(locale, group.href)} className="mobile-nav__sub-item mobile-nav__sub-item--all">
+                    <Link href={withLocale(locale, group.href)} prefetch={false} className="mobile-nav__sub-item mobile-nav__sub-item--all">
                       Browse All {group.label}
                     </Link>
                   )}
                   {group.items.filter((i) => i.href !== group.href).map((item) => (
-                    <Link key={item.href} href={withLocale(locale, item.href)} className="mobile-nav__sub-item">
+                    <Link key={item.href} href={withLocale(locale, item.href)} prefetch={false} className="mobile-nav__sub-item">
                       <span className="mobile-nav__sub-label">{item.label}</span>
                       {item.desc && <span className="mobile-nav__sub-desc">{item.desc}</span>}
                     </Link>
@@ -262,12 +264,12 @@ export async function Header({ locale, dict }: { locale: Locale; dict: Dictionar
                 </div>
               </details>
             ) : (
-              <Link key={group.key} href={withLocale(locale, group.href ?? '/')} className="mobile-nav__item">
+              <Link key={group.key} href={withLocale(locale, group.href ?? '/')} prefetch={false} className="mobile-nav__item">
                 {group.label}
               </Link>
             )
           ))}
-          <Link href={withLocale(locale, '/contact')} className="mobile-nav__cta">
+          <Link href={withLocale(locale, '/contact')} prefetch={false} className="mobile-nav__cta">
             {dict.nav.contact}
           </Link>
         </div>
