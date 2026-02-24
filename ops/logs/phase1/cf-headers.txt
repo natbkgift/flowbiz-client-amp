@@ -7,3 +7,12 @@
 [2026-02-24T18:41:39] STATIC round2 url=https://amppattaya.com/_next/static/chunks/4bd1b696-bf5e0dbacfa5baef.js cf=HIT age=259 server=cloudflare set-cookie=
 [2026-02-24T18:41:39] PASS static age increased on round2
 [2026-02-24T18:41:39] VERIFY end
+[2026-02-24T19:48:19] VERIFY start
+[2026-02-24T19:48:19] HTML /en/ cf=DYNAMIC age= server=cloudflare cache-control=public, s-maxage=300, stale-while-revalidate=3600
+[2026-02-24T19:48:20] HTML /en/ cf=DYNAMIC age= server=cloudflare cache-control=public, s-maxage=300, stale-while-revalidate=3600
+[2026-02-24T19:48:20] HTML /th/ cf=DYNAMIC age= server=cloudflare cache-control=public, s-maxage=300, stale-while-revalidate=3600
+[2026-02-24T19:48:20] HTML /th/ cf=DYNAMIC age= server=cloudflare cache-control=public, s-maxage=300, stale-while-revalidate=3600
+[2026-02-24T19:48:23] STATIC round1 url=https://amppattaya.com/_next/static/chunks/4bd1b696-bf5e0dbacfa5baef.js cf=HIT age=4260 server=cloudflare set-cookie=
+[2026-02-24T19:48:23] STATIC round2 url=https://amppattaya.com/_next/static/chunks/4bd1b696-bf5e0dbacfa5baef.js cf=HIT age=4263 server=cloudflare set-cookie=
+[2026-02-24T19:48:23] PASS static age increased on round2
+[2026-02-24T19:48:23] VERIFY end
