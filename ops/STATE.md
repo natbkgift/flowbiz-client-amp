@@ -21,5 +21,5 @@
   - Lighthouse truth model: use simulated LCP (`audits[largest-contentful-paint].numericValue`) as truth; observed is supporting note only
   - Lighthouse gates: mobile>=92, desktop>=97, CLS=0, DOM<900, hydrationSignals=0
   - Avoid evidence bloat: evidence PR should prefer lh-*.{txt,json}, hydration.txt, cf-headers.txt, ops/STATE.md (attempt files only if necessary)
-- NextAction: Open evidence-only PR (post-PR #190) to update ops/logs/phase1/* + ops/STATE.md on main, then build Evidence Pack for iter-06 and choose next 1 patch
+- NextAction: Build Evidence Pack for phase1-iter-06 from ops/logs/phase1 (main), propose Options A/B, choose 1 patch ≤300LOC ≤5files, build → PR → merge+deploy → production evidence → evidence PR
 - LastResultSummary: Phase1 FAIL — mobile median perf=78 LCP=4963ms TBT=210ms CLS=0 DOM=687; desktop median perf=96 LCP=1401ms TBT=1ms CLS=0 DOM=687
