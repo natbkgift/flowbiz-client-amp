@@ -21,6 +21,7 @@ export function TrackedLink({
   eventType,
   eventPayload,
   children,
+  prefetch,
   ...props
 }: LinkProps & {
   eventType: EventType;
@@ -31,6 +32,7 @@ export function TrackedLink({
   return (
     <Link
       {...props}
+      prefetch={prefetch ?? false}
       data-amp-event-type={eventType}
       data-amp-event-payload={
         eventPayload ? JSON.stringify(eventPayload) : undefined
