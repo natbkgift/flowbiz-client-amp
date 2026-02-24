@@ -141,7 +141,8 @@ describe('sitemap-xml.ts (static pages)', () => {
 });
 
 describe('middleware security headers', () => {
-  const src = readFileSync(resolve(__dirname, '..', 'middleware.ts'), 'utf-8');
+  // Next.js 16 uses proxy.ts (Edge Proxy) instead of middleware.ts.
+  const src = readFileSync(resolve(__dirname, '..', 'proxy.ts'), 'utf-8');
 
   it('sets Content-Security-Policy header', () => {
     expect(src).toContain('Content-Security-Policy');
