@@ -185,6 +185,13 @@ jobs:
 
             # Authenticate to GHCR on the VPS so docker pull can access private images
             echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u "${{ github.actor }}" --password-stdin
+            # ╔══════════════════════════════════════════════════════════════╗
+            # ║  PERMANENT: VPS repo sync — DO NOT REMOVE                    ║
+            # ║  Without this, the VPS working directory stays at an old     ║
+            # ║  commit.  docker-compose.prod.yml and alembic migrations      ║
+            # ║  read from the working dir, so a stale checkout causes the   ║
+            # ║  wrong image tag / old migration files to be used.           ║
+            # ╚══════════════════════════════════════════════════════════════╝
             echo "Syncing repository to deployed commit"
             echo "target_sha=${{ github.sha }}"
             if command -v git >/dev/null 2>&1; then
@@ -238,6 +245,14 @@ jobs:
               docker inspect --format 'admin_image_ref={{.Config.Image}} admin_image_id={{.Image}}' "${ADMIN_CID_AFTER}" || true
             fi
 
+            # ╔══════════════════════════════════════════════════════════════╗
+            # ║  PERMANENT: online migration only — DO NOT add --sql flag    ║
+            # ║  `alembic upgrade head --sql` runs in offline/dry-run mode.  ║
+            # ║  Any migration that queries the DB (e.g. duplicate checks)   ║
+            # ║  will crash with `AttributeError: 'NoneType' ...` because    ║
+            # ║  Alembic's MockConnection returns None from execute().        ║
+            # ║  The real online `alembic upgrade head` is safe and correct. ║
+            # ╚══════════════════════════════════════════════════════════════╝
             echo "Applying migrations"
             compose exec -T api alembic upgrade head
 
@@ -359,6 +374,9 @@ jobs:
               local expect_status="${3:-200}"
 
               local status
+              # -L is REQUIRED: Next.js canonical redirect /en → /en/ returns
+              # 308, not 200.  Without -L the smoke test would always FAIL on
+              # every public page even when the site is healthy.
               status=$(curl -sS -L -o /dev/null -w "%{http_code}" --max-time 15 "$url" || echo "000")
 
               if [[ "$status" == "$expect_status" ]]; then
