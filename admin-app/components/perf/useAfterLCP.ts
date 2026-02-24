@@ -7,6 +7,8 @@ type UseAfterLCPOptions = {
   fallbackMs?: number;
   /** Debounce window: wait for LCP to stop updating before enabling deferred work. */
   quietWindowMs?: number;
+  /** Optional minimum delay after LCP is finalized before enabling deferred work. */
+  postLcpDelayMs?: number;
 };
 
 /**
@@ -19,15 +21,26 @@ export function useAfterLCP(options: UseAfterLCPOptions = {}) {
   const fallbackMs = typeof options.fallbackMs === 'number' ? options.fallbackMs : 15000;
   const quietWindowMs =
     typeof options.quietWindowMs === 'number' ? options.quietWindowMs : 1200;
+  const postLcpDelayMs =
+    typeof options.postLcpDelayMs === 'number' ? options.postLcpDelayMs : 0;
 
   const [afterLcp, setAfterLcp] = useState(false);
 
   useEffect(() => {
     let done = false;
-    const mark = () => {
+    const markNow = () => {
       if (done) return;
       done = true;
       setAfterLcp(true);
+    };
+
+    const mark = () => {
+      if (done) return;
+      if (postLcpDelayMs > 0) {
+        setTimeout(markNow, postLcpDelayMs);
+        return;
+      }
+      markNow();
     };
 
     const fallbackTimer = setTimeout(mark, fallbackMs);
@@ -80,7 +93,7 @@ export function useAfterLCP(options: UseAfterLCPOptions = {}) {
       clearTimeout(fallbackTimer);
       if (quietTimer) clearTimeout(quietTimer);
     };
-  }, [fallbackMs, quietWindowMs]);
+  }, [fallbackMs, quietWindowMs, postLcpDelayMs]);
 
   return afterLcp;
 }
