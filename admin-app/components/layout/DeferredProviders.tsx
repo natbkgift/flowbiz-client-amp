@@ -15,6 +15,14 @@ import dynamic from 'next/dynamic';
 
 import { useAfterLCP } from '@/components/perf/useAfterLCP';
 
+const PostLCPAnalytics = dynamic(
+  () =>
+    import('@/components/analytics/PostLCPAnalytics').then((m) => ({
+      default: m.PostLCPAnalytics,
+    })),
+  { ssr: false }
+);
+
 const ExperimentProvider = dynamic(
   () =>
     import('@/components/analytics/ExperimentProvider').then((m) => ({
@@ -62,6 +70,7 @@ export function DeferredProviders() {
 
   return (
     <>
+      <PostLCPAnalytics />
       <ExperimentProvider />
       <ScrollReveal />
       <FloatingWhatsAppCTA />
