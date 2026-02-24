@@ -484,3 +484,41 @@ hydrationSignals(total): 0
   - Failed to load resource: the server responded with a status of 422 () @ https://amppattaya.com/api/v1/events:0:0
   - Loading the script 'https://static.cloudflareinsights.com/beacon.min.js/vcd15cbe7772f49c399c6a5babf22c1241717689176015' violates the following Content Security Policy directive: "script-src 'self' 'unsafe-inline'". Note that 'script-src-ele @ https://amppattaya.com/en/?lh=1771976058666:0:0
 ### END PRESET: desktop
+### PRESET: mobile
+timestamp: 2026-02-24T23:45:49.496Z
+url: https://amppattaya.com/en/
+preset: mobile
+runs: 5
+hydrationSignals(total): 0
+- lh-mobile-run01.json consoleErrors=1 hydrationSignals=0
+  - Loading the script 'https://static.cloudflareinsights.com/beacon.min.js/vcd15cbe7772f49c399c6a5babf22c1241717689176015' violates the following Content Security Policy directive: "script-src 'self' 'unsafe-inline'". Note that 'script-src-ele @ https://amppattaya.com/en/?lh=1771976658434:0:0
+- lh-mobile-run02.json consoleErrors=1 hydrationSignals=0
+  - Loading the script 'https://static.cloudflareinsights.com/beacon.min.js/vcd15cbe7772f49c399c6a5babf22c1241717689176015' violates the following Content Security Policy directive: "script-src 'self' 'unsafe-inline'". Note that 'script-src-ele @ https://amppattaya.com/en/?lh=1771976678559:0:0
+- lh-mobile-run03.json consoleErrors=1 hydrationSignals=0
+  - Loading the script 'https://static.cloudflareinsights.com/beacon.min.js/vcd15cbe7772f49c399c6a5babf22c1241717689176015' violates the following Content Security Policy directive: "script-src 'self' 'unsafe-inline'". Note that 'script-src-ele @ https://amppattaya.com/en/?lh=1771976696256:0:0
+- lh-mobile-run04.json consoleErrors=1 hydrationSignals=0
+  - Loading the script 'https://static.cloudflareinsights.com/beacon.min.js/vcd15cbe7772f49c399c6a5babf22c1241717689176015' violates the following Content Security Policy directive: "script-src 'self' 'unsafe-inline'". Note that 'script-src-ele @ https://amppattaya.com/en/?lh=1771976713384:0:0
+- lh-mobile-run05.json consoleErrors=3 hydrationSignals=0
+  - Failed to load resource: the server responded with a status of 422 () @ https://amppattaya.com/api/v1/events:0:0
+  - Failed to load resource: the server responded with a status of 422 () @ https://amppattaya.com/api/v1/events:0:0
+  - Loading the script 'https://static.cloudflareinsights.com/beacon.min.js/vcd15cbe7772f49c399c6a5babf22c1241717689176015' violates the following Content Security Policy directive: "script-src 'self' 'unsafe-inline'". Note that 'script-src-ele @ https://amppattaya.com/en/?lh=1771976730128:0:0
+### END PRESET: mobile
+### PRESET: desktop
+timestamp: 2026-02-24T23:47:15.792Z
+url: https://amppattaya.com/en/
+preset: desktop
+runs: 5
+hydrationSignals(total): 0
+- lh-desktop-run01.json consoleErrors=1 hydrationSignals=0
+  - Loading the script 'https://static.cloudflareinsights.com/beacon.min.js/vcd15cbe7772f49c399c6a5babf22c1241717689176015' violates the following Content Security Policy directive: "script-src 'self' 'unsafe-inline'". Note that 'script-src-ele @ https://amppattaya.com/en/?lh=1771976749565:0:0
+- lh-desktop-run02.json consoleErrors=1 hydrationSignals=0
+  - Loading the script 'https://static.cloudflareinsights.com/beacon.min.js/vcd15cbe7772f49c399c6a5babf22c1241717689176015' violates the following Content Security Policy directive: "script-src 'self' 'unsafe-inline'". Note that 'script-src-ele @ https://amppattaya.com/en/?lh=1771976766809:0:0
+- lh-desktop-run03.json consoleErrors=3 hydrationSignals=0
+  - Failed to load resource: the server responded with a status of 422 () @ https://amppattaya.com/api/v1/events:0:0
+  - Failed to load resource: the server responded with a status of 422 () @ https://amppattaya.com/api/v1/events:0:0
+  - Loading the script 'https://static.cloudflareinsights.com/beacon.min.js/vcd15cbe7772f49c399c6a5babf22c1241717689176015' violates the following Content Security Policy directive: "script-src 'self' 'unsafe-inline'". Note that 'script-src-ele @ https://amppattaya.com/en/?lh=1771976784648:0:0
+- lh-desktop-run04.json consoleErrors=1 hydrationSignals=0
+  - Loading the script 'https://static.cloudflareinsights.com/beacon.min.js/vcd15cbe7772f49c399c6a5babf22c1241717689176015' violates the following Content Security Policy directive: "script-src 'self' 'unsafe-inline'". Note that 'script-src-ele @ https://amppattaya.com/en/?lh=1771976801982:0:0
+- lh-desktop-run05.json consoleErrors=1 hydrationSignals=0
+  - Loading the script 'https://static.cloudflareinsights.com/beacon.min.js/vcd15cbe7772f49c399c6a5babf22c1241717689176015' violates the following Content Security Policy directive: "script-src 'self' 'unsafe-inline'". Note that 'script-src-ele @ https://amppattaya.com/en/?lh=1771976818940:0:0
+### END PRESET: desktop
