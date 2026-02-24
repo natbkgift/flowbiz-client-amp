@@ -191,7 +191,7 @@ export default async function SmartFinderPage({
                   <button className="btn btn-cta" type="submit">
                     {dict.guided.next}
                   </button>
-                  <Link className="btn btn-secondary" href={withLocale(locale, '/smart-finder')}>
+                  <Link prefetch={false} className="btn btn-secondary" href={withLocale(locale, '/smart-finder')}>
                     {dict.smartFinder.startOver}
                   </Link>
                 </div>
@@ -222,7 +222,7 @@ export default async function SmartFinderPage({
                   <button className="btn btn-cta" type="submit">
                     {dict.guided.next}
                   </button>
-                  <Link
+                  <Link prefetch={false}
                     className="btn btn-secondary"
                     href={withLocale(locale, `/smart-finder?step=budget&purpose=${purpose ?? 'invest'}`)}
                   >
@@ -259,7 +259,7 @@ export default async function SmartFinderPage({
                 </div>
 
                 <div className="cta-row">
-                  <Link
+                  <Link prefetch={false}
                     className="btn btn-secondary"
                     href={withLocale(
                       locale,
@@ -300,7 +300,7 @@ export default async function SmartFinderPage({
                 </div>
 
                 <div className="cta-row">
-                  <Link
+                  <Link prefetch={false}
                     className="btn btn-secondary"
                     href={withLocale(
                       locale,
@@ -335,10 +335,10 @@ export default async function SmartFinderPage({
                           ))}
                         </ul>
                         <div className="card-actions mt-4">
-                          <Link className="btn btn-cta" href={withLocale(locale, `/projects/${encodeURIComponent(it.slug)}`)}>
+                          <Link prefetch={false} className="btn btn-cta" href={withLocale(locale, `/projects/${encodeURIComponent(it.slug)}`)}>
                             {dict.smartFinder.viewProject}
                           </Link>
-                          <Link className="btn btn-secondary" href={withLocale(locale, `/compare?ids=${encodeURIComponent(it.project_id)}`)}>
+                          <Link prefetch={false} className="btn btn-secondary" href={withLocale(locale, `/compare?ids=${encodeURIComponent(it.project_id)}`)}>
                             {dict.smartFinder.compare}
                           </Link>
                         </div>
@@ -352,10 +352,10 @@ export default async function SmartFinderPage({
                       {dict.smartFinder.noProjectsDescription}
                     </p>
                     <div className="cta-row">
-                      <Link className="btn btn-cta" href={withLocale(locale, '/projects')}>
+                      <Link prefetch={false} className="btn btn-cta" href={withLocale(locale, '/projects')}>
                         {dict.smartFinder.goToProjects}
                       </Link>
-                      <Link className="btn btn-secondary" href={withLocale(locale, '/smart-finder')}>
+                      <Link prefetch={false} className="btn btn-secondary" href={withLocale(locale, '/smart-finder')}>
                         {dict.smartFinder.startOver}
                       </Link>
                     </div>

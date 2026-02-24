@@ -116,7 +116,7 @@ export default async function GuidesIndexPage({ params }: { params: Promise<{ lo
 
           <div className="grid grid-2">
             {guides.map((g) => (
-              <Link key={g.slug} href={withLocale(locale, `/guides/${g.slug}`)} className="card">
+              <Link prefetch={false} key={g.slug} href={withLocale(locale, `/guides/${g.slug}`)} className="card">
                 <div className="card-title">{locale === 'th' ? g.titleTh : g.titleEn}</div>
                 <div className="card-subtitle">
                   {locale === 'th'

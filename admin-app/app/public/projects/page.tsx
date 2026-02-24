@@ -57,7 +57,7 @@ export default function PublicProjectsPage() {
       <ul className="space-y-2">
         {rows.map((r) => (
           <li key={r.name} className="flex items-center justify-between">
-            <Link className="underline" href={`/public/properties?search=${encodeURIComponent(r.name)}`}>
+            <Link prefetch={false} className="underline" href={`/public/properties?search=${encodeURIComponent(r.name)}`}>
               {r.name}
             </Link>
             <span className="text-slate-600">{r.count}</span>

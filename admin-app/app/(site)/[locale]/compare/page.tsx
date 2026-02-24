@@ -124,10 +124,10 @@ export default async function ComparePage({
                 {dict.compare.getStartedDesc}
               </p>
               <div className="cta-row">
-                <Link className="btn btn-cta" href={withLocale(locale, '/smart-finder')}>
+                <Link prefetch={false} className="btn btn-cta" href={withLocale(locale, '/smart-finder')}>
                   {dict.compare.goToSmartFinder}
                 </Link>
-                <Link className="btn btn-secondary" href={withLocale(locale, '/projects')}>
+                <Link prefetch={false} className="btn btn-secondary" href={withLocale(locale, '/projects')}>
                   {dict.compare.browseProjects}
                 </Link>
               </div>
@@ -172,7 +172,7 @@ export default async function ComparePage({
                     <th>{dict.compare.field}</th>
                     {items.map((ev) => (
                       <th key={ev.project.id}>
-                        <Link href={withLocale(locale, `/projects/${encodeURIComponent(ev.project.slug)}`)}>
+                        <Link prefetch={false} href={withLocale(locale, `/projects/${encodeURIComponent(ev.project.slug)}`)}>
                           {ev.project.name}
                         </Link>
                       </th>
@@ -233,10 +233,10 @@ export default async function ComparePage({
             </div>
 
             <div className="cta-row mt-4">
-              <Link className="btn btn-secondary" href={withLocale(locale, '/smart-finder')}>
+              <Link prefetch={false} className="btn btn-secondary" href={withLocale(locale, '/smart-finder')}>
                 {dict.compare.backToSmartFinder}
               </Link>
-              <Link className="btn btn-cta" href={withLocale(locale, '/contact?topic=investment_plan')}>
+              <Link prefetch={false} className="btn btn-cta" href={withLocale(locale, '/contact?topic=investment_plan')}>
                 {dict.compare.getInvestmentPlan}
               </Link>
             </div>

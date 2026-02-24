@@ -74,7 +74,7 @@ export function ProjectCard({
   );
 
   if (slug && locale) {
-    return <Link href={withLocale(locale, `/projects/${slug}`)}>{inner}</Link>;
+    return <Link prefetch={false} href={withLocale(locale, `/projects/${slug}`)}>{inner}</Link>;
   }
 
   return inner;

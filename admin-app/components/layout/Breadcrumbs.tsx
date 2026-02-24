@@ -45,7 +45,7 @@ export function Breadcrumbs({ items }: BreadcrumbsProps) {
                 <span aria-current="page">{item.label}</span>
               ) : (
                 <>
-                  <Link href={item.href} className="breadcrumbs-link">
+                  <Link prefetch={false} href={item.href} className="breadcrumbs-link">
                     {item.label}
                   </Link>
                   <span className="breadcrumbs-separator" aria-hidden="true">

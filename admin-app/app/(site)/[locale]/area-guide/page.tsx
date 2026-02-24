@@ -132,7 +132,7 @@ export default async function AreaGuidePage({ params }: { params: Promise<{ loca
             {AREAS.map((area) => (
               <div key={area.slug} className="card reveal">
                 <h3 className="card-title">
-                  <Link
+                  <Link prefetch={false}
                     href={withLocale(locale, `/area-guide/${area.slug}`)}
                     className="card-link"
                   >
@@ -146,7 +146,7 @@ export default async function AreaGuidePage({ params }: { params: Promise<{ loca
                   </p>
                   <div className="area-card-types">
                     {area.types.map((type) => (
-                      <Link
+                      <Link prefetch={false}
                         key={type}
                         href={withLocale(locale, `/buy/${type}-pattaya?area=${area.slug}`)}
                         className="btn btn-sm btn-outline"
@@ -154,7 +154,7 @@ export default async function AreaGuidePage({ params }: { params: Promise<{ loca
                         {locale === 'th' ? typeLabels[type].th : typeLabels[type].en}
                       </Link>
                     ))}
-                    <Link
+                    <Link prefetch={false}
                       href={withLocale(locale, `/rent/condo-pattaya?area=${area.slug}`)}
                       className="btn btn-sm btn-outline"
                     >
@@ -164,7 +164,7 @@ export default async function AreaGuidePage({ params }: { params: Promise<{ loca
                 </div>
 
                 <div className="card-actions">
-                  <Link
+                  <Link prefetch={false}
                     href={withLocale(locale, `/area-guide/${area.slug}`)}
                     className="btn btn-tertiary"
                   >
@@ -188,7 +188,7 @@ export default async function AreaGuidePage({ params }: { params: Promise<{ loca
             {AREAS.map((area) => (
               <div key={area.slug} className="map-item" role="listitem">
                 <div className="map-item__title">
-                  <Link href={withLocale(locale, `/area-guide/${area.slug}`)}>
+                  <Link prefetch={false} href={withLocale(locale, `/area-guide/${area.slug}`)}>
                     {locale === 'th' ? area.nameTh : area.nameEn}
                   </Link>
                 </div>
@@ -201,7 +201,7 @@ export default async function AreaGuidePage({ params }: { params: Promise<{ loca
                   </span>
                 </div>
                 <div className="map-item__row">
-                  <Link
+                  <Link prefetch={false}
                     href={withLocale(locale, `/areas/${area.slug}`)}
                     className="btn btn-tertiary"
                   >

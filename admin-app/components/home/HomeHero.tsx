@@ -56,13 +56,13 @@ export function HomeHero({
                         </p>
 
                         <div className="flex flex-wrap gap-4">
-                            <Link
+                            <Link prefetch={false}
                                 className="px-6 py-3 bg-white text-gray-900 rounded-full text-sm font-semibold hover:bg-gray-100 transition-colors"
                                 href={`/${locale}/projects`}
                             >
                                 {dict.nav?.projects || "Explore Projects"}
                             </Link>
-                            <Link
+                            <Link prefetch={false}
                                 className="px-6 py-3 bg-white/10 hover:bg-white/20 rounded-full text-white text-sm font-medium transition-colors border border-white/20"
                                 href={`/${locale}/invest`}
                             >

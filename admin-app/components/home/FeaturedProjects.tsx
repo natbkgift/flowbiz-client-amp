@@ -39,7 +39,7 @@ export function FeaturedProjects({
           const price = p.starting_price ? formatPrice(Number(p.starting_price)) : null;
 
           return (
-            <Link
+            <Link prefetch={false}
               key={p.id}
               href={withLocale(locale, `/projects/${encodeURIComponent(p.slug)}`)}
               className="property-card reveal"

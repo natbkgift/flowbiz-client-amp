@@ -28,7 +28,7 @@ setup_logging()
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    """Modern lifespan handler — replaces deprecated @app.on_event."""
+    """Application lifespan handler: initialise database and bootstrap admin user."""
     init_db()
     bootstrap_admin_user()
     yield

@@ -15,7 +15,7 @@ export function StickyMobileCTA() {
 
   return (
     <div className="mobile-cta" role="region" aria-label={dict.common.ctaRegion}>
-      <Link
+      <Link prefetch={false}
         className="btn btn-cta mobile-cta__btn"
         href={withLocale(locale, '/contact?topic=private_tour')}
       >
@@ -29,7 +29,7 @@ export function StickyMobileCTA() {
       >
         {dict.cta.whatsapp}
       </a>
-      <Link
+      <Link prefetch={false}
         className="btn btn-secondary mobile-cta__btn"
         href={withLocale(locale, '/contact?topic=investment_plan')}
       >

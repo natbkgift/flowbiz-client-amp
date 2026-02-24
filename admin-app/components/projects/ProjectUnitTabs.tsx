@@ -102,7 +102,7 @@ export function ProjectUnitTabs({
             const img = resolveImageUrl(u.cover_image ?? u.local_images?.[0] ?? u.images?.[0] ?? null);
             const href = u.slug ? `/${locale}/property/${encodeURIComponent(u.slug)}` : '#';
             return (
-              <Link key={u.id} href={href} className="property-card">
+              <Link prefetch={false} key={u.id} href={href} className="property-card">
                 <div className="card-image">
                   {img ? (
                     <Image

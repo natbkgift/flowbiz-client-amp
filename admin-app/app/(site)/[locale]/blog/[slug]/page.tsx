@@ -91,7 +91,7 @@ export default async function BlogPostPage({ params }: PageProps) {
             <p className="subhead">
               Whether you are a first-time buyer, seasoned investor, or looking to relocate, understanding the local market dynamics, legal framework, and emerging trends is essential for a successful property transaction. Contact our advisory team for personalized guidance tailored to your investment objectives.
             </p>
-            <Link
+            <Link prefetch={false}
               href={`/${locale}/blog`}
               className="btn btn-tertiary"
             >
@@ -158,7 +158,7 @@ export default async function BlogPostPage({ params }: PageProps) {
             </div>
           </div>
 
-          <Link
+          <Link prefetch={false}
             href={`/${locale}/blog`}
             className="btn btn-tertiary"
           >

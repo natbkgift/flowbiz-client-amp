@@ -207,7 +207,7 @@ export default async function HomePage({
                 : 'bg-emerald-50 text-emerald-700';
 
               return (
-                <Link
+                <Link prefetch={false}
                   key={prop.id}
                   href={withLocale(locale, `/properties/${prop.id}`)}
                   className="property-card reveal"
@@ -549,7 +549,7 @@ export default async function HomePage({
               <div className="relative z-10">
                 <h3 className="text-xl font-serif font-medium text-gray-900 mb-4">The AMP Pattaya Standard</h3>
                 <p className="text-gray-600 mb-6 leading-relaxed">We protect your investment from day one. Our multi-layered due diligence process ensures every property meets international standards for quality, legal clarity, and long-term value.</p>
-                <Link href={`/${locale}/about`} className="text-primary font-semibold hover:text-primary-dark transition-colors inline-flex items-center gap-2">Discover our approach →</Link>
+                <Link prefetch={false} href={`/${locale}/about`} className="text-primary font-semibold hover:text-primary-dark transition-colors inline-flex items-center gap-2">Discover our approach →</Link>
               </div>
             </div>
           </div>

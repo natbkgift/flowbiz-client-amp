@@ -15,7 +15,7 @@ export function PropertyCard({ item, dict }: { item: PropertyListItem; dict: Dic
   const img = resolveImageUrl(item.cover_image ?? item.local_images?.[0] ?? item.images?.[0] ?? null);
 
   return (
-    <Link href={href} className="property-card">
+    <Link prefetch={false} href={href} className="property-card">
       <div className="card-image">
         {img ? (
           <Image

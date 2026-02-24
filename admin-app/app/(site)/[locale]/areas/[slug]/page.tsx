@@ -76,7 +76,7 @@ export default async function AreaPage({
           <h1 className="section-title">{dict.area.notFound}</h1>
           <p className="section-subtitle">{dict.area.invalidLink}</p>
           <div className="cta-row mt-4">
-            <Link className="btn btn-cta" href={withLocale(locale, '/area-guide')}>
+            <Link prefetch={false} className="btn btn-cta" href={withLocale(locale, '/area-guide')}>
               {dict.area.backToAreaGuide}
             </Link>
           </div>
@@ -156,10 +156,10 @@ export default async function AreaPage({
                 {dict.area.nextStepDesc}
               </p>
               <div className="cta-row mt-3">
-                <Link className="btn btn-cta" href={withLocale(locale, '/smart-finder')}>
+                <Link prefetch={false} className="btn btn-cta" href={withLocale(locale, '/smart-finder')}>
                   {dict.area.goToSmartFinder}
                 </Link>
-                <Link className="btn btn-secondary" href={withLocale(locale, '/projects')}>
+                <Link prefetch={false} className="btn btn-secondary" href={withLocale(locale, '/projects')}>
                   {dict.area.browseProjects}
                 </Link>
               </div>

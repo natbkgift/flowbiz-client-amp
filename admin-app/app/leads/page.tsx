@@ -64,7 +64,7 @@ export default function LeadsPage() {
                   <td className="p-3">{lead.score}</td>
                   <td className="p-3">{lead.status}</td>
                   <td className="p-3">
-                    <Link className="underline" href={`/leads/${lead.id}`}>
+                    <Link prefetch={false} className="underline" href={`/leads/${lead.id}`}>
                       Open
                     </Link>
                   </td>

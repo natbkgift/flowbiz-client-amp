@@ -162,7 +162,7 @@ export default function PublicPropertiesPage() {
             {items.map((p) => {
               const thumbnail = p.cover_image ?? p.local_images?.[0] ?? p.images?.[0] ?? null;
               return (
-                <Link
+                <Link prefetch={false}
                   key={p.id}
                   href={toPropertyHref(p)}
                   className="bg-white rounded-lg shadow-sm hover:shadow-md transition overflow-hidden"

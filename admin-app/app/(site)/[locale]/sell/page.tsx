@@ -71,10 +71,10 @@ export default async function SellPage({ params }: { params: Promise<{ locale: s
           <h1 className="headline">{dict.sell.headline}</h1>
           <p className="subhead">{dict.sell.subhead}</p>
           <div className="cta-row">
-            <Link className="btn btn-cta" href={withLocale(locale, '/sell/valuation')}>
+            <Link prefetch={false} className="btn btn-cta" href={withLocale(locale, '/sell/valuation')}>
               {t.valuationCta}
             </Link>
-            <Link className="btn btn-secondary" href={withLocale(locale, '/sell/list-property')}>
+            <Link prefetch={false} className="btn btn-secondary" href={withLocale(locale, '/sell/list-property')}>
               {t.listCta}
             </Link>
           </div>
@@ -93,7 +93,7 @@ export default async function SellPage({ params }: { params: Promise<{ locale: s
               <h3 className="card-title">{t.valuationTitle}</h3>
               <p className="card-subtitle">{t.valuationDesc}</p>
               <div className="card-actions">
-                <Link
+                <Link prefetch={false}
                   href={withLocale(locale, '/sell/valuation')}
                   className="btn btn-cta"
                 >
@@ -106,7 +106,7 @@ export default async function SellPage({ params }: { params: Promise<{ locale: s
               <h3 className="card-title">{t.listTitle}</h3>
               <p className="card-subtitle">{t.listDesc}</p>
               <div className="card-actions">
-                <Link
+                <Link prefetch={false}
                   href={withLocale(locale, '/sell/list-property')}
                   className="btn btn-secondary"
                 >

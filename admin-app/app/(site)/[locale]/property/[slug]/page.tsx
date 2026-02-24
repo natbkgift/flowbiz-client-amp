@@ -112,7 +112,7 @@ export default async function PropertyPage({ params }: PageProps) {
             <p className="card-subtitle">{dict.property.exploreRelated}</p>
             <div className="card-actions">
               {internalLinks.map((it) => (
-                <Link
+                <Link prefetch={false}
                   key={it.href}
                   className={it.variant === 'secondary' ? 'btn btn-secondary' : 'btn btn-tertiary'}
                   href={it.href}
@@ -225,7 +225,7 @@ export default async function PropertyPage({ params }: PageProps) {
               <a href={CTA.lineUrl} className="btn btn-cta" target="_blank" rel="noreferrer">
                 {dict.property.lineChat}
               </a>
-              <Link className="btn btn-secondary" href={withLocale(locale, '/contact')}>
+              <Link prefetch={false} className="btn btn-secondary" href={withLocale(locale, '/contact')}>
                 {dict.cta.speakToAdvisor}
               </Link>
             </div>
@@ -335,7 +335,7 @@ export default async function PropertyPage({ params }: PageProps) {
               <p className="card-subtitle">{dict.property.exploreRelated}</p>
               <div className="card-actions">
                 {internalLinks.map((it) => (
-                  <Link
+                  <Link prefetch={false}
                     key={it.href}
                     className={it.variant === 'secondary' ? 'btn btn-secondary' : 'btn btn-tertiary'}
                     href={it.href}

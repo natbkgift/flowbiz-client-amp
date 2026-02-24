@@ -29,7 +29,7 @@ export function TrackedLink({
   className?: string;
 }) {
   return (
-    <Link
+    <Link prefetch={false}
       {...props}
       data-amp-event-type={eventType}
       data-amp-event-payload={

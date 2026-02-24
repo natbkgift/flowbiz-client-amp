@@ -52,7 +52,7 @@ export default function PublicCompanyPage() {
         return (
           <section className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {items.map((item) => (
-              <Link
+              <Link prefetch={false}
                 key={item.id}
                 href={`/public/company/${item.slug}`}
                 className="bg-white rounded-lg shadow-sm hover:shadow-md transition p-5"

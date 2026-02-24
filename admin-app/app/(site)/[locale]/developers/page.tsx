@@ -94,7 +94,7 @@ export default async function DevelopersIndexPage({ params }: { params: Promise<
           {ids.length ? (
             <div className="grid grid-3">
               {ids.map((id) => (
-                <Link key={id} href={withLocale(locale, `/developers/${encodeURIComponent(id)}`)} className="card">
+                <Link prefetch={false} key={id} href={withLocale(locale, `/developers/${encodeURIComponent(id)}`)} className="card">
                   <div className="card-title">{id}</div>
                   <div className="card-subtitle">{dict.listing.viewDetails}</div>
                 </Link>

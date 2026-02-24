@@ -23,7 +23,7 @@ export default function NotFound() {
       <p className="mt-3 max-w-md text-[var(--color-text-secondary)]">
         {dict.errors.pageNotFoundDescription}
       </p>
-      <Link
+      <Link prefetch={false}
         href={withLocale(locale, '/')}
         className="btn btn-cta mt-6"
       >

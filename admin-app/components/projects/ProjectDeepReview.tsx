@@ -104,10 +104,10 @@ export function ProjectDeepReview({
         </ul>
 
         <div className="cta-row mt-3">
-          <Link className="btn btn-cta" href={withLocale(locale, '/contact?topic=investment_plan')}>
+          <Link prefetch={false} className="btn btn-cta" href={withLocale(locale, '/contact?topic=investment_plan')}>
             {dict.deepReview.getInvestmentPlan}
           </Link>
-          <Link className="btn btn-secondary" href={withLocale(locale, '/compare')}>
+          <Link prefetch={false} className="btn btn-secondary" href={withLocale(locale, '/compare')}>
             {dict.deepReview.goToCompare}
           </Link>
         </div>

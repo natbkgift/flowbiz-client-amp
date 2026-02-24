@@ -89,7 +89,7 @@ export default async function ProjectDetailPage({
             <p className="card-subtitle">{dict.property.navigateToKeyPages}</p>
             <div className="card-actions">
               {internalLinks.map((it) => (
-                <Link
+                <Link prefetch={false}
                   key={it.href}
                   className={it.variant === 'secondary' ? 'btn btn-secondary' : 'btn btn-tertiary'}
                   href={it.href}
@@ -377,7 +377,7 @@ export default async function ProjectDetailPage({
           <p className="card-subtitle">{dict.property.navigateToKeyPages}</p>
           <div className="card-actions">
             {internalLinks.map((it) => (
-              <Link
+              <Link prefetch={false}
                 key={it.href}
                 className={it.variant === 'secondary' ? 'btn btn-secondary' : 'btn btn-tertiary'}
                 href={it.href}

@@ -114,7 +114,7 @@ export default async function BlogIndexPage({ params }: PageProps) {
                   <span>{article.readTime}</span>
                 </div>
                 <h2 className="card-title">
-                  <Link
+                  <Link prefetch={false}
                     href={withLocale(locale, `/blog/${article.slug}`)}
                     className="card-link"
                   >
@@ -123,7 +123,7 @@ export default async function BlogIndexPage({ params }: PageProps) {
                 </h2>
                 <p className="card-subtitle">{article.excerpt}</p>
                 <div className="card-actions">
-                  <Link
+                  <Link prefetch={false}
                     href={withLocale(locale, `/blog/${article.slug}`)}
                     className="btn btn-tertiary"
                   >

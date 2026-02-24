@@ -33,7 +33,7 @@ export function AdminLayout({ children }: { children: ReactNode }) {
       {/* Sidebar */}
       <aside className="w-56 shrink-0 bg-slate-900 text-white flex flex-col" role="navigation" aria-label="Admin navigation">
         <div className="p-4 border-b border-slate-700">
-          <Link href="/analytics" className="text-lg font-semibold tracking-tight">
+          <Link prefetch={false} href="/analytics" className="text-lg font-semibold tracking-tight">
             {ADMIN_LABELS.brand}
           </Link>
         </div>
@@ -45,7 +45,7 @@ export function AdminLayout({ children }: { children: ReactNode }) {
                 pathname === item.href || pathname?.startsWith(item.href + '/');
               return (
                 <li key={item.href}>
-                  <Link
+                  <Link prefetch={false}
                     href={item.href}
                     aria-current={isActive ? 'page' : undefined}
                     className={`flex items-center gap-3 px-3 py-2 rounded-md text-sm transition-colors ${

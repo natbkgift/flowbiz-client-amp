@@ -97,7 +97,7 @@ export default function InquiriesPage() {
       <main id="main-content" className="max-w-6xl mx-auto p-6 space-y-4">
         <div className="flex items-baseline gap-4">
           <h1 className="text-2xl font-semibold">Inquiries</h1>
-          <Link className="text-sm underline" href="/leads">Legacy Leads</Link>
+          <Link prefetch={false} className="text-sm underline" href="/leads">Legacy Leads</Link>
         </div>
 
       {error ? <p className="text-red-600" role="alert">{error}</p> : null}
@@ -187,7 +187,7 @@ export default function InquiriesPage() {
                   )}
                 </td>
                 <td className="p-3">
-                  <Link className="underline" href={`/inquiries/${it.id}`}>
+                  <Link prefetch={false} className="underline" href={`/inquiries/${it.id}`}>
                     Open
                   </Link>
                 </td>
