@@ -340,7 +340,7 @@
           "statistics": {
             "anyOf": [
               {
-                "$ref": "#/components/schemas/packages__core__schemas__projects__AreaStatisticsSnapshot"
+                "$ref": "#/components/schemas/AreaStatisticsSnapshot"
               },
               {
                 "type": "null"
@@ -352,6 +352,62 @@
           "area"
         ],
         "title": "AreaStatisticsResponse",
+        "type": "object"
+      },
+      "AreaStatisticsSnapshot": {
+        "properties": {
+          "area_id": {
+            "format": "uuid",
+            "title": "Area Id",
+            "type": "string"
+          },
+          "as_of": {
+            "format": "date-time",
+            "title": "As Of",
+            "type": "string"
+          },
+          "avg_price": {
+            "anyOf": [
+              {
+                "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Avg Price"
+          },
+          "avg_rent": {
+            "anyOf": [
+              {
+                "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Avg Rent"
+          },
+          "roi_percent": {
+            "anyOf": [
+              {
+                "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Roi Percent"
+          }
+        },
+        "required": [
+          "area_id",
+          "as_of"
+        ],
+        "title": "AreaStatisticsSnapshot",
         "type": "object"
       },
       "AvailabilityResponse": {
@@ -922,6 +978,40 @@
         ],
         "title": "ContactChannel",
         "type": "string"
+      },
+      "DbStatsResponse": {
+        "description": "Safe DB visibility diagnostics (counts only, no secrets).",
+        "properties": {
+          "db_fingerprint": {
+            "title": "Db Fingerprint",
+            "type": "string"
+          },
+          "projects_published": {
+            "title": "Projects Published",
+            "type": "integer"
+          },
+          "projects_total": {
+            "title": "Projects Total",
+            "type": "integer"
+          },
+          "properties_active": {
+            "title": "Properties Active",
+            "type": "integer"
+          },
+          "properties_total": {
+            "title": "Properties Total",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "db_fingerprint",
+          "projects_total",
+          "projects_published",
+          "properties_total",
+          "properties_active"
+        ],
+        "title": "DbStatsResponse",
+        "type": "object"
       },
       "DeveloperCreate": {
         "properties": {
@@ -2219,6 +2309,7 @@
                 "type": "number"
               },
               {
+                "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
                 "type": "string"
               }
             ],
@@ -2237,6 +2328,7 @@
                 "type": "number"
               },
               {
+                "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
                 "type": "string"
               }
             ],
@@ -2259,6 +2351,7 @@
       "MortgageResponse": {
         "properties": {
           "payment_per_period": {
+            "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
             "title": "Payment Per Period",
             "type": "string"
           },
@@ -2267,10 +2360,12 @@
             "type": "integer"
           },
           "total_interest": {
+            "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
             "title": "Total Interest",
             "type": "string"
           },
           "total_paid": {
+            "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
             "title": "Total Paid",
             "type": "string"
           }
@@ -3006,6 +3101,7 @@
           "starting_price": {
             "anyOf": [
               {
+                "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
                 "type": "string"
               },
               {
@@ -3067,7 +3163,7 @@
           "area_statistics": {
             "anyOf": [
               {
-                "$ref": "#/components/schemas/packages__core__schemas__projects__AreaStatisticsSnapshot"
+                "$ref": "#/components/schemas/AreaStatisticsSnapshot"
               },
               {
                 "type": "null"
@@ -3161,6 +3257,7 @@
           "starting_price": {
             "anyOf": [
               {
+                "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
                 "type": "string"
               },
               {
@@ -3320,6 +3417,7 @@
                 "type": "number"
               },
               {
+                "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
                 "type": "string"
               }
             ],
@@ -3331,6 +3429,7 @@
                 "type": "number"
               },
               {
+                "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
                 "type": "string"
               },
               {
@@ -3492,6 +3591,7 @@
             "title": "Local Images"
           },
           "price": {
+            "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
             "title": "Price",
             "type": "string"
           },
@@ -3515,6 +3615,7 @@
           "size": {
             "anyOf": [
               {
+                "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
                 "type": "string"
               },
               {
@@ -3526,6 +3627,7 @@
           "size_sqm": {
             "anyOf": [
               {
+                "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
                 "type": "string"
               },
               {
@@ -3768,6 +3870,7 @@
             "title": "Local Images"
           },
           "price": {
+            "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
             "title": "Price",
             "type": "string"
           },
@@ -4002,6 +4105,7 @@
                 "type": "number"
               },
               {
+                "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
                 "type": "string"
               },
               {
@@ -4016,6 +4120,7 @@
                 "type": "number"
               },
               {
+                "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
                 "type": "string"
               },
               {
@@ -4117,6 +4222,7 @@
             "type": "string"
           },
           "price": {
+            "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
             "title": "Price",
             "type": "string"
           },
@@ -4173,6 +4279,7 @@
                 "type": "number"
               },
               {
+                "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
                 "type": "string"
               }
             ],
@@ -4186,6 +4293,7 @@
                 "type": "number"
               },
               {
+                "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
                 "type": "string"
               }
             ],
@@ -4198,6 +4306,7 @@
                 "type": "number"
               },
               {
+                "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
                 "type": "string"
               }
             ],
@@ -4214,14 +4323,17 @@
       "RoiResponse": {
         "properties": {
           "gross_yield_percent": {
+            "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
             "title": "Gross Yield Percent",
             "type": "string"
           },
           "net_annual_income": {
+            "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
             "title": "Net Annual Income",
             "type": "string"
           },
           "net_yield_percent": {
+            "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
             "title": "Net Yield Percent",
             "type": "string"
           }
@@ -4314,6 +4426,7 @@
                 "type": "number"
               },
               {
+                "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
                 "type": "string"
               },
               {
@@ -4412,6 +4525,7 @@
           "asking_price": {
             "anyOf": [
               {
+                "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
                 "type": "string"
               },
               {
@@ -4843,59 +4957,6 @@
           "total"
         ],
         "title": "PaginationMeta",
-        "type": "object"
-      },
-      "packages__core__schemas__projects__AreaStatisticsSnapshot": {
-        "properties": {
-          "area_id": {
-            "format": "uuid",
-            "title": "Area Id",
-            "type": "string"
-          },
-          "as_of": {
-            "format": "date-time",
-            "title": "As Of",
-            "type": "string"
-          },
-          "avg_price": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Avg Price"
-          },
-          "avg_rent": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Avg Rent"
-          },
-          "roi_percent": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Roi Percent"
-          }
-        },
-        "required": [
-          "area_id",
-          "as_of"
-        ],
-        "title": "AreaStatisticsSnapshot",
         "type": "object"
       },
       "packages__core__schemas__property_api__PaginationMeta": {
@@ -11418,6 +11479,57 @@
         ]
       }
     },
+    "/v1/db-stats": {
+      "get": {
+        "operationId": "get_db_stats_v1_db_stats_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DbStatsResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Validation error"
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Rate limited"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Internal server error"
+          }
+        },
+        "summary": "Get Db Stats",
+        "tags": [
+          "meta"
+        ]
+      }
+    },
     "/v1/developers": {
       "get": {
         "operationId": "list_developers_v1_developers_get",
@@ -12642,9 +12754,9 @@
         ]
       }
     },
-    "/v1/properties": {
+    "/v1/properties/": {
       "get": {
-        "operationId": "list_properties_v1_properties_get",
+        "operationId": "list_properties_v1_properties__get",
         "parameters": [
           {
             "in": "query",
@@ -12785,9 +12897,9 @@
         ]
       }
     },
-    "/v1/properties/slug/{slug}": {
+    "/v1/properties/slug/{slug}/": {
       "get": {
-        "operationId": "get_property_by_slug_v1_properties_slug__slug__get",
+        "operationId": "get_property_by_slug_v1_properties_slug__slug___get",
         "parameters": [
           {
             "in": "path",
@@ -12848,9 +12960,9 @@
         ]
       }
     },
-    "/v1/properties/{property_id}": {
+    "/v1/properties/{property_id}/": {
       "get": {
-        "operationId": "get_property_v1_properties__property_id__get",
+        "operationId": "get_property_v1_properties__property_id___get",
         "parameters": [
           {
             "in": "path",
@@ -12954,6 +13066,7 @@
                   "type": "number"
                 },
                 {
+                  "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
                   "type": "string"
                 },
                 {
@@ -12973,6 +13086,7 @@
                   "type": "number"
                 },
                 {
+                  "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
                   "type": "string"
                 },
                 {

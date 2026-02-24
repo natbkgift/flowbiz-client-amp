@@ -369,6 +369,10 @@
   },
   {
     "method": "GET",
+    "path": "/v1/db-stats"
+  },
+  {
+    "method": "GET",
     "path": "/v1/developers"
   },
   {
@@ -445,15 +449,15 @@
   },
   {
     "method": "GET",
-    "path": "/v1/properties"
+    "path": "/v1/properties/"
   },
   {
     "method": "GET",
-    "path": "/v1/properties/slug/{slug}"
+    "path": "/v1/properties/slug/{slug}/"
   },
   {
     "method": "GET",
-    "path": "/v1/properties/{property_id}"
+    "path": "/v1/properties/{property_id}/"
   },
   {
     "method": "GET",
