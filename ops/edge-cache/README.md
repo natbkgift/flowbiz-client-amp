@@ -52,6 +52,30 @@
 
 ---
 
+## โบนัส (สำคัญกับ Lighthouse): เอา 307 `/` → `/en/` ออกแบบ “ไม่ redirect”
+
+ตอนนี้ `https://amppattaya.com/` ตอบ `307 Location: /en/` ซึ่ง Lighthouse ลงโทษ redirect chain หนัก
+
+แนวทางที่คุมเกมสุดคือให้ nginx “เสิร์ฟ `/en/` ที่ path `/` แบบ internal rewrite” (URL ใน browser ยังเป็น `/` แต่คอนเทนต์คือ `/en/`)
+
+ตัวอย่าง (ปรับตาม upstream ของคุณ):
+
+```nginx
+location = / {
+  rewrite ^/$ /en/ break;
+  proxy_pass http://next_upstream;
+  proxy_set_header Host $host;
+  proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+  proxy_set_header X-Forwarded-Proto $scheme;
+}
+```
+
+หมายเหตุ:
+- ถ้าใช้ Cloudflare หน้า VPS ให้แก้ที่ origin (nginx) จะนิ่งที่สุด
+- ตรวจผลด้วย `curl -I https://amppattaya.com/` ต้องได้ `200` (ไม่ใช่ 307) และไม่มี `Location`
+
+---
+
 ## หลังเปิด edge cache แล้วให้วัดผลแบบมาตรฐาน
 - Lighthouse mobile `/en/` 5 runs
 - ใช้ median: Perf, LCP, TBT, CLS
