@@ -17,5 +17,5 @@
   - Patch bounds: ≤300 LOC and ≤5 files per iteration
   - Cloudflare lock: NO HTML cache; static-only cache rules invariant
   - Lighthouse gates: mobile>=92, desktop>=97, CLS=0, DOM<900, hydrationSignals=0
-- NextAction: Create branch `phase1-iter-02-trackedlink-prefetch-off`, implement 1 patch (disable Link prefetch default in TrackedLink), build, PR, merge+deploy, re-run CF verify + `npm run lh:gate`
+- NextAction: Merge PR #183 (phase1-iter-02-trackedlink-prefetch-off) → deploy → run CF verify + `npm run lh:gate` (production) → open evidence PR with updated ops/logs/phase1 + ops/STATE.md
 - LastResultSummary: Phase1 FAIL — mobile median perf=84 LCP=3853ms TBT=237ms CLS=0 DOM=687; desktop median perf=96 LCP=1272ms TBT=4ms CLS=0 DOM=687; hydrationSignals(total)=0
