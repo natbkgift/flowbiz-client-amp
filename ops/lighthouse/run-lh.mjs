@@ -1,5 +1,5 @@
 import { spawnSync } from 'node:child_process';
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, readFileSync, renameSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
 import process from 'node:process';
 
@@ -145,47 +145,56 @@ function main() {
   };
 
   const perRun = [];
+  const attemptErrors = [];
   let attempt = 0;
-  const maxAttempts = runs + 3;
+  const maxAttempts = runs + 10;
 
   while (perRun.length < runs && attempt < maxAttempts) {
     attempt += 1;
     const bust = Date.now();
     const runIdx = String(perRun.length + 1).padStart(2, '0');
-    const file = `lh-${preset}-run${runIdx}.json`;
-    const outPath = path.join(outDir, file);
+    const tmpFile = `lh-${preset}-attempt${String(attempt).padStart(2, '0')}.json`;
+    const tmpPath = path.join(outDir, tmpFile);
     const runUrl = url.includes('?') ? `${url}&lh=${bust}` : `${url}?lh=${bust}`;
 
-    const status = runOne({ url: runUrl, preset, outPath });
-    if (!existsSync(outPath)) {
-      perRun.push({ file, status, runtimeError: `lighthouse did not write output (exit=${status})` });
+    const status = runOne({ url: runUrl, preset, outPath: tmpPath });
+    if (!existsSync(tmpPath)) {
+      attemptErrors.push({ attempt, status, runtimeError: `lighthouse did not write output (exit=${status})` });
       continue;
     }
 
-    const json = JSON.parse(readFileSync(outPath, 'utf8'));
+    const json = JSON.parse(readFileSync(tmpPath, 'utf8'));
     if (json?.runtimeError) {
-      perRun.push({ file, runtimeError: json.runtimeError?.message ?? 'runtimeError' });
+      attemptErrors.push({ attempt, status, runtimeError: json.runtimeError?.message ?? 'runtimeError', file: tmpFile });
       continue;
     }
     const m = extractMetrics(json);
+    if (!Number.isFinite(m.perfScore) || !Number.isFinite(m.lcp) || !Number.isFinite(m.tbt) || !Number.isFinite(m.cls) || !Number.isFinite(m.dom)) {
+      attemptErrors.push({ attempt, status, runtimeError: 'missing required metrics', file: tmpFile });
+      continue;
+    }
+
     const consoleErrors = extractConsoleErrors(json);
     const hydrationSignals = countHydrationSignals(consoleErrors);
+
+    const file = `lh-${preset}-run${runIdx}.json`;
+    const outPath = path.join(outDir, file);
+    renameSync(tmpPath, outPath);
     perRun.push({ file, status, ...m, consoleErrorsCount: consoleErrors.length, hydrationSignals, consoleErrors });
   }
 
-  const valid = perRun.filter((r) => !r.runtimeError && Number.isFinite(r.perfScore) && Number.isFinite(r.lcp) && Number.isFinite(r.tbt) && Number.isFinite(r.cls) && Number.isFinite(r.dom));
-  if (valid.length < runs) {
-    console.error(`Not enough valid runs: ${valid.length}/${runs}`);
+  if (perRun.length < runs) {
+    console.error(`Not enough valid runs: ${perRun.length}/${runs}`);
     process.exit(1);
   }
 
   const meds = {
-    perfScoreMed: median(valid.map((r) => r.perfScore)),
-    lcpMed: median(valid.map((r) => r.lcp)),
-    tbtMed: median(valid.map((r) => r.tbt)),
-    clsMed: median(valid.map((r) => r.cls)),
-    domMed: median(valid.map((r) => r.dom)),
-    hydrationSignals: valid.reduce((sum, r) => sum + (Number.isFinite(r.hydrationSignals) ? r.hydrationSignals : 0), 0),
+    perfScoreMed: median(perRun.map((r) => r.perfScore)),
+    lcpMed: median(perRun.map((r) => r.lcp)),
+    tbtMed: median(perRun.map((r) => r.tbt)),
+    clsMed: median(perRun.map((r) => r.cls)),
+    domMed: median(perRun.map((r) => r.dom)),
+    hydrationSignals: perRun.reduce((sum, r) => sum + (Number.isFinite(r.hydrationSignals) ? r.hydrationSignals : 0), 0),
   };
 
   const reasons = gateFailReasons(meds, gates);
@@ -200,6 +209,7 @@ function main() {
     ok,
     failReasons: reasons,
     perRun,
+    attemptErrors,
   };
 
   const summaryPath = path.join(outDir, `lh-${preset}.json`);
@@ -212,7 +222,7 @@ function main() {
   hydLines.push(`preset: ${preset}`);
   hydLines.push(`runs: ${runs}`);
   hydLines.push(`hydrationSignals(total): ${meds.hydrationSignals}`);
-  for (const r of valid) {
+  for (const r of perRun) {
     hydLines.push(`- ${r.file} consoleErrors=${r.consoleErrorsCount ?? 0} hydrationSignals=${r.hydrationSignals ?? 0}`);
     if (Array.isArray(r.consoleErrors) && r.consoleErrors.length) {
       for (const e of r.consoleErrors.slice(0, 10)) {
@@ -231,7 +241,7 @@ function main() {
   lines.push(`Gates: perf>=${gates.perfScoreMin} lcp<=${gates.lcpMax} tbt<=${gates.tbtMax} cls<=${gates.clsMax} dom<=${gates.domMax}`);
   lines.push(`Result: ${ok ? 'PASS' : `FAIL (${reasons.join(', ')})`}`);
   lines.push('Runs:');
-  for (const r of valid) {
+  for (const r of perRun) {
     lines.push(`- ${r.file} perf=${Math.round(r.perfScore)} lcp=${Math.round(r.lcp)} tbt=${Math.round(r.tbt)} cls=${r.cls} dom=${Math.round(r.dom)}`);
   }
   writeFileSync(path.join(outDir, `lh-${preset}.txt`), lines.join('\n') + '\n');
