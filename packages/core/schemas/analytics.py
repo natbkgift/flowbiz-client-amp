@@ -15,6 +15,10 @@ EventType = Literal[
     "form_submit",
     "form_error",
     "form_success",
+    "experiment_exposure",
+    "experiment_outcome",
+    "segment_entry_click",
+    "scroll_depth",
 ]
 
 

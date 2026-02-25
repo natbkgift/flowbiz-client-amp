@@ -164,8 +164,10 @@ describe('middleware security headers', () => {
     expect(src).toContain("form-action 'self'");
   });
 
-  it('CSP does NOT use unsafe-eval', () => {
-    expect(src).not.toContain('unsafe-eval');
+  it('CSP allows unsafe-eval only in non-production', () => {
+    expect(src).toContain("process.env.NODE_ENV === 'production'");
+    expect(src).toContain("script-src 'self' 'unsafe-inline'");
+    expect(src).toContain("script-src 'self' 'unsafe-inline' 'unsafe-eval'");
   });
 
   it('CSP includes upgrade-insecure-requests', () => {

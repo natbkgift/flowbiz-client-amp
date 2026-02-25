@@ -12,6 +12,7 @@
  * - `experiment_exposure`  — User was shown an experiment variant.
  * - `experiment_outcome`   — Conversion attributed to an experiment.
  * - `segment_entry_click`  — User clicks a buyer-segment entry card.
+ * - `scroll_depth`         — User reaches tracked page-depth milestones.
  */
 export type EventType =
   | 'page_view'
@@ -24,7 +25,8 @@ export type EventType =
   | 'form_success'
   | 'experiment_exposure'
   | 'experiment_outcome'
-  | 'segment_entry_click';
+  | 'segment_entry_click'
+  | 'scroll_depth';
 
 const SESSION_KEY = 'amp_session_id_v1';
 
@@ -100,7 +102,7 @@ export async function trackEvent(event_type: EventType, page: string, payload?: 
   const experiments = getExperimentContext();
 
   try {
-    await fetch('/api/v1/events', {
+    await fetch('/api/v1/events/', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
