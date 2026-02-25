@@ -1,13 +1,13 @@
 # ops/STATE.md (STATE-LOCK)
 
 - CurrentPhase: A+B=PASS, Phase1=FAIL, Phase2=BLOCKED, Phase3=BLOCKED, Phase4=BLOCKED, Phase5=BLOCKED
-- CurrentIteration: phase1-iter-19 (remove searchParams from home SSR, GuidedOverlay → client, limit:100→8 — deployed, pending gate)
+- CurrentIteration: phase1-iter-19 (remove searchParams from home SSR, GuidedOverlay → client, limit:100→8 — deployed, FAIL)
 - MainlineStatus: RUNNING
 - LatestEvidence: ops/logs/phase1/
-  - cf-headers.txt (2026-02-25 11:04:34)
+  - cf-headers.txt (2026-02-25 14:53:15)
   - lh-mobile.txt + lh-mobile.json (2026-02-25 07:49:49)
-  - lh-desktop.txt + lh-desktop.json (2026-02-25 11:05:53)
-  - hydration.txt (2026-02-25 11:05:53)
+  - lh-desktop.txt + lh-desktop.json (2026-02-25 15:06:41)
+  - hydration.txt (2026-02-25 15:06:41)
 - OpenPRsAllowed: 2 (1x Phase1 mainline iteration PR + 1x parallel-prep PR)
 - OpenPRsNow: (none)
 - PRsToClose: (none)
@@ -21,5 +21,5 @@
   - Lighthouse truth model: use simulated LCP (`audits[largest-contentful-paint].numericValue`) as truth; observed is supporting note only
   - Lighthouse gates: mobile>=92, desktop>=97, CLS=0, DOM<900, hydrationSignals=0
   - Avoid evidence bloat: evidence PR should prefer lh-*.{txt,json}, hydration.txt, cf-headers.txt, ops/STATE.md (attempt files only if necessary)
-- NextAction: Run desktop LH gate after deployment; if perfMed≥97 merge evidence PR.
-- LastResultSummary: Iter-19 patch deployed — root cause identified: home page consumed `await searchParams` server-side, causing every unique ?lh=<ts> LH run to trigger a fresh ISR computation (cache miss per run). Fix: extracted GuidedOverlay to client component (reads URL params via useSearchParams), removed searchParams from server component → ISR cache now shared for all URL variants. Also reduced fetchProjects limit:100→8 (only 6 displayed). TTFB probe: CF=DYNAMIC runs 2-10 = 220-250ms, run 1 = 1212ms (TCP cold). LH gate pending.
+- NextAction: Iter-20 Evidence-first patch: tackle Hero/LCP render delay on desktop (current perfMed ~90-91) while keeping TTFB stable and hydrationSignals=0.
+- LastResultSummary: Iter-19 deployed and verified. Cloudflare invariants PASS (`HTML=DYNAMIC`, static `_next/*` = HIT, no Set-Cookie). Desktop gate still FAIL: `perfMed=90`, `lcpMed=1865ms`, `tbtMed=0`, `clsMed=0`, `domMed=717` (runs: 76/93/90/90/91). One transient `NO_NAVSTART` observed and auto-retried; final evidence contains full 5 valid runs.
