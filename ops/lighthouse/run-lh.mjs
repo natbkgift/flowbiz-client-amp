@@ -123,7 +123,7 @@ function runOne({ url, preset, outPath }) {
 
 function isTransientError(message) {
   if (!message || typeof message !== 'string') return false;
-  return /CSS\.enable|NO_NAVSTART|Status code:\s*522|Status code:\s*502|Status code:\s*503|Status code:\s*504|net::|ERR_|ECONNRESET|ECONNREFUSED|ETIMEDOUT|ENOTFOUND|EAI_AGAIN|socket hang up|timed out/i.test(message);
+  return /CSS\.enable|NO_NAVSTART|NO_FCP|Status code:\s*522|Status code:\s*502|Status code:\s*503|Status code:\s*504|net::|ERR_|ECONNRESET|ECONNREFUSED|ETIMEDOUT|ENOTFOUND|EAI_AGAIN|socket hang up|timed out/i.test(message);
 }
 
 function gateFailReasons(meds, gates) {
