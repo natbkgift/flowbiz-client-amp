@@ -1,5 +1,5 @@
 import { spawnSync } from 'node:child_process';
-import { existsSync, mkdirSync, readFileSync, renameSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, readFileSync, renameSync, unlinkSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
 import process from 'node:process';
 
@@ -93,17 +93,28 @@ function runOne({ url, preset, outPath }) {
 
   const npxBin = process.platform === 'win32' ? 'npx.cmd' : 'npx';
   const res = spawnSync(npxBin, args, {
-    stdio: 'inherit',
+    stdio: 'pipe',
+    encoding: 'utf8',
     cwd: process.cwd(),
     shell: process.platform === 'win32',
   });
 
+  const stdout = typeof res.stdout === 'string' ? res.stdout : '';
+  const stderr = typeof res.stderr === 'string' ? res.stderr : '';
+  if (stdout) process.stdout.write(stdout);
+  if (stderr) process.stderr.write(stderr);
+
   if (res.error) {
     // eslint-disable-next-line no-console
     console.error(`Failed to spawn lighthouse via ${npxBin}:`, res.error.message);
-    return 1;
+    return { status: 1, output: res.error.message };
   }
-  return res.status ?? 1;
+  return { status: res.status ?? 1, output: `${stdout}\n${stderr}`.trim() };
+}
+
+function isTransientError(message) {
+  if (!message || typeof message !== 'string') return false;
+  return /CSS\.enable|NO_NAVSTART|Status code:\s*522|Status code:\s*502|Status code:\s*503|Status code:\s*504|net::|ERR_|ECONNRESET|ECONNREFUSED|ETIMEDOUT|ENOTFOUND|EAI_AGAIN|socket hang up|timed out/i.test(message);
 }
 
 function gateFailReasons(meds, gates) {
@@ -146,8 +157,25 @@ function main() {
 
   const perRun = [];
   const attemptErrors = [];
+  const maxAttempts = Number(args.maxAttempts ?? (runs + 15));
+
+  const warmupTmpPath = path.join(outDir, `lh-${preset}-warmup.json`);
+  const warmupBust = Date.now();
+  const warmupUrl = url.includes('?') ? `${url}&lhwarm=${warmupBust}` : `${url}?lhwarm=${warmupBust}`;
+  const warmup = runOne({ url: warmupUrl, preset, outPath: warmupTmpPath });
+  if (existsSync(warmupTmpPath)) {
+    try {
+      unlinkSync(warmupTmpPath);
+    } catch {
+      // ignore cleanup failure
+    }
+  }
+  if (warmup.status !== 0) {
+    attemptErrors.push({ attempt: 0, status: warmup.status, runtimeError: 'warmup failed (ignored)', transient: isTransientError(warmup.output) });
+  }
+
   let attempt = 0;
-  const maxAttempts = runs + 10;
+  let hardFailure = null;
 
   while (perRun.length < runs && attempt < maxAttempts) {
     attempt += 1;
@@ -157,21 +185,58 @@ function main() {
     const tmpPath = path.join(outDir, tmpFile);
     const runUrl = url.includes('?') ? `${url}&lh=${bust}` : `${url}?lh=${bust}`;
 
-    const status = runOne({ url: runUrl, preset, outPath: tmpPath });
+    const run = runOne({ url: runUrl, preset, outPath: tmpPath });
+    const status = run.status;
     if (!existsSync(tmpPath)) {
-      attemptErrors.push({ attempt, status, runtimeError: `lighthouse did not write output (exit=${status})` });
+      const runtimeError = `lighthouse did not write output (exit=${status})`;
+      const transient = isTransientError(run.output) || isTransientError(runtimeError);
+      attemptErrors.push({ attempt, status, runtimeError, transient });
+      if (!transient) {
+        hardFailure = runtimeError;
+        break;
+      }
       continue;
     }
 
-    const json = JSON.parse(readFileSync(tmpPath, 'utf8'));
+    let json;
+    try {
+      json = JSON.parse(readFileSync(tmpPath, 'utf8'));
+    } catch {
+      const runtimeError = 'invalid lighthouse JSON output';
+      attemptErrors.push({ attempt, status, runtimeError, file: tmpFile, transient: true });
+      try {
+        unlinkSync(tmpPath);
+      } catch {
+        // ignore cleanup failure
+      }
+      continue;
+    }
     if (json?.runtimeError) {
-      attemptErrors.push({ attempt, status, runtimeError: json.runtimeError?.message ?? 'runtimeError', file: tmpFile });
+      const runtimeError = json.runtimeError?.message ?? 'runtimeError';
+      const transient = isTransientError(runtimeError);
+      attemptErrors.push({ attempt, status, runtimeError, file: tmpFile, transient });
+      try {
+        unlinkSync(tmpPath);
+      } catch {
+        // ignore cleanup failure
+      }
+      if (!transient) {
+        hardFailure = runtimeError;
+        break;
+      }
       continue;
     }
     const m = extractMetrics(json);
     if (!Number.isFinite(m.perfScore) || !Number.isFinite(m.lcp) || !Number.isFinite(m.tbt) || !Number.isFinite(m.cls) || !Number.isFinite(m.dom)) {
-      attemptErrors.push({ attempt, status, runtimeError: 'missing required metrics', file: tmpFile });
-      continue;
+      const runtimeError = 'missing required metrics';
+      attemptErrors.push({ attempt, status, runtimeError, file: tmpFile, transient: false });
+      try {
+        unlinkSync(tmpPath);
+      } catch {
+        // ignore cleanup failure
+      }
+      hardFailure = runtimeError;
+      break;
     }
 
     const consoleErrors = extractConsoleErrors(json);
@@ -179,12 +244,20 @@ function main() {
 
     const file = `lh-${preset}-run${runIdx}.json`;
     const outPath = path.join(outDir, file);
+    if (existsSync(outPath)) {
+      try {
+        unlinkSync(outPath);
+      } catch {
+        // ignore cleanup failure
+      }
+    }
     renameSync(tmpPath, outPath);
     perRun.push({ file, status, ...m, consoleErrorsCount: consoleErrors.length, hydrationSignals, consoleErrors });
   }
 
   if (perRun.length < runs) {
-    console.error(`Not enough valid runs: ${perRun.length}/${runs}`);
+    const suffix = hardFailure ? `; stopped on non-transient error: ${hardFailure}` : '';
+    console.error(`Not enough valid runs: ${perRun.length}/${runs}${suffix}`);
     process.exit(1);
   }
 
