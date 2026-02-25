@@ -1,7 +1,7 @@
 # ops/STATE.md (STATE-LOCK)
 
 - CurrentPhase: A+B=PASS, Phase1=FAIL, Phase2=BLOCKED, Phase3=BLOCKED, Phase4=BLOCKED, Phase5=BLOCKED
-- CurrentIteration: phase1-iter-12 (restore patch prepared)
+- CurrentIteration: phase1-iter-13 (revert DeferredProviders to GOOD_SHA snapshot)
 - MainlineStatus: RUNNING
 - LatestEvidence: ops/logs/phase1/
   - cf-headers.txt (2026-02-25 06:31:33)
@@ -21,5 +21,5 @@
   - Lighthouse truth model: use simulated LCP (`audits[largest-contentful-paint].numericValue`) as truth; observed is supporting note only
   - Lighthouse gates: mobile>=92, desktop>=97, CLS=0, DOM<900, hydrationSignals=0
   - Avoid evidence bloat: evidence PR should prefer lh-*.{txt,json}, hydration.txt, cf-headers.txt, ops/STATE.md (attempt files only if necessary)
-- NextAction: Open PR for phase1-iter-12 restore-desktop97 snapshot (GOOD_SHA=9132ed3), merge+deploy, then production CF verify + lh:gate; if desktop>=97 then open/merge new evidence-only PR
-- LastResultSummary: Desktop guard failed on later iterations (desktop median fell below 97). Iter-12 repair action: restore known-good snapshot from 9132ed3 for DeferredProviders/useAfterLCP path before further tuning
+- NextAction: Open PR for phase1-iter-13-revert-deferredproviders (restore admin-app/components/layout/DeferredProviders.tsx from GOOD_SHA=9132ed3), merge+deploy, then production CF verify + lh:gate; if desktop>=97 then open/merge evidence-only PR allowlist (exclude lh-*-run*.json)
+- LastResultSummary: `git bisect` identified first bad commit `bd803383` (iter-10 DeferredProviders patch). Iter-13 performs strict snapshot restore of DeferredProviders to recover Desktop median >=97
