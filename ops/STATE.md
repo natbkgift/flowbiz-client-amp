@@ -1,7 +1,7 @@
 # ops/STATE.md (STATE-LOCK)
 
 - CurrentPhase: A+B=PASS, Phase1=FAIL, Phase2=BLOCKED, Phase3=BLOCKED, Phase4=BLOCKED, Phase5=BLOCKED
-- CurrentIteration: phase1-iter-13 (revert DeferredProviders to GOOD_SHA snapshot)
+- CurrentIteration: phase1-iter-14 (explicit revert of first bad commit in DeferredProviders)
 - MainlineStatus: RUNNING
 - LatestEvidence: ops/logs/phase1/
   - cf-headers.txt (2026-02-25 06:31:33)
@@ -21,5 +21,5 @@
   - Lighthouse truth model: use simulated LCP (`audits[largest-contentful-paint].numericValue`) as truth; observed is supporting note only
   - Lighthouse gates: mobile>=92, desktop>=97, CLS=0, DOM<900, hydrationSignals=0
   - Avoid evidence bloat: evidence PR should prefer lh-*.{txt,json}, hydration.txt, cf-headers.txt, ops/STATE.md (attempt files only if necessary)
-- NextAction: Open PR for phase1-iter-13-revert-deferredproviders (restore admin-app/components/layout/DeferredProviders.tsx from GOOD_SHA=9132ed3), merge+deploy, then production CF verify + lh:gate; if desktop>=97 then open/merge evidence-only PR allowlist (exclude lh-*-run*.json)
-- LastResultSummary: `git bisect` identified first bad commit `bd803383` (iter-10 DeferredProviders patch). Iter-13 performs strict snapshot restore of DeferredProviders to recover Desktop median >=97
+- NextAction: Open PR for phase1-iter-14-explicit-revert-bad (restore admin-app/components/layout/DeferredProviders.tsx from PARENT_SHA=9132ed3413b610c89af5ef1b51001bfa20c73696), merge+deploy, then production CF verify + lh:gate, then open evidence-only PR allowlist (exclude lh-*-run*.json)
+- LastResultSummary: Iter-13 confirmed no net diff in DeferredProviders; Iter-14 executes explicit parent-based revert using first bad commit `bd803383c5e0a5aaf4b6ff361e318ff6ab847649` -> parent `9132ed3413b610c89af5ef1b51001bfa20c73696`
