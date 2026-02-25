@@ -15,6 +15,7 @@ type LeadFormProps = {
   heading?: string;
   propertyId?: string | null;
   defaultMessage?: string;
+  variant?: 'default' | 'home';
 };
 
 type LeadFormStatus =
@@ -23,7 +24,7 @@ type LeadFormStatus =
   | { state: 'success'; id?: string }
   | { state: 'error'; message: string };
 
-export function LeadForm({ heading, propertyId, defaultMessage }: LeadFormProps) {
+export function LeadForm({ heading, propertyId, defaultMessage, variant = 'default' }: LeadFormProps) {
   const pathname = usePathname() ?? '/';
   const searchParams = useSearchParams();
   const locale = localeFromPathname(pathname);
@@ -48,6 +49,8 @@ export function LeadForm({ heading, propertyId, defaultMessage }: LeadFormProps)
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
+  const [budget, setBudget] = useState('');
+  const [purpose, setPurpose] = useState('');
   const [message, setMessage] = useState(defaultMessage ?? '');
   const [website, setWebsite] = useState('');
   const [consent, setConsent] = useState(false);
@@ -55,11 +58,51 @@ export function LeadForm({ heading, propertyId, defaultMessage }: LeadFormProps)
 
   const canSubmit = useMemo(() => {
     if (!name.trim()) return false;
-    if (!message.trim()) return false;
     if (!email.trim() && !phone.trim()) return false;
+    if (variant === 'home') {
+      if (!budget.trim()) return false;
+      if (!purpose.trim()) return false;
+    } else if (!message.trim()) {
+      return false;
+    }
     if (!consent) return false;
     return status.state !== 'submitting';
-  }, [email, message, name, phone, consent, status.state]);
+  }, [email, message, name, phone, consent, status.state, budget, purpose, variant]);
+
+  const homePurposeOptions = [
+    { value: 'invest', label: locale === 'th' ? 'ลงทุน' : 'Invest' },
+    { value: 'buy', label: locale === 'th' ? 'ซื้อ' : 'Buy' },
+    { value: 'rent', label: locale === 'th' ? 'เช่า' : 'Rent' },
+  ];
+
+  const budgetOptions = [
+    { value: '<3m', label: locale === 'th' ? 'ต่ำกว่า 3 ล้านบาท' : 'Under THB 3M' },
+    { value: '3-5m', label: locale === 'th' ? '3–5 ล้านบาท' : 'THB 3M–5M' },
+    { value: '5-8m', label: locale === 'th' ? '5–8 ล้านบาท' : 'THB 5M–8M' },
+    { value: '8m+', label: locale === 'th' ? 'มากกว่า 8 ล้านบาท' : 'THB 8M+' },
+    { value: 'not_sure', label: locale === 'th' ? 'ยังไม่แน่ใจ' : 'Not sure yet' },
+  ];
+
+  function buildSubmissionMessage(): string {
+    if (variant !== 'home') return message.trim();
+
+    const selectedPurpose = homePurposeOptions.find((item) => item.value === purpose)?.label ?? purpose;
+    const selectedBudget = budgetOptions.find((item) => item.value === budget)?.label ?? budget;
+    const freeText = message.trim();
+
+    const lines = [
+      locale === 'th' ? `วัตถุประสงค์: ${selectedPurpose}` : `Purpose: ${selectedPurpose}`,
+      locale === 'th' ? `งบประมาณ: ${selectedBudget}` : `Budget: ${selectedBudget}`,
+    ];
+
+    if (freeText) {
+      lines.push(locale === 'th' ? `รายละเอียดเพิ่มเติม: ${freeText}` : `Additional notes: ${freeText}`);
+    } else {
+      lines.push(locale === 'th' ? 'รายละเอียดเพิ่มเติม: -' : 'Additional notes: -');
+    }
+
+    return lines.join('\n');
+  }
 
   function safeSourcePage(): string | null {
     if (typeof window === 'undefined') return null;
@@ -97,11 +140,15 @@ export function LeadForm({ heading, propertyId, defaultMessage }: LeadFormProps)
     if (!canSubmit) return;
 
     const submitIso = new Date().toISOString();
+    const finalMessage = buildSubmissionMessage();
 
     trackEvent('form_submit', pathname, {
       property_id: propertyId ?? null,
       has_email: Boolean(email.trim()),
       has_phone: Boolean(phone.trim()),
+      variant,
+      purpose: purpose || null,
+      budget: budget || null,
     });
 
     // Compute lead quality score for CRM enrichment
@@ -109,7 +156,7 @@ export function LeadForm({ heading, propertyId, defaultMessage }: LeadFormProps)
       name,
       email: email.trim() || undefined,
       phone: phone.trim() || undefined,
-      message,
+      message: finalMessage,
       propertyId: propertyId ?? undefined,
     });
 
@@ -124,7 +171,7 @@ export function LeadForm({ heading, propertyId, defaultMessage }: LeadFormProps)
           name,
           email: email.trim() || null,
           phone: phone.trim() || null,
-          message,
+          message: finalMessage,
           consent_given: true,
           // Operational metadata (not user PII)
           property_id: propertyId ?? null,
@@ -139,6 +186,8 @@ export function LeadForm({ heading, propertyId, defaultMessage }: LeadFormProps)
           // Lead quality score (0–100 + tier)
           lead_score: leadScore.total,
           lead_tier: leadScore.tier,
+          extra_budget: variant === 'home' ? budget : null,
+          extra_purpose: variant === 'home' ? purpose : null,
         }),
       });
 
@@ -156,13 +205,19 @@ export function LeadForm({ heading, propertyId, defaultMessage }: LeadFormProps)
       }
 
       setStatus({ state: 'success', id });
-      trackEvent('form_success', pathname, { property_id: propertyId ?? null });
+      trackEvent('form_success', pathname, {
+        property_id: propertyId ?? null,
+        variant,
+        purpose: purpose || null,
+        budget: budget || null,
+      });
       // Attribute conversion to active experiments
       trackExperimentOutcomes('form_submit', 1, trackEvent, pathname);
     } catch (err) {
       trackEvent('form_error', pathname, {
         property_id: propertyId ?? null,
         message: err instanceof Error ? err.message : 'Failed',
+        variant,
       });
       setStatus({
         state: 'error',
@@ -174,7 +229,13 @@ export function LeadForm({ heading, propertyId, defaultMessage }: LeadFormProps)
   return (
     <form className="inquiry-form" onSubmit={(e) => e.preventDefault()}>
       <h3>{heading ?? dict.common.leadForm.headingDefault}</h3>
-      <p className="form-desc">{dict.common.leadForm.description}</p>
+      <p className="form-desc">
+        {variant === 'home'
+          ? (locale === 'th'
+            ? 'แจ้งงบประมาณและช่วงเวลาที่ต้องการ เราจะส่ง shortlist ที่ตรงเป้าหมายของคุณ'
+            : 'Tell us your budget and timeline — we will send a curated shortlist that fits your goals.')
+          : dict.common.leadForm.description}
+      </p>
 
       <div
         className="form-grid"
@@ -202,8 +263,14 @@ export function LeadForm({ heading, propertyId, defaultMessage }: LeadFormProps)
         <input type="hidden" name="utm_term" value={utm.utm_term ?? ''} />
         <input type="hidden" name="utm_content" value={utm.utm_content ?? ''} />
 
-        <label htmlFor="lead-name" className="sr-only">
-          {dict.common.leadForm.namePlaceholder}
+        <div className="form-helper" aria-live="polite">
+          {status.state === 'error'
+            ? (locale === 'th' ? 'กรุณาตรวจสอบข้อมูลที่จำเป็นและลองอีกครั้ง' : 'Please check required fields and try again.')
+            : '\u00A0'}
+        </div>
+
+        <label htmlFor="lead-name" className={variant === 'home' ? 'form-label' : 'sr-only'}>
+          {locale === 'th' ? 'ชื่อ' : 'Name'}
         </label>
         <input
           id="lead-name"
@@ -211,13 +278,14 @@ export function LeadForm({ heading, propertyId, defaultMessage }: LeadFormProps)
           name="name"
           placeholder={dict.common.leadForm.namePlaceholder}
           aria-required="true"
+          required
           value={name}
           onChange={(e) => setName(e.target.value)}
         />
         <div className="form-grid-2">
           <div>
-            <label htmlFor="lead-email" className="sr-only">
-              {dict.common.leadForm.emailPlaceholder}
+            <label htmlFor="lead-email" className={variant === 'home' ? 'form-label' : 'sr-only'}>
+              {locale === 'th' ? 'อีเมล' : 'Email'}
             </label>
             <input
               id="lead-email"
@@ -231,30 +299,70 @@ export function LeadForm({ heading, propertyId, defaultMessage }: LeadFormProps)
             />
           </div>
           <div>
-            <label htmlFor="lead-phone" className="sr-only">
-              {dict.common.leadForm.phonePlaceholder}
+            <label htmlFor="lead-phone" className={variant === 'home' ? 'form-label' : 'sr-only'}>
+              {locale === 'th' ? 'WhatsApp/โทรศัพท์' : 'WhatsApp/Phone'}
             </label>
             <input
               id="lead-phone"
               className="form-input"
               name="phone"
               type="tel"
-              placeholder={dict.common.leadForm.phonePlaceholder}
+              placeholder={variant === 'home' ? (locale === 'th' ? 'WhatsApp หรือเบอร์โทร' : 'WhatsApp or phone number') : dict.common.leadForm.phonePlaceholder}
               aria-required="true"
               value={phone}
               onChange={(e) => setPhone(e.target.value)}
             />
           </div>
         </div>
-        <label htmlFor="lead-message" className="sr-only">
-          {dict.common.leadForm.messagePlaceholder}
+
+        {variant === 'home' ? (
+          <div className="form-grid-2">
+            <div>
+              <label htmlFor="lead-budget" className="form-label">{locale === 'th' ? 'งบประมาณ' : 'Budget'}</label>
+              <select
+                id="lead-budget"
+                className="form-select"
+                value={budget}
+                onChange={(e) => setBudget(e.target.value)}
+                required
+              >
+                <option value="">{locale === 'th' ? 'เลือกงบประมาณ' : 'Select budget'}</option>
+                {budgetOptions.map((item) => (
+                  <option key={item.value} value={item.value}>{item.label}</option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label htmlFor="lead-purpose" className="form-label">{locale === 'th' ? 'วัตถุประสงค์' : 'Purpose'}</label>
+              <select
+                id="lead-purpose"
+                className="form-select"
+                value={purpose}
+                onChange={(e) => setPurpose(e.target.value)}
+                required
+              >
+                <option value="">{locale === 'th' ? 'เลือกวัตถุประสงค์' : 'Select purpose'}</option>
+                {homePurposeOptions.map((item) => (
+                  <option key={item.value} value={item.value}>{item.label}</option>
+                ))}
+              </select>
+            </div>
+          </div>
+        ) : null}
+
+        <label htmlFor="lead-message" className={variant === 'home' ? 'form-label' : 'sr-only'}>
+          {variant === 'home'
+            ? (locale === 'th' ? 'ข้อความเพิ่มเติม (ไม่บังคับ)' : 'Additional message (optional)')
+            : dict.common.leadForm.messagePlaceholder}
         </label>
         <textarea
           id="lead-message"
           className="form-textarea"
           name="message"
-          placeholder={dict.common.leadForm.messagePlaceholder}
-          aria-required="true"
+          placeholder={variant === 'home'
+            ? (locale === 'th' ? 'ความต้องการพิเศษ/โครงการที่สนใจ (ถ้ามี)' : 'Special requirements or preferred projects (optional)')
+            : dict.common.leadForm.messagePlaceholder}
+          aria-required={variant === 'home' ? 'false' : 'true'}
           value={message}
           onChange={(e) => setMessage(e.target.value)}
           rows={4}
@@ -282,21 +390,40 @@ export function LeadForm({ heading, propertyId, defaultMessage }: LeadFormProps)
           {status.state === 'submitting' ? dict.common.leadForm.submitting : dict.common.leadForm.submit}
         </button>
 
-        <div className="cta-row">
+        <p className="form-trust-note">
+          {variant === 'home'
+            ? (locale === 'th'
+              ? 'ทีมที่ปรึกษาของเราจะติดต่อกลับพร้อม shortlist ตามงบประมาณและช่วงเวลาที่แจ้งไว้'
+              : 'Our advisory team will follow up with a curated shortlist based on your budget and timeline.')
+            : (locale === 'th'
+              ? 'เราใช้ข้อมูลของคุณเพื่อการติดต่อและคัดเลือกข้อเสนอที่เหมาะสมเท่านั้น'
+              : 'Your details are used only to contact you and curate relevant options.')}
+        </p>
+
+        <div className="cta-row cta-row--contacts">
           <a
-            className="btn btn-secondary"
+            className="form-contact-link"
             href={CTA.whatsAppUrl}
             target="_blank"
             rel="noreferrer"
+            data-amp-event-type="cta_click"
+            data-amp-event-payload={JSON.stringify({ cta: 'leadform_whatsapp', from: 'form_secondary_contact', variant })}
           >
             {dict.cta.whatsapp}
           </a>
-          <a className="btn btn-secondary" href={CTA.lineUrl} target="_blank" rel="noreferrer">
+          <a
+            className="form-contact-link"
+            href={CTA.lineUrl}
+            target="_blank"
+            rel="noreferrer"
+            data-amp-event-type="cta_click"
+            data-amp-event-payload={JSON.stringify({ cta: 'leadform_line', from: 'form_secondary_contact', variant })}
+          >
             {dict.cta.line}
           </a>
         </div>
 
-        <div id="lead-form-status" aria-live="assertive" aria-atomic="true">
+        <div id="lead-form-status" className="form-status-slot" aria-live="assertive" aria-atomic="true">
           {status.state === 'success' ? (
             <p className="form-success" role="status">{dict.common.leadForm.success}{status.id ? ` (id: ${status.id})` : ''}</p>
           ) : null}

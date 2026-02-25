@@ -303,6 +303,15 @@ def import_projects(db: Session, rows: list[dict], *, dry_run: bool) -> StepResu
         if status not in ("draft", "published", "archived"):
             status = "published"
 
+        starting_price = None
+        raw_starting_price = row.get("starting_price")
+        if raw_starting_price not in (None, ""):
+            try:
+                starting_price = Decimal(str(raw_starting_price))
+            except (InvalidOperation, ValueError):
+                result.errors.append(f"{label}: invalid starting_price '{raw_starting_price}'")
+                continue
+
         _, is_new = _upsert_by_slug(
             db,
             Project,
@@ -312,6 +321,7 @@ def import_projects(db: Session, rows: list[dict], *, dry_run: bool) -> StepResu
                 "developer_id": developer_id,
                 "area_id": area_id,
                 "cover_image_url": str(row.get("cover_image_url") or "").strip() or None,
+                "starting_price": starting_price,
                 "status": status,
             },
         )

@@ -3,6 +3,8 @@ import { headers } from 'next/headers';
 
 import type { Dictionary, Locale } from '../../app/_lib/i18n/types';
 import { switchLocaleInPathname, withLocale } from '../../app/_lib/i18n/routing';
+import { TrackedLink } from '@/components/analytics/TrackedLink';
+import { CTA } from '@/app/_lib/public-cta';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -124,8 +126,8 @@ export async function Header({ locale, dict }: { locale: Locale; dict: Dictionar
     },
   ];
 
-  const langLabel = locale === 'th' ? dict.common.thai : dict.common.english;
   const nextLocale = locale === 'en' ? 'th' : 'en';
+  const langLabel = nextLocale.toUpperCase();
   const switchHref = switchLocaleInPathname(pathnameHeader || '/', nextLocale);
 
   const mobileToggleId = 'amp-mobile-menu-toggle';
@@ -134,7 +136,7 @@ export async function Header({ locale, dict }: { locale: Locale; dict: Dictionar
     <>
       <a href="#main-content" className="skip-link">{dict.common.skipLink}</a>
 
-      <input id={mobileToggleId} type="checkbox" className="sr-only" aria-hidden="true" />
+      <input id={mobileToggleId} type="checkbox" className="sr-only" aria-hidden="true" tabIndex={-1} />
 
       <header className="header">
         <div className="header-content">
@@ -200,16 +202,29 @@ export async function Header({ locale, dict }: { locale: Locale; dict: Dictionar
                 )}
               </div>
             ))}
-            <Link
-              href={withLocale(locale, '/contact')}
-              prefetch={false}
-              className={`nav-link nav-link--cta ${isActive('/contact') ? 'nav-link--active' : ''}`}
-            >
-              {dict.nav.contact}
-            </Link>
           </nav>
 
           <div className="header-actions">
+            <TrackedLink
+              href={CTA.whatsAppUrl}
+              className="header-link desktop-only"
+              target="_blank"
+              rel="noopener noreferrer"
+              eventType="cta_click"
+              eventPayload={{ cta: 'whatsapp_header', from: 'header' }}
+            >
+              {dict.cta.whatsapp}
+            </TrackedLink>
+
+            <TrackedLink
+              href={withLocale(locale, '/contact')}
+              className={`nav-link nav-link--cta desktop-only ${isActive('/contact') ? 'nav-link--active' : ''}`}
+              eventType="cta_click"
+              eventPayload={{ cta: 'request_consultation_header', from: 'header' }}
+            >
+              {locale === 'th' ? 'ขอคำปรึกษา' : 'Request Consultation'}
+            </TrackedLink>
+
             <Link href={switchHref} prefetch={false} className="lang-switch" aria-label={dict.common.language}>
               {langLabel}
             </Link>
@@ -231,7 +246,9 @@ export async function Header({ locale, dict }: { locale: Locale; dict: Dictionar
       </header>
 
       {/* Mobile overlay (CSS toggled via checkbox) */}
-      <label htmlFor={mobileToggleId} className="mobile-overlay" aria-hidden="true" />
+      <label htmlFor={mobileToggleId} className="mobile-overlay">
+        <span className="sr-only">Close menu</span>
+      </label>
 
       {/* Mobile drawer */}
       <div

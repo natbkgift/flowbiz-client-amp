@@ -20,6 +20,14 @@ const LinkClickTracker = dynamic(
   { ssr: false }
 );
 
+const ScrollDepthTracker = dynamic(
+  () =>
+    import('@/components/analytics/ScrollDepthTracker').then((m) => ({
+      default: m.ScrollDepthTracker,
+    })),
+  { ssr: false }
+);
+
 /**
  * Mount analytics only after LCP.
  *
@@ -34,6 +42,7 @@ export function PostLCPAnalytics() {
     <>
       <SiteAnalytics />
       <LinkClickTracker />
+      <ScrollDepthTracker />
     </>
   );
 }

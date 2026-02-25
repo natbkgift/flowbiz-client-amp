@@ -13,6 +13,15 @@ export const CTA = {
   phoneTel: process.env.NEXT_PUBLIC_PHONE_TEL ?? 'tel:+66634533526',
 };
 
+export const CONTACT_SCAFFOLD = {
+  businessName: process.env.NEXT_PUBLIC_BUSINESS_NAME ?? 'AMP Pattaya',
+  city: process.env.NEXT_PUBLIC_BUSINESS_CITY ?? 'Pattaya',
+  region: process.env.NEXT_PUBLIC_BUSINESS_REGION ?? 'Chonburi',
+  country: process.env.NEXT_PUBLIC_BUSINESS_COUNTRY ?? 'Thailand',
+  addressLine: process.env.NEXT_PUBLIC_BUSINESS_ADDRESS ?? null,
+  hasVerifiedAddress: Boolean(process.env.NEXT_PUBLIC_BUSINESS_ADDRESS),
+};
+
 /**
  * Build a WhatsApp deep-link with a pre-filled message.
  *

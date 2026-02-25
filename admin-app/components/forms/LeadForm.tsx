@@ -25,6 +25,7 @@ export type LeadFormProps = {
   heading?: string;
   propertyId?: string | null;
   defaultMessage?: string;
+  variant?: 'default' | 'home';
 };
 
 export function LeadForm(props: LeadFormProps) {

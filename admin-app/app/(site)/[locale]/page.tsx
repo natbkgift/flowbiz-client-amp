@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
+import Image from 'next/image';
 import { Suspense } from 'react';
 
 import { TrackedLink } from '@/components/analytics/TrackedLink';
@@ -8,17 +9,35 @@ import { FeaturedProjects } from '@/components/home/FeaturedProjects';
 import { LeadForm } from '@/components/forms/LeadForm';
 import { Container } from '@/components/layout/Container';
 import propertyPlaceholder from '@/public/images/property-placeholder.svg';
+import condoViewImage from '@/public/images/condo-view.png';
+import propertyExteriorImage from '@/public/images/property-exterior.png';
+import propertyInteriorImage from '@/public/images/property-interior.png';
+import propertyPoolImage from '@/public/images/property-pool.png';
+import villaGardenImage from '@/public/images/villa-garden.png';
 import { getDictionary, normalizeLocale } from '@/app/_lib/i18n/get-dictionary';
 import { GuidedOverlay } from './_components/GuidedOverlay';
 import { withLocale } from '@/app/_lib/i18n/routing';
 import { makePageMetadata } from '@/app/_lib/i18n/metadata';
 import { getContentRecommendation } from '@/lib/personalization';
-import { organizationSchema, webSiteSchema, localBusinessSchema } from '@/app/_lib/schema-markup';
 import { fetchProjects, fetchProperties as fetchPropertiesAPI } from '@/app/_lib/public-api-server';
 import type { PropertyListItem } from '@/app/public/_shared/types';
 import { resolveImageUrl } from '@/app/_lib/public-api-shared';
 
 export const revalidate = 300;
+
+const PROPERTY_FALLBACK_IMAGES = [
+  propertyExteriorImage,
+  condoViewImage,
+  propertyPoolImage,
+  propertyInteriorImage,
+  villaGardenImage,
+];
+
+function looksPlaceholderLike(url: string | null): boolean {
+  if (!url) return true;
+  const normalized = url.toLowerCase();
+  return normalized.includes('placeholder') || normalized.includes('default-image') || normalized.endsWith('.svg');
+}
 
 export async function generateMetadata({
   params,
@@ -45,10 +64,17 @@ export default async function HomePage({
 
   async function FeaturedProjectsSection() {
     let allProjects: Awaited<ReturnType<typeof fetchProjects>> = [];
+    let allProperties: PropertyListItem[] = [];
     try {
-      allProjects = await fetchProjects({ limit: 8 });
+      const [projectsRes, propertiesRes] = await Promise.all([
+        fetchProjects({ limit: 24 }),
+        fetchPropertiesAPI({ limit: 200, sort: 'newest' }),
+      ]);
+      allProjects = projectsRes;
+      allProperties = propertiesRes.data || [];
     } catch {
       allProjects = [];
+      allProperties = [];
     }
 
     const PROJECT_PRIORITY = [
@@ -62,7 +88,38 @@ export default async function HomePage({
       'grand-solaire',
     ];
 
-    const sortedProjects = [...allProjects].sort((a, b) => {
+    const projectMediaHints = new Map<string, { coverImageUrl?: string; startingPrice?: number }>();
+    for (const prop of allProperties) {
+      if (!prop.project_id) continue;
+      const imgCandidates = [prop.cover_image, ...(prop.local_images ?? []), ...(prop.images ?? [])];
+      const realImg = imgCandidates
+        .map((candidate) => resolveImageUrl(candidate))
+        .find((resolved) => resolved && !looksPlaceholderLike(resolved));
+      const current = projectMediaHints.get(prop.project_id) ?? {};
+      const nextPrice = typeof prop.price === 'number' && Number.isFinite(prop.price) && prop.price > 0
+        ? Number(prop.price)
+        : undefined;
+
+      projectMediaHints.set(prop.project_id, {
+        coverImageUrl: current.coverImageUrl ?? realImg ?? undefined,
+        startingPrice: current.startingPrice != null && nextPrice != null
+          ? Math.min(current.startingPrice, nextPrice)
+          : (current.startingPrice ?? nextPrice),
+      });
+    }
+
+    const enrichedProjects = allProjects.map((project) => {
+      const hint = projectMediaHints.get(project.id);
+      const resolvedCover = resolveImageUrl(project.cover_image_url ?? null);
+      const hasRealProjectCover = !!resolvedCover && !looksPlaceholderLike(resolvedCover);
+      return {
+        ...project,
+        cover_image_url: hasRealProjectCover ? project.cover_image_url : (hint?.coverImageUrl ?? project.cover_image_url),
+        starting_price: project.starting_price ?? hint?.startingPrice ?? null,
+      };
+    });
+
+    const sortedProjects = [...enrichedProjects].sort((a, b) => {
       const aIdx = PROJECT_PRIORITY.indexOf(a.slug);
       const bIdx = PROJECT_PRIORITY.indexOf(b.slug);
       if (aIdx === -1 && bIdx === -1) return 0;
@@ -73,7 +130,6 @@ export default async function HomePage({
 
     const featuredProjects = sortedProjects.slice(0, 6);
     const totalProjectCount = allProjects.length;
-    if (featuredProjects.length === 0) return null;
 
     return (
       <section className="py-16 md:py-20 xl:py-24 2xl:py-28">
@@ -86,7 +142,7 @@ export default async function HomePage({
           />
           <div className="cta-row cta-row--center mt-6">
             <TrackedLink
-              className="btn btn-secondary"
+              className="btn btn-primary btn-featured-section"
               href={withLocale(locale, '/projects')}
               eventType="cta_click"
               eventPayload={{ cta: 'view_all_projects', from: 'home_featured' }}
@@ -126,7 +182,34 @@ export default async function HomePage({
       featuredProperties = [];
     }
 
-    if (featuredProperties.length === 0) return null;
+    function deriveStatTokens(input: PropertyListItem): { bed: string | null; bath: string | null; size: string | null; view: string | null } {
+      const text = `${input.title} ${input.address ?? ''}`.toLowerCase();
+
+      const bedMatch = text.match(/\b(\d{1,2})\s*(?:br|bed|beds|bedroom|bedrooms)\b/i);
+      const bathMatch = text.match(/\b(\d{1,2})\s*(?:ba|bath|baths|bathroom|bathrooms)\b/i);
+      const sizeMatch = text.match(/\b(\d{2,4})\s*(?:sqm|sq\.?m|m2|ตร\.ม\.)\b/i);
+
+      let viewValue: string | null = null;
+      if (text.includes('sea view')) viewValue = locale === 'th' ? 'วิวทะเล' : 'Sea view';
+      else if (text.includes('city view')) viewValue = locale === 'th' ? 'วิวเมือง' : 'City view';
+      else if (text.includes('garden view')) viewValue = locale === 'th' ? 'วิวสวน' : 'Garden view';
+
+      return {
+        bed: bedMatch ? `${bedMatch[1]} ${locale === 'th' ? 'นอน' : 'Bed'}` : null,
+        bath: bathMatch ? `${bathMatch[1]} ${locale === 'th' ? 'น้ำ' : 'Bath'}` : null,
+        size: sizeMatch ? `${sizeMatch[1]} ${locale === 'th' ? 'ตร.ม.' : 'sqm'}` : null,
+        view: viewValue,
+      };
+    }
+
+    function deriveTags(input: PropertyListItem): string[] {
+      const text = `${input.title} ${input.status}`.toLowerCase();
+      const tags: string[] = [];
+      if (text.includes('high yield')) tags.push(locale === 'th' ? 'ผลตอบแทนสูง' : 'High yield');
+      if (text.includes('corner')) tags.push(locale === 'th' ? 'ห้องมุม' : 'Corner');
+      if (text.includes('sea view')) tags.push(locale === 'th' ? 'วิวทะเล' : 'Sea view');
+      return tags.slice(0, 3);
+    }
 
     return (
       <section className="py-16 md:py-20 xl:py-24 2xl:py-28 bg-surface">
@@ -136,11 +219,24 @@ export default async function HomePage({
             <p className="section-subtitle">{locale === 'th' ? 'ห้องชุดคัดเลือกสำหรับนักลงทุนและผู้ซื้อ' : 'Curated units for buyers and investors — sale and rental opportunities.'}</p>
           </div>
 
-          <div className="grid grid-fluid">
-            {featuredProperties.map((prop) => {
+          {featuredProperties.length === 0 ? (
+            <div className="premium-empty-state" role="status" aria-live="polite">
+              <h3>{locale === 'th' ? 'ยังไม่มียูนิตคัดสรรในขณะนี้' : 'No curated opportunities available right now'}</h3>
+              <p>{locale === 'th' ? 'ทีมกำลังอัปเดตรายการลงทุนสำหรับหน้านี้' : 'Our team is preparing the next shortlist of investment opportunities.'}</p>
+            </div>
+          ) : null}
+
+          <div className="investment-grid">
+            {featuredProperties.map((prop, index) => {
               const img = prop.cover_image || (prop.local_images?.[0]) || (prop.images?.[0]) || null;
-              const imgSrc = resolveImageUrl(img) ?? propertyPlaceholder.src;
+              const resolvedImgSrc = resolveImageUrl(img);
+              const hasRealImage = !!resolvedImgSrc && !looksPlaceholderLike(resolvedImgSrc);
+              const imgSrc = hasRealImage
+                ? resolvedImgSrc
+                : (PROPERTY_FALLBACK_IMAGES[index % PROPERTY_FALLBACK_IMAGES.length] ?? propertyPlaceholder.src);
               const priceFormatted = prop.price ? `฿${Math.round(prop.price).toLocaleString()}` : null;
+              const statTokens = deriveStatTokens(prop);
+              const tags = deriveTags(prop);
               const typeBadge = prop.type === 'rent' ? (locale === 'th' ? 'ให้เช่า' : 'For Rent')
                 : prop.type === 'resale' ? (locale === 'th' ? 'ขายต่อ' : 'Resale')
                   : (locale === 'th' ? 'ขาย' : 'For Sale');
@@ -152,30 +248,58 @@ export default async function HomePage({
                 <Link
                   key={prop.id}
                   href={withLocale(locale, `/properties/${prop.id}`)}
-                  className="property-card reveal"
+                  className="property-card reveal premium-investment-card"
                 >
                   <div className="card-image card-image--featured relative">
-                    <img
+                    <Image
                       src={imgSrc}
                       alt={prop.title}
-                      className="absolute inset-0 h-full w-full object-cover"
+                      fill
+                      className={`absolute inset-0 h-full w-full object-cover ${hasRealImage ? '' : 'premium-investment-card__fallback-image'}`}
                       loading="lazy"
                       decoding="async"
-                      sizes="(min-width: 1024px) 33vw, (min-width: 768px) 50vw, 100vw"
+                      sizes="(min-width: 2560px) 18vw, (min-width: 1920px) 22vw, (min-width: 1024px) 30vw, (min-width: 768px) 48vw, 100vw"
                     />
+                    <div className="premium-investment-card__media-scrim" aria-hidden="true" />
+                    <div className="premium-investment-card__media-meta" aria-hidden="true">
+                      <span>
+                        {hasRealImage
+                          ? (locale === 'th' ? 'Curated unit' : 'Curated unit')
+                          : (locale === 'th' ? 'ภาพตัวอย่าง — รอรูปจริง' : 'Preview image — real photo pending')}
+                      </span>
+                    </div>
                     <span className={`absolute top-3 left-3 text-xs font-semibold px-2.5 py-1 rounded-full ${badgeColor}`}>
                       {typeBadge}
                     </span>
                   </div>
                   <div className="card-content flex flex-col h-full p-6">
+                    <div className="card-price premium-investment-card__price">
+                      {priceFormatted ? `${priceFormatted}${prop.type === 'rent' ? (locale === 'th' ? '/เดือน' : '/mo') : ''}` : (locale === 'th' ? 'รอข้อมูลราคา' : 'Price pending')}
+                    </div>
                     <div className="card-title text-lg font-medium text-gray-900 mb-1 line-clamp-2">{prop.title}</div>
-                    <div className="text-sm text-gray-500 mb-4">{prop.address || prop.city}</div>
-                    <div className="flex items-center justify-between mt-auto pt-4 border-t border-gray-100">
-                      {priceFormatted ? (
-                        <div className="card-price text-gray-900 font-semibold">
-                          {priceFormatted}{prop.type === 'rent' ? (locale === 'th' ? '/เดือน' : '/mo') : ''}
-                        </div>
-                      ) : <div />}
+                    <div className="text-sm text-gray-500 mb-3 line-clamp-1">{prop.address || prop.city || (locale === 'th' ? 'ทำเลรอข้อมูล' : 'Location pending')}</div>
+
+                    <div className="premium-investment-card__facts" aria-label={locale === 'th' ? 'ข้อมูลยูนิต' : 'Unit facts'}>
+                      {[statTokens.bed, statTokens.bath, statTokens.size, statTokens.view]
+                        .filter(Boolean)
+                        .slice(0, 4)
+                        .map((token) => (
+                          <span key={token} className="premium-fact-chip">{token}</span>
+                        ))}
+                      {![statTokens.bed, statTokens.bath, statTokens.size, statTokens.view].some(Boolean) ? (
+                        <span className="premium-fact-chip premium-fact-chip--muted">{locale === 'th' ? 'รายละเอียดยูนิตรออัปเดต' : 'Unit facts pending'}</span>
+                      ) : null}
+                    </div>
+
+                    {tags.length > 0 ? (
+                      <div className="premium-investment-card__tags" aria-label={locale === 'th' ? 'แท็กยูนิต' : 'Unit tags'}>
+                        {tags.map((tag) => <span key={tag} className="premium-tag-chip">{tag}</span>)}
+                      </div>
+                    ) : null}
+
+                    <div className="flex items-center justify-between gap-3 mt-auto pt-4 border-t border-gray-100">
+                      <span className="text-xs text-gray-500">{locale === 'th' ? 'ข้อมูลคัดสรรโดย AMP' : 'Curated by AMP'}</span>
+                      <span className="premium-investment-card__linkhint">{locale === 'th' ? 'ดูรายละเอียด' : 'View details'}</span>
                     </div>
                   </div>
                 </Link>
@@ -188,9 +312,17 @@ export default async function HomePage({
               className="btn btn-secondary"
               href={withLocale(locale, '/buy')}
               eventType="cta_click"
-              eventPayload={{ cta: 'browse_all_properties', from: 'home_properties' }}
+              eventPayload={{ cta: 'see_all_investment_picks', from: 'home_properties' }}
             >
-              {locale === 'th' ? 'ดูอสังหาริมทรัพย์ทั้งหมด' : 'Browse All Properties'}
+              {locale === 'th' ? 'ดูยูนิตลงทุนทั้งหมด' : 'See all investment picks'}
+            </TrackedLink>
+            <TrackedLink
+              className="btn btn-tertiary"
+              href={withLocale(locale, '/invest/calculator')}
+              eventType="cta_click"
+              eventPayload={{ cta: 'open_roi_calculator', from: 'home_properties' }}
+            >
+              {locale === 'th' ? 'ROI Calculator' : 'ROI Calculator'}
             </TrackedLink>
           </div>
         </Container>
@@ -198,19 +330,117 @@ export default async function HomePage({
     );
   }
 
-  const jsonLd = JSON.stringify([
-    organizationSchema(),
-    webSiteSchema(),
-    localBusinessSchema(),
-  ], null, 0);
+  function SectionCardSkeleton({ kind, locale }: { kind: 'project' | 'investment'; locale: 'en' | 'th' }) {
+    const heading = kind === 'project'
+      ? (locale === 'th' ? 'กำลังโหลดโครงการแนะนำ' : 'Loading featured projects')
+      : (locale === 'th' ? 'กำลังโหลดยูนิตคัดสรร' : 'Loading curated opportunities');
+
+    return (
+      <section className="py-16 md:py-20 xl:py-24 2xl:py-28 bg-surface">
+        <Container variant="wide">
+          <div className="section-header">
+            <h2 className="section-title">{heading}</h2>
+          </div>
+          <div className={kind === 'project' ? 'project-grid-premium' : 'investment-grid'} aria-hidden="true">
+            {Array.from({ length: 6 }).map((_, index) => (
+              <div key={`${kind}-skeleton-${index}`} className="property-card">
+                <div className="card-image card-image--featured skeleton skeleton--image" />
+                <div className="p-6 space-y-3">
+                  <div className="skeleton skeleton--title" />
+                  <div className="skeleton skeleton--text" />
+                  <div className="skeleton skeleton--text" />
+                </div>
+              </div>
+            ))}
+          </div>
+        </Container>
+      </section>
+    );
+  }
+
+  const statTrendCues = [
+    locale === 'th' ? '↗ แนวโน้มบวก' : '↗ Positive trend cue',
+    locale === 'th' ? '→ ทรงตัว' : '→ Stable trend cue',
+    locale === 'th' ? '↗ ดีมานด์เพิ่ม' : '↗ Demand trend cue',
+    locale === 'th' ? '→ ติดตามต่อเนื่อง' : '→ Monitoring trend cue',
+  ];
+
+  const whyPattayaStats = (dict.home.investStats as Array<{ label?: string; value?: string }> | undefined) ?? [];
+
+  const trustProofItems: Array<{ key: string; label: string; value: string | null }> = [
+    {
+      key: 'licensed',
+      label: locale === 'th' ? 'Local licensed team' : 'Local licensed team',
+      value: process.env.NEXT_PUBLIC_LOCAL_LICENSE_STATUS ?? null,
+    },
+    {
+      key: 'years',
+      label: locale === 'th' ? 'Years in Pattaya' : 'Years in Pattaya',
+      value: process.env.NEXT_PUBLIC_YEARS_IN_PATTAYA ?? null,
+    },
+    {
+      key: 'clients',
+      label: locale === 'th' ? '#clients' : '#clients',
+      value: process.env.NEXT_PUBLIC_CLIENT_COUNT ?? null,
+    },
+    {
+      key: 'response',
+      label: locale === 'th' ? 'response time' : 'response time',
+      value: process.env.NEXT_PUBLIC_RESPONSE_TIME_SLA ?? null,
+    },
+  ];
+
+  const insightCards = [
+    {
+      key: 'area_intelligence',
+      title: locale === 'th' ? 'Area intelligence' : 'Area intelligence',
+      body: locale === 'th'
+        ? 'โฟกัส micro-location ที่ดีมานด์จริง พร้อมสัญญาณราคาและสภาพคล่อง'
+        : 'Micro-location signals, price direction, and liquidity cues for each Pattaya zone.',
+      href: withLocale(locale, '/area-guide'),
+      updatedAt: process.env.NEXT_PUBLIC_INSIGHTS_AREA_UPDATED_AT ?? null,
+    },
+    {
+      key: 'yield_rent_demand',
+      title: locale === 'th' ? 'Yield & rent demand' : 'Yield & rent demand',
+      body: locale === 'th'
+        ? 'สรุปดีมานด์เช่าและช่วงผลตอบแทนแบบไม่ overclaim'
+        : 'Rental demand snapshots and yield ranges without overclaiming certainty.',
+      href: withLocale(locale, '/invest/guides'),
+      updatedAt: process.env.NEXT_PUBLIC_INSIGHTS_YIELD_UPDATED_AT ?? null,
+    },
+    {
+      key: 'new_launches',
+      title: locale === 'th' ? 'New launches' : 'New launches',
+      body: locale === 'th'
+        ? 'โครงการเปิดใหม่ที่ทีมคัดกรองแล้ว พร้อมมุมมองความเสี่ยง/โอกาส'
+        : 'Curated launch pipeline with practical risk/opportunity notes from the team.',
+      href: withLocale(locale, '/projects'),
+      updatedAt: process.env.NEXT_PUBLIC_INSIGHTS_LAUNCH_UPDATED_AT ?? null,
+    },
+  ];
+
+  function getInitials(name: string): string {
+    const parts = name.trim().split(/\s+/).filter(Boolean).slice(0, 2);
+    if (!parts.length) return 'NA';
+    return parts.map((part) => part[0]?.toUpperCase() ?? '').join('');
+  }
+
+  function getPlatformBadge(context: string | undefined): string {
+    const source = (context ?? '').toLowerCase();
+    if (source.includes('google')) return 'Google';
+    if (source.includes('facebook') || source.includes('fb')) return 'Facebook';
+    return locale === 'th' ? 'Source TBD' : 'Source TBD';
+  }
+
+  function getReviewHighlight(quote: string): string {
+    const normalized = quote.replace(/\s+/g, ' ').trim();
+    const chunks = normalized.split(/(?<=[.!?])\s+/);
+    return chunks[0] || normalized;
+  }
 
   return (
     <main id="main-content" data-emphasis={recommendation.emphasis}>
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: jsonLd }}
-      />
-
       <HomeHero
         dict={dict}
         locale={locale}
@@ -239,180 +469,243 @@ export default async function HomePage({
           closeAriaLabel={dict.common.close}
         />
       </Suspense>
-
-
-      {/* Explore Opportunities (Combined Flow) */}
-      <section className="cv-auto py-16 md:py-20 xl:py-24 2xl:py-28">
-        <Container variant="wide">
-          <div className="section-header">
-            <h2 className="section-title">{dict.home.pathSectionTitle}</h2>
-            <p className="section-subtitle">{dict.home.pathSectionSubtitle}</p>
-          </div>
-
-          <div className="grid grid-3">
-            <TrackedLink
-              className="path-card reveal"
-              href={withLocale(locale, '/invest')}
-              eventType="path_entry_click"
-              eventPayload={{ path: 'invest' }}
-            >
-              <h3>{dict.home.pathInvest.title}</h3>
-              <p>{dict.home.pathInvest.desc}</p>
-            </TrackedLink>
-            <TrackedLink
-              className="path-card reveal"
-              href={withLocale(locale, '/buy')}
-              eventType="path_entry_click"
-              eventPayload={{ path: 'buy' }}
-            >
-              <h3>{dict.home.pathBuy.title}</h3>
-              <p>{dict.home.pathBuy.desc}</p>
-            </TrackedLink>
-            <TrackedLink
-              className="path-card reveal"
-              href={withLocale(locale, '/rent')}
-              eventType="path_entry_click"
-              eventPayload={{ path: 'live' }}
-            >
-              <h3>{dict.home.pathLive.title}</h3>
-              <p>{dict.home.pathLive.desc}</p>
-            </TrackedLink>
-          </div>
-
-          <div className="mt-16 pt-16 border-t border-gray-100">
-            <h3 className="text-2xl font-serif font-medium text-center mb-4">{dict.homepageSegmentation.sectionTitle}</h3>
-            <p className="text-gray-600 text-center mb-10 max-w-2xl mx-auto">{dict.homepageSegmentation.sectionSubtitle}</p>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8">
-              {dict.homepageSegmentation.cards.map((card: any) => (
-                <TrackedLink
-                  key={card.href}
-                  className="path-card reveal bg-gray-50 border-none shadow-sm hover:shadow-md"
-                  href={withLocale(locale, card.href)}
-                  eventType="segment_entry_click"
-                  eventPayload={{ segment: card.href.replace('/', '') }}
-                >
-                  <h4 className="text-lg font-medium mb-2 text-gray-900">{card.title}</h4>
-                  <p className="text-gray-600 text-sm">{card.desc}</p>
-                </TrackedLink>
-              ))}
-            </div>
-          </div>
-        </Container>
-      </section>
-
-
       {/* Featured Projects — Real Data (streamed) */}
-      <Suspense fallback={null}>
+      <Suspense fallback={<SectionCardSkeleton kind="project" locale={locale} />}>
         <FeaturedProjectsSection />
       </Suspense>
 
       {/* Selected Investment Opportunities — Real Properties (streamed) */}
-      <Suspense fallback={null}>
+      <Suspense fallback={<SectionCardSkeleton kind="investment" locale={locale} />}>
         <FeaturedPropertiesSection />
       </Suspense>
 
-      {/* Investment Stats */}
+      {/* Why Pattaya (Proof Metrics) */}
       <section className="cv-auto py-16 md:py-20 xl:py-24 2xl:py-28 bg-surface">
         <Container variant="wide">
           <div className="section-header">
-            <h2 className="section-title">{dict.home.investStatsTitle}</h2>
-            <p className="section-subtitle">{dict.home.investStatsSubtitle}</p>
+            <h2 className="section-title">{locale === 'th' ? 'Why Pattaya Right Now' : 'Why Pattaya Right Now'}</h2>
+            <p className="section-subtitle">
+              {locale === 'th'
+                ? 'สัญญาณตลาดที่ทีมใช้ประกอบการคัดเลือกดีล (พร้อมหมายเหตุแหล่งข้อมูลอย่างโปร่งใส)'
+                : 'Market proof cues we use when curating opportunities, with transparent source notes.'}
+            </p>
           </div>
 
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-12 border-t border-gray-200 pt-12">
-            {dict.home.investStats.map((stat: any) => (
-              <div key={stat.label} className="reveal text-center md:text-left">
-                <div className="text-4xl md:text-5xl font-serif font-semibold text-primary mb-3">{stat.value}</div>
-                <div className="text-lg font-medium text-gray-900 mb-2">{stat.label}</div>
-              </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-5 md:gap-6 border-t border-gray-200 pt-10">
+            {(whyPattayaStats.length > 0 ? whyPattayaStats.slice(0, 4) : Array.from({ length: 4 }).map((_, index) => ({
+              label: locale === 'th' ? `ตัวชี้วัด ${index + 1}` : `Metric ${index + 1}`,
+              value: null,
+            }))).map((stat, index) => (
+              <article key={`${stat.label}-${index}`} className="reveal rounded-2xl border border-gray-100 bg-white p-6 shadow-sm min-h-[176px] flex flex-col">
+                <div className="text-3xl md:text-4xl font-serif font-semibold text-primary leading-[1.1] min-h-[2.5rem]">
+                  {stat?.value?.trim()
+                    ? stat.value
+                    : (locale === 'th' ? 'TODO: รอตรวจสอบข้อมูล' : 'TODO: data verification pending')}
+                </div>
+                <div className="text-base md:text-lg font-medium text-gray-900 mt-3 leading-snug min-h-[3rem]">
+                  {stat?.label?.trim()
+                    ? stat.label
+                    : (locale === 'th' ? 'หัวข้อข้อมูลรอยืนยัน' : 'Metric label pending verification')}
+                </div>
+                <div className="mt-auto pt-4 text-xs text-gray-500 flex items-center gap-2">
+                  <span aria-hidden="true">{statTrendCues[index % statTrendCues.length].split(' ')[0]}</span>
+                  <span>{statTrendCues[index % statTrendCues.length].replace(/^[^\s]+\s*/, '')}</span>
+                </div>
+              </article>
             ))}
           </div>
 
-          <p className="text-xs text-gray-400 mt-6 text-center md:text-left">
+          <p className="text-xs text-gray-400 mt-5 text-center md:text-left">
             {locale === 'th'
-              ? '* อ้างอิงข้อมูลตลาดคอนโดพัทยา ตัวเลขเป็นเพียงแนวทางเบื้องต้น ไม่ใช่การรับประกันผลตอบแทน'
-              : '* Based on median Pattaya condo market data. Figures are indicative only and do not constitute a guarantee of returns.'}
+              ? '* Source note: ใช้ข้อมูลตลาดสาธารณะ/ภายในที่ทีมใช้งานจริง — TODO: ระบุที่มาและวันที่อัปเดตที่ยืนยันแล้ว'
+              : '* Source note: based on internal/public market references used by the team — TODO: attach verified source and date stamp.'}
           </p>
 
           <div className="cta-row cta-row--center mt-8">
             <TrackedLink
               className="btn btn-cta"
-              href={withLocale(locale, '/invest')}
+              href={withLocale(locale, '/invest/guides')}
               eventType="cta_click"
-              eventPayload={{ cta: 'explore_investment', from: 'home_stats' }}
+              eventPayload={{ cta: 'explore_investment_insights', from: 'home_why_pattaya' }}
             >
-              {dict.cta.exploreInvestment}
+              {locale === 'th' ? 'Explore investment insights' : 'Explore investment insights'}
             </TrackedLink>
           </div>
         </Container>
       </section>
 
-      {/* Trust & Market Insight */}
+      {/* Trust + Process + Content Engine */}
       <section className="cv-auto py-16 md:py-20 xl:py-24 2xl:py-28">
         <Container variant="wide">
-          <div className="grid md:grid-cols-2 gap-12 items-center mb-20">
-            <div>
-              <h2 className="text-3xl md:text-4xl font-medium font-serif mb-6 text-gray-900">{dict.home.trustTitle}</h2>
-              <p className="text-lg text-gray-600 mb-8 leading-relaxed">{dict.home.trustSubtitle}</p>
-              <ul className="space-y-4">
-                {dict.home.trustBullets.map((b: string) => (
-                  <li key={b} className="flex items-start gap-3">
-                    <span className="text-primary mt-1 text-xl leading-none">✓</span>
-                    <span className="text-gray-700 font-medium">{b}</span>
+          <div className="section-header">
+            <h2 className="section-title">{locale === 'th' ? 'Why International Buyers Trust Us' : 'Why International Buyers Trust Us'}</h2>
+            <p className="section-subtitle">
+              {locale === 'th'
+                ? 'หลักฐาน + กระบวนการ + มุมมองตลาด ใน flow เดียว เพื่อให้คุณตัดสินใจได้มั่นใจขึ้น'
+                : 'Proof assets, process clarity, and market intelligence in one coherent decision flow.'}
+            </p>
+          </div>
+
+          <div className="grid lg:grid-cols-2 gap-8 md:gap-10 mb-16">
+            <div className="rounded-2xl border border-gray-100 bg-white p-6 md:p-8 shadow-sm">
+              <h3 className="text-2xl font-serif font-medium text-gray-900 mb-5">{locale === 'th' ? 'Proof assets' : 'Proof assets'}</h3>
+              <div className="grid sm:grid-cols-2 gap-4">
+                {trustProofItems.map((item) => (
+                  <div key={item.key} className="rounded-xl border border-gray-100 bg-gray-50 px-4 py-4 min-h-[108px] flex flex-col">
+                    <div className="text-xs uppercase tracking-[0.08em] text-gray-500 mb-2">{item.label}</div>
+                    <div className="text-base font-semibold text-gray-900 leading-snug">
+                      {item.value?.trim()
+                        ? item.value
+                        : (locale === 'th' ? 'TODO: รอข้อมูลยืนยัน' : 'TODO: verified value pending')}
+                    </div>
+                  </div>
+                ))}
+              </div>
+              <p className="text-xs text-gray-400 mt-4">
+                {locale === 'th'
+                  ? '* ข้อมูล proof บางรายการยังรอทีมยืนยันก่อนเผยแพร่'
+                  : '* Some proof values are intentionally pending until verified by the team.'}
+              </p>
+            </div>
+
+            <div className="rounded-2xl border border-gray-100 bg-white p-6 md:p-8 shadow-sm">
+              <h3 className="text-2xl font-serif font-medium text-gray-900 mb-5">{locale === 'th' ? 'Our process' : 'Our process'}</h3>
+              <ol className="space-y-4" aria-label={locale === 'th' ? 'กระบวนการหลัก 3 ขั้น' : 'Three-step process'}>
+                {[
+                  {
+                    step: locale === 'th' ? 'Consult' : 'Consult',
+                    body: locale === 'th' ? 'ทำความเข้าใจเป้าหมาย งบประมาณ และ timeline' : 'Align on goals, budget, and timeline.',
+                  },
+                  {
+                    step: locale === 'th' ? 'Shortlist' : 'Shortlist',
+                    body: locale === 'th' ? 'คัดตัวเลือกที่ตรงเกณฑ์ พร้อม trade-offs โปร่งใส' : 'Curate options with transparent trade-offs.',
+                  },
+                  {
+                    step: locale === 'th' ? 'Tour / Deal' : 'Tour / Deal',
+                    body: locale === 'th' ? 'จัด private tour และปิดดีลตามความพร้อมของคุณ' : 'Arrange private tours and guide deal execution.',
+                  },
+                ].map((item, index) => (
+                  <li key={item.step} className="flex items-start gap-3">
+                    <span className="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary text-sm font-semibold">
+                      {index + 1}
+                    </span>
+                    <div>
+                      <div className="font-semibold text-gray-900">{item.step}</div>
+                      <p className="text-sm text-gray-600 leading-relaxed">{item.body}</p>
+                    </div>
                   </li>
                 ))}
-              </ul>
-            </div>
-            <div className="bg-gray-50 rounded-2xl p-8 border border-gray-100 shadow-sm relative overflow-hidden">
-              <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-bl-[100px] z-0"></div>
-              <div className="relative z-10">
-                <h3 className="text-xl font-serif font-medium text-gray-900 mb-4">The AMP Pattaya Standard</h3>
-                <p className="text-gray-600 mb-6 leading-relaxed">We protect your investment from day one. Our multi-layered due diligence process ensures every property meets international standards for quality, legal clarity, and long-term value.</p>
-                <Link href={`/${locale}/about`} className="text-primary font-semibold hover:text-primary-dark transition-colors inline-flex items-center gap-2">Discover our approach →</Link>
+              </ol>
+
+              <div className="cta-row mt-7">
+                <TrackedLink
+                  href={withLocale(locale, '/about')}
+                  className="btn btn-secondary"
+                  eventType="cta_click"
+                  eventPayload={{ cta: 'meet_the_team', from: 'home_trust' }}
+                >
+                  {locale === 'th' ? 'Meet the team' : 'Meet the team'}
+                </TrackedLink>
+                <TrackedLink
+                  href={withLocale(locale, '/about#how-we-work')}
+                  className="btn btn-tertiary"
+                  eventType="cta_click"
+                  eventPayload={{ cta: 'how_we_work', from: 'home_trust' }}
+                >
+                  {locale === 'th' ? 'How we work' : 'How we work'}
+                </TrackedLink>
               </div>
             </div>
           </div>
 
           <div className="section-header">
-            <h2 className="section-title">{dict.home.insightTitle}</h2>
-            <p className="section-subtitle">{dict.home.insightSubtitle}</p>
+            <h2 className="section-title">{locale === 'th' ? 'Market Insight Engine' : 'Market Insight Engine'}</h2>
+            <p className="section-subtitle">
+              {locale === 'th'
+                ? 'โครงคอนเทนต์พร้อมต่อยอด SEO/insights โดยคงน้ำหนักที่ actionable และเชื่อถือได้'
+                : 'Content structure ready for SEO/insight scale while staying practical and trustworthy.'}
+            </p>
           </div>
 
-          <div className="grid grid-3">
-            {dict.home.insightCards.map((c) => (
-              <div key={c.title} className="card reveal">
-                <h3 className="card-title">{c.title}</h3>
-                <p className="card-subtitle">{c.body}</p>
-              </div>
+          <div className="grid md:grid-cols-3 gap-6 md:gap-8">
+            {insightCards.map((card) => (
+              <article key={card.key} className="card reveal">
+                <div className="text-xs uppercase tracking-[0.08em] text-primary mb-2">{card.title}</div>
+                <p className="card-subtitle mb-4">{card.body}</p>
+                <p className="text-xs text-gray-400 mb-5">
+                  {card.updatedAt
+                    ? `${locale === 'th' ? 'Last updated' : 'Last updated'}: ${card.updatedAt}`
+                    : (locale === 'th'
+                      ? 'Last updated: TODO (รอยืนยันวันที่อัปเดต)'
+                      : 'Last updated: TODO (verified date pending)')}
+                </p>
+                <TrackedLink
+                  className="text-primary font-semibold hover:text-primary-dark transition-colors inline-flex items-center gap-2"
+                  href={card.href}
+                  eventType="cta_click"
+                  eventPayload={{ cta: 'read_insights', from: 'home_insight_engine', topic: card.key }}
+                >
+                  {locale === 'th' ? 'Read insights' : 'Read insights'}
+                </TrackedLink>
+              </article>
             ))}
           </div>
 
-          {/* Google Reviews — Real, Static */}
-          {dict.common.testimonials.length >= 2 ? (
-            <div className="mt-20 pt-16 border-t border-gray-100">
-              <div className="section-header">
-                <div className="flex items-center justify-center gap-2 mb-3">
-                  <span className="text-2xl" aria-label="5 stars">⭐⭐⭐⭐⭐</span>
-                  <span className="text-xl font-semibold text-gray-900">5.0</span>
-                </div>
-                <h2 className="section-title">{locale === 'th' ? 'รีวิวจากลูกค้า' : 'Client Reviews'}</h2>
-                <p className="section-subtitle text-sm text-gray-500">{locale === 'th' ? 'รีวิวจริงจาก Google' : 'Based on verified Google reviews'}</p>
-              </div>
-
-              <div className="grid md:grid-cols-3 gap-6 md:gap-8">
-                {dict.common.testimonials.slice(0, 3).map((t) => (
-                  <figure key={t.name} className="bg-gray-50 rounded-2xl p-6 border border-gray-100">
-                    <div className="text-yellow-400 text-sm mb-3">★★★★★</div>
-                    <blockquote className="text-gray-700 leading-relaxed mb-4 line-clamp-3">&ldquo;{t.quote}&rdquo;</blockquote>
-                    <figcaption>
-                      <div className="font-medium text-gray-900 text-sm">{t.name}</div>
-                      <div className="text-xs text-gray-500">{t.context}</div>
-                    </figcaption>
-                  </figure>
-                ))}
-              </div>
+          <div className="mt-20 pt-16 border-t border-gray-100">
+            <div className="section-header">
+              <h2 className="section-title">{locale === 'th' ? 'Client Reviews' : 'Client Reviews'}</h2>
+              <p className="section-subtitle text-sm text-gray-500">
+                {locale === 'th'
+                  ? 'แสดง feedback ที่มีอยู่ พร้อมป้ายแหล่งที่มาแบบระมัดระวัง (ไม่แอบอ้างคะแนนรวม)'
+                  : 'Feedback highlights with careful source badges (no unverified aggregate rating claims).'}
+              </p>
             </div>
-          ) : null}
+
+            {dict.common.testimonials.length > 0 ? (
+              <div className="grid md:grid-cols-3 gap-6 md:gap-8">
+                {dict.common.testimonials.slice(0, 3).map((t) => {
+                  const highlight = getReviewHighlight(t.quote);
+                  const remainder = t.quote.replace(highlight, '').trim();
+                  const platformBadge = getPlatformBadge(t.context);
+
+                  return (
+                    <figure key={t.name} className="bg-gray-50 rounded-2xl p-6 border border-gray-100 min-h-[260px] flex flex-col">
+                      <div className="flex items-center justify-between gap-2 mb-3">
+                        <span className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-primary/10 text-primary text-xs font-semibold">
+                          {getInitials(t.name)}
+                        </span>
+                        <span className="text-xs font-medium text-gray-500 border border-gray-200 rounded-full px-2.5 py-1">{platformBadge}</span>
+                      </div>
+
+                      <blockquote className="text-gray-900 font-medium leading-relaxed mb-3">&ldquo;{highlight}&rdquo;</blockquote>
+                      {remainder ? <p className="text-sm text-gray-600 leading-relaxed mb-4">{remainder}</p> : null}
+
+                      <figcaption className="mt-auto pt-3 border-t border-gray-200">
+                        <div className="font-medium text-gray-900 text-sm">{t.name}</div>
+                        <div className="text-xs text-gray-500">{t.context || (locale === 'th' ? 'Source context: TODO' : 'Source context: TODO')}</div>
+                      </figcaption>
+                    </figure>
+                  );
+                })}
+              </div>
+            ) : (
+              <div className="premium-empty-state" role="status" aria-live="polite">
+                <h3>{locale === 'th' ? 'กำลังเตรียมรีวิวที่ยืนยันแหล่งข้อมูลแล้ว' : 'Preparing verified review highlights'}</h3>
+                <p>{locale === 'th' ? 'TODO: เชื่อมแหล่งรีวิวที่ยืนยันได้ก่อนแสดงคะแนน/จำนวนรวม' : 'TODO: connect verifiable review source before showing aggregate score/count.'}</p>
+              </div>
+            )}
+
+            <div className="cta-row cta-row--center mt-8">
+              <TrackedLink
+                className="btn btn-secondary"
+                href={withLocale(locale, '/about#reviews')}
+                eventType="cta_click"
+                eventPayload={{ cta: 'see_all_reviews', from: 'home_reviews' }}
+              >
+                {locale === 'th' ? 'See all reviews' : 'See all reviews'}
+              </TrackedLink>
+            </div>
+          </div>
         </Container>
       </section>
 
@@ -421,45 +714,54 @@ export default async function HomePage({
         <Container variant="wide">
           <div className="section-header">
             <h2 className="section-title">{locale === 'th' ? 'ดูวิดีโอของเรา' : 'See Our Work'}</h2>
-            <p className="section-subtitle">{locale === 'th' ? 'พาชมโครงการและทำความรู้จักทีมงานของเรา' : 'Project walkthroughs and meet our advisory team.'}</p>
+            <p className="section-subtitle">{locale === 'th' ? 'พอร์ตงานจริงของทีมในรูปแบบเดียวกัน อ่านง่าย และลด layout shift' : 'Consistent portfolio previews with stable layout and clear watch intent.'}</p>
           </div>
 
           <div className="grid md:grid-cols-2 gap-6 md:gap-8">
-            {/* Video 1: Meet the Team */}
-            <div className="relative aspect-video rounded-2xl overflow-hidden bg-gray-900">
-              <iframe
-                className="w-full h-full"
-                src="about:blank"
-                title="Meet AMP Pattaya Team"
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                allowFullScreen
-                loading="lazy"
-                srcDoc={`<style>*{padding:0;margin:0;overflow:hidden}html,body{height:100%}img,span{position:absolute;width:100%;top:0;bottom:0;margin:auto}span{height:60px;width:60px;border-radius:50%;background:rgba(0,0,0,.7);display:flex;align-items:center;justify-content:center;font-size:24px;color:#fff}</style><a href='https://www.youtube.com/embed/_-Yzpo3tCuQ?autoplay=1'><img src='https://img.youtube.com/vi/_-Yzpo3tCuQ/hqdefault.jpg' alt='Meet AMP Pattaya'><span>▶</span></a>`}
-              />
-            </div>
-            {/* Video 2: New Project Presale */}
-            <div className="relative aspect-video rounded-2xl overflow-hidden bg-gray-900">
-              <iframe
-                className="w-full h-full"
-                src="about:blank"
-                title="New Project Presale Tour"
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                allowFullScreen
-                loading="lazy"
-                srcDoc={`<style>*{padding:0;margin:0;overflow:hidden}html,body{height:100%}img,span{position:absolute;width:100%;top:0;bottom:0;margin:auto}span{height:60px;width:60px;border-radius:50%;background:rgba(0,0,0,.7);display:flex;align-items:center;justify-content:center;font-size:24px;color:#fff}</style><a href='https://www.youtube.com/embed/77If6rT5fdE?autoplay=1'><img src='https://img.youtube.com/vi/77If6rT5fdE/hqdefault.jpg' alt='New Development Presale'><span>▶</span></a>`}
-              />
-            </div>
+            {[
+              {
+                key: 'team_story',
+                title: locale === 'th' ? 'Meet AMP Pattaya Team' : 'Meet AMP Pattaya Team',
+                caption: locale === 'th' ? 'ดูทีมที่ปรึกษาและแนวทางการคัดทรัพย์ของเรา' : 'See how the advisory team frames each shortlist.',
+                ytId: '_-Yzpo3tCuQ',
+              },
+              {
+                key: 'launch_walkthrough',
+                title: locale === 'th' ? 'New Project Presale Tour' : 'New Project Presale Tour',
+                caption: locale === 'th' ? 'ดูตัวอย่างการพาโครงการใหม่และสิ่งที่ต้องเช็กก่อนตัดสินใจ' : 'Preview how we review new launches before recommendations.',
+                ytId: '77If6rT5fdE',
+              },
+            ].map((video) => (
+              <figure key={video.key} className="rounded-2xl overflow-hidden border border-gray-100 bg-white shadow-sm">
+                <div className="relative aspect-video bg-gray-900">
+                  <iframe
+                    className="w-full h-full"
+                    src="about:blank"
+                    title={video.title}
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowFullScreen
+                    loading="lazy"
+                    srcDoc={`<style>*{padding:0;margin:0;overflow:hidden}html,body{height:100%;background:#111}img,span{position:absolute;left:0;right:0;top:0;bottom:0;margin:auto}img{width:100%;height:100%;object-fit:cover;filter:brightness(.72)}span{height:58px;width:58px;border-radius:999px;background:rgba(255,255,255,.9);display:flex;align-items:center;justify-content:center;font-size:20px;color:#111;font-weight:700;box-shadow:0 8px 24px rgba(0,0,0,.35)}</style><a href='https://www.youtube.com/embed/${video.ytId}?autoplay=1'><img src='https://img.youtube.com/vi/${video.ytId}/hqdefault.jpg' alt='${video.title}'><span>▶</span></a>`}
+                  />
+                </div>
+                <figcaption className="px-5 py-4 text-sm text-gray-600 min-h-[72px] leading-relaxed">
+                  {video.caption}
+                </figcaption>
+              </figure>
+            ))}
           </div>
 
           <div className="cta-row cta-row--center mt-6">
-            <a
+            <TrackedLink
               className="btn btn-secondary"
               href="https://www.youtube.com/@AssetManagementProperty"
+              eventType="cta_click"
+              eventPayload={{ cta: 'watch_more', from: 'home_video' }}
               target="_blank"
               rel="noopener noreferrer"
             >
-              {locale === 'th' ? 'ดูช่องของเรา' : 'Explore Our Channel'}
-            </a>
+              {locale === 'th' ? 'Watch more' : 'Watch more'}
+            </TrackedLink>
           </div>
         </Container>
       </section>
@@ -469,32 +771,42 @@ export default async function HomePage({
         <Container variant="wide">
           <div className="grid lg:grid-cols-2 gap-16 items-center">
             <div className="reveal">
-              <h2 className="text-3xl md:text-5xl font-serif font-medium mb-6 leading-tight">{dict.home.premiumCtaTitle}</h2>
-              <p className="text-lg text-white/80 mb-10 max-w-lg leading-relaxed">{dict.home.premiumCtaBody}</p>
+              <h2 className="text-3xl md:text-5xl font-serif font-medium mb-6 leading-tight">
+                {locale === 'th' ? 'พร้อมปิดดีลที่ตรงกับเป้าหมายของคุณหรือยัง?' : 'Ready to shortlist the right deal for your goal?'}
+              </h2>
+              <p className="text-lg text-white/80 mb-10 max-w-lg leading-relaxed">
+                {locale === 'th'
+                  ? 'แจ้งงบประมาณและวัตถุประสงค์ของคุณ แล้วทีมที่ปรึกษาจะจัด shortlist แบบคัดสรร พร้อมขั้นตอนถัดไปที่ชัดเจน'
+                  : 'Share your budget and intent, and our advisory team will prepare a curated shortlist with clear next steps.'}
+              </p>
               <div className="flex flex-wrap gap-4">
                 <TrackedLink
                   className="px-6 py-3 bg-white text-gray-900 rounded-full text-sm font-semibold hover:bg-gray-100 transition-colors"
                   href={withLocale(locale, '/contact')}
                   eventType="cta_click"
-                  eventPayload={{ cta: 'speak_to_advisor', from: 'home_premium' }}
+                  eventPayload={{ cta: 'book_consultation', from: 'home_bottom' }}
                 >
-                  {dict.cta.speakToAdvisor}
+                  {locale === 'th' ? 'นัดคำปรึกษา' : 'Book Consultation'}
                 </TrackedLink>
                 <TrackedLink
                   className="px-6 py-3 bg-white/10 hover:bg-white/20 backdrop-blur-md rounded-full text-white text-sm font-medium transition-colors border border-white/20"
                   href={withLocale(locale, '/invest')}
                   eventType="cta_click"
-                  eventPayload={{ cta: 'explore_investment', from: 'home_premium' }}
+                  eventPayload={{ cta: 'view_investment_path', from: 'home_bottom' }}
                 >
-                  {dict.cta.exploreInvestment}
+                  {locale === 'th' ? 'ดูเส้นทางการลงทุน' : 'See Investment Path'}
                 </TrackedLink>
               </div>
             </div>
             <div className="reveal">
               <div className="bg-white p-8 md:p-10 rounded-2xl shadow-2xl text-gray-900">
-                <h3 className="text-2xl font-medium mb-2">Request a Private Consultation</h3>
-                <p className="text-gray-600 mb-8 text-sm">Tell us about your requirements and we will curate a personalized shortlist.</p>
-                <LeadForm />
+                <h3 className="text-2xl font-medium mb-2">{locale === 'th' ? 'รับคำแนะนำจากที่ปรึกษา AMP' : 'Request a Private Consultation'}</h3>
+                <p className="text-gray-600 mb-8 text-sm">
+                  {locale === 'th'
+                    ? 'กรอกข้อมูลสั้น ๆ แล้วเราจะติดต่อกลับพร้อม shortlist ที่เหมาะกับงบประมาณของคุณ'
+                    : 'Complete the short form and we will follow up with a curated shortlist matched to your budget.'}
+                </p>
+                <LeadForm variant="home" />
               </div>
             </div>
           </div>
