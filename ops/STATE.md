@@ -1,7 +1,7 @@
 # ops/STATE.md (STATE-LOCK)
 
 - CurrentPhase: A+B=PASS, Phase1=FAIL, Phase2=BLOCKED, Phase3=BLOCKED, Phase4=BLOCKED, Phase5=BLOCKED
-- CurrentIteration: phase1-iter-16 (desktop probe + metric-based bisect helper)
+- CurrentIteration: phase1-iter-17 (desktop restore from boundary before evidence #202)
 - MainlineStatus: RUNNING
 - LatestEvidence: ops/logs/phase1/
   - cf-headers.txt (2026-02-25 07:46:52)
@@ -21,5 +21,5 @@
   - Lighthouse truth model: use simulated LCP (`audits[largest-contentful-paint].numericValue`) as truth; observed is supporting note only
   - Lighthouse gates: mobile>=92, desktop>=97, CLS=0, DOM<900, hydrationSignals=0
   - Avoid evidence bloat: evidence PR should prefer lh-*.{txt,json}, hydration.txt, cf-headers.txt, ops/STATE.md (attempt files only if necessary)
-- NextAction: Merge Iter-16 OPS-only patch, run lh:probe:desktop to find good-enough anchor (perf median >=96), then start bisect using lh:bisect:desktop helper
-- LastResultSummary: No production commit currently passes desktop>=97 with lh:gate:desktop; Iter-16 adds non-enforcing desktop probe and metric-based bisect decision to unblock bisect workflow
+- NextAction: Merge Iter-17 patch -> deploy -> CF verify -> lh:gate:desktop -> open evidence-only PR allowlist
+- LastResultSummary: Deterministic evidence boundary: GOOD 9132ed3 (perfMed=97) -> BAD eba2816 (perfMed=92), patch preceding evidence #202 is PR #201 (DeferredProviders path)
