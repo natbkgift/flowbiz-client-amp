@@ -1,7 +1,7 @@
 # ops/STATE.md (STATE-LOCK)
 
 - CurrentPhase: A+B=PASS, Phase1=FAIL, Phase2=BLOCKED, Phase3=BLOCKED, Phase4=BLOCKED, Phase5=BLOCKED
-- CurrentIteration: phase1-iter-10 (evidence collected)
+- CurrentIteration: phase1-iter-11 (repair patch prepared: option A)
 - MainlineStatus: RUNNING
 - LatestEvidence: ops/logs/phase1/
   - cf-headers.txt (2026-02-25 06:44:12)
@@ -21,5 +21,5 @@
   - Lighthouse truth model: use simulated LCP (`audits[largest-contentful-paint].numericValue`) as truth; observed is supporting note only
   - Lighthouse gates: mobile>=92, desktop>=97, CLS=0, DOM<900, hydrationSignals=0
   - Avoid evidence bloat: evidence PR should prefer lh-*.{txt,json}, hydration.txt, cf-headers.txt, ops/STATE.md (attempt files only if necessary)
-- NextAction: phase1-iter-11 — Evidence Pack + A/B options first (STRICT). Priority: recover Desktop to >=97 while preserving Mobile gains from iter-10 (TBT now <=200), then continue reducing Mobile LCP
-- LastResultSummary: Phase1 FAIL (iter-10 post-deploy) — mobile median perf=84 LCP=4090ms TBT=167ms CLS=0 DOM=717 (improved, but perf/lcp still fail); desktop median perf=92 LCP=1779ms TBT=0ms CLS=0 DOM=717 (regressed, fail: perf<97)
+- NextAction: Open PR for phase1-iter-11 repair Option A (revert PR #201 DeferredProviders split), merge+deploy, then production CF verify + lh:gate; if desktop>=97 then open/merge new evidence-only PR
+- LastResultSummary: Desktop regression observed after PR #201 split-heavy gate (post-#201 median desktop perf=92). Repair decision: Option A revert to restore desktop guard ASAP.
