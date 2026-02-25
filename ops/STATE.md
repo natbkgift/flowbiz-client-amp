@@ -1,7 +1,7 @@
 # ops/STATE.md (STATE-LOCK)
 
 - CurrentPhase: A+B=PASS, Phase1=FAIL, Phase2=BLOCKED, Phase3=BLOCKED, Phase4=BLOCKED, Phase5=BLOCKED
-- CurrentIteration: phase1-iter-14 (explicit revert of first bad commit in DeferredProviders)
+- CurrentIteration: phase1-iter-16 (desktop probe + metric-based bisect helper)
 - MainlineStatus: RUNNING
 - LatestEvidence: ops/logs/phase1/
   - cf-headers.txt (2026-02-25 07:46:52)
@@ -21,5 +21,5 @@
   - Lighthouse truth model: use simulated LCP (`audits[largest-contentful-paint].numericValue`) as truth; observed is supporting note only
   - Lighthouse gates: mobile>=92, desktop>=97, CLS=0, DOM<900, hydrationSignals=0
   - Avoid evidence bloat: evidence PR should prefer lh-*.{txt,json}, hydration.txt, cf-headers.txt, ops/STATE.md (attempt files only if necessary)
-- NextAction: Open/merge Iter-14 evidence-only PR allowlist (exclude lh-*-run*.json), then proceed to next repair iteration because desktop gate still fails
-- LastResultSummary: Iter-14 explicit parent-based revert completed and deployed; CF verify passed, but Lighthouse medians still failed (desktop perf=88, mobile perf=78)
+- NextAction: Merge Iter-16 OPS-only patch, run lh:probe:desktop to find good-enough anchor (perf median >=96), then start bisect using lh:bisect:desktop helper
+- LastResultSummary: No production commit currently passes desktop>=97 with lh:gate:desktop; Iter-16 adds non-enforcing desktop probe and metric-based bisect decision to unblock bisect workflow

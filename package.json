@@ -10,7 +10,9 @@
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
     "lh:gate": "node ops/lighthouse/lh-gate.mjs",
-    "lh:gate:desktop": "node ops/lighthouse/lh-gate.mjs --preset desktop"
+    "lh:gate:desktop": "node ops/lighthouse/lh-gate.mjs --preset desktop",
+    "lh:probe:desktop": "node ops/lighthouse/run-lh.mjs --url https://amppattaya.com/en/ --runs 5 --preset desktop --outDir ops/logs/phase1 --enforceGates false --summaryBaseName lh-desktop-probe",
+    "lh:bisect:desktop": "node ops/bisect/desktop_probe.mjs --threshold 96"
   },
   "jest": {
     "testEnvironment": "node",
