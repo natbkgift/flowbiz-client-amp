@@ -4,10 +4,10 @@
 - CurrentIteration: phase1-iter-17 (desktop restore from boundary before evidence #202)
 - MainlineStatus: RUNNING
 - LatestEvidence: ops/logs/phase1/
-  - cf-headers.txt (2026-02-25 07:46:52)
+  - cf-headers.txt (2026-02-25 11:04:34)
   - lh-mobile.txt + lh-mobile.json (2026-02-25 07:49:49)
-  - lh-desktop.txt + lh-desktop.json (2026-02-25 07:50:45)
-  - hydration.txt (2026-02-25 07:50:45)
+  - lh-desktop.txt + lh-desktop.json (2026-02-25 11:05:53)
+  - hydration.txt (2026-02-25 11:05:53)
 - OpenPRsAllowed: 2 (1x Phase1 mainline iteration PR + 1x parallel-prep PR)
 - OpenPRsNow: (none)
 - PRsToClose: (none)
@@ -21,5 +21,5 @@
   - Lighthouse truth model: use simulated LCP (`audits[largest-contentful-paint].numericValue`) as truth; observed is supporting note only
   - Lighthouse gates: mobile>=92, desktop>=97, CLS=0, DOM<900, hydrationSignals=0
   - Avoid evidence bloat: evidence PR should prefer lh-*.{txt,json}, hydration.txt, cf-headers.txt, ops/STATE.md (attempt files only if necessary)
-- NextAction: Merge Iter-17 patch -> deploy -> CF verify -> lh:gate:desktop -> open evidence-only PR allowlist
-- LastResultSummary: Deterministic evidence boundary: GOOD 9132ed3 (perfMed=97) -> BAD eba2816 (perfMed=92), patch preceding evidence #202 is PR #201 (DeferredProviders path)
+- NextAction: Iter-18 Evidence Pack (desktop-first): keep one-patch discipline and continue regression surgery from PR #201 boundary
+- LastResultSummary: Iter-17 patch merged and deployed (PR #211). CF invariants PASS, but desktop gate still FAIL (perfMed=91 < 97)
