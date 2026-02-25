@@ -1,0 +1,74 @@
+[
+  {
+    "project_slug": "arcadia-millennium-tower",
+    "cover_image_url": "https://arcadiamillenniumtower.com/wp-content/uploads/2025/09/image-03.jpg",
+    "source_page_url": "https://arcadiamillenniumtower.com/",
+    "source_domain": "arcadiamillenniumtower.com",
+    "source_type": "official_project_website",
+    "source_title": "Home - Arcadia Millennium Tower",
+    "credit": "Arcadia Millennium Tower official website",
+    "rights_status": "verify_reuse_permission_required",
+    "approved_for_seed": true,
+    "notes": "Selected from homepage media gallery/hero assets."
+  },
+  {
+    "project_slug": "city-garden-pratumnak",
+    "cover_image_url": "https://globaltopgroup.com/wp-content/uploads/img/pratumnak/pratumnak-thumb.webp",
+    "source_page_url": "https://globaltopgroup.com/properties/city-garden-pratumnak/",
+    "source_domain": "globaltopgroup.com",
+    "source_type": "official_developer_website",
+    "source_title": "City Garden Pratumnak | Peacful Luxury Condo at Cosy Beach",
+    "credit": "Global Top Group official website",
+    "rights_status": "verify_reuse_permission_required",
+    "approved_for_seed": true,
+    "notes": "Project page redirects from citygardenpratumnak.com; developer slug in local seed remains matrix-developments pending data review."
+  },
+  {
+    "project_slug": "copacabana-beach-jomtien",
+    "cover_image_url": "https://copacabanajomtien.com/wp-content/uploads/2024/01/DJI_0074-scaled.jpg",
+    "source_page_url": "https://copacabanajomtien.com/",
+    "source_domain": "copacabanajomtien.com",
+    "source_type": "official_project_website",
+    "source_title": "Copacabana Beach Jomtien – Where The Beach Life Never Ends",
+    "credit": "Copacabana Beach Jomtien official website",
+    "rights_status": "verify_reuse_permission_required",
+    "approved_for_seed": true,
+    "notes": "Chosen from homepage hero/background section."
+  },
+  {
+    "project_slug": "grand-solaire",
+    "cover_image_url": "https://www.grandsolaire.com/wp-content/uploads/2022/11/drone-in-the-sky-2022-08-01-04-17-14-utc-e1667451875172.webp",
+    "source_page_url": "https://www.grandsolaire.com/",
+    "source_domain": "www.grandsolaire.com",
+    "source_type": "official_project_website",
+    "source_title": "Grand Solaire Pattaya",
+    "credit": "Grand Solaire official website",
+    "rights_status": "verify_reuse_permission_required",
+    "approved_for_seed": true,
+    "notes": "Selected from homepage hero background rendered by site builder."
+  },
+  {
+    "project_slug": "the-riviera-jomtien",
+    "cover_image_url": "/media/rent/rent-en-condo-for-rent-4207/01_b41236ce182f.jpg",
+    "source_page_url": "https://amppattaya.com/api/v1/properties/?page=1&limit=100&sort=newest",
+    "source_domain": "amppattaya.com",
+    "source_type": "amp_api_property_derived",
+    "source_title": "AMP public API property feed",
+    "credit": "AMP Pattaya media (API-derived)",
+    "rights_status": "amp_owned_or_licensed_verify_internal_policy",
+    "approved_for_seed": true,
+    "notes": "Mapped by project-name heuristic from property title."
+  },
+  {
+    "project_slug": "the-riviera-monaco",
+    "cover_image_url": "/media/rent/rent-en-condo-for-sale-3235/01_3e22694f51a7.jpg",
+    "source_page_url": "https://amppattaya.com/api/v1/properties/?page=1&limit=100&sort=newest",
+    "source_domain": "amppattaya.com",
+    "source_type": "amp_api_property_derived",
+    "source_title": "AMP public API property feed",
+    "credit": "AMP Pattaya media (API-derived)",
+    "rights_status": "amp_owned_or_licensed_verify_internal_policy",
+    "approved_for_seed": true,
+    "notes": "Mapped by project-name heuristic from property title."
+  }
+]

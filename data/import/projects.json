@@ -4,7 +4,7 @@
     "slug": "arcadia-millennium-tower",
     "developer_slug": "global-top-group",
     "area_slug": "central-pattaya",
-    "cover_image_url": "/images/property-exterior.png",
+    "cover_image_url": "https://arcadiamillenniumtower.com/wp-content/uploads/2025/09/image-03.jpg",
     "status": "published"
   },
   {
@@ -12,7 +12,7 @@
     "slug": "city-garden-pratumnak",
     "developer_slug": "matrix-developments",
     "area_slug": "pratumnak",
-    "cover_image_url": "/images/villa-garden.png",
+    "cover_image_url": "https://globaltopgroup.com/wp-content/uploads/img/pratumnak/pratumnak-thumb.webp",
     "status": "published",
     "starting_price": 5900000
   },
@@ -21,7 +21,7 @@
     "slug": "copacabana-beach-jomtien",
     "developer_slug": "heights-holdings",
     "area_slug": "jomtien",
-    "cover_image_url": "/images/property-pool.png",
+    "cover_image_url": "https://copacabanajomtien.com/wp-content/uploads/2024/01/DJI_0074-scaled.jpg",
     "status": "published",
     "starting_price": 3200000
   },
@@ -38,7 +38,7 @@
     "slug": "grand-solaire",
     "developer_slug": "heights-holdings",
     "area_slug": "central-pattaya",
-    "cover_image_url": "/images/project-overview.png",
+    "cover_image_url": "https://www.grandsolaire.com/wp-content/uploads/2022/11/drone-in-the-sky-2022-08-01-04-17-14-utc-e1667451875172.webp",
     "status": "published",
     "starting_price": 3800000
   },

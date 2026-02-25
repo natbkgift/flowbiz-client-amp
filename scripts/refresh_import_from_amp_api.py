@@ -53,6 +53,17 @@ def _write_json(path: Path, rows: list[dict[str, Any]]) -> None:
     path.write_text(json.dumps(rows, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
 
 
+def _read_cover_source_map(path: Path) -> dict[str, dict[str, Any]]:
+    rows = _read_json(path)
+    out: dict[str, dict[str, Any]] = {}
+    for row in rows:
+        slug = str(row.get("project_slug") or "").strip()
+        if not slug:
+            continue
+        out[slug] = row
+    return out
+
+
 def _is_real_media(url: str | None) -> bool:
     if not url:
         return False
@@ -201,6 +212,7 @@ def main() -> int:
     old_projects = _read_json(IMPORT_DIR / "projects.json")
     old_buy = _read_json(IMPORT_DIR / "units_buy.json")
     old_rent = _read_json(IMPORT_DIR / "units_rent.json")
+    cover_source_map = _read_cover_source_map(IMPORT_DIR / "project_cover_sources.json")
 
     old_projects_by_slug = {
         str(r.get("slug") or "").strip(): r for r in old_projects if str(r.get("slug") or "").strip()
@@ -310,6 +322,12 @@ def main() -> int:
         cover = str(p.get("cover_image_url") or "").strip() or None
         if not _is_real_media(cover):
             cover = hint.get("cover_image_url") or cover or None
+
+        manual_cover = cover_source_map.get(slug, {})
+        if bool(manual_cover.get("approved_for_seed")):
+            mapped_cover = str(manual_cover.get("cover_image_url") or "").strip() or None
+            if _is_real_media(mapped_cover):
+                cover = mapped_cover
 
         live_starting = _to_float(p.get("starting_price"))
         hint_starting = _to_float(hint.get("starting_price"))

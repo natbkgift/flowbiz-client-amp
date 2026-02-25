@@ -2,6 +2,12 @@
 const imageHosts = [
   'amppattaya.com',
   'www.amppattaya.com',
+  'arcadiamillenniumtower.com',
+  'arcadiamilleniumtower.ht1freshdigital.com',
+  'globaltopgroup.com',
+  'copacabanajomtien.com',
+  'grandsolaire.com',
+  'www.grandsolaire.com',
   ...(process.env.NEXT_PUBLIC_IMAGE_HOSTS ?? '')
     .split(',')
     .map((h) => h.trim())

@@ -21,7 +21,16 @@ export function resolveImageUrl(image: string | null | undefined): string | null
   // Protocol-relative → assume https.
   if (raw.startsWith('//')) return `https:${raw}`;
 
-  const defaultAllowed = ['amppattaya.com', 'www.amppattaya.com'];
+  const defaultAllowed = [
+    'amppattaya.com',
+    'www.amppattaya.com',
+    'arcadiamillenniumtower.com',
+    'arcadiamilleniumtower.ht1freshdigital.com',
+    'globaltopgroup.com',
+    'copacabanajomtien.com',
+    'grandsolaire.com',
+    'www.grandsolaire.com',
+  ];
   const envAllowed = (process.env.NEXT_PUBLIC_IMAGE_HOSTS ?? '')
     .split(',')
     .map((h) => h.trim())
