@@ -4,10 +4,10 @@
 - CurrentIteration: phase1-iter-14 (explicit revert of first bad commit in DeferredProviders)
 - MainlineStatus: RUNNING
 - LatestEvidence: ops/logs/phase1/
-  - cf-headers.txt (2026-02-25 06:31:33)
-  - lh-mobile.txt + lh-mobile.json (2026-02-25 06:33:08)
-  - lh-desktop.txt + lh-desktop.json (2026-02-25 06:34:36)
-  - hydration.txt (2026-02-25 06:34:36)
+  - cf-headers.txt (2026-02-25 07:46:52)
+  - lh-mobile.txt + lh-mobile.json (2026-02-25 07:49:49)
+  - lh-desktop.txt + lh-desktop.json (2026-02-25 07:50:45)
+  - hydration.txt (2026-02-25 07:50:45)
 - OpenPRsAllowed: 2 (1x Phase1 mainline iteration PR + 1x parallel-prep PR)
 - OpenPRsNow: (none)
 - PRsToClose: (none)
@@ -21,5 +21,5 @@
   - Lighthouse truth model: use simulated LCP (`audits[largest-contentful-paint].numericValue`) as truth; observed is supporting note only
   - Lighthouse gates: mobile>=92, desktop>=97, CLS=0, DOM<900, hydrationSignals=0
   - Avoid evidence bloat: evidence PR should prefer lh-*.{txt,json}, hydration.txt, cf-headers.txt, ops/STATE.md (attempt files only if necessary)
-- NextAction: Open PR for phase1-iter-14-explicit-revert-bad (restore admin-app/components/layout/DeferredProviders.tsx from PARENT_SHA=9132ed3413b610c89af5ef1b51001bfa20c73696), merge+deploy, then production CF verify + lh:gate, then open evidence-only PR allowlist (exclude lh-*-run*.json)
-- LastResultSummary: Iter-13 confirmed no net diff in DeferredProviders; Iter-14 executes explicit parent-based revert using first bad commit `bd803383c5e0a5aaf4b6ff361e318ff6ab847649` -> parent `9132ed3413b610c89af5ef1b51001bfa20c73696`
+- NextAction: Open/merge Iter-14 evidence-only PR allowlist (exclude lh-*-run*.json), then proceed to next repair iteration because desktop gate still fails
+- LastResultSummary: Iter-14 explicit parent-based revert completed and deployed; CF verify passed, but Lighthouse medians still failed (desktop perf=88, mobile perf=78)
