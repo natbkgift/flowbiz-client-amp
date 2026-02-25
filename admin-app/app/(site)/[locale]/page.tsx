@@ -8,8 +8,8 @@ import { FeaturedProjects } from '@/components/home/FeaturedProjects';
 import { LeadForm } from '@/components/forms/LeadForm';
 import { Container } from '@/components/layout/Container';
 import propertyPlaceholder from '@/public/images/property-placeholder.svg';
-import { buildWhatsAppUrl } from '@/app/_lib/public-cta';
 import { getDictionary, normalizeLocale } from '@/app/_lib/i18n/get-dictionary';
+import { GuidedOverlay } from './_components/GuidedOverlay';
 import { withLocale } from '@/app/_lib/i18n/routing';
 import { makePageMetadata } from '@/app/_lib/i18n/metadata';
 import { getContentRecommendation } from '@/lib/personalization';
@@ -33,78 +33,20 @@ export async function generateMetadata({
 
 export default async function HomePage({
   params,
-  searchParams,
 }: {
   params: Promise<{ locale: string }>;
-  searchParams?: Promise<Record<string, string | string[] | undefined>>;
 }) {
   const { locale: rawLocale } = await params;
   const locale = normalizeLocale(rawLocale);
   const dict = getDictionary(locale);
 
-  type GuidedStep = 'goal' | 'budget' | 'contact';
-  type GuidedGoal = 'buy' | 'rent' | 'invest';
-
-  function pickParam(value: unknown): string | null {
-    if (typeof value === 'string') return value;
-    if (Array.isArray(value) && typeof value[0] === 'string') return value[0];
-    return null;
-  }
-
-  function normalizeGuidedStep(step: string | null): GuidedStep {
-    if (step === 'goal' || step === 'budget' || step === 'contact') return step;
-    return 'goal';
-  }
-
-  function normalizeGoal(goal: string | null): GuidedGoal | null {
-    if (goal === 'buy' || goal === 'rent' || goal === 'invest') return goal;
-    return null;
-  }
-
-  function hrefWithQuery(path: string, query: Record<string, string>): string {
-    const url = new URL(path, 'https://amppattaya.com');
-    for (const [k, v] of Object.entries(query)) url.searchParams.set(k, v);
-    return url.pathname + url.search;
-  }
-
-  const smartLabels = {
-    buy: dict.guided.buy,
-    rent: dict.guided.rent,
-    invest: dict.guided.invest,
-  };
-
-  const sp = searchParams ? await searchParams : undefined;
-  const guidedOpen = pickParam(sp?.guided) === '1';
-  const step = normalizeGuidedStep(pickParam(sp?.step));
-  const goal = normalizeGoal(pickParam(sp?.goal));
-  const budget = pickParam(sp?.budget);
-  const timeline = pickParam(sp?.timeline);
-
-  const effectiveStep: GuidedStep = guidedOpen
-    ? goal
-      ? step
-      : 'goal'
-    : 'goal';
-
-  const summaryLines = [
-    goal ? `${dict.home.goalPrefix}: ${goal}` : null,
-    budget ? `${dict.home.budgetPrefix}: ${budget}` : null,
-    timeline ? `${dict.home.timelinePrefix}: ${timeline}` : null,
-  ].filter(Boolean) as string[];
-  const summaryText = summaryLines.join(' | ');
-  const whatsAppText = summaryText
-    ? `${dict.home.whatsAppGreeting} — ${summaryText}`
-    : dict.home.whatsAppFallback;
-  const whatsAppHref = buildWhatsAppUrl(whatsAppText);
-
-  const closeHref = withLocale(locale, '/');
 
   const recommendation = getContentRecommendation();
 
   async function FeaturedProjectsSection() {
     let allProjects: Awaited<ReturnType<typeof fetchProjects>> = [];
     try {
-      allProjects = await fetchProjects({ limit: 100 });
+      allProjects = await fetchProjects({ limit: 8 });
     } catch {
       allProjects = [];
     }
@@ -272,155 +214,32 @@ export default async function HomePage({
       <HomeHero
         dict={dict}
         locale={locale}
-        guidedHref={withLocale(locale, hrefWithQuery('/', { guided: '1', step: 'goal' }))}
+        guidedHref={withLocale(locale, '/?guided=1&step=goal')}
       />
 
-      {/* Guided Goal Modal */}
-      {guidedOpen ? (
-        <div className="guided-overlay" role="presentation">
-          <dialog className="guided-dialog" open aria-modal="true" aria-labelledby="guided-dialog-title">
-            <div className="guided-dialog__header">
-              <div>
-                <div className="guided-dialog__title" id="guided-dialog-title">{dict.guided.title}</div>
-                <div className="guided-dialog__step">
-                  {effectiveStep === 'goal'
-                    ? dict.guided.stepGoal
-                    : effectiveStep === 'budget'
-                      ? dict.guided.stepBudget
-                      : dict.guided.stepContact}
-                  {'  '}•{'  '}{dict.guided.stepProgress}
-                </div>
-              </div>
-              <a className="guided-dialog__close" href={closeHref} aria-label={dict.common.close}>
-                ✕
-              </a>
-            </div>
+      {/* Guided Finder Overlay — client component.
+          Reads URL params client-side so this server component stays
+          searchParams-free → Next.js ISR cache is shared across ALL URL
+          variants (including ?lh=<ts> Lighthouse runs). Iter-19 fix. */}
+      <Suspense fallback={null}>
+        <GuidedOverlay
+          locale={locale}
+          guided={dict.guided}
+          homeKV={{
+            goalPrefix: dict.home.goalPrefix,
+            budgetPrefix: dict.home.budgetPrefix,
+            timelinePrefix: dict.home.timelinePrefix,
+            whatsAppGreeting: dict.home.whatsAppGreeting,
+            whatsAppFallback: dict.home.whatsAppFallback,
+          }}
+          ctaKV={{
+            bookPrivateTour: dict.cta.bookPrivateTour,
+            whatsapp: dict.cta.whatsapp,
+          }}
+          closeAriaLabel={dict.common.close}
+        />
+      </Suspense>
 
-            <div className="guided-dialog__body">
-              {effectiveStep === 'goal' ? (
-                <form method="GET" action={withLocale(locale, '/')} className="guided-grid">
-                  <input type="hidden" name="guided" value="1" />
-                  <input type="hidden" name="step" value="budget" />
-                  <div className="guided-row">
-                    <button className="btn btn-cta" type="submit" name="goal" value="buy">
-                      {smartLabels.buy}
-                    </button>
-                    <button className="btn btn-secondary" type="submit" name="goal" value="rent">
-                      {smartLabels.rent}
-                    </button>
-                    <button className="btn btn-secondary" type="submit" name="goal" value="invest">
-                      {smartLabels.invest}
-                    </button>
-                  </div>
-                  <div className="cta-row cta-row--center">
-                    <a
-                      className="btn btn-tertiary"
-                      href={withLocale(
-                        locale,
-                        hrefWithQuery('/', { guided: '1', step: 'contact' })
-                      )}
-                    >
-                      {dict.guided.skipToContact}
-                    </a>
-                  </div>
-                </form>
-              ) : null}
-
-              {effectiveStep === 'budget' ? (
-                <form method="GET" action={withLocale(locale, '/')} className="guided-grid">
-                  <input type="hidden" name="guided" value="1" />
-                  <input type="hidden" name="step" value="contact" />
-                  <input type="hidden" name="goal" value={goal ?? 'buy'} />
-
-                  <label>
-                    <div className="font-semibold">{dict.guided.budgetLabel}</div>
-                    <select className="form-input" name="budget" defaultValue={budget ?? ''}>
-                      <option value="" disabled>
-                        {dict.guided.budgetSelect}
-                      </option>
-                      <option value="<3m">{dict.guided.budgetUnder3m}</option>
-                      <option value="3-5m">{dict.guided.budget3to5m}</option>
-                      <option value="5-8m">{dict.guided.budget5to8m}</option>
-                      <option value="8m+">{dict.guided.budget8mPlus}</option>
-                      <option value="not_sure">{dict.guided.budgetNotSure}</option>
-                    </select>
-                  </label>
-
-                  <div className="cta-row">
-                    <button className="btn btn-cta" type="submit">
-                      {dict.guided.next}
-                    </button>
-                    <a
-                      className="btn btn-secondary"
-                      href={withLocale(locale, hrefWithQuery('/', { guided: '1', step: 'goal' }))}
-                    >
-                      {dict.guided.changeGoal}
-                    </a>
-                  </div>
-                </form>
-              ) : null}
-
-              {effectiveStep === 'contact' ? (
-                <div className="guided-grid">
-                  <div className="font-semibold">{dict.guided.summary}</div>
-                  <div className="guided-summary">
-                    {summaryLines.length ? (
-                      <ul className="bullet-list">
-                        {summaryLines.map((l) => (
-                          <li key={l}>{l}</li>
-                        ))}
-                      </ul>
-                    ) : (
-                      <div>{dict.guided.noSelections}</div>
-                    )}
-                  </div>
-
-                  <div className="guided-row">
-                    <TrackedLink
-                      className="btn btn-cta"
-                      href={withLocale(
-                        locale,
-                        hrefWithQuery('/contact', {
-                          topic: 'private_consultation',
-                          msg: whatsAppText,
-                        })
-                      )}
-                      eventType="cta_click"
-                      eventPayload={{ cta: 'book_consultation', from: 'home_guided' }}
-                    >
-                      {dict.cta.bookPrivateTour}
-                    </TrackedLink>
-
-                    <a className="btn btn-secondary" href={whatsAppHref} target="_blank" rel="noreferrer">
-                      {dict.cta.whatsapp}
-                    </a>
-                  </div>
-
-                  <div className="cta-row">
-                    <a
-                      className="btn btn-tertiary"
-                      href={withLocale(
-                        locale,
-                        hrefWithQuery('/', {
-                          guided: '1',
-                          step: 'budget',
-                          goal: goal ?? 'buy',
-                          budget: budget ?? '',
-                        })
-                      )}
-                    >
-                      {dict.guided.back}
-                    </a>
-                    <a className="btn btn-secondary" href={closeHref}>
-                      {dict.guided.close}
-                    </a>
-                  </div>
-                </div>
-              ) : null}
-            </div>
-          </dialog>
-        </div>
-      ) : null}
 
       {/* Explore Opportunities (Combined Flow) */}
       <section className="cv-auto py-16 md:py-20 xl:py-24 2xl:py-28">

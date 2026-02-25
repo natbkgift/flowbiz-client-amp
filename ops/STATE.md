@@ -1,7 +1,7 @@
 # ops/STATE.md (STATE-LOCK)
 
 - CurrentPhase: A+B=PASS, Phase1=FAIL, Phase2=BLOCKED, Phase3=BLOCKED, Phase4=BLOCKED, Phase5=BLOCKED
-- CurrentIteration: phase1-iter-18 (restore Stage2 idle/interaction gate — deployed, FAIL)
+- CurrentIteration: phase1-iter-19 (remove searchParams from home SSR, GuidedOverlay → client, limit:100→8 — deployed, pending gate)
 - MainlineStatus: RUNNING
 - LatestEvidence: ops/logs/phase1/
   - cf-headers.txt (2026-02-25 11:04:34)
@@ -21,5 +21,5 @@
   - Lighthouse truth model: use simulated LCP (`audits[largest-contentful-paint].numericValue`) as truth; observed is supporting note only
   - Lighthouse gates: mobile>=92, desktop>=97, CLS=0, DOM<900, hydrationSignals=0
   - Avoid evidence bloat: evidence PR should prefer lh-*.{txt,json}, hydration.txt, cf-headers.txt, ops/STATE.md (attempt files only if necessary)
-- NextAction: Iter-19 Evidence Pack (desktop-first): LCP bimodal (4/5 slow ~1900ms, 1/5 fast ~1100ms) — root cause is CDN/server-side TTFB variance, not DeferredProviders staging. Need investigation into TTFB reduction: check ISR streaming impact on TTFB, API fetch latency on home page, CF edge warming strategy.
-- LastResultSummary: Iter-18 patch merged (PR #213) — Stage2 restored (exact 9132ed3 baseline). Deployment PASS (GH Actions succeeded 04:46 UTC). CF invariants PASS. Desktop gate STILL FAIL: perfMed=91 (<97). Runs: 84/90/92/91/97 LCP: 2179/1958/1796/1904/1099ms. Bimodal: 4/5 slow (LCP>1700ms), 1/5 fast (LCP<1200ms). DeferredProviders timing NOT the root cause — LCP variance is server/CDN-side.
+- NextAction: Run desktop LH gate after deployment; if perfMed≥97 merge evidence PR.
+- LastResultSummary: Iter-19 patch deployed — root cause identified: home page consumed `await searchParams` server-side, causing every unique ?lh=<ts> LH run to trigger a fresh ISR computation (cache miss per run). Fix: extracted GuidedOverlay to client component (reads URL params via useSearchParams), removed searchParams from server component → ISR cache now shared for all URL variants. Also reduced fetchProjects limit:100→8 (only 6 displayed). TTFB probe: CF=DYNAMIC runs 2-10 = 220-250ms, run 1 = 1212ms (TCP cold). LH gate pending.
