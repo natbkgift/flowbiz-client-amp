@@ -2,6 +2,7 @@
   "url": "https://amppattaya.com/en/",
   "preset": "desktop",
   "runs": 5,
+  "enforceGates": true,
   "gates": {
     "perfScoreMin": 97,
     "lcpMax": 2500,
@@ -10,11 +11,11 @@
     "domMax": 900
   },
   "medians": {
-    "perfScoreMed": 93,
-    "lcpMed": 1679.66,
+    "perfScoreMed": 91,
+    "lcpMed": 1907.0010000000009,
     "tbtMed": 0,
     "clsMed": 0,
-    "domMed": 717,
+    "domMed": 681,
     "hydrationSignals": 0
   },
   "ok": false,
@@ -25,29 +26,17 @@
     {
       "file": "lh-desktop-run01.json",
       "status": 0,
-      "perfScore": 98,
-      "lcp": 994.101,
-      "tbt": 3.5,
+      "perfScore": 90,
+      "lcp": 1907.0010000000009,
+      "tbt": 3,
       "cls": 0,
-      "dom": 681,
-      "consoleErrorsCount": 3,
+      "dom": 717,
+      "consoleErrorsCount": 1,
       "hydrationSignals": 0,
       "consoleErrors": [
         {
-          "description": "Failed to load resource: the server responded with a status of 422 ()",
-          "url": "https://amppattaya.com/api/v1/events",
-          "line": 0,
-          "col": 0
-        },
-        {
-          "description": "Failed to load resource: the server responded with a status of 422 ()",
-          "url": "https://amppattaya.com/api/v1/events",
-          "line": 0,
-          "col": 0
-        },
-        {
           "description": "Loading the script 'https://static.cloudflareinsights.com/beacon.min.js/vcd15cbe7772f49c399c6a5babf22c1241717689176015' violates the following Content Security Policy directive: \"script-src 'self' 'unsafe-inline'\". Note that 'script-src-elem' was not explicitly set, so 'script-src' is used as a fallback. The action has been blocked.",
-          "url": "https://amppattaya.com/en/?lh=1771981876127",
+          "url": "https://amppattaya.com/en/?lh=1771992292160",
           "line": 0,
           "col": 0
         }
@@ -56,40 +45,9 @@
     {
       "file": "lh-desktop-run02.json",
       "status": 0,
-      "perfScore": 90,
-      "lcp": 1824.7200000000003,
-      "tbt": 0,
-      "cls": 0,
-      "dom": 717,
-      "consoleErrorsCount": 3,
-      "hydrationSignals": 0,
-      "consoleErrors": [
-        {
-          "description": "Failed to load resource: the server responded with a status of 422 ()",
-          "url": "https://amppattaya.com/api/v1/events",
-          "line": 0,
-          "col": 0
-        },
-        {
-          "description": "Failed to load resource: the server responded with a status of 422 ()",
-          "url": "https://amppattaya.com/api/v1/events",
-          "line": 0,
-          "col": 0
-        },
-        {
-          "description": "Loading the script 'https://static.cloudflareinsights.com/beacon.min.js/vcd15cbe7772f49c399c6a5babf22c1241717689176015' violates the following Content Security Policy directive: \"script-src 'self' 'unsafe-inline'\". Note that 'script-src-elem' was not explicitly set, so 'script-src' is used as a fallback. The action has been blocked.",
-          "url": "https://amppattaya.com/en/?lh=1771981895711",
-          "line": 0,
-          "col": 0
-        }
-      ]
-    },
-    {
-      "file": "lh-desktop-run03.json",
-      "status": 0,
       "perfScore": 97,
-      "lcp": 1078.337,
-      "tbt": 0,
+      "lcp": 1165.02,
+      "tbt": 40,
       "cls": 0,
       "dom": 681,
       "consoleErrorsCount": 3,
@@ -109,7 +67,26 @@
         },
         {
           "description": "Loading the script 'https://static.cloudflareinsights.com/beacon.min.js/vcd15cbe7772f49c399c6a5babf22c1241717689176015' violates the following Content Security Policy directive: \"script-src 'self' 'unsafe-inline'\". Note that 'script-src-elem' was not explicitly set, so 'script-src' is used as a fallback. The action has been blocked.",
-          "url": "https://amppattaya.com/en/?lh=1771981913266",
+          "url": "https://amppattaya.com/en/?lh=1771992309502",
+          "line": 0,
+          "col": 0
+        }
+      ]
+    },
+    {
+      "file": "lh-desktop-run03.json",
+      "status": 0,
+      "perfScore": 91,
+      "lcp": 1928.9109999999998,
+      "tbt": 0,
+      "cls": 0,
+      "dom": 676,
+      "consoleErrorsCount": 1,
+      "hydrationSignals": 0,
+      "consoleErrors": [
+        {
+          "description": "Loading the script 'https://static.cloudflareinsights.com/beacon.min.js/vcd15cbe7772f49c399c6a5babf22c1241717689176015' violates the following Content Security Policy directive: \"script-src 'self' 'unsafe-inline'\". Note that 'script-src-elem' was not explicitly set, so 'script-src' is used as a fallback. The action has been blocked.",
+          "url": "https://amppattaya.com/en/?lh=1771992328432",
           "line": 0,
           "col": 0
         }
@@ -118,17 +95,41 @@
     {
       "file": "lh-desktop-run04.json",
       "status": 0,
-      "perfScore": 93,
-      "lcp": 1679.66,
+      "perfScore": 88,
+      "lcp": 1930.7124999999996,
       "tbt": 0,
-      "cls": 0,
-      "dom": 717,
-      "consoleErrorsCount": 1,
+      "cls": 0.0001594469995967866,
+      "dom": 715,
+      "consoleErrorsCount": 5,
       "hydrationSignals": 0,
       "consoleErrors": [
         {
+          "description": "Failed to load resource: the server responded with a status of 404 ()",
+          "url": "https://amppattaya.com/images/property-interior.png",
+          "line": 0,
+          "col": 0
+        },
+        {
+          "description": "Failed to load resource: the server responded with a status of 404 ()",
+          "url": "https://amppattaya.com/images/condo-view.png",
+          "line": 0,
+          "col": 0
+        },
+        {
+          "description": "Failed to load resource: the server responded with a status of 422 ()",
+          "url": "https://amppattaya.com/api/v1/events",
+          "line": 0,
+          "col": 0
+        },
+        {
+          "description": "Failed to load resource: the server responded with a status of 422 ()",
+          "url": "https://amppattaya.com/api/v1/events",
+          "line": 0,
+          "col": 0
+        },
+        {
           "description": "Loading the script 'https://static.cloudflareinsights.com/beacon.min.js/vcd15cbe7772f49c399c6a5babf22c1241717689176015' violates the following Content Security Policy directive: \"script-src 'self' 'unsafe-inline'\". Note that 'script-src-elem' was not explicitly set, so 'script-src' is used as a fallback. The action has been blocked.",
-          "url": "https://amppattaya.com/en/?lh=1771981932637",
+          "url": "https://amppattaya.com/en/?lh=1771992345433",
           "line": 0,
           "col": 0
         }
@@ -137,12 +138,12 @@
     {
       "file": "lh-desktop-run05.json",
       "status": 0,
-      "perfScore": 90,
-      "lcp": 1836.7019999999995,
+      "perfScore": 98,
+      "lcp": 1042.238,
       "tbt": 0,
       "cls": 0,
-      "dom": 717,
-      "consoleErrorsCount": 3,
+      "dom": 676,
+      "consoleErrorsCount": 2,
       "hydrationSignals": 0,
       "consoleErrors": [
         {
@@ -152,27 +153,13 @@
           "col": 0
         },
         {
-          "description": "Failed to load resource: the server responded with a status of 422 ()",
-          "url": "https://amppattaya.com/api/v1/events",
-          "line": 0,
-          "col": 0
-        },
-        {
           "description": "Loading the script 'https://static.cloudflareinsights.com/beacon.min.js/vcd15cbe7772f49c399c6a5babf22c1241717689176015' violates the following Content Security Policy directive: \"script-src 'self' 'unsafe-inline'\". Note that 'script-src-elem' was not explicitly set, so 'script-src' is used as a fallback. The action has been blocked.",
-          "url": "https://amppattaya.com/en/?lh=1771981965865",
+          "url": "https://amppattaya.com/en/?lh=1771992366074",
           "line": 0,
           "col": 0
         }
       ]
     }
   ],
-  "attemptErrors": [
-    {
-      "attempt": 5,
-      "status": 1,
-      "runtimeError": "Something went wrong with recording the trace over your page load. Please run Lighthouse again. (NO_NAVSTART)",
-      "file": "lh-desktop-attempt05.json",
-      "transient": true
-    }
-  ]
+  "attemptErrors": []
 }
