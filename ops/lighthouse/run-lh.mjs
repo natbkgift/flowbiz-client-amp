@@ -26,6 +26,15 @@ function toNum(x) {
   return typeof x === 'number' && Number.isFinite(x) ? x : null;
 }
 
+function toBool(x, fallback = true) {
+  if (typeof x === 'boolean') return x;
+  if (typeof x !== 'string') return fallback;
+  const v = x.trim().toLowerCase();
+  if (['1', 'true', 'yes', 'on'].includes(v)) return true;
+  if (['0', 'false', 'no', 'off'].includes(v)) return false;
+  return fallback;
+}
+
 function extractMetrics(json) {
   const perfScore = toNum(json?.categories?.performance?.score);
   const lcp = toNum(json?.audits?.['largest-contentful-paint']?.numericValue);
@@ -138,6 +147,8 @@ function main() {
 
   const runs = Number(args.runs ?? 5);
   const preset = String(args.preset ?? 'mobile');
+  const enforceGates = toBool(args.enforceGates, true);
+  const summaryBaseName = String(args.summaryBaseName ?? `lh-${preset}`);
   if (!['mobile', 'desktop'].includes(preset)) {
     console.error(`Invalid --preset: ${preset}`);
     process.exit(2);
@@ -277,6 +288,7 @@ function main() {
     url,
     preset,
     runs,
+    enforceGates,
     gates,
     medians: meds,
     ok,
@@ -285,7 +297,7 @@ function main() {
     attemptErrors,
   };
 
-  const summaryPath = path.join(outDir, `lh-${preset}.json`);
+  const summaryPath = path.join(outDir, `${summaryBaseName}.json`);
   writeFileSync(summaryPath, JSON.stringify(summary, null, 2));
 
   // Hydration evidence (shared file required by Phase 1 gate contract)
@@ -317,9 +329,12 @@ function main() {
   for (const r of perRun) {
     lines.push(`- ${r.file} perf=${Math.round(r.perfScore)} lcp=${Math.round(r.lcp)} tbt=${Math.round(r.tbt)} cls=${r.cls} dom=${Math.round(r.dom)}`);
   }
-  writeFileSync(path.join(outDir, `lh-${preset}.txt`), lines.join('\n') + '\n');
+  if (!enforceGates) {
+    lines.push('ProbeMode: gates evaluated but NOT enforced for exit code');
+  }
+  writeFileSync(path.join(outDir, `${summaryBaseName}.txt`), lines.join('\n') + '\n');
 
-  process.exit(ok ? 0 : 1);
+  process.exit(enforceGates ? (ok ? 0 : 1) : 0);
 }
 
 main();
