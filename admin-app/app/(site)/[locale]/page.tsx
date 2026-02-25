@@ -68,7 +68,7 @@ export default async function HomePage({
     try {
       const [projectsRes, propertiesRes] = await Promise.all([
         fetchProjects({ limit: 24 }),
-        fetchPropertiesAPI({ limit: 200, sort: 'newest' }),
+        fetchPropertiesAPI({ limit: 100, sort: 'newest' }),
       ]);
       allProjects = projectsRes;
       allProperties = propertiesRes.data || [];
@@ -88,24 +88,55 @@ export default async function HomePage({
       'grand-solaire',
     ];
 
+    function normalizeProjectText(input: string | null | undefined): string {
+      return String(input ?? '')
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, ' ')
+        .replace(/\s+/g, ' ')
+        .trim();
+    }
+
     const projectMediaHints = new Map<string, { coverImageUrl?: string; startingPrice?: number }>();
+    const projectsById = new Map(allProjects.map((project) => [project.id, project]));
+    const projectNameIndex = allProjects.map((project) => ({
+      id: project.id,
+      normalizedName: normalizeProjectText(project.name),
+    }));
     for (const prop of allProperties) {
-      if (!prop.project_id) continue;
       const imgCandidates = [prop.cover_image, ...(prop.local_images ?? []), ...(prop.images ?? [])];
       const realImg = imgCandidates
         .map((candidate) => resolveImageUrl(candidate))
         .find((resolved) => resolved && !looksPlaceholderLike(resolved));
-      const current = projectMediaHints.get(prop.project_id) ?? {};
+      if (!realImg) continue;
       const nextPrice = typeof prop.price === 'number' && Number.isFinite(prop.price) && prop.price > 0
         ? Number(prop.price)
         : undefined;
 
-      projectMediaHints.set(prop.project_id, {
-        coverImageUrl: current.coverImageUrl ?? realImg ?? undefined,
-        startingPrice: current.startingPrice != null && nextPrice != null
-          ? Math.min(current.startingPrice, nextPrice)
-          : (current.startingPrice ?? nextPrice),
-      });
+      const applyHint = (projectId: string) => {
+        if (!projectId || !projectsById.has(projectId)) return;
+        const existing = projectMediaHints.get(projectId) ?? {};
+        projectMediaHints.set(projectId, {
+          coverImageUrl: existing.coverImageUrl ?? realImg ?? undefined,
+          startingPrice: existing.startingPrice != null && nextPrice != null
+            ? Math.min(existing.startingPrice, nextPrice)
+            : (existing.startingPrice ?? nextPrice),
+        });
+      };
+
+      if (prop.project_id) {
+        applyHint(prop.project_id);
+        continue;
+      }
+
+      const haystack = normalizeProjectText(`${prop.title} ${prop.address ?? ''}`);
+      if (!haystack) continue;
+
+      const matches = projectNameIndex.filter((entry) =>
+        entry.normalizedName.length >= 8 && haystack.includes(entry.normalizedName)
+      );
+      if (matches.length === 1) {
+        applyHint(matches[0].id);
+      }
     }
 
     const enrichedProjects = allProjects.map((project) => {
