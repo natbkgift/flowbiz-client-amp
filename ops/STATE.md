@@ -1,7 +1,7 @@
 # ops/STATE.md (STATE-LOCK)
 
 - CurrentPhase: A+B=PASS, Phase1=FAIL, Phase2=BLOCKED, Phase3=BLOCKED, Phase4=BLOCKED, Phase5=BLOCKED
-- CurrentIteration: phase1-iter-17 (desktop restore from boundary before evidence #202)
+- CurrentIteration: phase1-iter-18 (restore Stage2 idle/interaction gate in DeferredProviders — exact 9132ed3 baseline)
 - MainlineStatus: RUNNING
 - LatestEvidence: ops/logs/phase1/
   - cf-headers.txt (2026-02-25 11:04:34)
@@ -21,5 +21,5 @@
   - Lighthouse truth model: use simulated LCP (`audits[largest-contentful-paint].numericValue`) as truth; observed is supporting note only
   - Lighthouse gates: mobile>=92, desktop>=97, CLS=0, DOM<900, hydrationSignals=0
   - Avoid evidence bloat: evidence PR should prefer lh-*.{txt,json}, hydration.txt, cf-headers.txt, ops/STATE.md (attempt files only if necessary)
-- NextAction: Iter-18 Evidence Pack (desktop-first): keep one-patch discipline and continue regression surgery from PR #201 boundary
-- LastResultSummary: Iter-17 patch merged and deployed (PR #211). CF invariants PASS, but desktop gate still FAIL (perfMed=91 < 97)
+- NextAction: merge → deploy → CF verify → lh:gate:desktop → evidence-only PR
+- LastResultSummary: Iter-18 patch applied. Restoring Stage2 (900ms minDelay + requestIdleCallback + 4000ms hardTimeout) in DeferredProviders — exact state of 9132ed3 which scored perfMed=97. Previous Iter-17 simplified too aggressively; Stage2 ensures deferred providers do not activate during LH CPU-throttled measurement window.
