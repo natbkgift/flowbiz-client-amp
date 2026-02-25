@@ -96,6 +96,12 @@ def _dedupe_keep_order(items: list[str]) -> list[str]:
     return out
 
 
+def _normalize_text(value: Any) -> str:
+    return " ".join(
+        "".join(ch.lower() if str(ch).isalnum() else " " for ch in str(value or "")).split()
+    )
+
+
 @dataclass
 class FetchSummary:
     projects: int = 0
@@ -234,11 +240,27 @@ def main() -> int:
 
     # Build project image + starting price hints from real property media.
     project_media_hints: dict[str, dict[str, Any]] = {}
-    for prop in api_properties:
-        project_id = str(prop.get("project_id") or "").strip()
-        if not project_id:
-            continue
+    project_ids = {str(p.get("id") or "").strip() for p in api_projects if str(p.get("id") or "").strip()}
+    project_name_index = [
+        {
+            "id": str(p.get("id") or "").strip(),
+            "normalized_name": _normalize_text(p.get("name")),
+        }
+        for p in api_projects
+        if str(p.get("id") or "").strip() and _normalize_text(p.get("name"))
+    ]
 
+    def apply_project_hint(project_id: str, *, real_img: str | None, price_num: float | None, include_price: bool) -> None:
+        if not project_id or project_id not in project_ids:
+            return
+        hint = project_media_hints.setdefault(project_id, {})
+        if real_img and not hint.get("cover_image_url"):
+            hint["cover_image_url"] = real_img
+        if include_price:
+            current_price = _to_float(hint.get("starting_price"))
+            hint["starting_price"] = price_num if current_price is None else min(current_price, price_num)
+
+    for prop in api_properties:
         images = []
         for key in ("cover_image",):
             value = prop.get(key)
@@ -254,12 +276,21 @@ def main() -> int:
         prop_type = str(prop.get("type") or "").strip().lower()
         include_in_project_price = prop_type in {"new", "resale"} and price_num is not None and price_num > 0
 
-        hint = project_media_hints.setdefault(project_id, {})
-        if real_img and not hint.get("cover_image_url"):
-            hint["cover_image_url"] = real_img
-        if include_in_project_price:
-            current_price = _to_float(hint.get("starting_price"))
-            hint["starting_price"] = price_num if current_price is None else min(current_price, price_num)
+        project_id = str(prop.get("project_id") or "").strip()
+        if project_id:
+            apply_project_hint(project_id, real_img=real_img, price_num=price_num, include_price=include_in_project_price)
+            continue
+
+        haystack = _normalize_text(f"{prop.get('title') or ''} {prop.get('address') or ''}")
+        if not haystack:
+            continue
+        matches = [
+            row["id"]
+            for row in project_name_index
+            if len(row["normalized_name"]) >= 8 and row["normalized_name"] in haystack
+        ]
+        if len(matches) == 1:
+            apply_project_hint(matches[0], real_img=real_img, price_num=price_num, include_price=include_in_project_price)
 
     # Merge projects
     old_order = {str(r.get("slug") or ""): i for i, r in enumerate(old_projects)}

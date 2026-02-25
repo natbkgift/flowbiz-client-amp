@@ -98,6 +98,10 @@ const DEFAULT_SITE_ORIGIN = 'https://amppattaya.com';
 function getOrigin(): string {
   const env = process.env.NEXT_PUBLIC_SITE_URL;
   if (env && env.startsWith('http')) return env;
+  if (process.env.NODE_ENV === 'development') {
+    const port = process.env.PORT || '3000';
+    return `http://127.0.0.1:${port}`;
+  }
   return DEFAULT_SITE_ORIGIN;
 }
 
