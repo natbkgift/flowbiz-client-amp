@@ -1,7 +1,7 @@
 # ops/STATE.md (STATE-LOCK)
 
 - CurrentPhase: A+B=PASS, Phase1=FAIL, Phase2=BLOCKED, Phase3=BLOCKED, Phase4=BLOCKED, Phase5=BLOCKED
-- CurrentIteration: phase1-iter-18 (restore Stage2 idle/interaction gate in DeferredProviders — exact 9132ed3 baseline)
+- CurrentIteration: phase1-iter-18 (restore Stage2 idle/interaction gate — deployed, FAIL)
 - MainlineStatus: RUNNING
 - LatestEvidence: ops/logs/phase1/
   - cf-headers.txt (2026-02-25 11:04:34)
@@ -21,5 +21,5 @@
   - Lighthouse truth model: use simulated LCP (`audits[largest-contentful-paint].numericValue`) as truth; observed is supporting note only
   - Lighthouse gates: mobile>=92, desktop>=97, CLS=0, DOM<900, hydrationSignals=0
   - Avoid evidence bloat: evidence PR should prefer lh-*.{txt,json}, hydration.txt, cf-headers.txt, ops/STATE.md (attempt files only if necessary)
-- NextAction: merge → deploy → CF verify → lh:gate:desktop → evidence-only PR
-- LastResultSummary: Iter-18 patch applied. Restoring Stage2 (900ms minDelay + requestIdleCallback + 4000ms hardTimeout) in DeferredProviders — exact state of 9132ed3 which scored perfMed=97. Previous Iter-17 simplified too aggressively; Stage2 ensures deferred providers do not activate during LH CPU-throttled measurement window.
+- NextAction: Iter-19 Evidence Pack (desktop-first): LCP bimodal (4/5 slow ~1900ms, 1/5 fast ~1100ms) — root cause is CDN/server-side TTFB variance, not DeferredProviders staging. Need investigation into TTFB reduction: check ISR streaming impact on TTFB, API fetch latency on home page, CF edge warming strategy.
+- LastResultSummary: Iter-18 patch merged (PR #213) — Stage2 restored (exact 9132ed3 baseline). Deployment PASS (GH Actions succeeded 04:46 UTC). CF invariants PASS. Desktop gate STILL FAIL: perfMed=91 (<97). Runs: 84/90/92/91/97 LCP: 2179/1958/1796/1904/1099ms. Bimodal: 4/5 slow (LCP>1700ms), 1/5 fast (LCP<1200ms). DeferredProviders timing NOT the root cause — LCP variance is server/CDN-side.
