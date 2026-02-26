@@ -289,12 +289,6 @@ export type TrustBadge = { key: string; label: string };
 
 export type AreaStatisticsSnapshot = {
   area_id: string;
-  avg_price_sqm?: string | null;
-  avg_rent_monthly?: string | null;
-  avg_roi_percent?: string | null;
-  total_projects?: number | null;
-  total_units?: number | null;
-  as_of_date?: string | null;
   avg_price: string | null;
   avg_rent: string | null;
   roi_percent: string | null;
@@ -325,82 +319,13 @@ export type AreaItem = {
   name: string;
   slug: string;
   city: string | null;
-  status?: string;
-  hero_image_url?: string | null;
   created_at: string;
-  updated_at?: string;
 };
 
 export type AreaStatisticsResponse = {
   area: AreaItem;
   statistics: AreaStatisticsSnapshot | null;
 };
-
-export type AreaDetailResponse = {
-  area: AreaItem;
-  statistics: AreaStatisticsSnapshot | null;
-  content?: Record<string, unknown> | null;
-  map_center?: Record<string, unknown> | null;
-};
-
-export type DeveloperItem = {
-  id: string;
-  name: string;
-  slug: string;
-  website: string | null;
-  tier?: string | null;
-  logo_url?: string | null;
-  status?: string;
-  created_at: string;
-  updated_at?: string;
-};
-
-export type DeveloperDetailResponse = {
-  developer: DeveloperItem;
-  summary?: Record<string, unknown> | null;
-};
-
-export async function fetchAreas(): Promise<AreaItem[]> {
-  const origin = getOrigin();
-  const base = apiBase();
-
-  const url = new URL(`${base}/v1/areas`, origin);
-  const res = await fetchWithRetry(url.toString(), { next: { revalidate: PAGE_REVALIDATE_SECONDS } });
-  if (!res.ok) throw new Error(`Failed to fetch areas (${res.status})`);
-  return (await res.json()) as AreaItem[];
-}
-
-export async function fetchAreaBySlug(slug: string): Promise<AreaDetailResponse | null> {
-  const origin = getOrigin();
-  const base = apiBase();
-
-  const url = new URL(`${base}/v1/areas/${encodeURIComponent(slug)}`, origin);
-  const res = await fetchWithRetry(url.toString(), { next: { revalidate: PAGE_REVALIDATE_SECONDS } });
-  if (res.status === 404) return null;
-  if (!res.ok) throw new Error(`Failed to fetch area detail (${res.status})`);
-  return (await res.json()) as AreaDetailResponse;
-}
-
-export async function fetchDevelopers(): Promise<DeveloperItem[]> {
-  const origin = getOrigin();
-  const base = apiBase();
-
-  const url = new URL(`${base}/v1/developers`, origin);
-  const res = await fetchWithRetry(url.toString(), { next: { revalidate: PAGE_REVALIDATE_SECONDS } });
-  if (!res.ok) throw new Error(`Failed to fetch developers (${res.status})`);
-  return (await res.json()) as DeveloperItem[];
-}
-
-export async function fetchDeveloperBySlug(slug: string): Promise<DeveloperDetailResponse | null> {
-  const origin = getOrigin();
-  const base = apiBase();
-
-  const url = new URL(`${base}/v1/developers/${encodeURIComponent(slug)}`, origin);
-  const res = await fetchWithRetry(url.toString(), { next: { revalidate: PAGE_REVALIDATE_SECONDS } });
-  if (res.status === 404) return null;
-  if (!res.ok) throw new Error(`Failed to fetch developer detail (${res.status})`);
-  return (await res.json()) as DeveloperDetailResponse;
-}
 
 export async function fetchAreaStatisticsBySlug(slug: string): Promise<AreaStatisticsResponse | null> {
   const origin = getOrigin();

@@ -79,8 +79,6 @@ export function proxy(req: NextRequest) {
     pathname.startsWith('/leads') ||
     pathname.startsWith('/inquiries') ||
     pathname.startsWith('/analytics') ||
-    pathname.startsWith('/areas-admin') ||
-    pathname.startsWith('/developers-admin') ||
     pathname.startsWith('/projects-admin') ||
     pathname.startsWith('/properties-admin') ||
     pathname.startsWith('/media') ||
