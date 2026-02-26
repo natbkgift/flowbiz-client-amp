@@ -13,6 +13,7 @@ export function ProjectCard({
   startingPrice,
   coverImage,
   propertyType,
+  analyticsSource,
 }: {
   name: string;
   count: number;
@@ -22,6 +23,7 @@ export function ProjectCard({
   startingPrice?: number | null;
   coverImage?: string | null;
   propertyType?: string | null;
+  analyticsSource?: string;
 }) {
   const formattedPrice = startingPrice && Number.isFinite(startingPrice)
     ? `${dict.listing.startingFrom ?? 'From'} ฿${Math.round(startingPrice).toLocaleString()}`
@@ -63,7 +65,19 @@ export function ProjectCard({
   );
 
   if (slug && locale) {
-    return <Link href={withLocale(locale, `/projects/${slug}`)}>{inner}</Link>;
+    return (
+      <Link
+        href={withLocale(locale, `/projects/${slug}`)}
+        data-amp-event-type="featured_click"
+        data-amp-event-payload={JSON.stringify({
+          from: analyticsSource ?? 'project_card',
+          slug,
+          project_name: name,
+        })}
+      >
+        {inner}
+      </Link>
+    );
   }
 
   return inner;

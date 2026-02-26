@@ -161,12 +161,14 @@ export async function fetchPropertyBySlug(slug: string): Promise<PropertyDetail 
   return (await res.json()) as PropertyDetail;
 }
 
-export async function fetchProjects(params?: { limit?: number }): Promise<ProjectItem[]> {
+export async function fetchProjects(params?: { limit?: number; page?: number; status_filter?: string }): Promise<ProjectItem[]> {
   const origin = getOrigin();
   const base = apiBase();
 
   const url = new URL(`${base}/v1/projects`, origin);
   if (params?.limit) url.searchParams.set('limit', String(params.limit));
+  if (params?.page) url.searchParams.set('page', String(params.page));
+  if (params?.status_filter) url.searchParams.set('status_filter', params.status_filter);
 
   const res = await fetchWithRetry(url.toString(), { next: { revalidate: PAGE_REVALIDATE_SECONDS } });
   if (!res.ok) throw new Error(`Failed to fetch projects (${res.status})`);
