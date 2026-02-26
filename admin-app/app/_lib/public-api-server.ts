@@ -126,7 +126,9 @@ export async function fetchProperties(params: {
   // Use the slash form to avoid redirect edge-cases during SSR.
   const url = new URL(`${base}/v1/properties/`, origin);
   url.searchParams.set('page', String(params.page ?? 1));
-  url.searchParams.set('limit', String(params.limit ?? 60));
+  // API contract: limit is capped at 100. Clamp defensively to avoid 422s from callers.
+  const safeLimit = Math.max(1, Math.min(params.limit ?? 60, 100));
+  url.searchParams.set('limit', String(safeLimit));
 
   if (params.type) url.searchParams.set('type', params.type);
   if (params.search) url.searchParams.set('search', params.search);
