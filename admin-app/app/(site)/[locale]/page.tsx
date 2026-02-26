@@ -669,7 +669,7 @@ export default async function HomePage({
   }
 
   return (
-    <main id="main-content" data-emphasis={recommendation.emphasis} className="flex flex-col">
+    <main id="main-content" data-emphasis={recommendation.emphasis} className="home-page flex flex-col">
       <HomeHero
         dict={dict}
         locale={locale}
@@ -753,7 +753,7 @@ export default async function HomePage({
               label: locale === 'th' ? `ตัวชี้วัด ${index + 1}` : `Metric ${index + 1}`,
               value: null,
             }))).map((stat, index) => (
-              <article key={`${stat.label}-${index}`} className="reveal rounded-2xl border border-gray-100 bg-white p-6 shadow-sm min-h-[176px] flex flex-col">
+              <article key={`${stat.label}-${index}`} className="home-proof-metric reveal rounded-2xl border border-gray-100 bg-white p-6 shadow-sm min-h-[176px] flex flex-col">
                 <div className="text-3xl md:text-4xl font-serif font-semibold text-primary leading-[1.1] min-h-[2.5rem]">
                   {stat?.value?.trim()
                     ? stat.value
@@ -806,7 +806,7 @@ export default async function HomePage({
           </div>
 
           <div className="grid lg:grid-cols-2 gap-8 md:gap-10 mb-16">
-            <div className="rounded-2xl border border-gray-100 bg-white p-6 md:p-8 shadow-sm">
+            <div className="home-proof-panel rounded-2xl border border-gray-100 bg-white p-6 md:p-8 shadow-sm">
               <h3 className="text-2xl font-serif font-medium text-gray-900 mb-5">{locale === 'th' ? 'Proof assets' : 'Proof assets'}</h3>
               <div className="grid sm:grid-cols-2 gap-4">
                 {trustProofItems.map((item) => (
@@ -827,7 +827,7 @@ export default async function HomePage({
               </p>
             </div>
 
-            <div className="rounded-2xl border border-gray-100 bg-white p-6 md:p-8 shadow-sm">
+            <div className="home-proof-panel rounded-2xl border border-gray-100 bg-white p-6 md:p-8 shadow-sm">
               <h3 className="text-2xl font-serif font-medium text-gray-900 mb-5">{locale === 'th' ? 'Our process' : 'Our process'}</h3>
               <ol className="space-y-4" aria-label={locale === 'th' ? 'กระบวนการหลัก 3 ขั้น' : 'Three-step process'}>
                 {processTimeline.map((item, index) => (
@@ -873,7 +873,7 @@ export default async function HomePage({
 
               <div className="grid md:grid-cols-3 gap-6 md:gap-8">
                 {insightCards.map((card) => (
-                  <article key={card.key} className="card reveal">
+                  <article key={card.key} className="home-insight-card card reveal">
                     <div className="text-xs uppercase tracking-[0.08em] text-primary mb-2">{card.title}</div>
                     <p className="card-subtitle mb-4">{card.body}</p>
                     <p className="text-xs text-gray-400 mb-5">
@@ -912,7 +912,7 @@ export default async function HomePage({
                   const platformBadge = getPlatformBadge(t.context);
 
                   return (
-                    <figure key={t.name} className="bg-gray-50 rounded-2xl p-6 border border-gray-100 min-h-[260px] flex flex-col">
+                    <figure key={t.name} className="home-review-card bg-gray-50 rounded-2xl p-6 border border-gray-100 min-h-[260px] flex flex-col">
                       <div className="flex items-center justify-between gap-2 mb-3">
                         <span className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-primary/10 text-primary text-xs font-semibold">
                           {getInitials(t.name)}
@@ -980,7 +980,7 @@ export default async function HomePage({
                 thumbSrc: '/media/video-thumbs/77If6rT5fdE.jpg',
               },
             ].map((video) => (
-              <figure key={video.key} className="rounded-2xl overflow-hidden border border-gray-100 bg-white shadow-sm">
+              <figure key={video.key} className="home-video-card rounded-2xl overflow-hidden border border-gray-100 bg-white shadow-sm">
                 <div className="relative aspect-video bg-gray-900">
                   <iframe
                     className="w-full h-full"
@@ -1017,7 +1017,7 @@ export default async function HomePage({
 
       {/* Premium CTA / Conversion Gate */}
       {isSectionEnabled('bottom_cta') ? (
-      <section className="cv-auto py-20 md:py-32 bg-gray-900 text-white mt-8" style={sectionOrderStyle('bottom_cta')}>
+      <section className="home-bottom-cta cv-auto py-20 md:py-32 bg-gray-900 text-white mt-8" style={sectionOrderStyle('bottom_cta')}>
         <Container variant="wide">
           <div className="grid lg:grid-cols-2 gap-16 items-center">
             <div className="reveal">
@@ -1045,7 +1045,7 @@ export default async function HomePage({
                   {bottomCtaSecondaryLabel}
                 </TrackedLink>
               </div>
-              <p className="mt-4 text-sm text-white/70 max-w-xl">{bottomCtaTrustNote}</p>
+              <p className="home-bottom-trust-note mt-4 text-sm text-white/70 max-w-xl">{bottomCtaTrustNote}</p>
             </div>
             <div className="reveal">
               <div className="bg-white p-8 md:p-10 rounded-2xl shadow-2xl text-gray-900">
