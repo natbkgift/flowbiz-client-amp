@@ -8,6 +8,7 @@ from sqlalchemy.orm import Session
 
 from apps.api.dependencies.auth import get_current_admin
 from packages.core.database import get_db
+from packages.core.media_integrity import run_scan
 from packages.core.media_storage import MediaStorageService, parse_source_domain
 from packages.core.models import MediaAsset, Property, User
 from packages.core.schemas.media_library import (
@@ -178,6 +179,26 @@ def list_media_assets(
     )
 
 
+# ---------------------------------------------------------------------------
+# B2: Media Integrity Report (on-demand scan) — must be before {media_id} route
+# ---------------------------------------------------------------------------
+
+
+@router.get("/media-assets/integrity-report")
+def get_media_integrity_report(
+    _admin: User = Depends(get_current_admin),
+    db: Session = Depends(get_db),
+) -> dict:
+    """Run a full media integrity scan and return the JSON report.
+
+    Read-only — never writes to the database.
+    This endpoint is intentionally synchronous because the scan is bounded
+    by the number of media assets and entity records (no unbounded IO loops).
+    """
+    report = run_scan(db)
+    return report.to_dict()
+
+
 @router.get("/media-assets/{media_id}", response_model=MediaAssetItem)
 def get_media_asset(
     media_id: UUID,
@@ -297,3 +318,5 @@ def assign_media_to_property(
         cover_image=prop.cover_image,
         local_images=prop.local_images,
     )
+
+

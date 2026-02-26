@@ -44,6 +44,37 @@ type UploadResponse = {
   deduped: boolean;
 };
 
+// B2 — Integrity types
+type IntegrityFinding = {
+  severity: 'error' | 'warn' | 'info';
+  category: string;
+  entity: string;
+  record_id: string;
+  value: string;
+  detail: string;
+};
+
+type IntegritySummary = {
+  scanned_at: string;
+  total_media_assets: number;
+  total_entity_refs_scanned: number;
+  local_paths_ok: number;
+  missing_file_count: number;
+  external_leakage_count: number;
+  invalid_path_format_count: number;
+  empty_file_count: number;
+  mime_ext_mismatch_count: number;
+  duplicate_checksum_groups: number;
+  error_count: number;
+  warn_count: number;
+  info_count: number;
+};
+
+type IntegrityReport = {
+  summary: IntegritySummary;
+  findings: IntegrityFinding[];
+};
+
 export default function AdminMediaLibraryPage() {
   const router = useRouter();
 
@@ -61,6 +92,12 @@ export default function AdminMediaLibraryPage() {
   const [uploading, setUploading] = useState(false);
   const [ingestUrl, setIngestUrl] = useState('');
   const [propertySourceId, setPropertySourceId] = useState('');
+
+  // B2 — Integrity scan state
+  const [integrityReport, setIntegrityReport] = useState<IntegrityReport | null>(null);
+  const [integrityLoading, setIntegrityLoading] = useState(false);
+  const [integrityError, setIntegrityError] = useState<string | null>(null);
+  const [integrityExpanded, setIntegrityExpanded] = useState(false);
 
   const selected = useMemo(
     () => items.find((item) => item.id === selectedId) ?? null,
@@ -230,6 +267,24 @@ export default function AdminMediaLibraryPage() {
     } catch (err) {
       if (handleUnauthorizedError(err, router)) return;
       setError(err instanceof Error ? err.message : 'Assign failed');
+    }
+  }
+
+  // B2 — Run integrity scan
+  async function handleRunIntegrityCheck(): Promise<void> {
+    setIntegrityLoading(true);
+    setIntegrityError(null);
+    setIntegrityReport(null);
+
+    try {
+      const data = await apiRequest<IntegrityReport>('/admin/media-assets/integrity-report');
+      setIntegrityReport(data);
+      setIntegrityExpanded(true);
+    } catch (err) {
+      if (handleUnauthorizedError(err, router)) return;
+      setIntegrityError(err instanceof Error ? err.message : 'Integrity check failed');
+    } finally {
+      setIntegrityLoading(false);
     }
   }
 
@@ -404,6 +459,130 @@ export default function AdminMediaLibraryPage() {
               </>
             )}
           </div>
+        </section>
+
+        {/* B2 — Media Integrity Check */}
+        <section className="card section-stack">
+          <div className="flex items-center justify-between gap-4">
+            <div>
+              <h2 className="text-lg font-semibold">Integrity Check (B2)</h2>
+              <p className="type-small text-[var(--color-text-secondary)]">
+                Scans media_assets registry and all entity image fields for broken files, external URL leakage, and duplicate checksums.
+              </p>
+            </div>
+            <button
+              className="btn btn-secondary"
+              type="button"
+              disabled={integrityLoading}
+              onClick={() => void handleRunIntegrityCheck()}
+            >
+              {integrityLoading ? 'Scanning…' : 'Run Check'}
+            </button>
+          </div>
+
+          {integrityError ? (
+            <p className="ui-status ui-status--error" role="alert">{integrityError}</p>
+          ) : null}
+
+          {integrityReport ? (
+            <div className="section-stack">
+              {/* Summary metrics */}
+              <div className={`grid grid-cols-2 md:grid-cols-4 gap-3 p-4 rounded border ${
+                integrityReport.summary.error_count > 0
+                  ? 'border-red-400 bg-red-50 dark:bg-red-950/20'
+                  : integrityReport.summary.warn_count > 0
+                  ? 'border-yellow-400 bg-yellow-50 dark:bg-yellow-950/20'
+                  : 'border-green-400 bg-green-50 dark:bg-green-950/20'
+              }`}>
+                <div>
+                  <div className="text-xs text-[var(--color-text-secondary)]">Errors</div>
+                  <div className={`text-2xl font-bold ${integrityReport.summary.error_count > 0 ? 'text-red-600' : 'text-green-600'}`}>
+                    {integrityReport.summary.error_count}
+                  </div>
+                </div>
+                <div>
+                  <div className="text-xs text-[var(--color-text-secondary)]">Warnings</div>
+                  <div className={`text-2xl font-bold ${integrityReport.summary.warn_count > 0 ? 'text-yellow-600' : 'text-[var(--color-text-secondary)]'}`}>
+                    {integrityReport.summary.warn_count}
+                  </div>
+                </div>
+                <div>
+                  <div className="text-xs text-[var(--color-text-secondary)]">Media assets</div>
+                  <div className="text-2xl font-bold">{integrityReport.summary.total_media_assets}</div>
+                </div>
+                <div>
+                  <div className="text-xs text-[var(--color-text-secondary)]">Entity refs</div>
+                  <div className="text-2xl font-bold">{integrityReport.summary.total_entity_refs_scanned}</div>
+                </div>
+                <div>
+                  <div className="text-xs text-[var(--color-text-secondary)]">Missing files</div>
+                  <div className={`text-xl font-semibold ${integrityReport.summary.missing_file_count > 0 ? 'text-red-600' : ''}`}>
+                    {integrityReport.summary.missing_file_count}
+                  </div>
+                </div>
+                <div>
+                  <div className="text-xs text-[var(--color-text-secondary)]">External leaks</div>
+                  <div className={`text-xl font-semibold ${integrityReport.summary.external_leakage_count > 0 ? 'text-red-600' : ''}`}>
+                    {integrityReport.summary.external_leakage_count}
+                  </div>
+                </div>
+                <div>
+                  <div className="text-xs text-[var(--color-text-secondary)]">Dupe checksums</div>
+                  <div className={`text-xl font-semibold ${integrityReport.summary.duplicate_checksum_groups > 0 ? 'text-yellow-600' : ''}`}>
+                    {integrityReport.summary.duplicate_checksum_groups}
+                  </div>
+                </div>
+                <div>
+                  <div className="text-xs text-[var(--color-text-secondary)]">Local paths OK</div>
+                  <div className="text-xl font-semibold text-green-600">{integrityReport.summary.local_paths_ok}</div>
+                </div>
+              </div>
+
+              <p className="type-small text-[var(--color-text-secondary)]">
+                Scanned at: {new Date(integrityReport.summary.scanned_at).toLocaleString()}
+              </p>
+
+              {/* Findings */}
+              {integrityReport.findings.length > 0 && (
+                <div>
+                  <button
+                    className="btn btn-ghost type-small"
+                    type="button"
+                    onClick={() => setIntegrityExpanded((v) => !v)}
+                  >
+                    {integrityExpanded ? '▼ Hide' : '▶ Show'} {integrityReport.findings.length} finding(s)
+                  </button>
+
+                  {integrityExpanded && (
+                    <div className="mt-3 space-y-1 max-h-96 overflow-y-auto text-xs font-mono border rounded p-3">
+                      {integrityReport.findings.map((f, i) => (
+                        <div
+                          key={i}
+                          className={`flex gap-2 ${
+                            f.severity === 'error'
+                              ? 'text-red-600 dark:text-red-400'
+                              : f.severity === 'warn'
+                              ? 'text-yellow-700 dark:text-yellow-400'
+                              : 'text-[var(--color-text-secondary)]'
+                          }`}
+                        >
+                          <span className="shrink-0 w-12 uppercase">{f.severity}</span>
+                          <span className="shrink-0 w-32 truncate">{f.category}</span>
+                          <span className="shrink-0 w-40 truncate">{f.entity}</span>
+                          <span className="shrink-0 w-36 truncate" title={f.record_id}>{f.record_id}</span>
+                          <span className="truncate" title={`${f.value} — ${f.detail}`}>{f.value || f.detail}</span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {integrityReport.summary.error_count === 0 && integrityReport.summary.warn_count === 0 && (
+                <p className="ui-status ui-status--success">✔ No integrity issues found.</p>
+              )}
+            </div>
+          ) : null}
         </section>
       </main>
     </AdminLayout>
