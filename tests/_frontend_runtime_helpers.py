@@ -138,3 +138,99 @@ def find_structured_property_candidate(items: list[dict]) -> dict | None:
 
 def extract_links(html: str) -> list[str]:
     return re.findall(r'href="([^"]+)"', unescape(html), flags=re.IGNORECASE)
+
+
+def pick_primary_property_slug(items: list[dict]) -> str | None:
+    for item in items:
+        slug = str(item.get("slug") or "").strip()
+        if slug:
+            return slug
+    return None
+
+
+def pick_structured_property_slug(items: list[dict]) -> str | None:
+    for item in items:
+        slug = str(item.get("slug") or "").strip()
+        if not slug:
+            continue
+        has_structured = any(
+            item.get(key) is not None
+            for key in ("bedrooms", "bathrooms", "size_sqm", "view_label")
+        ) or bool(item.get("tags"))
+        if has_structured:
+            return slug
+    return None
+
+
+def pick_low_media_property_slug(items: list[dict]) -> str | None:
+    for item in items:
+        slug = str(item.get("slug") or "").strip()
+        if not slug:
+            continue
+        detail = get_property_detail(slug)
+        local_images = detail.get("local_images") or []
+        images = detail.get("images") or []
+        cover = detail.get("cover_image")
+        local_count = len(local_images) if isinstance(local_images, list) else 0
+        image_count = len(images) if isinstance(images, list) else 0
+        if local_count == 0 and image_count <= 1 and not cover:
+            return slug
+    return None
+
+
+def pick_multi_image_property_slug(items: list[dict]) -> str | None:
+    for item in items:
+        slug = str(item.get("slug") or "").strip()
+        if not slug:
+            continue
+        detail = get_property_detail(slug)
+        local_images = detail.get("local_images") or []
+        images = detail.get("images") or []
+        local_count = len(local_images) if isinstance(local_images, list) else 0
+        image_count = len(images) if isinstance(images, list) else 0
+        if max(local_count, image_count) >= 2:
+            return slug
+    return None
+
+
+def pick_related_links_property_slug(items: list[dict]) -> str | None:
+    for item in items:
+        slug = str(item.get("slug") or "").strip()
+        if not slug:
+            continue
+        detail = get_property_detail(slug)
+        if detail.get("project_id") or detail.get("area_id") or detail.get("developer_id"):
+            return slug
+    return None
+
+
+def get_areas_list() -> list[dict]:
+    payload = get_html("/api/v1/areas")
+    data = json.loads(payload)
+    assert isinstance(data, list) and len(data) > 0, "Expected non-empty areas list from /api/v1/areas"
+    return data
+
+
+def get_area_statistics(slug: str) -> dict:
+    payload = get_json(f"/api/v1/areas/{slug}/statistics")
+    assert isinstance(payload, dict), f"Expected area statistics payload for slug={slug}"
+    return payload
+
+
+def pick_primary_area_slug(areas: list[dict]) -> str | None:
+    for area in areas:
+        slug = str(area.get("slug") or "").strip()
+        if slug:
+            return slug
+    return None
+
+
+def pick_area_with_stats_slug(areas: list[dict]) -> str | None:
+    for area in areas:
+        slug = str(area.get("slug") or "").strip()
+        if not slug:
+            continue
+        stats = get_area_statistics(slug)
+        if isinstance(stats.get("statistics"), dict):
+            return slug
+    return None
