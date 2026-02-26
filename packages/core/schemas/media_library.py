@@ -27,9 +27,21 @@ class MediaAssetItem(BaseModel):
     tags: list[str] | None = None
 
     source_url: str | None = None
+    source_page_url: str | None = None
     source_domain: str | None = None
     source_type: str | None = None
     rights_status: str | None = None
+    approval_status: str | None = None
+    approval_note: str | None = None
+    approved_by: str | None = None
+    approved_at: datetime | None = None
+    last_checked_at: datetime | None = None
+    rights_note: str | None = None
+    license_evidence_url: str | None = None
+    exception_reason: str | None = None
+    is_exception: bool = False
+    usage_scope: str | None = None
+    linked_entity_hint: str | None = None
     credit: str | None = None
 
     focal_x: Decimal | None = None
@@ -58,8 +70,20 @@ class MediaAssetUpdate(BaseModel):
     caption_th: str | None = None
     tags: list[str] | None = None
     source_url: HttpUrl | None = None
+    source_page_url: HttpUrl | None = None
     source_type: str | None = Field(default=None, max_length=64)
     rights_status: str | None = Field(default=None, max_length=64)
+    approval_status: str | None = Field(default=None, max_length=32)
+    approval_note: str | None = None
+    approved_by: str | None = Field(default=None, max_length=255)
+    approved_at: datetime | None = None
+    last_checked_at: datetime | None = None
+    rights_note: str | None = None
+    license_evidence_url: HttpUrl | None = None
+    exception_reason: str | None = None
+    is_exception: bool | None = None
+    usage_scope: str | None = Field(default=None, max_length=255)
+    linked_entity_hint: str | None = Field(default=None, max_length=255)
     credit: str | None = Field(default=None, max_length=255)
     focal_x: Decimal | None = Field(default=None, ge=0, le=100)
     focal_y: Decimal | None = Field(default=None, ge=0, le=100)
@@ -68,8 +92,17 @@ class MediaAssetUpdate(BaseModel):
 class MediaAssetIngestRequest(BaseModel):
     source_url: HttpUrl
     title: str | None = Field(default=None, max_length=255)
+    source_page_url: HttpUrl | None = None
     source_type: str | None = Field(default=None, max_length=64)
     rights_status: str | None = Field(default=None, max_length=64)
+    approval_status: str | None = Field(default=None, max_length=32)
+    approval_note: str | None = None
+    rights_note: str | None = None
+    license_evidence_url: HttpUrl | None = None
+    exception_reason: str | None = None
+    is_exception: bool | None = None
+    usage_scope: str | None = Field(default=None, max_length=255)
+    linked_entity_hint: str | None = Field(default=None, max_length=255)
     credit: str | None = Field(default=None, max_length=255)
     tags: list[str] | None = None
 
@@ -86,3 +119,27 @@ class MediaAssetAssignResponse(BaseModel):
     assigned_path: str
     cover_image: str | None
     local_images: list[str] | None
+
+
+class MediaSourceRightsReportResponse(BaseModel):
+    summary: dict[str, int]
+    top_domains: list[dict[str, int | str]]
+
+
+class MediaSourceRightsUpdate(BaseModel):
+    source_url: HttpUrl | None = None
+    source_page_url: HttpUrl | None = None
+    source_type: str | None = Field(default=None, max_length=64)
+    rights_status: str | None = Field(default=None, max_length=64)
+    approval_status: str | None = Field(default=None, max_length=32)
+    approval_note: str | None = None
+    approved_by: str | None = Field(default=None, max_length=255)
+    approved_at: datetime | None = None
+    last_checked_at: datetime | None = None
+    rights_note: str | None = None
+    license_evidence_url: HttpUrl | None = None
+    exception_reason: str | None = None
+    is_exception: bool | None = None
+    usage_scope: str | None = Field(default=None, max_length=255)
+    linked_entity_hint: str | None = Field(default=None, max_length=255)
+    credit: str | None = Field(default=None, max_length=255)

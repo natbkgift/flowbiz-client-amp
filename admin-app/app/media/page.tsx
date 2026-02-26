@@ -23,9 +23,21 @@ type MediaAsset = {
   caption_th: string | null;
   tags: string[] | null;
   source_url: string | null;
+  source_page_url: string | null;
   source_domain: string | null;
   source_type: string | null;
   rights_status: string | null;
+  approval_status: string | null;
+  approval_note: string | null;
+  approved_by: string | null;
+  approved_at: string | null;
+  last_checked_at: string | null;
+  rights_note: string | null;
+  license_evidence_url: string | null;
+  exception_reason: string | null;
+  is_exception: boolean;
+  usage_scope: string | null;
+  linked_entity_hint: string | null;
   credit: string | null;
   focal_x: string | null;
   focal_y: string | null;
@@ -75,6 +87,20 @@ type IntegrityReport = {
   findings: IntegrityFinding[];
 };
 
+type SourceRightsReport = {
+  summary: {
+    total_media_assets: number;
+    missing_source_metadata_count: number;
+    pending_approval_count: number;
+    exception_count: number;
+    rejected_or_restricted_count: number;
+    unknown_source_type_count: number;
+    errors: number;
+    warnings: number;
+  };
+  top_domains: Array<{ source_domain: string; count: number }>;
+};
+
 export default function AdminMediaLibraryPage() {
   const router = useRouter();
 
@@ -98,6 +124,23 @@ export default function AdminMediaLibraryPage() {
   const [integrityLoading, setIntegrityLoading] = useState(false);
   const [integrityError, setIntegrityError] = useState<string | null>(null);
   const [integrityExpanded, setIntegrityExpanded] = useState(false);
+
+  const [sourceRightsItems, setSourceRightsItems] = useState<MediaAsset[]>([]);
+  const [sourceRightsSelectedId, setSourceRightsSelectedId] = useState<string | null>(null);
+  const [sourceRightsLoading, setSourceRightsLoading] = useState(false);
+  const [sourceRightsError, setSourceRightsError] = useState<string | null>(null);
+  const [sourceRightsReport, setSourceRightsReport] = useState<SourceRightsReport | null>(null);
+  const [sourceRightsSourceTypeFilter, setSourceRightsSourceTypeFilter] = useState('');
+  const [sourceRightsRightsStatusFilter, setSourceRightsRightsStatusFilter] = useState('');
+  const [sourceRightsApprovalStatusFilter, setSourceRightsApprovalStatusFilter] = useState('');
+  const [sourceRightsDomainFilter, setSourceRightsDomainFilter] = useState('');
+  const [sourceRightsSearchFilter, setSourceRightsSearchFilter] = useState('');
+  const [sourceRightsExceptionOnly, setSourceRightsExceptionOnly] = useState(false);
+
+  const selectedSourceRights = useMemo(
+    () => sourceRightsItems.find((item) => item.id === sourceRightsSelectedId) ?? null,
+    [sourceRightsItems, sourceRightsSelectedId]
+  );
 
   const selected = useMemo(
     () => items.find((item) => item.id === selectedId) ?? null,
@@ -139,7 +182,84 @@ export default function AdminMediaLibraryPage() {
       return;
     }
     void loadMedia();
+    void loadSourceRightsRegistry();
+    void loadSourceRightsReport();
   }, [router]);
+
+  async function loadSourceRightsRegistry(): Promise<void> {
+    setSourceRightsLoading(true);
+    setSourceRightsError(null);
+
+    const params = new URLSearchParams();
+    params.set('page', '1');
+    params.set('limit', '50');
+    if (sourceRightsSourceTypeFilter.trim()) params.set('source_type', sourceRightsSourceTypeFilter.trim());
+    if (sourceRightsRightsStatusFilter.trim()) params.set('rights_status', sourceRightsRightsStatusFilter.trim());
+    if (sourceRightsApprovalStatusFilter.trim()) params.set('approval_status', sourceRightsApprovalStatusFilter.trim());
+    if (sourceRightsDomainFilter.trim()) params.set('source_domain', sourceRightsDomainFilter.trim());
+    if (sourceRightsSearchFilter.trim()) params.set('search', sourceRightsSearchFilter.trim());
+    if (sourceRightsExceptionOnly) params.set('is_exception', 'true');
+
+    try {
+      const res = await apiRequest<MediaListResponse>(`/admin/media-assets/source-rights?${params.toString()}`);
+      setSourceRightsItems(res.data);
+      if (!sourceRightsSelectedId && res.data.length > 0) {
+        setSourceRightsSelectedId(res.data[0].id);
+      }
+      if (sourceRightsSelectedId && !res.data.some((item) => item.id === sourceRightsSelectedId)) {
+        setSourceRightsSelectedId(res.data[0]?.id ?? null);
+      }
+    } catch (err) {
+      if (handleUnauthorizedError(err, router)) return;
+      setSourceRightsError(err instanceof Error ? err.message : 'Unable to load source-rights registry');
+    } finally {
+      setSourceRightsLoading(false);
+    }
+  }
+
+  async function loadSourceRightsReport(): Promise<void> {
+    try {
+      const data = await apiRequest<SourceRightsReport>('/admin/media-assets/source-rights/report');
+      setSourceRightsReport(data);
+    } catch (err) {
+      if (handleUnauthorizedError(err, router)) return;
+      setSourceRightsError(err instanceof Error ? err.message : 'Unable to load source-rights summary');
+    }
+  }
+
+  async function handleSaveSourceRights(e: React.FormEvent<HTMLFormElement>): Promise<void> {
+    e.preventDefault();
+    if (!selectedSourceRights) return;
+
+    const fd = new FormData(e.currentTarget);
+    const payload = {
+      source_type: String(fd.get('source_type') ?? '').trim() || null,
+      source_url: String(fd.get('source_url') ?? '').trim() || null,
+      source_page_url: String(fd.get('source_page_url') ?? '').trim() || null,
+      rights_status: String(fd.get('rights_status') ?? '').trim() || null,
+      approval_status: String(fd.get('approval_status') ?? '').trim() || null,
+      credit: String(fd.get('credit') ?? '').trim() || null,
+      rights_note: String(fd.get('rights_note') ?? '').trim() || null,
+      license_evidence_url: String(fd.get('license_evidence_url') ?? '').trim() || null,
+      exception_reason: String(fd.get('exception_reason') ?? '').trim() || null,
+      usage_scope: String(fd.get('usage_scope') ?? '').trim() || null,
+      is_exception: String(fd.get('is_exception') ?? '') === 'true',
+      last_checked_at: new Date().toISOString(),
+    };
+
+    try {
+      const updated = await apiRequest<MediaAsset>(`/admin/media-assets/${selectedSourceRights.id}/source-rights`, {
+        method: 'PATCH',
+        body: JSON.stringify(payload),
+      });
+      setSourceRightsItems((prev) => prev.map((item) => (item.id === updated.id ? updated : item)));
+      setNotice('Source-rights metadata saved.');
+      await loadSourceRightsReport();
+    } catch (err) {
+      if (handleUnauthorizedError(err, router)) return;
+      setSourceRightsError(err instanceof Error ? err.message : 'Unable to save source-rights metadata');
+    }
+  }
 
   async function handleUpload(file: File): Promise<void> {
     setUploading(true);
@@ -583,6 +703,111 @@ export default function AdminMediaLibraryPage() {
               )}
             </div>
           ) : null}
+        </section>
+
+        <section className="card section-stack">
+          <div className="flex items-center justify-between gap-4">
+            <div>
+              <h2 className="text-lg font-semibold">Source &amp; Rights Registry (B12)</h2>
+              <p className="type-small text-[var(--color-text-secondary)]">
+                Review source provenance, approval states, and exception tracking for media governance.
+              </p>
+            </div>
+            <button
+              className="btn btn-secondary"
+              type="button"
+              disabled={sourceRightsLoading}
+              onClick={() => {
+                void loadSourceRightsRegistry();
+                void loadSourceRightsReport();
+              }}
+            >
+              {sourceRightsLoading ? 'Refreshing…' : 'Refresh registry'}
+            </button>
+          </div>
+
+          {sourceRightsReport ? (
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 p-4 rounded border border-[var(--color-border)] bg-[var(--color-surface-secondary)]">
+              <div><div className="text-xs text-[var(--color-text-secondary)]">Total assets</div><div className="text-xl font-semibold">{sourceRightsReport.summary.total_media_assets}</div></div>
+              <div><div className="text-xs text-[var(--color-text-secondary)]">Pending approvals</div><div className="text-xl font-semibold">{sourceRightsReport.summary.pending_approval_count}</div></div>
+              <div><div className="text-xs text-[var(--color-text-secondary)]">Exceptions</div><div className="text-xl font-semibold">{sourceRightsReport.summary.exception_count}</div></div>
+              <div><div className="text-xs text-[var(--color-text-secondary)]">Missing source metadata</div><div className="text-xl font-semibold">{sourceRightsReport.summary.missing_source_metadata_count}</div></div>
+            </div>
+          ) : null}
+
+          <div className="grid md:grid-cols-6 gap-3">
+            <label className="form-field"><span className="form-label">Source type</span><input className="form-input" value={sourceRightsSourceTypeFilter} onChange={(e) => setSourceRightsSourceTypeFilter(e.target.value)} /></label>
+            <label className="form-field"><span className="form-label">Rights status</span><input className="form-input" value={sourceRightsRightsStatusFilter} onChange={(e) => setSourceRightsRightsStatusFilter(e.target.value)} /></label>
+            <label className="form-field"><span className="form-label">Approval status</span><input className="form-input" value={sourceRightsApprovalStatusFilter} onChange={(e) => setSourceRightsApprovalStatusFilter(e.target.value)} /></label>
+            <label className="form-field"><span className="form-label">Source domain</span><input className="form-input" value={sourceRightsDomainFilter} onChange={(e) => setSourceRightsDomainFilter(e.target.value)} /></label>
+            <label className="form-field"><span className="form-label">Search</span><input className="form-input" value={sourceRightsSearchFilter} onChange={(e) => setSourceRightsSearchFilter(e.target.value)} /></label>
+            <label className="form-field"><span className="form-label">Exceptions only</span><select className="form-select" value={sourceRightsExceptionOnly ? 'true' : 'false'} onChange={(e) => setSourceRightsExceptionOnly(e.target.value === 'true')}><option value="false">all</option><option value="true">true</option></select></label>
+          </div>
+
+          <div>
+            <button className="btn btn-primary" type="button" onClick={() => void loadSourceRightsRegistry()} disabled={sourceRightsLoading}>Apply source-rights filters</button>
+          </div>
+
+          {sourceRightsError ? <p className="ui-status ui-status--error" role="alert">{sourceRightsError}</p> : null}
+
+          <div className="grid lg:grid-cols-[1fr_1fr] gap-4">
+            <div className="section-stack">
+              <h3 className="text-base font-semibold">Registry items</h3>
+              {sourceRightsLoading ? (
+                <div className="ui-loading-grid"><div className="ui-loading-card"><div className="skeleton skeleton--title" /></div></div>
+              ) : sourceRightsItems.length === 0 ? (
+                <div className="ui-empty">
+                  <h4 className="ui-empty__title">No source-rights records found</h4>
+                  <p className="ui-empty__body">Try relaxing filters or run backfill first.</p>
+                </div>
+              ) : (
+                <div className="space-y-2 max-h-96 overflow-y-auto">
+                  {sourceRightsItems.map((item) => (
+                    <button key={item.id} type="button" className={`w-full text-left border rounded-lg p-3 ${sourceRightsSelectedId === item.id ? 'ring-2 ring-[var(--color-primary)]' : ''}`} onClick={() => setSourceRightsSelectedId(item.id)}>
+                      <p className="text-sm font-semibold text-safe-wrap text-clamp-1">{item.title || item.storage_path}</p>
+                      <div className="mt-1 flex flex-wrap gap-2 text-xs">
+                        <span className={`badge ${item.approval_status === 'approved' ? 'badge-success' : item.approval_status === 'rejected' ? 'badge-danger' : 'badge-warning'}`}>{item.approval_status || 'pending'}</span>
+                        <span className={`badge ${item.is_exception ? 'badge-warning' : 'badge-neutral'}`}>{item.is_exception ? 'exception' : 'normal'}</span>
+                        <span className="badge badge-neutral">{item.source_type || 'unknown'}</span>
+                        <span className="badge badge-neutral">{item.rights_status || 'missing'}</span>
+                      </div>
+                      <p className="mt-1 text-xs text-[var(--color-text-secondary)]">{item.source_domain || '-'}</p>
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            <div className="section-stack">
+              <h3 className="text-base font-semibold">Edit source-rights metadata</h3>
+              {!selectedSourceRights ? (
+                <div className="ui-empty"><p className="ui-empty__body">Select a source-rights item to edit.</p></div>
+              ) : (
+                <form className="section-stack" onSubmit={(e) => void handleSaveSourceRights(e)}>
+                  <label className="form-field"><span className="form-label">Source type</span><input name="source_type" className="form-input" defaultValue={selectedSourceRights.source_type ?? ''} /></label>
+                  <label className="form-field"><span className="form-label">Source URL</span><input name="source_url" className="form-input" defaultValue={selectedSourceRights.source_url ?? ''} /></label>
+                  <label className="form-field"><span className="form-label">Source page URL</span><input name="source_page_url" className="form-input" defaultValue={selectedSourceRights.source_page_url ?? ''} /></label>
+                  <label className="form-field"><span className="form-label">Rights status</span><input name="rights_status" className="form-input" defaultValue={selectedSourceRights.rights_status ?? ''} /></label>
+                  <label className="form-field"><span className="form-label">Approval status</span><input name="approval_status" className="form-input" defaultValue={selectedSourceRights.approval_status ?? 'pending'} /></label>
+                  <label className="form-field"><span className="form-label">Credit</span><input name="credit" className="form-input" defaultValue={selectedSourceRights.credit ?? ''} /></label>
+                  <label className="form-field"><span className="form-label">Rights note</span><textarea name="rights_note" className="form-textarea" defaultValue={selectedSourceRights.rights_note ?? ''} /></label>
+                  <label className="form-field"><span className="form-label">Exception reason</span><textarea name="exception_reason" className="form-textarea" defaultValue={selectedSourceRights.exception_reason ?? ''} /></label>
+                  <label className="form-field"><span className="form-label">License evidence URL</span><input name="license_evidence_url" className="form-input" defaultValue={selectedSourceRights.license_evidence_url ?? ''} /></label>
+                  <label className="form-field"><span className="form-label">Usage scope</span><input name="usage_scope" className="form-input" defaultValue={selectedSourceRights.usage_scope ?? ''} /></label>
+                  <label className="form-field"><span className="form-label">Exception flag</span>
+                    <select name="is_exception" className="form-select" defaultValue={selectedSourceRights.is_exception ? 'true' : 'false'}>
+                      <option value="false">false</option>
+                      <option value="true">true</option>
+                    </select>
+                  </label>
+                  <div className="type-small text-[var(--color-text-secondary)]">
+                    Last checked: {selectedSourceRights.last_checked_at ? new Date(selectedSourceRights.last_checked_at).toLocaleString() : 'never'}
+                  </div>
+                  <button className="btn btn-primary" type="submit">Save source-rights</button>
+                </form>
+              )}
+            </div>
+          </div>
         </section>
       </main>
     </AdminLayout>

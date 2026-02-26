@@ -925,6 +925,8 @@ class MediaAsset(Base):
         Index("ix_media_assets_created_at", "created_at"),
         Index("ix_media_assets_source_domain", "source_domain"),
         Index("ix_media_assets_checksum_sha256", "checksum_sha256"),
+        Index("ix_media_assets_approval_status", "approval_status"),
+        Index("ix_media_assets_is_exception", "is_exception"),
     )
 
     id: Mapped[UUID] = mapped_column(primary_key=True, default=uuid4)
@@ -944,9 +946,26 @@ class MediaAsset(Base):
     tags: Mapped[list | None] = mapped_column(JSONB, nullable=True)
 
     source_url: Mapped[str | None] = mapped_column(String(1000), nullable=True)
+    source_page_url: Mapped[str | None] = mapped_column(String(1000), nullable=True)
     source_domain: Mapped[str | None] = mapped_column(String(255), nullable=True)
     source_type: Mapped[str | None] = mapped_column(String(64), nullable=True)
     rights_status: Mapped[str | None] = mapped_column(String(64), nullable=True)
+    approval_status: Mapped[str | None] = mapped_column(String(32), nullable=True)
+    approval_note: Mapped[str | None] = mapped_column(Text, nullable=True)
+    approved_by: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    approved_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    last_checked_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    rights_note: Mapped[str | None] = mapped_column(Text, nullable=True)
+    license_evidence_url: Mapped[str | None] = mapped_column(String(1000), nullable=True)
+    exception_reason: Mapped[str | None] = mapped_column(Text, nullable=True)
+    is_exception: Mapped[bool] = mapped_column(
+        Boolean,
+        nullable=False,
+        default=False,
+        server_default="false",
+    )
+    usage_scope: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    linked_entity_hint: Mapped[str | None] = mapped_column(String(255), nullable=True)
     credit: Mapped[str | None] = mapped_column(String(255), nullable=True)
 
     focal_x: Mapped[Decimal | None] = mapped_column(Numeric(5, 2), nullable=True)

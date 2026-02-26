@@ -2,6 +2,8 @@ from __future__ import annotations
 
 from uuid import UUID
 
+from datetime import datetime, timezone
+
 from fastapi import APIRouter, Depends, File, HTTPException, Query, UploadFile, status
 from sqlalchemy import String, cast, desc, func, or_, select
 from sqlalchemy.orm import Session
@@ -17,8 +19,16 @@ from packages.core.schemas.media_library import (
     MediaAssetIngestRequest,
     MediaAssetItem,
     MediaAssetListResponse,
+    MediaSourceRightsReportResponse,
+    MediaSourceRightsUpdate,
     MediaAssetUpdate,
     MediaAssetUploadResponse,
+)
+from packages.core.source_rights_registry import (
+    build_source_rights_report,
+    normalize_approval_status,
+    normalize_rights_status,
+    normalize_source_type,
 )
 
 router = APIRouter(prefix="/admin", tags=["admin"])
@@ -35,6 +45,10 @@ def _coerce_tags(tags: list[str] | None) -> list[str] | None:
         if value not in out:
             out.append(value)
     return out or None
+
+
+def _now_utc() -> datetime:
+    return datetime.now(timezone.utc)
 
 
 @router.post("/media-assets/upload", response_model=MediaAssetUploadResponse, status_code=201)
@@ -122,9 +136,21 @@ def ingest_media_asset_from_url(
         height=stored.height,
         checksum_sha256=stored.checksum_sha256,
         source_url=str(payload.source_url),
+        source_page_url=str(payload.source_page_url) if payload.source_page_url is not None else None,
         source_domain=parse_source_domain(str(payload.source_url)),
-        source_type=payload.source_type,
-        rights_status=payload.rights_status,
+        source_type=normalize_source_type(payload.source_type),
+        rights_status=normalize_rights_status(payload.rights_status),
+        approval_status=normalize_approval_status(payload.approval_status),
+        approval_note=payload.approval_note,
+        rights_note=payload.rights_note,
+        license_evidence_url=(
+            str(payload.license_evidence_url) if payload.license_evidence_url is not None else None
+        ),
+        exception_reason=payload.exception_reason,
+        is_exception=bool(payload.is_exception) if payload.is_exception is not None else False,
+        usage_scope=payload.usage_scope,
+        linked_entity_hint=payload.linked_entity_hint,
+        last_checked_at=_now_utc(),
         credit=payload.credit,
         title=payload.title,
         tags=_coerce_tags(payload.tags),
@@ -199,6 +225,78 @@ def get_media_integrity_report(
     return report.to_dict()
 
 
+@router.get("/media-assets/source-rights", response_model=MediaAssetListResponse)
+def list_media_assets_source_rights(
+    page: int = Query(default=1, ge=1),
+    limit: int = Query(default=24, ge=1, le=200),
+    source_type: str | None = Query(default=None),
+    rights_status: str | None = Query(default=None),
+    approval_status: str | None = Query(default=None),
+    source_domain: str | None = Query(default=None),
+    is_exception: bool | None = Query(default=None),
+    search: str | None = Query(default=None),
+    db: Session = Depends(get_db),
+    _admin: User = Depends(get_current_admin),
+) -> MediaAssetListResponse:
+    query = select(MediaAsset)
+
+    if source_type:
+        query = query.where(MediaAsset.source_type == normalize_source_type(source_type))
+    if rights_status:
+        query = query.where(MediaAsset.rights_status == normalize_rights_status(rights_status))
+    if approval_status:
+        query = query.where(MediaAsset.approval_status == normalize_approval_status(approval_status))
+    if source_domain:
+        query = query.where(MediaAsset.source_domain == source_domain.strip().lower())
+    if is_exception is not None:
+        query = query.where(MediaAsset.is_exception.is_(is_exception))
+    if search:
+        pattern = f"%{search.strip()}%"
+        query = query.where(
+            or_(
+                MediaAsset.title.ilike(pattern),
+                MediaAsset.storage_path.ilike(pattern),
+                MediaAsset.source_url.ilike(pattern),
+                MediaAsset.source_page_url.ilike(pattern),
+                MediaAsset.credit.ilike(pattern),
+            )
+        )
+
+    total = db.scalar(select(func.count()).select_from(query.subquery())) or 0
+    rows = db.scalars(
+        query.order_by(desc(MediaAsset.created_at), desc(MediaAsset.id))
+        .offset((page - 1) * limit)
+        .limit(limit)
+    ).all()
+
+    return MediaAssetListResponse(
+        data=[MediaAssetItem.model_validate(row) for row in rows],
+        meta={"page": page, "limit": limit, "total": int(total)},
+    )
+
+
+@router.get("/media-assets/source-rights/report", response_model=MediaSourceRightsReportResponse)
+def source_rights_report(
+    pending_threshold: int = Query(default=5, ge=0, le=10000),
+    db: Session = Depends(get_db),
+    _admin: User = Depends(get_current_admin),
+) -> MediaSourceRightsReportResponse:
+    report = build_source_rights_report(db, pending_threshold=pending_threshold)
+    return MediaSourceRightsReportResponse(
+        summary={
+            "total_media_assets": report.summary.total_media_assets,
+            "missing_source_metadata_count": report.summary.missing_source_metadata_count,
+            "pending_approval_count": report.summary.pending_approval_count,
+            "exception_count": report.summary.exception_count,
+            "rejected_or_restricted_count": report.summary.rejected_or_restricted_count,
+            "unknown_source_type_count": report.summary.unknown_source_type_count,
+            "errors": report.summary.errors,
+            "warnings": report.summary.warnings,
+        },
+        top_domains=report.top_domains,
+    )
+
+
 @router.get("/media-assets/{media_id}", response_model=MediaAssetItem)
 def get_media_asset(
     media_id: UUID,
@@ -229,9 +327,67 @@ def update_media_asset(
         source_url = data.get("source_url")
         data["source_url"] = str(source_url) if source_url is not None else None
         data["source_domain"] = parse_source_domain(data["source_url"])
+    if "source_page_url" in data:
+        source_page_url = data.get("source_page_url")
+        data["source_page_url"] = str(source_page_url) if source_page_url is not None else None
+    if "source_type" in data:
+        data["source_type"] = normalize_source_type(data.get("source_type"))
+    if "rights_status" in data:
+        data["rights_status"] = normalize_rights_status(data.get("rights_status"))
+    if "approval_status" in data:
+        data["approval_status"] = normalize_approval_status(data.get("approval_status"))
+    if "license_evidence_url" in data:
+        license_url = data.get("license_evidence_url")
+        data["license_evidence_url"] = str(license_url) if license_url is not None else None
 
     for key, value in data.items():
         setattr(row, key, value)
+
+    row.last_checked_at = _now_utc()
+    if row.approval_status == "approved" and row.approved_at is None:
+        row.approved_at = _now_utc()
+
+    db.add(row)
+    db.commit()
+    db.refresh(row)
+    return MediaAssetItem.model_validate(row)
+
+
+@router.patch("/media-assets/{media_id}/source-rights", response_model=MediaAssetItem)
+def patch_media_source_rights(
+    media_id: UUID,
+    payload: MediaSourceRightsUpdate,
+    db: Session = Depends(get_db),
+    _admin: User = Depends(get_current_admin),
+) -> MediaAssetItem:
+    row = db.get(MediaAsset, media_id)
+    if row is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Media asset not found")
+
+    data = payload.model_dump(exclude_unset=True)
+    if "source_url" in data:
+        source_url = data.get("source_url")
+        data["source_url"] = str(source_url) if source_url is not None else None
+        data["source_domain"] = parse_source_domain(data["source_url"])
+    if "source_page_url" in data:
+        source_page_url = data.get("source_page_url")
+        data["source_page_url"] = str(source_page_url) if source_page_url is not None else None
+    if "source_type" in data:
+        data["source_type"] = normalize_source_type(data.get("source_type"))
+    if "rights_status" in data:
+        data["rights_status"] = normalize_rights_status(data.get("rights_status"))
+    if "approval_status" in data:
+        data["approval_status"] = normalize_approval_status(data.get("approval_status"))
+    if "license_evidence_url" in data:
+        license_url = data.get("license_evidence_url")
+        data["license_evidence_url"] = str(license_url) if license_url is not None else None
+
+    for key, value in data.items():
+        setattr(row, key, value)
+
+    row.last_checked_at = _now_utc()
+    if row.approval_status == "approved" and row.approved_at is None:
+        row.approved_at = _now_utc()
 
     db.add(row)
     db.commit()
