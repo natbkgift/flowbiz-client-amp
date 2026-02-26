@@ -46,6 +46,39 @@ jobs:
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
           SHA="${GITHUB_SHA}"
+          BEFORE_SHA="${{ github.event.before }}"
+
+          git fetch origin main --depth=1
+          CURRENT_HEAD="$(git rev-parse origin/main)"
+
+          mapfile -t CHANGED_FILES < <(git diff --name-only "$BEFORE_SHA" "$SHA")
+          python scripts/governance/decide_auto_revert.py \
+            --target-sha "$SHA" \
+            --branch main \
+            --before-sha "$BEFORE_SHA" \
+            --summary .tmp/governance/summary.json \
+            --current-head-sha "$CURRENT_HEAD" \
+            --changed-files "${CHANGED_FILES[@]}" \
+            --out .tmp/governance/revert-decision.json
+
+          ALLOW_REVERT="$(python - <<'PY'
+import json
+from pathlib import Path
+p = Path('.tmp/governance/revert-decision.json')
+if not p.exists():
+    print('false')
+else:
+    payload = json.loads(p.read_text(encoding='utf-8'))
+    print('true' if payload.get('allow_revert') else 'false')
+PY
+          )"
+
+          if [[ "$ALLOW_REVERT" != "true" ]]; then
+            echo "::warning::Skipping auto-revert due to stale/ambiguous decision evidence"
+            cat .tmp/governance/revert-decision.json || true
+            exit 0
+          fi
+
           parents="$(git show -s --format=%P "$SHA" | wc -w | tr -d ' ')"
 
           if [[ "${parents}" -gt 1 ]]; then
