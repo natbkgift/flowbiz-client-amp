@@ -1,6 +1,5 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import Image from 'next/image';
 import { Suspense } from 'react';
 
 import { TrackedLink } from '@/components/analytics/TrackedLink';
@@ -15,13 +14,15 @@ import propertyInteriorImage from '@/public/images/property-interior.png';
 import propertyPoolImage from '@/public/images/property-pool.png';
 import villaGardenImage from '@/public/images/villa-garden.png';
 import { getDictionary, normalizeLocale } from '@/app/_lib/i18n/get-dictionary';
+import { normalizeLocalMediaPath, pickPrimaryLocalMedia } from '@/app/_lib/local-media';
 import { GuidedOverlay } from './_components/GuidedOverlay';
 import { withLocale } from '@/app/_lib/i18n/routing';
 import { makePageMetadata } from '@/app/_lib/i18n/metadata';
 import { getContentRecommendation } from '@/lib/personalization';
 import { fetchProjects, fetchProperties as fetchPropertiesAPI } from '@/app/_lib/public-api-server';
 import type { PropertyListItem } from '@/app/public/_shared/types';
-import { resolveImageUrl } from '@/app/_lib/public-api-shared';
+import { LocalMediaImage } from '@/components/media/LocalMediaImage';
+import { EmptyStateCard, LoadingCardGrid } from '@/components/ui/StateBlocks';
 
 export const revalidate = 300;
 
@@ -32,12 +33,6 @@ const PROPERTY_FALLBACK_IMAGES = [
   propertyInteriorImage,
   villaGardenImage,
 ];
-
-function looksPlaceholderLike(url: string | null): boolean {
-  if (!url) return true;
-  const normalized = url.toLowerCase();
-  return normalized.includes('placeholder') || normalized.includes('default-image') || normalized.endsWith('.svg');
-}
 
 export async function generateMetadata({
   params,
@@ -105,8 +100,8 @@ export default async function HomePage({
     for (const prop of allProperties) {
       const imgCandidates = [prop.cover_image, ...(prop.local_images ?? []), ...(prop.images ?? [])];
       const realImg = imgCandidates
-        .map((candidate) => resolveImageUrl(candidate))
-        .find((resolved) => resolved && !looksPlaceholderLike(resolved));
+        .map((candidate) => normalizeLocalMediaPath(candidate))
+        .find((resolved): resolved is string => Boolean(resolved));
       if (!realImg) continue;
       const nextPrice = typeof prop.price === 'number' && Number.isFinite(prop.price) && prop.price > 0
         ? Number(prop.price)
@@ -141,8 +136,8 @@ export default async function HomePage({
 
     const enrichedProjects = allProjects.map((project) => {
       const hint = projectMediaHints.get(project.id);
-      const resolvedCover = resolveImageUrl(project.cover_image_url ?? null);
-      const hasRealProjectCover = !!resolvedCover && !looksPlaceholderLike(resolvedCover);
+      const resolvedCover = normalizeLocalMediaPath(project.cover_image_url ?? null);
+      const hasRealProjectCover = Boolean(resolvedCover);
       return {
         ...project,
         cover_image_url: hasRealProjectCover ? project.cover_image_url : (hint?.coverImageUrl ?? project.cover_image_url),
@@ -251,20 +246,21 @@ export default async function HomePage({
           </div>
 
           {featuredProperties.length === 0 ? (
-            <div className="premium-empty-state" role="status" aria-live="polite">
-              <h3>{locale === 'th' ? 'ยังไม่มียูนิตคัดสรรในขณะนี้' : 'No curated opportunities available right now'}</h3>
-              <p>{locale === 'th' ? 'ทีมกำลังอัปเดตรายการลงทุนสำหรับหน้านี้' : 'Our team is preparing the next shortlist of investment opportunities.'}</p>
-            </div>
+            <EmptyStateCard
+              title={locale === 'th' ? 'ยังไม่มียูนิตคัดสรรในขณะนี้' : 'No curated opportunities available right now'}
+              body={locale === 'th' ? 'ทีมกำลังอัปเดตรายการลงทุนสำหรับหน้านี้' : 'Our team is preparing the next shortlist of investment opportunities.'}
+            />
           ) : null}
 
           <div className="investment-grid">
             {featuredProperties.map((prop, index) => {
-              const img = prop.cover_image || (prop.local_images?.[0]) || (prop.images?.[0]) || null;
-              const resolvedImgSrc = resolveImageUrl(img);
-              const hasRealImage = !!resolvedImgSrc && !looksPlaceholderLike(resolvedImgSrc);
-              const imgSrc = hasRealImage
-                ? resolvedImgSrc
-                : (PROPERTY_FALLBACK_IMAGES[index % PROPERTY_FALLBACK_IMAGES.length] ?? propertyPlaceholder.src);
+              const media = {
+                cover_image: prop.cover_image ?? null,
+                local_images: prop.local_images ?? null,
+                images: prop.images ?? null,
+              };
+              const hasLocalMedia = Boolean(pickPrimaryLocalMedia(media));
+              const fallbackSrc = (PROPERTY_FALLBACK_IMAGES[index % PROPERTY_FALLBACK_IMAGES.length] ?? propertyPlaceholder).src;
               const priceFormatted = prop.price ? `฿${Math.round(prop.price).toLocaleString()}` : null;
               const statTokens = deriveStatTokens(prop);
               const tags = deriveTags(prop);
@@ -279,22 +275,21 @@ export default async function HomePage({
                 <Link
                   key={prop.id}
                   href={withLocale(locale, `/properties/${prop.id}`)}
-                  className="property-card reveal premium-investment-card"
+                  className="property-card reveal premium-investment-card card-interactive"
                 >
                   <div className="card-image card-image--featured relative">
-                    <Image
-                      src={imgSrc}
+                    <LocalMediaImage
+                      media={media}
                       alt={prop.title}
-                      fill
-                      className={`absolute inset-0 h-full w-full object-cover ${hasRealImage ? '' : 'premium-investment-card__fallback-image'}`}
-                      loading="lazy"
-                      decoding="async"
-                      sizes="(min-width: 2560px) 18vw, (min-width: 1920px) 22vw, (min-width: 1024px) 30vw, (min-width: 768px) 48vw, 100vw"
+                      altFallback={locale === 'th' ? `ภาพประกอบอสังหาฯ ${prop.title}` : `Property preview for ${prop.title}`}
+                      className="card-image card-image--featured relative"
+                      imageClassName={`absolute inset-0 h-full w-full object-cover ${hasLocalMedia ? '' : 'premium-investment-card__fallback-image'}`}
+                      fallbackSrc={fallbackSrc}
                     />
                     <div className="premium-investment-card__media-scrim" aria-hidden="true" />
                     <div className="premium-investment-card__media-meta" aria-hidden="true">
                       <span>
-                        {hasRealImage
+                        {hasLocalMedia
                           ? (locale === 'th' ? 'Curated unit' : 'Curated unit')
                           : (locale === 'th' ? 'ภาพตัวอย่าง — รอรูปจริง' : 'Preview image — real photo pending')}
                       </span>
@@ -372,18 +367,7 @@ export default async function HomePage({
           <div className="section-header">
             <h2 className="section-title">{heading}</h2>
           </div>
-          <div className={kind === 'project' ? 'project-grid-premium' : 'investment-grid'} aria-hidden="true">
-            {Array.from({ length: 6 }).map((_, index) => (
-              <div key={`${kind}-skeleton-${index}`} className="property-card">
-                <div className="card-image card-image--featured skeleton skeleton--image" />
-                <div className="p-6 space-y-3">
-                  <div className="skeleton skeleton--title" />
-                  <div className="skeleton skeleton--text" />
-                  <div className="skeleton skeleton--text" />
-                </div>
-              </div>
-            ))}
-          </div>
+          <LoadingCardGrid cards={kind === 'project' ? 6 : 8} />
         </Container>
       </section>
     );

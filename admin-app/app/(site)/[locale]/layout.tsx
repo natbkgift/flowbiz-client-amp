@@ -44,7 +44,7 @@ export default async function SiteLayout({
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLd }} />
       <Header locale={locale} dict={dict} />
       <DeferredProviders />
-      {children}
+      <div className="layout-shell">{children}</div>
       <Footer locale={locale} dict={dict} />
       <div aria-live="polite" aria-atomic="true" id="amp-live-region" className="sr-only" />
     </>

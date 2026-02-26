@@ -1,8 +1,8 @@
 import Link from 'next/link';
-import Image from 'next/image';
 
 import { withLocale } from '@/app/_lib/i18n/routing';
 import type { Dictionary } from '@/app/_lib/i18n/types';
+import { LocalMediaImage } from '@/components/media/LocalMediaImage';
 
 export function ProjectCard({
   name,
@@ -32,33 +32,22 @@ export function ProjectCard({
     : null;
 
   const inner = (
-    <div className="property-card">
-      {coverImage ? (
-        <div className="card-image">
-          <Image
-            src={coverImage}
-            alt={name}
-            fill
-            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, (max-width: 1536px) 33vw, 20vw"
-            className="object-cover"
-            loading="lazy"
-            decoding="async"
-          />
-          {typeLabel ? (
-            <span className="absolute top-2 left-2 rounded bg-[var(--color-primary)] px-2 py-0.5 text-xs font-semibold text-white">
-              {typeLabel}
-            </span>
-          ) : null}
-        </div>
-      ) : (
-        <div className="card-image bg-[var(--color-surface)]">
-          {typeLabel ? (
-            <span className="absolute top-2 left-2 rounded bg-[var(--color-primary)] px-2 py-0.5 text-xs font-semibold text-white">
-              {typeLabel}
-            </span>
-          ) : null}
-        </div>
-      )}
+    <div className="property-card card-interactive">
+      <div className="card-image bg-[var(--color-surface)]">
+        <LocalMediaImage
+          media={{ cover_image_url: coverImage ?? null }}
+          alt={name}
+          altFallback={name}
+          className="card-image"
+          imageClassName="absolute inset-0 h-full w-full object-cover"
+          fallbackSrc="/images/project-overview.png"
+        />
+        {typeLabel ? (
+          <span className="absolute top-2 left-2 rounded bg-[var(--color-primary)] px-2 py-0.5 text-xs font-semibold text-white">
+            {typeLabel}
+          </span>
+        ) : null}
+      </div>
       <div className="card-content">
         <div className="card-title">{name}</div>
         {formattedPrice ? (

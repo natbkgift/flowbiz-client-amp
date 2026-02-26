@@ -4,6 +4,7 @@ import { Container } from '@/components/layout/Container';
 import { Breadcrumbs } from '@/components/layout/Breadcrumbs';
 import { ProjectCard } from '@/components/project/ProjectCard';
 import { ProjectSearchFilters } from '@/components/projects/ProjectSearchFilters';
+import { EmptyStateCard, InlineStatusMessage } from '@/components/ui/StateBlocks';
 import { fetchProjects } from '@/app/_lib/public-api-server';
 import { getDictionary, normalizeLocale } from '@/app/_lib/i18n/get-dictionary';
 import { breadcrumbSchema } from '@/app/_lib/schema-markup';
@@ -141,15 +142,17 @@ export default async function ProjectsPage({
         ) : (
           <>
             {!projectsFetchOk ? (
-              <div className="card">
-                <p className="card-subtitle">
-                  {locale === 'th'
-                    ? 'ไม่สามารถโหลดข้อมูลโปรเจกต์ได้ กรุณาลองใหม่อีกครั้ง'
-                    : 'Unable to load projects. Please try again later.'}
-                </p>
-              </div>
+              <InlineStatusMessage
+                tone="error"
+                message={locale === 'th'
+                  ? 'ไม่สามารถโหลดข้อมูลโปรเจกต์ได้ กรุณาลองใหม่อีกครั้ง'
+                  : 'Unable to load projects. Please try again later.'}
+              />
             ) : (
-              <p>{dict.listing.noProperties}</p>
+              <EmptyStateCard
+                title={locale === 'th' ? 'ยังไม่พบโครงการที่ตรงเงื่อนไข' : 'No projects match your filters'}
+                body={dict.listing.noProperties}
+              />
             )}
           </>
         )}

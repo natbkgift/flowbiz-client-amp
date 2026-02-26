@@ -4,6 +4,7 @@ import Link from 'next/link';
 
 import { Breadcrumbs } from '@/components/layout/Breadcrumbs';
 import { Container } from '@/components/layout/Container';
+import { EmptyStateCard, InlineStatusMessage } from '@/components/ui/StateBlocks';
 import { fetchProjects } from '@/app/_lib/public-api-server';
 import { getDictionary, normalizeLocale } from '@/app/_lib/i18n/get-dictionary';
 import { makePageMetadata } from '@/app/_lib/i18n/metadata';
@@ -34,9 +35,11 @@ export default async function DevelopersIndexPage({ params }: { params: Promise<
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://amppattaya.com';
 
   let projects: Awaited<ReturnType<typeof fetchProjects>>;
+  let projectsFetchOk = true;
   try {
     projects = await fetchProjects({ limit: 200 });
   } catch {
+    projectsFetchOk = false;
     projects = [];
   }
 
@@ -91,6 +94,15 @@ export default async function DevelopersIndexPage({ params }: { params: Promise<
             </p>
           </div>
 
+          {!projectsFetchOk ? (
+            <InlineStatusMessage
+              tone="error"
+              message={locale === 'th'
+                ? 'โหลดข้อมูลโครงการไม่สำเร็จ จึงยังสร้างรายชื่อ developer ไม่ได้'
+                : 'Unable to load projects, so developer placeholders are temporarily unavailable.'}
+            />
+          ) : null}
+
           {ids.length ? (
             <div className="grid grid-3">
               {ids.map((id) => (
@@ -101,22 +113,22 @@ export default async function DevelopersIndexPage({ params }: { params: Promise<
               ))}
             </div>
           ) : (
-            <div className="card">
-              <div className="card-title">{locale === 'th' ? 'ยังไม่มีข้อมูล Developer' : 'No developer data yet'}</div>
-              <div className="card-subtitle">
-                {locale === 'th'
-                  ? 'สามารถดูโครงการทั้งหมดก่อน หรือคุยกับที่ปรึกษาเพื่อรับ shortlist'
-                  : 'Browse projects first or request a shortlist from an advisor.'}
-              </div>
-              <div className="cta-row">
-                <a className="btn btn-cta" href={withLocale(locale, '/projects')}>
-                  {dict.nav.projects}
-                </a>
-                <a className="btn btn-secondary" href={withLocale(locale, '/contact')}>
-                  {dict.cta.speakToAdvisor}
-                </a>
-              </div>
-            </div>
+            <EmptyStateCard
+              title={locale === 'th' ? 'ยังไม่มีข้อมูล Developer' : 'No developer data yet'}
+              body={locale === 'th'
+                ? 'สามารถดูโครงการทั้งหมดก่อน หรือคุยกับที่ปรึกษาเพื่อรับ shortlist'
+                : 'Browse projects first or request a shortlist from an advisor.'}
+              action={(
+                <div className="cta-row">
+                  <a className="btn btn-cta" href={withLocale(locale, '/projects')}>
+                    {dict.nav.projects}
+                  </a>
+                  <a className="btn btn-secondary" href={withLocale(locale, '/contact')}>
+                    {dict.cta.speakToAdvisor}
+                  </a>
+                </div>
+              )}
+            />
           )}
         </Container>
       </section>

@@ -5,13 +5,15 @@ export function Container({
   variant,
 }: {
   children: ReactNode;
-  variant?: 'default' | 'wide' | 'full';
+  variant?: 'default' | 'wide' | 'full' | 'readable';
 }) {
   const cls =
     variant === 'wide'
       ? 'container--wide'
       : variant === 'full'
         ? 'container--full'
+        : variant === 'readable'
+          ? 'container--readable'
         : 'container';
   return <div className={cls}>{children}</div>;
 }

@@ -1,9 +1,10 @@
 import Link from 'next/link';
-import Image from 'next/image';
 
-import { resolveImageUrl } from '@/app/_lib/public-api-shared';
+import { pickPrimaryLocalMedia } from '@/app/_lib/local-media';
 import { withLocale } from '@/app/_lib/i18n/routing';
 import type { ProjectItem } from '@/app/_lib/public-api-server';
+import { LocalMediaImage } from '@/components/media/LocalMediaImage';
+import { EmptyStateCard } from '@/components/ui/StateBlocks';
 import condoViewImage from '@/public/images/condo-view.png';
 import projectOverviewImage from '@/public/images/project-overview.png';
 import propertyExteriorImage from '@/public/images/property-exterior.png';
@@ -26,16 +27,6 @@ const PROJECT_FALLBACK_IMAGES = [
   propertyInteriorImage,
   villaGardenImage,
 ];
-
-function looksPlaceholderLike(url: string | null): boolean {
-  if (!url) return true;
-  const normalized = url.toLowerCase();
-  return (
-    normalized.includes('placeholder') ||
-    normalized.includes('default-image') ||
-    normalized.endsWith('.svg')
-  );
-}
 
 export function FeaturedProjects({
   projects,
@@ -70,10 +61,11 @@ export function FeaturedProjects({
           <h2 className="section-title">{title}</h2>
           <p className="section-subtitle">{subtitle}</p>
         </div>
-        <div className="premium-empty-state" role="status" aria-live="polite">
-          <h3>{locale === 'th' ? 'ยังไม่มีโครงการแนะนำในขณะนี้' : 'No featured projects available right now'}</h3>
-          <p>{locale === 'th' ? 'กำลังเตรียมรายการคัดสรรสำหรับหน้าแรก' : 'We are curating the next set of premium projects for this section.'}</p>
-        </div>
+        <EmptyStateCard
+          className="ui-empty"
+          title={locale === 'th' ? 'ยังไม่มีโครงการแนะนำในขณะนี้' : 'No featured projects available right now'}
+          body={locale === 'th' ? 'กำลังเตรียมรายการคัดสรรสำหรับหน้าแรก' : 'We are curating the next set of premium projects for this section.'}
+        />
       </div>
     );
   }
@@ -153,8 +145,16 @@ export function FeaturedProjects({
 
       <div className="project-grid-premium">
         {projects.map((p, index) => {
-          const img = resolveImageUrl(p.cover_image_url ?? null);
-          const useFallbackMedia = looksPlaceholderLike(img);
+          const dynamicProject = p as ProjectItem & {
+            hero_image_url?: string | null;
+            images?: Array<string | null | undefined> | null;
+          };
+          const media = {
+            cover_image_url: p.cover_image_url ?? null,
+            hero_image_url: dynamicProject.hero_image_url ?? null,
+            images: dynamicProject.images ?? null,
+          };
+          const hasLocalMedia = Boolean(pickPrimaryLocalMedia(media));
           const price = p.starting_price ? formatPrice(Number(p.starting_price)) : null;
           const badges = extractBadgeSet(p);
           const facts = extractQuickFacts(p);
@@ -165,37 +165,17 @@ export function FeaturedProjects({
             <Link
               key={p.id}
               href={withLocale(locale, `/projects/${encodeURIComponent(p.slug)}`)}
-              className="premium-project-card reveal"
+              className="premium-project-card reveal card-interactive"
             >
               <div className="card-image premium-project-card__media">
-                {!useFallbackMedia && img ? (
-                  <Image
-                    src={img}
-                    alt={p.name}
-                    fill
-                    sizes="(min-width: 2560px) 18vw, (min-width: 1920px) 22vw, (min-width: 1024px) 30vw, (min-width: 768px) 48vw, 100vw"
-                    className="object-cover"
-                    loading="lazy"
-                    decoding="async"
-                  />
-                ) : (
-                  <>
-                    <Image
-                      src={fallbackImage}
-                      alt={locale === 'th' ? `ภาพประกอบโครงการ ${p.name}` : `Project preview for ${p.name}`}
-                      fill
-                      sizes="(min-width: 2560px) 18vw, (min-width: 1920px) 22vw, (min-width: 1024px) 30vw, (min-width: 768px) 48vw, 100vw"
-                      className="object-cover premium-project-card__fallback-image"
-                      loading="lazy"
-                      decoding="async"
-                    />
-                    <div className="premium-project-card__fallback">
-                      <span className="premium-project-card__fallback-label">
-                        {locale === 'th' ? 'ภาพตัวอย่าง — รอรูปจริง' : 'Preview image — real photo pending'}
-                      </span>
-                    </div>
-                  </>
-                )}
+                <LocalMediaImage
+                  media={media}
+                  alt={p.name}
+                  altFallback={locale === 'th' ? `ภาพประกอบโครงการ ${p.name}` : `Project preview for ${p.name}`}
+                  className="card-image premium-project-card__media"
+                  imageClassName={`absolute inset-0 h-full w-full object-cover ${hasLocalMedia ? '' : 'premium-project-card__fallback-image'}`}
+                  fallbackSrc={fallbackImage.src}
+                />
                 <div className="premium-project-card__media-scrim" aria-hidden="true" />
                 {badges.length > 0 ? (
                   <div className="premium-project-card__badges" aria-label={locale === 'th' ? 'ป้ายกำกับโครงการ' : 'Project badges'}>
@@ -206,7 +186,11 @@ export function FeaturedProjects({
                   </div>
                 ) : null}
                 <div className="premium-project-card__media-meta" aria-hidden="true">
-                  <span>{locale === 'th' ? 'AMP Curated' : 'AMP Curated'}</span>
+                  <span>
+                    {hasLocalMedia
+                      ? (locale === 'th' ? 'AMP Curated' : 'AMP Curated')
+                      : (locale === 'th' ? 'ภาพตัวอย่าง — รอรูปจริง' : 'Preview image — real photo pending')}
+                  </span>
                 </div>
               </div>
               <div className="card-content premium-project-card__body">
