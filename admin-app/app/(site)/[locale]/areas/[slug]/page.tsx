@@ -4,25 +4,22 @@ import Link from 'next/link';
 import { Container } from '@/components/layout/Container';
 import { getDictionary, normalizeLocale } from '@/app/_lib/i18n/get-dictionary';
 import { withLocale, ogLocale } from '@/app/_lib/i18n/routing';
-import { fetchAreaStatisticsBySlug } from '@/app/_lib/public-api-server';
+import { fetchAreaBySlug, fetchAreaStatisticsBySlug, fetchAreas } from '@/app/_lib/public-api-server';
  
 
 export const revalidate = 300;
 
-const AREA_SLUGS = ['jomtien', 'pratumnak', 'wongamat', 'central'] as const;
-
-type AreaSlug = (typeof AREA_SLUGS)[number];
-
-function isAreaSlug(slug: string): slug is AreaSlug {
-  return (AREA_SLUGS as readonly string[]).includes(slug);
-}
-
 /** Pre-render all known area pages at build time. */
-export function generateStaticParams() {
-  return AREA_SLUGS.flatMap((slug) => [
-    { locale: 'en', slug },
-    { locale: 'th', slug },
-  ]);
+export async function generateStaticParams() {
+  try {
+    const areas = await fetchAreas();
+    return areas.flatMap((area) => [
+      { locale: 'en', slug: area.slug },
+      { locale: 'th', slug: area.slug },
+    ]);
+  } catch {
+    return [];
+  }
 }
 
 export async function generateMetadata({
@@ -34,10 +31,16 @@ export async function generateMetadata({
   const locale = normalizeLocale(rawLocale);
   const dict = getDictionary(locale);
   const canonical = `/${locale}/areas/${encodeURIComponent(slug)}`;
+  let areaTitle: string | null = null;
 
-  const titleBase = isAreaSlug(slug)
-    ? dict.area.areas[slug].title
-    : dict.area.fallbackTitle;
+  try {
+    const detail = await fetchAreaBySlug(slug);
+    areaTitle = detail?.area.name ?? null;
+  } catch {
+    areaTitle = null;
+  }
+
+  const titleBase = areaTitle || dict.area.fallbackTitle;
 
   return {
     title: `${titleBase} | ${dict.brand.name}`,
@@ -68,8 +71,13 @@ export default async function AreaPage({
   const { locale: rawLocale, slug } = await params;
   const locale = normalizeLocale(rawLocale);
   const dict = getDictionary(locale);
-
-  if (!isAreaSlug(slug)) {
+  let areaDetail: Awaited<ReturnType<typeof fetchAreaBySlug>>;
+  try {
+    areaDetail = await fetchAreaBySlug(slug);
+  } catch {
+    areaDetail = null;
+  }
+  if (!areaDetail) {
     return (
       <main className="section" id="main-content">
         <Container>
@@ -85,7 +93,8 @@ export default async function AreaPage({
     );
   }
 
-  const areaCopy = dict.area.areas[slug];
+  const content = (areaDetail.content ?? {}) as Record<string, unknown>;
+  const localized = (content[locale] ?? {}) as Record<string, unknown>;
   let stats: Awaited<ReturnType<typeof fetchAreaStatisticsBySlug>>;
   try {
     stats = await fetchAreaStatisticsBySlug(slug);
@@ -93,8 +102,13 @@ export default async function AreaPage({
     stats = null;
   }
 
-  const title = areaCopy.title;
-  const buyerTypes = areaCopy.buyerTypes;
+  const title =
+    (typeof localized.title === 'string' && localized.title.trim())
+      ? localized.title.trim()
+      : areaDetail.area.name;
+  const buyerTypes = Array.isArray(localized.buyer_types)
+    ? localized.buyer_types.map((item) => String(item)).filter(Boolean)
+    : [];
 
   const hasStats = Boolean(stats?.statistics);
 
@@ -121,7 +135,7 @@ export default async function AreaPage({
               </p>
               <ul className="bullet-list mt-3">
                 <li>{dict.area.avgPrice}: {stats?.statistics?.avg_price ?? '—'}</li>
-                <li>{dict.area.asOf}: {stats?.statistics?.as_of ?? '—'}</li>
+                <li>{dict.area.asOf}: {stats?.statistics?.as_of_date ?? stats?.statistics?.as_of ?? '—'}</li>
               </ul>
             </div>
 
@@ -144,9 +158,11 @@ export default async function AreaPage({
                 {dict.area.suitableBuyerDesc}
               </p>
               <ul className="bullet-list mt-3">
-                {buyerTypes.map((b) => (
-                  <li key={b}>{b}</li>
-                ))}
+                {buyerTypes.length
+                  ? buyerTypes.map((b) => (
+                    <li key={b}>{b}</li>
+                  ))
+                  : <li>{locale === 'th' ? 'TODO: เพิ่ม buyer types ใน areas.content' : 'TODO: add buyer types to areas.content'}</li>}
               </ul>
             </div>
 

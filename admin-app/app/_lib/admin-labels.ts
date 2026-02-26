@@ -9,6 +9,8 @@ export const ADMIN_LABELS = {
   brand: 'AMP Admin',
   nav: {
     analytics: 'Analytics',
+    areas: 'Areas',
+    developers: 'Developers',
     inquiries: 'Inquiries',
     leads: 'Leads',
     media: 'Media Library',
