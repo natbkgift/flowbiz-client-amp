@@ -634,6 +634,7 @@ def main() -> int:
                     str(_PROJECT_ROOT / "scripts" / "mirror_project_cover_images.py"),
                     "--input-dir",
                     str(input_dir),
+                    "--skip-local-file-check",
                     "--write-report",
                 ],
                 check=False,

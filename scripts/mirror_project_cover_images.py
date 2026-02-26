@@ -291,6 +291,7 @@ def mirror_project_covers(
     timeout: int,
     force: bool,
     origin_for_local_media: str,
+    skip_local_file_check: bool,
 ) -> dict[str, Any]:
     projects_path = import_dir / "projects.json"
     sources_path = import_dir / "project_cover_sources.json"
@@ -319,7 +320,11 @@ def mirror_project_covers(
         if _is_local_media_path(cover, media_prefix):
             local_rel = str(cover).lstrip("/")
             local_abs = public_root / local_rel
-            exists = local_abs.exists() and local_abs.is_file() and local_abs.stat().st_size > 0
+            exists = (
+                True
+                if skip_local_file_check
+                else (local_abs.exists() and local_abs.is_file() and local_abs.stat().st_size > 0)
+            )
             is_in_project_covers = str(cover).startswith(prefix + "/" + media_subdir.strip("/") + "/")
             preferred_external_from_source = None
             if source_row is not None and bool(source_row.get("approved_for_seed")):
@@ -342,6 +347,7 @@ def mirror_project_covers(
                         "source_url": cover,
                         "local_url": cover,
                         "file_exists": True,
+                        "file_check_skipped": bool(skip_local_file_check),
                     }
                 )
                 continue
@@ -492,6 +498,7 @@ def mirror_project_covers(
                     "source_url": cover,
                     "local_url": cover,
                     "file_exists": bool(exists),
+                    "file_check_skipped": bool(skip_local_file_check),
                 }
             )
             continue
@@ -623,6 +630,11 @@ def main() -> int:
         help="Origin used to fetch existing /media/... covers when local file is unavailable (default: %(default)s)",
     )
     parser.add_argument(
+        "--skip-local-file-check",
+        action="store_true",
+        help="Trust existing /media/... paths without verifying files under --public-root (useful in API containers that do not mount frontend public assets).",
+    )
+    parser.add_argument(
         "--write-report",
         nargs="?",
         const=str(DEFAULT_REPORT_PATH),
@@ -638,6 +650,7 @@ def main() -> int:
         timeout=max(5, int(args.timeout)),
         force=bool(args.force),
         origin_for_local_media=str(args.origin_for_local_media or ""),
+        skip_local_file_check=bool(args.skip_local_file_check),
     )
 
     print(json.dumps(report, ensure_ascii=False, indent=2))
