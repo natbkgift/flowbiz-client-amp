@@ -158,6 +158,14 @@ const nextConfig = {
         headers: [{ key: 'X-Robots-Tag', value: 'noindex, nofollow' }],
       },
       {
+        source: '/properties-admin',
+        headers: [{ key: 'X-Robots-Tag', value: 'noindex, nofollow' }],
+      },
+      {
+        source: '/properties-admin/:path*',
+        headers: [{ key: 'X-Robots-Tag', value: 'noindex, nofollow' }],
+      },
+      {
         source: '/media',
         headers: [{ key: 'X-Robots-Tag', value: 'noindex, nofollow' }],
       },

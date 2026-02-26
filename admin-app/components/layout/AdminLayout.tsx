@@ -16,6 +16,7 @@ type NavItem = {
 const NAV_ITEMS: NavItem[] = [
   { href: '/analytics', label: ADMIN_LABELS.nav.analytics, icon: '📊' },
   { href: '/projects-admin', label: ADMIN_LABELS.nav.projects, icon: '🏗️' },
+  { href: '/properties-admin', label: ADMIN_LABELS.nav.properties, icon: '🏠' },
   { href: '/media', label: ADMIN_LABELS.nav.media, icon: '🖼️' },
   { href: '/inquiries', label: ADMIN_LABELS.nav.inquiries, icon: '📨' },
   { href: '/leads', label: ADMIN_LABELS.nav.leads, icon: '👤' },

@@ -3,13 +3,14 @@ import hashlib
 import io
 import threading
 import time
+from decimal import Decimal
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, Query, UploadFile, status
 from fastapi.params import File
 from fastapi.responses import JSONResponse
-from pydantic import BaseModel
-from sqlalchemy import func, select, text
+from pydantic import BaseModel, Field
+from sqlalchemy import desc, func, or_, select, text
 from sqlalchemy.dialects.postgresql import insert as pg_insert
 from sqlalchemy.dialects.sqlite import insert as sqlite_insert
 from sqlalchemy.exc import IntegrityError
@@ -17,13 +18,33 @@ from sqlalchemy.orm import Session
 
 from apps.api.dependencies.auth import get_current_admin
 from packages.core.database import get_db
-from packages.core.models import CompanyInfo, Property, PropertyImportAudit, User
+from packages.core.models import (
+    Area,
+    CompanyInfo,
+    Developer,
+    MediaAsset,
+    Project,
+    Property,
+    PropertyImportAudit,
+    User,
+)
+from packages.core.project_media_governance import evaluate_project_media_governance
+from packages.core.property_type import validate_property_fields
+from packages.core.schemas.media_library import MediaAssetItem
 from packages.core.schemas.property_api import (
     CompanyInfoCreate,
     CompanyInfoItem,
     CompanyInfoUpdate,
+    PaginationMeta,
+    PropertyAdminListResponse,
+    PropertyBulkStatusRequest,
+    PropertyBulkStatusResponse,
     PropertyCreate,
     PropertyDetail,
+    PropertyListItem,
+    PropertyListResponse,
+    PropertyPublishResponse,
+    PropertyStatus,
     PropertyUpdate,
 )
 from packages.core.schemas.property_import import PropertyImportResult, PropertyImportRow
@@ -126,6 +147,195 @@ class PropertyMediaSyncRequest(BaseModel):
 class PropertyMediaSyncResponse(BaseModel):
     updated: int
     missing: int
+    warnings: int = 0
+
+
+class PropertyMediaGovernanceWarning(BaseModel):
+    level: str
+    path: str
+    detail: str
+
+
+def _coerce_string_list(value: list[str] | None) -> list[str]:
+    if not value:
+        return []
+    out: list[str] = []
+    for raw in value:
+        item = str(raw).strip()
+        if not item:
+            continue
+        if item in out:
+            continue
+        out.append(item)
+    return out
+
+
+def _normalize_tags(value: list[str] | None) -> list[str] | None:
+    values = _coerce_string_list(value)
+    if not values:
+        return None
+    return values
+
+
+def _extract_tags(features: dict | None) -> list[str] | None:
+    if not isinstance(features, dict):
+        return None
+    tags = features.get("tags")
+    if not isinstance(tags, list):
+        return None
+    return _normalize_tags([str(item) for item in tags])
+
+
+def _extract_view_label(features: dict | None) -> str | None:
+    if not isinstance(features, dict):
+        return None
+    value = features.get("view_label")
+    if value is None:
+        return None
+    text_value = str(value).strip()
+    return text_value or None
+
+
+def _is_local_media_path(value: str) -> bool:
+    return value.startswith("/media/") and "://" not in value
+
+
+def _validate_local_media_path(value: str, *, field_name: str) -> None:
+    if _is_local_media_path(value):
+        return
+    raise HTTPException(
+        status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
+        detail=f"{field_name} must be local /media/ path",
+    )
+
+
+def _validate_relations_exist(
+    db: Session,
+    *,
+    project_id: UUID | None,
+    area_id: UUID | None,
+    developer_id: UUID | None,
+) -> None:
+    if project_id is not None and db.get(Project, project_id) is None:
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_CONTENT, detail="project_id not found")
+    if area_id is not None and db.get(Area, area_id) is None:
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_CONTENT, detail="area_id not found")
+    if developer_id is not None and db.get(Developer, developer_id) is None:
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_CONTENT, detail="developer_id not found")
+
+
+def _collect_property_media_paths(
+    *,
+    cover_image: str | None,
+    cover_image_url: str | None,
+    local_images: list[str] | None,
+    images: list[str] | None,
+) -> list[str]:
+    candidates: list[str] = []
+    for path in [cover_image, cover_image_url, *(_coerce_string_list(local_images)), *(_coerce_string_list(images))]:
+        item = str(path or "").strip()
+        if not item:
+            continue
+        if item in candidates:
+            continue
+        candidates.append(item)
+    return candidates
+
+
+def _media_governance_warnings(
+    db: Session,
+    *,
+    cover_image: str | None,
+    cover_image_url: str | None,
+    local_images: list[str] | None,
+    images: list[str] | None,
+) -> list[PropertyMediaGovernanceWarning]:
+    paths = _collect_property_media_paths(
+        cover_image=cover_image,
+        cover_image_url=cover_image_url,
+        local_images=local_images,
+        images=images,
+    )
+    paths = [path for path in paths if _is_local_media_path(path)]
+    if not paths:
+        return []
+    governance = evaluate_project_media_governance(db, paths=paths)
+    return [PropertyMediaGovernanceWarning(**item.to_dict()) for item in governance.warnings]
+
+
+def _validate_property_media_governance(
+    db: Session,
+    *,
+    cover_image: str | None,
+    cover_image_url: str | None,
+    local_images: list[str] | None,
+    images: list[str] | None,
+) -> list[PropertyMediaGovernanceWarning]:
+    local_images_clean = _coerce_string_list(local_images)
+    images_clean = [path for path in _coerce_string_list(images) if _is_local_media_path(path)]
+
+    if cover_image is not None:
+        cover_image = cover_image.strip() or None
+    if cover_image_url is not None:
+        cover_image_url = cover_image_url.strip() or None
+
+    if cover_image is not None:
+        _validate_local_media_path(cover_image, field_name="cover_image")
+    if cover_image_url is not None:
+        _validate_local_media_path(cover_image_url, field_name="cover_image_url")
+    for item in local_images_clean:
+        _validate_local_media_path(item, field_name="local_images")
+
+    governance = evaluate_project_media_governance(
+        db,
+        paths=_collect_property_media_paths(
+            cover_image=cover_image,
+            cover_image_url=cover_image_url,
+            local_images=local_images_clean,
+            images=images_clean,
+        ),
+    )
+    if governance.errors:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
+            detail={
+                "code": "property_media_governance_blocked",
+                "errors": [item.to_dict() for item in governance.errors],
+            },
+        )
+
+    return [PropertyMediaGovernanceWarning(**item.to_dict()) for item in governance.warnings]
+
+
+def _serialize_property_detail(
+    db: Session,
+    prop: Property,
+    *,
+    warnings_override: list[PropertyMediaGovernanceWarning] | None = None,
+) -> PropertyDetail:
+    payload = PropertyDetail.model_validate(prop).model_dump()
+    payload["cover_image"] = prop.cover_image or prop.cover_image_url
+    payload["cover_image_url"] = prop.cover_image_url or prop.cover_image
+    payload["local_images"] = _coerce_string_list(prop.local_images)
+    payload["images"] = _coerce_string_list(prop.images)
+    payload["size_sqm"] = prop.size_sqm or prop.size
+    payload["view_label"] = _extract_view_label(prop.features)
+    payload["tags"] = _extract_tags(prop.features)
+    payload["media_warnings"] = [
+        warning.model_dump()
+        for warning in (
+            warnings_override
+            if warnings_override is not None
+            else _media_governance_warnings(
+                db,
+                cover_image=prop.cover_image,
+                cover_image_url=prop.cover_image_url,
+                local_images=prop.local_images,
+                images=prop.images,
+            )
+        )
+    ]
+    return PropertyDetail.model_validate(payload)
 
 
 @router.get("/properties/imports", response_model=PropertyImportAuditListResponse)
@@ -519,6 +729,99 @@ def import_properties(
         _release_import_lock(db, lock_mode)
 
 
+@router.get("/properties", response_model=PropertyAdminListResponse)
+def admin_list_properties(
+    page: int = Query(1, ge=1),
+    limit: int = Query(20, ge=1, le=200),
+    search: str | None = Query(default=None),
+    status_filter: PropertyStatus | None = Query(default=None, alias="status"),
+    listing_type: str | None = Query(default=None, alias="type"),
+    project_id: UUID | None = Query(default=None),
+    area_id: UUID | None = Query(default=None),
+    db: Session = Depends(get_db),
+    _admin: User = Depends(get_current_admin),
+) -> PropertyAdminListResponse:
+    query = select(Property)
+
+    if search:
+        pattern = f"%{search.strip()}%"
+        query = query.where(
+            or_(
+                Property.title.ilike(pattern),
+                Property.slug.ilike(pattern),
+                Property.source_id.ilike(pattern),
+                Property.address.ilike(pattern),
+            )
+        )
+    if status_filter is not None:
+        query = query.where(Property.status == status_filter.value)
+    if listing_type:
+        query = query.where(Property.type == listing_type)
+    if project_id is not None:
+        query = query.where(Property.project_id == project_id)
+    if area_id is not None:
+        query = query.where(Property.area_id == area_id)
+
+    total = db.scalar(select(func.count()).select_from(query.subquery())) or 0
+    rows = db.scalars(
+        query.order_by(desc(Property.updated_at), desc(Property.id))
+        .offset((page - 1) * limit)
+        .limit(limit)
+    ).all()
+
+    return PropertyAdminListResponse(
+        data=[_serialize_property_detail(db, row) for row in rows],
+        meta=PaginationMeta(page=page, limit=limit, total=int(total)),
+    )
+
+
+@router.get("/properties/{property_id}", response_model=PropertyDetail)
+def admin_get_property(
+    property_id: UUID,
+    db: Session = Depends(get_db),
+    _admin: User = Depends(get_current_admin),
+) -> PropertyDetail:
+    prop = db.get(Property, property_id)
+    if prop is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Property not found")
+    return _serialize_property_detail(db, prop)
+
+
+@router.get("/properties/by/{identifier}", response_model=PropertyDetail)
+def admin_get_property_by_identifier(
+    identifier: str,
+    db: Session = Depends(get_db),
+    _admin: User = Depends(get_current_admin),
+) -> PropertyDetail:
+    prop = db.scalar(
+        select(Property).where(or_(Property.source_id == identifier, Property.slug == identifier))
+    )
+    if prop is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Property not found")
+    return _serialize_property_detail(db, prop)
+
+
+@router.get("/properties/media-candidates", response_model=list[MediaAssetItem])
+def list_property_media_candidates(
+    search: str | None = Query(default=None),
+    limit: int = Query(default=60, ge=1, le=200),
+    db: Session = Depends(get_db),
+    _admin: User = Depends(get_current_admin),
+) -> list[MediaAssetItem]:
+    query = select(MediaAsset).where(MediaAsset.kind == "image", MediaAsset.status == "active")
+    if search:
+        pattern = f"%{search.strip()}%"
+        query = query.where(
+            or_(
+                MediaAsset.storage_path.ilike(pattern),
+                MediaAsset.title.ilike(pattern),
+                MediaAsset.source_domain.ilike(pattern),
+            )
+        )
+    rows = db.scalars(query.order_by(desc(MediaAsset.created_at), desc(MediaAsset.id)).limit(limit)).all()
+    return [MediaAssetItem.model_validate(row) for row in rows]
+
+
 @router.post("/properties/media", response_model=PropertyMediaSyncResponse)
 def sync_property_media(
     payload: PropertyMediaSyncRequest,
@@ -527,43 +830,36 @@ def sync_property_media(
 ) -> PropertyMediaSyncResponse:
     updated = 0
     missing = 0
+    warnings = 0
 
     for item in payload.items:
-        # Hard rule: no external hotlink URLs.
-        if any(("://" in p) for p in item.local_images):
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="local_images must be local paths (no http/https)",
-            )
-        if any((not p.startswith("/media/")) for p in item.local_images):
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="local_images must start with /media/",
-            )
-        if item.cover_image and (
-            "://" in item.cover_image or not item.cover_image.startswith("/media/")
-        ):
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="cover_image must be a local /media/ path",
-            )
+        media_warnings = _validate_property_media_governance(
+            db,
+            cover_image=item.cover_image,
+            cover_image_url=item.cover_image,
+            local_images=item.local_images,
+            images=item.local_images,
+        )
+        warnings += len(media_warnings)
 
         prop = db.scalar(select(Property).where(Property.source_id == item.source_id))
         if prop is None:
             missing += 1
             continue
 
-        prop.local_images = item.local_images
-        prop.cover_image = item.cover_image or (item.local_images[0] if item.local_images else None)
+        cleaned_local_images = _coerce_string_list(item.local_images)
+        prop.local_images = cleaned_local_images
+        prop.cover_image = item.cover_image or (cleaned_local_images[0] if cleaned_local_images else None)
+        prop.cover_image_url = prop.cover_image
 
         # Backward compatibility for existing clients.
-        prop.images = item.local_images
+        prop.images = cleaned_local_images
 
         db.add(prop)
         updated += 1
 
     db.commit()
-    return PropertyMediaSyncResponse(updated=updated, missing=missing)
+    return PropertyMediaSyncResponse(updated=updated, missing=missing, warnings=warnings)
 
 
 @router.post("/properties", response_model=PropertyDetail, status_code=status.HTTP_201_CREATED)
@@ -572,11 +868,62 @@ def create_property(
     db: Session = Depends(get_db),
     _admin: User = Depends(get_current_admin),
 ) -> PropertyDetail:
-    prop = Property(**payload.model_dump())
+    _validate_relations_exist(
+        db,
+        project_id=payload.project_id,
+        area_id=payload.area_id,
+        developer_id=payload.developer_id,
+    )
+
+    warnings = _validate_property_media_governance(
+        db,
+        cover_image=payload.cover_image,
+        cover_image_url=payload.cover_image_url,
+        local_images=payload.local_images,
+        images=payload.images,
+    )
+
+    tags = _normalize_tags(payload.tags)
+    features = dict(payload.features or {})
+    if tags is not None:
+        features["tags"] = tags
+    if payload.view_label is not None:
+        features["view_label"] = payload.view_label
+
+    prop = Property(
+        source_id=payload.source_id,
+        slug=payload.slug,
+        title=payload.title,
+        description=payload.description,
+        type=payload.type.value if hasattr(payload.type, "value") else str(payload.type),
+        property_type=payload.property_type,
+        status=payload.status.value if hasattr(payload.status, "value") else str(payload.status),
+        price=payload.price,
+        currency=payload.currency,
+        price_period=payload.price_period,
+        bedrooms=payload.bedrooms,
+        bathrooms=payload.bathrooms,
+        size=payload.size,
+        size_sqm=payload.size_sqm or payload.size,
+        floor=payload.floor,
+        floors=payload.floors,
+        furnishing=payload.furnishing,
+        view=payload.view,
+        address=payload.address,
+        city=payload.city,
+        area_id=payload.area_id,
+        project_id=payload.project_id,
+        developer_id=payload.developer_id,
+        cover_image=payload.cover_image,
+        cover_image_url=payload.cover_image_url or payload.cover_image,
+        local_images=_coerce_string_list(payload.local_images),
+        images=[path for path in _coerce_string_list(payload.images) if _is_local_media_path(path)],
+        features=features or None,
+    )
     db.add(prop)
     _commit_or_conflict(db, detail="A property with this slug already exists.")
     db.refresh(prop)
-    return PropertyDetail.model_validate(prop)
+    return _serialize_property_detail(db, prop, warnings_override=warnings)
 
 
 @router.patch("/properties/{property_id}", response_model=PropertyDetail)
@@ -590,13 +937,162 @@ def update_property(
     if prop is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Property not found")
 
-    for field, value in payload.model_dump(exclude_unset=True).items():
+    data = payload.model_dump(exclude_unset=True)
+
+    _validate_relations_exist(
+        db,
+        project_id=data.get("project_id", prop.project_id),
+        area_id=data.get("area_id", prop.area_id),
+        developer_id=data.get("developer_id", prop.developer_id),
+    )
+
+    warnings = _validate_property_media_governance(
+        db,
+        cover_image=data.get("cover_image", prop.cover_image),
+        cover_image_url=data.get("cover_image_url", prop.cover_image_url),
+        local_images=data.get("local_images", prop.local_images),
+        images=data.get("images", prop.images),
+    )
+
+    if "tags" in data:
+        features = dict(prop.features or {})
+        tags = _normalize_tags(data.get("tags"))
+        if tags is None:
+            features.pop("tags", None)
+        else:
+            features["tags"] = tags
+        prop.features = features or None
+
+    if "view_label" in data:
+        features = dict(prop.features or {})
+        view_label = data.get("view_label")
+        if view_label is None:
+            features.pop("view_label", None)
+        else:
+            features["view_label"] = str(view_label).strip()
+        prop.features = features or None
+
+    for field, value in data.items():
+        if field in {"tags", "view_label"}:
+            continue
+        if field == "images" and value is not None:
+            value = [path for path in _coerce_string_list(value) if _is_local_media_path(path)]
+        if field == "local_images" and value is not None:
+            value = _coerce_string_list(value)
+        if field == "cover_image_url" and value is None and prop.cover_image is not None:
+            value = prop.cover_image
         setattr(prop, field, value)
+
+    if prop.size_sqm is None and prop.size is not None:
+        prop.size_sqm = prop.size
 
     db.add(prop)
     _commit_or_conflict(db, detail="A property with this slug already exists.")
     db.refresh(prop)
-    return PropertyDetail.model_validate(prop)
+    return _serialize_property_detail(db, prop, warnings_override=warnings)
+
+
+@router.post("/properties/{property_id}/publish", response_model=PropertyPublishResponse)
+def publish_property(
+    property_id: UUID,
+    db: Session = Depends(get_db),
+    _admin: User = Depends(get_current_admin),
+) -> PropertyPublishResponse:
+    prop = db.get(Property, property_id)
+    if prop is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Property not found")
+
+    warnings = _validate_property_media_governance(
+        db,
+        cover_image=prop.cover_image,
+        cover_image_url=prop.cover_image_url,
+        local_images=prop.local_images,
+        images=prop.images,
+    )
+
+    validation_errors = validate_property_fields(
+        property_type=prop.property_type,
+        transaction_type=prop.type,
+        price=float(prop.price) if isinstance(prop.price, Decimal) else prop.price,
+        price_period=prop.price_period,
+        bedrooms=prop.bedrooms,
+        bathrooms=prop.bathrooms,
+        size_sqm=float(prop.size_sqm or prop.size) if (prop.size_sqm or prop.size) else None,
+        features=prop.features,
+    )
+    if validation_errors:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
+            detail={"code": "property_structured_validation_failed", "errors": validation_errors},
+        )
+
+    if prop.size_sqm is None and prop.size is not None:
+        prop.size_sqm = prop.size
+
+    prop.status = PropertyStatus.ACTIVE.value
+    db.add(prop)
+    db.commit()
+    db.refresh(prop)
+
+    return PropertyPublishResponse(
+        property=_serialize_property_detail(db, prop, warnings_override=warnings),
+        published=True,
+    )
+
+
+@router.post("/properties/{property_id}/unpublish", response_model=PropertyDetail)
+def unpublish_property(
+    property_id: UUID,
+    db: Session = Depends(get_db),
+    _admin: User = Depends(get_current_admin),
+) -> PropertyDetail:
+    prop = db.get(Property, property_id)
+    if prop is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Property not found")
+
+    prop.status = PropertyStatus.INACTIVE.value
+    db.add(prop)
+    db.commit()
+    db.refresh(prop)
+    return _serialize_property_detail(db, prop)
+
+
+@router.post("/properties/bulk/status", response_model=PropertyBulkStatusResponse)
+def bulk_update_property_status(
+    payload: PropertyBulkStatusRequest,
+    db: Session = Depends(get_db),
+    _admin: User = Depends(get_current_admin),
+) -> PropertyBulkStatusResponse:
+    if not payload.property_ids:
+        return PropertyBulkStatusResponse(updated=0)
+
+    rows = db.scalars(select(Property).where(Property.id.in_(payload.property_ids))).all()
+    row_map = {row.id: row for row in rows}
+
+    if payload.status == PropertyStatus.ACTIVE:
+        for property_id in payload.property_ids:
+            row = row_map.get(property_id)
+            if row is None:
+                continue
+            _validate_property_media_governance(
+                db,
+                cover_image=row.cover_image,
+                cover_image_url=row.cover_image_url,
+                local_images=row.local_images,
+                images=row.images,
+            )
+
+    updated = 0
+    for property_id in payload.property_ids:
+        row = row_map.get(property_id)
+        if row is None:
+            continue
+        row.status = payload.status.value
+        db.add(row)
+        updated += 1
+
+    db.commit()
+    return PropertyBulkStatusResponse(updated=updated)
 
 
 @router.delete("/properties/{property_id}", status_code=status.HTTP_204_NO_CONTENT)

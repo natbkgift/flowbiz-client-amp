@@ -80,6 +80,7 @@ export function proxy(req: NextRequest) {
     pathname.startsWith('/inquiries') ||
     pathname.startsWith('/analytics') ||
     pathname.startsWith('/projects-admin') ||
+    pathname.startsWith('/properties-admin') ||
     pathname.startsWith('/media') ||
     pathname.startsWith('/public')
   ) {

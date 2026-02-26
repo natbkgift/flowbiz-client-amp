@@ -9,7 +9,7 @@ from enum import Enum
 from typing import Optional
 from uuid import UUID
 
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field
 
 
 class PaginationMeta(BaseModel):
@@ -27,6 +27,13 @@ class PropertyType(str, Enum):
 class PropertyStatus(str, Enum):
     ACTIVE = "active"
     INACTIVE = "inactive"
+    ARCHIVED = "archived"
+
+
+class MediaGovernanceMessage(BaseModel):
+    level: str
+    path: str
+    detail: str
 
 
 class PropertyListItem(BaseModel):
@@ -42,9 +49,20 @@ class PropertyListItem(BaseModel):
     images: list[str] | None = None
     local_images: list[str] | None = None
     cover_image: str | None = None
+    cover_image_url: str | None = None
     status: PropertyStatus
     slug: str | None = None
     project_id: UUID | None = None
+    area_id: UUID | None = None
+    developer_id: UUID | None = None
+    property_type: str | None = None
+    bedrooms: int | None = None
+    bathrooms: int | None = None
+    size: Decimal | None = None
+    size_sqm: Decimal | None = None
+    view: str | None = None
+    view_label: str | None = None
+    tags: list[str] | None = None
 
 
 class PropertyDetail(BaseModel):
@@ -72,6 +90,15 @@ class PropertyDetail(BaseModel):
     furnishing: str | None = None
     view: str | None = None
     floor: int | None = None
+    floors: int | None = None
+    area_id: UUID | None = None
+    developer_id: UUID | None = None
+    price_period: str | None = None
+    currency: str = "THB"
+    cover_image_url: str | None = None
+    view_label: str | None = None
+    tags: list[str] | None = None
+    media_warnings: list[MediaGovernanceMessage] = Field(default_factory=list)
     created_at: datetime
     updated_at: datetime
 
@@ -85,11 +112,28 @@ class PropertyCreate(BaseModel):
     bedrooms: int | None = None
     bathrooms: int | None = None
     size: Decimal | None = None
+    size_sqm: Decimal | None = None
+    floor: int | None = None
+    floors: int | None = None
+    furnishing: str | None = None
+    property_type: str = "condo"
+    view: str | None = None
+    view_label: str | None = None
     address: str
     city: str
     images: list[str] | None = None
+    local_images: list[str] | None = None
+    cover_image: str | None = None
+    cover_image_url: str | None = None
     status: PropertyStatus = PropertyStatus.ACTIVE
     slug: str | None = None
+    project_id: UUID | None = None
+    area_id: UUID | None = None
+    developer_id: UUID | None = None
+    features: dict | None = None
+    tags: list[str] | None = None
+    currency: str = "THB"
+    price_period: str | None = None
 
 
 class PropertyUpdate(BaseModel):
@@ -100,11 +144,47 @@ class PropertyUpdate(BaseModel):
     bedrooms: Optional[int | None] = None
     bathrooms: Optional[int | None] = None
     size: Optional[Decimal | None] = None
+    size_sqm: Optional[Decimal | None] = None
+    floor: Optional[int | None] = None
+    floors: Optional[int | None] = None
+    furnishing: Optional[str | None] = None
+    property_type: Optional[str | None] = None
+    view: Optional[str | None] = None
+    view_label: Optional[str | None] = None
     address: Optional[str] = None
     city: Optional[str] = None
     images: Optional[list[str] | None] = None
+    local_images: Optional[list[str] | None] = None
+    cover_image: Optional[str | None] = None
+    cover_image_url: Optional[str | None] = None
     status: Optional[PropertyStatus] = None
     slug: Optional[str | None] = None
+    project_id: Optional[UUID | None] = None
+    area_id: Optional[UUID | None] = None
+    developer_id: Optional[UUID | None] = None
+    features: Optional[dict | None] = None
+    tags: Optional[list[str] | None] = None
+    currency: Optional[str] = None
+    price_period: Optional[str | None] = None
+
+
+class PropertyAdminListResponse(BaseModel):
+    data: list[PropertyDetail]
+    meta: PaginationMeta
+
+
+class PropertyPublishResponse(BaseModel):
+    property: PropertyDetail
+    published: bool
+
+
+class PropertyBulkStatusRequest(BaseModel):
+    property_ids: list[UUID]
+    status: PropertyStatus
+
+
+class PropertyBulkStatusResponse(BaseModel):
+    updated: int
 
 
 class PropertyListResponse(BaseModel):

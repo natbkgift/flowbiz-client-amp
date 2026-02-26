@@ -13,6 +13,7 @@ export const ADMIN_LABELS = {
     leads: 'Leads',
     media: 'Media Library',
     projects: 'Projects',
+    properties: 'Properties',
   },
   logout: 'Logout',
   logoutAria: 'Log out of admin panel',

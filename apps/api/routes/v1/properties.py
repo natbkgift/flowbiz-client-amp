@@ -99,6 +99,33 @@ def _merge_images(*lists: list[str]) -> list[str]:
     return out
 
 
+def _extract_tags(features: object | None) -> list[str] | None:
+    if not isinstance(features, dict):
+        return None
+    raw = features.get("tags")
+    if not isinstance(raw, list):
+        return None
+    values: list[str] = []
+    for item in raw:
+        text = str(item).strip()
+        if not text:
+            continue
+        if text in values:
+            continue
+        values.append(text)
+    return values or None
+
+
+def _extract_view_label(features: object | None) -> str | None:
+    if not isinstance(features, dict):
+        return None
+    raw = features.get("view_label")
+    if raw is None:
+        return None
+    value = str(raw).strip()
+    return value or None
+
+
 @router.get("/properties", response_model=PropertyListResponse, include_in_schema=False)
 @router.get("/properties/", response_model=PropertyListResponse)
 def list_properties(
@@ -167,6 +194,10 @@ def list_properties(
         # Keep both fields populated for legacy/front-end compatibility.
         m.images = merged
         m.local_images = merged
+        m.cover_image_url = m.cover_image
+        m.tags = _extract_tags(getattr(item, "features", None))
+        m.view_label = _extract_view_label(getattr(item, "features", None))
+        m.size_sqm = getattr(item, "size_sqm", None) or getattr(item, "size", None)
         data.append(m)
 
     return PropertyListResponse(data=data, meta=PaginationMeta(page=page, limit=limit, total=total))
@@ -199,6 +230,10 @@ def get_property(
 
     m.images = merged
     m.local_images = merged
+    m.cover_image_url = m.cover_image
+    m.tags = _extract_tags(getattr(prop, "features", None))
+    m.view_label = _extract_view_label(getattr(prop, "features", None))
+    m.size_sqm = getattr(prop, "size_sqm", None) or getattr(prop, "size", None)
     return m
 
 
@@ -229,6 +264,10 @@ def get_property_by_slug(
 
     m.images = merged
     m.local_images = merged
+    m.cover_image_url = m.cover_image
+    m.tags = _extract_tags(getattr(prop, "features", None))
+    m.view_label = _extract_view_label(getattr(prop, "features", None))
+    m.size_sqm = getattr(prop, "size_sqm", None) or getattr(prop, "size", None)
     return m
 
 
