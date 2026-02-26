@@ -150,14 +150,6 @@ const nextConfig = {
         headers: [{ key: 'X-Robots-Tag', value: 'noindex, nofollow' }],
       },
       {
-        source: '/home-composer',
-        headers: [{ key: 'X-Robots-Tag', value: 'noindex, nofollow' }],
-      },
-      {
-        source: '/home-composer/:path*',
-        headers: [{ key: 'X-Robots-Tag', value: 'noindex, nofollow' }],
-      },
-      {
         source: '/projects-admin',
         headers: [{ key: 'X-Robots-Tag', value: 'noindex, nofollow' }],
       },

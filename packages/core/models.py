@@ -918,36 +918,6 @@ class CompanyInfo(Base):
     )
 
 
-class HomeComposerConfig(Base):
-    __tablename__ = "home_composer_configs"
-    __table_args__ = (
-        Index("ix_home_composer_page_locale", "page_key", "locale"),
-        Index("ix_home_composer_status", "status"),
-        Index("ix_home_composer_updated_at", "updated_at"),
-        UniqueConstraint("page_key", "locale", "status", name="uq_home_composer_page_locale_status"),
-    )
-
-    id: Mapped[UUID] = mapped_column(primary_key=True, default=uuid4)
-    page_key: Mapped[str] = mapped_column(String(100), nullable=False, default="home")
-    locale: Mapped[str] = mapped_column(String(8), nullable=False, default="en")
-    status: Mapped[str] = mapped_column(String(32), nullable=False, default="draft")
-    version: Mapped[int] = mapped_column(Integer, nullable=False, default=1)
-    config: Mapped[dict] = mapped_column(JSONB, nullable=False, default=dict)
-
-    updated_by: Mapped[str | None] = mapped_column(String(255), nullable=True)
-    published_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
-
-    created_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), nullable=False, server_default=func.now()
-    )
-    updated_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True),
-        nullable=False,
-        server_default=func.now(),
-        onupdate=func.now(),
-    )
-
-
 class MediaAsset(Base):
     __tablename__ = "media_assets"
     __table_args__ = (
