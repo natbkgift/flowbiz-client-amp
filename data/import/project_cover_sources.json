@@ -9,7 +9,14 @@
     "credit": "Arcadia Millennium Tower official website",
     "rights_status": "verify_reuse_permission_required",
     "approved_for_seed": true,
-    "notes": "Selected from homepage media gallery/hero assets."
+    "notes": "Selected from homepage media gallery/hero assets.",
+    "mirrored_local_path": "/media/project-covers/arcadia-millennium-tower/cover_13fa6f0e75f7.jpg",
+    "mirror_status": "already_local",
+    "mirror_last_checked_at": "2026-02-26T00:44:07.501064+00:00",
+    "mirror_file_sha256": "11542986c40272b6c918f3bd91f033320c08ef492293c327ee99a677cc8ffa12",
+    "mirror_file_size_bytes": 598051,
+    "mirror_source_url": "https://arcadiamillenniumtower.com/wp-content/uploads/2025/09/image-03.jpg",
+    "mirror_content_type": "image/jpeg"
   },
   {
     "project_slug": "city-garden-pratumnak",
@@ -21,7 +28,14 @@
     "credit": "Global Top Group official website",
     "rights_status": "verify_reuse_permission_required",
     "approved_for_seed": true,
-    "notes": "Project page redirects from citygardenpratumnak.com; developer slug in local seed remains matrix-developments pending data review."
+    "notes": "Project page redirects from citygardenpratumnak.com; developer slug in local seed remains matrix-developments pending data review.",
+    "mirrored_local_path": "/media/project-covers/city-garden-pratumnak/cover_19d5cc49057c.webp",
+    "mirror_status": "already_local",
+    "mirror_last_checked_at": "2026-02-26T00:44:07.501064+00:00",
+    "mirror_file_sha256": "a9bb88a9b58ccd7c1343570b0ef51b9da19e7b513c83910bf75b69b6e8ee2f3e",
+    "mirror_file_size_bytes": 260440,
+    "mirror_source_url": "https://globaltopgroup.com/wp-content/uploads/img/pratumnak/pratumnak-thumb.webp",
+    "mirror_content_type": "image/webp"
   },
   {
     "project_slug": "copacabana-beach-jomtien",
@@ -33,7 +47,14 @@
     "credit": "Copacabana Beach Jomtien official website",
     "rights_status": "verify_reuse_permission_required",
     "approved_for_seed": true,
-    "notes": "Chosen from homepage hero/background section."
+    "notes": "Chosen from homepage hero/background section.",
+    "mirrored_local_path": "/media/project-covers/copacabana-beach-jomtien/cover_44839d734c2f.jpg",
+    "mirror_status": "already_local",
+    "mirror_last_checked_at": "2026-02-26T00:44:07.501064+00:00",
+    "mirror_file_sha256": "ecb9540af906f53b2128878ebf38dd2c3b5550c01f1d161267cb056f0c3bbece",
+    "mirror_file_size_bytes": 1002873,
+    "mirror_source_url": "https://copacabanajomtien.com/wp-content/uploads/2024/01/DJI_0074-scaled.jpg",
+    "mirror_content_type": "image/jpeg"
   },
   {
     "project_slug": "dusit-grand-condo-view",
@@ -45,7 +66,14 @@
     "credit": "Dusit Group official website",
     "rights_status": "verify_reuse_permission_required",
     "approved_for_seed": true,
-    "notes": "Selected from project gallery on official developer website."
+    "notes": "Selected from project gallery on official developer website.",
+    "mirrored_local_path": "/media/project-covers/dusit-grand-condo-view/cover_951a61356c21.jpg",
+    "mirror_status": "already_local",
+    "mirror_last_checked_at": "2026-02-26T00:44:07.501064+00:00",
+    "mirror_file_sha256": "803172adfccafb0245a55eaecb8b183a17892614d87613035109baeb7024d478",
+    "mirror_file_size_bytes": 411994,
+    "mirror_source_url": "https://dusit-group.com/wp-content/uploads/2024/06/1-10-scaled.jpg",
+    "mirror_content_type": "image/jpeg"
   },
   {
     "project_slug": "grand-solaire",
@@ -57,7 +85,14 @@
     "credit": "Grand Solaire official website",
     "rights_status": "verify_reuse_permission_required",
     "approved_for_seed": true,
-    "notes": "Selected from homepage hero background rendered by site builder."
+    "notes": "Selected from homepage hero background rendered by site builder.",
+    "mirrored_local_path": "/media/project-covers/grand-solaire/cover_e831b1643816.webp",
+    "mirror_status": "already_local",
+    "mirror_last_checked_at": "2026-02-26T00:44:07.501064+00:00",
+    "mirror_file_sha256": "ba0582d00c9a37c974359d1633c7bce0d2391e2aa347b34f4e63483b4031952d",
+    "mirror_file_size_bytes": 17176,
+    "mirror_source_url": "https://www.grandsolaire.com/wp-content/uploads/2022/11/drone-in-the-sky-2022-08-01-04-17-14-utc-e1667451875172.webp",
+    "mirror_content_type": "image/webp"
   },
   {
     "project_slug": "ocean-horizon",
@@ -69,7 +104,14 @@
     "credit": "Ocean Horizon Pattaya official website (archived via Internet Archive)",
     "rights_status": "verify_reuse_permission_required_archive_source",
     "approved_for_seed": true,
-    "notes": "Current official domain serves bot challenge; cover sourced from archived official site snapshot."
+    "notes": "Current official domain serves bot challenge; cover sourced from archived official site snapshot.",
+    "mirrored_local_path": "/media/project-covers/ocean-horizon/cover_058967c7a26f.jpg",
+    "mirror_status": "already_local",
+    "mirror_last_checked_at": "2026-02-26T00:44:07.501064+00:00",
+    "mirror_file_sha256": "1de10229c0d7d05014453503ccf24a8805d7be96117c1eb068178ebe1591c4d4",
+    "mirror_file_size_bytes": 694073,
+    "mirror_source_url": "https://web.archive.org/web/20210121194645/https://www.oceanhorizonpattaya.com/wp-content/themes/ocean/images/gallery/building/building-1.jpg",
+    "mirror_content_type": "image/jpeg"
   },
   {
     "project_slug": "the-orient-jomtien",
@@ -81,31 +123,54 @@
     "credit": "FazWaz project listing (temporary exception source)",
     "rights_status": "replace_with_official_source_when_available",
     "approved_for_seed": true,
-    "notes": "Matrix Developments official domain is parked; AMP project page currently renders placeholder-only image. Replace when official source is recovered."
+    "notes": "Matrix Developments official domain is parked; AMP project page currently renders placeholder-only image. Replace when official source is recovered.",
+    "mirrored_local_path": "/media/project-covers/the-orient-jomtien/cover_6359a2b6dcc5.webp",
+    "mirror_status": "already_local",
+    "mirror_last_checked_at": "2026-02-26T00:44:07.501064+00:00",
+    "mirror_file_sha256": "bf509232dd5be8299c8a84bcd1538a18635e51ce0d80fa2b71c4e06ebca8d6a1",
+    "mirror_file_size_bytes": 96050,
+    "mirror_source_url": "https://cdn.fazwaz.com/nw/1okrJjgKY56MWu9BMeVQdZvhWaQ/0x0/enriched-project-feature/6214/5c402e580759c24a1a3d0022.jpg",
+    "mirror_content_type": "image/webp"
   },
   {
     "project_slug": "the-riviera-jomtien",
-    "cover_image_url": "/media/rent/rent-en-condo-for-rent-4207/01_b41236ce182f.jpg",
-    "source_page_url": "https://amppattaya.com/api/v1/properties/?page=1&limit=100&sort=newest",
-    "source_domain": "amppattaya.com",
-    "source_type": "amp_api_property_derived",
-    "source_title": "AMP public API property feed",
-    "credit": "AMP Pattaya media (API-derived)",
-    "rights_status": "amp_owned_or_licensed_verify_internal_policy",
+    "cover_image_url": "https://therivierajomtien.com/wp-content/uploads/2022/06/1-1-scaled.jpg",
+    "source_page_url": "https://therivierajomtien.com/",
+    "source_domain": "therivierajomtien.com",
+    "source_type": "official_project_website",
+    "source_title": "The Riviera Jomtien official website",
+    "credit": "The Riviera Jomtien official website",
+    "rights_status": "verify_reuse_permission_required",
     "approved_for_seed": true,
-    "notes": "Mapped by project-name heuristic from property title."
+    "notes": "Official Riviera Jomtien hero/gallery image selected to avoid dependency on non-public AMP property media paths.",
+    "mirrored_local_path": "/media/project-covers/the-riviera-jomtien/cover_31dde7af340e.jpg",
+    "mirror_status": "already_local",
+    "mirror_last_checked_at": "2026-02-26T00:44:07.501064+00:00",
+    "mirror_error": "HTTP Error 404: Not Found",
+    "mirror_file_sha256": "94fa53b6cef4678967bc3286a19e6f13794333fbebdeb0c00cf74dd84e6696e9",
+    "mirror_file_size_bytes": 832962,
+    "mirror_source_url": "https://therivierajomtien.com/wp-content/uploads/2022/06/1-1-scaled.jpg",
+    "mirror_content_type": "image/jpeg"
   },
   {
     "project_slug": "the-riviera-monaco",
-    "cover_image_url": "/media/rent/rent-en-condo-for-sale-3235/01_3e22694f51a7.jpg",
-    "source_page_url": "https://amppattaya.com/api/v1/properties/?page=1&limit=100&sort=newest",
-    "source_domain": "amppattaya.com",
-    "source_type": "amp_api_property_derived",
-    "source_title": "AMP public API property feed",
-    "credit": "AMP Pattaya media (API-derived)",
-    "rights_status": "amp_owned_or_licensed_verify_internal_policy",
+    "cover_image_url": "https://therivieramonaco.com/wp-content/uploads/2023/01/R3-MainImage.jpg",
+    "source_page_url": "https://therivieramonaco.com/",
+    "source_domain": "therivieramonaco.com",
+    "source_type": "official_project_website",
+    "source_title": "The Riviera Monaco official website",
+    "credit": "The Riviera Monaco official website",
+    "rights_status": "verify_reuse_permission_required",
     "approved_for_seed": true,
-    "notes": "Mapped by project-name heuristic from property title."
+    "notes": "Official Riviera Monaco hero image selected to avoid dependency on non-public AMP property media paths.",
+    "mirrored_local_path": "/media/project-covers/the-riviera-monaco/cover_84a7b41c3c79.jpg",
+    "mirror_status": "already_local",
+    "mirror_last_checked_at": "2026-02-26T00:44:07.501064+00:00",
+    "mirror_error": "HTTP Error 404: Not Found",
+    "mirror_file_sha256": "e7e3f0ff5f05fc4725ff41fab570c8f00df1f5becc2be12146a8eec2d8e49d77",
+    "mirror_file_size_bytes": 475353,
+    "mirror_source_url": "https://therivieramonaco.com/wp-content/uploads/2023/01/R3-MainImage.jpg",
+    "mirror_content_type": "image/jpeg"
   },
   {
     "project_slug": "wongamat-tower",
@@ -117,6 +182,13 @@
     "credit": "Wongamat Tower official website (archived via Internet Archive)",
     "rights_status": "verify_reuse_permission_required_archive_source",
     "approved_for_seed": true,
-    "notes": "Current domain redirects to non-official booking page; archived official microsite used."
+    "notes": "Current domain redirects to non-official booking page; archived official microsite used.",
+    "mirrored_local_path": "/media/project-covers/wongamat-tower/cover_b688a580f462.jpg",
+    "mirror_status": "already_local",
+    "mirror_last_checked_at": "2026-02-26T00:44:07.501064+00:00",
+    "mirror_file_sha256": "f41e9965c143c3d1d6368aca8f8081f4185ab6138a301c69172fbe3f61aa148f",
+    "mirror_file_size_bytes": 35143,
+    "mirror_source_url": "https://web.archive.org/web/20131124235400im_/http://www.wongamattower.com/_/rsrc/1348469563406/config/Project%20Video%20Image.jpg",
+    "mirror_content_type": "image/jpeg"
   }
 ]

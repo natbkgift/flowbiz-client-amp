@@ -4,7 +4,7 @@
     "slug": "arcadia-millennium-tower",
     "developer_slug": "global-top-group",
     "area_slug": "central-pattaya",
-    "cover_image_url": "https://arcadiamillenniumtower.com/wp-content/uploads/2025/09/image-03.jpg",
+    "cover_image_url": "/media/project-covers/arcadia-millennium-tower/cover_13fa6f0e75f7.jpg",
     "status": "published"
   },
   {
@@ -12,7 +12,7 @@
     "slug": "city-garden-pratumnak",
     "developer_slug": "matrix-developments",
     "area_slug": "pratumnak",
-    "cover_image_url": "https://globaltopgroup.com/wp-content/uploads/img/pratumnak/pratumnak-thumb.webp",
+    "cover_image_url": "/media/project-covers/city-garden-pratumnak/cover_19d5cc49057c.webp",
     "status": "published",
     "starting_price": 5900000
   },
@@ -21,7 +21,7 @@
     "slug": "copacabana-beach-jomtien",
     "developer_slug": "heights-holdings",
     "area_slug": "jomtien",
-    "cover_image_url": "https://copacabanajomtien.com/wp-content/uploads/2024/01/DJI_0074-scaled.jpg",
+    "cover_image_url": "/media/project-covers/copacabana-beach-jomtien/cover_44839d734c2f.jpg",
     "status": "published",
     "starting_price": 3200000
   },
@@ -30,7 +30,7 @@
     "slug": "dusit-grand-condo-view",
     "developer_slug": "baan-dusit",
     "area_slug": "jomtien",
-    "cover_image_url": "https://dusit-group.com/wp-content/uploads/2024/06/1-10-scaled.jpg",
+    "cover_image_url": "/media/project-covers/dusit-grand-condo-view/cover_951a61356c21.jpg",
     "status": "published"
   },
   {
@@ -38,7 +38,7 @@
     "slug": "grand-solaire",
     "developer_slug": "heights-holdings",
     "area_slug": "central-pattaya",
-    "cover_image_url": "https://www.grandsolaire.com/wp-content/uploads/2022/11/drone-in-the-sky-2022-08-01-04-17-14-utc-e1667451875172.webp",
+    "cover_image_url": "/media/project-covers/grand-solaire/cover_e831b1643816.webp",
     "status": "published",
     "starting_price": 3800000
   },
@@ -47,7 +47,7 @@
     "slug": "ocean-horizon",
     "developer_slug": "ocean-property",
     "area_slug": "pratumnak",
-    "cover_image_url": "https://web.archive.org/web/20210121194645/https://www.oceanhorizonpattaya.com/wp-content/themes/ocean/images/gallery/building/building-1.jpg",
+    "cover_image_url": "/media/project-covers/ocean-horizon/cover_058967c7a26f.jpg",
     "status": "published"
   },
   {
@@ -55,7 +55,7 @@
     "slug": "the-orient-jomtien",
     "developer_slug": "siam-oriental",
     "area_slug": "jomtien",
-    "cover_image_url": "https://cdn.fazwaz.com/nw/1okrJjgKY56MWu9BMeVQdZvhWaQ/0x0/enriched-project-feature/6214/5c402e580759c24a1a3d0022.jpg",
+    "cover_image_url": "/media/project-covers/the-orient-jomtien/cover_6359a2b6dcc5.webp",
     "status": "published"
   },
   {
@@ -63,7 +63,7 @@
     "slug": "the-riviera-jomtien",
     "developer_slug": "the-riviera-group",
     "area_slug": "jomtien",
-    "cover_image_url": "/media/rent/rent-en-condo-for-rent-4207/01_b41236ce182f.jpg",
+    "cover_image_url": "/media/project-covers/the-riviera-jomtien/cover_31dde7af340e.jpg",
     "status": "published",
     "starting_price": 4500000
   },
@@ -72,7 +72,7 @@
     "slug": "the-riviera-monaco",
     "developer_slug": "the-riviera-group",
     "area_slug": "na-jomtien",
-    "cover_image_url": "/media/rent/rent-en-condo-for-sale-3235/01_3e22694f51a7.jpg",
+    "cover_image_url": "/media/project-covers/the-riviera-monaco/cover_84a7b41c3c79.jpg",
     "status": "published"
   },
   {
@@ -80,7 +80,7 @@
     "slug": "wongamat-tower",
     "developer_slug": "nova-group",
     "area_slug": "wongamat",
-    "cover_image_url": "https://web.archive.org/web/20131124235400im_/http://www.wongamattower.com/_/rsrc/1348469563406/config/Project%20Video%20Image.jpg",
+    "cover_image_url": "/media/project-covers/wongamat-tower/cover_b688a580f462.jpg",
     "status": "published"
   }
 ]

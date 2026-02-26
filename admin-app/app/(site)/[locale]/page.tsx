@@ -755,12 +755,14 @@ export default async function HomePage({
                 title: locale === 'th' ? 'Meet AMP Pattaya Team' : 'Meet AMP Pattaya Team',
                 caption: locale === 'th' ? 'ดูทีมที่ปรึกษาและแนวทางการคัดทรัพย์ของเรา' : 'See how the advisory team frames each shortlist.',
                 ytId: '_-Yzpo3tCuQ',
+                thumbSrc: '/media/video-thumbs/_-Yzpo3tCuQ.jpg',
               },
               {
                 key: 'launch_walkthrough',
                 title: locale === 'th' ? 'New Project Presale Tour' : 'New Project Presale Tour',
                 caption: locale === 'th' ? 'ดูตัวอย่างการพาโครงการใหม่และสิ่งที่ต้องเช็กก่อนตัดสินใจ' : 'Preview how we review new launches before recommendations.',
                 ytId: '77If6rT5fdE',
+                thumbSrc: '/media/video-thumbs/77If6rT5fdE.jpg',
               },
             ].map((video) => (
               <figure key={video.key} className="rounded-2xl overflow-hidden border border-gray-100 bg-white shadow-sm">
@@ -772,7 +774,7 @@ export default async function HomePage({
                     allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                     allowFullScreen
                     loading="lazy"
-                    srcDoc={`<style>*{padding:0;margin:0;overflow:hidden}html,body{height:100%;background:#111}img,span{position:absolute;left:0;right:0;top:0;bottom:0;margin:auto}img{width:100%;height:100%;object-fit:cover;filter:brightness(.72)}span{height:58px;width:58px;border-radius:999px;background:rgba(255,255,255,.9);display:flex;align-items:center;justify-content:center;font-size:20px;color:#111;font-weight:700;box-shadow:0 8px 24px rgba(0,0,0,.35)}</style><a href='https://www.youtube.com/embed/${video.ytId}?autoplay=1'><img src='https://img.youtube.com/vi/${video.ytId}/hqdefault.jpg' alt='${video.title}'><span>▶</span></a>`}
+                    srcDoc={`<style>*{padding:0;margin:0;overflow:hidden}html,body{height:100%;background:#111}img,span{position:absolute;left:0;right:0;top:0;bottom:0;margin:auto}img{width:100%;height:100%;object-fit:cover;filter:brightness(.72)}span{height:58px;width:58px;border-radius:999px;background:rgba(255,255,255,.9);display:flex;align-items:center;justify-content:center;font-size:20px;color:#111;font-weight:700;box-shadow:0 8px 24px rgba(0,0,0,.35)}</style><a href='https://www.youtube.com/embed/${video.ytId}?autoplay=1'><img src='${video.thumbSrc}' alt='${video.title}'><span>▶</span></a>`}
                   />
                 </div>
                 <figcaption className="px-5 py-4 text-sm text-gray-600 min-h-[72px] leading-relaxed">

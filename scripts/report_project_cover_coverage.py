@@ -16,6 +16,7 @@ from typing import Any
 REPO_ROOT = Path(__file__).resolve().parent.parent
 IMPORT_DIR = REPO_ROOT / "data" / "import"
 DEFAULT_WRITE = REPO_ROOT / "ops" / "logs" / "project_cover_coverage.json"
+DEFAULT_PUBLIC_ROOT = REPO_ROOT / "admin-app" / "public"
 
 FEATURED_PRIORITY = [
     "the-riviera-jomtien",
@@ -58,7 +59,27 @@ def _is_real_cover(url: str | None) -> bool:
     return u.startswith("http://") or u.startswith("https://") or "/media/" in u
 
 
-def generate_report(import_dir: Path = IMPORT_DIR) -> dict[str, Any]:
+def _is_external_cover(url: str | None) -> bool:
+    if not url:
+        return False
+    u = str(url).strip().lower()
+    return u.startswith("http://") or u.startswith("https://")
+
+
+def _local_media_file_info(url: str | None, *, public_root: Path) -> dict[str, Any] | None:
+    if not url or not str(url).startswith("/media/"):
+        return None
+    p = public_root / str(url).lstrip("/")
+    exists = p.exists() and p.is_file()
+    size = int(p.stat().st_size) if exists else 0
+    return {
+        "path": str(p),
+        "exists": bool(exists and size > 0),
+        "size_bytes": size,
+    }
+
+
+def generate_report(import_dir: Path = IMPORT_DIR, *, public_root: Path = DEFAULT_PUBLIC_ROOT) -> dict[str, Any]:
     projects = _read_json(import_dir / "projects.json")
     sources = _read_json(import_dir / "project_cover_sources.json")
     source_by_slug = {str(r.get("project_slug") or "").strip(): r for r in sources}
@@ -75,6 +96,8 @@ def generate_report(import_dir: Path = IMPORT_DIR) -> dict[str, Any]:
                 "name": str(row.get("name") or "").strip(),
                 "cover_image_url": cover,
                 "is_real_cover": real,
+                "is_external_cover": _is_external_cover(cover),
+                "local_media_file": _local_media_file_info(cover, public_root=public_root),
                 "source_type": source_row.get("source_type"),
                 "source_page_url": source_row.get("source_page_url"),
                 "rights_status": source_row.get("rights_status"),
@@ -83,6 +106,13 @@ def generate_report(import_dir: Path = IMPORT_DIR) -> dict[str, Any]:
 
     total = len(project_rows)
     real_count = sum(1 for r in project_rows if r["is_real_cover"])
+    external_count = sum(1 for r in project_rows if r["is_external_cover"])
+    local_media_count = sum(1 for r in project_rows if str(r.get("cover_image_url") or "").startswith("/media/"))
+    local_media_missing_count = sum(
+        1
+        for r in project_rows
+        if isinstance(r.get("local_media_file"), dict) and not bool(r["local_media_file"].get("exists"))
+    )
     featured = sorted(
         project_rows,
         key=lambda r: FEATURED_PRIORITY.index(r["slug"]) if r["slug"] in FEATURED_PRIORITY else 999,
@@ -101,6 +131,10 @@ def generate_report(import_dir: Path = IMPORT_DIR) -> dict[str, Any]:
             "projects_total": total,
             "projects_real_cover_count": real_count,
             "projects_real_cover_pct": round((real_count / total * 100) if total else 0.0, 2),
+            "projects_external_cover_count": external_count,
+            "projects_external_cover_pct": round((external_count / total * 100) if total else 0.0, 2),
+            "projects_local_media_cover_count": local_media_count,
+            "projects_local_media_missing_file_count": local_media_missing_count,
             "featured_home_cards_count": len(featured),
             "featured_home_real_cover_count": featured_real_count,
             "featured_home_real_cover_pct": round((featured_real_count / len(featured) * 100) if featured else 0.0, 2),
@@ -115,6 +149,7 @@ def generate_report(import_dir: Path = IMPORT_DIR) -> dict[str, Any]:
 def main() -> int:
     parser = argparse.ArgumentParser(description="Report real-cover coverage for project seed data.")
     parser.add_argument("--input-dir", default=str(IMPORT_DIR), help="Import JSON directory (default: %(default)s)")
+    parser.add_argument("--public-root", default=str(DEFAULT_PUBLIC_ROOT), help="Frontend public root for local /media file existence checks (default: %(default)s)")
     parser.add_argument(
         "--write",
         nargs="?",
@@ -123,7 +158,7 @@ def main() -> int:
     )
     args = parser.parse_args()
 
-    report = generate_report(Path(args.input_dir))
+    report = generate_report(Path(args.input_dir), public_root=Path(args.public_root))
     print(json.dumps(report, ensure_ascii=False, indent=2))
 
     if args.write:

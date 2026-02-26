@@ -462,6 +462,20 @@ def main() -> int:
     _write_json(IMPORT_DIR / "units_buy.json", merged_buy)
     _write_json(IMPORT_DIR / "units_rent.json", merged_rent)
 
+    # Mirror external project covers into local /media paths so import data never hotlinks.
+    try:
+        subprocess.run(
+            [
+                sys.executable,
+                str(REPO_ROOT / "scripts" / "mirror_project_cover_images.py"),
+                "--write-report",
+            ],
+            check=False,
+        )
+    except Exception:
+        # Non-fatal: refresh data should still complete even if mirroring fails.
+        pass
+
     # Auto-generate coverage report after refresh so homepage media quality can be tracked over time.
     try:
         subprocess.run(

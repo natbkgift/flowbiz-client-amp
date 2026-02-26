@@ -546,6 +546,21 @@ def _load_json(path: Path) -> list[dict]:
     return []
 
 
+def _find_external_project_covers(path: Path) -> list[dict[str, str]]:
+    rows = _load_json(path)
+    out: list[dict[str, str]] = []
+    for row in rows:
+        cover = str(row.get("cover_image_url") or "").strip()
+        if cover.startswith("http://") or cover.startswith("https://"):
+            out.append(
+                {
+                    "slug": str(row.get("slug") or "").strip(),
+                    "cover_image_url": cover,
+                }
+            )
+    return out
+
+
 # ── Main ─────────────────────────────────────────────────────────────────
 def main() -> int:
     parser = argparse.ArgumentParser(
@@ -608,6 +623,36 @@ def main() -> int:
         "units_rent": "units_rent.json",
         "team": "team.json",
     }
+
+    # Best-effort media mirroring before any import step touches DB.
+    # This keeps project cover_image_url local (/media/...) and prevents public hotlinks.
+    if "projects" in steps_to_run:
+        try:
+            subprocess.run(
+                [
+                    sys.executable,
+                    str(_PROJECT_ROOT / "scripts" / "mirror_project_cover_images.py"),
+                    "--input-dir",
+                    str(input_dir),
+                    "--write-report",
+                ],
+                check=False,
+            )
+        except Exception:
+            pass
+
+        external_project_covers = _find_external_project_covers(input_dir / "projects.json")
+        if external_project_covers and not os.environ.get("AMP_ALLOW_EXTERNAL_PROJECT_COVERS", "").strip():
+            log.error(
+                "Refusing import: %d project cover(s) still use external URLs. "
+                "Run scripts/mirror_project_cover_images.py or set AMP_ALLOW_EXTERNAL_PROJECT_COVERS=1 to override.",
+                len(external_project_covers),
+            )
+            for row in external_project_covers[:20]:
+                log.error("  - %s -> %s", row.get("slug"), row.get("cover_image_url"))
+            if len(external_project_covers) > 20:
+                log.error("  ... and %d more", len(external_project_covers) - 20)
+            return 1
 
     def _slug_set(filename: str) -> set[str]:
         rows = _load_json(input_dir / filename)
