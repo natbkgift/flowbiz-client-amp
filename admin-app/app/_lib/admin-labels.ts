@@ -11,6 +11,7 @@ export const ADMIN_LABELS = {
     analytics: 'Analytics',
     areas: 'Areas',
     developers: 'Developers',
+    homeComposer: 'Home Composer',
     inquiries: 'Inquiries',
     leads: 'Leads',
     media: 'Media Library',

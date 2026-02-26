@@ -412,3 +412,25 @@ export async function fetchAreaStatisticsBySlug(slug: string): Promise<AreaStati
   if (!res.ok) throw new Error(`Failed to fetch area statistics (${res.status})`);
   return (await res.json()) as AreaStatisticsResponse;
 }
+
+export type HomeComposerPublishedResponse = {
+  page_key: string;
+  locale: 'en' | 'th';
+  version: number;
+  updated_at: string;
+  config: Record<string, unknown>;
+};
+
+export async function fetchHomeComposerPublished(locale: 'en' | 'th'): Promise<HomeComposerPublishedResponse | null> {
+  const origin = getOrigin();
+  const base = apiBase();
+
+  const url = new URL(`${base}/v1/home-composer`, origin);
+  url.searchParams.set('page_key', 'home');
+  url.searchParams.set('locale', locale);
+
+  const res = await fetchWithRetry(url.toString(), { next: { revalidate: PAGE_REVALIDATE_SECONDS } });
+  if (res.status === 404) return null;
+  if (!res.ok) throw new Error(`Failed to fetch home composer (${res.status})`);
+  return (await res.json()) as HomeComposerPublishedResponse;
+}
