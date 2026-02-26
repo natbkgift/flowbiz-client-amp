@@ -19,14 +19,19 @@ def test_admin_can_create_and_list_domain_entities(client):
 
     area = client.post(
         "/admin/areas",
-        json={"name": "Pattaya", "slug": "pattaya", "city": "Pattaya"},
+        json={"name": "Pattaya", "slug": "pattaya", "city": "Pattaya", "status": "published"},
         headers=headers,
     )
     assert area.status_code == 201
 
     dev = client.post(
         "/admin/developers",
-        json={"name": "DevCo", "slug": "devco", "website": "https://example.com"},
+        json={
+            "name": "DevCo",
+            "slug": "devco",
+            "website": "https://example.com",
+            "status": "active",
+        },
         headers=headers,
     )
     assert dev.status_code == 201
