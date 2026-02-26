@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
+import Image from 'next/image';
 
 import { Container } from '@/components/layout/Container';
 import { Breadcrumbs } from '@/components/layout/Breadcrumbs';
@@ -7,7 +8,13 @@ import { LeadForm } from '@/components/forms/LeadForm';
 import { Gallery } from '@/components/media/Gallery';
 import { Reviews } from '@/components/ux/Reviews';
 import { IconBed, IconBath, IconArea } from '@/components/icons/SvgIcons';
-import { fetchPropertyBySlug } from '@/app/_lib/public-api-server';
+import {
+  fetchAreas,
+  fetchDevelopers,
+  fetchProjects,
+  fetchProperties,
+  fetchPropertyBySlug,
+} from '@/app/_lib/public-api-server';
 import { CTA } from '@/app/_lib/public-cta';
 import { resolveImageUrl } from '@/app/_lib/public-api-shared';
 import { getDictionary, normalizeLocale } from '@/app/_lib/i18n/get-dictionary';
@@ -22,6 +29,40 @@ import {
 export const revalidate = 300;
 
 type PageProps = { params: Promise<{ locale: string; slug: string }> };
+
+function toLocalPropertyImage(input: string | null | undefined): string | null {
+  const resolved = resolveImageUrl(input);
+  if (!resolved) return null;
+  if (resolved.startsWith('/media/')) return resolved;
+  if (resolved.startsWith('/images/')) return resolved;
+  if (resolved.startsWith('/uploads/')) return resolved;
+  return null;
+}
+
+function uniqStrings(values: Array<string | null | undefined>): string[] {
+  return Array.from(new Set(values.filter((value): value is string => Boolean(value))));
+}
+
+function prettyText(raw: string | null | undefined): string | null {
+  const value = String(raw ?? '').trim();
+  if (!value) return null;
+  return value
+    .replace(/[_-]+/g, ' ')
+    .replace(/\s{2,}/g, ' ')
+    .replace(/\b\w/g, (char) => char.toUpperCase());
+}
+
+function formatPriceSuffix(locale: 'en' | 'th', period: string | null | undefined): string {
+  const normalized = String(period ?? '').trim().toLowerCase();
+  if (!normalized) return '';
+  if (normalized === 'month' || normalized === 'monthly' || normalized === 'mo') {
+    return locale === 'th' ? ' / เดือน' : ' /mo';
+  }
+  if (normalized === 'year' || normalized === 'yearly' || normalized === 'yr') {
+    return locale === 'th' ? ' / ปี' : ' /yr';
+  }
+  return ` /${normalized}`;
+}
 
 /**
  * Clean property title: strip source IDs, "rentthai" references, and numeric prefixes.
@@ -45,7 +86,12 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const dict = getDictionary(locale);
   const canonical = `/${locale}/property/${encodeURIComponent(slug)}`;
 
-  const p = await fetchPropertyBySlug(slug);
+  let p = null;
+  try {
+    p = await fetchPropertyBySlug(slug);
+  } catch {
+    p = null;
+  }
   if (!p) {
     const title = `${dict.brand.name} | ${dict.nav.buy}`;
     return {
@@ -101,7 +147,7 @@ export default async function PropertyPage({ params }: PageProps) {
   const locale = normalizeLocale(rawLocale);
   const dict = getDictionary(locale);
   const internalLinks = getInternalLinks(locale, dict, { from: 'property_detail', includeProjects: true });
-  const property = await fetchPropertyBySlug(slug);
+  const property = await fetchPropertyBySlug(slug).catch(() => null);
   if (!property) {
     return (
       <main className="section" id="main-content">
@@ -133,17 +179,77 @@ export default async function PropertyPage({ params }: PageProps) {
   const siteUrl = 'https://amppattaya.com';
   const canonicalUrl = `${siteUrl}/${locale}/property/${encodeURIComponent(slug)}`;
 
-  const images = (property.local_images ?? property.images ?? [])
-    .map((u) => resolveImageUrl(u))
-    .filter((v): v is string => Boolean(v));
+  const localImages = uniqStrings((property.local_images ?? []).map((u) => toLocalPropertyImage(u)));
+  const fallbackLocalImages = uniqStrings((property.images ?? []).map((u) => toLocalPropertyImage(u)));
+  const cover = toLocalPropertyImage(property.cover_image) ?? localImages[0] ?? fallbackLocalImages[0] ?? null;
+  const gallery = uniqStrings([cover, ...localImages, ...fallbackLocalImages]);
 
-  const cover = resolveImageUrl(property.cover_image) ?? images[0] ?? null;
-  const gallery = cover ? [cover, ...images.filter((u) => u !== cover)] : images;
+  const [projectsResult, areasResult, developersResult, propertiesResult] = await Promise.all([
+    fetchProjects({ limit: 200 }).catch(() => []),
+    fetchAreas().catch(() => []),
+    fetchDevelopers().catch(() => []),
+    fetchProperties({ limit: 100, type: property.type }).catch(() => ({
+      data: [],
+      meta: { page: 1, limit: 100, total: 0 },
+    })),
+  ]);
+
+  const projects = projectsResult ?? [];
+  const areas = areasResult ?? [];
+  const developers = developersResult ?? [];
+  const projectById = new Map(projects.map((item) => [item.id, item]));
+  const areaById = new Map(areas.map((item) => [item.id, item]));
+  const developerById = new Map(developers.map((item) => [item.id, item]));
+
+  const relatedProject = property.project_id ? projectById.get(property.project_id) ?? null : null;
+  const relatedArea = property.area_id ? areaById.get(property.area_id) ?? null : null;
+  const relatedDeveloper = property.developer_id ? developerById.get(property.developer_id) ?? null : null;
+
+  const contextualLinks = [
+    relatedProject?.slug
+      ? {
+          href: `/${locale}/projects/${encodeURIComponent(relatedProject.slug)}`,
+          label: locale === 'th' ? `โครงการ: ${relatedProject.name}` : `Project: ${relatedProject.name}`,
+        }
+      : null,
+    relatedArea?.slug
+      ? {
+          href: `/${locale}/areas/${encodeURIComponent(relatedArea.slug)}`,
+          label: locale === 'th' ? `พื้นที่: ${relatedArea.name}` : `Area: ${relatedArea.name}`,
+        }
+      : null,
+    relatedDeveloper?.slug
+      ? {
+          href: `/${locale}/developers/${encodeURIComponent(relatedDeveloper.slug)}`,
+          label: locale === 'th' ? `ผู้พัฒนา: ${relatedDeveloper.name}` : `Developer: ${relatedDeveloper.name}`,
+        }
+      : null,
+  ].filter((item): item is { href: string; label: string } => Boolean(item));
 
   const priceNumber = Number(property.price);
   const priceValue = Number.isFinite(priceNumber) ? Math.round(priceNumber) : undefined;
   const sizeDisplay = property.size_sqm ?? property.size;
   const isRent = property.type === 'rent';
+  const priceSuffix = formatPriceSuffix(locale, property.price_period);
+  const displayView = prettyText(property.view_label ?? property.view);
+  const displayFurnishing = prettyText(property.furnishing);
+  const displayPropertyType = prettyText(property.property_type);
+  const tags = (property.tags ?? []).filter(Boolean).slice(0, 6);
+  const descriptionText =
+    property.description?.trim()
+    || (locale === 'th'
+      ? 'รายละเอียดเพิ่มเติมสามารถขอได้จากที่ปรึกษาอสังหาริมทรัพย์ของเรา'
+      : 'Additional details are available from our property advisor.');
+
+  const similarProperties = (propertiesResult.data ?? [])
+    .filter((candidate) => candidate.slug && candidate.slug !== property.slug)
+    .filter((candidate) => (
+      (property.project_id && candidate.project_id === property.project_id)
+      || (property.area_id && candidate.area_id === property.area_id)
+      || (property.developer_id && candidate.developer_id === property.developer_id)
+      || (candidate.city && candidate.city === property.city)
+    ))
+    .slice(0, 3);
 
   const jsonLd = JSON.stringify(
     [
@@ -151,9 +257,9 @@ export default async function PropertyPage({ params }: PageProps) {
         name: displayTitle,
         description: property.description ?? `${property.address}, ${property.city}`,
         url: canonicalUrl,
-        image: gallery[0],
+        image: gallery[0] ?? undefined,
         price: priceValue,
-        currency: 'THB',
+        currency: property.currency || 'THB',
         address: property.address,
         locality: property.city ?? 'Pattaya',
       }),
@@ -179,7 +285,7 @@ export default async function PropertyPage({ params }: PageProps) {
         offers: {
           '@type': 'Offer',
           url: canonicalUrl,
-          priceCurrency: 'THB',
+          priceCurrency: property.currency || 'THB',
           price: priceValue,
           availability: 'https://schema.org/InStock',
         },
@@ -210,7 +316,7 @@ export default async function PropertyPage({ params }: PageProps) {
           <div className="detail-main">
             <div id="gallery-section">
               {gallery.length > 0 ? (
-                <Gallery images={gallery} alt={displayTitle} />
+                <Gallery images={gallery} alt={dict.property.galleryPhoto} />
               ) : (
                 <div className="gallery-main" style={{ aspectRatio: '4 / 3', background: 'var(--color-surface)', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                   <p className="text-sm text-[var(--color-text-secondary)]">
@@ -239,12 +345,11 @@ export default async function PropertyPage({ params }: PageProps) {
               </div>
               <div className="property-price">
                 {formatPriceTHB(priceNumber)}
-                {isRent ? <span className="text-sm font-normal text-[var(--color-text-secondary)]"> /mo</span> : null}
+                {(isRent || priceSuffix) ? <span className="text-sm font-normal text-[var(--color-text-secondary)]">{priceSuffix || (locale === 'th' ? ' / เดือน' : ' /mo')}</span> : null}
               </div>
             </div>
 
-            {/* Enhanced Feature Grid */}
-            <div className="property-facts">
+            <div className="property-facts" aria-label={locale === 'th' ? 'รายละเอียดหลักของอสังหาริมทรัพย์' : 'Key property details'}>
               <div className="flex items-center gap-2">
                 <IconBed size="sm" />
                 <div>
@@ -287,32 +392,66 @@ export default async function PropertyPage({ params }: PageProps) {
                 <div className="flex items-center gap-2">
                   <span className="icon icon--sm" aria-hidden="true">&#9733;</span>
                   <div>
-                    <strong className="capitalize">{property.furnishing}</strong>
+                    <strong>{displayFurnishing}</strong>
                     <div className="text-sm text-[var(--color-text-secondary)]">
                       {locale === 'th' ? 'เฟอร์นิเจอร์' : 'Furnishing'}
                     </div>
                   </div>
                 </div>
               ) : null}
-              {property.view ? (
+              {displayView ? (
                 <div className="flex items-center gap-2">
                   <span className="icon icon--sm" aria-hidden="true">&#127748;</span>
                   <div>
-                    <strong className="capitalize">{property.view}</strong>
+                    <strong>{displayView}</strong>
                     <div className="text-sm text-[var(--color-text-secondary)]">
                       {locale === 'th' ? 'วิว' : 'View'}
                     </div>
                   </div>
                 </div>
               ) : null}
+              {displayPropertyType ? (
+                <div className="flex items-center gap-2">
+                  <span className="icon icon--sm" aria-hidden="true">&#9632;</span>
+                  <div>
+                    <strong>{displayPropertyType}</strong>
+                    <div className="text-sm text-[var(--color-text-secondary)]">
+                      {locale === 'th' ? 'ประเภททรัพย์' : 'Property type'}
+                    </div>
+                  </div>
+                </div>
+              ) : null}
             </div>
+
+            {tags.length > 0 ? (
+              <div className="mt-3 mb-6 flex flex-wrap gap-2" aria-label={locale === 'th' ? 'แท็กทรัพย์' : 'Property tags'}>
+                {tags.map((tag) => (
+                  <span key={tag} className="pill">
+                    {prettyText(tag) ?? tag}
+                  </span>
+                ))}
+              </div>
+            ) : null}
+
+            {contextualLinks.length > 0 ? (
+              <div className="card reveal mb-6">
+                <h2 className="card-title">{locale === 'th' ? 'ข้อมูลที่เกี่ยวข้อง' : 'Related context'}</h2>
+                <p className="card-subtitle">{locale === 'th' ? 'ไปยังหน้าโครงการ พื้นที่ หรือผู้พัฒนา' : 'Navigate to linked project, area, or developer pages'}</p>
+                <div className="card-actions">
+                  {contextualLinks.map((item) => (
+                    <Link key={item.href} className="btn btn-secondary" href={item.href}>
+                      {item.label}
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            ) : null}
 
             <div className="bg-[var(--color-white)] p-6 rounded-xl mb-6">
               <h2 className="mb-4">{dict.property.description}</h2>
-              <p className="mb-0">{property.description ?? '—'}</p>
+              <p className="mb-0">{descriptionText}</p>
             </div>
 
-            {/* FloorPlan section */}
             <div className="bg-[var(--color-white)] p-6 rounded-xl mb-6">
               <h2 className="mb-4">{locale === 'th' ? 'แปลนห้อง' : 'Floor Plan'}</h2>
               <p className="text-sm text-[var(--color-text-secondary)]">
@@ -322,7 +461,6 @@ export default async function PropertyPage({ params }: PageProps) {
               </p>
             </div>
 
-            {/* Reviews / Testimonials */}
             <div className="mb-6">
               <Reviews
                 reviews={(property as Record<string, unknown>).reviews as [] ?? []}
@@ -350,16 +488,57 @@ export default async function PropertyPage({ params }: PageProps) {
 
             <div>
               <h2 className="mb-6">{dict.property.similarProperties}</h2>
-              <div className="grid grid-2">
-                <div className="property-card">
-                  <div className="card-content">
-                    <div className="card-title">{dict.property.comingSoon}</div>
-                    <div className="card-location mb-0">
-                      {dict.property.similarComingSoonText}
+              {similarProperties.length > 0 ? (
+                <div className="grid grid-2">
+                  {similarProperties.map((candidate) => {
+                    const candidateImage =
+                      toLocalPropertyImage(candidate.cover_image)
+                      ?? toLocalPropertyImage(candidate.local_images?.[0])
+                      ?? toLocalPropertyImage(candidate.images?.[0]);
+                    return (
+                      <article key={candidate.id} className="property-card">
+                        {candidateImage ? (
+                          <div className="card-image relative overflow-hidden">
+                            <Image
+                              src={candidateImage}
+                              alt={cleanTitle(candidate.title)}
+                              fill
+                              sizes="(min-width: 1024px) 33vw, 100vw"
+                              className="object-cover"
+                              loading="lazy"
+                            />
+                          </div>
+                        ) : (
+                          <div className="card-image" aria-hidden="true" style={{ background: 'var(--color-surface)' }} />
+                        )}
+                        <div className="card-content">
+                          <div className="card-title">{cleanTitle(candidate.title)}</div>
+                          <div className="card-location">{candidate.address}, {candidate.city}</div>
+                          <div className="card-price">{formatPriceTHB(Number(candidate.price))}</div>
+                          {candidate.slug ? (
+                            <div className="mt-3">
+                              <Link className="btn btn-secondary" href={`/${locale}/property/${encodeURIComponent(candidate.slug)}`}>
+                                {locale === 'th' ? 'ดูรายละเอียด' : 'View details'}
+                              </Link>
+                            </div>
+                          ) : null}
+                        </div>
+                      </article>
+                    );
+                  })}
+                  </div>
+              ) : (
+                <div className="grid grid-2">
+                  <div className="property-card">
+                    <div className="card-content">
+                      <div className="card-title">{dict.property.comingSoon}</div>
+                      <div className="card-location mb-0">
+                        {dict.property.similarComingSoonText}
+                      </div>
                     </div>
                   </div>
                 </div>
-              </div>
+              )}
             </div>
           </div>
 

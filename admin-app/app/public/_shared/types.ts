@@ -68,5 +68,13 @@ export type PropertyDetail = {
   property_type?: string;
   furnishing?: string | null;
   view?: string | null;
+  view_label?: string | null;
   floor?: number | null;
+  floors?: number | null;
+  area_id?: string | null;
+  developer_id?: string | null;
+  price_period?: string | null;
+  currency?: string;
+  cover_image_url?: string | null;
+  tags?: string[] | null;
 };

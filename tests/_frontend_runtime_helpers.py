@@ -107,3 +107,34 @@ def html_contains_query_param_link(html: str, *, key: str, value: str) -> bool:
     links = re.findall(r'href="([^"]+)"', unescape(html), flags=re.IGNORECASE)
     token = f"{key}={value}"
     return any(token in link for link in links)
+
+
+def get_properties_list(*, limit: int = 100, page: int = 1) -> list[dict]:
+    payload = get_json(f"/api/v1/properties/?limit={limit}&page={page}")
+    items = payload.get("data")
+    assert isinstance(items, list) and len(items) > 0, "Expected non-empty property list from /api/v1/properties"
+    return items
+
+
+def get_property_detail(slug: str) -> dict:
+    payload = get_json(f"/api/v1/properties/slug/{slug}/")
+    assert isinstance(payload, dict) and payload.get("slug") == slug, f"Expected property detail payload for slug={slug}"
+    return payload
+
+
+def find_structured_property_candidate(items: list[dict]) -> dict | None:
+    for item in items:
+        slug = str(item.get("slug") or "").strip()
+        if not slug:
+            continue
+        has_structured = any(
+            item.get(key) is not None
+            for key in ("bedrooms", "bathrooms", "size_sqm", "view_label")
+        ) or bool(item.get("tags"))
+        if has_structured:
+            return item
+    return None
+
+
+def extract_links(html: str) -> list[str]:
+    return re.findall(r'href="([^"]+)"', unescape(html), flags=re.IGNORECASE)
