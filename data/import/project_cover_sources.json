@@ -36,6 +36,18 @@
     "notes": "Chosen from homepage hero/background section."
   },
   {
+    "project_slug": "dusit-grand-condo-view",
+    "cover_image_url": "https://dusit-group.com/wp-content/uploads/2024/06/1-10-scaled.jpg",
+    "source_page_url": "https://dusit-group.com/dusit-grand-condo-view/",
+    "source_domain": "dusit-group.com",
+    "source_type": "official_developer_website",
+    "source_title": "Dusit Grand Condo View",
+    "credit": "Dusit Group official website",
+    "rights_status": "verify_reuse_permission_required",
+    "approved_for_seed": true,
+    "notes": "Selected from project gallery on official developer website."
+  },
+  {
     "project_slug": "grand-solaire",
     "cover_image_url": "https://www.grandsolaire.com/wp-content/uploads/2022/11/drone-in-the-sky-2022-08-01-04-17-14-utc-e1667451875172.webp",
     "source_page_url": "https://www.grandsolaire.com/",
@@ -46,6 +58,30 @@
     "rights_status": "verify_reuse_permission_required",
     "approved_for_seed": true,
     "notes": "Selected from homepage hero background rendered by site builder."
+  },
+  {
+    "project_slug": "ocean-horizon",
+    "cover_image_url": "https://web.archive.org/web/20210121194645/https://www.oceanhorizonpattaya.com/wp-content/themes/ocean/images/gallery/building/building-1.jpg",
+    "source_page_url": "https://web.archive.org/web/20210121194645/https://www.oceanhorizonpattaya.com/",
+    "source_domain": "web.archive.org",
+    "source_type": "official_project_website_archive",
+    "source_title": "Oceanhorizon Pattaya – Beachfront Condo Pattaya (Wayback snapshot)",
+    "credit": "Ocean Horizon Pattaya official website (archived via Internet Archive)",
+    "rights_status": "verify_reuse_permission_required_archive_source",
+    "approved_for_seed": true,
+    "notes": "Current official domain serves bot challenge; cover sourced from archived official site snapshot."
+  },
+  {
+    "project_slug": "the-orient-jomtien",
+    "cover_image_url": "https://cdn.fazwaz.com/nw/1okrJjgKY56MWu9BMeVQdZvhWaQ/0x0/enriched-project-feature/6214/5c402e580759c24a1a3d0022.jpg",
+    "source_page_url": "https://www.fazwaz.co.th/en/projects/thailand/chon-buri/pattaya/nong-prue/the-orient-resort-and-spa",
+    "source_domain": "fazwaz.co.th",
+    "source_type": "marketplace_exception_non_official",
+    "source_title": "The Orient Resort And Spa Condo Details in Pattaya, Nong Prue | FazWaz.co.th",
+    "credit": "FazWaz project listing (temporary exception source)",
+    "rights_status": "replace_with_official_source_when_available",
+    "approved_for_seed": true,
+    "notes": "Matrix Developments official domain is parked; AMP project page currently renders placeholder-only image. Replace when official source is recovered."
   },
   {
     "project_slug": "the-riviera-jomtien",
@@ -70,5 +106,17 @@
     "rights_status": "amp_owned_or_licensed_verify_internal_policy",
     "approved_for_seed": true,
     "notes": "Mapped by project-name heuristic from property title."
+  },
+  {
+    "project_slug": "wongamat-tower",
+    "cover_image_url": "https://web.archive.org/web/20131124235400im_/http://www.wongamattower.com/_/rsrc/1348469563406/config/Project%20Video%20Image.jpg",
+    "source_page_url": "https://web.archive.org/web/20131124235400/http://www.wongamattower.com:80/",
+    "source_domain": "web.archive.org",
+    "source_type": "official_project_website_archive",
+    "source_title": "Wong Amat Tower Pattaya (Wayback snapshot)",
+    "credit": "Wongamat Tower official website (archived via Internet Archive)",
+    "rights_status": "verify_reuse_permission_required_archive_source",
+    "approved_for_seed": true,
+    "notes": "Current domain redirects to non-official booking page; archived official microsite used."
   }
 ]

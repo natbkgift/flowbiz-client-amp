@@ -8,6 +8,9 @@ const imageHosts = [
   'copacabanajomtien.com',
   'grandsolaire.com',
   'www.grandsolaire.com',
+  'dusit-group.com',
+  'web.archive.org',
+  'cdn.fazwaz.com',
   ...(process.env.NEXT_PUBLIC_IMAGE_HOSTS ?? '')
     .split(',')
     .map((h) => h.trim())

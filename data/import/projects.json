@@ -30,7 +30,7 @@
     "slug": "dusit-grand-condo-view",
     "developer_slug": "baan-dusit",
     "area_slug": "jomtien",
-    "cover_image_url": "/images/condo-view.png",
+    "cover_image_url": "https://dusit-group.com/wp-content/uploads/2024/06/1-10-scaled.jpg",
     "status": "published"
   },
   {
@@ -47,7 +47,7 @@
     "slug": "ocean-horizon",
     "developer_slug": "ocean-property",
     "area_slug": "pratumnak",
-    "cover_image_url": "/images/property-pool.png",
+    "cover_image_url": "https://web.archive.org/web/20210121194645/https://www.oceanhorizonpattaya.com/wp-content/themes/ocean/images/gallery/building/building-1.jpg",
     "status": "published"
   },
   {
@@ -55,7 +55,7 @@
     "slug": "the-orient-jomtien",
     "developer_slug": "siam-oriental",
     "area_slug": "jomtien",
-    "cover_image_url": "/images/property-interior.png",
+    "cover_image_url": "https://cdn.fazwaz.com/nw/1okrJjgKY56MWu9BMeVQdZvhWaQ/0x0/enriched-project-feature/6214/5c402e580759c24a1a3d0022.jpg",
     "status": "published"
   },
   {
@@ -80,7 +80,7 @@
     "slug": "wongamat-tower",
     "developer_slug": "nova-group",
     "area_slug": "wongamat",
-    "cover_image_url": "/images/property-exterior.png",
+    "cover_image_url": "https://web.archive.org/web/20131124235400im_/http://www.wongamattower.com/_/rsrc/1348469563406/config/Project%20Video%20Image.jpg",
     "status": "published"
   }
 ]

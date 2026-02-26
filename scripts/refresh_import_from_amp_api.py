@@ -13,6 +13,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import subprocess
 import sys
 import urllib.error
 import urllib.parse
@@ -460,6 +461,20 @@ def main() -> int:
     _write_json(IMPORT_DIR / "projects.json", merged_projects)
     _write_json(IMPORT_DIR / "units_buy.json", merged_buy)
     _write_json(IMPORT_DIR / "units_rent.json", merged_rent)
+
+    # Auto-generate coverage report after refresh so homepage media quality can be tracked over time.
+    try:
+        subprocess.run(
+            [
+                sys.executable,
+                str(REPO_ROOT / "scripts" / "report_project_cover_coverage.py"),
+                "--write",
+            ],
+            check=False,
+        )
+    except Exception:
+        # Non-fatal: refresh data should still complete even if reporting fails.
+        pass
 
     print(
         json.dumps(

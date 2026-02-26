@@ -22,6 +22,7 @@ import argparse
 import json
 import logging
 import os
+import subprocess
 import sys
 import time
 from dataclasses import dataclass, field
@@ -809,6 +810,20 @@ def main() -> int:
         json.dumps(summary, ensure_ascii=False, indent=2),
         encoding="utf-8",
     )
+
+    # Auto-generate project cover coverage report after refresh/import cycles.
+    # Non-fatal by design: reporting should not block data import.
+    try:
+        subprocess.run(
+            [
+                sys.executable,
+                str(_PROJECT_ROOT / "scripts" / "report_project_cover_coverage.py"),
+                "--write",
+            ],
+            check=False,
+        )
+    except Exception:
+        pass
 
     return 0 if total_errors == 0 else 1
 

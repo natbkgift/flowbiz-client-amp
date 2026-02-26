@@ -30,6 +30,9 @@ export function resolveImageUrl(image: string | null | undefined): string | null
     'copacabanajomtien.com',
     'grandsolaire.com',
     'www.grandsolaire.com',
+    'dusit-group.com',
+    'web.archive.org',
+    'cdn.fazwaz.com',
   ];
   const envAllowed = (process.env.NEXT_PUBLIC_IMAGE_HOSTS ?? '')
     .split(',')

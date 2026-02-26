@@ -1,0 +1,141 @@
+"""Report real-cover coverage for project seed data (and optional featured homepage subset).
+
+Usage:
+  python scripts/report_project_cover_coverage.py
+  python scripts/report_project_cover_coverage.py --write ops/logs/project_cover_coverage.json
+"""
+
+from __future__ import annotations
+
+import argparse
+import json
+from pathlib import Path
+from typing import Any
+
+
+REPO_ROOT = Path(__file__).resolve().parent.parent
+IMPORT_DIR = REPO_ROOT / "data" / "import"
+DEFAULT_WRITE = REPO_ROOT / "ops" / "logs" / "project_cover_coverage.json"
+
+FEATURED_PRIORITY = [
+    "the-riviera-jomtien",
+    "the-riviera-monaco",
+    "copacabana-beach-jomtien",
+    "arcadia-millennium-tower",
+    "city-garden-pratumnak",
+    "wongamat-tower",
+    "dusit-grand-condo-view",
+    "grand-solaire",
+]
+
+
+def _read_json(path: Path) -> list[dict[str, Any]]:
+    if not path.exists():
+        return []
+    raw = json.loads(path.read_text(encoding="utf-8"))
+    if isinstance(raw, list):
+        return raw
+    if isinstance(raw, dict) and isinstance(raw.get("data"), list):
+        return raw["data"]
+    return []
+
+
+def _is_real_cover(url: str | None) -> bool:
+    if not url:
+        return False
+    u = str(url).strip().lower()
+    if not u:
+        return False
+    if "placeholder" in u or "default-image" in u:
+        return False
+    if u.startswith("/images/"):
+        return False
+    if (
+        "/images/" in u
+        and (u.startswith("https://amppattaya.com/") or u.startswith("https://www.amppattaya.com/") or u.startswith("http://127.0.0.1:") or u.startswith("http://localhost:"))
+    ):
+        return False
+    return u.startswith("http://") or u.startswith("https://") or "/media/" in u
+
+
+def generate_report(import_dir: Path = IMPORT_DIR) -> dict[str, Any]:
+    projects = _read_json(import_dir / "projects.json")
+    sources = _read_json(import_dir / "project_cover_sources.json")
+    source_by_slug = {str(r.get("project_slug") or "").strip(): r for r in sources}
+
+    project_rows = []
+    for row in projects:
+        slug = str(row.get("slug") or "").strip()
+        cover = str(row.get("cover_image_url") or "").strip() or None
+        real = _is_real_cover(cover)
+        source_row = source_by_slug.get(slug, {})
+        project_rows.append(
+            {
+                "slug": slug,
+                "name": str(row.get("name") or "").strip(),
+                "cover_image_url": cover,
+                "is_real_cover": real,
+                "source_type": source_row.get("source_type"),
+                "source_page_url": source_row.get("source_page_url"),
+                "rights_status": source_row.get("rights_status"),
+            }
+        )
+
+    total = len(project_rows)
+    real_count = sum(1 for r in project_rows if r["is_real_cover"])
+    featured = sorted(
+        project_rows,
+        key=lambda r: FEATURED_PRIORITY.index(r["slug"]) if r["slug"] in FEATURED_PRIORITY else 999,
+    )[:6]
+    featured_real_count = sum(1 for r in featured if r["is_real_cover"])
+
+    by_source_type: dict[str, int] = {}
+    for row in project_rows:
+        if not row["is_real_cover"]:
+            continue
+        key = str(row.get("source_type") or "untracked")
+        by_source_type[key] = by_source_type.get(key, 0) + 1
+
+    return {
+        "summary": {
+            "projects_total": total,
+            "projects_real_cover_count": real_count,
+            "projects_real_cover_pct": round((real_count / total * 100) if total else 0.0, 2),
+            "featured_home_cards_count": len(featured),
+            "featured_home_real_cover_count": featured_real_count,
+            "featured_home_real_cover_pct": round((featured_real_count / len(featured) * 100) if featured else 0.0, 2),
+        },
+        "by_source_type": dict(sorted(by_source_type.items(), key=lambda kv: kv[0])),
+        "missing_real_cover_slugs": [r["slug"] for r in project_rows if not r["is_real_cover"]],
+        "projects": project_rows,
+        "featured_home_preview": featured,
+    }
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser(description="Report real-cover coverage for project seed data.")
+    parser.add_argument("--input-dir", default=str(IMPORT_DIR), help="Import JSON directory (default: %(default)s)")
+    parser.add_argument(
+        "--write",
+        nargs="?",
+        const=str(DEFAULT_WRITE),
+        help="Write JSON report to path (default when flag present without value: ops/logs/project_cover_coverage.json)",
+    )
+    args = parser.parse_args()
+
+    report = generate_report(Path(args.input_dir))
+    print(json.dumps(report, ensure_ascii=False, indent=2))
+
+    if args.write:
+        out_path = Path(args.write)
+        if not out_path.is_absolute():
+            out_path = REPO_ROOT / out_path
+        out_path.parent.mkdir(parents=True, exist_ok=True)
+        out_path.write_text(json.dumps(report, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+        print(f"\nWROTE:{out_path}")
+
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
