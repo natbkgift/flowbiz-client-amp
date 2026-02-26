@@ -15,6 +15,7 @@ type NavItem = {
 
 const NAV_ITEMS: NavItem[] = [
   { href: '/analytics', label: ADMIN_LABELS.nav.analytics, icon: '📊' },
+  { href: '/home-composer', label: ADMIN_LABELS.nav.homeComposer, icon: '🧩' },
   { href: '/areas-admin', label: ADMIN_LABELS.nav.areas, icon: '📍' },
   { href: '/developers-admin', label: ADMIN_LABELS.nav.developers, icon: '🏢' },
   { href: '/projects-admin', label: ADMIN_LABELS.nav.projects, icon: '🏗️' },

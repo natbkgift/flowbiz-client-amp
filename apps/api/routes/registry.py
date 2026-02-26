@@ -6,6 +6,7 @@ from apps.api.routes import admin, health
 from apps.api.routes.admin_analytics_v2 import router as admin_analytics_router
 from apps.api.routes.admin_crm import router as admin_crm_router
 from apps.api.routes.admin_domain import router as admin_domain_router
+from apps.api.routes.admin_home_composer import router as admin_home_composer_router
 from apps.api.routes.admin_media import router as admin_media_router
 from apps.api.routes.admin_marketplace import router as admin_marketplace_router
 from apps.api.routes.admin_properties import router as admin_properties_router
@@ -21,6 +22,7 @@ from apps.api.routes.v1.crm import router as crm_router
 from apps.api.routes.v1.db_stats import router as db_stats_router
 from apps.api.routes.v1.domain import router as domain_router
 from apps.api.routes.v1.finder import router as finder_router
+from apps.api.routes.v1.home_composer import router as home_composer_router
 from apps.api.routes.v1.investment import router as investment_router
 from apps.api.routes.v1.marketplace import router as marketplace_router
 from apps.api.routes.v1.members import router as members_router
@@ -39,6 +41,7 @@ _ADMIN_ROUTERS = [
     admin_crm_router,
     admin_analytics_router,
     admin_domain_router,
+    admin_home_composer_router,
     admin_media_router,
     admin_rbac_router,
     admin_properties_router,
@@ -68,6 +71,7 @@ def register_routes(app: FastAPI) -> None:
     app.include_router(booking_router)
     app.include_router(domain_router)
     app.include_router(finder_router)
+    app.include_router(home_composer_router)
     app.include_router(smart_finder_router)
     app.include_router(investment_router)
     app.include_router(recommendations_router)
