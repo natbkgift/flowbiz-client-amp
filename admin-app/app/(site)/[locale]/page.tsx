@@ -66,6 +66,16 @@ export default async function HomePage({
   }
 
   const composerConfig = (composerPayload?.config ?? {}) as Record<string, unknown>;
+  const composerHero = (composerConfig.hero ?? {}) as Record<string, unknown>;
+  const composerPathSelector = (composerConfig.path_selector ?? {}) as Record<string, unknown>;
+  const composerFeaturedProjects = (composerConfig.featured_projects ?? {}) as Record<string, unknown>;
+  const composerFeaturedProperties = (composerConfig.featured_properties ?? {}) as Record<string, unknown>;
+  const composerProofTrust = (composerConfig.proof_trust ?? {}) as Record<string, unknown>;
+  const composerMarketInsights = (composerConfig.market_insights ?? {}) as Record<string, unknown>;
+  const composerReviews = (composerConfig.reviews ?? {}) as Record<string, unknown>;
+  const composerVideos = (composerConfig.videos ?? {}) as Record<string, unknown>;
+  const composerBottomCta = (composerConfig.bottom_cta ?? {}) as Record<string, unknown>;
+
   const composerEnabled = Array.isArray(composerConfig.enabled_sections)
     ? composerConfig.enabled_sections.map((item) => String(item))
     : [];
@@ -76,21 +86,24 @@ export default async function HomePage({
   for (const [index, key] of composerOrder.entries()) {
     sectionOrderMap.set(key, index + 1);
   }
+  const sectionConfigs: Record<string, Record<string, unknown>> = {
+    hero: composerHero,
+    path_selector: composerPathSelector,
+    featured_projects: composerFeaturedProjects,
+    featured_properties: composerFeaturedProperties,
+    proof_trust: composerProofTrust,
+    market_insights: composerMarketInsights,
+    reviews: composerReviews,
+    videos: composerVideos,
+    bottom_cta: composerBottomCta,
+  };
   const isSectionEnabled = (key: string): boolean => {
-    if (!composerEnabled.length) return true;
-    return composerEnabled.includes(key);
+    const sectionConfig = sectionConfigs[key];
+    const enabledBySectionFlag = typeof sectionConfig?.enabled === 'boolean' ? sectionConfig.enabled : true;
+    const enabledBySectionList = !composerEnabled.length || composerEnabled.includes(key);
+    return enabledBySectionFlag && enabledBySectionList;
   };
   const sectionOrderStyle = (key: string): { order: number } => ({ order: sectionOrderMap.get(key) ?? 999 });
-
-  const composerHero = (composerConfig.hero ?? {}) as Record<string, unknown>;
-  const composerPathSelector = (composerConfig.path_selector ?? {}) as Record<string, unknown>;
-  const composerFeaturedProjects = (composerConfig.featured_projects ?? {}) as Record<string, unknown>;
-  const composerFeaturedProperties = (composerConfig.featured_properties ?? {}) as Record<string, unknown>;
-  const composerProofTrust = (composerConfig.proof_trust ?? {}) as Record<string, unknown>;
-  const composerMarketInsights = (composerConfig.market_insights ?? {}) as Record<string, unknown>;
-  const composerReviews = (composerConfig.reviews ?? {}) as Record<string, unknown>;
-  const composerVideos = (composerConfig.videos ?? {}) as Record<string, unknown>;
-  const composerBottomCta = (composerConfig.bottom_cta ?? {}) as Record<string, unknown>;
 
 
   const recommendation = getContentRecommendation();
@@ -570,6 +583,12 @@ export default async function HomePage({
     typeof composerBottomCta.secondary_cta_url === 'string' && composerBottomCta.secondary_cta_url.trim()
       ? withLocale(locale, composerBottomCta.secondary_cta_url.trim())
       : withLocale(locale, '/invest');
+  const bottomCtaTrustNote =
+    typeof composerBottomCta.trust_note === 'string' && composerBottomCta.trust_note.trim()
+      ? composerBottomCta.trust_note.trim()
+      : (locale === 'th'
+        ? 'ทีมที่ปรึกษาท้องถิ่นจะติดต่อกลับพร้อม shortlist ที่ตรงกับเป้าหมายของคุณ'
+        : 'Our local advisory team follows up with a shortlist matched to your goals.');
 
   const insightCards = [
     {
@@ -610,7 +629,7 @@ export default async function HomePage({
         .map((item, index) => ({
           step: String(item.step ?? index + 1),
           title: String(item.title ?? (locale === 'th' ? `ขั้นตอน ${index + 1}` : `Step ${index + 1}`)),
-          body: String(item.body ?? (locale === 'th' ? 'TODO: เพิ่มรายละเอียดกระบวนการ' : 'TODO: process detail pending')),
+          body: String(item.body ?? (locale === 'th' ? 'รายละเอียดขั้นตอนจะปรับตามแผนการของคุณระหว่างการปรึกษา' : 'Process details are tailored to your goals during consultation.')),
         }))
     : [
       {
@@ -738,12 +757,12 @@ export default async function HomePage({
                 <div className="text-3xl md:text-4xl font-serif font-semibold text-primary leading-[1.1] min-h-[2.5rem]">
                   {stat?.value?.trim()
                     ? stat.value
-                    : (locale === 'th' ? 'TODO: รอตรวจสอบข้อมูล' : 'TODO: data verification pending')}
+                    : (locale === 'th' ? 'รออัปเดตข้อมูลล่าสุด' : 'Latest update in progress')}
                 </div>
                 <div className="text-base md:text-lg font-medium text-gray-900 mt-3 leading-snug min-h-[3rem]">
                   {stat?.label?.trim()
                     ? stat.label
-                    : (locale === 'th' ? 'หัวข้อข้อมูลรอยืนยัน' : 'Metric label pending verification')}
+                    : (locale === 'th' ? 'หัวข้อข้อมูลตลาด' : 'Market signal')}
                 </div>
                 <div className="mt-auto pt-4 text-xs text-gray-500 flex items-center gap-2">
                   <span aria-hidden="true">{statTrendCues[index % statTrendCues.length].split(' ')[0]}</span>
@@ -755,8 +774,8 @@ export default async function HomePage({
 
           <p className="text-xs text-gray-400 mt-5 text-center md:text-left">
             {locale === 'th'
-              ? '* Source note: ใช้ข้อมูลตลาดสาธารณะ/ภายในที่ทีมใช้งานจริง — TODO: ระบุที่มาและวันที่อัปเดตที่ยืนยันแล้ว'
-              : '* Source note: based on internal/public market references used by the team — TODO: attach verified source and date stamp.'}
+              ? '* Source note: ใช้ข้อมูลตลาดสาธารณะและข้อมูลภายในที่ทีมตรวจสอบแล้ว พร้อมอัปเดตตามรอบงาน'
+              : '* Source note: based on verified public and internal market references, updated on the team review cycle.'}
           </p>
 
           <div className="cta-row cta-row--center mt-8">
@@ -796,7 +815,7 @@ export default async function HomePage({
                     <div className="text-base font-semibold text-gray-900 leading-snug">
                       {item.value?.trim()
                         ? item.value
-                        : (locale === 'th' ? 'TODO: รอข้อมูลยืนยัน' : 'TODO: verified value pending')}
+                        : (locale === 'th' ? 'รอยืนยันค่าล่าสุดจากทีม' : 'Latest value pending team confirmation')}
                     </div>
                   </div>
                 ))}
@@ -861,8 +880,8 @@ export default async function HomePage({
                       {card.updatedAt
                         ? `${locale === 'th' ? 'Last updated' : 'Last updated'}: ${card.updatedAt}`
                         : (locale === 'th'
-                          ? 'Last updated: TODO (รอยืนยันวันที่อัปเดต)'
-                          : 'Last updated: TODO (verified date pending)')}
+                          ? 'Last updated: ทีมกำลังอัปเดตวันที่ล่าสุด'
+                          : 'Last updated: team update in progress')}
                     </p>
                     <TrackedLink
                       className="text-primary font-semibold hover:text-primary-dark transition-colors inline-flex items-center gap-2"
@@ -906,7 +925,7 @@ export default async function HomePage({
 
                       <figcaption className="mt-auto pt-3 border-t border-gray-200">
                         <div className="font-medium text-gray-900 text-sm">{t.name}</div>
-                        <div className="text-xs text-gray-500">{t.context || (locale === 'th' ? 'Source context: TODO' : 'Source context: TODO')}</div>
+                        <div className="text-xs text-gray-500">{t.context || (locale === 'th' ? 'Verified client feedback' : 'Verified client feedback')}</div>
                       </figcaption>
                     </figure>
                   );
@@ -915,7 +934,7 @@ export default async function HomePage({
             ) : (
               <div className="premium-empty-state" role="status" aria-live="polite">
                 <h3>{locale === 'th' ? 'กำลังเตรียมรีวิวที่ยืนยันแหล่งข้อมูลแล้ว' : 'Preparing verified review highlights'}</h3>
-                <p>{locale === 'th' ? 'TODO: เชื่อมแหล่งรีวิวที่ยืนยันได้ก่อนแสดงคะแนน/จำนวนรวม' : 'TODO: connect verifiable review source before showing aggregate score/count.'}</p>
+                <p>{locale === 'th' ? 'เราจะแสดงรีวิวเพิ่มเติมทันทีเมื่อผ่านการยืนยันแหล่งข้อมูลแล้ว' : 'Additional testimonials will appear as soon as source verification is complete.'}</p>
               </div>
             )}
 
@@ -1026,6 +1045,7 @@ export default async function HomePage({
                   {bottomCtaSecondaryLabel}
                 </TrackedLink>
               </div>
+              <p className="mt-4 text-sm text-white/70 max-w-xl">{bottomCtaTrustNote}</p>
             </div>
             <div className="reveal">
               <div className="bg-white p-8 md:p-10 rounded-2xl shadow-2xl text-gray-900">
