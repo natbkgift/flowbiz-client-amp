@@ -99,3 +99,73 @@ class ProjectEvaluationResponse(BaseModel):
     project: ProjectItem
     area_statistics: AreaStatisticsSnapshot | None = None
     badges: list[TrustBadge] = []
+
+
+class ProjectMediaGovernanceMessage(BaseModel):
+    level: str = Field(min_length=1, max_length=16)
+    path: str = Field(min_length=1, max_length=500)
+    detail: str = Field(min_length=1, max_length=500)
+
+
+class ProjectAdminItem(ProjectDetailResponse):
+    media_warnings: list[ProjectMediaGovernanceMessage] = Field(default_factory=list)
+
+
+class AdminProjectListResponse(BaseModel):
+    data: list[ProjectAdminItem]
+    meta: dict[str, int]
+
+
+class ProjectAdminCreate(BaseModel):
+    slug: str = Field(min_length=2, max_length=200)
+    name: str = Field(min_length=1, max_length=300)
+    status: str = Field(default="draft", max_length=32)
+    property_type: str = Field(default="condo", max_length=50)
+
+    delivery_date: date | None = None
+    starting_price: Decimal | None = None
+    cover_image_url: str | None = Field(default=None, max_length=500)
+    hero_image_url: str | None = Field(default=None, max_length=500)
+    images: list[str] | None = None
+
+    summary: dict = Field(default_factory=dict)
+    description: dict | None = None
+    amenities: list | None = None
+    investment_snapshot: dict | None = None
+    location: dict | None = None
+    unit_count: int | None = None
+    floors: int | None = None
+    year_built: int | None = None
+    is_featured: bool = False
+    developer_id: UUID | None = None
+    area_id: UUID | None = None
+
+
+class ProjectAdminUpdate(BaseModel):
+    slug: str | None = Field(default=None, min_length=2, max_length=200)
+    name: str | None = Field(default=None, min_length=1, max_length=300)
+    status: str | None = Field(default=None, max_length=32)
+    property_type: str | None = Field(default=None, max_length=50)
+
+    delivery_date: date | None = None
+    starting_price: Decimal | None = None
+    cover_image_url: str | None = Field(default=None, max_length=500)
+    hero_image_url: str | None = Field(default=None, max_length=500)
+    images: list[str] | None = None
+
+    summary: dict | None = None
+    description: dict | None = None
+    amenities: list | None = None
+    investment_snapshot: dict | None = None
+    location: dict | None = None
+    unit_count: int | None = None
+    floors: int | None = None
+    year_built: int | None = None
+    is_featured: bool | None = None
+    developer_id: UUID | None = None
+    area_id: UUID | None = None
+
+
+class ProjectPublishResponse(BaseModel):
+    project: ProjectAdminItem
+    published: bool

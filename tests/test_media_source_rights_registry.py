@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 import sys
+from collections.abc import Generator
 from pathlib import Path
 from uuid import uuid4
 
@@ -16,7 +17,7 @@ from packages.core.source_rights_registry import build_source_rights_report
 
 
 @pytest.fixture(autouse=True)
-def _cleanup_media_assets() -> None:
+def _cleanup_media_assets() -> Generator[None, None, None]:
     init_db()
     with SessionLocal() as db:
         db.query(MediaAsset).delete()

@@ -9,6 +9,7 @@ from apps.api.routes.admin_domain import router as admin_domain_router
 from apps.api.routes.admin_media import router as admin_media_router
 from apps.api.routes.admin_marketplace import router as admin_marketplace_router
 from apps.api.routes.admin_properties import router as admin_properties_router
+from apps.api.routes.admin_projects import router as admin_projects_router
 from apps.api.routes.admin_rbac import router as admin_rbac_router
 from apps.api.routes.admin_seller import router as admin_seller_router
 from apps.api.routes.auth_me import router as auth_me_router
@@ -41,6 +42,7 @@ _ADMIN_ROUTERS = [
     admin_media_router,
     admin_rbac_router,
     admin_properties_router,
+    admin_projects_router,
 ]
 
 
