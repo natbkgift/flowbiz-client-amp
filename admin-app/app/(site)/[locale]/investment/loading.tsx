@@ -1,6 +1,6 @@
 import { LoadingCardGrid } from '@/components/ui/StateBlocks';
 
-export default function RentLoading() {
+export default function InvestmentLoading() {
   return (
     <main id="main-content" className="section" aria-busy="true">
       <div className="container section-stack">

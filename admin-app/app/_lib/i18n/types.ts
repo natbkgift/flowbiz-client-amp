@@ -390,15 +390,21 @@ export type Dictionary = {
   };
   listing: {
     filtersAndSort: string;
+    applyFilters: string;
     results: string;
     sort: string;
     newest: string;
+    oldest: string;
     priceLowToHigh: string;
     priceHighToLow: string;
     noProperties: string;
     view: string;
     contact: string;
     listings: string;
+    previousPage: string;
+    nextPage: string;
+    pageOf: string;
+    paginationLabel: string;
     viewDetails: string;
     projectsSubtitle: string;
     publishedProjects: string;
@@ -407,12 +413,23 @@ export type Dictionary = {
   };
   filters: {
     heading: string;
+    searchPlaceholder: string;
+    propertyType: string;
+    allPropertyTypes: string;
     priceRange: string;
     min: string;
     max: string;
     bedrooms: string;
+    bathrooms: string;
     studio: string;
     area: string;
+    allAreas: string;
+    project: string;
+    allProjects: string;
+    developer: string;
+    allDevelopers: string;
+    status: string;
+    allStatuses: string;
     clear: string;
     close: string;
   };

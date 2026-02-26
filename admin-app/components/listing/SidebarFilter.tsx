@@ -1,100 +1,79 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
-import { usePathname } from 'next/navigation';
+import type { Dictionary } from '../../app/_lib/i18n/types';
 
-import type { PropertyListItem } from '../../app/public/_shared/types';
-import { en } from '../../app/_lib/i18n/en';
-import { th } from '../../app/_lib/i18n/th';
-import { localeFromPathname } from '../../app/_lib/i18n/routing';
+export type ListingFilters = {
+  search: string;
+  propertyType: string;
+  projectId: string;
+  areaId: string;
+  developerId: string;
+  status: string;
+  beds: string;
+  baths: string;
+  minPrice: string;
+  maxPrice: string;
+};
 
-function parseBedroomsFromTitle(title: string): number | null {
-  const t = (title || '').trim();
-  if (!t) return null;
-  if (/\bstudio\b/i.test(t)) return 0;
-  const m = t.match(/\b(\d{1,2})\s*(?:br|bed|beds|bedroom|bedrooms)\b/i);
-  if (!m) return null;
-  const n = Number(m[1]);
-  return Number.isFinite(n) ? n : null;
-}
+export type ListingFilterOptions = {
+  propertyTypes: { value: string; label: string }[];
+  projects: { value: string; label: string }[];
+  areas: { value: string; label: string }[];
+  developers: { value: string; label: string }[];
+  statuses: { value: string; label: string }[];
+  bedOptions: number[];
+  bathOptions: number[];
+};
 
 export function SidebarFilter({
-  items,
   isOpen,
   onClose,
-  onChange,
+  dict,
+  filters,
+  options,
+  onFiltersChange,
+  onApply,
+  onReset,
 }: {
-  items: PropertyListItem[];
   isOpen: boolean;
   onClose: () => void;
-  onChange: (filtered: PropertyListItem[]) => void;
+  dict: Dictionary;
+  filters: ListingFilters;
+  options: ListingFilterOptions;
+  onFiltersChange: (next: Partial<ListingFilters>) => void;
+  onApply: () => void;
+  onReset: () => void;
 }) {
-  const prices = useMemo(() => items.map((p) => Number(p.price)).filter((n) => Number.isFinite(n)), [items]);
-  const minPrice = prices.length ? Math.min(...prices) : 0;
-  const maxPrice = prices.length ? Math.max(...prices) : 0;
-
-  const [priceMin, setPriceMin] = useState(minPrice);
-  const [priceMax, setPriceMax] = useState(maxPrice);
-  const [beds, setBeds] = useState<Set<number>>(new Set());
-  const [areas, setAreas] = useState<Set<string>>(new Set());
-
-  const bedOptions = useMemo(() => {
-    const set = new Set<number>();
-    for (const p of items) {
-      const b = parseBedroomsFromTitle(p.title);
-      if (b != null) set.add(b);
-    }
-    return Array.from(set).sort((a, b) => a - b);
-  }, [items]);
-
-  const areaOptions = useMemo(() => {
-    const set = new Set<string>();
-    for (const p of items) {
-      const a = (p.city || '').trim();
-      if (a) set.add(a);
-    }
-    return Array.from(set).sort((a, b) => a.localeCompare(b));
-  }, [items]);
-
-  const filtered = useMemo(() => {
-    return items.filter((p) => {
-      const price = Number(p.price);
-      if (Number.isFinite(price)) {
-        if (price < priceMin || price > priceMax) return false;
-      }
-
-      if (beds.size) {
-        const b = parseBedroomsFromTitle(p.title);
-        if (b == null || !beds.has(b)) return false;
-      }
-
-      if (areas.size) {
-        const a = (p.city || '').trim();
-        if (!a || !areas.has(a)) return false;
-      }
-
-      return true;
-    });
-  }, [areas, beds, items, priceMax, priceMin]);
-
-  useEffect(() => {
-    onChange(filtered);
-  }, [filtered, onChange]);
-
-  function clear() {
-    setPriceMin(minPrice);
-    setPriceMax(maxPrice);
-    setBeds(new Set());
-    setAreas(new Set());
-  }
-
-  const pathname = usePathname() ?? '/';
-  const locale = localeFromPathname(pathname);
-  const dict = locale === 'th' ? th : en;
-
   return (
     <aside className={isOpen ? 'filter-sidebar active' : 'filter-sidebar'} aria-label={dict.filters.heading}>
       <h3 className="mb-6">{dict.filters.heading}</h3>
+
+      <div className="filter-section">
+        <h3>{dict.listing.results}</h3>
+        <input
+          className="form-input"
+          type="search"
+          value={filters.search}
+          onChange={(e) => onFiltersChange({ search: e.target.value })}
+          placeholder={dict.filters.searchPlaceholder}
+          aria-label={dict.filters.searchPlaceholder}
+        />
+      </div>
+
+      <div className="filter-section">
+        <h3>{dict.filters.propertyType}</h3>
+        <select
+          className="form-select"
+          value={filters.propertyType}
+          onChange={(e) => onFiltersChange({ propertyType: e.target.value })}
+          aria-label={dict.filters.propertyType}
+        >
+          <option value="">{dict.filters.allPropertyTypes}</option>
+          {options.propertyTypes.map((option) => (
+            <option key={option.value} value={option.value}>{option.label}</option>
+          ))}
+        </select>
+      </div>
 
       <div className="filter-section">
         <h3>{dict.filters.priceRange}</h3>
@@ -104,8 +83,8 @@ export function SidebarFilter({
             <input
               className="form-input"
               inputMode="numeric"
-              value={priceMin}
-              onChange={(e) => setPriceMin(Number(e.target.value) || 0)}
+              value={filters.minPrice}
+              onChange={(e) => onFiltersChange({ minPrice: e.target.value })}
             />
           </label>
           <label>
@@ -113,8 +92,8 @@ export function SidebarFilter({
             <input
               className="form-input"
               inputMode="numeric"
-              value={priceMax}
-              onChange={(e) => setPriceMax(Number(e.target.value) || 0)}
+              value={filters.maxPrice}
+              onChange={(e) => onFiltersChange({ maxPrice: e.target.value })}
             />
           </label>
         </div>
@@ -123,21 +102,14 @@ export function SidebarFilter({
       <div className="filter-section">
         <h3>{dict.filters.bedrooms}</h3>
         <div className="chips-group">
-          {bedOptions.map((b) => {
-            const active = beds.has(b);
+          {options.bedOptions.map((b) => {
+            const active = filters.beds === String(b);
             return (
               <button
                 key={b}
                 type="button"
                 className={active ? 'chip active' : 'chip'}
-                onClick={() => {
-                  setBeds((prev) => {
-                    const next = new Set(prev);
-                    if (next.has(b)) next.delete(b);
-                    else next.add(b);
-                    return next;
-                  });
-                }}
+                onClick={() => onFiltersChange({ beds: active ? '' : String(b) })}
               >
                 {b === 0 ? dict.filters.studio : b}
               </button>
@@ -147,31 +119,90 @@ export function SidebarFilter({
       </div>
 
       <div className="filter-section">
-        <h3>{dict.filters.area}</h3>
-        <div className="checkbox-group">
-          {areaOptions.slice(0, 12).map((a) => (
-            <label key={a} className="checkbox-label">
-              <input
-                type="checkbox"
-                checked={areas.has(a)}
-                onChange={() => {
-                  setAreas((prev) => {
-                    const next = new Set(prev);
-                    if (next.has(a)) next.delete(a);
-                    else next.add(a);
-                    return next;
-                  });
-                }}
-              />
-              <span>{a}</span>
-            </label>
-          ))}
+        <h3>{dict.filters.bathrooms}</h3>
+        <div className="chips-group">
+          {options.bathOptions.map((b) => {
+            const active = filters.baths === String(b);
+            return (
+              <button
+                key={b}
+                type="button"
+                className={active ? 'chip active' : 'chip'}
+                onClick={() => onFiltersChange({ baths: active ? '' : String(b) })}
+              >
+                {b}
+              </button>
+            );
+          })}
         </div>
       </div>
 
+      <div className="filter-section">
+        <h3>{dict.filters.area}</h3>
+        <select
+          className="form-select"
+          value={filters.areaId}
+          onChange={(e) => onFiltersChange({ areaId: e.target.value })}
+          aria-label={dict.filters.area}
+        >
+          <option value="">{dict.filters.allAreas}</option>
+          {options.areas.map((option) => (
+            <option key={option.value} value={option.value}>{option.label}</option>
+          ))}
+        </select>
+      </div>
+
+      <div className="filter-section">
+        <h3>{dict.filters.project}</h3>
+        <select
+          className="form-select"
+          value={filters.projectId}
+          onChange={(e) => onFiltersChange({ projectId: e.target.value })}
+          aria-label={dict.filters.project}
+        >
+          <option value="">{dict.filters.allProjects}</option>
+          {options.projects.map((option) => (
+            <option key={option.value} value={option.value}>{option.label}</option>
+          ))}
+        </select>
+      </div>
+
+      <div className="filter-section">
+        <h3>{dict.filters.developer}</h3>
+        <select
+          className="form-select"
+          value={filters.developerId}
+          onChange={(e) => onFiltersChange({ developerId: e.target.value })}
+          aria-label={dict.filters.developer}
+        >
+          <option value="">{dict.filters.allDevelopers}</option>
+          {options.developers.map((option) => (
+            <option key={option.value} value={option.value}>{option.label}</option>
+          ))}
+        </select>
+      </div>
+
+      <div className="filter-section">
+        <h3>{dict.filters.status}</h3>
+        <select
+          className="form-select"
+          value={filters.status}
+          onChange={(e) => onFiltersChange({ status: e.target.value })}
+          aria-label={dict.filters.status}
+        >
+          <option value="">{dict.filters.allStatuses}</option>
+          {options.statuses.map((option) => (
+            <option key={option.value} value={option.value}>{option.label}</option>
+          ))}
+        </select>
+      </div>
+
       <div className="flex gap-3">
-        <button type="button" className="btn btn-secondary btn-block" onClick={clear}>
+        <button type="button" className="btn btn-secondary btn-block" onClick={onReset}>
           {dict.filters.clear}
+        </button>
+        <button type="button" className="btn btn-primary btn-block" onClick={onApply}>
+          {dict.listing.applyFilters}
         </button>
         <button type="button" className="btn btn-primary btn-block mobile-only" onClick={onClose}>
           {dict.filters.close}

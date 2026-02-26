@@ -20,6 +20,15 @@ export type PropertyListItem = {
   price: number;
   address: string;
   city: string;
+  bedrooms?: number | null;
+  bathrooms?: number | null;
+  size_sqm?: number | null;
+  property_type?: string | null;
+  area_id?: string | null;
+  developer_id?: string | null;
+  view_label?: string | null;
+  tags?: string[] | null;
+  created_at?: string;
   images: string[] | null;
   local_images?: string[] | null;
   cover_image?: string | null;
