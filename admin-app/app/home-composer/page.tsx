@@ -602,13 +602,19 @@ export default function HomeComposerPage() {
               </div>
               <div className="max-h-52 overflow-auto rounded-md border border-slate-200 p-2">
                 {projectCandidates.map((item) => (
-                  <label key={item.id} className="flex items-start gap-2 rounded px-2 py-1 text-sm hover:bg-slate-50">
-                    <input type="checkbox" checked={selectedProjectIds.has(item.id)} onChange={() => toggleProjectSelection(item.id)} />
-                    <span>
-                      <span className="font-medium text-slate-800">{item.name}</span>
+                  <div key={item.id} className="flex items-start gap-2 rounded px-2 py-1 text-sm hover:bg-slate-50">
+                    <input
+                      id={`featured-project-${item.id}`}
+                      type="checkbox"
+                      checked={selectedProjectIds.has(item.id)}
+                      onChange={() => toggleProjectSelection(item.id)}
+                      aria-label={`Select project ${item.name || item.slug || item.id}`}
+                    />
+                    <label htmlFor={`featured-project-${item.id}`} className="cursor-pointer">
+                      <span className="font-medium text-slate-800">{item.name || item.slug || item.id}</span>
                       <span className="ml-2 text-xs text-slate-500">{item.slug} · {item.status}</span>
-                    </span>
-                  </label>
+                    </label>
+                  </div>
                 ))}
               </div>
             </article>
@@ -628,13 +634,19 @@ export default function HomeComposerPage() {
               </div>
               <div className="max-h-52 overflow-auto rounded-md border border-slate-200 p-2">
                 {propertyCandidates.map((item) => (
-                  <label key={item.id} className="flex items-start gap-2 rounded px-2 py-1 text-sm hover:bg-slate-50">
-                    <input type="checkbox" checked={selectedPropertyIds.has(item.id)} onChange={() => togglePropertySelection(item.id)} />
-                    <span>
-                      <span className="font-medium text-slate-800">{item.title}</span>
+                  <div key={item.id} className="flex items-start gap-2 rounded px-2 py-1 text-sm hover:bg-slate-50">
+                    <input
+                      id={`featured-property-${item.id}`}
+                      type="checkbox"
+                      checked={selectedPropertyIds.has(item.id)}
+                      onChange={() => togglePropertySelection(item.id)}
+                      aria-label={`Select property ${item.title || item.source_id || item.id}`}
+                    />
+                    <label htmlFor={`featured-property-${item.id}`} className="cursor-pointer">
+                      <span className="font-medium text-slate-800">{item.title || item.source_id || item.id}</span>
                       <span className="ml-2 text-xs text-slate-500">{item.source_id} · {item.status} · {item.type}</span>
-                    </span>
-                  </label>
+                    </label>
+                  </div>
                 ))}
               </div>
             </article>
