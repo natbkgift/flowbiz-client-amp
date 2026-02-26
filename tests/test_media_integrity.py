@@ -295,6 +295,42 @@ def test_run_scan_returns_integrity_report(tmp_path: Path) -> None:
     assert report.summary.scanned_at != ""
 
 
+def test_orphan_file_detection_reports_warn_and_count(tmp_path: Path) -> None:
+    """Unreferenced files in media storage are reported as orphan_file warnings."""
+    _set_test_media_dir(tmp_path)
+    media_root = Path(settings.media_storage_dir)
+    orphan = media_root / "library" / "orphan-a.jpg"
+    orphan.parent.mkdir(parents=True, exist_ok=True)
+    orphan.write_bytes(b"orphan")
+
+    with SessionLocal() as db:
+        report = run_scan(db)
+
+    assert report.summary.orphan_file_count == 1
+    orphan_findings = [f for f in report.findings if f.category == "orphan_file"]
+    assert len(orphan_findings) == 1
+    assert orphan_findings[0].severity == SEVERITY_WARN
+    assert orphan_findings[0].value.endswith("/library/orphan-a.jpg")
+
+
+def test_orphan_file_detection_respects_sample_limit(tmp_path: Path) -> None:
+    """Orphan sample findings are capped while total orphan count remains accurate."""
+    _set_test_media_dir(tmp_path)
+    media_root = Path(settings.media_storage_dir)
+    for name in ["orphan-1.jpg", "orphan-2.jpg", "orphan-3.jpg"]:
+        target = media_root / "library" / name
+        target.parent.mkdir(parents=True, exist_ok=True)
+        target.write_bytes(b"orphan")
+
+    with SessionLocal() as db:
+        report = run_scan(db, orphan_sample_limit=2)
+
+    assert report.summary.orphan_file_count == 3
+    assert report.summary.orphan_file_sample_count == 2
+    orphan_findings = [f for f in report.findings if f.category == "orphan_file"]
+    assert len(orphan_findings) == 2
+
+
 # ---------------------------------------------------------------------------
 # 8. CLI strict-mode exit code
 # ---------------------------------------------------------------------------

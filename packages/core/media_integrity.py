@@ -16,10 +16,8 @@ Supports:
 """
 from __future__ import annotations
 
-import hashlib
 import json
 import mimetypes
-import os
 from collections import defaultdict
 from dataclasses import asdict, dataclass, field
 from datetime import datetime, timezone
@@ -98,6 +96,8 @@ class IntegritySummary:
     empty_file_count: int = 0
     mime_ext_mismatch_count: int = 0
     duplicate_checksum_groups: int = 0
+    orphan_file_count: int = 0
+    orphan_file_sample_count: int = 0
     error_count: int = 0
     warn_count: int = 0
     info_count: int = 0
@@ -182,7 +182,7 @@ def _disk_ext(path_str: str) -> str:
 # ---------------------------------------------------------------------------
 
 
-def run_scan(db: Session) -> IntegrityReport:
+def run_scan(db: Session, *, orphan_sample_limit: int = 20) -> IntegrityReport:
     """Execute full integrity scan and return IntegrityReport.
 
     This is the main entry point used by the CLI and the admin API endpoint.
@@ -191,8 +191,11 @@ def run_scan(db: Session) -> IntegrityReport:
     report = IntegrityReport()
     report.summary.scanned_at = datetime.now(timezone.utc).isoformat()
 
-    _scan_media_assets(db, report)
-    _scan_entity_image_fields(db, report)
+    referenced_local_paths: set[str] = set()
+
+    _scan_media_assets(db, report, referenced_local_paths)
+    _scan_entity_image_fields(db, report, referenced_local_paths)
+    _scan_orphan_files(report, referenced_local_paths, sample_limit=orphan_sample_limit)
 
     return report
 
@@ -202,7 +205,7 @@ def run_scan(db: Session) -> IntegrityReport:
 # ---------------------------------------------------------------------------
 
 
-def _scan_media_assets(db: Session, report: IntegrityReport) -> None:
+def _scan_media_assets(db: Session, report: IntegrityReport, referenced_local_paths: set[str]) -> None:
     rows = db.execute(
         text(
             "SELECT id, storage_path, mime_type, file_size_bytes, checksum_sha256, status "
@@ -244,6 +247,8 @@ def _scan_media_assets(db: Session, report: IntegrityReport) -> None:
                 ))
             report.summary.invalid_path_format_count += 1
             continue
+
+        referenced_local_paths.add(path_val)
 
         # 2) File existence + size
         disk_path = _local_path_to_disk(path_val)
@@ -312,7 +317,7 @@ def _scan_media_assets(db: Session, report: IntegrityReport) -> None:
 # ---------------------------------------------------------------------------
 
 
-def _scan_entity_image_fields(db: Session, report: IntegrityReport) -> None:
+def _scan_entity_image_fields(db: Session, report: IntegrityReport, referenced_local_paths: set[str]) -> None:
     prefix = _media_public_prefix()
 
     for (table, id_col, img_field, field_type) in ENTITY_IMAGE_FIELDS:
@@ -379,6 +384,7 @@ def _scan_entity_image_fields(db: Session, report: IntegrityReport) -> None:
                     report.summary.external_leakage_count += 1
 
                 elif _is_local_media_path(val):
+                    referenced_local_paths.add(val)
                     disk_path = _local_path_to_disk(val)
                     exists, _ = _check_disk_file(disk_path)
                     if not exists:
@@ -393,6 +399,47 @@ def _scan_entity_image_fields(db: Session, report: IntegrityReport) -> None:
                         report.summary.missing_file_count += 1
                     else:
                         report.summary.local_paths_ok += 1
+
+
+def _scan_orphan_files(
+    report: IntegrityReport,
+    referenced_local_paths: set[str],
+    *,
+    sample_limit: int = 20,
+) -> None:
+    base_dir = _media_base_dir()
+    if not base_dir.exists():
+        return
+
+    sample_taken = 0
+    prefix = _media_public_prefix()
+
+    for disk_file in base_dir.rglob("*"):
+        if not disk_file.is_file():
+            continue
+
+        try:
+            rel = disk_file.relative_to(base_dir)
+        except ValueError:
+            continue
+
+        local_path = f"{prefix}/{rel.as_posix()}"
+        if local_path in referenced_local_paths:
+            continue
+
+        report.summary.orphan_file_count += 1
+        if sample_taken < max(0, sample_limit):
+            report.add(IntegrityFinding(
+                severity=SEVERITY_WARN,
+                category="orphan_file",
+                entity="filesystem.media",
+                record_id=rel.as_posix(),
+                value=local_path,
+                detail="File exists in media storage but is not referenced by media_assets or scanned entity fields",
+            ))
+            sample_taken += 1
+
+    report.summary.orphan_file_sample_count = sample_taken
 
 
 # ---------------------------------------------------------------------------
@@ -416,6 +463,7 @@ def print_console_summary(report: IntegrityReport, *, verbose: bool = False) -> 
         f"  Empty files            : {s.empty_file_count}",
         f"  MIME/ext mismatches    : {s.mime_ext_mismatch_count}  [warn]",
         f"  Duplicate checksum grp : {s.duplicate_checksum_groups}  [warn]",
+        f"  Orphan files           : {s.orphan_file_count}  [warn] (sampled: {s.orphan_file_sample_count})",
         "  ----------------------------------------",
         f"  ERRORS   : {s.error_count}",
         f"  WARNINGS : {s.warn_count}",
