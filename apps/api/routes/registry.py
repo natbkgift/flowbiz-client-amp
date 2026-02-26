@@ -6,6 +6,7 @@ from apps.api.routes import admin, health
 from apps.api.routes.admin_analytics_v2 import router as admin_analytics_router
 from apps.api.routes.admin_crm import router as admin_crm_router
 from apps.api.routes.admin_domain import router as admin_domain_router
+from apps.api.routes.admin_media import router as admin_media_router
 from apps.api.routes.admin_marketplace import router as admin_marketplace_router
 from apps.api.routes.admin_properties import router as admin_properties_router
 from apps.api.routes.admin_rbac import router as admin_rbac_router
@@ -37,6 +38,7 @@ _ADMIN_ROUTERS = [
     admin_crm_router,
     admin_analytics_router,
     admin_domain_router,
+    admin_media_router,
     admin_rbac_router,
     admin_properties_router,
 ]

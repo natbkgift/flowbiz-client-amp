@@ -149,6 +149,14 @@ const nextConfig = {
         source: '/analytics/:path*',
         headers: [{ key: 'X-Robots-Tag', value: 'noindex, nofollow' }],
       },
+      {
+        source: '/media',
+        headers: [{ key: 'X-Robots-Tag', value: 'noindex, nofollow' }],
+      },
+      {
+        source: '/media/:path*',
+        headers: [{ key: 'X-Robots-Tag', value: 'noindex, nofollow' }],
+      },
     ];
   },
   // Blueprint doc 02 — URL STRUCTURE: 301 redirects for old/renamed slugs.

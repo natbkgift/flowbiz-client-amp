@@ -740,7 +740,7 @@ class Inquiry(Base):
     status: Mapped[str] = mapped_column(String(32), nullable=False, default="new")
 
     created_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), nullable=False, server_default=func.now(), index=True
+        DateTime(timezone=True), nullable=False, server_default=func.now()
     )
     updated_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
@@ -766,7 +766,7 @@ class LeadAssignment(Base):
     )
     reason: Mapped[str | None] = mapped_column(String(200), nullable=True)
     created_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), nullable=False, server_default=func.now(), index=True
+        DateTime(timezone=True), nullable=False, server_default=func.now()
     )
 
 
@@ -907,6 +907,54 @@ class CompanyInfo(Base):
     content: Mapped[str] = mapped_column(Text, nullable=False)
     meta_title: Mapped[str | None] = mapped_column(String(255), nullable=True)
     meta_description: Mapped[str | None] = mapped_column(String(500), nullable=True)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), nullable=False, server_default=func.now()
+    )
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        nullable=False,
+        server_default=func.now(),
+        onupdate=func.now(),
+    )
+
+
+class MediaAsset(Base):
+    __tablename__ = "media_assets"
+    __table_args__ = (
+        Index("ix_media_assets_status", "status"),
+        Index("ix_media_assets_created_at", "created_at"),
+        Index("ix_media_assets_source_domain", "source_domain"),
+        Index("ix_media_assets_checksum_sha256", "checksum_sha256"),
+    )
+
+    id: Mapped[UUID] = mapped_column(primary_key=True, default=uuid4)
+    storage_path: Mapped[str] = mapped_column(String(500), nullable=False, unique=True)
+    kind: Mapped[str] = mapped_column(String(32), nullable=False, default="image")
+    mime_type: Mapped[str] = mapped_column(String(120), nullable=False)
+    file_size_bytes: Mapped[int] = mapped_column(Integer, nullable=False)
+    width: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    height: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    checksum_sha256: Mapped[str] = mapped_column(String(64), nullable=False)
+
+    title: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    alt_text_en: Mapped[str | None] = mapped_column(String(500), nullable=True)
+    alt_text_th: Mapped[str | None] = mapped_column(String(500), nullable=True)
+    caption_en: Mapped[str | None] = mapped_column(Text, nullable=True)
+    caption_th: Mapped[str | None] = mapped_column(Text, nullable=True)
+    tags: Mapped[list | None] = mapped_column(JSONB, nullable=True)
+
+    source_url: Mapped[str | None] = mapped_column(String(1000), nullable=True)
+    source_domain: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    source_type: Mapped[str | None] = mapped_column(String(64), nullable=True)
+    rights_status: Mapped[str | None] = mapped_column(String(64), nullable=True)
+    credit: Mapped[str | None] = mapped_column(String(255), nullable=True)
+
+    focal_x: Mapped[Decimal | None] = mapped_column(Numeric(5, 2), nullable=True)
+    focal_y: Mapped[Decimal | None] = mapped_column(Numeric(5, 2), nullable=True)
+
+    status: Mapped[str] = mapped_column(
+        String(32), nullable=False, default="active", server_default="active"
+    )
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), nullable=False, server_default=func.now()
     )

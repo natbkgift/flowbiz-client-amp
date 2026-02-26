@@ -11,6 +11,7 @@ export const ADMIN_LABELS = {
     analytics: 'Analytics',
     inquiries: 'Inquiries',
     leads: 'Leads',
+    media: 'Media Library',
   },
   logout: 'Logout',
   logoutAria: 'Log out of admin panel',

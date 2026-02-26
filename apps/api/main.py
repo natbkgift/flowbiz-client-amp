@@ -151,6 +151,10 @@ app.middleware("http")(rate_limit_middleware)
 
 register_routes(app)
 
+media_dir = Path(settings.media_storage_dir_resolved).resolve()
+media_dir.mkdir(parents=True, exist_ok=True)
+app.mount(settings.media_public_prefix, StaticFiles(directory=media_dir), name="media")
+
 
 def bootstrap_admin_user() -> None:
     db = SessionLocal()

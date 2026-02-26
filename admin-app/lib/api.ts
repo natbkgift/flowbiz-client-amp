@@ -19,7 +19,8 @@ export async function apiRequest<T>(path: string, init?: RequestInit): Promise<T
   const headers = new Headers(init?.headers ?? {});
 
   const method = (init?.method ?? 'GET').toUpperCase();
-  if (method !== 'GET' && method !== 'HEAD') {
+  const isFormData = typeof FormData !== 'undefined' && init?.body instanceof FormData;
+  if (method !== 'GET' && method !== 'HEAD' && !isFormData) {
     headers.set('Content-Type', 'application/json');
   }
 

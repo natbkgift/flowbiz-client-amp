@@ -83,6 +83,36 @@ class Settings(BaseSettings):
     events_rate_limit_per_minute: int = 120
     events_max_payload_bytes: int = 8192
 
+    # Media Library (B1)
+    media_storage_dir: str | None = Field(
+        default=None,
+        validation_alias=AliasChoices("MEDIA_STORAGE_DIR"),
+    )
+    media_storage_dir_local: str = Field(
+        default="./storage/media",
+        validation_alias=AliasChoices("MEDIA_STORAGE_DIR_LOCAL"),
+    )
+    media_storage_dir_vps: str = Field(
+        default="/opt/flowbiz/storage/media",
+        validation_alias=AliasChoices("MEDIA_STORAGE_DIR_VPS"),
+    )
+    media_public_prefix: str = Field(
+        default="/media",
+        validation_alias=AliasChoices("MEDIA_PUBLIC_PREFIX"),
+    )
+    media_max_upload_bytes: int = Field(
+        default=10 * 1024 * 1024,
+        validation_alias=AliasChoices("MEDIA_MAX_UPLOAD_BYTES"),
+    )
+
+    @property
+    def media_storage_dir_resolved(self) -> str:
+        if self.media_storage_dir and self.media_storage_dir.strip():
+            return self.media_storage_dir.strip()
+        if self.app_env == "prod":
+            return self.media_storage_dir_vps
+        return self.media_storage_dir_local
+
     @model_validator(mode="after")
     def _check_production_secrets(self) -> "Settings":
         """Refuse to start with dangerous defaults outside dev/test."""
