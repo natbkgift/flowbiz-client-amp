@@ -61,7 +61,7 @@ export function Gallery({ images, alt = 'Gallery photo', className = '' }: Galle
             <button
               type="button"
               onClick={(e) => { e.stopPropagation(); prev(); }}
-              className="absolute left-2 top-1/2 -translate-y-1/2 rounded-full bg-black/40 p-2 text-white hover:bg-black/60"
+              className="absolute left-2 top-1/2 -translate-y-1/2 rounded-full bg-black/40 p-2 text-white hover:bg-black/60 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
               aria-label="Previous image"
             >
               &#8249;
@@ -69,7 +69,7 @@ export function Gallery({ images, alt = 'Gallery photo', className = '' }: Galle
             <button
               type="button"
               onClick={(e) => { e.stopPropagation(); next(); }}
-              className="absolute right-2 top-1/2 -translate-y-1/2 rounded-full bg-black/40 p-2 text-white hover:bg-black/60"
+              className="absolute right-2 top-1/2 -translate-y-1/2 rounded-full bg-black/40 p-2 text-white hover:bg-black/60 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
               aria-label="Next image"
             >
               &#8250;
@@ -87,7 +87,9 @@ export function Gallery({ images, alt = 'Gallery photo', className = '' }: Galle
               type="button"
               onClick={() => setActiveIndex(idx)}
               className={`gallery-thumbnail relative h-16 w-20 flex-shrink-0 overflow-hidden rounded-lg border-2 transition ${
-                idx === activeIndex ? 'border-[var(--color-primary)]' : 'border-transparent opacity-70 hover:opacity-100'
+                idx === activeIndex
+                  ? 'border-[var(--color-primary)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-primary)]'
+                  : 'border-transparent opacity-70 hover:opacity-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-primary)]'
               }`}
               aria-label={`View photo ${idx + 1}`}
             >
@@ -107,7 +109,7 @@ export function Gallery({ images, alt = 'Gallery photo', className = '' }: Galle
         >
           <button
             type="button"
-            className="absolute right-4 top-4 text-3xl text-white hover:text-gray-300"
+            className="absolute right-4 top-4 text-3xl text-white hover:text-gray-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
             onClick={() => setLightboxOpen(false)}
             aria-label="Close lightbox"
           >
@@ -127,7 +129,7 @@ export function Gallery({ images, alt = 'Gallery photo', className = '' }: Galle
               <button
                 type="button"
                 onClick={(e) => { e.stopPropagation(); prev(); }}
-                className="absolute left-4 top-1/2 -translate-y-1/2 rounded-full bg-white/20 p-3 text-2xl text-white hover:bg-white/40"
+                className="absolute left-4 top-1/2 -translate-y-1/2 rounded-full bg-white/20 p-3 text-2xl text-white hover:bg-white/40 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
                 aria-label="Previous image"
               >
                 &#8249;
@@ -135,7 +137,7 @@ export function Gallery({ images, alt = 'Gallery photo', className = '' }: Galle
               <button
                 type="button"
                 onClick={(e) => { e.stopPropagation(); next(); }}
-                className="absolute right-4 top-1/2 -translate-y-1/2 rounded-full bg-white/20 p-3 text-2xl text-white hover:bg-white/40"
+                className="absolute right-4 top-1/2 -translate-y-1/2 rounded-full bg-white/20 p-3 text-2xl text-white hover:bg-white/40 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
                 aria-label="Next image"
               >
                 &#8250;

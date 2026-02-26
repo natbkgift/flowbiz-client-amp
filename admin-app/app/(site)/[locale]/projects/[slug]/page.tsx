@@ -6,15 +6,45 @@ import { Container } from '@/components/layout/Container';
 import { TrackedLink } from '@/components/analytics/TrackedLink';
 import { ProjectDeepReview } from '@/components/projects/ProjectDeepReview';
 import { ProjectUnitTabs } from '@/components/projects/ProjectUnitTabs';
+import { ProjectCard } from '@/components/project/ProjectCard';
 import { Gallery } from '@/components/media/Gallery';
 import { LeadForm } from '@/components/forms/LeadForm';
+import { EmptyStateCard } from '@/components/ui/StateBlocks';
 import { getDictionary, normalizeLocale } from '@/app/_lib/i18n/get-dictionary';
 import { withLocale, ogLocale } from '@/app/_lib/i18n/routing';
-import { fetchProjectBySlug, fetchProjectEvaluation, fetchProperties } from '@/app/_lib/public-api-server';
+import {
+  fetchAreaBySlug,
+  fetchAreas,
+  fetchDeveloperBySlug,
+  fetchDevelopers,
+  fetchProjectBySlug,
+  fetchProjectEvaluation,
+  fetchProjects,
+  fetchProperties,
+} from '@/app/_lib/public-api-server';
 import { resolveImageUrl } from '@/app/_lib/public-api-shared';
 import { getInternalLinks } from '@/app/_lib/internal-links';
 
 export const revalidate = 300;
+
+function pickLocalizedText(
+  localized: Record<string, string> | null | undefined,
+  locale: 'en' | 'th',
+): string {
+  return localized?.[locale]?.trim() || localized?.en?.trim() || localized?.th?.trim() || '';
+}
+
+function toLocalProjectImage(input: string | null | undefined): string | null {
+  const resolved = resolveImageUrl(input);
+  if (!resolved) return null;
+  if (resolved.startsWith('/media/')) return resolved;
+  if (resolved.startsWith('/images/')) return resolved;
+  return null;
+}
+
+function uniqStrings(values: Array<string | null | undefined>): string[] {
+  return Array.from(new Set(values.filter((v): v is string => Boolean(v))));
+}
 
 export async function generateMetadata({
   params,
@@ -27,15 +57,18 @@ export async function generateMetadata({
   const canonical = `/${locale}/projects/${encodeURIComponent(slug)}`;
 
   let projectName: string | null = null;
+  let projectDescription: string | null = null;
   try {
     const project = await fetchProjectBySlug(slug);
     projectName = project?.name ?? null;
+    projectDescription = pickLocalizedText(project?.summary ?? project?.description, locale);
   } catch {
     projectName = null;
+    projectDescription = null;
   }
 
   const title = projectName ? `${projectName} | ${dict.brand.name}` : `${dict.brand.name} | ${dict.nav.projects}`;
-  const description = dict.property.projectMetaDescription;
+  const description = projectDescription || dict.property.projectMetaDescription;
   return {
     title,
     description,
@@ -106,32 +139,86 @@ export default async function ProjectDetailPage({
     );
   }
 
-  // Fetch project units and evaluation in parallel
-  const [evaluation, unitsResult] = await Promise.all([
+  const [evaluation, unitsResult, areasResult, developersResult, projectsResult] = await Promise.all([
     fetchProjectEvaluation(project.id).catch(() => null),
     fetchProperties({ project_id: project.id, limit: 100 }).catch(() => ({
       data: [],
       meta: { page: 1, limit: 100, total: 0 },
     })),
+    fetchAreas().catch(() => []),
+    fetchDevelopers().catch(() => []),
+    fetchProjects({ limit: 200 }).catch(() => []),
   ]);
 
   const units = unitsResult.data ?? [];
+  const areas = areasResult ?? [];
+  const developers = developersResult ?? [];
+  const allProjects = projectsResult ?? [];
 
-  // Project images
-  const projectImages = (project.images ?? [])
-    .map((u: string) => resolveImageUrl(u))
-    .filter((v): v is string => Boolean(v));
-  const coverImg = project.cover_image_url ? resolveImageUrl(project.cover_image_url) : null;
-  const galleryImages = coverImg
-    ? [coverImg, ...projectImages.filter((u) => u !== coverImg)]
-    : projectImages;
+  const areaById = new Map(areas.map((a) => [a.id, a]));
+  const developerById = new Map(developers.map((d) => [d.id, d]));
+  const area = project.area_id ? areaById.get(project.area_id) ?? null : null;
+  const developer = project.developer_id ? developerById.get(project.developer_id) ?? null : null;
 
-  // Localized content
-  const summary = project.summary?.[locale] ?? project.summary?.en ?? '';
-  const description = project.description?.[locale] ?? project.description?.en ?? '';
+  const relatedProjects = allProjects
+    .filter((candidate) => candidate.slug !== project.slug)
+    .filter((candidate) =>
+      (project.area_id && candidate.area_id === project.area_id)
+      || (project.developer_id && candidate.developer_id === project.developer_id)
+    )
+    .slice(0, 6);
+
+  const [areaDetail, developerDetail] = await Promise.all([
+    area?.slug ? fetchAreaBySlug(area.slug).catch(() => null) : Promise.resolve(null),
+    developer?.slug ? fetchDeveloperBySlug(developer.slug).catch(() => null) : Promise.resolve(null),
+  ]);
+
+  const localHero = toLocalProjectImage(project.hero_image_url);
+  const localCover = toLocalProjectImage(project.cover_image_url);
+  const localGallery = uniqStrings((project.images ?? []).map((u) => toLocalProjectImage(u)));
+  const heroImage = localHero ?? localCover ?? localGallery[0] ?? '/images/project-overview.png';
+  const galleryImages = uniqStrings([heroImage, ...localGallery]);
+
+  const summary = pickLocalizedText(project.summary, locale)
+    || (locale === 'th'
+      ? 'โครงการนี้มีข้อมูลหลักพร้อมให้คุณเริ่มเปรียบเทียบและนัดหมายเข้าชม'
+      : 'This project has core information ready for comparison and private viewing.');
+  const description = pickLocalizedText(project.description, locale)
+    || (locale === 'th'
+      ? 'ขณะนี้กำลังอัปเดตรายละเอียดฉบับเต็มของโครงการ ทีมที่ปรึกษาสามารถช่วยคัดยูนิตและข้อมูลลงทุนที่เหมาะกับเป้าหมายของคุณได้'
+      : 'Full long-form project details are being updated. Our advisors can help you shortlist suitable units and investment data now.');
   const amenities = project.amenities ?? [];
   const location = project.location ?? null;
   const investment = project.investment_snapshot ?? null;
+
+  const statusLabel = project.status
+    ? project.status.charAt(0).toUpperCase() + project.status.slice(1)
+    : null;
+
+  const quickFacts = [
+    { key: 'status', label: locale === 'th' ? 'สถานะ' : 'Status', value: statusLabel },
+    {
+      key: 'starting_price',
+      label: locale === 'th' ? 'ราคาเริ่มต้น' : 'Starting price',
+      value: project.starting_price ? formatPriceTHB(Number(project.starting_price)) : null,
+    },
+    { key: 'type', label: locale === 'th' ? 'ประเภท' : 'Type', value: project.property_type || null },
+    {
+      key: 'units',
+      label: locale === 'th' ? 'จำนวนยูนิต' : 'Units',
+      value: project.unit_count ? String(project.unit_count) : null,
+    },
+    {
+      key: 'floors',
+      label: locale === 'th' ? 'จำนวนชั้น' : 'Floors',
+      value: project.floors ? String(project.floors) : null,
+    },
+    {
+      key: 'delivery',
+      label: locale === 'th' ? 'กำหนดส่งมอบ' : 'Delivery',
+      value: project.delivery_date || null,
+    },
+  ].filter((item) => item.value);
 
   const jsonLd = JSON.stringify(
     [
@@ -198,103 +285,97 @@ export default async function ProjectDetailPage({
           ]}
         />
 
-        {/* Gallery */}
-        {galleryImages.length > 0 ? (
-          <div className="mb-6">
+        <section className="mb-6 grid gap-6 lg:grid-cols-[1.45fr_1fr]">
+          <div className="rounded-xl bg-[var(--color-surface)] p-3">
             <Gallery images={galleryImages} alt={project.name} />
           </div>
+
+          <aside className="rounded-xl bg-[var(--color-white)] p-5">
+            <h1 className="section-title mb-2">{project.name}</h1>
+            <p className="section-subtitle mb-4">{summary}</p>
+
+            <div className="mb-4 grid gap-2 text-sm text-[var(--color-text-muted)]">
+              {areaDetail?.area?.slug ? (
+                <div>
+                  <span className="font-semibold text-[var(--color-text)]">{locale === 'th' ? 'พื้นที่: ' : 'Area: '}</span>
+                  <Link className="link" href={withLocale(locale, `/areas/${areaDetail.area.slug}`)}>
+                    {areaDetail.area.name}
+                  </Link>
+                </div>
+              ) : null}
+              {developerDetail?.developer?.slug ? (
+                <div>
+                  <span className="font-semibold text-[var(--color-text)]">{locale === 'th' ? 'ผู้พัฒนา: ' : 'Developer: '}</span>
+                  <Link className="link" href={withLocale(locale, `/developers/${developerDetail.developer.slug}`)}>
+                    {developerDetail.developer.name}
+                  </Link>
+                </div>
+              ) : null}
+            </div>
+
+            <div className="mb-5 grid grid-cols-2 gap-2">
+              {quickFacts.slice(0, 4).map((fact) => (
+                <div key={fact.key} className="rounded-lg border border-[var(--color-border)] p-2">
+                  <div className="text-xs text-[var(--color-text-muted)]">{fact.label}</div>
+                  <div className="text-sm font-semibold text-[var(--color-text)]">{fact.value}</div>
+                </div>
+              ))}
+            </div>
+
+            <div className="flex flex-wrap gap-2">
+              <TrackedLink
+                className="btn btn-cta"
+                href={withLocale(locale, `/contact?topic=project_detail&project=${encodeURIComponent(project.name)}`)}
+                eventType="cta_click"
+                eventPayload={{ cta: 'request_consultation_project_detail', from: 'project_detail', slug: project.slug }}
+              >
+                {locale === 'th' ? 'ขอคำปรึกษาโครงการนี้' : 'Request consultation'}
+              </TrackedLink>
+              {units.length > 0 ? (
+                <TrackedLink
+                  className="btn btn-secondary"
+                  href="#available-units"
+                  eventType="cta_click"
+                  eventPayload={{ cta: 'browse_units_project_detail', from: 'project_detail', slug: project.slug }}
+                >
+                  {locale === 'th' ? 'ดูยูนิตในโครงการ' : 'Browse units'}
+                </TrackedLink>
+              ) : (
+                <TrackedLink
+                  className="btn btn-secondary"
+                  href={withLocale(locale, '/projects')}
+                  eventType="cta_click"
+                  eventPayload={{ cta: 'back_to_projects_project_detail', from: 'project_detail', slug: project.slug }}
+                >
+                  {dict.nav.projects}
+                </TrackedLink>
+              )}
+            </div>
+          </aside>
+        </section>
+
+        <section className="rounded-xl bg-[var(--color-white)] p-6 mb-6">
+          <h2 className="mb-3">{locale === 'th' ? 'ภาพรวมโครงการ' : 'Project Overview'}</h2>
+          <p className="mb-0 text-[var(--color-text)]">{description}</p>
+        </section>
+
+        {quickFacts.length > 4 ? (
+          <section className="rounded-xl bg-[var(--color-white)] p-6 mb-6">
+            <h2 className="mb-3">{locale === 'th' ? 'ข้อมูลสำคัญเพิ่มเติม' : 'Additional Key Facts'}</h2>
+            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+              {quickFacts.slice(4).map((fact) => (
+                <div key={fact.key} className="rounded-lg border border-[var(--color-border)] p-3">
+                  <div className="text-xs text-[var(--color-text-muted)]">{fact.label}</div>
+                  <div className="text-sm font-semibold text-[var(--color-text)]">{fact.value}</div>
+                </div>
+              ))}
+            </div>
+          </section>
         ) : null}
 
-        {/* Project Header */}
-        <div className="section-header">
-          <h1 className="section-title">{project.name}</h1>
-          {summary ? <p className="section-subtitle">{summary}</p> : null}
-        </div>
-
-        {/* Project Facts */}
-        <div className="property-facts mb-6">
-          {project.property_type ? (
-            <div className="flex items-center gap-2">
-              <strong className="capitalize">{project.property_type}</strong>
-              <span className="text-sm text-[var(--color-text-secondary)]">
-                {locale === 'th' ? 'ประเภท' : 'Type'}
-              </span>
-            </div>
-          ) : null}
-          {project.unit_count ? (
-            <div className="flex items-center gap-2">
-              <strong>{project.unit_count}</strong>
-              <span className="text-sm text-[var(--color-text-secondary)]">
-                {locale === 'th' ? 'ยูนิต' : 'Units'}
-              </span>
-            </div>
-          ) : null}
-          {project.floors ? (
-            <div className="flex items-center gap-2">
-              <strong>{project.floors}</strong>
-              <span className="text-sm text-[var(--color-text-secondary)]">
-                {locale === 'th' ? 'ชั้น' : 'Floors'}
-              </span>
-            </div>
-          ) : null}
-          {project.year_built ? (
-            <div className="flex items-center gap-2">
-              <strong>{project.year_built}</strong>
-              <span className="text-sm text-[var(--color-text-secondary)]">
-                {locale === 'th' ? 'ปีที่สร้าง' : 'Year Built'}
-              </span>
-            </div>
-          ) : null}
-          {project.starting_price ? (
-            <div className="flex items-center gap-2">
-              <strong>{formatPriceTHB(Number(project.starting_price))}</strong>
-              <span className="text-sm text-[var(--color-text-secondary)]">
-                {locale === 'th' ? 'ราคาเริ่มต้น' : 'Starting From'}
-              </span>
-            </div>
-          ) : null}
-          {project.delivery_date ? (
-            <div className="flex items-center gap-2">
-              <strong>{project.delivery_date}</strong>
-              <span className="text-sm text-[var(--color-text-secondary)]">
-                {locale === 'th' ? 'ส่งมอบ' : 'Delivery'}
-              </span>
-            </div>
-          ) : null}
-        </div>
-
-        {/* CTA Row */}
-        <div className="cta-row mb-6">
-          <TrackedLink
-            className="btn btn-cta"
-            href={withLocale(locale, '/contact')}
-            eventType="cta_click"
-            eventPayload={{ cta: 'speak_to_advisor', from: 'project_detail' }}
-          >
-            {dict.cta.speakToAdvisor}
-          </TrackedLink>
-          <TrackedLink
-            className="btn btn-secondary"
-            href={withLocale(locale, '/buy')}
-            eventType="cta_click"
-            eventPayload={{ cta: 'buy', from: 'project_detail' }}
-          >
-            {dict.nav.buy}
-          </TrackedLink>
-        </div>
-
-        {/* Description */}
-        {description ? (
-          <div className="bg-[var(--color-white)] p-6 rounded-xl mb-6">
-            <h2 className="mb-4">{locale === 'th' ? 'รายละเอียดโครงการ' : 'About This Project'}</h2>
-            <p className="mb-0">{description}</p>
-          </div>
-        ) : null}
-
-        {/* Amenities */}
         {amenities.length > 0 ? (
-          <div className="bg-[var(--color-white)] p-6 rounded-xl mb-6">
-            <h2 className="mb-4">{locale === 'th' ? 'สิ่งอำนวยความสะดวก' : 'Amenities'}</h2>
+          <section className="bg-[var(--color-white)] p-6 rounded-xl mb-6">
+            <h2 className="mb-4">{locale === 'th' ? 'สิ่งอำนวยความสะดวก' : 'Amenities & Highlights'}</h2>
             <div className="grid grid-3">
               {amenities.map((a: string) => (
                 <div key={a} className="flex items-center gap-2 py-1">
@@ -303,12 +384,20 @@ export default async function ProjectDetailPage({
                 </div>
               ))}
             </div>
-          </div>
-        ) : null}
+          </section>
+        ) : (
+          <section className="bg-[var(--color-white)] p-6 rounded-xl mb-6">
+            <h2 className="mb-3">{locale === 'th' ? 'สิ่งอำนวยความสะดวก' : 'Amenities'}</h2>
+            <p className="mb-0 text-[var(--color-text-muted)]">
+              {locale === 'th'
+                ? 'ยังไม่มีรายการสิ่งอำนวยความสะดวกแบบละเอียดในระบบตอนนี้ ทีมงานสามารถส่งข้อมูลเพิ่มเติมให้ได้เมื่อคุณติดต่อเข้ามา'
+                : 'Detailed amenities are not yet published for this project. Our team can share a full breakdown on request.'}
+            </p>
+          </section>
+        )}
 
-        {/* Investment Snapshot */}
         {investment ? (
-          <div className="bg-[var(--color-white)] p-6 rounded-xl mb-6">
+          <section className="bg-[var(--color-white)] p-6 rounded-xl mb-6">
             <h2 className="mb-4">{locale === 'th' ? 'ข้อมูลการลงทุน' : 'Investment Snapshot'}</h2>
             <div className="grid grid-3">
               {investment.avg_roi ? (
@@ -336,20 +425,18 @@ export default async function ProjectDetailPage({
                 </div>
               ) : null}
             </div>
-          </div>
+          </section>
         ) : null}
 
-        {/* Location */}
         {location && (location as Record<string, unknown>).address ? (
-          <div className="bg-[var(--color-white)] p-6 rounded-xl mb-6">
+          <section className="bg-[var(--color-white)] p-6 rounded-xl mb-6">
             <h2 className="mb-4">{locale === 'th' ? 'ที่ตั้ง' : 'Location'}</h2>
             <p>{String((location as Record<string, unknown>).address)}</p>
-          </div>
+          </section>
         ) : null}
 
-        {/* Sell / Rent Unit Tabs */}
         {units.length > 0 ? (
-          <div className="mb-6">
+          <section className="mb-6" id="available-units">
             <h2 className="mb-2">{locale === 'th' ? 'ยูนิตในโครงการ' : 'Available Units'}</h2>
             <ProjectUnitTabs
               units={units.map((u) => ({
@@ -365,14 +452,42 @@ export default async function ProjectDetailPage({
               }))}
               locale={locale}
             />
-          </div>
-        ) : null}
+          </section>
+        ) : (
+          <section className="mb-6">
+            <EmptyStateCard
+              title={locale === 'th' ? 'ยังไม่มียูนิตเผยแพร่ในโครงการนี้' : 'No public units yet for this project'}
+              body={locale === 'th'
+                ? 'คุณยังสามารถขอ shortlist จากทีมที่ปรึกษาได้ทันที'
+                : 'You can still request a curated shortlist from our advisory team.'}
+            />
+          </section>
+        )}
 
-        {/* Deep Review */}
         {evaluation ? <ProjectDeepReview locale={locale} evaluation={evaluation} /> : null}
 
-        {/* Related Links */}
-        <div className="card reveal mt-6">
+        {relatedProjects.length > 0 ? (
+          <section className="mt-6">
+            <h2 className="mb-2">{locale === 'th' ? 'โครงการที่เกี่ยวข้อง' : 'Related Projects'}</h2>
+            <div className="grid grid-3">
+              {relatedProjects.map((item) => (
+                <ProjectCard
+                  key={item.id}
+                  name={item.name}
+                  count={0}
+                  slug={item.slug}
+                  locale={locale}
+                  dict={dict}
+                  startingPrice={item.starting_price ? Number(item.starting_price) : null}
+                  coverImage={item.cover_image_url}
+                  analyticsSource="project_detail_related"
+                />
+              ))}
+            </div>
+          </section>
+        ) : null}
+
+        <section className="card reveal mt-6">
           <h2 className="card-title">{dict.property.exploreMore}</h2>
           <p className="card-subtitle">{dict.property.navigateToKeyPages}</p>
           <div className="card-actions">
@@ -388,9 +503,8 @@ export default async function ProjectDetailPage({
               </Link>
             ))}
           </div>
-        </div>
+        </section>
 
-        {/* Advisor CTA */}
         <div className="card reveal mt-6">
           <h2 className="card-title">{locale === 'th' ? 'ขอรายชื่อยูนิต' : 'Request a Shortlist'}</h2>
           <p className="card-subtitle">{dict.property.navigateToKeyPages}</p>
