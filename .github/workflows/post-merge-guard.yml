@@ -61,17 +61,7 @@ jobs:
             --changed-files "${CHANGED_FILES[@]}" \
             --out .tmp/governance/revert-decision.json
 
-          ALLOW_REVERT="$(python - <<'PY'
-import json
-from pathlib import Path
-p = Path('.tmp/governance/revert-decision.json')
-if not p.exists():
-    print('false')
-else:
-    payload = json.loads(p.read_text(encoding='utf-8'))
-    print('true' if payload.get('allow_revert') else 'false')
-PY
-          )"
+            ALLOW_REVERT="$(python -c 'import json,pathlib;p=pathlib.Path(".tmp/governance/revert-decision.json");print("true" if p.exists() and json.loads(p.read_text(encoding="utf-8-sig")).get("allow_revert") else "false")')"
 
           if [[ "$ALLOW_REVERT" != "true" ]]; then
             echo "::warning::Skipping auto-revert due to stale/ambiguous decision evidence"
