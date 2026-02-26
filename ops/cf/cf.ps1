@@ -18,7 +18,7 @@ function Assert-Env($name) {
   }
 }
 
-function CF-Req([string]$method, [string]$path, $body = $null) {
+function Invoke-CFRequest([string]$method, [string]$path, $body = $null) {
   Assert-Env 'CF_API_TOKEN'
   $uri = "https://api.cloudflare.com/client/v4$path"
   $headers = @{
@@ -46,25 +46,25 @@ function Write-Evidence([string]$line) {
 
 function Get-CFZone([string]$z) {
   if ([string]::IsNullOrWhiteSpace($z)) { throw 'ZoneId is required (pass -ZoneId or set CF_ZONE_ID)' }
-  $zone = CF-Req GET "/zones/$z"
+  $zone = Invoke-CFRequest GET "/zones/$z"
   if (-not $zone.success) { throw 'Zone read failed' }
   return $zone.result
 }
 
-function List-Rulesets([string]$z) {
-  $rulesets = CF-Req GET "/zones/$z/rulesets"
+function Get-Rulesets([string]$z) {
+  $rulesets = Invoke-CFRequest GET "/zones/$z/rulesets"
   $rulesets.result | Select-Object id, name, kind, phase | Format-Table
 }
 
-function List-PageRules([string]$z) {
-  $pageRules = CF-Req GET "/zones/$z/pagerules"
+function Get-PageRules([string]$z) {
+  $pageRules = Invoke-CFRequest GET "/zones/$z/pagerules"
   $pageRules.result | Select-Object id, status, priority, targets, actions | Out-String | Write-Host
 }
 
 function Find-PotentialHtmlCacheRulesets([string]$z) {
-  $rulesets = (CF-Req GET "/zones/$z/rulesets").result
+  $rulesets = (Invoke-CFRequest GET "/zones/$z/rulesets").result
   foreach ($rs in $rulesets) {
-    $full = CF-Req GET "/zones/$z/rulesets/$($rs.id)"
+    $full = Invoke-CFRequest GET "/zones/$z/rulesets/$($rs.id)"
     $json = $full.result | ConvertTo-Json -Depth 60
     if (
       $json -match "\^/\(en\|th\)" -or
@@ -111,10 +111,10 @@ function Get-DesiredStaticOnlyRulesetBody([string]$domain) {
   }
 }
 
-function Ensure-ProxiedRootAndWww([string]$z, [string]$domain) {
+function Set-ProxiedRootAndWww([string]$z, [string]$domain) {
   if ([string]::IsNullOrWhiteSpace($domain)) { throw 'Domain is required (pass -Domain or set DOMAIN)' }
 
-  $dns = CF-Req GET "/zones/$z/dns_records?per_page=100"
+  $dns = Invoke-CFRequest GET "/zones/$z/dns_records?per_page=100"
   $targets = @($domain, "www.$domain")
 
   $rows = $dns.result | Where-Object { $_.name -in $targets }
@@ -128,18 +128,18 @@ function Ensure-ProxiedRootAndWww([string]$z, [string]$domain) {
   foreach ($rec in $rows) {
     if ($rec.proxied -eq $true -and $rec.ttl -eq 1) { continue }
     $body = @{ type = $rec.type; name = $rec.name; content = $rec.content; ttl = 1; proxied = $true }
-    $res = CF-Req PUT "/zones/$z/dns_records/$($rec.id)" $body
+    $res = Invoke-CFRequest PUT "/zones/$z/dns_records/$($rec.id)" $body
     if (-not $res.success) {
       Write-Host "Failed to update DNS record: $($rec.name)" -ForegroundColor Red
     }
   }
 }
 
-function Upsert-StaticOnlyCacheRuleset([string]$z, [string]$domain) {
+function Set-StaticOnlyCacheRuleset([string]$z, [string]$domain) {
   if ([string]::IsNullOrWhiteSpace($domain)) { throw 'Domain is required (pass -Domain or set DOMAIN)' }
 
   $desired = Get-DesiredStaticOnlyRulesetBody $domain
-  $all = (CF-Req GET "/zones/$z/rulesets").result
+  $all = (Invoke-CFRequest GET "/zones/$z/rulesets").result
   $existing = $all | Where-Object { $_.phase -eq 'http_request_cache_settings' -and $_.kind -eq 'zone' -and $_.name -eq $desired.name }
 
   if ($existing.Count -gt 1) {
@@ -149,36 +149,36 @@ function Upsert-StaticOnlyCacheRuleset([string]$z, [string]$domain) {
   if ($existing) {
     $id = $existing[0].id
     Write-Evidence "UPSERT ruleset exists -> UPDATE id=$id name=$($desired.name) phase=http_request_cache_settings"
-    $res = CF-Req PUT "/zones/$z/rulesets/$id" $desired
+    $res = Invoke-CFRequest PUT "/zones/$z/rulesets/$id" $desired
     if (-not $res.success) { throw 'Ruleset update failed' }
     return $id
   }
 
   Write-Evidence "UPSERT ruleset missing -> CREATE name=$($desired.name) phase=http_request_cache_settings"
-  $res = CF-Req POST "/zones/$z/rulesets" $desired
+  $res = Invoke-CFRequest POST "/zones/$z/rulesets" $desired
   if (-not $res.success) { throw 'Ruleset create failed' }
   return $res.result.id
 }
 
-function Normalize-Expr([string]$expr) {
+function ConvertTo-NormalizedExpr([string]$expr) {
   if ($null -eq $expr) { return '' }
   return ($expr -replace '\s+', '' ).ToLowerInvariant()
 }
 
 function Find-DeterministicHtmlCacheRules([string]$z) {
   $hits = @()
-  $rulesets = (CF-Req GET "/zones/$z/rulesets").result
+  $rulesets = (Invoke-CFRequest GET "/zones/$z/rulesets").result
   foreach ($rs in $rulesets) {
     # Only phases that can affect cache settings
     if ($rs.phase -ne 'http_request_cache_settings') { continue }
-    $full = (CF-Req GET "/zones/$z/rulesets/$($rs.id)").result
+    $full = (Invoke-CFRequest GET "/zones/$z/rulesets/$($rs.id)").result
     if (-not $full.rules) { continue }
 
     for ($i = 0; $i -lt $full.rules.Count; $i += 1) {
       $r = $full.rules[$i]
       if ($r.action -ne 'set_cache_settings') { continue }
 
-      $exprNorm = Normalize-Expr ($r.expression)
+      $exprNorm = ConvertTo-NormalizedExpr ($r.expression)
       # Deterministic match only: explicitly targets ^/(en|th)(/.*)?$ via matches
       $isLocaleHtmlPath = $exprNorm -match 'http\.request\.uri\.path' -and $exprNorm -match 'matches' -and $exprNorm -match '\^/\(en\|th\)\(/\.\*\)\?\$'
       if (-not $isLocaleHtmlPath) { continue }
@@ -221,7 +221,7 @@ function Disable-DeterministicHtmlCacheRules([string]$z) {
   $grouped = $hits | Group-Object -Property RulesetId
   foreach ($g in $grouped) {
     $rid = $g.Name
-    $full = (CF-Req GET "/zones/$z/rulesets/$rid").result
+    $full = (Invoke-CFRequest GET "/zones/$z/rulesets/$rid").result
     $changed = $false
     foreach ($item in $g.Group) {
       $idx = [int]$item.RuleIndex
@@ -236,12 +236,12 @@ function Disable-DeterministicHtmlCacheRules([string]$z) {
     if (-not $changed) { continue }
 
     $body = @{ name = $full.name; kind = $full.kind; phase = $full.phase; rules = $full.rules }
-    $res = CF-Req PUT "/zones/$z/rulesets/$rid" $body
+    $res = Invoke-CFRequest PUT "/zones/$z/rulesets/$rid" $body
     if (-not $res.success) { throw "Failed to update ruleset $rid" }
   }
 }
 
-function Purge-PhaseA([string]$z, [string]$domain) {
+function Clear-PhaseACache([string]$z, [string]$domain) {
   if ([string]::IsNullOrWhiteSpace($domain)) { throw 'Domain is required (pass -Domain or set DOMAIN)' }
   $purgeBody = @{ files = @(
       "https://$domain/",
@@ -249,12 +249,12 @@ function Purge-PhaseA([string]$z, [string]$domain) {
       "https://$domain/th/"
     )
   }
-  $res = CF-Req POST "/zones/$z/purge_cache" $purgeBody
+  $res = Invoke-CFRequest POST "/zones/$z/purge_cache" $purgeBody
   if (-not $res.success) { throw 'Purge failed' }
   Write-Evidence 'Purge submitted for / /en/ /th/'
 }
 
-function Verify-Freeze([string]$domain) {
+function Test-Freeze([string]$domain) {
   if ([string]::IsNullOrWhiteSpace($domain)) { throw 'Domain is required (pass -Domain or set DOMAIN)' }
 
   Write-Evidence 'VERIFY start'
@@ -327,7 +327,7 @@ function Verify-Freeze([string]$domain) {
 Write-Host '== Zone sanity check ==' -ForegroundColor Cyan
 if ($VerifyFreeze -and -not ($EnsureDns -or $ApplyStaticOnly -or $DisableHtmlCacheRules -or $Purge)) {
   Write-Host 'VERIFY-ONLY mode: skipping Cloudflare API calls' -ForegroundColor Cyan
-  Verify-Freeze $Domain
+  Test-Freeze $Domain
   return
 }
 
@@ -335,22 +335,22 @@ $zone = Get-CFZone $ZoneId
 Write-Host "Zone: $($zone.name)" -ForegroundColor Green
 
 Write-Host '== List existing cache rulesets (phase rules) ==' -ForegroundColor Cyan
-List-Rulesets $ZoneId
+Get-Rulesets $ZoneId
 
 Write-Host '== List Page Rules (quota check) ==' -ForegroundColor Cyan
-List-PageRules $ZoneId
+Get-PageRules $ZoneId
 
 Write-Host '== Find potential en/th HTML caching rulesets (manual review) ==' -ForegroundColor Cyan
 Find-PotentialHtmlCacheRulesets $ZoneId
 
 if ($EnsureDns) {
   Write-Host '== APPLY: Ensure proxied root + www ==' -ForegroundColor Cyan
-  Ensure-ProxiedRootAndWww $ZoneId $Domain
+  Set-ProxiedRootAndWww $ZoneId $Domain
 }
 
 if ($ApplyStaticOnly) {
   Write-Host '== APPLY: Create static-only cache ruleset ==' -ForegroundColor Cyan
-  Upsert-StaticOnlyCacheRuleset $ZoneId $Domain | Out-Null
+  Set-StaticOnlyCacheRuleset $ZoneId $Domain | Out-Null
 }
 
 if ($DisableHtmlCacheRules) {
@@ -360,12 +360,12 @@ if ($DisableHtmlCacheRules) {
 
 if ($Purge) {
   Write-Host '== APPLY: Purge / /en/ /th/ ==' -ForegroundColor Cyan
-  Purge-PhaseA $ZoneId $Domain
+  Clear-PhaseACache $ZoneId $Domain
 }
 
 if ($VerifyFreeze) {
   Write-Host '== VERIFY: Cloudflare Freeze invariants ==' -ForegroundColor Cyan
-  Verify-Freeze $Domain
+  Test-Freeze $Domain
 }
 
 if (-not ($EnsureDns -or $ApplyStaticOnly -or $DisableHtmlCacheRules -or $Purge -or $VerifyFreeze)) {

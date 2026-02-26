@@ -74,8 +74,7 @@ export function useAfterLCP(options: UseAfterLCPOptions = {}) {
 
         // `buffered: true` catches early entries.
         // Some browsers throw if the type isn't supported.
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        po.observe({ type: 'largest-contentful-paint', buffered: true } as any);
+        po.observe({ type: 'largest-contentful-paint', buffered: true });
 
         return () => {
           document.removeEventListener('visibilitychange', onVisibilityChange);
