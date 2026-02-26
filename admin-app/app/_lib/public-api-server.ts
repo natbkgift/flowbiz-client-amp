@@ -360,6 +360,7 @@ export type DeveloperItem = {
 export type DeveloperDetailResponse = {
   developer: DeveloperItem;
   summary?: Record<string, unknown> | null;
+  media_warnings?: Array<{ level?: string; path?: string; detail?: string }>;
 };
 
 export async function fetchAreas(): Promise<AreaItem[]> {
@@ -387,7 +388,7 @@ export async function fetchDevelopers(): Promise<DeveloperItem[]> {
   const origin = getOrigin();
   const base = apiBase();
 
-  const url = new URL(`${base}/v1/developers`, origin);
+  const url = new URL(`${base}/v1/developers/`, origin);
   const res = await fetchWithRetry(url.toString(), { next: { revalidate: PAGE_REVALIDATE_SECONDS } });
   if (!res.ok) throw new Error(`Failed to fetch developers (${res.status})`);
   return (await res.json()) as DeveloperItem[];
@@ -397,7 +398,7 @@ export async function fetchDeveloperBySlug(slug: string): Promise<DeveloperDetai
   const origin = getOrigin();
   const base = apiBase();
 
-  const url = new URL(`${base}/v1/developers/${encodeURIComponent(slug)}`, origin);
+  const url = new URL(`${base}/v1/developers/${encodeURIComponent(slug)}/`, origin);
   const res = await fetchWithRetry(url.toString(), { next: { revalidate: PAGE_REVALIDATE_SECONDS } });
   if (res.status === 404) return null;
   if (!res.ok) throw new Error(`Failed to fetch developer detail (${res.status})`);

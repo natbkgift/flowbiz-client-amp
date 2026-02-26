@@ -234,3 +234,51 @@ def pick_area_with_stats_slug(areas: list[dict]) -> str | None:
         if isinstance(stats.get("statistics"), dict):
             return slug
     return None
+
+
+def get_developers_list() -> list[dict]:
+    payload = get_html("/api/v1/developers/")
+    data = json.loads(payload)
+    assert isinstance(data, list) and len(data) > 0, "Expected non-empty developers list from /api/v1/developers/"
+    return data
+
+
+def get_developer_detail(slug: str) -> dict:
+    payload = get_json(f"/api/v1/developers/{slug}/")
+    assert isinstance(payload, dict), f"Expected developer detail payload for slug={slug}"
+    developer = payload.get("developer")
+    assert isinstance(developer, dict) and developer.get("slug") == slug, f"Expected developer slug identity for slug={slug}"
+    return payload
+
+
+def pick_primary_developer_slug(developers: list[dict]) -> str | None:
+    for developer in developers:
+        slug = str(developer.get("slug") or "").strip()
+        if slug:
+            return slug
+    return None
+
+
+def pick_developer_with_website_slug(developers: list[dict]) -> str | None:
+    for developer in developers:
+        slug = str(developer.get("slug") or "").strip()
+        if not slug:
+            continue
+        website = str(developer.get("website") or "").strip()
+        if website:
+            return slug
+    return None
+
+
+def pick_developer_without_optional_profile_slug(developers: list[dict]) -> str | None:
+    for developer in developers:
+        slug = str(developer.get("slug") or "").strip()
+        if not slug:
+            continue
+        detail = get_developer_detail(slug)
+        summary = detail.get("summary")
+        website = str((detail.get("developer") or {}).get("website") or "").strip()
+        logo = str((detail.get("developer") or {}).get("logo_url") or "").strip()
+        if summary is None and not website and not logo:
+            return slug
+    return None
