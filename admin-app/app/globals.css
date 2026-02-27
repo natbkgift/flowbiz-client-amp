@@ -1,0 +1,363 @@
+:root {
+  --font-ui: "Segoe UI", Tahoma, "Noto Sans Thai", sans-serif;
+  --color-primary: #0f6d5a;
+  --color-primary-ink: #064b3d;
+  --color-text: #1f2937;
+  --color-muted: #5b6472;
+  --color-bg: #f6f7f9;
+  --color-surface: #ffffff;
+  --color-border: #d1d5db;
+  --color-error: #b00020;
+  --container-padding: 16px;
+  --container-max: 1280px;
+  --measure-max: 72ch;
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+  --space-6: 32px;
+  --type-h1: clamp(1.9rem, 1.55rem + 1.35vw, 3rem);
+  --type-h2: clamp(1.45rem, 1.25rem + 0.95vw, 2.2rem);
+  --type-h3: clamp(1.2rem, 1.05rem + 0.45vw, 1.55rem);
+  --type-body: clamp(1rem, 0.98rem + 0.08vw, 1.05rem);
+  --type-button: 0.98rem;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden;
+}
+
+body {
+  font-family: var(--font-ui);
+  color: var(--color-text);
+  background: var(--color-bg);
+  font-size: var(--type-body);
+  line-height: 1.55;
+}
+
+h1,
+h2,
+h3,
+p {
+  margin: 0;
+}
+
+h1 {
+  font-size: var(--type-h1);
+  line-height: 1.15;
+}
+
+h2 {
+  font-size: var(--type-h2);
+  line-height: 1.2;
+}
+
+h3 {
+  font-size: var(--type-h3);
+  line-height: 1.25;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+button {
+  font-size: var(--type-button);
+  font-family: inherit;
+}
+
+:focus-visible {
+  outline: 3px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+.container {
+  width: 100%;
+  max-width: var(--container-max);
+  margin-inline: auto;
+  padding-inline: var(--container-padding);
+}
+
+.content-measure {
+  max-width: var(--measure-max);
+}
+
+.content-stack {
+  display: grid;
+  gap: var(--space-5);
+  padding-block: var(--space-6);
+}
+
+.locale-safe {
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+html[lang="th"] .locale-safe {
+  word-break: normal;
+  line-break: loose;
+}
+
+.header {
+  border-bottom: 1px solid var(--color-border);
+  background: var(--color-surface);
+  position: sticky;
+  top: 0;
+  z-index: 20;
+}
+
+.header-shell {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 64px;
+  gap: var(--space-4);
+}
+
+.brand {
+  font-weight: 700;
+  letter-spacing: 0.01em;
+}
+
+.nav {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.nav-link {
+  color: var(--color-muted);
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-sm);
+}
+
+.nav-link:hover {
+  color: var(--color-primary-ink);
+  background: #edf6f3;
+}
+
+.nav-toggle {
+  display: none;
+}
+
+.skip-link {
+  position: absolute;
+  top: -40px;
+  left: 8px;
+  background: var(--color-surface);
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+}
+
+.skip-link:focus-visible {
+  top: 8px;
+}
+
+.card {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-5);
+  display: grid;
+  gap: var(--space-4);
+}
+
+.card-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+}
+
+.btn {
+  border: 1px solid transparent;
+  border-radius: var(--radius-md);
+  padding: 10px 16px;
+  background: var(--color-primary);
+  color: #fff;
+  transition: background 0.15s ease, transform 0.15s ease, opacity 0.15s ease;
+  cursor: pointer;
+}
+
+.btn:hover {
+  background: var(--color-primary-ink);
+}
+
+.btn:active {
+  transform: translateY(1px);
+}
+
+.btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.btn-secondary {
+  background: #fff;
+  color: var(--color-primary-ink);
+  border-color: var(--color-primary);
+}
+
+.btn-secondary:hover {
+  background: #edf6f3;
+}
+
+.field {
+  display: grid;
+  gap: var(--space-2);
+  max-width: 420px;
+}
+
+input,
+textarea,
+select {
+  width: 100%;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  padding: 10px 12px;
+  font: inherit;
+  background: #fff;
+}
+
+input:hover,
+textarea:hover,
+select:hover {
+  border-color: #94a3b8;
+}
+
+input:disabled,
+textarea:disabled,
+select:disabled {
+  background: #f1f5f9;
+  color: #64748b;
+}
+
+.state-grid {
+  display: grid;
+  gap: var(--space-3);
+}
+
+.state-empty,
+.state-loading,
+.state-error {
+  border-radius: var(--radius-md);
+  padding: var(--space-4);
+  border: 1px solid var(--color-border);
+  background: #fff;
+}
+
+.state-empty {
+  color: var(--color-muted);
+}
+
+.state-loading::after {
+  content: " ...";
+  animation: pulse-dots 1s infinite;
+}
+
+.state-error {
+  color: var(--color-error);
+  border-color: #ef9aa8;
+  background: #fff3f5;
+}
+
+.cover-media {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+  border-radius: var(--radius-md);
+  background: #e5e7eb;
+}
+
+.footer {
+  border-top: 1px solid var(--color-border);
+  background: var(--color-surface);
+  margin-top: var(--space-6);
+  padding-top: var(--space-6);
+}
+
+.footer-grid {
+  display: grid;
+  gap: var(--space-5);
+}
+
+.footer-links,
+.footer-social {
+  display: flex;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+}
+
+.footer-legal {
+  margin-top: var(--space-5);
+  padding-block: var(--space-4);
+  border-top: 1px solid var(--color-border);
+  display: flex;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+  color: var(--color-muted);
+}
+
+@keyframes pulse-dots {
+  0%,
+  100% {
+    opacity: 0.35;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+@media (max-width: 767px) {
+  .nav-toggle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .nav {
+    width: 100%;
+    order: 3;
+    padding-bottom: var(--space-3);
+    overflow-x: auto;
+  }
+}
+
+@media (min-width: 1024px) {
+  :root {
+    --container-padding: 24px;
+  }
+
+  .footer-grid {
+    grid-template-columns: 2fr 1fr 1fr;
+  }
+}
+
+@media (min-width: 1920px) {
+  :root {
+    --container-padding: 40px;
+    --container-max: 1720px;
+    --measure-max: 76ch;
+  }
+}
+
+@media (min-width: 2560px) {
+  :root {
+    --container-max: 1700px;
+    --measure-max: 80ch;
+  }
+}

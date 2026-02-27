@@ -1,0 +1,11 @@
+{
+  "name": "admin-app-a1-harness",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "a1:serve": "node scripts/a1-public-server.mjs",
+    "a1:matrix": "node scripts/run-a1-with-harness.mjs",
+    "test:a1": "vitest run __tests__/a1_shared_foundation.test.ts __tests__/a1_validation_matrix_runner.test.ts"
+  }
+}

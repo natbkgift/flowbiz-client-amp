@@ -1,0 +1,24 @@
+# Python caches / virtualenv
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.venv/
+
+# Local sqlite and temp files
+*.db
+nul
+
+# Node build/runtime artifacts
+node_modules/
+admin-app/node_modules/
+admin-app/.next/
+admin-app/tsconfig.tsbuildinfo
+admin-app/nul
+
+# Local ops outputs
+ops/logs/
+ops/previews/
+ops/__pycache__/
+admin-app/ops/
