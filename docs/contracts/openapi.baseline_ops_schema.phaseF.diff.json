@@ -1,7 +1,0 @@
-{
-  "baseline": "docs/contracts/openapi.baseline.json",
-  "breaking": false,
-  "current": "docs/contracts/openapi.phaseF.json",
-  "diff_count": 0,
-  "diffs": []
-}
