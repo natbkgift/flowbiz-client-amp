@@ -29,7 +29,7 @@ const GONE_PATHS = new Set<string>([
  * 4. Redirect non-prefixed public paths to `/en` by default.
  * 5. Attach security headers (CSP, HSTS, X-Frame-Options, etc.) to localized responses.
  */
-export function proxy(req: NextRequest) {
+export async function proxy(req: NextRequest) {
   const { pathname, search } = req.nextUrl;
 
   // Ignore next internals & static assets.
@@ -85,9 +85,15 @@ export function proxy(req: NextRequest) {
     pathname.startsWith('/projects-admin') ||
     pathname.startsWith('/properties-admin') ||
     pathname.startsWith('/media') ||
+    pathname.startsWith('/seo-admin') ||
     pathname.startsWith('/public')
   ) {
     return NextResponse.next();
+  }
+
+  const resolvedRedirect = await resolveDynamicRedirect(req);
+  if (resolvedRedirect) {
+    return resolvedRedirect;
   }
 
   const segments = pathname.split('/').filter(Boolean);
@@ -138,6 +144,33 @@ export function proxy(req: NextRequest) {
   url.pathname = `/en${pathname === '/' ? '' : pathname}`;
   url.search = search;
   return NextResponse.redirect(url);
+}
+
+async function resolveDynamicRedirect(req: NextRequest): Promise<NextResponse | null> {
+  const path = req.nextUrl.pathname;
+  if (!path || path.startsWith('/api/')) return null;
+
+  const qs = req.nextUrl.searchParams.toString();
+  const url = new URL('/api/v1/redirects/resolve', req.nextUrl.origin);
+  url.searchParams.set('path', path);
+  if (qs) url.searchParams.set('query_string', qs);
+
+  try {
+    const resp = await fetch(url.toString(), { method: 'GET', cache: 'no-store' });
+    if (!resp.ok) return null;
+    const payload = (await resp.json()) as {
+      matched?: boolean;
+      location?: string;
+      status_code?: number;
+    };
+    if (!payload.matched || !payload.location || !payload.status_code) return null;
+
+    const target = new URL(payload.location, req.nextUrl.origin);
+    if (target.pathname === req.nextUrl.pathname) return null;
+    return NextResponse.redirect(target, payload.status_code);
+  } catch {
+    return null;
+  }
 }
 
 /** Attach all security response headers (incl. CSP + cross-origin isolation). */

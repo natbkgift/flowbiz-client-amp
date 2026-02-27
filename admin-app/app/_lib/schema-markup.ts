@@ -9,14 +9,21 @@ const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://amppattaya.com';
 const LOGO_URL = `${SITE_URL}/images/logo.png`;
 const PHONE = process.env.NEXT_PUBLIC_PHONE ?? '+66-33-123-456';
 
+type SchemaHooks = {
+  organizationName?: string | null;
+  localBusinessName?: string | null;
+  articleAuthor?: string | null;
+};
+
 // ---------------------------------------------------------------------------
 // 1. Organization (Global — every page)
 // ---------------------------------------------------------------------------
-export function organizationSchema() {
+export function organizationSchema(hooks?: SchemaHooks) {
+  const name = hooks?.organizationName || 'AMP Pattaya';
   return {
     '@context': 'https://schema.org',
     '@type': 'Organization',
-    name: 'AMP Pattaya',
+    name,
     url: SITE_URL,
     logo: LOGO_URL,
     description:
@@ -206,6 +213,7 @@ export function articleSchema(opts: {
   datePublished?: string;
   dateModified?: string;
   url?: string;
+  authorName?: string;
 }) {
   return {
     '@context': 'https://schema.org',
@@ -214,7 +222,7 @@ export function articleSchema(opts: {
     description: opts.description,
     ...(opts.image ? { image: opts.image } : {}),
     ...(opts.url ? { url: opts.url } : {}),
-    author: { '@type': 'Organization', name: 'AMP Pattaya' },
+    author: { '@type': 'Organization', name: opts.authorName || 'AMP Pattaya' },
     publisher: {
       '@type': 'Organization',
       name: 'AMP Pattaya',
@@ -245,11 +253,12 @@ export function webSiteSchema() {
 // ---------------------------------------------------------------------------
 // 9. RealEstateAgent / LocalBusiness (Homepage + Contact)
 // ---------------------------------------------------------------------------
-export function localBusinessSchema() {
+export function localBusinessSchema(hooks?: SchemaHooks) {
+  const name = hooks?.localBusinessName || hooks?.organizationName || 'AMP Pattaya';
   return {
     '@context': 'https://schema.org',
     '@type': 'RealEstateAgent',
-    name: 'AMP Pattaya',
+    name,
     image: LOGO_URL,
     address: {
       '@type': 'PostalAddress',
@@ -274,6 +283,19 @@ export function localBusinessSchema() {
     },
     priceRange: 'THB 2,000,000 - 100,000,000',
   };
+}
+
+export function dedupeSchemaByType(items: Record<string, unknown>[]): Record<string, unknown>[] {
+  const seen = new Set<string>();
+  const out: Record<string, unknown>[] = [];
+  for (const item of items) {
+    const type = typeof item['@type'] === 'string' ? String(item['@type']) : '';
+    const key = type || JSON.stringify(item);
+    if (seen.has(key)) continue;
+    seen.add(key);
+    out.push(item);
+  }
+  return out;
 }
 
 // ---------------------------------------------------------------------------

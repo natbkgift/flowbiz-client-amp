@@ -200,6 +200,34 @@ export async function fetchProjectBySlug(slug: string): Promise<ProjectDetail | 
   return (await res.json()) as ProjectDetail;
 }
 
+export type SeoResolvedOverride = {
+  found: boolean;
+  path: string;
+  locale: string;
+  title?: string | null;
+  description?: string | null;
+  canonical?: string | null;
+  robots?: { index: boolean; follow: boolean };
+  schema?: {
+    organization_name?: string | null;
+    local_business_name?: string | null;
+    article_author?: string | null;
+  };
+};
+
+export async function fetchSeoResolvedOverride(path: string, locale: string): Promise<SeoResolvedOverride | null> {
+  const origin = getOrigin();
+  const base = apiBase();
+
+  const url = new URL(`${base}/v1/seo/resolve`, origin);
+  url.searchParams.set('path', path);
+  url.searchParams.set('locale', locale);
+
+  const res = await fetchWithRetry(url.toString(), { next: { revalidate: 30 }, retryOn5xx: false });
+  if (!res.ok) return null;
+  return (await res.json()) as SeoResolvedOverride;
+}
+
 export type MarketplaceCategoryItem = {
   id: string;
   slug: string;

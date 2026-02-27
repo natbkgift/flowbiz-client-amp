@@ -23,6 +23,7 @@ import {
   fetchHomeComposerPublished,
   fetchProjects,
   fetchProperties as fetchPropertiesAPI,
+  fetchSeoResolvedOverride,
 } from '@/app/_lib/public-api-server';
 import type { PropertyListItem } from '@/app/public/_shared/types';
 import { LocalMediaImage } from '@/components/media/LocalMediaImage';
@@ -46,7 +47,24 @@ export async function generateMetadata({
   const { locale: rawLocale } = await params;
   const locale = normalizeLocale(rawLocale);
   const dict = getDictionary(locale);
-  return makePageMetadata(locale, '', `${dict.brand.name} | ${dict.home.heroTitle}`, dict.home.heroSubtitle, dict.brand.name);
+  const base = makePageMetadata(locale, '', `${dict.brand.name} | ${dict.home.heroTitle}`, dict.home.heroSubtitle, dict.brand.name);
+  const resolvedPath = `/${locale}`;
+  const override = await fetchSeoResolvedOverride(resolvedPath, locale);
+  if (!override?.found) return base;
+
+  const canonical = override.canonical || base.alternates?.canonical;
+  return {
+    ...base,
+    title: override.title || base.title,
+    description: override.description || base.description,
+    alternates: {
+      ...base.alternates,
+      canonical,
+    },
+    robots: override.robots
+      ? { index: override.robots.index, follow: override.robots.follow }
+      : base.robots,
+  };
 }
 
 export default async function HomePage({

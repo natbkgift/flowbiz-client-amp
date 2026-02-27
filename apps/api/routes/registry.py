@@ -13,6 +13,7 @@ from apps.api.routes.admin_marketplace import router as admin_marketplace_router
 from apps.api.routes.admin_properties import router as admin_properties_router
 from apps.api.routes.admin_projects import router as admin_projects_router
 from apps.api.routes.admin_rbac import router as admin_rbac_router
+from apps.api.routes.admin_seo import router as admin_seo_router
 from apps.api.routes.admin_seller import router as admin_seller_router
 from apps.api.routes.auth_me import router as auth_me_router
 from apps.api.routes.v1 import auth, meta
@@ -33,6 +34,7 @@ from apps.api.routes.v1.projects import router as projects_router
 from apps.api.routes.v1.properties import router as properties_router
 from apps.api.routes.v1.recommendations import router as recommendations_router
 from apps.api.routes.v1.seller import router as seller_router
+from apps.api.routes.v1.seo_controls import router as seo_controls_router
 from apps.api.routes.v1.smart_finder import router as smart_finder_router
 
 # Admin routers that are also mounted under /v1 prefix for backwards compat.
@@ -49,6 +51,7 @@ _ADMIN_ROUTERS = [
     admin_rbac_router,
     admin_properties_router,
     admin_projects_router,
+    admin_seo_router,
 ]
 
 
@@ -83,6 +86,7 @@ def register_routes(app: FastAPI) -> None:
     app.include_router(projects_router)
     app.include_router(seller_router)
     app.include_router(marketplace_router)
+    app.include_router(seo_controls_router)
     app.include_router(db_stats_router)
 
     # Compatibility: mirror admin APIs under /v1/admin/*
