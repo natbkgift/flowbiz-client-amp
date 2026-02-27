@@ -1,0 +1,82 @@
+name: Manual Governance Revert
+
+on:
+  workflow_dispatch:
+    inputs:
+      target_sha:
+        description: "Commit SHA to revert"
+        required: true
+        type: string
+      allow_non_head:
+        description: "Allow reverting a non-head commit on main"
+        required: true
+        default: false
+        type: boolean
+      confirm:
+        description: "Type REVERT to confirm"
+        required: true
+        type: string
+
+permissions:
+  contents: write
+
+jobs:
+  revert:
+    name: Manual Revert
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Validate request
+        env:
+          TARGET_SHA: ${{ inputs.target_sha }}
+          ALLOW_NON_HEAD: ${{ inputs.allow_non_head }}
+          CONFIRM: ${{ inputs.confirm }}
+        run: |
+          set -euo pipefail
+
+          if [ "$CONFIRM" != "REVERT" ]; then
+            echo "::error::Confirmation mismatch. Type REVERT to proceed."
+            exit 1
+          fi
+
+          if ! git cat-file -e "${TARGET_SHA}^{commit}" 2>/dev/null; then
+            echo "::error::target_sha does not exist in this repository."
+            exit 1
+          fi
+
+          git fetch origin main --depth=1
+          CURRENT_HEAD="$(git rev-parse origin/main)"
+
+          if [ "$ALLOW_NON_HEAD" != "true" ] && [ "$TARGET_SHA" != "$CURRENT_HEAD" ]; then
+            echo "::error::target_sha is not current main HEAD."
+            echo "::error::target_sha=$TARGET_SHA"
+            echo "::error::current_head=$CURRENT_HEAD"
+            exit 1
+          fi
+
+      - name: Revert target commit
+        env:
+          TARGET_SHA: ${{ inputs.target_sha }}
+        run: |
+          set -euo pipefail
+
+          git checkout -B main origin/main
+
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          PARENTS="$(git show -s --format=%P "$TARGET_SHA" | wc -w | tr -d ' ')"
+
+          if [ "$PARENTS" -gt 1 ]; then
+            git revert -m 1 --no-edit "$TARGET_SHA" || { git revert --abort || true; exit 1; }
+          else
+            git revert --no-edit "$TARGET_SHA" || { git revert --abort || true; exit 1; }
+          fi
+
+          git commit --amend -m "manual-revert: governance recovery (${TARGET_SHA})"
+          git push origin HEAD:main

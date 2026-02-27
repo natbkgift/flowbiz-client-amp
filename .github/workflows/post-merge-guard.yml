@@ -1,0 +1,54 @@
+name: Post-Merge Governance Guard
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: post-merge-guard-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  guard:
+    name: Post-Merge Guard
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install test dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install fastapi sqlalchemy pydantic pytest httpx python-multipart pillow python-dotenv
+
+      - name: Run governance guard suite
+        run: |
+          python -m pytest -q \
+            tests/test_b1_media_library.py \
+            tests/test_admin_properties_cms.py \
+            tests/test_admin_domain_cms.py \
+            tests/test_media_integrity.py
+
+      - name: Media Integrity Strict Gate
+        run: |
+          python ops/scan_media_integrity.py \
+            --strict \
+            --write ops/logs/post_merge_media_integrity_report.json
+
+      - name: Failure policy (no auto-revert)
+        if: failure()
+        run: |
+          {
+            echo "### Governance Guard Failed"
+            echo "- Auto-revert is disabled by policy."
+            echo "- Fix forward with a new commit, or run the manual revert workflow."
+          } >> "$GITHUB_STEP_SUMMARY"
