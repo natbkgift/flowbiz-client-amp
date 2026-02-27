@@ -18,8 +18,9 @@ const REQUEST_TIMEOUT_MS = 10_000;
  */
 async function fetchWithRetry(
   input: string,
-  init?: RequestInit & { next?: { revalidate?: number } },
+  init?: RequestInit & { next?: { revalidate?: number }; retryOn5xx?: boolean },
 ): Promise<Response> {
+  const retryOn5xx = init?.retryOn5xx ?? true;
   let lastError: unknown;
   for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
     const controller = new AbortController();
@@ -28,7 +29,7 @@ async function fetchWithRetry(
       const res = await fetch(input, { ...init, signal: controller.signal });
       clearTimeout(timeoutId);
       // Only retry on server errors (5xx). Client errors (4xx) are intentional.
-      if (res.status >= 500 && attempt < MAX_RETRIES) {
+      if (retryOn5xx && res.status >= 500 && attempt < MAX_RETRIES) {
         await delay(RETRY_BASE_MS * 2 ** attempt);
         continue;
       }
@@ -438,4 +439,90 @@ export async function fetchHomeComposerPublished(locale: 'en' | 'th'): Promise<H
   if (res.status === 404) return null;
   if (!res.ok) throw new Error(`Failed to fetch home composer (${res.status})`);
   return (await res.json()) as HomeComposerPublishedResponse;
+}
+
+export type ContentLocalizedText = {
+  en: string;
+  th: string;
+};
+
+export type ContentLink = {
+  label: ContentLocalizedText;
+  href: string;
+};
+
+export type ContentSummaryApiItem = {
+  slug: string;
+  title: ContentLocalizedText;
+  excerpt?: ContentLocalizedText | null;
+  category?: ContentLocalizedText | null;
+  read_time?: ContentLocalizedText | null;
+  published_at?: string | null;
+  updated_at: string;
+  hero_image_url?: string | null;
+};
+
+export type BlogPostDetailApi = ContentSummaryApiItem & {
+  body: { en: string[]; th: string[] };
+  related_guides?: string[];
+  links?: ContentLink[];
+};
+
+export type GuideDetailApi = ContentSummaryApiItem & {
+  summary?: ContentLocalizedText | null;
+  checklist: { en: string[]; th: string[] };
+  related_blog_posts?: string[];
+  links?: ContentLink[];
+};
+
+export async function fetchBlogPosts(): Promise<ContentSummaryApiItem[]> {
+  const origin = getOrigin();
+  const base = apiBase();
+  const url = new URL(`${base}/v1/content/blog-posts/`, origin);
+  const res = await fetchWithRetry(url.toString(), {
+    next: { revalidate: PAGE_REVALIDATE_SECONDS },
+    retryOn5xx: false,
+  });
+  if (!res.ok) throw new Error(`Failed to fetch blog posts (${res.status})`);
+  const payload = (await res.json()) as unknown;
+  return Array.isArray(payload) ? (payload as ContentSummaryApiItem[]) : [];
+}
+
+export async function fetchBlogPostBySlug(slug: string): Promise<BlogPostDetailApi | null> {
+  const origin = getOrigin();
+  const base = apiBase();
+  const url = new URL(`${base}/v1/content/blog-posts/${encodeURIComponent(slug)}/`, origin);
+  const res = await fetchWithRetry(url.toString(), {
+    next: { revalidate: PAGE_REVALIDATE_SECONDS },
+    retryOn5xx: false,
+  });
+  if (res.status === 404) return null;
+  if (!res.ok) throw new Error(`Failed to fetch blog detail (${res.status})`);
+  return (await res.json()) as BlogPostDetailApi;
+}
+
+export async function fetchGuides(): Promise<ContentSummaryApiItem[]> {
+  const origin = getOrigin();
+  const base = apiBase();
+  const url = new URL(`${base}/v1/content/guides/`, origin);
+  const res = await fetchWithRetry(url.toString(), {
+    next: { revalidate: PAGE_REVALIDATE_SECONDS },
+    retryOn5xx: false,
+  });
+  if (!res.ok) throw new Error(`Failed to fetch guides (${res.status})`);
+  const payload = (await res.json()) as unknown;
+  return Array.isArray(payload) ? (payload as ContentSummaryApiItem[]) : [];
+}
+
+export async function fetchGuideBySlug(slug: string): Promise<GuideDetailApi | null> {
+  const origin = getOrigin();
+  const base = apiBase();
+  const url = new URL(`${base}/v1/content/guides/${encodeURIComponent(slug)}/`, origin);
+  const res = await fetchWithRetry(url.toString(), {
+    next: { revalidate: PAGE_REVALIDATE_SECONDS },
+    retryOn5xx: false,
+  });
+  if (res.status === 404) return null;
+  if (!res.ok) throw new Error(`Failed to fetch guide detail (${res.status})`);
+  return (await res.json()) as GuideDetailApi;
 }

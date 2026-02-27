@@ -51,7 +51,7 @@ export default async function BlogIndexPage({ params, searchParams }: PageProps)
 
   const dict = getDictionary(locale);
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://amppattaya.com';
-  const entities = getBlogPosts();
+  const entities = await getBlogPosts();
 
   const filtered = entities.filter((item) => {
     if (!query) return true;

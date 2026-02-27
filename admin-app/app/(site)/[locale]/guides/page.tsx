@@ -56,7 +56,7 @@ export default async function GuidesIndexPage({ params, searchParams }: PageProp
 
   const dict = getDictionary(locale);
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://amppattaya.com';
-  const entities = getGuideArticles();
+  const entities = await getGuideArticles();
 
   const filtered = entities.filter((item) => {
     if (!query) return true;

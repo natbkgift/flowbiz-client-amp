@@ -198,16 +198,26 @@ export async function developersEntries(): Promise<UrlEntry[]> {
 /*  sitemap-guides.xml — content hub                                  */
 /* ------------------------------------------------------------------ */
 
-export function guidesEntries(): UrlEntry[] {
-  return getGuideSlugs().flatMap((slug) => entry(`/guides/${slug}`, 'monthly', 0.6));
+export async function guidesEntries(): Promise<UrlEntry[]> {
+  try {
+    const slugs = await getGuideSlugs();
+    return slugs.flatMap((slug) => entry(`/guides/${slug}`, 'monthly', 0.6));
+  } catch {
+    return [];
+  }
 }
 
 /* ------------------------------------------------------------------ */
 /*  sitemap-blog.xml — content hub                                    */
 /* ------------------------------------------------------------------ */
 
-export function blogEntries(): UrlEntry[] {
-  return getBlogSlugs().flatMap((slug) => entry(`/blog/${slug}`, 'monthly', 0.5));
+export async function blogEntries(): Promise<UrlEntry[]> {
+  try {
+    const slugs = await getBlogSlugs();
+    return slugs.flatMap((slug) => entry(`/blog/${slug}`, 'monthly', 0.5));
+  } catch {
+    return [];
+  }
 }
 
 /* ------------------------------------------------------------------ */

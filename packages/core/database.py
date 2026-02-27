@@ -1,6 +1,6 @@
 from collections.abc import Generator
 
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, text
 from sqlalchemy.orm import DeclarativeBase, Session, sessionmaker
 
 from packages.core.config import settings
@@ -42,3 +42,22 @@ def init_db() -> None:
     from packages.core import models  # noqa: F401
 
     Base.metadata.create_all(bind=engine)
+    _apply_sqlite_compat_migrations()
+
+
+def _apply_sqlite_compat_migrations() -> None:
+    """Backfill critical columns for local SQLite dev DBs not tracked by Alembic history."""
+    if not settings.database_url.startswith("sqlite"):
+        return
+
+    with engine.begin() as conn:
+        try:
+            result = conn.execute(text("PRAGMA table_info(articles)"))
+            existing = {str(row[1]) for row in result.fetchall()}
+        except Exception:
+            return
+
+        if "hero_image_url" not in existing:
+            conn.execute(text("ALTER TABLE articles ADD COLUMN hero_image_url VARCHAR(512)"))
+        if "hero_media_asset_id" not in existing:
+            conn.execute(text("ALTER TABLE articles ADD COLUMN hero_media_asset_id CHAR(32)"))

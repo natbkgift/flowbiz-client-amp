@@ -39,7 +39,7 @@ export async function generateMetadata({
   const { locale: rawLocale, slug } = await params;
   const locale = normalizeLocale(rawLocale);
   const dict = getDictionary(locale);
-  const guide = getGuideArticleBySlug(slug);
+  const guide = await getGuideArticleBySlug(slug);
   const guideTitle = pickLocalizedText(guide?.title, locale) || humanize(slug);
   const title = locale === 'th' ? `คู่มือ: ${guideTitle}` : `Guide: ${guideTitle}`;
   const desc = locale === 'th'
@@ -57,7 +57,7 @@ export default async function GuideArticlePage({
   const locale = normalizeLocale(rawLocale);
   const dict = getDictionary(locale);
 
-  const guide = getGuideArticleBySlug(slug);
+  const guide = await getGuideArticleBySlug(slug);
   if (!guide) {
     notFound();
   }
@@ -69,13 +69,15 @@ export default async function GuideArticlePage({
     : 'Guide content is being updated in the system (TODO: add summary).');
 
   const checklist = pickLocalizedList(guide.checklist, locale);
-  const relatedBlogPosts = (guide.relatedBlogPosts ?? []).map((blogSlug) => {
-    const post = getBlogPostBySlug(blogSlug);
-    return {
-      slug: blogSlug,
-      title: pickLocalizedText(post?.title, locale) || blogSlug,
-    };
-  }).filter((item) => Boolean(item.slug));
+  const relatedBlogPosts = (await Promise.all(
+    (guide.relatedBlogPosts ?? []).map(async (blogSlug) => {
+      const post = await getBlogPostBySlug(blogSlug);
+      return {
+        slug: blogSlug,
+        title: pickLocalizedText(post?.title, locale) || blogSlug,
+      };
+    })
+  )).filter((item) => Boolean(item.slug));
 
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://amppattaya.com';
   const canonicalUrl = `${siteUrl}/${locale}/guides/${encodeURIComponent(slug)}`;

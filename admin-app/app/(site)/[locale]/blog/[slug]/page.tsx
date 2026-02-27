@@ -9,7 +9,7 @@ import { getDictionary, normalizeLocale } from '@/app/_lib/i18n/get-dictionary';
 import { makePageMetadata } from '@/app/_lib/i18n/metadata';
 import { withLocale } from '@/app/_lib/i18n/routing';
 import { articleSchema, breadcrumbSchema } from '@/app/_lib/schema-markup';
-import { getBlogPostBySlug, getGuideArticleBySlug, getGuideSlugs } from '@/app/_lib/content-hub';
+import { getBlogPostBySlug, getGuideArticleBySlug } from '@/app/_lib/content-hub';
 
 type PageProps = {
   params: Promise<{ slug: string; locale: string }>;
@@ -30,7 +30,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const { slug, locale: rawLocale } = await params;
   const locale = normalizeLocale(rawLocale);
   const dict = getDictionary(locale);
-  const article = getBlogPostBySlug(slug);
+  const article = await getBlogPostBySlug(slug);
   const title = pickLocalizedText(article?.title, locale) || slug.replace(/-/g, ' ');
   const paragraphs = pickBodyParagraphs(article?.body, locale);
   const desc = paragraphs[0] || pickLocalizedText(article?.excerpt, locale) || 'Practical guidance for Pattaya property decisions.';
@@ -42,7 +42,7 @@ export default async function BlogPostPage({ params }: PageProps) {
   const locale = normalizeLocale(rawLocale);
   const dict = getDictionary(locale);
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://amppattaya.com';
-  const article = getBlogPostBySlug(slug);
+  const article = await getBlogPostBySlug(slug);
 
   if (!article) {
     notFound();
@@ -51,10 +51,20 @@ export default async function BlogPostPage({ params }: PageProps) {
   const title = pickLocalizedText(article.title, locale) || slug.replace(/-/g, ' ');
   const category = pickLocalizedText(article.category, locale) || (locale === 'th' ? 'บทความ' : 'Article');
   const paragraphs = pickBodyParagraphs(article.body, locale);
-  const relatedGuides = (article.relatedGuides ?? []).map((guideSlug) => ({
-    slug: guideSlug,
-    title: pickLocalizedText(getGuideArticleBySlug(guideSlug)?.title, locale) || guideSlug,
-  })).filter((item) => getGuideSlugs().includes(item.slug));
+  const relatedGuides = (
+    await Promise.all(
+      (article.relatedGuides ?? []).map(async (guideSlug) => {
+        const guide = await getGuideArticleBySlug(guideSlug);
+        return {
+          slug: guideSlug,
+          title: pickLocalizedText(guide?.title, locale) || guideSlug,
+          exists: Boolean(guide),
+        };
+      })
+    )
+  )
+    .filter((item) => item.exists)
+    .map(({ exists: _exists, ...rest }) => rest);
 
   const breadcrumbItems = [
     { label: dict.nav.home, href: `/${locale}` },
