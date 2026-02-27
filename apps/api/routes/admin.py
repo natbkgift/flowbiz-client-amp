@@ -108,9 +108,9 @@ def list_leads(
     _admin: User = Depends(get_current_admin),
 ) -> PaginatedResponse[LeadAdminItem]:
     if sort not in {"newest", "follow_up_due"}:
-        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="Invalid sort")
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_CONTENT, detail="Invalid sort")
     if order not in {"asc", "desc"}:
-        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="Invalid order")
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_CONTENT, detail="Invalid order")
 
     base = select(Lead)
     if status_filter:
@@ -400,3 +400,4 @@ def export_leads_csv(
         media_type="text/csv",
         headers={"Content-Disposition": 'attachment; filename="leads-export.csv"'},
     )
+

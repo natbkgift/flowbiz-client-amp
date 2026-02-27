@@ -33,9 +33,9 @@ def _normalize_path(value: str) -> str:
 
 def _validate_redirect(old_path: str, new_path: str, status_code: int) -> None:
     if status_code not in {301, 302}:
-        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="status_code must be 301 or 302")
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_CONTENT, detail="status_code must be 301 or 302")
     if old_path == new_path:
-        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="Self redirect is not allowed")
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_CONTENT, detail="Self redirect is not allowed")
 
 
 def _would_create_loop(db: Session, old_path: str, new_path: str, *, ignore_id: UUID | None = None) -> bool:
@@ -152,7 +152,7 @@ def create_redirect(
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Redirect old_path already exists")
 
     if _would_create_loop(db, old_path, new_path):
-        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="Redirect loop detected")
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_CONTENT, detail="Redirect loop detected")
 
     row = RedirectRule(
         old_path=old_path,
@@ -193,7 +193,7 @@ def update_redirect(
     status_code = payload.status_code if payload.status_code is not None else row.status_code
     _validate_redirect(row.old_path, new_path, status_code)
     if _would_create_loop(db, row.old_path, new_path, ignore_id=row.id):
-        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="Redirect loop detected")
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_CONTENT, detail="Redirect loop detected")
 
     row.new_path = new_path
     row.status_code = status_code
@@ -283,3 +283,4 @@ def broken_links_report(
     }
 
     return {"summary": summary, "issues": issues}
+

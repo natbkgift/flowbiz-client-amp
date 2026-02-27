@@ -92,7 +92,7 @@ def set_role_permissions(
     missing = [k for k in keys if k not in found_keys]
     if missing:
         raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
             detail={"missing": missing},
         )
 
@@ -102,3 +102,4 @@ def set_role_permissions(
 
     db.commit()
     return RoleItem.model_validate(role)
+

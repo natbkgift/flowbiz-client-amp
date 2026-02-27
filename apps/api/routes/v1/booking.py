@@ -17,7 +17,7 @@ router = APIRouter(prefix="/v1", tags=["booking"])
 def _validate_range(start_at: datetime, end_at: datetime) -> None:
     if end_at <= start_at:
         raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
             detail="end_at must be after start_at",
         )
 
@@ -143,3 +143,4 @@ def get_booking(booking_id: UUID, db: Session = Depends(get_db)) -> BookingItem:
     if row is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Booking not found")
     return BookingItem.model_validate(row)
+

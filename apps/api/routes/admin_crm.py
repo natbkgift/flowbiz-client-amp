@@ -99,9 +99,9 @@ def list_inquiries(
     _admin: User = Depends(get_current_admin),
 ) -> PaginatedResponse[InquiryItem]:
     if sort not in _VALID_LIST_SORTS:
-        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="Invalid sort")
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_CONTENT, detail="Invalid sort")
     if order not in {"asc", "desc"}:
-        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="Invalid order")
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_CONTENT, detail="Invalid order")
 
     base = select(Inquiry)
     if status_filter:
@@ -466,3 +466,4 @@ def update_viewing(
     db.commit()
     db.refresh(viewing)
     return ViewingItem.model_validate(viewing)
+

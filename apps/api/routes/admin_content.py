@@ -133,12 +133,12 @@ def ingest_article_hero_image(
     if payload.publish_now:
         if not _article_locales_complete(article):
             raise HTTPException(
-                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
                 detail="Article must include complete en/th title and body before publish",
             )
         if not _hero_rights_ok(article, db):
             raise HTTPException(
-                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
                 detail="Hero image must have approved rights metadata before publish",
             )
         article.status = "published"
@@ -156,3 +156,4 @@ def ingest_article_hero_image(
         deduped=deduped,
         published=published,
     )
+

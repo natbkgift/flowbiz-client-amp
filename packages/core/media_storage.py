@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import hashlib
 import ipaddress
-import imghdr
 import io
 import socket
 import struct
@@ -23,7 +22,6 @@ _ALLOWED_MIME_TYPES = {
     "image/webp": ".webp",
 }
 
-_ALLOWED_KINDS = {"jpeg", "png", "webp"}
 _ALLOWED_PORTS = {80, 443}
 _MAX_REDIRECTS = 3
 
@@ -70,11 +68,12 @@ class MediaStorageService:
         return f"{self._public_prefix}/{unix}"
 
     def _sniff_mime(self, data: bytes, declared: str | None) -> str:
-        kind = imghdr.what(None, h=data)
-        if kind in _ALLOWED_KINDS:
-            if kind == "jpeg":
-                return "image/jpeg"
-            return f"image/{kind}"
+        if data.startswith(b"\xFF\xD8\xFF"):
+            return "image/jpeg"
+        if data.startswith(b"\x89PNG\r\n\x1a\n"):
+            return "image/png"
+        if len(data) >= 12 and data[:4] == b"RIFF" and data[8:12] == b"WEBP":
+            return "image/webp"
 
         if declared in _ALLOWED_MIME_TYPES:
             return declared

@@ -26,7 +26,7 @@ def compare_properties(
     ordered = _sorted_unique(payload.property_ids)
     if len(ordered) > 4:
         raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
             detail="Max 4 properties",
         )
 
@@ -56,3 +56,4 @@ def compare_properties(
         )
 
     return {"ordered_property_ids": [str(x) for x in ordered], "items": items}
+
