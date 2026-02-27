@@ -1,9 +1,0 @@
-{
-  "files": {
-    "scripts/baseline_integrity.py": [
-      "Cache-Control",
-      "\\bcache\\b",
-      "cache[-_ ]key"
-    ]
-  }
-}

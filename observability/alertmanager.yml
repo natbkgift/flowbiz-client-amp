@@ -1,5 +1,0 @@
-route:
-  receiver: "log"
-
-receivers:
-  - name: "log"
