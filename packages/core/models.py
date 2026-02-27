@@ -29,6 +29,10 @@ from packages.core.database import Base
 
 class Lead(Base):
     __tablename__ = "leads"
+    __table_args__ = (
+        Index("ix_leads_status_created", "status", "created_at"),
+        Index("ix_leads_owner_created", "owner_user_id", "created_at"),
+    )
 
     id: Mapped[UUID] = mapped_column(primary_key=True, default=uuid4)
     name: Mapped[str] = mapped_column(String(200), nullable=False)
@@ -36,8 +40,20 @@ class Lead(Base):
     phone: Mapped[str | None] = mapped_column(String(50), nullable=True)
     score: Mapped[int] = mapped_column(Integer, nullable=False)
     status: Mapped[str] = mapped_column(String(32), nullable=False, default="new")
+    source_page: Mapped[str | None] = mapped_column(String(500), nullable=True)
+    purpose: Mapped[str | None] = mapped_column(String(64), nullable=True, index=True)
+    owner_user_id: Mapped[UUID | None] = mapped_column(
+        ForeignKey("users.id", ondelete="SET NULL"), nullable=True, index=True
+    )
+    follow_up_due_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True, index=True)
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), nullable=False, server_default=func.now()
+    )
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        nullable=False,
+        server_default=func.now(),
+        onupdate=func.now(),
     )
 
 
@@ -788,6 +804,60 @@ class AuditLog(Base):
     user_agent: Mapped[str | None] = mapped_column(String(300), nullable=True)
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), nullable=False, server_default=func.now(), index=True
+    )
+
+
+class SeoPageOverride(Base):
+    __tablename__ = "seo_page_overrides"
+    __table_args__ = (
+        UniqueConstraint("path", "locale", name="uq_seo_page_overrides_path_locale"),
+        Index("ix_seo_page_overrides_path_locale", "path", "locale"),
+    )
+
+    id: Mapped[UUID] = mapped_column(primary_key=True, default=uuid4)
+    path: Mapped[str] = mapped_column(String(500), nullable=False)
+    locale: Mapped[str] = mapped_column(String(8), nullable=False, default="en")
+    title: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    description: Mapped[str | None] = mapped_column(String(500), nullable=True)
+    canonical: Mapped[str | None] = mapped_column(String(1000), nullable=True)
+    robots_index: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True, server_default="true")
+    robots_follow: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True, server_default="true")
+    schema_org_name: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    schema_local_business_name: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    schema_article_author: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    enabled: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True, server_default="true")
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), nullable=False, server_default=func.now(), index=True
+    )
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        nullable=False,
+        server_default=func.now(),
+        onupdate=func.now(),
+    )
+
+
+class RedirectRule(Base):
+    __tablename__ = "redirect_rules"
+    __table_args__ = (
+        UniqueConstraint("old_path", name="uq_redirect_rules_old_path"),
+        Index("ix_redirect_rules_old_path", "old_path"),
+    )
+
+    id: Mapped[UUID] = mapped_column(primary_key=True, default=uuid4)
+    old_path: Mapped[str] = mapped_column(String(500), nullable=False)
+    new_path: Mapped[str] = mapped_column(String(500), nullable=False)
+    status_code: Mapped[int] = mapped_column(Integer, nullable=False, default=301, server_default="301")
+    enabled: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True, server_default="true")
+    preserve_query: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True, server_default="true")
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), nullable=False, server_default=func.now(), index=True
+    )
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        nullable=False,
+        server_default=func.now(),
+        onupdate=func.now(),
     )
 
 

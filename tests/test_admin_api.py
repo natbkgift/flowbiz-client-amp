@@ -75,3 +75,61 @@ def test_admin_list_and_update_lead(client):
     )
     assert update_response.status_code == 200
     assert update_response.json()["status"] == "contacted"
+
+
+def test_admin_lead_workflow_timeline_and_export(client):
+    token = _login_token(client)
+    lead_id = _create_lead(client)
+    headers = {"Authorization": f"Bearer {token}"}
+
+    listing = client.get("/admin/leads?page=1&limit=10&status=new&sort=newest&order=desc", headers=headers)
+    assert listing.status_code == 200
+    body = listing.json()
+    assert body["meta"]["page"] == 1
+    assert body["meta"]["limit"] == 10
+    assert isinstance(body["data"], list)
+
+    status_updated = client.patch(
+        f"/admin/leads/{lead_id}",
+        json={"status": "contacted"},
+        headers=headers,
+    )
+    assert status_updated.status_code == 200
+
+    assigned = client.post(
+        f"/admin/leads/{lead_id}/assign",
+        json={"owner_user_id": None, "reason": "manual"},
+        headers=headers,
+    )
+    assert assigned.status_code == 200
+
+    added = client.post(
+        f"/admin/leads/{lead_id}/notes",
+        json={"note": "first note"},
+        headers=headers,
+    )
+    assert added.status_code == 200
+    note_id = added.json()["note_id"]
+
+    edited = client.patch(
+        f"/admin/leads/{lead_id}/notes/{note_id}",
+        json={"note": "edited note"},
+        headers=headers,
+    )
+    assert edited.status_code == 200
+    assert edited.json()["note"] == "edited note"
+
+    timeline = client.get(f"/admin/leads/{lead_id}/timeline?limit=20", headers=headers)
+    assert timeline.status_code == 200
+    actions = [item["action"] for item in timeline.json()["data"]]
+    assert "status_update" in actions
+    assert "assign_manual" in actions
+    assert "note_add" in actions
+    assert "note_update" in actions
+
+    exported = client.get("/admin/leads-export.csv?status=contacted", headers=headers)
+    assert exported.status_code == 200
+    assert exported.headers["content-type"].startswith("text/csv")
+    csv_text = exported.text
+    assert "id,name,email,phone,status,score,source_page,purpose,owner_user_id,follow_up_due_at,duplicate_hint,spam_hint,created_at" in csv_text
+    assert "password" not in csv_text.lower()
