@@ -22,3 +22,7 @@ ops/logs/
 ops/previews/
 ops/__pycache__/
 admin-app/ops/
+
+# B13 generated artifacts
+admin-app/public/media/project-covers/
+data/import/
