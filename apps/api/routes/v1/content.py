@@ -10,6 +10,15 @@ from packages.core.models import Article, MediaAsset
 router = APIRouter(prefix="/v1/content", tags=["content"])
 
 
+def _safe_media_path(value: object | None) -> str | None:
+    if not isinstance(value, str):
+        return None
+    candidate = value.strip()
+    if not candidate or "://" in candidate:
+        return None
+    return candidate
+
+
 def _localized_complete(payload: dict | None) -> bool:
     if not isinstance(payload, dict):
         return False
@@ -47,7 +56,7 @@ def _serialize(article: Article) -> dict:
         "title": article.title,
         "excerpt": article.excerpt,
         "body_md": article.body_md,
-        "hero_image_url": article.hero_image_url,
+        "hero_image_url": _safe_media_path(article.hero_image_url),
         "published_at": article.published_at.isoformat() if article.published_at else None,
     }
 

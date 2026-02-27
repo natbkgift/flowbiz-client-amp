@@ -11,6 +11,7 @@ from sqlalchemy.orm import Session
 
 from apps.api.dependencies.auth import get_current_admin
 from packages.core.database import get_db
+from packages.core.media_library import require_local_media_path
 from packages.core.models import MediaAsset, Project, User
 from packages.core.project_media_governance import evaluate_project_media_governance
 
@@ -120,6 +121,12 @@ def admin_create_project(
     db: Session = Depends(get_db),
     _admin: User = Depends(get_current_admin),
 ) -> dict:
+    if payload.cover_image_url is not None:
+        payload.cover_image_url = require_local_media_path(payload.cover_image_url, field_name="cover_image_url")
+    if payload.hero_image_url is not None:
+        payload.hero_image_url = require_local_media_path(payload.hero_image_url, field_name="hero_image_url")
+    payload.images = [require_local_media_path(path, field_name="images") for path in (payload.images or [])]
+
     paths = [p for p in [payload.cover_image_url, payload.hero_image_url, *(payload.images or [])] if p]
     warnings = _validate_media_governance(db, paths)
 
@@ -142,6 +149,13 @@ def admin_patch_project(
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Project not found")
 
     updates = payload.model_dump(exclude_unset=True)
+    if "cover_image_url" in updates and updates["cover_image_url"] is not None:
+        updates["cover_image_url"] = require_local_media_path(updates["cover_image_url"], field_name="cover_image_url")
+    if "hero_image_url" in updates and updates["hero_image_url"] is not None:
+        updates["hero_image_url"] = require_local_media_path(updates["hero_image_url"], field_name="hero_image_url")
+    if "images" in updates and updates["images"] is not None:
+        updates["images"] = [require_local_media_path(path, field_name="images") for path in updates["images"]]
+
     merged_paths = [
         updates.get("cover_image_url", row.cover_image_url),
         updates.get("hero_image_url", row.hero_image_url),

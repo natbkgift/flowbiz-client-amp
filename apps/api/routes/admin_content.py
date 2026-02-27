@@ -9,6 +9,7 @@ from sqlalchemy.orm import Session
 
 from apps.api.dependencies.auth import get_current_admin
 from packages.core.database import get_db
+from packages.core.media_library import require_local_media_path
 from packages.core.models import Article, MediaAsset, User
 
 router = APIRouter(prefix="/admin", tags=["admin"])
@@ -34,11 +35,12 @@ def ingest_article_hero_image(
     if article is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Article not found")
 
-    media = db.scalar(select(MediaAsset).where(MediaAsset.storage_path == payload.storage_path))
+    normalized_path = require_local_media_path(payload.storage_path, field_name="storage_path")
+    media = db.scalar(select(MediaAsset).where(MediaAsset.storage_path == normalized_path))
     if media is None:
         media = MediaAsset(
             id=uuid4(),
-            storage_path=payload.storage_path,
+            storage_path=normalized_path,
             kind="image",
             mime_type="image/jpeg",
             file_size_bytes=1,
@@ -61,7 +63,7 @@ def ingest_article_hero_image(
         if payload.approval_status is not None:
             media.approval_status = payload.approval_status
 
-    article.hero_image_url = payload.storage_path
+    article.hero_image_url = normalized_path
     article.hero_media_asset_id = media.id
     if payload.publish_now:
         article.status = "published"

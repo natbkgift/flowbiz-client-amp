@@ -10,6 +10,15 @@ from packages.core.models import Area, AreaStatistic, Developer
 router = APIRouter(prefix="/v1", tags=["domain"])
 
 
+def _safe_media_path(value: object | None) -> str | None:
+    if not isinstance(value, str):
+        return None
+    candidate = value.strip()
+    if not candidate or "://" in candidate:
+        return None
+    return candidate
+
+
 @router.get("/areas")
 def list_areas(db: Session = Depends(get_db)) -> list[dict]:
     rows = db.scalars(
@@ -24,7 +33,7 @@ def list_areas(db: Session = Depends(get_db)) -> list[dict]:
             "name": row.name,
             "city": row.city,
             "status": row.status,
-            "hero_image_url": row.hero_image_url,
+            "hero_image_url": _safe_media_path(row.hero_image_url),
             "content": row.content,
         }
         for row in rows
@@ -48,7 +57,7 @@ def get_area(slug: str, db: Session = Depends(get_db)) -> dict:
         "name": row.name,
         "city": row.city,
         "status": row.status,
-        "hero_image_url": row.hero_image_url,
+        "hero_image_url": _safe_media_path(row.hero_image_url),
         "content": row.content,
         "map_center": row.map_center,
     }
@@ -93,7 +102,7 @@ def list_developers(db: Session = Depends(get_db)) -> list[dict]:
             "website": row.website,
             "summary": row.summary,
             "tier": row.tier,
-            "logo_url": row.logo_url,
+            "logo_url": _safe_media_path(row.logo_url),
             "status": row.status,
         }
         for row in rows
@@ -118,7 +127,7 @@ def get_developer(slug: str, db: Session = Depends(get_db)) -> dict:
         "website": row.website,
         "summary": row.summary,
         "tier": row.tier,
-        "logo_url": row.logo_url,
+        "logo_url": _safe_media_path(row.logo_url),
         "status": row.status,
     }
 

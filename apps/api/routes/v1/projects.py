@@ -10,6 +10,29 @@ from packages.core.models import Project
 router = APIRouter(prefix="/v1", tags=["projects"])
 
 
+def _safe_media_path(value: object | None) -> str | None:
+    if not isinstance(value, str):
+        return None
+    candidate = value.strip()
+    if not candidate or "://" in candidate:
+        return None
+    return candidate
+
+
+def _safe_media_list(value: object | None) -> list[str]:
+    if not isinstance(value, list):
+        return []
+    out: list[str] = []
+    seen: set[str] = set()
+    for item in value:
+        path = _safe_media_path(item)
+        if path is None or path in seen:
+            continue
+        seen.add(path)
+        out.append(path)
+    return out
+
+
 @router.get("/projects")
 def list_projects(
     page: int = Query(1, ge=1),
@@ -38,9 +61,9 @@ def list_projects(
                 "area_id": str(row.area_id) if row.area_id else None,
                 "developer_id": str(row.developer_id) if row.developer_id else None,
                 "starting_price": float(row.starting_price) if row.starting_price is not None else None,
-                "cover_image_url": row.cover_image_url,
-                "hero_image_url": row.hero_image_url,
-                "images": row.images or [],
+                "cover_image_url": _safe_media_path(row.cover_image_url),
+                "hero_image_url": _safe_media_path(row.hero_image_url),
+                "images": _safe_media_list(row.images),
                 "summary": row.summary or {},
                 "updated_at": row.updated_at.isoformat() if row.updated_at else None,
             }
@@ -74,9 +97,9 @@ def get_project(project_id: str, db: Session = Depends(get_db)) -> dict:
             "property_type": row.property_type,
             "summary": row.summary or {},
             "description": row.description or {},
-            "cover_image_url": row.cover_image_url,
-            "hero_image_url": row.hero_image_url,
-            "images": row.images or [],
+            "cover_image_url": _safe_media_path(row.cover_image_url),
+            "hero_image_url": _safe_media_path(row.hero_image_url),
+            "images": _safe_media_list(row.images),
         }
     }
 

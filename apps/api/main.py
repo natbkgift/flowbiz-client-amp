@@ -5,7 +5,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 
-from apps.api.routes import admin_content, admin_crm, admin_domain, admin_home_composer, admin_projects, admin_properties
+from apps.api.routes import admin_content, admin_crm, admin_domain, admin_home_composer, admin_media, admin_projects, admin_properties
 from apps.api.routes.v1 import auth, content, crm, domain, home_composer, projects, properties
 from packages.core.database import init_db
 
@@ -46,3 +46,4 @@ app.include_router(admin_domain.router)
 app.include_router(admin_projects.router)
 app.include_router(admin_content.router)
 app.include_router(admin_home_composer.router)
+app.include_router(admin_media.router)
