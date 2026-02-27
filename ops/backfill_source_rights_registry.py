@@ -9,6 +9,8 @@ from pathlib import Path
 from typing import Any
 
 from sqlalchemy import select
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker
 
 _ROOT = Path(__file__).resolve().parent.parent
 if str(_ROOT) not in sys.path:
@@ -43,6 +45,16 @@ def _parse_args() -> argparse.Namespace:
         "--write",
         default="ops/logs/source_rights_backfill_report.json",
         help="Output JSON report path",
+    )
+    parser.add_argument(
+        "--db-path",
+        default=None,
+        help="SQLite DB path override (for staging/prod-like backfill)",
+    )
+    parser.add_argument(
+        "--database-url",
+        default=None,
+        help="Full SQLAlchemy database URL override (takes precedence over --db-path)",
     )
     parser.add_argument("--apply", action="store_true", help="Apply updates to DB")
     parser.add_argument("--force", action="store_true", help="Overwrite existing values")
@@ -114,11 +126,27 @@ def _find_asset(db, normalized: dict[str, Any]) -> MediaAsset | None:
     return None
 
 
+def _build_session_factory(args: argparse.Namespace):
+    if args.database_url:
+        connect_args = {"check_same_thread": False} if args.database_url.startswith("sqlite:///") else {}
+        engine = create_engine(args.database_url, connect_args=connect_args, future=True)
+        return sessionmaker(bind=engine, autoflush=False, autocommit=False, future=True)
+
+    if args.db_path:
+        db_path = Path(args.db_path).expanduser().resolve()
+        database_url = f"sqlite:///{db_path.as_posix()}"
+        engine = create_engine(database_url, connect_args={"check_same_thread": False}, future=True)
+        return sessionmaker(bind=engine, autoflush=False, autocommit=False, future=True)
+
+    return SessionLocal
+
+
 def main() -> int:
     args = _parse_args()
     mapping_path = Path(args.mapping)
     out_path = Path(args.write)
     out_path.parent.mkdir(parents=True, exist_ok=True)
+    session_factory = _build_session_factory(args)
 
     if not mapping_path.exists():
         raise SystemExit(f"Mapping file not found: {mapping_path}")
@@ -127,7 +155,7 @@ def main() -> int:
     summary = BackfillSummary(mapping_rows=len(rows))
     unmatched: list[dict[str, Any]] = []
 
-    with SessionLocal() as db:
+    with session_factory() as db:
         for src in rows:
             normalized = _normalize_row(src)
             row = _find_asset(db, normalized)

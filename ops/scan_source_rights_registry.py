@@ -5,6 +5,9 @@ import argparse
 import sys
 from pathlib import Path
 
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker
+
 _ROOT = Path(__file__).resolve().parent.parent
 if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
@@ -41,13 +44,39 @@ def _parse_args() -> argparse.Namespace:
     )
     parser.add_argument("--no-write", action="store_true", dest="no_write")
     parser.add_argument("--quiet", action="store_true")
+    parser.add_argument(
+        "--db-path",
+        default=None,
+        help="SQLite DB path override (for staging/prod-like scans)",
+    )
+    parser.add_argument(
+        "--database-url",
+        default=None,
+        help="Full SQLAlchemy database URL override (takes precedence over --db-path)",
+    )
     return parser.parse_args()
+
+
+def _build_session_factory(args: argparse.Namespace):
+    if args.database_url:
+        connect_args = {"check_same_thread": False} if args.database_url.startswith("sqlite:///") else {}
+        engine = create_engine(args.database_url, connect_args=connect_args, future=True)
+        return sessionmaker(bind=engine, autoflush=False, autocommit=False, future=True)
+
+    if args.db_path:
+        db_path = Path(args.db_path).expanduser().resolve()
+        database_url = f"sqlite:///{db_path.as_posix()}"
+        engine = create_engine(database_url, connect_args={"check_same_thread": False}, future=True)
+        return sessionmaker(bind=engine, autoflush=False, autocommit=False, future=True)
+
+    return SessionLocal
 
 
 def main() -> int:
     args = _parse_args()
+    session_factory = _build_session_factory(args)
 
-    with SessionLocal() as db:
+    with session_factory() as db:
         report = build_source_rights_report(
             db,
             pending_threshold=args.pending_threshold,

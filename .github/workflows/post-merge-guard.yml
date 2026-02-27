@@ -36,13 +36,26 @@ jobs:
             tests/test_b1_media_library.py \
             tests/test_admin_properties_cms.py \
             tests/test_admin_domain_cms.py \
-            tests/test_media_integrity.py
+            tests/test_media_integrity.py \
+            tests/test_b12_source_rights_registry.py
 
       - name: Media Integrity Strict Gate
         run: |
           python ops/scan_media_integrity.py \
             --strict \
             --write ops/logs/post_merge_media_integrity_report.json
+
+      - name: Source Rights Registry B12 Gate
+        run: |
+          EXTRA_ARGS=""
+          if [ "${B12_FAIL_ON_WARN:-false}" = "true" ]; then
+            EXTRA_ARGS="--fail-on-warn"
+          fi
+
+          python ops/scan_source_rights_registry.py \
+            --strict \
+            ${EXTRA_ARGS} \
+            --write ops/logs/post_merge_b12_source_rights_report.json
 
       - name: Failure policy (no auto-revert)
         if: failure()
