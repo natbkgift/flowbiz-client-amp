@@ -34,6 +34,35 @@ _image_cache: dict[str, tuple[float, list[str]]] = {}
 _IMAGE_CACHE_TTL = 60  # seconds
 
 
+def _normalize_i18n_map(value: object | None) -> dict[str, str] | None:
+    if not isinstance(value, dict):
+        return None
+    out: dict[str, str] = {}
+    for locale in ("en", "th"):
+        raw = value.get(locale)
+        if raw is None:
+            continue
+        text = str(raw).strip()
+        if text:
+            out[locale] = text
+    return out or None
+
+
+def _resolve_text_for_locale(i18n_map: dict[str, str] | None, fallback: str | None, locale: str) -> str | None:
+    if i18n_map:
+        primary = i18n_map.get(locale)
+        if primary:
+            return primary
+        if i18n_map.get("en"):
+            return i18n_map["en"]
+        if i18n_map.get("th"):
+            return i18n_map["th"]
+    if fallback is None:
+        return None
+    value = str(fallback).strip()
+    return value or None
+
+
 def _list_local_images(property_id: UUID) -> list[str]:
     """Return public /images/... URLs by listing storage folder (cached)."""
     cache_key = str(property_id)
@@ -149,6 +178,7 @@ def list_properties(
     type: PropertyType | None = None,
     search: str | None = None,
     sort: str | None = Query(default=None, pattern=r"^(price_asc|price_desc|newest|oldest)$"),
+    locale: str = Query(default="en", pattern=r"^(en|th)$"),
     project_id: UUID | None = Query(default=None),
     db: Session = Depends(get_db),
 ) -> PropertyListResponse:
@@ -190,6 +220,8 @@ def list_properties(
         # Build response using DB fields first (images/local_images/cover_image/cover_image_url)
         # then fallback to storage folder listing.
         m = PropertyListItem.model_validate(item)
+        title_i18n = _normalize_i18n_map(getattr(item, "title_i18n", None))
+        description_i18n = _normalize_i18n_map(getattr(item, "description_i18n", None))
 
         stored_local = _coerce_image_list(getattr(item, "local_images", None))
         stored_images = _coerce_image_list(getattr(item, "images", None))
@@ -206,6 +238,14 @@ def list_properties(
         m.images = merged
         m.local_images = merged
         m.cover_image_url = m.cover_image
+        m.title_i18n = title_i18n
+        m.description_i18n = description_i18n
+        m.title = _resolve_text_for_locale(title_i18n, getattr(item, "title", None), locale) or m.title
+        m.description = _resolve_text_for_locale(
+            description_i18n,
+            getattr(item, "description", None),
+            locale,
+        )
         m.tags = _extract_tags(getattr(item, "features", None))
         m.view_label = _extract_view_label(getattr(item, "features", None))
         m.size_sqm = getattr(item, "size_sqm", None) or getattr(item, "size", None)
@@ -218,6 +258,7 @@ def list_properties(
 @router.get("/properties/{property_id}/", response_model=PropertyDetail)
 def get_property(
     property_id: UUID,
+    locale: str = Query(default="en", pattern=r"^(en|th)$"),
     db: Session = Depends(get_db),
 ) -> PropertyDetail:
     prop = db.get(Property, property_id)
@@ -238,6 +279,12 @@ def get_property(
     m.images = merged
     m.local_images = merged
     m.cover_image_url = m.cover_image
+    title_i18n = _normalize_i18n_map(getattr(prop, "title_i18n", None))
+    description_i18n = _normalize_i18n_map(getattr(prop, "description_i18n", None))
+    m.title_i18n = title_i18n
+    m.description_i18n = description_i18n
+    m.title = _resolve_text_for_locale(title_i18n, getattr(prop, "title", None), locale) or m.title
+    m.description = _resolve_text_for_locale(description_i18n, getattr(prop, "description", None), locale)
     m.tags = _extract_tags(getattr(prop, "features", None))
     m.view_label = _extract_view_label(getattr(prop, "features", None))
     m.size_sqm = getattr(prop, "size_sqm", None) or getattr(prop, "size", None)
@@ -248,6 +295,7 @@ def get_property(
 @router.get("/properties/slug/{slug}/", response_model=PropertyDetail)
 def get_property_by_slug(
     slug: str,
+    locale: str = Query(default="en", pattern=r"^(en|th)$"),
     db: Session = Depends(get_db),
 ) -> PropertyDetail:
     prop = db.scalar(select(Property).where(Property.slug == slug))
@@ -268,6 +316,12 @@ def get_property_by_slug(
     m.images = merged
     m.local_images = merged
     m.cover_image_url = m.cover_image
+    title_i18n = _normalize_i18n_map(getattr(prop, "title_i18n", None))
+    description_i18n = _normalize_i18n_map(getattr(prop, "description_i18n", None))
+    m.title_i18n = title_i18n
+    m.description_i18n = description_i18n
+    m.title = _resolve_text_for_locale(title_i18n, getattr(prop, "title", None), locale) or m.title
+    m.description = _resolve_text_for_locale(description_i18n, getattr(prop, "description", None), locale)
     m.tags = _extract_tags(getattr(prop, "features", None))
     m.view_label = _extract_view_label(getattr(prop, "features", None))
     m.size_sqm = getattr(prop, "size_sqm", None) or getattr(prop, "size", None)

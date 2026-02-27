@@ -3,6 +3,7 @@ import hashlib
 import io
 import threading
 import time
+from datetime import datetime, timezone
 from decimal import Decimal
 from uuid import UUID
 
@@ -37,6 +38,8 @@ from packages.core.schemas.property_api import (
     CompanyInfoUpdate,
     PaginationMeta,
     PropertyAdminListResponse,
+    PropertyBulkTagsRequest,
+    PropertyBulkUpdateRequest,
     PropertyBulkStatusRequest,
     PropertyBulkStatusResponse,
     PropertyCreate,
@@ -138,6 +141,7 @@ class PropertyMediaSyncItem(BaseModel):
     source_id: str
     local_images: list[str]
     cover_image: str | None = None
+    source_meta: dict | None = None
 
 
 class PropertyMediaSyncRequest(BaseModel):
@@ -175,6 +179,47 @@ def _normalize_tags(value: list[str] | None) -> list[str] | None:
     if not values:
         return None
     return values
+
+
+def _normalize_i18n_map(value: dict | None, *, field_name: str) -> dict[str, str] | None:
+    if value is None:
+        return None
+    if not isinstance(value, dict):
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
+            detail=f"{field_name} must be an object",
+        )
+
+    allowed = {"en", "th"}
+    keys = set(value.keys())
+    if not keys.issubset(allowed):
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
+            detail=f"{field_name} supports only en/th keys",
+        )
+
+    out: dict[str, str] = {}
+    for locale in ("en", "th"):
+        raw = value.get(locale)
+        if raw is None:
+            continue
+        text = str(raw).strip()
+        if text:
+            out[locale] = text
+
+    return out or None
+
+
+def _resolve_i18n_text(i18n_map: dict[str, str] | None, legacy_value: str | None) -> str | None:
+    if i18n_map:
+        if i18n_map.get("en"):
+            return i18n_map["en"]
+        if i18n_map.get("th"):
+            return i18n_map["th"]
+    if legacy_value is None:
+        return None
+    value = str(legacy_value).strip()
+    return value or None
 
 
 def _extract_tags(features: dict | None) -> list[str] | None:
@@ -647,11 +692,19 @@ def import_properties(
 
                 for r in rows_sorted:
                     will_update = r.source_id in existing_source_ids
+                    synced_at = datetime.now(timezone.utc)
+                    import_meta = {
+                        "source": "csv_import",
+                        "filename": file.filename or "unknown",
+                        "file_sha256": file_sha256,
+                    }
 
                     values = {
                         "source_id": r.source_id,
                         "title": r.title,
                         "description": None,
+                        "title_i18n": None,
+                        "description_i18n": None,
                         "type": r.type,
                         "price": r.price,
                         "bedrooms": r.bedrooms,
@@ -662,6 +715,8 @@ def import_properties(
                         "images": None,
                         "slug": r.slug,
                         "status": r.status,
+                        "last_synced_at": synced_at,
+                        "source_meta": import_meta,
                     }
 
                     set_ = {
@@ -675,6 +730,8 @@ def import_properties(
                         "bathrooms": r.bathrooms,
                         "size": r.size,
                         "slug": r.slug,
+                        "last_synced_at": synced_at,
+                        "source_meta": import_meta,
                     }
 
                     if dialect_name == "postgresql":
@@ -886,6 +943,16 @@ def sync_property_media(
         prop.local_images = cleaned_local_images
         prop.cover_image = item.cover_image or (cleaned_local_images[0] if cleaned_local_images else None)
         prop.cover_image_url = prop.cover_image
+        prop.last_synced_at = datetime.now(timezone.utc)
+
+        source_meta = dict(prop.source_meta or {})
+        source_meta["media_sync"] = {
+            "source_id": item.source_id,
+            "synced_at": prop.last_synced_at.isoformat(),
+        }
+        if item.source_meta is not None:
+            source_meta["provided"] = item.source_meta
+        prop.source_meta = source_meta
 
         # Backward compatibility for existing clients.
         prop.images = cleaned_local_images
@@ -903,6 +970,13 @@ def create_property(
     db: Session = Depends(get_db),
     _admin: User = Depends(get_current_admin),
 ) -> PropertyDetail:
+    title_i18n = _normalize_i18n_map(payload.title_i18n, field_name="title_i18n")
+    description_i18n = _normalize_i18n_map(payload.description_i18n, field_name="description_i18n")
+    resolved_title = _resolve_i18n_text(title_i18n, payload.title)
+    resolved_description = _resolve_i18n_text(description_i18n, payload.description)
+    if not resolved_title:
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_CONTENT, detail="title is required")
+
     _validate_relations_exist(
         db,
         project_id=payload.project_id,
@@ -933,8 +1007,10 @@ def create_property(
     prop = Property(
         source_id=payload.source_id,
         slug=payload.slug,
-        title=payload.title,
-        description=payload.description,
+        title=resolved_title,
+        description=resolved_description,
+        title_i18n=title_i18n,
+        description_i18n=description_i18n,
         type=payload.type.value if hasattr(payload.type, "value") else str(payload.type),
         property_type=payload.property_type,
         status=payload.status.value if hasattr(payload.status, "value") else str(payload.status),
@@ -960,6 +1036,8 @@ def create_property(
         local_images=_coerce_string_list(payload.local_images),
         images=[path for path in _coerce_string_list(payload.images) if _is_local_media_path(path)],
         features=features or None,
+        source_meta=payload.source_meta,
+        last_synced_at=payload.last_synced_at,
     )
     _apply_canonical_legacy_alignment(prop)
     db.add(prop)
@@ -980,6 +1058,14 @@ def update_property(
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Property not found")
 
     data = payload.model_dump(exclude_unset=True)
+
+    if "title_i18n" in data:
+        data["title_i18n"] = _normalize_i18n_map(data.get("title_i18n"), field_name="title_i18n")
+    if "description_i18n" in data:
+        data["description_i18n"] = _normalize_i18n_map(
+            data.get("description_i18n"),
+            field_name="description_i18n",
+        )
 
     _validate_relations_exist(
         db,
@@ -1013,6 +1099,18 @@ def update_property(
         else:
             features["view_label"] = str(view_label).strip()
         prop.features = features or None
+
+    if "title_i18n" in data or "title" in data:
+        prop.title = _resolve_i18n_text(
+            data.get("title_i18n", prop.title_i18n),
+            data.get("title", prop.title),
+        ) or prop.title
+
+    if "description_i18n" in data or "description" in data:
+        prop.description = _resolve_i18n_text(
+            data.get("description_i18n", prop.description_i18n),
+            data.get("description", prop.description),
+        )
 
     for field, value in data.items():
         if field in {"tags", "view_label"}:
@@ -1130,6 +1228,188 @@ def bulk_update_property_status(
         updated += 1
 
     db.commit()
+    return PropertyBulkStatusResponse(updated=updated)
+
+
+@router.post("/properties/bulk/tags", response_model=PropertyBulkStatusResponse)
+def bulk_update_property_tags(
+    payload: PropertyBulkTagsRequest,
+    db: Session = Depends(get_db),
+    _admin: User = Depends(get_current_admin),
+) -> PropertyBulkStatusResponse:
+    if not payload.property_ids:
+        return PropertyBulkStatusResponse(updated=0)
+
+    operation = str(payload.operation).strip().lower()
+    if operation not in {"add", "remove", "set"}:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
+            detail="operation must be one of add/remove/set",
+        )
+
+    incoming_tags = _normalize_tags(payload.tags) or []
+    rows = db.scalars(select(Property).where(Property.id.in_(payload.property_ids))).all()
+    row_map = {row.id: row for row in rows}
+
+    updated = 0
+    for property_id in payload.property_ids:
+        row = row_map.get(property_id)
+        if row is None:
+            continue
+
+        features = dict(row.features or {})
+        existing = _extract_tags(features) or []
+
+        if operation == "set":
+            next_tags = incoming_tags
+        elif operation == "add":
+            next_tags = list(existing)
+            for tag in incoming_tags:
+                if tag not in next_tags:
+                    next_tags.append(tag)
+        else:
+            remove_set = set(incoming_tags)
+            next_tags = [tag for tag in existing if tag not in remove_set]
+
+        if next_tags:
+            features["tags"] = next_tags
+        else:
+            features.pop("tags", None)
+
+        row.features = features or None
+        db.add(row)
+        updated += 1
+
+    db.commit()
+    return PropertyBulkStatusResponse(updated=updated)
+
+
+@router.post("/properties/bulk/update", response_model=PropertyBulkStatusResponse)
+def bulk_update_properties(
+    payload: PropertyBulkUpdateRequest,
+    db: Session = Depends(get_db),
+    _admin: User = Depends(get_current_admin),
+) -> PropertyBulkStatusResponse:
+    if not payload.property_ids:
+        return PropertyBulkStatusResponse(updated=0)
+
+    data = payload.fields.model_dump(exclude_unset=True)
+    if not data:
+        return PropertyBulkStatusResponse(updated=0)
+
+    allowed_fields = {
+        "status",
+        "type",
+        "property_type",
+        "price",
+        "currency",
+        "price_period",
+        "bedrooms",
+        "bathrooms",
+        "size",
+        "size_sqm",
+        "view",
+        "address",
+        "city",
+        "project_id",
+        "area_id",
+        "developer_id",
+        "cover_image",
+        "cover_image_url",
+        "local_images",
+        "images",
+        "tags",
+        "view_label",
+        "title",
+        "title_i18n",
+        "description",
+        "description_i18n",
+        "source_meta",
+        "last_synced_at",
+    }
+    disallowed = sorted(field for field in data if field not in allowed_fields)
+    if disallowed:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
+            detail=f"bulk update fields not allowed: {', '.join(disallowed)}",
+        )
+
+    if "title_i18n" in data:
+        data["title_i18n"] = _normalize_i18n_map(data.get("title_i18n"), field_name="title_i18n")
+    if "description_i18n" in data:
+        data["description_i18n"] = _normalize_i18n_map(
+            data.get("description_i18n"),
+            field_name="description_i18n",
+        )
+
+    rows = db.scalars(select(Property).where(Property.id.in_(payload.property_ids))).all()
+    row_map = {row.id: row for row in rows}
+
+    updated = 0
+    for property_id in payload.property_ids:
+        row = row_map.get(property_id)
+        if row is None:
+            continue
+
+        _validate_relations_exist(
+            db,
+            project_id=data.get("project_id", row.project_id),
+            area_id=data.get("area_id", row.area_id),
+            developer_id=data.get("developer_id", row.developer_id),
+        )
+
+        _validate_property_media_governance(
+            db,
+            cover_image=data.get("cover_image", row.cover_image),
+            cover_image_url=data.get("cover_image_url", row.cover_image_url),
+            local_images=data.get("local_images", row.local_images),
+            images=data.get("images", row.images),
+        )
+
+        if "tags" in data:
+            features = dict(row.features or {})
+            tags = _normalize_tags(data.get("tags"))
+            if tags is None:
+                features.pop("tags", None)
+            else:
+                features["tags"] = tags
+            row.features = features or None
+
+        if "view_label" in data:
+            features = dict(row.features or {})
+            view_label = data.get("view_label")
+            if view_label is None:
+                features.pop("view_label", None)
+            else:
+                features["view_label"] = str(view_label).strip()
+            row.features = features or None
+
+        if "title_i18n" in data or "title" in data:
+            row.title = _resolve_i18n_text(
+                data.get("title_i18n", row.title_i18n),
+                data.get("title", row.title),
+            ) or row.title
+
+        if "description_i18n" in data or "description" in data:
+            row.description = _resolve_i18n_text(
+                data.get("description_i18n", row.description_i18n),
+                data.get("description", row.description),
+            )
+
+        for field, value in data.items():
+            if field in {"tags", "view_label"}:
+                continue
+            if field == "images" and value is not None:
+                value = [path for path in _coerce_string_list(value) if _is_local_media_path(path)]
+            if field == "local_images" and value is not None:
+                value = _coerce_string_list(value)
+            setattr(row, field, value)
+
+        _apply_canonical_legacy_alignment(row)
+        db.add(row)
+        updated += 1
+
+    _commit_or_conflict(db, detail="A property with this slug already exists.")
     return PropertyBulkStatusResponse(updated=updated)
 
 

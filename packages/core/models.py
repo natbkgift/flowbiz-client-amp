@@ -472,6 +472,8 @@ class Property(Base):
     slug: Mapped[str | None] = mapped_column(String(500), nullable=True, unique=True, index=True)
     title: Mapped[str] = mapped_column(String(500), nullable=False)
     description: Mapped[str | None] = mapped_column(Text, nullable=True)
+    title_i18n: Mapped[dict | None] = mapped_column(JSONB, nullable=True)
+    description_i18n: Mapped[dict | None] = mapped_column(JSONB, nullable=True)
 
     type: Mapped[str] = mapped_column(property_type_enum, nullable=False)
     # NOT NULL per Blueprint Doc 05; sentinel default 'condo' for existing rows
@@ -521,6 +523,8 @@ class Property(Base):
     images: Mapped[list | None] = mapped_column(JSONB, nullable=True)
     local_images: Mapped[list | None] = mapped_column(JSONB, nullable=True)
     features: Mapped[dict | None] = mapped_column(JSONB, nullable=True)
+    source_meta: Mapped[dict | None] = mapped_column(JSONB, nullable=True)
+    last_synced_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
 
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), nullable=False, server_default=func.now()

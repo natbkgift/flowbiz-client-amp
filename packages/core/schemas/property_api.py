@@ -40,6 +40,8 @@ class PropertyListItem(BaseModel):
     slug: str | None = None
     title: str
     description: str | None = None
+    title_i18n: dict[str, str] | None = None
+    description_i18n: dict[str, str] | None = None
     type: str
     property_type: str = "condo"
     status: str
@@ -64,12 +66,14 @@ class PropertyListItem(BaseModel):
     fee_notes: str | None = None
     cover_image: str | None = None
     cover_image_url: str | None = None
-    images: list[str] = Field(default_factory=list)
-    local_images: list[str] = Field(default_factory=list)
+    images: list[str] | None = Field(default_factory=list)
+    local_images: list[str] | None = Field(default_factory=list)
     features: dict | None = None
     tags: list[str] | None = None
     view_label: str | None = None
     media_warnings: list[PropertyMediaWarning] = Field(default_factory=list)
+    source_meta: dict | None = None
+    last_synced_at: datetime | None = None
     created_at: datetime | None = None
     updated_at: datetime | None = None
 
@@ -97,6 +101,8 @@ class PropertyBaseWrite(BaseModel):
     slug: str | None = None
     title: str | None = None
     description: str | None = None
+    title_i18n: dict[str, str] | None = None
+    description_i18n: dict[str, str] | None = None
     type: PropertyType | str | None = None
     property_type: str | None = None
     status: PropertyStatus | str | None = None
@@ -123,13 +129,15 @@ class PropertyBaseWrite(BaseModel):
     images: list[str] | None = None
     local_images: list[str] | None = None
     features: dict | None = None
+    source_meta: dict | None = None
+    last_synced_at: datetime | None = None
     tags: list[str] | None = None
     view_label: str | None = None
 
 
 class PropertyCreate(PropertyBaseWrite):
     source_id: str
-    title: str
+    title: str | None = None
     type: PropertyType | str
     price: Decimal
     address: str
@@ -150,6 +158,17 @@ class PropertyBulkStatusRequest(BaseModel):
 
 class PropertyBulkStatusResponse(BaseModel):
     updated: int
+
+
+class PropertyBulkTagsRequest(BaseModel):
+    property_ids: list[UUID]
+    operation: str
+    tags: list[str]
+
+
+class PropertyBulkUpdateRequest(BaseModel):
+    property_ids: list[UUID]
+    fields: PropertyUpdate
 
 
 class CompanyInfoCreate(BaseModel):
