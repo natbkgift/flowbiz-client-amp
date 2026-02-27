@@ -87,7 +87,7 @@ def _guess_mime(path: Path, file_mime: str | None) -> str:
 def inspect_image_bytes(payload: bytes, *, filename: str, file_mime: str | None) -> MediaInspection:
     if len(payload) > MAX_IMAGE_SIZE_BYTES:
         raise HTTPException(
-            status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
+            status_code=status.HTTP_413_CONTENT_TOO_LARGE,
             detail=f"file too large: max {MAX_IMAGE_SIZE_BYTES} bytes",
         )
 
