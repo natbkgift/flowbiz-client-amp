@@ -3,6 +3,7 @@ import type { Metadata } from 'next';
 import { Container } from '@/components/layout/Container';
 import { Breadcrumbs } from '@/components/layout/Breadcrumbs';
 import { LeadForm } from '@/components/forms/LeadForm';
+import { TrackedLink } from '@/components/analytics/TrackedLink';
 import { getDictionary, normalizeLocale } from '@/app/_lib/i18n/get-dictionary';
 import { makePageMetadata } from '@/app/_lib/i18n/metadata';
 import { withLocale } from '@/app/_lib/i18n/routing';
@@ -148,6 +149,16 @@ export default async function SellValuationPage({
             <div>
               <h2 className="cta-title">{t.formHeading}</h2>
               <p className="cta-body">{t.subtitle}</p>
+              <div className="cta-row mt-4">
+                <TrackedLink
+                  className="btn btn-secondary"
+                  href={withLocale(locale, '/sell/list-property')}
+                  eventType="cta_click"
+                  eventPayload={{ cta: 'valuation_to_list_property', from: 'sell_valuation' }}
+                >
+                  {locale === 'th' ? 'ลงประกาศอสังหาริมทรัพย์' : 'List Your Property'}
+                </TrackedLink>
+              </div>
             </div>
             <div className="cta-panel__form">
               <LeadForm defaultMessage={t.formMessage} />

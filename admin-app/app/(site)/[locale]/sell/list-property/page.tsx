@@ -3,6 +3,7 @@ import type { Metadata } from 'next';
 import { Container } from '@/components/layout/Container';
 import { Breadcrumbs } from '@/components/layout/Breadcrumbs';
 import { SellerForm } from '@/components/forms/SellerForm';
+import { TrackedLink } from '@/components/analytics/TrackedLink';
 import { getDictionary, normalizeLocale } from '@/app/_lib/i18n/get-dictionary';
 import { makePageMetadata } from '@/app/_lib/i18n/metadata';
 import { withLocale } from '@/app/_lib/i18n/routing';
@@ -103,9 +104,14 @@ export default async function SellListPropertyPage({
           <h1 className="headline">{t.title}</h1>
           <p className="subhead">{t.subtitle}</p>
           <div className="cta-row">
-            <a className="btn btn-secondary" href={withLocale(locale, '/sell/valuation')}>
+            <TrackedLink
+              className="btn btn-secondary"
+              href={withLocale(locale, '/sell/valuation')}
+              eventType="cta_click"
+              eventPayload={{ cta: 'sell_list_to_valuation', from: 'sell_list_property' }}
+            >
               {locale === 'th' ? 'รับประเมินราคาก่อน' : 'Get a Valuation First'}
-            </a>
+            </TrackedLink>
           </div>
         </Container>
       </section>

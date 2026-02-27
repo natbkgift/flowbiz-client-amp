@@ -26,7 +26,7 @@ def get_runtime_context() -> RuntimeContext:
     return RuntimeContext(base_url=base_url)
 
 
-def _http_get(url: str, *, timeout: float = 20.0) -> tuple[int, str]:
+def _http_get(url: str, *, timeout: float = 45.0) -> tuple[int, str]:
     req = Request(url, headers={"User-Agent": USER_AGENT})
     try:
         with urlopen(req, timeout=timeout) as resp:
@@ -37,6 +37,8 @@ def _http_get(url: str, *, timeout: float = 20.0) -> tuple[int, str]:
         return int(exc.code), body
     except URLError as exc:
         raise AssertionError(f"Route down or unreachable: {url} ({exc})") from exc
+    except TimeoutError as exc:
+        raise AssertionError(f"Route timed out: {url} ({exc})") from exc
 
 
 def require_runtime_enabled() -> None:

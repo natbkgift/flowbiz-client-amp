@@ -1,6 +1,7 @@
 import { Container } from '@/components/layout/Container';
 import { Breadcrumbs } from '@/components/layout/Breadcrumbs';
 import { LeadForm } from '@/components/forms/LeadForm';
+import { TrackedLink } from '@/components/analytics/TrackedLink';
 import { CTA } from '@/app/_lib/public-cta';
 import { getDictionary, normalizeLocale } from '@/app/_lib/i18n/get-dictionary';
 import { makePageMetadata } from '@/app/_lib/i18n/metadata';
@@ -70,17 +71,36 @@ export default async function ContactPage({
               <p className="section-subtitle">{dict.contact.advisoryBody}</p>
 
               <div className="cta-row">
-                <a className="btn btn-cta" href={CTA.whatsAppUrl} target="_blank" rel="noreferrer">
+                <TrackedLink
+                  className="btn btn-cta"
+                  href={CTA.whatsAppUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  eventType="cta_click"
+                  eventPayload={{ cta: 'contact_whatsapp', from: 'contact' }}
+                >
                   {dict.cta.whatsapp}
-                </a>
-                <a className="btn btn-secondary" href={CTA.lineUrl} target="_blank" rel="noreferrer">
+                </TrackedLink>
+                <TrackedLink
+                  className="btn btn-secondary"
+                  href={CTA.lineUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  eventType="cta_click"
+                  eventPayload={{ cta: 'contact_line', from: 'contact' }}
+                >
                   {dict.cta.line}
-                </a>
+                </TrackedLink>
               </div>
 
-              <a className="btn btn-tertiary" href={CTA.phoneTel}>
+              <TrackedLink
+                className="btn btn-tertiary"
+                href={CTA.phoneTel}
+                eventType="cta_click"
+                eventPayload={{ cta: 'contact_phone', from: 'contact' }}
+              >
                 {CTA.phoneTel}
-              </a>
+              </TrackedLink>
 
               <div className="trust-box">
                 <h3 className="trust-box__title">{dict.contact.trustTitle}</h3>

@@ -1,8 +1,7 @@
-import Link from 'next/link';
-
 import { Container } from '@/components/layout/Container';
 import { Breadcrumbs } from '@/components/layout/Breadcrumbs';
 import { SellerForm } from '@/components/forms/SellerForm';
+import { TrackedLink } from '@/components/analytics/TrackedLink';
 import { getDictionary, normalizeLocale } from '@/app/_lib/i18n/get-dictionary';
 import { makePageMetadata } from '@/app/_lib/i18n/metadata';
 import { withLocale } from '@/app/_lib/i18n/routing';
@@ -71,12 +70,22 @@ export default async function SellPage({ params }: { params: Promise<{ locale: s
           <h1 className="headline">{dict.sell.headline}</h1>
           <p className="subhead">{dict.sell.subhead}</p>
           <div className="cta-row">
-            <Link className="btn btn-cta" href={withLocale(locale, '/sell/valuation')}>
+            <TrackedLink
+              className="btn btn-cta"
+              href={withLocale(locale, '/sell/valuation')}
+              eventType="cta_click"
+              eventPayload={{ cta: 'sell_valuation_top', from: 'sell' }}
+            >
               {t.valuationCta}
-            </Link>
-            <Link className="btn btn-secondary" href={withLocale(locale, '/sell/list-property')}>
+            </TrackedLink>
+            <TrackedLink
+              className="btn btn-secondary"
+              href={withLocale(locale, '/sell/list-property')}
+              eventType="cta_click"
+              eventPayload={{ cta: 'sell_listing_top', from: 'sell' }}
+            >
               {t.listCta}
-            </Link>
+            </TrackedLink>
           </div>
         </Container>
       </section>
@@ -93,12 +102,14 @@ export default async function SellPage({ params }: { params: Promise<{ locale: s
               <h3 className="card-title">{t.valuationTitle}</h3>
               <p className="card-subtitle">{t.valuationDesc}</p>
               <div className="card-actions">
-                <Link
+                <TrackedLink
                   href={withLocale(locale, '/sell/valuation')}
                   className="btn btn-cta"
+                  eventType="cta_click"
+                  eventPayload={{ cta: 'sell_valuation_card', from: 'sell' }}
                 >
                   {t.valuationCta}
-                </Link>
+                </TrackedLink>
               </div>
             </div>
 
@@ -106,12 +117,14 @@ export default async function SellPage({ params }: { params: Promise<{ locale: s
               <h3 className="card-title">{t.listTitle}</h3>
               <p className="card-subtitle">{t.listDesc}</p>
               <div className="card-actions">
-                <Link
+                <TrackedLink
                   href={withLocale(locale, '/sell/list-property')}
                   className="btn btn-secondary"
+                  eventType="cta_click"
+                  eventPayload={{ cta: 'sell_listing_card', from: 'sell' }}
                 >
                   {t.listCta}
-                </Link>
+                </TrackedLink>
               </div>
             </div>
           </div>
