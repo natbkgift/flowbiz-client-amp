@@ -36,7 +36,8 @@ jobs:
             tests/test_b1_media_library.py \
             tests/test_admin_properties_cms.py \
             tests/test_admin_domain_cms.py \
-            tests/test_media_integrity.py
+            tests/test_media_integrity.py \
+            tests/test_b13_import_sync_mirror_pipeline.py
 
       - name: Media Integrity Strict Gate
         run: |
@@ -55,3 +56,15 @@ jobs:
             --strict \
             ${EXTRA_ARGS} \
             --write ops/logs/ci_b12_source_rights_report.json
+
+      - name: Project Cover Coverage B13 Gate
+        run: |
+          EXTRA_ARGS=""
+          if [ "${B13_FAIL_ON_WARN:-false}" = "true" ]; then
+            EXTRA_ARGS="--fail-on-warn"
+          fi
+
+          python scripts/report_project_cover_coverage.py \
+            --strict \
+            ${EXTRA_ARGS} \
+            --write ops/logs/ci_b13_project_cover_report.json
