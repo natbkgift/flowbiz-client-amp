@@ -385,7 +385,13 @@ class Project(Base):
     description: Mapped[dict | None] = mapped_column(JSONB, nullable=True)
 
     # Metadata
+    badges: Mapped[list | None] = mapped_column(JSONB, nullable=True)
+    highlights: Mapped[list | None] = mapped_column(JSONB, nullable=True)
+    quick_facts: Mapped[list | None] = mapped_column(JSONB, nullable=True)
     amenities: Mapped[list | None] = mapped_column(JSONB, nullable=True)
+    trust_proof: Mapped[list | None] = mapped_column(JSONB, nullable=True)
+    source_notes: Mapped[dict | None] = mapped_column(JSONB, nullable=True)
+    claims_updated_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     investment_snapshot: Mapped[dict | None] = mapped_column(JSONB, nullable=True)
     location: Mapped[dict | None] = mapped_column(JSONB, nullable=True)
     unit_count: Mapped[int | None] = mapped_column(Integer, nullable=True)

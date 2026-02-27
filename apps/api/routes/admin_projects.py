@@ -1,18 +1,20 @@
 from __future__ import annotations
 
-from datetime import date
+import os
+from datetime import UTC, date, datetime
 from decimal import Decimal
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 from sqlalchemy import desc, select
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from apps.api.dependencies.auth import get_current_admin
 from packages.core.database import get_db
 from packages.core.media_library import require_local_media_path
-from packages.core.models import MediaAsset, Project, User
+from packages.core.models import Area, Developer, MediaAsset, Project, User
 from packages.core.project_media_governance import evaluate_project_media_governance
 
 router = APIRouter(prefix="/admin", tags=["admin"])
@@ -22,6 +24,8 @@ class ProjectCreate(BaseModel):
     slug: str
     name: str
     status: str = "draft"
+    area_id: UUID | None = None
+    developer_id: UUID | None = None
     property_type: str = "condo"
     delivery_date: date | None = None
     starting_price: Decimal | None = None
@@ -30,7 +34,13 @@ class ProjectCreate(BaseModel):
     images: list[str] = Field(default_factory=list)
     summary: dict = Field(default_factory=dict)
     description: dict | None = None
+    badges: list = Field(default_factory=list)
+    highlights: list = Field(default_factory=list)
+    quick_facts: list = Field(default_factory=list)
     amenities: list | None = None
+    trust_proof: list = Field(default_factory=list)
+    source_notes: dict = Field(default_factory=dict)
+    claims_updated_at: datetime | None = None
     investment_snapshot: dict | None = None
     location: dict | None = None
     unit_count: int | None = None
@@ -38,11 +48,27 @@ class ProjectCreate(BaseModel):
     year_built: int | None = None
     is_featured: bool = False
 
+    @field_validator("slug", "name", "status", "property_type")
+    @classmethod
+    def _required_non_blank(cls, value: str) -> str:
+        cleaned = str(value or "").strip()
+        if not cleaned:
+            raise ValueError("must not be blank")
+        return cleaned
+
+    @field_validator("summary", "description", "source_notes")
+    @classmethod
+    def _validate_locale_map(cls, value: dict | None) -> dict | None:
+        return _validate_en_th_map(value)
+
 
 class ProjectPatch(BaseModel):
+    slug: str | None = None
     name: str | None = None
     status: str | None = None
+    area_id: UUID | None = None
     property_type: str | None = None
+    developer_id: UUID | None = None
     delivery_date: date | None = None
     starting_price: Decimal | None = None
     cover_image_url: str | None = None
@@ -50,7 +76,13 @@ class ProjectPatch(BaseModel):
     images: list[str] | None = None
     summary: dict | None = None
     description: dict | None = None
+    badges: list | None = None
+    highlights: list | None = None
+    quick_facts: list | None = None
     amenities: list | None = None
+    trust_proof: list | None = None
+    source_notes: dict | None = None
+    claims_updated_at: datetime | None = None
     investment_snapshot: dict | None = None
     location: dict | None = None
     unit_count: int | None = None
@@ -58,13 +90,79 @@ class ProjectPatch(BaseModel):
     year_built: int | None = None
     is_featured: bool | None = None
 
+    @field_validator("slug", "name", "status", "property_type")
+    @classmethod
+    def _optional_non_blank(cls, value: str | None) -> str | None:
+        if value is None:
+            return None
+        cleaned = value.strip()
+        if not cleaned:
+            raise ValueError("must not be blank")
+        return cleaned
+
+    @field_validator("summary", "description", "source_notes")
+    @classmethod
+    def _optional_locale_map(cls, value: dict | None) -> dict | None:
+        return _validate_en_th_map(value)
+
+
+def _validate_en_th_map(value: dict | None) -> dict | None:
+    if value is None:
+        return None
+    if not isinstance(value, dict):
+        raise ValueError("must be an object with en/th keys")
+    if not value:
+        return value
+    invalid = sorted([key for key in value if key not in {"en", "th"}])
+    if invalid:
+        raise ValueError(f"unsupported locale keys: {', '.join(invalid)}")
+    return value
+
+
+def _preview_url_for_slug(slug: str) -> str:
+    base = (
+        os.getenv("FLOWBIZ_PUBLIC_BASE_URL")
+        or os.getenv("FLOWBIZ_SITE_BASE_URL")
+        or os.getenv("FLOWBIZ_FRONTEND_BASE_URL")
+        or ""
+    ).strip()
+    if not base:
+        return f"/projects/{slug}"
+    return f"{base.rstrip('/')}/projects/{slug}"
+
+
+def _validate_relations(db: Session, *, area_id: UUID | None, developer_id: UUID | None) -> None:
+    if area_id is not None:
+        area = db.get(Area, area_id)
+        if area is None or area.deleted_at is not None:
+            raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_CONTENT, detail="area_id not found")
+    if developer_id is not None:
+        developer = db.get(Developer, developer_id)
+        if developer is None or developer.deleted_at is not None:
+            raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_CONTENT, detail="developer_id not found")
+
+
+def _assert_slug_available(db: Session, *, slug: str, exclude_project_id: UUID | None = None) -> None:
+    row = db.scalar(select(Project).where(Project.slug == slug).limit(1))
+    if row is None:
+        return
+    if exclude_project_id is not None and row.id == exclude_project_id:
+        return
+    raise HTTPException(
+        status_code=status.HTTP_409_CONFLICT,
+        detail={"code": "project_slug_conflict", "message": "slug already exists", "field": "slug"},
+    )
+
 
 def _serialize(row: Project) -> dict:
     return {
         "id": str(row.id),
         "slug": row.slug,
+        "preview_url": _preview_url_for_slug(row.slug),
         "name": row.name,
         "status": row.status,
+        "area_id": str(row.area_id) if row.area_id else None,
+        "developer_id": str(row.developer_id) if row.developer_id else None,
         "property_type": row.property_type,
         "delivery_date": row.delivery_date.isoformat() if row.delivery_date else None,
         "starting_price": float(row.starting_price) if row.starting_price is not None else None,
@@ -73,7 +171,13 @@ def _serialize(row: Project) -> dict:
         "images": row.images or [],
         "summary": row.summary or {},
         "description": row.description,
+        "badges": row.badges or [],
+        "highlights": row.highlights or [],
+        "quick_facts": row.quick_facts or [],
         "amenities": row.amenities,
+        "trust_proof": row.trust_proof or [],
+        "source_notes": row.source_notes or {},
+        "claims_updated_at": row.claims_updated_at.isoformat() if row.claims_updated_at else None,
         "investment_snapshot": row.investment_snapshot,
         "location": row.location,
         "unit_count": row.unit_count,
@@ -87,7 +191,7 @@ def _validate_media_governance(db: Session, paths: list[str]) -> list[dict]:
     result = evaluate_project_media_governance(db, paths=paths)
     if result.errors:
         raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
             detail={"code": "media_governance_blocked", "errors": [item.to_dict() for item in result.errors]},
         )
     return [item.to_dict() for item in result.warnings]
@@ -99,7 +203,9 @@ def admin_list_projects(
     db: Session = Depends(get_db),
     _admin: User = Depends(get_current_admin),
 ) -> dict:
-    rows = db.scalars(select(Project).order_by(desc(Project.updated_at)).limit(limit)).all()
+    rows = db.scalars(
+        select(Project).where(Project.deleted_at.is_(None)).order_by(desc(Project.updated_at)).limit(limit)
+    ).all()
     return {"data": [_serialize(row) for row in rows]}
 
 
@@ -110,7 +216,7 @@ def admin_get_project(
     _admin: User = Depends(get_current_admin),
 ) -> dict:
     row = db.get(Project, project_id)
-    if row is None:
+    if row is None or row.deleted_at is not None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Project not found")
     return _serialize(row)
 
@@ -121,6 +227,9 @@ def admin_create_project(
     db: Session = Depends(get_db),
     _admin: User = Depends(get_current_admin),
 ) -> dict:
+    _assert_slug_available(db, slug=payload.slug)
+    _validate_relations(db, area_id=payload.area_id, developer_id=payload.developer_id)
+
     if payload.cover_image_url is not None:
         payload.cover_image_url = require_local_media_path(payload.cover_image_url, field_name="cover_image_url")
     if payload.hero_image_url is not None:
@@ -132,7 +241,14 @@ def admin_create_project(
 
     row = Project(**payload.model_dump())
     db.add(row)
-    db.commit()
+    try:
+        db.commit()
+    except IntegrityError as exc:
+        db.rollback()
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail={"code": "project_slug_conflict", "message": "slug already exists", "field": "slug"},
+        ) from exc
     db.refresh(row)
     return {"project": _serialize(row), "media_warnings": warnings}
 
@@ -145,10 +261,17 @@ def admin_patch_project(
     _admin: User = Depends(get_current_admin),
 ) -> dict:
     row = db.get(Project, project_id)
-    if row is None:
+    if row is None or row.deleted_at is not None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Project not found")
 
     updates = payload.model_dump(exclude_unset=True)
+    if "slug" in updates and updates["slug"] is not None:
+        _assert_slug_available(db, slug=updates["slug"], exclude_project_id=row.id)
+    _validate_relations(
+        db,
+        area_id=updates.get("area_id", row.area_id),
+        developer_id=updates.get("developer_id", row.developer_id),
+    )
     if "cover_image_url" in updates and updates["cover_image_url"] is not None:
         updates["cover_image_url"] = require_local_media_path(updates["cover_image_url"], field_name="cover_image_url")
     if "hero_image_url" in updates and updates["hero_image_url"] is not None:
@@ -166,7 +289,14 @@ def admin_patch_project(
     for field, value in updates.items():
         setattr(row, field, value)
     db.add(row)
-    db.commit()
+    try:
+        db.commit()
+    except IntegrityError as exc:
+        db.rollback()
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail={"code": "project_slug_conflict", "message": "slug already exists", "field": "slug"},
+        ) from exc
     db.refresh(row)
     return {"project": _serialize(row), "media_warnings": warnings}
 
@@ -178,13 +308,29 @@ def admin_publish_project(
     _admin: User = Depends(get_current_admin),
 ) -> dict:
     row = db.get(Project, project_id)
-    if row is None:
+    if row is None or row.deleted_at is not None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Project not found")
     row.status = "published"
     db.add(row)
     db.commit()
     db.refresh(row)
     return {"project": _serialize(row), "published": True}
+
+
+@router.delete("/projects/{project_id}")
+def admin_delete_project(
+    project_id: UUID,
+    db: Session = Depends(get_db),
+    _admin: User = Depends(get_current_admin),
+) -> dict:
+    row = db.get(Project, project_id)
+    if row is None or row.deleted_at is not None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Project not found")
+    row.deleted_at = datetime.now(UTC)
+    db.add(row)
+    db.commit()
+    db.refresh(row)
+    return {"deleted": True, "project": _serialize(row)}
 
 
 @router.get("/projects/media-candidates")

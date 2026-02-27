@@ -3,6 +3,7 @@ from __future__ import annotations
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy import asc, desc, func, select
 from sqlalchemy.orm import Session
+from uuid import UUID
 
 from packages.core.database import get_db
 from packages.core.models import Project
@@ -65,6 +66,14 @@ def list_projects(
                 "hero_image_url": _safe_media_path(row.hero_image_url),
                 "images": _safe_media_list(row.images),
                 "summary": row.summary or {},
+                "description": row.description or {},
+                "badges": row.badges or [],
+                "highlights": row.highlights or [],
+                "quick_facts": row.quick_facts or [],
+                "amenities": row.amenities or [],
+                "trust_proof": row.trust_proof or [],
+                "source_notes": row.source_notes or {},
+                "claims_updated_at": row.claims_updated_at.isoformat() if row.claims_updated_at else None,
                 "updated_at": row.updated_at.isoformat() if row.updated_at else None,
             }
             for row in rows
@@ -73,10 +82,14 @@ def list_projects(
     }
 
 
-def _project_or_404(db: Session, *, project_id=None, slug=None) -> Project:
+def _project_or_404(db: Session, *, project_ref: str | None = None, slug: str | None = None) -> Project:
     q = select(Project).where(Project.deleted_at.is_(None), Project.status == "published")
-    if project_id is not None:
-        q = q.where(Project.id == project_id)
+    if project_ref is not None:
+        ref = project_ref.strip()
+        try:
+            q = q.where(Project.id == UUID(ref))
+        except ValueError:
+            q = q.where(Project.slug == ref)
     if slug is not None:
         q = q.where(Project.slug == slug)
     row = db.scalar(q)
@@ -87,19 +100,28 @@ def _project_or_404(db: Session, *, project_id=None, slug=None) -> Project:
 
 @router.get("/projects/{project_id}")
 def get_project(project_id: str, db: Session = Depends(get_db)) -> dict:
-    row = _project_or_404(db, project_id=project_id)
+    row = _project_or_404(db, project_ref=project_id)
     return {
         "project": {
             "id": str(row.id),
             "slug": row.slug,
             "name": row.name,
             "status": row.status,
+            "area_id": str(row.area_id) if row.area_id else None,
+            "developer_id": str(row.developer_id) if row.developer_id else None,
             "property_type": row.property_type,
             "summary": row.summary or {},
             "description": row.description or {},
             "cover_image_url": _safe_media_path(row.cover_image_url),
             "hero_image_url": _safe_media_path(row.hero_image_url),
             "images": _safe_media_list(row.images),
+            "badges": row.badges or [],
+            "highlights": row.highlights or [],
+            "quick_facts": row.quick_facts or [],
+            "amenities": row.amenities or [],
+            "trust_proof": row.trust_proof or [],
+            "source_notes": row.source_notes or {},
+            "claims_updated_at": row.claims_updated_at.isoformat() if row.claims_updated_at else None,
         }
     }
 
@@ -112,6 +134,6 @@ def get_project_by_slug(slug: str, db: Session = Depends(get_db)) -> dict:
 
 @router.get("/projects/{project_id}/evaluation")
 def get_project_evaluation(project_id: str, db: Session = Depends(get_db)) -> dict:
-    row = _project_or_404(db, project_id=project_id)
+    row = _project_or_404(db, project_ref=project_id)
     snapshot = row.investment_snapshot or {}
     return {"project_id": str(row.id), "evaluation": snapshot}
