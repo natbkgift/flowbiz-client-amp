@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 from decimal import Decimal
+from pathlib import Path
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, File, Form, HTTPException, Query, UploadFile, status
@@ -11,6 +12,7 @@ from sqlalchemy.orm import Session
 
 from apps.api.dependencies.auth import get_current_admin
 from packages.core.database import get_db
+from packages.core.media_integrity import run_scan
 from packages.core.media_library import (
     compute_usage_map,
     read_sidecar,
@@ -194,6 +196,24 @@ def list_media(
         query = query.where(MediaAsset.storage_path.ilike(pattern) | MediaAsset.title.ilike(pattern))
     rows = db.scalars(query.order_by(desc(MediaAsset.updated_at), desc(MediaAsset.id)).limit(limit)).all()
     return {"items": [serialize_media_asset(row) for row in rows]}
+
+
+@router.get("/integrity-report")
+def media_integrity_report(
+    orphan_sample_limit: int = Query(default=20, ge=0, le=200),
+    media_root: str | None = Query(default=None),
+    media_prefix: str = Query(default="/media"),
+    db: Session = Depends(get_db),
+    _admin: User = Depends(get_current_admin),
+) -> dict:
+    root = Path(media_root).resolve() if media_root else None
+    report = run_scan(
+        db,
+        media_root=root,
+        media_public_prefix=media_prefix,
+        orphan_sample_limit=orphan_sample_limit,
+    )
+    return report.to_dict()
 
 
 @router.get("/{media_id}")
