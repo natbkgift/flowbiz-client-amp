@@ -1,4 +1,6 @@
 import type { Metadata } from 'next';
+import Link from 'next/link';
+import { notFound } from 'next/navigation';
 
 import { Breadcrumbs } from '@/components/layout/Breadcrumbs';
 import { Container } from '@/components/layout/Container';
@@ -7,6 +9,7 @@ import { getDictionary, normalizeLocale } from '@/app/_lib/i18n/get-dictionary';
 import { makePageMetadata } from '@/app/_lib/i18n/metadata';
 import { withLocale } from '@/app/_lib/i18n/routing';
 import { breadcrumbSchema } from '@/app/_lib/schema-markup';
+import { getBlogPostBySlug, getGuideArticleBySlug } from '@/app/_lib/content-hub';
 
 export const revalidate = 300;
 
@@ -17,6 +20,17 @@ function humanize(slug: string): string {
     .join(' ');
 }
 
+function pickLocalizedText(value: { en: string; th: string } | undefined, locale: 'en' | 'th'): string {
+  if (!value) return '';
+  return (value[locale] || value.en || value.th || '').trim();
+}
+
+function pickLocalizedList(value: { en: string[]; th: string[] } | undefined, locale: 'en' | 'th'): string[] {
+  if (!value) return [];
+  const localized = value[locale] ?? value.en ?? value.th ?? [];
+  return Array.isArray(localized) ? localized.map((item) => String(item).trim()).filter(Boolean) : [];
+}
+
 export async function generateMetadata({
   params,
 }: {
@@ -25,7 +39,9 @@ export async function generateMetadata({
   const { locale: rawLocale, slug } = await params;
   const locale = normalizeLocale(rawLocale);
   const dict = getDictionary(locale);
-  const title = locale === 'th' ? `คู่มือ: ${slug}` : `Guide: ${humanize(slug)}`;
+  const guide = getGuideArticleBySlug(slug);
+  const guideTitle = pickLocalizedText(guide?.title, locale) || humanize(slug);
+  const title = locale === 'th' ? `คู่มือ: ${guideTitle}` : `Guide: ${guideTitle}`;
   const desc = locale === 'th'
     ? 'สรุปแนวทาง + เช็กลิสต์ เพื่อช่วยตัดสินใจก่อนคุยกับที่ปรึกษา'
     : 'A practical summary and checklist to prepare before speaking with an advisor.';
@@ -41,10 +57,25 @@ export default async function GuideArticlePage({
   const locale = normalizeLocale(rawLocale);
   const dict = getDictionary(locale);
 
-  const h1 = locale === 'th' ? `คู่มือ: ${slug}` : humanize(slug);
-  const lead = locale === 'th'
-    ? 'บทความนี้เป็นโครงแบบ (template) สำหรับ cluster guides ตาม Content Pillar Map — เราจะขยายเนื้อหาเชิงลึกในรอบถัดไป'
-    : 'This is a template page for cluster guides per the Content Pillar Map. We will expand with deeper content in a next iteration.';
+  const guide = getGuideArticleBySlug(slug);
+  if (!guide) {
+    notFound();
+  }
+
+  const guideTitle = pickLocalizedText(guide.title, locale) || humanize(slug);
+  const h1 = locale === 'th' ? `คู่มือ: ${guideTitle}` : guideTitle;
+  const lead = pickLocalizedText(guide.summary, locale) || (locale === 'th'
+    ? 'เนื้อหาคู่มือกำลังอัปเดตในระบบ (TODO: เติม summary)'
+    : 'Guide content is being updated in the system (TODO: add summary).');
+
+  const checklist = pickLocalizedList(guide.checklist, locale);
+  const relatedBlogPosts = (guide.relatedBlogPosts ?? []).map((blogSlug) => {
+    const post = getBlogPostBySlug(blogSlug);
+    return {
+      slug: blogSlug,
+      title: pickLocalizedText(post?.title, locale) || blogSlug,
+    };
+  }).filter((item) => Boolean(item.slug));
 
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://amppattaya.com';
   const canonicalUrl = `${siteUrl}/${locale}/guides/${encodeURIComponent(slug)}`;
@@ -110,11 +141,27 @@ export default async function GuideArticlePage({
           </div>
 
           <ul className="bullet-list">
-            <li>{locale === 'th' ? 'งบประมาณรวม + เงินสำรองค่าโอน' : 'Total budget + closing cost buffer'}</li>
-            <li>{locale === 'th' ? 'ทำเลที่ต้องการ + ระยะทางถึงชายหาด/เมือง' : 'Preferred area + distance to beach/city'}</li>
-            <li>{locale === 'th' ? 'เป้าหมาย: อยู่เอง / ปล่อยเช่า / เก็งกำไร' : 'Goal: live / rent / flip'}</li>
-            <li>{locale === 'th' ? 'ความเสี่ยงที่รับได้ + ระยะเวลาถือครอง' : 'Risk tolerance + holding period'}</li>
+            {checklist.length ? checklist.map((item) => <li key={item}>{item}</li>) : (
+              <li>
+                {locale === 'th'
+                  ? 'เช็กลิสต์กำลังอัปเดตในระบบ (TODO: เติม checklist ใน guide entity)'
+                  : 'Checklist is being updated in the system (TODO: add checklist in guide entity).'}
+              </li>
+            )}
           </ul>
+
+          {relatedBlogPosts.length ? (
+            <div className="mt-6" aria-labelledby="related-blog-title">
+              <h2 id="related-blog-title" className="section-title">{locale === 'th' ? 'บทความที่เกี่ยวข้อง' : 'Related blog posts'}</h2>
+              <ul className="bullet-list mt-3">
+                {relatedBlogPosts.map((item) => (
+                  <li key={item.slug}>
+                    <Link href={withLocale(locale, `/blog/${item.slug}`)}>{item.title}</Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ) : null}
 
           <div className="cta-strip">
             <div className="cta-strip__text">

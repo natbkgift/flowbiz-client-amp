@@ -282,3 +282,51 @@ def pick_developer_without_optional_profile_slug(developers: list[dict]) -> str 
         if summary is None and not website and not logo:
             return slug
     return None
+
+
+def _extract_slugs_from_listing(path_prefix: str, html: str) -> list[str]:
+    links = extract_links(html)
+    slugs: list[str] = []
+    needle = f"/{path_prefix.strip('/')}/"
+    for href in links:
+        if needle not in href:
+            continue
+        chunk = href.split(needle, 1)[1]
+        slug = chunk.split("?", 1)[0].split("#", 1)[0].strip("/")
+        if slug and "/" not in slug and slug not in slugs:
+            slugs.append(slug)
+    return slugs
+
+
+def get_blog_sitemap_slugs() -> list[str]:
+    xml = get_html("/sitemap-blog.xml")
+    slugs = re.findall(r"/blog/([^/<]+)</loc>", xml, flags=re.IGNORECASE)
+    unique = []
+    for slug in slugs:
+        cleaned = slug.strip()
+        if cleaned and cleaned not in unique:
+            unique.append(cleaned)
+    return unique
+
+
+def get_guides_sitemap_slugs() -> list[str]:
+    xml = get_html("/sitemap-guides.xml")
+    slugs = re.findall(r"/guides/([^/<]+)</loc>", xml, flags=re.IGNORECASE)
+    unique = []
+    for slug in slugs:
+        cleaned = slug.strip()
+        if cleaned and cleaned not in unique:
+            unique.append(cleaned)
+    return unique
+
+
+def pick_blog_slug_from_listing(locale: str = "en") -> str | None:
+    html = get_html(f"/{locale}/blog/")
+    slugs = _extract_slugs_from_listing(f"{locale}/blog", html)
+    return slugs[0] if slugs else None
+
+
+def pick_guide_slug_from_listing(locale: str = "en") -> str | None:
+    html = get_html(f"/{locale}/guides/")
+    slugs = _extract_slugs_from_listing(f"{locale}/guides", html)
+    return slugs[0] if slugs else None

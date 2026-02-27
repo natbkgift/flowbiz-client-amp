@@ -4,10 +4,12 @@ import Link from 'next/link';
 
 import { Breadcrumbs } from '@/components/layout/Breadcrumbs';
 import { Container } from '@/components/layout/Container';
+import { EmptyStateCard } from '@/components/ui/StateBlocks';
 import { getDictionary, normalizeLocale } from '@/app/_lib/i18n/get-dictionary';
 import { makePageMetadata } from '@/app/_lib/i18n/metadata';
 import { withLocale } from '@/app/_lib/i18n/routing';
 import { breadcrumbSchema } from '@/app/_lib/schema-markup';
+import { getGuideArticles } from '@/app/_lib/content-hub';
 
 export const revalidate = 300;
 
@@ -28,44 +30,50 @@ export async function generateMetadata({
 
 type GuideLink = { slug: string; titleEn: string; titleTh: string };
 
-const guides: GuideLink[] = [
-  {
-    slug: 'best-condos-jomtien',
-    titleEn: 'Best Condos in Jomtien',
-    titleTh: 'คอนโดน่าอยู่ในจอมเทียน (แนะนำ)',
-  },
-  {
-    slug: 'luxury-condos-pattaya',
-    titleEn: 'Luxury Condos Pattaya',
-    titleTh: 'คอนโดหรูพัทยา (Luxury)',
-  },
-  {
-    slug: 'foreign-condo-ownership-thailand',
-    titleEn: 'Foreign Ownership Guide (Thailand)',
-    titleTh: 'คู่มือโควต้าต่างชาติ (Foreign Quota)',
-  },
-  {
-    slug: 'roi-pattaya-condos',
-    titleEn: 'ROI Analysis: Pattaya Condos',
-    titleTh: 'วิเคราะห์ผลตอบแทนคอนโดพัทยา (ROI)',
-  },
-  {
-    slug: 'pool-villa-pattaya',
-    titleEn: 'Pool Villas in Pattaya',
-    titleTh: 'พูลวิลล่าพัทยา (Pool Villa)',
-  },
-  {
-    slug: 'cost-of-living-pattaya',
-    titleEn: 'Cost of Living in Pattaya',
-    titleTh: 'ค่าครองชีพในพัทยา (Cost of Living)',
-  },
-];
+type PageProps = {
+  params: Promise<{ locale: string }>;
+  searchParams?: Promise<Record<string, string | string[] | undefined>>;
+};
 
-export default async function GuidesIndexPage({ params }: { params: Promise<{ locale: string }> }) {
+function toStringParam(input: string | string[] | undefined): string {
+  if (Array.isArray(input)) return (input[0] ?? '').trim();
+  return (input ?? '').trim();
+}
+
+function pickLocalizedText(value: { en: string; th: string } | undefined, locale: 'en' | 'th'): string {
+  if (!value) return '';
+  return (value[locale] || value.en || value.th || '').trim();
+}
+
+export default async function GuidesIndexPage({ params, searchParams }: PageProps) {
   const { locale: rawLocale } = await params;
   const locale = normalizeLocale(rawLocale);
+  const resolvedSearchParams = searchParams ? await searchParams : {};
+  const query = toStringParam(resolvedSearchParams?.q).toLowerCase();
+  const sort = toStringParam(resolvedSearchParams?.sort) || 'newest';
+  const page = Math.max(Number.parseInt(toStringParam(resolvedSearchParams?.page) || '1', 10) || 1, 1);
+  const pageSize = 6;
+
   const dict = getDictionary(locale);
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://amppattaya.com';
+  const entities = getGuideArticles();
+
+  const filtered = entities.filter((item) => {
+    if (!query) return true;
+    const title = pickLocalizedText(item.title, locale).toLowerCase();
+    const summary = pickLocalizedText(item.summary, locale).toLowerCase();
+    return title.includes(query) || summary.includes(query) || item.slug.includes(query);
+  });
+
+  const sorted = [...filtered].sort((left, right) => {
+    const l = Date.parse(left.publishedAt || '') || 0;
+    const r = Date.parse(right.publishedAt || '') || 0;
+    return sort === 'oldest' ? l - r : r - l;
+  });
+
+  const totalPages = Math.max(Math.ceil(sorted.length / pageSize), 1);
+  const currentPage = Math.min(page, totalPages);
+  const items = sorted.slice((currentPage - 1) * pageSize, currentPage * pageSize);
 
   const breadcrumbItems = [
     { label: dict.nav.home, href: `/${locale}` },
@@ -105,6 +113,23 @@ export default async function GuidesIndexPage({ params }: { params: Promise<{ lo
 
       <section className="section">
         <Container>
+          <form className="mb-6 grid gap-3 md:grid-cols-[2fr_1fr_auto]" role="search" aria-label={locale === 'th' ? 'ค้นหาคู่มือ' : 'Search guides'}>
+            <label className="sr-only" htmlFor="guide-search">{locale === 'th' ? 'ค้นหา' : 'Search'}</label>
+            <input
+              id="guide-search"
+              name="q"
+              defaultValue={toStringParam(resolvedSearchParams?.q)}
+              placeholder={locale === 'th' ? 'ค้นหาจากหัวข้อหรือคีย์เวิร์ด' : 'Search by title or keyword'}
+              className="rounded-lg border border-[var(--color-border)] bg-[var(--color-white)] px-4 py-2"
+            />
+            <label className="sr-only" htmlFor="guide-sort">{locale === 'th' ? 'เรียงลำดับ' : 'Sort order'}</label>
+            <select id="guide-sort" name="sort" defaultValue={sort} className="rounded-lg border border-[var(--color-border)] bg-[var(--color-white)] px-3 py-2">
+              <option value="newest">{locale === 'th' ? 'ล่าสุดก่อน' : 'Newest first'}</option>
+              <option value="oldest">{locale === 'th' ? 'เก่าสุดก่อน' : 'Oldest first'}</option>
+            </select>
+            <button className="btn btn-secondary" type="submit">{locale === 'th' ? 'ใช้งานตัวกรอง' : 'Apply'}</button>
+          </form>
+
           <div className="section-header">
             <h2 className="section-title">{locale === 'th' ? 'บทความแนะนำ' : 'Featured Articles'}</h2>
             <p className="section-subtitle">
@@ -114,18 +139,45 @@ export default async function GuidesIndexPage({ params }: { params: Promise<{ lo
             </p>
           </div>
 
+          {items.length === 0 ? (
+            <EmptyStateCard
+              title={locale === 'th' ? 'ไม่พบคู่มือตามเงื่อนไข' : 'No guides found for this filter'}
+              body={locale === 'th' ? 'ลองเปลี่ยนคำค้นหา หรือกลับไปดูคู่มือทั้งหมด' : 'Try another keyword or browse all guides.'}
+              action={<Link href={withLocale(locale, '/guides')} className="btn btn-cta">{locale === 'th' ? 'ดูคู่มือทั้งหมด' : 'Browse all guides'}</Link>}
+            />
+          ) : null}
+
           <div className="grid grid-2">
-            {guides.map((g) => (
-              <Link key={g.slug} href={withLocale(locale, `/guides/${g.slug}`)} className="card">
-                <div className="card-title">{locale === 'th' ? g.titleTh : g.titleEn}</div>
+            {items.map((guide) => (
+              <Link key={guide.slug} href={withLocale(locale, `/guides/${guide.slug}`)} className="card">
+                <div className="card-title">{pickLocalizedText(guide.title, locale) || guide.slug}</div>
                 <div className="card-subtitle">
-                  {locale === 'th'
-                    ? 'อ่านสรุป + เช็กลิสต์ แล้วคุยกับที่ปรึกษาเพื่อ shortlist'
-                    : 'Read a practical summary + checklist, then request a shortlist.'}
+                  {pickLocalizedText(guide.summary, locale)
+                    || (locale === 'th'
+                      ? 'สรุปคู่มือกำลังอัปเดต (TODO: เติม guide summary)'
+                      : 'Guide summary is being updated (TODO: add guide summary).')}
                 </div>
               </Link>
             ))}
           </div>
+
+          <nav className="mt-6 flex items-center justify-between" aria-label={dict.listing.paginationLabel}>
+            <Link
+              className={`btn btn-secondary ${currentPage <= 1 ? 'pointer-events-none opacity-50' : ''}`}
+              href={withLocale(locale, `/guides?page=${Math.max(1, currentPage - 1)}&sort=${encodeURIComponent(sort)}${query ? `&q=${encodeURIComponent(query)}` : ''}`)}
+            >
+              {dict.listing.previousPage}
+            </Link>
+            <p className="text-sm text-[var(--color-text-secondary)]">
+              {dict.listing.pageOf.replace('{page}', String(currentPage)).replace('{total}', String(totalPages))}
+            </p>
+            <Link
+              className={`btn btn-secondary ${currentPage >= totalPages ? 'pointer-events-none opacity-50' : ''}`}
+              href={withLocale(locale, `/guides?page=${Math.min(totalPages, currentPage + 1)}&sort=${encodeURIComponent(sort)}${query ? `&q=${encodeURIComponent(query)}` : ''}`)}
+            >
+              {dict.listing.nextPage}
+            </Link>
+          </nav>
 
           <div className="cta-strip">
             <div className="cta-strip__text">

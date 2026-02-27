@@ -6,6 +6,7 @@
  * route (app/sitemap.xml/route.ts).
  */
 import { fetchProjects, fetchProperties } from './public-api-server';
+import { getBlogSlugs, getGuideSlugs } from './content-hub';
 
 export const SITE_URL = (process.env.NEXT_PUBLIC_SITE_URL ?? 'https://amppattaya.com').replace(
   /\/+$/,
@@ -197,32 +198,16 @@ export async function developersEntries(): Promise<UrlEntry[]> {
 /*  sitemap-guides.xml — content hub                                  */
 /* ------------------------------------------------------------------ */
 
-const GUIDE_SLUGS = [
-  'best-condos-jomtien',
-  'luxury-condos-pattaya',
-  'foreign-condo-ownership-thailand',
-  'roi-pattaya-condos',
-  'pool-villa-pattaya',
-  'cost-of-living-pattaya',
-];
-
 export function guidesEntries(): UrlEntry[] {
-  return GUIDE_SLUGS.flatMap((slug) => entry(`/guides/${slug}`, 'monthly', 0.6));
+  return getGuideSlugs().flatMap((slug) => entry(`/guides/${slug}`, 'monthly', 0.6));
 }
 
 /* ------------------------------------------------------------------ */
 /*  sitemap-blog.xml — content hub                                    */
 /* ------------------------------------------------------------------ */
 
-const BLOG_SLUGS = [
-  'pattaya-real-estate-investment-guide-2025',
-  'buying-condo-thailand-foreigner-complete-guide',
-  'top-areas-pattaya-investment-2025',
-  'pattaya-rental-yield-analysis',
-];
-
 export function blogEntries(): UrlEntry[] {
-  return BLOG_SLUGS.flatMap((slug) => entry(`/blog/${slug}`, 'monthly', 0.5));
+  return getBlogSlugs().flatMap((slug) => entry(`/blog/${slug}`, 'monthly', 0.5));
 }
 
 /* ------------------------------------------------------------------ */
