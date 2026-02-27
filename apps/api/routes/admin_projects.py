@@ -154,7 +154,26 @@ def _assert_slug_available(db: Session, *, slug: str, exclude_project_id: UUID |
     )
 
 
-def _serialize(row: Project) -> dict:
+def _serialize(row: Project, db: Session) -> dict:
+    area_payload = None
+    if row.area_id is not None:
+        area_row = db.get(Area, row.area_id)
+        if area_row is not None and area_row.deleted_at is None:
+            area_payload = {"id": str(area_row.id), "slug": area_row.slug, "name": area_row.name}
+        else:
+            area_payload = {"id": str(row.area_id), "slug": None, "name": None}
+
+    developer_payload = None
+    if row.developer_id is not None:
+        developer_row = db.get(Developer, row.developer_id)
+        if developer_row is not None and developer_row.deleted_at is None:
+            developer_payload = {
+                "id": str(developer_row.id),
+                "slug": developer_row.slug,
+                "name": developer_row.name,
+            }
+        else:
+            developer_payload = {"id": str(row.developer_id), "slug": None, "name": None}
     return {
         "id": str(row.id),
         "slug": row.slug,
@@ -163,6 +182,8 @@ def _serialize(row: Project) -> dict:
         "status": row.status,
         "area_id": str(row.area_id) if row.area_id else None,
         "developer_id": str(row.developer_id) if row.developer_id else None,
+        "area": area_payload,
+        "developer": developer_payload,
         "property_type": row.property_type,
         "delivery_date": row.delivery_date.isoformat() if row.delivery_date else None,
         "starting_price": float(row.starting_price) if row.starting_price is not None else None,
@@ -206,7 +227,7 @@ def admin_list_projects(
     rows = db.scalars(
         select(Project).where(Project.deleted_at.is_(None)).order_by(desc(Project.updated_at)).limit(limit)
     ).all()
-    return {"data": [_serialize(row) for row in rows]}
+    return {"data": [_serialize(row, db) for row in rows]}
 
 
 @router.get("/projects/{project_id}")
@@ -218,7 +239,7 @@ def admin_get_project(
     row = db.get(Project, project_id)
     if row is None or row.deleted_at is not None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Project not found")
-    return _serialize(row)
+    return _serialize(row, db)
 
 
 @router.post("/projects", status_code=status.HTTP_201_CREATED)
@@ -250,7 +271,7 @@ def admin_create_project(
             detail={"code": "project_slug_conflict", "message": "slug already exists", "field": "slug"},
         ) from exc
     db.refresh(row)
-    return {"project": _serialize(row), "media_warnings": warnings}
+    return {"project": _serialize(row, db), "media_warnings": warnings}
 
 
 @router.patch("/projects/{project_id}")
@@ -298,7 +319,7 @@ def admin_patch_project(
             detail={"code": "project_slug_conflict", "message": "slug already exists", "field": "slug"},
         ) from exc
     db.refresh(row)
-    return {"project": _serialize(row), "media_warnings": warnings}
+    return {"project": _serialize(row, db), "media_warnings": warnings}
 
 
 @router.post("/projects/{project_id}/publish")
@@ -314,7 +335,7 @@ def admin_publish_project(
     db.add(row)
     db.commit()
     db.refresh(row)
-    return {"project": _serialize(row), "published": True}
+    return {"project": _serialize(row, db), "published": True}
 
 
 @router.delete("/projects/{project_id}")
@@ -330,7 +351,7 @@ def admin_delete_project(
     db.add(row)
     db.commit()
     db.refresh(row)
-    return {"deleted": True, "project": _serialize(row)}
+    return {"deleted": True, "project": _serialize(row, db)}
 
 
 @router.get("/projects/media-candidates")

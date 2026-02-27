@@ -218,8 +218,11 @@ class Area(Base):
         server_default="draft",
     )
     content: Mapped[dict | None] = mapped_column(JSONB, nullable=True)
+    summary: Mapped[dict | None] = mapped_column(JSONB, nullable=True)
+    source_note: Mapped[str | None] = mapped_column(Text, nullable=True)
     map_center: Mapped[dict | None] = mapped_column(JSONB, nullable=True)
     hero_image_url: Mapped[str | None] = mapped_column(String(500), nullable=True)
+    cover_image_url: Mapped[str | None] = mapped_column(String(500), nullable=True)
 
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), nullable=False, server_default=func.now()
@@ -297,8 +300,12 @@ class Developer(Base):
     name: Mapped[str] = mapped_column(String(200), nullable=False)
     website: Mapped[str | None] = mapped_column(String(500), nullable=True)
     summary: Mapped[dict | None] = mapped_column(JSONB, nullable=True)
+    profile: Mapped[dict | None] = mapped_column(JSONB, nullable=True)
+    source_note: Mapped[str | None] = mapped_column(Text, nullable=True)
+    trust_proof: Mapped[dict | None] = mapped_column(JSONB, nullable=True)
     tier: Mapped[str | None] = mapped_column(String(32), nullable=True)
     logo_url: Mapped[str | None] = mapped_column(String(500), nullable=True)
+    cover_image_url: Mapped[str | None] = mapped_column(String(500), nullable=True)
     status: Mapped[str] = mapped_column(
         String(50), nullable=False, default="inactive", server_default="inactive"
     )

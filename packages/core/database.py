@@ -18,6 +18,36 @@ SessionLocal = sessionmaker(bind=engine, autoflush=False, autocommit=False, futu
 Base = declarative_base()
 
 
+def _ensure_sqlite_columns() -> None:
+    if not DATABASE_URL.startswith("sqlite://"):
+        return
+
+    table_columns = {
+        "areas": {
+            "summary": "JSON",
+            "source_note": "TEXT",
+            "cover_image_url": "VARCHAR(500)",
+        },
+        "developers": {
+            "profile": "JSON",
+            "source_note": "TEXT",
+            "trust_proof": "JSON",
+            "cover_image_url": "VARCHAR(500)",
+        },
+    }
+
+    with engine.begin() as conn:
+        for table_name, columns in table_columns.items():
+            existing_rows = conn.exec_driver_sql(f"PRAGMA table_info('{table_name}')").fetchall()
+            existing = {str(row[1]) for row in existing_rows}
+            for column_name, column_ddl in columns.items():
+                if column_name in existing:
+                    continue
+                conn.exec_driver_sql(
+                    f"ALTER TABLE {table_name} ADD COLUMN {column_name} {column_ddl}"
+                )
+
+
 def get_db() -> Generator[Session, None, None]:
     db = SessionLocal()
     try:
@@ -33,6 +63,7 @@ def init_db() -> None:
     from packages.core.models import User
 
     Base.metadata.create_all(bind=engine)
+    _ensure_sqlite_columns()
 
     with SessionLocal() as db:
         admin = db.query(User).filter(User.email == "admin@local.dev").first()

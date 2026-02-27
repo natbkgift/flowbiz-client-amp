@@ -6,9 +6,27 @@ from sqlalchemy.orm import Session
 from uuid import UUID
 
 from packages.core.database import get_db
-from packages.core.models import Project
+from packages.core.models import Area, Developer, Project
 
 router = APIRouter(prefix="/v1", tags=["projects"])
+
+
+def _linked_area(row: Project, db: Session) -> dict | None:
+    if row.area_id is None:
+        return None
+    area = db.get(Area, row.area_id)
+    if area is None or area.deleted_at is not None:
+        return {"id": str(row.area_id), "slug": None, "name": None}
+    return {"id": str(area.id), "slug": area.slug, "name": area.name}
+
+
+def _linked_developer(row: Project, db: Session) -> dict | None:
+    if row.developer_id is None:
+        return None
+    developer = db.get(Developer, row.developer_id)
+    if developer is None or developer.deleted_at is not None:
+        return {"id": str(row.developer_id), "slug": None, "name": None}
+    return {"id": str(developer.id), "slug": developer.slug, "name": developer.name}
 
 
 def _safe_media_path(value: object | None) -> str | None:
@@ -61,6 +79,8 @@ def list_projects(
                 "property_type": row.property_type,
                 "area_id": str(row.area_id) if row.area_id else None,
                 "developer_id": str(row.developer_id) if row.developer_id else None,
+                "area": _linked_area(row, db),
+                "developer": _linked_developer(row, db),
                 "starting_price": float(row.starting_price) if row.starting_price is not None else None,
                 "cover_image_url": _safe_media_path(row.cover_image_url),
                 "hero_image_url": _safe_media_path(row.hero_image_url),
@@ -109,6 +129,8 @@ def get_project(project_id: str, db: Session = Depends(get_db)) -> dict:
             "status": row.status,
             "area_id": str(row.area_id) if row.area_id else None,
             "developer_id": str(row.developer_id) if row.developer_id else None,
+            "area": _linked_area(row, db),
+            "developer": _linked_developer(row, db),
             "property_type": row.property_type,
             "summary": row.summary or {},
             "description": row.description or {},
@@ -129,7 +151,18 @@ def get_project(project_id: str, db: Session = Depends(get_db)) -> dict:
 @router.get("/projects/slug/{slug}")
 def get_project_by_slug(slug: str, db: Session = Depends(get_db)) -> dict:
     row = _project_or_404(db, slug=slug)
-    return {"project": {"id": str(row.id), "slug": row.slug, "name": row.name, "status": row.status}}
+    return {
+        "project": {
+            "id": str(row.id),
+            "slug": row.slug,
+            "name": row.name,
+            "status": row.status,
+            "area_id": str(row.area_id) if row.area_id else None,
+            "developer_id": str(row.developer_id) if row.developer_id else None,
+            "area": _linked_area(row, db),
+            "developer": _linked_developer(row, db),
+        }
+    }
 
 
 @router.get("/projects/{project_id}/evaluation")
