@@ -20,3 +20,22 @@ class LeadAssignmentItem(BaseModel):
 class LeadAssignRequest(BaseModel):
     assigned_user_id: UUID | None = None
     reason: str | None = Field(default=None, max_length=200)
+
+
+class InquiryNoteCreate(BaseModel):
+    note: str = Field(min_length=1, max_length=2000)
+
+
+class InquiryNoteUpdate(BaseModel):
+    note: str = Field(min_length=1, max_length=2000)
+
+
+class InquiryTimelineEvent(BaseModel):
+    id: UUID
+    inquiry_id: UUID
+    action: str
+    actor_user_id: UUID | None = None
+    note_id: str | None = None
+    note: str | None = None
+    diff: dict | None = None
+    created_at: datetime

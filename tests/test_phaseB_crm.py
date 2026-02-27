@@ -84,3 +84,119 @@ def test_admin_can_list_inquiries_and_viewings(client):
     viewings = client.get("/admin/viewings", headers=headers)
     assert viewings.status_code == 200
     assert isinstance(viewings.json(), list)
+
+
+def test_admin_inquiry_filters_and_pagination(client):
+    token = _login_token(client)
+    headers = {"Authorization": f"Bearer {token}"}
+
+    _ = client.post(
+        "/v1/inquiries",
+        json={
+            "name": "Filter New",
+            "email": "filter-new@example.com",
+            "message": "Need info",
+            "source_page": "/en",
+        },
+    )
+    old = client.post(
+        "/v1/inquiries",
+        json={
+            "name": "Filter Closed",
+            "email": "filter-closed@example.com",
+            "message": "Need callback",
+            "source_page": "/th",
+        },
+    )
+    assert old.status_code == 201
+    old_id = old.json()["id"]
+
+    patched = client.patch(
+        f"/admin/inquiries/{old_id}",
+        json={"status": "contacted"},
+        headers=headers,
+    )
+    assert patched.status_code == 200
+
+    filtered = client.get(
+        "/admin/inquiries?status=contacted&page=1&limit=1&sort=created_at&order=desc",
+        headers=headers,
+    )
+    assert filtered.status_code == 200
+    body = filtered.json()
+    assert body["meta"]["page"] == 1
+    assert body["meta"]["limit"] == 1
+    assert body["meta"]["total"] >= 1
+    assert len(body["data"]) <= 1
+    assert body["data"][0]["status"] == "contacted"
+
+
+def test_admin_note_and_timeline_flow(client):
+    token = _login_token(client)
+    headers = {"Authorization": f"Bearer {token}"}
+
+    created = client.post(
+        "/v1/inquiries",
+        json={
+            "name": "Timeline User",
+            "email": "timeline@example.com",
+            "message": "Timeline message",
+            "source_page": "/en",
+        },
+    )
+    assert created.status_code == 201
+    inquiry_id = created.json()["id"]
+
+    status_updated = client.patch(
+        f"/admin/inquiries/{inquiry_id}",
+        json={"status": "contacted"},
+        headers=headers,
+    )
+    assert status_updated.status_code == 200
+
+    added = client.post(
+        f"/admin/inquiries/{inquiry_id}/notes",
+        json={"note": "first note"},
+        headers=headers,
+    )
+    assert added.status_code == 200
+    note_id = added.json()["note_id"]
+    assert note_id
+
+    edited = client.patch(
+        f"/admin/inquiries/{inquiry_id}/notes/{note_id}",
+        json={"note": "edited note"},
+        headers=headers,
+    )
+    assert edited.status_code == 200
+    assert edited.json()["note"] == "edited note"
+
+    timeline = client.get(f"/admin/inquiries/{inquiry_id}/timeline?limit=20", headers=headers)
+    assert timeline.status_code == 200
+    actions = [event["action"] for event in timeline.json()["data"]]
+    assert "status_update" in actions
+    assert "note_add" in actions
+    assert "note_update" in actions
+
+
+def test_admin_csv_export_has_safe_fields(client):
+    token = _login_token(client)
+    headers = {"Authorization": f"Bearer {token}"}
+
+    created = client.post(
+        "/v1/inquiries",
+        json={
+            "name": "Csv User",
+            "email": "csv@example.com",
+            "message": "Sensitive body should not be exported",
+            "source_page": "/en/export",
+        },
+    )
+    assert created.status_code == 201
+
+    exported = client.get("/admin/inquiries-export.csv", headers=headers)
+    assert exported.status_code == 200
+    assert exported.headers["content-type"].startswith("text/csv")
+    csv_text = exported.text
+    assert "id,name,email,phone,status,score,advisor_user_id,source_page,duplicate_hint,spam_hint,created_at" in csv_text
+    assert "Sensitive body should not be exported" not in csv_text

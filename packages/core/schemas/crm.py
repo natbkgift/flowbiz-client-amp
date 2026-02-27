@@ -84,6 +84,8 @@ class InquiryItem(BaseModel):
     persona: str | None = None
     budget_band: str | None = None
     timeline: str | None = None
+    is_duplicate_hint: bool = False
+    is_spam_hint: bool = False
     created_at: datetime
     updated_at: datetime | None = None
 
