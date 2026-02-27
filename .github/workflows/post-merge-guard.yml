@@ -36,6 +36,7 @@ jobs:
             tests/test_b3_projects_cms.py \
             tests/test_b1_media_library.py \
             tests/test_admin_properties_cms.py \
+            tests/test_b4_properties_cms_upgrade.py \
             tests/test_admin_domain_cms.py \
             tests/test_media_integrity.py \
             tests/test_b12_source_rights_registry.py \
