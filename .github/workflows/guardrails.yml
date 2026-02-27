@@ -1,0 +1,35 @@
+name: Governance (Deterministic)
+
+on:
+  pull_request:
+    branches: [main]
+    types: [opened, synchronize, reopened]
+
+permissions:
+  contents: read
+
+jobs:
+  governance:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          pip install ".[dev]"
+
+      - name: Run autonomous governance gates
+        env:
+          GOV_BASE: ${{ github.event.pull_request.base.sha }}
+          GOV_HEAD: ${{ github.event.pull_request.head.sha }}
+        run: |
+          python scripts/governance/run_ci_gates.py --base "$GOV_BASE" --head "$GOV_HEAD" --out-dir .tmp/governance

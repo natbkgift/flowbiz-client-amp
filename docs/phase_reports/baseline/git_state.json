@@ -1,0 +1,9 @@
+{
+  "branch": "main",
+  "diff_name_status_origin_main": [],
+  "diff_stat_origin_main": [],
+  "head": "b35bfb5b36d35005f73a7853b0fa52a70c3f6964",
+  "status_porcelain": [
+    " M scripts/baseline_integrity.py"
+  ]
+}

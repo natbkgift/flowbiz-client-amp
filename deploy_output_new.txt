@@ -1,0 +1,41 @@
+# CONTINUOUS PRODUCTION GUARD REPORT
+
+## Source State
+- SOURCE_SHA: 9c5af5a3f475472841b24f4d0b1d337271a5e137
+- Commit timestamp: 2026-02-23T10:50:41.0000000+07:00
+
+## VPS State Before
+- DEPLOYED_SHA: 5ce56a26743b26489df52f600408ce9d0f75c7be
+- Image tag: flowbiz-client-amp-api:469038c9
+- Container status: running running=true restarts=0
+- Alembic version: current=SECURITY: ADMIN_BOOTSTRAP_PASSWORD is using the default value. Set a strong password via ADMIN_BOOTSTRAP_PASSWORD env var.
+SECURITY: PII_HASH_PEPPER is empty. PII dedup hashing has zero additional entropy.
+INFO  [alembic.runtime.migration] Context impl PostgresqlImpl.
+INFO  [alembic.runtime.migration] Will assume transactional DDL.
+0028_add_property_floors (head) heads=0028_add_property_floors (head)
+
+## Drift Detected
+- YES
+- Type: Code / Container
+
+## Actions Executed
+- Git reset: YES
+- Image rebuild: YES
+- Container restart: YES
+- Migration applied: YES
+
+## Runtime Validation
+- Health: internal_healthz=200 public_health=200
+- API: properties=200 projects=200 recommendations=200
+- Auth: auth_me=401 login_invalid=401
+- Assets: public_root=307
+- Errors found: 
+
+## Final State
+- DEPLOYED_SHA: 9c5af5a3f475472841b24f4d0b1d337271a5e137
+- Image tag: flowbiz-client-amp-api:9c5af5a3
+- Alembic head: 0028_add_property_floors (head)
+- Container stable: True
+
+## FINAL VERDICT
+PRODUCTION HEALTHY: YES

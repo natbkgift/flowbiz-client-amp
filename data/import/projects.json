@@ -1,0 +1,86 @@
+[
+  {
+    "name": "Arcadia Millennium Tower",
+    "slug": "arcadia-millennium-tower",
+    "developer_slug": "global-top-group",
+    "area_slug": "central-pattaya",
+    "cover_image_url": "/media/project-covers/arcadia-millennium-tower/cover_13fa6f0e75f7.jpg",
+    "status": "published"
+  },
+  {
+    "name": "City Garden Pratumnak",
+    "slug": "city-garden-pratumnak",
+    "developer_slug": "matrix-developments",
+    "area_slug": "pratumnak",
+    "cover_image_url": "/media/project-covers/city-garden-pratumnak/cover_19d5cc49057c.webp",
+    "status": "published",
+    "starting_price": 5900000
+  },
+  {
+    "name": "Copacabana Beach Jomtien",
+    "slug": "copacabana-beach-jomtien",
+    "developer_slug": "heights-holdings",
+    "area_slug": "jomtien",
+    "cover_image_url": "/media/project-covers/copacabana-beach-jomtien/cover_44839d734c2f.jpg",
+    "status": "published",
+    "starting_price": 3200000
+  },
+  {
+    "name": "Dusit Grand Condo View",
+    "slug": "dusit-grand-condo-view",
+    "developer_slug": "baan-dusit",
+    "area_slug": "jomtien",
+    "cover_image_url": "/media/project-covers/dusit-grand-condo-view/cover_951a61356c21.jpg",
+    "status": "published"
+  },
+  {
+    "name": "Grand Solaire",
+    "slug": "grand-solaire",
+    "developer_slug": "heights-holdings",
+    "area_slug": "central-pattaya",
+    "cover_image_url": "/media/project-covers/grand-solaire/cover_e831b1643816.webp",
+    "status": "published",
+    "starting_price": 3800000
+  },
+  {
+    "name": "Ocean Horizon",
+    "slug": "ocean-horizon",
+    "developer_slug": "ocean-property",
+    "area_slug": "pratumnak",
+    "cover_image_url": "/media/project-covers/ocean-horizon/cover_058967c7a26f.jpg",
+    "status": "published"
+  },
+  {
+    "name": "The Orient Jomtien",
+    "slug": "the-orient-jomtien",
+    "developer_slug": "siam-oriental",
+    "area_slug": "jomtien",
+    "cover_image_url": "/media/project-covers/the-orient-jomtien/cover_6359a2b6dcc5.webp",
+    "status": "published"
+  },
+  {
+    "name": "The Riviera Jomtien",
+    "slug": "the-riviera-jomtien",
+    "developer_slug": "the-riviera-group",
+    "area_slug": "jomtien",
+    "cover_image_url": "/media/project-covers/the-riviera-jomtien/cover_31dde7af340e.jpg",
+    "status": "published",
+    "starting_price": 4500000
+  },
+  {
+    "name": "The Riviera Monaco",
+    "slug": "the-riviera-monaco",
+    "developer_slug": "the-riviera-group",
+    "area_slug": "na-jomtien",
+    "cover_image_url": "/media/project-covers/the-riviera-monaco/cover_84a7b41c3c79.jpg",
+    "status": "published"
+  },
+  {
+    "name": "Wongamat Tower",
+    "slug": "wongamat-tower",
+    "developer_slug": "nova-group",
+    "area_slug": "wongamat",
+    "cover_image_url": "/media/project-covers/wongamat-tower/cover_b688a580f462.jpg",
+    "status": "published"
+  }
+]

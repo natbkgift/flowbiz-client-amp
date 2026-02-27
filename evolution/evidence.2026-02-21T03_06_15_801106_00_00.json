@@ -1,0 +1,162 @@
+{
+  "timestamp": "2026-02-21T03:06:15.801106+00:00",
+  "mode": "constrained",
+  "total_score": 100.0,
+  "max_score": 100,
+  "weakest_phase": 1,
+  "weakest_phase_name": "Brand & Design System",
+  "weakest_phase_pct": 100.0,
+  "termination_eligible": true,
+  "phases": [
+    {
+      "phase": 1,
+      "name": "Brand & Design System",
+      "score": 15.0,
+      "max": 15,
+      "pct": 100.0,
+      "details": {
+        "tokens_file": false,
+        "css_var_count": 86,
+        "tokens_score": 3,
+        "typography": true,
+        "typography_score": 3.0,
+        "atomic_components": 25,
+        "atomic_score": 5,
+        "raw_shadow_count": 0,
+        "shadow_score": 4.0
+      },
+      "gaps": [],
+      "previous_score": 15.0,
+      "delta": 0.0
+    },
+    {
+      "phase": 2,
+      "name": "Structure & Layout",
+      "score": 15.0,
+      "max": 15,
+      "pct": 100.0,
+      "details": {
+        "section_count": 5,
+        "section_score": 4.0,
+        "density_valid": true,
+        "density_score": 4.0,
+        "has_sticky_cta": true,
+        "sticky_score": 4.0,
+        "has_sitemap": true,
+        "hierarchy_score": 3.0
+      },
+      "gaps": [],
+      "previous_score": 15.0,
+      "delta": 0.0
+    },
+    {
+      "phase": 3,
+      "name": "Multilingual Architecture",
+      "score": 15.0,
+      "max": 15,
+      "pct": 100.0,
+      "details": {
+        "en_routes": 24,
+        "th_routes": 24,
+        "en_score": 4,
+        "th_score": 4,
+        "route_parity": 1.0,
+        "parity_score": 4.0,
+        "en_keys": 524,
+        "th_keys": 524,
+        "translation_coverage": 1.0,
+        "coverage_score": 3.0
+      },
+      "gaps": [],
+      "previous_score": 15.0,
+      "delta": 0.0
+    },
+    {
+      "phase": 4,
+      "name": "Conversion & Funnel",
+      "score": 15.0,
+      "max": 15,
+      "pct": 100.0,
+      "details": {
+        "has_hero_cta": true,
+        "cta_score": 4.0,
+        "has_qualification_form": true,
+        "form_score": 4.0,
+        "has_lead_scoring": true,
+        "scoring_score": 4.0,
+        "has_crm_endpoint": true,
+        "crm_score": 3.0
+      },
+      "gaps": [],
+      "previous_score": 15.0,
+      "delta": 0.0
+    },
+    {
+      "phase": 5,
+      "name": "Behavioral Personalization",
+      "score": 20.0,
+      "max": 20,
+      "pct": 100.0,
+      "details": {
+        "has_tracking": true,
+        "tracking_score": 5.0,
+        "has_classification": true,
+        "classification_score": 5.0,
+        "has_intent_score": true,
+        "intent_score_val": 4.0,
+        "has_dynamic_rendering": true,
+        "dynamic_rendering_used": true,
+        "dynamic_score": 4.0,
+        "has_repeat_visitor": true,
+        "repeat_score": 2.0
+      },
+      "gaps": [],
+      "previous_score": 20.0,
+      "delta": 0.0
+    },
+    {
+      "phase": 6,
+      "name": "Copy & Persuasion",
+      "score": 10.0,
+      "max": 10,
+      "pct": 100.0,
+      "details": {
+        "en_word_count": 3933,
+        "en_threshold": 2000,
+        "en_score": 3,
+        "th_word_count": 4590,
+        "th_threshold": 1000,
+        "th_score": 3,
+        "has_legal_disclaimer": true,
+        "legal_score": 2.0,
+        "has_risk_reassurance": true,
+        "risk_score": 2.0
+      },
+      "gaps": [],
+      "previous_score": 10.0,
+      "delta": 0.0
+    },
+    {
+      "phase": 7,
+      "name": "SEO & Traffic Architecture",
+      "score": 10.0,
+      "max": 10,
+      "pct": 100.0,
+      "details": {
+        "has_sitemap": true,
+        "sitemap_score": 3.0,
+        "has_robots": true,
+        "robots_score": 2.0,
+        "has_canonical": true,
+        "canonical_score": 2.0,
+        "internal_links": 92,
+        "link_density_ratio": 1,
+        "link_score": 3
+      },
+      "gaps": [],
+      "previous_score": 10.0,
+      "delta": 0.0
+    }
+  ],
+  "gap_recommendations": []
+}

@@ -1,0 +1,11 @@
+groups:
+  - name: amp-api
+    rules:
+      - alert: AmpApiDown
+        expr: up{job="amp-api"} == 0
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: "AMP API is down"
+          description: "Prometheus cannot scrape /metrics from amp-api for 2 minutes."

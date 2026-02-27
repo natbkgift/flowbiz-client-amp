@@ -1,0 +1,171 @@
+[2026-02-24T18:41:36] VERIFY start
+[2026-02-24T18:41:36] HTML /en/ cf=DYNAMIC age= server=cloudflare cache-control=public, s-maxage=300, stale-while-revalidate=3600
+[2026-02-24T18:41:36] HTML /en/ cf=DYNAMIC age= server=cloudflare cache-control=public, s-maxage=300, stale-while-revalidate=3600
+[2026-02-24T18:41:36] HTML /th/ cf=DYNAMIC age= server=cloudflare cache-control=public, s-maxage=300, stale-while-revalidate=3600
+[2026-02-24T18:41:37] HTML /th/ cf=DYNAMIC age= server=cloudflare cache-control=public, s-maxage=300, stale-while-revalidate=3600
+[2026-02-24T18:41:39] STATIC round1 url=https://amppattaya.com/_next/static/chunks/4bd1b696-bf5e0dbacfa5baef.js cf=HIT age=256 server=cloudflare set-cookie=
+[2026-02-24T18:41:39] STATIC round2 url=https://amppattaya.com/_next/static/chunks/4bd1b696-bf5e0dbacfa5baef.js cf=HIT age=259 server=cloudflare set-cookie=
+[2026-02-24T18:41:39] PASS static age increased on round2
+[2026-02-24T18:41:39] VERIFY end
+[2026-02-24T19:48:19] VERIFY start
+[2026-02-24T19:48:19] HTML /en/ cf=DYNAMIC age= server=cloudflare cache-control=public, s-maxage=300, stale-while-revalidate=3600
+[2026-02-24T19:48:20] HTML /en/ cf=DYNAMIC age= server=cloudflare cache-control=public, s-maxage=300, stale-while-revalidate=3600
+[2026-02-24T19:48:20] HTML /th/ cf=DYNAMIC age= server=cloudflare cache-control=public, s-maxage=300, stale-while-revalidate=3600
+[2026-02-24T19:48:20] HTML /th/ cf=DYNAMIC age= server=cloudflare cache-control=public, s-maxage=300, stale-while-revalidate=3600
+[2026-02-24T19:48:23] STATIC round1 url=https://amppattaya.com/_next/static/chunks/4bd1b696-bf5e0dbacfa5baef.js cf=HIT age=4260 server=cloudflare set-cookie=
+[2026-02-24T19:48:23] STATIC round2 url=https://amppattaya.com/_next/static/chunks/4bd1b696-bf5e0dbacfa5baef.js cf=HIT age=4263 server=cloudflare set-cookie=
+[2026-02-24T19:48:23] PASS static age increased on round2
+[2026-02-24T19:48:23] VERIFY end
+[2026-02-24T20:02:14] VERIFY start
+[2026-02-24T20:02:14] HTML /en/ cf=DYNAMIC age= server=cloudflare cache-control=public, s-maxage=300, stale-while-revalidate=3600
+[2026-02-24T20:02:14] HTML /en/ cf=DYNAMIC age= server=cloudflare cache-control=public, s-maxage=300, stale-while-revalidate=3600
+[2026-02-24T20:02:15] HTML /th/ cf=DYNAMIC age= server=cloudflare cache-control=public, s-maxage=300, stale-while-revalidate=3600
+[2026-02-24T20:02:15] HTML /th/ cf=DYNAMIC age= server=cloudflare cache-control=public, s-maxage=300, stale-while-revalidate=3600
+[2026-02-24T20:02:18] STATIC round1 url=https://amppattaya.com/_next/static/chunks/4bd1b696-bf5e0dbacfa5baef.js cf=HIT age=5095 server=cloudflare set-cookie=
+[2026-02-24T20:02:18] STATIC round2 url=https://amppattaya.com/_next/static/chunks/4bd1b696-bf5e0dbacfa5baef.js cf=HIT age=5098 server=cloudflare set-cookie=
+[2026-02-24T20:02:18] PASS static age increased on round2
+[2026-02-24T20:02:18] VERIFY end
+[2026-02-24T20:15:22] VERIFY start
+[2026-02-24T20:15:23] HTML /en/ cf=DYNAMIC age= server=cloudflare cache-control=public, s-maxage=300, stale-while-revalidate=3600
+[2026-02-24T20:15:23] HTML /en/ cf=DYNAMIC age= server=cloudflare cache-control=public, s-maxage=300, stale-while-revalidate=3600
+[2026-02-24T20:15:24] HTML /th/ cf=DYNAMIC age= server=cloudflare cache-control=public, s-maxage=300, stale-while-revalidate=3600
+[2026-02-24T20:15:24] HTML /th/ cf=DYNAMIC age= server=cloudflare cache-control=public, s-maxage=300, stale-while-revalidate=3600
+[2026-02-24T20:15:27] STATIC round1 url=https://amppattaya.com/_next/static/chunks/4bd1b696-bf5e0dbacfa5baef.js cf=HIT age=3987 server=cloudflare set-cookie=
+[2026-02-24T20:15:27] STATIC round2 url=https://amppattaya.com/_next/static/chunks/4bd1b696-bf5e0dbacfa5baef.js cf=HIT age=5886 server=cloudflare set-cookie=
+[2026-02-24T20:15:27] PASS static age increased on round2
+[2026-02-24T20:15:27] VERIFY end
+[2026-02-24T20:25:16] VERIFY start
+[2026-02-24T20:25:16] HTML /en/ cf=DYNAMIC age= server=cloudflare cache-control=public, s-maxage=300, stale-while-revalidate=3600
+[2026-02-24T20:25:17] HTML /en/ cf=DYNAMIC age= server=cloudflare cache-control=public, s-maxage=300, stale-while-revalidate=3600
+[2026-02-24T20:25:18] HTML /th/ cf=DYNAMIC age= server=cloudflare cache-control=public, s-maxage=300, stale-while-revalidate=3600
+[2026-02-24T20:25:18] HTML /th/ cf=DYNAMIC age= server=cloudflare cache-control=public, s-maxage=300, stale-while-revalidate=3600
+[2026-02-24T20:25:22] STATIC round1 url=https://amppattaya.com/_next/static/chunks/4bd1b696-bf5e0dbacfa5baef.js cf=HIT age=6479 server=cloudflare set-cookie=
+[2026-02-24T20:25:22] STATIC round2 url=https://amppattaya.com/_next/static/chunks/4bd1b696-bf5e0dbacfa5baef.js cf=HIT age=4584 server=cloudflare set-cookie=
+[2026-02-24T20:25:22] FAIL static age did not increase on round2
+[2026-02-24T20:25:22] VERIFY end
+[2026-02-24T20:25:36] VERIFY start
+[2026-02-24T20:25:37] HTML /en/ cf=DYNAMIC age= server=cloudflare cache-control=public, s-maxage=300, stale-while-revalidate=3600
+[2026-02-24T20:25:37] HTML /en/ cf=DYNAMIC age= server=cloudflare cache-control=public, s-maxage=300, stale-while-revalidate=3600
+[2026-02-24T20:25:38] HTML /th/ cf=DYNAMIC age= server=cloudflare cache-control=public, s-maxage=300, stale-while-revalidate=3600
+[2026-02-24T20:25:38] HTML /th/ cf=DYNAMIC age= server=cloudflare cache-control=public, s-maxage=300, stale-while-revalidate=3600
+[2026-02-24T20:25:41] STATIC round1 url=https://amppattaya.com/_next/static/chunks/4bd1b696-bf5e0dbacfa5baef.js cf=HIT age=4601 server=cloudflare set-cookie=
+[2026-02-24T20:25:41] STATIC round2 url=https://amppattaya.com/_next/static/chunks/4bd1b696-bf5e0dbacfa5baef.js cf=HIT age=6501 server=cloudflare set-cookie=
+[2026-02-24T20:25:41] PASS static age increased on round2
+[2026-02-24T20:25:41] VERIFY end
+[2026-02-24T20:51:32] VERIFY start
+[2026-02-24T20:51:33] HTML /en/ cf=DYNAMIC age= server=cloudflare cache-control=public, s-maxage=300, stale-while-revalidate=3600
+[2026-02-24T20:51:33] HTML /en/ cf=DYNAMIC age= server=cloudflare cache-control=public, s-maxage=300, stale-while-revalidate=3600
+[2026-02-24T20:51:33] HTML /th/ cf=DYNAMIC age= server=cloudflare cache-control=public, s-maxage=300, stale-while-revalidate=3600
+[2026-02-24T20:51:34] HTML /th/ cf=DYNAMIC age= server=cloudflare cache-control=public, s-maxage=300, stale-while-revalidate=3600
+[2026-02-24T20:51:36] STATIC round1 url=https://amppattaya.com/_next/static/chunks/4bd1b696-bf5e0dbacfa5baef.js cf=HIT age=8054 server=cloudflare set-cookie=
+[2026-02-24T20:51:36] STATIC round2 url=https://amppattaya.com/_next/static/chunks/4bd1b696-bf5e0dbacfa5baef.js cf=HIT age=8056 server=cloudflare set-cookie=
+[2026-02-24T20:51:36] PASS static age increased on round2
+[2026-02-24T20:51:36] VERIFY end
+[2026-02-24T23:13:29] VERIFY start
+[2026-02-24T23:13:29] HTML /en/ cf=DYNAMIC age= server=cloudflare cache-control=public, s-maxage=300, stale-while-revalidate=3600
+[2026-02-24T23:13:30] HTML /en/ cf=DYNAMIC age= server=cloudflare cache-control=public, s-maxage=300, stale-while-revalidate=3600
+[2026-02-24T23:13:31] HTML /th/ cf=DYNAMIC age= server=cloudflare cache-control=public, s-maxage=300, stale-while-revalidate=3600
+[2026-02-24T23:13:31] HTML /th/ cf=DYNAMIC age= server=cloudflare cache-control=public, s-maxage=300, stale-while-revalidate=3600
+[2026-02-24T23:13:34] STATIC round1 url=https://amppattaya.com/_next/static/chunks/4bd1b696-bf5e0dbacfa5baef.js cf=HIT age=16571 server=cloudflare set-cookie=
+[2026-02-24T23:13:34] STATIC round2 url=https://amppattaya.com/_next/static/chunks/4bd1b696-bf5e0dbacfa5baef.js cf=HIT age=14676 server=cloudflare set-cookie=
+[2026-02-24T23:13:34] INFO static age did not increase on round2 (soft signal; may be different edge)
+[2026-02-24T23:13:34] VERIFY end
+[2026-02-24T23:35:00] VERIFY start
+[2026-02-24T23:35:00] HTML /en/ cf=DYNAMIC age= server=cloudflare cache-control=public, s-maxage=300, stale-while-revalidate=3600
+[2026-02-24T23:35:01] HTML /en/ cf=DYNAMIC age= server=cloudflare cache-control=public, s-maxage=300, stale-while-revalidate=3600
+[2026-02-24T23:35:01] HTML /th/ cf=DYNAMIC age= server=cloudflare cache-control=public, s-maxage=300, stale-while-revalidate=3600
+[2026-02-24T23:35:02] HTML /th/ cf=DYNAMIC age= server=cloudflare cache-control=public, s-maxage=300, stale-while-revalidate=3600
+[2026-02-24T23:35:04] STATIC round1 url=https://amppattaya.com/_next/static/chunks/4bd1b696-bf5e0dbacfa5baef.js cf=HIT age=15964 server=cloudflare set-cookie=
+[2026-02-24T23:35:04] STATIC round2 url=https://amppattaya.com/_next/static/chunks/4bd1b696-bf5e0dbacfa5baef.js cf=HIT age=1158 server=cloudflare set-cookie=
+[2026-02-24T23:35:04] INFO static age did not increase on round2 (soft signal; may be different edge)
+[2026-02-24T23:35:04] VERIFY end
+[2026-02-24T23:44:42] VERIFY start
+[2026-02-24T23:44:43] HTML /en/ cf=DYNAMIC age= server=cloudflare cache-control=public, s-maxage=300, stale-while-revalidate=3600
+[2026-02-24T23:44:43] HTML /en/ cf=DYNAMIC age= server=cloudflare cache-control=public, s-maxage=300, stale-while-revalidate=3600
+[2026-02-24T23:44:44] HTML /th/ cf=DYNAMIC age= server=cloudflare cache-control=public, s-maxage=300, stale-while-revalidate=3600
+[2026-02-24T23:44:44] HTML /th/ cf=DYNAMIC age= server=cloudflare cache-control=public, s-maxage=300, stale-while-revalidate=3600
+[2026-02-24T23:44:47] STATIC round1 url=https://amppattaya.com/_next/static/chunks/4bd1b696-bf5e0dbacfa5baef.js cf=HIT age=1738 server=cloudflare set-cookie=
+[2026-02-24T23:44:47] STATIC round2 url=https://amppattaya.com/_next/static/chunks/4bd1b696-bf5e0dbacfa5baef.js cf=HIT age=1740 server=cloudflare set-cookie=
+[2026-02-24T23:44:47] PASS static age increased on round2
+[2026-02-24T23:44:47] VERIFY end
+[2026-02-25T06:31:29] VERIFY start
+[2026-02-25T06:31:30] HTML /en/ cf=DYNAMIC age= server=cloudflare cache-control=public, s-maxage=300, stale-while-revalidate=3600
+[2026-02-25T06:31:30] HTML /en/ cf=DYNAMIC age= server=cloudflare cache-control=public, s-maxage=300, stale-while-revalidate=3600
+[2026-02-25T06:31:30] HTML /th/ cf=DYNAMIC age= server=cloudflare cache-control=public, s-maxage=300, stale-while-revalidate=3600
+[2026-02-25T06:31:30] HTML /th/ cf=DYNAMIC age= server=cloudflare cache-control=public, s-maxage=300, stale-while-revalidate=3600
+[2026-02-25T06:31:33] STATIC round1 url=https://amppattaya.com/_next/static/chunks/4bd1b696-bf5e0dbacfa5baef.js cf=HIT age=42850 server=cloudflare set-cookie=
+[2026-02-25T06:31:33] STATIC round2 url=https://amppattaya.com/_next/static/chunks/4bd1b696-bf5e0dbacfa5baef.js cf=HIT age=42852 server=cloudflare set-cookie=
+[2026-02-25T06:31:33] PASS static age increased on round2
+[2026-02-25T06:31:33] VERIFY end
+[2026-02-25T06:44:06] VERIFY start
+[2026-02-25T06:44:07] HTML /en/ cf=DYNAMIC age= server=cloudflare cache-control=public, s-maxage=300, stale-while-revalidate=3600
+[2026-02-25T06:44:07] HTML /en/ cf=DYNAMIC age= server=cloudflare cache-control=public, s-maxage=300, stale-while-revalidate=3600
+[2026-02-25T06:44:08] HTML /th/ cf=DYNAMIC age= server=cloudflare cache-control=public, s-maxage=300, stale-while-revalidate=3600
+[2026-02-25T06:44:08] HTML /th/ cf=DYNAMIC age= server=cloudflare cache-control=public, s-maxage=300, stale-while-revalidate=3600
+[2026-02-25T06:44:12] STATIC round1 url=https://amppattaya.com/_next/static/chunks/4bd1b696-bf5e0dbacfa5baef.js cf=HIT age=26861 server=cloudflare set-cookie=
+[2026-02-25T06:44:12] STATIC round2 url=https://amppattaya.com/_next/static/chunks/4bd1b696-bf5e0dbacfa5baef.js cf=HIT age=26863 server=cloudflare set-cookie=
+[2026-02-25T06:44:12] PASS static age increased on round2
+[2026-02-25T06:44:12] VERIFY end
+[2026-02-25T07:38:58] VERIFY start
+[2026-02-25T07:38:59] HTML /en/ cf=DYNAMIC age= server=cloudflare cache-control=public, s-maxage=300, stale-while-revalidate=3600
+[2026-02-25T07:39:00] HTML /en/ cf=DYNAMIC age= server=cloudflare cache-control=public, s-maxage=300, stale-while-revalidate=3600
+[2026-02-25T07:39:00] HTML /th/ cf=DYNAMIC age= server=cloudflare cache-control=public, s-maxage=300, stale-while-revalidate=3600
+[2026-02-25T07:39:00] HTML /th/ cf=DYNAMIC age= server=cloudflare cache-control=public, s-maxage=300, stale-while-revalidate=3600
+[2026-02-25T07:39:03] STATIC round1 url=https://amppattaya.com/_next/static/chunks/4bd1b696-bf5e0dbacfa5baef.js cf=HIT age=30152 server=cloudflare set-cookie=
+[2026-02-25T07:39:03] STATIC round2 url=https://amppattaya.com/_next/static/chunks/4bd1b696-bf5e0dbacfa5baef.js cf=HIT age=30154 server=cloudflare set-cookie=
+[2026-02-25T07:39:03] PASS static age increased on round2
+[2026-02-25T07:39:03] VERIFY end
+[2026-02-25T07:46:49] VERIFY start
+[2026-02-25T07:46:49] HTML /en/ cf=DYNAMIC age= server=cloudflare cache-control=public, s-maxage=300, stale-while-revalidate=3600
+[2026-02-25T07:46:49] HTML /en/ cf=DYNAMIC age= server=cloudflare cache-control=public, s-maxage=300, stale-while-revalidate=3600
+[2026-02-25T07:46:49] HTML /th/ cf=DYNAMIC age= server=cloudflare cache-control=public, s-maxage=300, stale-while-revalidate=3600
+[2026-02-25T07:46:50] HTML /th/ cf=DYNAMIC age= server=cloudflare cache-control=public, s-maxage=300, stale-while-revalidate=3600
+[2026-02-25T07:46:52] STATIC round1 url=https://amppattaya.com/_next/static/chunks/4bd1b696-bf5e0dbacfa5baef.js cf=HIT age=45472 server=cloudflare set-cookie=
+[2026-02-25T07:46:52] STATIC round2 url=https://amppattaya.com/_next/static/chunks/4bd1b696-bf5e0dbacfa5baef.js cf=HIT age=45474 server=cloudflare set-cookie=
+[2026-02-25T07:46:52] PASS static age increased on round2
+[2026-02-25T07:46:52] VERIFY end
+[2026-02-25T11:04:25] VERIFY start
+[2026-02-25T11:04:26] HTML /en/ cf=DYNAMIC age= server=cloudflare cache-control=public, s-maxage=300, stale-while-revalidate=3600
+[2026-02-25T11:04:29] HTML /en/ cf=DYNAMIC age= server=cloudflare cache-control=public, s-maxage=300, stale-while-revalidate=3600
+[2026-02-25T11:04:30] HTML /th/ cf=DYNAMIC age= server=cloudflare cache-control=public, s-maxage=300, stale-while-revalidate=3600
+[2026-02-25T11:04:30] HTML /th/ cf=DYNAMIC age= server=cloudflare cache-control=public, s-maxage=300, stale-while-revalidate=3600
+[2026-02-25T11:04:34] STATIC round1 url=https://amppattaya.com/_next/static/chunks/4bd1b696-bf5e0dbacfa5baef.js cf=HIT age=42482 server=cloudflare set-cookie=
+[2026-02-25T11:04:34] STATIC round2 url=https://amppattaya.com/_next/static/chunks/4bd1b696-bf5e0dbacfa5baef.js cf=HIT age=57335 server=cloudflare set-cookie=
+[2026-02-25T11:04:34] PASS static age increased on round2
+[2026-02-25T11:04:34] VERIFY end
+[2026-02-25T11:41:07] VERIFY start
+[2026-02-25T11:41:08] HTML /en/ cf=DYNAMIC age= server=cloudflare cache-control=public, s-maxage=300, stale-while-revalidate=3600
+[2026-02-25T11:41:09] HTML /en/ cf=DYNAMIC age= server=cloudflare cache-control=public, s-maxage=300, stale-while-revalidate=3600
+[2026-02-25T11:41:09] HTML /th/ cf=DYNAMIC age= server=cloudflare cache-control=public, s-maxage=300, stale-while-revalidate=3600
+[2026-02-25T11:41:10] HTML /th/ cf=DYNAMIC age= server=cloudflare cache-control=public, s-maxage=300, stale-while-revalidate=3600
+[2026-02-25T11:41:13] STATIC round1 url=https://amppattaya.com/_next/static/chunks/4bd1b696-bf5e0dbacfa5baef.js cf=HIT age=59532 server=cloudflare set-cookie=
+[2026-02-25T11:41:13] STATIC round2 url=https://amppattaya.com/_next/static/chunks/4bd1b696-bf5e0dbacfa5baef.js cf=HIT age=44684 server=cloudflare set-cookie=
+[2026-02-25T11:41:13] INFO static age did not increase on round2 (soft signal; may be different edge)
+[2026-02-25T11:41:13] VERIFY end
+[2026-02-25T12:34:23] VERIFY start
+[2026-02-25T12:34:25] HTML /en/ cf=DYNAMIC age= server=cloudflare cache-control=public, s-maxage=300, stale-while-revalidate=3600
+[2026-02-25T12:34:26] HTML /en/ cf=DYNAMIC age= server=cloudflare cache-control=public, s-maxage=300, stale-while-revalidate=3600
+[2026-02-25T12:34:26] HTML /th/ cf=DYNAMIC age= server=cloudflare cache-control=public, s-maxage=300, stale-while-revalidate=3600
+[2026-02-25T12:34:26] HTML /th/ cf=DYNAMIC age= server=cloudflare cache-control=public, s-maxage=300, stale-while-revalidate=3600
+[2026-02-25T12:34:31] STATIC round1 url=https://amppattaya.com/_next/static/chunks/4bd1b696-bf5e0dbacfa5baef.js cf=HIT age=20416 server=cloudflare set-cookie=
+[2026-02-25T12:34:31] STATIC round2 url=https://amppattaya.com/_next/static/chunks/4bd1b696-bf5e0dbacfa5baef.js cf=HIT age=47882 server=cloudflare set-cookie=
+[2026-02-25T12:34:31] PASS static age increased on round2
+[2026-02-25T12:34:31] VERIFY end
+[2026-02-25T13:57:44] VERIFY start
+[2026-02-25T13:57:44] HTML /en/ cf=DYNAMIC age= server=cloudflare cache-control=public, s-maxage=300, stale-while-revalidate=3600
+[2026-02-25T13:57:45] HTML /en/ cf=DYNAMIC age= server=cloudflare cache-control=public, s-maxage=300, stale-while-revalidate=3600
+[2026-02-25T13:57:46] HTML /th/ cf=DYNAMIC age= server=cloudflare cache-control=public, s-maxage=300, stale-while-revalidate=3600
+[2026-02-25T13:57:47] HTML /th/ cf=DYNAMIC age= server=cloudflare cache-control=public, s-maxage=300, stale-while-revalidate=3600
+[2026-02-25T13:57:51] STATIC round1 url=https://amppattaya.com/_next/static/chunks/4bd1b696-bf5e0dbacfa5baef.js cf=HIT age=52879 server=cloudflare set-cookie=
+[2026-02-25T13:57:51] STATIC round2 url=https://amppattaya.com/_next/static/chunks/4bd1b696-bf5e0dbacfa5baef.js cf=HIT age=67732 server=cloudflare set-cookie=
+[2026-02-25T13:57:51] PASS static age increased on round2
+[2026-02-25T13:57:51] VERIFY end
+[2026-02-25T14:53:06] VERIFY start
+[2026-02-25T14:53:07] HTML /en/ cf=DYNAMIC age= server=cloudflare cache-control=public, s-maxage=300, stale-while-revalidate=3600
+[2026-02-25T14:53:10] HTML /en/ cf=DYNAMIC age= server=cloudflare cache-control=public, s-maxage=300, stale-while-revalidate=3600
+[2026-02-25T14:53:11] HTML /th/ cf=DYNAMIC age= server=cloudflare cache-control=public, s-maxage=300, stale-while-revalidate=3600
+[2026-02-25T14:53:12] HTML /th/ cf=DYNAMIC age= server=cloudflare cache-control=public, s-maxage=300, stale-while-revalidate=3600
+[2026-02-25T14:53:15] STATIC round1 url=https://amppattaya.com/_next/static/chunks/4bd1b696-bf5e0dbacfa5baef.js cf=HIT age=71054 server=cloudflare set-cookie=
+[2026-02-25T14:53:15] STATIC round2 url=https://amppattaya.com/_next/static/chunks/4bd1b696-bf5e0dbacfa5baef.js cf=HIT age=56206 server=cloudflare set-cookie=
+[2026-02-25T14:53:15] INFO static age did not increase on round2 (soft signal; may be different edge)
+[2026-02-25T14:53:15] VERIFY end

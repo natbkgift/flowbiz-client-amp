@@ -1,0 +1,41 @@
+# CONTINUOUS PRODUCTION GUARD REPORT
+
+## Source State
+- SOURCE_SHA: 9e1e263bf1d0226f97db52a2d59025787ae67b7a
+- Commit timestamp: 2026-02-22T11:03:38.0000000+07:00
+
+## VPS State Before
+- DEPLOYED_SHA: 3f195093abb7ef361934bab7b049fe99a8dee44e
+- Image tag: flowbiz-client-amp-api:3f195093
+- Container status: running running=true restarts=0
+- Alembic version: current=SECURITY: ADMIN_BOOTSTRAP_PASSWORD is using the default value. Set a strong password via ADMIN_BOOTSTRAP_PASSWORD env var.
+SECURITY: PII_HASH_PEPPER is empty. PII dedup hashing has zero additional entropy.
+INFO  [alembic.runtime.migration] Context impl PostgresqlImpl.
+INFO  [alembic.runtime.migration] Will assume transactional DDL.
+0024_blueprint_core_schema_alignment heads=0027_doc06_property_columns (head)
+
+## Drift Detected
+- YES
+- Type: Code / Container / Migration
+
+## Actions Executed
+- Git reset: YES
+- Image rebuild: YES
+- Container restart: YES
+- Migration applied: YES
+
+## Runtime Validation
+- Health: internal_healthz=200 public_health=200
+- API: properties=500 projects=200 recommendations=500
+- Auth: auth_me=401 login_invalid=401
+- Assets: public_root=307
+- Errors found: EXCEPTION: Cannot convert value "23:api-1  | 2026-02-22 04:04:26,910 - apps.api.main - ERROR - Unhandled error on GET /v1/properties" to type "System.Int32". Error: "The input string '23:api-1  | 2026-02-22 04:04:26,910 - apps.api.main - ERROR - Unhandled error on GET /v1/properties' was not in a correct format."
+
+## Final State
+- DEPLOYED_SHA: 9e1e263bf1d0226f97db52a2d59025787ae67b7a
+- Image tag: flowbiz-client-amp-api:9e1e263b
+- Alembic head: 0027_doc06_property_columns (head)
+- Container stable: True
+
+## FINAL VERDICT
+PRODUCTION HEALTHY: NO

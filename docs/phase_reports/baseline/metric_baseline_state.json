@@ -1,0 +1,7 @@
+{
+  "baseline_window_days": 14,
+  "gate_pass": false,
+  "metrics_contract_sha256": "2ab28ff3710cb40b93281ded8be2ca5a04bba8ffcd9c02129d78b5d5dfbbaf4b",
+  "repo_detection_only": true,
+  "runtime_baseline": "unavailable_in_repo_context"
+}

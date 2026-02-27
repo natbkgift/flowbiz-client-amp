@@ -1,0 +1,83 @@
+name: Post-Merge Governance Guard
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+
+jobs:
+  guard:
+    # Avoid infinite loops on auto-revert commits.
+    if: ${{ !contains(github.event.head_commit.message, 'auto-revert:') }}
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          pip install ".[dev]"
+
+      - name: Run governance gates on the merged delta
+        id: gates
+        continue-on-error: true
+        env:
+          GOV_BASE: ${{ github.event.before }}
+          GOV_HEAD: ${{ github.sha }}
+        run: |
+          python scripts/governance/run_ci_gates.py --base "$GOV_BASE" --head "$GOV_HEAD" --out-dir .tmp/governance
+
+      - name: Auto-revert commit on governance violation
+        if: steps.gates.outcome == 'failure'
+        run: |
+          set -euo pipefail
+
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          SHA="${GITHUB_SHA}"
+          BEFORE_SHA="${{ github.event.before }}"
+
+          git fetch origin main --depth=1
+          CURRENT_HEAD="$(git rev-parse origin/main)"
+
+          mapfile -t CHANGED_FILES < <(git diff --name-only "$BEFORE_SHA" "$SHA")
+          python scripts/governance/decide_auto_revert.py \
+            --target-sha "$SHA" \
+            --branch main \
+            --before-sha "$BEFORE_SHA" \
+            --summary .tmp/governance/summary.json \
+            --current-head-sha "$CURRENT_HEAD" \
+            --changed-files "${CHANGED_FILES[@]}" \
+            --out .tmp/governance/revert-decision.json
+
+          ALLOW_REVERT="$(python -c 'import json,pathlib;p=pathlib.Path(".tmp/governance/revert-decision.json");print("true" if p.exists() and json.loads(p.read_text(encoding="utf-8-sig")).get("allow_revert") else "false")')"
+
+          if [[ "$ALLOW_REVERT" != "true" ]]; then
+            echo "::warning::Skipping auto-revert due to stale/ambiguous decision evidence"
+            cat .tmp/governance/revert-decision.json || true
+            exit 0
+          fi
+
+          parents="$(git show -s --format=%P "$SHA" | wc -w | tr -d ' ')"
+
+          if [[ "${parents}" -gt 1 ]]; then
+            git revert -m 1 --no-edit "$SHA" || { git revert --abort || true; exit 1; }
+          else
+            git revert --no-edit "$SHA" || { git revert --abort || true; exit 1; }
+          fi
+
+          # Ensure the revert commit is clearly marked.
+          git commit --amend -m "auto-revert: governance violation (${SHA})"
+
+          git push origin HEAD:main

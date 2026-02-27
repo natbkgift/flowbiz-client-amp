@@ -1,0 +1,192 @@
+# AMP Architecture Blueprint
+
+> 🏗️ Technical Architecture สำหรับ AI Agent System
+
+## System Overview
+
+```
+┌─────────────────────────────────────────────────────────────────────────┐
+│                         EXTERNAL CHANNELS                               │
+│  ┌─────────┐ ┌──────────┐ ┌──────────┐ ┌─────────┐ ┌────────┐          │
+│  │  LINE   │ │ Facebook │ │ WhatsApp │ │ Website │ │ Google │          │
+│  │   OA    │ │Messenger │ │ Business │ │  Chat   │ │  Ads   │          │
+│  └────┬────┘ └────┬─────┘ └────┬─────┘ └────┬────┘ └───┬────┘          │
+└───────┼──────────┼───────────┼───────────┼──────────┼───────────────────┘
+        │          │           │           │          │
+        └──────────┴───────────┴───────────┴──────────┘
+                               │
+                               ▼
+┌─────────────────────────────────────────────────────────────────────────┐
+│                      INTEGRATION LAYER                                  │
+│  ┌─────────────────┐  ┌─────────────────┐  ┌─────────────────┐         │
+│  │ Webhook Handler │  │   API Gateway   │  │  Message Queue  │         │
+│  │   (FastAPI)     │  │   (FastAPI)     │  │ (Redis/Celery)  │         │
+│  └────────┬────────┘  └────────┬────────┘  └────────┬────────┘         │
+└───────────┼────────────────────┼────────────────────┼───────────────────┘
+            │                    │                    │
+            └────────────────────┼────────────────────┘
+                                 │
+                                 ▼
+┌─────────────────────────────────────────────────────────────────────────┐
+│                    AI AGENTS ORCHESTRATOR                               │
+│  ┌─────────────────────────────────────────────────────────────────┐   │
+│  │                     Agent Router                                 │   │
+│  │              (Route messages to appropriate agent)               │   │
+│  └─────────────────────────────────────────────────────────────────┘   │
+│                                 │                                       │
+│    ┌────────────────────────────┼────────────────────────────┐         │
+│    │                            │                            │         │
+│    ▼                            ▼                            ▼         │
+│  ┌──────────────┐  ┌──────────────────┐  ┌──────────────┐             │
+│  │ Lead Router  │  │  AI Sale Chat    │  │   Listing    │             │
+│  │    Agent     │  │     Agent        │  │    Agent     │             │
+│  │              │  │                  │  │              │             │
+│  │ • Scoring    │  │ • Thai/English   │  │ • Property   │             │
+│  │ • Assignment │  │ • Qualification  │  │   management │             │
+│  │ • Routing    │  │ • RAG retrieval  │  │ • Auto-tag   │             │
+│  └──────────────┘  └──────────────────┘  └──────────────┘             │
+│                                                                         │
+│  ┌──────────────┐  ┌──────────────────┐  ┌──────────────┐             │
+│  │ Ads/Promo    │  │    Content       │  │  Analytics   │             │
+│  │    Agent     │  │     Agent        │  │    Agent     │             │
+│  │              │  │                  │  │              │             │
+│  │ • Ad copy    │  │ • Content gen    │  │ • Dashboard  │             │
+│  │ • Campaign   │  │ • Brand voice    │  │ • Reports    │             │
+│  │   analysis   │  │ • Social posts   │  │ • Predict    │             │
+│  └──────────────┘  └──────────────────┘  └──────────────┘             │
+│                                                                         │
+│  ┌──────────────┐                                                      │
+│  │ Ops/Document │                                                      │
+│  │    Agent     │                                                      │
+│  │              │                                                      │
+│  │ • Contracts  │                                                      │
+│  │ • Checklists │                                                      │
+│  │ • Templates  │                                                      │
+│  └──────────────┘                                                      │
+└─────────────────────────────────────────────────────────────────────────┘
+                                 │
+                                 ▼
+┌─────────────────────────────────────────────────────────────────────────┐
+│                         DATA LAYER                                      │
+│  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐   │
+│  │  Property   │  │   Lead      │  │   Google    │  │  Analytics  │   │
+│  │  Database   │  │   CRM       │  │   Drive     │  │   Store     │   │
+│  │ (PostgreSQL)│  │(PostgreSQL) │  │   (API)     │  │  (TimeSeries)│   │
+│  └─────────────┘  └─────────────┘  └─────────────┘  └─────────────┘   │
+└─────────────────────────────────────────────────────────────────────────┘
+```
+
+---
+
+## Technology Stack
+
+### Core Technologies
+
+| Layer | Technology | Version | Purpose |
+|-------|------------|---------|---------|
+| **Language** | Python | 3.11+ | Core runtime |
+| **Framework** | FastAPI | 0.104+ | API server |
+| **Validation** | Pydantic | 2.4+ | Data validation |
+| **Server** | Uvicorn | 0.24+ | ASGI server |
+
+### AI/ML Stack
+
+| Component | Technology | Purpose |
+|-----------|------------|---------|
+| **LLM Provider** | OpenAI GPT-4 | Primary AI reasoning |
+| **Fallback LLM** | Anthropic Claude | Backup/specialized tasks |
+| **RAG Framework** | LangChain | Orchestration |
+| **Vector Store** | ChromaDB | Property embeddings |
+| **Embeddings** | OpenAI Ada-002 | Text embeddings |
+
+### Infrastructure
+
+| Component | Technology | Purpose |
+|-----------|------------|---------|
+| **Container** | Docker | Containerization |
+| **Orchestration** | Docker Compose | Local/prod deployment |
+| **Reverse Proxy** | Nginx (system-level) | SSL/routing |
+| **Queue** | Redis | Message queue |
+| **Task Runner** | Celery | Async tasks |
+
+### Data Storage
+
+| Type | Technology | Use Case |
+|------|------------|----------|
+| **Relational** | PostgreSQL | Leads, Properties, Users |
+| **Cache** | Redis | Session, Rate limiting |
+| **Vector** | ChromaDB | Property embeddings |
+| **Files** | Google Drive API | Documents, Images |
+| **Time Series** | TimescaleDB (optional) | Analytics |
+
+### External Integrations
+
+| Service | API | Purpose |
+|---------|-----|---------|
+| **LINE** | Messaging API | Chat channel |
+| **Facebook** | Graph API | Messenger, Ads |
+| **Google** | Drive, Sheets, Ads API | Storage, Ads |
+| **WhatsApp** | Business API | Chat channel |
+
+---
+
+## Agent Architecture Pattern
+
+### Single Agent Structure
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                        AGENT                                │
+├─────────────────────────────────────────────────────────────┤
+│                                                             │
+│  ┌───────────────────────────────────────────────────────┐ │
+│  │                  INPUT HANDLER                        │ │
+│  │  • Validate incoming message                          │ │
+│  │  • Extract context (user, channel, history)           │ │
+│  │  • Determine intent                                   │ │
+│  └───────────────────────────────────────────────────────┘ │
+│                           │                                 │
+│                           ▼                                 │
+│  ┌───────────────────────────────────────────────────────┐ │
+│  │                    AI CORE                            │ │
+│  │  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐   │ │
+│  │  │   System    │  │    RAG      │  │  Response   │   │ │
+│  │  │   Prompt    │  │  Retrieval  │  │ Generation  │   │ │
+│  │  └─────────────┘  └─────────────┘  └─────────────┘   │ │
+│  └───────────────────────────────────────────────────────┘ │
+│                           │                                 │
+│                           ▼                                 │
+│  ┌───────────────────────────────────────────────────────┐ │
+│  │                 ACTION HANDLER                        │ │
+│  │  • Execute determined actions                         │ │
+│  │  • Update state (CRM, DB)                            │ │
+│  │  • Trigger downstream agents                         │ │
+│  │  • Send response to user                             │ │
+│  └───────────────────────────────────────────────────────┘ │
+│                                                             │
+└─────────────────────────────────────────────────────────────┘
+```
+
+### Agent File Structure
+
+```
+apps/agents/
+```
+
+---
+
+## Quality Standards
+
+### Testing & Coverage
+
+AMP follows a comprehensive testing strategy with defined coverage targets:
+
+- **Overall minimum coverage:** 70%
+- **Business logic:** 90%+
+- **API endpoints:** 80%+
+- **Agents:** 90%+
+- **Utilities:** 70%+
+
+Testing follows a pyramid approach (60% unit, 30% integration, 10% E2E).
+
+For detailed testing guidelines, test organization, and fixture patterns, see [CONTRIBUTING.md](../CONTRIBUTING.md#testing-requirements).

@@ -1,0 +1,943 @@
+{
+  "runtime": {
+    "startedAt": "2026-02-25T14:06:46.376Z",
+    "base": "http://127.0.0.1:3000",
+    "browserMode": "headless_forced"
+  },
+  "leadForm": [
+    {
+      "locale": "en",
+      "mode": "error",
+      "hasForm": true,
+      "screenshot": "ops\\logs\\phase5_1\\screenshots\\en_form_error.png",
+      "request": {
+        "method": "POST",
+        "url": "http://127.0.0.1:3000/api/v1/inquiries"
+      },
+      "response": {
+        "status": 500,
+        "url": "http://127.0.0.1:3000/api/v1/inquiries"
+      },
+      "ui": {
+        "statusBefore": "",
+        "submitDisabledBefore": true,
+        "submitDisabledAfter": false,
+        "errorVisible": true,
+        "errorText": "Failed: Simulated API error"
+      },
+      "consoleErrors": [
+        "Failed to load resource: the server responded with a status of 500 (Internal Server Error)"
+      ],
+      "pageErrors": []
+    },
+    {
+      "locale": "en",
+      "mode": "success",
+      "hasForm": true,
+      "screenshot": "ops\\logs\\phase5_1\\screenshots\\en_form_success.png",
+      "request": {
+        "method": "POST",
+        "url": "http://127.0.0.1:3000/api/v1/inquiries"
+      },
+      "response": {
+        "status": 200,
+        "url": "http://127.0.0.1:3000/api/v1/inquiries"
+      },
+      "ui": {
+        "successVisible": true,
+        "successText": "Thanks — we received your request. (id: qa-en-ok)",
+        "fieldStateAfterSubmit": {
+          "name": "QA Tester",
+          "email": "qa@example.com",
+          "phone": "+66000000000"
+        }
+      },
+      "consoleErrors": [],
+      "pageErrors": []
+    },
+    {
+      "locale": "th",
+      "mode": "error",
+      "hasForm": true,
+      "screenshot": "ops\\logs\\phase5_1\\screenshots\\th_form_error.png",
+      "request": {
+        "method": "POST",
+        "url": "http://127.0.0.1:3000/api/v1/inquiries"
+      },
+      "response": {
+        "status": 500,
+        "url": "http://127.0.0.1:3000/api/v1/inquiries"
+      },
+      "ui": {
+        "statusBefore": "",
+        "submitDisabledBefore": true,
+        "submitDisabledAfter": false,
+        "errorVisible": true,
+        "errorText": "ไม่สำเร็จ: จำลองข้อผิดพลาด"
+      },
+      "consoleErrors": [
+        "Failed to load resource: the server responded with a status of 500 (Internal Server Error)"
+      ],
+      "pageErrors": []
+    },
+    {
+      "locale": "th",
+      "mode": "success",
+      "hasForm": true,
+      "screenshot": "ops\\logs\\phase5_1\\screenshots\\th_form_success.png",
+      "request": {
+        "method": "POST",
+        "url": "http://127.0.0.1:3000/api/v1/inquiries"
+      },
+      "response": {
+        "status": 200,
+        "url": "http://127.0.0.1:3000/api/v1/inquiries"
+      },
+      "ui": {
+        "successVisible": true,
+        "successText": "ขอบคุณครับ/ค่ะ เราได้รับข้อมูลแล้ว (id: qa-th-ok)",
+        "fieldStateAfterSubmit": {
+          "name": "ผู้ทดสอบ",
+          "email": "qa@example.com",
+          "phone": "+66000000000"
+        }
+      },
+      "consoleErrors": [],
+      "pageErrors": []
+    }
+  ],
+  "keyboard": [
+    {
+      "locale": "en",
+      "focusVisibleCount": 76,
+      "hit": {
+        "/projects": true,
+        "/buy": true,
+        "/invest": true,
+        "/rent": true,
+        "/sell": true,
+        "/about": true,
+        "/area-guide": true,
+        "/contact": true
+      },
+      "sample": [
+        {
+          "tag": "a",
+          "id": null,
+          "className": "sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-50 focus:bg-white focus:px-4 focus:py-2 focus:",
+          "text": "Skip to main content",
+          "href": "#main-content",
+          "outlineWidth": "2px",
+          "outlineStyle": "solid"
+        },
+        {
+          "tag": "a",
+          "id": null,
+          "className": "skip-link",
+          "text": "Skip to main content",
+          "href": "#main-content",
+          "outlineWidth": "3px",
+          "outlineStyle": "solid"
+        },
+        {
+          "tag": "a",
+          "id": null,
+          "className": "logo",
+          "text": "AMPAMP Pattaya",
+          "href": "/en/",
+          "outlineWidth": "3px",
+          "outlineStyle": "solid"
+        },
+        {
+          "tag": "button",
+          "id": null,
+          "className": "nav-link nav-group__trigger ",
+          "text": "Buy",
+          "href": null,
+          "outlineWidth": "3px",
+          "outlineStyle": "solid"
+        },
+        {
+          "tag": "a",
+          "id": null,
+          "className": "dropdown-item dropdown-item--all",
+          "text": "Browse AllSee all buy options",
+          "href": "/en/buy/",
+          "outlineWidth": "3px",
+          "outlineStyle": "solid"
+        },
+        {
+          "tag": "a",
+          "id": null,
+          "className": "dropdown-item",
+          "text": "CondoHigh-rise & low-rise condos",
+          "href": "/en/buy/condo-pattaya/",
+          "outlineWidth": "3px",
+          "outlineStyle": "solid"
+        },
+        {
+          "tag": "a",
+          "id": null,
+          "className": "dropdown-item",
+          "text": "VillaPool villas & luxury homes",
+          "href": "/en/buy/villa-pattaya/",
+          "outlineWidth": "3px",
+          "outlineStyle": "solid"
+        },
+        {
+          "tag": "a",
+          "id": null,
+          "className": "dropdown-item",
+          "text": "HouseTownhouse & detached house",
+          "href": "/en/buy/house-pattaya/",
+          "outlineWidth": "3px",
+          "outlineStyle": "solid"
+        },
+        {
+          "tag": "a",
+          "id": null,
+          "className": "dropdown-item",
+          "text": "LandPlots & raw land",
+          "href": "/en/buy/land-pattaya/",
+          "outlineWidth": "3px",
+          "outlineStyle": "solid"
+        },
+        {
+          "tag": "a",
+          "id": null,
+          "className": "dropdown-item",
+          "text": "Hotel RoomHotel rooms & investment units",
+          "href": "/en/buy/hotel-pattaya/",
+          "outlineWidth": "3px",
+          "outlineStyle": "solid"
+        },
+        {
+          "tag": "a",
+          "id": null,
+          "className": "dropdown-item",
+          "text": "ShopRetail & shophouse",
+          "href": "/en/buy/shop-pattaya/",
+          "outlineWidth": "3px",
+          "outlineStyle": "solid"
+        },
+        {
+          "tag": "a",
+          "id": null,
+          "className": "dropdown-item",
+          "text": "OfficeCommercial office space",
+          "href": "/en/buy/office-pattaya/",
+          "outlineWidth": "3px",
+          "outlineStyle": "solid"
+        },
+        {
+          "tag": "button",
+          "id": null,
+          "className": "nav-link nav-group__trigger ",
+          "text": "Rent",
+          "href": null,
+          "outlineWidth": "3px",
+          "outlineStyle": "solid"
+        },
+        {
+          "tag": "a",
+          "id": null,
+          "className": "dropdown-item",
+          "text": "CondoMonthly & long-term condo rental",
+          "href": "/en/rent/condo-pattaya/",
+          "outlineWidth": "3px",
+          "outlineStyle": "solid"
+        },
+        {
+          "tag": "a",
+          "id": null,
+          "className": "dropdown-item",
+          "text": "VillaBeachside villa rentals",
+          "href": "/en/rent/villa-pattaya/",
+          "outlineWidth": "3px",
+          "outlineStyle": "solid"
+        },
+        {
+          "tag": "a",
+          "id": null,
+          "className": "dropdown-item",
+          "text": "HouseFamily home & townhouse rentals",
+          "href": "/en/rent/house-pattaya/",
+          "outlineWidth": "3px",
+          "outlineStyle": "solid"
+        },
+        {
+          "tag": "button",
+          "id": null,
+          "className": "nav-link nav-group__trigger ",
+          "text": "Sell",
+          "href": null,
+          "outlineWidth": "3px",
+          "outlineStyle": "solid"
+        },
+        {
+          "tag": "a",
+          "id": null,
+          "className": "dropdown-item",
+          "text": "Free ValuationGet an instant value estimate",
+          "href": "/en/sell/valuation/",
+          "outlineWidth": "3px",
+          "outlineStyle": "solid"
+        },
+        {
+          "tag": "a",
+          "id": null,
+          "className": "dropdown-item",
+          "text": "List Your PropertyReach thousands of buyers",
+          "href": "/en/sell/list-property/",
+          "outlineWidth": "3px",
+          "outlineStyle": "solid"
+        },
+        {
+          "tag": "button",
+          "id": null,
+          "className": "nav-link nav-group__trigger ",
+          "text": "Invest",
+          "href": null,
+          "outlineWidth": "3px",
+          "outlineStyle": "solid"
+        },
+        {
+          "tag": "a",
+          "id": null,
+          "className": "dropdown-item",
+          "text": "ROI CalculatorEstimate rental yields instantly",
+          "href": "/en/invest/calculator/",
+          "outlineWidth": "3px",
+          "outlineStyle": "solid"
+        },
+        {
+          "tag": "a",
+          "id": null,
+          "className": "dropdown-item",
+          "text": "Investment GuidesExpert articles & analysis",
+          "href": "/en/invest/guides/",
+          "outlineWidth": "3px",
+          "outlineStyle": "solid"
+        },
+        {
+          "tag": "a",
+          "id": null,
+          "className": "nav-link ",
+          "text": "Projects",
+          "href": "/en/projects/",
+          "outlineWidth": "3px",
+          "outlineStyle": "solid"
+        },
+        {
+          "tag": "button",
+          "id": null,
+          "className": "nav-link nav-group__trigger ",
+          "text": "Area Guide",
+          "href": null,
+          "outlineWidth": "3px",
+          "outlineStyle": "solid"
+        },
+        {
+          "tag": "a",
+          "id": null,
+          "className": "dropdown-item",
+          "text": "JomtienBeachfront & family lifestyle",
+          "href": "/en/area-guide/jomtien/",
+          "outlineWidth": "3px",
+          "outlineStyle": "solid"
+        },
+        {
+          "tag": "a",
+          "id": null,
+          "className": "dropdown-item",
+          "text": "Pratumnak HillQuiet luxury retreat",
+          "href": "/en/area-guide/pratumnak/",
+          "outlineWidth": "3px",
+          "outlineStyle": "solid"
+        },
+        {
+          "tag": "a",
+          "id": null,
+          "className": "dropdown-item",
+          "text": "WongamatNorth beach premium",
+          "href": "/en/area-guide/wongamat/",
+          "outlineWidth": "3px",
+          "outlineStyle": "solid"
+        },
+        {
+          "tag": "a",
+          "id": null,
+          "className": "dropdown-item",
+          "text": "Central PattayaUrban hub & conveniences",
+          "href": "/en/area-guide/central/",
+          "outlineWidth": "3px",
+          "outlineStyle": "solid"
+        },
+        {
+          "tag": "a",
+          "id": null,
+          "className": "dropdown-item",
+          "text": "Na JomtienEmerging coastal zone",
+          "href": "/en/area-guide/na-jomtien/",
+          "outlineWidth": "3px",
+          "outlineStyle": "solid"
+        },
+        {
+          "tag": "a",
+          "id": null,
+          "className": "dropdown-item",
+          "text": "Bang SarayPeaceful fishing village",
+          "href": "/en/area-guide/bang-saray/",
+          "outlineWidth": "3px",
+          "outlineStyle": "solid"
+        },
+        {
+          "tag": "button",
+          "id": null,
+          "className": "nav-link nav-group__trigger ",
+          "text": "Explore",
+          "href": null,
+          "outlineWidth": "3px",
+          "outlineStyle": "solid"
+        },
+        {
+          "tag": "a",
+          "id": null,
+          "className": "dropdown-item",
+          "text": "DevelopersTop Pattaya property developers",
+          "href": "/en/developers/",
+          "outlineWidth": "3px",
+          "outlineStyle": "solid"
+        },
+        {
+          "tag": "a",
+          "id": null,
+          "className": "dropdown-item",
+          "text": "MarketplaceBrowse all available listings",
+          "href": "/en/marketplace/",
+          "outlineWidth": "3px",
+          "outlineStyle": "solid"
+        },
+        {
+          "tag": "a",
+          "id": null,
+          "className": "dropdown-item",
+          "text": "Smart FinderAI-powered property matching",
+          "href": "/en/smart-finder/",
+          "outlineWidth": "3px",
+          "outlineStyle": "solid"
+        },
+        {
+          "tag": "a",
+          "id": null,
+          "className": "dropdown-item",
+          "text": "CompareSide-by-side property comparison",
+          "href": "/en/compare/",
+          "outlineWidth": "3px",
+          "outlineStyle": "solid"
+        }
+      ]
+    },
+    {
+      "locale": "th",
+      "focusVisibleCount": 75,
+      "hit": {
+        "/projects": true,
+        "/buy": true,
+        "/invest": true,
+        "/rent": true,
+        "/sell": true,
+        "/about": true,
+        "/area-guide": true,
+        "/contact": true
+      },
+      "sample": [
+        {
+          "tag": "a",
+          "id": null,
+          "className": "sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-50 focus:bg-white focus:px-4 focus:py-2 focus:",
+          "text": "ข้ามไปเนื้อหาหลัก",
+          "href": "#main-content",
+          "outlineWidth": "2px",
+          "outlineStyle": "solid"
+        },
+        {
+          "tag": "a",
+          "id": null,
+          "className": "skip-link",
+          "text": "ข้ามไปเนื้อหาหลัก",
+          "href": "#main-content",
+          "outlineWidth": "3px",
+          "outlineStyle": "solid"
+        },
+        {
+          "tag": "a",
+          "id": null,
+          "className": "logo",
+          "text": "AMPAMP Pattaya",
+          "href": "/th/",
+          "outlineWidth": "3px",
+          "outlineStyle": "solid"
+        },
+        {
+          "tag": "button",
+          "id": null,
+          "className": "nav-link nav-group__trigger ",
+          "text": "ซื้อ",
+          "href": null,
+          "outlineWidth": "3px",
+          "outlineStyle": "solid"
+        },
+        {
+          "tag": "a",
+          "id": null,
+          "className": "dropdown-item dropdown-item--all",
+          "text": "Browse AllSee all ซื้อ options",
+          "href": "/th/buy/",
+          "outlineWidth": "3px",
+          "outlineStyle": "solid"
+        },
+        {
+          "tag": "a",
+          "id": null,
+          "className": "dropdown-item",
+          "text": "CondoHigh-rise & low-rise condos",
+          "href": "/th/buy/condo-pattaya/",
+          "outlineWidth": "3px",
+          "outlineStyle": "solid"
+        },
+        {
+          "tag": "a",
+          "id": null,
+          "className": "dropdown-item",
+          "text": "VillaPool villas & luxury homes",
+          "href": "/th/buy/villa-pattaya/",
+          "outlineWidth": "3px",
+          "outlineStyle": "solid"
+        },
+        {
+          "tag": "a",
+          "id": null,
+          "className": "dropdown-item",
+          "text": "HouseTownhouse & detached house",
+          "href": "/th/buy/house-pattaya/",
+          "outlineWidth": "3px",
+          "outlineStyle": "solid"
+        },
+        {
+          "tag": "a",
+          "id": null,
+          "className": "dropdown-item",
+          "text": "LandPlots & raw land",
+          "href": "/th/buy/land-pattaya/",
+          "outlineWidth": "3px",
+          "outlineStyle": "solid"
+        },
+        {
+          "tag": "a",
+          "id": null,
+          "className": "dropdown-item",
+          "text": "Hotel RoomHotel rooms & investment units",
+          "href": "/th/buy/hotel-pattaya/",
+          "outlineWidth": "3px",
+          "outlineStyle": "solid"
+        },
+        {
+          "tag": "a",
+          "id": null,
+          "className": "dropdown-item",
+          "text": "ShopRetail & shophouse",
+          "href": "/th/buy/shop-pattaya/",
+          "outlineWidth": "3px",
+          "outlineStyle": "solid"
+        },
+        {
+          "tag": "a",
+          "id": null,
+          "className": "dropdown-item",
+          "text": "OfficeCommercial office space",
+          "href": "/th/buy/office-pattaya/",
+          "outlineWidth": "3px",
+          "outlineStyle": "solid"
+        },
+        {
+          "tag": "button",
+          "id": null,
+          "className": "nav-link nav-group__trigger ",
+          "text": "เช่า",
+          "href": null,
+          "outlineWidth": "3px",
+          "outlineStyle": "solid"
+        },
+        {
+          "tag": "a",
+          "id": null,
+          "className": "dropdown-item",
+          "text": "CondoMonthly & long-term condo rental",
+          "href": "/th/rent/condo-pattaya/",
+          "outlineWidth": "3px",
+          "outlineStyle": "solid"
+        },
+        {
+          "tag": "a",
+          "id": null,
+          "className": "dropdown-item",
+          "text": "VillaBeachside villa rentals",
+          "href": "/th/rent/villa-pattaya/",
+          "outlineWidth": "3px",
+          "outlineStyle": "solid"
+        },
+        {
+          "tag": "a",
+          "id": null,
+          "className": "dropdown-item",
+          "text": "HouseFamily home & townhouse rentals",
+          "href": "/th/rent/house-pattaya/",
+          "outlineWidth": "3px",
+          "outlineStyle": "solid"
+        },
+        {
+          "tag": "button",
+          "id": null,
+          "className": "nav-link nav-group__trigger ",
+          "text": "ขาย",
+          "href": null,
+          "outlineWidth": "3px",
+          "outlineStyle": "solid"
+        },
+        {
+          "tag": "a",
+          "id": null,
+          "className": "dropdown-item",
+          "text": "Free ValuationGet an instant value estimate",
+          "href": "/th/sell/valuation/",
+          "outlineWidth": "3px",
+          "outlineStyle": "solid"
+        },
+        {
+          "tag": "a",
+          "id": null,
+          "className": "dropdown-item",
+          "text": "List Your PropertyReach thousands of buyers",
+          "href": "/th/sell/list-property/",
+          "outlineWidth": "3px",
+          "outlineStyle": "solid"
+        },
+        {
+          "tag": "button",
+          "id": null,
+          "className": "nav-link nav-group__trigger ",
+          "text": "ลงทุน",
+          "href": null,
+          "outlineWidth": "3px",
+          "outlineStyle": "solid"
+        },
+        {
+          "tag": "a",
+          "id": null,
+          "className": "dropdown-item",
+          "text": "ROI CalculatorEstimate rental yields instantly",
+          "href": "/th/invest/calculator/",
+          "outlineWidth": "3px",
+          "outlineStyle": "solid"
+        },
+        {
+          "tag": "a",
+          "id": null,
+          "className": "dropdown-item",
+          "text": "Investment GuidesExpert articles & analysis",
+          "href": "/th/invest/guides/",
+          "outlineWidth": "3px",
+          "outlineStyle": "solid"
+        },
+        {
+          "tag": "a",
+          "id": null,
+          "className": "nav-link ",
+          "text": "โครงการ",
+          "href": "/th/projects/",
+          "outlineWidth": "3px",
+          "outlineStyle": "solid"
+        },
+        {
+          "tag": "button",
+          "id": null,
+          "className": "nav-link nav-group__trigger ",
+          "text": "ไกด์พื้นที่",
+          "href": null,
+          "outlineWidth": "3px",
+          "outlineStyle": "solid"
+        },
+        {
+          "tag": "a",
+          "id": null,
+          "className": "dropdown-item",
+          "text": "JomtienBeachfront & family lifestyle",
+          "href": "/th/area-guide/jomtien/",
+          "outlineWidth": "3px",
+          "outlineStyle": "solid"
+        },
+        {
+          "tag": "a",
+          "id": null,
+          "className": "dropdown-item",
+          "text": "Pratumnak HillQuiet luxury retreat",
+          "href": "/th/area-guide/pratumnak/",
+          "outlineWidth": "3px",
+          "outlineStyle": "solid"
+        },
+        {
+          "tag": "a",
+          "id": null,
+          "className": "dropdown-item",
+          "text": "WongamatNorth beach premium",
+          "href": "/th/area-guide/wongamat/",
+          "outlineWidth": "3px",
+          "outlineStyle": "solid"
+        },
+        {
+          "tag": "a",
+          "id": null,
+          "className": "dropdown-item",
+          "text": "Central PattayaUrban hub & conveniences",
+          "href": "/th/area-guide/central/",
+          "outlineWidth": "3px",
+          "outlineStyle": "solid"
+        },
+        {
+          "tag": "a",
+          "id": null,
+          "className": "dropdown-item",
+          "text": "Na JomtienEmerging coastal zone",
+          "href": "/th/area-guide/na-jomtien/",
+          "outlineWidth": "3px",
+          "outlineStyle": "solid"
+        },
+        {
+          "tag": "a",
+          "id": null,
+          "className": "dropdown-item",
+          "text": "Bang SarayPeaceful fishing village",
+          "href": "/th/area-guide/bang-saray/",
+          "outlineWidth": "3px",
+          "outlineStyle": "solid"
+        },
+        {
+          "tag": "button",
+          "id": null,
+          "className": "nav-link nav-group__trigger ",
+          "text": "Explore",
+          "href": null,
+          "outlineWidth": "3px",
+          "outlineStyle": "solid"
+        },
+        {
+          "tag": "a",
+          "id": null,
+          "className": "dropdown-item",
+          "text": "DevelopersTop Pattaya property developers",
+          "href": "/th/developers/",
+          "outlineWidth": "3px",
+          "outlineStyle": "solid"
+        },
+        {
+          "tag": "a",
+          "id": null,
+          "className": "dropdown-item",
+          "text": "MarketplaceBrowse all available listings",
+          "href": "/th/marketplace/",
+          "outlineWidth": "3px",
+          "outlineStyle": "solid"
+        },
+        {
+          "tag": "a",
+          "id": null,
+          "className": "dropdown-item",
+          "text": "Smart FinderAI-powered property matching",
+          "href": "/th/smart-finder/",
+          "outlineWidth": "3px",
+          "outlineStyle": "solid"
+        },
+        {
+          "tag": "a",
+          "id": null,
+          "className": "dropdown-item",
+          "text": "CompareSide-by-side property comparison",
+          "href": "/th/compare/",
+          "outlineWidth": "3px",
+          "outlineStyle": "solid"
+        }
+      ]
+    }
+  ],
+  "scrollDepth": [
+    {
+      "locale": "en",
+      "scrollDepthEvents": [
+        {
+          "event_type": "scroll_depth",
+          "page": "/en/",
+          "payload": {
+            "depth_percent": 25,
+            "_experiments": {
+              "hero_cta_copy": "control",
+              "social_proof_position": "variant_a"
+            }
+          }
+        },
+        {
+          "event_type": "scroll_depth",
+          "page": "/en/",
+          "payload": {
+            "depth_percent": 50,
+            "_experiments": {
+              "hero_cta_copy": "control",
+              "social_proof_position": "variant_a"
+            }
+          }
+        },
+        {
+          "event_type": "scroll_depth",
+          "page": "/en/",
+          "payload": {
+            "depth_percent": 75,
+            "_experiments": {
+              "hero_cta_copy": "control",
+              "social_proof_position": "variant_a"
+            }
+          }
+        }
+      ],
+      "observedEventTypes": [
+        "experiment_exposure",
+        "experiment_exposure",
+        "page_view",
+        "page_view",
+        "scroll_depth",
+        "scroll_depth",
+        "scroll_depth"
+      ],
+      "depthCounts": {
+        "25": 1,
+        "50": 1,
+        "75": 1
+      },
+      "eventResponseStatuses": [
+        201,
+        201,
+        201,
+        201,
+        201,
+        201,
+        201
+      ],
+      "sampleRequestShape": {
+        "event_type": "scroll_depth",
+        "page": "/en/",
+        "payload": {
+          "depth_percent": 25,
+          "_experiments": {
+            "hero_cta_copy": "control",
+            "social_proof_position": "variant_a"
+          }
+        }
+      }
+    },
+    {
+      "locale": "th",
+      "scrollDepthEvents": [
+        {
+          "event_type": "scroll_depth",
+          "page": "/th/",
+          "payload": {
+            "depth_percent": 25,
+            "_experiments": {
+              "hero_cta_copy": "control",
+              "social_proof_position": "variant_a"
+            }
+          }
+        },
+        {
+          "event_type": "scroll_depth",
+          "page": "/th/",
+          "payload": {
+            "depth_percent": 50,
+            "_experiments": {
+              "hero_cta_copy": "control",
+              "social_proof_position": "variant_a"
+            }
+          }
+        },
+        {
+          "event_type": "scroll_depth",
+          "page": "/th/",
+          "payload": {
+            "depth_percent": 75,
+            "_experiments": {
+              "hero_cta_copy": "control",
+              "social_proof_position": "variant_a"
+            }
+          }
+        }
+      ],
+      "observedEventTypes": [
+        "experiment_exposure",
+        "experiment_exposure",
+        "page_view",
+        "page_view",
+        "scroll_depth",
+        "scroll_depth",
+        "scroll_depth"
+      ],
+      "depthCounts": {
+        "25": 1,
+        "50": 1,
+        "75": 1
+      },
+      "eventResponseStatuses": [
+        201,
+        201,
+        201,
+        201,
+        201,
+        201,
+        201
+      ],
+      "sampleRequestShape": {
+        "event_type": "scroll_depth",
+        "page": "/th/",
+        "payload": {
+          "depth_percent": 25,
+          "_experiments": {
+            "hero_cta_copy": "control",
+            "social_proof_position": "variant_a"
+          }
+        }
+      }
+    }
+  ],
+  "analyticsAcceptance": {
+    "endpoint": "/api/v1/events",
+    "notes": [
+      {
+        "observedResponseStatuses": [
+          201,
+          201,
+          201,
+          201,
+          201,
+          201,
+          201,
+          201,
+          201,
+          201,
+          201,
+          201,
+          201,
+          201
+        ],
+        "hasNon2xx": false
+      }
+    ]
+  }
+}

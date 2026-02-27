@@ -1,0 +1,1293 @@
+# CONTINUOUS PRODUCTION GUARD REPORT
+
+## Source State
+- SOURCE_SHA: 3f195093abb7ef361934bab7b049fe99a8dee44e
+- Commit timestamp: 2026-02-22T10:56:12.0000000+07:00
+
+## VPS State Before
+- DEPLOYED_SHA: ff6bd55f48a95868476c74e73ec7d36ee86796e4
+- Image tag: flowbiz-client-amp-api:469038c9
+- Container status: running running=true restarts=0
+- Alembic version: current= heads=0023_v3_inquiry_tags (head)
+
+## Drift Detected
+- YES
+- Type: Code / Container
+
+## Actions Executed
+- Git reset: NO
+- Image rebuild: NO
+- Container restart: NO
+- Migration applied: NO
+
+## Runtime Validation
+- Health: 
+- API: 
+- Auth: 
+- Assets: 
+- Errors found: DEPLOY_FAILED: --- safe git update
+Already on 'main'
+HEAD is now at 3f195093 fix(admin-app): use webpack bundler to avoid Next.js 16 Turbopack panic (#172)
+--- deterministic build BUILD_SHA=3f195093
+ Image flowbiz-client-amp-api:3f195093 Building 
+ Image flowbiz-client-amp-admin-app:3f195093 Building 
+#1 [internal] load local bake definitions
+#1 reading from stdin 1.17kB done
+#1 DONE 0.0s
+
+#2 [api internal] load build definition from Dockerfile
+#2 transferring dockerfile: 1.48kB done
+#2 WARN: FromAsCasing: 'as' and 'FROM' keywords' casing do not match (line 1)
+#2 DONE 0.0s
+
+#3 [admin-app internal] load build definition from Dockerfile
+#3 transferring dockerfile: 522B done
+#3 DONE 0.0s
+
+#4 [api internal] load metadata for docker.io/library/python:3.11-slim
+#4 DONE 0.0s
+
+#5 [admin-app internal] load metadata for docker.io/library/node:20-alpine
+#5 ...
+
+#6 [api internal] load .dockerignore
+#6 transferring context: 2B done
+#6 DONE 0.0s
+
+#7 [api 1/9] FROM docker.io/library/python:3.11-slim@sha256:5be45dbade29bebd6886af6b438fd7e0b4eb7b611f39ba62b430263f82de36d2
+#7 resolve docker.io/library/python:3.11-slim@sha256:5be45dbade29bebd6886af6b438fd7e0b4eb7b611f39ba62b430263f82de36d2 0.0s done
+#7 DONE 0.0s
+
+#8 [api internal] load build context
+#8 transferring context: 20.88kB 0.0s done
+#8 DONE 0.0s
+
+#9 [api 2/9] WORKDIR /app
+#9 CACHED
+
+#10 [api 3/9] COPY pyproject.toml ./
+#10 CACHED
+
+#11 [api 4/9] RUN pip install --no-cache-dir     "fastapi>=0.104.0"     "python-multipart>=0.0.9"     "uvicorn[standard]>=0.24.0"     "pydantic>=2.4.0"     "email-validator>=2.1.0"     "pydantic-settings>=2.0.0"     "prometheus-fastapi-instrumentator>=6.1.0"     "opentelemetry-api>=1.22.0"     "opentelemetry-sdk>=1.22.0"     "opentelemetry-exporter-otlp-proto-http>=1.22.0"     "opentelemetry-instrumentation-fastapi>=0.43b0"     "opentelemetry-instrumentation-requests>=0.43b0"     "sqlalchemy>=2.0.0"     "alembic>=1.13.0"     "psycopg2-binary>=2.9.0"     "python-jose[cryptography]>=3.3.0"     "PyJWT>=2.8.0"     "bcrypt>=5.0.0"
+#11 ...
+
+#5 [admin-app internal] load metadata for docker.io/library/node:20-alpine
+#5 DONE 1.4s
+
+#12 [admin-app internal] load .dockerignore
+#12 transferring context: 2B done
+#12 DONE 0.0s
+
+#13 [admin-app builder 1/6] FROM docker.io/library/node:20-alpine@sha256:09e2b3d9726018aecf269bd35325f46bf75046a643a66d28360ec71132750ec8
+#13 resolve docker.io/library/node:20-alpine@sha256:09e2b3d9726018aecf269bd35325f46bf75046a643a66d28360ec71132750ec8 0.0s done
+#13 DONE 0.0s
+
+#14 [admin-app internal] load build context
+#14 transferring context: 31.21kB 0.0s done
+#14 DONE 0.0s
+
+#15 [admin-app builder 2/6] WORKDIR /app
+#15 CACHED
+
+#16 [admin-app builder 3/6] COPY package.json package-lock.json* ./
+#16 DONE 0.1s
+
+#11 [api 4/9] RUN pip install --no-cache-dir     "fastapi>=0.104.0"     "python-multipart>=0.0.9"     "uvicorn[standard]>=0.24.0"     "pydantic>=2.4.0"     "email-validator>=2.1.0"     "pydantic-settings>=2.0.0"     "prometheus-fastapi-instrumentator>=6.1.0"     "opentelemetry-api>=1.22.0"     "opentelemetry-sdk>=1.22.0"     "opentelemetry-exporter-otlp-proto-http>=1.22.0"     "opentelemetry-instrumentation-fastapi>=0.43b0"     "opentelemetry-instrumentation-requests>=0.43b0"     "sqlalchemy>=2.0.0"     "alembic>=1.13.0"     "psycopg2-binary>=2.9.0"     "python-jose[cryptography]>=3.3.0"     "PyJWT>=2.8.0"     "bcrypt>=5.0.0"
+#11 2.448 Collecting fastapi>=0.104.0
+#11 3.437   Downloading fastapi-0.129.2-py3-none-any.whl.metadata (30 kB)
+#11 3.666 Collecting python-multipart>=0.0.9
+#11 3.829   Downloading python_multipart-0.0.22-py3-none-any.whl.metadata (1.8 kB)
+#11 4.050 Collecting uvicorn>=0.24.0 (from uvicorn[standard]>=0.24.0)
+#11 4.216   Downloading uvicorn-0.41.0-py3-none-any.whl.metadata (6.7 kB)
+#11 4.720 Collecting pydantic>=2.4.0
+#11 4.883   Downloading pydantic-2.12.5-py3-none-any.whl.metadata (90 kB)
+#11 5.069      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 90.6/90.6 kB 484.8 kB/s eta 0:00:00
+#11 5.255 Collecting email-validator>=2.1.0
+#11 5.420   Downloading email_validator-2.3.0-py3-none-any.whl.metadata (26 kB)
+#11 5.616 Collecting pydantic-settings>=2.0.0
+#11 5.783   Downloading pydantic_settings-2.13.1-py3-none-any.whl.metadata (3.4 kB)
+#11 5.970 Collecting prometheus-fastapi-instrumentator>=6.1.0
+#11 6.140   Downloading prometheus_fastapi_instrumentator-7.1.0-py3-none-any.whl.metadata (13 kB)
+#11 6.353 Collecting opentelemetry-api>=1.22.0
+#11 6.528   Downloading opentelemetry_api-1.39.1-py3-none-any.whl.metadata (1.5 kB)
+#11 6.756 Collecting opentelemetry-sdk>=1.22.0
+#11 6.922   Downloading opentelemetry_sdk-1.39.1-py3-none-any.whl.metadata (1.5 kB)
+#11 7.110 Collecting opentelemetry-exporter-otlp-proto-http>=1.22.0
+#11 7.275   Downloading opentelemetry_exporter_otlp_proto_http-1.39.1-py3-none-any.whl.metadata (2.4 kB)
+#11 7.467 Collecting opentelemetry-instrumentation-fastapi>=0.43b0
+#11 7.632   Downloading opentelemetry_instrumentation_fastapi-0.60b1-py3-none-any.whl.metadata (2.2 kB)
+#11 7.834 Collecting opentelemetry-instrumentation-requests>=0.43b0
+#11 8.001   Downloading opentelemetry_instrumentation_requests-0.60b1-py3-none-any.whl.metadata (2.6 kB)
+#11 8.699 Collecting sqlalchemy>=2.0.0
+#11 8.864   Downloading sqlalchemy-2.0.46-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl.metadata (9.5 kB)
+#11 9.062 Collecting alembic>=1.13.0
+#11 9.227   Downloading alembic-1.18.4-py3-none-any.whl.metadata (7.2 kB)
+#11 9.457 Collecting psycopg2-binary>=2.9.0
+#11 9.622   Downloading psycopg2_binary-2.9.11-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.whl.metadata (4.9 kB)
+#11 9.803 Collecting python-jose>=3.3.0 (from python-jose[cryptography]>=3.3.0)
+#11 9.967   Downloading python_jose-3.5.0-py2.py3-none-any.whl.metadata (5.5 kB)
+#11 10.15 Collecting PyJWT>=2.8.0
+#11 10.31   Downloading pyjwt-2.11.0-py3-none-any.whl.metadata (4.0 kB)
+#11 10.52 Collecting bcrypt>=5.0.0
+#11 10.68   Downloading bcrypt-5.0.0-cp39-abi3-manylinux_2_34_x86_64.whl.metadata (10 kB)
+#11 10.95 Collecting starlette<1.0.0,>=0.40.0 (from fastapi>=0.104.0)
+#11 11.11   Downloading starlette-0.52.1-py3-none-any.whl.metadata (6.3 kB)
+#11 11.31 Collecting typing-extensions>=4.8.0 (from fastapi>=0.104.0)
+#11 ...
+
+#17 [admin-app builder 4/6] RUN npm install
+#17 2.891 npm warn deprecated whatwg-encoding@3.1.1: Use @exodus/bytes instead for a more spec-conformant and faster implementation
+#17 ...
+
+#11 [api 4/9] RUN pip install --no-cache-dir     "fastapi>=0.104.0"     "python-multipart>=0.0.9"     "uvicorn[standard]>=0.24.0"     "pydantic>=2.4.0"     "email-validator>=2.1.0"     "pydantic-settings>=2.0.0"     "prometheus-fastapi-instrumentator>=6.1.0"     "opentelemetry-api>=1.22.0"     "opentelemetry-sdk>=1.22.0"     "opentelemetry-exporter-otlp-proto-http>=1.22.0"     "opentelemetry-instrumentation-fastapi>=0.43b0"     "opentelemetry-instrumentation-requests>=0.43b0"     "sqlalchemy>=2.0.0"     "alembic>=1.13.0"     "psycopg2-binary>=2.9.0"     "python-jose[cryptography]>=3.3.0"     "PyJWT>=2.8.0"     "bcrypt>=5.0.0"
+#11 11.47   Downloading typing_extensions-4.15.0-py3-none-any.whl.metadata (3.3 kB)
+#11 11.65 Collecting typing-inspection>=0.4.2 (from fastapi>=0.104.0)
+#11 11.81   Downloading typing_inspection-0.4.2-py3-none-any.whl.metadata (2.6 kB)
+#11 11.99 Collecting annotated-doc>=0.0.2 (from fastapi>=0.104.0)
+#11 12.15   Downloading annotated_doc-0.0.4-py3-none-any.whl.metadata (6.6 kB)
+#11 12.35 Collecting click>=7.0 (from uvicorn>=0.24.0->uvicorn[standard]>=0.24.0)
+#11 12.51   Downloading click-8.3.1-py3-none-any.whl.metadata (2.6 kB)
+#11 12.68 Collecting h11>=0.8 (from uvicorn>=0.24.0->uvicorn[standard]>=0.24.0)
+#11 12.85   Downloading h11-0.16.0-py3-none-any.whl.metadata (8.3 kB)
+#11 13.03 Collecting annotated-types>=0.6.0 (from pydantic>=2.4.0)
+#11 13.20   Downloading annotated_types-0.7.0-py3-none-any.whl.metadata (15 kB)
+#11 14.18 Collecting pydantic-core==2.41.5 (from pydantic>=2.4.0)
+#11 14.34   Downloading pydantic_core-2.41.5-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl.metadata (7.3 kB)
+#11 14.52 Collecting dnspython>=2.0.0 (from email-validator>=2.1.0)
+#11 14.69   Downloading dnspython-2.8.0-py3-none-any.whl.metadata (5.7 kB)
+#11 14.87 Collecting idna>=2.0.0 (from email-validator>=2.1.0)
+#11 15.03   Downloading idna-3.11-py3-none-any.whl.metadata (8.4 kB)
+#11 15.22 Collecting python-dotenv>=0.21.0 (from pydantic-settings>=2.0.0)
+#11 15.39   Downloading python_dotenv-1.2.1-py3-none-any.whl.metadata (25 kB)
+#11 15.58 Collecting prometheus-client<1.0.0,>=0.8.0 (from prometheus-fastapi-instrumentator>=6.1.0)
+#11 15.74   Downloading prometheus_client-0.24.1-py3-none-any.whl.metadata (2.1 kB)
+#11 16.03 Collecting importlib-metadata<8.8.0,>=6.0 (from opentelemetry-api>=1.22.0)
+#11 16.20   Downloading importlib_metadata-8.7.1-py3-none-any.whl.metadata (4.7 kB)
+#11 16.40 Collecting opentelemetry-semantic-conventions==0.60b1 (from opentelemetry-sdk>=1.22.0)
+#11 16.57   Downloading opentelemetry_semantic_conventions-0.60b1-py3-none-any.whl.metadata (2.4 kB)
+#11 16.76 Collecting googleapis-common-protos~=1.52 (from opentelemetry-exporter-otlp-proto-http>=1.22.0)
+#11 16.92   Downloading googleapis_common_protos-1.72.0-py3-none-any.whl.metadata (9.4 kB)
+#11 17.11 Collecting opentelemetry-exporter-otlp-proto-common==1.39.1 (from opentelemetry-exporter-otlp-proto-http>=1.22.0)
+#11 17.28   Downloading opentelemetry_exporter_otlp_proto_common-1.39.1-py3-none-any.whl.metadata (1.8 kB)
+#11 17.46 Collecting opentelemetry-proto==1.39.1 (from opentelemetry-exporter-otlp-proto-http>=1.22.0)
+#11 17.63   Downloading opentelemetry_proto-1.39.1-py3-none-any.whl.metadata (2.3 kB)
+#11 17.82 Collecting requests~=2.7 (from opentelemetry-exporter-otlp-proto-http>=1.22.0)
+#11 17.99   Downloading requests-2.32.5-py3-none-any.whl.metadata (4.9 kB)
+#11 18.34 Collecting protobuf<7.0,>=5.0 (from opentelemetry-proto==1.39.1->opentelemetry-exporter-otlp-proto-http>=1.22.0)
+#11 18.50   Downloading protobuf-6.33.5-cp39-abi3-manylinux2014_x86_64.whl.metadata (593 bytes)
+#11 18.70 Collecting opentelemetry-instrumentation-asgi==0.60b1 (from opentelemetry-instrumentation-fastapi>=0.43b0)
+#11 18.86   Downloading opentelemetry_instrumentation_asgi-0.60b1-py3-none-any.whl.metadata (2.0 kB)
+#11 19.05 Collecting opentelemetry-instrumentation==0.60b1 (from opentelemetry-instrumentation-fastapi>=0.43b0)
+#11 19.21   Downloading opentelemetry_instrumentation-0.60b1-py3-none-any.whl.metadata (7.2 kB)
+#11 19.40 Collecting opentelemetry-util-http==0.60b1 (from opentelemetry-instrumentation-fastapi>=0.43b0)
+#11 19.56   Downloading opentelemetry_util_http-0.60b1-py3-none-any.whl.metadata (2.6 kB)
+#11 19.76 Collecting packaging>=18.0 (from opentelemetry-instrumentation==0.60b1->opentelemetry-instrumentation-fastapi>=0.43b0)
+#11 19.92   Downloading packaging-26.0-py3-none-any.whl.metadata (3.3 kB)
+#11 20.31 Collecting wrapt<2.0.0,>=1.0.0 (from opentelemetry-instrumentation==0.60b1->opentelemetry-instrumentation-fastapi>=0.43b0)
+#11 20.47   Downloading wrapt-1.17.3-cp311-cp311-manylinux1_x86_64.manylinux_2_28_x86_64.manylinux_2_5_x86_64.whl.metadata (6.4 kB)
+#11 20.66 Collecting asgiref~=3.0 (from opentelemetry-instrumentation-asgi==0.60b1->opentelemetry-instrumentation-fastapi>=0.43b0)
+#11 20.82   Downloading asgiref-3.11.1-py3-none-any.whl.metadata (9.3 kB)
+#11 21.15 Collecting greenlet>=1 (from sqlalchemy>=2.0.0)
+#11 21.31   Downloading greenlet-3.3.2-cp311-cp311-manylinux_2_24_x86_64.manylinux_2_28_x86_64.whl.metadata (3.7 kB)
+#11 21.52 Collecting Mako (from alembic>=1.13.0)
+#11 21.68   Downloading mako-1.3.10-py3-none-any.whl.metadata (2.9 kB)
+#11 21.88 Collecting ecdsa!=0.15 (from python-jose>=3.3.0->python-jose[cryptography]>=3.3.0)
+#11 22.04   Downloading ecdsa-0.19.1-py2.py3-none-any.whl.metadata (29 kB)
+#11 22.23 Collecting rsa!=4.1.1,!=4.4,<5.0,>=4.0 (from python-jose>=3.3.0->python-jose[cryptography]>=3.3.0)
+#11 22.40   Downloading rsa-4.9.1-py3-none-any.whl.metadata (5.6 kB)
+#11 22.58 Collecting pyasn1>=0.5.0 (from python-jose>=3.3.0->python-jose[cryptography]>=3.3.0)
+#11 22.75   Downloading pyasn1-0.6.2-py3-none-any.whl.metadata (8.4 kB)
+#11 23.12 Collecting cryptography>=3.4.0 (from python-jose[cryptography]>=3.3.0)
+#11 23.28   Downloading cryptography-46.0.5-cp311-abi3-manylinux_2_34_x86_64.whl.metadata (5.7 kB)
+#11 23.49 Collecting httptools>=0.6.3 (from uvicorn[standard]>=0.24.0)
+#11 23.66   Downloading httptools-0.7.1-cp311-cp311-manylinux1_x86_64.manylinux_2_28_x86_64.manylinux_2_5_x86_64.whl.metadata (3.5 kB)
+#11 23.87 Collecting pyyaml>=5.1 (from uvicorn[standard]>=0.24.0)
+#11 24.03   Downloading pyyaml-6.0.3-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl.metadata (2.4 kB)
+#11 24.24 Collecting uvloop>=0.15.1 (from uvicorn[standard]>=0.24.0)
+#11 24.40   Downloading uvloop-0.22.1-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl.metadata (4.9 kB)
+#11 24.63 Collecting watchfiles>=0.20 (from uvicorn[standard]>=0.24.0)
+#11 24.80   Downloading watchfiles-1.1.1-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl.metadata (4.9 kB)
+#11 25.15 Collecting websockets>=10.4 (from uvicorn[standard]>=0.24.0)
+#11 25.32   Downloading websockets-16.0-cp311-cp311-manylinux1_x86_64.manylinux_2_28_x86_64.manylinux_2_5_x86_64.whl.metadata (6.8 kB)
+#11 25.61 Collecting cffi>=2.0.0 (from cryptography>=3.4.0->python-jose[cryptography]>=3.3.0)
+#11 25.77   Downloading cffi-2.0.0-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.whl.metadata (2.6 kB)
+#11 25.97 Collecting six>=1.9.0 (from ecdsa!=0.15->python-jose>=3.3.0->python-jose[cryptography]>=3.3.0)
+#11 26.13   Downloading six-1.17.0-py2.py3-none-any.whl.metadata (1.7 kB)
+#11 26.38 Collecting zipp>=3.20 (from importlib-metadata<8.8.0,>=6.0->opentelemetry-api>=1.22.0)
+#11 26.54   Downloading zipp-3.23.0-py3-none-any.whl.metadata (3.6 kB)
+#11 26.83 Collecting charset_normalizer<4,>=2 (from requests~=2.7->opentelemetry-exporter-otlp-proto-http>=1.22.0)
+#11 26.99   Downloading charset_normalizer-3.4.4-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl.metadata (37 kB)
+#11 27.21 Collecting urllib3<3,>=1.21.1 (from requests~=2.7->opentelemetry-exporter-otlp-proto-http>=1.22.0)
+#11 27.38   Downloading urllib3-2.6.3-py3-none-any.whl.metadata (6.9 kB)
+#11 27.56 Collecting certifi>=2017.4.17 (from requests~=2.7->opentelemetry-exporter-otlp-proto-http>=1.22.0)
+#11 27.73   Downloading certifi-2026.1.4-py3-none-any.whl.metadata (2.5 kB)
+#11 27.94 Collecting anyio<5,>=3.6.2 (from starlette<1.0.0,>=0.40.0->fastapi>=0.104.0)
+#11 28.10   Downloading anyio-4.12.1-py3-none-any.whl.metadata (4.3 kB)
+#11 28.38 Collecting MarkupSafe>=0.9.2 (from Mako->alembic>=1.13.0)
+#11 28.54   Downloading markupsafe-3.0.3-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl.metadata (2.7 kB)
+#11 28.75 Collecting pycparser (from cffi>=2.0.0->cryptography>=3.4.0->python-jose[cryptography]>=3.3.0)
+#11 28.92   Downloading pycparser-3.0-py3-none-any.whl.metadata (8.2 kB)
+#11 29.17 Downloading fastapi-0.129.2-py3-none-any.whl (103 kB)
+#11 29.23    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 103.2/103.2 kB 2.1 MB/s eta 0:00:00
+#11 29.39 Downloading python_multipart-0.0.22-py3-none-any.whl (24 kB)
+#11 29.56 Downloading uvicorn-0.41.0-py3-none-any.whl (68 kB)
+#11 29.59    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 68.8/68.8 kB 2.8 MB/s eta 0:00:00
+#11 29.75 Downloading pydantic-2.12.5-py3-none-any.whl (463 kB)
+#11 29.98    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 463.6/463.6 kB 2.0 MB/s eta 0:00:00
+#11 30.15 Downloading pydantic_core-2.41.5-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (2.1 MB)
+#11 30.47    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 2.1/2.1 MB 6.4 MB/s eta 0:00:00
+#11 30.64 Downloading email_validator-2.3.0-py3-none-any.whl (35 kB)
+#11 30.80 Downloading pydantic_settings-2.13.1-py3-none-any.whl (58 kB)
+#11 30.81    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 58.9/58.9 kB 138.8 MB/s eta 0:00:00
+#11 30.97 Downloading prometheus_fastapi_instrumentator-7.1.0-py3-none-any.whl (19 kB)
+#11 31.14 Downloading opentelemetry_api-1.39.1-py3-none-any.whl (66 kB)
+#11 31.14    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 66.4/66.4 kB 125.9 MB/s eta 0:00:00
+#11 31.30 Downloading opentelemetry_sdk-1.39.1-py3-none-any.whl (132 kB)
+#11 31.31    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 132.6/132.6 kB 53.0 MB/s eta 0:00:00
+#11 31.47 Downloading opentelemetry_semantic_conventions-0.60b1-py3-none-any.whl (219 kB)
+#11 31.48    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 220.0/220.0 kB 48.6 MB/s eta 0:00:00
+#11 31.64 Downloading opentelemetry_exporter_otlp_proto_http-1.39.1-py3-none-any.whl (19 kB)
+#11 31.81 Downloading opentelemetry_exporter_otlp_proto_common-1.39.1-py3-none-any.whl (18 kB)
+#11 31.97 Downloading opentelemetry_proto-1.39.1-py3-none-any.whl (72 kB)
+#11 31.97    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 72.5/72.5 kB 229.9 MB/s eta 0:00:00
+#11 32.14 Downloading opentelemetry_instrumentation_fastapi-0.60b1-py3-none-any.whl (13 kB)
+#11 32.30 Downloading opentelemetry_instrumentation-0.60b1-py3-none-any.whl (33 kB)
+#11 32.47 Downloading opentelemetry_instrumentation_asgi-0.60b1-py3-none-any.whl (16 kB)
+#11 32.63 Downloading opentelemetry_util_http-0.60b1-py3-none-any.whl (8.9 kB)
+#11 32.80 Downloading opentelemetry_instrumentation_requests-0.60b1-py3-none-any.whl (13 kB)
+#11 32.96 Downloading sqlalchemy-2.0.46-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl (3.3 MB)
+#11 33.14    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 3.3/3.3 MB 18.9 MB/s eta 0:00:00
+#11 33.31 Downloading alembic-1.18.4-py3-none-any.whl (263 kB)
+#11 33.31    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 263.9/263.9 kB 221.3 MB/s eta 0:00:00
+#11 33.47 Downloading psycopg2_binary-2.9.11-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.whl (4.2 MB)
+#11 33.53    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 4.2/4.2 MB 77.4 MB/s eta 0:00:00
+#11 33.70 Downloading python_jose-3.5.0-py2.py3-none-any.whl (34 kB)
+#11 33.86 Downloading pyjwt-2.11.0-py3-none-any.whl (28 kB)
+#11 34.02 Downloading bcrypt-5.0.0-cp39-abi3-manylinux_2_34_x86_64.whl (278 kB)
+#11 34.03    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 278.2/278.2 kB 278.3 MB/s eta 0:00:00
+#11 34.19 Downloading annotated_doc-0.0.4-py3-none-any.whl (5.3 kB)
+#11 34.36 Downloading annotated_types-0.7.0-py3-none-any.whl (13 kB)
+#11 34.52 Downloading click-8.3.1-py3-none-any.whl (108 kB)
+#11 34.52    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 108.3/108.3 kB 265.6 MB/s eta 0:00:00
+#11 34.69 Downloading cryptography-46.0.5-cp311-abi3-manylinux_2_34_x86_64.whl (4.5 MB)
+#11 34.86    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 4.5/4.5 MB 27.0 MB/s eta 0:00:00
+#11 35.02 Downloading dnspython-2.8.0-py3-none-any.whl (331 kB)
+#11 35.02    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 331.1/331.1 kB 304.7 MB/s eta 0:00:00
+#11 35.19 Downloading ecdsa-0.19.1-py2.py3-none-any.whl (150 kB)
+#11 35.19    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 150.6/150.6 kB 176.2 MB/s eta 0:00:00
+#11 35.36 Downloading googleapis_common_protos-1.72.0-py3-none-any.whl (297 kB)
+#11 35.36    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 297.5/297.5 kB 239.8 MB/s eta 0:00:00
+#11 35.52 Downloading greenlet-3.3.2-cp311-cp311-manylinux_2_24_x86_64.manylinux_2_28_x86_64.whl (594 kB)
+#11 35.53    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 594.2/594.2 kB 144.3 MB/s eta 0:00:00
+#11 35.70 Downloading h11-0.16.0-py3-none-any.whl (37 kB)
+#11 35.86 Downloading httptools-0.7.1-cp311-cp311-manylinux1_x86_64.manylinux_2_28_x86_64.manylinux_2_5_x86_64.whl (456 kB)
+#11 35.87    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 456.6/456.6 kB 187.7 MB/s eta 0:00:00
+#11 36.03 Downloading idna-3.11-py3-none-any.whl (71 kB)
+#11 36.03    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 71.0/71.0 kB 263.6 MB/s eta 0:00:00
+#11 36.20 Downloading importlib_metadata-8.7.1-py3-none-any.whl (27 kB)
+#11 36.36 Downloading prometheus_client-0.24.1-py3-none-any.whl (64 kB)
+#11 36.37    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 64.1/64.1 kB 280.5 MB/s eta 0:00:00
+#11 36.53 Downloading pyasn1-0.6.2-py3-none-any.whl (83 kB)
+#11 36.53    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 83.4/83.4 kB 245.6 MB/s eta 0:00:00
+#11 36.70 Downloading python_dotenv-1.2.1-py3-none-any.whl (21 kB)
+#11 36.86 Downloading pyyaml-6.0.3-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl (806 kB)
+#11 36.87    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 806.6/806.6 kB 130.9 MB/s eta 0:00:00
+#11 37.03 Downloading requests-2.32.5-py3-none-any.whl (64 kB)
+#11 37.04    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 64.7/64.7 kB 271.6 MB/s eta 0:00:00
+#11 37.20 Downloading rsa-4.9.1-py3-none-any.whl (34 kB)
+#11 37.36 Downloading starlette-0.52.1-py3-none-any.whl (74 kB)
+#11 37.37    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 74.3/74.3 kB 191.1 MB/s eta 0:00:00
+#11 37.53 Downloading typing_extensions-4.15.0-py3-none-any.whl (44 kB)
+#11 37.53    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 44.6/44.6 kB 260.5 MB/s eta 0:00:00
+#11 37.70 Downloading typing_inspection-0.4.2-py3-none-any.whl (14 kB)
+#11 37.86 Downloading uvloop-0.22.1-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl (3.8 MB)
+#11 37.90    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 3.8/3.8 MB 107.4 MB/s eta 0:00:00
+#11 38.07 Downloading watchfiles-1.1.1-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (456 kB)
+#11 38.07    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 456.1/456.1 kB 157.9 MB/s eta 0:00:00
+#11 38.24 Downloading websockets-16.0-cp311-cp311-manylinux1_x86_64.manylinux_2_28_x86_64.manylinux_2_5_x86_64.whl (184 kB)
+#11 38.24    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 184.6/184.6 kB 188.4 MB/s eta 0:00:00
+#11 38.40 Downloading mako-1.3.10-py3-none-any.whl (78 kB)
+#11 38.41    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 78.5/78.5 kB 235.8 MB/s eta 0:00:00
+#11 38.57 Downloading anyio-4.12.1-py3-none-any.whl (113 kB)
+#11 38.58    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 113.6/113.6 kB 232.2 MB/s eta 0:00:00
+#11 38.74 Downloading asgiref-3.11.1-py3-none-any.whl (24 kB)
+#11 38.90 Downloading certifi-2026.1.4-py3-none-any.whl (152 kB)
+#11 38.91    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 152.9/152.9 kB 138.2 MB/s eta 0:00:00
+#11 39.07 Downloading cffi-2.0.0-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.whl (215 kB)
+#11 39.08    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 215.6/215.6 kB 196.7 MB/s eta 0:00:00
+#11 39.24 Downloading charset_normalizer-3.4.4-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl (151 kB)
+#11 39.24    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 151.6/151.6 kB 215.3 MB/s eta 0:00:00
+#11 39.41 Downloading markupsafe-3.0.3-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl (22 kB)
+#11 39.57 Downloading packaging-26.0-py3-none-any.whl (74 kB)
+#11 39.58    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 74.4/74.4 kB 247.9 MB/s eta 0:00:00
+#11 39.74 Downloading protobuf-6.33.5-cp39-abi3-manylinux2014_x86_64.whl (323 kB)
+#11 39.74    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 323.5/323.5 kB 238.4 MB/s eta 0:00:00
+#11 39.91 Downloading six-1.17.0-py2.py3-none-any.whl (11 kB)
+#11 40.07 Downloading urllib3-2.6.3-py3-none-any.whl (131 kB)
+#11 40.08    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 131.6/131.6 kB 253.0 MB/s eta 0:00:00
+#11 40.24 Downloading wrapt-1.17.3-cp311-cp311-manylinux1_x86_64.manylinux_2_28_x86_64.manylinux_2_5_x86_64.whl (82 kB)
+#11 40.24    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 82.4/82.4 kB 384.1 MB/s eta 0:00:00
+#11 40.41 Downloading zipp-3.23.0-py3-none-any.whl (10 kB)
+#11 40.57 Downloading pycparser-3.0-py3-none-any.whl (48 kB)
+#11 40.58    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 48.2/48.2 kB 146.1 MB/s eta 0:00:00
+#11 40.85 Installing collected packages: zipp, wrapt, websockets, uvloop, urllib3, typing-extensions, six, pyyaml, python-multipart, python-dotenv, PyJWT, pycparser, pyasn1, psycopg2-binary, protobuf, prometheus-client, packaging, opentelemetry-util-http, MarkupSafe, idna, httptools, h11, greenlet, dnspython, click, charset_normalizer, certifi, bcrypt, asgiref, annotated-types, annotated-doc, uvicorn, typing-inspection, sqlalchemy, rsa, requests, pydantic-core, opentelemetry-proto, Mako, importlib-metadata, googleapis-common-protos, email-validator, ecdsa, cffi, anyio, watchfiles, starlette, python-jose, pydantic, opentelemetry-exporter-otlp-proto-common, opentelemetry-api, cryptography, alembic, pydantic-settings, prometheus-fastapi-instrumentator, opentelemetry-semantic-conventions, fastapi, opentelemetry-sdk, opentelemetry-instrumentation, opentelemetry-instrumentation-requests, opentelemetry-instrumentation-asgi, opentelemetry-exporter-otlp-proto-http, opentelemetry-instrumentation-fastapi
+#11 46.34 Successfully installed Mako-1.3.10 MarkupSafe-3.0.3 PyJWT-2.11.0 alembic-1.18.4 annotated-doc-0.0.4 annotated-types-0.7.0 anyio-4.12.1 asgiref-3.11.1 bcrypt-5.0.0 certifi-2026.1.4 cffi-2.0.0 charset_normalizer-3.4.4 click-8.3.1 cryptography-46.0.5 dnspython-2.8.0 ecdsa-0.19.1 email-validator-2.3.0 fastapi-0.129.2 googleapis-common-protos-1.72.0 greenlet-3.3.2 h11-0.16.0 httptools-0.7.1 idna-3.11 importlib-metadata-8.7.1 opentelemetry-api-1.39.1 opentelemetry-exporter-otlp-proto-common-1.39.1 opentelemetry-exporter-otlp-proto-http-1.39.1 opentelemetry-instrumentation-0.60b1 opentelemetry-instrumentation-asgi-0.60b1 opentelemetry-instrumentation-fastapi-0.60b1 opentelemetry-instrumentation-requests-0.60b1 opentelemetry-proto-1.39.1 opentelemetry-sdk-1.39.1 opentelemetry-semantic-conventions-0.60b1 opentelemetry-util-http-0.60b1 packaging-26.0 prometheus-client-0.24.1 prometheus-fastapi-instrumentator-7.1.0 protobuf-6.33.5 psycopg2-binary-2.9.11 pyasn1-0.6.2 pycparser-3.0 pydantic-2.12.5 pydantic-core-2.41.5 pydantic-settings-2.13.1 python-dotenv-1.2.1 python-jose-3.5.0 python-multipart-0.0.22 pyyaml-6.0.3 requests-2.32.5 rsa-4.9.1 six-1.17.0 sqlalchemy-2.0.46 starlette-0.52.1 typing-extensions-4.15.0 typing-inspection-0.4.2 urllib3-2.6.3 uvicorn-0.41.0 uvloop-0.22.1 watchfiles-1.1.1 websockets-16.0 wrapt-1.17.3 zipp-3.23.0
+#11 46.34 WARNING: Running pip as the 'root' user can result in broken permissions and conflicting behaviour with the system package manager. It is recommended to use a virtual environment instead: https://pip.pypa.io/warnings/venv
+#11 46.94 
+#11 46.94 [notice] A new release of pip is available: 24.0 -> 26.0.1
+#11 46.94 [notice] To update, run: pip install --upgrade pip
+#11 DONE 48.4s
+
+#17 [admin-app builder 4/6] RUN npm install
+#17 ...
+
+#18 [api 5/9] COPY apps/ ./apps/
+#18 DONE 0.1s
+
+#19 [api 6/9] COPY packages/ ./packages/
+#19 DONE 0.1s
+
+#20 [api 7/9] COPY alembic.ini ./
+#20 DONE 0.0s
+
+#21 [api 8/9] COPY alembic/ ./alembic/
+#21 DONE 0.0s
+
+#17 [admin-app builder 4/6] RUN npm install
+#17 ...
+
+#22 [api 9/9] RUN useradd -m -u 1000 appuser && chown -R appuser:appuser /app
+#22 DONE 0.6s
+
+#23 [api] exporting to image
+#23 exporting layers
+#23 ...
+
+#17 [admin-app builder 4/6] RUN npm install
+#17 47.74 
+#17 47.74 added 505 packages, and audited 507 packages in 47s
+#17 47.74 
+#17 47.74 172 packages are looking for funding
+#17 47.74   run `npm fund` for details
+#17 47.97 
+#17 47.97 20 vulnerabilities (5 moderate, 14 high, 1 critical)
+#17 47.97 
+#17 47.97 To address issues that do not require attention, run:
+#17 47.97   npm audit fix
+#17 47.97 
+#17 47.97 To address all issues (including breaking changes), run:
+#17 47.97   npm audit fix --force
+#17 47.97 
+#17 47.97 Run `npm audit` for details.
+#17 47.98 npm notice
+#17 47.98 npm notice New major version of npm available! 10.8.2 -> 11.10.1
+#17 47.98 npm notice Changelog: https://github.com/npm/cli/releases/tag/v11.10.1
+#17 47.98 npm notice To update run: npm install -g npm@11.10.1
+#17 47.98 npm notice
+#17 DONE 48.1s
+
+#24 [admin-app builder 5/6] COPY . .
+#24 DONE 0.3s
+
+#23 [api] exporting to image
+#23 exporting layers 4.9s done
+#23 exporting manifest sha256:5f167a21c90a333518c3fe9d7ef59cfdb4a27cf72f9a1de948f9b901ec514609 done
+#23 exporting config sha256:3efe51864d390996eff44671109292978d232c254826d48e53bab40f9056e435 done
+#23 exporting attestation manifest sha256:8c4ef40c39e13fbea45c30ccbd37936866db8151b2132f614179c5c95e9e06e9 0.0s done
+#23 exporting manifest list sha256:87017443c3ae5fdbd410f22dc3386a613a6f538fd7c8111952a6b3a04c3c1431 done
+#23 naming to docker.io/library/flowbiz-client-amp-api:3f195093 done
+#23 unpacking to docker.io/library/flowbiz-client-amp-api:3f195093
+#23 unpacking to docker.io/library/flowbiz-client-amp-api:3f195093 1.9s done
+#23 DONE 6.9s
+
+#25 [api] resolving provenance for metadata file
+#25 DONE 0.0s
+
+#26 [admin-app builder 6/6] RUN npm run build
+#26 0.322 
+#26 0.322 > flowbiz-admin-app@0.1.0 build
+#26 0.322 > next build --webpack
+#26 0.322 
+#26 1.105 Attention: Next.js now collects completely anonymous telemetry regarding usage.
+#26 1.106 This information is used to shape Next.js' roadmap and prioritize features.
+#26 1.106 You can learn more, including how to opt-out if you'd not like to participate in this anonymous program, by visiting the following URL:
+#26 1.106 https://nextjs.org/telemetry
+#26 1.106 
+#26 1.132 ▲ Next.js 16.1.6 (webpack)
+#26 1.132 - Experiments (use with caution):
+#26 1.132   · optimizePackageImports
+#26 1.132 
+#26 1.194 ⚠ The "middleware" file convention is deprecated. Please use "proxy" instead. Learn more: https://nextjs.org/docs/messages/middleware-to-proxy
+#26 1.286   Creating an optimized production build ...
+#26 23.01 ✓ Compiled successfully in 18.0s
+#26 23.02   Skipping validation of types
+#26 23.11   Collecting page data using 3 workers ...
+#26 25.45   Generating static pages using 3 workers (0/118) ...
+#26 26.36   Generating static pages using 3 workers (29/118) 
+#26 26.70   Generating static pages using 3 workers (58/118) 
+#26 28.52   Generating static pages using 3 workers (88/118) 
+#26 29.09 ✓ Generating static pages using 3 workers (118/118) in 3.6s
+#26 29.66   Finalizing page optimization ...
+#26 29.66   Collecting build traces ...
+#26 44.67 
+#26 44.68 Route (app)                        Revalidate  Expire
+#26 44.68 ┌ ƒ /_not-found
+#26 44.68 ├ ƒ /[locale]
+#26 44.68 ├ ƒ /[locale]/about
+#26 44.68 ├ ƒ /[locale]/area-guide
+#26 44.68 ├ ƒ /[locale]/area-guide/[slug]
+#26 44.68 ├ ƒ /[locale]/areas/[slug]
+#26 44.68 ├ ƒ /[locale]/blog
+#26 44.68 ├ ƒ /[locale]/blog/[slug]
+#26 44.68 ├ ƒ /[locale]/buy
+#26 44.68 ├ ƒ /[locale]/buy/condo-pattaya
+#26 44.68 ├ ƒ /[locale]/buy/hotel-pattaya
+#26 44.68 ├ ƒ /[locale]/buy/house-pattaya
+#26 44.68 ├ ƒ /[locale]/buy/land-pattaya
+#26 44.68 ├ ƒ /[locale]/buy/office-pattaya
+#26 44.68 ├ ƒ /[locale]/buy/shop-pattaya
+#26 44.68 ├ ƒ /[locale]/buy/villa-pattaya
+#26 44.68 ├ ƒ /[locale]/co-agent
+#26 44.68 ├ ƒ /[locale]/compare
+#26 44.68 ├ ƒ /[locale]/contact
+#26 44.68 ├ ƒ /[locale]/developers
+#26 44.68 ├ ƒ /[locale]/developers/[slug]
+#26 44.68 ├ ƒ /[locale]/european
+#26 44.68 ├ ƒ /[locale]/general
+#26 44.68 ├ ƒ /[locale]/guides
+#26 44.68 ├ ƒ /[locale]/guides/[slug]
+#26 44.68 ├ ƒ /[locale]/holiday-home
+#26 44.68 ├ ƒ /[locale]/invest
+#26 44.68 ├ ƒ /[locale]/invest/calculator
+#26 44.68 ├ ƒ /[locale]/invest/guides
+#26 44.68 ├ ƒ /[locale]/investment
+#26 44.68 ├ ƒ /[locale]/investor
+#26 44.68 ├ ƒ /[locale]/luxury
+#26 44.68 ├ ƒ /[locale]/marketplace
+#26 44.68 ├ ƒ /[locale]/privacy
+#26 44.68 ├ ƒ /[locale]/projects
+#26 44.68 ├ ƒ /[locale]/projects/[slug]
+#26 44.68 ├ ƒ /[locale]/property/[slug]
+#26 44.68 ├ ƒ /[locale]/rent
+#26 44.68 ├ ƒ /[locale]/rent/condo-pattaya
+#26 44.68 ├ ƒ /[locale]/rent/hotel-pattaya
+#26 44.68 ├ ƒ /[locale]/rent/house-pattaya
+#26 44.68 ├ ƒ /[locale]/rent/land-pattaya
+#26 44.68 ├ ƒ /[locale]/rent/office-pattaya
+#26 44.68 ├ ƒ /[locale]/rent/shop-pattaya
+#26 44.68 ├ ƒ /[locale]/rent/villa-pattaya
+#26 44.68 ├ ƒ /[locale]/sell
+#26 44.68 ├ ƒ /[locale]/sell/list-property
+#26 44.68 ├ ƒ /[locale]/sell/valuation
+#26 44.68 ├ ƒ /[locale]/smart-finder
+#26 44.68 ├ ƒ /[locale]/terms
+#26 44.68 ├ ƒ /analytics
+#26 44.68 ├ ƒ /api/health
+#26 44.68 ├ ƒ /inquiries
+#26 44.68 ├ ƒ /inquiries/[id]
+#26 44.68 ├ ƒ /leads
+#26 44.68 ├ ƒ /leads/[id]
+#26 44.68 ├ ƒ /login
+#26 44.68 ├ ○ /manifest.webmanifest
+#26 44.68 ├ ƒ /public/buy
+#26 44.68 ├ ƒ /public/company
+#26 44.68 ├ ƒ /public/company/[slug]
+#26 44.68 ├ ƒ /public/projects
+#26 44.68 ├ ƒ /public/properties
+#26 44.68 ├ ƒ /public/properties/[id]
+#26 44.68 ├ ƒ /public/rent
+#26 44.68 ├ ○ /robots.txt
+#26 44.68 ├ ƒ /sitemap-areas
+#26 44.68 ├ ○ /sitemap-areas.xml                     1d      1y
+#26 44.68 ├ ƒ /sitemap-blog
+#26 44.68 ├ ○ /sitemap-blog.xml                      1d      1y
+#26 44.68 ├ ƒ /sitemap-developers
+#26 44.68 ├ ƒ /sitemap-developers.xml
+#26 44.68 ├ ƒ /sitemap-guides
+#26 44.68 ├ ○ /sitemap-guides.xml                    1d      1y
+#26 44.68 ├ ƒ /sitemap-pages
+#26 44.68 ├ ○ /sitemap-pages.xml                     1h      1y
+#26 44.68 ├ ƒ /sitemap-projects
+#26 44.68 ├ ƒ /sitemap-projects.xml
+#26 44.68 ├ ƒ /sitemap-properties
+#26 44.68 ├ ƒ /sitemap-properties.xml
+#26 44.68 └ ○ /sitemap.xml                           1h      1y
+#26 44.68 
+#26 44.68 
+#26 44.68 ƒ Proxy (Middleware)
+#26 44.68 
+#26 44.68 ○  (Static)   prerendered as static content
+#26 44.68 ƒ  (Dynamic)  server-rendered on demand
+#26 44.68 
+#26 DONE 44.9s
+
+#27 [admin-app runner 3/5] COPY --from=builder /app/.next/standalone ./
+#27 DONE 0.6s
+
+#28 [admin-app runner 4/5] COPY --from=builder /app/.next/static ./.next/static
+#28 DONE 0.1s
+
+#29 [admin-app runner 5/5] COPY --from=builder /app/public ./public
+#29 DONE 0.0s
+
+#30 [admin-app] exporting to image
+#30 exporting layers
+#30 exporting layers 2.5s done
+#30 exporting manifest sha256:74fb6027a195f697ae9e84fb61a6b680c419ea521635b7668ec22face0ad23cb done
+#30 exporting config sha256:210655a488534ed94837fab6812997c61ca92c2c556845f100af760324797657 done
+#30 exporting attestation manifest sha256:98985068d12c8a793f7d4b3e5c44903c7035e425e0f82a1b394f785557f3a810 0.0s done
+#30 exporting manifest list sha256:c21ffff6e29cff7b5c2143b40dd314175c5d993da64cef585692259fcc8e867f done
+#30 naming to docker.io/library/flowbiz-client-amp-admin-app:3f195093 done
+#30 unpacking to docker.io/library/flowbiz-client-amp-admin-app:3f195093
+#30 unpacking to docker.io/library/flowbiz-client-amp-admin-app:3f195093 0.8s done
+#30 DONE 3.4s
+
+#31 [admin-app] resolving provenance for metadata file
+#31 DONE 0.0s
+ Image flowbiz-client-amp-api:3f195093 Built 
+ Image flowbiz-client-amp-admin-app:3f195093 Built 
+--- controlled restart (services only)
+time="2026-02-22T11:01:33+07:00" level=warning msg="No services to build"
+ Container flowbiz-client-amp-postgres-1 Running 
+ Container flowbiz-client-amp-admin-app-1 Recreate 
+ Container flowbiz-client-amp-api-1 Recreate 
+ Container flowbiz-client-amp-admin-app-1 Recreated 
+ Container flowbiz-client-amp-api-1 Recreated 
+ Container flowbiz-client-amp-admin-app-1 Starting 
+ Container flowbiz-client-amp-postgres-1 Waiting 
+ Container flowbiz-client-amp-admin-app-1 Started 
+ Container flowbiz-client-amp-postgres-1 Healthy 
+ Container flowbiz-client-amp-api-1 Starting 
+ Container flowbiz-client-amp-api-1 Started 
+--- alembic upgrade
+SECURITY: ADMIN_BOOTSTRAP_PASSWORD is using the default value. Set a strong password via ADMIN_BOOTSTRAP_PASSWORD env var.
+SECURITY: PII_HASH_PEPPER is empty. PII dedup hashing has zero additional entropy.
+INFO  [alembic.runtime.migration] Context impl PostgresqlImpl.
+INFO  [alembic.runtime.migration] Will assume transactional DDL.
+INFO  [alembic.runtime.migration] Running upgrade 0024_blueprint_core_schema_alignment -> 0025_blueprint_schema_v2, Blueprint Doc 05 — Database schema gap-fill (v2)
+INFO  [alembic.runtime.migration] Running upgrade 0025_blueprint_schema_v2 -> 0026_blueprint_schema_v3, Blueprint Doc 05 — Database schema gap-fill (v3)
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.11/site-packages/sqlalchemy/engine/base.py", line 1967, in _exec_single_context
+    self.dialect.do_execute(
+  File "/usr/local/lib/python3.11/site-packages/sqlalchemy/engine/default.py", line 952, in do_execute
+    cursor.execute(statement, parameters)
+psycopg2.errors.InvalidTextRepresentation: invalid input syntax for type json
+DETAIL:  Token "'" is invalid.
+CONTEXT:  JSON data, line 1: '...
+
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/usr/local/bin/alembic", line 8, in <module>
+    sys.exit(main())
+             ^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/alembic/config.py", line 1047, in main
+    CommandLine(prog=prog).main(argv=argv)
+  File "/usr/local/lib/python3.11/site-packages/alembic/config.py", line 1037, in main
+    self.run_cmd(cfg, options)
+  File "/usr/local/lib/python3.11/site-packages/alembic/config.py", line 971, in run_cmd
+    fn(
+  File "/usr/local/lib/python3.11/site-packages/alembic/command.py", line 483, in upgrade
+    script.run_env()
+  File "/usr/local/lib/python3.11/site-packages/alembic/script/base.py", line 545, in run_env
+    util.load_python_file(self.dir, "env.py")
+  File "/usr/local/lib/python3.11/site-packages/alembic/util/pyfiles.py", line 116, in load_python_file
+    module = load_module_py(module_id, path)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/alembic/util/pyfiles.py", line 136, in load_module_py
+    spec.loader.exec_module(module)  # type: ignore
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<frozen importlib._bootstrap_external>", line 940, in exec_module
+  File "<frozen importlib._bootstrap>", line 241, in _call_with_frames_removed
+  File "/app/alembic/env.py", line 49, in <module>
+    run_migrations_online()
+  File "/app/alembic/env.py", line 43, in run_migrations_online
+    context.run_migrations()
+  File "<string>", line 8, in run_migrations
+  File "/usr/local/lib/python3.11/site-packages/alembic/runtime/environment.py", line 969, in run_migrations
+    self.get_context().run_migrations(**kw)
+  File "/usr/local/lib/python3.11/site-packages/alembic/runtime/migration.py", line 626, in run_migrations
+    step.migration_fn(**kw)
+  File "/app/alembic/versions/0026_blueprint_schema_v3.py", line 165, in upgrade
+    op.alter_column(
+  File "<string>", line 8, in alter_column
+  File "<string>", line 3, in alter_column
+  File "/usr/local/lib/python3.11/site-packages/alembic/operations/ops.py", line 1974, in alter_column
+    return operations.invoke(alt)
+           ^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/alembic/operations/base.py", line 452, in invoke
+    return fn(self, operation)
+           ^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/alembic/operations/toimpl.py", line 58, in alter_column
+    operations.impl.alter_column(
+  File "/usr/local/lib/python3.11/site-packages/alembic/ddl/postgresql.py", line 202, in alter_column
+    super().alter_column(
+  File "/usr/local/lib/python3.11/site-packages/alembic/ddl/impl.py", line 327, in alter_column
+    self._exec(
+  File "/usr/local/lib/python3.11/site-packages/alembic/ddl/impl.py", line 256, in _exec
+    return conn.execute(construct, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/sqlalchemy/engine/base.py", line 1419, in execute
+    return meth(
+           ^^^^^
+  File "/usr/local/lib/python3.11/site-packages/sqlalchemy/sql/ddl.py", line 187, in _execute_on_connection
+    return connection._execute_ddl(
+           ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/sqlalchemy/engine/base.py", line 1530, in _execute_ddl
+    ret = self._execute_context(
+          ^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/sqlalchemy/engine/base.py", line 1846, in _execute_context
+    return self._exec_single_context(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/sqlalchemy/engine/base.py", line 1986, in _exec_single_context
+    self._handle_dbapi_exception(
+  File "/usr/local/lib/python3.11/site-packages/sqlalchemy/engine/base.py", line 2363, in _handle_dbapi_exception
+    raise sqlalchemy_exception.with_traceback(exc_info[2]) from e
+  File "/usr/local/lib/python3.11/site-packages/sqlalchemy/engine/base.py", line 1967, in _exec_single_context
+    self.dialect.do_execute(
+  File "/usr/local/lib/python3.11/site-packages/sqlalchemy/engine/default.py", line 952, in do_execute
+    cursor.execute(statement, parameters)
+sqlalchemy.exc.DataError: (psycopg2.errors.InvalidTextRepresentation) invalid input syntax for type json
+DETAIL:  Token "'" is invalid.
+CONTEXT:  JSON data, line 1: '...
+
+[SQL: ALTER TABLE projects ALTER COLUMN summary SET DEFAULT '''{}''::jsonb']
+(Background on this error at: https://sqlalche.me/e/20/9h9h); EXCEPTION: Deploy failed: --- safe git update
+Already on 'main'
+HEAD is now at 3f195093 fix(admin-app): use webpack bundler to avoid Next.js 16 Turbopack panic (#172)
+--- deterministic build BUILD_SHA=3f195093
+ Image flowbiz-client-amp-api:3f195093 Building 
+ Image flowbiz-client-amp-admin-app:3f195093 Building 
+#1 [internal] load local bake definitions
+#1 reading from stdin 1.17kB done
+#1 DONE 0.0s
+
+#2 [api internal] load build definition from Dockerfile
+#2 transferring dockerfile: 1.48kB done
+#2 WARN: FromAsCasing: 'as' and 'FROM' keywords' casing do not match (line 1)
+#2 DONE 0.0s
+
+#3 [admin-app internal] load build definition from Dockerfile
+#3 transferring dockerfile: 522B done
+#3 DONE 0.0s
+
+#4 [api internal] load metadata for docker.io/library/python:3.11-slim
+#4 DONE 0.0s
+
+#5 [admin-app internal] load metadata for docker.io/library/node:20-alpine
+#5 ...
+
+#6 [api internal] load .dockerignore
+#6 transferring context: 2B done
+#6 DONE 0.0s
+
+#7 [api 1/9] FROM docker.io/library/python:3.11-slim@sha256:5be45dbade29bebd6886af6b438fd7e0b4eb7b611f39ba62b430263f82de36d2
+#7 resolve docker.io/library/python:3.11-slim@sha256:5be45dbade29bebd6886af6b438fd7e0b4eb7b611f39ba62b430263f82de36d2 0.0s done
+#7 DONE 0.0s
+
+#8 [api internal] load build context
+#8 transferring context: 20.88kB 0.0s done
+#8 DONE 0.0s
+
+#9 [api 2/9] WORKDIR /app
+#9 CACHED
+
+#10 [api 3/9] COPY pyproject.toml ./
+#10 CACHED
+
+#11 [api 4/9] RUN pip install --no-cache-dir     "fastapi>=0.104.0"     "python-multipart>=0.0.9"     "uvicorn[standard]>=0.24.0"     "pydantic>=2.4.0"     "email-validator>=2.1.0"     "pydantic-settings>=2.0.0"     "prometheus-fastapi-instrumentator>=6.1.0"     "opentelemetry-api>=1.22.0"     "opentelemetry-sdk>=1.22.0"     "opentelemetry-exporter-otlp-proto-http>=1.22.0"     "opentelemetry-instrumentation-fastapi>=0.43b0"     "opentelemetry-instrumentation-requests>=0.43b0"     "sqlalchemy>=2.0.0"     "alembic>=1.13.0"     "psycopg2-binary>=2.9.0"     "python-jose[cryptography]>=3.3.0"     "PyJWT>=2.8.0"     "bcrypt>=5.0.0"
+#11 ...
+
+#5 [admin-app internal] load metadata for docker.io/library/node:20-alpine
+#5 DONE 1.4s
+
+#12 [admin-app internal] load .dockerignore
+#12 transferring context: 2B done
+#12 DONE 0.0s
+
+#13 [admin-app builder 1/6] FROM docker.io/library/node:20-alpine@sha256:09e2b3d9726018aecf269bd35325f46bf75046a643a66d28360ec71132750ec8
+#13 resolve docker.io/library/node:20-alpine@sha256:09e2b3d9726018aecf269bd35325f46bf75046a643a66d28360ec71132750ec8 0.0s done
+#13 DONE 0.0s
+
+#14 [admin-app internal] load build context
+#14 transferring context: 31.21kB 0.0s done
+#14 DONE 0.0s
+
+#15 [admin-app builder 2/6] WORKDIR /app
+#15 CACHED
+
+#16 [admin-app builder 3/6] COPY package.json package-lock.json* ./
+#16 DONE 0.1s
+
+#11 [api 4/9] RUN pip install --no-cache-dir     "fastapi>=0.104.0"     "python-multipart>=0.0.9"     "uvicorn[standard]>=0.24.0"     "pydantic>=2.4.0"     "email-validator>=2.1.0"     "pydantic-settings>=2.0.0"     "prometheus-fastapi-instrumentator>=6.1.0"     "opentelemetry-api>=1.22.0"     "opentelemetry-sdk>=1.22.0"     "opentelemetry-exporter-otlp-proto-http>=1.22.0"     "opentelemetry-instrumentation-fastapi>=0.43b0"     "opentelemetry-instrumentation-requests>=0.43b0"     "sqlalchemy>=2.0.0"     "alembic>=1.13.0"     "psycopg2-binary>=2.9.0"     "python-jose[cryptography]>=3.3.0"     "PyJWT>=2.8.0"     "bcrypt>=5.0.0"
+#11 2.448 Collecting fastapi>=0.104.0
+#11 3.437   Downloading fastapi-0.129.2-py3-none-any.whl.metadata (30 kB)
+#11 3.666 Collecting python-multipart>=0.0.9
+#11 3.829   Downloading python_multipart-0.0.22-py3-none-any.whl.metadata (1.8 kB)
+#11 4.050 Collecting uvicorn>=0.24.0 (from uvicorn[standard]>=0.24.0)
+#11 4.216   Downloading uvicorn-0.41.0-py3-none-any.whl.metadata (6.7 kB)
+#11 4.720 Collecting pydantic>=2.4.0
+#11 4.883   Downloading pydantic-2.12.5-py3-none-any.whl.metadata (90 kB)
+#11 5.069      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 90.6/90.6 kB 484.8 kB/s eta 0:00:00
+#11 5.255 Collecting email-validator>=2.1.0
+#11 5.420   Downloading email_validator-2.3.0-py3-none-any.whl.metadata (26 kB)
+#11 5.616 Collecting pydantic-settings>=2.0.0
+#11 5.783   Downloading pydantic_settings-2.13.1-py3-none-any.whl.metadata (3.4 kB)
+#11 5.970 Collecting prometheus-fastapi-instrumentator>=6.1.0
+#11 6.140   Downloading prometheus_fastapi_instrumentator-7.1.0-py3-none-any.whl.metadata (13 kB)
+#11 6.353 Collecting opentelemetry-api>=1.22.0
+#11 6.528   Downloading opentelemetry_api-1.39.1-py3-none-any.whl.metadata (1.5 kB)
+#11 6.756 Collecting opentelemetry-sdk>=1.22.0
+#11 6.922   Downloading opentelemetry_sdk-1.39.1-py3-none-any.whl.metadata (1.5 kB)
+#11 7.110 Collecting opentelemetry-exporter-otlp-proto-http>=1.22.0
+#11 7.275   Downloading opentelemetry_exporter_otlp_proto_http-1.39.1-py3-none-any.whl.metadata (2.4 kB)
+#11 7.467 Collecting opentelemetry-instrumentation-fastapi>=0.43b0
+#11 7.632   Downloading opentelemetry_instrumentation_fastapi-0.60b1-py3-none-any.whl.metadata (2.2 kB)
+#11 7.834 Collecting opentelemetry-instrumentation-requests>=0.43b0
+#11 8.001   Downloading opentelemetry_instrumentation_requests-0.60b1-py3-none-any.whl.metadata (2.6 kB)
+#11 8.699 Collecting sqlalchemy>=2.0.0
+#11 8.864   Downloading sqlalchemy-2.0.46-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl.metadata (9.5 kB)
+#11 9.062 Collecting alembic>=1.13.0
+#11 9.227   Downloading alembic-1.18.4-py3-none-any.whl.metadata (7.2 kB)
+#11 9.457 Collecting psycopg2-binary>=2.9.0
+#11 9.622   Downloading psycopg2_binary-2.9.11-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.whl.metadata (4.9 kB)
+#11 9.803 Collecting python-jose>=3.3.0 (from python-jose[cryptography]>=3.3.0)
+#11 9.967   Downloading python_jose-3.5.0-py2.py3-none-any.whl.metadata (5.5 kB)
+#11 10.15 Collecting PyJWT>=2.8.0
+#11 10.31   Downloading pyjwt-2.11.0-py3-none-any.whl.metadata (4.0 kB)
+#11 10.52 Collecting bcrypt>=5.0.0
+#11 10.68   Downloading bcrypt-5.0.0-cp39-abi3-manylinux_2_34_x86_64.whl.metadata (10 kB)
+#11 10.95 Collecting starlette<1.0.0,>=0.40.0 (from fastapi>=0.104.0)
+#11 11.11   Downloading starlette-0.52.1-py3-none-any.whl.metadata (6.3 kB)
+#11 11.31 Collecting typing-extensions>=4.8.0 (from fastapi>=0.104.0)
+#11 ...
+
+#17 [admin-app builder 4/6] RUN npm install
+#17 2.891 npm warn deprecated whatwg-encoding@3.1.1: Use @exodus/bytes instead for a more spec-conformant and faster implementation
+#17 ...
+
+#11 [api 4/9] RUN pip install --no-cache-dir     "fastapi>=0.104.0"     "python-multipart>=0.0.9"     "uvicorn[standard]>=0.24.0"     "pydantic>=2.4.0"     "email-validator>=2.1.0"     "pydantic-settings>=2.0.0"     "prometheus-fastapi-instrumentator>=6.1.0"     "opentelemetry-api>=1.22.0"     "opentelemetry-sdk>=1.22.0"     "opentelemetry-exporter-otlp-proto-http>=1.22.0"     "opentelemetry-instrumentation-fastapi>=0.43b0"     "opentelemetry-instrumentation-requests>=0.43b0"     "sqlalchemy>=2.0.0"     "alembic>=1.13.0"     "psycopg2-binary>=2.9.0"     "python-jose[cryptography]>=3.3.0"     "PyJWT>=2.8.0"     "bcrypt>=5.0.0"
+#11 11.47   Downloading typing_extensions-4.15.0-py3-none-any.whl.metadata (3.3 kB)
+#11 11.65 Collecting typing-inspection>=0.4.2 (from fastapi>=0.104.0)
+#11 11.81   Downloading typing_inspection-0.4.2-py3-none-any.whl.metadata (2.6 kB)
+#11 11.99 Collecting annotated-doc>=0.0.2 (from fastapi>=0.104.0)
+#11 12.15   Downloading annotated_doc-0.0.4-py3-none-any.whl.metadata (6.6 kB)
+#11 12.35 Collecting click>=7.0 (from uvicorn>=0.24.0->uvicorn[standard]>=0.24.0)
+#11 12.51   Downloading click-8.3.1-py3-none-any.whl.metadata (2.6 kB)
+#11 12.68 Collecting h11>=0.8 (from uvicorn>=0.24.0->uvicorn[standard]>=0.24.0)
+#11 12.85   Downloading h11-0.16.0-py3-none-any.whl.metadata (8.3 kB)
+#11 13.03 Collecting annotated-types>=0.6.0 (from pydantic>=2.4.0)
+#11 13.20   Downloading annotated_types-0.7.0-py3-none-any.whl.metadata (15 kB)
+#11 14.18 Collecting pydantic-core==2.41.5 (from pydantic>=2.4.0)
+#11 14.34   Downloading pydantic_core-2.41.5-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl.metadata (7.3 kB)
+#11 14.52 Collecting dnspython>=2.0.0 (from email-validator>=2.1.0)
+#11 14.69   Downloading dnspython-2.8.0-py3-none-any.whl.metadata (5.7 kB)
+#11 14.87 Collecting idna>=2.0.0 (from email-validator>=2.1.0)
+#11 15.03   Downloading idna-3.11-py3-none-any.whl.metadata (8.4 kB)
+#11 15.22 Collecting python-dotenv>=0.21.0 (from pydantic-settings>=2.0.0)
+#11 15.39   Downloading python_dotenv-1.2.1-py3-none-any.whl.metadata (25 kB)
+#11 15.58 Collecting prometheus-client<1.0.0,>=0.8.0 (from prometheus-fastapi-instrumentator>=6.1.0)
+#11 15.74   Downloading prometheus_client-0.24.1-py3-none-any.whl.metadata (2.1 kB)
+#11 16.03 Collecting importlib-metadata<8.8.0,>=6.0 (from opentelemetry-api>=1.22.0)
+#11 16.20   Downloading importlib_metadata-8.7.1-py3-none-any.whl.metadata (4.7 kB)
+#11 16.40 Collecting opentelemetry-semantic-conventions==0.60b1 (from opentelemetry-sdk>=1.22.0)
+#11 16.57   Downloading opentelemetry_semantic_conventions-0.60b1-py3-none-any.whl.metadata (2.4 kB)
+#11 16.76 Collecting googleapis-common-protos~=1.52 (from opentelemetry-exporter-otlp-proto-http>=1.22.0)
+#11 16.92   Downloading googleapis_common_protos-1.72.0-py3-none-any.whl.metadata (9.4 kB)
+#11 17.11 Collecting opentelemetry-exporter-otlp-proto-common==1.39.1 (from opentelemetry-exporter-otlp-proto-http>=1.22.0)
+#11 17.28   Downloading opentelemetry_exporter_otlp_proto_common-1.39.1-py3-none-any.whl.metadata (1.8 kB)
+#11 17.46 Collecting opentelemetry-proto==1.39.1 (from opentelemetry-exporter-otlp-proto-http>=1.22.0)
+#11 17.63   Downloading opentelemetry_proto-1.39.1-py3-none-any.whl.metadata (2.3 kB)
+#11 17.82 Collecting requests~=2.7 (from opentelemetry-exporter-otlp-proto-http>=1.22.0)
+#11 17.99   Downloading requests-2.32.5-py3-none-any.whl.metadata (4.9 kB)
+#11 18.34 Collecting protobuf<7.0,>=5.0 (from opentelemetry-proto==1.39.1->opentelemetry-exporter-otlp-proto-http>=1.22.0)
+#11 18.50   Downloading protobuf-6.33.5-cp39-abi3-manylinux2014_x86_64.whl.metadata (593 bytes)
+#11 18.70 Collecting opentelemetry-instrumentation-asgi==0.60b1 (from opentelemetry-instrumentation-fastapi>=0.43b0)
+#11 18.86   Downloading opentelemetry_instrumentation_asgi-0.60b1-py3-none-any.whl.metadata (2.0 kB)
+#11 19.05 Collecting opentelemetry-instrumentation==0.60b1 (from opentelemetry-instrumentation-fastapi>=0.43b0)
+#11 19.21   Downloading opentelemetry_instrumentation-0.60b1-py3-none-any.whl.metadata (7.2 kB)
+#11 19.40 Collecting opentelemetry-util-http==0.60b1 (from opentelemetry-instrumentation-fastapi>=0.43b0)
+#11 19.56   Downloading opentelemetry_util_http-0.60b1-py3-none-any.whl.metadata (2.6 kB)
+#11 19.76 Collecting packaging>=18.0 (from opentelemetry-instrumentation==0.60b1->opentelemetry-instrumentation-fastapi>=0.43b0)
+#11 19.92   Downloading packaging-26.0-py3-none-any.whl.metadata (3.3 kB)
+#11 20.31 Collecting wrapt<2.0.0,>=1.0.0 (from opentelemetry-instrumentation==0.60b1->opentelemetry-instrumentation-fastapi>=0.43b0)
+#11 20.47   Downloading wrapt-1.17.3-cp311-cp311-manylinux1_x86_64.manylinux_2_28_x86_64.manylinux_2_5_x86_64.whl.metadata (6.4 kB)
+#11 20.66 Collecting asgiref~=3.0 (from opentelemetry-instrumentation-asgi==0.60b1->opentelemetry-instrumentation-fastapi>=0.43b0)
+#11 20.82   Downloading asgiref-3.11.1-py3-none-any.whl.metadata (9.3 kB)
+#11 21.15 Collecting greenlet>=1 (from sqlalchemy>=2.0.0)
+#11 21.31   Downloading greenlet-3.3.2-cp311-cp311-manylinux_2_24_x86_64.manylinux_2_28_x86_64.whl.metadata (3.7 kB)
+#11 21.52 Collecting Mako (from alembic>=1.13.0)
+#11 21.68   Downloading mako-1.3.10-py3-none-any.whl.metadata (2.9 kB)
+#11 21.88 Collecting ecdsa!=0.15 (from python-jose>=3.3.0->python-jose[cryptography]>=3.3.0)
+#11 22.04   Downloading ecdsa-0.19.1-py2.py3-none-any.whl.metadata (29 kB)
+#11 22.23 Collecting rsa!=4.1.1,!=4.4,<5.0,>=4.0 (from python-jose>=3.3.0->python-jose[cryptography]>=3.3.0)
+#11 22.40   Downloading rsa-4.9.1-py3-none-any.whl.metadata (5.6 kB)
+#11 22.58 Collecting pyasn1>=0.5.0 (from python-jose>=3.3.0->python-jose[cryptography]>=3.3.0)
+#11 22.75   Downloading pyasn1-0.6.2-py3-none-any.whl.metadata (8.4 kB)
+#11 23.12 Collecting cryptography>=3.4.0 (from python-jose[cryptography]>=3.3.0)
+#11 23.28   Downloading cryptography-46.0.5-cp311-abi3-manylinux_2_34_x86_64.whl.metadata (5.7 kB)
+#11 23.49 Collecting httptools>=0.6.3 (from uvicorn[standard]>=0.24.0)
+#11 23.66   Downloading httptools-0.7.1-cp311-cp311-manylinux1_x86_64.manylinux_2_28_x86_64.manylinux_2_5_x86_64.whl.metadata (3.5 kB)
+#11 23.87 Collecting pyyaml>=5.1 (from uvicorn[standard]>=0.24.0)
+#11 24.03   Downloading pyyaml-6.0.3-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl.metadata (2.4 kB)
+#11 24.24 Collecting uvloop>=0.15.1 (from uvicorn[standard]>=0.24.0)
+#11 24.40   Downloading uvloop-0.22.1-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl.metadata (4.9 kB)
+#11 24.63 Collecting watchfiles>=0.20 (from uvicorn[standard]>=0.24.0)
+#11 24.80   Downloading watchfiles-1.1.1-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl.metadata (4.9 kB)
+#11 25.15 Collecting websockets>=10.4 (from uvicorn[standard]>=0.24.0)
+#11 25.32   Downloading websockets-16.0-cp311-cp311-manylinux1_x86_64.manylinux_2_28_x86_64.manylinux_2_5_x86_64.whl.metadata (6.8 kB)
+#11 25.61 Collecting cffi>=2.0.0 (from cryptography>=3.4.0->python-jose[cryptography]>=3.3.0)
+#11 25.77   Downloading cffi-2.0.0-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.whl.metadata (2.6 kB)
+#11 25.97 Collecting six>=1.9.0 (from ecdsa!=0.15->python-jose>=3.3.0->python-jose[cryptography]>=3.3.0)
+#11 26.13   Downloading six-1.17.0-py2.py3-none-any.whl.metadata (1.7 kB)
+#11 26.38 Collecting zipp>=3.20 (from importlib-metadata<8.8.0,>=6.0->opentelemetry-api>=1.22.0)
+#11 26.54   Downloading zipp-3.23.0-py3-none-any.whl.metadata (3.6 kB)
+#11 26.83 Collecting charset_normalizer<4,>=2 (from requests~=2.7->opentelemetry-exporter-otlp-proto-http>=1.22.0)
+#11 26.99   Downloading charset_normalizer-3.4.4-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl.metadata (37 kB)
+#11 27.21 Collecting urllib3<3,>=1.21.1 (from requests~=2.7->opentelemetry-exporter-otlp-proto-http>=1.22.0)
+#11 27.38   Downloading urllib3-2.6.3-py3-none-any.whl.metadata (6.9 kB)
+#11 27.56 Collecting certifi>=2017.4.17 (from requests~=2.7->opentelemetry-exporter-otlp-proto-http>=1.22.0)
+#11 27.73   Downloading certifi-2026.1.4-py3-none-any.whl.metadata (2.5 kB)
+#11 27.94 Collecting anyio<5,>=3.6.2 (from starlette<1.0.0,>=0.40.0->fastapi>=0.104.0)
+#11 28.10   Downloading anyio-4.12.1-py3-none-any.whl.metadata (4.3 kB)
+#11 28.38 Collecting MarkupSafe>=0.9.2 (from Mako->alembic>=1.13.0)
+#11 28.54   Downloading markupsafe-3.0.3-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl.metadata (2.7 kB)
+#11 28.75 Collecting pycparser (from cffi>=2.0.0->cryptography>=3.4.0->python-jose[cryptography]>=3.3.0)
+#11 28.92   Downloading pycparser-3.0-py3-none-any.whl.metadata (8.2 kB)
+#11 29.17 Downloading fastapi-0.129.2-py3-none-any.whl (103 kB)
+#11 29.23    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 103.2/103.2 kB 2.1 MB/s eta 0:00:00
+#11 29.39 Downloading python_multipart-0.0.22-py3-none-any.whl (24 kB)
+#11 29.56 Downloading uvicorn-0.41.0-py3-none-any.whl (68 kB)
+#11 29.59    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 68.8/68.8 kB 2.8 MB/s eta 0:00:00
+#11 29.75 Downloading pydantic-2.12.5-py3-none-any.whl (463 kB)
+#11 29.98    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 463.6/463.6 kB 2.0 MB/s eta 0:00:00
+#11 30.15 Downloading pydantic_core-2.41.5-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (2.1 MB)
+#11 30.47    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 2.1/2.1 MB 6.4 MB/s eta 0:00:00
+#11 30.64 Downloading email_validator-2.3.0-py3-none-any.whl (35 kB)
+#11 30.80 Downloading pydantic_settings-2.13.1-py3-none-any.whl (58 kB)
+#11 30.81    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 58.9/58.9 kB 138.8 MB/s eta 0:00:00
+#11 30.97 Downloading prometheus_fastapi_instrumentator-7.1.0-py3-none-any.whl (19 kB)
+#11 31.14 Downloading opentelemetry_api-1.39.1-py3-none-any.whl (66 kB)
+#11 31.14    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 66.4/66.4 kB 125.9 MB/s eta 0:00:00
+#11 31.30 Downloading opentelemetry_sdk-1.39.1-py3-none-any.whl (132 kB)
+#11 31.31    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 132.6/132.6 kB 53.0 MB/s eta 0:00:00
+#11 31.47 Downloading opentelemetry_semantic_conventions-0.60b1-py3-none-any.whl (219 kB)
+#11 31.48    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 220.0/220.0 kB 48.6 MB/s eta 0:00:00
+#11 31.64 Downloading opentelemetry_exporter_otlp_proto_http-1.39.1-py3-none-any.whl (19 kB)
+#11 31.81 Downloading opentelemetry_exporter_otlp_proto_common-1.39.1-py3-none-any.whl (18 kB)
+#11 31.97 Downloading opentelemetry_proto-1.39.1-py3-none-any.whl (72 kB)
+#11 31.97    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 72.5/72.5 kB 229.9 MB/s eta 0:00:00
+#11 32.14 Downloading opentelemetry_instrumentation_fastapi-0.60b1-py3-none-any.whl (13 kB)
+#11 32.30 Downloading opentelemetry_instrumentation-0.60b1-py3-none-any.whl (33 kB)
+#11 32.47 Downloading opentelemetry_instrumentation_asgi-0.60b1-py3-none-any.whl (16 kB)
+#11 32.63 Downloading opentelemetry_util_http-0.60b1-py3-none-any.whl (8.9 kB)
+#11 32.80 Downloading opentelemetry_instrumentation_requests-0.60b1-py3-none-any.whl (13 kB)
+#11 32.96 Downloading sqlalchemy-2.0.46-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl (3.3 MB)
+#11 33.14    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 3.3/3.3 MB 18.9 MB/s eta 0:00:00
+#11 33.31 Downloading alembic-1.18.4-py3-none-any.whl (263 kB)
+#11 33.31    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 263.9/263.9 kB 221.3 MB/s eta 0:00:00
+#11 33.47 Downloading psycopg2_binary-2.9.11-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.whl (4.2 MB)
+#11 33.53    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 4.2/4.2 MB 77.4 MB/s eta 0:00:00
+#11 33.70 Downloading python_jose-3.5.0-py2.py3-none-any.whl (34 kB)
+#11 33.86 Downloading pyjwt-2.11.0-py3-none-any.whl (28 kB)
+#11 34.02 Downloading bcrypt-5.0.0-cp39-abi3-manylinux_2_34_x86_64.whl (278 kB)
+#11 34.03    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 278.2/278.2 kB 278.3 MB/s eta 0:00:00
+#11 34.19 Downloading annotated_doc-0.0.4-py3-none-any.whl (5.3 kB)
+#11 34.36 Downloading annotated_types-0.7.0-py3-none-any.whl (13 kB)
+#11 34.52 Downloading click-8.3.1-py3-none-any.whl (108 kB)
+#11 34.52    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 108.3/108.3 kB 265.6 MB/s eta 0:00:00
+#11 34.69 Downloading cryptography-46.0.5-cp311-abi3-manylinux_2_34_x86_64.whl (4.5 MB)
+#11 34.86    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 4.5/4.5 MB 27.0 MB/s eta 0:00:00
+#11 35.02 Downloading dnspython-2.8.0-py3-none-any.whl (331 kB)
+#11 35.02    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 331.1/331.1 kB 304.7 MB/s eta 0:00:00
+#11 35.19 Downloading ecdsa-0.19.1-py2.py3-none-any.whl (150 kB)
+#11 35.19    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 150.6/150.6 kB 176.2 MB/s eta 0:00:00
+#11 35.36 Downloading googleapis_common_protos-1.72.0-py3-none-any.whl (297 kB)
+#11 35.36    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 297.5/297.5 kB 239.8 MB/s eta 0:00:00
+#11 35.52 Downloading greenlet-3.3.2-cp311-cp311-manylinux_2_24_x86_64.manylinux_2_28_x86_64.whl (594 kB)
+#11 35.53    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 594.2/594.2 kB 144.3 MB/s eta 0:00:00
+#11 35.70 Downloading h11-0.16.0-py3-none-any.whl (37 kB)
+#11 35.86 Downloading httptools-0.7.1-cp311-cp311-manylinux1_x86_64.manylinux_2_28_x86_64.manylinux_2_5_x86_64.whl (456 kB)
+#11 35.87    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 456.6/456.6 kB 187.7 MB/s eta 0:00:00
+#11 36.03 Downloading idna-3.11-py3-none-any.whl (71 kB)
+#11 36.03    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 71.0/71.0 kB 263.6 MB/s eta 0:00:00
+#11 36.20 Downloading importlib_metadata-8.7.1-py3-none-any.whl (27 kB)
+#11 36.36 Downloading prometheus_client-0.24.1-py3-none-any.whl (64 kB)
+#11 36.37    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 64.1/64.1 kB 280.5 MB/s eta 0:00:00
+#11 36.53 Downloading pyasn1-0.6.2-py3-none-any.whl (83 kB)
+#11 36.53    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 83.4/83.4 kB 245.6 MB/s eta 0:00:00
+#11 36.70 Downloading python_dotenv-1.2.1-py3-none-any.whl (21 kB)
+#11 36.86 Downloading pyyaml-6.0.3-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl (806 kB)
+#11 36.87    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 806.6/806.6 kB 130.9 MB/s eta 0:00:00
+#11 37.03 Downloading requests-2.32.5-py3-none-any.whl (64 kB)
+#11 37.04    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 64.7/64.7 kB 271.6 MB/s eta 0:00:00
+#11 37.20 Downloading rsa-4.9.1-py3-none-any.whl (34 kB)
+#11 37.36 Downloading starlette-0.52.1-py3-none-any.whl (74 kB)
+#11 37.37    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 74.3/74.3 kB 191.1 MB/s eta 0:00:00
+#11 37.53 Downloading typing_extensions-4.15.0-py3-none-any.whl (44 kB)
+#11 37.53    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 44.6/44.6 kB 260.5 MB/s eta 0:00:00
+#11 37.70 Downloading typing_inspection-0.4.2-py3-none-any.whl (14 kB)
+#11 37.86 Downloading uvloop-0.22.1-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl (3.8 MB)
+#11 37.90    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 3.8/3.8 MB 107.4 MB/s eta 0:00:00
+#11 38.07 Downloading watchfiles-1.1.1-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (456 kB)
+#11 38.07    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 456.1/456.1 kB 157.9 MB/s eta 0:00:00
+#11 38.24 Downloading websockets-16.0-cp311-cp311-manylinux1_x86_64.manylinux_2_28_x86_64.manylinux_2_5_x86_64.whl (184 kB)
+#11 38.24    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 184.6/184.6 kB 188.4 MB/s eta 0:00:00
+#11 38.40 Downloading mako-1.3.10-py3-none-any.whl (78 kB)
+#11 38.41    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 78.5/78.5 kB 235.8 MB/s eta 0:00:00
+#11 38.57 Downloading anyio-4.12.1-py3-none-any.whl (113 kB)
+#11 38.58    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 113.6/113.6 kB 232.2 MB/s eta 0:00:00
+#11 38.74 Downloading asgiref-3.11.1-py3-none-any.whl (24 kB)
+#11 38.90 Downloading certifi-2026.1.4-py3-none-any.whl (152 kB)
+#11 38.91    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 152.9/152.9 kB 138.2 MB/s eta 0:00:00
+#11 39.07 Downloading cffi-2.0.0-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.whl (215 kB)
+#11 39.08    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 215.6/215.6 kB 196.7 MB/s eta 0:00:00
+#11 39.24 Downloading charset_normalizer-3.4.4-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl (151 kB)
+#11 39.24    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 151.6/151.6 kB 215.3 MB/s eta 0:00:00
+#11 39.41 Downloading markupsafe-3.0.3-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl (22 kB)
+#11 39.57 Downloading packaging-26.0-py3-none-any.whl (74 kB)
+#11 39.58    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 74.4/74.4 kB 247.9 MB/s eta 0:00:00
+#11 39.74 Downloading protobuf-6.33.5-cp39-abi3-manylinux2014_x86_64.whl (323 kB)
+#11 39.74    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 323.5/323.5 kB 238.4 MB/s eta 0:00:00
+#11 39.91 Downloading six-1.17.0-py2.py3-none-any.whl (11 kB)
+#11 40.07 Downloading urllib3-2.6.3-py3-none-any.whl (131 kB)
+#11 40.08    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 131.6/131.6 kB 253.0 MB/s eta 0:00:00
+#11 40.24 Downloading wrapt-1.17.3-cp311-cp311-manylinux1_x86_64.manylinux_2_28_x86_64.manylinux_2_5_x86_64.whl (82 kB)
+#11 40.24    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 82.4/82.4 kB 384.1 MB/s eta 0:00:00
+#11 40.41 Downloading zipp-3.23.0-py3-none-any.whl (10 kB)
+#11 40.57 Downloading pycparser-3.0-py3-none-any.whl (48 kB)
+#11 40.58    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 48.2/48.2 kB 146.1 MB/s eta 0:00:00
+#11 40.85 Installing collected packages: zipp, wrapt, websockets, uvloop, urllib3, typing-extensions, six, pyyaml, python-multipart, python-dotenv, PyJWT, pycparser, pyasn1, psycopg2-binary, protobuf, prometheus-client, packaging, opentelemetry-util-http, MarkupSafe, idna, httptools, h11, greenlet, dnspython, click, charset_normalizer, certifi, bcrypt, asgiref, annotated-types, annotated-doc, uvicorn, typing-inspection, sqlalchemy, rsa, requests, pydantic-core, opentelemetry-proto, Mako, importlib-metadata, googleapis-common-protos, email-validator, ecdsa, cffi, anyio, watchfiles, starlette, python-jose, pydantic, opentelemetry-exporter-otlp-proto-common, opentelemetry-api, cryptography, alembic, pydantic-settings, prometheus-fastapi-instrumentator, opentelemetry-semantic-conventions, fastapi, opentelemetry-sdk, opentelemetry-instrumentation, opentelemetry-instrumentation-requests, opentelemetry-instrumentation-asgi, opentelemetry-exporter-otlp-proto-http, opentelemetry-instrumentation-fastapi
+#11 46.34 Successfully installed Mako-1.3.10 MarkupSafe-3.0.3 PyJWT-2.11.0 alembic-1.18.4 annotated-doc-0.0.4 annotated-types-0.7.0 anyio-4.12.1 asgiref-3.11.1 bcrypt-5.0.0 certifi-2026.1.4 cffi-2.0.0 charset_normalizer-3.4.4 click-8.3.1 cryptography-46.0.5 dnspython-2.8.0 ecdsa-0.19.1 email-validator-2.3.0 fastapi-0.129.2 googleapis-common-protos-1.72.0 greenlet-3.3.2 h11-0.16.0 httptools-0.7.1 idna-3.11 importlib-metadata-8.7.1 opentelemetry-api-1.39.1 opentelemetry-exporter-otlp-proto-common-1.39.1 opentelemetry-exporter-otlp-proto-http-1.39.1 opentelemetry-instrumentation-0.60b1 opentelemetry-instrumentation-asgi-0.60b1 opentelemetry-instrumentation-fastapi-0.60b1 opentelemetry-instrumentation-requests-0.60b1 opentelemetry-proto-1.39.1 opentelemetry-sdk-1.39.1 opentelemetry-semantic-conventions-0.60b1 opentelemetry-util-http-0.60b1 packaging-26.0 prometheus-client-0.24.1 prometheus-fastapi-instrumentator-7.1.0 protobuf-6.33.5 psycopg2-binary-2.9.11 pyasn1-0.6.2 pycparser-3.0 pydantic-2.12.5 pydantic-core-2.41.5 pydantic-settings-2.13.1 python-dotenv-1.2.1 python-jose-3.5.0 python-multipart-0.0.22 pyyaml-6.0.3 requests-2.32.5 rsa-4.9.1 six-1.17.0 sqlalchemy-2.0.46 starlette-0.52.1 typing-extensions-4.15.0 typing-inspection-0.4.2 urllib3-2.6.3 uvicorn-0.41.0 uvloop-0.22.1 watchfiles-1.1.1 websockets-16.0 wrapt-1.17.3 zipp-3.23.0
+#11 46.34 WARNING: Running pip as the 'root' user can result in broken permissions and conflicting behaviour with the system package manager. It is recommended to use a virtual environment instead: https://pip.pypa.io/warnings/venv
+#11 46.94 
+#11 46.94 [notice] A new release of pip is available: 24.0 -> 26.0.1
+#11 46.94 [notice] To update, run: pip install --upgrade pip
+#11 DONE 48.4s
+
+#17 [admin-app builder 4/6] RUN npm install
+#17 ...
+
+#18 [api 5/9] COPY apps/ ./apps/
+#18 DONE 0.1s
+
+#19 [api 6/9] COPY packages/ ./packages/
+#19 DONE 0.1s
+
+#20 [api 7/9] COPY alembic.ini ./
+#20 DONE 0.0s
+
+#21 [api 8/9] COPY alembic/ ./alembic/
+#21 DONE 0.0s
+
+#17 [admin-app builder 4/6] RUN npm install
+#17 ...
+
+#22 [api 9/9] RUN useradd -m -u 1000 appuser && chown -R appuser:appuser /app
+#22 DONE 0.6s
+
+#23 [api] exporting to image
+#23 exporting layers
+#23 ...
+
+#17 [admin-app builder 4/6] RUN npm install
+#17 47.74 
+#17 47.74 added 505 packages, and audited 507 packages in 47s
+#17 47.74 
+#17 47.74 172 packages are looking for funding
+#17 47.74   run `npm fund` for details
+#17 47.97 
+#17 47.97 20 vulnerabilities (5 moderate, 14 high, 1 critical)
+#17 47.97 
+#17 47.97 To address issues that do not require attention, run:
+#17 47.97   npm audit fix
+#17 47.97 
+#17 47.97 To address all issues (including breaking changes), run:
+#17 47.97   npm audit fix --force
+#17 47.97 
+#17 47.97 Run `npm audit` for details.
+#17 47.98 npm notice
+#17 47.98 npm notice New major version of npm available! 10.8.2 -> 11.10.1
+#17 47.98 npm notice Changelog: https://github.com/npm/cli/releases/tag/v11.10.1
+#17 47.98 npm notice To update run: npm install -g npm@11.10.1
+#17 47.98 npm notice
+#17 DONE 48.1s
+
+#24 [admin-app builder 5/6] COPY . .
+#24 DONE 0.3s
+
+#23 [api] exporting to image
+#23 exporting layers 4.9s done
+#23 exporting manifest sha256:5f167a21c90a333518c3fe9d7ef59cfdb4a27cf72f9a1de948f9b901ec514609 done
+#23 exporting config sha256:3efe51864d390996eff44671109292978d232c254826d48e53bab40f9056e435 done
+#23 exporting attestation manifest sha256:8c4ef40c39e13fbea45c30ccbd37936866db8151b2132f614179c5c95e9e06e9 0.0s done
+#23 exporting manifest list sha256:87017443c3ae5fdbd410f22dc3386a613a6f538fd7c8111952a6b3a04c3c1431 done
+#23 naming to docker.io/library/flowbiz-client-amp-api:3f195093 done
+#23 unpacking to docker.io/library/flowbiz-client-amp-api:3f195093
+#23 unpacking to docker.io/library/flowbiz-client-amp-api:3f195093 1.9s done
+#23 DONE 6.9s
+
+#25 [api] resolving provenance for metadata file
+#25 DONE 0.0s
+
+#26 [admin-app builder 6/6] RUN npm run build
+#26 0.322 
+#26 0.322 > flowbiz-admin-app@0.1.0 build
+#26 0.322 > next build --webpack
+#26 0.322 
+#26 1.105 Attention: Next.js now collects completely anonymous telemetry regarding usage.
+#26 1.106 This information is used to shape Next.js' roadmap and prioritize features.
+#26 1.106 You can learn more, including how to opt-out if you'd not like to participate in this anonymous program, by visiting the following URL:
+#26 1.106 https://nextjs.org/telemetry
+#26 1.106 
+#26 1.132 ▲ Next.js 16.1.6 (webpack)
+#26 1.132 - Experiments (use with caution):
+#26 1.132   · optimizePackageImports
+#26 1.132 
+#26 1.194 ⚠ The "middleware" file convention is deprecated. Please use "proxy" instead. Learn more: https://nextjs.org/docs/messages/middleware-to-proxy
+#26 1.286   Creating an optimized production build ...
+#26 23.01 ✓ Compiled successfully in 18.0s
+#26 23.02   Skipping validation of types
+#26 23.11   Collecting page data using 3 workers ...
+#26 25.45   Generating static pages using 3 workers (0/118) ...
+#26 26.36   Generating static pages using 3 workers (29/118) 
+#26 26.70   Generating static pages using 3 workers (58/118) 
+#26 28.52   Generating static pages using 3 workers (88/118) 
+#26 29.09 ✓ Generating static pages using 3 workers (118/118) in 3.6s
+#26 29.66   Finalizing page optimization ...
+#26 29.66   Collecting build traces ...
+#26 44.67 
+#26 44.68 Route (app)                        Revalidate  Expire
+#26 44.68 ┌ ƒ /_not-found
+#26 44.68 ├ ƒ /[locale]
+#26 44.68 ├ ƒ /[locale]/about
+#26 44.68 ├ ƒ /[locale]/area-guide
+#26 44.68 ├ ƒ /[locale]/area-guide/[slug]
+#26 44.68 ├ ƒ /[locale]/areas/[slug]
+#26 44.68 ├ ƒ /[locale]/blog
+#26 44.68 ├ ƒ /[locale]/blog/[slug]
+#26 44.68 ├ ƒ /[locale]/buy
+#26 44.68 ├ ƒ /[locale]/buy/condo-pattaya
+#26 44.68 ├ ƒ /[locale]/buy/hotel-pattaya
+#26 44.68 ├ ƒ /[locale]/buy/house-pattaya
+#26 44.68 ├ ƒ /[locale]/buy/land-pattaya
+#26 44.68 ├ ƒ /[locale]/buy/office-pattaya
+#26 44.68 ├ ƒ /[locale]/buy/shop-pattaya
+#26 44.68 ├ ƒ /[locale]/buy/villa-pattaya
+#26 44.68 ├ ƒ /[locale]/co-agent
+#26 44.68 ├ ƒ /[locale]/compare
+#26 44.68 ├ ƒ /[locale]/contact
+#26 44.68 ├ ƒ /[locale]/developers
+#26 44.68 ├ ƒ /[locale]/developers/[slug]
+#26 44.68 ├ ƒ /[locale]/european
+#26 44.68 ├ ƒ /[locale]/general
+#26 44.68 ├ ƒ /[locale]/guides
+#26 44.68 ├ ƒ /[locale]/guides/[slug]
+#26 44.68 ├ ƒ /[locale]/holiday-home
+#26 44.68 ├ ƒ /[locale]/invest
+#26 44.68 ├ ƒ /[locale]/invest/calculator
+#26 44.68 ├ ƒ /[locale]/invest/guides
+#26 44.68 ├ ƒ /[locale]/investment
+#26 44.68 ├ ƒ /[locale]/investor
+#26 44.68 ├ ƒ /[locale]/luxury
+#26 44.68 ├ ƒ /[locale]/marketplace
+#26 44.68 ├ ƒ /[locale]/privacy
+#26 44.68 ├ ƒ /[locale]/projects
+#26 44.68 ├ ƒ /[locale]/projects/[slug]
+#26 44.68 ├ ƒ /[locale]/property/[slug]
+#26 44.68 ├ ƒ /[locale]/rent
+#26 44.68 ├ ƒ /[locale]/rent/condo-pattaya
+#26 44.68 ├ ƒ /[locale]/rent/hotel-pattaya
+#26 44.68 ├ ƒ /[locale]/rent/house-pattaya
+#26 44.68 ├ ƒ /[locale]/rent/land-pattaya
+#26 44.68 ├ ƒ /[locale]/rent/office-pattaya
+#26 44.68 ├ ƒ /[locale]/rent/shop-pattaya
+#26 44.68 ├ ƒ /[locale]/rent/villa-pattaya
+#26 44.68 ├ ƒ /[locale]/sell
+#26 44.68 ├ ƒ /[locale]/sell/list-property
+#26 44.68 ├ ƒ /[locale]/sell/valuation
+#26 44.68 ├ ƒ /[locale]/smart-finder
+#26 44.68 ├ ƒ /[locale]/terms
+#26 44.68 ├ ƒ /analytics
+#26 44.68 ├ ƒ /api/health
+#26 44.68 ├ ƒ /inquiries
+#26 44.68 ├ ƒ /inquiries/[id]
+#26 44.68 ├ ƒ /leads
+#26 44.68 ├ ƒ /leads/[id]
+#26 44.68 ├ ƒ /login
+#26 44.68 ├ ○ /manifest.webmanifest
+#26 44.68 ├ ƒ /public/buy
+#26 44.68 ├ ƒ /public/company
+#26 44.68 ├ ƒ /public/company/[slug]
+#26 44.68 ├ ƒ /public/projects
+#26 44.68 ├ ƒ /public/properties
+#26 44.68 ├ ƒ /public/properties/[id]
+#26 44.68 ├ ƒ /public/rent
+#26 44.68 ├ ○ /robots.txt
+#26 44.68 ├ ƒ /sitemap-areas
+#26 44.68 ├ ○ /sitemap-areas.xml                     1d      1y
+#26 44.68 ├ ƒ /sitemap-blog
+#26 44.68 ├ ○ /sitemap-blog.xml                      1d      1y
+#26 44.68 ├ ƒ /sitemap-developers
+#26 44.68 ├ ƒ /sitemap-developers.xml
+#26 44.68 ├ ƒ /sitemap-guides
+#26 44.68 ├ ○ /sitemap-guides.xml                    1d      1y
+#26 44.68 ├ ƒ /sitemap-pages
+#26 44.68 ├ ○ /sitemap-pages.xml                     1h      1y
+#26 44.68 ├ ƒ /sitemap-projects
+#26 44.68 ├ ƒ /sitemap-projects.xml
+#26 44.68 ├ ƒ /sitemap-properties
+#26 44.68 ├ ƒ /sitemap-properties.xml
+#26 44.68 └ ○ /sitemap.xml                           1h      1y
+#26 44.68 
+#26 44.68 
+#26 44.68 ƒ Proxy (Middleware)
+#26 44.68 
+#26 44.68 ○  (Static)   prerendered as static content
+#26 44.68 ƒ  (Dynamic)  server-rendered on demand
+#26 44.68 
+#26 DONE 44.9s
+
+#27 [admin-app runner 3/5] COPY --from=builder /app/.next/standalone ./
+#27 DONE 0.6s
+
+#28 [admin-app runner 4/5] COPY --from=builder /app/.next/static ./.next/static
+#28 DONE 0.1s
+
+#29 [admin-app runner 5/5] COPY --from=builder /app/public ./public
+#29 DONE 0.0s
+
+#30 [admin-app] exporting to image
+#30 exporting layers
+#30 exporting layers 2.5s done
+#30 exporting manifest sha256:74fb6027a195f697ae9e84fb61a6b680c419ea521635b7668ec22face0ad23cb done
+#30 exporting config sha256:210655a488534ed94837fab6812997c61ca92c2c556845f100af760324797657 done
+#30 exporting attestation manifest sha256:98985068d12c8a793f7d4b3e5c44903c7035e425e0f82a1b394f785557f3a810 0.0s done
+#30 exporting manifest list sha256:c21ffff6e29cff7b5c2143b40dd314175c5d993da64cef585692259fcc8e867f done
+#30 naming to docker.io/library/flowbiz-client-amp-admin-app:3f195093 done
+#30 unpacking to docker.io/library/flowbiz-client-amp-admin-app:3f195093
+#30 unpacking to docker.io/library/flowbiz-client-amp-admin-app:3f195093 0.8s done
+#30 DONE 3.4s
+
+#31 [admin-app] resolving provenance for metadata file
+#31 DONE 0.0s
+ Image flowbiz-client-amp-api:3f195093 Built 
+ Image flowbiz-client-amp-admin-app:3f195093 Built 
+--- controlled restart (services only)
+time="2026-02-22T11:01:33+07:00" level=warning msg="No services to build"
+ Container flowbiz-client-amp-postgres-1 Running 
+ Container flowbiz-client-amp-admin-app-1 Recreate 
+ Container flowbiz-client-amp-api-1 Recreate 
+ Container flowbiz-client-amp-admin-app-1 Recreated 
+ Container flowbiz-client-amp-api-1 Recreated 
+ Container flowbiz-client-amp-admin-app-1 Starting 
+ Container flowbiz-client-amp-postgres-1 Waiting 
+ Container flowbiz-client-amp-admin-app-1 Started 
+ Container flowbiz-client-amp-postgres-1 Healthy 
+ Container flowbiz-client-amp-api-1 Starting 
+ Container flowbiz-client-amp-api-1 Started 
+--- alembic upgrade
+SECURITY: ADMIN_BOOTSTRAP_PASSWORD is using the default value. Set a strong password via ADMIN_BOOTSTRAP_PASSWORD env var.
+SECURITY: PII_HASH_PEPPER is empty. PII dedup hashing has zero additional entropy.
+INFO  [alembic.runtime.migration] Context impl PostgresqlImpl.
+INFO  [alembic.runtime.migration] Will assume transactional DDL.
+INFO  [alembic.runtime.migration] Running upgrade 0024_blueprint_core_schema_alignment -> 0025_blueprint_schema_v2, Blueprint Doc 05 — Database schema gap-fill (v2)
+INFO  [alembic.runtime.migration] Running upgrade 0025_blueprint_schema_v2 -> 0026_blueprint_schema_v3, Blueprint Doc 05 — Database schema gap-fill (v3)
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.11/site-packages/sqlalchemy/engine/base.py", line 1967, in _exec_single_context
+    self.dialect.do_execute(
+  File "/usr/local/lib/python3.11/site-packages/sqlalchemy/engine/default.py", line 952, in do_execute
+    cursor.execute(statement, parameters)
+psycopg2.errors.InvalidTextRepresentation: invalid input syntax for type json
+DETAIL:  Token "'" is invalid.
+CONTEXT:  JSON data, line 1: '...
+
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/usr/local/bin/alembic", line 8, in <module>
+    sys.exit(main())
+             ^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/alembic/config.py", line 1047, in main
+    CommandLine(prog=prog).main(argv=argv)
+  File "/usr/local/lib/python3.11/site-packages/alembic/config.py", line 1037, in main
+    self.run_cmd(cfg, options)
+  File "/usr/local/lib/python3.11/site-packages/alembic/config.py", line 971, in run_cmd
+    fn(
+  File "/usr/local/lib/python3.11/site-packages/alembic/command.py", line 483, in upgrade
+    script.run_env()
+  File "/usr/local/lib/python3.11/site-packages/alembic/script/base.py", line 545, in run_env
+    util.load_python_file(self.dir, "env.py")
+  File "/usr/local/lib/python3.11/site-packages/alembic/util/pyfiles.py", line 116, in load_python_file
+    module = load_module_py(module_id, path)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/alembic/util/pyfiles.py", line 136, in load_module_py
+    spec.loader.exec_module(module)  # type: ignore
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<frozen importlib._bootstrap_external>", line 940, in exec_module
+  File "<frozen importlib._bootstrap>", line 241, in _call_with_frames_removed
+  File "/app/alembic/env.py", line 49, in <module>
+    run_migrations_online()
+  File "/app/alembic/env.py", line 43, in run_migrations_online
+    context.run_migrations()
+  File "<string>", line 8, in run_migrations
+  File "/usr/local/lib/python3.11/site-packages/alembic/runtime/environment.py", line 969, in run_migrations
+    self.get_context().run_migrations(**kw)
+  File "/usr/local/lib/python3.11/site-packages/alembic/runtime/migration.py", line 626, in run_migrations
+    step.migration_fn(**kw)
+  File "/app/alembic/versions/0026_blueprint_schema_v3.py", line 165, in upgrade
+    op.alter_column(
+  File "<string>", line 8, in alter_column
+  File "<string>", line 3, in alter_column
+  File "/usr/local/lib/python3.11/site-packages/alembic/operations/ops.py", line 1974, in alter_column
+    return operations.invoke(alt)
+           ^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/alembic/operations/base.py", line 452, in invoke
+    return fn(self, operation)
+           ^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/alembic/operations/toimpl.py", line 58, in alter_column
+    operations.impl.alter_column(
+  File "/usr/local/lib/python3.11/site-packages/alembic/ddl/postgresql.py", line 202, in alter_column
+    super().alter_column(
+  File "/usr/local/lib/python3.11/site-packages/alembic/ddl/impl.py", line 327, in alter_column
+    self._exec(
+  File "/usr/local/lib/python3.11/site-packages/alembic/ddl/impl.py", line 256, in _exec
+    return conn.execute(construct, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/sqlalchemy/engine/base.py", line 1419, in execute
+    return meth(
+           ^^^^^
+  File "/usr/local/lib/python3.11/site-packages/sqlalchemy/sql/ddl.py", line 187, in _execute_on_connection
+    return connection._execute_ddl(
+           ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/sqlalchemy/engine/base.py", line 1530, in _execute_ddl
+    ret = self._execute_context(
+          ^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/sqlalchemy/engine/base.py", line 1846, in _execute_context
+    return self._exec_single_context(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/sqlalchemy/engine/base.py", line 1986, in _exec_single_context
+    self._handle_dbapi_exception(
+  File "/usr/local/lib/python3.11/site-packages/sqlalchemy/engine/base.py", line 2363, in _handle_dbapi_exception
+    raise sqlalchemy_exception.with_traceback(exc_info[2]) from e
+  File "/usr/local/lib/python3.11/site-packages/sqlalchemy/engine/base.py", line 1967, in _exec_single_context
+    self.dialect.do_execute(
+  File "/usr/local/lib/python3.11/site-packages/sqlalchemy/engine/default.py", line 952, in do_execute
+    cursor.execute(statement, parameters)
+sqlalchemy.exc.DataError: (psycopg2.errors.InvalidTextRepresentation) invalid input syntax for type json
+DETAIL:  Token "'" is invalid.
+CONTEXT:  JSON data, line 1: '...
+
+[SQL: ALTER TABLE projects ALTER COLUMN summary SET DEFAULT '''{}''::jsonb']
+(Background on this error at: https://sqlalche.me/e/20/9h9h)
+
+## Final State
+- DEPLOYED_SHA: 
+- Image tag: 
+- Alembic head: 
+- Container stable: 
+
+## FINAL VERDICT
+PRODUCTION HEALTHY: NO
