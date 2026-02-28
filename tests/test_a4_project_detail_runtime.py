@@ -228,6 +228,13 @@ def test_a4_project_detail_sections_ctas_and_internal_links(client) -> None:
         check = client.get(path)
         assert check.status_code == 200, f"dead internal link: {path}"
 
+    default_list = client.get("/projects")
+    assert default_list.status_code == 200, default_list.text
+
+    default_detail = client.get(f"/projects/{seeded['main_project_slug']}")
+    assert default_detail.status_code == 200, default_detail.text
+    assert 'lang="en"' in default_detail.text
+
 
 def test_a4_project_detail_th_fallback_and_gallery_hotlink_guard(client) -> None:
     seeded = _seed_a4_detail_fixture()
@@ -238,6 +245,7 @@ def test_a4_project_detail_th_fallback_and_gallery_hotlink_guard(client) -> None
     assert 'lang="th"' in th_html
     # Summary has only EN in seeded data, TH page must still render fallback text.
     assert "A4 EN summary" in th_html
+    assert "<h2>แกลเลอรี</h2>" in th_html
     assert "จองนัดเข้าชม" in th_html
 
     no_media_response = client.get(f"/en/projects/{seeded['no_media_project_slug']}")

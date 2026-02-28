@@ -999,6 +999,7 @@ def _render_project_detail_page(locale: str, request: Request, db: Session, slug
 
     copy = {
         "summary_title": "Project Summary",
+        "gallery": "Gallery",
         "area": "Area",
         "developer": "Developer",
         "status": "Status",
@@ -1033,6 +1034,7 @@ def _render_project_detail_page(locale: str, request: Request, db: Session, slug
         copy.update(
             {
                 "summary_title": "สรุปโครงการ",
+                "gallery": "แกลเลอรี",
                 "area": "ทำเล",
                 "developer": "ผู้พัฒนา",
                 "status": "สถานะ",
@@ -1281,7 +1283,7 @@ def _render_project_detail_page(locale: str, request: Request, db: Session, slug
     body = (
         f"<section id=\"project-hero\" class=\"card\"><img class=\"media\" src=\"{escape(hero_media)}\" alt=\"{escape(row.name)}\" width=\"1280\" height=\"720\" loading=\"eager\" /><h2>{escape(row.name)}</h2><p>{escape(summary_text)}</p>"
         f"<div class=\"grid\"><a class=\"btn\" href=\"/{locale}/contact?intent=consultation&project={escape(row.slug)}\">{escape(copy['request_consultation'])}</a><a class=\"btn\" href=\"/{locale}/contact?intent=viewing&project={escape(row.slug)}\">{escape(copy['book_viewing'])}</a></div></section>"
-        f"<section id=\"project-gallery\" class=\"stack\"><h2>Gallery</h2>{gallery_note_html}<section class=\"grid\"><article class=\"card\"><img class=\"media\" src=\"{escape(hero_media)}\" alt=\"{escape(row.name)}\" width=\"1280\" height=\"720\" loading=\"lazy\" /></article>{gallery_extra}</section></section>"
+        f"<section id=\"project-gallery\" class=\"stack\"><h2>{escape(copy['gallery'])}</h2>{gallery_note_html}<section class=\"grid\"><article class=\"card\"><img class=\"media\" src=\"{escape(hero_media)}\" alt=\"{escape(row.name)}\" width=\"1280\" height=\"720\" loading=\"lazy\" /></article>{gallery_extra}</section></section>"
         f"<section id=\"project-summary\" class=\"card\"><h2>{escape(copy['summary_title'])}</h2><p><strong>{escape(copy['area'])}:</strong> <a href=\"{area_href}\">{escape(area_name)}</a></p><p><strong>{escape(copy['developer'])}:</strong> <a href=\"{developer_href}\">{escape(developer_name)}</a></p><p><strong>{escape(copy['status'])}:</strong> {escape(status_text)}</p><p><strong>{escape(copy['starting_price'])}:</strong> {escape(price_text)}</p>{f'<p>{escape(description_text)}</p>' if description_text else ''}</section>"
         f"<section id=\"project-facts\" class=\"grid\"><article class=\"card\"><h2>{escape(copy['facts'])}</h2><ul>{facts_html}</ul></article><article class=\"card\"><h2>{escape(copy['highlights'])}</h2><ul>{highlights_html}</ul></article><article class=\"card\"><h2>{escape(copy['amenities'])}</h2><ul>{amenities_html}</ul></article></section>"
         f"<section id=\"project-location\" class=\"card\"><h2>{escape(copy['location'])}</h2>{location_body}</section>"
@@ -2372,10 +2374,20 @@ def render_projects(request: Request, db: Session = Depends(get_db)) -> HTMLResp
     return _render_projects_page(_request_locale(request), request, db)
 
 
+@router.get("/projects", response_class=HTMLResponse)
+def render_projects_default_locale(request: Request, db: Session = Depends(get_db)) -> HTMLResponse:
+    return _render_projects_page("en", request, db)
+
+
 @router.get("/en/projects/{slug}", response_class=HTMLResponse)
 @router.get("/th/projects/{slug}", response_class=HTMLResponse)
 def render_project_detail(slug: str, request: Request, db: Session = Depends(get_db)) -> HTMLResponse:
     return _render_project_detail_page(_request_locale(request), request, db, slug)
+
+
+@router.get("/projects/{slug}", response_class=HTMLResponse)
+def render_project_detail_default_locale(slug: str, request: Request, db: Session = Depends(get_db)) -> HTMLResponse:
+    return _render_project_detail_page("en", request, db, slug)
 
 
 @router.get("/en/smart-finder", response_class=HTMLResponse)
