@@ -61,6 +61,10 @@ if [[ ! -f "$VPS_ACTIVE_PATH/.env" ]]; then
   exit 1
 fi
 
+set -a
+. "$VPS_ACTIVE_PATH/.env"
+set +a
+
 export BUILD_SHA
 BUILD_SHA="$(git rev-parse --short HEAD)"
 export FLOWBIZ_ENV_FILE="$VPS_ACTIVE_PATH/.env"
@@ -76,24 +80,30 @@ compose=(
 echo "--- build api BUILD_SHA=$BUILD_SHA"
 "${compose[@]}" build api
 
+echo "--- migrations"
+"${compose[@]}" run --rm --no-deps api alembic upgrade head
+
 echo "--- recreate api"
 "${compose[@]}" up -d --no-deps --force-recreate api
 
-echo "--- migrations"
-"${compose[@]}" exec -T api alembic upgrade head
-
 echo "--- smoke"
-code=000
+healthz=000
+properties=000
+projects=000
 for _ in $(seq 1 30); do
-  code="$(curl -sS -o /dev/null -w '%{http_code}' "http://127.0.0.1:${VPS_API_PORT}/healthz" || echo 000)"
-  [[ "$code" == "200" ]] && break
+  healthz="$(curl -sS -o /dev/null -w '%{http_code}' "http://127.0.0.1:${VPS_API_PORT}/healthz" || echo 000)"
+  properties="$(curl -sS -o /dev/null -w '%{http_code}' "http://127.0.0.1:${VPS_API_PORT}/v1/properties?limit=1" || echo 000)"
+  projects="$(curl -sS -o /dev/null -w '%{http_code}' "http://127.0.0.1:${VPS_API_PORT}/v1/projects?limit=1" || echo 000)"
+  [[ "$healthz" == "200" && "$properties" == "200" && "$projects" == "200" ]] && break
   sleep 2
 done
 
 echo "release_path=$release_path"
 echo "build_sha=$BUILD_SHA"
-echo "healthz=$code"
-[[ "$code" == "200" ]]
+echo "healthz=$healthz"
+echo "properties=$properties"
+echo "projects=$projects"
+[[ "$healthz" == "200" && "$properties" == "200" && "$projects" == "200" ]]
 '@
 
 $tmp = New-TemporaryFile
