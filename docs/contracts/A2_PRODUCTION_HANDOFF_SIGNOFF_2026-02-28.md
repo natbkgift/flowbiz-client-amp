@@ -23,12 +23,12 @@ Status: Ready for final editorial/legal/admin pass; final closure blocked on ext
 | About / contact baseline content published in system | PASS | Engineering / Content Ops | `data/import/company_info.json`, `/en/about`, `/en/contact` runtime routes | None |
 | Final contact/about localized editorial content published | BLOCKED | Content | Baseline content exists, but final EN/TH editorial approval is still pending | Replace migrated baseline with final localized editorial copy |
 | Trust/process baseline content published in system | PASS | Engineering / Content Ops | `data/import/company_info.json` slug=`how-we-work`, `/en/about#process-section` | None |
-| Real customer reviews published | BLOCKED | Content / Brand | `data/import/testimonials.json` is intentionally empty until approved customer reviews exist | Publish approved customer testimonials into `Testimonial` |
+| Real customer reviews published | PASS | Content / Brand | `data/import/testimonials.json`, Google Business review set provided for Asset Management Property, runtime review sections | None |
 | Team baseline records published from approved company-owned source | PASS | Engineering / Content Ops | `data/import/team_members.json`, `scripts/seed_company_team_testimonials.py --sync ...` | None |
 | Final team profiles published | BLOCKED | Content / HR / Brand | Seeded team records now include real names and roles, but still lack final localized bios and approved local photos | Publish final team-member profiles and approved local photos |
 | Insights baseline content published in system | PASS | Engineering / Content Ops | `data/import/articles.json`, `/en/insights` runtime route | None |
 | Insights editorial backlog sufficient to remove fallback dependence | BLOCKED | Content | Seeded insights now provide a small approved baseline only; this is not yet a durable editorial backlog | Publish approved guides/blogs into `Article` |
-| Production CDN/object storage preserves `.webp` / `.avif` MIME at edge | BLOCKED | Infra / DevOps | Repo proves local runtime only; no deploy/CDN manifests prove edge behavior | Verify against deployed environment with curl/header checks |
+| Production CDN/object storage preserves `.webp` / `.avif` MIME at edge on `amppattaya.com` | PASS | Infra / DevOps / Engineering | Verified from `flowbiz-vps` on 2026-02-28 with `curl -I https://amppattaya.com/media/...webp` and `curl -I https://amppattaya.com/media/system/a2-probe.avif`; responses returned `Content-Type: image/webp` and `Content-Type: image/avif` through Cloudflare | None |
 | Downstream CRM consumers tolerate additive fields (`budget_band`, `timeline`, `persona`, `tags`) | BLOCKED | CRM / Integrations | Repo proves API compatibility only; external parsers are out of scope | Validate external consumers in their own environment |
 
 ## Approved Company-owned Source
@@ -61,16 +61,15 @@ Expected:
 ### Content / Legal
 
 1. Replace source-reference legal placeholder content with final approved legal body.
-2. Publish real customer testimonials.
-3. Publish final process/trust copy.
-4. Publish final EN/TH about/contact copy.
-5. Publish real team profiles and approved local images.
-6. Publish a stable Insights backlog.
+2. Publish final process/trust copy.
+3. Publish final EN/TH about/contact copy.
+4. Publish real team profiles and approved local images.
+5. Publish a stable Insights backlog.
 
 ### Infra / DevOps
 
-1. Verify deployed `.webp` and `.avif` headers at edge/CDN.
-2. Confirm no proxy/CDN layer rewrites media MIME incorrectly.
+1. Keep current `amppattaya.com` `/media/` nginx route in place.
+2. Re-run header checks after any Nginx/CDN change.
 
 ### CRM / Integrations
 

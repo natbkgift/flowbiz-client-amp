@@ -19,7 +19,7 @@ Date: 2026-02-28
   - `testimonials.json`
   - `articles.json`
 - Migration source notes are embedded in seeded record content/context fields for operational traceability.
-- `testimonials.json` is intentionally empty by default until approved customer review content is available. This prevents seeded brand statements from being rendered as fake reviews.
+- `testimonials.json` now contains approved Google Business review records provided for Asset Management Property. Any future seed updates must continue to use real customer reviews only.
 
 ## 1) Content Publication Map (Operational)
 
@@ -60,7 +60,7 @@ This map is the minimum publish set required to replace fallback/TODO states in 
 - `TeamMember.photo_url` is validated with `require_local_media_path` (same rule used by admin write flows).
 - External URLs such as `https://...` are rejected by seed path with row-level error context.
 - `Article.hero_image_url` is validated with `require_local_media_path` in seed path.
-- Default import data does not preload testimonials unless they are approved customer reviews.
+- Default import data now preloads approved Google Business testimonials only.
 - Optional `--sync` mode can prune stale managed rows for `company_info`, `team_members`, and `testimonials` when the import directory is intended to be authoritative.
 
 ## 3) Media MIME Verification Boundary (`.webp` / `.avif`)
@@ -73,14 +73,12 @@ This map is the minimum publish set required to replace fallback/TODO states in 
 - Runtime test verifies local `.webp` response content-type in [tests/test_a2_home_runtime_real_route.py](tests/test_a2_home_runtime_real_route.py#L296).
 - Runtime test verifies local `.avif` response content-type in [tests/test_a2_home_runtime_real_route.py](tests/test_a2_home_runtime_real_route.py#L302).
 
-### Not provable from repo context alone
-- Production CDN/object-storage edge behavior (`Content-Type`, compression, cache metadata, byte-range behavior).
-- Any reverse-proxy/header rewriting outside app runtime.
-
-### Required production confirmation
-- Execute deploy-environment checks using production URL and sample `.webp/.avif` objects.
-- Confirm `Content-Type` remains `image/webp` and `image/avif` at final edge response.
-- Confirm no CDN rule rewrites media MIME to generic types.
+### Deployed production confirmation completed
+- Verified on 2026-02-28 from `flowbiz-vps` against `https://amppattaya.com/` through Cloudflare.
+- Confirmed final edge responses:
+  - `Content-Type: image/webp` for `/media/project-covers/the-orient-jomtien/cover_6359a2b6dcc5.webp`
+  - `Content-Type: image/avif` for `/media/system/a2-probe.avif`
+- Confirmed the current Nginx vhost on `flowbiz-vps` now serves `/media/` from `/var/www/amppattaya/media/`.
 
 ### Suggested staging/production commands
 - `curl -I https://<your-domain>/media/<path-to-sample>.webp`
@@ -114,7 +112,7 @@ Endpoint: `/v1/inquiries`
 ## Remaining Team Inputs (Editorial/Legal)
 
 Even with migrated company-owned source content published, these still require team ownership for final production quality:
-- Reviews: curated and approved customer review records
+- Reviews: curate and maintain future approved customer review records
 - Trust/process detail: fully approved long-form operational/process copy
 - Insights: broader editorial backlog (guides/blog cadence)
 - Legal pages: final legal-approved privacy/terms/cookies body

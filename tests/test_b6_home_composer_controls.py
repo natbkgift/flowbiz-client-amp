@@ -504,3 +504,51 @@ def test_b6_events_endpoint_lock(client) -> None:
     assert payload["ok"] is True
     assert payload["endpoint"] == "/api/v1/events"
     assert payload["event"] == "home_hero_primary_click"
+
+
+def test_b6_events_endpoint_accepts_spec_envelope(client) -> None:
+    response = client.post(
+        "/api/v1/events",
+        json={
+            "schema_version": "1.0",
+            "event_id": "evt_test_123",
+            "event_name": "home_form_submit",
+            "occurred_at": "2026-02-28T15:04:05.123Z",
+            "source": {
+                "app": "amppattaya-web",
+                "env": "prod",
+                "page": "/en",
+                "locale": "en",
+                "placement": "footer_form",
+            },
+            "actor": {
+                "anonymous_id": "anon_test",
+                "session_id": "sess_test",
+                "user_agent": "pytest",
+            },
+            "context": {"referrer": "https://www.google.com/"},
+            "payload": {
+                "intent": "invest",
+                "fields_present": ["name", "email", "budget_range", "purpose", "timeline"],
+                "form": {
+                    "name": "John Doe",
+                    "email": "john@example.com",
+                    "whatsapp": "+31612345678",
+                    "budget_range": "4-6M THB",
+                    "purpose": "invest",
+                    "timeline": "1-3 months",
+                },
+            },
+        },
+    )
+    assert response.status_code == 202, response.text
+    payload = response.json()
+    assert payload["ok"] is True
+    assert payload["endpoint"] == "/api/v1/events"
+    assert payload["event"] == "home_form_submit"
+    assert payload["event_name"] == "home_form_submit"
+    assert payload["event_id"] == "evt_test_123"
+    assert payload["schema_version"] == "1.0"
+    assert payload["locale"] == "en"
+    assert payload["path"] == "/en"
+    assert len(payload["idempotency_key"]) == 64

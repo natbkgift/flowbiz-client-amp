@@ -289,7 +289,7 @@ def test_b14_repo_import_seed_files_are_safe_and_runtime_ready() -> None:
     summary = seed_content(input_dir=Path("data/import"), dry_run=True)
     assert summary["company_info"]["created"] >= 7
     assert summary["team_members"]["created"] >= 5
-    assert summary["testimonials"]["created"] == 0
+    assert summary["testimonials"]["created"] >= 5
     assert summary["articles"]["created"] >= 3
 
 

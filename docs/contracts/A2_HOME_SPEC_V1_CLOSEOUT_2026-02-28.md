@@ -23,7 +23,7 @@ Scope: Finalize A2 Home on real runtime surface + tracking verification + data-s
 - Seed workflow now includes a dedicated script for content ops to upsert company/team/testimonial data from JSON files.
 - Seed workflow now enforces local-media-only validation for team photo URLs (`photo_url`) to prevent hotlink bypass through seed path.
 - Seed workflow now supports `Article` upsert from `articles.json` with local-media-only validation for `hero_image_url`.
-- Import data under `data/import/` now includes approved company-owned source mapping for `CompanyInfo`, `TeamMember`, and `Article`, while `Testimonial` remains intentionally empty until approved customer reviews exist.
+- Import data under `data/import/` now includes approved company-owned source mapping for `CompanyInfo`, `TeamMember`, `Article`, and approved Google Business `Testimonial` records.
 
 ## Runtime Policy
 
@@ -91,7 +91,7 @@ Evidence source:
   - Inputs: `company_info.json`, `team_members.json`, `testimonials.json`, `articles.json`
   - Supports `--dry-run` and idempotent upsert behavior.
   - Enforces local-only media rule for `TeamMember.photo_url`; external URLs are rejected with row-level error context.
-  - Default testimonial seed is intentionally empty to avoid rendering brand statements as fake reviews.
+  - Testimonial seed now uses approved Google Business reviews instead of brand statements.
 - Operational handoff mapping is documented in `docs/contracts/A2_OPERATIONAL_HANDOFF_2026-02-28.md`.
 
 ### Media Safety
@@ -100,7 +100,10 @@ Evidence source:
 - Local runtime now mounts `/media` to a repo media root so browser-based checks can load local media paths without external hotlinks.
 - `.webp` responses are served with `image/webp` content type in local runtime verification.
 - `.avif` responses are served with `image/avif` content type in local runtime verification.
-- Repository does not include deploy/CDN configuration files (no Docker/deploy manifests found in repo root) that could prove production edge MIME behavior.
+- Production `amppattaya.com` now serves:
+  - `.webp` with `Content-Type: image/webp`
+  - `.avif` with `Content-Type: image/avif`
+  verified on 2026-02-28 from `flowbiz-vps` after enabling `/media/` static serving in Nginx.
 
 #### Production verification commands (required outside repo)
 - `curl -I https://<your-domain>/media/<sample>.webp`
@@ -167,9 +170,9 @@ Result:
 1. Destination pages are production-structured but still depend on actual editorial publication quality (depth, legal review, and localized tone) to fully remove remaining fallback copy.
 2. Local media MIME serving for `.webp/.avif` is verified in local runtime; production CDN/storage header behavior must still be verified in deployed environment.
 3. Contact channels on Home still use external WhatsApp/LINE links by design; those destinations remain outside app runtime control.
-4. Reviews/trust/process/legal content still require final editorial/legal approval cycle for complete production handoff.
-4. Visual prominence is enforced by deterministic CSS/test contract rather than visual diffing; CI screenshots would strengthen proof.
-5. External/downstream CRM consumers with strict response parsing remain out-of-repo and must validate additive inquiry fields against their own deserializers.
+4. Reviews are now seeded from approved Google Business records, but trust/process/legal content still require final editorial/legal approval cycle for complete production handoff.
+5. Visual prominence is enforced by deterministic CSS/test contract rather than visual diffing; CI screenshots would strengthen proof.
+6. External/downstream CRM consumers with strict response parsing remain out-of-repo and must validate additive inquiry fields against their own deserializers.
 
 ## DoD Checklist (Strict)
 

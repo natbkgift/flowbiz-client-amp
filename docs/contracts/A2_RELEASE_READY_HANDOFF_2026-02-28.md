@@ -75,17 +75,15 @@ This is the single handoff pack to use for the remaining A2 completion work.
 ### Content / Legal
 
 1. Replace reference-style legal content with final legal-approved body
-2. Publish approved customer testimonials; default import leaves this empty on purpose until real reviews exist
-3. Replace seeded name-and-role team profiles with final localized bios and approved local photos
-4. Review and finalize EN/TH about/contact copy
-5. Review and finalize process/trust copy
-6. Publish additional articles so Insights is not dependent on a minimal seed set
+2. Replace seeded name-and-role team profiles with final localized bios and approved local photos
+3. Review and finalize EN/TH about/contact copy
+4. Review and finalize process/trust copy
+5. Publish additional articles so Insights is not dependent on a minimal seed set
 
 ### Infra / DevOps
 
-1. Verify `.webp` edge headers in deployed environment
-2. Verify `.avif` edge headers in deployed environment
-3. Confirm CDN/proxy does not rewrite content-type incorrectly
+1. Keep `amppattaya.com` `/media/` route aligned with current Nginx config
+2. Re-verify `.webp` / `.avif` headers after any CDN, proxy, or web-server change
 
 ### CRM / Integrations
 
@@ -119,6 +117,11 @@ Expected:
 - `Content-Type: image/avif` for `.avif`
 - no fallback to `application/octet-stream`
 
+Current verified host:
+
+- `https://amppattaya.com/media/project-covers/the-orient-jomtien/cover_6359a2b6dcc5.webp`
+- `https://amppattaya.com/media/system/a2-probe.avif`
+
 ### Runtime smoke
 
 ```powershell
@@ -140,9 +143,8 @@ Verify at least one consumer path with:
 A2 may be marked `closed` only when:
 
 1. all owner actions above are complete
-2. production media header checks pass
-3. downstream CRM verification is confirmed
-4. final editorial/legal/admin pass is complete
+2. downstream CRM verification is confirmed
+3. final editorial/legal/admin pass is complete
 
 Until then, the correct status is:
 

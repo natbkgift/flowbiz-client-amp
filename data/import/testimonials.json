@@ -1,1 +1,56 @@
-[]
+[
+  {
+    "status": "published",
+    "persona": "general_client",
+    "intent": "general",
+    "quote": "Great service! The team was professional, helpful, and made everything easy. Highly recommend!",
+    "attribution_name": "Naty Web",
+    "context": "Google Business review for Asset Management Property, Local Guide, 16 reviews, 39 photos",
+    "display_order": 1
+  },
+  {
+    "status": "published",
+    "persona": "general_client",
+    "intent": "general",
+    "quote": "Five stars all the way! From start to finish, they made everything so smooth and easy. Always ready to help, incredibly professional, and the fact that they speak Russian was a huge plus. Honestly one of the best experiences I’ve had in Pattaya.",
+    "attribution_name": "Josh Mckinley",
+    "context": "Google Business review for Asset Management Property, posted 7 months ago",
+    "display_order": 2
+  },
+  {
+    "status": "published",
+    "persona": "general_client",
+    "intent": "general",
+    "quote": "Absolutely impressed by this real estate team in Pattaya! Professional, attentive, and genuinely friendly — they made the whole experience smooth and enjoyable. Highly recommended!",
+    "attribution_name": "Fari Doulou",
+    "context": "Google Business review for Asset Management Property, posted 7 months ago",
+    "display_order": 3
+  },
+  {
+    "status": "published",
+    "persona": "general_client",
+    "intent": "general",
+    "quote": "พนักงานทุกคนน่ารักมากๆค่ะ ดูแลดีมาก",
+    "attribution_name": "Focus Chanrakkun",
+    "context": "Google Business review for Asset Management Property, posted a year ago",
+    "display_order": 4
+  },
+  {
+    "status": "published",
+    "persona": "general_client",
+    "intent": "general",
+    "quote": "Excellent company! Everything went smoothly and without any hassle. Very professional and always willing to help. I especially appreciate that they speak Russian—it made the whole process so much easier. I definitely recommend them in Pattaya!",
+    "attribution_name": "Wesi Wesi",
+    "context": "Google Business review for Asset Management Property, translated from Russian, posted 7 months ago",
+    "display_order": 5
+  },
+  {
+    "status": "published",
+    "persona": "general_client",
+    "intent": "general",
+    "quote": "A top-notch team – professional, friendly, and they speak French! Thank you for your dedication and invaluable help in Pattaya. I highly recommend them.",
+    "attribution_name": "Andrea Kawala",
+    "context": "Google Business review for Asset Management Property, translated from French, edited 7 months ago",
+    "display_order": 6
+  }
+]
