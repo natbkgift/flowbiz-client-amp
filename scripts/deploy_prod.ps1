@@ -19,13 +19,6 @@ if ($dirty) {
   throw "Local worktree must be clean before deploy."
 }
 
-if (-not $RemoteUrl) {
-  $RemoteUrl = (& git remote get-url origin 2>&1 | Out-String).Trim()
-  if ($LASTEXITCODE -ne 0 -or -not $RemoteUrl) {
-    throw "Unable to resolve git remote origin URL."
-  }
-}
-
 if (-not $TargetSha) {
   $TargetSha = (& git rev-parse HEAD 2>&1 | Out-String).Trim()
   if ($LASTEXITCODE -ne 0 -or -not $TargetSha) {
@@ -42,6 +35,10 @@ VPS_ACTIVE_PATH="$3"
 VPS_RELEASE_ROOT="$4"
 VPS_API_PORT="$5"
 COMPOSE_PROJECT_NAME="$6"
+
+if [[ -z "$REMOTE_URL" ]]; then
+  REMOTE_URL="$(git -C "$VPS_ACTIVE_PATH" remote get-url origin)"
+fi
 
 release_path="${VPS_RELEASE_ROOT}/flowbiz-client-amp-release-${TARGET_SHA:0:8}-$(date +%Y%m%d%H%M%S)"
 

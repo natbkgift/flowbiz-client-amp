@@ -11,7 +11,7 @@ VPS_ACTIVE_PATH="${VPS_ACTIVE_PATH:-/opt/flowbiz/clients/flowbiz-client-amp}"
 VPS_RELEASE_ROOT="${VPS_RELEASE_ROOT:-/opt/flowbiz/clients}"
 VPS_API_PORT="${VPS_API_PORT:-8001}"
 COMPOSE_PROJECT_NAME="${COMPOSE_PROJECT_NAME:-flowbiz-client-amp}"
-REMOTE_URL="${REMOTE_URL_OVERRIDE:-$(git remote get-url origin)}"
+REMOTE_URL="${REMOTE_URL_OVERRIDE:-}"
 TARGET_SHA="${TARGET_SHA_OVERRIDE:-$(git rev-parse HEAD)}"
 
 while [[ $# -gt 0 ]]; do
@@ -47,6 +47,10 @@ VPS_ACTIVE_PATH="$3"
 VPS_RELEASE_ROOT="$4"
 VPS_API_PORT="$5"
 COMPOSE_PROJECT_NAME="$6"
+
+if [[ -z "$REMOTE_URL" ]]; then
+  REMOTE_URL="$(git -C "$VPS_ACTIVE_PATH" remote get-url origin)"
+fi
 
 release_path="${VPS_RELEASE_ROOT}/flowbiz-client-amp-release-${TARGET_SHA:0:8}-$(date +%Y%m%d%H%M%S)"
 
