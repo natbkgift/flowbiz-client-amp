@@ -23,6 +23,7 @@ from packages.core.models import (
     CompanyInfo,
     Developer,
     HomeComposerConfig,
+    MediaAsset,
     Project,
     Property,
     TeamMember,
@@ -46,6 +47,7 @@ _PUBLIC_ROUTE_SUFFIXES = {
     "/projects",
     "/developers",
     "/smart-finder",
+    "/compare",
     "/blog",
     "/guides",
     "/invest/guides",
@@ -1551,63 +1553,873 @@ def _render_project_detail_page(
     return HTMLResponse(_render_page_shell(locale, title=title, intro=intro, body=body))
 
 
-def _render_smart_finder_page(locale: str, request: Request) -> HTMLResponse:
+def _render_smart_finder_page(locale: str, request: Request, db: Session) -> HTMLResponse:
+    copy, body = _smart_finder_runtime(locale=locale, request=request, db=db)
+    return HTMLResponse(
+        _render_page_shell(locale, title=copy["title"], intro=copy["intro"], body=body)
+    )
+
+
+def _render_compare_page(locale: str, request: Request, db: Session) -> HTMLResponse:
+    copy, body, compare_count = _compare_runtime(locale=locale, request=request, db=db)
+    html = _render_page_shell(locale, title=copy["title"], intro=copy["intro"], body=body)
+    html = html.replace("<body>", f'<body data-compare-count="{compare_count}">', 1)
+    return HTMLResponse(html)
+
+
+def _finder_budget_band_from_price(value: float | None) -> str | None:
+    if value is None:
+        return None
+    if value < 3_000_000:
+        return "lt_3m"
+    if value < 6_000_000:
+        return "3m_6m"
+    if value < 10_000_000:
+        return "6m_10m"
+    return "gt_10m"
+
+
+def _finder_preference_tags(prop: Property) -> list[str]:
+    values: list[str] = []
+    features = prop.features if isinstance(prop.features, dict) else {}
+    for key in ["tags", "amenities", "highlights", "lifestyle"]:
+        raw = features.get(key)
+        if isinstance(raw, list):
+            values.extend(str(item or "").strip().lower() for item in raw)
+    for value in [prop.property_type, prop.furnishing, prop.view]:
+        text = str(value or "").strip().lower()
+        if text:
+            values.append(text)
+    haystack = " ".join(values)
+    tags: set[str] = set()
+    if "sea" in haystack and "view" in haystack:
+        tags.add("sea_view")
+    if "beach" in haystack:
+        tags.add("near_beach")
+    if "pet" in haystack:
+        tags.add("pet_friendly")
+    if "park" in haystack:
+        tags.add("parking")
+    if "furnished" in haystack or str(prop.furnishing or "").strip().lower() == "fully_furnished":
+        tags.add("furnished")
+    floor = prop.floor if prop.floor is not None else prop.floor_number
+    if floor is not None and floor >= 20:
+        tags.add("high_floor")
+    return sorted(tags)
+
+
+def _build_smart_finder_candidates(locale: str, request: Request, db: Session) -> list[dict]:
+    rows = db.scalars(
+        select(Property)
+        .where(Property.deleted_at.is_(None), Property.status == "active")
+        .order_by(desc(Property.updated_at), desc(Property.created_at))
+        .limit(120)
+    ).all()
+    if not rows:
+        return []
+
+    area_ids = [row.area_id for row in rows if row.area_id is not None]
+    project_ids = [row.project_id for row in rows if row.project_id is not None]
+    area_lookup: dict[str, str] = {}
+    project_lookup: dict[str, str] = {}
+
+    if area_ids:
+        area_rows = db.scalars(
+            select(Area).where(Area.id.in_(area_ids), Area.deleted_at.is_(None))
+        ).all()
+        area_lookup = {
+            str(row.id): str(row.name or "").strip()
+            for row in area_rows
+            if str(row.name or "").strip()
+        }
+
+    if project_ids:
+        project_rows = db.scalars(
+            select(Project).where(Project.id.in_(project_ids), Project.deleted_at.is_(None))
+        ).all()
+        project_lookup = {
+            str(row.id): str(row.name or "").strip()
+            for row in project_rows
+            if str(row.name or "").strip()
+        }
+
+    out: list[dict] = []
+    for row in rows:
+        price_value: float | None = None
+        try:
+            price_value = float(row.price) if row.price is not None else None
+        except (TypeError, ValueError, InvalidOperation):
+            price_value = None
+        out.append(
+            {
+                "id": str(row.id),
+                "slug": str(row.slug or row.id),
+                "href": f"/{locale}/property/{_property_ref_for_route(row)}",
+                "title": _property_title_for_locale(row, locale),
+                "description": _property_description_for_locale(row, locale)
+                or (
+                    "Property details pending publication."
+                    if locale == "en"
+                    else "รายละเอียดทรัพย์รอเผยแพร่"
+                ),
+                "media": _property_media_path(row, request=request),
+                "price_text": _format_money(row.price, fallback="-"),
+                "price_value": price_value,
+                "budget_band": _finder_budget_band_from_price(price_value),
+                "intent_tags": (
+                    ["rent"] if str(row.type or "").strip() == "rent" else ["buy", "invest"]
+                ),
+                "preference_tags": _finder_preference_tags(row),
+                "stats": " • ".join(_property_stats(row)) or "-",
+                "area": area_lookup.get(str(row.area_id), str(row.city or "").strip() or "-"),
+                "project": project_lookup.get(str(row.project_id), "-"),
+            }
+        )
+    return out
+
+
+def _smart_finder_runtime(
+    *, locale: str, request: Request, db: Session
+) -> tuple[dict[str, str], str]:
     selected_intent = str(request.query_params.get("intent") or "").strip().lower()
-    intents = [
-        (
-            "invest",
-            "Invest" if locale == "en" else "ลงทุน",
-            "Shortlist yield-focused opportunities and next-step review."
-            if locale == "en"
-            else "คัด shortlist สำหรับการลงทุนและวางขั้นตอนถัดไป",
-        ),
-        (
-            "buy",
-            "Buy" if locale == "en" else "ซื้อ",
-            "Focus on ownership fit, budget, and legal next steps."
-            if locale == "en"
-            else "โฟกัสความเหมาะสม งบประมาณ และขั้นตอนกฎหมาย",
-        ),
-        (
-            "rent",
-            "Rent" if locale == "en" else "เช่า",
-            "Filter for move-in timing, budget band, and lifestyle needs."
-            if locale == "en"
-            else "คัดตามช่วงย้ายเข้า งบประมาณ และรูปแบบการอยู่อาศัย",
-        ),
-        (
-            "sell",
-            "Sell" if locale == "en" else "ขาย",
-            "Prepare pricing context, asset facts, and launch readiness."
-            if locale == "en"
-            else "เตรียมบริบทด้านราคา ข้อมูลทรัพย์ และความพร้อมก่อนปล่อยขาย",
-        ),
-    ]
-    selected_copy = next(
-        (description for key, _, description in intents if key == selected_intent), None
+    if selected_intent not in {"buy", "rent", "invest", "sell"}:
+        selected_intent = ""
+    selected_matching_mode = (
+        str(request.query_params.get("matching_mode") or "").strip().lower() or "weighted"
     )
-    selection_note = selected_copy or (
-        "Choose the path that matches your goal, then continue to consultation or published inventory."
-        if locale == "en"
-        else "เลือกเส้นทางที่ตรงกับเป้าหมายของคุณ แล้วไปต่อที่ consultation หรือ inventory ที่เผยแพร่"
+    if selected_matching_mode not in {"weighted", "strict"}:
+        selected_matching_mode = "weighted"
+
+    copy = {
+        "title": "Smart Finder",
+        "intro": "A guided public route that narrows the next step before consultation.",
+        "lead": "Choose the path that matches your goal, then continue to consultation or published inventory.",
+        "step_budget": "Step 1: Budget",
+        "step_purpose": "Step 2: Purpose",
+        "step_timeline": "Step 3: Timeline",
+        "step_preferences": "Step 4: Preferences",
+        "budget": "Budget range",
+        "purpose": "Purpose",
+        "timeline": "Timeline",
+        "preferences": "Preferences",
+        "matching_mode": "Matching mode",
+        "matching_weighted": "Weighted shortlist",
+        "matching_strict": "Strict match",
+        "select_budget": "Select budget",
+        "select_timeline": "Select timeline",
+        "budget_lt_3m": "Below THB 3M",
+        "budget_3m_6m": "THB 3M - 6M",
+        "budget_6m_10m": "THB 6M - 10M",
+        "budget_gt_10m": "Above THB 10M",
+        "purpose_buy": "Buy",
+        "purpose_buy_note": "Focus on ownership fit, budget, and legal next steps.",
+        "purpose_rent": "Rent",
+        "purpose_rent_note": "Filter for move-in timing, budget band, and lifestyle needs.",
+        "purpose_invest": "Invest",
+        "purpose_invest_note": "Shortlist yield-focused opportunities and next-step review.",
+        "purpose_sell": "Sell",
+        "purpose_sell_note": "Prepare pricing context, asset facts, and launch readiness.",
+        "timeline_0_3m": "0-3 months",
+        "timeline_3_6m": "3-6 months",
+        "timeline_6m_plus": "6+ months",
+        "pref_sea_view": "Sea view",
+        "pref_near_beach": "Near beach",
+        "pref_high_floor": "High floor",
+        "pref_furnished": "Furnished",
+        "pref_pet_friendly": "Pet friendly",
+        "pref_parking": "Parking",
+        "back": "Back",
+        "next": "Next step",
+        "show_results": "Show shortlist",
+        "required_error": "Please complete this step before continuing.",
+        "loading": "Matching listings to your inputs...",
+        "runtime_error": "Unable to process Smart Finder right now. Please retry.",
+        "summary_title": "Result summary",
+        "summary_intro": "Your guided inputs are mapped below. Continue with shortlist or consultation.",
+        "score_label": "Match score",
+        "results_title": "Shortlisted matches",
+        "results_empty": "No matches for the current criteria. Adjust filters or request consultation.",
+        "empty_hint": "No exact matches yet. We can still prepare an assisted shortlist from current inventory.",
+        "adjust": "Adjust filters",
+        "shortlist_cta": "Request consultation with this shortlist",
+        "compare_cta": "Compare shortlisted units",
+        "view_details": "View details",
+        "browse_projects": "Browse published projects",
+        "sell_cta": "Go to Sell flow",
+    }
+    if locale == "th":
+        copy.update(
+            {
+                "intro": "เส้นทาง public แบบ guided เพื่อคัด step ถัดไปก่อนเข้าสู่ consultation",
+                "lead": "เลือกเส้นทางที่ตรงกับเป้าหมายของคุณ แล้วไปต่อที่ consultation หรือ inventory ที่เผยแพร่",
+                "step_budget": "ขั้นตอน 1: งบประมาณ",
+                "step_purpose": "ขั้นตอน 2: วัตถุประสงค์",
+                "step_timeline": "ขั้นตอน 3: ไทม์ไลน์",
+                "step_preferences": "ขั้นตอน 4: ความต้องการ",
+                "budget": "ช่วงงบประมาณ",
+                "purpose": "วัตถุประสงค์",
+                "timeline": "ไทม์ไลน์",
+                "preferences": "ความต้องการ",
+                "matching_mode": "โหมดการคัดเลือก",
+                "matching_weighted": "ถ่วงน้ำหนัก",
+                "matching_strict": "ตรงเงื่อนไขแบบ strict",
+                "select_budget": "เลือกงบประมาณ",
+                "select_timeline": "เลือกไทม์ไลน์",
+                "budget_lt_3m": "ต่ำกว่า 3 ล้านบาท",
+                "budget_3m_6m": "3 - 6 ล้านบาท",
+                "budget_6m_10m": "6 - 10 ล้านบาท",
+                "budget_gt_10m": "มากกว่า 10 ล้านบาท",
+                "purpose_buy": "ซื้อ",
+                "purpose_buy_note": "โฟกัสความเหมาะสมในการถือครอง งบ และขั้นตอนกฎหมาย",
+                "purpose_rent": "เช่า",
+                "purpose_rent_note": "คัดตามช่วงย้ายเข้า งบ และไลฟ์สไตล์การอยู่อาศัย",
+                "purpose_invest": "ลงทุน",
+                "purpose_invest_note": "คัด shortlist การลงทุนพร้อมบริบทความเสี่ยง",
+                "purpose_sell": "ขาย",
+                "purpose_sell_note": "เตรียมบริบทด้านราคาและความพร้อมก่อนปล่อยขาย",
+                "timeline_0_3m": "0-3 เดือน",
+                "timeline_3_6m": "3-6 เดือน",
+                "timeline_6m_plus": "6 เดือนขึ้นไป",
+                "pref_sea_view": "วิวทะเล",
+                "pref_near_beach": "ใกล้หาด",
+                "pref_high_floor": "ชั้นสูง",
+                "pref_furnished": "พร้อมเฟอร์นิเจอร์",
+                "pref_pet_friendly": "เลี้ยงสัตว์ได้",
+                "pref_parking": "ที่จอดรถ",
+                "back": "ย้อนกลับ",
+                "next": "ขั้นตอนถัดไป",
+                "show_results": "ดู shortlist",
+                "required_error": "กรุณากรอกข้อมูลขั้นตอนนี้ก่อนดำเนินการต่อ",
+                "loading": "กำลังจับคู่รายการตามเงื่อนไขของคุณ...",
+                "runtime_error": "ยังไม่สามารถประมวลผล Smart Finder ได้ กรุณาลองใหม่",
+                "summary_title": "สรุปผลการคัดกรอง",
+                "summary_intro": "สรุปเงื่อนไขที่เลือกไว้ และไปต่อที่ shortlist หรือ consultation ได้ทันที",
+                "score_label": "คะแนนความตรงเงื่อนไข",
+                "results_title": "รายการที่คัดได้",
+                "results_empty": "ยังไม่พบรายการที่ตรงเงื่อนไข กรุณาปรับตัวกรองหรือขอคำปรึกษา",
+                "empty_hint": "แม้ยังไม่ตรงทั้งหมด ทีมงานยังช่วยจัด shortlist จาก inventory ล่าสุดให้ได้",
+                "adjust": "ปรับตัวกรอง",
+                "shortlist_cta": "ขอคำปรึกษาพร้อม shortlist นี้",
+                "compare_cta": "เปรียบเทียบยูนิตที่คัดได้",
+                "view_details": "ดูรายละเอียด",
+                "browse_projects": "ดูโครงการที่เผยแพร่",
+                "sell_cta": "ไปที่ขั้นตอนการขาย",
+            }
+        )
+
+    candidates = _build_smart_finder_candidates(locale, request, db)
+    candidates_json = json.dumps(candidates, ensure_ascii=False).replace("</", "<\\/")
+
+    styles = (
+        "<style>"
+        ".finder-stepper{list-style:none;margin:0;padding:0;display:grid;gap:8px;grid-template-columns:1fr}"
+        ".finder-step{padding:10px 12px;border:1px solid #d1d5db;border-radius:10px;background:#fff}"
+        ".finder-step[aria-current='step']{border-color:#0f6d5a;box-shadow:0 0 0 1px rgba(15,109,90,.2)}"
+        ".finder-form{display:grid;gap:12px}.finder-fieldset{display:grid;gap:8px;border:1px solid #d1d5db;border-radius:12px;padding:12px}"
+        ".finder-fieldset legend{font-weight:700;padding:0 6px}.finder-options{display:grid;gap:10px}"
+        ".finder-options label{display:grid;gap:4px;padding:10px;border:1px solid #d1d5db;border-radius:10px}"
+        ".finder-actions{display:flex;gap:10px;flex-wrap:wrap}.finder-results-grid{display:grid;gap:12px;grid-template-columns:1fr}"
+        "@media (min-width:768px){.finder-stepper{grid-template-columns:repeat(2,minmax(0,1fr))}.finder-results-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}"
+        "@media (min-width:1200px){.finder-stepper{grid-template-columns:repeat(4,minmax(0,1fr))}.finder-results-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}"
+        "@media (min-width:1920px){.finder-results-grid{grid-template-columns:repeat(4,minmax(0,1fr))}}"
+        "@media (min-width:2560px){.finder-results-grid{grid-template-columns:repeat(5,minmax(0,1fr))}}"
+        "</style>"
     )
-    cards = "".join(
-        f'<article class="card"><h2>{escape(label)}</h2><p>{escape(description)}</p><a class="btn" href="/{locale}/smart-finder?intent={escape(key)}">{"Use this path" if locale == "en" else "เลือกเส้นทางนี้"}</a></article>'
-        for key, label, description in intents
-    )
+
     body = (
-        f'<section class="card"><h2>{"Smart Finder" if locale == "en" else "Smart Finder"}</h2><p>{escape(selection_note)}</p>'
-        f'<div class="grid"><a class="btn" href="/{locale}#consult-title">{"Request consultation" if locale == "en" else "ขอคำปรึกษา"}</a>'
-        f'<a class="btn" href="/{locale}/projects">{"Browse published projects" if locale == "en" else "ดูโครงการที่เผยแพร่"}</a></div></section>'
-        f'<section class="grid">{cards}</section>'
+        f"{styles}"
+        f'<section class="card"><h2>{escape(copy["title"])}</h2><p>{escape(copy["lead"])}</p></section>'
+        '<section class="card">'
+        '<ol id="finder-stepper" class="finder-stepper" aria-label="Smart Finder Steps">'
+        f'<li class="finder-step" data-step-index="0" data-step-key="budget" aria-current="step">{escape(copy["step_budget"])}</li>'
+        f'<li class="finder-step" data-step-index="1" data-step-key="purpose" aria-current="false">{escape(copy["step_purpose"])}</li>'
+        f'<li class="finder-step" data-step-index="2" data-step-key="timeline" aria-current="false">{escape(copy["step_timeline"])}</li>'
+        f'<li class="finder-step" data-step-index="3" data-step-key="preferences" aria-current="false">{escape(copy["step_preferences"])}</li>'
+        "</ol>"
+        '<form id="finder-form" class="finder-form" novalidate>'
+        f'<fieldset class="finder-fieldset" data-finder-step="0"><legend>{escape(copy["budget"])}</legend><label for="finder-budget">{escape(copy["budget"])}</label><select id="finder-budget" name="budget" required><option value="">{escape(copy["select_budget"])}</option><option value="lt_3m">{escape(copy["budget_lt_3m"])}</option><option value="3m_6m">{escape(copy["budget_3m_6m"])}</option><option value="6m_10m">{escape(copy["budget_6m_10m"])}</option><option value="gt_10m">{escape(copy["budget_gt_10m"])}</option></select></fieldset>'
+        f'<fieldset class="finder-fieldset" data-finder-step="1" hidden><legend>{escape(copy["purpose"])}</legend><div class="finder-options"><label for="finder-purpose-buy"><input id="finder-purpose-buy" type="radio" name="purpose" value="buy" required /><span><strong>{escape(copy["purpose_buy"])}</strong></span><span>{escape(copy["purpose_buy_note"])}</span></label><label for="finder-purpose-rent"><input id="finder-purpose-rent" type="radio" name="purpose" value="rent" required /><span><strong>{escape(copy["purpose_rent"])}</strong></span><span>{escape(copy["purpose_rent_note"])}</span></label><label for="finder-purpose-invest"><input id="finder-purpose-invest" type="radio" name="purpose" value="invest" required /><span><strong>{escape(copy["purpose_invest"])}</strong></span><span>{escape(copy["purpose_invest_note"])}</span></label><label for="finder-purpose-sell"><input id="finder-purpose-sell" type="radio" name="purpose" value="sell" required /><span><strong>{escape(copy["purpose_sell"])}</strong></span><span>{escape(copy["purpose_sell_note"])}</span></label></div></fieldset>'
+        f'<fieldset class="finder-fieldset" data-finder-step="2" hidden><legend>{escape(copy["timeline"])}</legend><label for="finder-timeline">{escape(copy["timeline"])}</label><select id="finder-timeline" name="timeline" required><option value="">{escape(copy["select_timeline"])}</option><option value="0_3m">{escape(copy["timeline_0_3m"])}</option><option value="3_6m">{escape(copy["timeline_3_6m"])}</option><option value="6m_plus">{escape(copy["timeline_6m_plus"])}</option></select></fieldset>'
+        f'<fieldset class="finder-fieldset" data-finder-step="3" hidden><legend>{escape(copy["preferences"])}</legend><div class="finder-options"><label for="finder-pref-sea-view"><input id="finder-pref-sea-view" type="checkbox" name="preferences" value="sea_view" /><span>{escape(copy["pref_sea_view"])}</span></label><label for="finder-pref-near-beach"><input id="finder-pref-near-beach" type="checkbox" name="preferences" value="near_beach" /><span>{escape(copy["pref_near_beach"])}</span></label><label for="finder-pref-high-floor"><input id="finder-pref-high-floor" type="checkbox" name="preferences" value="high_floor" /><span>{escape(copy["pref_high_floor"])}</span></label><label for="finder-pref-furnished"><input id="finder-pref-furnished" type="checkbox" name="preferences" value="furnished" /><span>{escape(copy["pref_furnished"])}</span></label><label for="finder-pref-pet-friendly"><input id="finder-pref-pet-friendly" type="checkbox" name="preferences" value="pet_friendly" /><span>{escape(copy["pref_pet_friendly"])}</span></label><label for="finder-pref-parking"><input id="finder-pref-parking" type="checkbox" name="preferences" value="parking" /><span>{escape(copy["pref_parking"])}</span></label></div><label for="finder-matching-mode">{escape(copy["matching_mode"])}</label><select id="finder-matching-mode" name="matching_mode"><option value="weighted"{" selected" if selected_matching_mode == "weighted" else ""}>{escape(copy["matching_weighted"])}</option><option value="strict"{" selected" if selected_matching_mode == "strict" else ""}>{escape(copy["matching_strict"])}</option></select></fieldset>'
+        f'<div class="finder-actions"><button id="finder-back" class="btn btn-secondary-hero" type="button">{escape(copy["back"])}</button><button id="finder-next" class="btn btn-secondary-hero" type="button">{escape(copy["next"])}</button><button id="finder-submit" class="btn" type="submit" hidden>{escape(copy["show_results"])}</button></div>'
+        '<p id="finder-status" class="muted" role="status" aria-live="polite"></p>'
+        "</form>"
+        f'<div id="finder-loading" class="state-loading" role="status" aria-live="polite" hidden>{escape(copy["loading"])}</div>'
+        f'<div id="finder-error" class="state-error" hidden>{escape(copy["runtime_error"])}</div>'
+        "</section>"
+        f'<section id="finder-summary" class="card" hidden><h2>{escape(copy["summary_title"])}</h2><p>{escape(copy["summary_intro"])}</p><ul id="finder-summary-list"></ul><div class="finder-actions"><a id="finder-shortlist-cta" class="btn" data-event="finder_consultation_cta_click" data-placement="finder_summary" data-cta-id="finder_shortlist_consultation" href="/{locale}/contact?intent=consultation&source=smart-finder">{escape(copy["shortlist_cta"])}</a><a id="finder-compare-cta" class="btn btn-secondary-hero" data-event="finder_compare_cta_click" data-placement="finder_summary" data-cta-id="finder_compare_shortlist" href="/{locale}/compare">{escape(copy["compare_cta"])}</a></div></section>'
+        f'<section id="finder-empty" class="card" hidden><h2>{escape(copy["results_empty"])}</h2><p>{escape(copy["empty_hint"])}</p><div class="finder-actions"><button id="finder-adjust-btn" class="btn btn-secondary-hero" type="button" data-event="finder_adjust_filters_click" data-placement="finder_empty" data-cta-id="finder_adjust">{escape(copy["adjust"])}</button><a class="btn" data-event="finder_consultation_cta_click" data-placement="finder_empty" data-cta-id="finder_empty_consultation" href="/{locale}/contact?intent=consultation&source=smart-finder">{escape(copy["shortlist_cta"])}</a><a id="finder-sell-cta" class="btn btn-secondary-hero" data-event="finder_sell_cta_click" data-placement="finder_empty" data-cta-id="finder_sell_flow" href="/{locale}/sell?intent=sell">{escape(copy["sell_cta"])}</a></div></section>'
+        f'<section id="finder-results" class="card" hidden><h2>{escape(copy["results_title"])}</h2><div id="finder-results-grid" class="finder-results-grid"></div><div class="finder-actions"><a class="btn btn-secondary-hero" href="/{locale}/projects">{escape(copy["browse_projects"])}</a></div></section>'
+        f'<script id="finder-candidates-data" type="application/json">{candidates_json}</script>'
     )
-    title = "Smart Finder"
-    intro = (
-        "A guided public route that narrows the next step before consultation."
-        if locale == "en"
-        else "เส้นทาง public สำหรับคัด step ถัดไปก่อนเข้าสู่ consultation"
+
+    body += _smart_finder_script(
+        locale=locale,
+        selected_intent=selected_intent,
+        selected_matching_mode=selected_matching_mode,
+        copy=copy,
     )
-    return HTMLResponse(_render_page_shell(locale, title=title, intro=intro, body=body))
+    return copy, body
+
+
+def _smart_finder_script(
+    *,
+    locale: str,
+    selected_intent: str,
+    selected_matching_mode: str,
+    copy: dict[str, str],
+) -> str:
+    return f"""
+<script>
+(() => {{
+  const locale = document.documentElement.lang || 'en';
+  const endpoint = '/api/v1/events';
+  const path = location.pathname;
+  const selectedIntent = {selected_intent!r};
+  const selectedMatchingMode = {selected_matching_mode!r};
+  const candidates = JSON.parse(document.getElementById('finder-candidates-data')?.textContent || '[]');
+  const form = document.getElementById('finder-form');
+  const summaryEl = document.getElementById('finder-summary');
+  const summaryList = document.getElementById('finder-summary-list');
+  const emptyEl = document.getElementById('finder-empty');
+  const resultsEl = document.getElementById('finder-results');
+  const resultsGrid = document.getElementById('finder-results-grid');
+  const statusEl = document.getElementById('finder-status');
+  const loadingEl = document.getElementById('finder-loading');
+  const errorEl = document.getElementById('finder-error');
+  const shortlistCta = document.getElementById('finder-shortlist-cta');
+  const compareCta = document.getElementById('finder-compare-cta');
+  const sellCta = document.getElementById('finder-sell-cta');
+  const backBtn = document.getElementById('finder-back');
+  const nextBtn = document.getElementById('finder-next');
+  const submitBtn = document.getElementById('finder-submit');
+  const steps = Array.from(document.querySelectorAll('[data-finder-step]'));
+  const stepItems = Array.from(document.querySelectorAll('[data-step-index]'));
+  let step = 0;
+  const scoring = {{
+    weights: {{ budget: 40, purpose: 35, timeline: 10, preferences: 15 }},
+    minScore: 40,
+  }};
+  function compact(raw){{const out={{}};for(const [k,v] of Object.entries(raw||{{}})){{if(v===undefined||v===null)continue;if(Array.isArray(v)&&v.length===0)continue;out[k]=v;}}return out;}}
+  function track(eventName,payload){{const payloadBody=compact(payload);const sourceBody=compact({{app:'flowbiz-public-runtime',env:'runtime',page:path,locale,placement:payloadBody.placement}});return fetch(endpoint,{{method:'POST',headers:{{'content-type':'application/json'}},body:JSON.stringify({{event_name:eventName,source:sourceBody,payload:payloadBody}}),keepalive:true}}).catch(()=>null);}}
+  function stepName(idx){{const node=stepItems[idx];return node?.getAttribute('data-step-key')||String(idx+1);}}
+  function setStep(nextStep, shouldTrack) {{
+    step = Math.max(0, Math.min(nextStep, steps.length - 1));
+    steps.forEach((node, idx) => {{ node.hidden = idx !== step; }});
+    stepItems.forEach((node, idx) => {{ node.setAttribute('aria-current', idx === step ? 'step' : 'false'); }});
+    if (backBtn instanceof HTMLButtonElement) backBtn.disabled = step === 0;
+    if (nextBtn instanceof HTMLButtonElement) nextBtn.hidden = step >= steps.length - 1;
+    if (submitBtn instanceof HTMLButtonElement) submitBtn.hidden = step < steps.length - 1;
+    const firstInput = steps[step]?.querySelector('input,select,textarea');
+    if (firstInput instanceof HTMLElement) firstInput.focus();
+    if (shouldTrack) track('finder_step_progress', {{ placement: 'smart_finder_steps', step: step + 1, step_name: stepName(step), intent: readData().purpose || undefined }});
+  }}
+  function readData() {{
+    if (!(form instanceof HTMLFormElement)) return {{budget:'',purpose:'',timeline:'',preferences:[],matching_mode:'weighted'}};
+    const data = new FormData(form);
+    return {{
+      budget: String(data.get('budget') || '').trim(),
+      purpose: String(data.get('purpose') || '').trim(),
+      timeline: String(data.get('timeline') || '').trim(),
+      preferences: data.getAll('preferences').map((item) => String(item || '').trim()).filter(Boolean),
+      matching_mode: String(data.get('matching_mode') || 'weighted').trim() || 'weighted',
+    }};
+  }}
+  function validateStep() {{
+    const data = readData();
+    let target = null;
+    if (step === 0 && !data.budget) target = form?.querySelector('[name="budget"]');
+    if (step === 1 && !data.purpose) target = form?.querySelector('[name="purpose"]');
+    if (step === 2 && !data.timeline) target = form?.querySelector('[name="timeline"]');
+    if (target instanceof HTMLElement) {{
+      target.focus();
+      target.setAttribute('aria-invalid', 'true');
+      if (statusEl instanceof HTMLElement) statusEl.textContent = {copy["required_error"]!r};
+      track('finder_step_progress', {{ placement: 'smart_finder_steps', step: step + 1, step_name: stepName(step), status: 'validation_error' }});
+      return false;
+    }}
+    if (statusEl instanceof HTMLElement) statusEl.textContent = '';
+    return true;
+  }}
+  function budgetMatch(item, selected) {{ if (!selected) return true; if (!item?.budget_band) return true; return item.budget_band === selected; }}
+  function intentMatch(item, selected) {{ if (!selected) return true; if (selected === 'sell') return false; const tags = Array.isArray(item?.intent_tags) ? item.intent_tags : []; return tags.includes(selected); }}
+  function timelineMatch(item, selected) {{
+    if (!selected) return true;
+    const type = String(item?.type || '').toLowerCase();
+    if (selected === '0_3m') return type === 'rent' || type === 'resale';
+    if (selected === '3_6m') return type === 'new' || type === 'resale' || type === 'rent';
+    return type === 'new' || type === 'resale';
+  }}
+  function preferenceStats(item, selected) {{
+    if (!Array.isArray(selected) || selected.length === 0) return {{ matchedCount: 0, ratio: 1, strictMatch: true }};
+    const tags = Array.isArray(item?.preference_tags) ? item.preference_tags : [];
+    const matchedCount = selected.filter((tag) => tags.includes(tag)).length;
+    return {{
+      matchedCount,
+      ratio: selected.length > 0 ? matchedCount / selected.length : 1,
+      strictMatch: matchedCount === selected.length,
+    }};
+  }}
+  function scoreItem(item, data) {{
+    const budgetMatched = budgetMatch(item, data.budget);
+    const purposeMatched = intentMatch(item, data.purpose);
+    const timelineMatched = timelineMatch(item, data.timeline);
+    const pref = preferenceStats(item, data.preferences);
+    let score = 0;
+    if (budgetMatched) score += scoring.weights.budget;
+    if (purposeMatched) score += scoring.weights.purpose;
+    if (timelineMatched) score += scoring.weights.timeline;
+    score += Math.round(scoring.weights.preferences * pref.ratio);
+    return {{
+      score,
+      budgetMatched,
+      purposeMatched,
+      timelineMatched,
+      preferencesStrictMatched: pref.strictMatch,
+      item,
+    }};
+  }}
+  function selectMatches(data) {{
+    const ranked = candidates.map((item) => scoreItem(item, data));
+    const strictMode = data.matching_mode === 'strict';
+    const filtered = ranked.filter((entry) => {{
+      if (data.purpose === 'sell') return false;
+      if (!entry.purposeMatched) return false;
+      if (strictMode) return entry.budgetMatched && entry.timelineMatched && entry.preferencesStrictMatched;
+      return entry.score >= scoring.minScore;
+    }});
+    filtered.sort((a,b) => b.score - a.score || Number(a.item?.price_value || 0) - Number(b.item?.price_value || 0));
+    return filtered.slice(0, 8);
+  }}
+  function renderSummary(data, count, topScore) {{
+    if (!(summaryList instanceof HTMLElement)) return;
+    const purposeLabel = {{ buy: {copy["purpose_buy"]!r}, rent: {copy["purpose_rent"]!r}, invest: {copy["purpose_invest"]!r}, sell: {copy["purpose_sell"]!r} }}[data.purpose] || '-';
+    const budgetLabel = {{ lt_3m: {copy["budget_lt_3m"]!r}, '3m_6m': {copy["budget_3m_6m"]!r}, '6m_10m': {copy["budget_6m_10m"]!r}, gt_10m: {copy["budget_gt_10m"]!r} }}[data.budget] || '-';
+    const timelineLabel = {{ '0_3m': {copy["timeline_0_3m"]!r}, '3_6m': {copy["timeline_3_6m"]!r}, '6m_plus': {copy["timeline_6m_plus"]!r} }}[data.timeline] || '-';
+    const modeLabel = data.matching_mode === 'strict' ? {copy["matching_strict"]!r} : {copy["matching_weighted"]!r};
+    summaryList.innerHTML = '<li><strong>' + {copy["budget"]!r} + ':</strong> ' + budgetLabel + '</li>'
+      + '<li><strong>' + {copy["purpose"]!r} + ':</strong> ' + purposeLabel + '</li>'
+      + '<li><strong>' + {copy["timeline"]!r} + ':</strong> ' + timelineLabel + '</li>'
+      + '<li><strong>' + {copy["preferences"]!r} + ':</strong> ' + ((data.preferences || []).join(', ') || '-') + '</li>'
+      + '<li><strong>' + {copy["matching_mode"]!r} + ':</strong> ' + modeLabel + '</li>'
+      + '<li><strong>' + {copy["score_label"]!r} + ':</strong> ' + String(topScore) + '</li>'
+      + '<li><strong>' + {copy["results_title"]!r} + ':</strong> ' + String(count) + '</li>';
+  }}
+  function renderResults(matches) {{
+    if (!(resultsGrid instanceof HTMLElement)) return;
+    resultsGrid.innerHTML = matches.map((entry) => {{
+      const item = entry.item || {{}};
+      return '<article class="card" data-card-id="' + String(item.id || '') + '" data-card-slug="' + String(item.slug || '') + '"><img class="media" src="' + String(item.media || '/media/placeholders/image-fallback.webp') + '" alt="' + String(item.title || 'Property') + '" width="640" height="360" loading="lazy" /><h3>' + String(item.title || 'Property') + '</h3><p class="muted"><strong>' + {copy["score_label"]!r} + ':</strong> ' + String(entry.score || 0) + '</p><p class="muted">' + String(item.price_text || '-') + ' • ' + String(item.stats || '-') + '</p><p class="muted">' + String(item.area || '-') + ' • ' + String(item.project || '-') + '</p><p>' + String(item.description || '') + '</p><a class="btn btn-secondary-hero btn-sm" data-event="finder_result_card_click" data-placement="finder_results" data-cta-id="finder_result_card" data-card-id="' + String(item.id || '') + '" data-card-slug="' + String(item.slug || '') + '" href="' + String(item.href || '#') + '">' + {copy["view_details"]!r} + '</a></article>';
+    }}).join('');
+  }}
+  function runFinder() {{
+    if (loadingEl instanceof HTMLElement) loadingEl.hidden = false;
+    if (errorEl instanceof HTMLElement) errorEl.hidden = true;
+    const data = readData();
+    requestAnimationFrame(() => {{
+      try {{
+        const matches = selectMatches(data);
+        const topScore = matches.length ? matches[0].score : 0;
+        renderSummary(data, matches.length, topScore);
+        if (summaryEl instanceof HTMLElement) summaryEl.hidden = false;
+        const query = new URLSearchParams();
+        query.set('intent', 'consultation');
+        query.set('source', 'smart-finder');
+        if (data.purpose) query.set('purpose', data.purpose);
+        if (data.budget) query.set('budget', data.budget);
+        if (data.timeline) query.set('timeline', data.timeline);
+        if (data.preferences.length) query.set('preferences', data.preferences.join(','));
+        query.set('matching_mode', data.matching_mode);
+        query.set('shortlist_count', String(matches.length));
+        if (shortlistCta instanceof HTMLAnchorElement) shortlistCta.href = '/' + locale + '/contact?' + query.toString();
+        const compareIds = matches.slice(0, 4).map((entry) => String(entry.item?.slug || '')).filter(Boolean).join(',');
+        if (compareCta instanceof HTMLAnchorElement) compareCta.href = '/' + locale + '/compare' + (compareIds ? ('?ids=' + encodeURIComponent(compareIds)) : '');
+        if (sellCta instanceof HTMLAnchorElement) sellCta.href = '/' + locale + '/sell?intent=sell&timeline=' + encodeURIComponent(data.timeline || '');
+        if (data.purpose === 'sell' || matches.length === 0) {{
+          if (resultsEl instanceof HTMLElement) resultsEl.hidden = true;
+          if (emptyEl instanceof HTMLElement) emptyEl.hidden = false;
+          renderResults([]);
+          track('finder_no_matches', {{ placement: 'smart_finder_results', intent: data.purpose || undefined, matching_mode: data.matching_mode, filter_values: ['budget:' + data.budget, 'timeline:' + data.timeline] }});
+        }} else {{
+          renderResults(matches);
+          if (resultsEl instanceof HTMLElement) resultsEl.hidden = false;
+          if (emptyEl instanceof HTMLElement) emptyEl.hidden = true;
+          track('finder_shortlist_generated', {{ placement: 'smart_finder_results', intent: data.purpose || undefined, matching_mode: data.matching_mode, shortlist_count: matches.length, top_score: topScore }});
+        }}
+      }} catch {{
+        if (errorEl instanceof HTMLElement) errorEl.hidden = false;
+      }} finally {{
+        if (loadingEl instanceof HTMLElement) loadingEl.hidden = true;
+      }}
+    }});
+  }}
+  document.querySelectorAll('[data-event]').forEach((node)=>{{node.addEventListener('click',()=>{{const eventName=node.getAttribute('data-event');if(!eventName)return;const current=readData();track(eventName,compact({{label:node.textContent?.trim()||'',placement:node.getAttribute('data-placement')||undefined,cta_id:node.getAttribute('data-cta-id')||undefined,card_id:node.getAttribute('data-card-id')||undefined,card_slug:node.getAttribute('data-card-slug')||undefined,intent:current.purpose||undefined,matching_mode:current.matching_mode||undefined}}));}});}});
+  form?.querySelectorAll('input,select').forEach((node)=>{{node.addEventListener('change',()=>{{node.setAttribute('aria-invalid','false');}});}});
+  backBtn?.addEventListener('click',()=>{{ if(step<=0)return; setStep(step-1,true); }});
+  nextBtn?.addEventListener('click',()=>{{ if(!validateStep()) return; setStep(step+1,true); }});
+  form?.addEventListener('submit',(event)=>{{ event.preventDefault(); if(!validateStep()) return; runFinder(); }});
+  document.getElementById('finder-adjust-btn')?.addEventListener('click',()=>{{ setStep(0,true); }});
+  if (selectedIntent && form instanceof HTMLFormElement) {{
+    const input = form.querySelector('input[name="purpose"][value="' + selectedIntent + '"]');
+    if (input instanceof HTMLInputElement) input.checked = true;
+  }}
+  if (form instanceof HTMLFormElement) {{
+    const mode = form.querySelector('[name="matching_mode"]');
+    if (mode instanceof HTMLSelectElement) mode.value = selectedMatchingMode || 'weighted';
+  }}
+  window.addEventListener('error',()=>{{if(errorEl instanceof HTMLElement)errorEl.hidden=false;}});
+  setStep(0,false);
+  track('finder_step_progress', {{ placement: 'smart_finder_steps', step: 1, step_name: stepName(0), intent: selectedIntent || undefined }});
+}})();
+</script>
+"""
+
+
+def _compare_requested_tokens(request: Request) -> list[str]:
+    tokens: list[str] = []
+    for raw in request.query_params.getlist("ids"):
+        tokens.extend(str(raw or "").split(","))
+    for key in ["id", "property", "slug"]:
+        for raw in request.query_params.getlist(key):
+            tokens.extend(str(raw or "").split(","))
+    out: list[str] = []
+    seen: set[str] = set()
+    for token in tokens:
+        value = str(token or "").strip()
+        if not value or value in seen:
+            continue
+        seen.add(value)
+        out.append(value)
+    return out[:8]
+
+
+def _property_source_media_paths(prop: Property) -> list[str]:
+    paths: list[str] = []
+    for value in [prop.cover_image_url, prop.cover_image]:
+        text = str(value or "").strip()
+        if text.startswith("/media/"):
+            paths.append(text)
+    for payload in [prop.local_images, prop.images]:
+        if not isinstance(payload, list):
+            continue
+        for value in payload:
+            text = str(value or "").strip()
+            if text.startswith("/media/"):
+                paths.append(text)
+    out: list[str] = []
+    seen: set[str] = set()
+    for path in paths:
+        if path in seen:
+            continue
+        seen.add(path)
+        out.append(path)
+    return out
+
+
+def _domain_from_url(value: str | None) -> str:
+    raw = str(value or "").strip()
+    if not raw:
+        return ""
+    try:
+        parsed = urlparse(raw)
+        return str(parsed.hostname or "").strip().lower()
+    except ValueError:
+        return ""
+
+
+def _resolved_source_meta_for_compare(
+    prop: Property, media_lookup: dict[str, MediaAsset | None]
+) -> tuple[str, str]:
+    source_meta = prop.source_meta if isinstance(prop.source_meta, dict) else {}
+    source_domain = str(source_meta.get("source_domain") or "").strip().lower()
+    source_url = str(source_meta.get("source_url") or "").strip()
+    source_raw = str(source_meta.get("source") or "").strip()
+    rights_status = str(source_meta.get("rights_status") or "").strip().lower()
+
+    if not source_domain:
+        source_domain = _domain_from_url(source_url)
+    if not source_domain:
+        source_domain = _domain_from_url(source_raw)
+
+    if not source_domain or not rights_status:
+        for path in _property_source_media_paths(prop):
+            asset = media_lookup.get(path)
+            if asset is None:
+                continue
+            if not source_domain:
+                source_domain = str(asset.source_domain or "").strip().lower()
+            if not rights_status:
+                rights_status = str(asset.rights_status or "").strip().lower()
+            if source_domain and rights_status:
+                break
+
+    if not source_domain:
+        source_domain = "flowbiz.com" if _property_source_media_paths(prop) else "unknown"
+    if not rights_status:
+        rights_status = "pending_review"
+
+    return source_domain, rights_status
+
+
+def _compare_runtime(
+    *, locale: str, request: Request, db: Session
+) -> tuple[dict[str, str], str, int]:
+    copy = {
+        "title": "Compare Listings",
+        "intro": "Side-by-side comparison for active listings with safe fallback values.",
+        "lead": "Compare ownership-ready listings with clear pricing and key unit facts.",
+        "empty": "No listings were selected for comparison. Add units from Smart Finder or listing pages.",
+        "empty_hint": "TODO: select at least 2 active listings to see side-by-side differences.",
+        "cta_smart_finder": "Open Smart Finder",
+        "cta_consult": "Request Consultation",
+        "cta_adjust": "Adjust Compare Set",
+        "mobile_rows": "Collapsed rows (mobile)",
+        "desktop_table": "Comparison table (desktop)",
+        "loading": "Preparing comparison...",
+        "runtime_error": "Unable to render comparison right now. Please retry.",
+        "field_price": "Price",
+        "field_bedrooms": "Bedrooms",
+        "field_bathrooms": "Bathrooms",
+        "field_size": "Size (sqm)",
+        "field_type": "Listing type",
+        "field_property_type": "Property type",
+        "field_floor": "Floor",
+        "field_area": "Area",
+        "field_project": "Project",
+        "field_updated": "Updated",
+        "field_source": "Source",
+        "field_rights": "Rights status",
+        "na": "-",
+        "rights_pending": "pending_review",
+        "stats_pending": "Stats pending publication",
+        "view_details": "View details",
+    }
+    if locale == "th":
+        copy.update(
+            {
+                "title": "เปรียบเทียบรายการ",
+                "intro": "หน้าเปรียบเทียบแบบ side-by-side สำหรับรายการ active พร้อม fallback ที่ปลอดภัย",
+                "lead": "เปรียบเทียบรายการพร้อมถือครองด้วยราคาและข้อมูลยูนิตที่อ่านง่าย",
+                "empty": "ยังไม่มีรายการที่เลือกมาเปรียบเทียบ เพิ่มยูนิตจาก Smart Finder หรือหน้ารายการก่อน",
+                "empty_hint": "TODO: เลือกรายการ active อย่างน้อย 2 รายการเพื่อแสดงผลเปรียบเทียบ",
+                "cta_smart_finder": "เปิด Smart Finder",
+                "cta_consult": "ขอคำปรึกษา",
+                "cta_adjust": "ปรับชุดเปรียบเทียบ",
+                "mobile_rows": "แถวแบบยุบได้ (มือถือ)",
+                "desktop_table": "ตารางเปรียบเทียบ (เดสก์ท็อป)",
+                "loading": "กำลังเตรียมข้อมูลเปรียบเทียบ...",
+                "runtime_error": "ยังไม่สามารถแสดงหน้าเปรียบเทียบได้ กรุณาลองใหม่",
+                "field_price": "ราคา",
+                "field_bedrooms": "ห้องนอน",
+                "field_bathrooms": "ห้องน้ำ",
+                "field_size": "ขนาด (ตร.ม.)",
+                "field_type": "ประเภทรายการ",
+                "field_property_type": "ประเภททรัพย์",
+                "field_floor": "ชั้น",
+                "field_area": "ทำเล",
+                "field_project": "โครงการ",
+                "field_updated": "อัปเดต",
+                "field_source": "แหล่งข้อมูล",
+                "field_rights": "สถานะสิทธิ์",
+                "rights_pending": "pending_review",
+                "stats_pending": "รอเผยแพร่ข้อมูลสถิติ",
+                "view_details": "ดูรายละเอียด",
+            }
+        )
+
+    tokens = _compare_requested_tokens(request)
+    rows = db.scalars(
+        select(Property)
+        .where(Property.deleted_at.is_(None), Property.status == "active")
+        .order_by(desc(Property.updated_at), desc(Property.created_at))
+        .limit(80)
+    ).all()
+    by_slug = {str(row.slug or ""): row for row in rows if str(row.slug or "").strip()}
+    by_id = {str(row.id): row for row in rows}
+    selected_rows: list[Property] = []
+    if tokens:
+        for token in tokens:
+            row = by_slug.get(token) or by_id.get(token)
+            if row is None or row in selected_rows:
+                continue
+            selected_rows.append(row)
+    else:
+        selected_rows = rows[:4]
+    selected_rows = selected_rows[:6]
+
+    area_ids = [row.area_id for row in selected_rows if row.area_id is not None]
+    project_ids = [row.project_id for row in selected_rows if row.project_id is not None]
+    area_lookup: dict[str, str] = {}
+    project_lookup: dict[str, str] = {}
+    if area_ids:
+        area_rows = db.scalars(
+            select(Area).where(Area.id.in_(area_ids), Area.deleted_at.is_(None))
+        ).all()
+        area_lookup = {
+            str(row.id): str(row.name or "").strip()
+            for row in area_rows
+            if str(row.name or "").strip()
+        }
+    if project_ids:
+        project_rows = db.scalars(
+            select(Project).where(Project.id.in_(project_ids), Project.deleted_at.is_(None))
+        ).all()
+        project_lookup = {
+            str(row.id): str(row.name or "").strip()
+            for row in project_rows
+            if str(row.name or "").strip()
+        }
+
+    media_paths = {
+        path
+        for prop in selected_rows
+        for path in _property_source_media_paths(prop)
+        if path.startswith("/media/")
+    }
+    media_lookup: dict[str, MediaAsset | None] = {}
+    if media_paths:
+        media_rows = db.scalars(
+            select(MediaAsset).where(MediaAsset.storage_path.in_(list(media_paths)))
+        ).all()
+        media_lookup = {str(row.storage_path): row for row in media_rows}
+
+    items: list[dict[str, str]] = []
+    for row in selected_rows:
+        source_domain, rights_status = _resolved_source_meta_for_compare(row, media_lookup)
+        size_text = (
+            f"{float(row.size_sqm):,.0f}"
+            if row.size_sqm is not None
+            else f"{float(row.size):,.0f}"
+            if row.size is not None
+            else copy["na"]
+        )
+        floor_text = (
+            str(row.floor)
+            if row.floor is not None
+            else str(row.floor_number)
+            if row.floor_number is not None
+            else copy["na"]
+        )
+        items.append(
+            {
+                "id": str(row.id),
+                "slug": str(row.slug or row.id),
+                "title": _property_title_for_locale(row, locale),
+                "media": _property_media_path(row, request=request),
+                "href": f"/{locale}/property/{_property_ref_for_route(row)}",
+                "price": _format_money(row.price, fallback=copy["na"]),
+                "bedrooms": str(row.bedrooms) if row.bedrooms is not None else copy["na"],
+                "bathrooms": str(row.bathrooms) if row.bathrooms is not None else copy["na"],
+                "size": size_text,
+                "type": str(row.type or "").strip() or copy["na"],
+                "property_type": str(row.property_type or "").strip() or copy["na"],
+                "floor": floor_text,
+                "area": area_lookup.get(str(row.area_id), copy["na"]),
+                "project": project_lookup.get(str(row.project_id), copy["na"]),
+                "updated": _format_locale_date(row.updated_at, locale, fallback=copy["na"]),
+                "source": source_domain or copy["na"],
+                "rights": rights_status or copy["rights_pending"],
+                "stats": " • ".join(_property_stats(row)) or copy["stats_pending"],
+            }
+        )
+
+    body = _compare_body(locale=locale, copy=copy, items=items)
+    return copy, body, len(items)
+
+
+def _compare_body(*, locale: str, copy: dict[str, str], items: list[dict[str, str]]) -> str:
+    has_rows = bool(items)
+    fields = [
+        ("field_price", "price"),
+        ("field_bedrooms", "bedrooms"),
+        ("field_bathrooms", "bathrooms"),
+        ("field_size", "size"),
+        ("field_type", "type"),
+        ("field_property_type", "property_type"),
+        ("field_floor", "floor"),
+        ("field_area", "area"),
+        ("field_project", "project"),
+        ("field_updated", "updated"),
+        ("field_source", "source"),
+        ("field_rights", "rights"),
+    ]
+    table_header = "".join(
+        f'<th scope="col"><span>{escape(item["title"])}</span><a class="btn btn-secondary-hero btn-sm" data-event="compare_usage" data-placement="compare_header" data-cta-id="compare_header_view_details" data-card-id="{escape(item["id"])}" data-card-slug="{escape(item["slug"])}" href="{escape(item["href"])}">{escape(copy["view_details"])}</a></th>'
+        for item in items
+    )
+    table_rows = "".join(
+        "<tr>"
+        f'<th scope="row">{escape(copy[label_key])}</th>'
+        + "".join(f"<td>{escape(item[value_key])}</td>" for item in items)
+        + "</tr>"
+        for label_key, value_key in fields
+    )
+    mobile_rows = "".join(
+        '<details class="card compare-row-collapse" data-event="compare_usage" data-placement="compare_mobile_rows" data-cta-id="compare_toggle_row">'
+        f"<summary>{escape(copy[label_key])}</summary><ul>"
+        + "".join(
+            f"<li><strong>{escape(item['title'])}</strong>: {escape(item[value_key])}</li>"
+            for item in items
+        )
+        + "</ul></details>"
+        for label_key, value_key in fields
+    )
+    compare_cards = "".join(
+        f'<article class="card compare-item" data-card-id="{escape(item["id"])}" data-card-slug="{escape(item["slug"])}"><img class="media" src="{escape(item["media"])}" alt="{escape(item["title"])}" width="640" height="360" loading="lazy" /><h2>{escape(item["title"])}</h2><p class="muted">{escape(item["price"])} • {escape(item["stats"])}</p><div class="cta-row"><a class="btn btn-secondary-hero btn-sm" data-event="compare_usage" data-placement="compare_cards" data-cta-id="compare_card_view_details" data-card-id="{escape(item["id"])}" data-card-slug="{escape(item["slug"])}" href="{escape(item["href"])}">{escape(copy["view_details"])}</a></div></article>'
+        for item in items
+    )
+
+    compare_styles = (
+        "<style>"
+        ".compare-cards{display:grid;gap:12px;grid-template-columns:1fr}.compare-table-wrap{overflow-x:auto}"
+        ".compare-table{width:100%;border-collapse:collapse;min-width:700px}.compare-table th,.compare-table td{border:1px solid #d1d5db;padding:10px;text-align:left;vertical-align:top;background:#fff}"
+        ".compare-table thead th{position:sticky;top:0;z-index:3;background:#f9fafb}.compare-table tbody th{position:sticky;left:0;z-index:2;background:#f9fafb;min-width:170px}"
+        ".compare-mobile{display:grid;gap:12px}.compare-row-collapse summary{cursor:pointer;font-weight:700}.compare-row-collapse ul{margin:8px 0 0;padding-left:18px;display:grid;gap:6px}"
+        "@media (max-width:767px){.compare-desktop{display:none}}"
+        "@media (min-width:768px){.compare-mobile{display:none}.compare-cards{grid-template-columns:repeat(2,minmax(0,1fr))}}"
+        "@media (min-width:1200px){.compare-cards{grid-template-columns:repeat(3,minmax(0,1fr))}}"
+        "@media (min-width:1920px){.compare-cards{grid-template-columns:repeat(4,minmax(0,1fr))}}"
+        "@media (min-width:2560px){.compare-cards{grid-template-columns:repeat(5,minmax(0,1fr))}}"
+        "</style>"
+    )
+
+    compare_script = """
+<script>
+(() => {
+  const locale = document.documentElement.lang || 'en';
+  const endpoint = '/api/v1/events';
+  const path = location.pathname;
+  const compareCount = Number(document.body.getAttribute('data-compare-count') || '0');
+  const runtimeErrorEl = document.getElementById('compare-error');
+  function compact(raw){const out={};for(const [k,v] of Object.entries(raw||{})){if(v===undefined||v===null)continue;if(Array.isArray(v)&&v.length===0)continue;out[k]=v;}return out;}
+  function track(eventName,payload){const payloadBody=compact(payload);const sourceBody=compact({app:'flowbiz-public-runtime',env:'runtime',page:path,locale,placement:payloadBody.placement});return fetch(endpoint,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({event_name:eventName,source:sourceBody,payload:payloadBody}),keepalive:true}).catch(()=>null);}
+  track('compare_usage',{placement:'compare_page',compare_count:compareCount});
+  document.querySelectorAll('[data-event]').forEach((node)=>{node.addEventListener('click',()=>{const eventName=node.getAttribute('data-event');if(!eventName)return;track(eventName,compact({label:node.textContent?.trim()||'',placement:node.getAttribute('data-placement')||undefined,cta_id:node.getAttribute('data-cta-id')||undefined,card_id:node.getAttribute('data-card-id')||undefined,card_slug:node.getAttribute('data-card-slug')||undefined,compare_count:compareCount}));});});
+  window.addEventListener('error',()=>{if(runtimeErrorEl instanceof HTMLElement)runtimeErrorEl.hidden=false;});
+})();
+</script>
+"""
+
+    consult_href = f"/{locale}/contact?intent=consultation&source=compare"
+    compare_ids = ",".join(item["slug"] for item in items if item["slug"])
+    adjust_href = (
+        f"/{locale}/compare?ids={escape(compare_ids)}" if compare_ids else f"/{locale}/compare"
+    )
+    content = (
+        f'<section class="card"><h2>{escape(copy["lead"])}</h2><div class="cta-row"><a class="btn" data-event="compare_consultation_cta_click" data-placement="compare_hero" data-cta-id="compare_consultation_hero" href="{consult_href}">{escape(copy["cta_consult"])}</a><a class="btn btn-secondary-hero" data-event="compare_usage" data-placement="compare_hero" data-cta-id="compare_open_smart_finder" href="/{locale}/smart-finder">{escape(copy["cta_smart_finder"])}</a></div></section>'
+        f'<div id="compare-loading" class="state-loading" role="status" aria-live="polite" hidden>{escape(copy["loading"])}</div>'
+        f'<div id="compare-error" class="state-error" hidden>{escape(copy["runtime_error"])}</div>'
+    )
+    if not has_rows:
+        content += f'<section id="compare-empty" class="card"><h2>{escape(copy["empty"])}</h2><p>{escape(copy["empty_hint"])}</p><div class="cta-row"><a class="btn" data-event="compare_consultation_cta_click" data-placement="compare_empty" data-cta-id="compare_consultation_empty" href="{consult_href}">{escape(copy["cta_consult"])}</a><a class="btn btn-secondary-hero" data-event="compare_usage" data-placement="compare_empty" data-cta-id="compare_empty_smart_finder" href="/{locale}/smart-finder">{escape(copy["cta_smart_finder"])}</a></div></section>'
+    else:
+        content += (
+            f'<section class="compare-cards">{compare_cards}</section>'
+            f'<section class="card compare-desktop"><h2>{escape(copy["desktop_table"])}</h2><div class="compare-table-wrap"><table class="compare-table" id="compare-table"><thead><tr><th scope="col">Field</th>{table_header}</tr></thead><tbody>{table_rows}</tbody></table></div></section>'
+            f'<section class="compare-mobile"><h2>{escape(copy["mobile_rows"])}</h2>{mobile_rows}</section>'
+            f'<section class="card"><div class="cta-row"><a class="btn" data-event="compare_consultation_cta_click" data-placement="compare_footer" data-cta-id="compare_consultation_footer" href="{consult_href}">{escape(copy["cta_consult"])}</a><a class="btn btn-secondary-hero" data-event="compare_usage" data-placement="compare_footer" data-cta-id="compare_adjust_set" href="{adjust_href}">{escape(copy["cta_adjust"])}</a></div></section>'
+        )
+    return f"{compare_styles}{content}{compare_script}"
 
 
 def _area_copy(locale: str) -> dict[str, str]:
@@ -5426,8 +6238,19 @@ def render_project_detail_default_locale(
 
 @router.get("/en/smart-finder", response_class=HTMLResponse)
 @router.get("/th/smart-finder", response_class=HTMLResponse)
-def render_smart_finder(request: Request) -> HTMLResponse:
-    return _render_smart_finder_page(_request_locale(request), request)
+def render_smart_finder(request: Request, db: Session = Depends(get_db)) -> HTMLResponse:
+    return _render_smart_finder_page(_request_locale(request), request, db)
+
+
+@router.get("/en/compare", response_class=HTMLResponse)
+@router.get("/th/compare", response_class=HTMLResponse)
+def render_compare(request: Request, db: Session = Depends(get_db)) -> HTMLResponse:
+    return _render_compare_page(_request_locale(request), request, db)
+
+
+@router.get("/compare", response_class=HTMLResponse)
+def render_compare_default_locale(request: Request, db: Session = Depends(get_db)) -> HTMLResponse:
+    return _render_compare_page("en", request, db)
 
 
 @router.get("/en/area-guide", response_class=HTMLResponse)
