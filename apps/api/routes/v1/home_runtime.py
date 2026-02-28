@@ -1,15 +1,15 @@
 from __future__ import annotations
 
 import json
-from decimal import Decimal
+from decimal import Decimal, InvalidOperation
 from html import escape
 from pathlib import Path
-from urllib.parse import urlparse
+from urllib.parse import urlencode, urlparse
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, Request, status
 from fastapi.responses import HTMLResponse
-from sqlalchemy import desc, func, or_, select
+from sqlalchemy import asc, desc, func, or_, select
 from sqlalchemy.orm import Session
 
 from apps.api.routes.home_composer_contract import normalize_home_config, resolve_home_runtime
@@ -22,6 +22,10 @@ _INTERNAL_MEDIA_HOSTS = {"localhost", "127.0.0.1", "flowbiz.com", "www.flowbiz.c
 _ALLOWED_RUNTIME_PATHS = {"/", "/en", "/th"}
 _PUBLIC_ROUTE_SUFFIXES = {
     "",
+    "/buy",
+    "/rent",
+    "/investment",
+    "/marketplace",
     "/projects",
     "/developers",
     "/smart-finder",
@@ -1546,6 +1550,666 @@ def _render_property_detail_page(locale: str, request: Request, db: Session, pro
     return HTMLResponse(_render_page_shell(locale, title=title, intro=intro, body=body))
 
 
+def _parse_positive_int(
+    raw: str | None,
+    *,
+    default: int,
+    minimum: int,
+    maximum: int,
+    field: str,
+    errors: list[str],
+) -> int:
+    text = str(raw or "").strip()
+    if not text:
+        return default
+    try:
+        value = int(text)
+    except ValueError:
+        errors.append(f"Invalid {field} value.")
+        return default
+    if value < minimum or value > maximum:
+        errors.append(f"{field.capitalize()} is out of range.")
+        return default
+    return value
+
+
+def _parse_optional_int(
+    raw: str | None,
+    *,
+    minimum: int,
+    maximum: int,
+    field: str,
+    errors: list[str],
+) -> int | None:
+    text = str(raw or "").strip()
+    if not text:
+        return None
+    try:
+        value = int(text)
+    except ValueError:
+        errors.append(f"Invalid {field} value.")
+        return None
+    if value < minimum or value > maximum:
+        errors.append(f"{field.capitalize()} is out of range.")
+        return None
+    return value
+
+
+def _parse_optional_decimal(
+    raw: str | None,
+    *,
+    minimum: Decimal,
+    maximum: Decimal,
+    field: str,
+    errors: list[str],
+) -> Decimal | None:
+    text = str(raw or "").strip()
+    if not text:
+        return None
+    try:
+        value = Decimal(text)
+    except InvalidOperation:
+        errors.append(f"Invalid {field} value.")
+        return None
+    if value < minimum or value > maximum:
+        errors.append(f"{field.capitalize()} is out of range.")
+        return None
+    return value
+
+
+def _resolve_area_filter(db: Session, raw: str | None) -> Area | None:
+    token = str(raw or "").strip()
+    if not token:
+        return None
+    row = db.scalar(select(Area).where(Area.deleted_at.is_(None), Area.slug == token))
+    if row is not None:
+        return row
+    try:
+        area_id = UUID(token)
+    except ValueError:
+        return None
+    row = db.get(Area, area_id)
+    if row is None or row.deleted_at is not None:
+        return None
+    return row
+
+
+def _resolve_project_filter(db: Session, raw: str | None) -> Project | None:
+    token = str(raw or "").strip()
+    if not token:
+        return None
+    row = db.scalar(
+        select(Project).where(Project.deleted_at.is_(None), Project.status == "published", Project.slug == token)
+    )
+    if row is not None:
+        return row
+    try:
+        project_id = UUID(token)
+    except ValueError:
+        return None
+    row = db.get(Project, project_id)
+    if row is None or row.deleted_at is not None or row.status != "published":
+        return None
+    return row
+
+
+def _humanize_token(value: str) -> str:
+    token = " ".join(str(value or "").strip().replace("-", " ").replace("_", " ").split())
+    return token.title()
+
+
+def _localized_property_stats(prop: Property, locale: str) -> list[str]:
+    stats: list[str] = []
+    if prop.bedrooms is not None:
+        stats.append(f"{prop.bedrooms} beds" if locale == "en" else f"{prop.bedrooms} ห้องนอน")
+    if prop.bathrooms is not None:
+        stats.append(f"{prop.bathrooms} baths" if locale == "en" else f"{prop.bathrooms} ห้องน้ำ")
+    size_value = prop.size_sqm if prop.size_sqm is not None else prop.size
+    if size_value is not None:
+        stats.append(f"{float(size_value):,.0f} sqm" if locale == "en" else f"{float(size_value):,.0f} ตร.ม.")
+    return stats
+
+
+def _listing_property_tags(prop: Property) -> list[str]:
+    tags: list[str] = []
+    for raw in [prop.type, prop.property_type, prop.furnishing]:
+        text = str(raw or "").strip().lower()
+        if text and text not in tags:
+            tags.append(text)
+    if isinstance(prop.features, dict) and isinstance(prop.features.get("tags"), list):
+        for item in prop.features.get("tags") or []:
+            text = str(item or "").strip().lower()
+            if text and text not in tags:
+                tags.append(text)
+    return [_humanize_token(tag) for tag in tags[:5]]
+
+
+def _listing_querystring(params: dict[str, object]) -> str:
+    query = urlencode({key: str(value) for key, value in params.items() if str(value or "").strip()})
+    return f"?{query}" if query else ""
+
+
+def _project_investment_snapshot_ready(project: Project | None) -> bool:
+    if project is None or project.deleted_at is not None or project.status != "published":
+        return False
+    snapshot = project.investment_snapshot if isinstance(project.investment_snapshot, dict) else {}
+    source = str(snapshot.get("source") or "").strip()
+    updated = str(snapshot.get("updated_at") or "").strip()
+    return bool(source and updated)
+
+
+def _listing_copy(locale: str, intent: str) -> dict[str, str]:
+    common_en = {
+        "copy_pack_id": "a5-listing-v1-2026-02-28",
+        "filters_title": "Filter listings",
+        "price_min": "Min price (THB)",
+        "price_max": "Max price (THB)",
+        "beds": "Bedrooms (min)",
+        "baths": "Bathrooms (min)",
+        "area": "Area",
+        "project": "Project",
+        "property_type": "Property type",
+        "all_areas": "All areas",
+        "all_projects": "All projects",
+        "all_property_types": "All property types",
+        "sort": "Sort",
+        "sort_newest": "Newest",
+        "sort_price_asc": "Price: Low to high",
+        "sort_price_desc": "Price: High to low",
+        "apply_filters": "Apply filters",
+        "reset_filters": "Reset",
+        "consult_cta": "Request Consultation",
+        "smart_finder_cta": "Open Smart Finder",
+        "view_details": "View details",
+        "location_pending": "Location pending publication",
+        "stats_pending": "Stats pending publication",
+        "tags_pending": "Tags will appear from published data.",
+        "loading": "Loading listings",
+        "loading_hint": "Applying filters...",
+        "runtime_error": "Unable to process this interaction right now. Please reload and try again.",
+        "query_error": "Some query parameters were invalid. Default values were used where possible.",
+        "empty": "No listings match the current filters. Adjust filters or request consultation.",
+        "results": "results",
+        "showing": "Showing",
+        "pagination_prev": "Previous",
+        "pagination_next": "Next",
+        "linked_area": "Area",
+        "linked_project": "Project",
+        "rule_note": "Inventory rules: active listings only, local media only, and verified listing fields only.",
+    }
+    intents_en = {
+        "buy": {
+            "page_title": "Buy Property in Pattaya",
+            "page_intro": "Browse active sale listings with local media, practical filters, and direct next-step support.",
+            "hero_title": "Buy Listings",
+            "hero_sub": "Compare ownership-ready listings with clear pricing and key unit facts.",
+            "smart_intent": "buy",
+            "rule_note": "Buy rules: active sale listings (new/resale), local media covers, no fabricated claims.",
+        },
+        "rent": {
+            "page_title": "Rent Property in Pattaya",
+            "page_intro": "Browse active rental listings with local media and move-in focused filters.",
+            "hero_title": "Rent Listings",
+            "hero_sub": "Filter by budget, room count, and area to shortlist your next rental.",
+            "smart_intent": "rent",
+            "rule_note": "Rent rules: active rental listings only, local media covers, no fabricated claims.",
+        },
+        "investment": {
+            "page_title": "Investment Property in Pattaya",
+            "page_intro": "Browse investment-ready sale listings that pass data quality and source-timestamp checks.",
+            "hero_title": "Investment Listings",
+            "hero_sub": "View sale listings tied to projects with published investment snapshot source and update date.",
+            "smart_intent": "invest",
+            "rule_note": "Investment rules: active sale listings + local cover media + project investment_snapshot.source and updated_at.",
+        },
+        "marketplace": {
+            "page_title": "Property Marketplace in Pattaya",
+            "page_intro": "Browse active buy and rent inventory in one page with unified filters and consultation paths.",
+            "hero_title": "Marketplace Listings",
+            "hero_sub": "Browse all active listings with local media and transparent listing facts.",
+            "smart_intent": "buy",
+            "rule_note": "Marketplace rules: active listings across buy/rent that pass local media and listing quality gates.",
+        },
+    }
+    common_th = {
+        "copy_pack_id": "a5-listing-v1-2026-02-28",
+        "filters_title": "กรองรายการอสังหา",
+        "price_min": "ราคาต่ำสุด (THB)",
+        "price_max": "ราคาสูงสุด (THB)",
+        "beds": "ห้องนอน (ขั้นต่ำ)",
+        "baths": "ห้องน้ำ (ขั้นต่ำ)",
+        "area": "ทำเล",
+        "project": "โครงการ",
+        "property_type": "ประเภททรัพย์",
+        "all_areas": "ทุกทำเล",
+        "all_projects": "ทุกโครงการ",
+        "all_property_types": "ทุกประเภททรัพย์",
+        "sort": "เรียงลำดับ",
+        "sort_newest": "ล่าสุด",
+        "sort_price_asc": "ราคา: ต่ำไปสูง",
+        "sort_price_desc": "ราคา: สูงไปต่ำ",
+        "apply_filters": "ใช้ตัวกรอง",
+        "reset_filters": "รีเซ็ต",
+        "consult_cta": "ขอคำปรึกษา",
+        "smart_finder_cta": "เปิด Smart Finder",
+        "view_details": "ดูรายละเอียด",
+        "location_pending": "รอเผยแพร่ข้อมูลทำเล",
+        "stats_pending": "รอเผยแพร่ข้อมูลยูนิต",
+        "tags_pending": "แท็กจะแสดงจากข้อมูลที่เผยแพร่แล้ว",
+        "loading": "กำลังโหลดรายการ",
+        "loading_hint": "กำลังใช้ตัวกรอง...",
+        "runtime_error": "ยังไม่สามารถประมวลผลได้ในขณะนี้ กรุณารีเฟรชแล้วลองใหม่",
+        "query_error": "พารามิเตอร์บางรายการไม่ถูกต้อง ระบบใช้ค่าเริ่มต้นแทน",
+        "empty": "ไม่พบรายการที่ตรงกับตัวกรองนี้ ลองปรับตัวกรองหรือขอคำปรึกษา",
+        "results": "รายการ",
+        "showing": "กำลังแสดง",
+        "pagination_prev": "ก่อนหน้า",
+        "pagination_next": "ถัดไป",
+        "linked_area": "ทำเล",
+        "linked_project": "โครงการ",
+        "rule_note": "กติกา inventory: แสดงเฉพาะรายการ active, ใช้ local media เท่านั้น และใช้ข้อมูลที่ยืนยันได้เท่านั้น",
+    }
+    intents_th = {
+        "buy": {
+            "page_title": "ซื้ออสังหาในพัทยา",
+            "page_intro": "ดูรายการขาย active พร้อม local media ตัวกรองที่ใช้งานจริง และเส้นทางปรึกษาที่ชัดเจน",
+            "hero_title": "รายการสำหรับซื้อ",
+            "hero_sub": "เปรียบเทียบรายการที่พร้อมถือครองด้วยราคาและข้อมูลยูนิตที่ชัดเจน",
+            "smart_intent": "buy",
+            "rule_note": "กติกา Buy: แสดงเฉพาะรายการขาย active (new/resale) ที่มี local cover และไม่ใส่ข้อมูลที่สร้างขึ้น",
+        },
+        "rent": {
+            "page_title": "เช่าอสังหาในพัทยา",
+            "page_intro": "ดูรายการเช่า active พร้อม local media และตัวกรองเพื่อวางแผนย้ายเข้า",
+            "hero_title": "รายการสำหรับเช่า",
+            "hero_sub": "กรองตามงบ จำนวนห้อง และทำเลเพื่อ shortlist สำหรับการเช่า",
+            "smart_intent": "rent",
+            "rule_note": "กติกา Rent: แสดงเฉพาะรายการเช่า active ที่มี local cover และไม่ใส่ข้อมูลที่สร้างขึ้น",
+        },
+        "investment": {
+            "page_title": "อสังหาเพื่อการลงทุนในพัทยา",
+            "page_intro": "ดูรายการขายเพื่อการลงทุนที่ผ่าน quality gate และมี source/timestamp สำหรับข้อมูลลงทุน",
+            "hero_title": "รายการเพื่อการลงทุน",
+            "hero_sub": "แสดงเฉพาะรายการขายที่เชื่อมกับโครงการซึ่งมี investment snapshot พร้อมแหล่งที่มาและวันที่อัปเดต",
+            "smart_intent": "invest",
+            "rule_note": "กติกา Investment: รายการขาย active + local cover + โครงการต้องมี investment_snapshot.source และ updated_at",
+        },
+        "marketplace": {
+            "page_title": "มาร์เก็ตเพลสอสังหาในพัทยา",
+            "page_intro": "รวมรายการซื้อและเช่า active ในหน้าเดียว ด้วยตัวกรองเดียวกันและเส้นทางปรึกษาที่ชัดเจน",
+            "hero_title": "รายการใน Marketplace",
+            "hero_sub": "ดูรายการ active ทั้งหมดด้วย local media และข้อมูลทรัพย์ที่โปร่งใส",
+            "smart_intent": "buy",
+            "rule_note": "กติกา Marketplace: รวมรายการ active buy/rent ที่ผ่าน local media และ quality gate ของ listing",
+        },
+    }
+    common = common_th if locale == "th" else common_en
+    intents = intents_th if locale == "th" else intents_en
+    defaults = intents.get("marketplace") or {}
+    selected = intents.get(intent) or defaults
+    return {**common, **selected}
+
+
+def _render_property_listing_page(locale: str, request: Request, db: Session, intent: str) -> HTMLResponse:
+    if intent not in {"buy", "rent", "investment", "marketplace"}:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Listing not found")
+
+    copy = _listing_copy(locale, intent)
+    errors: list[str] = []
+    query = request.query_params
+    listing_path = f"/{locale}/{intent}"
+
+    page = _parse_positive_int(query.get("page"), default=1, minimum=1, maximum=999, field="page", errors=errors)
+    limit = _parse_positive_int(query.get("limit"), default=12, minimum=1, maximum=48, field="limit", errors=errors)
+    price_min = _parse_optional_decimal(
+        query.get("price_min"),
+        minimum=Decimal("0"),
+        maximum=Decimal("999999999999"),
+        field="price_min",
+        errors=errors,
+    )
+    price_max = _parse_optional_decimal(
+        query.get("price_max"),
+        minimum=Decimal("0"),
+        maximum=Decimal("999999999999"),
+        field="price_max",
+        errors=errors,
+    )
+    beds = _parse_optional_int(query.get("beds"), minimum=0, maximum=20, field="beds", errors=errors)
+    baths = _parse_optional_int(query.get("baths"), minimum=0, maximum=20, field="baths", errors=errors)
+
+    area_raw = str(query.get("area") or "").strip()
+    area_row = _resolve_area_filter(db, area_raw)
+    if area_raw and area_row is None:
+        errors.append("Invalid area filter value.")
+
+    project_raw = str(query.get("project") or "").strip()
+    project_row = _resolve_project_filter(db, project_raw)
+    if project_raw and project_row is None:
+        errors.append("Invalid project filter value.")
+
+    property_type = " ".join(str(query.get("property_type") or "").strip().lower().split())
+    if property_type and not property_type.replace("-", "").replace("_", "").isalnum():
+        errors.append("Invalid property_type value.")
+        property_type = ""
+
+    sort = str(query.get("sort") or "newest").strip().lower()
+    if sort not in {"newest", "price_asc", "price_desc"}:
+        errors.append("Invalid sort value.")
+        sort = "newest"
+
+    if price_min is not None and price_max is not None and price_min > price_max:
+        errors.append("price_min is higher than price_max. Values were swapped.")
+        price_min, price_max = price_max, price_min
+
+    intent_filters = [Property.status == "active"]
+    if intent in {"buy", "investment"}:
+        intent_filters.append(Property.type.in_(["new", "resale"]))
+    elif intent == "rent":
+        intent_filters.append(Property.type == "rent")
+
+    quality_gate_filters = [
+        Property.price > 0,
+        or_(Property.cover_image_url.like("/media/%"), Property.cover_image.like("/media/%")),
+        or_(
+            Property.area_id.is_not(None),
+            Property.project_id.is_not(None),
+            Property.city.is_not(None),
+            Property.address.is_not(None),
+        ),
+    ]
+    if intent in {"investment", "marketplace"}:
+        intent_filters.extend(quality_gate_filters)
+
+    eligible_investment_project_ids: list[UUID] = []
+    if intent == "investment":
+        eligible_investment_project_ids = [
+            item.id
+            for item in db.scalars(
+                select(Project).where(Project.deleted_at.is_(None), Project.status == "published")
+            ).all()
+            if _project_investment_snapshot_ready(item)
+        ]
+        if eligible_investment_project_ids:
+            intent_filters.append(Property.project_id.in_(eligible_investment_project_ids))
+        else:
+            intent_filters.append(Property.id.is_(None))
+
+    area_option_ids = [
+        item
+        for item in db.scalars(
+            select(Property.area_id).where(*intent_filters, Property.area_id.is_not(None)).distinct()
+        ).all()
+        if item is not None
+    ]
+    area_options = (
+        db.scalars(select(Area).where(Area.deleted_at.is_(None), Area.id.in_(area_option_ids)).order_by(Area.name.asc())).all()
+        if area_option_ids
+        else []
+    )
+
+    project_option_ids = [
+        item
+        for item in db.scalars(
+            select(Property.project_id).where(*intent_filters, Property.project_id.is_not(None)).distinct()
+        ).all()
+        if item is not None
+    ]
+    project_options = (
+        db.scalars(
+            select(Project)
+            .where(Project.deleted_at.is_(None), Project.status == "published", Project.id.in_(project_option_ids))
+            .order_by(Project.name.asc())
+        ).all()
+        if project_option_ids
+        else []
+    )
+
+    property_type_options = sorted(
+        {
+            str(value or "").strip().lower()
+            for value in db.scalars(select(Property.property_type).where(*intent_filters).distinct()).all()
+            if str(value or "").strip()
+        }
+    )
+
+    filters = list(intent_filters)
+    if price_min is not None:
+        filters.append(Property.price >= price_min)
+    if price_max is not None:
+        filters.append(Property.price <= price_max)
+    if beds is not None:
+        filters.append(Property.bedrooms >= beds)
+    if baths is not None:
+        filters.append(Property.bathrooms >= baths)
+    if area_row is not None:
+        filters.append(Property.area_id == area_row.id)
+    if project_row is not None:
+        filters.append(Property.project_id == project_row.id)
+    if property_type:
+        filters.append(func.lower(Property.property_type) == property_type)
+
+    query_rows = select(Property).where(*filters)
+    total = int(db.scalar(select(func.count()).select_from(query_rows.subquery())) or 0)
+
+    if sort == "price_asc":
+        order_by = [asc(Property.price), desc(Property.updated_at), desc(Property.id)]
+    elif sort == "price_desc":
+        order_by = [desc(Property.price), desc(Property.updated_at), desc(Property.id)]
+    else:
+        order_by = [desc(Property.updated_at), desc(Property.created_at), desc(Property.id)]
+
+    rows = db.scalars(query_rows.order_by(*order_by).offset((page - 1) * limit).limit(limit)).all()
+
+    row_area_ids = [item.area_id for item in rows if item.area_id is not None]
+    area_lookup = (
+        {item.id: item for item in db.scalars(select(Area).where(Area.deleted_at.is_(None), Area.id.in_(row_area_ids))).all()}
+        if row_area_ids
+        else {}
+    )
+    row_project_ids = [item.project_id for item in rows if item.project_id is not None]
+    project_lookup = (
+        {
+            item.id: item
+            for item in db.scalars(
+                select(Project).where(Project.deleted_at.is_(None), Project.status == "published", Project.id.in_(row_project_ids))
+            ).all()
+        }
+        if row_project_ids
+        else {}
+    )
+
+    selected_area = area_row.slug if area_row is not None else area_raw
+    selected_project = project_row.slug if project_row is not None else project_raw
+
+    area_options_html = [f'<option value="">{escape(copy["all_areas"])}</option>']
+    known_area_values: set[str] = set()
+    for item in area_options:
+        value = str(item.slug or "").strip() or str(item.id)
+        known_area_values.add(value)
+        selected = " selected" if value == selected_area else ""
+        area_options_html.append(f'<option value="{escape(value)}"{selected}>{escape(item.name)}</option>')
+    if selected_area and selected_area not in known_area_values:
+        area_options_html.append(f'<option value="{escape(selected_area)}" selected>{escape(selected_area)}</option>')
+
+    project_options_html = [f'<option value="">{escape(copy["all_projects"])}</option>']
+    known_project_values: set[str] = set()
+    for item in project_options:
+        value = str(item.slug or "").strip() or str(item.id)
+        known_project_values.add(value)
+        selected = " selected" if value == selected_project else ""
+        project_options_html.append(f'<option value="{escape(value)}"{selected}>{escape(item.name)}</option>')
+    if selected_project and selected_project not in known_project_values:
+        project_options_html.append(f'<option value="{escape(selected_project)}" selected>{escape(selected_project)}</option>')
+
+    property_type_options_html = [f'<option value="">{escape(copy["all_property_types"])}</option>']
+    known_property_types: set[str] = set()
+    for item in property_type_options:
+        known_property_types.add(item)
+        selected = " selected" if item == property_type else ""
+        property_type_options_html.append(f'<option value="{escape(item)}"{selected}>{escape(_humanize_token(item))}</option>')
+    if property_type and property_type not in known_property_types:
+        property_type_options_html.append(f'<option value="{escape(property_type)}" selected>{escape(_humanize_token(property_type))}</option>')
+
+    cards_html = ""
+    for row in rows:
+        prop_ref = _property_ref_for_route(row)
+        title = _property_title_for_locale(row, locale)
+        media = _property_media_path(row, request=request)
+        price_text = _format_money(row.price, fallback="-")
+        stats_text = " • ".join(_localized_property_stats(row, locale)) or copy["stats_pending"]
+        row_area = area_lookup.get(row.area_id) if row.area_id is not None else None
+        row_project = project_lookup.get(row.project_id) if row.project_id is not None else None
+        area_name = str(getattr(row_area, "name", "") or "").strip()
+        project_name = str(getattr(row_project, "name", "") or "").strip()
+        city_name = str(row.city or "").strip()
+        location_parts = [part for part in [city_name, area_name, project_name] if part]
+        location_text = " • ".join(dict.fromkeys(location_parts)) or copy["location_pending"]
+        area_href = f"/{locale}/areas/{row_area.slug}" if row_area is not None and row_area.status == "published" else f"/{locale}/areas"
+        project_href = (
+            f"/{locale}/projects/{row_project.slug}"
+            if row_project is not None and row_project.status == "published"
+            else f"/{locale}/projects"
+        )
+        tag_html = "".join(f"<span class=\"tag\">{escape(tag)}</span>" for tag in _listing_property_tags(row))
+        tags_block = f"<div class=\"tag-row\">{tag_html}</div>" if tag_html else f"<p class=\"muted\" data-tags-empty=\"true\">{escape(copy['tags_pending'])}</p>"
+        cards_html += (
+            f"<article class=\"card listing-card\" data-card-id=\"{escape(str(row.id))}\" data-card-slug=\"{escape(str(row.slug or row.id))}\">"
+            f"<a class=\"listing-link\" data-event=\"listing_card_click\" data-cta-id=\"listing_card\" data-card-id=\"{escape(str(row.id))}\" data-card-slug=\"{escape(str(row.slug or row.id))}\" data-placement=\"listing_grid\" href=\"/{locale}/property/{escape(prop_ref)}\">"
+            f"<img class=\"media\" src=\"{escape(media)}\" alt=\"{escape(title)}\" width=\"640\" height=\"360\" loading=\"lazy\" />"
+            f"<p class=\"price\">{escape(price_text)}</p><h3>{escape(title)}</h3></a>"
+            f"<p class=\"muted\">{escape(location_text)}</p><p class=\"muted\">{escape(stats_text)}</p>{tags_block}"
+            f"<p class=\"muted listing-links\"><strong>{escape(copy['linked_area'])}:</strong> <a href=\"{area_href}\">{escape(area_name or copy['all_areas'])}</a> • <strong>{escape(copy['linked_project'])}:</strong> <a href=\"{project_href}\">{escape(project_name or copy['all_projects'])}</a></p>"
+            f"<a class=\"btn btn-secondary-hero btn-sm\" data-event=\"listing_card_click\" data-cta-id=\"listing_view_details\" data-card-id=\"{escape(str(row.id))}\" data-card-slug=\"{escape(str(row.slug or row.id))}\" data-placement=\"listing_card_footer\" href=\"/{locale}/property/{escape(prop_ref)}\">{escape(copy['view_details'])}</a>"
+            f"</article>"
+        )
+
+    if not cards_html:
+        cards_html = f'<div id="listing-empty" class="state-empty">{escape(copy["empty"])}</div>'
+
+    base_params = {
+        "limit": limit,
+        "sort": sort,
+        "price_min": str(price_min) if price_min is not None else "",
+        "price_max": str(price_max) if price_max is not None else "",
+        "beds": beds if beds is not None else "",
+        "baths": baths if baths is not None else "",
+        "area": selected_area,
+        "project": selected_project,
+        "property_type": property_type,
+    }
+    has_prev = page > 1
+    has_next = page * limit < total
+    prev_href = f"{listing_path}{_listing_querystring({**base_params, 'page': page - 1})}"
+    next_href = f"{listing_path}{_listing_querystring({**base_params, 'page': page + 1})}"
+    showing_start = ((page - 1) * limit) + 1 if total else 0
+    showing_end = min(page * limit, total) if total else 0
+    prev_link = (
+        f'<a id="pagination-prev" rel="prev" class="btn btn-secondary-hero btn-sm" href="{prev_href}">{escape(copy["pagination_prev"])}</a>'
+        if has_prev
+        else ""
+    )
+    next_link = (
+        f'<a id="pagination-next" rel="next" class="btn btn-secondary-hero btn-sm" href="{next_href}">{escape(copy["pagination_next"])}</a>'
+        if has_next
+        else ""
+    )
+
+    pagination_html = (
+        "<nav class=\"card pagination\" aria-label=\"Pagination\">"
+        f"<p class=\"muted\">{escape(copy['showing'])} {showing_start}-{showing_end} / {total} {escape(copy['results'])}</p>"
+        "<div class=\"cta-row\">"
+        f"{prev_link}{next_link}"
+        "</div></nav>"
+    )
+
+    hero_media = _property_media_path(rows[0], request=request) if rows else _DEFAULT_MEDIA_FALLBACK
+    filter_values = {
+        "price_min": str(price_min) if price_min is not None else "",
+        "price_max": str(price_max) if price_max is not None else "",
+        "beds": str(beds) if beds is not None else "",
+        "baths": str(baths) if baths is not None else "",
+        "area": selected_area,
+        "project": selected_project,
+        "property_type": property_type,
+    }
+    error_rows = "".join(f"<li>{escape(message)}</li>" for message in errors)
+    query_error_html = (
+        f'<div id="listing-error" class="state-error"><p>{escape(copy["query_error"])}</p><ul>{error_rows}</ul></div>'
+        if errors
+        else '<div id="listing-error" class="state-error" hidden></div>'
+    )
+
+    listing_styles = (
+        "<style>"
+        ".listing-hero{display:grid;gap:12px}.listing-filters{display:grid;gap:12px}.filter-grid{display:grid;gap:12px;grid-template-columns:1fr}"
+        ".filter-control{display:grid;gap:6px}.filter-control input,.filter-control select{width:100%;min-height:42px;padding:10px 12px;border:1px solid #d1d5db;border-radius:8px;background:#fff}"
+        ".listing-grid{display:grid;gap:16px;grid-template-columns:1fr}.listing-skeleton-grid{display:grid;gap:16px;grid-template-columns:1fr}.listing-link{display:grid;gap:10px;text-decoration:none}.listing-links a{text-decoration:underline}"
+        ".skeleton-card{display:grid;gap:8px}.skeleton-media{width:100%;aspect-ratio:16/9;border-radius:10px;background:linear-gradient(90deg,#e5e7eb,#f3f4f6,#e5e7eb)}.skeleton-line{height:12px;border-radius:999px;background:#e5e7eb}.skeleton-line.w40{width:40%}.skeleton-line.w60{width:60%}.skeleton-line.w80{width:80%}"
+        "@media (min-width:768px){.filter-grid{grid-template-columns:repeat(2,minmax(0,1fr))} .listing-grid,.listing-skeleton-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}"
+        "@media (min-width:1200px){.filter-grid{grid-template-columns:repeat(4,minmax(0,1fr))} .listing-grid,.listing-skeleton-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}"
+        "@media (min-width:1920px){.listing-grid,.listing-skeleton-grid{grid-template-columns:repeat(4,minmax(0,1fr))}}"
+        "@media (min-width:2560px){.listing-grid,.listing-skeleton-grid{grid-template-columns:repeat(5,minmax(0,1fr))}}"
+        "</style>"
+    )
+
+    tracking_script = """
+<script>
+(() => {
+  const locale = document.documentElement.lang || 'en';
+  const path = location.pathname;
+  const endpoint = '/api/v1/events';
+  function compact(raw){const out={};for(const [k,v] of Object.entries(raw||{})){if(v===undefined||v===null)continue;if(Array.isArray(v)&&v.length===0)continue;out[k]=v;}return out;}
+  function track(eventName,payload){const payloadBody=compact(payload);const sourceBody=compact({app:'flowbiz-public-runtime',env:'runtime',page:path,locale,placement:payloadBody.placement});return fetch(endpoint,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({event_name:eventName,source:sourceBody,payload:payloadBody}),keepalive:true}).catch(()=>null);}
+  document.querySelectorAll('[data-event]').forEach((node)=>{node.addEventListener('click',()=>{const eventName=node.getAttribute('data-event');if(!eventName)return;track(eventName,compact({label:node.textContent?.trim()||'',placement:node.getAttribute('data-placement')||undefined,cta_id:node.getAttribute('data-cta-id')||undefined,card_id:node.getAttribute('data-card-id')||undefined,card_slug:node.getAttribute('data-card-slug')||undefined,intent:node.getAttribute('data-intent')||undefined}));});});
+  const form = document.getElementById('listing-filters');
+  const loadingEl = document.getElementById('listing-loading');
+  const skeletonEl = document.getElementById('listing-skeleton');
+  const runtimeErrorEl = document.getElementById('listing-error-runtime');
+  if(form instanceof HTMLFormElement){
+    const filters=()=>{const out={};const data=new FormData(form);for(const [k,v] of data.entries()){const t=String(v||'').trim();if(!t||k==='page'||k==='limit')continue;out[k]=t;}return out;};
+    form.querySelectorAll('[data-track-filter]').forEach((node)=>{node.addEventListener('change',()=>{const active=filters();track('listing_filter_change',{placement:'filter_bar',filter_name:node.getAttribute('name')||undefined,filter_value:String(node.value||'').trim()||undefined,filter_values:Object.entries(active).map(([k,v])=>`${k}:${v}`),intent:form.getAttribute('data-intent')||undefined});});});
+    const sortSelect = document.getElementById('sort');
+    if(sortSelect instanceof HTMLSelectElement){sortSelect.addEventListener('change',()=>{const active=filters();track('listing_sort_change',{placement:'sort_control',sort:sortSelect.value||undefined,filter_values:Object.entries(active).map(([k,v])=>`${k}:${v}`),intent:form.getAttribute('data-intent')||undefined});const pageInput=document.getElementById('form-page');if(pageInput instanceof HTMLInputElement){pageInput.value='1';}form.requestSubmit();});}
+    form.addEventListener('submit',()=>{if(loadingEl instanceof HTMLElement)loadingEl.hidden=false;if(skeletonEl instanceof HTMLElement)skeletonEl.hidden=false;});
+  }
+  window.addEventListener('error',()=>{if(runtimeErrorEl instanceof HTMLElement)runtimeErrorEl.hidden=false;});
+})();
+</script>
+"""
+
+    body = (
+        f"{listing_styles}"
+        f"<section id=\"listing-hero\" class=\"card listing-hero\" aria-labelledby=\"listing-hero-title\" data-copy-pack-id=\"{escape(copy['copy_pack_id'])}\" data-intent=\"{escape(intent)}\">"
+        f"<img class=\"media\" src=\"{escape(hero_media)}\" alt=\"{escape(copy['hero_title'])}\" width=\"1280\" height=\"720\" loading=\"eager\" />"
+        f"<h2 id=\"listing-hero-title\">{escape(copy['hero_title'])}</h2><p>{escape(copy['hero_sub'])}</p>"
+        f"<p id=\"listing-rule-note\" class=\"muted\">{escape(copy['rule_note'])}</p>"
+        f"<div class=\"cta-row\"><a class=\"btn\" data-event=\"listing_cta_click\" data-cta-id=\"listing_consultation\" data-placement=\"listing_hero\" data-intent=\"{escape(intent)}\" href=\"/{locale}/contact?intent=consultation&source={escape(intent)}\">{escape(copy['consult_cta'])}</a>"
+        f"<a class=\"btn btn-secondary-hero\" data-event=\"listing_cta_click\" data-cta-id=\"listing_smart_finder\" data-placement=\"listing_hero\" data-intent=\"{escape(intent)}\" href=\"/{locale}/smart-finder?intent={escape(copy['smart_intent'])}\">{escape(copy['smart_finder_cta'])}</a></div>"
+        f"</section>"
+        f"<section id=\"listing-filters-section\" class=\"card stack\" aria-labelledby=\"listing-filters-title\"><h2 id=\"listing-filters-title\">{escape(copy['filters_title'])}</h2>{query_error_html}"
+        f"<form id=\"listing-filters\" class=\"listing-filters\" method=\"get\" action=\"{listing_path}\" data-intent=\"{escape(intent)}\">"
+        f"<input id=\"form-page\" type=\"hidden\" name=\"page\" value=\"1\" /><input type=\"hidden\" name=\"limit\" value=\"{limit}\" />"
+        f"<div class=\"filter-grid\">"
+        f"<label class=\"filter-control\" for=\"price_min\"><span>{escape(copy['price_min'])}</span><input data-track-filter id=\"price_min\" name=\"price_min\" type=\"number\" min=\"0\" inputmode=\"numeric\" value=\"{escape(filter_values['price_min'])}\" /></label>"
+        f"<label class=\"filter-control\" for=\"price_max\"><span>{escape(copy['price_max'])}</span><input data-track-filter id=\"price_max\" name=\"price_max\" type=\"number\" min=\"0\" inputmode=\"numeric\" value=\"{escape(filter_values['price_max'])}\" /></label>"
+        f"<label class=\"filter-control\" for=\"beds\"><span>{escape(copy['beds'])}</span><input data-track-filter id=\"beds\" name=\"beds\" type=\"number\" min=\"0\" inputmode=\"numeric\" value=\"{escape(filter_values['beds'])}\" /></label>"
+        f"<label class=\"filter-control\" for=\"baths\"><span>{escape(copy['baths'])}</span><input data-track-filter id=\"baths\" name=\"baths\" type=\"number\" min=\"0\" inputmode=\"numeric\" value=\"{escape(filter_values['baths'])}\" /></label>"
+        f"<label class=\"filter-control\" for=\"area\"><span>{escape(copy['area'])}</span><select data-track-filter id=\"area\" name=\"area\">{''.join(area_options_html)}</select></label>"
+        f"<label class=\"filter-control\" for=\"project\"><span>{escape(copy['project'])}</span><select data-track-filter id=\"project\" name=\"project\">{''.join(project_options_html)}</select></label>"
+        f"<label class=\"filter-control\" for=\"property_type\"><span>{escape(copy['property_type'])}</span><select data-track-filter id=\"property_type\" name=\"property_type\">{''.join(property_type_options_html)}</select></label>"
+        f"<label class=\"filter-control\" for=\"sort\"><span>{escape(copy['sort'])}</span><select id=\"sort\" name=\"sort\"><option value=\"newest\"{' selected' if sort == 'newest' else ''}>{escape(copy['sort_newest'])}</option><option value=\"price_asc\"{' selected' if sort == 'price_asc' else ''}>{escape(copy['sort_price_asc'])}</option><option value=\"price_desc\"{' selected' if sort == 'price_desc' else ''}>{escape(copy['sort_price_desc'])}</option></select></label>"
+        f"</div><div class=\"cta-row\"><button class=\"btn\" type=\"submit\" data-event=\"listing_cta_click\" data-cta-id=\"listing_apply_filters\" data-placement=\"filter_bar\" data-intent=\"{escape(intent)}\">{escape(copy['apply_filters'])}</button><a class=\"btn btn-secondary-hero\" data-event=\"listing_cta_click\" data-cta-id=\"listing_reset_filters\" data-placement=\"filter_bar\" data-intent=\"{escape(intent)}\" href=\"{listing_path}\">{escape(copy['reset_filters'])}</a></div></form></section>"
+        f"<div id=\"listing-loading\" class=\"state-loading\" role=\"status\" aria-live=\"polite\" hidden>{escape(copy['loading'])}</div>"
+        f"<div id=\"listing-error-runtime\" class=\"state-error\" hidden>{escape(copy['runtime_error'])}</div>"
+        f"<section id=\"listing-skeleton\" class=\"listing-skeleton-grid\" aria-hidden=\"true\" hidden><article class=\"card skeleton-card\"><div class=\"skeleton-media\"></div><div class=\"skeleton-line w40\"></div><div class=\"skeleton-line w80\"></div><div class=\"skeleton-line w60\"></div></article><article class=\"card skeleton-card\"><div class=\"skeleton-media\"></div><div class=\"skeleton-line w40\"></div><div class=\"skeleton-line w80\"></div><div class=\"skeleton-line w60\"></div></article><article class=\"card skeleton-card\"><div class=\"skeleton-media\"></div><div class=\"skeleton-line w40\"></div><div class=\"skeleton-line w80\"></div><div class=\"skeleton-line w60\"></div></article></section>"
+        f"<section id=\"listing-results\" class=\"listing-grid\">{cards_html}</section>{pagination_html}"
+        f"<section class=\"card\"><p class=\"muted\">{escape(copy['loading_hint'])}</p><div class=\"cta-row\"><a class=\"btn\" data-event=\"listing_cta_click\" data-cta-id=\"listing_footer_consultation\" data-placement=\"listing_footer\" data-intent=\"{escape(intent)}\" href=\"/{locale}/contact?intent=consultation&source={escape(intent)}\">{escape(copy['consult_cta'])}</a><a class=\"btn btn-secondary-hero\" data-event=\"listing_cta_click\" data-cta-id=\"listing_footer_smart_finder\" data-placement=\"listing_footer\" data-intent=\"{escape(intent)}\" href=\"/{locale}/smart-finder?intent={escape(copy['smart_intent'])}\">{escape(copy['smart_finder_cta'])}</a></div></section>"
+        f"{tracking_script}"
+    )
+    return HTMLResponse(_render_page_shell(locale, title=copy["page_title"], intro=copy["page_intro"], body=body))
+
+
 def _render_insights_page(locale: str, request: Request, db: Session) -> HTMLResponse:
     rows = db.scalars(select(Article).where(Article.deleted_at.is_(None), Article.status == "published", Article.category.in_(["guide", "blog"])).order_by(desc(Article.published_at), desc(Article.created_at)).limit(12)).all()
     cards = []
@@ -1676,6 +2340,30 @@ def render_home_en(request: Request, db: Session = Depends(get_db)) -> HTMLRespo
 def render_home_th(request: Request, db: Session = Depends(get_db)) -> HTMLResponse:
     source, resolved = _load_home_context(db, "th")
     return HTMLResponse(_render("th", request, db, source, resolved))
+
+
+@router.get("/en/buy", response_class=HTMLResponse)
+@router.get("/th/buy", response_class=HTMLResponse)
+def render_listing_buy(request: Request, db: Session = Depends(get_db)) -> HTMLResponse:
+    return _render_property_listing_page(_request_locale(request), request, db, "buy")
+
+
+@router.get("/en/rent", response_class=HTMLResponse)
+@router.get("/th/rent", response_class=HTMLResponse)
+def render_listing_rent(request: Request, db: Session = Depends(get_db)) -> HTMLResponse:
+    return _render_property_listing_page(_request_locale(request), request, db, "rent")
+
+
+@router.get("/en/investment", response_class=HTMLResponse)
+@router.get("/th/investment", response_class=HTMLResponse)
+def render_listing_investment(request: Request, db: Session = Depends(get_db)) -> HTMLResponse:
+    return _render_property_listing_page(_request_locale(request), request, db, "investment")
+
+
+@router.get("/en/marketplace", response_class=HTMLResponse)
+@router.get("/th/marketplace", response_class=HTMLResponse)
+def render_listing_marketplace(request: Request, db: Session = Depends(get_db)) -> HTMLResponse:
+    return _render_property_listing_page(_request_locale(request), request, db, "marketplace")
 
 
 @router.get("/en/projects", response_class=HTMLResponse)
