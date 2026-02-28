@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from collections.abc import Generator
-from uuid import uuid4
+from uuid import UUID, uuid4
 
 import pytest
 
@@ -207,7 +207,11 @@ def test_b5_developers_cms_crud_publish_reflect_and_validation(client) -> None:
             "cover_image_url": cover,
             "website": "https://developer.example.test",
             "profile": {"en": "Trusted developer"},
-            "trust_proof": {"licenses": ["EEC-1234"]},
+            "trust_proof": {
+                "licenses": ["EEC-1234"],
+                "approval_status": "approved",
+                "legal_approved": True,
+            },
             "source_note": "source: annual filing",
         },
     )
@@ -239,10 +243,35 @@ def test_b5_developers_cms_crud_publish_reflect_and_validation(client) -> None:
     patched = client.patch(
         f"/admin/developers/{developer_id}",
         headers=headers,
-        json={"profile": {"en": "Trusted developer", "th": "ผู้พัฒนาที่น่าเชื่อถือ"}},
+        json={
+            "profile": {"en": "Trusted developer", "th": "ผู้พัฒนาที่น่าเชื่อถือ"},
+            "trust_proof": {
+                "licenses": ["EEC-1234"],
+                "approval_status": "approved",
+                "legal_approved": True,
+            },
+        },
     )
     assert patched.status_code == 200, patched.text
     assert patched.json()["developer"]["profile"]["th"] == "ผู้พัฒนาที่น่าเชื่อถือ"
+
+    with SessionLocal() as db:
+        area = Area(slug=f"b5-dev-area-{uuid4()}", name="B5 Dev Area", status="published")
+        db.add(area)
+        db.flush()
+        db.add(
+            Project(
+                slug=f"b5-dev-project-{uuid4()}",
+                name="B5 Developer Linked Project",
+                status="published",
+                property_type="condo",
+                area_id=area.id,
+                developer_id=UUID(developer_id),
+                summary={"en": "Linked project for developer publish readiness"},
+                cover_image_url=cover,
+            )
+        )
+        db.commit()
 
     published = client.post(f"/admin/developers/{developer_id}/publish", headers=headers)
     assert published.status_code == 200, published.text

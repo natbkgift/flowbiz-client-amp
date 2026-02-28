@@ -7,14 +7,14 @@ from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import BaseModel, field_validator
-from sqlalchemy import desc, select
+from sqlalchemy import desc, func, select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from apps.api.dependencies.auth import get_current_admin
 from packages.core.database import get_db
 from packages.core.media_library import require_local_media_path
-from packages.core.models import Area, AreaStatistic, Developer, User
+from packages.core.models import Area, AreaStatistic, Developer, Project, User
 from packages.core.project_media_governance import evaluate_project_media_governance
 
 router = APIRouter(prefix="/admin", tags=["admin"])
@@ -27,6 +27,8 @@ _AREA_CONTENT_REQUIRED_KEYS = [
     "metrics_update_cadence",
 ]
 _AREA_REQUIRED_LOCALES = ["en", "th"]
+_DEVELOPER_REQUIRED_LOCALES = ["en", "th"]
+_TRUST_APPROVED_VALUES = {"approved", "verified", "legal_approved", "content_approved"}
 
 
 def _govern_media_or_422(db: Session, *, paths: list[str]) -> list[dict]:
@@ -142,6 +144,158 @@ def _enforce_area_publish_requirements(db: Session, area: Area) -> None:
             "missing": sorted(set(missing)),
             "required_locales": _AREA_REQUIRED_LOCALES,
             "required_content_keys": _AREA_CONTENT_REQUIRED_KEYS,
+        },
+    )
+
+
+def _developer_profile_payload(developer: Developer) -> dict | None:
+    if isinstance(developer.profile, dict):
+        return developer.profile
+    if isinstance(developer.summary, dict):
+        return developer.summary
+    return None
+
+
+def _developer_profile_locales(payload: dict | None) -> list[str]:
+    if not isinstance(payload, dict):
+        return []
+    locales: list[str] = []
+    for locale in _DEVELOPER_REQUIRED_LOCALES:
+        if _localized_content_text(payload.get(locale), locale):
+            locales.append(locale)
+    if locales:
+        return locales
+    # Backward-compat: accept non-locale nested payload if text exists.
+    for locale in _DEVELOPER_REQUIRED_LOCALES:
+        if _localized_content_text(payload, locale):
+            return [locale]
+    return []
+
+
+def _trust_proof_has_content(value: object) -> bool:
+    return bool(_localized_content_text(value, "en") or _localized_content_text(value, "th"))
+
+
+def _trust_proof_has_approval(value: object) -> bool:
+    def walk(node: object) -> bool:
+        if isinstance(node, dict):
+            for key in ["legal_approved", "content_approved", "verified", "approved", "is_approved"]:
+                flag = node.get(key)
+                if isinstance(flag, bool) and flag:
+                    return True
+            for key in ["approval_status", "legal_status", "content_status", "verification_status", "status"]:
+                raw = str(node.get(key) or "").strip().lower()
+                if raw in _TRUST_APPROVED_VALUES:
+                    return True
+            return any(walk(item) for item in node.values())
+        if isinstance(node, list):
+            return any(walk(item) for item in node)
+        return False
+
+    return walk(value)
+
+
+def _developer_publish_linkage(db: Session, developer_id: UUID) -> tuple[int, list[str], int, list[str]]:
+    published_project_rows = db.execute(
+        select(Project.slug)
+        .where(
+            Project.deleted_at.is_(None),
+            Project.status == "published",
+            Project.developer_id == developer_id,
+        )
+        .order_by(Project.slug.asc())
+    ).all()
+    published_project_slugs = [str(slug) for (slug,) in published_project_rows if str(slug or "").strip()]
+    linked_area_rows = db.execute(
+        select(Area.slug)
+        .select_from(Project)
+        .join(Area, Area.id == Project.area_id)
+        .where(
+            Project.deleted_at.is_(None),
+            Project.status == "published",
+            Project.developer_id == developer_id,
+            Area.deleted_at.is_(None),
+            Area.status == "published",
+        )
+        .group_by(Area.id, Area.slug)
+        .order_by(Area.slug.asc())
+    ).all()
+    linked_area_slugs = [str(slug) for (slug,) in linked_area_rows if str(slug or "").strip()]
+    linked_project_count = int(
+        db.scalar(
+            select(func.count(Project.id))
+            .select_from(Project)
+            .join(Area, Area.id == Project.area_id)
+            .where(
+                Project.deleted_at.is_(None),
+                Project.status == "published",
+                Project.developer_id == developer_id,
+                Area.deleted_at.is_(None),
+                Area.status == "published",
+            )
+        )
+        or 0
+    )
+    return len(published_project_slugs), published_project_slugs, linked_project_count, linked_area_slugs
+
+
+def _developer_publish_readiness(db: Session, developer: Developer) -> dict:
+    missing: list[str] = []
+
+    profile_payload = _developer_profile_payload(developer)
+    profile_locales = _developer_profile_locales(profile_payload)
+    if not profile_locales:
+        missing.append("profile")
+
+    source_note = str(developer.source_note or "").strip()
+    if not source_note:
+        missing.append("source_note")
+
+    trust = developer.trust_proof
+    trust_has_content = _trust_proof_has_content(trust)
+    trust_has_approval = _trust_proof_has_approval(trust)
+    if not trust_has_content:
+        missing.append("trust_proof")
+    if not trust_has_approval:
+        missing.append("trust_proof.approval")
+
+    published_project_count, published_project_slugs, linked_project_count, linked_area_slugs = _developer_publish_linkage(
+        db, developer.id
+    )
+    if published_project_count <= 0:
+        missing.append("projects.published")
+    if linked_project_count <= 0:
+        missing.append("areas.linked_from_published_projects")
+
+    return {
+        "ready": len(missing) == 0,
+        "missing": sorted(set(missing)),
+        "required_locales": _DEVELOPER_REQUIRED_LOCALES,
+        "profile_locales_available": profile_locales,
+        "source_note_present": bool(source_note),
+        "trust_proof_content_present": trust_has_content,
+        "trust_proof_approval_detected": trust_has_approval,
+        "published_project_count": published_project_count,
+        "published_project_slugs": published_project_slugs,
+        "linked_published_project_count": linked_project_count,
+        "linked_published_area_count": len(linked_area_slugs),
+        "linked_area_slugs": linked_area_slugs,
+    }
+
+
+def _enforce_developer_publish_requirements(db: Session, developer: Developer) -> dict:
+    readiness = _developer_publish_readiness(db, developer)
+    if readiness["ready"]:
+        return readiness
+    raise HTTPException(
+        status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
+        detail={
+            "code": "developer_publish_requirements_missing",
+            "message": (
+                "Developer publish is blocked: missing approved profile/trust proof content "
+                "or missing published project-to-area linkage."
+            ),
+            **readiness,
         },
     )
 
@@ -595,6 +749,16 @@ def admin_get_developer(
     return _serialize_developer(row)
 
 
+@router.get("/developers/{developer_id}/publish-readiness")
+def admin_get_developer_publish_readiness(
+    developer_id: UUID,
+    db: Session = Depends(get_db),
+    _admin: User = Depends(get_current_admin),
+) -> dict:
+    row = _developer_or_404(db, developer_id)
+    return {"developer_id": str(row.id), "slug": row.slug, **_developer_publish_readiness(db, row)}
+
+
 @router.post("/developers", status_code=status.HTTP_201_CREATED)
 def create_developer(
     payload: DeveloperCreate,
@@ -631,7 +795,13 @@ def create_developer(
     )
     db.add(row)
     try:
+        db.flush()
+        if row.status == "active":
+            _enforce_developer_publish_requirements(db, row)
         db.commit()
+    except HTTPException:
+        db.rollback()
+        raise
     except IntegrityError as exc:
         db.rollback()
         raise HTTPException(
@@ -669,7 +839,13 @@ def admin_patch_developer(
         setattr(row, field, value)
     db.add(row)
     try:
+        db.flush()
+        if row.status == "active":
+            _enforce_developer_publish_requirements(db, row)
         db.commit()
+    except HTTPException:
+        db.rollback()
+        raise
     except IntegrityError as exc:
         db.rollback()
         raise HTTPException(
@@ -689,9 +865,15 @@ def publish_developer(
     row = _developer_or_404(db, developer_id)
     row.status = "active"
     db.add(row)
-    db.commit()
+    try:
+        db.flush()
+        readiness = _enforce_developer_publish_requirements(db, row)
+        db.commit()
+    except HTTPException:
+        db.rollback()
+        raise
     db.refresh(row)
-    return {"developer": _serialize_developer(row), "published": True}
+    return {"developer": _serialize_developer(row), "published": True, "publish_readiness": readiness}
 
 
 @router.post("/developers/{developer_id}/unpublish")

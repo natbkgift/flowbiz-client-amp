@@ -7,7 +7,7 @@ import pytest
 
 from packages.core.auth import create_access_token, hash_password
 from packages.core.database import SessionLocal, init_db
-from packages.core.models import Area, AreaStatistic, Developer, MediaAsset, User
+from packages.core.models import Area, AreaStatistic, Developer, MediaAsset, Project, User
 
 
 @pytest.fixture(autouse=True)
@@ -15,6 +15,7 @@ def _cleanup_tables() -> Generator[None, None, None]:
     init_db()
     with SessionLocal() as db:
         db.query(AreaStatistic).delete()
+        db.query(Project).delete()
         db.query(Area).delete()
         db.query(Developer).delete()
         db.query(MediaAsset).delete()
@@ -23,6 +24,7 @@ def _cleanup_tables() -> Generator[None, None, None]:
     yield
     with SessionLocal() as db:
         db.query(AreaStatistic).delete()
+        db.query(Project).delete()
         db.query(Area).delete()
         db.query(Developer).delete()
         db.query(MediaAsset).delete()
@@ -113,6 +115,13 @@ def test_flow_a_publish_reflects_public_lists(client) -> None:
             "slug": f"sunrise-{uuid4()}",
             "status": "inactive",
             "logo_url": logo,
+            "profile": {"en": "Sunrise Dev profile"},
+            "trust_proof": {
+                "licenses": ["EEC-2026-001"],
+                "approval_status": "approved",
+                "legal_approved": True,
+            },
+            "source_note": "source: legal reviewed developer dossier",
         },
     )
     assert created_developer.status_code == 201, created_developer.text
@@ -135,6 +144,21 @@ def test_flow_a_publish_reflects_public_lists(client) -> None:
 
     publish_area = client.post(f"/admin/areas/{area_id}/publish", headers=headers)
     assert publish_area.status_code == 200, publish_area.text
+
+    linked_project = client.post(
+        "/admin/projects",
+        headers=headers,
+        json={
+            "slug": f"sunrise-link-{uuid4()}",
+            "name": "Sunrise Linked Project",
+            "status": "published",
+            "property_type": "condo",
+            "area_id": area_id,
+            "developer_id": developer_id,
+            "summary": {"en": "Linked project for developer publish readiness"},
+        },
+    )
+    assert linked_project.status_code == 201, linked_project.text
 
     publish_developer = client.post(f"/admin/developers/{developer_id}/publish", headers=headers)
     assert publish_developer.status_code == 200, publish_developer.text
@@ -223,13 +247,39 @@ def test_flow_b_statistics_and_summary_reflect_public_endpoints(client) -> None:
         json={
             "name": "Laguna Group",
             "slug": f"laguna-{uuid4()}",
-            "status": "active",
+            "status": "inactive",
             "logo_url": logo,
+            "profile": {"en": "Reliable premium builder", "th": "ผู้พัฒนาคุณภาพ"},
             "summary": {"en": "Reliable premium builder", "th": "ผู้พัฒนาคุณภาพ"},
+            "trust_proof": {
+                "licenses": ["LG-LEGAL-2026"],
+                "approval_status": "approved",
+                "legal_approved": True,
+            },
+            "source_note": "source: legal-reviewed profile pack",
         },
     )
     assert created_developer.status_code == 201, created_developer.text
+    developer_id = created_developer.json()["developer"]["id"]
     developer_slug = created_developer.json()["developer"]["slug"]
+
+    linked_project = client.post(
+        "/admin/projects",
+        headers=headers,
+        json={
+            "slug": f"laguna-link-{uuid4()}",
+            "name": "Laguna Linked Project",
+            "status": "published",
+            "property_type": "condo",
+            "area_id": area_id,
+            "developer_id": developer_id,
+            "summary": {"en": "Linked project for developer publish readiness"},
+        },
+    )
+    assert linked_project.status_code == 201, linked_project.text
+
+    publish_developer = client.post(f"/admin/developers/{developer_id}/publish", headers=headers)
+    assert publish_developer.status_code == 200, publish_developer.text
 
     dev_public = client.get(f"/v1/developers/{developer_slug}")
     assert dev_public.status_code == 200, dev_public.text
@@ -346,3 +396,38 @@ def test_area_publish_blocked_when_required_area_guide_fields_are_missing(client
     assert "source_note" in missing
     assert "statistics" in missing
     assert "content.en.why_live_invest" in missing
+
+
+def test_developer_publish_blocked_when_required_content_or_linkage_is_missing(client) -> None:
+    headers = _make_admin_headers()
+    logo = f"/media/library/{uuid4()}.jpg"
+    _add_media_asset(path=logo, rights_status="approved", approval_status="approved")
+
+    created_developer = client.post(
+        "/admin/developers",
+        headers=headers,
+        json={
+            "name": "Incomplete Developer",
+            "slug": f"incomplete-dev-{uuid4()}",
+            "status": "inactive",
+            "logo_url": logo,
+            # Intentionally missing profile/trust/source_note and no linked published projects.
+        },
+    )
+    assert created_developer.status_code == 201, created_developer.text
+    developer_id = created_developer.json()["developer"]["id"]
+
+    readiness = client.get(f"/admin/developers/{developer_id}/publish-readiness", headers=headers)
+    assert readiness.status_code == 200, readiness.text
+    readiness_body = readiness.json()
+    assert readiness_body["ready"] is False
+    assert "profile" in readiness_body["missing"]
+    assert "trust_proof" in readiness_body["missing"]
+    assert "trust_proof.approval" in readiness_body["missing"]
+    assert "projects.published" in readiness_body["missing"]
+    assert "areas.linked_from_published_projects" in readiness_body["missing"]
+
+    publish = client.post(f"/admin/developers/{developer_id}/publish", headers=headers)
+    assert publish.status_code == 422, publish.text
+    detail = publish.json().get("detail") or {}
+    assert detail.get("code") == "developer_publish_requirements_missing"

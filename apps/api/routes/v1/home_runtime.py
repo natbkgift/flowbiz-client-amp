@@ -1807,31 +1807,236 @@ def _render_area_detail_page(locale: str, request: Request, db: Session, slug: s
     return HTMLResponse(_render_page_shell(locale, title=row.name, intro=summary, body=body))
 
 
+def _developer_copy(locale: str) -> dict[str, str]:
+    copy = {
+        "page_title": "Developers",
+        "page_intro": "Published developer profiles with project links, location focus, and consultation paths.",
+        "breadcrumb_home": "Home",
+        "breadcrumb_hub": "Developers",
+        "listing_title": "Developer Directory",
+        "listing_intro": "Review published developer profiles and continue to project details or consultation.",
+        "listing_empty": "No active developers are published yet. TODO: publish approved developer cards with profile and local media.",
+        "listing_profile_pending": "Developer profile pending publication. TODO: add approved profile/about content.",
+        "listing_project_count_pending": "Published project count is pending data sync. TODO: verify project linkage.",
+        "listing_project_count_zero": "No published projects linked yet. TODO: link approved published projects to this developer.",
+        "listing_project_count_one": "1 published project linked.",
+        "listing_project_count_many": "{count} published projects linked.",
+        "listing_view_detail": "View developer",
+        "listing_browse_projects": "Browse projects",
+        "loading": "Loading developer content...",
+        "runtime_error": "A runtime error occurred. Please refresh and retry.",
+        "overview_title": "Developer profile",
+        "projects_title": "Published projects by this developer",
+        "projects_empty": "No published projects are linked to this developer yet. TODO: publish or link approved projects.",
+        "project_card_cta": "View project details",
+        "location_focus_title": "Location focus",
+        "location_focus_empty": "Location focus is pending project linkage. TODO: link published projects to approved areas.",
+        "location_focus_projects": "{count} published projects",
+        "trust_title": "Trust proof",
+        "trust_empty": "Trust proof is not published yet. TODO: add approved licenses, awards, or verification records.",
+        "cta_title": "Next step",
+        "cta_intro": "Need a shortlist from this developer? Continue to consultation or browse published projects.",
+        "cta_consult": "Consult about this developer",
+        "cta_browse_projects": "Browse developer projects",
+        "cta_visit_website": "Visit official website",
+    }
+    if locale == "th":
+        copy.update(
+            {
+                "page_title": "ผู้พัฒนาโครงการ",
+                "page_intro": "โปรไฟล์ผู้พัฒนาที่เผยแพร่ พร้อมลิงก์โครงการ บริบททำเล และเส้นทางปรึกษา",
+                "breadcrumb_home": "หน้าแรก",
+                "breadcrumb_hub": "ผู้พัฒนาโครงการ",
+                "listing_title": "รายชื่อผู้พัฒนา",
+                "listing_intro": "ดูโปรไฟล์ผู้พัฒนาที่เผยแพร่ แล้วไปต่อที่รายละเอียดโครงการหรือการปรึกษา",
+                "listing_empty": "ยังไม่มีผู้พัฒนาที่เผยแพร่ TODO: เผยแพร่การ์ดผู้พัฒนาพร้อมโปรไฟล์และ local media ที่อนุมัติแล้ว",
+                "listing_profile_pending": "ยังไม่มีโปรไฟล์ผู้พัฒนาที่เผยแพร่ TODO: เพิ่มเนื้อหา profile/about ที่อนุมัติแล้ว",
+                "listing_project_count_pending": "จำนวนโครงการที่เผยแพร่กำลังรอซิงก์ข้อมูล TODO: ตรวจสอบการเชื่อมโยงโครงการ",
+                "listing_project_count_zero": "ยังไม่มีโครงการที่เผยแพร่เชื่อมอยู่ TODO: เชื่อมโครงการที่อนุมัติแล้วกับผู้พัฒนารายนี้",
+                "listing_project_count_one": "เชื่อมกับโครงการที่เผยแพร่ 1 โครงการ",
+                "listing_project_count_many": "เชื่อมกับโครงการที่เผยแพร่ {count} โครงการ",
+                "listing_view_detail": "ดูรายละเอียดผู้พัฒนา",
+                "listing_browse_projects": "ดูโครงการ",
+                "loading": "กำลังโหลดข้อมูลผู้พัฒนา...",
+                "runtime_error": "เกิดข้อผิดพลาดระหว่างแสดงผล กรุณารีเฟรชแล้วลองใหม่",
+                "overview_title": "โปรไฟล์ผู้พัฒนา",
+                "projects_title": "โครงการที่เผยแพร่ของผู้พัฒนานี้",
+                "projects_empty": "ยังไม่มีโครงการที่เผยแพร่เชื่อมกับผู้พัฒนารายนี้ TODO: เผยแพร่หรือเชื่อมโครงการที่อนุมัติแล้ว",
+                "project_card_cta": "ดูรายละเอียดโครงการ",
+                "location_focus_title": "ทำเลที่ผู้พัฒนานี้โฟกัส",
+                "location_focus_empty": "ยังไม่มีบริบททำเลจากโครงการที่เชื่อมโยง TODO: เชื่อมโครงการที่เผยแพร่กับพื้นที่ที่อนุมัติแล้ว",
+                "location_focus_projects": "{count} โครงการที่เผยแพร่",
+                "trust_title": "หลักฐานความน่าเชื่อถือ",
+                "trust_empty": "ยังไม่มีหลักฐานความน่าเชื่อถือที่เผยแพร่ TODO: เพิ่มใบอนุญาต รางวัล หรือข้อมูลยืนยันที่อนุมัติแล้ว",
+                "cta_title": "ขั้นตอนถัดไป",
+                "cta_intro": "ต้องการ shortlist จากผู้พัฒนานี้หรือไม่ ไปต่อที่ consultation หรือดูโครงการที่เผยแพร่",
+                "cta_consult": "ปรึกษาเรื่องผู้พัฒนานี้",
+                "cta_browse_projects": "ดูโครงการของผู้พัฒนา",
+                "cta_visit_website": "เว็บไซต์ทางการ",
+            }
+        )
+    return copy
+
+
+def _developer_page_styles() -> str:
+    return (
+        "<style>"
+        ".crumbs{list-style:none;margin:0;padding:0;display:flex;gap:8px;flex-wrap:wrap;align-items:center}"
+        ".crumbs li{display:inline-flex;align-items:center;gap:8px}.crumbs li+li::before{content:'/';color:#6b7280}"
+        ".developer-grid{display:grid;gap:16px;grid-template-columns:1fr}.cta-row{display:flex;gap:10px;flex-wrap:wrap}"
+        ".facts{margin:0;padding-left:18px;display:grid;gap:6px}"
+        "@media (min-width:768px){.developer-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}"
+        "@media (min-width:1200px){.developer-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}"
+        "@media (min-width:1920px){.developer-grid{grid-template-columns:repeat(4,minmax(0,1fr))}}"
+        "@media (min-width:2560px){.developer-grid{grid-template-columns:repeat(5,minmax(0,1fr))}}"
+        "</style>"
+    )
+
+
+def _developer_tracking_script(*, loading_id: str, error_id: str) -> str:
+    return f"""
+<script>
+(() => {{
+  const locale = document.documentElement.lang || 'en';
+  const path = location.pathname;
+  const endpoint = '/api/v1/events';
+  const loadingEl = document.getElementById('{loading_id}');
+  const runtimeErrorEl = document.getElementById('{error_id}');
+  function compact(raw){{const out={{}};for(const [k,v] of Object.entries(raw||{{}})){{if(v===undefined||v===null)continue;if(Array.isArray(v)&&v.length===0)continue;out[k]=v;}}return out;}}
+  function track(eventName,payload){{const payloadBody=compact(payload);const sourceBody=compact({{app:'flowbiz-public-runtime',env:'runtime',page:path,locale,placement:payloadBody.placement}});return fetch(endpoint,{{method:'POST',headers:{{'content-type':'application/json'}},body:JSON.stringify({{event_name:eventName,source:sourceBody,payload:payloadBody}}),keepalive:true}}).catch(()=>null);}}
+  document.querySelectorAll('[data-event]').forEach((node)=>{{node.addEventListener('click',()=>{{const eventName=node.getAttribute('data-event');if(!eventName)return;const loadingTarget=node.getAttribute('data-loading-target');if(loadingTarget&&loadingEl instanceof HTMLElement&&loadingEl.id===loadingTarget)loadingEl.hidden=false;track(eventName,compact({{label:node.textContent?.trim()||'',placement:node.getAttribute('data-placement')||undefined,cta_id:node.getAttribute('data-cta-id')||undefined,developer_slug:node.getAttribute('data-developer-slug')||undefined,area_slug:node.getAttribute('data-area-slug')||undefined,card_slug:node.getAttribute('data-card-slug')||undefined}}));}});}});
+  window.addEventListener('error',()=>{{if(runtimeErrorEl instanceof HTMLElement)runtimeErrorEl.hidden=false;}});
+  window.addEventListener('unhandledrejection',()=>{{if(runtimeErrorEl instanceof HTMLElement)runtimeErrorEl.hidden=false;}});
+}})();
+</script>
+"""
+
+
+def _developer_project_count_text(*, copy: dict[str, str], project_count: int | None) -> str:
+    if project_count is None:
+        return copy["listing_project_count_pending"]
+    if project_count <= 0:
+        return copy["listing_project_count_zero"]
+    if project_count == 1:
+        return copy["listing_project_count_one"]
+    return copy["listing_project_count_many"].format(count=f"{project_count:,}")
+
+
+def _developer_trust_proof_items(value: object, *, locale: str) -> list[str]:
+    out: list[str] = []
+    seen: set[str] = set()
+
+    def push(raw: object, *, prefix: str = "") -> None:
+        text = " ".join(str(raw or "").split())
+        if not text:
+            return
+        line = f"{prefix}: {text}" if prefix else text
+        key = line.lower()
+        if key in seen:
+            return
+        seen.add(key)
+        out.append(line)
+
+    def walk(node: object, *, prefix: str = "", depth: int = 0) -> None:
+        if node is None or depth > 4:
+            return
+        if isinstance(node, dict):
+            localized = _localized_dict_text(node, locale)
+            if localized and set(node.keys()).issubset({"en", "th"}):
+                push(localized, prefix=prefix)
+                return
+            for key, item in node.items():
+                label = " ".join(str(key or "").replace("_", " ").split())
+                next_prefix = f"{prefix} / {label}" if prefix and label else (label or prefix)
+                walk(item, prefix=next_prefix, depth=depth + 1)
+            return
+        if isinstance(node, list):
+            for item in node:
+                walk(item, prefix=prefix, depth=depth + 1)
+            return
+        push(node, prefix=prefix)
+
+    walk(value)
+    return out[:10]
+
+
+def _developer_location_focus(db: Session, developer_id: UUID) -> list[dict[str, object]]:
+    rows = db.execute(
+        select(Area.slug, Area.name, func.count(Project.id))
+        .select_from(Project)
+        .join(Area, Area.id == Project.area_id)
+        .where(
+            Project.deleted_at.is_(None),
+            Project.status == "published",
+            Project.developer_id == developer_id,
+            Area.deleted_at.is_(None),
+            Area.status == "published",
+        )
+        .group_by(Area.id, Area.slug, Area.name)
+        .order_by(desc(func.count(Project.id)), Area.name.asc())
+        .limit(8)
+    ).all()
+    return [{"slug": slug, "name": name, "project_count": int(total)} for slug, name, total in rows if slug and name]
+
+
 def _render_developers_page(locale: str, request: Request, db: Session) -> HTMLResponse:
+    copy = _developer_copy(locale)
     rows = db.scalars(
         select(Developer)
         .where(Developer.deleted_at.is_(None), Developer.status == "active")
         .order_by(Developer.name.asc())
-        .limit(20)
+        .limit(24)
     ).all()
-    cards = []
+    project_counts = {
+        str(developer_id): int(total)
+        for developer_id, total in db.execute(
+            select(Project.developer_id, func.count(Project.id))
+            .where(
+                Project.deleted_at.is_(None),
+                Project.status == "published",
+                Project.developer_id.is_not(None),
+            )
+            .group_by(Project.developer_id)
+        ).all()
+    }
+    cards: list[str] = []
     for row in rows:
         media = _safe_media_url(row.cover_image_url or row.logo_url, _DEFAULT_MEDIA_FALLBACK, request=request)
-        profile = _localized_dict_text(row.profile or row.summary, locale) or (
-            "Developer profile pending publication." if locale == "en" else "รอเผยแพร่โปรไฟล์ผู้พัฒนา"
-        )
+        profile = _localized_dict_text(row.profile or row.summary, locale) or copy["listing_profile_pending"]
+        project_count = project_counts.get(str(row.id))
+        project_count_text = _developer_project_count_text(copy=copy, project_count=project_count)
+        detail_href = f"/{locale}/developers/{row.slug}"
+        browse_href = f"/{locale}/projects?{urlencode({'developer': row.slug})}"
         cards.append(
-            f"<article class=\"card\"><img class=\"media\" src=\"{escape(media)}\" alt=\"{escape(row.name)}\" width=\"640\" height=\"360\" loading=\"lazy\" /><h2>{escape(row.name)}</h2><p>{escape(profile)}</p><a class=\"btn\" href=\"/{locale}/developers/{escape(row.slug)}\">{'View developer' if locale == 'en' else 'ดูรายละเอียดผู้พัฒนา'}</a></article>"
+            f"<article class=\"card\">"
+            f"<img class=\"media\" src=\"{escape(media)}\" alt=\"{escape(row.name)}\" width=\"640\" height=\"360\" loading=\"lazy\" />"
+            f"<h2>{escape(row.name)}</h2><p>{escape(profile)}</p>"
+            f"<p class=\"muted\" data-developer-project-count=\"{escape(row.slug)}\">{escape(project_count_text)}</p>"
+            f"<div class=\"cta-row\">"
+            f"<a class=\"btn\" data-event=\"developer_card_click\" data-placement=\"developer_listing_grid\" data-cta-id=\"developer_card_primary\" data-card-slug=\"{escape(row.slug)}\" data-developer-slug=\"{escape(row.slug)}\" data-loading-target=\"developer-list-loading\" href=\"{detail_href}\">{escape(copy['listing_view_detail'])}</a>"
+            f"<a class=\"btn btn-secondary-hero\" data-event=\"developer_cta_click\" data-placement=\"developer_listing_grid\" data-cta-id=\"developer_card_browse_projects\" data-developer-slug=\"{escape(row.slug)}\" data-loading-target=\"developer-list-loading\" href=\"{browse_href}\">{escape(copy['listing_browse_projects'])}</a>"
+            f"</div></article>"
         )
-    fallback = "No active developers are published yet." if locale == "en" else "ยังไม่มีผู้พัฒนาที่เผยแพร่"
-    body_content = "".join(cards) if cards else f"<div class=\"card\">{escape(fallback)}</div>"
-    body = f"<section class=\"grid\">{body_content}</section>"
-    title = "Developers"
-    intro = "Published developer profiles and linked project context." if locale == "en" else "โปรไฟล์ผู้พัฒนาที่เผยแพร่และบริบทโครงการที่เกี่ยวข้อง"
-    return HTMLResponse(_render_page_shell(locale, title=title, intro=intro, body=body))
+    cards_html = "".join(cards) if cards else f"<div class=\"card state-empty\">{escape(copy['listing_empty'])}</div>"
+    breadcrumb = (
+        f"<nav id=\"developer-breadcrumb\" class=\"card\" aria-label=\"Breadcrumb\"><ol class=\"crumbs\">"
+        f"<li><a href=\"/{locale}\">{escape(copy['breadcrumb_home'])}</a></li>"
+        f"<li aria-current=\"page\">{escape(copy['breadcrumb_hub'])}</li></ol></nav>"
+    )
+    body = (
+        f"{_developer_page_styles()}"
+        f"{breadcrumb}"
+        f"<section id=\"developer-list-overview\" class=\"card\"><h2>{escape(copy['listing_title'])}</h2><p>{escape(copy['listing_intro'])}</p></section>"
+        f"<div id=\"developer-list-loading\" class=\"state-loading\" role=\"status\" aria-live=\"polite\" hidden>{escape(copy['loading'])}</div>"
+        f"<div id=\"developer-list-runtime-error\" class=\"state-error\" hidden>{escape(copy['runtime_error'])}</div>"
+        f"<section id=\"developer-listing\" class=\"developer-grid\">{cards_html}</section>"
+        f"{_developer_tracking_script(loading_id='developer-list-loading', error_id='developer-list-runtime-error')}"
+    )
+    return HTMLResponse(_render_page_shell(locale, title=copy["page_title"], intro=copy["page_intro"], body=body))
 
 
 def _render_developer_detail_page(locale: str, request: Request, db: Session, slug: str) -> HTMLResponse:
+    copy = _developer_copy(locale)
     row = db.scalar(
         select(Developer).where(
             Developer.deleted_at.is_(None),
@@ -1843,9 +2048,7 @@ def _render_developer_detail_page(locale: str, request: Request, db: Session, sl
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Developer not found")
 
     media = _safe_media_url(row.cover_image_url or row.logo_url, _DEFAULT_MEDIA_FALLBACK, request=request)
-    profile = _localized_dict_text(row.profile or row.summary, locale) or (
-        "Developer profile pending publication." if locale == "en" else "รอเผยแพร่โปรไฟล์ผู้พัฒนา"
-    )
+    profile = _localized_dict_text(row.profile or row.summary, locale) or copy["listing_profile_pending"]
     projects = db.scalars(
         select(Project)
         .where(Project.deleted_at.is_(None), Project.status == "published", Project.developer_id == row.id)
@@ -1853,25 +2056,53 @@ def _render_developer_detail_page(locale: str, request: Request, db: Session, sl
         .limit(8)
     ).all()
     project_cards = "".join(
-        f"<article class=\"card\"><img class=\"media\" src=\"{escape(_safe_media_url(item.cover_image_url or item.hero_image_url, _DEFAULT_MEDIA_FALLBACK, request=request))}\" alt=\"{escape(item.name)}\" width=\"640\" height=\"360\" loading=\"lazy\" /><h3>{escape(item.name)}</h3><p class=\"muted\">{escape(_format_money(item.starting_price, fallback='-'))}</p><a class=\"btn\" href=\"/{locale}/projects/{escape(item.slug)}\">{'View project details' if locale == 'en' else 'ดูรายละเอียดโครงการ'}</a></article>"
+        f"<article class=\"card\"><img class=\"media\" src=\"{escape(_safe_media_url(item.cover_image_url or item.hero_image_url, _DEFAULT_MEDIA_FALLBACK, request=request))}\" alt=\"{escape(item.name)}\" width=\"640\" height=\"360\" loading=\"lazy\" /><h3>{escape(item.name)}</h3><p class=\"muted\">{escape(_format_money(item.starting_price, fallback='-'))}</p><a class=\"btn\" data-event=\"developer_cta_click\" data-placement=\"developer_detail_projects\" data-cta-id=\"developer_project_card\" data-developer-slug=\"{escape(row.slug)}\" data-card-slug=\"{escape(item.slug)}\" data-loading-target=\"developer-detail-loading\" href=\"/{locale}/projects/{escape(item.slug)}\">{escape(copy['project_card_cta'])}</a></article>"
         for item in projects
-    ) or (
-        f"<div class=\"card\">{'No published projects are linked to this developer yet.' if locale == 'en' else 'ยังไม่มีโครงการที่เผยแพร่เชื่อมกับผู้พัฒนารายนี้'}</div>"
-    )
+    ) or f"<div class=\"card state-empty\">{escape(copy['projects_empty'])}</div>"
+
+    location_focus = _developer_location_focus(db, row.id)
+    location_rows_items: list[str] = []
+    for item in location_focus:
+        area_slug = str(item["slug"])
+        area_name = str(item["name"])
+        area_project_count = int(item["project_count"])
+        project_count_text = copy["location_focus_projects"].format(count=f"{area_project_count:,}")
+        location_rows_items.append(
+            f"<li><a href=\"/{locale}/areas/{escape(area_slug)}\">{escape(area_name)}</a> <span class=\"muted\">({escape(project_count_text)})</span></li>"
+        )
+    location_rows = "".join(location_rows_items) or f"<li>{escape(copy['location_focus_empty'])}</li>"
+
+    trust_items = _developer_trust_proof_items(row.trust_proof, locale=locale)
+    trust_rows = "".join(f"<li>{escape(item)}</li>" for item in trust_items) or f"<li>{escape(copy['trust_empty'])}</li>"
+
     website_text = str(row.website or "").strip()
     website_html = (
-        f'<a class="btn" href="{escape(website_text)}" target="_blank" rel="noopener">{escape(website_text)}</a>'
+        f'<a class="btn btn-secondary-hero" href="{escape(website_text)}" target="_blank" rel="noopener">{escape(copy["cta_visit_website"])}</a>'
         if website_text
         else ""
     )
+    consult_href = f"/{locale}/contact?{urlencode({'intent': 'consultation', 'developer': row.slug})}"
+    browse_projects_href = f"/{locale}/projects?{urlencode({'developer': row.slug})}"
+    breadcrumb = (
+        f"<nav id=\"developer-breadcrumb\" class=\"card\" aria-label=\"Breadcrumb\"><ol class=\"crumbs\">"
+        f"<li><a href=\"/{locale}\">{escape(copy['breadcrumb_home'])}</a></li>"
+        f"<li><a href=\"/{locale}/developers\">{escape(copy['breadcrumb_hub'])}</a></li>"
+        f"<li aria-current=\"page\">{escape(row.name)}</li></ol></nav>"
+    )
 
     body = (
-        f"<section class=\"card\"><img class=\"media\" src=\"{escape(media)}\" alt=\"{escape(row.name)}\" width=\"1280\" height=\"720\" loading=\"lazy\" /><h2>{escape(row.name)}</h2><p>{escape(profile)}</p>{website_html}</section>"
-        f"<section class=\"stack\"><h2>{'Published projects by this developer' if locale == 'en' else 'โครงการที่เผยแพร่ของผู้พัฒนานี้'}</h2><section class=\"grid\">{project_cards}</section></section>"
+        f"{_developer_page_styles()}"
+        f"{breadcrumb}"
+        f"<div id=\"developer-detail-loading\" class=\"state-loading\" role=\"status\" aria-live=\"polite\" hidden>{escape(copy['loading'])}</div>"
+        f"<div id=\"developer-detail-runtime-error\" class=\"state-error\" hidden>{escape(copy['runtime_error'])}</div>"
+        f"<section id=\"developer-overview\" class=\"card\"><h2>{escape(copy['overview_title'])}</h2><img class=\"media\" src=\"{escape(media)}\" alt=\"{escape(row.name)}\" width=\"1280\" height=\"720\" loading=\"lazy\" /><h3>{escape(row.name)}</h3><p>{escape(profile)}</p></section>"
+        f"<section id=\"developer-location-focus\" class=\"card\"><h2>{escape(copy['location_focus_title'])}</h2><ul class=\"facts\">{location_rows}</ul></section>"
+        f"<section id=\"developer-trust-proof\" class=\"card\"><h2>{escape(copy['trust_title'])}</h2><ul class=\"facts\">{trust_rows}</ul></section>"
+        f"<section id=\"developer-projects\" class=\"stack\"><h2>{escape(copy['projects_title'])}</h2><section class=\"developer-grid\">{project_cards}</section></section>"
+        f"<section id=\"developer-cta\" class=\"card\"><h2>{escape(copy['cta_title'])}</h2><p>{escape(copy['cta_intro'])}</p><div class=\"cta-row\"><a class=\"btn\" data-event=\"developer_cta_click\" data-placement=\"developer_detail_footer\" data-cta-id=\"developer_consult\" data-developer-slug=\"{escape(row.slug)}\" data-loading-target=\"developer-detail-loading\" href=\"{consult_href}\">{escape(copy['cta_consult'])}</a><a class=\"btn btn-secondary-hero\" data-event=\"developer_cta_click\" data-placement=\"developer_detail_footer\" data-cta-id=\"developer_browse_projects\" data-developer-slug=\"{escape(row.slug)}\" data-loading-target=\"developer-detail-loading\" href=\"{browse_projects_href}\">{escape(copy['cta_browse_projects'])}</a>{website_html}</div></section>"
+        f"{_developer_tracking_script(loading_id='developer-detail-loading', error_id='developer-detail-runtime-error')}"
     )
-    title = row.name
-    intro = profile
-    return HTMLResponse(_render_page_shell(locale, title=title, intro=intro, body=body))
+    return HTMLResponse(_render_page_shell(locale, title=row.name, intro=profile, body=body))
 
 
 def _property_or_404(db: Session, property_ref: str) -> Property:
@@ -3476,10 +3707,20 @@ def render_developers(request: Request, db: Session = Depends(get_db)) -> HTMLRe
     return _render_developers_page(_request_locale(request), request, db)
 
 
+@router.get("/developers", response_class=HTMLResponse)
+def render_developers_default_locale(request: Request, db: Session = Depends(get_db)) -> HTMLResponse:
+    return _render_developers_page("en", request, db)
+
+
 @router.get("/en/developers/{slug}", response_class=HTMLResponse)
 @router.get("/th/developers/{slug}", response_class=HTMLResponse)
 def render_developer_detail(slug: str, request: Request, db: Session = Depends(get_db)) -> HTMLResponse:
     return _render_developer_detail_page(_request_locale(request), request, db, slug)
+
+
+@router.get("/developers/{slug}", response_class=HTMLResponse)
+def render_developer_detail_default_locale(slug: str, request: Request, db: Session = Depends(get_db)) -> HTMLResponse:
+    return _render_developer_detail_page("en", request, db, slug)
 
 
 @router.get("/en/property/{property_ref}", response_class=HTMLResponse)
