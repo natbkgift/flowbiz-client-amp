@@ -38,6 +38,9 @@ _PUBLIC_ROUTE_SUFFIXES = {
     "",
     "/buy",
     "/rent",
+    "/sell",
+    "/sell/list-property",
+    "/sell/valuation",
     "/investment",
     "/marketplace",
     "/projects",
@@ -50,6 +53,7 @@ _PUBLIC_ROUTE_SUFFIXES = {
     "/areas",
     "/insights",
     "/about",
+    "/how-we-work",
     "/contact",
     "/privacy",
     "/terms",
@@ -622,7 +626,7 @@ def _render(locale: str, request: Request, db: Session, source: str, resolved: d
         "invest": "/investment/methodology",
         "buy": "/projects",
         "rent": "/contact",
-        "sell": "/contact",
+        "sell": "/sell",
     }
     card_html = "".join(
         f"""
@@ -812,6 +816,7 @@ def _render_page_shell(
         ("projects", "Projects" if locale == "en" else "โครงการ"),
         ("areas", "Areas" if locale == "en" else "ทำเล"),
         ("developers", "Developers" if locale == "en" else "ผู้พัฒนา"),
+        ("sell", "Sell" if locale == "en" else "ขาย"),
         ("insights", "Insights" if locale == "en" else "บทความ"),
         ("about", "About" if locale == "en" else "เกี่ยวกับเรา"),
         ("contact", "Contact" if locale == "en" else "ติดต่อ"),
@@ -839,10 +844,14 @@ def _render_page_shell(
       .container{{max-width:var(--max);margin:0 auto;padding:24px var(--pad)}} .stack{{display:grid;gap:16px}}
       .card{{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:16px;display:grid;gap:12px}}
       .grid{{display:grid;gap:16px;grid-template-columns:1fr}} .muted{{color:var(--muted)}} .btn{{display:inline-flex;align-items:center;justify-content:center;border-radius:12px;border:1px solid var(--c1);padding:10px 16px;background:#fff;color:var(--c1);text-decoration:none}}
+      .state-empty,.state-loading,.state-error,.state-success{{border:1px solid var(--border);border-radius:10px;padding:10px 12px;background:#fff}}
+      .state-loading{{background:#ecfeff;color:#0c4a6e}} .state-error{{background:#fef2f2;color:#991b1b;border-color:#fecaca}} .state-success{{background:#f0fdf4;color:#166534;border-color:#bbf7d0}}
       .media{{width:100%;aspect-ratio:16/9;object-fit:cover;border-radius:12px;background:#e5e7eb}}
       .skip-link{{position:absolute;left:-9999px;top:auto}}
       .skip-link:focus{{left:16px;top:16px;background:#fff;border:1px solid var(--border);padding:8px 12px;border-radius:8px;z-index:1000}}
       @media (min-width:768px){{.grid{{grid-template-columns:repeat(2,minmax(0,1fr))}}}}
+      @media (min-width:1024px){{.grid-3{{grid-template-columns:repeat(3,minmax(0,1fr))}}}}
+      @media (min-width:2560px){{.container{{max-width:1440px}}}}
     </style>
   </head>
   <body>
@@ -4270,14 +4279,87 @@ def _company_page(locale: str, slug: str, title: str, fallback: str, db: Session
     return HTMLResponse(_render_page_shell(locale, title=title, intro=meta or title, body=body))
 
 
-def _render_about_page(locale: str, db: Session) -> HTMLResponse:
+def _normalize_company_kv_key(raw: str) -> str:
+    key = re.sub(r"[^a-z0-9]+", "_", str(raw or "").strip().lower()).strip("_")
+    return key
+
+
+def _parse_company_kv_content(content: str) -> dict[str, str]:
+    out: dict[str, str] = {}
+    for raw_line in str(content or "").splitlines():
+        line = raw_line.strip()
+        if not line or ":" not in line:
+            continue
+        key_raw, value_raw = line.split(":", 1)
+        key = _normalize_company_kv_key(key_raw)
+        value = value_raw.strip()
+        if not key or not value or key in out:
+            continue
+        out[key] = value
+    return out
+
+
+def _contact_detail_value(
+    fields: dict[str, str],
+    keys: list[str],
+    *,
+    fallback: str,
+) -> str:
+    for key in keys:
+        value = str(fields.get(key) or "").strip()
+        if value:
+            return value
+    return fallback
+
+
+def _contact_map_href(fields: dict[str, str]) -> str | None:
+    direct = str(fields.get("map_url") or fields.get("map") or fields.get("google_map") or "").strip()
+    if direct:
+        parsed = urlparse(direct)
+        host = str(parsed.hostname or "").lower()
+        if parsed.scheme in {"http", "https"} and host in {
+            "maps.google.com",
+            "www.google.com",
+            "goo.gl",
+            "maps.app.goo.gl",
+        }:
+            return direct
+
+    lat_raw = fields.get("lat") or fields.get("latitude")
+    lng_raw = fields.get("lng") or fields.get("longitude")
+    lat, lng = _extract_lat_lng({"lat": lat_raw, "lng": lng_raw})
+    if lat is None or lng is None:
+        address = str(fields.get("address") or fields.get("office_address") or "").strip()
+        if not address:
+            return None
+        return f"https://maps.google.com/?{urlencode({'q': address})}"
+    return f"https://maps.google.com/?q={lat:.6f},{lng:.6f}"
+
+
+def _contact_channel_href(kind: str, value: str) -> str | None:
+    text = str(value or "").strip()
+    if not text:
+        return None
+    if kind == "email":
+        return f"mailto:{text}" if "@" in text else None
+    if kind == "phone":
+        compact = re.sub(r"[^0-9+]", "", text)
+        return f"tel:{compact}" if compact else None
+    if kind == "whatsapp":
+        digits = re.sub(r"[^0-9]", "", text)
+        return f"https://wa.me/{digits}" if digits else None
+    if kind == "line":
+        return f"https://line.me/R/ti/p/{text}" if text else None
+    return None
+
+
+def _render_about_page(locale: str, request: Request, db: Session) -> HTMLResponse:
     about_row = db.scalar(select(CompanyInfo).where(CompanyInfo.slug == "about"))
     process_row = db.scalar(select(CompanyInfo).where(CompanyInfo.slug == "how-we-work"))
     team_rows = db.scalars(
         select(TeamMember)
         .where(TeamMember.deleted_at.is_(None), TeamMember.status == "active")
         .order_by(TeamMember.display_order.asc(), TeamMember.name.asc())
-        .limit(12)
     ).all()
     review_rows = db.scalars(
         select(Testimonial)
@@ -4301,8 +4383,8 @@ def _render_about_page(locale: str, db: Session) -> HTMLResponse:
         )
     team_cards = []
     for row in team_rows:
-        photo = str(row.photo_url or "").strip()
-        photo_html = f'<img class="media" src="{escape(photo)}" alt="{escape(row.name)}" width="640" height="360" />' if photo.startswith("/media/") else ""
+        photo = _local_runtime_media_path(str(row.photo_url or "").strip(), request=request) or _DEFAULT_MEDIA_FALLBACK
+        photo_html = f'<img class="media" src="{escape(photo)}" alt="{escape(row.name)}" width="640" height="360" loading="lazy" />'
         team_cards.append(
             f"<article class=\"card\">{photo_html}<h3>{escape(row.name)}</h3><p class=\"muted\">{escape(row.role_title)}</p><p>{escape(_localized_dict_text(row.bio, locale) or '')}</p></article>"
         )
@@ -4317,36 +4399,394 @@ def _render_about_page(locale: str, db: Session) -> HTMLResponse:
     if not reviews_body:
         review_fallback = "Approved testimonials are not published yet. Publish testimonial records to populate this page." if locale == "en" else "ยังไม่มี testimonial ที่เผยแพร่ โปรดเผยแพร่ testimonial เพื่อให้หน้านี้แสดงผล"
         reviews_body = f"<div class=\"card\">{escape(review_fallback)}</div>"
-    work_fallback = "Video proof appears when mirrored local media is published through approved workflow." if locale == "en" else "ส่วนวิดีโอจะแสดงเมื่อมีการเผยแพร่ local media ผ่าน workflow ที่อนุมัติแล้ว"
+    proof_cards = []
+    for row in team_rows[:3]:
+        photo = _local_runtime_media_path(str(row.photo_url or "").strip(), request=request) or _DEFAULT_MEDIA_FALLBACK
+        proof_cards.append(
+            f"<article class=\"card\"><img class=\"media\" src=\"{escape(photo)}\" alt=\"{escape(row.name)} proof asset\" width=\"640\" height=\"360\" loading=\"lazy\" /><h3>{escape(row.name)}</h3><p>{'Published local media asset from workflow.' if locale == 'en' else 'สื่อ local ที่เผยแพร่ผ่าน workflow'}</p></article>"
+        )
+    if not proof_cards:
+        fallback_note = (
+            "Proof assets are pending publication. TODO: publish approved local media assets."
+            if locale == "en"
+            else "ยังไม่มี proof assets ที่เผยแพร่ TODO: เพิ่มสื่อ local ที่อนุมัติแล้ว"
+        )
+        proof_cards.append(
+            f"<article class=\"card\"><img class=\"media\" src=\"{_DEFAULT_MEDIA_FALLBACK}\" alt=\"Proof asset fallback\" width=\"640\" height=\"360\" loading=\"lazy\" /><p>{escape(fallback_note)}</p></article>"
+        )
+    work_fallback = "Video proof appears when approved local media is published in the system." if locale == "en" else "ส่วนวิดีโอจะแสดงเมื่อมีการเผยแพร่สื่อ local ที่อนุมัติแล้วในระบบ"
+    how_we_work_href = f"/{locale}/how-we-work"
+    proof_cta_label = "Open how we work" if locale == "en" else "เปิดหน้า how we work"
+    about_cta_label = "Contact our local team" if locale == "en" else "ติดต่อทีม local"
     body = (
         f"<section id=\"about-section\" class=\"card\"><h2>{escape(about_row.title if about_row is not None else ('About' if locale == 'en' else 'About'))}</h2><div>{_format_text_block(about_content)}</div></section>"
         f"<section id=\"process-section\" class=\"card\"><h2>{'How we work' if locale == 'en' else 'How we work'}</h2><div>{_format_text_block(process_content)}</div></section>"
         f"<section id=\"team-section\" class=\"grid\"><h2>{'Team' if locale == 'en' else 'Team'}</h2>{team_body}</section>"
+        f"<section id=\"proof-assets\" class=\"grid\"><h2>{'Proof assets' if locale == 'en' else 'Proof assets'}</h2>{''.join(proof_cards)}</section>"
         f"<section id=\"client-reviews\" class=\"grid\"><h2>{'Client Reviews' if locale == 'en' else 'Client Reviews'}</h2>{reviews_body}</section>"
-        f"<section id=\"work-proof\" class=\"card\"><h2>{'See Our Work' if locale == 'en' else 'See Our Work'}</h2><p>{escape(work_fallback)}</p><a class=\"btn\" href=\"/{locale}\">{'Back to Home' if locale == 'en' else 'กลับหน้าแรก'}</a></section>"
+        f"<section id=\"work-proof\" class=\"card\"><h2>{'See our work' if locale == 'en' else 'ดูผลงานของเรา'}</h2><p>{escape(work_fallback)}</p><div class=\"grid\"><a class=\"btn\" href=\"{how_we_work_href}\">{proof_cta_label}</a><a class=\"btn\" href=\"/{locale}/contact?intent=consultation\">{about_cta_label}</a></div></section>"
     )
     title = "About" if locale == "en" else "About"
     intro = str(about_row.meta_description if about_row is not None else "").strip() or ("Published company overview and supporting content." if locale == "en" else "ข้อมูลบริษัทและคอนเทนต์ที่เผยแพร่แล้ว")
     return HTMLResponse(_render_page_shell(locale, title=title, intro=intro, body=body))
 
 
-def _render_contact_page(locale: str, db: Session) -> HTMLResponse:
-    row = db.scalar(select(CompanyInfo).where(CompanyInfo.slug == "contact"))
-    content = str(row.content if row is not None else "").strip()
+def _render_how_we_work_page(locale: str, db: Session) -> HTMLResponse:
+    process_row = db.scalar(select(CompanyInfo).where(CompanyInfo.slug == "how-we-work"))
+    content = str(process_row.content if process_row is not None else "").strip()
     if not content:
         content = (
-            "Contact page details are not published yet. Use the consultation form on Home for the current workflow."
+            "How-we-work detail is not published yet. TODO: publish approved process details."
             if locale == "en"
-            else "ยังไม่มีรายละเอียดหน้า Contact ที่เผยแพร่ ใช้ฟอร์มปรึกษาบนหน้า Home สำหรับ workflow ปัจจุบัน"
+            else "ยังไม่มีเนื้อหา how-we-work ที่เผยแพร่ TODO: เพิ่มรายละเอียด process ที่อนุมัติแล้ว"
         )
-    meta = str(row.meta_description if row is not None else "").strip()
-    body = (
-        f"<section class=\"card\"><div>{_format_text_block(content)}</div><a class=\"btn\" href=\"/{locale}#consult-title\">"
-        f"{'Go to consultation form' if locale == 'en' else 'ไปที่ฟอร์มปรึกษา'}</a></section>"
+    intro = str(process_row.meta_description if process_row is not None else "").strip() or (
+        "Process and handoff steps for consultation, valuation, and listing."
+        if locale == "en"
+        else "ขั้นตอนการทำงานและการส่งมอบสำหรับ consultation, valuation และ listing"
     )
+    process_title = process_row.title if process_row is not None else ("How we work" if locale == "en" else "How we work")
+    steps = (
+        ["Consultation and goal setup", "Document review and data check", "Go-live plan with approval checkpoints"]
+        if locale == "en"
+        else ["ตั้งเป้าหมายและรับข้อมูลเบื้องต้น", "ตรวจเอกสารและตรวจข้อมูล", "วางแผน go-live พร้อมจุดอนุมัติ"]
+    )
+    steps_html = "".join(f"<li>{escape(step)}</li>" for step in steps)
+    body = (
+        f"<section id=\"how-we-work-overview\" class=\"card\"><h2>{escape(process_title)}</h2><div>{_format_text_block(content)}</div></section>"
+        f"<section id=\"how-we-work-steps\" class=\"card\"><h2>{'Process overview' if locale == 'en' else 'ภาพรวมขั้นตอน'}</h2><ol>{steps_html}</ol></section>"
+        f"<section id=\"how-we-work-proof\" class=\"card\"><h2>{'Process proof assets' if locale == 'en' else 'หลักฐานประกอบ process'}</h2><img class=\"media\" src=\"{_DEFAULT_MEDIA_FALLBACK}\" alt=\"Process proof asset\" width=\"1280\" height=\"720\" loading=\"lazy\" /><p>{'Only local media from our runtime storage is used in public pages.' if locale == 'en' else 'หน้า public ใช้เฉพาะสื่อ local จากระบบ storage ของเรา'}</p></section>"
+        f"<section id=\"how-we-work-next-step\" class=\"card\"><h2>{'Next step' if locale == 'en' else 'ขั้นตอนถัดไป'}</h2><div class=\"grid\"><a class=\"btn\" href=\"/{locale}/contact?intent=consultation\">{'Request consultation' if locale == 'en' else 'ขอคำปรึกษา'}</a><a class=\"btn\" href=\"/{locale}/sell/list-property\">{'List a property' if locale == 'en' else 'ลงประกาศทรัพย์'}</a></div></section>"
+    )
+    return HTMLResponse(_render_page_shell(locale, title=process_title, intro=intro, body=body))
+
+
+def _render_contact_page(locale: str, db: Session) -> HTMLResponse:
+    row = db.scalar(select(CompanyInfo).where(CompanyInfo.slug == "contact"))
+    raw_content = str(row.content if row is not None else "").strip()
+    if not raw_content:
+        raw_content = (
+            "Contact details are not published yet. TODO: publish verified NAP, channels, and office schedule."
+            if locale == "en"
+            else "ยังไม่มีข้อมูลติดต่อที่เผยแพร่ TODO: เพิ่ม NAP, ช่องทางติดต่อ และเวลาเปิดทำการที่ยืนยันแล้ว"
+        )
+    fields = _parse_company_kv_content(raw_content)
+    fallback_address = (
+        "Address pending publication. TODO: publish verified office address."
+        if locale == "en"
+        else "ยังไม่เผยแพร่ที่อยู่สำนักงาน TODO: เพิ่มที่อยู่ที่ยืนยันแล้ว"
+    )
+    fallback_phone = (
+        "Phone pending publication. TODO: publish verified phone."
+        if locale == "en"
+        else "ยังไม่เผยแพร่เบอร์โทร TODO: เพิ่มเบอร์ที่ยืนยันแล้ว"
+    )
+    fallback_email = (
+        "Email pending publication. TODO: publish verified email."
+        if locale == "en"
+        else "ยังไม่เผยแพร่อีเมล TODO: เพิ่มอีเมลที่ยืนยันแล้ว"
+    )
+    nap_name = _contact_detail_value(fields, ["name", "company_name", "company"], fallback="FlowBiz")
+    nap_address = _contact_detail_value(fields, ["address", "office_address", "street_address"], fallback=fallback_address)
+    nap_phone = _contact_detail_value(fields, ["phone", "telephone", "tel"], fallback=fallback_phone)
+    nap_email = _contact_detail_value(fields, ["email", "contact_email"], fallback=fallback_email)
+    office_hours = _contact_detail_value(
+        fields,
+        ["office_hours", "business_hours", "hours"],
+        fallback=(
+            "Office hours pending publication. TODO: publish verified schedule."
+            if locale == "en"
+            else "ยังไม่เผยแพร่เวลาเปิดทำการ TODO: เพิ่มเวลาที่ยืนยันแล้ว"
+        ),
+    )
+    whatsapp_value = str(fields.get("whatsapp") or "").strip()
+    line_value = str(fields.get("line") or fields.get("line_id") or "").strip()
+    map_href = _contact_map_href(fields)
+
+    channel_rows: list[str] = []
+    for label, kind, raw in [
+        ("Email", "email", nap_email),
+        ("Phone", "phone", nap_phone),
+        ("WhatsApp", "whatsapp", whatsapp_value),
+        ("LINE", "line", line_value),
+    ]:
+        href = _contact_channel_href(kind, raw)
+        if not href:
+            continue
+        rel_attr = " target=\"_blank\" rel=\"noopener\"" if href.startswith("https://") else ""
+        channel_rows.append(f"<li><a href=\"{escape(href)}\"{rel_attr}>{escape(label)}: {escape(raw)}</a></li>")
+    if not channel_rows:
+        channel_rows.append(
+            f"<li class=\"state-empty\">{escape('Contact channels pending publication. TODO: publish verified channels.' if locale == 'en' else 'ยังไม่เผยแพร่ช่องทางติดต่อ TODO: เพิ่มช่องทางที่ยืนยันแล้ว')}</li>"
+        )
+
+    contact_intro = (
+        "Send your requirement and we will follow up with the next approved step."
+        if locale == "en"
+        else "ส่งความต้องการของคุณ แล้วเราจะติดต่อกลับด้วยขั้นตอนถัดไปที่อนุมัติแล้ว"
+    )
+    required_error = "Please fill all required fields." if locale == "en" else "กรุณากรอกข้อมูลที่จำเป็นให้ครบ"
+    submitting_text = "Submitting..." if locale == "en" else "กำลังส่งข้อมูล..."
+    success_text = (
+        "Submitted. Our team will review and contact you with the next step."
+        if locale == "en"
+        else "ส่งข้อมูลแล้ว ทีมงานจะตรวจสอบและติดต่อกลับพร้อมขั้นตอนถัดไป"
+    )
+    error_text = "Unable to submit right now. Please try again." if locale == "en" else "ยังไม่สามารถส่งคำขอได้ในตอนนี้ กรุณาลองใหม่อีกครั้ง"
+
+    map_html = (
+        f"<a class=\"btn\" data-event=\"contact_map_open\" data-placement=\"contact_map\" data-cta-id=\"open_map\" href=\"{escape(map_href)}\" target=\"_blank\" rel=\"noopener\">{'Open map' if locale == 'en' else 'เปิดแผนที่'}</a>"
+        if map_href
+        else f"<p class=\"state-empty\">{escape('Map pending publication. TODO: publish verified map URL or coordinates.' if locale == 'en' else 'ยังไม่เผยแพร่แผนที่ TODO: เพิ่มลิงก์หรือพิกัดที่ยืนยันแล้ว')}</p>"
+    )
+
+    body = (
+        f"<section id=\"contact-notes\" class=\"card\"><h2>{'Published contact notes' if locale == 'en' else 'ข้อมูลติดต่อที่เผยแพร่'}</h2><div>{_format_text_block(raw_content)}</div></section>"
+        f"<section id=\"contact-nap\" class=\"card\"><h2>NAP</h2><p><strong>{escape(nap_name)}</strong></p><p>{escape(nap_address)}</p><p>{escape(nap_phone)}</p><p>{escape(nap_email)}</p></section>"
+        f"<section id=\"contact-channels\" class=\"card\"><h2>{'Contact channels' if locale == 'en' else 'ช่องทางติดต่อ'}</h2><ul>{''.join(channel_rows)}</ul></section>"
+        f"<section id=\"contact-map\" class=\"card\"><h2>{'Map' if locale == 'en' else 'แผนที่'}</h2>{map_html}</section>"
+        f"<section id=\"contact-office-hours\" class=\"card\"><h2>{'Office hours' if locale == 'en' else 'เวลาเปิดทำการ'}</h2><p>{escape(office_hours)}</p></section>"
+        f"<section id=\"contact-form\" class=\"card\"><h2>{'Contact form' if locale == 'en' else 'ฟอร์มติดต่อ'}</h2><p>{escape(contact_intro)}</p>"
+        f"<form id=\"contact-lead-form\" novalidate><label class=\"field\" for=\"contact-name\"><span>{'Name' if locale == 'en' else 'ชื่อ'}</span><input id=\"contact-name\" name=\"name\" type=\"text\" required /></label>"
+        f"<label class=\"field\" for=\"contact-contact\"><span>{'Email or phone' if locale == 'en' else 'อีเมลหรือเบอร์โทร'}</span><input id=\"contact-contact\" name=\"contact\" type=\"text\" required /></label>"
+        f"<label class=\"field\" for=\"contact-intent\"><span>{'Intent' if locale == 'en' else 'ความต้องการ'}</span><select id=\"contact-intent\" name=\"intent\" required><option value=\"\">{'Select intent' if locale == 'en' else 'เลือกความต้องการ'}</option><option value=\"buy\">Buy</option><option value=\"rent\">Rent</option><option value=\"invest\">Invest</option><option value=\"sell\">Sell</option><option value=\"general\">General</option></select></label>"
+        f"<label class=\"field\" for=\"contact-message\"><span>{'Message' if locale == 'en' else 'ข้อความ'}</span><textarea id=\"contact-message\" name=\"message\" rows=\"4\" required></textarea></label>"
+        f"<div class=\"grid\"><button id=\"contact-submit\" class=\"btn\" type=\"submit\" data-event=\"contact_cta_click\" data-placement=\"contact_form\" data-cta-id=\"contact_submit\">{'Submit contact request' if locale == 'en' else 'ส่งคำขอติดต่อ'}</button><a class=\"btn\" href=\"/{locale}/sell/list-property\" data-event=\"contact_cta_click\" data-placement=\"contact_form\" data-cta-id=\"contact_go_sell\">{'List a property' if locale == 'en' else 'ลงประกาศทรัพย์'}</a></div>"
+        f"<p id=\"contact-form-status\" class=\"muted\" role=\"status\" aria-live=\"polite\"></p><div id=\"contact-form-loading\" class=\"state-loading\" hidden>{'Submitting...' if locale == 'en' else 'กำลังส่งข้อมูล...'}</div><div id=\"contact-form-error\" class=\"state-error\" hidden>{escape(error_text)}</div><div id=\"contact-form-success\" class=\"state-success\" hidden>{escape(success_text)}</div></form></section>"
+        "<script>"
+        "(() => {"
+        "const locale = document.documentElement.lang || 'en';"
+        "const endpoint = '/api/v1/events';"
+        "const path = location.pathname;"
+        "function compact(raw){const out={};for(const [key,value] of Object.entries(raw||{})){if(value===undefined||value===null)continue;if(Array.isArray(value)&&value.length===0)continue;out[key]=value;}return out;}"
+        "function track(eventName,payload){const payloadBody=compact(payload);const sourceBody=compact({app:'flowbiz-public-runtime',env:'runtime',page:path,locale,placement:payloadBody.placement});return fetch(endpoint,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({event_name:eventName,source:sourceBody,payload:payloadBody}),keepalive:true}).catch(()=>null);}"
+        "document.querySelectorAll('[data-event]').forEach((node)=>{node.addEventListener('click',()=>{const eventName=node.getAttribute('data-event');if(!eventName)return;track(eventName,{label:node.textContent?.trim()||'',placement:node.getAttribute('data-placement')||undefined,cta_id:node.getAttribute('data-cta-id')||undefined,intent:node.getAttribute('data-intent')||undefined});});});"
+        "const form=document.getElementById('contact-lead-form');const submitBtn=document.getElementById('contact-submit');const statusEl=document.getElementById('contact-form-status');const loadingEl=document.getElementById('contact-form-loading');const errorEl=document.getElementById('contact-form-error');const successEl=document.getElementById('contact-form-success');"
+        "if(!(form instanceof HTMLFormElement))return;"
+        "const requiredFields=Array.from(form.querySelectorAll('[required]'));"
+        "requiredFields.forEach((field)=>{const clear=()=>{if(String(field.value||'').trim())field.setAttribute('aria-invalid','false');};field.addEventListener('input',clear);field.addEventListener('change',clear);});"
+        "form.addEventListener('submit',async(event)=>{event.preventDefault();if(!(submitBtn instanceof HTMLButtonElement)||!(statusEl instanceof HTMLElement)||!(loadingEl instanceof HTMLElement)||!(errorEl instanceof HTMLElement)||!(successEl instanceof HTMLElement))return;errorEl.hidden=true;successEl.hidden=true;statusEl.textContent='';let firstInvalid=null;for(const field of requiredFields){const invalid=String(field.value||'').trim().length===0;field.setAttribute('aria-invalid',invalid?'true':'false');if(invalid&&!firstInvalid)firstInvalid=field;}if(firstInvalid){statusEl.textContent="
+        f"{required_error!r}"
+        ";firstInvalid.focus();await track('contact_form_error',{reason:'validation',placement:'contact_form',cta_id:'contact_submit'});return;}loadingEl.hidden=false;statusEl.textContent="
+        f"{submitting_text!r}"
+        ";submitBtn.disabled=true;const data=Object.fromEntries(new FormData(form).entries());const contact=String(data.contact||'').trim();const isEmail=contact.includes('@');const intent=String(data.intent||'general').trim()||'general';const fieldsPresent=Object.entries(data).filter(([,value])=>String(value||'').trim().length>0).map(([key])=>key);try{await track('contact_form_submit',{placement:'contact_form',cta_id:'contact_submit',intent,fields_present:fieldsPresent});const response=await fetch('/v1/inquiries',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({name:String(data.name||'').trim(),email:isEmail?contact:null,phone:isEmail?null:contact,message:String(data.message||'').trim(),source_page:location.pathname,intent})});if(!response.ok)throw new Error('submit_failed');await track('contact_form_success',{placement:'contact_form',cta_id:'contact_submit',intent});statusEl.textContent="
+        f"{success_text!r}"
+        ";successEl.hidden=false;form.reset();requiredFields.forEach((field)=>field.setAttribute('aria-invalid','false'));}catch{errorEl.hidden=false;statusEl.textContent="
+        f"{error_text!r}"
+        ";await track('contact_form_error',{reason:'submit_failed',placement:'contact_form',cta_id:'contact_submit',intent});}finally{loadingEl.hidden=true;submitBtn.disabled=false;}});"
+        "})();"
+        "</script>"
+    )
+    meta = str(row.meta_description if row is not None else "").strip()
     title = row.title if row is not None else ("Contact" if locale == "en" else "Contact")
     intro = meta or ("Current contact workflow and next-step guidance." if locale == "en" else "ช่องทางติดต่อและขั้นตอนถัดไปในปัจจุบัน")
     return HTMLResponse(_render_page_shell(locale, title=title, intro=intro, body=body))
+
+
+def _sell_copy(locale: str) -> dict[str, str]:
+    if locale == "th":
+        return {
+            "title": "Sell",
+            "intro": "ส่งรายละเอียดทรัพย์เพื่อเริ่ม valuation และวางแผน listing ตามข้อมูลที่ยืนยันแล้ว",
+            "intent_title": "ตั้งต้นจากเป้าหมายการขายของคุณ",
+            "intent_body": "ระบุเป้าหมายราคา ไทม์ไลน์ และข้อจำกัดที่สำคัญเพื่อให้ทีมช่วยวางแผนขั้นตอนถัดไป",
+            "process_title": "Process overview",
+            "docs_title": "Required documents",
+            "trust_title": "Trust proof",
+            "trust_fallback": "ยังไม่มี trust proof ที่เผยแพร่ TODO: เพิ่มข้อมูลที่อนุมัติแล้วจากระบบ",
+            "go_list": "ไปที่ฟอร์มลงประกาศ",
+            "go_value": "ไปที่ฟอร์มขอประเมินราคา",
+            "contact_team": "ติดต่อทีม",
+        }
+    return {
+        "title": "Sell",
+        "intro": "Share your property details to start valuation and listing planning based on published facts.",
+        "intent_title": "Start with seller intent",
+        "intent_body": "Tell us your pricing goal, timeline, and constraints so we can map the next approved step.",
+        "process_title": "Process overview",
+        "docs_title": "Required documents",
+        "trust_title": "Trust proof",
+        "trust_fallback": "Trust proof is pending publication. TODO: publish approved trust records from system data.",
+        "go_list": "Open list-property form",
+        "go_value": "Open valuation form",
+        "contact_team": "Contact team",
+    }
+
+
+def _sell_tracking_script() -> str:
+    return (
+        "<script>"
+        "(()=>{const locale=document.documentElement.lang||'en';const endpoint='/api/v1/events';const path=location.pathname;"
+        "function compact(raw){const out={};for(const [key,value] of Object.entries(raw||{})){if(value===undefined||value===null)continue;if(Array.isArray(value)&&value.length===0)continue;out[key]=value;}return out;}"
+        "function track(eventName,payload){const payloadBody=compact(payload);const sourceBody=compact({app:'flowbiz-public-runtime',env:'runtime',page:path,locale,placement:payloadBody.placement});return fetch(endpoint,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({event_name:eventName,source:sourceBody,payload:payloadBody}),keepalive:true}).catch(()=>null);}"
+        "document.querySelectorAll('[data-event]').forEach((node)=>{node.addEventListener('click',()=>{const eventName=node.getAttribute('data-event');if(!eventName)return;track(eventName,{label:node.textContent?.trim()||'',placement:node.getAttribute('data-placement')||undefined,cta_id:node.getAttribute('data-cta-id')||undefined,intent:node.getAttribute('data-intent')||undefined});});});"
+        "})();"
+        "</script>"
+    )
+
+
+def _render_sell_page(locale: str, request: Request, db: Session) -> HTMLResponse:
+    copy = _sell_copy(locale)
+    process_row = db.scalar(select(CompanyInfo).where(CompanyInfo.slug == "how-we-work"))
+    process_content = str(process_row.content if process_row is not None else "").strip() or (
+        "Published process details are pending. TODO: publish approved process notes."
+        if locale == "en"
+        else "ยังไม่มีข้อมูล process ที่เผยแพร่ TODO: เพิ่มเนื้อหาที่อนุมัติแล้ว"
+    )
+    testimonials = db.scalars(
+        select(Testimonial)
+        .where(Testimonial.deleted_at.is_(None), Testimonial.status == "published", Testimonial.intent == "sell")
+        .order_by(Testimonial.display_order.asc(), desc(Testimonial.updated_at))
+        .limit(3)
+    ).all()
+    if not testimonials:
+        # Fallback to published general testimonials if sell-specific proof is not yet published.
+        testimonials = db.scalars(
+            select(Testimonial)
+            .where(Testimonial.deleted_at.is_(None), Testimonial.status == "published")
+            .order_by(Testimonial.display_order.asc(), desc(Testimonial.updated_at))
+            .limit(3)
+        ).all()
+    trust_rows = "".join(
+        f"<article class=\"card\"><h3>{escape(row.attribution_name or ('Client proof' if locale == 'en' else 'หลักฐานลูกค้า'))}</h3><p><strong>{escape(row.quote)}</strong></p><p class=\"muted\">{escape(str(row.context or row.persona or '').strip())}</p></article>"
+        for row in testimonials
+    )
+    if not trust_rows:
+        trust_rows = f"<div class=\"state-empty\">{escape(copy['trust_fallback'])}</div>"
+    docs = (
+        [
+            "Ownership document copy",
+            "Current property photos from local source",
+            "Latest utility/tax note (if available)",
+            "Preferred timeline and expected price range",
+        ]
+        if locale == "en"
+        else [
+            "สำเนาเอกสารสิทธิ์",
+            "รูปทรัพย์ปัจจุบันจากแหล่ง local",
+            "ข้อมูลค่าสาธารณูปโภค/ภาษีล่าสุด (ถ้ามี)",
+            "ไทม์ไลน์และช่วงราคาที่คาดหวัง",
+        ]
+    )
+    docs_html = "".join(f"<li>{escape(item)}</li>" for item in docs)
+    body = (
+        f"<section id=\"seller-intent\" class=\"card\"><h2>{escape(copy['intent_title'])}</h2><p>{escape(copy['intent_body'])}</p><img class=\"media\" src=\"{_DEFAULT_MEDIA_FALLBACK}\" alt=\"Seller process proof\" width=\"1280\" height=\"720\" loading=\"lazy\" /></section>"
+        f"<section id=\"seller-process\" class=\"card\"><h2>{escape(copy['process_title'])}</h2><div>{_format_text_block(process_content)}</div><a class=\"btn\" href=\"/{locale}/how-we-work\" data-event=\"sell_cta_click\" data-placement=\"sell_process\" data-cta-id=\"sell_how_we_work\" data-intent=\"sell\">{'Open how-we-work page' if locale == 'en' else 'เปิดหน้า how-we-work'}</a></section>"
+        f"<section id=\"seller-docs\" class=\"card\"><h2>{escape(copy['docs_title'])}</h2><ul>{docs_html}</ul></section>"
+        f"<section id=\"seller-trust\" class=\"grid\"><h2>{escape(copy['trust_title'])}</h2>{trust_rows}</section>"
+        f"<section id=\"seller-cta\" class=\"card\"><h2>{'Next step' if locale == 'en' else 'ขั้นตอนถัดไป'}</h2><div class=\"grid\"><a class=\"btn\" href=\"/{locale}/sell/list-property\" data-event=\"sell_cta_click\" data-placement=\"sell_next_step\" data-cta-id=\"sell_list_property\" data-intent=\"sell\">{escape(copy['go_list'])}</a><a class=\"btn\" href=\"/{locale}/sell/valuation\" data-event=\"sell_cta_click\" data-placement=\"sell_next_step\" data-cta-id=\"sell_valuation\" data-intent=\"sell\">{escape(copy['go_value'])}</a><a class=\"btn\" href=\"/{locale}/contact?intent=sell\" data-event=\"sell_cta_click\" data-placement=\"sell_next_step\" data-cta-id=\"sell_contact\" data-intent=\"sell\">{escape(copy['contact_team'])}</a></div></section>"
+        f"{_sell_tracking_script()}"
+    )
+    return HTMLResponse(_render_page_shell(locale, title=copy["title"], intro=copy["intro"], body=body))
+
+
+def _render_sell_list_property_page(locale: str, request: Request, db: Session) -> HTMLResponse:
+    copy = _sell_copy(locale)
+    process_row = db.scalar(select(CompanyInfo).where(CompanyInfo.slug == "how-we-work"))
+    process_content = str(process_row.content if process_row is not None else "").strip() or (
+        "Process details pending publication. TODO: publish approved handoff steps."
+        if locale == "en"
+        else "ยังไม่มีรายละเอียด process ที่เผยแพร่ TODO: เพิ่มขั้นตอนที่อนุมัติแล้ว"
+    )
+    required_error = "Please fill all required fields." if locale == "en" else "กรุณากรอกข้อมูลที่จำเป็นให้ครบ"
+    submitting_text = "Submitting..." if locale == "en" else "กำลังส่งข้อมูล..."
+    success_text = "List-property request submitted. Our team will review and contact you." if locale == "en" else "ส่งคำขอลงประกาศแล้ว ทีมงานจะตรวจสอบและติดต่อกลับ"
+    error_text = "Unable to submit right now. Please try again." if locale == "en" else "ยังไม่สามารถส่งคำขอได้ในตอนนี้ กรุณาลองใหม่อีกครั้ง"
+    docs = (
+        "Include ownership document, local photos, and expected listing price."
+        if locale == "en"
+        else "แนบข้อมูลเอกสารสิทธิ์ รูปจากพื้นที่จริง และราคาที่ต้องการลงประกาศ"
+    )
+    body = (
+        f"<section id=\"seller-intent\" class=\"card\"><h2>{escape(copy['intent_title'])}</h2><p>{escape(copy['intent_body'])}</p></section>"
+        f"<section id=\"seller-process\" class=\"card\"><h2>{escape(copy['process_title'])}</h2><div>{_format_text_block(process_content)}</div></section>"
+        f"<section id=\"seller-docs\" class=\"card\"><h2>{escape(copy['docs_title'])}</h2><p>{escape(docs)}</p></section>"
+        f"<section id=\"seller-trust\" class=\"card\"><h2>{escape(copy['trust_title'])}</h2><p>{escape('Only data submitted through approved runtime forms will be used for next-step review.' if locale == 'en' else 'ใช้เฉพาะข้อมูลที่ส่งผ่านฟอร์ม runtime ที่อนุมัติแล้วในการตรวจสอบขั้นตอนถัดไป')}</p></section>"
+        f"<section id=\"sell-list-property-form\" class=\"card\"><h2>{'List-property form' if locale == 'en' else 'ฟอร์มลงประกาศทรัพย์'}</h2><form id=\"sell-list-form\" novalidate>"
+        f"<label class=\"field\" for=\"sell-list-name\"><span>{'Name' if locale == 'en' else 'ชื่อ'}</span><input id=\"sell-list-name\" name=\"name\" type=\"text\" required /></label>"
+        f"<label class=\"field\" for=\"sell-list-contact\"><span>{'Email or phone' if locale == 'en' else 'อีเมลหรือเบอร์โทร'}</span><input id=\"sell-list-contact\" name=\"contact\" type=\"text\" required /></label>"
+        f"<label class=\"field\" for=\"sell-list-type\"><span>{'Property type' if locale == 'en' else 'ประเภททรัพย์'}</span><select id=\"sell-list-type\" name=\"property_type\" required><option value=\"\">{'Select property type' if locale == 'en' else 'เลือกประเภททรัพย์'}</option><option value=\"condo\">Condo</option><option value=\"house\">House</option><option value=\"villa\">Villa</option><option value=\"land\">Land</option><option value=\"commercial\">Commercial</option></select></label>"
+        f"<label class=\"field\" for=\"sell-list-area\"><span>{'Area' if locale == 'en' else 'ทำเล'}</span><input id=\"sell-list-area\" name=\"area\" type=\"text\" required /></label>"
+        f"<label class=\"field\" for=\"sell-list-address\"><span>{'Address or landmark' if locale == 'en' else 'ที่อยู่หรือจุดสังเกต'}</span><input id=\"sell-list-address\" name=\"address\" type=\"text\" required /></label>"
+        f"<label class=\"field\" for=\"sell-list-ownership\"><span>{'Ownership status' if locale == 'en' else 'สถานะกรรมสิทธิ์'}</span><select id=\"sell-list-ownership\" name=\"ownership_status\" required><option value=\"\">{'Select ownership status' if locale == 'en' else 'เลือกสถานะกรรมสิทธิ์'}</option><option value=\"freehold\">Freehold</option><option value=\"leasehold\">Leasehold</option><option value=\"company\">Company holding</option><option value=\"other\">Other</option></select></label>"
+        f"<label class=\"field\" for=\"sell-list-price\"><span>{'Expected listing price (THB)' if locale == 'en' else 'ราคาที่ต้องการลงประกาศ (บาท)'}</span><input id=\"sell-list-price\" name=\"asking_price\" type=\"number\" min=\"0\" inputmode=\"numeric\" /></label>"
+        f"<label class=\"field\" for=\"sell-list-timeline\"><span>{'Timeline' if locale == 'en' else 'ไทม์ไลน์'}</span><select id=\"sell-list-timeline\" name=\"timeline\" required><option value=\"\">{'Select timeline' if locale == 'en' else 'เลือกไทม์ไลน์'}</option><option value=\"0_3m\">0-3 months</option><option value=\"3_6m\">3-6 months</option><option value=\"6m_plus\">6+ months</option></select></label>"
+        f"<label class=\"field\" for=\"sell-list-docs\"><span>{'Documents and notes' if locale == 'en' else 'เอกสารและหมายเหตุ'}</span><textarea id=\"sell-list-docs\" name=\"documents\" rows=\"4\" required></textarea></label>"
+        f"<div class=\"grid\"><button id=\"sell-list-submit\" class=\"btn\" type=\"submit\" data-event=\"sell_cta_click\" data-placement=\"sell_list_form\" data-cta-id=\"sell_list_submit\" data-intent=\"sell\">{'Submit list-property request' if locale == 'en' else 'ส่งคำขอลงประกาศ'}</button><a class=\"btn\" href=\"/{locale}/sell/valuation\" data-event=\"sell_cta_click\" data-placement=\"sell_list_form\" data-cta-id=\"sell_list_to_valuation\" data-intent=\"sell\">{escape(copy['go_value'])}</a></div>"
+        f"<p id=\"sell-list-status\" class=\"muted\" role=\"status\" aria-live=\"polite\"></p><div id=\"sell-list-loading\" class=\"state-loading\" hidden>{'Submitting...' if locale == 'en' else 'กำลังส่งข้อมูล...'}</div><div id=\"sell-list-error\" class=\"state-error\" hidden>{escape(error_text)}</div><div id=\"sell-list-success\" class=\"state-success\" hidden>{escape(success_text)}</div></form></section>"
+        "<script>"
+        "(()=>{const locale=document.documentElement.lang||'en';const endpoint='/api/v1/events';const path=location.pathname;"
+        "function compact(raw){const out={};for(const [key,value] of Object.entries(raw||{})){if(value===undefined||value===null)continue;if(Array.isArray(value)&&value.length===0)continue;out[key]=value;}return out;}"
+        "function track(eventName,payload){const payloadBody=compact(payload);const sourceBody=compact({app:'flowbiz-public-runtime',env:'runtime',page:path,locale,placement:payloadBody.placement});return fetch(endpoint,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({event_name:eventName,source:sourceBody,payload:payloadBody}),keepalive:true}).catch(()=>null);}"
+        "document.querySelectorAll('[data-event]').forEach((node)=>{node.addEventListener('click',()=>{const eventName=node.getAttribute('data-event');if(!eventName)return;track(eventName,{label:node.textContent?.trim()||'',placement:node.getAttribute('data-placement')||undefined,cta_id:node.getAttribute('data-cta-id')||undefined,intent:node.getAttribute('data-intent')||undefined});});});"
+        "const form=document.getElementById('sell-list-form');const submitBtn=document.getElementById('sell-list-submit');const statusEl=document.getElementById('sell-list-status');const loadingEl=document.getElementById('sell-list-loading');const errorEl=document.getElementById('sell-list-error');const successEl=document.getElementById('sell-list-success');if(!(form instanceof HTMLFormElement))return;const requiredFields=Array.from(form.querySelectorAll('[required]'));requiredFields.forEach((field)=>{const clear=()=>{if(String(field.value||'').trim())field.setAttribute('aria-invalid','false');};field.addEventListener('input',clear);field.addEventListener('change',clear);});"
+        "form.addEventListener('submit',async(event)=>{event.preventDefault();if(!(submitBtn instanceof HTMLButtonElement)||!(statusEl instanceof HTMLElement)||!(loadingEl instanceof HTMLElement)||!(errorEl instanceof HTMLElement)||!(successEl instanceof HTMLElement))return;errorEl.hidden=true;successEl.hidden=true;statusEl.textContent='';let firstInvalid=null;for(const field of requiredFields){const invalid=String(field.value||'').trim().length===0;field.setAttribute('aria-invalid',invalid?'true':'false');if(invalid&&!firstInvalid)firstInvalid=field;}if(firstInvalid){statusEl.textContent="
+        f"{required_error!r}"
+        ";firstInvalid.focus();await track('sell_list_property_error',{reason:'validation',placement:'sell_list_form',cta_id:'sell_list_submit',intent:'sell'});return;}loadingEl.hidden=false;statusEl.textContent="
+        f"{submitting_text!r}"
+        ";submitBtn.disabled=true;const data=Object.fromEntries(new FormData(form).entries());const contact=String(data.contact||'').trim();const isEmail=contact.includes('@');const fieldsPresent=Object.entries(data).filter(([,value])=>String(value||'').trim().length>0).map(([key])=>key);const messageParts=['Property type: '+String(data.property_type||''),'Area: '+String(data.area||''),'Address: '+String(data.address||''),'Ownership: '+String(data.ownership_status||''),'Expected price: '+String(data.asking_price||''),'Documents: '+String(data.documents||'')];try{await track('sell_list_property_submit',{placement:'sell_list_form',cta_id:'sell_list_submit',intent:'sell',fields_present:fieldsPresent});const response=await fetch('/v1/inquiries',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({name:String(data.name||'').trim(),email:isEmail?contact:null,phone:isEmail?null:contact,message:'Sell list-property request. '+messageParts.join('; '),source_page:location.pathname,intent:'sell',timeline:String(data.timeline||'').trim()||null,budget_band:String(data.asking_price||'').trim()||null})});if(!response.ok)throw new Error('submit_failed');await track('sell_list_property_success',{placement:'sell_list_form',cta_id:'sell_list_submit',intent:'sell'});statusEl.textContent="
+        f"{success_text!r}"
+        ";successEl.hidden=false;form.reset();requiredFields.forEach((field)=>field.setAttribute('aria-invalid','false'));}catch{errorEl.hidden=false;statusEl.textContent="
+        f"{error_text!r}"
+        ";await track('sell_list_property_error',{reason:'submit_failed',placement:'sell_list_form',cta_id:'sell_list_submit',intent:'sell'});}finally{loadingEl.hidden=true;submitBtn.disabled=false;}});})();"
+        "</script>"
+    )
+    return HTMLResponse(_render_page_shell(locale, title=f"{copy['title']} / List Property", intro=copy["intro"], body=body))
+
+
+def _render_sell_valuation_page(locale: str, request: Request, db: Session) -> HTMLResponse:
+    copy = _sell_copy(locale)
+    process_row = db.scalar(select(CompanyInfo).where(CompanyInfo.slug == "how-we-work"))
+    process_content = str(process_row.content if process_row is not None else "").strip() or (
+        "Process details pending publication. TODO: publish approved handoff steps."
+        if locale == "en"
+        else "ยังไม่มีรายละเอียด process ที่เผยแพร่ TODO: เพิ่มขั้นตอนที่อนุมัติแล้ว"
+    )
+    required_error = "Please fill all required fields." if locale == "en" else "กรุณากรอกข้อมูลที่จำเป็นให้ครบ"
+    submitting_text = "Submitting..." if locale == "en" else "กำลังส่งข้อมูล..."
+    success_text = "Valuation request submitted. Our team will review and contact you." if locale == "en" else "ส่งคำขอประเมินราคาแล้ว ทีมงานจะตรวจสอบและติดต่อกลับ"
+    error_text = "Unable to submit right now. Please try again." if locale == "en" else "ยังไม่สามารถส่งคำขอได้ในตอนนี้ กรุณาลองใหม่อีกครั้ง"
+    docs = (
+        "Include latest unit details, condition notes, and a clear valuation goal."
+        if locale == "en"
+        else "ระบุรายละเอียดทรัพย์ล่าสุด สภาพทรัพย์ และเป้าหมายการประเมินราคา"
+    )
+    body = (
+        f"<section id=\"seller-intent\" class=\"card\"><h2>{escape(copy['intent_title'])}</h2><p>{escape(copy['intent_body'])}</p></section>"
+        f"<section id=\"seller-process\" class=\"card\"><h2>{escape(copy['process_title'])}</h2><div>{_format_text_block(process_content)}</div></section>"
+        f"<section id=\"seller-docs\" class=\"card\"><h2>{escape(copy['docs_title'])}</h2><p>{escape(docs)}</p></section>"
+        f"<section id=\"seller-trust\" class=\"card\"><h2>{escape(copy['trust_title'])}</h2><p>{escape('Valuation is reviewed from submitted facts and available market evidence in system records.' if locale == 'en' else 'การประเมินราคาพิจารณาจากข้อมูลที่ส่งเข้ามาและข้อมูลตลาดที่มีในระบบ')}</p></section>"
+        f"<section id=\"sell-valuation-form\" class=\"card\"><h2>{'Valuation form' if locale == 'en' else 'ฟอร์มขอประเมินราคา'}</h2><form id=\"sell-valuation-lead-form\" novalidate>"
+        f"<label class=\"field\" for=\"sell-value-name\"><span>{'Name' if locale == 'en' else 'ชื่อ'}</span><input id=\"sell-value-name\" name=\"name\" type=\"text\" required /></label>"
+        f"<label class=\"field\" for=\"sell-value-contact\"><span>{'Email or phone' if locale == 'en' else 'อีเมลหรือเบอร์โทร'}</span><input id=\"sell-value-contact\" name=\"contact\" type=\"text\" required /></label>"
+        f"<label class=\"field\" for=\"sell-value-type\"><span>{'Property type' if locale == 'en' else 'ประเภททรัพย์'}</span><select id=\"sell-value-type\" name=\"property_type\" required><option value=\"\">{'Select property type' if locale == 'en' else 'เลือกประเภททรัพย์'}</option><option value=\"condo\">Condo</option><option value=\"house\">House</option><option value=\"villa\">Villa</option><option value=\"land\">Land</option><option value=\"commercial\">Commercial</option></select></label>"
+        f"<label class=\"field\" for=\"sell-value-area\"><span>{'Area' if locale == 'en' else 'ทำเล'}</span><input id=\"sell-value-area\" name=\"area\" type=\"text\" required /></label>"
+        f"<label class=\"field\" for=\"sell-value-size\"><span>{'Size (sqm)' if locale == 'en' else 'ขนาด (ตร.ม.)'}</span><input id=\"sell-value-size\" name=\"size_sqm\" type=\"number\" min=\"0\" inputmode=\"numeric\" required /></label>"
+        f"<label class=\"field\" for=\"sell-value-beds\"><span>{'Bedrooms' if locale == 'en' else 'ห้องนอน'}</span><input id=\"sell-value-beds\" name=\"bedrooms\" type=\"number\" min=\"0\" inputmode=\"numeric\" /></label>"
+        f"<label class=\"field\" for=\"sell-value-baths\"><span>{'Bathrooms' if locale == 'en' else 'ห้องน้ำ'}</span><input id=\"sell-value-baths\" name=\"bathrooms\" type=\"number\" min=\"0\" inputmode=\"numeric\" /></label>"
+        f"<label class=\"field\" for=\"sell-value-condition\"><span>{'Condition' if locale == 'en' else 'สภาพทรัพย์'}</span><select id=\"sell-value-condition\" name=\"condition\" required><option value=\"\">{'Select condition' if locale == 'en' else 'เลือกสภาพทรัพย์'}</option><option value=\"new\">New</option><option value=\"good\">Good</option><option value=\"needs_update\">Needs update</option></select></label>"
+        f"<label class=\"field\" for=\"sell-value-timeline\"><span>{'Timeline' if locale == 'en' else 'ไทม์ไลน์'}</span><select id=\"sell-value-timeline\" name=\"timeline\" required><option value=\"\">{'Select timeline' if locale == 'en' else 'เลือกไทม์ไลน์'}</option><option value=\"0_3m\">0-3 months</option><option value=\"3_6m\">3-6 months</option><option value=\"6m_plus\">6+ months</option></select></label>"
+        f"<label class=\"field\" for=\"sell-value-notes\"><span>{'Notes' if locale == 'en' else 'หมายเหตุ'}</span><textarea id=\"sell-value-notes\" name=\"notes\" rows=\"4\"></textarea></label>"
+        f"<div class=\"grid\"><button id=\"sell-value-submit\" class=\"btn\" type=\"submit\" data-event=\"sell_cta_click\" data-placement=\"sell_valuation_form\" data-cta-id=\"sell_valuation_submit\" data-intent=\"sell\">{'Submit valuation request' if locale == 'en' else 'ส่งคำขอประเมินราคา'}</button><a class=\"btn\" href=\"/{locale}/sell/list-property\" data-event=\"sell_cta_click\" data-placement=\"sell_valuation_form\" data-cta-id=\"sell_valuation_to_list\" data-intent=\"sell\">{escape(copy['go_list'])}</a></div>"
+        f"<p id=\"sell-valuation-status\" class=\"muted\" role=\"status\" aria-live=\"polite\"></p><div id=\"sell-valuation-loading\" class=\"state-loading\" hidden>{'Submitting...' if locale == 'en' else 'กำลังส่งข้อมูล...'}</div><div id=\"sell-valuation-error\" class=\"state-error\" hidden>{escape(error_text)}</div><div id=\"sell-valuation-success\" class=\"state-success\" hidden>{escape(success_text)}</div></form></section>"
+        "<script>"
+        "(()=>{const locale=document.documentElement.lang||'en';const endpoint='/api/v1/events';const path=location.pathname;"
+        "function compact(raw){const out={};for(const [key,value] of Object.entries(raw||{})){if(value===undefined||value===null)continue;if(Array.isArray(value)&&value.length===0)continue;out[key]=value;}return out;}"
+        "function track(eventName,payload){const payloadBody=compact(payload);const sourceBody=compact({app:'flowbiz-public-runtime',env:'runtime',page:path,locale,placement:payloadBody.placement});return fetch(endpoint,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({event_name:eventName,source:sourceBody,payload:payloadBody}),keepalive:true}).catch(()=>null);}"
+        "document.querySelectorAll('[data-event]').forEach((node)=>{node.addEventListener('click',()=>{const eventName=node.getAttribute('data-event');if(!eventName)return;track(eventName,{label:node.textContent?.trim()||'',placement:node.getAttribute('data-placement')||undefined,cta_id:node.getAttribute('data-cta-id')||undefined,intent:node.getAttribute('data-intent')||undefined});});});"
+        "const form=document.getElementById('sell-valuation-lead-form');const submitBtn=document.getElementById('sell-value-submit');const statusEl=document.getElementById('sell-valuation-status');const loadingEl=document.getElementById('sell-valuation-loading');const errorEl=document.getElementById('sell-valuation-error');const successEl=document.getElementById('sell-valuation-success');if(!(form instanceof HTMLFormElement))return;const requiredFields=Array.from(form.querySelectorAll('[required]'));requiredFields.forEach((field)=>{const clear=()=>{if(String(field.value||'').trim())field.setAttribute('aria-invalid','false');};field.addEventListener('input',clear);field.addEventListener('change',clear);});"
+        "form.addEventListener('submit',async(event)=>{event.preventDefault();if(!(submitBtn instanceof HTMLButtonElement)||!(statusEl instanceof HTMLElement)||!(loadingEl instanceof HTMLElement)||!(errorEl instanceof HTMLElement)||!(successEl instanceof HTMLElement))return;errorEl.hidden=true;successEl.hidden=true;statusEl.textContent='';let firstInvalid=null;for(const field of requiredFields){const invalid=String(field.value||'').trim().length===0;field.setAttribute('aria-invalid',invalid?'true':'false');if(invalid&&!firstInvalid)firstInvalid=field;}if(firstInvalid){statusEl.textContent="
+        f"{required_error!r}"
+        ";firstInvalid.focus();await track('sell_valuation_error',{reason:'validation',placement:'sell_valuation_form',cta_id:'sell_valuation_submit',intent:'sell'});return;}loadingEl.hidden=false;statusEl.textContent="
+        f"{submitting_text!r}"
+        ";submitBtn.disabled=true;const data=Object.fromEntries(new FormData(form).entries());const contact=String(data.contact||'').trim();const isEmail=contact.includes('@');const fieldsPresent=Object.entries(data).filter(([,value])=>String(value||'').trim().length>0).map(([key])=>key);const messageParts=['Property type: '+String(data.property_type||''),'Area: '+String(data.area||''),'Size sqm: '+String(data.size_sqm||''),'Bedrooms: '+String(data.bedrooms||''),'Bathrooms: '+String(data.bathrooms||''),'Condition: '+String(data.condition||''),'Notes: '+String(data.notes||'')];try{await track('sell_valuation_submit',{placement:'sell_valuation_form',cta_id:'sell_valuation_submit',intent:'sell',fields_present:fieldsPresent});const response=await fetch('/v1/inquiries',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({name:String(data.name||'').trim(),email:isEmail?contact:null,phone:isEmail?null:contact,message:'Sell valuation request. '+messageParts.join('; '),source_page:location.pathname,intent:'sell',timeline:String(data.timeline||'').trim()||null,budget_band:null})});if(!response.ok)throw new Error('submit_failed');await track('sell_valuation_success',{placement:'sell_valuation_form',cta_id:'sell_valuation_submit',intent:'sell'});statusEl.textContent="
+        f"{success_text!r}"
+        ";successEl.hidden=false;form.reset();requiredFields.forEach((field)=>field.setAttribute('aria-invalid','false'));}catch{errorEl.hidden=false;statusEl.textContent="
+        f"{error_text!r}"
+        ";await track('sell_valuation_error',{reason:'submit_failed',placement:'sell_valuation_form',cta_id:'sell_valuation_submit',intent:'sell'});}finally{loadingEl.hidden=true;submitBtn.disabled=false;}});})();"
+        "</script>"
+    )
+    return HTMLResponse(_render_page_shell(locale, title=f"{copy['title']} / Valuation", intro=copy["intro"], body=body))
 
 
 def _request_locale(request: Request) -> str:
@@ -4568,13 +5008,45 @@ def render_insights(request: Request, db: Session = Depends(get_db)) -> HTMLResp
 @router.get("/en/about", response_class=HTMLResponse)
 @router.get("/th/about", response_class=HTMLResponse)
 def render_about(request: Request, db: Session = Depends(get_db)) -> HTMLResponse:
-    return _render_about_page(_request_locale(request), db)
+    return _render_about_page(_request_locale(request), request, db)
+
+
+@router.get("/en/how-we-work", response_class=HTMLResponse)
+@router.get("/th/how-we-work", response_class=HTMLResponse)
+@router.get("/how-we-work", response_class=HTMLResponse)
+def render_how_we_work(request: Request, db: Session = Depends(get_db)) -> HTMLResponse:
+    locale = _request_locale(request) if request.url.path.startswith("/en") or request.url.path.startswith("/th") else "en"
+    return _render_how_we_work_page(locale, db)
 
 
 @router.get("/en/contact", response_class=HTMLResponse)
 @router.get("/th/contact", response_class=HTMLResponse)
 def render_contact(request: Request, db: Session = Depends(get_db)) -> HTMLResponse:
     return _render_contact_page(_request_locale(request), db)
+
+
+@router.get("/en/sell", response_class=HTMLResponse)
+@router.get("/th/sell", response_class=HTMLResponse)
+@router.get("/sell", response_class=HTMLResponse)
+def render_sell(request: Request, db: Session = Depends(get_db)) -> HTMLResponse:
+    locale = _request_locale(request) if request.url.path.startswith("/en") or request.url.path.startswith("/th") else "en"
+    return _render_sell_page(locale, request, db)
+
+
+@router.get("/en/sell/list-property", response_class=HTMLResponse)
+@router.get("/th/sell/list-property", response_class=HTMLResponse)
+@router.get("/sell/list-property", response_class=HTMLResponse)
+def render_sell_list_property(request: Request, db: Session = Depends(get_db)) -> HTMLResponse:
+    locale = _request_locale(request) if request.url.path.startswith("/en") or request.url.path.startswith("/th") else "en"
+    return _render_sell_list_property_page(locale, request, db)
+
+
+@router.get("/en/sell/valuation", response_class=HTMLResponse)
+@router.get("/th/sell/valuation", response_class=HTMLResponse)
+@router.get("/sell/valuation", response_class=HTMLResponse)
+def render_sell_valuation(request: Request, db: Session = Depends(get_db)) -> HTMLResponse:
+    locale = _request_locale(request) if request.url.path.startswith("/en") or request.url.path.startswith("/th") else "en"
+    return _render_sell_valuation_page(locale, request, db)
 
 
 @router.get("/en/privacy", response_class=HTMLResponse)
