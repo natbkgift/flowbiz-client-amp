@@ -36,7 +36,7 @@ VPS_RELEASE_ROOT="$4"
 VPS_API_PORT="$5"
 COMPOSE_PROJECT_NAME="$6"
 
-if [[ -z "$REMOTE_URL" ]]; then
+if [[ -z "$REMOTE_URL" || "$REMOTE_URL" == "__AUTO__" ]]; then
   REMOTE_URL="$(git -C "$VPS_ACTIVE_PATH" remote get-url origin)"
 fi
 
@@ -100,7 +100,8 @@ $tmp = New-TemporaryFile
 try {
   $utf8NoBom = New-Object System.Text.UTF8Encoding($false)
   [System.IO.File]::WriteAllText($tmp.FullName, $remoteScript.Replace("`r`n", "`n").Replace("`r", ""), $utf8NoBom)
-  $cmd = "cmd /c type `"$($tmp.FullName)`" | ssh -o BatchMode=yes $VpsHost bash -s -- `"$RemoteUrl`" `"$TargetSha`" `"$VpsActivePath`" `"$VpsReleaseRoot`" `"$VpsApiPort`" `"$ComposeProjectName`""
+  $remoteArg = if ($RemoteUrl) { $RemoteUrl } else { "__AUTO__" }
+  $cmd = "cmd /c type `"$($tmp.FullName)`" | ssh -o BatchMode=yes $VpsHost bash -s -- `"$remoteArg`" `"$TargetSha`" `"$VpsActivePath`" `"$VpsReleaseRoot`" `"$VpsApiPort`" `"$ComposeProjectName`""
   & pwsh -NoProfile -Command $cmd
   if ($LASTEXITCODE -ne 0) {
     throw "Production deploy failed."

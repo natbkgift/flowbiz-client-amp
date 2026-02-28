@@ -48,7 +48,7 @@ VPS_RELEASE_ROOT="$4"
 VPS_API_PORT="$5"
 COMPOSE_PROJECT_NAME="$6"
 
-if [[ -z "$REMOTE_URL" ]]; then
+if [[ -z "$REMOTE_URL" || "$REMOTE_URL" == "__AUTO__" ]]; then
   REMOTE_URL="$(git -C "$VPS_ACTIVE_PATH" remote get-url origin)"
 fi
 
