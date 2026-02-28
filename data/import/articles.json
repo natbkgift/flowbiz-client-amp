@@ -8,14 +8,39 @@
       "th": "ขอบเขตบริการของบริษัทในประเทศไทย"
     },
     "excerpt": {
-      "en": "Migrated from approved company-owned source assetmp.net.",
-      "th": "ย้ายมาจากแหล่งข้อมูลที่ได้รับอนุมัติของบริษัท assetmp.net"
+      "en": "Approved company-owned summary of service areas and practical use in this runtime.",
+      "th": "สรุปจากแหล่งข้อมูลของบริษัทเกี่ยวกับพื้นที่ให้บริการและการใช้งานใน runtime นี้"
     },
     "body_md": {
-      "en": "Approved company-owned messaging on assetmp.net describes Asset Management Property as a Thailand real estate agency covering Pattaya, Bangkok, Phuket, and Koh Samui.\n\nThe same source highlights multilingual support and complete service from start to finish, which makes this article a safe editorial baseline for the current runtime.",
-      "th": "ข้อความจาก assetmp.net ซึ่งเป็นแหล่งข้อมูลของบริษัทระบุว่าทีมให้บริการในพัทยา กรุงเทพฯ ภูเก็ต และเกาะสมุย พร้อมรองรับหลายภาษาและบริการครบวงจรตั้งแต่ต้นจนจบ"
+      "en": "## Coverage from approved source\nThe approved company-owned source states service coverage in Pattaya, Bangkok, Phuket, and Koh Samui for current operations.\n\n## Stated service scope\nThe same source describes end-to-end support, including property investment support, asset management support, legal process support, and market-oriented guidance.\n\n## How this maps to runtime pages\nUse [Guides](/en/guides) for practical workflows and [Contact](/en/contact) when you need a tracked consultation path.\n\n## Editorial note\nThis article keeps only approved source-aligned statements and avoids unverified market metrics.",
+      "th": "## ขอบเขตพื้นที่จากแหล่งข้อมูลที่อนุมัติ\nแหล่งข้อมูลของบริษัทที่อนุมัติแล้วระบุพื้นที่บริการในพัทยา กรุงเทพฯ ภูเก็ต และเกาะสมุย สำหรับการดำเนินงานปัจจุบัน\n\n## ขอบเขตบริการที่ระบุ\nแหล่งข้อมูลเดียวกันระบุการดูแลแบบครบกระบวนการ เช่น การสนับสนุนด้านการลงทุน การดูแลสินทรัพย์ การประสานงานกฎหมาย และคำแนะนำเชิงตลาด\n\n## การเชื่อมกับหน้าใน runtime\nใช้ [Guides](/th/guides) เพื่อดู workflow และไป [Contact](/th/contact) เมื่อต้องการ consultation ที่ติดตามผลได้\n\n## หมายเหตุด้านบรรณาธิการ\nบทความนี้คงเฉพาะข้อความที่สอดคล้องกับแหล่งข้อมูลที่อนุมัติ และหลีกเลี่ยงตัวเลขตลาดที่ยังไม่ยืนยัน"
     },
-    "hero_image_url": "/media/library/variants/05032d16-54ae-45f4-bb89-3ae1fc2fa52f.webp"
+    "hero_image_url": "/media/library/variants/05032d16-54ae-45f4-bb89-3ae1fc2fa52f.webp",
+    "published_at": "2026-02-24T08:30:00Z",
+    "updated_at": "2026-02-26T09:15:00Z",
+    "tags": {
+      "en": ["service-coverage", "thailand-real-estate", "workflow"],
+      "th": ["ขอบเขตบริการ", "อสังหาไทย", "เวิร์กโฟลว์"]
+    },
+    "topics": {
+      "en": ["market-context", "buyer-support"],
+      "th": ["บริบทตลาด", "การดูแลผู้ซื้อ"]
+    },
+    "author_name": {
+      "en": "Pawat M. Phothisarn",
+      "th": "Pawat M. Phothisarn"
+    },
+    "author_role": {
+      "en": "Managing Director",
+      "th": "กรรมการผู้จัดการ"
+    },
+    "author_bio": {
+      "en": "Name and role published on approved company-owned source assetmp.net.",
+      "th": "ชื่อและตำแหน่งเผยแพร่บนแหล่งข้อมูลบริษัทที่อนุมัติแล้ว assetmp.net"
+    },
+    "source_url": "https://www.assetmp.net/",
+    "source_domain": "assetmp.net",
+    "source_rights": "company-owned first-party content"
   },
   {
     "slug": "assetmp-multilingual-support",
@@ -26,14 +51,82 @@
       "th": "การรองรับหลายภาษาและขั้นตอนถัดไปที่มีคนดูแล"
     },
     "excerpt": {
-      "en": "A company-owned summary of how the team positions support for local and international clients.",
-      "th": "สรุปจากแหล่งข้อมูลของบริษัทเกี่ยวกับการดูแลลูกค้าทั้งในและต่างประเทศ"
+      "en": "Practical article from approved company-owned source for local and international client support.",
+      "th": "บทความเชิงปฏิบัติจากแหล่งข้อมูลบริษัทที่อนุมัติแล้ว สำหรับการดูแลลูกค้าทั้งในและต่างประเทศ"
     },
     "body_md": {
-      "en": "The company site positions multilingual support as part of the service experience for people comparing locations and property types across Thailand.\n\nFor the A2 runtime, this article is kept intentionally factual and should be expanded in admin with final editorial detail when approved.",
-      "th": "เว็บไซต์บริษัทวางตำแหน่งการรองรับหลายภาษาเป็นส่วนหนึ่งของประสบการณ์บริการสำหรับผู้ที่กำลังเทียบทำเลและประเภทอสังหาในประเทศไทย\n\nใน runtime ปัจจุบัน บทความนี้เก็บข้อความไว้แบบตรงไปตรงมาและควรขยายรายละเอียดผ่าน admin เมื่อข้อความฉบับสุดท้ายได้รับอนุมัติ"
+      "en": "## Multilingual support baseline\nThe approved company-owned source highlights multilingual service to support clients comparing locations and property types across Thailand.\n\n## Practical next-step flow\nIn this runtime, the next step is consultation intake with clear intent, budget range, and timeline before shortlist delivery.\n\n## Internal links for follow-up\nGo to [Blog](/en/blog) for market context and [Contact](/en/contact) to continue with a tracked request.\n\n## Editorial guardrail\nThis article is limited to approved source statements and current runtime process behavior.",
+      "th": "## ฐานข้อมูลการรองรับหลายภาษา\nแหล่งข้อมูลของบริษัทที่อนุมัติแล้วระบุการดูแลหลายภาษา เพื่อรองรับลูกค้าที่กำลังเทียบทำเลและประเภทอสังหาในประเทศไทย\n\n## ขั้นตอนถัดไปเชิงปฏิบัติ\nใน runtime นี้ ขั้นตอนถัดไปคือ consultation intake โดยระบุเป้าหมาย งบประมาณ และไทม์ไลน์ก่อนส่ง shortlist\n\n## ลิงก์ภายในสำหรับไปต่อ\nไปที่ [Blog](/th/blog) เพื่อดูบริบทตลาด และ [Contact](/th/contact) เพื่อส่งคำขอที่ติดตามผลได้\n\n## แนวทางคุมคุณภาพเนื้อหา\nบทความนี้จำกัดเฉพาะข้อความจากแหล่งข้อมูลที่อนุมัติ และพฤติกรรมกระบวนการที่ใช้งานจริงใน runtime"
     },
-    "hero_image_url": "/media/library/variants/05032d16-54ae-45f4-bb89-3ae1fc2fa52f.webp"
+    "hero_image_url": "/media/library/variants/05032d16-54ae-45f4-bb89-3ae1fc2fa52f.webp",
+    "published_at": "2026-02-22T08:30:00Z",
+    "updated_at": "2026-02-25T10:05:00Z",
+    "tags": {
+      "en": ["multilingual-support", "consultation", "client-journey"],
+      "th": ["รองรับหลายภาษา", "การปรึกษา", "เส้นทางลูกค้า"]
+    },
+    "topics": {
+      "en": ["process-guide", "buyer-support"],
+      "th": ["คู่มือกระบวนการ", "การดูแลผู้ซื้อ"]
+    },
+    "author_name": {
+      "en": "Natcha Piya",
+      "th": "Natcha Piya"
+    },
+    "author_role": {
+      "en": "Sales Executive, Chinese",
+      "th": "ผู้บริหารงานขาย (ภาษาจีน)"
+    },
+    "author_bio": {
+      "en": "Name and role published on approved company-owned source assetmp.net.",
+      "th": "ชื่อและตำแหน่งเผยแพร่บนแหล่งข้อมูลบริษัทที่อนุมัติแล้ว assetmp.net"
+    },
+    "source_url": "https://www.assetmp.net/",
+    "source_domain": "assetmp.net",
+    "source_rights": "company-owned first-party content"
+  },
+  {
+    "slug": "assetmp-investment-screening-basics",
+    "category": "guide",
+    "status": "published",
+    "title": {
+      "en": "Investment screening basics for published listings",
+      "th": "พื้นฐานการคัดกรองการลงทุนสำหรับรายการที่เผยแพร่แล้ว"
+    },
+    "excerpt": {
+      "en": "A source-aligned investment screening checklist using only published system facts.",
+      "th": "เช็กลิสต์คัดกรองการลงทุนจากข้อเท็จจริงที่เผยแพร่ในระบบเท่านั้น"
+    },
+    "body_md": {
+      "en": "## Scope of this guide\nThis guide is limited to published listing and project facts already available in the current runtime.\n\n## Screening checklist\n1. Confirm listing status is active and media is local.\n2. Check project linkage and latest published update timestamp.\n3. Review source note before using any hard metric claim.\n\n## Where to continue\nOpen [Investment Methodology](/en/investment/methodology) for policy context and [Invest Guides](/en/invest/guides) for related articles.\n\n## Policy guardrail\nDo not add projected ROI or guarantee language when source evidence is missing.",
+      "th": "## ขอบเขตของคู่มือนี้\nคู่มือนี้จำกัดเฉพาะข้อเท็จจริงของรายการและโครงการที่เผยแพร่ใน runtime ปัจจุบัน\n\n## เช็กลิสต์การคัดกรอง\n1. ยืนยันว่ารายการเป็น active และสื่อเป็นไฟล์ local\n2. ตรวจสอบการเชื่อมกับโครงการและวันที่อัปเดตล่าสุดที่เผยแพร่\n3. ตรวจสอบ source note ก่อนใช้ตัวเลขเชิงอ้างอิง\n\n## เส้นทางไปต่อ\nเปิด [Investment Methodology](/th/investment/methodology) เพื่อดูหลักเกณฑ์ และ [Invest Guides](/th/invest/guides) สำหรับบทความที่เกี่ยวข้อง\n\n## กติกาความถูกต้อง\nห้ามใส่ถ้อยคำรับประกันผลตอบแทนหรือ ROI เมื่อไม่มีหลักฐานแหล่งข้อมูลรองรับ"
+    },
+    "hero_image_url": "/media/library/variants/05032d16-54ae-45f4-bb89-3ae1fc2fa52f.webp",
+    "published_at": "2026-02-20T08:30:00Z",
+    "updated_at": "2026-02-27T11:20:00Z",
+    "tags": {
+      "en": ["investment", "yield-basics", "risk-checklist", "methodology"],
+      "th": ["การลงทุน", "พื้นฐานผลตอบแทน", "เช็กลิสต์ความเสี่ยง", "ระเบียบวิธี"]
+    },
+    "topics": {
+      "en": ["investment-guide", "invest/guides", "capital-planning"],
+      "th": ["คู่มือลงทุน", "invest/guides", "การวางแผนเงินลงทุน"]
+    },
+    "author_name": {
+      "en": "Thanyarat V",
+      "th": "Thanyarat V"
+    },
+    "author_role": {
+      "en": "Sales Executive",
+      "th": "ผู้บริหารงานขาย"
+    },
+    "author_bio": {
+      "en": "Name and role published on approved company-owned source assetmp.net.",
+      "th": "ชื่อและตำแหน่งเผยแพร่บนแหล่งข้อมูลบริษัทที่อนุมัติแล้ว assetmp.net"
+    },
+    "source_url": "https://www.assetmp.net/",
+    "source_domain": "assetmp.net",
+    "source_rights": "company-owned first-party content"
   },
   {
     "slug": "assetmp-contact-and-coverage",
@@ -44,13 +137,38 @@
       "th": "วิธีเริ่มต้นส่งคำขออสังหากับทีมปัจจุบัน"
     },
     "excerpt": {
-      "en": "Contact details and coverage migrated from the approved company-owned source.",
-      "th": "ช่องทางติดต่อและขอบเขตบริการที่ย้ายมาจากแหล่งข้อมูลบริษัทที่ได้รับอนุมัติ"
+      "en": "Contact channels and service coverage from approved company-owned source, mapped to current consultation flow.",
+      "th": "ช่องทางติดต่อและขอบเขตบริการจากแหล่งข้อมูลบริษัทที่อนุมัติแล้ว พร้อมการเชื่อมกับ consultation flow ปัจจุบัน"
     },
     "body_md": {
-      "en": "The approved company-owned source lists contact@assetmp.net and +66 (0)82 469 5465 as active contact points, with service coverage that includes Pattaya, Bangkok, Phuket, and Koh Samui.\n\nUse the consultation flow in this runtime when you want tracked follow-up and the current CRM process.",
-      "th": "แหล่งข้อมูลของบริษัทที่ได้รับอนุมัติระบุช่องทางติดต่อ contact@assetmp.net และ +66 (0)82 469 5465 พร้อมขอบเขตบริการในพัทยา กรุงเทพฯ ภูเก็ต และเกาะสมุย\n\nให้ใช้ consultation flow ใน runtime นี้เมื่อคุณต้องการการติดตามผลและกระบวนการ CRM ปัจจุบัน"
+      "en": "## Approved contact channels\nThe approved company-owned source lists email and phone contact channels for direct inquiries.\n\n## Service coverage context\nCoverage in the approved source includes Pattaya, Bangkok, Phuket, and Koh Samui for current customer requests.\n\n## Runtime conversion path\nUse [Contact](/en/contact) or start from [Home](/en) consultation to keep request tracking in the current CRM workflow.\n\n## Editorial guardrail\nThis article intentionally avoids fabricated performance claims, reviews, or SLA language.",
+      "th": "## ช่องทางติดต่อที่อนุมัติแล้ว\nแหล่งข้อมูลของบริษัทที่อนุมัติแล้วระบุช่องทางติดต่อทางอีเมลและโทรศัพท์สำหรับการสอบถามโดยตรง\n\n## บริบทขอบเขตบริการ\nขอบเขตบริการในแหล่งข้อมูลที่อนุมัติครอบคลุมพัทยา กรุงเทพฯ ภูเก็ต และเกาะสมุยสำหรับคำขอปัจจุบัน\n\n## เส้นทาง conversion ใน runtime\nใช้ [Contact](/th/contact) หรือเริ่มจาก consultation บน [Home](/th) เพื่อให้คำขอถูกติดตามใน CRM ปัจจุบัน\n\n## กติกาด้านเนื้อหา\nบทความนี้หลีกเลี่ยงการอ้างตัวเลขผลงาน รีวิว หรือ SLA ที่ไม่มีหลักฐานรองรับ"
     },
-    "hero_image_url": "/media/library/variants/05032d16-54ae-45f4-bb89-3ae1fc2fa52f.webp"
+    "hero_image_url": "/media/library/variants/05032d16-54ae-45f4-bb89-3ae1fc2fa52f.webp",
+    "published_at": "2026-02-18T08:30:00Z",
+    "updated_at": "2026-02-25T07:40:00Z",
+    "tags": {
+      "en": ["contact", "consultation", "service-coverage"],
+      "th": ["ติดต่อ", "การปรึกษา", "ขอบเขตบริการ"]
+    },
+    "topics": {
+      "en": ["client-intake", "operating-workflow"],
+      "th": ["การรับคำขอลูกค้า", "เวิร์กโฟลว์การทำงาน"]
+    },
+    "author_name": {
+      "en": "Penjan W",
+      "th": "Penjan W"
+    },
+    "author_role": {
+      "en": "Sales Executive",
+      "th": "ผู้บริหารงานขาย"
+    },
+    "author_bio": {
+      "en": "Name and role published on approved company-owned source assetmp.net.",
+      "th": "ชื่อและตำแหน่งเผยแพร่บนแหล่งข้อมูลบริษัทที่อนุมัติแล้ว assetmp.net"
+    },
+    "source_url": "https://www.assetmp.net/",
+    "source_domain": "assetmp.net",
+    "source_rights": "company-owned first-party content"
   }
 ]

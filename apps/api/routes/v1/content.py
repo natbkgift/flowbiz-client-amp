@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from typing import Any
+
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy import desc, select
 from sqlalchemy.orm import Session
@@ -38,6 +40,39 @@ def _hero_rights_ok(db: Session, article: Article) -> bool:
     return (media.approval_status or "").lower() == "approved"
 
 
+def _taxonomy_value(value: Any) -> list[str] | dict[str, list[str]] | None:
+    if isinstance(value, dict):
+        localized: dict[str, list[str]] = {}
+        for key in ["en", "th"]:
+            nested = _taxonomy_value(value.get(key))
+            if isinstance(nested, list) and nested:
+                localized[key] = nested
+        return localized or None
+    if isinstance(value, list):
+        out: list[str] = []
+        seen: set[str] = set()
+        for item in value:
+            text = str(item or "").strip()
+            if not text:
+                continue
+            normalized = text.casefold()
+            if normalized in seen:
+                continue
+            seen.add(normalized)
+            out.append(text)
+        return out or None
+    if isinstance(value, str):
+        return _taxonomy_value([part.strip() for part in value.split(",")])
+    return None
+
+
+def _article_metadata(article: Article) -> tuple[dict[str, Any], dict[str, Any]]:
+    body_meta = article.body_md if isinstance(article.body_md, dict) else {}
+    source_meta = body_meta.get("source_meta") if isinstance(body_meta.get("source_meta"), dict) else {}
+    author_profile = body_meta.get("author_profile") if isinstance(body_meta.get("author_profile"), dict) else {}
+    return source_meta, author_profile
+
+
 def _publishable(db: Session, article: Article) -> bool:
     if article.status != "published":
         return False
@@ -49,6 +84,10 @@ def _publishable(db: Session, article: Article) -> bool:
 
 
 def _serialize(article: Article) -> dict:
+    body_meta = article.body_md if isinstance(article.body_md, dict) else {}
+    tags = _taxonomy_value(body_meta.get("tags"))
+    topics = _taxonomy_value(body_meta.get("topics"))
+    source_meta, author_profile = _article_metadata(article)
     return {
         "id": str(article.id),
         "slug": article.slug,
@@ -58,6 +97,11 @@ def _serialize(article: Article) -> dict:
         "body_md": article.body_md,
         "hero_image_url": _safe_media_path(article.hero_image_url),
         "published_at": article.published_at.isoformat() if article.published_at else None,
+        "updated_at": article.updated_at.isoformat() if article.updated_at else None,
+        "tags": tags,
+        "topics": topics,
+        "author_profile": author_profile or None,
+        "source_meta": source_meta or None,
     }
 
 

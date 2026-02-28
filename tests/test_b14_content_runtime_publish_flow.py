@@ -6,6 +6,7 @@ from pathlib import Path
 from uuid import uuid4
 
 import pytest
+from sqlalchemy import select
 
 from packages.core.auth import create_access_token, hash_password
 from packages.core.database import SessionLocal, init_db
@@ -154,6 +155,16 @@ def test_b14_seed_content_upserts_company_team_testimonials(tmp_path: Path) -> N
                     "excerpt": {"en": "Sourced from approved company-owned website assetmp.net."},
                     "body_md": {"en": "Multilingual support and end-to-end service across Thailand."},
                     "hero_image_url": "/media/library/variants/05032d16-54ae-45f4-bb89-3ae1fc2fa52f.webp",
+                    "tags": {"en": ["investment", "yield"], "th": ["การลงทุน", "ผลตอบแทน"]},
+                    "topics": {"en": ["investment-guide"], "th": ["คู่มือลงทุน"]},
+                    "author_name": {"en": "Pawat M. Phothisarn"},
+                    "author_role": {"en": "Managing Director"},
+                    "author_bio": {"en": "Approved author profile"},
+                    "source_url": "https://www.assetmp.net/",
+                    "source_domain": "assetmp.net",
+                    "source_rights": "company-owned first-party content",
+                    "published_at": "2026-02-20T08:30:00Z",
+                    "updated_at": "2026-02-27T09:45:00Z",
                 }
             ],
             ensure_ascii=False,
@@ -178,6 +189,20 @@ def test_b14_seed_content_upserts_company_team_testimonials(tmp_path: Path) -> N
     assert rerun["team_members"]["updated"] == 1
     assert rerun["testimonials"]["updated"] == 1
     assert rerun["articles"]["updated"] == 1
+
+    with SessionLocal() as db:
+        article = db.scalar(select(Article).where(Article.slug == "assetmp-company-overview"))
+        assert article is not None
+        assert isinstance(article.body_md, dict)
+        assert article.body_md.get("tags")
+        assert article.body_md.get("topics")
+        author_profile = article.body_md.get("author_profile")
+        assert isinstance(author_profile, dict)
+        assert isinstance(author_profile.get("name"), dict)
+        source_meta = article.body_md.get("source_meta")
+        assert isinstance(source_meta, dict)
+        assert source_meta.get("domain") == "assetmp.net"
+        assert article.published_at is not None
 
 
 def test_b14_seed_rejects_external_article_hero_image_url(tmp_path: Path) -> None:
@@ -283,6 +308,63 @@ def test_b14_seeded_company_and_article_are_visible_on_runtime(client, tmp_path:
     insights = client.get("/en/insights")
     assert insights.status_code == 200, insights.text
     assert "AssetMP seeded insight" in insights.text
+
+
+def test_b14_admin_article_editorial_metadata_drives_runtime_filter_and_author(client) -> None:
+    headers = _make_admin_headers()
+    local_hero = "/media/library/variants/05032d16-54ae-45f4-bb89-3ae1fc2fa52f.webp"
+    slug = "admin-invest-guide-metadata"
+
+    with SessionLocal() as db:
+        db.add(
+            Article(
+                slug=slug,
+                category="guide",
+                status="published",
+                title={"en": "Investment title keyword only", "th": "ชื่อมีคำว่าลงทุน"},
+                excerpt={"en": "Before taxonomy update", "th": "ก่อนอัปเดต taxonomy"},
+                body_md={
+                    "en": "## Body\nInitial body.",
+                    "th": "## เนื้อหา\nเนื้อหาเริ่มต้น",
+                    "tags": {"en": ["rental"], "th": ["เช่า"]},
+                    "topics": {"en": ["rental-guide"], "th": ["คู่มือเช่า"]},
+                },
+                hero_image_url=local_hero,
+            )
+        )
+        db.commit()
+
+    before = client.get("/en/invest/guides")
+    assert before.status_code == 200, before.text
+    assert slug not in before.text
+
+    editorial = client.patch(
+        f"/admin/content/articles/{slug}/editorial",
+        headers=headers,
+        json={
+            "tags": {"en": ["investment", "yield"], "th": ["การลงทุน", "ผลตอบแทน"]},
+            "topics": {"en": ["investment-guide"], "th": ["คู่มือลงทุน"]},
+            "author_name": {"en": "Pawat M. Phothisarn", "th": "Pawat M. Phothisarn"},
+            "author_role": {"en": "Managing Director", "th": "กรรมการผู้จัดการ"},
+            "author_bio": {"en": "Approved author profile"},
+            "source_domain": "assetmp.net",
+            "source_url": "https://www.assetmp.net/",
+            "source_rights": "company-owned first-party content",
+            "published_at": "2026-02-27T10:00:00Z",
+        },
+    )
+    assert editorial.status_code == 200, editorial.text
+    body = editorial.json()["article"]
+    assert body["body_md"]["tags"]["en"] == ["investment", "yield"]
+    assert body["body_md"]["author_profile"]["name"]["en"] == "Pawat M. Phothisarn"
+
+    after = client.get("/en/invest/guides")
+    assert after.status_code == 200, after.text
+    assert slug in after.text
+
+    detail = client.get(f"/en/guides/{slug}")
+    assert detail.status_code == 200, detail.text
+    assert "Author: Pawat M. Phothisarn" in detail.text
 
 
 def test_b14_repo_import_seed_files_are_safe_and_runtime_ready() -> None:

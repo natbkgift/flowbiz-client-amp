@@ -1,8 +1,10 @@
 from __future__ import annotations
 
 import json
+import re
 from decimal import Decimal, InvalidOperation
 from html import escape
+from datetime import UTC, datetime
 from pathlib import Path
 from urllib.parse import urlencode, urlparse
 from uuid import UUID
@@ -25,6 +27,7 @@ from packages.core.models import (
     Property,
     TeamMember,
     Testimonial,
+    User,
 )
 
 router = APIRouter(tags=["home-runtime"])
@@ -40,6 +43,9 @@ _PUBLIC_ROUTE_SUFFIXES = {
     "/projects",
     "/developers",
     "/smart-finder",
+    "/blog",
+    "/guides",
+    "/invest/guides",
     "/area-guide",
     "/areas",
     "/insights",
@@ -793,7 +799,15 @@ def _render(locale: str, request: Request, db: Session, source: str, resolved: d
 """
 
 
-def _render_page_shell(locale: str, *, title: str, intro: str, body: str) -> str:
+def _render_page_shell(
+    locale: str,
+    *,
+    title: str,
+    intro: str,
+    body: str,
+    canonical_href: str | None = None,
+    head_extra: str = "",
+) -> str:
     nav_items = [
         ("projects", "Projects" if locale == "en" else "โครงการ"),
         ("areas", "Areas" if locale == "en" else "ทำเล"),
@@ -805,12 +819,19 @@ def _render_page_shell(locale: str, *, title: str, intro: str, body: str) -> str
     nav_html = "".join(
         f'<a class="btn" href="/{locale}/{path}">{escape(label)}</a>' for path, label in nav_items
     )
+    canonical_line = (
+        f'<link rel="canonical" href="{escape(canonical_href)}" />'
+        if str(canonical_href or "").strip()
+        else ""
+    )
     return f"""<!doctype html>
 <html lang="{locale}">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{escape(title)}</title>
+    {canonical_line}
+    {head_extra}
     <style>
       :root{{--c1:#0f6d5a;--txt:#1f2937;--muted:#5b6472;--bg:#f6f7f9;--surface:#fff;--border:#d1d5db;--pad:16px;--max:1080px}}
       *{{box-sizing:border-box}} body{{margin:0;font-family:Segoe UI,Tahoma,"Noto Sans Thai",sans-serif;background:var(--bg);color:var(--txt);line-height:1.55}}
@@ -819,11 +840,14 @@ def _render_page_shell(locale: str, *, title: str, intro: str, body: str) -> str
       .card{{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:16px;display:grid;gap:12px}}
       .grid{{display:grid;gap:16px;grid-template-columns:1fr}} .muted{{color:var(--muted)}} .btn{{display:inline-flex;align-items:center;justify-content:center;border-radius:12px;border:1px solid var(--c1);padding:10px 16px;background:#fff;color:var(--c1);text-decoration:none}}
       .media{{width:100%;aspect-ratio:16/9;object-fit:cover;border-radius:12px;background:#e5e7eb}}
+      .skip-link{{position:absolute;left:-9999px;top:auto}}
+      .skip-link:focus{{left:16px;top:16px;background:#fff;border:1px solid var(--border);padding:8px 12px;border-radius:8px;z-index:1000}}
       @media (min-width:768px){{.grid{{grid-template-columns:repeat(2,minmax(0,1fr))}}}}
     </style>
   </head>
   <body>
-    <main class="container stack">
+    <a class="skip-link" href="#main-content">Skip to main content</a>
+    <main id="main-content" class="container stack">
             <section class="card"><div class="grid">{nav_html}</div></section>
             <a class="btn" href="/{locale}">Back to Home</a>
       <section class="card">
@@ -3473,23 +3497,765 @@ def _render_property_listing_page(locale: str, request: Request, db: Session, in
     return HTMLResponse(_render_page_shell(locale, title=copy["page_title"], intro=copy["page_intro"], body=body))
 
 
+_EN_MONTHS = [
+    "Jan",
+    "Feb",
+    "Mar",
+    "Apr",
+    "May",
+    "Jun",
+    "Jul",
+    "Aug",
+    "Sep",
+    "Oct",
+    "Nov",
+    "Dec",
+]
+_TH_MONTHS = [
+    "ม.ค.",
+    "ก.พ.",
+    "มี.ค.",
+    "เม.ย.",
+    "พ.ค.",
+    "มิ.ย.",
+    "ก.ค.",
+    "ส.ค.",
+    "ก.ย.",
+    "ต.ค.",
+    "พ.ย.",
+    "ธ.ค.",
+]
+_CONTENT_INVEST_KEYWORDS = (
+    "invest",
+    "investment",
+    "yield",
+    "roi",
+    "cashflow",
+    "capital gain",
+    "ลงทุน",
+    "ผลตอบแทน",
+    "กระแสเงินสด",
+)
+_CONTENT_INVEST_TAG_MARKERS = {
+    "invest",
+    "investment",
+    "investment-guide",
+    "investment-guides",
+    "yield",
+    "yield-basics",
+    "roi",
+    "cashflow",
+    "capital-gain",
+    "การลงทุน",
+    "ผลตอบแทน",
+    "กระแสเงินสด",
+}
+
+
+def _format_locale_date(value: datetime | None, locale: str, *, fallback: str = "-") -> str:
+    if value is None:
+        return fallback
+    dt = value.astimezone(UTC) if value.tzinfo is not None else value
+    month_idx = max(1, min(12, dt.month)) - 1
+    if locale == "th":
+        return f"{dt.day} {_TH_MONTHS[month_idx]} {dt.year}"
+    return f"{_EN_MONTHS[month_idx]} {dt.day}, {dt.year}"
+
+
+def _localized_text_value(value: object, locale: str) -> str | None:
+    if isinstance(value, dict):
+        return _localized_dict_text(value, locale)
+    text = str(value or "").strip()
+    return text or None
+
+
+def _article_body_metadata(article: Article) -> dict[str, object]:
+    if not isinstance(article.body_md, dict):
+        return {}
+    return article.body_md
+
+
+def _article_author_profile(article: Article, locale: str) -> tuple[str | None, str | None, str | None]:
+    body_meta = _article_body_metadata(article)
+    profile = body_meta.get("author_profile")
+    if not isinstance(profile, dict):
+        return None, None, None
+    name = _localized_text_value(profile.get("name"), locale)
+    role = _localized_text_value(profile.get("role"), locale)
+    bio = _localized_text_value(profile.get("bio"), locale)
+    return name, role, bio
+
+
+def _article_tags_for_locale(article: Article, locale: str) -> list[str]:
+    def _coerce_tags(payload: object) -> list[str]:
+        if isinstance(payload, dict):
+            nested: list[str] = []
+            for locale_key in [locale, "en", "th"]:
+                nested.extend(_coerce_tags(payload.get(locale_key)))
+            return nested
+        if isinstance(payload, list):
+            return [str(item).strip() for item in payload if str(item).strip()]
+        if isinstance(payload, str):
+            return [part.strip() for part in payload.split(",") if part.strip()]
+        return []
+
+    out: list[str] = []
+    seen: set[str] = set()
+    containers: list[dict] = []
+    for raw in [article.title, article.excerpt, article.body_md]:
+        if isinstance(raw, dict):
+            containers.append(raw)
+            localized = raw.get(locale)
+            if isinstance(localized, dict):
+                containers.insert(0, localized)
+            for fallback_locale in ["en", "th"]:
+                nested = raw.get(fallback_locale)
+                if isinstance(nested, dict):
+                    containers.append(nested)
+    for container in containers:
+        for key in ["tags", "topics", "keywords"]:
+            for tag in _coerce_tags(container.get(key)):
+                normalized = tag.casefold()
+                if normalized in seen:
+                    continue
+                seen.add(normalized)
+                out.append(tag)
+                if len(out) == 8:
+                    return out
+    return out
+
+
+def _article_author_label(article: Article, db: Session, locale: str) -> tuple[str, bool]:
+    author_name, _, _ = _article_author_profile(article, locale)
+    if author_name:
+        return author_name, False
+    if article.author_user_id is None:
+        return (
+            (
+                "Author pending publication. TODO: assign article author in CMS."
+                if locale == "en"
+                else "ยังไม่มีผู้เขียนที่เผยแพร่ TODO: ระบุผู้เขียนใน CMS"
+            ),
+            True,
+        )
+    user = db.get(User, article.author_user_id)
+    if user is None or not str(user.email or "").strip():
+        return (
+            (
+                "Author pending publication. TODO: assign article author in CMS."
+                if locale == "en"
+                else "ยังไม่มีผู้เขียนที่เผยแพร่ TODO: ระบุผู้เขียนใน CMS"
+            ),
+            True,
+        )
+    return str(user.email).strip(), False
+
+
+def _normalize_taxonomy_token(value: str) -> str:
+    lowered = str(value or "").strip().casefold()
+    if not lowered:
+        return ""
+    normalized = re.sub(r"[\s_]+", "-", lowered)
+    normalized = re.sub(r"[^\w-]", "", normalized, flags=re.UNICODE)
+    return normalized.strip("-")
+
+
+def _is_invest_taxonomy_tag(value: str) -> bool:
+    token = _normalize_taxonomy_token(value)
+    if not token:
+        return False
+    return token in _CONTENT_INVEST_TAG_MARKERS_NORMALIZED
+
+
+_CONTENT_INVEST_TAG_MARKERS_NORMALIZED = {
+    _normalize_taxonomy_token(marker) for marker in _CONTENT_INVEST_TAG_MARKERS
+}
+
+
+def _slugify_heading(value: str, *, used: set[str]) -> str:
+    base = re.sub(r"[^\w\s-]", "", str(value or "").strip(), flags=re.UNICODE)
+    base = re.sub(r"\s+", "-", base, flags=re.UNICODE).strip("-").lower()
+    if not base:
+        base = "section"
+    candidate = base
+    suffix = 2
+    while candidate in used:
+        candidate = f"{base}-{suffix}"
+        suffix += 1
+    used.add(candidate)
+    return candidate
+
+
+def _render_inline_markdown(text: str) -> str:
+    out: list[str] = []
+    cursor = 0
+    for match in re.finditer(r"\[([^\]]+)\]\(([^)]+)\)", text):
+        out.append(escape(text[cursor : match.start()]))
+        label = str(match.group(1) or "").strip()
+        href = str(match.group(2) or "").strip()
+        if href.startswith("/") or href.startswith("http://") or href.startswith("https://"):
+            out.append(f'<a href="{escape(href)}">{escape(label)}</a>')
+        else:
+            out.append(escape(match.group(0)))
+        cursor = match.end()
+    out.append(escape(text[cursor:]))
+    return "".join(out)
+
+
+def _is_markdown_table_separator(line: str) -> bool:
+    return bool(re.fullmatch(r"\s*\|?(\s*:?-+:?\s*\|)+\s*:?-+:?\s*\|?\s*", line))
+
+
+def _split_markdown_table_cells(line: str) -> list[str]:
+    raw = line.strip().strip("|")
+    return [cell.strip() for cell in raw.split("|")]
+
+
+def _render_article_markdown(markdown_text: str) -> tuple[str, list[tuple[str, str]]]:
+    lines = str(markdown_text or "").replace("\r\n", "\n").replace("\r", "\n").split("\n")
+    blocks: list[str] = []
+    toc_items: list[tuple[str, str]] = []
+    used_ids: set[str] = set()
+    idx = 0
+    while idx < len(lines):
+        line = lines[idx].rstrip()
+        stripped = line.strip()
+        if not stripped:
+            idx += 1
+            continue
+
+        heading_match = re.match(r"^(#{1,6})\s+(.+)$", stripped)
+        if heading_match:
+            heading_text = heading_match.group(2).strip()
+            heading_id = _slugify_heading(heading_text, used=used_ids)
+            level = max(2, min(4, len(heading_match.group(1))))
+            if level in {2, 3}:
+                toc_items.append((heading_text, heading_id))
+            blocks.append(f'<h{level} id="{escape(heading_id)}">{_render_inline_markdown(heading_text)}</h{level}>')
+            idx += 1
+            continue
+
+        if stripped.startswith("|") and idx + 1 < len(lines) and _is_markdown_table_separator(lines[idx + 1]):
+            header_cells = _split_markdown_table_cells(stripped)
+            idx += 2
+            data_rows: list[list[str]] = []
+            while idx < len(lines):
+                current = lines[idx].strip()
+                if not current.startswith("|"):
+                    break
+                data_rows.append(_split_markdown_table_cells(current))
+                idx += 1
+            thead = "".join(f"<th>{_render_inline_markdown(cell)}</th>" for cell in header_cells)
+            tbody_rows = []
+            for row_cells in data_rows:
+                cells = "".join(f"<td>{_render_inline_markdown(cell)}</td>" for cell in row_cells)
+                tbody_rows.append(f"<tr>{cells}</tr>")
+            blocks.append(
+                "<div class=\"table-wrap\"><table class=\"article-table\">"
+                f"<thead><tr>{thead}</tr></thead><tbody>{''.join(tbody_rows)}</tbody></table></div>"
+            )
+            continue
+
+        if re.match(r"^[-*]\s+.+", stripped):
+            items: list[str] = []
+            while idx < len(lines):
+                candidate = lines[idx].strip()
+                match = re.match(r"^[-*]\s+(.+)$", candidate)
+                if not match:
+                    break
+                items.append(f"<li>{_render_inline_markdown(match.group(1).strip())}</li>")
+                idx += 1
+            blocks.append(f"<ul>{''.join(items)}</ul>")
+            continue
+
+        if re.match(r"^\d+\.\s+.+", stripped):
+            items = []
+            while idx < len(lines):
+                candidate = lines[idx].strip()
+                match = re.match(r"^\d+\.\s+(.+)$", candidate)
+                if not match:
+                    break
+                items.append(f"<li>{_render_inline_markdown(match.group(1).strip())}</li>")
+                idx += 1
+            blocks.append(f"<ol>{''.join(items)}</ol>")
+            continue
+
+        paragraph_lines = [stripped]
+        idx += 1
+        while idx < len(lines):
+            candidate = lines[idx].strip()
+            if not candidate:
+                break
+            if re.match(r"^(#{1,6})\s+.+$", candidate):
+                break
+            if re.match(r"^[-*]\s+.+", candidate) or re.match(r"^\d+\.\s+.+", candidate):
+                break
+            if candidate.startswith("|") and idx + 1 < len(lines) and _is_markdown_table_separator(lines[idx + 1]):
+                break
+            paragraph_lines.append(candidate)
+            idx += 1
+        blocks.append(f"<p>{_render_inline_markdown(' '.join(paragraph_lines))}</p>")
+    return "".join(blocks), toc_items
+
+
+def _article_matches_invest_topic(article: Article, locale: str) -> bool:
+    tags = _article_tags_for_locale(article, locale)
+    if tags:
+        if any(_is_invest_taxonomy_tag(tag) for tag in tags):
+            return True
+        # If taxonomy exists and does not map to invest markers, keep it out of invest listing.
+        return False
+    tags_corpus = " ".join(tags).casefold()
+    title_text = str(_localized_dict_text(article.title, locale) or "").casefold()
+    excerpt_text = str(_localized_dict_text(article.excerpt, locale) or "").casefold()
+    slug = str(article.slug or "").casefold()
+    corpus = " ".join([slug, title_text, excerpt_text, tags_corpus])
+    return any(keyword in corpus for keyword in _CONTENT_INVEST_KEYWORDS)
+
+
+def _content_tracking_script(*, loading_id: str, error_id: str) -> str:
+    return f"""
+<script>
+(() => {{
+  const locale = document.documentElement.lang || 'en';
+  const path = location.pathname;
+  const endpoint = '/api/v1/events';
+  const loadingEl = document.getElementById('{loading_id}');
+  const errorEl = document.getElementById('{error_id}');
+  const scrollMarks = [25, 50, 75, 90];
+  const firedMarks = new Set();
+
+  function compact(raw) {{
+    const out = {{}};
+    for (const [k, v] of Object.entries(raw || {{}})) {{
+      if (v === undefined || v === null) continue;
+      if (Array.isArray(v) && v.length === 0) continue;
+      out[k] = v;
+    }}
+    return out;
+  }}
+
+  function track(eventName, payload) {{
+    const payloadBody = compact(payload);
+    const sourceBody = compact({{
+      app: 'flowbiz-public-runtime',
+      env: 'runtime',
+      page: path,
+      locale,
+      placement: payloadBody.placement,
+    }});
+    return fetch(endpoint, {{
+      method: 'POST',
+      headers: {{ 'content-type': 'application/json' }},
+      body: JSON.stringify({{ event_name: eventName, source: sourceBody, payload: payloadBody }}),
+      keepalive: true,
+    }}).catch(() => null);
+  }}
+
+  document.querySelectorAll('[data-event]').forEach((node) => {{
+    node.addEventListener('click', () => {{
+      const eventName = node.getAttribute('data-event');
+      if (!eventName) return;
+      const loadingTarget = node.getAttribute('data-loading-target');
+      if (loadingTarget && loadingEl instanceof HTMLElement && loadingTarget === loadingEl.id) {{
+        loadingEl.hidden = false;
+      }}
+      track(eventName, compact({{
+        label: node.textContent?.trim() || '',
+        placement: node.getAttribute('data-placement') || undefined,
+        cta_id: node.getAttribute('data-cta-id') || undefined,
+        card_slug: node.getAttribute('data-card-slug') || undefined,
+        article_slug: node.getAttribute('data-article-slug') || undefined,
+      }}));
+    }});
+  }});
+
+  window.addEventListener('scroll', () => {{
+    const scrollHeight = document.documentElement.scrollHeight - window.innerHeight;
+    if (scrollHeight <= 0) return;
+    const depth = Math.round((window.scrollY / scrollHeight) * 100);
+    for (const mark of scrollMarks) {{
+      if (depth >= mark && !firedMarks.has(mark)) {{
+        firedMarks.add(mark);
+        track('content_scroll_depth', {{ placement: 'content_page', depth: mark }});
+      }}
+    }}
+  }}, {{ passive: true }});
+
+  window.addEventListener('error', () => {{
+    if (errorEl instanceof HTMLElement) errorEl.hidden = false;
+  }});
+}})();
+</script>
+"""
+
+
+def _content_listing_copy(locale: str, mode: str) -> dict[str, str]:
+    if locale == "th":
+        copy: dict[str, str] = {
+            "blog_title": "Blog",
+            "guides_title": "Guides",
+            "invest_title": "Investment Guides",
+            "blog_intro": "บทความจากทีมงาน พร้อมบริบทและขั้นตอนถัดไปที่ชัดเจน",
+            "guides_intro": "คู่มือปฏิบัติสำหรับการซื้อ ลงทุน เช่า และขายในพัทยา",
+            "invest_intro": "คู่มือโฟกัสการลงทุนโดยใช้ข้อมูลที่เผยแพร่ในระบบเท่านั้น",
+            "insights_title": "Market Insights",
+            "insights_intro": "ไกด์และบทความที่เผยแพร่แล้ว พร้อมเส้นทางไปสู่การปรึกษา",
+            "category_title": "เลือกหัวข้อคอนเทนต์",
+            "date_label": "เผยแพร่",
+            "updated_label": "อัปเดต",
+            "date_pending": "ยังไม่มีวันที่เผยแพร่ TODO: เพิ่มวันที่เผยแพร่",
+            "updated_pending": "ยังไม่มีวันที่อัปเดต TODO: เพิ่มวันที่อัปเดต",
+            "excerpt_pending": "ยังไม่มีบทสรุป TODO: เพิ่ม excerpt ที่อนุมัติแล้ว",
+            "empty": "ยังไม่มีคอนเทนต์ที่เผยแพร่ TODO: เผยแพร่บทความที่อนุมัติแล้ว",
+            "loading": "กำลังโหลดคอนเทนต์...",
+            "runtime_error": "เกิดข้อผิดพลาดในการแสดงผล กรุณาลองใหม่",
+            "consult_cta": "ขอคำปรึกษา",
+            "read_article": "อ่านบทความ",
+            "back_insights": "กลับหน้า Insights",
+            "category_blog_desc": "บทความมุมมองตลาดและกระบวนการทำงาน",
+            "category_guides_desc": "คู่มือใช้งานจริงสำหรับผู้ซื้อและผู้ขาย",
+            "category_invest_desc": "หัวข้อที่เกี่ยวข้องกับผลตอบแทนและการลงทุน",
+            "topic_note": "แท็กจะแสดงเมื่อข้อมูลหัวข้อถูกเผยแพร่",
+        }
+    else:
+        copy = {
+            "blog_title": "Blog",
+            "guides_title": "Guides",
+            "invest_title": "Investment Guides",
+            "blog_intro": "Editorial market notes with clear conversion paths and no fabricated claims.",
+            "guides_intro": "Practical guides for buying, investing, renting, and selling in Pattaya.",
+            "invest_intro": "Investment-focused guides from published system data only.",
+            "insights_title": "Market Insights",
+            "insights_intro": "Published guides and blog posts with consultable next steps.",
+            "category_title": "Browse Content Topics",
+            "date_label": "Published",
+            "updated_label": "Updated",
+            "date_pending": "Publish date pending. TODO: add approved publish date.",
+            "updated_pending": "Update date pending. TODO: add approved update date.",
+            "excerpt_pending": "Excerpt pending publication. TODO: add approved summary.",
+            "empty": "No published content yet. TODO: publish approved guides or blog posts.",
+            "loading": "Loading content...",
+            "runtime_error": "Unable to render this content page right now. Please retry.",
+            "consult_cta": "Request Consultation",
+            "read_article": "Read article",
+            "back_insights": "Back to Insights",
+            "category_blog_desc": "Editorial market context and workflow notes.",
+            "category_guides_desc": "Actionable playbooks for buyers and sellers.",
+            "category_invest_desc": "Topics focused on yield and investment decisions.",
+            "topic_note": "Tags appear when topic metadata is published.",
+        }
+    if mode == "blog":
+        copy["page_title"] = copy["blog_title"]
+        copy["page_intro"] = copy["blog_intro"]
+        copy["listing_suffix"] = "/blog"
+    elif mode == "guides":
+        copy["page_title"] = copy["guides_title"]
+        copy["page_intro"] = copy["guides_intro"]
+        copy["listing_suffix"] = "/guides"
+    elif mode == "invest-guides":
+        copy["page_title"] = copy["invest_title"]
+        copy["page_intro"] = copy["invest_intro"]
+        copy["listing_suffix"] = "/invest/guides"
+    else:
+        copy["page_title"] = copy["insights_title"]
+        copy["page_intro"] = copy["insights_intro"]
+        copy["listing_suffix"] = "/insights"
+    return copy
+
+
 def _render_insights_page(locale: str, request: Request, db: Session) -> HTMLResponse:
-    rows = db.scalars(select(Article).where(Article.deleted_at.is_(None), Article.status == "published", Article.category.in_(["guide", "blog"])).order_by(desc(Article.published_at), desc(Article.created_at)).limit(12)).all()
-    cards = []
+    return _render_content_listing_page(locale, request, db, mode="insights")
+
+
+def _render_content_listing_page(locale: str, request: Request, db: Session, mode: str) -> HTMLResponse:
+    copy = _content_listing_copy(locale, mode)
+    categories = ["guide", "blog"] if mode == "insights" else (["blog"] if mode == "blog" else ["guide"])
+    rows = db.scalars(
+        select(Article)
+        .where(
+            Article.deleted_at.is_(None),
+            Article.status == "published",
+            Article.category.in_(categories),
+        )
+        .order_by(desc(Article.published_at), desc(Article.updated_at), desc(Article.created_at))
+        .limit(60)
+    ).all()
+    if mode == "invest-guides":
+        rows = [row for row in rows if _article_matches_invest_topic(row, locale)]
+    rows = rows[:24]
+
+    blog_count = int(
+        db.scalar(
+            select(func.count())
+            .select_from(Article)
+            .where(Article.deleted_at.is_(None), Article.status == "published", Article.category == "blog")
+        )
+        or 0
+    )
+    guide_rows = db.scalars(
+        select(Article).where(Article.deleted_at.is_(None), Article.status == "published", Article.category == "guide")
+    ).all()
+    guides_count = len(guide_rows)
+    invest_count = len([row for row in guide_rows if _article_matches_invest_topic(row, locale)])
+
+    category_cards = (
+        f"<article class=\"card category-card\"><h3>{escape(copy['blog_title'])}</h3><p>{escape(copy['category_blog_desc'])}</p><p class=\"muted\">{blog_count}</p><a class=\"btn\" href=\"/{locale}/blog\">{escape(copy['blog_title'])}</a></article>"
+        f"<article class=\"card category-card\"><h3>{escape(copy['guides_title'])}</h3><p>{escape(copy['category_guides_desc'])}</p><p class=\"muted\">{guides_count}</p><a class=\"btn\" href=\"/{locale}/guides\">{escape(copy['guides_title'])}</a></article>"
+        f"<article class=\"card category-card\"><h3>{escape(copy['invest_title'])}</h3><p>{escape(copy['category_invest_desc'])}</p><p class=\"muted\">{invest_count}</p><a class=\"btn\" href=\"/{locale}/invest/guides\">{escape(copy['invest_title'])}</a></article>"
+    )
+
+    cards: list[str] = []
     for row in rows:
         title = _localized_dict_text(row.title, locale) or row.slug
-        excerpt = _localized_dict_text(row.excerpt, locale) or ("Excerpt pending publication." if locale == "en" else "รอเผยแพร่บทสรุป")
-        media = _safe_media_url(row.hero_image_url, _DEFAULT_MEDIA_FALLBACK, request=request)
-        published = row.published_at.strftime("%Y-%m-%d") if row.published_at is not None else "-"
-        cards.append(
-            f"<article class=\"card\"><img class=\"media\" src=\"{escape(media)}\" alt=\"{escape(title)}\" width=\"640\" height=\"360\" /><h2>{escape(title)}</h2><p class=\"muted\">{escape(row.category)} • {escape(published)}</p><p>{escape(excerpt)}</p><p class=\"muted\">Slug: {escape(row.slug)}</p><a class=\"btn\" href=\"/{locale}/contact\">{'Talk to an advisor' if locale == 'en' else 'คุยกับที่ปรึกษา'}</a></article>"
+        excerpt = _localized_dict_text(row.excerpt, locale) or copy["excerpt_pending"]
+        tags = _article_tags_for_locale(row, locale)
+        tag_badges = "".join(f'<span class="tag">{escape(tag)}</span>' for tag in tags)
+        tags_html = (
+            f"<div class=\"tag-row\">{tag_badges}</div>"
+            if tags
+            else f"<p class=\"muted\">{escape(copy['topic_note'])}</p>"
         )
-    fallback = "Published insights are not available yet. Publish guide or blog content to populate this page." if locale == "en" else "ยังไม่มีบทความที่เผยแพร่ โปรดเผยแพร่ guide หรือ blog เพื่อให้หน้านี้แสดงผล"
-    body_content = "".join(cards) if cards else f"<div class=\"card\">{escape(fallback)}</div>"
-    body = f"<section class=\"grid\">{body_content}</section>"
-    title = "Market Insights" if locale == "en" else "Market Insights"
-    intro = "Published guides and articles from the current system, mapped to consultable next steps." if locale == "en" else "ไกด์และบทความที่เผยแพร่จากระบบปัจจุบัน พร้อมทางไปสู่ขั้นตอนปรึกษา"
-    return HTMLResponse(_render_page_shell(locale, title=title, intro=intro, body=body))
+        media = _safe_media_url(row.hero_image_url, _DEFAULT_MEDIA_FALLBACK, request=request)
+        published_text = _format_locale_date(row.published_at, locale, fallback=copy["date_pending"])
+        updated_text = _format_locale_date(row.updated_at, locale, fallback=copy["updated_pending"])
+        category_slug = "blog" if row.category == "blog" else "guides"
+        detail_href = f"/{locale}/{category_slug}/{row.slug}"
+        cards.append(
+            f"<article class=\"card content-card\" data-card-slug=\"{escape(row.slug)}\">"
+            f"<a class=\"content-link\" data-event=\"article_click\" data-placement=\"listing_card\" data-card-slug=\"{escape(row.slug)}\" href=\"{detail_href}\">"
+            f"<img class=\"media\" src=\"{escape(media)}\" alt=\"{escape(title)}\" width=\"640\" height=\"360\" loading=\"lazy\" />"
+            f"<h2>{escape(title)}</h2></a>"
+            f"<p>{escape(excerpt)}</p>"
+            f"<p class=\"muted\">{escape(copy['date_label'])}: {escape(published_text)} • {escape(copy['updated_label'])}: {escape(updated_text)}</p>"
+            f"{tags_html}"
+            f"<div class=\"cta-row\">"
+            f"<a class=\"btn\" data-event=\"article_click\" data-placement=\"listing_card\" data-card-slug=\"{escape(row.slug)}\" href=\"{detail_href}\">{escape(copy['read_article'])}</a>"
+            f"<a class=\"btn btn-secondary-hero\" data-event=\"content_cta_click\" data-cta-id=\"content_consult_card\" data-placement=\"listing_card\" data-article-slug=\"{escape(row.slug)}\" href=\"/{locale}/contact?intent=consultation&article={escape(row.slug)}\">{escape(copy['consult_cta'])}</a>"
+            f"</div>"
+            f"</article>"
+        )
+    cards_html = "".join(cards)
+    is_empty = not cards
+    empty_html = f"<div id=\"content-empty\" class=\"state-empty\"{' hidden' if not is_empty else ''}>{escape(copy['empty'])}</div>"
+    loading_id = "content-loading"
+    error_id = "content-error"
+    tracking_script = _content_tracking_script(loading_id=loading_id, error_id=error_id)
+    listing_styles = (
+        "<style>"
+        ".content-category-grid{display:grid;gap:16px;grid-template-columns:1fr}.content-grid{display:grid;gap:16px;grid-template-columns:1fr}"
+        ".content-card{display:grid;gap:10px}.content-link{display:grid;gap:10px;text-decoration:none}.tag-row{display:flex;gap:8px;flex-wrap:wrap}"
+        ".tag{display:inline-flex;padding:2px 8px;border-radius:999px;background:#edf6f3;color:#0f6d5a;font-size:.85rem}"
+        ".cta-row{display:flex;gap:10px;flex-wrap:wrap}.article-shell{display:grid;gap:16px}"
+        "@media (min-width:768px){.content-category-grid{grid-template-columns:repeat(3,minmax(0,1fr))}.content-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}"
+        "@media (min-width:1200px){.content-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}"
+        "@media (min-width:1920px){.content-grid{grid-template-columns:repeat(4,minmax(0,1fr))}}"
+        "@media (min-width:2560px){.content-grid{grid-template-columns:repeat(5,minmax(0,1fr))}}"
+        "</style>"
+    )
+    body = (
+        f"{listing_styles}"
+        f"<section class=\"card article-shell\" aria-labelledby=\"content-intro-title\">"
+        f"<h2 id=\"content-intro-title\">{escape(copy['page_title'])}</h2><p>{escape(copy['page_intro'])}</p>"
+        f"<div class=\"cta-row\"><a class=\"btn\" data-event=\"content_cta_click\" data-cta-id=\"content_consult_header\" data-placement=\"listing_header\" href=\"/{locale}/contact?intent=consultation\">{escape(copy['consult_cta'])}</a>"
+        f"<a class=\"btn btn-secondary-hero\" href=\"/{locale}/insights\">{escape(copy['back_insights'])}</a></div></section>"
+        f"<section class=\"card\" aria-labelledby=\"content-category-title\"><h2 id=\"content-category-title\">{escape(copy['category_title'])}</h2><div class=\"content-category-grid\">{category_cards}</div></section>"
+        f"<div id=\"{loading_id}\" class=\"state-loading\" role=\"status\" aria-live=\"polite\" hidden>{escape(copy['loading'])}</div>"
+        f"<div id=\"{error_id}\" class=\"state-error\" hidden>{escape(copy['runtime_error'])}</div>"
+        f"{empty_html}"
+        f"<section class=\"content-grid\" aria-live=\"polite\">{cards_html}</section>"
+        f"{tracking_script}"
+    )
+    canonical = _absolute_url(request, f"/{locale}{copy['listing_suffix']}")
+    return HTMLResponse(
+        _render_page_shell(
+            locale,
+            title=copy["page_title"],
+            intro=copy["page_intro"],
+            body=body,
+            canonical_href=canonical,
+        )
+    )
+
+
+def _render_content_detail_page(locale: str, request: Request, db: Session, slug: str, category: str) -> HTMLResponse:
+    row = db.scalar(
+        select(Article).where(
+            Article.deleted_at.is_(None),
+            Article.status == "published",
+            Article.slug == slug,
+            Article.category == category,
+        )
+    )
+    if row is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Article not found")
+
+    title = _localized_dict_text(row.title, locale) or row.slug
+    excerpt = _localized_dict_text(row.excerpt, locale) or (
+        "Excerpt pending publication. TODO: add approved summary."
+        if locale == "en"
+        else "ยังไม่มีบทสรุป TODO: เพิ่ม excerpt ที่อนุมัติแล้ว"
+    )
+    body_md = _localized_dict_text(row.body_md, locale) or ""
+    rendered_body, toc_items = _render_article_markdown(body_md)
+    if not rendered_body:
+        rendered_body = (
+            "<p>Article body pending publication. TODO: add approved body content.</p>"
+            if locale == "en"
+            else "<p>ยังไม่มีเนื้อหาบทความ TODO: เพิ่มเนื้อหาที่อนุมัติแล้ว</p>"
+        )
+    show_toc = len(toc_items) >= 3
+    tags = _article_tags_for_locale(row, locale)
+    _, author_role, author_bio = _article_author_profile(row, locale)
+    author_label, author_pending = _article_author_label(row, db, locale)
+    hero_media = _safe_media_url(row.hero_image_url, _DEFAULT_MEDIA_FALLBACK, request=request)
+    published_text = _format_locale_date(
+        row.published_at,
+        locale,
+        fallback=(
+            "Publish date pending. TODO: add approved publish date."
+            if locale == "en"
+            else "ยังไม่มีวันที่เผยแพร่ TODO: เพิ่มวันที่เผยแพร่"
+        ),
+    )
+    updated_text = _format_locale_date(
+        row.updated_at,
+        locale,
+        fallback=(
+            "Update date pending. TODO: add approved update date."
+            if locale == "en"
+            else "ยังไม่มีวันที่อัปเดต TODO: เพิ่มวันที่อัปเดต"
+        ),
+    )
+
+    route_prefix = "blog" if category == "blog" else "guides"
+    detail_path = f"/{locale}/{route_prefix}/{row.slug}"
+    listing_path = f"/{locale}/{route_prefix}"
+
+    related_rows = db.scalars(
+        select(Article)
+        .where(
+            Article.deleted_at.is_(None),
+            Article.status == "published",
+            Article.category == category,
+            Article.id != row.id,
+        )
+        .order_by(desc(Article.published_at), desc(Article.updated_at), desc(Article.created_at))
+        .limit(4)
+    ).all()
+    related_html = "".join(
+        (
+            f"<article class=\"card\">"
+            f"<a class=\"content-link\" data-event=\"article_click\" data-placement=\"related_content\" data-card-slug=\"{escape(item.slug)}\" href=\"/{locale}/{route_prefix}/{escape(item.slug)}\">"
+            f"<img class=\"media\" src=\"{escape(_safe_media_url(item.hero_image_url, _DEFAULT_MEDIA_FALLBACK, request=request))}\" alt=\"{escape(_localized_dict_text(item.title, locale) or item.slug)}\" width=\"640\" height=\"360\" loading=\"lazy\" />"
+            f"<h3>{escape(_localized_dict_text(item.title, locale) or item.slug)}</h3></a>"
+            f"<p>{escape(_localized_dict_text(item.excerpt, locale) or excerpt)}</p>"
+            f"</article>"
+        )
+        for item in related_rows
+    ) or (
+        f"<div class=\"card\">"
+        + escape(
+            "Related content is pending publication. TODO: publish at least one related article."
+            if locale == "en"
+            else "ยังไม่มีคอนเทนต์ที่เกี่ยวข้อง TODO: เผยแพร่บทความที่เกี่ยวข้องอย่างน้อย 1 รายการ"
+        )
+        + "</div>"
+    )
+
+    toc_html = ""
+    if show_toc:
+        toc_html = (
+            "<nav id=\"article-toc\" class=\"card\" aria-label=\"Table of contents\">"
+            + f"<h2>{'Table of contents' if locale == 'en' else 'สารบัญ'}</h2>"
+            + "<ol>"
+            + "".join(f"<li><a href=\"#{escape(anchor)}\">{escape(label)}</a></li>" for label, anchor in toc_items)
+            + "</ol></nav>"
+        )
+
+    tag_badges = "".join(f'<span class="tag">{escape(tag)}</span>' for tag in tags)
+    tag_html = (
+        f"<div class=\"tag-row\">{tag_badges}</div>"
+        if tags
+        else f"<p class=\"muted\">{'Tags pending publication. TODO: add approved topic tags.' if locale == 'en' else 'ยังไม่มีแท็ก TODO: เพิ่มแท็กที่อนุมัติแล้ว'}</p>"
+    )
+    schema_payload: dict[str, object] = {
+        "@context": "https://schema.org",
+        "@type": "Article",
+        "headline": title,
+        "description": excerpt,
+        "inLanguage": locale,
+        "url": _absolute_url(request, detail_path),
+        "mainEntityOfPage": _absolute_url(request, detail_path),
+        "image": [_absolute_url(request, hero_media)],
+        "datePublished": row.published_at.isoformat() if row.published_at else None,
+        "dateModified": row.updated_at.isoformat() if row.updated_at else None,
+    }
+    if not author_pending:
+        author_schema: dict[str, object] = {"@type": "Person", "name": author_label}
+        if author_role:
+            author_schema["jobTitle"] = author_role
+        schema_payload["author"] = author_schema
+    if tags:
+        schema_payload["keywords"] = ", ".join(tags)
+    schema_json = json.dumps({k: v for k, v in schema_payload.items() if v is not None}, ensure_ascii=False)
+
+    loading_id = "article-loading"
+    error_id = "article-error"
+    tracking_script = _content_tracking_script(loading_id=loading_id, error_id=error_id)
+    detail_styles = (
+        "<style>"
+        ".article-layout{display:grid;gap:16px}.article-meta{display:grid;gap:8px}.article-prose{max-width:72ch;line-height:1.72}"
+        ".article-prose p{margin:0 0 12px}.article-prose h2,.article-prose h3,.article-prose h4{margin:22px 0 10px;line-height:1.35}"
+        ".article-prose ul,.article-prose ol{padding-left:22px;display:grid;gap:8px}.article-prose a{text-decoration:underline}"
+        ".table-wrap{overflow-x:auto}.article-table{width:100%;border-collapse:collapse}.article-table th,.article-table td{border:1px solid #d1d5db;padding:8px;text-align:left;vertical-align:top}"
+        ".tag-row{display:flex;gap:8px;flex-wrap:wrap}.tag{display:inline-flex;padding:2px 8px;border-radius:999px;background:#edf6f3;color:#0f6d5a;font-size:.85rem}"
+        ".related-grid{display:grid;gap:16px;grid-template-columns:1fr}.content-link{display:grid;gap:10px;text-decoration:none}.cta-row{display:flex;gap:10px;flex-wrap:wrap}"
+        "@media (min-width:768px){.related-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}"
+        "@media (min-width:1200px){.related-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}"
+        "@media (min-width:1920px){.related-grid{grid-template-columns:repeat(4,minmax(0,1fr))}}"
+        "</style>"
+    )
+    author_role_html = f'<p class="muted">{escape(author_role)}</p>' if author_role else ""
+    author_bio_html = f'<p class="muted">{escape(author_bio)}</p>' if author_bio else ""
+    body = (
+        f"{detail_styles}"
+        f"<section id=\"article-hero\" class=\"card article-layout\">"
+        f"<img class=\"media\" src=\"{escape(hero_media)}\" alt=\"{escape(title)}\" width=\"1280\" height=\"720\" loading=\"eager\" />"
+        f"<p>{escape(excerpt)}</p>"
+        f"<div class=\"article-meta\">"
+        f"<p class=\"muted\">{'Published' if locale == 'en' else 'เผยแพร่'}: {escape(published_text)}</p>"
+        f"<p class=\"muted\">{'Updated' if locale == 'en' else 'อัปเดต'}: {escape(updated_text)}</p>"
+        f"<p class=\"muted\">{'Author' if locale == 'en' else 'ผู้เขียน'}: {escape(author_label)}</p>"
+        f"{author_role_html}"
+        f"{author_bio_html}"
+        f"</div>"
+        f"{tag_html}"
+        f"<div class=\"cta-row\"><a class=\"btn\" data-event=\"content_cta_click\" data-cta-id=\"article_consultation_hero\" data-placement=\"article_hero\" data-article-slug=\"{escape(row.slug)}\" href=\"/{locale}/contact?intent=consultation&article={escape(row.slug)}\">{'Request Consultation' if locale == 'en' else 'ขอคำปรึกษา'}</a>"
+        f"<a class=\"btn btn-secondary-hero\" href=\"{listing_path}\">{'Back to listing' if locale == 'en' else 'กลับหน้ารายการ'}</a></div>"
+        f"</section>"
+        f"{toc_html}"
+        f"<section id=\"article-body\" class=\"card\"><h2>{'Article' if locale == 'en' else 'บทความ'}</h2><div class=\"article-prose\">{rendered_body}</div></section>"
+        f"<section id=\"article-related\" class=\"stack\"><h2>{'Related content' if locale == 'en' else 'คอนเทนต์ที่เกี่ยวข้อง'}</h2><div class=\"related-grid\">{related_html}</div></section>"
+        f"<section class=\"card\"><h2>{'Need help with this topic?' if locale == 'en' else 'ต้องการคำแนะนำต่อจากบทความนี้?'}</h2><p>{'Continue to consultation for a curated next step.' if locale == 'en' else 'ไปต่อที่ consultation เพื่อรับขั้นตอนถัดไปที่เหมาะกับคุณ'}</p><div class=\"cta-row\">"
+        f"<a class=\"btn\" data-event=\"content_cta_click\" data-cta-id=\"article_consultation_footer\" data-placement=\"article_footer\" data-article-slug=\"{escape(row.slug)}\" href=\"/{locale}/contact?intent=consultation&article={escape(row.slug)}\">{'Request Consultation' if locale == 'en' else 'ขอคำปรึกษา'}</a>"
+        f"<a class=\"btn btn-secondary-hero\" href=\"/{locale}/insights\">{'View all insights' if locale == 'en' else 'ดู Insights ทั้งหมด'}</a>"
+        f"</div></section>"
+        f"<div id=\"{loading_id}\" class=\"state-loading\" role=\"status\" aria-live=\"polite\" hidden>{'Loading article...' if locale == 'en' else 'กำลังโหลดบทความ...'}</div>"
+        f"<div id=\"{error_id}\" class=\"state-error\" hidden>{'Unable to render article right now. Please retry.' if locale == 'en' else 'ยังไม่สามารถแสดงบทความได้ กรุณาลองใหม่'}</div>"
+        f'<script type="application/ld+json" data-schema-hook="article-detail">{schema_json}</script>'
+        f"{tracking_script}"
+    )
+    canonical = _absolute_url(request, detail_path)
+    return HTMLResponse(
+        _render_page_shell(
+            locale,
+            title=title,
+            intro=excerpt,
+            body=body,
+            canonical_href=canonical,
+        )
+    )
 
 
 def _format_text_block(value: str) -> str:
@@ -3736,6 +4502,61 @@ def render_property_detail_default_locale(
     db: Session = Depends(get_db),
 ) -> HTMLResponse:
     return _render_property_detail_page("en", request, db, property_ref)
+
+
+@router.get("/en/blog", response_class=HTMLResponse)
+@router.get("/th/blog", response_class=HTMLResponse)
+def render_blog_listing(request: Request, db: Session = Depends(get_db)) -> HTMLResponse:
+    return _render_content_listing_page(_request_locale(request), request, db, mode="blog")
+
+
+@router.get("/blog", response_class=HTMLResponse)
+def render_blog_listing_default_locale(request: Request, db: Session = Depends(get_db)) -> HTMLResponse:
+    return _render_content_listing_page("en", request, db, mode="blog")
+
+
+@router.get("/en/blog/{slug}", response_class=HTMLResponse)
+@router.get("/th/blog/{slug}", response_class=HTMLResponse)
+def render_blog_detail(slug: str, request: Request, db: Session = Depends(get_db)) -> HTMLResponse:
+    return _render_content_detail_page(_request_locale(request), request, db, slug, "blog")
+
+
+@router.get("/blog/{slug}", response_class=HTMLResponse)
+def render_blog_detail_default_locale(slug: str, request: Request, db: Session = Depends(get_db)) -> HTMLResponse:
+    return _render_content_detail_page("en", request, db, slug, "blog")
+
+
+@router.get("/en/guides", response_class=HTMLResponse)
+@router.get("/th/guides", response_class=HTMLResponse)
+def render_guides_listing(request: Request, db: Session = Depends(get_db)) -> HTMLResponse:
+    return _render_content_listing_page(_request_locale(request), request, db, mode="guides")
+
+
+@router.get("/guides", response_class=HTMLResponse)
+def render_guides_listing_default_locale(request: Request, db: Session = Depends(get_db)) -> HTMLResponse:
+    return _render_content_listing_page("en", request, db, mode="guides")
+
+
+@router.get("/en/guides/{slug}", response_class=HTMLResponse)
+@router.get("/th/guides/{slug}", response_class=HTMLResponse)
+def render_guides_detail(slug: str, request: Request, db: Session = Depends(get_db)) -> HTMLResponse:
+    return _render_content_detail_page(_request_locale(request), request, db, slug, "guide")
+
+
+@router.get("/guides/{slug}", response_class=HTMLResponse)
+def render_guides_detail_default_locale(slug: str, request: Request, db: Session = Depends(get_db)) -> HTMLResponse:
+    return _render_content_detail_page("en", request, db, slug, "guide")
+
+
+@router.get("/en/invest/guides", response_class=HTMLResponse)
+@router.get("/th/invest/guides", response_class=HTMLResponse)
+def render_invest_guides_listing(request: Request, db: Session = Depends(get_db)) -> HTMLResponse:
+    return _render_content_listing_page(_request_locale(request), request, db, mode="invest-guides")
+
+
+@router.get("/invest/guides", response_class=HTMLResponse)
+def render_invest_guides_listing_default_locale(request: Request, db: Session = Depends(get_db)) -> HTMLResponse:
+    return _render_content_listing_page("en", request, db, mode="invest-guides")
 
 
 @router.get("/en/insights", response_class=HTMLResponse)

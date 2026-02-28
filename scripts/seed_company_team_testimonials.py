@@ -2,10 +2,11 @@ from __future__ import annotations
 
 import argparse
 import json
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
-from sqlalchemy import delete, or_, select
+from sqlalchemy import delete, select
 from sqlalchemy.orm import Session
 
 from packages.core.database import SessionLocal, init_db
@@ -172,6 +173,62 @@ def _coerce_localized_text(value: Any) -> dict[str, str]:
     return {"en": text} if text else {}
 
 
+def _coerce_localized_profile(value: Any) -> dict[str, str]:
+    if isinstance(value, dict):
+        out: dict[str, str] = {}
+        for key in ["en", "th"]:
+            text = str(value.get(key) or "").strip()
+            if text:
+                out[key] = text
+        return out
+    text = str(value or "").strip()
+    return {"en": text} if text else {}
+
+
+def _coerce_taxonomy_list(value: Any) -> list[str]:
+    if isinstance(value, list):
+        values = [str(item).strip() for item in value if str(item).strip()]
+    elif isinstance(value, str):
+        values = [part.strip() for part in value.split(",") if part.strip()]
+    else:
+        values = []
+    out: list[str] = []
+    seen: set[str] = set()
+    for item in values:
+        normalized = item.casefold()
+        if normalized in seen:
+            continue
+        seen.add(normalized)
+        out.append(item)
+    return out
+
+
+def _coerce_taxonomy_value(value: Any) -> list[str] | dict[str, list[str]]:
+    if isinstance(value, dict):
+        localized: dict[str, list[str]] = {}
+        for key in ["en", "th"]:
+            values = _coerce_taxonomy_list(value.get(key))
+            if values:
+                localized[key] = values
+        return localized
+    return _coerce_taxonomy_list(value)
+
+
+def _parse_optional_datetime(value: Any) -> datetime | None:
+    raw = str(value or "").strip()
+    if not raw:
+        return None
+    if raw.endswith("Z"):
+        raw = raw[:-1] + "+00:00"
+    try:
+        parsed = datetime.fromisoformat(raw)
+    except ValueError:
+        return None
+    if parsed.tzinfo is None:
+        return parsed.replace(tzinfo=UTC)
+    return parsed.astimezone(UTC)
+
+
 def _upsert_articles(db: Session, rows: list[dict[str, Any]], *, dry_run: bool) -> tuple[int, int]:
     created = 0
     updated = 0
@@ -193,23 +250,64 @@ def _upsert_articles(db: Session, rows: list[dict[str, Any]], *, dry_run: bool) 
                 detail = getattr(exc, "detail", str(exc))
                 raise ValueError(f"articles[{index}] invalid hero_image_url: {detail}") from exc
 
+        tags = _coerce_taxonomy_value(row.get("tags"))
+        topics = _coerce_taxonomy_value(row.get("topics"))
+        author_name = _coerce_localized_profile(row.get("author_name"))
+        author_role = _coerce_localized_profile(row.get("author_role"))
+        author_bio = _coerce_localized_profile(row.get("author_bio"))
+        author_profile: dict[str, Any] = {}
+        if author_name:
+            author_profile["name"] = author_name
+        if author_role:
+            author_profile["role"] = author_role
+        if author_bio:
+            author_profile["bio"] = author_bio
+        source_meta: dict[str, Any] = {}
+        source_url = str(row.get("source_url") or "").strip()
+        source_domain = str(row.get("source_domain") or "").strip()
+        source_rights = str(row.get("source_rights") or "").strip()
+        if source_url:
+            source_meta["url"] = source_url
+        if source_domain:
+            source_meta["domain"] = source_domain
+        if source_rights:
+            source_meta["rights"] = source_rights
+
+        body_payload = dict(body_md)
+        if tags:
+            body_payload["tags"] = tags
+        if topics:
+            body_payload["topics"] = topics
+        if author_profile:
+            body_payload["author_profile"] = author_profile
+        if source_meta:
+            body_payload["source_meta"] = source_meta
+        published_at = _parse_optional_datetime(row.get("published_at"))
+        updated_at = _parse_optional_datetime(row.get("updated_at"))
+
         existing = db.scalar(select(Article).where(Article.slug == slug).limit(1))
         values = {
             "category": category,
             "status": status,
             "title": title,
             "excerpt": excerpt or None,
-            "body_md": body_md,
+            "body_md": body_payload,
             "hero_image_url": hero_image_url,
+            "published_at": published_at,
         }
         if existing is None:
             if not dry_run:
-                db.add(Article(slug=slug, **values))
+                article = Article(slug=slug, **values)
+                if updated_at is not None:
+                    article.updated_at = updated_at
+                db.add(article)
             created += 1
         else:
             if not dry_run:
                 for key, value in values.items():
                     setattr(existing, key, value)
+                if updated_at is not None:
+                    existing.updated_at = updated_at
                 db.add(existing)
             updated += 1
     return created, updated
