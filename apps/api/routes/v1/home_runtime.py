@@ -1,17 +1,20 @@
 from __future__ import annotations
 
+import json
+from decimal import Decimal
 from html import escape
 from pathlib import Path
 from urllib.parse import urlparse
+from uuid import UUID
 
-from fastapi import APIRouter, Depends, Request
+from fastapi import APIRouter, Depends, HTTPException, Request, status
 from fastapi.responses import HTMLResponse
-from sqlalchemy import desc, func, select
+from sqlalchemy import desc, func, or_, select
 from sqlalchemy.orm import Session
 
 from apps.api.routes.home_composer_contract import normalize_home_config, resolve_home_runtime
 from packages.core.database import get_db
-from packages.core.models import Area, Article, CompanyInfo, HomeComposerConfig, Project, Property, TeamMember, Testimonial
+from packages.core.models import Area, Article, CompanyInfo, Developer, HomeComposerConfig, Project, Property, TeamMember, Testimonial
 
 router = APIRouter(tags=["home-runtime"])
 
@@ -20,6 +23,7 @@ _ALLOWED_RUNTIME_PATHS = {"/", "/en", "/th"}
 _PUBLIC_ROUTE_SUFFIXES = {
     "",
     "/projects",
+    "/developers",
     "/smart-finder",
     "/areas",
     "/insights",
@@ -341,7 +345,7 @@ def _area_name(db: Session, area_id: object) -> str | None:
 
 
 def _format_money(amount: object, *, fallback: str) -> str:
-    if isinstance(amount, (int, float)):
+    if isinstance(amount, (int, float, Decimal)):
         return f"THB {float(amount):,.0f}"
     return fallback
 
@@ -777,6 +781,7 @@ def _render_page_shell(locale: str, *, title: str, intro: str, body: str) -> str
     nav_items = [
         ("projects", "Projects" if locale == "en" else "โครงการ"),
         ("areas", "Areas" if locale == "en" else "ทำเล"),
+        ("developers", "Developers" if locale == "en" else "ผู้พัฒนา"),
         ("insights", "Insights" if locale == "en" else "บทความ"),
         ("about", "About" if locale == "en" else "เกี่ยวกับเรา"),
         ("contact", "Contact" if locale == "en" else "ติดต่อ"),
@@ -826,6 +831,131 @@ def _localized_dict_text(value: object, locale: str) -> str | None:
     return None
 
 
+def _clean_text_list(value: object | None) -> list[str]:
+    if not isinstance(value, list):
+        return []
+    out: list[str] = []
+    seen: set[str] = set()
+    for item in value:
+        text = str(item or "").strip()
+        if not text or text in seen:
+            continue
+        seen.add(text)
+        out.append(text)
+    return out
+
+
+def _project_gallery_paths(project: Project, *, request: Request) -> list[str]:
+    candidates: list[str] = []
+    for value in [project.hero_image_url, project.cover_image_url]:
+        text = str(value or "").strip()
+        if text:
+            candidates.append(text)
+    if isinstance(project.images, list):
+        for value in project.images:
+            text = str(value or "").strip()
+            if text:
+                candidates.append(text)
+    out: list[str] = []
+    seen: set[str] = set()
+    for value in candidates:
+        safe = _safe_media_url(value, _DEFAULT_MEDIA_FALLBACK, request=request)
+        # Skip disallowed raw values instead of polluting the gallery with fallback duplicates.
+        if safe == _DEFAULT_MEDIA_FALLBACK and not _is_allowed_media_url(value, request=request):
+            continue
+        if safe in seen:
+            continue
+        seen.add(safe)
+        out.append(safe)
+    if not out:
+        out.append(_DEFAULT_MEDIA_FALLBACK)
+    return out[:8]
+
+
+def _project_faq_items(project: Project, locale: str) -> list[tuple[str, str]]:
+    source_notes = project.source_notes if isinstance(project.source_notes, dict) else {}
+    raw = source_notes.get("faq") or source_notes.get("faqs") or []
+    if not isinstance(raw, list):
+        return []
+    out: list[tuple[str, str]] = []
+    for item in raw:
+        question = ""
+        answer = ""
+        if isinstance(item, dict):
+            question = (
+                _localized_dict_text(item.get("question"), locale)
+                or _localized_dict_text(item.get("q"), locale)
+                or str(item.get("question") or item.get("q") or item.get("title") or "").strip()
+            )
+            answer = (
+                _localized_dict_text(item.get("answer"), locale)
+                or _localized_dict_text(item.get("a"), locale)
+                or str(item.get("answer") or item.get("a") or item.get("body") or "").strip()
+            )
+        elif isinstance(item, (list, tuple)) and len(item) >= 2:
+            question = str(item[0] or "").strip()
+            answer = str(item[1] or "").strip()
+        if question and answer:
+            out.append((question, answer))
+        if len(out) == 6:
+            break
+    return out
+
+
+def _property_ref_for_route(prop: Property) -> str:
+    slug = str(prop.slug or "").strip()
+    return slug or str(prop.id)
+
+
+def _property_media_path(prop: Property, *, request: Request) -> str:
+    candidates: list[str] = []
+    for value in [prop.cover_image_url, prop.cover_image]:
+        text = str(value or "").strip()
+        if text:
+            candidates.append(text)
+    if isinstance(prop.local_images, list):
+        for value in prop.local_images:
+            text = str(value or "").strip()
+            if text:
+                candidates.append(text)
+    if isinstance(prop.images, list):
+        for value in prop.images:
+            text = str(value or "").strip()
+            if text:
+                candidates.append(text)
+    for value in candidates:
+        safe = _safe_media_url(value, _DEFAULT_MEDIA_FALLBACK, request=request)
+        if safe == _DEFAULT_MEDIA_FALLBACK and not _is_allowed_media_url(value, request=request):
+            continue
+        return safe
+    return _DEFAULT_MEDIA_FALLBACK
+
+
+def _property_title_for_locale(prop: Property, locale: str) -> str:
+    return _localized_dict_text(getattr(prop, "title_i18n", None), locale) or str(prop.title or "").strip() or (
+        "Property" if locale == "en" else "อสังหา"
+    )
+
+
+def _property_description_for_locale(prop: Property, locale: str) -> str:
+    return (
+        _localized_dict_text(getattr(prop, "description_i18n", None), locale)
+        or str(prop.description or "").strip()
+    )
+
+
+def _absolute_url(request: Request, path: str) -> str:
+    raw = str(path or "").strip()
+    if not raw:
+        return str(request.base_url).rstrip("/")
+    if raw.startswith("http://") or raw.startswith("https://"):
+        return raw
+    base = str(request.base_url).rstrip("/")
+    if raw.startswith("/"):
+        return f"{base}{raw}"
+    return f"{base}/{raw}"
+
+
 def _render_projects_page(locale: str, request: Request, db: Session) -> HTMLResponse:
     rows = db.scalars(
         select(Project)
@@ -842,13 +972,322 @@ def _render_projects_page(locale: str, request: Request, db: Session) -> HTMLRes
         updated_text = row.updated_at.strftime("%Y-%m-%d") if row.updated_at else "-"
         type_text = str(row.property_type or "").strip() or ("property" if locale == "en" else "อสังหา")
         cards.append(
-            f"<article class=\"card\"><img class=\"media\" src=\"{escape(media)}\" alt=\"{escape(row.name)}\" width=\"640\" height=\"360\" /><h2>{escape(row.name)}</h2><p class=\"muted\">{escape(area_name)} • {escape(price_text)}</p><p class=\"muted\">{escape(type_text)} • Updated {escape(updated_text)}</p><p>{escape(summary)}</p><div class=\"grid\"><a class=\"btn\" href=\"/{locale}/contact\">{'Request details' if locale == 'en' else 'ขอรายละเอียด'}</a><a class=\"btn\" href=\"/{locale}/investment/methodology\">{'How we evaluate' if locale == 'en' else 'หลักเกณฑ์การคัดเลือก'}</a></div></article>"
+            f"<article class=\"card\"><img class=\"media\" src=\"{escape(media)}\" alt=\"{escape(row.name)}\" width=\"640\" height=\"360\" /><h2>{escape(row.name)}</h2><p class=\"muted\">{escape(area_name)} • {escape(price_text)}</p><p class=\"muted\">{escape(type_text)} • Updated {escape(updated_text)}</p><p>{escape(summary)}</p><div class=\"grid\"><a class=\"btn\" href=\"/{locale}/projects/{escape(row.slug)}\">{'View project details' if locale == 'en' else 'ดูรายละเอียดโครงการ'}</a><a class=\"btn\" href=\"/{locale}/contact?intent=consultation&project={escape(row.slug)}\">{'Request details' if locale == 'en' else 'ขอรายละเอียด'}</a></div></article>"
         )
     fallback = "Published projects are not available yet. Publish project records to populate this page." if locale == "en" else "ยังไม่มีโครงการที่เผยแพร่ โปรดเผยแพร่ข้อมูลโครงการเพื่อให้หน้านี้แสดงผล"
     body_content = "".join(cards) if cards else f"<div class=\"card\">{escape(fallback)}</div>"
     body = f"<section class=\"grid\">{body_content}</section>"
     title = "Projects" if locale == "en" else "Projects"
     intro = "Published projects from the current system with verified local media and direct consultation paths." if locale == "en" else "โครงการที่เผยแพร่จากระบบปัจจุบัน พร้อมสื่อภายในระบบและเส้นทางติดต่อที่ชัดเจน"
+    return HTMLResponse(_render_page_shell(locale, title=title, intro=intro, body=body))
+
+
+def _render_project_detail_page(locale: str, request: Request, db: Session, slug: str) -> HTMLResponse:
+    row = db.scalar(
+        select(Project).where(
+            Project.deleted_at.is_(None),
+            Project.status == "published",
+            Project.slug == slug,
+        )
+    )
+    if row is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Project not found")
+
+    copy = {
+        "summary_title": "Project Summary",
+        "area": "Area",
+        "developer": "Developer",
+        "status": "Status",
+        "starting_price": "Starting price",
+        "facts": "Key Facts",
+        "highlights": "Highlights",
+        "amenities": "Amenities",
+        "location": "Location Context",
+        "location_fallback": "Map data is pending publication. Browse published area context for this project.",
+        "investment": "Investment Snapshot",
+        "investment_fallback": "Investment snapshot is pending publication with verified source and update timestamp.",
+        "source": "Source",
+        "updated": "Updated",
+        "availability": "Unit Availability Preview",
+        "buy_units": "Buy units",
+        "rent_units": "Rent units",
+        "availability_fallback": "No active units are linked to this project yet.",
+        "related_projects": "Related Projects",
+        "related_properties": "Related Properties",
+        "related_projects_fallback": "Related projects will appear when matching published inventory is available.",
+        "related_properties_fallback": "Related properties will appear when active matching units are available.",
+        "request_consultation": "Request Consultation",
+        "book_viewing": "Book Viewing",
+        "faq": "FAQ",
+        "gallery_note": "Gallery is currently limited to available local media.",
+        "empty_list": "Pending publication",
+        "view_property": "View property",
+        "view_project": "View project",
+        "map_link": "Open map context",
+    }
+    if locale == "th":
+        copy.update(
+            {
+                "summary_title": "สรุปโครงการ",
+                "area": "ทำเล",
+                "developer": "ผู้พัฒนา",
+                "status": "สถานะ",
+                "starting_price": "ราคาเริ่มต้น",
+                "facts": "ข้อมูลสำคัญ",
+                "highlights": "จุดเด่น",
+                "amenities": "สิ่งอำนวยความสะดวก",
+                "location": "บริบททำเล",
+                "location_fallback": "ยังไม่มีข้อมูลแผนที่ที่เผยแพร่ ดูข้อมูลทำเลที่เผยแพร่ได้จากหน้าพื้นที่",
+                "investment": "ภาพรวมการลงทุน",
+                "investment_fallback": "ยังไม่มี investment snapshot ที่มีแหล่งที่มาและเวลาปรับปรุง",
+                "source": "แหล่งข้อมูล",
+                "updated": "อัปเดตล่าสุด",
+                "availability": "ยูนิตที่พร้อมแสดงตัวอย่าง",
+                "buy_units": "ยูนิตสำหรับซื้อ",
+                "rent_units": "ยูนิตสำหรับเช่า",
+                "availability_fallback": "ยังไม่มียูนิต active ที่เชื่อมกับโครงการนี้",
+                "related_projects": "โครงการที่เกี่ยวข้อง",
+                "related_properties": "ทรัพย์ที่เกี่ยวข้อง",
+                "related_projects_fallback": "จะแสดงโครงการที่เกี่ยวข้องเมื่อมีข้อมูลที่เผยแพร่",
+                "related_properties_fallback": "จะแสดงทรัพย์ที่เกี่ยวข้องเมื่อมียูนิตที่เผยแพร่",
+                "request_consultation": "ขอคำปรึกษา",
+                "book_viewing": "จองนัดเข้าชม",
+                "faq": "คำถามที่พบบ่อย",
+                "gallery_note": "แกลเลอรีจะแสดงตาม local media ที่พร้อมใช้งาน",
+                "empty_list": "รอการเผยแพร่",
+                "view_property": "ดูรายละเอียดทรัพย์",
+                "view_project": "ดูรายละเอียดโครงการ",
+                "map_link": "เปิดบริบทแผนที่",
+            }
+        )
+
+    area_row = db.get(Area, row.area_id) if row.area_id else None
+    if area_row is not None and area_row.deleted_at is not None:
+        area_row = None
+    developer_row = db.get(Developer, row.developer_id) if row.developer_id else None
+    if developer_row is not None and (developer_row.deleted_at is not None or developer_row.status != "active"):
+        developer_row = None
+
+    area_name = str(getattr(area_row, "name", "") or "").strip() or ("Area pending publication" if locale == "en" else "พื้นที่รอเผยแพร่")
+    area_href = f"/{locale}/areas/{area_row.slug}" if area_row is not None and area_row.status == "published" else f"/{locale}/areas"
+    developer_name = str(getattr(developer_row, "name", "") or "").strip() or ("Developer pending publication" if locale == "en" else "ผู้พัฒนารอเผยแพร่")
+    developer_href = f"/{locale}/developers/{developer_row.slug}" if developer_row is not None else f"/{locale}/developers"
+
+    summary_text = _localized_dict_text(row.summary, locale) or ("Summary pending publication." if locale == "en" else "รอสรุปเนื้อหาเผยแพร่")
+    description_text = _localized_dict_text(row.description, locale) or ""
+    status_text = str(row.status or "").strip() or "-"
+    price_text = _format_money(row.starting_price, fallback="Pricing pending publication" if locale == "en" else "รอเผยแพร่ราคา")
+
+    gallery = _project_gallery_paths(row, request=request)
+    hero_media = gallery[0]
+    gallery_extra = "".join(
+        f'<img class="media" src="{escape(path)}" alt="{escape(row.name)} gallery {idx}" loading="lazy" width="640" height="360" />'
+        for idx, path in enumerate(gallery[1:], start=2)
+    )
+    gallery_note_html = (
+        f'<p class="muted" data-gallery-note="true">{escape(copy["gallery_note"])}</p>'
+        if len(gallery) <= 2
+        else ""
+    )
+
+    facts = _clean_text_list(row.quick_facts) or _project_facts(row)
+    highlights = _clean_text_list(row.highlights)
+    amenities = _clean_text_list(row.amenities)
+    facts_html = "".join(f"<li>{escape(item)}</li>" for item in facts) or f"<li>{escape(copy['empty_list'])}</li>"
+    highlights_html = "".join(f"<li>{escape(item)}</li>" for item in highlights) or f"<li>{escape(copy['empty_list'])}</li>"
+    amenities_html = "".join(f"<li>{escape(item)}</li>" for item in amenities) or f"<li>{escape(copy['empty_list'])}</li>"
+
+    location = row.location if isinstance(row.location, dict) else {}
+    lat_raw = location.get("lat") or location.get("latitude")
+    lng_raw = location.get("lng") or location.get("longitude")
+    try:
+        lat = float(lat_raw) if lat_raw is not None else None
+    except (TypeError, ValueError):
+        lat = None
+    try:
+        lng = float(lng_raw) if lng_raw is not None else None
+    except (TypeError, ValueError):
+        lng = None
+    location_context = (
+        _localized_dict_text(location.get("context"), locale)
+        or str(location.get("context") or location.get("label") or "").strip()
+    )
+    if lat is not None and lng is not None:
+        map_href = f"https://maps.google.com/?q={lat:.6f},{lng:.6f}"
+        location_body = (
+            f"<p>{escape(location_context or area_name)}</p>"
+            f"<p class=\"muted\">{escape(f'Lat {lat:.6f}, Lng {lng:.6f}')}</p>"
+            f"<a class=\"btn\" href=\"{escape(map_href)}\" rel=\"noopener\" target=\"_blank\">{escape(copy['map_link'])}</a>"
+        )
+    else:
+        location_body = f"<p>{escape(copy['location_fallback'])}</p><a class=\"btn\" href=\"{area_href}\">{escape(area_name)}</a>"
+
+    source_notes = row.source_notes if isinstance(row.source_notes, dict) else {}
+    snapshot = row.investment_snapshot if isinstance(row.investment_snapshot, dict) else {}
+    investment_source = str(snapshot.get("source") or source_notes.get("investment_source") or source_notes.get("source") or "").strip()
+    investment_updated = str(snapshot.get("updated_at") or "").strip() or (row.claims_updated_at.date().isoformat() if row.claims_updated_at else "")
+    investment_rows = []
+    for key, value in snapshot.items():
+        if key in {"source", "updated_at"}:
+            continue
+        text = ""
+        if isinstance(value, (int, float, Decimal)):
+            text = f"{float(value):,.2f}".rstrip("0").rstrip(".")
+        elif isinstance(value, (dict, list)):
+            text = json.dumps(value, ensure_ascii=False)
+        else:
+            text = str(value or "").strip()
+        if text:
+            investment_rows.append((key.replace("_", " ").strip().title(), text))
+    if investment_source and investment_updated:
+        metrics_html = "".join(f"<li><strong>{escape(label)}:</strong> {escape(value)}</li>" for label, value in investment_rows)
+        if not metrics_html:
+            metrics_html = f"<li>{escape(copy['empty_list'])}</li>"
+        investment_body = (
+            f"<p class=\"muted\">{escape(copy['source'])}: {escape(investment_source)}</p>"
+            f"<p class=\"muted\">{escape(copy['updated'])}: {escape(investment_updated)}</p>"
+            f"<ul>{metrics_html}</ul>"
+        )
+    else:
+        investment_body = f"<p>{escape(copy['investment_fallback'])}</p>"
+
+    unit_rows = db.scalars(
+        select(Property)
+        .where(Property.status == "active", Property.project_id == row.id)
+        .order_by(desc(Property.updated_at))
+        .limit(12)
+    ).all()
+    buy_units = [item for item in unit_rows if str(item.type or "").lower() != "rent"]
+    rent_units = [item for item in unit_rows if str(item.type or "").lower() == "rent"]
+
+    def _unit_card(prop: Property) -> str:
+        title = _property_title_for_locale(prop, locale)
+        price = _format_money(prop.price, fallback="-")
+        stats = " • ".join(_property_stats(prop)) or "-"
+        href = f"/{locale}/property/{escape(_property_ref_for_route(prop))}"
+        media = _property_media_path(prop, request=request)
+        return (
+            f"<article class=\"card\">"
+            f"<img class=\"media\" src=\"{escape(media)}\" alt=\"{escape(title)}\" width=\"640\" height=\"360\" loading=\"lazy\" />"
+            f"<h3>{escape(title)}</h3>"
+            f"<p class=\"muted\">{escape(price)}</p>"
+            f"<p class=\"muted\">{escape(stats)}</p>"
+            f"<a class=\"btn\" href=\"{href}\">{escape(copy['view_property'])}</a>"
+            f"</article>"
+        )
+
+    buy_html = "".join(_unit_card(item) for item in buy_units[:3]) or f"<div class=\"card\">{escape(copy['availability_fallback'])}</div>"
+    rent_html = "".join(_unit_card(item) for item in rent_units[:3]) or f"<div class=\"card\">{escape(copy['availability_fallback'])}</div>"
+
+    related_filters = []
+    if row.area_id is not None:
+        related_filters.append(Project.area_id == row.area_id)
+    if row.developer_id is not None:
+        related_filters.append(Project.developer_id == row.developer_id)
+    related_projects_query = select(Project).where(
+        Project.deleted_at.is_(None),
+        Project.status == "published",
+        Project.id != row.id,
+    )
+    if related_filters:
+        related_projects_query = related_projects_query.where(or_(*related_filters))
+    related_projects = db.scalars(related_projects_query.order_by(desc(Project.updated_at)).limit(4)).all()
+    related_projects_html = "".join(
+        (
+            f"<article class=\"card\">"
+            f"<img class=\"media\" src=\"{escape(_safe_media_url(item.cover_image_url or item.hero_image_url, _DEFAULT_MEDIA_FALLBACK, request=request))}\" alt=\"{escape(item.name)}\" width=\"640\" height=\"360\" loading=\"lazy\" />"
+            f"<h3>{escape(item.name)}</h3>"
+            f"<p class=\"muted\">{escape(_format_money(item.starting_price, fallback='-'))}</p>"
+            f"<a class=\"btn\" href=\"/{locale}/projects/{escape(item.slug)}\">{escape(copy['view_project'])}</a>"
+            f"</article>"
+        )
+        for item in related_projects
+    ) or f"<div class=\"card\">{escape(copy['related_projects_fallback'])}</div>"
+
+    related_properties: list[Property] = []
+    seen_property_ids = {str(item.id) for item in unit_rows}
+    if row.area_id is not None or row.developer_id is not None:
+        candidates = db.scalars(
+            select(Property).where(Property.status == "active").order_by(desc(Property.updated_at)).limit(60)
+        ).all()
+        for item in candidates:
+            if str(item.id) in seen_property_ids:
+                continue
+            matches_area = row.area_id is not None and item.area_id == row.area_id
+            matches_developer = row.developer_id is not None and item.developer_id == row.developer_id
+            if not (matches_area or matches_developer):
+                continue
+            related_properties.append(item)
+            seen_property_ids.add(str(item.id))
+            if len(related_properties) == 4:
+                break
+    related_properties_html = "".join(_unit_card(item) for item in related_properties) or f"<div class=\"card\">{escape(copy['related_properties_fallback'])}</div>"
+
+    faq_items = _project_faq_items(row, locale)
+    faq_html = ""
+    if faq_items:
+        faq_rows = "".join(
+            f"<details class=\"card\"><summary><strong>{escape(question)}</strong></summary><p>{escape(answer)}</p></details>"
+            for question, answer in faq_items
+        )
+        faq_html = f"<section id=\"project-faq\" class=\"stack\"><h2>{escape(copy['faq'])}</h2>{faq_rows}</section>"
+
+    project_url = f"/{locale}/projects/{row.slug}"
+    schema_hooks: list[tuple[str, dict]] = []
+    project_schema: dict[str, object] = {
+        "@context": "https://schema.org",
+        "@type": "RealEstateListing",
+        "name": row.name,
+        "url": _absolute_url(request, project_url),
+    }
+    if summary_text:
+        project_schema["description"] = summary_text
+    project_schema["image"] = [_absolute_url(request, image) for image in gallery[:5]]
+    if row.starting_price is not None:
+        project_schema["offers"] = {
+            "@type": "Offer",
+            "priceCurrency": "THB",
+            "price": float(row.starting_price),
+        }
+    schema_hooks.append(("project-detail", project_schema))
+    if faq_items:
+        schema_hooks.append(
+            (
+                "project-faq",
+                {
+                    "@context": "https://schema.org",
+                    "@type": "FAQPage",
+                    "mainEntity": [
+                        {
+                            "@type": "Question",
+                            "name": question,
+                            "acceptedAnswer": {"@type": "Answer", "text": answer},
+                        }
+                        for question, answer in faq_items
+                    ],
+                },
+            )
+        )
+    schema_html = "".join(
+        f'<script type="application/ld+json" data-schema-hook="{escape(name)}">{json.dumps(payload, ensure_ascii=False)}</script>'
+        for name, payload in schema_hooks
+    )
+
+    detail_intro = description_text or summary_text
+    body = (
+        f"<section id=\"project-hero\" class=\"card\"><img class=\"media\" src=\"{escape(hero_media)}\" alt=\"{escape(row.name)}\" width=\"1280\" height=\"720\" loading=\"eager\" /><h2>{escape(row.name)}</h2><p>{escape(summary_text)}</p>"
+        f"<div class=\"grid\"><a class=\"btn\" href=\"/{locale}/contact?intent=consultation&project={escape(row.slug)}\">{escape(copy['request_consultation'])}</a><a class=\"btn\" href=\"/{locale}/contact?intent=viewing&project={escape(row.slug)}\">{escape(copy['book_viewing'])}</a></div></section>"
+        f"<section id=\"project-gallery\" class=\"stack\"><h2>Gallery</h2>{gallery_note_html}<section class=\"grid\"><article class=\"card\"><img class=\"media\" src=\"{escape(hero_media)}\" alt=\"{escape(row.name)}\" width=\"1280\" height=\"720\" loading=\"lazy\" /></article>{gallery_extra}</section></section>"
+        f"<section id=\"project-summary\" class=\"card\"><h2>{escape(copy['summary_title'])}</h2><p><strong>{escape(copy['area'])}:</strong> <a href=\"{area_href}\">{escape(area_name)}</a></p><p><strong>{escape(copy['developer'])}:</strong> <a href=\"{developer_href}\">{escape(developer_name)}</a></p><p><strong>{escape(copy['status'])}:</strong> {escape(status_text)}</p><p><strong>{escape(copy['starting_price'])}:</strong> {escape(price_text)}</p>{f'<p>{escape(description_text)}</p>' if description_text else ''}</section>"
+        f"<section id=\"project-facts\" class=\"grid\"><article class=\"card\"><h2>{escape(copy['facts'])}</h2><ul>{facts_html}</ul></article><article class=\"card\"><h2>{escape(copy['highlights'])}</h2><ul>{highlights_html}</ul></article><article class=\"card\"><h2>{escape(copy['amenities'])}</h2><ul>{amenities_html}</ul></article></section>"
+        f"<section id=\"project-location\" class=\"card\"><h2>{escape(copy['location'])}</h2>{location_body}</section>"
+        f"<section id=\"project-investment\" class=\"card\"><h2>{escape(copy['investment'])}</h2>{investment_body}</section>"
+        f"<section id=\"project-availability\" class=\"stack\"><h2>{escape(copy['availability'])}</h2><article class=\"card\"><h3>{escape(copy['buy_units'])}</h3><section class=\"grid\">{buy_html}</section></article><article class=\"card\"><h3>{escape(copy['rent_units'])}</h3><section class=\"grid\">{rent_html}</section></article></section>"
+        f"<section id=\"project-related\" class=\"stack\"><article><h2>{escape(copy['related_projects'])}</h2><section class=\"grid\">{related_projects_html}</section></article><article><h2>{escape(copy['related_properties'])}</h2><section class=\"grid\">{related_properties_html}</section></article></section>"
+        f"{faq_html}{schema_html}"
+    )
+    title = row.name
+    intro = detail_intro
     return HTMLResponse(_render_page_shell(locale, title=title, intro=intro, body=body))
 
 
@@ -938,6 +1377,172 @@ def _render_areas_page(locale: str, request: Request, db: Session) -> HTMLRespon
     body = f"<section class=\"grid\">{body_content}</section>"
     title = "Areas" if locale == "en" else "Areas"
     intro = "Published area coverage from the current system with linked project inventory context." if locale == "en" else "ทำเลที่เผยแพร่จากระบบปัจจุบัน พร้อมบริบทจำนวนโครงการที่มีอยู่"
+    return HTMLResponse(_render_page_shell(locale, title=title, intro=intro, body=body))
+
+
+def _render_area_detail_page(locale: str, request: Request, db: Session, slug: str) -> HTMLResponse:
+    row = db.scalar(
+        select(Area).where(
+            Area.deleted_at.is_(None),
+            Area.status == "published",
+            Area.slug == slug,
+        )
+    )
+    if row is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Area not found")
+
+    summary = _localized_dict_text(row.summary, locale) or ("Area summary pending publication." if locale == "en" else "รอสรุปพื้นที่เผยแพร่")
+    media = _safe_media_url(row.cover_image_url or row.hero_image_url, _DEFAULT_MEDIA_FALLBACK, request=request)
+    projects = db.scalars(
+        select(Project)
+        .where(Project.deleted_at.is_(None), Project.status == "published", Project.area_id == row.id)
+        .order_by(desc(Project.updated_at))
+        .limit(8)
+    ).all()
+    project_cards = "".join(
+        f"<article class=\"card\"><img class=\"media\" src=\"{escape(_safe_media_url(item.cover_image_url or item.hero_image_url, _DEFAULT_MEDIA_FALLBACK, request=request))}\" alt=\"{escape(item.name)}\" width=\"640\" height=\"360\" loading=\"lazy\" /><h3>{escape(item.name)}</h3><p class=\"muted\">{escape(_format_money(item.starting_price, fallback='-'))}</p><a class=\"btn\" href=\"/{locale}/projects/{escape(item.slug)}\">{'View project details' if locale == 'en' else 'ดูรายละเอียดโครงการ'}</a></article>"
+        for item in projects
+    ) or (
+        f"<div class=\"card\">{'No published projects are linked to this area yet.' if locale == 'en' else 'ยังไม่มีโครงการที่เผยแพร่เชื่อมกับทำเลนี้'}</div>"
+    )
+
+    map_center = row.map_center if isinstance(row.map_center, dict) else {}
+    lat_raw = map_center.get("lat") or map_center.get("latitude")
+    lng_raw = map_center.get("lng") or map_center.get("longitude")
+    try:
+        lat = float(lat_raw) if lat_raw is not None else None
+    except (TypeError, ValueError):
+        lat = None
+    try:
+        lng = float(lng_raw) if lng_raw is not None else None
+    except (TypeError, ValueError):
+        lng = None
+    if lat is not None and lng is not None:
+        map_html = (
+            f"<p class=\"muted\">{escape(f'Lat {lat:.6f}, Lng {lng:.6f}')}</p>"
+            f"<a class=\"btn\" href=\"https://maps.google.com/?q={lat:.6f},{lng:.6f}\" target=\"_blank\" rel=\"noopener\">{'Open map context' if locale == 'en' else 'เปิดบริบทแผนที่'}</a>"
+        )
+    else:
+        map_html = f"<p>{'Map coordinates are pending publication.' if locale == 'en' else 'ยังไม่มีพิกัดแผนที่ที่เผยแพร่'}</p>"
+
+    body = (
+        f"<section class=\"card\"><img class=\"media\" src=\"{escape(media)}\" alt=\"{escape(row.name)}\" width=\"1280\" height=\"720\" loading=\"lazy\" /><h2>{escape(row.name)}</h2><p>{escape(summary)}</p></section>"
+        f"<section class=\"card\"><h2>{'Location context' if locale == 'en' else 'บริบททำเล'}</h2>{map_html}</section>"
+        f"<section class=\"stack\"><h2>{'Published projects in this area' if locale == 'en' else 'โครงการที่เผยแพร่ในทำเลนี้'}</h2><section class=\"grid\">{project_cards}</section></section>"
+    )
+    title = row.name
+    intro = summary
+    return HTMLResponse(_render_page_shell(locale, title=title, intro=intro, body=body))
+
+
+def _render_developers_page(locale: str, request: Request, db: Session) -> HTMLResponse:
+    rows = db.scalars(
+        select(Developer)
+        .where(Developer.deleted_at.is_(None), Developer.status == "active")
+        .order_by(Developer.name.asc())
+        .limit(20)
+    ).all()
+    cards = []
+    for row in rows:
+        media = _safe_media_url(row.cover_image_url or row.logo_url, _DEFAULT_MEDIA_FALLBACK, request=request)
+        profile = _localized_dict_text(row.profile or row.summary, locale) or (
+            "Developer profile pending publication." if locale == "en" else "รอเผยแพร่โปรไฟล์ผู้พัฒนา"
+        )
+        cards.append(
+            f"<article class=\"card\"><img class=\"media\" src=\"{escape(media)}\" alt=\"{escape(row.name)}\" width=\"640\" height=\"360\" loading=\"lazy\" /><h2>{escape(row.name)}</h2><p>{escape(profile)}</p><a class=\"btn\" href=\"/{locale}/developers/{escape(row.slug)}\">{'View developer' if locale == 'en' else 'ดูรายละเอียดผู้พัฒนา'}</a></article>"
+        )
+    fallback = "No active developers are published yet." if locale == "en" else "ยังไม่มีผู้พัฒนาที่เผยแพร่"
+    body_content = "".join(cards) if cards else f"<div class=\"card\">{escape(fallback)}</div>"
+    body = f"<section class=\"grid\">{body_content}</section>"
+    title = "Developers"
+    intro = "Published developer profiles and linked project context." if locale == "en" else "โปรไฟล์ผู้พัฒนาที่เผยแพร่และบริบทโครงการที่เกี่ยวข้อง"
+    return HTMLResponse(_render_page_shell(locale, title=title, intro=intro, body=body))
+
+
+def _render_developer_detail_page(locale: str, request: Request, db: Session, slug: str) -> HTMLResponse:
+    row = db.scalar(
+        select(Developer).where(
+            Developer.deleted_at.is_(None),
+            Developer.status == "active",
+            Developer.slug == slug,
+        )
+    )
+    if row is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Developer not found")
+
+    media = _safe_media_url(row.cover_image_url or row.logo_url, _DEFAULT_MEDIA_FALLBACK, request=request)
+    profile = _localized_dict_text(row.profile or row.summary, locale) or (
+        "Developer profile pending publication." if locale == "en" else "รอเผยแพร่โปรไฟล์ผู้พัฒนา"
+    )
+    projects = db.scalars(
+        select(Project)
+        .where(Project.deleted_at.is_(None), Project.status == "published", Project.developer_id == row.id)
+        .order_by(desc(Project.updated_at))
+        .limit(8)
+    ).all()
+    project_cards = "".join(
+        f"<article class=\"card\"><img class=\"media\" src=\"{escape(_safe_media_url(item.cover_image_url or item.hero_image_url, _DEFAULT_MEDIA_FALLBACK, request=request))}\" alt=\"{escape(item.name)}\" width=\"640\" height=\"360\" loading=\"lazy\" /><h3>{escape(item.name)}</h3><p class=\"muted\">{escape(_format_money(item.starting_price, fallback='-'))}</p><a class=\"btn\" href=\"/{locale}/projects/{escape(item.slug)}\">{'View project details' if locale == 'en' else 'ดูรายละเอียดโครงการ'}</a></article>"
+        for item in projects
+    ) or (
+        f"<div class=\"card\">{'No published projects are linked to this developer yet.' if locale == 'en' else 'ยังไม่มีโครงการที่เผยแพร่เชื่อมกับผู้พัฒนารายนี้'}</div>"
+    )
+    website_text = str(row.website or "").strip()
+    website_html = (
+        f'<a class="btn" href="{escape(website_text)}" target="_blank" rel="noopener">{escape(website_text)}</a>'
+        if website_text
+        else ""
+    )
+
+    body = (
+        f"<section class=\"card\"><img class=\"media\" src=\"{escape(media)}\" alt=\"{escape(row.name)}\" width=\"1280\" height=\"720\" loading=\"lazy\" /><h2>{escape(row.name)}</h2><p>{escape(profile)}</p>{website_html}</section>"
+        f"<section class=\"stack\"><h2>{'Published projects by this developer' if locale == 'en' else 'โครงการที่เผยแพร่ของผู้พัฒนานี้'}</h2><section class=\"grid\">{project_cards}</section></section>"
+    )
+    title = row.name
+    intro = profile
+    return HTMLResponse(_render_page_shell(locale, title=title, intro=intro, body=body))
+
+
+def _property_or_404(db: Session, property_ref: str) -> Property:
+    ref = str(property_ref or "").strip()
+    if not ref:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Property not found")
+    row = None
+    try:
+        row = db.get(Property, UUID(ref))
+    except ValueError:
+        row = db.scalar(select(Property).where(Property.slug == ref))
+    if row is None or row.status != "active":
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Property not found")
+    return row
+
+
+def _render_property_detail_page(locale: str, request: Request, db: Session, property_ref: str) -> HTMLResponse:
+    row = _property_or_404(db, property_ref)
+
+    title = _property_title_for_locale(row, locale)
+    description = _property_description_for_locale(row, locale)
+    media = _property_media_path(row, request=request)
+    area_row = db.get(Area, row.area_id) if row.area_id else None
+    if area_row is not None and area_row.deleted_at is not None:
+        area_row = None
+    developer_row = db.get(Developer, row.developer_id) if row.developer_id else None
+    if developer_row is not None and (developer_row.deleted_at is not None or developer_row.status != "active"):
+        developer_row = None
+    project_row = db.get(Project, row.project_id) if row.project_id else None
+    if project_row is not None and (project_row.deleted_at is not None or project_row.status != "published"):
+        project_row = None
+
+    area_href = f"/{locale}/areas/{area_row.slug}" if area_row is not None and area_row.status == "published" else f"/{locale}/areas"
+    developer_href = f"/{locale}/developers/{developer_row.slug}" if developer_row is not None else f"/{locale}/developers"
+    project_href = f"/{locale}/projects/{project_row.slug}" if project_row is not None else f"/{locale}/projects"
+    price_text = _format_money(row.price, fallback="-")
+    stats_text = " • ".join(_property_stats(row)) or "-"
+
+    body = (
+        f"<section class=\"card\"><img class=\"media\" src=\"{escape(media)}\" alt=\"{escape(title)}\" width=\"1280\" height=\"720\" loading=\"lazy\" /><h2>{escape(title)}</h2><p class=\"muted\">{escape(price_text)} • {escape(stats_text)}</p>{f'<p>{escape(description)}</p>' if description else ''}</section>"
+        f"<section class=\"card\"><p><strong>{'Area' if locale == 'en' else 'ทำเล'}:</strong> <a href=\"{area_href}\">{escape(str(getattr(area_row, 'name', '') or '-'))}</a></p><p><strong>{'Developer' if locale == 'en' else 'ผู้พัฒนา'}:</strong> <a href=\"{developer_href}\">{escape(str(getattr(developer_row, 'name', '') or '-'))}</a></p><p><strong>{'Project' if locale == 'en' else 'โครงการ'}:</strong> <a href=\"{project_href}\">{escape(str(getattr(project_row, 'name', '') or '-'))}</a></p><a class=\"btn\" href=\"/{locale}/contact?intent=viewing&property={escape(_property_ref_for_route(row))}\">{'Book Viewing' if locale == 'en' else 'จองนัดเข้าชม'}</a></section>"
+    )
+    intro = description or title
     return HTMLResponse(_render_page_shell(locale, title=title, intro=intro, body=body))
 
 
@@ -1079,6 +1684,12 @@ def render_projects(request: Request, db: Session = Depends(get_db)) -> HTMLResp
     return _render_projects_page(_request_locale(request), request, db)
 
 
+@router.get("/en/projects/{slug}", response_class=HTMLResponse)
+@router.get("/th/projects/{slug}", response_class=HTMLResponse)
+def render_project_detail(slug: str, request: Request, db: Session = Depends(get_db)) -> HTMLResponse:
+    return _render_project_detail_page(_request_locale(request), request, db, slug)
+
+
 @router.get("/en/smart-finder", response_class=HTMLResponse)
 @router.get("/th/smart-finder", response_class=HTMLResponse)
 def render_smart_finder(request: Request) -> HTMLResponse:
@@ -1089,6 +1700,30 @@ def render_smart_finder(request: Request) -> HTMLResponse:
 @router.get("/th/areas", response_class=HTMLResponse)
 def render_areas(request: Request, db: Session = Depends(get_db)) -> HTMLResponse:
     return _render_areas_page(_request_locale(request), request, db)
+
+
+@router.get("/en/areas/{slug}", response_class=HTMLResponse)
+@router.get("/th/areas/{slug}", response_class=HTMLResponse)
+def render_area_detail(slug: str, request: Request, db: Session = Depends(get_db)) -> HTMLResponse:
+    return _render_area_detail_page(_request_locale(request), request, db, slug)
+
+
+@router.get("/en/developers", response_class=HTMLResponse)
+@router.get("/th/developers", response_class=HTMLResponse)
+def render_developers(request: Request, db: Session = Depends(get_db)) -> HTMLResponse:
+    return _render_developers_page(_request_locale(request), request, db)
+
+
+@router.get("/en/developers/{slug}", response_class=HTMLResponse)
+@router.get("/th/developers/{slug}", response_class=HTMLResponse)
+def render_developer_detail(slug: str, request: Request, db: Session = Depends(get_db)) -> HTMLResponse:
+    return _render_developer_detail_page(_request_locale(request), request, db, slug)
+
+
+@router.get("/en/property/{property_ref}", response_class=HTMLResponse)
+@router.get("/th/property/{property_ref}", response_class=HTMLResponse)
+def render_property_detail(property_ref: str, request: Request, db: Session = Depends(get_db)) -> HTMLResponse:
+    return _render_property_detail_page(_request_locale(request), request, db, property_ref)
 
 
 @router.get("/en/insights", response_class=HTMLResponse)
