@@ -19,6 +19,15 @@ from packages.core.project_media_governance import evaluate_project_media_govern
 
 router = APIRouter(prefix="/admin", tags=["admin"])
 
+_AREA_CONTENT_REQUIRED_KEYS = [
+    "why_live_invest",
+    "transport",
+    "lifestyle",
+    "beach_proximity",
+    "metrics_update_cadence",
+]
+_AREA_REQUIRED_LOCALES = ["en", "th"]
+
 
 def _govern_media_or_422(db: Session, *, paths: list[str]) -> list[dict]:
     result = evaluate_project_media_governance(db, paths=paths)
@@ -42,6 +51,99 @@ def _validate_locale_map(value: dict | None) -> dict | None:
     if invalid:
         raise ValueError(f"unsupported locale keys: {', '.join(invalid)}")
     return value
+
+
+def _localized_content_text(value: object, locale: str) -> str:
+    if value is None:
+        return ""
+    if isinstance(value, str):
+        return " ".join(value.split())
+    if isinstance(value, dict):
+        localized = str(value.get(locale) or "").strip()
+        if localized:
+            return localized
+        for key in ["text", "body", "summary", "description", "value", "label", "title"]:
+            if key in value:
+                text = _localized_content_text(value.get(key), locale)
+                if text:
+                    return text
+        for nested in value.values():
+            text = _localized_content_text(nested, locale)
+            if text:
+                return text
+        return ""
+    if isinstance(value, list):
+        texts = [_localized_content_text(item, locale) for item in value]
+        return " ".join(text for text in texts if text).strip()
+    return " ".join(str(value).split())
+
+
+def _area_content_key_text(content: dict | None, locale: str, key: str) -> str:
+    if not isinstance(content, dict):
+        return ""
+    locale_payload = content.get(locale) if isinstance(content.get(locale), dict) else None
+    if locale_payload is not None and key in locale_payload:
+        return _localized_content_text(locale_payload.get(key), locale)
+    # Backward compatibility fallback if key exists at root content map.
+    if key in content:
+        return _localized_content_text(content.get(key), locale)
+    return ""
+
+
+def _collect_area_publish_missing(db: Session, area: Area) -> list[str]:
+    missing: list[str] = []
+
+    source_note = str(area.source_note or "").strip()
+    if not source_note:
+        missing.append("source_note")
+
+    content = area.content if isinstance(area.content, dict) else {}
+    for locale in _AREA_REQUIRED_LOCALES:
+        for key in _AREA_CONTENT_REQUIRED_KEYS:
+            if not _area_content_key_text(content, locale, key):
+                missing.append(f"content.{locale}.{key}")
+
+    stat = db.scalar(select(AreaStatistic).where(AreaStatistic.area_id == area.id))
+    if stat is None:
+        missing.append("statistics")
+        return missing
+
+    metrics_present = any(
+        value is not None
+        for value in [
+            stat.avg_price_sqm,
+            stat.avg_rent_monthly,
+            stat.avg_roi_percent,
+            stat.total_projects,
+            stat.total_units,
+        ]
+    )
+    if not metrics_present:
+        missing.append("statistics.metric_values")
+    if stat.as_of_date is None:
+        missing.append("statistics.as_of_date")
+    if stat.updated_at is None:
+        missing.append("statistics.updated_at")
+    return missing
+
+
+def _enforce_area_publish_requirements(db: Session, area: Area) -> None:
+    missing = _collect_area_publish_missing(db, area)
+    if not missing:
+        return
+    raise HTTPException(
+        status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
+        detail={
+            "code": "area_publish_requirements_missing",
+            "message": (
+                "Area publish is blocked: missing required area guide content, "
+                "metrics source metadata, or stats freshness."
+            ),
+            "missing": sorted(set(missing)),
+            "required_locales": _AREA_REQUIRED_LOCALES,
+            "required_content_keys": _AREA_CONTENT_REQUIRED_KEYS,
+        },
+    )
 
 
 def _public_base() -> str:
@@ -332,7 +434,13 @@ def create_area(
     )
     db.add(area)
     try:
+        db.flush()
+        if area.status == "published":
+            _enforce_area_publish_requirements(db, area)
         db.commit()
+    except HTTPException:
+        db.rollback()
+        raise
     except IntegrityError as exc:
         db.rollback()
         raise HTTPException(
@@ -371,7 +479,13 @@ def admin_patch_area(
         setattr(row, field, value)
     db.add(row)
     try:
+        db.flush()
+        if row.status == "published":
+            _enforce_area_publish_requirements(db, row)
         db.commit()
+    except HTTPException:
+        db.rollback()
+        raise
     except IntegrityError as exc:
         db.rollback()
         raise HTTPException(
@@ -391,6 +505,8 @@ def publish_area(
     area = _area_or_404(db, area_id)
     area.status = "published"
     db.add(area)
+    db.flush()
+    _enforce_area_publish_requirements(db, area)
     db.commit()
     db.refresh(area)
     return {"area": _serialize_area(db, area), "published": True}

@@ -14,7 +14,18 @@ from sqlalchemy.orm import Session
 
 from apps.api.routes.home_composer_contract import normalize_home_config, resolve_home_runtime
 from packages.core.database import get_db
-from packages.core.models import Area, Article, CompanyInfo, Developer, HomeComposerConfig, Project, Property, TeamMember, Testimonial
+from packages.core.models import (
+    Area,
+    AreaStatistic,
+    Article,
+    CompanyInfo,
+    Developer,
+    HomeComposerConfig,
+    Project,
+    Property,
+    TeamMember,
+    Testimonial,
+)
 
 router = APIRouter(tags=["home-runtime"])
 
@@ -29,6 +40,7 @@ _PUBLIC_ROUTE_SUFFIXES = {
     "/projects",
     "/developers",
     "/smart-finder",
+    "/area-guide",
     "/areas",
     "/insights",
     "/about",
@@ -1357,36 +1369,408 @@ def _render_smart_finder_page(locale: str, request: Request) -> HTMLResponse:
     return HTMLResponse(_render_page_shell(locale, title=title, intro=intro, body=body))
 
 
+def _area_copy(locale: str) -> dict[str, str]:
+    copy = {
+        "page_title": "Area Guide",
+        "page_intro": "Published area content, conversion CTAs, and internal links mapped to listings and projects.",
+        "breadcrumb_home": "Home",
+        "breadcrumb_hub": "Area Guide",
+        "listing_title": "Explore Pattaya Areas",
+        "listing_intro": "Use this hub to compare neighborhoods, view verified context, and continue to listings or consultation.",
+        "listing_empty": "No published areas are available yet. TODO: publish area cards with approved media and summary.",
+        "listing_summary_pending": "Area summary pending publication. TODO: publish approved area summary.",
+        "listing_metrics_pending": "Metrics pending verified source note and update timestamp.",
+        "listing_source_guard": "Source note is required before publishing hard metric claims.",
+        "listing_metric_projects": "Published projects",
+        "listing_metric_price": "Avg price / sqm",
+        "listing_metric_roi": "Avg ROI",
+        "listing_metric_updated": "Updated",
+        "listing_view_area": "View area guide",
+        "listing_browse_projects": "Browse projects in this area",
+        "listing_consult": "Consult about this area",
+        "loading": "Loading area content...",
+        "runtime_error": "A runtime error occurred. Please refresh and retry.",
+        "overview_title": "Overview",
+        "overview_map": "Map context",
+        "overview_map_pending": "Map coordinates are pending publication. TODO: attach verified coordinates in admin.",
+        "overview_open_map": "Open map context",
+        "why_title": "Why live or invest here",
+        "why_fallback": "Area fit context is pending publication. TODO: add approved why-live/invest narrative.",
+        "stats_title": "Area stats",
+        "stats_pending": "Statistics are pending verified source note and update timestamp.",
+        "stats_todo": "TODO: publish source note + updated timestamp before showing hard metric claims.",
+        "stats_source": "Source",
+        "stats_updated": "Updated",
+        "stats_as_of": "As of",
+        "stats_cadence": "Update cadence",
+        "stats_avg_price": "Avg price / sqm",
+        "stats_avg_rent": "Avg monthly rent",
+        "stats_avg_roi": "Avg ROI",
+        "stats_total_projects": "Total projects",
+        "stats_total_units": "Total units",
+        "projects_title": "Featured projects in this area",
+        "projects_empty": "No published projects are linked to this area yet.",
+        "projects_cta": "View project details",
+        "properties_title": "Featured properties in this area",
+        "properties_empty": "No active properties are linked to this area yet.",
+        "properties_cta": "View property details",
+        "properties_stats_pending": "Property stats pending publication",
+        "proximity_title": "Transport, lifestyle, and beach proximity",
+        "proximity_transport": "Transport",
+        "proximity_lifestyle": "Lifestyle",
+        "proximity_beach": "Beach proximity",
+        "proximity_transport_pending": "Transport context pending publication. TODO: add verified transit anchors.",
+        "proximity_lifestyle_pending": "Lifestyle context pending publication. TODO: add approved neighborhood highlights.",
+        "proximity_beach_pending": "Beach proximity context pending publication. TODO: add verified travel-time context.",
+        "cta_title": "Next step",
+        "cta_intro": "Need a shortlist for this area? Continue to consultation or browse live listings.",
+        "cta_consult": "Consult about this area",
+        "cta_browse_listings": "Browse listings",
+        "cta_back_hub": "Back to Area Guide",
+    }
+    if locale == "th":
+        copy.update(
+            {
+                "page_title": "คู่มือทำเล",
+                "page_intro": "คอนเทนต์ทำเลที่เผยแพร่ พร้อม CTA และลิงก์ภายในไปยังรายการประกาศและโครงการ",
+                "breadcrumb_home": "หน้าแรก",
+                "breadcrumb_hub": "คู่มือทำเล",
+                "listing_title": "สำรวจทำเลพัทยา",
+                "listing_intro": "ใช้หน้านี้เพื่อเทียบย่าน ดูบริบทที่ยืนยันแล้ว และไปต่อสู่ listings หรือ consultation",
+                "listing_empty": "ยังไม่มีทำเลที่เผยแพร่ TODO: เผยแพร่การ์ดทำเลพร้อมสื่อที่อนุมัติและสรุปเนื้อหา",
+                "listing_summary_pending": "ยังไม่มีสรุปทำเลที่เผยแพร่ TODO: เพิ่มสรุปทำเลที่อนุมัติแล้ว",
+                "listing_metrics_pending": "สถิติกำลังรอ source note และวันอัปเดตที่ยืนยันแล้ว",
+                "listing_source_guard": "ต้องมี source note ก่อนแสดงตัวเลขแบบยืนยัน",
+                "listing_metric_projects": "โครงการที่เผยแพร่",
+                "listing_metric_price": "ราคาเฉลี่ย / ตร.ม.",
+                "listing_metric_roi": "ROI เฉลี่ย",
+                "listing_metric_updated": "อัปเดต",
+                "listing_view_area": "ดูคู่มือทำเล",
+                "listing_browse_projects": "ดูโครงการในทำเลนี้",
+                "listing_consult": "ปรึกษาเรื่องทำเลนี้",
+                "loading": "กำลังโหลดเนื้อหาทำเล...",
+                "runtime_error": "เกิดข้อผิดพลาดระหว่างแสดงผล กรุณารีเฟรชแล้วลองใหม่",
+                "overview_title": "ภาพรวม",
+                "overview_map": "บริบทแผนที่",
+                "overview_map_pending": "ยังไม่มีพิกัดที่เผยแพร่ TODO: เพิ่มพิกัดที่ยืนยันแล้วใน admin",
+                "overview_open_map": "เปิดบริบทแผนที่",
+                "why_title": "ทำไมควรอยู่อาศัยหรือลงทุนที่นี่",
+                "why_fallback": "ยังไม่มีบริบทความเหมาะสมของทำเล TODO: เพิ่มเนื้อหา why-live/invest ที่อนุมัติแล้ว",
+                "stats_title": "สถิติทำเล",
+                "stats_pending": "สถิติกำลังรอ source note และวันอัปเดตที่ยืนยันแล้ว",
+                "stats_todo": "TODO: ต้องเผยแพร่ source note และ updated timestamp ก่อนแสดงตัวเลขแบบยืนยัน",
+                "stats_source": "แหล่งข้อมูล",
+                "stats_updated": "อัปเดต",
+                "stats_as_of": "ข้อมูล ณ",
+                "stats_cadence": "รอบการอัปเดต",
+                "stats_avg_price": "ราคาเฉลี่ย / ตร.ม.",
+                "stats_avg_rent": "ค่าเช่าเฉลี่ยต่อเดือน",
+                "stats_avg_roi": "ROI เฉลี่ย",
+                "stats_total_projects": "จำนวนโครงการ",
+                "stats_total_units": "จำนวนยูนิต",
+                "projects_title": "โครงการเด่นในทำเลนี้",
+                "projects_empty": "ยังไม่มีโครงการที่เผยแพร่ในทำเลนี้",
+                "projects_cta": "ดูรายละเอียดโครงการ",
+                "properties_title": "ประกาศเด่นในทำเลนี้",
+                "properties_empty": "ยังไม่มีประกาศ active ในทำเลนี้",
+                "properties_cta": "ดูรายละเอียดประกาศ",
+                "properties_stats_pending": "รอเผยแพร่ข้อมูลยูนิต",
+                "proximity_title": "บริบทการเดินทาง ไลฟ์สไตล์ และระยะหาด",
+                "proximity_transport": "การเดินทาง",
+                "proximity_lifestyle": "ไลฟ์สไตล์",
+                "proximity_beach": "ระยะใกล้หาด",
+                "proximity_transport_pending": "ยังไม่มีบริบทการเดินทาง TODO: เพิ่มจุดเชื่อมต่อคมนาคมที่ยืนยันแล้ว",
+                "proximity_lifestyle_pending": "ยังไม่มีบริบทไลฟ์สไตล์ TODO: เพิ่มจุดเด่นย่านที่อนุมัติแล้ว",
+                "proximity_beach_pending": "ยังไม่มีบริบทระยะหาด TODO: เพิ่มข้อมูลเวลาเดินทางที่ยืนยันแล้ว",
+                "cta_title": "ขั้นตอนถัดไป",
+                "cta_intro": "ต้องการ shortlist สำหรับทำเลนี้ไหม ไปต่อที่ consultation หรือ listings ที่เผยแพร่",
+                "cta_consult": "ปรึกษาเรื่องทำเลนี้",
+                "cta_browse_listings": "ดูรายการประกาศ",
+                "cta_back_hub": "กลับหน้าคู่มือทำเล",
+            }
+        )
+    return copy
+
+
+def _area_page_styles() -> str:
+    return (
+        "<style>"
+        ".crumbs{list-style:none;margin:0;padding:0;display:flex;gap:8px;flex-wrap:wrap;align-items:center}"
+        ".crumbs li{display:inline-flex;align-items:center;gap:8px}.crumbs li+li::before{content:'/';color:#6b7280}"
+        ".area-grid{display:grid;gap:16px;grid-template-columns:1fr}.area-grid-3{display:grid;gap:16px;grid-template-columns:1fr}"
+        ".facts{margin:0;padding-left:18px;display:grid;gap:6px}.area-meta{display:grid;gap:8px}.cta-row{display:flex;gap:10px;flex-wrap:wrap}"
+        ".area-overview{display:grid;gap:16px}.area-proximity{display:grid;gap:16px;grid-template-columns:1fr}"
+        "@media (min-width:768px){.area-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.area-overview{grid-template-columns:repeat(2,minmax(0,1fr))}.area-proximity{grid-template-columns:repeat(2,minmax(0,1fr))}}"
+        "@media (min-width:1200px){.area-grid-3{grid-template-columns:repeat(3,minmax(0,1fr))}.area-proximity{grid-template-columns:repeat(3,minmax(0,1fr))}}"
+        "@media (min-width:1920px){.area-grid-3{grid-template-columns:repeat(4,minmax(0,1fr))}}"
+        "@media (min-width:2560px){.area-grid-3{grid-template-columns:repeat(5,minmax(0,1fr))}}"
+        "</style>"
+    )
+
+
+def _area_tracking_script(*, loading_id: str, error_id: str) -> str:
+    return f"""
+<script>
+(() => {{
+  const locale = document.documentElement.lang || 'en';
+  const path = location.pathname;
+  const endpoint = '/api/v1/events';
+  const loadingEl = document.getElementById('{loading_id}');
+  const runtimeErrorEl = document.getElementById('{error_id}');
+  function compact(raw){{const out={{}};for(const [k,v] of Object.entries(raw||{{}})){{if(v===undefined||v===null)continue;if(Array.isArray(v)&&v.length===0)continue;out[k]=v;}}return out;}}
+  function track(eventName,payload){{const payloadBody=compact(payload);const sourceBody=compact({{app:'flowbiz-public-runtime',env:'runtime',page:path,locale,placement:payloadBody.placement}});return fetch(endpoint,{{method:'POST',headers:{{'content-type':'application/json'}},body:JSON.stringify({{event_name:eventName,source:sourceBody,payload:payloadBody}}),keepalive:true}}).catch(()=>null);}}
+  document.querySelectorAll('[data-event]').forEach((node)=>{{node.addEventListener('click',()=>{{const eventName=node.getAttribute('data-event');if(!eventName)return;const loadingTarget=node.getAttribute('data-loading-target');if(loadingTarget&&loadingEl instanceof HTMLElement&&loadingEl.id===loadingTarget)loadingEl.hidden=false;track(eventName,compact({{label:node.textContent?.trim()||'',placement:node.getAttribute('data-placement')||undefined,cta_id:node.getAttribute('data-cta-id')||undefined,area_slug:node.getAttribute('data-area-slug')||undefined,card_slug:node.getAttribute('data-card-slug')||undefined}}));}});}});
+  window.addEventListener('error',()=>{{if(runtimeErrorEl instanceof HTMLElement)runtimeErrorEl.hidden=false;}});
+}})();
+</script>
+"""
+
+
+def _area_text_value(value: object, locale: str) -> str:
+    if value is None:
+        return ""
+    if isinstance(value, dict):
+        localized = _localized_dict_text(value, locale)
+        if localized:
+            return localized
+        for key in ["text", "body", "summary", "description", "value", "label", "title"]:
+            if key in value:
+                candidate = _area_text_value(value.get(key), locale)
+                if candidate:
+                    return candidate
+        for nested in value.values():
+            candidate = _area_text_value(nested, locale)
+            if candidate:
+                return candidate
+        return ""
+    if isinstance(value, list):
+        parts = [_area_text_value(item, locale) for item in value]
+        return " ".join(part for part in parts if part).strip()
+    return " ".join(str(value).split())
+
+
+def _area_content_text(content: object, locale: str, keys: list[str]) -> str:
+    if not isinstance(content, dict):
+        return ""
+    containers: list[dict] = [content]
+    locale_payload = content.get(locale)
+    if isinstance(locale_payload, dict):
+        containers.insert(0, locale_payload)
+    for fallback_locale in ["en", "th"]:
+        payload = content.get(fallback_locale)
+        if isinstance(payload, dict):
+            containers.append(payload)
+    for key in keys:
+        for container in containers:
+            if key in container:
+                text = _area_text_value(container.get(key), locale)
+                if text:
+                    return text
+    return ""
+
+
+def _area_metrics_cadence(content: object, locale: str) -> str:
+    return _area_content_text(content, locale, ["metrics_update_cadence", "update_cadence", "cadence"])
+
+
+def _has_verified_area_metrics(source_note: str, cadence: str, stat: AreaStatistic | None) -> bool:
+    if stat is None:
+        return False
+    return bool(source_note and cadence and (stat.updated_at or stat.as_of_date))
+
+
+def _area_stats_lookup(db: Session, area_ids: list[UUID]) -> dict[str, AreaStatistic]:
+    if not area_ids:
+        return {}
+    stat_rows = db.scalars(select(AreaStatistic).where(AreaStatistic.area_id.in_(area_ids))).all()
+    return {str(item.area_id): item for item in stat_rows}
+
+
+def _render_area_card(
+    *,
+    locale: str,
+    request: Request,
+    row: Area,
+    copy: dict[str, str],
+    stat: AreaStatistic | None,
+    project_count: int,
+) -> str:
+    media = _safe_media_url(row.cover_image_url or row.hero_image_url, _DEFAULT_MEDIA_FALLBACK, request=request)
+    summary = _localized_dict_text(row.summary, locale) or copy["listing_summary_pending"]
+    source_note = " ".join(str(row.source_note or "").split())
+    cadence_text = _area_metrics_cadence(row.content, locale)
+    metrics_verified = _has_verified_area_metrics(source_note, cadence_text, stat)
+
+    metric_rows: list[str] = []
+    if metrics_verified and stat is not None:
+        total_projects = stat.total_projects if stat.total_projects is not None else project_count
+        if total_projects:
+            metric_rows.append(f"<li><strong>{escape(copy['listing_metric_projects'])}:</strong> {int(total_projects):,}</li>")
+        if stat.avg_price_sqm is not None:
+            metric_rows.append(f"<li><strong>{escape(copy['listing_metric_price'])}:</strong> {escape(_format_money(stat.avg_price_sqm, fallback='-'))}</li>")
+        if stat.avg_roi_percent is not None:
+            metric_rows.append(f"<li><strong>{escape(copy['listing_metric_roi'])}:</strong> {float(stat.avg_roi_percent):.1f}%</li>")
+        if stat.updated_at is not None:
+            metric_rows.append(
+                f"<li><strong>{escape(copy['listing_metric_updated'])}:</strong> {escape(stat.updated_at.strftime('%Y-%m-%d'))}</li>"
+            )
+    if not metric_rows:
+        metric_rows = [f"<li>{escape(copy['listing_metrics_pending'])}</li>"]
+
+    detail_href = f"/{locale}/areas/{row.slug}"
+    browse_href = f"/{locale}/projects?{urlencode({'area': row.slug})}"
+    consult_href = f"/{locale}/contact?{urlencode({'intent': 'consultation', 'area': row.slug})}"
+    source_html = (
+        f"<p class=\"muted\"><strong>{escape(copy['stats_source'])}:</strong> {escape(source_note)}</p>"
+        if source_note
+        else f"<p class=\"muted\">{escape(copy['listing_source_guard'])}</p>"
+    )
+    return (
+        f"<article class=\"card\"><img class=\"media\" src=\"{escape(media)}\" alt=\"{escape(row.name)}\" width=\"640\" height=\"360\" loading=\"lazy\" />"
+        f"<h2>{escape(row.name)}</h2><p>{escape(summary)}</p><ul class=\"facts\">{''.join(metric_rows)}</ul>{source_html}"
+        f"<div class=\"cta-row\"><a class=\"btn\" data-event=\"area_card_click\" data-placement=\"area_guide_grid\" data-cta-id=\"area_card_primary\" data-card-slug=\"{escape(row.slug)}\" data-area-slug=\"{escape(row.slug)}\" data-loading-target=\"area-guide-loading\" href=\"{detail_href}\">{escape(copy['listing_view_area'])}</a>"
+        f"<a class=\"btn btn-secondary-hero\" data-event=\"area_cta_click\" data-placement=\"area_guide_grid\" data-cta-id=\"area_card_browse_projects\" data-area-slug=\"{escape(row.slug)}\" data-loading-target=\"area-guide-loading\" href=\"{browse_href}\">{escape(copy['listing_browse_projects'])}</a>"
+        f"<a class=\"btn btn-secondary-hero\" data-event=\"area_cta_click\" data-placement=\"area_guide_grid\" data-cta-id=\"area_card_consult\" data-area-slug=\"{escape(row.slug)}\" data-loading-target=\"area-guide-loading\" href=\"{consult_href}\">{escape(copy['listing_consult'])}</a></div></article>"
+    )
+
+
+def _render_area_detail_body(
+    *,
+    locale: str,
+    request: Request,
+    row: Area,
+    copy: dict[str, str],
+    summary: str,
+    stat: AreaStatistic | None,
+    projects: list[Project],
+    properties: list[Property],
+) -> str:
+    media = _safe_media_url(row.cover_image_url or row.hero_image_url, _DEFAULT_MEDIA_FALLBACK, request=request)
+    source_note = " ".join(str(row.source_note or "").split())
+    cadence_text = _area_metrics_cadence(row.content, locale)
+    metrics_verified = _has_verified_area_metrics(source_note, cadence_text, stat)
+
+    why_text = _area_content_text(
+        row.content,
+        locale,
+        ["why_live_invest", "why_live_here", "why_invest_here", "why", "investment_thesis", "live_invest"],
+    ) or copy["why_fallback"]
+    transport_text = _area_content_text(row.content, locale, ["transport", "transport_proximity"]) or copy["proximity_transport_pending"]
+    lifestyle_text = _area_content_text(row.content, locale, ["lifestyle", "lifestyle_proximity"]) or copy["proximity_lifestyle_pending"]
+    beach_text = _area_content_text(row.content, locale, ["beach", "beach_proximity"]) or copy["proximity_beach_pending"]
+
+    project_cards = "".join(
+        f"<article class=\"card\"><img class=\"media\" src=\"{escape(_safe_media_url(item.cover_image_url or item.hero_image_url, _DEFAULT_MEDIA_FALLBACK, request=request))}\" alt=\"{escape(item.name)}\" width=\"640\" height=\"360\" loading=\"lazy\" /><h3>{escape(item.name)}</h3><p class=\"muted\">{escape(_format_money(item.starting_price, fallback='-'))}</p><a class=\"btn\" data-event=\"area_cta_click\" data-placement=\"area_detail_projects\" data-cta-id=\"area_project_card\" data-area-slug=\"{escape(row.slug)}\" data-loading-target=\"area-detail-loading\" href=\"/{locale}/projects/{escape(item.slug)}\">{escape(copy['projects_cta'])}</a></article>"
+        for item in projects
+    ) or f"<div class=\"card\">{escape(copy['projects_empty'])}</div>"
+
+    property_cards = "".join(
+        f"<article class=\"card\"><img class=\"media\" src=\"{escape(_safe_media_url(item.cover_image_url or item.cover_image, _DEFAULT_MEDIA_FALLBACK, request=request))}\" alt=\"{escape(_property_title_for_locale(item, locale))}\" width=\"640\" height=\"360\" loading=\"lazy\" /><h3>{escape(_property_title_for_locale(item, locale))}</h3><p class=\"muted\">{escape(_format_money(item.price, fallback='-'))} • {escape(' • '.join(_localized_property_stats(item, locale)) or copy['properties_stats_pending'])}</p><a class=\"btn\" data-event=\"area_cta_click\" data-placement=\"area_detail_properties\" data-cta-id=\"area_property_card\" data-area-slug=\"{escape(row.slug)}\" data-loading-target=\"area-detail-loading\" href=\"/{locale}/property/{escape(item.slug or str(item.id))}\">{escape(copy['properties_cta'])}</a></article>"
+        for item in properties
+    ) or f"<div class=\"card\">{escape(copy['properties_empty'])}</div>"
+
+    stats_rows: list[str] = []
+    stats_meta: list[str] = []
+    if metrics_verified and stat is not None:
+        if stat.avg_price_sqm is not None:
+            stats_rows.append(f"<li><strong>{escape(copy['stats_avg_price'])}:</strong> {escape(_format_money(stat.avg_price_sqm, fallback='-'))}</li>")
+        if stat.avg_rent_monthly is not None:
+            stats_rows.append(f"<li><strong>{escape(copy['stats_avg_rent'])}:</strong> {escape(_format_money(stat.avg_rent_monthly, fallback='-'))}</li>")
+        if stat.avg_roi_percent is not None:
+            stats_rows.append(f"<li><strong>{escape(copy['stats_avg_roi'])}:</strong> {float(stat.avg_roi_percent):.1f}%</li>")
+        if stat.total_projects is not None:
+            stats_rows.append(f"<li><strong>{escape(copy['stats_total_projects'])}:</strong> {int(stat.total_projects):,}</li>")
+        if stat.total_units is not None:
+            stats_rows.append(f"<li><strong>{escape(copy['stats_total_units'])}:</strong> {int(stat.total_units):,}</li>")
+        if source_note:
+            stats_meta.append(f"<p class=\"muted\"><strong>{escape(copy['stats_source'])}:</strong> {escape(source_note)}</p>")
+        if stat.updated_at is not None:
+            stats_meta.append(f"<p class=\"muted\"><strong>{escape(copy['stats_updated'])}:</strong> {escape(stat.updated_at.strftime('%Y-%m-%d'))}</p>")
+        if stat.as_of_date is not None:
+            stats_meta.append(f"<p class=\"muted\"><strong>{escape(copy['stats_as_of'])}:</strong> {escape(stat.as_of_date.isoformat())}</p>")
+        stats_meta.append(f"<p class=\"muted\"><strong>{escape(copy['stats_cadence'])}:</strong> {escape(cadence_text)}</p>")
+    if not stats_rows:
+        stats_rows = [f"<li>{escape(copy['stats_pending'])}</li>"]
+    if not stats_meta:
+        stats_meta = [f"<p class=\"muted\">{escape(copy['stats_todo'])}</p>"]
+
+    lat, lng = _extract_lat_lng(row.map_center if isinstance(row.map_center, dict) else {})
+    if lat is not None and lng is not None:
+        map_html = (
+            f"<p class=\"muted\">{escape(f'Lat {lat:.6f}, Lng {lng:.6f}')}</p>"
+            f"<a class=\"btn\" data-event=\"area_cta_click\" data-placement=\"area_detail_overview\" data-cta-id=\"area_open_map\" data-area-slug=\"{escape(row.slug)}\" href=\"https://maps.google.com/?q={lat:.6f},{lng:.6f}\" target=\"_blank\" rel=\"noopener\">{escape(copy['overview_open_map'])}</a>"
+        )
+    else:
+        map_html = f"<p class=\"muted\">{escape(copy['overview_map_pending'])}</p>"
+
+    consult_href = f"/{locale}/contact?{urlencode({'intent': 'consultation', 'area': row.slug})}"
+    browse_href = f"/{locale}/buy?{urlencode({'area': row.slug})}"
+    breadcrumb = (
+        f"<nav id=\"area-breadcrumb\" class=\"card\" aria-label=\"Breadcrumb\"><ol class=\"crumbs\">"
+        f"<li><a href=\"/{locale}\">{escape(copy['breadcrumb_home'])}</a></li>"
+        f"<li><a href=\"/{locale}/area-guide\">{escape(copy['breadcrumb_hub'])}</a></li>"
+        f"<li aria-current=\"page\">{escape(row.name)}</li></ol></nav>"
+    )
+    return (
+        f"{_area_page_styles()}"
+        f"{breadcrumb}"
+        f"<div id=\"area-detail-loading\" class=\"state-loading\" role=\"status\" aria-live=\"polite\" hidden>{escape(copy['loading'])}</div>"
+        f"<div id=\"area-detail-runtime-error\" class=\"state-error\" hidden>{escape(copy['runtime_error'])}</div>"
+        f"<section id=\"area-overview\" class=\"card area-overview\"><article class=\"area-meta\"><h2>{escape(copy['overview_title'])}</h2><img class=\"media\" src=\"{escape(media)}\" alt=\"{escape(row.name)}\" width=\"1280\" height=\"720\" loading=\"lazy\" /><p>{escape(summary)}</p></article><article class=\"area-meta\"><h3>{escape(copy['overview_map'])}</h3>{map_html}</article></section>"
+        f"<section id=\"area-why-live-invest\" class=\"card\"><h2>{escape(copy['why_title'])}</h2><p>{escape(why_text)}</p></section>"
+        f"<section id=\"area-stats\" class=\"card\"><h2>{escape(copy['stats_title'])}</h2><ul class=\"facts\">{''.join(stats_rows)}</ul>{''.join(stats_meta)}</section>"
+        f"<section id=\"area-featured-projects\" class=\"stack\"><h2>{escape(copy['projects_title'])}</h2><div class=\"area-grid area-grid-3\">{project_cards}</div></section>"
+        f"<section id=\"area-featured-properties\" class=\"stack\"><h2>{escape(copy['properties_title'])}</h2><div class=\"area-grid area-grid-3\">{property_cards}</div></section>"
+        f"<section id=\"area-proximity\" class=\"stack\"><h2>{escape(copy['proximity_title'])}</h2><div class=\"area-proximity\"><article class=\"card\"><h3>{escape(copy['proximity_transport'])}</h3><p>{escape(transport_text)}</p></article><article class=\"card\"><h3>{escape(copy['proximity_lifestyle'])}</h3><p>{escape(lifestyle_text)}</p></article><article class=\"card\"><h3>{escape(copy['proximity_beach'])}</h3><p>{escape(beach_text)}</p></article></div></section>"
+        f"<section id=\"area-cta\" class=\"card\"><h2>{escape(copy['cta_title'])}</h2><p>{escape(copy['cta_intro'])}</p><div class=\"cta-row\"><a class=\"btn\" data-event=\"area_cta_click\" data-placement=\"area_detail_footer\" data-cta-id=\"area_consult\" data-area-slug=\"{escape(row.slug)}\" data-loading-target=\"area-detail-loading\" href=\"{consult_href}\">{escape(copy['cta_consult'])}</a><a class=\"btn btn-secondary-hero\" data-event=\"area_cta_click\" data-placement=\"area_detail_footer\" data-cta-id=\"area_browse_listings\" data-area-slug=\"{escape(row.slug)}\" data-loading-target=\"area-detail-loading\" href=\"{browse_href}\">{escape(copy['cta_browse_listings'])}</a><a class=\"btn btn-secondary-hero\" data-event=\"area_cta_click\" data-placement=\"area_detail_footer\" data-cta-id=\"area_back_hub\" data-area-slug=\"{escape(row.slug)}\" data-loading-target=\"area-detail-loading\" href=\"/{locale}/area-guide\">{escape(copy['cta_back_hub'])}</a></div></section>"
+        f"{_area_tracking_script(loading_id='area-detail-loading', error_id='area-detail-runtime-error')}"
+    )
+
+
 def _render_areas_page(locale: str, request: Request, db: Session) -> HTMLResponse:
-    rows = db.scalars(select(Area).where(Area.deleted_at.is_(None), Area.status == "published").order_by(Area.name.asc()).limit(12)).all()
+    copy = _area_copy(locale)
+    rows = db.scalars(select(Area).where(Area.deleted_at.is_(None), Area.status == "published").order_by(Area.name.asc()).limit(24)).all()
     project_counts = {
-        str(area_id): total
+        str(area_id): int(total)
         for area_id, total in db.execute(
             select(Project.area_id, func.count(Project.id))
             .where(Project.deleted_at.is_(None), Project.status == "published", Project.area_id.is_not(None))
             .group_by(Project.area_id)
         ).all()
     }
-    cards = []
+    stats_by_area = _area_stats_lookup(db, [row.id for row in rows])
+    cards: list[str] = []
     for row in rows:
-        media = _safe_media_url(row.cover_image_url or row.hero_image_url, _DEFAULT_MEDIA_FALLBACK, request=request)
-        summary = _localized_dict_text(row.summary, locale) or ("Area summary pending publication." if locale == "en" else "รอสรุปพื้นที่เผยแพร่")
-        source_note = str(row.source_note or "").strip()
-        source_html = f"<p class=\"muted\">{escape(source_note)}</p>" if source_note else ""
-        area_projects = project_counts.get(str(row.id), 0)
-        area_projects_text = f"{area_projects} published projects" if locale == "en" else f"{area_projects} โครงการที่เผยแพร่"
         cards.append(
-            f"<article class=\"card\"><img class=\"media\" src=\"{escape(media)}\" alt=\"{escape(row.name)}\" width=\"640\" height=\"360\" /><h2>{escape(row.name)}</h2><p class=\"muted\">{escape(area_projects_text)}</p><p>{escape(summary)}</p>{source_html}<a class=\"btn\" href=\"/{locale}/projects\">{'Browse projects in Pattaya' if locale == 'en' else 'ดูโครงการในพัทยา'}</a></article>"
+            _render_area_card(
+                locale=locale,
+                request=request,
+                row=row,
+                copy=copy,
+                stat=stats_by_area.get(str(row.id)),
+                project_count=project_counts.get(str(row.id), 0),
+            )
         )
-    fallback = "Published areas are not available yet. Publish area records to populate this page." if locale == "en" else "ยังไม่มีพื้นที่ที่เผยแพร่ โปรดเผยแพร่ข้อมูลทำเลเพื่อให้หน้านี้แสดงผล"
-    body_content = "".join(cards) if cards else f"<div class=\"card\">{escape(fallback)}</div>"
-    body = f"<section class=\"grid\">{body_content}</section>"
-    title = "Areas" if locale == "en" else "Areas"
-    intro = "Published area coverage from the current system with linked project inventory context." if locale == "en" else "ทำเลที่เผยแพร่จากระบบปัจจุบัน พร้อมบริบทจำนวนโครงการที่มีอยู่"
-    return HTMLResponse(_render_page_shell(locale, title=title, intro=intro, body=body))
+    cards_html = "".join(cards) if cards else f"<div class=\"card\">{escape(copy['listing_empty'])}</div>"
+    breadcrumb = (
+        f"<nav id=\"area-breadcrumb\" class=\"card\" aria-label=\"Breadcrumb\"><ol class=\"crumbs\">"
+        f"<li><a href=\"/{locale}\">{escape(copy['breadcrumb_home'])}</a></li>"
+        f"<li aria-current=\"page\">{escape(copy['breadcrumb_hub'])}</li></ol></nav>"
+    )
+    body = (
+        f"{_area_page_styles()}"
+        f"{breadcrumb}"
+        f"<section id=\"area-guide-overview\" class=\"card\"><h2>{escape(copy['listing_title'])}</h2><p>{escape(copy['listing_intro'])}</p></section>"
+        f"<div id=\"area-guide-loading\" class=\"state-loading\" role=\"status\" aria-live=\"polite\" hidden>{escape(copy['loading'])}</div>"
+        f"<div id=\"area-guide-runtime-error\" class=\"state-error\" hidden>{escape(copy['runtime_error'])}</div>"
+        f"<section id=\"area-guide-listing\" class=\"area-grid area-grid-3\">{cards_html}</section>"
+        f"{_area_tracking_script(loading_id='area-guide-loading', error_id='area-guide-runtime-error')}"
+    )
+    return HTMLResponse(_render_page_shell(locale, title=copy["page_title"], intro=copy["page_intro"], body=body))
 
 
 def _render_area_detail_page(locale: str, request: Request, db: Session, slug: str) -> HTMLResponse:
+    copy = _area_copy(locale)
     row = db.scalar(
         select(Area).where(
             Area.deleted_at.is_(None),
@@ -1396,49 +1780,31 @@ def _render_area_detail_page(locale: str, request: Request, db: Session, slug: s
     )
     if row is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Area not found")
-
-    summary = _localized_dict_text(row.summary, locale) or ("Area summary pending publication." if locale == "en" else "รอสรุปพื้นที่เผยแพร่")
-    media = _safe_media_url(row.cover_image_url or row.hero_image_url, _DEFAULT_MEDIA_FALLBACK, request=request)
+    summary = _localized_dict_text(row.summary, locale) or copy["listing_summary_pending"]
+    stat = db.scalar(select(AreaStatistic).where(AreaStatistic.area_id == row.id))
     projects = db.scalars(
         select(Project)
         .where(Project.deleted_at.is_(None), Project.status == "published", Project.area_id == row.id)
         .order_by(desc(Project.updated_at))
         .limit(8)
     ).all()
-    project_cards = "".join(
-        f"<article class=\"card\"><img class=\"media\" src=\"{escape(_safe_media_url(item.cover_image_url or item.hero_image_url, _DEFAULT_MEDIA_FALLBACK, request=request))}\" alt=\"{escape(item.name)}\" width=\"640\" height=\"360\" loading=\"lazy\" /><h3>{escape(item.name)}</h3><p class=\"muted\">{escape(_format_money(item.starting_price, fallback='-'))}</p><a class=\"btn\" href=\"/{locale}/projects/{escape(item.slug)}\">{'View project details' if locale == 'en' else 'ดูรายละเอียดโครงการ'}</a></article>"
-        for item in projects
-    ) or (
-        f"<div class=\"card\">{'No published projects are linked to this area yet.' if locale == 'en' else 'ยังไม่มีโครงการที่เผยแพร่เชื่อมกับทำเลนี้'}</div>"
+    properties = db.scalars(
+        select(Property)
+        .where(Property.status == "active", Property.area_id == row.id)
+        .order_by(desc(Property.updated_at), desc(Property.created_at))
+        .limit(8)
+    ).all()
+    body = _render_area_detail_body(
+        locale=locale,
+        request=request,
+        row=row,
+        copy=copy,
+        summary=summary,
+        stat=stat,
+        projects=projects,
+        properties=properties,
     )
-
-    map_center = row.map_center if isinstance(row.map_center, dict) else {}
-    lat_raw = map_center.get("lat") or map_center.get("latitude")
-    lng_raw = map_center.get("lng") or map_center.get("longitude")
-    try:
-        lat = float(lat_raw) if lat_raw is not None else None
-    except (TypeError, ValueError):
-        lat = None
-    try:
-        lng = float(lng_raw) if lng_raw is not None else None
-    except (TypeError, ValueError):
-        lng = None
-    if lat is not None and lng is not None:
-        map_html = (
-            f"<p class=\"muted\">{escape(f'Lat {lat:.6f}, Lng {lng:.6f}')}</p>"
-            f"<a class=\"btn\" href=\"https://maps.google.com/?q={lat:.6f},{lng:.6f}\" target=\"_blank\" rel=\"noopener\">{'Open map context' if locale == 'en' else 'เปิดบริบทแผนที่'}</a>"
-        )
-    else:
-        map_html = f"<p>{'Map coordinates are pending publication.' if locale == 'en' else 'ยังไม่มีพิกัดแผนที่ที่เผยแพร่'}</p>"
-
-    body = (
-        f"<section class=\"card\"><img class=\"media\" src=\"{escape(media)}\" alt=\"{escape(row.name)}\" width=\"1280\" height=\"720\" loading=\"lazy\" /><h2>{escape(row.name)}</h2><p>{escape(summary)}</p></section>"
-        f"<section class=\"card\"><h2>{'Location context' if locale == 'en' else 'บริบททำเล'}</h2>{map_html}</section>"
-        f"<section class=\"stack\"><h2>{'Published projects in this area' if locale == 'en' else 'โครงการที่เผยแพร่ในทำเลนี้'}</h2><section class=\"grid\">{project_cards}</section></section>"
-    )
-    title = row.name
-    intro = summary
-    return HTMLResponse(_render_page_shell(locale, title=title, intro=intro, body=body))
+    return HTMLResponse(_render_page_shell(locale, title=row.name, intro=summary, body=body))
 
 
 def _render_developers_page(locale: str, request: Request, db: Session) -> HTMLResponse:
@@ -3060,16 +3426,48 @@ def render_smart_finder(request: Request) -> HTMLResponse:
     return _render_smart_finder_page(_request_locale(request), request)
 
 
+@router.get("/en/area-guide", response_class=HTMLResponse)
+@router.get("/th/area-guide", response_class=HTMLResponse)
+def render_area_guide(request: Request, db: Session = Depends(get_db)) -> HTMLResponse:
+    return _render_areas_page(_request_locale(request), request, db)
+
+
+@router.get("/area-guide", response_class=HTMLResponse)
+def render_area_guide_default_locale(request: Request, db: Session = Depends(get_db)) -> HTMLResponse:
+    return _render_areas_page("en", request, db)
+
+
 @router.get("/en/areas", response_class=HTMLResponse)
 @router.get("/th/areas", response_class=HTMLResponse)
 def render_areas(request: Request, db: Session = Depends(get_db)) -> HTMLResponse:
     return _render_areas_page(_request_locale(request), request, db)
 
 
+@router.get("/areas", response_class=HTMLResponse)
+def render_areas_default_locale(request: Request, db: Session = Depends(get_db)) -> HTMLResponse:
+    return _render_areas_page("en", request, db)
+
+
+@router.get("/en/area-guide/{slug}", response_class=HTMLResponse)
+@router.get("/th/area-guide/{slug}", response_class=HTMLResponse)
+def render_area_guide_detail(slug: str, request: Request, db: Session = Depends(get_db)) -> HTMLResponse:
+    return _render_area_detail_page(_request_locale(request), request, db, slug)
+
+
+@router.get("/area-guide/{slug}", response_class=HTMLResponse)
+def render_area_guide_detail_default_locale(slug: str, request: Request, db: Session = Depends(get_db)) -> HTMLResponse:
+    return _render_area_detail_page("en", request, db, slug)
+
+
 @router.get("/en/areas/{slug}", response_class=HTMLResponse)
 @router.get("/th/areas/{slug}", response_class=HTMLResponse)
 def render_area_detail(slug: str, request: Request, db: Session = Depends(get_db)) -> HTMLResponse:
     return _render_area_detail_page(_request_locale(request), request, db, slug)
+
+
+@router.get("/areas/{slug}", response_class=HTMLResponse)
+def render_area_detail_default_locale(slug: str, request: Request, db: Session = Depends(get_db)) -> HTMLResponse:
+    return _render_area_detail_page("en", request, db, slug)
 
 
 @router.get("/en/developers", response_class=HTMLResponse)

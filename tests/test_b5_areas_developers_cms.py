@@ -82,6 +82,22 @@ def test_b5_areas_cms_crud_publish_reflect_and_i18n_fallback(client) -> None:
             "hero_image_url": hero,
             "summary": {"en": "Area summary EN"},
             "source_note": "source: internal area desk",
+            "content": {
+                "en": {
+                    "why_live_invest": "Strong demand from renters and end-users.",
+                    "transport": "Near city routes and public transport.",
+                    "lifestyle": "Close to shopping and healthcare.",
+                    "beach_proximity": "Short drive to the beach.",
+                    "metrics_update_cadence": "Monthly",
+                },
+                "th": {
+                    "why_live_invest": "มีดีมานด์จากผู้เช่าและผู้ซื้ออยู่อาศัยจริง",
+                    "transport": "ใกล้เส้นทางเข้าเมืองและขนส่งสาธารณะ",
+                    "lifestyle": "ใกล้แหล่งช้อปปิ้งและโรงพยาบาล",
+                    "beach_proximity": "ขับรถไปหาดได้ไม่นาน",
+                    "metrics_update_cadence": "รายเดือน",
+                },
+            },
         },
     )
     assert created.status_code == 201, created.text
@@ -109,7 +125,26 @@ def test_b5_areas_cms_crud_publish_reflect_and_i18n_fallback(client) -> None:
     patched = client.patch(
         f"/admin/areas/{area_id}",
         headers=headers,
-        json={"summary": {"en": "Area summary EN", "th": "สรุปโซน"}, "source_note": "source: updated"},
+        json={
+            "summary": {"en": "Area summary EN", "th": "สรุปโซน"},
+            "source_note": "source: updated",
+            "content": {
+                "en": {
+                    "why_live_invest": "Updated EN why-live-invest",
+                    "transport": "Updated EN transport",
+                    "lifestyle": "Updated EN lifestyle",
+                    "beach_proximity": "Updated EN beach proximity",
+                    "metrics_update_cadence": "Monthly",
+                },
+                "th": {
+                    "why_live_invest": "อัปเดตเหตุผลการอยู่อาศัย/ลงทุน",
+                    "transport": "อัปเดตข้อมูลการเดินทาง",
+                    "lifestyle": "อัปเดตข้อมูลไลฟ์สไตล์",
+                    "beach_proximity": "อัปเดตข้อมูลระยะหาด",
+                    "metrics_update_cadence": "รายเดือน",
+                },
+            },
+        },
     )
     assert patched.status_code == 200, patched.text
     assert patched.json()["area"]["summary"]["th"] == "สรุปโซน"

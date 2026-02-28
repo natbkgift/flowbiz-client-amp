@@ -7,8 +7,12 @@ from datetime import UTC, datetime
 from typing import Any
 from uuid import uuid4
 
-from fastapi import APIRouter, status
-from pydantic import BaseModel, ConfigDict, Field
+from fastapi import APIRouter, Depends, Request, status
+from pydantic import BaseModel, ConfigDict
+from sqlalchemy.orm import Session
+
+from packages.core.database import get_db
+from packages.core.models import AnalyticsEvent
 
 router = APIRouter(prefix="/api/v1", tags=["events"])
 logger = logging.getLogger("flowbiz.events")
@@ -25,6 +29,11 @@ _RESERVED_EVENT_FIELDS = {
     "actor",
     "context",
     "payload",
+}
+
+_EVENT_TAXONOMY_REQUIRED: dict[str, list[str]] = {
+    "area_card_click": ["source.locale", "source.page", "payload.placement", "payload.area_slug"],
+    "area_cta_click": ["source.locale", "source.page", "payload.placement", "payload.cta_id", "payload.area_slug"],
 }
 
 
@@ -95,9 +104,46 @@ def _redacted_log_fields(normalized: dict[str, Any]) -> dict[str, Any]:
     }
 
 
+def _dot_get(payload: dict[str, Any], key: str) -> Any:
+    current: Any = payload
+    for part in key.split("."):
+        if not isinstance(current, dict):
+            return None
+        current = current.get(part)
+    return current
+
+
+def _taxonomy_eval(normalized: dict[str, Any]) -> dict[str, Any]:
+    event_name = str(normalized.get("event_name") or "").strip()
+    required = _EVENT_TAXONOMY_REQUIRED.get(event_name) or []
+    if not required:
+        return {"event_name": event_name, "required": [], "missing": [], "valid": True}
+
+    envelope = normalized.get("body") if isinstance(normalized.get("body"), dict) else {}
+    missing: list[str] = []
+    for key in required:
+        value = _dot_get(envelope, key)
+        if value is None:
+            missing.append(key)
+            continue
+        if isinstance(value, str) and not value.strip():
+            missing.append(key)
+    return {
+        "event_name": event_name,
+        "required": required,
+        "missing": missing,
+        "valid": len(missing) == 0,
+    }
+
+
 @router.post("/events", status_code=status.HTTP_202_ACCEPTED)
-def ingest_event(payload: EventIngestRequest) -> dict[str, Any]:
+def ingest_event(
+    payload: EventIngestRequest,
+    request: Request,
+    db: Session = Depends(get_db),
+) -> dict[str, Any]:
     normalized = _normalize_event(payload)
+    taxonomy = _taxonomy_eval(normalized)
     logger.info(
         json.dumps(
             {
@@ -108,11 +154,40 @@ def ingest_event(payload: EventIngestRequest) -> dict[str, Any]:
                 "event_id": normalized["event_id"],
                 "event_name": normalized["event_name"],
                 "idempotency_key": normalized["idempotency_key"],
+                "taxonomy_valid": taxonomy["valid"],
+                "taxonomy_missing": taxonomy["missing"],
                 **_redacted_log_fields(normalized),
             },
             ensure_ascii=False,
         )
     )
+    try:
+        actor = normalized["actor"] if isinstance(normalized.get("actor"), dict) else {}
+        source = normalized["body"].get("source") if isinstance(normalized["body"].get("source"), dict) else {}
+        payload_body = normalized["payload"] if isinstance(normalized.get("payload"), dict) else {}
+        row = AnalyticsEvent(
+            event_type=normalized["event_name"],
+            page=normalized.get("path"),
+            session_id=str(actor.get("session_id") or "").strip() or None,
+            user_agent=str(actor.get("user_agent") or request.headers.get("user-agent") or "").strip() or None,
+            payload={
+                "schema_version": normalized["schema_version"],
+                "event_id": normalized["event_id"],
+                "event_name": normalized["event_name"],
+                "occurred_at": normalized["occurred_at"],
+                "idempotency_key": normalized["idempotency_key"],
+                "source": source,
+                "actor": actor,
+                "payload": payload_body,
+                "taxonomy": taxonomy,
+            },
+        )
+        db.add(row)
+        db.commit()
+    except Exception:
+        db.rollback()
+        logger.exception("event_persist_failed", extra={"event_name": normalized["event_name"]})
+
     return {
         "ok": True,
         "endpoint": "/api/v1/events",
@@ -125,4 +200,6 @@ def ingest_event(payload: EventIngestRequest) -> dict[str, Any]:
         "path": normalized["path"],
         "occurred_at": normalized["occurred_at"],
         "received_at": datetime.now(UTC).isoformat(),
+        "taxonomy_valid": taxonomy["valid"],
+        "taxonomy_missing_fields": taxonomy["missing"],
     }

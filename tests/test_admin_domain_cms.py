@@ -82,6 +82,23 @@ def test_flow_a_publish_reflects_public_lists(client) -> None:
             "city": "Pattaya",
             "status": "draft",
             "hero_image_url": hero,
+            "source_note": "internal desk",
+            "content": {
+                "en": {
+                    "why_live_invest": "Family-friendly demand and active renter pool.",
+                    "transport": "Connected to city routes and key roads.",
+                    "lifestyle": "Nearby retail and daily convenience anchors.",
+                    "beach_proximity": "Beach reachable in under 15 minutes.",
+                    "metrics_update_cadence": "Monthly",
+                },
+                "th": {
+                    "why_live_invest": "เหมาะกับครอบครัวและมีดีมานด์ผู้เช่าต่อเนื่อง",
+                    "transport": "เชื่อมเส้นทางหลักเข้าเมืองได้สะดวก",
+                    "lifestyle": "ใกล้ศูนย์การค้าและสิ่งอำนวยความสะดวกประจำวัน",
+                    "beach_proximity": "เดินทางถึงหาดได้ภายในประมาณ 15 นาที",
+                    "metrics_update_cadence": "รายเดือน",
+                },
+            },
         },
     )
     assert created_area.status_code == 201, created_area.text
@@ -101,6 +118,20 @@ def test_flow_a_publish_reflects_public_lists(client) -> None:
     assert created_developer.status_code == 201, created_developer.text
     developer_id = created_developer.json()["developer"]["id"]
     developer_slug = created_developer.json()["developer"]["slug"]
+
+    upsert_stat = client.put(
+        f"/admin/areas/{area_id}/statistics",
+        headers=headers,
+        json={
+            "avg_price_sqm": 118000,
+            "avg_rent_monthly": 29000,
+            "avg_roi_percent": 6.2,
+            "total_projects": 8,
+            "total_units": 2100,
+            "as_of_date": "2026-02-28",
+        },
+    )
+    assert upsert_stat.status_code == 200, upsert_stat.text
 
     publish_area = client.post(f"/admin/areas/{area_id}/publish", headers=headers)
     assert publish_area.status_code == 200, publish_area.text
@@ -136,9 +167,27 @@ def test_flow_b_statistics_and_summary_reflect_public_endpoints(client) -> None:
         json={
             "name": "Pratumnak Heights",
             "slug": f"pratumnak-{uuid4()}",
-            "status": "published",
+            "status": "draft",
             "hero_image_url": hero,
-            "content": {"en": {"title": "Pratumnak"}, "th": {"title": "พระตำหนัก"}},
+            "source_note": "internal market desk",
+            "content": {
+                "en": {
+                    "title": "Pratumnak",
+                    "why_live_invest": "Strong owner-occupier + rental mix.",
+                    "transport": "Fast road links to city center.",
+                    "lifestyle": "Close to dining and wellness clusters.",
+                    "beach_proximity": "Easy access to nearby beaches.",
+                    "metrics_update_cadence": "Monthly",
+                },
+                "th": {
+                    "title": "พระตำหนัก",
+                    "why_live_invest": "มีดีมานด์ทั้งอยู่อาศัยจริงและปล่อยเช่า",
+                    "transport": "เชื่อมเข้าเมืองได้สะดวก",
+                    "lifestyle": "ใกล้ร้านอาหารและแหล่งสุขภาพ",
+                    "beach_proximity": "เข้าถึงชายหาดใกล้เคียงได้ง่าย",
+                    "metrics_update_cadence": "รายเดือน",
+                },
+            },
         },
     )
     assert created_area.status_code == 201, created_area.text
@@ -158,6 +207,9 @@ def test_flow_b_statistics_and_summary_reflect_public_endpoints(client) -> None:
         },
     )
     assert upsert_stat.status_code == 200, upsert_stat.text
+
+    publish_area = client.post(f"/admin/areas/{area_id}/publish", headers=headers)
+    assert publish_area.status_code == 200, publish_area.text
 
     stat_public = client.get(f"/v1/areas/{area_slug}/statistics")
     assert stat_public.status_code == 200, stat_public.text
@@ -266,3 +318,31 @@ def test_domain_defaults_are_aligned_when_status_omitted(client) -> None:
     )
     assert developer_resp.status_code == 201, developer_resp.text
     assert developer_resp.json()["developer"]["status"] == "inactive"
+
+
+def test_area_publish_blocked_when_required_area_guide_fields_are_missing(client) -> None:
+    headers = _make_admin_headers()
+    hero = f"/media/library/{uuid4()}.jpg"
+    _add_media_asset(path=hero, rights_status="approved", approval_status="approved")
+
+    created_area = client.post(
+        "/admin/areas",
+        headers=headers,
+        json={
+            "name": "Incomplete Area",
+            "slug": f"incomplete-{uuid4()}",
+            "status": "draft",
+            "hero_image_url": hero,
+        },
+    )
+    assert created_area.status_code == 201, created_area.text
+    area_id = created_area.json()["area"]["id"]
+
+    publish = client.post(f"/admin/areas/{area_id}/publish", headers=headers)
+    assert publish.status_code == 422, publish.text
+    detail = publish.json().get("detail") or {}
+    assert detail.get("code") == "area_publish_requirements_missing"
+    missing = detail.get("missing") or []
+    assert "source_note" in missing
+    assert "statistics" in missing
+    assert "content.en.why_live_invest" in missing

@@ -9,13 +9,14 @@ import pytest
 
 from packages.core.auth import create_access_token, hash_password
 from packages.core.database import SessionLocal, init_db
-from packages.core.models import HomeComposerConfig, Project, Property, User
+from packages.core.models import AnalyticsEvent, HomeComposerConfig, Project, Property, User
 
 
 @pytest.fixture(autouse=True)
 def _cleanup_tables() -> Generator[None, None, None]:
     init_db()
     with SessionLocal() as db:
+        db.query(AnalyticsEvent).delete()
         db.query(HomeComposerConfig).delete()
         db.query(Project).delete()
         db.query(Property).delete()
@@ -23,6 +24,7 @@ def _cleanup_tables() -> Generator[None, None, None]:
         db.commit()
     yield
     with SessionLocal() as db:
+        db.query(AnalyticsEvent).delete()
         db.query(HomeComposerConfig).delete()
         db.query(Project).delete()
         db.query(Property).delete()
@@ -586,3 +588,29 @@ def test_b6_events_endpoint_accepts_spec_envelope(client) -> None:
     assert payload["locale"] == "en"
     assert payload["path"] == "/en"
     assert len(payload["idempotency_key"]) == 64
+
+
+def test_b6_events_endpoint_persists_area_taxonomy_payload(client) -> None:
+    response = client.post(
+        "/api/v1/events",
+        json={
+            "event_name": "area_cta_click",
+            "source": {"app": "flowbiz-public-runtime", "page": "/en/area-guide/jomtien", "locale": "en", "placement": "area_detail_footer"},
+            "actor": {"session_id": "sess-area", "user_agent": "pytest"},
+            "payload": {"placement": "area_detail_footer", "cta_id": "area_consult", "area_slug": "jomtien"},
+        },
+    )
+    assert response.status_code == 202, response.text
+    body = response.json()
+    assert body["taxonomy_valid"] is True
+    assert body["taxonomy_missing_fields"] == []
+
+    with SessionLocal() as db:
+        row = db.query(AnalyticsEvent).filter(AnalyticsEvent.event_type == "area_cta_click").first()
+        assert row is not None
+        payload = row.payload or {}
+        assert payload.get("event_name") == "area_cta_click"
+        assert (payload.get("source") or {}).get("locale") == "en"
+        assert (payload.get("payload") or {}).get("area_slug") == "jomtien"
+        taxonomy = payload.get("taxonomy") or {}
+        assert taxonomy.get("valid") is True
