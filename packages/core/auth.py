@@ -1,31 +1,33 @@
 from __future__ import annotations
 
-import base64
 import hashlib
 import hmac
-import json
+import os
 from datetime import UTC, datetime, timedelta
 
-SECRET = "flowbiz-dev-secret"
+import bcrypt
+import jwt
+from jwt import InvalidTokenError
+
+SECRET = os.getenv("JWT_SECRET_KEY", "flowbiz-dev-secret")
+ALGORITHM = os.getenv("JWT_ALGORITHM", "HS256")
+EXPIRE_MINUTES = int(os.getenv("JWT_EXPIRE_MINUTES", "720"))
 
 
-def hash_password(password: str) -> str:
+def _legacy_hash(password: str) -> str:
     payload = f"flowbiz::{password}".encode("utf-8")
     return hashlib.sha256(payload).hexdigest()
 
 
+def hash_password(password: str) -> str:
+    return bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt()).decode("utf-8")
+
+
 def verify_password(password: str, password_hash: str) -> bool:
-    expected = hash_password(password)
+    if password_hash.startswith("$2"):
+        return bcrypt.checkpw(password.encode("utf-8"), password_hash.encode("utf-8"))
+    expected = _legacy_hash(password)
     return hmac.compare_digest(expected, password_hash)
-
-
-def _b64url_encode(raw: bytes) -> str:
-    return base64.urlsafe_b64encode(raw).decode("ascii").rstrip("=")
-
-
-def _b64url_decode(raw: str) -> bytes:
-    padding = "=" * (-len(raw) % 4)
-    return base64.urlsafe_b64decode(raw + padding)
 
 
 def create_access_token(
@@ -38,27 +40,13 @@ def create_access_token(
     payload = {
         "sub": subject,
         "role": role,
-        "exp": int(expires.timestamp()),
+        "exp": expires,
     }
-    body = json.dumps(payload, separators=(",", ":"), sort_keys=True).encode("utf-8")
-    sig = hmac.new(SECRET.encode("utf-8"), body, hashlib.sha256).digest()
-    return f"{_b64url_encode(body)}.{_b64url_encode(sig)}"
+    return jwt.encode(payload, SECRET, algorithm=ALGORITHM)
 
 
 def decode_access_token(token: str) -> dict:
     try:
-        body_part, sig_part = token.split(".", 1)
-        body = _b64url_decode(body_part)
-        sig = _b64url_decode(sig_part)
-    except Exception as exc:  # pragma: no cover - defensive
-        raise ValueError("invalid token format") from exc
-
-    expected_sig = hmac.new(SECRET.encode("utf-8"), body, hashlib.sha256).digest()
-    if not hmac.compare_digest(sig, expected_sig):
-        raise ValueError("invalid token signature")
-
-    payload = json.loads(body.decode("utf-8"))
-    exp = int(payload.get("exp", 0))
-    if exp < int(datetime.now(UTC).timestamp()):
-        raise ValueError("token expired")
-    return payload
+        return jwt.decode(token, SECRET, algorithms=[ALGORITHM])
+    except InvalidTokenError as exc:
+        raise ValueError("invalid token") from exc
