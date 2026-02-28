@@ -19,6 +19,7 @@ from sqlalchemy.orm import Session
 
 from apps.api.dependencies.auth import get_current_admin
 from packages.core.database import get_db
+from packages.core.media_library import require_local_media_path
 from packages.core.models import (
     Area,
     CompanyInfo,
@@ -27,6 +28,8 @@ from packages.core.models import (
     Project,
     Property,
     PropertyImportAudit,
+    TeamMember,
+    Testimonial,
     User,
 )
 from packages.core.project_media_governance import evaluate_project_media_governance
@@ -35,6 +38,7 @@ from packages.core.schemas.media_library import MediaAssetItem
 from packages.core.schemas.property_api import (
     CompanyInfoCreate,
     CompanyInfoItem,
+    CompanyListResponse,
     CompanyInfoUpdate,
     PaginationMeta,
     PropertyAdminListResponse,
@@ -49,6 +53,14 @@ from packages.core.schemas.property_api import (
     PropertyPublishResponse,
     PropertyStatus,
     PropertyUpdate,
+    TeamMemberCreate,
+    TeamMemberItem,
+    TeamMemberListResponse,
+    TeamMemberUpdate,
+    TestimonialCreate,
+    TestimonialItem,
+    TestimonialListResponse,
+    TestimonialUpdate,
 )
 from packages.core.schemas.property_import import PropertyImportResult, PropertyImportRow
 
@@ -1440,6 +1452,27 @@ def create_company_info(
     return CompanyInfoItem.model_validate(info)
 
 
+@router.get("/company", response_model=CompanyListResponse)
+def list_company_info(
+    db: Session = Depends(get_db),
+    _admin: User = Depends(get_current_admin),
+) -> CompanyListResponse:
+    rows = db.scalars(select(CompanyInfo).order_by(CompanyInfo.slug.asc())).all()
+    return CompanyListResponse(data=[CompanyInfoItem.model_validate(row) for row in rows])
+
+
+@router.get("/company/{slug}", response_model=CompanyInfoItem)
+def get_company_info(
+    slug: str,
+    db: Session = Depends(get_db),
+    _admin: User = Depends(get_current_admin),
+) -> CompanyInfoItem:
+    row = db.scalar(select(CompanyInfo).where(CompanyInfo.slug == slug))
+    if row is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Company info not found")
+    return CompanyInfoItem.model_validate(row)
+
+
 @router.patch("/company/{slug}", response_model=CompanyInfoItem)
 def update_company_info(
     slug: str,
@@ -1458,3 +1491,221 @@ def update_company_info(
     _commit_or_conflict(db, detail="Company info with this slug already exists.")
     db.refresh(info)
     return CompanyInfoItem.model_validate(info)
+
+
+@router.get("/team-members", response_model=TeamMemberListResponse)
+def list_team_members(
+    db: Session = Depends(get_db),
+    _admin: User = Depends(get_current_admin),
+) -> TeamMemberListResponse:
+    rows = db.scalars(
+        select(TeamMember)
+        .where(TeamMember.deleted_at.is_(None))
+        .order_by(TeamMember.display_order.asc(), TeamMember.name.asc())
+    ).all()
+    return TeamMemberListResponse(data=[TeamMemberItem.model_validate(row) for row in rows])
+
+
+@router.post("/team-members", response_model=TeamMemberItem, status_code=status.HTTP_201_CREATED)
+def create_team_member(
+    payload: TeamMemberCreate,
+    db: Session = Depends(get_db),
+    _admin: User = Depends(get_current_admin),
+) -> TeamMemberItem:
+    data = payload.model_dump()
+    photo_url = data.get("photo_url")
+    if photo_url is not None:
+        data["photo_url"] = require_local_media_path(photo_url, field_name="photo_url")
+    row = TeamMember(**data)
+    db.add(row)
+    db.commit()
+    db.refresh(row)
+    return TeamMemberItem.model_validate(row)
+
+
+@router.get("/team-members/{member_id}", response_model=TeamMemberItem)
+def get_team_member(
+    member_id: UUID,
+    db: Session = Depends(get_db),
+    _admin: User = Depends(get_current_admin),
+) -> TeamMemberItem:
+    row = db.get(TeamMember, member_id)
+    if row is None or row.deleted_at is not None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Team member not found")
+    return TeamMemberItem.model_validate(row)
+
+
+@router.patch("/team-members/{member_id}", response_model=TeamMemberItem)
+def update_team_member(
+    member_id: UUID,
+    payload: TeamMemberUpdate,
+    db: Session = Depends(get_db),
+    _admin: User = Depends(get_current_admin),
+) -> TeamMemberItem:
+    row = db.get(TeamMember, member_id)
+    if row is None or row.deleted_at is not None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Team member not found")
+
+    updates = payload.model_dump(exclude_unset=True)
+    if "photo_url" in updates and updates["photo_url"] is not None:
+        updates["photo_url"] = require_local_media_path(updates["photo_url"], field_name="photo_url")
+    for field, value in updates.items():
+        setattr(row, field, value)
+
+    db.add(row)
+    db.commit()
+    db.refresh(row)
+    return TeamMemberItem.model_validate(row)
+
+
+@router.post("/team-members/{member_id}/publish", response_model=TeamMemberItem)
+def publish_team_member(
+    member_id: UUID,
+    db: Session = Depends(get_db),
+    _admin: User = Depends(get_current_admin),
+) -> TeamMemberItem:
+    row = db.get(TeamMember, member_id)
+    if row is None or row.deleted_at is not None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Team member not found")
+    row.status = "active"
+    db.add(row)
+    db.commit()
+    db.refresh(row)
+    return TeamMemberItem.model_validate(row)
+
+
+@router.post("/team-members/{member_id}/unpublish", response_model=TeamMemberItem)
+def unpublish_team_member(
+    member_id: UUID,
+    db: Session = Depends(get_db),
+    _admin: User = Depends(get_current_admin),
+) -> TeamMemberItem:
+    row = db.get(TeamMember, member_id)
+    if row is None or row.deleted_at is not None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Team member not found")
+    row.status = "draft"
+    db.add(row)
+    db.commit()
+    db.refresh(row)
+    return TeamMemberItem.model_validate(row)
+
+
+@router.delete("/team-members/{member_id}")
+def delete_team_member(
+    member_id: UUID,
+    db: Session = Depends(get_db),
+    _admin: User = Depends(get_current_admin),
+) -> dict:
+    row = db.get(TeamMember, member_id)
+    if row is None or row.deleted_at is not None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Team member not found")
+    row.deleted_at = datetime.now(timezone.utc)
+    db.add(row)
+    db.commit()
+    return {"deleted": True}
+
+
+@router.get("/testimonials", response_model=TestimonialListResponse)
+def list_testimonials(
+    db: Session = Depends(get_db),
+    _admin: User = Depends(get_current_admin),
+) -> TestimonialListResponse:
+    rows = db.scalars(
+        select(Testimonial)
+        .where(Testimonial.deleted_at.is_(None))
+        .order_by(Testimonial.display_order.asc(), Testimonial.created_at.desc())
+    ).all()
+    return TestimonialListResponse(data=[TestimonialItem.model_validate(row) for row in rows])
+
+
+@router.post("/testimonials", response_model=TestimonialItem, status_code=status.HTTP_201_CREATED)
+def create_testimonial(
+    payload: TestimonialCreate,
+    db: Session = Depends(get_db),
+    _admin: User = Depends(get_current_admin),
+) -> TestimonialItem:
+    row = Testimonial(**payload.model_dump())
+    db.add(row)
+    db.commit()
+    db.refresh(row)
+    return TestimonialItem.model_validate(row)
+
+
+@router.get("/testimonials/{testimonial_id}", response_model=TestimonialItem)
+def get_testimonial(
+    testimonial_id: UUID,
+    db: Session = Depends(get_db),
+    _admin: User = Depends(get_current_admin),
+) -> TestimonialItem:
+    row = db.get(Testimonial, testimonial_id)
+    if row is None or row.deleted_at is not None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Testimonial not found")
+    return TestimonialItem.model_validate(row)
+
+
+@router.patch("/testimonials/{testimonial_id}", response_model=TestimonialItem)
+def update_testimonial(
+    testimonial_id: UUID,
+    payload: TestimonialUpdate,
+    db: Session = Depends(get_db),
+    _admin: User = Depends(get_current_admin),
+) -> TestimonialItem:
+    row = db.get(Testimonial, testimonial_id)
+    if row is None or row.deleted_at is not None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Testimonial not found")
+
+    updates = payload.model_dump(exclude_unset=True)
+    for field, value in updates.items():
+        setattr(row, field, value)
+
+    db.add(row)
+    db.commit()
+    db.refresh(row)
+    return TestimonialItem.model_validate(row)
+
+
+@router.post("/testimonials/{testimonial_id}/publish", response_model=TestimonialItem)
+def publish_testimonial(
+    testimonial_id: UUID,
+    db: Session = Depends(get_db),
+    _admin: User = Depends(get_current_admin),
+) -> TestimonialItem:
+    row = db.get(Testimonial, testimonial_id)
+    if row is None or row.deleted_at is not None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Testimonial not found")
+    row.status = "published"
+    db.add(row)
+    db.commit()
+    db.refresh(row)
+    return TestimonialItem.model_validate(row)
+
+
+@router.post("/testimonials/{testimonial_id}/unpublish", response_model=TestimonialItem)
+def unpublish_testimonial(
+    testimonial_id: UUID,
+    db: Session = Depends(get_db),
+    _admin: User = Depends(get_current_admin),
+) -> TestimonialItem:
+    row = db.get(Testimonial, testimonial_id)
+    if row is None or row.deleted_at is not None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Testimonial not found")
+    row.status = "draft"
+    db.add(row)
+    db.commit()
+    db.refresh(row)
+    return TestimonialItem.model_validate(row)
+
+
+@router.delete("/testimonials/{testimonial_id}")
+def delete_testimonial(
+    testimonial_id: UUID,
+    db: Session = Depends(get_db),
+    _admin: User = Depends(get_current_admin),
+) -> dict:
+    row = db.get(Testimonial, testimonial_id)
+    if row is None or row.deleted_at is not None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Testimonial not found")
+    row.deleted_at = datetime.now(timezone.utc)
+    db.add(row)
+    db.commit()
+    return {"deleted": True}

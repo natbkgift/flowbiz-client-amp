@@ -39,6 +39,12 @@ _ALLOWED_EXTERNAL_CTA_HOSTS = {
     "flowbiz.com",
     "www.flowbiz.com",
 }
+_ALLOWED_MEDIA_HOSTS = {
+    "flowbiz.com",
+    "www.flowbiz.com",
+    "localhost",
+    "127.0.0.1",
+}
 
 
 class LocalizedText(BaseModel):
@@ -184,11 +190,72 @@ class VideoConfig(BaseModel):
     def _validate_video_paths(cls, value: list[str]) -> list[str]:
         out: list[str] = []
         for item in value:
-            validated = _validate_local_media_path(item)
+            validated = _validate_media_url(item)
             if validated is None:
                 continue
             out.append(validated)
         return out
+
+
+class HeroSecondaryCtaConfig(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    text: LocalizedText = Field(default_factory=LocalizedText)
+    href: str = "/projects"
+
+    @field_validator("href")
+    @classmethod
+    def _validate_href(cls, value: str) -> str:
+        return CtaConfig._validate_href(value)
+
+
+class PathCardConfig(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    key: Literal["invest", "buy", "rent", "sell"]
+    fit: LocalizedText = Field(default_factory=LocalizedText)
+    outcome: LocalizedText = Field(default_factory=LocalizedText)
+    href: str
+
+    @field_validator("href")
+    @classmethod
+    def _validate_href(cls, value: str) -> str:
+        return CtaConfig._validate_href(value)
+
+
+class PathSelectorConfig(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    cards: list[PathCardConfig] = Field(default_factory=list)
+
+
+class TrustMicroItem(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    key: str
+    text: LocalizedText = Field(default_factory=LocalizedText)
+
+
+class VideoItemConfig(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    key: str
+    video_path: str | None = None
+    thumbnail_path: str | None = None
+    poster_path: str | None = None
+
+    @field_validator("video_path", "thumbnail_path", "poster_path")
+    @classmethod
+    def _validate_media_paths(cls, value: str | None) -> str | None:
+        return _validate_media_url(value)
+
+
+class BottomConsultationConfig(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    promise_copy: LocalizedText = Field(default_factory=LocalizedText)
+    trust_note: LocalizedText = Field(default_factory=LocalizedText)
+    submit_text: LocalizedText = Field(default_factory=LocalizedText)
 
 
 class HomeComposerSchema(BaseModel):
@@ -202,6 +269,11 @@ class HomeComposerSchema(BaseModel):
     proof_assets: list[ProofAsset] = Field(default_factory=list)
     reviews: ReviewsConfig = Field(default_factory=ReviewsConfig)
     video: VideoConfig = Field(default_factory=VideoConfig)
+    hero_secondary_cta: HeroSecondaryCtaConfig = Field(default_factory=HeroSecondaryCtaConfig)
+    path_selector: PathSelectorConfig = Field(default_factory=PathSelectorConfig)
+    trust_micro_strip: list[TrustMicroItem] = Field(default_factory=list)
+    video_items: list[VideoItemConfig] = Field(default_factory=list)
+    consultation: BottomConsultationConfig = Field(default_factory=BottomConsultationConfig)
     updated_at: datetime | None = None
 
     @model_validator(mode="after")
@@ -235,17 +307,44 @@ class HomeComposerSchema(BaseModel):
         return self
 
 
-def _validate_local_media_path(value: str | None) -> str | None:
+def _validate_media_url(value: str | None) -> str | None:
     if value is None:
         return None
-    path = str(value).strip()
-    if not path:
+    raw = str(value).strip()
+    if not raw:
         return None
-    if not path.startswith("/media/"):
-        raise ValueError("media path must use local /media/ prefix")
-    if "://" in path:
-        raise ValueError("external media URLs are not allowed")
-    return path
+
+    if raw.startswith("data:"):
+        return raw
+
+    if raw.startswith("/"):
+        if raw.startswith("//"):
+            raise ValueError("non-allowlisted media host")
+        return raw
+
+    parsed = urlparse(raw)
+    if parsed.scheme in {"http", "https"} and parsed.hostname:
+        if parsed.hostname.lower() in _ALLOWED_MEDIA_HOSTS:
+            return raw
+        raise ValueError("non-allowlisted media host")
+
+    raise ValueError("invalid media URL")
+
+
+def _validate_local_media_path(value: str | None) -> str | None:
+    validated = _validate_media_url(value)
+    if validated is None:
+        return None
+    if validated.startswith("/") and validated.startswith("/media/"):
+        return validated
+    if validated.startswith("/") and validated.startswith("/storage/"):
+        return validated
+    if validated.startswith("data:"):
+        return validated
+    parsed = urlparse(validated)
+    if parsed.scheme in {"http", "https"} and parsed.hostname and parsed.hostname.lower() in _ALLOWED_MEDIA_HOSTS:
+        return validated
+    raise ValueError("non-allowlisted media host")
 
 
 def _coerce_string_list(value: Any) -> list[str]:
@@ -324,6 +423,53 @@ def default_home_config() -> HomeComposerSchema:
             "proof_assets": [],
             "reviews": {"source": "manual", "source_ids": []},
             "video": {"source": "disabled", "video_paths": []},
+            "hero_secondary_cta": {
+                "text": {"en": "Browse Curated Projects", "th": "ดูโครงการคัดสรร"},
+                "href": "/projects",
+            },
+            "path_selector": {
+                "cards": [
+                    {
+                        "key": "invest",
+                        "fit": {"en": "For yield-focused investors", "th": "สำหรับนักลงทุนที่เน้นผลตอบแทน"},
+                        "outcome": {"en": "Get vetted picks + risk notes", "th": "รับรายการคัดกรองพร้อมบันทึกความเสี่ยง"},
+                        "href": "/investment?intent=invest",
+                    },
+                    {
+                        "key": "buy",
+                        "fit": {"en": "For end-buyers moving to Pattaya", "th": "สำหรับผู้ซื้อเพื่ออยู่อาศัย"},
+                        "outcome": {"en": "Receive shortlist + legal steps", "th": "รับ shortlist พร้อมขั้นตอนกฎหมาย"},
+                        "href": "/projects?intent=buy",
+                    },
+                    {
+                        "key": "rent",
+                        "fit": {"en": "For lifestyle renters and expats", "th": "สำหรับผู้เช่าและชาวต่างชาติ"},
+                        "outcome": {"en": "Compare ready-to-move options", "th": "เปรียบเทียบยูนิตพร้อมเข้าอยู่"},
+                        "href": "/rent?intent=rent",
+                    },
+                    {
+                        "key": "sell",
+                        "fit": {"en": "For owners preparing an exit", "th": "สำหรับเจ้าของที่ต้องการขาย"},
+                        "outcome": {"en": "Get pricing and go-to-market plan", "th": "รับแผนตั้งราคาและนำออกตลาด"},
+                        "href": "/sell?intent=sell",
+                    },
+                ]
+            },
+            "trust_micro_strip": [
+                {"key": "media", "text": {"en": "Local-only media", "th": "สื่อท้องถิ่นจริง"}},
+                {"key": "foreign", "text": {"en": "Foreign ownership guidance", "th": "คำแนะนำสิทธิ์ต่างชาติ"}},
+                {"key": "fees", "text": {"en": "Clear fees & steps", "th": "ค่าใช้จ่ายและขั้นตอนชัดเจน"}},
+                {"key": "sla", "text": {"en": "Reply within 1 business day", "th": "ตอบกลับภายใน 1 วันทำการ"}},
+            ],
+            "video_items": [],
+            "consultation": {
+                "promise_copy": {
+                    "en": "Tell us your budget and timeline—we’ll send a curated shortlist and floor plans within 1 business day.",
+                    "th": "แจ้งงบและไทม์ไลน์ แล้วเราจะส่ง shortlist และ floor plan ภายใน 1 วันทำการ",
+                },
+                "trust_note": {"en": "No spam • Reply within 1 business day", "th": "ไม่สแปม • ตอบกลับภายใน 1 วันทำการ"},
+                "submit_text": {"en": "Request Consultation", "th": "ขอคำปรึกษา"},
+            },
             "updated_at": None,
         }
     )
@@ -423,6 +569,45 @@ def normalize_home_config(raw_config: dict[str, Any] | None) -> HomeComposerSche
             "video_paths": _coerce_string_list(video.get("video_paths") or video.get("paths")),
         }
 
+    hero_secondary_cta = incoming.get("hero_secondary_cta")
+    if isinstance(hero_secondary_cta, dict):
+        base["hero_secondary_cta"] = {
+            "text": _coerce_localized_text(hero_secondary_cta.get("text") or hero_secondary_cta.get("label")),
+            "href": _coerce_text(hero_secondary_cta.get("href")) or "/projects",
+        }
+
+    path_selector = incoming.get("path_selector")
+    if isinstance(path_selector, dict) and isinstance(path_selector.get("cards"), list):
+        cards: list[dict[str, Any]] = []
+        for card in path_selector.get("cards", []):
+            if not isinstance(card, dict):
+                continue
+            cards.append(
+                {
+                    "key": _coerce_text(card.get("key")) or "invest",
+                    "fit": _coerce_localized_text(card.get("fit")),
+                    "outcome": _coerce_localized_text(card.get("outcome")),
+                    "href": _coerce_text(card.get("href")) or "/projects",
+                }
+            )
+        base["path_selector"] = {"cards": cards}
+
+    trust_micro_strip = incoming.get("trust_micro_strip")
+    if isinstance(trust_micro_strip, list):
+        base["trust_micro_strip"] = trust_micro_strip
+
+    video_items = incoming.get("video_items")
+    if isinstance(video_items, list):
+        base["video_items"] = video_items
+
+    consultation = incoming.get("consultation")
+    if isinstance(consultation, dict):
+        base["consultation"] = {
+            "promise_copy": _coerce_localized_text(consultation.get("promise_copy")),
+            "trust_note": _coerce_localized_text(consultation.get("trust_note")),
+            "submit_text": _coerce_localized_text(consultation.get("submit_text")),
+        }
+
     updated_at = incoming.get("updated_at")
     if updated_at is not None:
         base["updated_at"] = updated_at
@@ -481,8 +666,34 @@ def resolve_home_runtime(*, db: Session, config: HomeComposerSchema, locale: str
                 "text": resolve_text_for_locale(config.hero.cta.text, locale=locale, fallback="Explore Projects"),
                 "href": config.hero.cta.href,
             },
-            "media_path": config.hero.media_path,
+            "media_path": _sanitize_runtime_media_url(config.hero.media_path),
         },
+        "hero_secondary_cta": {
+            "text": resolve_text_for_locale(
+                config.hero_secondary_cta.text,
+                locale=locale,
+                fallback="Browse Curated Projects",
+            ),
+            "href": config.hero_secondary_cta.href,
+        },
+        "path_selector": {
+            "cards": [
+                {
+                    "key": card.key,
+                    "fit": resolve_text_for_locale(card.fit, locale=locale, fallback=card.key),
+                    "outcome": resolve_text_for_locale(card.outcome, locale=locale, fallback=""),
+                    "href": card.href,
+                }
+                for card in config.path_selector.cards
+            ]
+        },
+        "trust_micro_strip": [
+            {
+                "key": item.key,
+                "text": resolve_text_for_locale(item.text, locale=locale, fallback=item.key),
+            }
+            for item in config.trust_micro_strip
+        ],
         "featured_projects": featured,
         "investment_picks": investment,
         "trust_blocks": [
@@ -499,7 +710,7 @@ def resolve_home_runtime(*, db: Session, config: HomeComposerSchema, locale: str
             {
                 "key": asset.key,
                 "label": resolve_text_for_locale(asset.label, locale=locale, fallback=asset.key),
-                "media_path": asset.media_path,
+                "media_path": _sanitize_runtime_media_url(asset.media_path),
                 "updated_at": asset.updated_at.isoformat() if asset.updated_at else None,
             }
             for asset in config.proof_assets
@@ -510,7 +721,33 @@ def resolve_home_runtime(*, db: Session, config: HomeComposerSchema, locale: str
         },
         "video": {
             "source": config.video.source,
-            "video_paths": list(config.video.video_paths),
+            "video_paths": [_sanitize_runtime_media_url(item) for item in config.video.video_paths if _sanitize_runtime_media_url(item)],
+        },
+        "video_items": [
+            {
+                "key": item.key,
+                "video_path": _sanitize_runtime_media_url(item.video_path),
+                "thumbnail_path": _sanitize_runtime_media_url(item.thumbnail_path),
+                "poster_path": _sanitize_runtime_media_url(item.poster_path),
+            }
+            for item in config.video_items
+        ],
+        "consultation": {
+            "promise_copy": resolve_text_for_locale(
+                config.consultation.promise_copy,
+                locale=locale,
+                fallback="Tell us your budget and timeline—we’ll send a curated shortlist and floor plans within 1 business day.",
+            ),
+            "trust_note": resolve_text_for_locale(
+                config.consultation.trust_note,
+                locale=locale,
+                fallback="No spam • Reply within 1 business day",
+            ),
+            "submit_text": resolve_text_for_locale(
+                config.consultation.submit_text,
+                locale=locale,
+                fallback="Request Consultation",
+            ),
         },
         "updated_at": config.updated_at.isoformat() if config.updated_at else None,
     }
@@ -649,8 +886,8 @@ def _project_payload(row: Project) -> dict[str, Any]:
         "id": str(row.id),
         "slug": row.slug,
         "name": row.name,
-        "cover_image_url": row.cover_image_url,
-        "hero_image_url": row.hero_image_url,
+        "cover_image_url": _sanitize_runtime_media_url(row.cover_image_url),
+        "hero_image_url": _sanitize_runtime_media_url(row.hero_image_url),
     }
 
 
@@ -659,8 +896,15 @@ def _property_payload(row: Property) -> dict[str, Any]:
         "id": str(row.id),
         "slug": row.slug,
         "title": row.title,
-        "cover_image_url": row.cover_image_url,
+        "cover_image_url": _sanitize_runtime_media_url(row.cover_image_url),
         "price": float(row.price) if row.price is not None else None,
         "currency": row.currency,
         "price_period": row.price_period,
     }
+
+
+def _sanitize_runtime_media_url(value: str | None) -> str | None:
+    try:
+        return _validate_media_url(value)
+    except ValueError:
+        return None

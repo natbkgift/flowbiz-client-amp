@@ -1,0 +1,51 @@
+[
+  {
+    "slug": "about",
+    "title": "About Asset Management Property",
+    "meta_title": "About Asset Management Property",
+    "meta_description": "Company-owned overview migrated from the approved source assetmp.net.",
+    "content": "Asset Management Property describes itself on assetmp.net as one of the trusted providers of real estate services across Thailand.\n\nThe approved company-owned source states the business serves Pattaya, Bangkok, Phuket, Koh Samui, and Hua Hin, with more than nine years of dedicated industry experience across residences, condominiums, commercial investments, and holiday homes.\n\nThe same source highlights a multilingual team covering English, Chinese, Russian, German, Arabic, Dutch, and Thai, alongside services that include property investment, asset management, legal processes, and market analytics.\n\nThis record is a repo-backed baseline for runtime use and remains editable in admin for final editorial approval."
+  },
+  {
+    "slug": "how-we-work",
+    "title": "How We Work",
+    "meta_title": "How Asset Management Property Works",
+    "meta_description": "Current company workflow baseline for the A2 runtime.",
+    "content": "The approved company-owned source describes a hands-on approach that combines property scouting, legal due diligence, negotiation support, and after-sales service.\n\nIn the current A2 runtime, the workflow starts with purpose, budget range, and timeline. The team reviews the request against published inventory, responds with the clearest next step, and continues through consultation and follow-up.\n\nThis baseline is kept factual to both the company-owned source and the runtime implementation, and remains editable in admin for final editorial approval."
+  },
+  {
+    "slug": "contact",
+    "title": "Contact Asset Management Property",
+    "meta_title": "Contact Asset Management Property",
+    "meta_description": "Company contact details migrated from the approved source assetmp.net.",
+    "content": "Website: https://www.assetmp.net/\nAddress: 8/44 North Pattaya Rd., Chon Buri, Thailand\nEmail: mail@assetmp.net\nPhone: 063 453 3526\nCoverage: Pattaya, Bangkok, Phuket, Koh Samui, Hua Hin\n\nUse the consultation form on Home if you want the current runtime workflow with tracking and CRM capture."
+  },
+  {
+    "slug": "privacy",
+    "title": "Privacy Policy",
+    "meta_title": "Privacy Policy",
+    "meta_description": "Baseline privacy content migrated from the approved source assetmp.net.",
+    "content": "Effective date on the approved company-owned source: June 24, 2025.\n\nAsset Management Property states that this privacy policy covers personal data collected when users interact with the website chat function. The source lists examples such as full name, email address, telephone number, and other information voluntarily disclosed during chat.\n\nThe same source states that session-based cookies may be used only to maintain conversation continuity and that no tracking or profiling cookies are used for marketing or behavioral analytics within that chat flow.\n\nThe company-owned policy states the data is used to respond to inquiries, facilitate communication, improve chat functionality and security, and comply with legal obligations. It also lists PDPA rights including access, rectification, deletion under certain conditions, objection or restriction, withdrawal of consent, and complaint rights.\n\nPrivacy contact on the approved source: dpo@assetmanagementproperty.co.th.\n\nThis record is a migrated legal baseline for runtime use and should still be reviewed in admin before final closure."
+  },
+  {
+    "slug": "terms",
+    "title": "Terms",
+    "meta_title": "Terms",
+    "meta_description": "Terms page requires final legal-approved body.",
+    "content": "Final legal-approved terms content still needs to be published in admin.\n\nThe current runtime keeps this record in the system so the page is editable and does not dead-end, but final legal text must replace this baseline before final sign-off."
+  },
+  {
+    "slug": "cookies",
+    "title": "Cookies",
+    "meta_title": "Cookies",
+    "meta_description": "Cookies page requires final legal-approved body.",
+    "content": "Final legal-approved cookies content still needs to be published in admin.\n\nThe current runtime keeps this record in the system so the page is editable and does not dead-end, but final legal text must replace this baseline before final sign-off."
+  },
+  {
+    "slug": "investment-methodology",
+    "title": "Investment Methodology",
+    "meta_title": "Investment Methodology",
+    "meta_description": "Current runtime methodology baseline for investment selections.",
+    "content": "Published investment cards are shown only when the system has local media, published pricing context, and enough comparison fields to avoid blank cards.\n\nFigures shown in runtime are estimates, not guarantees. The methodology page should be extended in admin when the final editorial and compliance wording is approved."
+  }
+]

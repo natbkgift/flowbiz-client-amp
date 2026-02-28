@@ -388,3 +388,119 @@ def test_b6_backward_compatibility_with_legacy_payload(client) -> None:
     assert project_id in first_section["project_ids"]
     assert payload["resolved"]["hero"]["headline"] == "Legacy Headline"
     assert payload["resolved"]["featured_projects"][0]["id"] == project_id
+
+
+def test_b6_additive_contract_fields_and_media_allowlist(client) -> None:
+    headers = _make_admin_headers()
+
+    created = client.post(
+        "/admin/home-composer",
+        headers=headers,
+        json={
+            "page_key": "home",
+            "locale": "en",
+            "status": "published",
+            "version": 7,
+            "config": {
+                "hero_secondary_cta": {
+                    "text": {"en": "Browse Curated Projects", "th": "ดูโครงการคัดสรร"},
+                    "href": "/projects",
+                },
+                "path_selector": {
+                    "cards": [
+                        {
+                            "key": "invest",
+                            "fit": {"en": "For yield-focused investors"},
+                            "outcome": {"en": "Get vetted picks + risk notes"},
+                            "href": "/investment?intent=invest",
+                        },
+                        {
+                            "key": "buy",
+                            "fit": {"en": "For end-buyers moving to Pattaya"},
+                            "outcome": {"en": "Receive shortlist + legal steps"},
+                            "href": "/projects?intent=buy",
+                        },
+                        {
+                            "key": "rent",
+                            "fit": {"en": "For lifestyle renters and expats"},
+                            "outcome": {"en": "Compare ready-to-move options"},
+                            "href": "/rent?intent=rent",
+                        },
+                        {
+                            "key": "sell",
+                            "fit": {"en": "For owners preparing an exit"},
+                            "outcome": {"en": "Get pricing and go-to-market plan"},
+                            "href": "/sell?intent=sell",
+                        },
+                    ]
+                },
+                "trust_micro_strip": [
+                    {"key": "media", "text": {"en": "Local-only media"}},
+                    {"key": "sla", "text": {"en": "Reply within 1 business day"}},
+                ],
+                "video_items": [
+                    {
+                        "key": "v1",
+                        "video_path": "/media/library/videos/video-1.mp4",
+                        "thumbnail_path": "https://flowbiz.com/media/library/videos/thumb-1.webp",
+                        "poster_path": "/media/library/videos/poster-1.webp",
+                    }
+                ],
+                "consultation": {
+                    "promise_copy": {
+                        "en": "Tell us your budget and timeline—we’ll send a curated shortlist and floor plans within 1 business day."
+                    },
+                    "trust_note": {"en": "No spam • Reply within 1 business day"},
+                    "submit_text": {"en": "Request Consultation"},
+                },
+            },
+        },
+    )
+    assert created.status_code == 201, created.text
+
+    public_home = client.get("/v1/home-composer?page_key=home&locale=en")
+    assert public_home.status_code == 200, public_home.text
+    payload = public_home.json()["resolved"]
+
+    assert payload["hero_secondary_cta"]["text"] == "Browse Curated Projects"
+    assert payload["hero_secondary_cta"]["href"] == "/projects"
+    assert [item["key"] for item in payload["path_selector"]["cards"]] == ["invest", "buy", "rent", "sell"]
+    assert payload["trust_micro_strip"][0]["text"] == "Local-only media"
+    assert payload["video_items"][0]["thumbnail_path"] == "https://flowbiz.com/media/library/videos/thumb-1.webp"
+    assert payload["consultation"]["submit_text"] == "Request Consultation"
+
+    invalid_external = client.post(
+        "/admin/home-composer",
+        headers=headers,
+        json={
+            "page_key": "home",
+            "locale": "en",
+            "status": "draft",
+            "config": {
+                "video_items": [
+                    {
+                        "key": "bad",
+                        "thumbnail_path": "https://evil.test/video-thumb.webp",
+                    }
+                ]
+            },
+        },
+    )
+    assert invalid_external.status_code == 422, invalid_external.text
+
+
+def test_b6_events_endpoint_lock(client) -> None:
+    response = client.post(
+        "/api/v1/events",
+        json={
+            "event": "home_hero_primary_click",
+            "label": "Request Consultation",
+            "locale": "en",
+            "path": "/en",
+        },
+    )
+    assert response.status_code == 202, response.text
+    payload = response.json()
+    assert payload["ok"] is True
+    assert payload["endpoint"] == "/api/v1/events"
+    assert payload["event"] == "home_hero_primary_click"

@@ -6,9 +6,11 @@
   "scripts": {
     "a1:serve": "node scripts/a1-public-server.mjs",
     "a1:matrix": "node scripts/run-a1-with-harness.mjs",
-    "test:a1": "vitest run __tests__/a1_shared_foundation.test.ts __tests__/a1_validation_matrix_runner.test.ts"
+    "test:a1": "vitest run __tests__/a1_shared_foundation.test.ts __tests__/a1_validation_matrix_runner.test.ts __tests__/a2_home_runtime.test.ts",
+    "test:a2:browser": "node scripts/run-a2-browser-events-check.mjs"
   },
   "devDependencies": {
+    "playwright": "^1.54.2",
     "vitest": "^4.0.18"
   }
 }

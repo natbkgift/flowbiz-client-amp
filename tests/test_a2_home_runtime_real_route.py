@@ -1,0 +1,313 @@
+from __future__ import annotations
+
+import re
+from datetime import UTC, datetime
+from pathlib import Path
+from urllib.parse import urlparse
+from uuid import uuid4
+
+from packages.core.database import SessionLocal
+from packages.core.models import Area, Article, CompanyInfo, HomeComposerConfig, Project, TeamMember, Testimonial as TestimonialModel
+
+
+_LOCAL_WEBP = "/media/library/variants/05032d16-54ae-45f4-bb89-3ae1fc2fa52f.webp"
+TestimonialModel.__test__ = False
+
+
+def _extract_attrs(html: str, attr: str) -> list[str]:
+    return [m.group(1) for m in re.finditer(rf'{attr}="([^"]+)"', html, flags=re.IGNORECASE)]
+
+
+def _is_allowed_media(url: str, *, host: str) -> bool:
+    value = str(url or "").strip()
+    if not value:
+        return True
+    if value.startswith("data:"):
+        return True
+    if value.startswith("/"):
+        return not value.startswith("//")
+    parsed = urlparse(value)
+    if parsed.scheme not in {"http", "https"}:
+        return False
+    return (parsed.hostname or "").lower() in {
+        host.lower(),
+        "localhost",
+        "127.0.0.1",
+        "flowbiz.com",
+        "www.flowbiz.com",
+    }
+
+
+def _reset_home_configs() -> None:
+    with SessionLocal() as db:
+        db.query(HomeComposerConfig).filter(HomeComposerConfig.page_key == "home").delete()
+        db.commit()
+
+
+def _seed_runtime_content() -> None:
+    with SessionLocal() as db:
+        db.query(CompanyInfo).filter(CompanyInfo.slug.in_(["about", "how-we-work", "contact", "privacy", "terms", "cookies", "investment-methodology"])).delete(synchronize_session=False)
+        area = Area(
+            slug=f"runtime-area-{uuid4()}",
+            name="Central Pattaya",
+            status="published",
+            summary={"en": "Published area summary", "th": "สรุปพื้นที่ที่เผยแพร่"},
+            source_note="Internal source note",
+            cover_image_url=_LOCAL_WEBP,
+        )
+        db.add(area)
+        db.flush()
+
+        project = Project(
+            slug=f"runtime-project-{uuid4()}",
+            name="Harbor View",
+            status="published",
+            area_id=area.id,
+            property_type="condo",
+            starting_price=3500000,
+            cover_image_url=_LOCAL_WEBP,
+            summary={"en": "Published project summary", "th": "สรุปโครงการที่เผยแพร่"},
+        )
+        article = Article(
+            slug=f"runtime-guide-{uuid4()}",
+            category="guide",
+            status="published",
+            title={"en": "Published market guide", "th": "ไกด์ตลาดที่เผยแพร่"},
+            excerpt={"en": "Published article excerpt", "th": "บทสรุปบทความที่เผยแพร่"},
+            body_md={"en": "Body", "th": "Body"},
+            hero_image_url=_LOCAL_WEBP,
+            published_at=datetime.now(UTC),
+        )
+        about = CompanyInfo(
+            title="About FlowBiz",
+            slug="about",
+            content="Published company overview",
+            meta_description="Published about metadata",
+        )
+        how_we_work = CompanyInfo(
+            title="How we work",
+            slug="how-we-work",
+            content="Published workflow detail",
+            meta_description="Published workflow metadata",
+        )
+        contact = CompanyInfo(
+            title="Contact",
+            slug="contact",
+            content="Published contact details",
+            meta_description="Published contact metadata",
+        )
+        privacy = CompanyInfo(title="Privacy Policy", slug="privacy", content="Published privacy content")
+        terms = CompanyInfo(title="Terms", slug="terms", content="Published terms content")
+        cookies = CompanyInfo(title="Cookies", slug="cookies", content="Published cookies content")
+        methodology = CompanyInfo(
+            title="Investment Methodology",
+            slug="investment-methodology",
+            content="Published methodology detail",
+            meta_description="Published methodology metadata",
+        )
+        team = TeamMember(
+            name="Nara Flow",
+            role_title="Property Advisor",
+            bio={"en": "Published team bio", "th": "ประวัติทีมที่เผยแพร่"},
+            status="active",
+        )
+        review = TestimonialModel(
+            status="published",
+            persona="buyer",
+            intent="buy",
+            quote="Published review quote",
+            attribution_name="Verified Buyer",
+            context="Client from Germany",
+        )
+        db.add_all([project, article, about, how_we_work, contact, privacy, terms, cookies, methodology, team, review])
+        db.commit()
+
+
+def test_a2_real_runtime_route_exists_and_safe_default_copy(client) -> None:
+    _reset_home_configs()
+    response = client.get("/en")
+    assert response.status_code == 200, response.text
+    assert response.headers["content-type"].startswith("text/html")
+
+    html = response.text
+    assert html.count("<h1") == 1
+    assert "Curated Pattaya Property with Clear Next Steps" in html
+    assert "Media from our system, practical guidance, and clear paths for buyers, investors, renters, and sellers in Pattaya." in html
+    assert "Request Consultation" in html
+    assert "Browse Curated Projects" in html
+    assert "Media from our system" in html
+    assert "Reply within 1 business day" not in html
+    assert "FlowBiz Pattaya" not in html
+
+
+def test_a2_real_runtime_uses_published_home_config_and_real_routes(client) -> None:
+    _reset_home_configs()
+    with SessionLocal() as db:
+        db.add(
+            HomeComposerConfig(
+                page_key="home",
+                locale="en",
+                status="published",
+                version=42,
+                published_at=datetime.now(UTC),
+                config={
+                    "hero": {
+                        "headline": {"en": "Published Home Headline"},
+                        "subheadline": {"en": "Published Home Subheadline"},
+                        "cta": {"text": {"en": "Request Consultation"}, "href": "/contact"},
+                    },
+                    "hero_secondary_cta": {"text": {"en": "Browse Curated Projects"}, "href": "/projects"},
+                    "trust_micro_strip": [{"key": "support", "text": {"en": "Team-reviewed copy"}}],
+                    "consultation": {"trust_note": {"en": "Handled through published workflow note."}},
+                },
+            )
+        )
+        db.commit()
+
+    response = client.get("/en")
+    assert response.status_code == 200, response.text
+    html = response.text
+
+    assert "Published Home Headline" in html
+    assert "Published Home Subheadline" in html
+    assert "Team-reviewed copy" in html
+    assert "Handled through published workflow note." in html
+    assert 'href="/en/contact"' in html
+    assert 'href="/en/projects"' in html
+
+
+def test_a2_real_runtime_th_fallback_and_core_sections(client) -> None:
+    _reset_home_configs()
+    response = client.get("/th")
+    assert response.status_code == 200, response.text
+    html = response.text
+    assert 'lang="th"' in html
+    for section_id in [
+        "hero-title",
+        "intent-title",
+        "featured-title",
+        "investment-title",
+        "why-pattaya-title",
+        "trust-title",
+        "insights-title",
+        "reviews-title",
+        "video-title",
+        "consult-title",
+    ]:
+        assert section_id in html
+
+
+def test_a2_real_runtime_media_host_allowlist(client) -> None:
+    _reset_home_configs()
+    response = client.get("/en")
+    assert response.status_code == 200, response.text
+    html = response.text
+    host = "testserver"
+    for value in [*_extract_attrs(html, "src"), *_extract_attrs(html, "srcset"), *_extract_attrs(html, "poster")]:
+        for candidate in [part.strip().split()[0] for part in value.split(",") if part.strip()]:
+            assert _is_allowed_media(candidate, host=host), f"Disallowed media URL in runtime HTML: {candidate}"
+
+
+def test_a2_why_pattaya_responsive_css_and_no_overflow_hooks(client) -> None:
+    _reset_home_configs()
+    response = client.get("/en")
+    assert response.status_code == 200, response.text
+    html = response.text
+    assert ".metrics{display:grid;gap:12px;grid-template-columns:1fr}" in html
+    assert "@media (min-width:768px){.grid-2{grid-template-columns:repeat(2,minmax(0,1fr))} .metrics{grid-template-columns:repeat(2,minmax(0,1fr))}}" in html
+    assert "@media (min-width:1024px){.grid-3{grid-template-columns:repeat(3,minmax(0,1fr))} .grid-5{grid-template-columns:repeat(3,minmax(0,1fr))} .metrics{grid-template-columns:repeat(3,minmax(0,1fr))}}" in html
+
+
+def test_a2_accessibility_states_and_forward_paths(client) -> None:
+    _reset_home_configs()
+    response = client.get("/en")
+    assert response.status_code == 200, response.text
+    html = response.text
+    assert ":focus-visible" in html
+    assert 'id="consultation-form"' in html
+    assert 'id="form-loading"' in html
+    assert 'id="form-error"' in html
+
+    hrefs = [href for href in _extract_attrs(html, "href") if href.startswith("/")]
+    assert hrefs
+    for href in hrefs:
+        path = href.split("#", 1)[0] or "/"
+        check = client.get(path)
+        assert check.status_code == 200, f"Dead-end href found: {href}"
+
+
+def test_a2_runtime_does_not_mask_unknown_paths(client) -> None:
+    _reset_home_configs()
+    assert client.get("/foo").status_code == 404
+    assert client.get("/favicon.ico").status_code == 404
+    assert client.get("/robots.txt").status_code == 404
+
+
+def test_a2_runtime_destination_routes_render_published_data(client) -> None:
+    _reset_home_configs()
+    _seed_runtime_content()
+
+    home = client.get("/en")
+    assert home.status_code == 200, home.text
+    assert "Published review quote" in home.text
+    assert 'href="/en/about#client-reviews"' in home.text
+
+    projects = client.get("/en/projects")
+    assert projects.status_code == 200, projects.text
+    assert "Harbor View" in projects.text
+    assert "Published project summary" in projects.text
+
+    areas = client.get("/en/areas")
+    assert areas.status_code == 200, areas.text
+    assert "Central Pattaya" in areas.text
+    assert "Published area summary" in areas.text
+
+    insights = client.get("/en/insights")
+    assert insights.status_code == 200, insights.text
+    assert "Published market guide" in insights.text
+
+    about = client.get("/en/about")
+    assert about.status_code == 200, about.text
+    assert "Published company overview" in about.text
+    assert "Published workflow detail" in about.text
+    assert "Nara Flow" in about.text
+
+    contact = client.get("/en/contact")
+    assert contact.status_code == 200, contact.text
+    assert "Published contact details" in contact.text
+
+    privacy = client.get("/en/privacy")
+    assert privacy.status_code == 200, privacy.text
+    assert "Published privacy content" in privacy.text
+
+    terms = client.get("/en/terms")
+    assert terms.status_code == 200, terms.text
+    assert "Published terms content" in terms.text
+
+    cookies = client.get("/en/cookies")
+    assert cookies.status_code == 200, cookies.text
+    assert "Published cookies content" in cookies.text
+
+    methodology = client.get("/en/investment/methodology")
+    assert methodology.status_code == 200, methodology.text
+    assert "Published methodology detail" in methodology.text
+
+
+def test_a2_runtime_serves_local_webp_with_image_content_type(client) -> None:
+    response = client.get(_LOCAL_WEBP)
+    assert response.status_code == 200, response.text
+    assert response.headers["content-type"].startswith("image/webp")
+
+
+def test_a2_runtime_serves_local_avif_with_image_content_type(client) -> None:
+    avif_relative = f"library/test-a2-{uuid4()}.avif"
+    avif_path = Path("storage/media") / avif_relative
+    avif_path.parent.mkdir(parents=True, exist_ok=True)
+    avif_path.write_bytes(b"avif-test")
+    try:
+        response = client.get(f"/media/{avif_relative}")
+        assert response.status_code == 200, response.text
+        assert response.headers["content-type"].startswith("image/avif")
+    finally:
+        if avif_path.exists():
+            avif_path.unlink()

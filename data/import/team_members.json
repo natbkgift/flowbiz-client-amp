@@ -1,0 +1,62 @@
+[
+  {
+    "name": "Pawat M. Phothisarn",
+    "role_title": "Managing Director",
+    "bio": {
+      "en": "Published on the approved company-owned source assetmp.net. Final localized biography should be reviewed in admin.",
+      "th": "เผยแพร่ชื่อและตำแหน่งบนเว็บไซต์บริษัท assetmp.net แล้ว โดยประวัติฉบับสุดท้ายควรตรวจทานและปรับใน admin"
+    },
+    "display_order": 1,
+    "status": "active"
+  },
+  {
+    "name": "Natcha Piya",
+    "role_title": "Sales Executive, Chinese",
+    "bio": {
+      "en": "Published on the approved company-owned source assetmp.net. Final localized biography should be reviewed in admin.",
+      "th": "เผยแพร่ชื่อและตำแหน่งบนเว็บไซต์บริษัท assetmp.net แล้ว โดยประวัติฉบับสุดท้ายควรตรวจทานและปรับใน admin"
+    },
+    "display_order": 2,
+    "status": "active"
+  },
+  {
+    "name": "Doren T",
+    "role_title": "Sales Executive, Chinese",
+    "bio": {
+      "en": "Published on the approved company-owned source assetmp.net. Final localized biography should be reviewed in admin.",
+      "th": "เผยแพร่ชื่อและตำแหน่งบนเว็บไซต์บริษัท assetmp.net แล้ว โดยประวัติฉบับสุดท้ายควรตรวจทานและปรับใน admin"
+    },
+    "display_order": 3,
+    "status": "active"
+  },
+  {
+    "name": "Thanyarat V",
+    "role_title": "Sales Executive",
+    "bio": {
+      "en": "Published on the approved company-owned source assetmp.net. Final localized biography should be reviewed in admin.",
+      "th": "เผยแพร่ชื่อและตำแหน่งบนเว็บไซต์บริษัท assetmp.net แล้ว โดยประวัติฉบับสุดท้ายควรตรวจทานและปรับใน admin"
+    },
+    "display_order": 4,
+    "status": "active"
+  },
+  {
+    "name": "Penjan W",
+    "role_title": "Sales Executive",
+    "bio": {
+      "en": "Published on the approved company-owned source assetmp.net. Final localized biography should be reviewed in admin.",
+      "th": "เผยแพร่ชื่อและตำแหน่งบนเว็บไซต์บริษัท assetmp.net แล้ว โดยประวัติฉบับสุดท้ายควรตรวจทานและปรับใน admin"
+    },
+    "display_order": 5,
+    "status": "active"
+  },
+  {
+    "name": "Suphitchaya B",
+    "role_title": "Sales Executive",
+    "bio": {
+      "en": "Published on the approved company-owned source assetmp.net. Final localized biography should be reviewed in admin.",
+      "th": "เผยแพร่ชื่อและตำแหน่งบนเว็บไซต์บริษัท assetmp.net แล้ว โดยประวัติฉบับสุดท้ายควรตรวจทานและปรับใน admin"
+    },
+    "display_order": 6,
+    "status": "active"
+  }
+]

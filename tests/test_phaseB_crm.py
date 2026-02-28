@@ -1,6 +1,9 @@
 from datetime import UTC, datetime, timedelta
 from uuid import UUID
 
+from sqlalchemy import func, select
+
+from apps.api.routes.admin_crm import _spam_filter_clause
 from packages.core.database import SessionLocal
 from packages.core.models import Inquiry
 
@@ -206,6 +209,61 @@ def test_admin_csv_export_has_safe_fields(client):
     assert "Sensitive body should not be exported" not in csv_text
 
 
+def test_create_inquiry_accepts_budget_band_and_timeline(client):
+    inquiry_resp = client.post(
+        "/v1/inquiries",
+        json={
+            "name": "Budget User",
+            "email": "budget@example.com",
+            "message": "Need shortlist",
+            "source_page": "/en",
+            "intent": "invest",
+            "budget_band": "3m_6m",
+            "timeline": "3_6m",
+            "persona": "investor",
+            "tags": ["home_form"],
+        },
+    )
+    assert inquiry_resp.status_code == 201
+    inquiry = inquiry_resp.json()
+    assert inquiry["budget_band"] == "3m_6m"
+    assert inquiry["timeline"] == "3_6m"
+
+
+def test_inquiry_legacy_payload_and_additive_payload_are_both_supported(client):
+    legacy = client.post(
+        "/v1/inquiries",
+        json={
+            "name": "Legacy User",
+            "email": "legacy@example.com",
+            "message": "Legacy payload",
+            "source_page": "/en",
+        },
+    )
+    assert legacy.status_code == 201, legacy.text
+    legacy_body = legacy.json()
+    assert legacy_body["budget_band"] is None
+    assert legacy_body["timeline"] is None
+
+    additive = client.post(
+        "/v1/inquiries",
+        json={
+            "name": "Additive User",
+            "email": "additive@example.com",
+            "message": "Additive payload",
+            "source_page": "/th",
+            "budget_band": "6m_10m",
+            "timeline": "0_3m",
+            "persona": "investor",
+            "tags": ["home_form", "a2_runtime"],
+        },
+    )
+    assert additive.status_code == 201, additive.text
+    additive_body = additive.json()
+    assert additive_body["budget_band"] == "6m_10m"
+    assert additive_body["timeline"] == "0_3m"
+
+
 def test_admin_inquiry_is_spam_filter_has_deterministic_total(client):
     token = _login_token(client)
     headers = {"Authorization": f"Bearer {token}"}
@@ -252,7 +310,11 @@ def test_admin_inquiry_is_spam_filter_has_deterministic_total(client):
     assert spam_filtered.status_code == 200
     spam_body = spam_filtered.json()
     spam_ids = {item["id"] for item in spam_body["data"]}
-    assert spam_body["meta"]["total"] == len(spam_body["data"])
+    with SessionLocal() as db:
+        expected_spam_total = db.scalar(
+            select(func.count()).select_from(Inquiry).where(_spam_filter_clause(is_spam=True))
+        )
+    assert spam_body["meta"]["total"] == expected_spam_total
     assert spam_id in spam_ids
     assert clean_id not in spam_ids
 
@@ -263,6 +325,11 @@ def test_admin_inquiry_is_spam_filter_has_deterministic_total(client):
     assert clean_filtered.status_code == 200
     clean_body = clean_filtered.json()
     clean_ids = {item["id"] for item in clean_body["data"]}
-    assert clean_body["meta"]["total"] == len(clean_body["data"])
+    with SessionLocal() as db:
+        expected_clean_total = db.scalar(
+            select(func.count()).select_from(Inquiry).where(_spam_filter_clause(is_spam=False))
+        )
+    assert clean_body["meta"]["total"] == expected_clean_total
+    assert len(clean_body["data"]) == min(50, expected_clean_total)
     assert clean_id in clean_ids
     assert spam_id not in clean_ids

@@ -23,6 +23,10 @@ class InquiryCreate(BaseModel):
     message: str
     source_page: str | None = None
     intent: str = "general"
+    budget_band: str | None = None
+    timeline: str | None = None
+    persona: str | None = None
+    tags: list[str] | None = None
 
 
 class ViewingCreate(BaseModel):
@@ -98,11 +102,14 @@ def create_inquiry(
         source_page=(payload.source_page or "").strip() or None,
         score=0,
         status="new",
+        budget_band=(payload.budget_band or "").strip() or None,
+        timeline=(payload.timeline or "").strip() or None,
+        persona=(payload.persona or "").strip() or None,
         submit_timestamp=now,
         first_touch_timestamp=now,
         email_hash=_hash_text(payload.email),
         phone_hash=_hash_text(payload.phone),
-        tags=[],
+        tags=list(payload.tags or []),
     )
     db.add(inquiry)
     db.commit()

@@ -312,15 +312,33 @@ async function run() {
                 const rootOverflow = document.documentElement.scrollWidth > window.innerWidth + 1;
                 const bodyOverflow = document.body.scrollWidth > window.innerWidth + 1;
 
-                const externalImageNodes = Array.from(document.querySelectorAll('img[src], source[srcset]'));
-                const externalImages = externalImageNodes.filter((el) => {
-                  const src = (el).getAttribute('src') || (el).getAttribute('srcset') || '';
-                  if (!src) return false;
-                  const firstSrc = src.split(',')[0]?.trim()?.split(' ')[0] || '';
-                  if (!firstSrc) return false;
-                  if (firstSrc.startsWith('/media/') || firstSrc.startsWith('/storage/')) return false;
-                  return /^https?:\/\//i.test(firstSrc);
-                });
+                const allowedHosts = new Set([window.location.hostname, '127.0.0.1', 'localhost', 'flowbiz.com', 'www.flowbiz.com']);
+                const srcSetToCandidates = (raw) =>
+                  String(raw || '')
+                    .split(',')
+                    .map((part) => part.trim().split(/\s+/)[0])
+                    .filter(Boolean);
+                const isAllowedMedia = (candidate) => {
+                  const value = String(candidate || '').trim();
+                  if (!value) return true;
+                  if (value.startsWith('data:')) return true;
+                  if (value.startsWith('/')) return !value.startsWith('//');
+                  try {
+                    const parsed = new URL(value, window.location.origin);
+                    if (!['http:', 'https:'].includes(parsed.protocol)) return false;
+                    return allowedHosts.has(parsed.hostname.toLowerCase());
+                  } catch {
+                    return false;
+                  }
+                };
+
+                const candidateUrls = [];
+                for (const node of Array.from(document.querySelectorAll('img[src], img[srcset], source[srcset], video[poster]'))) {
+                  if (node.hasAttribute('src')) candidateUrls.push(...srcSetToCandidates(node.getAttribute('src')));
+                  if (node.hasAttribute('srcset')) candidateUrls.push(...srcSetToCandidates(node.getAttribute('srcset')));
+                  if (node.hasAttribute('poster')) candidateUrls.push(...srcSetToCandidates(node.getAttribute('poster')));
+                }
+                const externalImages = candidateUrls.filter((url) => !isAllowedMedia(url));
 
                 const tabbables = Array.from(
                   document.querySelectorAll('a[href], button, input, select, textarea, [tabindex]:not([tabindex="-1"])'),

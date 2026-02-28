@@ -202,3 +202,84 @@ class CompanyInfoItem(BaseModel):
 class CompanyListResponse(BaseModel):
     data: list[CompanyInfoItem]
 
+
+class TeamMemberCreate(BaseModel):
+    name: str
+    role_title: str
+    bio: dict | None = None
+    photo_url: str | None = None
+    languages: list[str] | None = None
+    specialties: list[str] | None = None
+    display_order: int = 0
+    status: str = "draft"
+
+
+class TeamMemberUpdate(BaseModel):
+    name: str | None = None
+    role_title: str | None = None
+    bio: dict | None = None
+    photo_url: str | None = None
+    languages: list[str] | None = None
+    specialties: list[str] | None = None
+    display_order: int | None = None
+    status: str | None = None
+
+
+class TeamMemberItem(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: UUID
+    name: str
+    role_title: str
+    bio: dict | None = None
+    photo_url: str | None = None
+    languages: list | None = None
+    specialties: list | None = None
+    display_order: int
+    status: str
+    created_at: datetime
+    updated_at: datetime
+
+
+class TeamMemberListResponse(BaseModel):
+    data: list[TeamMemberItem]
+
+
+class TestimonialCreate(BaseModel):
+    status: str = "draft"
+    persona: str
+    intent: str
+    quote: str
+    attribution_name: str | None = None
+    context: str | None = None
+    display_order: int = 0
+
+
+class TestimonialUpdate(BaseModel):
+    status: str | None = None
+    persona: str | None = None
+    intent: str | None = None
+    quote: str | None = None
+    attribution_name: str | None = None
+    context: str | None = None
+    display_order: int | None = None
+
+
+class TestimonialItem(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: UUID
+    status: str
+    persona: str
+    intent: str
+    quote: str
+    attribution_name: str | None = None
+    context: str | None = None
+    display_order: int
+    created_at: datetime
+    updated_at: datetime
+
+
+class TestimonialListResponse(BaseModel):
+    data: list[TestimonialItem]
+

@@ -1,0 +1,56 @@
+[
+  {
+    "slug": "assetmp-company-service-coverage",
+    "category": "guide",
+    "status": "published",
+    "title": {
+      "en": "Company service coverage across Thailand",
+      "th": "ขอบเขตบริการของบริษัทในประเทศไทย"
+    },
+    "excerpt": {
+      "en": "Migrated from approved company-owned source assetmp.net.",
+      "th": "ย้ายมาจากแหล่งข้อมูลที่ได้รับอนุมัติของบริษัท assetmp.net"
+    },
+    "body_md": {
+      "en": "Approved company-owned messaging on assetmp.net describes Asset Management Property as a Thailand real estate agency covering Pattaya, Bangkok, Phuket, and Koh Samui.\n\nThe same source highlights multilingual support and complete service from start to finish, which makes this article a safe editorial baseline for the current runtime.",
+      "th": "ข้อความจาก assetmp.net ซึ่งเป็นแหล่งข้อมูลของบริษัทระบุว่าทีมให้บริการในพัทยา กรุงเทพฯ ภูเก็ต และเกาะสมุย พร้อมรองรับหลายภาษาและบริการครบวงจรตั้งแต่ต้นจนจบ"
+    },
+    "hero_image_url": "/media/library/variants/05032d16-54ae-45f4-bb89-3ae1fc2fa52f.webp"
+  },
+  {
+    "slug": "assetmp-multilingual-support",
+    "category": "guide",
+    "status": "published",
+    "title": {
+      "en": "Multilingual support and guided next steps",
+      "th": "การรองรับหลายภาษาและขั้นตอนถัดไปที่มีคนดูแล"
+    },
+    "excerpt": {
+      "en": "A company-owned summary of how the team positions support for local and international clients.",
+      "th": "สรุปจากแหล่งข้อมูลของบริษัทเกี่ยวกับการดูแลลูกค้าทั้งในและต่างประเทศ"
+    },
+    "body_md": {
+      "en": "The company site positions multilingual support as part of the service experience for people comparing locations and property types across Thailand.\n\nFor the A2 runtime, this article is kept intentionally factual and should be expanded in admin with final editorial detail when approved.",
+      "th": "เว็บไซต์บริษัทวางตำแหน่งการรองรับหลายภาษาเป็นส่วนหนึ่งของประสบการณ์บริการสำหรับผู้ที่กำลังเทียบทำเลและประเภทอสังหาในประเทศไทย\n\nใน runtime ปัจจุบัน บทความนี้เก็บข้อความไว้แบบตรงไปตรงมาและควรขยายรายละเอียดผ่าน admin เมื่อข้อความฉบับสุดท้ายได้รับอนุมัติ"
+    },
+    "hero_image_url": "/media/library/variants/05032d16-54ae-45f4-bb89-3ae1fc2fa52f.webp"
+  },
+  {
+    "slug": "assetmp-contact-and-coverage",
+    "category": "blog",
+    "status": "published",
+    "title": {
+      "en": "How to start a property request with the current team",
+      "th": "วิธีเริ่มต้นส่งคำขออสังหากับทีมปัจจุบัน"
+    },
+    "excerpt": {
+      "en": "Contact details and coverage migrated from the approved company-owned source.",
+      "th": "ช่องทางติดต่อและขอบเขตบริการที่ย้ายมาจากแหล่งข้อมูลบริษัทที่ได้รับอนุมัติ"
+    },
+    "body_md": {
+      "en": "The approved company-owned source lists contact@assetmp.net and +66 (0)82 469 5465 as active contact points, with service coverage that includes Pattaya, Bangkok, Phuket, and Koh Samui.\n\nUse the consultation flow in this runtime when you want tracked follow-up and the current CRM process.",
+      "th": "แหล่งข้อมูลของบริษัทที่ได้รับอนุมัติระบุช่องทางติดต่อ contact@assetmp.net และ +66 (0)82 469 5465 พร้อมขอบเขตบริการในพัทยา กรุงเทพฯ ภูเก็ต และเกาะสมุย\n\nให้ใช้ consultation flow ใน runtime นี้เมื่อคุณต้องการการติดตามผลและกระบวนการ CRM ปัจจุบัน"
+    },
+    "hero_image_url": "/media/library/variants/05032d16-54ae-45f4-bb89-3ae1fc2fa52f.webp"
+  }
+]
