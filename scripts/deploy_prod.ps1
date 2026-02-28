@@ -5,7 +5,8 @@ param(
   [int]$VpsApiPort = 8001,
   [string]$ComposeProjectName = "flowbiz-client-amp",
   [string]$RemoteUrl = "",
-  [string]$TargetSha = ""
+  [string]$TargetSha = "",
+  [string]$AlembicTarget = "head"
 )
 
 $ErrorActionPreference = "Stop"
@@ -26,6 +27,12 @@ if (-not $TargetSha) {
   }
 }
 
+$AlembicTarget = $AlembicTarget.Replace("`r", "").Replace("`n", "")
+
+function Quote-BashArg([string]$Value) {
+  return "'" + $Value.Replace("'", "'""'""'") + "'"
+}
+
 $remoteScript = @'
 set -euo pipefail
 
@@ -35,6 +42,8 @@ VPS_ACTIVE_PATH="$3"
 VPS_RELEASE_ROOT="$4"
 VPS_API_PORT="$5"
 COMPOSE_PROJECT_NAME="$6"
+ALEMBIC_UPGRADE_TARGET="$7"
+ALEMBIC_UPGRADE_TARGET="${ALEMBIC_UPGRADE_TARGET//$'\r'/}"
 
 if [[ -z "$REMOTE_URL" || "$REMOTE_URL" == "__AUTO__" ]]; then
   REMOTE_URL="$(git -C "$VPS_ACTIVE_PATH" remote get-url origin)"
@@ -81,7 +90,9 @@ echo "--- build api BUILD_SHA=$BUILD_SHA"
 "${compose[@]}" build api
 
 echo "--- migrations"
-"${compose[@]}" run --rm --no-deps api alembic upgrade head
+"${compose[@]}" run --rm --no-deps \
+  -e ALEMBIC_UPGRADE_TARGET="$ALEMBIC_UPGRADE_TARGET" \
+  api sh -lc 'python -m alembic upgrade "$ALEMBIC_UPGRADE_TARGET"'
 
 echo "--- recreate api"
 "${compose[@]}" up -d --no-deps --force-recreate api
@@ -106,16 +117,35 @@ echo "projects=$projects"
 [[ "$healthz" == "200" && "$properties" == "200" && "$projects" == "200" ]]
 '@
 
+$remoteTmp = $null
 $tmp = New-TemporaryFile
 try {
   $utf8NoBom = New-Object System.Text.UTF8Encoding($false)
   [System.IO.File]::WriteAllText($tmp.FullName, $remoteScript.Replace("`r`n", "`n").Replace("`r", ""), $utf8NoBom)
   $remoteArg = if ($RemoteUrl) { $RemoteUrl } else { "__AUTO__" }
-  $cmd = "cmd /c type `"$($tmp.FullName)`" | ssh -o BatchMode=yes $VpsHost bash -s -- `"$remoteArg`" `"$TargetSha`" `"$VpsActivePath`" `"$VpsReleaseRoot`" `"$VpsApiPort`" `"$ComposeProjectName`""
-  & pwsh -NoProfile -Command $cmd
+  $remoteTmp = "/tmp/flowbiz-deploy-$([guid]::NewGuid().ToString('N')).sh"
+  & scp -q $tmp.FullName "${VpsHost}:$remoteTmp"
+  if ($LASTEXITCODE -ne 0) {
+    throw "Unable to upload deploy script to VPS."
+  }
+
+  $qRemoteTmp = Quote-BashArg $remoteTmp
+  $qRemoteArg = Quote-BashArg $remoteArg
+  $qTargetSha = Quote-BashArg $TargetSha
+  $qVpsActivePath = Quote-BashArg $VpsActivePath
+  $qVpsReleaseRoot = Quote-BashArg $VpsReleaseRoot
+  $qVpsApiPort = Quote-BashArg ([string]$VpsApiPort)
+  $qComposeProjectName = Quote-BashArg $ComposeProjectName
+  $qAlembicTarget = Quote-BashArg $AlembicTarget
+  $remoteCommand = "chmod 700 $qRemoteTmp && bash $qRemoteTmp $qRemoteArg $qTargetSha $qVpsActivePath $qVpsReleaseRoot $qVpsApiPort $qComposeProjectName $qAlembicTarget; status=`$?; rm -f $qRemoteTmp; exit `$status"
+
+  & ssh -o BatchMode=yes $VpsHost $remoteCommand
   if ($LASTEXITCODE -ne 0) {
     throw "Production deploy failed."
   }
 } finally {
+  if ($remoteTmp) {
+    & ssh -o BatchMode=yes $VpsHost "rm -f $(Quote-BashArg $remoteTmp)" | Out-Null
+  }
   Remove-Item -Force -ErrorAction SilentlyContinue $tmp.FullName
 }

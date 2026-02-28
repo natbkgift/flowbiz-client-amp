@@ -13,6 +13,7 @@ VPS_API_PORT="${VPS_API_PORT:-8001}"
 COMPOSE_PROJECT_NAME="${COMPOSE_PROJECT_NAME:-flowbiz-client-amp}"
 REMOTE_URL="${REMOTE_URL_OVERRIDE:-}"
 TARGET_SHA="${TARGET_SHA_OVERRIDE:-$(git rev-parse HEAD)}"
+ALEMBIC_UPGRADE_TARGET="${ALEMBIC_UPGRADE_TARGET:-head}"
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
@@ -23,9 +24,12 @@ while [[ $# -gt 0 ]]; do
     --compose-project-name) COMPOSE_PROJECT_NAME="$2"; shift 2 ;;
     --remote-url) REMOTE_URL="$2"; shift 2 ;;
     --target-sha) TARGET_SHA="$2"; shift 2 ;;
+    --alembic-target) ALEMBIC_UPGRADE_TARGET="$2"; shift 2 ;;
     *) echo "Unknown arg: $1" >&2; exit 2 ;;
   esac
 done
+
+ALEMBIC_UPGRADE_TARGET="${ALEMBIC_UPGRADE_TARGET//$'\r'/}"
 
 if [[ -n "$(git status --short)" ]]; then
   echo "Local worktree must be clean before deploy." >&2
@@ -38,7 +42,8 @@ ssh -o BatchMode=yes "$VPS_HOST" bash -s -- \
   "$VPS_ACTIVE_PATH" \
   "$VPS_RELEASE_ROOT" \
   "$VPS_API_PORT" \
-  "$COMPOSE_PROJECT_NAME" <<'BASH'
+  "$COMPOSE_PROJECT_NAME" \
+  "$ALEMBIC_UPGRADE_TARGET" <<'BASH'
 set -euo pipefail
 
 REMOTE_URL="$1"
@@ -47,6 +52,8 @@ VPS_ACTIVE_PATH="$3"
 VPS_RELEASE_ROOT="$4"
 VPS_API_PORT="$5"
 COMPOSE_PROJECT_NAME="$6"
+ALEMBIC_UPGRADE_TARGET="$7"
+ALEMBIC_UPGRADE_TARGET="${ALEMBIC_UPGRADE_TARGET//$'\r'/}"
 
 if [[ -z "$REMOTE_URL" || "$REMOTE_URL" == "__AUTO__" ]]; then
   REMOTE_URL="$(git -C "$VPS_ACTIVE_PATH" remote get-url origin)"
@@ -93,7 +100,9 @@ echo "--- build api BUILD_SHA=$BUILD_SHA"
 "${compose[@]}" build api
 
 echo "--- migrations"
-"${compose[@]}" run --rm --no-deps api alembic upgrade head
+"${compose[@]}" run --rm --no-deps \
+  -e ALEMBIC_UPGRADE_TARGET="$ALEMBIC_UPGRADE_TARGET" \
+  api sh -lc 'python -m alembic upgrade "$ALEMBIC_UPGRADE_TARGET"'
 
 echo "--- recreate api"
 "${compose[@]}" up -d --no-deps --force-recreate api
