@@ -4163,7 +4163,7 @@ def _render_content_detail_page(locale: str, request: Request, db: Session, slug
         )
         for item in related_rows
     ) or (
-        f"<div class=\"card\">"
+        "<div class=\"card\">"
         + escape(
             "Related content is pending publication. TODO: publish at least one related article."
             if locale == "en"

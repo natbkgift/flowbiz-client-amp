@@ -5,8 +5,13 @@ from urllib.parse import urlparse
 from uuid import uuid4
 
 from packages.core.database import SessionLocal
-from packages.core.models import CompanyInfo, TeamMember, Testimonial as TestimonialModel
-
+from packages.core.models import (
+    CompanyInfo,
+    TeamMember,
+)
+from packages.core.models import (
+    Testimonial as TestimonialModel,
+)
 
 _LOCAL_WEBP = "/media/library/variants/05032d16-54ae-45f4-bb89-3ae1fc2fa52f.webp"
 TestimonialModel.__test__ = False
@@ -214,9 +219,20 @@ def test_a10_about_contact_sell_pages_keep_local_media_policy(client) -> None:
     for path in pages:
         html = client.get(path).text
         host = "testserver"
-        for value in [*_extract_attrs(html, "src"), *_extract_attrs(html, "srcset"), *_extract_attrs(html, "poster")]:
-            for candidate in [part.strip().split()[0] for part in value.split(",") if part.strip()]:
-                assert _is_allowed_media(candidate, host=host), f"Disallowed media URL on {path}: {candidate}"
+        media_values = [
+            *_extract_attrs(html, "src"),
+            *_extract_attrs(html, "srcset"),
+            *_extract_attrs(html, "poster"),
+        ]
+        for value in media_values:
+            for part in value.split(","):
+                cleaned = part.strip()
+                if not cleaned:
+                    continue
+                candidate = cleaned.split()[0]
+                assert _is_allowed_media(candidate, host=host), (
+                    f"Disallowed media URL on {path}: {candidate}"
+                )
 
 
 def test_a10_submit_paths_work_for_contact_and_sell_intents(client) -> None:
