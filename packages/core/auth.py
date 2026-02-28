@@ -9,7 +9,9 @@ import bcrypt
 import jwt
 from jwt import InvalidTokenError
 
-SECRET = os.getenv("JWT_SECRET_KEY", "flowbiz-dev-secret")
+_DEFAULT_DEV_SECRET = "flowbiz-dev-secret-2026-local-only-minimum-32b"
+
+SECRET = os.getenv("JWT_SECRET_KEY", _DEFAULT_DEV_SECRET)
 ALGORITHM = os.getenv("JWT_ALGORITHM", "HS256")
 EXPIRE_MINUTES = int(os.getenv("JWT_EXPIRE_MINUTES", "720"))
 
@@ -36,7 +38,7 @@ def create_access_token(
     role: str = "admin",
     expires_delta: timedelta | None = None,
 ) -> str:
-    expires = datetime.now(UTC) + (expires_delta or timedelta(hours=12))
+    expires = datetime.now(UTC) + (expires_delta or timedelta(minutes=EXPIRE_MINUTES))
     payload = {
         "sub": subject,
         "role": role,

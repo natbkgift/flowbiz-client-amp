@@ -177,6 +177,38 @@ def test_run_scan_detects_external_leakage_and_missing_local_file(tmp_path: Path
     assert missing is not None
 
 
+def test_run_scan_flags_invalid_media_asset_storage_path(tmp_path: Path) -> None:
+    media_root = tmp_path / "media"
+    media_root.mkdir(parents=True, exist_ok=True)
+
+    with SessionLocal() as db:
+        asset = MediaAsset(
+            storage_path="library/not-prefixed.jpg",
+            kind="image",
+            mime_type="image/jpeg",
+            file_size_bytes=123,
+            checksum_sha256="a" * 64,
+            status="active",
+        )
+        db.add(asset)
+        db.commit()
+
+        report = run_scan(db, media_root=media_root, media_public_prefix="/media")
+
+    finding = next(
+        (
+            item
+            for item in report.findings
+            if item.category == "invalid_path_format"
+            and item.entity == "media_assets.storage_path"
+            and item.value == "library/not-prefixed.jpg"
+        ),
+        None,
+    )
+    assert finding is not None
+    assert report.summary.invalid_path_format_count >= 1
+
+
 def test_run_scan_detects_orphan_files(tmp_path: Path) -> None:
     media_root = tmp_path / "media"
     orphan = media_root / "library" / f"orphan-{uuid4()}.jpg"
@@ -191,6 +223,47 @@ def test_run_scan_detects_orphan_files(tmp_path: Path) -> None:
     assert orphan_finding is not None
     assert orphan_finding.severity == SEVERITY_WARN
     assert orphan_finding.suggestion is not None
+
+
+def test_run_scan_detects_duplicate_checksum_groups(tmp_path: Path) -> None:
+    media_root = tmp_path / "media"
+    payload = b"same-bytes"
+    first = media_root / "library" / f"{uuid4()}.jpg"
+    second = media_root / "library" / f"{uuid4()}.jpg"
+    first.parent.mkdir(parents=True, exist_ok=True)
+    first.write_bytes(payload)
+    second.write_bytes(payload)
+    checksum = hashlib.sha256(payload).hexdigest()
+
+    with SessionLocal() as db:
+        db.add_all(
+            [
+                MediaAsset(
+                    storage_path=f"/media/library/{first.name}",
+                    kind="image",
+                    mime_type="image/jpeg",
+                    file_size_bytes=len(payload),
+                    checksum_sha256=checksum,
+                    status="active",
+                ),
+                MediaAsset(
+                    storage_path=f"/media/library/{second.name}",
+                    kind="image",
+                    mime_type="image/jpeg",
+                    file_size_bytes=len(payload),
+                    checksum_sha256=checksum,
+                    status="active",
+                ),
+            ]
+        )
+        db.commit()
+
+        report = run_scan(db, media_root=media_root, media_public_prefix="/media")
+
+    finding = next((item for item in report.findings if item.category == "duplicate_checksum"), None)
+    assert finding is not None
+    assert finding.severity == SEVERITY_WARN
+    assert report.summary.duplicate_checksum_groups >= 1
 
 
 def test_cli_strict_exits_nonzero_on_errors() -> None:

@@ -293,6 +293,103 @@ def test_a2_runtime_destination_routes_render_published_data(client) -> None:
     assert "Published methodology detail" in methodology.text
 
 
+def test_a3_public_projects_routes_remain_published_only_under_status_queries(client) -> None:
+    _reset_home_configs()
+    with SessionLocal() as db:
+        db.query(Project).delete()
+        db.add_all(
+            [
+                Project(
+                    slug=f"published-{uuid4()}",
+                    name="Published Project",
+                    status="published",
+                    property_type="condo",
+                    summary={"en": "Published summary"},
+                    cover_image_url=_LOCAL_WEBP,
+                ),
+                Project(
+                    slug=f"draft-{uuid4()}",
+                    name="Draft Project",
+                    status="draft",
+                    property_type="condo",
+                    summary={"en": "Draft summary"},
+                ),
+                Project(
+                    slug=f"archived-{uuid4()}",
+                    name="Archived Project",
+                    status="archived",
+                    property_type="condo",
+                    summary={"en": "Archived summary"},
+                ),
+            ]
+        )
+        db.commit()
+
+    api_by_status = client.get("/v1/projects?status=draft")
+    assert api_by_status.status_code == 200, api_by_status.text
+    assert {item["status"] for item in api_by_status.json()["data"]} <= {"published"}
+    assert "Draft Project" not in {item["name"] for item in api_by_status.json()["data"]}
+
+    api_by_legacy_status = client.get("/v1/projects?status_filter=archived")
+    assert api_by_legacy_status.status_code == 200, api_by_legacy_status.text
+    assert {item["status"] for item in api_by_legacy_status.json()["data"]} <= {"published"}
+    assert "Archived Project" not in {item["name"] for item in api_by_legacy_status.json()["data"]}
+
+    html = client.get("/en/projects?status=draft&status_filter=archived")
+    assert html.status_code == 200, html.text
+    assert "Published Project" in html.text
+    assert "Draft Project" not in html.text
+    assert "Archived Project" not in html.text
+
+
+def test_a3_runtime_uses_spec_event_envelope_in_browser_tracking(client) -> None:
+    _reset_home_configs()
+    response = client.get("/en")
+    assert response.status_code == 200, response.text
+    html = response.text
+
+    assert "event_name: eventName" in html
+    assert "source: sourceBody" in html
+    assert "payload: payloadBody" in html
+    assert "app: 'flowbiz-public-runtime'" in html
+    assert "{ event: eventName, locale, path, ...payload }" not in html
+
+
+def test_a3_smart_finder_cta_uses_real_route_when_configured(client) -> None:
+    _reset_home_configs()
+    with SessionLocal() as db:
+        db.add(
+            HomeComposerConfig(
+                page_key="home",
+                locale="en",
+                status="published",
+                version=43,
+                published_at=datetime.now(UTC),
+                config={
+                    "hero": {
+                        "headline": {"en": "Published Home Headline"},
+                        "subheadline": {"en": "Published Home Subheadline"},
+                        "cta": {"text": {"en": "Request Consultation"}, "href": "/contact"},
+                    },
+                    "hero_secondary_cta": {"text": {"en": "Smart Finder"}, "href": "/en"},
+                },
+            )
+        )
+        db.commit()
+
+    response = client.get("/en")
+    assert response.status_code == 200, response.text
+    assert ">Smart Finder<" in response.text
+    assert 'data-cta-id="hero_secondary"' in response.text
+    assert 'href="/en/smart-finder"' in response.text
+    assert 'href="/en#intent-title"' not in response.text
+
+    smart_finder = client.get("/en/smart-finder?intent=buy")
+    assert smart_finder.status_code == 200, smart_finder.text
+    assert "Smart Finder" in smart_finder.text
+    assert "ownership fit" in smart_finder.text
+
+
 def test_a2_runtime_serves_local_webp_with_image_content_type(client) -> None:
     response = client.get(_LOCAL_WEBP)
     assert response.status_code == 200, response.text

@@ -20,6 +20,7 @@ _ALLOWED_RUNTIME_PATHS = {"/", "/en", "/th"}
 _PUBLIC_ROUTE_SUFFIXES = {
     "",
     "/projects",
+    "/smart-finder",
     "/areas",
     "/insights",
     "/about",
@@ -245,6 +246,15 @@ def _locale_path(locale: str, suffix: str = "") -> str:
     return f"/{locale}{suffix}"
 
 
+def _is_smart_finder_label(value: str | None) -> bool:
+    normalized = " ".join(str(value or "").lower().replace("-", " ").split())
+    return "smart finder" in normalized
+
+
+def _resolve_cta_text(value: str | None, fallback: str, *, source: str) -> str:
+    return _published_text(value, fallback) if source == "published" else fallback
+
+
 def _normalized_runtime_href(locale: str, requested: str | None) -> str | None:
     raw = str(requested or "").strip()
     if not raw:
@@ -275,6 +285,16 @@ def _safe_forward_href(locale: str, requested: str | None, fallback_target: str)
         return normalized
     fallback = _normalized_runtime_href(locale, fallback_target)
     return fallback or _section_href(locale, "#consult-title")
+
+
+def _resolve_secondary_cta_href(locale: str, requested: str | None, label: str) -> str:
+    if _is_smart_finder_label(label):
+        normalized = _normalized_runtime_href(locale, requested)
+        smart_finder_href = _locale_path(locale, "/smart-finder")
+        if normalized == smart_finder_href:
+            return normalized
+        return smart_finder_href
+    return _safe_forward_href(locale, requested, "/projects")
 
 
 def _load_home_context(db: Session, locale: str) -> tuple[str, dict]:
@@ -378,14 +398,30 @@ def _property_tags(prop: Property | None) -> list[str]:
 
 def _count_cards(db: Session) -> list[tuple[str, int]]:
     areas = int(db.scalar(select(func.count()).select_from(Area).where(Area.status == "published")) or 0)
-    projects = int(db.scalar(select(func.count()).select_from(Project).where(Project.status == "published")) or 0)
+    projects = int(
+        db.scalar(
+            select(func.count()).select_from(Project).where(Project.deleted_at.is_(None), Project.status == "published")
+        )
+        or 0
+    )
     properties = int(db.scalar(select(func.count()).select_from(Property).where(Property.status == "active")) or 0)
     return [("areas", areas), ("projects", projects), ("properties", properties)]
 
-def _build_featured_html(db: Session, request: Request, locale: str, copy: dict[str, str], resolved: dict) -> str:
+def _build_featured_html(
+    db: Session,
+    request: Request,
+    locale: str,
+    copy: dict[str, str],
+    resolved: dict,
+    *,
+    cta_label: str,
+    cta_href: str,
+) -> str:
     cards: list[str] = []
     for item in (resolved.get("featured_projects") or [])[:8]:
         project = _project_by_id(db, str(item.get("id") or ""))
+        project_id = escape(str(item.get("id") or "project"))
+        project_slug = escape(str(item.get("slug") or ""))
         media = _safe_media_url(item.get("cover_image_url") or item.get("hero_image_url"), _DEFAULT_MEDIA_FALLBACK, request=request)
         name = escape(str(item.get("name") or "Project"))
         area_name = _area_name(db, getattr(project, "area_id", None)) or copy["featured_pending_area"]
@@ -398,12 +434,12 @@ def _build_featured_html(db: Session, request: Request, locale: str, copy: dict[
         )
         cards.append(
             f"""
-            <article class=\"card\">
+            <article class=\"card\" data-card-id=\"{project_id}\" data-card-slug=\"{project_slug}\">
               <img class=\"cover-media\" src=\"{escape(media)}\" alt=\"{name}\" loading=\"lazy\" width=\"640\" height=\"360\" />
               <h3>{name}</h3>
               <p class=\"muted\">{escape(area_name)} • {escape(price_text)}</p>
               {facts_html}
-              <a class=\"btn btn-secondary-hero btn-sm\" data-event=\"home_browse_projects_click\" data-placement=\"featured_card\" href=\"{_section_href(locale, '#consult-title')}\">{escape(copy['cta_secondary'])}</a>
+              <a class=\"btn btn-secondary-hero btn-sm\" data-event=\"home_browse_projects_click\" data-cta-id=\"featured_project_cta\" data-card-id=\"{project_id}\" data-card-slug=\"{project_slug}\" data-placement=\"featured_card\" href=\"{cta_href}\">{escape(cta_label)}</a>
             </article>
             """
         )
@@ -417,6 +453,7 @@ def _build_investment_html(db: Session, request: Request, locale: str, copy: dic
     for item in (resolved.get("investment_picks") or [])[:6]:
         prop = _property_by_id(db, str(item.get("id") or ""))
         item_id = escape(str(item.get("id") or "pick"))
+        item_slug = escape(str(getattr(prop, "slug", "") or item.get("slug") or ""))
         title = escape(str(item.get("title") or "Investment pick"))
         media = _safe_media_url(item.get("cover_image_url"), _DEFAULT_MEDIA_FALLBACK, request=request)
         price_text = _format_money(item.get("price"), fallback=copy["featured_pending_price"])
@@ -430,13 +467,13 @@ def _build_investment_html(db: Session, request: Request, locale: str, copy: dic
         tags_html = "".join(f"<span class=\"tag\">{escape(tag)}</span>" for tag in tags)
         cards.append(
             f"""
-            <article class=\"card\" data-item-id=\"{item_id}\">
+            <article class=\"card\" data-item-id=\"{item_id}\" data-card-id=\"{item_id}\" data-card-slug=\"{item_slug}\">
               <img class=\"cover-media\" src=\"{escape(media)}\" alt=\"{title}\" loading=\"lazy\" width=\"640\" height=\"360\" />
               <p class=\"price\">{escape(price_text)}</p>
               <h3>{title}</h3>
               {stats_html}
               <div class=\"tag-row\">{tags_html}</div>
-              <a class=\"btn btn-secondary-hero btn-sm\" data-event=\"home_investment_pick_click\" data-item-id=\"{item_id}\" href=\"{_section_href(locale, '#consult-title')}\">{escape(copy['view_pick'])}</a>
+              <a class=\"btn btn-secondary-hero btn-sm\" data-event=\"home_investment_pick_click\" data-cta-id=\"investment_pick_cta\" data-item-id=\"{item_id}\" data-card-id=\"{item_id}\" data-card-slug=\"{item_slug}\" data-placement=\"investment_card\" href=\"{_section_href(locale, '#consult-title')}\">{escape(copy['view_pick'])}</a>
             </article>
             """
         )
@@ -543,6 +580,7 @@ def _render(locale: str, request: Request, db: Session, source: str, resolved: d
     copy = _safe_copy(locale)
     hero = resolved.get("hero") or {}
     secondary_cta = resolved.get("hero_secondary_cta") or {}
+    primary_cta = hero.get("cta") if isinstance(hero.get("cta"), dict) else {}
     consultation = resolved.get("consultation") or {}
     trust_items = [str(item.get("text") or "").strip() for item in (resolved.get("trust_micro_strip") or []) if str(item.get("text") or "").strip()]
     hero_title = _published_text(hero.get("headline"), copy["h1"]) if source == "published" else copy["h1"]
@@ -550,6 +588,8 @@ def _render(locale: str, request: Request, db: Session, source: str, resolved: d
     hero_trust_strip = " • ".join(trust_items[:4]) if source == "published" and trust_items else copy["trust_strip"]
     consult_copy = _published_text(consultation.get("promise_copy"), copy["consult_sub"]) if source == "published" else copy["consult_sub"]
     consult_trust = _published_text(consultation.get("trust_note"), copy["consult_trust"]) if source == "published" else copy["consult_trust"]
+    hero_primary_label = _resolve_cta_text(primary_cta.get("text"), copy["cta_primary"], source=source)
+    hero_secondary_label = _resolve_cta_text(secondary_cta.get("text"), copy["cta_secondary"], source=source)
     path_cards = resolved.get("path_selector", {}).get("cards") if source == "published" else None
     cards = path_cards if isinstance(path_cards, list) and len(path_cards) == 4 else _default_path_cards(locale)
     fallback_targets = {
@@ -560,7 +600,7 @@ def _render(locale: str, request: Request, db: Session, source: str, resolved: d
     }
     card_html = "".join(
         f"""
-        <a class=\"intent-card\" href=\"{_safe_forward_href(locale, card.get('href') if isinstance(card, dict) else None, fallback_targets.get(str((card or {}).get('key') or ''), '#consult-title'))}\" data-event=\"home_intent_start_click\" data-intent=\"{escape(str((card or {}).get('key') or 'path'))}\">
+        <a class=\"intent-card\" href=\"{_safe_forward_href(locale, card.get('href') if isinstance(card, dict) else None, fallback_targets.get(str((card or {}).get('key') or ''), '#consult-title'))}\" data-event=\"home_intent_start_click\" data-cta-id=\"intent_{escape(str((card or {}).get('key') or 'path'))}\" data-intent=\"{escape(str((card or {}).get('key') or 'path'))}\" data-filter-values='["{escape(str((card or {}).get("key") or "path"))}"]' data-placement=\"intent_selector\">
           <h3>{escape(str((card or {}).get('title') or (card or {}).get('key') or 'Path'))}</h3>
           <p><strong>Fit:</strong> {escape(str((card or {}).get('fit') or ''))}</p>
           <p><strong>Outcome:</strong> {escape(str((card or {}).get('outcome') or ''))}</p>
@@ -569,10 +609,18 @@ def _render(locale: str, request: Request, db: Session, source: str, resolved: d
         """
         for card in cards
     )
-    consult_href = _safe_forward_href(locale, hero.get("cta", {}).get("href") if isinstance(hero.get("cta"), dict) else None, "/contact")
-    featured_href = _safe_forward_href(locale, secondary_cta.get("href") if isinstance(secondary_cta, dict) else None, "/projects")
+    consult_href = _safe_forward_href(locale, primary_cta.get("href") if isinstance(primary_cta, dict) else None, "/contact")
+    featured_href = _resolve_secondary_cta_href(locale, secondary_cta.get("href") if isinstance(secondary_cta, dict) else None, hero_secondary_label)
     hero_media = _safe_media_url(hero.get("media_path"), _DEFAULT_MEDIA_FALLBACK, request=request)
-    featured_html = _build_featured_html(db, request, locale, copy, resolved)
+    featured_html = _build_featured_html(
+        db,
+        request,
+        locale,
+        copy,
+        resolved,
+        cta_label=hero_secondary_label,
+        cta_href=featured_href,
+    )
     investment_html = _build_investment_html(db, request, locale, copy, resolved)
     why_html = _build_why_html(db, copy)
     trust_html = _build_trust_html(copy, resolved)
@@ -616,18 +664,18 @@ def _render(locale: str, request: Request, db: Session, source: str, resolved: d
         <img class=\"hero-media\" src=\"{escape(hero_media)}\" alt=\"{escape(copy['hero_alt'])}\" width=\"1280\" height=\"720\" loading=\"eager\" />
         <h1 id=\"hero-title\">{escape(hero_title)}</h1>
         <p>{escape(hero_sub)}</p>
-        <div class=\"cta-row\"><a class=\"btn btn-primary-hero\" data-event=\"home_hero_primary_click\" data-cta-id=\"hero_primary\" href=\"{consult_href}\">{escape(copy['cta_primary'])}</a><a class=\"btn btn-secondary-hero\" data-event=\"home_hero_secondary_click\" data-cta-id=\"hero_secondary\" data-placement=\"hero\" href=\"{featured_href}\">{escape(copy['cta_secondary'])}</a></div>
+        <div class=\"cta-row\"><a class=\"btn btn-primary-hero\" data-event=\"home_hero_primary_click\" data-cta-id=\"hero_primary\" data-placement=\"hero\" href=\"{consult_href}\">{escape(hero_primary_label)}</a><a class=\"btn btn-secondary-hero\" data-event=\"home_hero_secondary_click\" data-cta-id=\"hero_secondary\" data-placement=\"hero\" href=\"{featured_href}\">{escape(hero_secondary_label)}</a></div>
         <p class=\"trust-strip\">{escape(hero_trust_strip)}</p>
       </section>
       <section aria-labelledby=\"intent-title\"><h2 id=\"intent-title\">{escape(copy['path_title'])}</h2><div class=\"grid-2\">{card_html}</div></section>
-      <section aria-labelledby=\"featured-title\"><h2 id=\"featured-title\">{escape(copy['featured_title'])}</h2><p class=\"muted\">{escape(copy['featured_sub'])}</p><div class=\"grid-3\">{featured_html}</div><a class=\"btn btn-secondary-hero btn-sm\" data-event=\"home_browse_projects_click\" data-placement=\"featured_footer\" href=\"{featured_href}\">{escape(copy['cta_secondary'])}</a></section>
-      <section aria-labelledby=\"investment-title\"><div style=\"display:flex;justify-content:space-between;gap:12px;align-items:center;flex-wrap:wrap\"><h2 id=\"investment-title\">{escape(copy['investment_title'])}</h2><a id=\"investment-methodology\" href=\"{_locale_path(locale, '/investment/methodology')}\">{escape(copy['methodology'])}</a></div><p class=\"muted\">{escape(copy['investment_disclaimer'])}</p><div class=\"grid-5\">{investment_html}</div><div id=\"methodology-note\" class=\"state-empty\">{escape(copy['methodology_note'])}</div><a class=\"btn btn-secondary-hero btn-sm\" data-event=\"home_investment_pick_click\" data-item-id=\"all_picks\" href=\"{_locale_path(locale, '/investment/methodology')}\">{escape(copy['view_all_picks'])}</a></section>
+      <section aria-labelledby=\"featured-title\"><h2 id=\"featured-title\">{escape(copy['featured_title'])}</h2><p class=\"muted\">{escape(copy['featured_sub'])}</p><div class=\"grid-3\">{featured_html}</div><a class=\"btn btn-secondary-hero btn-sm\" data-event=\"home_browse_projects_click\" data-cta-id=\"featured_footer_cta\" data-placement=\"featured_footer\" href=\"{featured_href}\">{escape(hero_secondary_label)}</a></section>
+      <section aria-labelledby=\"investment-title\"><div style=\"display:flex;justify-content:space-between;gap:12px;align-items:center;flex-wrap:wrap\"><h2 id=\"investment-title\">{escape(copy['investment_title'])}</h2><a id=\"investment-methodology\" href=\"{_locale_path(locale, '/investment/methodology')}\">{escape(copy['methodology'])}</a></div><p class=\"muted\">{escape(copy['investment_disclaimer'])}</p><div class=\"grid-5\">{investment_html}</div><div id=\"methodology-note\" class=\"state-empty\">{escape(copy['methodology_note'])}</div><a class=\"btn btn-secondary-hero btn-sm\" data-event=\"home_investment_pick_click\" data-cta-id=\"investment_all_picks_cta\" data-item-id=\"all_picks\" data-placement=\"investment_footer\" href=\"{_locale_path(locale, '/investment/methodology')}\">{escape(copy['view_all_picks'])}</a></section>
       <section aria-labelledby=\"why-pattaya-title\"><h2 id=\"why-pattaya-title\">{escape(copy['why_title'])}</h2><p>{escape(copy['why_intro'])}</p>{why_html}<a class=\"btn btn-secondary-hero btn-sm\" href=\"{_locale_path(locale, '/areas')}\">{escape(copy['area_guides'])}</a></section>
       <section aria-labelledby=\"trust-title\"><h2 id=\"trust-title\">{escape(copy['trust_title'])}</h2><div class=\"grid-2\">{trust_html}</div><div class=\"cta-row\"><a class=\"btn btn-secondary-hero btn-sm\" href=\"{_locale_path(locale, '/about')}#team-section\">{escape(copy['team_link'])}</a><a class=\"btn btn-secondary-hero btn-sm\" href=\"{_locale_path(locale, '/about')}#process-section\">{escape(copy['process_link'])}</a></div></section>
       <section aria-labelledby=\"insights-title\"><h2 id=\"insights-title\">{escape(copy['insights_title'])}</h2><p>{escape(copy['insights_sub'])}</p>{insights_html}<a class=\"btn btn-secondary-hero btn-sm\" href=\"{_locale_path(locale, '/insights')}\">{escape(copy['browse_insights'])}</a></section>
       <section aria-labelledby=\"reviews-title\"><h2 id=\"reviews-title\">{escape(copy['reviews_title'])}</h2>{reviews_html}<a class=\"btn btn-secondary-hero btn-sm\" href=\"{_locale_path(locale, '/about')}#client-reviews\">{escape(copy['see_client_stories'])}</a></section>
       <section aria-labelledby=\"video-title\"><h2 id=\"video-title\">{escape(copy['work_title'])}</h2><p>{escape(copy['work_sub'])}</p><div class=\"grid-2\">{video_html}</div><a class=\"btn btn-secondary-hero btn-sm\" href=\"{_locale_path(locale, '/about')}#work-proof\">{escape(copy['watch_more'])}</a></section>
-      <section aria-labelledby=\"consult-title\"><h2 id=\"consult-title\">{escape(copy['consult_title'])}</h2><p>{escape(consult_copy)}</p><form id=\"consultation-form\" class=\"card\" novalidate><label class=\"field\" for=\"name\"><span>{escape(copy['name'])}</span><input id=\"name\" name=\"name\" type=\"text\" required /></label><label class=\"field\" for=\"contact\"><span>{escape(copy['contact'])}</span><input id=\"contact\" name=\"contact\" type=\"text\" required /></label><label class=\"field\" for=\"budget\"><span>{escape(copy['budget'])}</span><select id=\"budget\" name=\"budget\" required><option value=\"\">{escape(copy['select_budget'])}</option><option value=\"lt_3m\">Below THB 3M</option><option value=\"3m_6m\">THB 3M - 6M</option><option value=\"6m_10m\">THB 6M - 10M</option><option value=\"gt_10m\">Above THB 10M</option></select></label><label class=\"field\" for=\"purpose\"><span>{escape(copy['purpose'])}</span><select id=\"purpose\" name=\"purpose\" required><option value=\"\">{escape(copy['select_purpose'])}</option><option value=\"invest\">Invest</option><option value=\"buy\">Buy</option><option value=\"rent\">Rent</option><option value=\"sell\">Sell</option></select></label><label class=\"field\" for=\"timeline\"><span>{escape(copy['timeline'])}</span><select id=\"timeline\" name=\"timeline\" required><option value=\"\">{escape(copy['select_timeline'])}</option><option value=\"0_3m\">0-3 months</option><option value=\"3_6m\">3-6 months</option><option value=\"6m_plus\">6+ months</option></select></label><div class=\"cta-row\"><button id=\"consult-submit\" class=\"btn\" type=\"submit\">{escape(copy['cta_primary'])}</button><a class=\"btn btn-secondary-hero btn-sm\" data-event=\"home_whatsapp_click\" data-placement=\"bottom_form\" href=\"https://wa.me/66000000000\">WhatsApp</a><a class=\"btn btn-secondary-hero btn-sm\" href=\"https://line.me/R/ti/p/@flowbiz\">LINE</a></div><p class=\"muted\">{escape(consult_trust)}</p><p id=\"form-status\" class=\"muted\" role=\"status\" aria-live=\"polite\"></p><div id=\"form-loading\" class=\"state-loading\" hidden>{escape(copy['submitting'])}</div><div id=\"form-error\" class=\"state-error\" hidden>{escape(copy['submit_error'])}</div></form></section>
+      <section aria-labelledby=\"consult-title\"><h2 id=\"consult-title\">{escape(copy['consult_title'])}</h2><p>{escape(consult_copy)}</p><form id=\"consultation-form\" class=\"card\" novalidate><label class=\"field\" for=\"name\"><span>{escape(copy['name'])}</span><input id=\"name\" name=\"name\" type=\"text\" required /></label><label class=\"field\" for=\"contact\"><span>{escape(copy['contact'])}</span><input id=\"contact\" name=\"contact\" type=\"text\" required /></label><label class=\"field\" for=\"budget\"><span>{escape(copy['budget'])}</span><select id=\"budget\" name=\"budget\" required><option value=\"\">{escape(copy['select_budget'])}</option><option value=\"lt_3m\">Below THB 3M</option><option value=\"3m_6m\">THB 3M - 6M</option><option value=\"6m_10m\">THB 6M - 10M</option><option value=\"gt_10m\">Above THB 10M</option></select></label><label class=\"field\" for=\"purpose\"><span>{escape(copy['purpose'])}</span><select id=\"purpose\" name=\"purpose\" required><option value=\"\">{escape(copy['select_purpose'])}</option><option value=\"invest\">Invest</option><option value=\"buy\">Buy</option><option value=\"rent\">Rent</option><option value=\"sell\">Sell</option></select></label><label class=\"field\" for=\"timeline\"><span>{escape(copy['timeline'])}</span><select id=\"timeline\" name=\"timeline\" required><option value=\"\">{escape(copy['select_timeline'])}</option><option value=\"0_3m\">0-3 months</option><option value=\"3_6m\">3-6 months</option><option value=\"6m_plus\">6+ months</option></select></label><div class=\"cta-row\"><button id=\"consult-submit\" class=\"btn\" type=\"submit\">{escape(hero_primary_label)}</button><a class=\"btn btn-secondary-hero btn-sm\" data-event=\"home_whatsapp_click\" data-cta-id=\"whatsapp_cta\" data-placement=\"bottom_form\" href=\"https://wa.me/66000000000\">WhatsApp</a><a class=\"btn btn-secondary-hero btn-sm\" href=\"https://line.me/R/ti/p/@flowbiz\">LINE</a></div><p class=\"muted\">{escape(consult_trust)}</p><p id=\"form-status\" class=\"muted\" role=\"status\" aria-live=\"polite\"></p><div id=\"form-loading\" class=\"state-loading\" hidden>{escape(copy['submitting'])}</div><div id=\"form-error\" class=\"state-error\" hidden>{escape(copy['submit_error'])}</div></form></section>
     </main>
     <footer><div class=\"container\" style=\"display:grid;gap:12px\"><nav class=\"footer-links\"><a href=\"{_locale_path(locale, '/projects')}\">{escape(copy['footer_projects'])}</a><a href=\"{_locale_path(locale, '/areas')}\">{escape(copy['footer_areas'])}</a><a href=\"{_locale_path(locale, '/investment/methodology')}\">{escape(copy['footer_investment'])}</a><a href=\"{_locale_path(locale, '/about')}\">{escape(copy['footer_about'])}</a><a href=\"{_locale_path(locale, '/contact')}\">{escape(copy['footer_contact'])}</a></nav><nav class=\"footer-links\"><a href=\"{_locale_path(locale, '/privacy')}\">{escape(copy['privacy'])}</a><a href=\"{_locale_path(locale, '/terms')}\">{escape(copy['terms'])}</a><a href=\"{_locale_path(locale, '/cookies')}\">{escape(copy['cookies'])}</a></nav></div></footer>
     <script>
@@ -637,21 +685,66 @@ def _render(locale: str, request: Request, db: Session, source: str, resolved: d
         const endpoint = '/api/v1/events';
         const scrollMarks = [25, 50, 75, 90];
         const fired = new Set();
+        function compactPayload(raw) {{
+          const out = {{}};
+          for (const [key, value] of Object.entries(raw || {{}})) {{
+            if (value === undefined || value === null) continue;
+            if (Array.isArray(value) && value.length === 0) continue;
+            out[key] = value;
+          }}
+          return out;
+        }}
+        function parseFilterValues(raw) {{
+          const value = String(raw || '').trim();
+          if (!value) return undefined;
+          try {{
+            const parsed = JSON.parse(value);
+            return Array.isArray(parsed) || typeof parsed === 'object' ? parsed : [parsed];
+          }} catch {{
+            return value.split(',').map((part) => part.trim()).filter(Boolean);
+          }}
+        }}
+        function elementPayload(node) {{
+          const card = node.closest('[data-card-id], [data-item-id]');
+          return compactPayload({{
+            label: node.textContent?.trim() || '',
+            placement: node.getAttribute('data-placement') || card?.getAttribute('data-placement') || undefined,
+            cta_id: node.getAttribute('data-cta-id') || undefined,
+            card_id: node.getAttribute('data-card-id') || card?.getAttribute('data-card-id') || node.getAttribute('data-item-id') || card?.getAttribute('data-item-id') || undefined,
+            card_slug: node.getAttribute('data-card-slug') || card?.getAttribute('data-card-slug') || undefined,
+            filter_values: parseFilterValues(node.getAttribute('data-filter-values') || card?.getAttribute('data-filter-values') || ''),
+            intent: node.getAttribute('data-intent') || undefined,
+            item_id: node.getAttribute('data-item-id') || card?.getAttribute('data-item-id') || undefined,
+          }});
+        }}
         function track(eventName, payload) {{
-          return fetch(endpoint, {{ method: 'POST', headers: {{ 'content-type': 'application/json' }}, body: JSON.stringify({{ event: eventName, locale, path, ...payload }}), keepalive: true }}).catch(() => null);
+          const payloadBody = compactPayload(payload);
+          const sourceBody = compactPayload({{
+            app: 'flowbiz-public-runtime',
+            env: 'runtime',
+            page: path,
+            locale,
+            placement: payloadBody.placement,
+          }});
+          return fetch(endpoint, {{
+            method: 'POST',
+            headers: {{ 'content-type': 'application/json' }},
+            body: JSON.stringify({{ event_name: eventName, source: sourceBody, payload: payloadBody }}),
+            keepalive: true,
+          }}).catch(() => null);
         }}
         document.querySelectorAll('[data-event]').forEach((node) => {{
           node.addEventListener('click', () => {{
             const eventName = node.getAttribute('data-event');
             if (!eventName) return;
-            track(eventName, {{ label: node.textContent?.trim() || '', placement: node.getAttribute('data-placement') || undefined, item_id: node.getAttribute('data-item-id') || undefined }});
+            track(eventName, elementPayload(node));
           }});
         }});
         window.addEventListener('scroll', () => {{
           const scrollHeight = document.documentElement.scrollHeight - window.innerHeight;
           if (scrollHeight <= 0) return;
           const depth = Math.round((window.scrollY / scrollHeight) * 100);
-          for (const mark of scrollMarks) {{ if (depth >= mark && !fired.has(mark)) {{ fired.add(mark); track('home_scroll_depth', {{ depth: mark }}); }} }}
+          for (const mark of scrollMarks) {{ if (depth >= mark && !fired.has(mark)) {{ fired.add(mark); track('home_scroll_depth', {{ depth: mark, placement: 'page_scroll' }}); }} }}
         }}, {{ passive: true }});
         const form = document.getElementById('consultation-form');
         const submitBtn = document.getElementById('consult-submit');
@@ -667,7 +760,7 @@ def _render(locale: str, request: Request, db: Session, source: str, resolved: d
             const fieldsPresent = Object.entries(data).filter(([, value]) => String(value || '').trim().length > 0).map(([key]) => key);
             const isEmail = contact.includes('@');
             try {{
-              await track('home_form_submit', {{ fields_present: fieldsPresent, intent }});
+              await track('home_form_submit', {{ fields_present: fieldsPresent, intent, filter_values: intent ? [intent] : [], placement: 'consult_form', cta_id: 'consult_submit' }});
               await fetch('/v1/inquiries', {{ method: 'POST', headers: {{ 'content-type': 'application/json' }}, body: JSON.stringify({{ name: data.name, email: isEmail ? contact : null, phone: isEmail ? null : contact, message: 'Budget: ' + String(data.budget || '') + '; Purpose: ' + String(data.purpose || '') + '; Timeline: ' + String(data.timeline || ''), source_page: location.pathname, intent, budget_band: String(data.budget || ''), timeline: String(data.timeline || '') }}) }});
               statusEl.textContent = {copy['submit_success']!r}; form.reset();
             }} catch {{ errorEl.hidden = false; statusEl.textContent = ''; }} finally {{ loadingEl.hidden = true; submitBtn.disabled = false; }}
@@ -734,7 +827,12 @@ def _localized_dict_text(value: object, locale: str) -> str | None:
 
 
 def _render_projects_page(locale: str, request: Request, db: Session) -> HTMLResponse:
-    rows = db.scalars(select(Project).where(Project.status == "published").order_by(desc(Project.updated_at)).limit(12)).all()
+    rows = db.scalars(
+        select(Project)
+        .where(Project.deleted_at.is_(None), Project.status == "published")
+        .order_by(desc(Project.updated_at))
+        .limit(12)
+    ).all()
     cards = []
     for row in rows:
         media = _safe_media_url(row.cover_image_url or row.hero_image_url, _DEFAULT_MEDIA_FALLBACK, request=request)
@@ -754,13 +852,73 @@ def _render_projects_page(locale: str, request: Request, db: Session) -> HTMLRes
     return HTMLResponse(_render_page_shell(locale, title=title, intro=intro, body=body))
 
 
+def _render_smart_finder_page(locale: str, request: Request) -> HTMLResponse:
+    selected_intent = str(request.query_params.get("intent") or "").strip().lower()
+    intents = [
+        (
+            "invest",
+            "Invest" if locale == "en" else "ลงทุน",
+            "Shortlist yield-focused opportunities and next-step review."
+            if locale == "en"
+            else "คัด shortlist สำหรับการลงทุนและวางขั้นตอนถัดไป",
+        ),
+        (
+            "buy",
+            "Buy" if locale == "en" else "ซื้อ",
+            "Focus on ownership fit, budget, and legal next steps."
+            if locale == "en"
+            else "โฟกัสความเหมาะสม งบประมาณ และขั้นตอนกฎหมาย",
+        ),
+        (
+            "rent",
+            "Rent" if locale == "en" else "เช่า",
+            "Filter for move-in timing, budget band, and lifestyle needs."
+            if locale == "en"
+            else "คัดตามช่วงย้ายเข้า งบประมาณ และรูปแบบการอยู่อาศัย",
+        ),
+        (
+            "sell",
+            "Sell" if locale == "en" else "ขาย",
+            "Prepare pricing context, asset facts, and launch readiness."
+            if locale == "en"
+            else "เตรียมบริบทด้านราคา ข้อมูลทรัพย์ และความพร้อมก่อนปล่อยขาย",
+        ),
+    ]
+    selected_copy = next((description for key, _, description in intents if key == selected_intent), None)
+    selection_note = (
+        selected_copy
+        or (
+            "Choose the path that matches your goal, then continue to consultation or published inventory."
+            if locale == "en"
+            else "เลือกเส้นทางที่ตรงกับเป้าหมายของคุณ แล้วไปต่อที่ consultation หรือ inventory ที่เผยแพร่"
+        )
+    )
+    cards = "".join(
+        f"<article class=\"card\"><h2>{escape(label)}</h2><p>{escape(description)}</p><a class=\"btn\" href=\"/{locale}/smart-finder?intent={escape(key)}\">{'Use this path' if locale == 'en' else 'เลือกเส้นทางนี้'}</a></article>"
+        for key, label, description in intents
+    )
+    body = (
+        f"<section class=\"card\"><h2>{'Smart Finder' if locale == 'en' else 'Smart Finder'}</h2><p>{escape(selection_note)}</p>"
+        f"<div class=\"grid\"><a class=\"btn\" href=\"/{locale}#consult-title\">{'Request consultation' if locale == 'en' else 'ขอคำปรึกษา'}</a>"
+        f"<a class=\"btn\" href=\"/{locale}/projects\">{'Browse published projects' if locale == 'en' else 'ดูโครงการที่เผยแพร่'}</a></div></section>"
+        f"<section class=\"grid\">{cards}</section>"
+    )
+    title = "Smart Finder"
+    intro = (
+        "A guided public route that narrows the next step before consultation."
+        if locale == "en"
+        else "เส้นทาง public สำหรับคัด step ถัดไปก่อนเข้าสู่ consultation"
+    )
+    return HTMLResponse(_render_page_shell(locale, title=title, intro=intro, body=body))
+
+
 def _render_areas_page(locale: str, request: Request, db: Session) -> HTMLResponse:
     rows = db.scalars(select(Area).where(Area.deleted_at.is_(None), Area.status == "published").order_by(Area.name.asc()).limit(12)).all()
     project_counts = {
         str(area_id): total
         for area_id, total in db.execute(
             select(Project.area_id, func.count(Project.id))
-            .where(Project.status == "published", Project.area_id.is_not(None))
+            .where(Project.deleted_at.is_(None), Project.status == "published", Project.area_id.is_not(None))
             .group_by(Project.area_id)
         ).all()
     }
@@ -919,6 +1077,12 @@ def render_home_th(request: Request, db: Session = Depends(get_db)) -> HTMLRespo
 @router.get("/th/projects", response_class=HTMLResponse)
 def render_projects(request: Request, db: Session = Depends(get_db)) -> HTMLResponse:
     return _render_projects_page(_request_locale(request), request, db)
+
+
+@router.get("/en/smart-finder", response_class=HTMLResponse)
+@router.get("/th/smart-finder", response_class=HTMLResponse)
+def render_smart_finder(request: Request) -> HTMLResponse:
+    return _render_smart_finder_page(_request_locale(request), request)
 
 
 @router.get("/en/areas", response_class=HTMLResponse)

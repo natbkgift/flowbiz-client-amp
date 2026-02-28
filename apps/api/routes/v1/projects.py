@@ -11,6 +11,10 @@ from packages.core.models import Area, Developer, Project
 router = APIRouter(prefix="/v1", tags=["projects"])
 
 
+def _public_projects_base_query():
+    return select(Project).where(Project.deleted_at.is_(None), Project.status == "published")
+
+
 def _linked_area(row: Project, db: Session) -> dict | None:
     if row.area_id is None:
         return None
@@ -56,12 +60,9 @@ def _safe_media_list(value: object | None) -> list[str]:
 def list_projects(
     page: int = Query(1, ge=1),
     limit: int = Query(20, ge=1, le=200),
-    status_filter: str = Query("published"),
     db: Session = Depends(get_db),
 ) -> dict:
-    base = select(Project).where(Project.deleted_at.is_(None))
-    if status_filter:
-        base = base.where(Project.status == status_filter)
+    base = _public_projects_base_query()
 
     total = db.scalar(select(func.count()).select_from(base.subquery())) or 0
     rows = db.scalars(
@@ -103,7 +104,7 @@ def list_projects(
 
 
 def _project_or_404(db: Session, *, project_ref: str | None = None, slug: str | None = None) -> Project:
-    q = select(Project).where(Project.deleted_at.is_(None), Project.status == "published")
+    q = _public_projects_base_query()
     if project_ref is not None:
         ref = project_ref.strip()
         try:

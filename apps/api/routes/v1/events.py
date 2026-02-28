@@ -13,6 +13,20 @@ from pydantic import BaseModel, ConfigDict, Field
 router = APIRouter(prefix="/api/v1", tags=["events"])
 logger = logging.getLogger("flowbiz.events")
 
+_RESERVED_EVENT_FIELDS = {
+    "event",
+    "event_name",
+    "schema_version",
+    "event_id",
+    "occurred_at",
+    "locale",
+    "path",
+    "source",
+    "actor",
+    "context",
+    "payload",
+}
+
 
 class EventIngestRequest(BaseModel):
     model_config = ConfigDict(extra="allow")
@@ -42,6 +56,12 @@ def _normalize_event(payload: EventIngestRequest) -> dict[str, Any]:
     source = body.get("source") if isinstance(body.get("source"), dict) else {}
     actor = body.get("actor") if isinstance(body.get("actor"), dict) else {}
     payload_body = body.get("payload") if isinstance(body.get("payload"), dict) else {}
+    if not payload_body:
+        payload_body = {
+            key: value
+            for key, value in body.items()
+            if key not in _RESERVED_EVENT_FIELDS and value is not None
+        }
     locale = str(body.get("locale") or source.get("locale") or "").strip() or None
     path = str(body.get("path") or source.get("page") or "").strip() or None
     event_id = str(body.get("event_id") or "").strip() or f"evt_{uuid4().hex}"

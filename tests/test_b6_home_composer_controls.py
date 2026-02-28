@@ -506,6 +506,40 @@ def test_b6_events_endpoint_lock(client) -> None:
     assert payload["event"] == "home_hero_primary_click"
 
 
+def test_b6_events_endpoint_backfills_legacy_flattened_payload_metadata(client) -> None:
+    first = client.post(
+        "/api/v1/events",
+        json={
+            "event": "home_browse_projects_click",
+            "locale": "en",
+            "path": "/en",
+            "placement": "featured_footer",
+            "cta_id": "hero_secondary",
+            "card_id": "project-alpha",
+            "card_slug": "project-alpha",
+        },
+    )
+    second = client.post(
+        "/api/v1/events",
+        json={
+            "event": "home_browse_projects_click",
+            "locale": "en",
+            "path": "/en",
+            "placement": "featured_footer",
+            "cta_id": "hero_secondary",
+            "card_id": "project-beta",
+            "card_slug": "project-beta",
+        },
+    )
+    assert first.status_code == 202, first.text
+    assert second.status_code == 202, second.text
+    first_payload = first.json()
+    second_payload = second.json()
+    assert first_payload["path"] == "/en"
+    assert second_payload["path"] == "/en"
+    assert first_payload["idempotency_key"] != second_payload["idempotency_key"]
+
+
 def test_b6_events_endpoint_accepts_spec_envelope(client) -> None:
     response = client.post(
         "/api/v1/events",
