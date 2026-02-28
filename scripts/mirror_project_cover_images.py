@@ -162,7 +162,9 @@ def _download_to_file(url: str, dest_path: Path, *, timeout: int) -> tuple[int, 
         with urllib.request.urlopen(req, timeout=timeout) as resp:
             status = int(getattr(resp, "status", 200))
             if not (200 <= status < 400):
-                raise urllib.error.HTTPError(url, status, f"unexpected status {status}", hdrs=None, fp=None)
+                raise urllib.error.HTTPError(
+                    url, status, f"unexpected status {status}", hdrs=None, fp=None
+                )
 
             content_type = str(resp.headers.get("Content-Type") or "").strip() or None
             with tmp_path.open("wb") as f:
@@ -236,7 +238,9 @@ def _mirror_one(
         )
 
     try:
-        bytes_written, content_type = _download_to_file(source_url, provisional_file, timeout=timeout)
+        bytes_written, content_type = _download_to_file(
+            source_url, provisional_file, timeout=timeout
+        )
         final_file, final_url = _build_local_paths(
             public_root=public_root,
             media_prefix=media_prefix,
@@ -298,7 +302,11 @@ def mirror_project_covers(
     sources_path = import_dir / "project_cover_sources.json"
     projects = _read_json_list(projects_path)
     sources = _read_json_list(sources_path)
-    source_by_slug = {str(r.get("project_slug") or "").strip(): r for r in sources if str(r.get("project_slug") or "").strip()}
+    source_by_slug = {
+        str(r.get("project_slug") or "").strip(): r
+        for r in sources
+        if str(r.get("project_slug") or "").strip()
+    }
 
     prefix = "/" + media_prefix.strip("/")
     now_iso = datetime.now(timezone.utc).isoformat()
@@ -326,7 +334,9 @@ def mirror_project_covers(
                 if skip_local_file_check
                 else (local_abs.exists() and local_abs.is_file() and local_abs.stat().st_size > 0)
             )
-            is_in_project_covers = str(cover).startswith(prefix + "/" + media_subdir.strip("/") + "/")
+            is_in_project_covers = str(cover).startswith(
+                prefix + "/" + media_subdir.strip("/") + "/"
+            )
             preferred_external_from_source = None
             if source_row is not None and bool(source_row.get("approved_for_seed")):
                 candidate = str(source_row.get("cover_image_url") or "").strip() or None
@@ -536,7 +546,9 @@ def mirror_project_covers(
                 mirrored += 1
             if source_row is not None:
                 source_row["mirrored_local_path"] = mirror_res.local_url
-                source_row["mirror_status"] = "mirrored_ok_reused" if mirror_res.reused_existing else "mirrored_ok"
+                source_row["mirror_status"] = (
+                    "mirrored_ok_reused" if mirror_res.reused_existing else "mirrored_ok"
+                )
                 source_row["mirror_last_checked_at"] = now_iso
                 source_row["mirror_file_sha256"] = mirror_res.sha256
                 source_row["mirror_file_size_bytes"] = mirror_res.bytes_written
@@ -592,7 +604,9 @@ def mirror_project_covers(
             continue
         local_abs = public_root / cover.lstrip("/")
         if not (local_abs.exists() and local_abs.is_file() and local_abs.stat().st_size > 0):
-            local_missing_files.append({"slug": slug, "cover_image_url": cover, "expected_file": str(local_abs)})
+            local_missing_files.append(
+                {"slug": slug, "cover_image_url": cover, "expected_file": str(local_abs)}
+            )
 
     return {
         "summary": {
@@ -636,7 +650,9 @@ def _print_human_summary(report: dict[str, Any]) -> None:
 def _exit_code_for_policy(report: dict[str, Any], *, strict: bool, fail_on_warn: bool) -> int:
     summary = report.get("summary", {})
     errors = int(summary.get("failures_count", 0))
-    warnings = int(summary.get("external_remaining_count", 0)) + int(summary.get("local_missing_files_count", 0))
+    warnings = int(summary.get("external_remaining_count", 0)) + int(
+        summary.get("local_missing_files_count", 0)
+    )
     if fail_on_warn and (errors > 0 or warnings > 0):
         return 2
     if strict and warnings > 0:
@@ -645,13 +661,36 @@ def _exit_code_for_policy(report: dict[str, Any], *, strict: bool, fail_on_warn:
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description="Mirror external project cover images into local /media paths.")
-    parser.add_argument("--input-dir", default=str(IMPORT_DIR), help="Import JSON dir (default: %(default)s)")
-    parser.add_argument("--public-root", default=str(DEFAULT_PUBLIC_ROOT), help="Frontend public root where /media is stored (default: %(default)s)")
-    parser.add_argument("--media-prefix", default=DEFAULT_MEDIA_PREFIX, help="Public media URL prefix (default: %(default)s)")
-    parser.add_argument("--media-subdir", default=DEFAULT_MEDIA_SUBDIR, help="Project cover subdir under media prefix (default: %(default)s)")
-    parser.add_argument("--timeout", type=int, default=45, help="HTTP timeout seconds per image (default: %(default)s)")
-    parser.add_argument("--force", action="store_true", help="Re-download even if mirrored file already exists")
+    parser = argparse.ArgumentParser(
+        description="Mirror external project cover images into local /media paths."
+    )
+    parser.add_argument(
+        "--input-dir", default=str(IMPORT_DIR), help="Import JSON dir (default: %(default)s)"
+    )
+    parser.add_argument(
+        "--public-root",
+        default=str(DEFAULT_PUBLIC_ROOT),
+        help="Frontend public root where /media is stored (default: %(default)s)",
+    )
+    parser.add_argument(
+        "--media-prefix",
+        default=DEFAULT_MEDIA_PREFIX,
+        help="Public media URL prefix (default: %(default)s)",
+    )
+    parser.add_argument(
+        "--media-subdir",
+        default=DEFAULT_MEDIA_SUBDIR,
+        help="Project cover subdir under media prefix (default: %(default)s)",
+    )
+    parser.add_argument(
+        "--timeout",
+        type=int,
+        default=45,
+        help="HTTP timeout seconds per image (default: %(default)s)",
+    )
+    parser.add_argument(
+        "--force", action="store_true", help="Re-download even if mirrored file already exists"
+    )
     parser.add_argument(
         "--origin-for-local-media",
         default="https://amppattaya.com",
@@ -662,9 +701,20 @@ def main() -> int:
         action="store_true",
         help="Trust existing /media/... paths without verifying files under --public-root (useful in API containers that do not mount frontend public assets).",
     )
-    parser.add_argument("--strict", action="store_true", help="Fail when external or broken local cover refs remain")
-    parser.add_argument("--fail-on-warn", action="store_true", dest="fail_on_warn", help="Fail on warnings as well as errors")
-    parser.add_argument("--dry-run", action="store_true", help="Compute and report changes without rewriting JSON import files")
+    parser.add_argument(
+        "--strict", action="store_true", help="Fail when external or broken local cover refs remain"
+    )
+    parser.add_argument(
+        "--fail-on-warn",
+        action="store_true",
+        dest="fail_on_warn",
+        help="Fail on warnings as well as errors",
+    )
+    parser.add_argument(
+        "--dry-run",
+        action="store_true",
+        help="Compute and report changes without rewriting JSON import files",
+    )
     parser.add_argument("--quiet", action="store_true", help="Suppress human-readable summary")
     parser.add_argument(
         "--write-report",
@@ -696,10 +746,14 @@ def main() -> int:
         if not out_path.is_absolute():
             out_path = REPO_ROOT / out_path
         out_path.parent.mkdir(parents=True, exist_ok=True)
-        out_path.write_text(json.dumps(report, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+        out_path.write_text(
+            json.dumps(report, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
+        )
         print(f"\nWROTE:{out_path}")
 
-    return _exit_code_for_policy(report, strict=bool(args.strict), fail_on_warn=bool(args.fail_on_warn))
+    return _exit_code_for_policy(
+        report, strict=bool(args.strict), fail_on_warn=bool(args.fail_on_warn)
+    )
 
 
 if __name__ == "__main__":

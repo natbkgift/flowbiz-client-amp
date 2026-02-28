@@ -282,7 +282,10 @@ def test_admin_csv_export_has_safe_fields(client):
     assert exported.status_code == 200
     assert exported.headers["content-type"].startswith("text/csv")
     csv_text = exported.text
-    assert "id,name,email,phone,status,score,advisor_user_id,source_page,duplicate_hint,spam_hint,created_at" in csv_text
+    assert (
+        "id,name,email,phone,status,score,advisor_user_id,source_page,duplicate_hint,spam_hint,created_at"
+        in csv_text
+    )
     assert "Sensitive body should not be exported" not in csv_text
 
 

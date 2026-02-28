@@ -45,7 +45,9 @@ class Lead(Base):
     owner_user_id: Mapped[UUID | None] = mapped_column(
         ForeignKey("users.id", ondelete="SET NULL"), nullable=True, index=True
     )
-    follow_up_due_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True, index=True)
+    follow_up_due_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True), nullable=True, index=True
+    )
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), nullable=False, server_default=func.now()
     )
@@ -398,7 +400,9 @@ class Project(Base):
     amenities: Mapped[list | None] = mapped_column(JSONB, nullable=True)
     trust_proof: Mapped[list | None] = mapped_column(JSONB, nullable=True)
     source_notes: Mapped[dict | None] = mapped_column(JSONB, nullable=True)
-    claims_updated_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    claims_updated_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True), nullable=True
+    )
     investment_snapshot: Mapped[dict | None] = mapped_column(JSONB, nullable=True)
     location: Mapped[dict | None] = mapped_column(JSONB, nullable=True)
     unit_count: Mapped[int | None] = mapped_column(Integer, nullable=True)
@@ -837,12 +841,18 @@ class SeoPageOverride(Base):
     title: Mapped[str | None] = mapped_column(String(255), nullable=True)
     description: Mapped[str | None] = mapped_column(String(500), nullable=True)
     canonical: Mapped[str | None] = mapped_column(String(1000), nullable=True)
-    robots_index: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True, server_default="true")
-    robots_follow: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True, server_default="true")
+    robots_index: Mapped[bool] = mapped_column(
+        Boolean, nullable=False, default=True, server_default="true"
+    )
+    robots_follow: Mapped[bool] = mapped_column(
+        Boolean, nullable=False, default=True, server_default="true"
+    )
     schema_org_name: Mapped[str | None] = mapped_column(String(255), nullable=True)
     schema_local_business_name: Mapped[str | None] = mapped_column(String(255), nullable=True)
     schema_article_author: Mapped[str | None] = mapped_column(String(255), nullable=True)
-    enabled: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True, server_default="true")
+    enabled: Mapped[bool] = mapped_column(
+        Boolean, nullable=False, default=True, server_default="true"
+    )
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), nullable=False, server_default=func.now(), index=True
     )
@@ -864,9 +874,15 @@ class RedirectRule(Base):
     id: Mapped[UUID] = mapped_column(primary_key=True, default=uuid4)
     old_path: Mapped[str] = mapped_column(String(500), nullable=False)
     new_path: Mapped[str] = mapped_column(String(500), nullable=False)
-    status_code: Mapped[int] = mapped_column(Integer, nullable=False, default=301, server_default="301")
-    enabled: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True, server_default="true")
-    preserve_query: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True, server_default="true")
+    status_code: Mapped[int] = mapped_column(
+        Integer, nullable=False, default=301, server_default="301"
+    )
+    enabled: Mapped[bool] = mapped_column(
+        Boolean, nullable=False, default=True, server_default="true"
+    )
+    preserve_query: Mapped[bool] = mapped_column(
+        Boolean, nullable=False, default=True, server_default="true"
+    )
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), nullable=False, server_default=func.now(), index=True
     )
@@ -1015,7 +1031,9 @@ class HomeComposerConfig(Base):
         Index("ix_home_composer_page_locale", "page_key", "locale"),
         Index("ix_home_composer_status", "status"),
         Index("ix_home_composer_updated_at", "updated_at"),
-        UniqueConstraint("page_key", "locale", "status", name="uq_home_composer_page_locale_status"),
+        UniqueConstraint(
+            "page_key", "locale", "status", name="uq_home_composer_page_locale_status"
+        ),
     )
 
     id: Mapped[UUID] = mapped_column(primary_key=True, default=uuid4)

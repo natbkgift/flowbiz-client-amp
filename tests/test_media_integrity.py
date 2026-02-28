@@ -219,7 +219,9 @@ def test_run_scan_detects_orphan_files(tmp_path: Path) -> None:
         report = run_scan(db, media_root=media_root, media_public_prefix="/media")
 
     assert report.summary.orphan_file_count >= 1
-    orphan_finding = next((item for item in report.findings if item.category == "orphan_file"), None)
+    orphan_finding = next(
+        (item for item in report.findings if item.category == "orphan_file"), None
+    )
     assert orphan_finding is not None
     assert orphan_finding.severity == SEVERITY_WARN
     assert orphan_finding.suggestion is not None
@@ -260,7 +262,9 @@ def test_run_scan_detects_duplicate_checksum_groups(tmp_path: Path) -> None:
 
         report = run_scan(db, media_root=media_root, media_public_prefix="/media")
 
-    finding = next((item for item in report.findings if item.category == "duplicate_checksum"), None)
+    finding = next(
+        (item for item in report.findings if item.category == "duplicate_checksum"), None
+    )
     assert finding is not None
     assert finding.severity == SEVERITY_WARN
     assert report.summary.duplicate_checksum_groups >= 1

@@ -20,19 +20,18 @@ branch_labels: str | Sequence[str] | None = None
 depends_on: str | Sequence[str] | None = None
 
 
-
 def _bind():
     return op.get_bind()
-
 
 
 def _table_exists(table_name: str) -> bool:
     bind = _bind()
     if bind.dialect.name == "postgresql":
-        result = bind.execute(text("SELECT to_regclass(:name)"), {"name": f"public.{table_name}"}).scalar()
+        result = bind.execute(
+            text("SELECT to_regclass(:name)"), {"name": f"public.{table_name}"}
+        ).scalar()
         return result is not None
     return inspect(bind).has_table(table_name)
-
 
 
 def _index_exists(table_name: str, index_name: str) -> bool:
@@ -51,7 +50,6 @@ def _index_exists(table_name: str, index_name: str) -> bool:
     return any(ix.get("name") == index_name for ix in insp.get_indexes(table_name))
 
 
-
 def upgrade() -> None:
     table_name = "home_composer_configs"
 
@@ -66,9 +64,21 @@ def upgrade() -> None:
             sa.Column("config", sa.JSON(), nullable=False),
             sa.Column("updated_by", sa.String(length=255), nullable=True),
             sa.Column("published_at", sa.DateTime(timezone=True), nullable=True),
-            sa.Column("created_at", sa.DateTime(timezone=True), nullable=False, server_default=sa.func.now()),
-            sa.Column("updated_at", sa.DateTime(timezone=True), nullable=False, server_default=sa.func.now()),
-            sa.UniqueConstraint("page_key", "locale", "status", name="uq_home_composer_page_locale_status"),
+            sa.Column(
+                "created_at",
+                sa.DateTime(timezone=True),
+                nullable=False,
+                server_default=sa.func.now(),
+            ),
+            sa.Column(
+                "updated_at",
+                sa.DateTime(timezone=True),
+                nullable=False,
+                server_default=sa.func.now(),
+            ),
+            sa.UniqueConstraint(
+                "page_key", "locale", "status", name="uq_home_composer_page_locale_status"
+            ),
         )
 
     if not _index_exists(table_name, "ix_home_composer_page_locale"):
@@ -77,7 +87,6 @@ def upgrade() -> None:
         op.create_index("ix_home_composer_status", table_name, ["status"])
     if not _index_exists(table_name, "ix_home_composer_updated_at"):
         op.create_index("ix_home_composer_updated_at", table_name, ["updated_at"])
-
 
 
 def downgrade() -> None:

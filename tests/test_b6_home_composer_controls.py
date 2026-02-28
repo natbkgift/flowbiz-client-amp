@@ -99,7 +99,9 @@ def test_b6_create_patch_publish_unpublish_and_preview(client) -> None:
     assert created.status_code == 201, created.text
     composer_id = created.json()["id"]
 
-    preview = client.get("/admin/home-composer/preview/draft?page_key=home&locale=th", headers=headers)
+    preview = client.get(
+        "/admin/home-composer/preview/draft?page_key=home&locale=th", headers=headers
+    )
     assert preview.status_code == 200, preview.text
     assert preview.json()["resolved_locale"] == "en"
     assert preview.json()["source"] == "draft"
@@ -466,9 +468,17 @@ def test_b6_additive_contract_fields_and_media_allowlist(client) -> None:
 
     assert payload["hero_secondary_cta"]["text"] == "Browse Curated Projects"
     assert payload["hero_secondary_cta"]["href"] == "/projects"
-    assert [item["key"] for item in payload["path_selector"]["cards"]] == ["invest", "buy", "rent", "sell"]
+    assert [item["key"] for item in payload["path_selector"]["cards"]] == [
+        "invest",
+        "buy",
+        "rent",
+        "sell",
+    ]
     assert payload["trust_micro_strip"][0]["text"] == "Local-only media"
-    assert payload["video_items"][0]["thumbnail_path"] == "https://flowbiz.com/media/library/videos/thumb-1.webp"
+    assert (
+        payload["video_items"][0]["thumbnail_path"]
+        == "https://flowbiz.com/media/library/videos/thumb-1.webp"
+    )
     assert payload["consultation"]["submit_text"] == "Request Consultation"
 
     invalid_external = client.post(
@@ -595,9 +605,18 @@ def test_b6_events_endpoint_persists_area_taxonomy_payload(client) -> None:
         "/api/v1/events",
         json={
             "event_name": "area_cta_click",
-            "source": {"app": "flowbiz-public-runtime", "page": "/en/area-guide/jomtien", "locale": "en", "placement": "area_detail_footer"},
+            "source": {
+                "app": "flowbiz-public-runtime",
+                "page": "/en/area-guide/jomtien",
+                "locale": "en",
+                "placement": "area_detail_footer",
+            },
             "actor": {"session_id": "sess-area", "user_agent": "pytest"},
-            "payload": {"placement": "area_detail_footer", "cta_id": "area_consult", "area_slug": "jomtien"},
+            "payload": {
+                "placement": "area_detail_footer",
+                "cta_id": "area_consult",
+                "area_slug": "jomtien",
+            },
         },
     )
     assert response.status_code == 202, response.text

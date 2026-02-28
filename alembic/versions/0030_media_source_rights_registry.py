@@ -22,15 +22,12 @@ branch_labels: str | Sequence[str] | None = None
 depends_on: str | Sequence[str] | None = None
 
 
-
 def _bind():
     return op.get_bind()
 
 
-
 def _is_postgres() -> bool:
     return _bind().dialect.name == "postgresql"
-
 
 
 def _table_exists(table_name: str) -> bool:
@@ -43,7 +40,6 @@ def _table_exists(table_name: str) -> bool:
     return inspect(bind).has_table(table_name)
 
 
-
 def _column_exists(table_name: str, column_name: str) -> bool:
     if not _table_exists(table_name):
         return False
@@ -51,14 +47,15 @@ def _column_exists(table_name: str, column_name: str) -> bool:
     return any(col.get("name") == column_name for col in insp.get_columns(table_name))
 
 
-
 def _index_exists(index_name: str) -> bool:
     if not _table_exists("media_assets"):
         return False
     if _is_postgres():
-        result = _bind().execute(
-            text("SELECT 1 FROM pg_indexes WHERE indexname = :n"), {"n": index_name}
-        ).scalar()
+        result = (
+            _bind()
+            .execute(text("SELECT 1 FROM pg_indexes WHERE indexname = :n"), {"n": index_name})
+            .scalar()
+        )
         return result is not None
 
     insp = inspect(_bind())
@@ -66,7 +63,6 @@ def _index_exists(index_name: str) -> bool:
         if ix.get("name") == index_name:
             return True
     return False
-
 
 
 def upgrade() -> None:
@@ -80,9 +76,15 @@ def upgrade() -> None:
         ("approval_note", sa.Column("approval_note", sa.Text(), nullable=True)),
         ("approved_by", sa.Column("approved_by", sa.String(length=255), nullable=True)),
         ("approved_at", sa.Column("approved_at", sa.DateTime(timezone=True), nullable=True)),
-        ("last_checked_at", sa.Column("last_checked_at", sa.DateTime(timezone=True), nullable=True)),
+        (
+            "last_checked_at",
+            sa.Column("last_checked_at", sa.DateTime(timezone=True), nullable=True),
+        ),
         ("rights_note", sa.Column("rights_note", sa.Text(), nullable=True)),
-        ("license_evidence_url", sa.Column("license_evidence_url", sa.String(length=1000), nullable=True)),
+        (
+            "license_evidence_url",
+            sa.Column("license_evidence_url", sa.String(length=1000), nullable=True),
+        ),
         ("exception_reason", sa.Column("exception_reason", sa.Text(), nullable=True)),
         (
             "is_exception",
@@ -94,7 +96,10 @@ def upgrade() -> None:
             ),
         ),
         ("usage_scope", sa.Column("usage_scope", sa.String(length=255), nullable=True)),
-        ("linked_entity_hint", sa.Column("linked_entity_hint", sa.String(length=255), nullable=True)),
+        (
+            "linked_entity_hint",
+            sa.Column("linked_entity_hint", sa.String(length=255), nullable=True),
+        ),
     ]
 
     for col_name, col in additions:
@@ -105,7 +110,6 @@ def upgrade() -> None:
         op.create_index("ix_media_assets_approval_status", table, ["approval_status"])
     if not _index_exists("ix_media_assets_is_exception"):
         op.create_index("ix_media_assets_is_exception", table, ["is_exception"])
-
 
 
 def downgrade() -> None:

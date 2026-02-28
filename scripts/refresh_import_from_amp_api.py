@@ -77,7 +77,9 @@ def _is_real_media(url: str | None) -> bool:
         return False
     if "placeholder" in u:
         return False
-    return "/media/" in u or u.startswith("http://") or u.startswith("https://") or u.startswith("/")
+    return (
+        "/media/" in u or u.startswith("http://") or u.startswith("https://") or u.startswith("/")
+    )
 
 
 def _to_float(value: Any) -> float | None:
@@ -204,17 +206,39 @@ def fetch_property_detail(base_url: str, slug: str) -> dict[str, Any] | None:
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description="Refresh data/import JSON snapshots from AMP public API.")
-    parser.add_argument("--base-url", default="https://amppattaya.com/api", help="Base public API URL (default: %(default)s)")
-    parser.add_argument("--limit", type=int, default=100, help="Properties page size (default: %(default)s)")
-    parser.add_argument("--skip-property-details", action="store_true", help="Do not call property detail endpoint (faster, less metadata)")
+    parser = argparse.ArgumentParser(
+        description="Refresh data/import JSON snapshots from AMP public API."
+    )
+    parser.add_argument(
+        "--base-url",
+        default="https://amppattaya.com/api",
+        help="Base public API URL (default: %(default)s)",
+    )
+    parser.add_argument(
+        "--limit", type=int, default=100, help="Properties page size (default: %(default)s)"
+    )
+    parser.add_argument(
+        "--skip-property-details",
+        action="store_true",
+        help="Do not call property detail endpoint (faster, less metadata)",
+    )
     parser.add_argument("--import-dir", default=str(IMPORT_DIR), help="Import data directory")
-    parser.add_argument("--strict", action="store_true", help="Fail when refresh produced empty API datasets")
-    parser.add_argument("--fail-on-warn", action="store_true", dest="fail_on_warn", help="Fail on warnings too")
-    parser.add_argument("--no-write", action="store_true", dest="no_write", help="Do not write refreshed JSON files")
+    parser.add_argument(
+        "--strict", action="store_true", help="Fail when refresh produced empty API datasets"
+    )
+    parser.add_argument(
+        "--fail-on-warn", action="store_true", dest="fail_on_warn", help="Fail on warnings too"
+    )
+    parser.add_argument(
+        "--no-write", action="store_true", dest="no_write", help="Do not write refreshed JSON files"
+    )
     parser.add_argument("--quiet", action="store_true", help="Suppress human-readable summary")
-    parser.add_argument("--skip-mirror", action="store_true", help="Do not invoke mirror step after refresh")
-    parser.add_argument("--skip-report", action="store_true", help="Do not invoke B13 report step after refresh")
+    parser.add_argument(
+        "--skip-mirror", action="store_true", help="Do not invoke mirror step after refresh"
+    )
+    parser.add_argument(
+        "--skip-report", action="store_true", help="Do not invoke B13 report step after refresh"
+    )
     parser.add_argument(
         "--write",
         nargs="?",
@@ -232,7 +256,9 @@ def main() -> int:
     cover_source_map = _read_cover_source_map(import_dir / "project_cover_sources.json")
 
     old_projects_by_slug = {
-        str(r.get("slug") or "").strip(): r for r in old_projects if str(r.get("slug") or "").strip()
+        str(r.get("slug") or "").strip(): r
+        for r in old_projects
+        if str(r.get("slug") or "").strip()
     }
     old_units_by_source = {
         str(r.get("source_id") or "").strip(): r
@@ -269,7 +295,9 @@ def main() -> int:
 
     # Build project image + starting price hints from real property media.
     project_media_hints: dict[str, dict[str, Any]] = {}
-    project_ids = {str(p.get("id") or "").strip() for p in api_projects if str(p.get("id") or "").strip()}
+    project_ids = {
+        str(p.get("id") or "").strip() for p in api_projects if str(p.get("id") or "").strip()
+    }
     project_name_index = [
         {
             "id": str(p.get("id") or "").strip(),
@@ -279,7 +307,9 @@ def main() -> int:
         if str(p.get("id") or "").strip() and _normalize_text(p.get("name"))
     ]
 
-    def apply_project_hint(project_id: str, *, real_img: str | None, price_num: float | None, include_price: bool) -> None:
+    def apply_project_hint(
+        project_id: str, *, real_img: str | None, price_num: float | None, include_price: bool
+    ) -> None:
         if not project_id or project_id not in project_ids:
             return
         hint = project_media_hints.setdefault(project_id, {})
@@ -287,7 +317,9 @@ def main() -> int:
             hint["cover_image_url"] = real_img
         if include_price:
             current_price = _to_float(hint.get("starting_price"))
-            hint["starting_price"] = price_num if current_price is None else min(current_price, price_num)
+            hint["starting_price"] = (
+                price_num if current_price is None else min(current_price, price_num)
+            )
 
     for prop in api_properties:
         images = []
@@ -303,11 +335,18 @@ def main() -> int:
         real_img = next((img for img in images if _is_real_media(img)), None)
         price_num = _to_float(prop.get("price"))
         prop_type = str(prop.get("type") or "").strip().lower()
-        include_in_project_price = prop_type in {"new", "resale"} and price_num is not None and price_num > 0
+        include_in_project_price = (
+            prop_type in {"new", "resale"} and price_num is not None and price_num > 0
+        )
 
         project_id = str(prop.get("project_id") or "").strip()
         if project_id:
-            apply_project_hint(project_id, real_img=real_img, price_num=price_num, include_price=include_in_project_price)
+            apply_project_hint(
+                project_id,
+                real_img=real_img,
+                price_num=price_num,
+                include_price=include_in_project_price,
+            )
             continue
 
         haystack = _normalize_text(f"{prop.get('title') or ''} {prop.get('address') or ''}")
@@ -319,7 +358,12 @@ def main() -> int:
             if len(row["normalized_name"]) >= 8 and row["normalized_name"] in haystack
         ]
         if len(matches) == 1:
-            apply_project_hint(matches[0], real_img=real_img, price_num=price_num, include_price=include_in_project_price)
+            apply_project_hint(
+                matches[0],
+                real_img=real_img,
+                price_num=price_num,
+                include_price=include_in_project_price,
+            )
 
     # Merge projects
     old_order = {str(r.get("slug") or ""): i for i, r in enumerate(old_projects)}
@@ -369,8 +413,14 @@ def main() -> int:
         if slug and slug not in seen_project_slugs:
             merged_projects.append(old)
 
-    project_slug_by_id = {str(p.get("id") or "").strip(): str(p.get("slug") or "").strip() for p in api_projects}
-    project_meta_by_slug = {str(r.get("slug") or "").strip(): r for r in merged_projects if str(r.get("slug") or "").strip()}
+    project_slug_by_id = {
+        str(p.get("id") or "").strip(): str(p.get("slug") or "").strip() for p in api_projects
+    }
+    project_meta_by_slug = {
+        str(r.get("slug") or "").strip(): r
+        for r in merged_projects
+        if str(r.get("slug") or "").strip()
+    }
 
     def build_unit_row(prop: dict[str, Any]) -> dict[str, Any] | None:
         source_id = str(prop.get("source_id") or "").strip()
@@ -384,7 +434,9 @@ def main() -> int:
         detail = property_details_by_id.get(pid, {})
         old = old_units_by_source.get(source_id, {})
 
-        project_slug = project_slug_by_id.get(str(prop.get("project_id") or "").strip()) or old.get("project_slug")
+        project_slug = project_slug_by_id.get(str(prop.get("project_id") or "").strip()) or old.get(
+            "project_slug"
+        )
         project_meta = project_meta_by_slug.get(str(project_slug or "").strip(), {})
 
         price = _to_float(prop.get("price"))
@@ -428,7 +480,9 @@ def main() -> int:
             "images": images,
             "project_slug": project_slug or None,
             "area_slug": old.get("area_slug") or project_meta.get("area_slug") or None,
-            "developer_slug": old.get("developer_slug") or project_meta.get("developer_slug") or None,
+            "developer_slug": old.get("developer_slug")
+            or project_meta.get("developer_slug")
+            or None,
             "slug": slug or old.get("slug") or None,
             "status": str(prop.get("status") or old.get("status") or "active").strip() or "active",
         }
@@ -441,7 +495,11 @@ def main() -> int:
         if _to_float(size_sqm) is not None:
             size_value = _to_float(size_sqm)
             if size_value is not None:
-                row["size_sqm"] = int(round(size_value)) if float(size_value).is_integer() else round(size_value, 2)
+                row["size_sqm"] = (
+                    int(round(size_value))
+                    if float(size_value).is_integer()
+                    else round(size_value, 2)
+                )
         return row
 
     live_buy: list[dict[str, Any]] = []
@@ -461,7 +519,9 @@ def main() -> int:
             live_buy.append(row)
 
     # Preserve legacy rows not present in live API export
-    def merge_legacy(live_rows: list[dict[str, Any]], legacy_rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    def merge_legacy(
+        live_rows: list[dict[str, Any]], legacy_rows: list[dict[str, Any]]
+    ) -> list[dict[str, Any]]:
         live_ids = {str(r.get("source_id") or "").strip() for r in live_rows}
         extra = [r for r in legacy_rows if str(r.get("source_id") or "").strip() not in live_ids]
         return live_rows + extra

@@ -231,7 +231,9 @@ def save_upload_as_media_asset(
 ) -> MediaAsset:
     ensure_media_dirs()
     payload = upload.file.read()
-    inspection = inspect_image_bytes(payload, filename=upload.filename or "upload.bin", file_mime=upload.content_type)
+    inspection = inspect_image_bytes(
+        payload, filename=upload.filename or "upload.bin", file_mime=upload.content_type
+    )
 
     media_id = uuid4()
     suffix = Path(upload.filename or "upload.bin").suffix.lower() or ".bin"
@@ -283,7 +285,9 @@ def save_upload_as_media_asset(
         {
             "crop_hint": metadata.get("crop_hint"),
             "variants": variants,
-            "source_metadata": metadata.get("source_metadata") if isinstance(metadata.get("source_metadata"), dict) else {},
+            "source_metadata": metadata.get("source_metadata")
+            if isinstance(metadata.get("source_metadata"), dict)
+            else {},
             "avif_available": bool(variants["avif"]["available"]),
         },
     )
@@ -294,7 +298,9 @@ def save_upload_as_media_asset(
 def update_media_file_in_place(db: Session, *, media: MediaAsset, upload: UploadFile) -> MediaAsset:
     ensure_media_dirs()
     payload = upload.file.read()
-    inspection = inspect_image_bytes(payload, filename=upload.filename or "upload.bin", file_mime=upload.content_type)
+    inspection = inspect_image_bytes(
+        payload, filename=upload.filename or "upload.bin", file_mime=upload.content_type
+    )
 
     disk_path = _disk_path_from_public(media.storage_path)
     disk_path.parent.mkdir(parents=True, exist_ok=True)
@@ -357,23 +363,50 @@ def compute_usage_map(db: Session, *, media: MediaAsset) -> list[dict[str, str]]
     for row in db.scalars(select(Property)).all():
         images = row.images or []
         local_images = row.local_images or []
-        if row.cover_image == path or row.cover_image_url == path or path in images or path in local_images:
-            usage.append({"entity": "property", "id": str(row.id), "slug": str(row.slug or ""), "field": "media"})
+        if (
+            row.cover_image == path
+            or row.cover_image_url == path
+            or path in images
+            or path in local_images
+        ):
+            usage.append(
+                {
+                    "entity": "property",
+                    "id": str(row.id),
+                    "slug": str(row.slug or ""),
+                    "field": "media",
+                }
+            )
 
     for row in db.scalars(select(Project)).all():
         if row.cover_image_url == path or row.hero_image_url == path or path in (row.images or []):
-            usage.append({"entity": "project", "id": str(row.id), "slug": row.slug, "field": "media"})
+            usage.append(
+                {"entity": "project", "id": str(row.id), "slug": row.slug, "field": "media"}
+            )
 
     for row in db.scalars(select(Area)).all():
         if row.hero_image_url == path:
-            usage.append({"entity": "area", "id": str(row.id), "slug": row.slug, "field": "hero_image_url"})
+            usage.append(
+                {"entity": "area", "id": str(row.id), "slug": row.slug, "field": "hero_image_url"}
+            )
 
     for row in db.scalars(select(Developer)).all():
         if row.logo_url == path:
-            usage.append({"entity": "developer", "id": str(row.id), "slug": row.slug, "field": "logo_url"})
+            usage.append(
+                {"entity": "developer", "id": str(row.id), "slug": row.slug, "field": "logo_url"}
+            )
 
     for row in db.scalars(select(Article)).all():
-        if row.hero_image_url == path or (row.hero_media_asset_id and row.hero_media_asset_id == media.id):
-            usage.append({"entity": "article", "id": str(row.id), "slug": row.slug, "field": "hero_image_url"})
+        if row.hero_image_url == path or (
+            row.hero_media_asset_id and row.hero_media_asset_id == media.id
+        ):
+            usage.append(
+                {
+                    "entity": "article",
+                    "id": str(row.id),
+                    "slug": row.slug,
+                    "field": "hero_image_url",
+                }
+            )
 
     return usage

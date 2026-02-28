@@ -82,7 +82,9 @@ def list_projects(
                 "developer_id": str(row.developer_id) if row.developer_id else None,
                 "area": _linked_area(row, db),
                 "developer": _linked_developer(row, db),
-                "starting_price": float(row.starting_price) if row.starting_price is not None else None,
+                "starting_price": float(row.starting_price)
+                if row.starting_price is not None
+                else None,
                 "cover_image_url": _safe_media_path(row.cover_image_url),
                 "hero_image_url": _safe_media_path(row.hero_image_url),
                 "images": _safe_media_list(row.images),
@@ -94,7 +96,9 @@ def list_projects(
                 "amenities": row.amenities or [],
                 "trust_proof": row.trust_proof or [],
                 "source_notes": row.source_notes or {},
-                "claims_updated_at": row.claims_updated_at.isoformat() if row.claims_updated_at else None,
+                "claims_updated_at": row.claims_updated_at.isoformat()
+                if row.claims_updated_at
+                else None,
                 "updated_at": row.updated_at.isoformat() if row.updated_at else None,
             }
             for row in rows
@@ -103,7 +107,9 @@ def list_projects(
     }
 
 
-def _project_or_404(db: Session, *, project_ref: str | None = None, slug: str | None = None) -> Project:
+def _project_or_404(
+    db: Session, *, project_ref: str | None = None, slug: str | None = None
+) -> Project:
     q = _public_projects_base_query()
     if project_ref is not None:
         ref = project_ref.strip()
@@ -144,7 +150,9 @@ def get_project(project_id: str, db: Session = Depends(get_db)) -> dict:
             "amenities": row.amenities or [],
             "trust_proof": row.trust_proof or [],
             "source_notes": row.source_notes or {},
-            "claims_updated_at": row.claims_updated_at.isoformat() if row.claims_updated_at else None,
+            "claims_updated_at": row.claims_updated_at.isoformat()
+            if row.claims_updated_at
+            else None,
         }
     }
 

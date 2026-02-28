@@ -22,4 +22,3 @@ class MediaAssetItem(BaseModel):
     status: str
     created_at: datetime
     updated_at: datetime
-

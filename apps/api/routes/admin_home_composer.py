@@ -10,7 +10,11 @@ from sqlalchemy import desc, select
 from sqlalchemy.orm import Session
 
 from apps.api.dependencies.auth import get_current_admin
-from apps.api.routes.home_composer_contract import deep_merge_dict, normalize_home_config, resolve_home_runtime
+from apps.api.routes.home_composer_contract import (
+    deep_merge_dict,
+    normalize_home_config,
+    resolve_home_runtime,
+)
 from packages.core.database import get_db
 from packages.core.models import Area, Developer, HomeComposerConfig, Project, Property, User
 
@@ -35,13 +39,17 @@ class HomeComposerPatchRequest(BaseModel):
 
 def _validate_locale(value: str) -> str:
     if value not in {"en", "th"}:
-        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_CONTENT, detail="Invalid locale")
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT, detail="Invalid locale"
+        )
     return value
 
 
 def _validate_status(value: str) -> str:
     if value not in {"draft", "published"}:
-        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_CONTENT, detail="Invalid status")
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT, detail="Invalid status"
+        )
     return value
 
 

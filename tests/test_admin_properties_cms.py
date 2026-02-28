@@ -205,7 +205,9 @@ def test_publish_unpublish_and_bulk_status(client: TestClient) -> None:
     assert bulk.json()["updated"] == 2
 
 
-def test_property_canonical_fields_precede_legacy_without_breaking_compat(client: TestClient) -> None:
+def test_property_canonical_fields_precede_legacy_without_breaking_compat(
+    client: TestClient,
+) -> None:
     headers = _make_admin_headers()
     legacy_cover = f"/media/library/{uuid4()}.jpg"
     canonical_cover = f"/media/library/{uuid4()}.jpg"
@@ -244,7 +246,9 @@ def test_property_canonical_fields_precede_legacy_without_breaking_compat(client
     assert float(body["size_sqm"]) == 33
 
 
-def test_property_cover_ingest_updates_local_media_and_source_rights_metadata(client: TestClient) -> None:
+def test_property_cover_ingest_updates_local_media_and_source_rights_metadata(
+    client: TestClient,
+) -> None:
     headers = _make_admin_headers()
     original_cover = f"/media/library/{uuid4()}.jpg"
     new_cover = f"/media/library/{uuid4()}.jpg"

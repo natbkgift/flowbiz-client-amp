@@ -70,7 +70,11 @@ class CtaConfig(BaseModel):
             return href
 
         parsed = urlparse(href)
-        if parsed.scheme in {"http", "https"} and parsed.hostname and parsed.hostname.lower() in _ALLOWED_EXTERNAL_CTA_HOSTS:
+        if (
+            parsed.scheme in {"http", "https"}
+            and parsed.hostname
+            and parsed.hostname.lower() in _ALLOWED_EXTERNAL_CTA_HOSTS
+        ):
             return href
         raise ValueError("CTA href must be internal relative URL or allowlisted external host")
 
@@ -303,7 +307,9 @@ class HomeComposerSchema(BaseModel):
             seen_keys.add(key)
             next_order += 1
 
-        self.sections = sorted(self.sections, key=lambda item: (item.order, SECTION_KEYS.index(item.key)))
+        self.sections = sorted(
+            self.sections, key=lambda item: (item.order, SECTION_KEYS.index(item.key))
+        )
         return self
 
 
@@ -342,7 +348,11 @@ def _validate_local_media_path(value: str | None) -> str | None:
     if validated.startswith("data:"):
         return validated
     parsed = urlparse(validated)
-    if parsed.scheme in {"http", "https"} and parsed.hostname and parsed.hostname.lower() in _ALLOWED_MEDIA_HOSTS:
+    if (
+        parsed.scheme in {"http", "https"}
+        and parsed.hostname
+        and parsed.hostname.lower() in _ALLOWED_MEDIA_HOSTS
+    ):
         return validated
     raise ValueError("non-allowlisted media host")
 
@@ -431,35 +441,65 @@ def default_home_config() -> HomeComposerSchema:
                 "cards": [
                     {
                         "key": "invest",
-                        "fit": {"en": "For yield-focused investors", "th": "สำหรับนักลงทุนที่เน้นผลตอบแทน"},
-                        "outcome": {"en": "Get vetted picks + risk notes", "th": "รับรายการคัดกรองพร้อมบันทึกความเสี่ยง"},
+                        "fit": {
+                            "en": "For yield-focused investors",
+                            "th": "สำหรับนักลงทุนที่เน้นผลตอบแทน",
+                        },
+                        "outcome": {
+                            "en": "Get vetted picks + risk notes",
+                            "th": "รับรายการคัดกรองพร้อมบันทึกความเสี่ยง",
+                        },
                         "href": "/investment?intent=invest",
                     },
                     {
                         "key": "buy",
-                        "fit": {"en": "For end-buyers moving to Pattaya", "th": "สำหรับผู้ซื้อเพื่ออยู่อาศัย"},
-                        "outcome": {"en": "Receive shortlist + legal steps", "th": "รับ shortlist พร้อมขั้นตอนกฎหมาย"},
+                        "fit": {
+                            "en": "For end-buyers moving to Pattaya",
+                            "th": "สำหรับผู้ซื้อเพื่ออยู่อาศัย",
+                        },
+                        "outcome": {
+                            "en": "Receive shortlist + legal steps",
+                            "th": "รับ shortlist พร้อมขั้นตอนกฎหมาย",
+                        },
                         "href": "/projects?intent=buy",
                     },
                     {
                         "key": "rent",
-                        "fit": {"en": "For lifestyle renters and expats", "th": "สำหรับผู้เช่าและชาวต่างชาติ"},
-                        "outcome": {"en": "Compare ready-to-move options", "th": "เปรียบเทียบยูนิตพร้อมเข้าอยู่"},
+                        "fit": {
+                            "en": "For lifestyle renters and expats",
+                            "th": "สำหรับผู้เช่าและชาวต่างชาติ",
+                        },
+                        "outcome": {
+                            "en": "Compare ready-to-move options",
+                            "th": "เปรียบเทียบยูนิตพร้อมเข้าอยู่",
+                        },
                         "href": "/rent?intent=rent",
                     },
                     {
                         "key": "sell",
-                        "fit": {"en": "For owners preparing an exit", "th": "สำหรับเจ้าของที่ต้องการขาย"},
-                        "outcome": {"en": "Get pricing and go-to-market plan", "th": "รับแผนตั้งราคาและนำออกตลาด"},
+                        "fit": {
+                            "en": "For owners preparing an exit",
+                            "th": "สำหรับเจ้าของที่ต้องการขาย",
+                        },
+                        "outcome": {
+                            "en": "Get pricing and go-to-market plan",
+                            "th": "รับแผนตั้งราคาและนำออกตลาด",
+                        },
                         "href": "/sell?intent=sell",
                     },
                 ]
             },
             "trust_micro_strip": [
                 {"key": "media", "text": {"en": "Local-only media", "th": "สื่อท้องถิ่นจริง"}},
-                {"key": "foreign", "text": {"en": "Foreign ownership guidance", "th": "คำแนะนำสิทธิ์ต่างชาติ"}},
+                {
+                    "key": "foreign",
+                    "text": {"en": "Foreign ownership guidance", "th": "คำแนะนำสิทธิ์ต่างชาติ"},
+                },
                 {"key": "fees", "text": {"en": "Clear fees & steps", "th": "ค่าใช้จ่ายและขั้นตอนชัดเจน"}},
-                {"key": "sla", "text": {"en": "Reply within 1 business day", "th": "ตอบกลับภายใน 1 วันทำการ"}},
+                {
+                    "key": "sla",
+                    "text": {"en": "Reply within 1 business day", "th": "ตอบกลับภายใน 1 วันทำการ"},
+                },
             ],
             "video_items": [],
             "consultation": {
@@ -467,7 +507,10 @@ def default_home_config() -> HomeComposerSchema:
                     "en": "Tell us your budget and timeline—we’ll send a curated shortlist and floor plans within 1 business day.",
                     "th": "แจ้งงบและไทม์ไลน์ แล้วเราจะส่ง shortlist และ floor plan ภายใน 1 วันทำการ",
                 },
-                "trust_note": {"en": "No spam • Reply within 1 business day", "th": "ไม่สแปม • ตอบกลับภายใน 1 วันทำการ"},
+                "trust_note": {
+                    "en": "No spam • Reply within 1 business day",
+                    "th": "ไม่สแปม • ตอบกลับภายใน 1 วันทำการ",
+                },
                 "submit_text": {"en": "Request Consultation", "th": "ขอคำปรึกษา"},
             },
             "updated_at": None,
@@ -520,12 +563,20 @@ def normalize_home_config(raw_config: dict[str, Any] | None) -> HomeComposerSche
                 "text": _coerce_localized_text(cta.get("text") or cta.get("label")),
                 "href": _coerce_text(cta.get("href")) or "/projects",
             },
-            "media_path": _coerce_text(hero.get("media_path") or hero.get("image") or hero.get("image_path")),
+            "media_path": _coerce_text(
+                hero.get("media_path") or hero.get("image") or hero.get("image_path")
+            ),
         }
 
     featured = incoming.get("featured")
     legacy_featured = incoming.get("featured_projects")
-    featured_source = featured if isinstance(featured, dict) else legacy_featured if isinstance(legacy_featured, dict) else {}
+    featured_source = (
+        featured
+        if isinstance(featured, dict)
+        else legacy_featured
+        if isinstance(legacy_featured, dict)
+        else {}
+    )
     if isinstance(featured_source, dict):
         base["featured"] = {
             "strategy": featured_source.get("strategy", "auto"),
@@ -537,12 +588,19 @@ def normalize_home_config(raw_config: dict[str, Any] | None) -> HomeComposerSche
 
     investment = incoming.get("investment_picks")
     legacy_investment = incoming.get("investment")
-    investment_source = investment if isinstance(investment, dict) else legacy_investment if isinstance(legacy_investment, dict) else {}
+    investment_source = (
+        investment
+        if isinstance(investment, dict)
+        else legacy_investment
+        if isinstance(legacy_investment, dict)
+        else {}
+    )
     if isinstance(investment_source, dict):
         base["investment_picks"] = {
             "strategy": investment_source.get("strategy", "auto"),
             "manual_property_ids": _coerce_string_list(
-                investment_source.get("manual_property_ids") or investment_source.get("property_ids")
+                investment_source.get("manual_property_ids")
+                or investment_source.get("property_ids")
             ),
             "limit": _coerce_int(investment_source.get("limit", 6), default=6),
         }
@@ -572,7 +630,9 @@ def normalize_home_config(raw_config: dict[str, Any] | None) -> HomeComposerSche
     hero_secondary_cta = incoming.get("hero_secondary_cta")
     if isinstance(hero_secondary_cta, dict):
         base["hero_secondary_cta"] = {
-            "text": _coerce_localized_text(hero_secondary_cta.get("text") or hero_secondary_cta.get("label")),
+            "text": _coerce_localized_text(
+                hero_secondary_cta.get("text") or hero_secondary_cta.get("label")
+            ),
             "href": _coerce_text(hero_secondary_cta.get("href")) or "/projects",
         }
 
@@ -624,7 +684,9 @@ def normalize_home_config(raw_config: dict[str, Any] | None) -> HomeComposerSche
     return HomeComposerSchema.model_validate(base)
 
 
-def resolve_text_for_locale(value: LocalizedText | dict[str, Any] | None, *, locale: str, fallback: str) -> str:
+def resolve_text_for_locale(
+    value: LocalizedText | dict[str, Any] | None, *, locale: str, fallback: str
+) -> str:
     localized: dict[str, Any]
     if isinstance(value, LocalizedText):
         localized = value.model_dump(mode="json")
@@ -656,14 +718,18 @@ def resolve_home_runtime(*, db: Session, config: HomeComposerSchema, locale: str
             for section in config.sections
         ],
         "hero": {
-            "headline": resolve_text_for_locale(config.hero.headline, locale=locale, fallback="Find your next home in Pattaya"),
+            "headline": resolve_text_for_locale(
+                config.hero.headline, locale=locale, fallback="Find your next home in Pattaya"
+            ),
             "subheadline": resolve_text_for_locale(
                 config.hero.subheadline,
                 locale=locale,
                 fallback="Verified listings, local insights, and trusted advisors.",
             ),
             "cta": {
-                "text": resolve_text_for_locale(config.hero.cta.text, locale=locale, fallback="Explore Projects"),
+                "text": resolve_text_for_locale(
+                    config.hero.cta.text, locale=locale, fallback="Explore Projects"
+                ),
                 "href": config.hero.cta.href,
             },
             "media_path": _sanitize_runtime_media_url(config.hero.media_path),
@@ -721,7 +787,11 @@ def resolve_home_runtime(*, db: Session, config: HomeComposerSchema, locale: str
         },
         "video": {
             "source": config.video.source,
-            "video_paths": [_sanitize_runtime_media_url(item) for item in config.video.video_paths if _sanitize_runtime_media_url(item)],
+            "video_paths": [
+                _sanitize_runtime_media_url(item)
+                for item in config.video.video_paths
+                if _sanitize_runtime_media_url(item)
+            ],
         },
         "video_items": [
             {
@@ -753,7 +823,9 @@ def resolve_home_runtime(*, db: Session, config: HomeComposerSchema, locale: str
     }
 
 
-def _resolve_featured_projects(*, db: Session, config: FeaturedSelectionConfig) -> list[dict[str, Any]]:
+def _resolve_featured_projects(
+    *, db: Session, config: FeaturedSelectionConfig
+) -> list[dict[str, Any]]:
     auto_limit = config.limit
 
     selected: list[Project] = []
@@ -774,7 +846,9 @@ def _resolve_featured_projects(*, db: Session, config: FeaturedSelectionConfig) 
     return [_project_payload(item) for item in selected[:auto_limit]]
 
 
-def _resolve_projects_by_ids(*, db: Session, project_ids: Iterable[str], limit: int) -> list[Project]:
+def _resolve_projects_by_ids(
+    *, db: Session, project_ids: Iterable[str], limit: int
+) -> list[Project]:
     ordered_ids = list(project_ids)[:limit]
     if not ordered_ids:
         return []
@@ -818,13 +892,17 @@ def _resolve_auto_projects(*, db: Session, limit: int, exclude_ids: set[Any]) ->
     return list(rows)
 
 
-def _resolve_investment_properties(*, db: Session, config: InvestmentSelectionConfig) -> list[dict[str, Any]]:
+def _resolve_investment_properties(
+    *, db: Session, config: InvestmentSelectionConfig
+) -> list[dict[str, Any]]:
     auto_limit = config.limit
 
     selected: list[Property] = []
     if config.strategy == "manual" and config.manual_property_ids:
         selected.extend(
-            _resolve_properties_by_ids(db=db, property_ids=config.manual_property_ids, limit=auto_limit)
+            _resolve_properties_by_ids(
+                db=db, property_ids=config.manual_property_ids, limit=auto_limit
+            )
         )
 
     if len(selected) >= auto_limit:
@@ -839,7 +917,9 @@ def _resolve_investment_properties(*, db: Session, config: InvestmentSelectionCo
     return [_property_payload(item) for item in selected[:auto_limit]]
 
 
-def _resolve_properties_by_ids(*, db: Session, property_ids: Iterable[str], limit: int) -> list[Property]:
+def _resolve_properties_by_ids(
+    *, db: Session, property_ids: Iterable[str], limit: int
+) -> list[Property]:
     ordered_ids = list(property_ids)[:limit]
     if not ordered_ids:
         return []

@@ -256,7 +256,9 @@ def build_source_rights_report(
                 }
             )
 
-        if source_type in {"archive", "marketplace_exception", "unknown"} and not bool(row.is_exception):
+        if source_type in {"archive", "marketplace_exception", "unknown"} and not bool(
+            row.is_exception
+        ):
             if len(report.findings) < findings_limit:
                 report.add(
                     SourceRightsFinding(
@@ -299,7 +301,11 @@ def build_source_rights_report(
                     )
                 )
 
-        if approval_status == "approved" and rights_status not in {"approved", "licensed", "exception_allowed"}:
+        if approval_status == "approved" and rights_status not in {
+            "approved",
+            "licensed",
+            "exception_allowed",
+        }:
             if len(report.findings) < findings_limit:
                 report.add(
                     SourceRightsFinding(

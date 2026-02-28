@@ -152,9 +152,15 @@ def test_a8_developer_listing_default_locale_project_count_and_runtime_guards(cl
     assert "bad-cdn.example" not in html
 
     host = "testserver"
-    for value in [*_extract_attrs(html, "src"), *_extract_attrs(html, "srcset"), *_extract_attrs(html, "poster")]:
+    for value in [
+        *_extract_attrs(html, "src"),
+        *_extract_attrs(html, "srcset"),
+        *_extract_attrs(html, "poster"),
+    ]:
         for candidate in [part.strip().split()[0] for part in value.split(",") if part.strip()]:
-            assert _is_allowed_media(candidate, host=host), f"Disallowed media URL in A8 developers listing HTML: {candidate}"
+            assert _is_allowed_media(candidate, host=host), (
+                f"Disallowed media URL in A8 developers listing HTML: {candidate}"
+            )
 
 
 def test_a8_developer_detail_routes_trust_location_ctas_and_fallbacks(client) -> None:
@@ -185,7 +191,9 @@ def test_a8_developer_detail_routes_trust_location_ctas_and_fallbacks(client) ->
 
     assert client.get(f"/en/areas/{seeded['area_main_slug']}").status_code == 200
     assert client.get(f"/en/projects/{seeded['project_a_slug']}").status_code == 200
-    assert client.get(f"/en/contact?intent=consultation&developer={primary_slug}").status_code == 200
+    assert (
+        client.get(f"/en/contact?intent=consultation&developer={primary_slug}").status_code == 200
+    )
     assert client.get(f"/en/projects?developer={primary_slug}").status_code == 200
 
     th_response = client.get(f"/th/developers/{primary_slug}")
@@ -195,7 +203,19 @@ def test_a8_developer_detail_routes_trust_location_ctas_and_fallbacks(client) ->
     pending_response = client.get(f"/en/developers/{pending_slug}")
     assert pending_response.status_code == 200, pending_response.text
     pending_html = pending_response.text
-    assert "Developer profile pending publication. TODO: add approved profile/about content." in pending_html
-    assert "No published projects are linked to this developer yet. TODO: publish or link approved projects." in pending_html
-    assert "Location focus is pending project linkage. TODO: link published projects to approved areas." in pending_html
-    assert "Trust proof is not published yet. TODO: add approved licenses, awards, or verification records." in pending_html
+    assert (
+        "Developer profile pending publication. TODO: add approved profile/about content."
+        in pending_html
+    )
+    assert (
+        "No published projects are linked to this developer yet. TODO: publish or link approved projects."
+        in pending_html
+    )
+    assert (
+        "Location focus is pending project linkage. TODO: link published projects to approved areas."
+        in pending_html
+    )
+    assert (
+        "Trust proof is not published yet. TODO: add approved licenses, awards, or verification records."
+        in pending_html
+    )

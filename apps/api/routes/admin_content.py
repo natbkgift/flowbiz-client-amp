@@ -49,7 +49,9 @@ def _to_utc(value: datetime) -> datetime:
     return value.astimezone(UTC)
 
 
-def _coerce_localized_text(value: dict[str, str] | str | None, *, field_name: str) -> dict[str, str]:
+def _coerce_localized_text(
+    value: dict[str, str] | str | None, *, field_name: str
+) -> dict[str, str]:
     if isinstance(value, str):
         text = value.strip()
         if text:
@@ -72,7 +74,9 @@ def _coerce_localized_text(value: dict[str, str] | str | None, *, field_name: st
     )
 
 
-def _coerce_optional_localized_text(value: dict[str, str] | str | None, *, field_name: str) -> dict[str, str] | None:
+def _coerce_optional_localized_text(
+    value: dict[str, str] | str | None, *, field_name: str
+) -> dict[str, str] | None:
     if value is None:
         return None
     if isinstance(value, str):
@@ -187,7 +191,9 @@ def ingest_article_hero_image(
             "slug": article.slug,
             "status": article.status,
             "hero_image_url": article.hero_image_url,
-            "hero_media_asset_id": str(article.hero_media_asset_id) if article.hero_media_asset_id else None,
+            "hero_media_asset_id": str(article.hero_media_asset_id)
+            if article.hero_media_asset_id
+            else None,
         }
     }
 
@@ -205,7 +211,9 @@ def update_article_editorial(
 
     updates = payload.model_dump(exclude_unset=True)
     if not updates:
-        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="No editable fields provided")
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="No editable fields provided"
+        )
 
     if "title" in updates:
         article.title = _coerce_localized_text(payload.title, field_name="title")
@@ -238,19 +246,25 @@ def update_article_editorial(
             else {}
         )
         if "author_name" in updates:
-            author_name = _coerce_optional_localized_text(payload.author_name, field_name="author_name")
+            author_name = _coerce_optional_localized_text(
+                payload.author_name, field_name="author_name"
+            )
             if author_name:
                 author_profile["name"] = author_name
             else:
                 author_profile.pop("name", None)
         if "author_role" in updates:
-            author_role = _coerce_optional_localized_text(payload.author_role, field_name="author_role")
+            author_role = _coerce_optional_localized_text(
+                payload.author_role, field_name="author_role"
+            )
             if author_role:
                 author_profile["role"] = author_role
             else:
                 author_profile.pop("role", None)
         if "author_bio" in updates:
-            author_bio = _coerce_optional_localized_text(payload.author_bio, field_name="author_bio")
+            author_bio = _coerce_optional_localized_text(
+                payload.author_bio, field_name="author_bio"
+            )
             if author_bio:
                 author_profile["bio"] = author_bio
             else:

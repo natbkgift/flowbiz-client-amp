@@ -33,7 +33,13 @@ _RESERVED_EVENT_FIELDS = {
 
 _EVENT_TAXONOMY_REQUIRED: dict[str, list[str]] = {
     "area_card_click": ["source.locale", "source.page", "payload.placement", "payload.area_slug"],
-    "area_cta_click": ["source.locale", "source.page", "payload.placement", "payload.cta_id", "payload.area_slug"],
+    "area_cta_click": [
+        "source.locale",
+        "source.page",
+        "payload.placement",
+        "payload.cta_id",
+        "payload.area_slug",
+    ],
 }
 
 
@@ -95,10 +101,20 @@ def _normalize_event(payload: EventIngestRequest) -> dict[str, Any]:
 def _redacted_log_fields(normalized: dict[str, Any]) -> dict[str, Any]:
     payload = normalized.get("payload") or {}
     form = payload.get("form") if isinstance(payload.get("form"), dict) else {}
-    email_hash = _sha256(str(form.get("email") or "").strip().lower()) if str(form.get("email") or "").strip() else None
-    phone_hash = _sha256(str(form.get("whatsapp") or form.get("phone") or "").strip()) if str(form.get("whatsapp") or form.get("phone") or "").strip() else None
+    email_hash = (
+        _sha256(str(form.get("email") or "").strip().lower())
+        if str(form.get("email") or "").strip()
+        else None
+    )
+    phone_hash = (
+        _sha256(str(form.get("whatsapp") or form.get("phone") or "").strip())
+        if str(form.get("whatsapp") or form.get("phone") or "").strip()
+        else None
+    )
     return {
-        "fields_present": payload.get("fields_present") if isinstance(payload.get("fields_present"), list) else [],
+        "fields_present": payload.get("fields_present")
+        if isinstance(payload.get("fields_present"), list)
+        else [],
         "email_hash": email_hash,
         "phone_hash": phone_hash,
     }
@@ -163,13 +179,20 @@ def ingest_event(
     )
     try:
         actor = normalized["actor"] if isinstance(normalized.get("actor"), dict) else {}
-        source = normalized["body"].get("source") if isinstance(normalized["body"].get("source"), dict) else {}
+        source = (
+            normalized["body"].get("source")
+            if isinstance(normalized["body"].get("source"), dict)
+            else {}
+        )
         payload_body = normalized["payload"] if isinstance(normalized.get("payload"), dict) else {}
         row = AnalyticsEvent(
             event_type=normalized["event_name"],
             page=normalized.get("path"),
             session_id=str(actor.get("session_id") or "").strip() or None,
-            user_agent=str(actor.get("user_agent") or request.headers.get("user-agent") or "").strip() or None,
+            user_agent=str(
+                actor.get("user_agent") or request.headers.get("user-agent") or ""
+            ).strip()
+            or None,
             payload={
                 "schema_version": normalized["schema_version"],
                 "event_id": normalized["event_id"],

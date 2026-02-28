@@ -100,7 +100,11 @@ def _seed_a6_fixture() -> dict[str, str]:
                 "rights_note": "licensed for runtime use",
                 "license_evidence_url": "https://example.test/license-a6.pdf",
                 "last_checked_at": "2026-02-28",
-                "location": {"lat": 12.9322, "lng": 100.8822, "context": {"en": "Near central mall"}},
+                "location": {
+                    "lat": 12.9322,
+                    "lng": 100.8822,
+                    "context": {"en": "Near central mall"},
+                },
             },
             last_synced_at=datetime.now(UTC),
         )
@@ -192,7 +196,9 @@ def test_a6_property_detail_sections_gallery_keyboard_and_local_media(client) ->
         *_extract_attrs(html, "poster"),
     ]:
         for candidate in [part.strip().split()[0] for part in value.split(",") if part.strip()]:
-            assert _is_allowed_media(candidate, host=host), f"Disallowed media URL in A6 runtime HTML: {candidate}"
+            assert _is_allowed_media(candidate, host=host), (
+                f"Disallowed media URL in A6 runtime HTML: {candidate}"
+            )
 
     assert "<strong>View:</strong>" in html
     assert "maps.google.com/?q=" in html

@@ -205,7 +205,9 @@ def create_booking(payload: BookingCreate, db: Session = Depends(get_db)) -> Boo
 
     idempotency_key = str(payload.idempotency_key or "").strip() or None
     if idempotency_key:
-        existing = db.scalar(select(Booking).where(Booking.idempotency_key == idempotency_key).limit(1))
+        existing = db.scalar(
+            select(Booking).where(Booking.idempotency_key == idempotency_key).limit(1)
+        )
         if existing is not None:
             return _to_booking_item(existing)
 

@@ -82,12 +82,16 @@ def _normalize_row(src: dict[str, Any]) -> dict[str, Any]:
         "rights_status": rights_status,
         "approval_status": approval_status,
         "credit": src.get("credit"),
-        "rights_note": f"backfilled_from_project_cover_sources:{src.get('source_title') or ''}".strip(":"),
+        "rights_note": f"backfilled_from_project_cover_sources:{src.get('source_title') or ''}".strip(
+            ":"
+        ),
         "license_evidence_url": src.get("source_page_url"),
         "is_exception": is_exception,
         "exception_reason": exception_reason,
         "usage_scope": "project-card",
-        "linked_entity_hint": f"project:{src.get('project_slug')}" if src.get("project_slug") else None,
+        "linked_entity_hint": f"project:{src.get('project_slug')}"
+        if src.get("project_slug")
+        else None,
     }
 
 
@@ -128,7 +132,9 @@ def _find_asset(db, normalized: dict[str, Any]) -> MediaAsset | None:
 
 def _build_session_factory(args: argparse.Namespace):
     if args.database_url:
-        connect_args = {"check_same_thread": False} if args.database_url.startswith("sqlite:///") else {}
+        connect_args = (
+            {"check_same_thread": False} if args.database_url.startswith("sqlite:///") else {}
+        )
         engine = create_engine(args.database_url, connect_args=connect_args, future=True)
         return sessionmaker(bind=engine, autoflush=False, autocommit=False, future=True)
 

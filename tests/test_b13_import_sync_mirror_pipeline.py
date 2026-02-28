@@ -18,7 +18,11 @@ def test_b13_report_strict_detects_external_and_broken_refs(tmp_path: Path) -> N
         import_dir / "projects.json",
         [
             {"slug": "ext-a", "name": "Ext A", "cover_image_url": "https://cdn.example/a.jpg"},
-            {"slug": "loc-b", "name": "Loc B", "cover_image_url": "/media/project-covers/loc-b/cover.jpg"},
+            {
+                "slug": "loc-b",
+                "name": "Loc B",
+                "cover_image_url": "/media/project-covers/loc-b/cover.jpg",
+            },
         ],
     )
     _write_json(import_dir / "project_cover_sources.json", [])
@@ -47,7 +51,9 @@ def test_b13_report_strict_detects_external_and_broken_refs(tmp_path: Path) -> N
 def test_b13_report_fail_on_warn_for_missing_cover(tmp_path: Path) -> None:
     import_dir = tmp_path / "import"
     public_root = tmp_path / "public"
-    _write_json(import_dir / "projects.json", [{"slug": "p1", "name": "No Cover", "cover_image_url": ""}])
+    _write_json(
+        import_dir / "projects.json", [{"slug": "p1", "name": "No Cover", "cover_image_url": ""}]
+    )
     _write_json(import_dir / "project_cover_sources.json", [])
 
     from scripts import report_project_cover_coverage as mod
@@ -80,7 +86,10 @@ def test_b13_report_write_json(tmp_path: Path) -> None:
     cover_path.parent.mkdir(parents=True, exist_ok=True)
     cover_path.write_bytes(b"ok")
 
-    _write_json(import_dir / "projects.json", [{"slug": "ok", "name": "Ok", "cover_image_url": "/media/project-covers/ok/cover.jpg"}])
+    _write_json(
+        import_dir / "projects.json",
+        [{"slug": "ok", "name": "Ok", "cover_image_url": "/media/project-covers/ok/cover.jpg"}],
+    )
     _write_json(import_dir / "project_cover_sources.json", [])
 
     from scripts import report_project_cover_coverage as mod
@@ -110,8 +119,20 @@ def test_b13_mirror_rewrites_external_to_local_media_path(tmp_path: Path, monkey
     import_dir = tmp_path / "import"
     public_root = tmp_path / "public"
 
-    _write_json(import_dir / "projects.json", [{"slug": "demo", "name": "Demo", "cover_image_url": "https://cdn.example/demo.jpg"}])
-    _write_json(import_dir / "project_cover_sources.json", [{"project_slug": "demo", "approved_for_seed": True, "cover_image_url": "https://cdn.example/demo.jpg"}])
+    _write_json(
+        import_dir / "projects.json",
+        [{"slug": "demo", "name": "Demo", "cover_image_url": "https://cdn.example/demo.jpg"}],
+    )
+    _write_json(
+        import_dir / "project_cover_sources.json",
+        [
+            {
+                "project_slug": "demo",
+                "approved_for_seed": True,
+                "cover_image_url": "https://cdn.example/demo.jpg",
+            }
+        ],
+    )
 
     from scripts import mirror_project_cover_images as mod
 
@@ -143,8 +164,20 @@ def test_b13_mirror_idempotent_rerun_reuses_existing(tmp_path: Path, monkeypatch
     import_dir = tmp_path / "import"
     public_root = tmp_path / "public"
 
-    _write_json(import_dir / "projects.json", [{"slug": "same", "name": "Same", "cover_image_url": "https://cdn.example/same.jpg"}])
-    _write_json(import_dir / "project_cover_sources.json", [{"project_slug": "same", "approved_for_seed": True, "cover_image_url": "https://cdn.example/same.jpg"}])
+    _write_json(
+        import_dir / "projects.json",
+        [{"slug": "same", "name": "Same", "cover_image_url": "https://cdn.example/same.jpg"}],
+    )
+    _write_json(
+        import_dir / "project_cover_sources.json",
+        [
+            {
+                "project_slug": "same",
+                "approved_for_seed": True,
+                "cover_image_url": "https://cdn.example/same.jpg",
+            }
+        ],
+    )
 
     from scripts import mirror_project_cover_images as mod
 

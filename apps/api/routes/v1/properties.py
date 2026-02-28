@@ -48,7 +48,9 @@ def _normalize_i18n_map(value: object | None) -> dict[str, str] | None:
     return out or None
 
 
-def _resolve_text_for_locale(i18n_map: dict[str, str] | None, fallback: str | None, locale: str) -> str | None:
+def _resolve_text_for_locale(
+    i18n_map: dict[str, str] | None, fallback: str | None, locale: str
+) -> str | None:
     if i18n_map:
         primary = i18n_map.get(locale)
         if primary:
@@ -155,7 +157,9 @@ def _extract_view_label(features: object | None) -> str | None:
     return value or None
 
 
-def _resolve_canonical_cover(*, cover_image_url: object | None, cover_image: object | None, merged: list[str]) -> str | None:
+def _resolve_canonical_cover(
+    *, cover_image_url: object | None, cover_image: object | None, merged: list[str]
+) -> str | None:
     # Canonical precedence: cover_image_url > cover_image > first merged image.
     if isinstance(cover_image_url, str):
         candidate = cover_image_url.strip()
@@ -240,7 +244,9 @@ def list_properties(
         m.cover_image_url = m.cover_image
         m.title_i18n = title_i18n
         m.description_i18n = description_i18n
-        m.title = _resolve_text_for_locale(title_i18n, getattr(item, "title", None), locale) or m.title
+        m.title = (
+            _resolve_text_for_locale(title_i18n, getattr(item, "title", None), locale) or m.title
+        )
         m.description = _resolve_text_for_locale(
             description_i18n,
             getattr(item, "description", None),
@@ -284,7 +290,9 @@ def get_property(
     m.title_i18n = title_i18n
     m.description_i18n = description_i18n
     m.title = _resolve_text_for_locale(title_i18n, getattr(prop, "title", None), locale) or m.title
-    m.description = _resolve_text_for_locale(description_i18n, getattr(prop, "description", None), locale)
+    m.description = _resolve_text_for_locale(
+        description_i18n, getattr(prop, "description", None), locale
+    )
     m.tags = _extract_tags(getattr(prop, "features", None))
     m.view_label = _extract_view_label(getattr(prop, "features", None))
     m.size_sqm = getattr(prop, "size_sqm", None) or getattr(prop, "size", None)
@@ -321,7 +329,9 @@ def get_property_by_slug(
     m.title_i18n = title_i18n
     m.description_i18n = description_i18n
     m.title = _resolve_text_for_locale(title_i18n, getattr(prop, "title", None), locale) or m.title
-    m.description = _resolve_text_for_locale(description_i18n, getattr(prop, "description", None), locale)
+    m.description = _resolve_text_for_locale(
+        description_i18n, getattr(prop, "description", None), locale
+    )
     m.tags = _extract_tags(getattr(prop, "features", None))
     m.view_label = _extract_view_label(getattr(prop, "features", None))
     m.size_sqm = getattr(prop, "size_sqm", None) or getattr(prop, "size", None)

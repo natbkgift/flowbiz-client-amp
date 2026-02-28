@@ -20,11 +20,15 @@ def get_current_admin(
     try:
         payload = decode_access_token(token)
     except ValueError as exc:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token") from exc
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token"
+        ) from exc
 
     email = str(payload.get("sub") or "").strip()
     if not email:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token subject")
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token subject"
+        )
 
     user = db.scalar(select(User).where(User.email == email))
     if user is None or user.role != "admin":

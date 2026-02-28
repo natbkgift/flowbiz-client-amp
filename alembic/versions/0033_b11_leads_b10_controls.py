@@ -27,7 +27,9 @@ def _bind():
 def _table_exists(table_name: str) -> bool:
     bind = _bind()
     if bind.dialect.name == "postgresql":
-        result = bind.execute(text("SELECT to_regclass(:name)"), {"name": f"public.{table_name}"}).scalar()
+        result = bind.execute(
+            text("SELECT to_regclass(:name)"), {"name": f"public.{table_name}"}
+        ).scalar()
         return result is not None
     return inspect(bind).has_table(table_name)
 
@@ -70,11 +72,18 @@ def upgrade() -> None:
                 ondelete="SET NULL",
             )
         if not _column_exists("leads", "follow_up_due_at"):
-            op.add_column("leads", sa.Column("follow_up_due_at", sa.DateTime(timezone=True), nullable=True))
+            op.add_column(
+                "leads", sa.Column("follow_up_due_at", sa.DateTime(timezone=True), nullable=True)
+            )
         if not _column_exists("leads", "updated_at"):
             op.add_column(
                 "leads",
-                sa.Column("updated_at", sa.DateTime(timezone=True), nullable=False, server_default=sa.text("CURRENT_TIMESTAMP")),
+                sa.Column(
+                    "updated_at",
+                    sa.DateTime(timezone=True),
+                    nullable=False,
+                    server_default=sa.text("CURRENT_TIMESTAMP"),
+                ),
             )
         if not _index_exists("leads", "ix_leads_status_created"):
             op.create_index("ix_leads_status_created", "leads", ["status", "created_at"])
@@ -91,17 +100,31 @@ def upgrade() -> None:
             sa.Column("description", sa.String(length=500), nullable=True),
             sa.Column("canonical", sa.String(length=1000), nullable=True),
             sa.Column("robots_index", sa.Boolean(), nullable=False, server_default=sa.text("true")),
-            sa.Column("robots_follow", sa.Boolean(), nullable=False, server_default=sa.text("true")),
+            sa.Column(
+                "robots_follow", sa.Boolean(), nullable=False, server_default=sa.text("true")
+            ),
             sa.Column("schema_org_name", sa.String(length=255), nullable=True),
             sa.Column("schema_local_business_name", sa.String(length=255), nullable=True),
             sa.Column("schema_article_author", sa.String(length=255), nullable=True),
             sa.Column("enabled", sa.Boolean(), nullable=False, server_default=sa.text("true")),
-            sa.Column("created_at", sa.DateTime(timezone=True), nullable=False, server_default=sa.text("CURRENT_TIMESTAMP")),
-            sa.Column("updated_at", sa.DateTime(timezone=True), nullable=False, server_default=sa.text("CURRENT_TIMESTAMP")),
+            sa.Column(
+                "created_at",
+                sa.DateTime(timezone=True),
+                nullable=False,
+                server_default=sa.text("CURRENT_TIMESTAMP"),
+            ),
+            sa.Column(
+                "updated_at",
+                sa.DateTime(timezone=True),
+                nullable=False,
+                server_default=sa.text("CURRENT_TIMESTAMP"),
+            ),
             sa.PrimaryKeyConstraint("id"),
             sa.UniqueConstraint("path", "locale", name="uq_seo_page_overrides_path_locale"),
         )
-        op.create_index("ix_seo_page_overrides_path_locale", "seo_page_overrides", ["path", "locale"])
+        op.create_index(
+            "ix_seo_page_overrides_path_locale", "seo_page_overrides", ["path", "locale"]
+        )
 
     if not _table_exists("redirect_rules"):
         op.create_table(
@@ -111,9 +134,21 @@ def upgrade() -> None:
             sa.Column("new_path", sa.String(length=500), nullable=False),
             sa.Column("status_code", sa.Integer(), nullable=False, server_default="301"),
             sa.Column("enabled", sa.Boolean(), nullable=False, server_default=sa.text("true")),
-            sa.Column("preserve_query", sa.Boolean(), nullable=False, server_default=sa.text("true")),
-            sa.Column("created_at", sa.DateTime(timezone=True), nullable=False, server_default=sa.text("CURRENT_TIMESTAMP")),
-            sa.Column("updated_at", sa.DateTime(timezone=True), nullable=False, server_default=sa.text("CURRENT_TIMESTAMP")),
+            sa.Column(
+                "preserve_query", sa.Boolean(), nullable=False, server_default=sa.text("true")
+            ),
+            sa.Column(
+                "created_at",
+                sa.DateTime(timezone=True),
+                nullable=False,
+                server_default=sa.text("CURRENT_TIMESTAMP"),
+            ),
+            sa.Column(
+                "updated_at",
+                sa.DateTime(timezone=True),
+                nullable=False,
+                server_default=sa.text("CURRENT_TIMESTAMP"),
+            ),
             sa.PrimaryKeyConstraint("id"),
             sa.UniqueConstraint("old_path", name="uq_redirect_rules_old_path"),
         )

@@ -110,9 +110,13 @@ def list_inquiries(
     _admin: User = Depends(get_current_admin),
 ) -> PaginatedResponse[InquiryItem]:
     if sort not in _VALID_LIST_SORTS:
-        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_CONTENT, detail="Invalid sort")
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT, detail="Invalid sort"
+        )
     if order not in {"asc", "desc"}:
-        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_CONTENT, detail="Invalid order")
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT, detail="Invalid order"
+        )
 
     base = select(Inquiry)
     if status_filter:
@@ -148,7 +152,9 @@ def list_inquiries(
     }[sort]
     order_clause = asc(sort_column) if order == "asc" else desc(sort_column)
     rows = db.scalars(
-        base.order_by(order_clause, desc(Inquiry.created_at)).offset((page - 1) * limit).limit(limit)
+        base.order_by(order_clause, desc(Inquiry.created_at))
+        .offset((page - 1) * limit)
+        .limit(limit)
     ).all()
 
     return PaginatedResponse(
@@ -265,7 +271,9 @@ def assign_inquiry(
     return _to_inquiry_item(inquiry)
 
 
-@router.get("/inquiries/{inquiry_id}/timeline", response_model=PaginatedResponse[InquiryTimelineEvent])
+@router.get(
+    "/inquiries/{inquiry_id}/timeline", response_model=PaginatedResponse[InquiryTimelineEvent]
+)
 def list_inquiry_timeline(
     inquiry_id: UUID,
     page: int = Query(1, ge=1),
@@ -325,7 +333,9 @@ def append_inquiry_note(
         .limit(1)
     )
     if created is None:
-        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Note not saved")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Note not saved"
+        )
     return _build_timeline_event(created, inquiry_id)
 
 
@@ -350,7 +360,9 @@ def update_inquiry_note(
         )
         .order_by(desc(AuditLog.created_at))
     ).all()
-    if not any(isinstance(log.diff, dict) and str(log.diff.get("note_id")) == note_id for log in logs):
+    if not any(
+        isinstance(log.diff, dict) and str(log.diff.get("note_id")) == note_id for log in logs
+    ):
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Note not found")
 
     write_audit_log(
@@ -374,7 +386,9 @@ def update_inquiry_note(
         .limit(1)
     )
     if updated is None:
-        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Note not updated")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Note not updated"
+        )
     return _build_timeline_event(updated, inquiry_id)
 
 
@@ -476,4 +490,3 @@ def update_viewing(
     db.commit()
     db.refresh(viewing)
     return ViewingItem.model_validate(viewing)
-

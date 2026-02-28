@@ -282,4 +282,3 @@ class TestimonialItem(BaseModel):
 
 class TestimonialListResponse(BaseModel):
     data: list[TestimonialItem]
-

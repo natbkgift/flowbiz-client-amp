@@ -42,9 +42,11 @@ def _table_exists(table_name: str) -> bool:
 
 def _index_exists(index_name: str) -> bool:
     if _is_postgres():
-        result = _bind().execute(
-            text("SELECT 1 FROM pg_indexes WHERE indexname = :n"), {"n": index_name}
-        ).scalar()
+        result = (
+            _bind()
+            .execute(text("SELECT 1 FROM pg_indexes WHERE indexname = :n"), {"n": index_name})
+            .scalar()
+        )
         return result is not None
 
     insp = inspect(_bind())

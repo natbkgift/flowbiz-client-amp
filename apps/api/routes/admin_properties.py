@@ -267,7 +267,9 @@ def _extract_view_label(features: dict | None) -> str | None:
     return text_value or None
 
 
-def _normalize_cover_fields(*, cover_image: str | None, cover_image_url: str | None) -> tuple[str | None, str | None]:
+def _normalize_cover_fields(
+    *, cover_image: str | None, cover_image_url: str | None
+) -> tuple[str | None, str | None]:
     legacy_cover = (cover_image or "").strip() or None
     canonical_cover = (cover_image_url or "").strip() or None
 
@@ -323,11 +325,17 @@ def _validate_relations_exist(
     developer_id: UUID | None,
 ) -> None:
     if project_id is not None and db.get(Project, project_id) is None:
-        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_CONTENT, detail="project_id not found")
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT, detail="project_id not found"
+        )
     if area_id is not None and db.get(Area, area_id) is None:
-        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_CONTENT, detail="area_id not found")
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT, detail="area_id not found"
+        )
     if developer_id is not None and db.get(Developer, developer_id) is None:
-        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_CONTENT, detail="developer_id not found")
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT, detail="developer_id not found"
+        )
 
 
 def _collect_property_media_paths(
@@ -338,7 +346,12 @@ def _collect_property_media_paths(
     images: list[str] | None,
 ) -> list[str]:
     candidates: list[str] = []
-    for path in [cover_image, cover_image_url, *(_coerce_string_list(local_images)), *(_coerce_string_list(images))]:
+    for path in [
+        cover_image,
+        cover_image_url,
+        *(_coerce_string_list(local_images)),
+        *(_coerce_string_list(images)),
+    ]:
         item = str(path or "").strip()
         if not item:
             continue
@@ -936,7 +949,9 @@ def list_property_media_candidates(
                 MediaAsset.source_domain.ilike(pattern),
             )
         )
-    rows = db.scalars(query.order_by(desc(MediaAsset.created_at), desc(MediaAsset.id)).limit(limit)).all()
+    rows = db.scalars(
+        query.order_by(desc(MediaAsset.created_at), desc(MediaAsset.id)).limit(limit)
+    ).all()
     return [MediaAssetItem.model_validate(row) for row in rows]
 
 
@@ -967,7 +982,9 @@ def sync_property_media(
 
         cleaned_local_images = _coerce_string_list(item.local_images)
         prop.local_images = cleaned_local_images
-        prop.cover_image = item.cover_image or (cleaned_local_images[0] if cleaned_local_images else None)
+        prop.cover_image = item.cover_image or (
+            cleaned_local_images[0] if cleaned_local_images else None
+        )
         prop.cover_image_url = prop.cover_image
         prop.last_synced_at = datetime.now(timezone.utc)
 
@@ -1004,7 +1021,9 @@ def ingest_property_cover_image(
     normalized_path = require_local_media_path(payload.storage_path, field_name="storage_path")
     media = db.scalar(select(MediaAsset).where(MediaAsset.storage_path == normalized_path))
     if media is None:
-        checksum = hashlib.sha256(f"{property_id}:{time.time_ns()}:{normalized_path}".encode("utf-8")).hexdigest()
+        checksum = hashlib.sha256(
+            f"{property_id}:{time.time_ns()}:{normalized_path}".encode("utf-8")
+        ).hexdigest()
         media = MediaAsset(
             storage_path=normalized_path,
             kind="image",
@@ -1043,7 +1062,10 @@ def ingest_property_cover_image(
 
     local_images = _coerce_string_list(prop.local_images)
     if payload.append_to_gallery:
-        local_images = [normalized_path, *[path for path in local_images if path != normalized_path]]
+        local_images = [
+            normalized_path,
+            *[path for path in local_images if path != normalized_path],
+        ]
     else:
         if not local_images:
             local_images = [normalized_path]
@@ -1113,7 +1135,9 @@ def create_property(
     resolved_title = _resolve_i18n_text(title_i18n, payload.title)
     resolved_description = _resolve_i18n_text(description_i18n, payload.description)
     if not resolved_title:
-        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_CONTENT, detail="title is required")
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT, detail="title is required"
+        )
 
     _validate_relations_exist(
         db,
@@ -1239,10 +1263,13 @@ def update_property(
         prop.features = features or None
 
     if "title_i18n" in data or "title" in data:
-        prop.title = _resolve_i18n_text(
-            data.get("title_i18n", prop.title_i18n),
-            data.get("title", prop.title),
-        ) or prop.title
+        prop.title = (
+            _resolve_i18n_text(
+                data.get("title_i18n", prop.title_i18n),
+                data.get("title", prop.title),
+            )
+            or prop.title
+        )
 
     if "description_i18n" in data or "description" in data:
         prop.description = _resolve_i18n_text(
@@ -1523,10 +1550,13 @@ def bulk_update_properties(
             row.features = features or None
 
         if "title_i18n" in data or "title" in data:
-            row.title = _resolve_i18n_text(
-                data.get("title_i18n", row.title_i18n),
-                data.get("title", row.title),
-            ) or row.title
+            row.title = (
+                _resolve_i18n_text(
+                    data.get("title_i18n", row.title_i18n),
+                    data.get("title", row.title),
+                )
+                or row.title
+            )
 
         if "description_i18n" in data or "description" in data:
             row.description = _resolve_i18n_text(
@@ -1674,7 +1704,9 @@ def update_team_member(
 
     updates = payload.model_dump(exclude_unset=True)
     if "photo_url" in updates and updates["photo_url"] is not None:
-        updates["photo_url"] = require_local_media_path(updates["photo_url"], field_name="photo_url")
+        updates["photo_url"] = require_local_media_path(
+            updates["photo_url"], field_name="photo_url"
+        )
     for field, value in updates.items():
         setattr(row, field, value)
 

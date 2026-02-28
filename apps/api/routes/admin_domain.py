@@ -179,11 +179,23 @@ def _trust_proof_has_content(value: object) -> bool:
 def _trust_proof_has_approval(value: object) -> bool:
     def walk(node: object) -> bool:
         if isinstance(node, dict):
-            for key in ["legal_approved", "content_approved", "verified", "approved", "is_approved"]:
+            for key in [
+                "legal_approved",
+                "content_approved",
+                "verified",
+                "approved",
+                "is_approved",
+            ]:
                 flag = node.get(key)
                 if isinstance(flag, bool) and flag:
                     return True
-            for key in ["approval_status", "legal_status", "content_status", "verification_status", "status"]:
+            for key in [
+                "approval_status",
+                "legal_status",
+                "content_status",
+                "verification_status",
+                "status",
+            ]:
                 raw = str(node.get(key) or "").strip().lower()
                 if raw in _TRUST_APPROVED_VALUES:
                     return True
@@ -195,7 +207,9 @@ def _trust_proof_has_approval(value: object) -> bool:
     return walk(value)
 
 
-def _developer_publish_linkage(db: Session, developer_id: UUID) -> tuple[int, list[str], int, list[str]]:
+def _developer_publish_linkage(
+    db: Session, developer_id: UUID
+) -> tuple[int, list[str], int, list[str]]:
     published_project_rows = db.execute(
         select(Project.slug)
         .where(
@@ -205,7 +219,9 @@ def _developer_publish_linkage(db: Session, developer_id: UUID) -> tuple[int, li
         )
         .order_by(Project.slug.asc())
     ).all()
-    published_project_slugs = [str(slug) for (slug,) in published_project_rows if str(slug or "").strip()]
+    published_project_slugs = [
+        str(slug) for (slug,) in published_project_rows if str(slug or "").strip()
+    ]
     linked_area_rows = db.execute(
         select(Area.slug)
         .select_from(Project)
@@ -236,7 +252,12 @@ def _developer_publish_linkage(db: Session, developer_id: UUID) -> tuple[int, li
         )
         or 0
     )
-    return len(published_project_slugs), published_project_slugs, linked_project_count, linked_area_slugs
+    return (
+        len(published_project_slugs),
+        published_project_slugs,
+        linked_project_count,
+        linked_area_slugs,
+    )
 
 
 def _developer_publish_readiness(db: Session, developer: Developer) -> dict:
@@ -259,8 +280,8 @@ def _developer_publish_readiness(db: Session, developer: Developer) -> dict:
     if not trust_has_approval:
         missing.append("trust_proof.approval")
 
-    published_project_count, published_project_slugs, linked_project_count, linked_area_slugs = _developer_publish_linkage(
-        db, developer.id
+    published_project_count, published_project_slugs, linked_project_count, linked_area_slugs = (
+        _developer_publish_linkage(db, developer.id)
     )
     if published_project_count <= 0:
         missing.append("projects.published")
@@ -435,7 +456,9 @@ class DeveloperPatch(BaseModel):
         return _validate_locale_map(value)
 
 
-def _assert_area_slug_available(db: Session, *, slug: str, exclude_area_id: UUID | None = None) -> None:
+def _assert_area_slug_available(
+    db: Session, *, slug: str, exclude_area_id: UUID | None = None
+) -> None:
     row = db.scalar(select(Area).where(Area.slug == slug).limit(1))
     if row is None:
         return
@@ -460,7 +483,11 @@ def _assert_developer_slug_available(
         return
     raise HTTPException(
         status_code=status.HTTP_409_CONFLICT,
-        detail={"code": "developer_slug_conflict", "message": "slug already exists", "field": "slug"},
+        detail={
+            "code": "developer_slug_conflict",
+            "message": "slug already exists",
+            "field": "slug",
+        },
     )
 
 
@@ -469,7 +496,9 @@ def _serialize_stat(row: AreaStatistic | None) -> dict | None:
         return None
     return {
         "avg_price_sqm": float(row.avg_price_sqm) if row.avg_price_sqm is not None else None,
-        "avg_rent_monthly": float(row.avg_rent_monthly) if row.avg_rent_monthly is not None else None,
+        "avg_rent_monthly": float(row.avg_rent_monthly)
+        if row.avg_rent_monthly is not None
+        else None,
         "avg_roi_percent": float(row.avg_roi_percent) if row.avg_roi_percent is not None else None,
         "total_projects": row.total_projects,
         "total_units": row.total_units,
@@ -599,7 +628,11 @@ def create_area(
         db.rollback()
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
-            detail={"code": "area_slug_conflict", "message": "slug already exists", "field": "slug"},
+            detail={
+                "code": "area_slug_conflict",
+                "message": "slug already exists",
+                "field": "slug",
+            },
         ) from exc
     db.refresh(area)
 
@@ -619,15 +652,23 @@ def admin_patch_area(
         _assert_area_slug_available(db, slug=updates["slug"], exclude_area_id=row.id)
 
     if "hero_image_url" in updates and updates["hero_image_url"] is not None:
-        updates["hero_image_url"] = require_local_media_path(updates["hero_image_url"], field_name="hero_image_url")
+        updates["hero_image_url"] = require_local_media_path(
+            updates["hero_image_url"], field_name="hero_image_url"
+        )
     if "cover_image_url" in updates and updates["cover_image_url"] is not None:
-        updates["cover_image_url"] = require_local_media_path(updates["cover_image_url"], field_name="cover_image_url")
+        updates["cover_image_url"] = require_local_media_path(
+            updates["cover_image_url"], field_name="cover_image_url"
+        )
 
     merged_paths = [
         updates.get("cover_image_url", row.cover_image_url),
         updates.get("hero_image_url", row.hero_image_url),
     ]
-    warnings = _govern_media_or_422(db, paths=[path for path in merged_paths if path]) if merged_paths else []
+    warnings = (
+        _govern_media_or_422(db, paths=[path for path in merged_paths if path])
+        if merged_paths
+        else []
+    )
 
     for field, value in updates.items():
         setattr(row, field, value)
@@ -644,7 +685,11 @@ def admin_patch_area(
         db.rollback()
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
-            detail={"code": "area_slug_conflict", "message": "slug already exists", "field": "slug"},
+            detail={
+                "code": "area_slug_conflict",
+                "message": "slug already exists",
+                "field": "slug",
+            },
         ) from exc
     db.refresh(row)
     return {"area": _serialize_area(db, row), "media_warnings": warnings}
@@ -734,7 +779,10 @@ def admin_list_developers(
     _admin: User = Depends(get_current_admin),
 ) -> dict:
     rows = db.scalars(
-        select(Developer).where(Developer.deleted_at.is_(None)).order_by(desc(Developer.updated_at)).limit(limit)
+        select(Developer)
+        .where(Developer.deleted_at.is_(None))
+        .order_by(desc(Developer.updated_at))
+        .limit(limit)
     ).all()
     return {"data": [_serialize_developer(row) for row in rows]}
 
@@ -806,7 +854,11 @@ def create_developer(
         db.rollback()
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
-            detail={"code": "developer_slug_conflict", "message": "slug already exists", "field": "slug"},
+            detail={
+                "code": "developer_slug_conflict",
+                "message": "slug already exists",
+                "field": "slug",
+            },
         ) from exc
     db.refresh(row)
     return {"developer": _serialize_developer(row), "media_warnings": warnings}
@@ -827,13 +879,19 @@ def admin_patch_developer(
     if "logo_url" in updates and updates["logo_url"] is not None:
         updates["logo_url"] = require_local_media_path(updates["logo_url"], field_name="logo_url")
     if "cover_image_url" in updates and updates["cover_image_url"] is not None:
-        updates["cover_image_url"] = require_local_media_path(updates["cover_image_url"], field_name="cover_image_url")
+        updates["cover_image_url"] = require_local_media_path(
+            updates["cover_image_url"], field_name="cover_image_url"
+        )
 
     merged_paths = [
         updates.get("logo_url", row.logo_url),
         updates.get("cover_image_url", row.cover_image_url),
     ]
-    warnings = _govern_media_or_422(db, paths=[path for path in merged_paths if path]) if merged_paths else []
+    warnings = (
+        _govern_media_or_422(db, paths=[path for path in merged_paths if path])
+        if merged_paths
+        else []
+    )
 
     for field, value in updates.items():
         setattr(row, field, value)
@@ -850,7 +908,11 @@ def admin_patch_developer(
         db.rollback()
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
-            detail={"code": "developer_slug_conflict", "message": "slug already exists", "field": "slug"},
+            detail={
+                "code": "developer_slug_conflict",
+                "message": "slug already exists",
+                "field": "slug",
+            },
         ) from exc
     db.refresh(row)
     return {"developer": _serialize_developer(row), "media_warnings": warnings}
@@ -873,7 +935,11 @@ def publish_developer(
         db.rollback()
         raise
     db.refresh(row)
-    return {"developer": _serialize_developer(row), "published": True, "publish_readiness": readiness}
+    return {
+        "developer": _serialize_developer(row),
+        "published": True,
+        "publish_readiness": readiness,
+    }
 
 
 @router.post("/developers/{developer_id}/unpublish")

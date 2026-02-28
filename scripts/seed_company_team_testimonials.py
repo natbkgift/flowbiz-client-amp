@@ -36,7 +36,9 @@ def _load_rows(path: Path) -> list[dict[str, Any]]:
     return []
 
 
-def _upsert_company_info(db: Session, rows: list[dict[str, Any]], *, dry_run: bool) -> tuple[int, int]:
+def _upsert_company_info(
+    db: Session, rows: list[dict[str, Any]], *, dry_run: bool
+) -> tuple[int, int]:
     created = 0
     updated = 0
     for row in rows:
@@ -66,7 +68,9 @@ def _upsert_company_info(db: Session, rows: list[dict[str, Any]], *, dry_run: bo
     return created, updated
 
 
-def _upsert_team_members(db: Session, rows: list[dict[str, Any]], *, dry_run: bool) -> tuple[int, int]:
+def _upsert_team_members(
+    db: Session, rows: list[dict[str, Any]], *, dry_run: bool
+) -> tuple[int, int]:
     created = 0
     updated = 0
     for index, row in enumerate(rows, 1):
@@ -113,7 +117,9 @@ def _upsert_team_members(db: Session, rows: list[dict[str, Any]], *, dry_run: bo
     return created, updated
 
 
-def _upsert_testimonials(db: Session, rows: list[dict[str, Any]], *, dry_run: bool) -> tuple[int, int]:
+def _upsert_testimonials(
+    db: Session, rows: list[dict[str, Any]], *, dry_run: bool
+) -> tuple[int, int]:
     created = 0
     updated = 0
     for row in rows:
@@ -245,7 +251,9 @@ def _upsert_articles(db: Session, rows: list[dict[str, Any]], *, dry_run: bool) 
         hero_image_url = str(row.get("hero_image_url") or "").strip() or None
         if hero_image_url is not None:
             try:
-                hero_image_url = require_local_media_path(hero_image_url, field_name="hero_image_url")
+                hero_image_url = require_local_media_path(
+                    hero_image_url, field_name="hero_image_url"
+                )
             except Exception as exc:
                 detail = getattr(exc, "detail", str(exc))
                 raise ValueError(f"articles[{index}] invalid hero_image_url: {detail}") from exc
@@ -314,13 +322,17 @@ def _upsert_articles(db: Session, rows: list[dict[str, Any]], *, dry_run: bool) 
 
 
 def _sync_company_info(db: Session, rows: list[dict[str, Any]], *, dry_run: bool) -> int:
-    slugs = {str(row.get("slug") or "").strip() for row in rows if str(row.get("slug") or "").strip()}
+    slugs = {
+        str(row.get("slug") or "").strip() for row in rows if str(row.get("slug") or "").strip()
+    }
     removable = _MANAGED_COMPANY_SLUGS - slugs
     if not removable:
         return 0
     if dry_run:
         return len(
-            db.scalars(select(CompanyInfo.slug).where(CompanyInfo.slug.in_(sorted(removable)))).all()
+            db.scalars(
+                select(CompanyInfo.slug).where(CompanyInfo.slug.in_(sorted(removable)))
+            ).all()
         )
     result = db.execute(delete(CompanyInfo).where(CompanyInfo.slug.in_(sorted(removable))))
     return int(result.rowcount or 0)
@@ -344,12 +356,17 @@ def _sync_team_members(db: Session, rows: list[dict[str, Any]], *, dry_run: bool
 
 def _sync_testimonials(db: Session, rows: list[dict[str, Any]], *, dry_run: bool) -> int:
     keys = {
-        (str(row.get("quote") or "").strip(), str(row.get("attribution_name") or "").strip() or None)
+        (
+            str(row.get("quote") or "").strip(),
+            str(row.get("attribution_name") or "").strip() or None,
+        )
         for row in rows
         if str(row.get("quote") or "").strip()
     }
     existing_rows = db.scalars(select(Testimonial).where(Testimonial.deleted_at.is_(None))).all()
-    removable_ids = [row.id for row in existing_rows if (row.quote, row.attribution_name) not in keys]
+    removable_ids = [
+        row.id for row in existing_rows if (row.quote, row.attribution_name) not in keys
+    ]
     if dry_run:
         return len(removable_ids)
     if not removable_ids:
@@ -358,7 +375,9 @@ def _sync_testimonials(db: Session, rows: list[dict[str, Any]], *, dry_run: bool
     return int(result.rowcount or 0)
 
 
-def seed_content(*, input_dir: Path, dry_run: bool, sync_entities: set[str] | None = None) -> dict[str, dict[str, int]]:
+def seed_content(
+    *, input_dir: Path, dry_run: bool, sync_entities: set[str] | None = None
+) -> dict[str, dict[str, int]]:
     init_db()
     company_rows = _load_rows(input_dir / "company_info.json")
     team_rows = _load_rows(input_dir / "team_members.json")
@@ -369,25 +388,51 @@ def seed_content(*, input_dir: Path, dry_run: bool, sync_entities: set[str] | No
     with SessionLocal() as db:
         company_created, company_updated = _upsert_company_info(db, company_rows, dry_run=dry_run)
         team_created, team_updated = _upsert_team_members(db, team_rows, dry_run=dry_run)
-        testimonial_created, testimonial_updated = _upsert_testimonials(db, testimonial_rows, dry_run=dry_run)
+        testimonial_created, testimonial_updated = _upsert_testimonials(
+            db, testimonial_rows, dry_run=dry_run
+        )
         article_created, article_updated = _upsert_articles(db, article_rows, dry_run=dry_run)
-        company_removed = _sync_company_info(db, company_rows, dry_run=dry_run) if "company_info" in sync_entities else 0
-        team_removed = _sync_team_members(db, team_rows, dry_run=dry_run) if "team_members" in sync_entities else 0
-        testimonial_removed = _sync_testimonials(db, testimonial_rows, dry_run=dry_run) if "testimonials" in sync_entities else 0
+        company_removed = (
+            _sync_company_info(db, company_rows, dry_run=dry_run)
+            if "company_info" in sync_entities
+            else 0
+        )
+        team_removed = (
+            _sync_team_members(db, team_rows, dry_run=dry_run)
+            if "team_members" in sync_entities
+            else 0
+        )
+        testimonial_removed = (
+            _sync_testimonials(db, testimonial_rows, dry_run=dry_run)
+            if "testimonials" in sync_entities
+            else 0
+        )
         if not dry_run:
             db.commit()
 
     return {
-        "company_info": {"created": company_created, "updated": company_updated, "removed": company_removed},
+        "company_info": {
+            "created": company_created,
+            "updated": company_updated,
+            "removed": company_removed,
+        },
         "team_members": {"created": team_created, "updated": team_updated, "removed": team_removed},
-        "testimonials": {"created": testimonial_created, "updated": testimonial_updated, "removed": testimonial_removed},
+        "testimonials": {
+            "created": testimonial_created,
+            "updated": testimonial_updated,
+            "removed": testimonial_removed,
+        },
         "articles": {"created": article_created, "updated": article_updated},
     }
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description="Seed CompanyInfo, TeamMember, and Testimonial content")
-    parser.add_argument("--input", default="data/import", help="Input directory containing JSON files")
+    parser = argparse.ArgumentParser(
+        description="Seed CompanyInfo, TeamMember, and Testimonial content"
+    )
+    parser.add_argument(
+        "--input", default="data/import", help="Input directory containing JSON files"
+    )
     parser.add_argument("--dry-run", action="store_true", help="Validate and count only")
     parser.add_argument(
         "--sync",
@@ -398,7 +443,9 @@ def main() -> int:
     )
     args = parser.parse_args()
 
-    summary = seed_content(input_dir=Path(args.input), dry_run=bool(args.dry_run), sync_entities=set(args.sync or []))
+    summary = seed_content(
+        input_dir=Path(args.input), dry_run=bool(args.dry_run), sync_entities=set(args.sync or [])
+    )
     print(json.dumps(summary, ensure_ascii=False, indent=2))
     return 0
 

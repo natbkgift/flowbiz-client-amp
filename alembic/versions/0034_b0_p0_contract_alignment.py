@@ -45,12 +45,20 @@ def _sync_domain_status_defaults() -> None:
 
     if dialect == "sqlite":
         with op.batch_alter_table("areas") as batch_op:
-            batch_op.alter_column("status", server_default="draft", existing_type=sa.String(length=50))
+            batch_op.alter_column(
+                "status", server_default="draft", existing_type=sa.String(length=50)
+            )
         with op.batch_alter_table("developers") as batch_op:
-            batch_op.alter_column("status", server_default="inactive", existing_type=sa.String(length=50))
+            batch_op.alter_column(
+                "status", server_default="inactive", existing_type=sa.String(length=50)
+            )
     else:
-        op.alter_column("areas", "status", existing_type=sa.String(length=50), server_default="draft")
-        op.alter_column("developers", "status", existing_type=sa.String(length=50), server_default="inactive")
+        op.alter_column(
+            "areas", "status", existing_type=sa.String(length=50), server_default="draft"
+        )
+        op.alter_column(
+            "developers", "status", existing_type=sa.String(length=50), server_default="inactive"
+        )
 
 
 def upgrade() -> None:
@@ -63,9 +71,17 @@ def downgrade() -> None:
 
     if dialect == "sqlite":
         with op.batch_alter_table("areas") as batch_op:
-            batch_op.alter_column("status", server_default="published", existing_type=sa.String(length=50))
+            batch_op.alter_column(
+                "status", server_default="published", existing_type=sa.String(length=50)
+            )
         with op.batch_alter_table("developers") as batch_op:
-            batch_op.alter_column("status", server_default="active", existing_type=sa.String(length=50))
+            batch_op.alter_column(
+                "status", server_default="active", existing_type=sa.String(length=50)
+            )
     else:
-        op.alter_column("areas", "status", existing_type=sa.String(length=50), server_default="published")
-        op.alter_column("developers", "status", existing_type=sa.String(length=50), server_default="active")
+        op.alter_column(
+            "areas", "status", existing_type=sa.String(length=50), server_default="published"
+        )
+        op.alter_column(
+            "developers", "status", existing_type=sa.String(length=50), server_default="active"
+        )

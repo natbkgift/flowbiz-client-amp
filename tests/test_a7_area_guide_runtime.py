@@ -117,9 +117,15 @@ def test_a7_area_guide_listing_routes_tracking_and_metrics_guard(client) -> None
     assert 'id="area-guide-runtime-error"' in html
 
     host = "testserver"
-    for value in [*_extract_attrs(html, "src"), *_extract_attrs(html, "srcset"), *_extract_attrs(html, "poster")]:
+    for value in [
+        *_extract_attrs(html, "src"),
+        *_extract_attrs(html, "srcset"),
+        *_extract_attrs(html, "poster"),
+    ]:
         for candidate in [part.strip().split()[0] for part in value.split(",") if part.strip()]:
-            assert _is_allowed_media(candidate, host=host), f"Disallowed media URL in A7 area-guide HTML: {candidate}"
+            assert _is_allowed_media(candidate, host=host), (
+                f"Disallowed media URL in A7 area-guide HTML: {candidate}"
+            )
 
 
 def test_a7_area_detail_sections_tracking_and_internal_links(client) -> None:
@@ -150,7 +156,7 @@ def test_a7_area_detail_sections_tracking_and_internal_links(client) -> None:
                     "lifestyle": "ใกล้คาเฟ่ โรงพยาบาล และศูนย์การค้า",
                     "beach_proximity": "ถึงหาดได้ภายในประมาณ 10-15 นาที",
                     "metrics_update_cadence": "รายเดือน",
-                }
+                },
             },
         )
         db.add(area)
@@ -262,7 +268,9 @@ def test_a7_area_detail_source_less_metrics_show_pending(client) -> None:
     html = response.text
 
     assert "Statistics are pending verified source note and update timestamp." in html
-    assert "TODO: publish source note + updated timestamp before showing hard metric claims." in html
+    assert (
+        "TODO: publish source note + updated timestamp before showing hard metric claims." in html
+    )
     assert "777,777" not in html
     assert "8.1%" not in html
     assert "No published projects are linked to this area yet." in html

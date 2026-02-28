@@ -37,8 +37,12 @@ def _is_allowed_media(url: str, *, host: str) -> bool:
 def _seed_a5_fixture() -> dict[str, str]:
     with SessionLocal() as db:
         db.query(Property).filter(Property.source_id.like("a5-%")).delete(synchronize_session=False)
-        db.query(Project).filter(Project.slug.like("a5-project-%")).delete(synchronize_session=False)
-        db.query(Developer).filter(Developer.slug.like("a5-dev-%")).delete(synchronize_session=False)
+        db.query(Project).filter(Project.slug.like("a5-project-%")).delete(
+            synchronize_session=False
+        )
+        db.query(Developer).filter(Developer.slug.like("a5-dev-%")).delete(
+            synchronize_session=False
+        )
         db.query(Area).filter(Area.slug.like("a5-area-%")).delete(synchronize_session=False)
         db.commit()
 
@@ -251,7 +255,7 @@ def test_a5_card_cta_tracking_states_and_no_hotlink(client) -> None:
     html = response.text
 
     assert 'class="price">THB ' in html
-    assert 'listing-links' in html
+    assert "listing-links" in html
     assert 'class="tag">' in html
     assert 'href="/en/contact?intent=consultation' in html
     assert 'href="/en/smart-finder?intent=' in html
@@ -271,10 +275,7 @@ def test_a5_card_cta_tracking_states_and_no_hotlink(client) -> None:
         "@media (min-width:1920px){.listing-grid,.listing-skeleton-grid{"
         "grid-template-columns:repeat(4,minmax(0,1fr))}}"
     )
-    assert (
-        large_grid_hook
-        in html
-    )
+    assert large_grid_hook in html
 
     empty = client.get("/en/buy?price_min=999999999999")
     assert empty.status_code == 200, empty.text

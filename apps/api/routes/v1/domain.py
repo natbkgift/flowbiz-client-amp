@@ -51,7 +51,9 @@ def _serialize_stats(row: AreaStatistic | None) -> dict | None:
         return None
     return {
         "avg_price_sqm": float(row.avg_price_sqm) if row.avg_price_sqm is not None else None,
-        "avg_rent_monthly": float(row.avg_rent_monthly) if row.avg_rent_monthly is not None else None,
+        "avg_rent_monthly": float(row.avg_rent_monthly)
+        if row.avg_rent_monthly is not None
+        else None,
         "avg_roi_percent": float(row.avg_roi_percent) if row.avg_roi_percent is not None else None,
         "total_projects": row.total_projects,
         "total_units": row.total_units,

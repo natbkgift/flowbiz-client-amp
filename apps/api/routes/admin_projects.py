@@ -135,14 +135,20 @@ def _validate_relations(db: Session, *, area_id: UUID | None, developer_id: UUID
     if area_id is not None:
         area = db.get(Area, area_id)
         if area is None or area.deleted_at is not None:
-            raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_CONTENT, detail="area_id not found")
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_CONTENT, detail="area_id not found"
+            )
     if developer_id is not None:
         developer = db.get(Developer, developer_id)
         if developer is None or developer.deleted_at is not None:
-            raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_CONTENT, detail="developer_id not found")
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_CONTENT, detail="developer_id not found"
+            )
 
 
-def _assert_slug_available(db: Session, *, slug: str, exclude_project_id: UUID | None = None) -> None:
+def _assert_slug_available(
+    db: Session, *, slug: str, exclude_project_id: UUID | None = None
+) -> None:
     row = db.scalar(select(Project).where(Project.slug == slug).limit(1))
     if row is None:
         return
@@ -213,7 +219,10 @@ def _validate_media_governance(db: Session, paths: list[str]) -> list[dict]:
     if result.errors:
         raise HTTPException(
             status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
-            detail={"code": "media_governance_blocked", "errors": [item.to_dict() for item in result.errors]},
+            detail={
+                "code": "media_governance_blocked",
+                "errors": [item.to_dict() for item in result.errors],
+            },
         )
     return [item.to_dict() for item in result.warnings]
 
@@ -225,7 +234,10 @@ def admin_list_projects(
     _admin: User = Depends(get_current_admin),
 ) -> dict:
     rows = db.scalars(
-        select(Project).where(Project.deleted_at.is_(None)).order_by(desc(Project.updated_at)).limit(limit)
+        select(Project)
+        .where(Project.deleted_at.is_(None))
+        .order_by(desc(Project.updated_at))
+        .limit(limit)
     ).all()
     return {"data": [_serialize(row, db) for row in rows]}
 
@@ -252,12 +264,20 @@ def admin_create_project(
     _validate_relations(db, area_id=payload.area_id, developer_id=payload.developer_id)
 
     if payload.cover_image_url is not None:
-        payload.cover_image_url = require_local_media_path(payload.cover_image_url, field_name="cover_image_url")
+        payload.cover_image_url = require_local_media_path(
+            payload.cover_image_url, field_name="cover_image_url"
+        )
     if payload.hero_image_url is not None:
-        payload.hero_image_url = require_local_media_path(payload.hero_image_url, field_name="hero_image_url")
-    payload.images = [require_local_media_path(path, field_name="images") for path in (payload.images or [])]
+        payload.hero_image_url = require_local_media_path(
+            payload.hero_image_url, field_name="hero_image_url"
+        )
+    payload.images = [
+        require_local_media_path(path, field_name="images") for path in (payload.images or [])
+    ]
 
-    paths = [p for p in [payload.cover_image_url, payload.hero_image_url, *(payload.images or [])] if p]
+    paths = [
+        p for p in [payload.cover_image_url, payload.hero_image_url, *(payload.images or [])] if p
+    ]
     warnings = _validate_media_governance(db, paths)
 
     row = Project(**payload.model_dump())
@@ -268,7 +288,11 @@ def admin_create_project(
         db.rollback()
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
-            detail={"code": "project_slug_conflict", "message": "slug already exists", "field": "slug"},
+            detail={
+                "code": "project_slug_conflict",
+                "message": "slug already exists",
+                "field": "slug",
+            },
         ) from exc
     db.refresh(row)
     return {"project": _serialize(row, db), "media_warnings": warnings}
@@ -294,11 +318,17 @@ def admin_patch_project(
         developer_id=updates.get("developer_id", row.developer_id),
     )
     if "cover_image_url" in updates and updates["cover_image_url"] is not None:
-        updates["cover_image_url"] = require_local_media_path(updates["cover_image_url"], field_name="cover_image_url")
+        updates["cover_image_url"] = require_local_media_path(
+            updates["cover_image_url"], field_name="cover_image_url"
+        )
     if "hero_image_url" in updates and updates["hero_image_url"] is not None:
-        updates["hero_image_url"] = require_local_media_path(updates["hero_image_url"], field_name="hero_image_url")
+        updates["hero_image_url"] = require_local_media_path(
+            updates["hero_image_url"], field_name="hero_image_url"
+        )
     if "images" in updates and updates["images"] is not None:
-        updates["images"] = [require_local_media_path(path, field_name="images") for path in updates["images"]]
+        updates["images"] = [
+            require_local_media_path(path, field_name="images") for path in updates["images"]
+        ]
 
     merged_paths = [
         updates.get("cover_image_url", row.cover_image_url),
@@ -316,7 +346,11 @@ def admin_patch_project(
         db.rollback()
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
-            detail={"code": "project_slug_conflict", "message": "slug already exists", "field": "slug"},
+            detail={
+                "code": "project_slug_conflict",
+                "message": "slug already exists",
+                "field": "slug",
+            },
         ) from exc
     db.refresh(row)
     return {"project": _serialize(row, db), "media_warnings": warnings}

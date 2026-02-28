@@ -7,7 +7,15 @@ from urllib.parse import urlparse
 from uuid import uuid4
 
 from packages.core.database import SessionLocal
-from packages.core.models import Area, Article, CompanyInfo, HomeComposerConfig, Project, TeamMember, Testimonial as TestimonialModel
+from packages.core.models import (
+    Area,
+    Article,
+    CompanyInfo,
+    HomeComposerConfig,
+    Project,
+    TeamMember,
+    Testimonial as TestimonialModel,
+)
 
 
 _LOCAL_WEBP = "/media/library/variants/05032d16-54ae-45f4-bb89-3ae1fc2fa52f.webp"
@@ -46,7 +54,19 @@ def _reset_home_configs() -> None:
 
 def _seed_runtime_content() -> None:
     with SessionLocal() as db:
-        db.query(CompanyInfo).filter(CompanyInfo.slug.in_(["about", "how-we-work", "contact", "privacy", "terms", "cookies", "investment-methodology"])).delete(synchronize_session=False)
+        db.query(CompanyInfo).filter(
+            CompanyInfo.slug.in_(
+                [
+                    "about",
+                    "how-we-work",
+                    "contact",
+                    "privacy",
+                    "terms",
+                    "cookies",
+                    "investment-methodology",
+                ]
+            )
+        ).delete(synchronize_session=False)
         area = Area(
             slug=f"runtime-area-{uuid4()}",
             name="Central Pattaya",
@@ -96,7 +116,9 @@ def _seed_runtime_content() -> None:
             content="Published contact details",
             meta_description="Published contact metadata",
         )
-        privacy = CompanyInfo(title="Privacy Policy", slug="privacy", content="Published privacy content")
+        privacy = CompanyInfo(
+            title="Privacy Policy", slug="privacy", content="Published privacy content"
+        )
         terms = CompanyInfo(title="Terms", slug="terms", content="Published terms content")
         cookies = CompanyInfo(title="Cookies", slug="cookies", content="Published cookies content")
         methodology = CompanyInfo(
@@ -119,7 +141,21 @@ def _seed_runtime_content() -> None:
             attribution_name="Verified Buyer",
             context="Client from Germany",
         )
-        db.add_all([project, article, about, how_we_work, contact, privacy, terms, cookies, methodology, team, review])
+        db.add_all(
+            [
+                project,
+                article,
+                about,
+                how_we_work,
+                contact,
+                privacy,
+                terms,
+                cookies,
+                methodology,
+                team,
+                review,
+            ]
+        )
         db.commit()
 
 
@@ -132,7 +168,10 @@ def test_a2_real_runtime_route_exists_and_safe_default_copy(client) -> None:
     html = response.text
     assert html.count("<h1") == 1
     assert "Curated Pattaya Property with Clear Next Steps" in html
-    assert "Media from our system, practical guidance, and clear paths for buyers, investors, renters, and sellers in Pattaya." in html
+    assert (
+        "Media from our system, practical guidance, and clear paths for buyers, investors, renters, and sellers in Pattaya."
+        in html
+    )
     assert "Request Consultation" in html
     assert "Browse Curated Projects" in html
     assert "Media from our system" in html
@@ -156,9 +195,14 @@ def test_a2_real_runtime_uses_published_home_config_and_real_routes(client) -> N
                         "subheadline": {"en": "Published Home Subheadline"},
                         "cta": {"text": {"en": "Request Consultation"}, "href": "/contact"},
                     },
-                    "hero_secondary_cta": {"text": {"en": "Browse Curated Projects"}, "href": "/projects"},
+                    "hero_secondary_cta": {
+                        "text": {"en": "Browse Curated Projects"},
+                        "href": "/projects",
+                    },
                     "trust_micro_strip": [{"key": "support", "text": {"en": "Team-reviewed copy"}}],
-                    "consultation": {"trust_note": {"en": "Handled through published workflow note."}},
+                    "consultation": {
+                        "trust_note": {"en": "Handled through published workflow note."}
+                    },
                 },
             )
         )
@@ -203,9 +247,15 @@ def test_a2_real_runtime_media_host_allowlist(client) -> None:
     assert response.status_code == 200, response.text
     html = response.text
     host = "testserver"
-    for value in [*_extract_attrs(html, "src"), *_extract_attrs(html, "srcset"), *_extract_attrs(html, "poster")]:
+    for value in [
+        *_extract_attrs(html, "src"),
+        *_extract_attrs(html, "srcset"),
+        *_extract_attrs(html, "poster"),
+    ]:
         for candidate in [part.strip().split()[0] for part in value.split(",") if part.strip()]:
-            assert _is_allowed_media(candidate, host=host), f"Disallowed media URL in runtime HTML: {candidate}"
+            assert _is_allowed_media(candidate, host=host), (
+                f"Disallowed media URL in runtime HTML: {candidate}"
+            )
 
 
 def test_a2_why_pattaya_responsive_css_and_no_overflow_hooks(client) -> None:
@@ -214,8 +264,14 @@ def test_a2_why_pattaya_responsive_css_and_no_overflow_hooks(client) -> None:
     assert response.status_code == 200, response.text
     html = response.text
     assert ".metrics{display:grid;gap:12px;grid-template-columns:1fr}" in html
-    assert "@media (min-width:768px){.grid-2{grid-template-columns:repeat(2,minmax(0,1fr))} .metrics{grid-template-columns:repeat(2,minmax(0,1fr))}}" in html
-    assert "@media (min-width:1024px){.grid-3{grid-template-columns:repeat(3,minmax(0,1fr))} .grid-5{grid-template-columns:repeat(3,minmax(0,1fr))} .metrics{grid-template-columns:repeat(3,minmax(0,1fr))}}" in html
+    assert (
+        "@media (min-width:768px){.grid-2{grid-template-columns:repeat(2,minmax(0,1fr))} .metrics{grid-template-columns:repeat(2,minmax(0,1fr))}}"
+        in html
+    )
+    assert (
+        "@media (min-width:1024px){.grid-3{grid-template-columns:repeat(3,minmax(0,1fr))} .grid-5{grid-template-columns:repeat(3,minmax(0,1fr))} .metrics{grid-template-columns:repeat(3,minmax(0,1fr))}}"
+        in html
+    )
 
 
 def test_a2_accessibility_states_and_forward_paths(client) -> None:

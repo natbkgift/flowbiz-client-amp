@@ -70,7 +70,9 @@ def _add_media_asset(
 
 def _seed_area_and_developer() -> tuple[str, str]:
     with SessionLocal() as db:
-        area = Area(slug=f"area-{uuid4()}", name="Central Pattaya", city="Pattaya", status="published")
+        area = Area(
+            slug=f"area-{uuid4()}", name="Central Pattaya", city="Pattaya", status="published"
+        )
         developer = Developer(slug=f"dev-{uuid4()}", name="FlowBiz Dev", status="active")
         db.add(area)
         db.add(developer)
@@ -238,12 +240,19 @@ def test_b3_slug_conflict_on_create_and_patch(client) -> None:
     other = client.post(
         "/admin/projects",
         headers=headers,
-        json={"slug": f"b3-other-{uuid4()}", "name": "P3", "status": "draft", "property_type": "condo"},
+        json={
+            "slug": f"b3-other-{uuid4()}",
+            "name": "P3",
+            "status": "draft",
+            "property_type": "condo",
+        },
     )
     assert other.status_code == 201, other.text
     other_id = other.json()["project"]["id"]
 
-    patch_conflict = client.patch(f"/admin/projects/{other_id}", headers=headers, json={"slug": slug})
+    patch_conflict = client.patch(
+        f"/admin/projects/{other_id}", headers=headers, json={"slug": slug}
+    )
     assert patch_conflict.status_code == 409, patch_conflict.text
     assert patch_conflict.json()["detail"]["code"] == "project_slug_conflict"
 
@@ -254,7 +263,12 @@ def test_b3_required_field_validation(client) -> None:
     missing_name = client.post(
         "/admin/projects",
         headers=headers,
-        json={"slug": f"b3-name-{uuid4()}", "name": "", "status": "draft", "property_type": "condo"},
+        json={
+            "slug": f"b3-name-{uuid4()}",
+            "name": "",
+            "status": "draft",
+            "property_type": "condo",
+        },
     )
     assert missing_name.status_code == 422, missing_name.text
 
@@ -268,7 +282,12 @@ def test_b3_required_field_validation(client) -> None:
     missing_status = client.post(
         "/admin/projects",
         headers=headers,
-        json={"slug": f"b3-status-{uuid4()}", "name": "Has Name", "status": "", "property_type": "condo"},
+        json={
+            "slug": f"b3-status-{uuid4()}",
+            "name": "Has Name",
+            "status": "",
+            "property_type": "condo",
+        },
     )
     assert missing_status.status_code == 422, missing_status.text
 

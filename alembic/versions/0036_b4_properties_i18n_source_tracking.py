@@ -22,7 +22,9 @@ depends_on: str | Sequence[str] | None = None
 def upgrade() -> None:
     op.add_column("properties", sa.Column("title_i18n", sa.JSON(), nullable=True))
     op.add_column("properties", sa.Column("description_i18n", sa.JSON(), nullable=True))
-    op.add_column("properties", sa.Column("last_synced_at", sa.DateTime(timezone=True), nullable=True))
+    op.add_column(
+        "properties", sa.Column("last_synced_at", sa.DateTime(timezone=True), nullable=True)
+    )
     op.add_column("properties", sa.Column("source_meta", sa.JSON(), nullable=True))
 
 

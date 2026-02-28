@@ -25,4 +25,3 @@ class PropertyImportResult(BaseModel):
     errors: list[str] = Field(default_factory=list)
     total_rows: int = 0
     dry_run: bool = False
-

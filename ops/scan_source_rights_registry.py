@@ -13,12 +13,17 @@ if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
 
 from packages.core.database import SessionLocal
-from packages.core.source_rights_registry import build_source_rights_report, print_source_rights_summary
+from packages.core.source_rights_registry import (
+    build_source_rights_report,
+    print_source_rights_summary,
+)
 
 
 def _parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Scan source-rights registry governance state")
-    parser.add_argument("--strict", action="store_true", help="Exit non-zero when report has errors")
+    parser.add_argument(
+        "--strict", action="store_true", help="Exit non-zero when report has errors"
+    )
     parser.add_argument(
         "--fail-on-warn",
         action="store_true",
@@ -59,7 +64,9 @@ def _parse_args() -> argparse.Namespace:
 
 def _build_session_factory(args: argparse.Namespace):
     if args.database_url:
-        connect_args = {"check_same_thread": False} if args.database_url.startswith("sqlite:///") else {}
+        connect_args = (
+            {"check_same_thread": False} if args.database_url.startswith("sqlite:///") else {}
+        )
         engine = create_engine(args.database_url, connect_args=connect_args, future=True)
         return sessionmaker(bind=engine, autoflush=False, autocommit=False, future=True)
 

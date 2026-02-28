@@ -10,7 +10,13 @@ from sqlalchemy import select
 
 from packages.core.auth import create_access_token, hash_password
 from packages.core.database import SessionLocal, init_db
-from packages.core.models import Article, CompanyInfo, TeamMember, Testimonial as TestimonialModel, User
+from packages.core.models import (
+    Article,
+    CompanyInfo,
+    TeamMember,
+    Testimonial as TestimonialModel,
+    User,
+)
 from scripts.seed_company_team_testimonials import seed_content
 
 
@@ -99,7 +105,9 @@ def test_b14_admin_content_publish_flow_reflects_about_page(client) -> None:
 
     publish_team = client.post(f"/admin/team-members/{team_id}/publish", headers=headers)
     assert publish_team.status_code == 200, publish_team.text
-    publish_testimonial = client.post(f"/admin/testimonials/{testimonial_id}/publish", headers=headers)
+    publish_testimonial = client.post(
+        f"/admin/testimonials/{testimonial_id}/publish", headers=headers
+    )
     assert publish_testimonial.status_code == 200, publish_testimonial.text
 
     about_after = client.get("/en/about")
@@ -110,7 +118,9 @@ def test_b14_admin_content_publish_flow_reflects_about_page(client) -> None:
 
     unpublish_team = client.post(f"/admin/team-members/{team_id}/unpublish", headers=headers)
     assert unpublish_team.status_code == 200, unpublish_team.text
-    unpublish_testimonial = client.post(f"/admin/testimonials/{testimonial_id}/unpublish", headers=headers)
+    unpublish_testimonial = client.post(
+        f"/admin/testimonials/{testimonial_id}/unpublish", headers=headers
+    )
     assert unpublish_testimonial.status_code == 200, unpublish_testimonial.text
 
     about_unpublished = client.get("/en/about")
@@ -125,21 +135,43 @@ def test_b14_seed_content_upserts_company_team_testimonials(tmp_path: Path) -> N
 
     (input_dir / "company_info.json").write_text(
         json.dumps(
-            [{"slug": "about", "title": "About", "content": "Seeded about", "meta_description": "Seeded meta"}],
+            [
+                {
+                    "slug": "about",
+                    "title": "About",
+                    "content": "Seeded about",
+                    "meta_description": "Seeded meta",
+                }
+            ],
             ensure_ascii=False,
         ),
         encoding="utf-8",
     )
     (input_dir / "team_members.json").write_text(
         json.dumps(
-            [{"name": "Seed Team", "role_title": "Advisor", "bio": {"en": "Seed bio"}, "status": "active"}],
+            [
+                {
+                    "name": "Seed Team",
+                    "role_title": "Advisor",
+                    "bio": {"en": "Seed bio"},
+                    "status": "active",
+                }
+            ],
             ensure_ascii=False,
         ),
         encoding="utf-8",
     )
     (input_dir / "testimonials.json").write_text(
         json.dumps(
-            [{"status": "published", "persona": "buyer", "intent": "buy", "quote": "Seed quote", "attribution_name": "Seed Client"}],
+            [
+                {
+                    "status": "published",
+                    "persona": "buyer",
+                    "intent": "buy",
+                    "quote": "Seed quote",
+                    "attribution_name": "Seed Client",
+                }
+            ],
             ensure_ascii=False,
         ),
         encoding="utf-8",
@@ -153,7 +185,9 @@ def test_b14_seed_content_upserts_company_team_testimonials(tmp_path: Path) -> N
                     "status": "published",
                     "title": {"en": "AssetMP company overview"},
                     "excerpt": {"en": "Sourced from approved company-owned website assetmp.net."},
-                    "body_md": {"en": "Multilingual support and end-to-end service across Thailand."},
+                    "body_md": {
+                        "en": "Multilingual support and end-to-end service across Thailand."
+                    },
                     "hero_image_url": "/media/library/variants/05032d16-54ae-45f4-bb89-3ae1fc2fa52f.webp",
                     "tags": {"en": ["investment", "yield"], "th": ["การลงทุน", "ผลตอบแทน"]},
                     "topics": {"en": ["investment-guide"], "th": ["คู่มือลงทุน"]},
@@ -233,7 +267,13 @@ def test_b14_seed_rejects_external_team_photo_url(tmp_path: Path) -> None:
     input_dir.mkdir(parents=True, exist_ok=True)
     (input_dir / "team_members.json").write_text(
         json.dumps(
-            [{"name": "Unsafe Team", "role_title": "Advisor", "photo_url": "https://cdn.example.com/team.jpg"}],
+            [
+                {
+                    "name": "Unsafe Team",
+                    "role_title": "Advisor",
+                    "photo_url": "https://cdn.example.com/team.jpg",
+                }
+            ],
             ensure_ascii=False,
         ),
         encoding="utf-8",
@@ -248,7 +288,14 @@ def test_b14_seed_accepts_local_team_photo_url(tmp_path: Path) -> None:
     input_dir.mkdir(parents=True, exist_ok=True)
     (input_dir / "team_members.json").write_text(
         json.dumps(
-            [{"name": "Safe Team", "role_title": "Advisor", "photo_url": "/media/library/safe-team.jpg", "status": "active"}],
+            [
+                {
+                    "name": "Safe Team",
+                    "role_title": "Advisor",
+                    "photo_url": "/media/library/safe-team.jpg",
+                    "status": "active",
+                }
+            ],
             ensure_ascii=False,
         ),
         encoding="utf-8",
@@ -285,7 +332,9 @@ def test_b14_seeded_company_and_article_are_visible_on_runtime(client, tmp_path:
                     "status": "published",
                     "title": {"en": "AssetMP seeded insight"},
                     "excerpt": {"en": "exclusive listings across Thailand"},
-                    "body_md": {"en": "multilingual support and complete service from start to finish"},
+                    "body_md": {
+                        "en": "multilingual support and complete service from start to finish"
+                    },
                     "hero_image_url": "/media/library/variants/05032d16-54ae-45f4-bb89-3ae1fc2fa52f.webp",
                 }
             ],
@@ -380,7 +429,10 @@ def test_b14_seed_sync_prunes_stale_team_and_testimonials(tmp_path: Path) -> Non
     input_dir.mkdir(parents=True, exist_ok=True)
     (input_dir / "company_info.json").write_text("[]", encoding="utf-8")
     (input_dir / "team_members.json").write_text(
-        json.dumps([{"name": "Current Team", "role_title": "Advisor", "status": "active"}], ensure_ascii=False),
+        json.dumps(
+            [{"name": "Current Team", "role_title": "Advisor", "status": "active"}],
+            ensure_ascii=False,
+        ),
         encoding="utf-8",
     )
     (input_dir / "testimonials.json").write_text("[]", encoding="utf-8")
@@ -388,7 +440,15 @@ def test_b14_seed_sync_prunes_stale_team_and_testimonials(tmp_path: Path) -> Non
 
     with SessionLocal() as db:
         db.add(TeamMember(name="Stale Team", role_title="Advisor", status="active"))
-        db.add(TestimonialModel(status="published", persona="buyer", intent="buy", quote="Old quote", attribution_name="Old client"))
+        db.add(
+            TestimonialModel(
+                status="published",
+                persona="buyer",
+                intent="buy",
+                quote="Old quote",
+                attribution_name="Old client",
+            )
+        )
         db.commit()
 
     summary = seed_content(

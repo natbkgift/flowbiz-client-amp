@@ -8,8 +8,26 @@ from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
 
-from apps.api.routes import admin_content, admin_crm, admin_domain, admin_home_composer, admin_media, admin_projects, admin_properties
-from apps.api.routes.v1 import auth, content, crm, domain, events, home_composer, home_runtime, projects, properties
+from apps.api.routes import (
+    admin_content,
+    admin_crm,
+    admin_domain,
+    admin_home_composer,
+    admin_media,
+    admin_projects,
+    admin_properties,
+)
+from apps.api.routes.v1 import (
+    auth,
+    content,
+    crm,
+    domain,
+    events,
+    home_composer,
+    home_runtime,
+    projects,
+    properties,
+)
 from packages.core.database import init_db
 
 

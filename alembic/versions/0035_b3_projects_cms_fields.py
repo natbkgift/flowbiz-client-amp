@@ -25,7 +25,9 @@ def upgrade() -> None:
     op.add_column("projects", sa.Column("quick_facts", sa.JSON(), nullable=True))
     op.add_column("projects", sa.Column("trust_proof", sa.JSON(), nullable=True))
     op.add_column("projects", sa.Column("source_notes", sa.JSON(), nullable=True))
-    op.add_column("projects", sa.Column("claims_updated_at", sa.DateTime(timezone=True), nullable=True))
+    op.add_column(
+        "projects", sa.Column("claims_updated_at", sa.DateTime(timezone=True), nullable=True)
+    )
 
 
 def downgrade() -> None:

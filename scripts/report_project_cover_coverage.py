@@ -52,9 +52,11 @@ def _is_real_cover(url: str | None) -> bool:
         return False
     if u.startswith("/images/"):
         return False
-    if (
-        "/images/" in u
-        and (u.startswith("https://amppattaya.com/") or u.startswith("https://www.amppattaya.com/") or u.startswith("http://127.0.0.1:") or u.startswith("http://localhost:"))
+    if "/images/" in u and (
+        u.startswith("https://amppattaya.com/")
+        or u.startswith("https://www.amppattaya.com/")
+        or u.startswith("http://127.0.0.1:")
+        or u.startswith("http://localhost:")
     ):
         return False
     return u.startswith("http://") or u.startswith("https://") or "/media/" in u
@@ -86,7 +88,9 @@ def _local_media_file_info(url: str | None, *, public_root: Path) -> dict[str, A
     }
 
 
-def generate_report(import_dir: Path = IMPORT_DIR, *, public_root: Path = DEFAULT_PUBLIC_ROOT) -> dict[str, Any]:
+def generate_report(
+    import_dir: Path = IMPORT_DIR, *, public_root: Path = DEFAULT_PUBLIC_ROOT
+) -> dict[str, Any]:
     projects = _read_json(import_dir / "projects.json")
     sources = _read_json(import_dir / "project_cover_sources.json")
     source_by_slug = {str(r.get("project_slug") or "").strip(): r for r in sources}
@@ -118,7 +122,8 @@ def generate_report(import_dir: Path = IMPORT_DIR, *, public_root: Path = DEFAUL
     local_media_missing_count = sum(
         1
         for r in project_rows
-        if isinstance(r.get("local_media_file"), dict) and not bool(r["local_media_file"].get("exists"))
+        if isinstance(r.get("local_media_file"), dict)
+        and not bool(r["local_media_file"].get("exists"))
     )
     no_cover_count = sum(1 for r in project_rows if not str(r.get("cover_image_url") or "").strip())
     featured = sorted(
@@ -138,7 +143,8 @@ def generate_report(import_dir: Path = IMPORT_DIR, *, public_root: Path = DEFAUL
     broken_rows = [
         r
         for r in project_rows
-        if isinstance(r.get("local_media_file"), dict) and not bool(r["local_media_file"].get("exists"))
+        if isinstance(r.get("local_media_file"), dict)
+        and not bool(r["local_media_file"].get("exists"))
     ]
 
     return {
@@ -148,13 +154,17 @@ def generate_report(import_dir: Path = IMPORT_DIR, *, public_root: Path = DEFAUL
             "projects_real_cover_count": real_count,
             "projects_real_cover_pct": round((real_count / total * 100) if total else 0.0, 2),
             "projects_external_cover_count": external_count,
-            "projects_external_cover_pct": round((external_count / total * 100) if total else 0.0, 2),
+            "projects_external_cover_pct": round(
+                (external_count / total * 100) if total else 0.0, 2
+            ),
             "projects_local_media_cover_count": local_media_count,
             "projects_local_media_missing_file_count": local_media_missing_count,
             "projects_missing_cover_count": no_cover_count,
             "featured_home_cards_count": len(featured),
             "featured_home_real_cover_count": featured_real_count,
-            "featured_home_real_cover_pct": round((featured_real_count / len(featured) * 100) if featured else 0.0, 2),
+            "featured_home_real_cover_pct": round(
+                (featured_real_count / len(featured) * 100) if featured else 0.0, 2
+            ),
             "dataset_empty": total == 0,
         },
         "by_source_type": dict(sorted(by_source_type.items(), key=lambda kv: kv[0])),
@@ -180,7 +190,9 @@ def _print_human_summary(report: dict[str, Any]) -> None:
 
 def _exit_code_for_policy(report: dict[str, Any], *, strict: bool, fail_on_warn: bool) -> int:
     summary = report.get("summary", {})
-    errors = int(summary.get("projects_external_cover_count", 0)) + int(summary.get("projects_local_media_missing_file_count", 0))
+    errors = int(summary.get("projects_external_cover_count", 0)) + int(
+        summary.get("projects_local_media_missing_file_count", 0)
+    )
     warnings = int(summary.get("projects_missing_cover_count", 0))
     if fail_on_warn and (errors > 0 or warnings > 0):
         return 2
@@ -190,10 +202,22 @@ def _exit_code_for_policy(report: dict[str, Any], *, strict: bool, fail_on_warn:
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description="Report real-cover coverage for project seed data.")
-    parser.add_argument("--input-dir", default=str(IMPORT_DIR), help="Import JSON directory (default: %(default)s)")
-    parser.add_argument("--public-root", default=str(DEFAULT_PUBLIC_ROOT), help="Frontend public root for local /media file existence checks (default: %(default)s)")
-    parser.add_argument("--strict", action="store_true", help="Exit non-zero when external covers or broken local media refs exist")
+    parser = argparse.ArgumentParser(
+        description="Report real-cover coverage for project seed data."
+    )
+    parser.add_argument(
+        "--input-dir", default=str(IMPORT_DIR), help="Import JSON directory (default: %(default)s)"
+    )
+    parser.add_argument(
+        "--public-root",
+        default=str(DEFAULT_PUBLIC_ROOT),
+        help="Frontend public root for local /media file existence checks (default: %(default)s)",
+    )
+    parser.add_argument(
+        "--strict",
+        action="store_true",
+        help="Exit non-zero when external covers or broken local media refs exist",
+    )
     parser.add_argument(
         "--fail-on-warn",
         action="store_true",
@@ -201,7 +225,9 @@ def main() -> int:
         help="Exit non-zero on warnings as well (currently: missing cover rows)",
     )
     parser.add_argument("--quiet", action="store_true", help="Suppress human-readable summary")
-    parser.add_argument("--no-write", action="store_true", dest="no_write", help="Do not write JSON report")
+    parser.add_argument(
+        "--no-write", action="store_true", dest="no_write", help="Do not write JSON report"
+    )
     parser.add_argument(
         "--write",
         nargs="?",
@@ -221,10 +247,14 @@ def main() -> int:
         if not out_path.is_absolute():
             out_path = REPO_ROOT / out_path
         out_path.parent.mkdir(parents=True, exist_ok=True)
-        out_path.write_text(json.dumps(report, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+        out_path.write_text(
+            json.dumps(report, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
+        )
         print(f"\nWROTE:{out_path}")
 
-    return _exit_code_for_policy(report, strict=bool(args.strict), fail_on_warn=bool(args.fail_on_warn))
+    return _exit_code_for_policy(
+        report, strict=bool(args.strict), fail_on_warn=bool(args.fail_on_warn)
+    )
 
 
 if __name__ == "__main__":

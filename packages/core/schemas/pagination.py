@@ -16,4 +16,3 @@ class PaginationMeta(BaseModel):
 class PaginatedResponse(BaseModel, Generic[T]):
     data: list[T]
     meta: PaginationMeta
-

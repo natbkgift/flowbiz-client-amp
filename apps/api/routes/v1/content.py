@@ -68,8 +68,12 @@ def _taxonomy_value(value: Any) -> list[str] | dict[str, list[str]] | None:
 
 def _article_metadata(article: Article) -> tuple[dict[str, Any], dict[str, Any]]:
     body_meta = article.body_md if isinstance(article.body_md, dict) else {}
-    source_meta = body_meta.get("source_meta") if isinstance(body_meta.get("source_meta"), dict) else {}
-    author_profile = body_meta.get("author_profile") if isinstance(body_meta.get("author_profile"), dict) else {}
+    source_meta = (
+        body_meta.get("source_meta") if isinstance(body_meta.get("source_meta"), dict) else {}
+    )
+    author_profile = (
+        body_meta.get("author_profile") if isinstance(body_meta.get("author_profile"), dict) else {}
+    )
     return source_meta, author_profile
 
 

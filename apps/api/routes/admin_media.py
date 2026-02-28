@@ -168,7 +168,9 @@ def upload_media_multi(
     _admin: User = Depends(get_current_admin),
 ) -> dict:
     if not files:
-        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_CONTENT, detail="files is required")
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT, detail="files is required"
+        )
 
     metadata = {
         "tags": _parse_json_field(tags, default=[]),
@@ -193,8 +195,12 @@ def list_media(
     query = select(MediaAsset)
     if q:
         pattern = f"%{q.strip()}%"
-        query = query.where(MediaAsset.storage_path.ilike(pattern) | MediaAsset.title.ilike(pattern))
-    rows = db.scalars(query.order_by(desc(MediaAsset.updated_at), desc(MediaAsset.id)).limit(limit)).all()
+        query = query.where(
+            MediaAsset.storage_path.ilike(pattern) | MediaAsset.title.ilike(pattern)
+        )
+    rows = db.scalars(
+        query.order_by(desc(MediaAsset.updated_at), desc(MediaAsset.id)).limit(limit)
+    ).all()
     return {"items": [serialize_media_asset(row) for row in rows]}
 
 
@@ -354,7 +360,12 @@ def media_usage(
     if media is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Media not found")
     usage = compute_usage_map(db, media=media)
-    return {"media_id": str(media.id), "storage_path": media.storage_path, "usage": usage, "count": len(usage)}
+    return {
+        "media_id": str(media.id),
+        "storage_path": media.storage_path,
+        "usage": usage,
+        "count": len(usage),
+    }
 
 
 @router.put("/properties/{property_id}/gallery")

@@ -18,7 +18,9 @@ def get_home_composer(
     db: Session = Depends(get_db),
 ) -> dict:
     if locale not in {"en", "th"}:
-        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_CONTENT, detail="Invalid locale")
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT, detail="Invalid locale"
+        )
 
     row = db.scalar(
         select(HomeComposerConfig)

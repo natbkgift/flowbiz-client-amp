@@ -12,7 +12,13 @@ from packages.core.models import AnalyticsEvent
 EVENT_TYPES = ["area_card_click", "area_cta_click"]
 REQUIRED = {
     "area_card_click": ["source.locale", "source.page", "payload.placement", "payload.area_slug"],
-    "area_cta_click": ["source.locale", "source.page", "payload.placement", "payload.cta_id", "payload.area_slug"],
+    "area_cta_click": [
+        "source.locale",
+        "source.page",
+        "payload.placement",
+        "payload.cta_id",
+        "payload.area_slug",
+    ],
 }
 
 
@@ -39,9 +45,15 @@ def _missing_fields(event_type: str, envelope: dict) -> list[str]:
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description="Validate area event taxonomy coverage from analytics_events.")
-    parser.add_argument("--days", type=int, default=30, help="Lookback window in days (default: 30)")
-    parser.add_argument("--limit", type=int, default=1000, help="Max rows to inspect (default: 1000)")
+    parser = argparse.ArgumentParser(
+        description="Validate area event taxonomy coverage from analytics_events."
+    )
+    parser.add_argument(
+        "--days", type=int, default=30, help="Lookback window in days (default: 30)"
+    )
+    parser.add_argument(
+        "--limit", type=int, default=1000, help="Max rows to inspect (default: 1000)"
+    )
     args = parser.parse_args()
 
     init_db()

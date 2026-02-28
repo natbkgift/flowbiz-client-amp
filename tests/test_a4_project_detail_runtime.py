@@ -73,8 +73,16 @@ def _seed_a4_detail_fixture() -> dict[str, str]:
             quick_facts=["Near beach", "Foreign quota", "Ready transfer"],
             highlights=["Sea view", "High floor"],
             amenities=["Pool", "Gym", "Parking"],
-            location={"lat": 12.9281, "lng": 100.8771, "context": {"en": "Near beach road", "th": "ใกล้ถนนเลียบหาด"}},
-            investment_snapshot={"source": "Internal desk", "updated_at": "2026-02-20", "gross_yield_percent": 6.1},
+            location={
+                "lat": 12.9281,
+                "lng": 100.8771,
+                "context": {"en": "Near beach road", "th": "ใกล้ถนนเลียบหาด"},
+            },
+            investment_snapshot={
+                "source": "Internal desk",
+                "updated_at": "2026-02-20",
+                "gross_yield_percent": 6.1,
+            },
             source_notes={
                 "faq": [
                     {
@@ -256,6 +264,12 @@ def test_a4_project_detail_th_fallback_and_gallery_hotlink_guard(client) -> None
     assert "bad-cdn.example" not in no_media_html
 
     host = "testserver"
-    for value in [*_extract_attrs(no_media_html, "src"), *_extract_attrs(no_media_html, "srcset"), *_extract_attrs(no_media_html, "poster")]:
+    for value in [
+        *_extract_attrs(no_media_html, "src"),
+        *_extract_attrs(no_media_html, "srcset"),
+        *_extract_attrs(no_media_html, "poster"),
+    ]:
         for candidate in [part.strip().split()[0] for part in value.split(",") if part.strip()]:
-            assert _is_allowed_media(candidate, host=host), f"Disallowed media URL in A4 runtime HTML: {candidate}"
+            assert _is_allowed_media(candidate, host=host), (
+                f"Disallowed media URL in A4 runtime HTML: {candidate}"
+            )

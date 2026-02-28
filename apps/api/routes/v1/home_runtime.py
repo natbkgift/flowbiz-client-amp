@@ -255,16 +255,56 @@ def _safe_copy(locale: str) -> dict[str, str]:
 def _default_path_cards(locale: str) -> list[dict[str, str]]:
     if locale == "th":
         return [
-            {"key": "invest", "title": "Invest", "fit": "สำหรับผู้ใช้ที่กำลังเทียบผลตอบแทน ดีมานด์ และทางออกการลงทุน", "outcome": "ดูรายการที่มีข้อมูลเปรียบเทียบพร้อมใช้งานในระบบ"},
-            {"key": "buy", "title": "Buy", "fit": "สำหรับผู้ซื้อที่กำลังมองหาอสังหาที่เหมาะกับการถือครองในพัทยา", "outcome": "ดูโครงการคัดสรรและขั้นตอนถัดไปที่ชัดเจน"},
-            {"key": "rent", "title": "Rent", "fit": "สำหรับผู้เช่าที่กำลังวางแผนย้ายอยู่ระยะยาวหรือแบบยืดหยุ่น", "outcome": "เริ่มจากการแจ้งความต้องการเพื่อรับคำแนะนำถัดไป"},
-            {"key": "sell", "title": "Sell", "fit": "สำหรับเจ้าของที่ต้องการเริ่มต้นขายอย่างเป็นระบบ", "outcome": "ส่งรายละเอียดเบื้องต้นเพื่อรับขั้นตอนถัดไป"},
+            {
+                "key": "invest",
+                "title": "Invest",
+                "fit": "สำหรับผู้ใช้ที่กำลังเทียบผลตอบแทน ดีมานด์ และทางออกการลงทุน",
+                "outcome": "ดูรายการที่มีข้อมูลเปรียบเทียบพร้อมใช้งานในระบบ",
+            },
+            {
+                "key": "buy",
+                "title": "Buy",
+                "fit": "สำหรับผู้ซื้อที่กำลังมองหาอสังหาที่เหมาะกับการถือครองในพัทยา",
+                "outcome": "ดูโครงการคัดสรรและขั้นตอนถัดไปที่ชัดเจน",
+            },
+            {
+                "key": "rent",
+                "title": "Rent",
+                "fit": "สำหรับผู้เช่าที่กำลังวางแผนย้ายอยู่ระยะยาวหรือแบบยืดหยุ่น",
+                "outcome": "เริ่มจากการแจ้งความต้องการเพื่อรับคำแนะนำถัดไป",
+            },
+            {
+                "key": "sell",
+                "title": "Sell",
+                "fit": "สำหรับเจ้าของที่ต้องการเริ่มต้นขายอย่างเป็นระบบ",
+                "outcome": "ส่งรายละเอียดเบื้องต้นเพื่อรับขั้นตอนถัดไป",
+            },
         ]
     return [
-        {"key": "invest", "title": "Invest", "fit": "For people comparing yield, demand, and exit visibility", "outcome": "See which published picks currently have comparison data"},
-        {"key": "buy", "title": "Buy", "fit": "For buyers looking for the right Pattaya property to own", "outcome": "Browse curated projects and the clearest next step"},
-        {"key": "rent", "title": "Rent", "fit": "For renters planning a move, long stay, or flexible setup", "outcome": "Start with a request so we can guide the next step"},
-        {"key": "sell", "title": "Sell", "fit": "For owners who want to start with clear input and next-step guidance", "outcome": "Share the basics and request the next step"},
+        {
+            "key": "invest",
+            "title": "Invest",
+            "fit": "For people comparing yield, demand, and exit visibility",
+            "outcome": "See which published picks currently have comparison data",
+        },
+        {
+            "key": "buy",
+            "title": "Buy",
+            "fit": "For buyers looking for the right Pattaya property to own",
+            "outcome": "Browse curated projects and the clearest next step",
+        },
+        {
+            "key": "rent",
+            "title": "Rent",
+            "fit": "For renters planning a move, long stay, or flexible setup",
+            "outcome": "Start with a request so we can guide the next step",
+        },
+        {
+            "key": "sell",
+            "title": "Sell",
+            "fit": "For owners who want to start with clear input and next-step guidance",
+            "outcome": "Share the basics and request the next step",
+        },
     ]
 
 
@@ -328,9 +368,27 @@ def _resolve_secondary_cta_href(locale: str, requested: str | None, label: str) 
 
 
 def _load_home_context(db: Session, locale: str) -> tuple[str, dict]:
-    row = db.scalar(select(HomeComposerConfig).where(HomeComposerConfig.page_key == "home", HomeComposerConfig.locale == locale, HomeComposerConfig.status == "published").order_by(desc(HomeComposerConfig.version), desc(HomeComposerConfig.updated_at)).limit(1))
+    row = db.scalar(
+        select(HomeComposerConfig)
+        .where(
+            HomeComposerConfig.page_key == "home",
+            HomeComposerConfig.locale == locale,
+            HomeComposerConfig.status == "published",
+        )
+        .order_by(desc(HomeComposerConfig.version), desc(HomeComposerConfig.updated_at))
+        .limit(1)
+    )
     if row is None and locale != "en":
-        row = db.scalar(select(HomeComposerConfig).where(HomeComposerConfig.page_key == "home", HomeComposerConfig.locale == "en", HomeComposerConfig.status == "published").order_by(desc(HomeComposerConfig.version), desc(HomeComposerConfig.updated_at)).limit(1))
+        row = db.scalar(
+            select(HomeComposerConfig)
+            .where(
+                HomeComposerConfig.page_key == "home",
+                HomeComposerConfig.locale == "en",
+                HomeComposerConfig.status == "published",
+            )
+            .order_by(desc(HomeComposerConfig.version), desc(HomeComposerConfig.updated_at))
+            .limit(1)
+        )
     source = "published" if row is not None else "safe_default"
     normalized = normalize_home_config(row.config if row is not None else {})
     return source, resolve_home_runtime(db=db, config=normalized, locale=locale)
@@ -427,15 +485,23 @@ def _property_tags(prop: Property | None) -> list[str]:
 
 
 def _count_cards(db: Session) -> list[tuple[str, int]]:
-    areas = int(db.scalar(select(func.count()).select_from(Area).where(Area.status == "published")) or 0)
+    areas = int(
+        db.scalar(select(func.count()).select_from(Area).where(Area.status == "published")) or 0
+    )
     projects = int(
         db.scalar(
-            select(func.count()).select_from(Project).where(Project.deleted_at.is_(None), Project.status == "published")
+            select(func.count())
+            .select_from(Project)
+            .where(Project.deleted_at.is_(None), Project.status == "published")
         )
         or 0
     )
-    properties = int(db.scalar(select(func.count()).select_from(Property).where(Property.status == "active")) or 0)
+    properties = int(
+        db.scalar(select(func.count()).select_from(Property).where(Property.status == "active"))
+        or 0
+    )
     return [("areas", areas), ("projects", projects), ("properties", properties)]
+
 
 def _build_featured_html(
     db: Session,
@@ -452,15 +518,23 @@ def _build_featured_html(
         project = _project_by_id(db, str(item.get("id") or ""))
         project_id = escape(str(item.get("id") or "project"))
         project_slug = escape(str(item.get("slug") or ""))
-        media = _safe_media_url(item.get("cover_image_url") or item.get("hero_image_url"), _DEFAULT_MEDIA_FALLBACK, request=request)
+        media = _safe_media_url(
+            item.get("cover_image_url") or item.get("hero_image_url"),
+            _DEFAULT_MEDIA_FALLBACK,
+            request=request,
+        )
         name = escape(str(item.get("name") or "Project"))
-        area_name = _area_name(db, getattr(project, "area_id", None)) or copy["featured_pending_area"]
-        price_text = _format_money(getattr(project, "starting_price", None), fallback=copy["featured_pending_price"])
+        area_name = (
+            _area_name(db, getattr(project, "area_id", None)) or copy["featured_pending_area"]
+        )
+        price_text = _format_money(
+            getattr(project, "starting_price", None), fallback=copy["featured_pending_price"]
+        )
         facts = _project_facts(project)
         facts_html = (
-            f"<ul class=\"facts\">{''.join(f'<li>{escape(fact)}</li>' for fact in facts)}</ul>"
+            f'<ul class="facts">{"".join(f"<li>{escape(fact)}</li>" for fact in facts)}</ul>'
             if facts
-            else f"<div class=\"state-empty state-inline\">{escape(copy['featured_pending_facts'])}</div>"
+            else f'<div class="state-empty state-inline">{escape(copy["featured_pending_facts"])}</div>'
         )
         cards.append(
             f"""
@@ -475,26 +549,30 @@ def _build_featured_html(
         )
     if cards:
         return "".join(cards)
-    return f"<div class=\"state-empty\">{escape(copy['featured_fallback'])}</div>"
+    return f'<div class="state-empty">{escape(copy["featured_fallback"])}</div>'
 
 
-def _build_investment_html(db: Session, request: Request, locale: str, copy: dict[str, str], resolved: dict) -> str:
+def _build_investment_html(
+    db: Session, request: Request, locale: str, copy: dict[str, str], resolved: dict
+) -> str:
     cards: list[str] = []
     for item in (resolved.get("investment_picks") or [])[:6]:
         prop = _property_by_id(db, str(item.get("id") or ""))
         item_id = escape(str(item.get("id") or "pick"))
         item_slug = escape(str(getattr(prop, "slug", "") or item.get("slug") or ""))
         title = escape(str(item.get("title") or "Investment pick"))
-        media = _safe_media_url(item.get("cover_image_url"), _DEFAULT_MEDIA_FALLBACK, request=request)
+        media = _safe_media_url(
+            item.get("cover_image_url"), _DEFAULT_MEDIA_FALLBACK, request=request
+        )
         price_text = _format_money(item.get("price"), fallback=copy["featured_pending_price"])
         stats = _property_stats(prop)
         tags = _property_tags(prop)
         stats_html = (
-            f"<ul class=\"facts\">{''.join(f'<li>{escape(stat)}</li>' for stat in stats)}</ul>"
+            f'<ul class="facts">{"".join(f"<li>{escape(stat)}</li>" for stat in stats)}</ul>'
             if stats
-            else f"<div class=\"state-empty state-inline\">{escape(copy['investment_pending_stats'])}</div>"
+            else f'<div class="state-empty state-inline">{escape(copy["investment_pending_stats"])}</div>'
         )
-        tags_html = "".join(f"<span class=\"tag\">{escape(tag)}</span>" for tag in tags)
+        tags_html = "".join(f'<span class="tag">{escape(tag)}</span>' for tag in tags)
         cards.append(
             f"""
             <article class=\"card\" data-item-id=\"{item_id}\" data-card-id=\"{item_id}\" data-card-slug=\"{item_slug}\">
@@ -503,47 +581,53 @@ def _build_investment_html(db: Session, request: Request, locale: str, copy: dic
               <h3>{title}</h3>
               {stats_html}
               <div class=\"tag-row\">{tags_html}</div>
-              <a class=\"btn btn-secondary-hero btn-sm\" data-event=\"home_investment_pick_click\" data-cta-id=\"investment_pick_cta\" data-item-id=\"{item_id}\" data-card-id=\"{item_id}\" data-card-slug=\"{item_slug}\" data-placement=\"investment_card\" href=\"{_section_href(locale, '#consult-title')}\">{escape(copy['view_pick'])}</a>
+              <a class=\"btn btn-secondary-hero btn-sm\" data-event=\"home_investment_pick_click\" data-cta-id=\"investment_pick_cta\" data-item-id=\"{item_id}\" data-card-id=\"{item_id}\" data-card-slug=\"{item_slug}\" data-placement=\"investment_card\" href=\"{_section_href(locale, "#consult-title")}\">{escape(copy["view_pick"])}</a>
             </article>
             """
         )
     if cards:
         return "".join(cards)
-    return f"<div class=\"state-empty\">{escape(copy['investment_fallback'])}</div>"
+    return f'<div class="state-empty">{escape(copy["investment_fallback"])}</div>'
 
 
 def _build_why_html(db: Session, copy: dict[str, str]) -> str:
     counts = _count_cards(db)
     if not any(value for _, value in counts):
-        return f"<div class=\"state-empty\">{escape(copy['why_empty'])}</div>"
-    labels = {"areas": copy["why_areas"], "projects": copy["why_projects"], "properties": copy["why_properties"]}
+        return f'<div class="state-empty">{escape(copy["why_empty"])}</div>'
+    labels = {
+        "areas": copy["why_areas"],
+        "projects": copy["why_projects"],
+        "properties": copy["why_properties"],
+    }
     cards = "".join(
-        f"<article class=\"metric\"><h3>{escape(labels[key])}</h3><p>{value}</p></article>"
+        f'<article class="metric"><h3>{escape(labels[key])}</h3><p>{value}</p></article>'
         for key, value in counts
     )
-    return f"<div class=\"metrics\">{cards}</div><p class=\"muted\">{escape(copy['why_source'])}</p>"
+    return f'<div class="metrics">{cards}</div><p class="muted">{escape(copy["why_source"])}</p>'
 
 
 def _build_trust_html(copy: dict[str, str], resolved: dict) -> str:
     blocks = resolved.get("trust_blocks") or []
     rendered = [
-        f"<article class=\"card\"><h3>{escape(str(block.get('title') or 'Trust block'))}</h3><p>{escape(str(block.get('body') or ''))}</p></article>"
+        f'<article class="card"><h3>{escape(str(block.get("title") or "Trust block"))}</h3><p>{escape(str(block.get("body") or ""))}</p></article>'
         for block in blocks
         if str(block.get("title") or "").strip() or str(block.get("body") or "").strip()
     ]
     if rendered:
         return "".join(rendered)
     return (
-        f"<div class=\"state-empty\" id=\"trust-publication-note\">{escape(copy['trust_fallback'])}</div>"
-        f"<div class=\"state-empty\" id=\"team-note\">{escape(copy['team_note'])}</div>"
-        f"<div class=\"state-empty\" id=\"process-note\">{escape(copy['process_note'])}</div>"
+        f'<div class="state-empty" id="trust-publication-note">{escape(copy["trust_fallback"])}</div>'
+        f'<div class="state-empty" id="team-note">{escape(copy["team_note"])}</div>'
+        f'<div class="state-empty" id="process-note">{escape(copy["process_note"])}</div>'
     )
 
 
 def _build_video_html(request: Request, copy: dict[str, str], resolved: dict) -> str:
     cards: list[str] = []
     for item in (resolved.get("video_items") or [])[:4]:
-        thumb = _safe_media_url(item.get("thumbnail_path"), _DEFAULT_MEDIA_FALLBACK, request=request)
+        thumb = _safe_media_url(
+            item.get("thumbnail_path"), _DEFAULT_MEDIA_FALLBACK, request=request
+        )
         poster = _safe_media_url(item.get("poster_path"), _DEFAULT_MEDIA_FALLBACK, request=request)
         label = escape(str(item.get("key") or "Video"))
         cards.append(
@@ -558,7 +642,7 @@ def _build_video_html(request: Request, copy: dict[str, str], resolved: dict) ->
         )
     if cards:
         return "".join(cards)
-    return f"<div class=\"state-empty\">{escape(copy['video_fallback'])}</div>"
+    return f'<div class="state-empty">{escape(copy["video_fallback"])}</div>'
 
 
 def _build_insights_preview_html(db: Session, locale: str, copy: dict[str, str]) -> str:
@@ -573,19 +657,25 @@ def _build_insights_preview_html(db: Session, locale: str, copy: dict[str, str])
         .limit(3)
     ).all()
     if not rows:
-        return f"<div id=\"insights-note\" class=\"state-empty\">{escape(copy['insights_fallback'])}</div>"
+        return (
+            f'<div id="insights-note" class="state-empty">{escape(copy["insights_fallback"])}</div>'
+        )
     cards = []
     for row in rows:
         title = _localized_dict_text(row.title, locale) or row.slug
         excerpt = _localized_dict_text(row.excerpt, locale) or copy["insights_fallback"]
         cards.append(
-            f"<article class=\"card\"><h3>{escape(title)}</h3><p class=\"muted\">{escape(row.category)}</p><p>{escape(excerpt)}</p></article>"
+            f'<article class="card"><h3>{escape(title)}</h3><p class="muted">{escape(row.category)}</p><p>{escape(excerpt)}</p></article>'
         )
-    return f"<div class=\"grid-3\">{''.join(cards)}</div>"
+    return f'<div class="grid-3">{"".join(cards)}</div>'
 
 
 def _build_reviews_html(db: Session, locale: str, copy: dict[str, str], resolved: dict) -> str:
-    review_ids = [str(item) for item in ((resolved.get("reviews") or {}).get("source_ids") or []) if str(item).strip()]
+    review_ids = [
+        str(item)
+        for item in ((resolved.get("reviews") or {}).get("source_ids") or [])
+        if str(item).strip()
+    ]
     rows = db.scalars(
         select(Testimonial)
         .where(Testimonial.deleted_at.is_(None), Testimonial.status == "published")
@@ -596,15 +686,18 @@ def _build_reviews_html(db: Session, locale: str, copy: dict[str, str], resolved
         allowed = set(review_ids)
         rows = [row for row in rows if str(row.id) in allowed]
     if not rows:
-        return f"<div id=\"reviews-note\" class=\"state-empty\">{escape(copy['reviews_fallback'])}</div>"
+        return (
+            f'<div id="reviews-note" class="state-empty">{escape(copy["reviews_fallback"])}</div>'
+        )
     cards = []
     for row in rows[:3]:
         title = row.attribution_name or ("Client review" if locale == "en" else "รีวิวลูกค้า")
         context = row.context or row.persona or row.intent
         cards.append(
-            f"<article class=\"card\"><h3>{escape(title)}</h3><p><strong>{escape(row.quote)}</strong></p><p class=\"muted\">{escape(str(context or '').strip())}</p></article>"
+            f'<article class="card"><h3>{escape(title)}</h3><p><strong>{escape(row.quote)}</strong></p><p class="muted">{escape(str(context or "").strip())}</p></article>'
         )
-    return f"<div class=\"grid-3\">{''.join(cards)}</div>"
+    return f'<div class="grid-3">{"".join(cards)}</div>'
+
 
 def _render(locale: str, request: Request, db: Session, source: str, resolved: dict) -> str:
     copy = _safe_copy(locale)
@@ -612,16 +705,46 @@ def _render(locale: str, request: Request, db: Session, source: str, resolved: d
     secondary_cta = resolved.get("hero_secondary_cta") or {}
     primary_cta = hero.get("cta") if isinstance(hero.get("cta"), dict) else {}
     consultation = resolved.get("consultation") or {}
-    trust_items = [str(item.get("text") or "").strip() for item in (resolved.get("trust_micro_strip") or []) if str(item.get("text") or "").strip()]
-    hero_title = _published_text(hero.get("headline"), copy["h1"]) if source == "published" else copy["h1"]
-    hero_sub = _published_text(hero.get("subheadline"), copy["sub"]) if source == "published" else copy["sub"]
-    hero_trust_strip = " • ".join(trust_items[:4]) if source == "published" and trust_items else copy["trust_strip"]
-    consult_copy = _published_text(consultation.get("promise_copy"), copy["consult_sub"]) if source == "published" else copy["consult_sub"]
-    consult_trust = _published_text(consultation.get("trust_note"), copy["consult_trust"]) if source == "published" else copy["consult_trust"]
-    hero_primary_label = _resolve_cta_text(primary_cta.get("text"), copy["cta_primary"], source=source)
-    hero_secondary_label = _resolve_cta_text(secondary_cta.get("text"), copy["cta_secondary"], source=source)
+    trust_items = [
+        str(item.get("text") or "").strip()
+        for item in (resolved.get("trust_micro_strip") or [])
+        if str(item.get("text") or "").strip()
+    ]
+    hero_title = (
+        _published_text(hero.get("headline"), copy["h1"]) if source == "published" else copy["h1"]
+    )
+    hero_sub = (
+        _published_text(hero.get("subheadline"), copy["sub"])
+        if source == "published"
+        else copy["sub"]
+    )
+    hero_trust_strip = (
+        " • ".join(trust_items[:4])
+        if source == "published" and trust_items
+        else copy["trust_strip"]
+    )
+    consult_copy = (
+        _published_text(consultation.get("promise_copy"), copy["consult_sub"])
+        if source == "published"
+        else copy["consult_sub"]
+    )
+    consult_trust = (
+        _published_text(consultation.get("trust_note"), copy["consult_trust"])
+        if source == "published"
+        else copy["consult_trust"]
+    )
+    hero_primary_label = _resolve_cta_text(
+        primary_cta.get("text"), copy["cta_primary"], source=source
+    )
+    hero_secondary_label = _resolve_cta_text(
+        secondary_cta.get("text"), copy["cta_secondary"], source=source
+    )
     path_cards = resolved.get("path_selector", {}).get("cards") if source == "published" else None
-    cards = path_cards if isinstance(path_cards, list) and len(path_cards) == 4 else _default_path_cards(locale)
+    cards = (
+        path_cards
+        if isinstance(path_cards, list) and len(path_cards) == 4
+        else _default_path_cards(locale)
+    )
     fallback_targets = {
         "invest": "/investment/methodology",
         "buy": "/projects",
@@ -630,17 +753,23 @@ def _render(locale: str, request: Request, db: Session, source: str, resolved: d
     }
     card_html = "".join(
         f"""
-        <a class=\"intent-card\" href=\"{_safe_forward_href(locale, card.get('href') if isinstance(card, dict) else None, fallback_targets.get(str((card or {}).get('key') or ''), '#consult-title'))}\" data-event=\"home_intent_start_click\" data-cta-id=\"intent_{escape(str((card or {}).get('key') or 'path'))}\" data-intent=\"{escape(str((card or {}).get('key') or 'path'))}\" data-filter-values='["{escape(str((card or {}).get("key") or "path"))}"]' data-placement=\"intent_selector\">
-          <h3>{escape(str((card or {}).get('title') or (card or {}).get('key') or 'Path'))}</h3>
-          <p><strong>Fit:</strong> {escape(str((card or {}).get('fit') or ''))}</p>
-          <p><strong>Outcome:</strong> {escape(str((card or {}).get('outcome') or ''))}</p>
-          <span class=\"start-pill\">{escape(copy['start'])}</span>
+        <a class=\"intent-card\" href=\"{_safe_forward_href(locale, card.get("href") if isinstance(card, dict) else None, fallback_targets.get(str((card or {}).get("key") or ""), "#consult-title"))}\" data-event=\"home_intent_start_click\" data-cta-id=\"intent_{escape(str((card or {}).get("key") or "path"))}\" data-intent=\"{escape(str((card or {}).get("key") or "path"))}\" data-filter-values='["{escape(str((card or {}).get("key") or "path"))}"]' data-placement=\"intent_selector\">
+          <h3>{escape(str((card or {}).get("title") or (card or {}).get("key") or "Path"))}</h3>
+          <p><strong>Fit:</strong> {escape(str((card or {}).get("fit") or ""))}</p>
+          <p><strong>Outcome:</strong> {escape(str((card or {}).get("outcome") or ""))}</p>
+          <span class=\"start-pill\">{escape(copy["start"])}</span>
         </a>
         """
         for card in cards
     )
-    consult_href = _safe_forward_href(locale, primary_cta.get("href") if isinstance(primary_cta, dict) else None, "/contact")
-    featured_href = _resolve_secondary_cta_href(locale, secondary_cta.get("href") if isinstance(secondary_cta, dict) else None, hero_secondary_label)
+    consult_href = _safe_forward_href(
+        locale, primary_cta.get("href") if isinstance(primary_cta, dict) else None, "/contact"
+    )
+    featured_href = _resolve_secondary_cta_href(
+        locale,
+        secondary_cta.get("href") if isinstance(secondary_cta, dict) else None,
+        hero_secondary_label,
+    )
     hero_media = _safe_media_url(hero.get("media_path"), _DEFAULT_MEDIA_FALLBACK, request=request)
     featured_html = _build_featured_html(
         db,
@@ -691,23 +820,23 @@ def _render(locale: str, request: Request, db: Session, source: str, resolved: d
     <a class=\"skip-link\" href=\"#main\">Skip to main content</a>
     <main id=\"main\" class=\"container stack\">
       <section class=\"hero\" aria-labelledby=\"hero-title\">
-        <img class=\"hero-media\" src=\"{escape(hero_media)}\" alt=\"{escape(copy['hero_alt'])}\" width=\"1280\" height=\"720\" loading=\"eager\" />
+        <img class=\"hero-media\" src=\"{escape(hero_media)}\" alt=\"{escape(copy["hero_alt"])}\" width=\"1280\" height=\"720\" loading=\"eager\" />
         <h1 id=\"hero-title\">{escape(hero_title)}</h1>
         <p>{escape(hero_sub)}</p>
         <div class=\"cta-row\"><a class=\"btn btn-primary-hero\" data-event=\"home_hero_primary_click\" data-cta-id=\"hero_primary\" data-placement=\"hero\" href=\"{consult_href}\">{escape(hero_primary_label)}</a><a class=\"btn btn-secondary-hero\" data-event=\"home_hero_secondary_click\" data-cta-id=\"hero_secondary\" data-placement=\"hero\" href=\"{featured_href}\">{escape(hero_secondary_label)}</a></div>
         <p class=\"trust-strip\">{escape(hero_trust_strip)}</p>
       </section>
-      <section aria-labelledby=\"intent-title\"><h2 id=\"intent-title\">{escape(copy['path_title'])}</h2><div class=\"grid-2\">{card_html}</div></section>
-      <section aria-labelledby=\"featured-title\"><h2 id=\"featured-title\">{escape(copy['featured_title'])}</h2><p class=\"muted\">{escape(copy['featured_sub'])}</p><div class=\"grid-3\">{featured_html}</div><a class=\"btn btn-secondary-hero btn-sm\" data-event=\"home_browse_projects_click\" data-cta-id=\"featured_footer_cta\" data-placement=\"featured_footer\" href=\"{featured_href}\">{escape(hero_secondary_label)}</a></section>
-      <section aria-labelledby=\"investment-title\"><div style=\"display:flex;justify-content:space-between;gap:12px;align-items:center;flex-wrap:wrap\"><h2 id=\"investment-title\">{escape(copy['investment_title'])}</h2><a id=\"investment-methodology\" href=\"{_locale_path(locale, '/investment/methodology')}\">{escape(copy['methodology'])}</a></div><p class=\"muted\">{escape(copy['investment_disclaimer'])}</p><div class=\"grid-5\">{investment_html}</div><div id=\"methodology-note\" class=\"state-empty\">{escape(copy['methodology_note'])}</div><a class=\"btn btn-secondary-hero btn-sm\" data-event=\"home_investment_pick_click\" data-cta-id=\"investment_all_picks_cta\" data-item-id=\"all_picks\" data-placement=\"investment_footer\" href=\"{_locale_path(locale, '/investment/methodology')}\">{escape(copy['view_all_picks'])}</a></section>
-      <section aria-labelledby=\"why-pattaya-title\"><h2 id=\"why-pattaya-title\">{escape(copy['why_title'])}</h2><p>{escape(copy['why_intro'])}</p>{why_html}<a class=\"btn btn-secondary-hero btn-sm\" href=\"{_locale_path(locale, '/areas')}\">{escape(copy['area_guides'])}</a></section>
-      <section aria-labelledby=\"trust-title\"><h2 id=\"trust-title\">{escape(copy['trust_title'])}</h2><div class=\"grid-2\">{trust_html}</div><div class=\"cta-row\"><a class=\"btn btn-secondary-hero btn-sm\" href=\"{_locale_path(locale, '/about')}#team-section\">{escape(copy['team_link'])}</a><a class=\"btn btn-secondary-hero btn-sm\" href=\"{_locale_path(locale, '/about')}#process-section\">{escape(copy['process_link'])}</a></div></section>
-      <section aria-labelledby=\"insights-title\"><h2 id=\"insights-title\">{escape(copy['insights_title'])}</h2><p>{escape(copy['insights_sub'])}</p>{insights_html}<a class=\"btn btn-secondary-hero btn-sm\" href=\"{_locale_path(locale, '/insights')}\">{escape(copy['browse_insights'])}</a></section>
-      <section aria-labelledby=\"reviews-title\"><h2 id=\"reviews-title\">{escape(copy['reviews_title'])}</h2>{reviews_html}<a class=\"btn btn-secondary-hero btn-sm\" href=\"{_locale_path(locale, '/about')}#client-reviews\">{escape(copy['see_client_stories'])}</a></section>
-      <section aria-labelledby=\"video-title\"><h2 id=\"video-title\">{escape(copy['work_title'])}</h2><p>{escape(copy['work_sub'])}</p><div class=\"grid-2\">{video_html}</div><a class=\"btn btn-secondary-hero btn-sm\" href=\"{_locale_path(locale, '/about')}#work-proof\">{escape(copy['watch_more'])}</a></section>
-      <section aria-labelledby=\"consult-title\"><h2 id=\"consult-title\">{escape(copy['consult_title'])}</h2><p>{escape(consult_copy)}</p><form id=\"consultation-form\" class=\"card\" novalidate><label class=\"field\" for=\"name\"><span>{escape(copy['name'])}</span><input id=\"name\" name=\"name\" type=\"text\" required /></label><label class=\"field\" for=\"contact\"><span>{escape(copy['contact'])}</span><input id=\"contact\" name=\"contact\" type=\"text\" required /></label><label class=\"field\" for=\"budget\"><span>{escape(copy['budget'])}</span><select id=\"budget\" name=\"budget\" required><option value=\"\">{escape(copy['select_budget'])}</option><option value=\"lt_3m\">Below THB 3M</option><option value=\"3m_6m\">THB 3M - 6M</option><option value=\"6m_10m\">THB 6M - 10M</option><option value=\"gt_10m\">Above THB 10M</option></select></label><label class=\"field\" for=\"purpose\"><span>{escape(copy['purpose'])}</span><select id=\"purpose\" name=\"purpose\" required><option value=\"\">{escape(copy['select_purpose'])}</option><option value=\"invest\">Invest</option><option value=\"buy\">Buy</option><option value=\"rent\">Rent</option><option value=\"sell\">Sell</option></select></label><label class=\"field\" for=\"timeline\"><span>{escape(copy['timeline'])}</span><select id=\"timeline\" name=\"timeline\" required><option value=\"\">{escape(copy['select_timeline'])}</option><option value=\"0_3m\">0-3 months</option><option value=\"3_6m\">3-6 months</option><option value=\"6m_plus\">6+ months</option></select></label><div class=\"cta-row\"><button id=\"consult-submit\" class=\"btn\" type=\"submit\">{escape(hero_primary_label)}</button><a class=\"btn btn-secondary-hero btn-sm\" data-event=\"home_whatsapp_click\" data-cta-id=\"whatsapp_cta\" data-placement=\"bottom_form\" href=\"https://wa.me/66000000000\">WhatsApp</a><a class=\"btn btn-secondary-hero btn-sm\" href=\"https://line.me/R/ti/p/@flowbiz\">LINE</a></div><p class=\"muted\">{escape(consult_trust)}</p><p id=\"form-status\" class=\"muted\" role=\"status\" aria-live=\"polite\"></p><div id=\"form-loading\" class=\"state-loading\" hidden>{escape(copy['submitting'])}</div><div id=\"form-error\" class=\"state-error\" hidden>{escape(copy['submit_error'])}</div></form></section>
+      <section aria-labelledby=\"intent-title\"><h2 id=\"intent-title\">{escape(copy["path_title"])}</h2><div class=\"grid-2\">{card_html}</div></section>
+      <section aria-labelledby=\"featured-title\"><h2 id=\"featured-title\">{escape(copy["featured_title"])}</h2><p class=\"muted\">{escape(copy["featured_sub"])}</p><div class=\"grid-3\">{featured_html}</div><a class=\"btn btn-secondary-hero btn-sm\" data-event=\"home_browse_projects_click\" data-cta-id=\"featured_footer_cta\" data-placement=\"featured_footer\" href=\"{featured_href}\">{escape(hero_secondary_label)}</a></section>
+      <section aria-labelledby=\"investment-title\"><div style=\"display:flex;justify-content:space-between;gap:12px;align-items:center;flex-wrap:wrap\"><h2 id=\"investment-title\">{escape(copy["investment_title"])}</h2><a id=\"investment-methodology\" href=\"{_locale_path(locale, "/investment/methodology")}\">{escape(copy["methodology"])}</a></div><p class=\"muted\">{escape(copy["investment_disclaimer"])}</p><div class=\"grid-5\">{investment_html}</div><div id=\"methodology-note\" class=\"state-empty\">{escape(copy["methodology_note"])}</div><a class=\"btn btn-secondary-hero btn-sm\" data-event=\"home_investment_pick_click\" data-cta-id=\"investment_all_picks_cta\" data-item-id=\"all_picks\" data-placement=\"investment_footer\" href=\"{_locale_path(locale, "/investment/methodology")}\">{escape(copy["view_all_picks"])}</a></section>
+      <section aria-labelledby=\"why-pattaya-title\"><h2 id=\"why-pattaya-title\">{escape(copy["why_title"])}</h2><p>{escape(copy["why_intro"])}</p>{why_html}<a class=\"btn btn-secondary-hero btn-sm\" href=\"{_locale_path(locale, "/areas")}\">{escape(copy["area_guides"])}</a></section>
+      <section aria-labelledby=\"trust-title\"><h2 id=\"trust-title\">{escape(copy["trust_title"])}</h2><div class=\"grid-2\">{trust_html}</div><div class=\"cta-row\"><a class=\"btn btn-secondary-hero btn-sm\" href=\"{_locale_path(locale, "/about")}#team-section\">{escape(copy["team_link"])}</a><a class=\"btn btn-secondary-hero btn-sm\" href=\"{_locale_path(locale, "/about")}#process-section\">{escape(copy["process_link"])}</a></div></section>
+      <section aria-labelledby=\"insights-title\"><h2 id=\"insights-title\">{escape(copy["insights_title"])}</h2><p>{escape(copy["insights_sub"])}</p>{insights_html}<a class=\"btn btn-secondary-hero btn-sm\" href=\"{_locale_path(locale, "/insights")}\">{escape(copy["browse_insights"])}</a></section>
+      <section aria-labelledby=\"reviews-title\"><h2 id=\"reviews-title\">{escape(copy["reviews_title"])}</h2>{reviews_html}<a class=\"btn btn-secondary-hero btn-sm\" href=\"{_locale_path(locale, "/about")}#client-reviews\">{escape(copy["see_client_stories"])}</a></section>
+      <section aria-labelledby=\"video-title\"><h2 id=\"video-title\">{escape(copy["work_title"])}</h2><p>{escape(copy["work_sub"])}</p><div class=\"grid-2\">{video_html}</div><a class=\"btn btn-secondary-hero btn-sm\" href=\"{_locale_path(locale, "/about")}#work-proof\">{escape(copy["watch_more"])}</a></section>
+      <section aria-labelledby=\"consult-title\"><h2 id=\"consult-title\">{escape(copy["consult_title"])}</h2><p>{escape(consult_copy)}</p><form id=\"consultation-form\" class=\"card\" novalidate><label class=\"field\" for=\"name\"><span>{escape(copy["name"])}</span><input id=\"name\" name=\"name\" type=\"text\" required /></label><label class=\"field\" for=\"contact\"><span>{escape(copy["contact"])}</span><input id=\"contact\" name=\"contact\" type=\"text\" required /></label><label class=\"field\" for=\"budget\"><span>{escape(copy["budget"])}</span><select id=\"budget\" name=\"budget\" required><option value=\"\">{escape(copy["select_budget"])}</option><option value=\"lt_3m\">Below THB 3M</option><option value=\"3m_6m\">THB 3M - 6M</option><option value=\"6m_10m\">THB 6M - 10M</option><option value=\"gt_10m\">Above THB 10M</option></select></label><label class=\"field\" for=\"purpose\"><span>{escape(copy["purpose"])}</span><select id=\"purpose\" name=\"purpose\" required><option value=\"\">{escape(copy["select_purpose"])}</option><option value=\"invest\">Invest</option><option value=\"buy\">Buy</option><option value=\"rent\">Rent</option><option value=\"sell\">Sell</option></select></label><label class=\"field\" for=\"timeline\"><span>{escape(copy["timeline"])}</span><select id=\"timeline\" name=\"timeline\" required><option value=\"\">{escape(copy["select_timeline"])}</option><option value=\"0_3m\">0-3 months</option><option value=\"3_6m\">3-6 months</option><option value=\"6m_plus\">6+ months</option></select></label><div class=\"cta-row\"><button id=\"consult-submit\" class=\"btn\" type=\"submit\">{escape(hero_primary_label)}</button><a class=\"btn btn-secondary-hero btn-sm\" data-event=\"home_whatsapp_click\" data-cta-id=\"whatsapp_cta\" data-placement=\"bottom_form\" href=\"https://wa.me/66000000000\">WhatsApp</a><a class=\"btn btn-secondary-hero btn-sm\" href=\"https://line.me/R/ti/p/@flowbiz\">LINE</a></div><p class=\"muted\">{escape(consult_trust)}</p><p id=\"form-status\" class=\"muted\" role=\"status\" aria-live=\"polite\"></p><div id=\"form-loading\" class=\"state-loading\" hidden>{escape(copy["submitting"])}</div><div id=\"form-error\" class=\"state-error\" hidden>{escape(copy["submit_error"])}</div></form></section>
     </main>
-    <footer><div class=\"container\" style=\"display:grid;gap:12px\"><nav class=\"footer-links\"><a href=\"{_locale_path(locale, '/projects')}\">{escape(copy['footer_projects'])}</a><a href=\"{_locale_path(locale, '/areas')}\">{escape(copy['footer_areas'])}</a><a href=\"{_locale_path(locale, '/investment/methodology')}\">{escape(copy['footer_investment'])}</a><a href=\"{_locale_path(locale, '/about')}\">{escape(copy['footer_about'])}</a><a href=\"{_locale_path(locale, '/contact')}\">{escape(copy['footer_contact'])}</a></nav><nav class=\"footer-links\"><a href=\"{_locale_path(locale, '/privacy')}\">{escape(copy['privacy'])}</a><a href=\"{_locale_path(locale, '/terms')}\">{escape(copy['terms'])}</a><a href=\"{_locale_path(locale, '/cookies')}\">{escape(copy['cookies'])}</a></nav></div></footer>
+    <footer><div class=\"container\" style=\"display:grid;gap:12px\"><nav class=\"footer-links\"><a href=\"{_locale_path(locale, "/projects")}\">{escape(copy["footer_projects"])}</a><a href=\"{_locale_path(locale, "/areas")}\">{escape(copy["footer_areas"])}</a><a href=\"{_locale_path(locale, "/investment/methodology")}\">{escape(copy["footer_investment"])}</a><a href=\"{_locale_path(locale, "/about")}\">{escape(copy["footer_about"])}</a><a href=\"{_locale_path(locale, "/contact")}\">{escape(copy["footer_contact"])}</a></nav><nav class=\"footer-links\"><a href=\"{_locale_path(locale, "/privacy")}\">{escape(copy["privacy"])}</a><a href=\"{_locale_path(locale, "/terms")}\">{escape(copy["terms"])}</a><a href=\"{_locale_path(locale, "/cookies")}\">{escape(copy["cookies"])}</a></nav></div></footer>
     <script>
       (() => {{
         const locale = document.documentElement.lang || 'en';
@@ -783,7 +912,7 @@ def _render(locale: str, request: Request, db: Session, source: str, resolved: d
         const errorEl = document.getElementById('form-error');
         if (form instanceof HTMLFormElement) {{
           form.addEventListener('submit', async (event) => {{
-            event.preventDefault(); errorEl.hidden = true; loadingEl.hidden = false; statusEl.textContent = {copy['submitting']!r}; submitBtn.disabled = true;
+            event.preventDefault(); errorEl.hidden = true; loadingEl.hidden = false; statusEl.textContent = {copy["submitting"]!r}; submitBtn.disabled = true;
             const data = Object.fromEntries(new FormData(form).entries());
             const contact = String(data.contact || '').trim();
             const intent = String(data.purpose || 'general');
@@ -792,7 +921,7 @@ def _render(locale: str, request: Request, db: Session, source: str, resolved: d
             try {{
               await track('home_form_submit', {{ fields_present: fieldsPresent, intent, filter_values: intent ? [intent] : [], placement: 'consult_form', cta_id: 'consult_submit' }});
               await fetch('/v1/inquiries', {{ method: 'POST', headers: {{ 'content-type': 'application/json' }}, body: JSON.stringify({{ name: data.name, email: isEmail ? contact : null, phone: isEmail ? null : contact, message: 'Budget: ' + String(data.budget || '') + '; Purpose: ' + String(data.purpose || '') + '; Timeline: ' + String(data.timeline || ''), source_page: location.pathname, intent, budget_band: String(data.budget || ''), timeline: String(data.timeline || '') }}) }});
-              statusEl.textContent = {copy['submit_success']!r}; form.reset();
+              statusEl.textContent = {copy["submit_success"]!r}; form.reset();
             }} catch {{ errorEl.hidden = false; statusEl.textContent = ''; }} finally {{ loadingEl.hidden = true; submitBtn.disabled = false; }}
           }});
         }}
@@ -981,8 +1110,10 @@ def _property_media_path(prop: Property, *, request: Request) -> str:
 
 
 def _property_title_for_locale(prop: Property, locale: str) -> str:
-    return _localized_dict_text(getattr(prop, "title_i18n", None), locale) or str(prop.title or "").strip() or (
-        "Property" if locale == "en" else "อสังหา"
+    return (
+        _localized_dict_text(getattr(prop, "title_i18n", None), locale)
+        or str(prop.title or "").strip()
+        or ("Property" if locale == "en" else "อสังหา")
     )
 
 
@@ -1014,24 +1145,45 @@ def _render_projects_page(locale: str, request: Request, db: Session) -> HTMLRes
     ).all()
     cards = []
     for row in rows:
-        media = _safe_media_url(row.cover_image_url or row.hero_image_url, _DEFAULT_MEDIA_FALLBACK, request=request)
-        area_name = _area_name(db, row.area_id) or ("Area pending publication" if locale == "en" else "พื้นที่รอเผยแพร่")
-        price_text = _format_money(row.starting_price, fallback="Pricing pending publication" if locale == "en" else "รอเผยแพร่ราคา")
-        summary = _localized_dict_text(row.summary, locale) or ("Summary pending publication." if locale == "en" else "รอสรุปเนื้อหาเผยแพร่")
-        updated_text = row.updated_at.strftime("%Y-%m-%d") if row.updated_at else "-"
-        type_text = str(row.property_type or "").strip() or ("property" if locale == "en" else "อสังหา")
-        cards.append(
-            f"<article class=\"card\"><img class=\"media\" src=\"{escape(media)}\" alt=\"{escape(row.name)}\" width=\"640\" height=\"360\" /><h2>{escape(row.name)}</h2><p class=\"muted\">{escape(area_name)} • {escape(price_text)}</p><p class=\"muted\">{escape(type_text)} • Updated {escape(updated_text)}</p><p>{escape(summary)}</p><div class=\"grid\"><a class=\"btn\" href=\"/{locale}/projects/{escape(row.slug)}\">{'View project details' if locale == 'en' else 'ดูรายละเอียดโครงการ'}</a><a class=\"btn\" href=\"/{locale}/contact?intent=consultation&project={escape(row.slug)}\">{'Request details' if locale == 'en' else 'ขอรายละเอียด'}</a></div></article>"
+        media = _safe_media_url(
+            row.cover_image_url or row.hero_image_url, _DEFAULT_MEDIA_FALLBACK, request=request
         )
-    fallback = "Published projects are not available yet. Publish project records to populate this page." if locale == "en" else "ยังไม่มีโครงการที่เผยแพร่ โปรดเผยแพร่ข้อมูลโครงการเพื่อให้หน้านี้แสดงผล"
-    body_content = "".join(cards) if cards else f"<div class=\"card\">{escape(fallback)}</div>"
-    body = f"<section class=\"grid\">{body_content}</section>"
+        area_name = _area_name(db, row.area_id) or (
+            "Area pending publication" if locale == "en" else "พื้นที่รอเผยแพร่"
+        )
+        price_text = _format_money(
+            row.starting_price,
+            fallback="Pricing pending publication" if locale == "en" else "รอเผยแพร่ราคา",
+        )
+        summary = _localized_dict_text(row.summary, locale) or (
+            "Summary pending publication." if locale == "en" else "รอสรุปเนื้อหาเผยแพร่"
+        )
+        updated_text = row.updated_at.strftime("%Y-%m-%d") if row.updated_at else "-"
+        type_text = str(row.property_type or "").strip() or (
+            "property" if locale == "en" else "อสังหา"
+        )
+        cards.append(
+            f'<article class="card"><img class="media" src="{escape(media)}" alt="{escape(row.name)}" width="640" height="360" /><h2>{escape(row.name)}</h2><p class="muted">{escape(area_name)} • {escape(price_text)}</p><p class="muted">{escape(type_text)} • Updated {escape(updated_text)}</p><p>{escape(summary)}</p><div class="grid"><a class="btn" href="/{locale}/projects/{escape(row.slug)}">{"View project details" if locale == "en" else "ดูรายละเอียดโครงการ"}</a><a class="btn" href="/{locale}/contact?intent=consultation&project={escape(row.slug)}">{"Request details" if locale == "en" else "ขอรายละเอียด"}</a></div></article>'
+        )
+    fallback = (
+        "Published projects are not available yet. Publish project records to populate this page."
+        if locale == "en"
+        else "ยังไม่มีโครงการที่เผยแพร่ โปรดเผยแพร่ข้อมูลโครงการเพื่อให้หน้านี้แสดงผล"
+    )
+    body_content = "".join(cards) if cards else f'<div class="card">{escape(fallback)}</div>'
+    body = f'<section class="grid">{body_content}</section>'
     title = "Projects" if locale == "en" else "Projects"
-    intro = "Published projects from the current system with verified local media and direct consultation paths." if locale == "en" else "โครงการที่เผยแพร่จากระบบปัจจุบัน พร้อมสื่อภายในระบบและเส้นทางติดต่อที่ชัดเจน"
+    intro = (
+        "Published projects from the current system with verified local media and direct consultation paths."
+        if locale == "en"
+        else "โครงการที่เผยแพร่จากระบบปัจจุบัน พร้อมสื่อภายในระบบและเส้นทางติดต่อที่ชัดเจน"
+    )
     return HTMLResponse(_render_page_shell(locale, title=title, intro=intro, body=body))
 
 
-def _render_project_detail_page(locale: str, request: Request, db: Session, slug: str) -> HTMLResponse:
+def _render_project_detail_page(
+    locale: str, request: Request, db: Session, slug: str
+) -> HTMLResponse:
     row = db.scalar(
         select(Project).where(
             Project.deleted_at.is_(None),
@@ -1116,18 +1268,37 @@ def _render_project_detail_page(locale: str, request: Request, db: Session, slug
     if area_row is not None and area_row.deleted_at is not None:
         area_row = None
     developer_row = db.get(Developer, row.developer_id) if row.developer_id else None
-    if developer_row is not None and (developer_row.deleted_at is not None or developer_row.status != "active"):
+    if developer_row is not None and (
+        developer_row.deleted_at is not None or developer_row.status != "active"
+    ):
         developer_row = None
 
-    area_name = str(getattr(area_row, "name", "") or "").strip() or ("Area pending publication" if locale == "en" else "พื้นที่รอเผยแพร่")
-    area_href = f"/{locale}/areas/{area_row.slug}" if area_row is not None and area_row.status == "published" else f"/{locale}/areas"
-    developer_name = str(getattr(developer_row, "name", "") or "").strip() or ("Developer pending publication" if locale == "en" else "ผู้พัฒนารอเผยแพร่")
-    developer_href = f"/{locale}/developers/{developer_row.slug}" if developer_row is not None else f"/{locale}/developers"
+    area_name = str(getattr(area_row, "name", "") or "").strip() or (
+        "Area pending publication" if locale == "en" else "พื้นที่รอเผยแพร่"
+    )
+    area_href = (
+        f"/{locale}/areas/{area_row.slug}"
+        if area_row is not None and area_row.status == "published"
+        else f"/{locale}/areas"
+    )
+    developer_name = str(getattr(developer_row, "name", "") or "").strip() or (
+        "Developer pending publication" if locale == "en" else "ผู้พัฒนารอเผยแพร่"
+    )
+    developer_href = (
+        f"/{locale}/developers/{developer_row.slug}"
+        if developer_row is not None
+        else f"/{locale}/developers"
+    )
 
-    summary_text = _localized_dict_text(row.summary, locale) or ("Summary pending publication." if locale == "en" else "รอสรุปเนื้อหาเผยแพร่")
+    summary_text = _localized_dict_text(row.summary, locale) or (
+        "Summary pending publication." if locale == "en" else "รอสรุปเนื้อหาเผยแพร่"
+    )
     description_text = _localized_dict_text(row.description, locale) or ""
     status_text = str(row.status or "").strip() or "-"
-    price_text = _format_money(row.starting_price, fallback="Pricing pending publication" if locale == "en" else "รอเผยแพร่ราคา")
+    price_text = _format_money(
+        row.starting_price,
+        fallback="Pricing pending publication" if locale == "en" else "รอเผยแพร่ราคา",
+    )
 
     gallery = _project_gallery_paths(row, request=request)
     hero_media = gallery[0]
@@ -1144,9 +1315,18 @@ def _render_project_detail_page(locale: str, request: Request, db: Session, slug
     facts = _clean_text_list(row.quick_facts) or _project_facts(row)
     highlights = _clean_text_list(row.highlights)
     amenities = _clean_text_list(row.amenities)
-    facts_html = "".join(f"<li>{escape(item)}</li>" for item in facts) or f"<li>{escape(copy['empty_list'])}</li>"
-    highlights_html = "".join(f"<li>{escape(item)}</li>" for item in highlights) or f"<li>{escape(copy['empty_list'])}</li>"
-    amenities_html = "".join(f"<li>{escape(item)}</li>" for item in amenities) or f"<li>{escape(copy['empty_list'])}</li>"
+    facts_html = (
+        "".join(f"<li>{escape(item)}</li>" for item in facts)
+        or f"<li>{escape(copy['empty_list'])}</li>"
+    )
+    highlights_html = (
+        "".join(f"<li>{escape(item)}</li>" for item in highlights)
+        or f"<li>{escape(copy['empty_list'])}</li>"
+    )
+    amenities_html = (
+        "".join(f"<li>{escape(item)}</li>" for item in amenities)
+        or f"<li>{escape(copy['empty_list'])}</li>"
+    )
 
     location = row.location if isinstance(row.location, dict) else {}
     lat_raw = location.get("lat") or location.get("latitude")
@@ -1167,16 +1347,23 @@ def _render_project_detail_page(locale: str, request: Request, db: Session, slug
         map_href = f"https://maps.google.com/?q={lat:.6f},{lng:.6f}"
         location_body = (
             f"<p>{escape(location_context or area_name)}</p>"
-            f"<p class=\"muted\">{escape(f'Lat {lat:.6f}, Lng {lng:.6f}')}</p>"
-            f"<a class=\"btn\" href=\"{escape(map_href)}\" rel=\"noopener\" target=\"_blank\">{escape(copy['map_link'])}</a>"
+            f'<p class="muted">{escape(f"Lat {lat:.6f}, Lng {lng:.6f}")}</p>'
+            f'<a class="btn" href="{escape(map_href)}" rel="noopener" target="_blank">{escape(copy["map_link"])}</a>'
         )
     else:
-        location_body = f"<p>{escape(copy['location_fallback'])}</p><a class=\"btn\" href=\"{area_href}\">{escape(area_name)}</a>"
+        location_body = f'<p>{escape(copy["location_fallback"])}</p><a class="btn" href="{area_href}">{escape(area_name)}</a>'
 
     source_notes = row.source_notes if isinstance(row.source_notes, dict) else {}
     snapshot = row.investment_snapshot if isinstance(row.investment_snapshot, dict) else {}
-    investment_source = str(snapshot.get("source") or source_notes.get("investment_source") or source_notes.get("source") or "").strip()
-    investment_updated = str(snapshot.get("updated_at") or "").strip() or (row.claims_updated_at.date().isoformat() if row.claims_updated_at else "")
+    investment_source = str(
+        snapshot.get("source")
+        or source_notes.get("investment_source")
+        or source_notes.get("source")
+        or ""
+    ).strip()
+    investment_updated = str(snapshot.get("updated_at") or "").strip() or (
+        row.claims_updated_at.date().isoformat() if row.claims_updated_at else ""
+    )
     investment_rows = []
     for key, value in snapshot.items():
         if key in {"source", "updated_at"}:
@@ -1191,12 +1378,15 @@ def _render_project_detail_page(locale: str, request: Request, db: Session, slug
         if text:
             investment_rows.append((key.replace("_", " ").strip().title(), text))
     if investment_source and investment_updated:
-        metrics_html = "".join(f"<li><strong>{escape(label)}:</strong> {escape(value)}</li>" for label, value in investment_rows)
+        metrics_html = "".join(
+            f"<li><strong>{escape(label)}:</strong> {escape(value)}</li>"
+            for label, value in investment_rows
+        )
         if not metrics_html:
             metrics_html = f"<li>{escape(copy['empty_list'])}</li>"
         investment_body = (
-            f"<p class=\"muted\">{escape(copy['source'])}: {escape(investment_source)}</p>"
-            f"<p class=\"muted\">{escape(copy['updated'])}: {escape(investment_updated)}</p>"
+            f'<p class="muted">{escape(copy["source"])}: {escape(investment_source)}</p>'
+            f'<p class="muted">{escape(copy["updated"])}: {escape(investment_updated)}</p>'
             f"<ul>{metrics_html}</ul>"
         )
     else:
@@ -1218,17 +1408,23 @@ def _render_project_detail_page(locale: str, request: Request, db: Session, slug
         href = f"/{locale}/property/{escape(_property_ref_for_route(prop))}"
         media = _property_media_path(prop, request=request)
         return (
-            f"<article class=\"card\">"
-            f"<img class=\"media\" src=\"{escape(media)}\" alt=\"{escape(title)}\" width=\"640\" height=\"360\" loading=\"lazy\" />"
+            f'<article class="card">'
+            f'<img class="media" src="{escape(media)}" alt="{escape(title)}" width="640" height="360" loading="lazy" />'
             f"<h3>{escape(title)}</h3>"
-            f"<p class=\"muted\">{escape(price)}</p>"
-            f"<p class=\"muted\">{escape(stats)}</p>"
-            f"<a class=\"btn\" href=\"{href}\">{escape(copy['view_property'])}</a>"
+            f'<p class="muted">{escape(price)}</p>'
+            f'<p class="muted">{escape(stats)}</p>'
+            f'<a class="btn" href="{href}">{escape(copy["view_property"])}</a>'
             f"</article>"
         )
 
-    buy_html = "".join(_unit_card(item) for item in buy_units[:3]) or f"<div class=\"card\">{escape(copy['availability_fallback'])}</div>"
-    rent_html = "".join(_unit_card(item) for item in rent_units[:3]) or f"<div class=\"card\">{escape(copy['availability_fallback'])}</div>"
+    buy_html = (
+        "".join(_unit_card(item) for item in buy_units[:3])
+        or f'<div class="card">{escape(copy["availability_fallback"])}</div>'
+    )
+    rent_html = (
+        "".join(_unit_card(item) for item in rent_units[:3])
+        or f'<div class="card">{escape(copy["availability_fallback"])}</div>'
+    )
 
     related_filters = []
     if row.area_id is not None:
@@ -1242,46 +1438,59 @@ def _render_project_detail_page(locale: str, request: Request, db: Session, slug
     )
     if related_filters:
         related_projects_query = related_projects_query.where(or_(*related_filters))
-    related_projects = db.scalars(related_projects_query.order_by(desc(Project.updated_at)).limit(4)).all()
-    related_projects_html = "".join(
-        (
-            f"<article class=\"card\">"
-            f"<img class=\"media\" src=\"{escape(_safe_media_url(item.cover_image_url or item.hero_image_url, _DEFAULT_MEDIA_FALLBACK, request=request))}\" alt=\"{escape(item.name)}\" width=\"640\" height=\"360\" loading=\"lazy\" />"
-            f"<h3>{escape(item.name)}</h3>"
-            f"<p class=\"muted\">{escape(_format_money(item.starting_price, fallback='-'))}</p>"
-            f"<a class=\"btn\" href=\"/{locale}/projects/{escape(item.slug)}\">{escape(copy['view_project'])}</a>"
-            f"</article>"
+    related_projects = db.scalars(
+        related_projects_query.order_by(desc(Project.updated_at)).limit(4)
+    ).all()
+    related_projects_html = (
+        "".join(
+            (
+                f'<article class="card">'
+                f'<img class="media" src="{escape(_safe_media_url(item.cover_image_url or item.hero_image_url, _DEFAULT_MEDIA_FALLBACK, request=request))}" alt="{escape(item.name)}" width="640" height="360" loading="lazy" />'
+                f"<h3>{escape(item.name)}</h3>"
+                f'<p class="muted">{escape(_format_money(item.starting_price, fallback="-"))}</p>'
+                f'<a class="btn" href="/{locale}/projects/{escape(item.slug)}">{escape(copy["view_project"])}</a>'
+                f"</article>"
+            )
+            for item in related_projects
         )
-        for item in related_projects
-    ) or f"<div class=\"card\">{escape(copy['related_projects_fallback'])}</div>"
+        or f'<div class="card">{escape(copy["related_projects_fallback"])}</div>'
+    )
 
     related_properties: list[Property] = []
     seen_property_ids = {str(item.id) for item in unit_rows}
     if row.area_id is not None or row.developer_id is not None:
         candidates = db.scalars(
-            select(Property).where(Property.status == "active").order_by(desc(Property.updated_at)).limit(60)
+            select(Property)
+            .where(Property.status == "active")
+            .order_by(desc(Property.updated_at))
+            .limit(60)
         ).all()
         for item in candidates:
             if str(item.id) in seen_property_ids:
                 continue
             matches_area = row.area_id is not None and item.area_id == row.area_id
-            matches_developer = row.developer_id is not None and item.developer_id == row.developer_id
+            matches_developer = (
+                row.developer_id is not None and item.developer_id == row.developer_id
+            )
             if not (matches_area or matches_developer):
                 continue
             related_properties.append(item)
             seen_property_ids.add(str(item.id))
             if len(related_properties) == 4:
                 break
-    related_properties_html = "".join(_unit_card(item) for item in related_properties) or f"<div class=\"card\">{escape(copy['related_properties_fallback'])}</div>"
+    related_properties_html = (
+        "".join(_unit_card(item) for item in related_properties)
+        or f'<div class="card">{escape(copy["related_properties_fallback"])}</div>'
+    )
 
     faq_items = _project_faq_items(row, locale)
     faq_html = ""
     if faq_items:
         faq_rows = "".join(
-            f"<details class=\"card\"><summary><strong>{escape(question)}</strong></summary><p>{escape(answer)}</p></details>"
+            f'<details class="card"><summary><strong>{escape(question)}</strong></summary><p>{escape(answer)}</p></details>'
             for question, answer in faq_items
         )
-        faq_html = f"<section id=\"project-faq\" class=\"stack\"><h2>{escape(copy['faq'])}</h2>{faq_rows}</section>"
+        faq_html = f'<section id="project-faq" class="stack"><h2>{escape(copy["faq"])}</h2>{faq_rows}</section>'
 
     project_url = f"/{locale}/projects/{row.slug}"
     schema_hooks: list[tuple[str, dict]] = []
@@ -1326,15 +1535,15 @@ def _render_project_detail_page(locale: str, request: Request, db: Session, slug
 
     detail_intro = description_text or summary_text
     body = (
-        f"<section id=\"project-hero\" class=\"card\"><img class=\"media\" src=\"{escape(hero_media)}\" alt=\"{escape(row.name)}\" width=\"1280\" height=\"720\" loading=\"eager\" /><h2>{escape(row.name)}</h2><p>{escape(summary_text)}</p>"
-        f"<div class=\"grid\"><a class=\"btn\" href=\"/{locale}/contact?intent=consultation&project={escape(row.slug)}\">{escape(copy['request_consultation'])}</a><a class=\"btn\" href=\"/{locale}/contact?intent=viewing&project={escape(row.slug)}\">{escape(copy['book_viewing'])}</a></div></section>"
-        f"<section id=\"project-gallery\" class=\"stack\"><h2>{escape(copy['gallery'])}</h2>{gallery_note_html}<section class=\"grid\"><article class=\"card\"><img class=\"media\" src=\"{escape(hero_media)}\" alt=\"{escape(row.name)}\" width=\"1280\" height=\"720\" loading=\"lazy\" /></article>{gallery_extra}</section></section>"
-        f"<section id=\"project-summary\" class=\"card\"><h2>{escape(copy['summary_title'])}</h2><p><strong>{escape(copy['area'])}:</strong> <a href=\"{area_href}\">{escape(area_name)}</a></p><p><strong>{escape(copy['developer'])}:</strong> <a href=\"{developer_href}\">{escape(developer_name)}</a></p><p><strong>{escape(copy['status'])}:</strong> {escape(status_text)}</p><p><strong>{escape(copy['starting_price'])}:</strong> {escape(price_text)}</p>{f'<p>{escape(description_text)}</p>' if description_text else ''}</section>"
-        f"<section id=\"project-facts\" class=\"grid\"><article class=\"card\"><h2>{escape(copy['facts'])}</h2><ul>{facts_html}</ul></article><article class=\"card\"><h2>{escape(copy['highlights'])}</h2><ul>{highlights_html}</ul></article><article class=\"card\"><h2>{escape(copy['amenities'])}</h2><ul>{amenities_html}</ul></article></section>"
-        f"<section id=\"project-location\" class=\"card\"><h2>{escape(copy['location'])}</h2>{location_body}</section>"
-        f"<section id=\"project-investment\" class=\"card\"><h2>{escape(copy['investment'])}</h2>{investment_body}</section>"
-        f"<section id=\"project-availability\" class=\"stack\"><h2>{escape(copy['availability'])}</h2><article class=\"card\"><h3>{escape(copy['buy_units'])}</h3><section class=\"grid\">{buy_html}</section></article><article class=\"card\"><h3>{escape(copy['rent_units'])}</h3><section class=\"grid\">{rent_html}</section></article></section>"
-        f"<section id=\"project-related\" class=\"stack\"><article><h2>{escape(copy['related_projects'])}</h2><section class=\"grid\">{related_projects_html}</section></article><article><h2>{escape(copy['related_properties'])}</h2><section class=\"grid\">{related_properties_html}</section></article></section>"
+        f'<section id="project-hero" class="card"><img class="media" src="{escape(hero_media)}" alt="{escape(row.name)}" width="1280" height="720" loading="eager" /><h2>{escape(row.name)}</h2><p>{escape(summary_text)}</p>'
+        f'<div class="grid"><a class="btn" href="/{locale}/contact?intent=consultation&project={escape(row.slug)}">{escape(copy["request_consultation"])}</a><a class="btn" href="/{locale}/contact?intent=viewing&project={escape(row.slug)}">{escape(copy["book_viewing"])}</a></div></section>'
+        f'<section id="project-gallery" class="stack"><h2>{escape(copy["gallery"])}</h2>{gallery_note_html}<section class="grid"><article class="card"><img class="media" src="{escape(hero_media)}" alt="{escape(row.name)}" width="1280" height="720" loading="lazy" /></article>{gallery_extra}</section></section>'
+        f'<section id="project-summary" class="card"><h2>{escape(copy["summary_title"])}</h2><p><strong>{escape(copy["area"])}:</strong> <a href="{area_href}">{escape(area_name)}</a></p><p><strong>{escape(copy["developer"])}:</strong> <a href="{developer_href}">{escape(developer_name)}</a></p><p><strong>{escape(copy["status"])}:</strong> {escape(status_text)}</p><p><strong>{escape(copy["starting_price"])}:</strong> {escape(price_text)}</p>{f"<p>{escape(description_text)}</p>" if description_text else ""}</section>'
+        f'<section id="project-facts" class="grid"><article class="card"><h2>{escape(copy["facts"])}</h2><ul>{facts_html}</ul></article><article class="card"><h2>{escape(copy["highlights"])}</h2><ul>{highlights_html}</ul></article><article class="card"><h2>{escape(copy["amenities"])}</h2><ul>{amenities_html}</ul></article></section>'
+        f'<section id="project-location" class="card"><h2>{escape(copy["location"])}</h2>{location_body}</section>'
+        f'<section id="project-investment" class="card"><h2>{escape(copy["investment"])}</h2>{investment_body}</section>'
+        f'<section id="project-availability" class="stack"><h2>{escape(copy["availability"])}</h2><article class="card"><h3>{escape(copy["buy_units"])}</h3><section class="grid">{buy_html}</section></article><article class="card"><h3>{escape(copy["rent_units"])}</h3><section class="grid">{rent_html}</section></article></section>'
+        f'<section id="project-related" class="stack"><article><h2>{escape(copy["related_projects"])}</h2><section class="grid">{related_projects_html}</section></article><article><h2>{escape(copy["related_properties"])}</h2><section class="grid">{related_properties_html}</section></article></section>'
         f"{faq_html}{schema_html}"
     )
     title = row.name
@@ -1374,24 +1583,23 @@ def _render_smart_finder_page(locale: str, request: Request) -> HTMLResponse:
             else "เตรียมบริบทด้านราคา ข้อมูลทรัพย์ และความพร้อมก่อนปล่อยขาย",
         ),
     ]
-    selected_copy = next((description for key, _, description in intents if key == selected_intent), None)
-    selection_note = (
-        selected_copy
-        or (
-            "Choose the path that matches your goal, then continue to consultation or published inventory."
-            if locale == "en"
-            else "เลือกเส้นทางที่ตรงกับเป้าหมายของคุณ แล้วไปต่อที่ consultation หรือ inventory ที่เผยแพร่"
-        )
+    selected_copy = next(
+        (description for key, _, description in intents if key == selected_intent), None
+    )
+    selection_note = selected_copy or (
+        "Choose the path that matches your goal, then continue to consultation or published inventory."
+        if locale == "en"
+        else "เลือกเส้นทางที่ตรงกับเป้าหมายของคุณ แล้วไปต่อที่ consultation หรือ inventory ที่เผยแพร่"
     )
     cards = "".join(
-        f"<article class=\"card\"><h2>{escape(label)}</h2><p>{escape(description)}</p><a class=\"btn\" href=\"/{locale}/smart-finder?intent={escape(key)}\">{'Use this path' if locale == 'en' else 'เลือกเส้นทางนี้'}</a></article>"
+        f'<article class="card"><h2>{escape(label)}</h2><p>{escape(description)}</p><a class="btn" href="/{locale}/smart-finder?intent={escape(key)}">{"Use this path" if locale == "en" else "เลือกเส้นทางนี้"}</a></article>'
         for key, label, description in intents
     )
     body = (
-        f"<section class=\"card\"><h2>{'Smart Finder' if locale == 'en' else 'Smart Finder'}</h2><p>{escape(selection_note)}</p>"
-        f"<div class=\"grid\"><a class=\"btn\" href=\"/{locale}#consult-title\">{'Request consultation' if locale == 'en' else 'ขอคำปรึกษา'}</a>"
-        f"<a class=\"btn\" href=\"/{locale}/projects\">{'Browse published projects' if locale == 'en' else 'ดูโครงการที่เผยแพร่'}</a></div></section>"
-        f"<section class=\"grid\">{cards}</section>"
+        f'<section class="card"><h2>{"Smart Finder" if locale == "en" else "Smart Finder"}</h2><p>{escape(selection_note)}</p>'
+        f'<div class="grid"><a class="btn" href="/{locale}#consult-title">{"Request consultation" if locale == "en" else "ขอคำปรึกษา"}</a>'
+        f'<a class="btn" href="/{locale}/projects">{"Browse published projects" if locale == "en" else "ดูโครงการที่เผยแพร่"}</a></div></section>'
+        f'<section class="grid">{cards}</section>'
     )
     title = "Smart Finder"
     intro = (
@@ -1603,7 +1811,9 @@ def _area_content_text(content: object, locale: str, keys: list[str]) -> str:
 
 
 def _area_metrics_cadence(content: object, locale: str) -> str:
-    return _area_content_text(content, locale, ["metrics_update_cadence", "update_cadence", "cadence"])
+    return _area_content_text(
+        content, locale, ["metrics_update_cadence", "update_cadence", "cadence"]
+    )
 
 
 def _has_verified_area_metrics(source_note: str, cadence: str, stat: AreaStatistic | None) -> bool:
@@ -1628,7 +1838,9 @@ def _render_area_card(
     stat: AreaStatistic | None,
     project_count: int,
 ) -> str:
-    media = _safe_media_url(row.cover_image_url or row.hero_image_url, _DEFAULT_MEDIA_FALLBACK, request=request)
+    media = _safe_media_url(
+        row.cover_image_url or row.hero_image_url, _DEFAULT_MEDIA_FALLBACK, request=request
+    )
     summary = _localized_dict_text(row.summary, locale) or copy["listing_summary_pending"]
     source_note = " ".join(str(row.source_note or "").split())
     cadence_text = _area_metrics_cadence(row.content, locale)
@@ -1638,11 +1850,17 @@ def _render_area_card(
     if metrics_verified and stat is not None:
         total_projects = stat.total_projects if stat.total_projects is not None else project_count
         if total_projects:
-            metric_rows.append(f"<li><strong>{escape(copy['listing_metric_projects'])}:</strong> {int(total_projects):,}</li>")
+            metric_rows.append(
+                f"<li><strong>{escape(copy['listing_metric_projects'])}:</strong> {int(total_projects):,}</li>"
+            )
         if stat.avg_price_sqm is not None:
-            metric_rows.append(f"<li><strong>{escape(copy['listing_metric_price'])}:</strong> {escape(_format_money(stat.avg_price_sqm, fallback='-'))}</li>")
+            metric_rows.append(
+                f"<li><strong>{escape(copy['listing_metric_price'])}:</strong> {escape(_format_money(stat.avg_price_sqm, fallback='-'))}</li>"
+            )
         if stat.avg_roi_percent is not None:
-            metric_rows.append(f"<li><strong>{escape(copy['listing_metric_roi'])}:</strong> {float(stat.avg_roi_percent):.1f}%</li>")
+            metric_rows.append(
+                f"<li><strong>{escape(copy['listing_metric_roi'])}:</strong> {float(stat.avg_roi_percent):.1f}%</li>"
+            )
         if stat.updated_at is not None:
             metric_rows.append(
                 f"<li><strong>{escape(copy['listing_metric_updated'])}:</strong> {escape(stat.updated_at.strftime('%Y-%m-%d'))}</li>"
@@ -1654,16 +1872,16 @@ def _render_area_card(
     browse_href = f"/{locale}/projects?{urlencode({'area': row.slug})}"
     consult_href = f"/{locale}/contact?{urlencode({'intent': 'consultation', 'area': row.slug})}"
     source_html = (
-        f"<p class=\"muted\"><strong>{escape(copy['stats_source'])}:</strong> {escape(source_note)}</p>"
+        f'<p class="muted"><strong>{escape(copy["stats_source"])}:</strong> {escape(source_note)}</p>'
         if source_note
-        else f"<p class=\"muted\">{escape(copy['listing_source_guard'])}</p>"
+        else f'<p class="muted">{escape(copy["listing_source_guard"])}</p>'
     )
     return (
-        f"<article class=\"card\"><img class=\"media\" src=\"{escape(media)}\" alt=\"{escape(row.name)}\" width=\"640\" height=\"360\" loading=\"lazy\" />"
-        f"<h2>{escape(row.name)}</h2><p>{escape(summary)}</p><ul class=\"facts\">{''.join(metric_rows)}</ul>{source_html}"
-        f"<div class=\"cta-row\"><a class=\"btn\" data-event=\"area_card_click\" data-placement=\"area_guide_grid\" data-cta-id=\"area_card_primary\" data-card-slug=\"{escape(row.slug)}\" data-area-slug=\"{escape(row.slug)}\" data-loading-target=\"area-guide-loading\" href=\"{detail_href}\">{escape(copy['listing_view_area'])}</a>"
-        f"<a class=\"btn btn-secondary-hero\" data-event=\"area_cta_click\" data-placement=\"area_guide_grid\" data-cta-id=\"area_card_browse_projects\" data-area-slug=\"{escape(row.slug)}\" data-loading-target=\"area-guide-loading\" href=\"{browse_href}\">{escape(copy['listing_browse_projects'])}</a>"
-        f"<a class=\"btn btn-secondary-hero\" data-event=\"area_cta_click\" data-placement=\"area_guide_grid\" data-cta-id=\"area_card_consult\" data-area-slug=\"{escape(row.slug)}\" data-loading-target=\"area-guide-loading\" href=\"{consult_href}\">{escape(copy['listing_consult'])}</a></div></article>"
+        f'<article class="card"><img class="media" src="{escape(media)}" alt="{escape(row.name)}" width="640" height="360" loading="lazy" />'
+        f'<h2>{escape(row.name)}</h2><p>{escape(summary)}</p><ul class="facts">{"".join(metric_rows)}</ul>{source_html}'
+        f'<div class="cta-row"><a class="btn" data-event="area_card_click" data-placement="area_guide_grid" data-cta-id="area_card_primary" data-card-slug="{escape(row.slug)}" data-area-slug="{escape(row.slug)}" data-loading-target="area-guide-loading" href="{detail_href}">{escape(copy["listing_view_area"])}</a>'
+        f'<a class="btn btn-secondary-hero" data-event="area_cta_click" data-placement="area_guide_grid" data-cta-id="area_card_browse_projects" data-area-slug="{escape(row.slug)}" data-loading-target="area-guide-loading" href="{browse_href}">{escape(copy["listing_browse_projects"])}</a>'
+        f'<a class="btn btn-secondary-hero" data-event="area_cta_click" data-placement="area_guide_grid" data-cta-id="area_card_consult" data-area-slug="{escape(row.slug)}" data-loading-target="area-guide-loading" href="{consult_href}">{escape(copy["listing_consult"])}</a></div></article>'
     )
 
 
@@ -1678,96 +1896,150 @@ def _render_area_detail_body(
     projects: list[Project],
     properties: list[Property],
 ) -> str:
-    media = _safe_media_url(row.cover_image_url or row.hero_image_url, _DEFAULT_MEDIA_FALLBACK, request=request)
+    media = _safe_media_url(
+        row.cover_image_url or row.hero_image_url, _DEFAULT_MEDIA_FALLBACK, request=request
+    )
     source_note = " ".join(str(row.source_note or "").split())
     cadence_text = _area_metrics_cadence(row.content, locale)
     metrics_verified = _has_verified_area_metrics(source_note, cadence_text, stat)
 
-    why_text = _area_content_text(
-        row.content,
-        locale,
-        ["why_live_invest", "why_live_here", "why_invest_here", "why", "investment_thesis", "live_invest"],
-    ) or copy["why_fallback"]
-    transport_text = _area_content_text(row.content, locale, ["transport", "transport_proximity"]) or copy["proximity_transport_pending"]
-    lifestyle_text = _area_content_text(row.content, locale, ["lifestyle", "lifestyle_proximity"]) or copy["proximity_lifestyle_pending"]
-    beach_text = _area_content_text(row.content, locale, ["beach", "beach_proximity"]) or copy["proximity_beach_pending"]
+    why_text = (
+        _area_content_text(
+            row.content,
+            locale,
+            [
+                "why_live_invest",
+                "why_live_here",
+                "why_invest_here",
+                "why",
+                "investment_thesis",
+                "live_invest",
+            ],
+        )
+        or copy["why_fallback"]
+    )
+    transport_text = (
+        _area_content_text(row.content, locale, ["transport", "transport_proximity"])
+        or copy["proximity_transport_pending"]
+    )
+    lifestyle_text = (
+        _area_content_text(row.content, locale, ["lifestyle", "lifestyle_proximity"])
+        or copy["proximity_lifestyle_pending"]
+    )
+    beach_text = (
+        _area_content_text(row.content, locale, ["beach", "beach_proximity"])
+        or copy["proximity_beach_pending"]
+    )
 
-    project_cards = "".join(
-        f"<article class=\"card\"><img class=\"media\" src=\"{escape(_safe_media_url(item.cover_image_url or item.hero_image_url, _DEFAULT_MEDIA_FALLBACK, request=request))}\" alt=\"{escape(item.name)}\" width=\"640\" height=\"360\" loading=\"lazy\" /><h3>{escape(item.name)}</h3><p class=\"muted\">{escape(_format_money(item.starting_price, fallback='-'))}</p><a class=\"btn\" data-event=\"area_cta_click\" data-placement=\"area_detail_projects\" data-cta-id=\"area_project_card\" data-area-slug=\"{escape(row.slug)}\" data-loading-target=\"area-detail-loading\" href=\"/{locale}/projects/{escape(item.slug)}\">{escape(copy['projects_cta'])}</a></article>"
-        for item in projects
-    ) or f"<div class=\"card\">{escape(copy['projects_empty'])}</div>"
+    project_cards = (
+        "".join(
+            f'<article class="card"><img class="media" src="{escape(_safe_media_url(item.cover_image_url or item.hero_image_url, _DEFAULT_MEDIA_FALLBACK, request=request))}" alt="{escape(item.name)}" width="640" height="360" loading="lazy" /><h3>{escape(item.name)}</h3><p class="muted">{escape(_format_money(item.starting_price, fallback="-"))}</p><a class="btn" data-event="area_cta_click" data-placement="area_detail_projects" data-cta-id="area_project_card" data-area-slug="{escape(row.slug)}" data-loading-target="area-detail-loading" href="/{locale}/projects/{escape(item.slug)}">{escape(copy["projects_cta"])}</a></article>'
+            for item in projects
+        )
+        or f'<div class="card">{escape(copy["projects_empty"])}</div>'
+    )
 
-    property_cards = "".join(
-        f"<article class=\"card\"><img class=\"media\" src=\"{escape(_safe_media_url(item.cover_image_url or item.cover_image, _DEFAULT_MEDIA_FALLBACK, request=request))}\" alt=\"{escape(_property_title_for_locale(item, locale))}\" width=\"640\" height=\"360\" loading=\"lazy\" /><h3>{escape(_property_title_for_locale(item, locale))}</h3><p class=\"muted\">{escape(_format_money(item.price, fallback='-'))} • {escape(' • '.join(_localized_property_stats(item, locale)) or copy['properties_stats_pending'])}</p><a class=\"btn\" data-event=\"area_cta_click\" data-placement=\"area_detail_properties\" data-cta-id=\"area_property_card\" data-area-slug=\"{escape(row.slug)}\" data-loading-target=\"area-detail-loading\" href=\"/{locale}/property/{escape(item.slug or str(item.id))}\">{escape(copy['properties_cta'])}</a></article>"
-        for item in properties
-    ) or f"<div class=\"card\">{escape(copy['properties_empty'])}</div>"
+    property_cards = (
+        "".join(
+            f'<article class="card"><img class="media" src="{escape(_safe_media_url(item.cover_image_url or item.cover_image, _DEFAULT_MEDIA_FALLBACK, request=request))}" alt="{escape(_property_title_for_locale(item, locale))}" width="640" height="360" loading="lazy" /><h3>{escape(_property_title_for_locale(item, locale))}</h3><p class="muted">{escape(_format_money(item.price, fallback="-"))} • {escape(" • ".join(_localized_property_stats(item, locale)) or copy["properties_stats_pending"])}</p><a class="btn" data-event="area_cta_click" data-placement="area_detail_properties" data-cta-id="area_property_card" data-area-slug="{escape(row.slug)}" data-loading-target="area-detail-loading" href="/{locale}/property/{escape(item.slug or str(item.id))}">{escape(copy["properties_cta"])}</a></article>'
+            for item in properties
+        )
+        or f'<div class="card">{escape(copy["properties_empty"])}</div>'
+    )
 
     stats_rows: list[str] = []
     stats_meta: list[str] = []
     if metrics_verified and stat is not None:
         if stat.avg_price_sqm is not None:
-            stats_rows.append(f"<li><strong>{escape(copy['stats_avg_price'])}:</strong> {escape(_format_money(stat.avg_price_sqm, fallback='-'))}</li>")
+            stats_rows.append(
+                f"<li><strong>{escape(copy['stats_avg_price'])}:</strong> {escape(_format_money(stat.avg_price_sqm, fallback='-'))}</li>"
+            )
         if stat.avg_rent_monthly is not None:
-            stats_rows.append(f"<li><strong>{escape(copy['stats_avg_rent'])}:</strong> {escape(_format_money(stat.avg_rent_monthly, fallback='-'))}</li>")
+            stats_rows.append(
+                f"<li><strong>{escape(copy['stats_avg_rent'])}:</strong> {escape(_format_money(stat.avg_rent_monthly, fallback='-'))}</li>"
+            )
         if stat.avg_roi_percent is not None:
-            stats_rows.append(f"<li><strong>{escape(copy['stats_avg_roi'])}:</strong> {float(stat.avg_roi_percent):.1f}%</li>")
+            stats_rows.append(
+                f"<li><strong>{escape(copy['stats_avg_roi'])}:</strong> {float(stat.avg_roi_percent):.1f}%</li>"
+            )
         if stat.total_projects is not None:
-            stats_rows.append(f"<li><strong>{escape(copy['stats_total_projects'])}:</strong> {int(stat.total_projects):,}</li>")
+            stats_rows.append(
+                f"<li><strong>{escape(copy['stats_total_projects'])}:</strong> {int(stat.total_projects):,}</li>"
+            )
         if stat.total_units is not None:
-            stats_rows.append(f"<li><strong>{escape(copy['stats_total_units'])}:</strong> {int(stat.total_units):,}</li>")
+            stats_rows.append(
+                f"<li><strong>{escape(copy['stats_total_units'])}:</strong> {int(stat.total_units):,}</li>"
+            )
         if source_note:
-            stats_meta.append(f"<p class=\"muted\"><strong>{escape(copy['stats_source'])}:</strong> {escape(source_note)}</p>")
+            stats_meta.append(
+                f'<p class="muted"><strong>{escape(copy["stats_source"])}:</strong> {escape(source_note)}</p>'
+            )
         if stat.updated_at is not None:
-            stats_meta.append(f"<p class=\"muted\"><strong>{escape(copy['stats_updated'])}:</strong> {escape(stat.updated_at.strftime('%Y-%m-%d'))}</p>")
+            stats_meta.append(
+                f'<p class="muted"><strong>{escape(copy["stats_updated"])}:</strong> {escape(stat.updated_at.strftime("%Y-%m-%d"))}</p>'
+            )
         if stat.as_of_date is not None:
-            stats_meta.append(f"<p class=\"muted\"><strong>{escape(copy['stats_as_of'])}:</strong> {escape(stat.as_of_date.isoformat())}</p>")
-        stats_meta.append(f"<p class=\"muted\"><strong>{escape(copy['stats_cadence'])}:</strong> {escape(cadence_text)}</p>")
+            stats_meta.append(
+                f'<p class="muted"><strong>{escape(copy["stats_as_of"])}:</strong> {escape(stat.as_of_date.isoformat())}</p>'
+            )
+        stats_meta.append(
+            f'<p class="muted"><strong>{escape(copy["stats_cadence"])}:</strong> {escape(cadence_text)}</p>'
+        )
     if not stats_rows:
         stats_rows = [f"<li>{escape(copy['stats_pending'])}</li>"]
     if not stats_meta:
-        stats_meta = [f"<p class=\"muted\">{escape(copy['stats_todo'])}</p>"]
+        stats_meta = [f'<p class="muted">{escape(copy["stats_todo"])}</p>']
 
     lat, lng = _extract_lat_lng(row.map_center if isinstance(row.map_center, dict) else {})
     if lat is not None and lng is not None:
         map_html = (
-            f"<p class=\"muted\">{escape(f'Lat {lat:.6f}, Lng {lng:.6f}')}</p>"
-            f"<a class=\"btn\" data-event=\"area_cta_click\" data-placement=\"area_detail_overview\" data-cta-id=\"area_open_map\" data-area-slug=\"{escape(row.slug)}\" href=\"https://maps.google.com/?q={lat:.6f},{lng:.6f}\" target=\"_blank\" rel=\"noopener\">{escape(copy['overview_open_map'])}</a>"
+            f'<p class="muted">{escape(f"Lat {lat:.6f}, Lng {lng:.6f}")}</p>'
+            f'<a class="btn" data-event="area_cta_click" data-placement="area_detail_overview" data-cta-id="area_open_map" data-area-slug="{escape(row.slug)}" href="https://maps.google.com/?q={lat:.6f},{lng:.6f}" target="_blank" rel="noopener">{escape(copy["overview_open_map"])}</a>'
         )
     else:
-        map_html = f"<p class=\"muted\">{escape(copy['overview_map_pending'])}</p>"
+        map_html = f'<p class="muted">{escape(copy["overview_map_pending"])}</p>'
 
     consult_href = f"/{locale}/contact?{urlencode({'intent': 'consultation', 'area': row.slug})}"
     browse_href = f"/{locale}/buy?{urlencode({'area': row.slug})}"
     breadcrumb = (
-        f"<nav id=\"area-breadcrumb\" class=\"card\" aria-label=\"Breadcrumb\"><ol class=\"crumbs\">"
-        f"<li><a href=\"/{locale}\">{escape(copy['breadcrumb_home'])}</a></li>"
-        f"<li><a href=\"/{locale}/area-guide\">{escape(copy['breadcrumb_hub'])}</a></li>"
-        f"<li aria-current=\"page\">{escape(row.name)}</li></ol></nav>"
+        f'<nav id="area-breadcrumb" class="card" aria-label="Breadcrumb"><ol class="crumbs">'
+        f'<li><a href="/{locale}">{escape(copy["breadcrumb_home"])}</a></li>'
+        f'<li><a href="/{locale}/area-guide">{escape(copy["breadcrumb_hub"])}</a></li>'
+        f'<li aria-current="page">{escape(row.name)}</li></ol></nav>'
     )
     return (
         f"{_area_page_styles()}"
         f"{breadcrumb}"
-        f"<div id=\"area-detail-loading\" class=\"state-loading\" role=\"status\" aria-live=\"polite\" hidden>{escape(copy['loading'])}</div>"
-        f"<div id=\"area-detail-runtime-error\" class=\"state-error\" hidden>{escape(copy['runtime_error'])}</div>"
-        f"<section id=\"area-overview\" class=\"card area-overview\"><article class=\"area-meta\"><h2>{escape(copy['overview_title'])}</h2><img class=\"media\" src=\"{escape(media)}\" alt=\"{escape(row.name)}\" width=\"1280\" height=\"720\" loading=\"lazy\" /><p>{escape(summary)}</p></article><article class=\"area-meta\"><h3>{escape(copy['overview_map'])}</h3>{map_html}</article></section>"
-        f"<section id=\"area-why-live-invest\" class=\"card\"><h2>{escape(copy['why_title'])}</h2><p>{escape(why_text)}</p></section>"
-        f"<section id=\"area-stats\" class=\"card\"><h2>{escape(copy['stats_title'])}</h2><ul class=\"facts\">{''.join(stats_rows)}</ul>{''.join(stats_meta)}</section>"
-        f"<section id=\"area-featured-projects\" class=\"stack\"><h2>{escape(copy['projects_title'])}</h2><div class=\"area-grid area-grid-3\">{project_cards}</div></section>"
-        f"<section id=\"area-featured-properties\" class=\"stack\"><h2>{escape(copy['properties_title'])}</h2><div class=\"area-grid area-grid-3\">{property_cards}</div></section>"
-        f"<section id=\"area-proximity\" class=\"stack\"><h2>{escape(copy['proximity_title'])}</h2><div class=\"area-proximity\"><article class=\"card\"><h3>{escape(copy['proximity_transport'])}</h3><p>{escape(transport_text)}</p></article><article class=\"card\"><h3>{escape(copy['proximity_lifestyle'])}</h3><p>{escape(lifestyle_text)}</p></article><article class=\"card\"><h3>{escape(copy['proximity_beach'])}</h3><p>{escape(beach_text)}</p></article></div></section>"
-        f"<section id=\"area-cta\" class=\"card\"><h2>{escape(copy['cta_title'])}</h2><p>{escape(copy['cta_intro'])}</p><div class=\"cta-row\"><a class=\"btn\" data-event=\"area_cta_click\" data-placement=\"area_detail_footer\" data-cta-id=\"area_consult\" data-area-slug=\"{escape(row.slug)}\" data-loading-target=\"area-detail-loading\" href=\"{consult_href}\">{escape(copy['cta_consult'])}</a><a class=\"btn btn-secondary-hero\" data-event=\"area_cta_click\" data-placement=\"area_detail_footer\" data-cta-id=\"area_browse_listings\" data-area-slug=\"{escape(row.slug)}\" data-loading-target=\"area-detail-loading\" href=\"{browse_href}\">{escape(copy['cta_browse_listings'])}</a><a class=\"btn btn-secondary-hero\" data-event=\"area_cta_click\" data-placement=\"area_detail_footer\" data-cta-id=\"area_back_hub\" data-area-slug=\"{escape(row.slug)}\" data-loading-target=\"area-detail-loading\" href=\"/{locale}/area-guide\">{escape(copy['cta_back_hub'])}</a></div></section>"
+        f'<div id="area-detail-loading" class="state-loading" role="status" aria-live="polite" hidden>{escape(copy["loading"])}</div>'
+        f'<div id="area-detail-runtime-error" class="state-error" hidden>{escape(copy["runtime_error"])}</div>'
+        f'<section id="area-overview" class="card area-overview"><article class="area-meta"><h2>{escape(copy["overview_title"])}</h2><img class="media" src="{escape(media)}" alt="{escape(row.name)}" width="1280" height="720" loading="lazy" /><p>{escape(summary)}</p></article><article class="area-meta"><h3>{escape(copy["overview_map"])}</h3>{map_html}</article></section>'
+        f'<section id="area-why-live-invest" class="card"><h2>{escape(copy["why_title"])}</h2><p>{escape(why_text)}</p></section>'
+        f'<section id="area-stats" class="card"><h2>{escape(copy["stats_title"])}</h2><ul class="facts">{"".join(stats_rows)}</ul>{"".join(stats_meta)}</section>'
+        f'<section id="area-featured-projects" class="stack"><h2>{escape(copy["projects_title"])}</h2><div class="area-grid area-grid-3">{project_cards}</div></section>'
+        f'<section id="area-featured-properties" class="stack"><h2>{escape(copy["properties_title"])}</h2><div class="area-grid area-grid-3">{property_cards}</div></section>'
+        f'<section id="area-proximity" class="stack"><h2>{escape(copy["proximity_title"])}</h2><div class="area-proximity"><article class="card"><h3>{escape(copy["proximity_transport"])}</h3><p>{escape(transport_text)}</p></article><article class="card"><h3>{escape(copy["proximity_lifestyle"])}</h3><p>{escape(lifestyle_text)}</p></article><article class="card"><h3>{escape(copy["proximity_beach"])}</h3><p>{escape(beach_text)}</p></article></div></section>'
+        f'<section id="area-cta" class="card"><h2>{escape(copy["cta_title"])}</h2><p>{escape(copy["cta_intro"])}</p><div class="cta-row"><a class="btn" data-event="area_cta_click" data-placement="area_detail_footer" data-cta-id="area_consult" data-area-slug="{escape(row.slug)}" data-loading-target="area-detail-loading" href="{consult_href}">{escape(copy["cta_consult"])}</a><a class="btn btn-secondary-hero" data-event="area_cta_click" data-placement="area_detail_footer" data-cta-id="area_browse_listings" data-area-slug="{escape(row.slug)}" data-loading-target="area-detail-loading" href="{browse_href}">{escape(copy["cta_browse_listings"])}</a><a class="btn btn-secondary-hero" data-event="area_cta_click" data-placement="area_detail_footer" data-cta-id="area_back_hub" data-area-slug="{escape(row.slug)}" data-loading-target="area-detail-loading" href="/{locale}/area-guide">{escape(copy["cta_back_hub"])}</a></div></section>'
         f"{_area_tracking_script(loading_id='area-detail-loading', error_id='area-detail-runtime-error')}"
     )
 
 
 def _render_areas_page(locale: str, request: Request, db: Session) -> HTMLResponse:
     copy = _area_copy(locale)
-    rows = db.scalars(select(Area).where(Area.deleted_at.is_(None), Area.status == "published").order_by(Area.name.asc()).limit(24)).all()
+    rows = db.scalars(
+        select(Area)
+        .where(Area.deleted_at.is_(None), Area.status == "published")
+        .order_by(Area.name.asc())
+        .limit(24)
+    ).all()
     project_counts = {
         str(area_id): int(total)
         for area_id, total in db.execute(
             select(Project.area_id, func.count(Project.id))
-            .where(Project.deleted_at.is_(None), Project.status == "published", Project.area_id.is_not(None))
+            .where(
+                Project.deleted_at.is_(None),
+                Project.status == "published",
+                Project.area_id.is_not(None),
+            )
             .group_by(Project.area_id)
         ).all()
     }
@@ -1784,22 +2056,26 @@ def _render_areas_page(locale: str, request: Request, db: Session) -> HTMLRespon
                 project_count=project_counts.get(str(row.id), 0),
             )
         )
-    cards_html = "".join(cards) if cards else f"<div class=\"card\">{escape(copy['listing_empty'])}</div>"
+    cards_html = (
+        "".join(cards) if cards else f'<div class="card">{escape(copy["listing_empty"])}</div>'
+    )
     breadcrumb = (
-        f"<nav id=\"area-breadcrumb\" class=\"card\" aria-label=\"Breadcrumb\"><ol class=\"crumbs\">"
-        f"<li><a href=\"/{locale}\">{escape(copy['breadcrumb_home'])}</a></li>"
-        f"<li aria-current=\"page\">{escape(copy['breadcrumb_hub'])}</li></ol></nav>"
+        f'<nav id="area-breadcrumb" class="card" aria-label="Breadcrumb"><ol class="crumbs">'
+        f'<li><a href="/{locale}">{escape(copy["breadcrumb_home"])}</a></li>'
+        f'<li aria-current="page">{escape(copy["breadcrumb_hub"])}</li></ol></nav>'
     )
     body = (
         f"{_area_page_styles()}"
         f"{breadcrumb}"
-        f"<section id=\"area-guide-overview\" class=\"card\"><h2>{escape(copy['listing_title'])}</h2><p>{escape(copy['listing_intro'])}</p></section>"
-        f"<div id=\"area-guide-loading\" class=\"state-loading\" role=\"status\" aria-live=\"polite\" hidden>{escape(copy['loading'])}</div>"
-        f"<div id=\"area-guide-runtime-error\" class=\"state-error\" hidden>{escape(copy['runtime_error'])}</div>"
-        f"<section id=\"area-guide-listing\" class=\"area-grid area-grid-3\">{cards_html}</section>"
+        f'<section id="area-guide-overview" class="card"><h2>{escape(copy["listing_title"])}</h2><p>{escape(copy["listing_intro"])}</p></section>'
+        f'<div id="area-guide-loading" class="state-loading" role="status" aria-live="polite" hidden>{escape(copy["loading"])}</div>'
+        f'<div id="area-guide-runtime-error" class="state-error" hidden>{escape(copy["runtime_error"])}</div>'
+        f'<section id="area-guide-listing" class="area-grid area-grid-3">{cards_html}</section>'
         f"{_area_tracking_script(loading_id='area-guide-loading', error_id='area-guide-runtime-error')}"
     )
-    return HTMLResponse(_render_page_shell(locale, title=copy["page_title"], intro=copy["page_intro"], body=body))
+    return HTMLResponse(
+        _render_page_shell(locale, title=copy["page_title"], intro=copy["page_intro"], body=body)
+    )
 
 
 def _render_area_detail_page(locale: str, request: Request, db: Session, slug: str) -> HTMLResponse:
@@ -1817,7 +2093,9 @@ def _render_area_detail_page(locale: str, request: Request, db: Session, slug: s
     stat = db.scalar(select(AreaStatistic).where(AreaStatistic.area_id == row.id))
     projects = db.scalars(
         select(Project)
-        .where(Project.deleted_at.is_(None), Project.status == "published", Project.area_id == row.id)
+        .where(
+            Project.deleted_at.is_(None), Project.status == "published", Project.area_id == row.id
+        )
         .order_by(desc(Project.updated_at))
         .limit(8)
     ).all()
@@ -2009,7 +2287,11 @@ def _developer_location_focus(db: Session, developer_id: UUID) -> list[dict[str,
         .order_by(desc(func.count(Project.id)), Area.name.asc())
         .limit(8)
     ).all()
-    return [{"slug": slug, "name": name, "project_count": int(total)} for slug, name, total in rows if slug and name]
+    return [
+        {"slug": slug, "name": name, "project_count": int(total)}
+        for slug, name, total in rows
+        if slug and name
+    ]
 
 
 def _render_developers_page(locale: str, request: Request, db: Session) -> HTMLResponse:
@@ -2034,41 +2316,54 @@ def _render_developers_page(locale: str, request: Request, db: Session) -> HTMLR
     }
     cards: list[str] = []
     for row in rows:
-        media = _safe_media_url(row.cover_image_url or row.logo_url, _DEFAULT_MEDIA_FALLBACK, request=request)
-        profile = _localized_dict_text(row.profile or row.summary, locale) or copy["listing_profile_pending"]
+        media = _safe_media_url(
+            row.cover_image_url or row.logo_url, _DEFAULT_MEDIA_FALLBACK, request=request
+        )
+        profile = (
+            _localized_dict_text(row.profile or row.summary, locale)
+            or copy["listing_profile_pending"]
+        )
         project_count = project_counts.get(str(row.id))
         project_count_text = _developer_project_count_text(copy=copy, project_count=project_count)
         detail_href = f"/{locale}/developers/{row.slug}"
         browse_href = f"/{locale}/projects?{urlencode({'developer': row.slug})}"
         cards.append(
-            f"<article class=\"card\">"
-            f"<img class=\"media\" src=\"{escape(media)}\" alt=\"{escape(row.name)}\" width=\"640\" height=\"360\" loading=\"lazy\" />"
+            f'<article class="card">'
+            f'<img class="media" src="{escape(media)}" alt="{escape(row.name)}" width="640" height="360" loading="lazy" />'
             f"<h2>{escape(row.name)}</h2><p>{escape(profile)}</p>"
-            f"<p class=\"muted\" data-developer-project-count=\"{escape(row.slug)}\">{escape(project_count_text)}</p>"
-            f"<div class=\"cta-row\">"
-            f"<a class=\"btn\" data-event=\"developer_card_click\" data-placement=\"developer_listing_grid\" data-cta-id=\"developer_card_primary\" data-card-slug=\"{escape(row.slug)}\" data-developer-slug=\"{escape(row.slug)}\" data-loading-target=\"developer-list-loading\" href=\"{detail_href}\">{escape(copy['listing_view_detail'])}</a>"
-            f"<a class=\"btn btn-secondary-hero\" data-event=\"developer_cta_click\" data-placement=\"developer_listing_grid\" data-cta-id=\"developer_card_browse_projects\" data-developer-slug=\"{escape(row.slug)}\" data-loading-target=\"developer-list-loading\" href=\"{browse_href}\">{escape(copy['listing_browse_projects'])}</a>"
+            f'<p class="muted" data-developer-project-count="{escape(row.slug)}">{escape(project_count_text)}</p>'
+            f'<div class="cta-row">'
+            f'<a class="btn" data-event="developer_card_click" data-placement="developer_listing_grid" data-cta-id="developer_card_primary" data-card-slug="{escape(row.slug)}" data-developer-slug="{escape(row.slug)}" data-loading-target="developer-list-loading" href="{detail_href}">{escape(copy["listing_view_detail"])}</a>'
+            f'<a class="btn btn-secondary-hero" data-event="developer_cta_click" data-placement="developer_listing_grid" data-cta-id="developer_card_browse_projects" data-developer-slug="{escape(row.slug)}" data-loading-target="developer-list-loading" href="{browse_href}">{escape(copy["listing_browse_projects"])}</a>'
             f"</div></article>"
         )
-    cards_html = "".join(cards) if cards else f"<div class=\"card state-empty\">{escape(copy['listing_empty'])}</div>"
+    cards_html = (
+        "".join(cards)
+        if cards
+        else f'<div class="card state-empty">{escape(copy["listing_empty"])}</div>'
+    )
     breadcrumb = (
-        f"<nav id=\"developer-breadcrumb\" class=\"card\" aria-label=\"Breadcrumb\"><ol class=\"crumbs\">"
-        f"<li><a href=\"/{locale}\">{escape(copy['breadcrumb_home'])}</a></li>"
-        f"<li aria-current=\"page\">{escape(copy['breadcrumb_hub'])}</li></ol></nav>"
+        f'<nav id="developer-breadcrumb" class="card" aria-label="Breadcrumb"><ol class="crumbs">'
+        f'<li><a href="/{locale}">{escape(copy["breadcrumb_home"])}</a></li>'
+        f'<li aria-current="page">{escape(copy["breadcrumb_hub"])}</li></ol></nav>'
     )
     body = (
         f"{_developer_page_styles()}"
         f"{breadcrumb}"
-        f"<section id=\"developer-list-overview\" class=\"card\"><h2>{escape(copy['listing_title'])}</h2><p>{escape(copy['listing_intro'])}</p></section>"
-        f"<div id=\"developer-list-loading\" class=\"state-loading\" role=\"status\" aria-live=\"polite\" hidden>{escape(copy['loading'])}</div>"
-        f"<div id=\"developer-list-runtime-error\" class=\"state-error\" hidden>{escape(copy['runtime_error'])}</div>"
-        f"<section id=\"developer-listing\" class=\"developer-grid\">{cards_html}</section>"
+        f'<section id="developer-list-overview" class="card"><h2>{escape(copy["listing_title"])}</h2><p>{escape(copy["listing_intro"])}</p></section>'
+        f'<div id="developer-list-loading" class="state-loading" role="status" aria-live="polite" hidden>{escape(copy["loading"])}</div>'
+        f'<div id="developer-list-runtime-error" class="state-error" hidden>{escape(copy["runtime_error"])}</div>'
+        f'<section id="developer-listing" class="developer-grid">{cards_html}</section>'
         f"{_developer_tracking_script(loading_id='developer-list-loading', error_id='developer-list-runtime-error')}"
     )
-    return HTMLResponse(_render_page_shell(locale, title=copy["page_title"], intro=copy["page_intro"], body=body))
+    return HTMLResponse(
+        _render_page_shell(locale, title=copy["page_title"], intro=copy["page_intro"], body=body)
+    )
 
 
-def _render_developer_detail_page(locale: str, request: Request, db: Session, slug: str) -> HTMLResponse:
+def _render_developer_detail_page(
+    locale: str, request: Request, db: Session, slug: str
+) -> HTMLResponse:
     copy = _developer_copy(locale)
     row = db.scalar(
         select(Developer).where(
@@ -2080,18 +2375,29 @@ def _render_developer_detail_page(locale: str, request: Request, db: Session, sl
     if row is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Developer not found")
 
-    media = _safe_media_url(row.cover_image_url or row.logo_url, _DEFAULT_MEDIA_FALLBACK, request=request)
-    profile = _localized_dict_text(row.profile or row.summary, locale) or copy["listing_profile_pending"]
+    media = _safe_media_url(
+        row.cover_image_url or row.logo_url, _DEFAULT_MEDIA_FALLBACK, request=request
+    )
+    profile = (
+        _localized_dict_text(row.profile or row.summary, locale) or copy["listing_profile_pending"]
+    )
     projects = db.scalars(
         select(Project)
-        .where(Project.deleted_at.is_(None), Project.status == "published", Project.developer_id == row.id)
+        .where(
+            Project.deleted_at.is_(None),
+            Project.status == "published",
+            Project.developer_id == row.id,
+        )
         .order_by(desc(Project.updated_at))
         .limit(8)
     ).all()
-    project_cards = "".join(
-        f"<article class=\"card\"><img class=\"media\" src=\"{escape(_safe_media_url(item.cover_image_url or item.hero_image_url, _DEFAULT_MEDIA_FALLBACK, request=request))}\" alt=\"{escape(item.name)}\" width=\"640\" height=\"360\" loading=\"lazy\" /><h3>{escape(item.name)}</h3><p class=\"muted\">{escape(_format_money(item.starting_price, fallback='-'))}</p><a class=\"btn\" data-event=\"developer_cta_click\" data-placement=\"developer_detail_projects\" data-cta-id=\"developer_project_card\" data-developer-slug=\"{escape(row.slug)}\" data-card-slug=\"{escape(item.slug)}\" data-loading-target=\"developer-detail-loading\" href=\"/{locale}/projects/{escape(item.slug)}\">{escape(copy['project_card_cta'])}</a></article>"
-        for item in projects
-    ) or f"<div class=\"card state-empty\">{escape(copy['projects_empty'])}</div>"
+    project_cards = (
+        "".join(
+            f'<article class="card"><img class="media" src="{escape(_safe_media_url(item.cover_image_url or item.hero_image_url, _DEFAULT_MEDIA_FALLBACK, request=request))}" alt="{escape(item.name)}" width="640" height="360" loading="lazy" /><h3>{escape(item.name)}</h3><p class="muted">{escape(_format_money(item.starting_price, fallback="-"))}</p><a class="btn" data-event="developer_cta_click" data-placement="developer_detail_projects" data-cta-id="developer_project_card" data-developer-slug="{escape(row.slug)}" data-card-slug="{escape(item.slug)}" data-loading-target="developer-detail-loading" href="/{locale}/projects/{escape(item.slug)}">{escape(copy["project_card_cta"])}</a></article>'
+            for item in projects
+        )
+        or f'<div class="card state-empty">{escape(copy["projects_empty"])}</div>'
+    )
 
     location_focus = _developer_location_focus(db, row.id)
     location_rows_items: list[str] = []
@@ -2101,12 +2407,17 @@ def _render_developer_detail_page(locale: str, request: Request, db: Session, sl
         area_project_count = int(item["project_count"])
         project_count_text = copy["location_focus_projects"].format(count=f"{area_project_count:,}")
         location_rows_items.append(
-            f"<li><a href=\"/{locale}/areas/{escape(area_slug)}\">{escape(area_name)}</a> <span class=\"muted\">({escape(project_count_text)})</span></li>"
+            f'<li><a href="/{locale}/areas/{escape(area_slug)}">{escape(area_name)}</a> <span class="muted">({escape(project_count_text)})</span></li>'
         )
-    location_rows = "".join(location_rows_items) or f"<li>{escape(copy['location_focus_empty'])}</li>"
+    location_rows = (
+        "".join(location_rows_items) or f"<li>{escape(copy['location_focus_empty'])}</li>"
+    )
 
     trust_items = _developer_trust_proof_items(row.trust_proof, locale=locale)
-    trust_rows = "".join(f"<li>{escape(item)}</li>" for item in trust_items) or f"<li>{escape(copy['trust_empty'])}</li>"
+    trust_rows = (
+        "".join(f"<li>{escape(item)}</li>" for item in trust_items)
+        or f"<li>{escape(copy['trust_empty'])}</li>"
+    )
 
     website_text = str(row.website or "").strip()
     website_html = (
@@ -2114,25 +2425,27 @@ def _render_developer_detail_page(locale: str, request: Request, db: Session, sl
         if website_text
         else ""
     )
-    consult_href = f"/{locale}/contact?{urlencode({'intent': 'consultation', 'developer': row.slug})}"
+    consult_href = (
+        f"/{locale}/contact?{urlencode({'intent': 'consultation', 'developer': row.slug})}"
+    )
     browse_projects_href = f"/{locale}/projects?{urlencode({'developer': row.slug})}"
     breadcrumb = (
-        f"<nav id=\"developer-breadcrumb\" class=\"card\" aria-label=\"Breadcrumb\"><ol class=\"crumbs\">"
-        f"<li><a href=\"/{locale}\">{escape(copy['breadcrumb_home'])}</a></li>"
-        f"<li><a href=\"/{locale}/developers\">{escape(copy['breadcrumb_hub'])}</a></li>"
-        f"<li aria-current=\"page\">{escape(row.name)}</li></ol></nav>"
+        f'<nav id="developer-breadcrumb" class="card" aria-label="Breadcrumb"><ol class="crumbs">'
+        f'<li><a href="/{locale}">{escape(copy["breadcrumb_home"])}</a></li>'
+        f'<li><a href="/{locale}/developers">{escape(copy["breadcrumb_hub"])}</a></li>'
+        f'<li aria-current="page">{escape(row.name)}</li></ol></nav>'
     )
 
     body = (
         f"{_developer_page_styles()}"
         f"{breadcrumb}"
-        f"<div id=\"developer-detail-loading\" class=\"state-loading\" role=\"status\" aria-live=\"polite\" hidden>{escape(copy['loading'])}</div>"
-        f"<div id=\"developer-detail-runtime-error\" class=\"state-error\" hidden>{escape(copy['runtime_error'])}</div>"
-        f"<section id=\"developer-overview\" class=\"card\"><h2>{escape(copy['overview_title'])}</h2><img class=\"media\" src=\"{escape(media)}\" alt=\"{escape(row.name)}\" width=\"1280\" height=\"720\" loading=\"lazy\" /><h3>{escape(row.name)}</h3><p>{escape(profile)}</p></section>"
-        f"<section id=\"developer-location-focus\" class=\"card\"><h2>{escape(copy['location_focus_title'])}</h2><ul class=\"facts\">{location_rows}</ul></section>"
-        f"<section id=\"developer-trust-proof\" class=\"card\"><h2>{escape(copy['trust_title'])}</h2><ul class=\"facts\">{trust_rows}</ul></section>"
-        f"<section id=\"developer-projects\" class=\"stack\"><h2>{escape(copy['projects_title'])}</h2><section class=\"developer-grid\">{project_cards}</section></section>"
-        f"<section id=\"developer-cta\" class=\"card\"><h2>{escape(copy['cta_title'])}</h2><p>{escape(copy['cta_intro'])}</p><div class=\"cta-row\"><a class=\"btn\" data-event=\"developer_cta_click\" data-placement=\"developer_detail_footer\" data-cta-id=\"developer_consult\" data-developer-slug=\"{escape(row.slug)}\" data-loading-target=\"developer-detail-loading\" href=\"{consult_href}\">{escape(copy['cta_consult'])}</a><a class=\"btn btn-secondary-hero\" data-event=\"developer_cta_click\" data-placement=\"developer_detail_footer\" data-cta-id=\"developer_browse_projects\" data-developer-slug=\"{escape(row.slug)}\" data-loading-target=\"developer-detail-loading\" href=\"{browse_projects_href}\">{escape(copy['cta_browse_projects'])}</a>{website_html}</div></section>"
+        f'<div id="developer-detail-loading" class="state-loading" role="status" aria-live="polite" hidden>{escape(copy["loading"])}</div>'
+        f'<div id="developer-detail-runtime-error" class="state-error" hidden>{escape(copy["runtime_error"])}</div>'
+        f'<section id="developer-overview" class="card"><h2>{escape(copy["overview_title"])}</h2><img class="media" src="{escape(media)}" alt="{escape(row.name)}" width="1280" height="720" loading="lazy" /><h3>{escape(row.name)}</h3><p>{escape(profile)}</p></section>'
+        f'<section id="developer-location-focus" class="card"><h2>{escape(copy["location_focus_title"])}</h2><ul class="facts">{location_rows}</ul></section>'
+        f'<section id="developer-trust-proof" class="card"><h2>{escape(copy["trust_title"])}</h2><ul class="facts">{trust_rows}</ul></section>'
+        f'<section id="developer-projects" class="stack"><h2>{escape(copy["projects_title"])}</h2><section class="developer-grid">{project_cards}</section></section>'
+        f'<section id="developer-cta" class="card"><h2>{escape(copy["cta_title"])}</h2><p>{escape(copy["cta_intro"])}</p><div class="cta-row"><a class="btn" data-event="developer_cta_click" data-placement="developer_detail_footer" data-cta-id="developer_consult" data-developer-slug="{escape(row.slug)}" data-loading-target="developer-detail-loading" href="{consult_href}">{escape(copy["cta_consult"])}</a><a class="btn btn-secondary-hero" data-event="developer_cta_click" data-placement="developer_detail_footer" data-cta-id="developer_browse_projects" data-developer-slug="{escape(row.slug)}" data-loading-target="developer-detail-loading" href="{browse_projects_href}">{escape(copy["cta_browse_projects"])}</a>{website_html}</div></section>'
         f"{_developer_tracking_script(loading_id='developer-detail-loading', error_id='developer-detail-runtime-error')}"
     )
     return HTMLResponse(_render_page_shell(locale, title=row.name, intro=profile, body=body))
@@ -2558,12 +2871,12 @@ def _property_detail_script(copy: dict[str, str], property_ref: str, property_id
           if (!bookingResponse.ok) throw new Error('booking_failed');
         }}
         successEl.hidden = false;
-        statusEl.textContent = {copy['submit_success']!r};
+        statusEl.textContent = {copy["submit_success"]!r};
         inquiryForm.reset();
         if (intentInput) intentInput.value = 'inquiry';
       }} catch {{
         errorEl.hidden = false;
-        statusEl.textContent = {copy['submit_error']!r};
+        statusEl.textContent = {copy["submit_error"]!r};
       }} finally {{
         loadingEl.hidden = true;
         submitBtn.disabled = false;
@@ -2588,9 +2901,9 @@ def _property_detail_script(copy: dict[str, str], property_ref: str, property_id
           document.execCommand('copy');
           document.body.removeChild(temp);
         }}
-        copyStatus.textContent = {copy['copy_success']!r};
+        copyStatus.textContent = {copy["copy_success"]!r};
       }} catch {{
-        copyStatus.textContent = {copy['copy_error']!r};
+        copyStatus.textContent = {copy["copy_error"]!r};
       }}
     }});
   }}
@@ -2599,7 +2912,9 @@ def _property_detail_script(copy: dict[str, str], property_ref: str, property_id
 """
 
 
-def _render_property_detail_page(locale: str, request: Request, db: Session, property_ref: str) -> HTMLResponse:
+def _render_property_detail_page(
+    locale: str, request: Request, db: Session, property_ref: str
+) -> HTMLResponse:
     row = _property_or_404(db, property_ref)
     copy = _property_detail_copy(locale)
     title = _property_title_for_locale(row, locale)
@@ -2619,26 +2934,48 @@ def _render_property_detail_page(locale: str, request: Request, db: Session, pro
         )
         for idx, path in enumerate(gallery)
     )
-    gallery_note_html = f'<p class="muted" data-gallery-note="true">{escape(copy["gallery_note"])}</p>'
+    gallery_note_html = (
+        f'<p class="muted" data-gallery-note="true">{escape(copy["gallery_note"])}</p>'
+    )
     if len(gallery) == 1 and gallery[0] == _DEFAULT_MEDIA_FALLBACK:
-        gallery_note_html = f'<p class="muted" data-gallery-empty="true">{escape(copy["gallery_empty"])}</p>'
+        gallery_note_html = (
+            f'<p class="muted" data-gallery-empty="true">{escape(copy["gallery_empty"])}</p>'
+        )
 
     area_row = db.get(Area, row.area_id) if row.area_id else None
     if area_row is not None and area_row.deleted_at is not None:
         area_row = None
     developer_row = db.get(Developer, row.developer_id) if row.developer_id else None
-    if developer_row is not None and (developer_row.deleted_at is not None or developer_row.status != "active"):
+    if developer_row is not None and (
+        developer_row.deleted_at is not None or developer_row.status != "active"
+    ):
         developer_row = None
     project_row = db.get(Project, row.project_id) if row.project_id else None
-    if project_row is not None and (project_row.deleted_at is not None or project_row.status != "published"):
+    if project_row is not None and (
+        project_row.deleted_at is not None or project_row.status != "published"
+    ):
         project_row = None
 
-    area_href = f"/{locale}/areas/{area_row.slug}" if area_row is not None and area_row.status == "published" else f"/{locale}/areas"
-    developer_href = f"/{locale}/developers/{developer_row.slug}" if developer_row is not None else f"/{locale}/developers"
-    project_href = f"/{locale}/projects/{project_row.slug}" if project_row is not None else f"/{locale}/projects"
+    area_href = (
+        f"/{locale}/areas/{area_row.slug}"
+        if area_row is not None and area_row.status == "published"
+        else f"/{locale}/areas"
+    )
+    developer_href = (
+        f"/{locale}/developers/{developer_row.slug}"
+        if developer_row is not None
+        else f"/{locale}/developers"
+    )
+    project_href = (
+        f"/{locale}/projects/{project_row.slug}"
+        if project_row is not None
+        else f"/{locale}/projects"
+    )
 
     price_text = _format_money(row.price, fallback="-")
-    status_text = " ".join(str(row.status or "").replace("_", " ").split()) or copy["status_pending"]
+    status_text = (
+        " ".join(str(row.status or "").replace("_", " ").split()) or copy["status_pending"]
+    )
     view_text = " ".join(str(row.view or "").replace("_", " ").split()) or copy["view_pending"]
     size_value = row.size_sqm if row.size_sqm is not None else row.size
     key_stats = [
@@ -2647,12 +2984,18 @@ def _render_property_detail_page(locale: str, request: Request, db: Session, pro
         (copy["size"], f"{float(size_value):,.0f} sqm" if size_value is not None else "-"),
         (copy["view"], view_text),
     ]
-    stats_html = "".join(
-        f"<li><strong>{escape(label)}:</strong> {escape(value)}</li>" for label, value in key_stats
-    ) or f"<li>{escape(copy['stats_pending'])}</li>"
+    stats_html = (
+        "".join(
+            f"<li><strong>{escape(label)}:</strong> {escape(value)}</li>"
+            for label, value in key_stats
+        )
+        or f"<li>{escape(copy['stats_pending'])}</li>"
+    )
 
     source_meta = row.source_meta if isinstance(row.source_meta, dict) else {}
-    source_location = source_meta.get("location") if isinstance(source_meta.get("location"), dict) else {}
+    source_location = (
+        source_meta.get("location") if isinstance(source_meta.get("location"), dict) else {}
+    )
     lat, lng = _extract_lat_lng(source_location)
     if lat is None or lng is None:
         lat, lng = _extract_lat_lng(source_meta)
@@ -2676,30 +3019,42 @@ def _render_property_detail_page(locale: str, request: Request, db: Session, pro
             or str(project_location.get("context") or project_location.get("label") or "").strip()
         )
     if not location_context:
-        location_context = " • ".join(
-            part for part in [str(row.address or "").strip(), str(row.city or "").strip()] if part
-        ) or str(getattr(area_row, "name", "") or "").strip()
+        location_context = (
+            " • ".join(
+                part
+                for part in [str(row.address or "").strip(), str(row.city or "").strip()]
+                if part
+            )
+            or str(getattr(area_row, "name", "") or "").strip()
+        )
 
     if lat is not None and lng is not None:
         map_href = f"https://maps.google.com/?q={lat:.6f},{lng:.6f}"
         location_body = (
             f"<p>{escape(location_context)}</p>"
-            f"<p class=\"muted\">Lat {lat:.6f}, Lng {lng:.6f}</p>"
-            f"<a class=\"btn\" href=\"{escape(map_href)}\" target=\"_blank\" rel=\"noopener\">{escape(copy['open_map'])}</a>"
+            f'<p class="muted">Lat {lat:.6f}, Lng {lng:.6f}</p>'
+            f'<a class="btn" href="{escape(map_href)}" target="_blank" rel="noopener">{escape(copy["open_map"])}</a>'
         )
     else:
         area_name = str(getattr(area_row, "name", "") or "-")
-        location_body = f"<p>{escape(copy['location_fallback'])}</p><a class=\"btn\" href=\"{area_href}\">{escape(area_name)}</a>"
+        location_body = f'<p>{escape(copy["location_fallback"])}</p><a class="btn" href="{area_href}">{escape(area_name)}</a>'
 
     features = _property_feature_items(row)
-    features_html = "".join(f"<li>{escape(item)}</li>" for item in features) or f"<li>{escape(copy['features_fallback'])}</li>"
+    features_html = (
+        "".join(f"<li>{escape(item)}</li>" for item in features)
+        or f"<li>{escape(copy['features_fallback'])}</li>"
+    )
 
     related_rows: list[Property] = []
     seen_related_ids: set[str] = {str(row.id)}
     if row.project_id is not None:
         same_project = db.scalars(
             select(Property)
-            .where(Property.status == "active", Property.project_id == row.project_id, Property.id != row.id)
+            .where(
+                Property.status == "active",
+                Property.project_id == row.project_id,
+                Property.id != row.id,
+            )
             .order_by(desc(Property.updated_at))
             .limit(8)
         ).all()
@@ -2713,14 +3068,19 @@ def _render_property_detail_page(locale: str, request: Request, db: Session, pro
                 break
     if len(related_rows) < 4 and (row.area_id is not None or row.developer_id is not None):
         secondary_pool = db.scalars(
-            select(Property).where(Property.status == "active", Property.id != row.id).order_by(desc(Property.updated_at)).limit(80)
+            select(Property)
+            .where(Property.status == "active", Property.id != row.id)
+            .order_by(desc(Property.updated_at))
+            .limit(80)
         ).all()
         for item in secondary_pool:
             item_key = str(item.id)
             if item_key in seen_related_ids:
                 continue
             matches_area = row.area_id is not None and item.area_id == row.area_id
-            matches_developer = row.developer_id is not None and item.developer_id == row.developer_id
+            matches_developer = (
+                row.developer_id is not None and item.developer_id == row.developer_id
+            )
             if not (matches_area or matches_developer):
                 continue
             seen_related_ids.add(item_key)
@@ -2728,45 +3088,66 @@ def _render_property_detail_page(locale: str, request: Request, db: Session, pro
             if len(related_rows) == 4:
                 break
 
-    related_html = "".join(
-        (
-            f"<article class=\"card\">"
-            f"<img class=\"media\" src=\"{escape(_property_gallery_paths(item, request=request)[0])}\" alt=\"{escape(_property_title_for_locale(item, locale))}\" width=\"640\" height=\"360\" loading=\"lazy\" />"
-            f"<h3>{escape(_property_title_for_locale(item, locale))}</h3>"
-            f"<p class=\"muted\">{escape(_format_money(item.price, fallback='-'))} • {escape(' • '.join(_localized_property_stats(item, locale)) or copy['stats_pending'])}</p>"
-            f"<a class=\"btn\" href=\"/{locale}/property/{escape(_property_ref_for_route(item))}\">{escape(copy['book_viewing'])}</a>"
-            "</article>"
+    related_html = (
+        "".join(
+            (
+                f'<article class="card">'
+                f'<img class="media" src="{escape(_property_gallery_paths(item, request=request)[0])}" alt="{escape(_property_title_for_locale(item, locale))}" width="640" height="360" loading="lazy" />'
+                f"<h3>{escape(_property_title_for_locale(item, locale))}</h3>"
+                f'<p class="muted">{escape(_format_money(item.price, fallback="-"))} • {escape(" • ".join(_localized_property_stats(item, locale)) or copy["stats_pending"])}</p>'
+                f'<a class="btn" href="/{locale}/property/{escape(_property_ref_for_route(item))}">{escape(copy["book_viewing"])}</a>'
+                "</article>"
+            )
+            for item in related_rows
         )
-        for item in related_rows
-    ) or f"<div class=\"card\" data-related-empty=\"true\">{escape(copy['related_fallback'])}</div>"
+        or f'<div class="card" data-related-empty="true">{escape(copy["related_fallback"])}</div>'
+    )
 
     updated_dt = row.last_synced_at or row.updated_at
-    updated_text = updated_dt.strftime("%Y-%m-%d") if updated_dt is not None else copy["updated_pending"]
-    source_name = " ".join(str(source_meta.get("source") or source_meta.get("source_name") or "").split())
+    updated_text = (
+        updated_dt.strftime("%Y-%m-%d") if updated_dt is not None else copy["updated_pending"]
+    )
+    source_name = " ".join(
+        str(source_meta.get("source") or source_meta.get("source_name") or "").split()
+    )
     source_url = " ".join(str(source_meta.get("source_url") or "").split())
     source_domain = " ".join(str(source_meta.get("source_domain") or "").split())
     source_type = " ".join(str(source_meta.get("source_type") or "").split())
     rights_status = " ".join(str(source_meta.get("rights_status") or "").split())
     rights_note = " ".join(str(source_meta.get("rights_note") or "").split())
     license_evidence_url = " ".join(str(source_meta.get("license_evidence_url") or "").split())
-    source_checked = " ".join(str(source_meta.get("last_checked_at") or source_meta.get("checked_at") or "").split())
+    source_checked = " ".join(
+        str(source_meta.get("last_checked_at") or source_meta.get("checked_at") or "").split()
+    )
     source_meta_body = ""
     if source_name:
-        source_meta_body += f"<p><strong>{escape(copy['source'])}:</strong> {escape(source_name)}</p>"
+        source_meta_body += (
+            f"<p><strong>{escape(copy['source'])}:</strong> {escape(source_name)}</p>"
+        )
     if source_url:
         source_meta_body += f'<p><strong>{escape(copy["source_url"])}:</strong> <a href="{escape(source_url)}" target="_blank" rel="noopener">{escape(source_url)}</a></p>'
     if source_domain:
-        source_meta_body += f"<p><strong>{escape(copy['source_domain'])}:</strong> {escape(source_domain)}</p>"
+        source_meta_body += (
+            f"<p><strong>{escape(copy['source_domain'])}:</strong> {escape(source_domain)}</p>"
+        )
     if source_type:
-        source_meta_body += f"<p><strong>{escape(copy['source_type'])}:</strong> {escape(source_type)}</p>"
+        source_meta_body += (
+            f"<p><strong>{escape(copy['source_type'])}:</strong> {escape(source_type)}</p>"
+        )
     if rights_status:
-        source_meta_body += f"<p><strong>{escape(copy['rights'])}:</strong> {escape(rights_status)}</p>"
+        source_meta_body += (
+            f"<p><strong>{escape(copy['rights'])}:</strong> {escape(rights_status)}</p>"
+        )
     if rights_note:
-        source_meta_body += f"<p><strong>{escape(copy['rights_note'])}:</strong> {escape(rights_note)}</p>"
+        source_meta_body += (
+            f"<p><strong>{escape(copy['rights_note'])}:</strong> {escape(rights_note)}</p>"
+        )
     if license_evidence_url:
         source_meta_body += f'<p><strong>{escape(copy["license_evidence"])}:</strong> <a href="{escape(license_evidence_url)}" target="_blank" rel="noopener">{escape(license_evidence_url)}</a></p>'
     if source_checked:
-        source_meta_body += f"<p><strong>{escape(copy['source_checked'])}:</strong> {escape(source_checked)}</p>"
+        source_meta_body += (
+            f"<p><strong>{escape(copy['source_checked'])}:</strong> {escape(source_checked)}</p>"
+        )
     if not source_meta_body:
         source_meta_body = f"<p>{escape(copy['source_pending'])}</p>"
 
@@ -2775,14 +3156,18 @@ def _render_property_detail_page(locale: str, request: Request, db: Session, pro
     share_line = "https://social-plugins.line.me/lineit/share?" + urlencode({"url": property_url})
     share_x = "https://x.com/intent/tweet?" + urlencode({"url": property_url, "text": title})
 
-    description_html = f"<p>{escape(description)}</p>" if description else f"<p>{escape(copy['description_pending'])}</p>"
+    description_html = (
+        f"<p>{escape(description)}</p>"
+        if description
+        else f"<p>{escape(copy['description_pending'])}</p>"
+    )
 
     body = (
         "<style>"
         ".property-thumb-strip{display:grid;gap:8px;grid-template-columns:repeat(auto-fit,minmax(96px,1fr))}"
         ".property-thumb{padding:0;border:2px solid #d1d5db;border-radius:10px;background:#fff;cursor:pointer}"
         ".property-thumb img{display:block;width:100%;aspect-ratio:16/9;object-fit:cover;border-radius:8px}"
-        ".property-thumb.is-active,.property-thumb[aria-current=\"true\"]{border-color:#0f6d5a}"
+        '.property-thumb.is-active,.property-thumb[aria-current="true"]{border-color:#0f6d5a}'
         ".property-two-col{display:grid;gap:16px;grid-template-columns:1fr}"
         ".property-list{margin:0;padding-left:20px;display:grid;gap:8px}"
         ".property-related-grid{display:grid;gap:16px;grid-template-columns:1fr}"
@@ -2793,52 +3178,52 @@ def _render_property_detail_page(locale: str, request: Request, db: Session, pro
         "@media (min-width:1024px){.property-two-col{grid-template-columns:minmax(0,1.35fr) minmax(0,1fr)}.property-related-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}"
         "@media (min-width:1920px){.property-related-grid{grid-template-columns:repeat(4,minmax(0,1fr))}}"
         "</style>"
-        f"<section id=\"property-hero\" class=\"card\">"
+        f'<section id="property-hero" class="card">'
         f"<h2>{escape(title)}</h2>"
-        f"<p class=\"muted\"><strong>{escape(copy['price'])}:</strong> {escape(price_text)} • <strong>{escape(copy['status'])}:</strong> {escape(status_text)}</p>"
-        f"<div class=\"cta-row\"><a class=\"btn\" data-property-intent=\"inquiry\" href=\"#property-inquiry-form\">{escape(copy['send_inquiry'])}</a><a class=\"btn\" data-property-intent=\"viewing\" href=\"#property-inquiry-form\">{escape(copy['book_viewing'])}</a></div>"
+        f'<p class="muted"><strong>{escape(copy["price"])}:</strong> {escape(price_text)} • <strong>{escape(copy["status"])}:</strong> {escape(status_text)}</p>'
+        f'<div class="cta-row"><a class="btn" data-property-intent="inquiry" href="#property-inquiry-form">{escape(copy["send_inquiry"])}</a><a class="btn" data-property-intent="viewing" href="#property-inquiry-form">{escape(copy["book_viewing"])}</a></div>'
         f"{description_html}"
         "</section>"
-        f"<section id=\"property-gallery\" class=\"card\" data-property-gallery=\"true\" aria-label=\"{escape(copy['gallery'])}\">"
+        f'<section id="property-gallery" class="card" data-property-gallery="true" aria-label="{escape(copy["gallery"])}">'
         f"<h2>{escape(copy['gallery'])}</h2>{gallery_note_html}"
-        f"<img class=\"media\" data-gallery-hero=\"true\" src=\"{escape(hero_media)}\" alt=\"{escape(title)}\" width=\"1280\" height=\"720\" loading=\"eager\" />"
-        f"<div class=\"property-thumb-strip\" role=\"listbox\" aria-label=\"{escape(copy['gallery'])}\">{thumb_buttons}</div>"
+        f'<img class="media" data-gallery-hero="true" src="{escape(hero_media)}" alt="{escape(title)}" width="1280" height="720" loading="eager" />'
+        f'<div class="property-thumb-strip" role="listbox" aria-label="{escape(copy["gallery"])}">{thumb_buttons}</div>'
         "</section>"
-        f"<section id=\"property-summary\" class=\"property-two-col\">"
-        f"<article class=\"card\"><h2>{escape(copy['key_stats'])}</h2><ul class=\"property-list\">{stats_html}</ul></article>"
-        f"<article id=\"property-links\" class=\"card\"><h2>{escape(copy['links'])}</h2>"
-        f"<p><strong>{escape(copy['area'])}:</strong> <a href=\"{area_href}\">{escape(str(getattr(area_row, 'name', '') or '-'))}</a></p>"
-        f"<p><strong>{escape(copy['developer'])}:</strong> <a href=\"{developer_href}\">{escape(str(getattr(developer_row, 'name', '') or '-'))}</a></p>"
-        f"<p><strong>{escape(copy['project'])}:</strong> <a href=\"{project_href}\">{escape(str(getattr(project_row, 'name', '') or '-'))}</a></p>"
+        f'<section id="property-summary" class="property-two-col">'
+        f'<article class="card"><h2>{escape(copy["key_stats"])}</h2><ul class="property-list">{stats_html}</ul></article>'
+        f'<article id="property-links" class="card"><h2>{escape(copy["links"])}</h2>'
+        f'<p><strong>{escape(copy["area"])}:</strong> <a href="{area_href}">{escape(str(getattr(area_row, "name", "") or "-"))}</a></p>'
+        f'<p><strong>{escape(copy["developer"])}:</strong> <a href="{developer_href}">{escape(str(getattr(developer_row, "name", "") or "-"))}</a></p>'
+        f'<p><strong>{escape(copy["project"])}:</strong> <a href="{project_href}">{escape(str(getattr(project_row, "name", "") or "-"))}</a></p>'
         "</article></section>"
-        f"<section id=\"property-location\" class=\"card\"><h2>{escape(copy['location'])}</h2>{location_body}</section>"
-        f"<section id=\"property-features\" class=\"card\"><h2>{escape(copy['features'])}</h2><ul class=\"property-list\">{features_html}</ul></section>"
-        f"<section id=\"property-inquiry\" class=\"stack\"><h2>{escape(copy['inquiry_section'])}</h2><p>{escape(copy['inquiry_intro'])}</p>"
-        f"<form id=\"property-inquiry-form\" class=\"card\" novalidate data-property-id=\"{escape(str(row.id))}\">"
-        f"<label class=\"field\" for=\"property-name\"><span>{escape(copy['name'])}</span><input id=\"property-name\" name=\"name\" type=\"text\" required /></label>"
-        f"<label class=\"field\" for=\"property-contact\"><span>{escape(copy['contact'])}</span><input id=\"property-contact\" name=\"contact\" type=\"text\" required /></label>"
-        f"<label class=\"field\" for=\"property-intent\"><span>{escape(copy['intent'])}</span><select id=\"property-intent\" name=\"intent\" required><option value=\"inquiry\">{escape(copy['intent_inquiry'])}</option><option value=\"viewing\">{escape(copy['intent_viewing'])}</option></select></label>"
-        f"<label class=\"field\" for=\"property-viewing-at\"><span>{escape(copy['viewing_at'])}</span><input id=\"property-viewing-at\" name=\"viewing_at\" type=\"datetime-local\" /></label>"
-        f"<label class=\"field\" for=\"property-viewing-duration\"><span>{escape(copy['viewing_duration'])}</span><select id=\"property-viewing-duration\" name=\"viewing_duration\"><option value=\"60\">60 min</option><option value=\"30\">30 min</option><option value=\"90\">90 min</option></select></label>"
-        f"<label class=\"field\" for=\"property-guests\"><span>{escape(copy['guests'])}</span><input id=\"property-guests\" name=\"guests\" type=\"number\" min=\"1\" max=\"20\" inputmode=\"numeric\" /></label>"
-        f"<label class=\"field\" for=\"property-budget\"><span>{escape(copy['budget'])}</span><select id=\"property-budget\" name=\"budget\"><option value=\"\">{escape(copy['select_budget'])}</option><option value=\"lt_3m\">Below THB 3M</option><option value=\"3m_6m\">THB 3M - 6M</option><option value=\"6m_10m\">THB 6M - 10M</option><option value=\"gt_10m\">Above THB 10M</option></select></label>"
-        f"<label class=\"field\" for=\"property-timeline\"><span>{escape(copy['timeline'])}</span><select id=\"property-timeline\" name=\"timeline\"><option value=\"\">{escape(copy['select_timeline'])}</option><option value=\"0_3m\">0-3 months</option><option value=\"3_6m\">3-6 months</option><option value=\"6m_plus\">6+ months</option></select></label>"
-        f"<label class=\"field\" for=\"property-message\"><span>{escape(copy['message'])}</span><textarea id=\"property-message\" name=\"message\" rows=\"4\" placeholder=\"{escape(copy['message_placeholder'])}\"></textarea></label>"
-        f"<div class=\"cta-row\"><button id=\"property-inquiry-submit\" class=\"btn\" type=\"submit\">{escape(copy['submit'])}</button><a class=\"btn\" href=\"/{locale}/contact?intent=viewing&property={escape(property_ref_safe)}\">{escape(copy['book_viewing'])}</a></div>"
-        "<p id=\"property-form-status\" class=\"muted\" role=\"status\" aria-live=\"polite\"></p>"
-        f"<div id=\"property-form-loading\" class=\"state-loading\" hidden>{escape(copy['submitting'])}</div>"
-        f"<div id=\"property-form-error\" class=\"state-error\" hidden>{escape(copy['submit_error'])}</div>"
-        f"<div id=\"property-form-success\" class=\"state-success\" hidden>{escape(copy['submit_success'])}</div>"
+        f'<section id="property-location" class="card"><h2>{escape(copy["location"])}</h2>{location_body}</section>'
+        f'<section id="property-features" class="card"><h2>{escape(copy["features"])}</h2><ul class="property-list">{features_html}</ul></section>'
+        f'<section id="property-inquiry" class="stack"><h2>{escape(copy["inquiry_section"])}</h2><p>{escape(copy["inquiry_intro"])}</p>'
+        f'<form id="property-inquiry-form" class="card" novalidate data-property-id="{escape(str(row.id))}">'
+        f'<label class="field" for="property-name"><span>{escape(copy["name"])}</span><input id="property-name" name="name" type="text" required /></label>'
+        f'<label class="field" for="property-contact"><span>{escape(copy["contact"])}</span><input id="property-contact" name="contact" type="text" required /></label>'
+        f'<label class="field" for="property-intent"><span>{escape(copy["intent"])}</span><select id="property-intent" name="intent" required><option value="inquiry">{escape(copy["intent_inquiry"])}</option><option value="viewing">{escape(copy["intent_viewing"])}</option></select></label>'
+        f'<label class="field" for="property-viewing-at"><span>{escape(copy["viewing_at"])}</span><input id="property-viewing-at" name="viewing_at" type="datetime-local" /></label>'
+        f'<label class="field" for="property-viewing-duration"><span>{escape(copy["viewing_duration"])}</span><select id="property-viewing-duration" name="viewing_duration"><option value="60">60 min</option><option value="30">30 min</option><option value="90">90 min</option></select></label>'
+        f'<label class="field" for="property-guests"><span>{escape(copy["guests"])}</span><input id="property-guests" name="guests" type="number" min="1" max="20" inputmode="numeric" /></label>'
+        f'<label class="field" for="property-budget"><span>{escape(copy["budget"])}</span><select id="property-budget" name="budget"><option value="">{escape(copy["select_budget"])}</option><option value="lt_3m">Below THB 3M</option><option value="3m_6m">THB 3M - 6M</option><option value="6m_10m">THB 6M - 10M</option><option value="gt_10m">Above THB 10M</option></select></label>'
+        f'<label class="field" for="property-timeline"><span>{escape(copy["timeline"])}</span><select id="property-timeline" name="timeline"><option value="">{escape(copy["select_timeline"])}</option><option value="0_3m">0-3 months</option><option value="3_6m">3-6 months</option><option value="6m_plus">6+ months</option></select></label>'
+        f'<label class="field" for="property-message"><span>{escape(copy["message"])}</span><textarea id="property-message" name="message" rows="4" placeholder="{escape(copy["message_placeholder"])}"></textarea></label>'
+        f'<div class="cta-row"><button id="property-inquiry-submit" class="btn" type="submit">{escape(copy["submit"])}</button><a class="btn" href="/{locale}/contact?intent=viewing&property={escape(property_ref_safe)}">{escape(copy["book_viewing"])}</a></div>'
+        '<p id="property-form-status" class="muted" role="status" aria-live="polite"></p>'
+        f'<div id="property-form-loading" class="state-loading" hidden>{escape(copy["submitting"])}</div>'
+        f'<div id="property-form-error" class="state-error" hidden>{escape(copy["submit_error"])}</div>'
+        f'<div id="property-form-success" class="state-success" hidden>{escape(copy["submit_success"])}</div>'
         "</form></section>"
-        f"<section id=\"property-related\" class=\"stack\"><h2>{escape(copy['related'])}</h2><div class=\"property-related-grid\">{related_html}</div></section>"
-        f"<section id=\"property-share\" class=\"card\"><h2>{escape(copy['share'])}</h2>"
-        f"<div class=\"cta-row\"><a class=\"btn\" target=\"_blank\" rel=\"noopener\" href=\"{escape(share_x)}\">{escape(copy['share_x'])}</a>"
-        f"<a class=\"btn\" target=\"_blank\" rel=\"noopener\" href=\"{escape(share_facebook)}\">{escape(copy['share_facebook'])}</a>"
-        f"<a class=\"btn\" target=\"_blank\" rel=\"noopener\" href=\"{escape(share_line)}\">{escape(copy['share_line'])}</a>"
-        f"<button id=\"property-copy-link\" class=\"btn\" type=\"button\" data-link=\"{escape(property_url)}\">{escape(copy['copy_link'])}</button></div>"
-        "<p id=\"property-copy-status\" class=\"muted\" role=\"status\" aria-live=\"polite\"></p>"
+        f'<section id="property-related" class="stack"><h2>{escape(copy["related"])}</h2><div class="property-related-grid">{related_html}</div></section>'
+        f'<section id="property-share" class="card"><h2>{escape(copy["share"])}</h2>'
+        f'<div class="cta-row"><a class="btn" target="_blank" rel="noopener" href="{escape(share_x)}">{escape(copy["share_x"])}</a>'
+        f'<a class="btn" target="_blank" rel="noopener" href="{escape(share_facebook)}">{escape(copy["share_facebook"])}</a>'
+        f'<a class="btn" target="_blank" rel="noopener" href="{escape(share_line)}">{escape(copy["share_line"])}</a>'
+        f'<button id="property-copy-link" class="btn" type="button" data-link="{escape(property_url)}">{escape(copy["copy_link"])}</button></div>'
+        '<p id="property-copy-status" class="muted" role="status" aria-live="polite"></p>'
         "</section>"
-        f"<section id=\"property-freshness\" class=\"card\"><h2>{escape(copy['freshness'])}</h2><p><strong>{escape(copy['updated'])}:</strong> {escape(updated_text)}</p>{source_meta_body}</section>"
+        f'<section id="property-freshness" class="card"><h2>{escape(copy["freshness"])}</h2><p><strong>{escape(copy["updated"])}:</strong> {escape(updated_text)}</p>{source_meta_body}</section>'
         f"{_property_detail_script(copy, property_ref_safe, str(row.id))}"
     )
 
@@ -2935,7 +3320,9 @@ def _resolve_project_filter(db: Session, raw: str | None) -> Project | None:
     if not token:
         return None
     row = db.scalar(
-        select(Project).where(Project.deleted_at.is_(None), Project.status == "published", Project.slug == token)
+        select(Project).where(
+            Project.deleted_at.is_(None), Project.status == "published", Project.slug == token
+        )
     )
     if row is not None:
         return row
@@ -2962,7 +3349,9 @@ def _localized_property_stats(prop: Property, locale: str) -> list[str]:
         stats.append(f"{prop.bathrooms} baths" if locale == "en" else f"{prop.bathrooms} ห้องน้ำ")
     size_value = prop.size_sqm if prop.size_sqm is not None else prop.size
     if size_value is not None:
-        stats.append(f"{float(size_value):,.0f} sqm" if locale == "en" else f"{float(size_value):,.0f} ตร.ม.")
+        stats.append(
+            f"{float(size_value):,.0f} sqm" if locale == "en" else f"{float(size_value):,.0f} ตร.ม."
+        )
     return stats
 
 
@@ -2981,7 +3370,9 @@ def _listing_property_tags(prop: Property) -> list[str]:
 
 
 def _listing_querystring(params: dict[str, object]) -> str:
-    query = urlencode({key: str(value) for key, value in params.items() if str(value or "").strip()})
+    query = urlencode(
+        {key: str(value) for key, value in params.items() if str(value or "").strip()}
+    )
     return f"?{query}" if query else ""
 
 
@@ -3146,7 +3537,9 @@ def _listing_copy(locale: str, intent: str) -> dict[str, str]:
     return {**common, **selected}
 
 
-def _render_property_listing_page(locale: str, request: Request, db: Session, intent: str) -> HTMLResponse:
+def _render_property_listing_page(
+    locale: str, request: Request, db: Session, intent: str
+) -> HTMLResponse:
     if intent not in {"buy", "rent", "investment", "marketplace"}:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Listing not found")
 
@@ -3155,8 +3548,12 @@ def _render_property_listing_page(locale: str, request: Request, db: Session, in
     query = request.query_params
     listing_path = f"/{locale}/{intent}"
 
-    page = _parse_positive_int(query.get("page"), default=1, minimum=1, maximum=999, field="page", errors=errors)
-    limit = _parse_positive_int(query.get("limit"), default=12, minimum=1, maximum=48, field="limit", errors=errors)
+    page = _parse_positive_int(
+        query.get("page"), default=1, minimum=1, maximum=999, field="page", errors=errors
+    )
+    limit = _parse_positive_int(
+        query.get("limit"), default=12, minimum=1, maximum=48, field="limit", errors=errors
+    )
     price_min = _parse_optional_decimal(
         query.get("price_min"),
         minimum=Decimal("0"),
@@ -3171,8 +3568,12 @@ def _render_property_listing_page(locale: str, request: Request, db: Session, in
         field="price_max",
         errors=errors,
     )
-    beds = _parse_optional_int(query.get("beds"), minimum=0, maximum=20, field="beds", errors=errors)
-    baths = _parse_optional_int(query.get("baths"), minimum=0, maximum=20, field="baths", errors=errors)
+    beds = _parse_optional_int(
+        query.get("beds"), minimum=0, maximum=20, field="beds", errors=errors
+    )
+    baths = _parse_optional_int(
+        query.get("baths"), minimum=0, maximum=20, field="baths", errors=errors
+    )
 
     area_raw = str(query.get("area") or "").strip()
     area_row = _resolve_area_filter(db, area_raw)
@@ -3234,12 +3635,18 @@ def _render_property_listing_page(locale: str, request: Request, db: Session, in
     area_option_ids = [
         item
         for item in db.scalars(
-            select(Property.area_id).where(*intent_filters, Property.area_id.is_not(None)).distinct()
+            select(Property.area_id)
+            .where(*intent_filters, Property.area_id.is_not(None))
+            .distinct()
         ).all()
         if item is not None
     ]
     area_options = (
-        db.scalars(select(Area).where(Area.deleted_at.is_(None), Area.id.in_(area_option_ids)).order_by(Area.name.asc())).all()
+        db.scalars(
+            select(Area)
+            .where(Area.deleted_at.is_(None), Area.id.in_(area_option_ids))
+            .order_by(Area.name.asc())
+        ).all()
         if area_option_ids
         else []
     )
@@ -3247,14 +3654,20 @@ def _render_property_listing_page(locale: str, request: Request, db: Session, in
     project_option_ids = [
         item
         for item in db.scalars(
-            select(Property.project_id).where(*intent_filters, Property.project_id.is_not(None)).distinct()
+            select(Property.project_id)
+            .where(*intent_filters, Property.project_id.is_not(None))
+            .distinct()
         ).all()
         if item is not None
     ]
     project_options = (
         db.scalars(
             select(Project)
-            .where(Project.deleted_at.is_(None), Project.status == "published", Project.id.in_(project_option_ids))
+            .where(
+                Project.deleted_at.is_(None),
+                Project.status == "published",
+                Project.id.in_(project_option_ids),
+            )
             .order_by(Project.name.asc())
         ).all()
         if project_option_ids
@@ -3264,7 +3677,9 @@ def _render_property_listing_page(locale: str, request: Request, db: Session, in
     property_type_options = sorted(
         {
             str(value or "").strip().lower()
-            for value in db.scalars(select(Property.property_type).where(*intent_filters).distinct()).all()
+            for value in db.scalars(
+                select(Property.property_type).where(*intent_filters).distinct()
+            ).all()
             if str(value or "").strip()
         }
     )
@@ -3299,7 +3714,12 @@ def _render_property_listing_page(locale: str, request: Request, db: Session, in
 
     row_area_ids = [item.area_id for item in rows if item.area_id is not None]
     area_lookup = (
-        {item.id: item for item in db.scalars(select(Area).where(Area.deleted_at.is_(None), Area.id.in_(row_area_ids))).all()}
+        {
+            item.id: item
+            for item in db.scalars(
+                select(Area).where(Area.deleted_at.is_(None), Area.id.in_(row_area_ids))
+            ).all()
+        }
         if row_area_ids
         else {}
     )
@@ -3308,7 +3728,11 @@ def _render_property_listing_page(locale: str, request: Request, db: Session, in
         {
             item.id: item
             for item in db.scalars(
-                select(Project).where(Project.deleted_at.is_(None), Project.status == "published", Project.id.in_(row_project_ids))
+                select(Project).where(
+                    Project.deleted_at.is_(None),
+                    Project.status == "published",
+                    Project.id.in_(row_project_ids),
+                )
             ).all()
         }
         if row_project_ids
@@ -3324,9 +3748,13 @@ def _render_property_listing_page(locale: str, request: Request, db: Session, in
         value = str(item.slug or "").strip() or str(item.id)
         known_area_values.add(value)
         selected = " selected" if value == selected_area else ""
-        area_options_html.append(f'<option value="{escape(value)}"{selected}>{escape(item.name)}</option>')
+        area_options_html.append(
+            f'<option value="{escape(value)}"{selected}>{escape(item.name)}</option>'
+        )
     if selected_area and selected_area not in known_area_values:
-        area_options_html.append(f'<option value="{escape(selected_area)}" selected>{escape(selected_area)}</option>')
+        area_options_html.append(
+            f'<option value="{escape(selected_area)}" selected>{escape(selected_area)}</option>'
+        )
 
     project_options_html = [f'<option value="">{escape(copy["all_projects"])}</option>']
     known_project_values: set[str] = set()
@@ -3334,18 +3762,26 @@ def _render_property_listing_page(locale: str, request: Request, db: Session, in
         value = str(item.slug or "").strip() or str(item.id)
         known_project_values.add(value)
         selected = " selected" if value == selected_project else ""
-        project_options_html.append(f'<option value="{escape(value)}"{selected}>{escape(item.name)}</option>')
+        project_options_html.append(
+            f'<option value="{escape(value)}"{selected}>{escape(item.name)}</option>'
+        )
     if selected_project and selected_project not in known_project_values:
-        project_options_html.append(f'<option value="{escape(selected_project)}" selected>{escape(selected_project)}</option>')
+        project_options_html.append(
+            f'<option value="{escape(selected_project)}" selected>{escape(selected_project)}</option>'
+        )
 
     property_type_options_html = [f'<option value="">{escape(copy["all_property_types"])}</option>']
     known_property_types: set[str] = set()
     for item in property_type_options:
         known_property_types.add(item)
         selected = " selected" if item == property_type else ""
-        property_type_options_html.append(f'<option value="{escape(item)}"{selected}>{escape(_humanize_token(item))}</option>')
+        property_type_options_html.append(
+            f'<option value="{escape(item)}"{selected}>{escape(_humanize_token(item))}</option>'
+        )
     if property_type and property_type not in known_property_types:
-        property_type_options_html.append(f'<option value="{escape(property_type)}" selected>{escape(_humanize_token(property_type))}</option>')
+        property_type_options_html.append(
+            f'<option value="{escape(property_type)}" selected>{escape(_humanize_token(property_type))}</option>'
+        )
 
     cards_html = ""
     for row in rows:
@@ -3361,22 +3797,32 @@ def _render_property_listing_page(locale: str, request: Request, db: Session, in
         city_name = str(row.city or "").strip()
         location_parts = [part for part in [city_name, area_name, project_name] if part]
         location_text = " • ".join(dict.fromkeys(location_parts)) or copy["location_pending"]
-        area_href = f"/{locale}/areas/{row_area.slug}" if row_area is not None and row_area.status == "published" else f"/{locale}/areas"
+        area_href = (
+            f"/{locale}/areas/{row_area.slug}"
+            if row_area is not None and row_area.status == "published"
+            else f"/{locale}/areas"
+        )
         project_href = (
             f"/{locale}/projects/{row_project.slug}"
             if row_project is not None and row_project.status == "published"
             else f"/{locale}/projects"
         )
-        tag_html = "".join(f"<span class=\"tag\">{escape(tag)}</span>" for tag in _listing_property_tags(row))
-        tags_block = f"<div class=\"tag-row\">{tag_html}</div>" if tag_html else f"<p class=\"muted\" data-tags-empty=\"true\">{escape(copy['tags_pending'])}</p>"
+        tag_html = "".join(
+            f'<span class="tag">{escape(tag)}</span>' for tag in _listing_property_tags(row)
+        )
+        tags_block = (
+            f'<div class="tag-row">{tag_html}</div>'
+            if tag_html
+            else f'<p class="muted" data-tags-empty="true">{escape(copy["tags_pending"])}</p>'
+        )
         cards_html += (
-            f"<article class=\"card listing-card\" data-card-id=\"{escape(str(row.id))}\" data-card-slug=\"{escape(str(row.slug or row.id))}\">"
-            f"<a class=\"listing-link\" data-event=\"listing_card_click\" data-cta-id=\"listing_card\" data-card-id=\"{escape(str(row.id))}\" data-card-slug=\"{escape(str(row.slug or row.id))}\" data-placement=\"listing_grid\" href=\"/{locale}/property/{escape(prop_ref)}\">"
-            f"<img class=\"media\" src=\"{escape(media)}\" alt=\"{escape(title)}\" width=\"640\" height=\"360\" loading=\"lazy\" />"
-            f"<p class=\"price\">{escape(price_text)}</p><h3>{escape(title)}</h3></a>"
-            f"<p class=\"muted\">{escape(location_text)}</p><p class=\"muted\">{escape(stats_text)}</p>{tags_block}"
-            f"<p class=\"muted listing-links\"><strong>{escape(copy['linked_area'])}:</strong> <a href=\"{area_href}\">{escape(area_name or copy['all_areas'])}</a> • <strong>{escape(copy['linked_project'])}:</strong> <a href=\"{project_href}\">{escape(project_name or copy['all_projects'])}</a></p>"
-            f"<a class=\"btn btn-secondary-hero btn-sm\" data-event=\"listing_card_click\" data-cta-id=\"listing_view_details\" data-card-id=\"{escape(str(row.id))}\" data-card-slug=\"{escape(str(row.slug or row.id))}\" data-placement=\"listing_card_footer\" href=\"/{locale}/property/{escape(prop_ref)}\">{escape(copy['view_details'])}</a>"
+            f'<article class="card listing-card" data-card-id="{escape(str(row.id))}" data-card-slug="{escape(str(row.slug or row.id))}">'
+            f'<a class="listing-link" data-event="listing_card_click" data-cta-id="listing_card" data-card-id="{escape(str(row.id))}" data-card-slug="{escape(str(row.slug or row.id))}" data-placement="listing_grid" href="/{locale}/property/{escape(prop_ref)}">'
+            f'<img class="media" src="{escape(media)}" alt="{escape(title)}" width="640" height="360" loading="lazy" />'
+            f'<p class="price">{escape(price_text)}</p><h3>{escape(title)}</h3></a>'
+            f'<p class="muted">{escape(location_text)}</p><p class="muted">{escape(stats_text)}</p>{tags_block}'
+            f'<p class="muted listing-links"><strong>{escape(copy["linked_area"])}:</strong> <a href="{area_href}">{escape(area_name or copy["all_areas"])}</a> • <strong>{escape(copy["linked_project"])}:</strong> <a href="{project_href}">{escape(project_name or copy["all_projects"])}</a></p>'
+            f'<a class="btn btn-secondary-hero btn-sm" data-event="listing_card_click" data-cta-id="listing_view_details" data-card-id="{escape(str(row.id))}" data-card-slug="{escape(str(row.slug or row.id))}" data-placement="listing_card_footer" href="/{locale}/property/{escape(prop_ref)}">{escape(copy["view_details"])}</a>'
             f"</article>"
         )
 
@@ -3412,9 +3858,9 @@ def _render_property_listing_page(locale: str, request: Request, db: Session, in
     )
 
     pagination_html = (
-        "<nav class=\"card pagination\" aria-label=\"Pagination\">"
-        f"<p class=\"muted\">{escape(copy['showing'])} {showing_start}-{showing_end} / {total} {escape(copy['results'])}</p>"
-        "<div class=\"cta-row\">"
+        '<nav class="card pagination" aria-label="Pagination">'
+        f'<p class="muted">{escape(copy["showing"])} {showing_start}-{showing_end} / {total} {escape(copy["results"])}</p>'
+        '<div class="cta-row">'
         f"{prev_link}{next_link}"
         "</div></nav>"
     )
@@ -3476,34 +3922,36 @@ def _render_property_listing_page(locale: str, request: Request, db: Session, in
 
     body = (
         f"{listing_styles}"
-        f"<section id=\"listing-hero\" class=\"card listing-hero\" aria-labelledby=\"listing-hero-title\" data-copy-pack-id=\"{escape(copy['copy_pack_id'])}\" data-intent=\"{escape(intent)}\">"
-        f"<img class=\"media\" src=\"{escape(hero_media)}\" alt=\"{escape(copy['hero_title'])}\" width=\"1280\" height=\"720\" loading=\"eager\" />"
-        f"<h2 id=\"listing-hero-title\">{escape(copy['hero_title'])}</h2><p>{escape(copy['hero_sub'])}</p>"
-        f"<p id=\"listing-rule-note\" class=\"muted\">{escape(copy['rule_note'])}</p>"
-        f"<div class=\"cta-row\"><a class=\"btn\" data-event=\"listing_cta_click\" data-cta-id=\"listing_consultation\" data-placement=\"listing_hero\" data-intent=\"{escape(intent)}\" href=\"/{locale}/contact?intent=consultation&source={escape(intent)}\">{escape(copy['consult_cta'])}</a>"
-        f"<a class=\"btn btn-secondary-hero\" data-event=\"listing_cta_click\" data-cta-id=\"listing_smart_finder\" data-placement=\"listing_hero\" data-intent=\"{escape(intent)}\" href=\"/{locale}/smart-finder?intent={escape(copy['smart_intent'])}\">{escape(copy['smart_finder_cta'])}</a></div>"
+        f'<section id="listing-hero" class="card listing-hero" aria-labelledby="listing-hero-title" data-copy-pack-id="{escape(copy["copy_pack_id"])}" data-intent="{escape(intent)}">'
+        f'<img class="media" src="{escape(hero_media)}" alt="{escape(copy["hero_title"])}" width="1280" height="720" loading="eager" />'
+        f'<h2 id="listing-hero-title">{escape(copy["hero_title"])}</h2><p>{escape(copy["hero_sub"])}</p>'
+        f'<p id="listing-rule-note" class="muted">{escape(copy["rule_note"])}</p>'
+        f'<div class="cta-row"><a class="btn" data-event="listing_cta_click" data-cta-id="listing_consultation" data-placement="listing_hero" data-intent="{escape(intent)}" href="/{locale}/contact?intent=consultation&source={escape(intent)}">{escape(copy["consult_cta"])}</a>'
+        f'<a class="btn btn-secondary-hero" data-event="listing_cta_click" data-cta-id="listing_smart_finder" data-placement="listing_hero" data-intent="{escape(intent)}" href="/{locale}/smart-finder?intent={escape(copy["smart_intent"])}">{escape(copy["smart_finder_cta"])}</a></div>'
         f"</section>"
-        f"<section id=\"listing-filters-section\" class=\"card stack\" aria-labelledby=\"listing-filters-title\"><h2 id=\"listing-filters-title\">{escape(copy['filters_title'])}</h2>{query_error_html}"
-        f"<form id=\"listing-filters\" class=\"listing-filters\" method=\"get\" action=\"{listing_path}\" data-intent=\"{escape(intent)}\">"
-        f"<input id=\"form-page\" type=\"hidden\" name=\"page\" value=\"1\" /><input type=\"hidden\" name=\"limit\" value=\"{limit}\" />"
-        f"<div class=\"filter-grid\">"
-        f"<label class=\"filter-control\" for=\"price_min\"><span>{escape(copy['price_min'])}</span><input data-track-filter id=\"price_min\" name=\"price_min\" type=\"number\" min=\"0\" inputmode=\"numeric\" value=\"{escape(filter_values['price_min'])}\" /></label>"
-        f"<label class=\"filter-control\" for=\"price_max\"><span>{escape(copy['price_max'])}</span><input data-track-filter id=\"price_max\" name=\"price_max\" type=\"number\" min=\"0\" inputmode=\"numeric\" value=\"{escape(filter_values['price_max'])}\" /></label>"
-        f"<label class=\"filter-control\" for=\"beds\"><span>{escape(copy['beds'])}</span><input data-track-filter id=\"beds\" name=\"beds\" type=\"number\" min=\"0\" inputmode=\"numeric\" value=\"{escape(filter_values['beds'])}\" /></label>"
-        f"<label class=\"filter-control\" for=\"baths\"><span>{escape(copy['baths'])}</span><input data-track-filter id=\"baths\" name=\"baths\" type=\"number\" min=\"0\" inputmode=\"numeric\" value=\"{escape(filter_values['baths'])}\" /></label>"
-        f"<label class=\"filter-control\" for=\"area\"><span>{escape(copy['area'])}</span><select data-track-filter id=\"area\" name=\"area\">{''.join(area_options_html)}</select></label>"
-        f"<label class=\"filter-control\" for=\"project\"><span>{escape(copy['project'])}</span><select data-track-filter id=\"project\" name=\"project\">{''.join(project_options_html)}</select></label>"
-        f"<label class=\"filter-control\" for=\"property_type\"><span>{escape(copy['property_type'])}</span><select data-track-filter id=\"property_type\" name=\"property_type\">{''.join(property_type_options_html)}</select></label>"
-        f"<label class=\"filter-control\" for=\"sort\"><span>{escape(copy['sort'])}</span><select id=\"sort\" name=\"sort\"><option value=\"newest\"{' selected' if sort == 'newest' else ''}>{escape(copy['sort_newest'])}</option><option value=\"price_asc\"{' selected' if sort == 'price_asc' else ''}>{escape(copy['sort_price_asc'])}</option><option value=\"price_desc\"{' selected' if sort == 'price_desc' else ''}>{escape(copy['sort_price_desc'])}</option></select></label>"
-        f"</div><div class=\"cta-row\"><button class=\"btn\" type=\"submit\" data-event=\"listing_cta_click\" data-cta-id=\"listing_apply_filters\" data-placement=\"filter_bar\" data-intent=\"{escape(intent)}\">{escape(copy['apply_filters'])}</button><a class=\"btn btn-secondary-hero\" data-event=\"listing_cta_click\" data-cta-id=\"listing_reset_filters\" data-placement=\"filter_bar\" data-intent=\"{escape(intent)}\" href=\"{listing_path}\">{escape(copy['reset_filters'])}</a></div></form></section>"
-        f"<div id=\"listing-loading\" class=\"state-loading\" role=\"status\" aria-live=\"polite\" hidden>{escape(copy['loading'])}</div>"
-        f"<div id=\"listing-error-runtime\" class=\"state-error\" hidden>{escape(copy['runtime_error'])}</div>"
-        f"<section id=\"listing-skeleton\" class=\"listing-skeleton-grid\" aria-hidden=\"true\" hidden><article class=\"card skeleton-card\"><div class=\"skeleton-media\"></div><div class=\"skeleton-line w40\"></div><div class=\"skeleton-line w80\"></div><div class=\"skeleton-line w60\"></div></article><article class=\"card skeleton-card\"><div class=\"skeleton-media\"></div><div class=\"skeleton-line w40\"></div><div class=\"skeleton-line w80\"></div><div class=\"skeleton-line w60\"></div></article><article class=\"card skeleton-card\"><div class=\"skeleton-media\"></div><div class=\"skeleton-line w40\"></div><div class=\"skeleton-line w80\"></div><div class=\"skeleton-line w60\"></div></article></section>"
-        f"<section id=\"listing-results\" class=\"listing-grid\">{cards_html}</section>{pagination_html}"
-        f"<section class=\"card\"><p class=\"muted\">{escape(copy['loading_hint'])}</p><div class=\"cta-row\"><a class=\"btn\" data-event=\"listing_cta_click\" data-cta-id=\"listing_footer_consultation\" data-placement=\"listing_footer\" data-intent=\"{escape(intent)}\" href=\"/{locale}/contact?intent=consultation&source={escape(intent)}\">{escape(copy['consult_cta'])}</a><a class=\"btn btn-secondary-hero\" data-event=\"listing_cta_click\" data-cta-id=\"listing_footer_smart_finder\" data-placement=\"listing_footer\" data-intent=\"{escape(intent)}\" href=\"/{locale}/smart-finder?intent={escape(copy['smart_intent'])}\">{escape(copy['smart_finder_cta'])}</a></div></section>"
+        f'<section id="listing-filters-section" class="card stack" aria-labelledby="listing-filters-title"><h2 id="listing-filters-title">{escape(copy["filters_title"])}</h2>{query_error_html}'
+        f'<form id="listing-filters" class="listing-filters" method="get" action="{listing_path}" data-intent="{escape(intent)}">'
+        f'<input id="form-page" type="hidden" name="page" value="1" /><input type="hidden" name="limit" value="{limit}" />'
+        f'<div class="filter-grid">'
+        f'<label class="filter-control" for="price_min"><span>{escape(copy["price_min"])}</span><input data-track-filter id="price_min" name="price_min" type="number" min="0" inputmode="numeric" value="{escape(filter_values["price_min"])}" /></label>'
+        f'<label class="filter-control" for="price_max"><span>{escape(copy["price_max"])}</span><input data-track-filter id="price_max" name="price_max" type="number" min="0" inputmode="numeric" value="{escape(filter_values["price_max"])}" /></label>'
+        f'<label class="filter-control" for="beds"><span>{escape(copy["beds"])}</span><input data-track-filter id="beds" name="beds" type="number" min="0" inputmode="numeric" value="{escape(filter_values["beds"])}" /></label>'
+        f'<label class="filter-control" for="baths"><span>{escape(copy["baths"])}</span><input data-track-filter id="baths" name="baths" type="number" min="0" inputmode="numeric" value="{escape(filter_values["baths"])}" /></label>'
+        f'<label class="filter-control" for="area"><span>{escape(copy["area"])}</span><select data-track-filter id="area" name="area">{"".join(area_options_html)}</select></label>'
+        f'<label class="filter-control" for="project"><span>{escape(copy["project"])}</span><select data-track-filter id="project" name="project">{"".join(project_options_html)}</select></label>'
+        f'<label class="filter-control" for="property_type"><span>{escape(copy["property_type"])}</span><select data-track-filter id="property_type" name="property_type">{"".join(property_type_options_html)}</select></label>'
+        f'<label class="filter-control" for="sort"><span>{escape(copy["sort"])}</span><select id="sort" name="sort"><option value="newest"{" selected" if sort == "newest" else ""}>{escape(copy["sort_newest"])}</option><option value="price_asc"{" selected" if sort == "price_asc" else ""}>{escape(copy["sort_price_asc"])}</option><option value="price_desc"{" selected" if sort == "price_desc" else ""}>{escape(copy["sort_price_desc"])}</option></select></label>'
+        f'</div><div class="cta-row"><button class="btn" type="submit" data-event="listing_cta_click" data-cta-id="listing_apply_filters" data-placement="filter_bar" data-intent="{escape(intent)}">{escape(copy["apply_filters"])}</button><a class="btn btn-secondary-hero" data-event="listing_cta_click" data-cta-id="listing_reset_filters" data-placement="filter_bar" data-intent="{escape(intent)}" href="{listing_path}">{escape(copy["reset_filters"])}</a></div></form></section>'
+        f'<div id="listing-loading" class="state-loading" role="status" aria-live="polite" hidden>{escape(copy["loading"])}</div>'
+        f'<div id="listing-error-runtime" class="state-error" hidden>{escape(copy["runtime_error"])}</div>'
+        f'<section id="listing-skeleton" class="listing-skeleton-grid" aria-hidden="true" hidden><article class="card skeleton-card"><div class="skeleton-media"></div><div class="skeleton-line w40"></div><div class="skeleton-line w80"></div><div class="skeleton-line w60"></div></article><article class="card skeleton-card"><div class="skeleton-media"></div><div class="skeleton-line w40"></div><div class="skeleton-line w80"></div><div class="skeleton-line w60"></div></article><article class="card skeleton-card"><div class="skeleton-media"></div><div class="skeleton-line w40"></div><div class="skeleton-line w80"></div><div class="skeleton-line w60"></div></article></section>'
+        f'<section id="listing-results" class="listing-grid">{cards_html}</section>{pagination_html}'
+        f'<section class="card"><p class="muted">{escape(copy["loading_hint"])}</p><div class="cta-row"><a class="btn" data-event="listing_cta_click" data-cta-id="listing_footer_consultation" data-placement="listing_footer" data-intent="{escape(intent)}" href="/{locale}/contact?intent=consultation&source={escape(intent)}">{escape(copy["consult_cta"])}</a><a class="btn btn-secondary-hero" data-event="listing_cta_click" data-cta-id="listing_footer_smart_finder" data-placement="listing_footer" data-intent="{escape(intent)}" href="/{locale}/smart-finder?intent={escape(copy["smart_intent"])}">{escape(copy["smart_finder_cta"])}</a></div></section>'
         f"{tracking_script}"
     )
-    return HTMLResponse(_render_page_shell(locale, title=copy["page_title"], intro=copy["page_intro"], body=body))
+    return HTMLResponse(
+        _render_page_shell(locale, title=copy["page_title"], intro=copy["page_intro"], body=body)
+    )
 
 
 _EN_MONTHS = [
@@ -3584,7 +4032,9 @@ def _article_body_metadata(article: Article) -> dict[str, object]:
     return article.body_md
 
 
-def _article_author_profile(article: Article, locale: str) -> tuple[str | None, str | None, str | None]:
+def _article_author_profile(
+    article: Article, locale: str
+) -> tuple[str | None, str | None, str | None]:
     body_meta = _article_body_metadata(article)
     profile = body_meta.get("author_profile")
     if not isinstance(profile, dict):
@@ -3740,11 +4190,17 @@ def _render_article_markdown(markdown_text: str) -> tuple[str, list[tuple[str, s
             level = max(2, min(4, len(heading_match.group(1))))
             if level in {2, 3}:
                 toc_items.append((heading_text, heading_id))
-            blocks.append(f'<h{level} id="{escape(heading_id)}">{_render_inline_markdown(heading_text)}</h{level}>')
+            blocks.append(
+                f'<h{level} id="{escape(heading_id)}">{_render_inline_markdown(heading_text)}</h{level}>'
+            )
             idx += 1
             continue
 
-        if stripped.startswith("|") and idx + 1 < len(lines) and _is_markdown_table_separator(lines[idx + 1]):
+        if (
+            stripped.startswith("|")
+            and idx + 1 < len(lines)
+            and _is_markdown_table_separator(lines[idx + 1])
+        ):
             header_cells = _split_markdown_table_cells(stripped)
             idx += 2
             data_rows: list[list[str]] = []
@@ -3760,7 +4216,7 @@ def _render_article_markdown(markdown_text: str) -> tuple[str, list[tuple[str, s
                 cells = "".join(f"<td>{_render_inline_markdown(cell)}</td>" for cell in row_cells)
                 tbody_rows.append(f"<tr>{cells}</tr>")
             blocks.append(
-                "<div class=\"table-wrap\"><table class=\"article-table\">"
+                '<div class="table-wrap"><table class="article-table">'
                 f"<thead><tr>{thead}</tr></thead><tbody>{''.join(tbody_rows)}</tbody></table></div>"
             )
             continue
@@ -3799,7 +4255,11 @@ def _render_article_markdown(markdown_text: str) -> tuple[str, list[tuple[str, s
                 break
             if re.match(r"^[-*]\s+.+", candidate) or re.match(r"^\d+\.\s+.+", candidate):
                 break
-            if candidate.startswith("|") and idx + 1 < len(lines) and _is_markdown_table_separator(lines[idx + 1]):
+            if (
+                candidate.startswith("|")
+                and idx + 1 < len(lines)
+                and _is_markdown_table_separator(lines[idx + 1])
+            ):
                 break
             paragraph_lines.append(candidate)
             idx += 1
@@ -3977,9 +4437,13 @@ def _render_insights_page(locale: str, request: Request, db: Session) -> HTMLRes
     return _render_content_listing_page(locale, request, db, mode="insights")
 
 
-def _render_content_listing_page(locale: str, request: Request, db: Session, mode: str) -> HTMLResponse:
+def _render_content_listing_page(
+    locale: str, request: Request, db: Session, mode: str
+) -> HTMLResponse:
     copy = _content_listing_copy(locale, mode)
-    categories = ["guide", "blog"] if mode == "insights" else (["blog"] if mode == "blog" else ["guide"])
+    categories = (
+        ["guide", "blog"] if mode == "insights" else (["blog"] if mode == "blog" else ["guide"])
+    )
     rows = db.scalars(
         select(Article)
         .where(
@@ -3998,20 +4462,26 @@ def _render_content_listing_page(locale: str, request: Request, db: Session, mod
         db.scalar(
             select(func.count())
             .select_from(Article)
-            .where(Article.deleted_at.is_(None), Article.status == "published", Article.category == "blog")
+            .where(
+                Article.deleted_at.is_(None),
+                Article.status == "published",
+                Article.category == "blog",
+            )
         )
         or 0
     )
     guide_rows = db.scalars(
-        select(Article).where(Article.deleted_at.is_(None), Article.status == "published", Article.category == "guide")
+        select(Article).where(
+            Article.deleted_at.is_(None), Article.status == "published", Article.category == "guide"
+        )
     ).all()
     guides_count = len(guide_rows)
     invest_count = len([row for row in guide_rows if _article_matches_invest_topic(row, locale)])
 
     category_cards = (
-        f"<article class=\"card category-card\"><h3>{escape(copy['blog_title'])}</h3><p>{escape(copy['category_blog_desc'])}</p><p class=\"muted\">{blog_count}</p><a class=\"btn\" href=\"/{locale}/blog\">{escape(copy['blog_title'])}</a></article>"
-        f"<article class=\"card category-card\"><h3>{escape(copy['guides_title'])}</h3><p>{escape(copy['category_guides_desc'])}</p><p class=\"muted\">{guides_count}</p><a class=\"btn\" href=\"/{locale}/guides\">{escape(copy['guides_title'])}</a></article>"
-        f"<article class=\"card category-card\"><h3>{escape(copy['invest_title'])}</h3><p>{escape(copy['category_invest_desc'])}</p><p class=\"muted\">{invest_count}</p><a class=\"btn\" href=\"/{locale}/invest/guides\">{escape(copy['invest_title'])}</a></article>"
+        f'<article class="card category-card"><h3>{escape(copy["blog_title"])}</h3><p>{escape(copy["category_blog_desc"])}</p><p class="muted">{blog_count}</p><a class="btn" href="/{locale}/blog">{escape(copy["blog_title"])}</a></article>'
+        f'<article class="card category-card"><h3>{escape(copy["guides_title"])}</h3><p>{escape(copy["category_guides_desc"])}</p><p class="muted">{guides_count}</p><a class="btn" href="/{locale}/guides">{escape(copy["guides_title"])}</a></article>'
+        f'<article class="card category-card"><h3>{escape(copy["invest_title"])}</h3><p>{escape(copy["category_invest_desc"])}</p><p class="muted">{invest_count}</p><a class="btn" href="/{locale}/invest/guides">{escape(copy["invest_title"])}</a></article>'
     )
 
     cards: list[str] = []
@@ -4021,32 +4491,34 @@ def _render_content_listing_page(locale: str, request: Request, db: Session, mod
         tags = _article_tags_for_locale(row, locale)
         tag_badges = "".join(f'<span class="tag">{escape(tag)}</span>' for tag in tags)
         tags_html = (
-            f"<div class=\"tag-row\">{tag_badges}</div>"
+            f'<div class="tag-row">{tag_badges}</div>'
             if tags
-            else f"<p class=\"muted\">{escape(copy['topic_note'])}</p>"
+            else f'<p class="muted">{escape(copy["topic_note"])}</p>'
         )
         media = _safe_media_url(row.hero_image_url, _DEFAULT_MEDIA_FALLBACK, request=request)
-        published_text = _format_locale_date(row.published_at, locale, fallback=copy["date_pending"])
+        published_text = _format_locale_date(
+            row.published_at, locale, fallback=copy["date_pending"]
+        )
         updated_text = _format_locale_date(row.updated_at, locale, fallback=copy["updated_pending"])
         category_slug = "blog" if row.category == "blog" else "guides"
         detail_href = f"/{locale}/{category_slug}/{row.slug}"
         cards.append(
-            f"<article class=\"card content-card\" data-card-slug=\"{escape(row.slug)}\">"
-            f"<a class=\"content-link\" data-event=\"article_click\" data-placement=\"listing_card\" data-card-slug=\"{escape(row.slug)}\" href=\"{detail_href}\">"
-            f"<img class=\"media\" src=\"{escape(media)}\" alt=\"{escape(title)}\" width=\"640\" height=\"360\" loading=\"lazy\" />"
+            f'<article class="card content-card" data-card-slug="{escape(row.slug)}">'
+            f'<a class="content-link" data-event="article_click" data-placement="listing_card" data-card-slug="{escape(row.slug)}" href="{detail_href}">'
+            f'<img class="media" src="{escape(media)}" alt="{escape(title)}" width="640" height="360" loading="lazy" />'
             f"<h2>{escape(title)}</h2></a>"
             f"<p>{escape(excerpt)}</p>"
-            f"<p class=\"muted\">{escape(copy['date_label'])}: {escape(published_text)} • {escape(copy['updated_label'])}: {escape(updated_text)}</p>"
+            f'<p class="muted">{escape(copy["date_label"])}: {escape(published_text)} • {escape(copy["updated_label"])}: {escape(updated_text)}</p>'
             f"{tags_html}"
-            f"<div class=\"cta-row\">"
-            f"<a class=\"btn\" data-event=\"article_click\" data-placement=\"listing_card\" data-card-slug=\"{escape(row.slug)}\" href=\"{detail_href}\">{escape(copy['read_article'])}</a>"
-            f"<a class=\"btn btn-secondary-hero\" data-event=\"content_cta_click\" data-cta-id=\"content_consult_card\" data-placement=\"listing_card\" data-article-slug=\"{escape(row.slug)}\" href=\"/{locale}/contact?intent=consultation&article={escape(row.slug)}\">{escape(copy['consult_cta'])}</a>"
+            f'<div class="cta-row">'
+            f'<a class="btn" data-event="article_click" data-placement="listing_card" data-card-slug="{escape(row.slug)}" href="{detail_href}">{escape(copy["read_article"])}</a>'
+            f'<a class="btn btn-secondary-hero" data-event="content_cta_click" data-cta-id="content_consult_card" data-placement="listing_card" data-article-slug="{escape(row.slug)}" href="/{locale}/contact?intent=consultation&article={escape(row.slug)}">{escape(copy["consult_cta"])}</a>'
             f"</div>"
             f"</article>"
         )
     cards_html = "".join(cards)
     is_empty = not cards
-    empty_html = f"<div id=\"content-empty\" class=\"state-empty\"{' hidden' if not is_empty else ''}>{escape(copy['empty'])}</div>"
+    empty_html = f'<div id="content-empty" class="state-empty"{" hidden" if not is_empty else ""}>{escape(copy["empty"])}</div>'
     loading_id = "content-loading"
     error_id = "content-error"
     tracking_script = _content_tracking_script(loading_id=loading_id, error_id=error_id)
@@ -4064,15 +4536,15 @@ def _render_content_listing_page(locale: str, request: Request, db: Session, mod
     )
     body = (
         f"{listing_styles}"
-        f"<section class=\"card article-shell\" aria-labelledby=\"content-intro-title\">"
-        f"<h2 id=\"content-intro-title\">{escape(copy['page_title'])}</h2><p>{escape(copy['page_intro'])}</p>"
-        f"<div class=\"cta-row\"><a class=\"btn\" data-event=\"content_cta_click\" data-cta-id=\"content_consult_header\" data-placement=\"listing_header\" href=\"/{locale}/contact?intent=consultation\">{escape(copy['consult_cta'])}</a>"
-        f"<a class=\"btn btn-secondary-hero\" href=\"/{locale}/insights\">{escape(copy['back_insights'])}</a></div></section>"
-        f"<section class=\"card\" aria-labelledby=\"content-category-title\"><h2 id=\"content-category-title\">{escape(copy['category_title'])}</h2><div class=\"content-category-grid\">{category_cards}</div></section>"
-        f"<div id=\"{loading_id}\" class=\"state-loading\" role=\"status\" aria-live=\"polite\" hidden>{escape(copy['loading'])}</div>"
-        f"<div id=\"{error_id}\" class=\"state-error\" hidden>{escape(copy['runtime_error'])}</div>"
+        f'<section class="card article-shell" aria-labelledby="content-intro-title">'
+        f'<h2 id="content-intro-title">{escape(copy["page_title"])}</h2><p>{escape(copy["page_intro"])}</p>'
+        f'<div class="cta-row"><a class="btn" data-event="content_cta_click" data-cta-id="content_consult_header" data-placement="listing_header" href="/{locale}/contact?intent=consultation">{escape(copy["consult_cta"])}</a>'
+        f'<a class="btn btn-secondary-hero" href="/{locale}/insights">{escape(copy["back_insights"])}</a></div></section>'
+        f'<section class="card" aria-labelledby="content-category-title"><h2 id="content-category-title">{escape(copy["category_title"])}</h2><div class="content-category-grid">{category_cards}</div></section>'
+        f'<div id="{loading_id}" class="state-loading" role="status" aria-live="polite" hidden>{escape(copy["loading"])}</div>'
+        f'<div id="{error_id}" class="state-error" hidden>{escape(copy["runtime_error"])}</div>'
         f"{empty_html}"
-        f"<section class=\"content-grid\" aria-live=\"polite\">{cards_html}</section>"
+        f'<section class="content-grid" aria-live="polite">{cards_html}</section>'
         f"{tracking_script}"
     )
     canonical = _absolute_url(request, f"/{locale}{copy['listing_suffix']}")
@@ -4087,7 +4559,9 @@ def _render_content_listing_page(locale: str, request: Request, db: Session, mod
     )
 
 
-def _render_content_detail_page(locale: str, request: Request, db: Session, slug: str, category: str) -> HTMLResponse:
+def _render_content_detail_page(
+    locale: str, request: Request, db: Session, slug: str, category: str
+) -> HTMLResponse:
     row = db.scalar(
         select(Article).where(
             Article.deleted_at.is_(None),
@@ -4154,16 +4628,16 @@ def _render_content_detail_page(locale: str, request: Request, db: Session, slug
     ).all()
     related_html = "".join(
         (
-            f"<article class=\"card\">"
-            f"<a class=\"content-link\" data-event=\"article_click\" data-placement=\"related_content\" data-card-slug=\"{escape(item.slug)}\" href=\"/{locale}/{route_prefix}/{escape(item.slug)}\">"
-            f"<img class=\"media\" src=\"{escape(_safe_media_url(item.hero_image_url, _DEFAULT_MEDIA_FALLBACK, request=request))}\" alt=\"{escape(_localized_dict_text(item.title, locale) or item.slug)}\" width=\"640\" height=\"360\" loading=\"lazy\" />"
+            f'<article class="card">'
+            f'<a class="content-link" data-event="article_click" data-placement="related_content" data-card-slug="{escape(item.slug)}" href="/{locale}/{route_prefix}/{escape(item.slug)}">'
+            f'<img class="media" src="{escape(_safe_media_url(item.hero_image_url, _DEFAULT_MEDIA_FALLBACK, request=request))}" alt="{escape(_localized_dict_text(item.title, locale) or item.slug)}" width="640" height="360" loading="lazy" />'
             f"<h3>{escape(_localized_dict_text(item.title, locale) or item.slug)}</h3></a>"
             f"<p>{escape(_localized_dict_text(item.excerpt, locale) or excerpt)}</p>"
             f"</article>"
         )
         for item in related_rows
     ) or (
-        "<div class=\"card\">"
+        '<div class="card">'
         + escape(
             "Related content is pending publication. TODO: publish at least one related article."
             if locale == "en"
@@ -4175,18 +4649,21 @@ def _render_content_detail_page(locale: str, request: Request, db: Session, slug
     toc_html = ""
     if show_toc:
         toc_html = (
-            "<nav id=\"article-toc\" class=\"card\" aria-label=\"Table of contents\">"
+            '<nav id="article-toc" class="card" aria-label="Table of contents">'
             + f"<h2>{'Table of contents' if locale == 'en' else 'สารบัญ'}</h2>"
             + "<ol>"
-            + "".join(f"<li><a href=\"#{escape(anchor)}\">{escape(label)}</a></li>" for label, anchor in toc_items)
+            + "".join(
+                f'<li><a href="#{escape(anchor)}">{escape(label)}</a></li>'
+                for label, anchor in toc_items
+            )
             + "</ol></nav>"
         )
 
     tag_badges = "".join(f'<span class="tag">{escape(tag)}</span>' for tag in tags)
     tag_html = (
-        f"<div class=\"tag-row\">{tag_badges}</div>"
+        f'<div class="tag-row">{tag_badges}</div>'
         if tags
-        else f"<p class=\"muted\">{'Tags pending publication. TODO: add approved topic tags.' if locale == 'en' else 'ยังไม่มีแท็ก TODO: เพิ่มแท็กที่อนุมัติแล้ว'}</p>"
+        else f'<p class="muted">{"Tags pending publication. TODO: add approved topic tags." if locale == "en" else "ยังไม่มีแท็ก TODO: เพิ่มแท็กที่อนุมัติแล้ว"}</p>'
     )
     schema_payload: dict[str, object] = {
         "@context": "https://schema.org",
@@ -4207,7 +4684,9 @@ def _render_content_detail_page(locale: str, request: Request, db: Session, slug
         schema_payload["author"] = author_schema
     if tags:
         schema_payload["keywords"] = ", ".join(tags)
-    schema_json = json.dumps({k: v for k, v in schema_payload.items() if v is not None}, ensure_ascii=False)
+    schema_json = json.dumps(
+        {k: v for k, v in schema_payload.items() if v is not None}, ensure_ascii=False
+    )
 
     loading_id = "article-loading"
     error_id = "article-error"
@@ -4229,29 +4708,29 @@ def _render_content_detail_page(locale: str, request: Request, db: Session, slug
     author_bio_html = f'<p class="muted">{escape(author_bio)}</p>' if author_bio else ""
     body = (
         f"{detail_styles}"
-        f"<section id=\"article-hero\" class=\"card article-layout\">"
-        f"<img class=\"media\" src=\"{escape(hero_media)}\" alt=\"{escape(title)}\" width=\"1280\" height=\"720\" loading=\"eager\" />"
+        f'<section id="article-hero" class="card article-layout">'
+        f'<img class="media" src="{escape(hero_media)}" alt="{escape(title)}" width="1280" height="720" loading="eager" />'
         f"<p>{escape(excerpt)}</p>"
-        f"<div class=\"article-meta\">"
-        f"<p class=\"muted\">{'Published' if locale == 'en' else 'เผยแพร่'}: {escape(published_text)}</p>"
-        f"<p class=\"muted\">{'Updated' if locale == 'en' else 'อัปเดต'}: {escape(updated_text)}</p>"
-        f"<p class=\"muted\">{'Author' if locale == 'en' else 'ผู้เขียน'}: {escape(author_label)}</p>"
+        f'<div class="article-meta">'
+        f'<p class="muted">{"Published" if locale == "en" else "เผยแพร่"}: {escape(published_text)}</p>'
+        f'<p class="muted">{"Updated" if locale == "en" else "อัปเดต"}: {escape(updated_text)}</p>'
+        f'<p class="muted">{"Author" if locale == "en" else "ผู้เขียน"}: {escape(author_label)}</p>'
         f"{author_role_html}"
         f"{author_bio_html}"
         f"</div>"
         f"{tag_html}"
-        f"<div class=\"cta-row\"><a class=\"btn\" data-event=\"content_cta_click\" data-cta-id=\"article_consultation_hero\" data-placement=\"article_hero\" data-article-slug=\"{escape(row.slug)}\" href=\"/{locale}/contact?intent=consultation&article={escape(row.slug)}\">{'Request Consultation' if locale == 'en' else 'ขอคำปรึกษา'}</a>"
-        f"<a class=\"btn btn-secondary-hero\" href=\"{listing_path}\">{'Back to listing' if locale == 'en' else 'กลับหน้ารายการ'}</a></div>"
+        f'<div class="cta-row"><a class="btn" data-event="content_cta_click" data-cta-id="article_consultation_hero" data-placement="article_hero" data-article-slug="{escape(row.slug)}" href="/{locale}/contact?intent=consultation&article={escape(row.slug)}">{"Request Consultation" if locale == "en" else "ขอคำปรึกษา"}</a>'
+        f'<a class="btn btn-secondary-hero" href="{listing_path}">{"Back to listing" if locale == "en" else "กลับหน้ารายการ"}</a></div>'
         f"</section>"
         f"{toc_html}"
-        f"<section id=\"article-body\" class=\"card\"><h2>{'Article' if locale == 'en' else 'บทความ'}</h2><div class=\"article-prose\">{rendered_body}</div></section>"
-        f"<section id=\"article-related\" class=\"stack\"><h2>{'Related content' if locale == 'en' else 'คอนเทนต์ที่เกี่ยวข้อง'}</h2><div class=\"related-grid\">{related_html}</div></section>"
-        f"<section class=\"card\"><h2>{'Need help with this topic?' if locale == 'en' else 'ต้องการคำแนะนำต่อจากบทความนี้?'}</h2><p>{'Continue to consultation for a curated next step.' if locale == 'en' else 'ไปต่อที่ consultation เพื่อรับขั้นตอนถัดไปที่เหมาะกับคุณ'}</p><div class=\"cta-row\">"
-        f"<a class=\"btn\" data-event=\"content_cta_click\" data-cta-id=\"article_consultation_footer\" data-placement=\"article_footer\" data-article-slug=\"{escape(row.slug)}\" href=\"/{locale}/contact?intent=consultation&article={escape(row.slug)}\">{'Request Consultation' if locale == 'en' else 'ขอคำปรึกษา'}</a>"
-        f"<a class=\"btn btn-secondary-hero\" href=\"/{locale}/insights\">{'View all insights' if locale == 'en' else 'ดู Insights ทั้งหมด'}</a>"
+        f'<section id="article-body" class="card"><h2>{"Article" if locale == "en" else "บทความ"}</h2><div class="article-prose">{rendered_body}</div></section>'
+        f'<section id="article-related" class="stack"><h2>{"Related content" if locale == "en" else "คอนเทนต์ที่เกี่ยวข้อง"}</h2><div class="related-grid">{related_html}</div></section>'
+        f'<section class="card"><h2>{"Need help with this topic?" if locale == "en" else "ต้องการคำแนะนำต่อจากบทความนี้?"}</h2><p>{"Continue to consultation for a curated next step." if locale == "en" else "ไปต่อที่ consultation เพื่อรับขั้นตอนถัดไปที่เหมาะกับคุณ"}</p><div class="cta-row">'
+        f'<a class="btn" data-event="content_cta_click" data-cta-id="article_consultation_footer" data-placement="article_footer" data-article-slug="{escape(row.slug)}" href="/{locale}/contact?intent=consultation&article={escape(row.slug)}">{"Request Consultation" if locale == "en" else "ขอคำปรึกษา"}</a>'
+        f'<a class="btn btn-secondary-hero" href="/{locale}/insights">{"View all insights" if locale == "en" else "ดู Insights ทั้งหมด"}</a>'
         f"</div></section>"
-        f"<div id=\"{loading_id}\" class=\"state-loading\" role=\"status\" aria-live=\"polite\" hidden>{'Loading article...' if locale == 'en' else 'กำลังโหลดบทความ...'}</div>"
-        f"<div id=\"{error_id}\" class=\"state-error\" hidden>{'Unable to render article right now. Please retry.' if locale == 'en' else 'ยังไม่สามารถแสดงบทความได้ กรุณาลองใหม่'}</div>"
+        f'<div id="{loading_id}" class="state-loading" role="status" aria-live="polite" hidden>{"Loading article..." if locale == "en" else "กำลังโหลดบทความ..."}</div>'
+        f'<div id="{error_id}" class="state-error" hidden>{"Unable to render article right now. Please retry." if locale == "en" else "ยังไม่สามารถแสดงบทความได้ กรุณาลองใหม่"}</div>'
         f'<script type="application/ld+json" data-schema-hook="article-detail">{schema_json}</script>'
         f"{tracking_script}"
     )
@@ -4275,7 +4754,7 @@ def _company_page(locale: str, slug: str, title: str, fallback: str, db: Session
     row = db.scalar(select(CompanyInfo).where(CompanyInfo.slug == slug))
     content = str(row.content if row is not None else fallback).strip() or fallback
     meta = str(row.meta_description if row is not None else "").strip()
-    body = f"<section class=\"card\"><p>{escape(meta)}</p><div>{_format_text_block(content)}</div><a class=\"btn\" href=\"/{locale}/contact\">{'Contact our team' if locale == 'en' else 'ติดต่อทีมงาน'}</a></section>"
+    body = f'<section class="card"><p>{escape(meta)}</p><div>{_format_text_block(content)}</div><a class="btn" href="/{locale}/contact">{"Contact our team" if locale == "en" else "ติดต่อทีมงาน"}</a></section>'
     return HTMLResponse(_render_page_shell(locale, title=title, intro=meta or title, body=body))
 
 
@@ -4313,7 +4792,9 @@ def _contact_detail_value(
 
 
 def _contact_map_href(fields: dict[str, str]) -> str | None:
-    direct = str(fields.get("map_url") or fields.get("map") or fields.get("google_map") or "").strip()
+    direct = str(
+        fields.get("map_url") or fields.get("map") or fields.get("google_map") or ""
+    ).strip()
     if direct:
         parsed = urlparse(direct)
         host = str(parsed.hostname or "").lower()
@@ -4383,27 +4864,41 @@ def _render_about_page(locale: str, request: Request, db: Session) -> HTMLRespon
         )
     team_cards = []
     for row in team_rows:
-        photo = _local_runtime_media_path(str(row.photo_url or "").strip(), request=request) or _DEFAULT_MEDIA_FALLBACK
+        photo = (
+            _local_runtime_media_path(str(row.photo_url or "").strip(), request=request)
+            or _DEFAULT_MEDIA_FALLBACK
+        )
         photo_html = f'<img class="media" src="{escape(photo)}" alt="{escape(row.name)}" width="640" height="360" loading="lazy" />'
         team_cards.append(
-            f"<article class=\"card\">{photo_html}<h3>{escape(row.name)}</h3><p class=\"muted\">{escape(row.role_title)}</p><p>{escape(_localized_dict_text(row.bio, locale) or '')}</p></article>"
+            f'<article class="card">{photo_html}<h3>{escape(row.name)}</h3><p class="muted">{escape(row.role_title)}</p><p>{escape(_localized_dict_text(row.bio, locale) or "")}</p></article>'
         )
     team_body = "".join(team_cards)
     if not team_body:
-        team_fallback = "Team profiles are not published yet. TODO: publish approved team bios." if locale == "en" else "ยังไม่มีโปรไฟล์ทีมที่เผยแพร่ TODO: เพิ่มประวัติทีมที่อนุมัติแล้ว"
-        team_body = f"<div class=\"card\">{escape(team_fallback)}</div>"
+        team_fallback = (
+            "Team profiles are not published yet. TODO: publish approved team bios."
+            if locale == "en"
+            else "ยังไม่มีโปรไฟล์ทีมที่เผยแพร่ TODO: เพิ่มประวัติทีมที่อนุมัติแล้ว"
+        )
+        team_body = f'<div class="card">{escape(team_fallback)}</div>'
     reviews_body = "".join(
-        f"<article class=\"card\"><h3>{escape(row.attribution_name or ('Client review' if locale == 'en' else 'รีวิวลูกค้า'))}</h3><p><strong>{escape(row.quote)}</strong></p><p class=\"muted\">{escape(str(row.context or row.persona or row.intent or '').strip())}</p></article>"
+        f'<article class="card"><h3>{escape(row.attribution_name or ("Client review" if locale == "en" else "รีวิวลูกค้า"))}</h3><p><strong>{escape(row.quote)}</strong></p><p class="muted">{escape(str(row.context or row.persona or row.intent or "").strip())}</p></article>'
         for row in review_rows
     )
     if not reviews_body:
-        review_fallback = "Approved testimonials are not published yet. Publish testimonial records to populate this page." if locale == "en" else "ยังไม่มี testimonial ที่เผยแพร่ โปรดเผยแพร่ testimonial เพื่อให้หน้านี้แสดงผล"
-        reviews_body = f"<div class=\"card\">{escape(review_fallback)}</div>"
+        review_fallback = (
+            "Approved testimonials are not published yet. Publish testimonial records to populate this page."
+            if locale == "en"
+            else "ยังไม่มี testimonial ที่เผยแพร่ โปรดเผยแพร่ testimonial เพื่อให้หน้านี้แสดงผล"
+        )
+        reviews_body = f'<div class="card">{escape(review_fallback)}</div>'
     proof_cards = []
     for row in team_rows[:3]:
-        photo = _local_runtime_media_path(str(row.photo_url or "").strip(), request=request) or _DEFAULT_MEDIA_FALLBACK
+        photo = (
+            _local_runtime_media_path(str(row.photo_url or "").strip(), request=request)
+            or _DEFAULT_MEDIA_FALLBACK
+        )
         proof_cards.append(
-            f"<article class=\"card\"><img class=\"media\" src=\"{escape(photo)}\" alt=\"{escape(row.name)} proof asset\" width=\"640\" height=\"360\" loading=\"lazy\" /><h3>{escape(row.name)}</h3><p>{'Published local media asset from workflow.' if locale == 'en' else 'สื่อ local ที่เผยแพร่ผ่าน workflow'}</p></article>"
+            f'<article class="card"><img class="media" src="{escape(photo)}" alt="{escape(row.name)} proof asset" width="640" height="360" loading="lazy" /><h3>{escape(row.name)}</h3><p>{"Published local media asset from workflow." if locale == "en" else "สื่อ local ที่เผยแพร่ผ่าน workflow"}</p></article>'
         )
     if not proof_cards:
         fallback_note = (
@@ -4412,22 +4907,30 @@ def _render_about_page(locale: str, request: Request, db: Session) -> HTMLRespon
             else "ยังไม่มี proof assets ที่เผยแพร่ TODO: เพิ่มสื่อ local ที่อนุมัติแล้ว"
         )
         proof_cards.append(
-            f"<article class=\"card\"><img class=\"media\" src=\"{_DEFAULT_MEDIA_FALLBACK}\" alt=\"Proof asset fallback\" width=\"640\" height=\"360\" loading=\"lazy\" /><p>{escape(fallback_note)}</p></article>"
+            f'<article class="card"><img class="media" src="{_DEFAULT_MEDIA_FALLBACK}" alt="Proof asset fallback" width="640" height="360" loading="lazy" /><p>{escape(fallback_note)}</p></article>'
         )
-    work_fallback = "Video proof appears when approved local media is published in the system." if locale == "en" else "ส่วนวิดีโอจะแสดงเมื่อมีการเผยแพร่สื่อ local ที่อนุมัติแล้วในระบบ"
+    work_fallback = (
+        "Video proof appears when approved local media is published in the system."
+        if locale == "en"
+        else "ส่วนวิดีโอจะแสดงเมื่อมีการเผยแพร่สื่อ local ที่อนุมัติแล้วในระบบ"
+    )
     how_we_work_href = f"/{locale}/how-we-work"
     proof_cta_label = "Open how we work" if locale == "en" else "เปิดหน้า how we work"
     about_cta_label = "Contact our local team" if locale == "en" else "ติดต่อทีม local"
     body = (
-        f"<section id=\"about-section\" class=\"card\"><h2>{escape(about_row.title if about_row is not None else ('About' if locale == 'en' else 'About'))}</h2><div>{_format_text_block(about_content)}</div></section>"
-        f"<section id=\"process-section\" class=\"card\"><h2>{'How we work' if locale == 'en' else 'How we work'}</h2><div>{_format_text_block(process_content)}</div></section>"
-        f"<section id=\"team-section\" class=\"grid\"><h2>{'Team' if locale == 'en' else 'Team'}</h2>{team_body}</section>"
-        f"<section id=\"proof-assets\" class=\"grid\"><h2>{'Proof assets' if locale == 'en' else 'Proof assets'}</h2>{''.join(proof_cards)}</section>"
-        f"<section id=\"client-reviews\" class=\"grid\"><h2>{'Client Reviews' if locale == 'en' else 'Client Reviews'}</h2>{reviews_body}</section>"
-        f"<section id=\"work-proof\" class=\"card\"><h2>{'See our work' if locale == 'en' else 'ดูผลงานของเรา'}</h2><p>{escape(work_fallback)}</p><div class=\"grid\"><a class=\"btn\" href=\"{how_we_work_href}\">{proof_cta_label}</a><a class=\"btn\" href=\"/{locale}/contact?intent=consultation\">{about_cta_label}</a></div></section>"
+        f'<section id="about-section" class="card"><h2>{escape(about_row.title if about_row is not None else ("About" if locale == "en" else "About"))}</h2><div>{_format_text_block(about_content)}</div></section>'
+        f'<section id="process-section" class="card"><h2>{"How we work" if locale == "en" else "How we work"}</h2><div>{_format_text_block(process_content)}</div></section>'
+        f'<section id="team-section" class="grid"><h2>{"Team" if locale == "en" else "Team"}</h2>{team_body}</section>'
+        f'<section id="proof-assets" class="grid"><h2>{"Proof assets" if locale == "en" else "Proof assets"}</h2>{"".join(proof_cards)}</section>'
+        f'<section id="client-reviews" class="grid"><h2>{"Client Reviews" if locale == "en" else "Client Reviews"}</h2>{reviews_body}</section>'
+        f'<section id="work-proof" class="card"><h2>{"See our work" if locale == "en" else "ดูผลงานของเรา"}</h2><p>{escape(work_fallback)}</p><div class="grid"><a class="btn" href="{how_we_work_href}">{proof_cta_label}</a><a class="btn" href="/{locale}/contact?intent=consultation">{about_cta_label}</a></div></section>'
     )
     title = "About" if locale == "en" else "About"
-    intro = str(about_row.meta_description if about_row is not None else "").strip() or ("Published company overview and supporting content." if locale == "en" else "ข้อมูลบริษัทและคอนเทนต์ที่เผยแพร่แล้ว")
+    intro = str(about_row.meta_description if about_row is not None else "").strip() or (
+        "Published company overview and supporting content."
+        if locale == "en"
+        else "ข้อมูลบริษัทและคอนเทนต์ที่เผยแพร่แล้ว"
+    )
     return HTMLResponse(_render_page_shell(locale, title=title, intro=intro, body=body))
 
 
@@ -4445,18 +4948,26 @@ def _render_how_we_work_page(locale: str, db: Session) -> HTMLResponse:
         if locale == "en"
         else "ขั้นตอนการทำงานและการส่งมอบสำหรับ consultation, valuation และ listing"
     )
-    process_title = process_row.title if process_row is not None else ("How we work" if locale == "en" else "How we work")
+    process_title = (
+        process_row.title
+        if process_row is not None
+        else ("How we work" if locale == "en" else "How we work")
+    )
     steps = (
-        ["Consultation and goal setup", "Document review and data check", "Go-live plan with approval checkpoints"]
+        [
+            "Consultation and goal setup",
+            "Document review and data check",
+            "Go-live plan with approval checkpoints",
+        ]
         if locale == "en"
         else ["ตั้งเป้าหมายและรับข้อมูลเบื้องต้น", "ตรวจเอกสารและตรวจข้อมูล", "วางแผน go-live พร้อมจุดอนุมัติ"]
     )
     steps_html = "".join(f"<li>{escape(step)}</li>" for step in steps)
     body = (
-        f"<section id=\"how-we-work-overview\" class=\"card\"><h2>{escape(process_title)}</h2><div>{_format_text_block(content)}</div></section>"
-        f"<section id=\"how-we-work-steps\" class=\"card\"><h2>{'Process overview' if locale == 'en' else 'ภาพรวมขั้นตอน'}</h2><ol>{steps_html}</ol></section>"
-        f"<section id=\"how-we-work-proof\" class=\"card\"><h2>{'Process proof assets' if locale == 'en' else 'หลักฐานประกอบ process'}</h2><img class=\"media\" src=\"{_DEFAULT_MEDIA_FALLBACK}\" alt=\"Process proof asset\" width=\"1280\" height=\"720\" loading=\"lazy\" /><p>{'Only local media from our runtime storage is used in public pages.' if locale == 'en' else 'หน้า public ใช้เฉพาะสื่อ local จากระบบ storage ของเรา'}</p></section>"
-        f"<section id=\"how-we-work-next-step\" class=\"card\"><h2>{'Next step' if locale == 'en' else 'ขั้นตอนถัดไป'}</h2><div class=\"grid\"><a class=\"btn\" href=\"/{locale}/contact?intent=consultation\">{'Request consultation' if locale == 'en' else 'ขอคำปรึกษา'}</a><a class=\"btn\" href=\"/{locale}/sell/list-property\">{'List a property' if locale == 'en' else 'ลงประกาศทรัพย์'}</a></div></section>"
+        f'<section id="how-we-work-overview" class="card"><h2>{escape(process_title)}</h2><div>{_format_text_block(content)}</div></section>'
+        f'<section id="how-we-work-steps" class="card"><h2>{"Process overview" if locale == "en" else "ภาพรวมขั้นตอน"}</h2><ol>{steps_html}</ol></section>'
+        f'<section id="how-we-work-proof" class="card"><h2>{"Process proof assets" if locale == "en" else "หลักฐานประกอบ process"}</h2><img class="media" src="{_DEFAULT_MEDIA_FALLBACK}" alt="Process proof asset" width="1280" height="720" loading="lazy" /><p>{"Only local media from our runtime storage is used in public pages." if locale == "en" else "หน้า public ใช้เฉพาะสื่อ local จากระบบ storage ของเรา"}</p></section>'
+        f'<section id="how-we-work-next-step" class="card"><h2>{"Next step" if locale == "en" else "ขั้นตอนถัดไป"}</h2><div class="grid"><a class="btn" href="/{locale}/contact?intent=consultation">{"Request consultation" if locale == "en" else "ขอคำปรึกษา"}</a><a class="btn" href="/{locale}/sell/list-property">{"List a property" if locale == "en" else "ลงประกาศทรัพย์"}</a></div></section>'
     )
     return HTMLResponse(_render_page_shell(locale, title=process_title, intro=intro, body=body))
 
@@ -4486,9 +4997,15 @@ def _render_contact_page(locale: str, db: Session) -> HTMLResponse:
         if locale == "en"
         else "ยังไม่เผยแพร่อีเมล TODO: เพิ่มอีเมลที่ยืนยันแล้ว"
     )
-    nap_name = _contact_detail_value(fields, ["name", "company_name", "company"], fallback="FlowBiz")
-    nap_address = _contact_detail_value(fields, ["address", "office_address", "street_address"], fallback=fallback_address)
-    nap_phone = _contact_detail_value(fields, ["phone", "telephone", "tel"], fallback=fallback_phone)
+    nap_name = _contact_detail_value(
+        fields, ["name", "company_name", "company"], fallback="FlowBiz"
+    )
+    nap_address = _contact_detail_value(
+        fields, ["address", "office_address", "street_address"], fallback=fallback_address
+    )
+    nap_phone = _contact_detail_value(
+        fields, ["phone", "telephone", "tel"], fallback=fallback_phone
+    )
     nap_email = _contact_detail_value(fields, ["email", "contact_email"], fallback=fallback_email)
     office_hours = _contact_detail_value(
         fields,
@@ -4513,11 +5030,13 @@ def _render_contact_page(locale: str, db: Session) -> HTMLResponse:
         href = _contact_channel_href(kind, raw)
         if not href:
             continue
-        rel_attr = " target=\"_blank\" rel=\"noopener\"" if href.startswith("https://") else ""
-        channel_rows.append(f"<li><a href=\"{escape(href)}\"{rel_attr}>{escape(label)}: {escape(raw)}</a></li>")
+        rel_attr = ' target="_blank" rel="noopener"' if href.startswith("https://") else ""
+        channel_rows.append(
+            f'<li><a href="{escape(href)}"{rel_attr}>{escape(label)}: {escape(raw)}</a></li>'
+        )
     if not channel_rows:
         channel_rows.append(
-            f"<li class=\"state-empty\">{escape('Contact channels pending publication. TODO: publish verified channels.' if locale == 'en' else 'ยังไม่เผยแพร่ช่องทางติดต่อ TODO: เพิ่มช่องทางที่ยืนยันแล้ว')}</li>"
+            f'<li class="state-empty">{escape("Contact channels pending publication. TODO: publish verified channels." if locale == "en" else "ยังไม่เผยแพร่ช่องทางติดต่อ TODO: เพิ่มช่องทางที่ยืนยันแล้ว")}</li>'
         )
 
     contact_intro = (
@@ -4525,34 +5044,40 @@ def _render_contact_page(locale: str, db: Session) -> HTMLResponse:
         if locale == "en"
         else "ส่งความต้องการของคุณ แล้วเราจะติดต่อกลับด้วยขั้นตอนถัดไปที่อนุมัติแล้ว"
     )
-    required_error = "Please fill all required fields." if locale == "en" else "กรุณากรอกข้อมูลที่จำเป็นให้ครบ"
+    required_error = (
+        "Please fill all required fields." if locale == "en" else "กรุณากรอกข้อมูลที่จำเป็นให้ครบ"
+    )
     submitting_text = "Submitting..." if locale == "en" else "กำลังส่งข้อมูล..."
     success_text = (
         "Submitted. Our team will review and contact you with the next step."
         if locale == "en"
         else "ส่งข้อมูลแล้ว ทีมงานจะตรวจสอบและติดต่อกลับพร้อมขั้นตอนถัดไป"
     )
-    error_text = "Unable to submit right now. Please try again." if locale == "en" else "ยังไม่สามารถส่งคำขอได้ในตอนนี้ กรุณาลองใหม่อีกครั้ง"
+    error_text = (
+        "Unable to submit right now. Please try again."
+        if locale == "en"
+        else "ยังไม่สามารถส่งคำขอได้ในตอนนี้ กรุณาลองใหม่อีกครั้ง"
+    )
 
     map_html = (
-        f"<a class=\"btn\" data-event=\"contact_map_open\" data-placement=\"contact_map\" data-cta-id=\"open_map\" href=\"{escape(map_href)}\" target=\"_blank\" rel=\"noopener\">{'Open map' if locale == 'en' else 'เปิดแผนที่'}</a>"
+        f'<a class="btn" data-event="contact_map_open" data-placement="contact_map" data-cta-id="open_map" href="{escape(map_href)}" target="_blank" rel="noopener">{"Open map" if locale == "en" else "เปิดแผนที่"}</a>'
         if map_href
-        else f"<p class=\"state-empty\">{escape('Map pending publication. TODO: publish verified map URL or coordinates.' if locale == 'en' else 'ยังไม่เผยแพร่แผนที่ TODO: เพิ่มลิงก์หรือพิกัดที่ยืนยันแล้ว')}</p>"
+        else f'<p class="state-empty">{escape("Map pending publication. TODO: publish verified map URL or coordinates." if locale == "en" else "ยังไม่เผยแพร่แผนที่ TODO: เพิ่มลิงก์หรือพิกัดที่ยืนยันแล้ว")}</p>'
     )
 
     body = (
-        f"<section id=\"contact-notes\" class=\"card\"><h2>{'Published contact notes' if locale == 'en' else 'ข้อมูลติดต่อที่เผยแพร่'}</h2><div>{_format_text_block(raw_content)}</div></section>"
-        f"<section id=\"contact-nap\" class=\"card\"><h2>NAP</h2><p><strong>{escape(nap_name)}</strong></p><p>{escape(nap_address)}</p><p>{escape(nap_phone)}</p><p>{escape(nap_email)}</p></section>"
-        f"<section id=\"contact-channels\" class=\"card\"><h2>{'Contact channels' if locale == 'en' else 'ช่องทางติดต่อ'}</h2><ul>{''.join(channel_rows)}</ul></section>"
-        f"<section id=\"contact-map\" class=\"card\"><h2>{'Map' if locale == 'en' else 'แผนที่'}</h2>{map_html}</section>"
-        f"<section id=\"contact-office-hours\" class=\"card\"><h2>{'Office hours' if locale == 'en' else 'เวลาเปิดทำการ'}</h2><p>{escape(office_hours)}</p></section>"
-        f"<section id=\"contact-form\" class=\"card\"><h2>{'Contact form' if locale == 'en' else 'ฟอร์มติดต่อ'}</h2><p>{escape(contact_intro)}</p>"
-        f"<form id=\"contact-lead-form\" novalidate><label class=\"field\" for=\"contact-name\"><span>{'Name' if locale == 'en' else 'ชื่อ'}</span><input id=\"contact-name\" name=\"name\" type=\"text\" required /></label>"
-        f"<label class=\"field\" for=\"contact-contact\"><span>{'Email or phone' if locale == 'en' else 'อีเมลหรือเบอร์โทร'}</span><input id=\"contact-contact\" name=\"contact\" type=\"text\" required /></label>"
-        f"<label class=\"field\" for=\"contact-intent\"><span>{'Intent' if locale == 'en' else 'ความต้องการ'}</span><select id=\"contact-intent\" name=\"intent\" required><option value=\"\">{'Select intent' if locale == 'en' else 'เลือกความต้องการ'}</option><option value=\"buy\">Buy</option><option value=\"rent\">Rent</option><option value=\"invest\">Invest</option><option value=\"sell\">Sell</option><option value=\"general\">General</option></select></label>"
-        f"<label class=\"field\" for=\"contact-message\"><span>{'Message' if locale == 'en' else 'ข้อความ'}</span><textarea id=\"contact-message\" name=\"message\" rows=\"4\" required></textarea></label>"
-        f"<div class=\"grid\"><button id=\"contact-submit\" class=\"btn\" type=\"submit\" data-event=\"contact_cta_click\" data-placement=\"contact_form\" data-cta-id=\"contact_submit\">{'Submit contact request' if locale == 'en' else 'ส่งคำขอติดต่อ'}</button><a class=\"btn\" href=\"/{locale}/sell/list-property\" data-event=\"contact_cta_click\" data-placement=\"contact_form\" data-cta-id=\"contact_go_sell\">{'List a property' if locale == 'en' else 'ลงประกาศทรัพย์'}</a></div>"
-        f"<p id=\"contact-form-status\" class=\"muted\" role=\"status\" aria-live=\"polite\"></p><div id=\"contact-form-loading\" class=\"state-loading\" hidden>{'Submitting...' if locale == 'en' else 'กำลังส่งข้อมูล...'}</div><div id=\"contact-form-error\" class=\"state-error\" hidden>{escape(error_text)}</div><div id=\"contact-form-success\" class=\"state-success\" hidden>{escape(success_text)}</div></form></section>"
+        f'<section id="contact-notes" class="card"><h2>{"Published contact notes" if locale == "en" else "ข้อมูลติดต่อที่เผยแพร่"}</h2><div>{_format_text_block(raw_content)}</div></section>'
+        f'<section id="contact-nap" class="card"><h2>NAP</h2><p><strong>{escape(nap_name)}</strong></p><p>{escape(nap_address)}</p><p>{escape(nap_phone)}</p><p>{escape(nap_email)}</p></section>'
+        f'<section id="contact-channels" class="card"><h2>{"Contact channels" if locale == "en" else "ช่องทางติดต่อ"}</h2><ul>{"".join(channel_rows)}</ul></section>'
+        f'<section id="contact-map" class="card"><h2>{"Map" if locale == "en" else "แผนที่"}</h2>{map_html}</section>'
+        f'<section id="contact-office-hours" class="card"><h2>{"Office hours" if locale == "en" else "เวลาเปิดทำการ"}</h2><p>{escape(office_hours)}</p></section>'
+        f'<section id="contact-form" class="card"><h2>{"Contact form" if locale == "en" else "ฟอร์มติดต่อ"}</h2><p>{escape(contact_intro)}</p>'
+        f'<form id="contact-lead-form" novalidate><label class="field" for="contact-name"><span>{"Name" if locale == "en" else "ชื่อ"}</span><input id="contact-name" name="name" type="text" required /></label>'
+        f'<label class="field" for="contact-contact"><span>{"Email or phone" if locale == "en" else "อีเมลหรือเบอร์โทร"}</span><input id="contact-contact" name="contact" type="text" required /></label>'
+        f'<label class="field" for="contact-intent"><span>{"Intent" if locale == "en" else "ความต้องการ"}</span><select id="contact-intent" name="intent" required><option value="">{"Select intent" if locale == "en" else "เลือกความต้องการ"}</option><option value="buy">Buy</option><option value="rent">Rent</option><option value="invest">Invest</option><option value="sell">Sell</option><option value="general">General</option></select></label>'
+        f'<label class="field" for="contact-message"><span>{"Message" if locale == "en" else "ข้อความ"}</span><textarea id="contact-message" name="message" rows="4" required></textarea></label>'
+        f'<div class="grid"><button id="contact-submit" class="btn" type="submit" data-event="contact_cta_click" data-placement="contact_form" data-cta-id="contact_submit">{"Submit contact request" if locale == "en" else "ส่งคำขอติดต่อ"}</button><a class="btn" href="/{locale}/sell/list-property" data-event="contact_cta_click" data-placement="contact_form" data-cta-id="contact_go_sell">{"List a property" if locale == "en" else "ลงประกาศทรัพย์"}</a></div>'
+        f'<p id="contact-form-status" class="muted" role="status" aria-live="polite"></p><div id="contact-form-loading" class="state-loading" hidden>{"Submitting..." if locale == "en" else "กำลังส่งข้อมูล..."}</div><div id="contact-form-error" class="state-error" hidden>{escape(error_text)}</div><div id="contact-form-success" class="state-success" hidden>{escape(success_text)}</div></form></section>'
         "<script>"
         "(() => {"
         "const locale = document.documentElement.lang || 'en';"
@@ -4579,7 +5104,11 @@ def _render_contact_page(locale: str, db: Session) -> HTMLResponse:
     )
     meta = str(row.meta_description if row is not None else "").strip()
     title = row.title if row is not None else ("Contact" if locale == "en" else "Contact")
-    intro = meta or ("Current contact workflow and next-step guidance." if locale == "en" else "ช่องทางติดต่อและขั้นตอนถัดไปในปัจจุบัน")
+    intro = meta or (
+        "Current contact workflow and next-step guidance."
+        if locale == "en"
+        else "ช่องทางติดต่อและขั้นตอนถัดไปในปัจจุบัน"
+    )
     return HTMLResponse(_render_page_shell(locale, title=title, intro=intro, body=body))
 
 
@@ -4635,7 +5164,11 @@ def _render_sell_page(locale: str, request: Request, db: Session) -> HTMLRespons
     )
     testimonials = db.scalars(
         select(Testimonial)
-        .where(Testimonial.deleted_at.is_(None), Testimonial.status == "published", Testimonial.intent == "sell")
+        .where(
+            Testimonial.deleted_at.is_(None),
+            Testimonial.status == "published",
+            Testimonial.intent == "sell",
+        )
         .order_by(Testimonial.display_order.asc(), desc(Testimonial.updated_at))
         .limit(3)
     ).all()
@@ -4648,11 +5181,11 @@ def _render_sell_page(locale: str, request: Request, db: Session) -> HTMLRespons
             .limit(3)
         ).all()
     trust_rows = "".join(
-        f"<article class=\"card\"><h3>{escape(row.attribution_name or ('Client proof' if locale == 'en' else 'หลักฐานลูกค้า'))}</h3><p><strong>{escape(row.quote)}</strong></p><p class=\"muted\">{escape(str(row.context or row.persona or '').strip())}</p></article>"
+        f'<article class="card"><h3>{escape(row.attribution_name or ("Client proof" if locale == "en" else "หลักฐานลูกค้า"))}</h3><p><strong>{escape(row.quote)}</strong></p><p class="muted">{escape(str(row.context or row.persona or "").strip())}</p></article>'
         for row in testimonials
     )
     if not trust_rows:
-        trust_rows = f"<div class=\"state-empty\">{escape(copy['trust_fallback'])}</div>"
+        trust_rows = f'<div class="state-empty">{escape(copy["trust_fallback"])}</div>'
     docs = (
         [
             "Ownership document copy",
@@ -4670,14 +5203,16 @@ def _render_sell_page(locale: str, request: Request, db: Session) -> HTMLRespons
     )
     docs_html = "".join(f"<li>{escape(item)}</li>" for item in docs)
     body = (
-        f"<section id=\"seller-intent\" class=\"card\"><h2>{escape(copy['intent_title'])}</h2><p>{escape(copy['intent_body'])}</p><img class=\"media\" src=\"{_DEFAULT_MEDIA_FALLBACK}\" alt=\"Seller process proof\" width=\"1280\" height=\"720\" loading=\"lazy\" /></section>"
-        f"<section id=\"seller-process\" class=\"card\"><h2>{escape(copy['process_title'])}</h2><div>{_format_text_block(process_content)}</div><a class=\"btn\" href=\"/{locale}/how-we-work\" data-event=\"sell_cta_click\" data-placement=\"sell_process\" data-cta-id=\"sell_how_we_work\" data-intent=\"sell\">{'Open how-we-work page' if locale == 'en' else 'เปิดหน้า how-we-work'}</a></section>"
-        f"<section id=\"seller-docs\" class=\"card\"><h2>{escape(copy['docs_title'])}</h2><ul>{docs_html}</ul></section>"
-        f"<section id=\"seller-trust\" class=\"grid\"><h2>{escape(copy['trust_title'])}</h2>{trust_rows}</section>"
-        f"<section id=\"seller-cta\" class=\"card\"><h2>{'Next step' if locale == 'en' else 'ขั้นตอนถัดไป'}</h2><div class=\"grid\"><a class=\"btn\" href=\"/{locale}/sell/list-property\" data-event=\"sell_cta_click\" data-placement=\"sell_next_step\" data-cta-id=\"sell_list_property\" data-intent=\"sell\">{escape(copy['go_list'])}</a><a class=\"btn\" href=\"/{locale}/sell/valuation\" data-event=\"sell_cta_click\" data-placement=\"sell_next_step\" data-cta-id=\"sell_valuation\" data-intent=\"sell\">{escape(copy['go_value'])}</a><a class=\"btn\" href=\"/{locale}/contact?intent=sell\" data-event=\"sell_cta_click\" data-placement=\"sell_next_step\" data-cta-id=\"sell_contact\" data-intent=\"sell\">{escape(copy['contact_team'])}</a></div></section>"
+        f'<section id="seller-intent" class="card"><h2>{escape(copy["intent_title"])}</h2><p>{escape(copy["intent_body"])}</p><img class="media" src="{_DEFAULT_MEDIA_FALLBACK}" alt="Seller process proof" width="1280" height="720" loading="lazy" /></section>'
+        f'<section id="seller-process" class="card"><h2>{escape(copy["process_title"])}</h2><div>{_format_text_block(process_content)}</div><a class="btn" href="/{locale}/how-we-work" data-event="sell_cta_click" data-placement="sell_process" data-cta-id="sell_how_we_work" data-intent="sell">{"Open how-we-work page" if locale == "en" else "เปิดหน้า how-we-work"}</a></section>'
+        f'<section id="seller-docs" class="card"><h2>{escape(copy["docs_title"])}</h2><ul>{docs_html}</ul></section>'
+        f'<section id="seller-trust" class="grid"><h2>{escape(copy["trust_title"])}</h2>{trust_rows}</section>'
+        f'<section id="seller-cta" class="card"><h2>{"Next step" if locale == "en" else "ขั้นตอนถัดไป"}</h2><div class="grid"><a class="btn" href="/{locale}/sell/list-property" data-event="sell_cta_click" data-placement="sell_next_step" data-cta-id="sell_list_property" data-intent="sell">{escape(copy["go_list"])}</a><a class="btn" href="/{locale}/sell/valuation" data-event="sell_cta_click" data-placement="sell_next_step" data-cta-id="sell_valuation" data-intent="sell">{escape(copy["go_value"])}</a><a class="btn" href="/{locale}/contact?intent=sell" data-event="sell_cta_click" data-placement="sell_next_step" data-cta-id="sell_contact" data-intent="sell">{escape(copy["contact_team"])}</a></div></section>'
         f"{_sell_tracking_script()}"
     )
-    return HTMLResponse(_render_page_shell(locale, title=copy["title"], intro=copy["intro"], body=body))
+    return HTMLResponse(
+        _render_page_shell(locale, title=copy["title"], intro=copy["intro"], body=body)
+    )
 
 
 def _render_sell_list_property_page(locale: str, request: Request, db: Session) -> HTMLResponse:
@@ -4688,32 +5223,42 @@ def _render_sell_list_property_page(locale: str, request: Request, db: Session) 
         if locale == "en"
         else "ยังไม่มีรายละเอียด process ที่เผยแพร่ TODO: เพิ่มขั้นตอนที่อนุมัติแล้ว"
     )
-    required_error = "Please fill all required fields." if locale == "en" else "กรุณากรอกข้อมูลที่จำเป็นให้ครบ"
+    required_error = (
+        "Please fill all required fields." if locale == "en" else "กรุณากรอกข้อมูลที่จำเป็นให้ครบ"
+    )
     submitting_text = "Submitting..." if locale == "en" else "กำลังส่งข้อมูล..."
-    success_text = "List-property request submitted. Our team will review and contact you." if locale == "en" else "ส่งคำขอลงประกาศแล้ว ทีมงานจะตรวจสอบและติดต่อกลับ"
-    error_text = "Unable to submit right now. Please try again." if locale == "en" else "ยังไม่สามารถส่งคำขอได้ในตอนนี้ กรุณาลองใหม่อีกครั้ง"
+    success_text = (
+        "List-property request submitted. Our team will review and contact you."
+        if locale == "en"
+        else "ส่งคำขอลงประกาศแล้ว ทีมงานจะตรวจสอบและติดต่อกลับ"
+    )
+    error_text = (
+        "Unable to submit right now. Please try again."
+        if locale == "en"
+        else "ยังไม่สามารถส่งคำขอได้ในตอนนี้ กรุณาลองใหม่อีกครั้ง"
+    )
     docs = (
         "Include ownership document, local photos, and expected listing price."
         if locale == "en"
         else "แนบข้อมูลเอกสารสิทธิ์ รูปจากพื้นที่จริง และราคาที่ต้องการลงประกาศ"
     )
     body = (
-        f"<section id=\"seller-intent\" class=\"card\"><h2>{escape(copy['intent_title'])}</h2><p>{escape(copy['intent_body'])}</p></section>"
-        f"<section id=\"seller-process\" class=\"card\"><h2>{escape(copy['process_title'])}</h2><div>{_format_text_block(process_content)}</div></section>"
-        f"<section id=\"seller-docs\" class=\"card\"><h2>{escape(copy['docs_title'])}</h2><p>{escape(docs)}</p></section>"
-        f"<section id=\"seller-trust\" class=\"card\"><h2>{escape(copy['trust_title'])}</h2><p>{escape('Only data submitted through approved runtime forms will be used for next-step review.' if locale == 'en' else 'ใช้เฉพาะข้อมูลที่ส่งผ่านฟอร์ม runtime ที่อนุมัติแล้วในการตรวจสอบขั้นตอนถัดไป')}</p></section>"
-        f"<section id=\"sell-list-property-form\" class=\"card\"><h2>{'List-property form' if locale == 'en' else 'ฟอร์มลงประกาศทรัพย์'}</h2><form id=\"sell-list-form\" novalidate>"
-        f"<label class=\"field\" for=\"sell-list-name\"><span>{'Name' if locale == 'en' else 'ชื่อ'}</span><input id=\"sell-list-name\" name=\"name\" type=\"text\" required /></label>"
-        f"<label class=\"field\" for=\"sell-list-contact\"><span>{'Email or phone' if locale == 'en' else 'อีเมลหรือเบอร์โทร'}</span><input id=\"sell-list-contact\" name=\"contact\" type=\"text\" required /></label>"
-        f"<label class=\"field\" for=\"sell-list-type\"><span>{'Property type' if locale == 'en' else 'ประเภททรัพย์'}</span><select id=\"sell-list-type\" name=\"property_type\" required><option value=\"\">{'Select property type' if locale == 'en' else 'เลือกประเภททรัพย์'}</option><option value=\"condo\">Condo</option><option value=\"house\">House</option><option value=\"villa\">Villa</option><option value=\"land\">Land</option><option value=\"commercial\">Commercial</option></select></label>"
-        f"<label class=\"field\" for=\"sell-list-area\"><span>{'Area' if locale == 'en' else 'ทำเล'}</span><input id=\"sell-list-area\" name=\"area\" type=\"text\" required /></label>"
-        f"<label class=\"field\" for=\"sell-list-address\"><span>{'Address or landmark' if locale == 'en' else 'ที่อยู่หรือจุดสังเกต'}</span><input id=\"sell-list-address\" name=\"address\" type=\"text\" required /></label>"
-        f"<label class=\"field\" for=\"sell-list-ownership\"><span>{'Ownership status' if locale == 'en' else 'สถานะกรรมสิทธิ์'}</span><select id=\"sell-list-ownership\" name=\"ownership_status\" required><option value=\"\">{'Select ownership status' if locale == 'en' else 'เลือกสถานะกรรมสิทธิ์'}</option><option value=\"freehold\">Freehold</option><option value=\"leasehold\">Leasehold</option><option value=\"company\">Company holding</option><option value=\"other\">Other</option></select></label>"
-        f"<label class=\"field\" for=\"sell-list-price\"><span>{'Expected listing price (THB)' if locale == 'en' else 'ราคาที่ต้องการลงประกาศ (บาท)'}</span><input id=\"sell-list-price\" name=\"asking_price\" type=\"number\" min=\"0\" inputmode=\"numeric\" /></label>"
-        f"<label class=\"field\" for=\"sell-list-timeline\"><span>{'Timeline' if locale == 'en' else 'ไทม์ไลน์'}</span><select id=\"sell-list-timeline\" name=\"timeline\" required><option value=\"\">{'Select timeline' if locale == 'en' else 'เลือกไทม์ไลน์'}</option><option value=\"0_3m\">0-3 months</option><option value=\"3_6m\">3-6 months</option><option value=\"6m_plus\">6+ months</option></select></label>"
-        f"<label class=\"field\" for=\"sell-list-docs\"><span>{'Documents and notes' if locale == 'en' else 'เอกสารและหมายเหตุ'}</span><textarea id=\"sell-list-docs\" name=\"documents\" rows=\"4\" required></textarea></label>"
-        f"<div class=\"grid\"><button id=\"sell-list-submit\" class=\"btn\" type=\"submit\" data-event=\"sell_cta_click\" data-placement=\"sell_list_form\" data-cta-id=\"sell_list_submit\" data-intent=\"sell\">{'Submit list-property request' if locale == 'en' else 'ส่งคำขอลงประกาศ'}</button><a class=\"btn\" href=\"/{locale}/sell/valuation\" data-event=\"sell_cta_click\" data-placement=\"sell_list_form\" data-cta-id=\"sell_list_to_valuation\" data-intent=\"sell\">{escape(copy['go_value'])}</a></div>"
-        f"<p id=\"sell-list-status\" class=\"muted\" role=\"status\" aria-live=\"polite\"></p><div id=\"sell-list-loading\" class=\"state-loading\" hidden>{'Submitting...' if locale == 'en' else 'กำลังส่งข้อมูล...'}</div><div id=\"sell-list-error\" class=\"state-error\" hidden>{escape(error_text)}</div><div id=\"sell-list-success\" class=\"state-success\" hidden>{escape(success_text)}</div></form></section>"
+        f'<section id="seller-intent" class="card"><h2>{escape(copy["intent_title"])}</h2><p>{escape(copy["intent_body"])}</p></section>'
+        f'<section id="seller-process" class="card"><h2>{escape(copy["process_title"])}</h2><div>{_format_text_block(process_content)}</div></section>'
+        f'<section id="seller-docs" class="card"><h2>{escape(copy["docs_title"])}</h2><p>{escape(docs)}</p></section>'
+        f'<section id="seller-trust" class="card"><h2>{escape(copy["trust_title"])}</h2><p>{escape("Only data submitted through approved runtime forms will be used for next-step review." if locale == "en" else "ใช้เฉพาะข้อมูลที่ส่งผ่านฟอร์ม runtime ที่อนุมัติแล้วในการตรวจสอบขั้นตอนถัดไป")}</p></section>'
+        f'<section id="sell-list-property-form" class="card"><h2>{"List-property form" if locale == "en" else "ฟอร์มลงประกาศทรัพย์"}</h2><form id="sell-list-form" novalidate>'
+        f'<label class="field" for="sell-list-name"><span>{"Name" if locale == "en" else "ชื่อ"}</span><input id="sell-list-name" name="name" type="text" required /></label>'
+        f'<label class="field" for="sell-list-contact"><span>{"Email or phone" if locale == "en" else "อีเมลหรือเบอร์โทร"}</span><input id="sell-list-contact" name="contact" type="text" required /></label>'
+        f'<label class="field" for="sell-list-type"><span>{"Property type" if locale == "en" else "ประเภททรัพย์"}</span><select id="sell-list-type" name="property_type" required><option value="">{"Select property type" if locale == "en" else "เลือกประเภททรัพย์"}</option><option value="condo">Condo</option><option value="house">House</option><option value="villa">Villa</option><option value="land">Land</option><option value="commercial">Commercial</option></select></label>'
+        f'<label class="field" for="sell-list-area"><span>{"Area" if locale == "en" else "ทำเล"}</span><input id="sell-list-area" name="area" type="text" required /></label>'
+        f'<label class="field" for="sell-list-address"><span>{"Address or landmark" if locale == "en" else "ที่อยู่หรือจุดสังเกต"}</span><input id="sell-list-address" name="address" type="text" required /></label>'
+        f'<label class="field" for="sell-list-ownership"><span>{"Ownership status" if locale == "en" else "สถานะกรรมสิทธิ์"}</span><select id="sell-list-ownership" name="ownership_status" required><option value="">{"Select ownership status" if locale == "en" else "เลือกสถานะกรรมสิทธิ์"}</option><option value="freehold">Freehold</option><option value="leasehold">Leasehold</option><option value="company">Company holding</option><option value="other">Other</option></select></label>'
+        f'<label class="field" for="sell-list-price"><span>{"Expected listing price (THB)" if locale == "en" else "ราคาที่ต้องการลงประกาศ (บาท)"}</span><input id="sell-list-price" name="asking_price" type="number" min="0" inputmode="numeric" /></label>'
+        f'<label class="field" for="sell-list-timeline"><span>{"Timeline" if locale == "en" else "ไทม์ไลน์"}</span><select id="sell-list-timeline" name="timeline" required><option value="">{"Select timeline" if locale == "en" else "เลือกไทม์ไลน์"}</option><option value="0_3m">0-3 months</option><option value="3_6m">3-6 months</option><option value="6m_plus">6+ months</option></select></label>'
+        f'<label class="field" for="sell-list-docs"><span>{"Documents and notes" if locale == "en" else "เอกสารและหมายเหตุ"}</span><textarea id="sell-list-docs" name="documents" rows="4" required></textarea></label>'
+        f'<div class="grid"><button id="sell-list-submit" class="btn" type="submit" data-event="sell_cta_click" data-placement="sell_list_form" data-cta-id="sell_list_submit" data-intent="sell">{"Submit list-property request" if locale == "en" else "ส่งคำขอลงประกาศ"}</button><a class="btn" href="/{locale}/sell/valuation" data-event="sell_cta_click" data-placement="sell_list_form" data-cta-id="sell_list_to_valuation" data-intent="sell">{escape(copy["go_value"])}</a></div>'
+        f'<p id="sell-list-status" class="muted" role="status" aria-live="polite"></p><div id="sell-list-loading" class="state-loading" hidden>{"Submitting..." if locale == "en" else "กำลังส่งข้อมูล..."}</div><div id="sell-list-error" class="state-error" hidden>{escape(error_text)}</div><div id="sell-list-success" class="state-success" hidden>{escape(success_text)}</div></form></section>'
         "<script>"
         "(()=>{const locale=document.documentElement.lang||'en';const endpoint='/api/v1/events';const path=location.pathname;"
         "function compact(raw){const out={};for(const [key,value] of Object.entries(raw||{})){if(value===undefined||value===null)continue;if(Array.isArray(value)&&value.length===0)continue;out[key]=value;}return out;}"
@@ -4731,7 +5276,11 @@ def _render_sell_list_property_page(locale: str, request: Request, db: Session) 
         ";await track('sell_list_property_error',{reason:'submit_failed',placement:'sell_list_form',cta_id:'sell_list_submit',intent:'sell'});}finally{loadingEl.hidden=true;submitBtn.disabled=false;}});})();"
         "</script>"
     )
-    return HTMLResponse(_render_page_shell(locale, title=f"{copy['title']} / List Property", intro=copy["intro"], body=body))
+    return HTMLResponse(
+        _render_page_shell(
+            locale, title=f"{copy['title']} / List Property", intro=copy["intro"], body=body
+        )
+    )
 
 
 def _render_sell_valuation_page(locale: str, request: Request, db: Session) -> HTMLResponse:
@@ -4742,33 +5291,43 @@ def _render_sell_valuation_page(locale: str, request: Request, db: Session) -> H
         if locale == "en"
         else "ยังไม่มีรายละเอียด process ที่เผยแพร่ TODO: เพิ่มขั้นตอนที่อนุมัติแล้ว"
     )
-    required_error = "Please fill all required fields." if locale == "en" else "กรุณากรอกข้อมูลที่จำเป็นให้ครบ"
+    required_error = (
+        "Please fill all required fields." if locale == "en" else "กรุณากรอกข้อมูลที่จำเป็นให้ครบ"
+    )
     submitting_text = "Submitting..." if locale == "en" else "กำลังส่งข้อมูล..."
-    success_text = "Valuation request submitted. Our team will review and contact you." if locale == "en" else "ส่งคำขอประเมินราคาแล้ว ทีมงานจะตรวจสอบและติดต่อกลับ"
-    error_text = "Unable to submit right now. Please try again." if locale == "en" else "ยังไม่สามารถส่งคำขอได้ในตอนนี้ กรุณาลองใหม่อีกครั้ง"
+    success_text = (
+        "Valuation request submitted. Our team will review and contact you."
+        if locale == "en"
+        else "ส่งคำขอประเมินราคาแล้ว ทีมงานจะตรวจสอบและติดต่อกลับ"
+    )
+    error_text = (
+        "Unable to submit right now. Please try again."
+        if locale == "en"
+        else "ยังไม่สามารถส่งคำขอได้ในตอนนี้ กรุณาลองใหม่อีกครั้ง"
+    )
     docs = (
         "Include latest unit details, condition notes, and a clear valuation goal."
         if locale == "en"
         else "ระบุรายละเอียดทรัพย์ล่าสุด สภาพทรัพย์ และเป้าหมายการประเมินราคา"
     )
     body = (
-        f"<section id=\"seller-intent\" class=\"card\"><h2>{escape(copy['intent_title'])}</h2><p>{escape(copy['intent_body'])}</p></section>"
-        f"<section id=\"seller-process\" class=\"card\"><h2>{escape(copy['process_title'])}</h2><div>{_format_text_block(process_content)}</div></section>"
-        f"<section id=\"seller-docs\" class=\"card\"><h2>{escape(copy['docs_title'])}</h2><p>{escape(docs)}</p></section>"
-        f"<section id=\"seller-trust\" class=\"card\"><h2>{escape(copy['trust_title'])}</h2><p>{escape('Valuation is reviewed from submitted facts and available market evidence in system records.' if locale == 'en' else 'การประเมินราคาพิจารณาจากข้อมูลที่ส่งเข้ามาและข้อมูลตลาดที่มีในระบบ')}</p></section>"
-        f"<section id=\"sell-valuation-form\" class=\"card\"><h2>{'Valuation form' if locale == 'en' else 'ฟอร์มขอประเมินราคา'}</h2><form id=\"sell-valuation-lead-form\" novalidate>"
-        f"<label class=\"field\" for=\"sell-value-name\"><span>{'Name' if locale == 'en' else 'ชื่อ'}</span><input id=\"sell-value-name\" name=\"name\" type=\"text\" required /></label>"
-        f"<label class=\"field\" for=\"sell-value-contact\"><span>{'Email or phone' if locale == 'en' else 'อีเมลหรือเบอร์โทร'}</span><input id=\"sell-value-contact\" name=\"contact\" type=\"text\" required /></label>"
-        f"<label class=\"field\" for=\"sell-value-type\"><span>{'Property type' if locale == 'en' else 'ประเภททรัพย์'}</span><select id=\"sell-value-type\" name=\"property_type\" required><option value=\"\">{'Select property type' if locale == 'en' else 'เลือกประเภททรัพย์'}</option><option value=\"condo\">Condo</option><option value=\"house\">House</option><option value=\"villa\">Villa</option><option value=\"land\">Land</option><option value=\"commercial\">Commercial</option></select></label>"
-        f"<label class=\"field\" for=\"sell-value-area\"><span>{'Area' if locale == 'en' else 'ทำเล'}</span><input id=\"sell-value-area\" name=\"area\" type=\"text\" required /></label>"
-        f"<label class=\"field\" for=\"sell-value-size\"><span>{'Size (sqm)' if locale == 'en' else 'ขนาด (ตร.ม.)'}</span><input id=\"sell-value-size\" name=\"size_sqm\" type=\"number\" min=\"0\" inputmode=\"numeric\" required /></label>"
-        f"<label class=\"field\" for=\"sell-value-beds\"><span>{'Bedrooms' if locale == 'en' else 'ห้องนอน'}</span><input id=\"sell-value-beds\" name=\"bedrooms\" type=\"number\" min=\"0\" inputmode=\"numeric\" /></label>"
-        f"<label class=\"field\" for=\"sell-value-baths\"><span>{'Bathrooms' if locale == 'en' else 'ห้องน้ำ'}</span><input id=\"sell-value-baths\" name=\"bathrooms\" type=\"number\" min=\"0\" inputmode=\"numeric\" /></label>"
-        f"<label class=\"field\" for=\"sell-value-condition\"><span>{'Condition' if locale == 'en' else 'สภาพทรัพย์'}</span><select id=\"sell-value-condition\" name=\"condition\" required><option value=\"\">{'Select condition' if locale == 'en' else 'เลือกสภาพทรัพย์'}</option><option value=\"new\">New</option><option value=\"good\">Good</option><option value=\"needs_update\">Needs update</option></select></label>"
-        f"<label class=\"field\" for=\"sell-value-timeline\"><span>{'Timeline' if locale == 'en' else 'ไทม์ไลน์'}</span><select id=\"sell-value-timeline\" name=\"timeline\" required><option value=\"\">{'Select timeline' if locale == 'en' else 'เลือกไทม์ไลน์'}</option><option value=\"0_3m\">0-3 months</option><option value=\"3_6m\">3-6 months</option><option value=\"6m_plus\">6+ months</option></select></label>"
-        f"<label class=\"field\" for=\"sell-value-notes\"><span>{'Notes' if locale == 'en' else 'หมายเหตุ'}</span><textarea id=\"sell-value-notes\" name=\"notes\" rows=\"4\"></textarea></label>"
-        f"<div class=\"grid\"><button id=\"sell-value-submit\" class=\"btn\" type=\"submit\" data-event=\"sell_cta_click\" data-placement=\"sell_valuation_form\" data-cta-id=\"sell_valuation_submit\" data-intent=\"sell\">{'Submit valuation request' if locale == 'en' else 'ส่งคำขอประเมินราคา'}</button><a class=\"btn\" href=\"/{locale}/sell/list-property\" data-event=\"sell_cta_click\" data-placement=\"sell_valuation_form\" data-cta-id=\"sell_valuation_to_list\" data-intent=\"sell\">{escape(copy['go_list'])}</a></div>"
-        f"<p id=\"sell-valuation-status\" class=\"muted\" role=\"status\" aria-live=\"polite\"></p><div id=\"sell-valuation-loading\" class=\"state-loading\" hidden>{'Submitting...' if locale == 'en' else 'กำลังส่งข้อมูล...'}</div><div id=\"sell-valuation-error\" class=\"state-error\" hidden>{escape(error_text)}</div><div id=\"sell-valuation-success\" class=\"state-success\" hidden>{escape(success_text)}</div></form></section>"
+        f'<section id="seller-intent" class="card"><h2>{escape(copy["intent_title"])}</h2><p>{escape(copy["intent_body"])}</p></section>'
+        f'<section id="seller-process" class="card"><h2>{escape(copy["process_title"])}</h2><div>{_format_text_block(process_content)}</div></section>'
+        f'<section id="seller-docs" class="card"><h2>{escape(copy["docs_title"])}</h2><p>{escape(docs)}</p></section>'
+        f'<section id="seller-trust" class="card"><h2>{escape(copy["trust_title"])}</h2><p>{escape("Valuation is reviewed from submitted facts and available market evidence in system records." if locale == "en" else "การประเมินราคาพิจารณาจากข้อมูลที่ส่งเข้ามาและข้อมูลตลาดที่มีในระบบ")}</p></section>'
+        f'<section id="sell-valuation-form" class="card"><h2>{"Valuation form" if locale == "en" else "ฟอร์มขอประเมินราคา"}</h2><form id="sell-valuation-lead-form" novalidate>'
+        f'<label class="field" for="sell-value-name"><span>{"Name" if locale == "en" else "ชื่อ"}</span><input id="sell-value-name" name="name" type="text" required /></label>'
+        f'<label class="field" for="sell-value-contact"><span>{"Email or phone" if locale == "en" else "อีเมลหรือเบอร์โทร"}</span><input id="sell-value-contact" name="contact" type="text" required /></label>'
+        f'<label class="field" for="sell-value-type"><span>{"Property type" if locale == "en" else "ประเภททรัพย์"}</span><select id="sell-value-type" name="property_type" required><option value="">{"Select property type" if locale == "en" else "เลือกประเภททรัพย์"}</option><option value="condo">Condo</option><option value="house">House</option><option value="villa">Villa</option><option value="land">Land</option><option value="commercial">Commercial</option></select></label>'
+        f'<label class="field" for="sell-value-area"><span>{"Area" if locale == "en" else "ทำเล"}</span><input id="sell-value-area" name="area" type="text" required /></label>'
+        f'<label class="field" for="sell-value-size"><span>{"Size (sqm)" if locale == "en" else "ขนาด (ตร.ม.)"}</span><input id="sell-value-size" name="size_sqm" type="number" min="0" inputmode="numeric" required /></label>'
+        f'<label class="field" for="sell-value-beds"><span>{"Bedrooms" if locale == "en" else "ห้องนอน"}</span><input id="sell-value-beds" name="bedrooms" type="number" min="0" inputmode="numeric" /></label>'
+        f'<label class="field" for="sell-value-baths"><span>{"Bathrooms" if locale == "en" else "ห้องน้ำ"}</span><input id="sell-value-baths" name="bathrooms" type="number" min="0" inputmode="numeric" /></label>'
+        f'<label class="field" for="sell-value-condition"><span>{"Condition" if locale == "en" else "สภาพทรัพย์"}</span><select id="sell-value-condition" name="condition" required><option value="">{"Select condition" if locale == "en" else "เลือกสภาพทรัพย์"}</option><option value="new">New</option><option value="good">Good</option><option value="needs_update">Needs update</option></select></label>'
+        f'<label class="field" for="sell-value-timeline"><span>{"Timeline" if locale == "en" else "ไทม์ไลน์"}</span><select id="sell-value-timeline" name="timeline" required><option value="">{"Select timeline" if locale == "en" else "เลือกไทม์ไลน์"}</option><option value="0_3m">0-3 months</option><option value="3_6m">3-6 months</option><option value="6m_plus">6+ months</option></select></label>'
+        f'<label class="field" for="sell-value-notes"><span>{"Notes" if locale == "en" else "หมายเหตุ"}</span><textarea id="sell-value-notes" name="notes" rows="4"></textarea></label>'
+        f'<div class="grid"><button id="sell-value-submit" class="btn" type="submit" data-event="sell_cta_click" data-placement="sell_valuation_form" data-cta-id="sell_valuation_submit" data-intent="sell">{"Submit valuation request" if locale == "en" else "ส่งคำขอประเมินราคา"}</button><a class="btn" href="/{locale}/sell/list-property" data-event="sell_cta_click" data-placement="sell_valuation_form" data-cta-id="sell_valuation_to_list" data-intent="sell">{escape(copy["go_list"])}</a></div>'
+        f'<p id="sell-valuation-status" class="muted" role="status" aria-live="polite"></p><div id="sell-valuation-loading" class="state-loading" hidden>{"Submitting..." if locale == "en" else "กำลังส่งข้อมูล..."}</div><div id="sell-valuation-error" class="state-error" hidden>{escape(error_text)}</div><div id="sell-valuation-success" class="state-success" hidden>{escape(success_text)}</div></form></section>'
         "<script>"
         "(()=>{const locale=document.documentElement.lang||'en';const endpoint='/api/v1/events';const path=location.pathname;"
         "function compact(raw){const out={};for(const [key,value] of Object.entries(raw||{})){if(value===undefined||value===null)continue;if(Array.isArray(value)&&value.length===0)continue;out[key]=value;}return out;}"
@@ -4786,7 +5345,11 @@ def _render_sell_valuation_page(locale: str, request: Request, db: Session) -> H
         ";await track('sell_valuation_error',{reason:'submit_failed',placement:'sell_valuation_form',cta_id:'sell_valuation_submit',intent:'sell'});}finally{loadingEl.hidden=true;submitBtn.disabled=false;}});})();"
         "</script>"
     )
-    return HTMLResponse(_render_page_shell(locale, title=f"{copy['title']} / Valuation", intro=copy["intro"], body=body))
+    return HTMLResponse(
+        _render_page_shell(
+            locale, title=f"{copy['title']} / Valuation", intro=copy["intro"], body=body
+        )
+    )
 
 
 def _request_locale(request: Request) -> str:
@@ -4848,12 +5411,16 @@ def render_projects_default_locale(request: Request, db: Session = Depends(get_d
 
 @router.get("/en/projects/{slug}", response_class=HTMLResponse)
 @router.get("/th/projects/{slug}", response_class=HTMLResponse)
-def render_project_detail(slug: str, request: Request, db: Session = Depends(get_db)) -> HTMLResponse:
+def render_project_detail(
+    slug: str, request: Request, db: Session = Depends(get_db)
+) -> HTMLResponse:
     return _render_project_detail_page(_request_locale(request), request, db, slug)
 
 
 @router.get("/projects/{slug}", response_class=HTMLResponse)
-def render_project_detail_default_locale(slug: str, request: Request, db: Session = Depends(get_db)) -> HTMLResponse:
+def render_project_detail_default_locale(
+    slug: str, request: Request, db: Session = Depends(get_db)
+) -> HTMLResponse:
     return _render_project_detail_page("en", request, db, slug)
 
 
@@ -4870,7 +5437,9 @@ def render_area_guide(request: Request, db: Session = Depends(get_db)) -> HTMLRe
 
 
 @router.get("/area-guide", response_class=HTMLResponse)
-def render_area_guide_default_locale(request: Request, db: Session = Depends(get_db)) -> HTMLResponse:
+def render_area_guide_default_locale(
+    request: Request, db: Session = Depends(get_db)
+) -> HTMLResponse:
     return _render_areas_page("en", request, db)
 
 
@@ -4887,12 +5456,16 @@ def render_areas_default_locale(request: Request, db: Session = Depends(get_db))
 
 @router.get("/en/area-guide/{slug}", response_class=HTMLResponse)
 @router.get("/th/area-guide/{slug}", response_class=HTMLResponse)
-def render_area_guide_detail(slug: str, request: Request, db: Session = Depends(get_db)) -> HTMLResponse:
+def render_area_guide_detail(
+    slug: str, request: Request, db: Session = Depends(get_db)
+) -> HTMLResponse:
     return _render_area_detail_page(_request_locale(request), request, db, slug)
 
 
 @router.get("/area-guide/{slug}", response_class=HTMLResponse)
-def render_area_guide_detail_default_locale(slug: str, request: Request, db: Session = Depends(get_db)) -> HTMLResponse:
+def render_area_guide_detail_default_locale(
+    slug: str, request: Request, db: Session = Depends(get_db)
+) -> HTMLResponse:
     return _render_area_detail_page("en", request, db, slug)
 
 
@@ -4903,7 +5476,9 @@ def render_area_detail(slug: str, request: Request, db: Session = Depends(get_db
 
 
 @router.get("/areas/{slug}", response_class=HTMLResponse)
-def render_area_detail_default_locale(slug: str, request: Request, db: Session = Depends(get_db)) -> HTMLResponse:
+def render_area_detail_default_locale(
+    slug: str, request: Request, db: Session = Depends(get_db)
+) -> HTMLResponse:
     return _render_area_detail_page("en", request, db, slug)
 
 
@@ -4914,24 +5489,32 @@ def render_developers(request: Request, db: Session = Depends(get_db)) -> HTMLRe
 
 
 @router.get("/developers", response_class=HTMLResponse)
-def render_developers_default_locale(request: Request, db: Session = Depends(get_db)) -> HTMLResponse:
+def render_developers_default_locale(
+    request: Request, db: Session = Depends(get_db)
+) -> HTMLResponse:
     return _render_developers_page("en", request, db)
 
 
 @router.get("/en/developers/{slug}", response_class=HTMLResponse)
 @router.get("/th/developers/{slug}", response_class=HTMLResponse)
-def render_developer_detail(slug: str, request: Request, db: Session = Depends(get_db)) -> HTMLResponse:
+def render_developer_detail(
+    slug: str, request: Request, db: Session = Depends(get_db)
+) -> HTMLResponse:
     return _render_developer_detail_page(_request_locale(request), request, db, slug)
 
 
 @router.get("/developers/{slug}", response_class=HTMLResponse)
-def render_developer_detail_default_locale(slug: str, request: Request, db: Session = Depends(get_db)) -> HTMLResponse:
+def render_developer_detail_default_locale(
+    slug: str, request: Request, db: Session = Depends(get_db)
+) -> HTMLResponse:
     return _render_developer_detail_page("en", request, db, slug)
 
 
 @router.get("/en/property/{property_ref}", response_class=HTMLResponse)
 @router.get("/th/property/{property_ref}", response_class=HTMLResponse)
-def render_property_detail(property_ref: str, request: Request, db: Session = Depends(get_db)) -> HTMLResponse:
+def render_property_detail(
+    property_ref: str, request: Request, db: Session = Depends(get_db)
+) -> HTMLResponse:
     return _render_property_detail_page(_request_locale(request), request, db, property_ref)
 
 
@@ -4951,7 +5534,9 @@ def render_blog_listing(request: Request, db: Session = Depends(get_db)) -> HTML
 
 
 @router.get("/blog", response_class=HTMLResponse)
-def render_blog_listing_default_locale(request: Request, db: Session = Depends(get_db)) -> HTMLResponse:
+def render_blog_listing_default_locale(
+    request: Request, db: Session = Depends(get_db)
+) -> HTMLResponse:
     return _render_content_listing_page("en", request, db, mode="blog")
 
 
@@ -4962,7 +5547,9 @@ def render_blog_detail(slug: str, request: Request, db: Session = Depends(get_db
 
 
 @router.get("/blog/{slug}", response_class=HTMLResponse)
-def render_blog_detail_default_locale(slug: str, request: Request, db: Session = Depends(get_db)) -> HTMLResponse:
+def render_blog_detail_default_locale(
+    slug: str, request: Request, db: Session = Depends(get_db)
+) -> HTMLResponse:
     return _render_content_detail_page("en", request, db, slug, "blog")
 
 
@@ -4973,18 +5560,24 @@ def render_guides_listing(request: Request, db: Session = Depends(get_db)) -> HT
 
 
 @router.get("/guides", response_class=HTMLResponse)
-def render_guides_listing_default_locale(request: Request, db: Session = Depends(get_db)) -> HTMLResponse:
+def render_guides_listing_default_locale(
+    request: Request, db: Session = Depends(get_db)
+) -> HTMLResponse:
     return _render_content_listing_page("en", request, db, mode="guides")
 
 
 @router.get("/en/guides/{slug}", response_class=HTMLResponse)
 @router.get("/th/guides/{slug}", response_class=HTMLResponse)
-def render_guides_detail(slug: str, request: Request, db: Session = Depends(get_db)) -> HTMLResponse:
+def render_guides_detail(
+    slug: str, request: Request, db: Session = Depends(get_db)
+) -> HTMLResponse:
     return _render_content_detail_page(_request_locale(request), request, db, slug, "guide")
 
 
 @router.get("/guides/{slug}", response_class=HTMLResponse)
-def render_guides_detail_default_locale(slug: str, request: Request, db: Session = Depends(get_db)) -> HTMLResponse:
+def render_guides_detail_default_locale(
+    slug: str, request: Request, db: Session = Depends(get_db)
+) -> HTMLResponse:
     return _render_content_detail_page("en", request, db, slug, "guide")
 
 
@@ -4995,7 +5588,9 @@ def render_invest_guides_listing(request: Request, db: Session = Depends(get_db)
 
 
 @router.get("/invest/guides", response_class=HTMLResponse)
-def render_invest_guides_listing_default_locale(request: Request, db: Session = Depends(get_db)) -> HTMLResponse:
+def render_invest_guides_listing_default_locale(
+    request: Request, db: Session = Depends(get_db)
+) -> HTMLResponse:
     return _render_content_listing_page("en", request, db, mode="invest-guides")
 
 
@@ -5015,7 +5610,11 @@ def render_about(request: Request, db: Session = Depends(get_db)) -> HTMLRespons
 @router.get("/th/how-we-work", response_class=HTMLResponse)
 @router.get("/how-we-work", response_class=HTMLResponse)
 def render_how_we_work(request: Request, db: Session = Depends(get_db)) -> HTMLResponse:
-    locale = _request_locale(request) if request.url.path.startswith("/en") or request.url.path.startswith("/th") else "en"
+    locale = (
+        _request_locale(request)
+        if request.url.path.startswith("/en") or request.url.path.startswith("/th")
+        else "en"
+    )
     return _render_how_we_work_page(locale, db)
 
 
@@ -5029,7 +5628,11 @@ def render_contact(request: Request, db: Session = Depends(get_db)) -> HTMLRespo
 @router.get("/th/sell", response_class=HTMLResponse)
 @router.get("/sell", response_class=HTMLResponse)
 def render_sell(request: Request, db: Session = Depends(get_db)) -> HTMLResponse:
-    locale = _request_locale(request) if request.url.path.startswith("/en") or request.url.path.startswith("/th") else "en"
+    locale = (
+        _request_locale(request)
+        if request.url.path.startswith("/en") or request.url.path.startswith("/th")
+        else "en"
+    )
     return _render_sell_page(locale, request, db)
 
 
@@ -5037,7 +5640,11 @@ def render_sell(request: Request, db: Session = Depends(get_db)) -> HTMLResponse
 @router.get("/th/sell/list-property", response_class=HTMLResponse)
 @router.get("/sell/list-property", response_class=HTMLResponse)
 def render_sell_list_property(request: Request, db: Session = Depends(get_db)) -> HTMLResponse:
-    locale = _request_locale(request) if request.url.path.startswith("/en") or request.url.path.startswith("/th") else "en"
+    locale = (
+        _request_locale(request)
+        if request.url.path.startswith("/en") or request.url.path.startswith("/th")
+        else "en"
+    )
     return _render_sell_list_property_page(locale, request, db)
 
 
@@ -5045,7 +5652,11 @@ def render_sell_list_property(request: Request, db: Session = Depends(get_db)) -
 @router.get("/th/sell/valuation", response_class=HTMLResponse)
 @router.get("/sell/valuation", response_class=HTMLResponse)
 def render_sell_valuation(request: Request, db: Session = Depends(get_db)) -> HTMLResponse:
-    locale = _request_locale(request) if request.url.path.startswith("/en") or request.url.path.startswith("/th") else "en"
+    locale = (
+        _request_locale(request)
+        if request.url.path.startswith("/en") or request.url.path.startswith("/th")
+        else "en"
+    )
     return _render_sell_valuation_page(locale, request, db)
 
 
@@ -5053,7 +5664,11 @@ def render_sell_valuation(request: Request, db: Session = Depends(get_db)) -> HT
 @router.get("/th/privacy", response_class=HTMLResponse)
 def render_privacy(request: Request, db: Session = Depends(get_db)) -> HTMLResponse:
     locale = _request_locale(request)
-    fallback = "Privacy content is not published yet. TODO: publish approved privacy details." if locale == "en" else "ยังไม่มีเนื้อหา Privacy ที่เผยแพร่ TODO: เพิ่มรายละเอียด privacy ที่อนุมัติแล้ว"
+    fallback = (
+        "Privacy content is not published yet. TODO: publish approved privacy details."
+        if locale == "en"
+        else "ยังไม่มีเนื้อหา Privacy ที่เผยแพร่ TODO: เพิ่มรายละเอียด privacy ที่อนุมัติแล้ว"
+    )
     return _company_page(locale, "privacy", "Privacy Policy", fallback, db)
 
 
@@ -5061,7 +5676,11 @@ def render_privacy(request: Request, db: Session = Depends(get_db)) -> HTMLRespo
 @router.get("/th/terms", response_class=HTMLResponse)
 def render_terms(request: Request, db: Session = Depends(get_db)) -> HTMLResponse:
     locale = _request_locale(request)
-    fallback = "Terms content is not published yet. TODO: publish approved terms." if locale == "en" else "ยังไม่มีเนื้อหา Terms ที่เผยแพร่ TODO: เพิ่มข้อกำหนดที่อนุมัติแล้ว"
+    fallback = (
+        "Terms content is not published yet. TODO: publish approved terms."
+        if locale == "en"
+        else "ยังไม่มีเนื้อหา Terms ที่เผยแพร่ TODO: เพิ่มข้อกำหนดที่อนุมัติแล้ว"
+    )
     return _company_page(locale, "terms", "Terms", fallback, db)
 
 
@@ -5069,7 +5688,11 @@ def render_terms(request: Request, db: Session = Depends(get_db)) -> HTMLRespons
 @router.get("/th/cookies", response_class=HTMLResponse)
 def render_cookies(request: Request, db: Session = Depends(get_db)) -> HTMLResponse:
     locale = _request_locale(request)
-    fallback = "Cookies content is not published yet. TODO: publish approved cookie details." if locale == "en" else "ยังไม่มีเนื้อหา Cookies ที่เผยแพร่ TODO: เพิ่มรายละเอียด cookies ที่อนุมัติแล้ว"
+    fallback = (
+        "Cookies content is not published yet. TODO: publish approved cookie details."
+        if locale == "en"
+        else "ยังไม่มีเนื้อหา Cookies ที่เผยแพร่ TODO: เพิ่มรายละเอียด cookies ที่อนุมัติแล้ว"
+    )
     return _company_page(locale, "cookies", "Cookies", fallback, db)
 
 
@@ -5077,6 +5700,10 @@ def render_cookies(request: Request, db: Session = Depends(get_db)) -> HTMLRespo
 @router.get("/th/investment/methodology", response_class=HTMLResponse)
 def render_investment_methodology(request: Request, db: Session = Depends(get_db)) -> HTMLResponse:
     locale = _request_locale(request)
-    fallback = "Investment methodology is not published yet. TODO: publish approved selection criteria and source notes." if locale == "en" else "ยังไม่มี methodology การลงทุนที่เผยแพร่ TODO: เพิ่มเกณฑ์คัดเลือกและ source notes ที่อนุมัติแล้ว"
+    fallback = (
+        "Investment methodology is not published yet. TODO: publish approved selection criteria and source notes."
+        if locale == "en"
+        else "ยังไม่มี methodology การลงทุนที่เผยแพร่ TODO: เพิ่มเกณฑ์คัดเลือกและ source notes ที่อนุมัติแล้ว"
+    )
     title = "Investment Methodology" if locale == "en" else "Investment Methodology"
     return _company_page(locale, "investment-methodology", title, fallback, db)

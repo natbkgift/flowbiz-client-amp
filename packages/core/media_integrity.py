@@ -153,7 +153,13 @@ def run_scan(
     prefix = _normalize_prefix(media_public_prefix)
     referenced_local_paths: set[str] = set()
 
-    _scan_media_assets(db, report, media_root=root, media_public_prefix=prefix, referenced_local_paths=referenced_local_paths)
+    _scan_media_assets(
+        db,
+        report,
+        media_root=root,
+        media_public_prefix=prefix,
+        referenced_local_paths=referenced_local_paths,
+    )
     _scan_entity_image_fields(
         db,
         report,
@@ -362,7 +368,9 @@ def _scan_entity_image_fields(
                     continue
 
                 if _is_external_url(item):
-                    severity = SEVERITY_ERROR if field_name in _EXTERNAL_ERROR_FIELDS else SEVERITY_WARN
+                    severity = (
+                        SEVERITY_ERROR if field_name in _EXTERNAL_ERROR_FIELDS else SEVERITY_WARN
+                    )
                     report.summary.external_leakage_count += 1
                     report.add(
                         IntegrityFinding(
@@ -379,7 +387,9 @@ def _scan_entity_image_fields(
 
                 if _is_local_media_path(item, prefix=media_public_prefix):
                     referenced_local_paths.add(item)
-                    disk_path = _local_path_to_disk(item, prefix=media_public_prefix, media_root=media_root)
+                    disk_path = _local_path_to_disk(
+                        item, prefix=media_public_prefix, media_root=media_root
+                    )
                     exists, _ = _check_disk_file(disk_path)
                     if not exists:
                         report.summary.missing_file_count += 1
@@ -486,4 +496,3 @@ def print_console_summary(report: IntegrityReport, *, verbose: bool = False) -> 
                 print(f"  detail: {item.detail}")
             if item.suggestion:
                 print(f"  suggestion: {item.suggestion}")
-

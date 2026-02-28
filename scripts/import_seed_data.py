@@ -567,9 +567,7 @@ def _find_external_project_covers(path: Path) -> list[dict[str, str]]:
     return out
 
 
-def _warning_skipped_steps(
-    results: list[StepResult], *, warn_on_optional_skip: bool
-) -> list[str]:
+def _warning_skipped_steps(results: list[StepResult], *, warn_on_optional_skip: bool) -> list[str]:
     skipped_steps = [r.step for r in results if r.skipped > 0]
     if warn_on_optional_skip:
         return skipped_steps
@@ -606,7 +604,9 @@ def main() -> int:
         default=None,
         help=f"Import only specific step(s). Can be repeated. Options: {', '.join(STEP_ORDER)}",
     )
-    parser.add_argument("--strict", action="store_true", help="Exit non-zero when import result has errors")
+    parser.add_argument(
+        "--strict", action="store_true", help="Exit non-zero when import result has errors"
+    )
     parser.add_argument(
         "--fail-on-warn",
         action="store_true",
@@ -620,9 +620,15 @@ def main() -> int:
         help="Treat missing optional steps (developers/areas/team) as warnings too",
     )
     parser.add_argument("--db-path", default=None, help="SQLite DB path override")
-    parser.add_argument("--database-url", default=None, help="SQLAlchemy database URL override (higher priority than --db-path)")
+    parser.add_argument(
+        "--database-url",
+        default=None,
+        help="SQLAlchemy database URL override (higher priority than --db-path)",
+    )
     parser.add_argument("--quiet", action="store_true", help="Reduce human log output to summary")
-    parser.add_argument("--no-write", action="store_true", dest="no_write", help="Do not write summary JSON file")
+    parser.add_argument(
+        "--no-write", action="store_true", dest="no_write", help="Do not write summary JSON file"
+    )
     parser.add_argument(
         "--write",
         default="ops/logs/b13_import_seed_summary.json",
@@ -704,7 +710,10 @@ def main() -> int:
                 return 1
 
         external_project_covers = _find_external_project_covers(input_dir / "projects.json")
-        if external_project_covers and not os.environ.get("AMP_ALLOW_EXTERNAL_PROJECT_COVERS", "").strip():
+        if (
+            external_project_covers
+            and not os.environ.get("AMP_ALLOW_EXTERNAL_PROJECT_COVERS", "").strip()
+        ):
             log.error(
                 "Refusing import: %d project cover(s) still use external URLs. "
                 "Run scripts/mirror_project_cover_images.py or set AMP_ALLOW_EXTERNAL_PROJECT_COVERS=1 to override.",
@@ -790,13 +799,19 @@ def main() -> int:
 
     def _session_factory():
         if args.database_url:
-            connect_args = {"check_same_thread": False} if str(args.database_url).startswith("sqlite:///") else {}
+            connect_args = (
+                {"check_same_thread": False}
+                if str(args.database_url).startswith("sqlite:///")
+                else {}
+            )
             engine = create_engine(args.database_url, connect_args=connect_args, future=True)
             return sessionmaker(bind=engine, autoflush=False, autocommit=False, future=True)
         if args.db_path:
             db_path = Path(args.db_path).expanduser().resolve()
             database_url = f"sqlite:///{db_path.as_posix()}"
-            engine = create_engine(database_url, connect_args={"check_same_thread": False}, future=True)
+            engine = create_engine(
+                database_url, connect_args={"check_same_thread": False}, future=True
+            )
             return sessionmaker(bind=engine, autoflush=False, autocommit=False, future=True)
         return SessionLocal
 
@@ -937,7 +952,9 @@ def main() -> int:
         if not out_path.is_absolute():
             out_path = _PROJECT_ROOT / out_path
         out_path.parent.mkdir(parents=True, exist_ok=True)
-        out_path.write_text(json.dumps(summary, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+        out_path.write_text(
+            json.dumps(summary, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
+        )
         if not args.quiet:
             log.info("Summary written -> %s", out_path)
 

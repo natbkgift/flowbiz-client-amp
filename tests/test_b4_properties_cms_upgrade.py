@@ -129,7 +129,11 @@ def test_bulk_tags_add_remove_set(client: TestClient) -> None:
     add_resp = client.post(
         "/admin/properties/bulk/tags",
         headers=headers,
-        json={"property_ids": [a["id"], b["id"]], "operation": "add", "tags": ["sea_view", "corner"]},
+        json={
+            "property_ids": [a["id"], b["id"]],
+            "operation": "add",
+            "tags": ["sea_view", "corner"],
+        },
     )
     assert add_resp.status_code == 200, add_resp.text
     assert add_resp.json()["updated"] == 2
@@ -167,7 +171,10 @@ def test_bulk_update_validates_and_updates_structured_fields(client: TestClient)
     invalid_media = client.post(
         "/admin/properties/bulk/update",
         headers=headers,
-        json={"property_ids": [a["id"]], "fields": {"cover_image": "https://cdn.example.com/hotlink.jpg"}},
+        json={
+            "property_ids": [a["id"]],
+            "fields": {"cover_image": "https://cdn.example.com/hotlink.jpg"},
+        },
     )
     assert invalid_media.status_code == 422, invalid_media.text
 

@@ -9,7 +9,16 @@ import pytest
 
 from packages.core.auth import create_access_token, hash_password
 from packages.core.database import SessionLocal, init_db
-from packages.core.models import Area, AreaStatistic, Article, Developer, MediaAsset, Project, Property, User
+from packages.core.models import (
+    Area,
+    AreaStatistic,
+    Article,
+    Developer,
+    MediaAsset,
+    Project,
+    Property,
+    User,
+)
 
 _PNG_1X1 = base64.b64decode(
     "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO6H9n8AAAAASUVORK5CYII="

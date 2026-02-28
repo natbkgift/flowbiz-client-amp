@@ -101,7 +101,10 @@ def _seed_a9_articles() -> dict[str, str]:
                     status="published",
                     author_user_id=author.id,
                     title={"en": "Pattaya Buyer Flow", "th": "เส้นทางผู้ซื้อพัทยา"},
-                    excerpt={"en": "Understand each verified step before you commit.", "th": "เข้าใจทุกขั้นตอนก่อนตัดสินใจ"},
+                    excerpt={
+                        "en": "Understand each verified step before you commit.",
+                        "th": "เข้าใจทุกขั้นตอนก่อนตัดสินใจ",
+                    },
                     body_md={
                         "en": blog_body,
                         "th": blog_body_th,
@@ -120,7 +123,10 @@ def _seed_a9_articles() -> dict[str, str]:
                     status="published",
                     title={"en": "Closing Cost Breakdown", "th": "สรุปค่าใช้จ่ายวันโอน"},
                     excerpt={"en": "Map fees before transfer day.", "th": "วางแผนค่าใช้จ่ายก่อนวันโอน"},
-                    body_md={"en": "## Fees\nPublished fee checklist.", "th": "## ค่าธรรมเนียม\nเช็กลิสต์ค่าธรรมเนียม"},
+                    body_md={
+                        "en": "## Fees\nPublished fee checklist.",
+                        "th": "## ค่าธรรมเนียม\nเช็กลิสต์ค่าธรรมเนียม",
+                    },
                     hero_image_url=_LOCAL_WEBP,
                     published_at=datetime(2026, 2, 26, 8, 30, tzinfo=UTC),
                 ),
@@ -130,7 +136,10 @@ def _seed_a9_articles() -> dict[str, str]:
                     status="published",
                     title={"en": "Relocation Setup Guide", "th": "คู่มือย้ายถิ่นฐาน"},
                     excerpt={"en": "A practical setup checklist.", "th": "เช็กลิสต์การตั้งถิ่นฐาน"},
-                    body_md={"en": "## Setup\nPublished guide body.", "th": "## การตั้งค่า\nเนื้อหาไกด์ที่เผยแพร่"},
+                    body_md={
+                        "en": "## Setup\nPublished guide body.",
+                        "th": "## การตั้งค่า\nเนื้อหาไกด์ที่เผยแพร่",
+                    },
                     hero_image_url=_LOCAL_WEBP,
                     published_at=datetime(2026, 2, 25, 8, 30, tzinfo=UTC),
                 ),
@@ -139,7 +148,10 @@ def _seed_a9_articles() -> dict[str, str]:
                     category="guide",
                     status="published",
                     title={"en": "Investment Yield Basics", "th": "พื้นฐานผลตอบแทนการลงทุน"},
-                    excerpt={"en": "Yield and risk framing for first-pass screening.", "th": "กรอบผลตอบแทนและความเสี่ยง"},
+                    excerpt={
+                        "en": "Yield and risk framing for first-pass screening.",
+                        "th": "กรอบผลตอบแทนและความเสี่ยง",
+                    },
                     body_md={
                         "en": "## Yield\nUse verified assumptions.",
                         "th": "## ผลตอบแทน\nใช้สมมติฐานที่ตรวจสอบแล้ว",
@@ -154,7 +166,10 @@ def _seed_a9_articles() -> dict[str, str]:
                     category="guide",
                     status="published",
                     title={"en": "Rental Contract Checklist", "th": "เช็กลิสต์สัญญาเช่า"},
-                    excerpt={"en": "Tenant checklist for rental contracts.", "th": "คู่มือผู้เช่าสำหรับสัญญาเช่า"},
+                    excerpt={
+                        "en": "Tenant checklist for rental contracts.",
+                        "th": "คู่มือผู้เช่าสำหรับสัญญาเช่า",
+                    },
                     body_md={"en": "## Contracts\nReview clauses.", "th": "## สัญญา\nตรวจสอบเงื่อนไข"},
                     hero_image_url=_LOCAL_WEBP,
                     published_at=datetime(2026, 2, 23, 8, 30, tzinfo=UTC),
@@ -163,8 +178,14 @@ def _seed_a9_articles() -> dict[str, str]:
                     slug=keyword_only_non_invest_slug,
                     category="guide",
                     status="published",
-                    title={"en": "Investment title but rental topic", "th": "ชื่อมีคำว่า ลงทุน แต่หัวข้อเช่า"},
-                    excerpt={"en": "Keyword should not override taxonomy.", "th": "ต้องใช้ taxonomy เป็นหลัก"},
+                    title={
+                        "en": "Investment title but rental topic",
+                        "th": "ชื่อมีคำว่า ลงทุน แต่หัวข้อเช่า",
+                    },
+                    excerpt={
+                        "en": "Keyword should not override taxonomy.",
+                        "th": "ต้องใช้ taxonomy เป็นหลัก",
+                    },
                     body_md={
                         "en": "## Rental process\nTenant checklist body.",
                         "th": "## กระบวนการเช่า\nเนื้อหาเช็กลิสต์ผู้เช่า",
@@ -223,9 +244,15 @@ def test_a9_listing_has_cards_metadata_tags_tracking_and_states(client) -> None:
     assert '<link rel="canonical"' in html
     assert seeded["blog_slug"] in html
 
-    for value in [*_extract_attrs(html, "src"), *_extract_attrs(html, "srcset"), *_extract_attrs(html, "poster")]:
+    for value in [
+        *_extract_attrs(html, "src"),
+        *_extract_attrs(html, "srcset"),
+        *_extract_attrs(html, "poster"),
+    ]:
         for candidate in [part.strip().split()[0] for part in value.split(",") if part.strip()]:
-            assert _is_allowed_media(candidate, host="testserver"), f"Disallowed media URL: {candidate}"
+            assert _is_allowed_media(candidate, host="testserver"), (
+                f"Disallowed media URL: {candidate}"
+            )
 
 
 def test_a9_invest_guides_filters_investment_topics(client) -> None:
@@ -264,9 +291,15 @@ def test_a9_detail_has_seo_toc_related_cta_and_tracking(client) -> None:
     assert "Table of contents" in html
     assert "/en/contact?intent=consultation&article=" in html
 
-    for value in [*_extract_attrs(html, "src"), *_extract_attrs(html, "srcset"), *_extract_attrs(html, "poster")]:
+    for value in [
+        *_extract_attrs(html, "src"),
+        *_extract_attrs(html, "srcset"),
+        *_extract_attrs(html, "poster"),
+    ]:
         for candidate in [part.strip().split()[0] for part in value.split(",") if part.strip()]:
-            assert _is_allowed_media(candidate, host="testserver"), f"Disallowed media URL: {candidate}"
+            assert _is_allowed_media(candidate, host="testserver"), (
+                f"Disallowed media URL: {candidate}"
+            )
 
 
 def test_a9_detail_route_is_category_scoped(client) -> None:
