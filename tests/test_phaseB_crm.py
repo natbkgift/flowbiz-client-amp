@@ -1,11 +1,11 @@
 from datetime import UTC, datetime, timedelta
-from uuid import UUID
+from uuid import UUID, uuid4
 
 from sqlalchemy import func, select
 
 from apps.api.routes.admin_crm import _spam_filter_clause
 from packages.core.database import SessionLocal
-from packages.core.models import Inquiry
+from packages.core.models import Inquiry, Property
 
 
 def _login_token(client) -> str:
@@ -43,6 +43,83 @@ def test_create_inquiry_and_schedule_viewing(client):
     assert viewing_resp.status_code == 201
     viewing = viewing_resp.json()
     assert viewing["status"] == "scheduled"
+
+
+def test_create_booking_flow_with_property_context_and_overlap_guard(client):
+    with SessionLocal() as db:
+        prop = Property(
+            source_id=f"crm-booking-{uuid4()}",
+            slug=f"crm-booking-{uuid4()}",
+            title="CRM Booking Property",
+            type="new",
+            property_type="condo",
+            status="active",
+            price=3200000,
+            address="CRM Booking Address",
+            city="Pattaya",
+        )
+        db.add(prop)
+        db.commit()
+        db.refresh(prop)
+        property_id = str(prop.id)
+
+    inquiry_resp = client.post(
+        "/v1/inquiries",
+        json={
+            "name": "Booking User",
+            "email": "booking@example.com",
+            "message": "Please schedule viewing",
+            "source_page": "/en/property",
+            "property_id": property_id,
+            "intent": "viewing",
+        },
+    )
+    assert inquiry_resp.status_code == 201, inquiry_resp.text
+    inquiry_id = inquiry_resp.json()["id"]
+
+    start_at = (datetime.now(UTC) + timedelta(days=1)).replace(microsecond=0).isoformat()
+    booking_resp = client.post(
+        "/v1/bookings",
+        json={
+            "property_id": property_id,
+            "inquiry_id": inquiry_id,
+            "start_at": start_at,
+            "duration_minutes": 60,
+            "guests": 2,
+            "notes": "Morning slot",
+            "idempotency_key": f"booking-{inquiry_id}",
+        },
+    )
+    assert booking_resp.status_code == 201, booking_resp.text
+    booking = booking_resp.json()
+    assert booking["status"] == "requested"
+    assert booking["property_id"] == property_id
+    assert booking["inquiry_id"] == inquiry_id
+
+    idempotent_resp = client.post(
+        "/v1/bookings",
+        json={
+            "property_id": property_id,
+            "inquiry_id": inquiry_id,
+            "start_at": start_at,
+            "duration_minutes": 60,
+            "idempotency_key": f"booking-{inquiry_id}",
+        },
+    )
+    assert idempotent_resp.status_code == 201, idempotent_resp.text
+    assert idempotent_resp.json()["id"] == booking["id"]
+
+    overlap_resp = client.post(
+        "/v1/bookings",
+        json={
+            "property_id": property_id,
+            "inquiry_id": inquiry_id,
+            "start_at": start_at,
+            "duration_minutes": 30,
+            "idempotency_key": f"overlap-{inquiry_id}",
+        },
+    )
+    assert overlap_resp.status_code == 409, overlap_resp.text
 
 
 def test_inquiry_retry_is_deduped_not_lost(client):

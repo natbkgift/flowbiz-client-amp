@@ -242,3 +242,53 @@ def test_property_canonical_fields_precede_legacy_without_breaking_compat(client
     assert body["cover_image_url"] == canonical_cover
     assert body["cover_image"] == legacy_cover
     assert float(body["size_sqm"]) == 33
+
+
+def test_property_cover_ingest_updates_local_media_and_source_rights_metadata(client: TestClient) -> None:
+    headers = _make_admin_headers()
+    original_cover = f"/media/library/{uuid4()}.jpg"
+    new_cover = f"/media/library/{uuid4()}.jpg"
+    _add_media_asset(path=original_cover, rights_status="approved", approval_status="approved")
+
+    created = _create_property(client, headers, slug=f"ingest-{uuid4()}", cover=original_cover)
+    property_id = created["id"]
+
+    ingest = client.post(
+        f"/admin/properties/{property_id}/cover-image/ingest",
+        headers=headers,
+        json={
+            "storage_path": new_cover,
+            "source_url": "https://example.test/property-source",
+            "source_page_url": "https://example.test/property-page",
+            "source_domain": "example.test",
+            "source_type": "official",
+            "rights_status": "approved",
+            "approval_status": "approved",
+            "rights_note": "approved by legal",
+            "license_evidence_url": "https://example.test/license.pdf",
+            "append_to_gallery": True,
+            "publish_now": True,
+        },
+    )
+    assert ingest.status_code == 200, ingest.text
+    body = ingest.json()
+    assert body["status"] == "active"
+    assert body["cover_image"] == new_cover
+    assert body["cover_image_url"] == new_cover
+    assert body["local_images"][0] == new_cover
+    assert body["source_meta"]["source_url"] == "https://example.test/property-source"
+    assert body["source_meta"]["source_domain"] == "example.test"
+    assert body["source_meta"]["rights_status"] == "approved"
+    assert body["source_meta"]["ingest"]["storage_path"] == new_cover
+
+    with SessionLocal() as db:
+        media = db.query(MediaAsset).filter(MediaAsset.storage_path == new_cover).first()
+        assert media is not None
+        assert media.source_url == "https://example.test/property-source"
+        assert media.source_page_url == "https://example.test/property-page"
+        assert media.source_domain == "example.test"
+        assert media.source_type == "official"
+        assert media.rights_status == "approved"
+        assert media.approval_status == "approved"
+        assert media.rights_note == "approved by legal"
+        assert media.license_evidence_url == "https://example.test/license.pdf"

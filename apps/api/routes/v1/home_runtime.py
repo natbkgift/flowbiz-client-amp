@@ -1522,12 +1522,477 @@ def _property_or_404(db: Session, property_ref: str) -> Property:
     return row
 
 
+def _local_runtime_media_path(value: str | None, *, request: Request) -> str | None:
+    raw = str(value or "").strip()
+    if not raw:
+        return None
+    if raw.startswith("/media/"):
+        return raw if _media_file_exists(raw) else None
+    if raw.startswith("http://") or raw.startswith("https://"):
+        if not _is_allowed_media_url(raw, request=request):
+            return None
+        try:
+            parsed = urlparse(raw)
+        except ValueError:
+            return None
+        path = str(parsed.path or "").strip()
+        if path.startswith("/media/") and _media_file_exists(path):
+            return path
+    return None
+
+
+def _property_gallery_paths(prop: Property, *, request: Request) -> list[str]:
+    candidates: list[str] = []
+    for value in [prop.cover_image_url, prop.cover_image]:
+        text = str(value or "").strip()
+        if text:
+            candidates.append(text)
+    if isinstance(prop.local_images, list):
+        for value in prop.local_images:
+            text = str(value or "").strip()
+            if text:
+                candidates.append(text)
+    if isinstance(prop.images, list):
+        for value in prop.images:
+            text = str(value or "").strip()
+            if text:
+                candidates.append(text)
+    out: list[str] = []
+    seen: set[str] = set()
+    for value in candidates:
+        local_path = _local_runtime_media_path(value, request=request)
+        if not local_path or local_path in seen:
+            continue
+        seen.add(local_path)
+        out.append(local_path)
+    if not out:
+        out.append(_DEFAULT_MEDIA_FALLBACK)
+    return out[:8]
+
+
+def _extract_lat_lng(value: object) -> tuple[float | None, float | None]:
+    if not isinstance(value, dict):
+        return None, None
+    lat_raw = value.get("lat") or value.get("latitude")
+    lng_raw = value.get("lng") or value.get("longitude")
+    try:
+        lat = float(lat_raw) if lat_raw is not None else None
+    except (TypeError, ValueError):
+        lat = None
+    try:
+        lng = float(lng_raw) if lng_raw is not None else None
+    except (TypeError, ValueError):
+        lng = None
+    return lat, lng
+
+
+def _property_feature_items(prop: Property) -> list[str]:
+    payload = prop.features if isinstance(prop.features, dict) else {}
+    out: list[str] = []
+    seen: set[str] = set()
+
+    def push(raw: object) -> None:
+        text = " ".join(str(raw or "").strip().split())
+        if not text:
+            return
+        key = text.lower()
+        if key in seen:
+            return
+        seen.add(key)
+        out.append(text)
+
+    def collect(value: object) -> None:
+        if value is None:
+            return
+        if isinstance(value, str):
+            for part in value.split(","):
+                push(part)
+            return
+        if isinstance(value, (int, float, Decimal)):
+            push(value)
+            return
+        if isinstance(value, list):
+            for item in value:
+                collect(item)
+            return
+        if isinstance(value, dict):
+            for key in ["label", "name", "title", "value"]:
+                if key in value:
+                    collect(value.get(key))
+            if any(key in value for key in ["label", "name", "title", "value"]):
+                return
+            for key, nested in value.items():
+                if isinstance(nested, bool):
+                    if nested:
+                        push(str(key).replace("_", " "))
+                else:
+                    collect(nested)
+
+    for key in ["amenities", "features", "tags", "highlights", "list", "items"]:
+        collect(payload.get(key))
+    return out[:12]
+
+
+def _property_detail_copy(locale: str) -> dict[str, str]:
+    copy = {
+        "status": "Status",
+        "status_pending": "Active",
+        "description": "Description",
+        "description_pending": "Description is pending publication. TODO: publish verified EN/TH copy.",
+        "gallery": "Gallery",
+        "gallery_note": "Gallery currently shows local media available in this runtime.",
+        "gallery_empty": "No approved local media is linked yet. TODO: upload approved local images.",
+        "price": "Price",
+        "key_stats": "Key Stats",
+        "view": "View",
+        "view_pending": "View pending publication",
+        "bedrooms": "Bedrooms",
+        "bathrooms": "Bathrooms",
+        "size": "Size",
+        "location": "Location",
+        "location_fallback": "Map coordinates are pending publication. TODO: attach verified map coordinates.",
+        "open_map": "Open map",
+        "features": "Features and Amenities",
+        "features_fallback": "No published features yet. TODO: add verified amenities/features list.",
+        "links": "Project Context",
+        "area": "Area",
+        "developer": "Developer",
+        "project": "Project",
+        "book_viewing": "Book Viewing",
+        "send_inquiry": "Inquiry",
+        "inquiry_section": "Inquiry or Book Viewing",
+        "inquiry_intro": "Share your details and we will follow up with the next step.",
+        "name": "Name",
+        "contact": "WhatsApp or Email",
+        "intent": "Intent",
+        "intent_inquiry": "Inquiry",
+        "intent_viewing": "Book viewing",
+        "budget": "Budget range",
+        "timeline": "Timeline",
+        "message": "Message",
+        "viewing_at": "Viewing date and time",
+        "viewing_duration": "Viewing duration",
+        "guests": "Guests",
+        "select_budget": "Select budget",
+        "select_timeline": "Select timeline",
+        "select_duration": "Select duration",
+        "message_placeholder": "Tell us what you need",
+        "submit": "Submit",
+        "submitting": "Submitting...",
+        "submit_success": "Request submitted. We will contact you with the next step.",
+        "submit_error": "Unable to submit right now. Please try again.",
+        "related": "Related Properties",
+        "related_fallback": "Related properties are pending publication. TODO: link matching active inventory.",
+        "share": "Share",
+        "share_x": "Share on X",
+        "share_facebook": "Share on Facebook",
+        "share_line": "Share on LINE",
+        "copy_link": "Copy link",
+        "copy_success": "Link copied.",
+        "copy_error": "Unable to copy link.",
+        "freshness": "Source Freshness",
+        "updated": "Updated",
+        "updated_pending": "Update date pending publication",
+        "source": "Source",
+        "source_url": "Source URL",
+        "source_domain": "Source Domain",
+        "source_type": "Source Type",
+        "rights": "Rights",
+        "rights_note": "Rights Note",
+        "license_evidence": "License Evidence",
+        "source_checked": "Last Checked",
+        "source_pending": "Source metadata is pending publication. TODO: attach source and rights metadata in admin.",
+        "stats_pending": "Stats pending publication",
+        "contact_fallback": "No contact details provided. TODO: publish contact details for this inquiry.",
+    }
+    if locale == "th":
+        copy.update(
+            {
+                "status": "สถานะ",
+                "status_pending": "พร้อมใช้งาน",
+                "description": "รายละเอียด",
+                "description_pending": "ยังไม่มีรายละเอียดที่เผยแพร่ TODO: เพิ่มคำอธิบาย EN/TH ที่ตรวจสอบแล้ว",
+                "gallery": "แกลเลอรี",
+                "gallery_note": "แกลเลอรีนี้ใช้เฉพาะ local media ที่มีในระบบตอนนี้",
+                "gallery_empty": "ยังไม่มีภาพ local media ที่อนุมัติ TODO: อัปโหลดรูปที่อนุมัติแล้ว",
+                "price": "ราคา",
+                "key_stats": "สถิติสำคัญ",
+                "view": "วิว",
+                "view_pending": "รอเผยแพร่ข้อมูลวิว",
+                "bedrooms": "ห้องนอน",
+                "bathrooms": "ห้องน้ำ",
+                "size": "ขนาด",
+                "location": "ทำเล",
+                "location_fallback": "ยังไม่มีพิกัดแผนที่ที่เผยแพร่ TODO: เพิ่มพิกัดที่ตรวจสอบแล้ว",
+                "open_map": "เปิดแผนที่",
+                "features": "จุดเด่นและสิ่งอำนวยความสะดวก",
+                "features_fallback": "ยังไม่มีข้อมูลจุดเด่นที่เผยแพร่ TODO: เพิ่มรายการ amenities/features ที่ตรวจสอบแล้ว",
+                "links": "บริบทโครงการ",
+                "area": "ทำเล",
+                "developer": "ผู้พัฒนา",
+                "project": "โครงการ",
+                "book_viewing": "จองนัดเข้าชม",
+                "send_inquiry": "สอบถาม",
+                "inquiry_section": "สอบถามหรือจองนัดเข้าชม",
+                "inquiry_intro": "ส่งรายละเอียดของคุณ แล้วเราจะติดต่อกลับพร้อมขั้นตอนถัดไป",
+                "name": "ชื่อ",
+                "contact": "WhatsApp หรือ Email",
+                "intent": "ความต้องการ",
+                "intent_inquiry": "สอบถาม",
+                "intent_viewing": "จองนัดเข้าชม",
+                "budget": "ช่วงงบประมาณ",
+                "timeline": "ไทม์ไลน์",
+                "message": "ข้อความ",
+                "viewing_at": "วันและเวลานัดเข้าชม",
+                "viewing_duration": "ระยะเวลานัดเข้าชม",
+                "guests": "จำนวนผู้เข้าชม",
+                "select_budget": "เลือกงบประมาณ",
+                "select_timeline": "เลือกไทม์ไลน์",
+                "select_duration": "เลือกระยะเวลา",
+                "message_placeholder": "แจ้งรายละเอียดที่ต้องการ",
+                "submit": "ส่งข้อมูล",
+                "submitting": "กำลังส่ง...",
+                "submit_success": "ส่งคำขอแล้ว เราจะติดต่อกลับพร้อมขั้นตอนถัดไป",
+                "submit_error": "ยังไม่สามารถส่งได้ กรุณาลองใหม่อีกครั้ง",
+                "related": "ทรัพย์ที่เกี่ยวข้อง",
+                "related_fallback": "ทรัพย์ที่เกี่ยวข้องรอเผยแพร่ TODO: เชื่อมรายการ active ที่เกี่ยวข้อง",
+                "share": "แชร์",
+                "share_x": "แชร์ไป X",
+                "share_facebook": "แชร์ไป Facebook",
+                "share_line": "แชร์ไป LINE",
+                "copy_link": "คัดลอกลิงก์",
+                "copy_success": "คัดลอกลิงก์แล้ว",
+                "copy_error": "ไม่สามารถคัดลอกลิงก์ได้",
+                "freshness": "ความใหม่ของข้อมูล",
+                "updated": "อัปเดต",
+                "updated_pending": "รอเผยแพร่วันที่อัปเดต",
+                "source": "แหล่งข้อมูล",
+                "source_url": "ลิงก์แหล่งข้อมูล",
+                "source_domain": "โดเมนแหล่งข้อมูล",
+                "source_type": "ประเภทแหล่งข้อมูล",
+                "rights": "สิทธิการใช้งาน",
+                "rights_note": "หมายเหตุสิทธิ์",
+                "license_evidence": "หลักฐานสิทธิ์",
+                "source_checked": "ตรวจสอบล่าสุด",
+                "source_pending": "ยังไม่มี source metadata ที่เผยแพร่ TODO: บันทึก source และ rights ใน admin",
+                "stats_pending": "รอเผยแพร่สถิติ",
+                "contact_fallback": "ยังไม่มีช่องทางติดต่อ TODO: เพิ่มช่องทางติดต่อที่ตรวจสอบแล้ว",
+            }
+        )
+    return copy
+
+
+def _property_detail_script(copy: dict[str, str], property_ref: str, property_id: str) -> str:
+    return f"""
+<script>
+(() => {{
+  const gallery = document.getElementById('property-gallery');
+  if (gallery) {{
+    const hero = gallery.querySelector('[data-gallery-hero]');
+    const thumbs = Array.from(gallery.querySelectorAll('[data-gallery-thumb]'));
+    let activeIndex = Math.max(0, thumbs.findIndex((node) => node.getAttribute('aria-current') === 'true'));
+    const setActive = (next, focus) => {{
+      if (!thumbs.length || !hero) return;
+      activeIndex = (next + thumbs.length) % thumbs.length;
+      thumbs.forEach((node, index) => {{
+        const selected = index === activeIndex;
+        node.classList.toggle('is-active', selected);
+        node.setAttribute('aria-current', selected ? 'true' : 'false');
+        if (selected) {{
+          const src = node.getAttribute('data-src') || '';
+          const alt = node.getAttribute('data-alt') || '';
+          if (src) hero.setAttribute('src', src);
+          if (alt) hero.setAttribute('alt', alt);
+          if (focus) node.focus();
+        }}
+      }});
+    }};
+    thumbs.forEach((node, index) => {{
+      node.addEventListener('click', () => setActive(index, false));
+      node.addEventListener('keydown', (event) => {{
+        if (event.key === 'Enter' || event.key === ' ') {{
+          event.preventDefault();
+          setActive(index, false);
+        }}
+      }});
+    }});
+    gallery.addEventListener('keydown', (event) => {{
+      if (!thumbs.length) return;
+      if (event.key === 'ArrowRight') {{
+        event.preventDefault();
+        setActive(activeIndex + 1, true);
+      }} else if (event.key === 'ArrowLeft') {{
+        event.preventDefault();
+        setActive(activeIndex - 1, true);
+      }} else if (event.key === 'Home') {{
+        event.preventDefault();
+        setActive(0, true);
+      }} else if (event.key === 'End') {{
+        event.preventDefault();
+        setActive(thumbs.length - 1, true);
+      }}
+    }});
+  }}
+
+  const inquiryForm = document.getElementById('property-inquiry-form');
+  const intentInput = document.getElementById('property-intent');
+  const viewingAtInput = document.getElementById('property-viewing-at');
+  const syncViewingRequirement = () => {{
+    if (!(intentInput instanceof HTMLSelectElement) || !(viewingAtInput instanceof HTMLInputElement)) return;
+    const needsViewing = intentInput.value === 'viewing';
+    viewingAtInput.required = needsViewing;
+    if (needsViewing) {{
+      if (!viewingAtInput.value) {{
+        const start = new Date();
+        start.setHours(start.getHours() + 24, 9, 0, 0);
+        viewingAtInput.value = start.toISOString().slice(0, 16);
+      }}
+    }}
+  }};
+  document.querySelectorAll('[data-property-intent]').forEach((node) => {{
+    node.addEventListener('click', () => {{
+      const intent = node.getAttribute('data-property-intent') || '';
+      if (intentInput && intent) {{
+        intentInput.value = intent;
+        syncViewingRequirement();
+      }}
+    }});
+  }});
+  if (intentInput instanceof HTMLSelectElement) {{
+    intentInput.addEventListener('change', syncViewingRequirement);
+    syncViewingRequirement();
+  }}
+  if (inquiryForm) {{
+    const submitBtn = document.getElementById('property-inquiry-submit');
+    const statusEl = document.getElementById('property-form-status');
+    const loadingEl = document.getElementById('property-form-loading');
+    const errorEl = document.getElementById('property-form-error');
+    const successEl = document.getElementById('property-form-success');
+    inquiryForm.addEventListener('submit', async (event) => {{
+      event.preventDefault();
+      if (!submitBtn || !statusEl || !loadingEl || !errorEl || !successEl) return;
+      errorEl.hidden = true;
+      successEl.hidden = true;
+      loadingEl.hidden = false;
+      submitBtn.disabled = true;
+      statusEl.textContent = '';
+
+      const data = Object.fromEntries(new FormData(inquiryForm).entries());
+      const contact = String(data.contact || '').trim();
+      const intent = String(data.intent || 'inquiry').trim() || 'inquiry';
+      const isEmail = contact.includes('@');
+      const userMessage = String(data.message || '').trim();
+      const propertyRef = {property_ref!r};
+      const propertyId = {property_id!r};
+      const mergedMessage = ['Property: ' + propertyRef, userMessage ? 'Message: ' + userMessage : ''].filter(Boolean).join(' | ');
+
+      try {{
+        const response = await fetch('/v1/inquiries', {{
+          method: 'POST',
+          headers: {{ 'content-type': 'application/json' }},
+          body: JSON.stringify({{
+            name: String(data.name || ''),
+            email: isEmail ? contact : null,
+            phone: isEmail ? null : contact,
+            message: mergedMessage,
+            source_page: location.pathname,
+            intent,
+            budget_band: String(data.budget || ''),
+            timeline: String(data.timeline || ''),
+            property_id: propertyId,
+          }}),
+        }});
+        if (!response.ok) throw new Error('submit_failed');
+        const inquiryBody = await response.json();
+        if (intent === 'viewing') {{
+          const viewingAtRaw = String(data.viewing_at || '').trim();
+          if (!viewingAtRaw) throw new Error('viewing_time_required');
+          const viewingAt = new Date(viewingAtRaw);
+          if (Number.isNaN(viewingAt.getTime())) throw new Error('viewing_time_invalid');
+          const durationRaw = Number.parseInt(String(data.viewing_duration || '60'), 10);
+          const durationMinutes = Number.isFinite(durationRaw) ? durationRaw : 60;
+          const guestsRaw = Number.parseInt(String(data.guests || '').trim(), 10);
+          const bookingResponse = await fetch('/v1/bookings', {{
+            method: 'POST',
+            headers: {{ 'content-type': 'application/json' }},
+            body: JSON.stringify({{
+              property_id: propertyId,
+              inquiry_id: inquiryBody.id,
+              start_at: viewingAt.toISOString(),
+              duration_minutes: durationMinutes,
+              guests: Number.isFinite(guestsRaw) ? guestsRaw : null,
+              notes: userMessage || null,
+              idempotency_key: propertyId + ':' + viewingAt.toISOString() + ':' + String(data.contact || '').trim().toLowerCase(),
+            }}),
+          }});
+          if (!bookingResponse.ok) throw new Error('booking_failed');
+        }}
+        successEl.hidden = false;
+        statusEl.textContent = {copy['submit_success']!r};
+        inquiryForm.reset();
+        if (intentInput) intentInput.value = 'inquiry';
+      }} catch {{
+        errorEl.hidden = false;
+        statusEl.textContent = {copy['submit_error']!r};
+      }} finally {{
+        loadingEl.hidden = true;
+        submitBtn.disabled = false;
+      }}
+    }});
+  }}
+
+  const copyBtn = document.getElementById('property-copy-link');
+  const copyStatus = document.getElementById('property-copy-status');
+  if (copyBtn && copyStatus) {{
+    copyBtn.addEventListener('click', async () => {{
+      const link = copyBtn.getAttribute('data-link') || '';
+      if (!link) return;
+      try {{
+        if (navigator.clipboard && navigator.clipboard.writeText) {{
+          await navigator.clipboard.writeText(link);
+        }} else {{
+          const temp = document.createElement('input');
+          temp.value = link;
+          document.body.appendChild(temp);
+          temp.select();
+          document.execCommand('copy');
+          document.body.removeChild(temp);
+        }}
+        copyStatus.textContent = {copy['copy_success']!r};
+      }} catch {{
+        copyStatus.textContent = {copy['copy_error']!r};
+      }}
+    }});
+  }}
+}})();
+</script>
+"""
+
+
 def _render_property_detail_page(locale: str, request: Request, db: Session, property_ref: str) -> HTMLResponse:
     row = _property_or_404(db, property_ref)
-
+    copy = _property_detail_copy(locale)
     title = _property_title_for_locale(row, locale)
     description = _property_description_for_locale(row, locale)
-    media = _property_media_path(row, request=request)
+    property_ref_safe = _property_ref_for_route(row)
+
+    gallery = _property_gallery_paths(row, request=request)
+    hero_media = gallery[0]
+    thumb_buttons = "".join(
+        (
+            f'<button class="property-thumb{" is-active" if idx == 0 else ""}" type="button" data-gallery-thumb="{idx}" '
+            f'data-src="{escape(path)}" data-alt="{escape(title)} image {idx + 1}" '
+            f'aria-current="{"true" if idx == 0 else "false"}" role="option" '
+            f'aria-label="{escape(title)} image {idx + 1}">'
+            f'<img src="{escape(path)}" alt="{escape(title)} thumbnail {idx + 1}" loading="lazy" width="160" height="90" />'
+            "</button>"
+        )
+        for idx, path in enumerate(gallery)
+    )
+    gallery_note_html = f'<p class="muted" data-gallery-note="true">{escape(copy["gallery_note"])}</p>'
+    if len(gallery) == 1 and gallery[0] == _DEFAULT_MEDIA_FALLBACK:
+        gallery_note_html = f'<p class="muted" data-gallery-empty="true">{escape(copy["gallery_empty"])}</p>'
+
     area_row = db.get(Area, row.area_id) if row.area_id else None
     if area_row is not None and area_row.deleted_at is not None:
         area_row = None
@@ -1541,13 +2006,212 @@ def _render_property_detail_page(locale: str, request: Request, db: Session, pro
     area_href = f"/{locale}/areas/{area_row.slug}" if area_row is not None and area_row.status == "published" else f"/{locale}/areas"
     developer_href = f"/{locale}/developers/{developer_row.slug}" if developer_row is not None else f"/{locale}/developers"
     project_href = f"/{locale}/projects/{project_row.slug}" if project_row is not None else f"/{locale}/projects"
+
     price_text = _format_money(row.price, fallback="-")
-    stats_text = " • ".join(_property_stats(row)) or "-"
+    status_text = " ".join(str(row.status or "").replace("_", " ").split()) or copy["status_pending"]
+    view_text = " ".join(str(row.view or "").replace("_", " ").split()) or copy["view_pending"]
+    size_value = row.size_sqm if row.size_sqm is not None else row.size
+    key_stats = [
+        (copy["bedrooms"], str(row.bedrooms) if row.bedrooms is not None else "-"),
+        (copy["bathrooms"], str(row.bathrooms) if row.bathrooms is not None else "-"),
+        (copy["size"], f"{float(size_value):,.0f} sqm" if size_value is not None else "-"),
+        (copy["view"], view_text),
+    ]
+    stats_html = "".join(
+        f"<li><strong>{escape(label)}:</strong> {escape(value)}</li>" for label, value in key_stats
+    ) or f"<li>{escape(copy['stats_pending'])}</li>"
+
+    source_meta = row.source_meta if isinstance(row.source_meta, dict) else {}
+    source_location = source_meta.get("location") if isinstance(source_meta.get("location"), dict) else {}
+    lat, lng = _extract_lat_lng(source_location)
+    if lat is None or lng is None:
+        lat, lng = _extract_lat_lng(source_meta)
+    if (lat is None or lng is None) and project_row is not None:
+        project_lat, project_lng = _extract_lat_lng(project_row.location)
+        if lat is None:
+            lat = project_lat
+        if lng is None:
+            lng = project_lng
+
+    location_context = (
+        _localized_dict_text(source_location.get("context"), locale)
+        or str(source_location.get("context") or source_location.get("label") or "").strip()
+        or _localized_dict_text(source_meta.get("context"), locale)
+        or str(source_meta.get("context") or source_meta.get("location_text") or "").strip()
+    )
+    if not location_context and project_row is not None and isinstance(project_row.location, dict):
+        project_location = project_row.location
+        location_context = (
+            _localized_dict_text(project_location.get("context"), locale)
+            or str(project_location.get("context") or project_location.get("label") or "").strip()
+        )
+    if not location_context:
+        location_context = " • ".join(
+            part for part in [str(row.address or "").strip(), str(row.city or "").strip()] if part
+        ) or str(getattr(area_row, "name", "") or "").strip()
+
+    if lat is not None and lng is not None:
+        map_href = f"https://maps.google.com/?q={lat:.6f},{lng:.6f}"
+        location_body = (
+            f"<p>{escape(location_context)}</p>"
+            f"<p class=\"muted\">Lat {lat:.6f}, Lng {lng:.6f}</p>"
+            f"<a class=\"btn\" href=\"{escape(map_href)}\" target=\"_blank\" rel=\"noopener\">{escape(copy['open_map'])}</a>"
+        )
+    else:
+        area_name = str(getattr(area_row, "name", "") or "-")
+        location_body = f"<p>{escape(copy['location_fallback'])}</p><a class=\"btn\" href=\"{area_href}\">{escape(area_name)}</a>"
+
+    features = _property_feature_items(row)
+    features_html = "".join(f"<li>{escape(item)}</li>" for item in features) or f"<li>{escape(copy['features_fallback'])}</li>"
+
+    related_rows: list[Property] = []
+    seen_related_ids: set[str] = {str(row.id)}
+    if row.project_id is not None:
+        same_project = db.scalars(
+            select(Property)
+            .where(Property.status == "active", Property.project_id == row.project_id, Property.id != row.id)
+            .order_by(desc(Property.updated_at))
+            .limit(8)
+        ).all()
+        for item in same_project:
+            item_key = str(item.id)
+            if item_key in seen_related_ids:
+                continue
+            seen_related_ids.add(item_key)
+            related_rows.append(item)
+            if len(related_rows) == 4:
+                break
+    if len(related_rows) < 4 and (row.area_id is not None or row.developer_id is not None):
+        secondary_pool = db.scalars(
+            select(Property).where(Property.status == "active", Property.id != row.id).order_by(desc(Property.updated_at)).limit(80)
+        ).all()
+        for item in secondary_pool:
+            item_key = str(item.id)
+            if item_key in seen_related_ids:
+                continue
+            matches_area = row.area_id is not None and item.area_id == row.area_id
+            matches_developer = row.developer_id is not None and item.developer_id == row.developer_id
+            if not (matches_area or matches_developer):
+                continue
+            seen_related_ids.add(item_key)
+            related_rows.append(item)
+            if len(related_rows) == 4:
+                break
+
+    related_html = "".join(
+        (
+            f"<article class=\"card\">"
+            f"<img class=\"media\" src=\"{escape(_property_gallery_paths(item, request=request)[0])}\" alt=\"{escape(_property_title_for_locale(item, locale))}\" width=\"640\" height=\"360\" loading=\"lazy\" />"
+            f"<h3>{escape(_property_title_for_locale(item, locale))}</h3>"
+            f"<p class=\"muted\">{escape(_format_money(item.price, fallback='-'))} • {escape(' • '.join(_localized_property_stats(item, locale)) or copy['stats_pending'])}</p>"
+            f"<a class=\"btn\" href=\"/{locale}/property/{escape(_property_ref_for_route(item))}\">{escape(copy['book_viewing'])}</a>"
+            "</article>"
+        )
+        for item in related_rows
+    ) or f"<div class=\"card\" data-related-empty=\"true\">{escape(copy['related_fallback'])}</div>"
+
+    updated_dt = row.last_synced_at or row.updated_at
+    updated_text = updated_dt.strftime("%Y-%m-%d") if updated_dt is not None else copy["updated_pending"]
+    source_name = " ".join(str(source_meta.get("source") or source_meta.get("source_name") or "").split())
+    source_url = " ".join(str(source_meta.get("source_url") or "").split())
+    source_domain = " ".join(str(source_meta.get("source_domain") or "").split())
+    source_type = " ".join(str(source_meta.get("source_type") or "").split())
+    rights_status = " ".join(str(source_meta.get("rights_status") or "").split())
+    rights_note = " ".join(str(source_meta.get("rights_note") or "").split())
+    license_evidence_url = " ".join(str(source_meta.get("license_evidence_url") or "").split())
+    source_checked = " ".join(str(source_meta.get("last_checked_at") or source_meta.get("checked_at") or "").split())
+    source_meta_body = ""
+    if source_name:
+        source_meta_body += f"<p><strong>{escape(copy['source'])}:</strong> {escape(source_name)}</p>"
+    if source_url:
+        source_meta_body += f'<p><strong>{escape(copy["source_url"])}:</strong> <a href="{escape(source_url)}" target="_blank" rel="noopener">{escape(source_url)}</a></p>'
+    if source_domain:
+        source_meta_body += f"<p><strong>{escape(copy['source_domain'])}:</strong> {escape(source_domain)}</p>"
+    if source_type:
+        source_meta_body += f"<p><strong>{escape(copy['source_type'])}:</strong> {escape(source_type)}</p>"
+    if rights_status:
+        source_meta_body += f"<p><strong>{escape(copy['rights'])}:</strong> {escape(rights_status)}</p>"
+    if rights_note:
+        source_meta_body += f"<p><strong>{escape(copy['rights_note'])}:</strong> {escape(rights_note)}</p>"
+    if license_evidence_url:
+        source_meta_body += f'<p><strong>{escape(copy["license_evidence"])}:</strong> <a href="{escape(license_evidence_url)}" target="_blank" rel="noopener">{escape(license_evidence_url)}</a></p>'
+    if source_checked:
+        source_meta_body += f"<p><strong>{escape(copy['source_checked'])}:</strong> {escape(source_checked)}</p>"
+    if not source_meta_body:
+        source_meta_body = f"<p>{escape(copy['source_pending'])}</p>"
+
+    property_url = _absolute_url(request, f"/{locale}/property/{property_ref_safe}")
+    share_facebook = "https://www.facebook.com/sharer/sharer.php?" + urlencode({"u": property_url})
+    share_line = "https://social-plugins.line.me/lineit/share?" + urlencode({"url": property_url})
+    share_x = "https://x.com/intent/tweet?" + urlencode({"url": property_url, "text": title})
+
+    description_html = f"<p>{escape(description)}</p>" if description else f"<p>{escape(copy['description_pending'])}</p>"
 
     body = (
-        f"<section class=\"card\"><img class=\"media\" src=\"{escape(media)}\" alt=\"{escape(title)}\" width=\"1280\" height=\"720\" loading=\"lazy\" /><h2>{escape(title)}</h2><p class=\"muted\">{escape(price_text)} • {escape(stats_text)}</p>{f'<p>{escape(description)}</p>' if description else ''}</section>"
-        f"<section class=\"card\"><p><strong>{'Area' if locale == 'en' else 'ทำเล'}:</strong> <a href=\"{area_href}\">{escape(str(getattr(area_row, 'name', '') or '-'))}</a></p><p><strong>{'Developer' if locale == 'en' else 'ผู้พัฒนา'}:</strong> <a href=\"{developer_href}\">{escape(str(getattr(developer_row, 'name', '') or '-'))}</a></p><p><strong>{'Project' if locale == 'en' else 'โครงการ'}:</strong> <a href=\"{project_href}\">{escape(str(getattr(project_row, 'name', '') or '-'))}</a></p><a class=\"btn\" href=\"/{locale}/contact?intent=viewing&property={escape(_property_ref_for_route(row))}\">{'Book Viewing' if locale == 'en' else 'จองนัดเข้าชม'}</a></section>"
+        "<style>"
+        ".property-thumb-strip{display:grid;gap:8px;grid-template-columns:repeat(auto-fit,minmax(96px,1fr))}"
+        ".property-thumb{padding:0;border:2px solid #d1d5db;border-radius:10px;background:#fff;cursor:pointer}"
+        ".property-thumb img{display:block;width:100%;aspect-ratio:16/9;object-fit:cover;border-radius:8px}"
+        ".property-thumb.is-active,.property-thumb[aria-current=\"true\"]{border-color:#0f6d5a}"
+        ".property-two-col{display:grid;gap:16px;grid-template-columns:1fr}"
+        ".property-list{margin:0;padding-left:20px;display:grid;gap:8px}"
+        ".property-related-grid{display:grid;gap:16px;grid-template-columns:1fr}"
+        ".state-loading,.state-error,.state-success{padding:10px 12px;border-radius:10px}"
+        ".state-loading{background:#ecfeff;color:#0c4a6e}"
+        ".state-error{background:#fef2f2;color:#991b1b}"
+        ".state-success{background:#ecfdf5;color:#065f46}"
+        "@media (min-width:1024px){.property-two-col{grid-template-columns:minmax(0,1.35fr) minmax(0,1fr)}.property-related-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}"
+        "@media (min-width:1920px){.property-related-grid{grid-template-columns:repeat(4,minmax(0,1fr))}}"
+        "</style>"
+        f"<section id=\"property-hero\" class=\"card\">"
+        f"<h2>{escape(title)}</h2>"
+        f"<p class=\"muted\"><strong>{escape(copy['price'])}:</strong> {escape(price_text)} • <strong>{escape(copy['status'])}:</strong> {escape(status_text)}</p>"
+        f"<div class=\"cta-row\"><a class=\"btn\" data-property-intent=\"inquiry\" href=\"#property-inquiry-form\">{escape(copy['send_inquiry'])}</a><a class=\"btn\" data-property-intent=\"viewing\" href=\"#property-inquiry-form\">{escape(copy['book_viewing'])}</a></div>"
+        f"{description_html}"
+        "</section>"
+        f"<section id=\"property-gallery\" class=\"card\" data-property-gallery=\"true\" aria-label=\"{escape(copy['gallery'])}\">"
+        f"<h2>{escape(copy['gallery'])}</h2>{gallery_note_html}"
+        f"<img class=\"media\" data-gallery-hero=\"true\" src=\"{escape(hero_media)}\" alt=\"{escape(title)}\" width=\"1280\" height=\"720\" loading=\"eager\" />"
+        f"<div class=\"property-thumb-strip\" role=\"listbox\" aria-label=\"{escape(copy['gallery'])}\">{thumb_buttons}</div>"
+        "</section>"
+        f"<section id=\"property-summary\" class=\"property-two-col\">"
+        f"<article class=\"card\"><h2>{escape(copy['key_stats'])}</h2><ul class=\"property-list\">{stats_html}</ul></article>"
+        f"<article id=\"property-links\" class=\"card\"><h2>{escape(copy['links'])}</h2>"
+        f"<p><strong>{escape(copy['area'])}:</strong> <a href=\"{area_href}\">{escape(str(getattr(area_row, 'name', '') or '-'))}</a></p>"
+        f"<p><strong>{escape(copy['developer'])}:</strong> <a href=\"{developer_href}\">{escape(str(getattr(developer_row, 'name', '') or '-'))}</a></p>"
+        f"<p><strong>{escape(copy['project'])}:</strong> <a href=\"{project_href}\">{escape(str(getattr(project_row, 'name', '') or '-'))}</a></p>"
+        "</article></section>"
+        f"<section id=\"property-location\" class=\"card\"><h2>{escape(copy['location'])}</h2>{location_body}</section>"
+        f"<section id=\"property-features\" class=\"card\"><h2>{escape(copy['features'])}</h2><ul class=\"property-list\">{features_html}</ul></section>"
+        f"<section id=\"property-inquiry\" class=\"stack\"><h2>{escape(copy['inquiry_section'])}</h2><p>{escape(copy['inquiry_intro'])}</p>"
+        f"<form id=\"property-inquiry-form\" class=\"card\" novalidate data-property-id=\"{escape(str(row.id))}\">"
+        f"<label class=\"field\" for=\"property-name\"><span>{escape(copy['name'])}</span><input id=\"property-name\" name=\"name\" type=\"text\" required /></label>"
+        f"<label class=\"field\" for=\"property-contact\"><span>{escape(copy['contact'])}</span><input id=\"property-contact\" name=\"contact\" type=\"text\" required /></label>"
+        f"<label class=\"field\" for=\"property-intent\"><span>{escape(copy['intent'])}</span><select id=\"property-intent\" name=\"intent\" required><option value=\"inquiry\">{escape(copy['intent_inquiry'])}</option><option value=\"viewing\">{escape(copy['intent_viewing'])}</option></select></label>"
+        f"<label class=\"field\" for=\"property-viewing-at\"><span>{escape(copy['viewing_at'])}</span><input id=\"property-viewing-at\" name=\"viewing_at\" type=\"datetime-local\" /></label>"
+        f"<label class=\"field\" for=\"property-viewing-duration\"><span>{escape(copy['viewing_duration'])}</span><select id=\"property-viewing-duration\" name=\"viewing_duration\"><option value=\"60\">60 min</option><option value=\"30\">30 min</option><option value=\"90\">90 min</option></select></label>"
+        f"<label class=\"field\" for=\"property-guests\"><span>{escape(copy['guests'])}</span><input id=\"property-guests\" name=\"guests\" type=\"number\" min=\"1\" max=\"20\" inputmode=\"numeric\" /></label>"
+        f"<label class=\"field\" for=\"property-budget\"><span>{escape(copy['budget'])}</span><select id=\"property-budget\" name=\"budget\"><option value=\"\">{escape(copy['select_budget'])}</option><option value=\"lt_3m\">Below THB 3M</option><option value=\"3m_6m\">THB 3M - 6M</option><option value=\"6m_10m\">THB 6M - 10M</option><option value=\"gt_10m\">Above THB 10M</option></select></label>"
+        f"<label class=\"field\" for=\"property-timeline\"><span>{escape(copy['timeline'])}</span><select id=\"property-timeline\" name=\"timeline\"><option value=\"\">{escape(copy['select_timeline'])}</option><option value=\"0_3m\">0-3 months</option><option value=\"3_6m\">3-6 months</option><option value=\"6m_plus\">6+ months</option></select></label>"
+        f"<label class=\"field\" for=\"property-message\"><span>{escape(copy['message'])}</span><textarea id=\"property-message\" name=\"message\" rows=\"4\" placeholder=\"{escape(copy['message_placeholder'])}\"></textarea></label>"
+        f"<div class=\"cta-row\"><button id=\"property-inquiry-submit\" class=\"btn\" type=\"submit\">{escape(copy['submit'])}</button><a class=\"btn\" href=\"/{locale}/contact?intent=viewing&property={escape(property_ref_safe)}\">{escape(copy['book_viewing'])}</a></div>"
+        "<p id=\"property-form-status\" class=\"muted\" role=\"status\" aria-live=\"polite\"></p>"
+        f"<div id=\"property-form-loading\" class=\"state-loading\" hidden>{escape(copy['submitting'])}</div>"
+        f"<div id=\"property-form-error\" class=\"state-error\" hidden>{escape(copy['submit_error'])}</div>"
+        f"<div id=\"property-form-success\" class=\"state-success\" hidden>{escape(copy['submit_success'])}</div>"
+        "</form></section>"
+        f"<section id=\"property-related\" class=\"stack\"><h2>{escape(copy['related'])}</h2><div class=\"property-related-grid\">{related_html}</div></section>"
+        f"<section id=\"property-share\" class=\"card\"><h2>{escape(copy['share'])}</h2>"
+        f"<div class=\"cta-row\"><a class=\"btn\" target=\"_blank\" rel=\"noopener\" href=\"{escape(share_x)}\">{escape(copy['share_x'])}</a>"
+        f"<a class=\"btn\" target=\"_blank\" rel=\"noopener\" href=\"{escape(share_facebook)}\">{escape(copy['share_facebook'])}</a>"
+        f"<a class=\"btn\" target=\"_blank\" rel=\"noopener\" href=\"{escape(share_line)}\">{escape(copy['share_line'])}</a>"
+        f"<button id=\"property-copy-link\" class=\"btn\" type=\"button\" data-link=\"{escape(property_url)}\">{escape(copy['copy_link'])}</button></div>"
+        "<p id=\"property-copy-status\" class=\"muted\" role=\"status\" aria-live=\"polite\"></p>"
+        "</section>"
+        f"<section id=\"property-freshness\" class=\"card\"><h2>{escape(copy['freshness'])}</h2><p><strong>{escape(copy['updated'])}:</strong> {escape(updated_text)}</p>{source_meta_body}</section>"
+        f"{_property_detail_script(copy, property_ref_safe, str(row.id))}"
     )
+
     intro = description or title
     return HTMLResponse(_render_page_shell(locale, title=title, intro=intro, body=body))
 
@@ -2424,6 +3088,15 @@ def render_developer_detail(slug: str, request: Request, db: Session = Depends(g
 @router.get("/th/property/{property_ref}", response_class=HTMLResponse)
 def render_property_detail(property_ref: str, request: Request, db: Session = Depends(get_db)) -> HTMLResponse:
     return _render_property_detail_page(_request_locale(request), request, db, property_ref)
+
+
+@router.get("/property/{property_ref}", response_class=HTMLResponse)
+def render_property_detail_default_locale(
+    property_ref: str,
+    request: Request,
+    db: Session = Depends(get_db),
+) -> HTMLResponse:
+    return _render_property_detail_page("en", request, db, property_ref)
 
 
 @router.get("/en/insights", response_class=HTMLResponse)

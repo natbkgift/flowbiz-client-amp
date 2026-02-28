@@ -166,6 +166,20 @@ class PropertyMediaSyncResponse(BaseModel):
     warnings: int = 0
 
 
+class PropertyCoverIngestRequest(BaseModel):
+    storage_path: str
+    source_url: str | None = None
+    source_page_url: str | None = None
+    source_domain: str | None = None
+    source_type: str | None = None
+    rights_status: str | None = None
+    approval_status: str | None = None
+    rights_note: str | None = None
+    license_evidence_url: str | None = None
+    append_to_gallery: bool = True
+    publish_now: bool = False
+
+
 class PropertyMediaGovernanceWarning(BaseModel):
     level: str
     path: str
@@ -974,6 +988,118 @@ def sync_property_media(
 
     db.commit()
     return PropertyMediaSyncResponse(updated=updated, missing=missing, warnings=warnings)
+
+
+@router.post("/properties/{property_id}/cover-image/ingest", response_model=PropertyDetail)
+def ingest_property_cover_image(
+    property_id: UUID,
+    payload: PropertyCoverIngestRequest,
+    db: Session = Depends(get_db),
+    _admin: User = Depends(get_current_admin),
+) -> PropertyDetail:
+    prop = db.get(Property, property_id)
+    if prop is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Property not found")
+
+    normalized_path = require_local_media_path(payload.storage_path, field_name="storage_path")
+    media = db.scalar(select(MediaAsset).where(MediaAsset.storage_path == normalized_path))
+    if media is None:
+        checksum = hashlib.sha256(f"{property_id}:{time.time_ns()}:{normalized_path}".encode("utf-8")).hexdigest()
+        media = MediaAsset(
+            storage_path=normalized_path,
+            kind="image",
+            mime_type="image/jpeg",
+            file_size_bytes=1,
+            checksum_sha256=checksum,
+            source_url=payload.source_url,
+            source_page_url=payload.source_page_url,
+            source_domain=payload.source_domain,
+            source_type=payload.source_type,
+            rights_status=payload.rights_status,
+            approval_status=payload.approval_status,
+            rights_note=payload.rights_note,
+            license_evidence_url=payload.license_evidence_url,
+            status="active",
+        )
+        db.add(media)
+        db.flush()
+    else:
+        if payload.source_url is not None:
+            media.source_url = payload.source_url
+        if payload.source_page_url is not None:
+            media.source_page_url = payload.source_page_url
+        if payload.source_domain is not None:
+            media.source_domain = payload.source_domain
+        if payload.source_type is not None:
+            media.source_type = payload.source_type
+        if payload.rights_status is not None:
+            media.rights_status = payload.rights_status
+        if payload.approval_status is not None:
+            media.approval_status = payload.approval_status
+        if payload.rights_note is not None:
+            media.rights_note = payload.rights_note
+        if payload.license_evidence_url is not None:
+            media.license_evidence_url = payload.license_evidence_url
+
+    local_images = _coerce_string_list(prop.local_images)
+    if payload.append_to_gallery:
+        local_images = [normalized_path, *[path for path in local_images if path != normalized_path]]
+    else:
+        if not local_images:
+            local_images = [normalized_path]
+    prop.local_images = local_images
+    prop.images = [path for path in _coerce_string_list(local_images) if _is_local_media_path(path)]
+    prop.cover_image = normalized_path
+    prop.cover_image_url = normalized_path
+    prop.last_synced_at = datetime.now(timezone.utc)
+
+    source_meta = dict(prop.source_meta or {})
+    ingest_meta = source_meta.get("ingest") if isinstance(source_meta.get("ingest"), dict) else {}
+    ingest_meta = dict(ingest_meta)
+    ingest_meta["storage_path"] = normalized_path
+    ingest_meta["media_asset_id"] = str(media.id)
+    ingest_meta["ingested_at"] = prop.last_synced_at.isoformat()
+    for key, value in {
+        "source_url": payload.source_url,
+        "source_page_url": payload.source_page_url,
+        "source_domain": payload.source_domain,
+        "source_type": payload.source_type,
+        "rights_status": payload.rights_status,
+        "approval_status": payload.approval_status,
+        "rights_note": payload.rights_note,
+        "license_evidence_url": payload.license_evidence_url,
+    }.items():
+        if value is not None:
+            ingest_meta[key] = value
+            source_meta[key] = value
+    if payload.source_url:
+        source_meta["source_url"] = payload.source_url
+        source_meta["source"] = payload.source_domain or payload.source_url
+    if payload.source_domain:
+        source_meta["source_domain"] = payload.source_domain
+        source_meta["source"] = payload.source_domain
+    if payload.rights_status is not None:
+        source_meta["rights_status"] = payload.rights_status
+    source_meta["ingest"] = ingest_meta
+    source_meta["last_checked_at"] = prop.last_synced_at.isoformat()
+    prop.source_meta = source_meta
+
+    if payload.publish_now:
+        prop.status = PropertyStatus.ACTIVE.value
+
+    warnings = _validate_property_media_governance(
+        db,
+        cover_image=prop.cover_image,
+        cover_image_url=prop.cover_image_url,
+        local_images=prop.local_images,
+        images=prop.images,
+    )
+    _apply_canonical_legacy_alignment(prop)
+    db.add(prop)
+    db.add(media)
+    db.commit()
+    db.refresh(prop)
+    return _serialize_property_detail(db, prop, warnings_override=warnings)
 
 
 @router.post("/properties", response_model=PropertyDetail, status_code=status.HTTP_201_CREATED)

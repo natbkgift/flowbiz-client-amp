@@ -10,14 +10,15 @@ from sqlalchemy import and_, select
 from sqlalchemy.orm import Session
 
 from packages.core.database import get_db
-from packages.core.models import Inquiry, Viewing
-from packages.core.schemas.crm import InquiryItem, ViewingItem
+from packages.core.models import Booking, Inquiry, Property, Viewing
+from packages.core.schemas.crm import BookingItem, InquiryItem, ViewingItem
 
 router = APIRouter(prefix="/v1", tags=["crm"])
 
 
 class InquiryCreate(BaseModel):
     name: str
+    property_id: UUID | None = None
     email: str | None = None
     phone: str | None = None
     message: str
@@ -33,6 +34,17 @@ class ViewingCreate(BaseModel):
     inquiry_id: UUID
     scheduled_at: datetime
     notes: str | None = None
+
+
+class BookingCreate(BaseModel):
+    property_id: UUID | None = None
+    inquiry_id: UUID | None = None
+    start_at: datetime
+    end_at: datetime | None = None
+    duration_minutes: int | None = 60
+    guests: int | None = None
+    notes: str | None = None
+    idempotency_key: str | None = None
 
 
 def _hash_text(value: str | None) -> str | None:
@@ -65,12 +77,32 @@ def _to_inquiry_item(inquiry: Inquiry, *, dedupe_hint: bool = False) -> InquiryI
     )
 
 
+def _to_booking_item(booking: Booking) -> BookingItem:
+    return BookingItem(
+        id=booking.id,
+        property_id=booking.property_id,
+        inquiry_id=booking.inquiry_id,
+        start_at=booking.start_at,
+        end_at=booking.end_at,
+        guests=booking.guests,
+        notes=booking.notes,
+        status=booking.status,
+        created_at=booking.created_at,
+        updated_at=booking.updated_at,
+    )
+
+
 @router.post("/inquiries", response_model=InquiryItem, status_code=status.HTTP_201_CREATED)
 def create_inquiry(
     payload: InquiryCreate,
     response: Response,
     db: Session = Depends(get_db),
 ) -> InquiryItem:
+    if payload.property_id is not None:
+        prop = db.get(Property, payload.property_id)
+        if prop is None or prop.status != "active":
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Property not found")
+
     now = datetime.now(UTC)
     dedupe_since = now - timedelta(minutes=10)
 
@@ -95,6 +127,7 @@ def create_inquiry(
 
     inquiry = Inquiry(
         intent=payload.intent or "general",
+        property_id=payload.property_id,
         name=payload.name.strip(),
         email=(payload.email or "").strip() or None,
         phone=(payload.phone or "").strip() or None,
@@ -134,3 +167,78 @@ def create_viewing(payload: ViewingCreate, db: Session = Depends(get_db)) -> Vie
     db.commit()
     db.refresh(viewing)
     return ViewingItem.model_validate(viewing)
+
+
+@router.post("/bookings", response_model=BookingItem, status_code=status.HTTP_201_CREATED)
+def create_booking(payload: BookingCreate, db: Session = Depends(get_db)) -> BookingItem:
+    inquiry: Inquiry | None = None
+    if payload.inquiry_id is not None:
+        inquiry = db.get(Inquiry, payload.inquiry_id)
+        if inquiry is None:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Inquiry not found")
+
+    property_id = payload.property_id or (inquiry.property_id if inquiry is not None else None)
+    if property_id is not None:
+        prop = db.get(Property, property_id)
+        if prop is None or prop.status != "active":
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Property not found")
+
+    if property_id is None:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
+            detail="property_id is required",
+        )
+
+    start_at = payload.start_at
+    duration = payload.duration_minutes if payload.duration_minutes is not None else 60
+    if duration < 15 or duration > 720:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
+            detail="duration_minutes must be between 15 and 720",
+        )
+    end_at = payload.end_at or (start_at + timedelta(minutes=duration))
+    if end_at <= start_at:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
+            detail="end_at must be greater than start_at",
+        )
+
+    idempotency_key = str(payload.idempotency_key or "").strip() or None
+    if idempotency_key:
+        existing = db.scalar(select(Booking).where(Booking.idempotency_key == idempotency_key).limit(1))
+        if existing is not None:
+            return _to_booking_item(existing)
+
+    overlap = db.scalar(
+        select(Booking)
+        .where(
+            and_(
+                Booking.property_id == property_id,
+                Booking.status.in_(["requested", "confirmed"]),
+                Booking.start_at < end_at,
+                Booking.end_at > start_at,
+            )
+        )
+        .order_by(Booking.start_at.asc())
+        .limit(1)
+    )
+    if overlap is not None:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Requested slot overlaps an existing booking",
+        )
+
+    booking = Booking(
+        property_id=property_id,
+        inquiry_id=payload.inquiry_id,
+        idempotency_key=idempotency_key,
+        start_at=start_at,
+        end_at=end_at,
+        guests=payload.guests,
+        notes=(payload.notes or "").strip() or None,
+        status="requested",
+    )
+    db.add(booking)
+    db.commit()
+    db.refresh(booking)
+    return _to_booking_item(booking)
