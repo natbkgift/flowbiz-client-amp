@@ -18,11 +18,18 @@ class InquiryItem(BaseModel):
     phone: str | None = None
     message: str
     source_page: str | None = None
+    intent: str | None = None
+    purpose: str | None = None
     score: int = 0
     status: str
     persona: str | None = None
     budget_band: str | None = None
     timeline: str | None = None
+    follow_up_status: str | None = None
+    follow_up_due_at: datetime | None = None
+    whatsapp_url: str | None = None
+    phone_url: str | None = None
+    email_url: str | None = None
     is_duplicate_hint: bool = False
     is_spam_hint: bool = False
     created_at: datetime

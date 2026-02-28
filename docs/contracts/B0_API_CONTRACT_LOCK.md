@@ -133,6 +133,12 @@ Lock rules:
 Lock rules:
 - Status transition matrix is enforced server-side.
 - Timeline/note changes are audit-log backed.
+- Follow-up statuses are canonical and validated server-side:
+  - `pending`, `scheduled`, `completed`, `no_response`
+- Inquiry response quick-contact actions are additive and derived safely:
+  - `email_url` from valid email only
+  - `phone_url` from normalized digits
+  - `whatsapp_url` uses E.164 digits; local phone values without country code use env `CRM_WHATSAPP_DEFAULT_COUNTRY_CODE` (fallback `+66`)
 
 ## Global Contract Rules
 - Errors are wrapped by global error handlers into unified envelope.

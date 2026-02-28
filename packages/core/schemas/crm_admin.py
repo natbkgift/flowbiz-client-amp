@@ -39,3 +39,8 @@ class InquiryNoteCreate(BaseModel):
 
 class InquiryNoteUpdate(BaseModel):
     note: str
+
+
+class InquiryFollowUpUpdate(BaseModel):
+    follow_up_status: str | None = None
+    follow_up_due_at: datetime | None = None

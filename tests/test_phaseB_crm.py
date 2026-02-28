@@ -46,6 +46,7 @@ def test_create_inquiry_and_schedule_viewing(client):
 
 
 def test_create_booking_flow_with_property_context_and_overlap_guard(client):
+    unique_key = uuid4().hex
     with SessionLocal() as db:
         prop = Property(
             source_id=f"crm-booking-{uuid4()}",
@@ -67,9 +68,9 @@ def test_create_booking_flow_with_property_context_and_overlap_guard(client):
         "/v1/inquiries",
         json={
             "name": "Booking User",
-            "email": "booking@example.com",
-            "message": "Please schedule viewing",
-            "source_page": "/en/property",
+            "email": f"booking-{unique_key}@example.com",
+            "message": f"Please schedule viewing {unique_key}",
+            "source_page": f"/en/property/{unique_key}",
             "property_id": property_id,
             "intent": "viewing",
         },
@@ -173,6 +174,7 @@ def test_admin_can_list_inquiries_and_viewings(client):
 def test_admin_inquiry_filters_and_pagination(client):
     token = _login_token(client)
     headers = {"Authorization": f"Bearer {token}"}
+    today = datetime.now(UTC).date().isoformat()
 
     _ = client.post(
         "/v1/inquiries",
@@ -190,6 +192,7 @@ def test_admin_inquiry_filters_and_pagination(client):
             "email": "filter-closed@example.com",
             "message": "Need callback",
             "source_page": "/th",
+            "intent": "general",
         },
     )
     assert old.status_code == 201
@@ -202,6 +205,17 @@ def test_admin_inquiry_filters_and_pagination(client):
     )
     assert patched.status_code == 200
 
+    follow_up = client.patch(
+        f"/admin/inquiries/{old_id}/follow-up",
+        json={
+            "follow_up_status": "scheduled",
+            "follow_up_due_at": "2030-01-15T10:00:00+00:00",
+        },
+        headers=headers,
+    )
+    assert follow_up.status_code == 200
+    assert follow_up.json()["follow_up_status"] == "scheduled"
+
     filtered = client.get(
         "/admin/inquiries?status=contacted&page=1&limit=1&sort=created_at&order=desc",
         headers=headers,
@@ -213,6 +227,30 @@ def test_admin_inquiry_filters_and_pagination(client):
     assert body["meta"]["total"] >= 1
     assert len(body["data"]) <= 1
     assert body["data"][0]["status"] == "contacted"
+
+    source_purpose_filtered = client.get(
+        (
+            f"/admin/inquiries?source=/th&purpose=general&follow_up_status=scheduled"
+            f"&date_from={today}&date_to={today}"
+        ),
+        headers=headers,
+    )
+    assert source_purpose_filtered.status_code == 200, source_purpose_filtered.text
+    source_body = source_purpose_filtered.json()
+    source_ids = {item["id"] for item in source_body["data"]}
+    assert old_id in source_ids
+
+    invalid_range = client.get(
+        "/admin/inquiries?date_from=2030-01-02&date_to=2030-01-01",
+        headers=headers,
+    )
+    assert invalid_range.status_code == 422
+
+    invalid_follow_up_filter = client.get(
+        "/admin/inquiries?follow_up_status=invalid_status",
+        headers=headers,
+    )
+    assert invalid_follow_up_filter.status_code == 422
 
 
 def test_admin_note_and_timeline_flow(client):
@@ -255,12 +293,21 @@ def test_admin_note_and_timeline_flow(client):
     assert edited.status_code == 200
     assert edited.json()["note"] == "edited note"
 
+    follow_up = client.patch(
+        f"/admin/inquiries/{inquiry_id}/follow-up",
+        json={"follow_up_status": "completed"},
+        headers=headers,
+    )
+    assert follow_up.status_code == 200
+    assert follow_up.json()["follow_up_status"] == "completed"
+
     timeline = client.get(f"/admin/inquiries/{inquiry_id}/timeline?limit=20", headers=headers)
     assert timeline.status_code == 200
     actions = [event["action"] for event in timeline.json()["data"]]
     assert "status_update" in actions
     assert "note_add" in actions
     assert "note_update" in actions
+    assert "follow_up_update" in actions
 
 
 def test_admin_csv_export_has_safe_fields(client):
@@ -283,8 +330,8 @@ def test_admin_csv_export_has_safe_fields(client):
     assert exported.headers["content-type"].startswith("text/csv")
     csv_text = exported.text
     assert (
-        "id,name,email,phone,status,score,advisor_user_id,source_page,duplicate_hint,spam_hint,created_at"
-        in csv_text
+        "id,name,email,phone,intent,purpose,status,follow_up_status,follow_up_due_at,score,"
+        "advisor_user_id,source_page,duplicate_hint,spam_hint,created_at" in csv_text
     )
     assert "Sensitive body should not be exported" not in csv_text
 
@@ -308,6 +355,9 @@ def test_create_inquiry_accepts_budget_band_and_timeline(client):
     inquiry = inquiry_resp.json()
     assert inquiry["budget_band"] == "3m_6m"
     assert inquiry["timeline"] == "3_6m"
+    assert inquiry["intent"] == "invest"
+    assert inquiry["purpose"] == "invest"
+    assert inquiry["follow_up_status"] == "pending"
 
 
 def test_inquiry_legacy_payload_and_additive_payload_are_both_supported(client):
@@ -413,3 +463,63 @@ def test_admin_inquiry_is_spam_filter_has_deterministic_total(client):
     assert len(clean_body["data"]) == min(50, expected_clean_total)
     assert clean_id in clean_ids
     assert spam_id not in clean_ids
+
+
+def test_admin_contact_actions_and_follow_up_due_date(client):
+    token = _login_token(client)
+    headers = {"Authorization": f"Bearer {token}"}
+
+    created = client.post(
+        "/v1/inquiries",
+        json={
+            "name": "Contact Action User",
+            "email": "quick-actions@example.com",
+            "phone": "+66 80 123 4567",
+            "message": "Contact me quickly",
+            "source_page": "/en/contact",
+            "intent": "buy",
+        },
+    )
+    assert created.status_code == 201
+    inquiry_id = created.json()["id"]
+
+    detail = client.get(f"/admin/inquiries/{inquiry_id}", headers=headers)
+    assert detail.status_code == 200, detail.text
+    body = detail.json()
+    assert body["email_url"] == "mailto:quick-actions@example.com"
+    assert body["phone_url"] == "tel:+66801234567"
+    assert body["whatsapp_url"] == "https://wa.me/66801234567"
+
+    follow_up = client.patch(
+        f"/admin/inquiries/{inquiry_id}/follow-up",
+        json={"follow_up_due_at": "2031-05-20T09:30:00+00:00"},
+        headers=headers,
+    )
+    assert follow_up.status_code == 200, follow_up.text
+    assert follow_up.json()["follow_up_due_at"].startswith("2031-05-20T09:30:00")
+
+    local_contact = client.post(
+        "/v1/inquiries",
+        json={
+            "name": "Local Phone User",
+            "email": None,
+            "phone": "080 123 4567",
+            "message": "Local number without country code",
+            "source_page": "/en/contact",
+            "intent": "rent",
+        },
+    )
+    assert local_contact.status_code == 201
+    local_id = local_contact.json()["id"]
+    local_detail = client.get(f"/admin/inquiries/{local_id}", headers=headers)
+    assert local_detail.status_code == 200
+    local_body = local_detail.json()
+    assert local_body["phone_url"] == "tel:0801234567"
+    assert local_body["whatsapp_url"] == "https://wa.me/66801234567"
+
+    invalid_follow_up = client.patch(
+        f"/admin/inquiries/{inquiry_id}/follow-up",
+        json={"follow_up_status": "later"},
+        headers=headers,
+    )
+    assert invalid_follow_up.status_code == 422

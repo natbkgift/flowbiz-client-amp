@@ -38,6 +38,10 @@ def _ensure_sqlite_columns() -> None:
             "trust_proof": "JSON",
             "cover_image_url": "VARCHAR(500)",
         },
+        "inquiries": {
+            "follow_up_status": "VARCHAR(32) NOT NULL DEFAULT 'pending'",
+            "follow_up_due_at": "DATETIME",
+        },
     }
 
     with engine.begin() as conn:

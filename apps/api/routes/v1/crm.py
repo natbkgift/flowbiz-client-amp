@@ -9,6 +9,8 @@ from pydantic import BaseModel
 from sqlalchemy import and_, select
 from sqlalchemy.orm import Session
 
+from packages.core.crm_contact_actions import build_contact_action_urls
+from packages.core.crm_follow_up import CANONICAL_FOLLOW_UP_STATUSES
 from packages.core.database import get_db
 from packages.core.models import Booking, Inquiry, Property, Viewing
 from packages.core.schemas.crm import BookingItem, InquiryItem, ViewingItem
@@ -55,6 +57,7 @@ def _hash_text(value: str | None) -> str | None:
 
 
 def _to_inquiry_item(inquiry: Inquiry, *, dedupe_hint: bool = False) -> InquiryItem:
+    contact_actions = build_contact_action_urls(email=inquiry.email, phone=inquiry.phone)
     return InquiryItem(
         id=inquiry.id,
         property_id=inquiry.property_id,
@@ -65,11 +68,18 @@ def _to_inquiry_item(inquiry: Inquiry, *, dedupe_hint: bool = False) -> InquiryI
         phone=inquiry.phone,
         message=inquiry.message,
         source_page=inquiry.source_page,
+        intent=inquiry.intent,
+        purpose=inquiry.intent,
         score=inquiry.score,
         status=inquiry.status,
         persona=inquiry.persona,
         budget_band=inquiry.budget_band,
         timeline=inquiry.timeline,
+        follow_up_status=inquiry.follow_up_status,
+        follow_up_due_at=inquiry.follow_up_due_at,
+        whatsapp_url=contact_actions["whatsapp_url"],
+        phone_url=contact_actions["phone_url"],
+        email_url=contact_actions["email_url"],
         is_duplicate_hint=dedupe_hint or inquiry.duplicate_of_inquiry_id is not None,
         is_spam_hint=False,
         created_at=inquiry.created_at,
@@ -137,6 +147,7 @@ def create_inquiry(
         status="new",
         budget_band=(payload.budget_band or "").strip() or None,
         timeline=(payload.timeline or "").strip() or None,
+        follow_up_status=CANONICAL_FOLLOW_UP_STATUSES[0],
         persona=(payload.persona or "").strip() or None,
         submit_timestamp=now,
         first_touch_timestamp=now,

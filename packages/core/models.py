@@ -769,6 +769,12 @@ class Inquiry(Base):
     persona: Mapped[str | None] = mapped_column(String(32), nullable=True)
     budget_band: Mapped[str | None] = mapped_column(String(32), nullable=True)
     timeline: Mapped[str | None] = mapped_column(String(32), nullable=True)
+    follow_up_status: Mapped[str] = mapped_column(
+        String(32), nullable=False, default="pending", server_default="pending", index=True
+    )
+    follow_up_due_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True), nullable=True, index=True
+    )
     tags: Mapped[list[str] | None] = mapped_column(JSONB, nullable=True)
 
     first_touch_timestamp: Mapped[datetime | None] = mapped_column(

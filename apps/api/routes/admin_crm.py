@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import csv
 import io
+from datetime import date, datetime, time
 from uuid import UUID, uuid4
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Response, status
@@ -10,10 +11,13 @@ from sqlalchemy.orm import Session
 
 from apps.api.dependencies.auth import get_current_admin
 from packages.core.audit import write_audit_log
+from packages.core.crm_contact_actions import build_contact_action_urls
+from packages.core.crm_follow_up import normalize_follow_up_status
 from packages.core.database import get_db
 from packages.core.models import AuditLog, Inquiry, LeadAssignment, User, Viewing
 from packages.core.schemas.crm import InquiryItem, InquiryStatusUpdate, ViewingItem, ViewingUpdate
 from packages.core.schemas.crm_admin import (
+    InquiryFollowUpUpdate,
     InquiryNoteCreate,
     InquiryNoteUpdate,
     InquiryTimelineEvent,
@@ -52,6 +56,7 @@ def _spam_filter_clause(*, is_spam: bool):
 
 
 def _to_inquiry_item(inquiry: Inquiry) -> InquiryItem:
+    contact_actions = build_contact_action_urls(email=inquiry.email, phone=inquiry.phone)
     return InquiryItem(
         id=inquiry.id,
         property_id=inquiry.property_id,
@@ -62,11 +67,18 @@ def _to_inquiry_item(inquiry: Inquiry) -> InquiryItem:
         phone=inquiry.phone,
         message=inquiry.message,
         source_page=inquiry.source_page,
+        intent=inquiry.intent,
+        purpose=inquiry.intent,
         score=inquiry.score,
         status=inquiry.status,
         persona=inquiry.persona,
         budget_band=inquiry.budget_band,
         timeline=inquiry.timeline,
+        follow_up_status=inquiry.follow_up_status,
+        follow_up_due_at=inquiry.follow_up_due_at,
+        whatsapp_url=contact_actions["whatsapp_url"],
+        phone_url=contact_actions["phone_url"],
+        email_url=contact_actions["email_url"],
         is_duplicate_hint=inquiry.duplicate_of_inquiry_id is not None,
         is_spam_hint=_is_spam_hint(inquiry),
         created_at=inquiry.created_at,
@@ -100,6 +112,11 @@ def list_inquiries(
     page: int = Query(1, ge=1),
     limit: int = Query(50, ge=1, le=200),
     status_filter: str | None = Query(default=None, alias="status"),
+    source_filter: str | None = Query(default=None, alias="source"),
+    purpose_filter: str | None = Query(default=None, alias="purpose"),
+    date_from: date | None = Query(default=None),
+    date_to: date | None = Query(default=None),
+    follow_up_status: str | None = Query(default=None),
     advisor_user_id: UUID | None = Query(default=None),
     query_text: str | None = Query(default=None, alias="q", min_length=1, max_length=200),
     has_duplicates: bool | None = Query(default=None),
@@ -117,10 +134,38 @@ def list_inquiries(
         raise HTTPException(
             status_code=status.HTTP_422_UNPROCESSABLE_CONTENT, detail="Invalid order"
         )
+    if date_from is not None and date_to is not None and date_from > date_to:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT, detail="Invalid date range"
+        )
 
     base = select(Inquiry)
     if status_filter:
         base = base.where(Inquiry.status == status_filter)
+    if source_filter:
+        like_pattern = f"%{source_filter.strip()}%"
+        base = base.where(Inquiry.source_page.ilike(like_pattern))
+    if purpose_filter:
+        base = base.where(func.lower(Inquiry.intent) == purpose_filter.strip().lower())
+    if date_from is not None:
+        base = base.where(Inquiry.created_at >= datetime.combine(date_from, time.min))
+    if date_to is not None:
+        base = base.where(Inquiry.created_at <= datetime.combine(date_to, time.max))
+    if follow_up_status:
+        normalized_input = follow_up_status.strip().lower()
+        if normalized_input == "none":
+            base = base.where(
+                or_(Inquiry.follow_up_status.is_(None), Inquiry.follow_up_status == "")
+            )
+        else:
+            try:
+                normalized_follow_up = normalize_follow_up_status(follow_up_status)
+            except ValueError as exc:
+                raise HTTPException(
+                    status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
+                    detail=str(exc),
+                ) from exc
+            base = base.where(func.lower(Inquiry.follow_up_status) == normalized_follow_up)
     if advisor_user_id is not None:
         base = base.where(Inquiry.advisor_user_id == advisor_user_id)
     if has_duplicates is not None:
@@ -138,6 +183,7 @@ def list_inquiries(
                 Inquiry.phone.ilike(like_pattern),
                 Inquiry.message.ilike(like_pattern),
                 Inquiry.source_page.ilike(like_pattern),
+                Inquiry.intent.ilike(like_pattern),
                 func.cast(Inquiry.id, String).ilike(like_pattern),
             )
         )
@@ -206,6 +252,72 @@ def update_inquiry_status(
         diff={"status": {"from": before, "to": payload.status}},
     )
 
+    db.commit()
+    db.refresh(inquiry)
+    return _to_inquiry_item(inquiry)
+
+
+@router.patch("/inquiries/{inquiry_id}/follow-up", response_model=InquiryItem)
+def update_inquiry_follow_up(
+    inquiry_id: UUID,
+    payload: InquiryFollowUpUpdate,
+    db: Session = Depends(get_db),
+    admin: User = Depends(get_current_admin),
+) -> InquiryItem:
+    inquiry = db.get(Inquiry, inquiry_id)
+    if inquiry is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Inquiry not found")
+    if not payload.model_fields_set:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
+            detail="At least one follow-up field is required",
+        )
+
+    diff: dict[str, dict[str, str | None]] = {}
+    if "follow_up_status" in payload.model_fields_set:
+        raw_status = str(payload.follow_up_status or "").strip()
+        if not raw_status:
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
+                detail="follow_up_status cannot be empty",
+            )
+        try:
+            status_value = normalize_follow_up_status(raw_status)
+        except ValueError as exc:
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
+                detail=str(exc),
+            ) from exc
+        diff["follow_up_status"] = {
+            "from": str(inquiry.follow_up_status or "").strip() or None,
+            "to": status_value,
+        }
+        inquiry.follow_up_status = status_value
+
+    if "follow_up_due_at" in payload.model_fields_set:
+        before_due = inquiry.follow_up_due_at.isoformat() if inquiry.follow_up_due_at else None
+        after_due = payload.follow_up_due_at
+        diff["follow_up_due_at"] = {
+            "from": before_due,
+            "to": after_due.isoformat() if after_due else None,
+        }
+        inquiry.follow_up_due_at = after_due
+
+    if not diff:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
+            detail="No follow-up changes provided",
+        )
+
+    db.add(inquiry)
+    write_audit_log(
+        db,
+        actor_user_id=admin.id,
+        entity_type="inquiry",
+        entity_id=str(inquiry.id),
+        action="follow_up_update",
+        diff=diff,
+    )
     db.commit()
     db.refresh(inquiry)
     return _to_inquiry_item(inquiry)
@@ -395,6 +507,11 @@ def update_inquiry_note(
 @router.get("/inquiries-export.csv")
 def export_inquiries_csv(
     status_filter: str | None = Query(default=None, alias="status"),
+    source_filter: str | None = Query(default=None, alias="source"),
+    purpose_filter: str | None = Query(default=None, alias="purpose"),
+    date_from: date | None = Query(default=None),
+    date_to: date | None = Query(default=None),
+    follow_up_status: str | None = Query(default=None),
     advisor_user_id: UUID | None = Query(default=None),
     query_text: str | None = Query(default=None, alias="q", min_length=1, max_length=200),
     has_duplicates: bool | None = Query(default=None),
@@ -408,6 +525,11 @@ def export_inquiries_csv(
         page=1,
         limit=200,
         status_filter=status_filter,
+        source_filter=source_filter,
+        purpose_filter=purpose_filter,
+        date_from=date_from,
+        date_to=date_to,
+        follow_up_status=follow_up_status,
         advisor_user_id=advisor_user_id,
         query_text=query_text,
         has_duplicates=has_duplicates,
@@ -426,7 +548,11 @@ def export_inquiries_csv(
             "name",
             "email",
             "phone",
+            "intent",
+            "purpose",
             "status",
+            "follow_up_status",
+            "follow_up_due_at",
             "score",
             "advisor_user_id",
             "source_page",
@@ -442,7 +568,11 @@ def export_inquiries_csv(
                 row.name,
                 row.email or "",
                 row.phone or "",
+                row.intent or "",
+                row.purpose or "",
                 row.status,
+                row.follow_up_status or "",
+                row.follow_up_due_at.isoformat() if row.follow_up_due_at else "",
                 row.score if row.score is not None else 0,
                 str(row.advisor_user_id) if row.advisor_user_id else "",
                 row.source_page or "",
