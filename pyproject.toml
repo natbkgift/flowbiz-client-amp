@@ -1,0 +1,58 @@
+[project]
+name = "flowbiz-template-service"
+version = "0.1.0"
+description = "FlowBiz Client Service Template"
+requires-python = ">=3.11"
+dependencies = [
+    "alembic>=1.13.0,<2.0.0",
+    "bcrypt>=5.0.0,<6.0.0",
+    "email-validator>=2.1.0,<3.0.0",
+    "fastapi>=0.104.0,<1.0.0",
+    "psycopg2-binary>=2.9.0,<3.0.0",
+    "pydantic>=2.4.0,<3.0.0",
+    "pydantic-settings>=2.0.0,<3.0.0",
+    "PyJWT[crypto]>=2.8.0,<3.0.0",
+    "python-jose[cryptography]>=3.3.0,<4.0.0",
+    "python-multipart>=0.0.22,<1.0.0",
+    "sqlalchemy>=2.0.0,<3.0.0",
+    "uvicorn[standard]>=0.24.0,<1.0.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "httpx>=0.25.0",
+    "mypy>=1.7.0",
+    "pytest>=7.4.0",
+    "pytest-asyncio>=0.21.0",
+    "pytest-cov>=4.1.0",
+    "ruff>=0.1.0",
+]
+
+[build-system]
+requires = ["setuptools>=68.0"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["apps*", "packages*"]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.ruff.lint]
+ignore = []
+select = ["E", "F", "I", "N", "W"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["apps", "packages"]
+
+[tool.ruff.lint.per-file-ignores]
+"alembic/versions/*.py" = ["E501"]
+"apps/agents/analytics/report_generator.py" = ["E741"]
+"docs/*.py" = ["E501", "W291"]
+"packages/core/property_type.py" = ["E501"]
