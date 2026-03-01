@@ -16,6 +16,7 @@ from packages.core.database import get_db
 from packages.core.media_library import require_local_media_path
 from packages.core.models import Area, AreaStatistic, Developer, Project, User
 from packages.core.project_media_governance import evaluate_project_media_governance
+from packages.core.seo_controls import upsert_slug_redirects
 
 router = APIRouter(prefix="/admin", tags=["admin"])
 
@@ -647,6 +648,7 @@ def admin_patch_area(
     _admin: User = Depends(get_current_admin),
 ) -> dict:
     row = _area_or_404(db, area_id)
+    old_slug = str(row.slug or "").strip()
     updates = payload.model_dump(exclude_unset=True)
     if "slug" in updates and updates["slug"] is not None:
         _assert_area_slug_available(db, slug=updates["slug"], exclude_area_id=row.id)
@@ -672,6 +674,13 @@ def admin_patch_area(
 
     for field, value in updates.items():
         setattr(row, field, value)
+    if "slug" in updates and updates["slug"] is not None:
+        upsert_slug_redirects(
+            db,
+            entity="area",
+            old_slug=old_slug,
+            new_slug=str(row.slug or "").strip(),
+        )
     db.add(row)
     try:
         db.flush()
@@ -872,6 +881,7 @@ def admin_patch_developer(
     _admin: User = Depends(get_current_admin),
 ) -> dict:
     row = _developer_or_404(db, developer_id)
+    old_slug = str(row.slug or "").strip()
     updates = payload.model_dump(exclude_unset=True)
     if "slug" in updates and updates["slug"] is not None:
         _assert_developer_slug_available(db, slug=updates["slug"], exclude_developer_id=row.id)
@@ -895,6 +905,13 @@ def admin_patch_developer(
 
     for field, value in updates.items():
         setattr(row, field, value)
+    if "slug" in updates and updates["slug"] is not None:
+        upsert_slug_redirects(
+            db,
+            entity="developer",
+            old_slug=old_slug,
+            new_slug=str(row.slug or "").strip(),
+        )
     db.add(row)
     try:
         db.flush()

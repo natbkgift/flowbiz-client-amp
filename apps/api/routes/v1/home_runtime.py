@@ -30,6 +30,7 @@ from packages.core.models import (
     Testimonial,
     User,
 )
+from packages.core.seo_controls import apply_runtime_seo
 
 router = APIRouter(tags=["home-runtime"])
 
@@ -788,7 +789,7 @@ def _render(locale: str, request: Request, db: Session, source: str, resolved: d
     insights_html = _build_insights_preview_html(db, locale, copy)
     reviews_html = _build_reviews_html(db, locale, copy, resolved)
     video_html = _build_video_html(request, copy, resolved)
-    return f"""<!doctype html>
+    html = f"""<!doctype html>
 <html lang=\"{locale}\">
   <head>
     <meta charset=\"utf-8\" />
@@ -932,6 +933,15 @@ def _render(locale: str, request: Request, db: Session, source: str, resolved: d
   </body>
 </html>
 """
+    return apply_runtime_seo(
+        db=db,
+        request=request,
+        locale=locale,
+        html=html,
+        default_title="FlowBiz Home",
+        default_description=hero_sub,
+        default_canonical=_absolute_url(request, request.url.path),
+    )
 
 
 def _render_page_shell(
@@ -940,7 +950,11 @@ def _render_page_shell(
     title: str,
     intro: str,
     body: str,
+    request: Request | None = None,
+    db: Session | None = None,
     canonical_href: str | None = None,
+    meta_description: str | None = None,
+    is_article_detail: bool = False,
     head_extra: str = "",
 ) -> str:
     nav_items = [
@@ -960,7 +974,7 @@ def _render_page_shell(
         if str(canonical_href or "").strip()
         else ""
     )
-    return f"""<!doctype html>
+    html = f"""<!doctype html>
 <html lang="{locale}">
   <head>
     <meta charset="utf-8" />
@@ -999,6 +1013,22 @@ def _render_page_shell(
   </body>
 </html>
 """
+    if request is None or db is None:
+        return html
+    effective_canonical = canonical_href or _absolute_url(request, request.url.path)
+    effective_description = (
+        str(meta_description).strip() if meta_description is not None else str(intro).strip()
+    )
+    return apply_runtime_seo(
+        db=db,
+        request=request,
+        locale=locale,
+        html=html,
+        default_title=title,
+        default_description=effective_description or None,
+        default_canonical=effective_canonical,
+        is_article_detail=is_article_detail,
+    )
 
 
 def _localized_dict_text(value: object, locale: str) -> str | None:
@@ -1180,7 +1210,9 @@ def _render_projects_page(locale: str, request: Request, db: Session) -> HTMLRes
         if locale == "en"
         else "โครงการที่เผยแพร่จากระบบปัจจุบัน พร้อมสื่อภายในระบบและเส้นทางติดต่อที่ชัดเจน"
     )
-    return HTMLResponse(_render_page_shell(locale, title=title, intro=intro, body=body))
+    return HTMLResponse(
+        _render_page_shell(locale, title=title, intro=intro, body=body, request=request, db=db)
+    )
 
 
 def _render_project_detail_page(
@@ -1550,19 +1582,35 @@ def _render_project_detail_page(
     )
     title = row.name
     intro = detail_intro
-    return HTMLResponse(_render_page_shell(locale, title=title, intro=intro, body=body))
+    return HTMLResponse(
+        _render_page_shell(locale, title=title, intro=intro, body=body, request=request, db=db)
+    )
 
 
 def _render_smart_finder_page(locale: str, request: Request, db: Session) -> HTMLResponse:
     copy, body = _smart_finder_runtime(locale=locale, request=request, db=db)
     return HTMLResponse(
-        _render_page_shell(locale, title=copy["title"], intro=copy["intro"], body=body)
+        _render_page_shell(
+            locale,
+            title=copy["title"],
+            intro=copy["intro"],
+            body=body,
+            request=request,
+            db=db,
+        )
     )
 
 
 def _render_compare_page(locale: str, request: Request, db: Session) -> HTMLResponse:
     copy, body, compare_count = _compare_runtime(locale=locale, request=request, db=db)
-    html = _render_page_shell(locale, title=copy["title"], intro=copy["intro"], body=body)
+    html = _render_page_shell(
+        locale,
+        title=copy["title"],
+        intro=copy["intro"],
+        body=body,
+        request=request,
+        db=db,
+    )
     html = html.replace("<body>", f'<body data-compare-count="{compare_count}">', 1)
     return HTMLResponse(html)
 
@@ -2886,7 +2934,14 @@ def _render_areas_page(locale: str, request: Request, db: Session) -> HTMLRespon
         f"{_area_tracking_script(loading_id='area-guide-loading', error_id='area-guide-runtime-error')}"
     )
     return HTMLResponse(
-        _render_page_shell(locale, title=copy["page_title"], intro=copy["page_intro"], body=body)
+        _render_page_shell(
+            locale,
+            title=copy["page_title"],
+            intro=copy["page_intro"],
+            body=body,
+            request=request,
+            db=db,
+        )
     )
 
 
@@ -2927,7 +2982,16 @@ def _render_area_detail_page(locale: str, request: Request, db: Session, slug: s
         projects=projects,
         properties=properties,
     )
-    return HTMLResponse(_render_page_shell(locale, title=row.name, intro=summary, body=body))
+    return HTMLResponse(
+        _render_page_shell(
+            locale,
+            title=row.name,
+            intro=summary,
+            body=body,
+            request=request,
+            db=db,
+        )
+    )
 
 
 def _developer_copy(locale: str) -> dict[str, str]:
@@ -3169,7 +3233,14 @@ def _render_developers_page(locale: str, request: Request, db: Session) -> HTMLR
         f"{_developer_tracking_script(loading_id='developer-list-loading', error_id='developer-list-runtime-error')}"
     )
     return HTMLResponse(
-        _render_page_shell(locale, title=copy["page_title"], intro=copy["page_intro"], body=body)
+        _render_page_shell(
+            locale,
+            title=copy["page_title"],
+            intro=copy["page_intro"],
+            body=body,
+            request=request,
+            db=db,
+        )
     )
 
 
@@ -3260,7 +3331,16 @@ def _render_developer_detail_page(
         f'<section id="developer-cta" class="card"><h2>{escape(copy["cta_title"])}</h2><p>{escape(copy["cta_intro"])}</p><div class="cta-row"><a class="btn" data-event="developer_cta_click" data-placement="developer_detail_footer" data-cta-id="developer_consult" data-developer-slug="{escape(row.slug)}" data-loading-target="developer-detail-loading" href="{consult_href}">{escape(copy["cta_consult"])}</a><a class="btn btn-secondary-hero" data-event="developer_cta_click" data-placement="developer_detail_footer" data-cta-id="developer_browse_projects" data-developer-slug="{escape(row.slug)}" data-loading-target="developer-detail-loading" href="{browse_projects_href}">{escape(copy["cta_browse_projects"])}</a>{website_html}</div></section>'
         f"{_developer_tracking_script(loading_id='developer-detail-loading', error_id='developer-detail-runtime-error')}"
     )
-    return HTMLResponse(_render_page_shell(locale, title=row.name, intro=profile, body=body))
+    return HTMLResponse(
+        _render_page_shell(
+            locale,
+            title=row.name,
+            intro=profile,
+            body=body,
+            request=request,
+            db=db,
+        )
+    )
 
 
 def _property_or_404(db: Session, property_ref: str) -> Property:
@@ -4040,7 +4120,16 @@ def _render_property_detail_page(
     )
 
     intro = description or title
-    return HTMLResponse(_render_page_shell(locale, title=title, intro=intro, body=body))
+    return HTMLResponse(
+        _render_page_shell(
+            locale,
+            title=title,
+            intro=intro,
+            body=body,
+            request=request,
+            db=db,
+        )
+    )
 
 
 def _parse_positive_int(
@@ -4762,7 +4851,14 @@ def _render_property_listing_page(
         f"{tracking_script}"
     )
     return HTMLResponse(
-        _render_page_shell(locale, title=copy["page_title"], intro=copy["page_intro"], body=body)
+        _render_page_shell(
+            locale,
+            title=copy["page_title"],
+            intro=copy["page_intro"],
+            body=body,
+            request=request,
+            db=db,
+        )
     )
 
 
@@ -5366,6 +5462,8 @@ def _render_content_listing_page(
             title=copy["page_title"],
             intro=copy["page_intro"],
             body=body,
+            request=request,
+            db=db,
             canonical_href=canonical,
         )
     )
@@ -5553,7 +5651,10 @@ def _render_content_detail_page(
             title=title,
             intro=excerpt,
             body=body,
+            request=request,
+            db=db,
             canonical_href=canonical,
+            is_article_detail=True,
         )
     )
 
@@ -5562,12 +5663,29 @@ def _format_text_block(value: str) -> str:
     return "<br />".join(escape(part) for part in str(value or "").splitlines()) or ""
 
 
-def _company_page(locale: str, slug: str, title: str, fallback: str, db: Session) -> HTMLResponse:
+def _company_page(
+    locale: str,
+    slug: str,
+    title: str,
+    fallback: str,
+    request: Request,
+    db: Session,
+) -> HTMLResponse:
     row = db.scalar(select(CompanyInfo).where(CompanyInfo.slug == slug))
     content = str(row.content if row is not None else fallback).strip() or fallback
     meta = str(row.meta_description if row is not None else "").strip()
     body = f'<section class="card"><p>{escape(meta)}</p><div>{_format_text_block(content)}</div><a class="btn" href="/{locale}/contact">{"Contact our team" if locale == "en" else "ติดต่อทีมงาน"}</a></section>'
-    return HTMLResponse(_render_page_shell(locale, title=title, intro=meta or title, body=body))
+    return HTMLResponse(
+        _render_page_shell(
+            locale,
+            title=title,
+            intro=meta or title,
+            body=body,
+            request=request,
+            db=db,
+            meta_description=meta or title,
+        )
+    )
 
 
 def _normalize_company_kv_key(raw: str) -> str:
@@ -5743,10 +5861,19 @@ def _render_about_page(locale: str, request: Request, db: Session) -> HTMLRespon
         if locale == "en"
         else "ข้อมูลบริษัทและคอนเทนต์ที่เผยแพร่แล้ว"
     )
-    return HTMLResponse(_render_page_shell(locale, title=title, intro=intro, body=body))
+    return HTMLResponse(
+        _render_page_shell(
+            locale,
+            title=title,
+            intro=intro,
+            body=body,
+            request=request,
+            db=db,
+        )
+    )
 
 
-def _render_how_we_work_page(locale: str, db: Session) -> HTMLResponse:
+def _render_how_we_work_page(locale: str, request: Request, db: Session) -> HTMLResponse:
     process_row = db.scalar(select(CompanyInfo).where(CompanyInfo.slug == "how-we-work"))
     content = str(process_row.content if process_row is not None else "").strip()
     if not content:
@@ -5781,10 +5908,19 @@ def _render_how_we_work_page(locale: str, db: Session) -> HTMLResponse:
         f'<section id="how-we-work-proof" class="card"><h2>{"Process proof assets" if locale == "en" else "หลักฐานประกอบ process"}</h2><img class="media" src="{_DEFAULT_MEDIA_FALLBACK}" alt="Process proof asset" width="1280" height="720" loading="lazy" /><p>{"Only local media from our runtime storage is used in public pages." if locale == "en" else "หน้า public ใช้เฉพาะสื่อ local จากระบบ storage ของเรา"}</p></section>'
         f'<section id="how-we-work-next-step" class="card"><h2>{"Next step" if locale == "en" else "ขั้นตอนถัดไป"}</h2><div class="grid"><a class="btn" href="/{locale}/contact?intent=consultation">{"Request consultation" if locale == "en" else "ขอคำปรึกษา"}</a><a class="btn" href="/{locale}/sell/list-property">{"List a property" if locale == "en" else "ลงประกาศทรัพย์"}</a></div></section>'
     )
-    return HTMLResponse(_render_page_shell(locale, title=process_title, intro=intro, body=body))
+    return HTMLResponse(
+        _render_page_shell(
+            locale,
+            title=process_title,
+            intro=intro,
+            body=body,
+            request=request,
+            db=db,
+        )
+    )
 
 
-def _render_contact_page(locale: str, db: Session) -> HTMLResponse:
+def _render_contact_page(locale: str, request: Request, db: Session) -> HTMLResponse:
     row = db.scalar(select(CompanyInfo).where(CompanyInfo.slug == "contact"))
     raw_content = str(row.content if row is not None else "").strip()
     if not raw_content:
@@ -5921,7 +6057,17 @@ def _render_contact_page(locale: str, db: Session) -> HTMLResponse:
         if locale == "en"
         else "ช่องทางติดต่อและขั้นตอนถัดไปในปัจจุบัน"
     )
-    return HTMLResponse(_render_page_shell(locale, title=title, intro=intro, body=body))
+    return HTMLResponse(
+        _render_page_shell(
+            locale,
+            title=title,
+            intro=intro,
+            body=body,
+            request=request,
+            db=db,
+            meta_description=meta or intro,
+        )
+    )
 
 
 def _sell_copy(locale: str) -> dict[str, str]:
@@ -6023,7 +6169,14 @@ def _render_sell_page(locale: str, request: Request, db: Session) -> HTMLRespons
         f"{_sell_tracking_script()}"
     )
     return HTMLResponse(
-        _render_page_shell(locale, title=copy["title"], intro=copy["intro"], body=body)
+        _render_page_shell(
+            locale,
+            title=copy["title"],
+            intro=copy["intro"],
+            body=body,
+            request=request,
+            db=db,
+        )
     )
 
 
@@ -6090,7 +6243,12 @@ def _render_sell_list_property_page(locale: str, request: Request, db: Session) 
     )
     return HTMLResponse(
         _render_page_shell(
-            locale, title=f"{copy['title']} / List Property", intro=copy["intro"], body=body
+            locale,
+            title=f"{copy['title']} / List Property",
+            intro=copy["intro"],
+            body=body,
+            request=request,
+            db=db,
         )
     )
 
@@ -6159,7 +6317,12 @@ def _render_sell_valuation_page(locale: str, request: Request, db: Session) -> H
     )
     return HTMLResponse(
         _render_page_shell(
-            locale, title=f"{copy['title']} / Valuation", intro=copy["intro"], body=body
+            locale,
+            title=f"{copy['title']} / Valuation",
+            intro=copy["intro"],
+            body=body,
+            request=request,
+            db=db,
         )
     )
 
@@ -6438,13 +6601,13 @@ def render_how_we_work(request: Request, db: Session = Depends(get_db)) -> HTMLR
         if request.url.path.startswith("/en") or request.url.path.startswith("/th")
         else "en"
     )
-    return _render_how_we_work_page(locale, db)
+    return _render_how_we_work_page(locale, request, db)
 
 
 @router.get("/en/contact", response_class=HTMLResponse)
 @router.get("/th/contact", response_class=HTMLResponse)
 def render_contact(request: Request, db: Session = Depends(get_db)) -> HTMLResponse:
-    return _render_contact_page(_request_locale(request), db)
+    return _render_contact_page(_request_locale(request), request, db)
 
 
 @router.get("/en/sell", response_class=HTMLResponse)
@@ -6492,7 +6655,7 @@ def render_privacy(request: Request, db: Session = Depends(get_db)) -> HTMLRespo
         if locale == "en"
         else "ยังไม่มีเนื้อหา Privacy ที่เผยแพร่ TODO: เพิ่มรายละเอียด privacy ที่อนุมัติแล้ว"
     )
-    return _company_page(locale, "privacy", "Privacy Policy", fallback, db)
+    return _company_page(locale, "privacy", "Privacy Policy", fallback, request, db)
 
 
 @router.get("/en/terms", response_class=HTMLResponse)
@@ -6504,7 +6667,7 @@ def render_terms(request: Request, db: Session = Depends(get_db)) -> HTMLRespons
         if locale == "en"
         else "ยังไม่มีเนื้อหา Terms ที่เผยแพร่ TODO: เพิ่มข้อกำหนดที่อนุมัติแล้ว"
     )
-    return _company_page(locale, "terms", "Terms", fallback, db)
+    return _company_page(locale, "terms", "Terms", fallback, request, db)
 
 
 @router.get("/en/cookies", response_class=HTMLResponse)
@@ -6516,7 +6679,7 @@ def render_cookies(request: Request, db: Session = Depends(get_db)) -> HTMLRespo
         if locale == "en"
         else "ยังไม่มีเนื้อหา Cookies ที่เผยแพร่ TODO: เพิ่มรายละเอียด cookies ที่อนุมัติแล้ว"
     )
-    return _company_page(locale, "cookies", "Cookies", fallback, db)
+    return _company_page(locale, "cookies", "Cookies", fallback, request, db)
 
 
 @router.get("/en/investment/methodology", response_class=HTMLResponse)
@@ -6529,4 +6692,4 @@ def render_investment_methodology(request: Request, db: Session = Depends(get_db
         else "ยังไม่มี methodology การลงทุนที่เผยแพร่ TODO: เพิ่มเกณฑ์คัดเลือกและ source notes ที่อนุมัติแล้ว"
     )
     title = "Investment Methodology" if locale == "en" else "Investment Methodology"
-    return _company_page(locale, "investment-methodology", title, fallback, db)
+    return _company_page(locale, "investment-methodology", title, fallback, request, db)

@@ -5,7 +5,7 @@ import mimetypes
 from pathlib import Path
 
 from fastapi import FastAPI, Request
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 
 from apps.api.routes import (
@@ -16,6 +16,7 @@ from apps.api.routes import (
     admin_media,
     admin_projects,
     admin_properties,
+    admin_seo,
 )
 from apps.api.routes.v1 import (
     auth,
@@ -28,7 +29,8 @@ from apps.api.routes.v1 import (
     projects,
     properties,
 )
-from packages.core.database import init_db
+from packages.core.database import SessionLocal, init_db
+from packages.core.seo_controls import resolve_redirect_rule
 
 
 @asynccontextmanager
@@ -67,6 +69,20 @@ async def unhandled_exception_handler(_: Request, exc: Exception) -> JSONRespons
     )
 
 
+@app.middleware("http")
+async def runtime_redirect_middleware(request: Request, call_next):
+    if request.method in {"GET", "HEAD"}:
+        with SessionLocal() as db:
+            rule = resolve_redirect_rule(db, path=request.url.path)
+        if rule is not None:
+            target = str(rule.new_path or "").strip()
+            if rule.preserve_query and request.url.query:
+                delimiter = "&" if "?" in target else "?"
+                target = f"{target}{delimiter}{request.url.query}"
+            return RedirectResponse(url=target, status_code=int(rule.status_code))
+    return await call_next(request)
+
+
 app.include_router(auth.router)
 app.include_router(crm.router)
 app.include_router(domain.router)
@@ -84,6 +100,7 @@ app.include_router(admin_projects.router)
 app.include_router(admin_content.router)
 app.include_router(admin_home_composer.router)
 app.include_router(admin_media.router)
+app.include_router(admin_seo.router)
 
 media_root = _pick_media_root()
 if media_root is not None:

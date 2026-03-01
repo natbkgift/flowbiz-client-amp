@@ -1,0 +1,54 @@
+{
+  "generated_at": "2026-03-01T13:25:20.433903+00:00",
+  "source": "data/import/company_info.json + data/import/articles.json + data/import/team_members.json",
+  "profiles": {
+    "en": {
+      "locale": "en",
+      "enabled": true,
+      "schema_org_name": "Asset Management Property",
+      "schema_org_url": "https://www.assetmp.net/",
+      "schema_org_logo_url": null,
+      "schema_org_same_as": [],
+      "schema_local_business_name": "Asset Management Property",
+      "schema_local_business_url": "https://www.assetmp.net/",
+      "schema_local_business_phone": "+66 63 453 3526",
+      "schema_local_business_price_range": null,
+      "schema_local_business_address": "8/44 North Pattaya Rd., Chon Buri, Thailand",
+      "schema_website_name": "Asset Management Property",
+      "schema_website_url": "/en",
+      "schema_website_search_path": "/en/smart-finder?intent={search_term_string}",
+      "schema_article_author": "Asset Management Property Editorial Team",
+      "schema_article_author_url": "/en/about#team-section",
+      "source_metadata": {
+        "approved_source_domain": "assetmp.net",
+        "rights": "company-owned first-party content"
+      }
+    },
+    "th": {
+      "locale": "th",
+      "enabled": true,
+      "schema_org_name": "Asset Management Property",
+      "schema_org_url": "https://www.assetmp.net/",
+      "schema_org_logo_url": null,
+      "schema_org_same_as": [],
+      "schema_local_business_name": "Asset Management Property",
+      "schema_local_business_url": "https://www.assetmp.net/",
+      "schema_local_business_phone": "+66 63 453 3526",
+      "schema_local_business_price_range": null,
+      "schema_local_business_address": "8/44 North Pattaya Rd., Chon Buri, Thailand",
+      "schema_website_name": "Asset Management Property",
+      "schema_website_url": "/th",
+      "schema_website_search_path": "/th/smart-finder?intent={search_term_string}",
+      "schema_article_author": "ทีมบรรณาธิการ Asset Management Property",
+      "schema_article_author_url": "/th/about#team-section",
+      "source_metadata": {
+        "approved_source_domain": "assetmp.net",
+        "rights": "company-owned first-party content"
+      }
+    }
+  },
+  "todos": [
+    "Populate schema_org_logo_url with approved local media asset when brand logo file is available in /media.",
+    "Update schema_org_same_as when approved social profiles are confirmed by brand/legal."
+  ]
+}

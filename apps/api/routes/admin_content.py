@@ -13,6 +13,7 @@ from apps.api.dependencies.auth import get_current_admin
 from packages.core.database import get_db
 from packages.core.media_library import require_local_media_path
 from packages.core.models import Article, MediaAsset, User
+from packages.core.seo_controls import upsert_slug_redirects
 
 router = APIRouter(prefix="/admin", tags=["admin"])
 
@@ -27,6 +28,7 @@ class HeroImageIngestRequest(BaseModel):
 
 
 class ArticleEditorialUpdateRequest(BaseModel):
+    slug: str | None = None
     title: dict[str, str] | str | None = None
     excerpt: dict[str, str] | str | None = None
     body_md: dict[str, str] | str | None = None
@@ -208,6 +210,8 @@ def update_article_editorial(
     article = db.scalar(select(Article).where(Article.slug == slug, Article.deleted_at.is_(None)))
     if article is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Article not found")
+    old_slug = str(article.slug or "").strip()
+    category = str(article.category or "").strip().lower()
 
     updates = payload.model_dump(exclude_unset=True)
     if not updates:
@@ -305,6 +309,27 @@ def update_article_editorial(
 
     article.body_md = body_payload
 
+    if "slug" in updates:
+        new_slug = str(payload.slug or "").strip()
+        if not new_slug:
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                detail="slug must not be empty",
+            )
+        conflict = db.scalar(
+            select(Article).where(
+                Article.slug == new_slug,
+                Article.deleted_at.is_(None),
+                Article.id != article.id,
+            )
+        )
+        if conflict is not None:
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail="Article slug already exists",
+            )
+        article.slug = new_slug
+
     if "status" in updates:
         status_text = str(payload.status or "").strip().lower()
         if status_text not in {"draft", "published", "archived"}:
@@ -317,6 +342,15 @@ def update_article_editorial(
         article.published_at = _to_utc(payload.published_at) if payload.published_at else None
     if "updated_at" in updates and payload.updated_at is not None:
         article.updated_at = _to_utc(payload.updated_at)
+
+    if "slug" in updates:
+        redirect_entity = "blog" if category == "blog" else "guide"
+        upsert_slug_redirects(
+            db,
+            entity=redirect_entity,
+            old_slug=old_slug,
+            new_slug=str(article.slug or "").strip(),
+        )
 
     db.add(article)
     db.commit()

@@ -1,0 +1,29 @@
+{
+  "version": "b10-prod-2026-03-01",
+  "checked_at_basis": "Derived from current public runtime route inventory in apps/api/routes/v1/home_runtime.py",
+  "seed_paths": [
+    "/en",
+    "/th",
+    "/en/buy",
+    "/th/buy",
+    "/en/rent",
+    "/th/rent",
+    "/en/projects",
+    "/th/projects",
+    "/en/areas",
+    "/th/areas",
+    "/en/developers",
+    "/th/developers",
+    "/en/blog",
+    "/th/blog",
+    "/en/guides",
+    "/th/guides",
+    "/en/contact",
+    "/th/contact",
+    "/en/about",
+    "/th/about"
+  ],
+  "max_depth": 2,
+  "max_pages": 180,
+  "max_link_checks": 1200
+}

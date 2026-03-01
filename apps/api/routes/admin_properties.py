@@ -34,6 +34,7 @@ from packages.core.models import (
 )
 from packages.core.project_media_governance import evaluate_project_media_governance
 from packages.core.property_type import validate_property_fields
+from packages.core.seo_controls import upsert_slug_redirects
 from packages.core.schemas.media_library import MediaAssetItem
 from packages.core.schemas.property_api import (
     CompanyInfoCreate,
@@ -1218,6 +1219,7 @@ def update_property(
     prop = db.get(Property, property_id)
     if prop is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Property not found")
+    old_slug = str(prop.slug or "").strip()
 
     data = payload.model_dump(exclude_unset=True)
 
@@ -1287,6 +1289,13 @@ def update_property(
         setattr(prop, field, value)
 
     _apply_canonical_legacy_alignment(prop)
+    if "slug" in data and data["slug"] is not None:
+        upsert_slug_redirects(
+            db,
+            entity="property",
+            old_slug=old_slug,
+            new_slug=str(prop.slug or "").strip(),
+        )
 
     db.add(prop)
     _commit_or_conflict(db, detail="A property with this slug already exists.")

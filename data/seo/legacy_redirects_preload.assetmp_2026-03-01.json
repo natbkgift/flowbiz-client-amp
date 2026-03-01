@@ -1,0 +1,826 @@
+{
+  "generated_at": "2026-03-01T13:26:40.014479+00:00",
+  "source_domain": "assetmp.net",
+  "crawl_seed_urls": [
+    "https://www.assetmp.net/",
+    "https://www.assetmp.net/en/"
+  ],
+  "crawl_limits": {
+    "max_pages": 30,
+    "max_depth": 1
+  },
+  "total_discovered_paths": 85,
+  "total_redirect_rows": 81,
+  "redirects": [
+    {
+      "old_path": "/",
+      "new_path": "/en",
+      "status_code": 301,
+      "preserve_query": true,
+      "enabled": true,
+      "source_url": "https://www.assetmp.net/",
+      "mapping_strategy": "legacy_root",
+      "source": "assetmp.net crawl 2026-03-01"
+    },
+    {
+      "old_path": "/abo_client",
+      "new_path": "/en/about",
+      "status_code": 301,
+      "preserve_query": true,
+      "enabled": true,
+      "source_url": "https://www.assetmp.net/abo_client",
+      "mapping_strategy": "legacy_about_alias",
+      "source": "assetmp.net crawl 2026-03-01"
+    },
+    {
+      "old_path": "/add-property.html",
+      "new_path": "/en/sell/list-property",
+      "status_code": 301,
+      "preserve_query": true,
+      "enabled": true,
+      "source_url": "https://www.assetmp.net/add-property.html",
+      "mapping_strategy": "legacy_add_property_page",
+      "source": "assetmp.net crawl 2026-03-01"
+    },
+    {
+      "old_path": "/blog-detail.html",
+      "new_path": "/en/blog",
+      "status_code": 301,
+      "preserve_query": true,
+      "enabled": true,
+      "source_url": "https://www.assetmp.net/blog-detail.html",
+      "mapping_strategy": "legacy_blog_detail_page",
+      "source": "assetmp.net crawl 2026-03-01"
+    },
+    {
+      "old_path": "/cn",
+      "new_path": "/en",
+      "status_code": 301,
+      "preserve_query": true,
+      "enabled": true,
+      "source_url": "https://www.assetmp.net/cn",
+      "mapping_strategy": "legacy_unknown_to_home",
+      "source": "assetmp.net crawl 2026-03-01"
+    },
+    {
+      "old_path": "/cn/add-property.html",
+      "new_path": "/en/sell/list-property",
+      "status_code": 301,
+      "preserve_query": true,
+      "enabled": true,
+      "source_url": "https://www.assetmp.net/cn/add-property.html",
+      "mapping_strategy": "legacy_add_property_page",
+      "source": "assetmp.net crawl 2026-03-01"
+    },
+    {
+      "old_path": "/cn/blog-detail.html",
+      "new_path": "/en/blog",
+      "status_code": 301,
+      "preserve_query": true,
+      "enabled": true,
+      "source_url": "https://www.assetmp.net/cn/blog-detail.html",
+      "mapping_strategy": "legacy_blog_detail_page",
+      "source": "assetmp.net crawl 2026-03-01"
+    },
+    {
+      "old_path": "/cn/property-details-v1.html",
+      "new_path": "/en/buy",
+      "status_code": 301,
+      "preserve_query": true,
+      "enabled": true,
+      "source_url": "https://www.assetmp.net/cn/property-details-v1.html",
+      "mapping_strategy": "legacy_listing_template_page",
+      "source": "assetmp.net crawl 2026-03-01"
+    },
+    {
+      "old_path": "/cn/sidebar-grid.html",
+      "new_path": "/en/buy",
+      "status_code": 301,
+      "preserve_query": true,
+      "enabled": true,
+      "source_url": "https://www.assetmp.net/cn/sidebar-grid.html",
+      "mapping_strategy": "legacy_listing_template_page",
+      "source": "assetmp.net crawl 2026-03-01"
+    },
+    {
+      "old_path": "/en/-9860",
+      "new_path": "/en/buy",
+      "status_code": 301,
+      "preserve_query": true,
+      "enabled": true,
+      "source_url": "https://www.assetmp.net/en/-9860",
+      "mapping_strategy": "legacy_en_detail_to_buy",
+      "source": "assetmp.net crawl 2026-03-01"
+    },
+    {
+      "old_path": "/en/1-bed-1-bath-32-39-sq-m-ashton-silom-4420",
+      "new_path": "/en/buy",
+      "status_code": 301,
+      "preserve_query": true,
+      "enabled": true,
+      "source_url": "https://www.assetmp.net/en/1-bed-1-bath-32-39-sq-m-ashton-silom-4420",
+      "mapping_strategy": "legacy_en_detail_to_buy",
+      "source": "assetmp.net crawl 2026-03-01"
+    },
+    {
+      "old_path": "/en/1-bed-1-bath-44-sq-m-m-phayathai-condo-6555",
+      "new_path": "/en/buy",
+      "status_code": 301,
+      "preserve_query": true,
+      "enabled": true,
+      "source_url": "https://www.assetmp.net/en/1-bed-1-bath-44-sq-m-m-phayathai-condo-6555",
+      "mapping_strategy": "legacy_en_detail_to_buy",
+      "source": "assetmp.net crawl 2026-03-01"
+    },
+    {
+      "old_path": "/en/1-bed-1-bath-45-sqm-condo-for-rent-amp-sale-5693",
+      "new_path": "/en/buy",
+      "status_code": 301,
+      "preserve_query": true,
+      "enabled": true,
+      "source_url": "https://www.assetmp.net/en/1-bed-1-bath-45-sqm-condo-for-rent-amp-sale-5693",
+      "mapping_strategy": "legacy_en_detail_to_buy",
+      "source": "assetmp.net crawl 2026-03-01"
+    },
+    {
+      "old_path": "/en/1-bed-1-bath-46-7-sqm-condo-for-sale-4981",
+      "new_path": "/en/buy",
+      "status_code": 301,
+      "preserve_query": true,
+      "enabled": true,
+      "source_url": "https://www.assetmp.net/en/1-bed-1-bath-46-7-sqm-condo-for-sale-4981",
+      "mapping_strategy": "legacy_en_detail_to_buy",
+      "source": "assetmp.net crawl 2026-03-01"
+    },
+    {
+      "old_path": "/en/1-bed-1-bed-26-9-sq-m-edge-central-pattaya-1521",
+      "new_path": "/en/buy",
+      "status_code": 301,
+      "preserve_query": true,
+      "enabled": true,
+      "source_url": "https://www.assetmp.net/en/1-bed-1-bed-26-9-sq-m-edge-central-pattaya-1521",
+      "mapping_strategy": "legacy_en_detail_to_buy",
+      "source": "assetmp.net crawl 2026-03-01"
+    },
+    {
+      "old_path": "/en/1-bed-43-07-sq-m-the-peak-towers-a-1518",
+      "new_path": "/en/buy",
+      "status_code": 301,
+      "preserve_query": true,
+      "enabled": true,
+      "source_url": "https://www.assetmp.net/en/1-bed-43-07-sq-m-the-peak-towers-a-1518",
+      "mapping_strategy": "legacy_en_detail_to_buy",
+      "source": "assetmp.net crawl 2026-03-01"
+    },
+    {
+      "old_path": "/en/1-bed-bath-35-sq-m-city-garden-tower-2276",
+      "new_path": "/en/buy",
+      "status_code": 301,
+      "preserve_query": true,
+      "enabled": true,
+      "source_url": "https://www.assetmp.net/en/1-bed-bath-35-sq-m-city-garden-tower-2276",
+      "mapping_strategy": "legacy_en_detail_to_buy",
+      "source": "assetmp.net crawl 2026-03-01"
+    },
+    {
+      "old_path": "/en/1-bed-plus-1-bath-48-73-sq-m-chapter-chula-samyan-6883",
+      "new_path": "/en/buy",
+      "status_code": 301,
+      "preserve_query": true,
+      "enabled": true,
+      "source_url": "https://www.assetmp.net/en/1-bed-plus-1-bath-48-73-sq-m-chapter-chula-samyan-6883",
+      "mapping_strategy": "legacy_en_detail_to_buy",
+      "source": "assetmp.net crawl 2026-03-01"
+    },
+    {
+      "old_path": "/en/1-bedroom-1-bathroom-35-sq-m-condo-for-sale-4685",
+      "new_path": "/en/buy",
+      "status_code": 301,
+      "preserve_query": true,
+      "enabled": true,
+      "source_url": "https://www.assetmp.net/en/1-bedroom-1-bathroom-35-sq-m-condo-for-sale-4685",
+      "mapping_strategy": "legacy_en_detail_to_buy",
+      "source": "assetmp.net crawl 2026-03-01"
+    },
+    {
+      "old_path": "/en/1-bedroom-for-sale-fully-furnished-4987",
+      "new_path": "/en/buy",
+      "status_code": 301,
+      "preserve_query": true,
+      "enabled": true,
+      "source_url": "https://www.assetmp.net/en/1-bedroom-for-sale-fully-furnished-4987",
+      "mapping_strategy": "legacy_en_detail_to_buy",
+      "source": "assetmp.net crawl 2026-03-01"
+    },
+    {
+      "old_path": "/en/135-sqm-2-bed-2-bath-duplex-condo-for-sale-5014",
+      "new_path": "/en/buy",
+      "status_code": 301,
+      "preserve_query": true,
+      "enabled": true,
+      "source_url": "https://www.assetmp.net/en/135-sqm-2-bed-2-bath-duplex-condo-for-sale-5014",
+      "mapping_strategy": "legacy_en_detail_to_buy",
+      "source": "assetmp.net crawl 2026-03-01"
+    },
+    {
+      "old_path": "/en/160-sqm-3-bed-2-bath-baan-ananda-condo-6428",
+      "new_path": "/en/buy",
+      "status_code": 301,
+      "preserve_query": true,
+      "enabled": true,
+      "source_url": "https://www.assetmp.net/en/160-sqm-3-bed-2-bath-baan-ananda-condo-6428",
+      "mapping_strategy": "legacy_en_detail_to_buy",
+      "source": "assetmp.net crawl 2026-03-01"
+    },
+    {
+      "old_path": "/en/1bed-1-bath-30-70-sq-m-metris-ladprao-3065",
+      "new_path": "/en/buy",
+      "status_code": 301,
+      "preserve_query": true,
+      "enabled": true,
+      "source_url": "https://www.assetmp.net/en/1bed-1-bath-30-70-sq-m-metris-ladprao-3065",
+      "mapping_strategy": "legacy_en_detail_to_buy",
+      "source": "assetmp.net crawl 2026-03-01"
+    },
+    {
+      "old_path": "/en/2-bed-1-bath-55-2-sqm-vipkaron-894",
+      "new_path": "/en/buy",
+      "status_code": 301,
+      "preserve_query": true,
+      "enabled": true,
+      "source_url": "https://www.assetmp.net/en/2-bed-1-bath-55-2-sqm-vipkaron-894",
+      "mapping_strategy": "legacy_en_detail_to_buy",
+      "source": "assetmp.net crawl 2026-03-01"
+    },
+    {
+      "old_path": "/en/2-bed-2-bath-55-sq-m-the-origin-sukhumvit-105-6639",
+      "new_path": "/en/buy",
+      "status_code": 301,
+      "preserve_query": true,
+      "enabled": true,
+      "source_url": "https://www.assetmp.net/en/2-bed-2-bath-55-sq-m-the-origin-sukhumvit-105-6639",
+      "mapping_strategy": "legacy_en_detail_to_buy",
+      "source": "assetmp.net crawl 2026-03-01"
+    },
+    {
+      "old_path": "/en/2-bed-2-bath-57-50-sq-m-ocean-horizon-beachfront-condo-pattaya-2859",
+      "new_path": "/en/buy",
+      "status_code": 301,
+      "preserve_query": true,
+      "enabled": true,
+      "source_url": "https://www.assetmp.net/en/2-bed-2-bath-57-50-sq-m-ocean-horizon-beachfront-condo-pattaya-2859",
+      "mapping_strategy": "legacy_en_detail_to_buy",
+      "source": "assetmp.net crawl 2026-03-01"
+    },
+    {
+      "old_path": "/en/2-bed-2-bath-65sq-m-the-jewel-condominium-2057",
+      "new_path": "/en/buy",
+      "status_code": 301,
+      "preserve_query": true,
+      "enabled": true,
+      "source_url": "https://www.assetmp.net/en/2-bed-2-bath-65sq-m-the-jewel-condominium-2057",
+      "mapping_strategy": "legacy_en_detail_to_buy",
+      "source": "assetmp.net crawl 2026-03-01"
+    },
+    {
+      "old_path": "/en/2-bed-60-86sq-m-splendid-condominium-1229",
+      "new_path": "/en/buy",
+      "status_code": 301,
+      "preserve_query": true,
+      "enabled": true,
+      "source_url": "https://www.assetmp.net/en/2-bed-60-86sq-m-splendid-condominium-1229",
+      "mapping_strategy": "legacy_en_detail_to_buy",
+      "source": "assetmp.net crawl 2026-03-01"
+    },
+    {
+      "old_path": "/en/2-bed-91-09sqm-the-bangkok-thonglor-7045",
+      "new_path": "/en/buy",
+      "status_code": 301,
+      "preserve_query": true,
+      "enabled": true,
+      "source_url": "https://www.assetmp.net/en/2-bed-91-09sqm-the-bangkok-thonglor-7045",
+      "mapping_strategy": "legacy_en_detail_to_buy",
+      "source": "assetmp.net crawl 2026-03-01"
+    },
+    {
+      "old_path": "/en/34-87sqm-dusit-grand-park-1-2990",
+      "new_path": "/en/buy",
+      "status_code": 301,
+      "preserve_query": true,
+      "enabled": true,
+      "source_url": "https://www.assetmp.net/en/34-87sqm-dusit-grand-park-1-2990",
+      "mapping_strategy": "legacy_en_detail_to_buy",
+      "source": "assetmp.net crawl 2026-03-01"
+    },
+    {
+      "old_path": "/en/4-bed-4-bath-580-sq-m-unique-residences-9347",
+      "new_path": "/en/buy",
+      "status_code": 301,
+      "preserve_query": true,
+      "enabled": true,
+      "source_url": "https://www.assetmp.net/en/4-bed-4-bath-580-sq-m-unique-residences-9347",
+      "mapping_strategy": "legacy_en_detail_to_buy",
+      "source": "assetmp.net crawl 2026-03-01"
+    },
+    {
+      "old_path": "/en/5-bedroom-sea-view-villas-chalong-771",
+      "new_path": "/en/buy",
+      "status_code": 301,
+      "preserve_query": true,
+      "enabled": true,
+      "source_url": "https://www.assetmp.net/en/5-bedroom-sea-view-villas-chalong-771",
+      "mapping_strategy": "legacy_en_detail_to_buy",
+      "source": "assetmp.net crawl 2026-03-01"
+    },
+    {
+      "old_path": "/en/70-sqm-1bed-1bath-apartments-phase-2-1023",
+      "new_path": "/en/buy",
+      "status_code": 301,
+      "preserve_query": true,
+      "enabled": true,
+      "source_url": "https://www.assetmp.net/en/70-sqm-1bed-1bath-apartments-phase-2-1023",
+      "mapping_strategy": "legacy_en_detail_to_buy",
+      "source": "assetmp.net crawl 2026-03-01"
+    },
+    {
+      "old_path": "/en/add-property.html",
+      "new_path": "/en/sell/list-property",
+      "status_code": 301,
+      "preserve_query": true,
+      "enabled": true,
+      "source_url": "https://www.assetmp.net/en/add-property.html",
+      "mapping_strategy": "legacy_add_property_page",
+      "source": "assetmp.net crawl 2026-03-01"
+    },
+    {
+      "old_path": "/en/amari-residence-hotel-branded-residence-on-pratumnak-hill-2854",
+      "new_path": "/en/buy",
+      "status_code": 301,
+      "preserve_query": true,
+      "enabled": true,
+      "source_url": "https://www.assetmp.net/en/amari-residence-hotel-branded-residence-on-pratumnak-hill-2854",
+      "mapping_strategy": "legacy_en_detail_to_buy",
+      "source": "assetmp.net crawl 2026-03-01"
+    },
+    {
+      "old_path": "/en/apartment-block-including-2-bedroom-pool-villa-for-sale-jomtien-2330",
+      "new_path": "/en/buy",
+      "status_code": 301,
+      "preserve_query": true,
+      "enabled": true,
+      "source_url": "https://www.assetmp.net/en/apartment-block-including-2-bedroom-pool-villa-for-sale-jomtien-2330",
+      "mapping_strategy": "legacy_en_detail_to_buy",
+      "source": "assetmp.net crawl 2026-03-01"
+    },
+    {
+      "old_path": "/en/apartments-for-sale-pattaya-9853",
+      "new_path": "/en/buy",
+      "status_code": 301,
+      "preserve_query": true,
+      "enabled": true,
+      "source_url": "https://www.assetmp.net/en/apartments-for-sale-pattaya-9853",
+      "mapping_strategy": "legacy_en_detail_to_buy",
+      "source": "assetmp.net crawl 2026-03-01"
+    },
+    {
+      "old_path": "/en/asset-managemet-property-10000",
+      "new_path": "/en/buy",
+      "status_code": 301,
+      "preserve_query": true,
+      "enabled": true,
+      "source_url": "https://www.assetmp.net/en/asset-managemet-property-10000",
+      "mapping_strategy": "legacy_en_detail_to_buy",
+      "source": "assetmp.net crawl 2026-03-01"
+    },
+    {
+      "old_path": "/en/asset-managemet-property-10002",
+      "new_path": "/en/buy",
+      "status_code": 301,
+      "preserve_query": true,
+      "enabled": true,
+      "source_url": "https://www.assetmp.net/en/asset-managemet-property-10002",
+      "mapping_strategy": "legacy_en_detail_to_buy",
+      "source": "assetmp.net crawl 2026-03-01"
+    },
+    {
+      "old_path": "/en/asset-managemet-property-9999",
+      "new_path": "/en/buy",
+      "status_code": 301,
+      "preserve_query": true,
+      "enabled": true,
+      "source_url": "https://www.assetmp.net/en/asset-managemet-property-9999",
+      "mapping_strategy": "legacy_en_detail_to_buy",
+      "source": "assetmp.net crawl 2026-03-01"
+    },
+    {
+      "old_path": "/en/beachfront-3-bedrooms-condo-in-jomtien-2816",
+      "new_path": "/en/buy",
+      "status_code": 301,
+      "preserve_query": true,
+      "enabled": true,
+      "source_url": "https://www.assetmp.net/en/beachfront-3-bedrooms-condo-in-jomtien-2816",
+      "mapping_strategy": "legacy_en_detail_to_buy",
+      "source": "assetmp.net crawl 2026-03-01"
+    },
+    {
+      "old_path": "/en/blog-detail.html",
+      "new_path": "/en/blog",
+      "status_code": 301,
+      "preserve_query": true,
+      "enabled": true,
+      "source_url": "https://www.assetmp.net/en/blog-detail.html",
+      "mapping_strategy": "legacy_blog_detail_page",
+      "source": "assetmp.net crawl 2026-03-01"
+    },
+    {
+      "old_path": "/en/centric-sea-pattaya-condo-for-sale-2040",
+      "new_path": "/en/buy",
+      "status_code": 301,
+      "preserve_query": true,
+      "enabled": true,
+      "source_url": "https://www.assetmp.net/en/centric-sea-pattaya-condo-for-sale-2040",
+      "mapping_strategy": "legacy_en_detail_to_buy",
+      "source": "assetmp.net crawl 2026-03-01"
+    },
+    {
+      "old_path": "/en/charming-community-of-4-rental-villas-in-bophut-9173",
+      "new_path": "/en/buy",
+      "status_code": 301,
+      "preserve_query": true,
+      "enabled": true,
+      "source_url": "https://www.assetmp.net/en/charming-community-of-4-rental-villas-in-bophut-9173",
+      "mapping_strategy": "legacy_en_detail_to_buy",
+      "source": "assetmp.net crawl 2026-03-01"
+    },
+    {
+      "old_path": "/en/free-maintenance-fee-2-years-chapter-one-the-campus-ladprao-1-for-sale-5976",
+      "new_path": "/en/buy",
+      "status_code": 301,
+      "preserve_query": true,
+      "enabled": true,
+      "source_url": "https://www.assetmp.net/en/free-maintenance-fee-2-years-chapter-one-the-campus-ladprao-1-for-sale-5976",
+      "mapping_strategy": "legacy_en_detail_to_buy",
+      "source": "assetmp.net crawl 2026-03-01"
+    },
+    {
+      "old_path": "/en/good-value-2-bedroom-condo-for-sale-2556",
+      "new_path": "/en/buy",
+      "status_code": 301,
+      "preserve_query": true,
+      "enabled": true,
+      "source_url": "https://www.assetmp.net/en/good-value-2-bedroom-condo-for-sale-2556",
+      "mapping_strategy": "legacy_en_detail_to_buy",
+      "source": "assetmp.net crawl 2026-03-01"
+    },
+    {
+      "old_path": "/en/hot-price-modern-townhouse-with-garden-view-9133",
+      "new_path": "/en/buy",
+      "status_code": 301,
+      "preserve_query": true,
+      "enabled": true,
+      "source_url": "https://www.assetmp.net/en/hot-price-modern-townhouse-with-garden-view-9133",
+      "mapping_strategy": "legacy_en_detail_to_buy",
+      "source": "assetmp.net crawl 2026-03-01"
+    },
+    {
+      "old_path": "/en/hot-resale-39-sqm-apartment-in-title-naiyang-521",
+      "new_path": "/en/buy",
+      "status_code": 301,
+      "preserve_query": true,
+      "enabled": true,
+      "source_url": "https://www.assetmp.net/en/hot-resale-39-sqm-apartment-in-title-naiyang-521",
+      "mapping_strategy": "legacy_en_detail_to_buy",
+      "source": "assetmp.net crawl 2026-03-01"
+    },
+    {
+      "old_path": "/en/modern-3-bedrooms-duplex-in-bangtao-333",
+      "new_path": "/en/buy",
+      "status_code": 301,
+      "preserve_query": true,
+      "enabled": true,
+      "source_url": "https://www.assetmp.net/en/modern-3-bedrooms-duplex-in-bangtao-333",
+      "mapping_strategy": "legacy_en_detail_to_buy",
+      "source": "assetmp.net crawl 2026-03-01"
+    },
+    {
+      "old_path": "/en/pool-villa-pattaya-10001",
+      "new_path": "/en/buy",
+      "status_code": 301,
+      "preserve_query": true,
+      "enabled": true,
+      "source_url": "https://www.assetmp.net/en/pool-villa-pattaya-10001",
+      "mapping_strategy": "legacy_en_detail_to_buy",
+      "source": "assetmp.net crawl 2026-03-01"
+    },
+    {
+      "old_path": "/en/property-details-v1.html",
+      "new_path": "/en/buy",
+      "status_code": 301,
+      "preserve_query": true,
+      "enabled": true,
+      "source_url": "https://www.assetmp.net/en/property-details-v1.html",
+      "mapping_strategy": "legacy_listing_template_page",
+      "source": "assetmp.net crawl 2026-03-01"
+    },
+    {
+      "old_path": "/en/quot-cheap-land-quot-38-rai-sea-view-land-in-taling-ngam-9546",
+      "new_path": "/en/buy",
+      "status_code": 301,
+      "preserve_query": true,
+      "enabled": true,
+      "source_url": "https://www.assetmp.net/en/quot-cheap-land-quot-38-rai-sea-view-land-in-taling-ngam-9546",
+      "mapping_strategy": "legacy_en_detail_to_buy",
+      "source": "assetmp.net crawl 2026-03-01"
+    },
+    {
+      "old_path": "/en/samui-beachside-villa-9585",
+      "new_path": "/en/buy",
+      "status_code": 301,
+      "preserve_query": true,
+      "enabled": true,
+      "source_url": "https://www.assetmp.net/en/samui-beachside-villa-9585",
+      "mapping_strategy": "legacy_en_detail_to_buy",
+      "source": "assetmp.net crawl 2026-03-01"
+    },
+    {
+      "old_path": "/en/sidebar-grid.html",
+      "new_path": "/en/buy",
+      "status_code": 301,
+      "preserve_query": true,
+      "enabled": true,
+      "source_url": "https://www.assetmp.net/en/sidebar-grid.html",
+      "mapping_strategy": "legacy_listing_template_page",
+      "source": "assetmp.net crawl 2026-03-01"
+    },
+    {
+      "old_path": "/en/studio-26sq-m-seven-seas-le-carnival-2536",
+      "new_path": "/en/buy",
+      "status_code": 301,
+      "preserve_query": true,
+      "enabled": true,
+      "source_url": "https://www.assetmp.net/en/studio-26sq-m-seven-seas-le-carnival-2536",
+      "mapping_strategy": "legacy_en_detail_to_buy",
+      "source": "assetmp.net crawl 2026-03-01"
+    },
+    {
+      "old_path": "/en/studio-size-29-75-sqm-9876",
+      "new_path": "/en/buy",
+      "status_code": 301,
+      "preserve_query": true,
+      "enabled": true,
+      "source_url": "https://www.assetmp.net/en/studio-size-29-75-sqm-9876",
+      "mapping_strategy": "legacy_en_detail_to_buy",
+      "source": "assetmp.net crawl 2026-03-01"
+    },
+    {
+      "old_path": "/en/stunning-sea-view-villa-9595",
+      "new_path": "/en/buy",
+      "status_code": 301,
+      "preserve_query": true,
+      "enabled": true,
+      "source_url": "https://www.assetmp.net/en/stunning-sea-view-villa-9595",
+      "mapping_strategy": "legacy_en_detail_to_buy",
+      "source": "assetmp.net crawl 2026-03-01"
+    },
+    {
+      "old_path": "/en/the-riviera-wongamat-condo-for-sale-2323",
+      "new_path": "/en/buy",
+      "status_code": 301,
+      "preserve_query": true,
+      "enabled": true,
+      "source_url": "https://www.assetmp.net/en/the-riviera-wongamat-condo-for-sale-2323",
+      "mapping_strategy": "legacy_en_detail_to_buy",
+      "source": "assetmp.net crawl 2026-03-01"
+    },
+    {
+      "old_path": "/it",
+      "new_path": "/en",
+      "status_code": 301,
+      "preserve_query": true,
+      "enabled": true,
+      "source_url": "https://www.assetmp.net/it",
+      "mapping_strategy": "legacy_unknown_to_home",
+      "source": "assetmp.net crawl 2026-03-01"
+    },
+    {
+      "old_path": "/it/add-property.html",
+      "new_path": "/en/sell/list-property",
+      "status_code": 301,
+      "preserve_query": true,
+      "enabled": true,
+      "source_url": "https://www.assetmp.net/it/add-property.html",
+      "mapping_strategy": "legacy_add_property_page",
+      "source": "assetmp.net crawl 2026-03-01"
+    },
+    {
+      "old_path": "/it/property-details-v1.html",
+      "new_path": "/en/buy",
+      "status_code": 301,
+      "preserve_query": true,
+      "enabled": true,
+      "source_url": "https://www.assetmp.net/it/property-details-v1.html",
+      "mapping_strategy": "legacy_listing_template_page",
+      "source": "assetmp.net crawl 2026-03-01"
+    },
+    {
+      "old_path": "/it/sidebar-grid.html",
+      "new_path": "/en/buy",
+      "status_code": 301,
+      "preserve_query": true,
+      "enabled": true,
+      "source_url": "https://www.assetmp.net/it/sidebar-grid.html",
+      "mapping_strategy": "legacy_listing_template_page",
+      "source": "assetmp.net crawl 2026-03-01"
+    },
+    {
+      "old_path": "/property-details-v1.html",
+      "new_path": "/en/buy",
+      "status_code": 301,
+      "preserve_query": true,
+      "enabled": true,
+      "source_url": "https://www.assetmp.net/property-details-v1.html",
+      "mapping_strategy": "legacy_listing_template_page",
+      "source": "assetmp.net crawl 2026-03-01"
+    },
+    {
+      "old_path": "/ru",
+      "new_path": "/en",
+      "status_code": 301,
+      "preserve_query": true,
+      "enabled": true,
+      "source_url": "https://www.assetmp.net/ru",
+      "mapping_strategy": "legacy_unknown_to_home",
+      "source": "assetmp.net crawl 2026-03-01"
+    },
+    {
+      "old_path": "/ru/add-property.html",
+      "new_path": "/en/sell/list-property",
+      "status_code": 301,
+      "preserve_query": true,
+      "enabled": true,
+      "source_url": "https://www.assetmp.net/ru/add-property.html",
+      "mapping_strategy": "legacy_add_property_page",
+      "source": "assetmp.net crawl 2026-03-01"
+    },
+    {
+      "old_path": "/ru/blog-detail.html",
+      "new_path": "/en/blog",
+      "status_code": 301,
+      "preserve_query": true,
+      "enabled": true,
+      "source_url": "https://www.assetmp.net/ru/blog-detail.html",
+      "mapping_strategy": "legacy_blog_detail_page",
+      "source": "assetmp.net crawl 2026-03-01"
+    },
+    {
+      "old_path": "/ru/property-details-v1.html",
+      "new_path": "/en/buy",
+      "status_code": 301,
+      "preserve_query": true,
+      "enabled": true,
+      "source_url": "https://www.assetmp.net/ru/property-details-v1.html",
+      "mapping_strategy": "legacy_listing_template_page",
+      "source": "assetmp.net crawl 2026-03-01"
+    },
+    {
+      "old_path": "/ru/sidebar-grid.html",
+      "new_path": "/en/buy",
+      "status_code": 301,
+      "preserve_query": true,
+      "enabled": true,
+      "source_url": "https://www.assetmp.net/ru/sidebar-grid.html",
+      "mapping_strategy": "legacy_listing_template_page",
+      "source": "assetmp.net crawl 2026-03-01"
+    },
+    {
+      "old_path": "/sidebar-grid.html",
+      "new_path": "/en/buy",
+      "status_code": 301,
+      "preserve_query": true,
+      "enabled": true,
+      "source_url": "https://www.assetmp.net/sidebar-grid.html",
+      "mapping_strategy": "legacy_listing_template_page",
+      "source": "assetmp.net crawl 2026-03-01"
+    },
+    {
+      "old_path": "/th/1-bed-1-bath-28-sq-m-the-aristo-condo-2-223",
+      "new_path": "/th/buy",
+      "status_code": 301,
+      "preserve_query": true,
+      "enabled": true,
+      "source_url": "https://www.assetmp.net/th/1-bed-1-bath-28-sq-m-the-aristo-condo-2-223",
+      "mapping_strategy": "legacy_th_detail_to_buy",
+      "source": "assetmp.net crawl 2026-03-01"
+    },
+    {
+      "old_path": "/th/39-sqm-1-bed-1-bath-condo-for-sale-at-urbano-absolute-5901",
+      "new_path": "/th/buy",
+      "status_code": 301,
+      "preserve_query": true,
+      "enabled": true,
+      "source_url": "https://www.assetmp.net/th/39-sqm-1-bed-1-bath-condo-for-sale-at-urbano-absolute-5901",
+      "mapping_strategy": "legacy_th_detail_to_buy",
+      "source": "assetmp.net crawl 2026-03-01"
+    },
+    {
+      "old_path": "/th/4-bed-4-bath-381-sq-m-baan-rajprasong-3941",
+      "new_path": "/th/buy",
+      "status_code": 301,
+      "preserve_query": true,
+      "enabled": true,
+      "source_url": "https://www.assetmp.net/th/4-bed-4-bath-381-sq-m-baan-rajprasong-3941",
+      "mapping_strategy": "legacy_th_detail_to_buy",
+      "source": "assetmp.net crawl 2026-03-01"
+    },
+    {
+      "old_path": "/th/5-bed-5-bath-pool-villa-for-sale-in-phuket-843",
+      "new_path": "/th/buy",
+      "status_code": 301,
+      "preserve_query": true,
+      "enabled": true,
+      "source_url": "https://www.assetmp.net/th/5-bed-5-bath-pool-villa-for-sale-in-phuket-843",
+      "mapping_strategy": "legacy_th_detail_to_buy",
+      "source": "assetmp.net crawl 2026-03-01"
+    },
+    {
+      "old_path": "/th/add-property.html",
+      "new_path": "/th/sell/list-property",
+      "status_code": 301,
+      "preserve_query": true,
+      "enabled": true,
+      "source_url": "https://www.assetmp.net/th/add-property.html",
+      "mapping_strategy": "legacy_add_property_page",
+      "source": "assetmp.net crawl 2026-03-01"
+    },
+    {
+      "old_path": "/th/blog-detail.html",
+      "new_path": "/th/blog",
+      "status_code": 301,
+      "preserve_query": true,
+      "enabled": true,
+      "source_url": "https://www.assetmp.net/th/blog-detail.html",
+      "mapping_strategy": "legacy_blog_detail_page",
+      "source": "assetmp.net crawl 2026-03-01"
+    },
+    {
+      "old_path": "/th/dusit-grand-park-condo-for-sale-2115",
+      "new_path": "/th/buy",
+      "status_code": 301,
+      "preserve_query": true,
+      "enabled": true,
+      "source_url": "https://www.assetmp.net/th/dusit-grand-park-condo-for-sale-2115",
+      "mapping_strategy": "legacy_th_detail_to_buy",
+      "source": "assetmp.net crawl 2026-03-01"
+    },
+    {
+      "old_path": "/th/family-loft-2-bed-villoft-zen-living-855",
+      "new_path": "/th/buy",
+      "status_code": 301,
+      "preserve_query": true,
+      "enabled": true,
+      "source_url": "https://www.assetmp.net/th/family-loft-2-bed-villoft-zen-living-855",
+      "mapping_strategy": "legacy_th_detail_to_buy",
+      "source": "assetmp.net crawl 2026-03-01"
+    },
+    {
+      "old_path": "/th/property-details-v1.html",
+      "new_path": "/th/buy",
+      "status_code": 301,
+      "preserve_query": true,
+      "enabled": true,
+      "source_url": "https://www.assetmp.net/th/property-details-v1.html",
+      "mapping_strategy": "legacy_listing_template_page",
+      "source": "assetmp.net crawl 2026-03-01"
+    },
+    {
+      "old_path": "/th/sidebar-grid.html",
+      "new_path": "/th/buy",
+      "status_code": 301,
+      "preserve_query": true,
+      "enabled": true,
+      "source_url": "https://www.assetmp.net/th/sidebar-grid.html",
+      "mapping_strategy": "legacy_listing_template_page",
+      "source": "assetmp.net crawl 2026-03-01"
+    },
+    {
+      "old_path": "/th/studio-1-bath-24-94-sq-m-flexi-sathon-chareon-nakorn-3964",
+      "new_path": "/th/buy",
+      "status_code": 301,
+      "preserve_query": true,
+      "enabled": true,
+      "source_url": "https://www.assetmp.net/th/studio-1-bath-24-94-sq-m-flexi-sathon-chareon-nakorn-3964",
+      "mapping_strategy": "legacy_th_detail_to_buy",
+      "source": "assetmp.net crawl 2026-03-01"
+    },
+    {
+      "old_path": "/th/studio-22-11-sqm-the-nest-chula-samyan-6998",
+      "new_path": "/th/buy",
+      "status_code": 301,
+      "preserve_query": true,
+      "enabled": true,
+      "source_url": "https://www.assetmp.net/th/studio-22-11-sqm-the-nest-chula-samyan-6998",
+      "mapping_strategy": "legacy_th_detail_to_buy",
+      "source": "assetmp.net crawl 2026-03-01"
+    }
+  ]
+}

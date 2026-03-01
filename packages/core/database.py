@@ -42,6 +42,19 @@ def _ensure_sqlite_columns() -> None:
             "follow_up_status": "VARCHAR(32) NOT NULL DEFAULT 'pending'",
             "follow_up_due_at": "DATETIME",
         },
+        "seo_page_overrides": {
+            "schema_org_url": "VARCHAR(500)",
+            "schema_org_logo_url": "VARCHAR(500)",
+            "schema_org_same_as": "JSON",
+            "schema_local_business_url": "VARCHAR(500)",
+            "schema_local_business_phone": "VARCHAR(80)",
+            "schema_local_business_price_range": "VARCHAR(120)",
+            "schema_local_business_address": "VARCHAR(500)",
+            "schema_website_name": "VARCHAR(255)",
+            "schema_website_url": "VARCHAR(500)",
+            "schema_website_search_path": "VARCHAR(500)",
+            "schema_article_author_url": "VARCHAR(500)",
+        },
     }
 
     with engine.begin() as conn:

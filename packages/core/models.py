@@ -854,8 +854,21 @@ class SeoPageOverride(Base):
         Boolean, nullable=False, default=True, server_default="true"
     )
     schema_org_name: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    schema_org_url: Mapped[str | None] = mapped_column(String(500), nullable=True)
+    schema_org_logo_url: Mapped[str | None] = mapped_column(String(500), nullable=True)
+    schema_org_same_as: Mapped[list | None] = mapped_column(JSONB, nullable=True)
     schema_local_business_name: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    schema_local_business_url: Mapped[str | None] = mapped_column(String(500), nullable=True)
+    schema_local_business_phone: Mapped[str | None] = mapped_column(String(80), nullable=True)
+    schema_local_business_price_range: Mapped[str | None] = mapped_column(
+        String(120), nullable=True
+    )
+    schema_local_business_address: Mapped[str | None] = mapped_column(String(500), nullable=True)
+    schema_website_name: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    schema_website_url: Mapped[str | None] = mapped_column(String(500), nullable=True)
+    schema_website_search_path: Mapped[str | None] = mapped_column(String(500), nullable=True)
     schema_article_author: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    schema_article_author_url: Mapped[str | None] = mapped_column(String(500), nullable=True)
     enabled: Mapped[bool] = mapped_column(
         Boolean, nullable=False, default=True, server_default="true"
     )
@@ -897,6 +910,22 @@ class RedirectRule(Base):
         nullable=False,
         server_default=func.now(),
         onupdate=func.now(),
+    )
+
+
+class SeoBrokenLinkReport(Base):
+    __tablename__ = "seo_broken_link_reports"
+    __table_args__ = (Index("ix_seo_broken_link_reports_created_at", "created_at"),)
+
+    id: Mapped[UUID] = mapped_column(primary_key=True, default=uuid4)
+    checked_pages: Mapped[list] = mapped_column(JSONB, nullable=False, default=list)
+    total_links: Mapped[int] = mapped_column(Integer, nullable=False, default=0, server_default="0")
+    broken_links: Mapped[list] = mapped_column(JSONB, nullable=False, default=list)
+    checker_version: Mapped[str] = mapped_column(
+        String(32), nullable=False, default="b10-v1", server_default="b10-v1"
+    )
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), nullable=False, server_default=func.now()
     )
 
 

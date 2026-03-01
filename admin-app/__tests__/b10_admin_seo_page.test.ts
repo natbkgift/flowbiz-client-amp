@@ -1,0 +1,57 @@
+import fs from "node:fs";
+import path from "node:path";
+
+import { describe, expect, it } from "vitest";
+
+const root = path.resolve(__dirname, "..");
+
+function read(relativePath: string): string {
+  return fs.readFileSync(path.join(root, relativePath), "utf-8");
+}
+
+describe("B10 admin SEO page contract", () => {
+  it("keeps admin auth/session flow compatible with existing admin pages", () => {
+    const page = read("app/admin/seo/page.tsx");
+    expect(page).toContain('fetch("/v1/auth/login"');
+    expect(page).toContain("AUTH_SESSION_STORAGE_KEY");
+    expect(page).toContain("window.sessionStorage.setItem");
+    expect(page).toContain("window.sessionStorage.getItem");
+    expect(page).toContain("window.sessionStorage.removeItem");
+    expect(page).toContain("LEGACY_TOKEN_STORAGE_KEY");
+  });
+
+  it("wires B10 endpoints for overrides redirects schema and broken-links", () => {
+    const page = read("app/admin/seo/page.tsx");
+    expect(page).toContain('"/admin/seo/overrides"');
+    expect(page).toContain('"/admin/seo/redirects"');
+    expect(page).toContain('"/admin/seo/schema-source"');
+    expect(page).toContain('"/admin/seo/schema-source/bootstrap-production"');
+    expect(page).toContain('"/admin/seo/broken-links/run"');
+    expect(page).toContain('"/admin/seo/broken-links/latest"');
+    expect(page).toContain('"/admin/seo/broken-links/policy"');
+    expect(page).toContain('"/admin/seo/redirects/preload-production"');
+  });
+
+  it("contains required sections and runtime states", () => {
+    const page = read("app/admin/seo/page.tsx");
+    expect(page).toContain('<main id="main-content"');
+    expect(page).toContain("sectionOverrides");
+    expect(page).toContain("sectionRedirects");
+    expect(page).toContain("sectionSchema");
+    expect(page).toContain("sectionBroken");
+    expect(page).toContain("state-empty");
+    expect(page).toContain("state-loading");
+    expect(page).toContain("state-error");
+  });
+
+  it("includes basic accessible labels and EN/TH copy", () => {
+    const page = read("app/admin/seo/page.tsx");
+    expect(page).toContain('htmlFor="seo-login-email"');
+    expect(page).toContain('htmlFor="seo-login-password"');
+    expect(page).toContain('htmlFor="seo-override-path"');
+    expect(page).toContain('htmlFor="seo-redirect-old-path"');
+    expect(page).toContain('htmlFor="seo-schema-org-name"');
+    expect(page).toContain('title: "SEO Controls"');
+    expect(page).toContain('title: "SEO Controls หลังบ้าน"');
+  });
+});
