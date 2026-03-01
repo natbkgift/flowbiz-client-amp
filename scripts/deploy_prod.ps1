@@ -114,6 +114,45 @@ echo "build_sha=$BUILD_SHA"
 echo "healthz=$healthz"
 echo "properties=$properties"
 echo "projects=$projects"
+
+deploy_status="error"
+if [[ "$healthz" == "200" && "$properties" == "200" && "$projects" == "200" ]]; then
+  deploy_status="ok"
+fi
+
+telemetry_dir="${VPS_ACTIVE_PATH}/ops/logs"
+telemetry_file="${telemetry_dir}/deploy_telemetry.json"
+mkdir -p "$telemetry_dir"
+export TELEMETRY_FILE="$telemetry_file"
+export TARGET_SHA
+export release_path
+export TELEMETRY_DEPLOYED_AT
+TELEMETRY_DEPLOYED_AT="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+export TELEMETRY_DEPLOY_STATUS="$deploy_status"
+python - <<'PY'
+import json
+import os
+from pathlib import Path
+
+path = Path(os.environ["TELEMETRY_FILE"])
+payload = {
+    "generated_at": os.environ["TELEMETRY_DEPLOYED_AT"],
+    "deployed_at": os.environ["TELEMETRY_DEPLOYED_AT"],
+    "deploy_status": os.environ["TELEMETRY_DEPLOY_STATUS"],
+    "smoke_passed": os.environ["TELEMETRY_DEPLOY_STATUS"] == "ok",
+    "build_sha": os.environ.get("BUILD_SHA"),
+    "target_sha": os.environ.get("TARGET_SHA"),
+    "release_path": os.environ.get("release_path"),
+    "source": "scripts/deploy_prod.ps1",
+    "smoke": {
+        "healthz_code": os.environ.get("healthz"),
+        "properties_code": os.environ.get("properties"),
+        "projects_code": os.environ.get("projects"),
+    },
+}
+path.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
+PY
+echo "deploy_telemetry=$telemetry_file"
 [[ "$healthz" == "200" && "$properties" == "200" && "$projects" == "200" ]]
 '@
 

@@ -6,7 +6,7 @@
   "scripts": {
     "a1:serve": "node scripts/a1-public-server.mjs",
     "a1:matrix": "node scripts/run-a1-with-harness.mjs",
-    "test:a1": "vitest run __tests__/a1_shared_foundation.test.ts __tests__/a1_validation_matrix_runner.test.ts __tests__/a2_home_runtime.test.ts __tests__/b10_admin_seo_page.test.ts __tests__/b11_admin_inquiries_page.test.ts",
+    "test:a1": "vitest run __tests__/a1_shared_foundation.test.ts __tests__/a1_validation_matrix_runner.test.ts __tests__/a2_home_runtime.test.ts __tests__/b10_admin_seo_page.test.ts __tests__/b11_admin_inquiries_page.test.ts __tests__/b14_admin_dashboard_page.test.ts __tests__/b14_admin_workspaces_pages.test.ts",
     "test:a2:browser": "node scripts/run-a2-browser-events-check.mjs"
   },
   "devDependencies": {

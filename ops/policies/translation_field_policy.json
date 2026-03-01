@@ -1,0 +1,59 @@
+{
+  "version": "2026-03-01",
+  "owner_team": "content-locale-owner",
+  "approved": false,
+  "required_locales": ["en", "th"],
+  "notes": "TODO: content/locale owner must sign off required fields before this policy is used as a release gate.",
+  "entities": [
+    {
+      "key": "areas",
+      "mode": "localized_fields",
+      "model": "Area",
+      "fields": [
+        { "path": "content.why_live_invest", "localized": true },
+        { "path": "content.transport", "localized": true },
+        { "path": "content.lifestyle", "localized": true },
+        { "path": "content.beach_proximity", "localized": true },
+        { "path": "content.metrics_update_cadence", "localized": true }
+      ]
+    },
+    {
+      "key": "developers",
+      "mode": "localized_fields",
+      "model": "Developer",
+      "fields": [{ "path": "profile", "localized": true }]
+    },
+    {
+      "key": "projects",
+      "mode": "localized_fields",
+      "model": "Project",
+      "fields": [
+        { "path": "summary", "localized": true },
+        { "path": "description", "localized": true }
+      ]
+    },
+    {
+      "key": "articles",
+      "mode": "localized_fields",
+      "model": "Article",
+      "fields": [
+        { "path": "title", "localized": true },
+        { "path": "excerpt", "localized": true },
+        { "path": "body_md", "localized": true }
+      ]
+    },
+    {
+      "key": "team_members",
+      "mode": "localized_fields",
+      "model": "TeamMember",
+      "fields": [{ "path": "bio", "localized": true }]
+    },
+    {
+      "key": "home_composer",
+      "mode": "locale_pairs",
+      "model": "HomeComposerConfig",
+      "group_by": ["page_key", "status"],
+      "statuses": ["draft", "published"]
+    }
+  ]
+}

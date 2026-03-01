@@ -9,6 +9,7 @@ from fastapi.responses import JSONResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 
 from apps.api.routes import (
+    admin_dashboard,
     admin_content,
     admin_crm,
     admin_domain,
@@ -95,6 +96,7 @@ app.include_router(home_runtime.router)
 
 app.include_router(admin_crm.router)
 app.include_router(admin_properties.router)
+app.include_router(admin_dashboard.router)
 app.include_router(admin_domain.router)
 app.include_router(admin_projects.router)
 app.include_router(admin_content.router)
