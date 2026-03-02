@@ -82,7 +82,7 @@ function getExperimentContext(): Record<string, string> {
 /**
  * Send an analytics event to the backend tracking endpoint.
  *
- * Events are POSTed to `/api/v1/events` with `keepalive: true` so they
+ * Events are POSTed to `/_events` with `keepalive: true` so they
  * survive page navigations. Every event is automatically enriched with
  * the current session ID and active experiment variant assignments.
  *
@@ -100,7 +100,7 @@ export async function trackEvent(event_type: EventType, page: string, payload?: 
   const experiments = getExperimentContext();
 
   try {
-    await fetch('/api/v1/events', {
+    await fetch('/_events', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({

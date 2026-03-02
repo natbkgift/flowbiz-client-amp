@@ -5,7 +5,7 @@
  * structured payloads, and sends them to the analytics endpoint. Designed
  * to be initialised once in the site layout.
  *
- * In production, consider replacing the `/api/v1/events` sink with a
+ * In production, consider replacing the `/_events` sink with a
  * dedicated service like Sentry, Datadog RUM, or LogRocket.
  */
 
@@ -27,7 +27,7 @@ interface ErrorReport {
 }
 
 const MAX_STACK_LENGTH = 2000;
-const REPORT_ENDPOINT = '/api/v1/events';
+const REPORT_ENDPOINT = '/_events';
 
 /**
  * Send a structured error report to the analytics sink.

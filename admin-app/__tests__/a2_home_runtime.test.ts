@@ -177,8 +177,8 @@ describe('A2 home runtime spec locks', () => {
   it('wires fixed tracking endpoint and required event names', async () => {
     const html = await getHtml('/en');
 
-    expect(html).toContain("const endpoint = '/api/v1/events';");
-    expect(html).not.toContain('/api/v1/events/');
+    expect(html).toContain("const endpoint = '/_events';");
+    expect(html).not.toContain('/_events/');
 
     expect(html).toContain('home_hero_primary_click');
     expect(html).toContain('home_hero_secondary_click');

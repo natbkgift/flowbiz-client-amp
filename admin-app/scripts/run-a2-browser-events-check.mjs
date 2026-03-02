@@ -50,13 +50,13 @@ async function run() {
     const tracked = [];
     const inquiries = [];
 
-    await page.route('**/api/v1/events', async (route) => {
+    await page.route('**/_events', async (route) => {
       const payload = route.request().postDataJSON();
       tracked.push(payload);
       await route.fulfill({
         status: 202,
         contentType: 'application/json',
-        body: JSON.stringify({ ok: true, endpoint: '/api/v1/events' }),
+        body: JSON.stringify({ ok: true, endpoint: '/_events' }),
       });
     });
 

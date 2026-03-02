@@ -423,7 +423,7 @@ function renderA2Home(routeLocale) {
       (() => {
         const locale = document.documentElement.lang || 'en';
         const path = location.pathname;
-        const endpoint = '/api/v1/events';
+        const endpoint = '/_events';
         const scrollMarks = [25, 50, 75, 90];
         const firedMarks = new Set();
 
@@ -600,7 +600,7 @@ const server = http.createServer((req, res) => {
   const url = new URL(req.url || '/', `http://${host}:${port}`);
   const pathname = url.pathname;
 
-  if (pathname === '/api/v1/events') {
+  if (pathname === '/_events') {
     if (req.method === 'OPTIONS') {
       return sendNoContent(res, 204);
     }
@@ -614,7 +614,7 @@ const server = http.createServer((req, res) => {
             payload,
             created_at: new Date().toISOString(),
           });
-          sendJson(res, 202, { ok: true, endpoint: '/api/v1/events' });
+          sendJson(res, 202, { ok: true, endpoint: '/_events' });
         })
         .catch(() => {
           sendJson(res, 400, { ok: false, error: 'invalid_json' });
@@ -639,7 +639,7 @@ const server = http.createServer((req, res) => {
     return;
   }
 
-  if (pathname === '/api/v1/events-log') {
+  if (pathname === '/_events-log') {
     return sendJson(res, 200, { data: eventStore });
   }
 
