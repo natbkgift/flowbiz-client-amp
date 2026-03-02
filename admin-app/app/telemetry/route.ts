@@ -12,7 +12,7 @@ export async function POST(req: NextRequest) {
   }
 
   return NextResponse.json(
-    { ok: true, endpoint: '/_events' },
+    { ok: true, endpoint: '/telemetry' },
     { status: 202 },
   );
 }

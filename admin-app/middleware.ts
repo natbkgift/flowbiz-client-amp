@@ -11,7 +11,7 @@ const NON_LOCALIZED_ROUTE_PREFIXES = [
   '/public',
   '/admin',
   '/home-composer',
-  '/_events',
+  '/telemetry',
 ] as const;
 
 function isLocale(value: string | undefined): value is Locale {
