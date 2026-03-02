@@ -246,7 +246,8 @@ def test_a11_compare_empty_and_incomplete_data_fallback(client) -> None:
     assert empty_response.status_code == 200, empty_response.text
     empty_html = empty_response.text
     assert 'id="compare-empty"' in empty_html
-    assert "TODO: select at least 2 active listings" in empty_html
+    assert "Select at least 2 active listings" in empty_html
+    assert "TODO:" not in empty_html
 
     incomplete_response = client.get(f"/en/compare?ids={seeded['buy_slug']},{seeded['rent_slug']}")
     assert incomplete_response.status_code == 200, incomplete_response.text

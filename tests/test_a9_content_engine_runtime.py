@@ -319,9 +319,10 @@ def test_a9_locale_safe_dates_for_thai_listing(client) -> None:
     assert "2026-02-27" not in html
 
 
-def test_a9_empty_state_has_todo_fallback(client) -> None:
+def test_a9_empty_state_has_publish_safe_fallback(client) -> None:
     response = client.get("/en/blog")
     assert response.status_code == 200, response.text
     html = response.text
-    assert "No published content yet. TODO: publish approved guides or blog posts." in html
+    assert "No published content yet." in html
+    assert "TODO:" not in html
     assert 'id="content-empty"' in html

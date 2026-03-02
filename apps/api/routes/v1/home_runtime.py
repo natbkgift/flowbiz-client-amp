@@ -107,6 +107,55 @@ def _safe_media_url(value: str | None, fallback: str, *, request: Request) -> st
     return fallback
 
 
+_TODO_TEXT_PATTERN = re.compile(r"\s*TODO:\s*[^<\n]+", flags=re.IGNORECASE)
+_IMG_TAG_PATTERN = re.compile(r"<img\b(?P<attrs>[^>]*?)>", flags=re.IGNORECASE)
+_ALT_ATTR_PATTERN = re.compile(r"\balt\s*=\s*(['\"])(?P<value>.*?)\1", flags=re.IGNORECASE)
+_WIDTH_ATTR_PATTERN = re.compile(r"\bwidth\s*=\s*(['\"]).*?\1", flags=re.IGNORECASE)
+_HEIGHT_ATTR_PATTERN = re.compile(r"\bheight\s*=\s*(['\"]).*?\1", flags=re.IGNORECASE)
+
+
+def _alt_fallback(locale: str) -> str:
+    return "รูปภาพอสังหา" if locale == "th" else "Property image"
+
+
+def _sanitize_public_html(html: str, *, locale: str) -> str:
+    without_todo = _TODO_TEXT_PATTERN.sub("", html)
+
+    fallback_alt = _alt_fallback(locale)
+
+    def _normalize_img(match: re.Match[str]) -> str:
+        attrs = str(match.group("attrs") or "")
+        attrs_lower = attrs.lower()
+        class_match = re.search(
+            r"\bclass\s*=\s*(['\"])(?P<classes>.*?)\1",
+            attrs,
+            flags=re.IGNORECASE,
+        )
+        classes = str(class_match.group("classes") or "").lower() if class_match else ""
+        is_hero = (
+            "hero-media" in classes
+            or 'data-gallery-hero="true"' in attrs_lower
+            or "data-gallery-hero='true'" in attrs_lower
+        )
+        width = "1280" if is_hero else "640"
+        height = "720" if is_hero else "360"
+
+        alt_match = _ALT_ATTR_PATTERN.search(attrs)
+        if alt_match:
+            if not str(alt_match.group("value") or "").strip():
+                attrs = _ALT_ATTR_PATTERN.sub(f'alt="{fallback_alt}"', attrs, count=1)
+        else:
+            attrs = f'{attrs} alt="{fallback_alt}"'
+
+        if not _WIDTH_ATTR_PATTERN.search(attrs):
+            attrs = f'{attrs} width="{width}"'
+        if not _HEIGHT_ATTR_PATTERN.search(attrs):
+            attrs = f'{attrs} height="{height}"'
+        return f"<img{attrs}>"
+
+    return _IMG_TAG_PATTERN.sub(_normalize_img, without_todo)
+
+
 def _safe_copy(locale: str) -> dict[str, str]:
     if locale == "th":
         return {
@@ -933,7 +982,8 @@ def _render(locale: str, request: Request, db: Session, source: str, resolved: d
   </body>
 </html>
 """
-    return apply_runtime_seo(
+    html = _sanitize_public_html(html, locale=locale)
+    seo_html = apply_runtime_seo(
         db=db,
         request=request,
         locale=locale,
@@ -942,6 +992,7 @@ def _render(locale: str, request: Request, db: Session, source: str, resolved: d
         default_description=hero_sub,
         default_canonical=_absolute_url(request, request.url.path),
     )
+    return _sanitize_public_html(seo_html, locale=locale)
 
 
 def _render_page_shell(
@@ -1013,13 +1064,14 @@ def _render_page_shell(
   </body>
 </html>
 """
+    html = _sanitize_public_html(html, locale=locale)
     if request is None or db is None:
         return html
     effective_canonical = canonical_href or _absolute_url(request, request.url.path)
     effective_description = (
         str(meta_description).strip() if meta_description is not None else str(intro).strip()
     )
-    return apply_runtime_seo(
+    seo_html = apply_runtime_seo(
         db=db,
         request=request,
         locale=locale,
@@ -1029,6 +1081,7 @@ def _render_page_shell(
         default_canonical=effective_canonical,
         is_article_detail=is_article_detail,
     )
+    return _sanitize_public_html(seo_html, locale=locale)
 
 
 def _localized_dict_text(value: object, locale: str) -> str | None:
@@ -2217,7 +2270,7 @@ def _compare_runtime(
         "intro": "Side-by-side comparison for active listings with safe fallback values.",
         "lead": "Compare ownership-ready listings with clear pricing and key unit facts.",
         "empty": "No listings were selected for comparison. Add units from Smart Finder or listing pages.",
-        "empty_hint": "TODO: select at least 2 active listings to see side-by-side differences.",
+        "empty_hint": "Select at least 2 active listings to see side-by-side differences.",
         "cta_smart_finder": "Open Smart Finder",
         "cta_consult": "Request Consultation",
         "cta_adjust": "Adjust Compare Set",
@@ -2249,7 +2302,7 @@ def _compare_runtime(
                 "intro": "หน้าเปรียบเทียบแบบ side-by-side สำหรับรายการ active พร้อม fallback ที่ปลอดภัย",
                 "lead": "เปรียบเทียบรายการพร้อมถือครองด้วยราคาและข้อมูลยูนิตที่อ่านง่าย",
                 "empty": "ยังไม่มีรายการที่เลือกมาเปรียบเทียบ เพิ่มยูนิตจาก Smart Finder หรือหน้ารายการก่อน",
-                "empty_hint": "TODO: เลือกรายการ active อย่างน้อย 2 รายการเพื่อแสดงผลเปรียบเทียบ",
+                "empty_hint": "เลือกรายการ active อย่างน้อย 2 รายการเพื่อแสดงผลเปรียบเทียบ",
                 "cta_smart_finder": "เปิด Smart Finder",
                 "cta_consult": "ขอคำปรึกษา",
                 "cta_adjust": "ปรับชุดเปรียบเทียบ",
@@ -2499,7 +2552,7 @@ def _area_copy(locale: str) -> dict[str, str]:
         "why_fallback": "Area fit context is pending publication. TODO: add approved why-live/invest narrative.",
         "stats_title": "Area stats",
         "stats_pending": "Statistics are pending verified source note and update timestamp.",
-        "stats_todo": "TODO: publish source note + updated timestamp before showing hard metric claims.",
+        "stats_todo": "Publish source note and updated timestamp before showing hard metric claims.",
         "stats_source": "Source",
         "stats_updated": "Updated",
         "stats_as_of": "As of",
@@ -2559,7 +2612,7 @@ def _area_copy(locale: str) -> dict[str, str]:
                 "why_fallback": "ยังไม่มีบริบทความเหมาะสมของทำเล TODO: เพิ่มเนื้อหา why-live/invest ที่อนุมัติแล้ว",
                 "stats_title": "สถิติทำเล",
                 "stats_pending": "สถิติกำลังรอ source note และวันอัปเดตที่ยืนยันแล้ว",
-                "stats_todo": "TODO: ต้องเผยแพร่ source note และ updated timestamp ก่อนแสดงตัวเลขแบบยืนยัน",
+                "stats_todo": "ต้องเผยแพร่ source note และ updated timestamp ก่อนแสดงตัวเลขแบบยืนยัน",
                 "stats_source": "แหล่งข้อมูล",
                 "stats_updated": "อัปเดต",
                 "stats_as_of": "ข้อมูล ณ",

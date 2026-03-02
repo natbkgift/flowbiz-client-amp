@@ -144,7 +144,8 @@ def test_a8_developer_listing_default_locale_project_count_and_runtime_guards(cl
     assert f'href="/en/developers/{seeded["developer_primary_slug"]}"' in html
     assert f'href="/en/developers/{seeded["developer_pending_slug"]}"' in html
     assert "2 published projects linked." in html
-    assert "Published project count is pending data sync. TODO: verify project linkage." in html
+    assert "Published project count is pending data sync." in html
+    assert "TODO:" not in html
     assert 'id="developer-list-loading"' in html
     assert 'id="developer-list-runtime-error"' in html
     assert 'aria-label="Breadcrumb"' in html
@@ -203,19 +204,8 @@ def test_a8_developer_detail_routes_trust_location_ctas_and_fallbacks(client) ->
     pending_response = client.get(f"/en/developers/{pending_slug}")
     assert pending_response.status_code == 200, pending_response.text
     pending_html = pending_response.text
-    assert (
-        "Developer profile pending publication. TODO: add approved profile/about content."
-        in pending_html
-    )
-    assert (
-        "No published projects are linked to this developer yet. TODO: publish or link approved projects."
-        in pending_html
-    )
-    assert (
-        "Location focus is pending project linkage. TODO: link published projects to approved areas."
-        in pending_html
-    )
-    assert (
-        "Trust proof is not published yet. TODO: add approved licenses, awards, or verification records."
-        in pending_html
-    )
+    assert "Developer profile pending publication." in pending_html
+    assert "No published projects are linked to this developer yet." in pending_html
+    assert "Location focus is pending project linkage." in pending_html
+    assert "Trust proof is not published yet." in pending_html
+    assert "TODO:" not in pending_html

@@ -535,7 +535,7 @@ function buildHtml(routePath, locale) {
         <nav class="nav" aria-label="Primary">
           <a class="nav-link locale-safe" href="/${locale}/about">About</a>
           <a class="nav-link locale-safe" href="/${locale}/projects">Projects</a>
-          <a class="nav-link locale-safe" href="/${locale}/property/sample-property">Properties</a>
+          <a class="nav-link locale-safe" href="/${locale}/marketplace">Properties</a>
           <a class="nav-link locale-safe" href="/${locale}/contact">Contact</a>
         </nav>
       </div>
@@ -577,7 +577,7 @@ function buildHtml(routePath, locale) {
         <nav class="footer-links" aria-label="Footer links">
           <a href="/${locale}/about">About</a>
           <a href="/${locale}/projects">Projects</a>
-          <a href="/${locale}/property/sample-property">Properties</a>
+          <a href="/${locale}/marketplace">Properties</a>
           <a href="/${locale}/contact">Contact</a>
         </nav>
         <nav class="footer-social" aria-label="Social links">

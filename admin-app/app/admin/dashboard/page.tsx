@@ -406,7 +406,7 @@ export default function AdminDashboardPage() {
           <section className="dashboard-grid" aria-label={t.widgets}>
             {widgets.length === 0 ? (
               <div className="card">
-                <div className="state-empty">No widgets found. TODO: check backend summary contract.</div>
+                <div className="state-empty">No widgets found. Check backend summary contract.</div>
               </div>
             ) : (
               widgets.map((widget) => (

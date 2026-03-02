@@ -19,7 +19,7 @@ export function Header() {
             <a className="nav-link locale-safe" href="/en/projects">
               Projects
             </a>
-            <a className="nav-link locale-safe" href="/en/property/sample-property">
+            <a className="nav-link locale-safe" href="/en/marketplace">
               Properties
             </a>
             <a className="nav-link locale-safe" href="/en/contact">

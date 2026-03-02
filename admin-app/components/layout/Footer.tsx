@@ -11,7 +11,7 @@ export function Footer() {
         <nav className="footer-links" aria-label="Footer links">
           <a href="/en/about">About</a>
           <a href="/en/projects">Projects</a>
-          <a href="/en/property/sample-property">Properties</a>
+          <a href="/en/marketplace">Properties</a>
           <a href="/en/contact">Contact</a>
         </nav>
         <nav className="footer-social" aria-label="Social links">

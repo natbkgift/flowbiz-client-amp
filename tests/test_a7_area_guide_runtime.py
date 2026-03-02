@@ -268,9 +268,8 @@ def test_a7_area_detail_source_less_metrics_show_pending(client) -> None:
     html = response.text
 
     assert "Statistics are pending verified source note and update timestamp." in html
-    assert (
-        "TODO: publish source note + updated timestamp before showing hard metric claims." in html
-    )
+    assert "Publish source note and updated timestamp before showing hard metric claims." in html
+    assert "TODO:" not in html
     assert "777,777" not in html
     assert "8.1%" not in html
     assert "No published projects are linked to this area yet." in html
