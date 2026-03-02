@@ -1,63 +1,47 @@
-import { useMemo, useState } from "react";
+'use client';
 
-type LocalMediaImageProps = {
-  src?: string | null;
-  alt?: string;
-  className?: string;
-  fallbackSrc?: string;
-  width?: number;
-  height?: number;
-};
+import { useMemo } from 'react';
 
-function toLocalPath(value?: string | null): string | null {
-  const raw = String(value ?? "").trim();
-  if (!raw) return null;
-  if (raw.startsWith("/media/")) return raw;
-  if (raw.startsWith("/storage/")) return raw;
-  return null;
-}
+import { pickPrimaryLocalMedia, type LocalMediaInput } from '@/app/_lib/local-media';
+import { SafeCoverImage } from '@/components/media/SafeCoverImage';
 
-function defaultAltText(): string {
-  if (typeof document !== "undefined" && document.documentElement.lang.toLowerCase().startsWith("th")) {
-    return "รูปภาพอสังหา";
-  }
-  return "Property image";
-}
+const DEFAULT_FALLBACK_SRC = '/images/property-placeholder.svg';
 
 export function LocalMediaImage({
-  src,
+  media,
   alt,
+  altFallback,
   className,
-  fallbackSrc = "/media/placeholders/image-fallback.webp",
-  width = 640,
-  height = 360,
-}: LocalMediaImageProps) {
-  const preferred = useMemo(() => toLocalPath(src), [src]);
-  const fallback = useMemo(
-    () => toLocalPath(fallbackSrc) ?? "/media/placeholders/image-fallback.webp",
-    [fallbackSrc]
-  );
-  const safeWidth = Number.isFinite(width) && width > 0 ? Math.round(width) : 640;
-  const safeHeight = Number.isFinite(height) && height > 0 ? Math.round(height) : 360;
-  const resolvedAlt = useMemo(() => {
-    const raw = String(alt ?? "").trim();
-    return raw || defaultAltText();
-  }, [alt]);
-  const [currentSrc, setCurrentSrc] = useState<string>(preferred ?? fallback);
+  imageClassName,
+  aspectRatio = '4 / 3',
+  loading = 'lazy',
+  fallbackSrc = DEFAULT_FALLBACK_SRC,
+}: {
+  media: LocalMediaInput;
+  alt?: string | null;
+  altFallback?: string;
+  className?: string;
+  imageClassName?: string;
+  aspectRatio?: string;
+  loading?: 'lazy' | 'eager';
+  fallbackSrc?: string;
+}) {
+  const src = useMemo(() => pickPrimaryLocalMedia(media), [media]);
+  const safeAlt = (alt && alt.trim()) || altFallback || 'Property image';
 
   return (
-    <img
-      className={className}
-      src={currentSrc}
-      alt={resolvedAlt}
-      width={safeWidth}
-      height={safeHeight}
-      style={{ aspectRatio: `${safeWidth} / ${safeHeight}` }}
-      loading="lazy"
-      decoding="async"
-      onError={() => {
-        setCurrentSrc((previous) => (previous === fallback ? previous : fallback));
-      }}
-    />
+    <div
+      className={className ?? 'media-shell'}
+      style={{ aspectRatio }}
+      data-media-kind={src ? 'local' : 'fallback'}
+    >
+      <SafeCoverImage
+        src={src}
+        alt={safeAlt}
+        className={imageClassName ?? 'media-shell__img'}
+        loading={loading}
+        fallbackSrc={fallbackSrc}
+      />
+    </div>
   );
 }

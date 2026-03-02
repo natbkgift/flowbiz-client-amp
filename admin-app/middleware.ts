@@ -3,9 +3,22 @@ import { checkRateLimit } from './lib/rate-limiter';
 
 const LOCALES = ['en', 'th'] as const;
 type Locale = (typeof LOCALES)[number];
+const NON_LOCALIZED_ROUTE_PREFIXES = [
+  '/login',
+  '/leads',
+  '/inquiries',
+  '/analytics',
+  '/public',
+  '/admin',
+  '/home-composer',
+] as const;
 
 function isLocale(value: string | undefined): value is Locale {
   return (LOCALES as readonly string[]).includes(value ?? '');
+}
+
+function hasRoutePrefix(pathname: string, prefix: string): boolean {
+  return pathname === prefix || pathname.startsWith(`${prefix}/`);
 }
 
 const PUBLIC_FILE = /\.[^/]+$/;
@@ -63,13 +76,7 @@ export function middleware(req: NextRequest) {
   if (pathname.startsWith('/api/')) return NextResponse.next();
 
   // Ignore admin routes (keep existing URLs stable).
-  if (
-    pathname.startsWith('/login') ||
-    pathname.startsWith('/leads') ||
-    pathname.startsWith('/inquiries') ||
-    pathname.startsWith('/analytics') ||
-    pathname.startsWith('/public')
-  ) {
+  if (NON_LOCALIZED_ROUTE_PREFIXES.some((prefix) => hasRoutePrefix(pathname, prefix))) {
     return NextResponse.next();
   }
 
@@ -94,6 +101,29 @@ export function middleware(req: NextRequest) {
 
 /** Attach all security response headers (incl. CSP + cross-origin isolation). */
 function setSecurityHeaders(res: NextResponse) {
+  const isDev = process.env.NODE_ENV !== 'production';
+  const scriptSrc = isDev
+    ? "script-src 'self' 'unsafe-inline' 'unsafe-eval'"
+    : "script-src 'self' 'unsafe-inline'";
+  const connectSrc = isDev
+    ? "connect-src 'self' http: https: ws: wss:"
+    : "connect-src 'self' https:";
+
+  const cspParts = [
+    "default-src 'self'",
+    scriptSrc,
+    "style-src 'self' 'unsafe-inline'",
+    "font-src 'self'",
+    "img-src 'self' data: blob: https:",
+    connectSrc,
+    "object-src 'none'",
+    "worker-src 'self'",
+    "frame-ancestors 'none'",
+    "base-uri 'self'",
+    "form-action 'self'",
+  ];
+  if (!isDev) cspParts.push('upgrade-insecure-requests');
+
   res.headers.set('X-Content-Type-Options', 'nosniff');
   res.headers.set('X-Frame-Options', 'DENY');
   res.headers.set('Referrer-Policy', 'strict-origin-when-cross-origin');
@@ -106,23 +136,7 @@ function setSecurityHeaders(res: NextResponse) {
   res.headers.set('Cross-Origin-Resource-Policy', 'same-origin');
   // Rate-limit hint for upstream proxy (nginx/CDN enforces actual limits)
   res.headers.set('X-RateLimit-Policy', '60;w=60;comment="form submissions"');
-  res.headers.set(
-    'Content-Security-Policy',
-    [
-      "default-src 'self'",
-      "script-src 'self' 'unsafe-inline'",
-      "style-src 'self' 'unsafe-inline'",
-      "font-src 'self'",
-      "img-src 'self' data: blob: https:",
-      "connect-src 'self' https:",
-      "object-src 'none'",
-      "worker-src 'self'",
-      "frame-ancestors 'none'",
-      "base-uri 'self'",
-      "form-action 'self'",
-      'upgrade-insecure-requests',
-    ].join('; '),
-  );
+  res.headers.set('Content-Security-Policy', cspParts.join('; '));
 }
 
 /** Set browser + CDN cache headers for public pages. */

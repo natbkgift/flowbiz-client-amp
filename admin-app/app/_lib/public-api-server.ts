@@ -18,8 +18,9 @@ const REQUEST_TIMEOUT_MS = 10_000;
  */
 async function fetchWithRetry(
   input: string,
-  init?: RequestInit & { next?: { revalidate?: number } },
+  init?: RequestInit & { next?: { revalidate?: number }; retryOn5xx?: boolean },
 ): Promise<Response> {
+  const retryOn5xx = init?.retryOn5xx ?? true;
   let lastError: unknown;
   for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
     const controller = new AbortController();
@@ -28,7 +29,7 @@ async function fetchWithRetry(
       const res = await fetch(input, { ...init, signal: controller.signal });
       clearTimeout(timeoutId);
       // Only retry on server errors (5xx). Client errors (4xx) are intentional.
-      if (res.status >= 500 && attempt < MAX_RETRIES) {
+      if (retryOn5xx && res.status >= 500 && attempt < MAX_RETRIES) {
         await delay(RETRY_BASE_MS * 2 ** attempt);
         continue;
       }
@@ -55,6 +56,40 @@ export type ProjectItem = {
   developer_id?: string | null;
   area_id?: string | null;
   status: string;
+  cover_image_url?: string | null;
+  starting_price?: number | null;
+  is_featured?: boolean;
+  created_at: string;
+  updated_at: string;
+};
+
+export type ProjectDetail = {
+  id: string;
+  slug: string;
+  name: string;
+  status: string;
+  property_type: string;
+  delivery_date?: string | null;
+  starting_price?: number | null;
+
+  cover_image_url?: string | null;
+  hero_image_url?: string | null;
+  images?: string[] | null;
+
+  summary: Record<string, string>;
+  description?: Record<string, string> | null;
+
+  amenities?: string[] | null;
+  investment_snapshot?: Record<string, unknown> | null;
+  location?: Record<string, unknown> | null;
+  unit_count?: number | null;
+  floors?: number | null;
+  year_built?: number | null;
+  is_featured?: boolean;
+
+  developer_id?: string | null;
+  area_id?: string | null;
+
   created_at: string;
   updated_at: string;
 };
@@ -64,6 +99,10 @@ const DEFAULT_SITE_ORIGIN = 'https://amppattaya.com';
 function getOrigin(): string {
   const env = process.env.NEXT_PUBLIC_SITE_URL;
   if (env && env.startsWith('http')) return env;
+  if (process.env.NODE_ENV === 'development') {
+    const port = process.env.PORT || '3000';
+    return `http://127.0.0.1:${port}`;
+  }
   return DEFAULT_SITE_ORIGIN;
 }
 
@@ -78,17 +117,24 @@ export async function fetchProperties(params: {
   type?: string;
   search?: string;
   sort?: 'price_asc' | 'price_desc' | 'newest' | 'oldest';
+  project_id?: string;
 }): Promise<PropertyListResponse> {
   const origin = getOrigin();
   const base = apiBase();
 
-  const url = new URL(`${base}/v1/properties`, origin);
+  // Important: Next.js uses `trailingSlash: true` which can 308-redirect
+  // `/api/v1/properties?...` → `/api/v1/properties/?...`.
+  // Use the slash form to avoid redirect edge-cases during SSR.
+  const url = new URL(`${base}/v1/properties/`, origin);
   url.searchParams.set('page', String(params.page ?? 1));
-  url.searchParams.set('limit', String(params.limit ?? 60));
+  // API contract: limit is capped at 100. Clamp defensively to avoid 422s from callers.
+  const safeLimit = Math.max(1, Math.min(params.limit ?? 60, 100));
+  url.searchParams.set('limit', String(safeLimit));
 
   if (params.type) url.searchParams.set('type', params.type);
   if (params.search) url.searchParams.set('search', params.search);
   if (params.sort) url.searchParams.set('sort', params.sort);
+  if (params.project_id) url.searchParams.set('project_id', params.project_id);
 
   const res = await fetchWithRetry(url.toString(), {
     // Public pages: allow caching but keep it reasonably fresh.
@@ -118,19 +164,32 @@ export async function fetchPropertyBySlug(slug: string): Promise<PropertyDetail 
   return (await res.json()) as PropertyDetail;
 }
 
-export async function fetchProjects(params?: { limit?: number }): Promise<ProjectItem[]> {
+export async function fetchProjects(params?: { limit?: number; page?: number; status_filter?: string }): Promise<ProjectItem[]> {
   const origin = getOrigin();
   const base = apiBase();
 
   const url = new URL(`${base}/v1/projects`, origin);
   if (params?.limit) url.searchParams.set('limit', String(params.limit));
+  if (params?.page) url.searchParams.set('page', String(params.page));
+  if (params?.status_filter) url.searchParams.set('status_filter', params.status_filter);
 
   const res = await fetchWithRetry(url.toString(), { next: { revalidate: PAGE_REVALIDATE_SECONDS } });
   if (!res.ok) throw new Error(`Failed to fetch projects (${res.status})`);
-  return (await res.json()) as ProjectItem[];
+
+  // Some environments return a bare array, others return an envelope.
+  // Normalize to a list so pages can render safely during static generation.
+  const payload = (await res.json()) as unknown;
+  if (Array.isArray(payload)) return payload as ProjectItem[];
+  if (payload && typeof payload === 'object') {
+    const maybe = payload as { data?: unknown; items?: unknown };
+    if (Array.isArray(maybe.data)) return maybe.data as ProjectItem[];
+    if (Array.isArray(maybe.items)) return maybe.items as ProjectItem[];
+  }
+
+  return [];
 }
 
-export async function fetchProjectBySlug(slug: string): Promise<ProjectItem | null> {
+export async function fetchProjectBySlug(slug: string): Promise<ProjectDetail | null> {
   const origin = getOrigin();
   const base = apiBase();
 
@@ -138,7 +197,35 @@ export async function fetchProjectBySlug(slug: string): Promise<ProjectItem | nu
   const res = await fetchWithRetry(url.toString(), { next: { revalidate: PAGE_REVALIDATE_SECONDS } });
   if (res.status === 404) return null;
   if (!res.ok) throw new Error(`Failed to fetch project (${res.status})`);
-  return (await res.json()) as ProjectItem;
+  return (await res.json()) as ProjectDetail;
+}
+
+export type SeoResolvedOverride = {
+  found: boolean;
+  path: string;
+  locale: string;
+  title?: string | null;
+  description?: string | null;
+  canonical?: string | null;
+  robots?: { index: boolean; follow: boolean };
+  schema?: {
+    organization_name?: string | null;
+    local_business_name?: string | null;
+    article_author?: string | null;
+  };
+};
+
+export async function fetchSeoResolvedOverride(path: string, locale: string): Promise<SeoResolvedOverride | null> {
+  const origin = getOrigin();
+  const base = apiBase();
+
+  const url = new URL(`${base}/v1/seo/resolve`, origin);
+  url.searchParams.set('path', path);
+  url.searchParams.set('locale', locale);
+
+  const res = await fetchWithRetry(url.toString(), { next: { revalidate: 30 }, retryOn5xx: false });
+  if (!res.ok) return null;
+  return (await res.json()) as SeoResolvedOverride;
 }
 
 export type MarketplaceCategoryItem = {
@@ -235,6 +322,12 @@ export type TrustBadge = { key: string; label: string };
 
 export type AreaStatisticsSnapshot = {
   area_id: string;
+  avg_price_sqm?: string | null;
+  avg_rent_monthly?: string | null;
+  avg_roi_percent?: string | null;
+  total_projects?: number | null;
+  total_units?: number | null;
+  as_of_date?: string | null;
   avg_price: string | null;
   avg_rent: string | null;
   roi_percent: string | null;
@@ -265,13 +358,83 @@ export type AreaItem = {
   name: string;
   slug: string;
   city: string | null;
+  status?: string;
+  hero_image_url?: string | null;
   created_at: string;
+  updated_at?: string;
 };
 
 export type AreaStatisticsResponse = {
   area: AreaItem;
   statistics: AreaStatisticsSnapshot | null;
 };
+
+export type AreaDetailResponse = {
+  area: AreaItem;
+  statistics: AreaStatisticsSnapshot | null;
+  content?: Record<string, unknown> | null;
+  map_center?: Record<string, unknown> | null;
+};
+
+export type DeveloperItem = {
+  id: string;
+  name: string;
+  slug: string;
+  website: string | null;
+  tier?: string | null;
+  logo_url?: string | null;
+  status?: string;
+  created_at: string;
+  updated_at?: string;
+};
+
+export type DeveloperDetailResponse = {
+  developer: DeveloperItem;
+  summary?: Record<string, unknown> | null;
+  media_warnings?: Array<{ level?: string; path?: string; detail?: string }>;
+};
+
+export async function fetchAreas(): Promise<AreaItem[]> {
+  const origin = getOrigin();
+  const base = apiBase();
+
+  const url = new URL(`${base}/v1/areas`, origin);
+  const res = await fetchWithRetry(url.toString(), { next: { revalidate: PAGE_REVALIDATE_SECONDS } });
+  if (!res.ok) throw new Error(`Failed to fetch areas (${res.status})`);
+  return (await res.json()) as AreaItem[];
+}
+
+export async function fetchAreaBySlug(slug: string): Promise<AreaDetailResponse | null> {
+  const origin = getOrigin();
+  const base = apiBase();
+
+  const url = new URL(`${base}/v1/areas/${encodeURIComponent(slug)}`, origin);
+  const res = await fetchWithRetry(url.toString(), { next: { revalidate: PAGE_REVALIDATE_SECONDS } });
+  if (res.status === 404) return null;
+  if (!res.ok) throw new Error(`Failed to fetch area detail (${res.status})`);
+  return (await res.json()) as AreaDetailResponse;
+}
+
+export async function fetchDevelopers(): Promise<DeveloperItem[]> {
+  const origin = getOrigin();
+  const base = apiBase();
+
+  const url = new URL(`${base}/v1/developers/`, origin);
+  const res = await fetchWithRetry(url.toString(), { next: { revalidate: PAGE_REVALIDATE_SECONDS } });
+  if (!res.ok) throw new Error(`Failed to fetch developers (${res.status})`);
+  return (await res.json()) as DeveloperItem[];
+}
+
+export async function fetchDeveloperBySlug(slug: string): Promise<DeveloperDetailResponse | null> {
+  const origin = getOrigin();
+  const base = apiBase();
+
+  const url = new URL(`${base}/v1/developers/${encodeURIComponent(slug)}/`, origin);
+  const res = await fetchWithRetry(url.toString(), { next: { revalidate: PAGE_REVALIDATE_SECONDS } });
+  if (res.status === 404) return null;
+  if (!res.ok) throw new Error(`Failed to fetch developer detail (${res.status})`);
+  return (await res.json()) as DeveloperDetailResponse;
+}
 
 export async function fetchAreaStatisticsBySlug(slug: string): Promise<AreaStatisticsResponse | null> {
   const origin = getOrigin();
@@ -282,4 +445,112 @@ export async function fetchAreaStatisticsBySlug(slug: string): Promise<AreaStati
   if (res.status === 404) return null;
   if (!res.ok) throw new Error(`Failed to fetch area statistics (${res.status})`);
   return (await res.json()) as AreaStatisticsResponse;
+}
+
+export type HomeComposerPublishedResponse = {
+  page_key: string;
+  locale: 'en' | 'th';
+  version: number;
+  updated_at: string;
+  config: Record<string, unknown>;
+};
+
+export async function fetchHomeComposerPublished(locale: 'en' | 'th'): Promise<HomeComposerPublishedResponse | null> {
+  const origin = getOrigin();
+  const base = apiBase();
+
+  const url = new URL(`${base}/v1/home-composer`, origin);
+  url.searchParams.set('page_key', 'home');
+  url.searchParams.set('locale', locale);
+
+  const res = await fetchWithRetry(url.toString(), { cache: 'no-store' });
+  if (res.status === 404) return null;
+  if (!res.ok) throw new Error(`Failed to fetch home composer (${res.status})`);
+  return (await res.json()) as HomeComposerPublishedResponse;
+}
+
+export type ContentLocalizedText = {
+  en: string;
+  th: string;
+};
+
+export type ContentLink = {
+  label: ContentLocalizedText;
+  href: string;
+};
+
+export type ContentSummaryApiItem = {
+  slug: string;
+  title: ContentLocalizedText;
+  excerpt?: ContentLocalizedText | null;
+  category?: ContentLocalizedText | null;
+  read_time?: ContentLocalizedText | null;
+  published_at?: string | null;
+  updated_at: string;
+  hero_image_url?: string | null;
+};
+
+export type BlogPostDetailApi = ContentSummaryApiItem & {
+  body: { en: string[]; th: string[] };
+  related_guides?: string[];
+  links?: ContentLink[];
+};
+
+export type GuideDetailApi = ContentSummaryApiItem & {
+  summary?: ContentLocalizedText | null;
+  checklist: { en: string[]; th: string[] };
+  related_blog_posts?: string[];
+  links?: ContentLink[];
+};
+
+export async function fetchBlogPosts(): Promise<ContentSummaryApiItem[]> {
+  const origin = getOrigin();
+  const base = apiBase();
+  const url = new URL(`${base}/v1/content/blog-posts/`, origin);
+  const res = await fetchWithRetry(url.toString(), {
+    next: { revalidate: PAGE_REVALIDATE_SECONDS },
+    retryOn5xx: false,
+  });
+  if (!res.ok) throw new Error(`Failed to fetch blog posts (${res.status})`);
+  const payload = (await res.json()) as unknown;
+  return Array.isArray(payload) ? (payload as ContentSummaryApiItem[]) : [];
+}
+
+export async function fetchBlogPostBySlug(slug: string): Promise<BlogPostDetailApi | null> {
+  const origin = getOrigin();
+  const base = apiBase();
+  const url = new URL(`${base}/v1/content/blog-posts/${encodeURIComponent(slug)}/`, origin);
+  const res = await fetchWithRetry(url.toString(), {
+    next: { revalidate: PAGE_REVALIDATE_SECONDS },
+    retryOn5xx: false,
+  });
+  if (res.status === 404) return null;
+  if (!res.ok) throw new Error(`Failed to fetch blog detail (${res.status})`);
+  return (await res.json()) as BlogPostDetailApi;
+}
+
+export async function fetchGuides(): Promise<ContentSummaryApiItem[]> {
+  const origin = getOrigin();
+  const base = apiBase();
+  const url = new URL(`${base}/v1/content/guides/`, origin);
+  const res = await fetchWithRetry(url.toString(), {
+    next: { revalidate: PAGE_REVALIDATE_SECONDS },
+    retryOn5xx: false,
+  });
+  if (!res.ok) throw new Error(`Failed to fetch guides (${res.status})`);
+  const payload = (await res.json()) as unknown;
+  return Array.isArray(payload) ? (payload as ContentSummaryApiItem[]) : [];
+}
+
+export async function fetchGuideBySlug(slug: string): Promise<GuideDetailApi | null> {
+  const origin = getOrigin();
+  const base = apiBase();
+  const url = new URL(`${base}/v1/content/guides/${encodeURIComponent(slug)}/`, origin);
+  const res = await fetchWithRetry(url.toString(), {
+    next: { revalidate: PAGE_REVALIDATE_SECONDS },
+    retryOn5xx: false,
+  });
+  if (res.status === 404) return null;
+  if (!res.ok) throw new Error(`Failed to fetch guide detail (${res.status})`);
+  return (await res.json()) as GuideDetailApi;
 }

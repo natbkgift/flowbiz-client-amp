@@ -4,6 +4,8 @@ import { useEffect } from 'react';
 
 export function ScrollReveal() {
   useEffect(() => {
+    document.documentElement.classList.add('amp-reveal');
+
     const elements = Array.from(document.querySelectorAll<HTMLElement>('.reveal'));
     if (!elements.length) return;
 
