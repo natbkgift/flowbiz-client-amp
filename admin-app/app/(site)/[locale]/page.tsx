@@ -395,11 +395,14 @@ export default async function HomePage({
               const badgeColor = prop.type === 'rent'
                 ? 'bg-blue-50 text-blue-700'
                 : 'bg-emerald-50 text-emerald-700';
+              const propertyHref = prop.slug
+                ? withLocale(locale, `/property/${encodeURIComponent(prop.slug)}`)
+                : withLocale(locale, prop.type === 'rent' ? '/rent' : '/buy');
 
               return (
                 <Link
                   key={prop.id}
-                  href={withLocale(locale, `/properties/${prop.id}`)}
+                  href={propertyHref}
                   className="property-card reveal premium-investment-card card-interactive"
                 >
                   <div className="card-image card-image--featured relative">

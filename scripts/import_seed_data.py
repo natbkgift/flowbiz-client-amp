@@ -192,6 +192,10 @@ def import_developers(db: Session, rows: list[dict], *, dry_run: bool) -> StepRe
             result.inserted += 1
             continue
 
+        status = str(row.get("status") or "active").strip().lower()
+        if status not in ("active", "inactive"):
+            status = "active"
+
         _, is_new = _upsert_by_slug(
             db,
             Developer,
@@ -200,6 +204,7 @@ def import_developers(db: Session, rows: list[dict], *, dry_run: bool) -> StepRe
                 "name": str(row["name"]).strip(),
                 "website": str(row.get("website") or "").strip() or None,
                 "logo_url": str(row.get("logo_url") or "").strip() or None,
+                "status": status,
             },
         )
         if is_new:
@@ -238,6 +243,10 @@ def import_areas(db: Session, rows: list[dict], *, dry_run: bool) -> StepResult:
             result.inserted += 1
             continue
 
+        status = str(row.get("status") or "published").strip().lower()
+        if status not in ("draft", "published", "archived"):
+            status = "published"
+
         _, is_new = _upsert_by_slug(
             db,
             Area,
@@ -245,6 +254,7 @@ def import_areas(db: Session, rows: list[dict], *, dry_run: bool) -> StepResult:
             {
                 "name": str(row["name"]).strip(),
                 "city": str(row.get("city") or "Pattaya").strip(),
+                "status": status,
             },
         )
         if is_new:

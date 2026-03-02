@@ -4,6 +4,7 @@ import Link from 'next/link';
 import type { PropertyListItem } from '../../app/public/_shared/types';
 import type { Dictionary } from '../../app/_lib/i18n/types';
 import { resolveImageUrl } from '../../app/_lib/public-api-shared';
+import { withLocale } from '../../app/_lib/i18n/routing';
 
 const PROPERTY_CARD_FALLBACK = '/media/project-covers/the-riviera-jomtien/cover_31dde7af340e.jpg';
 
@@ -12,8 +13,18 @@ function formatPriceTHB(price: number): string {
   return `฿${Math.round(price).toLocaleString()}`;
 }
 
-export function PropertyCard({ item, dict }: { item: PropertyListItem; dict: Dictionary }) {
-  const href = item.slug ? `/property/${encodeURIComponent(item.slug)}` : '/rent';
+export function PropertyCard({
+  item,
+  dict,
+  locale,
+}: {
+  item: PropertyListItem;
+  dict: Dictionary;
+  locale: 'en' | 'th';
+}) {
+  const href = item.slug
+    ? withLocale(locale, `/property/${encodeURIComponent(item.slug)}`)
+    : withLocale(locale, item.type === 'rent' ? '/rent' : '/buy');
   const img = resolveImageUrl(item.cover_image ?? item.local_images?.[0] ?? item.images?.[0] ?? null) ?? PROPERTY_CARD_FALLBACK;
 
   return (
