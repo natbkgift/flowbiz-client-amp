@@ -407,7 +407,7 @@ export default async function HomePage({
                       media={media}
                       alt={prop.title}
                       altFallback={locale === 'th' ? `ภาพประกอบอสังหาฯ ${prop.title}` : `Property preview for ${prop.title}`}
-                      className="card-image card-image--featured relative"
+                      className="media-shell"
                       imageClassName={`absolute inset-0 h-full w-full object-cover ${hasLocalMedia ? '' : 'premium-investment-card__fallback-image'}`}
                       fallbackSrc={fallbackSrc}
                     />

@@ -41,6 +41,20 @@ const nextConfig = {
       },
     ];
   },
+  async rewrites() {
+    if (process.env.NODE_ENV !== 'development') return [];
+
+    const devApiOrigin = process.env.LOCAL_API_ORIGIN || 'http://127.0.0.1:8000';
+    return {
+      fallback: [
+        // Local dev parity with production nginx:
+        // /api/* on frontend should hit backend root (without /api prefix).
+        { source: '/api/:path*', destination: `${devApiOrigin}/:path*` },
+        // If a /media file is missing in Next public/, fall through to backend media mount.
+        { source: '/media/:path*', destination: `${devApiOrigin}/media/:path*` },
+      ],
+    };
+  },
 };
 
 // Bundle analysis: run `ANALYZE=true npm run build` to generate reports.

@@ -2,12 +2,41 @@
 
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 import type { Dictionary, Locale } from '../../app/_lib/i18n/types';
 import { switchLocaleInPathname, withLocale } from '../../app/_lib/i18n/routing';
 
-type NavItem = { href: string; label: string };
+type DropdownItem = {
+  href: string;
+  label: string;
+  desc?: string;
+};
+
+type NavGroup = {
+  key: string;
+  label: string;
+  href?: string;
+  items?: DropdownItem[];
+};
+
+function ChevronDown({ open }: { open: boolean }) {
+  return (
+    <svg
+      width="12"
+      height="12"
+      viewBox="0 0 12 12"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      aria-hidden="true"
+      style={{ transition: 'transform 0.2s', transform: open ? 'rotate(180deg)' : 'rotate(0deg)', flexShrink: 0 }}
+    >
+      <path d="M2 4l4 4 4-4" />
+    </svg>
+  );
+}
 
 function HamburgerIcon() {
   return (
@@ -19,6 +48,138 @@ function HamburgerIcon() {
   );
 }
 
+function DesktopNavGroup({
+  group,
+  locale,
+  isActive,
+}: {
+  group: NavGroup;
+  locale: Locale;
+  isActive: (href: string) => boolean;
+}) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+  const timeout = useRef<ReturnType<typeof setTimeout>>();
+
+  useEffect(() => {
+    if (!open) return;
+    function onPointer(e: MouseEvent) {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+    }
+    function onKey(e: KeyboardEvent) {
+      if (e.key === 'Escape') setOpen(false);
+    }
+    document.addEventListener('mousedown', onPointer);
+    document.addEventListener('keydown', onKey);
+    return () => {
+      document.removeEventListener('mousedown', onPointer);
+      document.removeEventListener('keydown', onKey);
+    };
+  }, [open]);
+
+  const hasDropdown = !!(group.items?.length);
+  const active = group.href ? isActive(group.href) : false;
+
+  if (!hasDropdown) {
+    return (
+      <Link
+        href={withLocale(locale, group.href ?? '/')}
+        className={`nav-link ${active ? 'nav-link--active' : ''}`}
+        aria-current={active ? 'page' : undefined}
+      >
+        {group.label}
+      </Link>
+    );
+  }
+
+  return (
+    <div
+      ref={ref}
+      className="nav-group"
+      onMouseEnter={() => {
+        clearTimeout(timeout.current);
+        setOpen(true);
+      }}
+      onMouseLeave={() => {
+        timeout.current = setTimeout(() => setOpen(false), 150);
+      }}
+      onFocus={() => {
+        clearTimeout(timeout.current);
+        setOpen(true);
+      }}
+      onBlur={() => {
+        timeout.current = setTimeout(() => setOpen(false), 120);
+      }}
+    >
+      <button
+        type="button"
+        className={`nav-link nav-group__trigger ${active ? 'nav-link--active' : ''}`}
+        aria-expanded={open}
+        aria-haspopup="menu"
+        onClick={() => setOpen((v) => !v)}
+      >
+        {group.label}
+        <ChevronDown open={open} />
+      </button>
+
+      <div className={`dropdown-panel ${open ? 'dropdown-panel--open' : ''}`} role="menu">
+        <div className="dropdown-list">
+          {group.items!.map((item) => (
+            <Link key={item.href} href={withLocale(locale, item.href)} className="dropdown-item" role="menuitem" onClick={() => setOpen(false)}>
+              <span className="dropdown-item__label">{item.label}</span>
+              {item.desc ? <span className="dropdown-item__desc">{item.desc}</span> : null}
+            </Link>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function MobileSection({
+  group,
+  locale,
+  onNavClick,
+}: {
+  group: NavGroup;
+  locale: Locale;
+  onNavClick: () => void;
+}) {
+  const [expanded, setExpanded] = useState(false);
+
+  if (!group.items?.length) {
+    return (
+      <Link href={withLocale(locale, group.href ?? '/')} className="mobile-nav__item" onClick={onNavClick}>
+        {group.label}
+      </Link>
+    );
+  }
+
+  return (
+    <div className="mobile-nav__section">
+      <button
+        type="button"
+        className={`mobile-nav__trigger ${expanded ? 'mobile-nav__trigger--open' : ''}`}
+        aria-expanded={expanded}
+        onClick={() => setExpanded((v) => !v)}
+      >
+        <span>{group.label}</span>
+        <ChevronDown open={expanded} />
+      </button>
+      {expanded ? (
+        <div className="mobile-nav__sub">
+          {group.items.map((item) => (
+            <Link key={item.href} href={withLocale(locale, item.href)} className="mobile-nav__sub-item" onClick={onNavClick}>
+              <span className="mobile-nav__sub-label">{item.label}</span>
+              {item.desc ? <span className="mobile-nav__sub-desc">{item.desc}</span> : null}
+            </Link>
+          ))}
+        </div>
+      ) : null}
+    </div>
+  );
+}
+
 export function Header({ locale, dict }: { locale: Locale; dict: Dictionary }) {
   const [mobileOpen, setMobileOpen] = useState(false);
   const mobileMenuRef = useRef<HTMLDivElement>(null);
@@ -26,16 +187,45 @@ export function Header({ locale, dict }: { locale: Locale; dict: Dictionary }) {
   const router = useRouter();
   const pathname = usePathname();
 
-  const items: NavItem[] = useMemo(
-    () => [
-      { href: '/invest', label: dict.nav.invest },
-      { href: '/buy', label: dict.nav.buy },
-      { href: '/projects', label: dict.nav.projects },
-      { href: '/area-guide', label: dict.nav.areaGuide },
-      { href: '/contact', label: dict.nav.contact },
-    ],
-    [dict, locale]
-  );
+  const investLabel = locale === 'th' ? 'คู่มือลงทุน' : 'Investment Guides';
+  const smartFinderLabel = locale === 'th' ? 'ค้นหาอัจฉริยะ' : 'Smart Finder';
+  const compareLabel = locale === 'th' ? 'เปรียบเทียบ' : 'Compare';
+  const marketplaceLabel = locale === 'th' ? 'ทุกประกาศ' : 'Marketplace';
+
+  const navConfig: NavGroup[] = [
+    {
+      key: 'invest',
+      label: dict.nav.invest,
+      href: '/invest',
+      items: [
+        { href: '/invest', label: dict.nav.invest, desc: locale === 'th' ? 'เส้นทางลงทุนสำหรับผู้ซื้อระหว่างประเทศ' : 'Investment-first path for international buyers' },
+        { href: '/investment', label: investLabel, desc: locale === 'th' ? 'โอกาสลงทุนคัดสรรพร้อมบริบทตลาด' : 'Curated opportunities with market context' },
+        { href: '/smart-finder', label: smartFinderLabel, desc: locale === 'th' ? 'ช่วยเลือกจากงบประมาณและเป้าหมาย' : 'Guided matching by budget and goals' },
+        { href: '/compare', label: compareLabel, desc: locale === 'th' ? 'เทียบตัวเลือกแบบ side-by-side' : 'Compare options side-by-side' },
+      ],
+    },
+    {
+      key: 'buy',
+      label: dict.nav.buy,
+      href: '/buy',
+      items: [
+        { href: '/buy', label: dict.nav.buy, desc: locale === 'th' ? 'แนวทางซื้อสำหรับชาวต่างชาติ' : 'Buyer path for foreign nationals' },
+        { href: '/projects', label: dict.nav.projects, desc: locale === 'th' ? 'ดูโครงการที่ผ่านการคัดกรอง' : 'Browse vetted project catalogue' },
+        { href: '/marketplace', label: marketplaceLabel, desc: locale === 'th' ? 'รวมประกาศทั้งหมดในระบบ' : 'All active listings in one view' },
+        { href: '/rent', label: dict.nav.live, desc: locale === 'th' ? 'เปรียบเทียบยูนิตเช่าพร้อมอยู่' : 'Explore active rental options' },
+      ],
+    },
+    { key: 'projects', label: dict.nav.projects, href: '/projects' },
+    {
+      key: 'area-guide',
+      label: dict.nav.areaGuide,
+      href: '/area-guide',
+      items: [
+        { href: '/area-guide', label: dict.nav.areaGuide, desc: locale === 'th' ? 'ภาพรวมแต่ละโซนในพัทยา' : 'Understand Pattaya zone differences' },
+        { href: '/contact', label: dict.nav.contact, desc: locale === 'th' ? 'คุยกับที่ปรึกษาก่อนเลือกทำเล' : 'Talk to an advisor before selecting an area' },
+      ],
+    },
+  ];
 
   const langLabel = locale === 'th' ? dict.common.thai : dict.common.english;
 
@@ -78,16 +268,16 @@ export function Header({ locale, dict }: { locale: Locale; dict: Dictionary }) {
           </Link>
 
           <nav className="nav desktop-only" aria-label={dict.common.mainNavigation}>
-            {items.map((it) => (
-              <Link
-                key={it.href}
-                href={withLocale(locale, it.href)}
-                className={it.href === '/contact' ? 'nav-link nav-link--cta' : 'nav-link'}
-                aria-current={isActive(it.href) ? 'page' : undefined}
-              >
-                {it.label}
-              </Link>
+            {navConfig.map((group) => (
+              <DesktopNavGroup key={group.key} group={group} locale={locale} isActive={isActive} />
             ))}
+            <Link
+              href={withLocale(locale, '/contact')}
+              className={`nav-link nav-link--cta ${isActive('/contact') ? 'nav-link--active' : ''}`}
+              aria-current={isActive('/contact') ? 'page' : undefined}
+            >
+              {dict.nav.contact}
+            </Link>
           </nav>
 
           <div className="header-actions">
@@ -126,17 +316,14 @@ export function Header({ locale, dict }: { locale: Locale; dict: Dictionary }) {
         role="navigation"
         aria-label={dict.common.mainNavigation}
       >
-        {items.map((it) => (
-          <Link
-            key={it.href}
-            href={withLocale(locale, it.href)}
-            onClick={() => setMobileOpen(false)}
-            className={it.href === '/contact' ? 'nav-link nav-link--cta' : 'nav-link'}
-            aria-current={isActive(it.href) ? 'page' : undefined}
-          >
-            {it.label}
+        <div className="mobile-menu__inner">
+          {navConfig.map((group) => (
+            <MobileSection key={group.key} group={group} locale={locale} onNavClick={() => setMobileOpen(false)} />
+          ))}
+          <Link href={withLocale(locale, '/contact')} className="mobile-nav__cta" onClick={() => setMobileOpen(false)}>
+            {dict.nav.contact}
           </Link>
-        ))}
+        </div>
       </nav>
     </>
   );

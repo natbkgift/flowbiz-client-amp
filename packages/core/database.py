@@ -7,7 +7,15 @@ from pathlib import Path
 from sqlalchemy import create_engine
 from sqlalchemy.orm import Session, declarative_base, sessionmaker
 
-DB_PATH = Path("test_flowbiz.db").resolve()
+def _default_sqlite_path() -> Path:
+    app_env = (os.getenv("APP_ENV") or "").strip().lower()
+    is_test_env = app_env in {"test", "ci"} or bool(os.getenv("PYTEST_CURRENT_TEST"))
+    if is_test_env:
+        return Path("test_flowbiz.db").resolve()
+    return Path("flowbiz.db").resolve()
+
+
+DB_PATH = _default_sqlite_path()
 DEFAULT_DATABASE_URL = f"sqlite:///{DB_PATH.as_posix()}"
 DATABASE_URL = os.getenv("DATABASE_URL") or DEFAULT_DATABASE_URL
 

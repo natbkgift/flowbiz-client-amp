@@ -166,7 +166,7 @@ export function FeaturedProjects({
                   media={media}
                   alt={p.name}
                   altFallback={locale === 'th' ? `ภาพประกอบโครงการ ${p.name}` : `Project preview for ${p.name}`}
-                  className="card-image premium-project-card__media"
+                  className="media-shell"
                   imageClassName={`absolute inset-0 h-full w-full object-cover ${hasLocalMedia ? '' : 'premium-project-card__fallback-image'}`}
                   fallbackSrc={fallbackImage}
                 />
