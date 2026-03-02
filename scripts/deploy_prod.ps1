@@ -3,6 +3,7 @@ param(
   [string]$VpsActivePath = "/opt/flowbiz/clients/flowbiz-client-amp",
   [string]$VpsReleaseRoot = "/opt/flowbiz/clients",
   [int]$VpsApiPort = 8001,
+  [int]$VpsAdminPort = 8002,
   [string]$ComposeProjectName = "flowbiz-client-amp",
   [string]$RemoteUrl = "",
   [string]$TargetSha = "",
@@ -41,8 +42,9 @@ TARGET_SHA="$2"
 VPS_ACTIVE_PATH="$3"
 VPS_RELEASE_ROOT="$4"
 VPS_API_PORT="$5"
-COMPOSE_PROJECT_NAME="$6"
-ALEMBIC_UPGRADE_TARGET="$7"
+VPS_ADMIN_PORT="$6"
+COMPOSE_PROJECT_NAME="$7"
+ALEMBIC_UPGRADE_TARGET="$8"
 ALEMBIC_UPGRADE_TARGET="${ALEMBIC_UPGRADE_TARGET//$'\r'/}"
 
 if [[ -z "$REMOTE_URL" || "$REMOTE_URL" == "__AUTO__" ]]; then
@@ -78,6 +80,7 @@ export BUILD_SHA
 BUILD_SHA="$(git rev-parse --short HEAD)"
 export FLOWBIZ_ENV_FILE="$VPS_ACTIVE_PATH/.env"
 export VPS_API_PORT
+export VPS_ADMIN_PORT
 
 compose=(
   docker compose
@@ -86,26 +89,28 @@ compose=(
   -f "$release_path/docker-compose.prod.yml"
 )
 
-echo "--- build api BUILD_SHA=$BUILD_SHA"
-"${compose[@]}" build api
+echo "--- build api/admin-app BUILD_SHA=$BUILD_SHA"
+"${compose[@]}" build api admin-app
 
 echo "--- migrations"
 "${compose[@]}" run --rm --no-deps \
   -e ALEMBIC_UPGRADE_TARGET="$ALEMBIC_UPGRADE_TARGET" \
   api sh -lc 'python -m alembic upgrade "$ALEMBIC_UPGRADE_TARGET"'
 
-echo "--- recreate api"
-"${compose[@]}" up -d --no-deps --force-recreate api
+echo "--- recreate api/admin-app"
+"${compose[@]}" up -d --no-deps --force-recreate api admin-app
 
 echo "--- smoke"
 healthz=000
 properties=000
 projects=000
+admin_login=000
 for _ in $(seq 1 30); do
   healthz="$(curl -sS -o /dev/null -w '%{http_code}' "http://127.0.0.1:${VPS_API_PORT}/healthz" || echo 000)"
   properties="$(curl -sS -o /dev/null -w '%{http_code}' "http://127.0.0.1:${VPS_API_PORT}/v1/properties?limit=1" || echo 000)"
   projects="$(curl -sS -o /dev/null -w '%{http_code}' "http://127.0.0.1:${VPS_API_PORT}/v1/projects?limit=1" || echo 000)"
-  [[ "$healthz" == "200" && "$properties" == "200" && "$projects" == "200" ]] && break
+  admin_login="$(curl -sS -o /dev/null -w '%{http_code}' "http://127.0.0.1:${VPS_ADMIN_PORT}/login" || echo 000)"
+  [[ "$healthz" == "200" && "$properties" == "200" && "$projects" == "200" && "$admin_login" == "200" ]] && break
   sleep 2
 done
 
@@ -114,9 +119,10 @@ echo "build_sha=$BUILD_SHA"
 echo "healthz=$healthz"
 echo "properties=$properties"
 echo "projects=$projects"
+echo "admin_login=$admin_login"
 
 deploy_status="error"
-if [[ "$healthz" == "200" && "$properties" == "200" && "$projects" == "200" ]]; then
+if [[ "$healthz" == "200" && "$properties" == "200" && "$projects" == "200" && "$admin_login" == "200" ]]; then
   deploy_status="ok"
 fi
 
@@ -148,12 +154,13 @@ payload = {
         "healthz_code": os.environ.get("healthz"),
         "properties_code": os.environ.get("properties"),
         "projects_code": os.environ.get("projects"),
+        "admin_login_code": os.environ.get("admin_login"),
     },
 }
 path.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
 PY
 echo "deploy_telemetry=$telemetry_file"
-[[ "$healthz" == "200" && "$properties" == "200" && "$projects" == "200" ]]
+[[ "$healthz" == "200" && "$properties" == "200" && "$projects" == "200" && "$admin_login" == "200" ]]
 '@
 
 $remoteTmp = $null
@@ -174,9 +181,10 @@ try {
   $qVpsActivePath = Quote-BashArg $VpsActivePath
   $qVpsReleaseRoot = Quote-BashArg $VpsReleaseRoot
   $qVpsApiPort = Quote-BashArg ([string]$VpsApiPort)
+  $qVpsAdminPort = Quote-BashArg ([string]$VpsAdminPort)
   $qComposeProjectName = Quote-BashArg $ComposeProjectName
   $qAlembicTarget = Quote-BashArg $AlembicTarget
-  $remoteCommand = "chmod 700 $qRemoteTmp && bash $qRemoteTmp $qRemoteArg $qTargetSha $qVpsActivePath $qVpsReleaseRoot $qVpsApiPort $qComposeProjectName $qAlembicTarget; status=`$?; rm -f $qRemoteTmp; exit `$status"
+  $remoteCommand = "chmod 700 $qRemoteTmp && bash $qRemoteTmp $qRemoteArg $qTargetSha $qVpsActivePath $qVpsReleaseRoot $qVpsApiPort $qVpsAdminPort $qComposeProjectName $qAlembicTarget; status=`$?; rm -f $qRemoteTmp; exit `$status"
 
   & ssh -o BatchMode=yes $VpsHost $remoteCommand
   if ($LASTEXITCODE -ne 0) {
