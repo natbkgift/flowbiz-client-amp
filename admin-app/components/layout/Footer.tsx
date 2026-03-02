@@ -1,30 +1,57 @@
-export function Footer() {
+import Link from 'next/link';
+
+import { Container } from './Container';
+import type { Dictionary, Locale } from '../../app/_lib/i18n/types';
+import { withLocale } from '../../app/_lib/i18n/routing';
+
+export function Footer({ locale, dict }: { locale: Locale; dict: Dictionary }) {
   return (
     <footer className="footer" role="contentinfo">
-      <div className="container footer-grid">
-        <section className="footer-nap locale-safe" aria-label="Contact details">
-          <h3>FlowBiz Pattaya</h3>
-          <p>123 Beach Road, Pattaya, Chonburi 20150</p>
-          <p>+66 38 000 000</p>
-          <p>hello@flowbiz.co</p>
-        </section>
-        <nav className="footer-links" aria-label="Footer links">
-          <a href="/en/about">About</a>
-          <a href="/en/projects">Projects</a>
-          <a href="/en/marketplace">Properties</a>
-          <a href="/en/contact">Contact</a>
-        </nav>
-        <nav className="footer-social" aria-label="Social links">
-          <a href="https://facebook.com/flowbiz">Facebook</a>
-          <a href="https://instagram.com/flowbiz">Instagram</a>
-          <a href="https://youtube.com/@flowbiz">YouTube</a>
-        </nav>
-      </div>
-      <div className="container footer-legal">
-        <a href="/en/privacy">Privacy Policy</a>
-        <a href="/en/terms">Terms of Service</a>
-        <span>Copyright 2026 FlowBiz</span>
-      </div>
+      <Container>
+        <div className="footer-content">
+          <div>
+            <h3>{dict.brand.name}</h3>
+            <p className="text-muted-on-dark">{dict.brand.tagline}</p>
+          </div>
+
+          <nav aria-label={dict.common.footerNavigation}>
+            <h3>{dict.common.quickLinks}</h3>
+            <p>
+              <Link href={withLocale(locale, '/invest')}>{dict.nav.invest}</Link>
+            </p>
+            <p>
+              <Link href={withLocale(locale, '/buy')}>{dict.nav.buy}</Link>
+            </p>
+            <p>
+              <Link href={withLocale(locale, '/projects')}>{dict.nav.projects}</Link>
+            </p>
+          </nav>
+
+          <div>
+            <h3>{dict.common.contactHeading}</h3>
+            <p className="text-muted-on-dark">info@amppattaya.com</p>
+            <p>
+              <Link href={withLocale(locale, '/contact')}>{dict.nav.contact}</Link>
+            </p>
+          </div>
+
+          <div>
+            <h3>{dict.common.legalHeading ?? 'Legal'}</h3>
+            <p>
+              <Link href={withLocale(locale, '/privacy')}>{dict.common.privacyPolicy ?? 'Privacy Policy'}</Link>
+            </p>
+            <p>
+              <Link href={withLocale(locale, '/terms')}>{dict.common.termsOfService ?? 'Terms of Service'}</Link>
+            </p>
+            <p className="text-muted-on-dark footer-compliance">
+              {dict.common.pdpaNotice ?? 'PDPA & GDPR Compliant'}
+            </p>
+          </div>
+        </div>
+
+        <p className="footer-meta">© {new Date().getFullYear()} {dict.brand.name}</p>
+        <p className="footer-disclaimer">{dict.common.footerDisclaimer}</p>
+      </Container>
     </footer>
   );
 }

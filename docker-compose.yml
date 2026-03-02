@@ -43,5 +43,19 @@ services:
         condition: service_healthy
     restart: unless-stopped
 
+  admin-app:
+    image: flowbiz-client-amp-admin-app:${BUILD_SHA:-latest}
+    build:
+      context: ./admin-app
+      dockerfile: Dockerfile
+    expose:
+      - "3000"
+    environment:
+      NEXT_PUBLIC_API_BASE: ${NEXT_PUBLIC_API_BASE:-/api}
+      NEXT_PUBLIC_WHATSAPP_URL: ${NEXT_PUBLIC_WHATSAPP_URL:-https://wa.me/66634533526}
+      NEXT_PUBLIC_LINE_URL: ${NEXT_PUBLIC_LINE_URL:-https://line.me/ti/p/~@554dksqb}
+      NEXT_PUBLIC_PHONE_TEL: ${NEXT_PUBLIC_PHONE_TEL:-tel:+66634533526}
+    restart: unless-stopped
+
 volumes:
   postgres_data:
