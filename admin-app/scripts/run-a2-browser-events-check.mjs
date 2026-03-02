@@ -34,6 +34,30 @@ function clickWithoutNavigation(locator) {
   });
 }
 
+function normalizeTrackedEvent(payload) {
+  if (!payload || typeof payload !== 'object') return null;
+
+  // Legacy shape from lightweight harness servers.
+  if (typeof payload.event === 'string' && payload.event.length > 0) {
+    return payload;
+  }
+
+  // Runtime shape from /api/v1/events.
+  const eventName = typeof payload.event_name === 'string' ? payload.event_name : '';
+  if (!eventName) return null;
+
+  const source = payload.source && typeof payload.source === 'object' ? payload.source : {};
+  const body = payload.payload && typeof payload.payload === 'object' ? payload.payload : {};
+
+  return {
+    event: eventName,
+    event_name: eventName,
+    locale: typeof source.locale === 'string' ? source.locale : '',
+    path: typeof source.page === 'string' ? source.page : '',
+    ...(body || {}),
+  };
+}
+
 async function run() {
   const server = spawn(pythonExe, ['-m', 'uvicorn', 'apps.api.main:app', '--host', API_HOST, '--port', String(API_PORT)], {
     cwd: repoRoot,
@@ -50,15 +74,26 @@ async function run() {
     const tracked = [];
     const inquiries = [];
 
-    await page.route('**/telemetry', async (route) => {
-      const payload = route.request().postDataJSON();
-      tracked.push(payload);
+    const captureEventRoute = async (route, endpoint) => {
+      let payload = null;
+      try {
+        payload = route.request().postDataJSON();
+      } catch {
+        payload = null;
+      }
+
+      const normalized = normalizeTrackedEvent(payload);
+      if (normalized) tracked.push(normalized);
+
       await route.fulfill({
         status: 202,
         contentType: 'application/json',
-        body: JSON.stringify({ ok: true, endpoint: '/telemetry' }),
+        body: JSON.stringify({ ok: true, endpoint }),
       });
-    });
+    };
+
+    await page.route('**/telemetry', async (route) => captureEventRoute(route, '/telemetry'));
+    await page.route('**/api/v1/events', async (route) => captureEventRoute(route, '/api/v1/events'));
 
     await page.route('**/v1/inquiries', async (route) => {
       inquiries.push(route.request().postDataJSON());
