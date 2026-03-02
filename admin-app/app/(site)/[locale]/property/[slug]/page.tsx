@@ -22,6 +22,7 @@ import { PAGE_REVALIDATE_SECONDS } from '@/app/_lib/constants';
 export const revalidate = PAGE_REVALIDATE_SECONDS;
 
 type PageProps = { params: { locale: string; slug: string } };
+const PROPERTY_DETAIL_FALLBACK = '/media/project-covers/the-riviera-jomtien/cover_31dde7af340e.jpg';
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const locale = normalizeLocale(params.locale);
@@ -117,9 +118,9 @@ export default async function PropertyPage({ params }: PageProps) {
     .map((u) => resolveImageUrl(u))
     .filter((v): v is string => Boolean(v));
 
-  const cover = resolveImageUrl(property.cover_image) ?? images[0] ?? null;
-  const gallery = cover ? [cover, ...images.filter((u) => u !== cover)] : images;
-  const main = gallery[0] ?? null;
+  const cover = resolveImageUrl(property.cover_image) ?? images[0] ?? PROPERTY_DETAIL_FALLBACK;
+  const gallery = [cover, ...images.filter((u) => u !== cover)];
+  const main = gallery[0];
 
   const priceNumber = Number(property.price);
   const priceValue = Number.isFinite(priceNumber) ? Math.round(priceNumber) : undefined;
@@ -191,16 +192,15 @@ export default async function PropertyPage({ params }: PageProps) {
           <div className="detail-main">
             <div id="gallery-section">
               <div className="gallery-main">
-                {main ? (
-                  <Image
-                    src={main}
-                    alt={property.title}
-                    fill
-                    sizes="(min-width: 1024px) 70vw, 100vw"
-                    className="object-cover"
-                    priority
-                  />
-                ) : null}
+                <Image
+                  src={main}
+                  alt={property.title}
+                  fill
+                  unoptimized
+                  sizes="(min-width: 1024px) 70vw, 100vw"
+                  className="object-cover"
+                  priority
+                />
                 <div className="gallery-counter">1 / {Math.max(gallery.length, 1)}</div>
               </div>
 
@@ -208,7 +208,7 @@ export default async function PropertyPage({ params }: PageProps) {
                 <div className="gallery-thumbnails">
                   {gallery.slice(0, 12).map((src, idx) => (
                     <div key={src} className={idx === 0 ? 'gallery-thumbnail active' : 'gallery-thumbnail'}>
-                      <Image src={src} alt={`${dict.property.galleryPhoto} ${idx + 1}`} width={80} height={60} className="object-cover" loading="lazy" />
+                      <Image src={src} alt={`${dict.property.galleryPhoto} ${idx + 1}`} width={80} height={60} unoptimized className="object-cover" loading="lazy" />
                     </div>
                   ))}
                 </div>

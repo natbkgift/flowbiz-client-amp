@@ -7,7 +7,7 @@ export type LocalMediaInput = {
   images?: Array<string | null | undefined> | null;
 };
 
-const LOCAL_PREFIXES = ['/media/', '/images/', '/uploads/', '/assets/'];
+const LOCAL_PREFIXES = ['/media/', '/uploads/', '/assets/'];
 
 export function isLocalMediaPath(value: string | null | undefined): boolean {
   if (!value) return false;

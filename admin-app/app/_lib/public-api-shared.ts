@@ -1,11 +1,18 @@
 import type { PropertyListItem } from '../public/_shared/types';
 
+const LOCAL_MEDIA_PREFIXES = ['/media/', '/uploads/', '/assets/', '/_next/'];
+
 export function resolveImageUrl(image: string | null | undefined): string | null {
   if (!image) return null;
 
-  // Strict: public site must only render local images served via /images/.
-  // Anything else is treated as non-renderable to avoid hotlinking.
-  if (image.startsWith('/images/')) return image;
+  const raw = String(image).trim();
+  if (!raw) return null;
+  if (raw.includes('://') || raw.startsWith('//')) return null;
+
+  const normalized = raw.startsWith('/') ? raw : `/${raw}`;
+  if (LOCAL_MEDIA_PREFIXES.some((prefix) => normalized.startsWith(prefix))) {
+    return normalized;
+  }
   return null;
 }
 

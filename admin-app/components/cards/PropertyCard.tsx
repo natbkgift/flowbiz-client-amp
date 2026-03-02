@@ -5,6 +5,8 @@ import type { PropertyListItem } from '../../app/public/_shared/types';
 import type { Dictionary } from '../../app/_lib/i18n/types';
 import { resolveImageUrl } from '../../app/_lib/public-api-shared';
 
+const PROPERTY_CARD_FALLBACK = '/media/project-covers/the-riviera-jomtien/cover_31dde7af340e.jpg';
+
 function formatPriceTHB(price: number): string {
   if (!Number.isFinite(price)) return '฿-';
   return `฿${Math.round(price).toLocaleString()}`;
@@ -12,20 +14,19 @@ function formatPriceTHB(price: number): string {
 
 export function PropertyCard({ item, dict }: { item: PropertyListItem; dict: Dictionary }) {
   const href = item.slug ? `/property/${encodeURIComponent(item.slug)}` : '/rent';
-  const img = resolveImageUrl(item.cover_image ?? item.local_images?.[0] ?? item.images?.[0] ?? null);
+  const img = resolveImageUrl(item.cover_image ?? item.local_images?.[0] ?? item.images?.[0] ?? null) ?? PROPERTY_CARD_FALLBACK;
 
   return (
     <Link href={href} className="property-card">
       <div className="card-image">
-        {img ? (
-          <Image
-            src={img}
-            alt={item.title}
-            fill
-            sizes="(min-width: 1024px) 33vw, (min-width: 768px) 50vw, 100vw"
-            className="object-cover"
-          />
-        ) : null}
+        <Image
+          src={img}
+          alt={item.title}
+          fill
+          unoptimized
+          sizes="(min-width: 1024px) 33vw, (min-width: 768px) 50vw, 100vw"
+          className="object-cover"
+        />
       </div>
 
       <div className="card-content">

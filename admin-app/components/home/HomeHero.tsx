@@ -131,6 +131,7 @@ export function HomeHero({
                 fill
                 priority
                 fetchPriority="high"
+                unoptimized
                 sizes="100vw"
                 className="absolute inset-0 w-full h-full object-cover object-[64%_center] sm:object-[60%_center] md:object-center block scale-[1.01]"
             />
