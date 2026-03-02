@@ -5,7 +5,7 @@ import { useMemo } from 'react';
 import { pickPrimaryLocalMedia, type LocalMediaInput } from '@/app/_lib/local-media';
 import { SafeCoverImage } from '@/components/media/SafeCoverImage';
 
-const DEFAULT_FALLBACK_SRC = '/images/property-placeholder.svg';
+const DEFAULT_FALLBACK_SRC = '/media/project-covers/the-riviera-jomtien/cover_31dde7af340e.jpg';
 
 export function LocalMediaImage({
   media,

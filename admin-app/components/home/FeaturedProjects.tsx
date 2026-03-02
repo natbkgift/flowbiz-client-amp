@@ -5,12 +5,6 @@ import { withLocale } from '@/app/_lib/i18n/routing';
 import type { ProjectItem } from '@/app/_lib/public-api-server';
 import { LocalMediaImage } from '@/components/media/LocalMediaImage';
 import { EmptyStateCard } from '@/components/ui/StateBlocks';
-import condoViewImage from '@/public/images/condo-view.png';
-import projectOverviewImage from '@/public/images/project-overview.png';
-import propertyExteriorImage from '@/public/images/property-exterior.png';
-import propertyInteriorImage from '@/public/images/property-interior.png';
-import propertyPoolImage from '@/public/images/property-pool.png';
-import villaGardenImage from '@/public/images/villa-garden.png';
 
 type BadgeLabel = 'New' | 'Hot' | 'Beachfront';
 
@@ -20,12 +14,12 @@ function formatPrice(price: number): string {
 }
 
 const PROJECT_FALLBACK_IMAGES = [
-  projectOverviewImage,
-  condoViewImage,
-  propertyExteriorImage,
-  propertyPoolImage,
-  propertyInteriorImage,
-  villaGardenImage,
+  '/media/project-covers/the-riviera-jomtien/cover_31dde7af340e.jpg',
+  '/media/project-covers/the-riviera-monaco/cover_84a7b41c3c79.jpg',
+  '/media/project-covers/copacabana-beach-jomtien/cover_44839d734c2f.jpg',
+  '/media/project-covers/city-garden-pratumnak/cover_19d5cc49057c.webp',
+  '/media/project-covers/grand-solaire/cover_e831b1643816.webp',
+  '/media/project-covers/wongamat-tower/cover_b688a580f462.jpg',
 ];
 
 export function FeaturedProjects({
@@ -174,7 +168,7 @@ export function FeaturedProjects({
                   altFallback={locale === 'th' ? `ภาพประกอบโครงการ ${p.name}` : `Project preview for ${p.name}`}
                   className="card-image premium-project-card__media"
                   imageClassName={`absolute inset-0 h-full w-full object-cover ${hasLocalMedia ? '' : 'premium-project-card__fallback-image'}`}
-                  fallbackSrc={fallbackImage.src}
+                  fallbackSrc={fallbackImage}
                 />
                 <div className="premium-project-card__media-scrim" aria-hidden="true" />
                 {badges.length > 0 ? (

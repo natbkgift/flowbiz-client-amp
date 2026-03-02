@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react';
 
-const DEFAULT_FALLBACK_SRC = '/images/property-placeholder.svg';
+const DEFAULT_FALLBACK_SRC = '/media/project-covers/the-riviera-jomtien/cover_31dde7af340e.jpg';
 
 function normalizeSrc(raw: string | null | undefined): string | null {
   if (!raw) return null;

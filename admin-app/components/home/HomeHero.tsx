@@ -2,8 +2,9 @@ import Image from "next/image";
 import { TrackedLink } from "@/components/analytics/TrackedLink";
 import { HeroOverlay } from "@/components/home/HeroOverlay";
 import { Container } from "@/components/layout/Container";
-import heroBanner from "@/public/images/hero-banner.webp";
 import { withLocale } from "@/app/_lib/i18n/routing";
+
+const HERO_FALLBACK_IMAGE = "/media/project-covers/the-riviera-jomtien/cover_31dde7af340e.jpg";
 
 type HomeHeroComposer = {
     heading?: string;
@@ -120,7 +121,7 @@ export function HomeHero({
     const pathSelectorEnabled = composer?.path_selector_enabled ?? true;
     const heroImageSrc = typeof composer?.hero_image === 'string' && composer.hero_image.startsWith('/media/')
         ? composer.hero_image
-        : heroBanner.src;
+        : HERO_FALLBACK_IMAGE;
 
     return (
         <section className="relative w-full bg-gray-900 overflow-hidden min-h-[720px] sm:min-h-[760px] md:min-h-[680px] xl:min-h-[720px]">

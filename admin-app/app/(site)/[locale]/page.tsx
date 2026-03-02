@@ -7,12 +7,6 @@ import { HomeHero } from '@/components/home/HomeHero';
 import { FeaturedProjects } from '@/components/home/FeaturedProjects';
 import { LeadForm } from '@/components/forms/LeadForm';
 import { Container } from '@/components/layout/Container';
-import propertyPlaceholder from '@/public/images/property-placeholder.svg';
-import condoViewImage from '@/public/images/condo-view.png';
-import propertyExteriorImage from '@/public/images/property-exterior.png';
-import propertyInteriorImage from '@/public/images/property-interior.png';
-import propertyPoolImage from '@/public/images/property-pool.png';
-import villaGardenImage from '@/public/images/villa-garden.png';
 import { getDictionary, normalizeLocale } from '@/app/_lib/i18n/get-dictionary';
 import { normalizeLocalMediaPath, pickPrimaryLocalMedia } from '@/app/_lib/local-media';
 import { GuidedOverlay } from './_components/GuidedOverlay';
@@ -32,11 +26,11 @@ import { EmptyStateCard, LoadingCardGrid } from '@/components/ui/StateBlocks';
 export const revalidate = 300;
 
 const PROPERTY_FALLBACK_IMAGES = [
-  propertyExteriorImage,
-  condoViewImage,
-  propertyPoolImage,
-  propertyInteriorImage,
-  villaGardenImage,
+  '/media/project-covers/the-riviera-jomtien/cover_31dde7af340e.jpg',
+  '/media/project-covers/the-riviera-monaco/cover_84a7b41c3c79.jpg',
+  '/media/project-covers/copacabana-beach-jomtien/cover_44839d734c2f.jpg',
+  '/media/project-covers/city-garden-pratumnak/cover_19d5cc49057c.webp',
+  '/media/project-covers/grand-solaire/cover_e831b1643816.webp',
 ];
 
 export async function generateMetadata({
@@ -391,7 +385,7 @@ export default async function HomePage({
                 images: prop.images ?? null,
               };
               const hasLocalMedia = Boolean(pickPrimaryLocalMedia(media));
-              const fallbackSrc = (PROPERTY_FALLBACK_IMAGES[index % PROPERTY_FALLBACK_IMAGES.length] ?? propertyPlaceholder).src;
+              const fallbackSrc = PROPERTY_FALLBACK_IMAGES[index % PROPERTY_FALLBACK_IMAGES.length];
               const priceFormatted = prop.price ? `฿${Math.round(prop.price).toLocaleString()}` : null;
               const statTokens = deriveStatTokens(prop);
               const tags = deriveTags(prop);
