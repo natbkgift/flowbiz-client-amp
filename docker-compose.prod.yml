@@ -10,6 +10,7 @@ services:
     ports:
       - "127.0.0.1:${VPS_API_PORT:-8001}:8000"
     volumes:
+      - /opt/flowbiz/storage/media:/app/storage/media
       - /opt/flowbiz/storage/property-images:/opt/flowbiz/storage/property-images:ro
     restart: always
 
