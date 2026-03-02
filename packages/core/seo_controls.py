@@ -9,7 +9,6 @@ from typing import Any
 from urllib.parse import urlparse
 
 from fastapi import FastAPI, Request
-from fastapi.testclient import TestClient
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
@@ -581,6 +580,13 @@ def run_broken_internal_link_check(
     max_link_checks: int | None = None,
     max_depth: int | None = None,
 ) -> dict[str, Any]:
+    try:
+        from fastapi.testclient import TestClient
+    except RuntimeError as exc:  # pragma: no cover - depends on optional runtime deps
+        raise RuntimeError(
+            "Broken-link checker requires TestClient dependencies (install httpx)."
+        ) from exc
+
     policy = get_effective_broken_link_policy(
         seed_paths=seed_paths,
         max_depth=max_depth,
