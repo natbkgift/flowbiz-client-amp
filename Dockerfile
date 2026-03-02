@@ -7,6 +7,7 @@ COPY pyproject.toml ./
 COPY apps/ ./apps/
 COPY packages/ ./packages/
 COPY scripts/ ./scripts/
+COPY ops/ ./ops/
 COPY data/ ./data/
 COPY alembic.ini ./
 COPY alembic/ ./alembic/
