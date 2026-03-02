@@ -694,6 +694,21 @@ select {
   margin-top: 0;
 }
 
+.nav-link[aria-current='page'] {
+  color: var(--color-primary-dark) !important;
+  font-weight: 600 !important;
+  background: rgba(10, 77, 140, 0.08);
+}
+
+.nav-link[aria-current='page']::after {
+  content: '';
+  display: block;
+  height: 2px;
+  background: var(--color-primary);
+  border-radius: 1px;
+  margin-top: 0;
+}
+
 /* Dropdown panel — hidden by default */
 .dropdown-panel {
   display: none;
@@ -3779,7 +3794,12 @@ summary.mobile-nav__trigger::-webkit-details-marker {
   --maxw-wide: 1680px;
   --maxw-readable: 840px;
   --line-readable: 68ch;
+  --measure-max: var(--line-readable);
   --section-space-y: clamp(64px, 8vw, 112px);
+  --type-h1: var(--font-h1);
+  --type-h2: var(--font-h2);
+  --type-h3: var(--font-h3);
+  --type-body: var(--font-body);
 }
 
 .layout-shell {
@@ -3885,6 +3905,10 @@ summary.mobile-nav__trigger::-webkit-details-marker {
   position: relative;
 }
 
+.btn:active {
+  transform: translateY(1px);
+}
+
 .btn-ghost {
   background: transparent;
   border: 1px solid transparent;
@@ -3914,6 +3938,7 @@ summary.mobile-nav__trigger::-webkit-details-marker {
   text-underline-offset: 3px;
 }
 
+.btn:disabled,
 .btn[disabled],
 .btn[aria-disabled='true'],
 .btn.is-loading {
@@ -4046,6 +4071,35 @@ summary.mobile-nav__trigger::-webkit-details-marker {
 .ui-empty__action {
   margin-top: 14px;
   display: inline-flex;
+}
+
+.state-empty {
+  border: 1px dashed var(--color-gray-300);
+  border-radius: var(--radius-lg);
+  padding: clamp(22px, 3vw, 36px);
+  background: var(--color-white);
+  text-align: center;
+}
+
+.state-loading {
+  border: 1px solid var(--color-gray-200);
+  border-radius: var(--radius-lg);
+  padding: 18px;
+  background: var(--color-white);
+  color: var(--color-text-secondary);
+}
+
+.state-error {
+  border: 1px solid rgba(220, 38, 38, 0.25);
+  border-radius: var(--radius-sm);
+  padding: 12px 14px;
+  background: var(--color-error-bg);
+  color: var(--color-error-text);
+}
+
+.locale-safe {
+  word-break: break-word;
+  overflow-wrap: anywhere;
 }
 
 .ui-loading-grid {

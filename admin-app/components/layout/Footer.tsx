@@ -49,6 +49,21 @@ export function Footer({ locale, dict }: { locale: Locale; dict: Dictionary }) {
           </div>
         </div>
 
+        <section className="footer-nap locale-safe" aria-label={dict.common.contactHeading}>
+          <dl className="footer-nap-list">
+            <dt>{dict.common.contactHeading}</dt>
+            <dd>{dict.brand.name}</dd>
+            <dt>Email</dt>
+            <dd>info@amppattaya.com</dd>
+            <dt>Facebook</dt>
+            <dd>
+              <a href="https://facebook.com/flowbiz" target="_blank" rel="noreferrer">
+                facebook.com/flowbiz
+              </a>
+            </dd>
+          </dl>
+        </section>
+
         <p className="footer-meta">© {new Date().getFullYear()} {dict.brand.name}</p>
         <p className="footer-disclaimer">{dict.common.footerDisclaimer}</p>
       </Container>

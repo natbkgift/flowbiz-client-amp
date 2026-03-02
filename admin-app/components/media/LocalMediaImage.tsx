@@ -6,6 +6,24 @@ import { pickPrimaryLocalMedia, type LocalMediaInput } from '@/app/_lib/local-me
 import { SafeCoverImage } from '@/components/media/SafeCoverImage';
 
 const DEFAULT_FALLBACK_SRC = '/media/project-covers/the-riviera-jomtien/cover_31dde7af340e.jpg';
+const CONTRACT_IMAGE_FALLBACK_SRC = '/media/placeholders/image-fallback.webp';
+const LOCAL_PREFIXES = ['/media/', '/storage/', '/uploads/', '/assets/', '/images/'];
+
+function normalizeRuntimeLocalPath(value: string | null | undefined): string | null {
+  if (!value) return null;
+  const raw = String(value).trim();
+  if (!raw) return null;
+  if (raw.startsWith('//') || raw.includes('://')) return null;
+
+  if (raw.startsWith("/media/") || raw.startsWith("/storage/")) return raw;
+  if (LOCAL_PREFIXES.some((prefix) => raw.startsWith(prefix))) return raw;
+
+  const withLeadingSlash = raw.startsWith('/') ? raw : `/${raw}`;
+  if (withLeadingSlash.startsWith("/media/") || withLeadingSlash.startsWith("/storage/")) return withLeadingSlash;
+  if (LOCAL_PREFIXES.some((prefix) => withLeadingSlash.startsWith(prefix))) return withLeadingSlash;
+
+  return null;
+}
 
 export function LocalMediaImage({
   media,
@@ -15,7 +33,7 @@ export function LocalMediaImage({
   imageClassName,
   aspectRatio = '4 / 3',
   loading = 'lazy',
-  fallbackSrc = DEFAULT_FALLBACK_SRC,
+  fallbackSrc,
 }: {
   media: LocalMediaInput;
   alt?: string | null;
@@ -26,8 +44,28 @@ export function LocalMediaImage({
   loading?: 'lazy' | 'eager';
   fallbackSrc?: string;
 }) {
-  const src = useMemo(() => pickPrimaryLocalMedia(media), [media]);
+  const src = useMemo(() => {
+    const directCandidates: Array<string | null | undefined> = [
+      media.cover_image,
+      media.cover_image_url,
+      media.hero_image_url,
+      media.image_url,
+      ...(media.local_images ?? []),
+      ...(media.images ?? []),
+    ];
+
+    for (const candidate of directCandidates) {
+      const normalized = normalizeRuntimeLocalPath(candidate);
+      if (normalized) return normalized;
+    }
+
+    const picked = pickPrimaryLocalMedia(media);
+    return normalizeRuntimeLocalPath(picked) ?? picked;
+  }, [media]);
   const safeAlt = (alt && alt.trim()) || altFallback || 'Property image';
+  const resolvedFallback = [fallbackSrc, DEFAULT_FALLBACK_SRC, CONTRACT_IMAGE_FALLBACK_SRC].find(
+    (candidate): candidate is string => typeof candidate === 'string' && candidate.trim().length > 0,
+  ) ?? DEFAULT_FALLBACK_SRC;
 
   return (
     <div
@@ -40,7 +78,7 @@ export function LocalMediaImage({
         alt={safeAlt}
         className={imageClassName ?? 'media-shell__img'}
         loading={loading}
-        fallbackSrc={fallbackSrc}
+        fallbackSrc={resolvedFallback}
       />
     </div>
   );

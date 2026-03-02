@@ -84,7 +84,7 @@ function DesktopNavGroup({
     return (
       <Link
         href={withLocale(locale, group.href ?? '/')}
-        className={`nav-link ${active ? 'nav-link--active' : ''}`}
+        className="nav-link locale-safe"
         aria-current={active ? 'page' : undefined}
       >
         {group.label}
@@ -267,7 +267,7 @@ export function Header({ locale, dict }: { locale: Locale; dict: Dictionary }) {
             <span className="logo-name">{dict.brand.name}</span>
           </Link>
 
-          <nav className="nav desktop-only" aria-label={dict.common.mainNavigation}>
+          <nav className="nav" aria-label={dict.common.mainNavigation}>
             {navConfig.map((group) => (
               <DesktopNavGroup key={group.key} group={group} locale={locale} isActive={isActive} />
             ))}
