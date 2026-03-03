@@ -13,10 +13,10 @@ describe("B15 admin layout cms workspace contract", () => {
   it("uses auth/session flow and company CMS endpoints for site-layout", () => {
     const page = read("app/admin/layout/page.tsx");
 
-    expect(page).toContain('fetch("/v1/auth/login"');
+    expect(page).toContain('fetch(`${API_PREFIX}/v1/auth/login`');
     expect(page).toContain("AUTH_SESSION_STORAGE_KEY");
-    expect(page).toContain("/admin/company/site-layout");
-    expect(page).toContain('"/admin/company"');
+    expect(page).toContain("`${API_PREFIX}/admin/company/${SITE_LAYOUT_CMS_SLUG}`");
+    expect(page).toContain("`${API_PREFIX}/admin/company`");
     expect(page).toContain('"site-layout JSON"');
     expect(page).toContain("primary_links");
     expect(page).toContain("legal_links");

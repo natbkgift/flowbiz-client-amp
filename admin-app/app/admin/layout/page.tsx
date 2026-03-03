@@ -19,6 +19,7 @@ type CompanyInfoItem = {
 
 const AUTH_SESSION_STORAGE_KEY = "flowbiz_admin_auth_session_v1";
 const LEGACY_TOKEN_STORAGE_KEY = "flowbiz_admin_token";
+const API_PREFIX = "/api";
 
 const copy = {
   en: {
@@ -203,7 +204,10 @@ export default function AdminLayoutCmsPage() {
     setPageError(null);
     setResultMessage(null);
     try {
-      const response = await authFetch(`/admin/company/${SITE_LAYOUT_CMS_SLUG}`, activeToken);
+      const response = await authFetch(
+        `${API_PREFIX}/admin/company/${SITE_LAYOUT_CMS_SLUG}`,
+        activeToken,
+      );
       if (response.status === 404) {
         setRecordExists(false);
         setUpdatedAt(null);
@@ -232,7 +236,7 @@ export default function AdminLayoutCmsPage() {
     setAuthLoading(true);
     setAuthError(null);
     try {
-      const response = await fetch("/v1/auth/login", {
+      const response = await fetch(`${API_PREFIX}/v1/auth/login`, {
         method: "POST",
         headers: { "content-type": "application/json" },
         body: JSON.stringify({ email: nextEmail, password: loginPassword }),
@@ -309,7 +313,9 @@ export default function AdminLayoutCmsPage() {
             },
       );
       const response = await authFetch(
-        recordExists ? `/admin/company/${SITE_LAYOUT_CMS_SLUG}` : "/admin/company",
+        recordExists
+          ? `${API_PREFIX}/admin/company/${SITE_LAYOUT_CMS_SLUG}`
+          : `${API_PREFIX}/admin/company`,
         activeToken,
         { method: recordExists ? "PATCH" : "POST", body },
       );
