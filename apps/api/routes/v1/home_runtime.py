@@ -38,6 +38,7 @@ _INTERNAL_MEDIA_HOSTS = {"localhost", "127.0.0.1", "flowbiz.com", "www.flowbiz.c
 _ALLOWED_RUNTIME_PATHS = {"/", "/en", "/th"}
 _PUBLIC_ROUTE_SUFFIXES = {
     "",
+    "/invest",
     "/buy",
     "/rent",
     "/sell",
@@ -68,6 +69,10 @@ _MEDIA_ROOTS = [
     Path("storage/media"),
     Path("admin-app/public/media"),
 ]
+_SITE_LAYOUT_CMS_SLUG = "site-layout"
+_DEFAULT_CONTACT_EMAIL = "info@amppattaya.com"
+_DEFAULT_FACEBOOK_URL = "https://facebook.com/flowbiz"
+_DEFAULT_FACEBOOK_LABEL = "facebook.com/flowbiz"
 
 
 def _media_file_exists(value: str) -> bool:
@@ -366,6 +371,184 @@ def _section_href(locale: str, fragment: str) -> str:
 
 def _locale_path(locale: str, suffix: str = "") -> str:
     return f"/{locale}{suffix}"
+
+
+def _runtime_default_nav_items(locale: str) -> list[tuple[str, str]]:
+    if locale == "th":
+        return [
+            (_locale_path(locale, "/invest"), "ลงทุน"),
+            (_locale_path(locale, "/buy"), "ซื้อ"),
+            (_locale_path(locale, "/projects"), "โครงการ"),
+            (_locale_path(locale, "/area-guide"), "ทำเล"),
+        ]
+    return [
+        (_locale_path(locale, "/invest"), "Invest"),
+        (_locale_path(locale, "/buy"), "Buy"),
+        (_locale_path(locale, "/projects"), "Projects"),
+        (_locale_path(locale, "/area-guide"), "Area Guide"),
+    ]
+
+
+def _runtime_default_footer_primary_items(locale: str) -> list[tuple[str, str]]:
+    if locale == "th":
+        return [
+            (_locale_path(locale, "/invest"), "ลงทุน"),
+            (_locale_path(locale, "/buy"), "ซื้อ"),
+            (_locale_path(locale, "/projects"), "โครงการ"),
+        ]
+    return [
+        (_locale_path(locale, "/invest"), "Invest"),
+        (_locale_path(locale, "/buy"), "Buy"),
+        (_locale_path(locale, "/projects"), "Projects"),
+    ]
+
+
+def _runtime_default_footer_legal_items(locale: str) -> list[tuple[str, str]]:
+    if locale == "th":
+        return [
+            (_locale_path(locale, "/privacy"), "นโยบายความเป็นส่วนตัว"),
+            (_locale_path(locale, "/terms"), "ข้อกำหนดการใช้บริการ"),
+        ]
+    return [
+        (_locale_path(locale, "/privacy"), "Privacy Policy"),
+        (_locale_path(locale, "/terms"), "Terms"),
+    ]
+
+
+def _layout_cms_document(db: Session | None) -> dict[str, object]:
+    if db is None:
+        return {}
+    row = db.scalar(select(CompanyInfo).where(CompanyInfo.slug == _SITE_LAYOUT_CMS_SLUG))
+    text = str(row.content if row is not None else "").strip()
+    if not text:
+        return {}
+    try:
+        parsed = json.loads(text)
+    except json.JSONDecodeError:
+        return {}
+    return parsed if isinstance(parsed, dict) else {}
+
+
+def _layout_localized_text(value: object, locale: str) -> str:
+    if isinstance(value, str):
+        return value.strip()
+    if isinstance(value, dict):
+        for key in [locale, "en", "th"]:
+            text = str(value.get(key) or "").strip()
+            if text:
+                return text
+    return ""
+
+
+def _runtime_links_from_cms(
+    locale: str,
+    raw_links: object,
+    *,
+    fallback: list[tuple[str, str]],
+    max_items: int = 8,
+) -> list[tuple[str, str]]:
+    if not isinstance(raw_links, list):
+        return fallback
+    fallback_by_href = {href: label for href, label in fallback}
+    out: list[tuple[str, str]] = []
+    seen: set[str] = set()
+    for raw_item in raw_links:
+        if not isinstance(raw_item, dict):
+            continue
+        if raw_item.get("enabled") is False:
+            continue
+        href = _normalized_runtime_href(locale, str(raw_item.get("href") or "").strip())
+        if not href or href in seen:
+            continue
+        label = _layout_localized_text(raw_item.get("label"), locale) or fallback_by_href.get(
+            href, ""
+        )
+        if not label:
+            continue
+        seen.add(href)
+        out.append((href, label))
+        if len(out) >= max_items:
+            break
+    return out or fallback
+
+
+def _runtime_single_link_from_cms(
+    locale: str,
+    raw: object,
+    *,
+    fallback: tuple[str, str],
+) -> tuple[str, str]:
+    if not isinstance(raw, dict):
+        return fallback
+    if raw.get("enabled") is False:
+        return fallback
+    href = _normalized_runtime_href(locale, str(raw.get("href") or "").strip())
+    label = _layout_localized_text(raw.get("label"), locale)
+    if not href or not label:
+        return fallback
+    return (href, label)
+
+
+def _runtime_footer_contact(locale: str, db: Session | None) -> dict[str, str]:
+    doc = _layout_cms_document(db)
+    footer = doc.get("footer") if isinstance(doc.get("footer"), dict) else {}
+    contact = footer.get("contact") if isinstance(footer, dict) and isinstance(footer.get("contact"), dict) else {}
+    email = str(contact.get("email") if isinstance(contact, dict) else "").strip() or _DEFAULT_CONTACT_EMAIL
+    raw_facebook = str(
+        contact.get("facebook_url") if isinstance(contact, dict) else ""
+    ).strip()
+    parsed = urlparse(raw_facebook)
+    if parsed.scheme in {"http", "https"} and str(parsed.hostname or "").lower() in {
+        "facebook.com",
+        "www.facebook.com",
+    }:
+        facebook_url = raw_facebook
+    else:
+        facebook_url = _DEFAULT_FACEBOOK_URL
+    facebook_label = (
+        _layout_localized_text(
+            contact.get("facebook_label") if isinstance(contact, dict) else "",
+            locale,
+        )
+        or _DEFAULT_FACEBOOK_LABEL
+    )
+    return {
+        "email": email,
+        "facebook_url": facebook_url,
+        "facebook_label": facebook_label,
+    }
+
+
+def _runtime_nav_items(locale: str, db: Session | None) -> list[tuple[str, str]]:
+    fallback = _runtime_default_nav_items(locale)
+    doc = _layout_cms_document(db)
+    header = doc.get("header") if isinstance(doc.get("header"), dict) else {}
+    raw_links = header.get("primary_links") if isinstance(header, dict) else None
+    return _runtime_links_from_cms(locale, raw_links, fallback=fallback)
+
+
+def _runtime_contact_cta(locale: str, db: Session | None) -> tuple[str, str]:
+    fallback = (_locale_path(locale, "/contact"), "Contact" if locale == "en" else "ติดต่อ")
+    doc = _layout_cms_document(db)
+    header = doc.get("header") if isinstance(doc.get("header"), dict) else {}
+    raw_cta = header.get("contact_cta") if isinstance(header, dict) else None
+    return _runtime_single_link_from_cms(locale, raw_cta, fallback=fallback)
+
+
+def _runtime_footer_primary_items(locale: str, db: Session | None) -> list[tuple[str, str]]:
+    fallback = _runtime_default_footer_primary_items(locale)
+    doc = _layout_cms_document(db)
+    footer = doc.get("footer") if isinstance(doc.get("footer"), dict) else {}
+    raw_links = footer.get("quick_links") if isinstance(footer, dict) else None
+    return _runtime_links_from_cms(locale, raw_links, fallback=fallback)
+
+
+def _runtime_footer_legal_items(locale: str, db: Session | None) -> list[tuple[str, str]]:
+    fallback = _runtime_default_footer_legal_items(locale)
+    doc = _layout_cms_document(db)
+    footer = doc.get("footer") if isinstance(doc.get("footer"), dict) else {}
+    raw_links = footer.get("legal_links") if isinstance(footer, dict) else None
+    return _runtime_links_from_cms(locale, raw_links, fallback=fallback)
 
 
 def _is_smart_finder_label(value: str | None) -> bool:
@@ -838,6 +1021,29 @@ def _render(locale: str, request: Request, db: Session, source: str, resolved: d
     insights_html = _build_insights_preview_html(db, locale, copy)
     reviews_html = _build_reviews_html(db, locale, copy, resolved)
     video_html = _build_video_html(request, copy, resolved)
+    contact_cta_href, contact_cta_label = _runtime_contact_cta(locale, db)
+    nav_links_html = "".join(
+        f'<a class="btn btn-secondary-hero btn-sm" href="{escape(href)}">{escape(label)}</a>'
+        for href, label in _runtime_nav_items(locale, db)
+    )
+    nav_html = (
+        f'{nav_links_html}<a class="btn btn-secondary-hero btn-sm" href="{escape(contact_cta_href)}">{escape(contact_cta_label)}</a>'
+    )
+    footer_primary_html = "".join(
+        f'<a href="{escape(href)}">{escape(label)}</a>'
+        for href, label in _runtime_footer_primary_items(locale, db)
+    )
+    footer_legal_html = "".join(
+        f'<a href="{escape(href)}">{escape(label)}</a>'
+        for href, label in _runtime_footer_legal_items(locale, db)
+    )
+    footer_contact = _runtime_footer_contact(locale, db)
+    footer_contact_html = (
+        f'<p class="muted">{escape(footer_contact["email"])}</p>'
+        f'<a href="{escape(footer_contact["facebook_url"])}" target="_blank" rel="noopener noreferrer">{escape(footer_contact["facebook_label"])}</a>'
+    )
+    main_nav_label = "Main navigation" if locale == "en" else "เมนูหลัก"
+    footer_nav_label = "Footer navigation" if locale == "en" else "เมนูท้ายหน้า"
     html = f"""<!doctype html>
 <html lang=\"{locale}\">
   <head>
@@ -849,6 +1055,7 @@ def _render(locale: str, request: Request, db: Session, source: str, resolved: d
       *{{box-sizing:border-box}} body{{margin:0;font-family:Segoe UI,Tahoma,\"Noto Sans Thai\",sans-serif;background:var(--bg);color:var(--txt);line-height:1.55}}
       a{{color:inherit;text-decoration:none}} :focus-visible{{outline:3px solid var(--c1);outline-offset:2px}}
       .skip-link{{position:absolute;top:-40px;left:8px;background:#fff;padding:8px 12px;border:1px solid var(--border);border-radius:8px}} .skip-link:focus-visible{{top:8px}}
+      .site-header{{border-bottom:1px solid var(--border);background:#fff}} .site-header__inner{{display:flex;justify-content:flex-end;padding:14px var(--pad)}} .site-nav{{display:flex;gap:10px;flex-wrap:wrap}}
       .container{{max-width:var(--max);margin:0 auto;padding:0 var(--pad)}} .stack{{display:grid;gap:24px;padding:24px 0}}
       .hero{{display:grid;gap:16px}} .hero-media,.cover-media{{width:100%;aspect-ratio:16/9;object-fit:cover;border-radius:12px;background:#e5e7eb}}
       h1{{font-size:clamp(1.8rem,1.45rem + 1.4vw,2.8rem);line-height:1.15;margin:0}} h2{{margin:0;font-size:clamp(1.35rem,1.15rem + .9vw,2rem)}} h3{{margin:0;font-size:1.1rem;line-height:1.25}} p{{margin:0}}
@@ -870,6 +1077,7 @@ def _render(locale: str, request: Request, db: Session, source: str, resolved: d
   </head>
   <body>
     <a class=\"skip-link\" href=\"#main\">Skip to main content</a>
+    <header class=\"site-header\" role=\"banner\"><div class=\"container site-header__inner\"><nav class=\"site-nav\" aria-label=\"{escape(main_nav_label)}\">{nav_html}</nav></div></header>
     <main id=\"main\" class=\"container stack\">
       <section class=\"hero\" aria-labelledby=\"hero-title\">
         <img class=\"hero-media\" src=\"{escape(hero_media)}\" alt=\"{escape(copy["hero_alt"])}\" width=\"1280\" height=\"720\" loading=\"eager\" />
@@ -888,7 +1096,7 @@ def _render(locale: str, request: Request, db: Session, source: str, resolved: d
       <section aria-labelledby=\"video-title\"><h2 id=\"video-title\">{escape(copy["work_title"])}</h2><p>{escape(copy["work_sub"])}</p><div class=\"grid-2\">{video_html}</div><a class=\"btn btn-secondary-hero btn-sm\" href=\"{_locale_path(locale, "/about")}#work-proof\">{escape(copy["watch_more"])}</a></section>
       <section aria-labelledby=\"consult-title\"><h2 id=\"consult-title\">{escape(copy["consult_title"])}</h2><p>{escape(consult_copy)}</p><form id=\"consultation-form\" class=\"card\" novalidate><label class=\"field\" for=\"name\"><span>{escape(copy["name"])}</span><input id=\"name\" name=\"name\" type=\"text\" required /></label><label class=\"field\" for=\"contact\"><span>{escape(copy["contact"])}</span><input id=\"contact\" name=\"contact\" type=\"text\" required /></label><label class=\"field\" for=\"budget\"><span>{escape(copy["budget"])}</span><select id=\"budget\" name=\"budget\" required><option value=\"\">{escape(copy["select_budget"])}</option><option value=\"lt_3m\">Below THB 3M</option><option value=\"3m_6m\">THB 3M - 6M</option><option value=\"6m_10m\">THB 6M - 10M</option><option value=\"gt_10m\">Above THB 10M</option></select></label><label class=\"field\" for=\"purpose\"><span>{escape(copy["purpose"])}</span><select id=\"purpose\" name=\"purpose\" required><option value=\"\">{escape(copy["select_purpose"])}</option><option value=\"invest\">Invest</option><option value=\"buy\">Buy</option><option value=\"rent\">Rent</option><option value=\"sell\">Sell</option></select></label><label class=\"field\" for=\"timeline\"><span>{escape(copy["timeline"])}</span><select id=\"timeline\" name=\"timeline\" required><option value=\"\">{escape(copy["select_timeline"])}</option><option value=\"0_3m\">0-3 months</option><option value=\"3_6m\">3-6 months</option><option value=\"6m_plus\">6+ months</option></select></label><div class=\"cta-row\"><button id=\"consult-submit\" class=\"btn\" type=\"submit\">{escape(hero_primary_label)}</button><a class=\"btn btn-secondary-hero btn-sm\" data-event=\"home_whatsapp_click\" data-cta-id=\"whatsapp_cta\" data-placement=\"bottom_form\" href=\"https://wa.me/66000000000\">WhatsApp</a><a class=\"btn btn-secondary-hero btn-sm\" href=\"https://line.me/R/ti/p/@flowbiz\">LINE</a></div><p class=\"muted\">{escape(consult_trust)}</p><p id=\"form-status\" class=\"muted\" role=\"status\" aria-live=\"polite\"></p><div id=\"form-loading\" class=\"state-loading\" hidden>{escape(copy["submitting"])}</div><div id=\"form-error\" class=\"state-error\" hidden>{escape(copy["submit_error"])}</div></form></section>
     </main>
-    <footer><div class=\"container\" style=\"display:grid;gap:12px\"><nav class=\"footer-links\"><a href=\"{_locale_path(locale, "/projects")}\">{escape(copy["footer_projects"])}</a><a href=\"{_locale_path(locale, "/areas")}\">{escape(copy["footer_areas"])}</a><a href=\"{_locale_path(locale, "/investment/methodology")}\">{escape(copy["footer_investment"])}</a><a href=\"{_locale_path(locale, "/about")}\">{escape(copy["footer_about"])}</a><a href=\"{_locale_path(locale, "/contact")}\">{escape(copy["footer_contact"])}</a></nav><nav class=\"footer-links\"><a href=\"{_locale_path(locale, "/privacy")}\">{escape(copy["privacy"])}</a><a href=\"{_locale_path(locale, "/terms")}\">{escape(copy["terms"])}</a><a href=\"{_locale_path(locale, "/cookies")}\">{escape(copy["cookies"])}</a></nav></div></footer>
+    <footer><div class=\"container\" style=\"display:grid;gap:12px\"><nav class=\"footer-links\" aria-label=\"{escape(footer_nav_label)}\">{footer_primary_html}</nav><nav class=\"footer-links\" aria-label=\"{escape(footer_nav_label)}\">{footer_legal_html}</nav><div class=\"footer-links\">{footer_contact_html}</div></div></footer>
     <script>
       (() => {{
         const locale = document.documentElement.lang || 'en';
@@ -1008,18 +1216,30 @@ def _render_page_shell(
     is_article_detail: bool = False,
     head_extra: str = "",
 ) -> str:
-    nav_items = [
-        ("projects", "Projects" if locale == "en" else "โครงการ"),
-        ("areas", "Areas" if locale == "en" else "ทำเล"),
-        ("developers", "Developers" if locale == "en" else "ผู้พัฒนา"),
-        ("sell", "Sell" if locale == "en" else "ขาย"),
-        ("insights", "Insights" if locale == "en" else "บทความ"),
-        ("about", "About" if locale == "en" else "เกี่ยวกับเรา"),
-        ("contact", "Contact" if locale == "en" else "ติดต่อ"),
-    ]
-    nav_html = "".join(
-        f'<a class="btn" href="/{locale}/{path}">{escape(label)}</a>' for path, label in nav_items
+    nav_items = _runtime_nav_items(locale, db)
+    contact_cta_href, contact_cta_label = _runtime_contact_cta(locale, db)
+    footer_primary_items = _runtime_footer_primary_items(locale, db)
+    footer_legal_items = _runtime_footer_legal_items(locale, db)
+    nav_links_html = "".join(
+        f'<a class="btn" href="{escape(href)}">{escape(label)}</a>' for href, label in nav_items
     )
+    nav_html = (
+        f'{nav_links_html}<a class="btn" href="{escape(contact_cta_href)}">{escape(contact_cta_label)}</a>'
+    )
+    footer_primary_html = "".join(
+        f'<a href="{escape(href)}">{escape(label)}</a>'
+        for href, label in footer_primary_items
+    )
+    footer_legal_html = "".join(
+        f'<a href="{escape(href)}">{escape(label)}</a>' for href, label in footer_legal_items
+    )
+    footer_contact = _runtime_footer_contact(locale, db)
+    footer_contact_html = (
+        f'<p class="muted">{escape(footer_contact["email"])}</p>'
+        f'<a href="{escape(footer_contact["facebook_url"])}" target="_blank" rel="noopener noreferrer">{escape(footer_contact["facebook_label"])}</a>'
+    )
+    main_nav_label = "Main navigation" if locale == "en" else "เมนูหลัก"
+    footer_nav_label = "Footer navigation" if locale == "en" else "เมนูท้ายหน้า"
     canonical_line = (
         f'<link rel="canonical" href="{escape(canonical_href)}" />'
         if str(canonical_href or "").strip()
@@ -1040,6 +1260,8 @@ def _render_page_shell(
       .container{{max-width:var(--max);margin:0 auto;padding:24px var(--pad)}} .stack{{display:grid;gap:16px}}
       .card{{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:16px;display:grid;gap:12px}}
       .grid{{display:grid;gap:16px;grid-template-columns:1fr}} .muted{{color:var(--muted)}} .btn{{display:inline-flex;align-items:center;justify-content:center;border-radius:12px;border:1px solid var(--c1);padding:10px 16px;background:#fff;color:var(--c1);text-decoration:none}}
+      .site-header{{border-bottom:1px solid var(--border);background:#fff}} .site-header__inner{{padding:14px var(--pad)}} .site-nav{{display:flex;gap:10px;justify-content:flex-end;flex-wrap:wrap}}
+      footer{{margin-top:20px;padding:18px 0;border-top:1px solid var(--border);background:#fff}} .footer-links{{display:flex;gap:12px;flex-wrap:wrap}}
       .state-empty,.state-loading,.state-error,.state-success{{border:1px solid var(--border);border-radius:10px;padding:10px 12px;background:#fff}}
       .state-loading{{background:#ecfeff;color:#0c4a6e}} .state-error{{background:#fef2f2;color:#991b1b;border-color:#fecaca}} .state-success{{background:#f0fdf4;color:#166534;border-color:#bbf7d0}}
       .media{{width:100%;aspect-ratio:16/9;object-fit:cover;border-radius:12px;background:#e5e7eb}}
@@ -1052,8 +1274,8 @@ def _render_page_shell(
   </head>
   <body>
     <a class="skip-link" href="#main-content">Skip to main content</a>
+    <header class="site-header" role="banner"><div class="container site-header__inner"><nav class="site-nav" aria-label="{escape(main_nav_label)}">{nav_html}</nav></div></header>
     <main id="main-content" class="container stack">
-            <section class="card"><div class="grid">{nav_html}</div></section>
             <a class="btn" href="/{locale}">Back to Home</a>
       <section class="card">
         <h1>{escape(title)}</h1>
@@ -1061,6 +1283,7 @@ def _render_page_shell(
       </section>
       {body}
     </main>
+    <footer><div class="container" style="display:grid;gap:12px"><nav class="footer-links" aria-label="{escape(footer_nav_label)}">{footer_primary_html}</nav><nav class="footer-links" aria-label="{escape(footer_nav_label)}">{footer_legal_html}</nav><div class="footer-links">{footer_contact_html}</div></div></footer>
   </body>
 </html>
 """
@@ -6418,6 +6641,18 @@ def render_listing_rent(request: Request, db: Session = Depends(get_db)) -> HTML
 @router.get("/th/investment", response_class=HTMLResponse)
 def render_listing_investment(request: Request, db: Session = Depends(get_db)) -> HTMLResponse:
     return _render_property_listing_page(_request_locale(request), request, db, "investment")
+
+
+@router.get("/en/invest", response_class=HTMLResponse)
+@router.get("/th/invest", response_class=HTMLResponse)
+@router.get("/invest", response_class=HTMLResponse)
+def render_listing_invest(request: Request, db: Session = Depends(get_db)) -> HTMLResponse:
+    locale = (
+        _request_locale(request)
+        if request.url.path.startswith("/en") or request.url.path.startswith("/th")
+        else "en"
+    )
+    return _render_property_listing_page(locale, request, db, "investment")
 
 
 @router.get("/en/marketplace", response_class=HTMLResponse)

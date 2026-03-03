@@ -1,10 +1,38 @@
 import Link from 'next/link';
 
 import { Container } from './Container';
+import type { ResolvedLayoutCms } from '../../app/_lib/layout-cms';
 import type { Dictionary, Locale } from '../../app/_lib/i18n/types';
 import { withLocale } from '../../app/_lib/i18n/routing';
 
-export function Footer({ locale, dict }: { locale: Locale; dict: Dictionary }) {
+type FooterCms = ResolvedLayoutCms['footer'];
+
+export function Footer({
+  locale,
+  dict,
+  cms,
+}: {
+  locale: Locale;
+  dict: Dictionary;
+  cms?: FooterCms;
+}) {
+  const quickLinks = (cms?.quickLinks?.length
+    ? cms.quickLinks
+    : [
+        { href: '/invest', label: dict.nav.invest },
+        { href: '/buy', label: dict.nav.buy },
+        { href: '/projects', label: dict.nav.projects },
+      ]);
+  const legalLinks = (cms?.legalLinks?.length
+    ? cms.legalLinks
+    : [
+        { href: '/privacy', label: dict.common.privacyPolicy ?? 'Privacy Policy' },
+        { href: '/terms', label: dict.common.termsOfService ?? 'Terms of Service' },
+      ]);
+  const contactEmail = cms?.contact?.email || dict.common.contactEmail;
+  const facebookUrl = cms?.contact?.facebookUrl || dict.common.facebookUrl;
+  const facebookLabel = cms?.contact?.facebookLabel || dict.common.facebookLabel;
+
   return (
     <footer className="footer" role="contentinfo">
       <Container>
@@ -16,20 +44,16 @@ export function Footer({ locale, dict }: { locale: Locale; dict: Dictionary }) {
 
           <nav aria-label={dict.common.footerNavigation}>
             <h3>{dict.common.quickLinks}</h3>
-            <p>
-              <Link href={withLocale(locale, '/invest')}>{dict.nav.invest}</Link>
-            </p>
-            <p>
-              <Link href={withLocale(locale, '/buy')}>{dict.nav.buy}</Link>
-            </p>
-            <p>
-              <Link href={withLocale(locale, '/projects')}>{dict.nav.projects}</Link>
-            </p>
+            {quickLinks.map((item) => (
+              <p key={item.href}>
+                <Link href={withLocale(locale, item.href)}>{item.label}</Link>
+              </p>
+            ))}
           </nav>
 
           <div>
             <h3>{dict.common.contactHeading}</h3>
-            <p className="text-muted-on-dark">info@amppattaya.com</p>
+            <p className="text-muted-on-dark">{contactEmail}</p>
             <p>
               <Link href={withLocale(locale, '/contact')}>{dict.nav.contact}</Link>
             </p>
@@ -37,12 +61,11 @@ export function Footer({ locale, dict }: { locale: Locale; dict: Dictionary }) {
 
           <div>
             <h3>{dict.common.legalHeading ?? 'Legal'}</h3>
-            <p>
-              <Link href={withLocale(locale, '/privacy')}>{dict.common.privacyPolicy ?? 'Privacy Policy'}</Link>
-            </p>
-            <p>
-              <Link href={withLocale(locale, '/terms')}>{dict.common.termsOfService ?? 'Terms of Service'}</Link>
-            </p>
+            {legalLinks.map((item) => (
+              <p key={item.href}>
+                <Link href={withLocale(locale, item.href)}>{item.label}</Link>
+              </p>
+            ))}
             <p className="text-muted-on-dark footer-compliance">
               {dict.common.pdpaNotice ?? 'PDPA & GDPR Compliant'}
             </p>
@@ -54,11 +77,11 @@ export function Footer({ locale, dict }: { locale: Locale; dict: Dictionary }) {
             <dt>{dict.common.contactHeading}</dt>
             <dd>{dict.brand.name}</dd>
             <dt>Email</dt>
-            <dd>info@amppattaya.com</dd>
+            <dd>{contactEmail}</dd>
             <dt>Facebook</dt>
             <dd>
-              <a href="https://facebook.com/flowbiz" target="_blank" rel="noreferrer">
-                facebook.com/flowbiz
+              <a href={facebookUrl} target="_blank" rel="noreferrer">
+                {facebookLabel}
               </a>
             </dd>
           </dl>

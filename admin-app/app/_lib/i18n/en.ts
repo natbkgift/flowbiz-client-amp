@@ -468,6 +468,9 @@ export const en: Dictionary = {
     privacyPolicy: 'Privacy Policy',
     termsOfService: 'Terms of Service',
     pdpaNotice: 'PDPA & GDPR Compliant',
+    contactEmail: 'info@amppattaya.com',
+    facebookUrl: 'https://facebook.com/flowbiz',
+    facebookLabel: 'facebook.com/flowbiz',
   },
   listing: {
     filtersAndSort: 'Filters & Sort',

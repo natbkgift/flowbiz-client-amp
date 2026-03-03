@@ -7,6 +7,8 @@ import { Header } from '@/components/layout/Header';
 import { SiteAnalytics } from '@/components/analytics/SiteAnalytics';
 import { LinkClickTracker } from '@/components/analytics/LinkClickTracker';
 import { ExperimentProvider } from '@/components/analytics/ExperimentProvider';
+import { resolveLayoutCms, SITE_LAYOUT_CMS_SLUG } from '@/app/_lib/layout-cms';
+import { fetchCompanyInfoBySlug } from '@/app/_lib/public-api-server';
 import { getDictionary, normalizeLocale } from '@/app/_lib/i18n/get-dictionary';
 import { SUPPORTED_LOCALES } from '@/app/_lib/i18n/routing';
 
@@ -32,7 +34,7 @@ const CookieConsent = dynamic(
   { ssr: false },
 );
 
-export default function SiteLayout({
+export default async function SiteLayout({
   children,
   params,
 }: {
@@ -41,6 +43,8 @@ export default function SiteLayout({
 }) {
   const locale = normalizeLocale(params.locale);
   const dict = getDictionary(locale);
+  const layoutCmsRow = await fetchCompanyInfoBySlug(SITE_LAYOUT_CMS_SLUG).catch(() => null);
+  const layoutCms = resolveLayoutCms(locale, dict, layoutCmsRow?.content);
 
   const siteUrl = 'https://amppattaya.com';
   const jsonLd = JSON.stringify(
@@ -70,7 +74,7 @@ export default function SiteLayout({
   return (
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLd }} />
-      <Header locale={locale} dict={dict} />
+      <Header locale={locale} dict={dict} cms={layoutCms.header} />
       <Suspense fallback={null}>
         <SiteAnalytics />
       </Suspense>
@@ -78,7 +82,7 @@ export default function SiteLayout({
       <ExperimentProvider />
       <ScrollReveal />
       {children}
-      <Footer locale={locale} dict={dict} />
+      <Footer locale={locale} dict={dict} cms={layoutCms.footer} />
       <div aria-live="polite" aria-atomic="true" id="amp-live-region" className="sr-only" />
       <FloatingWhatsAppCTA />
       <StickyMobileCTA />

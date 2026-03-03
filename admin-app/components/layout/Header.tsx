@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
 
+import type { ResolvedLayoutCms } from '../../app/_lib/layout-cms';
 import type { Dictionary, Locale } from '../../app/_lib/i18n/types';
 import { switchLocaleInPathname, withLocale } from '../../app/_lib/i18n/routing';
 
@@ -180,7 +181,17 @@ function MobileSection({
   );
 }
 
-export function Header({ locale, dict }: { locale: Locale; dict: Dictionary }) {
+type HeaderCms = ResolvedLayoutCms['header'];
+
+export function Header({
+  locale,
+  dict,
+  cms,
+}: {
+  locale: Locale;
+  dict: Dictionary;
+  cms?: HeaderCms;
+}) {
   const [mobileOpen, setMobileOpen] = useState(false);
   const mobileMenuRef = useRef<HTMLDivElement>(null);
   const hamburgerRef = useRef<HTMLButtonElement>(null);
@@ -192,7 +203,7 @@ export function Header({ locale, dict }: { locale: Locale; dict: Dictionary }) {
   const compareLabel = locale === 'th' ? 'เปรียบเทียบ' : 'Compare';
   const marketplaceLabel = locale === 'th' ? 'ทุกประกาศ' : 'Marketplace';
 
-  const navConfig: NavGroup[] = [
+  const defaultNavConfig: NavGroup[] = [
     {
       key: 'invest',
       label: dict.nav.invest,
@@ -226,6 +237,14 @@ export function Header({ locale, dict }: { locale: Locale; dict: Dictionary }) {
       ],
     },
   ];
+  const cmsNavConfig: NavGroup[] = (cms?.primaryLinks || []).map((item, index) => ({
+    key: `cms-${index}`,
+    label: item.label,
+    href: item.href,
+  }));
+  const navConfig = cmsNavConfig.length > 0 ? cmsNavConfig : defaultNavConfig;
+  const contactCtaHref = cms?.contactCta?.href || '/contact';
+  const contactCtaLabel = cms?.contactCta?.label || dict.nav.contact;
 
   const langLabel = locale === 'th' ? dict.common.thai : dict.common.english;
 
@@ -233,6 +252,9 @@ export function Header({ locale, dict }: { locale: Locale; dict: Dictionary }) {
   const pathWithoutLocale = pathname?.replace(new RegExp(`^/${locale}`), '') || '/';
   function isActive(href: string): boolean {
     if (href === '/') return pathWithoutLocale === '/' || pathWithoutLocale === '';
+    if (href === '/area-guide') {
+      return pathWithoutLocale.startsWith('/area-guide') || pathWithoutLocale.startsWith('/areas');
+    }
     return pathWithoutLocale.startsWith(href);
   }
 
@@ -272,11 +294,11 @@ export function Header({ locale, dict }: { locale: Locale; dict: Dictionary }) {
               <DesktopNavGroup key={group.key} group={group} locale={locale} isActive={isActive} />
             ))}
             <Link
-              href={withLocale(locale, '/contact')}
-              className={`nav-link nav-link--cta ${isActive('/contact') ? 'nav-link--active' : ''}`}
-              aria-current={isActive('/contact') ? 'page' : undefined}
+              href={withLocale(locale, contactCtaHref)}
+              className={`nav-link nav-link--cta ${isActive(contactCtaHref) ? 'nav-link--active' : ''}`}
+              aria-current={isActive(contactCtaHref) ? 'page' : undefined}
             >
-              {dict.nav.contact}
+              {contactCtaLabel}
             </Link>
           </nav>
 
@@ -320,8 +342,8 @@ export function Header({ locale, dict }: { locale: Locale; dict: Dictionary }) {
           {navConfig.map((group) => (
             <MobileSection key={group.key} group={group} locale={locale} onNavClick={() => setMobileOpen(false)} />
           ))}
-          <Link href={withLocale(locale, '/contact')} className="mobile-nav__cta" onClick={() => setMobileOpen(false)}>
-            {dict.nav.contact}
+          <Link href={withLocale(locale, contactCtaHref)} className="mobile-nav__cta" onClick={() => setMobileOpen(false)}>
+            {contactCtaLabel}
           </Link>
         </div>
       </nav>

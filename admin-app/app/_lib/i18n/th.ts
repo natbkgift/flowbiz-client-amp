@@ -461,6 +461,9 @@ export const th: Dictionary = {
     privacyPolicy: 'นโยบายความเป็นส่วนตัว',
     termsOfService: 'ข้อกำหนดการใช้บริการ',
     pdpaNotice: 'สอดคล้องกับ PDPA และ GDPR',
+    contactEmail: 'info@amppattaya.com',
+    facebookUrl: 'https://facebook.com/flowbiz',
+    facebookLabel: 'facebook.com/flowbiz',
   },
   listing: {
     filtersAndSort: 'ตัวกรองและจัดเรียง',

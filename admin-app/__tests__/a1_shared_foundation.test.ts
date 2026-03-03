@@ -35,6 +35,7 @@ describe('A1 shared foundation guards', () => {
   it('keeps semantic header/footer landmarks, NAP and legal/social links', () => {
     const header = read('components/layout/Header.tsx');
     const footer = read('components/layout/Footer.tsx');
+    const enDict = read('app/_lib/i18n/en.ts');
 
     expect(header).toContain('href="#main-content"');
     expect(header).toContain('<header className="header">');
@@ -43,8 +44,11 @@ describe('A1 shared foundation guards', () => {
 
     expect(footer).toContain('role="contentinfo"');
     expect(footer).toContain('footer-nap');
-    expect(footer).toContain('Privacy Policy');
-    expect(footer).toContain('facebook.com/flowbiz');
+    expect(footer).toContain('dict.common.privacyPolicy');
+    expect(footer).toContain('dict.common.contactEmail');
+    expect(footer).toContain('dict.common.facebookUrl');
+    expect(enDict).toContain("facebookUrl: 'https://facebook.com/flowbiz'");
+    expect(enDict).toContain("contactEmail: 'info@amppattaya.com'");
   });
 
   it('keeps shared controls and state styles for buttons, inputs, cards and global states', () => {

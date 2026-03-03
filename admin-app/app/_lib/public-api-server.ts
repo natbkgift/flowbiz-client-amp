@@ -474,6 +474,29 @@ export type ContentLocalizedText = {
   th: string;
 };
 
+export type CompanyInfoItem = {
+  id: string;
+  slug: string;
+  title: string;
+  content: string;
+  meta_title: string | null;
+  meta_description: string | null;
+  updated_at: string;
+};
+
+export async function fetchCompanyInfoBySlug(slug: string): Promise<CompanyInfoItem | null> {
+  const origin = getOrigin();
+  const base = apiBase();
+  const url = new URL(`${base}/v1/company/${encodeURIComponent(slug)}`, origin);
+  const res = await fetchWithRetry(url.toString(), {
+    next: { revalidate: PAGE_REVALIDATE_SECONDS },
+    retryOn5xx: false,
+  });
+  if (res.status === 404) return null;
+  if (!res.ok) throw new Error(`Failed to fetch company info (${res.status})`);
+  return (await res.json()) as CompanyInfoItem;
+}
+
 export type ContentLink = {
   label: ContentLocalizedText;
   href: string;

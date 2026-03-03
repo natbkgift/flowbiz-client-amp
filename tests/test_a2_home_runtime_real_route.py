@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 import re
 from datetime import UTC, datetime
 from pathlib import Path
@@ -49,6 +50,9 @@ def _is_allowed_media(url: str, *, host: str) -> bool:
 def _reset_home_configs() -> None:
     with SessionLocal() as db:
         db.query(HomeComposerConfig).filter(HomeComposerConfig.page_key == "home").delete()
+        db.query(CompanyInfo).filter(CompanyInfo.slug == "site-layout").delete(
+            synchronize_session=False
+        )
         db.commit()
 
 
@@ -347,6 +351,98 @@ def test_a2_runtime_destination_routes_render_published_data(client) -> None:
     methodology = client.get("/en/investment/methodology")
     assert methodology.status_code == 200, methodology.text
     assert "Published methodology detail" in methodology.text
+
+
+def test_a2_runtime_shell_has_semantic_header_footer_and_invest_alias(client) -> None:
+    _reset_home_configs()
+
+    projects = client.get("/en/projects")
+    assert projects.status_code == 200, projects.text
+    html = projects.text
+    assert '<header class="site-header" role="banner">' in html
+    assert '<nav class="site-nav" aria-label="Main navigation">' in html
+    assert '<footer><div class="container"' in html
+    assert 'href="/en/invest"' in html
+    assert 'href="/en/buy"' in html
+    assert 'href="/en/projects"' in html
+    assert 'href="/en/area-guide"' in html
+    assert 'href="/en/contact"' in html
+    assert 'href="/en/privacy"' in html
+    assert 'href="/en/terms"' in html
+
+    invest = client.get("/en/invest")
+    assert invest.status_code == 200, invest.text
+    assert "Investment Listings" in invest.text
+
+
+def test_a2_runtime_shell_uses_site_layout_cms_overrides(client) -> None:
+    _reset_home_configs()
+    with SessionLocal() as db:
+        db.query(CompanyInfo).filter(CompanyInfo.slug == "site-layout").delete(
+            synchronize_session=False
+        )
+        db.add(
+            CompanyInfo(
+                title="Site Layout CMS",
+                slug="site-layout",
+                content=json.dumps(
+                    {
+                        "header": {
+                            "primary_links": [
+                                {
+                                    "href": "/projects",
+                                    "label": {"en": "Projects Hub"},
+                                    "enabled": True,
+                                },
+                                {
+                                    "href": "/marketplace",
+                                    "label": {"en": "Marketplace"},
+                                    "enabled": True,
+                                },
+                            ],
+                            "contact_cta": {
+                                "href": "/about",
+                                "label": {"en": "Talk to Team"},
+                                "enabled": True,
+                            },
+                        },
+                        "footer": {
+                            "quick_links": [
+                                {"href": "/invest", "label": {"en": "Invest+"}, "enabled": True}
+                            ],
+                            "legal_links": [
+                                {
+                                    "href": "/privacy",
+                                    "label": {"en": "Privacy+"},
+                                    "enabled": True,
+                                }
+                            ],
+                            "contact": {
+                                "email": "cms@amppattaya.com",
+                                "facebook_url": "https://www.facebook.com/flowbiz",
+                                "facebook_label": {"en": "fb.com/flowbiz"},
+                            },
+                        },
+                    }
+                ),
+                meta_description="Runtime header/footer source of truth",
+            )
+        )
+        db.commit()
+
+    projects = client.get("/en/projects")
+    assert projects.status_code == 200, projects.text
+    html = projects.text
+    assert 'href="/en/marketplace"' in html
+    assert ">Projects Hub<" in html
+    assert ">Marketplace<" in html
+    assert 'href="/en/about"' in html
+    assert ">Talk to Team<" in html
+    assert ">Invest+<" in html
+    assert ">Privacy+<" in html
+    assert "cms@amppattaya.com" in html
+    assert 'href="https://www.facebook.com/flowbiz"' in html
+    assert ">fb.com/flowbiz<" in html
 
 
 def test_a3_public_projects_routes_remain_published_only_under_status_queries(client) -> None:

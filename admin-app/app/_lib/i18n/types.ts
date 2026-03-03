@@ -377,6 +377,9 @@ export type Dictionary = {
     privacyPolicy: string;
     termsOfService: string;
     pdpaNotice: string;
+    contactEmail: string;
+    facebookUrl: string;
+    facebookLabel: string;
   };
   listing: {
     filtersAndSort: string;
