@@ -56,4 +56,9 @@ describe("Admin shell + route consolidation (Phase A)", () => {
     expect(layoutCms).toContain('@/app/admin/layout/page');
     expect(homeComposer).toContain('@/app/admin/home-composer/page');
   });
+
+  it("disables trailing-slash redirects to prevent /admin proxy loops", () => {
+    const nextConfig = read("next.config.js");
+    expect(nextConfig).toContain("skipTrailingSlashRedirect: true");
+  });
 });
