@@ -611,6 +611,81 @@ class Article(Base):
 
 
 # ---------------------------------------------------------------------------
+# Domain: Content taxonomies / videos
+# ---------------------------------------------------------------------------
+
+
+class ContentTaxonomy(Base):
+    __tablename__ = "content_taxonomies"
+    __table_args__ = (
+        UniqueConstraint("kind", "slug", name="uq_content_taxonomies_kind_slug"),
+        Index("ix_content_taxonomies_kind_status", "kind", "status"),
+        Index("ix_content_taxonomies_display_order", "display_order"),
+    )
+
+    id: Mapped[UUID] = mapped_column(primary_key=True, default=uuid4)
+    kind: Mapped[str] = mapped_column(String(64), nullable=False)
+    slug: Mapped[str] = mapped_column(String(255), nullable=False, index=True)
+    label_i18n: Mapped[dict] = mapped_column(JSONB, nullable=False)
+    description_i18n: Mapped[dict | None] = mapped_column(JSONB, nullable=True)
+    status: Mapped[str] = mapped_column(
+        String(32), nullable=False, default="active", server_default="active"
+    )
+    display_order: Mapped[int] = mapped_column(
+        Integer, nullable=False, default=0, server_default="0"
+    )
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), nullable=False, server_default=func.now()
+    )
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        nullable=False,
+        server_default=func.now(),
+        onupdate=func.now(),
+    )
+    deleted_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+
+
+class ContentVideo(Base):
+    __tablename__ = "content_videos"
+    __table_args__ = (
+        Index("ix_content_videos_status_published", "status", "published_at"),
+        Index("ix_content_videos_display_order", "display_order"),
+    )
+
+    id: Mapped[UUID] = mapped_column(primary_key=True, default=uuid4)
+    slug: Mapped[str] = mapped_column(String(255), nullable=False, unique=True, index=True)
+    status: Mapped[str] = mapped_column(
+        String(32), nullable=False, default="draft", server_default="draft"
+    )
+    title: Mapped[dict] = mapped_column(JSONB, nullable=False)
+    caption: Mapped[dict | None] = mapped_column(JSONB, nullable=True)
+    youtube_url: Mapped[str | None] = mapped_column(String(500), nullable=True)
+    youtube_id: Mapped[str | None] = mapped_column(String(32), nullable=True, index=True)
+    thumbnail_path: Mapped[str | None] = mapped_column(String(500), nullable=True)
+    video_path: Mapped[str | None] = mapped_column(String(500), nullable=True)
+    tags: Mapped[list | dict | None] = mapped_column(JSONB, nullable=True)
+    topics: Mapped[list | dict | None] = mapped_column(JSONB, nullable=True)
+    source_url: Mapped[str | None] = mapped_column(String(500), nullable=True)
+    source_domain: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    verification_status: Mapped[str | None] = mapped_column(String(32), nullable=True)
+    display_order: Mapped[int] = mapped_column(
+        Integer, nullable=False, default=0, server_default="0"
+    )
+    published_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), nullable=False, server_default=func.now()
+    )
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        nullable=False,
+        server_default=func.now(),
+        onupdate=func.now(),
+    )
+    deleted_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+
+
+# ---------------------------------------------------------------------------
 # Domain: Team
 # ---------------------------------------------------------------------------
 

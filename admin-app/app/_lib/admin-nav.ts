@@ -13,6 +13,9 @@ export const ADMIN_PRIMARY_NAV: AdminNavItem[] = [
   { href: "/admin/developers", label: "Developers", description: "Developer CMS workspace" },
   { href: "/admin/company", label: "Company", description: "Company content records" },
   { href: "/admin/testimonials", label: "Testimonials", description: "Testimonials records" },
+  { href: "/admin/blog", label: "Blog", description: "Blog full CRUD workspace" },
+  { href: "/admin/videos", label: "Videos", description: "Video CMS workspace" },
+  { href: "/admin/taxonomy", label: "Taxonomy", description: "Shared tags/topics registry" },
   { href: "/admin/media", label: "Media Library", description: "Upload, integrity, replace" },
   { href: "/admin/imports", label: "Imports", description: "Import + mirror operations" },
 ];
