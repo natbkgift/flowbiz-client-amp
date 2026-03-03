@@ -10,27 +10,50 @@ function read(relativePath: string): string {
 }
 
 describe("Admin shell + route consolidation (Phase A)", () => {
+  const workspaceRoutes = [
+    "dashboard",
+    "domain",
+    "imports",
+    "inquiries",
+    "layout",
+    "media",
+    "seo",
+    "home-composer",
+  ] as const;
+
   it("provides canonical /admin shell layout + dashboard default route", () => {
     const layout = read("app/admin/layout.tsx");
     const index = read("app/admin/page.tsx");
+    const shell = read("components/layout/AdminShell.tsx");
+    const nav = read("app/_lib/admin-nav.ts");
     expect(layout).toContain("AdminShell");
     expect(index).toContain('redirect("/admin/dashboard")');
+    for (const route of workspaceRoutes) {
+      expect(nav).toContain(`/admin/${route}`);
+    }
+    expect(shell).toContain("ADMIN_PRIMARY_NAV");
+    expect(shell).toContain("ADMIN_SECONDARY_NAV");
   });
 
-  it("keeps home composer available under /admin and legacy alias", () => {
-    const adminComposer = read("app/admin/home-composer/page.tsx");
-    const legacyAlias = read("app/home-composer/page.tsx");
-    expect(adminComposer).toContain('id="main-content"');
-    expect(adminComposer).not.toContain("AdminLayout");
-    expect(legacyAlias).toContain('@/app/admin/home-composer/page');
+  it("keeps all workspaces under /admin with main landmark and no legacy shell import", () => {
+    for (const route of workspaceRoutes) {
+      const page = read(`app/admin/${route}/page.tsx`);
+      expect(page).toContain('id="main-content"');
+      expect(page).not.toContain("from '../../components/layout/AdminLayout'");
+      expect(page).not.toContain('from "@/components/layout/AdminLayout"');
+    }
   });
 
-  it("routes legacy admin paths into /admin canonical URLs", () => {
+  it("routes legacy admin paths into /admin canonical URLs or aliases", () => {
     const analytics = read("app/analytics/page.tsx");
     const inquiries = read("app/inquiries/page.tsx");
     const leads = read("app/leads/page.tsx");
+    const layoutCms = read("app/layout-cms/page.tsx");
+    const homeComposer = read("app/home-composer/page.tsx");
     expect(analytics).toContain('redirect("/admin/dashboard")');
     expect(inquiries).toContain('redirect("/admin/inquiries")');
     expect(leads).toContain('redirect("/admin/inquiries")');
+    expect(layoutCms).toContain('@/app/admin/layout/page');
+    expect(homeComposer).toContain('@/app/admin/home-composer/page');
   });
 });
