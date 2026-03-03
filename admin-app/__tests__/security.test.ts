@@ -141,6 +141,10 @@ describe('sitemap.ts', () => {
 describe('middleware security headers', () => {
   const src = readFileSync(resolve(__dirname, '..', 'middleware.ts'), 'utf-8');
 
+  it('keeps backend v1 routes outside locale redirect', () => {
+    expect(src).toContain("'\/v1'");
+  });
+
   it('sets Content-Security-Policy header', () => {
     expect(src).toContain('Content-Security-Policy');
   });

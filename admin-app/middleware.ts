@@ -4,6 +4,7 @@ import { checkRateLimit } from './lib/rate-limiter';
 const LOCALES = ['en', 'th'] as const;
 type Locale = (typeof LOCALES)[number];
 const NON_LOCALIZED_ROUTE_PREFIXES = [
+  '/v1',
   '/login',
   '/leads',
   '/inquiries',
