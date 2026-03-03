@@ -10,6 +10,7 @@ const NON_LOCALIZED_ROUTE_PREFIXES = [
   '/analytics',
   '/public',
   '/admin',
+  '/layout-cms',
   '/home-composer',
   '/telemetry',
 ] as const;

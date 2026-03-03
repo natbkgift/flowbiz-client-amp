@@ -23,4 +23,9 @@ describe("B15 admin layout cms workspace contract", () => {
     expect(page).toContain("SITE_LAYOUT_CMS_TEMPLATE");
     expect(page).toContain("state-error");
   });
+
+  it("exposes a non-admin alias route for environments that rewrite /admin/*", () => {
+    const alias = read("app/layout-cms/page.tsx");
+    expect(alias).toContain('@/app/admin/layout/page');
+  });
 });
