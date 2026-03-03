@@ -1,9 +1,8 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { type FormEvent, useCallback, useEffect, useMemo, useState } from 'react';
 
-import { apiRequest, handleUnauthorizedError } from '../../../lib/api';
+import { apiRequest } from '../../../lib/api';
 import { getToken, setToken } from '../../../lib/auth-store';
 
 type LocaleCode = 'en' | 'th';
@@ -43,6 +42,16 @@ type ComposerBundle = {
 type SaveResponse = {
   item: ComposerItem;
   validation: ValidationResult;
+};
+
+type LoginResponse = {
+  access_token: string;
+  token_type: string;
+};
+
+type SeededAuthSession = {
+  token: string;
+  email: string;
 };
 
 type CandidateProject = {
@@ -252,41 +261,50 @@ function splitLines(value: string): string[] {
     .filter(Boolean);
 }
 
-function syncLegacyTokenFromUnifiedSession(): string | null {
+function syncLegacyTokenFromUnifiedSession(): SeededAuthSession | null {
   if (typeof window === 'undefined') return null;
-  const current = getToken();
-  if (current?.trim()) return current.trim();
 
   const sessionRaw = window.sessionStorage.getItem(AUTH_SESSION_STORAGE_KEY);
   if (sessionRaw) {
     try {
-      const parsed = JSON.parse(sessionRaw) as { token?: unknown };
+      const parsed = JSON.parse(sessionRaw) as { token?: unknown; email?: unknown };
       const token = typeof parsed.token === 'string' ? parsed.token.trim() : '';
+      const email = typeof parsed.email === 'string' ? parsed.email.trim() : '';
       if (token) {
         setToken(token);
-        return token;
+        return { token, email };
       }
     } catch {
       window.sessionStorage.removeItem(AUTH_SESSION_STORAGE_KEY);
     }
   }
 
+  const current = getToken();
+  if (current?.trim()) return { token: current.trim(), email: '' };
+
   const legacy = window.localStorage.getItem(LEGACY_TOKEN_STORAGE_KEY) || '';
   if (legacy.trim()) {
-    setToken(legacy.trim());
-    return legacy.trim();
+    const token = legacy.trim();
+    setToken(token);
+    window.sessionStorage.setItem(AUTH_SESSION_STORAGE_KEY, JSON.stringify({ token, email: '' }));
+    window.localStorage.removeItem(LEGACY_TOKEN_STORAGE_KEY);
+    return { token, email: '' };
   }
   return null;
 }
 
 export default function HomeComposerPage() {
-  const router = useRouter();
-
+  const [authToken, setAuthToken] = useState('');
+  const [authEmail, setAuthEmail] = useState('');
+  const [loginEmail, setLoginEmail] = useState('');
+  const [loginPassword, setLoginPassword] = useState('');
+  const [authLoading, setAuthLoading] = useState(false);
+  const [authError, setAuthError] = useState<string | null>(null);
   const [locale, setLocale] = useState<LocaleCode>('en');
   const [bundle, setBundle] = useState<ComposerBundle | null>(null);
   const [config, setConfig] = useState<HomeComposerConfig>(defaultConfig());
 
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [publishing, setPublishing] = useState(false);
 
@@ -305,11 +323,45 @@ export default function HomeComposerPage() {
   const [trustItemsText, setTrustItemsText] = useState('');
 
   const draftId = bundle?.draft?.id ?? null;
+  const isAuthenticated = authToken.trim().length > 0;
 
   const selectedProjectIds = useMemo(() => new Set(config.featured_projects.selected_project_ids || []), [config.featured_projects.selected_project_ids]);
   const selectedPropertyIds = useMemo(() => new Set(config.featured_properties.selected_property_ids || []), [config.featured_properties.selected_property_ids]);
 
-  async function loadBundle(targetLocale: LocaleCode): Promise<void> {
+  const clearComposerSession = useCallback((nextAuthError?: string): void => {
+    setToken(null);
+    if (typeof window !== 'undefined') {
+      window.sessionStorage.removeItem(AUTH_SESSION_STORAGE_KEY);
+      window.localStorage.removeItem(LEGACY_TOKEN_STORAGE_KEY);
+    }
+    setAuthToken('');
+    setAuthEmail('');
+    setLoginPassword('');
+    setBundle(null);
+    setProjectCandidates([]);
+    setPropertyCandidates([]);
+    setMediaCandidates([]);
+    setValidation(null);
+    setNotice(null);
+    setSaving(false);
+    setPublishing(false);
+    setLoading(false);
+    if (nextAuthError) {
+      setAuthError(nextAuthError);
+    }
+  }, []);
+
+  const handleComposerUnauthorized = useCallback((err: unknown): boolean => {
+    if (err instanceof Error && err.message === 'UNAUTHORIZED') {
+      clearComposerSession('Session expired. Please sign in again.');
+      return true;
+    }
+    return false;
+  }, [clearComposerSession]);
+
+  const loadBundle = useCallback(async (targetLocale: LocaleCode): Promise<void> => {
+    const activeToken = getToken();
+    if (!activeToken?.trim()) return;
     setLoading(true);
     setError(null);
     setNotice(null);
@@ -318,7 +370,7 @@ export default function HomeComposerPage() {
       try {
         nextBundle = await apiRequest<ComposerBundle>(`/admin/home-composer?page_key=home&locale=${targetLocale}`);
       } catch (err) {
-        if (handleUnauthorizedError(err, router)) return;
+        if (handleComposerUnauthorized(err)) return;
         throw err;
       }
 
@@ -339,14 +391,16 @@ export default function HomeComposerPage() {
       setTrustItemsText((rawConfig.hero.trust_items || []).join('\n'));
       setValidation(null);
     } catch (err) {
-      if (handleUnauthorizedError(err, router)) return;
+      if (handleComposerUnauthorized(err)) return;
       setError(err instanceof Error ? err.message : 'Unable to load home composer');
     } finally {
       setLoading(false);
     }
-  }
+  }, [handleComposerUnauthorized]);
 
-  async function loadCandidates(term: string): Promise<void> {
+  const loadCandidates = useCallback(async (term: string): Promise<void> => {
+    const activeToken = getToken();
+    if (!activeToken?.trim()) return;
     try {
       const query = term.trim() ? `?search=${encodeURIComponent(term.trim())}` : '';
       const [projects, properties, media] = await Promise.all([
@@ -358,26 +412,86 @@ export default function HomeComposerPage() {
       setPropertyCandidates(properties);
       setMediaCandidates(media);
     } catch (err) {
-      if (handleUnauthorizedError(err, router)) return;
+      if (handleComposerUnauthorized(err)) return;
       setError('Unable to load candidates');
     }
-  }
+  }, [handleComposerUnauthorized]);
 
   useEffect(() => {
-    if (!syncLegacyTokenFromUnifiedSession()) {
-      router.push('/login');
-      return;
+    const seededSession = syncLegacyTokenFromUnifiedSession();
+    if (!seededSession) return;
+    setAuthToken(seededSession.token);
+    setAuthEmail(seededSession.email);
+    if (seededSession.email) {
+      setLoginEmail(seededSession.email);
     }
-    void loadBundle(locale);
-    void loadCandidates('');
-  }, [router, locale]);
+  }, []);
 
   useEffect(() => {
+    if (!isAuthenticated) return;
+    void loadBundle(locale);
+  }, [isAuthenticated, loadBundle, locale]);
+
+  useEffect(() => {
+    if (!isAuthenticated) return;
     const timer = setTimeout(() => {
       void loadCandidates(candidateSearch);
     }, 250);
     return () => clearTimeout(timer);
-  }, [candidateSearch]);
+  }, [candidateSearch, isAuthenticated, loadCandidates]);
+
+  async function login(event: FormEvent<HTMLFormElement>): Promise<void> {
+    event.preventDefault();
+    const email = loginEmail.trim();
+    const password = loginPassword;
+    if (!email || !password) {
+      setAuthError('Email and password are required.');
+      return;
+    }
+
+    setAuthLoading(true);
+    setAuthError(null);
+    try {
+      const response = await fetch('/v1/auth/login', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ email, password }),
+      });
+      if (!response.ok) {
+        setAuthError(response.status === 401 ? 'Invalid credentials.' : 'Unable to sign in right now.');
+        return;
+      }
+      const body = (await response.json()) as LoginResponse;
+      const token = String(body.access_token || '').trim();
+      if (!token) {
+        setAuthError('Unable to sign in right now.');
+        return;
+      }
+      setToken(token);
+      if (typeof window !== 'undefined') {
+        window.sessionStorage.setItem(
+          AUTH_SESSION_STORAGE_KEY,
+          JSON.stringify({ token, email })
+        );
+        window.localStorage.removeItem(LEGACY_TOKEN_STORAGE_KEY);
+      }
+      setAuthToken(token);
+      setAuthEmail(email);
+      setLoginPassword('');
+      setError(null);
+      await Promise.all([loadBundle(locale), loadCandidates(candidateSearch)]);
+    } catch {
+      setAuthError('Unable to sign in right now.');
+    } finally {
+      setAuthLoading(false);
+    }
+  }
+
+  function logout(): void {
+    setAuthError(null);
+    setError(null);
+    clearComposerSession();
+  }
 
   function updateSectionEnabled(section: SectionKey, enabled: boolean): void {
     const next = new Set(config.enabled_sections || []);
@@ -451,7 +565,7 @@ export default function HomeComposerPage() {
       setBundle((prev) => prev ? ({ ...prev, draft: res.item }) : prev);
       setConfig(normalizeConfig(res.item.config as Record<string, unknown>));
     } catch (err) {
-      if (handleUnauthorizedError(err, router)) return;
+      if (handleComposerUnauthorized(err)) return;
       setError(err instanceof Error ? err.message : 'Unable to save draft');
     } finally {
       setSaving(false);
@@ -472,7 +586,7 @@ export default function HomeComposerPage() {
       setNotice('Published');
       setBundle((prev) => prev ? ({ ...prev, published: res.item }) : prev);
     } catch (err) {
-      if (handleUnauthorizedError(err, router)) return;
+      if (handleComposerUnauthorized(err)) return;
       setError(err instanceof Error ? err.message : 'Unable to publish');
     } finally {
       setPublishing(false);
@@ -492,58 +606,110 @@ export default function HomeComposerPage() {
   };
 
   return (
-      <main id="main-content" className="container content-stack">
-        <header className="flex flex-wrap items-start justify-between gap-4">
-          <div>
-            <h1 className="text-2xl font-semibold text-slate-900">Home Composer</h1>
-            <p className="text-sm text-slate-600">Compose Home sections, hero copy/media, and featured entity selections with governance-aware publish checks.</p>
-          </div>
-          <div className="flex flex-wrap items-center gap-2">
-            <label className="text-sm text-slate-700">
-              Locale
-              <select
-                value={locale}
-                onChange={(e) => setLocale(e.target.value as LocaleCode)}
-                className="ml-2 rounded-md border border-slate-300 px-2 py-1"
-              >
-                <option value="en">EN</option>
-                <option value="th">TH</option>
-              </select>
+    <main id="main-content" className="container content-stack">
+      <header className="flex flex-wrap items-start justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-semibold text-slate-900">Home Composer</h1>
+          <p className="text-sm text-slate-600">Compose Home sections, hero copy/media, and featured entity selections with governance-aware publish checks.</p>
+        </div>
+        <div className="flex flex-wrap items-center gap-2">
+          <label className="text-sm text-slate-700">
+            Locale
+            <select
+              value={locale}
+              onChange={(e) => setLocale(e.target.value as LocaleCode)}
+              className="ml-2 rounded-md border border-slate-300 px-2 py-1"
+            >
+              <option value="en">EN</option>
+              <option value="th">TH</option>
+            </select>
+          </label>
+          {isAuthenticated ? (
+            <>
+              <button type="button" onClick={() => void loadBundle(locale)} disabled={loading} className="rounded-md border border-slate-300 px-4 py-2 text-sm disabled:opacity-60">{loading ? 'Refreshing…' : 'Refresh'}</button>
+              <button type="button" onClick={() => void handleSaveDraft()} disabled={saving || loading} className="rounded-md bg-slate-900 px-4 py-2 text-sm text-white disabled:opacity-60">{saving ? 'Saving…' : 'Save Draft'}</button>
+              <button type="button" onClick={() => void handlePublish()} disabled={publishing || loading} className="rounded-md border border-slate-300 px-4 py-2 text-sm disabled:opacity-60">{publishing ? 'Publishing…' : 'Publish'}</button>
+              <button type="button" onClick={logout} className="rounded-md border border-slate-300 px-4 py-2 text-sm">Sign out</button>
+            </>
+          ) : null}
+        </div>
+      </header>
+
+      <section className="card dashboard-controls" aria-label="Admin sign in">
+        {!isAuthenticated ? (
+          <form className="crm-login-form" onSubmit={(event) => void login(event)}>
+            <h2>Admin sign in</h2>
+            <p className="locale-safe">Use the same admin credentials as /v1/auth/login.</p>
+
+            <label className="field" htmlFor="home-composer-login-email">
+              <span>Admin email</span>
+              <input
+                id="home-composer-login-email"
+                type="email"
+                autoComplete="username"
+                value={loginEmail}
+                onChange={(event) => setLoginEmail(event.target.value)}
+              />
             </label>
-            <button type="button" onClick={() => void handleSaveDraft()} disabled={saving || loading} className="rounded-md bg-slate-900 px-4 py-2 text-sm text-white disabled:opacity-60">{saving ? 'Saving…' : 'Save Draft'}</button>
-            <button type="button" onClick={() => void handlePublish()} disabled={publishing || loading} className="rounded-md border border-slate-300 px-4 py-2 text-sm disabled:opacity-60">{publishing ? 'Publishing…' : 'Publish'}</button>
+
+            <label className="field" htmlFor="home-composer-login-password">
+              <span>Password</span>
+              <input
+                id="home-composer-login-password"
+                type="password"
+                autoComplete="current-password"
+                value={loginPassword}
+                onChange={(event) => setLoginPassword(event.target.value)}
+              />
+            </label>
+
+            {authError ? <div className="state-error">{authError}</div> : null}
+
+            <div className="card-actions">
+              <button className="btn" type="submit" disabled={authLoading}>
+                {authLoading ? 'Signing in' : 'Sign in'}
+              </button>
+            </div>
+          </form>
+        ) : (
+          <div className="crm-session-panel" role="status" aria-live="polite">
+            <p className="locale-safe">{authEmail ? `Signed in as ${authEmail}` : 'Signed in session active.'}</p>
           </div>
-        </header>
+        )}
+        {!isAuthenticated ? <div className="state-empty">Sign in to manage home composer.</div> : null}
+      </section>
 
-        {error ? <div className="rounded-md border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-700">{error}</div> : null}
-        {notice ? <div className="rounded-md border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm text-emerald-700">{notice}</div> : null}
+      {isAuthenticated ? (
+        <>
+          {error ? <div className="rounded-md border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-700">{error}</div> : null}
+          {notice ? <div className="rounded-md border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm text-emerald-700">{notice}</div> : null}
 
-        {validation && (validation.errors.length > 0 || validation.warnings.length > 0 || validation.media_warnings.length > 0) ? (
-          <section className="rounded-md border border-slate-200 bg-white p-3 text-sm" aria-live="polite">
-            <h2 className="font-medium text-slate-900">Validation panel</h2>
-            {validation.errors.length > 0 ? (
-              <ul className="mt-2 list-disc pl-5 text-rose-700">
-                {validation.errors.map((item, index) => <li key={`error-${index}`}>{item}</li>)}
-              </ul>
-            ) : null}
-            {validation.warnings.length > 0 ? (
-              <ul className="mt-2 list-disc pl-5 text-amber-700">
-                {validation.warnings.map((item, index) => <li key={`warn-${index}`}>{item}</li>)}
-              </ul>
-            ) : null}
-            {validation.media_warnings.length > 0 ? (
-              <ul className="mt-2 list-disc pl-5 text-amber-700">
-                {validation.media_warnings.map((item, index) => <li key={`media-${index}`}>{item.path} — {item.detail}</li>)}
-              </ul>
-            ) : null}
-          </section>
-        ) : null}
+          {validation && (validation.errors.length > 0 || validation.warnings.length > 0 || validation.media_warnings.length > 0) ? (
+            <section className="rounded-md border border-slate-200 bg-white p-3 text-sm" aria-live="polite">
+              <h2 className="font-medium text-slate-900">Validation panel</h2>
+              {validation.errors.length > 0 ? (
+                <ul className="mt-2 list-disc pl-5 text-rose-700">
+                  {validation.errors.map((item, index) => <li key={`error-${index}`}>{item}</li>)}
+                </ul>
+              ) : null}
+              {validation.warnings.length > 0 ? (
+                <ul className="mt-2 list-disc pl-5 text-amber-700">
+                  {validation.warnings.map((item, index) => <li key={`warn-${index}`}>{item}</li>)}
+                </ul>
+              ) : null}
+              {validation.media_warnings.length > 0 ? (
+                <ul className="mt-2 list-disc pl-5 text-amber-700">
+                  {validation.media_warnings.map((item, index) => <li key={`media-${index}`}>{item.path} — {item.detail}</li>)}
+                </ul>
+              ) : null}
+            </section>
+          ) : null}
 
-        {loading ? (
-          <div className="rounded-md border border-slate-200 bg-white px-4 py-3 text-sm text-slate-600">Loading composer configuration…</div>
-        ) : null}
+          {loading ? (
+            <div className="rounded-md border border-slate-200 bg-white px-4 py-3 text-sm text-slate-600">Loading composer configuration…</div>
+          ) : null}
 
-        <div className="grid grid-cols-1 gap-4 xl:grid-cols-[2fr,1fr]">
+          <div className="grid grid-cols-1 gap-4 xl:grid-cols-[2fr,1fr]">
           <section className="space-y-4">
             <article className="rounded-lg border border-slate-200 bg-white p-4">
               <h2 className="text-sm font-medium text-slate-900">Section controls (enable + order)</h2>
@@ -755,6 +921,8 @@ export default function HomeComposerPage() {
             </section>
           </aside>
         </div>
-      </main>
+        </>
+      ) : null}
+    </main>
   );
 }

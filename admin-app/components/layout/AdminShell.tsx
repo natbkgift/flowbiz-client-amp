@@ -35,6 +35,33 @@ function renderNavSection(
   );
 }
 
+function renderMobileNavRow(
+  title: string,
+  items: typeof ADMIN_PRIMARY_NAV,
+  pathname: string
+): ReactNode {
+  return (
+    <section className="admin-shell-mobile-row-group" aria-label={`${title} navigation`}>
+      <h2 className="admin-shell-mobile-row-title">{title}</h2>
+      <div className="admin-shell-mobile-row">
+        {items.map((item) => {
+          const active = isActiveAdminNav(pathname, item.href);
+          return (
+            <Link
+              key={item.href}
+              href={item.href}
+              className={active ? "admin-shell-mobile-link is-active" : "admin-shell-mobile-link"}
+              aria-current={active ? "page" : undefined}
+            >
+              {item.label}
+            </Link>
+          );
+        })}
+      </div>
+    </section>
+  );
+}
+
 export function AdminShell({ children }: { children: ReactNode }) {
   const pathname = usePathname() || "";
 
@@ -50,19 +77,8 @@ export function AdminShell({ children }: { children: ReactNode }) {
 
       <div className="admin-shell-main">
         <header className="admin-shell-mobile-nav" aria-label="Admin quick navigation">
-          {[...ADMIN_PRIMARY_NAV, ...ADMIN_SECONDARY_NAV].map((item) => {
-            const active = isActiveAdminNav(pathname, item.href);
-            return (
-              <Link
-                key={item.href}
-                href={item.href}
-                className={active ? "admin-shell-mobile-link is-active" : "admin-shell-mobile-link"}
-                aria-current={active ? "page" : undefined}
-              >
-                {item.label}
-              </Link>
-            );
-          })}
+          {renderMobileNavRow("Core", ADMIN_PRIMARY_NAV, pathname)}
+          {renderMobileNavRow("Content", ADMIN_SECONDARY_NAV, pathname)}
         </header>
         <div className="admin-shell-content">{children}</div>
       </div>

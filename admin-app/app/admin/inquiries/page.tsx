@@ -624,147 +624,149 @@ export default function AdminInquiriesPage() {
 
       {error ? <div className="state-error">{error}</div> : null}
 
-      <section className="crm-layout">
-        <article className="card crm-list">
-          <header className="crm-list-head">
-            <h2>{t.list}</h2>
-            <p>
-              {t.total}: <strong>{total}</strong>
-            </p>
-          </header>
+      {isAuthenticated ? (
+        <section className="crm-layout">
+          <article className="card crm-list">
+            <header className="crm-list-head">
+              <h2>{t.list}</h2>
+              <p>
+                {t.total}: <strong>{total}</strong>
+              </p>
+            </header>
 
-          {loading ? <div className="state-loading">{t.loading}</div> : null}
-          {!loading && items.length === 0 ? <div className="state-empty">{t.empty}</div> : null}
+            {loading ? <div className="state-loading">{t.loading}</div> : null}
+            {!loading && items.length === 0 ? <div className="state-empty">{t.empty}</div> : null}
 
-          {!loading && items.length > 0 ? (
-            <ul className="crm-items" aria-label={t.list}>
-              {items.map((item) => (
-                <li key={item.id}>
-                  <button
-                    type="button"
-                    className={`crm-row-button ${selectedId === item.id ? "is-active" : ""}`}
-                    onClick={() => void loadDetails(item.id)}
-                  >
-                    <span className="crm-row-title">{item.name}</span>
-                    <span className="crm-row-meta">{item.status}</span>
-                    <span className="crm-row-meta">{item.purpose || "-"}</span>
-                    <span className="crm-row-meta">{prettyDate(item.created_at, locale)}</span>
-                    <span className="crm-row-hints">
-                      {item.is_spam_hint ? <span className="crm-chip crm-chip-warn">{t.spam}</span> : null}
-                      {item.is_duplicate_hint ? <span className="crm-chip crm-chip-muted">{t.duplicate}</span> : null}
-                    </span>
-                  </button>
-                </li>
-              ))}
-            </ul>
-          ) : null}
-        </article>
-
-        <article className="card crm-detail">
-          <h2>{t.details}</h2>
-          {!selected ? <div className="state-empty">{t.noDetails}</div> : null}
-
-          {selected ? (
-            <>
-              <div className="crm-meta-grid">
-                <p>
-                  <strong>{t.intent}:</strong> {selected.purpose || "-"}
-                </p>
-                <p>
-                  <strong>{t.status}:</strong> {selected.status}
-                </p>
-                <p>
-                  <strong>{t.followUp}:</strong> {selected.follow_up_status || "-"}
-                </p>
-                <p>
-                  <strong>{t.followUpDueAt}:</strong> {prettyDate(selected.follow_up_due_at, locale)}
-                </p>
-                <p>
-                  <strong>{t.sourcePage}:</strong> {selected.source_page || "-"}
-                </p>
-                <p>
-                  <strong>{t.createdAt}:</strong> {prettyDate(selected.created_at, locale)}
-                </p>
-              </div>
-
-              <section aria-label={t.contactActions}>
-                <h3>{t.contactActions}</h3>
-                <div className="card-actions">
-                  {selected.whatsapp_url ? (
-                    <a className="btn btn-secondary" href={selected.whatsapp_url} target="_blank" rel="noreferrer">
-                      {t.whatsapp}
-                    </a>
-                  ) : null}
-                  {selected.phone_url ? (
-                    <a className="btn btn-secondary" href={selected.phone_url}>
-                      {t.phone}
-                    </a>
-                  ) : null}
-                  {selected.email_url ? (
-                    <a className="btn btn-secondary" href={selected.email_url}>
-                      {t.emailAction}
-                    </a>
-                  ) : null}
-                </div>
-              </section>
-
-              <section aria-label={t.followUp}>
-                <h3>{t.followUp}</h3>
-                <div className="crm-follow-up-grid">
-                  <label className="field" htmlFor="follow-up-status">
-                    <span>{t.followUp}</span>
-                    <select
-                      id="follow-up-status"
-                      value={followUpStatus}
-                      onChange={(event) => setFollowUpStatus(event.target.value)}
+            {!loading && items.length > 0 ? (
+              <ul className="crm-items" aria-label={t.list}>
+                {items.map((item) => (
+                  <li key={item.id}>
+                    <button
+                      type="button"
+                      className={`crm-row-button ${selectedId === item.id ? "is-active" : ""}`}
+                      onClick={() => void loadDetails(item.id)}
                     >
-                      {FOLLOW_UP_STATUSES.map((value) => (
-                        <option key={value} value={value}>
-                          {value}
-                        </option>
-                      ))}
-                    </select>
-                  </label>
-                  <label className="field" htmlFor="follow-up-due-at">
-                    <span>{t.followUpDueAt}</span>
-                    <input
-                      id="follow-up-due-at"
-                      type="datetime-local"
-                      value={followUpDueAt}
-                      onChange={(event) => setFollowUpDueAt(event.target.value)}
-                    />
-                  </label>
-                </div>
-                {followUpError ? <p className="state-error">{followUpError}</p> : null}
-                <div className="card-actions">
-                  <button className="btn" type="button" onClick={() => void saveFollowUp()} disabled={savingFollowUp}>
-                    {savingFollowUp ? t.saving : t.saveFollowUp}
-                  </button>
-                </div>
-              </section>
+                      <span className="crm-row-title">{item.name}</span>
+                      <span className="crm-row-meta">{item.status}</span>
+                      <span className="crm-row-meta">{item.purpose || "-"}</span>
+                      <span className="crm-row-meta">{prettyDate(item.created_at, locale)}</span>
+                      <span className="crm-row-hints">
+                        {item.is_spam_hint ? <span className="crm-chip crm-chip-warn">{t.spam}</span> : null}
+                        {item.is_duplicate_hint ? <span className="crm-chip crm-chip-muted">{t.duplicate}</span> : null}
+                      </span>
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            ) : null}
+          </article>
 
-              <section aria-label={t.timeline}>
-                <h3>{t.timeline}</h3>
-                {timelineError ? <div className="state-error">{timelineError}</div> : null}
-                {timeline.length === 0 ? (
-                  <div className="state-empty">-</div>
-                ) : (
-                  <ol className="crm-timeline">
-                    {timeline.map((event) => (
-                      <li key={event.id}>
-                        <p>
-                          <strong>{event.action}</strong> · {prettyDate(event.created_at, locale)}
-                        </p>
-                        {event.note ? <p className="locale-safe">{event.note}</p> : null}
-                      </li>
-                    ))}
-                  </ol>
-                )}
-              </section>
-            </>
-          ) : null}
-        </article>
-      </section>
+          <article className="card crm-detail">
+            <h2>{t.details}</h2>
+            {!selected ? <div className="state-empty">{t.noDetails}</div> : null}
+
+            {selected ? (
+              <>
+                <div className="crm-meta-grid">
+                  <p>
+                    <strong>{t.intent}:</strong> {selected.purpose || "-"}
+                  </p>
+                  <p>
+                    <strong>{t.status}:</strong> {selected.status}
+                  </p>
+                  <p>
+                    <strong>{t.followUp}:</strong> {selected.follow_up_status || "-"}
+                  </p>
+                  <p>
+                    <strong>{t.followUpDueAt}:</strong> {prettyDate(selected.follow_up_due_at, locale)}
+                  </p>
+                  <p>
+                    <strong>{t.sourcePage}:</strong> {selected.source_page || "-"}
+                  </p>
+                  <p>
+                    <strong>{t.createdAt}:</strong> {prettyDate(selected.created_at, locale)}
+                  </p>
+                </div>
+
+                <section aria-label={t.contactActions}>
+                  <h3>{t.contactActions}</h3>
+                  <div className="card-actions">
+                    {selected.whatsapp_url ? (
+                      <a className="btn btn-secondary" href={selected.whatsapp_url} target="_blank" rel="noreferrer">
+                        {t.whatsapp}
+                      </a>
+                    ) : null}
+                    {selected.phone_url ? (
+                      <a className="btn btn-secondary" href={selected.phone_url}>
+                        {t.phone}
+                      </a>
+                    ) : null}
+                    {selected.email_url ? (
+                      <a className="btn btn-secondary" href={selected.email_url}>
+                        {t.emailAction}
+                      </a>
+                    ) : null}
+                  </div>
+                </section>
+
+                <section aria-label={t.followUp}>
+                  <h3>{t.followUp}</h3>
+                  <div className="crm-follow-up-grid">
+                    <label className="field" htmlFor="follow-up-status">
+                      <span>{t.followUp}</span>
+                      <select
+                        id="follow-up-status"
+                        value={followUpStatus}
+                        onChange={(event) => setFollowUpStatus(event.target.value)}
+                      >
+                        {FOLLOW_UP_STATUSES.map((value) => (
+                          <option key={value} value={value}>
+                            {value}
+                          </option>
+                        ))}
+                      </select>
+                    </label>
+                    <label className="field" htmlFor="follow-up-due-at">
+                      <span>{t.followUpDueAt}</span>
+                      <input
+                        id="follow-up-due-at"
+                        type="datetime-local"
+                        value={followUpDueAt}
+                        onChange={(event) => setFollowUpDueAt(event.target.value)}
+                      />
+                    </label>
+                  </div>
+                  {followUpError ? <p className="state-error">{followUpError}</p> : null}
+                  <div className="card-actions">
+                    <button className="btn" type="button" onClick={() => void saveFollowUp()} disabled={savingFollowUp}>
+                      {savingFollowUp ? t.saving : t.saveFollowUp}
+                    </button>
+                  </div>
+                </section>
+
+                <section aria-label={t.timeline}>
+                  <h3>{t.timeline}</h3>
+                  {timelineError ? <div className="state-error">{timelineError}</div> : null}
+                  {timeline.length === 0 ? (
+                    <div className="state-empty">-</div>
+                  ) : (
+                    <ol className="crm-timeline">
+                      {timeline.map((event) => (
+                        <li key={event.id}>
+                          <p>
+                            <strong>{event.action}</strong> · {prettyDate(event.created_at, locale)}
+                          </p>
+                          {event.note ? <p className="locale-safe">{event.note}</p> : null}
+                        </li>
+                      ))}
+                    </ol>
+                  )}
+                </section>
+              </>
+            ) : null}
+          </article>
+        </section>
+      ) : null}
     </main>
   );
 }
