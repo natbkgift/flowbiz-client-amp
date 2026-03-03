@@ -28,7 +28,7 @@ jobs:
       - name: Install test dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install fastapi sqlalchemy pydantic pytest httpx python-multipart pillow python-dotenv
+          pip install fastapi sqlalchemy pydantic pytest httpx python-multipart pillow python-dotenv bcrypt pyjwt
 
       - name: Run governance guard suite
         run: |
