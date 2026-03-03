@@ -104,9 +104,7 @@ export function middleware(req: NextRequest) {
 /** Attach all security response headers (incl. CSP + cross-origin isolation). */
 function setSecurityHeaders(res: NextResponse) {
   const isDev = process.env.NODE_ENV !== 'production';
-  const scriptSrc = isDev
-    ? "script-src 'self' 'unsafe-inline' 'unsafe-eval'"
-    : "script-src 'self' 'unsafe-inline'";
+  const scriptSrc = "script-src 'self' 'unsafe-inline'";
   const connectSrc = isDev
     ? "connect-src 'self' http: https: ws: wss:"
     : "connect-src 'self' https:";
