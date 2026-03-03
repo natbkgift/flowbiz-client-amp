@@ -132,6 +132,7 @@ mkdir -p "$telemetry_dir"
 export TELEMETRY_FILE="$telemetry_file"
 export TARGET_SHA
 export release_path
+export healthz properties projects admin_login
 export TELEMETRY_DEPLOYED_AT
 TELEMETRY_DEPLOYED_AT="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
 export TELEMETRY_DEPLOY_STATUS="$deploy_status"
