@@ -11,6 +11,9 @@ type LoginResponse = {
   token_type: string;
 };
 
+const AUTH_SESSION_STORAGE_KEY = 'flowbiz_admin_auth_session_v1';
+const LEGACY_TOKEN_STORAGE_KEY = 'flowbiz_admin_token';
+
 export default function LoginPage() {
   const router = useRouter();
   const [email, setEmail] = useState('');
@@ -28,8 +31,16 @@ export default function LoginPage() {
         method: 'POST',
         body: JSON.stringify({ email, password })
       });
-      setToken(response.access_token);
-      router.push('/leads');
+      const token = String(response.access_token || '').trim();
+      setToken(token);
+      if (typeof window !== 'undefined' && token) {
+        window.sessionStorage.setItem(
+          AUTH_SESSION_STORAGE_KEY,
+          JSON.stringify({ token, email: email.trim() }),
+        );
+        window.localStorage.removeItem(LEGACY_TOKEN_STORAGE_KEY);
+      }
+      router.push('/admin/dashboard');
     } catch {
       setError('Login failed. Check email/password.');
     } finally {
