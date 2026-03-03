@@ -1,10 +1,10 @@
 # A1 Validation Matrix
 
-Generated at: 2026-03-02T14:39:17.908Z
+Generated at: 2026-03-03T01:45:44.231Z
 Base URL: http://127.0.0.1:3000
 Breakpoints: 360, 768, 1024, 1440, 1920, 2560
-Public routes discovered: 23
-Rows executed: 276
+Public routes discovered: 25
+Rows executed: 300
 
 ## Dynamic Samples
 - project slug: sample-project
@@ -15,7 +15,7 @@ Rows executed: 276
 - developer slug: sample-developer
 
 ## Summary
-- PASS: 270
+- PASS: 294
 - PARTIAL: 6
 - FAIL: 0
 
@@ -47,6 +47,12 @@ Rows executed: 276
 | /en/areas/sample-area | en | 1440 | PASS | status=200; main=true; h1=1; overflow=no; focusVisible=yes; tab=yes; maxMainWidth=1440; hotlink=no; screenshot=artifacts/a1-matrix/en/en__areas__sample-area__1440.png | - |
 | /en/areas/sample-area | en | 1920 | PASS | status=200; main=true; h1=1; overflow=no; focusVisible=yes; tab=yes; maxMainWidth=1440; hotlink=no; screenshot=artifacts/a1-matrix/en/en__areas__sample-area__1920.png | - |
 | /en/areas/sample-area | en | 2560 | PASS | status=200; main=true; h1=1; overflow=no; focusVisible=yes; tab=yes; maxMainWidth=1440; hotlink=no; screenshot=artifacts/a1-matrix/en/en__areas__sample-area__2560.png | - |
+| /en/blog | en | 360 | PASS | status=200; main=true; h1=1; overflow=no; focusVisible=yes; tab=yes; maxMainWidth=360; hotlink=no; screenshot=artifacts/a1-matrix/en/en__blog__360.png | - |
+| /en/blog | en | 768 | PASS | status=200; main=true; h1=1; overflow=no; focusVisible=yes; tab=yes; maxMainWidth=768; hotlink=no; screenshot=artifacts/a1-matrix/en/en__blog__768.png | - |
+| /en/blog | en | 1024 | PASS | status=200; main=true; h1=1; overflow=no; focusVisible=yes; tab=yes; maxMainWidth=1024; hotlink=no; screenshot=artifacts/a1-matrix/en/en__blog__1024.png | - |
+| /en/blog | en | 1440 | PASS | status=200; main=true; h1=1; overflow=no; focusVisible=yes; tab=yes; maxMainWidth=1440; hotlink=no; screenshot=artifacts/a1-matrix/en/en__blog__1440.png | - |
+| /en/blog | en | 1920 | PASS | status=200; main=true; h1=1; overflow=no; focusVisible=yes; tab=yes; maxMainWidth=1440; hotlink=no; screenshot=artifacts/a1-matrix/en/en__blog__1920.png | - |
+| /en/blog | en | 2560 | PASS | status=200; main=true; h1=1; overflow=no; focusVisible=yes; tab=yes; maxMainWidth=1440; hotlink=no; screenshot=artifacts/a1-matrix/en/en__blog__2560.png | - |
 | /en/buy | en | 360 | PASS | status=200; main=true; h1=1; overflow=no; focusVisible=yes; tab=yes; maxMainWidth=360; hotlink=no; screenshot=artifacts/a1-matrix/en/en__buy__360.png | - |
 | /en/buy | en | 768 | PASS | status=200; main=true; h1=1; overflow=no; focusVisible=yes; tab=yes; maxMainWidth=768; hotlink=no; screenshot=artifacts/a1-matrix/en/en__buy__768.png | - |
 | /en/buy | en | 1024 | PASS | status=200; main=true; h1=1; overflow=no; focusVisible=yes; tab=yes; maxMainWidth=1024; hotlink=no; screenshot=artifacts/a1-matrix/en/en__buy__1024.png | - |
@@ -65,6 +71,12 @@ Rows executed: 276
 | /en/contact | en | 1440 | PASS | status=200; main=true; h1=1; overflow=no; focusVisible=yes; tab=yes; maxMainWidth=1440; hotlink=no; screenshot=artifacts/a1-matrix/en/en__contact__1440.png | - |
 | /en/contact | en | 1920 | PASS | status=200; main=true; h1=1; overflow=no; focusVisible=yes; tab=yes; maxMainWidth=1440; hotlink=no; screenshot=artifacts/a1-matrix/en/en__contact__1920.png | - |
 | /en/contact | en | 2560 | PASS | status=200; main=true; h1=1; overflow=no; focusVisible=yes; tab=yes; maxMainWidth=1440; hotlink=no; screenshot=artifacts/a1-matrix/en/en__contact__2560.png | - |
+| /en/developers | en | 360 | PASS | status=200; main=true; h1=1; overflow=no; focusVisible=yes; tab=yes; maxMainWidth=360; hotlink=no; screenshot=artifacts/a1-matrix/en/en__developers__360.png | - |
+| /en/developers | en | 768 | PASS | status=200; main=true; h1=1; overflow=no; focusVisible=yes; tab=yes; maxMainWidth=768; hotlink=no; screenshot=artifacts/a1-matrix/en/en__developers__768.png | - |
+| /en/developers | en | 1024 | PASS | status=200; main=true; h1=1; overflow=no; focusVisible=yes; tab=yes; maxMainWidth=1024; hotlink=no; screenshot=artifacts/a1-matrix/en/en__developers__1024.png | - |
+| /en/developers | en | 1440 | PASS | status=200; main=true; h1=1; overflow=no; focusVisible=yes; tab=yes; maxMainWidth=1440; hotlink=no; screenshot=artifacts/a1-matrix/en/en__developers__1440.png | - |
+| /en/developers | en | 1920 | PASS | status=200; main=true; h1=1; overflow=no; focusVisible=yes; tab=yes; maxMainWidth=1440; hotlink=no; screenshot=artifacts/a1-matrix/en/en__developers__1920.png | - |
+| /en/developers | en | 2560 | PASS | status=200; main=true; h1=1; overflow=no; focusVisible=yes; tab=yes; maxMainWidth=1440; hotlink=no; screenshot=artifacts/a1-matrix/en/en__developers__2560.png | - |
 | /en/european | en | 360 | PASS | status=200; main=true; h1=1; overflow=no; focusVisible=yes; tab=yes; maxMainWidth=360; hotlink=no; screenshot=artifacts/a1-matrix/en/en__european__360.png | - |
 | /en/european | en | 768 | PASS | status=200; main=true; h1=1; overflow=no; focusVisible=yes; tab=yes; maxMainWidth=768; hotlink=no; screenshot=artifacts/a1-matrix/en/en__european__768.png | - |
 | /en/european | en | 1024 | PASS | status=200; main=true; h1=1; overflow=no; focusVisible=yes; tab=yes; maxMainWidth=1024; hotlink=no; screenshot=artifacts/a1-matrix/en/en__european__1024.png | - |
@@ -185,6 +197,12 @@ Rows executed: 276
 | /th/areas/sample-area | th | 1440 | PASS | status=200; main=true; h1=1; overflow=no; focusVisible=yes; tab=yes; maxMainWidth=1440; hotlink=no; screenshot=artifacts/a1-matrix/th/th__areas__sample-area__1440.png | - |
 | /th/areas/sample-area | th | 1920 | PASS | status=200; main=true; h1=1; overflow=no; focusVisible=yes; tab=yes; maxMainWidth=1440; hotlink=no; screenshot=artifacts/a1-matrix/th/th__areas__sample-area__1920.png | - |
 | /th/areas/sample-area | th | 2560 | PASS | status=200; main=true; h1=1; overflow=no; focusVisible=yes; tab=yes; maxMainWidth=1440; hotlink=no; screenshot=artifacts/a1-matrix/th/th__areas__sample-area__2560.png | - |
+| /th/blog | th | 360 | PASS | status=200; main=true; h1=1; overflow=no; focusVisible=yes; tab=yes; maxMainWidth=360; hotlink=no; screenshot=artifacts/a1-matrix/th/th__blog__360.png | - |
+| /th/blog | th | 768 | PASS | status=200; main=true; h1=1; overflow=no; focusVisible=yes; tab=yes; maxMainWidth=768; hotlink=no; screenshot=artifacts/a1-matrix/th/th__blog__768.png | - |
+| /th/blog | th | 1024 | PASS | status=200; main=true; h1=1; overflow=no; focusVisible=yes; tab=yes; maxMainWidth=1024; hotlink=no; screenshot=artifacts/a1-matrix/th/th__blog__1024.png | - |
+| /th/blog | th | 1440 | PASS | status=200; main=true; h1=1; overflow=no; focusVisible=yes; tab=yes; maxMainWidth=1440; hotlink=no; screenshot=artifacts/a1-matrix/th/th__blog__1440.png | - |
+| /th/blog | th | 1920 | PASS | status=200; main=true; h1=1; overflow=no; focusVisible=yes; tab=yes; maxMainWidth=1440; hotlink=no; screenshot=artifacts/a1-matrix/th/th__blog__1920.png | - |
+| /th/blog | th | 2560 | PASS | status=200; main=true; h1=1; overflow=no; focusVisible=yes; tab=yes; maxMainWidth=1440; hotlink=no; screenshot=artifacts/a1-matrix/th/th__blog__2560.png | - |
 | /th/buy | th | 360 | PASS | status=200; main=true; h1=1; overflow=no; focusVisible=yes; tab=yes; maxMainWidth=360; hotlink=no; screenshot=artifacts/a1-matrix/th/th__buy__360.png | - |
 | /th/buy | th | 768 | PASS | status=200; main=true; h1=1; overflow=no; focusVisible=yes; tab=yes; maxMainWidth=768; hotlink=no; screenshot=artifacts/a1-matrix/th/th__buy__768.png | - |
 | /th/buy | th | 1024 | PASS | status=200; main=true; h1=1; overflow=no; focusVisible=yes; tab=yes; maxMainWidth=1024; hotlink=no; screenshot=artifacts/a1-matrix/th/th__buy__1024.png | - |
@@ -203,6 +221,12 @@ Rows executed: 276
 | /th/contact | th | 1440 | PASS | status=200; main=true; h1=1; overflow=no; focusVisible=yes; tab=yes; maxMainWidth=1440; hotlink=no; screenshot=artifacts/a1-matrix/th/th__contact__1440.png | - |
 | /th/contact | th | 1920 | PASS | status=200; main=true; h1=1; overflow=no; focusVisible=yes; tab=yes; maxMainWidth=1440; hotlink=no; screenshot=artifacts/a1-matrix/th/th__contact__1920.png | - |
 | /th/contact | th | 2560 | PASS | status=200; main=true; h1=1; overflow=no; focusVisible=yes; tab=yes; maxMainWidth=1440; hotlink=no; screenshot=artifacts/a1-matrix/th/th__contact__2560.png | - |
+| /th/developers | th | 360 | PASS | status=200; main=true; h1=1; overflow=no; focusVisible=yes; tab=yes; maxMainWidth=360; hotlink=no; screenshot=artifacts/a1-matrix/th/th__developers__360.png | - |
+| /th/developers | th | 768 | PASS | status=200; main=true; h1=1; overflow=no; focusVisible=yes; tab=yes; maxMainWidth=768; hotlink=no; screenshot=artifacts/a1-matrix/th/th__developers__768.png | - |
+| /th/developers | th | 1024 | PASS | status=200; main=true; h1=1; overflow=no; focusVisible=yes; tab=yes; maxMainWidth=1024; hotlink=no; screenshot=artifacts/a1-matrix/th/th__developers__1024.png | - |
+| /th/developers | th | 1440 | PASS | status=200; main=true; h1=1; overflow=no; focusVisible=yes; tab=yes; maxMainWidth=1440; hotlink=no; screenshot=artifacts/a1-matrix/th/th__developers__1440.png | - |
+| /th/developers | th | 1920 | PASS | status=200; main=true; h1=1; overflow=no; focusVisible=yes; tab=yes; maxMainWidth=1440; hotlink=no; screenshot=artifacts/a1-matrix/th/th__developers__1920.png | - |
+| /th/developers | th | 2560 | PASS | status=200; main=true; h1=1; overflow=no; focusVisible=yes; tab=yes; maxMainWidth=1440; hotlink=no; screenshot=artifacts/a1-matrix/th/th__developers__2560.png | - |
 | /th/european | th | 360 | PASS | status=200; main=true; h1=1; overflow=no; focusVisible=yes; tab=yes; maxMainWidth=360; hotlink=no; screenshot=artifacts/a1-matrix/th/th__european__360.png | - |
 | /th/european | th | 768 | PASS | status=200; main=true; h1=1; overflow=no; focusVisible=yes; tab=yes; maxMainWidth=768; hotlink=no; screenshot=artifacts/a1-matrix/th/th__european__768.png | - |
 | /th/european | th | 1024 | PASS | status=200; main=true; h1=1; overflow=no; focusVisible=yes; tab=yes; maxMainWidth=1024; hotlink=no; screenshot=artifacts/a1-matrix/th/th__european__1024.png | - |

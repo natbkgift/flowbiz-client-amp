@@ -1,7 +1,7 @@
 # A1 Shared UI Gap Report
 
-Generated at: 2026-03-02T14:39:17.911Z
-PASS=270, PARTIAL=6, FAIL=0
+Generated at: 2026-03-03T01:45:44.232Z
+PASS=294, PARTIAL=6, FAIL=0
 
 ## Open Issues
 - PARTIAL en 360px /en: horizontal overflow
