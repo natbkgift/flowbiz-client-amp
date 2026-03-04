@@ -15,6 +15,7 @@ node_modules/
 admin-app/node_modules/
 admin-app/.next/
 admin-app/tsconfig.tsbuildinfo
+admin-app/artifacts/
 admin-app/nul
 
 # Local ops outputs

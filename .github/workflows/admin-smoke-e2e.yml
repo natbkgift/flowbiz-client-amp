@@ -1,0 +1,73 @@
+name: Admin Smoke E2E
+
+on:
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  admin-smoke-e2e:
+    name: admin-smoke-e2e
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: admin-app
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+          cache-dependency-path: admin-app/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Playwright browser
+        run: npx playwright install --with-deps chromium
+
+      - name: Build admin app
+        run: npm run build
+
+      - name: Start admin app
+        run: |
+          npm run start > /tmp/admin-smoke-server.log 2>&1 &
+          echo $! > /tmp/admin-smoke-server.pid
+
+      - name: Wait for admin app
+        run: |
+          for i in {1..60}; do
+            if curl -fsS http://127.0.0.1:3000/api/health >/dev/null; then
+              exit 0
+            fi
+            sleep 1
+          done
+          echo "admin app did not become ready" >&2
+          exit 1
+
+      - name: Run admin smoke e2e
+        run: npm run test:smoke:admin
+
+      - name: Stop admin app
+        if: always()
+        run: |
+          if [ -f /tmp/admin-smoke-server.pid ]; then
+            kill "$(cat /tmp/admin-smoke-server.pid)" || true
+          fi
+
+      - name: Upload admin smoke artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: admin-smoke-e2e-artifacts
+          path: |
+            admin-app/artifacts/admin-smoke
+            /tmp/admin-smoke-server.log
+          if-no-files-found: warn
