@@ -100,10 +100,10 @@ export function AdminShell({ children }: { children: ReactNode }) {
       </aside>
 
       <div className="admin-shell-main">
-        <header className="admin-shell-mobile-nav" aria-label="Admin quick navigation">
+        <nav className="admin-shell-mobile-nav" aria-label="Admin quick navigation">
           {renderMobileNavRow("Core", ADMIN_PRIMARY_NAV, pathname)}
           {renderMobileNavRow("Content", ADMIN_SECONDARY_NAV, pathname)}
-        </header>
+        </nav>
         <header className="admin-shell-topbar" aria-label="Admin page context">
           <p className="admin-shell-topbar-section">{sectionTitle}</p>
           <nav aria-label="Breadcrumb" className="admin-shell-breadcrumb">
