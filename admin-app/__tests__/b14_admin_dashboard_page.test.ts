@@ -13,12 +13,9 @@ describe("B14 admin dashboard page contract", () => {
   it("uses admin login endpoint and session storage auth flow", () => {
     const page = read("app/admin/dashboard/page.tsx");
 
-    expect(page).toContain('fetch("/v1/auth/login"');
-    expect(page).toContain("AUTH_SESSION_STORAGE_KEY");
-    expect(page).toContain("window.sessionStorage.setItem");
-    expect(page).toContain("window.sessionStorage.getItem");
-    expect(page).toContain("window.sessionStorage.removeItem");
-    expect(page).toContain("LEGACY_TOKEN_STORAGE_KEY");
+    expect(page).toContain('from "@/app/_lib/admin-auth"');
+    expect(page).toContain("loginAdmin");
+    expect(page).not.toContain('fetch("/v1/auth/login"');
   });
 
   it("loads B14 backend summary endpoint and includes all required widget keys", () => {

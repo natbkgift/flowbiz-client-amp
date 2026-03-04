@@ -8,8 +8,13 @@ export type LoginResponse = {
   token_type: string;
 };
 
+export type AdminLoginResult =
+  | { ok: true; accessToken: string }
+  | { ok: false; status: number };
+
 export const AUTH_SESSION_STORAGE_KEY = "flowbiz_admin_auth_session_v1";
 export const LEGACY_TOKEN_STORAGE_KEY = "flowbiz_admin_token";
+export const ADMIN_AUTH_LOGIN_PATH = "/api/v1/auth/login";
 
 export function readAuthSession(): AuthSession | null {
   if (typeof window === "undefined") return null;
@@ -48,6 +53,23 @@ export function clearAuthSession(): void {
   if (typeof window === "undefined") return;
   window.sessionStorage.removeItem(AUTH_SESSION_STORAGE_KEY);
   window.localStorage.removeItem(LEGACY_TOKEN_STORAGE_KEY);
+}
+
+export async function loginAdmin(email: string, password: string): Promise<AdminLoginResult> {
+  const response = await fetch(ADMIN_AUTH_LOGIN_PATH, {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({ email, password }),
+  });
+  if (!response.ok) {
+    return { ok: false, status: response.status };
+  }
+  const body = (await response.json()) as LoginResponse;
+  const accessToken = String(body.access_token || "").trim();
+  if (!accessToken) {
+    return { ok: false, status: response.status };
+  }
+  return { ok: true, accessToken };
 }
 
 export async function fetchJson<T>(

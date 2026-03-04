@@ -2,6 +2,7 @@
 
 import { type FormEvent, useCallback, useEffect, useMemo, useState } from 'react';
 
+import { clearAuthSession, loginAdmin, persistAuthSession, readAuthSession } from '@/app/_lib/admin-auth';
 import { apiRequest } from '../../../lib/api';
 import { getToken, setToken } from '../../../lib/auth-store';
 
@@ -44,11 +45,6 @@ type SaveResponse = {
   validation: ValidationResult;
 };
 
-type LoginResponse = {
-  access_token: string;
-  token_type: string;
-};
-
 type SeededAuthSession = {
   token: string;
   email: string;
@@ -80,7 +76,6 @@ type MediaAsset = {
   is_exception: boolean;
 };
 
-const AUTH_SESSION_STORAGE_KEY = 'flowbiz_admin_auth_session_v1';
 const LEGACY_TOKEN_STORAGE_KEY = 'flowbiz_admin_token';
 
 const SECTION_KEYS = [
@@ -263,30 +258,24 @@ function splitLines(value: string): string[] {
 
 function syncLegacyTokenFromUnifiedSession(): SeededAuthSession | null {
   if (typeof window === 'undefined') return null;
-
-  const sessionRaw = window.sessionStorage.getItem(AUTH_SESSION_STORAGE_KEY);
-  if (sessionRaw) {
-    try {
-      const parsed = JSON.parse(sessionRaw) as { token?: unknown; email?: unknown };
-      const token = typeof parsed.token === 'string' ? parsed.token.trim() : '';
-      const email = typeof parsed.email === 'string' ? parsed.email.trim() : '';
-      if (token) {
-        setToken(token);
-        return { token, email };
-      }
-    } catch {
-      window.sessionStorage.removeItem(AUTH_SESSION_STORAGE_KEY);
-    }
+  const session = readAuthSession();
+  if (session) {
+    setToken(session.token);
+    return session;
   }
 
   const current = getToken();
-  if (current?.trim()) return { token: current.trim(), email: '' };
+  if (current?.trim()) {
+    const token = current.trim();
+    persistAuthSession(token, '');
+    return { token, email: '' };
+  }
 
   const legacy = window.localStorage.getItem(LEGACY_TOKEN_STORAGE_KEY) || '';
   if (legacy.trim()) {
     const token = legacy.trim();
     setToken(token);
-    window.sessionStorage.setItem(AUTH_SESSION_STORAGE_KEY, JSON.stringify({ token, email: '' }));
+    persistAuthSession(token, '');
     window.localStorage.removeItem(LEGACY_TOKEN_STORAGE_KEY);
     return { token, email: '' };
   }
@@ -330,10 +319,7 @@ export default function HomeComposerPage() {
 
   const clearComposerSession = useCallback((nextAuthError?: string): void => {
     setToken(null);
-    if (typeof window !== 'undefined') {
-      window.sessionStorage.removeItem(AUTH_SESSION_STORAGE_KEY);
-      window.localStorage.removeItem(LEGACY_TOKEN_STORAGE_KEY);
-    }
+    clearAuthSession();
     setAuthToken('');
     setAuthEmail('');
     setLoginPassword('');
@@ -452,29 +438,14 @@ export default function HomeComposerPage() {
     setAuthLoading(true);
     setAuthError(null);
     try {
-      const response = await fetch('/v1/auth/login', {
-        method: 'POST',
-        headers: { 'content-type': 'application/json' },
-        body: JSON.stringify({ email, password }),
-      });
-      if (!response.ok) {
-        setAuthError(response.status === 401 ? 'Invalid credentials.' : 'Unable to sign in right now.');
+      const result = await loginAdmin(email, password);
+      if (!result.ok) {
+        setAuthError(result.status === 401 ? 'Invalid credentials.' : 'Unable to sign in right now.');
         return;
       }
-      const body = (await response.json()) as LoginResponse;
-      const token = String(body.access_token || '').trim();
-      if (!token) {
-        setAuthError('Unable to sign in right now.');
-        return;
-      }
+      const token = result.accessToken;
       setToken(token);
-      if (typeof window !== 'undefined') {
-        window.sessionStorage.setItem(
-          AUTH_SESSION_STORAGE_KEY,
-          JSON.stringify({ token, email })
-        );
-        window.localStorage.removeItem(LEGACY_TOKEN_STORAGE_KEY);
-      }
+      persistAuthSession(token, email);
       setAuthToken(token);
       setAuthEmail(email);
       setLoginPassword('');

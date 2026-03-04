@@ -2,10 +2,9 @@
 
 import { type FormEvent, useEffect, useState } from "react";
 
-type Locale = "en" | "th";
+import { clearAuthSession, loginAdmin, persistAuthSession, readAuthSession } from "@/app/_lib/admin-auth";
 
-type AuthSession = { token: string; email: string };
-type LoginResponse = { access_token: string; token_type: string };
+type Locale = "en" | "th";
 
 type SeoOverride = {
   id: string;
@@ -88,9 +87,6 @@ type SchemaForm = {
   schema_article_author_url: string;
 };
 
-const AUTH_SESSION_STORAGE_KEY = "flowbiz_admin_auth_session_v1";
-const LEGACY_TOKEN_STORAGE_KEY = "flowbiz_admin_token";
-
 const copy = {
   en: {
     title: "SEO Controls",
@@ -141,42 +137,6 @@ function detectLocale(): Locale {
   const q = new URLSearchParams(window.location.search).get("lang");
   if (q === "th" || q === "en") return q;
   return navigator.language.toLowerCase().startsWith("th") ? "th" : "en";
-}
-
-function readSession(): AuthSession | null {
-  if (typeof window === "undefined") return null;
-  const raw = window.sessionStorage.getItem(AUTH_SESSION_STORAGE_KEY);
-  if (raw) {
-    try {
-      const parsed = JSON.parse(raw) as { token?: string; email?: string };
-      if (parsed.token?.trim()) {
-        return { token: parsed.token.trim(), email: (parsed.email || "").trim() };
-      }
-    } catch {
-      window.sessionStorage.removeItem(AUTH_SESSION_STORAGE_KEY);
-    }
-  }
-  const legacy = (window.localStorage.getItem(LEGACY_TOKEN_STORAGE_KEY) || "").trim();
-  if (!legacy) return null;
-  const session = { token: legacy, email: "" };
-  window.sessionStorage.setItem(AUTH_SESSION_STORAGE_KEY, JSON.stringify(session));
-  window.localStorage.removeItem(LEGACY_TOKEN_STORAGE_KEY);
-  return session;
-}
-
-function writeSession(token: string, email: string): void {
-  if (typeof window === "undefined") return;
-  window.sessionStorage.setItem(
-    AUTH_SESSION_STORAGE_KEY,
-    JSON.stringify({ token: token.trim(), email: email.trim() })
-  );
-  window.localStorage.removeItem(LEGACY_TOKEN_STORAGE_KEY);
-}
-
-function clearSession(): void {
-  if (typeof window === "undefined") return;
-  window.sessionStorage.removeItem(AUTH_SESSION_STORAGE_KEY);
-  window.localStorage.removeItem(LEGACY_TOKEN_STORAGE_KEY);
 }
 
 function emptyOverride(locale: Locale): OverrideForm {
@@ -275,7 +235,7 @@ export default function AdminSeoPage() {
     setLocale(l);
     setOverrideForm(emptyOverride(l));
     setSchemaForm(emptySchema(l));
-    const s = readSession();
+    const s = readAuthSession();
     if (!s) return;
     setToken(s.token);
     setEmail(s.email);
@@ -294,18 +254,12 @@ export default function AdminSeoPage() {
     setBusy(true);
     setAuthError(null);
     try {
-      const res = await fetch("/v1/auth/login", {
-        method: "POST",
-        headers: { "content-type": "application/json" },
-        body: JSON.stringify({ email: loginEmail.trim(), password: loginPassword }),
-      });
-      if (!res.ok) throw new Error(`login_failed:${res.status}`);
-      const body = (await res.json()) as LoginResponse;
-      const accessToken = String(body.access_token || "").trim();
-      if (!accessToken) throw new Error("empty_token");
+      const result = await loginAdmin(loginEmail.trim(), loginPassword);
+      if (!result.ok) throw new Error(`login_failed:${result.status}`);
+      const accessToken = result.accessToken;
       setToken(accessToken);
       setEmail(loginEmail.trim());
-      writeSession(accessToken, loginEmail.trim());
+      persistAuthSession(accessToken, loginEmail.trim());
       await refreshAll(accessToken);
     } catch (error) {
       setAuthError(readApiError(error));
@@ -315,7 +269,7 @@ export default function AdminSeoPage() {
   }
 
   function logout() {
-    clearSession();
+    clearAuthSession();
     setToken("");
     setEmail("");
     setAuthError(null);
