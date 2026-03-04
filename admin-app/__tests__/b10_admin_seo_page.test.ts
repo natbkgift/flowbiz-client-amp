@@ -15,6 +15,7 @@ describe("B10 admin SEO page contract", () => {
     expect(page).toContain('from "@/app/_lib/admin-auth"');
     expect(page).toContain("loginAdmin");
     expect(page).not.toContain('fetch("/v1/auth/login"');
+    expect(page).not.toContain("login_failed:");
   });
 
   it("wires B10 endpoints for overrides redirects schema and broken-links", () => {

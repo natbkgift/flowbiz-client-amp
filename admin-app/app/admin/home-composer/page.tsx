@@ -2,7 +2,13 @@
 
 import { type FormEvent, useCallback, useEffect, useMemo, useState } from 'react';
 
-import { clearAuthSession, loginAdmin, persistAuthSession, readAuthSession } from '@/app/_lib/admin-auth';
+import {
+  clearAuthSession,
+  LEGACY_TOKEN_STORAGE_KEY,
+  loginAdmin,
+  persistAuthSession,
+  readAuthSession,
+} from '@/app/_lib/admin-auth';
 import { apiRequest } from '../../../lib/api';
 import { getToken, setToken } from '../../../lib/auth-store';
 
@@ -75,8 +81,6 @@ type MediaAsset = {
   approval_status: string | null;
   is_exception: boolean;
 };
-
-const LEGACY_TOKEN_STORAGE_KEY = 'flowbiz_admin_token';
 
 const SECTION_KEYS = [
   'hero',

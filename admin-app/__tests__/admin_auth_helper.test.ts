@@ -35,6 +35,17 @@ describe("admin auth helper", () => {
     expect(readAuthSession()).toEqual({ token: "token-123", email: "admin@example.com" });
   });
 
+  it("returns protocol error when 200 response is missing access token", async () => {
+    vi.spyOn(globalThis, "fetch").mockResolvedValue(
+      new Response(JSON.stringify({ token_type: "bearer" }), { status: 200 })
+    );
+
+    await expect(loginAdmin("admin@example.com", "valid-password")).resolves.toEqual({
+      ok: false,
+      status: 0,
+    });
+  });
+
   it("uses bearer token when calling admin APIs", async () => {
     const fetchSpy = vi.spyOn(globalThis, "fetch").mockResolvedValue(
       new Response(JSON.stringify({ ok: true }), { status: 200 })

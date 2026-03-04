@@ -100,6 +100,9 @@ const copy = {
     loginTitle: "Admin sign in",
     email: "Admin email",
     password: "Password",
+    loginMissing: "Email and password are required.",
+    loginInvalid: "Invalid credentials.",
+    loginError: "Unable to sign in right now.",
     sectionOverrides: "SEO overrides",
     sectionRedirects: "Redirect manager",
     sectionSchema: "Schema source fields",
@@ -121,6 +124,9 @@ const copy = {
     loginTitle: "เข้าสู่ระบบแอดมิน",
     email: "อีเมลแอดมิน",
     password: "รหัสผ่าน",
+    loginMissing: "กรอกอีเมลและรหัสผ่านก่อนเข้าสู่ระบบ",
+    loginInvalid: "อีเมลหรือรหัสผ่านไม่ถูกต้อง",
+    loginError: "ไม่สามารถเข้าสู่ระบบได้ในขณะนี้",
     sectionOverrides: "SEO overrides",
     sectionRedirects: "Redirect manager",
     sectionSchema: "Schema source fields",
@@ -248,21 +254,24 @@ export default function AdminSeoPage() {
   async function login(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (!loginEmail.trim() || !loginPassword) {
-      setAuthError("missing_credentials");
+      setAuthError(t.loginMissing);
       return;
     }
     setBusy(true);
     setAuthError(null);
     try {
       const result = await loginAdmin(loginEmail.trim(), loginPassword);
-      if (!result.ok) throw new Error(`login_failed:${result.status}`);
+      if (!result.ok) {
+        setAuthError(result.status === 401 ? t.loginInvalid : t.loginError);
+        return;
+      }
       const accessToken = result.accessToken;
       setToken(accessToken);
       setEmail(loginEmail.trim());
       persistAuthSession(accessToken, loginEmail.trim());
       await refreshAll(accessToken);
-    } catch (error) {
-      setAuthError(readApiError(error));
+    } catch {
+      setAuthError(t.loginError);
     } finally {
       setBusy(false);
     }
