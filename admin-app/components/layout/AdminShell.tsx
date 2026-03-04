@@ -110,11 +110,9 @@ export function AdminShell({ children }: { children: ReactNode }) {
             <ol>
               <li>
                 <Link href="/admin/dashboard">Admin</Link>
-              </li>
-              <li>
                 <span aria-hidden="true">/</span>
               </li>
-              <li>{item?.label ?? "Workspace"}</li>
+              <li aria-current="page">{item?.label ?? "Workspace"}</li>
             </ol>
           </nav>
         </header>
