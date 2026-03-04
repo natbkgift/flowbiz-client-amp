@@ -67,7 +67,8 @@ export async function loginAdmin(email: string, password: string): Promise<Admin
   const body = (await response.json()) as LoginResponse;
   const accessToken = String(body.access_token || "").trim();
   if (!accessToken) {
-    return { ok: false, status: response.status };
+    // HTTP 200 without an access token is treated as an internal auth protocol error.
+    return { ok: false, status: 0 };
   }
   return { ok: true, accessToken };
 }
