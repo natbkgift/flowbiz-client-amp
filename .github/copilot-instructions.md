@@ -32,7 +32,7 @@ This repository is production-critical for `amppattaya.com`.
 
 ## Deploy and Smoke Expectations
 - Deploy via existing script:
-  - `.\scripts\deploy_prod.ps1`
+  - `./scripts/deploy_prod.ps1`
 - Verify smoke post-deploy:
   - `healthz`, `properties`, `projects`, `admin_login` must all be `200`.
 - Confirm telemetry file updates:
