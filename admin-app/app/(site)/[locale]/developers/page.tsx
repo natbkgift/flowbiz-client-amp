@@ -4,9 +4,8 @@ import { getDictionary, normalizeLocale } from '@/app/_lib/i18n/get-dictionary';
 import { makePageMetadata } from '@/app/_lib/i18n/metadata';
 import { fetchDevelopers } from '@/app/_lib/public-api-server';
 import { Container } from '@/components/layout/Container';
-import { PAGE_REVALIDATE_SECONDS } from '@/app/_lib/constants';
 
-export const revalidate = PAGE_REVALIDATE_SECONDS;
+export const revalidate = 300;
 
 function pageCopy(locale: 'en' | 'th'): { title: string; subtitle: string; description: string } {
   if (locale === 'th') {
@@ -24,18 +23,20 @@ function pageCopy(locale: 'en' | 'th'): { title: string; subtitle: string; descr
   };
 }
 
-export async function generateMetadata({
-  params,
-}: {
-  params: { locale: string };
-}): Promise<Metadata> {
+export async function generateMetadata(
+  props: {
+    params: Promise<{ locale: string }>;
+  }
+): Promise<Metadata> {
+  const params = await props.params;
   const locale = normalizeLocale(params.locale);
   const dict = getDictionary(locale);
   const copy = pageCopy(locale);
   return makePageMetadata(locale, 'developers', copy.title, copy.description, dict.brand.name);
 }
 
-export default async function DevelopersPage({ params }: { params: { locale: string } }) {
+export default async function DevelopersPage(props: { params: Promise<{ locale: string }> }) {
+  const params = await props.params;
   const locale = normalizeLocale(params.locale);
   const dict = getDictionary(locale);
   const copy = pageCopy(locale);
@@ -76,3 +77,4 @@ export default async function DevelopersPage({ params }: { params: { locale: str
     </main>
   );
 }
+

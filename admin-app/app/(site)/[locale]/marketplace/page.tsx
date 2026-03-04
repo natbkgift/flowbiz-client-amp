@@ -6,21 +6,22 @@ import {
   fetchMarketplaceCategories,
   fetchMarketplaceItems,
 } from '@/app/_lib/public-api-server';
-import { PAGE_REVALIDATE_SECONDS } from '@/app/_lib/constants';
 
-export const revalidate = PAGE_REVALIDATE_SECONDS;
+export const revalidate = 300;
 
-export async function generateMetadata({
-  params,
-}: {
-  params: { locale: string };
-}) {
+export async function generateMetadata(
+  props: {
+    params: Promise<{ locale: string }>;
+  }
+) {
+  const params = await props.params;
   const locale = normalizeLocale(params.locale);
   const dict = getDictionary(locale);
   return makePageMetadata(locale, 'marketplace', dict.marketplace.title, dict.marketplace.subtitle, dict.brand.name);
 }
 
-export default async function MarketplacePage({ params }: { params: { locale: string } }) {
+export default async function MarketplacePage(props: { params: Promise<{ locale: string }> }) {
+  const params = await props.params;
   const locale = normalizeLocale(params.locale);
   const dict = getDictionary(locale);
 
@@ -85,3 +86,4 @@ export default async function MarketplacePage({ params }: { params: { locale: st
     </main>
   );
 }
+

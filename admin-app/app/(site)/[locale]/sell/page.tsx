@@ -1,27 +1,24 @@
-import dynamic from 'next/dynamic';
 
-const SellerForm = dynamic(
-  () => import('@/components/forms/SellerForm').then((m) => m.SellerForm),
-  { ssr: false },
-);
+import { SellerForm } from '@/components/forms/SellerForm';
 import { Container } from '@/components/layout/Container';
 import { getDictionary, normalizeLocale } from '@/app/_lib/i18n/get-dictionary';
 import { makePageMetadata } from '@/app/_lib/i18n/metadata';
-import { PAGE_REVALIDATE_SECONDS } from '@/app/_lib/constants';
 
-export const revalidate = PAGE_REVALIDATE_SECONDS;
+export const revalidate = 300;
 
-export async function generateMetadata({
-  params,
-}: {
-  params: { locale: string };
-}) {
+export async function generateMetadata(
+  props: {
+    params: Promise<{ locale: string }>;
+  }
+) {
+  const params = await props.params;
   const locale = normalizeLocale(params.locale);
   const dict = getDictionary(locale);
   return makePageMetadata(locale, 'sell', dict.sell.eyebrow, dict.sell.metaDescription, dict.brand.name);
 }
 
-export default function SellPage({ params }: { params: { locale: string } }) {
+export default async function SellPage(props: { params: Promise<{ locale: string }> }) {
+  const params = await props.params;
   const locale = normalizeLocale(params.locale);
   const dict = getDictionary(locale);
 
@@ -56,3 +53,5 @@ export default function SellPage({ params }: { params: { locale: string } }) {
     </main>
   );
 }
+
+

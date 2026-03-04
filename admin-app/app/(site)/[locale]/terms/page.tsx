@@ -3,25 +3,26 @@ import type { Metadata } from 'next';
 import { Container } from '@/components/layout/Container';
 import { getDictionary, normalizeLocale } from '@/app/_lib/i18n/get-dictionary';
 import { makePageMetadata } from '@/app/_lib/i18n/metadata';
-import { PAGE_REVALIDATE_SECONDS } from '@/app/_lib/constants';
 
-export const revalidate = PAGE_REVALIDATE_SECONDS;
+export const revalidate = 300;
 
-export async function generateMetadata({
-  params,
-}: {
-  params: { locale: string };
-}): Promise<Metadata> {
+export async function generateMetadata(
+  props: {
+    params: Promise<{ locale: string }>;
+  }
+): Promise<Metadata> {
+  const params = await props.params;
   const locale = normalizeLocale(params.locale);
   const dict = getDictionary(locale);
   return makePageMetadata(locale, '/terms', `Terms of Service | ${dict.brand.name}`, 'Terms of Service', dict.brand.name);
 }
 
-export default function TermsPage({
-  params,
-}: {
-  params: { locale: string };
-}) {
+export default async function TermsPage(
+  props: {
+    params: Promise<{ locale: string }>;
+  }
+) {
+  const params = await props.params;
   const locale = normalizeLocale(params.locale);
   const isTh = locale === 'th';
 
@@ -65,3 +66,4 @@ export default function TermsPage({
     </main>
   );
 }
+

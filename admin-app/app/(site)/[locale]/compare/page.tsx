@@ -6,15 +6,15 @@ import { makePageMetadata } from '@/app/_lib/i18n/metadata';
 import { withLocale } from '@/app/_lib/i18n/routing';
 import type { Dictionary } from '@/app/_lib/i18n/types';
 import { fetchProjectEvaluation, type ProjectEvaluationResponse } from '@/app/_lib/public-api-server';
-import { PAGE_REVALIDATE_SECONDS } from '@/app/_lib/constants';
 
-export const revalidate = PAGE_REVALIDATE_SECONDS;
+export const revalidate = 300;
 
-export async function generateMetadata({
-  params,
-}: {
-  params: { locale: string };
-}) {
+export async function generateMetadata(
+  props: {
+    params: Promise<{ locale: string }>;
+  }
+) {
+  const params = await props.params;
   const locale = normalizeLocale(params.locale);
   const dict = getDictionary(locale);
   return makePageMetadata(locale, 'compare', dict.compare.title, dict.compare.metaDescription, dict.brand.name);
@@ -76,13 +76,14 @@ function weaknesses(ev: ProjectEvaluationResponse, dict: Dictionary): string[] {
   return out;
 }
 
-export default async function ComparePage({
-  params,
-  searchParams,
-}: {
-  params: { locale: string };
-  searchParams?: Record<string, string | string[] | undefined>;
-}) {
+export default async function ComparePage(
+  props: {
+    params: Promise<{ locale: string }>;
+    searchParams?: Promise<Record<string, string | string[] | undefined>>;
+  }
+) {
+  const searchParams = await props.searchParams;
+  const params = await props.params;
   const locale = normalizeLocale(params.locale);
   const dict = getDictionary(locale);
 
@@ -235,3 +236,4 @@ export default async function ComparePage({
     </main>
   );
 }
+

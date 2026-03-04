@@ -4,7 +4,6 @@ import { Breadcrumbs } from '@/components/layout/Breadcrumbs';
 import { fetchProperties } from '@/app/_lib/public-api-server';
 import { getDictionary, normalizeLocale } from '@/app/_lib/i18n/get-dictionary';
 import { makePageMetadata } from '@/app/_lib/i18n/metadata';
-import { PAGE_REVALIDATE_SECONDS } from '@/app/_lib/constants';
 
 const ListingGrid = dynamic(() => import('@/components/listing/ListingGrid').then(m => m.ListingGrid), {
   loading: () => <div className="animate-pulse h-96 rounded bg-slate-100" />,
@@ -13,19 +12,21 @@ const LeadForm = dynamic(() => import('@/components/forms/LeadForm').then(m => m
   loading: () => <div className="animate-pulse h-48 rounded bg-slate-100" />,
 });
 
-export const revalidate = PAGE_REVALIDATE_SECONDS;
+export const revalidate = 300;
 
-export async function generateMetadata({
-  params,
-}: {
-  params: { locale: string };
-}) {
+export async function generateMetadata(
+  props: {
+    params: Promise<{ locale: string }>;
+  }
+) {
+  const params = await props.params;
   const locale = normalizeLocale(params.locale);
   const dict = getDictionary(locale);
   return makePageMetadata(locale, 'rent', dict.nav.live, dict.home.pathLive.desc, dict.brand.name);
 }
 
-export default async function RentPage({ params }: { params: { locale: string } }) {
+export default async function RentPage(props: { params: Promise<{ locale: string }> }) {
+  const params = await props.params;
   const locale = normalizeLocale(params.locale);
   const dict = getDictionary(locale);
 
@@ -95,3 +96,4 @@ export default async function RentPage({ params }: { params: { locale: string } 
     </main>
   );
 }
+

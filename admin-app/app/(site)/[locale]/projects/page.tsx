@@ -5,15 +5,15 @@ import { ProjectCard } from '@/components/project/ProjectCard';
 import { fetchProjects, fetchProperties } from '@/app/_lib/public-api-server';
 
 import { getDictionary, normalizeLocale } from '@/app/_lib/i18n/get-dictionary';
-import { PAGE_REVALIDATE_SECONDS } from '@/app/_lib/constants';
 
-export const revalidate = PAGE_REVALIDATE_SECONDS;
+export const revalidate = 300;
 
-export async function generateMetadata({
-  params,
-}: {
-  params: { locale: string };
-}): Promise<Metadata> {
+export async function generateMetadata(
+  props: {
+    params: Promise<{ locale: string }>;
+  }
+): Promise<Metadata> {
+  const params = await props.params;
   const locale = normalizeLocale(params.locale);
   const dict = getDictionary(locale);
   return makePageMetadata(locale, 'projects', dict.nav.projects, dict.listing.exploreProjectsDesc, dict.brand.name);
@@ -21,7 +21,8 @@ export async function generateMetadata({
 
 type ProjectRow = { name: string; count: number };
 
-export default async function ProjectsPage({ params }: { params: { locale: string } }) {
+export default async function ProjectsPage(props: { params: Promise<{ locale: string }> }) {
+  const params = await props.params;
   const locale = normalizeLocale(params.locale);
   const dict = getDictionary(locale);
   const siteUrl = 'https://amppattaya.com';
@@ -145,3 +146,4 @@ export default async function ProjectsPage({ params }: { params: { locale: strin
     </main>
   );
 }
+
