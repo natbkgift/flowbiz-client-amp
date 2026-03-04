@@ -22,7 +22,7 @@ export type AdminDataTableColumn<T> = {
 type AdminDataTableProps<T> = {
   rows: T[];
   columns: AdminDataTableColumn<T>[];
-  getRowId: (row: T) => string;
+  getRowId: (row: T, index: number) => string;
   emptyLabel: string;
   pageSize?: number;
   filterLabel?: string;
