@@ -4808,7 +4808,8 @@ summary.mobile-nav__trigger::-webkit-details-marker {
   }
 
   .admin-shell-topbar {
-    top: 76px;
+    position: static;
+    top: auto;
     padding: 10px 12px 8px;
   }
 }
