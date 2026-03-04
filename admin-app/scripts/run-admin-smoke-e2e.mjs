@@ -7,6 +7,24 @@ import { chromium } from "playwright";
 const BASE_URL = process.env.ADMIN_SMOKE_BASE_URL || "http://127.0.0.1:3000";
 const ARTIFACT_DIR = process.env.ADMIN_SMOKE_ARTIFACT_DIR || path.join(process.cwd(), "artifacts", "admin-smoke");
 
+function parseLoginPayload(rawBody) {
+  if (!rawBody) {
+    throw new Error("admin smoke failed: login request body was empty");
+  }
+  let parsed;
+  try {
+    parsed = JSON.parse(rawBody);
+  } catch {
+    throw new Error("admin smoke failed: login request body was not valid JSON");
+  }
+  const email = typeof parsed?.email === "string" ? parsed.email.trim() : "";
+  const password = typeof parsed?.password === "string" ? parsed.password : "";
+  if (!email || !password) {
+    throw new Error("admin smoke failed: login payload must include non-empty email and password");
+  }
+  return { email, password };
+}
+
 async function run() {
   await fs.mkdir(ARTIFACT_DIR, { recursive: true });
 
@@ -19,6 +37,16 @@ async function run() {
   let healthSummaryRequests = 0;
 
   await page.route("**/api/v1/auth/login", async (route) => {
+    const request = route.request();
+    if (request.method() !== "POST") {
+      throw new Error(`admin smoke failed: login method must be POST (got ${request.method()})`);
+    }
+    const contentType = request.headers()["content-type"] || "";
+    if (!contentType.toLowerCase().includes("application/json")) {
+      throw new Error(`admin smoke failed: login content-type must be application/json (got ${contentType || "missing"})`);
+    }
+    parseLoginPayload(request.postData());
+
     loginRequests += 1;
     if (loginRequests === 1) {
       loginStatuses.push(401);
@@ -39,6 +67,11 @@ async function run() {
   });
 
   await page.route("**/admin/dashboard/health-summary", async (route) => {
+    const authHeader = route.request().headers().authorization || "";
+    if (!/^Bearer\s+\S+$/i.test(authHeader)) {
+      throw new Error("admin smoke failed: dashboard summary request missing Authorization bearer token");
+    }
+
     healthSummaryRequests += 1;
     await route.fulfill({
       status: 200,
