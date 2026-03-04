@@ -4,15 +4,24 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import type { ReactNode } from "react";
 
-import { ADMIN_PRIMARY_NAV, ADMIN_SECONDARY_NAV, isActiveAdminNav } from "@/app/_lib/admin-nav";
+import { ADMIN_PRIMARY_NAV, ADMIN_SECONDARY_NAV, isActiveAdminNav, type AdminNavItem } from "@/app/_lib/admin-nav";
+
+const ADMIN_NAV_SECTIONS = [
+  { title: "Core", items: ADMIN_PRIMARY_NAV },
+  { title: "Content", items: ADMIN_SECONDARY_NAV },
+] as const;
 
 function renderNavSection(
   title: string,
   items: typeof ADMIN_PRIMARY_NAV,
   pathname: string
 ): ReactNode {
+  const sectionActive = items.some((item) => isActiveAdminNav(pathname, item.href));
   return (
-    <section className="admin-shell-nav-section" aria-label={title}>
+    <section
+      className={sectionActive ? "admin-shell-nav-section is-active" : "admin-shell-nav-section"}
+      aria-label={title}
+    >
       <h2>{title}</h2>
       <ul>
         {items.map((item) => {
@@ -40,8 +49,12 @@ function renderMobileNavRow(
   items: typeof ADMIN_PRIMARY_NAV,
   pathname: string
 ): ReactNode {
+  const sectionActive = items.some((item) => isActiveAdminNav(pathname, item.href));
   return (
-    <section className="admin-shell-mobile-row-group" aria-label={`${title} navigation`}>
+    <section
+      className={sectionActive ? "admin-shell-mobile-row-group is-active" : "admin-shell-mobile-row-group"}
+      aria-label={`${title} navigation`}
+    >
       <h2 className="admin-shell-mobile-row-title">{title}</h2>
       <div className="admin-shell-mobile-row">
         {items.map((item) => {
@@ -62,8 +75,19 @@ function renderMobileNavRow(
   );
 }
 
+function getCurrentAdminLocation(pathname: string): { sectionTitle: string; item: AdminNavItem | null } {
+  for (const section of ADMIN_NAV_SECTIONS) {
+    const item = section.items.find((candidate) => isActiveAdminNav(pathname, candidate.href));
+    if (item) {
+      return { sectionTitle: section.title, item };
+    }
+  }
+  return { sectionTitle: "Admin", item: null };
+}
+
 export function AdminShell({ children }: { children: ReactNode }) {
   const pathname = usePathname() || "";
+  const { sectionTitle, item } = getCurrentAdminLocation(pathname);
 
   return (
     <div className="admin-shell">
@@ -79,6 +103,20 @@ export function AdminShell({ children }: { children: ReactNode }) {
         <header className="admin-shell-mobile-nav" aria-label="Admin quick navigation">
           {renderMobileNavRow("Core", ADMIN_PRIMARY_NAV, pathname)}
           {renderMobileNavRow("Content", ADMIN_SECONDARY_NAV, pathname)}
+        </header>
+        <header className="admin-shell-topbar" aria-label="Admin page context">
+          <p className="admin-shell-topbar-section">{sectionTitle}</p>
+          <nav aria-label="Breadcrumb" className="admin-shell-breadcrumb">
+            <ol>
+              <li>
+                <Link href="/admin/dashboard">Admin</Link>
+              </li>
+              <li>
+                <span aria-hidden="true">/</span>
+              </li>
+              <li>{item?.label ?? "Workspace"}</li>
+            </ol>
+          </nav>
         </header>
         <div className="admin-shell-content">{children}</div>
       </div>
