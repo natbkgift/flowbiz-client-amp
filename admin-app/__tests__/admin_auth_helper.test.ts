@@ -1,6 +1,12 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-import { fetchJson, loginAdmin, persistAuthSession, readAuthSession } from "@/app/_lib/admin-auth";
+import {
+  ADMIN_AUTH_LOGIN_PATH,
+  fetchJson,
+  loginAdmin,
+  persistAuthSession,
+  readAuthSession,
+} from "@/app/_lib/admin-auth";
 
 describe("admin auth helper", () => {
   afterEach(() => {
@@ -21,7 +27,7 @@ describe("admin auth helper", () => {
   });
 
   it("returns token and persists session for valid credentials", async () => {
-    vi.spyOn(globalThis, "fetch").mockResolvedValue(
+    const fetchSpy = vi.spyOn(globalThis, "fetch").mockResolvedValue(
       new Response(JSON.stringify({ access_token: "token-123", token_type: "bearer" }), { status: 200 })
     );
 
@@ -32,6 +38,10 @@ describe("admin auth helper", () => {
       persistAuthSession(result.accessToken, "admin@example.com");
     }
 
+    expect(fetchSpy).toHaveBeenCalledWith(
+      ADMIN_AUTH_LOGIN_PATH,
+      expect.objectContaining({ method: "POST" })
+    );
     expect(readAuthSession()).toEqual({ token: "token-123", email: "admin@example.com" });
   });
 

@@ -65,7 +65,7 @@ const copy = {
     subtitle:
       "Single-page operational view of content/media/leads/SEO/tracking completeness with actionable links.",
     loginTitle: "Admin sign in",
-    loginSubtitle: "Use the same credentials as /v1/auth/login.",
+    loginSubtitle: "Use the same credentials as /api/v1/auth/login.",
     sessionActive: "Signed in session",
     sessionAs: "Signed in as",
     sessionUnknown: "Signed in (email unavailable)",
@@ -98,7 +98,7 @@ const copy = {
     title: "Admin Health / QA Dashboard",
     subtitle: "หน้าเดียวสำหรับดูความสมบูรณ์ของระบบและลิงก์แก้ปัญหาแบบ actionable",
     loginTitle: "เข้าสู่ระบบแอดมิน",
-    loginSubtitle: "ใช้บัญชีเดียวกับ /v1/auth/login",
+    loginSubtitle: "ใช้บัญชีเดียวกับ /api/v1/auth/login",
     sessionActive: "เซสชันที่เข้าสู่ระบบอยู่",
     sessionAs: "เข้าสู่ระบบเป็น",
     sessionUnknown: "เข้าสู่ระบบแล้ว (ไม่พบอีเมล)",

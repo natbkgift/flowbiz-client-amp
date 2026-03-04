@@ -12,7 +12,9 @@ function read(relativePath: string): string {
 describe("B14 admin workspace pages contract", () => {
   it("media workspace uses auth/session flow and full media CRUD endpoints", () => {
     const page = read("app/admin/media/page.tsx");
-    expect(page).toContain('fetch("/v1/auth/login"');
+    expect(page).toContain('from "@/app/_lib/admin-auth"');
+    expect(page).toContain("ADMIN_AUTH_LOGIN_PATH");
+    expect(page).not.toContain('fetch("/v1/auth/login"');
     expect(page).toContain("AUTH_SESSION_STORAGE_KEY");
     expect(page).toContain("LEGACY_TOKEN_STORAGE_KEY");
     expect(page).toContain("/admin/media/integrity-report?orphan_sample_limit=20");
@@ -44,7 +46,9 @@ describe("B14 admin workspace pages contract", () => {
 
   it("domain workspace uses domain CRUD + publish APIs and dashboard summaries", () => {
     const page = read("app/admin/domain/page.tsx");
-    expect(page).toContain('fetch("/v1/auth/login"');
+    expect(page).toContain('from "@/app/_lib/admin-auth"');
+    expect(page).toContain("ADMIN_AUTH_LOGIN_PATH");
+    expect(page).not.toContain('fetch("/v1/auth/login"');
     expect(page).toContain("/admin/areas?limit=40");
     expect(page).toContain("/admin/developers?limit=40");
     expect(page).toContain("/admin/projects?limit=40");
