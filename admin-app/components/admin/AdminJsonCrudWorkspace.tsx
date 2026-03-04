@@ -1,6 +1,6 @@
 "use client";
 
-import { type FormEvent, useEffect, useMemo, useState } from "react";
+import { type FormEvent, useCallback, useEffect, useMemo, useState } from "react";
 
 import {
   ADMIN_AUTH_LOGIN_PATH,
@@ -11,6 +11,7 @@ import {
   readAuthSession,
   toPrettyJson,
 } from "@/app/_lib/admin-auth";
+import { AdminDataTable, type AdminDataTableColumn } from "@/components/admin/AdminDataTable";
 
 type ListResponse = {
   data?: unknown[];
@@ -179,52 +180,105 @@ export function AdminJsonCrudWorkspace({ config }: { config: CrudConfig }) {
     return JSON.parse(input);
   }
 
-  function pickIdentifierFromRow(item: unknown): string {
+  const pickIdentifierFromRow = useCallback((item: unknown): string => {
     if (!item || typeof item !== "object") return "";
     const row = item as Record<string, unknown>;
     return pickString(row, config.identifierField) || pickString(row, "id") || pickString(row, "slug");
-  }
+  }, [config.identifierField]);
 
-  function renderRow(item: unknown, index: number) {
-    if (!item || typeof item !== "object") {
-      return (
-        <tr key={`row-${index}`}>
-          <td className="p-2" colSpan={5}>
-            {toPrettyJson(item)}
-          </td>
-        </tr>
-      );
-    }
-    const row = item as Record<string, unknown>;
-    const id = pickIdentifierFromRow(row);
-    const slug = pickString(row, "slug");
-    const name = pickString(row, "name") || pickString(row, "title") || pickString(row, "persona");
-    const status = pickString(row, "status");
-    const updatedAt =
-      pickString(row, "updated_at") ||
-      pickString(row, "created_at") ||
-      pickString(row, "claims_updated_at");
-    return (
-      <tr key={id || `row-${index}`} className="border-t">
-        <td className="p-2">
-          <button
-            className="btn btn-secondary"
-            type="button"
-            onClick={() => setIdentifier(id)}
-            disabled={!id}
-          >
-            Use
-          </button>
-        </td>
-        <td className="p-2">
-          <code>{id || "-"}</code>
-        </td>
-        <td className="p-2">{slug || "-"}</td>
-        <td className="p-2">{name || "-"}</td>
-        <td className="p-2">{status || updatedAt || "-"}</td>
-      </tr>
-    );
-  }
+  const tableColumns = useMemo<AdminDataTableColumn<unknown>[]>(
+    () => [
+      {
+        key: "use",
+        label: "Use",
+        renderCell: (item) => {
+          const id = pickIdentifierFromRow(item);
+          return (
+            <button className="btn btn-secondary" type="button" onClick={() => setIdentifier(id)} disabled={!id}>
+              Use
+            </button>
+          );
+        },
+        getSortValue: (item) => pickIdentifierFromRow(item),
+        getFilterValue: (item) => pickIdentifierFromRow(item),
+      },
+      {
+        key: "identifier",
+        label: "Identifier",
+        renderCell: (item) => {
+          const id = pickIdentifierFromRow(item);
+          return <code>{id || "-"}</code>;
+        },
+        getSortValue: (item) => pickIdentifierFromRow(item),
+        getFilterValue: (item) => pickIdentifierFromRow(item),
+      },
+      {
+        key: "slug",
+        label: "Slug",
+        renderCell: (item) => {
+          if (!item || typeof item !== "object") return "-";
+          return pickString(item as Record<string, unknown>, "slug") || "-";
+        },
+        getSortValue: (item) => (item && typeof item === "object" ? pickString(item as Record<string, unknown>, "slug") : ""),
+        getFilterValue: (item) =>
+          item && typeof item === "object" ? pickString(item as Record<string, unknown>, "slug") : "",
+      },
+      {
+        key: "name",
+        label: "Name/Title",
+        renderCell: (item) => {
+          if (!item || typeof item !== "object") return "-";
+          const row = item as Record<string, unknown>;
+          return pickString(row, "name") || pickString(row, "title") || pickString(row, "persona") || "-";
+        },
+        getSortValue: (item) => {
+          if (!item || typeof item !== "object") return "";
+          const row = item as Record<string, unknown>;
+          return pickString(row, "name") || pickString(row, "title") || pickString(row, "persona");
+        },
+        getFilterValue: (item) => {
+          if (!item || typeof item !== "object") return "";
+          const row = item as Record<string, unknown>;
+          return pickString(row, "name") || pickString(row, "title") || pickString(row, "persona");
+        },
+      },
+      {
+        key: "status",
+        label: "Status/Updated",
+        renderCell: (item) => {
+          if (!item || typeof item !== "object") return "-";
+          const row = item as Record<string, unknown>;
+          const status = pickString(row, "status");
+          const updatedAt =
+            pickString(row, "updated_at") ||
+            pickString(row, "created_at") ||
+            pickString(row, "claims_updated_at");
+          return status || updatedAt || "-";
+        },
+        getSortValue: (item) => {
+          if (!item || typeof item !== "object") return "";
+          const row = item as Record<string, unknown>;
+          return (
+            pickString(row, "status") ||
+            pickString(row, "updated_at") ||
+            pickString(row, "created_at") ||
+            pickString(row, "claims_updated_at")
+          );
+        },
+        getFilterValue: (item) => {
+          if (!item || typeof item !== "object") return "";
+          const row = item as Record<string, unknown>;
+          return (
+            pickString(row, "status") ||
+            pickString(row, "updated_at") ||
+            pickString(row, "created_at") ||
+            pickString(row, "claims_updated_at")
+          );
+        },
+      },
+    ],
+    [pickIdentifierFromRow]
+  );
 
   return (
     <main id="main-content" className="container content-stack">
@@ -448,20 +502,12 @@ export function AdminJsonCrudWorkspace({ config }: { config: CrudConfig }) {
             {items.length === 0 ? (
               <div className="state-empty">No records</div>
             ) : (
-              <div className="overflow-auto">
-                <table className="w-full text-sm">
-                  <thead className="bg-slate-100">
-                    <tr>
-                      <th className="text-left p-2">Use</th>
-                      <th className="text-left p-2">Identifier</th>
-                      <th className="text-left p-2">Slug</th>
-                      <th className="text-left p-2">Name/Title</th>
-                      <th className="text-left p-2">Status/Updated</th>
-                    </tr>
-                  </thead>
-                  <tbody>{items.map((item, index) => renderRow(item, index))}</tbody>
-                </table>
-              </div>
+              <AdminDataTable
+                rows={items}
+                columns={tableColumns}
+                getRowId={(item, index) => pickIdentifierFromRow(item) || `row-${index}`}
+                emptyLabel="No records"
+              />
             )}
           </section>
 
