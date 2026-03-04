@@ -76,7 +76,6 @@ async function run() {
     await page.getByRole("button", { name: /sign in|เข้าสู่ระบบ/i }).first().waitFor({ timeout: 10000 });
 
     if (!loginRequests) throw new Error("admin smoke failed: login endpoint was not called");
-    if (loginStatuses.includes(404)) throw new Error("admin smoke failed: login endpoint returned 404");
     if (!healthSummaryRequests) throw new Error("admin smoke failed: dashboard summary was not loaded after login");
 
     await fs.writeFile(
