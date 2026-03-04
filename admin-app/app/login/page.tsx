@@ -3,16 +3,12 @@
 import { FormEvent, useState } from 'react';
 import { useRouter } from 'next/navigation';
 
-import { apiRequest } from '../../lib/api';
+import {
+  ADMIN_AUTH_LOGIN_PATH,
+  loginAdmin,
+  persistAuthSession,
+} from '@/app/_lib/admin-auth';
 import { setToken } from '../../lib/auth-store';
-
-type LoginResponse = {
-  access_token: string;
-  token_type: string;
-};
-
-const AUTH_SESSION_STORAGE_KEY = 'flowbiz_admin_auth_session_v1';
-const LEGACY_TOKEN_STORAGE_KEY = 'flowbiz_admin_token';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -27,19 +23,14 @@ export default function LoginPage() {
     setError(null);
 
     try {
-      const response = await apiRequest<LoginResponse>('/v1/auth/login', {
-        method: 'POST',
-        body: JSON.stringify({ email, password })
-      });
-      const token = String(response.access_token || '').trim();
-      setToken(token);
-      if (typeof window !== 'undefined' && token) {
-        window.sessionStorage.setItem(
-          AUTH_SESSION_STORAGE_KEY,
-          JSON.stringify({ token, email: email.trim() }),
-        );
-        window.localStorage.removeItem(LEGACY_TOKEN_STORAGE_KEY);
+      const result = await loginAdmin(email, password);
+      if (!result.ok) {
+        throw new Error(`auth_failed:${result.status}`);
       }
+
+      const token = result.accessToken;
+      persistAuthSession(token, email.trim());
+      setToken(token);
       router.push('/admin/dashboard');
     } catch {
       setError('Login failed. Check email/password.');
@@ -61,6 +52,9 @@ export default function LoginPage() {
           <input id="login-password" className="w-full border rounded px-3 py-2" type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Password" autoComplete="current-password" />
         </div>
         {error ? <p className="text-sm text-red-600" role="alert">{error}</p> : null}
+        <p className="text-xs text-slate-500">
+          Auth endpoint: <code>{ADMIN_AUTH_LOGIN_PATH}</code>
+        </p>
         <button className="w-full bg-slate-900 text-white rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-slate-600 focus:ring-offset-2" disabled={loading}>
           {loading ? 'Signing in...' : 'Sign in'}
         </button>

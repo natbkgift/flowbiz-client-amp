@@ -68,4 +68,14 @@ describe("B14 admin workspace pages contract", () => {
     expect(page).toContain("loginAdmin");
     expect(page).not.toContain("fetch('/v1/auth/login'");
   });
+
+  it("login page uses canonical shared admin auth contract", () => {
+    const page = read("app/login/page.tsx");
+    expect(page).toContain("from '@/app/_lib/admin-auth'");
+    expect(page).toContain("loginAdmin");
+    expect(page).toContain("ADMIN_AUTH_LOGIN_PATH");
+    expect(page).toContain("persistAuthSession");
+    expect(page).not.toContain("'/v1/auth/login'");
+    expect(page).not.toContain('"/v1/auth/login"');
+  });
 });
