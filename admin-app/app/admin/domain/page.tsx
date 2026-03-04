@@ -1,6 +1,7 @@
 "use client";
 
 import { type FormEvent, useEffect, useState } from "react";
+import { ADMIN_AUTH_LOGIN_PATH } from "@/app/_lib/admin-auth";
 
 type Locale = "en" | "th";
 type EntityType = "areas" | "developers" | "projects";
@@ -233,7 +234,7 @@ export default function AdminDomainPage() {
     setAuthLoading(true);
     setAuthError(null);
     try {
-      const response = await fetch("/v1/auth/login", {
+      const response = await fetch(ADMIN_AUTH_LOGIN_PATH, {
         method: "POST",
         headers: { "content-type": "application/json" },
         body: JSON.stringify({ email: loginEmail.trim(), password: loginPassword }),

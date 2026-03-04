@@ -614,7 +614,7 @@ export default function HomeComposerPage() {
         {!isAuthenticated ? (
           <form className="crm-login-form" onSubmit={(event) => void login(event)}>
             <h2>Admin sign in</h2>
-            <p className="locale-safe">Use the same admin credentials as /v1/auth/login.</p>
+            <p className="locale-safe">Use the same admin credentials as /api/v1/auth/login.</p>
 
             <label className="field" htmlFor="home-composer-login-email">
               <span>Admin email</span>

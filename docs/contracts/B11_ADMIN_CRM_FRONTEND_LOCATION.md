@@ -11,7 +11,7 @@ Date: 2026-02-28
 - Evidence source: git history under `admin-app` shows `01bkgift` as dominant contributor.
 
 ## Auth session flow status
-- Admin CRM page now uses `POST /v1/auth/login` (`email/password`) and stores session token in `sessionStorage`.
+- Admin CRM page uses canonical `POST /api/v1/auth/login` (`email/password`) and stores session token in `sessionStorage`.
 - Legacy manual token key (`flowbiz_admin_token`) is migrated/cleared for backward compatibility.
 
 ## Scope lock for B11 UI

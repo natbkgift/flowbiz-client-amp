@@ -1,6 +1,7 @@
 "use client";
 
 import { type FormEvent, useEffect, useState } from "react";
+import { ADMIN_AUTH_LOGIN_PATH } from "@/app/_lib/admin-auth";
 
 type Locale = "en" | "th";
 
@@ -53,7 +54,7 @@ const copy = {
     subtitle:
       "Full media operations: upload, edit metadata, archive/restore, replace file, usage, and gallery sync.",
     loginTitle: "Admin sign in",
-    loginSubtitle: "Use the same credentials as /v1/auth/login.",
+    loginSubtitle: "Use the same credentials as /api/v1/auth/login.",
     email: "Admin email",
     password: "Password",
     signIn: "Sign in",
@@ -98,7 +99,7 @@ const copy = {
     title: "Admin Media Workspace",
     subtitle: "รองรับ full media operations: upload/edit/archive/restore/replace/usage/gallery sync",
     loginTitle: "เข้าสู่ระบบแอดมิน",
-    loginSubtitle: "ใช้บัญชีเดียวกับ /v1/auth/login",
+    loginSubtitle: "ใช้บัญชีเดียวกับ /api/v1/auth/login",
     email: "อีเมลแอดมิน",
     password: "รหัสผ่าน",
     signIn: "เข้าสู่ระบบ",
@@ -298,7 +299,7 @@ export default function AdminMediaPage() {
     setAuthLoading(true);
     setAuthError(null);
     try {
-      const response = await fetch("/v1/auth/login", {
+      const response = await fetch(ADMIN_AUTH_LOGIN_PATH, {
         method: "POST",
         headers: { "content-type": "application/json" },
         body: JSON.stringify({ email, password }),

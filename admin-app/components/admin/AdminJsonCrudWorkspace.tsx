@@ -3,6 +3,7 @@
 import { type FormEvent, useEffect, useMemo, useState } from "react";
 
 import {
+  ADMIN_AUTH_LOGIN_PATH,
   clearAuthSession,
   fetchJson,
   type LoginResponse,
@@ -124,7 +125,7 @@ export function AdminJsonCrudWorkspace({ config }: { config: CrudConfig }) {
     setAuthLoading(true);
     setAuthError(null);
     try {
-      const response = await fetch("/v1/auth/login", {
+      const response = await fetch(ADMIN_AUTH_LOGIN_PATH, {
         method: "POST",
         headers: { "content-type": "application/json" },
         body: JSON.stringify({ email: nextEmail, password: nextPassword }),

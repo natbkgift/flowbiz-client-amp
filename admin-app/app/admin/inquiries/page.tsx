@@ -49,7 +49,7 @@ const copy = {
     subtitle:
       "Operational list/detail for lead follow-up, assignment, notes timeline, and contact quick actions.",
     loginTitle: "Admin sign in",
-    loginSubtitle: "Use the same admin credentials as /v1/auth/login.",
+    loginSubtitle: "Use the same admin credentials as /api/v1/auth/login.",
     sessionActive: "Signed in session",
     sessionAs: "Signed in as",
     sessionUnknown: "Signed in (email unavailable)",
@@ -102,7 +102,7 @@ const copy = {
     subtitle:
       "หน้าหลังบ้านสำหรับติดตามลีดแบบใช้งานจริง ครบทั้งรายการ รายละเอียด ไทม์ไลน์ และ quick actions.",
     loginTitle: "เข้าสู่ระบบแอดมิน",
-    loginSubtitle: "ใช้บัญชีแอดมินเดียวกับเส้นทาง /v1/auth/login",
+    loginSubtitle: "ใช้บัญชีแอดมินเดียวกับเส้นทาง /api/v1/auth/login",
     sessionActive: "เซสชันที่เข้าสู่ระบบอยู่",
     sessionAs: "เข้าสู่ระบบเป็น",
     sessionUnknown: "เข้าสู่ระบบแล้ว (ไม่พบอีเมล)",
