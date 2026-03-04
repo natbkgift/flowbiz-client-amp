@@ -502,7 +502,7 @@ export function AdminJsonCrudWorkspace({ config }: { config: CrudConfig }) {
               <AdminDataTable
                 rows={items}
                 columns={tableColumns}
-                getRowId={(item) => pickIdentifierFromRow(item) || toPrettyJson(item)}
+                getRowId={(item) => pickIdentifierFromRow(item) || JSON.stringify(item)}
                 emptyLabel="No records"
               />
             )}
