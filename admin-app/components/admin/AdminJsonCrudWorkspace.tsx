@@ -1,6 +1,6 @@
 "use client";
 
-import { type FormEvent, useEffect, useMemo, useState } from "react";
+import { type FormEvent, useCallback, useEffect, useMemo, useState } from "react";
 
 import {
   ADMIN_AUTH_LOGIN_PATH,
@@ -180,102 +180,105 @@ export function AdminJsonCrudWorkspace({ config }: { config: CrudConfig }) {
     return JSON.parse(input);
   }
 
-  function pickIdentifierFromRow(item: unknown): string {
+  const pickIdentifierFromRow = useCallback((item: unknown): string => {
     if (!item || typeof item !== "object") return "";
     const row = item as Record<string, unknown>;
     return pickString(row, config.identifierField) || pickString(row, "id") || pickString(row, "slug");
-  }
+  }, [config.identifierField]);
 
-  const tableColumns: AdminDataTableColumn<unknown>[] = [
-    {
-      key: "use",
-      label: "Use",
-      renderCell: (item) => {
-        const id = pickIdentifierFromRow(item);
-        return (
-          <button className="btn btn-secondary" type="button" onClick={() => setIdentifier(id)} disabled={!id}>
-            Use
-          </button>
-        );
+  const tableColumns = useMemo<AdminDataTableColumn<unknown>[]>(
+    () => [
+      {
+        key: "use",
+        label: "Use",
+        renderCell: (item) => {
+          const id = pickIdentifierFromRow(item);
+          return (
+            <button className="btn btn-secondary" type="button" onClick={() => setIdentifier(id)} disabled={!id}>
+              Use
+            </button>
+          );
+        },
+        getSortValue: (item) => pickIdentifierFromRow(item),
+        getFilterValue: (item) => pickIdentifierFromRow(item),
       },
-      getSortValue: (item) => pickIdentifierFromRow(item),
-      getFilterValue: (item) => pickIdentifierFromRow(item),
-    },
-    {
-      key: "identifier",
-      label: "Identifier",
-      renderCell: (item) => {
-        const id = pickIdentifierFromRow(item);
-        return <code>{id || "-"}</code>;
+      {
+        key: "identifier",
+        label: "Identifier",
+        renderCell: (item) => {
+          const id = pickIdentifierFromRow(item);
+          return <code>{id || "-"}</code>;
+        },
+        getSortValue: (item) => pickIdentifierFromRow(item),
+        getFilterValue: (item) => pickIdentifierFromRow(item),
       },
-      getSortValue: (item) => pickIdentifierFromRow(item),
-      getFilterValue: (item) => pickIdentifierFromRow(item),
-    },
-    {
-      key: "slug",
-      label: "Slug",
-      renderCell: (item) => {
-        if (!item || typeof item !== "object") return "-";
-        return pickString(item as Record<string, unknown>, "slug") || "-";
+      {
+        key: "slug",
+        label: "Slug",
+        renderCell: (item) => {
+          if (!item || typeof item !== "object") return "-";
+          return pickString(item as Record<string, unknown>, "slug") || "-";
+        },
+        getSortValue: (item) => (item && typeof item === "object" ? pickString(item as Record<string, unknown>, "slug") : ""),
+        getFilterValue: (item) =>
+          item && typeof item === "object" ? pickString(item as Record<string, unknown>, "slug") : "",
       },
-      getSortValue: (item) => (item && typeof item === "object" ? pickString(item as Record<string, unknown>, "slug") : ""),
-      getFilterValue: (item) =>
-        item && typeof item === "object" ? pickString(item as Record<string, unknown>, "slug") : "",
-    },
-    {
-      key: "name",
-      label: "Name/Title",
-      renderCell: (item) => {
-        if (!item || typeof item !== "object") return "-";
-        const row = item as Record<string, unknown>;
-        return pickString(row, "name") || pickString(row, "title") || pickString(row, "persona") || "-";
+      {
+        key: "name",
+        label: "Name/Title",
+        renderCell: (item) => {
+          if (!item || typeof item !== "object") return "-";
+          const row = item as Record<string, unknown>;
+          return pickString(row, "name") || pickString(row, "title") || pickString(row, "persona") || "-";
+        },
+        getSortValue: (item) => {
+          if (!item || typeof item !== "object") return "";
+          const row = item as Record<string, unknown>;
+          return pickString(row, "name") || pickString(row, "title") || pickString(row, "persona");
+        },
+        getFilterValue: (item) => {
+          if (!item || typeof item !== "object") return "";
+          const row = item as Record<string, unknown>;
+          return pickString(row, "name") || pickString(row, "title") || pickString(row, "persona");
+        },
       },
-      getSortValue: (item) => {
-        if (!item || typeof item !== "object") return "";
-        const row = item as Record<string, unknown>;
-        return pickString(row, "name") || pickString(row, "title") || pickString(row, "persona");
+      {
+        key: "status",
+        label: "Status/Updated",
+        renderCell: (item) => {
+          if (!item || typeof item !== "object") return "-";
+          const row = item as Record<string, unknown>;
+          const status = pickString(row, "status");
+          const updatedAt =
+            pickString(row, "updated_at") ||
+            pickString(row, "created_at") ||
+            pickString(row, "claims_updated_at");
+          return status || updatedAt || "-";
+        },
+        getSortValue: (item) => {
+          if (!item || typeof item !== "object") return "";
+          const row = item as Record<string, unknown>;
+          return (
+            pickString(row, "status") ||
+            pickString(row, "updated_at") ||
+            pickString(row, "created_at") ||
+            pickString(row, "claims_updated_at")
+          );
+        },
+        getFilterValue: (item) => {
+          if (!item || typeof item !== "object") return "";
+          const row = item as Record<string, unknown>;
+          return (
+            pickString(row, "status") ||
+            pickString(row, "updated_at") ||
+            pickString(row, "created_at") ||
+            pickString(row, "claims_updated_at")
+          );
+        },
       },
-      getFilterValue: (item) => {
-        if (!item || typeof item !== "object") return "";
-        const row = item as Record<string, unknown>;
-        return pickString(row, "name") || pickString(row, "title") || pickString(row, "persona");
-      },
-    },
-    {
-      key: "status",
-      label: "Status/Updated",
-      renderCell: (item) => {
-        if (!item || typeof item !== "object") return "-";
-        const row = item as Record<string, unknown>;
-        const status = pickString(row, "status");
-        const updatedAt =
-          pickString(row, "updated_at") ||
-          pickString(row, "created_at") ||
-          pickString(row, "claims_updated_at");
-        return status || updatedAt || "-";
-      },
-      getSortValue: (item) => {
-        if (!item || typeof item !== "object") return "";
-        const row = item as Record<string, unknown>;
-        return (
-          pickString(row, "status") ||
-          pickString(row, "updated_at") ||
-          pickString(row, "created_at") ||
-          pickString(row, "claims_updated_at")
-        );
-      },
-      getFilterValue: (item) => {
-        if (!item || typeof item !== "object") return "";
-        const row = item as Record<string, unknown>;
-        return (
-          pickString(row, "status") ||
-          pickString(row, "updated_at") ||
-          pickString(row, "created_at") ||
-          pickString(row, "claims_updated_at")
-        );
-      },
-    },
-  ];
+    ],
+    [pickIdentifierFromRow]
+  );
 
   return (
     <main id="main-content" className="container content-stack">
@@ -502,7 +505,7 @@ export function AdminJsonCrudWorkspace({ config }: { config: CrudConfig }) {
               <AdminDataTable
                 rows={items}
                 columns={tableColumns}
-                getRowId={(item) => pickIdentifierFromRow(item) || JSON.stringify(item)}
+                getRowId={(item, index) => pickIdentifierFromRow(item) || `row-${index}`}
                 emptyLabel="No records"
               />
             )}

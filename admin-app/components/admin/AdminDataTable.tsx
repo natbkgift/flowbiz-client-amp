@@ -1,4 +1,6 @@
-import { type ReactNode, useMemo, useState } from "react";
+"use client";
+
+import { type ReactNode, useEffect, useId, useMemo, useState } from "react";
 
 import {
   clampPage,
@@ -38,29 +40,38 @@ export function AdminDataTable<T>({
   filterLabel = "Filter table rows",
   onBulkSelectionChange,
 }: AdminDataTableProps<T>) {
+  const hasColumns = columns.length > 0;
   const [filterQuery, setFilterQuery] = useState("");
-  const [sortKey, setSortKey] = useState(columns[0]?.key || "");
+  const [sortKey, setSortKey] = useState(() => columns[0]?.key || "");
   const [sortDirection, setSortDirection] = useState<SortDirection>("asc");
   const [page, setPage] = useState(1);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const filterInputId = useId();
 
-  if (columns.length === 0) {
-    return <div className="state-empty">{emptyLabel}</div>;
-  }
+  useEffect(() => {
+    if (!hasColumns) return;
+    const isValidSortKey = columns.some((column) => column.key === sortKey);
+    if (!isValidSortKey) {
+      setSortKey(columns[0]?.key || "");
+    }
+  }, [columns, hasColumns, sortKey]);
 
   const filteredRows = useMemo(
-    () =>
-      filterRows(rows, (row) => {
+    () => {
+      if (!hasColumns) return [];
+      return filterRows(rows, (row) => {
         const values = columns.map((column) => {
           const source = column.getFilterValue ? column.getFilterValue(row) : column.getSortValue?.(row);
           return normalizeTableValue(source);
         });
         return values.join(" ");
-      }, filterQuery),
-    [columns, filterQuery, rows]
+      }, filterQuery);
+    },
+    [columns, filterQuery, hasColumns, rows]
   );
 
   const sortedRows = useMemo(() => {
+    if (!hasColumns) return filteredRows;
     const sortColumn = columns.find((column) => column.key === sortKey) || columns[0];
     if (!sortColumn) return filteredRows;
     return sortRows(
@@ -68,16 +79,37 @@ export function AdminDataTable<T>({
       (row) => normalizeTableValue(sortColumn.getSortValue ? sortColumn.getSortValue(row) : sortColumn.getFilterValue?.(row)),
       sortDirection
     );
-  }, [columns, filteredRows, sortDirection, sortKey]);
+  }, [columns, filteredRows, hasColumns, sortDirection, sortKey]);
 
   const effectivePage = clampPage(page, sortedRows.length, pageSize);
+
+  useEffect(() => {
+    if (page !== effectivePage) {
+      setPage(effectivePage);
+    }
+  }, [effectivePage, page]);
+
   const paginatedRows = useMemo(
     () => paginateRows(sortedRows, effectivePage, pageSize),
     [effectivePage, pageSize, sortedRows]
   );
 
-  const pageIds = paginatedRows.map((row) => getRowId(row));
+  const paginatedRowsWithIds = useMemo(
+    () =>
+      paginatedRows.map((row, index) => ({
+        row,
+        id: getRowId(row, (effectivePage - 1) * pageSize + index),
+      })),
+    [effectivePage, getRowId, pageSize, paginatedRows]
+  );
+
+  const pageIds = paginatedRowsWithIds.map(({ id }) => id);
   const allOnPageSelected = pageIds.length > 0 && pageIds.every((id) => selectedIds.has(id));
+  const totalPages = Math.max(1, Math.ceil(sortedRows.length / pageSize));
+
+  if (!hasColumns) {
+    return <div className="state-empty">{emptyLabel}</div>;
+  }
 
   function updateSelected(next: Set<string>) {
     setSelectedIds(next);
@@ -97,10 +129,10 @@ export function AdminDataTable<T>({
   return (
     <div className="dashboard-table-wrap">
       <div className="card-actions">
-        <label className="field" htmlFor="admin-data-table-filter">
+        <label className="field" htmlFor={filterInputId}>
           <span>{filterLabel}</span>
           <input
-            id="admin-data-table-filter"
+            id={filterInputId}
             aria-label={filterLabel}
             value={filterQuery}
             onChange={(event) => {
@@ -144,8 +176,7 @@ export function AdminDataTable<T>({
               </tr>
             </thead>
             <tbody>
-              {paginatedRows.map((row) => {
-                const id = getRowId(row);
+              {paginatedRowsWithIds.map(({ row, id }) => {
                 return (
                   <tr key={id}>
                     <td>
@@ -178,7 +209,7 @@ export function AdminDataTable<T>({
             <button
               className="btn btn-secondary"
               type="button"
-              disabled={effectivePage >= Math.ceil(sortedRows.length / pageSize)}
+              disabled={effectivePage >= totalPages}
               onClick={() => setPage((current) => current + 1)}
             >
               Next
