@@ -4709,24 +4709,26 @@ summary.mobile-nav__trigger::-webkit-details-marker {
 }
 
 .admin-shell-mobile-row {
-  display: flex;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 8px;
-  overflow-x: auto;
-  padding-bottom: 2px;
-  scrollbar-width: thin;
+  overflow: visible;
 }
 
 .admin-shell-mobile-link {
   display: inline-flex;
+  width: 100%;
   align-items: center;
   justify-content: center;
-  white-space: nowrap;
+  white-space: normal;
+  text-align: center;
   border: 1px solid var(--color-gray-200);
   border-radius: 999px;
   min-height: var(--tap-target-min);
-  padding: 10px 14px;
+  padding: 10px 12px;
   font-size: 0.84rem;
   font-weight: 600;
+  line-height: 1.25;
   color: var(--color-text-secondary);
   background: #fff;
 }
@@ -4756,6 +4758,12 @@ summary.mobile-nav__trigger::-webkit-details-marker {
 
   .admin-shell-content {
     padding-top: 12px;
+  }
+}
+
+@media (min-width: 640px) and (max-width: 1024px) {
+  .admin-shell-mobile-row {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 }
 
