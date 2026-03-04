@@ -524,6 +524,64 @@ Evidence produced:
 
 ---
 
+### Round: 2026-03-04 (`Next.js` Advisory Closure + `dompurify` Patch)
+
+Scope completed in this round:
+- Upgraded `next` to `15.5.10` (security-fixed line for current `npm audit` advisories).
+- Upgraded `eslint-config-next` to `15.5.10`.
+- Upgraded `dompurify` to `3.3.1`.
+- Applied Next 15 compatibility updates:
+  - page `revalidate` exports changed to static literal (`300`) for route config parsing.
+  - removed `ssr: false` dynamic usage from server components by importing client components directly.
+  - applied official codemod for async request API (`params` / `searchParams`) in app routes.
+
+Commands executed and result:
+```powershell
+# Dependency/security update
+npm --prefix admin-app install next@15.5.10 --save-exact
+npm --prefix admin-app install --save-dev --save-exact eslint-config-next@15.5.10
+npm --prefix admin-app install dompurify@3.3.1 --save-exact
+
+# Next 15 migration helper
+npx @next/codemod@canary next-async-request-api admin-app/app --yes --force
+
+# Validation
+npm --prefix admin-app audit --omit=dev --json
+npm --prefix admin-app run build
+npm --prefix admin-app run test
+$env:ADMIN_SMOKE_BASE_URL='https://amppattaya.com'
+npm --prefix admin-app run test:smoke:admin
+```
+
+Validation result summary (`2026-03-04`):
+- `npm audit --omit=dev`: `0` vulnerabilities (`moderate/high/critical = 0`).
+- `next build`: PASS on `Next.js 15.5.10`.
+- `vitest`: PASS (`16 files`, `166 tests`).
+- Admin smoke e2e script: PASS (login path exercised with `401 -> 200` and dashboard health summary loaded).
+
+Playwright UAT login success flow (`2026-03-04`, real credential):
+- Environment endpoint used: `https://amppattaya.com` (no separate staging URL configured in repo docs/env at time of run).
+- Result: `6/6` routes passed.
+- Routes:
+  - `/admin/dashboard`
+  - `/admin/inquiries`
+  - `/admin/home-composer`
+  - `/admin/seo`
+  - `/admin/layout`
+  - `/admin/imports`
+
+Deploy smoke verification from VPS runtime (`2026-03-04`):
+- `healthz=200`
+- `properties=200`
+- `projects=200`
+- `admin_login=200`
+
+Evidence produced:
+- `admin-app/artifacts/admin-smoke/admin-smoke-summary.json`
+- `admin-app/artifacts/admin-uat/admin-uat-6-pages-summary.json`
+
+---
+
 ## Final Sign-off (Release Candidate)
 
 Mark release candidate as `production-ready` only when:

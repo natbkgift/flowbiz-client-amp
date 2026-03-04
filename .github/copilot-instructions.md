@@ -3,7 +3,7 @@
 This repository is production-critical for `amppattaya.com`.
 
 ## Scope and Stack
-- Frontend admin/site app: `admin-app` (Next.js 14, React 18).
+- Frontend admin/site app: `admin-app` (Next.js 15, React 18).
 - Backend/API and ops scripts exist in repo root and `scripts/`, `ops/`, `apps/api`.
 
 ## Branch and PR Rules

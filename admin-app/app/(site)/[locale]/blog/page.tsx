@@ -1,12 +1,11 @@
 import type { Metadata } from 'next';
 
 import { Container } from '@/components/layout/Container';
-import { PAGE_REVALIDATE_SECONDS } from '@/app/_lib/constants';
 import { getDictionary, normalizeLocale } from '@/app/_lib/i18n/get-dictionary';
 import { makePageMetadata } from '@/app/_lib/i18n/metadata';
 import { fetchBlogPosts, type ContentLocalizedText } from '@/app/_lib/public-api-server';
 
-export const revalidate = PAGE_REVALIDATE_SECONDS;
+export const revalidate = 300;
 
 function pageCopy(locale: 'en' | 'th') {
   if (locale === 'th') {
@@ -46,18 +45,20 @@ function formatDate(locale: 'en' | 'th', value: string | null | undefined): stri
   return formatter.format(date);
 }
 
-export async function generateMetadata({
-  params,
-}: {
-  params: { locale: string };
-}): Promise<Metadata> {
+export async function generateMetadata(
+  props: {
+    params: Promise<{ locale: string }>;
+  }
+): Promise<Metadata> {
+  const params = await props.params;
   const locale = normalizeLocale(params.locale);
   const dict = getDictionary(locale);
   const copy = pageCopy(locale);
   return makePageMetadata(locale, 'blog', copy.title, copy.description, dict.brand.name);
 }
 
-export default async function BlogPage({ params }: { params: { locale: string } }) {
+export default async function BlogPage(props: { params: Promise<{ locale: string }> }) {
+  const params = await props.params;
   const locale = normalizeLocale(params.locale);
   const copy = pageCopy(locale);
 
@@ -104,3 +105,4 @@ export default async function BlogPage({ params }: { params: { locale: string } 
     </main>
   );
 }
+

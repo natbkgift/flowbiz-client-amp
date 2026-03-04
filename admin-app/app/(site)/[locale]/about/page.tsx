@@ -4,25 +4,26 @@ import { IconCheck, IconShield, IconTrendingUp, IconUsers } from '@/components/i
 import { getDictionary, normalizeLocale } from '@/app/_lib/i18n/get-dictionary';
 import { makePageMetadata } from '@/app/_lib/i18n/metadata';
 import { withLocale } from '@/app/_lib/i18n/routing';
-import { PAGE_REVALIDATE_SECONDS } from '@/app/_lib/constants';
 
-export const revalidate = PAGE_REVALIDATE_SECONDS;
+export const revalidate = 300;
 
-export async function generateMetadata({
-  params,
-}: {
-  params: { locale: string };
-}) {
+export async function generateMetadata(
+  props: {
+    params: Promise<{ locale: string }>;
+  }
+) {
+  const params = await props.params;
   const locale = normalizeLocale(params.locale);
   const dict = getDictionary(locale);
   return makePageMetadata(locale, 'about', dict.about.heroTitle, dict.about.metaDescription, dict.brand.name);
 }
 
-export default function AboutPage({
-  params,
-}: {
-  params: { locale: string };
-}) {
+export default async function AboutPage(
+  props: {
+    params: Promise<{ locale: string }>;
+  }
+) {
+  const params = await props.params;
   const locale = normalizeLocale(params.locale);
   const dict = getDictionary(locale);
 
@@ -129,3 +130,4 @@ export default function AboutPage({
     </main>
   );
 }
+

@@ -12,15 +12,15 @@ import {
   type SmartFinderRiskTolerance,
   type SmartFinderTimeline,
 } from '@/app/_lib/public-api-server';
-import { PAGE_REVALIDATE_SECONDS } from '@/app/_lib/constants';
 
-export const revalidate = PAGE_REVALIDATE_SECONDS;
+export const revalidate = 300;
 
-export async function generateMetadata({
-  params,
-}: {
-  params: { locale: string };
-}) {
+export async function generateMetadata(
+  props: {
+    params: Promise<{ locale: string }>;
+  }
+) {
+  const params = await props.params;
   const locale = normalizeLocale(params.locale);
   const dict = getDictionary(locale);
   return makePageMetadata(locale, 'smart-finder', dict.smartFinder.title, dict.smartFinder.subtitle, dict.brand.name);
@@ -66,13 +66,14 @@ function normalizeQuota(value: string | null): SmartFinderForeignQuota | null {
   return null;
 }
 
-export default async function SmartFinderPage({
-  params,
-  searchParams,
-}: {
-  params: { locale: string };
-  searchParams?: Record<string, string | string[] | undefined>;
-}) {
+export default async function SmartFinderPage(
+  props: {
+    params: Promise<{ locale: string }>;
+    searchParams?: Promise<Record<string, string | string[] | undefined>>;
+  }
+) {
+  const searchParams = await props.searchParams;
+  const params = await props.params;
   const locale = normalizeLocale(params.locale);
   const dict = getDictionary(locale);
 
@@ -355,3 +356,4 @@ export default async function SmartFinderPage({
     </main>
   );
 }
+

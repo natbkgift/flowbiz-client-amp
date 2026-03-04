@@ -1,15 +1,11 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import Image from 'next/image';
-import dynamic from 'next/dynamic';
 
 import { Container } from '@/components/layout/Container';
 import { Breadcrumbs } from '@/components/layout/Breadcrumbs';
 
-const LeadForm = dynamic(
-  () => import('@/components/forms/LeadForm').then((m) => m.LeadForm),
-  { ssr: false },
-);
+import { LeadForm } from '@/components/forms/LeadForm';
 import { IconBed, IconBath, IconArea } from '@/components/icons/SvgIcons';
 import { fetchPropertyBySlug } from '@/app/_lib/public-api-server';
 import { CTA } from '@/app/_lib/public-cta';
@@ -17,14 +13,14 @@ import { resolveImageUrl } from '@/app/_lib/public-api-shared';
 import { getDictionary, normalizeLocale } from '@/app/_lib/i18n/get-dictionary';
 import { ogLocale } from '@/app/_lib/i18n/routing';
 import { getInternalLinks } from '@/app/_lib/internal-links';
-import { PAGE_REVALIDATE_SECONDS } from '@/app/_lib/constants';
 
-export const revalidate = PAGE_REVALIDATE_SECONDS;
+export const revalidate = 300;
 
-type PageProps = { params: { locale: string; slug: string } };
+type PageProps = { params: Promise<{ locale: string; slug: string }> };
 const PROPERTY_DETAIL_FALLBACK = '/media/project-covers/the-riviera-jomtien/cover_31dde7af340e.jpg';
 
-export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+export async function generateMetadata(props: PageProps): Promise<Metadata> {
+  const params = await props.params;
   const locale = normalizeLocale(params.locale);
   const dict = getDictionary(locale);
   const canonical = `/${locale}/property/${encodeURIComponent(params.slug)}`;
@@ -79,7 +75,8 @@ function formatPriceTHB(price: number): string {
   return `฿${Math.round(price).toLocaleString()}`;
 }
 
-export default async function PropertyPage({ params }: PageProps) {
+export default async function PropertyPage(props: PageProps) {
+  const params = await props.params;
   const locale = normalizeLocale(params.locale);
   const dict = getDictionary(locale);
   const internalLinks = getInternalLinks(locale, dict, { from: 'property_detail', includeProjects: true });
@@ -330,3 +327,5 @@ export default async function PropertyPage({ params }: PageProps) {
     </main>
   );
 }
+
+

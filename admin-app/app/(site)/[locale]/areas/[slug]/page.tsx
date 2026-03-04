@@ -5,9 +5,8 @@ import { Container } from '@/components/layout/Container';
 import { getDictionary, normalizeLocale } from '@/app/_lib/i18n/get-dictionary';
 import { withLocale, ogLocale } from '@/app/_lib/i18n/routing';
 import { fetchAreaStatisticsBySlug } from '@/app/_lib/public-api-server';
-import { PAGE_REVALIDATE_SECONDS } from '@/app/_lib/constants';
 
-export const revalidate = PAGE_REVALIDATE_SECONDS;
+export const revalidate = 300;
 
 const AREA_SLUGS = ['jomtien', 'pratumnak', 'wongamat', 'central'] as const;
 
@@ -25,11 +24,12 @@ export function generateStaticParams() {
   ]);
 }
 
-export async function generateMetadata({
-  params,
-}: {
-  params: { locale: string; slug: string };
-}): Promise<Metadata> {
+export async function generateMetadata(
+  props: {
+    params: Promise<{ locale: string; slug: string }>;
+  }
+): Promise<Metadata> {
+  const params = await props.params;
   const locale = normalizeLocale(params.locale);
   const dict = getDictionary(locale);
 
@@ -61,11 +61,12 @@ export async function generateMetadata({
   };
 }
 
-export default async function AreaPage({
-  params,
-}: {
-  params: { locale: string; slug: string };
-}) {
+export default async function AreaPage(
+  props: {
+    params: Promise<{ locale: string; slug: string }>;
+  }
+) {
+  const params = await props.params;
   const locale = normalizeLocale(params.locale);
   const dict = getDictionary(locale);
 
@@ -170,3 +171,4 @@ export default async function AreaPage({
     </main>
   );
 }
+

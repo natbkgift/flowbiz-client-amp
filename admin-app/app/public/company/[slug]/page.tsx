@@ -1,12 +1,13 @@
 'use client';
 
 import DOMPurify from 'dompurify';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState, use } from 'react';
 
 import { API_BASE } from '../../_shared/api';
 import type { CompanyInfoItem } from '../../_shared/types';
 
-export default function PublicCompanyDetailPage({ params }: { params: { slug: string } }) {
+export default function PublicCompanyDetailPage(props: { params: Promise<{ slug: string }> }) {
+  const params = use(props.params);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [info, setInfo] = useState<CompanyInfoItem | null>(null);

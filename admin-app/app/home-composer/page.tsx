@@ -1,1 +1,1 @@
-export { default } from "@/app/admin/home-composer/page";
+export { default } from '@/app/admin/home-composer/page';

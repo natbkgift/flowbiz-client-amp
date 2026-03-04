@@ -3,25 +3,26 @@ import type { Metadata } from 'next';
 import { Container } from '@/components/layout/Container';
 import { getDictionary, normalizeLocale } from '@/app/_lib/i18n/get-dictionary';
 import { makePageMetadata } from '@/app/_lib/i18n/metadata';
-import { PAGE_REVALIDATE_SECONDS } from '@/app/_lib/constants';
 
-export const revalidate = PAGE_REVALIDATE_SECONDS;
+export const revalidate = 300;
 
-export async function generateMetadata({
-  params,
-}: {
-  params: { locale: string };
-}): Promise<Metadata> {
+export async function generateMetadata(
+  props: {
+    params: Promise<{ locale: string }>;
+  }
+): Promise<Metadata> {
+  const params = await props.params;
   const locale = normalizeLocale(params.locale);
   const dict = getDictionary(locale);
   return makePageMetadata(locale, '/privacy', `Privacy Policy | ${dict.brand.name}`, 'Privacy Policy & Data Protection', dict.brand.name);
 }
 
-export default function PrivacyPage({
-  params,
-}: {
-  params: { locale: string };
-}) {
+export default async function PrivacyPage(
+  props: {
+    params: Promise<{ locale: string }>;
+  }
+) {
+  const params = await props.params;
   const locale = normalizeLocale(params.locale);
   const isTh = locale === 'th';
 
@@ -95,3 +96,4 @@ export default function PrivacyPage({
     </main>
   );
 }
+

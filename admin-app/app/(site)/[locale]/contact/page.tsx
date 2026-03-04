@@ -8,27 +8,28 @@ const LeadForm = dynamic(() => import('@/components/forms/LeadForm').then(m => m
 import { CTA } from '@/app/_lib/public-cta';
 import { getDictionary, normalizeLocale } from '@/app/_lib/i18n/get-dictionary';
 import { makePageMetadata } from '@/app/_lib/i18n/metadata';
-import { PAGE_REVALIDATE_SECONDS } from '@/app/_lib/constants';
 
-export const revalidate = PAGE_REVALIDATE_SECONDS;
+export const revalidate = 300;
 
-export async function generateMetadata({
-  params,
-}: {
-  params: { locale: string };
-}) {
+export async function generateMetadata(
+  props: {
+    params: Promise<{ locale: string }>;
+  }
+) {
+  const params = await props.params;
   const locale = normalizeLocale(params.locale);
   const dict = getDictionary(locale);
   return makePageMetadata(locale, 'contact', dict.nav.contact, dict.contact.subtitle, dict.brand.name);
 }
 
-export default function ContactPage({
-  params,
-  searchParams,
-}: {
-  params: { locale: string };
-  searchParams?: Record<string, string | string[] | undefined>;
-}) {
+export default async function ContactPage(
+  props: {
+    params: Promise<{ locale: string }>;
+    searchParams?: Promise<Record<string, string | string[] | undefined>>;
+  }
+) {
+  const searchParams = await props.searchParams;
+  const params = await props.params;
   const locale = normalizeLocale(params.locale);
   const dict = getDictionary(locale);
   const msg =
@@ -90,3 +91,4 @@ export default function ContactPage({
     </main>
   );
 }
+
