@@ -4731,6 +4731,8 @@ summary.mobile-nav__trigger::-webkit-details-marker {
   line-height: 1.25;
   color: var(--color-text-secondary);
   background: #fff;
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 .admin-shell-mobile-link.is-active {
