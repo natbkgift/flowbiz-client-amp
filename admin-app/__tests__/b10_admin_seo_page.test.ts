@@ -12,12 +12,10 @@ function read(relativePath: string): string {
 describe("B10 admin SEO page contract", () => {
   it("keeps admin auth/session flow compatible with existing admin pages", () => {
     const page = read("app/admin/seo/page.tsx");
-    expect(page).toContain('fetch("/v1/auth/login"');
-    expect(page).toContain("AUTH_SESSION_STORAGE_KEY");
-    expect(page).toContain("window.sessionStorage.setItem");
-    expect(page).toContain("window.sessionStorage.getItem");
-    expect(page).toContain("window.sessionStorage.removeItem");
-    expect(page).toContain("LEGACY_TOKEN_STORAGE_KEY");
+    expect(page).toContain('from "@/app/_lib/admin-auth"');
+    expect(page).toContain("loginAdmin");
+    expect(page).not.toContain('fetch("/v1/auth/login"');
+    expect(page).not.toContain("login_failed:");
   });
 
   it("wires B10 endpoints for overrides redirects schema and broken-links", () => {

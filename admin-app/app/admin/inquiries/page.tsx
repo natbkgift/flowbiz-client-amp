@@ -2,6 +2,8 @@
 
 import { type FormEvent, useEffect, useMemo, useState } from "react";
 
+import { clearAuthSession, loginAdmin, persistAuthSession, readAuthSession } from "@/app/_lib/admin-auth";
+
 type Locale = "en" | "th";
 
 type InquiryItem = {
@@ -31,16 +33,6 @@ type TimelineEvent = {
   actor_user_id: string | null;
 };
 
-type LoginResponse = {
-  access_token: string;
-  token_type: string;
-};
-
-type AuthSession = {
-  token: string;
-  email: string;
-};
-
 type PaginatedResponse<T> = {
   data: T[];
   meta: {
@@ -51,9 +43,6 @@ type PaginatedResponse<T> = {
 };
 
 const FOLLOW_UP_STATUSES = ["pending", "scheduled", "completed", "no_response"] as const;
-const AUTH_SESSION_STORAGE_KEY = "flowbiz_admin_auth_session_v1";
-const LEGACY_TOKEN_STORAGE_KEY = "flowbiz_admin_token";
-
 const copy = {
   en: {
     title: "Inquiries CRM",
@@ -203,47 +192,6 @@ function prettyDate(value: string | null, locale: Locale): string {
     hour: "2-digit",
     minute: "2-digit",
   }).format(date);
-}
-
-function readAuthSession(): AuthSession | null {
-  if (typeof window === "undefined") return null;
-
-  const fromSession = window.sessionStorage.getItem(AUTH_SESSION_STORAGE_KEY);
-  if (fromSession) {
-    try {
-      const parsed = JSON.parse(fromSession) as { token?: unknown; email?: unknown };
-      const token = typeof parsed.token === "string" ? parsed.token.trim() : "";
-      const email = typeof parsed.email === "string" ? parsed.email.trim() : "";
-      if (token) return { token, email };
-    } catch {
-      window.sessionStorage.removeItem(AUTH_SESSION_STORAGE_KEY);
-    }
-  }
-
-  const legacyToken = window.localStorage.getItem(LEGACY_TOKEN_STORAGE_KEY) || "";
-  if (legacyToken.trim()) {
-    const session = { token: legacyToken.trim(), email: "" };
-    window.sessionStorage.setItem(AUTH_SESSION_STORAGE_KEY, JSON.stringify(session));
-    window.localStorage.removeItem(LEGACY_TOKEN_STORAGE_KEY);
-    return session;
-  }
-
-  return null;
-}
-
-function persistAuthSession(token: string, email: string): void {
-  if (typeof window === "undefined") return;
-  window.sessionStorage.setItem(
-    AUTH_SESSION_STORAGE_KEY,
-    JSON.stringify({ token: token.trim(), email: email.trim() })
-  );
-  window.localStorage.removeItem(LEGACY_TOKEN_STORAGE_KEY);
-}
-
-function clearAuthSession(): void {
-  if (typeof window === "undefined") return;
-  window.sessionStorage.removeItem(AUTH_SESSION_STORAGE_KEY);
-  window.localStorage.removeItem(LEGACY_TOKEN_STORAGE_KEY);
 }
 
 async function fetchJson<T>(path: string, token: string): Promise<T> {
@@ -438,22 +386,12 @@ export default function AdminInquiriesPage() {
     setAuthLoading(true);
     setAuthError(null);
     try {
-      const response = await fetch("/v1/auth/login", {
-        method: "POST",
-        headers: { "content-type": "application/json" },
-        body: JSON.stringify({ email, password }),
-      });
-      if (!response.ok) {
-        setAuthError(response.status === 401 ? t.loginInvalid : t.loginError);
+      const loginResult = await loginAdmin(email, password);
+      if (!loginResult.ok) {
+        setAuthError(loginResult.status === 401 ? t.loginInvalid : t.loginError);
         return;
       }
-
-      const body = (await response.json()) as LoginResponse;
-      const accessToken = String(body.access_token || "").trim();
-      if (!accessToken) {
-        setAuthError(t.loginError);
-        return;
-      }
+      const accessToken = loginResult.accessToken;
 
       setAuthToken(accessToken);
       setAuthEmail(email);

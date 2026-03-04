@@ -31,7 +31,9 @@ describe("B14 admin workspace pages contract", () => {
 
   it("imports workspace uses list + import run endpoints", () => {
     const page = read("app/admin/imports/page.tsx");
-    expect(page).toContain('fetch("/v1/auth/login"');
+    expect(page).toContain('from "@/app/_lib/admin-auth"');
+    expect(page).toContain("loginAdmin");
+    expect(page).not.toContain('fetch("/v1/auth/login"');
     expect(page).toContain("/admin/properties/imports?");
     expect(page).toContain("/admin/properties/import?dry_run=");
     expect(page).toContain("/admin/dashboard/health-summary");
@@ -54,5 +56,12 @@ describe("B14 admin workspace pages contract", () => {
     expect(page).toContain("/statistics");
     expect(page).toContain("state-loading");
     expect(page).toContain("state-error");
+  });
+
+  it("home composer workspace uses shared admin auth helper", () => {
+    const page = read("app/admin/home-composer/page.tsx");
+    expect(page).toContain("from '@/app/_lib/admin-auth'");
+    expect(page).toContain("loginAdmin");
+    expect(page).not.toContain("fetch('/v1/auth/login'");
   });
 });

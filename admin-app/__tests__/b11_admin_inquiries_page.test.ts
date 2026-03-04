@@ -13,12 +13,9 @@ describe("B11 admin inquiries page contract", () => {
   it("uses admin login endpoint and session storage auth flow", () => {
     const page = read("app/admin/inquiries/page.tsx");
 
-    expect(page).toContain('fetch("/v1/auth/login"');
-    expect(page).toContain("AUTH_SESSION_STORAGE_KEY");
-    expect(page).toContain("window.sessionStorage.setItem");
-    expect(page).toContain("window.sessionStorage.getItem");
-    expect(page).toContain("window.sessionStorage.removeItem");
-    expect(page).toContain("LEGACY_TOKEN_STORAGE_KEY");
+    expect(page).toContain('from "@/app/_lib/admin-auth"');
+    expect(page).toContain("loginAdmin");
+    expect(page).not.toContain('fetch("/v1/auth/login"');
     expect(page).not.toContain('id="admin-token"');
   });
 
