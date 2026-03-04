@@ -1,6 +1,6 @@
 # FlowBiz Production-Ready Checklist (Local + VPS)
 
-Last updated: 2026-03-02
+Last updated: 2026-03-04
 
 This checklist is the single gate for production readiness across:
 - local validation (tests, lint, build, data/media integrity)
@@ -476,6 +476,51 @@ Expected:
 - `200` (or edge success)
 - `Content-Type: image/webp` for `.webp`
 - `Content-Type: image/avif` for `.avif`
+
+---
+
+## 17) Rolling Evidence Log
+
+### Round: 2026-03-04 (`Next.js` Security Patch + Admin UAT 6 Pages)
+
+Scope completed in this round:
+- Upgraded `admin-app` from `next@14.2.12` to `next@14.2.35` (patched line for 2025-12-11 Next.js advisory).
+- Aligned linter package to `eslint-config-next@14.2.35`.
+- Added repository-level Copilot coding agent setup file:
+  - `.github/copilot-instructions.md`
+- Executed Playwright UAT login success flow across 6 admin workspaces.
+
+Commands executed and result:
+```powershell
+# Dependency upgrade
+npm --prefix admin-app install next@14.2.35 --save-exact
+npm --prefix admin-app install --save-dev --save-exact eslint-config-next@14.2.35
+
+# Build validation
+npm --prefix admin-app run build
+# Result: PASS (Next.js 14.2.35)
+
+# Admin smoke script (real endpoint)
+$env:ADMIN_SMOKE_BASE_URL='https://amppattaya.com'
+npm --prefix admin-app run test:smoke:admin
+# Result: PASS
+```
+
+Playwright UAT login success flow (`2026-03-04`):
+- Environment endpoint used: `https://amppattaya.com` (no separate staging URL configured in repo docs/env at time of run).
+- Result: `6/6` routes passed (login success -> page load -> logout success).
+- Routes:
+  - `/admin/dashboard`
+  - `/admin/inquiries`
+  - `/admin/home-composer`
+  - `/admin/seo`
+  - `/admin/layout`
+  - `/admin/imports`
+
+Evidence produced:
+- `admin-app/artifacts/admin-smoke/admin-smoke-summary.json` (latest run with `loginRequests=2`, `loginStatuses=[401,200]`, `healthSummaryRequests=1`).
+- CI evidence reference for smoke gate:
+  - `admin-smoke-e2e` check in PR `#235` (PASS).
 
 ---
 
