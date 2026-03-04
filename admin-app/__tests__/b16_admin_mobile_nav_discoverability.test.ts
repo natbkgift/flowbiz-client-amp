@@ -13,10 +13,13 @@ describe("B16 admin mobile nav discoverability", () => {
   it("keeps mobile admin nav links visible with wrapped labels and touch target sizing", () => {
     const css = read("app/globals.css");
 
-    expect(css).toContain(".admin-shell-mobile-row {");
-    expect(css).toContain("grid-template-columns: repeat(2, minmax(0, 1fr));");
-    expect(css).toContain("white-space: normal;");
-    expect(css).toContain("min-height: var(--tap-target-min);");
-    expect(css).toContain("@media (min-width: 640px) and (max-width: 1024px)");
+    const baseMobileRowRegex =
+      /\.admin-shell-mobile-row\s*\{[^}]*grid-template-columns:\s*repeat\(2,\s*minmax\(0,\s*1fr\)\);\s*[^}]*white-space:\s*normal;[^}]*min-height:\s*var\(--tap-target-min\);[^}]*\}/s;
+
+    const mediaQueryMobileRowRegex =
+      /@media\s*\(min-width:\s*640px\)\s*and\s*\(max-width:\s*1024px\)\s*\{[^}]*\.admin-shell-mobile-row\s*\{[^}]*grid-template-columns:\s*repeat\(3,\s*minmax\(0,\s*1fr\)\);[^}]*\}[^}]*\}/s;
+
+    expect(css).toMatch(baseMobileRowRegex);
+    expect(css).toMatch(mediaQueryMobileRowRegex);
   });
 });
