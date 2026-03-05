@@ -35,7 +35,7 @@ const TESTIMONIAL_CREATE_FIELDS = [
 ] as const;
 
 const TESTIMONIAL_PATCH_FIELDS = [
-  { name: "quote", label: "Quote", type: "textarea", required: true, rows: 3 },
+  { name: "quote", label: "Quote", type: "textarea", rows: 3 },
   { name: "status", label: "Status", type: "status", options: ["draft", "inactive", "active"] },
   { name: "property_id", label: "Property ID", type: "relation", placeholder: "optional property UUID" },
   { name: "avatar_media_id", label: "Avatar media", type: "media", placeholder: "optional media ID/path" },
