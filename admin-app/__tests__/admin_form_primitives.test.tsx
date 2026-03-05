@@ -1,5 +1,5 @@
-import { fireEvent, render, screen } from "@testing-library/react";
-import { describe, expect, it } from "vitest";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { afterEach, describe, expect, it, vi } from "vitest";
 
 import {
   AdminFormPrimitiveInput,
@@ -9,6 +9,10 @@ import {
 } from "@/components/admin/AdminFormPrimitives";
 
 describe("Admin form primitives", () => {
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
   it("validates required and invalid values using a consistent message format", () => {
     const fields: AdminFormPrimitiveField[] = [
       { name: "status", label: "Status", type: "status", required: true, options: ["draft", "active"] },
@@ -45,6 +49,98 @@ describe("Admin form primitives", () => {
       project_id: "project-01",
       summary: { en: "Summary text" },
     });
+  });
+
+  it("normalizes local media path payload and rejects invalid media payloads", () => {
+    const fields: AdminFormPrimitiveField[] = [
+      { name: "hero_image_url", label: "Hero image", type: "media" },
+      { name: "cover_media_id", label: "Cover media", type: "media" },
+    ];
+
+    expect(
+      toPrimitivePayload(fields, {
+        hero_image_url: "media/library/hero.webp",
+        cover_media_id: "media-001",
+      })
+    ).toEqual({
+      hero_image_url: "/media/library/hero.webp",
+      cover_media_id: "media-001",
+    });
+
+    expect(() =>
+      toPrimitivePayload(fields, {
+        hero_image_url: "https://cdn.example.com/hero.webp",
+        cover_media_id: "media-001",
+      })
+    ).toThrow('Invalid media value for field "hero_image_url".');
+
+    expect(() =>
+      toPrimitivePayload(fields, {
+        hero_image_url: "/not-local/hero.webp",
+        cover_media_id: "media-001",
+      })
+    ).toThrow('Invalid media value for field "hero_image_url".');
+  });
+
+  it("rejects external URL input for media fields", () => {
+    const fields: AdminFormPrimitiveField[] = [
+      { name: "hero_image_url", label: "Hero image", type: "media", required: true },
+    ];
+    expect(validatePrimitiveValues(fields, { hero_image_url: "https://cdn.example.com/hero.webp" })).toEqual({
+      hero_image_url: "Hero image must use local media only.",
+    });
+  });
+
+  it("opens media picker and maps selected metadata to media id fields", async () => {
+    const handleChange = vi.fn();
+    vi.spyOn(globalThis, "fetch").mockResolvedValue({
+      ok: true,
+      json: async () => ({ items: [{ id: "media-001", storage_path: "/media/library/hero.webp" }] }),
+    } as Response);
+
+    render(
+      <AdminFormPrimitiveInput
+        idPrefix="test-form"
+        field={{ name: "cover_media_id", label: "Cover media", type: "media" }}
+        value=""
+        authToken="token-123"
+        onChange={handleChange}
+      />
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: "Choose media" }));
+    await waitFor(() => {
+      expect(screen.getByRole("button", { name: "/media/library/hero.webp" })).toBeInTheDocument();
+    });
+
+    fireEvent.click(screen.getByRole("button", { name: "/media/library/hero.webp" }));
+    expect(handleChange).toHaveBeenCalledWith("cover_media_id", "media-001");
+  });
+
+  it("maps selected metadata to local path fields", async () => {
+    const handleChange = vi.fn();
+    vi.spyOn(globalThis, "fetch").mockResolvedValue({
+      ok: true,
+      json: async () => ({ items: [{ id: "media-010", storage_path: "media/library/blog.webp" }] }),
+    } as Response);
+
+    render(
+      <AdminFormPrimitiveInput
+        idPrefix="test-form"
+        field={{ name: "hero_image_url", label: "Hero image", type: "media" }}
+        value=""
+        authToken="token-123"
+        onChange={handleChange}
+      />
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: "Choose media" }));
+    await waitFor(() => {
+      expect(screen.getByRole("button", { name: "media/library/blog.webp" })).toBeInTheDocument();
+    });
+
+    fireEvent.click(screen.getByRole("button", { name: "media/library/blog.webp" }));
+    expect(handleChange).toHaveBeenCalledWith("hero_image_url", "/media/library/blog.webp");
   });
 
   it("keeps label/aria/error association for a11y baseline", () => {

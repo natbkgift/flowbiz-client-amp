@@ -1,6 +1,7 @@
 "use client";
 
-import { type ChangeEvent, type ReactNode } from "react";
+import { type ChangeEvent, type ReactNode, useState } from "react";
+import { normalizeLocalMediaPath } from "@/app/_lib/local-media";
 
 export type PrimitiveFieldType = "text" | "textarea" | "number" | "select" | "status" | "relation" | "media";
 
@@ -19,8 +20,29 @@ type AdminFormPrimitiveProps = {
   field: AdminFormPrimitiveField;
   value: string;
   error?: string;
+  authToken?: string;
   onChange: (name: string, value: string) => void;
 };
+
+type MediaItem = {
+  id: string;
+  storage_path: string;
+};
+
+function isExternalUrl(value: string): boolean {
+  const normalized = value.trim().toLowerCase();
+  return normalized.includes("://") || normalized.startsWith("//");
+}
+
+function expectsMediaIdField(fieldName: string): boolean {
+  return /(^|[._])media_id$/i.test(fieldName);
+}
+
+function mediaInvalidMessage(field: AdminFormPrimitiveField, reason: "external" | "local-path"): string {
+  if (reason === "external") return `${field.label} must use local media only.`;
+  if (expectsMediaIdField(field.name)) return `${field.label} is invalid.`;
+  return `${field.label} must be a valid local media path.`;
+}
 
 function fieldId(idPrefix: string, fieldName: string): string {
   return `${idPrefix}-${fieldName.replace(/\./g, "-")}`;
@@ -84,6 +106,16 @@ export function validatePrimitiveValues(
       continue;
     }
     if (!value) continue;
+    if (field.type === "media") {
+      if (isExternalUrl(value)) {
+        errors[field.name] = mediaInvalidMessage(field, "external");
+        continue;
+      }
+      if (!expectsMediaIdField(field.name) && !normalizeLocalMediaPath(value)) {
+        errors[field.name] = mediaInvalidMessage(field, "local-path");
+        continue;
+      }
+    }
     if (field.type === "number" && Number.isNaN(Number(value))) {
       errors[field.name] = validationMessage(field.label, "invalid");
       continue;
@@ -133,6 +165,17 @@ export function toPrimitivePayload(
         throw new Error(`Invalid number value for field "${field.name}".`);
       }
       value = numericValue;
+    } else if (field.type === "media") {
+      if (isExternalUrl(trimmed)) {
+        throw new Error(`Invalid media value for field "${field.name}".`);
+      }
+      if (!expectsMediaIdField(field.name)) {
+        const normalizedLocalPath = normalizeLocalMediaPath(trimmed);
+        if (!normalizedLocalPath) {
+          throw new Error(`Invalid media value for field "${field.name}".`);
+        }
+        value = normalizedLocalPath;
+      }
     }
     setNestedValue(payload, field.name, value);
   }
@@ -212,17 +255,121 @@ export function RelationPickerPrimitive(props: AdminFormPrimitiveProps) {
 export function MediaPickerSlotPrimitive(props: AdminFormPrimitiveProps) {
   const id = fieldId(props.idPrefix, props.field.name);
   const errorId = `${id}-error`;
+  const [open, setOpen] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [loadError, setLoadError] = useState<string | null>(null);
+  const [items, setItems] = useState<MediaItem[]>([]);
+
+  async function openMediaPicker(): Promise<void> {
+    const token = props.authToken?.trim() || "";
+    if (!token) {
+      setOpen(true);
+      setLoadError("Sign in is required to load media.");
+      setItems([]);
+      return;
+    }
+    setOpen(true);
+    setLoading(true);
+    setLoadError(null);
+    try {
+      const response = await fetch("/admin/media?limit=40", {
+        headers: { Authorization: `Bearer ${token}` },
+        cache: "no-store",
+      });
+      if (!response.ok) {
+        setLoadError(`Unable to load media list (${response.status}).`);
+        setItems([]);
+        return;
+      }
+      const body = (await response.json()) as { items?: MediaItem[] };
+      setItems(Array.isArray(body.items) ? body.items : []);
+    } catch {
+      setLoadError("Unable to load media list.");
+      setItems([]);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  function pickMedia(item: MediaItem): void {
+    const value = expectsMediaIdField(props.field.name)
+      ? item.id
+      : normalizeLocalMediaPath(item.storage_path) || "";
+    if (!value) {
+      setLoadError("Selected media cannot be used in this field.");
+      return;
+    }
+    props.onChange(props.field.name, value);
+    setOpen(false);
+  }
+
   return (
-    <InputFrame {...props}>
-      <input
-        id={id}
-        value={props.value}
-        placeholder={props.field.placeholder || "Paste media ID/path"}
-        aria-invalid={props.error ? "true" : "false"}
-        aria-describedby={props.error ? errorId : undefined}
-        onChange={(event) => onInputChange(event, props.field.name, props.onChange)}
-      />
-    </InputFrame>
+    <>
+      <div className="field">
+        <label htmlFor={id}>
+          <span>{props.field.label}</span>
+        </label>
+        <div className="card-actions">
+          <input
+            id={id}
+            value={props.value}
+            placeholder={props.field.placeholder || "Paste media ID/path"}
+            aria-invalid={props.error ? "true" : "false"}
+            aria-describedby={props.error ? errorId : undefined}
+            onChange={(event) => onInputChange(event, props.field.name, props.onChange)}
+          />
+          <button
+            className="btn btn-secondary"
+            type="button"
+            disabled={!props.authToken?.trim()}
+            title={!props.authToken?.trim() ? "Sign in required to choose media" : undefined}
+            aria-label={!props.authToken?.trim() ? "Sign in required to choose media" : "Choose media"}
+            onClick={() => void openMediaPicker()}
+          >
+            Choose media
+          </button>
+        </div>
+        {props.error ? (
+          <span id={errorId} role="alert" className="state-error">
+            {props.error}
+          </span>
+        ) : null}
+      </div>
+      {open ? (
+        <div className="card" role="dialog" aria-modal="true" aria-label={`${props.field.label} media picker`}>
+          <div className="card-actions">
+            <button className="btn btn-secondary" type="button" onClick={() => setOpen(false)}>
+              Close
+            </button>
+          </div>
+          {loading ? (
+            <div className="state-loading" role="status" aria-live="polite">
+              Loading media
+            </div>
+          ) : null}
+          {loadError ? (
+            <div className="state-error" role="alert">
+              {loadError}
+            </div>
+          ) : null}
+          {!loading && !loadError ? (
+            items.length > 0 ? (
+              <ul aria-label="Available media items">
+                {items.map((item) => (
+                  <li key={item.id}>
+                    <button className="btn btn-secondary" type="button" onClick={() => pickMedia(item)}>
+                      {item.storage_path || item.id}
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <div className="state-empty">No media items available.</div>
+            )
+          ) : null}
+        </div>
+      ) : null}
+    </>
   );
 }
 
