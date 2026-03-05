@@ -45,7 +45,7 @@ const PROPERTY_CREATE_FIELDS = [
 ] as const;
 
 const PROPERTY_PATCH_FIELDS = [
-  { name: "title", label: "Title", type: "text", required: true },
+  { name: "title", label: "Title", type: "text" },
   { name: "status", label: "Status", type: "status", options: ["inactive", "active", "sold"] },
   { name: "project_id", label: "Project ID", type: "relation", placeholder: "optional project UUID" },
   { name: "area_id", label: "Area ID", type: "relation", placeholder: "optional area UUID" },
