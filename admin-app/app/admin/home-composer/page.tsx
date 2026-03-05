@@ -341,6 +341,8 @@ export default function HomeComposerPage() {
     setSaving(false);
     setPublishing(false);
     setLoading(false);
+    setHeroImageError(null);
+    setHeroMediaModalOpen(false);
     if (nextAuthError) {
       setAuthError(nextAuthError);
     }
@@ -385,6 +387,8 @@ export default function HomeComposerPage() {
       setProcessTimelineText(prettyJson(rawConfig.proof_trust.process_timeline));
       setTrustItemsText((rawConfig.hero.trust_items || []).join('\n'));
       setValidation(null);
+      setHeroImageError(null);
+      setHeroMediaModalOpen(false);
     } catch (err) {
       if (handleComposerUnauthorized(err)) return;
       setError(err instanceof Error ? err.message : 'Unable to load home composer');
