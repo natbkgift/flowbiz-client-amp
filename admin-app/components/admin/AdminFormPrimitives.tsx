@@ -100,6 +100,9 @@ export function validatePrimitiveValues(
 
 function setNestedValue(target: Record<string, unknown>, path: string, value: unknown): void {
   const parts = path.split(".");
+  const isBlockedKey = (key: string): boolean =>
+    key === "__proto__" || key === "prototype" || key === "constructor";
+  if (parts.some((part) => isBlockedKey(part))) throw new Error("Invalid field path.");
   let cursor: Record<string, unknown> = target;
   for (let index = 0; index < parts.length - 1; index += 1) {
     const key = parts[index];
@@ -109,7 +112,9 @@ function setNestedValue(target: Record<string, unknown>, path: string, value: un
     }
     cursor = cursor[key] as Record<string, unknown>;
   }
-  cursor[parts[parts.length - 1]] = value;
+  const finalKey = parts[parts.length - 1];
+  if (isBlockedKey(finalKey)) throw new Error("Invalid field path.");
+  cursor[finalKey] = value;
 }
 
 export function toPrimitivePayload(

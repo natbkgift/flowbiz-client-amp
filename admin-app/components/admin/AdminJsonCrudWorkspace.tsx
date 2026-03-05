@@ -496,12 +496,12 @@ export function AdminJsonCrudWorkspace({ config }: { config: CrudConfig }) {
                         body: JSON.stringify(
                           Array.isArray(config.createFormFields) && config.createFormFields.length > 0
                             ? (() => {
-                                const errors = validatePrimitiveValues(config.createFormFields || [], createFormValues);
+                                const errors = validatePrimitiveValues(config.createFormFields, createFormValues);
                                 setCreateFormErrors(errors);
                                 if (Object.keys(errors).length > 0) {
-                                  throw new Error(Object.values(errors)[0]);
+                                  throw new Error("Please correct the highlighted fields.");
                                 }
-                                return toPrimitivePayload(config.createFormFields || [], createFormValues);
+                                return toPrimitivePayload(config.createFormFields, createFormValues);
                               })()
                             : parseJsonInput(createPayload)
                         ),
@@ -562,12 +562,12 @@ export function AdminJsonCrudWorkspace({ config }: { config: CrudConfig }) {
                         body: JSON.stringify(
                           Array.isArray(config.patchFormFields) && config.patchFormFields.length > 0
                             ? (() => {
-                                const errors = validatePrimitiveValues(config.patchFormFields || [], patchFormValues);
+                                const errors = validatePrimitiveValues(config.patchFormFields, patchFormValues);
                                 setPatchFormErrors(errors);
                                 if (Object.keys(errors).length > 0) {
-                                  throw new Error(Object.values(errors)[0]);
+                                  throw new Error("Please correct the highlighted fields.");
                                 }
-                                return toPrimitivePayload(config.patchFormFields || [], patchFormValues);
+                                return toPrimitivePayload(config.patchFormFields, patchFormValues);
                               })()
                             : parseJsonInput(patchPayload)
                         ),
