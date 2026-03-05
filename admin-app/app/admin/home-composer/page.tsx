@@ -1,6 +1,6 @@
 'use client';
 
-import { type FormEvent, useCallback, useEffect, useMemo, useState } from 'react';
+import { type FormEvent, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import {
   clearAuthSession,
@@ -9,6 +9,7 @@ import {
   persistAuthSession,
   readAuthSession,
 } from '@/app/_lib/admin-auth';
+import { normalizeLocalMediaPath } from '@/app/_lib/local-media';
 import { apiRequest } from '../../../lib/api';
 import { getToken, setToken } from '../../../lib/auth-store';
 
@@ -93,6 +94,7 @@ const SECTION_KEYS = [
   'videos',
   'bottom_cta',
 ] as const;
+const HERO_IMAGE_LOCAL_ONLY_ERROR = 'Hero image must use local media only.';
 
 type SectionKey = (typeof SECTION_KEYS)[number];
 
@@ -314,6 +316,9 @@ export default function HomeComposerPage() {
   const [trustProofsText, setTrustProofsText] = useState('[]');
   const [processTimelineText, setProcessTimelineText] = useState('[]');
   const [trustItemsText, setTrustItemsText] = useState('');
+  const [heroImageError, setHeroImageError] = useState<string | null>(null);
+  const [heroMediaModalOpen, setHeroMediaModalOpen] = useState(false);
+  const heroMediaCloseButtonRef = useRef<HTMLButtonElement | null>(null);
 
   const draftId = bundle?.draft?.id ?? null;
   const isAuthenticated = authToken.trim().length > 0;
@@ -336,6 +341,8 @@ export default function HomeComposerPage() {
     setSaving(false);
     setPublishing(false);
     setLoading(false);
+    setHeroImageError(null);
+    setHeroMediaModalOpen(false);
     if (nextAuthError) {
       setAuthError(nextAuthError);
     }
@@ -380,6 +387,8 @@ export default function HomeComposerPage() {
       setProcessTimelineText(prettyJson(rawConfig.proof_trust.process_timeline));
       setTrustItemsText((rawConfig.hero.trust_items || []).join('\n'));
       setValidation(null);
+      setHeroImageError(null);
+      setHeroMediaModalOpen(false);
     } catch (err) {
       if (handleComposerUnauthorized(err)) return;
       setError(err instanceof Error ? err.message : 'Unable to load home composer');
@@ -429,6 +438,22 @@ export default function HomeComposerPage() {
     }, 250);
     return () => clearTimeout(timer);
   }, [candidateSearch, isAuthenticated, loadCandidates]);
+
+  useEffect(() => {
+    if (!heroMediaModalOpen) return;
+    heroMediaCloseButtonRef.current?.focus();
+  }, [heroMediaModalOpen]);
+
+  useEffect(() => {
+    if (!heroMediaModalOpen) return;
+    const onKeyDown = (event: KeyboardEvent): void => {
+      if (event.key !== 'Escape') return;
+      event.preventDefault();
+      setHeroMediaModalOpen(false);
+    };
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, [heroMediaModalOpen]);
 
   async function login(event: FormEvent<HTMLFormElement>): Promise<void> {
     event.preventDefault();
@@ -508,11 +533,40 @@ export default function HomeComposerPage() {
     }));
   }
 
+  function updateHeroImage(nextValue: string | null): void {
+    const raw = nextValue ?? '';
+    const trimmed = raw.trim();
+    setConfig((prev) => ({ ...prev, hero: { ...prev.hero, hero_image: raw || null } }));
+    if (!trimmed) {
+      setHeroImageError(null);
+      return;
+    }
+    setHeroImageError(normalizeLocalMediaPath(trimmed) ? null : HERO_IMAGE_LOCAL_ONLY_ERROR);
+  }
+
+  function selectHeroMedia(nextValue: string): void {
+    const normalized = normalizeLocalMediaPath(nextValue);
+    if (!normalized) {
+      setHeroImageError(HERO_IMAGE_LOCAL_ONLY_ERROR);
+      return;
+    }
+    setHeroImageError(null);
+    setConfig((prev) => ({ ...prev, hero: { ...prev.hero, hero_image: normalized } }));
+    setHeroMediaModalOpen(false);
+  }
+
   function readConfigForSave(): HomeComposerConfig {
+    const heroImageValue = (config.hero.hero_image || '').trim();
+    const normalizedHeroImage = heroImageValue ? normalizeLocalMediaPath(heroImageValue) : null;
+    if (heroImageValue && !normalizedHeroImage) {
+      setHeroImageError(HERO_IMAGE_LOCAL_ONLY_ERROR);
+    }
+    const safeHeroImage = heroImageValue && normalizedHeroImage ? normalizedHeroImage : null;
     return {
       ...config,
       hero: {
         ...config.hero,
+        hero_image: safeHeroImage,
         trust_items: splitLines(trustItemsText),
       },
       proof_trust: {
@@ -719,8 +773,55 @@ export default function HomeComposerPage() {
                 <label className="text-sm text-slate-700">Secondary CTA URL<input value={config.hero.secondary_cta_url || ''} onChange={(e) => setConfig((prev) => ({ ...prev, hero: { ...prev.hero, secondary_cta_url: e.target.value } }))} className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2" /></label>
               </div>
               <label className="block text-sm text-slate-700">Hero image (`/media/...` only)
-                <input value={config.hero.hero_image || ''} onChange={(e) => setConfig((prev) => ({ ...prev, hero: { ...prev.hero, hero_image: e.target.value || null } }))} className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2" />
+                <div className="mt-1 flex items-center gap-2">
+                  <input
+                    value={config.hero.hero_image || ''}
+                    onChange={(e) => updateHeroImage(e.target.value)}
+                    className="w-full rounded-md border border-slate-300 px-3 py-2"
+                    aria-invalid={!!heroImageError}
+                    aria-describedby={heroImageError ? 'hero-image-error' : undefined}
+                  />
+                  <button type="button" aria-label="Choose hero image media" onClick={() => setHeroMediaModalOpen(true)} className="rounded-md border border-slate-300 px-3 py-2 text-sm">
+                    Choose media
+                  </button>
+                </div>
               </label>
+              {heroImageError ? (
+                <p id="hero-image-error" className="text-sm text-rose-700" role="alert">
+                  {heroImageError}
+                </p>
+              ) : null}
+              {heroMediaModalOpen ? (
+                <div
+                  className="rounded-md border border-slate-200 bg-white p-3"
+                  role="dialog"
+                  aria-modal="true"
+                  aria-label="Hero image media picker"
+                >
+                  <div className="mb-3 flex items-center justify-between gap-2">
+                    <p className="text-sm text-slate-700">Select a media asset for the hero image.</p>
+                    <button ref={heroMediaCloseButtonRef} type="button" aria-label="Close hero image media picker" className="rounded border border-slate-300 px-2 py-1 text-xs" onClick={() => setHeroMediaModalOpen(false)}>
+                      Close
+                    </button>
+                  </div>
+                  <div className="max-h-56 space-y-2 overflow-auto">
+                    {mediaCandidates.length > 0 ? mediaCandidates.map((asset) => (
+                      <button
+                        key={asset.id}
+                        type="button"
+                        aria-label={`Select hero image ${asset.storage_path || asset.id}`}
+                        onClick={() => selectHeroMedia(asset.storage_path)}
+                        className="w-full rounded-md border border-slate-200 p-2 text-left hover:bg-slate-50"
+                      >
+                        <div className="font-mono text-xs text-slate-700 break-all">{asset.storage_path}</div>
+                        <div className={`mt-1 inline-flex rounded px-1.5 py-0.5 text-[11px] ${mediaBadgeClass(asset)}`}>
+                          rights={asset.rights_status || 'unknown'} · approval={asset.approval_status || 'unknown'}
+                        </div>
+                      </button>
+                    )) : <div className="text-sm text-slate-500">No media items available.</div>}
+                  </div>
+                </div>
+              ) : null}
               <label className="block text-sm text-slate-700">Trust micro-strip items (one per line)
                 <textarea value={trustItemsText} onChange={(e) => setTrustItemsText(e.target.value)} rows={4} className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2" />
               </label>
@@ -874,7 +975,7 @@ export default function HomeComposerPage() {
               <input value={candidateSearch} onChange={(e) => setCandidateSearch(e.target.value)} placeholder="Search projects/properties/media" className="mt-2 w-full rounded-md border border-slate-300 px-3 py-2 text-sm" />
               <div className="mt-3 max-h-[65vh] space-y-2 overflow-auto">
                 {mediaCandidates.map((asset) => (
-                  <button key={asset.id} type="button" onClick={() => setConfig((prev) => ({ ...prev, hero: { ...prev.hero, hero_image: asset.storage_path } }))} className="w-full rounded-md border border-slate-200 p-2 text-left hover:bg-slate-50">
+                  <button key={asset.id} type="button" onClick={() => selectHeroMedia(asset.storage_path)} className="w-full rounded-md border border-slate-200 p-2 text-left hover:bg-slate-50">
                     <div className="font-mono text-xs text-slate-700 break-all">{asset.storage_path}</div>
                     <div className={`mt-1 inline-flex rounded px-1.5 py-0.5 text-[11px] ${mediaBadgeClass(asset)}`}>
                       rights={asset.rights_status || 'unknown'} · approval={asset.approval_status || 'unknown'}
