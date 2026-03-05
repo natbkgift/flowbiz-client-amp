@@ -135,7 +135,7 @@ function checklistReport(
       if (typeof value === "string") return value.trim().length > 0;
       return value !== null && value !== undefined;
     });
-    if (!hasMedia) warnings.push("Hero media is recommended before publishing.");
+    if (!hasMedia) warnings.push("hero media is recommended before publish");
   }
   return { blocking, warnings };
 }
