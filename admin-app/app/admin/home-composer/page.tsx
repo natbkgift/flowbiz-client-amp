@@ -555,13 +555,13 @@ export default function HomeComposerPage() {
     const normalizedHeroImage = heroImageValue ? normalizeLocalMediaPath(heroImageValue) : null;
     if (heroImageValue && !normalizedHeroImage) {
       setHeroImageError(HERO_IMAGE_LOCAL_ONLY_ERROR);
-      throw new Error(HERO_IMAGE_LOCAL_ONLY_ERROR);
     }
+    const safeHeroImage = heroImageValue && normalizedHeroImage ? normalizedHeroImage : null;
     return {
       ...config,
       hero: {
         ...config.hero,
-        hero_image: normalizedHeroImage,
+        hero_image: safeHeroImage,
         trust_items: splitLines(trustItemsText),
       },
       proof_trust: {
