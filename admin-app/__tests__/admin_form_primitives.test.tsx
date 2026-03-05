@@ -56,7 +56,7 @@ describe("Admin form primitives", () => {
       { name: "hero_image_url", label: "Hero image", type: "media", required: true },
     ];
     expect(validatePrimitiveValues(fields, { hero_image_url: "https://cdn.example.com/hero.webp" })).toEqual({
-      hero_image_url: "Hero image is invalid.",
+      hero_image_url: "Hero image must use local media only.",
     });
   });
 

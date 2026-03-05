@@ -38,6 +38,12 @@ function expectsMediaIdField(fieldName: string): boolean {
   return /(^|[._])media_id$/i.test(fieldName);
 }
 
+function mediaInvalidMessage(field: AdminFormPrimitiveField, reason: "external" | "local-path"): string {
+  if (reason === "external") return `${field.label} must use local media only.`;
+  if (expectsMediaIdField(field.name)) return `${field.label} is invalid.`;
+  return `${field.label} must be a valid local media path.`;
+}
+
 function fieldId(idPrefix: string, fieldName: string): string {
   return `${idPrefix}-${fieldName.replace(/\./g, "-")}`;
 }
@@ -102,11 +108,11 @@ export function validatePrimitiveValues(
     if (!value) continue;
     if (field.type === "media") {
       if (isExternalUrl(value)) {
-        errors[field.name] = `${field.label} is invalid.`;
+        errors[field.name] = mediaInvalidMessage(field, "external");
         continue;
       }
       if (!expectsMediaIdField(field.name) && !normalizeLocalMediaPath(value)) {
-        errors[field.name] = `${field.label} is invalid.`;
+        errors[field.name] = mediaInvalidMessage(field, "local-path");
         continue;
       }
     }
@@ -256,7 +262,12 @@ export function MediaPickerSlotPrimitive(props: AdminFormPrimitiveProps) {
 
   async function openMediaPicker(): Promise<void> {
     const token = props.authToken?.trim() || "";
-    if (!token) return;
+    if (!token) {
+      setOpen(true);
+      setLoadError("Sign in is required to load media.");
+      setItems([]);
+      return;
+    }
     setOpen(true);
     setLoading(true);
     setLoadError(null);
@@ -265,7 +276,11 @@ export function MediaPickerSlotPrimitive(props: AdminFormPrimitiveProps) {
         headers: { Authorization: `Bearer ${token}` },
         cache: "no-store",
       });
-      if (!response.ok) throw new Error("failed");
+      if (!response.ok) {
+        setLoadError(`Unable to load media list (${response.status}).`);
+        setItems([]);
+        return;
+      }
       const body = (await response.json()) as { items?: MediaItem[] };
       setItems(Array.isArray(body.items) ? body.items : []);
     } catch {
@@ -280,7 +295,10 @@ export function MediaPickerSlotPrimitive(props: AdminFormPrimitiveProps) {
     const value = expectsMediaIdField(props.field.name)
       ? item.id
       : normalizeLocalMediaPath(item.storage_path) || "";
-    if (!value) return;
+    if (!value) {
+      setLoadError("Selected media cannot be used in this field.");
+      return;
+    }
     props.onChange(props.field.name, value);
     setOpen(false);
   }
@@ -300,30 +318,44 @@ export function MediaPickerSlotPrimitive(props: AdminFormPrimitiveProps) {
           className="btn btn-secondary"
           type="button"
           disabled={!props.authToken?.trim()}
+          title={!props.authToken?.trim() ? "Sign in required to choose media" : undefined}
+          aria-label={!props.authToken?.trim() ? "Sign in required to choose media" : "Choose media"}
           onClick={() => void openMediaPicker()}
         >
           Choose media
         </button>
       </div>
       {open ? (
-        <div className="card" role="dialog" aria-label={`${props.field.label} media picker`}>
+        <div className="card" role="dialog" aria-modal="true" aria-label={`${props.field.label} media picker`}>
           <div className="card-actions">
             <button className="btn btn-secondary" type="button" onClick={() => setOpen(false)}>
               Close
             </button>
           </div>
-          {loading ? <div className="state-loading">Loading media</div> : null}
-          {loadError ? <div className="state-error">{loadError}</div> : null}
+          {loading ? (
+            <div className="state-loading" role="status" aria-live="polite">
+              Loading media
+            </div>
+          ) : null}
+          {loadError ? (
+            <div className="state-error" role="alert">
+              {loadError}
+            </div>
+          ) : null}
           {!loading && !loadError ? (
-            <ul>
-              {items.map((item) => (
-                <li key={item.id}>
-                  <button className="btn btn-secondary" type="button" onClick={() => pickMedia(item)}>
-                    {item.storage_path || item.id}
-                  </button>
-                </li>
-              ))}
-            </ul>
+            items.length > 0 ? (
+              <ul aria-label="Available media items">
+                {items.map((item) => (
+                  <li key={item.id}>
+                    <button className="btn btn-secondary" type="button" onClick={() => pickMedia(item)}>
+                      {item.storage_path || item.id}
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <div className="state-empty">No media items available.</div>
+            )
           ) : null}
         </div>
       ) : null}
