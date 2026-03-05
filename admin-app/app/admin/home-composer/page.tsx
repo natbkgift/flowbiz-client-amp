@@ -770,13 +770,23 @@ export default function HomeComposerPage() {
               </div>
               <label className="block text-sm text-slate-700">Hero image (`/media/...` only)
                 <div className="mt-1 flex items-center gap-2">
-                  <input value={config.hero.hero_image || ''} onChange={(e) => updateHeroImage(e.target.value)} className="w-full rounded-md border border-slate-300 px-3 py-2" />
+                  <input
+                    value={config.hero.hero_image || ''}
+                    onChange={(e) => updateHeroImage(e.target.value)}
+                    className="w-full rounded-md border border-slate-300 px-3 py-2"
+                    aria-invalid={!!heroImageError}
+                    aria-describedby={heroImageError ? 'hero-image-error' : undefined}
+                  />
                   <button type="button" aria-label="Choose hero image media" onClick={() => setHeroMediaModalOpen(true)} className="rounded-md border border-slate-300 px-3 py-2 text-sm">
                     Choose media
                   </button>
                 </div>
               </label>
-              {heroImageError ? <p className="text-sm text-rose-700">{heroImageError}</p> : null}
+              {heroImageError ? (
+                <p id="hero-image-error" className="text-sm text-rose-700" role="alert">
+                  {heroImageError}
+                </p>
+              ) : null}
               {heroMediaModalOpen ? (
                 <div
                   className="rounded-md border border-slate-200 bg-white p-3"
