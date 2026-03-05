@@ -23,6 +23,24 @@ const TESTIMONIAL_PATCH_TEMPLATE = JSON.stringify(
   2
 );
 
+const TESTIMONIAL_CREATE_FIELDS = [
+  { name: "status", label: "Status", type: "status", required: true, options: ["draft", "inactive", "active"] },
+  { name: "persona", label: "Persona", type: "text", required: true, placeholder: "investor" },
+  { name: "intent", label: "Intent", type: "select", required: true, options: ["buy", "rent", "sell"] },
+  { name: "quote", label: "Quote", type: "textarea", required: true, rows: 3 },
+  { name: "attribution_name", label: "Attribution name", type: "text", required: true, placeholder: "Client A" },
+  { name: "context", label: "Context", type: "text", placeholder: "Sample context" },
+  { name: "property_id", label: "Property ID", type: "relation", placeholder: "optional property UUID" },
+  { name: "avatar_media_id", label: "Avatar media", type: "media", placeholder: "optional media ID/path" },
+] as const;
+
+const TESTIMONIAL_PATCH_FIELDS = [
+  { name: "quote", label: "Quote", type: "textarea", required: true, rows: 3 },
+  { name: "status", label: "Status", type: "status", options: ["draft", "inactive", "active"] },
+  { name: "property_id", label: "Property ID", type: "relation", placeholder: "optional property UUID" },
+  { name: "avatar_media_id", label: "Avatar media", type: "media", placeholder: "optional media ID/path" },
+] as const;
+
 export default function AdminTestimonialsCmsPage() {
   return (
     <AdminJsonCrudWorkspace
@@ -41,6 +59,8 @@ export default function AdminTestimonialsCmsPage() {
         deletePath: "/admin/testimonials/{id}",
         defaultCreatePayload: TESTIMONIAL_CREATE_TEMPLATE,
         defaultPatchPayload: TESTIMONIAL_PATCH_TEMPLATE,
+        createFormFields: [...TESTIMONIAL_CREATE_FIELDS],
+        patchFormFields: [...TESTIMONIAL_PATCH_FIELDS],
       }}
     />
   );

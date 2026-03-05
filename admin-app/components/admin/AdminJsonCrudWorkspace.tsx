@@ -12,6 +12,13 @@ import {
   toPrettyJson,
 } from "@/app/_lib/admin-auth";
 import { AdminDataTable, type AdminDataTableColumn } from "@/components/admin/AdminDataTable";
+import {
+  AdminFormPrimitiveInput,
+  type AdminFormPrimitiveField,
+  initializePrimitiveValues,
+  toPrimitivePayload,
+  validatePrimitiveValues,
+} from "@/components/admin/AdminFormPrimitives";
 
 type ListResponse = {
   data?: unknown[];
@@ -35,6 +42,8 @@ type CrudConfig = {
   defaultListQuery?: string;
   defaultCreatePayload?: string;
   defaultPatchPayload?: string;
+  createFormFields?: AdminFormPrimitiveField[];
+  patchFormFields?: AdminFormPrimitiveField[];
   queryHelp?: string;
 };
 
@@ -66,6 +75,14 @@ export function AdminJsonCrudWorkspace({ config }: { config: CrudConfig }) {
   const [identifier, setIdentifier] = useState("");
   const [createPayload, setCreatePayload] = useState(config.defaultCreatePayload || "{}");
   const [patchPayload, setPatchPayload] = useState(config.defaultPatchPayload || "{}");
+  const [createFormValues, setCreateFormValues] = useState<Record<string, string>>(() =>
+    initializePrimitiveValues(config.createFormFields, config.defaultCreatePayload || "{}")
+  );
+  const [patchFormValues, setPatchFormValues] = useState<Record<string, string>>(() =>
+    initializePrimitiveValues(config.patchFormFields, config.defaultPatchPayload || "{}")
+  );
+  const [createFormErrors, setCreateFormErrors] = useState<Record<string, string>>({});
+  const [patchFormErrors, setPatchFormErrors] = useState<Record<string, string>>({});
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -435,15 +452,39 @@ export function AdminJsonCrudWorkspace({ config }: { config: CrudConfig }) {
 
           {config.createPath ? (
             <section className="card">
-              <label className="field" htmlFor={`${config.title}-create-json`}>
-                <span>Create payload JSON</span>
-                <textarea
-                  id={`${config.title}-create-json`}
-                  rows={10}
-                  value={createPayload}
-                  onChange={(event) => setCreatePayload(event.target.value)}
-                />
-              </label>
+              {Array.isArray(config.createFormFields) && config.createFormFields.length > 0 ? (
+                <>
+                  <h2>Create record</h2>
+                  {config.createFormFields.map((field) => (
+                    <AdminFormPrimitiveInput
+                      key={field.name}
+                      idPrefix={`${config.title}-create`}
+                      field={field}
+                      value={createFormValues[field.name] || ""}
+                      error={createFormErrors[field.name]}
+                      onChange={(name, value) => {
+                        setCreateFormValues((current) => ({ ...current, [name]: value }));
+                        setCreateFormErrors((current) => {
+                          if (!current[name]) return current;
+                          const next = { ...current };
+                          delete next[name];
+                          return next;
+                        });
+                      }}
+                    />
+                  ))}
+                </>
+              ) : (
+                <label className="field" htmlFor={`${config.title}-create-json`}>
+                  <span>Create payload JSON</span>
+                  <textarea
+                    id={`${config.title}-create-json`}
+                    rows={10}
+                    value={createPayload}
+                    onChange={(event) => setCreatePayload(event.target.value)}
+                  />
+                </label>
+              )}
               <div className="card-actions">
                 <button
                   className="btn"
@@ -452,7 +493,18 @@ export function AdminJsonCrudWorkspace({ config }: { config: CrudConfig }) {
                     void runAction(() =>
                       fetchJson(config.createPath || "", token.trim(), {
                         method: "POST",
-                        body: JSON.stringify(parseJsonInput(createPayload)),
+                        body: JSON.stringify(
+                          Array.isArray(config.createFormFields) && config.createFormFields.length > 0
+                            ? (() => {
+                                const errors = validatePrimitiveValues(config.createFormFields || [], createFormValues);
+                                setCreateFormErrors(errors);
+                                if (Object.keys(errors).length > 0) {
+                                  throw new Error(Object.values(errors)[0]);
+                                }
+                                return toPrimitivePayload(config.createFormFields || [], createFormValues);
+                              })()
+                            : parseJsonInput(createPayload)
+                        ),
                       })
                     )
                   }
@@ -465,15 +517,39 @@ export function AdminJsonCrudWorkspace({ config }: { config: CrudConfig }) {
 
           {config.patchPath ? (
             <section className="card">
-              <label className="field" htmlFor={`${config.title}-patch-json`}>
-                <span>Patch payload JSON</span>
-                <textarea
-                  id={`${config.title}-patch-json`}
-                  rows={10}
-                  value={patchPayload}
-                  onChange={(event) => setPatchPayload(event.target.value)}
-                />
-              </label>
+              {Array.isArray(config.patchFormFields) && config.patchFormFields.length > 0 ? (
+                <>
+                  <h2>Update record</h2>
+                  {config.patchFormFields.map((field) => (
+                    <AdminFormPrimitiveInput
+                      key={field.name}
+                      idPrefix={`${config.title}-patch`}
+                      field={field}
+                      value={patchFormValues[field.name] || ""}
+                      error={patchFormErrors[field.name]}
+                      onChange={(name, value) => {
+                        setPatchFormValues((current) => ({ ...current, [name]: value }));
+                        setPatchFormErrors((current) => {
+                          if (!current[name]) return current;
+                          const next = { ...current };
+                          delete next[name];
+                          return next;
+                        });
+                      }}
+                    />
+                  ))}
+                </>
+              ) : (
+                <label className="field" htmlFor={`${config.title}-patch-json`}>
+                  <span>Patch payload JSON</span>
+                  <textarea
+                    id={`${config.title}-patch-json`}
+                    rows={10}
+                    value={patchPayload}
+                    onChange={(event) => setPatchPayload(event.target.value)}
+                  />
+                </label>
+              )}
               <div className="card-actions">
                 <button
                   className="btn btn-secondary"
@@ -483,7 +559,18 @@ export function AdminJsonCrudWorkspace({ config }: { config: CrudConfig }) {
                     void runAction(() =>
                       fetchJson(withIdentifier(config.patchPath || "", identifier), token.trim(), {
                         method: "PATCH",
-                        body: JSON.stringify(parseJsonInput(patchPayload)),
+                        body: JSON.stringify(
+                          Array.isArray(config.patchFormFields) && config.patchFormFields.length > 0
+                            ? (() => {
+                                const errors = validatePrimitiveValues(config.patchFormFields || [], patchFormValues);
+                                setPatchFormErrors(errors);
+                                if (Object.keys(errors).length > 0) {
+                                  throw new Error(Object.values(errors)[0]);
+                                }
+                                return toPrimitivePayload(config.patchFormFields || [], patchFormValues);
+                              })()
+                            : parseJsonInput(patchPayload)
+                        ),
                       })
                     )
                   }
