@@ -601,6 +601,7 @@ export function AdminJsonCrudWorkspace({ config }: { config: CrudConfig }) {
                       field={field}
                       value={createFormValues[field.name] || ""}
                       error={createFormErrors[field.name]}
+                      authToken={token}
                       onChange={(name, value) => {
                         setCreateFormValues((current) => ({ ...current, [name]: value }));
                         setCreateFormErrors((current) => {
@@ -666,6 +667,7 @@ export function AdminJsonCrudWorkspace({ config }: { config: CrudConfig }) {
                       field={field}
                       value={patchFormValues[field.name] || ""}
                       error={patchFormErrors[field.name]}
+                      authToken={token}
                       onChange={(name, value) => {
                         setPatchFormValues((current) => ({ ...current, [name]: value }));
                         setPatchFormErrors((current) => {
