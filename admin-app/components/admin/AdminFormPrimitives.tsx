@@ -304,26 +304,36 @@ export function MediaPickerSlotPrimitive(props: AdminFormPrimitiveProps) {
   }
 
   return (
-    <InputFrame {...props}>
-      <div className="card-actions">
-        <input
-          id={id}
-          value={props.value}
-          placeholder={props.field.placeholder || "Paste media ID/path"}
-          aria-invalid={props.error ? "true" : "false"}
-          aria-describedby={props.error ? errorId : undefined}
-          onChange={(event) => onInputChange(event, props.field.name, props.onChange)}
-        />
-        <button
-          className="btn btn-secondary"
-          type="button"
-          disabled={!props.authToken?.trim()}
-          title={!props.authToken?.trim() ? "Sign in required to choose media" : undefined}
-          aria-label={!props.authToken?.trim() ? "Sign in required to choose media" : "Choose media"}
-          onClick={() => void openMediaPicker()}
-        >
-          Choose media
-        </button>
+    <>
+      <div className="field">
+        <label htmlFor={id}>
+          <span>{props.field.label}</span>
+        </label>
+        <div className="card-actions">
+          <input
+            id={id}
+            value={props.value}
+            placeholder={props.field.placeholder || "Paste media ID/path"}
+            aria-invalid={props.error ? "true" : "false"}
+            aria-describedby={props.error ? errorId : undefined}
+            onChange={(event) => onInputChange(event, props.field.name, props.onChange)}
+          />
+          <button
+            className="btn btn-secondary"
+            type="button"
+            disabled={!props.authToken?.trim()}
+            title={!props.authToken?.trim() ? "Sign in required to choose media" : undefined}
+            aria-label={!props.authToken?.trim() ? "Sign in required to choose media" : "Choose media"}
+            onClick={() => void openMediaPicker()}
+          >
+            Choose media
+          </button>
+        </div>
+        {props.error ? (
+          <span id={errorId} role="alert" className="state-error">
+            {props.error}
+          </span>
+        ) : null}
       </div>
       {open ? (
         <div className="card" role="dialog" aria-modal="true" aria-label={`${props.field.label} media picker`}>
@@ -359,7 +369,7 @@ export function MediaPickerSlotPrimitive(props: AdminFormPrimitiveProps) {
           ) : null}
         </div>
       ) : null}
-    </InputFrame>
+    </>
   );
 }
 

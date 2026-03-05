@@ -51,6 +51,37 @@ describe("Admin form primitives", () => {
     });
   });
 
+  it("normalizes local media path payload and rejects invalid media payloads", () => {
+    const fields: AdminFormPrimitiveField[] = [
+      { name: "hero_image_url", label: "Hero image", type: "media" },
+      { name: "cover_media_id", label: "Cover media", type: "media" },
+    ];
+
+    expect(
+      toPrimitivePayload(fields, {
+        hero_image_url: "media/library/hero.webp",
+        cover_media_id: "media-001",
+      })
+    ).toEqual({
+      hero_image_url: "/media/library/hero.webp",
+      cover_media_id: "media-001",
+    });
+
+    expect(() =>
+      toPrimitivePayload(fields, {
+        hero_image_url: "https://cdn.example.com/hero.webp",
+        cover_media_id: "media-001",
+      })
+    ).toThrow('Invalid media value for field "hero_image_url".');
+
+    expect(() =>
+      toPrimitivePayload(fields, {
+        hero_image_url: "/not-local/hero.webp",
+        cover_media_id: "media-001",
+      })
+    ).toThrow('Invalid media value for field "hero_image_url".');
+  });
+
   it("rejects external URL input for media fields", () => {
     const fields: AdminFormPrimitiveField[] = [
       { name: "hero_image_url", label: "Hero image", type: "media", required: true },
