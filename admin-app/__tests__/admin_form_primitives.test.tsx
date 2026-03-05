@@ -51,6 +51,27 @@ describe("Admin form primitives", () => {
     });
   });
 
+  it("parses json primitive values and rejects invalid json values", () => {
+    const fields: AdminFormPrimitiveField[] = [
+      { name: "amenities", label: "Facilities", type: "json" },
+      { name: "investment_snapshot", label: "Investment snapshot", type: "json" },
+    ];
+
+    expect(
+      toPrimitivePayload(fields, {
+        amenities: '["pool","gym"]',
+        investment_snapshot: '{"source":"Internal Desk","updated_at":"2026-03-01"}',
+      })
+    ).toEqual({
+      amenities: ["pool", "gym"],
+      investment_snapshot: { source: "Internal Desk", updated_at: "2026-03-01" },
+    });
+
+    expect(validatePrimitiveValues(fields, { amenities: "[", investment_snapshot: "{}" })).toEqual({
+      amenities: "Facilities is invalid.",
+    });
+  });
+
   it("normalizes local media path payload and rejects invalid media payloads", () => {
     const fields: AdminFormPrimitiveField[] = [
       { name: "hero_image_url", label: "Hero image", type: "media" },

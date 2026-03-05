@@ -325,6 +325,16 @@ def test_b5_projects_link_area_developer_reflection_is_structured(client) -> Non
     assert project["developer"]["id"] == developer_id
     assert project["developer"]["slug"] == developer_slug
 
+    prepared = client.patch(
+        f"/admin/projects/{project_id}",
+        headers=headers,
+        json={
+            "amenities": ["pool"],
+            "investment_snapshot": {"source": "Internal Desk", "updated_at": "2026-03-01"},
+        },
+    )
+    assert prepared.status_code == 200, prepared.text
+
     published = client.post(f"/admin/projects/{project_id}/publish", headers=headers)
     assert published.status_code == 200, published.text
 

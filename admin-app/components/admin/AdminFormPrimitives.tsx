@@ -3,7 +3,7 @@
 import { type ChangeEvent, type ReactNode, useState } from "react";
 import { normalizeLocalMediaPath } from "@/app/_lib/local-media";
 
-export type PrimitiveFieldType = "text" | "textarea" | "number" | "select" | "status" | "relation" | "media";
+export type PrimitiveFieldType = "text" | "textarea" | "number" | "select" | "status" | "relation" | "media" | "json";
 
 export type AdminFormPrimitiveField = {
   name: string;
@@ -120,6 +120,14 @@ export function validatePrimitiveValues(
       errors[field.name] = validationMessage(field.label, "invalid");
       continue;
     }
+    if (field.type === "json") {
+      try {
+        JSON.parse(value);
+      } catch {
+        errors[field.name] = validationMessage(field.label, "invalid");
+      }
+      continue;
+    }
     if (field.type === "select" || field.type === "status") {
       const options = toDisplayOptions(field);
       if (options.length > 0 && !options.includes(value)) {
@@ -165,6 +173,12 @@ export function toPrimitivePayload(
         throw new Error(`Invalid number value for field "${field.name}".`);
       }
       value = numericValue;
+    } else if (field.type === "json") {
+      try {
+        value = JSON.parse(trimmed);
+      } catch {
+        throw new Error(`Invalid JSON value for field "${field.name}".`);
+      }
     } else if (field.type === "media") {
       if (isExternalUrl(trimmed)) {
         throw new Error(`Invalid media value for field "${field.name}".`);
@@ -381,6 +395,21 @@ export function AdminFormPrimitiveInput(props: AdminFormPrimitiveProps) {
   const id = fieldId(props.idPrefix, props.field.name);
   const errorId = `${id}-error`;
   if (props.field.type === "textarea") {
+    return (
+      <InputFrame {...props}>
+        <textarea
+          id={id}
+          rows={props.field.rows || 4}
+          value={props.value}
+          placeholder={props.field.placeholder}
+          aria-invalid={props.error ? "true" : "false"}
+          aria-describedby={props.error ? errorId : undefined}
+          onChange={(event) => onInputChange(event, props.field.name, props.onChange)}
+        />
+      </InputFrame>
+    );
+  }
+  if (props.field.type === "json") {
     return (
       <InputFrame {...props}>
         <textarea

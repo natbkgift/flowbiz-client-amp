@@ -228,6 +228,45 @@ def _validate_media_governance(db: Session, paths: list[str]) -> list[dict]:
     return [item.to_dict() for item in result.warnings]
 
 
+def _project_publish_readiness(row: Project) -> dict:
+    missing: list[str] = []
+    property_type = str(row.property_type or "").strip()
+    if not property_type:
+        missing.append("property_type")
+
+    amenities = row.amenities if isinstance(row.amenities, list) else []
+    has_facilities = any(str(item or "").strip() for item in amenities)
+    if not has_facilities:
+        missing.append("facilities")
+
+    snapshot = row.investment_snapshot if isinstance(row.investment_snapshot, dict) else {}
+    source = str(snapshot.get("source") or "").strip()
+    updated_at = str(snapshot.get("updated_at") or "").strip()
+    if not source:
+        missing.append("investment_snapshot.source")
+    if not updated_at:
+        missing.append("investment_snapshot.updated_at")
+
+    return {"ready": len(missing) == 0, "missing": sorted(set(missing))}
+
+
+def _enforce_project_publish_requirements(row: Project) -> dict:
+    readiness = _project_publish_readiness(row)
+    if readiness["ready"]:
+        return readiness
+    raise HTTPException(
+        status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
+        detail={
+            "code": "project_publish_requirements_missing",
+            "message": (
+                "Project publish is blocked: missing required facilities/investment snapshot "
+                "fields for listing readiness."
+            ),
+            **readiness,
+        },
+    )
+
+
 @router.get("/projects")
 def admin_list_projects(
     limit: int = Query(50, ge=1, le=200),
@@ -374,11 +413,12 @@ def admin_publish_project(
     row = db.get(Project, project_id)
     if row is None or row.deleted_at is not None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Project not found")
+    readiness = _enforce_project_publish_requirements(row)
     row.status = "published"
     db.add(row)
     db.commit()
     db.refresh(row)
-    return {"project": _serialize(row, db), "published": True}
+    return {"project": _serialize(row, db), "published": True, "publish_readiness": readiness}
 
 
 @router.delete("/projects/{project_id}")
