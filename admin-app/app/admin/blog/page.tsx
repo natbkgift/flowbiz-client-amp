@@ -37,10 +37,10 @@ const BLOG_CREATE_FIELDS = [
   { name: "body_md.th", label: "Body (TH)", type: "textarea", required: true, rows: 8, placeholder: "## บทนำ" },
   { name: "hero_image_url", label: "Hero image path", type: "media", placeholder: "/media/library/blog/hero.webp" },
   { name: "hero_media_asset_id", label: "Hero media asset ID", type: "relation", placeholder: "optional media UUID" },
-  { name: "tags.en", label: "Tags (EN comma separated)", type: "text", placeholder: "investment, market-update" },
-  { name: "tags.th", label: "Tags (TH comma separated)", type: "text", placeholder: "การลงทุน, อัปเดตตลาด" },
-  { name: "topics.en", label: "Topics (EN comma separated)", type: "text", placeholder: "market-update" },
-  { name: "topics.th", label: "Topics (TH comma separated)", type: "text", placeholder: "อัปเดตตลาด" },
+  { name: "tags.en", label: "Tags (EN comma separated)", type: "text", placeholder: "Use kind=tag slugs: investment, market-update" },
+  { name: "tags.th", label: "Tags (TH comma separated)", type: "text", placeholder: "ใช้ slug kind=tag: investment, market-update" },
+  { name: "topics.en", label: "Topics (EN comma separated)", type: "text", placeholder: "Use kind=topic slugs: market-update" },
+  { name: "topics.th", label: "Topics (TH comma separated)", type: "text", placeholder: "ใช้ slug kind=topic: market-update" },
 ] as const;
 
 const BLOG_PATCH_FIELDS = [
@@ -61,7 +61,7 @@ export default function AdminBlogCmsPage() {
     <AdminJsonCrudWorkspace
       config={{
         title: "Blog CMS",
-        subtitle: "Manage blog and guide articles via /admin/content/articles APIs.",
+        subtitle: "Manage blog and guide articles via /admin/content/articles APIs with taxonomy keys from /admin/content/taxonomies.",
         identifierLabel: "Article slug",
         identifierPlaceholder: "sample-blog-post",
         identifierField: "slug",
