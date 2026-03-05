@@ -126,7 +126,14 @@ export function toPrimitivePayload(
     const raw = values[field.name] || "";
     const trimmed = raw.trim();
     if (!trimmed) continue;
-    const value = field.type === "number" ? Number(trimmed) : trimmed;
+    let value: unknown = trimmed;
+    if (field.type === "number") {
+      const numericValue = Number(trimmed);
+      if (Number.isNaN(numericValue)) {
+        throw new Error(`Invalid number value for field "${field.name}".`);
+      }
+      value = numericValue;
+    }
     setNestedValue(payload, field.name, value);
   }
   return payload;
