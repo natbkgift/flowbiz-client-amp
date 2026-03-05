@@ -32,7 +32,7 @@ const PROJECT_CREATE_FIELDS = [
 ] as const;
 
 const PROJECT_PATCH_FIELDS = [
-  { name: "name", label: "Name", type: "text", required: true },
+  { name: "name", label: "Name", type: "text" },
   { name: "status", label: "Status", type: "status", options: ["draft", "inactive", "active"] },
   { name: "developer_id", label: "Developer ID", type: "relation", placeholder: "optional developer UUID" },
   { name: "hero_media_id", label: "Hero media", type: "media", placeholder: "optional media ID/path" },
