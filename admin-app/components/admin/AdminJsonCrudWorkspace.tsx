@@ -45,6 +45,21 @@ type CrudConfig = {
   defaultPatchPayload?: string;
   createFormFields?: AdminFormPrimitiveField[];
   patchFormFields?: AdminFormPrimitiveField[];
+  previewConfig?: {
+    recordPath?: string;
+    titlePath: string;
+    excerptPath?: string;
+    bodyPath?: string;
+    locales?: readonly string[];
+  };
+  publishChecklistConfig?: {
+    recordPath?: string;
+    requiredLocales: readonly string[];
+    requiredLocalizedFields: ReadonlyArray<{ path: string; label: string }>;
+    mediaAnyOfPaths?: readonly string[];
+    allowedStatuses?: readonly string[];
+    allowedCategories?: readonly string[];
+  };
   queryHelp?: string;
 };
 
@@ -62,6 +77,67 @@ function buildListPath(path: string, query: string): string {
 function pickString(record: Record<string, unknown>, key: string): string {
   const value = record[key];
   return typeof value === "string" ? value.trim() : "";
+}
+
+function nestedValue(record: Record<string, unknown>, path: string): unknown {
+  const parts = path.split(".");
+  let cursor: unknown = record;
+  for (const part of parts) {
+    if (!cursor || typeof cursor !== "object") return undefined;
+    cursor = (cursor as Record<string, unknown>)[part];
+  }
+  return cursor;
+}
+
+function nestedText(record: Record<string, unknown>, path: string): string {
+  const value = nestedValue(record, path);
+  return typeof value === "string" ? value.trim() : "";
+}
+
+function normalizeRecordCandidate(value: unknown): Record<string, unknown> | null {
+  if (!value || typeof value !== "object") return null;
+  return value as Record<string, unknown>;
+}
+
+function checklistReport(
+  config: CrudConfig["publishChecklistConfig"],
+  record: Record<string, unknown>
+): { blocking: string[]; warnings: string[] } {
+  if (!config) return { blocking: [], warnings: [] };
+  const blocking: string[] = [];
+  const warnings: string[] = [];
+  for (const field of config.requiredLocalizedFields) {
+    for (const locale of config.requiredLocales) {
+      if (!nestedText(record, `${field.path}.${locale}`)) {
+        blocking.push(`${field.label} (${locale.toUpperCase()}) is required.`);
+      }
+    }
+  }
+  if (Array.isArray(config.allowedStatuses) && config.allowedStatuses.length > 0) {
+    const statusText = nestedText(record, "status");
+    const normalizedStatus =
+      typeof statusText === "string" ? statusText.trim().toLowerCase() : "";
+    if (!normalizedStatus || !config.allowedStatuses.includes(normalizedStatus)) {
+      blocking.push(`Status must be one of: ${config.allowedStatuses.join(", ")}.`);
+    }
+  }
+  if (Array.isArray(config.allowedCategories) && config.allowedCategories.length > 0) {
+    const categoryText = nestedText(record, "category");
+    const normalizedCategory =
+      typeof categoryText === "string" ? categoryText.trim().toLowerCase() : "";
+    if (!normalizedCategory || !config.allowedCategories.includes(normalizedCategory)) {
+      blocking.push(`Category must be one of: ${config.allowedCategories.join(", ")}.`);
+    }
+  }
+  if (Array.isArray(config.mediaAnyOfPaths) && config.mediaAnyOfPaths.length > 0) {
+    const hasMedia = config.mediaAnyOfPaths.some((path) => {
+      const value = nestedValue(record, path);
+      if (typeof value === "string") return value.trim().length > 0;
+      return value !== null && value !== undefined;
+    });
+    if (!hasMedia) warnings.push("hero media is recommended before publish");
+  }
+  return { blocking, warnings };
 }
 
 function toDomIdToken(value: string): string {
@@ -100,6 +176,8 @@ export function AdminJsonCrudWorkspace({ config }: { config: CrudConfig }) {
   const [items, setItems] = useState<unknown[]>([]);
   const [meta, setMeta] = useState<ListResponse["meta"]>(null);
   const [result, setResult] = useState<string>("");
+  const [previewRecord, setPreviewRecord] = useState<Record<string, unknown> | null>(null);
+  const previewConfig = config.previewConfig;
 
   useEffect(() => {
     const session = readAuthSession();
@@ -202,6 +280,13 @@ export function AdminJsonCrudWorkspace({ config }: { config: CrudConfig }) {
     try {
       const output = await action();
       setResult(toPrettyJson(output));
+      const configuredRecordPath = config.previewConfig?.recordPath || config.publishChecklistConfig?.recordPath;
+      const candidate = configuredRecordPath
+        ? normalizeRecordCandidate(
+            normalizeRecordCandidate(output)?.[configuredRecordPath]
+          )
+        : normalizeRecordCandidate(output);
+      if (candidate) setPreviewRecord(candidate);
       await loadList();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Request failed.");
@@ -210,6 +295,51 @@ export function AdminJsonCrudWorkspace({ config }: { config: CrudConfig }) {
 
   function parseJsonInput(input: string): unknown {
     return JSON.parse(input);
+  }
+
+  async function publishRecord(): Promise<unknown> {
+    if (!config.publishPath) return null;
+    const activeIdentifier = identifier.trim();
+    if (!activeIdentifier) return null;
+    if (config.publishChecklistConfig) {
+      const detail = await fetchJson<Record<string, unknown>>(
+        withIdentifier(config.getPath, activeIdentifier),
+        token.trim()
+      );
+      const recordPath = config.publishChecklistConfig.recordPath;
+      const resolvedRecord = recordPath
+        ? normalizeRecordCandidate(detail[recordPath])
+        : normalizeRecordCandidate(detail);
+      if (resolvedRecord) setPreviewRecord(resolvedRecord);
+      if (!resolvedRecord) {
+        throw new Error("Unable to evaluate publish checklist. Verify the selected article exists and reload detail.");
+      }
+      const report = checklistReport(config.publishChecklistConfig, resolvedRecord);
+      if (report.blocking.length > 0) {
+        setResult(
+          toPrettyJson({
+            publish_checklist: {
+              blocking: report.blocking,
+              warnings: report.warnings,
+            },
+          })
+        );
+        throw new Error("Publish blocked by checklist requirements.");
+      }
+      if (report.warnings.length > 0) {
+        setResult(
+          toPrettyJson({
+            publish_checklist: {
+              blocking: [],
+              warnings: report.warnings,
+            },
+          })
+        );
+      }
+    }
+    return await fetchJson(withIdentifier(config.publishPath, activeIdentifier), token.trim(), {
+      method: "POST",
+    });
   }
 
   const pickIdentifierFromRow = useCallback((item: unknown): string => {
@@ -418,13 +548,7 @@ export function AdminJsonCrudWorkspace({ config }: { config: CrudConfig }) {
                 <button
                   className="btn btn-secondary"
                   type="button"
-                  onClick={() =>
-                    void runAction(() =>
-                      fetchJson(withIdentifier(config.publishPath || "", identifier), token.trim(), {
-                        method: "POST",
-                      })
-                    )
-                  }
+                  onClick={() => void runAction(() => publishRecord())}
                   disabled={!identifier.trim()}
                 >
                   Publish
@@ -617,6 +741,27 @@ export function AdminJsonCrudWorkspace({ config }: { config: CrudConfig }) {
             <section className="card">
               <h2>Result</h2>
               <pre>{result}</pre>
+            </section>
+          ) : null}
+          {previewConfig && previewRecord ? (
+            <section className="card">
+              <h2>Preview</h2>
+              {(previewConfig.locales || ["en", "th"]).map((locale) => {
+                const localeKey = locale.toLowerCase();
+                const title = nestedText(previewRecord, `${previewConfig.titlePath}.${localeKey}`);
+                const excerptPath = previewConfig.excerptPath;
+                const bodyPath = previewConfig.bodyPath;
+                const excerpt = excerptPath ? nestedText(previewRecord, `${excerptPath}.${localeKey}`) : "";
+                const body = bodyPath ? nestedText(previewRecord, `${bodyPath}.${localeKey}`) : "";
+                return (
+                  <article key={localeKey} className="card">
+                    <h3>{localeKey.toUpperCase()}</h3>
+                    <p className="locale-safe"><strong>{title || "-"}</strong></p>
+                    {excerpt ? <p className="locale-safe">{excerpt}</p> : <p className="locale-safe">-</p>}
+                    {body ? <pre>{body}</pre> : <pre>-</pre>}
+                  </article>
+                );
+              })}
             </section>
           ) : null}
         </>

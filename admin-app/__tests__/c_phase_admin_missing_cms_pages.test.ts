@@ -87,4 +87,17 @@ describe("Phase C missing CMS pages", () => {
     expect(testimonials).toContain("type: \"relation\"");
     expect(testimonials).toContain("type: \"media\"");
   });
+
+  it("configures blog workspace as form-first with preview and publish checklist", () => {
+    const blog = read("app/admin/blog/page.tsx");
+    const workspace = read("components/admin/AdminJsonCrudWorkspace.tsx");
+
+    expect(blog).toContain("createFormFields");
+    expect(blog).toContain("patchFormFields");
+    expect(blog).toContain("previewConfig");
+    expect(blog).toContain("publishChecklistConfig");
+    expect(blog).toContain("options: [\"blog\", \"guide\"]");
+    expect(workspace).toContain("Publish blocked by checklist requirements.");
+    expect(workspace).toContain("<h2>Preview</h2>");
+  });
 });

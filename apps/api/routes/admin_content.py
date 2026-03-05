@@ -30,6 +30,7 @@ router = APIRouter(prefix="/admin", tags=["admin"])
 
 _SITE_LAYOUT_CMS_SLUG = "site-layout"
 _ARTICLE_STATUSES = {"draft", "published", "archived"}
+_ARTICLE_ALLOWED_CATEGORIES = {"blog", "guide"}
 _TAXONOMY_STATUSES = {"draft", "active", "archived"}
 _VIDEO_STATUSES = {"draft", "published", "archived"}
 _YOUTUBE_ID_PATTERN = re.compile(r"^[A-Za-z0-9_-]{11}$")
@@ -418,7 +419,46 @@ def _coerce_slug(value: str | None, *, field_name: str = "slug") -> str:
 
 
 def _coerce_category(value: str | None) -> str:
-    return _coerce_required_text(value, field_name="category").lower()
+    category = _coerce_required_text(value, field_name="category").lower()
+    if category not in _ARTICLE_ALLOWED_CATEGORIES:
+        allowed_text = ", ".join(sorted(_ARTICLE_ALLOWED_CATEGORIES))
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail=f"category must be one of: {allowed_text}",
+        )
+    return category
+
+
+def _localized_value(value: Any, locale: str) -> str:
+    if not isinstance(value, dict):
+        return ""
+    return str(value.get(locale) or "").strip()
+
+
+def _article_publish_checklist(article: Article) -> dict[str, list[str]]:
+    blocking: list[str] = []
+    warnings: list[str] = []
+
+    for locale in ["en", "th"]:
+        if not _localized_value(article.title, locale):
+            blocking.append(f"title.{locale} is required")
+        body_value = _localized_value(article.body_md, locale)
+        if not body_value:
+            blocking.append(f"body_md.{locale} is required")
+
+    category = str(article.category or "").strip().lower()
+    if category not in _ARTICLE_ALLOWED_CATEGORIES:
+        blocking.append("category must be one of: blog, guide")
+
+    status_value = str(article.status or "").strip().lower()
+    if status_value != "draft":
+        blocking.append("status must be draft before publish")
+
+    has_media = bool(str(article.hero_image_url or "").strip() or article.hero_media_asset_id)
+    if not has_media:
+        warnings.append("hero media is recommended before publish")
+
+    return {"blocking": blocking, "warnings": warnings}
 
 
 def _article_by_slug_or_404(db: Session, slug: str) -> Article:
@@ -630,13 +670,23 @@ def publish_article(
     _admin: User = Depends(get_current_admin),
 ) -> dict[str, Any]:
     article = _article_by_slug_or_404(db, slug)
+    checklist = _article_publish_checklist(article)
+    if checklist["blocking"]:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail={
+                "message": "Publish checklist failed",
+                "blocking": checklist["blocking"],
+                "warnings": checklist["warnings"],
+            },
+        )
     article.status = "published"
     if article.published_at is None:
         article.published_at = datetime.now(UTC)
     db.add(article)
     db.commit()
     db.refresh(article)
-    return _article_response(article)
+    return {**_article_response(article), "publish_checklist": checklist}
 
 
 @router.post("/content/articles/{slug}/unpublish")

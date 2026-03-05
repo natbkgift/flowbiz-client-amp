@@ -98,6 +98,103 @@ def test_phase_d_article_full_crud_publish_flow(client) -> None:
     assert missing.status_code == 404, missing.text
 
 
+def test_phase_d_article_publish_blocks_missing_required_locale(client) -> None:
+    headers = _make_admin_headers()
+    slug = f"phase-d-blog-missing-locale-{uuid4()}"
+
+    created = client.post(
+        "/admin/content/articles",
+        headers=headers,
+        json={
+            "slug": slug,
+            "category": "blog",
+            "status": "draft",
+            "title": {"en": "Only EN title"},
+            "body_md": {"en": "Only EN body"},
+        },
+    )
+    _assert_201(created)
+
+    publish = client.post(f"/admin/content/articles/{slug}/publish", headers=headers)
+    assert publish.status_code == 422, publish.text
+    detail = publish.json()["detail"]
+    assert detail["message"] == "Publish checklist failed"
+    assert "title.th is required" in detail["blocking"]
+    assert "body_md.th is required" in detail["blocking"]
+
+
+def test_phase_d_article_publish_supports_guide_category_contract(client) -> None:
+    headers = _make_admin_headers()
+    slug = f"phase-d-guide-{uuid4()}"
+
+    created = client.post(
+        "/admin/content/articles",
+        headers=headers,
+        json={
+            "slug": slug,
+            "category": "guide",
+            "status": "draft",
+            "title": {"en": "Guide EN", "th": "ไกด์ TH"},
+            "body_md": {"en": "Guide body EN", "th": "เนื้อหาไกด์ TH"},
+        },
+    )
+    _assert_201(created)
+
+    published = client.post(f"/admin/content/articles/{slug}/publish", headers=headers)
+    _assert_200(published)
+    response_body = published.json()
+    assert response_body["article"]["category"] == "guide"
+    assert response_body["publish_checklist"]["blocking"] == []
+    assert response_body["publish_checklist"]["warnings"] == [
+        "hero media is recommended before publish"
+    ]
+
+
+def test_phase_d_article_create_rejects_invalid_category(client) -> None:
+    headers = _make_admin_headers()
+    slug = f"phase-d-invalid-category-{uuid4()}"
+
+    created = client.post(
+        "/admin/content/articles",
+        headers=headers,
+        json={
+            "slug": slug,
+            "category": "news",
+            "status": "draft",
+            "title": {"en": "Invalid category"},
+            "body_md": {"en": "Body"},
+        },
+    )
+    assert created.status_code == 422, created.text
+    assert created.json()["detail"] == "category must be one of: blog, guide"
+
+
+def test_phase_d_article_patch_rejects_invalid_category(client) -> None:
+    headers = _make_admin_headers()
+    slug = f"phase-d-category-patch-{uuid4()}"
+
+    created = client.post(
+        "/admin/content/articles",
+        headers=headers,
+        json={
+            "slug": slug,
+            "category": "blog",
+            "status": "draft",
+            "title": {"en": "Patch category"},
+            "body_md": {"en": "Body"},
+        },
+    )
+    _assert_201(created)
+
+    patched = client.patch(
+        f"/admin/content/articles/{slug}",
+        headers=headers,
+        json={"category": "news"},
+    )
+    assert patched.status_code == 422, patched.text
+    assert patched.json()["detail"] == "category must be one of: blog, guide"
+
+
 def test_phase_d_taxonomy_full_crud(client) -> None:
     headers = _make_admin_headers()
 
