@@ -27,7 +27,7 @@ export default function AdminTaxonomyCmsPage() {
     <AdminJsonCrudWorkspace
       config={{
         title: "Taxonomy CMS",
-        subtitle: "Manage shared tags/topics via /admin/content/taxonomies APIs.",
+        subtitle: "Manage shared tags/topics/facilities/type registry via /admin/content/taxonomies APIs.",
         identifierLabel: "Taxonomy ID",
         identifierPlaceholder: "taxonomy UUID",
         identifierField: "id",

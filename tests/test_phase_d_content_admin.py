@@ -236,6 +236,80 @@ def test_phase_d_taxonomy_full_crud(client) -> None:
     assert missing.status_code == 404, missing.text
 
 
+def test_phase_d_taxonomy_rejects_duplicate_kind_slug(client) -> None:
+    headers = _make_admin_headers()
+    payload = {
+        "kind": "topic",
+        "slug": "phase-d-duplicate-topic",
+        "label": {"en": "Original", "th": "ต้นฉบับ"},
+        "status": "active",
+    }
+    first = client.post("/admin/content/taxonomies", headers=headers, json=payload)
+    _assert_201(first)
+
+    duplicate = client.post("/admin/content/taxonomies", headers=headers, json=payload)
+    assert duplicate.status_code == 409, duplicate.text
+    assert duplicate.json()["detail"] == "Taxonomy already exists"
+
+
+def test_phase_d_taxonomy_rejects_invalid_slug_and_kind(client) -> None:
+    headers = _make_admin_headers()
+
+    invalid_slug = client.post(
+        "/admin/content/taxonomies",
+        headers=headers,
+        json={
+            "kind": "topic",
+            "slug": "invalid/slug",
+            "label": {"en": "Invalid slug"},
+        },
+    )
+    assert invalid_slug.status_code == 422, invalid_slug.text
+    assert invalid_slug.json()["detail"] == "slug must be lowercase letters, numbers, and hyphen only"
+
+    spaced_slug = client.post(
+        "/admin/content/taxonomies",
+        headers=headers,
+        json={
+            "kind": "topic",
+            "slug": "market update",
+            "label": {"en": "Spaced slug"},
+        },
+    )
+    assert spaced_slug.status_code == 422, spaced_slug.text
+    assert spaced_slug.json()["detail"] == "slug must be lowercase letters, numbers, and hyphen only"
+
+    invalid_kind = client.post(
+        "/admin/content/taxonomies",
+        headers=headers,
+        json={
+            "kind": "topic@v1",
+            "slug": "valid-slug",
+            "label": {"en": "Invalid kind"},
+        },
+    )
+    assert invalid_kind.status_code == 422, invalid_kind.text
+    assert (
+        invalid_kind.json()["detail"]
+        == "kind must use lowercase letters, numbers, hyphen, and underscore"
+    )
+
+    spaced_kind = client.post(
+        "/admin/content/taxonomies",
+        headers=headers,
+        json={
+            "kind": "property type",
+            "slug": "valid-slug",
+            "label": {"en": "Spaced kind"},
+        },
+    )
+    assert spaced_kind.status_code == 422, spaced_kind.text
+    assert (
+        spaced_kind.json()["detail"]
+        == "kind must use lowercase letters, numbers, hyphen, and underscore"
+    )
+
+
 def test_phase_d_video_full_crud(client) -> None:
     headers = _make_admin_headers()
     slug = f"phase-d-video-{uuid4()}"

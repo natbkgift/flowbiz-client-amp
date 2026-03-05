@@ -35,9 +35,9 @@ const PROPERTY_CREATE_FIELDS = [
   {
     name: "property_type",
     label: "Property type",
-    type: "select",
+    type: "text",
     required: true,
-    options: ["condo", "house", "townhome", "land"],
+    placeholder: "taxonomy slug from kind=property_type (e.g. condo)",
   },
   { name: "project_id", label: "Project ID", type: "relation", placeholder: "optional project UUID" },
   { name: "area_id", label: "Area ID", type: "relation", placeholder: "optional area UUID" },
@@ -57,7 +57,7 @@ export default function AdminPropertiesCmsPage() {
     <AdminJsonCrudWorkspace
       config={{
         title: "Properties CMS",
-        subtitle: "Manage listings via existing /admin/properties APIs.",
+        subtitle: "Manage listings via existing /admin/properties APIs (property_type from taxonomy /admin/content/taxonomies).",
         identifierLabel: "Property ID",
         identifierPlaceholder: "property UUID",
         identifierField: "id",

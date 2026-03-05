@@ -34,6 +34,8 @@ _ARTICLE_ALLOWED_CATEGORIES = {"blog", "guide"}
 _TAXONOMY_STATUSES = {"draft", "active", "archived"}
 _VIDEO_STATUSES = {"draft", "published", "archived"}
 _YOUTUBE_ID_PATTERN = re.compile(r"^[A-Za-z0-9_-]{11}$")
+_TAXONOMY_KIND_PATTERN = re.compile(r"^[a-z0-9]+(?:[-_][a-z0-9]+)*$")
+_TAXONOMY_SLUG_PATTERN = re.compile(r"^[a-z0-9]+(?:-[a-z0-9]+)*$")
 
 
 class PaginationMeta(BaseModel):
@@ -415,6 +417,26 @@ def _coerce_article_slug(value: str | None) -> str:
 
 def _coerce_slug(value: str | None, *, field_name: str = "slug") -> str:
     text = _coerce_required_text(value, field_name=field_name).lower().replace(" ", "-")
+    return text
+
+
+def _coerce_taxonomy_kind(value: str | None, *, field_name: str = "kind") -> str:
+    text = _coerce_required_text(value, field_name=field_name).lower()
+    if not _TAXONOMY_KIND_PATTERN.fullmatch(text):
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail=f"{field_name} must use lowercase letters, numbers, hyphen, and underscore",
+        )
+    return text
+
+
+def _coerce_taxonomy_slug(value: str | None, *, field_name: str = "slug") -> str:
+    text = _coerce_required_text(value, field_name=field_name).lower()
+    if not _TAXONOMY_SLUG_PATTERN.fullmatch(text):
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail=f"{field_name} must be lowercase letters, numbers, and hyphen only",
+        )
     return text
 
 
@@ -856,8 +878,8 @@ def create_taxonomy(
     db: Session = Depends(get_db),
     _admin: User = Depends(get_current_admin),
 ) -> dict[str, Any]:
-    kind = _coerce_slug(payload.kind, field_name="kind")
-    slug = _coerce_slug(payload.slug, field_name="slug")
+    kind = _coerce_taxonomy_kind(payload.kind, field_name="kind")
+    slug = _coerce_taxonomy_slug(payload.slug, field_name="slug")
 
     existing = db.scalar(
         select(ContentTaxonomy).where(
@@ -911,9 +933,9 @@ def patch_taxonomy(
     next_kind = row.kind
     next_slug = row.slug
     if "kind" in updates:
-        next_kind = _coerce_slug(payload.kind, field_name="kind")
+        next_kind = _coerce_taxonomy_kind(payload.kind, field_name="kind")
     if "slug" in updates:
-        next_slug = _coerce_slug(payload.slug, field_name="slug")
+        next_slug = _coerce_taxonomy_slug(payload.slug, field_name="slug")
 
     if next_kind != row.kind or next_slug != row.slug:
         conflict = db.scalar(

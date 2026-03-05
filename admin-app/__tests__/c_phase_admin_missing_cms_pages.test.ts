@@ -100,4 +100,22 @@ describe("Phase C missing CMS pages", () => {
     expect(workspace).toContain("Publish blocked by checklist requirements.");
     expect(workspace).toContain("<h2>Preview</h2>");
   });
+
+  it("wires taxonomy registry usage into article and property/project forms", () => {
+    const blog = read("app/admin/blog/page.tsx");
+    const projects = read("app/admin/projects/page.tsx");
+    const properties = read("app/admin/properties/page.tsx");
+
+    expect(blog).toContain("/admin/content/taxonomies");
+    expect(blog).toContain("kind=tag");
+    expect(blog).toContain("kind=topic");
+
+    expect(projects).toContain("/admin/content/taxonomies");
+    expect(projects).toContain("kind=property_type");
+    expect(projects).toMatch(/name:\s*"property_type"[\s\S]*?type:\s*"text"/);
+
+    expect(properties).toContain("/admin/content/taxonomies");
+    expect(properties).toContain("kind=property_type");
+    expect(properties).toMatch(/name:\s*"property_type"[\s\S]*?type:\s*"text"/);
+  });
 });

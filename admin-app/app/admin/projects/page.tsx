@@ -21,9 +21,9 @@ const PROJECT_CREATE_FIELDS = [
   {
     name: "property_type",
     label: "Property type",
-    type: "select",
+    type: "text",
     required: true,
-    options: ["condo", "house", "townhome", "land"],
+    placeholder: "taxonomy slug from kind=property_type (e.g. condo)",
   },
   { name: "developer_id", label: "Developer ID", type: "relation", placeholder: "optional developer UUID" },
   { name: "hero_media_id", label: "Hero media", type: "media", placeholder: "optional media ID/path" },
@@ -43,7 +43,7 @@ export default function AdminProjectsCmsPage() {
     <AdminJsonCrudWorkspace
       config={{
         title: "Projects CMS",
-        subtitle: "Manage projects via existing /admin/projects APIs.",
+        subtitle: "Manage projects via existing /admin/projects APIs (property_type from taxonomy /admin/content/taxonomies).",
         identifierLabel: "Project ID",
         identifierPlaceholder: "project UUID",
         identifierField: "id",
