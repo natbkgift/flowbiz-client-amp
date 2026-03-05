@@ -419,7 +419,14 @@ def _coerce_slug(value: str | None, *, field_name: str = "slug") -> str:
 
 
 def _coerce_category(value: str | None) -> str:
-    return _coerce_required_text(value, field_name="category").lower()
+    category = _coerce_required_text(value, field_name="category").lower()
+    if category not in _ARTICLE_ALLOWED_CATEGORIES:
+        allowed_text = ", ".join(sorted(_ARTICLE_ALLOWED_CATEGORIES))
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail=f"category must be one of: {allowed_text}",
+        )
+    return category
 
 
 def _localized_value(value: Any, locale: str) -> str:

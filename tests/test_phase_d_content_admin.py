@@ -150,6 +150,51 @@ def test_phase_d_article_publish_supports_guide_category_contract(client) -> Non
     ]
 
 
+def test_phase_d_article_create_rejects_invalid_category(client) -> None:
+    headers = _make_admin_headers()
+    slug = f"phase-d-invalid-category-{uuid4()}"
+
+    created = client.post(
+        "/admin/content/articles",
+        headers=headers,
+        json={
+            "slug": slug,
+            "category": "news",
+            "status": "draft",
+            "title": {"en": "Invalid category"},
+            "body_md": {"en": "Body"},
+        },
+    )
+    assert created.status_code == 422, created.text
+    assert created.json()["detail"] == "category must be one of: blog, guide"
+
+
+def test_phase_d_article_patch_rejects_invalid_category(client) -> None:
+    headers = _make_admin_headers()
+    slug = f"phase-d-category-patch-{uuid4()}"
+
+    created = client.post(
+        "/admin/content/articles",
+        headers=headers,
+        json={
+            "slug": slug,
+            "category": "blog",
+            "status": "draft",
+            "title": {"en": "Patch category"},
+            "body_md": {"en": "Body"},
+        },
+    )
+    _assert_201(created)
+
+    patched = client.patch(
+        f"/admin/content/articles/{slug}",
+        headers=headers,
+        json={"category": "news"},
+    )
+    assert patched.status_code == 422, patched.text
+    assert patched.json()["detail"] == "category must be one of: blog, guide"
+
+
 def test_phase_d_taxonomy_full_crud(client) -> None:
     headers = _make_admin_headers()
 

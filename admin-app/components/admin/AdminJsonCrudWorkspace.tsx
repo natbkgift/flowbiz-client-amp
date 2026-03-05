@@ -297,10 +297,10 @@ export function AdminJsonCrudWorkspace({ config }: { config: CrudConfig }) {
     return JSON.parse(input);
   }
 
-  async function publishRecord(): Promise<void> {
-    if (!config.publishPath) return;
+  async function publishRecord(): Promise<unknown> {
+    if (!config.publishPath) return null;
     const activeIdentifier = identifier.trim();
-    if (!activeIdentifier) return;
+    if (!activeIdentifier) return null;
     if (config.publishChecklistConfig) {
       const detail = await fetchJson<Record<string, unknown>>(
         withIdentifier(config.getPath, activeIdentifier),
@@ -337,7 +337,7 @@ export function AdminJsonCrudWorkspace({ config }: { config: CrudConfig }) {
         );
       }
     }
-    await fetchJson(withIdentifier(config.publishPath, activeIdentifier), token.trim(), {
+    return await fetchJson(withIdentifier(config.publishPath, activeIdentifier), token.trim(), {
       method: "POST",
     });
   }
