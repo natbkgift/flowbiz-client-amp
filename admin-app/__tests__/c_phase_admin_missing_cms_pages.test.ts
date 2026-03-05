@@ -112,10 +112,10 @@ describe("Phase C missing CMS pages", () => {
 
     expect(projects).toContain("/admin/content/taxonomies");
     expect(projects).toContain("kind=property_type");
-    expect(projects).toContain('type: "text"');
+    expect(projects).toContain('name: "property_type", type: "text"');
 
     expect(properties).toContain("/admin/content/taxonomies");
     expect(properties).toContain("kind=property_type");
-    expect(properties).toContain('type: "text"');
+    expect(properties).toContain('name: "property_type", type: "text"');
   });
 });
