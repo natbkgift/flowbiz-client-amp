@@ -114,14 +114,18 @@ function checklistReport(
     }
   }
   if (Array.isArray(config.allowedStatuses) && config.allowedStatuses.length > 0) {
-    const status = nestedText(record, "status");
-    if (!status || !config.allowedStatuses.includes(status)) {
+    const statusText = nestedText(record, "status");
+    const normalizedStatus =
+      typeof statusText === "string" ? statusText.trim().toLowerCase() : "";
+    if (!normalizedStatus || !config.allowedStatuses.includes(normalizedStatus)) {
       blocking.push(`Status must be one of: ${config.allowedStatuses.join(", ")}.`);
     }
   }
   if (Array.isArray(config.allowedCategories) && config.allowedCategories.length > 0) {
-    const category = nestedText(record, "category");
-    if (!category || !config.allowedCategories.includes(category)) {
+    const categoryText = nestedText(record, "category");
+    const normalizedCategory =
+      typeof categoryText === "string" ? categoryText.trim().toLowerCase() : "";
+    if (!normalizedCategory || !config.allowedCategories.includes(normalizedCategory)) {
       blocking.push(`Category must be one of: ${config.allowedCategories.join(", ")}.`);
     }
   }
