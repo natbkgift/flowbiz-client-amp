@@ -61,4 +61,30 @@ describe("Phase C missing CMS pages", () => {
       }
     }
   });
+
+  it("migrates selected admin pages to shared form primitives instead of direct JSON editing", () => {
+    const projects = read("app/admin/projects/page.tsx");
+    const properties = read("app/admin/properties/page.tsx");
+    const testimonials = read("app/admin/testimonials/page.tsx");
+    const workspace = read("components/admin/AdminJsonCrudWorkspace.tsx");
+
+    expect(workspace).toContain("AdminFormPrimitiveInput");
+    expect(workspace).toContain("validatePrimitiveValues");
+    expect(workspace).toContain("toPrimitivePayload");
+
+    expect(projects).toContain("createFormFields");
+    expect(projects).toContain("type: \"status\"");
+    expect(projects).toContain("type: \"relation\"");
+    expect(projects).toContain("type: \"media\"");
+
+    expect(properties).toContain("createFormFields");
+    expect(properties).toContain("type: \"status\"");
+    expect(properties).toContain("type: \"relation\"");
+    expect(properties).toContain("type: \"media\"");
+
+    expect(testimonials).toContain("createFormFields");
+    expect(testimonials).toContain("type: \"status\"");
+    expect(testimonials).toContain("type: \"relation\"");
+    expect(testimonials).toContain("type: \"media\"");
+  });
 });

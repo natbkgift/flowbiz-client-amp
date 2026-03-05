@@ -14,6 +14,30 @@ const PROJECT_CREATE_TEMPLATE = JSON.stringify(
 
 const PROJECT_PATCH_TEMPLATE = JSON.stringify({ name: "Updated Project Name" }, null, 2);
 
+const PROJECT_CREATE_FIELDS = [
+  { name: "name", label: "Name", type: "text", required: true, placeholder: "Sample Project" },
+  { name: "slug", label: "Slug", type: "text", required: true, placeholder: "sample-project-cms" },
+  { name: "status", label: "Status", type: "status", required: true, options: ["draft", "inactive", "active"] },
+  {
+    name: "property_type",
+    label: "Property type",
+    type: "select",
+    required: true,
+    options: ["condo", "house", "townhome", "land"],
+  },
+  { name: "developer_id", label: "Developer ID", type: "relation", placeholder: "optional developer UUID" },
+  { name: "hero_media_id", label: "Hero media", type: "media", placeholder: "optional media ID/path" },
+  { name: "summary.en", label: "Summary (EN)", type: "textarea", rows: 3 },
+  { name: "summary.th", label: "Summary (TH)", type: "textarea", rows: 3 },
+] as const;
+
+const PROJECT_PATCH_FIELDS = [
+  { name: "name", label: "Name", type: "text" },
+  { name: "status", label: "Status", type: "status", options: ["draft", "inactive", "active"] },
+  { name: "developer_id", label: "Developer ID", type: "relation", placeholder: "optional developer UUID" },
+  { name: "hero_media_id", label: "Hero media", type: "media", placeholder: "optional media ID/path" },
+] as const;
+
 export default function AdminProjectsCmsPage() {
   return (
     <AdminJsonCrudWorkspace
@@ -32,6 +56,8 @@ export default function AdminProjectsCmsPage() {
         defaultListQuery: "limit=40",
         defaultCreatePayload: PROJECT_CREATE_TEMPLATE,
         defaultPatchPayload: PROJECT_PATCH_TEMPLATE,
+        createFormFields: [...PROJECT_CREATE_FIELDS],
+        patchFormFields: [...PROJECT_PATCH_FIELDS],
         queryHelp: "Supported: limit",
       }}
     />

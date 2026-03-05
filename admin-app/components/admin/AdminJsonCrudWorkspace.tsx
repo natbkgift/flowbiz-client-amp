@@ -12,6 +12,13 @@ import {
   toPrettyJson,
 } from "@/app/_lib/admin-auth";
 import { AdminDataTable, type AdminDataTableColumn } from "@/components/admin/AdminDataTable";
+import {
+  AdminFormPrimitiveInput,
+  type AdminFormPrimitiveField,
+  initializePrimitiveValues,
+  toPrimitivePayload,
+  validatePrimitiveValues,
+} from "@/components/admin/AdminFormPrimitives";
 
 type ListResponse = {
   data?: unknown[];
@@ -21,6 +28,7 @@ type ListResponse = {
 
 type CrudConfig = {
   title: string;
+  idBase?: string;
   subtitle: string;
   identifierLabel: string;
   identifierPlaceholder: string;
@@ -35,6 +43,8 @@ type CrudConfig = {
   defaultListQuery?: string;
   defaultCreatePayload?: string;
   defaultPatchPayload?: string;
+  createFormFields?: AdminFormPrimitiveField[];
+  patchFormFields?: AdminFormPrimitiveField[];
   queryHelp?: string;
 };
 
@@ -54,6 +64,16 @@ function pickString(record: Record<string, unknown>, key: string): string {
   return typeof value === "string" ? value.trim() : "";
 }
 
+function toDomIdToken(value: string): string {
+  const normalized = value
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9_-]+/g, "-")
+    .replace(/-+/g, "-")
+    .replace(/^-|-$/g, "");
+  return normalized || "admin-workspace";
+}
+
 export function AdminJsonCrudWorkspace({ config }: { config: CrudConfig }) {
   const [token, setToken] = useState("");
   const [email, setEmail] = useState("");
@@ -66,6 +86,14 @@ export function AdminJsonCrudWorkspace({ config }: { config: CrudConfig }) {
   const [identifier, setIdentifier] = useState("");
   const [createPayload, setCreatePayload] = useState(config.defaultCreatePayload || "{}");
   const [patchPayload, setPatchPayload] = useState(config.defaultPatchPayload || "{}");
+  const [createFormValues, setCreateFormValues] = useState<Record<string, string>>(() =>
+    initializePrimitiveValues(config.createFormFields, config.defaultCreatePayload || "{}")
+  );
+  const [patchFormValues, setPatchFormValues] = useState<Record<string, string>>(() =>
+    initializePrimitiveValues(config.patchFormFields, config.defaultPatchPayload || "{}")
+  );
+  const [createFormErrors, setCreateFormErrors] = useState<Record<string, string>>({});
+  const [patchFormErrors, setPatchFormErrors] = useState<Record<string, string>>({});
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -86,6 +114,10 @@ export function AdminJsonCrudWorkspace({ config }: { config: CrudConfig }) {
   const listPath = useMemo(
     () => buildListPath(config.listPath, listQuery),
     [config.listPath, listQuery]
+  );
+  const idBase = useMemo(
+    () => toDomIdToken(config.idBase || config.title),
+    [config.idBase, config.title]
   );
 
   async function loadList(tokenOverride?: string): Promise<void> {
@@ -291,20 +323,20 @@ export function AdminJsonCrudWorkspace({ config }: { config: CrudConfig }) {
         {!isAuthenticated ? (
           <form className="crm-login-form" onSubmit={(event) => void login(event)}>
             <h2>Admin sign in</h2>
-            <label className="field" htmlFor={`${config.title}-login-email`}>
+            <label className="field" htmlFor={`${idBase}-login-email`}>
               <span>Email</span>
               <input
-                id={`${config.title}-login-email`}
+                id={`${idBase}-login-email`}
                 type="email"
                 autoComplete="username"
                 value={loginEmail}
                 onChange={(event) => setLoginEmail(event.target.value)}
               />
             </label>
-            <label className="field" htmlFor={`${config.title}-login-password`}>
+            <label className="field" htmlFor={`${idBase}-login-password`}>
               <span>Password</span>
               <input
-                id={`${config.title}-login-password`}
+                id={`${idBase}-login-password`}
                 type="password"
                 autoComplete="current-password"
                 value={loginPassword}
@@ -337,10 +369,10 @@ export function AdminJsonCrudWorkspace({ config }: { config: CrudConfig }) {
       {isAuthenticated ? (
         <>
           <section className="card">
-            <label className="field" htmlFor={`${config.title}-query`}>
+            <label className="field" htmlFor={`${idBase}-query`}>
               <span>List query</span>
               <input
-                id={`${config.title}-query`}
+                id={`${idBase}-query`}
                 value={listQuery}
                 onChange={(event) => setListQuery(event.target.value)}
                 placeholder="page=1&limit=20"
@@ -360,10 +392,10 @@ export function AdminJsonCrudWorkspace({ config }: { config: CrudConfig }) {
           </section>
 
           <section className="card">
-            <label className="field" htmlFor={`${config.title}-identifier`}>
+            <label className="field" htmlFor={`${idBase}-identifier`}>
               <span>{config.identifierLabel}</span>
               <input
-                id={`${config.title}-identifier`}
+                id={`${idBase}-identifier`}
                 value={identifier}
                 onChange={(event) => setIdentifier(event.target.value)}
                 placeholder={config.identifierPlaceholder}
@@ -435,15 +467,39 @@ export function AdminJsonCrudWorkspace({ config }: { config: CrudConfig }) {
 
           {config.createPath ? (
             <section className="card">
-              <label className="field" htmlFor={`${config.title}-create-json`}>
-                <span>Create payload JSON</span>
-                <textarea
-                  id={`${config.title}-create-json`}
-                  rows={10}
-                  value={createPayload}
-                  onChange={(event) => setCreatePayload(event.target.value)}
-                />
-              </label>
+              {Array.isArray(config.createFormFields) && config.createFormFields.length > 0 ? (
+                <>
+                  <h2>Create record</h2>
+                  {config.createFormFields.map((field) => (
+                    <AdminFormPrimitiveInput
+                      key={field.name}
+                      idPrefix={`${idBase}-create`}
+                      field={field}
+                      value={createFormValues[field.name] || ""}
+                      error={createFormErrors[field.name]}
+                      onChange={(name, value) => {
+                        setCreateFormValues((current) => ({ ...current, [name]: value }));
+                        setCreateFormErrors((current) => {
+                          if (!current[name]) return current;
+                          const next = { ...current };
+                          delete next[name];
+                          return next;
+                        });
+                      }}
+                    />
+                  ))}
+                </>
+              ) : (
+                <label className="field" htmlFor={`${idBase}-create-json`}>
+                  <span>Create payload JSON</span>
+                  <textarea
+                    id={`${idBase}-create-json`}
+                    rows={10}
+                    value={createPayload}
+                    onChange={(event) => setCreatePayload(event.target.value)}
+                  />
+                </label>
+              )}
               <div className="card-actions">
                 <button
                   className="btn"
@@ -452,7 +508,18 @@ export function AdminJsonCrudWorkspace({ config }: { config: CrudConfig }) {
                     void runAction(() =>
                       fetchJson(config.createPath || "", token.trim(), {
                         method: "POST",
-                        body: JSON.stringify(parseJsonInput(createPayload)),
+                        body: JSON.stringify(
+                          Array.isArray(config.createFormFields) && config.createFormFields.length > 0
+                            ? (() => {
+                                const errors = validatePrimitiveValues(config.createFormFields, createFormValues);
+                                setCreateFormErrors(errors);
+                                if (Object.keys(errors).length > 0) {
+                                  throw new Error("Please correct the highlighted fields.");
+                                }
+                                return toPrimitivePayload(config.createFormFields, createFormValues);
+                              })()
+                            : parseJsonInput(createPayload)
+                        ),
                       })
                     )
                   }
@@ -465,15 +532,39 @@ export function AdminJsonCrudWorkspace({ config }: { config: CrudConfig }) {
 
           {config.patchPath ? (
             <section className="card">
-              <label className="field" htmlFor={`${config.title}-patch-json`}>
-                <span>Patch payload JSON</span>
-                <textarea
-                  id={`${config.title}-patch-json`}
-                  rows={10}
-                  value={patchPayload}
-                  onChange={(event) => setPatchPayload(event.target.value)}
-                />
-              </label>
+              {Array.isArray(config.patchFormFields) && config.patchFormFields.length > 0 ? (
+                <>
+                  <h2>Update record</h2>
+                  {config.patchFormFields.map((field) => (
+                    <AdminFormPrimitiveInput
+                      key={field.name}
+                      idPrefix={`${idBase}-patch`}
+                      field={field}
+                      value={patchFormValues[field.name] || ""}
+                      error={patchFormErrors[field.name]}
+                      onChange={(name, value) => {
+                        setPatchFormValues((current) => ({ ...current, [name]: value }));
+                        setPatchFormErrors((current) => {
+                          if (!current[name]) return current;
+                          const next = { ...current };
+                          delete next[name];
+                          return next;
+                        });
+                      }}
+                    />
+                  ))}
+                </>
+              ) : (
+                <label className="field" htmlFor={`${idBase}-patch-json`}>
+                  <span>Patch payload JSON</span>
+                  <textarea
+                    id={`${idBase}-patch-json`}
+                    rows={10}
+                    value={patchPayload}
+                    onChange={(event) => setPatchPayload(event.target.value)}
+                  />
+                </label>
+              )}
               <div className="card-actions">
                 <button
                   className="btn btn-secondary"
@@ -483,7 +574,18 @@ export function AdminJsonCrudWorkspace({ config }: { config: CrudConfig }) {
                     void runAction(() =>
                       fetchJson(withIdentifier(config.patchPath || "", identifier), token.trim(), {
                         method: "PATCH",
-                        body: JSON.stringify(parseJsonInput(patchPayload)),
+                        body: JSON.stringify(
+                          Array.isArray(config.patchFormFields) && config.patchFormFields.length > 0
+                            ? (() => {
+                                const errors = validatePrimitiveValues(config.patchFormFields, patchFormValues);
+                                setPatchFormErrors(errors);
+                                if (Object.keys(errors).length > 0) {
+                                  throw new Error("Please correct the highlighted fields.");
+                                }
+                                return toPrimitivePayload(config.patchFormFields, patchFormValues);
+                              })()
+                            : parseJsonInput(patchPayload)
+                        ),
                       })
                     )
                   }
