@@ -65,8 +65,12 @@ describe("B14 admin workspace pages contract", () => {
   it("home composer workspace uses shared admin auth helper", () => {
     const page = read("app/admin/home-composer/page.tsx");
     expect(page).toContain("from '@/app/_lib/admin-auth'");
+    expect(page).toContain("from '@/app/_lib/local-media'");
     expect(page).toContain("loginAdmin");
     expect(page).not.toContain("fetch('/v1/auth/login'");
+    expect(page).toContain("Hero image media picker");
+    expect(page).toContain("Hero image must use local media only.");
+    expect(page).toContain("Choose media");
   });
 
   it("login page uses canonical shared admin auth contract", () => {
