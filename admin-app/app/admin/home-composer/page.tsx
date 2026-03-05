@@ -530,13 +530,14 @@ export default function HomeComposerPage() {
   }
 
   function updateHeroImage(nextValue: string | null): void {
-    const raw = (nextValue || '').trim();
+    const raw = nextValue ?? '';
+    const trimmed = raw.trim();
     setConfig((prev) => ({ ...prev, hero: { ...prev.hero, hero_image: raw || null } }));
-    if (!raw) {
+    if (!trimmed) {
       setHeroImageError(null);
       return;
     }
-    setHeroImageError(normalizeLocalMediaPath(raw) ? null : HERO_IMAGE_LOCAL_ONLY_ERROR);
+    setHeroImageError(normalizeLocalMediaPath(trimmed) ? null : HERO_IMAGE_LOCAL_ONLY_ERROR);
   }
 
   function selectHeroMedia(nextValue: string): void {
