@@ -392,5 +392,9 @@ Use these files as daily operating inputs:
 - `docs/marketing/AMP_NEW_PROJECT_PRIORITY_QUEUE_2026-03.md`
 - `docs/marketing/PHASE1_NEW_PROJECT_ROTATION_CALENDAR_2026-03_2026-04.csv`
 - `docs/marketing/AMP_DAY_BY_DAY_PLAYBOOK_30D_2026-03-09_to_2026-04-07.md`
+- `docs/marketing/AMP_REAL_CONTENT_EXAMPLES_7D_TH_EN.md`
+- `docs/marketing/AMP_REAL_META_AD_EXAMPLES_6CAMPAIGNS_TH_EN.csv`
+- `docs/marketing/AMP_VERIFIED_PROJECT_AD_WINNERS_2026.md`
+- `docs/marketing/AMP_NEW_CONDO_TH_EN_WORKING_EXAMPLES_2026.md`
 - `docs/marketing/PHASE1_30DAY_CONTENT_PLAN.csv`
 - `docs/marketing/PHASE1_MESSAGE_SCRIPTS.md`
