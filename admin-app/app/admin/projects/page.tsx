@@ -6,8 +6,6 @@ const PROJECT_CREATE_TEMPLATE = JSON.stringify(
     slug: "sample-project-cms",
     status: "draft",
     property_type: "condo",
-    amenities: ["pool", "gym"],
-    investment_snapshot: { source: "Internal Desk", updated_at: "2026-03-01" },
     summary: { en: "Summary", th: "สรุป" },
   },
   null,
