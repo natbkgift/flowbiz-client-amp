@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import hashlib
+import re
 from datetime import UTC, datetime, timedelta
 from uuid import UUID
 
@@ -30,6 +31,13 @@ class InquiryCreate(BaseModel):
     timeline: str | None = None
     persona: str | None = None
     tags: list[str] | None = None
+    locale: str | None = None
+    lead_type: str | None = None
+    offer_family: str | None = None
+    inventory_source: str | None = None
+    source_platform: str | None = None
+    campaign_name: str | None = None
+    call_requested: str | bool | None = None
 
 
 class ViewingCreate(BaseModel):
@@ -54,6 +62,92 @@ def _hash_text(value: str | None) -> str | None:
     if not text:
         return None
     return hashlib.sha256(text.encode("utf-8")).hexdigest()
+
+
+_ALLOWED_LEAD_TYPES = {"buyer", "renter", "investor", "owner", "developer", "undecided"}
+_ALLOWED_OFFER_FAMILIES = {
+    "new_project",
+    "resale",
+    "rental",
+    "discovery",
+    "owner_service",
+    "developer_partnership",
+}
+_ALLOWED_INVENTORY_SOURCES = {"developer_new", "owner_resale", "owner_rental", "unknown"}
+_ALLOWED_SOURCE_PLATFORMS = {"fb", "ig", "wa", "google", "website", "other"}
+_ALLOWED_LOCALES = {"th", "en"}
+
+
+def _normalize_token(value: str | None) -> str | None:
+    text = str(value or "").strip().lower()
+    if not text:
+        return None
+    text = re.sub(r"[\s\-]+", "_", text)
+    text = re.sub(r"[^a-z0-9_]", "", text)
+    return text or None
+
+
+def _normalize_campaign_name(value: str | None) -> str | None:
+    text = str(value or "").strip()
+    if not text:
+        return None
+    text = re.sub(r"\s+", "_", text)
+    text = text.replace(":", "-")
+    return text[:128]
+
+
+def _normalize_call_requested(value: str | bool | None) -> str | None:
+    if isinstance(value, bool):
+        return "yes" if value else "no"
+    text = _normalize_token(str(value or ""))
+    if not text:
+        return None
+    if text in {"yes", "y", "true", "1"}:
+        return "yes"
+    if text in {"no", "n", "false", "0"}:
+        return "no"
+    return None
+
+
+def _append_tag(tag_list: list[str], seen: set[str], value: str | None) -> None:
+    text = str(value or "").strip()
+    if not text or text in seen:
+        return
+    seen.add(text)
+    tag_list.append(text)
+
+
+def _compose_inquiry_tags(payload: InquiryCreate) -> list[str]:
+    tags: list[str] = []
+    seen: set[str] = set()
+    for raw in payload.tags or []:
+        if isinstance(raw, str):
+            _append_tag(tags, seen, raw.strip())
+
+    locale = _normalize_token(payload.locale)
+    lead_type = _normalize_token(payload.lead_type)
+    offer_family = _normalize_token(payload.offer_family)
+    inventory_source = _normalize_token(payload.inventory_source)
+    source_platform = _normalize_token(payload.source_platform)
+    campaign_name = _normalize_campaign_name(payload.campaign_name)
+    call_requested = _normalize_call_requested(payload.call_requested)
+
+    if locale in _ALLOWED_LOCALES:
+        _append_tag(tags, seen, f"locale:{locale}")
+    if lead_type in _ALLOWED_LEAD_TYPES:
+        _append_tag(tags, seen, f"lead_type:{lead_type}")
+    if offer_family in _ALLOWED_OFFER_FAMILIES:
+        _append_tag(tags, seen, f"offer_family:{offer_family}")
+    if inventory_source in _ALLOWED_INVENTORY_SOURCES:
+        _append_tag(tags, seen, f"inventory_source:{inventory_source}")
+    if source_platform in _ALLOWED_SOURCE_PLATFORMS:
+        _append_tag(tags, seen, f"source_platform:{source_platform}")
+    if campaign_name:
+        _append_tag(tags, seen, f"campaign:{campaign_name}")
+    if call_requested in {"yes", "no"}:
+        _append_tag(tags, seen, f"call_requested:{call_requested}")
+
+    return tags
 
 
 def _to_inquiry_item(inquiry: Inquiry, *, dedupe_hint: bool = False) -> InquiryItem:
@@ -153,7 +247,7 @@ def create_inquiry(
         first_touch_timestamp=now,
         email_hash=_hash_text(payload.email),
         phone_hash=_hash_text(payload.phone),
-        tags=list(payload.tags or []),
+        tags=_compose_inquiry_tags(payload),
     )
     db.add(inquiry)
     db.commit()

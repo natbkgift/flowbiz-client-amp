@@ -1,0 +1,13 @@
+tag_key,allowed_values,required,description,example
+locale,"th|en",yes,Conversation language,"locale:th"
+lead_type,"buyer|renter|investor|owner|developer|undecided",yes,Primary lead category,"lead_type:owner"
+offer_family,"new_project|resale|rental|discovery|owner_service|developer_partnership",yes,Offer bucket that generated the chat,"offer_family:new_project"
+inventory_source,"developer_new|owner_resale|owner_rental|unknown",yes,Origin of inventory focus,"inventory_source:developer_new"
+intent,"buy|rent|invest|sell|partner|general",yes,Declared intent from user,"intent:invest"
+qualification,"qualified|not_qualified|nurture|pending",yes,Qualification state,"qualification:pending"
+call_requested,"yes|no",yes,Call request status based on explicit user request,"call_requested:no"
+source_platform,"fb|ig|wa|google|website|other",yes,Traffic source platform,"source_platform:ig"
+campaign,"free_text",yes,Normalized campaign ID,"campaign:AMP_META_EN_DISCOVERY_GENERAL_RETARGET_MESSAGES_2026-03"
+persona,"investor|expat|lifestyle_buyer|seller|co_agent|unknown",no,Optional persona for deeper analytics,"persona:expat"
+budget_band,"lt_3m|3m_6m|6m_10m|gt_10m|custom",no,Budget normalization for routing,"budget_band:3m_6m"
+timeline,"0_3m|3_6m|6m_plus|custom",no,Timeline normalization for prioritization,"timeline:0_3m"

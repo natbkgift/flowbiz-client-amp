@@ -394,6 +394,44 @@ def test_inquiry_legacy_payload_and_additive_payload_are_both_supported(client):
     assert additive_body["timeline"] == "0_3m"
 
 
+def test_inquiry_additive_marketing_fields_are_normalized_into_tags(client):
+    unique = uuid4().hex
+    created = client.post(
+        "/v1/inquiries",
+        json={
+            "name": "Marketing Additive User",
+            "email": f"marketing-{unique}@example.com",
+            "message": f"Marketing payload {unique}",
+            "source_page": "/en/campaign",
+            "intent": "invest",
+            "tags": ["home_form"],
+            "locale": "EN",
+            "lead_type": "Buyer",
+            "offer_family": "new project",
+            "inventory_source": "developer-new",
+            "source_platform": "IG",
+            "campaign_name": "AMP META EN NEW PROJECT INVEST",
+            "call_requested": False,
+        },
+    )
+    assert created.status_code == 201, created.text
+    inquiry_id = created.json()["id"]
+
+    with SessionLocal() as db:
+        row = db.get(Inquiry, UUID(inquiry_id))
+        assert row is not None
+        tags = set(row.tags or [])
+
+    assert "home_form" in tags
+    assert "locale:en" in tags
+    assert "lead_type:buyer" in tags
+    assert "offer_family:new_project" in tags
+    assert "inventory_source:developer_new" in tags
+    assert "source_platform:ig" in tags
+    assert "campaign:AMP_META_EN_NEW_PROJECT_INVEST" in tags
+    assert "call_requested:no" in tags
+
+
 def test_admin_inquiry_is_spam_filter_has_deterministic_total(client):
     token = _login_token(client)
     headers = {"Authorization": f"Bearer {token}"}

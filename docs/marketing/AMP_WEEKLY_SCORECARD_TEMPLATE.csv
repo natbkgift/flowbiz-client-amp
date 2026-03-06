@@ -1,0 +1,6 @@
+week_start,locale,segment,offer_family,spend,message_starts,qualified_chats,qualified_rate,cpqc,first_response_sla_pct,call_request_rate,viewing_or_meeting_rate,deal_rate,status,notes
+2026-03-09,th,demand_new_projects,new_project,0,0,0,0,0,0,0,0,0,pending,fill after first week
+2026-03-09,en,demand_new_projects,new_project,0,0,0,0,0,0,0,0,0,pending,fill after first week
+2026-03-09,th,owner_supply,owner_service,0,0,0,0,0,0,0,0,0,pending,fill after first week
+2026-03-09,en,developer_partnership,developer_partnership,0,0,0,0,0,0,0,0,0,pending,fill after first week
+2026-03-09,both,demand_discovery,discovery,0,0,0,0,0,0,0,0,0,pending,fill after first week
