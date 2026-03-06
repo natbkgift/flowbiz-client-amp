@@ -8,7 +8,12 @@ const DEVELOPER_CREATE_TEMPLATE = JSON.stringify(
     profile: { en: "Profile", th: "โปรไฟล์" },
     summary: { en: "Summary", th: "สรุป" },
     source_note: "owner approved",
-    trust_proof: { approval_status: "approved" },
+    trust_proof: {
+      en: "Registered developer profile verified by legal team.",
+      th: "โปรไฟล์ผู้พัฒนาได้รับการตรวจสอบโดยทีมกฎหมายแล้ว",
+      approval_status: "approved",
+      legal_approved: true,
+    },
   },
   null,
   2
@@ -36,10 +41,11 @@ const DEVELOPER_CREATE_FIELDS = [
   { name: "source_note", label: "Source note", type: "textarea", rows: 2, required: true },
   {
     name: "trust_proof",
-    label: "Trust proof (JSON)",
+    label: "Trust proof (JSON: include en/th + approval)",
     type: "json",
     required: true,
-    placeholder: '{"approval_status":"approved","legal_approved":true}',
+    placeholder:
+      '{"en":"Legal profile verification complete.","th":"ตรวจสอบเอกสารทางกฎหมายเรียบร้อยแล้ว","approval_status":"approved","legal_approved":true}',
     rows: 4,
   },
 ] as const;
@@ -58,9 +64,10 @@ const DEVELOPER_PATCH_FIELDS = [
   { name: "source_note", label: "Source note", type: "textarea", rows: 2 },
   {
     name: "trust_proof",
-    label: "Trust proof (JSON)",
+    label: "Trust proof (JSON: include en/th + approval)",
     type: "json",
-    placeholder: '{"approval_status":"approved","legal_approved":true}',
+    placeholder:
+      '{"en":"Legal profile verification complete.","th":"ตรวจสอบเอกสารทางกฎหมายเรียบร้อยแล้ว","approval_status":"approved","legal_approved":true}',
     rows: 4,
   },
 ] as const;

@@ -300,6 +300,7 @@ export function AdminJsonCrudWorkspace({ config }: { config: CrudConfig }) {
     () => toDomIdToken(config.idBase || config.title),
     [config.idBase, config.title]
   );
+  const readinessPath = config.readinessPath || "";
 
   async function loadList(tokenOverride?: string): Promise<void> {
     const activeToken = (tokenOverride ?? token).trim();
@@ -653,7 +654,7 @@ export function AdminJsonCrudWorkspace({ config }: { config: CrudConfig }) {
                   type="button"
                   onClick={() =>
                     void runAction(() =>
-                      fetchJson(withIdentifier(config.readinessPath, identifier), token.trim())
+                      fetchJson(withIdentifier(readinessPath, identifier), token.trim())
                     )
                   }
                   disabled={!identifier.trim()}
