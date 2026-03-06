@@ -451,7 +451,7 @@ def _listing_quality_gate_errors(
         or str(address or "").strip()
     )
     if not has_location_context:
-        errors.append("location context is required (area_id, project_id, city, or address)")
+        errors.append("location context is required (Area, Project, City, or Address)")
     return errors
 
 
