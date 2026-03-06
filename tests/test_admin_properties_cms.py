@@ -205,6 +205,126 @@ def test_publish_unpublish_and_bulk_status(client: TestClient) -> None:
     assert bulk.json()["updated"] == 2
 
 
+def test_create_active_requires_listing_quality_gate(client: TestClient) -> None:
+    headers = _make_admin_headers()
+
+    blocked = client.post(
+        "/admin/properties",
+        headers=headers,
+        json={
+            "source_id": f"src-{uuid4()}",
+            "slug": f"create-active-blocked-{uuid4()}",
+            "title": "Blocked Active Property",
+            "type": "new",
+            "property_type": "condo",
+            "status": "active",
+            "price": 1500000,
+            "currency": "THB",
+            "bedrooms": 1,
+            "bathrooms": 1,
+            "size_sqm": 35,
+            "address": "",
+            "city": "",
+            "cover_image": None,
+            "cover_image_url": None,
+            "local_images": [],
+            "images": [],
+        },
+    )
+    assert blocked.status_code == 422, blocked.text
+    assert blocked.json()["detail"]["code"] == "property_structured_validation_failed"
+    assert "cover media is required and must use local /media path" in str(blocked.json())
+    assert "location context is required" in str(blocked.json())
+
+
+def test_patch_active_requires_listing_quality_gate(client: TestClient) -> None:
+    headers = _make_admin_headers()
+    cover = f"/media/library/{uuid4()}.jpg"
+    _add_media_asset(path=cover, rights_status="approved", approval_status="approved")
+    created = _create_property(client, headers, slug=f"patch-active-{uuid4()}", cover=cover)
+
+    blocked = client.patch(
+        f"/admin/properties/{created['id']}",
+        headers=headers,
+        json={
+            "status": "active",
+            "cover_image": None,
+            "cover_image_url": None,
+            "local_images": [],
+            "images": [],
+            "address": "",
+            "city": "",
+            "project_id": None,
+            "area_id": None,
+        },
+    )
+    assert blocked.status_code == 422, blocked.text
+    assert blocked.json()["detail"]["code"] == "property_structured_validation_failed"
+    assert "cover media is required and must use local /media path" in str(blocked.json())
+    assert "location context is required" in str(blocked.json())
+
+    ok = client.patch(
+        f"/admin/properties/{created['id']}",
+        headers=headers,
+        json={"status": "active"},
+    )
+    assert ok.status_code == 200, ok.text
+    assert ok.json()["status"] == "active"
+
+
+def test_publish_quality_gate_blocks_price_media_and_location_failures(client: TestClient) -> None:
+    headers = _make_admin_headers()
+    cover = f"/media/library/{uuid4()}.jpg"
+    _add_media_asset(path=cover, rights_status="approved", approval_status="approved")
+
+    created = _create_property(client, headers, slug=f"gate-{uuid4()}", cover=cover)
+    property_id = created["id"]
+
+    bad_price = client.patch(
+        f"/admin/properties/{property_id}",
+        headers=headers,
+        json={"price": 0},
+    )
+    assert bad_price.status_code == 200, bad_price.text
+    publish_bad_price = client.post(f"/admin/properties/{property_id}/publish", headers=headers)
+    assert publish_bad_price.status_code == 422, publish_bad_price.text
+    assert "price must be greater than zero" in str(publish_bad_price.json())
+
+    restore_price = client.patch(
+        f"/admin/properties/{property_id}",
+        headers=headers,
+        json={"price": 1200000},
+    )
+    assert restore_price.status_code == 200, restore_price.text
+
+    bad_media = client.patch(
+        f"/admin/properties/{property_id}",
+        headers=headers,
+        json={"cover_image": None, "cover_image_url": None, "local_images": [], "images": []},
+    )
+    assert bad_media.status_code == 200, bad_media.text
+    publish_bad_media = client.post(f"/admin/properties/{property_id}/publish", headers=headers)
+    assert publish_bad_media.status_code == 422, publish_bad_media.text
+    assert "cover media is required and must use local /media path" in str(publish_bad_media.json())
+
+    restore_media = client.patch(
+        f"/admin/properties/{property_id}",
+        headers=headers,
+        json={"cover_image": cover, "cover_image_url": cover, "local_images": [cover]},
+    )
+    assert restore_media.status_code == 200, restore_media.text
+
+    bad_location = client.patch(
+        f"/admin/properties/{property_id}",
+        headers=headers,
+        json={"address": "", "city": "", "project_id": None, "area_id": None},
+    )
+    assert bad_location.status_code == 200, bad_location.text
+    publish_bad_location = client.post(f"/admin/properties/{property_id}/publish", headers=headers)
+    assert publish_bad_location.status_code == 422, publish_bad_location.text
+    assert "location context is required" in str(publish_bad_location.json())
+
+
 def test_property_canonical_fields_precede_legacy_without_breaking_compat(
     client: TestClient,
 ) -> None:

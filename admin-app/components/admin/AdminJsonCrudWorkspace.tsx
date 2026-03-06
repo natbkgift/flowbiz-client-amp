@@ -57,9 +57,23 @@ type CrudConfig = {
     requiredLocales: readonly string[];
     requiredLocalizedFields: ReadonlyArray<{ path: string; label: string }>;
     mediaAnyOfPaths?: readonly string[];
+    requiredAnyOfPaths?: readonly string[];
+    requiredNumericGreaterThanZeroPaths?: readonly string[];
+    requiredLocalMediaAnyOfPaths?: readonly string[];
     allowedStatuses?: readonly string[];
     allowedCategories?: readonly string[];
   };
+  bulkActions?: ReadonlyArray<{
+    key: string;
+    title: string;
+    path: string;
+    method?: "POST" | "PATCH" | "PUT";
+    description?: string;
+    idLabel?: string;
+    idPlaceholder?: string;
+    defaultPayload?: string;
+    fields: AdminFormPrimitiveField[];
+  }>;
   queryHelp?: string;
 };
 
@@ -92,6 +106,58 @@ function nestedValue(record: Record<string, unknown>, path: string): unknown {
 function nestedText(record: Record<string, unknown>, path: string): string {
   const value = nestedValue(record, path);
   return typeof value === "string" ? value.trim() : "";
+}
+
+function pathLabel(path: string): string {
+  return path
+    .split(".")
+    .filter(Boolean)
+    .map((part) =>
+      part
+        .replace(/_/g, " ")
+        .replace(/\b\w/g, (char) => char.toUpperCase())
+    )
+    .join(" ");
+}
+
+// Shared presence helper for checklist paths (non-empty string or non-null value).
+function hasAnyValue(record: Record<string, unknown>, paths: readonly string[]): boolean {
+  return paths.some((path) => {
+    const value = nestedValue(record, path);
+    if (typeof value === "string") return value.trim().length > 0;
+    return value !== null && value !== undefined;
+  });
+}
+
+function isLocalMediaPath(value: unknown): boolean {
+  if (typeof value !== "string") return false;
+  return value.trim().startsWith("/media/");
+}
+
+function parseIdentifierList(value: string): string[] {
+  const items = value
+    .split(/[\s,]+/)
+    .map((item) => item.trim())
+    .filter((item) => item.length > 0);
+
+  const seen = new Set<string>();
+  const deduped: string[] = [];
+
+  for (const item of items) {
+    if (!seen.has(item)) {
+      seen.add(item);
+      deduped.push(item);
+    }
+  }
+
+  return deduped;
+}
+
+function joinReadableList(items: readonly string[]): string {
+  if (items.length === 0) return "";
+  if (items.length === 1) return items[0];
+  if (items.length === 2) return `${items[0]} or ${items[1]}`;
+  return `${items.slice(0, -1).join(", ")}, or ${items[items.length - 1]}`;
 }
 
 function normalizeRecordCandidate(value: unknown): Record<string, unknown> | null {
@@ -130,12 +196,34 @@ function checklistReport(
     }
   }
   if (Array.isArray(config.mediaAnyOfPaths) && config.mediaAnyOfPaths.length > 0) {
-    const hasMedia = config.mediaAnyOfPaths.some((path) => {
-      const value = nestedValue(record, path);
-      if (typeof value === "string") return value.trim().length > 0;
-      return value !== null && value !== undefined;
-    });
+    const hasMedia = hasAnyValue(record, config.mediaAnyOfPaths);
     if (!hasMedia) warnings.push("hero media is recommended before publish");
+  }
+  if (Array.isArray(config.requiredNumericGreaterThanZeroPaths)) {
+    for (const path of config.requiredNumericGreaterThanZeroPaths) {
+      const value = nestedValue(record, path);
+      const numericValue = typeof value === "number" ? value : Number(value);
+      if (!Number.isFinite(numericValue) || numericValue <= 0) {
+        blocking.push(`${pathLabel(path)} must be greater than zero.`);
+      }
+    }
+  }
+  if (Array.isArray(config.requiredAnyOfPaths) && config.requiredAnyOfPaths.length > 0) {
+    if (!hasAnyValue(record, config.requiredAnyOfPaths)) {
+      blocking.push(
+        `At least one of ${joinReadableList(config.requiredAnyOfPaths.map(pathLabel))} is required.`
+      );
+    }
+  }
+  if (Array.isArray(config.requiredLocalMediaAnyOfPaths) && config.requiredLocalMediaAnyOfPaths.length > 0) {
+    const hasLocalMedia = config.requiredLocalMediaAnyOfPaths.some((path) => isLocalMediaPath(nestedValue(record, path)));
+    if (!hasLocalMedia) {
+      blocking.push(
+        `At least one local media path is required (${joinReadableList(
+          config.requiredLocalMediaAnyOfPaths.map(pathLabel)
+        )}).`
+      );
+    }
   }
   return { blocking, warnings };
 }
@@ -151,6 +239,7 @@ function toDomIdToken(value: string): string {
 }
 
 export function AdminJsonCrudWorkspace({ config }: { config: CrudConfig }) {
+  const bulkActions = config.bulkActions || [];
   const [token, setToken] = useState("");
   const [email, setEmail] = useState("");
   const [loginEmail, setLoginEmail] = useState("");
@@ -170,6 +259,19 @@ export function AdminJsonCrudWorkspace({ config }: { config: CrudConfig }) {
   );
   const [createFormErrors, setCreateFormErrors] = useState<Record<string, string>>({});
   const [patchFormErrors, setPatchFormErrors] = useState<Record<string, string>>({});
+  const [bulkTargetIdsByAction, setBulkTargetIdsByAction] = useState<Record<string, string>>(() =>
+    bulkActions.reduce<Record<string, string>>((acc, action) => {
+      acc[action.key] = "";
+      return acc;
+    }, {})
+  );
+  const [bulkFormValues, setBulkFormValues] = useState<Record<string, Record<string, string>>>(() =>
+    bulkActions.reduce<Record<string, Record<string, string>>>((acc, action) => {
+      acc[action.key] = initializePrimitiveValues(action.fields, action.defaultPayload || "{}");
+      return acc;
+    }, {})
+  );
+  const [bulkFormErrors, setBulkFormErrors] = useState<Record<string, Record<string, string>>>({});
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -719,6 +821,90 @@ export function AdminJsonCrudWorkspace({ config }: { config: CrudConfig }) {
                   Patch
                 </button>
               </div>
+            </section>
+          ) : null}
+
+          {bulkActions.length > 0 ? (
+            <section className="card">
+              <h2>Bulk actions</h2>
+              {bulkActions.map((action) => (
+                <article key={action.key} className="card">
+                  <h3>{action.title}</h3>
+                  {action.description ? <p className="locale-safe">{action.description}</p> : null}
+                  <label className="field" htmlFor={`${idBase}-bulk-ids-${action.key}`}>
+                    <span>{action.idLabel || "Property IDs (comma/space/newline separated)"}</span>
+                    <textarea
+                      id={`${idBase}-bulk-ids-${action.key}`}
+                      rows={3}
+                      value={bulkTargetIdsByAction[action.key] || ""}
+                      placeholder={action.idPlaceholder || "uuid-1, uuid-2"}
+                      onChange={(event) =>
+                        setBulkTargetIdsByAction((current) => ({
+                          ...current,
+                          [action.key]: event.target.value,
+                        }))
+                      }
+                    />
+                  </label>
+                  {action.fields.map((field) => (
+                    <AdminFormPrimitiveInput
+                      key={`${action.key}-${field.name}`}
+                      idPrefix={`${idBase}-bulk-${action.key}`}
+                      field={field}
+                      value={bulkFormValues[action.key]?.[field.name] || ""}
+                      error={bulkFormErrors[action.key]?.[field.name]}
+                      authToken={token}
+                      onChange={(name, value) => {
+                        setBulkFormValues((current) => ({
+                          ...current,
+                          [action.key]: { ...(current[action.key] || {}), [name]: value },
+                        }));
+                        setBulkFormErrors((current) => {
+                          if (!current[action.key]?.[name]) return current;
+                          const nextActionErrors = { ...(current[action.key] || {}) };
+                          delete nextActionErrors[name];
+                          return { ...current, [action.key]: nextActionErrors };
+                        });
+                      }}
+                    />
+                  ))}
+                  <div className="card-actions">
+                    <button
+                      className="btn btn-secondary"
+                      type="button"
+                      onClick={() =>
+                        void runAction(async () => {
+                          const ids = parseIdentifierList(bulkTargetIdsByAction[action.key] || "");
+                          if (ids.length === 0) {
+                            throw new Error("At least one property ID is required.");
+                          }
+                          const values = bulkFormValues[action.key] || {};
+                          const errors = validatePrimitiveValues(action.fields, values);
+                          setBulkFormErrors((current) => ({ ...current, [action.key]: errors }));
+                          if (Object.keys(errors).length > 0) {
+                            throw new Error("Please correct the highlighted fields.");
+                          }
+                          const payload = toPrimitivePayload(action.fields, values);
+                          const response = await fetchJson(action.path, token.trim(), {
+                            method: action.method || "POST",
+                            body: JSON.stringify({
+                              property_ids: ids,
+                              ...payload,
+                            }),
+                          });
+                          setBulkTargetIdsByAction((current) => ({
+                            ...current,
+                            [action.key]: "",
+                          }));
+                          return response;
+                        })
+                      }
+                    >
+                      Run {action.title}
+                    </button>
+                  </div>
+                </article>
+              ))}
             </section>
           ) : null}
 
