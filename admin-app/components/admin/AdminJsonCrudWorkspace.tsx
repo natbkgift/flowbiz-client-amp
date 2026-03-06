@@ -35,6 +35,7 @@ type CrudConfig = {
   identifierField: string;
   listPath: string;
   getPath: string;
+  readinessPath?: string;
   createPath?: string;
   patchPath?: string;
   publishPath?: string;
@@ -646,6 +647,20 @@ export function AdminJsonCrudWorkspace({ config }: { config: CrudConfig }) {
               >
                 Get detail
               </button>
+              {config.readinessPath ? (
+                <button
+                  className="btn btn-secondary"
+                  type="button"
+                  onClick={() =>
+                    void runAction(() =>
+                      fetchJson(withIdentifier(config.readinessPath, identifier), token.trim())
+                    )
+                  }
+                  disabled={!identifier.trim()}
+                >
+                  Check readiness
+                </button>
+              ) : null}
               {config.publishPath ? (
                 <button
                   className="btn btn-secondary"
