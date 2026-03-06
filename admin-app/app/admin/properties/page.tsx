@@ -39,7 +39,7 @@ const PROPERTY_CREATE_FIELDS = [
   { name: "source_id", label: "Source ID", type: "text", required: true, placeholder: "cms-sample-001" },
   { name: "slug", label: "Slug", type: "text", required: true, placeholder: "cms-sample-property" },
   { name: "title", label: "Title", type: "text", required: true, placeholder: "Sample Property CMS" },
-  { name: "status", label: "Status", type: "status", required: true, options: ["inactive", "active", "archived"] },
+  { name: "status", label: "Status", type: "status", required: true, options: ["inactive", "archived"] },
   { name: "type", label: "Listing type", type: "select", required: true, options: ["new", "resale", "rent"] },
   {
     name: "property_type",
