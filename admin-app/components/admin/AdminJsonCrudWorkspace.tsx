@@ -135,10 +135,22 @@ function isLocalMediaPath(value: unknown): boolean {
 }
 
 function parseIdentifierList(value: string): string[] {
-  return value
+  const items = value
     .split(/[\s,]+/)
     .map((item) => item.trim())
     .filter((item) => item.length > 0);
+
+  const seen = new Set<string>();
+  const deduped: string[] = [];
+
+  for (const item of items) {
+    if (!seen.has(item)) {
+      seen.add(item);
+      deduped.push(item);
+    }
+  }
+
+  return deduped;
 }
 
 function joinReadableList(items: readonly string[]): string {
