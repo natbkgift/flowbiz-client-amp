@@ -171,7 +171,13 @@ export function AdminShell({ children }: { children: ReactNode }) {
         </nav>
         <header className="admin-shell-topbar" aria-label="Admin page context">
           <div className="admin-shell-topbar-main">
-            <p className="admin-shell-topbar-section">{sectionTitle}</p>
+            <p className="admin-shell-topbar-section">
+              {sectionTitle === "Core"
+                ? ui.core
+                : sectionTitle === "Content"
+                ? ui.content
+                : sectionTitle}
+            </p>
             <nav aria-label="Breadcrumb" className="admin-shell-breadcrumb">
               <ol>
                 <li>
