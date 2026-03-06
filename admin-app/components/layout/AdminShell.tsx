@@ -146,7 +146,7 @@ export function AdminShell({ children }: { children: ReactNode }) {
     setLocale(nextLocale);
     persistAdminLocale(nextLocale);
     if (typeof window !== "undefined") {
-      const currentHref = `${window.location.pathname}${window.location.search}`;
+      const currentHref = `${window.location.pathname}${window.location.search}${window.location.hash || ""}`;
       const nextHref = withAdminLocale(currentHref, nextLocale);
       if (nextHref !== currentHref) {
         window.location.assign(nextHref);
