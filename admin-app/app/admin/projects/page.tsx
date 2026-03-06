@@ -25,7 +25,22 @@ const PROJECT_CREATE_FIELDS = [
     required: true,
     placeholder: "taxonomy slug from kind=property_type (e.g. condo)",
   },
+  { name: "area_id", label: "Area ID", type: "relation", placeholder: "optional area UUID" },
   { name: "developer_id", label: "Developer ID", type: "relation", placeholder: "optional developer UUID" },
+  {
+    name: "amenities",
+    label: "Facilities (JSON array)",
+    type: "json",
+    placeholder: '[\"pool\", \"gym\"]',
+    rows: 3,
+  },
+  {
+    name: "investment_snapshot",
+    label: "Investment snapshot (JSON)",
+    type: "json",
+    placeholder: '{\"source\":\"Internal Desk\",\"updated_at\":\"2026-03-01\"}',
+    rows: 4,
+  },
   { name: "hero_media_id", label: "Hero media", type: "media", placeholder: "optional media ID/path" },
   { name: "summary.en", label: "Summary (EN)", type: "textarea", rows: 3 },
   { name: "summary.th", label: "Summary (TH)", type: "textarea", rows: 3 },
@@ -34,7 +49,23 @@ const PROJECT_CREATE_FIELDS = [
 const PROJECT_PATCH_FIELDS = [
   { name: "name", label: "Name", type: "text" },
   { name: "status", label: "Status", type: "status", options: ["draft", "inactive", "active"] },
+  { name: "property_type", label: "Property type", type: "text", placeholder: "e.g. condo" },
+  { name: "area_id", label: "Area ID", type: "relation", placeholder: "optional area UUID" },
   { name: "developer_id", label: "Developer ID", type: "relation", placeholder: "optional developer UUID" },
+  {
+    name: "amenities",
+    label: "Facilities (JSON array)",
+    type: "json",
+    placeholder: '[\"pool\", \"gym\"]',
+    rows: 3,
+  },
+  {
+    name: "investment_snapshot",
+    label: "Investment snapshot (JSON)",
+    type: "json",
+    placeholder: '{\"source\":\"Internal Desk\",\"updated_at\":\"2026-03-01\"}',
+    rows: 4,
+  },
   { name: "hero_media_id", label: "Hero media", type: "media", placeholder: "optional media ID/path" },
 ] as const;
 

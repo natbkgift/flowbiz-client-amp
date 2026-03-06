@@ -111,6 +111,7 @@ def test_b3_crud_publish_and_public_reflection(client) -> None:
             "highlights": ["near_beach", "sea_view"],
             "quick_facts": [{"label": "Units", "value": "320"}],
             "amenities": ["pool", "gym"],
+            "investment_snapshot": {"source": "Internal Desk", "updated_at": "2026-02-27"},
             "trust_proof": [{"type": "award", "value": "Top Developer 2025"}],
             "source_notes": {"en": "internal memo", "th": "บันทึกภายใน"},
             "claims_updated_at": "2026-02-27T10:00:00Z",
@@ -290,6 +291,31 @@ def test_b3_required_field_validation(client) -> None:
         },
     )
     assert missing_status.status_code == 422, missing_status.text
+
+
+def test_b3_publish_blocked_when_required_project_fields_are_missing(client) -> None:
+    headers = _make_admin_headers()
+    created = client.post(
+        "/admin/projects",
+        headers=headers,
+        json={
+            "slug": f"b3-publish-missing-{uuid4()}",
+            "name": "Missing Publish Fields",
+            "status": "draft",
+            "property_type": "condo",
+        },
+    )
+    assert created.status_code == 201, created.text
+    project_id = created.json()["project"]["id"]
+
+    publish = client.post(f"/admin/projects/{project_id}/publish", headers=headers)
+    assert publish.status_code == 422, publish.text
+    detail = publish.json().get("detail") or {}
+    assert detail.get("code") == "project_publish_requirements_missing"
+    missing = detail.get("missing") or []
+    assert "facilities" in missing
+    assert "investment_snapshot.source" in missing
+    assert "investment_snapshot.updated_at" in missing
 
 
 def test_b3_area_developer_fk_validation(client) -> None:
