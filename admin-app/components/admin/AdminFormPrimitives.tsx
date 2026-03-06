@@ -85,6 +85,10 @@ export function initializePrimitiveValues(
 
   return fields.reduce<Record<string, string>>((acc, field) => {
     const current = getValue(field.name);
+    if (field.type === "json" && current && typeof current === "object") {
+      acc[field.name] = JSON.stringify(current, null, 2);
+      return acc;
+    }
     if (typeof current === "string" || typeof current === "number" || typeof current === "boolean") {
       acc[field.name] = String(current);
       return acc;

@@ -4,6 +4,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import {
   AdminFormPrimitiveInput,
   type AdminFormPrimitiveField,
+  initializePrimitiveValues,
   toPrimitivePayload,
   validatePrimitiveValues,
 } from "@/components/admin/AdminFormPrimitives";
@@ -70,6 +71,26 @@ describe("Admin form primitives", () => {
     expect(validatePrimitiveValues(fields, { amenities: "[", investment_snapshot: "{}" })).toEqual({
       amenities: "Facilities is invalid.",
     });
+  });
+
+  it("initializes json primitive fields with formatted object/array defaults", () => {
+    const fields: AdminFormPrimitiveField[] = [
+      { name: "amenities", label: "Facilities", type: "json" },
+      { name: "investment_snapshot", label: "Investment snapshot", type: "json" },
+    ];
+
+    const values = initializePrimitiveValues(
+      fields,
+      JSON.stringify({
+        amenities: ["pool", "gym"],
+        investment_snapshot: { source: "Internal Desk", updated_at: "2026-03-01" },
+      })
+    );
+
+    expect(values.amenities).toBe(JSON.stringify(["pool", "gym"], null, 2));
+    expect(values.investment_snapshot).toBe(
+      JSON.stringify({ source: "Internal Desk", updated_at: "2026-03-01" }, null, 2)
+    );
   });
 
   it("normalizes local media path payload and rejects invalid media payloads", () => {
