@@ -205,6 +205,73 @@ def test_publish_unpublish_and_bulk_status(client: TestClient) -> None:
     assert bulk.json()["updated"] == 2
 
 
+def test_create_active_requires_listing_quality_gate(client: TestClient) -> None:
+    headers = _make_admin_headers()
+
+    blocked = client.post(
+        "/admin/properties",
+        headers=headers,
+        json={
+            "source_id": f"src-{uuid4()}",
+            "slug": f"create-active-blocked-{uuid4()}",
+            "title": "Blocked Active Property",
+            "type": "new",
+            "property_type": "condo",
+            "status": "active",
+            "price": 1500000,
+            "currency": "THB",
+            "bedrooms": 1,
+            "bathrooms": 1,
+            "size_sqm": 35,
+            "address": "",
+            "city": "",
+            "cover_image": None,
+            "cover_image_url": None,
+            "local_images": [],
+            "images": [],
+        },
+    )
+    assert blocked.status_code == 422, blocked.text
+    assert blocked.json()["detail"]["code"] == "property_structured_validation_failed"
+    assert "cover media is required and must use local /media path" in str(blocked.json())
+    assert "location context is required" in str(blocked.json())
+
+
+def test_patch_active_requires_listing_quality_gate(client: TestClient) -> None:
+    headers = _make_admin_headers()
+    cover = f"/media/library/{uuid4()}.jpg"
+    _add_media_asset(path=cover, rights_status="approved", approval_status="approved")
+    created = _create_property(client, headers, slug=f"patch-active-{uuid4()}", cover=cover)
+
+    blocked = client.patch(
+        f"/admin/properties/{created['id']}",
+        headers=headers,
+        json={
+            "status": "active",
+            "cover_image": None,
+            "cover_image_url": None,
+            "local_images": [],
+            "images": [],
+            "address": "",
+            "city": "",
+            "project_id": None,
+            "area_id": None,
+        },
+    )
+    assert blocked.status_code == 422, blocked.text
+    assert blocked.json()["detail"]["code"] == "property_structured_validation_failed"
+    assert "cover media is required and must use local /media path" in str(blocked.json())
+    assert "location context is required" in str(blocked.json())
+
+    ok = client.patch(
+        f"/admin/properties/{created['id']}",
+        headers=headers,
+        json={"status": "active"},
+    )
+    assert ok.status_code == 200, ok.text
+    assert ok.json()["status"] == "active"
+
+
 def test_publish_quality_gate_blocks_price_media_and_location_failures(client: TestClient) -> None:
     headers = _make_admin_headers()
     cover = f"/media/library/{uuid4()}.jpg"

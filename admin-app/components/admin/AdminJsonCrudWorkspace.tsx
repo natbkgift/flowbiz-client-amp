@@ -259,7 +259,12 @@ export function AdminJsonCrudWorkspace({ config }: { config: CrudConfig }) {
   );
   const [createFormErrors, setCreateFormErrors] = useState<Record<string, string>>({});
   const [patchFormErrors, setPatchFormErrors] = useState<Record<string, string>>({});
-  const [bulkTargetIds, setBulkTargetIds] = useState("");
+  const [bulkTargetIdsByAction, setBulkTargetIdsByAction] = useState<Record<string, string>>(() =>
+    bulkActions.reduce<Record<string, string>>((acc, action) => {
+      acc[action.key] = "";
+      return acc;
+    }, {})
+  );
   const [bulkFormValues, setBulkFormValues] = useState<Record<string, Record<string, string>>>(() =>
     bulkActions.reduce<Record<string, Record<string, string>>>((acc, action) => {
       acc[action.key] = initializePrimitiveValues(action.fields, action.defaultPayload || "{}");
@@ -831,9 +836,14 @@ export function AdminJsonCrudWorkspace({ config }: { config: CrudConfig }) {
                     <textarea
                       id={`${idBase}-bulk-ids-${action.key}`}
                       rows={3}
-                      value={bulkTargetIds}
+                      value={bulkTargetIdsByAction[action.key] || ""}
                       placeholder={action.idPlaceholder || "uuid-1, uuid-2"}
-                      onChange={(event) => setBulkTargetIds(event.target.value)}
+                      onChange={(event) =>
+                        setBulkTargetIdsByAction((current) => ({
+                          ...current,
+                          [action.key]: event.target.value,
+                        }))
+                      }
                     />
                   </label>
                   {action.fields.map((field) => (
@@ -864,7 +874,7 @@ export function AdminJsonCrudWorkspace({ config }: { config: CrudConfig }) {
                       type="button"
                       onClick={() =>
                         void runAction(async () => {
-                          const ids = parseIdentifierList(bulkTargetIds);
+                          const ids = parseIdentifierList(bulkTargetIdsByAction[action.key] || "");
                           if (ids.length === 0) {
                             throw new Error("At least one property ID is required.");
                           }
@@ -875,13 +885,18 @@ export function AdminJsonCrudWorkspace({ config }: { config: CrudConfig }) {
                             throw new Error("Please correct the highlighted fields.");
                           }
                           const payload = toPrimitivePayload(action.fields, values);
-                          return await fetchJson(action.path, token.trim(), {
+                          const response = await fetchJson(action.path, token.trim(), {
                             method: action.method || "POST",
                             body: JSON.stringify({
                               property_ids: ids,
                               ...payload,
                             }),
                           });
+                          setBulkTargetIdsByAction((current) => ({
+                            ...current,
+                            [action.key]: "",
+                          }));
+                          return response;
                         })
                       }
                     >
