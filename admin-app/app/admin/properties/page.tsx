@@ -62,7 +62,7 @@ const PROPERTY_CREATE_FIELDS = [
 
 const PROPERTY_PATCH_FIELDS = [
   { name: "title", label: "Title", type: "text" },
-  { name: "status", label: "Status", type: "status", options: ["inactive", "active", "archived"] },
+  { name: "status", label: "Status", type: "status", options: ["inactive", "archived"] },
   { name: "type", label: "Listing type", type: "select", options: ["new", "resale", "rent"] },
   { name: "price", label: "Price", type: "number", placeholder: "1750000" },
   { name: "bedrooms", label: "Bedrooms", type: "number", placeholder: "2" },
