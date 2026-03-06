@@ -118,4 +118,19 @@ describe("Phase C missing CMS pages", () => {
     expect(properties).toContain("kind=property_type");
     expect(properties).toMatch(/name:\s*"property_type"[\s\S]*?type:\s*"text"/);
   });
+
+  it("enables property listing publish quality gate and bulk action endpoints in UI config", () => {
+    const properties = read("app/admin/properties/page.tsx");
+    const workspace = read("components/admin/AdminJsonCrudWorkspace.tsx");
+
+    expect(properties).toContain("publishChecklistConfig");
+    expect(properties).toContain("requiredNumericGreaterThanZeroPaths");
+    expect(properties).toContain("requiredLocalMediaAnyOfPaths");
+    expect(properties).toContain("requiredAnyOfPaths");
+
+    expect(properties).toContain("/admin/properties/bulk/status");
+    expect(properties).toContain("/admin/properties/bulk/tags");
+    expect(properties).toContain("/admin/properties/bulk/update");
+    expect(workspace).toContain("Bulk actions");
+  });
 });
