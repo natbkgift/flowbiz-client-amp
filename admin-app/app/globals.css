@@ -4690,11 +4690,19 @@ summary.mobile-nav__trigger::-webkit-details-marker {
   top: 0;
   z-index: 20;
   display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: end;
   gap: 6px;
   padding: 12px 20px 10px;
   border-bottom: 1px solid var(--color-gray-200);
   background: rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(6px);
+}
+
+.admin-shell-topbar-main {
+  display: grid;
+  gap: 6px;
+  min-width: 0;
 }
 
 .admin-shell-topbar-section {
@@ -4719,6 +4727,27 @@ summary.mobile-nav__trigger::-webkit-details-marker {
 
 .admin-shell-breadcrumb a {
   color: var(--color-primary-dark);
+  font-weight: 600;
+}
+
+.admin-shell-locale-control {
+  display: inline-grid;
+  gap: 4px;
+  justify-items: start;
+}
+
+.admin-shell-locale-control label {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+}
+
+.admin-shell-locale-control select {
+  min-height: var(--tap-target-min);
+  border: 1px solid var(--color-gray-300);
+  border-radius: 999px;
+  padding: 6px 12px;
+  background: #fff;
   font-weight: 600;
 }
 
@@ -4810,6 +4839,7 @@ summary.mobile-nav__trigger::-webkit-details-marker {
   .admin-shell-topbar {
     position: static;
     top: auto;
+    grid-template-columns: minmax(0, 1fr);
     padding: 10px 12px 8px;
   }
 }

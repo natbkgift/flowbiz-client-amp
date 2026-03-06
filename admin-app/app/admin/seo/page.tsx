@@ -3,8 +3,9 @@
 import { type FormEvent, useEffect, useState } from "react";
 
 import { clearAuthSession, loginAdmin, persistAuthSession, readAuthSession } from "@/app/_lib/admin-auth";
+import { detectAdminLocale, type AdminLocale } from "@/app/_lib/admin-i18n";
 
-type Locale = "en" | "th";
+type Locale = AdminLocale;
 
 type SeoOverride = {
   id: string;
@@ -139,10 +140,7 @@ const copy = {
 };
 
 function detectLocale(): Locale {
-  if (typeof window === "undefined") return "en";
-  const q = new URLSearchParams(window.location.search).get("lang");
-  if (q === "th" || q === "en") return q;
-  return navigator.language.toLowerCase().startsWith("th") ? "th" : "en";
+  return detectAdminLocale();
 }
 
 function emptyOverride(locale: Locale): OverrideForm {

@@ -37,6 +37,9 @@ describe("Admin shell + route consolidation (Phase A)", () => {
     expect(shell).toContain('aria-label="Breadcrumb"');
     expect(shell).toContain("admin-shell-nav-section is-active");
     expect(shell).toContain("admin-shell-mobile-row-group is-active");
+    expect(shell).toContain("admin-language-switcher");
+    expect(shell).toContain("withAdminLocale");
+    expect(shell).toContain("detectAdminLocale");
   });
 
   it("keeps all workspaces under /admin with main landmark and no legacy shell import", () => {
