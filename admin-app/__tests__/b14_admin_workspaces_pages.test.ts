@@ -62,6 +62,27 @@ describe("B14 admin workspace pages contract", () => {
     expect(page).toContain("state-error");
   });
 
+  it("areas and developers workspaces use form-first localized editors with readiness checks", () => {
+    const areasPage = read("app/admin/areas/page.tsx");
+    expect(areasPage).toContain("createFormFields");
+    expect(areasPage).toContain("patchFormFields");
+    expect(areasPage).toContain("content.en.why_live_invest");
+    expect(areasPage).toContain("content.th.why_live_invest");
+    expect(areasPage).toContain("/admin/areas/{id}/publish-readiness");
+    expect(areasPage).toContain("/admin/areas/{id}/publish");
+    expect(areasPage).toContain("/admin/areas/{id}/unpublish");
+
+    const developersPage = read("app/admin/developers/page.tsx");
+    expect(developersPage).toContain("createFormFields");
+    expect(developersPage).toContain("patchFormFields");
+    expect(developersPage).toContain("profile.en");
+    expect(developersPage).toContain("profile.th");
+    expect(developersPage).toContain("trust_proof");
+    expect(developersPage).toContain("/admin/developers/{id}/publish-readiness");
+    expect(developersPage).toContain("/admin/developers/{id}/publish");
+    expect(developersPage).toContain("/admin/developers/{id}/unpublish");
+  });
+
   it("home composer workspace uses shared admin auth helper", () => {
     const page = read("app/admin/home-composer/page.tsx");
     expect(page).toContain("from '@/app/_lib/admin-auth'");

@@ -35,6 +35,7 @@ type CrudConfig = {
   identifierField: string;
   listPath: string;
   getPath: string;
+  readinessPath?: string;
   createPath?: string;
   patchPath?: string;
   publishPath?: string;
@@ -299,6 +300,7 @@ export function AdminJsonCrudWorkspace({ config }: { config: CrudConfig }) {
     () => toDomIdToken(config.idBase || config.title),
     [config.idBase, config.title]
   );
+  const readinessPath = config.readinessPath || "";
 
   async function loadList(tokenOverride?: string): Promise<void> {
     const activeToken = (tokenOverride ?? token).trim();
@@ -646,6 +648,20 @@ export function AdminJsonCrudWorkspace({ config }: { config: CrudConfig }) {
               >
                 Get detail
               </button>
+              {config.readinessPath ? (
+                <button
+                  className="btn btn-secondary"
+                  type="button"
+                  onClick={() =>
+                    void runAction(() =>
+                      fetchJson(withIdentifier(readinessPath, identifier), token.trim())
+                    )
+                  }
+                  disabled={!identifier.trim()}
+                >
+                  Check readiness
+                </button>
+              ) : null}
               {config.publishPath ? (
                 <button
                   className="btn btn-secondary"

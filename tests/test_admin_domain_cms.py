@@ -388,6 +388,14 @@ def test_area_publish_blocked_when_required_area_guide_fields_are_missing(client
     assert created_area.status_code == 201, created_area.text
     area_id = created_area.json()["area"]["id"]
 
+    readiness = client.get(f"/admin/areas/{area_id}/publish-readiness", headers=headers)
+    assert readiness.status_code == 200, readiness.text
+    readiness_body = readiness.json()
+    assert readiness_body["ready"] is False
+    assert "source_note" in readiness_body["missing"]
+    assert "statistics" in readiness_body["missing"]
+    assert "content.en.why_live_invest" in readiness_body["missing"]
+
     publish = client.post(f"/admin/areas/{area_id}/publish", headers=headers)
     assert publish.status_code == 422, publish.text
     detail = publish.json().get("detail") or {}

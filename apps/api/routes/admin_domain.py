@@ -149,6 +149,16 @@ def _enforce_area_publish_requirements(db: Session, area: Area) -> None:
     )
 
 
+def _area_publish_readiness(db: Session, area: Area) -> dict:
+    missing = sorted(set(_collect_area_publish_missing(db, area)))
+    return {
+        "ready": len(missing) == 0,
+        "missing": missing,
+        "required_locales": _AREA_REQUIRED_LOCALES,
+        "required_content_keys": _AREA_CONTENT_REQUIRED_KEYS,
+    }
+
+
 def _developer_profile_payload(developer: Developer) -> dict | None:
     if isinstance(developer.profile, dict):
         return developer.profile
@@ -581,6 +591,16 @@ def admin_get_area(
 ) -> dict:
     row = _area_or_404(db, area_id)
     return _serialize_area(db, row)
+
+
+@router.get("/areas/{area_id}/publish-readiness")
+def admin_get_area_publish_readiness(
+    area_id: UUID,
+    db: Session = Depends(get_db),
+    _admin: User = Depends(get_current_admin),
+) -> dict:
+    row = _area_or_404(db, area_id)
+    return {"area_id": str(row.id), "slug": row.slug, **_area_publish_readiness(db, row)}
 
 
 @router.post("/areas", status_code=status.HTTP_201_CREATED)
