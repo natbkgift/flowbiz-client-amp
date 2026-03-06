@@ -3,8 +3,9 @@
 import { type FormEvent, useEffect, useMemo, useState } from "react";
 
 import { clearAuthSession, loginAdmin, persistAuthSession, readAuthSession } from "@/app/_lib/admin-auth";
+import { detectAdminLocale, type AdminLocale } from "@/app/_lib/admin-i18n";
 
-type Locale = "en" | "th";
+type Locale = AdminLocale;
 type WidgetStatus = "ok" | "warn" | "error" | "unknown";
 
 type DashboardAction = {
@@ -130,10 +131,7 @@ const copy = {
 };
 
 function detectLocale(): Locale {
-  if (typeof window === "undefined") return "en";
-  const queryLocale = new URLSearchParams(window.location.search).get("lang");
-  if (queryLocale === "en" || queryLocale === "th") return queryLocale;
-  return navigator.language.toLowerCase().startsWith("th") ? "th" : "en";
+  return detectAdminLocale();
 }
 
 function prettyDate(value: string | null, locale: Locale): string {
@@ -228,8 +226,9 @@ export default function AdminDashboardPage() {
 
   async function login(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    const email = loginEmail.trim();
-    const password = loginPassword;
+    const formData = new FormData(event.currentTarget);
+    const email = String(formData.get("email") || loginEmail).trim();
+    const password = String(formData.get("password") || loginPassword);
     if (!email || !password) {
       setAuthError(t.loginMissing);
       return;
@@ -284,6 +283,7 @@ export default function AdminDashboardPage() {
               <span>{t.email}</span>
               <input
                 id="dashboard-login-email"
+                name="email"
                 type="email"
                 autoComplete="username"
                 value={loginEmail}
@@ -295,6 +295,7 @@ export default function AdminDashboardPage() {
               <span>{t.password}</span>
               <input
                 id="dashboard-login-password"
+                name="password"
                 type="password"
                 autoComplete="current-password"
                 value={loginPassword}

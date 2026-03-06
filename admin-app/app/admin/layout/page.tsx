@@ -3,9 +3,10 @@
 import { type FormEvent, useEffect, useMemo, useState } from "react";
 
 import { clearAuthSession, loginAdmin, persistAuthSession, readAuthSession } from "@/app/_lib/admin-auth";
+import { detectAdminLocale, type AdminLocale } from "@/app/_lib/admin-i18n";
 import { SITE_LAYOUT_CMS_SLUG, SITE_LAYOUT_CMS_TEMPLATE } from "@/app/_lib/layout-cms";
 
-type Locale = "en" | "th";
+type Locale = AdminLocale;
 type CompanyInfoItem = {
   id: string;
   slug: string;
@@ -79,10 +80,7 @@ const copy = {
 };
 
 function detectLocale(): Locale {
-  if (typeof window === "undefined") return "en";
-  const queryLocale = new URLSearchParams(window.location.search).get("lang");
-  if (queryLocale === "en" || queryLocale === "th") return queryLocale;
-  return navigator.language.toLowerCase().startsWith("th") ? "th" : "en";
+  return detectAdminLocale();
 }
 
 async function authFetch(path: string, token: string, init?: RequestInit): Promise<Response> {

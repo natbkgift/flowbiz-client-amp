@@ -3,8 +3,9 @@
 import { type FormEvent, useEffect, useMemo, useState } from "react";
 
 import { clearAuthSession, loginAdmin, persistAuthSession, readAuthSession } from "@/app/_lib/admin-auth";
+import { detectAdminLocale, type AdminLocale } from "@/app/_lib/admin-i18n";
 
-type Locale = "en" | "th";
+type Locale = AdminLocale;
 
 type InquiryItem = {
   id: string;
@@ -153,10 +154,7 @@ const copy = {
 };
 
 function detectLocale(): Locale {
-  if (typeof window === "undefined") return "en";
-  const queryLocale = new URLSearchParams(window.location.search).get("lang");
-  if (queryLocale === "th" || queryLocale === "en") return queryLocale;
-  return navigator.language.toLowerCase().startsWith("th") ? "th" : "en";
+  return detectAdminLocale();
 }
 
 function buildQuery(filters: Record<string, string>): string {
