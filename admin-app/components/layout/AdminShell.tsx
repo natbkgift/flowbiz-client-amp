@@ -9,6 +9,7 @@ import {
   detectAdminLocale,
   getAdminCopyValue,
   persistAdminLocale,
+  readPersistedAdminLocale,
   type AdminLocale,
   withAdminLocale,
 } from "@/app/_lib/admin-i18n";
@@ -83,7 +84,7 @@ function renderMobileNavRow(
   return (
     <section
       className={sectionActive ? "admin-shell-mobile-row-group is-active" : "admin-shell-mobile-row-group"}
-      aria-label={title}
+      aria-label={`${title} navigation`}
     >
       <h2 className="admin-shell-mobile-row-title">{title}</h2>
       <div className="admin-shell-mobile-row">
@@ -135,15 +136,21 @@ export function AdminShell({ children }: { children: ReactNode }) {
   useEffect(() => {
     const detectedLocale = detectAdminLocale();
     setLocale(detectedLocale);
-    persistAdminLocale(detectedLocale);
-  }, [pathname]);
+    if (readPersistedAdminLocale() !== detectedLocale) {
+      persistAdminLocale(detectedLocale);
+    }
+  }, []);
 
   function onLanguageChange(event: ChangeEvent<HTMLSelectElement>) {
     const nextLocale = event.target.value === "th" ? "th" : "en";
     setLocale(nextLocale);
     persistAdminLocale(nextLocale);
     if (typeof window !== "undefined") {
-      window.location.assign(withAdminLocale(`${window.location.pathname}${window.location.search}`, nextLocale));
+      const currentHref = `${window.location.pathname}${window.location.search}`;
+      const nextHref = withAdminLocale(currentHref, nextLocale);
+      if (nextHref !== currentHref) {
+        window.location.assign(nextHref);
+      }
     }
   }
 

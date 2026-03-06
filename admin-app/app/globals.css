@@ -4842,6 +4842,11 @@ summary.mobile-nav__trigger::-webkit-details-marker {
     grid-template-columns: minmax(0, 1fr);
     padding: 10px 12px 8px;
   }
+
+  .admin-shell-locale-control {
+    display: inline-grid;
+    justify-items: start;
+  }
 }
 
 @media (min-width: 640px) and (max-width: 1024px) {

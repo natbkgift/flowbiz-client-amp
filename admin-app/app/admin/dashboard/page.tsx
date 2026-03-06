@@ -226,8 +226,9 @@ export default function AdminDashboardPage() {
 
   async function login(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    const email = loginEmail.trim();
-    const password = loginPassword;
+    const formData = new FormData(event.currentTarget);
+    const email = String(formData.get("email") || loginEmail).trim();
+    const password = String(formData.get("password") || loginPassword);
     if (!email || !password) {
       setAuthError(t.loginMissing);
       return;
@@ -282,6 +283,7 @@ export default function AdminDashboardPage() {
               <span>{t.email}</span>
               <input
                 id="dashboard-login-email"
+                name="email"
                 type="email"
                 autoComplete="username"
                 value={loginEmail}
@@ -293,6 +295,7 @@ export default function AdminDashboardPage() {
               <span>{t.password}</span>
               <input
                 id="dashboard-login-password"
+                name="password"
                 type="password"
                 autoComplete="current-password"
                 value={loginPassword}

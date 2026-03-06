@@ -23,6 +23,10 @@ function readStoredLocale(): AdminLocale | null {
   return isAdminLocale(localLocale) ? localLocale : null;
 }
 
+export function readPersistedAdminLocale(): AdminLocale | null {
+  return readStoredLocale();
+}
+
 export function detectAdminLocale(): AdminLocale {
   if (typeof window === "undefined") return DEFAULT_LOCALE;
   const queryLocale = readAdminLocaleFromSearch(window.location.search);
