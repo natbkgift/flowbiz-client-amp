@@ -1010,7 +1010,13 @@ def _parse_revision_datetime(value: Any) -> datetime | None:
     if not text:
         return None
     normalized = text.replace("Z", "+00:00")
-    parsed = datetime.fromisoformat(normalized)
+    try:
+        parsed = datetime.fromisoformat(normalized)
+    except ValueError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Revision datetime must be a valid ISO 8601 datetime string",
+        ) from exc
     if parsed.tzinfo is None:
         return parsed.replace(tzinfo=UTC)
     return parsed.astimezone(UTC)
