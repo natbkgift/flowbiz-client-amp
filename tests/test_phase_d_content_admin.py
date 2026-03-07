@@ -5,11 +5,23 @@ from collections.abc import Generator
 from uuid import uuid4
 
 import pytest
-from sqlalchemy import select
+from sqlalchemy import desc, select
 
+from apps.api.dependencies.auth import ADMIN_PERMISSION_READ, ADMIN_PERMISSION_WRITE
 from packages.core.auth import create_access_token, hash_password
 from packages.core.database import SessionLocal, init_db
-from packages.core.models import Article, AuditLog, CompanyInfo, ContentTaxonomy, ContentVideo, User
+from packages.core.models import (
+    Article,
+    AuditLog,
+    CompanyInfo,
+    ContentTaxonomy,
+    ContentVideo,
+    Permission,
+    Role,
+    RolePermission,
+    User,
+    UserRole,
+)
 
 
 def _make_admin_headers() -> dict[str, str]:
@@ -21,13 +33,40 @@ def _make_admin_headers() -> dict[str, str]:
     return {"Authorization": f"Bearer {token}"}
 
 
+def _make_editor_headers_with_permissions(permission_keys: list[str]) -> dict[str, str]:
+    email = f"phase-d-editor-{uuid4()}@example.test"
+    with SessionLocal() as db:
+        user = User(email=email, password_hash=hash_password("pw"), role="editor")
+        db.add(user)
+        db.flush()
+        role = Role(name=f"phase-d-editor-role-{uuid4()}")
+        db.add(role)
+        db.flush()
+        db.add(UserRole(user_id=user.id, role_id=role.id))
+        for key in permission_keys:
+            permission = db.scalar(select(Permission).where(Permission.key == key))
+            if permission is None:
+                permission = Permission(key=key, description=f"seed {key}")
+                db.add(permission)
+                db.flush()
+            db.add(RolePermission(role_id=role.id, permission_id=permission.id))
+        db.commit()
+    token = create_access_token(subject=email, role="editor")
+    return {"Authorization": f"Bearer {token}"}
+
+
 def _cleanup_phase_d_entities() -> None:
     with SessionLocal() as db:
+        db.query(RolePermission).delete()
+        db.query(UserRole).delete()
+        db.query(Permission).delete()
+        db.query(Role).delete()
         db.query(ContentVideo).delete()
         db.query(ContentTaxonomy).delete()
         db.query(Article).delete()
         db.query(CompanyInfo).filter(CompanyInfo.slug == "site-layout").delete()
         db.query(User).filter(User.email.like("phase-d-admin-%")).delete()
+        db.query(User).filter(User.email.like("phase-d-editor-%")).delete()
         db.commit()
 
 
@@ -572,3 +611,165 @@ def test_phase_d_logo_endpoint_updates_site_layout_record(client) -> None:
         assert row is not None
         parsed = json.loads(row.content)
     assert parsed["header"]["logo"]["storage_path"] == "/media/library/logo/amp-logo.webp"
+
+
+def test_phase_d_article_revision_history_diff_and_restore(client) -> None:
+    headers = _make_admin_headers()
+    slug = f"phase-d-revision-{uuid4()}"
+    created = client.post(
+        "/admin/content/articles",
+        headers=headers,
+        json={
+            "slug": slug,
+            "category": "blog",
+            "status": "draft",
+            "title": {"en": "Revision title v1", "th": "หัวข้อ v1"},
+            "excerpt": {"en": "excerpt v1", "th": "สรุป v1"},
+            "body_md": {"en": "Body v1", "th": "เนื้อหา v1"},
+        },
+    )
+    _assert_201(created)
+    article_id = created.json()["article"]["id"]
+
+    _assert_200(
+        client.patch(
+            f"/admin/content/articles/{slug}",
+            headers=headers,
+            json={
+                "title": {"en": "Revision title v2", "th": "หัวข้อ v2"},
+                "body_md": {"en": "Body v2", "th": "เนื้อหา v2"},
+            },
+        )
+    )
+    _assert_200(
+        client.patch(
+            f"/admin/content/articles/{slug}",
+            headers=headers,
+            json={
+                "title": {"en": "Revision title v3", "th": "หัวข้อ v3"},
+                "body_md": {"en": "Body v3", "th": "เนื้อหา v3"},
+            },
+        )
+    )
+
+    revisions = client.get(f"/admin/content/articles/{slug}/revisions?limit=10", headers=headers)
+    _assert_200(revisions)
+    revision_rows = revisions.json()["data"]
+    assert len(revision_rows) >= 3
+    target_index = next(
+        (index for index, row in enumerate(revision_rows) if row.get("event") == "update" and index + 1 < len(revision_rows)),
+        None,
+    )
+    assert target_index is not None
+    target_revision_id = revision_rows[target_index]["revision_id"]
+    expected_base_revision_id = revision_rows[target_index + 1]["revision_id"]
+    create_revision = next((row for row in revision_rows if row.get("event") == "create"), None)
+    assert create_revision is not None
+    oldest_revision_id = create_revision["revision_id"]
+
+    diff = client.get(
+        f"/admin/content/articles/{slug}/revisions/{target_revision_id}/diff",
+        headers=headers,
+    )
+    _assert_200(diff)
+    assert diff.json()["base_revision"]["revision_id"] == expected_base_revision_id
+    assert diff.json()["summary"]["changed_fields"] > 0
+    title_change = next((change for change in diff.json()["changes"] if change["path"] == "title.en"), None)
+    assert title_change is not None
+    assert title_change["before"] != title_change["after"]
+
+    restored = client.post(
+        f"/admin/content/articles/{slug}/revisions/{oldest_revision_id}/restore",
+        headers=headers,
+    )
+    _assert_200(restored)
+    assert restored.json()["restored_revision_id"] == oldest_revision_id
+    assert restored.json()["article"]["title"]["en"] == "Revision title v1"
+    assert restored.json()["article"]["body_md"]["en"] == "Body v1"
+
+    with SessionLocal() as db:
+        restore_logs = db.scalars(
+            select(AuditLog).where(
+                AuditLog.entity_type == "article",
+                AuditLog.entity_id == article_id,
+                AuditLog.action == "revision_restore",
+            )
+        ).all()
+    assert len(restore_logs) == 1
+
+
+def test_phase_d_article_restore_rejects_external_hero_image_url(client) -> None:
+    headers = _make_admin_headers()
+    slug = f"phase-d-revision-media-{uuid4()}"
+    created = client.post(
+        "/admin/content/articles",
+        headers=headers,
+        json={
+            "slug": slug,
+            "category": "blog",
+            "status": "draft",
+            "title": {"en": "Revision media title", "th": "หัวข้อ media"},
+            "body_md": {"en": "Body", "th": "เนื้อหา"},
+        },
+    )
+    _assert_201(created)
+    article_id = created.json()["article"]["id"]
+
+    with SessionLocal() as db:
+        revision = db.scalar(
+            select(AuditLog)
+            .where(
+                AuditLog.entity_type == "article",
+                AuditLog.entity_id == article_id,
+                AuditLog.action == "revision_snapshot",
+            )
+            .order_by(desc(AuditLog.created_at), desc(AuditLog.id))
+            .limit(1)
+        )
+        assert revision is not None
+        payload = dict(revision.diff) if isinstance(revision.diff, dict) else {}
+        snapshot = dict(payload.get("snapshot")) if isinstance(payload.get("snapshot"), dict) else {}
+        snapshot["hero_image_url"] = "https://cdn.example.test/hero.jpg"
+        payload["snapshot"] = snapshot
+        revision.diff = payload
+        db.add(revision)
+        db.commit()
+        revision_id = str(revision.id)
+
+    restored = client.post(
+        f"/admin/content/articles/{slug}/revisions/{revision_id}/restore",
+        headers=headers,
+    )
+    assert restored.status_code == 422, restored.text
+    assert restored.json()["detail"] == "hero_image_url must be local /media/ path"
+
+
+def test_phase_d_article_restore_requires_admin_role(client) -> None:
+    admin_headers = _make_admin_headers()
+    editor_headers = _make_editor_headers_with_permissions(
+        [ADMIN_PERMISSION_READ, ADMIN_PERMISSION_WRITE]
+    )
+    slug = f"phase-d-revision-role-{uuid4()}"
+    created = client.post(
+        "/admin/content/articles",
+        headers=admin_headers,
+        json={
+            "slug": slug,
+            "category": "blog",
+            "status": "draft",
+            "title": {"en": "Role restricted restore", "th": "จำกัด role"},
+            "body_md": {"en": "Body", "th": "เนื้อหา"},
+        },
+    )
+    _assert_201(created)
+
+    revisions = client.get(f"/admin/content/articles/{slug}/revisions?limit=1", headers=admin_headers)
+    _assert_200(revisions)
+    revision_id = revisions.json()["data"][0]["revision_id"]
+
+    denied = client.post(
+        f"/admin/content/articles/{slug}/revisions/{revision_id}/restore",
+        headers=editor_headers,
+    )
+    assert denied.status_code == 403, denied.text
+    assert denied.json()["detail"] == "Restore requires admin role"

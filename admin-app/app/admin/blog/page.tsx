@@ -77,6 +77,11 @@ export default function AdminBlogCmsPage() {
         publishPath: "/admin/content/articles/{id}/publish",
         unpublishPath: "/admin/content/articles/{id}/unpublish",
         deletePath: "/admin/content/articles/{id}",
+        revisionConfig: {
+          listPath: "/admin/content/articles/{id}/revisions",
+          diffPath: "/admin/content/articles/{id}/revisions/{revisionId}/diff",
+          restorePath: "/admin/content/articles/{id}/revisions/{revisionId}/restore",
+        },
         defaultListQuery: "limit=40",
         defaultCreatePayload: BLOG_CREATE_TEMPLATE,
         defaultPatchPayload: BLOG_PATCH_TEMPLATE,

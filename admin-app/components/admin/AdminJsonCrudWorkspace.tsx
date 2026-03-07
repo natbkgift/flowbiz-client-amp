@@ -65,6 +65,11 @@ type CrudConfig = {
     allowedStatuses?: readonly string[];
     allowedCategories?: readonly string[];
   };
+  revisionConfig?: {
+    listPath: string;
+    diffPath: string;
+    restorePath?: string;
+  };
   bulkActions?: ReadonlyArray<{
     key: string;
     title: string;
@@ -98,6 +103,13 @@ type ChecklistReport = {
 
 function withIdentifier(pathTemplate: string, identifier: string): string {
   return pathTemplate.replace("{id}", encodeURIComponent(identifier.trim()));
+}
+
+function withRevisionIdentifier(pathTemplate: string, identifier: string, revisionId: string): string {
+  return withIdentifier(pathTemplate, identifier).replace(
+    "{revisionId}",
+    encodeURIComponent(revisionId.trim())
+  );
 }
 
 function buildListPath(path: string, query: string): string {
@@ -389,6 +401,9 @@ export function AdminJsonCrudWorkspace({ config }: { config: CrudConfig }) {
   const [result, setResult] = useState<string>("");
   const [publishWarningSignature, setPublishWarningSignature] = useState<string>("");
   const [previewRecord, setPreviewRecord] = useState<Record<string, unknown> | null>(null);
+  const [revisions, setRevisions] = useState<Record<string, unknown>[]>([]);
+  const [selectedRevisionId, setSelectedRevisionId] = useState("");
+  const revisionConfig = config.revisionConfig;
   const previewConfig = config.previewConfig;
   const checklistLocales = useMemo(
     () =>
@@ -558,6 +573,27 @@ export function AdminJsonCrudWorkspace({ config }: { config: CrudConfig }) {
       await loadList();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Request failed.");
+    }
+  }
+
+  async function loadRevisions(): Promise<void> {
+    if (!revisionConfig) return;
+    const activeIdentifier = identifier.trim();
+    if (!activeIdentifier) return;
+    const body = await fetchJson<{ data?: unknown[] }>(
+      withIdentifier(revisionConfig.listPath, activeIdentifier),
+      token.trim()
+    );
+    const rows = Array.isArray(body.data)
+      ? body.data.filter((row) => row && typeof row === "object").map((row) => row as Record<string, unknown>)
+      : [];
+    setRevisions(rows);
+    const selectedStillExists = rows.some(
+      (row) => String(row.revision_id || "").trim() === selectedRevisionId.trim()
+    );
+    if ((!selectedRevisionId || !selectedStillExists) && rows.length > 0) {
+      const firstId = String(rows[0]?.revision_id || "").trim();
+      setSelectedRevisionId(firstId);
     }
   }
 
@@ -877,6 +913,19 @@ export function AdminJsonCrudWorkspace({ config }: { config: CrudConfig }) {
                   disabled={!identifier.trim()}
                 >
                   Delete
+                </button>
+              ) : null}
+              {revisionConfig ? (
+                <button
+                  className="btn btn-secondary"
+                  type="button"
+                  onClick={() => void runAction(async () => {
+                    await loadRevisions();
+                    return { revisions_loaded: true };
+                  })}
+                  disabled={!identifier.trim()}
+                >
+                  Load revisions
                 </button>
               ) : null}
             </div>
@@ -1230,6 +1279,82 @@ export function AdminJsonCrudWorkspace({ config }: { config: CrudConfig }) {
             <section className="card">
               <h2>Result</h2>
               <pre>{result}</pre>
+            </section>
+          ) : null}
+          {revisionConfig ? (
+            <section className="card">
+              <h2>Revision history</h2>
+              {revisions.length === 0 ? (
+                <div className="state-empty">No revisions loaded. Select a record and click &quot;Load revisions&quot;.</div>
+              ) : (
+                <>
+                  <label className="field" htmlFor={`${idBase}-revision-id`}>
+                    <span>Revision</span>
+                    <select
+                      id={`${idBase}-revision-id`}
+                      value={selectedRevisionId}
+                      onChange={(event) => setSelectedRevisionId(event.target.value)}
+                    >
+                      {revisions.map((revision) => {
+                        const revisionId = String(revision.revision_id || "");
+                        const event = String(revision.event || "revision");
+                        const createdAt = String(revision.created_at || "");
+                        return (
+                          <option key={revisionId} value={revisionId}>
+                            {event} · {createdAt || revisionId}
+                          </option>
+                        );
+                      })}
+                    </select>
+                  </label>
+                  <div className="card-actions">
+                    <button
+                      className="btn btn-secondary"
+                      type="button"
+                      disabled={!identifier.trim() || !selectedRevisionId.trim()}
+                      onClick={() =>
+                        void runAction(() =>
+                          fetchJson(
+                            withRevisionIdentifier(
+                              revisionConfig.diffPath,
+                              identifier,
+                              selectedRevisionId
+                            ),
+                            token.trim()
+                          )
+                        )
+                      }
+                    >
+                      Show diff
+                    </button>
+                    {revisionConfig.restorePath ? (
+                      <button
+                        className="btn btn-secondary"
+                        type="button"
+                        disabled={!identifier.trim() || !selectedRevisionId.trim()}
+                        onClick={() =>
+                          void runAction(async () => {
+                            const restored = await fetchJson(
+                              withRevisionIdentifier(
+                                revisionConfig.restorePath || "",
+                                identifier,
+                                selectedRevisionId
+                              ),
+                              token.trim(),
+                              { method: "POST" }
+                            );
+                            await loadRevisions();
+                            return restored;
+                          })
+                        }
+                      >
+                        Restore revision
+                      </button>
+                    ) : null}
+                  </div>
+                  <pre>{toPrettyJson({ data: revisions })}</pre>
+                </>
+              )}
             </section>
           ) : null}
           {previewConfig && previewRecord ? (

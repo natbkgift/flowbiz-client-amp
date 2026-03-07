@@ -9,7 +9,7 @@ from uuid import UUID, uuid4
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from pydantic import BaseModel
-from sqlalchemy import desc, func, select
+from sqlalchemy import and_, desc, func, or_, select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
@@ -19,6 +19,7 @@ from packages.core.database import get_db
 from packages.core.media_library import require_local_media_path
 from packages.core.models import (
     Article,
+    AuditLog,
     CompanyInfo,
     ContentTaxonomy,
     ContentVideo,
@@ -46,6 +47,7 @@ _VIDEO_STATUSES = {"draft", "published", "archived"}
 _YOUTUBE_ID_PATTERN = re.compile(r"^[A-Za-z0-9_-]{11}$")
 _TAXONOMY_KIND_PATTERN = re.compile(r"^[a-z0-9]+(?:[-_][a-z0-9]+)*$")
 _TAXONOMY_SLUG_PATTERN = re.compile(r"^[a-z0-9]+(?:-[a-z0-9]+)*$")
+_ARTICLE_REVISION_ACTION = "revision_snapshot"
 
 
 class PaginationMeta(BaseModel):
@@ -421,6 +423,150 @@ def _article_response(article: Article) -> dict[str, dict[str, Any]]:
     return {"article": _serialize_article(article)}
 
 
+def _article_revision_snapshot(article: Article) -> dict[str, Any]:
+    return _serialize_article(article)
+
+
+def _article_revision_log_query(article_id: str):
+    return (
+        select(AuditLog)
+        .where(
+            AuditLog.entity_type == "article",
+            AuditLog.entity_id == article_id,
+            AuditLog.action == _ARTICLE_REVISION_ACTION,
+        )
+        .order_by(desc(AuditLog.created_at), desc(AuditLog.id))
+    )
+
+
+def _article_revision_snapshot_from_log(row: AuditLog | None) -> dict[str, Any] | None:
+    if row is None or not isinstance(row.diff, dict):
+        return None
+    snapshot = row.diff.get("snapshot")
+    if not isinstance(snapshot, dict):
+        return None
+    return snapshot
+
+
+def _flatten_for_diff(value: Any, *, prefix: str = "") -> dict[str, Any]:
+    if isinstance(value, dict):
+        out: dict[str, Any] = {}
+        for key in sorted(value.keys()):
+            path = f"{prefix}.{key}" if prefix else str(key)
+            out.update(_flatten_for_diff(value[key], prefix=path))
+        return out
+    if isinstance(value, list):
+        list_out: dict[str, Any] = {}
+        for index, item in enumerate(value):
+            path = f"{prefix}[{index}]"
+            list_out.update(_flatten_for_diff(item, prefix=path))
+        return list_out
+    return {prefix or "value": value}
+
+
+def _compute_revision_changes(before: dict[str, Any], after: dict[str, Any]) -> list[dict[str, Any]]:
+    before_flat = _flatten_for_diff(before)
+    after_flat = _flatten_for_diff(after)
+    all_paths = sorted(set(before_flat.keys()) | set(after_flat.keys()))
+    changes: list[dict[str, Any]] = []
+    for path in all_paths:
+        before_value = before_flat.get(path)
+        after_value = after_flat.get(path)
+        if before_value == after_value:
+            continue
+        changes.append({"path": path, "before": before_value, "after": after_value})
+    return changes
+
+
+def _serialize_revision_entry(row: AuditLog) -> dict[str, Any]:
+    payload = row.diff if isinstance(row.diff, dict) else {}
+    changes = payload.get("changes")
+    return {
+        "revision_id": str(row.id),
+        "event": payload.get("event"),
+        "created_at": row.created_at.isoformat() if row.created_at else None,
+        "actor_user_id": str(row.actor_user_id) if row.actor_user_id else None,
+        "changes": changes if isinstance(changes, list) else [],
+    }
+
+
+def _record_article_revision_audit(
+    *,
+    db: Session,
+    admin: User,
+    article: Article,
+    event: str,
+    previous_snapshot: dict[str, Any] | None = None,
+) -> None:
+    article_id = str(article.id)
+    previous = previous_snapshot
+    if previous is None:
+        latest_row = db.scalar(_article_revision_log_query(article_id).limit(1))
+        previous = _article_revision_snapshot_from_log(latest_row)
+    current_snapshot = _article_revision_snapshot(article)
+    diff = {
+        "event": event,
+        "snapshot": current_snapshot,
+        "changes": _compute_revision_changes(previous or {}, current_snapshot),
+    }
+    write_audit_log(
+        db,
+        actor_user_id=admin.id,
+        entity_type="article",
+        entity_id=article_id,
+        action=_ARTICLE_REVISION_ACTION,
+        diff=diff,
+    )
+
+
+def _article_revision_by_id_or_404(db: Session, *, article_id: str, revision_id: UUID) -> AuditLog:
+    row = db.scalar(
+        select(AuditLog).where(
+            AuditLog.id == revision_id,
+            AuditLog.entity_type == "article",
+            AuditLog.entity_id == article_id,
+            AuditLog.action == _ARTICLE_REVISION_ACTION,
+        )
+    )
+    if row is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Revision not found")
+    return row
+
+
+def _previous_article_revision(db: Session, *, article_id: str, target: AuditLog) -> AuditLog | None:
+    if target.created_at is None:
+        return None
+    candidate = db.scalar(
+        select(AuditLog).where(
+            AuditLog.entity_type == "article",
+            AuditLog.entity_id == article_id,
+            AuditLog.action == _ARTICLE_REVISION_ACTION,
+            or_(
+                AuditLog.created_at < target.created_at,
+                and_(AuditLog.created_at == target.created_at, AuditLog.id < target.id),
+            ),
+        )
+        .order_by(desc(AuditLog.created_at), desc(AuditLog.id))
+        .limit(1)
+    )
+    if candidate is not None and candidate.id != target.id:
+        return candidate
+
+    page_size = 200
+    offset = 0
+    while True:
+        page = db.scalars(_article_revision_log_query(article_id).offset(offset).limit(page_size)).all()
+        if not page:
+            return None
+        for index, row in enumerate(page):
+            if row.id != target.id:
+                continue
+            if index + 1 < len(page):
+                return page[index + 1]
+            return db.scalar(_article_revision_log_query(article_id).offset(offset + index + 1).limit(1))
+        offset += len(page)
+
+
 def _coerce_article_slug(value: str | None) -> str:
     return _coerce_required_text(value, field_name="slug")
 
@@ -688,7 +834,7 @@ def get_article(
 def create_article(
     payload: ArticleCreateRequest,
     db: Session = Depends(get_db),
-    _admin: User = Depends(get_current_admin),
+    admin: User = Depends(get_current_admin),
 ) -> dict[str, Any]:
     slug = _coerce_article_slug(payload.slug)
     conflict = db.scalar(select(Article).where(Article.slug == slug, Article.deleted_at.is_(None)))
@@ -729,6 +875,14 @@ def create_article(
         article.published_at = datetime.now(UTC)
 
     db.add(article)
+    db.flush()
+    _record_article_revision_audit(
+        db=db,
+        admin=admin,
+        article=article,
+        event="create",
+        previous_snapshot={},
+    )
     _commit_or_conflict(db, detail="Article slug already exists")
     db.refresh(article)
     return _article_response(article)
@@ -751,6 +905,7 @@ def patch_article(
 
     _apply_article_updates(article, payload, updates, db, admin)
     db.add(article)
+    _record_article_revision_audit(db=db, admin=admin, article=article, event="update")
     _commit_or_conflict(db, detail="Article slug already exists")
     db.refresh(article)
     return _article_response(article)
@@ -778,6 +933,7 @@ def publish_article(
     if article.published_at is None:
         article.published_at = datetime.now(UTC)
     db.add(article)
+    _record_article_revision_audit(db=db, admin=admin, article=article, event="publish")
     db.commit()
     db.refresh(article)
     return {**_article_response(article), "publish_checklist": checklist}
@@ -802,6 +958,7 @@ def unpublish_article(
             after=article.status,
         )
     db.add(article)
+    _record_article_revision_audit(db=db, admin=admin, article=article, event="unpublish")
     db.commit()
     db.refresh(article)
     return _article_response(article)
@@ -826,8 +983,175 @@ def delete_article(
             after=article.status,
         )
     db.add(article)
+    _record_article_revision_audit(db=db, admin=admin, article=article, event="delete")
     db.commit()
     return {"deleted": True}
+
+
+@router.get("/content/articles/{slug}/revisions")
+def list_article_revisions(
+    slug: str,
+    limit: int = Query(20, ge=1, le=100),
+    db: Session = Depends(get_db),
+    _admin: User = Depends(get_current_admin),
+) -> dict[str, Any]:
+    article = _article_by_slug_or_404(db, slug)
+    rows = db.scalars(_article_revision_log_query(str(article.id)).limit(limit)).all()
+    return {"data": [_serialize_revision_entry(row) for row in rows]}
+
+
+@router.get("/content/articles/{slug}/revisions/{revision_id}/diff")
+def get_article_revision_diff(
+    slug: str,
+    revision_id: UUID,
+    base_revision_id: UUID | None = Query(default=None),
+    db: Session = Depends(get_db),
+    _admin: User = Depends(get_current_admin),
+) -> dict[str, Any]:
+    article = _article_by_slug_or_404(db, slug)
+    article_id = str(article.id)
+    target = _article_revision_by_id_or_404(db, article_id=article_id, revision_id=revision_id)
+    target_snapshot = _article_revision_snapshot_from_log(target) or {}
+
+    base_revision: AuditLog | None = None
+    if base_revision_id is not None:
+        base_revision = _article_revision_by_id_or_404(
+            db, article_id=article_id, revision_id=base_revision_id
+        )
+    else:
+        base_revision = _previous_article_revision(db, article_id=article_id, target=target)
+    base_snapshot = _article_revision_snapshot_from_log(base_revision) or {}
+
+    changes = _compute_revision_changes(base_snapshot, target_snapshot)
+    return {
+        "revision": _serialize_revision_entry(target),
+        "base_revision": _serialize_revision_entry(base_revision) if base_revision else None,
+        "changes": changes,
+        "summary": {"changed_fields": len(changes)},
+    }
+
+
+def _parse_revision_datetime(value: Any) -> datetime | None:
+    if not isinstance(value, str):
+        return None
+    text = value.strip()
+    if not text:
+        return None
+    normalized = text.replace("Z", "+00:00")
+    try:
+        parsed = datetime.fromisoformat(normalized)
+    except ValueError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Revision datetime must be a valid ISO 8601 datetime string",
+        ) from exc
+    if parsed.tzinfo is None:
+        return parsed.replace(tzinfo=UTC)
+    return parsed.astimezone(UTC)
+
+
+def _parse_revision_uuid(value: Any, *, field_name: str) -> UUID | None:
+    if not isinstance(value, str):
+        return None
+    text = value.strip()
+    if not text:
+        return None
+    try:
+        return UUID(text)
+    except ValueError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail=f"Revision {field_name} must be a valid UUID format",
+        ) from exc
+
+
+@router.post("/content/articles/{slug}/revisions/{revision_id}/restore")
+def restore_article_revision(
+    slug: str,
+    revision_id: UUID,
+    db: Session = Depends(get_db),
+    admin: User = Depends(get_current_admin),
+) -> dict[str, Any]:
+    if admin.role != "admin":
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Restore requires admin role")
+
+    article = _article_by_slug_or_404(db, slug)
+    revision = _article_revision_by_id_or_404(db, article_id=str(article.id), revision_id=revision_id)
+    snapshot = _article_revision_snapshot_from_log(revision)
+    if snapshot is None:
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Revision snapshot unavailable")
+
+    previous_snapshot = _article_revision_snapshot(article)
+    previous_status = _normalize_status(article.status, allowed=_ARTICLE_STATUSES, field_name="status")
+
+    snapshot_slug = _coerce_article_slug(snapshot.get("slug"))
+    if snapshot_slug != article.slug:
+        conflict = db.scalar(
+            select(Article).where(
+                Article.slug == snapshot_slug,
+                Article.deleted_at.is_(None),
+                Article.id != article.id,
+            )
+        )
+        if conflict is not None:
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail="Article slug already exists",
+            )
+    article.slug = snapshot_slug
+    article.category = _coerce_category(snapshot.get("category"))
+    article.status = _normalize_status(snapshot.get("status"), allowed=_ARTICLE_STATUSES, field_name="status")
+
+    title_snapshot = snapshot.get("title")
+    if not isinstance(title_snapshot, dict):
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Revision title snapshot unavailable")
+    body_snapshot = snapshot.get("body_md")
+    if not isinstance(body_snapshot, dict):
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Revision body snapshot unavailable")
+
+    article.title = dict(title_snapshot)
+    article.excerpt = dict(snapshot.get("excerpt")) if isinstance(snapshot.get("excerpt"), dict) else None
+    article.body_md = dict(body_snapshot)
+    restored_hero_image_url = _coerce_optional_text(snapshot.get("hero_image_url"))
+    if restored_hero_image_url is not None:
+        restored_hero_image_url = require_local_media_path(
+            restored_hero_image_url,
+            field_name="hero_image_url",
+        )
+    article.hero_image_url = restored_hero_image_url
+    article.hero_media_asset_id = _parse_revision_uuid(
+        snapshot.get("hero_media_asset_id"),
+        field_name="hero_media_asset_id",
+    )
+    article.published_at = _parse_revision_datetime(snapshot.get("published_at"))
+
+    if previous_status != article.status:
+        _record_article_transition_audit(
+            db=db,
+            admin=admin,
+            article=article,
+            before=previous_status,
+            after=article.status,
+        )
+    write_audit_log(
+        db,
+        actor_user_id=admin.id,
+        entity_type="article",
+        entity_id=str(article.id),
+        action="revision_restore",
+        diff={"restored_revision_id": str(revision.id)},
+    )
+    _record_article_revision_audit(
+        db=db,
+        admin=admin,
+        article=article,
+        event="restore",
+        previous_snapshot=previous_snapshot,
+    )
+    db.add(article)
+    _commit_or_conflict(db, detail="Article slug already exists")
+    db.refresh(article)
+    return {**_article_response(article), "restored_revision_id": str(revision.id)}
 
 
 @router.post("/content/articles/{slug}/hero-image/ingest")
@@ -884,6 +1208,7 @@ def ingest_article_hero_image(
         if article.published_at is None:
             article.published_at = datetime.now(UTC)
     db.add(article)
+    _record_article_revision_audit(db=db, admin=admin, article=article, event="hero_ingest")
     db.commit()
     db.refresh(article)
 
@@ -916,6 +1241,7 @@ def update_article_editorial(
 
     _apply_article_updates(article, payload, updates, db, admin)
     db.add(article)
+    _record_article_revision_audit(db=db, admin=admin, article=article, event="editorial_update")
     _commit_or_conflict(db, detail="Article slug already exists")
     db.refresh(article)
     return _article_response(article)
