@@ -14,6 +14,7 @@ export const ADMIN_PRIMARY_NAV: AdminNavItem[] = [
   { href: "/admin/company", label: "Company", description: "Company content records" },
   { href: "/admin/testimonials", label: "Testimonials", description: "Testimonials records" },
   { href: "/admin/blog", label: "Blog", description: "Blog full CRUD workspace" },
+  { href: "/admin/review-queue", label: "Review Queue", description: "Pending editorial approvals" },
   { href: "/admin/videos", label: "Videos", description: "Video CMS workspace" },
   { href: "/admin/taxonomy", label: "Taxonomy", description: "Shared tags/topics registry" },
   { href: "/admin/media", label: "Media Library", description: "Upload, integrity, replace" },

@@ -9,7 +9,7 @@ from sqlalchemy import select
 
 from packages.core.auth import create_access_token, hash_password
 from packages.core.database import SessionLocal, init_db
-from packages.core.models import Article, CompanyInfo, ContentTaxonomy, ContentVideo, User
+from packages.core.models import Article, AuditLog, CompanyInfo, ContentTaxonomy, ContentVideo, User
 
 
 def _make_admin_headers() -> dict[str, str]:
@@ -80,15 +80,27 @@ def test_phase_d_article_full_crud_publish_flow(client) -> None:
     patched = client.patch(
         f"/admin/content/articles/{slug}",
         headers=headers,
-        json={"slug": new_slug, "status": "published"},
+        json={"slug": new_slug, "status": "in_review"},
     )
     _assert_200(patched)
     assert patched.json()["article"]["slug"] == new_slug
-    assert patched.json()["article"]["status"] == "published"
+    assert patched.json()["article"]["status"] == "in_review"
+
+    approved = client.patch(
+        f"/admin/content/articles/{new_slug}",
+        headers=headers,
+        json={"status": "approved"},
+    )
+    _assert_200(approved)
+    assert approved.json()["article"]["status"] == "approved"
+
+    published = client.post(f"/admin/content/articles/{new_slug}/publish", headers=headers)
+    _assert_200(published)
+    assert published.json()["article"]["status"] == "published"
 
     unpublished = client.post(f"/admin/content/articles/{new_slug}/unpublish", headers=headers)
     _assert_200(unpublished)
-    assert unpublished.json()["article"]["status"] == "draft"
+    assert unpublished.json()["article"]["status"] == "archived"
 
     deleted = client.delete(f"/admin/content/articles/{new_slug}", headers=headers)
     _assert_200(deleted)
@@ -114,6 +126,19 @@ def test_phase_d_article_publish_warns_when_th_translation_is_incomplete(client)
         },
     )
     _assert_201(created)
+
+    in_review = client.patch(
+        f"/admin/content/articles/{slug}",
+        headers=headers,
+        json={"status": "in_review"},
+    )
+    _assert_200(in_review)
+    approved = client.patch(
+        f"/admin/content/articles/{slug}",
+        headers=headers,
+        json={"status": "approved"},
+    )
+    _assert_200(approved)
 
     publish = client.post(f"/admin/content/articles/{slug}/publish", headers=headers)
     _assert_200(publish)
@@ -165,6 +190,19 @@ def test_phase_d_article_publish_supports_guide_category_contract(client) -> Non
         },
     )
     _assert_201(created)
+
+    in_review = client.patch(
+        f"/admin/content/articles/{slug}",
+        headers=headers,
+        json={"status": "in_review"},
+    )
+    _assert_200(in_review)
+    approved = client.patch(
+        f"/admin/content/articles/{slug}",
+        headers=headers,
+        json={"status": "approved"},
+    )
+    _assert_200(approved)
 
     published = client.post(f"/admin/content/articles/{slug}/publish", headers=headers)
     _assert_200(published)
@@ -219,6 +257,78 @@ def test_phase_d_article_patch_rejects_invalid_category(client) -> None:
     )
     assert patched.status_code == 422, patched.text
     assert patched.json()["detail"] == "category must be one of: blog, guide"
+
+
+def test_phase_d_article_status_transition_rejects_invalid_transition(client) -> None:
+    headers = _make_admin_headers()
+    slug = f"phase-d-status-invalid-{uuid4()}"
+    created = client.post(
+        "/admin/content/articles",
+        headers=headers,
+        json={
+            "slug": slug,
+            "category": "blog",
+            "status": "draft",
+            "title": {"en": "Status invalid"},
+            "body_md": {"en": "Body"},
+        },
+    )
+    _assert_201(created)
+
+    patched = client.patch(
+        f"/admin/content/articles/{slug}",
+        headers=headers,
+        json={"status": "published"},
+    )
+    assert patched.status_code == 400, patched.text
+    assert patched.json()["detail"] == "Invalid transition: draft -> published"
+
+
+def test_phase_d_article_status_transition_audit_log_records_all_transitions(client) -> None:
+    headers = _make_admin_headers()
+    slug = f"phase-d-status-audit-{uuid4()}"
+    created = client.post(
+        "/admin/content/articles",
+        headers=headers,
+        json={
+            "slug": slug,
+            "category": "blog",
+            "status": "draft",
+            "title": {"en": "Status audit"},
+            "body_md": {"en": "Body"},
+        },
+    )
+    _assert_201(created)
+
+    article_id = created.json()["article"]["id"]
+    _assert_200(client.patch(f"/admin/content/articles/{slug}", headers=headers, json={"status": "in_review"}))
+    _assert_200(client.patch(f"/admin/content/articles/{slug}", headers=headers, json={"status": "approved"}))
+    _assert_200(client.post(f"/admin/content/articles/{slug}/publish", headers=headers))
+    _assert_200(client.post(f"/admin/content/articles/{slug}/unpublish", headers=headers))
+
+    with SessionLocal() as db:
+        logs = db.scalars(
+            select(AuditLog)
+            .where(
+                AuditLog.entity_type == "article",
+                AuditLog.entity_id == article_id,
+                AuditLog.action == "status_transition",
+            )
+            .order_by(AuditLog.created_at.asc())
+        ).all()
+
+    assert [entry.diff.get("status", {}).get("from") for entry in logs] == [
+        "draft",
+        "in_review",
+        "approved",
+        "published",
+    ]
+    assert [entry.diff.get("status", {}).get("to") for entry in logs] == [
+        "in_review",
+        "approved",
+        "published",
+        "archived",
+    ]
 
 
 def test_phase_d_taxonomy_full_crud(client) -> None:
