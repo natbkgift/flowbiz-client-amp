@@ -284,6 +284,65 @@ def test_phase_d_article_status_transition_rejects_invalid_transition(client) ->
     assert patched.json()["detail"] == "Invalid transition: draft -> published"
 
 
+def test_phase_d_article_patch_to_published_enforces_publish_checklist(client) -> None:
+    headers = _make_admin_headers()
+    slug = f"phase-d-patch-publish-checklist-{uuid4()}"
+    created = client.post(
+        "/admin/content/articles",
+        headers=headers,
+        json={
+            "slug": slug,
+            "category": "blog",
+            "status": "draft",
+            "title": {"th": "เฉพาะหัวข้อ TH"},
+            "body_md": {"th": "เฉพาะเนื้อหา TH"},
+        },
+    )
+    _assert_201(created)
+
+    _assert_200(client.patch(f"/admin/content/articles/{slug}", headers=headers, json={"status": "in_review"}))
+    _assert_200(client.patch(f"/admin/content/articles/{slug}", headers=headers, json={"status": "approved"}))
+
+    publish_via_patch = client.patch(
+        f"/admin/content/articles/{slug}",
+        headers=headers,
+        json={"status": "published"},
+    )
+    assert publish_via_patch.status_code == 422, publish_via_patch.text
+    detail = publish_via_patch.json()["detail"]
+    assert detail["message"] == "Publish checklist failed"
+    assert "title.en is required" in detail["blocking"]
+    assert "body_md.en is required" in detail["blocking"]
+
+    current = client.get(f"/admin/content/articles/{slug}", headers=headers)
+    _assert_200(current)
+    assert current.json()["article"]["status"] == "approved"
+
+
+def test_phase_d_article_delete_allows_cleanup_from_draft_state(client) -> None:
+    headers = _make_admin_headers()
+    slug = f"phase-d-delete-draft-{uuid4()}"
+    created = client.post(
+        "/admin/content/articles",
+        headers=headers,
+        json={
+            "slug": slug,
+            "category": "blog",
+            "status": "draft",
+            "title": {"en": "Delete draft"},
+            "body_md": {"en": "Body"},
+        },
+    )
+    _assert_201(created)
+
+    deleted = client.delete(f"/admin/content/articles/{slug}", headers=headers)
+    _assert_200(deleted)
+    assert deleted.json()["deleted"] is True
+
+    missing = client.get(f"/admin/content/articles/{slug}", headers=headers)
+    assert missing.status_code == 404, missing.text
+
+
 def test_phase_d_article_status_transition_audit_log_records_all_transitions(client) -> None:
     headers = _make_admin_headers()
     slug = f"phase-d-status-audit-{uuid4()}"

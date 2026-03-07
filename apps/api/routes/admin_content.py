@@ -500,6 +500,20 @@ def _article_publish_checklist(article: Article) -> dict[str, list[str]]:
     return {"blocking": blocking, "warnings": warnings}
 
 
+def _ensure_article_publishable(article: Article) -> dict[str, list[str]]:
+    checklist = _article_publish_checklist(article)
+    if checklist["blocking"]:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail={
+                "message": "Publish checklist failed",
+                "blocking": checklist["blocking"],
+                "warnings": checklist["warnings"],
+            },
+        )
+    return checklist
+
+
 def _article_by_slug_or_404(db: Session, slug: str) -> Article:
     article = db.scalar(select(Article).where(Article.slug == slug, Article.deleted_at.is_(None)))
     if article is None:
@@ -596,6 +610,8 @@ def _apply_article_updates(
             field_name="status",
         )
         _validate_article_transition(before=before_status, after=next_status)
+        if next_status == "published" and before_status != next_status:
+            _ensure_article_publishable(article)
         article.status = next_status
         if before_status != next_status:
             _record_article_transition_audit(
@@ -747,16 +763,7 @@ def publish_article(
     admin: User = Depends(get_current_admin),
 ) -> dict[str, Any]:
     article = _article_by_slug_or_404(db, slug)
-    checklist = _article_publish_checklist(article)
-    if checklist["blocking"]:
-        raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-            detail={
-                "message": "Publish checklist failed",
-                "blocking": checklist["blocking"],
-                "warnings": checklist["warnings"],
-            },
-        )
+    checklist = _ensure_article_publishable(article)
     before_status = str(article.status or "").strip().lower()
     _validate_article_transition(before=before_status, after="published")
     article.status = "published"
@@ -809,7 +816,6 @@ def delete_article(
     article = _article_by_slug_or_404(db, slug)
     article.deleted_at = datetime.now(UTC)
     before_status = str(article.status or "").strip().lower()
-    _validate_article_transition(before=before_status, after="archived")
     article.status = "archived"
     if before_status != article.status:
         _record_article_transition_audit(
