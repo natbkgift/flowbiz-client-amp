@@ -3,7 +3,7 @@ import { AdminJsonCrudWorkspace } from "@/components/admin/AdminJsonCrudWorkspac
 const USER_CREATE_TEMPLATE = JSON.stringify(
   {
     email: "new-admin@example.com",
-    password: "change-me-please",
+    password: "initial-password-123",
     role: "editor",
     role_ids: [],
   },
