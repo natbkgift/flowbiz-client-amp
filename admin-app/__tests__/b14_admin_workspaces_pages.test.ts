@@ -94,6 +94,13 @@ describe("B14 admin workspace pages contract", () => {
     expect(nav).toContain("/admin/review-queue");
   });
 
+  it("blog workspace wires revision history, diff, and restore endpoints", () => {
+    const page = read("app/admin/blog/page.tsx");
+    expect(page).toContain("/admin/content/articles/{id}/revisions");
+    expect(page).toContain("/admin/content/articles/{id}/revisions/{revisionId}/diff");
+    expect(page).toContain("/admin/content/articles/{id}/revisions/{revisionId}/restore");
+  });
+
   it("users workspace avoids default credentials and masks password fields", () => {
     const page = read("app/admin/users/page.tsx");
     expect(page).toContain("User & Role Management");
