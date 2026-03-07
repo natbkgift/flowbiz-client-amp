@@ -7,6 +7,8 @@ import pytest
 from sqlalchemy import select
 
 from apps.api.dependencies.auth import (
+    ADMIN_PERMISSION_ALL,
+    ADMIN_PERMISSION_DELETE,
     ADMIN_PERMISSION_PUBLISH,
     ADMIN_PERMISSION_READ,
     ADMIN_PERMISSION_WRITE,
@@ -129,3 +131,47 @@ def test_non_admin_without_permissions_gets_403(client) -> None:
     headers = _make_user_headers(role="editor")
     response = client.get("/admin/areas", headers=headers)
     assert response.status_code == 403, response.text
+
+
+def test_delete_permission_is_enforced(client) -> None:
+    denied_headers = _make_user_headers(
+        role="editor",
+        permission_keys=[ADMIN_PERMISSION_READ],
+    )
+    denied = client.delete(f"/admin/areas/{uuid4()}", headers=denied_headers)
+    assert denied.status_code == 403, denied.text
+
+    delete_headers = _make_user_headers(
+        role="moderator",
+        permission_keys=[ADMIN_PERMISSION_DELETE],
+    )
+    allowed = client.delete(f"/admin/areas/{uuid4()}", headers=delete_headers)
+    assert allowed.status_code == 404, allowed.text
+
+
+def test_admin_all_permission_allows_any_action(client) -> None:
+    headers = _make_user_headers(
+        role="ops",
+        permission_keys=[ADMIN_PERMISSION_ALL],
+    )
+
+    can_read = client.get("/admin/areas", headers=headers)
+    assert can_read.status_code == 200, can_read.text
+
+    can_write = client.post(
+        "/admin/areas",
+        headers=headers,
+        json={
+            "name": "RBAC Admin All Area",
+            "slug": f"rbac-admin-all-area-{uuid4()}",
+            "city": "Pattaya",
+            "status": "draft",
+        },
+    )
+    assert can_write.status_code == 201, can_write.text
+
+    can_publish = client.post(f"/admin/projects/{uuid4()}/publish", headers=headers)
+    assert can_publish.status_code == 404, can_publish.text
+
+    can_delete = client.delete(f"/admin/areas/{uuid4()}", headers=headers)
+    assert can_delete.status_code == 404, can_delete.text
