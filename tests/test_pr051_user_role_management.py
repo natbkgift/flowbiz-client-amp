@@ -6,7 +6,7 @@ from uuid import UUID, uuid4
 import pytest
 from sqlalchemy import select
 
-from apps.api.dependencies.auth import ADMIN_PERMISSION_READ
+from apps.api.dependencies.auth import ADMIN_PERMISSION_READ, ADMIN_PERMISSION_WRITE
 from packages.core.auth import create_access_token, hash_password
 from packages.core.database import SessionLocal, init_db
 from packages.core.models import Permission, Role, RolePermission, User, UserRole
@@ -89,6 +89,10 @@ def test_pr051_assign_role_changes_permission_effect(client) -> None:
         name=f"readonly-{uuid4()}",
         permission_keys=[ADMIN_PERMISSION_READ],
     )
+    user_mgmt_role_id = _seed_role_with_permissions(
+        name=f"user-mgmt-{uuid4()}",
+        permission_keys=[ADMIN_PERMISSION_READ, ADMIN_PERMISSION_WRITE],
+    )
 
     user_email = f"operator-{uuid4()}@example.com"
     create_response = client.post(
@@ -110,8 +114,21 @@ def test_pr051_assign_role_changes_permission_effect(client) -> None:
     assert assign_response.status_code == 200, assign_response.text
     assert assign_response.json()["assigned"] is True
 
-    after = client.get("/admin/users", headers=user_headers)
-    assert after.status_code == 200, after.text
+    after_readonly = client.get("/admin/users", headers=user_headers)
+    assert after_readonly.status_code == 403, after_readonly.text
+    readonly_roles = client.get("/admin/roles", headers=user_headers)
+    assert readonly_roles.status_code == 403, readonly_roles.text
+
+    grant_user_mgmt = client.post(
+        f"/admin/users/{managed_user_id}/roles/{user_mgmt_role_id}",
+        headers=admin_headers,
+    )
+    assert grant_user_mgmt.status_code == 200, grant_user_mgmt.text
+
+    after_user_mgmt = client.get("/admin/users", headers=user_headers)
+    assert after_user_mgmt.status_code == 200, after_user_mgmt.text
+    user_mgmt_roles = client.get("/admin/roles", headers=user_headers)
+    assert user_mgmt_roles.status_code == 200, user_mgmt_roles.text
 
 
 def test_pr051_self_protection_blocks_self_privilege_changes(client) -> None:

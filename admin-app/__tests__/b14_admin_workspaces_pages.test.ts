@@ -94,6 +94,15 @@ describe("B14 admin workspace pages contract", () => {
     expect(nav).toContain("/admin/review-queue");
   });
 
+  it("users workspace avoids default credentials and masks password fields", () => {
+    const page = read("app/admin/users/page.tsx");
+    expect(page).toContain("User & Role Management");
+    expect(page).toContain("/admin/users");
+    expect(page).not.toContain("new-admin@example.com");
+    expect(page).not.toContain("initial-password-123");
+    expect(page).toContain('type: "password"');
+  });
+
   it("home composer workspace uses shared admin auth helper", () => {
     const page = read("app/admin/home-composer/page.tsx");
     expect(page).toContain("from '@/app/_lib/admin-auth'");

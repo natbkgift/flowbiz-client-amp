@@ -2,8 +2,8 @@ import { AdminJsonCrudWorkspace } from "@/components/admin/AdminJsonCrudWorkspac
 
 const USER_CREATE_TEMPLATE = JSON.stringify(
   {
-    email: "new-admin@example.com",
-    password: "initial-password-123",
+    email: "",
+    password: "",
     role: "editor",
     role_ids: [],
   },
@@ -22,7 +22,7 @@ const USER_PATCH_TEMPLATE = JSON.stringify(
 
 const USER_CREATE_FIELDS = [
   { name: "email", label: "Email", type: "text", required: true, placeholder: "user@example.com" },
-  { name: "password", label: "Password", type: "text", required: true, placeholder: "minimum 6 characters" },
+  { name: "password", label: "Password", type: "password", required: true, placeholder: "minimum 6 characters" },
   { name: "role", label: "Legacy role", type: "text", required: true, placeholder: "admin/editor/ops" },
   {
     name: "role_ids",
@@ -35,7 +35,7 @@ const USER_CREATE_FIELDS = [
 
 const USER_PATCH_FIELDS = [
   { name: "email", label: "Email", type: "text", placeholder: "user@example.com" },
-  { name: "password", label: "Password", type: "text", placeholder: "minimum 6 characters" },
+  { name: "password", label: "Password", type: "password", placeholder: "minimum 6 characters" },
   { name: "role", label: "Legacy role", type: "text", placeholder: "admin/editor/ops" },
   {
     name: "role_ids",

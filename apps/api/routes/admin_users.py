@@ -1,26 +1,44 @@
 from __future__ import annotations
 
+import re
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
-from pydantic import BaseModel, EmailStr, Field, field_validator
+from pydantic import BaseModel, Field, field_validator
 from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
-from apps.api.dependencies.auth import get_current_admin
+from apps.api.dependencies.auth import (
+    ADMIN_PERMISSION_ALL,
+    ADMIN_PERMISSION_WRITE,
+    get_current_admin,
+)
 from packages.core.auth import hash_password
 from packages.core.database import get_db
 from packages.core.models import Permission, Role, RolePermission, User, UserRole
 
 router = APIRouter(prefix="/admin", tags=["admin"])
+_EMAIL_PATTERN = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
+
+
+def _normalize_email(value: str | None) -> str:
+    cleaned = str(value or "").strip().lower()
+    if not cleaned or not _EMAIL_PATTERN.fullmatch(cleaned):
+        raise ValueError("must be a valid email")
+    return cleaned
 
 
 class AdminUserCreate(BaseModel):
-    email: EmailStr
+    email: str
     password: str = Field(min_length=6, max_length=255)
     role: str = "editor"
     role_ids: list[UUID] = Field(default_factory=list)
+
+    @field_validator("email")
+    @classmethod
+    def _valid_email(cls, value: str) -> str:
+        return _normalize_email(value)
 
     @field_validator("role")
     @classmethod
@@ -32,10 +50,17 @@ class AdminUserCreate(BaseModel):
 
 
 class AdminUserPatch(BaseModel):
-    email: EmailStr | None = None
+    email: str | None = None
     password: str | None = Field(default=None, min_length=6, max_length=255)
     role: str | None = None
     role_ids: list[UUID] | None = None
+
+    @field_validator("email")
+    @classmethod
+    def _optional_valid_email(cls, value: str | None) -> str | None:
+        if value is None:
+            return None
+        return _normalize_email(value)
 
     @field_validator("role")
     @classmethod
@@ -48,34 +73,52 @@ class AdminUserPatch(BaseModel):
         return cleaned
 
 
-def _permission_keys_for_role(db: Session, *, role_id: UUID) -> list[str]:
-    keys = db.scalars(
-        select(Permission.key)
-        .join(RolePermission, RolePermission.permission_id == Permission.id)
-        .where(RolePermission.role_id == role_id)
-        .order_by(Permission.key.asc())
+def _permission_keys_by_role_ids(db: Session, *, role_ids: list[UUID]) -> dict[UUID, list[str]]:
+    if not role_ids:
+        return {}
+    unique_role_ids = list(dict.fromkeys(role_ids))
+    rows = db.execute(
+        select(RolePermission.role_id, Permission.key)
+        .join(Permission, Permission.id == RolePermission.permission_id)
+        .where(RolePermission.role_id.in_(unique_role_ids))
+        .order_by(RolePermission.role_id.asc(), Permission.key.asc())
     ).all()
-    return [str(key) for key in keys]
-
-
-def _roles_for_user(db: Session, *, user_id: UUID) -> list[dict]:
-    roles = db.scalars(
-        select(Role).join(UserRole, UserRole.role_id == Role.id).where(UserRole.user_id == user_id)
-    ).all()
-    payload = [
-        {
-            "id": str(role.id),
-            "name": role.name,
-            "permission_keys": _permission_keys_for_role(db, role_id=role.id),
-        }
-        for role in roles
-    ]
-    payload.sort(key=lambda item: str(item["name"]).lower())
+    payload: dict[UUID, list[str]] = {role_id: [] for role_id in unique_role_ids}
+    for role_id, key in rows:
+        payload.setdefault(role_id, []).append(str(key))
     return payload
 
 
-def _serialize_user(db: Session, row: User) -> dict:
-    roles = _roles_for_user(db, user_id=row.id)
+def _roles_payload_by_user_ids(db: Session, *, user_ids: list[UUID]) -> dict[UUID, list[dict]]:
+    payload: dict[UUID, list[dict]] = {user_id: [] for user_id in user_ids}
+    if not user_ids:
+        return payload
+    rows = db.execute(
+        select(UserRole.user_id, Role.id, Role.name)
+        .join(Role, Role.id == UserRole.role_id)
+        .where(UserRole.user_id.in_(user_ids))
+        .order_by(UserRole.user_id.asc(), Role.name.asc())
+    ).all()
+    role_ids = [role_id for _, role_id, _ in rows]
+    permission_keys_by_role = _permission_keys_by_role_ids(db, role_ids=role_ids)
+    for user_id, role_id, role_name in rows:
+        payload.setdefault(user_id, []).append(
+            {
+                "id": str(role_id),
+                "name": role_name,
+                "permission_keys": permission_keys_by_role.get(role_id, []),
+            }
+        )
+    for roles in payload.values():
+        roles.sort(key=lambda item: str(item["name"]).lower())
+    return payload
+
+
+def _serialize_user(
+    db: Session, row: User, *, roles_by_user: dict[UUID, list[dict]] | None = None
+) -> dict:
+    role_payload = roles_by_user or _roles_payload_by_user_ids(db, user_ids=[row.id])
+    roles = role_payload.get(row.id, [])
     return {
         "id": str(row.id),
         "email": row.email,
@@ -85,11 +128,14 @@ def _serialize_user(db: Session, row: User) -> dict:
     }
 
 
-def _serialize_role(db: Session, row: Role) -> dict:
+def _serialize_role(
+    db: Session, row: Role, *, permission_keys_by_role: dict[UUID, list[str]] | None = None
+) -> dict:
+    permission_map = permission_keys_by_role or _permission_keys_by_role_ids(db, role_ids=[row.id])
     return {
         "id": str(row.id),
         "name": row.name,
-        "permission_keys": _permission_keys_for_role(db, role_id=row.id),
+        "permission_keys": permission_map.get(row.id, []),
     }
 
 
@@ -143,32 +189,56 @@ def _replace_user_roles(db: Session, *, user_id: UUID, role_ids: list[UUID]) -> 
         db.add(UserRole(user_id=user_id, role_id=role_id))
 
 
+def _permission_keys_for_user(db: Session, *, user_id: UUID) -> set[str]:
+    rows = db.scalars(
+        select(Permission.key)
+        .join(RolePermission, RolePermission.permission_id == Permission.id)
+        .join(UserRole, UserRole.role_id == RolePermission.role_id)
+        .where(UserRole.user_id == user_id)
+    ).all()
+    return set(rows)
+
+
+def _enforce_user_management_access(db: Session, *, admin: User) -> None:
+    if admin.role == "admin":
+        return
+    permission_keys = _permission_keys_for_user(db, user_id=admin.id)
+    if ADMIN_PERMISSION_ALL in permission_keys or ADMIN_PERMISSION_WRITE in permission_keys:
+        return
+    raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Admin access required")
+
+
 @router.get("/roles")
 def admin_list_roles(
     limit: int = Query(default=100, ge=1, le=500),
     db: Session = Depends(get_db),
-    _admin: User = Depends(get_current_admin),
+    admin: User = Depends(get_current_admin),
 ) -> dict:
+    _enforce_user_management_access(db, admin=admin)
     rows = db.scalars(select(Role).order_by(Role.name.asc()).limit(limit)).all()
-    return {"data": [_serialize_role(db, row) for row in rows]}
+    permission_map = _permission_keys_by_role_ids(db, role_ids=[row.id for row in rows])
+    return {"data": [_serialize_role(db, row, permission_keys_by_role=permission_map) for row in rows]}
 
 
 @router.get("/users")
 def admin_list_users(
     limit: int = Query(default=100, ge=1, le=500),
     db: Session = Depends(get_db),
-    _admin: User = Depends(get_current_admin),
+    admin: User = Depends(get_current_admin),
 ) -> dict:
+    _enforce_user_management_access(db, admin=admin)
     rows = db.scalars(select(User).order_by(User.email.asc()).limit(limit)).all()
-    return {"data": [_serialize_user(db, row) for row in rows]}
+    roles_by_user = _roles_payload_by_user_ids(db, user_ids=[row.id for row in rows])
+    return {"data": [_serialize_user(db, row, roles_by_user=roles_by_user) for row in rows]}
 
 
 @router.get("/users/{user_id}")
 def admin_get_user(
     user_id: UUID,
     db: Session = Depends(get_db),
-    _admin: User = Depends(get_current_admin),
+    admin: User = Depends(get_current_admin),
 ) -> dict:
+    _enforce_user_management_access(db, admin=admin)
     row = _load_user_or_404(db, user_id=user_id)
     return _serialize_user(db, row)
 
@@ -177,10 +247,11 @@ def admin_get_user(
 def admin_create_user(
     payload: AdminUserCreate,
     db: Session = Depends(get_db),
-    _admin: User = Depends(get_current_admin),
+    admin: User = Depends(get_current_admin),
 ) -> dict:
+    _enforce_user_management_access(db, admin=admin)
     row = User(
-        email=str(payload.email).strip().lower(),
+        email=payload.email,
         password_hash=hash_password(payload.password),
         role=payload.role,
     )
@@ -206,6 +277,7 @@ def admin_patch_user(
     db: Session = Depends(get_db),
     admin: User = Depends(get_current_admin),
 ) -> dict:
+    _enforce_user_management_access(db, admin=admin)
     row = _load_user_or_404(db, user_id=user_id)
     updates = payload.model_dump(exclude_unset=True)
     _enforce_self_privilege_protection(
@@ -214,7 +286,7 @@ def admin_patch_user(
         changing_privileges="role" in updates or "role_ids" in updates,
     )
     if "email" in updates and updates["email"] is not None:
-        row.email = str(updates["email"]).strip().lower()
+        row.email = updates["email"]
     if "password" in updates and updates["password"] is not None:
         row.password_hash = hash_password(updates["password"])
     if "role" in updates and updates["role"] is not None:
@@ -241,6 +313,7 @@ def admin_assign_role_to_user(
     db: Session = Depends(get_db),
     admin: User = Depends(get_current_admin),
 ) -> dict:
+    _enforce_user_management_access(db, admin=admin)
     row = _load_user_or_404(db, user_id=user_id)
     _load_role_or_404(db, role_id=role_id)
     _enforce_self_privilege_protection(
@@ -277,6 +350,7 @@ def admin_unassign_role_from_user(
     db: Session = Depends(get_db),
     admin: User = Depends(get_current_admin),
 ) -> dict:
+    _enforce_user_management_access(db, admin=admin)
     row = _load_user_or_404(db, user_id=user_id)
     _load_role_or_404(db, role_id=role_id)
     _enforce_self_privilege_protection(

@@ -3,7 +3,16 @@
 import { type ChangeEvent, type ReactNode, useState } from "react";
 import { normalizeLocalMediaPath } from "@/app/_lib/local-media";
 
-export type PrimitiveFieldType = "text" | "textarea" | "number" | "select" | "status" | "relation" | "media" | "json";
+export type PrimitiveFieldType =
+  | "text"
+  | "password"
+  | "textarea"
+  | "number"
+  | "select"
+  | "status"
+  | "relation"
+  | "media"
+  | "json";
 
 export type AdminFormPrimitiveField = {
   name: string;
@@ -455,7 +464,7 @@ export function AdminFormPrimitiveInput(props: AdminFormPrimitiveProps) {
     <InputFrame {...props}>
       <input
         id={id}
-        type={props.field.type === "number" ? "number" : "text"}
+        type={props.field.type === "number" ? "number" : props.field.type === "password" ? "password" : "text"}
         value={props.value}
         placeholder={props.field.placeholder}
         aria-invalid={props.error ? "true" : "false"}
