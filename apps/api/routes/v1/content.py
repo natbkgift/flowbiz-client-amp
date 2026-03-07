@@ -21,12 +21,10 @@ def _safe_media_path(value: object | None) -> str | None:
     return candidate
 
 
-def _localized_complete(payload: dict | None) -> bool:
+def _localized_complete(payload: dict | None, *, required_locales: tuple[str, ...] = ("en", "th")) -> bool:
     if not isinstance(payload, dict):
         return False
-    en = payload.get("en")
-    th = payload.get("th")
-    return bool(en) and bool(th)
+    return all(bool(payload.get(locale)) for locale in required_locales)
 
 
 def _hero_rights_ok(db: Session, article: Article) -> bool:
@@ -80,9 +78,9 @@ def _article_metadata(article: Article) -> tuple[dict[str, Any], dict[str, Any]]
 def _publishable(db: Session, article: Article) -> bool:
     if article.status != "published":
         return False
-    if not _localized_complete(article.title):
+    if not _localized_complete(article.title, required_locales=("en",)):
         return False
-    if not _localized_complete(article.body_md):
+    if not _localized_complete(article.body_md, required_locales=("en",)):
         return False
     return _hero_rights_ok(db, article)
 

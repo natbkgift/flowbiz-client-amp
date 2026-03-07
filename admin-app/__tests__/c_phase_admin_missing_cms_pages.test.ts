@@ -96,8 +96,12 @@ describe("Phase C missing CMS pages", () => {
     expect(blog).toContain("patchFormFields");
     expect(blog).toContain("previewConfig");
     expect(blog).toContain("publishChecklistConfig");
+    expect(blog).toContain("warningLocales: [\"th\"]");
     expect(blog).toContain("options: [\"blog\", \"guide\"]");
     expect(workspace).toContain("Publish blocked by checklist requirements.");
+    expect(workspace).toContain("Create locale tabs");
+    expect(workspace).toContain("Update locale tabs");
+    expect(workspace).toContain("Translation completeness");
     expect(workspace).toContain("<h2>Preview</h2>");
   });
 
