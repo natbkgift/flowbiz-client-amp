@@ -98,7 +98,7 @@ def test_phase_d_article_full_crud_publish_flow(client) -> None:
     assert missing.status_code == 404, missing.text
 
 
-def test_phase_d_article_publish_blocks_missing_required_locale(client) -> None:
+def test_phase_d_article_publish_warns_when_th_translation_is_incomplete(client) -> None:
     headers = _make_admin_headers()
     slug = f"phase-d-blog-missing-locale-{uuid4()}"
 
@@ -116,11 +116,36 @@ def test_phase_d_article_publish_blocks_missing_required_locale(client) -> None:
     _assert_201(created)
 
     publish = client.post(f"/admin/content/articles/{slug}/publish", headers=headers)
+    _assert_200(publish)
+    checklist = publish.json()["publish_checklist"]
+    assert checklist["blocking"] == []
+    assert "title.th is recommended" in checklist["warnings"]
+    assert "body_md.th is recommended" in checklist["warnings"]
+
+
+def test_phase_d_article_publish_blocks_missing_required_en_locale(client) -> None:
+    headers = _make_admin_headers()
+    slug = f"phase-d-blog-missing-en-locale-{uuid4()}"
+
+    created = client.post(
+        "/admin/content/articles",
+        headers=headers,
+        json={
+            "slug": slug,
+            "category": "blog",
+            "status": "draft",
+            "title": {"th": "เฉพาะหัวข้อ TH"},
+            "body_md": {"th": "เฉพาะเนื้อหา TH"},
+        },
+    )
+    _assert_201(created)
+
+    publish = client.post(f"/admin/content/articles/{slug}/publish", headers=headers)
     assert publish.status_code == 422, publish.text
     detail = publish.json()["detail"]
     assert detail["message"] == "Publish checklist failed"
-    assert "title.th is required" in detail["blocking"]
-    assert "body_md.th is required" in detail["blocking"]
+    assert "title.en is required" in detail["blocking"]
+    assert "body_md.en is required" in detail["blocking"]
 
 
 def test_phase_d_article_publish_supports_guide_category_contract(client) -> None:

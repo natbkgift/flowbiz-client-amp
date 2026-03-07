@@ -86,7 +86,8 @@ export default function AdminBlogCmsPage() {
         },
         publishChecklistConfig: {
           recordPath: "article",
-          requiredLocales: ["en", "th"],
+          requiredLocales: ["en"],
+          warningLocales: ["th"],
           requiredLocalizedFields: [
             { path: "title", label: "Title" },
             { path: "body_md", label: "Body" },

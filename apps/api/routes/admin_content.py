@@ -461,12 +461,19 @@ def _article_publish_checklist(article: Article) -> dict[str, list[str]]:
     blocking: list[str] = []
     warnings: list[str] = []
 
-    for locale in ["en", "th"]:
+    for locale in ["en"]:
         if not _localized_value(article.title, locale):
             blocking.append(f"title.{locale} is required")
         body_value = _localized_value(article.body_md, locale)
         if not body_value:
             blocking.append(f"body_md.{locale} is required")
+
+    for locale in ["th"]:
+        if not _localized_value(article.title, locale):
+            warnings.append(f"title.{locale} is recommended")
+        body_value = _localized_value(article.body_md, locale)
+        if not body_value:
+            warnings.append(f"body_md.{locale} is recommended")
 
     category = str(article.category or "").strip().lower()
     if category not in _ARTICLE_ALLOWED_CATEGORIES:

@@ -56,6 +56,7 @@ type CrudConfig = {
   publishChecklistConfig?: {
     recordPath?: string;
     requiredLocales: readonly string[];
+    warningLocales?: readonly string[];
     requiredLocalizedFields: ReadonlyArray<{ path: string; label: string }>;
     mediaAnyOfPaths?: readonly string[];
     requiredAnyOfPaths?: readonly string[];
@@ -76,6 +77,23 @@ type CrudConfig = {
     fields: AdminFormPrimitiveField[];
   }>;
   queryHelp?: string;
+};
+
+type LocalizedFieldGroup = {
+  baseFields: AdminFormPrimitiveField[];
+  localeOrder: string[];
+  byLocale: Record<string, AdminFormPrimitiveField[]>;
+};
+
+type ChecklistReport = {
+  blocking: string[];
+  warnings: string[];
+  completeness: {
+    filled: number;
+    total: number;
+    percent: number;
+    locales: Record<string, { filled: number; total: number }>;
+  };
 };
 
 function withIdentifier(pathTemplate: string, identifier: string): string {
@@ -166,17 +184,69 @@ function normalizeRecordCandidate(value: unknown): Record<string, unknown> | nul
   return value as Record<string, unknown>;
 }
 
-function checklistReport(
+function uniqueLocaleList(locales: readonly string[]): string[] {
+  const seen = new Set<string>();
+  const ordered: string[] = [];
+  for (const locale of locales) {
+    const normalized = locale.trim().toLowerCase();
+    if (!normalized || seen.has(normalized)) continue;
+    seen.add(normalized);
+    ordered.push(normalized);
+  }
+  return ordered;
+}
+
+function groupLocalizedFields(
+  fields: AdminFormPrimitiveField[] | undefined,
+  locales: readonly string[]
+): LocalizedFieldGroup {
+  const byLocale: Record<string, AdminFormPrimitiveField[]> = {};
+  const baseFields: AdminFormPrimitiveField[] = [];
+  const localeOrder = uniqueLocaleList(locales);
+
+  for (const locale of localeOrder) byLocale[locale] = [];
+  for (const field of fields || []) {
+    const match = field.name.match(/\.([a-z]{2})$/i);
+    const localeKey = match?.[1]?.toLowerCase();
+    if (localeKey && localeOrder.includes(localeKey)) {
+      byLocale[localeKey].push(field);
+      continue;
+    }
+    baseFields.push(field);
+  }
+  const usedLocales = localeOrder.filter((locale) => (byLocale[locale] || []).length > 0);
+  return {
+    baseFields,
+    localeOrder: usedLocales,
+    byLocale,
+  };
+}
+
+export function checklistReport(
   config: CrudConfig["publishChecklistConfig"],
   record: Record<string, unknown>
-): { blocking: string[]; warnings: string[] } {
-  if (!config) return { blocking: [], warnings: [] };
+): ChecklistReport {
+  if (!config) {
+    return {
+      blocking: [],
+      warnings: [],
+      completeness: { filled: 0, total: 0, percent: 100, locales: {} },
+    };
+  }
+  const requiredLocales = uniqueLocaleList(config.requiredLocales);
+  const warningLocales = uniqueLocaleList(config.warningLocales || []);
+  const completenessLocales = uniqueLocaleList([...requiredLocales, ...warningLocales]);
   const blocking: string[] = [];
   const warnings: string[] = [];
   for (const field of config.requiredLocalizedFields) {
-    for (const locale of config.requiredLocales) {
+    for (const locale of requiredLocales) {
       if (!nestedText(record, `${field.path}.${locale}`)) {
         blocking.push(`${field.label} (${locale.toUpperCase()}) is required.`);
+      }
+    }
+    for (const locale of warningLocales) {
+      if (!nestedText(record, `${field.path}.${locale}`)) {
+        warnings.push(`${field.label} (${locale.toUpperCase()}) is recommended.`);
       }
     }
   }
@@ -226,7 +296,31 @@ function checklistReport(
       );
     }
   }
-  return { blocking, warnings };
+  let totalLocalized = 0;
+  let filledLocalized = 0;
+  const localeStats: Record<string, { filled: number; total: number }> = {};
+  for (const locale of completenessLocales) {
+    localeStats[locale] = { filled: 0, total: 0 };
+    for (const field of config.requiredLocalizedFields) {
+      totalLocalized += 1;
+      localeStats[locale].total += 1;
+      if (nestedText(record, `${field.path}.${locale}`)) {
+        filledLocalized += 1;
+        localeStats[locale].filled += 1;
+      }
+    }
+  }
+
+  return {
+    blocking,
+    warnings,
+    completeness: {
+      filled: filledLocalized,
+      total: totalLocalized,
+      percent: totalLocalized > 0 ? Math.round((filledLocalized / totalLocalized) * 100) : 100,
+      locales: localeStats,
+    },
+  };
 }
 
 function toDomIdToken(value: string): string {
@@ -279,8 +373,44 @@ export function AdminJsonCrudWorkspace({ config }: { config: CrudConfig }) {
   const [items, setItems] = useState<unknown[]>([]);
   const [meta, setMeta] = useState<ListResponse["meta"]>(null);
   const [result, setResult] = useState<string>("");
+  const [publishWarningSignature, setPublishWarningSignature] = useState<string>("");
   const [previewRecord, setPreviewRecord] = useState<Record<string, unknown> | null>(null);
   const previewConfig = config.previewConfig;
+  const checklistLocales = useMemo(
+    () =>
+      uniqueLocaleList([
+        ...(previewConfig?.locales || []),
+        ...(config.publishChecklistConfig?.requiredLocales || []),
+        ...(config.publishChecklistConfig?.warningLocales || []),
+      ]),
+    [config.publishChecklistConfig?.requiredLocales, config.publishChecklistConfig?.warningLocales, previewConfig?.locales]
+  );
+  const createFieldGroups = useMemo(
+    () => groupLocalizedFields(config.createFormFields, checklistLocales),
+    [checklistLocales, config.createFormFields]
+  );
+  const patchFieldGroups = useMemo(
+    () => groupLocalizedFields(config.patchFormFields, checklistLocales),
+    [checklistLocales, config.patchFormFields]
+  );
+  const [createLocaleTab, setCreateLocaleTab] = useState(createFieldGroups.localeOrder[0] || "en");
+  const [patchLocaleTab, setPatchLocaleTab] = useState(patchFieldGroups.localeOrder[0] || "en");
+  const previewChecklist =
+    previewRecord && config.publishChecklistConfig
+      ? checklistReport(config.publishChecklistConfig, previewRecord)
+      : null;
+
+  useEffect(() => {
+    const fallback = createFieldGroups.localeOrder[0];
+    if (!fallback) return;
+    if (!createFieldGroups.localeOrder.includes(createLocaleTab)) setCreateLocaleTab(fallback);
+  }, [createFieldGroups.localeOrder, createLocaleTab]);
+
+  useEffect(() => {
+    const fallback = patchFieldGroups.localeOrder[0];
+    if (!fallback) return;
+    if (!patchFieldGroups.localeOrder.includes(patchLocaleTab)) setPatchLocaleTab(fallback);
+  }, [patchFieldGroups.localeOrder, patchLocaleTab]);
 
   useEffect(() => {
     const session = readAuthSession();
@@ -420,6 +550,7 @@ export function AdminJsonCrudWorkspace({ config }: { config: CrudConfig }) {
       }
       const report = checklistReport(config.publishChecklistConfig, resolvedRecord);
       if (report.blocking.length > 0) {
+        setPublishWarningSignature("");
         setResult(
           toPrettyJson({
             publish_checklist: {
@@ -431,19 +562,29 @@ export function AdminJsonCrudWorkspace({ config }: { config: CrudConfig }) {
         throw new Error("Publish blocked by checklist requirements.");
       }
       if (report.warnings.length > 0) {
+        const warningSignature = `${activeIdentifier}:${[...report.warnings].sort().join("|")}`;
         setResult(
           toPrettyJson({
             publish_checklist: {
               blocking: [],
               warnings: report.warnings,
+              completeness: report.completeness,
             },
           })
         );
+        if (publishWarningSignature !== warningSignature) {
+          setPublishWarningSignature(warningSignature);
+          throw new Error("Publish has warnings. Review checklist result and click Publish again to continue.");
+        }
+      } else {
+        setPublishWarningSignature("");
       }
     }
-    return await fetchJson(withIdentifier(config.publishPath, activeIdentifier), token.trim(), {
+    const published = await fetchJson(withIdentifier(config.publishPath, activeIdentifier), token.trim(), {
       method: "POST",
     });
+    setPublishWarningSignature("");
+    return published;
   }
 
   const pickIdentifierFromRow = useCallback((item: unknown): string => {
@@ -712,7 +853,7 @@ export function AdminJsonCrudWorkspace({ config }: { config: CrudConfig }) {
               {Array.isArray(config.createFormFields) && config.createFormFields.length > 0 ? (
                 <>
                   <h2>Create record</h2>
-                  {config.createFormFields.map((field) => (
+                  {createFieldGroups.baseFields.map((field) => (
                     <AdminFormPrimitiveInput
                       key={field.name}
                       idPrefix={`${idBase}-create`}
@@ -731,6 +872,51 @@ export function AdminJsonCrudWorkspace({ config }: { config: CrudConfig }) {
                       }}
                     />
                   ))}
+                  {createFieldGroups.localeOrder.length > 0 ? (
+                    <>
+                      <div className="card-actions" role="tablist" aria-label="Create locale tabs">
+                        {createFieldGroups.localeOrder.map((locale) => (
+                          <button
+                            key={`create-tab-${locale}`}
+                            className="btn btn-secondary"
+                            type="button"
+                            id={`${idBase}-create-tab-${locale}`}
+                            role="tab"
+                            aria-selected={createLocaleTab === locale}
+                            aria-controls={`${idBase}-create-panel-${locale}`}
+                            onClick={() => setCreateLocaleTab(locale)}
+                          >
+                            {locale.toUpperCase()}
+                          </button>
+                        ))}
+                      </div>
+                      <div
+                        id={`${idBase}-create-panel-${createLocaleTab}`}
+                        role="tabpanel"
+                        aria-labelledby={`${idBase}-create-tab-${createLocaleTab}`}
+                      >
+                        {(createFieldGroups.byLocale[createLocaleTab] || []).map((field) => (
+                          <AdminFormPrimitiveInput
+                            key={field.name}
+                            idPrefix={`${idBase}-create`}
+                            field={field}
+                            value={createFormValues[field.name] || ""}
+                            error={createFormErrors[field.name]}
+                            authToken={token}
+                            onChange={(name, value) => {
+                              setCreateFormValues((current) => ({ ...current, [name]: value }));
+                              setCreateFormErrors((current) => {
+                                if (!current[name]) return current;
+                                const next = { ...current };
+                                delete next[name];
+                                return next;
+                              });
+                            }}
+                          />
+                        ))}
+                      </div>
+                    </>
+                  ) : null}
                 </>
               ) : (
                 <label className="field" htmlFor={`${idBase}-create-json`}>
@@ -778,7 +964,7 @@ export function AdminJsonCrudWorkspace({ config }: { config: CrudConfig }) {
               {Array.isArray(config.patchFormFields) && config.patchFormFields.length > 0 ? (
                 <>
                   <h2>Update record</h2>
-                  {config.patchFormFields.map((field) => (
+                  {patchFieldGroups.baseFields.map((field) => (
                     <AdminFormPrimitiveInput
                       key={field.name}
                       idPrefix={`${idBase}-patch`}
@@ -797,6 +983,51 @@ export function AdminJsonCrudWorkspace({ config }: { config: CrudConfig }) {
                       }}
                     />
                   ))}
+                  {patchFieldGroups.localeOrder.length > 0 ? (
+                    <>
+                      <div className="card-actions" role="tablist" aria-label="Update locale tabs">
+                        {patchFieldGroups.localeOrder.map((locale) => (
+                          <button
+                            key={`patch-tab-${locale}`}
+                            className="btn btn-secondary"
+                            type="button"
+                            id={`${idBase}-patch-tab-${locale}`}
+                            role="tab"
+                            aria-selected={patchLocaleTab === locale}
+                            aria-controls={`${idBase}-patch-panel-${locale}`}
+                            onClick={() => setPatchLocaleTab(locale)}
+                          >
+                            {locale.toUpperCase()}
+                          </button>
+                        ))}
+                      </div>
+                      <div
+                        id={`${idBase}-patch-panel-${patchLocaleTab}`}
+                        role="tabpanel"
+                        aria-labelledby={`${idBase}-patch-tab-${patchLocaleTab}`}
+                      >
+                        {(patchFieldGroups.byLocale[patchLocaleTab] || []).map((field) => (
+                          <AdminFormPrimitiveInput
+                            key={field.name}
+                            idPrefix={`${idBase}-patch`}
+                            field={field}
+                            value={patchFormValues[field.name] || ""}
+                            error={patchFormErrors[field.name]}
+                            authToken={token}
+                            onChange={(name, value) => {
+                              setPatchFormValues((current) => ({ ...current, [name]: value }));
+                              setPatchFormErrors((current) => {
+                                if (!current[name]) return current;
+                                const next = { ...current };
+                                delete next[name];
+                                return next;
+                              });
+                            }}
+                          />
+                        ))}
+                      </div>
+                    </>
+                  ) : null}
                 </>
               ) : (
                 <label className="field" htmlFor={`${idBase}-patch-json`}>
@@ -950,6 +1181,21 @@ export function AdminJsonCrudWorkspace({ config }: { config: CrudConfig }) {
           {previewConfig && previewRecord ? (
             <section className="card">
               <h2>Preview</h2>
+              {previewChecklist && previewChecklist.completeness.total > 0 ? (
+                <article className="card">
+                  <h3>Translation completeness</h3>
+                  <p className="locale-safe">
+                    {previewChecklist.completeness.filled}/{previewChecklist.completeness.total} required fields (
+                    {previewChecklist.completeness.percent}%)
+                  </p>
+                  <progress max={100} value={previewChecklist.completeness.percent} />
+                  {Object.entries(previewChecklist.completeness.locales).map(([locale, stats]) => (
+                    <p key={`completeness-${locale}`} className="locale-safe">
+                      {locale.toUpperCase()}: {stats.filled}/{stats.total}
+                    </p>
+                  ))}
+                </article>
+              ) : null}
               {(previewConfig.locales || ["en", "th"]).map((locale) => {
                 const localeKey = locale.toLowerCase();
                 const title = nestedText(previewRecord, `${previewConfig.titlePath}.${localeKey}`);
