@@ -6,6 +6,7 @@ export type AdminNavItem = {
 
 export const ADMIN_PRIMARY_NAV: AdminNavItem[] = [
   { href: "/admin/dashboard", label: "Dashboard", description: "Health + QA overview" },
+  { href: "/admin/users", label: "Users & Roles", description: "User accounts and role assignments" },
   { href: "/admin/inquiries", label: "CRM", description: "Leads and inquiries workflow" },
   { href: "/admin/projects", label: "Projects", description: "Project CMS workspace" },
   { href: "/admin/properties", label: "Properties", description: "Property CMS workspace" },
