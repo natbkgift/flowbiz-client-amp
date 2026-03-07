@@ -121,6 +121,7 @@ def test_phase_d_article_publish_warns_when_th_translation_is_incomplete(client)
     assert checklist["blocking"] == []
     assert "title.th is recommended" in checklist["warnings"]
     assert "body_md.th is recommended" in checklist["warnings"]
+    assert publish.json()["article"]["status"] == "published"
 
 
 def test_phase_d_article_publish_blocks_missing_required_en_locale(client) -> None:
