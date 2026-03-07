@@ -1,4 +1,4 @@
-# AMP Meta Campaign Setup (Single File) - THB 1,500 / 3,000 / 8,000 per day
+# AMP Meta Campaign Setup (Entry / Mid / Premium) - THB 1,500 / 3,000 / 8,000 per day
 
 Last updated: 2026-03-07
 Scope: Phase 1 only (Facebook / Instagram / WhatsApp, no website required)
@@ -9,315 +9,301 @@ Call policy: Call only when user explicitly requests
 
 1. เลือกงบรายวัน 1 ระดับ: `1500` หรือ `3000` หรือ `8000` บาท/วัน
 2. เปิดเฉพาะแคมเปญที่งบในคอลัมน์นั้นมากกว่า 0
-3. ตั้งค่าที่ Ads Manager ตาม "Campaign Setup Cards" ด้านล่าง
+3. ทำตาม Campaign Setup Cards (`S01-S08`) ด้านล่าง
 4. ใช้ครีเอทีฟจากไฟล์:
    - `docs/marketing/AMP_TOP3_NEW_CONDO_CAROUSEL_VIDEO_FILLED_2026-03-07.md`
-   - `docs/marketing/AMP_REAL_META_AD_EXAMPLES_6CAMPAIGNS_TH_EN.csv`
-5. ทุกแชตต้องติดแท็ก CRM ให้ครบ (`locale`, `lead_type`, `offer_family`, `intent`, `campaign_name`, `call_requested`)
+   - `docs/marketing/AMP_REMAINING4_NEW_CONDO_CAROUSEL_VIDEO_FILLED_2026-03-07.md`
+5. ทุกแชตต้องติดแท็ก CRM ครบ (`locale`, `lead_type`, `offer_family`, `intent`, `campaign_name`, `price_segment`, `call_requested`)
 
 ---
 
-## 1) Budget Scenario Matrix (Campaign-by-Campaign)
+## 1) Project-to-Segment Map (แกนหลักใหม่)
 
-Use naming rule: `AMP_P1_{LOCALE}_{LANE}_{OBJECTIVE}_{MONTH}`
+Segment definitions:
+- `Entry`: ราคาตั้งต้นอ้างอิง <= 4.9M
+- `Mid`: ราคาตั้งต้นอ้างอิง 5.0M-8.9M
+- `Premium`: ราคาตั้งต้นอ้างอิง >= 9.0M
 
-| Campaign ID | Campaign Name (recommended) | Goal Lane | THB/day @1500 | THB/day @3000 | THB/day @8000 |
+Project grouping (initial):
+- Entry core:
+  - Avenue Boutique
+  - EMBASSY LIFE
+- Mid core:
+  - ZENITH Pattaya II
+  - Sea Spire Jomtien
+  - Copacabana Coral Reef Jomtien
+- Premium core:
+  - ONCE Wongamat
+  - The Riviera Palm Beach Wongamat
+
+Important:
+- โครงการบางตัวมีหลายช่วงราคา (เช่นยูนิตเล็ก vs ยูนิตใหญ่) ให้ยึด "ราคาในครีเอทีฟชิ้นนั้น" เป็นตัวกำหนด segment
+- รีเฟรช mapping ทุก 14 วันจากราคา/สต็อกล่าสุด
+
+---
+
+## 2) Budget Scenario Matrix (Campaign-by-Campaign)
+
+Use naming rule: `AMP_P1_{LOCALE}_{SEGMENT}_{GOAL}_{MONTH}`
+
+| Campaign ID | Campaign Name (recommended) | Segment Role | THB/day @1500 | THB/day @3000 | THB/day @8000 |
 |---|---|---|---:|---:|---:|
-| C01 | `AMP_P1_TH_NEW_TOP3_MSG_2026-03` | New condo (TH) | 450 | 850 | 2200 |
-| C02 | `AMP_P1_EN_NEW_TOP3_MSG_2026-03` | New condo (EN) | 300 | 600 | 1600 |
-| C03 | `AMP_P1_THEN_DISCOVERY_MSG_2026-03` | Discovery (undecided) | 100 | 200 | 600 |
-| C04 | `AMP_P1_TH_OWNER_SERVICE_MSG_2026-03` | Owner leads (TH) | 200 | 350 | 1000 |
-| C05 | `AMP_P1_EN_OWNER_SERVICE_MSG_2026-03` | Owner leads (EN) | 100 | 250 | 600 |
-| C06 | `AMP_P1_THEN_RETARGET_WARM_MSG_2026-03` | Retarget warm | 200 | 400 | 800 |
-| C07 | `AMP_P1_THEN_RETARGET_HOT_MSG_2026-03` | Retarget hot | 0 | 50 | 400 |
-| C08 | `AMP_P1_THEN_AUTHORITY_TRUST_MSG_2026-03` | Authority/brand trust | 150 | 300 | 800 |
+| S01 | `AMP_P1_TH_ENTRY_MSG_2026-03` | TH Entry buyers/investors | 350 | 650 | 1500 |
+| S02 | `AMP_P1_TH_MID_MSG_2026-03` | TH Mid buyers/investors | 250 | 450 | 1200 |
+| S03 | `AMP_P1_TH_PREMIUM_MSG_2026-03` | TH Premium buyers/investors | 100 | 200 | 600 |
+| S04 | `AMP_P1_EN_ENTRYMID_MSG_2026-03` | EN Entry+Mid (combined) | 250 | 500 | 900 |
+| S05 | `AMP_P1_EN_PREMIUM_MSG_2026-03` | EN Premium (separate) | 0 | 0 | 450 |
+| S06 | `AMP_P1_THEN_RETARGET_SEGMENT_MSG_2026-03` | Retarget by segment | 200 | 450 | 1100 |
+| S07 | `AMP_P1_THEN_OWNER_SERVICE_MSG_2026-03` | Owner supply lane | 250 | 550 | 1500 |
+| S08 | `AMP_P1_THEN_DISCOVERY_AUTHORITY_MSG_2026-03` | Discovery + trust | 100 | 200 | 750 |
 |  | **TOTAL** |  | **1500** | **3000** | **8000** |
 
-Budget mix outcome:
-- Demand + Retarget = 70% (`C01+C02+C03+C06+C07`)
-- Owner supply = 20% (`C04+C05`)
-- Authority = 10% (`C08`)
+Operational note:
+- `S05` เปิดเฉพาะงบ `8000` เพื่อเลี่ยง budget fragmentation
 
 ---
 
-## 2) Campaign Setup Cards (ใส่ค่าตามนี้ได้ทันที)
+## 3) Campaign Setup Cards (พร้อมตั้งค่าทันที)
 
-## C01 - TH New Condo Top 3
+## S01 - TH Entry
 
 - Objective: `Leads`
 - Conversion location: `Messaging apps`
 - Messaging app: `WhatsApp` (primary)
 - Buying type: `Auction`
-- Budget type: `ABO` (Ad set budget)
-- Attribution setting: `7-day click`
-- Placements: `Advantage+ placements`
-- Schedule: start today, run continuously
-
-Ad sets:
-- `AS1_TH_Broad_Pattaya+Bangkok`
-- `AS2_TH_InvestorInterest` (เปิดเมื่อ budget scenario >= 3000)
-- `AS3_TH_LAL_Engagers_1-3%` (เปิดเมื่อ budget scenario = 8000 และมีข้อมูลพอ)
-
-Creative set:
-- 2x Reel 15s (TH)
-- 1x Carousel 6 cards (TH)
-- 1x Story cutdown 9:16
-
-Message opener:
-- `สวัสดีครับ/ค่ะ ส่งงบ + ไทม์ไลน์ได้เลย เดี๋ยวทีมคัด shortlist ให้ตรงเป้าหมายครับ/ค่ะ`
-
-Tags on first qualification:
-- `locale:th|lead_type:buyer_or_investor|offer_family:new_project|inventory_source:developer_new|campaign_name:C01|call_requested:no`
-
-## C02 - EN New Condo Top 3
-
-- Objective: `Leads`
-- Conversion location: `Messaging apps`
-- Messaging app: `Messenger + Instagram Direct`
-- Buying type: `Auction`
 - Budget type: `ABO`
 - Attribution: `7-day click`
 - Placements: `Advantage+ placements`
 
+Project pool in ads:
+- Avenue Boutique
+- EMBASSY LIFE
+
 Ad sets:
-- `AS1_EN_Broad_ExpatTH`
-- `AS2_EN_PropertyInterest` (>= 3000)
-- `AS3_EN_LAL_Engagers_1-3%` (= 8000 with enough data)
-
-Creative set:
-- 2x Reel 15s (EN)
-- 1x Carousel 6 cards (EN)
-
-Message opener:
-- `Hi, share your budget and timeline and we will send you a focused shortlist in chat.`
+- `AS1_TH_Entry_Broad`
+- `AS2_TH_Entry_Investor` (>= 3000)
 
 Tags:
-- `locale:en|lead_type:buyer_or_investor|offer_family:new_project|inventory_source:developer_new|campaign_name:C02|call_requested:no`
+- `locale:th|offer_family:new_project|price_segment:entry|campaign_name:S01|call_requested:no`
 
-## C03 - TH/EN Discovery (Undecided)
+## S02 - TH Mid
 
-- Objective: `Leads`
-- Conversion location: `Messaging apps`
+- Objective: `Leads` -> messaging
+- Messaging app: `WhatsApp + Messenger`
+- Placements: `Advantage+ placements`
+
+Project pool in ads:
+- ZENITH Pattaya II
+- Sea Spire Jomtien
+- Copacabana Coral Reef Jomtien (entry-mid units)
+
+Ad sets:
+- `AS1_TH_Mid_Broad`
+- `AS2_TH_Mid_Investor` (>= 3000)
+
+Tags:
+- `locale:th|offer_family:new_project|price_segment:mid|campaign_name:S02|call_requested:no`
+
+## S03 - TH Premium
+
+- Objective: `Leads` -> messaging
+- Messaging app: `Messenger + WhatsApp`
+
+Project pool in ads:
+- ONCE Wongamat
+- The Riviera Palm Beach Wongamat
+- Copacabana Coral Reef (premium-size units only)
+
+Ad sets:
+- `AS1_TH_Premium_Broad`
+
+Tags:
+- `locale:th|offer_family:new_project|price_segment:premium|campaign_name:S03|call_requested:no`
+
+## S04 - EN Entry+Mid (combined)
+
+- Objective: `Leads` -> messaging
 - Messaging app: `Messenger + Instagram Direct`
-- Audience: broad + video viewers
-- Optimization intent: conversation starts
+
+Project pool in ads:
+- Entry + Mid projects in EN lane
 
 Ad sets:
-- `AS1_TH_Discovery` (always on)
-- `AS2_EN_Discovery` (>= 3000)
-
-Creative set:
-- 1x TH decision-map Reel
-- 1x EN decision-map Reel
-- 1x static FAQ post
-
-Opener:
-- `ตอนนี้สนใจ ลงทุน / อยู่เอง / พักผ่อน แบบไหนมากที่สุดครับ/ค่ะ?`
-- `Which goal is your priority now: investment, living, or holiday use?`
+- `AS1_EN_EntryMid_Broad`
+- `AS2_EN_EntryMid_ExpatTH` (>= 3000)
 
 Tags:
-- `lead_type:undecided|offer_family:discovery|intent:general|campaign_name:C03|call_requested:no`
+- `locale:en|offer_family:new_project|price_segment:entry_mid|campaign_name:S04|call_requested:no`
 
-## C04 - TH Owner Service
+## S05 - EN Premium (separate)
 
 - Objective: `Leads` -> messaging
-- Messaging app: `WhatsApp`
-- Audience: owner-related interests + page engagers
-- Offer: ฝากขาย/ปล่อยเช่าแบบมีระบบ
+- Activate only when budget scenario = `8000`
+- Messaging app: `Messenger + Instagram Direct`
+
+Project pool in ads:
+- ONCE Wongamat
+- The Riviera Palm Beach Wongamat
 
 Ad sets:
-- `AS1_TH_Owner_Broad`
-- `AS2_TH_Owner_Engagers` (>= 3000)
-
-Creative set:
-- 1x process carousel (6 cards)
-- 1x trust reel (before/after workflow)
-- 1x testimonial card
-
-Opener:
-- `ทรัพย์ต้องการขายหรือปล่อยเช่าครับ/ค่ะ และอยู่โซนไหน?`
+- `AS1_EN_Premium_Broad`
 
 Tags:
-- `locale:th|lead_type:owner|offer_family:owner_service|intent:sell_or_rentout|campaign_name:C04|call_requested:no`
+- `locale:en|offer_family:new_project|price_segment:premium|campaign_name:S05|call_requested:no`
 
-## C05 - EN Owner Service
+## S06 - Retarget by Segment
 
 - Objective: `Leads` -> messaging
-- Messaging app: `Messenger`
-- Audience: landlord/owner expat segment
+- Audience source: page engagers, IG engagers, video viewers, prior message openers
+- Lookback windows: warm `7-30 days`, hot `1-7 days`
 
 Ad sets:
-- `AS1_EN_Owner_Broad` (always on)
-
-Creative set:
-- 1x owner process video (EN)
-- 1x owner FAQ static (EN)
-
-Opener:
-- `Are you planning to sell, rent out, or both?`
+- `AS1_THEN_Entry_Warm_7to30`
+- `AS2_THEN_Mid_Warm_7to30`
+- `AS3_THEN_Premium_Warm_7to30` (>= 3000)
+- `AS4_THEN_Hot_1to7` (>= 3000)
 
 Tags:
-- `locale:en|lead_type:owner|offer_family:owner_service|intent:sell_or_rentout|campaign_name:C05|call_requested:no`
+- `offer_family:retarget|campaign_name:S06|call_requested:no`
 
-## C06 - Retarget Warm (7-30 days)
+## S07 - Owner Service (TH+EN)
 
 - Objective: `Leads` -> messaging
-- Audience source: engagers / video viewers / page interactions in 7-30 days
-- Exclude: people who already became qualified in past 14 days
+- Messaging app: `WhatsApp` (TH), `Messenger` (EN)
 
 Ad sets:
-- `AS1_TH_Warm`
-- `AS2_EN_Warm` (>= 3000)
-
-Creative set:
-- 1x comparison carousel
-- 1x objection-handling reel
-
-Opener:
-- `ยังเทียบโครงการอยู่ไหมครับ/ค่ะ? ส่งงบมา เดี๋ยวสรุปให้ในแชต`
-- `Still comparing projects? Share your budget and we will narrow it down fast.`
+- `AS1_TH_Owner`
+- `AS2_EN_Owner`
 
 Tags:
-- `offer_family:retarget|campaign_name:C06|call_requested:no`
+- `offer_family:owner_service|campaign_name:S07|call_requested:no`
 
-## C07 - Retarget Hot (1-7 days)
+## S08 - Discovery + Authority
 
 - Objective: `Leads` -> messaging
-- Activate condition:
-  - budget scenario 3000+: ON
-  - at least 50 warm conversations in last 14 days
+- Role: จับกลุ่มยังไม่ชัดเจน + สร้างความน่าเชื่อถือแบรนด์
 
 Ad sets:
-- `AS1_THEN_Hot_1to7D`
-
-Creative set:
-- 1x urgency reel (price-date reminder)
-- 1x shortlist CTA card
-
-Opener:
-- `ถ้าต้องการ ผมส่ง shortlist 3 ตัวเลือกที่เหมาะสุดให้ตอนนี้ได้เลย`
-- `If useful, I can send a 3-option shortlist right now.`
+- `AS1_THEN_Discovery`
+- `AS2_THEN_Authority`
 
 Tags:
-- `offer_family:retarget_hot|campaign_name:C07|call_requested:no`
-
-## C08 - Authority / Trust
-
-- Objective: `Leads` -> messaging
-- Audience: broad + engagers
-- Role: support conversion quality, not volume
-
-Ad sets:
-- `AS1_TH_Trust`
-- `AS2_EN_Trust` (>= 3000)
-
-Creative set:
-- company process explainer
-- team credibility / market update
-- client education post
-
-Opener:
-- `ส่งโจทย์มาได้เลย ทีมจะช่วย map ตัวเลือกให้ในแชต`
-- `Share your requirements and we will map options in chat.`
-
-Tags:
-- `offer_family:authority|campaign_name:C08|call_requested:no`
+- `offer_family:discovery_or_authority|campaign_name:S08|call_requested:no`
 
 ---
 
-## 3) Creative Design System (ทีมดีไซน์ทำตามนี้)
+## 4) Audience Overlap Control Rules (กันกลุ่มปน)
 
-Visual direction:
-- New condo lanes: premium + clean + location clarity
-- Owner lane: trust + process transparency
-- Retarget lanes: speed + decision support
+Exclusion matrix:
+- Entry ad sets exclude: engagers of Premium creatives in last 30 days
+- Premium ad sets exclude: engagers of Entry creatives in last 30 days
+- Mid ad sets exclude: qualified leads in Entry/Premium closed within 14 days
+- Retarget ad sets exclude: users with `qualification=qualified` in last 14 days
+
+Creative rule:
+- อย่าใส่หลายช่วงราคาในครีเอทีฟชิ้นเดียว
+- ทุกชิ้นต้องมี `price anchor` ชัดเจน (เช่น From 2.9M / From 6.8M / From 12.9M)
+
+Routing rule:
+- ถ้าลูกค้าแชตมาผิด segment ให้ re-tag แล้วส่ง shortlist segment ที่ถูกภายใน 1 รอบข้อความ
+
+---
+
+## 5) Creative Design System (แยกตาม Segment)
+
+Entry:
+- Angle: เริ่มต้นง่าย / ใช้งานจริง / rent-friendly
+- Hook examples: `เริ่มจาก X.XM`, `คอนโดใหม่ในงบเอื้อมถึง`
+
+Mid:
+- Angle: สมดุลราคา-คุณภาพ-ทำเล
+- Hook examples: `ทำเล + ส่วนกลางครบ`, `คุ้มทั้งอยู่เองและลงทุน`
+
+Premium:
+- Angle: rarity / view / privacy / iconic location
+- Hook examples: `limited high-floor`, `premium beachfront positioning`
 
 Format specs:
 - Reel/Story: `9:16` (1080x1920)
 - Carousel: `1:1` (1080x1080), 6 cards
-- Caption language: TH and EN separated by campaign
+- TH and EN separated per ad set
 
-Mandatory elements in every ad:
-- Project name clearly visible
-- 1 key location proof point
-- 1-3 facilities max (no overload)
-- Starting price with date footnote (`ราคาอ้างอิง ณ ...`)
-- Final CTA: `Send Message` or `Send WhatsApp Message`
-
-Avoid:
-- forcing phone call in first CTA
-- guaranteed return claims
-- overcrowded text blocks
+Mandatory elements:
+- Project name
+- Segment price anchor + date footnote
+- 1 location proof point
+- 1-3 facility highlights
+- CTA: `Send Message` / `Send WhatsApp Message`
 
 ---
 
-## 4) 14-Day Optimization Rules (ทำตามนี้ทุกวัน)
+## 6) 14-Day Optimization Rules
 
-Daily at 12:00 and 18:00:
-- Check spend, conversations, qualified rate, response speed
-- Fix tag completeness to >= 95%
+Daily check windows:
+- 12:00
+- 18:00
 
 Kill / Pause rule:
-- Pause ad/ad set when BOTH conditions are true:
-  - spend > 1.5x target CPQC band
+- Pause when BOTH are true:
+  - spend > 1.5x CPQC target band
   - qualified rate < 20% for 3 consecutive days
 
 Scale rule:
-- Increase budget +15% every 48h when BOTH conditions are true:
+- Increase budget +15% every 48h when BOTH are true:
   - qualified rate >= 30%
-  - CPQC is within target band for 3 consecutive days
+  - CPQC within target band for 3 consecutive days
 
-No-edit rule (learning protection):
+No-edit rule:
 - Do not edit same ad set more than once in 24h unless critical issue
 
 ---
 
-## 5) KPI Targets by Budget Scenario
+## 7) KPI Targets by Budget Scenario
 
-| Scenario | Expected Conversations/day | Expected Qualified Chats/day | CPQC Target Band (THB) | Notes |
+| Scenario | Expected Conversations/day | Expected Qualified Chats/day | CPQC Target Band (THB) | Primary focus |
 |---|---:|---:|---:|---|
-| 1500/day | 6-12 | 2-4 | 450-700 | prioritize speed + script quality |
-| 3000/day | 12-24 | 4-8 | 400-650 | begin audience split and stronger retarget |
-| 8000/day | 30-55 | 10-18 | 350-600 | full funnel with dedicated hot retarget |
+| 1500/day | 6-12 | 2-4 | 450-700 | prove segment fit + fast response |
+| 3000/day | 12-24 | 4-8 | 400-650 | stabilize Entry/Mid/Premium signal |
+| 8000/day | 30-55 | 10-18 | 350-600 | scale winners + separate EN Premium |
 
 ---
 
-## 6) Daily Execution Checklist (Operator)
+## 8) Daily Execution Checklist (Operator)
 
 - Launch check:
-  - campaign/ad set/ad names follow naming rule
-  - destination app is correct per campaign card
-  - message opener text matches campaign language
+  - segment label in campaign name is correct (`ENTRY/MID/PREMIUM`)
+  - destination app matches campaign card
+  - opener text matches language and segment
 - Midday check:
   - SLA first response <= 5 minutes
-  - no call push unless user asks for call
+  - no call push unless user explicitly requests call
 - End-of-day check:
-  - export key metrics
-  - update winners/losers
-  - queue next-day creative rotation
+  - update scorecard by segment
+  - log top objections by segment
+  - prepare next-day creative replacement for worst segment
 
 ---
 
-## 7) Ready-to-Copy Campaign Creation Order
+## 9) Ready-to-Copy Campaign Creation Order
 
 Create in this order:
-1. `C01`
-2. `C02`
-3. `C04`
-4. `C06`
-5. `C03`
-6. `C05`
-7. `C08`
-8. `C07` (only when activation condition is met)
+1. `S01`
+2. `S02`
+3. `S04`
+4. `S07`
+5. `S06`
+6. `S03`
+7. `S08`
+8. `S05` (only at 8000 budget scenario)
 
 Reason:
-- Start from core demand + owner + warm retarget first, then add discovery/authority/hot retarget to avoid early budget fragmentation.
+- Start with core demand (Entry/Mid) + owner lane first, then add Premium split and trust layer when volume is stable.
 
 ---
 
-## 8) Policy and Compliance Notes
+## 10) Policy and Compliance Notes
 
-- Use chat-first CTAs only.
-- Keep price claims date-stamped in creative.
-- If your target geography/regulatory setup requires Housing/Special Ad Category handling, configure it before launch.
-- Keep conversation logs and tags auditable in CRM.
+- Keep chat-first CTAs only.
+- Keep all price claims date-stamped in creative.
+- If geography/regulatory setup requires Housing/Special Ad Category, configure before launch.
+- Keep conversation tags auditable in CRM timeline.
