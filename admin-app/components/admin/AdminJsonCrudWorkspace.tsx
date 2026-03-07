@@ -1,6 +1,6 @@
 "use client";
 
-import { type FormEvent, useCallback, useEffect, useMemo, useState } from "react";
+import { type FormEvent, type KeyboardEvent, useCallback, useEffect, useMemo, useState } from "react";
 
 import {
   ADMIN_AUTH_LOGIN_PATH,
@@ -194,6 +194,20 @@ function uniqueLocaleList(locales: readonly string[]): string[] {
     ordered.push(normalized);
   }
   return ordered;
+}
+
+function nextLocaleTabFromKey(
+  key: string,
+  localeOrder: readonly string[],
+  activeLocale: string
+): string | null {
+  if (localeOrder.length === 0) return null;
+  const activeIndex = Math.max(0, localeOrder.indexOf(activeLocale));
+  if (key === "ArrowRight") return localeOrder[(activeIndex + 1) % localeOrder.length];
+  if (key === "ArrowLeft") return localeOrder[(activeIndex - 1 + localeOrder.length) % localeOrder.length];
+  if (key === "Home") return localeOrder[0];
+  if (key === "End") return localeOrder[localeOrder.length - 1];
+  return null;
 }
 
 function groupLocalizedFields(
@@ -411,6 +425,26 @@ export function AdminJsonCrudWorkspace({ config }: { config: CrudConfig }) {
     if (!fallback) return;
     if (!patchFieldGroups.localeOrder.includes(patchLocaleTab)) setPatchLocaleTab(fallback);
   }, [patchFieldGroups.localeOrder, patchLocaleTab]);
+
+  const onLocaleTabKeyDown = useCallback(
+    (
+      event: KeyboardEvent<HTMLButtonElement>,
+      localeOrder: string[],
+      activeLocale: string,
+      setActiveLocale: (locale: string) => void,
+      idPrefix: string
+    ) => {
+      const nextLocale = nextLocaleTabFromKey(event.key, localeOrder, activeLocale);
+      if (!nextLocale || nextLocale === activeLocale) return;
+      event.preventDefault();
+      setActiveLocale(nextLocale);
+      const nextTabId = `${idPrefix}${nextLocale}`;
+      window.requestAnimationFrame(() => {
+        document.getElementById(nextTabId)?.focus();
+      });
+    },
+    []
+  );
 
   useEffect(() => {
     const session = readAuthSession();
@@ -874,7 +908,7 @@ export function AdminJsonCrudWorkspace({ config }: { config: CrudConfig }) {
                   ))}
                   {createFieldGroups.localeOrder.length > 0 ? (
                     <>
-                      <div className="card-actions" role="tablist" aria-label="Create locale tabs">
+                      <div className="card-actions" role="tablist" aria-label="Create locale tabs" aria-orientation="horizontal">
                         {createFieldGroups.localeOrder.map((locale) => (
                           <button
                             key={`create-tab-${locale}`}
@@ -884,7 +918,17 @@ export function AdminJsonCrudWorkspace({ config }: { config: CrudConfig }) {
                             role="tab"
                             aria-selected={createLocaleTab === locale}
                             aria-controls={`${idBase}-create-panel-${locale}`}
+                            tabIndex={createLocaleTab === locale ? 0 : -1}
                             onClick={() => setCreateLocaleTab(locale)}
+                            onKeyDown={(event) =>
+                              onLocaleTabKeyDown(
+                                event,
+                                createFieldGroups.localeOrder,
+                                createLocaleTab,
+                                setCreateLocaleTab,
+                                `${idBase}-create-tab-`
+                              )
+                            }
                           >
                             {locale.toUpperCase()}
                           </button>
@@ -985,7 +1029,7 @@ export function AdminJsonCrudWorkspace({ config }: { config: CrudConfig }) {
                   ))}
                   {patchFieldGroups.localeOrder.length > 0 ? (
                     <>
-                      <div className="card-actions" role="tablist" aria-label="Update locale tabs">
+                      <div className="card-actions" role="tablist" aria-label="Update locale tabs" aria-orientation="horizontal">
                         {patchFieldGroups.localeOrder.map((locale) => (
                           <button
                             key={`patch-tab-${locale}`}
@@ -995,7 +1039,17 @@ export function AdminJsonCrudWorkspace({ config }: { config: CrudConfig }) {
                             role="tab"
                             aria-selected={patchLocaleTab === locale}
                             aria-controls={`${idBase}-patch-panel-${locale}`}
+                            tabIndex={patchLocaleTab === locale ? 0 : -1}
                             onClick={() => setPatchLocaleTab(locale)}
+                            onKeyDown={(event) =>
+                              onLocaleTabKeyDown(
+                                event,
+                                patchFieldGroups.localeOrder,
+                                patchLocaleTab,
+                                setPatchLocaleTab,
+                                `${idBase}-patch-tab-`
+                              )
+                            }
                           >
                             {locale.toUpperCase()}
                           </button>

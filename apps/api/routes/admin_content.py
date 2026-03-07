@@ -31,6 +31,8 @@ router = APIRouter(prefix="/admin", tags=["admin"])
 _SITE_LAYOUT_CMS_SLUG = "site-layout"
 _ARTICLE_STATUSES = {"draft", "published", "archived"}
 _ARTICLE_ALLOWED_CATEGORIES = {"blog", "guide"}
+_ARTICLE_PUBLISH_BLOCKING_LOCALES = ("en",)
+_ARTICLE_PUBLISH_WARNING_LOCALES = ("th",)
 _TAXONOMY_STATUSES = {"draft", "active", "archived"}
 _VIDEO_STATUSES = {"draft", "published", "archived"}
 _YOUTUBE_ID_PATTERN = re.compile(r"^[A-Za-z0-9_-]{11}$")
@@ -461,14 +463,14 @@ def _article_publish_checklist(article: Article) -> dict[str, list[str]]:
     blocking: list[str] = []
     warnings: list[str] = []
 
-    for locale in ["en"]:
+    for locale in _ARTICLE_PUBLISH_BLOCKING_LOCALES:
         if not _localized_value(article.title, locale):
             blocking.append(f"title.{locale} is required")
         body_value = _localized_value(article.body_md, locale)
         if not body_value:
             blocking.append(f"body_md.{locale} is required")
 
-    for locale in ["th"]:
+    for locale in _ARTICLE_PUBLISH_WARNING_LOCALES:
         if not _localized_value(article.title, locale):
             warnings.append(f"title.{locale} is recommended")
         body_value = _localized_value(article.body_md, locale)

@@ -1,6 +1,14 @@
+import fs from "node:fs";
+import path from "node:path";
+
 import { describe, expect, it } from "vitest";
 
 import { checklistReport } from "@/components/admin/AdminJsonCrudWorkspace";
+
+const workspaceSource = fs.readFileSync(
+  path.resolve(__dirname, "../components/admin/AdminJsonCrudWorkspace.tsx"),
+  "utf-8"
+);
 
 describe("AdminJsonCrudWorkspace checklist report", () => {
   const config = {
@@ -41,5 +49,12 @@ describe("AdminJsonCrudWorkspace checklist report", () => {
     expect(report.blocking).toEqual([]);
     expect(report.warnings).toEqual([]);
     expect(report.completeness.percent).toBe(100);
+  });
+
+  it("uses roving tab focus and keyboard navigation for locale tabs", () => {
+    expect(workspaceSource).toContain("tabIndex={createLocaleTab === locale ? 0 : -1}");
+    expect(workspaceSource).toContain("tabIndex={patchLocaleTab === locale ? 0 : -1}");
+    expect(workspaceSource).toContain("onLocaleTabKeyDown");
+    expect(workspaceSource).toContain("nextLocaleTabFromKey");
   });
 });
