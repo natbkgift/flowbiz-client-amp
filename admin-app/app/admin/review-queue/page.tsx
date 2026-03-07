@@ -39,7 +39,8 @@ export default function AdminReviewQueuePage() {
           bodyPath: "body_md",
           locales: ["en", "th"],
         },
-        queryHelp: "Locked to review queue (`status=in_review`) for pending approvals.",
+        queryHelp:
+          "Defaults to the review queue (`status=in_review`) for pending approvals. You can adjust the query if needed.",
       }}
     />
   );
