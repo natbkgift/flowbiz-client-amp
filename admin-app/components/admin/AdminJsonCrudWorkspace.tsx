@@ -1185,7 +1185,7 @@ export function AdminJsonCrudWorkspace({ config }: { config: CrudConfig }) {
                 <article className="card">
                   <h3>Translation completeness</h3>
                   <p className="locale-safe">
-                    {previewChecklist.completeness.filled}/{previewChecklist.completeness.total} required fields (
+                    {previewChecklist.completeness.filled}/{previewChecklist.completeness.total} localized fields (
                     {previewChecklist.completeness.percent}%)
                   </p>
                   <progress max={100} value={previewChecklist.completeness.percent} />
