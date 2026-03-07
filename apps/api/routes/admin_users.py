@@ -288,6 +288,13 @@ def admin_unassign_role_from_user(
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User role assignment not found")
 
     db.delete(link)
-    db.commit()
-    db.refresh(row)
+    try:
+        db.commit()
+        db.refresh(row)
+    except IntegrityError as exc:
+        db.rollback()
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail={"code": "user_role_unassign_failed", "message": "could not unassign role from user"},
+        ) from exc
     return {"assigned": False, "user": _serialize_user(db, row)}
