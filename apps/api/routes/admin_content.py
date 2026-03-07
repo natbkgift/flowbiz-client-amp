@@ -9,7 +9,7 @@ from uuid import UUID, uuid4
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from pydantic import BaseModel
-from sqlalchemy import desc, func, select
+from sqlalchemy import and_, desc, func, or_, select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
@@ -533,6 +533,40 @@ def _article_revision_by_id_or_404(db: Session, *, article_id: str, revision_id:
     return row
 
 
+def _previous_article_revision(db: Session, *, article_id: str, target: AuditLog) -> AuditLog | None:
+    if target.created_at is None:
+        return None
+    candidate = db.scalar(
+        select(AuditLog).where(
+            AuditLog.entity_type == "article",
+            AuditLog.entity_id == article_id,
+            AuditLog.action == _ARTICLE_REVISION_ACTION,
+            or_(
+                AuditLog.created_at < target.created_at,
+                and_(AuditLog.created_at == target.created_at, AuditLog.id < target.id),
+            ),
+        )
+        .order_by(desc(AuditLog.created_at), desc(AuditLog.id))
+        .limit(1)
+    )
+    if candidate is not None and candidate.id != target.id:
+        return candidate
+
+    page_size = 200
+    offset = 0
+    while True:
+        page = db.scalars(_article_revision_log_query(article_id).offset(offset).limit(page_size)).all()
+        if not page:
+            return None
+        for index, row in enumerate(page):
+            if row.id != target.id:
+                continue
+            if index + 1 < len(page):
+                return page[index + 1]
+            return db.scalar(_article_revision_log_query(article_id).offset(offset + index + 1).limit(1))
+        offset += len(page)
+
+
 def _coerce_article_slug(value: str | None) -> str:
     return _coerce_required_text(value, field_name="slug")
 
@@ -985,13 +1019,7 @@ def get_article_revision_diff(
             db, article_id=article_id, revision_id=base_revision_id
         )
     else:
-        ordered_rows = db.scalars(_article_revision_log_query(article_id)).all()
-        target_index = next(
-            (index for index, row in enumerate(ordered_rows) if row.id == target.id),
-            -1,
-        )
-        if target_index >= 0 and target_index + 1 < len(ordered_rows):
-            base_revision = ordered_rows[target_index + 1]
+        base_revision = _previous_article_revision(db, article_id=article_id, target=target)
     base_snapshot = _article_revision_snapshot_from_log(base_revision) or {}
 
     changes = _compute_revision_changes(base_snapshot, target_snapshot)
@@ -1084,7 +1112,13 @@ def restore_article_revision(
     article.title = dict(title_snapshot)
     article.excerpt = dict(snapshot.get("excerpt")) if isinstance(snapshot.get("excerpt"), dict) else None
     article.body_md = dict(body_snapshot)
-    article.hero_image_url = _coerce_optional_text(snapshot.get("hero_image_url"))
+    restored_hero_image_url = _coerce_optional_text(snapshot.get("hero_image_url"))
+    if restored_hero_image_url is not None:
+        restored_hero_image_url = require_local_media_path(
+            restored_hero_image_url,
+            field_name="hero_image_url",
+        )
+    article.hero_image_url = restored_hero_image_url
     article.hero_media_asset_id = _parse_revision_uuid(
         snapshot.get("hero_media_asset_id"),
         field_name="hero_media_asset_id",

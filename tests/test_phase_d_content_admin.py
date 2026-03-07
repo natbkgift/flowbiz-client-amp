@@ -5,7 +5,7 @@ from collections.abc import Generator
 from uuid import uuid4
 
 import pytest
-from sqlalchemy import select
+from sqlalchemy import desc, select
 
 from apps.api.dependencies.auth import ADMIN_PERMISSION_READ, ADMIN_PERMISSION_WRITE
 from packages.core.auth import create_access_token, hash_password
@@ -656,18 +656,27 @@ def test_phase_d_article_revision_history_diff_and_restore(client) -> None:
     _assert_200(revisions)
     revision_rows = revisions.json()["data"]
     assert len(revision_rows) >= 3
-    latest_revision_id = revision_rows[0]["revision_id"]
+    target_index = next(
+        (index for index, row in enumerate(revision_rows) if row.get("event") == "update" and index + 1 < len(revision_rows)),
+        None,
+    )
+    assert target_index is not None
+    target_revision_id = revision_rows[target_index]["revision_id"]
+    expected_base_revision_id = revision_rows[target_index + 1]["revision_id"]
     create_revision = next((row for row in revision_rows if row.get("event") == "create"), None)
     assert create_revision is not None
     oldest_revision_id = create_revision["revision_id"]
 
     diff = client.get(
-        f"/admin/content/articles/{slug}/revisions/{latest_revision_id}/diff",
+        f"/admin/content/articles/{slug}/revisions/{target_revision_id}/diff",
         headers=headers,
     )
     _assert_200(diff)
+    assert diff.json()["base_revision"]["revision_id"] == expected_base_revision_id
     assert diff.json()["summary"]["changed_fields"] > 0
-    assert any(change["path"] == "title.en" for change in diff.json()["changes"])
+    title_change = next((change for change in diff.json()["changes"] if change["path"] == "title.en"), None)
+    assert title_change is not None
+    assert title_change["before"] != title_change["after"]
 
     restored = client.post(
         f"/admin/content/articles/{slug}/revisions/{oldest_revision_id}/restore",
@@ -687,6 +696,52 @@ def test_phase_d_article_revision_history_diff_and_restore(client) -> None:
             )
         ).all()
     assert len(restore_logs) == 1
+
+
+def test_phase_d_article_restore_rejects_external_hero_image_url(client) -> None:
+    headers = _make_admin_headers()
+    slug = f"phase-d-revision-media-{uuid4()}"
+    created = client.post(
+        "/admin/content/articles",
+        headers=headers,
+        json={
+            "slug": slug,
+            "category": "blog",
+            "status": "draft",
+            "title": {"en": "Revision media title", "th": "หัวข้อ media"},
+            "body_md": {"en": "Body", "th": "เนื้อหา"},
+        },
+    )
+    _assert_201(created)
+    article_id = created.json()["article"]["id"]
+
+    with SessionLocal() as db:
+        revision = db.scalar(
+            select(AuditLog)
+            .where(
+                AuditLog.entity_type == "article",
+                AuditLog.entity_id == article_id,
+                AuditLog.action == "revision_snapshot",
+            )
+            .order_by(desc(AuditLog.created_at), desc(AuditLog.id))
+            .limit(1)
+        )
+        assert revision is not None
+        payload = dict(revision.diff) if isinstance(revision.diff, dict) else {}
+        snapshot = dict(payload.get("snapshot")) if isinstance(payload.get("snapshot"), dict) else {}
+        snapshot["hero_image_url"] = "https://cdn.example.test/hero.jpg"
+        payload["snapshot"] = snapshot
+        revision.diff = payload
+        db.add(revision)
+        db.commit()
+        revision_id = str(revision.id)
+
+    restored = client.post(
+        f"/admin/content/articles/{slug}/revisions/{revision_id}/restore",
+        headers=headers,
+    )
+    assert restored.status_code == 422, restored.text
+    assert restored.json()["detail"] == "hero_image_url must be local /media/ path"
 
 
 def test_phase_d_article_restore_requires_admin_role(client) -> None:

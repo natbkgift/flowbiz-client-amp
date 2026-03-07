@@ -1285,7 +1285,7 @@ export function AdminJsonCrudWorkspace({ config }: { config: CrudConfig }) {
             <section className="card">
               <h2>Revision history</h2>
               {revisions.length === 0 ? (
-                <div className="state-empty">No revisions loaded. Select a record and click "Load revisions".</div>
+                <div className="state-empty">No revisions loaded. Select a record and click &quot;Load revisions&quot;.</div>
               ) : (
                 <>
                   <label className="field" htmlFor={`${idBase}-revision-id`}>
