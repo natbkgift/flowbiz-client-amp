@@ -97,6 +97,7 @@ def test_permission_allow_and_deny_by_action(client) -> None:
     )
     assert can_write.status_code == 201, can_write.text
 
+    # Permission check must run before project lookup; missing publish permission returns 403.
     publish_denied = client.post(f"/admin/projects/{uuid4()}/publish", headers=headers)
     assert publish_denied.status_code == 403, publish_denied.text
 
@@ -104,8 +105,8 @@ def test_permission_allow_and_deny_by_action(client) -> None:
         role="publisher",
         permission_keys=[ADMIN_PERMISSION_READ, ADMIN_PERMISSION_PUBLISH],
     )
-    publish_allowed = client.post(f"/admin/projects/{uuid4()}/publish", headers=publish_headers)
-    assert publish_allowed.status_code == 404, publish_allowed.text
+    publish_response = client.post(f"/admin/projects/{uuid4()}/publish", headers=publish_headers)
+    assert publish_response.status_code == 404, publish_response.text
 
 
 def test_admin_role_still_has_full_access(client) -> None:

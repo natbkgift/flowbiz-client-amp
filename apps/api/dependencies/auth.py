@@ -38,7 +38,12 @@ def _permission_key_for_admin_request(request: Request) -> str:
         return ADMIN_PERMISSION_PUBLISH
     if method == "DELETE":
         return ADMIN_PERMISSION_DELETE
-    return ADMIN_PERMISSION_WRITE
+    if method in {"POST", "PUT", "PATCH"}:
+        return ADMIN_PERMISSION_WRITE
+    raise HTTPException(
+        status_code=status.HTTP_403_FORBIDDEN,
+        detail="Unsupported admin endpoint method",
+    )
 
 
 def _permission_keys_for_user(db: Session, *, user_id: UUID) -> set[str]:
