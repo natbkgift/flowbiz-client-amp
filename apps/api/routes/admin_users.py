@@ -252,7 +252,18 @@ def admin_assign_role_to_user(
     )
     if existing is None:
         db.add(UserRole(user_id=row.id, role_id=role_id))
-        db.commit()
+        try:
+            db.commit()
+        except IntegrityError as exc:
+            db.rollback()
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail={
+                    "code": "user_role_conflict",
+                    "message": "unable to assign role to user",
+                    "field": "role_id",
+                },
+            ) from exc
         db.refresh(row)
         return {"assigned": True, "user": _serialize_user(db, row)}
     db.refresh(row)
