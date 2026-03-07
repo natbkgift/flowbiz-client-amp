@@ -28,7 +28,7 @@ const BLOG_PATCH_TEMPLATE = JSON.stringify(
 const BLOG_CREATE_FIELDS = [
   { name: "slug", label: "Slug", type: "text", required: true, placeholder: "sample-blog-post" },
   { name: "category", label: "Category", type: "select", required: true, options: ["blog", "guide"] },
-  { name: "status", label: "Status", type: "status", required: true, options: ["draft", "published", "archived"] },
+  { name: "status", label: "Status", type: "status", required: true, options: ["draft"] },
   { name: "title.en", label: "Title (EN)", type: "text", required: true, placeholder: "Sample Blog Title" },
   { name: "title.th", label: "Title (TH)", type: "text", required: true, placeholder: "หัวข้อบทความตัวอย่าง" },
   { name: "excerpt.en", label: "Excerpt (EN)", type: "textarea", rows: 2, placeholder: "Short excerpt" },
@@ -45,7 +45,12 @@ const BLOG_CREATE_FIELDS = [
 
 const BLOG_PATCH_FIELDS = [
   { name: "category", label: "Category", type: "select", options: ["blog", "guide"] },
-  { name: "status", label: "Status", type: "status", options: ["draft", "published", "archived"] },
+  {
+    name: "status",
+    label: "Status",
+    type: "status",
+    options: ["draft", "in_review", "approved", "published", "archived"],
+  },
   { name: "title.en", label: "Title (EN)", type: "text" },
   { name: "title.th", label: "Title (TH)", type: "text" },
   { name: "excerpt.en", label: "Excerpt (EN)", type: "textarea", rows: 2 },
@@ -93,7 +98,7 @@ export default function AdminBlogCmsPage() {
             { path: "body_md", label: "Body" },
           ],
           mediaAnyOfPaths: ["hero_image_url", "hero_media_asset_id"],
-          allowedStatuses: ["draft"],
+          allowedStatuses: ["approved"],
           allowedCategories: ["blog", "guide"],
         },
         queryHelp: "Supported: category, status, page, limit",

@@ -14,6 +14,7 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from apps.api.dependencies.auth import get_current_admin
+from packages.core.audit import write_audit_log
 from packages.core.database import get_db
 from packages.core.media_library import require_local_media_path
 from packages.core.models import (
@@ -29,7 +30,14 @@ from packages.core.seo_controls import upsert_slug_redirects
 router = APIRouter(prefix="/admin", tags=["admin"])
 
 _SITE_LAYOUT_CMS_SLUG = "site-layout"
-_ARTICLE_STATUSES = {"draft", "published", "archived"}
+_ARTICLE_STATUSES = {"draft", "in_review", "approved", "published", "archived"}
+_ARTICLE_STATUS_TRANSITIONS: dict[str, set[str]] = {
+    "draft": {"draft", "in_review"},
+    "in_review": {"in_review", "approved"},
+    "approved": {"approved", "published"},
+    "published": {"published", "archived"},
+    "archived": {"archived"},
+}
 _ARTICLE_ALLOWED_CATEGORIES = {"blog", "guide"}
 _ARTICLE_PUBLISH_BLOCKING_LOCALES = ("en",)
 _ARTICLE_PUBLISH_WARNING_LOCALES = ("th",)
@@ -482,14 +490,28 @@ def _article_publish_checklist(article: Article) -> dict[str, list[str]]:
         blocking.append("category must be one of: blog, guide")
 
     status_value = str(article.status or "").strip().lower()
-    if status_value != "draft":
-        blocking.append("status must be draft before publish")
+    if status_value != "approved":
+        blocking.append("status must be approved before publish")
 
     has_media = bool(str(article.hero_image_url or "").strip() or article.hero_media_asset_id)
     if not has_media:
         warnings.append("hero media is recommended before publish")
 
     return {"blocking": blocking, "warnings": warnings}
+
+
+def _ensure_article_publishable(article: Article) -> dict[str, list[str]]:
+    checklist = _article_publish_checklist(article)
+    if checklist["blocking"]:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail={
+                "message": "Publish checklist failed",
+                "blocking": checklist["blocking"],
+                "warnings": checklist["warnings"],
+            },
+        )
+    return checklist
 
 
 def _article_by_slug_or_404(db: Session, slug: str) -> Article:
@@ -499,7 +521,31 @@ def _article_by_slug_or_404(db: Session, slug: str) -> Article:
     return article
 
 
-def _apply_article_updates(article: Article, payload: Any, updates: set[str], db: Session) -> None:
+def _validate_article_transition(*, before: str, after: str) -> None:
+    allowed = _ARTICLE_STATUS_TRANSITIONS.get(before, {before})
+    if after not in allowed:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Invalid transition: {before} -> {after}",
+        )
+
+
+def _record_article_transition_audit(
+    *, db: Session, admin: User, article: Article, before: str, after: str
+) -> None:
+    write_audit_log(
+        db,
+        actor_user_id=admin.id,
+        entity_type="article",
+        entity_id=str(article.id),
+        action="status_transition",
+        diff={"status": {"from": before, "to": after}},
+    )
+
+
+def _apply_article_updates(
+    article: Article, payload: Any, updates: set[str], db: Session, admin: User
+) -> None:
     old_slug = str(article.slug or "").strip()
     old_category = str(article.category or "").strip().lower()
 
@@ -557,11 +603,24 @@ def _apply_article_updates(article: Article, payload: Any, updates: set[str], db
         article.hero_media_asset_id = resolved_media_id
 
     if "status" in updates:
-        article.status = _normalize_status(
+        before_status = str(article.status or "").strip().lower()
+        next_status = _normalize_status(
             payload.status,
             allowed=_ARTICLE_STATUSES,
             field_name="status",
         )
+        _validate_article_transition(before=before_status, after=next_status)
+        if next_status == "published" and before_status != next_status:
+            _ensure_article_publishable(article)
+        article.status = next_status
+        if before_status != next_status:
+            _record_article_transition_audit(
+                db=db,
+                admin=admin,
+                article=article,
+                before=before_status,
+                after=next_status,
+            )
     if "published_at" in updates:
         article.published_at = _to_utc(payload.published_at) if payload.published_at else None
     if "updated_at" in updates and payload.updated_at is not None:
@@ -642,10 +701,13 @@ def create_article(
         hero_media_asset_id=payload.hero_media_asset_id,
     )
 
+    initial_status = _normalize_status(payload.status, allowed=_ARTICLE_STATUSES, field_name="status")
+    _validate_article_transition(before="draft", after=initial_status)
+
     article = Article(
         slug=slug,
         category=_coerce_category(payload.category),
-        status=_normalize_status(payload.status, allowed=_ARTICLE_STATUSES, field_name="status"),
+        status=initial_status,
         title=_coerce_localized_text(payload.title, field_name="title"),
         excerpt=_coerce_optional_localized_text(payload.excerpt, field_name="excerpt"),
         body_md={},
@@ -677,7 +739,7 @@ def patch_article(
     slug: str,
     payload: ArticleEditorialUpdateRequest,
     db: Session = Depends(get_db),
-    _admin: User = Depends(get_current_admin),
+    admin: User = Depends(get_current_admin),
 ) -> dict[str, Any]:
     article = _article_by_slug_or_404(db, slug)
     updates = set(payload.model_dump(exclude_unset=True).keys())
@@ -687,7 +749,7 @@ def patch_article(
             detail="No editable fields provided",
         )
 
-    _apply_article_updates(article, payload, updates, db)
+    _apply_article_updates(article, payload, updates, db, admin)
     db.add(article)
     _commit_or_conflict(db, detail="Article slug already exists")
     db.refresh(article)
@@ -698,20 +760,21 @@ def patch_article(
 def publish_article(
     slug: str,
     db: Session = Depends(get_db),
-    _admin: User = Depends(get_current_admin),
+    admin: User = Depends(get_current_admin),
 ) -> dict[str, Any]:
     article = _article_by_slug_or_404(db, slug)
-    checklist = _article_publish_checklist(article)
-    if checklist["blocking"]:
-        raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-            detail={
-                "message": "Publish checklist failed",
-                "blocking": checklist["blocking"],
-                "warnings": checklist["warnings"],
-            },
-        )
+    checklist = _ensure_article_publishable(article)
+    before_status = str(article.status or "").strip().lower()
+    _validate_article_transition(before=before_status, after="published")
     article.status = "published"
+    if before_status != article.status:
+        _record_article_transition_audit(
+            db=db,
+            admin=admin,
+            article=article,
+            before=before_status,
+            after=article.status,
+        )
     if article.published_at is None:
         article.published_at = datetime.now(UTC)
     db.add(article)
@@ -724,10 +787,20 @@ def publish_article(
 def unpublish_article(
     slug: str,
     db: Session = Depends(get_db),
-    _admin: User = Depends(get_current_admin),
+    admin: User = Depends(get_current_admin),
 ) -> dict[str, Any]:
     article = _article_by_slug_or_404(db, slug)
-    article.status = "draft"
+    before_status = str(article.status or "").strip().lower()
+    _validate_article_transition(before=before_status, after="archived")
+    article.status = "archived"
+    if before_status != article.status:
+        _record_article_transition_audit(
+            db=db,
+            admin=admin,
+            article=article,
+            before=before_status,
+            after=article.status,
+        )
     db.add(article)
     db.commit()
     db.refresh(article)
@@ -738,11 +811,20 @@ def unpublish_article(
 def delete_article(
     slug: str,
     db: Session = Depends(get_db),
-    _admin: User = Depends(get_current_admin),
+    admin: User = Depends(get_current_admin),
 ) -> dict[str, bool]:
     article = _article_by_slug_or_404(db, slug)
     article.deleted_at = datetime.now(UTC)
+    before_status = str(article.status or "").strip().lower()
     article.status = "archived"
+    if before_status != article.status:
+        _record_article_transition_audit(
+            db=db,
+            admin=admin,
+            article=article,
+            before=before_status,
+            after=article.status,
+        )
     db.add(article)
     db.commit()
     return {"deleted": True}
@@ -753,7 +835,7 @@ def ingest_article_hero_image(
     slug: str,
     payload: HeroImageIngestRequest,
     db: Session = Depends(get_db),
-    _admin: User = Depends(get_current_admin),
+    admin: User = Depends(get_current_admin),
 ) -> dict:
     article = _article_by_slug_or_404(db, slug)
 
@@ -788,7 +870,17 @@ def ingest_article_hero_image(
     article.hero_image_url = normalized_path
     article.hero_media_asset_id = media.id
     if payload.publish_now:
+        before_status = str(article.status or "").strip().lower()
+        _validate_article_transition(before=before_status, after="published")
         article.status = "published"
+        if before_status != article.status:
+            _record_article_transition_audit(
+                db=db,
+                admin=admin,
+                article=article,
+                before=before_status,
+                after=article.status,
+            )
         if article.published_at is None:
             article.published_at = datetime.now(UTC)
     db.add(article)
@@ -813,7 +905,7 @@ def update_article_editorial(
     slug: str,
     payload: ArticleEditorialUpdateRequest,
     db: Session = Depends(get_db),
-    _admin: User = Depends(get_current_admin),
+    admin: User = Depends(get_current_admin),
 ) -> dict:
     article = _article_by_slug_or_404(db, slug)
     updates = set(payload.model_dump(exclude_unset=True).keys())
@@ -822,7 +914,7 @@ def update_article_editorial(
             status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="No editable fields provided"
         )
 
-    _apply_article_updates(article, payload, updates, db)
+    _apply_article_updates(article, payload, updates, db, admin)
     db.add(article)
     _commit_or_conflict(db, detail="Article slug already exists")
     db.refresh(article)

@@ -83,6 +83,17 @@ describe("B14 admin workspace pages contract", () => {
     expect(developersPage).toContain("/admin/developers/{id}/unpublish");
   });
 
+  it("review queue workspace targets in_review items awaiting approval", () => {
+    const page = read("app/admin/review-queue/page.tsx");
+    const nav = read("app/_lib/admin-nav.ts");
+
+    expect(page).toContain("Editorial Review Queue");
+    expect(page).toContain("defaultListQuery: \"status=in_review&limit=40\"");
+    expect(page).toContain("options: [\"approved\"]");
+    expect(page).toContain("/admin/content/articles");
+    expect(nav).toContain("/admin/review-queue");
+  });
+
   it("home composer workspace uses shared admin auth helper", () => {
     const page = read("app/admin/home-composer/page.tsx");
     expect(page).toContain("from '@/app/_lib/admin-auth'");
