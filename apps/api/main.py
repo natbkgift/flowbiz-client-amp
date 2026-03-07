@@ -18,6 +18,7 @@ from apps.api.routes import (
     admin_projects,
     admin_properties,
     admin_seo,
+    admin_users,
 )
 from apps.api.routes.v1 import (
     auth,
@@ -103,6 +104,7 @@ app.include_router(admin_content.router)
 app.include_router(admin_home_composer.router)
 app.include_router(admin_media.router)
 app.include_router(admin_seo.router)
+app.include_router(admin_users.router)
 
 media_root = _pick_media_root()
 if media_root is not None:
