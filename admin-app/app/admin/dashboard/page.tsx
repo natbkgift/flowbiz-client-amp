@@ -403,7 +403,7 @@ function taskLabel(
   if (normalized === "failed" || normalized === "error" || normalized === "partial" || normalized === "warning") {
     return labels.taskAttention;
   }
-  return locale === "th" ? normalized.toUpperCase() : normalized.toUpperCase();
+  return normalized.toUpperCase();
 }
 
 async function fetchSummary(token: string): Promise<DashboardSummaryResponse> {
