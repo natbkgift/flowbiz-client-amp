@@ -11,6 +11,7 @@ Run these before merge or immediately after rebasing onto `main`:
 ```powershell
 npm --prefix admin-app run test -- __tests__/b14_admin_dashboard_page.test.ts __tests__/admin_dashboard_surface_styles.test.ts __tests__/admin_dashboard_layout_primitives.test.ts __tests__/admin_dashboard_section_primitives.test.ts __tests__/admin_dashboard_kpi_widgets.test.ts __tests__/admin_dashboard_trend_chart.test.ts __tests__/admin_dashboard_trend_utils.test.ts __tests__/admin_dashboard_recent_inquiries_table.test.ts __tests__/admin_dashboard_smoke_script.test.ts __tests__/b14_admin_workspaces_pages.test.ts
 npm --prefix admin-app run build
+# Default mocked smoke (CI-safe)
 $env:ADMIN_SMOKE_BASE_URL='https://amppattaya.com'
 npm --prefix admin-app run test:smoke:admin
 ```
@@ -20,9 +21,34 @@ Expected evidence:
 - Vitest passes for dashboard contracts and workspace regressions
 - `next build` passes
 - `admin-app/artifacts/admin-smoke/admin-smoke-summary.json` shows:
+  - `smokeMode="mocked"`
   - `loginStatuses=[401,200]`
+  - `healthSummaryStatuses=[200]`
   - `healthSummaryRequests=1`
   - `finalUrl=https://amppattaya.com/admin/dashboard`
+
+## Smoke Modes
+
+### Mocked smoke (default / CI-safe)
+
+- Uses deterministic mocked responses for `/api/v1/auth/login` and `/api/admin/dashboard/health-summary`.
+- Requires only `ADMIN_SMOKE_BASE_URL`.
+- Evidence includes `smokeMode="mocked"` and the `mockedRoutes` list in `admin-smoke-summary.json`.
+
+### Live smoke (staging/production contract check)
+
+- Uses real admin login + dashboard summary endpoints against the configured environment.
+- Requires all of:
+  - `ADMIN_SMOKE_MODE=live`
+  - `ADMIN_SMOKE_BASE_URL=https://<target-host>`
+  - `ADMIN_SMOKE_EMAIL=<admin-email>`
+  - `ADMIN_SMOKE_PASSWORD=<admin-password>`
+- Evidence includes:
+  - `smokeMode="live"`
+  - `loginStatuses=[200]`
+  - `healthSummaryStatuses=[200]`
+  - `healthSummaryContract` with widget/trend/inquiry/warning counts from the live response
+- The live mode is read-only: it signs in, loads the dashboard summary, verifies critical sections, captures evidence, and signs out.
 
 ## Manual QA Matrix
 
@@ -72,12 +98,29 @@ Required smoke codes:
 - `projects_code=200`
 - `admin_login_code=200`
 
-5. Run production admin smoke:
+5. Run the mocked smoke first (fast regression / same path as CI):
 
 ```powershell
 $env:ADMIN_SMOKE_BASE_URL='https://amppattaya.com'
 npm --prefix admin-app run test:smoke:admin
 ```
+
+6. Run live production admin smoke to verify the deployed dashboard contract:
+
+```powershell
+$env:ADMIN_SMOKE_MODE='live'
+$env:ADMIN_SMOKE_BASE_URL='https://amppattaya.com'
+$env:ADMIN_SMOKE_EMAIL='<admin-email>'
+$env:ADMIN_SMOKE_PASSWORD='<admin-password>'
+npm --prefix admin-app run test:smoke:admin
+```
+
+Failure handling:
+
+- If the command fails before opening the dashboard, confirm the live-mode env vars are present and the credentials are valid.
+- If `loginStatuses` is not `[200]`, treat it as an auth/configuration issue first.
+- If `healthSummaryStatuses` is not `[200]` or `healthSummaryContract` is missing, treat it as a live API contract or backend availability issue.
+- Attach `admin-app/artifacts/admin-smoke/admin-smoke-summary.json` and the screenshots from `admin-app/artifacts/admin-smoke/` to the deploy verification evidence.
 
 ## Rollback
 
@@ -97,12 +140,13 @@ If production validation fails after merge:
 
 - [ ] `deploy_telemetry.json` is updated for the final merged SHA
 - [ ] All 4 smoke HTTP codes are `200`
-- [ ] Admin smoke summary captured after deploy
+- [ ] Mocked admin smoke summary captured after deploy
+- [ ] Live admin smoke summary captured after deploy
 - [ ] Final URL remains `/admin/dashboard`
 - [ ] Any remaining non-blocking dashboard gaps are added to backlog
 
 ## Known Limitations
 
 - The trend chart currently supports the backend-provided `7d` and `30d` series only.
-- The admin smoke script uses mocked login and summary endpoints to validate UI flow deterministically.
+- The default admin smoke mode remains mocked for CI stability; use `ADMIN_SMOKE_MODE=live` for deployed-environment contract verification.
 - Table filtering and sorting operate on the currently loaded inquiry rows, not on server-side pagination.
