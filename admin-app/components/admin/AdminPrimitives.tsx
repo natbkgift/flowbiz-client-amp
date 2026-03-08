@@ -1,4 +1,9 @@
-import type { ButtonHTMLAttributes, KeyboardEventHandler, ReactNode } from "react";
+import type {
+  ButtonHTMLAttributes,
+  ComponentPropsWithoutRef,
+  KeyboardEventHandler,
+  ReactNode,
+} from "react";
 
 import { AdminIcon, type AdminIconName } from "@/components/admin/AdminIcons";
 
@@ -131,6 +136,7 @@ export function AdminSectionCard({
   icon,
   actions,
   className,
+  sectionProps,
   children,
 }: {
   title?: ReactNode;
@@ -138,10 +144,18 @@ export function AdminSectionCard({
   icon?: AdminIconName;
   actions?: ReactNode;
   className?: string;
+  sectionProps?: Omit<ComponentPropsWithoutRef<"section">, "children" | "className"> & {
+    className?: string;
+  };
   children: ReactNode;
 }) {
+  const { className: sectionClassName, ...restSectionProps } = sectionProps ?? {};
+
   return (
-    <section className={cx("card", "admin-section-card", className)}>
+    <section
+      {...restSectionProps}
+      className={cx("card", "admin-section-card", sectionClassName, className)}
+    >
       {title || description || actions ? (
         <header className="admin-section-card__header">
           <div className="admin-section-card__title-row">
@@ -211,12 +225,22 @@ export function AdminInput({
   className?: string;
   children: ReactNode;
 }) {
+  const labelContent = (
+    <>
+      {icon ? <AdminIcon name={icon} size={14} className="admin-input__label-icon" /> : null}
+      <span>{label}</span>
+    </>
+  );
+
   return (
-    <label className={cx("field", "admin-input", className)} htmlFor={htmlFor}>
-      <span className="admin-input__label">
-        {icon ? <AdminIcon name={icon} size={14} className="admin-input__label-icon" /> : null}
-        <span>{label}</span>
-      </span>
+    <div className={cx("field", "admin-input", className)}>
+      {htmlFor ? (
+        <label className="admin-input__label" htmlFor={htmlFor}>
+          {labelContent}
+        </label>
+      ) : (
+        <div className="admin-input__label">{labelContent}</div>
+      )}
       <div className="admin-input__control">{children}</div>
       {hint ? <small className="admin-input__hint locale-safe">{hint}</small> : null}
       {error ? (
@@ -224,7 +248,7 @@ export function AdminInput({
           {error}
         </span>
       ) : null}
-    </label>
+    </div>
   );
 }
 

@@ -28,14 +28,12 @@ export function DashboardSection({
       title={<span id={headingId}>{title}</span>}
       description={subtitle ? <p id={subtitleId}>{subtitle}</p> : undefined}
       actions={actions}
+      sectionProps={{
+        "aria-labelledby": headingId,
+        "aria-describedby": subtitle ? subtitleId : undefined,
+      }}
     >
-      <div
-        className="dashboard-section-body"
-        aria-labelledby={headingId}
-        aria-describedby={subtitle ? subtitleId : undefined}
-      >
-        {children}
-      </div>
+      <div className="dashboard-section-body">{children}</div>
     </AdminSectionCard>
   );
 }

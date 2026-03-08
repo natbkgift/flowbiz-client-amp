@@ -15,8 +15,10 @@ describe("admin dashboard section primitives", () => {
 
     expect(component).toContain("const headingId = useId()");
     expect(component).toContain("const subtitleId = useId()");
-    expect(component).toContain("aria-labelledby={headingId}");
-    expect(component).toContain("aria-describedby={subtitle ? subtitleId : undefined}");
-    expect(component).toContain("<h2 id={headingId}>{title}</h2>");
+    expect(component).toContain("sectionProps={{");
+    expect(component).toContain('"aria-labelledby": headingId');
+    expect(component).toContain('"aria-describedby": subtitle ? subtitleId : undefined');
+    expect(component).toContain('title={<span id={headingId}>{title}</span>}');
+    expect(component).toContain('description={subtitle ? <p id={subtitleId}>{subtitle}</p> : undefined}');
   });
 });
