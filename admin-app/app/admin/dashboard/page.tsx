@@ -426,15 +426,24 @@ export default function AdminDashboardPage() {
   function renderTrendToggle() {
     return (
       <div className="dashboard-period-toggle" role="group" aria-label={t.trendTitle}>
-        <AdminTabSwitch
-          ariaLabel={t.trendTitle}
-          value={chartPeriod}
-          onChange={(next) => setChartPeriod(next as TrendPeriod)}
-          options={[
-            { value: "7d", label: t.trendPeriod7d, disabled: loading },
-            { value: "30d", label: t.trendPeriod30d, disabled: loading },
-          ]}
-        />
+        <AdminButton
+          type="button"
+          variant={chartPeriod === "7d" ? "primary" : "secondary"}
+          aria-pressed={chartPeriod === "7d"}
+          disabled={loading}
+          onClick={() => setChartPeriod("7d")}
+        >
+          {t.trendPeriod7d}
+        </AdminButton>
+        <AdminButton
+          type="button"
+          variant={chartPeriod === "30d" ? "primary" : "secondary"}
+          aria-pressed={chartPeriod === "30d"}
+          disabled={loading}
+          onClick={() => setChartPeriod("30d")}
+        >
+          {t.trendPeriod30d}
+        </AdminButton>
       </div>
     );
   }
