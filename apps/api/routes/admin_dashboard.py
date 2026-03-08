@@ -605,13 +605,16 @@ def _collect_inquiry_trend_series(db: Session, *, now: datetime) -> dict[str, li
 
     def _build_series(days: int) -> list[dict[str, int | str]]:
         window_start = end_date - timedelta(days=days - 1)
-        return [
-            {
-                "bucket_date": (window_start + timedelta(days=offset)).isoformat(),
-                "count": int(counts.get((window_start + timedelta(days=offset)).isoformat(), 0)),
-            }
-            for offset in range(days)
-        ]
+        series: list[dict[str, int | str]] = []
+        for offset in range(days):
+            bucket_date = (window_start + timedelta(days=offset)).isoformat()
+            series.append(
+                {
+                    "bucket_date": bucket_date,
+                    "count": int(counts.get(bucket_date, 0)),
+                }
+            )
+        return series
 
     return {"7d": _build_series(7), "30d": _build_series(30)}
 

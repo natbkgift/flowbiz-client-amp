@@ -63,7 +63,7 @@ export function buildTrendPoints(
     const parsed = parseDate(bucket.bucket_date);
     if (!parsed) continue;
     const key = formatBucketKey(startOfUtcDay(parsed));
-    counts.set(key, Math.max(0, Number(bucket.count) || 0));
+    counts.set(key, bucket.count);
   }
 
   return Array.from({ length: days }).map((_, index) => {
