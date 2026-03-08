@@ -1,5 +1,7 @@
 "use client";
 
+// TODO(admin-architecture phase 2): decompose workspace state/actions into page, section, and domain blocks while preserving current CRUD contracts.
+
 import { type FormEvent, type KeyboardEvent, useCallback, useEffect, useMemo, useState } from "react";
 
 import {

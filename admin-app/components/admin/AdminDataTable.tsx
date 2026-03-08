@@ -1,18 +1,15 @@
 "use client";
 
-import { type ReactNode, useEffect, useId, useMemo, useState } from "react";
+import { type ReactNode, useId } from "react";
 
 import {
-  clampPage,
-  filterRows,
-  normalizeTableValue,
-  paginateRows,
-  sortRows,
-  togglePageSelection,
-  toggleSelection,
-  type SortDirection,
-} from "@/app/_lib/admin-data-table-state";
-import { AdminButton, AdminInput, AdminTable } from "@/components/admin/AdminPrimitives";
+  AdminTable,
+  AdminTablePagination,
+  AdminTableToolbar,
+} from "@/components/admin/data-display/AdminTable";
+import { useAdminDataTableState } from "@/components/admin/data-display/useAdminDataTableState";
+import { AdminButton } from "@/components/admin/forms/AdminButton";
+import { AdminInput } from "@/components/admin/forms/AdminInput";
 
 export type AdminDataTableColumn<T> = {
   key: string;
@@ -41,114 +38,52 @@ export function AdminDataTable<T>({
   filterLabel = "Filter table rows",
   onBulkSelectionChange,
 }: AdminDataTableProps<T>) {
-  const hasColumns = columns.length > 0;
-  const [filterQuery, setFilterQuery] = useState("");
-  const [sortKey, setSortKey] = useState(() => columns[0]?.key || "");
-  const [sortDirection, setSortDirection] = useState<SortDirection>("asc");
-  const [page, setPage] = useState(1);
-  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const filterInputId = useId();
-
-  useEffect(() => {
-    if (!hasColumns) return;
-    const isValidSortKey = columns.some((column) => column.key === sortKey);
-    if (!isValidSortKey) {
-      setSortKey(columns[0]?.key || "");
-    }
-  }, [columns, hasColumns, sortKey]);
-
-  const filteredRows = useMemo(
-    () => {
-      if (!hasColumns) return [];
-      return filterRows(rows, (row) => {
-        const values = columns.map((column) => {
-          const source = column.getFilterValue ? column.getFilterValue(row) : column.getSortValue?.(row);
-          return normalizeTableValue(source);
-        });
-        return values.join(" ");
-      }, filterQuery);
-    },
-    [columns, filterQuery, hasColumns, rows]
-  );
-
-  const sortedRows = useMemo(() => {
-    if (!hasColumns) return filteredRows;
-    const sortColumn = columns.find((column) => column.key === sortKey) || columns[0];
-    if (!sortColumn) return filteredRows;
-    return sortRows(
-      filteredRows,
-      (row) => normalizeTableValue(sortColumn.getSortValue ? sortColumn.getSortValue(row) : sortColumn.getFilterValue?.(row)),
-      sortDirection
-    );
-  }, [columns, filteredRows, hasColumns, sortDirection, sortKey]);
-
-  const effectivePage = clampPage(page, sortedRows.length, pageSize);
-
-  useEffect(() => {
-    if (page !== effectivePage) {
-      setPage(effectivePage);
-    }
-  }, [effectivePage, page]);
-
-  const paginatedRows = useMemo(
-    () => paginateRows(sortedRows, effectivePage, pageSize),
-    [effectivePage, pageSize, sortedRows]
-  );
-
-  const paginatedRowsWithIds = useMemo(
-    () =>
-      paginatedRows.map((row, index) => ({
-        row,
-        id: getRowId(row, (effectivePage - 1) * pageSize + index),
-      })),
-    [effectivePage, getRowId, pageSize, paginatedRows]
-  );
-
-  const pageIds = paginatedRowsWithIds.map(({ id }) => id);
-  const allOnPageSelected = pageIds.length > 0 && pageIds.every((id) => selectedIds.has(id));
-  const totalPages = Math.max(1, Math.ceil(sortedRows.length / pageSize));
+  const {
+    hasColumns,
+    filterQuery,
+    selectedIds,
+    effectivePage,
+    totalPages,
+    sortedRows,
+    paginatedRowsWithIds,
+    allOnPageSelected,
+    setFilterQuery,
+    toggleSort,
+    toggleRowSelection,
+    toggleCurrentPageSelection,
+    goToPreviousPage,
+    goToNextPage,
+  } = useAdminDataTableState({
+    rows,
+    columns,
+    getRowId,
+    pageSize,
+    onBulkSelectionChange,
+  });
 
   if (!hasColumns) {
     return <div className="state-empty">{emptyLabel}</div>;
   }
 
-  function updateSelected(next: Set<string>) {
-    setSelectedIds(next);
-    onBulkSelectionChange?.(Array.from(next));
-  }
-
-  function toggleSort(nextKey: string) {
-    setPage(1);
-    if (sortKey === nextKey) {
-      setSortDirection((current) => (current === "asc" ? "desc" : "asc"));
-      return;
-    }
-    setSortKey(nextKey);
-    setSortDirection("asc");
-  }
-
   return (
     <AdminTable
       toolbar={
-        <div className="card-actions">
+        <AdminTableToolbar className="card-actions">
           <AdminInput htmlFor={filterInputId} label={filterLabel}>
-          <input
-            id={filterInputId}
-            aria-label={filterLabel}
-            value={filterQuery}
-            onChange={(event) => {
-              setFilterQuery(event.target.value);
-              setPage(1);
-            }}
-          />
+            <input
+              id={filterInputId}
+              aria-label={filterLabel}
+              value={filterQuery}
+              onChange={(event) => setFilterQuery(event.target.value)}
+            />
           </AdminInput>
           <p className="locale-safe" aria-live="polite">
             Selected: {selectedIds.size}
           </p>
-        </div>
+        </AdminTableToolbar>
       }
     >
-
       {sortedRows.length === 0 ? (
         <div className="state-empty">{emptyLabel}</div>
       ) : (
@@ -161,7 +96,7 @@ export function AdminDataTable<T>({
                     type="checkbox"
                     aria-label="Select all rows on page"
                     checked={allOnPageSelected}
-                    onChange={(event) => updateSelected(togglePageSelection(selectedIds, pageIds, event.target.checked))}
+                    onChange={(event) => toggleCurrentPageSelection(event.target.checked)}
                   />
                 </th>
                 {columns.map((column) => (
@@ -179,43 +114,37 @@ export function AdminDataTable<T>({
               </tr>
             </thead>
             <tbody>
-              {paginatedRowsWithIds.map(({ row, id }) => {
-                return (
-                  <tr key={id}>
-                    <td>
-                      <input
-                        type="checkbox"
-                        aria-label={`Select row ${id}`}
-                        checked={selectedIds.has(id)}
-                        onChange={(event) => updateSelected(toggleSelection(selectedIds, id, event.target.checked))}
-                      />
-                    </td>
-                    {columns.map((column) => (
-                      <td key={`${id}-${column.key}`}>{column.renderCell(row)}</td>
-                    ))}
-                  </tr>
-                );
-              })}
+              {paginatedRowsWithIds.map(({ row, id }) => (
+                <tr key={id}>
+                  <td>
+                    <input
+                      type="checkbox"
+                      aria-label={`Select row ${id}`}
+                      checked={selectedIds.has(id)}
+                      onChange={(event) => toggleRowSelection(id, event.target.checked)}
+                    />
+                  </td>
+                  {columns.map((column) => (
+                    <td key={`${id}-${column.key}`}>{column.renderCell(row)}</td>
+                  ))}
+                </tr>
+              ))}
             </tbody>
           </table>
 
-          <div className="card-actions">
-            <AdminButton
-              variant="secondary"
-              disabled={effectivePage <= 1}
-              onClick={() => setPage((current) => Math.max(1, current - 1))}
-            >
-              Previous
-            </AdminButton>
-            <span aria-live="polite">Page {effectivePage}</span>
-            <AdminButton
-              variant="secondary"
-              disabled={effectivePage >= totalPages}
-              onClick={() => setPage((current) => current + 1)}
-            >
-              Next
-            </AdminButton>
-          </div>
+          <AdminTablePagination
+            className="card-actions"
+            currentPage={effectivePage}
+            totalPages={totalPages}
+            previousLabel="Previous"
+            nextLabel="Next"
+            label="Page"
+            onPrevious={goToPreviousPage}
+            onNext={goToNextPage}
+            previousDisabled={effectivePage <= 1}
+            nextDisabled={effectivePage >= totalPages}
+            summary={`Page ${effectivePage}`}
+          />
         </>
       )}
     </AdminTable>

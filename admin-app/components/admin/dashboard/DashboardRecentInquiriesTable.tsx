@@ -2,7 +2,13 @@ import { useDeferredValue, useEffect, useId, useMemo, useState } from "react";
 
 import { fetchJson } from "@/app/_lib/admin-auth";
 import type { AdminLocale } from "@/app/_lib/admin-i18n";
-import { AdminBadge, AdminTable, adminButtonClassName } from "@/components/admin/AdminPrimitives";
+import {
+  AdminTable,
+  AdminTablePagination,
+  AdminTableToolbar,
+} from "@/components/admin/data-display/AdminTable";
+import { AdminBadge } from "@/components/admin/feedback/AdminBadge";
+import { adminButtonClassName } from "@/components/admin/forms/AdminButton";
 
 type RecentInquiry = {
   id: string;
@@ -263,7 +269,7 @@ export function DashboardRecentInquiriesTable({
 
   return (
     <div className="dashboard-table-shell" aria-busy={requestLoading}>
-      <div className="dashboard-table-toolbar" role="search" aria-label={ui.filter}>
+      <AdminTableToolbar role="search" aria-label={ui.filter}>
         <label className="field dashboard-table-toolbar-field" htmlFor={filterId}>
           <span>{ui.filter}</span>
           <input
@@ -332,7 +338,7 @@ export function DashboardRecentInquiriesTable({
         >
           {ui.reset}
         </button>
-      </div>
+      </AdminTableToolbar>
 
       <p id={summaryId} className="dashboard-table-summary" aria-live="polite">
         {requestLoading
@@ -421,29 +427,18 @@ export function DashboardRecentInquiriesTable({
           </div>
 
           {totalPages > 1 ? (
-            <div className="dashboard-table-toolbar dashboard-table-pagination" aria-label={ui.page}>
-              <button
-                type="button"
-                className={adminButtonClassName({ variant: "secondary" })}
-                onClick={() => setPage((current) => Math.max(1, current - 1))}
-                disabled={page <= 1 || requestLoading}
-                aria-controls={tableId}
-              >
-                {ui.previous}
-              </button>
-              <span className="dashboard-table-summary" aria-live="polite">
-                {ui.page} {page} / {totalPages}
-              </span>
-              <button
-                type="button"
-                className={adminButtonClassName({ variant: "secondary" })}
-                onClick={() => setPage((current) => Math.min(totalPages, current + 1))}
-                disabled={page >= totalPages || requestLoading}
-                aria-controls={tableId}
-              >
-                {ui.next}
-              </button>
-            </div>
+            <AdminTablePagination
+              currentPage={page}
+              totalPages={totalPages}
+              previousLabel={ui.previous}
+              nextLabel={ui.next}
+              label={ui.page}
+              onPrevious={() => setPage((current) => Math.max(1, current - 1))}
+              onNext={() => setPage((current) => Math.min(totalPages, current + 1))}
+              previousDisabled={page <= 1 || requestLoading}
+              nextDisabled={page >= totalPages || requestLoading}
+              controlsId={tableId}
+            />
           ) : null}
         </>
       )}

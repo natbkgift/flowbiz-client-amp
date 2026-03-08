@@ -1,5 +1,7 @@
 "use client";
 
+// TODO(admin-architecture phase 2): split CRM page orchestration into page/section/domain blocks without changing routes or API contracts.
+
 import { type FormEvent, useEffect, useMemo, useRef, useState } from "react";
 
 import { clearAuthSession, loginAdmin, persistAuthSession, readAuthSession } from "@/app/_lib/admin-auth";
