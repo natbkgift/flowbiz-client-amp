@@ -513,8 +513,16 @@ npm --prefix admin-app install --save-dev --save-exact eslint-config-next@14.2.3
 npm --prefix admin-app run build
 # Result: PASS (Next.js 14.2.35)
 
-# Admin smoke script (real endpoint)
+# Admin smoke script (mocked default)
 $env:ADMIN_SMOKE_BASE_URL='https://amppattaya.com'
+npm --prefix admin-app run test:smoke:admin
+# Result: PASS
+
+# Admin smoke script (live endpoint contract)
+$env:ADMIN_SMOKE_MODE='live'
+$env:ADMIN_SMOKE_BASE_URL='https://amppattaya.com'
+$env:ADMIN_SMOKE_EMAIL='<admin-email>'
+$env:ADMIN_SMOKE_PASSWORD='<admin-password>'
 npm --prefix admin-app run test:smoke:admin
 # Result: PASS
 ```
@@ -531,7 +539,7 @@ Playwright UAT login success flow (`2026-03-04`):
   - `/admin/imports`
 
 Evidence produced:
-- `admin-app/artifacts/admin-smoke/admin-smoke-summary.json` (latest run with `loginRequests=2`, `loginStatuses=[401,200]`, `healthSummaryRequests=1`).
+- `admin-app/artifacts/admin-smoke/admin-smoke-summary.json` (includes `smokeMode`, login/summary statuses, and live `healthSummaryContract` details when `ADMIN_SMOKE_MODE=live`).
 - CI evidence reference for smoke gate:
   - `admin-smoke-e2e` check in PR `#235` (PASS).
 
@@ -562,7 +570,10 @@ npx @next/codemod@canary next-async-request-api admin-app/app --yes --force
 npm --prefix admin-app audit --omit=dev --json
 npm --prefix admin-app run build
 npm --prefix admin-app run test
+$env:ADMIN_SMOKE_MODE='live'
 $env:ADMIN_SMOKE_BASE_URL='https://amppattaya.com'
+$env:ADMIN_SMOKE_EMAIL='<admin-email>'
+$env:ADMIN_SMOKE_PASSWORD='<admin-password>'
 npm --prefix admin-app run test:smoke:admin
 ```
 
@@ -570,7 +581,7 @@ Validation result summary (`2026-03-04`):
 - `npm audit --omit=dev`: `0` vulnerabilities (`moderate/high/critical = 0`).
 - `next build`: PASS on `Next.js 15.5.10`.
 - `vitest`: PASS (`16 files`, `166 tests`).
-- Admin smoke e2e script: PASS (login path exercised with `401 -> 200` and dashboard health summary loaded).
+- Admin smoke e2e script: PASS (`mocked` mode verifies deterministic UI flow; `live` mode verifies deployed login + dashboard summary contract when credentials are provided).
 
 Playwright UAT login success flow (`2026-03-04`, real credential):
 - Environment endpoint used: `https://amppattaya.com` (no separate staging URL configured in repo docs/env at time of run).
@@ -592,6 +603,39 @@ Deploy smoke verification from VPS runtime (`2026-03-04`):
 Evidence produced:
 - `admin-app/artifacts/admin-smoke/admin-smoke-summary.json`
 - `admin-app/artifacts/admin-uat/admin-uat-6-pages-summary.json`
+
+### Admin smoke mode selection
+
+- Default command:
+
+```powershell
+$env:ADMIN_SMOKE_BASE_URL='https://amppattaya.com'
+npm --prefix admin-app run test:smoke:admin
+```
+
+  - Runs `mocked` smoke mode.
+  - Safe for CI and local deterministic UI verification.
+  - Evidence shows `smokeMode="mocked"` plus `mockedRoutes`.
+
+- Live deploy verification command:
+
+```powershell
+$env:ADMIN_SMOKE_MODE='live'
+$env:ADMIN_SMOKE_BASE_URL='https://amppattaya.com'
+$env:ADMIN_SMOKE_EMAIL='<admin-email>'
+$env:ADMIN_SMOKE_PASSWORD='<admin-password>'
+npm --prefix admin-app run test:smoke:admin
+```
+
+  - Runs the real admin login flow and real `/api/admin/dashboard/health-summary` request.
+  - Fails fast if the required live-mode env vars are missing.
+  - Evidence shows `smokeMode="live"`, `loginStatuses`, `healthSummaryStatuses`, and `healthSummaryContract`.
+
+Failure handling:
+- Missing `ADMIN_SMOKE_EMAIL` or `ADMIN_SMOKE_PASSWORD`: treat as operator/config issue.
+- `loginStatuses` not successful in live mode: treat as auth or environment issue.
+- `healthSummaryStatuses` non-200 or missing `healthSummaryContract`: treat as dashboard API contract or backend availability issue.
+- Preserve `admin-app/artifacts/admin-smoke/admin-smoke-summary.json` and screenshots for deploy evidence and rollback triage.
 
 ---
 
