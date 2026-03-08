@@ -14,7 +14,9 @@ describe("B14 admin dashboard page contract", () => {
     const page = read("app/admin/dashboard/page.tsx");
 
     expect(page).toContain('from "@/app/_lib/admin-auth"');
+    expect(page).toContain('from "@/app/admin/dashboard/state-utils"');
     expect(page).toContain("loginAdmin");
+    expect(page).toContain("transitionDashboardState");
     expect(page).not.toContain('fetch("/v1/auth/login"');
   });
 
@@ -44,6 +46,11 @@ describe("B14 admin dashboard page contract", () => {
     expect(page).toContain("state-empty");
     expect(page).toContain("state-loading");
     expect(page).toContain("state-error");
+    expect(page).toContain("dashboardState === \"error\"");
+    expect(page).toContain("dashboardState === \"empty\"");
+    expect(page).toContain("dashboardState === \"success\"");
+    expect(page).toContain("retry: \"Retry\"");
+    expect(page).toContain("retry: \"ลองใหม่\"");
     expect(page).toContain('title: "Admin Health / QA Dashboard"');
     expect(page).toContain('title: "Admin Health / QA Dashboard"');
     expect(page).toContain('subtitle: "หน้าเดียวสำหรับดูความสมบูรณ์ของระบบและลิงก์แก้ปัญหาแบบ actionable"');
