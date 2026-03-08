@@ -66,7 +66,7 @@ async function run() {
     });
   });
 
-  await page.route("**/admin/dashboard/health-summary", async (route) => {
+  await page.route("**/api/admin/dashboard/health-summary", async (route) => {
     const authHeader = route.request().headers().authorization || "";
     if (!/^Bearer\s+\S+$/i.test(authHeader)) {
       throw new Error("admin smoke failed: dashboard summary request missing Authorization bearer token");

@@ -163,7 +163,7 @@ function statusClass(status: WidgetStatus): string {
 }
 
 async function fetchSummary(token: string): Promise<DashboardSummaryResponse> {
-  const response = await fetch("/admin/dashboard/health-summary", {
+  const response = await fetch("/api/admin/dashboard/health-summary", {
     headers: { Authorization: `Bearer ${token}` },
     cache: "no-store",
   });

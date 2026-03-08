@@ -21,7 +21,7 @@ describe("B14 admin dashboard page contract", () => {
   it("loads B14 backend summary endpoint and includes all required widget keys", () => {
     const page = read("app/admin/dashboard/page.tsx");
 
-    expect(page).toContain('"/admin/dashboard/health-summary"');
+    expect(page).toContain('"/api/admin/dashboard/health-summary"');
     expect(page).toContain('"project_cover_coverage"');
     expect(page).toContain('"broken_media_count"');
     expect(page).toContain('"external_image_leakage_count"');

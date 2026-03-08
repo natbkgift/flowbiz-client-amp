@@ -437,6 +437,10 @@ npm --prefix admin-app run test -- __tests__/b14_admin_dashboard_page.test.ts __
 ```bash
 cat /opt/flowbiz/clients/flowbiz-client-amp/ops/logs/deploy_telemetry.json
 ```
+- [ ] Dashboard summary contract endpoint returns `200` via frontend API path:
+```bash
+curl -fsS -o /dev/null -w '%{http_code}\n' http://127.0.0.1:8002/api/admin/dashboard/health-summary
+```
 - [ ] Manual admin check: `/admin/dashboard` widgets show actionable statuses.
 
 ---
