@@ -10,7 +10,7 @@ import {
   readAuthSession,
 } from '@/app/_lib/admin-auth';
 import { normalizeLocalMediaPath } from '@/app/_lib/local-media';
-import { AdminButton, AdminPageHeader } from '@/components/admin/AdminPrimitives';
+import { ActionCard, AdminButton, AdminPageHeader, LogCard } from '@/components/admin/AdminPrimitives';
 import { apiRequest } from '../../../lib/api';
 import { getToken, setToken } from '../../../lib/auth-store';
 
@@ -672,12 +672,15 @@ export default function HomeComposerPage() {
         }
       />
 
-      <section className="card dashboard-controls" aria-label="Admin sign in">
+      <ActionCard
+        className="dashboard-controls"
+        title={isAuthenticated ? (authEmail || 'Signed in session') : 'Admin sign in'}
+        description={isAuthenticated ? 'Active home composer session.' : 'Use the same admin credentials as /api/v1/auth/login.'}
+        icon={isAuthenticated ? 'profile' : 'home'}
+        titleTag="h2"
+      >
         {!isAuthenticated ? (
           <form className="crm-login-form" method="post" onSubmit={(event) => void login(event)}>
-            <h2>Admin sign in</h2>
-            <p className="locale-safe">Use the same admin credentials as /api/v1/auth/login.</p>
-
             <label className="field" htmlFor="home-composer-login-email">
               <span>Admin email</span>
               <input
@@ -707,9 +710,9 @@ export default function HomeComposerPage() {
             {authError ? <div className="state-error">{authError}</div> : null}
 
             <div className="card-actions">
-              <button className="btn" type="submit" disabled={authLoading}>
+              <AdminButton variant="primary" icon="workspace" type="submit" disabled={authLoading}>
                 {authLoading ? 'Signing in' : 'Sign in'}
-              </button>
+              </AdminButton>
             </div>
           </form>
         ) : (
@@ -718,7 +721,7 @@ export default function HomeComposerPage() {
           </div>
         )}
         {!isAuthenticated ? <div className="state-empty">Sign in to manage home composer.</div> : null}
-      </section>
+      </ActionCard>
 
       {isAuthenticated ? (
         <>
@@ -726,8 +729,13 @@ export default function HomeComposerPage() {
           {notice ? <div className="rounded-md border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm text-emerald-700">{notice}</div> : null}
 
           {validation && (validation.errors.length > 0 || validation.warnings.length > 0 || validation.media_warnings.length > 0) ? (
-            <section className="rounded-md border border-slate-200 bg-white p-3 text-sm" aria-live="polite">
-              <h2 className="font-medium text-slate-900">Validation panel</h2>
+            <ActionCard
+              className="home-composer-card home-composer-card--compact"
+              title="Validation panel"
+              description="Draft validation and governance feedback before publishing."
+              icon="warning"
+              titleTag="h2"
+            >
               {validation.errors.length > 0 ? (
                 <ul className="mt-2 list-disc pl-5 text-rose-700">
                   {validation.errors.map((item, index) => <li key={`error-${index}`}>{item}</li>)}
@@ -743,7 +751,7 @@ export default function HomeComposerPage() {
                   {validation.media_warnings.map((item, index) => <li key={`media-${index}`}>{item.path} — {item.detail}</li>)}
                 </ul>
               ) : null}
-            </section>
+            </ActionCard>
           ) : null}
 
           {loading ? (
@@ -752,8 +760,14 @@ export default function HomeComposerPage() {
 
           <div className="grid grid-cols-1 gap-4 xl:grid-cols-[2fr,1fr]">
           <section className="space-y-4">
-            <article className="rounded-lg border border-slate-200 bg-white p-4">
-              <h2 className="text-sm font-medium text-slate-900">Section controls (enable + order)</h2>
+            <ActionCard
+              className="home-composer-card"
+              bodyClassName="space-y-3"
+              title="Section controls"
+              description="Enable sections and control the order they render on the homepage."
+              icon="settings"
+              titleTag="h2"
+            >
               <div className="mt-3 space-y-2">
                 {(config.section_order || SECTION_KEYS).map((section, idx) => (
                   <div key={section} className="flex items-center justify-between rounded-md border border-slate-200 px-3 py-2">
@@ -772,10 +786,16 @@ export default function HomeComposerPage() {
                   </div>
                 ))}
               </div>
-            </article>
+            </ActionCard>
 
-            <article className="rounded-lg border border-slate-200 bg-white p-4 space-y-3">
-              <h2 className="text-sm font-medium text-slate-900">Hero</h2>
+            <ActionCard
+              className="home-composer-card"
+              bodyClassName="space-y-3"
+              title="Hero"
+              description="Main heading, CTAs, trust strip, and hero image selection."
+              icon="home"
+              titleTag="h2"
+            >
               <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
                 <label className="text-sm text-slate-700">Heading<input value={config.hero.heading || ''} onChange={(e) => setConfig((prev) => ({ ...prev, hero: { ...prev.hero, heading: e.target.value } }))} className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2" /></label>
                 <label className="text-sm text-slate-700">Subheading<input value={config.hero.subheading || ''} onChange={(e) => setConfig((prev) => ({ ...prev, hero: { ...prev.hero, subheading: e.target.value } }))} className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2" /></label>
@@ -837,10 +857,16 @@ export default function HomeComposerPage() {
               <label className="block text-sm text-slate-700">Trust micro-strip items (one per line)
                 <textarea value={trustItemsText} onChange={(e) => setTrustItemsText(e.target.value)} rows={4} className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2" />
               </label>
-            </article>
+            </ActionCard>
 
-            <article className="rounded-lg border border-slate-200 bg-white p-4 space-y-3">
-              <h2 className="text-sm font-medium text-slate-900">Path selector</h2>
+            <ActionCard
+              className="home-composer-card"
+              bodyClassName="space-y-3"
+              title="Path selector"
+              description="Configure enabled journeys, labels, descriptions, and destination URLs."
+              icon="filter"
+              titleTag="h2"
+            >
               <label className="inline-flex items-center gap-2 text-sm text-slate-700">
                 <input type="checkbox" checked={Boolean(config.path_selector.enabled)} onChange={(e) => setConfig((prev) => ({ ...prev, path_selector: { ...prev.path_selector, enabled: e.target.checked } }))} />
                 Enabled
@@ -867,10 +893,16 @@ export default function HomeComposerPage() {
                   </div>
                 </div>
               ))}
-            </article>
+            </ActionCard>
 
-            <article className="rounded-lg border border-slate-200 bg-white p-4 space-y-3">
-              <h2 className="text-sm font-medium text-slate-900">Featured Projects</h2>
+            <ActionCard
+              className="home-composer-card"
+              bodyClassName="space-y-3"
+              title="Featured Projects"
+              description="Choose project selection mode, copy, and manual featured items."
+              icon="projects"
+              titleTag="h2"
+            >
               <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
                 <label className="text-sm text-slate-700">Mode
                   <select value={config.featured_projects.mode || 'auto'} onChange={(e) => setConfig((prev) => ({ ...prev, featured_projects: { ...prev.featured_projects, mode: e.target.value as 'manual' | 'auto' } }))} className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2">
@@ -899,10 +931,16 @@ export default function HomeComposerPage() {
                   </div>
                 ))}
               </div>
-            </article>
+            </ActionCard>
 
-            <article className="rounded-lg border border-slate-200 bg-white p-4 space-y-3">
-              <h2 className="text-sm font-medium text-slate-900">Featured Properties / Investment picks</h2>
+            <ActionCard
+              className="home-composer-card"
+              bodyClassName="space-y-3"
+              title="Featured Properties / Investment picks"
+              description="Configure property selection mode, copy, and manual picks."
+              icon="properties"
+              titleTag="h2"
+            >
               <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
                 <label className="text-sm text-slate-700">Mode
                   <select value={config.featured_properties.mode || 'auto'} onChange={(e) => setConfig((prev) => ({ ...prev, featured_properties: { ...prev.featured_properties, mode: e.target.value as 'manual' | 'auto' } }))} className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2">
@@ -931,10 +969,16 @@ export default function HomeComposerPage() {
                   </div>
                 ))}
               </div>
-            </article>
+            </ActionCard>
 
-            <article className="rounded-lg border border-slate-200 bg-white p-4 space-y-3">
-              <h2 className="text-sm font-medium text-slate-900">Proof / Trust</h2>
+            <ActionCard
+              className="home-composer-card"
+              bodyClassName="space-y-3"
+              title="Proof / Trust"
+              description="Edit supporting metrics, trust proofs, and process timeline JSON blocks."
+              icon="success"
+              titleTag="h2"
+            >
               <label className="block text-sm text-slate-700">Why Pattaya metrics JSON
                 <textarea rows={6} value={metricsText} onChange={(e) => setMetricsText(e.target.value)} className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 font-mono text-xs" />
               </label>
@@ -944,10 +988,16 @@ export default function HomeComposerPage() {
               <label className="block text-sm text-slate-700">Process timeline JSON
                 <textarea rows={6} value={processTimelineText} onChange={(e) => setProcessTimelineText(e.target.value)} className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 font-mono text-xs" />
               </label>
-            </article>
+            </ActionCard>
 
-            <article className="rounded-lg border border-slate-200 bg-white p-4 space-y-3">
-              <h2 className="text-sm font-medium text-slate-900">Market Insights / Reviews / Videos / Bottom CTA</h2>
+            <ActionCard
+              className="home-composer-card"
+              bodyClassName="space-y-3"
+              title="Market Insights / Reviews / Videos / Bottom CTA"
+              description="Configure supporting sections and final CTA content in one editor block."
+              icon="dashboard"
+              titleTag="h2"
+            >
               {(['market_insights', 'reviews', 'videos'] as const).map((section) => (
                 <div key={section} className="rounded-md border border-slate-200 p-3 space-y-2">
                   <div className="text-xs font-medium uppercase tracking-wide text-slate-500">{section}</div>
@@ -978,12 +1028,18 @@ export default function HomeComposerPage() {
                   <label className="text-sm text-slate-700">Secondary URL<input value={config.bottom_cta.secondary_cta_url || ''} onChange={(e) => setConfig((prev) => ({ ...prev, bottom_cta: { ...prev.bottom_cta, secondary_cta_url: e.target.value } }))} className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2" /></label>
                 </div>
               </div>
-            </article>
+            </ActionCard>
           </section>
 
           <aside className="space-y-4">
-            <section className="rounded-lg border border-slate-200 bg-white p-4">
-              <h2 className="text-sm font-medium text-slate-900">Media picker</h2>
+            <LogCard
+              className="home-composer-card"
+              bodyClassName="space-y-3"
+              title="Media picker"
+              description="Search media candidates and assign a local hero image."
+              icon="media"
+              titleTag="h2"
+            >
               <input value={candidateSearch} onChange={(e) => setCandidateSearch(e.target.value)} placeholder="Search projects/properties/media" className="mt-2 w-full rounded-md border border-slate-300 px-3 py-2 text-sm" />
               <div className="mt-3 max-h-[65vh] space-y-2 overflow-auto">
                 {mediaCandidates.map((asset) => (
@@ -995,10 +1051,16 @@ export default function HomeComposerPage() {
                   </button>
                 ))}
               </div>
-            </section>
+            </LogCard>
 
-            <section className="rounded-lg border border-slate-200 bg-white p-4 text-sm text-slate-600">
-              <h2 className="font-medium text-slate-900">Composer status</h2>
+            <LogCard
+              className="home-composer-card"
+              bodyClassName="space-y-3 text-sm text-slate-600"
+              title="Composer status"
+              description="Current bundle metadata for draft and published variants."
+              icon="info"
+              titleTag="h2"
+            >
               <ul className="mt-2 space-y-1">
                 <li>Page key: {bundle?.page_key || 'home'}</li>
                 <li>Locale: {bundle?.locale || locale}</li>
@@ -1006,7 +1068,7 @@ export default function HomeComposerPage() {
                 <li>Published version: {bundle?.published?.version ?? 'N/A'}</li>
                 <li>Published at: {bundle?.published?.published_at || 'N/A'}</li>
               </ul>
-            </section>
+            </LogCard>
           </aside>
         </div>
         </>

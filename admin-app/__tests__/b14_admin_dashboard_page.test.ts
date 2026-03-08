@@ -54,10 +54,14 @@ describe("B14 admin dashboard page contract", () => {
     expect(page).toContain('autoComplete="username"');
     expect(page).toContain('autoComplete="current-password"');
     expect(page).toContain("dashboard-shell-grid");
-    expect(page).toContain('className="dashboard-section--widgets"');
+    expect(page).toContain("dashboard-zone dashboard-zone--primary");
+    expect(page).toContain("dashboard-zone dashboard-zone--secondary");
+    expect(page).toContain("dashboard-zone dashboard-zone--tertiary");
+    expect(page).toContain('className="dashboard-section--widgets dashboard-section--primary"');
     expect(page).toContain('className="dashboard-section--table"');
     expect(page).toContain('className="dashboard-section--insights"');
-    expect(page).toContain('className="dashboard-section--warnings"');
+    expect(page).toContain('className="dashboard-log-card dashboard-section--warnings"');
+    expect(page).toContain('className="dashboard-action-card dashboard-section--tasks"');
     expect(page).toContain("DashboardMetricSkeletonRow");
     expect(page).toContain("DashboardKpiWidgets");
     expect(page).toContain("DashboardRecentInquiriesTable");
@@ -70,10 +74,10 @@ describe("B14 admin dashboard page contract", () => {
     expect(page).toContain("buildTrendPoints");
     expect(page).toContain("summary?.trend_series?.[chartPeriod]");
     expect(page).toContain("hasTrendData");
-    expect(page).toContain('role="group" aria-label={t.trendTitle}');
+    expect(page).toContain('ariaLabel={t.trendTitle}');
     expect(page).toContain('role="alert">{authError}</div>');
-    expect(page).toContain("state-empty");
-    expect(page).toContain("state-error");
+    expect(page).toContain("DashboardSectionState");
+    expect(page).toContain("workspaceLockedTitle");
     expect(page).toContain("dashboardState === \"loading\"");
     expect(page).toContain("dashboardState === \"idle\"");
     expect(page).toContain("dashboardState === \"error\"");
@@ -81,13 +85,26 @@ describe("B14 admin dashboard page contract", () => {
     expect(page).toContain("retry: \"Retry\"");
     expect(page).toContain("retry: \"ลองใหม่\"");
     expect(page).toContain('title: "Admin Health / QA Dashboard"');
-    expect(page).toContain('subtitle: "หน้าเดียวสำหรับดูความสมบูรณ์ของระบบและลิงก์แก้ปัญหาแบบ actionable"');
-    expect(page).toContain('trendTitle: "Lead activity trend"');
-    expect(page).toContain('trendTitle: "แนวโน้ม activity ของลีด"');
-    expect(page).toContain('trendHint: "Backend-provided daily inquiry buckets for the selected window."');
-    expect(page).toContain('insightsTitle: "Pipeline insights"');
-    expect(page).toContain('insightsTitle: "ข้อมูล pipeline"');
+    expect(page).toContain('subtitle: "ศูนย์ควบคุมสำหรับสุขภาพระบบ pipeline watchlist และ activity ล่าสุดของแอดมิน"');
+    expect(page).toContain('trendTitle: "Activity metrics"');
+    expect(page).toContain('trendHint: "Lead activity trend backed by backend-provided daily inquiry buckets."');
+    expect(page).toContain('insightsTitle: "Pipeline summary"');
+    expect(page).toContain('insightsTitle: "Pipeline summary"');
+    expect(page).toContain('watchlistTitle: "Watchlist"');
+    expect(page).toContain('backgroundTasksTitle: "Background tasks"');
     expect(page).toContain('sourcePage: "หน้าต้นทาง"');
     expect(page).toContain('intent: "เป้าหมาย"');
+  });
+
+  it("only renders background tasks when the backend provides task payloads", () => {
+    const page = read("app/admin/dashboard/page.tsx");
+
+    expect(page).toContain("const tasks: BackgroundTask[] = [];");
+    expect(page).toContain("if (raw?.last_import_status)");
+    expect(page).toContain("if (raw?.last_mirror_status)");
+    expect(page).toContain("if (raw?.last_deploy_health_status)");
+    expect(page).toContain("return tasks;");
+    expect(page).toContain("if (backgroundTasks.length === 0)");
+    expect(page).toContain("backgroundTasksEmptyTitle");
   });
 });

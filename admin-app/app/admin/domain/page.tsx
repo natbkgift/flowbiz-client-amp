@@ -5,7 +5,14 @@ import { ADMIN_AUTH_LOGIN_PATH } from "@/app/_lib/admin-auth";
 import { detectAdminLocale, type AdminLocale } from "@/app/_lib/admin-i18n";
 import { formatWorkspaceErrorMessage } from "@/app/_lib/admin-workspace-error";
 import AdminWorkspaceErrorState from "@/components/admin/AdminWorkspaceErrorState";
-import { AdminPageHeader, AdminStatCard } from "@/components/admin/AdminPrimitives";
+import {
+  ActionCard,
+  AdminButton,
+  AdminPageHeader,
+  AdminStatCard,
+  AdminTable,
+  LogCard,
+} from "@/components/admin/AdminPrimitives";
 
 type Locale = AdminLocale;
 type EntityType = "areas" | "developers" | "projects";
@@ -300,7 +307,13 @@ export default function AdminDomainPage() {
     <main id="main-content" className="container content-stack admin-overflow-guard">
       <AdminPageHeader title={t.title} description={t.subtitle} icon="domain" eyebrow="Domain workspace" />
 
-      <section className="card dashboard-controls" aria-label={t.loginTitle}>
+      <ActionCard
+        className="dashboard-controls"
+        title={isAuthenticated ? (email || "admin") : t.loginTitle}
+        description={isAuthenticated ? "Active CRUD workspace session." : "Use admin credentials to manage areas, developers, and projects."}
+        icon={isAuthenticated ? "profile" : "domain"}
+        titleTag="h2"
+      >
         {!isAuthenticated ? (
           <form className="crm-login-form" method="post" onSubmit={(event) => void login(event)}>
             <label className="field" htmlFor="domain-login-email">
@@ -312,19 +325,25 @@ export default function AdminDomainPage() {
               <input id="domain-login-password" name="password" type="password" autoComplete="current-password" required value={loginPassword} onChange={(event) => setLoginPassword(event.target.value)} />
             </label>
             {authError ? <div className="state-error">{authError}</div> : null}
-            <button className="btn" type="submit" disabled={authLoading}>{authLoading ? t.signingIn : t.signIn}</button>
+            <AdminButton variant="primary" icon="workspace" type="submit" disabled={authLoading}>
+              {authLoading ? t.signingIn : t.signIn}
+            </AdminButton>
           </form>
         ) : (
           <div className="crm-session-panel" role="status" aria-live="polite">
             <p className="locale-safe">{email || "admin"}</p>
             <div className="card-actions">
-              <button className="btn btn-secondary" type="button" onClick={() => void loadWorkspace()}>{t.refresh}</button>
-              <button className="btn btn-secondary" type="button" onClick={logout}>{t.signOut}</button>
+              <AdminButton variant="secondary" icon="refresh" type="button" onClick={() => void loadWorkspace()}>
+                {t.refresh}
+              </AdminButton>
+              <AdminButton variant="secondary" icon="x" type="button" onClick={logout}>
+                {t.signOut}
+              </AdminButton>
             </div>
           </div>
         )}
         {!isAuthenticated ? <div className="state-empty">{t.authRequired}</div> : null}
-      </section>
+      </ActionCard>
 
       {pageError ? (
         <AdminWorkspaceErrorState
@@ -344,8 +363,13 @@ export default function AdminDomainPage() {
             <AdminStatCard label={t.drafts} value={unpublishedDrafts} icon="blog" tone="warn" />
           </section>
 
-          <section className="card domain-editor-card">
-            <h2>{t.entity}</h2>
+          <ActionCard
+            className="domain-editor-card"
+            title={t.entity}
+            description="Create, patch, publish, unpublish, or delete selected entities without changing payload shapes."
+            icon="domain"
+            titleTag="h2"
+          >
             <label className="field" htmlFor="domain-entity-type">
               <span>{t.entity}</span>
               <select id="domain-entity-type" value={entity} onChange={(event) => setEntity(event.target.value as EntityType)}>
@@ -361,38 +385,42 @@ export default function AdminDomainPage() {
               <label className="field" htmlFor="domain-stats-json"><span>{t.statsJson}</span><textarea id="domain-stats-json" rows={6} value={statsJson} onChange={(event) => setStatsJson(event.target.value)} /></label>
             ) : null}
             <div className="card-actions">
-              <button className="btn" type="button" disabled={opBusy} onClick={() => void runAction(() => fetchJson(basePath(), token, { method: "POST", body: createJson }))}>{t.create}</button>
-              <button className="btn btn-secondary" type="button" disabled={opBusy || !entityId.trim()} onClick={() => void runAction(() => fetchJson(`${basePath()}/${entityId.trim()}`, token))}>{t.get}</button>
-              <button className="btn btn-secondary" type="button" disabled={opBusy || !entityId.trim()} onClick={() => void runAction(() => fetchJson(`${basePath()}/${entityId.trim()}`, token, { method: "PATCH", body: patchJson }))}>{t.patch}</button>
+              <AdminButton variant="primary" icon="plus" type="button" disabled={opBusy} onClick={() => void runAction(() => fetchJson(basePath(), token, { method: "POST", body: createJson }))}>{t.create}</AdminButton>
+              <AdminButton variant="secondary" icon="search" type="button" disabled={opBusy || !entityId.trim()} onClick={() => void runAction(() => fetchJson(`${basePath()}/${entityId.trim()}`, token))}>{t.get}</AdminButton>
+              <AdminButton variant="secondary" icon="refresh" type="button" disabled={opBusy || !entityId.trim()} onClick={() => void runAction(() => fetchJson(`${basePath()}/${entityId.trim()}`, token, { method: "PATCH", body: patchJson }))}>{t.patch}</AdminButton>
               {entity === "areas" ? (
-                <button className="btn btn-secondary" type="button" disabled={opBusy || !entityId.trim()} onClick={() => void runAction(() => fetchJson(`${basePath()}/${entityId.trim()}/statistics`, token, { method: "PUT", body: statsJson }))}>{t.stats}</button>
+                <AdminButton variant="secondary" icon="table" type="button" disabled={opBusy || !entityId.trim()} onClick={() => void runAction(() => fetchJson(`${basePath()}/${entityId.trim()}/statistics`, token, { method: "PUT", body: statsJson }))}>{t.stats}</AdminButton>
               ) : null}
-              <button className="btn btn-secondary" type="button" disabled={opBusy || !entityId.trim()} onClick={() => void runAction(() => fetchJson(`${basePath()}/${entityId.trim()}/publish`, token, { method: "POST" }))}>{t.publish}</button>
+              <AdminButton variant="secondary" icon="success" type="button" disabled={opBusy || !entityId.trim()} onClick={() => void runAction(() => fetchJson(`${basePath()}/${entityId.trim()}/publish`, token, { method: "POST" }))}>{t.publish}</AdminButton>
               {entity !== "projects" ? (
-                <button className="btn btn-secondary" type="button" disabled={opBusy || !entityId.trim()} onClick={() => void runAction(() => fetchJson(`${basePath()}/${entityId.trim()}/unpublish`, token, { method: "POST" }))}>{t.unpublish}</button>
+                <AdminButton variant="secondary" icon="warning" type="button" disabled={opBusy || !entityId.trim()} onClick={() => void runAction(() => fetchJson(`${basePath()}/${entityId.trim()}/unpublish`, token, { method: "POST" }))}>{t.unpublish}</AdminButton>
               ) : null}
-              <button className="btn btn-secondary" type="button" disabled={opBusy || !entityId.trim()} onClick={() => void runAction(() => fetchJson(`${basePath()}/${entityId.trim()}`, token, { method: "DELETE" }))}>{t.del}</button>
+              <AdminButton variant="danger" icon="x" type="button" disabled={opBusy || !entityId.trim()} onClick={() => void runAction(() => fetchJson(`${basePath()}/${entityId.trim()}`, token, { method: "DELETE" }))}>{t.del}</AdminButton>
             </div>
             {opError ? <div className="state-error">{opError}</div> : null}
             <label className="field" htmlFor="domain-op-result"><span>{t.result}</span><textarea id="domain-op-result" rows={10} readOnly value={opResult} /></label>
-          </section>
+          </ActionCard>
 
-          <section className="card">
-            <h2>{entity}</h2>
-            <div className="dashboard-table-wrap">
+          <LogCard
+            title={entity}
+            description="Latest entity rows for the currently selected workspace type."
+            icon="table"
+            titleTag="h2"
+          >
+            <AdminTable caption={entity}>
               <table className="dashboard-table">
                 <thead><tr><th>Slug</th><th>Name</th><th>Status</th><th>Updated</th><th>Action</th></tr></thead>
                 <tbody>
                   {(entity === "areas" ? areas : entity === "developers" ? developers : projects).map((row) => (
                     <tr key={row.id}>
                       <td>{row.slug || "-"}</td><td>{row.name || "-"}</td><td>{row.status || "-"}</td><td>{prettyDate(row.updated_at, locale)}</td>
-                      <td><button className="btn btn-secondary" type="button" onClick={() => setEntityId(row.id)}>select</button></td>
+                      <td><AdminButton variant="secondary" size="sm" icon="search" type="button" onClick={() => setEntityId(row.id)}>select</AdminButton></td>
                     </tr>
                   ))}
                 </tbody>
               </table>
-            </div>
-          </section>
+            </AdminTable>
+          </LogCard>
         </>
       ) : null}
     </main>

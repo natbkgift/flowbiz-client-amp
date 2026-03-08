@@ -5,7 +5,12 @@ import { type FormEvent, useEffect, useMemo, useState } from "react";
 import { clearAuthSession, loginAdmin, persistAuthSession, readAuthSession } from "@/app/_lib/admin-auth";
 import { detectAdminLocale, type AdminLocale } from "@/app/_lib/admin-i18n";
 import { SITE_LAYOUT_CMS_SLUG, SITE_LAYOUT_CMS_TEMPLATE } from "@/app/_lib/layout-cms";
-import { AdminPageHeader } from "@/components/admin/AdminPrimitives";
+import {
+  ActionCard,
+  AdminButton,
+  AdminPageHeader,
+  LogCard,
+} from "@/components/admin/AdminPrimitives";
 
 type Locale = AdminLocale;
 type CompanyInfoItem = {
@@ -290,10 +295,15 @@ export default function AdminLayoutCmsPage() {
     <main id="main-content" className="container content-stack">
       <AdminPageHeader title={t.title} description={t.subtitle} icon="layout" eyebrow="Layout CMS" />
 
-      <section className="card dashboard-controls" aria-label={t.loginTitle}>
+      <ActionCard
+        className="dashboard-controls"
+        title={isAuthenticated ? (email || "Admin") : t.loginTitle}
+        description={isAuthenticated ? "Current layout CMS session and fetch controls." : "Use admin credentials to edit the shared layout source."}
+        icon={isAuthenticated ? "profile" : "layout"}
+        titleTag="h2"
+      >
         {!isAuthenticated ? (
           <form className="crm-login-form" method="post" onSubmit={(event) => void login(event)}>
-            <h2>{t.loginTitle}</h2>
             <label className="field" htmlFor="layout-login-email">
               <span>{t.email}</span>
               <input
@@ -320,34 +330,42 @@ export default function AdminLayoutCmsPage() {
             </label>
             {authError ? <div className="state-error">{authError}</div> : null}
             <div className="card-actions">
-              <button className="btn" type="submit" disabled={authLoading}>
+              <AdminButton variant="primary" icon="workspace" type="submit" disabled={authLoading}>
                 {authLoading ? t.signingIn : t.signIn}
-              </button>
+              </AdminButton>
             </div>
           </form>
         ) : (
           <div className="crm-session-panel" role="status" aria-live="polite">
             <p className="locale-safe">{email ? `${t.email}: ${email}` : t.authRequired}</p>
             <div className="card-actions">
-              <button className="btn btn-secondary" type="button" onClick={() => void loadCurrent()}>
+              <AdminButton variant="secondary" icon="refresh" type="button" onClick={() => void loadCurrent()}>
                 {loading ? t.refresh : t.refresh}
-              </button>
-              <button className="btn btn-secondary" type="button" onClick={logout}>
+              </AdminButton>
+              <AdminButton variant="secondary" icon="x" type="button" onClick={logout}>
                 {t.signOut}
-              </button>
+              </AdminButton>
             </div>
           </div>
         )}
         {!isAuthenticated ? <div className="state-empty">{t.authRequired}</div> : null}
-      </section>
+      </ActionCard>
 
       {isAuthenticated ? (
-        <section className="card">
-          <p className="locale-safe">{recordExists ? t.exists : t.missing}</p>
-          <p>
-            <strong>{t.updatedAt}:</strong> {prettyDate(updatedAt, locale)}
-          </p>
-          <p className="locale-safe">{t.sourceHint}</p>
+        <ActionCard
+          title={t.configLabel}
+          description={t.sourceHint}
+          icon="layout"
+          titleTag="h2"
+          meta={
+            <>
+              <span className="locale-safe">{recordExists ? t.exists : t.missing}</span>
+              <span>
+                <strong>{t.updatedAt}:</strong> {prettyDate(updatedAt, locale)}
+              </span>
+            </>
+          }
+        >
           <label className="field" htmlFor="layout-cms-json">
             <span>{t.configLabel}</span>
             <textarea
@@ -358,25 +376,30 @@ export default function AdminLayoutCmsPage() {
             />
           </label>
           <div className="card-actions">
-            <button className="btn" type="button" disabled={saving} onClick={() => void saveConfig()}>
+            <AdminButton variant="primary" icon="success" type="button" disabled={saving} onClick={() => void saveConfig()}>
               {saving ? t.saving : t.save}
-            </button>
-            <button
-              className="btn btn-secondary"
+            </AdminButton>
+            <AdminButton
+              variant="secondary"
+              icon="refresh"
               type="button"
               onClick={() => setConfigText(SITE_LAYOUT_CMS_TEMPLATE)}
             >
               {t.reset}
-            </button>
+            </AdminButton>
           </div>
           {pageError ? <div className="state-error">{pageError}</div> : null}
           {resultMessage ? <div className="state-success">{resultMessage}</div> : null}
-        </section>
+        </ActionCard>
       ) : null}
 
       {isAuthenticated ? (
-        <section className="card">
-          <h2>{t.preview}</h2>
+        <LogCard
+          title={t.preview}
+          description="Resolved counts and contact details parsed from the current JSON config."
+          icon="table"
+          titleTag="h2"
+        >
           {!preview.ok ? (
             <div className="state-error">Invalid JSON</div>
           ) : (
@@ -387,7 +410,7 @@ export default function AdminLayoutCmsPage() {
               <li>Footer email: {preview.email}</li>
             </ul>
           )}
-        </section>
+        </LogCard>
       ) : null}
     </main>
   );

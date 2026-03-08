@@ -63,9 +63,11 @@ describe("B11 admin inquiries page contract", () => {
     const page = read("app/admin/inquiries/page.tsx");
 
     expect(page).toContain('<main id="main-content"');
-    expect(page).toContain('<h1>{t.title}</h1>');
-    expect(page).toContain('<h2>{t.list}</h2>');
-    expect(page).toContain('<h2>{t.details}</h2>');
+    expect(page).toContain("<AdminPageHeader title={t.title}");
+    expect(page).toContain('title={t.list}');
+    expect(page).toContain('title={t.details}');
+    expect(page).toContain('className="crm-list"');
+    expect(page).toContain('className="crm-detail"');
     expect(page).toContain('htmlFor="crm-login-email"');
     expect(page).toContain('htmlFor="crm-login-password"');
     expect(page).toContain('autoComplete="username"');

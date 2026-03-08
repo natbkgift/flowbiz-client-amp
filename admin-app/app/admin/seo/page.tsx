@@ -4,7 +4,13 @@ import { type FormEvent, useEffect, useState } from "react";
 
 import { clearAuthSession, loginAdmin, persistAuthSession, readAuthSession } from "@/app/_lib/admin-auth";
 import { detectAdminLocale, type AdminLocale } from "@/app/_lib/admin-i18n";
-import { AdminPageHeader } from "@/components/admin/AdminPrimitives";
+import {
+  ActionCard,
+  AdminButton,
+  AdminPageHeader,
+  AdminSectionCard,
+  LogCard,
+} from "@/components/admin/AdminPrimitives";
 import { formatSeoApiError, readRequestFailedStatus } from "./error-utils";
 
 type Locale = AdminLocale;
@@ -543,10 +549,14 @@ export default function AdminSeoPage() {
     <main id="main-content" className="container content-stack admin-overflow-guard">
       <AdminPageHeader title={t.title} description={t.subtitle} icon="globe" eyebrow="SEO controls" />
 
-      <section className="card" aria-label={t.loginTitle}>
+      <ActionCard
+        title={isAuth ? (email || t.authRequired) : t.loginTitle}
+        description={isAuth ? "Active SEO workspace session and refresh controls." : "Use admin credentials to manage overrides, redirects, schema, and broken-link reports."}
+        icon={isAuth ? "profile" : "globe"}
+        titleTag="h2"
+      >
         {!isAuth ? (
           <form className="crm-login-form" method="post" onSubmit={(event) => void login(event)}>
-            <h2>{t.loginTitle}</h2>
             <label className="field" htmlFor="seo-login-email">
               <span>{t.email}</span>
               <input id="seo-login-email" name="email" type="email" autoComplete="username" required value={loginEmail} onChange={(event) => setLoginEmail(event.target.value)} />
@@ -557,20 +567,20 @@ export default function AdminSeoPage() {
             </label>
             {authError ? <div className="state-error">{authError}</div> : null}
             <div className="card-actions">
-              <button className="btn" type="submit" disabled={busy}>{t.signIn}</button>
+              <AdminButton variant="primary" icon="workspace" type="submit" disabled={busy}>{t.signIn}</AdminButton>
             </div>
           </form>
         ) : (
           <div className="crm-session-panel" role="status" aria-live="polite">
             <p className="locale-safe">{email || t.authRequired}</p>
             <div className="card-actions">
-              <button className="btn btn-secondary" type="button" onClick={logout}>{t.signOut}</button>
-              <button className="btn btn-secondary" type="button" onClick={() => void refreshAll()} disabled={loading}>{loading ? t.loading : t.refresh}</button>
+              <AdminButton variant="secondary" icon="x" type="button" onClick={logout}>{t.signOut}</AdminButton>
+              <AdminButton variant="secondary" icon="refresh" type="button" onClick={() => void refreshAll()} disabled={loading}>{loading ? t.loading : t.refresh}</AdminButton>
             </div>
           </div>
         )}
         {!isAuth ? <div className="state-empty">{t.authRequired}</div> : null}
-      </section>
+      </ActionCard>
 
       {pageError ? (
         <div className="state-error" role="alert">
@@ -590,8 +600,12 @@ export default function AdminSeoPage() {
       {loading ? <div className="state-loading">{t.loading}</div> : null}
 
       <section className="seo-layout">
-        <article className="card seo-pane">
-          <h2>{t.sectionOverrides}</h2>
+        <AdminSectionCard
+          className="seo-pane"
+          title={t.sectionOverrides}
+          description="Manage per-path SEO metadata overrides."
+          icon="globe"
+        >
           <form className="seo-form-grid" onSubmit={(event) => void saveOverride(event)}>
             <label className="field" htmlFor="seo-override-path"><span>Path</span><input id="seo-override-path" value={overrideForm.path} onChange={(event) => setOverrideForm((prev) => ({ ...prev, path: event.target.value }))} required /></label>
             <label className="field" htmlFor="seo-override-locale"><span>Locale</span><select id="seo-override-locale" value={overrideForm.locale} onChange={(event) => setOverrideForm((prev) => ({ ...prev, locale: event.target.value === "th" ? "th" : "en" }))}><option value="en">en</option><option value="th">th</option></select></label>
@@ -618,10 +632,14 @@ export default function AdminSeoPage() {
               ))}
             </ul>
           ) : null}
-        </article>
+        </AdminSectionCard>
 
-        <article className="card seo-pane">
-          <h2>{t.sectionRedirects}</h2>
+        <AdminSectionCard
+          className="seo-pane"
+          title={t.sectionRedirects}
+          description="Manage redirect rules and preload production mappings."
+          icon="refresh"
+        >
           <form className="seo-form-grid" onSubmit={(event) => void saveRedirect(event)}>
             <label className="field" htmlFor="seo-redirect-old-path"><span>Old path</span><input id="seo-redirect-old-path" value={redirectForm.old_path} onChange={(event) => setRedirectForm((prev) => ({ ...prev, old_path: event.target.value }))} required /></label>
             <label className="field" htmlFor="seo-redirect-new-path"><span>New path</span><input id="seo-redirect-new-path" value={redirectForm.new_path} onChange={(event) => setRedirectForm((prev) => ({ ...prev, new_path: event.target.value }))} required /></label>
@@ -648,10 +666,14 @@ export default function AdminSeoPage() {
               ))}
             </ul>
           ) : null}
-        </article>
+        </AdminSectionCard>
 
-        <article className="card seo-pane seo-full">
-          <h2>{t.sectionSchema}</h2>
+        <AdminSectionCard
+          className="seo-pane seo-full"
+          title={t.sectionSchema}
+          description="Edit approved schema source fields by locale."
+          icon="layout"
+        >
           <form className="seo-form-grid" onSubmit={(event) => void saveSchema(event)}>
             <label className="field" htmlFor="seo-schema-locale"><span>Locale</span><select id="seo-schema-locale" value={schemaForm.locale} onChange={(event) => setSchemaForm((prev) => ({ ...prev, locale: event.target.value === "th" ? "th" : "en" }))}><option value="en">en</option><option value="th">th</option></select></label>
             <label className="seo-inline-check" htmlFor="seo-schema-enabled"><input id="seo-schema-enabled" type="checkbox" checked={schemaForm.enabled} onChange={(event) => setSchemaForm((prev) => ({ ...prev, enabled: event.target.checked }))} /><span>enabled</span></label>
@@ -675,10 +697,15 @@ export default function AdminSeoPage() {
             </div>
           </form>
           {!schemaHasData ? <div className="state-empty">{t.emptySchema}</div> : null}
-        </article>
+        </AdminSectionCard>
 
-        <article className="card seo-pane seo-full">
-          <h2>{t.sectionBroken}</h2>
+        <LogCard
+          className="seo-pane seo-full"
+          title={t.sectionBroken}
+          description="Run the link checker and inspect the latest crawl report."
+          icon="warning"
+          titleTag="h2"
+        >
           <div className="card-actions">
             <button className="btn" type="button" onClick={() => void runBrokenLinks()} disabled={!isAuth || busy}>Run checker</button>
             <button className="btn btn-secondary" type="button" onClick={() => void loadReport(token)} disabled={!isAuth || busy}>{t.refresh}</button>
@@ -721,7 +748,7 @@ export default function AdminSeoPage() {
               )}
             </>
           ) : null}
-        </article>
+        </LogCard>
       </section>
     </main>
   );

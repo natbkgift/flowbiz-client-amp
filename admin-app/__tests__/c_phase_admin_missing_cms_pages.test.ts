@@ -102,7 +102,8 @@ describe("Phase C missing CMS pages", () => {
     expect(workspace).toContain("Create locale tabs");
     expect(workspace).toContain("Update locale tabs");
     expect(workspace).toContain("Translation completeness");
-    expect(workspace).toContain("<h2>Preview</h2>");
+    expect(workspace).toContain("<LogCard");
+    expect(workspace).toContain('title="Preview"');
   });
 
   it("wires taxonomy registry usage into article and property/project forms", () => {

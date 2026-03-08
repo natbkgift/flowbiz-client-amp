@@ -6,7 +6,14 @@ import { clearAuthSession, loginAdmin, persistAuthSession, readAuthSession } fro
 import { detectAdminLocale, type AdminLocale } from "@/app/_lib/admin-i18n";
 import { formatWorkspaceErrorMessage } from "@/app/_lib/admin-workspace-error";
 import AdminWorkspaceErrorState from "@/components/admin/AdminWorkspaceErrorState";
-import { AdminPageHeader, AdminStatCard } from "@/components/admin/AdminPrimitives";
+import {
+  ActionCard,
+  AdminButton,
+  AdminPageHeader,
+  AdminStatCard,
+  AdminTable,
+  LogCard,
+} from "@/components/admin/AdminPrimitives";
 
 type Locale = AdminLocale;
 
@@ -312,12 +319,15 @@ export default function AdminImportsPage() {
     <main id="main-content" className="container content-stack">
       <AdminPageHeader title={t.title} description={t.subtitle} icon="imports" eyebrow="Import operations" />
 
-      <section className="card dashboard-controls" aria-label={t.loginTitle}>
+      <ActionCard
+        className="dashboard-controls"
+        title={isAuthenticated ? (authEmail || "Admin") : t.loginTitle}
+        description={isAuthenticated ? "Active workspace session and refresh controls." : t.loginSubtitle}
+        icon={isAuthenticated ? "profile" : "imports"}
+        titleTag="h2"
+      >
         {!isAuthenticated ? (
           <form className="crm-login-form" method="post" onSubmit={(event) => void login(event)}>
-            <h2>{t.loginTitle}</h2>
-            <p className="locale-safe">{t.loginSubtitle}</p>
-
             <label className="field" htmlFor="imports-login-email">
               <span>{t.email}</span>
               <input
@@ -347,26 +357,25 @@ export default function AdminImportsPage() {
             {authError ? <div className="state-error">{authError}</div> : null}
 
             <div className="card-actions">
-              <button className="btn" type="submit" disabled={authLoading}>
+              <AdminButton variant="primary" icon="workspace" type="submit" disabled={authLoading}>
                 {authLoading ? t.signingIn : t.signIn}
-              </button>
+              </AdminButton>
             </div>
           </form>
         ) : (
           <div className="crm-session-panel" role="status" aria-live="polite">
-            <h2>{authEmail || "Admin"}</h2>
             <div className="card-actions">
-              <button className="btn btn-secondary" type="button" onClick={() => void loadWorkspace()}>
+              <AdminButton variant="secondary" icon="refresh" type="button" onClick={() => void loadWorkspace()}>
                 {loading ? t.loading : t.refresh}
-              </button>
-              <button className="btn btn-secondary" type="button" onClick={logout}>
+              </AdminButton>
+              <AdminButton variant="secondary" icon="x" type="button" onClick={logout}>
                 {t.signOut}
-              </button>
+              </AdminButton>
             </div>
           </div>
         )}
         {!isAuthenticated ? <div className="state-empty">{t.authRequired}</div> : null}
-      </section>
+      </ActionCard>
 
       {pageError ? (
         <AdminWorkspaceErrorState
@@ -399,8 +408,12 @@ export default function AdminImportsPage() {
             <AdminStatCard label={t.total} value={total} icon="imports" tone="ok" />
           </section>
 
-          <section className="card" aria-label={t.importRun}>
-            <h2>{t.importRun}</h2>
+          <ActionCard
+            title={t.importRun}
+            description="Upload a CSV, choose dry-run mode, and inspect the normalized import result."
+            icon="imports"
+            titleTag="h2"
+          >
             <div className="dashboard-grid">
               <label className="field" htmlFor="imports-file">
                 <span>{t.csvFile}</span>
@@ -421,24 +434,29 @@ export default function AdminImportsPage() {
                 />
               </label>
               <div className="card-actions">
-                <button
-                  className="btn"
+                <AdminButton
+                  variant="primary"
+                  icon="imports"
                   type="button"
                   disabled={importBusy || !importFile}
                   onClick={() => void runImport()}
                 >
                   {importBusy ? t.loading : t.executeImport}
-                </button>
+                </AdminButton>
               </div>
             </div>
             <label className="field" htmlFor="imports-result">
               <span>{t.importResult}</span>
               <textarea id="imports-result" rows={8} readOnly value={importResult} />
             </label>
-          </section>
+          </ActionCard>
 
-          <section className="card" aria-label={t.imports}>
-            <h2>{t.imports}</h2>
+          <LogCard
+            title={t.imports}
+            description="Recent import executions with status, file, row counts, and runtime."
+            icon="table"
+            titleTag="h2"
+          >
             <div className="dashboard-grid">
               <label className="field" htmlFor="imports-filter-status">
                 <span>{t.filterStatus}</span>
@@ -465,7 +483,7 @@ export default function AdminImportsPage() {
             {imports.length === 0 ? (
               <div className="state-empty">{t.empty}</div>
             ) : (
-              <div className="dashboard-table-wrap">
+              <AdminTable caption={t.imports}>
                 <table className="dashboard-table">
                   <thead>
                     <tr>
@@ -492,9 +510,9 @@ export default function AdminImportsPage() {
                     ))}
                   </tbody>
                 </table>
-              </div>
+              </AdminTable>
             )}
-          </section>
+          </LogCard>
         </>
       ) : null}
     </main>

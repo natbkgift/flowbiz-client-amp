@@ -1,8 +1,8 @@
 import Link from "next/link";
 
 import { type AdminLocale, withAdminLocale } from "@/app/_lib/admin-i18n";
-import { AdminIcon, type AdminIconName } from "@/components/admin/AdminIcons";
-import { AdminBadge, adminButtonClassName } from "@/components/admin/AdminPrimitives";
+import type { AdminIconName } from "@/components/admin/AdminIcons";
+import { AdminBadge, MetricCard, adminButtonClassName } from "@/components/admin/AdminPrimitives";
 
 type WidgetStatus = "ok" | "warn" | "error" | "unknown";
 
@@ -438,17 +438,13 @@ export function DashboardKpiWidgets({
       {widgets.map((widget) => {
         const presentation = createPresentation(widget, metricMap, locale, fallback);
         return (
-          <article
+          <MetricCard
             key={widget.key}
-            className={`card dashboard-widget dashboard-kpi-card dashboard-kpi-card--${widget.status}`}
-          >
-            <header className="dashboard-widget-head">
-              <div className="dashboard-widget-title">
-                <span className="dashboard-widget-title-icon" aria-hidden="true">
-                  <AdminIcon name={widgetIcon(widget.key)} size={16} />
-                </span>
-                <h3>{widget.title}</h3>
-              </div>
+            className={`dashboard-widget dashboard-kpi-card dashboard-kpi-card--${widget.status}`}
+            icon={widgetIcon(widget.key)}
+            title={widget.title}
+            titleTag="h3"
+            actions={
               <AdminBadge
                 tone={widget.status === "ok" ? "ok" : widget.status === "warn" ? "warn" : widget.status === "error" ? "error" : "neutral"}
                 icon={statusIcon(widget.status)}
@@ -456,8 +452,24 @@ export function DashboardKpiWidgets({
               >
                 {statusLabel(widget.status, locale)}
               </AdminBadge>
-            </header>
-
+            }
+            footer={
+              (widget.actions || []).length > 0 ? (
+                <div className="dashboard-widget-actions">
+                  {(widget.actions || []).map((action, index) => (
+                    <Link
+                      key={`${widget.key}-${action.url}-${index}`}
+                      className={adminButtonClassName({ variant: "secondary", size: "sm" })}
+                      href={withAdminLocale(action.url, locale)}
+                    >
+                      {action.label}
+                    </Link>
+                  ))}
+                </div>
+              ) : undefined
+            }
+            bodyClassName="dashboard-widget__body"
+          >
             <div className="dashboard-kpi-value-block">
               <p className="dashboard-widget-value">{presentation.primaryValue}</p>
               {presentation.secondaryValue ? (
@@ -484,19 +496,7 @@ export function DashboardKpiWidgets({
             ) : null}
 
             <p className="locale-safe">{widget.summary}</p>
-
-            <div className="dashboard-widget-actions">
-              {(widget.actions || []).map((action, index) => (
-                <Link
-                  key={`${widget.key}-${action.url}-${index}`}
-                  className={adminButtonClassName({ variant: "secondary", size: "sm" })}
-                  href={withAdminLocale(action.url, locale)}
-                >
-                  {action.label}
-                </Link>
-              ))}
-            </div>
-          </article>
+          </MetricCard>
         );
       })}
     </div>

@@ -5,7 +5,15 @@ import { ADMIN_AUTH_LOGIN_PATH } from "@/app/_lib/admin-auth";
 import { detectAdminLocale, type AdminLocale } from "@/app/_lib/admin-i18n";
 import { formatWorkspaceErrorMessage } from "@/app/_lib/admin-workspace-error";
 import AdminWorkspaceErrorState from "@/components/admin/AdminWorkspaceErrorState";
-import { AdminPageHeader, AdminStatCard } from "@/components/admin/AdminPrimitives";
+import {
+  ActionCard,
+  AdminButton,
+  AdminPageHeader,
+  AdminSectionCard,
+  AdminStatCard,
+  AdminTable,
+  LogCard,
+} from "@/components/admin/AdminPrimitives";
 
 type Locale = AdminLocale;
 
@@ -369,12 +377,15 @@ export default function AdminMediaPage() {
     <main id="main-content" className="container content-stack">
       <AdminPageHeader title={t.title} description={t.subtitle} icon="media" eyebrow="Media operations" />
 
-      <section className="card dashboard-controls" aria-label={t.loginTitle}>
+      <ActionCard
+        className="dashboard-controls"
+        title={isAuthenticated ? (authEmail || "Admin") : t.loginTitle}
+        description={isAuthenticated ? "Active media workspace session." : t.loginSubtitle}
+        icon={isAuthenticated ? "profile" : "media"}
+        titleTag="h2"
+      >
         {!isAuthenticated ? (
           <form className="crm-login-form" method="post" onSubmit={(event) => void login(event)}>
-            <h2>{t.loginTitle}</h2>
-            <p className="locale-safe">{t.loginSubtitle}</p>
-
             <label className="field" htmlFor="media-login-email">
               <span>{t.email}</span>
               <input
@@ -404,26 +415,25 @@ export default function AdminMediaPage() {
             {authError ? <div className="state-error">{authError}</div> : null}
 
             <div className="card-actions">
-              <button className="btn" type="submit" disabled={authLoading}>
+              <AdminButton variant="primary" icon="workspace" type="submit" disabled={authLoading}>
                 {authLoading ? t.signingIn : t.signIn}
-              </button>
+              </AdminButton>
             </div>
           </form>
         ) : (
           <div className="crm-session-panel" role="status" aria-live="polite">
-            <h2>{authEmail || "Admin"}</h2>
             <div className="card-actions">
-              <button className="btn btn-secondary" type="button" onClick={() => void loadWorkspace()}>
+              <AdminButton variant="secondary" icon="refresh" type="button" onClick={() => void loadWorkspace()}>
                 {loading ? t.loading : t.refresh}
-              </button>
-              <button className="btn btn-secondary" type="button" onClick={logout}>
+              </AdminButton>
+              <AdminButton variant="secondary" icon="x" type="button" onClick={logout}>
                 {t.signOut}
-              </button>
+              </AdminButton>
             </div>
           </div>
         )}
         {!isAuthenticated ? <div className="state-empty">{t.authRequired}</div> : null}
-      </section>
+      </ActionCard>
 
       {pageError ? (
         <AdminWorkspaceErrorState
@@ -456,11 +466,13 @@ export default function AdminMediaPage() {
             />
           </section>
 
-          <section className="card" aria-label={t.operations}>
-            <h2>{t.operations}</h2>
+          <AdminSectionCard
+            title={t.operations}
+            description="Run upload, CRUD, replace, and gallery sync workflows from a shared action surface."
+            icon="media"
+          >
             <div className="dashboard-grid">
-              <article className="card">
-                <h3>{t.upload}</h3>
+              <ActionCard title={t.upload} description="Upload a new media asset with optional title metadata." icon="plus">
                 <label className="field" htmlFor="media-upload-file">
                   <span>{t.uploadFile}</span>
                   <input
@@ -477,8 +489,9 @@ export default function AdminMediaPage() {
                     onChange={(event) => setUploadTitle(event.target.value)}
                   />
                 </label>
-                <button
-                  className="btn"
+                <AdminButton
+                  variant="primary"
+                  icon="plus"
                   type="button"
                   disabled={opBusy || !uploadFile}
                   onClick={() =>
@@ -494,11 +507,10 @@ export default function AdminMediaPage() {
                   }
                 >
                   {t.upload}
-                </button>
-              </article>
+                </AdminButton>
+              </ActionCard>
 
-              <article className="card">
-                <h3>CRUD</h3>
+              <ActionCard title="CRUD" description="Read, patch, archive, restore, and inspect media usage." icon="refresh">
                 <label className="field" htmlFor="media-id">
                   <span>{t.mediaId}</span>
                   <input
@@ -517,8 +529,9 @@ export default function AdminMediaPage() {
                   />
                 </label>
                 <div className="card-actions">
-                  <button
-                    className="btn btn-secondary"
+                  <AdminButton
+                    variant="secondary"
+                    icon="search"
                     type="button"
                     disabled={opBusy || !mediaId.trim()}
                     onClick={() =>
@@ -526,9 +539,10 @@ export default function AdminMediaPage() {
                     }
                   >
                     {t.runGet}
-                  </button>
-                  <button
-                    className="btn btn-secondary"
+                  </AdminButton>
+                  <AdminButton
+                    variant="secondary"
+                    icon="refresh"
                     type="button"
                     disabled={opBusy || !mediaId.trim()}
                     onClick={() =>
@@ -542,9 +556,10 @@ export default function AdminMediaPage() {
                     }
                   >
                     {t.runPatch}
-                  </button>
-                  <button
-                    className="btn btn-secondary"
+                  </AdminButton>
+                  <AdminButton
+                    variant="secondary"
+                    icon="warning"
                     type="button"
                     disabled={opBusy || !mediaId.trim()}
                     onClick={() =>
@@ -556,9 +571,10 @@ export default function AdminMediaPage() {
                     }
                   >
                     {t.runArchive}
-                  </button>
-                  <button
-                    className="btn btn-secondary"
+                  </AdminButton>
+                  <AdminButton
+                    variant="secondary"
+                    icon="success"
                     type="button"
                     disabled={opBusy || !mediaId.trim()}
                     onClick={() =>
@@ -570,9 +586,10 @@ export default function AdminMediaPage() {
                     }
                   >
                     {t.runRestore}
-                  </button>
-                  <button
-                    className="btn btn-secondary"
+                  </AdminButton>
+                  <AdminButton
+                    variant="secondary"
+                    icon="table"
                     type="button"
                     disabled={opBusy || !mediaId.trim()}
                     onClick={() =>
@@ -580,12 +597,11 @@ export default function AdminMediaPage() {
                     }
                   >
                     {t.runUsage}
-                  </button>
+                  </AdminButton>
                 </div>
-              </article>
+              </ActionCard>
 
-              <article className="card">
-                <h3>{t.runReplace}</h3>
+              <ActionCard title={t.runReplace} description="Replace an existing media file while preserving the record." icon="refresh">
                 <label className="field" htmlFor="media-replace-file">
                   <span>{t.replaceFile}</span>
                   <input
@@ -594,8 +610,9 @@ export default function AdminMediaPage() {
                     onChange={(event) => setReplaceFile(event.target.files?.[0] || null)}
                   />
                 </label>
-                <button
-                  className="btn btn-secondary"
+                <AdminButton
+                  variant="secondary"
+                  icon="refresh"
                   type="button"
                   disabled={opBusy || !mediaId.trim() || !replaceFile}
                   onClick={() =>
@@ -610,11 +627,10 @@ export default function AdminMediaPage() {
                   }
                 >
                   {t.runReplace}
-                </button>
-              </article>
+                </AdminButton>
+              </ActionCard>
 
-              <article className="card">
-                <h3>{t.galleryOps}</h3>
+              <ActionCard title={t.galleryOps} description="Apply gallery payloads to property or project targets." icon="media">
                 <label className="field" htmlFor="gallery-target-type">
                   <span>{t.galleryTargetType}</span>
                   <select
@@ -645,8 +661,9 @@ export default function AdminMediaPage() {
                     onChange={(event) => setGalleryPayload(event.target.value)}
                   />
                 </label>
-                <button
-                  className="btn btn-secondary"
+                <AdminButton
+                  variant="secondary"
+                  icon="media"
                   type="button"
                   disabled={opBusy || !galleryTargetId.trim()}
                   onClick={() =>
@@ -664,8 +681,8 @@ export default function AdminMediaPage() {
                   }
                 >
                   {t.runGallery}
-                </button>
-              </article>
+                </AdminButton>
+              </ActionCard>
             </div>
 
             {opError ? <div className="state-error">{opError}</div> : null}
@@ -673,14 +690,18 @@ export default function AdminMediaPage() {
               <span>{t.result}</span>
               <textarea id="media-op-result" rows={10} value={opResult} readOnly />
             </label>
-          </section>
+          </AdminSectionCard>
 
-          <section className="card" aria-label={t.mediaList}>
-            <h2>{t.mediaList}</h2>
+          <LogCard
+            title={t.mediaList}
+            description="Recent media assets with approval, rights, status, and quick select actions."
+            icon="table"
+            titleTag="h2"
+          >
             {items.length === 0 ? (
               <div className="state-empty">{t.empty}</div>
             ) : (
-              <div className="dashboard-table-wrap">
+              <AdminTable caption={t.mediaList}>
                 <table className="dashboard-table">
                   <thead>
                     <tr>
@@ -701,21 +722,17 @@ export default function AdminMediaPage() {
                         <td>{item.rights_status || "-"}</td>
                         <td>{prettyDate(item.updated_at, locale)}</td>
                         <td>
-                          <button
-                            className="btn btn-secondary"
-                            type="button"
-                            onClick={() => setMediaId(item.id)}
-                          >
+                          <AdminButton variant="secondary" size="sm" icon="search" type="button" onClick={() => setMediaId(item.id)}>
                             select
-                          </button>
+                          </AdminButton>
                         </td>
                       </tr>
                     ))}
                   </tbody>
                 </table>
-              </div>
+              </AdminTable>
             )}
-          </section>
+          </LogCard>
         </>
       ) : null}
     </main>
