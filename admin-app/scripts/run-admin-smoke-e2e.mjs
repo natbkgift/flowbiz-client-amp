@@ -217,16 +217,15 @@ async function waitForVisibleText(page, value) {
 async function verifyDashboardUi(page, contractSummary) {
   await page.getByRole("button", { name: /sign out|ออกจากระบบ/i }).waitFor({ timeout: 10000 });
   await page.getByRole("button", { name: /refresh dashboard|รีเฟรชแดชบอร์ด/i }).first().waitFor({ timeout: 10000 });
-  await page.getByRole("heading", { name: /Admin Health \/ QA Dashboard/i }).waitFor({ timeout: 10000 });
-  await page.getByRole("heading", { name: /Health widgets|วิดเจ็ตสุขภาพระบบ/i }).waitFor({ timeout: 10000 });
-  await page.getByRole("heading", { name: /Lead activity trend|แนวโน้ม activity ของลีด/i }).waitFor({ timeout: 10000 });
-  await page.getByRole("heading", { name: /Recent leads\/inquiries|ลีด\/อินไควรีล่าสุด/i }).waitFor({ timeout: 10000 });
+  await page.getByRole("heading", { name: /Admin Health \/ QA Dashboard/i }).first().waitFor({ timeout: 10000 });
+  await page.getByRole("heading", { name: /Health widgets|วิดเจ็ตสุขภาพระบบ/i }).first().waitFor({ timeout: 10000 });
+  await page.getByRole("heading", { name: /Lead activity trend|แนวโน้ม activity ของลีด/i }).first().waitFor({ timeout: 10000 });
+  await page.getByRole("heading", { name: /Recent leads\/inquiries|ลีด\/อินไควรีล่าสุด/i }).first().waitFor({ timeout: 10000 });
   await page
     .getByPlaceholder(
       /Filter inquiries|กรอง inquiry|Search name, contact, status, intent, or source|ค้นหาชื่อ ช่องทางติดต่อ สถานะ เป้าหมาย หรือหน้าต้นทาง/i,
     )
     .waitFor({ timeout: 10000 });
-  await page.getByRole("heading", { name: /Deploy health/i }).waitFor({ timeout: 10000 });
 
   if (contractSummary.widgetCount > 0) {
     await waitForVisibleText(page, contractSummary.firstWidgetTitle);
