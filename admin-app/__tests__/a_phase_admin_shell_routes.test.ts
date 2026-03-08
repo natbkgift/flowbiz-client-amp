@@ -34,9 +34,12 @@ describe("Admin shell + route consolidation (Phase A)", () => {
     expect(shell).toContain("ADMIN_PRIMARY_NAV");
     expect(shell).toContain("ADMIN_SECONDARY_NAV");
     expect(shell).toContain("admin-shell-topbar");
-    expect(shell).toContain('aria-label="Breadcrumb"');
+    expect(shell).toContain("admin-shell-search--topbar");
+    expect(shell).toContain("admin-shell-quick-actions");
+    expect(shell).toContain("admin-shell-profile");
+    expect(shell).toContain("admin-shell-mobile-drawer");
+    expect(shell).toContain("aria-label={ui.breadcrumb}");
     expect(shell).toContain("admin-shell-nav-section is-active");
-    expect(shell).toContain("admin-shell-mobile-row-group is-active");
     expect(shell).toContain("admin-language-switcher");
     expect(shell).toContain("window.location.hash");
   });

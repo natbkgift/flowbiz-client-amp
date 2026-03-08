@@ -30,8 +30,10 @@ describe("Admin shell i18n", () => {
     expect(shell).toContain("getAdminNavText(item.label, locale)");
     expect(shell).toContain("getAdminNavText(item.description, locale)");
     expect(shell).toContain("aria-label={ui.workspaceNavigation}");
-    expect(shell).toContain("aria-label={ui.quickNavigation}");
+    expect(shell).toContain("aria-label={ui.quickActions}");
     expect(shell).toContain("aria-label={ui.pageContext}");
     expect(shell).toContain("aria-label={ui.breadcrumb}");
+    expect(shell).toContain('aria-controls="admin-shell-mobile-drawer"');
+    expect(shell).toContain('event.key === "Escape"');
   });
 });
