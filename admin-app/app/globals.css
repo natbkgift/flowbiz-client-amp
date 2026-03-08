@@ -4083,6 +4083,8 @@ summary.mobile-nav__trigger::-webkit-details-marker {
   padding: clamp(22px, 3vw, 36px);
   background: var(--color-white);
   text-align: center;
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 .state-loading {
@@ -4091,6 +4093,8 @@ summary.mobile-nav__trigger::-webkit-details-marker {
   padding: 18px;
   background: var(--color-white);
   color: var(--color-text-secondary);
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 .state-error {
@@ -4099,6 +4103,8 @@ summary.mobile-nav__trigger::-webkit-details-marker {
   padding: 12px 14px;
   background: var(--color-error-bg);
   color: var(--color-error-text);
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 .locale-safe {
@@ -4127,6 +4133,33 @@ summary.mobile-nav__trigger::-webkit-details-marker {
 .content-stack {
   display: grid;
   gap: 16px;
+}
+
+.content-stack > * {
+  min-width: 0;
+}
+
+.admin-overflow-guard {
+  overflow-x: clip;
+}
+
+.admin-overflow-guard .card,
+.admin-overflow-guard .field,
+.admin-overflow-guard .card-actions,
+.admin-overflow-guard .dashboard-table-wrap,
+.admin-overflow-guard .seo-table-wrap,
+.admin-overflow-guard .seo-layout,
+.admin-overflow-guard .seo-pane,
+.admin-overflow-guard .seo-form-grid,
+.admin-overflow-guard .seo-item-row,
+.admin-overflow-guard .domain-editor-card {
+  min-width: 0;
+}
+
+.admin-overflow-guard textarea,
+.admin-overflow-guard input,
+.admin-overflow-guard select {
+  max-width: 100%;
 }
 
 .field {

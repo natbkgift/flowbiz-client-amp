@@ -50,6 +50,8 @@ describe("B14 admin workspace pages contract", () => {
     const page = read("app/admin/domain/page.tsx");
     expect(page).toContain('from "@/app/_lib/admin-auth"');
     expect(page).toContain("ADMIN_AUTH_LOGIN_PATH");
+    expect(page).toContain("admin-overflow-guard");
+    expect(page).toContain("domain-editor-card");
     expect(page).not.toContain('fetch("/v1/auth/login"');
     expect(page).toContain("/admin/areas?limit=40");
     expect(page).toContain("/admin/developers?limit=40");
