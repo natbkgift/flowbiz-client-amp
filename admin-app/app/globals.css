@@ -4937,6 +4937,82 @@ summary.mobile-nav__trigger::-webkit-details-marker {
 .admin-shell-content {
   min-width: 0;
   padding: 20px 0 30px;
+  --admin-type-h1: clamp(1.45rem, 1.05rem + 1vw, 2rem);
+  --admin-type-h2: clamp(1.1rem, 0.98rem + 0.58vw, 1.45rem);
+  --admin-type-h3: clamp(1rem, 0.92rem + 0.42vw, 1.2rem);
+  --admin-type-body: clamp(0.9rem, 0.88rem + 0.2vw, 1rem);
+  --admin-type-label: clamp(0.78rem, 0.76rem + 0.2vw, 0.85rem);
+  --admin-type-helper: clamp(0.74rem, 0.72rem + 0.16vw, 0.8rem);
+  --admin-line-height: 1.5;
+  --admin-card-padding: clamp(14px, 1.5vw, 20px);
+  --admin-stack-gap: clamp(12px, 1.4vw, 16px);
+}
+
+.admin-shell-content h1,
+.admin-shell-content h2,
+.admin-shell-content h3 {
+  font-family: var(--font-sans), system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+
+.admin-shell-content h1 {
+  font-size: var(--admin-type-h1);
+  line-height: 1.18;
+  letter-spacing: -0.01em;
+  font-weight: 700;
+}
+
+.admin-shell-content h2 {
+  font-size: var(--admin-type-h2);
+  line-height: 1.24;
+  letter-spacing: -0.005em;
+  font-weight: 650;
+}
+
+.admin-shell-content h3 {
+  font-size: var(--admin-type-h3);
+  line-height: 1.28;
+  font-weight: 600;
+}
+
+.admin-shell-content p,
+.admin-shell-content li,
+.admin-shell-content td,
+.admin-shell-content th,
+.admin-shell-content input,
+.admin-shell-content select,
+.admin-shell-content textarea,
+.admin-shell-content button {
+  font-size: var(--admin-type-body);
+  line-height: var(--admin-line-height);
+}
+
+.admin-shell-content .field > span,
+.admin-shell-content label {
+  font-size: var(--admin-type-label);
+  line-height: 1.35;
+}
+
+.admin-shell-content .state-empty,
+.admin-shell-content .state-loading,
+.admin-shell-content .state-error,
+.admin-shell-content small {
+  font-size: var(--admin-type-helper);
+}
+
+.admin-shell-content .content-stack {
+  gap: var(--admin-stack-gap);
+}
+
+.admin-shell-content .card,
+.admin-shell-content .state-empty,
+.admin-shell-content .state-loading {
+  padding: var(--admin-card-padding);
+}
+
+.admin-shell-content .card > h1:first-child,
+.admin-shell-content .card > h2:first-child,
+.admin-shell-content .card > h3:first-child {
+  margin-bottom: 8px;
 }
 
 @media (max-width: 1024px) {
