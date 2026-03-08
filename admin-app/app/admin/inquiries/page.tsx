@@ -885,7 +885,7 @@ export default function AdminInquiriesPage() {
                     </header>
                     <ul className="crm-items">
                       {column.items.map((item) => (
-                        <li key={item.id}>
+                        <li key={item.id} className={`crm-row-card ${selectedId === item.id ? "is-active" : ""}`}>
                           <button
                             type="button"
                             draggable
@@ -895,6 +895,14 @@ export default function AdminInquiriesPage() {
                               event.dataTransfer.setData("text/plain", item.id);
                             }}
                             onKeyDown={(event) => {
+                              const eventTarget = event.target as HTMLElement | null;
+                              if (
+                                eventTarget?.closest(
+                                  "select, input, textarea, button, a"
+                                )
+                              ) {
+                                return;
+                              }
                               if (event.key !== "ArrowRight" && event.key !== "ArrowLeft") return;
                               const currentIndex = statusIndex(item.status);
                               if (currentIndex < 0) return;
@@ -917,28 +925,28 @@ export default function AdminInquiriesPage() {
                                 {prettyDate(item.follow_up_due_at, locale)}
                               </span>
                             </span>
-                            <span className="crm-row-meta">
-                              <select
-                                aria-label={t.status}
-                                value={item.status}
-                                onChange={(event) => {
-                                  event.stopPropagation();
-                                  void moveInquiryStatus(item.id, event.target.value);
-                                }}
-                                onClick={(event) => event.stopPropagation()}
-                              >
-                                {CRM_STATUSES.map((value) => (
-                                  <option key={value} value={value}>
-                                    {value}
-                                  </option>
-                                ))}
-                              </select>
-                            </span>
                             <span className="crm-row-hints">
                               {item.is_spam_hint ? <span className="crm-chip crm-chip-warn">{t.spam}</span> : null}
                               {item.is_duplicate_hint ? <span className="crm-chip crm-chip-muted">{t.duplicate}</span> : null}
                             </span>
                           </button>
+                          <label className="field crm-row-status-field">
+                            <span className="sr-only">{t.status}</span>
+                            <select
+                              aria-label={t.status}
+                              value={item.status}
+                              onChange={(event) => {
+                                void moveInquiryStatus(item.id, event.target.value);
+                              }}
+                              onKeyDown={(event) => event.stopPropagation()}
+                            >
+                              {CRM_STATUSES.map((value) => (
+                                <option key={value} value={value}>
+                                  {value}
+                                </option>
+                              ))}
+                            </select>
+                          </label>
                         </li>
                       ))}
                     </ul>

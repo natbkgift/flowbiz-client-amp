@@ -4368,6 +4368,11 @@ summary.mobile-nav__trigger::-webkit-details-marker {
   overflow-y: auto;
 }
 
+.crm-row-card {
+  display: grid;
+  gap: 8px;
+}
+
 .crm-row-button {
   width: 100%;
   display: grid;
@@ -4388,6 +4393,14 @@ summary.mobile-nav__trigger::-webkit-details-marker {
 .crm-row-button.is-active {
   border-color: var(--color-primary);
   background: var(--color-primary-light);
+}
+
+.crm-row-status-field {
+  margin: 0;
+}
+
+.crm-row-status-field select {
+  width: 100%;
 }
 
 .crm-table-wrap {
