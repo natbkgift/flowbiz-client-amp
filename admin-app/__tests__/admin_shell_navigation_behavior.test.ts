@@ -21,6 +21,16 @@ describe("admin shell navigation behavior", () => {
     expect(shell).toContain("admin-shell-sidebar-footer");
   });
 
+  it("shows the empty search state in both desktop and mobile navigation", () => {
+    const shell = read("components/layout/AdminShell.tsx");
+
+    expect(shell).toContain("const hasSearchResults = filteredNavGroups.some");
+    expect(shell).toContain("? filteredNavGroups.map((entry) =>");
+    expect(shell).toContain(": emptySearchState");
+    expect(shell).toContain("admin-shell-sidebar-scroll");
+    expect(shell).toContain("admin-shell-mobile-drawer-sections");
+  });
+
   it("implements mobile drawer toggle and close behavior", () => {
     const shell = read("components/layout/AdminShell.tsx");
 
@@ -40,5 +50,7 @@ describe("admin shell navigation behavior", () => {
     expect(css).toContain(".admin-shell-search");
     expect(css).toContain(".admin-shell-mobile-drawer");
     expect(css).toContain(".admin-shell-backdrop.is-open");
+    expect(css).toContain(".admin-button--danger");
+    expect(css).toContain(":not(.admin-button--danger)");
   });
 });
