@@ -4,7 +4,13 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { type ChangeEvent, type ReactNode, useEffect, useMemo, useState } from "react";
 
-import { ADMIN_PRIMARY_NAV, ADMIN_SECONDARY_NAV, isActiveAdminNav, type AdminNavItem } from "@/app/_lib/admin-nav";
+import {
+  ADMIN_PRIMARY_NAV,
+  ADMIN_SECONDARY_NAV,
+  getAdminNavText,
+  isActiveAdminNav,
+  type AdminNavItem,
+} from "@/app/_lib/admin-nav";
 import {
   detectAdminLocale,
   getAdminCopyValue,
@@ -15,8 +21,8 @@ import {
 } from "@/app/_lib/admin-i18n";
 
 const ADMIN_NAV_SECTIONS = [
-  { title: "Core", items: ADMIN_PRIMARY_NAV },
-  { title: "Content", items: ADMIN_SECONDARY_NAV },
+  { key: "core", items: ADMIN_PRIMARY_NAV },
+  { key: "content", items: ADMIN_SECONDARY_NAV },
 ] as const;
 
 const shellCopy = {
@@ -28,6 +34,11 @@ const shellCopy = {
     content: "Content",
     coreNavigation: "Core navigation",
     contentNavigation: "Content navigation",
+    workspaceNavigation: "Admin workspace navigation",
+    quickNavigation: "Admin quick navigation",
+    pageContext: "Admin page context",
+    breadcrumb: "Breadcrumb",
+    adminBrand: "AMP Admin",
   },
   th: {
     admin: "แอดมิน",
@@ -37,6 +48,11 @@ const shellCopy = {
     content: "เนื้อหา",
     coreNavigation: "เมนูหลัก",
     contentNavigation: "เมนูเนื้อหา",
+    workspaceNavigation: "เมนูพื้นที่ทำงานแอดมิน",
+    quickNavigation: "เมนูลัดแอดมิน",
+    pageContext: "บริบทหน้าปัจจุบัน",
+    breadcrumb: "เส้นทางหน้า",
+    adminBrand: "AMP แอดมิน",
   },
 } as const;
 
@@ -63,8 +79,8 @@ function renderNavSection(
                 className={active ? "admin-shell-nav-link is-active" : "admin-shell-nav-link"}
                 aria-current={active ? "page" : undefined}
               >
-                <span>{item.label}</span>
-                <small>{item.description}</small>
+                <span>{getAdminNavText(item.label, locale)}</span>
+                <small>{getAdminNavText(item.description, locale)}</small>
               </Link>
             </li>
           );
@@ -97,7 +113,7 @@ function renderMobileNavRow(
               className={active ? "admin-shell-mobile-link is-active" : "admin-shell-mobile-link"}
               aria-current={active ? "page" : undefined}
             >
-              {item.label}
+              {getAdminNavText(item.label, locale)}
             </Link>
           );
         })}
@@ -106,20 +122,20 @@ function renderMobileNavRow(
   );
 }
 
-function getCurrentAdminLocation(pathname: string): { sectionTitle: string; item: AdminNavItem | null } {
+function getCurrentAdminLocation(pathname: string): { sectionKey: "core" | "content" | null; item: AdminNavItem | null } {
   for (const section of ADMIN_NAV_SECTIONS) {
     const item = section.items.find((candidate) => isActiveAdminNav(pathname, candidate.href));
     if (item) {
-      return { sectionTitle: section.title, item };
+      return { sectionKey: section.key, item };
     }
   }
-  return { sectionTitle: "Admin", item: null };
+  return { sectionKey: null, item: null };
 }
 
 export function AdminShell({ children }: { children: ReactNode }) {
   const pathname = usePathname() || "";
   const [locale, setLocale] = useState<AdminLocale>("en");
-  const { sectionTitle, item } = getCurrentAdminLocation(pathname);
+  const { sectionKey, item } = getCurrentAdminLocation(pathname);
   const ui = useMemo(
     () => ({
       admin: getAdminCopyValue(shellCopy, locale, "admin"),
@@ -129,6 +145,11 @@ export function AdminShell({ children }: { children: ReactNode }) {
       content: getAdminCopyValue(shellCopy, locale, "content"),
       coreNavigation: getAdminCopyValue(shellCopy, locale, "coreNavigation"),
       contentNavigation: getAdminCopyValue(shellCopy, locale, "contentNavigation"),
+      workspaceNavigation: getAdminCopyValue(shellCopy, locale, "workspaceNavigation"),
+      quickNavigation: getAdminCopyValue(shellCopy, locale, "quickNavigation"),
+      pageContext: getAdminCopyValue(shellCopy, locale, "pageContext"),
+      breadcrumb: getAdminCopyValue(shellCopy, locale, "breadcrumb"),
+      adminBrand: getAdminCopyValue(shellCopy, locale, "adminBrand"),
     }),
     [locale]
   );
@@ -156,35 +177,31 @@ export function AdminShell({ children }: { children: ReactNode }) {
 
   return (
     <div className="admin-shell">
-      <aside className="admin-shell-sidebar" aria-label="Admin workspace navigation">
+      <aside className="admin-shell-sidebar" aria-label={ui.workspaceNavigation}>
         <div className="admin-shell-brand">
-          <Link href={withAdminLocale("/admin/dashboard", locale)}>AMP Admin</Link>
+          <Link href={withAdminLocale("/admin/dashboard", locale)}>{ui.adminBrand}</Link>
         </div>
         {renderNavSection(ui.core, ADMIN_PRIMARY_NAV, pathname, locale)}
         {renderNavSection(ui.content, ADMIN_SECONDARY_NAV, pathname, locale)}
       </aside>
 
       <div className="admin-shell-main">
-        <nav className="admin-shell-mobile-nav" aria-label="Admin quick navigation">
+        <nav className="admin-shell-mobile-nav" aria-label={ui.quickNavigation}>
           {renderMobileNavRow(ui.core, ADMIN_PRIMARY_NAV, pathname, locale)}
           {renderMobileNavRow(ui.content, ADMIN_SECONDARY_NAV, pathname, locale)}
         </nav>
-        <header className="admin-shell-topbar" aria-label="Admin page context">
+        <header className="admin-shell-topbar" aria-label={ui.pageContext}>
           <div className="admin-shell-topbar-main">
             <p className="admin-shell-topbar-section">
-              {sectionTitle === "Core"
-                ? ui.core
-                : sectionTitle === "Content"
-                ? ui.content
-                : sectionTitle}
+              {sectionKey === "core" ? ui.core : sectionKey === "content" ? ui.content : ui.admin}
             </p>
-            <nav aria-label="Breadcrumb" className="admin-shell-breadcrumb">
+            <nav aria-label={ui.breadcrumb} className="admin-shell-breadcrumb">
               <ol>
                 <li>
                   <Link href={withAdminLocale("/admin/dashboard", locale)}>{ui.admin}</Link>
                   <span aria-hidden="true">/</span>
                 </li>
-                <li aria-current="page">{item?.label ?? ui.workspace}</li>
+                <li aria-current="page">{item ? getAdminNavText(item.label, locale) : ui.workspace}</li>
               </ol>
             </nav>
           </div>
