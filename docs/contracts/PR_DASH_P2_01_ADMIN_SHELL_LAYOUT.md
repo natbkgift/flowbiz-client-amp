@@ -18,7 +18,7 @@
   - backdrop
   - close on navigation
   - close on `Escape`
-  - body scroll lock while drawer is open
+  - body scroll lock while drawer is open, including scrollbar compensation
 - Kept route compatibility:
   - existing `/admin/*` workspaces still live under the same shell
   - locale switching still uses `withAdminLocale(...)`

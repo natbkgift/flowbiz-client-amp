@@ -26,9 +26,10 @@ describe("admin shell navigation behavior", () => {
 
     expect(shell).toContain("mobileNavOpen");
     expect(shell).toContain("setMobileNavOpen(false)");
+    expect(shell).toContain("lockBodyScroll()");
     expect(shell).toContain('id="admin-shell-mobile-drawer"');
     expect(shell).toContain("closeMobileNav");
-    expect(shell).toContain('window.document.body.style.overflow = "hidden"');
+    expect(shell).toContain("body.style.paddingRight");
   });
 
   it("styles drawer and topbar shell controls in globals.css", () => {

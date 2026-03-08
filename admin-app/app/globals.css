@@ -4768,6 +4768,9 @@ summary.mobile-nav__trigger::-webkit-details-marker {
   --admin-ink-muted: #556579;
   --admin-shadow-soft: 0 18px 42px rgba(15, 23, 42, 0.08);
   --admin-shadow-strong: 0 24px 64px rgba(15, 23, 42, 0.14);
+  --admin-panel-radius: 18px;
+  --admin-toggle-size: 46px;
+  --admin-drawer-width: min(92vw, 380px);
   --admin-status-ok-bg: #ecfdf5;
   --admin-status-ok-text: #166534;
   --admin-status-ok-border: #86efac;
@@ -4956,10 +4959,10 @@ summary.mobile-nav__trigger::-webkit-details-marker {
   display: none;
   align-items: center;
   justify-content: center;
-  min-width: 46px;
-  min-height: 46px;
+  min-width: var(--admin-toggle-size);
+  min-height: var(--admin-toggle-size);
   border: 1px solid var(--admin-border-strong);
-  border-radius: 14px;
+  border-radius: var(--admin-panel-radius);
   background: rgba(255, 255, 255, 0.9);
   color: var(--admin-accent-strong);
   font-weight: 700;
@@ -5022,7 +5025,7 @@ summary.mobile-nav__trigger::-webkit-details-marker {
   width: 100%;
   min-height: var(--tap-target-min);
   border: 1px solid var(--admin-border-soft);
-  border-radius: 14px;
+  border-radius: var(--admin-panel-radius);
   padding: 11px 14px;
   background: rgba(255, 255, 255, 0.92);
   color: var(--admin-ink-strong);
@@ -5129,7 +5132,7 @@ summary.mobile-nav__trigger::-webkit-details-marker {
   min-width: 188px;
   padding: 11px 14px;
   border: 1px solid var(--admin-border-soft);
-  border-radius: 18px;
+  border-radius: var(--admin-panel-radius);
   background: rgba(255, 255, 255, 0.82);
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9);
 }
@@ -5185,7 +5188,7 @@ summary.mobile-nav__trigger::-webkit-details-marker {
   gap: 4px;
   padding: 12px;
   border: 1px dashed rgba(158, 192, 222, 0.22);
-  border-radius: 14px;
+  border-radius: var(--admin-panel-radius);
   background: rgba(255, 255, 255, 0.04);
   color: #d8e4f3;
 }
@@ -5228,7 +5231,7 @@ summary.mobile-nav__trigger::-webkit-details-marker {
   display: grid;
   gap: 3px;
   padding: 12px 14px;
-  border-radius: 16px;
+  border-radius: var(--admin-panel-radius);
   border: 1px solid var(--admin-border-soft);
   background: rgba(255, 255, 255, 0.86);
   color: var(--admin-ink-strong);
@@ -5497,7 +5500,7 @@ summary.mobile-nav__trigger::-webkit-details-marker {
     z-index: 40;
     display: grid;
     gap: 14px;
-    width: min(92vw, 380px);
+    width: var(--admin-drawer-width);
     height: 100vh;
     padding: 16px 14px 24px;
     overflow-y: auto;

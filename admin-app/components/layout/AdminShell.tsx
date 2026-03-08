@@ -123,6 +123,25 @@ type RenderNavSectionOptions = {
   onNavigate?: () => void;
 };
 
+function lockBodyScroll(): () => void {
+  if (typeof window === "undefined") return () => {};
+
+  const { body, documentElement } = window.document;
+  const previousOverflow = body.style.overflow;
+  const previousPaddingRight = body.style.paddingRight;
+  const scrollbarCompensation = Math.max(0, window.innerWidth - documentElement.clientWidth);
+
+  body.style.overflow = "hidden";
+  if (scrollbarCompensation > 0) {
+    body.style.paddingRight = `${scrollbarCompensation}px`;
+  }
+
+  return () => {
+    body.style.overflow = previousOverflow;
+    body.style.paddingRight = previousPaddingRight;
+  };
+}
+
 function filterNavItems(items: ShellSectionItems, searchTerm: string, locale: AdminLocale): ShellSectionItems {
   if (!searchTerm) return items;
   return items.filter((item) => {
@@ -250,7 +269,7 @@ export function AdminShell({ children }: { children: ReactNode }) {
   useEffect(() => {
     if (!mobileNavOpen || typeof window === "undefined") return;
 
-    const previousOverflow = window.document.body.style.overflow;
+    const restoreBodyScroll = lockBodyScroll();
     const focusTimer = window.setTimeout(() => drawerSearchRef.current?.focus(), 0);
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.key === "Escape") {
@@ -258,11 +277,10 @@ export function AdminShell({ children }: { children: ReactNode }) {
       }
     };
 
-    window.document.body.style.overflow = "hidden";
     window.addEventListener("keydown", onKeyDown);
 
     return () => {
-      window.document.body.style.overflow = previousOverflow;
+      restoreBodyScroll();
       window.removeEventListener("keydown", onKeyDown);
       window.clearTimeout(focusTimer);
     };
