@@ -44,6 +44,7 @@ describe("B14 admin dashboard page contract", () => {
     const page = read("app/admin/dashboard/page.tsx");
 
     expect(page).toContain('<main id="main-content"');
+    expect(page).toContain('aria-busy={loading}');
     expect(page).toContain('htmlFor="dashboard-login-email"');
     expect(page).toContain('htmlFor="dashboard-login-password"');
     expect(page).toContain('autoComplete="username"');
@@ -64,6 +65,8 @@ describe("B14 admin dashboard page contract", () => {
     expect(page).toContain("rawMetrics={summary?.raw_metrics}");
     expect(page).toContain("buildInquiryTrendPoints");
     expect(page).toContain("hasTrendData");
+    expect(page).toContain('role="group" aria-label={t.trendTitle}');
+    expect(page).toContain('role="alert">{authError}</div>');
     expect(page).toContain("state-empty");
     expect(page).toContain("state-error");
     expect(page).toContain("dashboardState === \"loading\"");
@@ -78,5 +81,7 @@ describe("B14 admin dashboard page contract", () => {
     expect(page).toContain('trendTitle: "แนวโน้ม activity ของลีด"');
     expect(page).toContain('insightsTitle: "Pipeline insights"');
     expect(page).toContain('insightsTitle: "ข้อมูล pipeline"');
+    expect(page).toContain('sourcePage: "หน้าต้นทาง"');
+    expect(page).toContain('intent: "เป้าหมาย"');
   });
 });

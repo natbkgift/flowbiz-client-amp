@@ -15,6 +15,10 @@ describe("admin dashboard trend chart component", () => {
 
     expect(component).toContain("export function DashboardTrendChart(");
     expect(component).toContain("export function DashboardTrendChartSkeleton()");
+    expect(component).toContain("useId()");
+    expect(component).toContain('className="sr-only"');
+    expect(component).toContain("aria-describedby={chartSummaryId}");
+    expect(component).toContain("<title id={chartTitleId}>");
     expect(component).toContain("dashboard-chart-svg");
     expect(component).toContain("dashboard-chart-line");
     expect(component).toContain("dashboard-chart-dot");

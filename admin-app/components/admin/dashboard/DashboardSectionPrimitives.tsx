@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+import { type ReactNode, useId } from "react";
 
 function joinClasses(...values: Array<string | undefined | false>): string {
   return values.filter(Boolean).join(" ");
@@ -17,12 +17,23 @@ export function DashboardSection({
   className?: string;
   children: ReactNode;
 }) {
+  const headingId = useId();
+  const subtitleId = useId();
+
   return (
-    <section className={joinClasses("card", "dashboard-section", className)} aria-label={title}>
+    <section
+      className={joinClasses("card", "dashboard-section", className)}
+      aria-labelledby={headingId}
+      aria-describedby={subtitle ? subtitleId : undefined}
+    >
       <header className="dashboard-section-head">
         <div className="dashboard-section-copy">
-          <h2>{title}</h2>
-          {subtitle ? <p className="locale-safe">{subtitle}</p> : null}
+          <h2 id={headingId}>{title}</h2>
+          {subtitle ? (
+            <p id={subtitleId} className="locale-safe">
+              {subtitle}
+            </p>
+          ) : null}
         </div>
         {actions ? <div className="dashboard-section-actions">{actions}</div> : null}
       </header>

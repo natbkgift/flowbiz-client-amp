@@ -1,3 +1,5 @@
+import { useId } from "react";
+
 import type { AdminLocale } from "@/app/_lib/admin-i18n";
 
 import {
@@ -12,12 +14,16 @@ const copy = {
     peak: "Peak day",
     activeDays: "Active days",
     ariaLabel: "Lead activity trend chart",
+    screenReaderSummary:
+      "Trend summary for the selected period. Total inquiries: {total}. Peak day count: {peak}. Active days: {activeDays}.",
   },
   th: {
     total: "รวม",
     peak: "วันที่สูงสุด",
     activeDays: "วันที่มี activity",
     ariaLabel: "กราฟแนวโน้ม activity ของลีด",
+    screenReaderSummary:
+      "สรุปแนวโน้มของช่วงเวลาที่เลือก อินไควรีรวม {total} รายการ วันที่สูงสุด {peak} รายการ และมี activity {activeDays} วัน",
   },
 } as const;
 
@@ -65,10 +71,16 @@ export function DashboardTrendChart({
   const ui = copy[locale];
   const summary = summarizeTrend(points);
   const geometry = buildChartGeometry(points);
+  const chartTitleId = useId();
+  const chartSummaryId = useId();
   const axisPoints =
     period === "30d"
       ? [points[0], points[9], points[19], points[29]].filter(Boolean)
       : points;
+  const srSummary = ui.screenReaderSummary
+    .replace("{total}", formatCount(summary.total, locale))
+    .replace("{peak}", formatCount(summary.peak, locale))
+    .replace("{activeDays}", formatCount(summary.activeDays, locale));
 
   return (
     <div className="dashboard-chart">
@@ -87,13 +99,19 @@ export function DashboardTrendChart({
         </article>
       </div>
 
+      <p id={chartSummaryId} className="sr-only">
+        {srSummary}
+      </p>
+
       <div className="dashboard-chart-surface">
         <svg
           className="dashboard-chart-svg"
           viewBox={`0 0 ${geometry.width} ${geometry.height}`}
           role="img"
-          aria-label={ui.ariaLabel}
+          aria-labelledby={chartTitleId}
+          aria-describedby={chartSummaryId}
         >
+          <title id={chartTitleId}>{`${ui.ariaLabel} (${period.toUpperCase()})`}</title>
           {[0, 1, 2, 3].map((step) => {
             const y = geometry.top + ((geometry.bottom - geometry.top) / 3) * step;
             return <line key={step} x1="12" y1={y} x2="308" y2={y} className="dashboard-chart-grid" />;
