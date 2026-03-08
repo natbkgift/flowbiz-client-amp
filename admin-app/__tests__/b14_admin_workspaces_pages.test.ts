@@ -145,11 +145,9 @@ describe("B14 admin workspace pages contract", () => {
 
     for (const file of loginPages) {
       const page = read(file);
-      expect(page).toContain("[loginEmail, setLoginEmail] = useState(");
-      expect(page).toContain("[loginPassword, setLoginPassword] = useState(");
-      expect(page).not.toContain("setLoginEmail(session.email)");
-      expect(page).not.toContain("setLoginEmail(s.email)");
-      expect(page).not.toContain("setLoginEmail(seededSession.email)");
+      expect(page).toContain('[loginEmail, setLoginEmail] = useState("");');
+      expect(page).toContain('[loginPassword, setLoginPassword] = useState("");');
+      expect(page).not.toMatch(/setLoginEmail\([^)]*\.email[^)]*\)/);
     }
   });
 });
