@@ -128,7 +128,6 @@ export default function AdminLayoutCmsPage() {
     if (!session) return;
     setToken(session.token);
     setEmail(session.email);
-    if (session.email) setLoginEmail(session.email);
   }, []);
 
   const isAuthenticated = token.trim().length > 0;

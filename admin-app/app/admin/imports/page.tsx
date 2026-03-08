@@ -189,7 +189,6 @@ export default function AdminImportsPage() {
     if (!session) return;
     setAuthToken(session.token);
     setAuthEmail(session.email);
-    if (session.email) setLoginEmail(session.email);
   }, []);
 
   const t = copy[locale];

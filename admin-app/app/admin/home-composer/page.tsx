@@ -421,9 +421,6 @@ export default function HomeComposerPage() {
     if (!seededSession) return;
     setAuthToken(seededSession.token);
     setAuthEmail(seededSession.email);
-    if (seededSession.email) {
-      setLoginEmail(seededSession.email);
-    }
   }, []);
 
   useEffect(() => {

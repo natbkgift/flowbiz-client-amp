@@ -179,7 +179,6 @@ export default function AdminDomainPage() {
     if (!session) return;
     setToken(session.token);
     setEmail(session.email);
-    if (session.email) setLoginEmail(session.email);
   }, []);
 
   const t = copy[locale];

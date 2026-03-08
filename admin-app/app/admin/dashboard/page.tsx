@@ -192,7 +192,6 @@ export default function AdminDashboardPage() {
     if (!session) return;
     setAuthToken(session.token);
     setAuthEmail(session.email);
-    if (session.email) setLoginEmail(session.email);
   }, []);
 
   const isAuthenticated = authToken.trim().length > 0;
