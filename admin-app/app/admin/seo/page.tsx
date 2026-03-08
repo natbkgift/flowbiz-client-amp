@@ -4,6 +4,7 @@ import { type FormEvent, useEffect, useState } from "react";
 
 import { clearAuthSession, loginAdmin, persistAuthSession, readAuthSession } from "@/app/_lib/admin-auth";
 import { detectAdminLocale, type AdminLocale } from "@/app/_lib/admin-i18n";
+import { formatSeoApiError, readRequestFailedStatus } from "./error-utils";
 
 type Locale = AdminLocale;
 
@@ -112,6 +113,7 @@ const copy = {
     emptyRedirects: "No redirects yet. Add legacy paths when available.",
     emptyReport: "No report yet. Run checker when ready.",
     emptySchema: "Schema source is empty. Fill approved business data before publishing.",
+    retry: "Retry",
   },
   th: {
     title: "SEO Controls หลังบ้าน",
@@ -136,6 +138,7 @@ const copy = {
     emptyRedirects: "ยังไม่มี redirects เพิ่ม path เดิมเมื่อพร้อม",
     emptyReport: "ยังไม่มีรายงาน ให้รัน checker เมื่อพร้อม",
     emptySchema: "ข้อมูล schema ยังว่าง ให้เติมข้อมูลธุรกิจที่อนุมัติก่อนเผยแพร่",
+    retry: "ลองใหม่",
   },
 };
 
@@ -192,13 +195,6 @@ function parseList(value: string): string[] {
     .split(/[\n,]/g)
     .map((v) => v.trim())
     .filter((v, i, all) => v.length > 0 && all.indexOf(v) === i);
-}
-
-function readApiError(error: unknown): string {
-  if (!(error instanceof Error)) return "request_failed";
-  if (!error.message.startsWith("request_failed:")) return error.message;
-  const parts = error.message.split(":");
-  return parts.slice(2).join(":").trim() || error.message;
 }
 
 async function api<T>(path: string, token: string, init?: RequestInit): Promise<T> {
@@ -334,8 +330,7 @@ export default function AdminSeoPage() {
       const body = await api<{ report: BrokenLinkReport }>("/admin/seo/broken-links/latest", activeToken);
       setReport(body.report || null);
     } catch (error) {
-      const msg = error instanceof Error ? error.message : "";
-      if (msg.includes("request_failed:404")) {
+      if (readRequestFailedStatus(error) === 404) {
         setReport(null);
         return;
       }
@@ -362,7 +357,7 @@ export default function AdminSeoPage() {
         loadPolicy(activeToken),
       ]);
     } catch (error) {
-      setPageError(readApiError(error));
+      setPageError(formatSeoApiError(error));
     } finally {
       setLoading(false);
     }
@@ -402,7 +397,7 @@ export default function AdminSeoPage() {
       setOverrideForm(emptyOverride(locale));
       await loadOverrides(token);
     } catch (error) {
-      setPageError(readApiError(error));
+      setPageError(formatSeoApiError(error));
     } finally {
       setBusy(false);
     }
@@ -433,7 +428,7 @@ export default function AdminSeoPage() {
       setRedirectForm(emptyRedirect());
       await loadRedirects(token);
     } catch (error) {
-      setPageError(readApiError(error));
+      setPageError(formatSeoApiError(error));
     } finally {
       setBusy(false);
     }
@@ -450,7 +445,7 @@ export default function AdminSeoPage() {
       });
       await loadRedirects(token);
     } catch (error) {
-      setPageError(readApiError(error));
+      setPageError(formatSeoApiError(error));
     } finally {
       setBusy(false);
     }
@@ -485,7 +480,7 @@ export default function AdminSeoPage() {
       });
       await loadSchema(token, schemaForm.locale);
     } catch (error) {
-      setPageError(readApiError(error));
+      setPageError(formatSeoApiError(error));
     } finally {
       setBusy(false);
     }
@@ -502,7 +497,7 @@ export default function AdminSeoPage() {
       });
       await loadSchema(token, schemaForm.locale);
     } catch (error) {
-      setPageError(readApiError(error));
+      setPageError(formatSeoApiError(error));
     } finally {
       setBusy(false);
     }
@@ -518,7 +513,7 @@ export default function AdminSeoPage() {
       });
       setReport(body.report || null);
     } catch (error) {
-      setPageError(readApiError(error));
+      setPageError(formatSeoApiError(error));
     } finally {
       setBusy(false);
     }
@@ -579,7 +574,21 @@ export default function AdminSeoPage() {
         {!isAuth ? <div className="state-empty">{t.authRequired}</div> : null}
       </section>
 
-      {pageError ? <div className="state-error">{pageError}</div> : null}
+      {pageError ? (
+        <div className="state-error" role="alert">
+          <p style={{ margin: 0, overflowWrap: "anywhere" }}>{pageError}</p>
+          <div className="card-actions">
+            <button
+              className="btn btn-secondary"
+              type="button"
+              onClick={() => void refreshAll()}
+              disabled={!isAuth || loading || busy}
+            >
+              {t.retry}
+            </button>
+          </div>
+        </div>
+      ) : null}
       {loading ? <div className="state-loading">{t.loading}</div> : null}
 
       <section className="seo-layout">

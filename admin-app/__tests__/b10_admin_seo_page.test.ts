@@ -41,6 +41,10 @@ describe("B10 admin SEO page contract", () => {
     expect(page).toContain("state-empty");
     expect(page).toContain("state-loading");
     expect(page).toContain("state-error");
+    expect(page).toContain("formatSeoApiError");
+    expect(page).toContain("readRequestFailedStatus");
+    expect(page).toContain("{t.retry}");
+    expect(page).toContain('overflowWrap: "anywhere"');
   });
 
   it("includes basic accessible labels and EN/TH copy", () => {
