@@ -30,6 +30,16 @@ function buildDashboardSmokePayload() {
   const generatedDate = new Date();
   const generatedAt = generatedDate.toISOString();
   const baseTimestamp = generatedDate.getTime();
+  const inquiries = Array.from({ length: 12 }).map((_, index) => ({
+    id: `smoke-inquiry-${index + 1}`,
+    created_at: new Date(baseTimestamp - index * 60 * 1000).toISOString(),
+    name: `Smoke Inquiry ${index + 1}`,
+    email: `smoke-${index + 1}@example.com`,
+    phone: null,
+    status: index % 2 === 0 ? "new" : "contacted",
+    intent: "general",
+    source_page: index % 2 === 0 ? "/en/contact" : "/th/contact",
+  }));
   return {
     generated_at: generatedAt,
     data_freshness: {
@@ -40,7 +50,7 @@ function buildDashboardSmokePayload() {
     },
     raw_metrics: {
       recent_inquiries: {
-        count: 1,
+        count: inquiries.length,
         latest_at: generatedAt,
       },
       last_deploy_health_status: {
@@ -80,20 +90,36 @@ function buildDashboardSmokePayload() {
         count: index === 29 ? 1 : 0,
       })),
     },
-    recent_inquiries: [
-      {
-        id: "smoke-inquiry-1",
-        created_at: generatedAt,
-        name: "Smoke Inquiry",
-        email: "smoke@example.com",
-        phone: null,
-        status: "new",
-        intent: "general",
-        source_page: "/en/contact",
-      },
-    ],
+    recent_inquiries: inquiries.slice(0, 10),
     incomplete_widget_count: 0,
     warnings: ["Smoke warning check"],
+  };
+}
+
+function buildInquiriesListPayload(pageNumber, limit = 10) {
+  const summary = buildDashboardSmokePayload();
+  const inquiries = summary.recent_inquiries.concat(
+    Array.from({ length: Math.max(0, summary.raw_metrics.recent_inquiries.count - summary.recent_inquiries.length) }).map(
+      (_, index) => ({
+        id: `smoke-inquiry-${summary.recent_inquiries.length + index + 1}`,
+        created_at: new Date(Date.parse(summary.generated_at) - (summary.recent_inquiries.length + index) * 60 * 1000).toISOString(),
+        name: `Smoke Inquiry ${summary.recent_inquiries.length + index + 1}`,
+        email: `smoke-${summary.recent_inquiries.length + index + 1}@example.com`,
+        phone: null,
+        status: (summary.recent_inquiries.length + index) % 2 === 0 ? "new" : "contacted",
+        intent: "general",
+        source_page: (summary.recent_inquiries.length + index) % 2 === 0 ? "/en/contact" : "/th/contact",
+      }),
+    ),
+  );
+  const start = Math.max(0, (pageNumber - 1) * limit);
+  return {
+    data: inquiries.slice(start, start + limit),
+    meta: {
+      page: pageNumber,
+      limit,
+      total: inquiries.length,
+    },
   };
 }
 
@@ -145,6 +171,8 @@ function inspectDashboardSummary(payload) {
   const trend30d = ensureArray(trendSeries["30d"], 'trend_series["30d"]');
   const recentInquiries = ensureArray(summary.recent_inquiries, "recent_inquiries");
   const warnings = ensureArray(summary.warnings, "warnings");
+  const rawMetrics = ensureRecord(summary.raw_metrics, "raw_metrics");
+  const recentInquiryMetrics = ensureRecord(rawMetrics.recent_inquiries, 'raw_metrics["recent_inquiries"]');
 
   if (summary.generated_at !== null && typeof summary.generated_at !== "string") {
     throw new Error("admin smoke failed: dashboard summary generated_at must be null or string");
@@ -198,6 +226,12 @@ function inspectDashboardSummary(payload) {
       "30d": trend30d.length,
     },
     recentInquiryCount: recentInquiries.length,
+    recentInquiryTotal:
+      typeof recentInquiryMetrics.count === "number" ? recentInquiryMetrics.count : recentInquiries.length,
+    recentInquiryTotalPages:
+      recentInquiries.length > 0 && typeof recentInquiryMetrics.count === "number"
+        ? Math.max(1, Math.ceil(recentInquiryMetrics.count / recentInquiries.length))
+        : 1,
     warningCount: warnings.length,
     incompleteWidgetCount: summary.incomplete_widget_count,
     firstWidgetTitle: widgets.find((item) => item.title.trim())?.title ?? null,
@@ -239,6 +273,19 @@ async function verifyDashboardUi(page, contractSummary) {
     await page.getByText(/No recent inquiries|ยังไม่มีอินไควรีล่าสุด/i).first().waitFor({ timeout: 10000 });
   }
 
+  if (contractSummary.recentInquiryTotal > contractSummary.recentInquiryCount) {
+    const nextPageResponse = page.waitForResponse((response) => response.url().includes("/api/admin/inquiries"));
+    await page.getByRole("button", { name: /Next|ถัดไป/i }).click();
+    const pageResponse = await nextPageResponse;
+    if (!pageResponse.ok()) {
+      throw new Error(`admin smoke failed: inquiries page request did not succeed (got ${pageResponse.status()})`);
+    }
+    await page
+      .getByText(new RegExp(`Page\\s+2\\s*\\/\\s*${contractSummary.recentInquiryTotalPages}|หน้า\\s+2\\s*\\/\\s*${contractSummary.recentInquiryTotalPages}`, "i"))
+      .first()
+      .waitFor({ timeout: 10000 });
+  }
+
   if (contractSummary.warningCount > 0) {
     await waitForVisibleText(page, contractSummary.firstWarning);
   } else {
@@ -258,6 +305,8 @@ async function run() {
   const loginStatuses = [];
   let healthSummaryRequests = 0;
   const healthSummaryStatuses = [];
+  let recentInquiriesRequests = 0;
+  const recentInquiriesStatuses = [];
   let healthSummaryContract = null;
 
   if (SMOKE_MODE === "mocked") {
@@ -304,6 +353,24 @@ async function run() {
         status: 200,
         contentType: "application/json",
         body: JSON.stringify(buildDashboardSmokePayload()),
+      });
+    });
+
+    await page.route("**/api/admin/inquiries**", async (route) => {
+      const authHeader = route.request().headers().authorization || "";
+      if (!/^Bearer\s+\S+$/i.test(authHeader)) {
+        throw new Error("admin smoke failed: inquiries page request missing Authorization bearer token");
+      }
+
+      const requestUrl = new URL(route.request().url());
+      const pageNumber = Number(requestUrl.searchParams.get("page") || "1");
+      const limit = Number(requestUrl.searchParams.get("limit") || "10");
+      recentInquiriesRequests += 1;
+      recentInquiriesStatuses.push(200);
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify(buildInquiriesListPayload(pageNumber, limit)),
       });
     });
   }
@@ -377,9 +444,13 @@ async function run() {
           loginStatuses,
           healthSummaryRequests,
           healthSummaryStatuses,
+          recentInquiriesRequests,
+          recentInquiriesStatuses,
           healthSummaryContract,
           mockedRoutes:
-            SMOKE_MODE === "mocked" ? ["/api/v1/auth/login", "/api/admin/dashboard/health-summary"] : [],
+            SMOKE_MODE === "mocked"
+              ? ["/api/v1/auth/login", "/api/admin/dashboard/health-summary", "/api/admin/inquiries"]
+              : [],
           finalUrl: page.url(),
         },
         null,

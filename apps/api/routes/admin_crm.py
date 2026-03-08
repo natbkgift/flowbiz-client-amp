@@ -28,7 +28,7 @@ from packages.core.schemas.pagination import PaginatedResponse, PaginationMeta
 
 router = APIRouter(prefix="/admin", tags=["admin"])
 
-_VALID_LIST_SORTS = {"created_at", "score", "status"}
+_VALID_LIST_SORTS = {"created_at", "score", "status", "name"}
 _STATUS_TRANSITIONS: dict[str, set[str]] = {
     "new": {"new", "contacted", "lost"},
     "contacted": {"contacted", "qualified", "closed", "lost"},
@@ -195,6 +195,7 @@ def list_inquiries(
         "created_at": Inquiry.created_at,
         "score": Inquiry.score,
         "status": Inquiry.status,
+        "name": Inquiry.name,
     }[sort]
     order_clause = asc(sort_column) if order == "asc" else desc(sort_column)
     rows = db.scalars(
