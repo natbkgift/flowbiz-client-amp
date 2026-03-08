@@ -17,6 +17,15 @@ import {
   DashboardWidgetSkeletonGrid,
 } from "@/components/admin/dashboard/DashboardSectionPrimitives";
 import { DashboardKpiWidgets } from "@/components/admin/dashboard/DashboardKpiWidgets";
+import {
+  DashboardTrendChart,
+  DashboardTrendChartSkeleton,
+} from "@/components/admin/dashboard/DashboardTrendChart";
+import {
+  buildInquiryTrendPoints,
+  hasTrendData,
+  type TrendPeriod,
+} from "@/components/admin/dashboard/trend-utils";
 
 type Locale = AdminLocale;
 type WidgetStatus = "ok" | "warn" | "error" | "unknown";
@@ -109,6 +118,12 @@ const copy = {
     widgetsHint: "Priority QA checks across content, media, translations, and deploy health.",
     widgetsEmptyTitle: "No widgets returned",
     widgetsEmptyBody: "Backend summary returned no health widgets for this snapshot.",
+    trendTitle: "Lead activity trend",
+    trendHint: "Daily inquiry buckets from the existing dashboard rows.",
+    trendEmptyTitle: "No activity in this window",
+    trendEmptyBody: "Switch periods or wait for fresh inquiry rows to populate this trend.",
+    trendPeriod7d: "7D",
+    trendPeriod30d: "30D",
     insightsTitle: "Pipeline insights",
     insightsHint: "Freshness timestamps from upstream summary sources.",
     insightsEmptyTitle: "No freshness insights",
@@ -171,6 +186,12 @@ const copy = {
     widgetsHint: "QA checks หลักของ content, media, translations และ deploy",
     widgetsEmptyTitle: "ยังไม่มีวิดเจ็ต",
     widgetsEmptyBody: "backend summary ยังไม่ส่ง health widget มาในรอบนี้",
+    trendTitle: "แนวโน้ม activity ของลีด",
+    trendHint: "bucket รายวันจาก inquiry rows ที่มีอยู่แล้วในแดชบอร์ด",
+    trendEmptyTitle: "ช่วงเวลานี้ยังไม่มี activity",
+    trendEmptyBody: "ลองสลับช่วงเวลา หรือรอ inquiry ใหม่เข้ามาในหน้าต่างนี้",
+    trendPeriod7d: "7D",
+    trendPeriod30d: "30D",
     insightsTitle: "ข้อมูล pipeline",
     insightsHint: "เวลาอัปเดตล่าสุดจาก upstream summary sources",
     insightsEmptyTitle: "ยังไม่มี freshness insight",
@@ -265,6 +286,7 @@ export default function AdminDashboardPage() {
   const [pageError, setPageError] = useState<string | null>(null);
   const [summary, setSummary] = useState<DashboardSummaryResponse | null>(null);
   const [dashboardState, setDashboardState] = useState<DashboardState>("idle");
+  const [chartPeriod, setChartPeriod] = useState<TrendPeriod>("7d");
 
   useEffect(() => {
     setLocale(detectLocale());
@@ -289,6 +311,16 @@ export default function AdminDashboardPage() {
       [string, FreshnessItem]
     >;
   }, [summary]);
+  const trendPoints = useMemo(
+    () =>
+      buildInquiryTrendPoints(
+        summary?.recent_inquiries || [],
+        summary?.generated_at || null,
+        chartPeriod,
+        locale,
+      ),
+    [chartPeriod, locale, summary],
+  );
   const overviewMetrics = useMemo(
     () => [
       {
@@ -381,6 +413,31 @@ export default function AdminDashboardPage() {
     );
   }
 
+  function renderTrendToggle() {
+    return (
+      <div className="dashboard-period-toggle" aria-label={t.trendTitle}>
+        <button
+          type="button"
+          className={chartPeriod === "7d" ? "dashboard-period-button is-active" : "dashboard-period-button"}
+          aria-pressed={chartPeriod === "7d"}
+          onClick={() => setChartPeriod("7d")}
+          disabled={loading}
+        >
+          {t.trendPeriod7d}
+        </button>
+        <button
+          type="button"
+          className={chartPeriod === "30d" ? "dashboard-period-button is-active" : "dashboard-period-button"}
+          aria-pressed={chartPeriod === "30d"}
+          onClick={() => setChartPeriod("30d")}
+          disabled={loading}
+        >
+          {t.trendPeriod30d}
+        </button>
+      </div>
+    );
+  }
+
   function renderWidgetsPanel() {
     if (dashboardState === "loading") {
       return <DashboardWidgetSkeletonGrid cards={6} />;
@@ -468,6 +525,39 @@ export default function AdminDashboardPage() {
         ))}
       </ul>
     );
+  }
+
+  function renderTrendPanel() {
+    if (dashboardState === "loading") {
+      return <DashboardTrendChartSkeleton />;
+    }
+
+    if (dashboardState === "error") {
+      return (
+        <DashboardSectionState
+          tone="error"
+          title={t.sectionErrorTitle}
+          body={pageError || `${t.loadError} ${t.loadErrorHint}`}
+          action={renderRefreshButton(t.retry)}
+        />
+      );
+    }
+
+    if (dashboardState === "idle") {
+      return <DashboardSectionState tone="info" title={t.sectionReadyTitle} body={t.sectionReadyBody} action={renderRefreshButton()} />;
+    }
+
+    if (!hasTrendData(trendPoints)) {
+      return (
+        <DashboardSectionState
+          tone="empty"
+          title={t.trendEmptyTitle}
+          body={t.trendEmptyBody}
+        />
+      );
+    }
+
+    return <DashboardTrendChart points={trendPoints} locale={locale} period={chartPeriod} />;
   }
 
   function renderWarningsPanel() {
@@ -713,6 +803,15 @@ export default function AdminDashboardPage() {
               className="dashboard-section--widgets"
             >
               {renderWidgetsPanel()}
+            </DashboardSection>
+
+            <DashboardSection
+              title={t.trendTitle}
+              subtitle={t.trendHint}
+              className="dashboard-section--chart"
+              actions={renderTrendToggle()}
+            >
+              {renderTrendPanel()}
             </DashboardSection>
 
             <DashboardSection

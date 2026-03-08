@@ -17,6 +17,8 @@ describe("B14 admin dashboard page contract", () => {
     expect(page).toContain('from "@/app/admin/dashboard/state-utils"');
     expect(page).toContain('from "@/components/admin/dashboard/DashboardSectionPrimitives"');
     expect(page).toContain('from "@/components/admin/dashboard/DashboardKpiWidgets"');
+    expect(page).toContain('from "@/components/admin/dashboard/DashboardTrendChart"');
+    expect(page).toContain('from "@/components/admin/dashboard/trend-utils"');
     expect(page).toContain("loginAdmin");
     expect(page).toContain("transitionDashboardState");
     expect(page).not.toContain('fetch("/v1/auth/login"');
@@ -52,10 +54,14 @@ describe("B14 admin dashboard page contract", () => {
     expect(page).toContain('className="dashboard-section--warnings"');
     expect(page).toContain("DashboardMetricSkeletonRow");
     expect(page).toContain("DashboardKpiWidgets");
+    expect(page).toContain("DashboardTrendChart");
+    expect(page).toContain("DashboardTrendChartSkeleton");
     expect(page).toContain("DashboardWidgetSkeletonGrid");
     expect(page).toContain("DashboardInsightSkeletonList");
     expect(page).toContain("DashboardTableSkeleton");
     expect(page).toContain("rawMetrics={summary?.raw_metrics}");
+    expect(page).toContain("buildInquiryTrendPoints");
+    expect(page).toContain("hasTrendData");
     expect(page).toContain("state-empty");
     expect(page).toContain("state-error");
     expect(page).toContain("dashboardState === \"loading\"");
@@ -66,6 +72,8 @@ describe("B14 admin dashboard page contract", () => {
     expect(page).toContain("retry: \"ลองใหม่\"");
     expect(page).toContain('title: "Admin Health / QA Dashboard"');
     expect(page).toContain('subtitle: "หน้าเดียวสำหรับดูความสมบูรณ์ของระบบและลิงก์แก้ปัญหาแบบ actionable"');
+    expect(page).toContain('trendTitle: "Lead activity trend"');
+    expect(page).toContain('trendTitle: "แนวโน้ม activity ของลีด"');
     expect(page).toContain('insightsTitle: "Pipeline insights"');
     expect(page).toContain('insightsTitle: "ข้อมูล pipeline"');
   });
