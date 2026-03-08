@@ -12,7 +12,7 @@
 - Added a dedicated dashboard chart section between KPI widgets and the recent inquiries table.
 - Implemented a lightweight SVG trend chart instead of introducing a charting dependency.
 - Added a period toggle for `7D` and `30D`.
-- Used existing `recent_inquiries.created_at` rows from `/api/admin/dashboard/health-summary` as the chart data source.
+- Switched the chart to backend-provided daily series from `/api/admin/dashboard/health-summary`.
 
 ## State Handling
 
@@ -24,10 +24,12 @@
 
 ## Data Contract
 
-- No backend contract changes
-- Trend points are derived client-side from:
-  - `summary.generated_at`
-  - `summary.recent_inquiries[*].created_at`
+- Backend summary now includes:
+  - `summary.trend_series["7d"][*].bucket_date`
+  - `summary.trend_series["7d"][*].count`
+  - `summary.trend_series["30d"][*].bucket_date`
+  - `summary.trend_series["30d"][*].count`
+- Frontend localizes labels and renders the backend series without depending on the visible `recent_inquiries` slice.
 
 ## Visual Notes
 

@@ -2,8 +2,9 @@ import type { AdminLocale } from "@/app/_lib/admin-i18n";
 
 export type TrendPeriod = "7d" | "30d";
 
-export type TrendInquiryRow = {
-  created_at: string | null;
+export type TrendSeriesBucket = {
+  bucket_date: string;
+  count: number;
 };
 
 export type TrendPoint = {
@@ -32,14 +33,19 @@ function parseDate(value: string | null | undefined): Date | null {
   return parsed;
 }
 
-export function buildInquiryTrendPoints(
-  rows: TrendInquiryRow[],
+export function buildTrendPoints(
+  buckets: TrendSeriesBucket[],
   generatedAt: string | null,
   period: TrendPeriod,
   locale: AdminLocale,
 ): TrendPoint[] {
   const days = period === "30d" ? 30 : 7;
-  const endSource = parseDate(generatedAt) || new Date();
+  const latestBucket = buckets
+    .map((bucket) => parseDate(bucket.bucket_date))
+    .filter((value): value is Date => value !== null)
+    .sort((left, right) => left.getTime() - right.getTime())
+    .at(-1);
+  const endSource = latestBucket || parseDate(generatedAt) || new Date();
   const endDate = startOfUtcDay(endSource);
   const formatter = new Intl.DateTimeFormat(locale === "th" ? "th-TH" : "en-US", {
     month: "short",
@@ -53,11 +59,11 @@ export function buildInquiryTrendPoints(
   });
 
   const counts = new Map<string, number>();
-  for (const row of rows) {
-    const parsed = parseDate(row.created_at);
+  for (const bucket of buckets) {
+    const parsed = parseDate(bucket.bucket_date);
     if (!parsed) continue;
     const key = formatBucketKey(startOfUtcDay(parsed));
-    counts.set(key, (counts.get(key) || 0) + 1);
+    counts.set(key, bucket.count);
   }
 
   return Array.from({ length: days }).map((_, index) => {

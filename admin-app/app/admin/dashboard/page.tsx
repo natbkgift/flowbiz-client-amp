@@ -23,8 +23,9 @@ import {
   DashboardTrendChartSkeleton,
 } from "@/components/admin/dashboard/DashboardTrendChart";
 import {
-  buildInquiryTrendPoints,
+  buildTrendPoints,
   hasTrendData,
+  type TrendSeriesBucket,
   type TrendPeriod,
 } from "@/components/admin/dashboard/trend-utils";
 
@@ -66,6 +67,7 @@ type DashboardSummaryResponse = {
   data_freshness: Record<string, FreshnessItem>;
   raw_metrics: Record<string, unknown>;
   widgets: DashboardWidget[];
+  trend_series: Record<TrendPeriod, TrendSeriesBucket[]>;
   recent_inquiries: RecentInquiry[];
   incomplete_widget_count: number;
   warnings: string[];
@@ -120,9 +122,9 @@ const copy = {
     widgetsEmptyTitle: "No widgets returned",
     widgetsEmptyBody: "Backend summary returned no health widgets for this snapshot.",
     trendTitle: "Lead activity trend",
-    trendHint: "Daily inquiry buckets from the existing dashboard rows.",
+    trendHint: "Backend-provided daily inquiry buckets for the selected window.",
     trendEmptyTitle: "No activity in this window",
-    trendEmptyBody: "Switch periods or wait for fresh inquiry rows to populate this trend.",
+    trendEmptyBody: "Switch periods or wait for new inquiry activity to appear in this trend.",
     trendPeriod7d: "7D",
     trendPeriod30d: "30D",
     insightsTitle: "Pipeline insights",
@@ -188,9 +190,9 @@ const copy = {
     widgetsEmptyTitle: "ยังไม่มีวิดเจ็ต",
     widgetsEmptyBody: "backend summary ยังไม่ส่ง health widget มาในรอบนี้",
     trendTitle: "แนวโน้ม activity ของลีด",
-    trendHint: "bucket รายวันจาก inquiry rows ที่มีอยู่แล้วในแดชบอร์ด",
+    trendHint: "bucket รายวันจาก backend สำหรับช่วงเวลาที่เลือก",
     trendEmptyTitle: "ช่วงเวลานี้ยังไม่มี activity",
-    trendEmptyBody: "ลองสลับช่วงเวลา หรือรอ inquiry ใหม่เข้ามาในหน้าต่างนี้",
+    trendEmptyBody: "ลองสลับช่วงเวลา หรือรอ activity ใหม่เข้ามาในกราฟนี้",
     trendPeriod7d: "7D",
     trendPeriod30d: "30D",
     insightsTitle: "ข้อมูล pipeline",
@@ -314,8 +316,8 @@ export default function AdminDashboardPage() {
   }, [summary]);
   const trendPoints = useMemo(
     () =>
-      buildInquiryTrendPoints(
-        summary?.recent_inquiries || [],
+      buildTrendPoints(
+        summary?.trend_series?.[chartPeriod] || [],
         summary?.generated_at || null,
         chartPeriod,
         locale,

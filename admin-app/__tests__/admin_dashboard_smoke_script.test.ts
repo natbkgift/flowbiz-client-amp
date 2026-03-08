@@ -14,8 +14,12 @@ describe("admin dashboard smoke script", () => {
     const script = read("scripts/run-admin-smoke-e2e.mjs");
 
     expect(script).toContain("function buildDashboardSmokePayload()");
+    expect(script).toContain("const generatedDate = new Date();");
+    expect(script).toContain("const baseTimestamp = generatedDate.getTime();");
     expect(script).toContain('title: "Recent leads / inquiries"');
     expect(script).toContain('title: "Deploy health"');
+    expect(script).toContain("trend_series:");
+    expect(script).toContain('bucket_date:');
     expect(script).toContain('name: "Smoke Inquiry"');
     expect(script).toContain('warnings: ["Smoke warning check"]');
     expect(script).toContain('getByRole("heading", { name: /Health widgets|วิดเจ็ตสุขภาพระบบ/i })');

@@ -63,7 +63,8 @@ describe("B14 admin dashboard page contract", () => {
     expect(page).toContain("DashboardInsightSkeletonList");
     expect(page).toContain("DashboardTableSkeleton");
     expect(page).toContain("rawMetrics={summary?.raw_metrics}");
-    expect(page).toContain("buildInquiryTrendPoints");
+    expect(page).toContain("buildTrendPoints");
+    expect(page).toContain("summary?.trend_series?.[chartPeriod]");
     expect(page).toContain("hasTrendData");
     expect(page).toContain('role="group" aria-label={t.trendTitle}');
     expect(page).toContain('role="alert">{authError}</div>');
@@ -79,6 +80,7 @@ describe("B14 admin dashboard page contract", () => {
     expect(page).toContain('subtitle: "หน้าเดียวสำหรับดูความสมบูรณ์ของระบบและลิงก์แก้ปัญหาแบบ actionable"');
     expect(page).toContain('trendTitle: "Lead activity trend"');
     expect(page).toContain('trendTitle: "แนวโน้ม activity ของลีด"');
+    expect(page).toContain('trendHint: "Backend-provided daily inquiry buckets for the selected window."');
     expect(page).toContain('insightsTitle: "Pipeline insights"');
     expect(page).toContain('insightsTitle: "ข้อมูล pipeline"');
     expect(page).toContain('sourcePage: "หน้าต้นทาง"');
