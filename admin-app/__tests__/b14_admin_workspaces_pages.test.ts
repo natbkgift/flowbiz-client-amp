@@ -18,6 +18,8 @@ describe("B14 admin workspace pages contract", () => {
     expect(page).toContain("AUTH_SESSION_STORAGE_KEY");
     expect(page).toContain("LEGACY_TOKEN_STORAGE_KEY");
     expect(page).toContain('fetch(`/api${path}`');
+    expect(page).toContain("AdminWorkspaceErrorState");
+    expect(page).toContain("formatWorkspaceErrorMessage");
     expect(page).toContain("/admin/media/integrity-report?orphan_sample_limit=20");
     expect(page).toContain("/admin/media?limit=40");
     expect(page).toContain("/admin/media/upload");
@@ -38,6 +40,8 @@ describe("B14 admin workspace pages contract", () => {
     expect(page).toContain("loginAdmin");
     expect(page).not.toContain('fetch("/v1/auth/login"');
     expect(page).toContain('fetch(`/api${path}`');
+    expect(page).toContain("AdminWorkspaceErrorState");
+    expect(page).toContain("formatWorkspaceErrorMessage");
     expect(page).toContain("/admin/properties/imports?");
     expect(page).toContain("/admin/properties/import?dry_run=");
     expect(page).toContain("/admin/dashboard/health-summary");
@@ -52,6 +56,8 @@ describe("B14 admin workspace pages contract", () => {
     expect(page).toContain("ADMIN_AUTH_LOGIN_PATH");
     expect(page).toContain("admin-overflow-guard");
     expect(page).toContain("domain-editor-card");
+    expect(page).toContain("AdminWorkspaceErrorState");
+    expect(page).toContain("formatWorkspaceErrorMessage");
     expect(page).not.toContain('fetch("/v1/auth/login"');
     expect(page).toContain("/admin/areas?limit=40");
     expect(page).toContain("/admin/developers?limit=40");

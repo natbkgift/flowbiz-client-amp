@@ -3,6 +3,8 @@
 import { type FormEvent, useEffect, useState } from "react";
 import { ADMIN_AUTH_LOGIN_PATH } from "@/app/_lib/admin-auth";
 import { detectAdminLocale, type AdminLocale } from "@/app/_lib/admin-i18n";
+import { formatWorkspaceErrorMessage } from "@/app/_lib/admin-workspace-error";
+import AdminWorkspaceErrorState from "@/components/admin/AdminWorkspaceErrorState";
 
 type Locale = AdminLocale;
 type EntityType = "areas" | "developers" | "projects";
@@ -33,6 +35,9 @@ const copy = {
     refresh: "Refresh",
     authRequired: "Sign in to load domain workspace.",
     loadError: "Unable to load domain data.",
+    errorTitle: "Domain workspace error",
+    errorHint: "Please retry. If it keeps failing, check API status and auth session.",
+    retry: "Retry",
     pending: "Pending translations",
     drafts: "Unpublished drafts",
     entity: "Entity",
@@ -61,6 +66,9 @@ const copy = {
     refresh: "รีเฟรช",
     authRequired: "กรุณาเข้าสู่ระบบก่อนใช้งาน",
     loadError: "ไม่สามารถโหลดข้อมูล domain ได้",
+    errorTitle: "ข้อผิดพลาดของ domain workspace",
+    errorHint: "กรุณาลองใหม่ หากยังไม่สำเร็จให้ตรวจสอบ API และเซสชันการเข้าสู่ระบบ",
+    retry: "ลองใหม่",
     pending: "รายการแปลที่ค้าง",
     drafts: "draft ที่ยังไม่เผยแพร่",
     entity: "Entity",
@@ -215,8 +223,8 @@ export default function AdminDomainPage() {
       setPendingTranslations(Number(summaryBody.raw_metrics?.pending_translations?.total_pending_translations || 0));
       setUnpublishedDrafts(Number(summaryBody.raw_metrics?.unpublished_drafts?.total_unpublished_drafts || 0));
       persistAuthSession(activeToken, email || loginEmail);
-    } catch {
-      setPageError(t.loadError);
+    } catch (error) {
+      setPageError(formatWorkspaceErrorMessage(error, t.errorHint));
     } finally {
       setLoading(false);
     }
@@ -320,7 +328,15 @@ export default function AdminDomainPage() {
         {!isAuthenticated ? <div className="state-empty">{t.authRequired}</div> : null}
       </section>
 
-      {pageError ? <div className="state-error">{pageError}</div> : null}
+      {pageError ? (
+        <AdminWorkspaceErrorState
+          title={t.errorTitle}
+          detail={pageError}
+          actionLabel={t.retry}
+          onAction={() => void loadWorkspace()}
+          actionDisabled={loading}
+        />
+      ) : null}
       {loading ? <div className="state-loading">Loading</div> : null}
 
       {isAuthenticated ? (

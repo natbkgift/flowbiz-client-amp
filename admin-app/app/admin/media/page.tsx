@@ -3,6 +3,8 @@
 import { type FormEvent, useEffect, useState } from "react";
 import { ADMIN_AUTH_LOGIN_PATH } from "@/app/_lib/admin-auth";
 import { detectAdminLocale, type AdminLocale } from "@/app/_lib/admin-i18n";
+import { formatWorkspaceErrorMessage } from "@/app/_lib/admin-workspace-error";
+import AdminWorkspaceErrorState from "@/components/admin/AdminWorkspaceErrorState";
 
 type Locale = AdminLocale;
 
@@ -68,6 +70,9 @@ const copy = {
     loginInvalid: "Invalid credentials.",
     loginError: "Unable to sign in right now.",
     loadError: "Unable to load media data right now.",
+    errorTitle: "Media workspace error",
+    errorHint: "Please retry. If it keeps failing, check API status and auth session.",
+    retry: "Retry",
     integrity: "Integrity summary",
     mediaList: "Recent media assets",
     empty: "No media records found.",
@@ -113,6 +118,9 @@ const copy = {
     loginInvalid: "ข้อมูลเข้าสู่ระบบไม่ถูกต้อง",
     loginError: "ไม่สามารถเข้าสู่ระบบได้ในขณะนี้",
     loadError: "ไม่สามารถโหลดข้อมูล media ได้",
+    errorTitle: "ข้อผิดพลาดของ media workspace",
+    errorHint: "กรุณาลองใหม่ หากยังไม่สำเร็จให้ตรวจสอบ API และเซสชันการเข้าสู่ระบบ",
+    retry: "ลองใหม่",
     integrity: "สรุปผล integrity",
     mediaList: "รายการ media ล่าสุด",
     empty: "ไม่พบรายการ media",
@@ -277,8 +285,8 @@ export default function AdminMediaPage() {
       setIntegrity(integrityBody.summary || null);
       setItems(Array.isArray(listBody.items) ? listBody.items : []);
       persistAuthSession(activeToken, authEmail || loginEmail);
-    } catch {
-      setPageError(t.loadError);
+    } catch (error) {
+      setPageError(formatWorkspaceErrorMessage(error, t.errorHint));
     } finally {
       setLoading(false);
     }
@@ -415,7 +423,15 @@ export default function AdminMediaPage() {
         {!isAuthenticated ? <div className="state-empty">{t.authRequired}</div> : null}
       </section>
 
-      {pageError ? <div className="state-error">{pageError}</div> : null}
+      {pageError ? (
+        <AdminWorkspaceErrorState
+          title={t.errorTitle}
+          detail={pageError}
+          actionLabel={t.retry}
+          onAction={() => void loadWorkspace()}
+          actionDisabled={loading}
+        />
+      ) : null}
       {loading ? <div className="state-loading">{t.loading}</div> : null}
 
       {isAuthenticated ? (

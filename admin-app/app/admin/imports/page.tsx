@@ -4,6 +4,8 @@ import { type FormEvent, useEffect, useState } from "react";
 
 import { clearAuthSession, loginAdmin, persistAuthSession, readAuthSession } from "@/app/_lib/admin-auth";
 import { detectAdminLocale, type AdminLocale } from "@/app/_lib/admin-i18n";
+import { formatWorkspaceErrorMessage } from "@/app/_lib/admin-workspace-error";
+import AdminWorkspaceErrorState from "@/components/admin/AdminWorkspaceErrorState";
 
 type Locale = AdminLocale;
 
@@ -67,6 +69,9 @@ const copy = {
     loginInvalid: "Invalid credentials.",
     loginError: "Unable to sign in right now.",
     loadError: "Unable to load import/mirror data right now.",
+    errorTitle: "Imports workspace error",
+    errorHint: "Please retry. If the problem persists, check API health and auth session.",
+    retry: "Retry",
     importRun: "Run import",
     csvFile: "CSV file",
     dryRun: "Dry run",
@@ -101,6 +106,9 @@ const copy = {
     loginInvalid: "ข้อมูลเข้าสู่ระบบไม่ถูกต้อง",
     loginError: "ไม่สามารถเข้าสู่ระบบได้ในขณะนี้",
     loadError: "ไม่สามารถโหลดข้อมูล import/mirror ได้",
+    errorTitle: "ข้อผิดพลาดของ imports workspace",
+    errorHint: "กรุณาลองใหม่ หากยังไม่สำเร็จให้ตรวจสอบ API และเซสชันการเข้าสู่ระบบ",
+    retry: "ลองใหม่",
     importRun: "รัน import",
     csvFile: "ไฟล์ CSV",
     dryRun: "โหมด dry run",
@@ -227,8 +235,8 @@ export default function AdminImportsPage() {
       setMirrorStatus(dashboardBody.raw_metrics?.last_mirror_status);
       setDeployStatus(dashboardBody.raw_metrics?.last_deploy_health_status);
       persistAuthSession(activeToken, authEmail || loginEmail);
-    } catch {
-      setPageError(t.loadError);
+    } catch (error) {
+      setPageError(formatWorkspaceErrorMessage(error, t.errorHint));
     } finally {
       setLoading(false);
     }
@@ -293,7 +301,7 @@ export default function AdminImportsPage() {
       setImportResult(toPrettyJson(result));
       await loadWorkspace();
     } catch (error) {
-      setPageError(error instanceof Error ? error.message : t.loadError);
+      setPageError(formatWorkspaceErrorMessage(error, t.errorHint));
     } finally {
       setImportBusy(false);
     }
@@ -358,7 +366,15 @@ export default function AdminImportsPage() {
         {!isAuthenticated ? <div className="state-empty">{t.authRequired}</div> : null}
       </section>
 
-      {pageError ? <div className="state-error">{pageError}</div> : null}
+      {pageError ? (
+        <AdminWorkspaceErrorState
+          title={t.errorTitle}
+          detail={pageError}
+          actionLabel={t.retry}
+          onAction={() => void loadWorkspace()}
+          actionDisabled={loading}
+        />
+      ) : null}
       {loading ? <div className="state-loading">{t.loading}</div> : null}
 
       {isAuthenticated ? (
