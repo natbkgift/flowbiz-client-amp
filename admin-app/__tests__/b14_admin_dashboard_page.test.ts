@@ -17,6 +17,7 @@ describe("B14 admin dashboard page contract", () => {
     expect(page).toContain('from "@/app/admin/dashboard/state-utils"');
     expect(page).toContain('from "@/components/admin/dashboard/DashboardSectionPrimitives"');
     expect(page).toContain('from "@/components/admin/dashboard/DashboardKpiWidgets"');
+    expect(page).toContain('from "@/components/admin/dashboard/DashboardRecentInquiriesTable"');
     expect(page).toContain('from "@/components/admin/dashboard/DashboardTrendChart"');
     expect(page).toContain('from "@/components/admin/dashboard/trend-utils"');
     expect(page).toContain("loginAdmin");
@@ -54,6 +55,7 @@ describe("B14 admin dashboard page contract", () => {
     expect(page).toContain('className="dashboard-section--warnings"');
     expect(page).toContain("DashboardMetricSkeletonRow");
     expect(page).toContain("DashboardKpiWidgets");
+    expect(page).toContain("DashboardRecentInquiriesTable");
     expect(page).toContain("DashboardTrendChart");
     expect(page).toContain("DashboardTrendChartSkeleton");
     expect(page).toContain("DashboardWidgetSkeletonGrid");

@@ -17,6 +17,7 @@ import {
   DashboardWidgetSkeletonGrid,
 } from "@/components/admin/dashboard/DashboardSectionPrimitives";
 import { DashboardKpiWidgets } from "@/components/admin/dashboard/DashboardKpiWidgets";
+import { DashboardRecentInquiriesTable } from "@/components/admin/dashboard/DashboardRecentInquiriesTable";
 import {
   DashboardTrendChart,
   DashboardTrendChartSkeleton,
@@ -632,32 +633,7 @@ export default function AdminDashboardPage() {
     }
 
     return (
-      <div className="dashboard-table-wrap">
-        <table className="dashboard-table">
-          <thead>
-            <tr>
-              <th>{t.createdAt}</th>
-              <th>{t.name}</th>
-              <th>{t.contact}</th>
-              <th>{t.status}</th>
-              <th>{t.intent}</th>
-              <th>{t.sourcePage}</th>
-            </tr>
-          </thead>
-          <tbody>
-            {(summary?.recent_inquiries || []).map((row) => (
-              <tr key={row.id}>
-                <td>{prettyDate(row.created_at, locale)}</td>
-                <td>{row.name}</td>
-                <td>{row.email || row.phone || "-"}</td>
-                <td>{row.status || "-"}</td>
-                <td>{row.intent || "-"}</td>
-                <td>{row.source_page || "-"}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+      <DashboardRecentInquiriesTable rows={summary?.recent_inquiries || []} locale={locale} />
     );
   }
 

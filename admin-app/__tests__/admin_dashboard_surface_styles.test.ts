@@ -45,6 +45,10 @@ describe("admin dashboard surface styles", () => {
     expect(css).toContain(".dashboard-period-toggle {");
     expect(css).toContain(".dashboard-chart {");
     expect(css).toContain(".dashboard-chart-line {");
+    expect(css).toContain(".dashboard-table-shell {");
+    expect(css).toContain(".dashboard-table-toolbar {");
+    expect(css).toContain(".dashboard-table-chip {");
+    expect(css).toContain(".dashboard-table-card-list {");
     expect(css).toContain(".dashboard-table tbody tr:hover td");
     expect(css).toContain(".dashboard-table-skeleton {");
     expect(css).toContain(".dashboard-warning-list li");
