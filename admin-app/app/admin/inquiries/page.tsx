@@ -488,7 +488,12 @@ export default function AdminInquiriesPage() {
     setSavedFilters(next);
     setSavedFilterName("");
     setActiveSavedFilterId(record.id);
-    window.localStorage.setItem(savedFiltersKey(role), JSON.stringify(next));
+    try {
+      window.localStorage?.setItem(savedFiltersKey(role), JSON.stringify(next));
+    } catch (error) {
+      // Avoid breaking the UI if localStorage is unavailable or quota is exceeded
+      console.error("Failed to persist saved inquiries filter to localStorage", error);
+    }
   }
 
   function loadSavedFilter() {
