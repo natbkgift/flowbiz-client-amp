@@ -62,10 +62,17 @@ type FreshnessItem = {
   age_seconds: number | null;
 };
 
+type DashboardRawMetrics = Record<string, unknown> & {
+  recent_inquiries?: {
+    count?: number | null;
+    latest_at?: string | null;
+  };
+};
+
 type DashboardSummaryResponse = {
   generated_at: string | null;
   data_freshness: Record<string, FreshnessItem>;
-  raw_metrics: Record<string, unknown>;
+  raw_metrics: DashboardRawMetrics;
   widgets: DashboardWidget[];
   trend_series: Record<TrendPeriod, TrendSeriesBucket[]>;
   recent_inquiries: RecentInquiry[];
@@ -302,6 +309,10 @@ export default function AdminDashboardPage() {
 
   const isAuthenticated = authToken.trim().length > 0;
   const t = copy[locale];
+  const totalRecentInquiryCount = Math.max(
+    Number(summary?.raw_metrics?.recent_inquiries?.count || 0),
+    summary?.recent_inquiries?.length || 0,
+  );
 
   const widgets = useMemo(() => {
     const rows = summary?.widgets || [];
@@ -342,7 +353,7 @@ export default function AdminDashboardPage() {
       {
         key: "recent_inquiries",
         label: t.recentInquiries,
-        value: String(summary?.recent_inquiries?.length || 0),
+        value: String(totalRecentInquiryCount),
       },
       {
         key: "warnings",
@@ -350,7 +361,7 @@ export default function AdminDashboardPage() {
         value: String(summary?.warnings?.length || 0),
       },
     ],
-    [locale, summary, t],
+    [locale, summary, t, totalRecentInquiryCount],
   );
 
   function renderRefreshButton(label?: string) {
@@ -623,7 +634,7 @@ export default function AdminDashboardPage() {
       return <DashboardSectionState tone="info" title={t.sectionReadyTitle} body={t.sectionReadyBody} action={renderRefreshButton()} />;
     }
 
-    if ((summary?.recent_inquiries || []).length === 0) {
+    if (totalRecentInquiryCount === 0) {
       return (
         <DashboardSectionState
           tone="empty"
@@ -635,7 +646,12 @@ export default function AdminDashboardPage() {
     }
 
     return (
-      <DashboardRecentInquiriesTable rows={summary?.recent_inquiries || []} locale={locale} />
+      <DashboardRecentInquiriesTable
+        rows={summary?.recent_inquiries || []}
+        totalCount={totalRecentInquiryCount}
+        locale={locale}
+        authToken={authToken}
+      />
     );
   }
 

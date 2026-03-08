@@ -29,6 +29,10 @@ describe("B14 admin dashboard page contract", () => {
     const page = read("app/admin/dashboard/page.tsx");
 
     expect(page).toContain('"/api/admin/dashboard/health-summary"');
+    expect(page).toContain("totalRecentInquiryCount");
+    expect(page).toContain("raw_metrics?.recent_inquiries?.count");
+    expect(page).toContain("authToken={authToken}");
+    expect(page).toContain("totalCount={totalRecentInquiryCount}");
     expect(page).toContain('"project_cover_coverage"');
     expect(page).toContain('"broken_media_count"');
     expect(page).toContain('"external_image_leakage_count"');

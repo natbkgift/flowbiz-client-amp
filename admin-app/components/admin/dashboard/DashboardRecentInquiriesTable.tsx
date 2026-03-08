@@ -1,5 +1,6 @@
-import { useDeferredValue, useId, useMemo, useState } from "react";
+import { useDeferredValue, useEffect, useId, useMemo, useState } from "react";
 
+import { fetchJson } from "@/app/_lib/admin-auth";
 import type { AdminLocale } from "@/app/_lib/admin-i18n";
 
 type RecentInquiry = {
@@ -16,6 +17,19 @@ type RecentInquiry = {
 type SortKey = "created_at" | "status" | "name";
 type SortDirection = "asc" | "desc";
 
+type PaginatedInquiriesResponse = {
+  data: RecentInquiry[];
+  meta?: {
+    page?: number;
+    limit?: number;
+    total?: number;
+  };
+};
+
+const DEFAULT_PAGE_SIZE = 10;
+const ALL_STATUS_FILTER_VALUE = "all";
+const KNOWN_STATUS_OPTIONS = ["new", "contacted", "qualified", "closed", "lost"] as const;
+
 const copy = {
   en: {
     filter: "Filter inquiries",
@@ -31,6 +45,11 @@ const copy = {
     desc: "DESC",
     reset: "Reset",
     results: "rows",
+    loading: "Loading inquiries…",
+    updateError: "Unable to update inquiries right now.",
+    page: "Page",
+    previous: "Previous",
+    next: "Next",
     noMatchesTitle: "No matching inquiries",
     noMatchesBody: "Adjust the search, status filter, or sort settings.",
     tableCaption: "Recent inquiries table with filters, sorting, and contact details.",
@@ -54,6 +73,11 @@ const copy = {
     desc: "DESC",
     reset: "รีเซ็ต",
     results: "แถว",
+    loading: "กำลังโหลด inquiry…",
+    updateError: "ไม่สามารถอัปเดต inquiry ได้ในขณะนี้",
+    page: "หน้า",
+    previous: "ก่อนหน้า",
+    next: "ถัดไป",
     noMatchesTitle: "ไม่พบ inquiry ที่ตรงเงื่อนไข",
     noMatchesBody: "ลองปรับคำค้นหา ตัวกรองสถานะ หรือรูปแบบการเรียง",
     tableCaption: "ตารางอินไควรีล่าสุดพร้อมตัวกรอง การเรียง และรายละเอียดการติดต่อ",
@@ -82,79 +106,162 @@ function normalizeText(value: string | null | undefined): string {
   return String(value || "").trim().toLowerCase();
 }
 
+function buildInquiriesPath(params: {
+  page: number;
+  query: string;
+  statusFilter: string;
+  sortKey: SortKey;
+  sortDirection: SortDirection;
+}): string {
+  const searchParams = new URLSearchParams({
+    page: String(params.page),
+    limit: String(DEFAULT_PAGE_SIZE),
+    sort: params.sortKey,
+    order: params.sortDirection,
+  });
+  const trimmedQuery = params.query.trim();
+  if (trimmedQuery) {
+    searchParams.set("q", trimmedQuery);
+  }
+  if (normalizeText(params.statusFilter) && params.statusFilter !== ALL_STATUS_FILTER_VALUE) {
+    searchParams.set("status", params.statusFilter);
+  }
+  return `/api/admin/inquiries?${searchParams.toString()}`;
+}
+
+function formatSummaryLabel(params: {
+  page: number;
+  totalPages: number;
+  showingStart: number;
+  showingEnd: number;
+  totalRows: number;
+  resultsLabel: string;
+  pageLabel: string;
+}): string {
+  return `${params.showingStart}-${params.showingEnd} / ${params.totalRows} ${params.resultsLabel} · ${params.pageLabel} ${params.page}/${params.totalPages}`;
+}
+
 export function DashboardRecentInquiriesTable({
   rows,
+  totalCount,
   locale,
+  authToken,
 }: {
   rows: RecentInquiry[];
+  totalCount: number;
   locale: AdminLocale;
+  authToken: string;
 }) {
   const ui = copy[locale];
   const [query, setQuery] = useState("");
   const deferredQuery = useDeferredValue(query);
-  const [statusFilter, setStatusFilter] = useState("all");
+  const [statusFilter, setStatusFilter] = useState(ALL_STATUS_FILTER_VALUE);
   const [sortKey, setSortKey] = useState<SortKey>("created_at");
   const [sortDirection, setSortDirection] = useState<SortDirection>("desc");
+  const [page, setPage] = useState(1);
+  const [serverRows, setServerRows] = useState(rows);
+  const [serverTotalCount, setServerTotalCount] = useState(totalCount);
+  const [requestLoading, setRequestLoading] = useState(false);
+  const [requestError, setRequestError] = useState<string | null>(null);
   const filterId = useId();
   const statusId = useId();
   const sortId = useId();
   const tableId = useId();
   const summaryId = useId();
 
+  const usingDefaultSnapshot =
+    page === 1 &&
+    normalizeText(deferredQuery).length === 0 &&
+    statusFilter === ALL_STATUS_FILTER_VALUE &&
+    sortKey === "created_at" &&
+    sortDirection === "desc";
+
+  useEffect(() => {
+    if (usingDefaultSnapshot) {
+      setServerRows(rows);
+      setServerTotalCount(totalCount);
+      setRequestLoading(false);
+      setRequestError(null);
+      return;
+    }
+
+    const activeToken = authToken.trim();
+    if (!activeToken) {
+      setRequestLoading(false);
+      setRequestError(ui.updateError);
+      return;
+    }
+
+    const abortController = new AbortController();
+    let cancelled = false;
+
+    async function loadRows() {
+      setRequestLoading(true);
+      setRequestError(null);
+      try {
+        const response = await fetchJson<PaginatedInquiriesResponse>(
+          buildInquiriesPath({
+            page,
+            query: deferredQuery,
+            statusFilter,
+            sortKey,
+            sortDirection,
+          }),
+          activeToken,
+          { signal: abortController.signal },
+        );
+        if (cancelled) return;
+        setServerRows(Array.isArray(response.data) ? response.data : []);
+        setServerTotalCount(
+          typeof response.meta?.total === "number" ? response.meta.total : 0,
+        );
+      } catch (error) {
+        if (cancelled) return;
+        if (error instanceof DOMException && error.name === "AbortError") {
+          return;
+        }
+        setRequestError(ui.updateError);
+      } finally {
+        if (!cancelled) {
+          setRequestLoading(false);
+        }
+      }
+    }
+
+    void loadRows();
+
+    return () => {
+      cancelled = true;
+      abortController.abort();
+    };
+  }, [authToken, deferredQuery, page, rows, sortDirection, sortKey, statusFilter, totalCount, ui.updateError, usingDefaultSnapshot]);
+
   const statusOptions = useMemo(
     () =>
       Array.from(
-        new Set(rows.map((row) => String(row.status || "").trim()).filter(Boolean)),
+        new Set([
+          ...KNOWN_STATUS_OPTIONS,
+          ...rows.map((row) => String(row.status || "").trim()).filter(Boolean),
+          ...serverRows.map((row) => String(row.status || "").trim()).filter(Boolean),
+        ]),
       ).sort((left, right) => left.localeCompare(right)),
-    [rows],
+    [rows, serverRows],
   );
 
-  const filteredRows = useMemo(() => {
-    const normalizedQuery = normalizeText(deferredQuery);
-    return rows.filter((row) => {
-      const matchesStatus =
-        statusFilter === "all" || normalizeText(row.status) === normalizeText(statusFilter);
-      if (!matchesStatus) return false;
-      if (!normalizedQuery) return true;
-      const haystack = [
-        row.name,
-        row.email,
-        row.phone,
-        row.status,
-        row.intent,
-        row.source_page,
-      ]
-        .map((value) => normalizeText(value))
-        .join(" ");
-      return haystack.includes(normalizedQuery);
-    });
-  }, [deferredQuery, rows, statusFilter]);
-
-  const sortedRows = useMemo(() => {
-    const ordered = [...filteredRows];
-    ordered.sort((left, right) => {
-      const direction = sortDirection === "asc" ? 1 : -1;
-      if (sortKey === "created_at") {
-        const leftTime = left.created_at ? new Date(left.created_at).getTime() : 0;
-        const rightTime = right.created_at ? new Date(right.created_at).getTime() : 0;
-        return (leftTime - rightTime) * direction;
-      }
-      const leftValue = normalizeText(sortKey === "status" ? left.status : left.name);
-      const rightValue = normalizeText(sortKey === "status" ? right.status : right.name);
-      return leftValue.localeCompare(rightValue) * direction;
-    });
-    return ordered;
-  }, [filteredRows, sortDirection, sortKey]);
+  const totalPages = Math.max(1, Math.ceil(serverTotalCount / DEFAULT_PAGE_SIZE));
+  const showingStart = serverTotalCount === 0 ? 0 : (page - 1) * DEFAULT_PAGE_SIZE + 1;
+  const showingEnd = serverTotalCount === 0 ? 0 : Math.min(page * DEFAULT_PAGE_SIZE, serverTotalCount);
 
   function resetControls() {
     setQuery("");
-    setStatusFilter("all");
+    setStatusFilter(ALL_STATUS_FILTER_VALUE);
     setSortKey("created_at");
     setSortDirection("desc");
+    setPage(1);
   }
 
   return (
-    <div className="dashboard-table-shell">
+    <div className="dashboard-table-shell" aria-busy={requestLoading}>
       <div className="dashboard-table-toolbar" role="search" aria-label={ui.filter}>
         <label className="field dashboard-table-toolbar-field" htmlFor={filterId}>
           <span>{ui.filter}</span>
@@ -163,15 +270,25 @@ export function DashboardRecentInquiriesTable({
             type="search"
             autoComplete="off"
             value={query}
-            onChange={(event) => setQuery(event.target.value)}
+            onChange={(event) => {
+              setQuery(event.target.value);
+              setPage(1);
+            }}
             placeholder={ui.searchPlaceholder}
           />
         </label>
 
         <label className="field dashboard-table-toolbar-field" htmlFor={statusId}>
           <span>{ui.status}</span>
-          <select id={statusId} value={statusFilter} onChange={(event) => setStatusFilter(event.target.value)}>
-            <option value="all">{ui.statusAll}</option>
+          <select
+            id={statusId}
+            value={statusFilter}
+            onChange={(event) => {
+              setStatusFilter(event.target.value);
+              setPage(1);
+            }}
+          >
+            <option value={ALL_STATUS_FILTER_VALUE}>{ui.statusAll}</option>
             {statusOptions.map((option) => (
               <option key={option} value={option}>
                 {option}
@@ -182,7 +299,14 @@ export function DashboardRecentInquiriesTable({
 
         <label className="field dashboard-table-toolbar-field" htmlFor={sortId}>
           <span>{ui.sortBy}</span>
-          <select id={sortId} value={sortKey} onChange={(event) => setSortKey(event.target.value as SortKey)}>
+          <select
+            id={sortId}
+            value={sortKey}
+            onChange={(event) => {
+              setSortKey(event.target.value as SortKey);
+              setPage(1);
+            }}
+          >
             <option value="created_at">{ui.sortCreated}</option>
             <option value="status">{ui.sortStatus}</option>
             <option value="name">{ui.sortName}</option>
@@ -192,7 +316,10 @@ export function DashboardRecentInquiriesTable({
         <button
           type="button"
           className="btn btn-secondary dashboard-table-direction"
-          onClick={() => setSortDirection((current) => (current === "asc" ? "desc" : "asc"))}
+          onClick={() => {
+            setSortDirection((current) => (current === "asc" ? "desc" : "asc"));
+            setPage(1);
+          }}
         >
           {ui.sortDirection}: {sortDirection === "asc" ? ui.asc : ui.desc}
         </button>
@@ -203,10 +330,22 @@ export function DashboardRecentInquiriesTable({
       </div>
 
       <p id={summaryId} className="dashboard-table-summary" aria-live="polite">
-        {sortedRows.length} / {rows.length} {ui.results}
+        {requestLoading
+          ? ui.loading
+          : formatSummaryLabel({
+              page,
+              totalPages,
+              showingStart,
+              showingEnd,
+              totalRows: serverTotalCount,
+              resultsLabel: ui.results,
+              pageLabel: ui.page,
+            })}
       </p>
 
-      {sortedRows.length === 0 ? (
+      {requestError ? <p className="state-error" role="status">{requestError}</p> : null}
+
+      {serverRows.length === 0 ? (
         <div className="dashboard-section-state dashboard-section-state--empty" role="status" aria-live="polite">
           <h3>{ui.noMatchesTitle}</h3>
           <p>{ui.noMatchesBody}</p>
@@ -227,7 +366,7 @@ export function DashboardRecentInquiriesTable({
                 </tr>
               </thead>
               <tbody>
-                {sortedRows.map((row) => (
+                {serverRows.map((row) => (
                   <tr key={row.id}>
                     <td>{prettyDate(row.created_at, locale)}</td>
                     <td>{row.name}</td>
@@ -244,7 +383,7 @@ export function DashboardRecentInquiriesTable({
           </div>
 
           <div className="dashboard-table-card-list">
-            {sortedRows.map((row) => (
+            {serverRows.map((row) => (
               <article key={row.id} className="dashboard-table-card">
                 <div className="dashboard-table-card-head">
                   <div>
@@ -271,6 +410,32 @@ export function DashboardRecentInquiriesTable({
               </article>
             ))}
           </div>
+
+          {totalPages > 1 ? (
+            <div className="dashboard-table-toolbar dashboard-table-pagination" aria-label={ui.page}>
+              <button
+                type="button"
+                className="btn btn-secondary"
+                onClick={() => setPage((current) => Math.max(1, current - 1))}
+                disabled={page <= 1 || requestLoading}
+                aria-controls={tableId}
+              >
+                {ui.previous}
+              </button>
+              <span className="dashboard-table-summary" aria-live="polite">
+                {ui.page} {page} / {totalPages}
+              </span>
+              <button
+                type="button"
+                className="btn btn-secondary"
+                onClick={() => setPage((current) => Math.min(totalPages, current + 1))}
+                disabled={page >= totalPages || requestLoading}
+                aria-controls={tableId}
+              >
+                {ui.next}
+              </button>
+            </div>
+          ) : null}
         </>
       )}
     </div>

@@ -253,6 +253,48 @@ def test_admin_inquiry_filters_and_pagination(client):
     assert invalid_follow_up_filter.status_code == 422
 
 
+def test_admin_inquiry_list_supports_name_sort(client):
+    token = _login_token(client)
+    headers = {"Authorization": f"Bearer {token}"}
+
+    first = client.post(
+        "/v1/inquiries",
+        json={
+            "name": "Zulu Sort Lead",
+            "email": "zulu-sort@example.com",
+            "message": "Need pricing details",
+        },
+    )
+    second = client.post(
+        "/v1/inquiries",
+        json={
+            "name": "Alpha Sort Lead",
+            "email": "alpha-sort@example.com",
+            "message": "Need location details",
+        },
+    )
+    assert first.status_code == 201, first.text
+    assert second.status_code == 201, second.text
+
+    asc_response = client.get(
+        "/admin/inquiries?q=Sort%20Lead&sort=name&order=asc&page=1&limit=10",
+        headers=headers,
+    )
+    assert asc_response.status_code == 200, asc_response.text
+    asc_body = asc_response.json()
+    asc_names = [item["name"] for item in asc_body["data"] if item["name"].endswith("Sort Lead")]
+    assert asc_names[:2] == ["Alpha Sort Lead", "Zulu Sort Lead"]
+
+    desc_response = client.get(
+        "/admin/inquiries?q=Sort%20Lead&sort=name&order=desc&page=1&limit=10",
+        headers=headers,
+    )
+    assert desc_response.status_code == 200, desc_response.text
+    desc_body = desc_response.json()
+    desc_names = [item["name"] for item in desc_body["data"] if item["name"].endswith("Sort Lead")]
+    assert desc_names[:2] == ["Zulu Sort Lead", "Alpha Sort Lead"]
+
+
 def test_admin_note_and_timeline_flow(client):
     token = _login_token(client)
     headers = {"Authorization": f"Bearer {token}"}

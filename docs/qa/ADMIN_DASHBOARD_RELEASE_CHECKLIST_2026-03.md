@@ -58,7 +58,7 @@ Expected evidence:
 - [ ] Overview metrics render without layout jump
 - [ ] KPI cards show status chips, summaries, and action links
 - [ ] Trend chart renders with `7D` and `30D` toggle behavior
-- [ ] Recent inquiries search, status filter, sort, and reset work
+- [ ] Recent inquiries search, status filter, sort, pagination, and reset work against live server data
 - [ ] Warnings section renders or shows empty state cleanly
 - [ ] Logout returns to sign-in state
 
@@ -149,4 +149,4 @@ If production validation fails after merge:
 
 - The trend chart currently supports the backend-provided `7d` and `30d` series only.
 - The default admin smoke mode remains mocked for CI stability; use `ADMIN_SMOKE_MODE=live` for deployed-environment contract verification.
-- Table filtering and sorting operate on the currently loaded inquiry rows, not on server-side pagination.
+- The recent inquiries table now depends on `/api/admin/inquiries` for `q`, `status`, `sort`, `order`, `page`, and `limit=10`; validate those server-backed controls during live smoke/manual QA.
