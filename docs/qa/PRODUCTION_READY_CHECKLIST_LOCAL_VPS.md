@@ -439,7 +439,16 @@ cat /opt/flowbiz/clients/flowbiz-client-amp/ops/logs/deploy_telemetry.json
 ```
 - [ ] Dashboard summary contract endpoint returns `200` via frontend API path:
 ```bash
-curl -fsS -o /dev/null -w '%{http_code}\n' http://127.0.0.1:8002/api/admin/dashboard/health-summary
+ADMIN_EMAIL="your-admin-email@example.com"
+ADMIN_PASSWORD="your-admin-password"
+TOKEN=$(curl -fsS -X POST \
+  -H 'Content-Type: application/json' \
+  -d "{\"username\":\"${ADMIN_EMAIL}\",\"password\":\"${ADMIN_PASSWORD}\"}" \
+  http://127.0.0.1:8002/api/v1/auth/login | jq -r '.access_token')
+
+curl -fsS -o /dev/null -w '%{http_code}\n' \
+  -H "Authorization: Bearer ${TOKEN}" \
+  http://127.0.0.1:8002/api/admin/dashboard/health-summary
 ```
 - [ ] Manual admin check: `/admin/dashboard` widgets show actionable statuses.
 
