@@ -156,7 +156,11 @@ async function run() {
     await page.getByRole("heading", { name: /Health widgets|วิดเจ็ตสุขภาพระบบ/i }).waitFor({ timeout: 10000 });
     await page.getByRole("heading", { name: /Lead activity trend|แนวโน้ม activity ของลีด/i }).waitFor({ timeout: 10000 });
     await page.getByRole("heading", { name: /Recent leads\/inquiries|ลีด\/อินไควรีล่าสุด/i }).waitFor({ timeout: 10000 });
-    await page.getByLabel(/Filter inquiries|กรอง inquiry/i).waitFor({ timeout: 10000 });
+    await page
+      .getByPlaceholder(
+        /Filter inquiries|กรอง inquiry|Search name, contact, status, intent, or source|ค้นหาชื่อ ช่องทางติดต่อ สถานะ เป้าหมาย หรือหน้าต้นทาง/i,
+      )
+      .waitFor({ timeout: 10000 });
     await page.getByRole("heading", { name: /Deploy health/i }).waitFor({ timeout: 10000 });
     await page.getByText(/Smoke warning check/i).waitFor({ timeout: 10000 });
     await page.waitForTimeout(300);

@@ -21,7 +21,7 @@ describe("admin dashboard smoke script", () => {
     expect(script).toContain('getByRole("heading", { name: /Health widgets|วิดเจ็ตสุขภาพระบบ/i })');
     expect(script).toContain('getByRole("heading", { name: /Lead activity trend|แนวโน้ม activity ของลีด/i })');
     expect(script).toContain('getByRole("heading", { name: /Deploy health/i })');
-    expect(script).toContain('getByLabel(/Filter inquiries|กรอง inquiry/i)');
+    expect(script).toContain("getByPlaceholder(");
     expect(script).toContain('getByText(/Smoke warning check/i)');
     expect(script).toContain('admin-smoke-summary.json');
   });
