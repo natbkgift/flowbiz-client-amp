@@ -25,6 +25,65 @@ function parseLoginPayload(rawBody) {
   return { email, password };
 }
 
+function buildDashboardSmokePayload() {
+  const generatedAt = new Date().toISOString();
+  return {
+    generated_at: generatedAt,
+    data_freshness: {
+      import_feed: {
+        checked_at: generatedAt,
+        age_seconds: 42,
+      },
+    },
+    raw_metrics: {
+      recent_inquiries: {
+        count: 1,
+        latest_at: generatedAt,
+      },
+      last_deploy_health_status: {
+        health_status: "ok",
+        health_checked_at: generatedAt,
+        deploy_status: "ok",
+        deploy_checked_at: generatedAt,
+        source: "admin-smoke",
+        build_sha: "adminsm",
+      },
+    },
+    widgets: [
+      {
+        key: "recent_leads_inquiries",
+        title: "Recent leads / inquiries",
+        value: 1,
+        status: "ok",
+        summary: "Latest captured inquiries are visible.",
+        actions: [],
+      },
+      {
+        key: "last_deploy_health_status",
+        title: "Deploy health",
+        value: "Healthy",
+        status: "ok",
+        summary: "Last deploy and health checks look normal.",
+        actions: [],
+      },
+    ],
+    recent_inquiries: [
+      {
+        id: "smoke-inquiry-1",
+        created_at: generatedAt,
+        name: "Smoke Inquiry",
+        email: "smoke@example.com",
+        phone: null,
+        status: "new",
+        intent: "general",
+        source_page: "/en/contact",
+      },
+    ],
+    incomplete_widget_count: 0,
+    warnings: ["Smoke warning check"],
+  };
+}
+
 async function run() {
   await fs.mkdir(ARTIFACT_DIR, { recursive: true });
 
@@ -76,15 +135,7 @@ async function run() {
     await route.fulfill({
       status: 200,
       contentType: "application/json",
-      body: JSON.stringify({
-        generated_at: new Date().toISOString(),
-        data_freshness: {},
-        raw_metrics: {},
-        widgets: [],
-        recent_inquiries: [],
-        incomplete_widget_count: 0,
-        warnings: [],
-      }),
+      body: JSON.stringify(buildDashboardSmokePayload()),
     });
   });
 
@@ -101,6 +152,13 @@ async function run() {
     await page.getByRole("button", { name: /sign in|เข้าสู่ระบบ/i }).click();
     await page.getByRole("button", { name: /sign out|ออกจากระบบ/i }).waitFor({ timeout: 10000 });
     await page.getByRole("button", { name: /refresh dashboard|รีเฟรชแดชบอร์ด/i }).first().waitFor({ timeout: 10000 });
+    await page.getByRole("heading", { name: /Admin Health \/ QA Dashboard/i }).waitFor({ timeout: 10000 });
+    await page.getByRole("heading", { name: /Health widgets|วิดเจ็ตสุขภาพระบบ/i }).waitFor({ timeout: 10000 });
+    await page.getByRole("heading", { name: /Lead activity trend|แนวโน้ม activity ของลีด/i }).waitFor({ timeout: 10000 });
+    await page.getByRole("heading", { name: /Recent leads\/inquiries|ลีด\/อินไควรีล่าสุด/i }).waitFor({ timeout: 10000 });
+    await page.getByLabel(/Filter inquiries|กรอง inquiry/i).waitFor({ timeout: 10000 });
+    await page.getByRole("heading", { name: /Deploy health/i }).waitFor({ timeout: 10000 });
+    await page.getByText(/Smoke warning check/i).waitFor({ timeout: 10000 });
     await page.waitForTimeout(300);
 
     await page.screenshot({ path: path.join(ARTIFACT_DIR, "admin-dashboard-after-login.png"), fullPage: true });
