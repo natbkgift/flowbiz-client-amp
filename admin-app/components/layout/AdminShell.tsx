@@ -13,10 +13,10 @@ import {
 } from "react";
 
 import {
-  ADMIN_PRIMARY_NAV,
-  ADMIN_SECONDARY_NAV,
+  ADMIN_NAV_GROUPS,
   getAdminNavText,
   isActiveAdminNav,
+  type AdminNavGroup,
   type AdminNavItem,
 } from "@/app/_lib/admin-nav";
 import {
@@ -29,11 +29,6 @@ import {
 } from "@/app/_lib/admin-i18n";
 import { AdminIcon } from "@/components/admin/AdminIcons";
 import { AdminBadge } from "@/components/admin/AdminPrimitives";
-
-const ADMIN_NAV_SECTIONS = [
-  { key: "core", items: ADMIN_PRIMARY_NAV },
-  { key: "content", items: ADMIN_SECONDARY_NAV },
-] as const;
 
 const ADMIN_QUICK_ACTIONS: AdminNavItem[] = [
   {
@@ -66,11 +61,9 @@ const shellCopy = {
   en: {
     admin: "Admin",
     workspace: "Workspace",
+    workspaceName: "AMP Pattaya",
+    workspaceSummary: "Operations admin workspace",
     language: "Language",
-    core: "Core",
-    content: "Content",
-    coreNavigation: "Core navigation",
-    contentNavigation: "Content navigation",
     workspaceNavigation: "Admin workspace navigation",
     quickNavigation: "Admin quick navigation",
     quickActions: "Quick actions",
@@ -78,7 +71,7 @@ const shellCopy = {
     breadcrumb: "Breadcrumb",
     adminBrand: "AMP Admin",
     search: "Search",
-    searchPlaceholder: "Search workspaces, labels, or tasks",
+    searchPlaceholder: "Search modules, workspaces, or tasks",
     searchHint: "Filter admin navigation instantly",
     noResults: "No matching workspaces",
     noResultsHint: "Try Dashboard, Media, SEO, or CRM.",
@@ -86,19 +79,24 @@ const shellCopy = {
     closeNavigation: "Close navigation",
     navigationPanel: "Admin navigation panel",
     currentWorkspace: "Current workspace",
-    profileLabel: "Workspace profile",
+    profileLabel: "User menu",
     profileTitle: "FlowBiz Operations",
+    profileSubtitle: "Admin session tools",
     visitSite: "Visit site",
     localeBadge: "Locale",
+    notifications: "Notifications",
+    notificationsHint: "Alerts, watchlist, and QA follow-up",
+    toolbarSearch: "Toolbar search",
+    workspacePanel: "Workspace",
+    workspacePanelHint: "Current admin workspace",
+    pageTitle: "Page title",
   },
   th: {
     admin: "แอดมิน",
     workspace: "พื้นที่ทำงาน",
+    workspaceName: "AMP Pattaya",
+    workspaceSummary: "พื้นที่ทำงานแอดมินสำหรับปฏิบัติการ",
     language: "ภาษา",
-    core: "หลัก",
-    content: "เนื้อหา",
-    coreNavigation: "เมนูหลัก",
-    contentNavigation: "เมนูเนื้อหา",
     workspaceNavigation: "เมนูพื้นที่ทำงานแอดมิน",
     quickNavigation: "เมนูลัดแอดมิน",
     quickActions: "คำสั่งลัด",
@@ -106,7 +104,7 @@ const shellCopy = {
     breadcrumb: "เส้นทางหน้า",
     adminBrand: "AMP แอดมิน",
     search: "ค้นหา",
-    searchPlaceholder: "ค้นหาเมนู งาน หรือ workspace",
+    searchPlaceholder: "ค้นหาโมดูล พื้นที่ทำงาน หรืองานที่ต้องทำ",
     searchHint: "กรองเมนูแอดมินได้ทันที",
     noResults: "ไม่พบ workspace ที่ตรงคำค้น",
     noResultsHint: "ลองค้นหา Dashboard, Media, SEO หรือ CRM",
@@ -114,19 +112,29 @@ const shellCopy = {
     closeNavigation: "ปิดเมนู",
     navigationPanel: "แผงเมนูแอดมิน",
     currentWorkspace: "workspace ปัจจุบัน",
-    profileLabel: "โปรไฟล์พื้นที่ทำงาน",
+    profileLabel: "เมนูผู้ใช้",
     profileTitle: "FlowBiz Operations",
+    profileSubtitle: "เครื่องมือจัดการเซสชันแอดมิน",
     visitSite: "เปิดเว็บไซต์",
     localeBadge: "ภาษา",
+    notifications: "การแจ้งเตือน",
+    notificationsHint: "alerts, watchlist และงาน QA ที่ต้องตาม",
+    toolbarSearch: "ค้นหาจากแถบด้านบน",
+    workspacePanel: "พื้นที่ทำงาน",
+    workspacePanelHint: "บริบทของ workspace ปัจจุบัน",
+    pageTitle: "ชื่อหน้า",
   },
 } as const;
 
-type ShellSectionItems = typeof ADMIN_PRIMARY_NAV;
-
-type RenderNavSectionOptions = {
+type RenderNavGroupOptions = {
   emptyState?: ReactNode;
   linkClassName?: string;
   onNavigate?: () => void;
+};
+
+type FilteredNavGroup = {
+  group: AdminNavGroup;
+  items: AdminNavItem[];
 };
 
 function lockBodyScroll(): () => void {
@@ -148,7 +156,7 @@ function lockBodyScroll(): () => void {
   };
 }
 
-function filterNavItems(items: ShellSectionItems, searchTerm: string, locale: AdminLocale): ShellSectionItems {
+function filterNavItems(items: AdminNavItem[], searchTerm: string, locale: AdminLocale): AdminNavItem[] {
   if (!searchTerm) return items;
   return items.filter((item) => {
     const haystack = `${getAdminNavText(item.label, locale)} ${getAdminNavText(item.description, locale)}`.toLowerCase();
@@ -156,19 +164,19 @@ function filterNavItems(items: ShellSectionItems, searchTerm: string, locale: Ad
   });
 }
 
-function renderNavSection(
+function renderNavGroup(
   title: string,
-  items: ShellSectionItems,
+  items: AdminNavItem[],
   pathname: string,
   locale: AdminLocale,
-  options?: RenderNavSectionOptions,
+  options?: RenderNavGroupOptions,
 ): ReactNode {
-  const sectionActive = items.some((item) => isActiveAdminNav(pathname, item.href));
-  const sectionClassName = sectionActive ? "admin-shell-nav-section is-active" : "admin-shell-nav-section";
+  const groupActive = items.some((item) => isActiveAdminNav(pathname, item.href));
+  const groupClassName = groupActive ? "admin-shell-nav-section is-active" : "admin-shell-nav-section";
   const linkClassName = options?.linkClassName ?? "admin-shell-nav-link";
 
   return (
-    <section className={sectionClassName} aria-label={title}>
+    <section className={groupClassName} aria-label={title}>
       <h2>{title}</h2>
       {items.length === 0 ? (
         options?.emptyState ?? null
@@ -183,7 +191,9 @@ function renderNavSection(
                   className={active ? `${linkClassName} is-active` : linkClassName}
                   aria-current={active ? "page" : undefined}
                   onClick={options?.onNavigate}
+                  title={getAdminNavText(item.label, locale)}
                 >
+                  <span className="admin-shell-nav-link-accent" aria-hidden="true" />
                   <span className="admin-shell-nav-link-icon" aria-hidden="true">
                     <AdminIcon name={item.icon} size={16} />
                   </span>
@@ -204,14 +214,16 @@ function renderNavSection(
   );
 }
 
-function getCurrentAdminLocation(pathname: string): { sectionKey: "core" | "content" | null; item: AdminNavItem | null } {
-  for (const section of ADMIN_NAV_SECTIONS) {
-    const item = section.items.find((candidate) => isActiveAdminNav(pathname, candidate.href));
+function getCurrentAdminLocation(
+  pathname: string,
+): { group: AdminNavGroup | null; item: AdminNavItem | null } {
+  for (const group of ADMIN_NAV_GROUPS) {
+    const item = group.items.find((candidate) => isActiveAdminNav(pathname, candidate.href));
     if (item) {
-      return { sectionKey: section.key, item };
+      return { group, item };
     }
   }
-  return { sectionKey: null, item: null };
+  return { group: null, item: null };
 }
 
 export function AdminShell({ children }: { children: ReactNode }) {
@@ -221,17 +233,15 @@ export function AdminShell({ children }: { children: ReactNode }) {
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
   const deferredSearch = useDeferredValue(searchQuery.trim().toLowerCase());
   const drawerSearchRef = useRef<HTMLInputElement | null>(null);
-  const { sectionKey, item } = getCurrentAdminLocation(pathname);
+  const { group, item } = getCurrentAdminLocation(pathname);
 
   const ui = useMemo(
     () => ({
       admin: getAdminCopyValue(shellCopy, locale, "admin"),
       workspace: getAdminCopyValue(shellCopy, locale, "workspace"),
+      workspaceName: getAdminCopyValue(shellCopy, locale, "workspaceName"),
+      workspaceSummary: getAdminCopyValue(shellCopy, locale, "workspaceSummary"),
       language: getAdminCopyValue(shellCopy, locale, "language"),
-      core: getAdminCopyValue(shellCopy, locale, "core"),
-      content: getAdminCopyValue(shellCopy, locale, "content"),
-      coreNavigation: getAdminCopyValue(shellCopy, locale, "coreNavigation"),
-      contentNavigation: getAdminCopyValue(shellCopy, locale, "contentNavigation"),
       workspaceNavigation: getAdminCopyValue(shellCopy, locale, "workspaceNavigation"),
       quickNavigation: getAdminCopyValue(shellCopy, locale, "quickNavigation"),
       quickActions: getAdminCopyValue(shellCopy, locale, "quickActions"),
@@ -249,24 +259,33 @@ export function AdminShell({ children }: { children: ReactNode }) {
       currentWorkspace: getAdminCopyValue(shellCopy, locale, "currentWorkspace"),
       profileLabel: getAdminCopyValue(shellCopy, locale, "profileLabel"),
       profileTitle: getAdminCopyValue(shellCopy, locale, "profileTitle"),
+      profileSubtitle: getAdminCopyValue(shellCopy, locale, "profileSubtitle"),
       visitSite: getAdminCopyValue(shellCopy, locale, "visitSite"),
       localeBadge: getAdminCopyValue(shellCopy, locale, "localeBadge"),
+      notifications: getAdminCopyValue(shellCopy, locale, "notifications"),
+      notificationsHint: getAdminCopyValue(shellCopy, locale, "notificationsHint"),
+      toolbarSearch: getAdminCopyValue(shellCopy, locale, "toolbarSearch"),
+      workspacePanel: getAdminCopyValue(shellCopy, locale, "workspacePanel"),
+      workspacePanelHint: getAdminCopyValue(shellCopy, locale, "workspacePanelHint"),
+      pageTitle: getAdminCopyValue(shellCopy, locale, "pageTitle"),
     }),
     [locale],
   );
 
-  const filteredPrimaryNav = useMemo(
-    () => filterNavItems(ADMIN_PRIMARY_NAV, deferredSearch, locale),
+  const filteredNavGroups = useMemo(
+    () =>
+      ADMIN_NAV_GROUPS.map((navGroup) => ({
+        group: navGroup,
+        items: filterNavItems(navGroup.items, deferredSearch, locale),
+      })).filter((entry) => entry.items.length > 0 || !deferredSearch) as FilteredNavGroup[],
     [deferredSearch, locale],
   );
-  const filteredSecondaryNav = useMemo(
-    () => filterNavItems(ADMIN_SECONDARY_NAV, deferredSearch, locale),
-    [deferredSearch, locale],
-  );
+
+  const currentGroupLabel = group ? getAdminNavText(group.label, locale) : ui.admin;
   const currentWorkspaceLabel = item ? getAdminNavText(item.label, locale) : ui.workspace;
-  const currentWorkspaceDescription = item ? getAdminNavText(item.description, locale) : ui.quickNavigation;
+  const currentWorkspaceDescription = item ? getAdminNavText(item.description, locale) : ui.workspaceSummary;
   const siteHref = locale === "th" ? "/th" : "/en";
-  const hasSearchResults = filteredPrimaryNav.length > 0 || filteredSecondaryNav.length > 0;
+  const hasSearchResults = filteredNavGroups.some((entry) => entry.items.length > 0);
 
   useEffect(() => {
     const detectedLocale = detectAdminLocale();
@@ -342,7 +361,7 @@ export function AdminShell({ children }: { children: ReactNode }) {
             </span>
             <span className="admin-shell-brand-copy">
               <strong>{ui.adminBrand}</strong>
-              <small>{ui.quickNavigation}</small>
+              <small>{ui.workspaceSummary}</small>
             </span>
           </Link>
         </div>
@@ -370,10 +389,13 @@ export function AdminShell({ children }: { children: ReactNode }) {
           <small>{ui.searchHint}</small>
         </label>
 
-          <div className="admin-shell-sidebar-scroll">
-            {renderNavSection(ui.core, filteredPrimaryNav, pathname, locale, { emptyState: emptySearchState })}
-            {renderNavSection(ui.content, filteredSecondaryNav, pathname, locale, { emptyState: emptySearchState })}
-          </div>
+        <div className="admin-shell-sidebar-scroll">
+          {filteredNavGroups.map((entry) =>
+            renderNavGroup(getAdminNavText(entry.group.label, locale), entry.items, pathname, locale, {
+              emptyState: emptySearchState,
+            }),
+          )}
+        </div>
 
         <nav className="admin-shell-sidebar-footer" aria-label={ui.quickActions}>
           {ADMIN_QUICK_ACTIONS.map((action) => {
@@ -418,33 +440,35 @@ export function AdminShell({ children }: { children: ReactNode }) {
             </button>
 
             <div className="admin-shell-topbar-main">
-              <p className="admin-shell-topbar-section">
-                {sectionKey === "core" ? ui.core : sectionKey === "content" ? ui.content : ui.admin}
-              </p>
+              <p className="admin-shell-topbar-section">{currentGroupLabel}</p>
+              <div className="admin-shell-page-heading" aria-label={ui.pageTitle}>
+                <span className="admin-shell-page-icon" aria-hidden="true">
+                  {item ? <AdminIcon name={item.icon} size={18} /> : <AdminIcon name="workspace" size={18} />}
+                </span>
+                <div>
+                  <p className="admin-shell-page-title">{currentWorkspaceLabel}</p>
+                  <p className="admin-shell-page-subtitle">{currentWorkspaceDescription}</p>
+                </div>
+              </div>
               <nav aria-label={ui.breadcrumb} className="admin-shell-breadcrumb">
                 <ol>
                   <li>
                     <Link href={withAdminLocale("/admin/dashboard", locale)}>{ui.admin}</Link>
                     <span aria-hidden="true">/</span>
                   </li>
-                  <li aria-current="page">{currentWorkspaceLabel}</li>
+                  <li>{currentGroupLabel}</li>
+                  <li>
+                    <span aria-hidden="true">/</span>
+                    <span aria-current="page">{currentWorkspaceLabel}</span>
+                  </li>
                 </ol>
               </nav>
-              <div className="admin-shell-topbar-context">
-                <span className="admin-shell-topbar-context-icon" aria-hidden="true">
-                  {item ? <AdminIcon name={item.icon} size={18} /> : <AdminIcon name="workspace" size={18} />}
-                </span>
-                <div>
-                  <strong>{currentWorkspaceLabel}</strong>
-                  <span>{currentWorkspaceDescription}</span>
-                </div>
-              </div>
             </div>
           </div>
 
           <div className="admin-shell-topbar-tools">
             <label className="admin-shell-search admin-shell-search--topbar" htmlFor="admin-shell-topbar-search">
-              <span>{ui.search}</span>
+              <span>{ui.toolbarSearch}</span>
               <div className="admin-shell-search-input">
                 <span className="admin-shell-search-icon" aria-hidden="true">
                   <AdminIcon name="search" size={15} />
@@ -459,40 +483,61 @@ export function AdminShell({ children }: { children: ReactNode }) {
               </div>
             </label>
 
-            <nav className="admin-shell-quick-actions" aria-label={ui.quickActions}>
-              {ADMIN_QUICK_ACTIONS.map((action) => {
-                const active = isActiveAdminNav(pathname, action.href);
-                return (
-                  <Link
-                    key={action.href}
-                    href={withAdminLocale(action.href, locale)}
-                    className={active ? "admin-shell-quick-link is-active" : "admin-shell-quick-link"}
-                    aria-current={active ? "page" : undefined}
-                  >
-                    <AdminIcon name={action.icon} size={14} />
-                    <span>{getAdminNavText(action.label, locale)}</span>
-                  </Link>
-                );
-              })}
-            </nav>
+            <Link
+              href={withAdminLocale("/admin/dashboard", locale)}
+              className="admin-shell-toolbar-chip admin-shell-toolbar-chip--notifications"
+            >
+              <span className="admin-shell-toolbar-chip-icon" aria-hidden="true">
+                <AdminIcon name="warning" size={16} />
+              </span>
+              <span className="admin-shell-toolbar-chip-copy">
+                <strong>{ui.notifications}</strong>
+                <small>{ui.notificationsHint}</small>
+              </span>
+            </Link>
+
+            <div className="admin-shell-toolbar-chip admin-shell-toolbar-chip--workspace">
+              <span className="admin-shell-toolbar-chip-icon" aria-hidden="true">
+                <AdminIcon name="workspace" size={16} />
+              </span>
+              <span className="admin-shell-toolbar-chip-copy">
+                <strong>{ui.workspacePanel}</strong>
+                <small>{currentGroupLabel}</small>
+              </span>
+              <AdminBadge tone="info" icon="workspace">
+                {ui.workspaceName}
+              </AdminBadge>
+            </div>
 
             <div className="admin-shell-profile" aria-label={ui.profileLabel}>
-              <p className="admin-shell-profile-kicker">{ui.profileLabel}</p>
-              <strong>{ui.profileTitle}</strong>
-              <span>{currentWorkspaceLabel}</span>
+              <div className="admin-shell-profile-head">
+                <span className="admin-shell-profile-avatar" aria-hidden="true">
+                  <AdminIcon name="profile" size={16} />
+                </span>
+                <div>
+                  <p className="admin-shell-profile-kicker">{ui.profileLabel}</p>
+                  <strong>{ui.profileTitle}</strong>
+                  <span>{ui.profileSubtitle}</span>
+                </div>
+              </div>
               <div className="admin-shell-profile-badges">
                 <AdminBadge tone="info" icon="language">
                   {ui.localeBadge}: {locale.toUpperCase()}
                 </AdminBadge>
               </div>
-            </div>
-
-            <div className="admin-shell-locale-control">
-              <label htmlFor="admin-language-switcher">{ui.language}</label>
-              <select id="admin-language-switcher" value={locale} onChange={onLanguageChange}>
-                <option value="en">EN</option>
-                <option value="th">TH</option>
-              </select>
+              <div className="admin-shell-profile-actions">
+                <Link href={siteHref} className="admin-shell-profile-link">
+                  <AdminIcon name="globe" size={14} />
+                  <span>{ui.visitSite}</span>
+                </Link>
+                <div className="admin-shell-locale-control">
+                  <label htmlFor="admin-language-switcher">{ui.language}</label>
+                  <select id="admin-language-switcher" value={locale} onChange={onLanguageChange}>
+                    <option value="en">EN</option>
+                    <option value="th">TH</option>
+                  </select>
+                </div>
+              </div>
             </div>
           </div>
         </header>
@@ -539,16 +584,12 @@ export function AdminShell({ children }: { children: ReactNode }) {
 
           <div className="admin-shell-mobile-drawer-sections">
             {hasSearchResults ? (
-              <>
-                {renderNavSection(ui.core, filteredPrimaryNav, pathname, locale, {
+              filteredNavGroups.map((entry) =>
+                renderNavGroup(getAdminNavText(entry.group.label, locale), entry.items, pathname, locale, {
                   linkClassName: "admin-shell-drawer-link",
                   onNavigate: closeMobileNav,
-                })}
-                {renderNavSection(ui.content, filteredSecondaryNav, pathname, locale, {
-                  linkClassName: "admin-shell-drawer-link",
-                  onNavigate: closeMobileNav,
-                })}
-              </>
+                }),
+              )
             ) : (
               emptySearchState
             )}
@@ -574,7 +615,7 @@ export function AdminShell({ children }: { children: ReactNode }) {
                 <AdminIcon name="globe" size={15} />
                 <strong>{ui.visitSite}</strong>
               </span>
-              <small>{ui.adminBrand}</small>
+              <small>{ui.workspacePanelHint}</small>
             </Link>
           </nav>
         </div>

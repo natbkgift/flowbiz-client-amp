@@ -1,8 +1,9 @@
-import type {
-  ButtonHTMLAttributes,
-  ComponentPropsWithoutRef,
-  KeyboardEventHandler,
-  ReactNode,
+import {
+  createElement,
+  type ButtonHTMLAttributes,
+  type ComponentPropsWithoutRef,
+  type KeyboardEventHandler,
+  type ReactNode,
 } from "react";
 
 import { AdminIcon, type AdminIconName } from "@/components/admin/AdminIcons";
@@ -11,9 +12,30 @@ function cx(...values: Array<string | false | null | undefined>): string {
   return values.filter(Boolean).join(" ");
 }
 
-type AdminButtonVariant = "primary" | "secondary" | "ghost";
+type AdminButtonVariant = "primary" | "secondary" | "ghost" | "danger";
 type AdminButtonSize = "sm" | "md";
-type AdminTone = "neutral" | "info" | "ok" | "warn" | "error";
+export type AdminTone = "neutral" | "info" | "ok" | "warn" | "error";
+
+type AdminCardTone = Exclude<AdminTone, "neutral"> | "neutral";
+type AdminCardTitleTag = "div" | "h2" | "h3";
+
+type AdminCardShellProps = {
+  title?: ReactNode;
+  description?: ReactNode;
+  icon?: AdminIconName;
+  meta?: ReactNode;
+  actions?: ReactNode;
+  footer?: ReactNode;
+  className?: string;
+  bodyClassName?: string;
+  titleTag?: AdminCardTitleTag;
+  tone?: AdminCardTone;
+  surface?: "metric" | "action" | "log";
+  sectionProps?: Omit<ComponentPropsWithoutRef<"section">, "children" | "className"> & {
+    className?: string;
+  };
+  children: ReactNode;
+};
 
 export function adminButtonClassName({
   variant = "secondary",
@@ -95,6 +117,230 @@ export function AdminBadge({
   );
 }
 
+function toneIcon(tone: AdminCardTone): AdminIconName {
+  if (tone === "ok") return "success";
+  if (tone === "warn") return "warning";
+  if (tone === "error") return "x";
+  if (tone === "info") return "info";
+  return "spark";
+}
+
+function toneLabel(tone: AdminCardTone): string {
+  if (tone === "ok") return "Stable";
+  if (tone === "warn") return "Watch";
+  if (tone === "error") return "Blocked";
+  if (tone === "info") return "Live";
+  return "Ready";
+}
+
+function AdminCardShell({
+  title,
+  description,
+  icon = "info",
+  meta,
+  actions,
+  footer,
+  className,
+  bodyClassName,
+  titleTag = "h3",
+  tone = "neutral",
+  surface = "metric",
+  sectionProps,
+  children,
+}: AdminCardShellProps) {
+  const { className: sectionClassName, ...restSectionProps } = sectionProps ?? {};
+  const titleNode = title
+    ? createElement(
+        titleTag,
+        {
+          className:
+            titleTag === "h2"
+              ? "admin-card-shell__title admin-type-section-title"
+              : "admin-card-shell__title admin-type-card-title",
+        },
+        title,
+      )
+    : null;
+
+  return (
+    <section
+      {...restSectionProps}
+      className={cx(
+        "card",
+        "admin-card-shell",
+        `admin-card-shell--${surface}`,
+        `admin-card-shell--${tone}`,
+        sectionClassName,
+        className,
+      )}
+    >
+      {title || description || meta || actions ? (
+        <header className="admin-card-shell__header">
+          <div className="admin-card-shell__header-main">
+            <span className="admin-card-shell__icon" aria-hidden="true">
+              <AdminIcon name={icon} size={18} />
+            </span>
+            <div className="admin-card-shell__heading">
+              {titleNode}
+              {description ? <div className="admin-card-shell__description admin-type-body locale-safe">{description}</div> : null}
+              {meta ? <div className="admin-card-shell__meta">{meta}</div> : null}
+            </div>
+          </div>
+          {actions ? <div className="admin-card-shell__actions">{actions}</div> : null}
+        </header>
+      ) : null}
+      <div className={cx("admin-card-shell__body", bodyClassName)}>{children}</div>
+      {footer ? <footer className="admin-card-shell__footer">{footer}</footer> : null}
+    </section>
+  );
+}
+
+export function MetricCard({
+  title,
+  description,
+  icon = "dashboard",
+  meta,
+  actions,
+  footer,
+  className,
+  bodyClassName,
+  titleTag = "h3",
+  tone = "neutral",
+  sectionProps,
+  children,
+}: Omit<AdminCardShellProps, "surface">) {
+  return (
+    <AdminCardShell
+      title={title}
+      description={description}
+      icon={icon}
+      meta={meta}
+      actions={actions}
+      footer={footer}
+      className={cx("metric-card", className)}
+      bodyClassName={bodyClassName}
+      titleTag={titleTag}
+      tone={tone}
+      surface="metric"
+      sectionProps={sectionProps}
+    >
+      {children}
+    </AdminCardShell>
+  );
+}
+
+export function ActionCard({
+  title,
+  description,
+  icon = "spark",
+  meta,
+  actions,
+  footer,
+  className,
+  bodyClassName,
+  titleTag = "h3",
+  tone = "info",
+  sectionProps,
+  children,
+}: Omit<AdminCardShellProps, "surface">) {
+  return (
+    <AdminCardShell
+      title={title}
+      description={description}
+      icon={icon}
+      meta={meta}
+      actions={actions}
+      footer={footer}
+      className={cx("action-card", className)}
+      bodyClassName={bodyClassName}
+      titleTag={titleTag}
+      tone={tone}
+      surface="action"
+      sectionProps={sectionProps}
+    >
+      {children}
+    </AdminCardShell>
+  );
+}
+
+export function LogCard({
+  title,
+  description,
+  icon = "table",
+  meta,
+  actions,
+  footer,
+  className,
+  bodyClassName,
+  titleTag = "h3",
+  tone = "neutral",
+  sectionProps,
+  children,
+}: Omit<AdminCardShellProps, "surface">) {
+  return (
+    <AdminCardShell
+      title={title}
+      description={description}
+      icon={icon}
+      meta={meta}
+      actions={actions}
+      footer={footer}
+      className={cx("log-card", className)}
+      bodyClassName={bodyClassName}
+      titleTag={titleTag}
+      tone={tone}
+      surface="log"
+      sectionProps={sectionProps}
+    >
+      {children}
+    </AdminCardShell>
+  );
+}
+
+export function StatCard({
+  title,
+  value,
+  metadata,
+  action,
+  icon = "info",
+  tone = "neutral",
+  className,
+}: {
+  title: ReactNode;
+  value: ReactNode;
+  metadata?: ReactNode;
+  action?: ReactNode;
+  icon?: AdminIconName;
+  tone?: AdminCardTone;
+  className?: string;
+}) {
+  const footerNode = action ? (
+    action
+  ) : (
+    <AdminBadge tone={tone === "neutral" ? "info" : tone} icon={toneIcon(tone)}>
+      {toneLabel(tone)}
+    </AdminBadge>
+  );
+
+  return (
+    <article className={cx("card", "admin-stat-card", `admin-stat-card--${tone}`, className)}>
+      <div className="admin-stat-card__head">
+        <div className="admin-stat-card__heading">
+          <span className="admin-stat-card__label admin-type-label">{title}</span>
+          {metadata ? <span className="admin-stat-card__meta admin-type-helper locale-safe">{metadata}</span> : null}
+        </div>
+        <span className="admin-stat-card__icon" aria-hidden="true">
+          <AdminIcon name={icon} size={16} />
+        </span>
+      </div>
+      <div className="admin-stat-card__body">
+        <strong className="admin-stat-card__value">{value}</strong>
+      </div>
+      <div className="admin-stat-card__footer">{footerNode}</div>
+    </article>
+  );
+}
+
 export function AdminPageHeader({
   title,
   description,
@@ -119,8 +365,8 @@ export function AdminPageHeader({
           <AdminIcon name={icon} size={20} />
         </div>
         <div className="admin-page-header__copy">
-          <p className="admin-page-header__eyebrow">{eyebrow}</p>
-          <h1>{title}</h1>
+          <p className="admin-page-header__eyebrow admin-type-helper">{eyebrow}</p>
+          <h1 className="admin-type-page-title">{title}</h1>
           {description ? <div className="admin-page-header__description locale-safe">{description}</div> : null}
           {meta ? <div className="admin-page-header__meta">{meta}</div> : null}
         </div>
@@ -149,31 +395,19 @@ export function AdminSectionCard({
   };
   children: ReactNode;
 }) {
-  const { className: sectionClassName, ...restSectionProps } = sectionProps ?? {};
-
   return (
-    <section
-      {...restSectionProps}
-      className={cx("card", "admin-section-card", sectionClassName, className)}
+    <MetricCard
+      className={cx("admin-section-card", className)}
+      title={title}
+      description={description}
+      icon={icon}
+      actions={actions}
+      sectionProps={sectionProps}
+      titleTag="h2"
+      bodyClassName="admin-section-card__body"
     >
-      {title || description || actions ? (
-        <header className="admin-section-card__header">
-          <div className="admin-section-card__title-row">
-            {icon ? (
-              <span className="admin-section-card__icon" aria-hidden="true">
-                <AdminIcon name={icon} size={16} />
-              </span>
-            ) : null}
-            <div className="admin-section-card__copy">
-              {title ? <h2>{title}</h2> : null}
-              {description ? <div className="admin-section-card__description locale-safe">{description}</div> : null}
-            </div>
-          </div>
-          {actions ? <div className="admin-section-card__actions">{actions}</div> : null}
-        </header>
-      ) : null}
-      <div className="admin-section-card__body">{children}</div>
-    </section>
+      {children}
+    </MetricCard>
   );
 }
 
@@ -193,16 +427,14 @@ export function AdminStatCard({
   className?: string;
 }) {
   return (
-    <article className={cx("card", "admin-stat-card", `admin-stat-card--${tone}`, className)}>
-      <div className="admin-stat-card__head">
-        <span className="admin-stat-card__label">{label}</span>
-        <span className="admin-stat-card__icon" aria-hidden="true">
-          <AdminIcon name={icon} size={16} />
-        </span>
-      </div>
-      <strong className="admin-stat-card__value">{value}</strong>
-      {detail ? <div className="admin-stat-card__detail locale-safe">{detail}</div> : null}
-    </article>
+    <StatCard
+      title={label}
+      value={value}
+      metadata={detail}
+      icon={icon}
+      tone={tone}
+      className={className}
+    />
   );
 }
 

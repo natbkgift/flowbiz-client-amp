@@ -13,11 +13,15 @@ import {
 } from "@/app/_lib/admin-auth";
 import { AdminDataTable, type AdminDataTableColumn } from "@/components/admin/AdminDataTable";
 import {
+  ActionCard,
   AdminBadge,
   AdminButton,
   AdminPageHeader,
   AdminSectionCard,
+  AdminTable,
   AdminTabSwitch,
+  LogCard,
+  MetricCard,
 } from "@/components/admin/AdminPrimitives";
 import {
   AdminFormPrimitiveInput,
@@ -1202,115 +1206,143 @@ export function AdminJsonCrudWorkspace({ config }: { config: CrudConfig }) {
           ) : null}
 
           {bulkActions.length > 0 ? (
-            <section className="card">
-              <h2>Bulk actions</h2>
-              {bulkActions.map((action) => (
-                <article key={action.key} className="card">
-                  <h3>{action.title}</h3>
-                  {action.description ? <p className="locale-safe">{action.description}</p> : null}
-                  <label className="field" htmlFor={`${idBase}-bulk-ids-${action.key}`}>
-                    <span>{action.idLabel || "Property IDs (comma/space/newline separated)"}</span>
-                    <textarea
-                      id={`${idBase}-bulk-ids-${action.key}`}
-                      rows={3}
-                      value={bulkTargetIdsByAction[action.key] || ""}
-                      placeholder={action.idPlaceholder || "uuid-1, uuid-2"}
-                      onChange={(event) =>
-                        setBulkTargetIdsByAction((current) => ({
-                          ...current,
-                          [action.key]: event.target.value,
-                        }))
-                      }
-                    />
-                  </label>
-                  {action.fields.map((field) => (
-                    <AdminFormPrimitiveInput
-                      key={`${action.key}-${field.name}`}
-                      idPrefix={`${idBase}-bulk-${action.key}`}
-                      field={field}
-                      value={bulkFormValues[action.key]?.[field.name] || ""}
-                      error={bulkFormErrors[action.key]?.[field.name]}
-                      authToken={token}
-                      onChange={(name, value) => {
-                        setBulkFormValues((current) => ({
-                          ...current,
-                          [action.key]: { ...(current[action.key] || {}), [name]: value },
-                        }));
-                        setBulkFormErrors((current) => {
-                          if (!current[action.key]?.[name]) return current;
-                          const nextActionErrors = { ...(current[action.key] || {}) };
-                          delete nextActionErrors[name];
-                          return { ...current, [action.key]: nextActionErrors };
-                        });
-                      }}
-                    />
-                  ))}
-                  <div className="card-actions">
-                    <button
-                      className="btn btn-secondary"
-                      type="button"
-                      onClick={() =>
-                        void runAction(async () => {
-                          const ids = parseIdentifierList(bulkTargetIdsByAction[action.key] || "");
-                          if (ids.length === 0) {
-                            throw new Error("At least one property ID is required.");
-                          }
-                          const values = bulkFormValues[action.key] || {};
-                          const errors = validatePrimitiveValues(action.fields, values);
-                          setBulkFormErrors((current) => ({ ...current, [action.key]: errors }));
-                          if (Object.keys(errors).length > 0) {
-                            throw new Error("Please correct the highlighted fields.");
-                          }
-                          const payload = toPrimitivePayload(action.fields, values);
-                          const response = await fetchJson(action.path, token.trim(), {
-                            method: action.method || "POST",
-                            body: JSON.stringify({
-                              property_ids: ids,
-                              ...payload,
-                            }),
-                          });
+            <AdminSectionCard
+              title="Bulk actions"
+              description="Run scoped batch updates without changing the existing API contract."
+              icon="spark"
+            >
+              <div className="admin-workspace-stack">
+                {bulkActions.map((action) => (
+                  <ActionCard
+                    key={action.key}
+                    title={action.title}
+                    description={action.description || "Apply this action to one or more selected record IDs."}
+                    icon="spark"
+                    meta={
+                      <AdminBadge tone="info" icon="table">
+                        Batch update
+                      </AdminBadge>
+                    }
+                  >
+                    <label className="field" htmlFor={`${idBase}-bulk-ids-${action.key}`}>
+                      <span>{action.idLabel || "Property IDs (comma/space/newline separated)"}</span>
+                      <textarea
+                        id={`${idBase}-bulk-ids-${action.key}`}
+                        rows={3}
+                        value={bulkTargetIdsByAction[action.key] || ""}
+                        placeholder={action.idPlaceholder || "uuid-1, uuid-2"}
+                        onChange={(event) =>
                           setBulkTargetIdsByAction((current) => ({
                             ...current,
-                            [action.key]: "",
+                            [action.key]: event.target.value,
+                          }))
+                        }
+                      />
+                    </label>
+                    {action.fields.map((field) => (
+                      <AdminFormPrimitiveInput
+                        key={`${action.key}-${field.name}`}
+                        idPrefix={`${idBase}-bulk-${action.key}`}
+                        field={field}
+                        value={bulkFormValues[action.key]?.[field.name] || ""}
+                        error={bulkFormErrors[action.key]?.[field.name]}
+                        authToken={token}
+                        onChange={(name, value) => {
+                          setBulkFormValues((current) => ({
+                            ...current,
+                            [action.key]: { ...(current[action.key] || {}), [name]: value },
                           }));
-                          return response;
-                        })
-                      }
-                    >
-                      Run {action.title}
-                    </button>
-                  </div>
-                </article>
-              ))}
-            </section>
+                          setBulkFormErrors((current) => {
+                            if (!current[action.key]?.[name]) return current;
+                            const nextActionErrors = { ...(current[action.key] || {}) };
+                            delete nextActionErrors[name];
+                            return { ...current, [action.key]: nextActionErrors };
+                          });
+                        }}
+                      />
+                    ))}
+                    <div className="card-actions">
+                      <AdminButton
+                        variant="secondary"
+                        icon="spark"
+                        type="button"
+                        onClick={() =>
+                          void runAction(async () => {
+                            const ids = parseIdentifierList(bulkTargetIdsByAction[action.key] || "");
+                            if (ids.length === 0) {
+                              throw new Error("At least one property ID is required.");
+                            }
+                            const values = bulkFormValues[action.key] || {};
+                            const errors = validatePrimitiveValues(action.fields, values);
+                            setBulkFormErrors((current) => ({ ...current, [action.key]: errors }));
+                            if (Object.keys(errors).length > 0) {
+                              throw new Error("Please correct the highlighted fields.");
+                            }
+                            const payload = toPrimitivePayload(action.fields, values);
+                            const response = await fetchJson(action.path, token.trim(), {
+                              method: action.method || "POST",
+                              body: JSON.stringify({
+                                property_ids: ids,
+                                ...payload,
+                              }),
+                            });
+                            setBulkTargetIdsByAction((current) => ({
+                              ...current,
+                              [action.key]: "",
+                            }));
+                            return response;
+                          })
+                        }
+                      >
+                        Run {action.title}
+                      </AdminButton>
+                    </div>
+                  </ActionCard>
+                ))}
+              </div>
+            </AdminSectionCard>
           ) : null}
 
           {error ? <div className="state-error">{error}</div> : null}
           {loading ? <div className="state-loading">Loading</div> : null}
 
-          <section className="card">
-            <h2>Records</h2>
+          <LogCard
+            title="Records"
+            description="Current list results rendered through the shared admin data table."
+            icon="table"
+            titleTag="h2"
+          >
             {items.length === 0 ? (
               <div className="state-empty">No records</div>
             ) : (
-              <AdminDataTable
-                rows={items}
-                columns={tableColumns}
-                getRowId={(item, index) => pickIdentifierFromRow(item) || `row-${index}`}
-                emptyLabel="No records"
-              />
+              <AdminTable caption="Records">
+                <AdminDataTable
+                  rows={items}
+                  columns={tableColumns}
+                  getRowId={(item, index) => pickIdentifierFromRow(item) || `row-${index}`}
+                  emptyLabel="No records"
+                />
+              </AdminTable>
             )}
-          </section>
+          </LogCard>
 
           {result ? (
-            <section className="card">
-              <h2>Result</h2>
+            <LogCard
+              title="Result"
+              description="Latest response payload from the selected workspace action."
+              icon="info"
+              titleTag="h2"
+            >
               <pre>{result}</pre>
-            </section>
+            </LogCard>
           ) : null}
           {revisionConfig ? (
-            <section className="card">
-              <h2>Revision history</h2>
+            <LogCard
+              title="Revision history"
+              description="Inspect revisions, diff snapshots, and restore when the endpoint supports it."
+              icon="refresh"
+              titleTag="h2"
+            >
               {revisions.length === 0 ? (
                 <div className="state-empty">No revisions loaded. Select a record and click &quot;Load revisions&quot;.</div>
               ) : (
@@ -1335,8 +1367,9 @@ export function AdminJsonCrudWorkspace({ config }: { config: CrudConfig }) {
                     </select>
                   </label>
                   <div className="card-actions">
-                    <button
-                      className="btn btn-secondary"
+                    <AdminButton
+                      variant="secondary"
+                      icon="table"
                       type="button"
                       disabled={!identifier.trim() || !selectedRevisionId.trim()}
                       onClick={() =>
@@ -1353,10 +1386,11 @@ export function AdminJsonCrudWorkspace({ config }: { config: CrudConfig }) {
                       }
                     >
                       Show diff
-                    </button>
+                    </AdminButton>
                     {revisionConfig.restorePath ? (
-                      <button
-                        className="btn btn-secondary"
+                      <AdminButton
+                        variant="secondary"
+                        icon="refresh"
                         type="button"
                         disabled={!identifier.trim() || !selectedRevisionId.trim()}
                         onClick={() =>
@@ -1376,20 +1410,28 @@ export function AdminJsonCrudWorkspace({ config }: { config: CrudConfig }) {
                         }
                       >
                         Restore revision
-                      </button>
+                      </AdminButton>
                     ) : null}
                   </div>
                   <pre>{toPrettyJson({ data: revisions })}</pre>
                 </>
               )}
-            </section>
+            </LogCard>
           ) : null}
           {previewConfig && previewRecord ? (
-            <section className="card">
-              <h2>Preview</h2>
+            <LogCard
+              title="Preview"
+              description="Localized preview content and translation completeness for the current record."
+              icon="workspace"
+              titleTag="h2"
+            >
               {previewChecklist && previewChecklist.completeness.total > 0 ? (
-                <article className="card">
-                  <h3>Translation completeness</h3>
+                <MetricCard
+                  title="Translation completeness"
+                  description="Localized field coverage from the current publish checklist."
+                  icon="language"
+                  tone="info"
+                >
                   <p className="locale-safe">
                     {previewChecklist.completeness.filled}/{previewChecklist.completeness.total} localized fields (
                     {previewChecklist.completeness.percent}%)
@@ -1400,25 +1442,31 @@ export function AdminJsonCrudWorkspace({ config }: { config: CrudConfig }) {
                       {locale.toUpperCase()}: {stats.filled}/{stats.total}
                     </p>
                   ))}
-                </article>
+                </MetricCard>
               ) : null}
-              {(previewConfig.locales || ["en", "th"]).map((locale) => {
-                const localeKey = locale.toLowerCase();
-                const title = nestedText(previewRecord, `${previewConfig.titlePath}.${localeKey}`);
-                const excerptPath = previewConfig.excerptPath;
-                const bodyPath = previewConfig.bodyPath;
-                const excerpt = excerptPath ? nestedText(previewRecord, `${excerptPath}.${localeKey}`) : "";
-                const body = bodyPath ? nestedText(previewRecord, `${bodyPath}.${localeKey}`) : "";
-                return (
-                  <article key={localeKey} className="card">
-                    <h3>{localeKey.toUpperCase()}</h3>
-                    <p className="locale-safe"><strong>{title || "-"}</strong></p>
-                    {excerpt ? <p className="locale-safe">{excerpt}</p> : <p className="locale-safe">-</p>}
-                    {body ? <pre>{body}</pre> : <pre>-</pre>}
-                  </article>
-                );
-              })}
-            </section>
+              <div className="admin-preview-grid">
+                {(previewConfig.locales || ["en", "th"]).map((locale) => {
+                  const localeKey = locale.toLowerCase();
+                  const title = nestedText(previewRecord, `${previewConfig.titlePath}.${localeKey}`);
+                  const excerptPath = previewConfig.excerptPath;
+                  const bodyPath = previewConfig.bodyPath;
+                  const excerpt = excerptPath ? nestedText(previewRecord, `${excerptPath}.${localeKey}`) : "";
+                  const body = bodyPath ? nestedText(previewRecord, `${bodyPath}.${localeKey}`) : "";
+                  return (
+                    <MetricCard
+                      key={localeKey}
+                      title={localeKey.toUpperCase()}
+                      description="Preview locale"
+                      icon="language"
+                    >
+                      <p className="locale-safe"><strong>{title || "-"}</strong></p>
+                      {excerpt ? <p className="locale-safe">{excerpt}</p> : <p className="locale-safe">-</p>}
+                      {body ? <pre>{body}</pre> : <pre>-</pre>}
+                    </MetricCard>
+                  );
+                })}
+              </div>
+            </LogCard>
           ) : null}
         </>
       ) : null}

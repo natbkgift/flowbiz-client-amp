@@ -4,7 +4,13 @@ import { type FormEvent, useEffect, useMemo, useRef, useState } from "react";
 
 import { clearAuthSession, loginAdmin, persistAuthSession, readAuthSession } from "@/app/_lib/admin-auth";
 import { detectAdminLocale, type AdminLocale } from "@/app/_lib/admin-i18n";
-import { AdminPageHeader } from "@/components/admin/AdminPrimitives";
+import {
+  ActionCard,
+  AdminButton,
+  AdminPageHeader,
+  AdminTable,
+  LogCard,
+} from "@/components/admin/AdminPrimitives";
 
 type Locale = AdminLocale;
 
@@ -614,13 +620,20 @@ export default function AdminInquiriesPage() {
     <main id="main-content" className="container content-stack">
       <AdminPageHeader title={t.title} description={t.subtitle} icon="message" eyebrow="CRM" />
 
-      <section className="card crm-controls" aria-label={t.filters}>
+      <ActionCard
+        className="crm-controls"
+        title={isAuthenticated ? t.filters : t.loginTitle}
+        description={
+          isAuthenticated
+            ? "Filter, export, save presets, and switch between table and kanban lead views."
+            : t.loginSubtitle
+        }
+        icon="message"
+        titleTag="h2"
+      >
         <div className="crm-auth-shell">
           {!isAuthenticated ? (
             <form className="crm-login-form" method="post" onSubmit={(event) => void login(event)}>
-              <h2>{t.loginTitle}</h2>
-              <p className="locale-safe">{t.loginSubtitle}</p>
-
               <label className="field" htmlFor="crm-login-email">
                 <span>{t.email}</span>
                 <input
@@ -650,21 +663,20 @@ export default function AdminInquiriesPage() {
               {authError ? <div className="state-error">{authError}</div> : null}
 
               <div className="card-actions">
-                <button className="btn" type="submit" disabled={authLoading}>
+                <AdminButton variant="primary" icon="workspace" type="submit" disabled={authLoading}>
                   {authLoading ? t.signingIn : t.signIn}
-                </button>
+                </AdminButton>
               </div>
             </form>
           ) : (
             <div className="crm-session-panel" role="status" aria-live="polite">
-              <h2>{t.sessionActive}</h2>
               <p className="locale-safe">
                 {authEmail ? `${t.sessionAs}: ${authEmail}` : t.sessionUnknown}
               </p>
               <div className="card-actions">
-                <button className="btn btn-secondary" type="button" onClick={logout}>
+                <AdminButton variant="secondary" icon="x" type="button" onClick={logout}>
                   {t.signOut}
-                </button>
+                </AdminButton>
               </div>
             </div>
           )}
@@ -805,25 +817,30 @@ export default function AdminInquiriesPage() {
         </fieldset>
 
         {!isAuthenticated ? <div className="state-empty">{t.authRequired}</div> : null}
-      </section>
+      </ActionCard>
 
       {error ? <div className="state-error">{error}</div> : null}
 
       {isAuthenticated ? (
         <section className="crm-layout">
-          <article className="card crm-list">
-            <header className="crm-list-head">
-              <h2>{t.list}</h2>
-              <p>
+          <LogCard
+            className="crm-list"
+            title={t.list}
+            description="Table and kanban views for active lead follow-up."
+            icon="table"
+            titleTag="h2"
+            meta={
+              <span>
                 {t.total}: <strong>{total}</strong>
-              </p>
-            </header>
+              </span>
+            }
+          >
 
             {loading ? <div className="state-loading">{t.loading}</div> : null}
             {!loading && items.length === 0 ? <div className="state-empty">{t.empty}</div> : null}
 
             {!loading && items.length > 0 && viewMode === "table" ? (
-              <div className="crm-table-wrap">
+              <AdminTable caption={t.list} className="crm-table-wrap">
                 <table className="dashboard-table crm-table" aria-label={t.list}>
                   <thead>
                     <tr>
@@ -862,7 +879,7 @@ export default function AdminInquiriesPage() {
                     ))}
                   </tbody>
                 </table>
-              </div>
+              </AdminTable>
             ) : null}
 
             {!loading && items.length > 0 && viewMode === "kanban" ? (
@@ -955,10 +972,15 @@ export default function AdminInquiriesPage() {
                 ))}
               </div>
             ) : null}
-          </article>
+          </LogCard>
 
-          <article className="card crm-detail">
-            <h2>{t.details}</h2>
+          <ActionCard
+            className="crm-detail"
+            title={t.details}
+            description="Selected inquiry metadata, contact actions, follow-up controls, and timeline."
+            icon="message"
+            titleTag="h2"
+          >
             {!selected ? <div className="state-empty">{t.noDetails}</div> : null}
 
             {selected ? (
@@ -1060,7 +1082,7 @@ export default function AdminInquiriesPage() {
                 </section>
               </>
             ) : null}
-          </article>
+          </ActionCard>
         </section>
       ) : null}
     </main>

@@ -1,6 +1,7 @@
 import { type ReactNode, useId } from "react";
 
-import { AdminSectionCard } from "@/components/admin/AdminPrimitives";
+import { AdminIcon, type AdminIconName } from "@/components/admin/AdminIcons";
+import { MetricCard } from "@/components/admin/AdminPrimitives";
 
 function joinClasses(...values: Array<string | undefined | false>): string {
   return values.filter(Boolean).join(" ");
@@ -10,12 +11,14 @@ export function DashboardSection({
   title,
   subtitle,
   actions,
+  icon = "dashboard",
   className,
   children,
 }: {
   title: string;
   subtitle?: string;
   actions?: ReactNode;
+  icon?: AdminIconName;
   className?: string;
   children: ReactNode;
 }) {
@@ -23,18 +26,20 @@ export function DashboardSection({
   const subtitleId = useId();
 
   return (
-    <AdminSectionCard
+    <MetricCard
       className={joinClasses("dashboard-section", className)}
       title={<span id={headingId}>{title}</span>}
       description={subtitle ? <p id={subtitleId}>{subtitle}</p> : undefined}
+      icon={icon}
       actions={actions}
+      titleTag="h2"
       sectionProps={{
         "aria-labelledby": headingId,
         "aria-describedby": subtitle ? subtitleId : undefined,
       }}
     >
       <div className="dashboard-section-body">{children}</div>
-    </AdminSectionCard>
+    </MetricCard>
   );
 }
 
@@ -55,6 +60,9 @@ export function DashboardSectionState({
       role={tone === "error" ? "alert" : "status"}
       aria-live="polite"
     >
+      <span className="dashboard-section-state__icon" aria-hidden="true">
+        <AdminIcon name={tone === "error" ? "x" : tone === "empty" ? "info" : "spark"} size={18} />
+      </span>
       <h3>{title}</h3>
       <p className="locale-safe">{body}</p>
       {action ? <div className="dashboard-section-actions">{action}</div> : null}

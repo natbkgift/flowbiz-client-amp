@@ -9,6 +9,10 @@ const workspaceSource = fs.readFileSync(
   path.resolve(__dirname, "../components/admin/AdminJsonCrudWorkspace.tsx"),
   "utf-8"
 );
+const primitivesSource = fs.readFileSync(
+  path.resolve(__dirname, "../components/admin/AdminPrimitives.tsx"),
+  "utf-8"
+);
 
 describe("AdminJsonCrudWorkspace checklist report", () => {
   const config = {
@@ -52,9 +56,12 @@ describe("AdminJsonCrudWorkspace checklist report", () => {
   });
 
   it("uses roving tab focus and keyboard navigation for locale tabs", () => {
-    expect(workspaceSource).toContain("tabIndex={createLocaleTab === locale ? 0 : -1}");
-    expect(workspaceSource).toContain("tabIndex={patchLocaleTab === locale ? 0 : -1}");
+    expect(workspaceSource).toContain("AdminTabSwitch");
+    expect(workspaceSource).toContain('ariaLabel="Create locale tabs"');
+    expect(workspaceSource).toContain('ariaLabel="Update locale tabs"');
     expect(workspaceSource).toContain("onLocaleTabKeyDown");
     expect(workspaceSource).toContain("nextLocaleTabFromKey");
+    expect(primitivesSource).toContain('role="tab"');
+    expect(primitivesSource).toContain("tabIndex={active ? 0 : -1}");
   });
 });
