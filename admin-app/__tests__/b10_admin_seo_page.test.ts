@@ -20,6 +20,7 @@ describe("B10 admin SEO page contract", () => {
 
   it("wires B10 endpoints for overrides redirects schema and broken-links", () => {
     const page = read("app/admin/seo/page.tsx");
+    expect(page).toContain('fetch(`/api${path}`');
     expect(page).toContain('"/admin/seo/overrides"');
     expect(page).toContain('"/admin/seo/redirects"');
     expect(page).toContain('"/admin/seo/schema-source"');

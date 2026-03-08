@@ -5,6 +5,7 @@ This document describes where B10 controls live and how they are used in runtime
 ## Admin API
 
 - Prefix: `/admin/seo` (admin auth required)
+- Admin frontend calls must use `/api/admin/seo/*` (Next.js proxy), which maps to backend `/admin/seo/*`.
 - SEO overrides:
   - `GET /admin/seo/overrides`
   - `POST /admin/seo/overrides`
