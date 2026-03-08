@@ -207,9 +207,9 @@ const copy = {
     recentInquiriesEmptyTitle: "ยังไม่มีอินไควรีล่าสุด",
     recentInquiriesEmptyBody: "เมื่อมี submission ใหม่ ระบบจะแสดงแถวข้อมูลที่นี่",
     emptyInquiries: "ยังไม่มีอินไควรีล่าสุด",
-    sourcePage: "หน้า source",
+    sourcePage: "หน้าต้นทาง",
     status: "สถานะ",
-    intent: "Intent",
+    intent: "เป้าหมาย",
     contact: "ช่องทางติดต่อ",
     name: "ชื่อ",
     createdAt: "เวลาสร้าง",
@@ -416,7 +416,7 @@ export default function AdminDashboardPage() {
 
   function renderTrendToggle() {
     return (
-      <div className="dashboard-period-toggle" aria-label={t.trendTitle}>
+      <div className="dashboard-period-toggle" role="group" aria-label={t.trendTitle}>
         <button
           type="button"
           className={chartPeriod === "7d" ? "dashboard-period-button is-active" : "dashboard-period-button"}
@@ -706,7 +706,7 @@ export default function AdminDashboardPage() {
   }
 
   return (
-    <main id="main-content" className="container content-stack">
+    <main id="main-content" className="container content-stack" aria-busy={loading}>
       <section className="card dashboard-hero">
         <h1>{t.title}</h1>
         <p className="locale-safe">{t.subtitle}</p>
@@ -745,7 +745,7 @@ export default function AdminDashboardPage() {
               />
             </label>
 
-            {authError ? <div className="state-error">{authError}</div> : null}
+            {authError ? <div className="state-error" role="alert">{authError}</div> : null}
 
             <div className="card-actions">
               <button className="btn" type="submit" disabled={authLoading}>

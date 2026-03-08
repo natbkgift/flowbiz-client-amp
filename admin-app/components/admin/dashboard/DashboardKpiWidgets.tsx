@@ -95,6 +95,10 @@ type WidgetPresentation = {
 
 const copy = {
   en: {
+    statusOk: "OK",
+    statusWarn: "Warning",
+    statusError: "Error",
+    statusUnknown: "Unknown",
     covered: "Covered",
     broken: "Broken",
     missing: "Missing",
@@ -121,34 +125,46 @@ const copy = {
     healthy: "Healthy",
     attention: "Attention",
     unknown: "Unknown",
+    projects: "Projects",
+    articles: "Articles",
+    homeComposer: "Home composer",
+    translationBreakdown: "Translation gaps",
   },
   th: {
+    statusOk: "ปกติ",
+    statusWarn: "เตือน",
+    statusError: "ผิดพลาด",
+    statusUnknown: "ไม่ทราบ",
     covered: "มี cover",
-    broken: "Broken",
+    broken: "เสีย",
     missing: "ขาด cover",
-    external: "external",
+    external: "ภายนอก",
     scanned: "สแกนล่าสุด",
-    reviews: "Reviews",
+    reviews: "รีวิว",
     videos: "วิดีโอ",
-    policy: "policy",
-    entities: "entities",
-    drafts: "drafts",
-    warnings: "warnings",
+    policy: "นโยบาย",
+    entities: "รายการ",
+    drafts: "ฉบับร่าง",
+    warnings: "คำเตือน",
     latest: "ล่าสุด",
     import: "Import",
     mirror: "Mirror",
     health: "Health",
     deploy: "Deploy",
     rows: "แถว",
-    errors: "errors",
-    failures: "failures",
+    errors: "ข้อผิดพลาด",
+    failures: "ล้มเหลว",
     build: "Build",
     source: "Source",
     approved: "อนุมัติแล้ว",
-    draft: "draft",
+    draft: "ยังไม่อนุมัติ",
     healthy: "ปกติ",
     attention: "ต้องตรวจ",
     unknown: "ไม่ทราบ",
+    projects: "โปรเจกต์",
+    articles: "บทความ",
+    homeComposer: "โฮมคอมโพสเซอร์",
+    translationBreakdown: "รายการที่ยังขาดคำแปล",
   },
 } as const;
 
@@ -184,6 +200,14 @@ function formatTextValue(value: DashboardWidget["value"], fallback: string): str
 
 function statusClass(status: WidgetStatus): string {
   return `dashboard-status dashboard-status-${status}`;
+}
+
+function statusLabel(status: WidgetStatus, locale: AdminLocale): string {
+  const ui = copy[locale];
+  if (status === "ok") return ui.statusOk;
+  if (status === "warn") return ui.statusWarn;
+  if (status === "error") return ui.statusError;
+  return ui.statusUnknown;
 }
 
 function formatStatusWord(
@@ -277,8 +301,8 @@ function createPresentation(
           ? ui.approved
           : ui.draft,
       details: [
-        `${ui.entities}: ${formatCount(metric?.projects_missing_en_th, locale, fallback)} projects / ${formatCount(metric?.articles_missing_en_th, locale, fallback)} articles`,
-        `Home composer: ${formatCount(metric?.home_composer_missing_locale_pairs, locale, fallback)}`,
+        `${ui.translationBreakdown}: ${formatCount(metric?.projects_missing_en_th, locale, fallback)} ${ui.projects} / ${formatCount(metric?.articles_missing_en_th, locale, fallback)} ${ui.articles}`,
+        `${ui.homeComposer}: ${formatCount(metric?.home_composer_missing_locale_pairs, locale, fallback)}`,
       ],
     };
   }
@@ -292,9 +316,9 @@ function createPresentation(
         fallback,
       ),
       details: [
-        `Projects: ${formatCount(metric?.projects_draft, locale, fallback)}`,
-        `Articles: ${formatCount(metric?.articles_draft, locale, fallback)}`,
-        `Home composer: ${formatCount(metric?.home_composer_draft, locale, fallback)}`,
+        `${ui.projects}: ${formatCount(metric?.projects_draft, locale, fallback)}`,
+        `${ui.articles}: ${formatCount(metric?.articles_draft, locale, fallback)}`,
+        `${ui.homeComposer}: ${formatCount(metric?.home_composer_draft, locale, fallback)}`,
       ],
     };
   }
@@ -399,7 +423,7 @@ export function DashboardKpiWidgets({
           >
             <header className="dashboard-widget-head">
               <h3>{widget.title}</h3>
-              <span className={statusClass(widget.status)}>{widget.status}</span>
+              <span className={statusClass(widget.status)}>{statusLabel(widget.status, locale)}</span>
             </header>
 
             <div className="dashboard-kpi-value-block">
