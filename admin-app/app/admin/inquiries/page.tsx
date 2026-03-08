@@ -1,6 +1,6 @@
 "use client";
 
-import { type FormEvent, useEffect, useMemo, useState } from "react";
+import { type FormEvent, useEffect, useMemo, useRef, useState } from "react";
 
 import { clearAuthSession, loginAdmin, persistAuthSession, readAuthSession } from "@/app/_lib/admin-auth";
 import { detectAdminLocale, type AdminLocale } from "@/app/_lib/admin-i18n";
@@ -34,6 +34,21 @@ type TimelineEvent = {
   actor_user_id: string | null;
 };
 
+type SavedFilter = {
+  id: string;
+  role: string;
+  name: string;
+  filters: {
+    status: string;
+    source: string;
+    purpose: string;
+    date_from: string;
+    date_to: string;
+    follow_up_status: string;
+    q: string;
+  };
+};
+
 type PaginatedResponse<T> = {
   data: T[];
   meta: {
@@ -44,6 +59,9 @@ type PaginatedResponse<T> = {
 };
 
 const FOLLOW_UP_STATUSES = ["pending", "scheduled", "completed", "no_response"] as const;
+const CRM_STATUSES = ["new", "contacted", "qualified", "closed", "lost"] as const;
+const SAVED_FILTERS_STORAGE_KEY = "flowbiz_crm_saved_filters_v1";
+const MAX_SAVED_FILTERS = 10;
 const copy = {
   en: {
     title: "Inquiries CRM",
@@ -78,6 +96,14 @@ const copy = {
     search: "Search",
     clear: "Clear",
     apply: "Apply filters",
+    tableView: "Table view",
+    kanbanView: "Kanban view",
+    saveFilter: "Save filter",
+    saveAs: "Save as",
+    savedFilters: "Saved filters",
+    loadFilter: "Load filter",
+    roleScope: "Role scope",
+    moveStatusError: "Unable to move inquiry status.",
     list: "Inquiries",
     total: "Total",
     details: "Details",
@@ -131,6 +157,14 @@ const copy = {
     search: "ค้นหา",
     clear: "ล้างค่า",
     apply: "ใช้ตัวกรอง",
+    tableView: "มุมมองตาราง",
+    kanbanView: "มุมมองคัมบัน",
+    saveFilter: "บันทึกตัวกรอง",
+    saveAs: "บันทึกเป็น",
+    savedFilters: "ตัวกรองที่บันทึกไว้",
+    loadFilter: "โหลดตัวกรอง",
+    roleScope: "ขอบเขตตาม role",
+    moveStatusError: "ย้ายสถานะรายการไม่สำเร็จ",
     list: "รายการ Inquiry",
     total: "ทั้งหมด",
     details: "รายละเอียด",
@@ -192,6 +226,38 @@ function prettyDate(value: string | null, locale: Locale): string {
   }).format(date);
 }
 
+function readRoleFromToken(token: string): string {
+  const value = token.trim();
+  if (!value || typeof window === "undefined") return "admin";
+  const chunks = value.split(".");
+  if (chunks.length < 2) return "admin";
+  try {
+    const normalized = chunks[1].replace(/-/g, "+").replace(/_/g, "/");
+    const padded = normalized + "=".repeat((4 - (normalized.length % 4)) % 4);
+    const payload = JSON.parse(window.atob(padded)) as { role?: unknown };
+    const role = typeof payload.role === "string" ? payload.role.trim() : "";
+    return role || "admin";
+  } catch {
+    return "admin";
+  }
+}
+
+function savedFiltersKey(role: string): string {
+  return `${SAVED_FILTERS_STORAGE_KEY}:${role}`;
+}
+
+function dueClass(dueAt: string | null): string {
+  if (!dueAt) return "crm-chip-muted";
+  const due = new Date(dueAt).getTime();
+  if (!Number.isFinite(due)) return "crm-chip-muted";
+  const now = Date.now();
+  return due < now ? "crm-chip-warn" : "crm-chip-sla";
+}
+
+function statusIndex(status: string): number {
+  return CRM_STATUSES.findIndex((value) => value === status);
+}
+
 async function fetchJson<T>(path: string, token: string): Promise<T> {
   const response = await fetch(path, {
     headers: { Authorization: `Bearer ${token}` },
@@ -204,6 +270,7 @@ async function fetchJson<T>(path: string, token: string): Promise<T> {
 }
 
 export default function AdminInquiriesPage() {
+  const savedFilterCounter = useRef(0);
   const [locale, setLocale] = useState<Locale>("en");
   const [authToken, setAuthToken] = useState("");
   const [authEmail, setAuthEmail] = useState("");
@@ -233,15 +300,41 @@ export default function AdminInquiriesPage() {
 
   const [followUpStatus, setFollowUpStatus] = useState("pending");
   const [followUpDueAt, setFollowUpDueAt] = useState("");
+  const [viewMode, setViewMode] = useState<"table" | "kanban">("table");
+  const [role, setRole] = useState("admin");
+  const [savedFilters, setSavedFilters] = useState<SavedFilter[]>([]);
+  const [savedFilterName, setSavedFilterName] = useState("");
+  const [activeSavedFilterId, setActiveSavedFilterId] = useState("");
 
   useEffect(() => {
     setLocale(detectLocale());
     const session = readAuthSession();
     if (!session) return;
     setAuthToken(session.token);
+    setRole(readRoleFromToken(session.token));
     setAuthEmail(session.email);
     if (session.email) setLoginEmail(session.email);
   }, []);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    setActiveSavedFilterId("");
+    const raw = window.localStorage.getItem(savedFiltersKey(role));
+    if (!raw) {
+      setSavedFilters([]);
+      setActiveSavedFilterId("");
+      return;
+    }
+    try {
+      const parsed = JSON.parse(raw) as SavedFilter[];
+      const scoped = Array.isArray(parsed) ? parsed.filter((item) => item.role === role) : [];
+      setSavedFilters(scoped);
+    } catch {
+      setSavedFilters([]);
+      setActiveSavedFilterId("");
+      window.localStorage.removeItem(savedFiltersKey(role));
+    }
+  }, [role]);
 
   const isAuthenticated = authToken.trim().length > 0;
   const t = copy[locale];
@@ -259,8 +352,31 @@ export default function AdminInquiriesPage() {
       }),
     [dateFrom, dateTo, followUpFilter, purposeFilter, search, sourceFilter, statusFilter]
   );
+  const kanbanColumns = useMemo(
+    () =>
+      CRM_STATUSES.map((status) => ({
+        status,
+        items: items.filter((item) => item.status === status),
+      })),
+    [items]
+  );
 
   async function loadList(tokenOverride?: string) {
+    await loadListWithFilters(
+      {
+        status: statusFilter,
+        source: sourceFilter,
+        purpose: purposeFilter,
+        date_from: dateFrom,
+        date_to: dateTo,
+        follow_up_status: followUpFilter,
+        q: search,
+      },
+      tokenOverride
+    );
+  }
+
+  async function loadListWithFilters(filters: Record<string, string>, tokenOverride?: string) {
     const activeToken = (tokenOverride ?? authToken).trim();
     if (!activeToken) {
       setError(t.authRequired);
@@ -270,8 +386,9 @@ export default function AdminInquiriesPage() {
     setLoading(true);
     setError(null);
     try {
+      const query = buildQuery(filters);
       const body = await fetchJson<PaginatedResponse<InquiryItem>>(
-        `/admin/inquiries?${filterQuery}`,
+        `/admin/inquiries?${query}`,
         activeToken
       );
       setItems(body.data);
@@ -346,6 +463,78 @@ export default function AdminInquiriesPage() {
     }
   }
 
+  function saveCurrentFilter() {
+    if (typeof window === "undefined") return;
+    const trimmedName = savedFilterName.trim();
+    if (!trimmedName) return;
+    const record: SavedFilter = {
+      id:
+        window.crypto?.randomUUID
+          ? window.crypto.randomUUID()
+          : `${Date.now()}-${savedFilterCounter.current++}-${Math.random().toString(16).slice(2)}`,
+      role,
+      name: trimmedName,
+      filters: {
+        status: statusFilter,
+        source: sourceFilter,
+        purpose: purposeFilter,
+        date_from: dateFrom,
+        date_to: dateTo,
+        follow_up_status: followUpFilter,
+        q: search,
+      },
+    };
+    const next = [record, ...savedFilters].slice(0, MAX_SAVED_FILTERS);
+    setSavedFilters(next);
+    setSavedFilterName("");
+    setActiveSavedFilterId(record.id);
+    try {
+      window.localStorage?.setItem(savedFiltersKey(role), JSON.stringify(next));
+    } catch (error) {
+      // Avoid breaking the UI if localStorage is unavailable or quota is exceeded
+      console.error("Failed to persist saved inquiries filter to localStorage", error);
+    }
+  }
+
+  function loadSavedFilter() {
+    const selectedFilter = savedFilters.find((item) => item.id === activeSavedFilterId);
+    if (!selectedFilter) return;
+    setStatusFilter(selectedFilter.filters.status);
+    setSourceFilter(selectedFilter.filters.source);
+    setPurposeFilter(selectedFilter.filters.purpose);
+    setDateFrom(selectedFilter.filters.date_from);
+    setDateTo(selectedFilter.filters.date_to);
+    setFollowUpFilter(selectedFilter.filters.follow_up_status);
+    setSearch(selectedFilter.filters.q);
+    void loadListWithFilters(selectedFilter.filters);
+  }
+
+  async function moveInquiryStatus(inquiryId: string, nextStatus: string) {
+    const activeToken = authToken.trim();
+    if (!activeToken) {
+      setError(t.authRequired);
+      return;
+    }
+    const current = items.find((item) => item.id === inquiryId);
+    if (!current || current.status === nextStatus) return;
+    try {
+      const response = await fetch(`/admin/inquiries/${inquiryId}`, {
+        method: "PATCH",
+        headers: {
+          "content-type": "application/json",
+          Authorization: `Bearer ${activeToken}`,
+        },
+        body: JSON.stringify({ status: nextStatus }),
+      });
+      if (!response.ok) throw new Error("move_failed");
+      const body = (await response.json()) as InquiryItem;
+      setItems((prev) => prev.map((item) => (item.id === body.id ? body : item)));
+      setSelected((prev) => (prev && prev.id === body.id ? body : prev));
+    } catch {
+      setError(t.moveStatusError);
+    }
+  }
+
   async function exportCsv() {
     const activeToken = authToken.trim();
     if (!activeToken) {
@@ -392,6 +581,7 @@ export default function AdminInquiriesPage() {
       const accessToken = loginResult.accessToken;
 
       setAuthToken(accessToken);
+      setRole(readRoleFromToken(accessToken));
       setAuthEmail(email);
       setLoginPassword("");
       persistAuthSession(accessToken, email);
@@ -406,6 +596,7 @@ export default function AdminInquiriesPage() {
   function logout() {
     clearAuthSession();
     setAuthToken("");
+    setRole("admin");
     setAuthEmail("");
     setLoginPassword("");
     setAuthError(null);
@@ -555,6 +746,63 @@ export default function AdminInquiriesPage() {
           </button>
         </div>
 
+        <div className="card-actions">
+          <button
+            className={`btn btn-secondary ${viewMode === "table" ? "is-active" : ""}`}
+            type="button"
+            onClick={() => setViewMode("table")}
+            aria-pressed={viewMode === "table"}
+          >
+            {t.tableView}
+          </button>
+          <button
+            className={`btn btn-secondary ${viewMode === "kanban" ? "is-active" : ""}`}
+            type="button"
+            onClick={() => setViewMode("kanban")}
+            aria-pressed={viewMode === "kanban"}
+          >
+            {t.kanbanView}
+          </button>
+        </div>
+
+        <fieldset className="crm-filters-fieldset" disabled={!isAuthenticated}>
+          <legend>{t.savedFilters}</legend>
+          <div className="crm-saved-filters">
+            <label className="field" htmlFor="crm-save-filter-name">
+              <span>{t.saveAs}</span>
+              <input
+                id="crm-save-filter-name"
+                value={savedFilterName}
+                onChange={(event) => setSavedFilterName(event.target.value)}
+              />
+            </label>
+            <button className="btn btn-secondary" type="button" onClick={saveCurrentFilter} disabled={!savedFilterName.trim()}>
+              {t.saveFilter}
+            </button>
+            <label className="field" htmlFor="crm-saved-filter-select">
+              <span>{t.savedFilters}</span>
+              <select
+                id="crm-saved-filter-select"
+                value={activeSavedFilterId}
+                onChange={(event) => setActiveSavedFilterId(event.target.value)}
+              >
+                <option value=""></option>
+                {savedFilters.map((item) => (
+                  <option key={item.id} value={item.id}>
+                    {item.name}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <button className="btn btn-secondary" type="button" onClick={loadSavedFilter} disabled={!activeSavedFilterId}>
+              {t.loadFilter}
+            </button>
+            <p className="crm-row-meta" role="status" aria-live="polite">
+              {t.roleScope}: <strong>{role}</strong>
+            </p>
+          </div>
+        </fieldset>
+
         {!isAuthenticated ? <div className="state-empty">{t.authRequired}</div> : null}
       </section>
 
@@ -573,27 +821,138 @@ export default function AdminInquiriesPage() {
             {loading ? <div className="state-loading">{t.loading}</div> : null}
             {!loading && items.length === 0 ? <div className="state-empty">{t.empty}</div> : null}
 
-            {!loading && items.length > 0 ? (
-              <ul className="crm-items" aria-label={t.list}>
-                {items.map((item) => (
-                  <li key={item.id}>
-                    <button
-                      type="button"
-                      className={`crm-row-button ${selectedId === item.id ? "is-active" : ""}`}
-                      onClick={() => void loadDetails(item.id)}
-                    >
-                      <span className="crm-row-title">{item.name}</span>
-                      <span className="crm-row-meta">{item.status}</span>
-                      <span className="crm-row-meta">{item.purpose || "-"}</span>
-                      <span className="crm-row-meta">{prettyDate(item.created_at, locale)}</span>
-                      <span className="crm-row-hints">
-                        {item.is_spam_hint ? <span className="crm-chip crm-chip-warn">{t.spam}</span> : null}
-                        {item.is_duplicate_hint ? <span className="crm-chip crm-chip-muted">{t.duplicate}</span> : null}
-                      </span>
-                    </button>
-                  </li>
+            {!loading && items.length > 0 && viewMode === "table" ? (
+              <div className="crm-table-wrap">
+                <table className="dashboard-table crm-table" aria-label={t.list}>
+                  <thead>
+                    <tr>
+                      <th scope="col">{t.list}</th>
+                      <th scope="col">{t.status}</th>
+                      <th scope="col">{t.followUp}</th>
+                      <th scope="col">{t.followUpDueAt}</th>
+                      <th scope="col">{t.createdAt}</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {items.map((item) => (
+                      <tr key={item.id} className={selectedId === item.id ? "is-active" : ""}>
+                        <td>
+                          <button
+                            type="button"
+                            className="crm-table-select"
+                            onClick={() => void loadDetails(item.id)}
+                          >
+                            {item.name}
+                          </button>
+                        </td>
+                        <td>{item.status}</td>
+                        <td>
+                          <span className={`crm-chip ${item.follow_up_status ? "crm-chip-sla" : "crm-chip-muted"}`}>
+                            {item.follow_up_status || "-"}
+                          </span>
+                        </td>
+                        <td>
+                          <span className={`crm-chip ${dueClass(item.follow_up_due_at)}`}>
+                            {prettyDate(item.follow_up_due_at, locale)}
+                          </span>
+                        </td>
+                        <td>{prettyDate(item.created_at, locale)}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            ) : null}
+
+            {!loading && items.length > 0 && viewMode === "kanban" ? (
+              <div className="crm-kanban" aria-label={t.kanbanView}>
+                {kanbanColumns.map((column) => (
+                  <section
+                    key={column.status}
+                    className="crm-kanban-column"
+                    onDragOver={(event) => event.preventDefault()}
+                    onDrop={(event) => {
+                      event.preventDefault();
+                      const droppedId = event.dataTransfer.getData("text/plain");
+                      if (droppedId) {
+                        void moveInquiryStatus(droppedId, column.status);
+                      }
+                    }}
+                  >
+                    <header className="crm-kanban-head">
+                      <h3>{column.status}</h3>
+                      <span>{column.items.length}</span>
+                    </header>
+                    <ul className="crm-items">
+                      {column.items.map((item) => (
+                        <li key={item.id} className={`crm-row-card ${selectedId === item.id ? "is-active" : ""}`}>
+                          <button
+                            type="button"
+                            draggable
+                            className={`crm-row-button ${selectedId === item.id ? "is-active" : ""}`}
+                            onClick={() => void loadDetails(item.id)}
+                            onDragStart={(event) => {
+                              event.dataTransfer.setData("text/plain", item.id);
+                            }}
+                            onKeyDown={(event) => {
+                              const eventTarget = event.target as HTMLElement | null;
+                              if (
+                                eventTarget?.closest(
+                                  "select, input, textarea, button, a"
+                                )
+                              ) {
+                                return;
+                              }
+                              if (event.key !== "ArrowRight" && event.key !== "ArrowLeft") return;
+                              const currentIndex = statusIndex(item.status);
+                              if (currentIndex < 0) return;
+                              const nextIndex = event.key === "ArrowRight" ? currentIndex + 1 : currentIndex - 1;
+                              const nextStatus = CRM_STATUSES[nextIndex];
+                              if (!nextStatus) return;
+                              event.preventDefault();
+                              void moveInquiryStatus(item.id, nextStatus);
+                            }}
+                          >
+                            <span className="crm-row-title">{item.name}</span>
+                            <span className="crm-row-meta">{item.purpose || "-"}</span>
+                            <span className="crm-row-meta">
+                              <span className={`crm-chip ${item.follow_up_status ? "crm-chip-sla" : "crm-chip-muted"}`}>
+                                {item.follow_up_status || "-"}
+                              </span>
+                            </span>
+                            <span className="crm-row-meta">
+                              <span className={`crm-chip ${dueClass(item.follow_up_due_at)}`}>
+                                {prettyDate(item.follow_up_due_at, locale)}
+                              </span>
+                            </span>
+                            <span className="crm-row-hints">
+                              {item.is_spam_hint ? <span className="crm-chip crm-chip-warn">{t.spam}</span> : null}
+                              {item.is_duplicate_hint ? <span className="crm-chip crm-chip-muted">{t.duplicate}</span> : null}
+                            </span>
+                          </button>
+                          <label className="field crm-row-status-field">
+                            <span className="sr-only">{t.status}</span>
+                            <select
+                              aria-label={t.status}
+                              value={item.status}
+                              onChange={(event) => {
+                                void moveInquiryStatus(item.id, event.target.value);
+                              }}
+                              onKeyDown={(event) => event.stopPropagation()}
+                            >
+                              {CRM_STATUSES.map((value) => (
+                                <option key={value} value={value}>
+                                  {value}
+                                </option>
+                              ))}
+                            </select>
+                          </label>
+                        </li>
+                      ))}
+                    </ul>
+                  </section>
                 ))}
-              </ul>
+              </div>
             ) : null}
           </article>
 

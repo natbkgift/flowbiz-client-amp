@@ -22,7 +22,7 @@ describe("B11 admin inquiries page contract", () => {
   it("keeps required admin inquiry API wiring", () => {
     const page = read("app/admin/inquiries/page.tsx");
 
-    expect(page).toContain("`/admin/inquiries?${filterQuery}`");
+    expect(page).toContain("`/admin/inquiries?${query}`");
     expect(page).toContain("`/admin/inquiries/${id}`");
     expect(page).toContain("`/admin/inquiries/${id}/timeline?limit=30`");
     expect(page).toContain("`/admin/inquiries/${selectedId}/follow-up`");
@@ -43,6 +43,20 @@ describe("B11 admin inquiries page contract", () => {
     expect(page).toContain("selected.whatsapp_url");
     expect(page).toContain("selected.phone_url");
     expect(page).toContain("selected.email_url");
+  });
+
+  it("supports table + kanban board with saved filters and status move wiring", () => {
+    const page = read("app/admin/inquiries/page.tsx");
+
+    expect(page).toContain('const [viewMode, setViewMode] = useState<"table" | "kanban">("table")');
+    expect(page).toContain("CRM_STATUSES");
+    expect(page).toContain('method: "PATCH"');
+    expect(page).toContain("`/admin/inquiries/${inquiryId}`");
+    expect(page).toContain('body: JSON.stringify({ status: nextStatus })');
+    expect(page).toContain("flowbiz_crm_saved_filters_v1");
+    expect(page).toContain("readRoleFromToken");
+    expect(page).toContain("saveCurrentFilter");
+    expect(page).toContain("loadSavedFilter");
   });
 
   it("keeps accessibility and runtime states in EN/TH copy", () => {
