@@ -313,7 +313,6 @@ export default function AdminInquiriesPage() {
     setAuthToken(session.token);
     setRole(readRoleFromToken(session.token));
     setAuthEmail(session.email);
-    if (session.email) setLoginEmail(session.email);
   }, []);
 
   useEffect(() => {

@@ -130,4 +130,24 @@ describe("B14 admin workspace pages contract", () => {
     expect(page).not.toContain("'/v1/auth/login'");
     expect(page).not.toContain('"/v1/auth/login"');
   });
+
+  it("admin login forms do not prefill credentials from stored sessions", () => {
+    const loginPages = [
+      "app/admin/dashboard/page.tsx",
+      "app/admin/domain/page.tsx",
+      "app/admin/seo/page.tsx",
+      "app/admin/layout/page.tsx",
+      "app/admin/media/page.tsx",
+      "app/admin/inquiries/page.tsx",
+      "app/admin/imports/page.tsx",
+      "app/admin/home-composer/page.tsx",
+    ];
+
+    for (const file of loginPages) {
+      const page = read(file);
+      expect(page).toMatch(/\[loginEmail,\s*setLoginEmail\]\s*=\s*useState\((["'])\1\);/);
+      expect(page).toMatch(/\[loginPassword,\s*setLoginPassword\]\s*=\s*useState\((["'])\1\);/);
+      expect(page).not.toMatch(/setLoginEmail\([^)]*\.email[^)]*\)/);
+    }
+  });
 });

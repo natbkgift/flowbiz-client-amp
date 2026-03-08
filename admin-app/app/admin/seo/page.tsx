@@ -243,7 +243,6 @@ export default function AdminSeoPage() {
     if (!s) return;
     setToken(s.token);
     setEmail(s.email);
-    setLoginEmail(s.email);
   }, []);
 
   const t = copy[locale];
