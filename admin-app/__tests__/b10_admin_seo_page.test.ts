@@ -34,6 +34,7 @@ describe("B10 admin SEO page contract", () => {
   it("contains required sections and runtime states", () => {
     const page = read("app/admin/seo/page.tsx");
     expect(page).toContain('<main id="main-content"');
+    expect(page).toContain("admin-overflow-guard");
     expect(page).toContain("sectionOverrides");
     expect(page).toContain("sectionRedirects");
     expect(page).toContain("sectionSchema");

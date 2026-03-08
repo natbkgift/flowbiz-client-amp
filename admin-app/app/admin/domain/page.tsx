@@ -288,7 +288,7 @@ export default function AdminDomainPage() {
   }
 
   return (
-    <main id="main-content" className="container content-stack">
+    <main id="main-content" className="container content-stack admin-overflow-guard">
       <section className="card">
         <h1>{t.title}</h1>
         <p className="locale-safe">{t.subtitle}</p>
@@ -330,7 +330,7 @@ export default function AdminDomainPage() {
             <article className="card"><h2>{t.drafts}</h2><p className="dashboard-widget-value">{unpublishedDrafts}</p></article>
           </section>
 
-          <section className="card">
+          <section className="card domain-editor-card">
             <h2>{t.entity}</h2>
             <label className="field" htmlFor="domain-entity-type">
               <span>{t.entity}</span>

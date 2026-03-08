@@ -539,7 +539,7 @@ export default function AdminSeoPage() {
   const reportTime = report?.checked_at ? new Date(report.checked_at).toLocaleString() : "-";
 
   return (
-    <main id="main-content" className="container content-stack">
+    <main id="main-content" className="container content-stack admin-overflow-guard">
       <section className="card">
         <h1>{t.title}</h1>
         <p className="locale-safe">{t.subtitle}</p>
