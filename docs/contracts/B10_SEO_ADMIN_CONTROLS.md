@@ -80,6 +80,10 @@ Coverage includes default and locale-prefixed paths (`/`, `/en`, `/th` patterns 
   - schema source fields
   - broken links run/latest report
   - one-click actions for production schema bootstrap and legacy redirect preload
+- Error handling:
+  - API failures are normalized into user-friendly text before render.
+  - Raw HTML error payloads must never be rendered directly in UI.
+  - Error banner includes a `Retry` action and wraps long text safely (no horizontal overflow).
 
 ## Production Cutover Inputs
 
