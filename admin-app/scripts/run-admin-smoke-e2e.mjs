@@ -98,19 +98,23 @@ function buildDashboardSmokePayload() {
 
 function buildInquiriesListPayload(pageNumber, limit = 10) {
   const summary = buildDashboardSmokePayload();
+  const remainingInquiriesCount = Math.max(
+    0,
+    summary.raw_metrics.recent_inquiries.count - summary.recent_inquiries.length,
+  );
   const inquiries = summary.recent_inquiries.concat(
-    Array.from({ length: Math.max(0, summary.raw_metrics.recent_inquiries.count - summary.recent_inquiries.length) }).map(
-      (_, index) => ({
-        id: `smoke-inquiry-${summary.recent_inquiries.length + index + 1}`,
-        created_at: new Date(Date.parse(summary.generated_at) - (summary.recent_inquiries.length + index) * 60 * 1000).toISOString(),
-        name: `Smoke Inquiry ${summary.recent_inquiries.length + index + 1}`,
-        email: `smoke-${summary.recent_inquiries.length + index + 1}@example.com`,
-        phone: null,
-        status: (summary.recent_inquiries.length + index) % 2 === 0 ? "new" : "contacted",
-        intent: "general",
-        source_page: (summary.recent_inquiries.length + index) % 2 === 0 ? "/en/contact" : "/th/contact",
-      }),
-    ),
+    Array.from({ length: remainingInquiriesCount }).map((_, index) => ({
+      id: `smoke-inquiry-${summary.recent_inquiries.length + index + 1}`,
+      created_at: new Date(
+        Date.parse(summary.generated_at) - (summary.recent_inquiries.length + index) * 60 * 1000,
+      ).toISOString(),
+      name: `Smoke Inquiry ${summary.recent_inquiries.length + index + 1}`,
+      email: `smoke-${summary.recent_inquiries.length + index + 1}@example.com`,
+      phone: null,
+      status: (summary.recent_inquiries.length + index) % 2 === 0 ? "new" : "contacted",
+      intent: "general",
+      source_page: (summary.recent_inquiries.length + index) % 2 === 0 ? "/en/contact" : "/th/contact",
+    })),
   );
   const start = Math.max(0, (pageNumber - 1) * limit);
   return {

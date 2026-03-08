@@ -27,7 +27,7 @@ type PaginatedInquiriesResponse = {
 };
 
 const DEFAULT_PAGE_SIZE = 10;
-const DEFAULT_STATUS_FILTER = "all";
+const ALL_STATUS_FILTER_VALUE = "all";
 const KNOWN_STATUS_OPTIONS = ["new", "contacted", "qualified", "closed", "lost"] as const;
 
 const copy = {
@@ -123,10 +123,22 @@ function buildInquiriesPath(params: {
   if (trimmedQuery) {
     searchParams.set("q", trimmedQuery);
   }
-  if (normalizeText(params.statusFilter) && params.statusFilter !== DEFAULT_STATUS_FILTER) {
+  if (normalizeText(params.statusFilter) && params.statusFilter !== ALL_STATUS_FILTER_VALUE) {
     searchParams.set("status", params.statusFilter);
   }
   return `/api/admin/inquiries?${searchParams.toString()}`;
+}
+
+function formatSummaryLabel(params: {
+  page: number;
+  totalPages: number;
+  showingStart: number;
+  showingEnd: number;
+  totalRows: number;
+  resultsLabel: string;
+  pageLabel: string;
+}): string {
+  return `${params.showingStart}-${params.showingEnd} / ${params.totalRows} ${params.resultsLabel} · ${params.pageLabel} ${params.page}/${params.totalPages}`;
 }
 
 export function DashboardRecentInquiriesTable({
@@ -143,7 +155,7 @@ export function DashboardRecentInquiriesTable({
   const ui = copy[locale];
   const [query, setQuery] = useState("");
   const deferredQuery = useDeferredValue(query);
-  const [statusFilter, setStatusFilter] = useState(DEFAULT_STATUS_FILTER);
+  const [statusFilter, setStatusFilter] = useState(ALL_STATUS_FILTER_VALUE);
   const [sortKey, setSortKey] = useState<SortKey>("created_at");
   const [sortDirection, setSortDirection] = useState<SortDirection>("desc");
   const [page, setPage] = useState(1);
@@ -160,7 +172,7 @@ export function DashboardRecentInquiriesTable({
   const usingDefaultSnapshot =
     page === 1 &&
     normalizeText(deferredQuery).length === 0 &&
-    statusFilter === DEFAULT_STATUS_FILTER &&
+    statusFilter === ALL_STATUS_FILTER_VALUE &&
     sortKey === "created_at" &&
     sortDirection === "desc";
 
@@ -242,7 +254,7 @@ export function DashboardRecentInquiriesTable({
 
   function resetControls() {
     setQuery("");
-    setStatusFilter(DEFAULT_STATUS_FILTER);
+    setStatusFilter(ALL_STATUS_FILTER_VALUE);
     setSortKey("created_at");
     setSortDirection("desc");
     setPage(1);
@@ -276,7 +288,7 @@ export function DashboardRecentInquiriesTable({
               setPage(1);
             }}
           >
-            <option value={DEFAULT_STATUS_FILTER}>{ui.statusAll}</option>
+            <option value={ALL_STATUS_FILTER_VALUE}>{ui.statusAll}</option>
             {statusOptions.map((option) => (
               <option key={option} value={option}>
                 {option}
@@ -320,7 +332,15 @@ export function DashboardRecentInquiriesTable({
       <p id={summaryId} className="dashboard-table-summary" aria-live="polite">
         {requestLoading
           ? ui.loading
-          : `${showingStart}-${showingEnd} / ${serverTotalCount} ${ui.results} · ${ui.page} ${page}/${totalPages}`}
+          : formatSummaryLabel({
+              page,
+              totalPages,
+              showingStart,
+              showingEnd,
+              totalRows: serverTotalCount,
+              resultsLabel: ui.results,
+              pageLabel: ui.page,
+            })}
       </p>
 
       {requestError ? <p className="state-error" role="status">{requestError}</p> : null}

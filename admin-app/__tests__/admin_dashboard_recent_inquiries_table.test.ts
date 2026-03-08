@@ -14,14 +14,15 @@ describe("admin dashboard recent inquiries table", () => {
     const component = read("components/admin/dashboard/DashboardRecentInquiriesTable.tsx");
 
     expect(component).toContain('import { fetchJson } from "@/app/_lib/admin-auth"');
-    expect(component).toContain('const DEFAULT_STATUS_FILTER = "all"');
+    expect(component).toContain('const ALL_STATUS_FILTER_VALUE = "all"');
     expect(component).toContain("const [query, setQuery] = useState(\"\")");
     expect(component).toContain("const deferredQuery = useDeferredValue(query)");
-    expect(component).toContain("const [statusFilter, setStatusFilter] = useState(DEFAULT_STATUS_FILTER)");
+    expect(component).toContain("const [statusFilter, setStatusFilter] = useState(ALL_STATUS_FILTER_VALUE)");
     expect(component).toContain("const [sortKey, setSortKey] = useState<SortKey>(\"created_at\")");
     expect(component).toContain("const [sortDirection, setSortDirection] = useState<SortDirection>(\"desc\")");
     expect(component).toContain("const [page, setPage] = useState(1)");
     expect(component).toContain("fetchJson<PaginatedInquiriesResponse>(");
+    expect(component).toContain("function formatSummaryLabel(params:");
     expect(component).toContain('return `/api/admin/inquiries?${searchParams.toString()}`;');
     expect(component).toContain("dashboard-table-toolbar");
     expect(component).toContain('role="search" aria-label={ui.filter}');
