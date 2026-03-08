@@ -16,6 +16,7 @@ import {
   DashboardTableSkeleton,
   DashboardWidgetSkeletonGrid,
 } from "@/components/admin/dashboard/DashboardSectionPrimitives";
+import { DashboardKpiWidgets } from "@/components/admin/dashboard/DashboardKpiWidgets";
 
 type Locale = AdminLocale;
 type WidgetStatus = "ok" | "warn" | "error" | "unknown";
@@ -217,21 +218,6 @@ function prettyDate(value: string | null, locale: Locale): string {
   }).format(date);
 }
 
-function widgetValueToText(value: DashboardWidget["value"], fallback: string): string {
-  if (value === null || value === undefined) return fallback;
-  if (typeof value === "string") return value.trim() || fallback;
-  if (typeof value === "number") return Number.isFinite(value) ? String(value) : fallback;
-  try {
-    return JSON.stringify(value);
-  } catch {
-    return fallback;
-  }
-}
-
-function statusClass(status: WidgetStatus): string {
-  return `dashboard-status dashboard-status-${status}`;
-}
-
 function humanizeMetricKey(key: string): string {
   return key
     .split("_")
@@ -427,31 +413,12 @@ export default function AdminDashboardPage() {
     }
 
     return (
-      <div className="dashboard-grid">
-        {widgets.map((widget) => (
-          <article key={widget.key} className="card dashboard-widget">
-            <header className="dashboard-widget-head">
-              <h3>{widget.title}</h3>
-              <span className={statusClass(widget.status)}>{widget.status}</span>
-            </header>
-            <p className="dashboard-widget-value">
-              {widgetValueToText(widget.value, t.unknownValue)}
-            </p>
-            <p className="locale-safe">{widget.summary}</p>
-            <div className="dashboard-widget-actions">
-              {(widget.actions || []).map((action, index) => (
-                <a
-                  key={`${widget.key}-${action.url}-${index}`}
-                  className="btn btn-secondary"
-                  href={action.url}
-                >
-                  {action.label}
-                </a>
-              ))}
-            </div>
-          </article>
-        ))}
-      </div>
+      <DashboardKpiWidgets
+        widgets={widgets}
+        rawMetrics={summary?.raw_metrics}
+        locale={locale}
+        fallback={t.unknownValue}
+      />
     );
   }
 

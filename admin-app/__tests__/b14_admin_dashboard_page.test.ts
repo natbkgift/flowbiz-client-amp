@@ -16,6 +16,7 @@ describe("B14 admin dashboard page contract", () => {
     expect(page).toContain('from "@/app/_lib/admin-auth"');
     expect(page).toContain('from "@/app/admin/dashboard/state-utils"');
     expect(page).toContain('from "@/components/admin/dashboard/DashboardSectionPrimitives"');
+    expect(page).toContain('from "@/components/admin/dashboard/DashboardKpiWidgets"');
     expect(page).toContain("loginAdmin");
     expect(page).toContain("transitionDashboardState");
     expect(page).not.toContain('fetch("/v1/auth/login"');
@@ -50,9 +51,11 @@ describe("B14 admin dashboard page contract", () => {
     expect(page).toContain('className="dashboard-section--insights"');
     expect(page).toContain('className="dashboard-section--warnings"');
     expect(page).toContain("DashboardMetricSkeletonRow");
+    expect(page).toContain("DashboardKpiWidgets");
     expect(page).toContain("DashboardWidgetSkeletonGrid");
     expect(page).toContain("DashboardInsightSkeletonList");
     expect(page).toContain("DashboardTableSkeleton");
+    expect(page).toContain("rawMetrics={summary?.raw_metrics}");
     expect(page).toContain("state-empty");
     expect(page).toContain("state-error");
     expect(page).toContain("dashboardState === \"loading\"");
