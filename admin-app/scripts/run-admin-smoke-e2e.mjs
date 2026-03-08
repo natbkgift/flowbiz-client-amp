@@ -26,7 +26,9 @@ function parseLoginPayload(rawBody) {
 }
 
 function buildDashboardSmokePayload() {
-  const generatedAt = new Date().toISOString();
+  const generatedDate = new Date();
+  const generatedAt = generatedDate.toISOString();
+  const baseTimestamp = generatedDate.getTime();
   return {
     generated_at: generatedAt,
     data_freshness: {
@@ -69,11 +71,11 @@ function buildDashboardSmokePayload() {
     ],
     trend_series: {
       "7d": Array.from({ length: 7 }).map((_, index) => ({
-        bucket_date: new Date(Date.now() - (6 - index) * 24 * 60 * 60 * 1000).toISOString().slice(0, 10),
+        bucket_date: new Date(baseTimestamp - (6 - index) * 24 * 60 * 60 * 1000).toISOString().slice(0, 10),
         count: index === 6 ? 1 : 0,
       })),
       "30d": Array.from({ length: 30 }).map((_, index) => ({
-        bucket_date: new Date(Date.now() - (29 - index) * 24 * 60 * 60 * 1000).toISOString().slice(0, 10),
+        bucket_date: new Date(baseTimestamp - (29 - index) * 24 * 60 * 60 * 1000).toISOString().slice(0, 10),
         count: index === 29 ? 1 : 0,
       })),
     },

@@ -599,7 +599,8 @@ def _collect_inquiry_trend_series(db: Session, *, now: datetime) -> dict[str, li
     for bucket_date, count in rows:
         if bucket_date is None:
             continue
-        counts[bucket_date.isoformat()] = int(count)
+        bucket_key = bucket_date if isinstance(bucket_date, str) else bucket_date.isoformat()
+        counts[bucket_key] = int(count)
 
     def _build_series(days: int) -> list[dict[str, int | str]]:
         window_start = end_date - timedelta(days=days - 1)
