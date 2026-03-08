@@ -581,27 +581,25 @@ def _collect_inquiry_trend_series(db: Session, *, now: datetime) -> dict[str, li
     end_date = now.astimezone(UTC).date()
     start_date = end_date - timedelta(days=29)
     start_at = datetime.combine(start_date, datetime.min.time(), tzinfo=UTC)
-    rows = db.scalars(
-        select(Inquiry.created_at)
-        .where(
+
+    # Let the database perform daily aggregation to avoid loading all rows into memory.
+    bucket_date_expr = func.date(Inquiry.created_at)
+    rows = db.execute(
+        select(
+            bucket_date_expr.label("bucket_date"),
+            func.count().label("count"),
+        ).where(
             Inquiry.deleted_at.is_(None),
             Inquiry.created_at.is_not(None),
             Inquiry.created_at >= start_at,
-        )
-        .order_by(Inquiry.created_at)
+        ).group_by(bucket_date_expr)
     ).all()
 
     counts: dict[str, int] = {}
-    for created_at in rows:
-        if created_at is None:
+    for bucket_date, count in rows:
+        if bucket_date is None:
             continue
-        timestamp = (
-            created_at.replace(tzinfo=UTC)
-            if created_at.tzinfo is None
-            else created_at.astimezone(UTC)
-        )
-        bucket_date = timestamp.date().isoformat()
-        counts[bucket_date] = counts.get(bucket_date, 0) + 1
+        counts[bucket_date.isoformat()] = int(count)
 
     def _build_series(days: int) -> list[dict[str, int | str]]:
         window_start = end_date - timedelta(days=days - 1)
