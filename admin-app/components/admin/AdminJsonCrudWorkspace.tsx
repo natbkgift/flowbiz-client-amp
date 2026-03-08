@@ -13,6 +13,13 @@ import {
 } from "@/app/_lib/admin-auth";
 import { AdminDataTable, type AdminDataTableColumn } from "@/components/admin/AdminDataTable";
 import {
+  AdminBadge,
+  AdminButton,
+  AdminPageHeader,
+  AdminSectionCard,
+  AdminTabSwitch,
+} from "@/components/admin/AdminPrimitives";
+import {
   AdminFormPrimitiveInput,
   type AdminFormPrimitiveField,
   initializePrimitiveValues,
@@ -759,15 +766,38 @@ export function AdminJsonCrudWorkspace({ config }: { config: CrudConfig }) {
 
   return (
     <main id="main-content" className="container content-stack">
-      <section className="card">
-        <h1>{config.title}</h1>
-        <p className="locale-safe">{config.subtitle}</p>
-      </section>
+      <AdminPageHeader
+        title={config.title}
+        description={config.subtitle}
+        icon="workspace"
+        eyebrow="Admin workspace"
+        meta={
+          <>
+            <AdminBadge tone="info" icon="workspace">
+              {config.identifierLabel}
+            </AdminBadge>
+            {config.createPath ? (
+              <AdminBadge tone="ok" icon="plus">
+                Create enabled
+              </AdminBadge>
+            ) : null}
+            {config.patchPath ? (
+              <AdminBadge tone="neutral" icon="refresh">
+                Patch enabled
+              </AdminBadge>
+            ) : null}
+          </>
+        }
+      />
 
-      <section className="card dashboard-controls" aria-label="auth">
+      <AdminSectionCard
+        className="dashboard-controls"
+        title={isAuthenticated ? "Session" : "Admin sign in"}
+        description={isAuthenticated ? "Active auth session for this workspace." : "Use existing admin credentials to access this workspace."}
+        icon={isAuthenticated ? "profile" : "users"}
+      >
         {!isAuthenticated ? (
           <form className="crm-login-form" onSubmit={(event) => void login(event)}>
-            <h2>Admin sign in</h2>
             <label className="field" htmlFor={`${idBase}-login-email`}>
               <span>Email</span>
               <input
@@ -790,30 +820,31 @@ export function AdminJsonCrudWorkspace({ config }: { config: CrudConfig }) {
             </label>
             {authError ? <div className="state-error">{authError}</div> : null}
             <div className="card-actions">
-              <button className="btn" type="submit" disabled={authLoading}>
+              <AdminButton variant="primary" icon="workspace" type="submit" disabled={authLoading}>
                 {authLoading ? "Signing in" : "Sign in"}
-              </button>
+              </AdminButton>
             </div>
           </form>
         ) : (
           <div className="crm-session-panel" role="status">
             <p>{email ? `Signed in as ${email}` : "Signed in session active."}</p>
             <div className="card-actions">
-              <button className="btn btn-secondary" type="button" onClick={() => void loadList()}>
+              <AdminButton variant="secondary" icon="refresh" type="button" onClick={() => void loadList()}>
                 {loading ? "Loading" : "Refresh list"}
-              </button>
-              <button className="btn btn-secondary" type="button" onClick={logout}>
+              </AdminButton>
+              <AdminButton variant="secondary" icon="x" type="button" onClick={logout}>
                 Sign out
-              </button>
+              </AdminButton>
             </div>
           </div>
         )}
         {!isAuthenticated ? <div className="state-empty">Sign in to manage this workspace.</div> : null}
-      </section>
+      </AdminSectionCard>
 
       {isAuthenticated ? (
         <>
-          <section className="card">
+          <div className="admin-workspace-split">
+          <AdminSectionCard title="List query" description={config.queryHelp || "Use existing query params without changing API contracts."} icon="filter">
             <label className="field" htmlFor={`${idBase}-query`}>
               <span>List query</span>
               <input
@@ -823,20 +854,23 @@ export function AdminJsonCrudWorkspace({ config }: { config: CrudConfig }) {
                 placeholder="page=1&limit=20"
               />
             </label>
-            {config.queryHelp ? <p className="locale-safe">{config.queryHelp}</p> : null}
             <div className="card-actions">
-              <button className="btn btn-secondary" type="button" onClick={() => void loadList()}>
+              <AdminButton variant="secondary" icon="refresh" type="button" onClick={() => void loadList()}>
                 Load list
-              </button>
+              </AdminButton>
             </div>
             {meta ? (
-              <p className="locale-safe">
+              <p className="locale-safe admin-meta-inline">
                 page={meta.page ?? "-"} limit={meta.limit ?? "-"} total={meta.total ?? "-"}
               </p>
             ) : null}
-          </section>
+          </AdminSectionCard>
 
-          <section className="card">
+          <AdminSectionCard
+            title="Record actions"
+            description="Select one record ID and run safe read/write actions."
+            icon="info"
+          >
             <label className="field" htmlFor={`${idBase}-identifier`}>
               <span>{config.identifierLabel}</span>
               <input
@@ -847,8 +881,9 @@ export function AdminJsonCrudWorkspace({ config }: { config: CrudConfig }) {
               />
             </label>
             <div className="card-actions">
-              <button
-                className="btn btn-secondary"
+              <AdminButton
+                variant="secondary"
+                icon="search"
                 type="button"
                 onClick={() =>
                   void runAction(() =>
@@ -858,10 +893,11 @@ export function AdminJsonCrudWorkspace({ config }: { config: CrudConfig }) {
                 disabled={!identifier.trim()}
               >
                 Get detail
-              </button>
+              </AdminButton>
               {config.readinessPath ? (
-                <button
-                  className="btn btn-secondary"
+                <AdminButton
+                  variant="secondary"
+                  icon="success"
                   type="button"
                   onClick={() =>
                     void runAction(() =>
@@ -871,21 +907,23 @@ export function AdminJsonCrudWorkspace({ config }: { config: CrudConfig }) {
                   disabled={!identifier.trim()}
                 >
                   Check readiness
-                </button>
+                </AdminButton>
               ) : null}
               {config.publishPath ? (
-                <button
-                  className="btn btn-secondary"
+                <AdminButton
+                  variant="secondary"
+                  icon="upload"
                   type="button"
                   onClick={() => void runAction(() => publishRecord())}
                   disabled={!identifier.trim()}
                 >
                   Publish
-                </button>
+                </AdminButton>
               ) : null}
               {config.unpublishPath ? (
-                <button
-                  className="btn btn-secondary"
+                <AdminButton
+                  variant="secondary"
+                  icon="refresh"
                   type="button"
                   onClick={() =>
                     void runAction(() =>
@@ -897,11 +935,12 @@ export function AdminJsonCrudWorkspace({ config }: { config: CrudConfig }) {
                   disabled={!identifier.trim()}
                 >
                   Unpublish
-                </button>
+                </AdminButton>
               ) : null}
               {config.deletePath ? (
-                <button
-                  className="btn btn-secondary"
+                <AdminButton
+                  variant="secondary"
+                  icon="x"
                   type="button"
                   onClick={() =>
                     void runAction(() =>
@@ -913,11 +952,12 @@ export function AdminJsonCrudWorkspace({ config }: { config: CrudConfig }) {
                   disabled={!identifier.trim()}
                 >
                   Delete
-                </button>
+                </AdminButton>
               ) : null}
               {revisionConfig ? (
-                <button
-                  className="btn btn-secondary"
+                <AdminButton
+                  variant="secondary"
+                  icon="review"
                   type="button"
                   onClick={() => void runAction(async () => {
                     await loadRevisions();
@@ -926,16 +966,16 @@ export function AdminJsonCrudWorkspace({ config }: { config: CrudConfig }) {
                   disabled={!identifier.trim()}
                 >
                   Load revisions
-                </button>
+                </AdminButton>
               ) : null}
             </div>
-          </section>
+          </AdminSectionCard>
+          </div>
 
           {config.createPath ? (
-            <section className="card">
+            <AdminSectionCard title="Create record" description="Create a new record using the existing workspace contract." icon="plus">
               {Array.isArray(config.createFormFields) && config.createFormFields.length > 0 ? (
                 <>
-                  <h2>Create record</h2>
                   {createFieldGroups.baseFields.map((field) => (
                     <AdminFormPrimitiveInput
                       key={field.name}
@@ -957,32 +997,25 @@ export function AdminJsonCrudWorkspace({ config }: { config: CrudConfig }) {
                   ))}
                   {createFieldGroups.localeOrder.length > 0 ? (
                     <>
-                      <div className="card-actions" role="tablist" aria-label="Create locale tabs" aria-orientation="horizontal">
-                        {createFieldGroups.localeOrder.map((locale) => (
-                          <button
-                            key={`create-tab-${locale}`}
-                            className="btn btn-secondary"
-                            type="button"
-                            id={`${idBase}-create-tab-${locale}`}
-                            role="tab"
-                            aria-selected={createLocaleTab === locale}
-                            aria-controls={`${idBase}-create-panel-${locale}`}
-                            tabIndex={createLocaleTab === locale ? 0 : -1}
-                            onClick={() => setCreateLocaleTab(locale)}
-                            onKeyDown={(event) =>
-                              onLocaleTabKeyDown(
-                                event,
-                                createFieldGroups.localeOrder,
-                                createLocaleTab,
-                                setCreateLocaleTab,
-                                `${idBase}-create-tab-`
-                              )
-                            }
-                          >
-                            {locale.toUpperCase()}
-                          </button>
-                        ))}
-                      </div>
+                      <AdminTabSwitch
+                        ariaLabel="Create locale tabs"
+                        value={createLocaleTab}
+                        onChange={setCreateLocaleTab}
+                        options={createFieldGroups.localeOrder.map((locale) => ({
+                          value: locale,
+                          label: locale.toUpperCase(),
+                          id: `${idBase}-create-tab-${locale}`,
+                          controls: `${idBase}-create-panel-${locale}`,
+                          onKeyDown: (event) =>
+                            onLocaleTabKeyDown(
+                              event,
+                              createFieldGroups.localeOrder,
+                              createLocaleTab,
+                              setCreateLocaleTab,
+                              `${idBase}-create-tab-`
+                            ),
+                        }))}
+                      />
                       <div
                         id={`${idBase}-create-panel-${createLocaleTab}`}
                         role="tabpanel"
@@ -1023,8 +1056,9 @@ export function AdminJsonCrudWorkspace({ config }: { config: CrudConfig }) {
                 </label>
               )}
               <div className="card-actions">
-                <button
-                  className="btn"
+                <AdminButton
+                  variant="primary"
+                  icon="plus"
                   type="button"
                   onClick={() =>
                     void runAction(() =>
@@ -1047,16 +1081,15 @@ export function AdminJsonCrudWorkspace({ config }: { config: CrudConfig }) {
                   }
                 >
                   Create
-                </button>
+                </AdminButton>
               </div>
-            </section>
+            </AdminSectionCard>
           ) : null}
 
           {config.patchPath ? (
-            <section className="card">
+            <AdminSectionCard title="Update record" description="Patch the selected record without changing the API payload shape." icon="refresh">
               {Array.isArray(config.patchFormFields) && config.patchFormFields.length > 0 ? (
                 <>
-                  <h2>Update record</h2>
                   {patchFieldGroups.baseFields.map((field) => (
                     <AdminFormPrimitiveInput
                       key={field.name}
@@ -1078,32 +1111,25 @@ export function AdminJsonCrudWorkspace({ config }: { config: CrudConfig }) {
                   ))}
                   {patchFieldGroups.localeOrder.length > 0 ? (
                     <>
-                      <div className="card-actions" role="tablist" aria-label="Update locale tabs" aria-orientation="horizontal">
-                        {patchFieldGroups.localeOrder.map((locale) => (
-                          <button
-                            key={`patch-tab-${locale}`}
-                            className="btn btn-secondary"
-                            type="button"
-                            id={`${idBase}-patch-tab-${locale}`}
-                            role="tab"
-                            aria-selected={patchLocaleTab === locale}
-                            aria-controls={`${idBase}-patch-panel-${locale}`}
-                            tabIndex={patchLocaleTab === locale ? 0 : -1}
-                            onClick={() => setPatchLocaleTab(locale)}
-                            onKeyDown={(event) =>
-                              onLocaleTabKeyDown(
-                                event,
-                                patchFieldGroups.localeOrder,
-                                patchLocaleTab,
-                                setPatchLocaleTab,
-                                `${idBase}-patch-tab-`
-                              )
-                            }
-                          >
-                            {locale.toUpperCase()}
-                          </button>
-                        ))}
-                      </div>
+                      <AdminTabSwitch
+                        ariaLabel="Update locale tabs"
+                        value={patchLocaleTab}
+                        onChange={setPatchLocaleTab}
+                        options={patchFieldGroups.localeOrder.map((locale) => ({
+                          value: locale,
+                          label: locale.toUpperCase(),
+                          id: `${idBase}-patch-tab-${locale}`,
+                          controls: `${idBase}-patch-panel-${locale}`,
+                          onKeyDown: (event) =>
+                            onLocaleTabKeyDown(
+                              event,
+                              patchFieldGroups.localeOrder,
+                              patchLocaleTab,
+                              setPatchLocaleTab,
+                              `${idBase}-patch-tab-`
+                            ),
+                        }))}
+                      />
                       <div
                         id={`${idBase}-patch-panel-${patchLocaleTab}`}
                         role="tabpanel"
@@ -1144,8 +1170,9 @@ export function AdminJsonCrudWorkspace({ config }: { config: CrudConfig }) {
                 </label>
               )}
               <div className="card-actions">
-                <button
-                  className="btn btn-secondary"
+                <AdminButton
+                  variant="secondary"
+                  icon="refresh"
                   type="button"
                   disabled={!identifier.trim()}
                   onClick={() =>
@@ -1169,9 +1196,9 @@ export function AdminJsonCrudWorkspace({ config }: { config: CrudConfig }) {
                   }
                 >
                   Patch
-                </button>
+                </AdminButton>
               </div>
-            </section>
+            </AdminSectionCard>
           ) : null}
 
           {bulkActions.length > 0 ? (

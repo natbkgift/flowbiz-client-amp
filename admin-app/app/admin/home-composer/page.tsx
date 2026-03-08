@@ -10,6 +10,7 @@ import {
   readAuthSession,
 } from '@/app/_lib/admin-auth';
 import { normalizeLocalMediaPath } from '@/app/_lib/local-media';
+import { AdminButton, AdminPageHeader } from '@/components/admin/AdminPrimitives';
 import { apiRequest } from '../../../lib/api';
 import { getToken, setToken } from '../../../lib/auth-store';
 
@@ -633,33 +634,43 @@ export default function HomeComposerPage() {
 
   return (
     <main id="main-content" className="container content-stack">
-      <header className="flex flex-wrap items-start justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-semibold text-slate-900">Home Composer</h1>
-          <p className="text-sm text-slate-600">Compose Home sections, hero copy/media, and featured entity selections with governance-aware publish checks.</p>
-        </div>
-        <div className="flex flex-wrap items-center gap-2">
-          <label className="text-sm text-slate-700">
-            Locale
-            <select
-              value={locale}
-              onChange={(e) => setLocale(e.target.value as LocaleCode)}
-              className="ml-2 rounded-md border border-slate-300 px-2 py-1"
-            >
-              <option value="en">EN</option>
-              <option value="th">TH</option>
-            </select>
-          </label>
-          {isAuthenticated ? (
-            <>
-              <button type="button" onClick={() => void loadBundle(locale)} disabled={loading} className="rounded-md border border-slate-300 px-4 py-2 text-sm disabled:opacity-60">{loading ? 'Refreshing…' : 'Refresh'}</button>
-              <button type="button" onClick={() => void handleSaveDraft()} disabled={saving || loading} className="rounded-md bg-slate-900 px-4 py-2 text-sm text-white disabled:opacity-60">{saving ? 'Saving…' : 'Save Draft'}</button>
-              <button type="button" onClick={() => void handlePublish()} disabled={publishing || loading} className="rounded-md border border-slate-300 px-4 py-2 text-sm disabled:opacity-60">{publishing ? 'Publishing…' : 'Publish'}</button>
-              <button type="button" onClick={logout} className="rounded-md border border-slate-300 px-4 py-2 text-sm">Sign out</button>
-            </>
-          ) : null}
-        </div>
-      </header>
+      <AdminPageHeader
+        title="Home Composer"
+        description="Compose Home sections, hero copy/media, and featured entity selections with governance-aware publish checks."
+        icon="spark"
+        eyebrow="Content orchestration"
+        actions={
+          <div className="card-actions">
+            <label className="text-sm text-slate-700">
+              Locale
+              <select
+                value={locale}
+                onChange={(e) => setLocale(e.target.value as LocaleCode)}
+                className="ml-2 rounded-md border border-slate-300 px-2 py-1"
+              >
+                <option value="en">EN</option>
+                <option value="th">TH</option>
+              </select>
+            </label>
+            {isAuthenticated ? (
+              <>
+                <AdminButton type="button" variant="secondary" icon="refresh" onClick={() => void loadBundle(locale)} disabled={loading}>
+                  {loading ? 'Refreshing…' : 'Refresh'}
+                </AdminButton>
+                <AdminButton type="button" variant="primary" icon="plus" onClick={() => void handleSaveDraft()} disabled={saving || loading}>
+                  {saving ? 'Saving…' : 'Save Draft'}
+                </AdminButton>
+                <AdminButton type="button" variant="secondary" icon="upload" onClick={() => void handlePublish()} disabled={publishing || loading}>
+                  {publishing ? 'Publishing…' : 'Publish'}
+                </AdminButton>
+                <AdminButton type="button" variant="secondary" icon="x" onClick={logout}>
+                  Sign out
+                </AdminButton>
+              </>
+            ) : null}
+          </div>
+        }
+      />
 
       <section className="card dashboard-controls" aria-label="Admin sign in">
         {!isAuthenticated ? (

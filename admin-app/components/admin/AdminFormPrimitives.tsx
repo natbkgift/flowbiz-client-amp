@@ -1,7 +1,9 @@
 "use client";
 
 import { type ChangeEvent, type ReactNode, useState } from "react";
+
 import { normalizeLocalMediaPath } from "@/app/_lib/local-media";
+import { AdminButton, AdminInput, AdminSectionCard } from "@/components/admin/AdminPrimitives";
 
 export type PrimitiveFieldType =
   | "text"
@@ -218,15 +220,9 @@ function InputFrame({
   const id = fieldId(idPrefix, field.name);
   const errorId = `${id}-error`;
   return (
-    <label className="field" htmlFor={id}>
-      <span>{field.label}</span>
+    <AdminInput htmlFor={id} label={field.label} error={error} errorId={error ? errorId : undefined}>
       {children}
-      {error ? (
-        <span id={errorId} role="alert" className="state-error">
-          {error}
-        </span>
-      ) : null}
-    </label>
+    </AdminInput>
   );
 }
 
@@ -332,10 +328,12 @@ export function MediaPickerSlotPrimitive(props: AdminFormPrimitiveProps) {
 
   return (
     <>
-      <div className="field">
-        <label htmlFor={id}>
-          <span>{props.field.label}</span>
-        </label>
+      <AdminInput
+        htmlFor={id}
+        label={props.field.label}
+        error={props.error}
+        errorId={props.error ? errorId : undefined}
+      >
         <div className="card-actions">
           <input
             id={id}
@@ -345,8 +343,9 @@ export function MediaPickerSlotPrimitive(props: AdminFormPrimitiveProps) {
             aria-describedby={props.error ? errorId : undefined}
             onChange={(event) => onInputChange(event, props.field.name, props.onChange)}
           />
-          <button
-            className="btn btn-secondary"
+          <AdminButton
+            variant="secondary"
+            icon="media"
             type="button"
             disabled={!props.authToken?.trim()}
             title={!props.authToken?.trim() ? "Sign in required to choose media" : undefined}
@@ -354,20 +353,20 @@ export function MediaPickerSlotPrimitive(props: AdminFormPrimitiveProps) {
             onClick={() => void openMediaPicker()}
           >
             Choose media
-          </button>
+          </AdminButton>
         </div>
-        {props.error ? (
-          <span id={errorId} role="alert" className="state-error">
-            {props.error}
-          </span>
-        ) : null}
-      </div>
+      </AdminInput>
       {open ? (
-        <div className="card" role="dialog" aria-modal="true" aria-label={`${props.field.label} media picker`}>
+        <AdminSectionCard
+          className="admin-media-picker"
+          title={`${props.field.label} media picker`}
+          icon="media"
+        >
+          <div role="dialog" aria-modal="true" aria-label={`${props.field.label} media picker`}>
           <div className="card-actions">
-            <button className="btn btn-secondary" type="button" onClick={() => setOpen(false)}>
+            <AdminButton variant="secondary" icon="x" type="button" onClick={() => setOpen(false)}>
               Close
-            </button>
+            </AdminButton>
           </div>
           {loading ? (
             <div className="state-loading" role="status" aria-live="polite">
@@ -381,12 +380,12 @@ export function MediaPickerSlotPrimitive(props: AdminFormPrimitiveProps) {
           ) : null}
           {!loading && !loadError ? (
             items.length > 0 ? (
-              <ul aria-label="Available media items">
+              <ul className="admin-media-picker-list" aria-label="Available media items">
                 {items.map((item) => (
                   <li key={item.id}>
-                    <button className="btn btn-secondary" type="button" onClick={() => pickMedia(item)}>
+                    <AdminButton variant="secondary" type="button" onClick={() => pickMedia(item)}>
                       {item.storage_path || item.id}
-                    </button>
+                    </AdminButton>
                   </li>
                 ))}
               </ul>
@@ -394,7 +393,8 @@ export function MediaPickerSlotPrimitive(props: AdminFormPrimitiveProps) {
               <div className="state-empty">No media items available.</div>
             )
           ) : null}
-        </div>
+          </div>
+        </AdminSectionCard>
       ) : null}
     </>
   );

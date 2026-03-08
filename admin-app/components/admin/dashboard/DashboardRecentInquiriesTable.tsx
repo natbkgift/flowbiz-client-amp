@@ -2,6 +2,7 @@ import { useDeferredValue, useEffect, useId, useMemo, useState } from "react";
 
 import { fetchJson } from "@/app/_lib/admin-auth";
 import type { AdminLocale } from "@/app/_lib/admin-i18n";
+import { AdminBadge, AdminTable, adminButtonClassName } from "@/components/admin/AdminPrimitives";
 
 type RecentInquiry = {
   id: string;
@@ -315,7 +316,7 @@ export function DashboardRecentInquiriesTable({
 
         <button
           type="button"
-          className="btn btn-secondary dashboard-table-direction"
+          className={adminButtonClassName({ variant: "secondary", className: "dashboard-table-direction" })}
           onClick={() => {
             setSortDirection((current) => (current === "asc" ? "desc" : "asc"));
             setPage(1);
@@ -324,7 +325,11 @@ export function DashboardRecentInquiriesTable({
           {ui.sortDirection}: {sortDirection === "asc" ? ui.asc : ui.desc}
         </button>
 
-        <button type="button" className="btn btn-secondary dashboard-table-reset" onClick={resetControls}>
+        <button
+          type="button"
+          className={adminButtonClassName({ variant: "secondary", className: "dashboard-table-reset" })}
+          onClick={resetControls}
+        >
           {ui.reset}
         </button>
       </div>
@@ -352,7 +357,7 @@ export function DashboardRecentInquiriesTable({
         </div>
       ) : (
         <>
-          <div className="dashboard-table-wrap dashboard-table-wrap--desktop">
+          <AdminTable className="dashboard-table-wrap--desktop">
             <table id={tableId} className="dashboard-table" aria-describedby={summaryId}>
               <caption className="sr-only">{ui.tableCaption}</caption>
               <thead>
@@ -372,7 +377,9 @@ export function DashboardRecentInquiriesTable({
                     <td>{row.name}</td>
                     <td>{row.email || row.phone || "-"}</td>
                     <td>
-                      <span className="dashboard-table-chip">{row.status || "-"}</span>
+                      <AdminBadge tone="neutral" className="dashboard-table-chip">
+                        {row.status || "-"}
+                      </AdminBadge>
                     </td>
                     <td>{row.intent || "-"}</td>
                     <td>{row.source_page || "-"}</td>
@@ -380,7 +387,7 @@ export function DashboardRecentInquiriesTable({
                 ))}
               </tbody>
             </table>
-          </div>
+          </AdminTable>
 
           <div className="dashboard-table-card-list">
             {serverRows.map((row) => (
@@ -390,7 +397,9 @@ export function DashboardRecentInquiriesTable({
                     <h3 className="dashboard-table-card-name">{row.name}</h3>
                     <p>{prettyDate(row.created_at, locale)}</p>
                   </div>
-                  <span className="dashboard-table-chip">{row.status || "-"}</span>
+                  <AdminBadge tone="neutral" className="dashboard-table-chip">
+                    {row.status || "-"}
+                  </AdminBadge>
                 </div>
 
                 <div className="dashboard-table-card-meta">
@@ -415,7 +424,7 @@ export function DashboardRecentInquiriesTable({
             <div className="dashboard-table-toolbar dashboard-table-pagination" aria-label={ui.page}>
               <button
                 type="button"
-                className="btn btn-secondary"
+                className={adminButtonClassName({ variant: "secondary" })}
                 onClick={() => setPage((current) => Math.max(1, current - 1))}
                 disabled={page <= 1 || requestLoading}
                 aria-controls={tableId}
@@ -427,7 +436,7 @@ export function DashboardRecentInquiriesTable({
               </span>
               <button
                 type="button"
-                className="btn btn-secondary"
+                className={adminButtonClassName({ variant: "secondary" })}
                 onClick={() => setPage((current) => Math.min(totalPages, current + 1))}
                 disabled={page >= totalPages || requestLoading}
                 aria-controls={tableId}

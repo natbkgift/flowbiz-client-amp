@@ -1,5 +1,7 @@
 import { type ReactNode, useId } from "react";
 
+import { AdminSectionCard } from "@/components/admin/AdminPrimitives";
+
 function joinClasses(...values: Array<string | undefined | false>): string {
   return values.filter(Boolean).join(" ");
 }
@@ -21,24 +23,18 @@ export function DashboardSection({
   const subtitleId = useId();
 
   return (
-    <section
-      className={joinClasses("card", "dashboard-section", className)}
-      aria-labelledby={headingId}
-      aria-describedby={subtitle ? subtitleId : undefined}
+    <AdminSectionCard
+      className={joinClasses("dashboard-section", className)}
+      title={<span id={headingId}>{title}</span>}
+      description={subtitle ? <p id={subtitleId}>{subtitle}</p> : undefined}
+      actions={actions}
+      sectionProps={{
+        "aria-labelledby": headingId,
+        "aria-describedby": subtitle ? subtitleId : undefined,
+      }}
     >
-      <header className="dashboard-section-head">
-        <div className="dashboard-section-copy">
-          <h2 id={headingId}>{title}</h2>
-          {subtitle ? (
-            <p id={subtitleId} className="locale-safe">
-              {subtitle}
-            </p>
-          ) : null}
-        </div>
-        {actions ? <div className="dashboard-section-actions">{actions}</div> : null}
-      </header>
       <div className="dashboard-section-body">{children}</div>
-    </section>
+    </AdminSectionCard>
   );
 }
 

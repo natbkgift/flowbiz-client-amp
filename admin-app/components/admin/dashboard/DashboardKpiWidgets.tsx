@@ -1,6 +1,8 @@
 import Link from "next/link";
 
 import { type AdminLocale, withAdminLocale } from "@/app/_lib/admin-i18n";
+import { AdminIcon, type AdminIconName } from "@/components/admin/AdminIcons";
+import { AdminBadge, adminButtonClassName } from "@/components/admin/AdminPrimitives";
 
 type WidgetStatus = "ok" | "warn" | "error" | "unknown";
 
@@ -202,12 +204,31 @@ function statusClass(status: WidgetStatus): string {
   return `dashboard-status dashboard-status-${status}`;
 }
 
+function statusIcon(status: WidgetStatus): AdminIconName {
+  if (status === "ok") return "success";
+  if (status === "warn") return "warning";
+  if (status === "error") return "x";
+  return "info";
+}
+
 function statusLabel(status: WidgetStatus, locale: AdminLocale): string {
   const ui = copy[locale];
   if (status === "ok") return ui.statusOk;
   if (status === "warn") return ui.statusWarn;
   if (status === "error") return ui.statusError;
   return ui.statusUnknown;
+}
+
+function widgetIcon(key: string): AdminIconName {
+  if (key.includes("cover")) return "media";
+  if (key.includes("media")) return "media";
+  if (key.includes("translation")) return "language";
+  if (key.includes("draft")) return "blog";
+  if (key.includes("inquiries")) return "message";
+  if (key.includes("video")) return "videos";
+  if (key.includes("import")) return "imports";
+  if (key.includes("deploy")) return "refresh";
+  return "dashboard";
 }
 
 function formatStatusWord(
@@ -422,8 +443,19 @@ export function DashboardKpiWidgets({
             className={`card dashboard-widget dashboard-kpi-card dashboard-kpi-card--${widget.status}`}
           >
             <header className="dashboard-widget-head">
-              <h3>{widget.title}</h3>
-              <span className={statusClass(widget.status)}>{statusLabel(widget.status, locale)}</span>
+              <div className="dashboard-widget-title">
+                <span className="dashboard-widget-title-icon" aria-hidden="true">
+                  <AdminIcon name={widgetIcon(widget.key)} size={16} />
+                </span>
+                <h3>{widget.title}</h3>
+              </div>
+              <AdminBadge
+                tone={widget.status === "ok" ? "ok" : widget.status === "warn" ? "warn" : widget.status === "error" ? "error" : "neutral"}
+                icon={statusIcon(widget.status)}
+                className={statusClass(widget.status)}
+              >
+                {statusLabel(widget.status, locale)}
+              </AdminBadge>
             </header>
 
             <div className="dashboard-kpi-value-block">
@@ -457,7 +489,7 @@ export function DashboardKpiWidgets({
               {(widget.actions || []).map((action, index) => (
                 <Link
                   key={`${widget.key}-${action.url}-${index}`}
-                  className="btn btn-secondary"
+                  className={adminButtonClassName({ variant: "secondary", size: "sm" })}
                   href={withAdminLocale(action.url, locale)}
                 >
                   {action.label}

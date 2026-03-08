@@ -5,6 +5,7 @@ import { ADMIN_AUTH_LOGIN_PATH } from "@/app/_lib/admin-auth";
 import { detectAdminLocale, type AdminLocale } from "@/app/_lib/admin-i18n";
 import { formatWorkspaceErrorMessage } from "@/app/_lib/admin-workspace-error";
 import AdminWorkspaceErrorState from "@/components/admin/AdminWorkspaceErrorState";
+import { AdminPageHeader, AdminStatCard } from "@/components/admin/AdminPrimitives";
 
 type Locale = AdminLocale;
 type EntityType = "areas" | "developers" | "projects";
@@ -297,10 +298,7 @@ export default function AdminDomainPage() {
 
   return (
     <main id="main-content" className="container content-stack admin-overflow-guard">
-      <section className="card">
-        <h1>{t.title}</h1>
-        <p className="locale-safe">{t.subtitle}</p>
-      </section>
+      <AdminPageHeader title={t.title} description={t.subtitle} icon="domain" eyebrow="Domain workspace" />
 
       <section className="card dashboard-controls" aria-label={t.loginTitle}>
         {!isAuthenticated ? (
@@ -342,8 +340,8 @@ export default function AdminDomainPage() {
       {isAuthenticated ? (
         <>
           <section className="dashboard-grid">
-            <article className="card"><h2>{t.pending}</h2><p className="dashboard-widget-value">{pendingTranslations}</p></article>
-            <article className="card"><h2>{t.drafts}</h2><p className="dashboard-widget-value">{unpublishedDrafts}</p></article>
+            <AdminStatCard label={t.pending} value={pendingTranslations} icon="language" tone="info" />
+            <AdminStatCard label={t.drafts} value={unpublishedDrafts} icon="blog" tone="warn" />
           </section>
 
           <section className="card domain-editor-card">

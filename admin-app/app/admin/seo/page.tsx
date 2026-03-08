@@ -4,6 +4,7 @@ import { type FormEvent, useEffect, useState } from "react";
 
 import { clearAuthSession, loginAdmin, persistAuthSession, readAuthSession } from "@/app/_lib/admin-auth";
 import { detectAdminLocale, type AdminLocale } from "@/app/_lib/admin-i18n";
+import { AdminPageHeader } from "@/components/admin/AdminPrimitives";
 import { formatSeoApiError, readRequestFailedStatus } from "./error-utils";
 
 type Locale = AdminLocale;
@@ -540,10 +541,7 @@ export default function AdminSeoPage() {
 
   return (
     <main id="main-content" className="container content-stack admin-overflow-guard">
-      <section className="card">
-        <h1>{t.title}</h1>
-        <p className="locale-safe">{t.subtitle}</p>
-      </section>
+      <AdminPageHeader title={t.title} description={t.subtitle} icon="globe" eyebrow="SEO controls" />
 
       <section className="card" aria-label={t.loginTitle}>
         {!isAuth ? (

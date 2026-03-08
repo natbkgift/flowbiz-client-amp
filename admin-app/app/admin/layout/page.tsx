@@ -5,6 +5,7 @@ import { type FormEvent, useEffect, useMemo, useState } from "react";
 import { clearAuthSession, loginAdmin, persistAuthSession, readAuthSession } from "@/app/_lib/admin-auth";
 import { detectAdminLocale, type AdminLocale } from "@/app/_lib/admin-i18n";
 import { SITE_LAYOUT_CMS_SLUG, SITE_LAYOUT_CMS_TEMPLATE } from "@/app/_lib/layout-cms";
+import { AdminPageHeader } from "@/components/admin/AdminPrimitives";
 
 type Locale = AdminLocale;
 type CompanyInfoItem = {
@@ -287,10 +288,7 @@ export default function AdminLayoutCmsPage() {
 
   return (
     <main id="main-content" className="container content-stack">
-      <section className="card">
-        <h1>{t.title}</h1>
-        <p className="locale-safe">{t.subtitle}</p>
-      </section>
+      <AdminPageHeader title={t.title} description={t.subtitle} icon="layout" eyebrow="Layout CMS" />
 
       <section className="card dashboard-controls" aria-label={t.loginTitle}>
         {!isAuthenticated ? (
