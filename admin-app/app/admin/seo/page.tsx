@@ -205,7 +205,7 @@ async function api<T>(path: string, token: string, init?: RequestInit): Promise<
   const headers = new Headers(init?.headers);
   if (token.trim()) headers.set("Authorization", `Bearer ${token.trim()}`);
   if (init?.body && !headers.has("content-type")) headers.set("content-type", "application/json");
-  const response = await fetch(path, { ...init, headers, cache: "no-store" });
+  const response = await fetch(`/api${path}`, { ...init, headers, cache: "no-store" });
   if (!response.ok) throw new Error(`request_failed:${response.status}:${await response.text()}`);
   return (await response.json()) as T;
 }
