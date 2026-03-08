@@ -24,8 +24,9 @@ describe("admin dashboard smoke script", () => {
     expect(script).toContain("function buildDashboardSmokePayload()");
     expect(script).toContain("function buildInquiriesListPayload(pageNumber, limit = 10)");
     expect(script).toContain("function inspectDashboardSummary(payload)");
-    expect(script).toContain("async function verifyDashboardUi(page, contractSummary)");
-    expect(script).toContain('getByRole("heading", { name: /Recent leads\\/inquiries|ลีด\\/อินไควรีล่าสุด/i }).first().waitFor');
+    expect(script).toContain("async function verifyDashboardUi(page, contractSummary, options = {})");
+    expect(script).toContain('const { smokeMode = "mocked", getCurrentRecentInquiriesRequestCount = () => 0 } = options;');
+    expect(script).toContain('getByRole("heading", { name: /Logs|Recent leads\\/inquiries|ลีด\\/อินไควรีล่าสุด/i })');
     expect(script).toContain("const generatedDate = new Date();");
     expect(script).toContain("const baseTimestamp = generatedDate.getTime();");
     expect(script).toContain('title: "Recent leads / inquiries"');
@@ -34,10 +35,11 @@ describe("admin dashboard smoke script", () => {
     expect(script).toContain('bucket_date:');
     expect(script).toContain('name: `Smoke Inquiry ${index + 1}`');
     expect(script).toContain('warnings: ["Smoke warning check"]');
-    expect(script).toContain('getByRole("heading", { name: /Health widgets|วิดเจ็ตสุขภาพระบบ/i })');
-    expect(script).toContain('getByRole("heading", { name: /Lead activity trend|แนวโน้ม activity ของลีด/i })');
+    expect(script).toContain('getByRole("heading", { name: /System health \\/ QA overview|Health widgets|วิดเจ็ตสุขภาพระบบ/i })');
+    expect(script).toContain('getByRole("heading", { name: /Activity metrics|Lead activity trend|แนวโน้ม activity ของลีด/i })');
     expect(script).toContain("getByPlaceholder(");
-    expect(script).toContain('page.getByRole("button", { name: /Next|ถัดไป/i }).click()');
+    expect(script).toContain('page.locator(".dashboard-table-pagination").getByRole("button", { name: /Next|ถัดไป/i }).click()');
+    expect(script).toContain('getCurrentRecentInquiriesRequestCount() <= requestsBeforePagination');
     expect(script).toContain('"/api/admin/inquiries"');
     expect(script).toContain("contractSummary.firstWarning");
     expect(script).toContain('admin-smoke-summary.json');

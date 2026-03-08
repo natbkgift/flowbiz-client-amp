@@ -116,6 +116,7 @@ type BackgroundTask = {
   title: string;
   detail: string;
   meta: string;
+  status: string | null;
   icon: AdminIconName;
   tone: "info" | "ok" | "warn" | "error";
   href: string;
@@ -570,6 +571,7 @@ export default function AdminDashboardPage() {
         title: t.taskImport,
         detail: `${t.latestTask}: ${prettyDate(raw.last_import_status.checked_at || null, locale)}`,
         meta: `${t.status}: ${compactValue(importStatus, t.taskUnknown)} · ${t.rows}: ${String(raw.last_import_status.rows_total || 0)}`,
+        status: importStatus,
         icon: "imports",
         tone: taskTone(importStatus),
         href: "/admin/imports",
@@ -583,6 +585,7 @@ export default function AdminDashboardPage() {
         title: t.taskMirror,
         detail: `${t.latestTask}: ${prettyDate(raw.last_mirror_status.checked_at || null, locale)}`,
         meta: `${t.status}: ${compactValue(mirrorStatus, t.taskUnknown)} · ${t.warnings}: ${String(raw.last_mirror_status.failures_count || 0)}`,
+        status: mirrorStatus,
         icon: "media",
         tone: taskTone(mirrorStatus),
         href: "/admin/media",
@@ -599,6 +602,7 @@ export default function AdminDashboardPage() {
           raw.last_deploy_health_status.build_sha?.slice(0, 7),
           t.unknownValue,
         )}`,
+        status: deployStatus,
         icon: "refresh",
         tone: taskTone(deployStatus),
         href: "/admin/seo",
@@ -968,15 +972,7 @@ export default function AdminDashboardPage() {
                 <p>{task.detail}</p>
               </div>
               <AdminBadge tone={task.tone} icon={task.tone === "ok" ? "success" : task.tone === "warn" ? "warning" : task.tone === "error" ? "x" : "info"}>
-                {taskLabel(
-                  task.key === "deploy"
-                    ? summary?.raw_metrics?.last_deploy_health_status?.deploy_status || summary?.raw_metrics?.last_deploy_health_status?.health_status
-                    : task.key === "mirror"
-                      ? summary?.raw_metrics?.last_mirror_status?.status
-                      : summary?.raw_metrics?.last_import_status?.status,
-                  locale,
-                  t,
-                )}
+                {taskLabel(task.status, locale, t)}
               </AdminBadge>
             </div>
             <div className="dashboard-task-item__footer">
