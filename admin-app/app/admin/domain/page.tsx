@@ -304,14 +304,14 @@ export default function AdminDomainPage() {
 
       <section className="card dashboard-controls" aria-label={t.loginTitle}>
         {!isAuthenticated ? (
-          <form className="crm-login-form" onSubmit={(event) => void login(event)}>
+          <form className="crm-login-form" method="post" onSubmit={(event) => void login(event)}>
             <label className="field" htmlFor="domain-login-email">
               <span>{t.email}</span>
-              <input id="domain-login-email" type="email" autoComplete="username" value={loginEmail} onChange={(event) => setLoginEmail(event.target.value)} />
+              <input id="domain-login-email" name="email" type="email" autoComplete="username" required value={loginEmail} onChange={(event) => setLoginEmail(event.target.value)} />
             </label>
             <label className="field" htmlFor="domain-login-password">
               <span>{t.password}</span>
-              <input id="domain-login-password" type="password" autoComplete="current-password" value={loginPassword} onChange={(event) => setLoginPassword(event.target.value)} />
+              <input id="domain-login-password" name="password" type="password" autoComplete="current-password" required value={loginPassword} onChange={(event) => setLoginPassword(event.target.value)} />
             </label>
             {authError ? <div className="state-error">{authError}</div> : null}
             <button className="btn" type="submit" disabled={authLoading}>{authLoading ? t.signingIn : t.signIn}</button>

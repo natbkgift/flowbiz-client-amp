@@ -316,7 +316,7 @@ export default function AdminImportsPage() {
 
       <section className="card dashboard-controls" aria-label={t.loginTitle}>
         {!isAuthenticated ? (
-          <form className="crm-login-form" onSubmit={(event) => void login(event)}>
+          <form className="crm-login-form" method="post" onSubmit={(event) => void login(event)}>
             <h2>{t.loginTitle}</h2>
             <p className="locale-safe">{t.loginSubtitle}</p>
 
@@ -324,8 +324,10 @@ export default function AdminImportsPage() {
               <span>{t.email}</span>
               <input
                 id="imports-login-email"
+                name="email"
                 type="email"
                 autoComplete="username"
+                required
                 value={loginEmail}
                 onChange={(event) => setLoginEmail(event.target.value)}
               />
@@ -335,8 +337,10 @@ export default function AdminImportsPage() {
               <span>{t.password}</span>
               <input
                 id="imports-login-password"
+                name="password"
                 type="password"
                 autoComplete="current-password"
+                required
                 value={loginPassword}
                 onChange={(event) => setLoginPassword(event.target.value)}
               />

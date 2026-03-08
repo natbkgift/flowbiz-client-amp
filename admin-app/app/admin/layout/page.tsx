@@ -294,14 +294,16 @@ export default function AdminLayoutCmsPage() {
 
       <section className="card dashboard-controls" aria-label={t.loginTitle}>
         {!isAuthenticated ? (
-          <form className="crm-login-form" onSubmit={(event) => void login(event)}>
+          <form className="crm-login-form" method="post" onSubmit={(event) => void login(event)}>
             <h2>{t.loginTitle}</h2>
             <label className="field" htmlFor="layout-login-email">
               <span>{t.email}</span>
               <input
                 id="layout-login-email"
+                name="email"
                 type="email"
                 autoComplete="username"
+                required
                 value={loginEmail}
                 onChange={(event) => setLoginEmail(event.target.value)}
               />
@@ -310,8 +312,10 @@ export default function AdminLayoutCmsPage() {
               <span>{t.password}</span>
               <input
                 id="layout-login-password"
+                name="password"
                 type="password"
                 autoComplete="current-password"
+                required
                 value={loginPassword}
                 onChange={(event) => setLoginPassword(event.target.value)}
               />

@@ -547,15 +547,15 @@ export default function AdminSeoPage() {
 
       <section className="card" aria-label={t.loginTitle}>
         {!isAuth ? (
-          <form className="crm-login-form" onSubmit={(event) => void login(event)}>
+          <form className="crm-login-form" method="post" onSubmit={(event) => void login(event)}>
             <h2>{t.loginTitle}</h2>
             <label className="field" htmlFor="seo-login-email">
               <span>{t.email}</span>
-              <input id="seo-login-email" type="email" autoComplete="username" value={loginEmail} onChange={(event) => setLoginEmail(event.target.value)} />
+              <input id="seo-login-email" name="email" type="email" autoComplete="username" required value={loginEmail} onChange={(event) => setLoginEmail(event.target.value)} />
             </label>
             <label className="field" htmlFor="seo-login-password">
               <span>{t.password}</span>
-              <input id="seo-login-password" type="password" autoComplete="current-password" value={loginPassword} onChange={(event) => setLoginPassword(event.target.value)} />
+              <input id="seo-login-password" name="password" type="password" autoComplete="current-password" required value={loginPassword} onChange={(event) => setLoginPassword(event.target.value)} />
             </label>
             {authError ? <div className="state-error">{authError}</div> : null}
             <div className="card-actions">
