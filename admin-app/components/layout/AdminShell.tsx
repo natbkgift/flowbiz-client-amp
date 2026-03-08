@@ -27,6 +27,8 @@ import {
   type AdminLocale,
   withAdminLocale,
 } from "@/app/_lib/admin-i18n";
+import { AdminIcon } from "@/components/admin/AdminIcons";
+import { AdminBadge } from "@/components/admin/AdminPrimitives";
 
 const ADMIN_NAV_SECTIONS = [
   { key: "core", items: ADMIN_PRIMARY_NAV },
@@ -36,21 +38,25 @@ const ADMIN_NAV_SECTIONS = [
 const ADMIN_QUICK_ACTIONS: AdminNavItem[] = [
   {
     href: "/admin/dashboard",
+    icon: "dashboard",
     label: { en: "Dashboard", th: "แดชบอร์ด" },
     description: { en: "Health overview", th: "ภาพรวมสุขภาพระบบ" },
   },
   {
     href: "/admin/imports",
+    icon: "imports",
     label: { en: "Imports", th: "นำเข้าข้อมูล" },
     description: { en: "Sync and mirror runs", th: "งาน sync และ mirror" },
   },
   {
     href: "/admin/media",
+    icon: "media",
     label: { en: "Media", th: "คลังสื่อ" },
     description: { en: "Upload and integrity", th: "อัปโหลดและตรวจสอบไฟล์" },
   },
   {
     href: "/admin/inquiries",
+    icon: "message",
     label: { en: "CRM", th: "CRM" },
     description: { en: "Lead inbox", th: "กล่องลีด" },
   },
@@ -178,8 +184,16 @@ function renderNavSection(
                   aria-current={active ? "page" : undefined}
                   onClick={options?.onNavigate}
                 >
-                  <span>{getAdminNavText(item.label, locale)}</span>
-                  <small>{getAdminNavText(item.description, locale)}</small>
+                  <span className="admin-shell-nav-link-icon" aria-hidden="true">
+                    <AdminIcon name={item.icon} size={16} />
+                  </span>
+                  <span className="admin-shell-nav-link-copy">
+                    <strong>{getAdminNavText(item.label, locale)}</strong>
+                    <small>{getAdminNavText(item.description, locale)}</small>
+                  </span>
+                  <span className="admin-shell-nav-link-trail" aria-hidden="true">
+                    <AdminIcon name="info" size={14} />
+                  </span>
                 </Link>
               </li>
             );
@@ -322,7 +336,15 @@ export function AdminShell({ children }: { children: ReactNode }) {
     <div className={mobileNavOpen ? "admin-shell is-nav-open" : "admin-shell"}>
       <aside className="admin-shell-sidebar" aria-label={ui.workspaceNavigation}>
         <div className="admin-shell-brand">
-          <Link href={withAdminLocale("/admin/dashboard", locale)}>{ui.adminBrand}</Link>
+          <Link href={withAdminLocale("/admin/dashboard", locale)}>
+            <span className="admin-shell-brand-mark" aria-hidden="true">
+              <AdminIcon name="workspace" size={18} />
+            </span>
+            <span className="admin-shell-brand-copy">
+              <strong>{ui.adminBrand}</strong>
+              <small>{ui.quickNavigation}</small>
+            </span>
+          </Link>
         </div>
 
         <div className="admin-shell-sidebar-meta">
@@ -333,20 +355,25 @@ export function AdminShell({ children }: { children: ReactNode }) {
 
         <label className="admin-shell-search admin-shell-search--sidebar" htmlFor="admin-shell-search">
           <span>{ui.search}</span>
-          <input
-            id="admin-shell-search"
-            type="search"
-            value={searchQuery}
-            onChange={onSearchChange}
-            placeholder={ui.searchPlaceholder}
-          />
+          <div className="admin-shell-search-input">
+            <span className="admin-shell-search-icon" aria-hidden="true">
+              <AdminIcon name="search" size={15} />
+            </span>
+            <input
+              id="admin-shell-search"
+              type="search"
+              value={searchQuery}
+              onChange={onSearchChange}
+              placeholder={ui.searchPlaceholder}
+            />
+          </div>
           <small>{ui.searchHint}</small>
         </label>
 
-        <div className="admin-shell-sidebar-scroll">
-          {renderNavSection(ui.core, filteredPrimaryNav, pathname, locale, { emptyState: emptySearchState })}
-          {renderNavSection(ui.content, filteredSecondaryNav, pathname, locale, { emptyState: emptySearchState })}
-        </div>
+          <div className="admin-shell-sidebar-scroll">
+            {renderNavSection(ui.core, filteredPrimaryNav, pathname, locale, { emptyState: emptySearchState })}
+            {renderNavSection(ui.content, filteredSecondaryNav, pathname, locale, { emptyState: emptySearchState })}
+          </div>
 
         <nav className="admin-shell-sidebar-footer" aria-label={ui.quickActions}>
           {ADMIN_QUICK_ACTIONS.map((action) => {
@@ -358,12 +385,18 @@ export function AdminShell({ children }: { children: ReactNode }) {
                 className={active ? "admin-shell-footer-link is-active" : "admin-shell-footer-link"}
                 aria-current={active ? "page" : undefined}
               >
-                {getAdminNavText(action.label, locale)}
+                <span aria-hidden="true">
+                  <AdminIcon name={action.icon} size={14} />
+                </span>
+                <span>{getAdminNavText(action.label, locale)}</span>
               </Link>
             );
           })}
           <Link href={siteHref} className="admin-shell-footer-link">
-            {ui.visitSite}
+            <span aria-hidden="true">
+              <AdminIcon name="globe" size={14} />
+            </span>
+            <span>{ui.visitSite}</span>
           </Link>
         </nav>
       </aside>
@@ -379,7 +412,9 @@ export function AdminShell({ children }: { children: ReactNode }) {
               aria-label={mobileNavOpen ? ui.closeNavigation : ui.openNavigation}
               onClick={toggleMobileNav}
             >
-              <span aria-hidden="true">{mobileNavOpen ? "x" : "="}</span>
+              <span aria-hidden="true">
+                <AdminIcon name={mobileNavOpen ? "x" : "menu"} size={16} />
+              </span>
             </button>
 
             <div className="admin-shell-topbar-main">
@@ -395,19 +430,33 @@ export function AdminShell({ children }: { children: ReactNode }) {
                   <li aria-current="page">{currentWorkspaceLabel}</li>
                 </ol>
               </nav>
+              <div className="admin-shell-topbar-context">
+                <span className="admin-shell-topbar-context-icon" aria-hidden="true">
+                  {item ? <AdminIcon name={item.icon} size={18} /> : <AdminIcon name="workspace" size={18} />}
+                </span>
+                <div>
+                  <strong>{currentWorkspaceLabel}</strong>
+                  <span>{currentWorkspaceDescription}</span>
+                </div>
+              </div>
             </div>
           </div>
 
           <div className="admin-shell-topbar-tools">
             <label className="admin-shell-search admin-shell-search--topbar" htmlFor="admin-shell-topbar-search">
               <span>{ui.search}</span>
-              <input
-                id="admin-shell-topbar-search"
-                type="search"
-                value={searchQuery}
-                onChange={onSearchChange}
-                placeholder={ui.searchPlaceholder}
-              />
+              <div className="admin-shell-search-input">
+                <span className="admin-shell-search-icon" aria-hidden="true">
+                  <AdminIcon name="search" size={15} />
+                </span>
+                <input
+                  id="admin-shell-topbar-search"
+                  type="search"
+                  value={searchQuery}
+                  onChange={onSearchChange}
+                  placeholder={ui.searchPlaceholder}
+                />
+              </div>
             </label>
 
             <nav className="admin-shell-quick-actions" aria-label={ui.quickActions}>
@@ -420,7 +469,8 @@ export function AdminShell({ children }: { children: ReactNode }) {
                     className={active ? "admin-shell-quick-link is-active" : "admin-shell-quick-link"}
                     aria-current={active ? "page" : undefined}
                   >
-                    {getAdminNavText(action.label, locale)}
+                    <AdminIcon name={action.icon} size={14} />
+                    <span>{getAdminNavText(action.label, locale)}</span>
                   </Link>
                 );
               })}
@@ -430,9 +480,11 @@ export function AdminShell({ children }: { children: ReactNode }) {
               <p className="admin-shell-profile-kicker">{ui.profileLabel}</p>
               <strong>{ui.profileTitle}</strong>
               <span>{currentWorkspaceLabel}</span>
-              <small>
-                {ui.localeBadge}: {locale.toUpperCase()}
-              </small>
+              <div className="admin-shell-profile-badges">
+                <AdminBadge tone="info" icon="language">
+                  {ui.localeBadge}: {locale.toUpperCase()}
+                </AdminBadge>
+              </div>
             </div>
 
             <div className="admin-shell-locale-control">
@@ -469,14 +521,19 @@ export function AdminShell({ children }: { children: ReactNode }) {
 
           <label className="admin-shell-search admin-shell-search--drawer" htmlFor="admin-shell-drawer-search">
             <span>{ui.search}</span>
-            <input
-              id="admin-shell-drawer-search"
-              ref={drawerSearchRef}
-              type="search"
-              value={searchQuery}
-              onChange={onSearchChange}
-              placeholder={ui.searchPlaceholder}
-            />
+            <div className="admin-shell-search-input">
+              <span className="admin-shell-search-icon" aria-hidden="true">
+                <AdminIcon name="search" size={15} />
+              </span>
+              <input
+                id="admin-shell-drawer-search"
+                ref={drawerSearchRef}
+                type="search"
+                value={searchQuery}
+                onChange={onSearchChange}
+                placeholder={ui.searchPlaceholder}
+              />
+            </div>
             <small>{ui.searchHint}</small>
           </label>
 
@@ -505,12 +562,18 @@ export function AdminShell({ children }: { children: ReactNode }) {
                 className="admin-shell-mobile-action"
                 onClick={closeMobileNav}
               >
-                <span>{getAdminNavText(action.label, locale)}</span>
+                <span className="admin-shell-mobile-action-head">
+                  <AdminIcon name={action.icon} size={15} />
+                  <strong>{getAdminNavText(action.label, locale)}</strong>
+                </span>
                 <small>{getAdminNavText(action.description, locale)}</small>
               </Link>
             ))}
             <Link href={siteHref} className="admin-shell-mobile-action" onClick={closeMobileNav}>
-              <span>{ui.visitSite}</span>
+              <span className="admin-shell-mobile-action-head">
+                <AdminIcon name="globe" size={15} />
+                <strong>{ui.visitSite}</strong>
+              </span>
               <small>{ui.adminBrand}</small>
             </Link>
           </nav>

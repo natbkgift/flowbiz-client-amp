@@ -6,6 +6,7 @@ import { clearAuthSession, loginAdmin, persistAuthSession, readAuthSession } fro
 import { detectAdminLocale, type AdminLocale } from "@/app/_lib/admin-i18n";
 import { formatWorkspaceErrorMessage } from "@/app/_lib/admin-workspace-error";
 import AdminWorkspaceErrorState from "@/components/admin/AdminWorkspaceErrorState";
+import { AdminPageHeader, AdminStatCard } from "@/components/admin/AdminPrimitives";
 
 type Locale = AdminLocale;
 
@@ -309,10 +310,7 @@ export default function AdminImportsPage() {
 
   return (
     <main id="main-content" className="container content-stack">
-      <section className="card">
-        <h1>{t.title}</h1>
-        <p className="locale-safe">{t.subtitle}</p>
-      </section>
+      <AdminPageHeader title={t.title} description={t.subtitle} icon="imports" eyebrow="Import operations" />
 
       <section className="card dashboard-controls" aria-label={t.loginTitle}>
         {!isAuthenticated ? (
@@ -384,25 +382,21 @@ export default function AdminImportsPage() {
       {isAuthenticated ? (
         <>
           <section className="dashboard-grid">
-            <article className="card">
-              <h2>{t.mirror}</h2>
-              <p className="dashboard-widget-value">{mirrorStatus?.status || "-"}</p>
-              <p className="locale-safe">
-                {t.checkedAt}: {prettyDate(mirrorStatus?.checked_at, locale)}
-              </p>
-            </article>
-            <article className="card">
-              <h2>{t.deploy}</h2>
-              <p className="dashboard-widget-value">{deployStatus?.deploy_status || "-"}</p>
-              <p className="locale-safe">
-                {t.checkedAt}: {prettyDate(deployStatus?.deploy_checked_at, locale)}
-              </p>
-              <p className="locale-safe">source: {deployStatus?.source || "-"}</p>
-            </article>
-            <article className="card">
-              <h2>{t.total}</h2>
-              <p className="dashboard-widget-value">{total}</p>
-            </article>
+            <AdminStatCard
+              label={t.mirror}
+              value={mirrorStatus?.status || "-"}
+              detail={`${t.checkedAt}: ${prettyDate(mirrorStatus?.checked_at, locale)}`}
+              icon="refresh"
+              tone="info"
+            />
+            <AdminStatCard
+              label={t.deploy}
+              value={deployStatus?.deploy_status || "-"}
+              detail={`${t.checkedAt}: ${prettyDate(deployStatus?.deploy_checked_at, locale)} · source: ${deployStatus?.source || "-"}`}
+              icon="dashboard"
+              tone="neutral"
+            />
+            <AdminStatCard label={t.total} value={total} icon="imports" tone="ok" />
           </section>
 
           <section className="card" aria-label={t.importRun}>

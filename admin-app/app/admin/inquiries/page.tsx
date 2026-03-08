@@ -4,6 +4,7 @@ import { type FormEvent, useEffect, useMemo, useRef, useState } from "react";
 
 import { clearAuthSession, loginAdmin, persistAuthSession, readAuthSession } from "@/app/_lib/admin-auth";
 import { detectAdminLocale, type AdminLocale } from "@/app/_lib/admin-i18n";
+import { AdminPageHeader } from "@/components/admin/AdminPrimitives";
 
 type Locale = AdminLocale;
 
@@ -611,10 +612,7 @@ export default function AdminInquiriesPage() {
 
   return (
     <main id="main-content" className="container content-stack">
-      <section className="card">
-        <h1>{t.title}</h1>
-        <p className="locale-safe">{t.subtitle}</p>
-      </section>
+      <AdminPageHeader title={t.title} description={t.subtitle} icon="message" eyebrow="CRM" />
 
       <section className="card crm-controls" aria-label={t.filters}>
         <div className="crm-auth-shell">

@@ -12,6 +12,7 @@ import {
   toggleSelection,
   type SortDirection,
 } from "@/app/_lib/admin-data-table-state";
+import { AdminButton, AdminInput, AdminTable } from "@/components/admin/AdminPrimitives";
 
 export type AdminDataTableColumn<T> = {
   key: string;
@@ -127,10 +128,10 @@ export function AdminDataTable<T>({
   }
 
   return (
-    <div className="dashboard-table-wrap">
-      <div className="card-actions">
-        <label className="field" htmlFor={filterInputId}>
-          <span>{filterLabel}</span>
+    <AdminTable
+      toolbar={
+        <div className="card-actions">
+          <AdminInput htmlFor={filterInputId} label={filterLabel}>
           <input
             id={filterInputId}
             aria-label={filterLabel}
@@ -140,11 +141,13 @@ export function AdminDataTable<T>({
               setPage(1);
             }}
           />
-        </label>
-        <p className="locale-safe" aria-live="polite">
-          Selected: {selectedIds.size}
-        </p>
-      </div>
+          </AdminInput>
+          <p className="locale-safe" aria-live="polite">
+            Selected: {selectedIds.size}
+          </p>
+        </div>
+      }
+    >
 
       {sortedRows.length === 0 ? (
         <div className="state-empty">{emptyLabel}</div>
@@ -163,14 +166,14 @@ export function AdminDataTable<T>({
                 </th>
                 {columns.map((column) => (
                   <th key={column.key}>
-                    <button
-                      className="btn btn-secondary"
-                      type="button"
+                    <AdminButton
+                      variant="secondary"
+                      size="sm"
                       onClick={() => toggleSort(column.key)}
                       aria-label={`Sort by ${column.label}`}
                     >
                       {column.label}
-                    </button>
+                    </AdminButton>
                   </th>
                 ))}
               </tr>
@@ -197,26 +200,24 @@ export function AdminDataTable<T>({
           </table>
 
           <div className="card-actions">
-            <button
-              className="btn btn-secondary"
-              type="button"
+            <AdminButton
+              variant="secondary"
               disabled={effectivePage <= 1}
               onClick={() => setPage((current) => Math.max(1, current - 1))}
             >
               Previous
-            </button>
+            </AdminButton>
             <span aria-live="polite">Page {effectivePage}</span>
-            <button
-              className="btn btn-secondary"
-              type="button"
+            <AdminButton
+              variant="secondary"
               disabled={effectivePage >= totalPages}
               onClick={() => setPage((current) => current + 1)}
             >
               Next
-            </button>
+            </AdminButton>
           </div>
         </>
       )}
-    </div>
+    </AdminTable>
   );
 }

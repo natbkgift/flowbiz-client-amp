@@ -28,6 +28,7 @@ import {
   type TrendSeriesBucket,
   type TrendPeriod,
 } from "@/components/admin/dashboard/trend-utils";
+import { AdminButton, AdminPageHeader, AdminTabSwitch } from "@/components/admin/AdminPrimitives";
 
 type Locale = AdminLocale;
 type WidgetStatus = "ok" | "warn" | "error" | "unknown";
@@ -366,14 +367,9 @@ export default function AdminDashboardPage() {
 
   function renderRefreshButton(label?: string) {
     return (
-      <button
-        className="btn btn-secondary"
-        type="button"
-        onClick={() => void loadDashboard()}
-        disabled={loading}
-      >
+      <AdminButton variant="secondary" icon="refresh" type="button" onClick={() => void loadDashboard()} disabled={loading}>
         {loading ? t.loading : label || t.refresh}
-      </button>
+      </AdminButton>
     );
   }
 
@@ -430,24 +426,15 @@ export default function AdminDashboardPage() {
   function renderTrendToggle() {
     return (
       <div className="dashboard-period-toggle" role="group" aria-label={t.trendTitle}>
-        <button
-          type="button"
-          className={chartPeriod === "7d" ? "dashboard-period-button is-active" : "dashboard-period-button"}
-          aria-pressed={chartPeriod === "7d"}
-          onClick={() => setChartPeriod("7d")}
-          disabled={loading}
-        >
-          {t.trendPeriod7d}
-        </button>
-        <button
-          type="button"
-          className={chartPeriod === "30d" ? "dashboard-period-button is-active" : "dashboard-period-button"}
-          aria-pressed={chartPeriod === "30d"}
-          onClick={() => setChartPeriod("30d")}
-          disabled={loading}
-        >
-          {t.trendPeriod30d}
-        </button>
+        <AdminTabSwitch
+          ariaLabel={t.trendTitle}
+          value={chartPeriod}
+          onChange={(next) => setChartPeriod(next as TrendPeriod)}
+          options={[
+            { value: "7d", label: t.trendPeriod7d, disabled: loading },
+            { value: "30d", label: t.trendPeriod30d, disabled: loading },
+          ]}
+        />
       </div>
     );
   }
@@ -725,11 +712,14 @@ export default function AdminDashboardPage() {
 
   return (
     <main id="main-content" className="container content-stack" aria-busy={loading}>
-      <section className="card dashboard-hero">
-        <h1>{t.title}</h1>
-        <p className="locale-safe">{t.subtitle}</p>
-        {isAuthenticated ? renderOverviewPanel() : <DashboardSectionState tone="info" title={t.loginTitle} body={t.authRequired} />}
-      </section>
+      <AdminPageHeader
+        className="dashboard-hero"
+        icon="dashboard"
+        eyebrow={locale === "th" ? "สุขภาพระบบ" : "System health"}
+        title={t.title}
+        description={t.subtitle}
+        meta={isAuthenticated ? renderOverviewPanel() : <DashboardSectionState tone="info" title={t.loginTitle} body={t.authRequired} />}
+      />
 
       <section className="card dashboard-controls" aria-label={t.loginTitle}>
         {!isAuthenticated ? (
@@ -766,9 +756,9 @@ export default function AdminDashboardPage() {
             {authError ? <div className="state-error" role="alert">{authError}</div> : null}
 
             <div className="card-actions">
-              <button className="btn" type="submit" disabled={authLoading}>
+              <AdminButton variant="primary" icon="workspace" type="submit" disabled={authLoading}>
                 {authLoading ? t.signingIn : t.signIn}
-              </button>
+              </AdminButton>
             </div>
           </form>
         ) : (
@@ -779,9 +769,9 @@ export default function AdminDashboardPage() {
             </p>
             <div className="card-actions">
               {renderRefreshButton()}
-              <button className="btn btn-secondary" type="button" onClick={logout}>
+              <AdminButton variant="secondary" icon="x" type="button" onClick={logout}>
                 {t.signOut}
-              </button>
+              </AdminButton>
             </div>
           </div>
         )}

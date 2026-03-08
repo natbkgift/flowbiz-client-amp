@@ -5,6 +5,7 @@ import { ADMIN_AUTH_LOGIN_PATH } from "@/app/_lib/admin-auth";
 import { detectAdminLocale, type AdminLocale } from "@/app/_lib/admin-i18n";
 import { formatWorkspaceErrorMessage } from "@/app/_lib/admin-workspace-error";
 import AdminWorkspaceErrorState from "@/components/admin/AdminWorkspaceErrorState";
+import { AdminPageHeader, AdminStatCard } from "@/components/admin/AdminPrimitives";
 
 type Locale = AdminLocale;
 
@@ -366,10 +367,7 @@ export default function AdminMediaPage() {
 
   return (
     <main id="main-content" className="container content-stack">
-      <section className="card">
-        <h1>{t.title}</h1>
-        <p className="locale-safe">{t.subtitle}</p>
-      </section>
+      <AdminPageHeader title={t.title} description={t.subtitle} icon="media" eyebrow="Media operations" />
 
       <section className="card dashboard-controls" aria-label={t.loginTitle}>
         {!isAuthenticated ? (
@@ -441,25 +439,21 @@ export default function AdminMediaPage() {
       {isAuthenticated ? (
         <>
           <section className="dashboard-grid" aria-label={t.integrity}>
-            <article className="card">
-              <h2>{t.broken}</h2>
-              <p className="dashboard-widget-value">{brokenCount}</p>
-            </article>
-            <article className="card">
-              <h2>{t.leakage}</h2>
-              <p className="dashboard-widget-value">{Number(integrity?.external_leakage_count || 0)}</p>
-            </article>
-            <article className="card">
-              <h2>{t.errors}</h2>
-              <p className="dashboard-widget-value">{Number(integrity?.error_count || 0)}</p>
-            </article>
-            <article className="card">
-              <h2>{t.warnings}</h2>
-              <p className="dashboard-widget-value">{Number(integrity?.warn_count || 0)}</p>
-              <p className="locale-safe">
-                {t.scannedAt}: {prettyDate(integrity?.scanned_at || null, locale)}
-              </p>
-            </article>
+            <AdminStatCard label={t.broken} value={brokenCount} icon="warning" tone="warn" />
+            <AdminStatCard
+              label={t.leakage}
+              value={Number(integrity?.external_leakage_count || 0)}
+              icon="globe"
+              tone="neutral"
+            />
+            <AdminStatCard label={t.errors} value={Number(integrity?.error_count || 0)} icon="x" tone="error" />
+            <AdminStatCard
+              label={t.warnings}
+              value={Number(integrity?.warn_count || 0)}
+              detail={`${t.scannedAt}: ${prettyDate(integrity?.scanned_at || null, locale)}`}
+              icon="info"
+              tone="info"
+            />
           </section>
 
           <section className="card" aria-label={t.operations}>
