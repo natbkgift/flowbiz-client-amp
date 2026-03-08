@@ -50,7 +50,11 @@ export function AdminButton({
   iconPosition?: "start" | "end";
 }) {
   const iconNode = icon ? (
-    <span className="admin-button__icon" aria-hidden={iconLabel ? undefined : "true"}>
+    <span
+      className="admin-button__icon"
+      aria-hidden={iconLabel ? undefined : "true"}
+      {...(iconLabel ? { role: "img", "aria-label": iconLabel } : {})}
+    >
       <AdminIcon name={icon} size={size === "sm" ? 15 : 16} />
     </span>
   ) : null;
