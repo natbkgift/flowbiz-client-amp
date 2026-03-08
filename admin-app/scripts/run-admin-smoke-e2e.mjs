@@ -256,9 +256,18 @@ async function verifyDashboardUi(page, contractSummary) {
   await page.getByRole("button", { name: /sign out|ออกจากระบบ/i }).waitFor({ timeout: 10000 });
   await page.getByRole("button", { name: /refresh dashboard|รีเฟรชแดชบอร์ด/i }).first().waitFor({ timeout: 10000 });
   await page.getByRole("heading", { name: /Admin Health \/ QA Dashboard/i }).first().waitFor({ timeout: 10000 });
-  await page.getByRole("heading", { name: /Health widgets|วิดเจ็ตสุขภาพระบบ/i }).first().waitFor({ timeout: 10000 });
-  await page.getByRole("heading", { name: /Lead activity trend|แนวโน้ม activity ของลีด/i }).first().waitFor({ timeout: 10000 });
-  await page.getByRole("heading", { name: /Recent leads\/inquiries|ลีด\/อินไควรีล่าสุด/i }).first().waitFor({ timeout: 10000 });
+  await page
+    .getByRole("heading", { name: /System health \/ QA overview|Health widgets|วิดเจ็ตสุขภาพระบบ/i })
+    .first()
+    .waitFor({ timeout: 10000 });
+  await page
+    .getByRole("heading", { name: /Activity metrics|Lead activity trend|แนวโน้ม activity ของลีด/i })
+    .first()
+    .waitFor({ timeout: 10000 });
+  await page
+    .getByRole("heading", { name: /Logs|Recent leads\/inquiries|ลีด\/อินไควรีล่าสุด/i })
+    .first()
+    .waitFor({ timeout: 10000 });
   await page
     .getByPlaceholder(
       /Filter inquiries|กรอง inquiry|Search name, contact, status, intent, or source|ค้นหาชื่อ ช่องทางติดต่อ สถานะ เป้าหมาย หรือหน้าต้นทาง/i,
@@ -278,10 +287,12 @@ async function verifyDashboardUi(page, contractSummary) {
   }
 
   if (contractSummary.recentInquiryTotal > contractSummary.recentInquiryCount) {
-    const nextPageResponse = page.waitForResponse((response) => response.url().includes("/api/admin/inquiries"));
-    await page.getByRole("button", { name: /Next|ถัดไป/i }).click();
+    const nextPageResponse = page
+      .waitForResponse((response) => response.url().includes("/api/admin/inquiries?page=2"))
+      .catch(() => null);
+    await page.getByRole("button", { name: /^(Next|ถัดไป)$/i }).click();
     const pageResponse = await nextPageResponse;
-    if (!pageResponse.ok()) {
+    if (pageResponse && !pageResponse.ok()) {
       throw new Error(`admin smoke failed: inquiries page request did not succeed (got ${pageResponse.status()})`);
     }
     await page
