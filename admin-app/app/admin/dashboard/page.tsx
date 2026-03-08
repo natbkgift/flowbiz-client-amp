@@ -4,6 +4,10 @@ import { type FormEvent, useEffect, useMemo, useState } from "react";
 
 import { clearAuthSession, loginAdmin, persistAuthSession, readAuthSession } from "@/app/_lib/admin-auth";
 import { detectAdminLocale, type AdminLocale } from "@/app/_lib/admin-i18n";
+import {
+  transitionDashboardState,
+  type DashboardState,
+} from "@/app/admin/dashboard/state-utils";
 
 type Locale = AdminLocale;
 type WidgetStatus = "ok" | "warn" | "error" | "unknown";
@@ -77,11 +81,17 @@ const copy = {
     signOut: "Sign out",
     refresh: "Refresh dashboard",
     loading: "Loading dashboard",
+    retry: "Retry",
     authRequired: "Sign in to load admin dashboard data.",
+    idleState: "Dashboard is ready. Click refresh to load the latest summary.",
     loginMissing: "Email and password are required.",
     loginInvalid: "Invalid credentials.",
     loginError: "Unable to sign in right now.",
     loadError: "Unable to load dashboard summary right now.",
+    loadErrorHint: "Check API health/auth configuration, then retry.",
+    emptyState: "No dashboard data found yet.",
+    emptyStateHint: "Check data pipelines and retry.",
+    emptyWidgets: "No widgets found. Check backend summary contract.",
     widgets: "Health widgets",
     generatedAt: "Generated at",
     incomplete: "Incomplete widgets",
@@ -110,11 +120,17 @@ const copy = {
     signOut: "ออกจากระบบ",
     refresh: "รีเฟรชแดชบอร์ด",
     loading: "กำลังโหลดแดชบอร์ด",
+    retry: "ลองใหม่",
     authRequired: "กรุณาเข้าสู่ระบบก่อนใช้งานแดชบอร์ด",
+    idleState: "พร้อมใช้งานแดชบอร์ดแล้ว กดรีเฟรชเพื่อโหลดข้อมูลล่าสุด",
     loginMissing: "ต้องกรอกอีเมลและรหัสผ่าน",
     loginInvalid: "ข้อมูลเข้าสู่ระบบไม่ถูกต้อง",
     loginError: "ไม่สามารถเข้าสู่ระบบได้ในขณะนี้",
     loadError: "ไม่สามารถโหลดสรุปแดชบอร์ดได้",
+    loadErrorHint: "ตรวจสอบ API/auth แล้วลองใหม่",
+    emptyState: "ยังไม่พบข้อมูลสรุปแดชบอร์ด",
+    emptyStateHint: "ตรวจ pipeline ข้อมูลแล้วลองใหม่อีกครั้ง",
+    emptyWidgets: "ยังไม่พบวิดเจ็ต ตรวจสอบ backend summary contract",
     widgets: "วิดเจ็ตสุขภาพระบบ",
     generatedAt: "เวลาที่สร้างรายงาน",
     incomplete: "วิดเจ็ตที่ยังไม่สมบูรณ์",
@@ -185,6 +201,7 @@ export default function AdminDashboardPage() {
   const [loading, setLoading] = useState(false);
   const [pageError, setPageError] = useState<string | null>(null);
   const [summary, setSummary] = useState<DashboardSummaryResponse | null>(null);
+  const [dashboardState, setDashboardState] = useState<DashboardState>("idle");
 
   useEffect(() => {
     setLocale(detectLocale());
@@ -192,6 +209,7 @@ export default function AdminDashboardPage() {
     if (!session) return;
     setAuthToken(session.token);
     setAuthEmail(session.email);
+    setDashboardState("idle");
   }, []);
 
   const isAuthenticated = authToken.trim().length > 0;
@@ -207,17 +225,22 @@ export default function AdminDashboardPage() {
     const activeToken = (tokenOverride ?? authToken).trim();
     if (!activeToken) {
       setPageError(t.authRequired);
+      setDashboardState((current) => transitionDashboardState(current, "fetch_error"));
       return;
     }
 
     setLoading(true);
     setPageError(null);
+    setDashboardState((current) => transitionDashboardState(current, "fetch_start"));
     try {
       const body = await fetchSummary(activeToken);
       setSummary(body);
+      setDashboardState((current) => transitionDashboardState(current, "fetch_success", body));
       persistAuthSession(activeToken, authEmail || loginEmail);
     } catch {
-      setPageError(t.loadError);
+      setSummary(null);
+      setPageError(`${t.loadError} ${t.loadErrorHint}`);
+      setDashboardState((current) => transitionDashboardState(current, "fetch_error"));
     } finally {
       setLoading(false);
     }
@@ -263,6 +286,7 @@ export default function AdminDashboardPage() {
     setAuthError(null);
     setPageError(null);
     setSummary(null);
+    setDashboardState((current) => transitionDashboardState(current, "reset"));
   }
 
   return (
@@ -329,10 +353,31 @@ export default function AdminDashboardPage() {
         {!isAuthenticated ? <div className="state-empty">{t.authRequired}</div> : null}
       </section>
 
-      {pageError ? <div className="state-error">{pageError}</div> : null}
-      {loading ? <div className="state-loading">{t.loading}</div> : null}
+      {isAuthenticated && dashboardState === "idle" ? <div className="state-empty">{t.idleState}</div> : null}
+      {isAuthenticated && dashboardState === "error" ? (
+        <div className="state-error" role="alert">
+          <p>{pageError || t.loadError}</p>
+          <div className="card-actions">
+            <button className="btn btn-secondary" type="button" onClick={() => void loadDashboard()}>
+              {t.retry}
+            </button>
+          </div>
+        </div>
+      ) : null}
+      {isAuthenticated && dashboardState === "loading" ? <div className="state-loading">{t.loading}</div> : null}
+      {isAuthenticated && dashboardState === "empty" ? (
+        <section className="card">
+          <div className="state-empty">{t.emptyState}</div>
+          <p className="locale-safe">{t.emptyStateHint}</p>
+          <div className="card-actions">
+            <button className="btn btn-secondary" type="button" onClick={() => void loadDashboard()}>
+              {t.retry}
+            </button>
+          </div>
+        </section>
+      ) : null}
 
-      {summary ? (
+      {isAuthenticated && dashboardState === "success" && summary ? (
         <>
           <section className="card dashboard-overview" aria-live="polite">
             <p>
@@ -346,7 +391,7 @@ export default function AdminDashboardPage() {
           <section className="dashboard-grid" aria-label={t.widgets}>
             {widgets.length === 0 ? (
               <div className="card">
-                <div className="state-empty">No widgets found. Check backend summary contract.</div>
+                <div className="state-empty">{t.emptyWidgets}</div>
               </div>
             ) : (
               widgets.map((widget) => (
