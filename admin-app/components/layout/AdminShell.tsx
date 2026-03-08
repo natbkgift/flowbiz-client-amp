@@ -390,11 +390,13 @@ export function AdminShell({ children }: { children: ReactNode }) {
         </label>
 
         <div className="admin-shell-sidebar-scroll">
-          {filteredNavGroups.map((entry) =>
-            renderNavGroup(getAdminNavText(entry.group.label, locale), entry.items, pathname, locale, {
-              emptyState: emptySearchState,
-            }),
-          )}
+          {hasSearchResults
+            ? filteredNavGroups.map((entry) =>
+                renderNavGroup(getAdminNavText(entry.group.label, locale), entry.items, pathname, locale, {
+                  emptyState: emptySearchState,
+                }),
+              )
+            : emptySearchState}
         </div>
 
         <nav className="admin-shell-sidebar-footer" aria-label={ui.quickActions}>
