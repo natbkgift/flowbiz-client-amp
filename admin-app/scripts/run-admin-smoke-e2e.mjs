@@ -67,6 +67,16 @@ function buildDashboardSmokePayload() {
         actions: [],
       },
     ],
+    trend_series: {
+      "7d": Array.from({ length: 7 }).map((_, index) => ({
+        bucket_date: new Date(Date.now() - (6 - index) * 24 * 60 * 60 * 1000).toISOString().slice(0, 10),
+        count: index === 6 ? 1 : 0,
+      })),
+      "30d": Array.from({ length: 30 }).map((_, index) => ({
+        bucket_date: new Date(Date.now() - (29 - index) * 24 * 60 * 60 * 1000).toISOString().slice(0, 10),
+        count: index === 29 ? 1 : 0,
+      })),
+    },
     recent_inquiries: [
       {
         id: "smoke-inquiry-1",

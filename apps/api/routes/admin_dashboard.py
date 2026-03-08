@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import json
 import os
-from datetime import UTC, datetime
+from datetime import UTC, datetime, timedelta
 from pathlib import Path
 from uuid import UUID
 
@@ -577,6 +577,45 @@ def _collect_recent_inquiries(db: Session) -> dict:
     return {"count": len(items), "items": items, "latest_at": latest_at}
 
 
+def _collect_inquiry_trend_series(db: Session, *, now: datetime) -> dict[str, list[dict[str, int | str]]]:
+    end_date = now.astimezone(UTC).date()
+    start_date = end_date - timedelta(days=29)
+    start_at = datetime.combine(start_date, datetime.min.time(), tzinfo=UTC)
+    rows = db.scalars(
+        select(Inquiry.created_at)
+        .where(
+            Inquiry.deleted_at.is_(None),
+            Inquiry.created_at.is_not(None),
+            Inquiry.created_at >= start_at,
+        )
+        .order_by(Inquiry.created_at)
+    ).all()
+
+    counts: dict[str, int] = {}
+    for created_at in rows:
+        if created_at is None:
+            continue
+        timestamp = (
+            created_at.replace(tzinfo=UTC)
+            if created_at.tzinfo is None
+            else created_at.astimezone(UTC)
+        )
+        bucket_date = timestamp.date().isoformat()
+        counts[bucket_date] = counts.get(bucket_date, 0) + 1
+
+    def _build_series(days: int) -> list[dict[str, int | str]]:
+        window_start = end_date - timedelta(days=days - 1)
+        return [
+            {
+                "bucket_date": (window_start + timedelta(days=offset)).isoformat(),
+                "count": int(counts.get((window_start + timedelta(days=offset)).isoformat(), 0)),
+            }
+            for offset in range(days)
+        ]
+
+    return {"7d": _build_series(7), "30d": _build_series(30)}
+
+
 def _latest_home_config_for_locale(db: Session, *, locale: str) -> HomeComposerConfig | None:
     for status_value in ("published", "draft"):
         row = db.scalar(
@@ -937,6 +976,7 @@ def admin_dashboard_health_summary(
     warnings.extend(translation_warnings)
     draft_metrics = _collect_unpublished_draft_metrics(db)
     recent_inquiries = _collect_recent_inquiries(db)
+    trend_series = _collect_inquiry_trend_series(db, now=now)
     review_video = _collect_review_video_verification_metrics(db)
     last_import = _collect_last_import_status(db)
     last_mirror = _collect_last_mirror_status()
@@ -1261,6 +1301,7 @@ def admin_dashboard_health_summary(
         "data_freshness": data_freshness,
         "raw_metrics": raw_metrics,
         "widgets": widgets,
+        "trend_series": trend_series,
         "recent_inquiries": recent_inquiries.get("items", []),
         "incomplete_widget_count": incomplete_widget_count,
         "warnings": warnings,

@@ -103,6 +103,6 @@ If production validation fails after merge:
 
 ## Known Limitations
 
-- The trend chart still derives from the existing `recent_inquiries.created_at` rows only.
+- The trend chart currently supports the backend-provided `7d` and `30d` series only.
 - The admin smoke script uses mocked login and summary endpoints to validate UI flow deterministically.
 - Table filtering and sorting operate on the currently loaded inquiry rows, not on server-side pagination.

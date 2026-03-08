@@ -1,18 +1,17 @@
 import { describe, expect, it } from "vitest";
 
 import {
-  buildInquiryTrendPoints,
+  buildTrendPoints,
   hasTrendData,
   summarizeTrend,
 } from "@/components/admin/dashboard/trend-utils";
 
 describe("admin dashboard trend utils", () => {
   it("builds 7d points ending at the generated day", () => {
-    const points = buildInquiryTrendPoints(
+    const points = buildTrendPoints(
       [
-        { created_at: "2026-03-08T09:00:00Z" },
-        { created_at: "2026-03-08T10:00:00Z" },
-        { created_at: "2026-03-06T12:00:00Z" },
+        { bucket_date: "2026-03-08", count: 2 },
+        { bucket_date: "2026-03-06", count: 1 },
       ],
       "2026-03-08T12:00:00Z",
       "7d",
@@ -28,8 +27,8 @@ describe("admin dashboard trend utils", () => {
   });
 
   it("builds 30d windows and summarizes totals", () => {
-    const points = buildInquiryTrendPoints(
-      [{ created_at: "2026-02-15T12:00:00Z" }],
+    const points = buildTrendPoints(
+      [{ bucket_date: "2026-02-15", count: 1 }],
       "2026-03-08T12:00:00Z",
       "30d",
       "en",
@@ -45,7 +44,7 @@ describe("admin dashboard trend utils", () => {
   });
 
   it("reports no data when every bucket is empty", () => {
-    const points = buildInquiryTrendPoints([], "2026-03-08T12:00:00Z", "7d", "en");
+    const points = buildTrendPoints([], "2026-03-08T12:00:00Z", "7d", "en");
 
     expect(hasTrendData(points)).toBe(false);
     expect(summarizeTrend(points)).toEqual({
@@ -53,5 +52,16 @@ describe("admin dashboard trend utils", () => {
       peak: 0,
       activeDays: 0,
     });
+  });
+
+  it("uses backend bucket values instead of re-counting duplicate dates", () => {
+    const points = buildTrendPoints(
+      [{ bucket_date: "2026-03-08", count: 5 }],
+      "2026-03-08T12:00:00Z",
+      "7d",
+      "en",
+    );
+
+    expect(points[6]?.value).toBe(5);
   });
 });

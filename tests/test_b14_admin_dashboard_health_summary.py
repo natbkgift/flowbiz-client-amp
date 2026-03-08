@@ -45,6 +45,7 @@ def test_b14_dashboard_summary_contract(client) -> None:
     assert isinstance(body.get("data_freshness"), dict)
     assert isinstance(body.get("raw_metrics"), dict)
     assert isinstance(body.get("widgets"), list)
+    assert isinstance(body.get("trend_series"), dict)
     assert isinstance(body.get("recent_inquiries"), list)
     assert isinstance(body.get("incomplete_widget_count"), int)
     assert isinstance(body.get("warnings"), list)
@@ -88,6 +89,38 @@ def test_b14_dashboard_summary_contract(client) -> None:
     pending_translations = body["raw_metrics"]["pending_translations"]
     assert isinstance(pending_translations.get("policy"), dict)
     assert isinstance(pending_translations.get("by_entity"), dict)
+    assert set(body["trend_series"].keys()) == {"7d", "30d"}
+    assert len(body["trend_series"]["7d"]) == 7
+    assert len(body["trend_series"]["30d"]) == 30
+    for bucket in body["trend_series"]["7d"] + body["trend_series"]["30d"]:
+        assert isinstance(bucket.get("bucket_date"), str)
+        assert isinstance(bucket.get("count"), int)
+
+
+def test_b14_dashboard_trend_series_counts_more_than_visible_recent_rows(client) -> None:
+    headers = _make_admin_headers()
+
+    for index in range(11):
+        response = client.post(
+            "/v1/inquiries",
+            json={
+                "name": f"B14 Trend Lead {index}",
+                "email": f"b14-trend-{index}@example.test",
+                "message": "Dashboard trend contract check",
+                "source_page": "/en/contact",
+                "intent": "general",
+            },
+        )
+        assert response.status_code == 201, response.text
+
+    summary_response = client.get("/admin/dashboard/health-summary", headers=headers)
+    assert summary_response.status_code == 200, summary_response.text
+    body = summary_response.json()
+
+    assert len(body["recent_inquiries"]) == 10
+    trend_total = sum(bucket["count"] for bucket in body["trend_series"]["7d"])
+    assert trend_total >= 11
+    assert trend_total > len(body["recent_inquiries"])
 
 
 def test_b14_dashboard_deploy_widget_uses_telemetry_file(client, tmp_path, monkeypatch) -> None:
