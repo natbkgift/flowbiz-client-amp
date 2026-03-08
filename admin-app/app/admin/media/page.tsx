@@ -205,7 +205,7 @@ async function fetchJson<T>(path: string, token: string, init?: RequestInit): Pr
   if (init?.body && !(init.body instanceof FormData) && !headers.has("content-type")) {
     headers.set("content-type", "application/json");
   }
-  const response = await fetch(path, { ...init, headers, cache: "no-store" });
+  const response = await fetch(`/api${path}`, { ...init, headers, cache: "no-store" });
   if (!response.ok) throw new Error(`request_failed:${response.status}:${await response.text()}`);
   return (await response.json()) as T;
 }
