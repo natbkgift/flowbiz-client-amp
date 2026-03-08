@@ -298,7 +298,7 @@ export default function AdminDashboardPage() {
 
       <section className="card dashboard-controls" aria-label={t.loginTitle}>
         {!isAuthenticated ? (
-          <form className="crm-login-form" onSubmit={(event) => void login(event)}>
+          <form className="crm-login-form" method="post" onSubmit={(event) => void login(event)}>
             <h2>{t.loginTitle}</h2>
             <p className="locale-safe">{t.loginSubtitle}</p>
 
@@ -309,6 +309,7 @@ export default function AdminDashboardPage() {
                 name="email"
                 type="email"
                 autoComplete="username"
+                required
                 value={loginEmail}
                 onChange={(event) => setLoginEmail(event.target.value)}
               />
@@ -321,6 +322,7 @@ export default function AdminDashboardPage() {
                 name="password"
                 type="password"
                 autoComplete="current-password"
+                required
                 value={loginPassword}
                 onChange={(event) => setLoginPassword(event.target.value)}
               />

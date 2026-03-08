@@ -619,7 +619,7 @@ export default function AdminInquiriesPage() {
       <section className="card crm-controls" aria-label={t.filters}>
         <div className="crm-auth-shell">
           {!isAuthenticated ? (
-            <form className="crm-login-form" onSubmit={(event) => void login(event)}>
+            <form className="crm-login-form" method="post" onSubmit={(event) => void login(event)}>
               <h2>{t.loginTitle}</h2>
               <p className="locale-safe">{t.loginSubtitle}</p>
 
@@ -627,8 +627,10 @@ export default function AdminInquiriesPage() {
                 <span>{t.email}</span>
                 <input
                   id="crm-login-email"
+                  name="email"
                   type="email"
                   autoComplete="username"
+                  required
                   value={loginEmail}
                   onChange={(event) => setLoginEmail(event.target.value)}
                 />
@@ -638,8 +640,10 @@ export default function AdminInquiriesPage() {
                 <span>{t.password}</span>
                 <input
                   id="crm-login-password"
+                  name="password"
                   type="password"
                   autoComplete="current-password"
+                  required
                   value={loginPassword}
                   onChange={(event) => setLoginPassword(event.target.value)}
                 />

@@ -158,6 +158,10 @@ describe("B14 admin workspace pages contract", () => {
       expect(page).toMatch(/\[loginEmail,\s*setLoginEmail\]\s*=\s*useState\((["'])\1\);/);
       expect(page).toMatch(/\[loginPassword,\s*setLoginPassword\]\s*=\s*useState\((["'])\1\);/);
       expect(page).not.toMatch(/setLoginEmail\([^)]*\.email[^)]*\)/);
+      expect(page).toContain('name="email"');
+      expect(page).toContain('name="password"');
+      expect(page).toContain('autoComplete="username"');
+      expect(page).toContain('autoComplete="current-password"');
     }
   });
 });

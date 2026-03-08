@@ -373,7 +373,7 @@ export default function AdminMediaPage() {
 
       <section className="card dashboard-controls" aria-label={t.loginTitle}>
         {!isAuthenticated ? (
-          <form className="crm-login-form" onSubmit={(event) => void login(event)}>
+          <form className="crm-login-form" method="post" onSubmit={(event) => void login(event)}>
             <h2>{t.loginTitle}</h2>
             <p className="locale-safe">{t.loginSubtitle}</p>
 
@@ -381,8 +381,10 @@ export default function AdminMediaPage() {
               <span>{t.email}</span>
               <input
                 id="media-login-email"
+                name="email"
                 type="email"
                 autoComplete="username"
+                required
                 value={loginEmail}
                 onChange={(event) => setLoginEmail(event.target.value)}
               />
@@ -392,8 +394,10 @@ export default function AdminMediaPage() {
               <span>{t.password}</span>
               <input
                 id="media-login-password"
+                name="password"
                 type="password"
                 autoComplete="current-password"
+                required
                 value={loginPassword}
                 onChange={(event) => setLoginPassword(event.target.value)}
               />

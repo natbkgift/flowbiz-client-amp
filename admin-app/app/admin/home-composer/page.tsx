@@ -663,7 +663,7 @@ export default function HomeComposerPage() {
 
       <section className="card dashboard-controls" aria-label="Admin sign in">
         {!isAuthenticated ? (
-          <form className="crm-login-form" onSubmit={(event) => void login(event)}>
+          <form className="crm-login-form" method="post" onSubmit={(event) => void login(event)}>
             <h2>Admin sign in</h2>
             <p className="locale-safe">Use the same admin credentials as /api/v1/auth/login.</p>
 
@@ -671,8 +671,10 @@ export default function HomeComposerPage() {
               <span>Admin email</span>
               <input
                 id="home-composer-login-email"
+                name="email"
                 type="email"
                 autoComplete="username"
+                required
                 value={loginEmail}
                 onChange={(event) => setLoginEmail(event.target.value)}
               />
@@ -682,8 +684,10 @@ export default function HomeComposerPage() {
               <span>Password</span>
               <input
                 id="home-composer-login-password"
+                name="password"
                 type="password"
                 autoComplete="current-password"
+                required
                 value={loginPassword}
                 onChange={(event) => setLoginPassword(event.target.value)}
               />
