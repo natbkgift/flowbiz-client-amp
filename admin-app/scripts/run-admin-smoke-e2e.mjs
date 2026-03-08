@@ -252,7 +252,8 @@ async function waitForVisibleText(page, value) {
   await page.getByText(new RegExp(escapeRegExp(value), "i")).first().waitFor({ timeout: 10000 });
 }
 
-async function verifyDashboardUi(page, contractSummary) {
+async function verifyDashboardUi(page, contractSummary, options = {}) {
+  const { smokeMode = "mocked", getCurrentRecentInquiriesRequestCount = () => 0 } = options;
   await page.getByRole("button", { name: /sign out|ออกจากระบบ/i }).waitFor({ timeout: 10000 });
   await page.getByRole("button", { name: /refresh dashboard|รีเฟรชแดชบอร์ด/i }).first().waitFor({ timeout: 10000 });
   await page.getByRole("heading", { name: /Admin Health \/ QA Dashboard/i }).first().waitFor({ timeout: 10000 });
@@ -287,18 +288,15 @@ async function verifyDashboardUi(page, contractSummary) {
   }
 
   if (contractSummary.recentInquiryTotal > contractSummary.recentInquiryCount) {
-    const nextPageResponse = page
-      .waitForResponse((response) => response.url().includes("/api/admin/inquiries?page=2"))
-      .catch(() => null);
-    await page.getByRole("button", { name: /^(Next|ถัดไป)$/i }).click();
-    const pageResponse = await nextPageResponse;
-    if (pageResponse && !pageResponse.ok()) {
-      throw new Error(`admin smoke failed: inquiries page request did not succeed (got ${pageResponse.status()})`);
-    }
+    const requestsBeforePagination = getCurrentRecentInquiriesRequestCount();
+    await page.locator(".dashboard-table-pagination").getByRole("button", { name: /Next|ถัดไป/i }).click();
     await page
       .getByText(new RegExp(`Page\\s+2\\s*\\/\\s*${contractSummary.recentInquiryTotalPages}|หน้า\\s+2\\s*\\/\\s*${contractSummary.recentInquiryTotalPages}`, "i"))
       .first()
       .waitFor({ timeout: 10000 });
+    if (smokeMode === "mocked" && getCurrentRecentInquiriesRequestCount() <= requestsBeforePagination) {
+      throw new Error("admin smoke failed: inquiries pagination did not trigger a page 2 refresh request");
+    }
   }
 
   if (contractSummary.warningCount > 0) {
@@ -392,7 +390,7 @@ async function run() {
 
   try {
     await page.goto(`${BASE_URL}/admin`, { waitUntil: "domcontentloaded", timeout: 30000 });
-    await page.waitForURL("**/admin/dashboard", { timeout: 10000 });
+    await page.waitForURL("**/admin/dashboard*", { timeout: 10000 });
 
     await page.fill("#dashboard-login-email", credentials.email);
     if (SMOKE_MODE === "mocked") {
@@ -437,7 +435,10 @@ async function run() {
       healthSummaryContract = inspectDashboardSummary(await summaryResponse.json());
     }
 
-    await verifyDashboardUi(page, healthSummaryContract);
+    await verifyDashboardUi(page, healthSummaryContract, {
+      smokeMode: SMOKE_MODE,
+      getCurrentRecentInquiriesRequestCount: () => recentInquiriesRequests,
+    });
     await page.waitForTimeout(300);
 
     await page.screenshot({ path: path.join(ARTIFACT_DIR, "admin-dashboard-after-login.png"), fullPage: true });

@@ -392,9 +392,7 @@ export function AdminShell({ children }: { children: ReactNode }) {
         <div className="admin-shell-sidebar-scroll">
           {hasSearchResults
             ? filteredNavGroups.map((entry) =>
-                renderNavGroup(getAdminNavText(entry.group.label, locale), entry.items, pathname, locale, {
-                  emptyState: emptySearchState,
-                }),
+                renderNavGroup(getAdminNavText(entry.group.label, locale), entry.items, pathname, locale),
               )
             : emptySearchState}
         </div>

@@ -562,54 +562,51 @@ export default function AdminDashboardPage() {
     const importStatus = raw?.last_import_status?.status || null;
     const mirrorStatus = raw?.last_mirror_status?.status || null;
     const deployStatus = raw?.last_deploy_health_status?.deploy_status || raw?.last_deploy_health_status?.health_status || null;
+    const tasks: BackgroundTask[] = [];
 
-    return [
-      ...(raw?.last_import_status
-        ? [
-            {
-              key: "import",
-              title: t.taskImport,
-              detail: `${t.latestTask}: ${prettyDate(raw.last_import_status.checked_at || null, locale)}`,
-              meta: `${t.status}: ${compactValue(importStatus, t.taskUnknown)} · ${t.rows}: ${String(raw.last_import_status.rows_total || 0)}`,
-              icon: "imports" as const,
-              tone: taskTone(importStatus),
-              href: "/admin/imports",
-              actionLabel: t.openImports,
-            },
-          ]
-        : []),
-      ...(raw?.last_mirror_status
-        ? [
-            {
-              key: "mirror",
-              title: t.taskMirror,
-              detail: `${t.latestTask}: ${prettyDate(raw.last_mirror_status.checked_at || null, locale)}`,
-              meta: `${t.status}: ${compactValue(mirrorStatus, t.taskUnknown)} · ${t.warnings}: ${String(raw.last_mirror_status.failures_count || 0)}`,
-              icon: "media" as const,
-              tone: taskTone(mirrorStatus),
-              href: "/admin/media",
-              actionLabel: t.openMedia,
-            },
-          ]
-        : []),
-      ...(raw?.last_deploy_health_status
-        ? [
-            {
-              key: "deploy",
-              title: t.taskDeploy,
-              detail: `${t.latestTask}: ${prettyDate(raw.last_deploy_health_status.deploy_checked_at || null, locale)}`,
-              meta: `${t.taskSource}: ${compactValue(raw.last_deploy_health_status.source, t.unknownValue)} · ${t.taskBuild}: ${compactValue(
-                raw.last_deploy_health_status.build_sha?.slice(0, 7),
-                t.unknownValue,
-              )}`,
-              icon: "refresh" as const,
-              tone: taskTone(deployStatus),
-              href: "/admin/seo",
-              actionLabel: t.openSeo,
-            },
-          ]
-        : []),
-    ];
+    if (raw?.last_import_status) {
+      tasks.push({
+        key: "import",
+        title: t.taskImport,
+        detail: `${t.latestTask}: ${prettyDate(raw.last_import_status.checked_at || null, locale)}`,
+        meta: `${t.status}: ${compactValue(importStatus, t.taskUnknown)} · ${t.rows}: ${String(raw.last_import_status.rows_total || 0)}`,
+        icon: "imports",
+        tone: taskTone(importStatus),
+        href: "/admin/imports",
+        actionLabel: t.openImports,
+      });
+    }
+
+    if (raw?.last_mirror_status) {
+      tasks.push({
+        key: "mirror",
+        title: t.taskMirror,
+        detail: `${t.latestTask}: ${prettyDate(raw.last_mirror_status.checked_at || null, locale)}`,
+        meta: `${t.status}: ${compactValue(mirrorStatus, t.taskUnknown)} · ${t.warnings}: ${String(raw.last_mirror_status.failures_count || 0)}`,
+        icon: "media",
+        tone: taskTone(mirrorStatus),
+        href: "/admin/media",
+        actionLabel: t.openMedia,
+      });
+    }
+
+    if (raw?.last_deploy_health_status) {
+      tasks.push({
+        key: "deploy",
+        title: t.taskDeploy,
+        detail: `${t.latestTask}: ${prettyDate(raw.last_deploy_health_status.deploy_checked_at || null, locale)}`,
+        meta: `${t.taskSource}: ${compactValue(raw.last_deploy_health_status.source, t.unknownValue)} · ${t.taskBuild}: ${compactValue(
+          raw.last_deploy_health_status.build_sha?.slice(0, 7),
+          t.unknownValue,
+        )}`,
+        icon: "refresh",
+        tone: taskTone(deployStatus),
+        href: "/admin/seo",
+        actionLabel: t.openSeo,
+      });
+    }
+
+    return tasks;
   }, [locale, summary, t]);
 
   function renderRefreshButton(label?: string) {

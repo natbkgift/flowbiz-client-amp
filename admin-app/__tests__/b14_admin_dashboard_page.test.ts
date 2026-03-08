@@ -99,9 +99,11 @@ describe("B14 admin dashboard page contract", () => {
   it("only renders background tasks when the backend provides task payloads", () => {
     const page = read("app/admin/dashboard/page.tsx");
 
-    expect(page).toContain("...(raw?.last_import_status");
-    expect(page).toContain("...(raw?.last_mirror_status");
-    expect(page).toContain("...(raw?.last_deploy_health_status");
+    expect(page).toContain("const tasks: BackgroundTask[] = [];");
+    expect(page).toContain("if (raw?.last_import_status)");
+    expect(page).toContain("if (raw?.last_mirror_status)");
+    expect(page).toContain("if (raw?.last_deploy_health_status)");
+    expect(page).toContain("return tasks;");
     expect(page).toContain("if (backgroundTasks.length === 0)");
     expect(page).toContain("backgroundTasksEmptyTitle");
   });
