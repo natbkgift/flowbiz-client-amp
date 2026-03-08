@@ -8,6 +8,14 @@ import {
   transitionDashboardState,
   type DashboardState,
 } from "@/app/admin/dashboard/state-utils";
+import {
+  DashboardInsightSkeletonList,
+  DashboardMetricSkeletonRow,
+  DashboardSection,
+  DashboardSectionState,
+  DashboardTableSkeleton,
+  DashboardWidgetSkeletonGrid,
+} from "@/components/admin/dashboard/DashboardSectionPrimitives";
 
 type Locale = AdminLocale;
 type WidgetStatus = "ok" | "warn" | "error" | "unknown";
@@ -69,6 +77,10 @@ const copy = {
     title: "Admin Health / QA Dashboard",
     subtitle:
       "Single-page operational view of content/media/leads/SEO/tracking completeness with actionable links.",
+    overviewReadyTitle: "Ready to load overview",
+    overviewReadyBody: "Refresh the dashboard to load the latest QA snapshot.",
+    overviewEmptyTitle: "Overview unavailable",
+    overviewEmptyBody: "Dashboard summary responded without any visible content yet.",
     loginTitle: "Admin sign in",
     loginSubtitle: "Use the same credentials as /api/v1/auth/login.",
     sessionActive: "Signed in session",
@@ -93,21 +105,44 @@ const copy = {
     emptyStateHint: "Check data pipelines and retry.",
     emptyWidgets: "No widgets found. Check backend summary contract.",
     widgets: "Health widgets",
+    widgetsHint: "Priority QA checks across content, media, translations, and deploy health.",
+    widgetsEmptyTitle: "No widgets returned",
+    widgetsEmptyBody: "Backend summary returned no health widgets for this snapshot.",
+    insightsTitle: "Pipeline insights",
+    insightsHint: "Freshness timestamps from upstream summary sources.",
+    insightsEmptyTitle: "No freshness insights",
+    insightsEmptyBody: "Freshness signals will appear here when upstream jobs report timestamps.",
     generatedAt: "Generated at",
     incomplete: "Incomplete widgets",
+    sectionReadyTitle: "Ready to load",
+    sectionReadyBody: "Refresh the dashboard to populate this section.",
+    sectionErrorTitle: "Section unavailable",
     recentInquiries: "Recent leads/inquiries",
+    recentInquiriesHint: "Latest captured leads and inquiries from public entry points.",
+    recentInquiriesEmptyTitle: "No recent inquiries",
+    recentInquiriesEmptyBody: "New lead rows will appear here after the next captured submission.",
     emptyInquiries: "No recent inquiries found.",
     sourcePage: "Source page",
     status: "Status",
     intent: "Intent",
     contact: "Contact",
+    name: "Name",
     createdAt: "Created at",
     warnings: "Warnings",
+    warningsHint: "Operator watchlist emitted by the summary endpoint.",
+    warningsEmptyTitle: "No active warnings",
+    warningsEmptyBody: "Current snapshot has no warning messages.",
+    checkedAt: "Checked at",
+    age: "Age",
     unknownValue: "Unknown",
   },
   th: {
     title: "Admin Health / QA Dashboard",
     subtitle: "หน้าเดียวสำหรับดูความสมบูรณ์ของระบบและลิงก์แก้ปัญหาแบบ actionable",
+    overviewReadyTitle: "พร้อมโหลดภาพรวม",
+    overviewReadyBody: "กดรีเฟรชเพื่อโหลด snapshot ล่าสุดของแดชบอร์ด",
+    overviewEmptyTitle: "ยังไม่มีภาพรวม",
+    overviewEmptyBody: "summary ตอบกลับมา แต่ยังไม่มีข้อมูลที่แสดงผลได้",
     loginTitle: "เข้าสู่ระบบแอดมิน",
     loginSubtitle: "ใช้บัญชีเดียวกับ /api/v1/auth/login",
     sessionActive: "เซสชันที่เข้าสู่ระบบอยู่",
@@ -132,16 +167,35 @@ const copy = {
     emptyStateHint: "ตรวจ pipeline ข้อมูลแล้วลองใหม่อีกครั้ง",
     emptyWidgets: "ยังไม่พบวิดเจ็ต ตรวจสอบ backend summary contract",
     widgets: "วิดเจ็ตสุขภาพระบบ",
+    widgetsHint: "QA checks หลักของ content, media, translations และ deploy",
+    widgetsEmptyTitle: "ยังไม่มีวิดเจ็ต",
+    widgetsEmptyBody: "backend summary ยังไม่ส่ง health widget มาในรอบนี้",
+    insightsTitle: "ข้อมูล pipeline",
+    insightsHint: "เวลาอัปเดตล่าสุดจาก upstream summary sources",
+    insightsEmptyTitle: "ยังไม่มี freshness insight",
+    insightsEmptyBody: "เมื่อ upstream jobs ส่ง timestamp มา ระบบจะแสดงในส่วนนี้",
     generatedAt: "เวลาที่สร้างรายงาน",
     incomplete: "วิดเจ็ตที่ยังไม่สมบูรณ์",
+    sectionReadyTitle: "พร้อมโหลดข้อมูล",
+    sectionReadyBody: "กดรีเฟรชเพื่อเติมข้อมูลในส่วนนี้",
+    sectionErrorTitle: "ไม่สามารถแสดงส่วนนี้ได้",
     recentInquiries: "ลีด/อินไควรีล่าสุด",
+    recentInquiriesHint: "ลีดและอินไควรีล่าสุดจากหน้า public",
+    recentInquiriesEmptyTitle: "ยังไม่มีอินไควรีล่าสุด",
+    recentInquiriesEmptyBody: "เมื่อมี submission ใหม่ ระบบจะแสดงแถวข้อมูลที่นี่",
     emptyInquiries: "ยังไม่มีอินไควรีล่าสุด",
     sourcePage: "หน้า source",
     status: "สถานะ",
     intent: "Intent",
     contact: "ช่องทางติดต่อ",
+    name: "ชื่อ",
     createdAt: "เวลาสร้าง",
     warnings: "คำเตือน",
+    warningsHint: "watchlist จาก summary endpoint",
+    warningsEmptyTitle: "ไม่มีคำเตือนที่เปิดอยู่",
+    warningsEmptyBody: "snapshot ปัจจุบันไม่มีข้อความเตือน",
+    checkedAt: "ตรวจล่าสุด",
+    age: "อายุข้อมูล",
     unknownValue: "ไม่ทราบ",
   },
 };
@@ -176,6 +230,29 @@ function widgetValueToText(value: DashboardWidget["value"], fallback: string): s
 
 function statusClass(status: WidgetStatus): string {
   return `dashboard-status dashboard-status-${status}`;
+}
+
+function humanizeMetricKey(key: string): string {
+  return key
+    .split("_")
+    .filter(Boolean)
+    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+    .join(" ");
+}
+
+function formatAge(value: number | null, locale: Locale, fallback: string): string {
+  if (typeof value !== "number" || !Number.isFinite(value) || value < 0) return fallback;
+  if (value < 60) return locale === "th" ? `${Math.round(value)} วินาทีที่ผ่านมา` : `${Math.round(value)}s ago`;
+  if (value < 3600) {
+    const minutes = Math.max(1, Math.round(value / 60));
+    return locale === "th" ? `${minutes} นาทีที่ผ่านมา` : `${minutes}m ago`;
+  }
+  if (value < 86400) {
+    const hours = Math.max(1, Math.round(value / 3600));
+    return locale === "th" ? `${hours} ชั่วโมงที่ผ่านมา` : `${hours}h ago`;
+  }
+  const days = Math.max(1, Math.round(value / 86400));
+  return locale === "th" ? `${days} วันที่ผ่านมา` : `${days}d ago`;
 }
 
 async function fetchSummary(token: string): Promise<DashboardSummaryResponse> {
@@ -220,6 +297,312 @@ export default function AdminDashboardPage() {
     const byKey = new Map(rows.map((row) => [row.key, row]));
     return WIDGET_KEYS.map((key) => byKey.get(key)).filter(Boolean) as DashboardWidget[];
   }, [summary]);
+  const freshnessEntries = useMemo(() => {
+    const source = summary?.data_freshness || {};
+    return Object.entries(source).sort(([left], [right]) => left.localeCompare(right)) as Array<
+      [string, FreshnessItem]
+    >;
+  }, [summary]);
+  const overviewMetrics = useMemo(
+    () => [
+      {
+        key: "generated_at",
+        label: t.generatedAt,
+        value: prettyDate(summary?.generated_at || null, locale),
+      },
+      {
+        key: "incomplete_widget_count",
+        label: t.incomplete,
+        value:
+          typeof summary?.incomplete_widget_count === "number"
+            ? String(summary.incomplete_widget_count)
+            : t.unknownValue,
+      },
+      {
+        key: "recent_inquiries",
+        label: t.recentInquiries,
+        value: String(summary?.recent_inquiries?.length || 0),
+      },
+      {
+        key: "warnings",
+        label: t.warnings,
+        value: String(summary?.warnings?.length || 0),
+      },
+    ],
+    [locale, summary, t],
+  );
+
+  function renderRefreshButton(label?: string) {
+    return (
+      <button
+        className="btn btn-secondary"
+        type="button"
+        onClick={() => void loadDashboard()}
+        disabled={loading}
+      >
+        {loading ? t.loading : label || t.refresh}
+      </button>
+    );
+  }
+
+  function renderOverviewPanel() {
+    if (dashboardState === "loading") {
+      return <DashboardMetricSkeletonRow cards={4} />;
+    }
+
+    if (dashboardState === "error") {
+      return (
+        <DashboardSectionState
+          tone="error"
+          title={t.sectionErrorTitle}
+          body={pageError || `${t.loadError} ${t.loadErrorHint}`}
+          action={renderRefreshButton(t.retry)}
+        />
+      );
+    }
+
+    if (dashboardState === "idle") {
+      return (
+        <DashboardSectionState
+          tone="info"
+          title={t.overviewReadyTitle}
+          body={t.overviewReadyBody}
+          action={renderRefreshButton()}
+        />
+      );
+    }
+
+    if (dashboardState === "empty") {
+      return (
+        <DashboardSectionState
+          tone="empty"
+          title={t.overviewEmptyTitle}
+          body={t.overviewEmptyBody}
+          action={renderRefreshButton(t.retry)}
+        />
+      );
+    }
+
+    return (
+      <div className="dashboard-summary-grid" aria-live="polite">
+        {overviewMetrics.map((item) => (
+          <article key={item.key} className="dashboard-summary-card">
+            <span>{item.label}</span>
+            <strong>{item.value}</strong>
+          </article>
+        ))}
+      </div>
+    );
+  }
+
+  function renderWidgetsPanel() {
+    if (dashboardState === "loading") {
+      return <DashboardWidgetSkeletonGrid cards={6} />;
+    }
+
+    if (dashboardState === "error") {
+      return (
+        <DashboardSectionState
+          tone="error"
+          title={t.sectionErrorTitle}
+          body={pageError || `${t.loadError} ${t.loadErrorHint}`}
+          action={renderRefreshButton(t.retry)}
+        />
+      );
+    }
+
+    if (dashboardState === "idle") {
+      return <DashboardSectionState tone="info" title={t.sectionReadyTitle} body={t.sectionReadyBody} action={renderRefreshButton()} />;
+    }
+
+    if (widgets.length === 0) {
+      return (
+        <DashboardSectionState
+          tone="empty"
+          title={t.widgetsEmptyTitle}
+          body={t.widgetsEmptyBody}
+          action={renderRefreshButton(t.retry)}
+        />
+      );
+    }
+
+    return (
+      <div className="dashboard-grid">
+        {widgets.map((widget) => (
+          <article key={widget.key} className="card dashboard-widget">
+            <header className="dashboard-widget-head">
+              <h3>{widget.title}</h3>
+              <span className={statusClass(widget.status)}>{widget.status}</span>
+            </header>
+            <p className="dashboard-widget-value">
+              {widgetValueToText(widget.value, t.unknownValue)}
+            </p>
+            <p className="locale-safe">{widget.summary}</p>
+            <div className="dashboard-widget-actions">
+              {(widget.actions || []).map((action, index) => (
+                <a
+                  key={`${widget.key}-${action.url}-${index}`}
+                  className="btn btn-secondary"
+                  href={action.url}
+                >
+                  {action.label}
+                </a>
+              ))}
+            </div>
+          </article>
+        ))}
+      </div>
+    );
+  }
+
+  function renderInsightsPanel() {
+    if (dashboardState === "loading") {
+      return <DashboardInsightSkeletonList items={4} />;
+    }
+
+    if (dashboardState === "error") {
+      return (
+        <DashboardSectionState
+          tone="error"
+          title={t.sectionErrorTitle}
+          body={pageError || `${t.loadError} ${t.loadErrorHint}`}
+          action={renderRefreshButton(t.retry)}
+        />
+      );
+    }
+
+    if (dashboardState === "idle") {
+      return <DashboardSectionState tone="info" title={t.sectionReadyTitle} body={t.sectionReadyBody} action={renderRefreshButton()} />;
+    }
+
+    if (freshnessEntries.length === 0) {
+      return (
+        <DashboardSectionState
+          tone="empty"
+          title={t.insightsEmptyTitle}
+          body={t.insightsEmptyBody}
+          action={renderRefreshButton(t.retry)}
+        />
+      );
+    }
+
+    return (
+      <ul className="dashboard-insight-list">
+        {freshnessEntries.map(([key, item]) => (
+          <li key={key} className="dashboard-insight-item">
+            <div className="dashboard-insight-copy">
+              <strong>{humanizeMetricKey(key)}</strong>
+              <p>
+                {t.checkedAt}: {prettyDate(item.checked_at, locale)}
+              </p>
+            </div>
+            <span className="dashboard-insight-age">{formatAge(item.age_seconds, locale, t.unknownValue)}</span>
+          </li>
+        ))}
+      </ul>
+    );
+  }
+
+  function renderWarningsPanel() {
+    if (dashboardState === "loading") {
+      return <DashboardInsightSkeletonList items={3} />;
+    }
+
+    if (dashboardState === "error") {
+      return (
+        <DashboardSectionState
+          tone="error"
+          title={t.sectionErrorTitle}
+          body={pageError || `${t.loadError} ${t.loadErrorHint}`}
+          action={renderRefreshButton(t.retry)}
+        />
+      );
+    }
+
+    if (dashboardState === "idle") {
+      return <DashboardSectionState tone="info" title={t.sectionReadyTitle} body={t.sectionReadyBody} action={renderRefreshButton()} />;
+    }
+
+    if ((summary?.warnings || []).length === 0) {
+      return (
+        <DashboardSectionState
+          tone="empty"
+          title={t.warningsEmptyTitle}
+          body={t.warningsEmptyBody}
+          action={renderRefreshButton(t.retry)}
+        />
+      );
+    }
+
+    return (
+      <ul className="dashboard-warning-list">
+        {(summary?.warnings || []).map((item) => (
+          <li key={item}>{item}</li>
+        ))}
+      </ul>
+    );
+  }
+
+  function renderTablePanel() {
+    if (dashboardState === "loading") {
+      return <DashboardTableSkeleton rows={5} />;
+    }
+
+    if (dashboardState === "error") {
+      return (
+        <DashboardSectionState
+          tone="error"
+          title={t.sectionErrorTitle}
+          body={pageError || `${t.loadError} ${t.loadErrorHint}`}
+          action={renderRefreshButton(t.retry)}
+        />
+      );
+    }
+
+    if (dashboardState === "idle") {
+      return <DashboardSectionState tone="info" title={t.sectionReadyTitle} body={t.sectionReadyBody} action={renderRefreshButton()} />;
+    }
+
+    if ((summary?.recent_inquiries || []).length === 0) {
+      return (
+        <DashboardSectionState
+          tone="empty"
+          title={t.recentInquiriesEmptyTitle}
+          body={t.recentInquiriesEmptyBody}
+          action={renderRefreshButton(t.retry)}
+        />
+      );
+    }
+
+    return (
+      <div className="dashboard-table-wrap">
+        <table className="dashboard-table">
+          <thead>
+            <tr>
+              <th>{t.createdAt}</th>
+              <th>{t.name}</th>
+              <th>{t.contact}</th>
+              <th>{t.status}</th>
+              <th>{t.intent}</th>
+              <th>{t.sourcePage}</th>
+            </tr>
+          </thead>
+          <tbody>
+            {(summary?.recent_inquiries || []).map((row) => (
+              <tr key={row.id}>
+                <td>{prettyDate(row.created_at, locale)}</td>
+                <td>{row.name}</td>
+                <td>{row.email || row.phone || "-"}</td>
+                <td>{row.status || "-"}</td>
+                <td>{row.intent || "-"}</td>
+                <td>{row.source_page || "-"}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    );
+  }
 
   async function loadDashboard(tokenOverride?: string) {
     const activeToken = (tokenOverride ?? authToken).trim();
@@ -291,9 +674,10 @@ export default function AdminDashboardPage() {
 
   return (
     <main id="main-content" className="container content-stack">
-      <section className="card">
+      <section className="card dashboard-hero">
         <h1>{t.title}</h1>
         <p className="locale-safe">{t.subtitle}</p>
+        {isAuthenticated ? renderOverviewPanel() : <DashboardSectionState tone="info" title={t.loginTitle} body={t.authRequired} />}
       </section>
 
       <section className="card dashboard-controls" aria-label={t.loginTitle}>
@@ -343,9 +727,7 @@ export default function AdminDashboardPage() {
               {authEmail ? `${t.sessionAs}: ${authEmail}` : t.sessionUnknown}
             </p>
             <div className="card-actions">
-              <button className="btn btn-secondary" type="button" onClick={() => void loadDashboard()}>
-                {loading ? t.loading : t.refresh}
-              </button>
+              {renderRefreshButton()}
               <button className="btn btn-secondary" type="button" onClick={logout}>
                 {t.signOut}
               </button>
@@ -355,118 +737,44 @@ export default function AdminDashboardPage() {
         {!isAuthenticated ? <div className="state-empty">{t.authRequired}</div> : null}
       </section>
 
-      {isAuthenticated && dashboardState === "idle" ? <div className="state-empty">{t.idleState}</div> : null}
-      {isAuthenticated && dashboardState === "error" ? (
-        <div className="state-error" role="alert">
-          <p>{pageError || t.loadError}</p>
-          <div className="card-actions">
-            <button className="btn btn-secondary" type="button" onClick={() => void loadDashboard()}>
-              {t.retry}
-            </button>
+      {isAuthenticated ? (
+        <div className="dashboard-shell-grid">
+          <div className="dashboard-shell-main">
+            <DashboardSection
+              title={t.widgets}
+              subtitle={t.widgetsHint}
+              className="dashboard-section--widgets"
+            >
+              {renderWidgetsPanel()}
+            </DashboardSection>
+
+            <DashboardSection
+              title={t.recentInquiries}
+              subtitle={t.recentInquiriesHint}
+              className="dashboard-section--table"
+            >
+              {renderTablePanel()}
+            </DashboardSection>
+          </div>
+
+          <div className="dashboard-shell-side">
+            <DashboardSection
+              title={t.insightsTitle}
+              subtitle={t.insightsHint}
+              className="dashboard-section--insights"
+            >
+              {renderInsightsPanel()}
+            </DashboardSection>
+
+            <DashboardSection
+              title={t.warnings}
+              subtitle={t.warningsHint}
+              className="dashboard-section--warnings"
+            >
+              {renderWarningsPanel()}
+            </DashboardSection>
           </div>
         </div>
-      ) : null}
-      {isAuthenticated && dashboardState === "loading" ? <div className="state-loading">{t.loading}</div> : null}
-      {isAuthenticated && dashboardState === "empty" ? (
-        <section className="card">
-          <div className="state-empty">{t.emptyState}</div>
-          <p className="locale-safe">{t.emptyStateHint}</p>
-          <div className="card-actions">
-            <button className="btn btn-secondary" type="button" onClick={() => void loadDashboard()}>
-              {t.retry}
-            </button>
-          </div>
-        </section>
-      ) : null}
-
-      {isAuthenticated && dashboardState === "success" && summary ? (
-        <>
-          <section className="card dashboard-overview" aria-live="polite">
-            <p>
-              <strong>{t.generatedAt}:</strong> {prettyDate(summary.generated_at, locale)}
-            </p>
-            <p>
-              <strong>{t.incomplete}:</strong> {summary.incomplete_widget_count}
-            </p>
-          </section>
-
-          <section className="dashboard-grid" aria-label={t.widgets}>
-            {widgets.length === 0 ? (
-              <div className="card">
-                <div className="state-empty">{t.emptyWidgets}</div>
-              </div>
-            ) : (
-              widgets.map((widget) => (
-                <article key={widget.key} className="card dashboard-widget">
-                  <header className="dashboard-widget-head">
-                    <h2>{widget.title}</h2>
-                    <span className={statusClass(widget.status)}>{widget.status}</span>
-                  </header>
-                  <p className="dashboard-widget-value">
-                    {widgetValueToText(widget.value, t.unknownValue)}
-                  </p>
-                  <p className="locale-safe">{widget.summary}</p>
-                  <div className="dashboard-widget-actions">
-                    {(widget.actions || []).map((action, index) => (
-                      <a
-                        key={`${widget.key}-${action.url}-${index}`}
-                        className="btn btn-secondary"
-                        href={action.url}
-                      >
-                        {action.label}
-                      </a>
-                    ))}
-                  </div>
-                </article>
-              ))
-            )}
-          </section>
-
-          <section className="card" aria-label={t.recentInquiries}>
-            <h2>{t.recentInquiries}</h2>
-            {(summary.recent_inquiries || []).length === 0 ? (
-              <div className="state-empty">{t.emptyInquiries}</div>
-            ) : (
-              <div className="dashboard-table-wrap">
-                <table className="dashboard-table">
-                  <thead>
-                    <tr>
-                      <th>{t.createdAt}</th>
-                      <th>Name</th>
-                      <th>{t.contact}</th>
-                      <th>{t.status}</th>
-                      <th>{t.intent}</th>
-                      <th>{t.sourcePage}</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {summary.recent_inquiries.map((row) => (
-                      <tr key={row.id}>
-                        <td>{prettyDate(row.created_at, locale)}</td>
-                        <td>{row.name}</td>
-                        <td>{row.email || row.phone || "-"}</td>
-                        <td>{row.status || "-"}</td>
-                        <td>{row.intent || "-"}</td>
-                        <td>{row.source_page || "-"}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            )}
-          </section>
-
-          {(summary.warnings || []).length > 0 ? (
-            <section className="card" aria-label={t.warnings}>
-              <h2>{t.warnings}</h2>
-              <ul className="dashboard-warning-list">
-                {summary.warnings.map((item) => (
-                  <li key={item}>{item}</li>
-                ))}
-              </ul>
-            </section>
-          ) : null}
-        </>
       ) : null}
     </main>
   );

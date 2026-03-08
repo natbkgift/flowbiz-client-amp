@@ -34,8 +34,13 @@ describe("admin dashboard surface styles", () => {
   it("styles dashboard-specific widgets, table states, and warning list", () => {
     const css = read("app/globals.css");
 
+    expect(css).toContain(".dashboard-shell-grid {");
+    expect(css).toContain(".dashboard-section-state--error {");
+    expect(css).toContain(".dashboard-summary-grid {");
+    expect(css).toContain(".dashboard-insight-item {");
     expect(css).toContain(".dashboard-widget::before");
     expect(css).toContain(".dashboard-table tbody tr:hover td");
+    expect(css).toContain(".dashboard-table-skeleton {");
     expect(css).toContain(".dashboard-warning-list li");
     expect(css).toContain(".dashboard-table-wrap {");
     expect(css).toContain(".dashboard-status-unknown {");
