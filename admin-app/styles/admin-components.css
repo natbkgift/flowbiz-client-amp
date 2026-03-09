@@ -1072,9 +1072,13 @@
   }
 
   .dashboard-summary-grid {
-    grid-template-columns: minmax(148px, 0.9fr) minmax(148px, 0.9fr) minmax(0, 1.55fr) minmax(138px, 0.85fr);
+    grid-template-columns: repeat(4, minmax(0, 1fr));
     gap: var(--admin-space-3);
     align-items: stretch;
+  }
+
+  .dashboard-summary-grid > * {
+    min-width: 0;
   }
 
   .dashboard-summary-card--primary {
@@ -1125,7 +1129,7 @@
   }
 
   .dashboard-zone--secondary {
-    grid-template-columns: minmax(280px, 0.9fr) minmax(380px, 1.1fr);
+    grid-template-columns: 1fr;
     background:
       radial-gradient(circle at top left, rgba(11, 165, 236, 0.06), transparent 30%),
       linear-gradient(180deg, rgba(255, 255, 255, 0.66), rgba(246, 249, 255, 0.46));

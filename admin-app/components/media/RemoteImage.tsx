@@ -1,4 +1,8 @@
-import Image from 'next/image';
+import Image, { type ImageLoaderProps } from 'next/image';
+
+function passthroughLoader({ src }: ImageLoaderProps): string {
+  return src;
+}
 
 function allowedHosts(): Set<string> {
   const raw = process.env.NEXT_PUBLIC_IMAGE_HOSTS ?? '';
@@ -34,20 +38,22 @@ export function RemoteImage({
   const hosts = allowedHosts();
   const host = isRemote ? hostnameOf(src) : null;
   const canOptimize = !isRemote || (host ? hosts.has(host) : false);
-
-  if (canOptimize) {
-    return <Image src={src} alt={alt} className={className} width={width} height={height} />;
-  }
+  const passthroughProps = canOptimize
+    ? {}
+    : {
+        loader: passthroughLoader,
+        unoptimized: true,
+      };
 
   return (
-    <img
+    <Image
       src={src}
       alt={alt}
       className={className}
       width={width}
       height={height}
       loading="lazy"
-      decoding="async"
+      {...passthroughProps}
     />
   );
 }

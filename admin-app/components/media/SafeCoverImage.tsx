@@ -1,5 +1,6 @@
 'use client';
 
+import Image, { type ImageLoaderProps } from 'next/image';
 import { useEffect, useMemo, useState } from 'react';
 
 const DEFAULT_FALLBACK_SRC = '/media/project-covers/the-riviera-jomtien/cover_31dde7af340e.jpg';
@@ -12,10 +13,15 @@ function normalizeSrc(raw: string | null | undefined): string | null {
   return s ? s : null;
 }
 
+function passthroughLoader({ src }: ImageLoaderProps): string {
+  return src;
+}
+
 /**
  * Production-safe cover image renderer:
  * - Always shows a luxury placeholder when src is missing or fails to load.
- * - Uses plain <img> to avoid Next Image remote host/protocol config breakage.
+ * - Uses unoptimized next/image with a passthrough loader so remote host config
+ *   does not block runtime fallback handling.
  */
 export function SafeCoverImage({
   src,
@@ -54,13 +60,15 @@ export function SafeCoverImage({
   }, [initial, primaryFallback]);
 
   return (
-    <img
+    <Image
       src={currentSrc}
       alt={alt}
       className={className}
-      sizes={sizes}
+      fill
+      sizes={sizes ?? '100vw'}
       loading={loading}
-      decoding="async"
+      loader={passthroughLoader}
+      unoptimized
       onError={() => {
         if (initial && currentSrc === initial) {
           setFallbackIndex(0);
