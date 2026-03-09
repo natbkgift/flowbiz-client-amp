@@ -1,0 +1,265 @@
+.admin-root {
+  min-height: 100vh;
+  background: var(--admin-bg-canvas);
+  color: var(--admin-text-base);
+  font-family: var(--admin-font-family);
+}
+
+  .admin-root,
+  .admin-root * {
+    box-sizing: border-box;
+  }
+
+  .admin-root h1,
+  .admin-root h2,
+  .admin-root h3,
+  .admin-root h4 {
+    margin: 0;
+    color: var(--admin-text-strong);
+    letter-spacing: -0.02em;
+  }
+
+  .admin-root h1 {
+    font-size: var(--admin-font-size-2xl);
+    line-height: var(--admin-line-height-tight);
+    font-weight: var(--admin-font-weight-bold);
+  }
+
+  .admin-root h2 {
+    font-size: var(--admin-font-size-xl);
+    line-height: var(--admin-line-height-tight);
+    font-weight: var(--admin-font-weight-bold);
+  }
+
+  .admin-root h3 {
+    font-size: var(--admin-font-size-lg);
+    line-height: var(--admin-line-height-normal);
+    font-weight: var(--admin-font-weight-semibold);
+  }
+
+  .admin-root p,
+  .admin-root li,
+  .admin-root label,
+  .admin-root input,
+  .admin-root select,
+  .admin-root textarea,
+  .admin-root button,
+  .admin-root th,
+  .admin-root td {
+    font-size: var(--admin-font-size-md);
+    line-height: var(--admin-line-height-relaxed);
+  }
+
+  .admin-root a {
+    color: var(--admin-color-primary-600);
+  }
+
+  .admin-root a:hover {
+    color: var(--admin-color-primary-700);
+  }
+
+  .admin-root ::selection {
+    background: var(--admin-color-primary-100);
+  }
+
+  .admin-root :focus-visible {
+    outline: none;
+    box-shadow: var(--admin-shadow-focus);
+  }
+
+  .admin-root .content-stack {
+    display: grid;
+    gap: var(--admin-space-8);
+  }
+
+  .admin-root .card,
+  .admin-card {
+    border: 1px solid var(--admin-border-subtle);
+    border-radius: var(--admin-radius-lg);
+    background: var(--admin-bg-card);
+    box-shadow: var(--admin-shadow-sm);
+    padding: var(--admin-space-6);
+  }
+
+  .admin-root .field,
+  .admin-field {
+    display: grid;
+    gap: var(--admin-space-2);
+    min-width: 0;
+  }
+
+  .admin-root .field > span:first-child,
+  .admin-field > span:first-child,
+  .admin-label {
+    color: var(--admin-text-muted);
+    font-size: var(--admin-font-size-sm);
+    font-weight: var(--admin-font-weight-medium);
+  }
+
+  .admin-root input:not([type="checkbox"]):not([type="radio"]),
+  .admin-root select,
+  .admin-root textarea {
+    width: 100%;
+    border: 1px solid var(--admin-border-default);
+    border-radius: var(--admin-radius-sm);
+    background: var(--admin-color-neutral-0);
+    color: var(--admin-text-base);
+    transition:
+      border-color var(--admin-duration-normal) var(--admin-ease-standard),
+      box-shadow var(--admin-duration-normal) var(--admin-ease-standard),
+      background-color var(--admin-duration-normal) var(--admin-ease-standard);
+  }
+
+  .admin-root input:not([type="checkbox"]):not([type="radio"]),
+  .admin-root select {
+    min-height: 42px;
+    padding: 0 var(--admin-space-4);
+  }
+
+  .admin-root textarea {
+    min-height: 120px;
+    padding: var(--admin-space-3) var(--admin-space-4);
+    resize: vertical;
+  }
+
+  .admin-root input::placeholder,
+  .admin-root textarea::placeholder {
+    color: var(--admin-text-soft);
+  }
+
+  .admin-root input:hover,
+  .admin-root select:hover,
+  .admin-root textarea:hover {
+    border-color: var(--admin-border-strong);
+  }
+
+  .admin-root input:focus-visible,
+  .admin-root select:focus-visible,
+  .admin-root textarea:focus-visible {
+    border-color: var(--admin-border-focus);
+  }
+
+  .admin-root .btn,
+  .admin-btn,
+  .admin-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--admin-space-2);
+    min-height: 40px;
+    padding: 0 var(--admin-space-4);
+    border: 1px solid transparent;
+    border-radius: var(--admin-radius-sm);
+    background: var(--admin-color-primary-500);
+    color: var(--admin-text-on-primary);
+    box-shadow: var(--admin-shadow-sm);
+    font-size: var(--admin-font-size-sm);
+    font-weight: var(--admin-font-weight-semibold);
+    cursor: pointer;
+    transition:
+      background-color var(--admin-duration-normal) var(--admin-ease-standard),
+      border-color var(--admin-duration-normal) var(--admin-ease-standard),
+      box-shadow var(--admin-duration-normal) var(--admin-ease-standard),
+      transform var(--admin-duration-fast) var(--admin-ease-standard);
+  }
+
+  .admin-root .btn:hover,
+  .admin-btn:hover,
+  .admin-button:hover {
+    transform: translateY(-1px);
+    background: var(--admin-color-primary-600);
+    color: var(--admin-text-on-primary);
+  }
+
+  .admin-root .btn:active,
+  .admin-btn:active,
+  .admin-button:active {
+    transform: translateY(0);
+  }
+
+  .admin-root .btn:disabled,
+  .admin-btn:disabled,
+  .admin-button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+  }
+
+  .admin-root .btn-secondary,
+  .admin-btn-secondary,
+  .admin-button--secondary {
+    background: var(--admin-color-neutral-0);
+    color: var(--admin-text-strong);
+    border-color: var(--admin-border-default);
+    box-shadow: none;
+  }
+
+  .admin-root .btn-secondary:hover,
+  .admin-btn-secondary:hover,
+  .admin-button--secondary:hover {
+    background: var(--admin-bg-hover);
+    color: var(--admin-text-strong);
+  }
+
+  .admin-btn-ghost,
+  .admin-button--ghost {
+    background: transparent;
+    color: var(--admin-text-base);
+    border-color: transparent;
+    box-shadow: none;
+  }
+
+  .admin-btn-ghost:hover,
+  .admin-button--ghost:hover {
+    background: var(--admin-bg-hover);
+    color: var(--admin-text-strong);
+  }
+
+  .admin-btn-danger,
+  .admin-button--danger {
+    background: var(--admin-color-danger-600);
+    color: var(--admin-text-on-primary);
+  }
+
+  .admin-btn-danger:hover,
+  .admin-button--danger:hover {
+    background: var(--admin-color-danger-700);
+  }
+
+  .admin-btn-sm,
+  .admin-button--sm {
+    min-height: 34px;
+    padding: 0 var(--admin-space-3);
+    font-size: var(--admin-font-size-xs);
+  }
+
+  .admin-button--block {
+    width: 100%;
+  }
+
+  .admin-root .state-empty,
+  .admin-root .state-loading,
+  .admin-root .state-error {
+    border-radius: var(--admin-radius-md);
+    padding: var(--admin-space-4);
+  }
+
+  .admin-root .state-empty,
+  .admin-root .state-loading {
+    border: 1px dashed var(--admin-border-default);
+    background: var(--admin-bg-card-muted);
+    color: var(--admin-text-muted);
+  }
+
+  .admin-root .state-error {
+    border: 1px solid var(--admin-color-danger-100);
+    background: var(--admin-color-danger-50);
+    color: var(--admin-color-danger-700);
+  }
+
+.admin-root .card-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--admin-space-3);
+  align-items: center;
+}

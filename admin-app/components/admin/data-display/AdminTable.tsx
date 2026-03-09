@@ -17,7 +17,7 @@ export function AdminTable({
   return (
     <div className={cx("admin-table-frame", className)}>
       {toolbar ? <div className="admin-table-frame__toolbar">{toolbar}</div> : null}
-      <div className="dashboard-table-wrap admin-table-frame__body">
+      <div className="admin-table-wrap dashboard-table-wrap admin-table-frame__body">
         {caption ? <p className="admin-table-frame__caption sr-only">{caption}</p> : null}
         {children}
       </div>

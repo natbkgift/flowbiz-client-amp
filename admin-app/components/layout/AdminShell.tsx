@@ -352,7 +352,7 @@ export function AdminShell({ children }: { children: ReactNode }) {
   );
 
   return (
-    <div className={mobileNavOpen ? "admin-shell is-nav-open" : "admin-shell"}>
+    <div className={mobileNavOpen ? "admin-root admin-shell is-nav-open" : "admin-root admin-shell"}>
       <aside className="admin-shell-sidebar" aria-label={ui.workspaceNavigation}>
         <div className="admin-shell-brand">
           <Link href={withAdminLocale("/admin/dashboard", locale)}>

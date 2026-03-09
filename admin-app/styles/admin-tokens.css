@@ -1,0 +1,126 @@
+.admin-root {
+  --admin-color-primary-50: #eef4ff;
+  --admin-color-primary-100: #dbe8ff;
+  --admin-color-primary-200: #bdd3ff;
+  --admin-color-primary-300: #93b6ff;
+  --admin-color-primary-400: #5f8fff;
+  --admin-color-primary-500: #2f6df6;
+  --admin-color-primary-600: #1f56d9;
+  --admin-color-primary-700: #1d48b2;
+  --admin-color-primary-800: #1d3e8d;
+  --admin-color-primary-900: #1d366f;
+
+    --admin-color-neutral-0: #ffffff;
+    --admin-color-neutral-25: #fcfdff;
+    --admin-color-neutral-50: #f8fafc;
+    --admin-color-neutral-100: #f1f5f9;
+    --admin-color-neutral-150: #e9eef5;
+    --admin-color-neutral-200: #e2e8f0;
+    --admin-color-neutral-300: #cbd5e1;
+    --admin-color-neutral-400: #94a3b8;
+    --admin-color-neutral-500: #64748b;
+    --admin-color-neutral-600: #475569;
+    --admin-color-neutral-700: #334155;
+    --admin-color-neutral-800: #1e293b;
+    --admin-color-neutral-900: #0f172a;
+
+    --admin-color-success-50: #ecfdf3;
+    --admin-color-success-100: #d1fadf;
+    --admin-color-success-500: #12b76a;
+    --admin-color-success-600: #039855;
+    --admin-color-success-700: #027a48;
+
+    --admin-color-warning-50: #fffaeb;
+    --admin-color-warning-100: #fef0c7;
+    --admin-color-warning-500: #f79009;
+    --admin-color-warning-600: #dc6803;
+    --admin-color-warning-700: #b54708;
+
+    --admin-color-danger-50: #fef3f2;
+    --admin-color-danger-100: #fee4e2;
+    --admin-color-danger-500: #f04438;
+    --admin-color-danger-600: #d92d20;
+    --admin-color-danger-700: #b42318;
+
+    --admin-color-info-50: #eff8ff;
+    --admin-color-info-100: #d1e9ff;
+    --admin-color-info-500: #0ba5ec;
+    --admin-color-info-600: #0086c9;
+    --admin-color-info-700: #026aa2;
+
+    --admin-bg-canvas: #f6f8fc;
+    --admin-bg-sidebar: #ffffff;
+    --admin-bg-header: rgba(255, 255, 255, 0.82);
+    --admin-bg-card: #ffffff;
+    --admin-bg-card-muted: #f8fafc;
+    --admin-bg-hover: #f1f5f9;
+    --admin-bg-active: #eef4ff;
+
+    --admin-text-strong: #0f172a;
+    --admin-text-base: #334155;
+    --admin-text-muted: #64748b;
+    --admin-text-soft: #94a3b8;
+    --admin-text-on-primary: #ffffff;
+
+    --admin-border-subtle: #e9eef5;
+    --admin-border-default: #e2e8f0;
+    --admin-border-strong: #cbd5e1;
+    --admin-border-focus: #5f8fff;
+
+    --admin-shadow-xs: 0 1px 2px rgba(15, 23, 42, 0.04);
+    --admin-shadow-sm: 0 1px 3px rgba(15, 23, 42, 0.06), 0 1px 2px rgba(15, 23, 42, 0.04);
+    --admin-shadow-md: 0 4px 10px rgba(15, 23, 42, 0.06), 0 2px 4px rgba(15, 23, 42, 0.04);
+    --admin-shadow-lg: 0 12px 24px rgba(15, 23, 42, 0.08), 0 4px 8px rgba(15, 23, 42, 0.04);
+    --admin-shadow-focus: 0 0 0 4px rgba(47, 109, 246, 0.12);
+
+    --admin-radius-xs: 8px;
+    --admin-radius-sm: 10px;
+    --admin-radius-md: 14px;
+    --admin-radius-lg: 18px;
+    --admin-radius-xl: 24px;
+    --admin-radius-pill: 999px;
+
+    --admin-space-1: 4px;
+    --admin-space-2: 8px;
+    --admin-space-3: 12px;
+    --admin-space-4: 16px;
+    --admin-space-5: 20px;
+    --admin-space-6: 24px;
+    --admin-space-8: 32px;
+    --admin-space-10: 40px;
+    --admin-space-12: 48px;
+    --admin-space-16: 64px;
+
+    --admin-sidebar-width: 280px;
+    --admin-sidebar-width-collapsed: 76px;
+    --admin-header-height: 72px;
+    --admin-content-max: 1600px;
+
+    --admin-font-family: var(--font-sans), "Noto Sans Thai", system-ui, sans-serif;
+
+    --admin-font-size-xs: 12px;
+    --admin-font-size-sm: 13px;
+    --admin-font-size-md: 14px;
+    --admin-font-size-lg: 16px;
+    --admin-font-size-xl: 20px;
+    --admin-font-size-2xl: 28px;
+
+    --admin-line-height-tight: 1.2;
+    --admin-line-height-normal: 1.45;
+    --admin-line-height-relaxed: 1.6;
+
+    --admin-font-weight-medium: 500;
+    --admin-font-weight-semibold: 600;
+    --admin-font-weight-bold: 700;
+
+    --admin-duration-fast: 120ms;
+    --admin-duration-normal: 180ms;
+    --admin-duration-slow: 260ms;
+    --admin-ease-standard: cubic-bezier(0.2, 0.8, 0.2, 1);
+
+    --admin-z-sidebar: 30;
+    --admin-z-header: 40;
+  --admin-z-dropdown: 60;
+  --admin-z-modal: 80;
+  --admin-z-toast: 90;
+}
