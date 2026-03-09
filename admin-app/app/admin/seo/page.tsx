@@ -6,9 +6,11 @@ import { clearAuthSession, loginAdmin, persistAuthSession, readAuthSession } fro
 import { detectAdminLocale, type AdminLocale } from "@/app/_lib/admin-i18n";
 import {
   ActionCard,
+  AdminBadge,
   AdminButton,
   AdminPageHeader,
   AdminSectionCard,
+  AdminTable,
   LogCard,
 } from "@/components/admin/AdminPrimitives";
 import { formatSeoApiError, readRequestFailedStatus } from "./error-utils";
@@ -202,6 +204,10 @@ function parseList(value: string): string[] {
     .split(/[\n,]/g)
     .map((v) => v.trim())
     .filter((v, i, all) => v.length > 0 && all.indexOf(v) === i);
+}
+
+function redirectStatusTone(statusCode: number): "info" | "warn" {
+  return statusCode === 302 ? "warn" : "info";
 }
 
 async function api<T>(path: string, token: string, init?: RequestInit): Promise<T> {
@@ -583,20 +589,15 @@ export default function AdminSeoPage() {
       </ActionCard>
 
       {pageError ? (
-        <div className="state-error" role="alert">
-          <p style={{ margin: 0, overflowWrap: "anywhere" }}>{pageError}</p>
-          <div className="card-actions">
-            <button
-              className="btn btn-secondary"
-              type="button"
-              onClick={() => void refreshAll()}
-              disabled={!isAuth || loading || busy}
-            >
-              {t.retry}
-            </button>
+          <div className="state-error" role="alert">
+            <p style={{ margin: 0, overflowWrap: "anywhere" }}>{pageError}</p>
+            <div className="card-actions">
+              <AdminButton variant="secondary" type="button" onClick={() => void refreshAll()} disabled={!isAuth || loading || busy}>
+                {t.retry}
+              </AdminButton>
+            </div>
           </div>
-        </div>
-      ) : null}
+        ) : null}
       {loading ? <div className="state-loading">{t.loading}</div> : null}
 
       <section className="seo-layout">
@@ -615,18 +616,20 @@ export default function AdminSeoPage() {
             <label className="seo-inline-check" htmlFor="seo-override-robots-index"><input id="seo-override-robots-index" type="checkbox" checked={overrideForm.robots_index} onChange={(event) => setOverrideForm((prev) => ({ ...prev, robots_index: event.target.checked }))} /><span>index</span></label>
             <label className="seo-inline-check" htmlFor="seo-override-robots-follow"><input id="seo-override-robots-follow" type="checkbox" checked={overrideForm.robots_follow} onChange={(event) => setOverrideForm((prev) => ({ ...prev, robots_follow: event.target.checked }))} /><span>follow</span></label>
             <label className="seo-inline-check" htmlFor="seo-override-enabled"><input id="seo-override-enabled" type="checkbox" checked={overrideForm.enabled} onChange={(event) => setOverrideForm((prev) => ({ ...prev, enabled: event.target.checked }))} /><span>enabled</span></label>
-            <div className="card-actions seo-actions-wide"><button className="btn" type="submit" disabled={!isAuth || busy}>{t.save}</button></div>
+            <div className="card-actions seo-actions-wide">
+              <AdminButton variant="primary" type="submit" disabled={!isAuth || busy}>{t.save}</AdminButton>
+            </div>
           </form>
           {overrides.length === 0 ? <div className="state-empty">{t.emptyOverrides}</div> : null}
           {overrides.length > 0 ? (
             <ul className="seo-item-list" aria-label={t.sectionOverrides}>
               {overrides.map((item) => (
                 <li key={item.id} className="seo-item-row">
-                  <div className="seo-item-head"><strong>{item.path}</strong><span className="seo-item-chip">{item.locale}</span></div>
+                  <div className="seo-item-head"><strong>{item.path}</strong><AdminBadge tone="info">{item.locale}</AdminBadge></div>
                   <p className="seo-item-meta">{item.title || "-"}</p>
                   <div className="card-actions">
-                    <button className="btn btn-secondary" type="button" onClick={() => { setEditingOverrideId(item.id); setOverrideForm({ path: item.path, locale: item.locale === "th" ? "th" : "en", title: item.title || "", description: item.description || "", canonical: item.canonical || "", robots_index: item.robots_index, robots_follow: item.robots_follow, enabled: item.enabled }); }}>{editingOverrideId === item.id ? "Editing" : "Edit"}</button>
-                    <button className="btn btn-secondary" type="button" onClick={async () => { await api(`/admin/seo/overrides/${item.id}`, token, { method: "DELETE" }); if (editingOverrideId === item.id) { setEditingOverrideId(null); setOverrideForm(emptyOverride(locale)); } await loadOverrides(token); }}>Delete</button>
+                    <AdminButton variant="secondary" type="button" onClick={() => { setEditingOverrideId(item.id); setOverrideForm({ path: item.path, locale: item.locale === "th" ? "th" : "en", title: item.title || "", description: item.description || "", canonical: item.canonical || "", robots_index: item.robots_index, robots_follow: item.robots_follow, enabled: item.enabled }); }}>{editingOverrideId === item.id ? "Editing" : "Edit"}</AdminButton>
+                    <AdminButton variant="secondary" type="button" onClick={async () => { await api(`/admin/seo/overrides/${item.id}`, token, { method: "DELETE" }); if (editingOverrideId === item.id) { setEditingOverrideId(null); setOverrideForm(emptyOverride(locale)); } await loadOverrides(token); }}>Delete</AdminButton>
                   </div>
                 </li>
               ))}
@@ -647,8 +650,8 @@ export default function AdminSeoPage() {
             <label className="seo-inline-check" htmlFor="seo-redirect-preserve-query"><input id="seo-redirect-preserve-query" type="checkbox" checked={redirectForm.preserve_query} onChange={(event) => setRedirectForm((prev) => ({ ...prev, preserve_query: event.target.checked }))} /><span>preserve query</span></label>
             <label className="seo-inline-check" htmlFor="seo-redirect-enabled"><input id="seo-redirect-enabled" type="checkbox" checked={redirectForm.enabled} onChange={(event) => setRedirectForm((prev) => ({ ...prev, enabled: event.target.checked }))} /><span>enabled</span></label>
             <div className="card-actions seo-actions-wide">
-              <button className="btn" type="submit" disabled={!isAuth || busy}>{t.save}</button>
-              <button className="btn btn-secondary" type="button" onClick={() => void preloadRedirectsFromProduction()} disabled={!isAuth || busy}>Preload production redirects</button>
+              <AdminButton variant="primary" type="submit" disabled={!isAuth || busy}>{t.save}</AdminButton>
+              <AdminButton variant="secondary" type="button" onClick={() => void preloadRedirectsFromProduction()} disabled={!isAuth || busy}>Preload production redirects</AdminButton>
             </div>
           </form>
           {redirects.length === 0 ? <div className="state-empty">{t.emptyRedirects}</div> : null}
@@ -656,11 +659,11 @@ export default function AdminSeoPage() {
             <ul className="seo-item-list" aria-label={t.sectionRedirects}>
               {redirects.map((item) => (
                 <li key={item.id} className="seo-item-row">
-                  <div className="seo-item-head"><strong>{item.old_path}</strong><span className="seo-item-chip">{item.status_code}</span></div>
+                  <div className="seo-item-head"><strong>{item.old_path}</strong><AdminBadge tone={redirectStatusTone(item.status_code)}>{item.status_code}</AdminBadge></div>
                   <p className="seo-item-meta">{item.new_path}</p>
                   <div className="card-actions">
-                    <button className="btn btn-secondary" type="button" onClick={() => { setEditingRedirectId(item.id); setRedirectForm({ old_path: item.old_path, new_path: item.new_path, status_code: item.status_code === 302 ? 302 : 301, preserve_query: item.preserve_query, enabled: item.enabled }); }}>{editingRedirectId === item.id ? "Editing" : "Edit"}</button>
-                    <button className="btn btn-secondary" type="button" onClick={async () => { await api(`/admin/seo/redirects/${item.id}`, token, { method: "DELETE" }); if (editingRedirectId === item.id) { setEditingRedirectId(null); setRedirectForm(emptyRedirect()); } await loadRedirects(token); }}>Delete</button>
+                    <AdminButton variant="secondary" type="button" onClick={() => { setEditingRedirectId(item.id); setRedirectForm({ old_path: item.old_path, new_path: item.new_path, status_code: item.status_code === 302 ? 302 : 301, preserve_query: item.preserve_query, enabled: item.enabled }); }}>{editingRedirectId === item.id ? "Editing" : "Edit"}</AdminButton>
+                    <AdminButton variant="secondary" type="button" onClick={async () => { await api(`/admin/seo/redirects/${item.id}`, token, { method: "DELETE" }); if (editingRedirectId === item.id) { setEditingRedirectId(null); setRedirectForm(emptyRedirect()); } await loadRedirects(token); }}>Delete</AdminButton>
                   </div>
                 </li>
               ))}
@@ -692,8 +695,8 @@ export default function AdminSeoPage() {
             <label className="field" htmlFor="seo-schema-article-author"><span>Article author override</span><input id="seo-schema-article-author" value={schemaForm.schema_article_author} onChange={(event) => setSchemaForm((prev) => ({ ...prev, schema_article_author: event.target.value }))} /></label>
             <label className="field" htmlFor="seo-schema-article-author-url"><span>Article author URL</span><input id="seo-schema-article-author-url" value={schemaForm.schema_article_author_url} onChange={(event) => setSchemaForm((prev) => ({ ...prev, schema_article_author_url: event.target.value }))} /></label>
             <div className="card-actions seo-actions-wide">
-              <button className="btn" type="submit" disabled={!isAuth || busy}>{t.save}</button>
-              <button className="btn btn-secondary" type="button" onClick={() => void bootstrapSchemaFromProduction()} disabled={!isAuth || busy}>Load approved schema defaults</button>
+              <AdminButton variant="primary" type="submit" disabled={!isAuth || busy}>{t.save}</AdminButton>
+              <AdminButton variant="secondary" type="button" onClick={() => void bootstrapSchemaFromProduction()} disabled={!isAuth || busy}>Load approved schema defaults</AdminButton>
             </div>
           </form>
           {!schemaHasData ? <div className="state-empty">{t.emptySchema}</div> : null}
@@ -707,8 +710,8 @@ export default function AdminSeoPage() {
           titleTag="h2"
         >
           <div className="card-actions">
-            <button className="btn" type="button" onClick={() => void runBrokenLinks()} disabled={!isAuth || busy}>Run checker</button>
-            <button className="btn btn-secondary" type="button" onClick={() => void loadReport(token)} disabled={!isAuth || busy}>{t.refresh}</button>
+            <AdminButton variant="primary" type="button" onClick={() => void runBrokenLinks()} disabled={!isAuth || busy}>Run checker</AdminButton>
+            <AdminButton variant="secondary" type="button" onClick={() => void loadReport(token)} disabled={!isAuth || busy}>{t.refresh}</AdminButton>
           </div>
           {policy ? (
             <div className="seo-report-grid" role="status" aria-live="polite">
@@ -730,8 +733,8 @@ export default function AdminSeoPage() {
               {report.broken_links.length === 0 ? (
                 <div className="state-empty">No broken links found.</div>
               ) : (
-                <div className="seo-table-wrap">
-                  <table className="seo-table">
+                <AdminTable caption="Broken links report">
+                  <table className="admin-table">
                     <thead><tr><th>source_page</th><th>href</th><th>status</th><th>error</th></tr></thead>
                     <tbody>
                       {report.broken_links.map((row, index) => (
@@ -744,7 +747,7 @@ export default function AdminSeoPage() {
                       ))}
                     </tbody>
                   </table>
-                </div>
+                </AdminTable>
               )}
             </>
           ) : null}
