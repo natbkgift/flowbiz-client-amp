@@ -1,0 +1,850 @@
+import Link from "next/link";
+import { type FormEvent, type ReactNode, useMemo } from "react";
+
+import { type AdminLocale, withAdminLocale } from "@/app/_lib/admin-i18n";
+import type { DashboardState } from "@/app/admin/dashboard/state-utils";
+import { ActionCard, LogCard, StatCard } from "@/components/admin/cards/AdminCards";
+import { AdminBadge } from "@/components/admin/feedback/AdminBadge";
+import { AdminButton, adminButtonClassName } from "@/components/admin/forms/AdminButton";
+import { AdminTabSwitch } from "@/components/admin/navigation/AdminTabSwitch";
+import { AdminPage, AdminPageBody, AdminPageHeader } from "@/components/admin/page/AdminPage";
+import { AdminSectionGrid } from "@/components/admin/section/AdminSection";
+import {
+  DashboardInsightSkeletonList,
+  DashboardMetricSkeletonRow,
+  DashboardSection,
+  DashboardSectionState,
+  DashboardTableSkeleton,
+  DashboardWidgetSkeletonGrid,
+} from "@/components/admin/dashboard/DashboardSectionPrimitives";
+import { DashboardKpiWidgets } from "@/components/admin/dashboard/DashboardKpiWidgets";
+import { DashboardRecentInquiriesTable } from "@/components/admin/dashboard/DashboardRecentInquiriesTable";
+import {
+  DashboardTrendChart,
+  DashboardTrendChartSkeleton,
+} from "@/components/admin/dashboard/DashboardTrendChart";
+import {
+  buildTrendPoints,
+  hasTrendData,
+  type TrendPeriod,
+} from "@/components/admin/dashboard/trend-utils";
+import { AdminIcon, type AdminIconName } from "@/components/admin/AdminIcons";
+import { dashboardCopy } from "@/components/admin/domain/dashboard/dashboard-copy";
+import {
+  type BackgroundTask,
+  type DashboardSummaryResponse,
+  type DashboardWidget,
+  WIDGET_KEYS,
+} from "@/components/admin/domain/dashboard/dashboard-types";
+
+type Locale = AdminLocale;
+
+type DashboardScreenCopy = (typeof dashboardCopy)[keyof typeof dashboardCopy];
+
+function prettyDate(value: string | null, locale: Locale): string {
+  if (!value) return "-";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return value;
+  return new Intl.DateTimeFormat(locale === "th" ? "th-TH" : "en-US", {
+    year: "numeric",
+    month: "short",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+  }).format(date);
+}
+
+function humanizeMetricKey(key: string): string {
+  return key
+    .split("_")
+    .filter(Boolean)
+    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+    .join(" ");
+}
+
+function formatAge(value: number | null, locale: Locale, fallback: string): string {
+  if (typeof value !== "number" || !Number.isFinite(value) || value < 0) return fallback;
+  if (value < 60) return locale === "th" ? `${Math.round(value)} วินาทีที่ผ่านมา` : `${Math.round(value)}s ago`;
+  if (value < 3600) {
+    const minutes = Math.max(1, Math.round(value / 60));
+    return locale === "th" ? `${minutes} นาทีที่ผ่านมา` : `${minutes}m ago`;
+  }
+  if (value < 86400) {
+    const hours = Math.max(1, Math.round(value / 3600));
+    return locale === "th" ? `${hours} ชั่วโมงที่ผ่านมา` : `${hours}h ago`;
+  }
+  const days = Math.max(1, Math.round(value / 86400));
+  return locale === "th" ? `${days} วันที่ผ่านมา` : `${days}d ago`;
+}
+
+function compactValue(value: string | null | undefined, fallback: string): string {
+  const text = String(value || "").trim();
+  return text || fallback;
+}
+
+function taskTone(status: string | null | undefined): BackgroundTask["tone"] {
+  const normalized = String(status || "").trim().toLowerCase();
+  if (!normalized) return "info";
+  if (normalized === "ok" || normalized === "healthy" || normalized === "success") return "ok";
+  if (normalized === "failed" || normalized === "error") return "error";
+  if (normalized === "partial" || normalized === "warning") return "warn";
+  return "info";
+}
+
+function taskLabel(
+  status: string | null | undefined,
+  labels: Pick<DashboardScreenCopy, "taskHealthy" | "taskAttention" | "taskUnknown">,
+): string {
+  const normalized = String(status || "").trim().toLowerCase();
+  if (!normalized) return labels.taskUnknown;
+  if (normalized === "ok" || normalized === "healthy" || normalized === "success") return labels.taskHealthy;
+  if (normalized === "failed" || normalized === "error" || normalized === "partial" || normalized === "warning") {
+    return labels.taskAttention;
+  }
+  return normalized.toUpperCase();
+}
+
+function DashboardControlCenter({
+  t,
+  isAuthenticated,
+  authEmail,
+  loginEmail,
+  loginPassword,
+  authLoading,
+  authError,
+  onLoginEmailChange,
+  onLoginPasswordChange,
+  onLogin,
+  onLogout,
+  refreshAction,
+}: {
+  t: DashboardScreenCopy;
+  isAuthenticated: boolean;
+  authEmail: string;
+  loginEmail: string;
+  loginPassword: string;
+  authLoading: boolean;
+  authError: string | null;
+  onLoginEmailChange: (value: string) => void;
+  onLoginPasswordChange: (value: string) => void;
+  onLogin: (event: FormEvent<HTMLFormElement>) => void | Promise<void>;
+  onLogout: () => void;
+  refreshAction: ReactNode;
+}) {
+  return (
+    <ActionCard
+      title={t.controlCenterTitle}
+      description={t.controlCenterHint}
+      icon={isAuthenticated ? "profile" : "workspace"}
+      tone={isAuthenticated ? ("info" as const) : ("neutral" as const)}
+      className="dashboard-control-card"
+      meta={
+        isAuthenticated ? (
+          <AdminBadge tone="ok" icon="success">
+            {t.sessionActive}
+          </AdminBadge>
+        ) : (
+          <AdminBadge tone="info" icon="workspace">
+            {t.loginTitle}
+          </AdminBadge>
+        )
+      }
+      footer={
+        isAuthenticated ? (
+          <div className="dashboard-control-card__actions">
+            {refreshAction}
+            <AdminButton variant="secondary" icon="x" type="button" onClick={onLogout}>
+              {t.signOut}
+            </AdminButton>
+          </div>
+        ) : undefined
+      }
+    >
+      {!isAuthenticated ? (
+        <form className="crm-login-form" method="post" onSubmit={(event) => void onLogin(event)}>
+          <label className="field" htmlFor="dashboard-login-email">
+            <span>{t.email}</span>
+            <input
+              id="dashboard-login-email"
+              name="email"
+              type="email"
+              autoComplete="username"
+              required
+              value={loginEmail}
+              onChange={(event) => onLoginEmailChange(event.target.value)}
+            />
+          </label>
+
+          <label className="field" htmlFor="dashboard-login-password">
+            <span>{t.password}</span>
+            <input
+              id="dashboard-login-password"
+              name="password"
+              type="password"
+              autoComplete="current-password"
+              required
+              value={loginPassword}
+              onChange={(event) => onLoginPasswordChange(event.target.value)}
+            />
+          </label>
+
+          {authError ? <div className="state-error" role="alert">{authError}</div> : null}
+
+          <div className="dashboard-control-card__actions">
+            <AdminButton variant="primary" icon="workspace" type="submit" disabled={authLoading}>
+              {authLoading ? t.signingIn : t.signIn}
+            </AdminButton>
+          </div>
+        </form>
+      ) : (
+        <div className="crm-session-panel" role="status" aria-live="polite">
+          <h2>{t.sessionActive}</h2>
+          <p className="locale-safe">
+            {authEmail ? `${t.sessionAs}: ${authEmail}` : t.sessionUnknown}
+          </p>
+        </div>
+      )}
+    </ActionCard>
+  );
+}
+
+export function AdminDashboardScreen({
+  locale,
+  authToken,
+  authEmail,
+  loginEmail,
+  loginPassword,
+  authLoading,
+  authError,
+  loading,
+  pageError,
+  summary,
+  dashboardState,
+  chartPeriod,
+  onChartPeriodChange,
+  onLoginEmailChange,
+  onLoginPasswordChange,
+  onLogin,
+  onLogout,
+  onRefresh,
+}: {
+  locale: Locale;
+  authToken: string;
+  authEmail: string;
+  loginEmail: string;
+  loginPassword: string;
+  authLoading: boolean;
+  authError: string | null;
+  loading: boolean;
+  pageError: string | null;
+  summary: DashboardSummaryResponse | null;
+  dashboardState: DashboardState;
+  chartPeriod: TrendPeriod;
+  onChartPeriodChange: (value: TrendPeriod) => void;
+  onLoginEmailChange: (value: string) => void;
+  onLoginPasswordChange: (value: string) => void;
+  onLogin: (event: FormEvent<HTMLFormElement>) => void | Promise<void>;
+  onLogout: () => void;
+  onRefresh: () => void | Promise<void>;
+}) {
+  const isAuthenticated = authToken.trim().length > 0;
+  const t = dashboardCopy[locale];
+  const totalRecentInquiryCount = Math.max(
+    Number(summary?.raw_metrics?.recent_inquiries?.count || 0),
+    summary?.recent_inquiries?.length || 0,
+  );
+
+  const widgets = useMemo(() => {
+    const rows = summary?.widgets || [];
+    const byKey = new Map(rows.map((row) => [row.key, row]));
+    return WIDGET_KEYS.map((key) => byKey.get(key)).filter(Boolean) as DashboardWidget[];
+  }, [summary]);
+
+  const freshnessEntries = useMemo(() => {
+    const source = summary?.data_freshness || {};
+    return Object.entries(source).sort(([left], [right]) => left.localeCompare(right)) as Array<
+      [string, { checked_at: string | null; age_seconds: number | null }]
+    >;
+  }, [summary]);
+
+  const trendPoints = useMemo(
+    () =>
+      buildTrendPoints(
+        summary?.trend_series?.[chartPeriod] || [],
+        summary?.generated_at || null,
+        chartPeriod,
+        locale,
+      ),
+    [chartPeriod, locale, summary],
+  );
+
+  const overviewCards = useMemo<
+    Array<{
+      key: string;
+      title: string;
+      value: string;
+      metadata: string;
+      icon: AdminIconName;
+      tone: "info" | "ok" | "warn";
+      action: ReactNode;
+    }>
+  >(
+    () => [
+      {
+        key: "generated_at",
+        title: t.generatedAt,
+        value: prettyDate(summary?.generated_at || null, locale),
+        metadata: t.snapshot,
+        icon: "refresh" as AdminIconName,
+        tone: "info" as const,
+        action: (
+          <AdminBadge tone="info" icon="refresh">
+            {t.snapshot}
+          </AdminBadge>
+        ),
+      },
+      {
+        key: "incomplete_widget_count",
+        title: t.incomplete,
+        value:
+          typeof summary?.incomplete_widget_count === "number"
+            ? String(summary.incomplete_widget_count)
+            : t.unknownValue,
+        metadata: t.operatorQueue,
+        icon: "review" as AdminIconName,
+        tone:
+          typeof summary?.incomplete_widget_count === "number" && summary.incomplete_widget_count > 0
+            ? ("warn" as const)
+            : ("ok" as const),
+        action: (
+          <AdminBadge
+            tone={typeof summary?.incomplete_widget_count === "number" && summary.incomplete_widget_count > 0 ? "warn" : "ok"}
+            icon={typeof summary?.incomplete_widget_count === "number" && summary.incomplete_widget_count > 0 ? "warning" : "success"}
+          >
+            {typeof summary?.incomplete_widget_count === "number" && summary.incomplete_widget_count > 0
+              ? t.needsReview
+              : t.stable}
+          </AdminBadge>
+        ),
+      },
+      {
+        key: "recent_inquiries",
+        title: t.recentInquiries,
+        value: String(totalRecentInquiryCount),
+        metadata: t.liveInbox,
+        icon: "message" as AdminIconName,
+        tone: totalRecentInquiryCount > 0 ? "ok" : "info",
+        action: (
+          <Link
+            className={adminButtonClassName({ variant: "secondary", size: "sm" })}
+            href={withAdminLocale("/admin/inquiries", locale)}
+          >
+            {t.openCrm}
+          </Link>
+        ),
+      },
+      {
+        key: "warnings",
+        title: t.warnings,
+        value: String(summary?.warnings?.length || 0),
+        metadata: t.watchlistTitle,
+        icon: "warning" as AdminIconName,
+        tone: (summary?.warnings?.length || 0) > 0 ? ("warn" as const) : ("ok" as const),
+        action: (
+          <AdminBadge
+            tone={(summary?.warnings?.length || 0) > 0 ? "warn" : "ok"}
+            icon={(summary?.warnings?.length || 0) > 0 ? "warning" : "success"}
+          >
+            {(summary?.warnings?.length || 0) > 0 ? t.reviewWatchlist : t.stable}
+          </AdminBadge>
+        ),
+      },
+    ],
+    [locale, summary, t, totalRecentInquiryCount],
+  );
+
+  const backgroundTasks = useMemo<BackgroundTask[]>(() => {
+    const raw = summary?.raw_metrics;
+    const importStatus = raw?.last_import_status?.status || null;
+    const mirrorStatus = raw?.last_mirror_status?.status || null;
+    const deployStatus = raw?.last_deploy_health_status?.deploy_status || raw?.last_deploy_health_status?.health_status || null;
+    const tasks: BackgroundTask[] = [];
+
+    if (raw?.last_import_status) {
+      tasks.push({
+        key: "import",
+        title: t.taskImport,
+        detail: `${t.latestTask}: ${prettyDate(raw.last_import_status.checked_at || null, locale)}`,
+        meta: `${t.status}: ${compactValue(importStatus, t.taskUnknown)} · ${t.rows}: ${String(raw.last_import_status.rows_total || 0)}`,
+        status: importStatus,
+        icon: "imports",
+        tone: taskTone(importStatus),
+        href: "/admin/imports",
+        actionLabel: t.openImports,
+      });
+    }
+
+    if (raw?.last_mirror_status) {
+      tasks.push({
+        key: "mirror",
+        title: t.taskMirror,
+        detail: `${t.latestTask}: ${prettyDate(raw.last_mirror_status.checked_at || null, locale)}`,
+        meta: `${t.status}: ${compactValue(mirrorStatus, t.taskUnknown)} · ${t.warnings}: ${String(raw.last_mirror_status.failures_count || 0)}`,
+        status: mirrorStatus,
+        icon: "media",
+        tone: taskTone(mirrorStatus),
+        href: "/admin/media",
+        actionLabel: t.openMedia,
+      });
+    }
+
+    if (raw?.last_deploy_health_status) {
+      tasks.push({
+        key: "deploy",
+        title: t.taskDeploy,
+        detail: `${t.latestTask}: ${prettyDate(raw.last_deploy_health_status.deploy_checked_at || null, locale)}`,
+        meta: `${t.taskSource}: ${compactValue(raw.last_deploy_health_status.source, t.unknownValue)} · ${t.taskBuild}: ${compactValue(
+          raw.last_deploy_health_status.build_sha?.slice(0, 7),
+          t.unknownValue,
+        )}`,
+        status: deployStatus,
+        icon: "refresh",
+        tone: taskTone(deployStatus),
+        href: "/admin/seo",
+        actionLabel: t.openSeo,
+      });
+    }
+
+    return tasks;
+  }, [locale, summary, t]);
+
+  function renderRefreshButton(label?: string) {
+    return (
+      <AdminButton variant="secondary" icon="refresh" type="button" onClick={() => void onRefresh()} disabled={loading}>
+        {loading ? t.loading : label || t.refresh}
+      </AdminButton>
+    );
+  }
+
+  function renderSectionState(emptyTitle: string, emptyBody: string) {
+    return (
+      <DashboardSectionState
+        tone="empty"
+        title={emptyTitle}
+        body={emptyBody}
+        action={renderRefreshButton(t.retry)}
+      />
+    );
+  }
+
+  function renderOverviewPanel() {
+    if (!isAuthenticated) {
+      return <DashboardSectionState tone="info" title={t.workspaceLockedTitle} body={t.workspaceLockedBody} />;
+    }
+
+    if (dashboardState === "loading") {
+      return <DashboardMetricSkeletonRow cards={4} />;
+    }
+
+    if (dashboardState === "error") {
+      return (
+        <DashboardSectionState
+          tone="error"
+          title={t.sectionErrorTitle}
+          body={pageError || `${t.loadError} ${t.loadErrorHint}`}
+          action={renderRefreshButton(t.retry)}
+        />
+      );
+    }
+
+    if (dashboardState === "idle") {
+      return (
+        <DashboardSectionState
+          tone="info"
+          title={t.overviewReadyTitle}
+          body={t.overviewReadyBody}
+          action={renderRefreshButton()}
+        />
+      );
+    }
+
+    if (dashboardState === "empty") {
+      return renderSectionState(t.overviewEmptyTitle, t.overviewEmptyBody);
+    }
+
+    return (
+      <div className="dashboard-summary-grid" aria-live="polite">
+        {overviewCards.map((item) => (
+          <StatCard
+            key={item.key}
+            title={item.title}
+            value={item.value}
+            metadata={item.metadata}
+            icon={item.icon}
+            tone={item.tone}
+            action={item.action}
+            className="dashboard-summary-card"
+          />
+        ))}
+      </div>
+    );
+  }
+
+  function renderWidgetsPanel() {
+    if (!isAuthenticated) {
+      return <DashboardSectionState tone="info" title={t.workspaceLockedTitle} body={t.workspaceLockedBody} />;
+    }
+
+    if (dashboardState === "loading") {
+      return <DashboardWidgetSkeletonGrid cards={6} />;
+    }
+
+    if (dashboardState === "error") {
+      return (
+        <DashboardSectionState
+          tone="error"
+          title={t.sectionErrorTitle}
+          body={pageError || `${t.loadError} ${t.loadErrorHint}`}
+          action={renderRefreshButton(t.retry)}
+        />
+      );
+    }
+
+    if (dashboardState === "idle") {
+      return <DashboardSectionState tone="info" title={t.sectionReadyTitle} body={t.sectionReadyBody} action={renderRefreshButton()} />;
+    }
+
+    if (widgets.length === 0) {
+      return renderSectionState(t.widgetsEmptyTitle, t.widgetsEmptyBody);
+    }
+
+    return (
+      <DashboardKpiWidgets
+        widgets={widgets}
+        rawMetrics={summary?.raw_metrics}
+        locale={locale}
+        fallback={t.unknownValue}
+      />
+    );
+  }
+
+  function renderInsightsPanel() {
+    if (!isAuthenticated) {
+      return <DashboardSectionState tone="info" title={t.workspaceLockedTitle} body={t.workspaceLockedBody} />;
+    }
+
+    if (dashboardState === "loading") {
+      return <DashboardInsightSkeletonList items={4} />;
+    }
+
+    if (dashboardState === "error") {
+      return (
+        <DashboardSectionState
+          tone="error"
+          title={t.sectionErrorTitle}
+          body={pageError || `${t.loadError} ${t.loadErrorHint}`}
+          action={renderRefreshButton(t.retry)}
+        />
+      );
+    }
+
+    if (dashboardState === "idle") {
+      return <DashboardSectionState tone="info" title={t.sectionReadyTitle} body={t.sectionReadyBody} action={renderRefreshButton()} />;
+    }
+
+    if (freshnessEntries.length === 0) {
+      return renderSectionState(t.insightsEmptyTitle, t.insightsEmptyBody);
+    }
+
+    return (
+      <ul className="dashboard-insight-list">
+        {freshnessEntries.map(([key, item]) => (
+          <li key={key} className="dashboard-insight-item">
+            <div className="dashboard-insight-copy">
+              <strong>{humanizeMetricKey(key)}</strong>
+              <p>
+                {t.checkedAt}: {prettyDate(item.checked_at, locale)}
+              </p>
+            </div>
+            <span className="dashboard-insight-age">{formatAge(item.age_seconds, locale, t.unknownValue)}</span>
+          </li>
+        ))}
+      </ul>
+    );
+  }
+
+  function renderTrendPanel() {
+    if (!isAuthenticated) {
+      return <DashboardSectionState tone="info" title={t.workspaceLockedTitle} body={t.workspaceLockedBody} />;
+    }
+
+    if (dashboardState === "loading") {
+      return <DashboardTrendChartSkeleton />;
+    }
+
+    if (dashboardState === "error") {
+      return (
+        <DashboardSectionState
+          tone="error"
+          title={t.sectionErrorTitle}
+          body={pageError || `${t.loadError} ${t.loadErrorHint}`}
+          action={renderRefreshButton(t.retry)}
+        />
+      );
+    }
+
+    if (dashboardState === "idle") {
+      return <DashboardSectionState tone="info" title={t.sectionReadyTitle} body={t.sectionReadyBody} action={renderRefreshButton()} />;
+    }
+
+    if (!hasTrendData(trendPoints)) {
+      return <DashboardSectionState tone="empty" title={t.trendEmptyTitle} body={t.trendEmptyBody} />;
+    }
+
+    return <DashboardTrendChart points={trendPoints} locale={locale} period={chartPeriod} />;
+  }
+
+  function renderWarningsPanel() {
+    if (!isAuthenticated) {
+      return <DashboardSectionState tone="info" title={t.workspaceLockedTitle} body={t.workspaceLockedBody} />;
+    }
+
+    if (dashboardState === "loading") {
+      return <DashboardInsightSkeletonList items={3} />;
+    }
+
+    if (dashboardState === "error") {
+      return (
+        <DashboardSectionState
+          tone="error"
+          title={t.sectionErrorTitle}
+          body={pageError || `${t.loadError} ${t.loadErrorHint}`}
+          action={renderRefreshButton(t.retry)}
+        />
+      );
+    }
+
+    if (dashboardState === "idle") {
+      return <DashboardSectionState tone="info" title={t.sectionReadyTitle} body={t.sectionReadyBody} action={renderRefreshButton()} />;
+    }
+
+    if ((summary?.warnings || []).length === 0) {
+      return renderSectionState(t.warningsEmptyTitle, t.warningsEmptyBody);
+    }
+
+    return (
+      <ul className="dashboard-warning-list">
+        {(summary?.warnings || []).map((item) => (
+          <li key={item}>
+            <span className="dashboard-warning-icon" aria-hidden="true">
+              <AdminIcon name="warning" size={16} />
+            </span>
+            <span>{item}</span>
+          </li>
+        ))}
+      </ul>
+    );
+  }
+
+  function renderTablePanel() {
+    if (!isAuthenticated) {
+      return <DashboardSectionState tone="info" title={t.workspaceLockedTitle} body={t.workspaceLockedBody} />;
+    }
+
+    if (dashboardState === "loading") {
+      return <DashboardTableSkeleton rows={5} />;
+    }
+
+    if (dashboardState === "error") {
+      return (
+        <DashboardSectionState
+          tone="error"
+          title={t.sectionErrorTitle}
+          body={pageError || `${t.loadError} ${t.loadErrorHint}`}
+          action={renderRefreshButton(t.retry)}
+        />
+      );
+    }
+
+    if (dashboardState === "idle") {
+      return <DashboardSectionState tone="info" title={t.sectionReadyTitle} body={t.sectionReadyBody} action={renderRefreshButton()} />;
+    }
+
+    if (totalRecentInquiryCount === 0) {
+      return renderSectionState(t.recentInquiriesEmptyTitle, t.recentInquiriesEmptyBody);
+    }
+
+    return (
+      <DashboardRecentInquiriesTable
+        rows={summary?.recent_inquiries || []}
+        totalCount={totalRecentInquiryCount}
+        locale={locale}
+        authToken={authToken}
+      />
+    );
+  }
+
+  function renderBackgroundTasksPanel() {
+    if (!isAuthenticated) {
+      return <DashboardSectionState tone="info" title={t.workspaceLockedTitle} body={t.workspaceLockedBody} />;
+    }
+
+    if (dashboardState === "loading") {
+      return <DashboardInsightSkeletonList items={3} />;
+    }
+
+    if (dashboardState === "error") {
+      return (
+        <DashboardSectionState
+          tone="error"
+          title={t.sectionErrorTitle}
+          body={pageError || `${t.loadError} ${t.loadErrorHint}`}
+          action={renderRefreshButton(t.retry)}
+        />
+      );
+    }
+
+    if (dashboardState === "idle") {
+      return <DashboardSectionState tone="info" title={t.sectionReadyTitle} body={t.sectionReadyBody} action={renderRefreshButton()} />;
+    }
+
+    if (backgroundTasks.length === 0) {
+      return renderSectionState(t.backgroundTasksEmptyTitle, t.backgroundTasksEmptyBody);
+    }
+
+    return (
+      <ul className="dashboard-task-list">
+        {backgroundTasks.map((task) => (
+          <li key={task.key} className="dashboard-task-item">
+            <div className="dashboard-task-item__head">
+              <span className="dashboard-task-item__icon" aria-hidden="true">
+                <AdminIcon name={task.icon} size={16} />
+              </span>
+              <div className="dashboard-task-item__copy">
+                <strong>{task.title}</strong>
+                <p>{task.detail}</p>
+              </div>
+              <AdminBadge tone={task.tone} icon={task.tone === "ok" ? "success" : task.tone === "warn" ? "warning" : task.tone === "error" ? "x" : "info"}>
+                {taskLabel(task.status, t)}
+              </AdminBadge>
+            </div>
+            <div className="dashboard-task-item__footer">
+              <span>{task.meta}</span>
+              <Link
+                className={adminButtonClassName({ variant: "secondary", size: "sm" })}
+                href={withAdminLocale(task.href, locale)}
+              >
+                {task.actionLabel}
+              </Link>
+            </div>
+          </li>
+        ))}
+      </ul>
+    );
+  }
+
+  return (
+    <AdminPage busy={loading}>
+      <AdminPageHeader
+        className="dashboard-hero"
+        icon="dashboard"
+        eyebrow={locale === "th" ? "สุขภาพระบบ" : "System health"}
+        title={t.title}
+        description={t.subtitle}
+        meta={renderOverviewPanel()}
+      />
+
+      <AdminPageBody>
+        <AdminSectionGrid className="dashboard-shell-grid">
+          <div className="dashboard-zone dashboard-zone--primary">
+            <DashboardSection
+              title={t.widgets}
+              subtitle={t.widgetsHint}
+              className="dashboard-section--widgets dashboard-section--primary"
+              icon="dashboard"
+            >
+              {renderWidgetsPanel()}
+            </DashboardSection>
+
+            <DashboardControlCenter
+              t={t}
+              isAuthenticated={isAuthenticated}
+              authEmail={authEmail}
+              loginEmail={loginEmail}
+              loginPassword={loginPassword}
+              authLoading={authLoading}
+              authError={authError}
+              onLoginEmailChange={onLoginEmailChange}
+              onLoginPasswordChange={onLoginPasswordChange}
+              onLogin={onLogin}
+              onLogout={onLogout}
+              refreshAction={renderRefreshButton()}
+            />
+          </div>
+
+          <div className="dashboard-zone dashboard-zone--secondary">
+            <DashboardSection
+              title={t.insightsTitle}
+              subtitle={t.insightsHint}
+              className="dashboard-section--insights"
+              icon="imports"
+            >
+              {renderInsightsPanel()}
+            </DashboardSection>
+
+            <DashboardSection
+              title={t.trendTitle}
+              subtitle={t.trendHint}
+              className="dashboard-section--chart"
+              icon="message"
+              actions={
+                <AdminTabSwitch
+                  ariaLabel={t.trendTitle}
+                  className="dashboard-period-toggle"
+                  value={chartPeriod}
+                  onChange={(value) => onChartPeriodChange(value as TrendPeriod)}
+                  options={[
+                    { value: "7d", label: t.trendPeriod7d, disabled: loading },
+                    { value: "30d", label: t.trendPeriod30d, disabled: loading },
+                  ]}
+                />
+              }
+            >
+              {renderTrendPanel()}
+            </DashboardSection>
+          </div>
+
+          <div className="dashboard-zone dashboard-zone--tertiary">
+            <LogCard
+              title={t.watchlistTitle}
+              description={t.watchlistHint}
+              icon="warning"
+              className="dashboard-log-card dashboard-section--warnings"
+            >
+              {renderWarningsPanel()}
+            </LogCard>
+
+            <DashboardSection
+              title={t.logsTitle}
+              subtitle={t.logsHint}
+              className="dashboard-section--table"
+              icon="table"
+            >
+              {renderTablePanel()}
+            </DashboardSection>
+
+            <ActionCard
+              title={t.backgroundTasksTitle}
+              description={t.backgroundTasksHint}
+              icon="refresh"
+              className="dashboard-action-card dashboard-section--tasks"
+              tone="neutral"
+            >
+              {renderBackgroundTasksPanel()}
+            </ActionCard>
+          </div>
+        </AdminSectionGrid>
+      </AdminPageBody>
+    </AdminPage>
+  );
+}

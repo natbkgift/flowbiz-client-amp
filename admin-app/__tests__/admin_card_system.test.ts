@@ -11,7 +11,8 @@ function read(relativePath: string): string {
 
 describe("admin card system", () => {
   it("exports reusable SaaS card primitives for stats, metrics, actions, and logs", () => {
-    const component = read("components/admin/AdminPrimitives.tsx");
+    const component = read("components/admin/cards/AdminCards.tsx");
+    const compatibilityBarrel = read("components/admin/AdminPrimitives.tsx");
 
     expect(component).toContain("export function StatCard(");
     expect(component).toContain("export function MetricCard(");
@@ -20,5 +21,6 @@ describe("admin card system", () => {
     expect(component).toContain("admin-card-shell");
     expect(component).toContain("admin-stat-card__footer");
     expect(component).toContain("admin-card-shell__header");
+    expect(compatibilityBarrel).toContain('from "@/components/admin/cards/AdminCards"');
   });
 });

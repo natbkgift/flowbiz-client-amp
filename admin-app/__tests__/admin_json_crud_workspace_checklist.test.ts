@@ -10,7 +10,7 @@ const workspaceSource = fs.readFileSync(
   "utf-8"
 );
 const primitivesSource = fs.readFileSync(
-  path.resolve(__dirname, "../components/admin/AdminPrimitives.tsx"),
+  path.resolve(__dirname, "../components/admin/navigation/AdminTabSwitch.tsx"),
   "utf-8"
 );
 

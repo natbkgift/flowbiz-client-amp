@@ -143,25 +143,29 @@ describe("B14 admin workspace pages contract", () => {
 
   it("admin login forms do not prefill credentials from stored sessions", () => {
     const loginPages = [
-      "app/admin/dashboard/page.tsx",
-      "app/admin/domain/page.tsx",
-      "app/admin/seo/page.tsx",
-      "app/admin/layout/page.tsx",
-      "app/admin/media/page.tsx",
-      "app/admin/inquiries/page.tsx",
-      "app/admin/imports/page.tsx",
-      "app/admin/home-composer/page.tsx",
+      {
+        stateFile: "app/admin/dashboard/page.tsx",
+        formFile: "components/admin/domain/dashboard/AdminDashboardScreen.tsx",
+      },
+      { stateFile: "app/admin/domain/page.tsx" },
+      { stateFile: "app/admin/seo/page.tsx" },
+      { stateFile: "app/admin/layout/page.tsx" },
+      { stateFile: "app/admin/media/page.tsx" },
+      { stateFile: "app/admin/inquiries/page.tsx" },
+      { stateFile: "app/admin/imports/page.tsx" },
+      { stateFile: "app/admin/home-composer/page.tsx" },
     ];
 
-    for (const file of loginPages) {
-      const page = read(file);
+    for (const { stateFile, formFile } of loginPages) {
+      const page = read(stateFile);
+      const formSource = read(formFile || stateFile);
       expect(page).toMatch(/\[loginEmail,\s*setLoginEmail\]\s*=\s*useState\((["'])\1\);/);
       expect(page).toMatch(/\[loginPassword,\s*setLoginPassword\]\s*=\s*useState\((["'])\1\);/);
       expect(page).not.toMatch(/setLoginEmail\([^)]*\.email[^)]*\)/);
-      expect(page).toContain('name="email"');
-      expect(page).toContain('name="password"');
-      expect(page).toContain('autoComplete="username"');
-      expect(page).toContain('autoComplete="current-password"');
+      expect(formSource).toContain('name="email"');
+      expect(formSource).toContain('name="password"');
+      expect(formSource).toContain('autoComplete="username"');
+      expect(formSource).toContain('autoComplete="current-password"');
     }
   });
 });

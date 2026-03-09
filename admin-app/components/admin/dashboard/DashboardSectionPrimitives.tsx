@@ -1,7 +1,10 @@
 import { type ReactNode, useId } from "react";
 
 import { AdminIcon, type AdminIconName } from "@/components/admin/AdminIcons";
-import { MetricCard } from "@/components/admin/AdminPrimitives";
+import {
+  AdminSection,
+  AdminSectionBody,
+} from "@/components/admin/section/AdminSection";
 
 function joinClasses(...values: Array<string | undefined | false>): string {
   return values.filter(Boolean).join(" ");
@@ -26,20 +29,20 @@ export function DashboardSection({
   const subtitleId = useId();
 
   return (
-    <MetricCard
+    <AdminSection
       className={joinClasses("dashboard-section", className)}
       title={<span id={headingId}>{title}</span>}
       description={subtitle ? <p id={subtitleId}>{subtitle}</p> : undefined}
       icon={icon}
       actions={actions}
-      titleTag="h2"
       sectionProps={{
         "aria-labelledby": headingId,
         "aria-describedby": subtitle ? subtitleId : undefined,
       }}
+      bodyClassName="dashboard-section-body"
     >
-      <div className="dashboard-section-body">{children}</div>
-    </MetricCard>
+      <AdminSectionBody className="dashboard-section-body">{children}</AdminSectionBody>
+    </AdminSection>
   );
 }
 
