@@ -14,11 +14,12 @@ describe("B14 admin dashboard page contract", () => {
     const page = read("app/admin/dashboard/page.tsx");
     const screen = read("components/admin/domain/dashboard/AdminDashboardScreen.tsx");
 
-    expect(page).toContain('from "@/app/_lib/admin-auth"');
+    expect(page).toContain('from "@/app/_lib/admin-auth-hooks"');
     expect(page).toContain('from "@/app/admin/dashboard/state-utils"');
     expect(page).toContain('from "@/components/admin/domain/dashboard/AdminDashboardScreen"');
     expect(page).toContain('from "@/components/admin/domain/dashboard/dashboard-copy"');
-    expect(page).toContain("loginAdmin");
+    expect(page).toContain("useAdminAuthController");
+    expect(page).toContain("loginWithAdminSession");
     expect(page).toContain("transitionDashboardState");
     expect(page).toContain("<AdminDashboardScreen");
     expect(screen).toContain('from "@/components/admin/dashboard/DashboardSectionPrimitives"');

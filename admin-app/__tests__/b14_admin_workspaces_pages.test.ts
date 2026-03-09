@@ -151,7 +151,10 @@ describe("B14 admin workspace pages contract", () => {
       { stateFile: "app/admin/seo/page.tsx" },
       { stateFile: "app/admin/layout/page.tsx" },
       { stateFile: "app/admin/media/page.tsx" },
-      { stateFile: "app/admin/inquiries/page.tsx" },
+      {
+        stateFile: "app/admin/inquiries/page.tsx",
+        formFile: "components/admin/domain/crm/InquiryControlCenter.tsx",
+      },
       { stateFile: "app/admin/imports/page.tsx" },
       { stateFile: "app/admin/home-composer/page.tsx" },
     ];

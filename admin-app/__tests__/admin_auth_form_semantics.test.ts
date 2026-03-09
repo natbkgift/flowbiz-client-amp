@@ -10,21 +10,27 @@ function read(relativePath: string): string {
 }
 
 const AUTH_FORM_PAGES = [
-  "app/login/page.tsx",
-  "app/admin/dashboard/page.tsx",
-  "app/admin/domain/page.tsx",
-  "app/admin/home-composer/page.tsx",
-  "app/admin/imports/page.tsx",
-  "app/admin/inquiries/page.tsx",
-  "app/admin/layout/page.tsx",
-  "app/admin/media/page.tsx",
-  "app/admin/seo/page.tsx",
+  { stateFile: "app/login/page.tsx" },
+  {
+    stateFile: "app/admin/dashboard/page.tsx",
+    formFile: "components/admin/domain/dashboard/AdminDashboardScreen.tsx",
+  },
+  { stateFile: "app/admin/domain/page.tsx" },
+  { stateFile: "app/admin/home-composer/page.tsx" },
+  { stateFile: "app/admin/imports/page.tsx" },
+  {
+    stateFile: "app/admin/inquiries/page.tsx",
+    formFile: "components/admin/domain/crm/InquiryControlCenter.tsx",
+  },
+  { stateFile: "app/admin/layout/page.tsx" },
+  { stateFile: "app/admin/media/page.tsx" },
+  { stateFile: "app/admin/seo/page.tsx" },
 ];
 
 describe("admin auth form semantics", () => {
   it("keeps login fields inside semantic forms with submit behavior", () => {
-    for (const file of AUTH_FORM_PAGES) {
-      const page = read(file);
+    for (const { stateFile, formFile } of AUTH_FORM_PAGES) {
+      const page = read(formFile || stateFile);
       expect(page).toContain("<form");
       expect(page).toContain("onSubmit");
       expect(page).toContain("type=\"submit\"");
@@ -32,8 +38,8 @@ describe("admin auth form semantics", () => {
   });
 
   it("uses proper login field attributes for password managers and a11y", () => {
-    for (const file of AUTH_FORM_PAGES) {
-      const page = read(file);
+    for (const { stateFile, formFile } of AUTH_FORM_PAGES) {
+      const page = read(formFile || stateFile);
       expect(page).toContain("name=\"email\"");
       expect(page).toContain("name=\"password\"");
       expect(page).toContain("type=\"email\"");
