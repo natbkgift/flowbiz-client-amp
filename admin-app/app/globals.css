@@ -5170,6 +5170,8 @@ summary.mobile-nav__trigger::-webkit-details-marker {
 }
 
 .seo-item-row {
+  display: grid;
+  gap: 10px;
   border: 1px solid var(--color-gray-200);
   border-radius: var(--radius-md);
   padding: 12px;
@@ -5178,9 +5180,10 @@ summary.mobile-nav__trigger::-webkit-details-marker {
 
 .seo-item-head {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
   gap: 8px;
+  flex-wrap: wrap;
 }
 
 .seo-item-chip {
@@ -5207,6 +5210,10 @@ summary.mobile-nav__trigger::-webkit-details-marker {
   border: 1px solid var(--color-gray-200);
   border-radius: var(--radius-sm);
   background: var(--color-gray-50);
+}
+
+.seo-report-grid p {
+  margin: 0;
 }
 
 .state-success {
@@ -5318,4 +5325,3 @@ summary.mobile-nav__trigger::-webkit-details-marker {
     scroll-behavior: auto !important;
   }
 }
-

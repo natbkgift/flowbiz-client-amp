@@ -22,7 +22,9 @@ const DEFAULT_ROUTES = [
   "/admin/home-composer",
   "/admin/layout",
 ];
+const DEFAULT_LOCALES = ["en", "th"];
 const ROUTES = parseRoutes(process.env.ADMIN_VISUAL_ROUTES) || DEFAULT_ROUTES;
+const LOCALES = parseLocales(process.env.ADMIN_VISUAL_LOCALES) || DEFAULT_LOCALES;
 const BREAKPOINTS = parseBreakpoints(process.env.ADMIN_VISUAL_BREAKPOINTS) || [768, 1024, 1366, 1440];
 const VISUAL_EMAIL = process.env.ADMIN_VISUAL_EMAIL || process.env.ADMIN_SMOKE_EMAIL || "";
 const VISUAL_PASSWORD = process.env.ADMIN_VISUAL_PASSWORD || process.env.ADMIN_SMOKE_PASSWORD || "";
@@ -57,6 +59,14 @@ function parseRoutes(raw) {
   return source.length ? [...new Set(source)] : null;
 }
 
+function parseLocales(raw) {
+  const source = String(raw || "")
+    .split(",")
+    .map((value) => value.trim().toLowerCase())
+    .filter((value) => value === "en" || value === "th");
+  return source.length ? [...new Set(source)] : null;
+}
+
 function normalizePhase(value) {
   return value === "after" ? "after" : "before";
 }
@@ -73,6 +83,12 @@ function formatTimestamp(value) {
 
 function sanitizeRouteForFile(route) {
   return route.replace(/^\//, "").replace(/\//g, "__").replace(/[^a-zA-Z0-9_-]/g, "-");
+}
+
+function withRouteLocale(route, locale) {
+  const targetUrl = new URL(route, BASE_URL);
+  targetUrl.searchParams.set("lang", locale);
+  return targetUrl.toString();
 }
 
 async function readJson(filePath, fallback) {
@@ -204,7 +220,10 @@ async function tryLogin(page, runMetadata) {
     return;
   }
 
-  await page.goto(`${BASE_URL}/admin/dashboard`, { waitUntil: "domcontentloaded", timeout: 30000 });
+  await page.goto(withRouteLocale("/admin/dashboard", LOCALES[0] || "en"), {
+    waitUntil: "domcontentloaded",
+    timeout: 30000,
+  });
   await page.waitForTimeout(800);
   const emailInput = (await page.locator("#dashboard-login-email").first().isVisible().catch(() => false))
     ? page.locator("#dashboard-login-email").first()
@@ -243,8 +262,8 @@ async function tryLogin(page, runMetadata) {
   };
 }
 
-async function captureRoute(page, route, width, captureLog, networkLog) {
-  const targetUrl = new URL(route, BASE_URL).toString();
+async function captureRoute(page, route, locale, width, captureLog, networkLog) {
+  const targetUrl = withRouteLocale(route, locale);
   const perCaptureConsoleStart = captureLog.length;
   const perCaptureNetworkStart = networkLog.length;
 
@@ -255,20 +274,59 @@ async function captureRoute(page, route, width, captureLog, networkLog) {
   await page.waitForLoadState("networkidle", { timeout: 5000 }).catch(() => {});
 
   const metrics = await page.evaluate(() => {
+    function isVisible(element) {
+      if (!(element instanceof HTMLElement)) return false;
+      if (element.closest('[aria-hidden="true"]')) return false;
+      const style = window.getComputedStyle(element);
+      if (style.display === "none" || style.visibility === "hidden") return false;
+      const rect = element.getBoundingClientRect();
+      return rect.width > 0 && rect.height > 0;
+    }
+
+    function hasStoredSessionToken() {
+      try {
+        const raw = window.sessionStorage.getItem("flowbiz_admin_auth_session_v1");
+        if (!raw) return false;
+        const parsed = JSON.parse(raw);
+        return typeof parsed?.token === "string" && parsed.token.trim().length > 0;
+      } catch {
+        return false;
+      }
+    }
+
     const body = document.body;
     const main = document.querySelector("main");
     const heading = main?.querySelector("h1") || document.querySelector("h1");
     const interactiveCount = document.querySelectorAll("button, a[href], input, select, textarea").length;
-    const authText = body?.innerText || "";
-    const skipLink = document.querySelector('a.sr-only[href="#main-content"]');
-    const skipLinkDelta =
-      skipLink instanceof HTMLElement && skipLink.scrollWidth > skipLink.clientWidth
-        ? skipLink.scrollWidth - skipLink.clientWidth
-        : 0;
-    const bodyOverflowDelta = body ? Math.max(0, body.scrollWidth - window.innerWidth) : 0;
-    const authBlocked =
-      /sign in required|admin sign in|เข้าสู่ระบบ|ต้องเข้าสู่ระบบ/i.test(authText) ||
-      Boolean(document.querySelector('input[type="password"]'));
+    const hasStoredSession = hasStoredSessionToken();
+    const hasVisibleAuthEmail = Array.from(
+      document.querySelectorAll("#dashboard-login-email, input[id$='login-email'], input[autocomplete='username']"),
+    ).some(isVisible);
+    const hasVisibleAuthPassword = Array.from(
+      document.querySelectorAll("#dashboard-login-password, input[id$='login-password'], input[autocomplete='current-password']"),
+    ).some(isVisible);
+    const hasVisibleSignInButton = Array.from(document.querySelectorAll("button, [role='button'], input[type='submit']")).some(
+      (element) => {
+        if (!(element instanceof HTMLElement) || !isVisible(element)) return false;
+        const buttonText =
+          "value" in element && typeof element.value === "string" && element.value
+            ? element.value
+            : element.textContent || "";
+        return /sign in|เข้าสู่ระบบ/i.test(buttonText);
+      },
+    );
+    const hasVisibleAuthNotice = Array.from(
+      document.querySelectorAll("main [role='status'], main [role='alert'], main p, main strong, main h2, main h3"),
+    ).some((element) => {
+      if (!(element instanceof HTMLElement) || !isVisible(element)) return false;
+      return /sign in is required|admin sign in|กรุณาเข้าสู่ระบบ|ต้องเข้าสู่ระบบ/i.test(element.textContent || "");
+    });
+    const overflowElements = Array.from(document.querySelectorAll("main *")).filter((element) => {
+      if (!(element instanceof HTMLElement) || !isVisible(element)) return false;
+      const rect = element.getBoundingClientRect();
+      return rect.left < -8 || rect.right > window.innerWidth + 8;
+    });
+    const authBlocked = (hasVisibleAuthEmail && hasVisibleAuthPassword && hasVisibleSignInButton) || (!hasStoredSession && hasVisibleAuthNotice);
     const emptyStateCount = document.querySelectorAll(
       ".state-empty, .state-loading, .dashboard-section-state, [data-empty-state], [role='status'], [role='alert']",
     ).length;
@@ -278,18 +336,19 @@ async function captureRoute(page, route, width, captureLog, networkLog) {
       hasH1: Boolean(heading),
       headingText: heading?.textContent?.trim() || null,
       interactiveCount,
-      overflowX: bodyOverflowDelta > 1 && !(skipLinkDelta > 0 && bodyOverflowDelta <= skipLinkDelta + 8),
+      overflowX: overflowElements.length > 0,
       authBlocked,
       emptyStateCount,
     };
   });
 
-  const fileName = `${sanitizeRouteForFile(route)}__${width}.png`;
+  const fileName = `${sanitizeRouteForFile(route)}__${locale}__${width}.png`;
   const screenshotPath = path.join(CAPTURE_DIR, fileName);
   await page.screenshot({ path: screenshotPath, fullPage: true });
 
   return {
     route,
+    locale,
     breakpoint: width,
     targetUrl,
     finalUrl: page.url(),
@@ -355,6 +414,7 @@ function findingsMarkdown({ runMetadata, metricsRows, topFindings }) {
   lines.push(`- Base URL: ${BASE_URL}`);
   lines.push(`- Auth mode: ${runMetadata.auth?.mode || "unverified"}`);
   lines.push(`- Auth note: ${runMetadata.auth?.message || "No auth note recorded."}`);
+  lines.push(`- Locales: ${LOCALES.join(", ")}`);
   lines.push(`- Breakpoints: ${BREAKPOINTS.join(", ")}`);
   lines.push(`- Routes: ${ROUTES.join(", ")}`);
   lines.push(`- Score: ${scoreIteration(metricsRows)}/100`);
@@ -372,7 +432,7 @@ function findingsMarkdown({ runMetadata, metricsRows, topFindings }) {
     if (!row.hasH1) issues.push("missing-h1");
     if ((row.httpStatus || 0) >= 400) issues.push(`http-${row.httpStatus}`);
     lines.push(
-      `- ${row.route} @ ${row.breakpoint}px → ${issues.length ? issues.join(", ") : "no critical heuristic flags"}; screenshot: ${row.screenshotPath}`,
+      `- ${row.route} [${row.locale}] @ ${row.breakpoint}px → ${issues.length ? issues.join(", ") : "no critical heuristic flags"}; screenshot: ${row.screenshotPath}`,
     );
   }
   lines.push("");
@@ -402,6 +462,7 @@ async function run() {
     generatedAt: new Date().toISOString(),
     baseUrl: BASE_URL,
     routes: ROUTES,
+    locales: LOCALES,
     breakpoints: BREAKPOINTS,
     iteration: ITERATION_KEY,
     phase: PHASE,
@@ -446,30 +507,33 @@ async function run() {
 
     const metricsRows = [];
     for (const route of ROUTES) {
-      for (const width of BREAKPOINTS) {
-        try {
-          metricsRows.push(await captureRoute(page, route, width, captureLog, networkLog));
-        } catch (error) {
-          metricsRows.push({
-            route,
-            breakpoint: width,
-            targetUrl: new URL(route, BASE_URL).toString(),
-            finalUrl: page.url(),
-            httpStatus: null,
-            title: "",
-            hasMain: false,
-            hasH1: false,
-            headingText: null,
-            interactiveCount: 0,
-            overflowX: false,
-            authBlocked: false,
-            emptyStateCount: 0,
-            consoleMessages: [],
-            networkFailures: [],
-            screenshotPath: null,
-            captureSucceeded: false,
-            error: error instanceof Error ? error.message : String(error),
-          });
+      for (const locale of LOCALES) {
+        for (const width of BREAKPOINTS) {
+          try {
+            metricsRows.push(await captureRoute(page, route, locale, width, captureLog, networkLog));
+          } catch (error) {
+            metricsRows.push({
+              route,
+              locale,
+              breakpoint: width,
+              targetUrl: withRouteLocale(route, locale),
+              finalUrl: page.url(),
+              httpStatus: null,
+              title: "",
+              hasMain: false,
+              hasH1: false,
+              headingText: null,
+              interactiveCount: 0,
+              overflowX: false,
+              authBlocked: false,
+              emptyStateCount: 0,
+              consoleMessages: [],
+              networkFailures: [],
+              screenshotPath: null,
+              captureSucceeded: false,
+              error: error instanceof Error ? error.message : String(error),
+            });
+          }
         }
       }
     }
@@ -492,12 +556,14 @@ async function run() {
       runDir: RUN_DIR,
       baseUrl: BASE_URL,
       routes: ROUTES,
+      locales: LOCALES,
       breakpoints: BREAKPOINTS,
       iterations: {},
       topFindings: [],
       verificationStatus: "captured",
     });
     summary.routes = ROUTES;
+    summary.locales = LOCALES;
     summary.breakpoints = BREAKPOINTS;
     summary.updatedAt = new Date().toISOString();
     summary.iterations[ITERATION_KEY] = summary.iterations[ITERATION_KEY] || {};
@@ -506,6 +572,7 @@ async function run() {
       auth: runMetadata.auth,
       captures: metricsRows.map((row) => ({
         route: row.route,
+        locale: row.locale,
         breakpoint: row.breakpoint,
         screenshotPath: row.screenshotPath,
         captureSucceeded: row.captureSucceeded,

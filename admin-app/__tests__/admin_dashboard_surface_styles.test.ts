@@ -38,6 +38,9 @@ describe("admin dashboard surface styles", () => {
     expect(css).toContain(".admin-root .btn,");
     expect(css).toContain(".admin-root .btn-secondary,");
     expect(css).toContain(".admin-btn-danger,");
+    expect(css).toContain(".admin-card-shell--ok::before");
+    expect(css).toContain(".admin-input.has-error .admin-input__label");
+    expect(css).toContain(".admin-shell-nav-match");
   });
 
   it("styles dashboard-specific widgets, table states, and warning list", () => {
@@ -62,5 +65,7 @@ describe("admin dashboard surface styles", () => {
     expect(css).toContain(".dashboard-warning-list li");
     expect(css).toContain(".dashboard-table-wrap {");
     expect(css).toContain(".dashboard-status-unknown {");
+    expect(css).toContain(".dashboard-summary-card--primary");
+    expect(css).toContain(".dashboard-summary-card--attention");
   });
 });

@@ -13,6 +13,7 @@ import {
   LogCard,
   MetricCard,
 } from "@/components/admin/AdminPrimitives";
+import { AdminIcon } from "@/components/admin/AdminIcons";
 import { AdminFormPrimitiveInput, type AdminFormPrimitiveField } from "@/components/admin/AdminFormPrimitives";
 import type { ChecklistReport, CrudConfig, ListResponse, LocalizedFieldGroup } from "@/components/admin/domain/crud-workspace/workspace-types";
 import { nestedText } from "@/components/admin/domain/crud-workspace/workspace-utils";
@@ -207,7 +208,17 @@ export function AdminCrudWorkspaceAuthPanel({
           </div>
         </div>
       )}
-      {!isAuthenticated ? <div className="state-empty">Sign in to manage this workspace.</div> : null}
+      {!isAuthenticated ? (
+        <div className="state-empty admin-workspace-auth-empty" role="status">
+          <span className="admin-workspace-auth-empty__icon" aria-hidden="true">
+            <AdminIcon name="workspace" size={18} />
+          </span>
+          <div className="admin-workspace-auth-empty__copy">
+            <strong>Sign in to manage this workspace.</strong>
+            <p className="locale-safe">Use the existing admin session to unlock records, mutations, and revision tools.</p>
+          </div>
+        </div>
+      ) : null}
     </AdminSectionCard>
   );
 }

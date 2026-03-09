@@ -10,7 +10,7 @@ import {
   readAuthSession,
 } from '@/app/_lib/admin-auth';
 import { normalizeLocalMediaPath } from '@/app/_lib/local-media';
-import { ActionCard, AdminButton, AdminPageHeader, LogCard } from '@/components/admin/AdminPrimitives';
+import { ActionCard, AdminButton, AdminPage, AdminPageBody, AdminPageHeader, LogCard } from '@/components/admin/AdminPrimitives';
 import { apiRequest } from '../../../lib/api';
 import { getToken, setToken } from '../../../lib/auth-store';
 
@@ -633,15 +633,15 @@ export default function HomeComposerPage() {
   };
 
   return (
-    <main id="main-content" className="container content-stack">
+    <AdminPage className="home-composer-stack">
       <AdminPageHeader
         title="Home Composer"
         description="Compose Home sections, hero copy/media, and featured entity selections with governance-aware publish checks."
         icon="spark"
         eyebrow="Content orchestration"
         actions={
-          <div className="card-actions">
-            <label className="home-composer-form-field">
+          <div className="home-composer-toolbar">
+            <label className="home-composer-form-field home-composer-inline-field">
               Locale
               <select
                 value={locale}
@@ -724,7 +724,7 @@ export default function HomeComposerPage() {
       </ActionCard>
 
       {isAuthenticated ? (
-        <>
+        <AdminPageBody className="home-composer-stack">
           {error ? <div className="home-composer-banner home-composer-banner--error">{error}</div> : null}
           {notice ? <div className="home-composer-banner home-composer-banner--success">{notice}</div> : null}
 
@@ -758,17 +758,17 @@ export default function HomeComposerPage() {
             <div className="home-composer-loading">Loading composer configuration…</div>
           ) : null}
 
-          <div className="grid grid-cols-1 gap-4 xl:grid-cols-[2fr,1fr]">
-          <section className="space-y-4">
+          <div className="home-composer-split">
+          <section className="home-composer-stack">
             <ActionCard
               className="home-composer-card"
-              bodyClassName="space-y-3"
+              bodyClassName="home-composer-stack"
               title="Section controls"
               description="Enable sections and control the order they render on the homepage."
               icon="settings"
               titleTag="h2"
             >
-              <div className="mt-3 space-y-2">
+              <div className="home-composer-stack home-composer-stack--compact">
                 {(config.section_order || SECTION_KEYS).map((section, idx) => (
                   <div key={section} className="home-composer-config-block home-composer-list-item">
                     <label className="home-composer-toggle-label">
@@ -779,9 +779,13 @@ export default function HomeComposerPage() {
                       />
                       {section}
                     </label>
-                    <div className="flex items-center gap-1">
-                      <button type="button" className="btn btn-secondary admin-btn-sm" onClick={() => moveSection(section, -1)} disabled={idx === 0}>Up</button>
-                      <button type="button" className="btn btn-secondary admin-btn-sm" onClick={() => moveSection(section, 1)} disabled={idx === (config.section_order || SECTION_KEYS).length - 1}>Down</button>
+                    <div className="home-composer-button-group">
+                      <AdminButton type="button" variant="secondary" size="sm" onClick={() => moveSection(section, -1)} disabled={idx === 0}>
+                        Up
+                      </AdminButton>
+                      <AdminButton type="button" variant="secondary" size="sm" onClick={() => moveSection(section, 1)} disabled={idx === (config.section_order || SECTION_KEYS).length - 1}>
+                        Down
+                      </AdminButton>
                     </div>
                   </div>
                 ))}
@@ -790,13 +794,13 @@ export default function HomeComposerPage() {
 
             <ActionCard
               className="home-composer-card"
-              bodyClassName="space-y-3"
+              bodyClassName="home-composer-stack"
               title="Hero"
               description="Main heading, CTAs, trust strip, and hero image selection."
               icon="home"
               titleTag="h2"
             >
-              <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+              <div className="home-composer-dual-grid">
                 <label className="home-composer-form-field">Heading<input value={config.hero.heading || ''} onChange={(e) => setConfig((prev) => ({ ...prev, hero: { ...prev.hero, heading: e.target.value } }))} className="home-composer-form-control" /></label>
                 <label className="home-composer-form-field">Subheading<input value={config.hero.subheading || ''} onChange={(e) => setConfig((prev) => ({ ...prev, hero: { ...prev.hero, subheading: e.target.value } }))} className="home-composer-form-control" /></label>
                 <label className="home-composer-form-field">Primary CTA label<input value={config.hero.primary_cta_label || ''} onChange={(e) => setConfig((prev) => ({ ...prev, hero: { ...prev.hero, primary_cta_label: e.target.value } }))} className="home-composer-form-control" /></label>
@@ -805,7 +809,7 @@ export default function HomeComposerPage() {
                 <label className="home-composer-form-field">Secondary CTA URL<input value={config.hero.secondary_cta_url || ''} onChange={(e) => setConfig((prev) => ({ ...prev, hero: { ...prev.hero, secondary_cta_url: e.target.value } }))} className="home-composer-form-control" /></label>
               </div>
               <label className="home-composer-form-field">Hero image (`/media/...` only)
-                <div className="mt-1 flex items-center gap-2">
+                <div className="home-composer-inline-field">
                   <input
                     value={config.hero.hero_image || ''}
                     onChange={(e) => updateHeroImage(e.target.value)}
@@ -813,9 +817,9 @@ export default function HomeComposerPage() {
                     aria-invalid={!!heroImageError}
                     aria-describedby={heroImageError ? 'hero-image-error' : undefined}
                   />
-                  <button type="button" aria-label="Choose hero image media" onClick={() => setHeroMediaModalOpen(true)} className="btn btn-secondary">
+                  <AdminButton type="button" variant="secondary" size="sm" aria-label="Choose hero image media" onClick={() => setHeroMediaModalOpen(true)}>
                     Choose media
-                  </button>
+                  </AdminButton>
                 </div>
               </label>
               {heroImageError ? (
@@ -830,8 +834,8 @@ export default function HomeComposerPage() {
                   aria-modal="true"
                   aria-label="Hero image media picker"
                 >
-                  <div className="mb-3 flex items-center justify-between gap-2">
-                    <p className="home-composer-form-field">Select a media asset for the hero image.</p>
+                  <div className="home-composer-dialog-head">
+                    <p className="home-composer-note">Select a media asset for the hero image.</p>
                     <button ref={heroMediaCloseButtonRef} type="button" aria-label="Close hero image media picker" className="btn btn-secondary admin-btn-sm" onClick={() => setHeroMediaModalOpen(false)}>
                       Close
                     </button>
@@ -846,7 +850,7 @@ export default function HomeComposerPage() {
                         className="home-composer-media-option"
                       >
                         <div className="home-composer-code">{asset.storage_path}</div>
-                        <div className={`mt-1 inline-flex rounded px-1.5 py-0.5 text-[11px] ${mediaBadgeClass(asset)}`}>
+                        <div className={`home-composer-media-status-badge ${mediaBadgeClass(asset)}`}>
                           rights={asset.rights_status || 'unknown'} · approval={asset.approval_status || 'unknown'}
                         </div>
                       </button>
@@ -861,7 +865,7 @@ export default function HomeComposerPage() {
 
             <ActionCard
               className="home-composer-card"
-              bodyClassName="space-y-3"
+              bodyClassName="home-composer-stack"
               title="Path selector"
               description="Configure enabled journeys, labels, descriptions, and destination URLs."
               icon="filter"
@@ -874,7 +878,7 @@ export default function HomeComposerPage() {
               {(config.path_selector.paths || []).map((path, idx) => (
                 <div key={path.key || idx} className="home-composer-config-block">
                   <div className="home-composer-config-block-kicker">{path.key}</div>
-                  <div className="mt-2 grid grid-cols-1 gap-2 md:grid-cols-3">
+                  <div className="home-composer-triple-grid">
                     <label className="home-composer-form-field">Label<input value={path.label || ''} onChange={(e) => setConfig((prev) => {
                       const nextPaths = [...(prev.path_selector.paths || [])];
                       nextPaths[idx] = { ...nextPaths[idx], label: e.target.value };
@@ -897,13 +901,13 @@ export default function HomeComposerPage() {
 
             <ActionCard
               className="home-composer-card"
-              bodyClassName="space-y-3"
+              bodyClassName="home-composer-stack"
               title="Featured Projects"
               description="Choose project selection mode, copy, and manual featured items."
               icon="projects"
               titleTag="h2"
             >
-              <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+              <div className="home-composer-dual-grid">
                 <label className="home-composer-form-field">Mode
                   <select value={config.featured_projects.mode || 'auto'} onChange={(e) => setConfig((prev) => ({ ...prev, featured_projects: { ...prev.featured_projects, mode: e.target.value as 'manual' | 'auto' } }))} className="home-composer-form-control">
                     <option value="auto">auto</option>
@@ -924,7 +928,7 @@ export default function HomeComposerPage() {
                       onChange={() => toggleProjectSelection(item.id)}
                       aria-label={`Select project ${item.name || item.slug || item.id}`}
                     />
-                    <label htmlFor={`featured-project-${item.id}`} className="cursor-pointer">
+                    <label htmlFor={`featured-project-${item.id}`} className="home-composer-option-label">
                       <span className="home-composer-option-title">{item.name || item.slug || item.id}</span>
                       <span className="home-composer-option-meta">{item.slug} · {item.status}</span>
                     </label>
@@ -935,13 +939,13 @@ export default function HomeComposerPage() {
 
             <ActionCard
               className="home-composer-card"
-              bodyClassName="space-y-3"
+              bodyClassName="home-composer-stack"
               title="Featured Properties / Investment picks"
               description="Configure property selection mode, copy, and manual picks."
               icon="properties"
               titleTag="h2"
             >
-              <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+              <div className="home-composer-dual-grid">
                 <label className="home-composer-form-field">Mode
                   <select value={config.featured_properties.mode || 'auto'} onChange={(e) => setConfig((prev) => ({ ...prev, featured_properties: { ...prev.featured_properties, mode: e.target.value as 'manual' | 'auto' } }))} className="home-composer-form-control">
                     <option value="auto">auto</option>
@@ -962,7 +966,7 @@ export default function HomeComposerPage() {
                       onChange={() => togglePropertySelection(item.id)}
                       aria-label={`Select property ${item.title || item.source_id || item.id}`}
                     />
-                    <label htmlFor={`featured-property-${item.id}`} className="cursor-pointer">
+                    <label htmlFor={`featured-property-${item.id}`} className="home-composer-option-label">
                       <span className="home-composer-option-title">{item.title || item.source_id || item.id}</span>
                       <span className="home-composer-option-meta">{item.source_id} · {item.status} · {item.type}</span>
                     </label>
@@ -973,7 +977,7 @@ export default function HomeComposerPage() {
 
             <ActionCard
               className="home-composer-card"
-              bodyClassName="space-y-3"
+              bodyClassName="home-composer-stack"
               title="Proof / Trust"
               description="Edit supporting metrics, trust proofs, and process timeline JSON blocks."
               icon="success"
@@ -992,7 +996,7 @@ export default function HomeComposerPage() {
 
             <ActionCard
               className="home-composer-card"
-              bodyClassName="space-y-3"
+              bodyClassName="home-composer-stack"
               title="Market Insights / Reviews / Videos / Bottom CTA"
               description="Configure supporting sections and final CTA content in one editor block."
               icon="dashboard"
@@ -1005,7 +1009,7 @@ export default function HomeComposerPage() {
                     <input type="checkbox" checked={Boolean(config[section].enabled)} onChange={(e) => setConfig((prev) => ({ ...prev, [section]: { ...prev[section], enabled: e.target.checked } }))} />
                     Enabled
                   </label>
-                  <div className="grid grid-cols-1 gap-2 md:grid-cols-3">
+                  <div className="home-composer-triple-grid">
                     <label className="home-composer-form-field">Heading<input value={config[section].heading || ''} onChange={(e) => setConfig((prev) => ({ ...prev, [section]: { ...prev[section], heading: e.target.value } }))} className="home-composer-form-control" /></label>
                     <label className="home-composer-form-field">Subcopy<input value={config[section].subcopy || ''} onChange={(e) => setConfig((prev) => ({ ...prev, [section]: { ...prev[section], subcopy: e.target.value } }))} className="home-composer-form-control" /></label>
                     <label className="home-composer-form-field">Mode<input value={config[section].mode || ''} onChange={(e) => setConfig((prev) => ({ ...prev, [section]: { ...prev[section], mode: e.target.value } }))} className="home-composer-form-control" /></label>
@@ -1018,7 +1022,7 @@ export default function HomeComposerPage() {
                   <input type="checkbox" checked={Boolean(config.bottom_cta.enabled)} onChange={(e) => setConfig((prev) => ({ ...prev, bottom_cta: { ...prev.bottom_cta, enabled: e.target.checked } }))} />
                   Enabled
                 </label>
-                <div className="grid grid-cols-1 gap-2 md:grid-cols-2">
+                <div className="home-composer-dual-grid">
                   <label className="home-composer-form-field">Heading<input value={config.bottom_cta.heading || ''} onChange={(e) => setConfig((prev) => ({ ...prev, bottom_cta: { ...prev.bottom_cta, heading: e.target.value } }))} className="home-composer-form-control" /></label>
                   <label className="home-composer-form-field">Subheading<input value={config.bottom_cta.subheading || ''} onChange={(e) => setConfig((prev) => ({ ...prev, bottom_cta: { ...prev.bottom_cta, subheading: e.target.value } }))} className="home-composer-form-control" /></label>
                   <label className="home-composer-form-field">Trust note<input value={config.bottom_cta.trust_note || ''} onChange={(e) => setConfig((prev) => ({ ...prev, bottom_cta: { ...prev.bottom_cta, trust_note: e.target.value } }))} className="home-composer-form-control" /></label>
@@ -1031,21 +1035,21 @@ export default function HomeComposerPage() {
             </ActionCard>
           </section>
 
-          <aside className="space-y-4">
+          <aside className="home-composer-stack">
             <LogCard
               className="home-composer-card"
-              bodyClassName="space-y-3"
+              bodyClassName="home-composer-stack"
               title="Media picker"
               description="Search media candidates and assign a local hero image."
               icon="media"
               titleTag="h2"
             >
-              <input value={candidateSearch} onChange={(e) => setCandidateSearch(e.target.value)} placeholder="Search projects/properties/media" className="mt-2 home-composer-search-input" />
-              <div className="mt-3 max-h-[65vh] space-y-2 overflow-auto">
+              <input value={candidateSearch} onChange={(e) => setCandidateSearch(e.target.value)} placeholder="Search projects/properties/media" className="home-composer-search-input" />
+              <div className="home-composer-search-results">
                 {mediaCandidates.map((asset) => (
                   <button key={asset.id} type="button" onClick={() => selectHeroMedia(asset.storage_path)} className="home-composer-media-option">
                     <div className="home-composer-code">{asset.storage_path}</div>
-                    <div className={`mt-1 inline-flex rounded px-1.5 py-0.5 text-[11px] ${mediaBadgeClass(asset)}`}>
+                    <div className={`home-composer-media-status-badge ${mediaBadgeClass(asset)}`}>
                       rights={asset.rights_status || 'unknown'} · approval={asset.approval_status || 'unknown'}
                     </div>
                   </button>
@@ -1055,13 +1059,13 @@ export default function HomeComposerPage() {
 
             <LogCard
               className="home-composer-card"
-              bodyClassName="space-y-3 home-composer-status-card"
+              bodyClassName="home-composer-stack home-composer-status-card"
               title="Composer status"
               description="Current bundle metadata for draft and published variants."
               icon="info"
               titleTag="h2"
             >
-              <ul className="mt-2 space-y-1">
+              <ul className="home-composer-status-list">
                 <li>Page key: {bundle?.page_key || 'home'}</li>
                 <li>Locale: {bundle?.locale || locale}</li>
                 <li>Draft version: {bundle?.draft?.version ?? 'N/A'}</li>
@@ -1071,9 +1075,8 @@ export default function HomeComposerPage() {
             </LogCard>
           </aside>
         </div>
-        </>
+        </AdminPageBody>
       ) : null}
-    </main>
+    </AdminPage>
   );
 }
-
