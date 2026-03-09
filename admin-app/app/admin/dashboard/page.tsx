@@ -71,7 +71,7 @@ export default function AdminDashboardPage() {
       const body = await fetchSummary(activeToken);
       setSummary(body);
       setDashboardState((current) => transitionDashboardState(current, "fetch_success", body));
-      persistSession(activeToken, emailOverride ?? authEmail || loginEmail);
+      persistSession(activeToken, (emailOverride ?? authEmail) || loginEmail);
     } catch {
       setSummary(null);
       setPageError(`${t.loadError} ${t.loadErrorHint}`);

@@ -156,7 +156,7 @@ export default function AdminInquiriesPage() {
         setSelected(null);
         setTimeline([]);
       }
-      persistSession(activeToken, emailOverride ?? authEmail || loginEmail);
+      persistSession(activeToken, (emailOverride ?? authEmail) || loginEmail);
     } catch {
       setError(t.error);
     } finally {
