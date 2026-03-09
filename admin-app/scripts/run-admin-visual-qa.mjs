@@ -192,16 +192,12 @@ async function captureRoute(page, route, width, captureLog, networkLog) {
     const heading = main?.querySelector("h1") || document.querySelector("h1");
     const interactiveCount = document.querySelectorAll("button, a[href], input, select, textarea").length;
     const authText = body?.innerText || "";
-    const hasVisibleOverflow = Array.from(document.querySelectorAll("*")).some((node) => {
-      if (!(node instanceof HTMLElement)) return false;
-      if (node.clientWidth <= 1 || node.clientHeight <= 1) return false;
-      if (node.className.includes("sr-only")) return false;
-      const style = window.getComputedStyle(node);
-      if (style.display === "none" || style.visibility === "hidden") return false;
-      if (style.position === "absolute" && style.clip !== "auto") return false;
-      const rect = node.getBoundingClientRect();
-      return rect.right > window.innerWidth + 1 || rect.left < -1;
-    });
+    const skipLink = document.querySelector('a.sr-only[href="#main-content"]');
+    const skipLinkDelta =
+      skipLink instanceof HTMLElement && skipLink.scrollWidth > skipLink.clientWidth
+        ? skipLink.scrollWidth - skipLink.clientWidth
+        : 0;
+    const bodyOverflowDelta = body ? Math.max(0, body.scrollWidth - window.innerWidth) : 0;
     const authBlocked =
       /sign in required|admin sign in|เข้าสู่ระบบ|ต้องเข้าสู่ระบบ/i.test(authText) ||
       Boolean(document.querySelector('input[type="password"]'));
@@ -214,7 +210,7 @@ async function captureRoute(page, route, width, captureLog, networkLog) {
       hasH1: Boolean(heading),
       headingText: heading?.textContent?.trim() || null,
       interactiveCount,
-      overflowX: hasVisibleOverflow,
+      overflowX: bodyOverflowDelta > 1 && !(skipLinkDelta > 0 && bodyOverflowDelta <= skipLinkDelta + 8),
       authBlocked,
       emptyStateCount,
     };
