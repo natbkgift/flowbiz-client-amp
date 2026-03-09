@@ -29,7 +29,11 @@ describe("admin shared surface polish", () => {
   it("gives dashboard overview cards explicit hierarchy classes", () => {
     const screen = read("components/admin/domain/dashboard/AdminDashboardScreen.tsx");
 
+    expect(screen).toContain('className: "dashboard-summary-card dashboard-summary-card--secondary dashboard-summary-card--snapshot"');
+    expect(screen).toContain('className: "dashboard-summary-card dashboard-summary-card--secondary dashboard-summary-card--queue"');
     expect(screen).toContain('className: "dashboard-summary-card dashboard-summary-card--primary"');
     expect(screen).toContain('className: "dashboard-summary-card dashboard-summary-card--attention"');
+    expect(screen).toContain('className="dashboard-hero-toolbar"');
+    expect(screen).toContain('className="dashboard-operational-card"');
   });
 });

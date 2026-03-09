@@ -85,6 +85,10 @@ describe("B14 admin dashboard page contract", () => {
     expect(screen).toContain('ariaLabel={t.trendTitle}');
     expect(screen).toContain('role="alert">{authError}</div>');
     expect(screen).toContain("DashboardSectionState");
+    expect(screen).toContain("renderOperationalIdleCard");
+    expect(screen).toContain("dashboard-operational-card");
+    expect(screen).toContain("dashboard-hero-toolbar");
+    expect(screen).toContain("dashboard-insight-item__status");
     expect(screen).toContain("workspaceLockedTitle");
     expect(screen).toContain("dashboardState === \"loading\"");
     expect(screen).toContain("dashboardState === \"idle\"");
@@ -100,8 +104,14 @@ describe("B14 admin dashboard page contract", () => {
     expect(copy).toContain('insightsTitle: "Pipeline summary"');
     expect(copy).toContain('watchlistTitle: "Watchlist"');
     expect(copy).toContain('backgroundTasksTitle: "Background tasks"');
+    expect(copy).toContain('lastUpdated: "Last updated"');
+    expect(copy).toContain('quickActions: "Quick actions"');
+    expect(copy).toContain('refreshRequired: "Refresh required"');
+    expect(copy).toContain('errorStatus: "Error"');
     expect(copy).toContain('sourcePage: "หน้าต้นทาง"');
     expect(copy).toContain('intent: "เป้าหมาย"');
+    expect(copy).toContain('lastUpdated: "อัปเดตล่าสุด"');
+    expect(copy).toContain('quickActions: "การดำเนินการด่วน"');
     expect(page).toContain("dashboardCopy[locale]");
   });
 

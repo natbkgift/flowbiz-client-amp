@@ -93,15 +93,45 @@ function taskTone(status: string | null | undefined): BackgroundTask["tone"] {
 
 function taskLabel(
   status: string | null | undefined,
-  labels: Pick<DashboardScreenCopy, "taskHealthy" | "taskAttention" | "taskUnknown">,
+  labels: Pick<DashboardScreenCopy, "taskHealthy" | "taskAttention" | "taskUnknown" | "taskError">,
 ): string {
   const normalized = String(status || "").trim().toLowerCase();
   if (!normalized) return labels.taskUnknown;
   if (normalized === "ok" || normalized === "healthy" || normalized === "success") return labels.taskHealthy;
-  if (normalized === "failed" || normalized === "error" || normalized === "partial" || normalized === "warning") {
+  if (normalized === "failed" || normalized === "error") return labels.taskError;
+  if (normalized === "partial" || normalized === "warning") {
     return labels.taskAttention;
   }
   return normalized.toUpperCase();
+}
+
+function badgeTone(tone: BackgroundTask["tone"]): "info" | "ok" | "warn" | "error" {
+  if (tone === "ok" || tone === "warn" || tone === "error") return tone;
+  return "info";
+}
+
+function badgeIcon(tone: BackgroundTask["tone"]): "success" | "warning" | "x" | "info" {
+  if (tone === "ok") return "success";
+  if (tone === "warn") return "warning";
+  if (tone === "error") return "x";
+  return "info";
+}
+
+function freshnessTone(ageSeconds: number | null): BackgroundTask["tone"] {
+  if (typeof ageSeconds !== "number" || !Number.isFinite(ageSeconds) || ageSeconds < 0) return "info";
+  if (ageSeconds <= 3600) return "ok";
+  if (ageSeconds <= 21600) return "warn";
+  return "error";
+}
+
+function toneLabel(
+  tone: BackgroundTask["tone"],
+  labels: Pick<DashboardScreenCopy, "taskHealthy" | "warningStatus" | "errorStatus" | "refreshRequired">,
+): string {
+  if (tone === "ok") return labels.taskHealthy;
+  if (tone === "warn") return labels.warningStatus;
+  if (tone === "error") return labels.errorStatus;
+  return labels.refreshRequired;
 }
 
 function DashboardControlCenter({
@@ -307,7 +337,7 @@ export function AdminDashboardScreen({
             {t.snapshot}
           </AdminBadge>
         ),
-        className: "dashboard-summary-card dashboard-summary-card--snapshot",
+        className: "dashboard-summary-card dashboard-summary-card--secondary dashboard-summary-card--snapshot",
       },
       {
         key: "incomplete_widget_count",
@@ -332,7 +362,7 @@ export function AdminDashboardScreen({
               : t.stable}
           </AdminBadge>
         ),
-        className: "dashboard-summary-card dashboard-summary-card--queue",
+        className: "dashboard-summary-card dashboard-summary-card--secondary dashboard-summary-card--queue",
       },
       {
         key: "recent_inquiries",
@@ -427,6 +457,25 @@ export function AdminDashboardScreen({
     return tasks;
   }, [locale, summary, t]);
 
+  const overallTone = useMemo<BackgroundTask["tone"]>(() => {
+    if (dashboardState === "error" || Boolean(pageError) || backgroundTasks.some((task) => task.tone === "error")) {
+      return "error";
+    }
+    if (
+      (summary?.warnings?.length || 0) > 0 ||
+      (summary?.incomplete_widget_count || 0) > 0 ||
+      backgroundTasks.some((task) => task.tone === "warn")
+    ) {
+      return "warn";
+    }
+    if (isAuthenticated) {
+      return "ok";
+    }
+    return "info";
+  }, [backgroundTasks, dashboardState, isAuthenticated, pageError, summary]);
+
+  const latestOperationalTimestamp = summary?.generated_at || summary?.raw_metrics?.recent_inquiries?.latest_at || null;
+
   function renderRefreshButton(label?: string) {
     return (
       <AdminButton variant="secondary" icon="refresh" type="button" onClick={() => void onRefresh()} disabled={loading}>
@@ -443,6 +492,95 @@ export function AdminDashboardScreen({
         body={emptyBody}
         action={renderRefreshButton(t.retry)}
       />
+    );
+  }
+
+  function renderOperationalIdleCard({
+    title,
+    value,
+    detail,
+    updatedAt,
+    action,
+    statusTone = "info",
+    statusLabel = t.refreshRequired,
+  }: {
+    title: string;
+    value: string;
+    detail: string;
+    updatedAt: string;
+    action: ReactNode;
+    statusTone?: BackgroundTask["tone"];
+    statusLabel?: string;
+  }) {
+    return (
+      <article className="dashboard-operational-card" role="status" aria-live="polite">
+        <div className="dashboard-operational-card__head">
+          <div className="dashboard-operational-card__heading">
+            <span className="dashboard-operational-card__label">{title}</span>
+            <strong className="dashboard-operational-card__value">{value}</strong>
+          </div>
+          <AdminBadge tone={badgeTone(statusTone)} icon={badgeIcon(statusTone)}>
+            {statusLabel}
+          </AdminBadge>
+        </div>
+        <dl className="dashboard-operational-card__meta">
+          <div>
+            <dt>{t.lastUpdated}</dt>
+            <dd>{updatedAt}</dd>
+          </div>
+          <div>
+            <dt>{t.metricValue}</dt>
+            <dd>{detail}</dd>
+          </div>
+        </dl>
+        <div className="dashboard-operational-card__actions">{action}</div>
+      </article>
+    );
+  }
+
+  function renderHeroToolbar() {
+    if (!isAuthenticated) {
+      return (
+        <div className="dashboard-hero-toolbar dashboard-hero-toolbar--locked">
+          <div className="dashboard-hero-toolbar__item">
+            <span className="dashboard-hero-toolbar__label">{t.status}</span>
+            <AdminBadge tone="info" icon="workspace">
+              {t.loginTitle}
+            </AdminBadge>
+          </div>
+          <div className="dashboard-hero-toolbar__item">
+            <span className="dashboard-hero-toolbar__label">{t.lastUpdated}</span>
+            <strong>{t.noSnapshotYet}</strong>
+          </div>
+        </div>
+      );
+    }
+
+    return (
+      <div className="dashboard-hero-toolbar">
+        <div className="dashboard-hero-toolbar__item">
+          <span className="dashboard-hero-toolbar__label">{t.status}</span>
+          <AdminBadge tone={badgeTone(overallTone)} icon={badgeIcon(overallTone)}>
+            {toneLabel(overallTone, t)}
+          </AdminBadge>
+        </div>
+        <div className="dashboard-hero-toolbar__item">
+          <span className="dashboard-hero-toolbar__label">{t.lastUpdated}</span>
+          <strong>{latestOperationalTimestamp ? prettyDate(latestOperationalTimestamp, locale) : t.noSnapshotYet}</strong>
+        </div>
+        <div className="dashboard-hero-toolbar__item dashboard-hero-toolbar__item--actions">
+          <span className="dashboard-hero-toolbar__label">{t.quickActions}</span>
+          <div className="dashboard-hero-toolbar__actions">
+            {renderRefreshButton()}
+            <Link
+              className={adminButtonClassName({ variant: "secondary", size: "sm" })}
+              href={withAdminLocale("/admin/inquiries", locale)}
+            >
+              {t.openCrm}
+            </Link>
+          </div>
+        </div>
+      </div>
     );
   }
 
@@ -467,14 +605,15 @@ export function AdminDashboardScreen({
     }
 
     if (dashboardState === "idle") {
-      return (
-        <DashboardSectionState
-          tone="info"
-          title={t.overviewReadyTitle}
-          body={t.overviewReadyBody}
-          action={renderRefreshButton()}
-        />
-      );
+      return renderOperationalIdleCard({
+        title: t.generatedAt,
+        value: latestOperationalTimestamp ? prettyDate(latestOperationalTimestamp, locale) : t.noSnapshotYet,
+        detail: `${WIDGET_KEYS.length} · ${t.snapshot}`,
+        updatedAt: latestOperationalTimestamp ? prettyDate(latestOperationalTimestamp, locale) : t.noSnapshotYet,
+        action: renderRefreshButton(),
+        statusTone: overallTone,
+        statusLabel: toneLabel(overallTone, t),
+      });
     }
 
     if (dashboardState === "empty") {
@@ -520,7 +659,13 @@ export function AdminDashboardScreen({
     }
 
     if (dashboardState === "idle") {
-      return <DashboardSectionState tone="info" title={t.sectionReadyTitle} body={t.sectionReadyBody} action={renderRefreshButton()} />;
+      return renderOperationalIdleCard({
+        title: t.widgets,
+        value: String(WIDGET_KEYS.length),
+        detail: t.widgetsHint,
+        updatedAt: latestOperationalTimestamp ? prettyDate(latestOperationalTimestamp, locale) : t.noSnapshotYet,
+        action: renderRefreshButton(),
+      });
     }
 
     if (widgets.length === 0) {
@@ -558,7 +703,13 @@ export function AdminDashboardScreen({
     }
 
     if (dashboardState === "idle") {
-      return <DashboardSectionState tone="info" title={t.sectionReadyTitle} body={t.sectionReadyBody} action={renderRefreshButton()} />;
+      return renderOperationalIdleCard({
+        title: t.insightsTitle,
+        value: freshnessEntries.length > 0 ? String(freshnessEntries.length) : t.unknownValue,
+        detail: t.insightsHint,
+        updatedAt: latestOperationalTimestamp ? prettyDate(latestOperationalTimestamp, locale) : t.noSnapshotYet,
+        action: renderRefreshButton(),
+      });
     }
 
     if (freshnessEntries.length === 0) {
@@ -567,17 +718,25 @@ export function AdminDashboardScreen({
 
     return (
       <ul className="dashboard-insight-list">
-        {freshnessEntries.map(([key, item]) => (
-          <li key={key} className="dashboard-insight-item">
-            <div className="dashboard-insight-copy">
-              <strong>{humanizeMetricKey(key)}</strong>
-              <p>
-                {t.checkedAt}: {prettyDate(item.checked_at, locale)}
-              </p>
-            </div>
-            <span className="dashboard-insight-age">{formatAge(item.age_seconds, locale, t.unknownValue)}</span>
-          </li>
-        ))}
+        {freshnessEntries.map(([key, item]) => {
+          const statusTone = freshnessTone(item.age_seconds);
+          return (
+            <li key={key} className="dashboard-insight-item">
+              <div className="dashboard-insight-copy">
+                <strong>{humanizeMetricKey(key)}</strong>
+                <p>
+                  {t.checkedAt}: {prettyDate(item.checked_at, locale)}
+                </p>
+              </div>
+              <div className="dashboard-insight-item__status">
+                <AdminBadge tone={badgeTone(statusTone)} icon={badgeIcon(statusTone)}>
+                  {toneLabel(statusTone, t)}
+                </AdminBadge>
+                <span className="dashboard-insight-age">{formatAge(item.age_seconds, locale, t.unknownValue)}</span>
+              </div>
+            </li>
+          );
+        })}
       </ul>
     );
   }
@@ -603,7 +762,13 @@ export function AdminDashboardScreen({
     }
 
     if (dashboardState === "idle") {
-      return <DashboardSectionState tone="info" title={t.sectionReadyTitle} body={t.sectionReadyBody} action={renderRefreshButton()} />;
+      return renderOperationalIdleCard({
+        title: t.trendTitle,
+        value: chartPeriod === "7d" ? t.trendPeriod7d : t.trendPeriod30d,
+        detail: t.trendHint,
+        updatedAt: latestOperationalTimestamp ? prettyDate(latestOperationalTimestamp, locale) : t.noSnapshotYet,
+        action: renderRefreshButton(),
+      });
     }
 
     if (!hasTrendData(trendPoints)) {
@@ -634,7 +799,15 @@ export function AdminDashboardScreen({
     }
 
     if (dashboardState === "idle") {
-      return <DashboardSectionState tone="info" title={t.sectionReadyTitle} body={t.sectionReadyBody} action={renderRefreshButton()} />;
+      return renderOperationalIdleCard({
+        title: t.warnings,
+        value: summary ? String(summary.warnings.length) : t.unknownValue,
+        detail: t.watchlistHint,
+        updatedAt: latestOperationalTimestamp ? prettyDate(latestOperationalTimestamp, locale) : t.noSnapshotYet,
+        action: renderRefreshButton(t.reviewWatchlist),
+        statusTone: (summary?.warnings?.length || 0) > 0 ? "warn" : "info",
+        statusLabel: (summary?.warnings?.length || 0) > 0 ? t.warningStatus : t.refreshRequired,
+      });
     }
 
     if ((summary?.warnings || []).length === 0) {
@@ -676,7 +849,19 @@ export function AdminDashboardScreen({
     }
 
     if (dashboardState === "idle") {
-      return <DashboardSectionState tone="info" title={t.sectionReadyTitle} body={t.sectionReadyBody} action={renderRefreshButton()} />;
+      return renderOperationalIdleCard({
+        title: t.recentInquiries,
+        value: summary ? String(totalRecentInquiryCount) : t.unknownValue,
+        detail: t.recentInquiriesHint,
+        updatedAt: summary?.raw_metrics?.recent_inquiries?.latest_at
+          ? prettyDate(summary.raw_metrics.recent_inquiries.latest_at, locale)
+          : t.noSnapshotYet,
+        action: (
+          <Link className={adminButtonClassName({ variant: "secondary", size: "sm" })} href={withAdminLocale("/admin/inquiries", locale)}>
+            {t.openCrm}
+          </Link>
+        ),
+      });
     }
 
     if (totalRecentInquiryCount === 0) {
@@ -714,7 +899,15 @@ export function AdminDashboardScreen({
     }
 
     if (dashboardState === "idle") {
-      return <DashboardSectionState tone="info" title={t.sectionReadyTitle} body={t.sectionReadyBody} action={renderRefreshButton()} />;
+      return renderOperationalIdleCard({
+        title: t.backgroundTasksTitle,
+        value: backgroundTasks.length > 0 ? String(backgroundTasks.length) : t.unknownValue,
+        detail: t.backgroundTasksHint,
+        updatedAt: latestOperationalTimestamp ? prettyDate(latestOperationalTimestamp, locale) : t.noSnapshotYet,
+        action: renderRefreshButton(),
+        statusTone: overallTone,
+        statusLabel: toneLabel(overallTone, t),
+      });
     }
 
     if (backgroundTasks.length === 0) {
@@ -760,6 +953,7 @@ export function AdminDashboardScreen({
         eyebrow={locale === "th" ? "สุขภาพระบบ" : "System health"}
         title={t.title}
         description={t.subtitle}
+        actions={renderHeroToolbar()}
         meta={renderOverviewPanel()}
       />
 
