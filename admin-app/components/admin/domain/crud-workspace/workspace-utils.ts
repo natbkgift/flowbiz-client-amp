@@ -36,6 +36,10 @@ export function nestedText(record: Record<string, unknown>, path: string): strin
   return typeof value === "string" ? value.trim() : "";
 }
 
+function normalizedFieldText(record: Record<string, unknown>, path: string): string {
+  return nestedText(record, path).toLowerCase();
+}
+
 function pathLabel(path: string): string {
   return path
     .split(".")
@@ -157,21 +161,21 @@ export function checklistReport(config: CrudConfig["publishChecklistConfig"], re
   }
 
   if (Array.isArray(config.allowedStatuses) && config.allowedStatuses.length > 0) {
-    const normalizedStatus = nestedText(record, "status").toLowerCase();
+    const normalizedStatus = normalizedFieldText(record, "status");
     if (!normalizedStatus || !config.allowedStatuses.includes(normalizedStatus)) {
       blocking.push(`Status must be one of: ${config.allowedStatuses.join(", ")}.`);
     }
   }
 
   if (Array.isArray(config.allowedCategories) && config.allowedCategories.length > 0) {
-    const normalizedCategory = nestedText(record, "category").toLowerCase();
+    const normalizedCategory = normalizedFieldText(record, "category");
     if (!normalizedCategory || !config.allowedCategories.includes(normalizedCategory)) {
       blocking.push(`Category must be one of: ${config.allowedCategories.join(", ")}.`);
     }
   }
 
   if (Array.isArray(config.mediaAnyOfPaths) && config.mediaAnyOfPaths.length > 0 && !hasAnyValue(record, config.mediaAnyOfPaths)) {
-    warnings.push("hero media is recommended before publish");
+    warnings.push("Hero media is recommended before publish.");
   }
 
   if (Array.isArray(config.requiredNumericGreaterThanZeroPaths)) {
