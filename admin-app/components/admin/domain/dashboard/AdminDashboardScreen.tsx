@@ -122,7 +122,8 @@ function badgeIcon(tone: BackgroundTask["tone"]): "success" | "warning" | "x" | 
 }
 
 function freshnessTone(ageSeconds: number | null): BackgroundTask["tone"] {
-  if (typeof ageSeconds !== "number" || !Number.isFinite(ageSeconds) || ageSeconds < 0) return "info";
+  if (ageSeconds === null) return "info";
+  if (typeof ageSeconds !== "number" || !Number.isFinite(ageSeconds) || ageSeconds < 0) return "error";
   if (ageSeconds <= FRESHNESS_OK_MAX_AGE_SECONDS) return "ok";
   if (ageSeconds <= FRESHNESS_WARN_MAX_AGE_SECONDS) return "warn";
   return "error";
@@ -461,22 +462,20 @@ export function AdminDashboardScreen({
     return tasks;
   }, [locale, summary, t]);
 
+  const warningCount = summary?.warnings?.length || 0;
+  const incompleteWidgetCount = summary?.incomplete_widget_count || 0;
   const overallTone = useMemo<BackgroundTask["tone"]>(() => {
     if (dashboardState === "error" || Boolean(pageError) || backgroundTasks.some((task) => task.tone === "error")) {
       return "error";
     }
-    if (
-      (summary?.warnings?.length || 0) > 0 ||
-      (summary?.incomplete_widget_count || 0) > 0 ||
-      backgroundTasks.some((task) => task.tone === "warn")
-    ) {
+    if (warningCount > 0 || incompleteWidgetCount > 0 || backgroundTasks.some((task) => task.tone === "warn")) {
       return "warn";
     }
     if (isAuthenticated) {
       return "ok";
     }
     return "info";
-  }, [backgroundTasks, dashboardState, isAuthenticated, pageError, summary]);
+  }, [backgroundTasks, dashboardState, incompleteWidgetCount, isAuthenticated, pageError, warningCount]);
 
   const latestOperationalTimestamp = summary?.generated_at || summary?.raw_metrics?.recent_inquiries?.latest_at || null;
   const latestOperationalLabel = latestOperationalTimestamp ? prettyDate(latestOperationalTimestamp, locale) : t.noSnapshotYet;

@@ -1664,6 +1664,7 @@
   }
 
   .dashboard-table-toolbar {
+    /* Search gets the widest column, status/sort are balanced mids, then direction/reset stay compact on the end. */
     grid-template-columns: minmax(220px, 2fr) repeat(2, minmax(150px, 1fr)) auto auto;
     align-items: end;
   }
