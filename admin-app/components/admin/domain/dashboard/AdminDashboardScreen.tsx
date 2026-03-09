@@ -41,6 +41,12 @@ type Locale = AdminLocale;
 
 type DashboardScreenCopy = (typeof dashboardCopy)[keyof typeof dashboardCopy];
 
+const HEALTHY_TASK_STATUSES = new Set(["ok", "healthy", "success"]);
+const ERROR_TASK_STATUSES = new Set(["failed", "error"]);
+const WARNING_TASK_STATUSES = new Set(["partial", "warning"]);
+const FRESHNESS_OK_MAX_AGE_SECONDS = 60 * 60;
+const FRESHNESS_WARN_MAX_AGE_SECONDS = 6 * 60 * 60;
+
 function prettyDate(value: string | null, locale: Locale): string {
   if (!value) return "-";
   const date = new Date(value);
@@ -85,9 +91,9 @@ function compactValue(value: string | null | undefined, fallback: string): strin
 function taskTone(status: string | null | undefined): BackgroundTask["tone"] {
   const normalized = String(status || "").trim().toLowerCase();
   if (!normalized) return "info";
-  if (normalized === "ok" || normalized === "healthy" || normalized === "success") return "ok";
-  if (normalized === "failed" || normalized === "error") return "error";
-  if (normalized === "partial" || normalized === "warning") return "warn";
+  if (HEALTHY_TASK_STATUSES.has(normalized)) return "ok";
+  if (ERROR_TASK_STATUSES.has(normalized)) return "error";
+  if (WARNING_TASK_STATUSES.has(normalized)) return "warn";
   return "info";
 }
 
@@ -97,11 +103,9 @@ function taskLabel(
 ): string {
   const normalized = String(status || "").trim().toLowerCase();
   if (!normalized) return labels.taskUnknown;
-  if (normalized === "ok" || normalized === "healthy" || normalized === "success") return labels.taskHealthy;
-  if (normalized === "failed" || normalized === "error") return labels.taskError;
-  if (normalized === "partial" || normalized === "warning") {
-    return labels.taskAttention;
-  }
+  if (HEALTHY_TASK_STATUSES.has(normalized)) return labels.taskHealthy;
+  if (ERROR_TASK_STATUSES.has(normalized)) return labels.taskError;
+  if (WARNING_TASK_STATUSES.has(normalized)) return labels.taskAttention;
   return normalized.toUpperCase();
 }
 
@@ -119,8 +123,8 @@ function badgeIcon(tone: BackgroundTask["tone"]): "success" | "warning" | "x" | 
 
 function freshnessTone(ageSeconds: number | null): BackgroundTask["tone"] {
   if (typeof ageSeconds !== "number" || !Number.isFinite(ageSeconds) || ageSeconds < 0) return "info";
-  if (ageSeconds <= 3600) return "ok";
-  if (ageSeconds <= 21600) return "warn";
+  if (ageSeconds <= FRESHNESS_OK_MAX_AGE_SECONDS) return "ok";
+  if (ageSeconds <= FRESHNESS_WARN_MAX_AGE_SECONDS) return "warn";
   return "error";
 }
 
