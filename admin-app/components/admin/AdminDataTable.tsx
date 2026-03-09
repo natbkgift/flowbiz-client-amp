@@ -70,7 +70,7 @@ export function AdminDataTable<T>({
     <AdminTable
       toolbar={
         <AdminTableToolbar className="card-actions">
-          <AdminInput htmlFor={filterInputId} label={filterLabel}>
+          <AdminInput htmlFor={filterInputId} label={filterLabel} icon="search">
             <input
               id={filterInputId}
               aria-label={filterLabel}
@@ -143,7 +143,7 @@ export function AdminDataTable<T>({
             onNext={goToNextPage}
             previousDisabled={effectivePage <= 1}
             nextDisabled={effectivePage >= totalPages}
-            summary={`Page ${effectivePage}`}
+            summary={`Page ${effectivePage} of ${totalPages}`}
           />
         </>
       )}

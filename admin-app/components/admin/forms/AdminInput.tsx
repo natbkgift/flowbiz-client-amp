@@ -22,6 +22,7 @@ export function AdminInput({
   className?: string;
   children: ReactNode;
 }) {
+  const hasError = Boolean(error);
   const labelContent = (
     <>
       {icon ? <AdminIcon name={icon} size={14} className="admin-input__label-icon" /> : null}
@@ -30,7 +31,7 @@ export function AdminInput({
   );
 
   return (
-    <div className={cx("admin-field", "admin-input", className)}>
+    <div className={cx("admin-field", "admin-input", hasError && "has-error", className)}>
       {htmlFor ? (
         <label className="admin-input__label" htmlFor={htmlFor}>
           {labelContent}

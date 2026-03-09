@@ -33,6 +33,9 @@ describe("admin shell navigation behavior", () => {
     const shell = read("components/layout/AdminShell.tsx");
 
     expect(shell).toContain("const hasSearchResults = filteredNavGroups.some");
+    expect(shell).toContain("renderHighlightedText");
+    expect(shell).toContain("admin-shell-nav-match");
+    expect(shell).toContain("admin-shell-nav-empty-icon");
     expect(shell).toContain("? filteredNavGroups.map((entry) =>");
     expect(shell).toContain(": emptySearchState");
     expect(shell).toContain("admin-shell-sidebar-scroll");

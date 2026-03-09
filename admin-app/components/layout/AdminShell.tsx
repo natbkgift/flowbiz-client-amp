@@ -137,6 +137,25 @@ type FilteredNavGroup = {
   items: AdminNavItem[];
 };
 
+function renderHighlightedText(text: string, searchTerm: string): ReactNode {
+  if (!searchTerm) return text;
+
+  const normalizedText = text.toLowerCase();
+  const matchIndex = normalizedText.indexOf(searchTerm);
+
+  if (matchIndex < 0) return text;
+
+  const matchEnd = matchIndex + searchTerm.length;
+
+  return (
+    <>
+      {text.slice(0, matchIndex)}
+      <mark className="admin-shell-nav-match">{text.slice(matchIndex, matchEnd)}</mark>
+      {text.slice(matchEnd)}
+    </>
+  );
+}
+
 function lockBodyScroll(): () => void {
   if (typeof window === "undefined") return () => {};
 
@@ -169,6 +188,7 @@ function renderNavGroup(
   items: AdminNavItem[],
   pathname: string,
   locale: AdminLocale,
+  searchTerm: string,
   options?: RenderNavGroupOptions,
 ): ReactNode {
   const groupActive = items.some((item) => isActiveAdminNav(pathname, item.href));
@@ -184,6 +204,8 @@ function renderNavGroup(
         <ul>
           {items.map((item) => {
             const active = isActiveAdminNav(pathname, item.href);
+            const label = getAdminNavText(item.label, locale);
+            const description = getAdminNavText(item.description, locale);
             return (
               <li key={item.href}>
                 <Link
@@ -191,15 +213,15 @@ function renderNavGroup(
                   className={active ? `${linkClassName} is-active` : linkClassName}
                   aria-current={active ? "page" : undefined}
                   onClick={options?.onNavigate}
-                  title={getAdminNavText(item.label, locale)}
+                  title={label}
                 >
                   <span className="admin-shell-nav-link-accent" aria-hidden="true" />
                   <span className="admin-shell-nav-link-icon" aria-hidden="true">
                     <AdminIcon name={item.icon} size={16} />
                   </span>
                   <span className="admin-shell-nav-link-copy">
-                    <strong>{getAdminNavText(item.label, locale)}</strong>
-                    <small>{getAdminNavText(item.description, locale)}</small>
+                    <strong>{renderHighlightedText(label, searchTerm)}</strong>
+                    <small>{renderHighlightedText(description, searchTerm)}</small>
                   </span>
                   <span className="admin-shell-nav-link-trail" aria-hidden="true">
                     <AdminIcon name="info" size={14} />
@@ -347,8 +369,11 @@ export function AdminShell({ children }: { children: ReactNode }) {
 
   const emptySearchState = (
     <div className="admin-shell-nav-empty" role="status" aria-live="polite">
+      <span className="admin-shell-nav-empty-icon" aria-hidden="true">
+        <AdminIcon name="search" size={18} />
+      </span>
       <strong>{ui.noResults}</strong>
-      <p>{ui.noResultsHint}</p>
+      <p className="locale-safe">{ui.noResultsHint}</p>
     </div>
   );
 
@@ -393,11 +418,11 @@ export function AdminShell({ children }: { children: ReactNode }) {
         <div className="admin-shell-sidebar-scroll">
           {hasSearchResults
             ? filteredNavGroups.map((entry) => (
-                <div key={entry.group.key}>
-                  {renderNavGroup(getAdminNavText(entry.group.label, locale), entry.items, pathname, locale)}
+               <div key={entry.group.key}>
+                  {renderNavGroup(getAdminNavText(entry.group.label, locale), entry.items, pathname, locale, deferredSearch)}
                 </div>
               ))
-            : emptySearchState}
+             : emptySearchState}
         </div>
 
         <nav className="admin-shell-sidebar-footer" aria-label={ui.quickActions}>
@@ -589,7 +614,7 @@ export function AdminShell({ children }: { children: ReactNode }) {
             {hasSearchResults ? (
               filteredNavGroups.map((entry) => (
                 <div key={entry.group.key}>
-                  {renderNavGroup(getAdminNavText(entry.group.label, locale), entry.items, pathname, locale, {
+                  {renderNavGroup(getAdminNavText(entry.group.label, locale), entry.items, pathname, locale, deferredSearch, {
                     linkClassName: "admin-shell-drawer-link",
                     onNavigate: closeMobileNav,
                   })}

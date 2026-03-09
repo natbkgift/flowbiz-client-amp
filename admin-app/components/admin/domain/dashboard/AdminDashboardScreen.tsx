@@ -291,6 +291,7 @@ export function AdminDashboardScreen({
       icon: AdminIconName;
       tone: "info" | "ok" | "warn";
       action: ReactNode;
+      className?: string;
     }>
   >(
     () => [
@@ -346,6 +347,7 @@ export function AdminDashboardScreen({
             {t.openCrm}
           </Link>
         ),
+        className: "dashboard-summary-card dashboard-summary-card--primary",
       },
       {
         key: "warnings",
@@ -362,6 +364,7 @@ export function AdminDashboardScreen({
             {(summary?.warnings?.length || 0) > 0 ? t.reviewWatchlist : t.stable}
           </AdminBadge>
         ),
+        className: "dashboard-summary-card dashboard-summary-card--attention",
       },
     ],
     [locale, summary, t, totalRecentInquiryCount],
@@ -487,7 +490,7 @@ export function AdminDashboardScreen({
             icon={item.icon}
             tone={item.tone}
             action={item.action}
-            className="dashboard-summary-card"
+            className={item.className ?? "dashboard-summary-card"}
           />
         ))}
       </div>
