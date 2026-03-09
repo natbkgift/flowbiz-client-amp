@@ -19,9 +19,11 @@ describe("admin shared surface polish", () => {
 
   it("adds search affordance and fuller pagination context to shared data tables", () => {
     const table = read("components/admin/AdminDataTable.tsx");
+    const primitives = read("components/admin/data-display/AdminTable.tsx");
 
     expect(table).toContain('label={filterLabel} icon="search"');
     expect(table).toContain('summary={`Page ${effectivePage} of ${totalPages}`}');
+    expect(primitives).toContain('aria-label={`Currently viewing page ${currentPage} of ${totalPages} total pages`}');
   });
 
   it("gives dashboard overview cards explicit hierarchy classes", () => {

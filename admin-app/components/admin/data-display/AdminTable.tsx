@@ -81,7 +81,7 @@ export function AdminTablePagination({
       >
         {previousLabel}
       </AdminButton>
-      <span className="dashboard-table-summary" aria-live="polite">
+      <span className="dashboard-table-summary" aria-live="polite" aria-label={`Currently viewing page ${currentPage} of ${totalPages} total pages`}>
         {summary || `${label} ${currentPage} / ${totalPages}`}
       </span>
       <AdminButton

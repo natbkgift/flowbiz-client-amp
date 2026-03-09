@@ -141,11 +141,12 @@ function renderHighlightedText(text: string, searchTerm: string): ReactNode {
   if (!searchTerm) return text;
 
   const normalizedText = text.toLowerCase();
-  const matchIndex = normalizedText.indexOf(searchTerm);
+  const normalizedSearchTerm = searchTerm.toLowerCase();
+  const matchIndex = normalizedText.indexOf(normalizedSearchTerm);
 
   if (matchIndex < 0) return text;
 
-  const matchEnd = matchIndex + searchTerm.length;
+  const matchEnd = matchIndex + normalizedSearchTerm.length;
 
   return (
     <>
