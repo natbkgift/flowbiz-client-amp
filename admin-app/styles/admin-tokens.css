@@ -91,10 +91,10 @@
     --admin-space-12: 48px;
     --admin-space-16: 64px;
 
-    --admin-sidebar-width: 280px;
+    --admin-sidebar-width: 264px;
     --admin-sidebar-width-collapsed: 76px;
     --admin-header-height: 72px;
-    --admin-content-max: 1600px;
+    --admin-content-max: 1720px;
 
     --admin-font-family: var(--font-sans), "Noto Sans Thai", system-ui, sans-serif;
 

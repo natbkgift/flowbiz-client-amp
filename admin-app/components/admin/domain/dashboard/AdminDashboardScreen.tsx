@@ -307,6 +307,7 @@ export function AdminDashboardScreen({
             {t.snapshot}
           </AdminBadge>
         ),
+        className: "dashboard-summary-card dashboard-summary-card--snapshot",
       },
       {
         key: "incomplete_widget_count",
@@ -331,6 +332,7 @@ export function AdminDashboardScreen({
               : t.stable}
           </AdminBadge>
         ),
+        className: "dashboard-summary-card dashboard-summary-card--queue",
       },
       {
         key: "recent_inquiries",

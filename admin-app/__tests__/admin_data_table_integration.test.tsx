@@ -54,7 +54,8 @@ describe("AdminDataTable integration", () => {
 
     fireEvent.change(screen.getByLabelText("Filter table rows"), { target: { value: "" } });
     fireEvent.click(screen.getByRole("button", { name: "Next" }));
-    expect(screen.getByText("Page 2")).toBeInTheDocument();
+    expect(screen.getByText("Page 2 of 2")).toBeInTheDocument();
+    expect(screen.getByLabelText("Currently viewing page 2 of 2 total pages")).toBeInTheDocument();
 
     fireEvent.click(screen.getByLabelText("Select all rows on page"));
     expect(screen.getByText("Selected: 1")).toBeInTheDocument();
