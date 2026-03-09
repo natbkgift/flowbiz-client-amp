@@ -137,7 +137,7 @@ function DashboardControlCenter({
       description={t.controlCenterHint}
       icon={isAuthenticated ? "profile" : "workspace"}
       tone={isAuthenticated ? ("info" as const) : ("neutral" as const)}
-      className={isAuthenticated ? "dashboard-control-card is-authenticated" : "dashboard-control-card is-auth-locked"}
+      className={isAuthenticated ? "dashboard-control-card" : "dashboard-control-card is-auth-locked"}
       meta={
         isAuthenticated ? (
           <AdminBadge tone="ok" icon="success">

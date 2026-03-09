@@ -129,8 +129,38 @@ function wait(time) {
   });
 }
 
+function waitForChildExit(child, timeoutMs) {
+  if (!child || child.exitCode !== null) {
+    return Promise.resolve(true);
+  }
+
+  return new Promise((resolve) => {
+    let settled = false;
+
+    const finish = (didExit) => {
+      if (settled) return;
+      settled = true;
+      clearTimeout(timer);
+      child.off("exit", onExit);
+      child.off("close", onClose);
+      resolve(didExit);
+    };
+
+    const onExit = () => finish(true);
+    const onClose = () => finish(true);
+    const timer = setTimeout(() => finish(false), timeoutMs);
+
+    child.once("exit", onExit);
+    child.once("close", onClose);
+  });
+}
+
 async function stopServer(child) {
   if (!child) return;
+
+  if (child.exitCode !== null) {
+    return;
+  }
 
   if (process.platform === "win32") {
     await new Promise((resolve) => {
@@ -141,10 +171,28 @@ async function stopServer(child) {
       killer.on("exit", resolve);
       killer.on("error", resolve);
     });
+    await waitForChildExit(child, 5000);
     return;
   }
 
-  child.kill("SIGTERM");
+  try {
+    child.kill("SIGTERM");
+  } catch {
+    return;
+  }
+
+  const exitedGracefully = await waitForChildExit(child, 15000);
+  if (exitedGracefully || child.exitCode !== null) {
+    return;
+  }
+
+  try {
+    child.kill("SIGKILL");
+  } catch {
+    return;
+  }
+
+  await waitForChildExit(child, 5000);
 }
 
 async function tryLogin(page, runMetadata) {

@@ -678,7 +678,6 @@
   .admin-card-shell,
   .admin-stat-card {
     position: relative;
-    overflow: hidden;
     display: grid;
     gap: var(--admin-space-4);
     min-height: 100%;
