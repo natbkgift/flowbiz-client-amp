@@ -30,7 +30,7 @@ export function AdminInput({
   );
 
   return (
-    <div className={cx("field", "admin-field", "admin-input", className)}>
+    <div className={cx("admin-field", "admin-input", className)}>
       {htmlFor ? (
         <label className="admin-input__label" htmlFor={htmlFor}>
           {labelContent}
