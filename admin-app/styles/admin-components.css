@@ -1388,6 +1388,11 @@
   .crm-login-form,
   .crm-session-panel,
   .home-composer-stack {
+    --home-composer-split-main: 1.4fr;
+    --home-composer-split-side: 0.6fr;
+    --home-composer-split-side-min: 300px;
+    --home-composer-surface-subtle: linear-gradient(180deg, var(--admin-color-neutral-0), var(--admin-color-neutral-50));
+    --home-composer-results-max-height: 65vh;
     display: grid;
     gap: var(--admin-space-4);
   }
@@ -1464,7 +1469,7 @@
   }
 
   .home-composer-split {
-    grid-template-columns: minmax(0, 1.35fr) minmax(300px, 0.85fr);
+    grid-template-columns: minmax(0, var(--home-composer-split-main)) minmax(var(--home-composer-split-side-min), var(--home-composer-split-side));
     gap: var(--admin-space-4);
   }
 
@@ -1674,7 +1679,7 @@
     padding: var(--admin-space-4);
     border: 1px solid var(--admin-border-subtle);
     border-radius: var(--admin-radius-md);
-    background: linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(248, 250, 252, 0.88));
+    background: var(--home-composer-surface-subtle);
   }
 
   .home-composer-config-block-kicker {
@@ -1713,7 +1718,7 @@
     padding: var(--admin-space-3) var(--admin-space-4);
     border: 1px solid var(--admin-border-subtle);
     border-radius: var(--admin-radius-md);
-    background: linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(248, 250, 252, 0.92));
+    background: var(--home-composer-surface-subtle);
   }
 
   .home-composer-button-group {
@@ -1733,9 +1738,9 @@
     display: grid;
     gap: var(--admin-space-3);
     padding: var(--admin-space-4);
-    border: 1px solid rgba(191, 219, 254, 0.78);
+    border: 1px solid var(--admin-color-primary-100);
     border-radius: var(--admin-radius-lg);
-    background: linear-gradient(180deg, rgba(239, 246, 255, 0.92), rgba(255, 255, 255, 0.98));
+    background: linear-gradient(180deg, var(--admin-color-primary-50), var(--admin-color-neutral-0));
   }
 
   .home-composer-media-list {
@@ -1770,13 +1775,13 @@
 
   .home-composer-media-status-badge {
     margin-top: var(--admin-space-1);
-    font-size: 11px;
+    font-size: var(--admin-font-size-xs);
   }
 
   .home-composer-search-results {
     display: grid;
     gap: var(--admin-space-2);
-    max-height: 65vh;
+    max-height: var(--home-composer-results-max-height);
     overflow: auto;
   }
 

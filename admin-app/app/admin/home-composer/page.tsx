@@ -633,14 +633,14 @@ export default function HomeComposerPage() {
   };
 
   return (
-    <AdminPage className="home-composer-stack" busy={loading || saving || publishing}>
+    <AdminPage className="home-composer-stack">
       <AdminPageHeader
         title="Home Composer"
         description="Compose Home sections, hero copy/media, and featured entity selections with governance-aware publish checks."
         icon="spark"
         eyebrow="Content orchestration"
         actions={
-          <div className="card-actions home-composer-toolbar">
+          <div className="home-composer-toolbar">
             <label className="home-composer-form-field home-composer-inline-field">
               Locale
               <select

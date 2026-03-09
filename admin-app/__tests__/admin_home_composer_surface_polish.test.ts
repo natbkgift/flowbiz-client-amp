@@ -32,5 +32,8 @@ describe("admin home composer surface polish", () => {
     expect(css).toContain(".home-composer-status-list");
     expect(css).toContain(".home-composer-form-field input:focus-visible");
     expect(css).toContain(".home-composer-media-status-badge");
+    expect(css).toContain("--home-composer-split-main");
+    expect(css).toContain("--home-composer-surface-subtle");
+    expect(css).toContain("--home-composer-results-max-height");
   });
 });
