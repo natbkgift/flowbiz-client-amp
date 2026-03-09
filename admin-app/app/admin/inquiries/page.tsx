@@ -4,7 +4,7 @@
 
 import { type FormEvent, useEffect, useMemo, useRef, useState } from "react";
 
-import { clearAuthSession, loginAdmin, persistAuthSession, readAuthSession } from "@/app/_lib/admin-auth";
+import { type AdminAuthErrorCode, useAdminAuthController } from "@/app/_lib/admin-auth-hooks";
 import { detectAdminLocale, type AdminLocale } from "@/app/_lib/admin-i18n";
 import {
   ActionCard,
@@ -281,12 +281,8 @@ async function fetchJson<T>(path: string, token: string): Promise<T> {
 export default function AdminInquiriesPage() {
   const savedFilterCounter = useRef(0);
   const [locale, setLocale] = useState<Locale>("en");
-  const [authToken, setAuthToken] = useState("");
-  const [authEmail, setAuthEmail] = useState("");
   const [loginEmail, setLoginEmail] = useState("");
   const [loginPassword, setLoginPassword] = useState("");
-  const [authLoading, setAuthLoading] = useState(false);
-  const [authError, setAuthError] = useState<string | null>(null);
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -314,15 +310,28 @@ export default function AdminInquiriesPage() {
   const [savedFilters, setSavedFilters] = useState<SavedFilter[]>([]);
   const [savedFilterName, setSavedFilterName] = useState("");
   const [activeSavedFilterId, setActiveSavedFilterId] = useState("");
+  const {
+    token: authToken,
+    email: authEmail,
+    authLoading,
+    authErrorCode,
+    isAuthenticated,
+    persistSession,
+    login: loginWithAdminSession,
+    logout: clearAdminSession,
+  } = useAdminAuthController();
 
   useEffect(() => {
     setLocale(detectLocale());
-    const session = readAuthSession();
-    if (!session) return;
-    setAuthToken(session.token);
-    setRole(readRoleFromToken(session.token));
-    setAuthEmail(session.email);
   }, []);
+
+  useEffect(() => {
+    if (!authToken.trim()) {
+      setRole("admin");
+      return;
+    }
+    setRole(readRoleFromToken(authToken));
+  }, [authToken]);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -344,8 +353,8 @@ export default function AdminInquiriesPage() {
     }
   }, [role]);
 
-  const isAuthenticated = authToken.trim().length > 0;
   const t = copy[locale];
+  const authError = authErrorCode ? authErrorMessage(t, authErrorCode) : null;
 
   const filterQuery = useMemo(
     () =>
@@ -369,7 +378,7 @@ export default function AdminInquiriesPage() {
     [items]
   );
 
-  async function loadList(tokenOverride?: string) {
+  async function loadList(tokenOverride?: string, emailOverride?: string) {
     await loadListWithFilters(
       {
         status: statusFilter,
@@ -380,11 +389,12 @@ export default function AdminInquiriesPage() {
         follow_up_status: followUpFilter,
         q: search,
       },
-      tokenOverride
+      tokenOverride,
+      emailOverride
     );
   }
 
-  async function loadListWithFilters(filters: Record<string, string>, tokenOverride?: string) {
+  async function loadListWithFilters(filters: Record<string, string>, tokenOverride?: string, emailOverride?: string) {
     const activeToken = (tokenOverride ?? authToken).trim();
     if (!activeToken) {
       setError(t.authRequired);
@@ -406,7 +416,7 @@ export default function AdminInquiriesPage() {
         setSelected(null);
         setTimeline([]);
       }
-      persistAuthSession(activeToken, authEmail || loginEmail);
+      persistSession(activeToken, emailOverride ?? authEmail || loginEmail);
     } catch {
       setError(t.error);
     } finally {
@@ -573,41 +583,20 @@ export default function AdminInquiriesPage() {
     event.preventDefault();
     const email = loginEmail.trim();
     const password = loginPassword;
-    if (!email || !password) {
-      setAuthError(t.loginMissing);
-      return;
-    }
-
-    setAuthLoading(true);
-    setAuthError(null);
     try {
-      const loginResult = await loginAdmin(email, password);
-      if (!loginResult.ok) {
-        setAuthError(loginResult.status === 401 ? t.loginInvalid : t.loginError);
-        return;
-      }
-      const accessToken = loginResult.accessToken;
-
-      setAuthToken(accessToken);
-      setRole(readRoleFromToken(accessToken));
-      setAuthEmail(email);
+      const loginResult = await loginWithAdminSession({ email, password });
+      if (!loginResult.ok) return;
       setLoginPassword("");
-      persistAuthSession(accessToken, email);
-      await loadList(accessToken);
+      await loadList(loginResult.accessToken, loginResult.email);
     } catch {
-      setAuthError(t.loginError);
-    } finally {
-      setAuthLoading(false);
+      return;
     }
   }
 
   function logout() {
-    clearAuthSession();
-    setAuthToken("");
+    clearAdminSession();
     setRole("admin");
-    setAuthEmail("");
     setLoginPassword("");
-    setAuthError(null);
     setError(null);
     setItems([]);
     setTotal(0);
@@ -1089,4 +1078,13 @@ export default function AdminInquiriesPage() {
       ) : null}
     </main>
   );
+}
+
+function authErrorMessage(
+  t: (typeof copy)[keyof typeof copy],
+  code: AdminAuthErrorCode
+): string {
+  if (code === "missing_credentials") return t.loginMissing;
+  if (code === "invalid_credentials") return t.loginInvalid;
+  return t.loginError;
 }

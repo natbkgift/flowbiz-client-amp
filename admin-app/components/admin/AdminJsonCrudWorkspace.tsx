@@ -5,14 +5,10 @@
 import { type FormEvent, type KeyboardEvent, useCallback, useEffect, useMemo, useState } from "react";
 
 import {
-  ADMIN_AUTH_LOGIN_PATH,
-  clearAuthSession,
   fetchJson,
-  type LoginResponse,
-  persistAuthSession,
-  readAuthSession,
   toPrettyJson,
 } from "@/app/_lib/admin-auth";
+import { useAdminAuthController } from "@/app/_lib/admin-auth-hooks";
 import { AdminDataTable, type AdminDataTableColumn } from "@/components/admin/AdminDataTable";
 import {
   ActionCard,
@@ -374,12 +370,26 @@ function toDomIdToken(value: string): string {
 
 export function AdminJsonCrudWorkspace({ config }: { config: CrudConfig }) {
   const bulkActions = config.bulkActions || [];
-  const [token, setToken] = useState("");
-  const [email, setEmail] = useState("");
   const [loginEmail, setLoginEmail] = useState("");
   const [loginPassword, setLoginPassword] = useState("");
-  const [authLoading, setAuthLoading] = useState(false);
-  const [authError, setAuthError] = useState<string | null>(null);
+  const {
+    token,
+    email,
+    authLoading,
+    authErrorCode,
+    isAuthenticated,
+    persistSession,
+    login: loginWithAdminSession,
+    logout: clearAdminSession,
+  } = useAdminAuthController();
+  const authError =
+    authErrorCode === "missing_credentials"
+      ? "Email and password are required."
+      : authErrorCode === "invalid_credentials"
+        ? "Invalid credentials."
+        : authErrorCode
+          ? "Unable to sign in."
+          : null;
 
   const [listQuery, setListQuery] = useState(config.defaultListQuery || "");
   const [identifier, setIdentifier] = useState("");
@@ -474,16 +484,6 @@ export function AdminJsonCrudWorkspace({ config }: { config: CrudConfig }) {
     []
   );
 
-  useEffect(() => {
-    const session = readAuthSession();
-    if (!session) return;
-    setToken(session.token);
-    setEmail(session.email);
-    if (session.email) setLoginEmail(session.email);
-  }, []);
-
-  const isAuthenticated = token.trim().length > 0;
-
   const listPath = useMemo(
     () => buildListPath(config.listPath, listQuery),
     [config.listPath, listQuery]
@@ -512,7 +512,7 @@ export function AdminJsonCrudWorkspace({ config }: { config: CrudConfig }) {
           : [];
       setItems(rows);
       setMeta(body.meta || null);
-      persistAuthSession(activeToken, email || loginEmail);
+      persistSession(activeToken, email || loginEmail);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Unable to load data.");
     } finally {
@@ -524,47 +524,19 @@ export function AdminJsonCrudWorkspace({ config }: { config: CrudConfig }) {
     event.preventDefault();
     const nextEmail = loginEmail.trim();
     const nextPassword = loginPassword;
-    if (!nextEmail || !nextPassword) {
-      setAuthError("Email and password are required.");
-      return;
-    }
-
-    setAuthLoading(true);
-    setAuthError(null);
     try {
-      const response = await fetch(ADMIN_AUTH_LOGIN_PATH, {
-        method: "POST",
-        headers: { "content-type": "application/json" },
-        body: JSON.stringify({ email: nextEmail, password: nextPassword }),
-      });
-      if (!response.ok) {
-        setAuthError(response.status === 401 ? "Invalid credentials." : "Unable to sign in.");
-        return;
-      }
-      const body = (await response.json()) as LoginResponse;
-      const accessToken = String(body.access_token || "").trim();
-      if (!accessToken) {
-        setAuthError("Unable to sign in.");
-        return;
-      }
-      setToken(accessToken);
-      setEmail(nextEmail);
+      const loginResult = await loginWithAdminSession({ email: nextEmail, password: nextPassword });
+      if (!loginResult.ok) return;
       setLoginPassword("");
-      persistAuthSession(accessToken, nextEmail);
-      await loadList(accessToken);
+      await loadList(loginResult.accessToken);
     } catch {
-      setAuthError("Unable to sign in.");
-    } finally {
-      setAuthLoading(false);
+      return;
     }
   }
 
   function logout(): void {
-    clearAuthSession();
-    setToken("");
-    setEmail("");
+    clearAdminSession();
     setLoginPassword("");
-    setAuthError(null);
     setError(null);
     setItems([]);
     setMeta(null);

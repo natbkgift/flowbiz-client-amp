@@ -2,7 +2,7 @@
 
 import { type FormEvent, useEffect, useState } from "react";
 
-import { clearAuthSession, loginAdmin, persistAuthSession, readAuthSession } from "@/app/_lib/admin-auth";
+import { type AdminAuthErrorCode, useAdminAuthController } from "@/app/_lib/admin-auth-hooks";
 import { detectAdminLocale, type AdminLocale } from "@/app/_lib/admin-i18n";
 import {
   transitionDashboardState,
@@ -32,30 +32,31 @@ async function fetchSummary(token: string): Promise<DashboardSummaryResponse> {
 
 export default function AdminDashboardPage() {
   const [locale, setLocale] = useState<Locale>("en");
-  const [authToken, setAuthToken] = useState("");
-  const [authEmail, setAuthEmail] = useState("");
   const [loginEmail, setLoginEmail] = useState("");
   const [loginPassword, setLoginPassword] = useState("");
-  const [authLoading, setAuthLoading] = useState(false);
-  const [authError, setAuthError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [pageError, setPageError] = useState<string | null>(null);
   const [summary, setSummary] = useState<DashboardSummaryResponse | null>(null);
   const [dashboardState, setDashboardState] = useState<DashboardState>("idle");
   const [chartPeriod, setChartPeriod] = useState<TrendPeriod>("7d");
+  const {
+    token: authToken,
+    email: authEmail,
+    authLoading,
+    authErrorCode,
+    persistSession,
+    login: loginWithAdminSession,
+    logout: clearAdminSession,
+  } = useAdminAuthController();
 
   useEffect(() => {
     setLocale(detectLocale());
-    const session = readAuthSession();
-    if (!session) return;
-    setAuthToken(session.token);
-    setAuthEmail(session.email);
-    setDashboardState("idle");
   }, []);
 
   const t = dashboardCopy[locale];
+  const authError = authErrorCode ? authErrorMessage(t, authErrorCode) : null;
 
-  async function loadDashboard(tokenOverride?: string) {
+  async function loadDashboard(tokenOverride?: string, emailOverride?: string) {
     const activeToken = (tokenOverride ?? authToken).trim();
     if (!activeToken) {
       setPageError(t.authRequired);
@@ -70,7 +71,7 @@ export default function AdminDashboardPage() {
       const body = await fetchSummary(activeToken);
       setSummary(body);
       setDashboardState((current) => transitionDashboardState(current, "fetch_success", body));
-      persistAuthSession(activeToken, authEmail || loginEmail);
+      persistSession(activeToken, emailOverride ?? authEmail || loginEmail);
     } catch {
       setSummary(null);
       setPageError(`${t.loadError} ${t.loadErrorHint}`);
@@ -85,38 +86,19 @@ export default function AdminDashboardPage() {
     const formData = new FormData(event.currentTarget);
     const email = String(formData.get("email") || loginEmail).trim();
     const password = String(formData.get("password") || loginPassword);
-    if (!email || !password) {
-      setAuthError(t.loginMissing);
-      return;
-    }
-
-    setAuthLoading(true);
-    setAuthError(null);
     try {
-      const loginResult = await loginAdmin(email, password);
-      if (!loginResult.ok) {
-        setAuthError(loginResult.status === 401 ? t.loginInvalid : t.loginError);
-        return;
-      }
-      const accessToken = loginResult.accessToken;
-      setAuthToken(accessToken);
-      setAuthEmail(email);
+      const loginResult = await loginWithAdminSession({ email, password });
+      if (!loginResult.ok) return;
       setLoginPassword("");
-      persistAuthSession(accessToken, email);
-      await loadDashboard(accessToken);
+      await loadDashboard(loginResult.accessToken, loginResult.email);
     } catch {
-      setAuthError(t.loginError);
-    } finally {
-      setAuthLoading(false);
+      return;
     }
   }
 
   function logout() {
-    clearAuthSession();
-    setAuthToken("");
-    setAuthEmail("");
+    clearAdminSession();
     setLoginPassword("");
-    setAuthError(null);
     setPageError(null);
     setSummary(null);
     setDashboardState((current) => transitionDashboardState(current, "reset"));
@@ -144,4 +126,13 @@ export default function AdminDashboardPage() {
       onRefresh={() => void loadDashboard()}
     />
   );
+}
+
+function authErrorMessage(
+  t: (typeof dashboardCopy)[keyof typeof dashboardCopy],
+  code: AdminAuthErrorCode
+): string {
+  if (code === "missing_credentials") return t.loginMissing;
+  if (code === "invalid_credentials") return t.loginInvalid;
+  return t.loginError;
 }
