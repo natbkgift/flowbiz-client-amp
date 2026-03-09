@@ -65,7 +65,12 @@ describe("admin dashboard surface styles", () => {
     expect(css).toContain(".dashboard-warning-list li");
     expect(css).toContain(".dashboard-table-wrap {");
     expect(css).toContain(".dashboard-status-unknown {");
+    expect(css).toContain(".dashboard-summary-card--secondary");
     expect(css).toContain(".dashboard-summary-card--primary");
     expect(css).toContain(".dashboard-summary-card--attention");
+    expect(css).toContain(".dashboard-hero-toolbar {");
+    expect(css).toContain(".dashboard-hero .dashboard-summary-grid {");
+    expect(css).toContain(".dashboard-operational-card {");
+    expect(css).toContain(".dashboard-insight-item__status {");
   });
 });
