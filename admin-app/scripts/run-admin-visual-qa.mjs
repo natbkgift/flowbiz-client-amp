@@ -28,7 +28,7 @@ const VISUAL_EMAIL = process.env.ADMIN_VISUAL_EMAIL || process.env.ADMIN_SMOKE_E
 const VISUAL_PASSWORD = process.env.ADMIN_VISUAL_PASSWORD || process.env.ADMIN_SMOKE_PASSWORD || "";
 const RUN_DIR = process.env.ADMIN_VISUAL_RUN_DIR
   ? path.resolve(process.cwd(), process.env.ADMIN_VISUAL_RUN_DIR)
-  : path.join(ARTIFACT_ROOT, `run-${timestampStamp(new Date())}`);
+  : path.join(ARTIFACT_ROOT, `run-${formatTimestamp(new Date())}`);
 const ITERATION_NUMBER = Number.parseInt(process.env.ADMIN_VISUAL_ITERATION || "1", 10) || 1;
 const ITERATION_KEY = `iteration-${String(ITERATION_NUMBER).padStart(2, "0")}`;
 const PHASE = normalizePhase(process.env.ADMIN_VISUAL_PHASE);
@@ -61,7 +61,7 @@ function normalizePhase(value) {
   return value === "after" ? "after" : "before";
 }
 
-function timestampStamp(value) {
+function formatTimestamp(value) {
   const year = value.getFullYear();
   const month = String(value.getMonth() + 1).padStart(2, "0");
   const day = String(value.getDate()).padStart(2, "0");
