@@ -67,6 +67,7 @@
     padding: var(--admin-space-6) var(--admin-space-4);
     background: var(--admin-bg-sidebar);
     border-right: 1px solid var(--admin-border-subtle);
+    box-shadow: 18px 0 40px rgba(15, 23, 42, 0.04);
   }
 
   .admin-shell-brand {
@@ -129,6 +130,14 @@
   .home-composer-status-card strong {
     color: var(--admin-text-strong);
     font-weight: var(--admin-font-weight-bold);
+  }
+
+  .admin-shell-sidebar-meta {
+    padding: var(--admin-space-4);
+    border: 1px solid var(--admin-border-subtle);
+    border-radius: var(--admin-radius-lg);
+    background: linear-gradient(180deg, rgba(238, 244, 255, 0.8), rgba(255, 255, 255, 0.96));
+    box-shadow: var(--admin-shadow-xs);
   }
 
   .admin-shell-brand-copy small,
@@ -230,10 +239,16 @@
     align-items: center;
     min-height: 44px;
     padding: 10px 12px 10px 10px;
-    border: 1px solid transparent;
+    border: 1px solid rgba(0, 0, 0, 0);
     border-radius: var(--admin-radius-md);
     color: var(--admin-text-base);
-    background: transparent;
+    background: rgba(255, 255, 255, 0.6);
+    transition:
+      background-color var(--admin-duration-normal) var(--admin-ease-standard),
+      border-color var(--admin-duration-normal) var(--admin-ease-standard),
+      box-shadow var(--admin-duration-normal) var(--admin-ease-standard),
+      color var(--admin-duration-normal) var(--admin-ease-standard),
+      transform var(--admin-duration-fast) var(--admin-ease-standard);
   }
 
   .admin-shell-nav-link-accent {
@@ -261,7 +276,10 @@
     background: var(--admin-bg-active);
     border-color: var(--admin-color-primary-100);
     color: var(--admin-color-primary-700);
-    box-shadow: inset 0 0 0 1px rgba(47, 109, 246, 0.04);
+    box-shadow:
+      inset 0 0 0 1px rgba(47, 109, 246, 0.04),
+      0 8px 18px rgba(47, 109, 246, 0.08);
+    transform: translateY(-1px);
   }
 
   .admin-shell-nav-link:hover .admin-shell-nav-link-trail,
@@ -331,8 +349,8 @@
     top: 0;
     z-index: var(--admin-z-header);
     display: grid;
-    gap: var(--admin-space-4);
-    padding: var(--admin-space-4) var(--admin-space-6);
+    gap: var(--admin-space-3);
+    padding: var(--admin-space-3) var(--admin-space-6) var(--admin-space-4);
     background: var(--admin-bg-header);
     border-bottom: 1px solid var(--admin-border-subtle);
     backdrop-filter: blur(14px);
@@ -342,7 +360,7 @@
     display: grid;
     grid-template-columns: auto minmax(0, 1fr);
     gap: var(--admin-space-3);
-    align-items: start;
+    align-items: center;
   }
 
   .admin-shell-topbar-main,
@@ -369,7 +387,7 @@
   .admin-shell-breadcrumb ol {
     display: flex;
     flex-wrap: wrap;
-    gap: var(--admin-space-2);
+    gap: 6px;
     margin: 0;
     padding: 0;
     list-style: none;
@@ -388,18 +406,25 @@
 
   .admin-shell-topbar-tools {
     display: grid;
-    grid-template-columns: minmax(220px, 1.4fr) minmax(0, 0.9fr) minmax(220px, 0.95fr) minmax(260px, 1fr);
+    grid-template-columns: minmax(240px, 1.55fr) minmax(180px, 0.9fr) minmax(220px, 1fr);
     gap: var(--admin-space-4);
-    align-items: stretch;
+    align-items: start;
   }
 
   .admin-shell-toolbar-chip,
   .admin-shell-profile {
-    padding: var(--admin-space-4);
+    padding: var(--admin-space-3) var(--admin-space-4);
     border: 1px solid var(--admin-border-subtle);
     border-radius: var(--admin-radius-lg);
-    background: rgba(255, 255, 255, 0.9);
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(248, 250, 252, 0.96));
     box-shadow: var(--admin-shadow-sm);
+  }
+
+  .admin-shell-profile {
+    grid-column: 2 / span 2;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: var(--admin-space-3);
+    align-items: center;
   }
 
   .admin-shell-toolbar-chip {
@@ -407,12 +432,16 @@
     grid-template-columns: auto minmax(0, 1fr);
     gap: var(--admin-space-3);
     align-items: center;
-    min-height: 76px;
+    min-height: 68px;
     color: inherit;
   }
 
   .admin-shell-toolbar-chip--workspace {
     grid-template-columns: auto minmax(0, 1fr) auto;
+  }
+
+  .admin-shell-toolbar-chip-copy {
+    align-content: start;
   }
 
   .admin-shell-toolbar-chip-icon,
@@ -428,15 +457,16 @@
   .admin-shell-profile-actions {
     display: flex;
     flex-wrap: wrap;
-    justify-content: space-between;
+    justify-content: flex-end;
     gap: var(--admin-space-3);
-    align-items: end;
+    align-items: center;
   }
 
   .admin-shell-profile-badges {
     display: flex;
     flex-wrap: wrap;
     gap: var(--admin-space-2);
+    justify-content: flex-start;
   }
 
   .admin-shell-profile-link,
@@ -698,8 +728,8 @@
   .dashboard-section-state {
     display: grid;
     gap: var(--admin-space-3);
-    align-content: center;
-    min-height: 180px;
+    align-content: start;
+    min-height: 0;
     padding: var(--admin-space-5);
     border: 1px dashed var(--admin-border-strong);
     border-radius: var(--admin-radius-lg);
@@ -742,6 +772,7 @@
 
   .dashboard-hero {
     grid-template-columns: 1fr;
+    gap: var(--admin-space-5);
   }
 
   .dashboard-hero .admin-page-header__meta {
@@ -750,15 +781,31 @@
   }
 
   .dashboard-zone--primary {
-    grid-template-columns: minmax(0, 1.75fr) minmax(300px, 0.95fr);
+    grid-template-columns: minmax(0, 1.65fr) minmax(320px, 0.92fr);
   }
 
   .dashboard-zone--secondary {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: minmax(280px, 0.92fr) minmax(0, 1.08fr);
   }
 
   .dashboard-zone--tertiary {
-    grid-template-columns: minmax(260px, 0.9fr) minmax(0, 1.5fr) minmax(260px, 0.95fr);
+    grid-template-columns: minmax(280px, 0.92fr) minmax(0, 1.45fr);
+    align-items: start;
+  }
+
+  .dashboard-section--warnings {
+    grid-column: 1;
+    grid-row: 1;
+  }
+
+  .dashboard-section--table {
+    grid-column: 2;
+    grid-row: 1 / span 2;
+  }
+
+  .dashboard-section--tasks {
+    grid-column: 1;
+    grid-row: 2;
   }
 
   .dashboard-widget::before {
@@ -948,6 +995,19 @@
     border-radius: var(--admin-radius-md);
     background: var(--admin-color-warning-50);
     color: var(--admin-color-warning-700);
+  }
+
+  .dashboard-control-card .admin-card-shell__body,
+  .dashboard-log-card .admin-card-shell__body,
+  .dashboard-action-card .admin-card-shell__body {
+    gap: var(--admin-space-5);
+  }
+
+  .dashboard-control-card__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--admin-space-3);
+    align-items: center;
   }
 
   .dashboard-table-shell,
@@ -1365,6 +1425,13 @@
     .dashboard-table-toolbar,
     .dashboard-table-card-meta {
       grid-template-columns: 1fr;
+    }
+
+    .dashboard-section--warnings,
+    .dashboard-section--table,
+    .dashboard-section--tasks {
+      grid-column: auto;
+      grid-row: auto;
     }
   }
 

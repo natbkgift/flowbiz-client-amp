@@ -286,6 +286,7 @@ export function AdminShell({ children }: { children: ReactNode }) {
   const currentWorkspaceDescription = item ? getAdminNavText(item.description, locale) : ui.workspaceSummary;
   const siteHref = locale === "th" ? "/th" : "/en";
   const hasSearchResults = filteredNavGroups.some((entry) => entry.items.length > 0);
+  const showWorkspaceBreadcrumb = currentGroupLabel !== currentWorkspaceLabel;
 
   useEffect(() => {
     const detectedLocale = detectAdminLocale();
@@ -391,9 +392,11 @@ export function AdminShell({ children }: { children: ReactNode }) {
 
         <div className="admin-shell-sidebar-scroll">
           {hasSearchResults
-            ? filteredNavGroups.map((entry) =>
-                renderNavGroup(getAdminNavText(entry.group.label, locale), entry.items, pathname, locale),
-              )
+            ? filteredNavGroups.map((entry) => (
+                <div key={entry.group.key}>
+                  {renderNavGroup(getAdminNavText(entry.group.label, locale), entry.items, pathname, locale)}
+                </div>
+              ))
             : emptySearchState}
         </div>
 
@@ -456,9 +459,9 @@ export function AdminShell({ children }: { children: ReactNode }) {
                     <Link href={withAdminLocale("/admin/dashboard", locale)}>{ui.admin}</Link>
                     <span aria-hidden="true">/</span>
                   </li>
-                  <li>{currentGroupLabel}</li>
+                  {showWorkspaceBreadcrumb ? <li>{currentGroupLabel}</li> : null}
                   <li>
-                    <span aria-hidden="true">/</span>
+                    {showWorkspaceBreadcrumb ? <span aria-hidden="true">/</span> : null}
                     <span aria-current="page">{currentWorkspaceLabel}</span>
                   </li>
                 </ol>
@@ -501,8 +504,8 @@ export function AdminShell({ children }: { children: ReactNode }) {
                 <AdminIcon name="workspace" size={16} />
               </span>
               <span className="admin-shell-toolbar-chip-copy">
-                <strong>{ui.workspacePanel}</strong>
-                <small>{currentGroupLabel}</small>
+                <strong>{currentWorkspaceLabel}</strong>
+                <small>{currentWorkspaceDescription}</small>
               </span>
               <AdminBadge tone="info" icon="workspace">
                 {ui.workspaceName}
@@ -584,12 +587,14 @@ export function AdminShell({ children }: { children: ReactNode }) {
 
           <div className="admin-shell-mobile-drawer-sections">
             {hasSearchResults ? (
-              filteredNavGroups.map((entry) =>
-                renderNavGroup(getAdminNavText(entry.group.label, locale), entry.items, pathname, locale, {
-                  linkClassName: "admin-shell-drawer-link",
-                  onNavigate: closeMobileNav,
-                }),
-              )
+              filteredNavGroups.map((entry) => (
+                <div key={entry.group.key}>
+                  {renderNavGroup(getAdminNavText(entry.group.label, locale), entry.items, pathname, locale, {
+                    linkClassName: "admin-shell-drawer-link",
+                    onNavigate: closeMobileNav,
+                  })}
+                </div>
+              ))
             ) : (
               emptySearchState
             )}
