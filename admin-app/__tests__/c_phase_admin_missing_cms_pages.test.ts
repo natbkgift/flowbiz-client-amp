@@ -67,8 +67,9 @@ describe("Phase C missing CMS pages", () => {
     const properties = read("app/admin/properties/page.tsx");
     const testimonials = read("app/admin/testimonials/page.tsx");
     const workspace = read("components/admin/AdminJsonCrudWorkspace.tsx");
+    const panels = read("components/admin/domain/crud-workspace/AdminCrudWorkspacePanels.tsx");
 
-    expect(workspace).toContain("AdminFormPrimitiveInput");
+    expect(panels).toContain("AdminFormPrimitiveInput");
     expect(workspace).toContain("validatePrimitiveValues");
     expect(workspace).toContain("toPrimitivePayload");
 
@@ -91,6 +92,7 @@ describe("Phase C missing CMS pages", () => {
   it("configures blog workspace as form-first with preview and publish checklist", () => {
     const blog = read("app/admin/blog/page.tsx");
     const workspace = read("components/admin/AdminJsonCrudWorkspace.tsx");
+    const panels = read("components/admin/domain/crud-workspace/AdminCrudWorkspacePanels.tsx");
 
     expect(blog).toContain("createFormFields");
     expect(blog).toContain("patchFormFields");
@@ -99,11 +101,11 @@ describe("Phase C missing CMS pages", () => {
     expect(blog).toContain("warningLocales: [\"th\"]");
     expect(blog).toContain("options: [\"blog\", \"guide\"]");
     expect(workspace).toContain("Publish blocked by checklist requirements.");
-    expect(workspace).toContain("Create locale tabs");
-    expect(workspace).toContain("Update locale tabs");
-    expect(workspace).toContain("Translation completeness");
-    expect(workspace).toContain("<LogCard");
-    expect(workspace).toContain('title="Preview"');
+    expect(panels).toContain("Create locale tabs");
+    expect(panels).toContain("Update locale tabs");
+    expect(panels).toContain("Translation completeness");
+    expect(panels).toContain("<LogCard");
+    expect(panels).toContain('title="Preview"');
   });
 
   it("wires taxonomy registry usage into article and property/project forms", () => {
@@ -126,7 +128,7 @@ describe("Phase C missing CMS pages", () => {
 
   it("enables property listing publish quality gate and bulk action endpoints in UI config", () => {
     const properties = read("app/admin/properties/page.tsx");
-    const workspace = read("components/admin/AdminJsonCrudWorkspace.tsx");
+    const panels = read("components/admin/domain/crud-workspace/AdminCrudWorkspacePanels.tsx");
 
     expect(properties).toContain("publishChecklistConfig");
     expect(properties).toContain("requiredNumericGreaterThanZeroPaths");
@@ -136,6 +138,6 @@ describe("Phase C missing CMS pages", () => {
     expect(properties).toContain("/admin/properties/bulk/status");
     expect(properties).toContain("/admin/properties/bulk/tags");
     expect(properties).toContain("/admin/properties/bulk/update");
-    expect(workspace).toContain("Bulk actions");
+    expect(panels).toContain("Bulk actions");
   });
 });

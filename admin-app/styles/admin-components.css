@@ -298,6 +298,21 @@
     color: var(--admin-text-strong);
   }
 
+  .admin-shell-mobile-drawer-actions {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-shell-mobile-action {
+    width: 100%;
+    min-height: 44px;
+    justify-content: flex-start;
+    align-items: flex-start;
+    padding: var(--admin-space-3);
+    white-space: normal;
+    overflow-wrap: anywhere;
+    word-break: break-word;
+  }
+
   .admin-shell-footer-link:hover,
   .admin-shell-footer-link.is-active,
   .admin-shell-mobile-action:hover {
@@ -342,6 +357,7 @@
   }
 
   .admin-shell-toggle {
+    display: none;
     min-width: 42px;
     min-height: 42px;
     border: 1px solid var(--admin-border-default);
@@ -1277,6 +1293,12 @@
   @media (max-width: 1024px) {
     .admin-shell {
       grid-template-columns: minmax(0, 1fr);
+    }
+
+    .admin-shell-toggle {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
     }
 
     .admin-shell-sidebar {

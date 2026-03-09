@@ -20,11 +20,8 @@ export function adminButtonClassName({
   return cx(
     "btn",
     "admin-btn",
-    "admin-button",
-    `admin-btn-${variant}`,
-    `admin-button--${variant}`,
+    variant !== "primary" && `admin-btn-${variant}`,
     size === "sm" && "admin-btn-sm",
-    `admin-button--${size}`,
     block && "admin-button--block",
     className,
   );

@@ -9,32 +9,40 @@ function read(relativePath: string): string {
   return fs.readFileSync(path.join(root, relativePath), "utf-8");
 }
 
+function readAdminStyles(): string {
+  return [
+    read("styles/admin-tokens.css"),
+    read("styles/admin-base.css"),
+    read("styles/admin-components.css"),
+  ].join("\n");
+}
+
 describe("admin typography scale", () => {
   it("defines scoped admin typography tokens in admin shell content", () => {
-    const css = read("app/globals.css");
+    const css = readAdminStyles();
 
     expect(css).toContain(".admin-shell-content {");
-    expect(css).toContain("--admin-type-h1:");
-    expect(css).toContain("--admin-type-h2:");
-    expect(css).toContain("--admin-type-h3:");
-    expect(css).toContain("--admin-type-body:");
-    expect(css).toContain("--admin-type-label:");
-    expect(css).toContain("--admin-type-helper:");
-    expect(css).toContain("--admin-stack-gap:");
+    expect(css).toContain("--admin-font-size-2xl:");
+    expect(css).toContain("--admin-font-size-xl:");
+    expect(css).toContain("--admin-font-size-lg:");
+    expect(css).toContain("--admin-font-size-md:");
+    expect(css).toContain("--admin-font-size-sm:");
+    expect(css).toContain("--admin-font-size-xs:");
+    expect(css).toContain(".content-stack {");
   });
 
   it("applies heading/label/body hierarchy under admin shell scope", () => {
-    const css = read("app/globals.css");
+    const css = readAdminStyles();
 
-    expect(css).toContain(".admin-shell-content h1");
-    expect(css).toContain("font-size: var(--admin-type-h1);");
-    expect(css).toContain(".admin-shell-content h2");
-    expect(css).toContain("font-size: var(--admin-type-h2);");
-    expect(css).toContain(".admin-shell-content h3");
-    expect(css).toContain("font-size: var(--admin-type-h3);");
-    expect(css).toContain(".admin-shell-content .field > span");
-    expect(css).toContain("font-size: var(--admin-type-label);");
-    expect(css).toContain(".admin-shell-content p,");
-    expect(css).toContain("font-size: var(--admin-type-body);");
+    expect(css).toContain(".admin-root h1 {");
+    expect(css).toContain("font-size: var(--admin-font-size-2xl);");
+    expect(css).toContain(".admin-root h2 {");
+    expect(css).toContain("font-size: var(--admin-font-size-xl);");
+    expect(css).toContain(".admin-root h3 {");
+    expect(css).toContain("font-size: var(--admin-font-size-lg);");
+    expect(css).toContain(".admin-root .field > span:first-child,");
+    expect(css).toContain("font-size: var(--admin-font-size-sm);");
+    expect(css).toContain(".admin-root p,");
+    expect(css).toContain("font-size: var(--admin-font-size-md);");
   });
 });
