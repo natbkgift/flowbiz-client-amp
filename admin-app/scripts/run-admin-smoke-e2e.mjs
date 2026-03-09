@@ -30,6 +30,12 @@ function buildDashboardSmokePayload() {
   const generatedDate = new Date();
   const generatedAt = generatedDate.toISOString();
   const baseTimestamp = generatedDate.getTime();
+  const trend7dCounts = [2, 3, 2, 4, 3, 5, 6];
+  const trend30dCounts = [
+    1, 0, 2, 1, 3, 2, 2, 4, 3, 2,
+    4, 5, 3, 2, 4, 6, 5, 4, 6, 5,
+    4, 7, 6, 5, 7, 8, 6, 7, 8, 9,
+  ];
   const inquiries = Array.from({ length: 12 }).map((_, index) => ({
     id: `smoke-inquiry-${index + 1}`,
     created_at: new Date(baseTimestamp - index * 60 * 1000).toISOString(),
@@ -44,14 +50,74 @@ function buildDashboardSmokePayload() {
     generated_at: generatedAt,
     data_freshness: {
       import_feed: {
-        checked_at: generatedAt,
-        age_seconds: 42,
+        checked_at: new Date(baseTimestamp - 12 * 60 * 1000).toISOString(),
+        age_seconds: 12 * 60,
+      },
+      media_scan: {
+        checked_at: new Date(baseTimestamp - 48 * 60 * 1000).toISOString(),
+        age_seconds: 48 * 60,
+      },
+      translation_queue: {
+        checked_at: new Date(baseTimestamp - 3 * 60 * 60 * 1000).toISOString(),
+        age_seconds: 3 * 60 * 60,
+      },
+      deploy_watch: {
+        checked_at: new Date(baseTimestamp - 8 * 60 * 60 * 1000).toISOString(),
+        age_seconds: 8 * 60 * 60,
       },
     },
     raw_metrics: {
+      project_cover_coverage: {
+        checked_at: generatedAt,
+        projects_total: 124,
+        projects_real_cover_count: 114,
+        projects_real_cover_pct: 92,
+        projects_external_cover_count: 4,
+        projects_missing_cover_count: 10,
+      },
+      media_integrity: {
+        scanned_at: new Date(baseTimestamp - 48 * 60 * 1000).toISOString(),
+        broken_media_count: 3,
+        external_image_leakage_count: 1,
+        error_count: 1,
+        warn_count: 4,
+      },
+      pending_translations: {
+        total_pending_translations: 8,
+        policy: {
+          approved: false,
+          checked_at: new Date(baseTimestamp - 3 * 60 * 60 * 1000).toISOString(),
+        },
+        projects_missing_en_th: 3,
+        articles_missing_en_th: 2,
+        home_composer_missing_locale_pairs: 3,
+      },
+      unpublished_drafts: {
+        total_unpublished_drafts: 4,
+        projects_draft: 1,
+        articles_draft: 2,
+        home_composer_draft: 1,
+      },
       recent_inquiries: {
         count: inquiries.length,
         latest_at: generatedAt,
+      },
+      review_video_source_verification_pending: {
+        total_pending: 2,
+        reviews_pending: 1,
+        videos_pending: 1,
+      },
+      last_import_status: {
+        status: "partial",
+        checked_at: new Date(baseTimestamp - 12 * 60 * 1000).toISOString(),
+        rows_total: 1240,
+        rows_errors: 6,
+        filename: "amp-sync-20260310.csv",
+      },
+      last_mirror_status: {
+        status: "ok",
+        checked_at: new Date(baseTimestamp - 38 * 60 * 1000).toISOString(),
+        failures_count: 1,
       },
       last_deploy_health_status: {
         health_status: "ok",
@@ -64,12 +130,60 @@ function buildDashboardSmokePayload() {
     },
     widgets: [
       {
+        key: "project_cover_coverage",
+        title: "Project Cover Coverage %",
+        value: 92,
+        status: "ok",
+        summary: "Most projects now serve a verified local cover image.",
+        actions: [{ label: "Open media", url: "/admin/media" }],
+      },
+      {
+        key: "broken_media_count",
+        title: "Broken media",
+        value: 3,
+        status: "warn",
+        summary: "A small group of media references still needs operator cleanup.",
+        actions: [{ label: "Open media", url: "/admin/media" }],
+      },
+      {
+        key: "pending_translations_count",
+        title: "Pending translations",
+        value: 8,
+        status: "warn",
+        summary: "Translation backlog is visible but contained within the current queue.",
+        actions: [{ label: "Open domain", url: "/admin/domain" }],
+      },
+      {
+        key: "unpublished_drafts_count",
+        title: "Unpublished drafts",
+        value: 4,
+        status: "warn",
+        summary: "Draft inventory is small enough to clear in a single publish pass.",
+        actions: [{ label: "Open layout", url: "/admin/layout" }],
+      },
+      {
         key: "recent_leads_inquiries",
         title: "Recent leads / inquiries",
-        value: 1,
+        value: inquiries.length,
         status: "ok",
         summary: "Latest captured inquiries are visible.",
-        actions: [],
+        actions: [{ label: "Open CRM", url: "/admin/inquiries" }],
+      },
+      {
+        key: "review_video_source_verification_pending",
+        title: "Video source verification",
+        value: 2,
+        status: "warn",
+        summary: "Two source-rights checks still need review before publish approval.",
+        actions: [{ label: "Open videos", url: "/admin/videos" }],
+      },
+      {
+        key: "last_import_mirror_status",
+        title: "Import / mirror health",
+        value: "Attention",
+        status: "warn",
+        summary: "Import completed with warnings while mirror stayed healthy.",
+        actions: [{ label: "Open imports", url: "/admin/imports" }],
       },
       {
         key: "last_deploy_health_status",
@@ -77,22 +191,23 @@ function buildDashboardSmokePayload() {
         value: "Healthy",
         status: "ok",
         summary: "Last deploy and health checks look normal.",
-        actions: [],
+        actions: [{ label: "Open SEO", url: "/admin/seo" }],
       },
     ],
     trend_series: {
       "7d": Array.from({ length: 7 }).map((_, index) => ({
         bucket_date: new Date(baseTimestamp - (6 - index) * 24 * 60 * 60 * 1000).toISOString().slice(0, 10),
-        count: index === 6 ? 1 : 0,
+        count: trend7dCounts[index],
       })),
       "30d": Array.from({ length: 30 }).map((_, index) => ({
         bucket_date: new Date(baseTimestamp - (29 - index) * 24 * 60 * 60 * 1000).toISOString().slice(0, 10),
-        count: index === 29 ? 1 : 0,
+        count: trend30dCounts[index],
       })),
     },
     recent_inquiries: inquiries.slice(0, 10),
-    incomplete_widget_count: 0,
-    warnings: ["Smoke warning check"],
+    incomplete_widget_count: 2,
+    // warnings: ["Smoke warning check"]
+    warnings: ["Smoke warning check", "Translation policy sign-off still pending"],
   };
 }
 

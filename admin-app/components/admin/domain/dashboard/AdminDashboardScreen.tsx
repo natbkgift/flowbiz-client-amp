@@ -141,12 +141,15 @@ function toneLabel(
 
 function DashboardControlCenter({
   t,
+  locale,
   isAuthenticated,
   authEmail,
   loginEmail,
   loginPassword,
   authLoading,
   authError,
+  overallTone,
+  latestOperationalLabel,
   onLoginEmailChange,
   onLoginPasswordChange,
   onLogin,
@@ -154,12 +157,15 @@ function DashboardControlCenter({
   refreshAction,
 }: {
   t: DashboardScreenCopy;
+  locale: Locale;
   isAuthenticated: boolean;
   authEmail: string;
   loginEmail: string;
   loginPassword: string;
   authLoading: boolean;
   authError: string | null;
+  overallTone: BackgroundTask["tone"];
+  latestOperationalLabel: string;
   onLoginEmailChange: (value: string) => void;
   onLoginPasswordChange: (value: string) => void;
   onLogin: (event: FormEvent<HTMLFormElement>) => void | Promise<void>;
@@ -237,10 +243,39 @@ function DashboardControlCenter({
         </form>
       ) : (
         <div className="crm-session-panel" role="status" aria-live="polite">
-          <h2>{t.sessionActive}</h2>
-          <p className="locale-safe">
-            {authEmail ? `${t.sessionAs}: ${authEmail}` : t.sessionUnknown}
-          </p>
+          <div className="crm-session-panel__head">
+            <div className="crm-session-panel__copy">
+              <span className="dashboard-operational-card__label">{t.status}</span>
+              <h2>{t.sessionActive}</h2>
+            </div>
+            <AdminBadge tone={badgeTone(overallTone)} icon={badgeIcon(overallTone)}>
+              {toneLabel(overallTone, t)}
+            </AdminBadge>
+          </div>
+          <dl className="crm-session-panel__meta">
+            <div>
+              <dt>{t.sessionAs}</dt>
+              <dd className="locale-safe">{authEmail || t.sessionUnknown}</dd>
+            </div>
+            <div>
+              <dt>{t.lastUpdated}</dt>
+              <dd>{latestOperationalLabel}</dd>
+            </div>
+          </dl>
+          <div className="crm-session-panel__quick-actions">
+            <Link
+              className={adminButtonClassName({ variant: "secondary", size: "sm" })}
+              href={withAdminLocale("/admin/inquiries", locale)}
+            >
+              {t.openCrm}
+            </Link>
+            <Link
+              className={adminButtonClassName({ variant: "secondary", size: "sm" })}
+              href={withAdminLocale("/admin/imports", locale)}
+            >
+              {t.openImports}
+            </Link>
+          </div>
         </div>
       )}
     </ActionCard>
@@ -958,10 +993,13 @@ export function AdminDashboardScreen({
         title={t.title}
         description={t.subtitle}
         actions={renderHeroToolbar()}
-        meta={renderOverviewPanel()}
       />
 
       <AdminPageBody>
+        <section className="dashboard-overview-band" aria-label={locale === "th" ? "ภาพรวมปฏิบัติการ" : "Operational overview"}>
+          {renderOverviewPanel()}
+        </section>
+
         <AdminSectionGrid className={isAuthenticated ? "dashboard-shell-grid" : "dashboard-shell-grid dashboard-shell-grid--locked"}>
           <div className="dashboard-zone dashboard-zone--primary">
             <DashboardSection
@@ -975,12 +1013,15 @@ export function AdminDashboardScreen({
 
             <DashboardControlCenter
               t={t}
+              locale={locale}
               isAuthenticated={isAuthenticated}
               authEmail={authEmail}
               loginEmail={loginEmail}
               loginPassword={loginPassword}
               authLoading={authLoading}
               authError={authError}
+              overallTone={overallTone}
+              latestOperationalLabel={latestOperationalLabel}
               onLoginEmailChange={onLoginEmailChange}
               onLoginPasswordChange={onLoginPasswordChange}
               onLogin={onLogin}
