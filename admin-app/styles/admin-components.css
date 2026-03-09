@@ -1392,6 +1392,10 @@
     gap: var(--admin-space-4);
   }
 
+  .home-composer-stack--compact {
+    gap: var(--admin-space-2);
+  }
+
   .dashboard-controls--auth .admin-section-card__body {
     grid-template-columns: minmax(0, 1.18fr) minmax(220px, 0.82fr);
     align-items: start;
@@ -1457,6 +1461,11 @@
   .home-composer-split {
     grid-template-columns: minmax(280px, 0.95fr) minmax(0, 1.2fr);
     align-items: start;
+  }
+
+  .home-composer-split {
+    grid-template-columns: minmax(0, 1.35fr) minmax(300px, 0.85fr);
+    gap: var(--admin-space-4);
   }
 
   .crm-saved-filters {
@@ -1594,6 +1603,22 @@
     font-size: var(--admin-font-size-sm);
   }
 
+  .home-composer-inline-field {
+    align-items: center;
+    flex-wrap: wrap;
+  }
+
+  .home-composer-inline-field > :first-child {
+    flex: 1 1 240px;
+    min-width: 0;
+  }
+
+  .home-composer-toolbar {
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    align-items: end;
+  }
+
   .home-composer-form-field input,
   .home-composer-form-field select,
   .home-composer-form-field textarea,
@@ -1605,6 +1630,23 @@
     border-radius: var(--admin-radius-sm);
     background: var(--admin-color-neutral-0);
     color: var(--admin-text-base);
+  }
+
+  .home-composer-form-field input:focus-visible,
+  .home-composer-form-field select:focus-visible,
+  .home-composer-form-field textarea:focus-visible,
+  .home-composer-search-input:focus-visible,
+  .home-composer-media-option:focus-visible {
+    box-shadow: var(--admin-shadow-focus);
+  }
+
+  .home-composer-form-field input:disabled,
+  .home-composer-form-field select:disabled,
+  .home-composer-form-field textarea:disabled,
+  .home-composer-search-input:disabled {
+    background: var(--admin-color-neutral-50);
+    color: var(--admin-text-soft);
+    cursor: not-allowed;
   }
 
   .home-composer-form-field textarea,
@@ -1630,6 +1672,9 @@
     display: grid;
     gap: var(--admin-space-3);
     padding: var(--admin-space-4);
+    border: 1px solid var(--admin-border-subtle);
+    border-radius: var(--admin-radius-md);
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(248, 250, 252, 0.88));
   }
 
   .home-composer-config-block-kicker {
@@ -1664,6 +1709,20 @@
     background: var(--admin-color-neutral-50);
   }
 
+  .home-composer-list-item {
+    padding: var(--admin-space-3) var(--admin-space-4);
+    border: 1px solid var(--admin-border-subtle);
+    border-radius: var(--admin-radius-md);
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(248, 250, 252, 0.92));
+  }
+
+  .home-composer-button-group {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--admin-space-2);
+    flex-wrap: wrap;
+  }
+
   .home-composer-option-label {
     cursor: pointer;
     display: grid;
@@ -1674,6 +1733,9 @@
     display: grid;
     gap: var(--admin-space-3);
     padding: var(--admin-space-4);
+    border: 1px solid rgba(191, 219, 254, 0.78);
+    border-radius: var(--admin-radius-lg);
+    background: linear-gradient(180deg, rgba(239, 246, 255, 0.92), rgba(255, 255, 255, 0.98));
   }
 
   .home-composer-media-list {
@@ -1704,6 +1766,26 @@
     font-size: var(--admin-font-size-xs);
     color: var(--admin-text-base);
     overflow-wrap: anywhere;
+  }
+
+  .home-composer-media-status-badge {
+    margin-top: var(--admin-space-1);
+    font-size: 11px;
+  }
+
+  .home-composer-search-results {
+    display: grid;
+    gap: var(--admin-space-2);
+    max-height: 65vh;
+    overflow: auto;
+  }
+
+  .home-composer-status-list {
+    display: grid;
+    gap: var(--admin-space-2);
+    list-style: none;
+    margin: 0;
+    padding: 0;
   }
 
   .admin-shell-backdrop {
