@@ -479,6 +479,7 @@ export function AdminDashboardScreen({
   }, [backgroundTasks, dashboardState, isAuthenticated, pageError, summary]);
 
   const latestOperationalTimestamp = summary?.generated_at || summary?.raw_metrics?.recent_inquiries?.latest_at || null;
+  const latestOperationalLabel = latestOperationalTimestamp ? prettyDate(latestOperationalTimestamp, locale) : t.noSnapshotYet;
 
   function renderRefreshButton(label?: string) {
     return (
@@ -570,7 +571,7 @@ export function AdminDashboardScreen({
         </div>
         <div className="dashboard-hero-toolbar__item">
           <span className="dashboard-hero-toolbar__label">{t.lastUpdated}</span>
-          <strong>{latestOperationalTimestamp ? prettyDate(latestOperationalTimestamp, locale) : t.noSnapshotYet}</strong>
+          <strong>{latestOperationalLabel}</strong>
         </div>
         <div className="dashboard-hero-toolbar__item dashboard-hero-toolbar__item--actions">
           <span className="dashboard-hero-toolbar__label">{t.quickActions}</span>
@@ -611,9 +612,9 @@ export function AdminDashboardScreen({
     if (dashboardState === "idle") {
       return renderOperationalIdleCard({
         title: t.generatedAt,
-        value: latestOperationalTimestamp ? prettyDate(latestOperationalTimestamp, locale) : t.noSnapshotYet,
+        value: latestOperationalLabel,
         detail: `${WIDGET_KEYS.length} · ${t.snapshot}`,
-        updatedAt: latestOperationalTimestamp ? prettyDate(latestOperationalTimestamp, locale) : t.noSnapshotYet,
+        updatedAt: latestOperationalLabel,
         action: renderRefreshButton(),
         statusTone: overallTone,
         statusLabel: toneLabel(overallTone, t),
@@ -667,7 +668,7 @@ export function AdminDashboardScreen({
         title: t.widgets,
         value: String(WIDGET_KEYS.length),
         detail: t.widgetsHint,
-        updatedAt: latestOperationalTimestamp ? prettyDate(latestOperationalTimestamp, locale) : t.noSnapshotYet,
+        updatedAt: latestOperationalLabel,
         action: renderRefreshButton(),
       });
     }
@@ -711,7 +712,7 @@ export function AdminDashboardScreen({
         title: t.insightsTitle,
         value: freshnessEntries.length > 0 ? String(freshnessEntries.length) : t.unknownValue,
         detail: t.insightsHint,
-        updatedAt: latestOperationalTimestamp ? prettyDate(latestOperationalTimestamp, locale) : t.noSnapshotYet,
+        updatedAt: latestOperationalLabel,
         action: renderRefreshButton(),
       });
     }
@@ -770,7 +771,7 @@ export function AdminDashboardScreen({
         title: t.trendTitle,
         value: chartPeriod === "7d" ? t.trendPeriod7d : t.trendPeriod30d,
         detail: t.trendHint,
-        updatedAt: latestOperationalTimestamp ? prettyDate(latestOperationalTimestamp, locale) : t.noSnapshotYet,
+        updatedAt: latestOperationalLabel,
         action: renderRefreshButton(),
       });
     }
@@ -807,7 +808,7 @@ export function AdminDashboardScreen({
         title: t.warnings,
         value: summary ? String(summary.warnings.length) : t.unknownValue,
         detail: t.watchlistHint,
-        updatedAt: latestOperationalTimestamp ? prettyDate(latestOperationalTimestamp, locale) : t.noSnapshotYet,
+        updatedAt: latestOperationalLabel,
         action: renderRefreshButton(t.reviewWatchlist),
         statusTone: (summary?.warnings?.length || 0) > 0 ? "warn" : "info",
         statusLabel: (summary?.warnings?.length || 0) > 0 ? t.warningStatus : t.refreshRequired,
@@ -907,7 +908,7 @@ export function AdminDashboardScreen({
         title: t.backgroundTasksTitle,
         value: backgroundTasks.length > 0 ? String(backgroundTasks.length) : t.unknownValue,
         detail: t.backgroundTasksHint,
-        updatedAt: latestOperationalTimestamp ? prettyDate(latestOperationalTimestamp, locale) : t.noSnapshotYet,
+        updatedAt: latestOperationalLabel,
         action: renderRefreshButton(),
         statusTone: overallTone,
         statusLabel: toneLabel(overallTone, t),

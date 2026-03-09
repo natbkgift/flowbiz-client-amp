@@ -1049,9 +1049,7 @@
   .dashboard-summary-grid,
   .dashboard-overview,
   .dashboard-grid,
-  .dashboard-kpi-grid,
-  .dashboard-shell-grid,
-  .dashboard-zone {
+  .dashboard-kpi-grid {
     display: grid;
     gap: var(--admin-space-6);
     align-items: stretch;
