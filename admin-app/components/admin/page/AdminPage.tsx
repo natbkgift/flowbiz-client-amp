@@ -13,7 +13,7 @@ export function AdminPage({
   busy?: boolean;
 }) {
   return (
-    <main id="main-content" className={cx("container", "content-stack", className)} aria-busy={busy}>
+    <main id="main-content" className={cx("admin-page", "container", "content-stack", className)} aria-busy={busy}>
       {children}
     </main>
   );

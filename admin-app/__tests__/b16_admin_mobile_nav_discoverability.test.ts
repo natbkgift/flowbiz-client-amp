@@ -11,19 +11,19 @@ function read(relativePath: string): string {
 
 describe("B16 admin mobile nav discoverability", () => {
   it("keeps mobile admin nav links visible with wrapped labels and touch target sizing", () => {
-    const css = read("app/globals.css");
+    const css = read("styles/admin-components.css");
 
-    const baseMobileRowRegex =
-      /\.admin-shell-mobile-row\s*\{[^}]*display:\s*grid;[^}]*grid-template-columns:\s*repeat\(2,\s*minmax\(0,\s*1fr\)\);[^}]*\}/s;
+    const drawerActionGridRegex =
+      /\.admin-shell-sidebar-footer,\s*\.admin-shell-mobile-drawer-actions\s*\{[^}]*display:\s*grid;[^}]*gap:\s*var\(--admin-space-2\);[^}]*\}[\s\S]*?\.admin-shell-mobile-drawer-actions\s*\{[^}]*grid-template-columns:\s*1fr;[^}]*\}/s;
 
-    const mobileLinkRegex =
-      /\.admin-shell-mobile-link\s*\{[^}]*width:\s*100%;[^}]*white-space:\s*normal;[^}]*min-height:\s*var\(--tap-target-min\);[^}]*overflow-wrap:\s*anywhere;[^}]*word-break:\s*break-word;[^}]*\}/s;
+    const mobileActionRegex =
+      /\.admin-shell-mobile-action\s*\{[^}]*width:\s*100%;[^}]*min-height:\s*44px;[^}]*white-space:\s*normal;[^}]*overflow-wrap:\s*anywhere;[^}]*word-break:\s*break-word;[^}]*\}/s;
 
-    const mediaQueryMobileRowRegex =
-      /@media\s*\(min-width:\s*640px\)\s*and\s*\(max-width:\s*1024px\)\s*\{[^}]*\.admin-shell-mobile-row\s*\{[^}]*grid-template-columns:\s*repeat\(3,\s*minmax\(0,\s*1fr\)\);[^}]*\}[^}]*\}/s;
+    const mobileDrawerMediaRegex =
+      /@media\s*\(max-width:\s*1024px\)\s*\{[\s\S]*\.admin-shell-mobile-drawer\s*\{[\s\S]*display:\s*grid;[\s\S]*\}[\s\S]*\}/s;
 
-    expect(css).toMatch(baseMobileRowRegex);
-    expect(css).toMatch(mobileLinkRegex);
-    expect(css).toMatch(mediaQueryMobileRowRegex);
+    expect(css).toMatch(drawerActionGridRegex);
+    expect(css).toMatch(mobileActionRegex);
+    expect(css).toMatch(mobileDrawerMediaRegex);
   });
 });

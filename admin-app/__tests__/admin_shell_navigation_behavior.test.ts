@@ -9,6 +9,14 @@ function read(relativePath: string): string {
   return fs.readFileSync(path.join(root, relativePath), "utf-8");
 }
 
+function readAdminStyles(): string {
+  return [
+    read("app/globals.css"),
+    read("styles/admin-base.css"),
+    read("styles/admin-components.css"),
+  ].join("\n");
+}
+
 describe("admin shell navigation behavior", () => {
   it("includes searchable nav, quick actions, and workspace profile slots", () => {
     const shell = read("components/layout/AdminShell.tsx");
@@ -43,14 +51,14 @@ describe("admin shell navigation behavior", () => {
   });
 
   it("styles drawer and topbar shell controls in globals.css", () => {
-    const css = read("app/globals.css");
+    const css = readAdminStyles();
 
     expect(css).toContain(".admin-shell-toggle");
     expect(css).toContain(".admin-shell-topbar-tools");
     expect(css).toContain(".admin-shell-search");
     expect(css).toContain(".admin-shell-mobile-drawer");
     expect(css).toContain(".admin-shell-backdrop.is-open");
-    expect(css).toContain(".admin-button--danger");
-    expect(css).toContain(":not(.admin-button--danger)");
+    expect(css).toContain(".admin-btn-danger,");
+    expect(css).toContain(".admin-button--danger {");
   });
 });

@@ -12,6 +12,7 @@ function read(relativePath: string): string {
 describe("admin dashboard recent inquiries table", () => {
   it("defines server-backed filter, sort, pagination, and mobile card fallback behavior", () => {
     const component = read("components/admin/dashboard/DashboardRecentInquiriesTable.tsx");
+    const primitives = read("components/admin/data-display/AdminTable.tsx");
 
     expect(component).toContain('import { fetchJson } from "@/app/_lib/admin-auth"');
     expect(component).toContain('const ALL_STATUS_FILTER_VALUE = "all"');
@@ -28,7 +29,7 @@ describe("admin dashboard recent inquiries table", () => {
     expect(component).toContain('role="search" aria-label={ui.filter}');
     expect(component).toContain("dashboard-table-direction");
     expect(component).toContain("dashboard-table-reset");
-    expect(component).toContain("dashboard-table-pagination");
+    expect(primitives).toContain("dashboard-table-pagination");
     expect(component).toContain("ui.previous");
     expect(component).toContain("ui.next");
     expect(component).toContain('type="search"');

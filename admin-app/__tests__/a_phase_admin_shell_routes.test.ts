@@ -46,9 +46,11 @@ describe("Admin shell + route consolidation (Phase A)", () => {
   });
 
   it("keeps all workspaces under /admin with main landmark and no legacy shell import", () => {
+    const adminPage = read("components/admin/page/AdminPage.tsx");
+    expect(adminPage).toContain('id="main-content"');
+
     for (const route of workspaceRoutes) {
       const page = read(`app/admin/${route}/page.tsx`);
-      expect(page).toContain('id="main-content"');
       expect(page).not.toContain("from '../../components/layout/AdminLayout'");
       expect(page).not.toContain('from "@/components/layout/AdminLayout"');
     }

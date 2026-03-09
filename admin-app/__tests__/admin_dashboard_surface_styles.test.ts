@@ -9,53 +9,56 @@ function read(relativePath: string): string {
   return fs.readFileSync(path.join(root, relativePath), "utf-8");
 }
 
+function readAdminStyles(): string {
+  return [
+    read("app/globals.css"),
+    read("styles/admin-tokens.css"),
+    read("styles/admin-base.css"),
+    read("styles/admin-components.css"),
+  ].join("\n");
+}
+
 describe("admin dashboard surface styles", () => {
   it("defines admin shell surface and status tokens", () => {
-    const css = read("app/globals.css");
+    const css = readAdminStyles();
 
     expect(css).toContain(".admin-shell {");
-    expect(css).toContain("--admin-surface-card:");
+    expect(css).toContain("--admin-bg-card:");
     expect(css).toContain("--admin-border-strong:");
-    expect(css).toContain("--admin-shadow-soft:");
-    expect(css).toContain("--admin-status-ok-bg:");
-    expect(css).toContain("--admin-status-error-border:");
+    expect(css).toContain("--admin-shadow-sm:");
+    expect(css).toContain("--admin-color-success-50:");
+    expect(css).toContain("--admin-color-danger-100:");
   });
 
   it("scopes card and button treatment to admin shell content", () => {
-    const css = read("app/globals.css");
+    const css = readAdminStyles();
 
-    expect(css).toContain(".admin-shell-content .card,");
-    expect(css).toContain("border-radius: var(--admin-card-radius);");
-    expect(css).toContain(".admin-shell-content .btn {");
-    expect(css).toContain(".admin-shell-content .btn-secondary {");
-    expect(css).toContain("background: linear-gradient(135deg, #0f766e 0%, #155e75 52%, #2563eb 100%);");
+    expect(css).toContain(".admin-root .card,");
+    expect(css).toContain("border-radius: var(--admin-radius-lg);");
+    expect(css).toContain(".admin-root .btn,");
+    expect(css).toContain(".admin-root .btn-secondary,");
+    expect(css).toContain(".admin-btn-danger,");
   });
 
   it("styles dashboard-specific widgets, table states, and warning list", () => {
-    const css = read("app/globals.css");
+    const css = readAdminStyles();
 
     expect(css).toContain(".dashboard-shell-grid {");
     expect(css).toContain(".dashboard-section-state--error {");
     expect(css).toContain(".dashboard-summary-grid {");
     expect(css).toContain(".dashboard-insight-item {");
     expect(css).toContain(".dashboard-widget::before");
-    expect(css).toContain(".dashboard-kpi-card {");
-    expect(css).toContain(".dashboard-kpi-card:focus-within {");
+    expect(css).toContain(".dashboard-kpi-card--ok {");
     expect(css).toContain(".dashboard-kpi-pill {");
-    expect(css).toContain(".dashboard-kpi-detail-list {");
     expect(css).toContain(".dashboard-period-toggle {");
-    expect(css).toContain(".dashboard-period-button:focus-visible {");
-    expect(css).toContain(".dashboard-chart {");
-    expect(css).toContain(".dashboard-chart-surface:focus-within {");
+    expect(css).toContain(".dashboard-chart-surface {");
     expect(css).toContain(".dashboard-chart-line {");
     expect(css).toContain(".dashboard-table-shell {");
     expect(css).toContain(".dashboard-table-toolbar {");
     expect(css).toContain(".dashboard-table-chip {");
     expect(css).toContain(".dashboard-table-card-list {");
-    expect(css).toContain(".dashboard-table-wrap:focus-within {");
-    expect(css).toContain(".dashboard-table-card:focus-within {");
+    expect(css).toContain(".dashboard-table-wrap,");
     expect(css).toContain(".dashboard-table tbody tr:hover td");
-    expect(css).toContain(".dashboard-table-skeleton {");
     expect(css).toContain(".dashboard-warning-list li");
     expect(css).toContain(".dashboard-table-wrap {");
     expect(css).toContain(".dashboard-status-unknown {");

@@ -624,12 +624,12 @@ export default function HomeComposerPage() {
     const rights = (asset.rights_status || '').toLowerCase();
     const approval = (asset.approval_status || '').toLowerCase();
     if (rights === 'restricted' || rights === 'rejected' || approval === 'rejected') {
-      return 'bg-rose-50 text-rose-700 border border-rose-200';
+      return 'home-composer-media-status home-composer-media-status--error';
     }
     if (rights === 'pending_review' || rights === 'exception_allowed' || approval === 'pending' || asset.is_exception) {
-      return 'bg-amber-50 text-amber-700 border border-amber-200';
+      return 'home-composer-media-status home-composer-media-status--warn';
     }
-    return 'bg-emerald-50 text-emerald-700 border border-emerald-200';
+    return 'home-composer-media-status home-composer-media-status--ok';
   };
 
   return (
@@ -641,12 +641,12 @@ export default function HomeComposerPage() {
         eyebrow="Content orchestration"
         actions={
           <div className="card-actions">
-            <label className="text-sm text-slate-700">
+            <label className="home-composer-form-field">
               Locale
               <select
                 value={locale}
                 onChange={(e) => setLocale(e.target.value as LocaleCode)}
-                className="ml-2 rounded-md border border-slate-300 px-2 py-1"
+                className="home-composer-form-control"
               >
                 <option value="en">EN</option>
                 <option value="th">TH</option>
@@ -725,8 +725,8 @@ export default function HomeComposerPage() {
 
       {isAuthenticated ? (
         <>
-          {error ? <div className="rounded-md border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-700">{error}</div> : null}
-          {notice ? <div className="rounded-md border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm text-emerald-700">{notice}</div> : null}
+          {error ? <div className="home-composer-banner home-composer-banner--error">{error}</div> : null}
+          {notice ? <div className="home-composer-banner home-composer-banner--success">{notice}</div> : null}
 
           {validation && (validation.errors.length > 0 || validation.warnings.length > 0 || validation.media_warnings.length > 0) ? (
             <ActionCard
@@ -737,17 +737,17 @@ export default function HomeComposerPage() {
               titleTag="h2"
             >
               {validation.errors.length > 0 ? (
-                <ul className="mt-2 list-disc pl-5 text-rose-700">
+                <ul className="home-composer-validation-list home-composer-validation-list--error">
                   {validation.errors.map((item, index) => <li key={`error-${index}`}>{item}</li>)}
                 </ul>
               ) : null}
               {validation.warnings.length > 0 ? (
-                <ul className="mt-2 list-disc pl-5 text-amber-700">
+                <ul className="home-composer-validation-list home-composer-validation-list--warn">
                   {validation.warnings.map((item, index) => <li key={`warn-${index}`}>{item}</li>)}
                 </ul>
               ) : null}
               {validation.media_warnings.length > 0 ? (
-                <ul className="mt-2 list-disc pl-5 text-amber-700">
+                <ul className="home-composer-validation-list home-composer-validation-list--warn">
                   {validation.media_warnings.map((item, index) => <li key={`media-${index}`}>{item.path} — {item.detail}</li>)}
                 </ul>
               ) : null}
@@ -755,7 +755,7 @@ export default function HomeComposerPage() {
           ) : null}
 
           {loading ? (
-            <div className="rounded-md border border-slate-200 bg-white px-4 py-3 text-sm text-slate-600">Loading composer configuration…</div>
+            <div className="home-composer-loading">Loading composer configuration…</div>
           ) : null}
 
           <div className="grid grid-cols-1 gap-4 xl:grid-cols-[2fr,1fr]">
@@ -770,8 +770,8 @@ export default function HomeComposerPage() {
             >
               <div className="mt-3 space-y-2">
                 {(config.section_order || SECTION_KEYS).map((section, idx) => (
-                  <div key={section} className="flex items-center justify-between rounded-md border border-slate-200 px-3 py-2">
-                    <label className="flex items-center gap-2 text-sm text-slate-700">
+                  <div key={section} className="home-composer-config-block home-composer-list-item">
+                    <label className="home-composer-toggle-label">
                       <input
                         type="checkbox"
                         checked={(config.enabled_sections || []).includes(section)}
@@ -780,8 +780,8 @@ export default function HomeComposerPage() {
                       {section}
                     </label>
                     <div className="flex items-center gap-1">
-                      <button type="button" className="rounded border border-slate-300 px-2 py-1 text-xs" onClick={() => moveSection(section, -1)} disabled={idx === 0}>Up</button>
-                      <button type="button" className="rounded border border-slate-300 px-2 py-1 text-xs" onClick={() => moveSection(section, 1)} disabled={idx === (config.section_order || SECTION_KEYS).length - 1}>Down</button>
+                      <button type="button" className="btn btn-secondary admin-btn-sm" onClick={() => moveSection(section, -1)} disabled={idx === 0}>Up</button>
+                      <button type="button" className="btn btn-secondary admin-btn-sm" onClick={() => moveSection(section, 1)} disabled={idx === (config.section_order || SECTION_KEYS).length - 1}>Down</button>
                     </div>
                   </div>
                 ))}
@@ -797,65 +797,65 @@ export default function HomeComposerPage() {
               titleTag="h2"
             >
               <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
-                <label className="text-sm text-slate-700">Heading<input value={config.hero.heading || ''} onChange={(e) => setConfig((prev) => ({ ...prev, hero: { ...prev.hero, heading: e.target.value } }))} className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2" /></label>
-                <label className="text-sm text-slate-700">Subheading<input value={config.hero.subheading || ''} onChange={(e) => setConfig((prev) => ({ ...prev, hero: { ...prev.hero, subheading: e.target.value } }))} className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2" /></label>
-                <label className="text-sm text-slate-700">Primary CTA label<input value={config.hero.primary_cta_label || ''} onChange={(e) => setConfig((prev) => ({ ...prev, hero: { ...prev.hero, primary_cta_label: e.target.value } }))} className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2" /></label>
-                <label className="text-sm text-slate-700">Primary CTA URL<input value={config.hero.primary_cta_url || ''} onChange={(e) => setConfig((prev) => ({ ...prev, hero: { ...prev.hero, primary_cta_url: e.target.value } }))} className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2" /></label>
-                <label className="text-sm text-slate-700">Secondary CTA label<input value={config.hero.secondary_cta_label || ''} onChange={(e) => setConfig((prev) => ({ ...prev, hero: { ...prev.hero, secondary_cta_label: e.target.value } }))} className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2" /></label>
-                <label className="text-sm text-slate-700">Secondary CTA URL<input value={config.hero.secondary_cta_url || ''} onChange={(e) => setConfig((prev) => ({ ...prev, hero: { ...prev.hero, secondary_cta_url: e.target.value } }))} className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2" /></label>
+                <label className="home-composer-form-field">Heading<input value={config.hero.heading || ''} onChange={(e) => setConfig((prev) => ({ ...prev, hero: { ...prev.hero, heading: e.target.value } }))} className="home-composer-form-control" /></label>
+                <label className="home-composer-form-field">Subheading<input value={config.hero.subheading || ''} onChange={(e) => setConfig((prev) => ({ ...prev, hero: { ...prev.hero, subheading: e.target.value } }))} className="home-composer-form-control" /></label>
+                <label className="home-composer-form-field">Primary CTA label<input value={config.hero.primary_cta_label || ''} onChange={(e) => setConfig((prev) => ({ ...prev, hero: { ...prev.hero, primary_cta_label: e.target.value } }))} className="home-composer-form-control" /></label>
+                <label className="home-composer-form-field">Primary CTA URL<input value={config.hero.primary_cta_url || ''} onChange={(e) => setConfig((prev) => ({ ...prev, hero: { ...prev.hero, primary_cta_url: e.target.value } }))} className="home-composer-form-control" /></label>
+                <label className="home-composer-form-field">Secondary CTA label<input value={config.hero.secondary_cta_label || ''} onChange={(e) => setConfig((prev) => ({ ...prev, hero: { ...prev.hero, secondary_cta_label: e.target.value } }))} className="home-composer-form-control" /></label>
+                <label className="home-composer-form-field">Secondary CTA URL<input value={config.hero.secondary_cta_url || ''} onChange={(e) => setConfig((prev) => ({ ...prev, hero: { ...prev.hero, secondary_cta_url: e.target.value } }))} className="home-composer-form-control" /></label>
               </div>
-              <label className="block text-sm text-slate-700">Hero image (`/media/...` only)
+              <label className="home-composer-form-field">Hero image (`/media/...` only)
                 <div className="mt-1 flex items-center gap-2">
                   <input
                     value={config.hero.hero_image || ''}
                     onChange={(e) => updateHeroImage(e.target.value)}
-                    className="w-full rounded-md border border-slate-300 px-3 py-2"
+                    className="home-composer-form-control"
                     aria-invalid={!!heroImageError}
                     aria-describedby={heroImageError ? 'hero-image-error' : undefined}
                   />
-                  <button type="button" aria-label="Choose hero image media" onClick={() => setHeroMediaModalOpen(true)} className="rounded-md border border-slate-300 px-3 py-2 text-sm">
+                  <button type="button" aria-label="Choose hero image media" onClick={() => setHeroMediaModalOpen(true)} className="btn btn-secondary">
                     Choose media
                   </button>
                 </div>
               </label>
               {heroImageError ? (
-                <p id="hero-image-error" className="text-sm text-rose-700" role="alert">
+                <p id="hero-image-error" className="home-composer-banner home-composer-banner--error" role="alert">
                   {heroImageError}
                 </p>
               ) : null}
               {heroMediaModalOpen ? (
                 <div
-                  className="rounded-md border border-slate-200 bg-white p-3"
+                  className="home-composer-media-dialog"
                   role="dialog"
                   aria-modal="true"
                   aria-label="Hero image media picker"
                 >
                   <div className="mb-3 flex items-center justify-between gap-2">
-                    <p className="text-sm text-slate-700">Select a media asset for the hero image.</p>
-                    <button ref={heroMediaCloseButtonRef} type="button" aria-label="Close hero image media picker" className="rounded border border-slate-300 px-2 py-1 text-xs" onClick={() => setHeroMediaModalOpen(false)}>
+                    <p className="home-composer-form-field">Select a media asset for the hero image.</p>
+                    <button ref={heroMediaCloseButtonRef} type="button" aria-label="Close hero image media picker" className="btn btn-secondary admin-btn-sm" onClick={() => setHeroMediaModalOpen(false)}>
                       Close
                     </button>
                   </div>
-                  <div className="max-h-56 space-y-2 overflow-auto">
+                  <div className="home-composer-media-list">
                     {mediaCandidates.length > 0 ? mediaCandidates.map((asset) => (
                       <button
                         key={asset.id}
                         type="button"
                         aria-label={`Select hero image ${asset.storage_path || asset.id}`}
                         onClick={() => selectHeroMedia(asset.storage_path)}
-                        className="w-full rounded-md border border-slate-200 p-2 text-left hover:bg-slate-50"
+                        className="home-composer-media-option"
                       >
-                        <div className="font-mono text-xs text-slate-700 break-all">{asset.storage_path}</div>
+                        <div className="home-composer-code">{asset.storage_path}</div>
                         <div className={`mt-1 inline-flex rounded px-1.5 py-0.5 text-[11px] ${mediaBadgeClass(asset)}`}>
                           rights={asset.rights_status || 'unknown'} · approval={asset.approval_status || 'unknown'}
                         </div>
                       </button>
-                    )) : <div className="text-sm text-slate-500">No media items available.</div>}
+                    )) : <div className="home-composer-note">No media items available.</div>}
                   </div>
                 </div>
               ) : null}
-              <label className="block text-sm text-slate-700">Trust micro-strip items (one per line)
-                <textarea value={trustItemsText} onChange={(e) => setTrustItemsText(e.target.value)} rows={4} className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2" />
+              <label className="home-composer-form-field">Trust micro-strip items (one per line)
+                <textarea value={trustItemsText} onChange={(e) => setTrustItemsText(e.target.value)} rows={4} className="home-composer-form-control" />
               </label>
             </ActionCard>
 
@@ -867,29 +867,29 @@ export default function HomeComposerPage() {
               icon="filter"
               titleTag="h2"
             >
-              <label className="inline-flex items-center gap-2 text-sm text-slate-700">
+              <label className="home-composer-toggle-label">
                 <input type="checkbox" checked={Boolean(config.path_selector.enabled)} onChange={(e) => setConfig((prev) => ({ ...prev, path_selector: { ...prev.path_selector, enabled: e.target.checked } }))} />
                 Enabled
               </label>
               {(config.path_selector.paths || []).map((path, idx) => (
-                <div key={path.key || idx} className="rounded-md border border-slate-200 p-3">
-                  <div className="text-xs font-medium uppercase tracking-wide text-slate-500">{path.key}</div>
+                <div key={path.key || idx} className="home-composer-config-block">
+                  <div className="home-composer-config-block-kicker">{path.key}</div>
                   <div className="mt-2 grid grid-cols-1 gap-2 md:grid-cols-3">
-                    <label className="text-sm text-slate-700">Label<input value={path.label || ''} onChange={(e) => setConfig((prev) => {
+                    <label className="home-composer-form-field">Label<input value={path.label || ''} onChange={(e) => setConfig((prev) => {
                       const nextPaths = [...(prev.path_selector.paths || [])];
                       nextPaths[idx] = { ...nextPaths[idx], label: e.target.value };
                       return { ...prev, path_selector: { ...prev.path_selector, paths: nextPaths } };
-                    })} className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2" /></label>
-                    <label className="text-sm text-slate-700">Description<input value={path.description || ''} onChange={(e) => setConfig((prev) => {
+                    })} className="home-composer-form-control" /></label>
+                    <label className="home-composer-form-field">Description<input value={path.description || ''} onChange={(e) => setConfig((prev) => {
                       const nextPaths = [...(prev.path_selector.paths || [])];
                       nextPaths[idx] = { ...nextPaths[idx], description: e.target.value };
                       return { ...prev, path_selector: { ...prev.path_selector, paths: nextPaths } };
-                    })} className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2" /></label>
-                    <label className="text-sm text-slate-700">URL<input value={path.url || ''} onChange={(e) => setConfig((prev) => {
+                    })} className="home-composer-form-control" /></label>
+                    <label className="home-composer-form-field">URL<input value={path.url || ''} onChange={(e) => setConfig((prev) => {
                       const nextPaths = [...(prev.path_selector.paths || [])];
                       nextPaths[idx] = { ...nextPaths[idx], url: e.target.value };
                       return { ...prev, path_selector: { ...prev.path_selector, paths: nextPaths } };
-                    })} className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2" /></label>
+                    })} className="home-composer-form-control" /></label>
                   </div>
                 </div>
               ))}
@@ -904,19 +904,19 @@ export default function HomeComposerPage() {
               titleTag="h2"
             >
               <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
-                <label className="text-sm text-slate-700">Mode
-                  <select value={config.featured_projects.mode || 'auto'} onChange={(e) => setConfig((prev) => ({ ...prev, featured_projects: { ...prev.featured_projects, mode: e.target.value as 'manual' | 'auto' } }))} className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2">
+                <label className="home-composer-form-field">Mode
+                  <select value={config.featured_projects.mode || 'auto'} onChange={(e) => setConfig((prev) => ({ ...prev, featured_projects: { ...prev.featured_projects, mode: e.target.value as 'manual' | 'auto' } }))} className="home-composer-form-control">
                     <option value="auto">auto</option>
                     <option value="manual">manual</option>
                   </select>
                 </label>
-                <label className="text-sm text-slate-700">Fallback rule<input value={config.featured_projects.fallback_rule || ''} onChange={(e) => setConfig((prev) => ({ ...prev, featured_projects: { ...prev.featured_projects, fallback_rule: e.target.value } }))} className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2" /></label>
-                <label className="text-sm text-slate-700">Heading<input value={config.featured_projects.heading || ''} onChange={(e) => setConfig((prev) => ({ ...prev, featured_projects: { ...prev.featured_projects, heading: e.target.value } }))} className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2" /></label>
-                <label className="text-sm text-slate-700">Subcopy<input value={config.featured_projects.subcopy || ''} onChange={(e) => setConfig((prev) => ({ ...prev, featured_projects: { ...prev.featured_projects, subcopy: e.target.value } }))} className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2" /></label>
+                <label className="home-composer-form-field">Fallback rule<input value={config.featured_projects.fallback_rule || ''} onChange={(e) => setConfig((prev) => ({ ...prev, featured_projects: { ...prev.featured_projects, fallback_rule: e.target.value } }))} className="home-composer-form-control" /></label>
+                <label className="home-composer-form-field">Heading<input value={config.featured_projects.heading || ''} onChange={(e) => setConfig((prev) => ({ ...prev, featured_projects: { ...prev.featured_projects, heading: e.target.value } }))} className="home-composer-form-control" /></label>
+                <label className="home-composer-form-field">Subcopy<input value={config.featured_projects.subcopy || ''} onChange={(e) => setConfig((prev) => ({ ...prev, featured_projects: { ...prev.featured_projects, subcopy: e.target.value } }))} className="home-composer-form-control" /></label>
               </div>
-              <div className="max-h-52 overflow-auto rounded-md border border-slate-200 p-2">
+              <div className="home-composer-option-list">
                 {projectCandidates.map((item) => (
-                  <div key={item.id} className="flex items-start gap-2 rounded px-2 py-1 text-sm hover:bg-slate-50">
+                  <div key={item.id} className="home-composer-option">
                     <input
                       id={`featured-project-${item.id}`}
                       type="checkbox"
@@ -925,8 +925,8 @@ export default function HomeComposerPage() {
                       aria-label={`Select project ${item.name || item.slug || item.id}`}
                     />
                     <label htmlFor={`featured-project-${item.id}`} className="cursor-pointer">
-                      <span className="font-medium text-slate-800">{item.name || item.slug || item.id}</span>
-                      <span className="ml-2 text-xs text-slate-500">{item.slug} · {item.status}</span>
+                      <span className="home-composer-option-title">{item.name || item.slug || item.id}</span>
+                      <span className="home-composer-option-meta">{item.slug} · {item.status}</span>
                     </label>
                   </div>
                 ))}
@@ -942,19 +942,19 @@ export default function HomeComposerPage() {
               titleTag="h2"
             >
               <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
-                <label className="text-sm text-slate-700">Mode
-                  <select value={config.featured_properties.mode || 'auto'} onChange={(e) => setConfig((prev) => ({ ...prev, featured_properties: { ...prev.featured_properties, mode: e.target.value as 'manual' | 'auto' } }))} className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2">
+                <label className="home-composer-form-field">Mode
+                  <select value={config.featured_properties.mode || 'auto'} onChange={(e) => setConfig((prev) => ({ ...prev, featured_properties: { ...prev.featured_properties, mode: e.target.value as 'manual' | 'auto' } }))} className="home-composer-form-control">
                     <option value="auto">auto</option>
                     <option value="manual">manual</option>
                   </select>
                 </label>
-                <label className="text-sm text-slate-700">Fallback rule<input value={config.featured_properties.fallback_rule || ''} onChange={(e) => setConfig((prev) => ({ ...prev, featured_properties: { ...prev.featured_properties, fallback_rule: e.target.value } }))} className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2" /></label>
-                <label className="text-sm text-slate-700">Heading<input value={config.featured_properties.heading || ''} onChange={(e) => setConfig((prev) => ({ ...prev, featured_properties: { ...prev.featured_properties, heading: e.target.value } }))} className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2" /></label>
-                <label className="text-sm text-slate-700">Subcopy<input value={config.featured_properties.subcopy || ''} onChange={(e) => setConfig((prev) => ({ ...prev, featured_properties: { ...prev.featured_properties, subcopy: e.target.value } }))} className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2" /></label>
+                <label className="home-composer-form-field">Fallback rule<input value={config.featured_properties.fallback_rule || ''} onChange={(e) => setConfig((prev) => ({ ...prev, featured_properties: { ...prev.featured_properties, fallback_rule: e.target.value } }))} className="home-composer-form-control" /></label>
+                <label className="home-composer-form-field">Heading<input value={config.featured_properties.heading || ''} onChange={(e) => setConfig((prev) => ({ ...prev, featured_properties: { ...prev.featured_properties, heading: e.target.value } }))} className="home-composer-form-control" /></label>
+                <label className="home-composer-form-field">Subcopy<input value={config.featured_properties.subcopy || ''} onChange={(e) => setConfig((prev) => ({ ...prev, featured_properties: { ...prev.featured_properties, subcopy: e.target.value } }))} className="home-composer-form-control" /></label>
               </div>
-              <div className="max-h-52 overflow-auto rounded-md border border-slate-200 p-2">
+              <div className="home-composer-option-list">
                 {propertyCandidates.map((item) => (
-                  <div key={item.id} className="flex items-start gap-2 rounded px-2 py-1 text-sm hover:bg-slate-50">
+                  <div key={item.id} className="home-composer-option">
                     <input
                       id={`featured-property-${item.id}`}
                       type="checkbox"
@@ -963,8 +963,8 @@ export default function HomeComposerPage() {
                       aria-label={`Select property ${item.title || item.source_id || item.id}`}
                     />
                     <label htmlFor={`featured-property-${item.id}`} className="cursor-pointer">
-                      <span className="font-medium text-slate-800">{item.title || item.source_id || item.id}</span>
-                      <span className="ml-2 text-xs text-slate-500">{item.source_id} · {item.status} · {item.type}</span>
+                      <span className="home-composer-option-title">{item.title || item.source_id || item.id}</span>
+                      <span className="home-composer-option-meta">{item.source_id} · {item.status} · {item.type}</span>
                     </label>
                   </div>
                 ))}
@@ -979,14 +979,14 @@ export default function HomeComposerPage() {
               icon="success"
               titleTag="h2"
             >
-              <label className="block text-sm text-slate-700">Why Pattaya metrics JSON
-                <textarea rows={6} value={metricsText} onChange={(e) => setMetricsText(e.target.value)} className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 font-mono text-xs" />
+              <label className="home-composer-form-field">Why Pattaya metrics JSON
+                <textarea rows={6} value={metricsText} onChange={(e) => setMetricsText(e.target.value)} className="home-composer-form-control home-composer-form-control--mono" />
               </label>
-              <label className="block text-sm text-slate-700">Trust proofs JSON
-                <textarea rows={6} value={trustProofsText} onChange={(e) => setTrustProofsText(e.target.value)} className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 font-mono text-xs" />
+              <label className="home-composer-form-field">Trust proofs JSON
+                <textarea rows={6} value={trustProofsText} onChange={(e) => setTrustProofsText(e.target.value)} className="home-composer-form-control home-composer-form-control--mono" />
               </label>
-              <label className="block text-sm text-slate-700">Process timeline JSON
-                <textarea rows={6} value={processTimelineText} onChange={(e) => setProcessTimelineText(e.target.value)} className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 font-mono text-xs" />
+              <label className="home-composer-form-field">Process timeline JSON
+                <textarea rows={6} value={processTimelineText} onChange={(e) => setProcessTimelineText(e.target.value)} className="home-composer-form-control home-composer-form-control--mono" />
               </label>
             </ActionCard>
 
@@ -999,33 +999,33 @@ export default function HomeComposerPage() {
               titleTag="h2"
             >
               {(['market_insights', 'reviews', 'videos'] as const).map((section) => (
-                <div key={section} className="rounded-md border border-slate-200 p-3 space-y-2">
-                  <div className="text-xs font-medium uppercase tracking-wide text-slate-500">{section}</div>
-                  <label className="inline-flex items-center gap-2 text-sm text-slate-700">
+                <div key={section} className="home-composer-config-block">
+                  <div className="home-composer-config-block-kicker">{section}</div>
+                  <label className="home-composer-toggle-label">
                     <input type="checkbox" checked={Boolean(config[section].enabled)} onChange={(e) => setConfig((prev) => ({ ...prev, [section]: { ...prev[section], enabled: e.target.checked } }))} />
                     Enabled
                   </label>
                   <div className="grid grid-cols-1 gap-2 md:grid-cols-3">
-                    <label className="text-sm text-slate-700">Heading<input value={config[section].heading || ''} onChange={(e) => setConfig((prev) => ({ ...prev, [section]: { ...prev[section], heading: e.target.value } }))} className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2" /></label>
-                    <label className="text-sm text-slate-700">Subcopy<input value={config[section].subcopy || ''} onChange={(e) => setConfig((prev) => ({ ...prev, [section]: { ...prev[section], subcopy: e.target.value } }))} className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2" /></label>
-                    <label className="text-sm text-slate-700">Mode<input value={config[section].mode || ''} onChange={(e) => setConfig((prev) => ({ ...prev, [section]: { ...prev[section], mode: e.target.value } }))} className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2" /></label>
+                    <label className="home-composer-form-field">Heading<input value={config[section].heading || ''} onChange={(e) => setConfig((prev) => ({ ...prev, [section]: { ...prev[section], heading: e.target.value } }))} className="home-composer-form-control" /></label>
+                    <label className="home-composer-form-field">Subcopy<input value={config[section].subcopy || ''} onChange={(e) => setConfig((prev) => ({ ...prev, [section]: { ...prev[section], subcopy: e.target.value } }))} className="home-composer-form-control" /></label>
+                    <label className="home-composer-form-field">Mode<input value={config[section].mode || ''} onChange={(e) => setConfig((prev) => ({ ...prev, [section]: { ...prev[section], mode: e.target.value } }))} className="home-composer-form-control" /></label>
                   </div>
                 </div>
               ))}
-              <div className="rounded-md border border-slate-200 p-3 space-y-2">
-                <div className="text-xs font-medium uppercase tracking-wide text-slate-500">bottom_cta</div>
-                <label className="inline-flex items-center gap-2 text-sm text-slate-700">
+              <div className="home-composer-config-block">
+                <div className="home-composer-config-block-kicker">bottom_cta</div>
+                <label className="home-composer-toggle-label">
                   <input type="checkbox" checked={Boolean(config.bottom_cta.enabled)} onChange={(e) => setConfig((prev) => ({ ...prev, bottom_cta: { ...prev.bottom_cta, enabled: e.target.checked } }))} />
                   Enabled
                 </label>
                 <div className="grid grid-cols-1 gap-2 md:grid-cols-2">
-                  <label className="text-sm text-slate-700">Heading<input value={config.bottom_cta.heading || ''} onChange={(e) => setConfig((prev) => ({ ...prev, bottom_cta: { ...prev.bottom_cta, heading: e.target.value } }))} className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2" /></label>
-                  <label className="text-sm text-slate-700">Subheading<input value={config.bottom_cta.subheading || ''} onChange={(e) => setConfig((prev) => ({ ...prev, bottom_cta: { ...prev.bottom_cta, subheading: e.target.value } }))} className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2" /></label>
-                  <label className="text-sm text-slate-700">Trust note<input value={config.bottom_cta.trust_note || ''} onChange={(e) => setConfig((prev) => ({ ...prev, bottom_cta: { ...prev.bottom_cta, trust_note: e.target.value } }))} className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2" /></label>
-                  <label className="text-sm text-slate-700">Primary label<input value={config.bottom_cta.primary_cta_label || ''} onChange={(e) => setConfig((prev) => ({ ...prev, bottom_cta: { ...prev.bottom_cta, primary_cta_label: e.target.value } }))} className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2" /></label>
-                  <label className="text-sm text-slate-700">Primary URL<input value={config.bottom_cta.primary_cta_url || ''} onChange={(e) => setConfig((prev) => ({ ...prev, bottom_cta: { ...prev.bottom_cta, primary_cta_url: e.target.value } }))} className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2" /></label>
-                  <label className="text-sm text-slate-700">Secondary label<input value={config.bottom_cta.secondary_cta_label || ''} onChange={(e) => setConfig((prev) => ({ ...prev, bottom_cta: { ...prev.bottom_cta, secondary_cta_label: e.target.value } }))} className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2" /></label>
-                  <label className="text-sm text-slate-700">Secondary URL<input value={config.bottom_cta.secondary_cta_url || ''} onChange={(e) => setConfig((prev) => ({ ...prev, bottom_cta: { ...prev.bottom_cta, secondary_cta_url: e.target.value } }))} className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2" /></label>
+                  <label className="home-composer-form-field">Heading<input value={config.bottom_cta.heading || ''} onChange={(e) => setConfig((prev) => ({ ...prev, bottom_cta: { ...prev.bottom_cta, heading: e.target.value } }))} className="home-composer-form-control" /></label>
+                  <label className="home-composer-form-field">Subheading<input value={config.bottom_cta.subheading || ''} onChange={(e) => setConfig((prev) => ({ ...prev, bottom_cta: { ...prev.bottom_cta, subheading: e.target.value } }))} className="home-composer-form-control" /></label>
+                  <label className="home-composer-form-field">Trust note<input value={config.bottom_cta.trust_note || ''} onChange={(e) => setConfig((prev) => ({ ...prev, bottom_cta: { ...prev.bottom_cta, trust_note: e.target.value } }))} className="home-composer-form-control" /></label>
+                  <label className="home-composer-form-field">Primary label<input value={config.bottom_cta.primary_cta_label || ''} onChange={(e) => setConfig((prev) => ({ ...prev, bottom_cta: { ...prev.bottom_cta, primary_cta_label: e.target.value } }))} className="home-composer-form-control" /></label>
+                  <label className="home-composer-form-field">Primary URL<input value={config.bottom_cta.primary_cta_url || ''} onChange={(e) => setConfig((prev) => ({ ...prev, bottom_cta: { ...prev.bottom_cta, primary_cta_url: e.target.value } }))} className="home-composer-form-control" /></label>
+                  <label className="home-composer-form-field">Secondary label<input value={config.bottom_cta.secondary_cta_label || ''} onChange={(e) => setConfig((prev) => ({ ...prev, bottom_cta: { ...prev.bottom_cta, secondary_cta_label: e.target.value } }))} className="home-composer-form-control" /></label>
+                  <label className="home-composer-form-field">Secondary URL<input value={config.bottom_cta.secondary_cta_url || ''} onChange={(e) => setConfig((prev) => ({ ...prev, bottom_cta: { ...prev.bottom_cta, secondary_cta_url: e.target.value } }))} className="home-composer-form-control" /></label>
                 </div>
               </div>
             </ActionCard>
@@ -1040,11 +1040,11 @@ export default function HomeComposerPage() {
               icon="media"
               titleTag="h2"
             >
-              <input value={candidateSearch} onChange={(e) => setCandidateSearch(e.target.value)} placeholder="Search projects/properties/media" className="mt-2 w-full rounded-md border border-slate-300 px-3 py-2 text-sm" />
+              <input value={candidateSearch} onChange={(e) => setCandidateSearch(e.target.value)} placeholder="Search projects/properties/media" className="mt-2 home-composer-search-input" />
               <div className="mt-3 max-h-[65vh] space-y-2 overflow-auto">
                 {mediaCandidates.map((asset) => (
-                  <button key={asset.id} type="button" onClick={() => selectHeroMedia(asset.storage_path)} className="w-full rounded-md border border-slate-200 p-2 text-left hover:bg-slate-50">
-                    <div className="font-mono text-xs text-slate-700 break-all">{asset.storage_path}</div>
+                  <button key={asset.id} type="button" onClick={() => selectHeroMedia(asset.storage_path)} className="home-composer-media-option">
+                    <div className="home-composer-code">{asset.storage_path}</div>
                     <div className={`mt-1 inline-flex rounded px-1.5 py-0.5 text-[11px] ${mediaBadgeClass(asset)}`}>
                       rights={asset.rights_status || 'unknown'} · approval={asset.approval_status || 'unknown'}
                     </div>
@@ -1055,7 +1055,7 @@ export default function HomeComposerPage() {
 
             <LogCard
               className="home-composer-card"
-              bodyClassName="space-y-3 text-sm text-slate-600"
+              bodyClassName="space-y-3 home-composer-status-card"
               title="Composer status"
               description="Current bundle metadata for draft and published variants."
               icon="info"
@@ -1076,3 +1076,4 @@ export default function HomeComposerPage() {
     </main>
   );
 }
+
