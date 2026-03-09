@@ -158,7 +158,7 @@ export function AdminCrudWorkspaceAuthPanel({
 }) {
   return (
     <AdminSectionCard
-      className="dashboard-controls"
+      className={isAuthenticated ? "dashboard-controls dashboard-controls--session" : "dashboard-controls dashboard-controls--auth"}
       title={isAuthenticated ? "Session" : "Admin sign in"}
       description={isAuthenticated ? "Active auth session for this workspace." : "Use existing admin credentials to access this workspace."}
       icon={isAuthenticated ? "profile" : "users"}
