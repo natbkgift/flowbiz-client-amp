@@ -102,9 +102,11 @@ async function ensureBaseUrl(url) {
   }
 
   const startLogs = [];
-  const child = spawn("npm", ["run", "dev"], {
+  const npmCommand = process.platform === "win32" ? "npm.cmd" : "npm";
+  const child = spawn(npmCommand, ["run", "dev"], {
     cwd: process.cwd(),
     env: process.env,
+    shell: process.platform === "win32",
     stdio: ["ignore", "pipe", "pipe"],
   });
 
@@ -125,6 +127,24 @@ function wait(time) {
   return new Promise((resolve) => {
     setTimeout(resolve, time);
   });
+}
+
+async function stopServer(child) {
+  if (!child) return;
+
+  if (process.platform === "win32") {
+    await new Promise((resolve) => {
+      const killer = spawn("taskkill", ["/pid", String(child.pid), "/t", "/f"], {
+        stdio: "ignore",
+        shell: true,
+      });
+      killer.on("exit", resolve);
+      killer.on("error", resolve);
+    });
+    return;
+  }
+
+  child.kill("SIGTERM");
 }
 
 async function tryLogin(page, runMetadata) {
@@ -473,9 +493,7 @@ async function run() {
   } finally {
     await context.close();
     await browser.close();
-    if (server.child) {
-      server.child.kill("SIGTERM");
-    }
+    await stopServer(server.child);
   }
 }
 

@@ -137,7 +137,7 @@ function DashboardControlCenter({
       description={t.controlCenterHint}
       icon={isAuthenticated ? "profile" : "workspace"}
       tone={isAuthenticated ? ("info" as const) : ("neutral" as const)}
-      className="dashboard-control-card"
+      className={isAuthenticated ? "dashboard-control-card is-authenticated" : "dashboard-control-card is-auth-locked"}
       meta={
         isAuthenticated ? (
           <AdminBadge tone="ok" icon="success">
@@ -194,6 +194,10 @@ function DashboardControlCenter({
             <AdminButton variant="primary" icon="workspace" type="submit" disabled={authLoading}>
               {authLoading ? t.signingIn : t.signIn}
             </AdminButton>
+          </div>
+          <div className="dashboard-control-card__helper state-empty" role="status">
+            <strong>{t.authRequired}</strong>
+            <p className="locale-safe">{t.loginSubtitle}</p>
           </div>
         </form>
       ) : (
@@ -755,7 +759,7 @@ export function AdminDashboardScreen({
       />
 
       <AdminPageBody>
-        <AdminSectionGrid className="dashboard-shell-grid">
+        <AdminSectionGrid className={isAuthenticated ? "dashboard-shell-grid" : "dashboard-shell-grid dashboard-shell-grid--locked"}>
           <div className="dashboard-zone dashboard-zone--primary">
             <DashboardSection
               title={t.widgets}
