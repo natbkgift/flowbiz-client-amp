@@ -95,6 +95,23 @@ type WidgetPresentation = {
   details?: string[];
 };
 
+type WidgetUiCopy = {
+  title?: string;
+  summary?: string;
+  actions?: Record<string, string>;
+};
+
+const WIDGET_DISPLAY_ORDER: Record<string, number> = {
+  project_cover_coverage: 0,
+  last_import_mirror_status: 1,
+  last_deploy_health_status: 2,
+  broken_media_count: 3,
+  pending_translations_count: 4,
+  recent_leads_inquiries: 5,
+  unpublished_drafts_count: 6,
+  review_video_source_verification_pending: 7,
+};
+
 const copy = {
   en: {
     statusOk: "OK",
@@ -137,11 +154,11 @@ const copy = {
     statusWarn: "เตือน",
     statusError: "ผิดพลาด",
     statusUnknown: "ไม่ทราบ",
-    covered: "มี cover",
+    covered: "มีภาพปก",
     broken: "เสีย",
-    missing: "ขาด cover",
-    external: "ภายนอก",
-    scanned: "สแกนล่าสุด",
+    missing: "ไม่มีภาพปก",
+    external: "ลิงก์ภายนอก",
+    scanned: "สแกนเมื่อ",
     reviews: "รีวิว",
     videos: "วิดีโอ",
     policy: "นโยบาย",
@@ -149,26 +166,88 @@ const copy = {
     drafts: "ฉบับร่าง",
     warnings: "คำเตือน",
     latest: "ล่าสุด",
-    import: "Import",
-    mirror: "Mirror",
-    health: "Health",
-    deploy: "Deploy",
+    import: "นำเข้า",
+    mirror: "มิเรอร์",
+    health: "สุขภาพระบบ",
+    deploy: "ดีพลอย",
     rows: "แถว",
     errors: "ข้อผิดพลาด",
     failures: "ล้มเหลว",
-    build: "Build",
-    source: "Source",
+    build: "บิลด์",
+    source: "แหล่งที่มา",
     approved: "อนุมัติแล้ว",
     draft: "ยังไม่อนุมัติ",
     healthy: "ปกติ",
-    attention: "ต้องตรวจ",
+    attention: "ต้องติดตาม",
     unknown: "ไม่ทราบ",
     projects: "โปรเจกต์",
     articles: "บทความ",
     homeComposer: "โฮมคอมโพสเซอร์",
-    translationBreakdown: "รายการที่ยังขาดคำแปล",
+    translationBreakdown: "คำแปลที่ยังขาด",
   },
 } as const;
+
+const widgetCopy: Record<AdminLocale, Record<string, WidgetUiCopy>> = {
+  en: {},
+  th: {
+    project_cover_coverage: {
+      title: "ความครอบคลุมภาพปกโปรเจกต์",
+      summary: "โปรเจกต์ส่วนใหญ่มีภาพปกภายในระบบที่ตรวจสอบแล้วและพร้อมใช้งาน",
+      actions: {
+        "/admin/media": "ดูคลังสื่อ",
+      },
+    },
+    broken_media_count: {
+      title: "สื่อที่มีปัญหา",
+      summary: "ยังมีรายการสื่อบางส่วนที่ควรให้ผู้ดูแลเข้าไปจัดการเพิ่มเติม",
+      actions: {
+        "/admin/media": "ดูคลังสื่อ",
+      },
+    },
+    pending_translations_count: {
+      title: "คำแปลที่รอดำเนินการ",
+      summary: "คิวคำแปลยังควบคุมได้และมองเห็นรายการที่ต้องตามต่อในรอบนี้",
+      actions: {
+        "/admin/domain": "เปิดโดเมน",
+      },
+    },
+    unpublished_drafts_count: {
+      title: "ฉบับร่างที่ยังไม่เผยแพร่",
+      summary: "จำนวนฉบับร่างยังอยู่ในระดับที่ทีมสามารถเคลียร์ได้ภายในรอบเดียว",
+      actions: {
+        "/admin/layout": "เปิดเลย์เอาต์",
+      },
+    },
+    recent_leads_inquiries: {
+      title: "ลีดและอินไควรีล่าสุด",
+      summary: "ลีดล่าสุดที่ระบบเก็บเข้ามายังตรวจสอบได้ครบจากหน้านี้",
+      actions: {
+        "/admin/inquiries": "เปิด CRM",
+      },
+    },
+    review_video_source_verification_pending: {
+      title: "การยืนยันแหล่งที่มาวิดีโอ",
+      summary: "ยังมีการตรวจสิทธิ์ต้นทางวิดีโอบางรายการที่ต้องปิดงานก่อนเผยแพร่",
+      actions: {
+        "/admin/videos": "เปิดวิดีโอ",
+      },
+    },
+    last_import_mirror_status: {
+      title: "สถานะนำเข้าและมิเรอร์",
+      summary: "รอบนำเข้าล่าสุดมีคำเตือนเล็กน้อย แต่ระบบมิเรอร์ยังคงเสถียร",
+      actions: {
+        "/admin/imports": "ดูงานนำเข้า",
+      },
+    },
+    last_deploy_health_status: {
+      title: "สถานะดีพลอย",
+      summary: "การดีพลอยและการตรวจสุขภาพระบบรอบล่าสุดยังอยู่ในเกณฑ์ปกติ",
+      actions: {
+        "/admin/seo": "ดู SEO",
+      },
+    },
+  },
+};
 
 function prettyDate(value: string | null | undefined, locale: AdminLocale): string | null {
   if (!value) return null;
@@ -238,9 +317,9 @@ function formatStatusWord(
 ): string {
   const normalized = String(value || "").trim().toLowerCase();
   if (!normalized) return fallback;
-  if (normalized === "ok") return locale === "th" ? "OK" : "OK";
-  if (normalized === "failed") return locale === "th" ? "FAILED" : "FAILED";
-  if (normalized === "partial") return locale === "th" ? "PARTIAL" : "PARTIAL";
+  if (normalized === "ok") return locale === "th" ? "ปกติ" : "OK";
+  if (normalized === "failed") return locale === "th" ? "ล้มเหลว" : "FAILED";
+  if (normalized === "partial") return locale === "th" ? "มีคำเตือน" : "PARTIAL";
   if (normalized === "unknown") return fallback;
   return normalized.toUpperCase();
 }
@@ -249,6 +328,36 @@ function compactBuildSha(value: string | null | undefined): string | null {
   const text = String(value || "").trim();
   if (!text) return null;
   return text.slice(0, 7);
+}
+
+function localizeWidget(widget: DashboardWidget, locale: AdminLocale): DashboardWidget {
+  const localized = widgetCopy[locale]?.[widget.key];
+  if (!localized) return widget;
+
+  return {
+    ...widget,
+    title: localized.title || widget.title,
+    summary: localized.summary || widget.summary,
+    actions: (widget.actions || []).map((action) => ({
+      ...action,
+      label: localized.actions?.[action.url] || action.label,
+    })),
+  };
+}
+
+function widgetSortOrder(key: string): number {
+  return WIDGET_DISPLAY_ORDER[key] ?? 99;
+}
+
+function widgetLayoutClass(key: string, status: WidgetStatus): string {
+  if (key === "project_cover_coverage") return "dashboard-kpi-card--hero";
+  if (key === "last_import_mirror_status" || key === "last_deploy_health_status") {
+    return "dashboard-kpi-card--signal";
+  }
+  if (status === "warn" || key === "broken_media_count" || key === "pending_translations_count") {
+    return "dashboard-kpi-card--attention";
+  }
+  return "dashboard-kpi-card--compact";
 }
 
 function createPresentation(
@@ -432,33 +541,37 @@ export function DashboardKpiWidgets({
   fallback: string;
 }) {
   const metricMap = (rawMetrics || {}) as DashboardRawMetrics;
+  const orderedWidgets = widgets
+    .map((widget) => localizeWidget(widget, locale))
+    .sort((left, right) => widgetSortOrder(left.key) - widgetSortOrder(right.key));
 
   return (
     <div className="dashboard-grid dashboard-kpi-grid">
-      {widgets.map((widget) => {
-        const presentation = createPresentation(widget, metricMap, locale, fallback);
+      {orderedWidgets.map((localizedWidget) => {
+        const presentation = createPresentation(localizedWidget, metricMap, locale, fallback);
+        const layoutClassName = widgetLayoutClass(localizedWidget.key, localizedWidget.status);
         return (
           <MetricCard
-            key={widget.key}
-            className={`dashboard-widget dashboard-kpi-card dashboard-kpi-card--${widget.status}`}
-            icon={widgetIcon(widget.key)}
-            title={widget.title}
+            key={localizedWidget.key}
+            className={`dashboard-widget dashboard-kpi-card dashboard-kpi-card--${localizedWidget.status} ${layoutClassName}`}
+            icon={widgetIcon(localizedWidget.key)}
+            title={localizedWidget.title}
             titleTag="h3"
             actions={
               <AdminBadge
-                tone={widget.status === "ok" ? "ok" : widget.status === "warn" ? "warn" : widget.status === "error" ? "error" : "neutral"}
-                icon={statusIcon(widget.status)}
-                className={statusClass(widget.status)}
+                tone={localizedWidget.status === "ok" ? "ok" : localizedWidget.status === "warn" ? "warn" : localizedWidget.status === "error" ? "error" : "neutral"}
+                icon={statusIcon(localizedWidget.status)}
+                className={statusClass(localizedWidget.status)}
               >
-                {statusLabel(widget.status, locale)}
+                {statusLabel(localizedWidget.status, locale)}
               </AdminBadge>
             }
             footer={
-              (widget.actions || []).length > 0 ? (
+              (localizedWidget.actions || []).length > 0 ? (
                 <div className="dashboard-widget-actions">
-                  {(widget.actions || []).map((action, index) => (
+                  {(localizedWidget.actions || []).map((action, index) => (
                     <Link
-                      key={`${widget.key}-${action.url}-${index}`}
+                      key={`${localizedWidget.key}-${action.url}-${index}`}
                       className={adminButtonClassName({ variant: "secondary", size: "sm" })}
                       href={withAdminLocale(action.url, locale)}
                     >
@@ -480,7 +593,7 @@ export function DashboardKpiWidgets({
             {(presentation.pills || []).length > 0 ? (
               <div className="dashboard-kpi-pill-row">
                 {(presentation.pills || []).map((item) => (
-                  <span key={`${widget.key}-${item}`} className="dashboard-kpi-pill">
+                  <span key={`${localizedWidget.key}-${item}`} className="dashboard-kpi-pill">
                     {item}
                   </span>
                 ))}
@@ -490,12 +603,12 @@ export function DashboardKpiWidgets({
             {(presentation.details || []).length > 0 ? (
               <ul className="dashboard-kpi-detail-list">
                 {(presentation.details || []).map((item) => (
-                  <li key={`${widget.key}-${item}`}>{item}</li>
+                  <li key={`${localizedWidget.key}-${item}`}>{item}</li>
                 ))}
               </ul>
             ) : null}
 
-            <p className="locale-safe">{widget.summary}</p>
+            <p className="locale-safe">{localizedWidget.summary}</p>
           </MetricCard>
         );
       })}

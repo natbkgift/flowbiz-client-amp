@@ -36,4 +36,10 @@ describe("Admin shell i18n", () => {
     expect(shell).toContain('aria-controls="admin-shell-mobile-drawer"');
     expect(shell).toContain('event.key === "Escape"');
   });
+
+  it("preserves the requested locale when /admin redirects to the dashboard", () => {
+    const adminIndex = read("app/admin/page.tsx");
+    expect(adminIndex).toContain("ADMIN_LOCALE_QUERY_KEY");
+    expect(adminIndex).toContain("redirect(`/admin/dashboard?${ADMIN_LOCALE_QUERY_KEY}=${locale}`)");
+  });
 });

@@ -41,7 +41,7 @@ const ADMIN_QUICK_ACTIONS: AdminNavItem[] = [
     href: "/admin/imports",
     icon: "imports",
     label: { en: "Imports", th: "นำเข้าข้อมูล" },
-    description: { en: "Sync and mirror runs", th: "งาน sync และ mirror" },
+    description: { en: "Sync and mirror runs", th: "งานซิงก์และมิเรอร์" },
   },
   {
     href: "/admin/media",
@@ -104,24 +104,24 @@ const shellCopy = {
     breadcrumb: "เส้นทางหน้า",
     adminBrand: "AMP แอดมิน",
     search: "ค้นหา",
-    searchPlaceholder: "ค้นหาโมดูล พื้นที่ทำงาน หรืองานที่ต้องทำ",
-    searchHint: "กรองเมนูแอดมินได้ทันที",
-    noResults: "ไม่พบ workspace ที่ตรงคำค้น",
-    noResultsHint: "ลองค้นหา Dashboard, Media, SEO หรือ CRM",
+    searchPlaceholder: "ค้นหาเมนู พื้นที่ทำงาน หรือรายการงาน",
+    searchHint: "ค้นหาและกรองเมนูแอดมินได้ทันที",
+    noResults: "ไม่พบเมนูที่ตรงคำค้น",
+    noResultsHint: "ลองค้นหา แดชบอร์ด คลังสื่อ SEO หรือ CRM",
     openNavigation: "เปิดเมนู",
     closeNavigation: "ปิดเมนู",
     navigationPanel: "แผงเมนูแอดมิน",
-    currentWorkspace: "workspace ปัจจุบัน",
+    currentWorkspace: "พื้นที่ทำงานปัจจุบัน",
     profileLabel: "เมนูผู้ใช้",
     profileTitle: "FlowBiz Operations",
     profileSubtitle: "เครื่องมือจัดการเซสชันแอดมิน",
     visitSite: "เปิดเว็บไซต์",
     localeBadge: "ภาษา",
     notifications: "การแจ้งเตือน",
-    notificationsHint: "alerts, watchlist และงาน QA ที่ต้องตาม",
+    notificationsHint: "สัญญาณเตือน รายการเฝ้าระวัง และงาน QA ที่ต้องติดตาม",
     toolbarSearch: "ค้นหาจากแถบด้านบน",
     workspacePanel: "พื้นที่ทำงาน",
-    workspacePanelHint: "บริบทของ workspace ปัจจุบัน",
+    workspacePanelHint: "บริบทของพื้นที่ทำงานปัจจุบัน",
     pageTitle: "ชื่อหน้า",
   },
 } as const;
@@ -184,6 +184,11 @@ function filterNavItems(items: AdminNavItem[], searchTerm: string, locale: Admin
   });
 }
 
+function resolveNavHref(href: string, locale: AdminLocale): string {
+  if (href.startsWith("/th") || href.startsWith("/en")) return href;
+  return withAdminLocale(href, locale);
+}
+
 function renderNavGroup(
   title: string,
   items: AdminNavItem[],
@@ -207,27 +212,46 @@ function renderNavGroup(
             const active = isActiveAdminNav(pathname, item.href);
             const label = getAdminNavText(item.label, locale);
             const description = getAdminNavText(item.description, locale);
+            const resolvedHref = resolveNavHref(item.href, locale);
+            const isPublicLocaleLink = item.href.startsWith("/th") || item.href.startsWith("/en");
+            const navContent = (
+              <>
+                <span className="admin-shell-nav-link-accent" aria-hidden="true" />
+                <span className="admin-shell-nav-link-icon" aria-hidden="true">
+                  <AdminIcon name={item.icon} size={16} />
+                </span>
+                <span className="admin-shell-nav-link-copy">
+                  <strong>{renderHighlightedText(label, searchTerm)}</strong>
+                  <small>{renderHighlightedText(description, searchTerm)}</small>
+                </span>
+                <span className="admin-shell-nav-link-trail" aria-hidden="true">
+                  <AdminIcon name="info" size={14} />
+                </span>
+              </>
+            );
             return (
               <li key={item.href}>
-                <Link
-                  href={withAdminLocale(item.href, locale)}
-                  className={active ? `${linkClassName} is-active` : linkClassName}
-                  aria-current={active ? "page" : undefined}
-                  onClick={options?.onNavigate}
-                  title={label}
-                >
-                  <span className="admin-shell-nav-link-accent" aria-hidden="true" />
-                  <span className="admin-shell-nav-link-icon" aria-hidden="true">
-                    <AdminIcon name={item.icon} size={16} />
-                  </span>
-                  <span className="admin-shell-nav-link-copy">
-                    <strong>{renderHighlightedText(label, searchTerm)}</strong>
-                    <small>{renderHighlightedText(description, searchTerm)}</small>
-                  </span>
-                  <span className="admin-shell-nav-link-trail" aria-hidden="true">
-                    <AdminIcon name="info" size={14} />
-                  </span>
-                </Link>
+                {isPublicLocaleLink ? (
+                  <a
+                    href={resolvedHref}
+                    className={active ? `${linkClassName} is-active` : linkClassName}
+                    aria-current={active ? "page" : undefined}
+                    onClick={options?.onNavigate}
+                    title={label}
+                  >
+                    {navContent}
+                  </a>
+                ) : (
+                  <Link
+                    href={resolvedHref}
+                    className={active ? `${linkClassName} is-active` : linkClassName}
+                    aria-current={active ? "page" : undefined}
+                    onClick={options?.onNavigate}
+                    title={label}
+                  >
+                    {navContent}
+                  </Link>
+                )}
               </li>
             );
           })}
@@ -308,7 +332,24 @@ export function AdminShell({ children }: { children: ReactNode }) {
   const currentWorkspaceLabel = item ? getAdminNavText(item.label, locale) : ui.workspace;
   const currentWorkspaceDescription = item ? getAdminNavText(item.description, locale) : ui.workspaceSummary;
   const siteHref = locale === "th" ? "/th" : "/en";
-  const hasSearchResults = filteredNavGroups.some((entry) => entry.items.length > 0);
+  const sidebarUtilityItems = useMemo<AdminNavItem[]>(
+    () => [
+      ...ADMIN_QUICK_ACTIONS,
+      {
+        href: siteHref,
+        icon: "globe",
+        label: { en: "Visit site", th: "เปิดเว็บไซต์" },
+        description: { en: "Open public website", th: "เปิดหน้าเว็บไซต์จริง" },
+      },
+    ],
+    [siteHref],
+  );
+  const filteredUtilityItems = useMemo(
+    () => filterNavItems(sidebarUtilityItems, deferredSearch, locale),
+    [deferredSearch, locale, sidebarUtilityItems],
+  );
+  const hasSearchResults =
+    filteredNavGroups.some((entry) => entry.items.length > 0) || filteredUtilityItems.length > 0;
   const showWorkspaceBreadcrumb = currentGroupLabel !== currentWorkspaceLabel;
 
   useEffect(() => {
@@ -399,172 +440,166 @@ export function AdminShell({ children }: { children: ReactNode }) {
           <span>{currentWorkspaceDescription}</span>
         </div>
 
-        <label className="admin-shell-search admin-shell-search--sidebar" htmlFor="admin-shell-search">
-          <span>{ui.search}</span>
-          <div className="admin-shell-search-input">
-            <span className="admin-shell-search-icon" aria-hidden="true">
-              <AdminIcon name="search" size={15} />
-            </span>
-            <input
-              id="admin-shell-search"
-              type="search"
-              value={searchQuery}
-              onChange={onSearchChange}
-              placeholder={ui.searchPlaceholder}
-            />
-          </div>
-          <small>{ui.searchHint}</small>
-        </label>
-
         <div className="admin-shell-sidebar-scroll">
-          {hasSearchResults
-            ? filteredNavGroups.map((entry) => (
-               <div key={entry.group.key}>
+          <label className="admin-shell-search admin-shell-search--sidebar" htmlFor="admin-shell-search">
+            <span>{ui.search}</span>
+            <div className="admin-shell-search-input">
+              <span className="admin-shell-search-icon" aria-hidden="true">
+                <AdminIcon name="search" size={15} />
+              </span>
+              <input
+                id="admin-shell-search"
+                type="search"
+                value={searchQuery}
+                onChange={onSearchChange}
+                placeholder={ui.searchPlaceholder}
+              />
+            </div>
+            <small>{ui.searchHint}</small>
+          </label>
+
+          {hasSearchResults ? (
+            <>
+              {filteredNavGroups.map((entry) => (
+                <div key={entry.group.key}>
                   {renderNavGroup(getAdminNavText(entry.group.label, locale), entry.items, pathname, locale, deferredSearch)}
                 </div>
-              ))
-             : emptySearchState}
-        </div>
+              ))}
 
-        <nav className="admin-shell-sidebar-footer" aria-label={ui.quickActions}>
-          {ADMIN_QUICK_ACTIONS.map((action) => {
-            const active = isActiveAdminNav(pathname, action.href);
-            return (
-              <Link
-                key={action.href}
-                href={withAdminLocale(action.href, locale)}
-                className={active ? "admin-shell-footer-link is-active" : "admin-shell-footer-link"}
-                aria-current={active ? "page" : undefined}
-              >
-                <span aria-hidden="true">
-                  <AdminIcon name={action.icon} size={14} />
-                </span>
-                <span>{getAdminNavText(action.label, locale)}</span>
-              </Link>
-            );
-          })}
-          <Link href={siteHref} className="admin-shell-footer-link">
-            <span aria-hidden="true">
-              <AdminIcon name="globe" size={14} />
-            </span>
-            <span>{ui.visitSite}</span>
-          </Link>
-        </nav>
+              <nav className="admin-shell-sidebar-footer" aria-label={ui.quickActions}>
+                {renderNavGroup(
+                  ui.quickNavigation,
+                  filteredUtilityItems,
+                  pathname,
+                  locale,
+                  deferredSearch,
+                  { linkClassName: "admin-shell-nav-link admin-shell-nav-link--utility" },
+                )}
+              </nav>
+            </>
+          ) : (
+            emptySearchState
+          )}
+        </div>
       </aside>
 
       <div className="admin-shell-main">
         <header className="admin-shell-topbar" aria-label={ui.pageContext}>
-          <div className="admin-shell-topbar-row">
-            <button
-              type="button"
-              className="admin-shell-toggle"
-              aria-expanded={mobileNavOpen}
-              aria-controls="admin-shell-mobile-drawer"
-              aria-label={mobileNavOpen ? ui.closeNavigation : ui.openNavigation}
-              onClick={toggleMobileNav}
-            >
-              <span aria-hidden="true">
-                <AdminIcon name={mobileNavOpen ? "x" : "menu"} size={16} />
-              </span>
-            </button>
-
-            <div className="admin-shell-topbar-main">
-              <p className="admin-shell-topbar-section">{currentGroupLabel}</p>
-              <div className="admin-shell-page-heading" aria-label={ui.pageTitle}>
-                <span className="admin-shell-page-icon" aria-hidden="true">
-                  {item ? <AdminIcon name={item.icon} size={18} /> : <AdminIcon name="workspace" size={18} />}
+          <div className="admin-shell-topbar-inner">
+            <div className="admin-shell-topbar-row">
+              <button
+                type="button"
+                className="admin-shell-toggle"
+                aria-expanded={mobileNavOpen}
+                aria-controls="admin-shell-mobile-drawer"
+                aria-label={mobileNavOpen ? ui.closeNavigation : ui.openNavigation}
+                onClick={toggleMobileNav}
+              >
+                <span aria-hidden="true">
+                  <AdminIcon name={mobileNavOpen ? "x" : "menu"} size={16} />
                 </span>
-                <div>
-                  <p className="admin-shell-page-title">{currentWorkspaceLabel}</p>
-                  <p className="admin-shell-page-subtitle">{currentWorkspaceDescription}</p>
+              </button>
+
+              <div className="admin-shell-topbar-main">
+                <p className="admin-shell-topbar-section">{currentGroupLabel}</p>
+                <div className="admin-shell-page-heading" aria-label={ui.pageTitle}>
+                  <span className="admin-shell-page-icon" aria-hidden="true">
+                    {item ? <AdminIcon name={item.icon} size={18} /> : <AdminIcon name="workspace" size={18} />}
+                  </span>
+                  <div>
+                    <p className="admin-shell-page-title">{currentWorkspaceLabel}</p>
+                    <p className="admin-shell-page-subtitle">{currentWorkspaceDescription}</p>
+                  </div>
                 </div>
+                <nav aria-label={ui.breadcrumb} className="admin-shell-breadcrumb">
+                  <ol>
+                    <li>
+                      <Link href={withAdminLocale("/admin/dashboard", locale)}>{ui.admin}</Link>
+                      <span aria-hidden="true">/</span>
+                    </li>
+                    {showWorkspaceBreadcrumb ? <li>{currentGroupLabel}</li> : null}
+                    <li>
+                      {showWorkspaceBreadcrumb ? <span aria-hidden="true">/</span> : null}
+                      <span aria-current="page">{currentWorkspaceLabel}</span>
+                    </li>
+                  </ol>
+                </nav>
               </div>
-              <nav aria-label={ui.breadcrumb} className="admin-shell-breadcrumb">
-                <ol>
-                  <li>
-                    <Link href={withAdminLocale("/admin/dashboard", locale)}>{ui.admin}</Link>
-                    <span aria-hidden="true">/</span>
-                  </li>
-                  {showWorkspaceBreadcrumb ? <li>{currentGroupLabel}</li> : null}
-                  <li>
-                    {showWorkspaceBreadcrumb ? <span aria-hidden="true">/</span> : null}
-                    <span aria-current="page">{currentWorkspaceLabel}</span>
-                  </li>
-                </ol>
-              </nav>
-            </div>
-          </div>
-
-          <div className="admin-shell-topbar-tools">
-            <label className="admin-shell-search admin-shell-search--topbar" htmlFor="admin-shell-topbar-search">
-              <span>{ui.toolbarSearch}</span>
-              <div className="admin-shell-search-input">
-                <span className="admin-shell-search-icon" aria-hidden="true">
-                  <AdminIcon name="search" size={15} />
-                </span>
-                <input
-                  id="admin-shell-topbar-search"
-                  type="search"
-                  value={searchQuery}
-                  onChange={onSearchChange}
-                  placeholder={ui.searchPlaceholder}
-                />
-              </div>
-            </label>
-
-            <Link
-              href={withAdminLocale("/admin/dashboard", locale)}
-              className="admin-shell-toolbar-chip admin-shell-toolbar-chip--notifications"
-            >
-              <span className="admin-shell-toolbar-chip-icon" aria-hidden="true">
-                <AdminIcon name="warning" size={16} />
-              </span>
-              <span className="admin-shell-toolbar-chip-copy">
-                <strong>{ui.notifications}</strong>
-                <small>{ui.notificationsHint}</small>
-              </span>
-            </Link>
-
-            <div className="admin-shell-toolbar-chip admin-shell-toolbar-chip--workspace">
-              <span className="admin-shell-toolbar-chip-icon" aria-hidden="true">
-                <AdminIcon name="workspace" size={16} />
-              </span>
-              <span className="admin-shell-toolbar-chip-copy">
-                <strong>{currentWorkspaceLabel}</strong>
-                <small>{currentWorkspaceDescription}</small>
-              </span>
-              <AdminBadge tone="info" icon="workspace">
-                {ui.workspaceName}
-              </AdminBadge>
             </div>
 
-            <div className="admin-shell-profile" aria-label={ui.profileLabel}>
-              <div className="admin-shell-profile-head">
-                <span className="admin-shell-profile-avatar" aria-hidden="true">
-                  <AdminIcon name="profile" size={16} />
-                </span>
-                <div>
-                  <p className="admin-shell-profile-kicker">{ui.profileLabel}</p>
-                  <strong>{ui.profileTitle}</strong>
-                  <span>{ui.profileSubtitle}</span>
+            <div className="admin-shell-topbar-tools">
+              <label className="admin-shell-search admin-shell-search--topbar" htmlFor="admin-shell-topbar-search">
+                <span>{ui.toolbarSearch}</span>
+                <div className="admin-shell-search-input">
+                  <span className="admin-shell-search-icon" aria-hidden="true">
+                    <AdminIcon name="search" size={15} />
+                  </span>
+                  <input
+                    id="admin-shell-topbar-search"
+                    type="search"
+                    value={searchQuery}
+                    onChange={onSearchChange}
+                    placeholder={ui.searchPlaceholder}
+                  />
                 </div>
-              </div>
-              <div className="admin-shell-profile-badges">
-                <AdminBadge tone="info" icon="language">
-                  {ui.localeBadge}: {locale.toUpperCase()}
-                </AdminBadge>
-              </div>
-              <div className="admin-shell-profile-actions">
-                <Link href={siteHref} className="admin-shell-profile-link">
-                  <AdminIcon name="globe" size={14} />
-                  <span>{ui.visitSite}</span>
+              </label>
+
+              <div className="admin-shell-topbar-status" aria-label={ui.quickActions}>
+                <Link
+                  href={withAdminLocale("/admin/dashboard", locale)}
+                  className="admin-shell-toolbar-chip admin-shell-toolbar-chip--notifications"
+                >
+                  <span className="admin-shell-toolbar-chip-icon" aria-hidden="true">
+                    <AdminIcon name="warning" size={16} />
+                  </span>
+                  <span className="admin-shell-toolbar-chip-copy">
+                    <strong>{ui.notifications}</strong>
+                    <small>{ui.notificationsHint}</small>
+                  </span>
                 </Link>
-                <div className="admin-shell-locale-control">
-                  <label htmlFor="admin-language-switcher">{ui.language}</label>
-                  <select id="admin-language-switcher" value={locale} onChange={onLanguageChange}>
-                    <option value="en">EN</option>
-                    <option value="th">TH</option>
-                  </select>
+
+                <div className="admin-shell-toolbar-chip admin-shell-toolbar-chip--workspace">
+                  <span className="admin-shell-toolbar-chip-icon" aria-hidden="true">
+                    <AdminIcon name="workspace" size={16} />
+                  </span>
+                  <span className="admin-shell-toolbar-chip-copy">
+                    <strong>{currentWorkspaceLabel}</strong>
+                    <small>{currentWorkspaceDescription}</small>
+                  </span>
+                  <AdminBadge tone="info" icon="workspace">
+                    {ui.workspaceName}
+                  </AdminBadge>
+                </div>
+              </div>
+
+              <div className="admin-shell-profile" aria-label={ui.profileLabel}>
+                <div className="admin-shell-profile-head">
+                  <span className="admin-shell-profile-avatar" aria-hidden="true">
+                    <AdminIcon name="profile" size={16} />
+                  </span>
+                  <div>
+                    <p className="admin-shell-profile-kicker">{ui.profileLabel}</p>
+                    <strong>{ui.profileTitle}</strong>
+                    <span>{ui.profileSubtitle}</span>
+                  </div>
+                </div>
+                <div className="admin-shell-profile-badges">
+                  <AdminBadge tone="info" icon="language">
+                    {ui.localeBadge}: {locale.toUpperCase()}
+                  </AdminBadge>
+                </div>
+                <div className="admin-shell-profile-actions">
+                  <Link href={siteHref} className="admin-shell-profile-link">
+                    <AdminIcon name="globe" size={14} />
+                    <span>{ui.visitSite}</span>
+                  </Link>
+                  <div className="admin-shell-locale-control">
+                    <label htmlFor="admin-language-switcher">{ui.language}</label>
+                    <select id="admin-language-switcher" value={locale} onChange={onLanguageChange}>
+                      <option value="en">EN</option>
+                      <option value="th">TH</option>
+                    </select>
+                  </div>
                 </div>
               </div>
             </div>

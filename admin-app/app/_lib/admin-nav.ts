@@ -20,7 +20,7 @@ const DASHBOARD_NAV: AdminNavItem = {
   href: "/admin/dashboard",
   icon: "dashboard",
   label: { en: "Dashboard", th: "แดชบอร์ด" },
-  description: { en: "Health + QA overview", th: "ภาพรวมสุขภาพระบบ + QA" },
+  description: { en: "Health + QA overview", th: "ภาพรวมสุขภาพระบบและ QA" },
 };
 
 const USERS_NAV: AdminNavItem = {
@@ -118,7 +118,7 @@ const IMPORTS_NAV: AdminNavItem = {
   href: "/admin/imports",
   icon: "imports",
   label: { en: "Imports", th: "นำเข้าข้อมูล" },
-  description: { en: "Import + mirror operations", th: "งานนำเข้าและ mirror" },
+  description: { en: "Import + mirror operations", th: "งานนำเข้าและมิเรอร์" },
 };
 
 const DOMAIN_NAV: AdminNavItem = {

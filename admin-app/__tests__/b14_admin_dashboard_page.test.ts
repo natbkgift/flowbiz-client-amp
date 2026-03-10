@@ -34,6 +34,7 @@ describe("B14 admin dashboard page contract", () => {
     const page = read("app/admin/dashboard/page.tsx");
     const screen = read("components/admin/domain/dashboard/AdminDashboardScreen.tsx");
     const types = read("components/admin/domain/dashboard/dashboard-types.ts");
+    const widgets = read("components/admin/dashboard/DashboardKpiWidgets.tsx");
 
     expect(page).toContain('"/api/admin/dashboard/health-summary"');
     expect(screen).toContain("totalRecentInquiryCount");
@@ -49,6 +50,9 @@ describe("B14 admin dashboard page contract", () => {
     expect(types).toContain('"review_video_source_verification_pending"');
     expect(types).toContain('"last_import_mirror_status"');
     expect(types).toContain('"last_deploy_health_status"');
+    expect(widgets).toContain("WIDGET_DISPLAY_ORDER");
+    expect(widgets).toContain("widgetLayoutClass");
+    expect(widgets).toContain('dashboard-kpi-card--hero');
   });
 
   it("contains accessible structure and runtime states in EN/TH copy", () => {
@@ -85,6 +89,8 @@ describe("B14 admin dashboard page contract", () => {
     expect(screen).toContain('ariaLabel={t.trendTitle}');
     expect(screen).toContain('role="alert">{authError}</div>');
     expect(screen).toContain("DashboardSectionState");
+    expect(screen).toContain("renderLockedOverviewPanel");
+    expect(screen).toContain("renderLockedSectionPreview");
     expect(screen).toContain("renderOperationalIdleCard");
     expect(screen).toContain("dashboard-operational-card");
     expect(screen).toContain("dashboard-hero-toolbar");
@@ -97,12 +103,15 @@ describe("B14 admin dashboard page contract", () => {
     expect(copy).toContain("retry: \"Retry\"");
     expect(copy).toContain("retry: \"ลองใหม่\"");
     expect(copy).toContain('title: "Admin Health / QA Dashboard"');
-    expect(copy).toContain('subtitle: "ศูนย์ควบคุมสำหรับสุขภาพระบบ pipeline watchlist และ activity ล่าสุดของแอดมิน"');
-    expect(copy).toContain('trendTitle: "Activity metrics"');
+    expect(copy).toContain('title: "แดชบอร์ดสุขภาพระบบและ QA"');
+    expect(copy).toContain('overviewLockedBody: "เข้าสู่ระบบเพื่อดูสถานะสุขภาพล่าสุด สแนปช็อตเวลาอัปเดต และเครื่องมือควบคุมของผู้ดูแล"');
+    expect(copy).toContain('widgetsLockedBody: "ปลดล็อกมุมมองคอนเทนต์ สื่อ คำแปล และความพร้อมก่อนดีพลอยของ workspace นี้"');
+    expect(copy).toContain('subtitle: "ศูนย์ควบคุมสุขภาพระบบ ภาพรวมคิวงาน รายการเฝ้าระวัง และกิจกรรมล่าสุดของทีมแอดมิน"');
+    expect(copy).toContain('trendTitle: "แนวโน้มกิจกรรมของลีด"');
     expect(copy).toContain('trendHint: "Lead activity trend backed by backend-provided daily inquiry buckets."');
     expect(copy).toContain('insightsTitle: "Pipeline summary"');
-    expect(copy).toContain('insightsTitle: "Pipeline summary"');
-    expect(copy).toContain('watchlistTitle: "Watchlist"');
+    expect(copy).toContain('insightsTitle: "สรุปคิวงาน"');
+    expect(copy).toContain('watchlistTitle: "รายการเฝ้าระวัง"');
     expect(copy).toContain('backgroundTasksTitle: "Background tasks"');
     expect(copy).toContain('lastUpdated: "Last updated"');
     expect(copy).toContain('quickActions: "Quick actions"');

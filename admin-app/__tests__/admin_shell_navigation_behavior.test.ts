@@ -32,12 +32,13 @@ describe("admin shell navigation behavior", () => {
   it("shows the empty search state in both desktop and mobile navigation", () => {
     const shell = read("components/layout/AdminShell.tsx");
 
-    expect(shell).toContain("const hasSearchResults = filteredNavGroups.some");
+    expect(shell).toContain("const hasSearchResults =");
+    expect(shell).toContain("filteredUtilityItems.length > 0");
     expect(shell).toContain("renderHighlightedText");
     expect(shell).toContain("admin-shell-nav-match");
     expect(shell).toContain("admin-shell-nav-empty-icon");
-    expect(shell).toContain("? filteredNavGroups.map((entry) =>");
-    expect(shell).toContain(": emptySearchState");
+    expect(shell).toContain("hasSearchResults ? (");
+    expect(shell).toContain("emptySearchState");
     expect(shell).toContain("admin-shell-sidebar-scroll");
     expect(shell).toContain("admin-shell-mobile-drawer-sections");
   });
