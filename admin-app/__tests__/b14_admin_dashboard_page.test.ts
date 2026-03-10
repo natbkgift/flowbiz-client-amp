@@ -85,6 +85,8 @@ describe("B14 admin dashboard page contract", () => {
     expect(screen).toContain('ariaLabel={t.trendTitle}');
     expect(screen).toContain('role="alert">{authError}</div>');
     expect(screen).toContain("DashboardSectionState");
+    expect(screen).toContain("renderLockedOverviewPanel");
+    expect(screen).toContain("renderLockedSectionPreview");
     expect(screen).toContain("renderOperationalIdleCard");
     expect(screen).toContain("dashboard-operational-card");
     expect(screen).toContain("dashboard-hero-toolbar");
@@ -97,7 +99,9 @@ describe("B14 admin dashboard page contract", () => {
     expect(copy).toContain("retry: \"Retry\"");
     expect(copy).toContain("retry: \"ลองใหม่\"");
     expect(copy).toContain('title: "Admin Health / QA Dashboard"');
-    expect(copy).toContain('title: "แดชบอร์ดสุขภาพระบบ / QA"');
+    expect(copy).toContain('title: "แดชบอร์ดสุขภาพระบบและ QA"');
+    expect(copy).toContain('overviewLockedBody: "เข้าสู่ระบบเพื่อดูสถานะสุขภาพล่าสุด สแนปช็อตเวลาอัปเดต และเครื่องมือควบคุมของผู้ดูแล"');
+    expect(copy).toContain('widgetsLockedBody: "ปลดล็อกมุมมองคอนเทนต์ สื่อ คำแปล และความพร้อมก่อนดีพลอยของ workspace นี้"');
     expect(copy).toContain('subtitle: "ศูนย์ควบคุมสุขภาพระบบ ภาพรวมคิวงาน รายการเฝ้าระวัง และกิจกรรมล่าสุดของทีมแอดมิน"');
     expect(copy).toContain('trendTitle: "แนวโน้มกิจกรรมของลีด"');
     expect(copy).toContain('trendHint: "Lead activity trend backed by backend-provided daily inquiry buckets."');

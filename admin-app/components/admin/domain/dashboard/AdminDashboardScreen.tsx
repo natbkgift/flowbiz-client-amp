@@ -534,6 +534,57 @@ export function AdminDashboardScreen({
     );
   }
 
+  function renderLockedOverviewPanel() {
+    return (
+      <div className="dashboard-locked-overview" role="status" aria-live="polite">
+        <div className="dashboard-locked-overview__main">
+          <span className="dashboard-section-state__icon" aria-hidden="true">
+            <AdminIcon name="workspace" size={18} />
+          </span>
+          <div className="dashboard-locked-overview__copy">
+            <h2>{t.workspaceLockedTitle}</h2>
+            <p className="locale-safe">{t.overviewLockedBody}</p>
+          </div>
+        </div>
+        <div className="dashboard-locked-overview__facts">
+          <div className="dashboard-locked-overview__fact">
+            <span>{t.status}</span>
+            <AdminBadge tone="info" icon="workspace">
+              {t.loginTitle}
+            </AdminBadge>
+          </div>
+          <div className="dashboard-locked-overview__fact">
+            <span>{t.lastUpdated}</span>
+            <strong>{t.noSnapshotYet}</strong>
+          </div>
+          <div className="dashboard-locked-overview__fact">
+            <span>{t.widgets}</span>
+            <strong>{WIDGET_KEYS.length}</strong>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  function renderLockedSectionPreview(detail: string) {
+    return (
+      <article className="dashboard-locked-preview" role="status" aria-live="polite">
+        <div className="dashboard-locked-preview__head">
+          <span className="dashboard-operational-card__label">{t.status}</span>
+          <AdminBadge tone="info" icon="workspace">
+            {t.loginTitle}
+          </AdminBadge>
+        </div>
+        <strong className="dashboard-locked-preview__title">{t.workspaceLockedTitle}</strong>
+        <p className="locale-safe">{detail}</p>
+        <div className="dashboard-locked-preview__meta">
+          <span>{t.lastUpdated}</span>
+          <strong>{t.noSnapshotYet}</strong>
+        </div>
+      </article>
+    );
+  }
+
   function renderOperationalIdleCard({
     title,
     value,
@@ -625,7 +676,7 @@ export function AdminDashboardScreen({
 
   function renderOverviewPanel() {
     if (!isAuthenticated) {
-      return <DashboardSectionState tone="info" title={t.workspaceLockedTitle} body={t.workspaceLockedBody} />;
+      return renderLockedOverviewPanel();
     }
 
     if (dashboardState === "loading") {
@@ -679,7 +730,7 @@ export function AdminDashboardScreen({
 
   function renderWidgetsPanel() {
     if (!isAuthenticated) {
-      return <DashboardSectionState tone="info" title={t.workspaceLockedTitle} body={t.workspaceLockedBody} />;
+      return renderLockedSectionPreview(t.widgetsLockedBody);
     }
 
     if (dashboardState === "loading") {
@@ -723,7 +774,7 @@ export function AdminDashboardScreen({
 
   function renderInsightsPanel() {
     if (!isAuthenticated) {
-      return <DashboardSectionState tone="info" title={t.workspaceLockedTitle} body={t.workspaceLockedBody} />;
+      return renderLockedSectionPreview(t.insightsLockedBody);
     }
 
     if (dashboardState === "loading") {
@@ -782,7 +833,7 @@ export function AdminDashboardScreen({
 
   function renderTrendPanel() {
     if (!isAuthenticated) {
-      return <DashboardSectionState tone="info" title={t.workspaceLockedTitle} body={t.workspaceLockedBody} />;
+      return renderLockedSectionPreview(t.trendLockedBody);
     }
 
     if (dashboardState === "loading") {
@@ -819,7 +870,7 @@ export function AdminDashboardScreen({
 
   function renderWarningsPanel() {
     if (!isAuthenticated) {
-      return <DashboardSectionState tone="info" title={t.workspaceLockedTitle} body={t.workspaceLockedBody} />;
+      return renderLockedSectionPreview(t.watchlistLockedBody);
     }
 
     if (dashboardState === "loading") {
@@ -869,7 +920,7 @@ export function AdminDashboardScreen({
 
   function renderTablePanel() {
     if (!isAuthenticated) {
-      return <DashboardSectionState tone="info" title={t.workspaceLockedTitle} body={t.workspaceLockedBody} />;
+      return renderLockedSectionPreview(t.logsLockedBody);
     }
 
     if (dashboardState === "loading") {
@@ -919,7 +970,7 @@ export function AdminDashboardScreen({
 
   function renderBackgroundTasksPanel() {
     if (!isAuthenticated) {
-      return <DashboardSectionState tone="info" title={t.workspaceLockedTitle} body={t.workspaceLockedBody} />;
+      return renderLockedSectionPreview(t.tasksLockedBody);
     }
 
     if (dashboardState === "loading") {
