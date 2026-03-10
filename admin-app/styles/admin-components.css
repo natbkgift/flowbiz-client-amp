@@ -2005,7 +2005,7 @@
     .admin-shell-content .container,
     .admin-page {
       width: min(var(--admin-content-max), calc(100vw - var(--admin-sidebar-width) - (var(--admin-space-10) * 2)));
-      margin-inline: 0 auto;
+      margin-inline: auto;
     }
 
     .admin-shell-topbar-tools {
