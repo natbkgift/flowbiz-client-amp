@@ -63,7 +63,7 @@ const copy = {
   en: {
     eyebrow: "Import operations",
     title: "Admin Imports Workspace",
-    subtitle: "Full import operations: run import, filter history, and track mirror/deploy outcomes.",
+    subtitle: "Run imports, review history, and track mirror and publish health from one operational workspace.",
     loginTitle: "Admin sign in",
     loginSubtitle: "Use the same credentials as /api/v1/auth/login.",
     sessionTitle: "Admin",
@@ -86,7 +86,7 @@ const copy = {
     importRun: "Run import",
     csvFile: "CSV file",
     dryRun: "Dry run",
-    executeImport: "Execute import",
+    executeImport: "Start import",
     importResult: "Import result",
     imports: "Latest imports",
     mirror: "Mirror status",
@@ -117,6 +117,9 @@ const copy = {
     live: "Live",
     ready: "Ready",
     stable: "Stable",
+    sourceTelemetryMissing: "Telemetry file missing",
+    sourceTelemetryFile: "Telemetry file",
+    sourceUnknown: "Unknown source",
     all: "all",
     true: "Dry run",
     false: "Live run",
@@ -124,7 +127,7 @@ const copy = {
   th: {
     eyebrow: "งานนำเข้าข้อมูล",
     title: "จัดการงานนำเข้า",
-    subtitle: "ดูแลการนำเข้าไฟล์ ประวัติการรัน และติดตามสถานะมิเรอร์กับการเผยแพร่ผ่านหน้าปฏิบัติการเดียว",
+    subtitle: "ดูแลการนำเข้าไฟล์ ประวัติการรัน และติดตามสถานะมิเรอร์กับสถานะเผยแพร่ผ่านพื้นที่ปฏิบัติการเดียว",
     loginTitle: "เข้าสู่ระบบแอดมิน",
     loginSubtitle: "ใช้บัญชีเดียวกับ /api/v1/auth/login",
     sessionTitle: "เซสชันแอดมิน",
@@ -146,19 +149,19 @@ const copy = {
     retry: "ลองใหม่",
     importRun: "เริ่มงานนำเข้า",
     csvFile: "ไฟล์ CSV",
-    dryRun: "โหมด dry run",
-    executeImport: "รัน import",
+    dryRun: "โหมดทดลองรัน",
+    executeImport: "เริ่มนำเข้า",
     importResult: "ผลลัพธ์การนำเข้า",
     imports: "ประวัติการนำเข้าล่าสุด",
     mirror: "สถานะมิเรอร์",
-    deploy: "สถานะดีพลอย",
+    deploy: "สถานะเผยแพร่",
     checkedAt: "เวลาตรวจสอบ",
     total: "ทั้งหมด",
     empty: "ยังไม่มีรายการ import",
     filterStatus: "กรองสถานะ",
     filterDryRun: "กรอง dry-run",
     sessionActive: "เซสชันพร้อมใช้งาน",
-    importRunDescription: "อัปโหลดไฟล์ CSV เลือกโหมด dry run และตรวจผลลัพธ์ที่ระบบแปลงก่อนสั่งนำเข้าจริง",
+    importRunDescription: "อัปโหลดไฟล์ CSV เลือกโหมดทดลองรัน และตรวจผลลัพธ์ที่ระบบแปลงก่อนสั่งนำเข้าจริง",
     importHistoryDescription: "ประวัติการรันล่าสุด พร้อมสถานะ ไฟล์ จำนวนแถว และเวลาที่ใช้ในการประมวลผล",
     source: "แหล่งที่มา",
     created: "สร้างเมื่อ",
@@ -178,6 +181,9 @@ const copy = {
     live: "สด",
     ready: "พร้อม",
     stable: "เสถียร",
+    sourceTelemetryMissing: "ยังไม่มีไฟล์ telemetry",
+    sourceTelemetryFile: "ไฟล์ telemetry",
+    sourceUnknown: "ไม่ทราบแหล่งที่มา",
     all: "ทั้งหมด",
     true: "ทดลองรัน",
     false: "รันจริง",
@@ -227,10 +233,22 @@ function translateImportStatus(value: string | null | undefined, t: ImportCopy):
   if (!raw) return "-";
   const normalized = raw.toLowerCase();
   if (normalized === "success") return t.success;
+  if (normalized === "ok" || normalized === "healthy") return t.ready;
   if (normalized === "partial") return t.partial;
+  if (normalized === "warning" || normalized === "degraded") return t.partial;
   if (normalized === "failed") return t.failed;
+  if (normalized === "error" || normalized === "unhealthy") return t.failed;
   if (normalized === "pending") return t.pending;
   if (normalized === "unknown") return t.unknown;
+  return raw;
+}
+
+function translateImportSource(value: string | null | undefined, t: ImportCopy): string {
+  const raw = String(value || "").trim();
+  if (!raw) return t.sourceUnknown;
+  const normalized = raw.toLowerCase();
+  if (normalized === "telemetry_file_missing") return t.sourceTelemetryMissing;
+  if (normalized === "telemetry_file") return t.sourceTelemetryFile;
   return raw;
 }
 
@@ -480,7 +498,10 @@ export default function AdminImportsPage() {
             <AdminStatCard
               label={t.deploy}
               value={translateImportStatus(deployStatus?.deploy_status, t)}
-              detail={`${t.checkedAt}: ${prettyDate(deployStatus?.deploy_checked_at, locale)} · ${t.source}: ${deployStatus?.source || "-"}`}
+              detail={`${t.checkedAt}: ${prettyDate(deployStatus?.deploy_checked_at, locale)} · ${t.source}: ${translateImportSource(
+                deployStatus?.source,
+                t
+              )}`}
               badgeLabel={t.ready}
               icon="dashboard"
               tone="neutral"

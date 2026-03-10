@@ -65,7 +65,7 @@ const copy = {
     eyebrow: "Media operations",
     title: "Admin Media Workspace",
     subtitle:
-      "Full media operations: upload, edit metadata, archive/restore, replace file, usage, and gallery sync.",
+      "Manage uploads, metadata updates, file replacement, usage checks, and gallery sync from one workspace.",
     loginTitle: "Admin sign in",
     loginSubtitle: "Use the same credentials as /api/v1/auth/login.",
     sessionTitle: "Admin",
@@ -114,7 +114,7 @@ const copy = {
     result: "Operation result",
     sessionActive: "Session active",
     operationErrorHint: "Unable to complete the requested media action right now.",
-    operationsDescription: "Run upload, CRUD, replacement, and gallery sync workflows from one shared control surface.",
+    operationsDescription: "Run upload, record management, replacement, and gallery sync workflows from one shared control surface.",
     uploadDescription: "Upload a new media asset and optionally attach title metadata before it enters the library.",
     crudTitle: "Media record tools",
     crudDescription: "Read, patch, archive, restore, or inspect how a media record is being used.",
@@ -144,7 +144,7 @@ const copy = {
   th: {
     eyebrow: "งานจัดการสื่อ",
     title: "จัดการสื่อ",
-    subtitle: "ดูแลงานอัปโหลด แก้ข้อมูลสื่อ เก็บเข้าคลัง กู้คืน แทนที่ไฟล์ ตรวจการใช้งาน และซิงก์แกลเลอรีในพื้นที่เดียว",
+    subtitle: "ดูแลงานอัปโหลด แก้เมทาดาทา เก็บเข้าคลัง กู้คืน แทนที่ไฟล์ ตรวจการใช้งาน และซิงก์แกลเลอรีจากพื้นที่งานเดียว",
     loginTitle: "เข้าสู่ระบบแอดมิน",
     loginSubtitle: "ใช้บัญชีเดียวกับ /api/v1/auth/login",
     sessionTitle: "เซสชันแอดมิน",
@@ -193,12 +193,12 @@ const copy = {
     result: "ผลลัพธ์",
     sessionActive: "เซสชันพร้อมใช้งาน",
     operationErrorHint: "ไม่สามารถดำเนินการคำสั่งสื่อนี้ได้ในขณะนี้",
-    operationsDescription: "สั่งงานอัปโหลด แก้ข้อมูล แทนที่ไฟล์ และซิงก์แกลเลอรีจากพื้นที่ควบคุมเดียว",
-    uploadDescription: "อัปโหลดไฟล์สื่อใหม่ พร้อมใส่ชื่อหรือ metadata เบื้องต้นก่อนเข้าสู่คลังสื่อ",
+    operationsDescription: "สั่งงานอัปโหลด จัดการเรคอร์ด แทนที่ไฟล์ และซิงก์แกลเลอรีจากแผงควบคุมเดียว",
+    uploadDescription: "อัปโหลดไฟล์สื่อใหม่ พร้อมใส่ชื่อหรือเมทาดาทาเบื้องต้นก่อนเข้าสู่คลังสื่อ",
     crudTitle: "เครื่องมือจัดการรายการสื่อ",
     crudDescription: "ดูข้อมูล แก้ patch เก็บเข้าคลัง กู้คืน และตรวจการใช้งานของรายการสื่อ",
-    replaceDescription: "แทนที่ไฟล์สื่อเดิมโดยคง record และการอ้างอิงเดิมไว้",
-    galleryDescription: "ส่ง payload แกลเลอรีไปยังทรัพย์หรือโครงการจากหน้าเดียวกัน",
+    replaceDescription: "แทนที่ไฟล์สื่อเดิมโดยคงเรคอร์ดและการอ้างอิงเดิมไว้",
+    galleryDescription: "ส่งเพย์โหลดแกลเลอรีไปยังทรัพย์หรือโครงการจากหน้าเดียวกัน",
     mediaListDescription: "รายการสื่อล่าสุด พร้อมสถานะการอนุมัติ สิทธิ์ และปุ่มเลือกใช้งานทันที",
     property: "ทรัพย์",
     project: "โครงการ",
@@ -304,8 +304,11 @@ function translateMediaValue(value: string | null | undefined, t: (typeof copy)[
   if (normalized === "active") return t.active;
   if (normalized === "archived") return t.archived;
   if (normalized === "pending") return t.pending;
+  if (normalized === "pending_review") return t.pending;
   if (normalized === "approved") return t.approved;
   if (normalized === "blocked") return t.blocked;
+  if (normalized === "restricted") return t.blocked;
+  if (normalized === "exception_allowed") return t.ready;
   if (normalized === "rejected") return t.rejected;
   if (normalized === "unknown") return t.unknown;
   return raw;

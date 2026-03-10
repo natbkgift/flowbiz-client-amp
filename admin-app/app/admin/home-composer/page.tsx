@@ -974,6 +974,41 @@ export default function HomeComposerPage() {
     return 'home-composer-media-status home-composer-media-status--ok';
   };
 
+  const translateComposerStatus = (value: string | null | undefined): string => {
+    const raw = String(value || '').trim();
+    if (!raw) return '';
+    const normalized = raw.toLowerCase();
+    if (locale === 'th') {
+      if (normalized === 'approved') return 'อนุมัติแล้ว';
+      if (normalized === 'active') return 'ใช้งานอยู่';
+      if (normalized === 'published') return 'เผยแพร่แล้ว';
+      if (normalized === 'pending' || normalized === 'pending_review') return 'รอตรวจสอบ';
+      if (normalized === 'draft') return 'ฉบับร่าง';
+      if (normalized === 'archived') return 'เก็บเข้าคลัง';
+      if (normalized === 'rejected') return 'ไม่อนุมัติ';
+      if (normalized === 'blocked') return 'ถูกบล็อก';
+      if (normalized === 'restricted') return 'จำกัดสิทธิ์';
+      if (normalized === 'exception_allowed') return 'ยกเว้นได้';
+      if (normalized === 'inactive') return 'ปิดใช้งาน';
+    } else {
+      if (normalized === 'pending_review') return 'pending review';
+      if (normalized === 'exception_allowed') return 'exception allowed';
+    }
+    return raw.replace(/_/g, ' ');
+  };
+
+  const formatMediaCompliance = (asset: MediaAsset): string => {
+    const rights = translateComposerStatus(asset.rights_status) || t.rightsUnknown;
+    const approval = translateComposerStatus(asset.approval_status) || t.approvalUnknown;
+    return `${t.rights}=${rights} · ${t.approval}=${approval}`;
+  };
+
+  const formatCandidateProjectMeta = (item: CandidateProject): string =>
+    [item.slug, translateComposerStatus(item.status)].filter(Boolean).join(' · ');
+
+  const formatCandidatePropertyMeta = (item: CandidateProperty): string =>
+    [item.source_id, translateComposerStatus(item.status), item.type].filter(Boolean).join(' · ');
+
   const sectionLabel = (section: SectionKey): string => SECTION_LABELS[section]?.[locale] ?? section;
   const pathKeyLabel = (key: string): string => PATH_KEY_LABELS[key]?.[locale] ?? key;
 
@@ -1213,9 +1248,7 @@ export default function HomeComposerPage() {
                         className="home-composer-media-option"
                       >
                         <div className="home-composer-code">{asset.storage_path}</div>
-                        <div className={`home-composer-media-status-badge ${mediaBadgeClass(asset)}`}>
-                          {t.rights}={asset.rights_status || t.rightsUnknown} · {t.approval}={asset.approval_status || t.approvalUnknown}
-                        </div>
+                        <div className={`home-composer-media-status-badge ${mediaBadgeClass(asset)}`}>{formatMediaCompliance(asset)}</div>
                       </button>
                     )) : <div className="home-composer-note">{t.noMediaItems}</div>}
                   </div>
@@ -1293,7 +1326,7 @@ export default function HomeComposerPage() {
                     />
                     <label htmlFor={`featured-project-${item.id}`} className="home-composer-option-label">
                       <span className="home-composer-option-title">{item.name || item.slug || item.id}</span>
-                      <span className="home-composer-option-meta">{item.slug} · {item.status}</span>
+                      <span className="home-composer-option-meta">{formatCandidateProjectMeta(item)}</span>
                     </label>
                   </div>
                 ))}
@@ -1331,7 +1364,7 @@ export default function HomeComposerPage() {
                     />
                     <label htmlFor={`featured-property-${item.id}`} className="home-composer-option-label">
                       <span className="home-composer-option-title">{item.title || item.source_id || item.id}</span>
-                      <span className="home-composer-option-meta">{item.source_id} · {item.status} · {item.type}</span>
+                      <span className="home-composer-option-meta">{formatCandidatePropertyMeta(item)}</span>
                     </label>
                   </div>
                 ))}
@@ -1412,9 +1445,7 @@ export default function HomeComposerPage() {
                 {mediaCandidates.map((asset) => (
                   <button key={asset.id} type="button" onClick={() => selectHeroMedia(asset.storage_path)} className="home-composer-media-option">
                     <div className="home-composer-code">{asset.storage_path}</div>
-                    <div className={`home-composer-media-status-badge ${mediaBadgeClass(asset)}`}>
-                      {t.rights}={asset.rights_status || t.rightsUnknown} · {t.approval}={asset.approval_status || t.approvalUnknown}
-                    </div>
+                    <div className={`home-composer-media-status-badge ${mediaBadgeClass(asset)}`}>{formatMediaCompliance(asset)}</div>
                   </button>
                 ))}
               </div>

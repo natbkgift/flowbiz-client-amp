@@ -1947,7 +1947,7 @@
     --home-composer-split-side: 0.6fr;
     --home-composer-split-side-min: 300px;
     --home-composer-surface-subtle: linear-gradient(180deg, var(--admin-color-neutral-0), var(--admin-color-neutral-50));
-    --home-composer-results-max-height: 65vh;
+    --home-composer-results-max-height: 52vh;
     display: grid;
     gap: var(--admin-space-4);
   }
@@ -2565,7 +2565,7 @@
   }
 
   .home-composer-card.admin-card-shell .admin-card-shell__body {
-    gap: var(--admin-space-4);
+    gap: var(--admin-space-3);
   }
 
   .home-composer-card--compact.admin-card-shell .admin-card-shell__body {
@@ -2655,7 +2655,7 @@
   .home-composer-config-block {
     display: grid;
     gap: var(--admin-space-3);
-    padding: var(--admin-space-4);
+    padding: var(--admin-space-3);
     border: 1px solid var(--admin-border-subtle);
     border-radius: var(--admin-radius-md);
     background: var(--home-composer-surface-subtle);
@@ -2670,13 +2670,13 @@
   }
 
   .home-composer-option-list {
-    max-height: 13rem;
+    max-height: 10.5rem;
     overflow: auto;
     display: grid;
     gap: var(--admin-space-2);
     border: 1px solid var(--admin-border-subtle);
     border-radius: var(--admin-radius-sm);
-    padding: var(--admin-space-2);
+    padding: var(--admin-space-1);
     background: var(--admin-color-neutral-0);
   }
 
@@ -2685,7 +2685,7 @@
     grid-template-columns: auto minmax(0, 1fr);
     gap: var(--admin-space-2);
     align-items: start;
-    padding: var(--admin-space-2);
+    padding: var(--admin-space-1) var(--admin-space-2);
     border-radius: var(--admin-radius-xs);
   }
 
@@ -2733,7 +2733,7 @@
     display: grid;
     gap: var(--admin-space-2);
     width: 100%;
-    padding: var(--admin-space-3);
+    padding: var(--admin-space-2);
     border: 1px solid var(--admin-border-subtle);
     border-radius: var(--admin-radius-sm);
     background: var(--admin-color-neutral-0);
@@ -2759,7 +2759,7 @@
 
   .home-composer-search-results {
     display: grid;
-    gap: var(--admin-space-2);
+    gap: var(--admin-space-1);
     max-height: var(--home-composer-results-max-height);
     overflow: auto;
   }
