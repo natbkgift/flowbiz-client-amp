@@ -101,6 +101,17 @@ type WidgetUiCopy = {
   actions?: Record<string, string>;
 };
 
+const WIDGET_DISPLAY_ORDER: Record<string, number> = {
+  project_cover_coverage: 0,
+  last_import_mirror_status: 1,
+  last_deploy_health_status: 2,
+  broken_media_count: 3,
+  pending_translations_count: 4,
+  recent_leads_inquiries: 5,
+  unpublished_drafts_count: 6,
+  review_video_source_verification_pending: 7,
+};
+
 const copy = {
   en: {
     statusOk: "OK",
@@ -334,6 +345,21 @@ function localizeWidget(widget: DashboardWidget, locale: AdminLocale): Dashboard
   };
 }
 
+function widgetSortOrder(key: string): number {
+  return WIDGET_DISPLAY_ORDER[key] ?? 99;
+}
+
+function widgetLayoutClass(key: string, status: WidgetStatus): string {
+  if (key === "project_cover_coverage") return "dashboard-kpi-card--hero";
+  if (key === "last_import_mirror_status" || key === "last_deploy_health_status") {
+    return "dashboard-kpi-card--signal";
+  }
+  if (status === "warn" || key === "broken_media_count" || key === "pending_translations_count") {
+    return "dashboard-kpi-card--attention";
+  }
+  return "dashboard-kpi-card--compact";
+}
+
 function createPresentation(
   widget: DashboardWidget,
   rawMetrics: DashboardRawMetrics,
@@ -515,16 +541,19 @@ export function DashboardKpiWidgets({
   fallback: string;
 }) {
   const metricMap = (rawMetrics || {}) as DashboardRawMetrics;
+  const orderedWidgets = widgets
+    .map((widget) => localizeWidget(widget, locale))
+    .sort((left, right) => widgetSortOrder(left.key) - widgetSortOrder(right.key));
 
   return (
     <div className="dashboard-grid dashboard-kpi-grid">
-      {widgets.map((widget) => {
-        const localizedWidget = localizeWidget(widget, locale);
+      {orderedWidgets.map((localizedWidget) => {
         const presentation = createPresentation(localizedWidget, metricMap, locale, fallback);
+        const layoutClassName = widgetLayoutClass(localizedWidget.key, localizedWidget.status);
         return (
           <MetricCard
             key={localizedWidget.key}
-            className={`dashboard-widget dashboard-kpi-card dashboard-kpi-card--${localizedWidget.status}`}
+            className={`dashboard-widget dashboard-kpi-card dashboard-kpi-card--${localizedWidget.status} ${layoutClassName}`}
             icon={widgetIcon(localizedWidget.key)}
             title={localizedWidget.title}
             titleTag="h3"

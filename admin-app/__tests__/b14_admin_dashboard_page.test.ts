@@ -34,6 +34,7 @@ describe("B14 admin dashboard page contract", () => {
     const page = read("app/admin/dashboard/page.tsx");
     const screen = read("components/admin/domain/dashboard/AdminDashboardScreen.tsx");
     const types = read("components/admin/domain/dashboard/dashboard-types.ts");
+    const widgets = read("components/admin/dashboard/DashboardKpiWidgets.tsx");
 
     expect(page).toContain('"/api/admin/dashboard/health-summary"');
     expect(screen).toContain("totalRecentInquiryCount");
@@ -49,6 +50,9 @@ describe("B14 admin dashboard page contract", () => {
     expect(types).toContain('"review_video_source_verification_pending"');
     expect(types).toContain('"last_import_mirror_status"');
     expect(types).toContain('"last_deploy_health_status"');
+    expect(widgets).toContain("WIDGET_DISPLAY_ORDER");
+    expect(widgets).toContain("widgetLayoutClass");
+    expect(widgets).toContain('dashboard-kpi-card--hero');
   });
 
   it("contains accessible structure and runtime states in EN/TH copy", () => {

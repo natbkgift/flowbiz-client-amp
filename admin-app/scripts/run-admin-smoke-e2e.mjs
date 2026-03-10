@@ -418,10 +418,12 @@ async function verifyDashboardUi(page, contractSummary, options = {}) {
   const { smokeMode = "mocked", getCurrentRecentInquiriesRequestCount = () => 0 } = options;
   await page.getByRole("button", { name: /sign out|ออกจากระบบ/i }).waitFor({ timeout: 10000 });
   await page.getByRole("button", { name: /refresh dashboard|รีเฟรชแดชบอร์ด/i }).first().waitFor({ timeout: 10000 });
-  await page
-    .getByRole("heading", { name: /Admin Health \/ QA Dashboard|แดชบอร์ดสุขภาพระบบ\s*\/\s*QA/i })
-    .first()
-    .waitFor({ timeout: 10000 });
+  await waitForVisibleTextMatch(page, [
+    "Admin Health / QA Dashboard",
+    "Admin Health and QA Dashboard",
+    "แดชบอร์ดสุขภาพระบบและ QA",
+    "แดชบอร์ดสุขภาพระบบ / QA",
+  ]);
   await page
     .getByRole("heading", { name: /System health \/ QA overview|Health widgets|ภาพรวมสุขภาพระบบ|วิดเจ็ตสุขภาพระบบ/i })
     .first()

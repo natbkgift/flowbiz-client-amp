@@ -54,6 +54,9 @@ describe("admin dashboard surface styles", () => {
     expect(css).toContain(".dashboard-insight-item {");
     expect(css).toContain(".dashboard-widget::before");
     expect(css).toContain(".dashboard-kpi-card--ok {");
+    expect(css).toContain(".dashboard-kpi-card--hero {");
+    expect(css).toContain(".dashboard-kpi-card--signal {");
+    expect(css).toContain(".dashboard-kpi-card--attention {");
     expect(css).toContain(".dashboard-kpi-pill {");
     expect(css).toContain(".dashboard-period-toggle {");
     expect(css).toContain(".dashboard-chart-surface {");

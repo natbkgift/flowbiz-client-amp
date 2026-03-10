@@ -544,30 +544,32 @@ export function AdminShell({ children }: { children: ReactNode }) {
                 </div>
               </label>
 
-              <Link
-                href={withAdminLocale("/admin/dashboard", locale)}
-                className="admin-shell-toolbar-chip admin-shell-toolbar-chip--notifications"
-              >
-                <span className="admin-shell-toolbar-chip-icon" aria-hidden="true">
-                  <AdminIcon name="warning" size={16} />
-                </span>
-                <span className="admin-shell-toolbar-chip-copy">
-                  <strong>{ui.notifications}</strong>
-                  <small>{ui.notificationsHint}</small>
-                </span>
-              </Link>
+              <div className="admin-shell-topbar-status" aria-label={ui.quickActions}>
+                <Link
+                  href={withAdminLocale("/admin/dashboard", locale)}
+                  className="admin-shell-toolbar-chip admin-shell-toolbar-chip--notifications"
+                >
+                  <span className="admin-shell-toolbar-chip-icon" aria-hidden="true">
+                    <AdminIcon name="warning" size={16} />
+                  </span>
+                  <span className="admin-shell-toolbar-chip-copy">
+                    <strong>{ui.notifications}</strong>
+                    <small>{ui.notificationsHint}</small>
+                  </span>
+                </Link>
 
-              <div className="admin-shell-toolbar-chip admin-shell-toolbar-chip--workspace">
-                <span className="admin-shell-toolbar-chip-icon" aria-hidden="true">
-                  <AdminIcon name="workspace" size={16} />
-                </span>
-                <span className="admin-shell-toolbar-chip-copy">
-                  <strong>{currentWorkspaceLabel}</strong>
-                  <small>{currentWorkspaceDescription}</small>
-                </span>
-                <AdminBadge tone="info" icon="workspace">
-                  {ui.workspaceName}
-                </AdminBadge>
+                <div className="admin-shell-toolbar-chip admin-shell-toolbar-chip--workspace">
+                  <span className="admin-shell-toolbar-chip-icon" aria-hidden="true">
+                    <AdminIcon name="workspace" size={16} />
+                  </span>
+                  <span className="admin-shell-toolbar-chip-copy">
+                    <strong>{currentWorkspaceLabel}</strong>
+                    <small>{currentWorkspaceDescription}</small>
+                  </span>
+                  <AdminBadge tone="info" icon="workspace">
+                    {ui.workspaceName}
+                  </AdminBadge>
+                </div>
               </div>
 
               <div className="admin-shell-profile" aria-label={ui.profileLabel}>
