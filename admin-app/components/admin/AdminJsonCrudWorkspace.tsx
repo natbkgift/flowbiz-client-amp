@@ -6,6 +6,7 @@ import { type Dispatch, type FormEvent, type KeyboardEvent, type SetStateAction,
 
 import { fetchJson, toPrettyJson } from "@/app/_lib/admin-auth";
 import { useAdminAuthController } from "@/app/_lib/admin-auth-hooks";
+import { detectAdminLocale } from "@/app/_lib/admin-i18n";
 import { type AdminDataTableColumn } from "@/components/admin/AdminDataTable";
 import {
   AdminCrudWorkspaceAuthPanel,
@@ -20,6 +21,10 @@ import {
   AdminCrudWorkspaceResultPanel,
   AdminCrudWorkspaceRevisionsPanel,
 } from "@/components/admin/domain/crud-workspace/AdminCrudWorkspacePanels";
+import {
+  getCrudWorkspaceCopy,
+  getCrudWorkspaceDisplayConfig,
+} from "@/components/admin/domain/crud-workspace/crud-workspace-copy";
 import type { CrudConfig, ListResponse } from "@/components/admin/domain/crud-workspace/workspace-types";
 import {
   buildListPath,
@@ -44,6 +49,9 @@ export { checklistReport } from "@/components/admin/domain/crud-workspace/worksp
 export type { CrudConfig } from "@/components/admin/domain/crud-workspace/workspace-types";
 
 export function AdminJsonCrudWorkspace({ config }: { config: CrudConfig }) {
+  const locale = detectAdminLocale();
+  const t = getCrudWorkspaceCopy(locale);
+  const displayConfig = useMemo(() => getCrudWorkspaceDisplayConfig(config, locale), [config, locale]);
   const bulkActions = config.bulkActions || [];
   const [loginEmail, setLoginEmail] = useState("");
   const [loginPassword, setLoginPassword] = useState("");
@@ -59,11 +67,11 @@ export function AdminJsonCrudWorkspace({ config }: { config: CrudConfig }) {
   } = useAdminAuthController();
   const authError =
     authErrorCode === "missing_credentials"
-      ? "Email and password are required."
+      ? t.missingCredentials
       : authErrorCode === "invalid_credentials"
-        ? "Invalid credentials."
+        ? t.invalidCredentials
         : authErrorCode
-          ? "Unable to sign in."
+          ? t.unableSignIn
           : null;
 
   const [listQuery, setListQuery] = useState(config.defaultListQuery || "");
@@ -153,7 +161,7 @@ export function AdminJsonCrudWorkspace({ config }: { config: CrudConfig }) {
   async function loadList(tokenOverride?: string): Promise<void> {
     const activeToken = (tokenOverride ?? token).trim();
     if (!activeToken) {
-      setError("Sign in is required.");
+      setError(t.signInRequired);
       return;
     }
 
@@ -166,7 +174,7 @@ export function AdminJsonCrudWorkspace({ config }: { config: CrudConfig }) {
       setMeta(body.meta || null);
       persistSession(activeToken, email || loginEmail);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Unable to load data.");
+      setError(err instanceof Error ? err.message : t.loadFailed);
     } finally {
       setLoading(false);
     }
@@ -203,7 +211,7 @@ export function AdminJsonCrudWorkspace({ config }: { config: CrudConfig }) {
       if (candidate) setPreviewRecord(candidate);
       await loadList();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Request failed.");
+      setError(err instanceof Error ? err.message : t.requestFailed);
     }
   }
 
@@ -289,12 +297,12 @@ export function AdminJsonCrudWorkspace({ config }: { config: CrudConfig }) {
     () => [
       {
         key: "use",
-        label: "Use",
+        label: t.use,
         renderCell: (item) => {
           const id = pickIdentifierFromRow(item);
           return (
             <button className="btn btn-secondary" type="button" onClick={() => setIdentifier(id)} disabled={!id}>
-              Use
+              {t.use}
             </button>
           );
         },
@@ -303,7 +311,7 @@ export function AdminJsonCrudWorkspace({ config }: { config: CrudConfig }) {
       },
       {
         key: "identifier",
-        label: "Identifier",
+        label: t.identifier,
         renderCell: (item) => {
           const id = pickIdentifierFromRow(item);
           return <code>{id || "-"}</code>;
@@ -313,14 +321,14 @@ export function AdminJsonCrudWorkspace({ config }: { config: CrudConfig }) {
       },
       {
         key: "slug",
-        label: "Slug",
+        label: t.slug,
         renderCell: (item) => (item && typeof item === "object" ? pickString(item as Record<string, unknown>, "slug") || "-" : "-"),
         getSortValue: (item) => (item && typeof item === "object" ? pickString(item as Record<string, unknown>, "slug") : ""),
         getFilterValue: (item) => (item && typeof item === "object" ? pickString(item as Record<string, unknown>, "slug") : ""),
       },
       {
         key: "name",
-        label: "Name/Title",
+        label: t.nameTitle,
         renderCell: (item) => {
           if (!item || typeof item !== "object") return "-";
           const row = item as Record<string, unknown>;
@@ -339,7 +347,7 @@ export function AdminJsonCrudWorkspace({ config }: { config: CrudConfig }) {
       },
       {
         key: "status",
-        label: "Status/Updated",
+        label: t.statusUpdated,
         renderCell: (item) => {
           if (!item || typeof item !== "object") return "-";
           const row = item as Record<string, unknown>;
@@ -359,8 +367,10 @@ export function AdminJsonCrudWorkspace({ config }: { config: CrudConfig }) {
         },
       },
     ],
-    [pickIdentifierFromRow]
+    [pickIdentifierFromRow, t.identifier, t.nameTitle, t.slug, t.statusUpdated, t.use]
   );
+
+  const hasOutputSidecar = Boolean(result) || Boolean(revisionConfig);
 
   function clearSingleFieldError(name: string, setErrors: Dispatch<SetStateAction<Record<string, string>>>) {
     setErrors((current) => {
@@ -396,10 +406,17 @@ export function AdminJsonCrudWorkspace({ config }: { config: CrudConfig }) {
 
   return (
     <main id="main-content" className="container content-stack">
-      <AdminCrudWorkspaceHeader config={config} />
+      <AdminCrudWorkspaceHeader
+        config={config}
+        title={displayConfig.title}
+        subtitle={displayConfig.subtitle}
+        identifierLabel={displayConfig.identifierLabel}
+        copy={t}
+      />
 
       <AdminCrudWorkspaceAuthPanel
         idBase={idBase}
+        copy={t}
         isAuthenticated={isAuthenticated}
         loginEmail={loginEmail}
         loginPassword={loginPassword}
@@ -419,15 +436,18 @@ export function AdminJsonCrudWorkspace({ config }: { config: CrudConfig }) {
           <div className="admin-workspace-split">
             <AdminCrudWorkspaceQueryPanel
               idBase={idBase}
+              copy={t}
               listQuery={listQuery}
               meta={meta}
-              queryHelp={config.queryHelp}
+              queryHelp={displayConfig.queryHelp}
               onListQueryChange={setListQuery}
               onLoadList={() => void loadList()}
             />
             <AdminCrudWorkspaceRecordActionsPanel
               idBase={idBase}
+              copy={t}
               config={config}
+              identifierLabel={displayConfig.identifierLabel}
               identifier={identifier}
               readinessPath={readinessPath}
               revisionConfig={revisionConfig}
@@ -461,6 +481,7 @@ export function AdminJsonCrudWorkspace({ config }: { config: CrudConfig }) {
           <div className="admin-workspace-editor-grid">
             <AdminCrudWorkspaceCreatePanel
               idBase={idBase}
+              copy={t}
               config={config}
               token={token}
               createPayload={createPayload}
@@ -482,7 +503,7 @@ export function AdminJsonCrudWorkspace({ config }: { config: CrudConfig }) {
                             const errors = validatePrimitiveValues(config.createFormFields, createFormValues);
                             setCreateFormErrors(errors);
                             if (Object.keys(errors).length > 0) {
-                              throw new Error("Please correct the highlighted fields.");
+                              throw new Error(t.fixFields);
                             }
                             return toPrimitivePayload(config.createFormFields, createFormValues);
                           })()
@@ -495,6 +516,7 @@ export function AdminJsonCrudWorkspace({ config }: { config: CrudConfig }) {
 
             <AdminCrudWorkspacePatchPanel
               idBase={idBase}
+              copy={t}
               config={config}
               identifier={identifier}
               token={token}
@@ -517,7 +539,7 @@ export function AdminJsonCrudWorkspace({ config }: { config: CrudConfig }) {
                             const errors = validatePrimitiveValues(config.patchFormFields, patchFormValues);
                             setPatchFormErrors(errors);
                             if (Object.keys(errors).length > 0) {
-                              throw new Error("Please correct the highlighted fields.");
+                              throw new Error(t.fixFields);
                             }
                             return toPrimitivePayload(config.patchFormFields, patchFormValues);
                           })()
@@ -531,6 +553,7 @@ export function AdminJsonCrudWorkspace({ config }: { config: CrudConfig }) {
 
           <AdminCrudWorkspaceBulkActionsPanel
             idBase={idBase}
+            copy={t}
             bulkActions={bulkActions}
             bulkTargetIdsByAction={bulkTargetIdsByAction}
             bulkFormValues={bulkFormValues}
@@ -555,7 +578,7 @@ export function AdminJsonCrudWorkspace({ config }: { config: CrudConfig }) {
                 const errors = validatePrimitiveValues(action.fields, values);
                 setBulkFormErrors((current) => ({ ...current, [action.key]: errors }));
                 if (Object.keys(errors).length > 0) {
-                  throw new Error("Please correct the highlighted fields.");
+                  throw new Error(t.fixFields);
                 }
                 const payload = toPrimitivePayload(action.fields, values);
                 const response = await fetchJson(action.path, token.trim(), {
@@ -575,39 +598,48 @@ export function AdminJsonCrudWorkspace({ config }: { config: CrudConfig }) {
           />
 
           {error ? <div className="state-error">{error}</div> : null}
-          {loading ? <div className="state-loading">Loading</div> : null}
+          {loading ? <div className="state-loading">{t.loading}</div> : null}
 
-          <div className="admin-workspace-output-grid">
-            <AdminCrudWorkspaceRecordsPanel items={items} tableColumns={tableColumns} pickIdentifierFromRow={pickIdentifierFromRow} />
-            <div className="admin-workspace-output-sidecar">
-              <AdminCrudWorkspaceResultPanel result={result} />
-              <AdminCrudWorkspaceRevisionsPanel
-                idBase={idBase}
-                identifier={identifier}
-                revisionConfig={revisionConfig}
-                revisions={revisions}
-                selectedRevisionId={selectedRevisionId}
-                onSelectedRevisionIdChange={setSelectedRevisionId}
-                onShowDiff={() =>
-                  void runAction(() =>
-                    fetchJson(withRevisionIdentifier(revisionConfig?.diffPath || "", identifier, selectedRevisionId), token.trim())
-                  )
-                }
-                onRestoreRevision={() =>
-                  void runAction(async () => {
-                    const restored = await fetchJson(
-                      withRevisionIdentifier(revisionConfig?.restorePath || "", identifier, selectedRevisionId),
-                      token.trim(),
-                      { method: "POST" }
-                    );
-                    await loadRevisions();
-                    return restored;
-                  })
-                }
-              />
-            </div>
+          <div className={hasOutputSidecar ? "admin-workspace-output-grid admin-workspace-output-grid--split" : "admin-workspace-output-grid"}>
+            <AdminCrudWorkspaceRecordsPanel
+              copy={t}
+              items={items}
+              hasLoadedRecords={Boolean(meta)}
+              tableColumns={tableColumns}
+              pickIdentifierFromRow={pickIdentifierFromRow}
+            />
+            {hasOutputSidecar ? (
+              <div className="admin-workspace-output-sidecar">
+                <AdminCrudWorkspaceResultPanel copy={t} result={result} />
+                <AdminCrudWorkspaceRevisionsPanel
+                  copy={t}
+                  idBase={idBase}
+                  identifier={identifier}
+                  revisionConfig={revisionConfig}
+                  revisions={revisions}
+                  selectedRevisionId={selectedRevisionId}
+                  onSelectedRevisionIdChange={setSelectedRevisionId}
+                  onShowDiff={() =>
+                    void runAction(() =>
+                      fetchJson(withRevisionIdentifier(revisionConfig?.diffPath || "", identifier, selectedRevisionId), token.trim())
+                    )
+                  }
+                  onRestoreRevision={() =>
+                    void runAction(async () => {
+                      const restored = await fetchJson(
+                        withRevisionIdentifier(revisionConfig?.restorePath || "", identifier, selectedRevisionId),
+                        token.trim(),
+                        { method: "POST" }
+                      );
+                      await loadRevisions();
+                      return restored;
+                    })
+                  }
+                />
+              </div>
+            ) : null}
           </div>
-          <AdminCrudWorkspacePreviewPanel previewConfig={previewConfig} previewRecord={previewRecord} previewChecklist={previewChecklist} />
+          <AdminCrudWorkspacePreviewPanel copy={t} previewConfig={previewConfig} previewRecord={previewRecord} previewChecklist={previewChecklist} />
         </>
       ) : null}
     </main>
