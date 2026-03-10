@@ -62,11 +62,14 @@ const LEGACY_TOKEN_STORAGE_KEY = "flowbiz_admin_token";
 
 const copy = {
   en: {
+    eyebrow: "Media operations",
     title: "Admin Media Workspace",
     subtitle:
       "Full media operations: upload, edit metadata, archive/restore, replace file, usage, and gallery sync.",
     loginTitle: "Admin sign in",
     loginSubtitle: "Use the same credentials as /api/v1/auth/login.",
+    sessionTitle: "Admin",
+    sessionDescription: "Active media workspace session.",
     email: "Admin email",
     password: "Password",
     signIn: "Sign in",
@@ -111,51 +114,54 @@ const copy = {
     result: "Operation result",
   },
   th: {
-    title: "Admin Media Workspace",
-    subtitle: "รองรับ full media operations: upload/edit/archive/restore/replace/usage/gallery sync",
+    eyebrow: "งานจัดการสื่อ",
+    title: "จัดการสื่อ",
+    subtitle: "ดูแลอัปโหลด แก้ metadata archive/restore replace usage และ gallery sync ผ่านพื้นที่งานเดียว",
     loginTitle: "เข้าสู่ระบบแอดมิน",
     loginSubtitle: "ใช้บัญชีเดียวกับ /api/v1/auth/login",
+    sessionTitle: "เซสชันแอดมิน",
+    sessionDescription: "เซสชันพื้นที่งานสื่อที่กำลังใช้งานอยู่",
     email: "อีเมลแอดมิน",
     password: "รหัสผ่าน",
     signIn: "เข้าสู่ระบบ",
     signingIn: "กำลังเข้าสู่ระบบ",
     signOut: "ออกจากระบบ",
     refresh: "รีเฟรช",
-    loading: "กำลังโหลด media workspace",
-    authRequired: "กรุณาเข้าสู่ระบบก่อนใช้งาน media workspace",
+    loading: "กำลังโหลดพื้นที่งานสื่อ",
+    authRequired: "กรุณาเข้าสู่ระบบก่อนใช้งานพื้นที่งานสื่อ",
     loginMissing: "ต้องกรอกอีเมลและรหัสผ่าน",
     loginInvalid: "ข้อมูลเข้าสู่ระบบไม่ถูกต้อง",
     loginError: "ไม่สามารถเข้าสู่ระบบได้ในขณะนี้",
-    loadError: "ไม่สามารถโหลดข้อมูล media ได้",
-    errorTitle: "ข้อผิดพลาดของ media workspace",
+    loadError: "ไม่สามารถโหลดข้อมูลสื่อได้",
+    errorTitle: "ข้อผิดพลาดของพื้นที่งานสื่อ",
     errorHint: "กรุณาลองใหม่ หากยังไม่สำเร็จให้ตรวจสอบ API และเซสชันการเข้าสู่ระบบ",
     retry: "ลองใหม่",
-    integrity: "สรุปผล integrity",
-    mediaList: "รายการ media ล่าสุด",
-    empty: "ไม่พบรายการ media",
+    integrity: "สรุปความสมบูรณ์ของสื่อ",
+    mediaList: "รายการสื่อล่าสุด",
+    empty: "ไม่พบรายการสื่อ",
     scannedAt: "เวลาสแกน",
     broken: "สื่อเสีย",
-    leakage: "External leakage",
-    errors: "Errors",
-    warnings: "Warnings",
-    operations: "การจัดการ media",
+    leakage: "สื่อภายนอกที่รั่วเข้าระบบ",
+    errors: "ข้อผิดพลาด",
+    warnings: "คำเตือน",
+    operations: "คำสั่งจัดการสื่อ",
     upload: "อัปโหลด",
     uploadFile: "ไฟล์อัปโหลด",
-    uploadTitle: "ชื่อ (optional)",
-    mediaId: "Media ID",
+    uploadTitle: "ชื่อไฟล์/หัวข้อ (ถ้ามี)",
+    mediaId: "รหัสสื่อ",
     patchJson: "Patch JSON",
     replaceFile: "ไฟล์ทดแทน",
     runPatch: "บันทึก patch",
-    runGet: "โหลดข้อมูล media",
-    runArchive: "Archive",
-    runRestore: "Restore",
-    runUsage: "Usage",
+    runGet: "ดูข้อมูลสื่อ",
+    runArchive: "เก็บเข้าคลัง",
+    runRestore: "กู้คืน",
+    runUsage: "ดูการใช้งาน",
     runReplace: "แทนที่ไฟล์",
-    galleryOps: "Gallery sync",
+    galleryOps: "ซิงก์แกลเลอรี",
     galleryTargetType: "ประเภทเป้าหมาย",
-    galleryTargetId: "Target ID",
+    galleryTargetId: "รหัสเป้าหมาย",
     galleryPayload: "Gallery payload JSON",
-    runGallery: "อัปเดต gallery",
+    runGallery: "อัปเดตแกลเลอรี",
     result: "ผลลัพธ์",
   },
 };
@@ -375,12 +381,12 @@ export default function AdminMediaPage() {
 
   return (
     <main id="main-content" className="container content-stack">
-      <AdminPageHeader title={t.title} description={t.subtitle} icon="media" eyebrow="Media operations" />
+      <AdminPageHeader title={t.title} description={t.subtitle} icon="media" eyebrow={t.eyebrow} />
 
       <ActionCard
         className="dashboard-controls"
-        title={isAuthenticated ? (authEmail || "Admin") : t.loginTitle}
-        description={isAuthenticated ? "Active media workspace session." : t.loginSubtitle}
+        title={isAuthenticated ? (authEmail || t.sessionTitle) : t.loginTitle}
+        description={isAuthenticated ? t.sessionDescription : t.loginSubtitle}
         icon={isAuthenticated ? "profile" : "media"}
         titleTag="h2"
       >

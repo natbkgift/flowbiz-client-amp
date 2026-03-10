@@ -61,10 +61,13 @@ type DashboardSummaryResponse = {
 
 const copy = {
   en: {
+    eyebrow: "Import operations",
     title: "Admin Imports Workspace",
     subtitle: "Full import operations: run import, filter history, and track mirror/deploy outcomes.",
     loginTitle: "Admin sign in",
     loginSubtitle: "Use the same credentials as /api/v1/auth/login.",
+    sessionTitle: "Admin",
+    sessionDescription: "Active workspace session and refresh controls.",
     email: "Admin email",
     password: "Password",
     signIn: "Sign in",
@@ -98,33 +101,36 @@ const copy = {
     false: "false",
   },
   th: {
-    title: "Admin Imports Workspace",
-    subtitle: "รองรับ import แบบครบ: run import, filter history และติดตาม mirror/deploy",
+    eyebrow: "งานนำเข้าข้อมูล",
+    title: "จัดการงานนำเข้า",
+    subtitle: "ดูแลการนำเข้าไฟล์ ประวัติการรัน และติดตามสถานะ mirror/deploy ผ่านหน้าปฏิบัติการเดียว",
     loginTitle: "เข้าสู่ระบบแอดมิน",
     loginSubtitle: "ใช้บัญชีเดียวกับ /api/v1/auth/login",
+    sessionTitle: "เซสชันแอดมิน",
+    sessionDescription: "เซสชันที่ใช้งานอยู่ พร้อมปุ่มรีเฟรชและควบคุมการทำงานของพื้นที่นี้",
     email: "อีเมลแอดมิน",
     password: "รหัสผ่าน",
     signIn: "เข้าสู่ระบบ",
     signingIn: "กำลังเข้าสู่ระบบ",
     signOut: "ออกจากระบบ",
     refresh: "รีเฟรช",
-    loading: "กำลังโหลด imports workspace",
-    authRequired: "กรุณาเข้าสู่ระบบก่อนใช้งาน imports workspace",
+    loading: "กำลังโหลดพื้นที่งานนำเข้า",
+    authRequired: "กรุณาเข้าสู่ระบบก่อนใช้งานพื้นที่งานนำเข้า",
     loginMissing: "ต้องกรอกอีเมลและรหัสผ่าน",
     loginInvalid: "ข้อมูลเข้าสู่ระบบไม่ถูกต้อง",
     loginError: "ไม่สามารถเข้าสู่ระบบได้ในขณะนี้",
     loadError: "ไม่สามารถโหลดข้อมูล import/mirror ได้",
-    errorTitle: "ข้อผิดพลาดของ imports workspace",
+    errorTitle: "ข้อผิดพลาดของพื้นที่งานนำเข้า",
     errorHint: "กรุณาลองใหม่ หากยังไม่สำเร็จให้ตรวจสอบ API และเซสชันการเข้าสู่ระบบ",
     retry: "ลองใหม่",
-    importRun: "รัน import",
+    importRun: "เริ่มงานนำเข้า",
     csvFile: "ไฟล์ CSV",
     dryRun: "โหมด dry run",
     executeImport: "รัน import",
-    importResult: "ผลการ import",
-    imports: "รายการ import ล่าสุด",
-    mirror: "สถานะ mirror",
-    deploy: "สถานะ deploy",
+    importResult: "ผลลัพธ์การนำเข้า",
+    imports: "ประวัติการนำเข้าล่าสุด",
+    mirror: "สถานะมิเรอร์",
+    deploy: "สถานะดีพลอย",
     checkedAt: "เวลาตรวจสอบ",
     total: "ทั้งหมด",
     empty: "ยังไม่มีรายการ import",
@@ -317,12 +323,12 @@ export default function AdminImportsPage() {
 
   return (
     <main id="main-content" className="container content-stack">
-      <AdminPageHeader title={t.title} description={t.subtitle} icon="imports" eyebrow="Import operations" />
+      <AdminPageHeader title={t.title} description={t.subtitle} icon="imports" eyebrow={t.eyebrow} />
 
       <ActionCard
         className="dashboard-controls"
-        title={isAuthenticated ? (authEmail || "Admin") : t.loginTitle}
-        description={isAuthenticated ? "Active workspace session and refresh controls." : t.loginSubtitle}
+        title={isAuthenticated ? (authEmail || t.sessionTitle) : t.loginTitle}
+        description={isAuthenticated ? t.sessionDescription : t.loginSubtitle}
         icon={isAuthenticated ? "profile" : "imports"}
         titleTag="h2"
       >
