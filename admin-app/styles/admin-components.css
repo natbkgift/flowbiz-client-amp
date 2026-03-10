@@ -2708,6 +2708,7 @@
     align-items: start;
     padding: var(--admin-space-1) var(--admin-space-2);
     border-radius: var(--admin-radius-xs);
+    min-height: 60px;
   }
 
   .home-composer-option:hover {
@@ -2732,6 +2733,29 @@
     cursor: pointer;
     display: grid;
     gap: 2px;
+    min-width: 0;
+    align-content: start;
+  }
+
+  .home-composer-option input {
+    margin-top: 4px;
+  }
+
+  .home-composer-option-title {
+    display: -webkit-box;
+    overflow: hidden;
+    line-height: 1.45;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+  }
+
+  .home-composer-option-meta {
+    overflow: hidden;
+    font-size: var(--admin-font-size-xs);
+    line-height: 1.45;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 
   .home-composer-media-dialog {
