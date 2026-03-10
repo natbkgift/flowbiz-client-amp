@@ -1006,8 +1006,24 @@ export default function HomeComposerPage() {
   const formatCandidateProjectMeta = (item: CandidateProject): string =>
     [item.slug, translateComposerStatus(item.status)].filter(Boolean).join(' · ');
 
-  const formatCandidatePropertyMeta = (item: CandidateProperty): string =>
-    [item.source_id, translateComposerStatus(item.status), item.type].filter(Boolean).join(' · ');
+  const formatCandidatePropertyTitle = (item: CandidateProperty): string => {
+    const rawTitle = item.title?.trim();
+    if (!rawTitle) return item.source_id || item.id;
+
+    const providerStripped = rawTitle.split(' | ')[0]?.trim() || rawTitle;
+    const codeMatch = providerStripped.match(/\s+-\s+(#\S.*)$/);
+    if (!codeMatch) return providerStripped;
+
+    const headline = providerStripped.slice(0, codeMatch.index).trim();
+    return headline || providerStripped;
+  };
+
+  const formatCandidatePropertyMeta = (item: CandidateProperty): string => {
+    const rawTitle = item.title?.trim() || '';
+    const codeMatch = rawTitle.match(/(#\S+)/);
+
+    return [codeMatch?.[1] || item.source_id, translateComposerStatus(item.status), item.type].filter(Boolean).join(' · ');
+  };
 
   const sectionLabel = (section: SectionKey): string => SECTION_LABELS[section]?.[locale] ?? section;
   const pathKeyLabel = (key: string): string => PATH_KEY_LABELS[key]?.[locale] ?? key;
@@ -1363,7 +1379,7 @@ export default function HomeComposerPage() {
                       aria-label={`${t.selectProperty} ${item.title || item.source_id || item.id}`}
                     />
                     <label htmlFor={`featured-property-${item.id}`} className="home-composer-option-label">
-                      <span className="home-composer-option-title">{item.title || item.source_id || item.id}</span>
+                      <span className="home-composer-option-title">{formatCandidatePropertyTitle(item)}</span>
                       <span className="home-composer-option-meta">{formatCandidatePropertyMeta(item)}</span>
                     </label>
                   </div>
