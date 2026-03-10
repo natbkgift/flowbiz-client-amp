@@ -85,6 +85,20 @@ type MediaAsset = {
   is_exception: boolean;
 };
 
+type MediaWorkspaceItem = {
+  id: string;
+  storage_path: string;
+  rights_status: string | null;
+  approval_status: string | null;
+  is_exception?: boolean | null;
+  kind?: string | null;
+  status?: string | null;
+};
+
+type MediaWorkspaceListResponse = {
+  items?: MediaWorkspaceItem[];
+};
+
 const HOME_COMPOSER_COPY = {
   en: {
     eyebrow: 'Content orchestration',
@@ -669,24 +683,60 @@ export default function HomeComposerPage() {
     }
   }, [handleComposerUnauthorized, t.loadComposerError]);
 
+  const loadMediaCandidates = useCallback(async (term: string): Promise<MediaAsset[]> => {
+    const params = new URLSearchParams();
+    params.set('limit', '60');
+    if (term.trim()) {
+      params.set('q', term.trim());
+    }
+
+    const body = await apiRequest<MediaWorkspaceListResponse>(`/admin/media?${params.toString()}`);
+    const rows = Array.isArray(body.items) ? body.items : [];
+
+    return rows
+      .filter((item) => (item.kind || 'image') === 'image')
+      .filter((item) => !item.status || item.status === 'active')
+      .map((item) => ({
+        id: item.id,
+        storage_path: item.storage_path,
+        rights_status: item.rights_status ?? null,
+        approval_status: item.approval_status ?? null,
+        is_exception: Boolean(item.is_exception),
+      }));
+  }, []);
+
   const loadCandidates = useCallback(async (term: string): Promise<void> => {
     const activeToken = getToken();
     if (!activeToken?.trim()) return;
     try {
       const query = term.trim() ? `?search=${encodeURIComponent(term.trim())}` : '';
-      const [projects, properties, media] = await Promise.all([
+      const [projects, properties, media] = await Promise.allSettled([
         apiRequest<CandidateProject[]>(`/admin/home-composer/candidates/projects${query}`),
         apiRequest<CandidateProperty[]>(`/admin/home-composer/candidates/properties${query}`),
-        apiRequest<MediaAsset[]>(`/admin/properties/media-candidates?limit=60${term.trim() ? `&search=${encodeURIComponent(term.trim())}` : ''}`),
+        loadMediaCandidates(term),
       ]);
-      setProjectCandidates(projects);
-      setPropertyCandidates(properties);
-      setMediaCandidates(media);
+      const nextProjects = projects.status === 'fulfilled' ? projects.value : [];
+      const nextProperties = properties.status === 'fulfilled' ? properties.value : [];
+      const nextMedia = media.status === 'fulfilled' ? media.value : [];
+
+      setProjectCandidates(nextProjects);
+      setPropertyCandidates(nextProperties);
+      setMediaCandidates(nextMedia);
+
+      if (
+        projects.status === 'rejected' &&
+        properties.status === 'rejected' &&
+        media.status === 'rejected'
+      ) {
+        setError(t.loadCandidatesError);
+      } else {
+        setError((current) => (current === t.loadCandidatesError ? null : current));
+      }
     } catch (err) {
       if (handleComposerUnauthorized(err)) return;
       setError(t.loadCandidatesError);
     }
-  }, [handleComposerUnauthorized, t.loadCandidatesError]);
+  }, [handleComposerUnauthorized, loadMediaCandidates, t.loadCandidatesError]);
 
   useEffect(() => {
     setLocale(detectLocale());

@@ -73,4 +73,12 @@ describe("Admin shell + route consolidation (Phase A)", () => {
     const nextConfig = read("next.config.js");
     expect(nextConfig).toContain("skipTrailingSlashRedirect: true");
   });
+
+  it("allows LOCAL_API_ORIGIN to power /api rewrites in local preview builds", () => {
+    const nextConfig = read("next.config.js");
+    expect(nextConfig).toContain("process.env.LOCAL_API_ORIGIN");
+    expect(nextConfig).toContain("process.env.LOCAL_MEDIA_ORIGIN || localApiOrigin");
+    expect(nextConfig).toContain("process.env.NODE_ENV === 'development' ? 'http://127.0.0.1:8000' : ''");
+    expect(nextConfig).toContain("if (!localApiOrigin) return []");
+  });
 });

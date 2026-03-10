@@ -43,16 +43,20 @@ const nextConfig = {
     ];
   },
   async rewrites() {
-    if (process.env.NODE_ENV !== 'development') return [];
+    const localApiOrigin =
+      process.env.LOCAL_API_ORIGIN ||
+      (process.env.NODE_ENV === 'development' ? 'http://127.0.0.1:8000' : '');
+    const localMediaOrigin = process.env.LOCAL_MEDIA_ORIGIN || localApiOrigin;
+    if (!localApiOrigin) return [];
 
-    const devApiOrigin = process.env.LOCAL_API_ORIGIN || 'http://127.0.0.1:8000';
     return {
       fallback: [
-        // Local dev parity with production nginx:
-        // /api/* on frontend should hit backend root (without /api prefix).
-        { source: '/api/:path*', destination: `${devApiOrigin}/:path*` },
-        // If a /media file is missing in Next public/, fall through to backend media mount.
-        { source: '/media/:path*', destination: `${devApiOrigin}/media/:path*` },
+        // Local preview parity with the deployed edge proxy:
+        // LOCAL_API_ORIGIN may point either at a backend root (e.g. localhost:8000)
+        // or a site-prefixed API origin (e.g. https://amppattaya.com/api).
+        { source: '/api/:path*', destination: `${localApiOrigin}/:path*` },
+        // Allow media to use a separate origin when API and site/media are hosted differently.
+        { source: '/media/:path*', destination: `${localMediaOrigin}/media/:path*` },
       ],
     };
   },
