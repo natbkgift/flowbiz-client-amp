@@ -350,6 +350,7 @@ export function AdminShell({ children }: { children: ReactNode }) {
   );
   const hasSearchResults =
     filteredNavGroups.some((entry) => entry.items.length > 0) || filteredUtilityItems.length > 0;
+  const showDesktopUtilityNav = deferredSearch.length > 0 && filteredUtilityItems.length > 0;
   const showWorkspaceBreadcrumb = currentGroupLabel !== currentWorkspaceLabel;
 
   useEffect(() => {
@@ -466,16 +467,18 @@ export function AdminShell({ children }: { children: ReactNode }) {
                 </div>
               ))}
 
-              <nav className="admin-shell-sidebar-footer" aria-label={ui.quickActions}>
-                {renderNavGroup(
-                  ui.quickNavigation,
-                  filteredUtilityItems,
-                  pathname,
-                  locale,
-                  deferredSearch,
-                  { linkClassName: "admin-shell-nav-link admin-shell-nav-link--utility" },
-                )}
-              </nav>
+              {showDesktopUtilityNav ? (
+                <nav className="admin-shell-sidebar-footer" aria-label={ui.quickActions}>
+                  {renderNavGroup(
+                    ui.quickNavigation,
+                    filteredUtilityItems,
+                    pathname,
+                    locale,
+                    deferredSearch,
+                    { linkClassName: "admin-shell-nav-link admin-shell-nav-link--utility" },
+                  )}
+                </nav>
+              ) : null}
             </>
           ) : (
             emptySearchState

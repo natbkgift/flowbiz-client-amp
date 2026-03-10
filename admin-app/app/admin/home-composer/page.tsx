@@ -1166,7 +1166,7 @@ export default function HomeComposerPage() {
               icon="settings"
               titleTag="h2"
             >
-              <div className="home-composer-stack home-composer-stack--compact">
+              <div className="home-composer-section-order">
                 {(config.section_order || SECTION_KEYS).map((section, idx) => (
                   <div key={section} className="home-composer-config-block home-composer-list-item">
                     <label className="home-composer-toggle-label">

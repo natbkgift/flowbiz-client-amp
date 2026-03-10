@@ -570,12 +570,12 @@ export default function AdminMediaPage() {
           </section>
 
           <AdminSectionCard
-            className="admin-workspace-panel admin-workspace-panel--actions"
+            className="admin-workspace-panel admin-workspace-panel--actions admin-workspace-panel--media-actions"
             title={t.operations}
             description={t.operationsDescription}
             icon="media"
           >
-            <div className="dashboard-grid">
+            <div className="admin-workspace-action-grid admin-workspace-action-grid--media">
               <ActionCard title={t.upload} description={t.uploadDescription} icon="plus">
                 <label className="field" htmlFor="media-upload-file">
                   <span>{t.uploadFile}</span>
@@ -790,9 +790,9 @@ export default function AdminMediaPage() {
             </div>
 
             {opError ? <div className="state-error">{opError}</div> : null}
-            <label className="field" htmlFor="media-op-result">
+            <label className="field admin-workspace-result-field" htmlFor="media-op-result">
               <span>{t.result}</span>
-              <textarea id="media-op-result" rows={10} value={opResult} readOnly />
+              <textarea id="media-op-result" rows={opResult ? 10 : 4} value={opResult} readOnly />
             </label>
           </AdminSectionCard>
 

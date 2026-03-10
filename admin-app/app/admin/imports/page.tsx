@@ -510,13 +510,13 @@ export default function AdminImportsPage() {
           </section>
 
           <ActionCard
-            className="admin-workspace-panel admin-workspace-panel--actions"
+            className="admin-workspace-panel admin-workspace-panel--actions admin-workspace-panel--imports-run"
             title={t.importRun}
             description={t.importRunDescription}
             icon="imports"
             titleTag="h2"
           >
-            <div className="dashboard-grid">
+            <div className="admin-workspace-form-grid admin-workspace-form-grid--imports">
               <label className="field" htmlFor="imports-file">
                 <span>{t.csvFile}</span>
                 <input
@@ -547,9 +547,9 @@ export default function AdminImportsPage() {
                 </AdminButton>
               </div>
             </div>
-            <label className="field" htmlFor="imports-result">
+            <label className="field admin-workspace-result-field" htmlFor="imports-result">
               <span>{t.importResult}</span>
-              <textarea id="imports-result" rows={8} readOnly value={importResult} />
+              <textarea id="imports-result" rows={importResult ? 8 : 4} readOnly value={importResult} />
             </label>
           </ActionCard>
 

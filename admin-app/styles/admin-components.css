@@ -1956,7 +1956,9 @@
   .admin-workspace-editor-grid,
   .admin-workspace-output-grid,
   .admin-workspace-output-sidecar,
-  .admin-preview-grid {
+  .admin-preview-grid,
+  .admin-workspace-action-grid,
+  .admin-workspace-form-grid {
     display: grid;
     gap: var(--admin-space-6);
     min-width: 0;
@@ -1969,6 +1971,11 @@
 
   .admin-workspace-editor-grid,
   .admin-workspace-output-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-workspace-action-grid,
+  .admin-workspace-form-grid {
     grid-template-columns: 1fr;
   }
 
@@ -2075,7 +2082,17 @@
     accent-color: var(--admin-color-primary-500);
   }
 
+  .admin-workspace-result-field textarea {
+    min-height: 148px;
+    resize: vertical;
+  }
+
   .home-composer-stack--compact {
+    gap: var(--admin-space-2);
+  }
+
+  .home-composer-section-order {
+    display: grid;
     gap: var(--admin-space-2);
   }
 
@@ -2096,6 +2113,10 @@
 
     .admin-workspace-output-grid--split {
       grid-template-columns: minmax(0, 1.4fr) minmax(320px, 0.6fr);
+    }
+
+    .admin-workspace-action-grid--media {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
     }
   }
 
@@ -2764,6 +2785,40 @@
     overflow: auto;
   }
 
+  .admin-workspace-form-grid--imports {
+    grid-template-columns: minmax(260px, 1.2fr) minmax(140px, 0.48fr) auto;
+    align-items: end;
+    gap: var(--admin-space-4);
+  }
+
+  .admin-workspace-form-grid--imports .card-actions {
+    justify-content: flex-end;
+  }
+
+  .admin-workspace-panel--media-actions .admin-section-card__body {
+    gap: var(--admin-space-3);
+  }
+
+  .admin-workspace-panel--media-actions .admin-workspace-action-grid--media > .admin-card-shell {
+    min-height: 100%;
+  }
+
+  .home-composer-section-order .home-composer-list-item {
+    min-height: 100%;
+    align-content: start;
+  }
+
+  @media (min-width: 1440px) {
+    .home-composer-section-order {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .home-composer-option-list {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      max-height: 12.5rem;
+    }
+  }
+
   .home-composer-status-list {
     display: grid;
     gap: var(--admin-space-2);
@@ -2986,6 +3041,7 @@
     .admin-workspace-editor-grid,
     .admin-workspace-output-grid,
     .admin-preview-grid,
+    .admin-workspace-form-grid--imports,
     .crm-layout,
     .dashboard-controls--auth .admin-section-card__body,
     .home-composer-split,
