@@ -159,7 +159,11 @@ export function AdminCrudWorkspaceAuthPanel({
 }) {
   return (
     <AdminSectionCard
-      className={isAuthenticated ? "dashboard-controls dashboard-controls--session" : "dashboard-controls dashboard-controls--auth"}
+      className={
+        isAuthenticated
+          ? "admin-workspace-panel admin-workspace-panel--auth dashboard-controls dashboard-controls--session"
+          : "admin-workspace-panel admin-workspace-panel--auth dashboard-controls dashboard-controls--auth"
+      }
       title={isAuthenticated ? "Session" : "Admin sign in"}
       description={isAuthenticated ? "Active auth session for this workspace." : "Use existing admin credentials to access this workspace."}
       icon={isAuthenticated ? "profile" : "users"}
@@ -239,7 +243,12 @@ export function AdminCrudWorkspaceQueryPanel({
   onLoadList: () => void | Promise<void>;
 }) {
   return (
-    <AdminSectionCard title="List query" description={queryHelp || "Use existing query params without changing API contracts."} icon="filter">
+    <AdminSectionCard
+      className="admin-workspace-panel admin-workspace-panel--query"
+      title="List query"
+      description={queryHelp || "Use existing query params without changing API contracts."}
+      icon="filter"
+    >
       <label className="field" htmlFor={`${idBase}-query`}>
         <span>List query</span>
         <input id={`${idBase}-query`} value={listQuery} onChange={(event) => onListQueryChange(event.target.value)} placeholder="page=1&limit=20" />
@@ -249,7 +258,19 @@ export function AdminCrudWorkspaceQueryPanel({
           Load list
         </AdminButton>
       </div>
-      {meta ? <p className="locale-safe admin-meta-inline">page={meta.page ?? "-"} limit={meta.limit ?? "-"} total={meta.total ?? "-"}</p> : null}
+      {meta ? (
+        <div className="admin-workspace-inline-metrics" aria-label="List query metadata">
+          <AdminBadge tone="info" icon="table">
+            page={meta.page ?? "-"}
+          </AdminBadge>
+          <AdminBadge tone="info" icon="table">
+            limit={meta.limit ?? "-"}
+          </AdminBadge>
+          <AdminBadge tone="neutral" icon="info">
+            total={meta.total ?? "-"}
+          </AdminBadge>
+        </div>
+      ) : null}
     </AdminSectionCard>
   );
 }
@@ -282,7 +303,12 @@ export function AdminCrudWorkspaceRecordActionsPanel({
   onLoadRevisions: () => void | Promise<void>;
 }) {
   return (
-    <AdminSectionCard title="Record actions" description="Select one record ID and run safe read/write actions." icon="info">
+    <AdminSectionCard
+      className="admin-workspace-panel admin-workspace-panel--actions"
+      title="Record actions"
+      description="Select one record ID and run safe read/write actions."
+      icon="info"
+    >
       <label className="field" htmlFor={`${idBase}-identifier`}>
         <span>{config.identifierLabel}</span>
         <input id={`${idBase}-identifier`} value={identifier} onChange={(event) => onIdentifierChange(event.target.value)} placeholder={config.identifierPlaceholder} />
@@ -359,7 +385,12 @@ export function AdminCrudWorkspaceCreatePanel({
   if (!config.createPath) return null;
 
   return (
-    <AdminSectionCard title="Create record" description="Create a new record using the existing workspace contract." icon="plus">
+    <AdminSectionCard
+      className="admin-workspace-panel admin-workspace-panel--create"
+      title="Create record"
+      description="Create a new record using the existing workspace contract."
+      icon="plus"
+    >
       {Array.isArray(config.createFormFields) && config.createFormFields.length > 0 ? (
         <LocalizedPrimitiveFields
           idBase={idBase}
@@ -428,7 +459,12 @@ export function AdminCrudWorkspacePatchPanel({
   if (!config.patchPath) return null;
 
   return (
-    <AdminSectionCard title="Update record" description="Patch the selected record without changing the API payload shape." icon="refresh">
+    <AdminSectionCard
+      className="admin-workspace-panel admin-workspace-panel--patch"
+      title="Update record"
+      description="Patch the selected record without changing the API payload shape."
+      icon="refresh"
+    >
       {Array.isArray(config.patchFormFields) && config.patchFormFields.length > 0 ? (
         <LocalizedPrimitiveFields
           idBase={idBase}
@@ -481,11 +517,17 @@ export function AdminCrudWorkspaceBulkActionsPanel({
   if (bulkActions.length === 0) return null;
 
   return (
-    <AdminSectionCard title="Bulk actions" description="Run scoped batch updates without changing the existing API contract." icon="spark">
+    <AdminSectionCard
+      className="admin-workspace-panel admin-workspace-panel--bulk"
+      title="Bulk actions"
+      description="Run scoped batch updates without changing the existing API contract."
+      icon="spark"
+    >
       <div className="admin-workspace-stack">
         {bulkActions.map((action) => (
           <ActionCard
             key={action.key}
+            className="admin-workspace-bulk-card"
             title={action.title}
             description={action.description || "Apply this action to one or more selected record IDs."}
             icon="spark"
@@ -538,7 +580,14 @@ export function AdminCrudWorkspaceRecordsPanel({
   pickIdentifierFromRow: (item: unknown) => string;
 }) {
   return (
-    <LogCard title="Records" description="Current list results rendered through the shared admin data table." icon="table" titleTag="h2">
+    <LogCard
+      className="admin-workspace-panel admin-workspace-panel--records"
+      bodyClassName="admin-workspace-log-body"
+      title="Records"
+      description="Current list results rendered through the shared admin data table."
+      icon="table"
+      titleTag="h2"
+    >
       {items.length === 0 ? (
         <div className="state-empty">No records</div>
       ) : (
@@ -554,7 +603,14 @@ export function AdminCrudWorkspaceResultPanel({ result }: { result: string }) {
   if (!result) return null;
 
   return (
-    <LogCard title="Result" description="Latest response payload from the selected workspace action." icon="info" titleTag="h2">
+    <LogCard
+      className="admin-workspace-panel admin-workspace-panel--result"
+      bodyClassName="admin-workspace-log-body"
+      title="Result"
+      description="Latest response payload from the selected workspace action."
+      icon="info"
+      titleTag="h2"
+    >
       <pre>{result}</pre>
     </LogCard>
   );
@@ -582,7 +638,14 @@ export function AdminCrudWorkspaceRevisionsPanel({
   if (!revisionConfig) return null;
 
   return (
-    <LogCard title="Revision history" description="Inspect revisions, diff snapshots, and restore when the endpoint supports it." icon="refresh" titleTag="h2">
+    <LogCard
+      className="admin-workspace-panel admin-workspace-panel--revisions"
+      bodyClassName="admin-workspace-log-body"
+      title="Revision history"
+      description="Inspect revisions, diff snapshots, and restore when the endpoint supports it."
+      icon="refresh"
+      titleTag="h2"
+    >
       {revisions.length === 0 ? (
         <div className="state-empty">No revisions loaded. Select a record and click &quot;Load revisions&quot;.</div>
       ) : (
@@ -631,9 +694,22 @@ export function AdminCrudWorkspacePreviewPanel({
   if (!previewConfig || !previewRecord) return null;
 
   return (
-    <LogCard title="Preview" description="Localized preview content and translation completeness for the current record." icon="workspace" titleTag="h2">
+    <LogCard
+      className="admin-workspace-panel admin-workspace-panel--preview"
+      bodyClassName="admin-workspace-log-body"
+      title="Preview"
+      description="Localized preview content and translation completeness for the current record."
+      icon="workspace"
+      titleTag="h2"
+    >
       {previewChecklist && previewChecklist.completeness.total > 0 ? (
-        <MetricCard title="Translation completeness" description="Localized field coverage from the current publish checklist." icon="language" tone="info">
+        <MetricCard
+          className="admin-workspace-preview-card"
+          title="Translation completeness"
+          description="Localized field coverage from the current publish checklist."
+          icon="language"
+          tone="info"
+        >
           <p className="locale-safe">
             {previewChecklist.completeness.filled}/{previewChecklist.completeness.total} localized fields ({previewChecklist.completeness.percent}%)
           </p>

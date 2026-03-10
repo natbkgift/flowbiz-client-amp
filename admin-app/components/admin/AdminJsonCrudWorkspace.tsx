@@ -458,74 +458,76 @@ export function AdminJsonCrudWorkspace({ config }: { config: CrudConfig }) {
             />
           </div>
 
-          <AdminCrudWorkspaceCreatePanel
-            idBase={idBase}
-            config={config}
-            token={token}
-            createPayload={createPayload}
-            createFieldGroups={createFieldGroups}
-            createFormValues={createFormValues}
-            createFormErrors={createFormErrors}
-            createLocaleTab={createLocaleTab}
-            onCreatePayloadChange={setCreatePayload}
-            onCreateLocaleTabChange={setCreateLocaleTab}
-            onLocaleTabKeyDown={onLocaleTabKeyDown}
-            onCreateFieldChange={handleCreateFieldChange}
-            onCreate={() =>
-              void runAction(() =>
-                fetchJson(config.createPath || "", token.trim(), {
-                  method: "POST",
-                  body: JSON.stringify(
-                    Array.isArray(config.createFormFields) && config.createFormFields.length > 0
-                      ? (() => {
-                          const errors = validatePrimitiveValues(config.createFormFields, createFormValues);
-                          setCreateFormErrors(errors);
-                          if (Object.keys(errors).length > 0) {
-                            throw new Error("Please correct the highlighted fields.");
-                          }
-                          return toPrimitivePayload(config.createFormFields, createFormValues);
-                        })()
-                      : parseJsonInput(createPayload)
-                  ),
-                })
-              )
-            }
-          />
+          <div className="admin-workspace-editor-grid">
+            <AdminCrudWorkspaceCreatePanel
+              idBase={idBase}
+              config={config}
+              token={token}
+              createPayload={createPayload}
+              createFieldGroups={createFieldGroups}
+              createFormValues={createFormValues}
+              createFormErrors={createFormErrors}
+              createLocaleTab={createLocaleTab}
+              onCreatePayloadChange={setCreatePayload}
+              onCreateLocaleTabChange={setCreateLocaleTab}
+              onLocaleTabKeyDown={onLocaleTabKeyDown}
+              onCreateFieldChange={handleCreateFieldChange}
+              onCreate={() =>
+                void runAction(() =>
+                  fetchJson(config.createPath || "", token.trim(), {
+                    method: "POST",
+                    body: JSON.stringify(
+                      Array.isArray(config.createFormFields) && config.createFormFields.length > 0
+                        ? (() => {
+                            const errors = validatePrimitiveValues(config.createFormFields, createFormValues);
+                            setCreateFormErrors(errors);
+                            if (Object.keys(errors).length > 0) {
+                              throw new Error("Please correct the highlighted fields.");
+                            }
+                            return toPrimitivePayload(config.createFormFields, createFormValues);
+                          })()
+                        : parseJsonInput(createPayload)
+                    ),
+                  })
+                )
+              }
+            />
 
-          <AdminCrudWorkspacePatchPanel
-            idBase={idBase}
-            config={config}
-            identifier={identifier}
-            token={token}
-            patchPayload={patchPayload}
-            patchFieldGroups={patchFieldGroups}
-            patchFormValues={patchFormValues}
-            patchFormErrors={patchFormErrors}
-            patchLocaleTab={patchLocaleTab}
-            onPatchPayloadChange={setPatchPayload}
-            onPatchLocaleTabChange={setPatchLocaleTab}
-            onLocaleTabKeyDown={onLocaleTabKeyDown}
-            onPatchFieldChange={handlePatchFieldChange}
-            onPatch={() =>
-              void runAction(() =>
-                fetchJson(withIdentifier(config.patchPath || "", identifier), token.trim(), {
-                  method: "PATCH",
-                  body: JSON.stringify(
-                    Array.isArray(config.patchFormFields) && config.patchFormFields.length > 0
-                      ? (() => {
-                          const errors = validatePrimitiveValues(config.patchFormFields, patchFormValues);
-                          setPatchFormErrors(errors);
-                          if (Object.keys(errors).length > 0) {
-                            throw new Error("Please correct the highlighted fields.");
-                          }
-                          return toPrimitivePayload(config.patchFormFields, patchFormValues);
-                        })()
-                      : parseJsonInput(patchPayload)
-                  ),
-                })
-              )
-            }
-          />
+            <AdminCrudWorkspacePatchPanel
+              idBase={idBase}
+              config={config}
+              identifier={identifier}
+              token={token}
+              patchPayload={patchPayload}
+              patchFieldGroups={patchFieldGroups}
+              patchFormValues={patchFormValues}
+              patchFormErrors={patchFormErrors}
+              patchLocaleTab={patchLocaleTab}
+              onPatchPayloadChange={setPatchPayload}
+              onPatchLocaleTabChange={setPatchLocaleTab}
+              onLocaleTabKeyDown={onLocaleTabKeyDown}
+              onPatchFieldChange={handlePatchFieldChange}
+              onPatch={() =>
+                void runAction(() =>
+                  fetchJson(withIdentifier(config.patchPath || "", identifier), token.trim(), {
+                    method: "PATCH",
+                    body: JSON.stringify(
+                      Array.isArray(config.patchFormFields) && config.patchFormFields.length > 0
+                        ? (() => {
+                            const errors = validatePrimitiveValues(config.patchFormFields, patchFormValues);
+                            setPatchFormErrors(errors);
+                            if (Object.keys(errors).length > 0) {
+                              throw new Error("Please correct the highlighted fields.");
+                            }
+                            return toPrimitivePayload(config.patchFormFields, patchFormValues);
+                          })()
+                        : parseJsonInput(patchPayload)
+                    ),
+                  })
+                )
+              }
+            />
+          </div>
 
           <AdminCrudWorkspaceBulkActionsPanel
             idBase={idBase}
@@ -575,32 +577,36 @@ export function AdminJsonCrudWorkspace({ config }: { config: CrudConfig }) {
           {error ? <div className="state-error">{error}</div> : null}
           {loading ? <div className="state-loading">Loading</div> : null}
 
-          <AdminCrudWorkspaceRecordsPanel items={items} tableColumns={tableColumns} pickIdentifierFromRow={pickIdentifierFromRow} />
-          <AdminCrudWorkspaceResultPanel result={result} />
-          <AdminCrudWorkspaceRevisionsPanel
-            idBase={idBase}
-            identifier={identifier}
-            revisionConfig={revisionConfig}
-            revisions={revisions}
-            selectedRevisionId={selectedRevisionId}
-            onSelectedRevisionIdChange={setSelectedRevisionId}
-            onShowDiff={() =>
-              void runAction(() =>
-                fetchJson(withRevisionIdentifier(revisionConfig?.diffPath || "", identifier, selectedRevisionId), token.trim())
-              )
-            }
-            onRestoreRevision={() =>
-              void runAction(async () => {
-                const restored = await fetchJson(
-                  withRevisionIdentifier(revisionConfig?.restorePath || "", identifier, selectedRevisionId),
-                  token.trim(),
-                  { method: "POST" }
-                );
-                await loadRevisions();
-                return restored;
-              })
-            }
-          />
+          <div className="admin-workspace-output-grid">
+            <AdminCrudWorkspaceRecordsPanel items={items} tableColumns={tableColumns} pickIdentifierFromRow={pickIdentifierFromRow} />
+            <div className="admin-workspace-output-sidecar">
+              <AdminCrudWorkspaceResultPanel result={result} />
+              <AdminCrudWorkspaceRevisionsPanel
+                idBase={idBase}
+                identifier={identifier}
+                revisionConfig={revisionConfig}
+                revisions={revisions}
+                selectedRevisionId={selectedRevisionId}
+                onSelectedRevisionIdChange={setSelectedRevisionId}
+                onShowDiff={() =>
+                  void runAction(() =>
+                    fetchJson(withRevisionIdentifier(revisionConfig?.diffPath || "", identifier, selectedRevisionId), token.trim())
+                  )
+                }
+                onRestoreRevision={() =>
+                  void runAction(async () => {
+                    const restored = await fetchJson(
+                      withRevisionIdentifier(revisionConfig?.restorePath || "", identifier, selectedRevisionId),
+                      token.trim(),
+                      { method: "POST" }
+                    );
+                    await loadRevisions();
+                    return restored;
+                  })
+                }
+              />
+            </div>
+          </div>
           <AdminCrudWorkspacePreviewPanel previewConfig={previewConfig} previewRecord={previewRecord} previewChecklist={previewChecklist} />
         </>
       ) : null}

@@ -1952,6 +1952,129 @@
     gap: var(--admin-space-4);
   }
 
+  .admin-workspace-split,
+  .admin-workspace-editor-grid,
+  .admin-workspace-output-grid,
+  .admin-workspace-output-sidecar,
+  .admin-preview-grid {
+    display: grid;
+    gap: var(--admin-space-6);
+    min-width: 0;
+    align-items: start;
+  }
+
+  .admin-workspace-split {
+    grid-template-columns: minmax(280px, 0.72fr) minmax(0, 1.28fr);
+  }
+
+  .admin-workspace-editor-grid,
+  .admin-workspace-output-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-workspace-output-sidecar {
+    align-content: start;
+  }
+
+  .admin-preview-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .admin-workspace-inline-metrics {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--admin-space-2);
+    align-items: center;
+  }
+
+  .admin-workspace-panel {
+    position: relative;
+    overflow: hidden;
+    border-color: rgba(203, 213, 225, 0.82);
+    background:
+      radial-gradient(circle at top right, rgba(47, 109, 246, 0.05), transparent 30%),
+      linear-gradient(180deg, rgba(255, 255, 255, 0.992), rgba(247, 250, 255, 0.972));
+    box-shadow:
+      0 14px 30px rgba(15, 23, 42, 0.045),
+      inset 0 1px 0 rgba(255, 255, 255, 0.94);
+  }
+
+  .admin-workspace-panel .admin-card-shell__header,
+  .admin-workspace-panel .admin-section-card__body,
+  .admin-workspace-panel .admin-card-shell__body {
+    gap: var(--admin-space-4);
+  }
+
+  .admin-workspace-panel .card-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--admin-space-2);
+    align-items: center;
+  }
+
+  .admin-workspace-panel--query {
+    background:
+      radial-gradient(circle at top right, rgba(14, 165, 233, 0.06), transparent 30%),
+      linear-gradient(180deg, rgba(248, 252, 255, 0.99), rgba(255, 255, 255, 0.975));
+  }
+
+  .admin-workspace-panel--actions {
+    background:
+      radial-gradient(circle at top right, rgba(47, 109, 246, 0.07), transparent 34%),
+      linear-gradient(180deg, rgba(244, 248, 255, 0.99), rgba(255, 255, 255, 0.975));
+  }
+
+  .admin-workspace-panel--create,
+  .admin-workspace-panel--patch,
+  .admin-workspace-panel--bulk {
+    min-height: 100%;
+  }
+
+  .admin-workspace-panel--records {
+    background:
+      linear-gradient(180deg, rgba(255, 255, 255, 0.995), rgba(248, 250, 252, 0.975)),
+      var(--admin-bg-card);
+  }
+
+  .admin-workspace-panel--result,
+  .admin-workspace-panel--revisions,
+  .admin-workspace-panel--preview {
+    background:
+      linear-gradient(180deg, rgba(250, 252, 255, 0.99), rgba(255, 255, 255, 0.976)),
+      var(--admin-bg-card);
+  }
+
+  .admin-workspace-panel--bulk .admin-workspace-stack {
+    gap: var(--admin-space-4);
+  }
+
+  .admin-workspace-bulk-card {
+    border-color: rgba(191, 219, 254, 0.72);
+    background:
+      radial-gradient(circle at top right, rgba(47, 109, 246, 0.05), transparent 28%),
+      linear-gradient(180deg, rgba(248, 251, 255, 0.99), rgba(255, 255, 255, 0.97));
+  }
+
+  .admin-workspace-log-body {
+    gap: var(--admin-space-4);
+  }
+
+  .admin-workspace-log-body pre {
+    margin: 0;
+    max-height: 420px;
+    padding: var(--admin-space-4);
+    overflow: auto;
+    border: 1px solid rgba(226, 232, 240, 0.92);
+    border-radius: var(--admin-radius-md);
+    background: rgba(248, 250, 252, 0.9);
+  }
+
+  .admin-workspace-preview-card progress {
+    width: 100%;
+    height: 10px;
+    accent-color: var(--admin-color-primary-500);
+  }
+
   .home-composer-stack--compact {
     gap: var(--admin-space-2);
   }
@@ -1964,6 +2087,16 @@
   .dashboard-controls--auth .state-empty {
     min-height: 100%;
     align-content: start;
+  }
+
+  @media (min-width: 1600px) {
+    .admin-workspace-editor-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .admin-workspace-output-grid {
+      grid-template-columns: minmax(0, 1.4fr) minmax(320px, 0.6fr);
+    }
   }
 
   .crm-login-form {
@@ -2849,6 +2982,10 @@
     .dashboard-kpi-grid,
     .dashboard-locked-overview,
     .dashboard-locked-overview__facts,
+    .admin-workspace-split,
+    .admin-workspace-editor-grid,
+    .admin-workspace-output-grid,
+    .admin-preview-grid,
     .crm-layout,
     .dashboard-controls--auth .admin-section-card__body,
     .home-composer-split,
