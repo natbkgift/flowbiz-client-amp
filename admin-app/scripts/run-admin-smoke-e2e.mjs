@@ -7,8 +7,45 @@ import { chromium } from "playwright";
 const BASE_URL = process.env.ADMIN_SMOKE_BASE_URL || "http://127.0.0.1:3000";
 const ARTIFACT_DIR = process.env.ADMIN_SMOKE_ARTIFACT_DIR || path.join(process.cwd(), "artifacts", "admin-smoke");
 const SMOKE_MODE = process.env.ADMIN_SMOKE_MODE === "live" ? "live" : "mocked";
+const SMOKE_LOCALE = process.env.ADMIN_SMOKE_LOCALE === "th" ? "th" : "en";
 const VIEWPORT_WIDTH = Number.parseInt(process.env.ADMIN_SMOKE_VIEWPORT_WIDTH || "1366", 10) || 1366;
 const VIEWPORT_HEIGHT = Number.parseInt(process.env.ADMIN_SMOKE_VIEWPORT_HEIGHT || "900", 10) || 900;
+
+const VISIBLE_WIDGET_TITLE_BY_KEY = {
+  en: {
+    project_cover_coverage: "Project Cover Coverage %",
+    broken_media_count: "Broken media",
+    pending_translations_count: "Pending translations",
+    unpublished_drafts_count: "Unpublished drafts",
+    recent_leads_inquiries: "Recent leads / inquiries",
+    review_video_source_verification_pending: "Video source verification",
+    last_import_mirror_status: "Import / mirror health",
+    last_deploy_health_status: "Deploy health",
+  },
+  th: {
+    project_cover_coverage: "ความครอบคลุมภาพปกโปรเจกต์",
+    broken_media_count: "สื่อที่มีปัญหา",
+    pending_translations_count: "คำแปลที่รอดำเนินการ",
+    unpublished_drafts_count: "ฉบับร่างที่ยังไม่เผยแพร่",
+    recent_leads_inquiries: "ลีดและอินไควรีล่าสุด",
+    review_video_source_verification_pending: "การยืนยันแหล่งที่มาวิดีโอ",
+    last_import_mirror_status: "สถานะนำเข้าและมิเรอร์",
+    last_deploy_health_status: "สถานะดีพลอย",
+  },
+};
+
+function buildAdminUrl(routePath) {
+  const normalizedBase = BASE_URL.endsWith("/") ? BASE_URL : `${BASE_URL}/`;
+  const url = new URL(routePath, normalizedBase);
+  if (SMOKE_LOCALE !== "en") {
+    url.searchParams.set("lang", SMOKE_LOCALE);
+  }
+  return url.toString();
+}
+
+function getVisibleWidgetTitle(widgetKey, fallbackTitle) {
+  return VISIBLE_WIDGET_TITLE_BY_KEY[SMOKE_LOCALE]?.[widgetKey] || fallbackTitle;
+}
 
 function parseLoginPayload(rawBody) {
   if (!rawBody) {
@@ -355,6 +392,7 @@ function inspectDashboardSummary(payload) {
         : 1,
     warningCount: warnings.length,
     incompleteWidgetCount: summary.incomplete_widget_count,
+    firstWidgetKey: widgets.find((item) => item.key.trim())?.key ?? null,
     firstWidgetTitle: widgets.find((item) => item.title.trim())?.title ?? null,
     firstInquiryText:
       recentInquiries
@@ -369,21 +407,31 @@ async function waitForVisibleText(page, value) {
   await page.getByText(new RegExp(escapeRegExp(value), "i")).first().waitFor({ timeout: 10000 });
 }
 
+async function waitForVisibleTextMatch(page, values) {
+  const candidates = values.filter((value) => typeof value === "string" && value.trim());
+  if (!candidates.length) return;
+  const pattern = new RegExp(candidates.map((value) => escapeRegExp(value)).join("|"), "i");
+  await page.getByText(pattern).first().waitFor({ timeout: 10000 });
+}
+
 async function verifyDashboardUi(page, contractSummary, options = {}) {
   const { smokeMode = "mocked", getCurrentRecentInquiriesRequestCount = () => 0 } = options;
   await page.getByRole("button", { name: /sign out|ออกจากระบบ/i }).waitFor({ timeout: 10000 });
   await page.getByRole("button", { name: /refresh dashboard|รีเฟรชแดชบอร์ด/i }).first().waitFor({ timeout: 10000 });
-  await page.getByRole("heading", { name: /Admin Health \/ QA Dashboard/i }).first().waitFor({ timeout: 10000 });
   await page
-    .getByRole("heading", { name: /System health \/ QA overview|Health widgets|วิดเจ็ตสุขภาพระบบ/i })
+    .getByRole("heading", { name: /Admin Health \/ QA Dashboard|แดชบอร์ดสุขภาพระบบ\s*\/\s*QA/i })
     .first()
     .waitFor({ timeout: 10000 });
   await page
-    .getByRole("heading", { name: /Activity metrics|Lead activity trend|แนวโน้ม activity ของลีด/i })
+    .getByRole("heading", { name: /System health \/ QA overview|Health widgets|ภาพรวมสุขภาพระบบ|วิดเจ็ตสุขภาพระบบ/i })
     .first()
     .waitFor({ timeout: 10000 });
   await page
-    .getByRole("heading", { name: /Logs|Recent leads\/inquiries|ลีด\/อินไควรีล่าสุด/i })
+    .getByRole("heading", { name: /Activity metrics|Lead activity trend|แนวโน้มกิจกรรมของลีด|แนวโน้ม activity ของลีด/i })
+    .first()
+    .waitFor({ timeout: 10000 });
+  await page
+    .getByRole("heading", { name: /Logs|Recent leads\/inquiries|บันทึกเหตุการณ์|ลีด\/อินไควรีล่าสุด/i })
     .first()
     .waitFor({ timeout: 10000 });
   await page
@@ -393,7 +441,10 @@ async function verifyDashboardUi(page, contractSummary, options = {}) {
     .waitFor({ timeout: 10000 });
 
   if (contractSummary.widgetCount > 0) {
-    await waitForVisibleText(page, contractSummary.firstWidgetTitle);
+    await waitForVisibleTextMatch(page, [
+      getVisibleWidgetTitle(contractSummary.firstWidgetKey, contractSummary.firstWidgetTitle),
+      contractSummary.firstWidgetTitle,
+    ]);
   } else {
     await page.getByText(/No widgets returned|ยังไม่มีวิดเจ็ต/i).first().waitFor({ timeout: 10000 });
   }
@@ -506,7 +557,7 @@ async function run() {
   }
 
   try {
-    await page.goto(`${BASE_URL}/admin`, { waitUntil: "domcontentloaded", timeout: 30000 });
+    await page.goto(buildAdminUrl("/admin/dashboard"), { waitUntil: "domcontentloaded", timeout: 30000 });
     await page.waitForURL("**/admin/dashboard*", { timeout: 10000 });
 
     await page.fill("#dashboard-login-email", credentials.email);
@@ -572,6 +623,7 @@ async function run() {
         {
           generatedAt: new Date().toISOString(),
           smokeMode: SMOKE_MODE,
+          locale: SMOKE_LOCALE,
           baseUrl: BASE_URL,
           viewport: {
             width: VIEWPORT_WIDTH,

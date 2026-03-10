@@ -97,12 +97,13 @@ describe("B14 admin dashboard page contract", () => {
     expect(copy).toContain("retry: \"Retry\"");
     expect(copy).toContain("retry: \"ลองใหม่\"");
     expect(copy).toContain('title: "Admin Health / QA Dashboard"');
-    expect(copy).toContain('subtitle: "ศูนย์ควบคุมสำหรับสุขภาพระบบ pipeline watchlist และ activity ล่าสุดของแอดมิน"');
-    expect(copy).toContain('trendTitle: "Activity metrics"');
+    expect(copy).toContain('title: "แดชบอร์ดสุขภาพระบบ / QA"');
+    expect(copy).toContain('subtitle: "ศูนย์ควบคุมสุขภาพระบบ ภาพรวมคิวงาน รายการเฝ้าระวัง และกิจกรรมล่าสุดของทีมแอดมิน"');
+    expect(copy).toContain('trendTitle: "แนวโน้มกิจกรรมของลีด"');
     expect(copy).toContain('trendHint: "Lead activity trend backed by backend-provided daily inquiry buckets."');
     expect(copy).toContain('insightsTitle: "Pipeline summary"');
-    expect(copy).toContain('insightsTitle: "Pipeline summary"');
-    expect(copy).toContain('watchlistTitle: "Watchlist"');
+    expect(copy).toContain('insightsTitle: "สรุปคิวงาน"');
+    expect(copy).toContain('watchlistTitle: "รายการเฝ้าระวัง"');
     expect(copy).toContain('backgroundTasksTitle: "Background tasks"');
     expect(copy).toContain('lastUpdated: "Last updated"');
     expect(copy).toContain('quickActions: "Quick actions"');

@@ -20,6 +20,8 @@ describe("admin dashboard kpi widgets", () => {
     expect(component).toContain("review_video_source_verification_pending");
     expect(component).toContain("last_import_mirror_status");
     expect(component).toContain("last_deploy_health_status");
+    expect(component).toContain("const widgetCopy");
+    expect(component).toContain("function localizeWidget(");
     expect(component).toContain("translationBreakdown");
     expect(component).toContain("homeComposer");
     expect(component).toContain("dashboard-kpi-pill-row");

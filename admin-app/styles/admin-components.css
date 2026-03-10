@@ -1428,6 +1428,15 @@
     border-color: rgba(240, 68, 56, 0.22);
   }
 
+  .dashboard-kpi-card .admin-card-shell__title {
+    line-height: 1.35;
+  }
+
+  .dashboard-kpi-card .locale-safe,
+  .dashboard-kpi-card .dashboard-kpi-secondary {
+    line-height: 1.55;
+  }
+
   .dashboard-widget-head,
   .dashboard-chart-stats,
   .dashboard-task-item__head,
@@ -1821,7 +1830,21 @@
 
   @media (min-width: 2800px) {
     .admin-root {
-      --admin-content-max: 3040px;
+      --admin-content-max: 3200px;
+    }
+
+    .dashboard-shell-grid {
+      grid-template-columns: minmax(0, 1.72fr) minmax(540px, 0.98fr);
+    }
+
+    .dashboard-zone--primary {
+      grid-template-columns: minmax(0, 1.5fr) minmax(420px, 0.94fr);
+    }
+  }
+
+  @media (min-width: 3400px) {
+    .admin-root {
+      --admin-content-max: 3360px;
     }
   }
 

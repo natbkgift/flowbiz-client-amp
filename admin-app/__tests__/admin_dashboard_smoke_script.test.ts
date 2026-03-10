@@ -14,19 +14,22 @@ describe("admin dashboard smoke script", () => {
     const script = read("scripts/run-admin-smoke-e2e.mjs");
 
     expect(script).toContain('const SMOKE_MODE = process.env.ADMIN_SMOKE_MODE === "live" ? "live" : "mocked";');
+    expect(script).toContain('const SMOKE_LOCALE = process.env.ADMIN_SMOKE_LOCALE === "th" ? "th" : "en";');
     expect(script).toContain('ADMIN_SMOKE_EMAIL');
     expect(script).toContain('ADMIN_SMOKE_PASSWORD');
     expect(script).toContain('smokeMode: SMOKE_MODE');
+    expect(script).toContain('locale: SMOKE_LOCALE');
     expect(script).toContain('healthSummaryStatuses');
     expect(script).toContain('recentInquiriesStatuses');
     expect(script).toContain('healthSummaryContract');
     expect(script).toContain('mockedRoutes:');
+    expect(script).toContain("function buildAdminUrl(routePath)");
+    expect(script).toContain("function getVisibleWidgetTitle(widgetKey, fallbackTitle)");
     expect(script).toContain("function buildDashboardSmokePayload()");
     expect(script).toContain("function buildInquiriesListPayload(pageNumber, limit = 10)");
     expect(script).toContain("function inspectDashboardSummary(payload)");
     expect(script).toContain("async function verifyDashboardUi(page, contractSummary, options = {})");
     expect(script).toContain('const { smokeMode = "mocked", getCurrentRecentInquiriesRequestCount = () => 0 } = options;');
-    expect(script).toContain('getByRole("heading", { name: /Logs|Recent leads\\/inquiries|ลีด\\/อินไควรีล่าสุด/i })');
     expect(script).toContain("const generatedDate = new Date();");
     expect(script).toContain("const baseTimestamp = generatedDate.getTime();");
     expect(script).toContain('title: "Recent leads / inquiries"');
@@ -34,9 +37,10 @@ describe("admin dashboard smoke script", () => {
     expect(script).toContain("trend_series:");
     expect(script).toContain('bucket_date:');
     expect(script).toContain('name: `Smoke Inquiry ${index + 1}`');
-    expect(script).toContain('warnings: ["Smoke warning check"]');
-    expect(script).toContain('getByRole("heading", { name: /System health \\/ QA overview|Health widgets|วิดเจ็ตสุขภาพระบบ/i })');
-    expect(script).toContain('getByRole("heading", { name: /Activity metrics|Lead activity trend|แนวโน้ม activity ของลีด/i })');
+    expect(script).toContain('warnings: ["Smoke warning check", "Translation policy sign-off still pending"]');
+    expect(script).toContain("System health \\/ QA overview|Health widgets|ภาพรวมสุขภาพระบบ|วิดเจ็ตสุขภาพระบบ");
+    expect(script).toContain("Activity metrics|Lead activity trend|แนวโน้มกิจกรรมของลีด|แนวโน้ม activity ของลีด");
+    expect(script).toContain("Logs|Recent leads\\/inquiries|บันทึกเหตุการณ์|ลีด\\/อินไควรีล่าสุด");
     expect(script).toContain("getByPlaceholder(");
     expect(script).toContain('page.locator(".dashboard-table-pagination").getByRole("button", { name: /Next|ถัดไป/i }).click()');
     expect(script).toContain('getCurrentRecentInquiriesRequestCount() <= requestsBeforePagination');
