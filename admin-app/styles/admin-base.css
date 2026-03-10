@@ -3,6 +3,7 @@
   background: var(--admin-bg-canvas);
   color: var(--admin-text-base);
   font-family: var(--admin-font-family);
+  overflow-x: clip;
 }
 
   .admin-root,

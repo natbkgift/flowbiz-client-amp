@@ -7,6 +7,8 @@ import { chromium } from "playwright";
 const BASE_URL = process.env.ADMIN_SMOKE_BASE_URL || "http://127.0.0.1:3000";
 const ARTIFACT_DIR = process.env.ADMIN_SMOKE_ARTIFACT_DIR || path.join(process.cwd(), "artifacts", "admin-smoke");
 const SMOKE_MODE = process.env.ADMIN_SMOKE_MODE === "live" ? "live" : "mocked";
+const VIEWPORT_WIDTH = Number.parseInt(process.env.ADMIN_SMOKE_VIEWPORT_WIDTH || "1366", 10) || 1366;
+const VIEWPORT_HEIGHT = Number.parseInt(process.env.ADMIN_SMOKE_VIEWPORT_HEIGHT || "900", 10) || 900;
 
 function parseLoginPayload(rawBody) {
   if (!rawBody) {
@@ -426,7 +428,7 @@ async function run() {
 
   const credentials = getSmokeCredentials();
   const browser = await chromium.launch({ headless: true, args: ["--disable-dev-shm-usage"] });
-  const context = await browser.newContext({ viewport: { width: 1366, height: 900 } });
+  const context = await browser.newContext({ viewport: { width: VIEWPORT_WIDTH, height: VIEWPORT_HEIGHT } });
   const page = await context.newPage();
 
   let loginRequests = 0;
@@ -571,6 +573,10 @@ async function run() {
           generatedAt: new Date().toISOString(),
           smokeMode: SMOKE_MODE,
           baseUrl: BASE_URL,
+          viewport: {
+            width: VIEWPORT_WIDTH,
+            height: VIEWPORT_HEIGHT,
+          },
           loginRequests,
           loginStatuses,
           healthSummaryRequests,
