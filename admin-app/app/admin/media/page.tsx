@@ -112,11 +112,39 @@ const copy = {
     galleryPayload: "Gallery payload JSON",
     runGallery: "Apply gallery",
     result: "Operation result",
+    sessionActive: "Session active",
+    operationErrorHint: "Unable to complete the requested media action right now.",
+    operationsDescription: "Run upload, CRUD, replacement, and gallery sync workflows from one shared control surface.",
+    uploadDescription: "Upload a new media asset and optionally attach title metadata before it enters the library.",
+    crudTitle: "Media record tools",
+    crudDescription: "Read, patch, archive, restore, or inspect how a media record is being used.",
+    replaceDescription: "Replace an existing media file while preserving the current record and references.",
+    galleryDescription: "Apply gallery payloads to property or project targets from the same workspace.",
+    mediaListDescription: "Recent media assets with approval, rights, status, and quick-select actions.",
+    property: "property",
+    project: "project",
+    path: "Path",
+    status: "Status",
+    approval: "Approval",
+    rights: "Rights",
+    updated: "Updated",
+    action: "Action",
+    select: "Select",
+    active: "Active",
+    archived: "Archived",
+    pending: "Pending",
+    approved: "Approved",
+    blocked: "Blocked",
+    rejected: "Rejected",
+    unknown: "Unknown",
+    ready: "Ready",
+    watch: "Watch",
+    live: "Live",
   },
   th: {
     eyebrow: "งานจัดการสื่อ",
     title: "จัดการสื่อ",
-    subtitle: "ดูแลอัปโหลด แก้ metadata archive/restore replace usage และ gallery sync ผ่านพื้นที่งานเดียว",
+    subtitle: "ดูแลงานอัปโหลด แก้ข้อมูลสื่อ เก็บเข้าคลัง กู้คืน แทนที่ไฟล์ ตรวจการใช้งาน และซิงก์แกลเลอรีในพื้นที่เดียว",
     loginTitle: "เข้าสู่ระบบแอดมิน",
     loginSubtitle: "ใช้บัญชีเดียวกับ /api/v1/auth/login",
     sessionTitle: "เซสชันแอดมิน",
@@ -149,7 +177,7 @@ const copy = {
     uploadFile: "ไฟล์อัปโหลด",
     uploadTitle: "ชื่อไฟล์/หัวข้อ (ถ้ามี)",
     mediaId: "รหัสสื่อ",
-    patchJson: "Patch JSON",
+    patchJson: "JSON สำหรับ patch",
     replaceFile: "ไฟล์ทดแทน",
     runPatch: "บันทึก patch",
     runGet: "ดูข้อมูลสื่อ",
@@ -160,9 +188,37 @@ const copy = {
     galleryOps: "ซิงก์แกลเลอรี",
     galleryTargetType: "ประเภทเป้าหมาย",
     galleryTargetId: "รหัสเป้าหมาย",
-    galleryPayload: "Gallery payload JSON",
+    galleryPayload: "JSON payload ของแกลเลอรี",
     runGallery: "อัปเดตแกลเลอรี",
     result: "ผลลัพธ์",
+    sessionActive: "เซสชันพร้อมใช้งาน",
+    operationErrorHint: "ไม่สามารถดำเนินการคำสั่งสื่อนี้ได้ในขณะนี้",
+    operationsDescription: "สั่งงานอัปโหลด แก้ข้อมูล แทนที่ไฟล์ และซิงก์แกลเลอรีจากพื้นที่ควบคุมเดียว",
+    uploadDescription: "อัปโหลดไฟล์สื่อใหม่ พร้อมใส่ชื่อหรือ metadata เบื้องต้นก่อนเข้าสู่คลังสื่อ",
+    crudTitle: "เครื่องมือจัดการรายการสื่อ",
+    crudDescription: "ดูข้อมูล แก้ patch เก็บเข้าคลัง กู้คืน และตรวจการใช้งานของรายการสื่อ",
+    replaceDescription: "แทนที่ไฟล์สื่อเดิมโดยคง record และการอ้างอิงเดิมไว้",
+    galleryDescription: "ส่ง payload แกลเลอรีไปยังทรัพย์หรือโครงการจากหน้าเดียวกัน",
+    mediaListDescription: "รายการสื่อล่าสุด พร้อมสถานะการอนุมัติ สิทธิ์ และปุ่มเลือกใช้งานทันที",
+    property: "ทรัพย์",
+    project: "โครงการ",
+    path: "พาธ",
+    status: "สถานะ",
+    approval: "การอนุมัติ",
+    rights: "สิทธิ์",
+    updated: "อัปเดตเมื่อ",
+    action: "การทำงาน",
+    select: "เลือก",
+    active: "ใช้งานอยู่",
+    archived: "เก็บเข้าคลัง",
+    pending: "รอตรวจสอบ",
+    approved: "อนุมัติแล้ว",
+    blocked: "ถูกบล็อก",
+    rejected: "ไม่อนุมัติ",
+    unknown: "ไม่ทราบ",
+    ready: "พร้อม",
+    watch: "เฝ้าระวัง",
+    live: "สด",
   },
 };
 
@@ -239,6 +295,20 @@ function toPrettyJson(value: unknown): string {
   } catch {
     return String(value);
   }
+}
+
+function translateMediaValue(value: string | null | undefined, t: (typeof copy)[Locale]): string {
+  const raw = String(value || "").trim();
+  if (!raw) return "-";
+  const normalized = raw.toLowerCase();
+  if (normalized === "active") return t.active;
+  if (normalized === "archived") return t.archived;
+  if (normalized === "pending") return t.pending;
+  if (normalized === "approved") return t.approved;
+  if (normalized === "blocked") return t.blocked;
+  if (normalized === "rejected") return t.rejected;
+  if (normalized === "unknown") return t.unknown;
+  return raw;
 }
 
 export default function AdminMediaPage() {
@@ -367,7 +437,7 @@ export default function AdminMediaPage() {
       setOpResult(toPrettyJson(result));
       await loadWorkspace();
     } catch (error) {
-      setOpError(error instanceof Error ? error.message : "operation_failed");
+      setOpError(formatWorkspaceErrorMessage(error, t.operationErrorHint));
     } finally {
       setOpBusy(false);
     }
@@ -384,7 +454,7 @@ export default function AdminMediaPage() {
       <AdminPageHeader title={t.title} description={t.subtitle} icon="media" eyebrow={t.eyebrow} />
 
       <ActionCard
-        className="dashboard-controls"
+        className="admin-workspace-panel admin-workspace-panel--auth dashboard-controls dashboard-controls--session"
         title={isAuthenticated ? (authEmail || t.sessionTitle) : t.loginTitle}
         description={isAuthenticated ? t.sessionDescription : t.loginSubtitle}
         icon={isAuthenticated ? "profile" : "media"}
@@ -428,14 +498,30 @@ export default function AdminMediaPage() {
           </form>
         ) : (
           <div className="crm-session-panel" role="status" aria-live="polite">
-            <div className="card-actions">
-              <AdminButton variant="secondary" icon="refresh" type="button" onClick={() => void loadWorkspace()}>
-                {loading ? t.loading : t.refresh}
-              </AdminButton>
-              <AdminButton variant="secondary" icon="x" type="button" onClick={logout}>
-                {t.signOut}
-              </AdminButton>
+            <div className="crm-session-panel__head">
+              <div className="crm-session-panel__copy">
+                <strong>{authEmail || t.sessionTitle}</strong>
+                <span>{t.sessionActive}</span>
+              </div>
+              <div className="crm-session-panel__quick-actions">
+                <AdminButton variant="secondary" icon="refresh" type="button" onClick={() => void loadWorkspace()}>
+                  {loading ? t.loading : t.refresh}
+                </AdminButton>
+                <AdminButton variant="secondary" icon="x" type="button" onClick={logout}>
+                  {t.signOut}
+                </AdminButton>
+              </div>
             </div>
+            <dl className="crm-session-panel__meta">
+              <div>
+                <dt>{t.mediaList}</dt>
+                <dd>{items.length}</dd>
+              </div>
+              <div>
+                <dt>{t.scannedAt}</dt>
+                <dd>{prettyDate(integrity?.scanned_at || null, locale)}</dd>
+              </div>
+            </dl>
           </div>
         )}
         {!isAuthenticated ? <div className="state-empty">{t.authRequired}</div> : null}
@@ -455,30 +541,39 @@ export default function AdminMediaPage() {
       {isAuthenticated ? (
         <>
           <section className="dashboard-grid" aria-label={t.integrity}>
-            <AdminStatCard label={t.broken} value={brokenCount} icon="warning" tone="warn" />
+            <AdminStatCard label={t.broken} value={brokenCount} badgeLabel={t.watch} icon="warning" tone="warn" />
             <AdminStatCard
               label={t.leakage}
               value={Number(integrity?.external_leakage_count || 0)}
+              badgeLabel={t.ready}
               icon="globe"
               tone="neutral"
             />
-            <AdminStatCard label={t.errors} value={Number(integrity?.error_count || 0)} icon="x" tone="error" />
+            <AdminStatCard
+              label={t.errors}
+              value={Number(integrity?.error_count || 0)}
+              badgeLabel={t.blocked}
+              icon="x"
+              tone="error"
+            />
             <AdminStatCard
               label={t.warnings}
               value={Number(integrity?.warn_count || 0)}
               detail={`${t.scannedAt}: ${prettyDate(integrity?.scanned_at || null, locale)}`}
+              badgeLabel={t.live}
               icon="info"
               tone="info"
             />
           </section>
 
           <AdminSectionCard
+            className="admin-workspace-panel admin-workspace-panel--actions"
             title={t.operations}
-            description="Run upload, CRUD, replace, and gallery sync workflows from a shared action surface."
+            description={t.operationsDescription}
             icon="media"
           >
             <div className="dashboard-grid">
-              <ActionCard title={t.upload} description="Upload a new media asset with optional title metadata." icon="plus">
+              <ActionCard title={t.upload} description={t.uploadDescription} icon="plus">
                 <label className="field" htmlFor="media-upload-file">
                   <span>{t.uploadFile}</span>
                   <input
@@ -516,7 +611,7 @@ export default function AdminMediaPage() {
                 </AdminButton>
               </ActionCard>
 
-              <ActionCard title="CRUD" description="Read, patch, archive, restore, and inspect media usage." icon="refresh">
+              <ActionCard title={t.crudTitle} description={t.crudDescription} icon="refresh">
                 <label className="field" htmlFor="media-id">
                   <span>{t.mediaId}</span>
                   <input
@@ -607,7 +702,7 @@ export default function AdminMediaPage() {
                 </div>
               </ActionCard>
 
-              <ActionCard title={t.runReplace} description="Replace an existing media file while preserving the record." icon="refresh">
+              <ActionCard title={t.runReplace} description={t.replaceDescription} icon="refresh">
                 <label className="field" htmlFor="media-replace-file">
                   <span>{t.replaceFile}</span>
                   <input
@@ -636,7 +731,7 @@ export default function AdminMediaPage() {
                 </AdminButton>
               </ActionCard>
 
-              <ActionCard title={t.galleryOps} description="Apply gallery payloads to property or project targets." icon="media">
+              <ActionCard title={t.galleryOps} description={t.galleryDescription} icon="media">
                 <label className="field" htmlFor="gallery-target-type">
                   <span>{t.galleryTargetType}</span>
                   <select
@@ -646,8 +741,8 @@ export default function AdminMediaPage() {
                       setGalleryTargetType(event.target.value === "project" ? "project" : "property")
                     }
                   >
-                    <option value="property">property</option>
-                    <option value="project">project</option>
+                    <option value="property">{t.property}</option>
+                    <option value="project">{t.project}</option>
                   </select>
                 </label>
                 <label className="field" htmlFor="gallery-target-id">
@@ -699,8 +794,10 @@ export default function AdminMediaPage() {
           </AdminSectionCard>
 
           <LogCard
+            className="admin-workspace-panel admin-workspace-panel--records"
+            bodyClassName="admin-workspace-log-body"
             title={t.mediaList}
-            description="Recent media assets with approval, rights, status, and quick select actions."
+            description={t.mediaListDescription}
             icon="table"
             titleTag="h2"
           >
@@ -711,25 +808,25 @@ export default function AdminMediaPage() {
                 <table className="dashboard-table">
                   <thead>
                     <tr>
-                      <th>Path</th>
-                      <th>Status</th>
-                      <th>Approval</th>
-                      <th>Rights</th>
-                      <th>Updated</th>
-                      <th>Action</th>
+                      <th>{t.path}</th>
+                      <th>{t.status}</th>
+                      <th>{t.approval}</th>
+                      <th>{t.rights}</th>
+                      <th>{t.updated}</th>
+                      <th>{t.action}</th>
                     </tr>
                   </thead>
                   <tbody>
                     {items.map((item) => (
                       <tr key={item.id}>
                         <td>{item.storage_path || "-"}</td>
-                        <td>{item.status || "-"}</td>
-                        <td>{item.approval_status || "-"}</td>
-                        <td>{item.rights_status || "-"}</td>
+                        <td>{translateMediaValue(item.status, t)}</td>
+                        <td>{translateMediaValue(item.approval_status, t)}</td>
+                        <td>{translateMediaValue(item.rights_status, t)}</td>
                         <td>{prettyDate(item.updated_at, locale)}</td>
                         <td>
                           <AdminButton variant="secondary" size="sm" icon="search" type="button" onClick={() => setMediaId(item.id)}>
-                            select
+                            {t.select}
                           </AdminButton>
                         </td>
                       </tr>

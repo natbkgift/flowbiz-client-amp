@@ -96,14 +96,35 @@ const copy = {
     empty: "No import records found yet.",
     filterStatus: "Status filter",
     filterDryRun: "Dry-run filter",
+    sessionActive: "Session active",
+    importRunDescription: "Upload a CSV, choose dry-run mode, and review the normalized import result before committing changes.",
+    importHistoryDescription: "Recent import executions with status, source file, row counts, and runtime.",
+    source: "Source",
+    created: "Created",
+    status: "Status",
+    file: "File",
+    rows: "Rows",
+    createdRows: "Created rows",
+    updatedRows: "Updated rows",
+    durationMs: "Duration (ms)",
+    success: "Success",
+    partial: "Partial",
+    failed: "Failed",
+    pending: "Pending",
+    unknown: "Unknown",
+    liveRun: "Live run",
+    dryRunValue: "Dry run",
+    live: "Live",
+    ready: "Ready",
+    stable: "Stable",
     all: "all",
-    true: "true",
-    false: "false",
+    true: "Dry run",
+    false: "Live run",
   },
   th: {
     eyebrow: "งานนำเข้าข้อมูล",
     title: "จัดการงานนำเข้า",
-    subtitle: "ดูแลการนำเข้าไฟล์ ประวัติการรัน และติดตามสถานะ mirror/deploy ผ่านหน้าปฏิบัติการเดียว",
+    subtitle: "ดูแลการนำเข้าไฟล์ ประวัติการรัน และติดตามสถานะมิเรอร์กับการเผยแพร่ผ่านหน้าปฏิบัติการเดียว",
     loginTitle: "เข้าสู่ระบบแอดมิน",
     loginSubtitle: "ใช้บัญชีเดียวกับ /api/v1/auth/login",
     sessionTitle: "เซสชันแอดมิน",
@@ -119,7 +140,7 @@ const copy = {
     loginMissing: "ต้องกรอกอีเมลและรหัสผ่าน",
     loginInvalid: "ข้อมูลเข้าสู่ระบบไม่ถูกต้อง",
     loginError: "ไม่สามารถเข้าสู่ระบบได้ในขณะนี้",
-    loadError: "ไม่สามารถโหลดข้อมูล import/mirror ได้",
+    loadError: "ไม่สามารถโหลดข้อมูลงานนำเข้าและสถานะมิเรอร์ได้",
     errorTitle: "ข้อผิดพลาดของพื้นที่งานนำเข้า",
     errorHint: "กรุณาลองใหม่ หากยังไม่สำเร็จให้ตรวจสอบ API และเซสชันการเข้าสู่ระบบ",
     retry: "ลองใหม่",
@@ -136,11 +157,34 @@ const copy = {
     empty: "ยังไม่มีรายการ import",
     filterStatus: "กรองสถานะ",
     filterDryRun: "กรอง dry-run",
+    sessionActive: "เซสชันพร้อมใช้งาน",
+    importRunDescription: "อัปโหลดไฟล์ CSV เลือกโหมด dry run และตรวจผลลัพธ์ที่ระบบแปลงก่อนสั่งนำเข้าจริง",
+    importHistoryDescription: "ประวัติการรันล่าสุด พร้อมสถานะ ไฟล์ จำนวนแถว และเวลาที่ใช้ในการประมวลผล",
+    source: "แหล่งที่มา",
+    created: "สร้างเมื่อ",
+    status: "สถานะ",
+    file: "ไฟล์",
+    rows: "จำนวนแถว",
+    createdRows: "แถวที่สร้าง",
+    updatedRows: "แถวที่อัปเดต",
+    durationMs: "เวลาที่ใช้ (ms)",
+    success: "สำเร็จ",
+    partial: "บางส่วน",
+    failed: "ล้มเหลว",
+    pending: "รอดำเนินการ",
+    unknown: "ไม่ทราบ",
+    liveRun: "รันจริง",
+    dryRunValue: "ทดลองรัน",
+    live: "สด",
+    ready: "พร้อม",
+    stable: "เสถียร",
     all: "ทั้งหมด",
-    true: "true",
-    false: "false",
+    true: "ทดลองรัน",
+    false: "รันจริง",
   },
 };
+
+type ImportCopy = typeof copy.en;
 
 function detectLocale(): Locale {
   return detectAdminLocale();
@@ -176,6 +220,18 @@ function toPrettyJson(value: unknown): string {
   } catch {
     return String(value);
   }
+}
+
+function translateImportStatus(value: string | null | undefined, t: ImportCopy): string {
+  const raw = String(value || "").trim();
+  if (!raw) return "-";
+  const normalized = raw.toLowerCase();
+  if (normalized === "success") return t.success;
+  if (normalized === "partial") return t.partial;
+  if (normalized === "failed") return t.failed;
+  if (normalized === "pending") return t.pending;
+  if (normalized === "unknown") return t.unknown;
+  return raw;
 }
 
 export default function AdminImportsPage() {
@@ -326,7 +382,7 @@ export default function AdminImportsPage() {
       <AdminPageHeader title={t.title} description={t.subtitle} icon="imports" eyebrow={t.eyebrow} />
 
       <ActionCard
-        className="dashboard-controls"
+        className="admin-workspace-panel admin-workspace-panel--auth dashboard-controls dashboard-controls--session"
         title={isAuthenticated ? (authEmail || t.sessionTitle) : t.loginTitle}
         description={isAuthenticated ? t.sessionDescription : t.loginSubtitle}
         icon={isAuthenticated ? "profile" : "imports"}
@@ -370,14 +426,30 @@ export default function AdminImportsPage() {
           </form>
         ) : (
           <div className="crm-session-panel" role="status" aria-live="polite">
-            <div className="card-actions">
-              <AdminButton variant="secondary" icon="refresh" type="button" onClick={() => void loadWorkspace()}>
-                {loading ? t.loading : t.refresh}
-              </AdminButton>
-              <AdminButton variant="secondary" icon="x" type="button" onClick={logout}>
-                {t.signOut}
-              </AdminButton>
+            <div className="crm-session-panel__head">
+              <div className="crm-session-panel__copy">
+                <strong>{authEmail || t.sessionTitle}</strong>
+                <span>{t.sessionActive}</span>
+              </div>
+              <div className="crm-session-panel__quick-actions">
+                <AdminButton variant="secondary" icon="refresh" type="button" onClick={() => void loadWorkspace()}>
+                  {loading ? t.loading : t.refresh}
+                </AdminButton>
+                <AdminButton variant="secondary" icon="x" type="button" onClick={logout}>
+                  {t.signOut}
+                </AdminButton>
+              </div>
             </div>
+            <dl className="crm-session-panel__meta">
+              <div>
+                <dt>{t.total}</dt>
+                <dd>{total}</dd>
+              </div>
+              <div>
+                <dt>{t.checkedAt}</dt>
+                <dd>{prettyDate(deployStatus?.deploy_checked_at || mirrorStatus?.checked_at, locale)}</dd>
+              </div>
+            </dl>
           </div>
         )}
         {!isAuthenticated ? <div className="state-empty">{t.authRequired}</div> : null}
@@ -399,24 +471,27 @@ export default function AdminImportsPage() {
           <section className="dashboard-grid">
             <AdminStatCard
               label={t.mirror}
-              value={mirrorStatus?.status || "-"}
+              value={translateImportStatus(mirrorStatus?.status, t)}
               detail={`${t.checkedAt}: ${prettyDate(mirrorStatus?.checked_at, locale)}`}
+              badgeLabel={t.live}
               icon="refresh"
               tone="info"
             />
             <AdminStatCard
               label={t.deploy}
-              value={deployStatus?.deploy_status || "-"}
-              detail={`${t.checkedAt}: ${prettyDate(deployStatus?.deploy_checked_at, locale)} · source: ${deployStatus?.source || "-"}`}
+              value={translateImportStatus(deployStatus?.deploy_status, t)}
+              detail={`${t.checkedAt}: ${prettyDate(deployStatus?.deploy_checked_at, locale)} · ${t.source}: ${deployStatus?.source || "-"}`}
+              badgeLabel={t.ready}
               icon="dashboard"
               tone="neutral"
             />
-            <AdminStatCard label={t.total} value={total} icon="imports" tone="ok" />
+            <AdminStatCard label={t.total} value={total} badgeLabel={t.stable} icon="imports" tone="ok" />
           </section>
 
           <ActionCard
+            className="admin-workspace-panel admin-workspace-panel--actions"
             title={t.importRun}
-            description="Upload a CSV, choose dry-run mode, and inspect the normalized import result."
+            description={t.importRunDescription}
             icon="imports"
             titleTag="h2"
           >
@@ -458,8 +533,10 @@ export default function AdminImportsPage() {
           </ActionCard>
 
           <LogCard
+            className="admin-workspace-panel admin-workspace-panel--records"
+            bodyClassName="admin-workspace-log-body"
             title={t.imports}
-            description="Recent import executions with status, file, row counts, and runtime."
+            description={t.importHistoryDescription}
             icon="table"
             titleTag="h2"
           >
@@ -493,20 +570,20 @@ export default function AdminImportsPage() {
                 <table className="dashboard-table">
                   <thead>
                     <tr>
-                      <th>Created</th>
-                      <th>Status</th>
-                      <th>File</th>
-                      <th>Rows</th>
-                      <th>Created rows</th>
-                      <th>Updated rows</th>
-                      <th>Duration (ms)</th>
+                      <th>{t.created}</th>
+                      <th>{t.status}</th>
+                      <th>{t.file}</th>
+                      <th>{t.rows}</th>
+                      <th>{t.createdRows}</th>
+                      <th>{t.updatedRows}</th>
+                      <th>{t.durationMs}</th>
                     </tr>
                   </thead>
                   <tbody>
                     {imports.map((row) => (
                       <tr key={row.id}>
                         <td>{prettyDate(row.created_at, locale)}</td>
-                        <td>{row.status || "-"}</td>
+                        <td>{translateImportStatus(row.status, t)}</td>
                         <td>{row.filename || "-"}</td>
                         <td>{row.rows_total}</td>
                         <td>{row.rows_created}</td>

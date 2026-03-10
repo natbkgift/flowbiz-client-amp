@@ -29,6 +29,8 @@ describe("B14 admin workspace pages contract", () => {
     expect(page).toContain("/usage");
     expect(page).toContain("/admin/media/projects/");
     expect(page).toContain("/admin/media/properties/");
+    expect(page).toContain("admin-workspace-panel admin-workspace-panel--actions");
+    expect(page).toContain("admin-workspace-panel admin-workspace-panel--records");
     expect(page).toContain("state-empty");
     expect(page).toContain("state-loading");
     expect(page).toContain("state-error");
@@ -45,6 +47,8 @@ describe("B14 admin workspace pages contract", () => {
     expect(page).toContain("/admin/properties/imports?");
     expect(page).toContain("/admin/properties/import?dry_run=");
     expect(page).toContain("/admin/dashboard/health-summary");
+    expect(page).toContain("admin-workspace-panel admin-workspace-panel--actions");
+    expect(page).toContain("admin-workspace-panel admin-workspace-panel--records");
     expect(page).toContain("state-empty");
     expect(page).toContain("state-loading");
     expect(page).toContain("state-error");
