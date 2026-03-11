@@ -276,7 +276,7 @@ function getCurrentAdminLocation(
 
 export function AdminShell({ children }: { children: ReactNode }) {
   const pathname = usePathname() || "";
-  const [locale, setLocale] = useState<AdminLocale>("en");
+  const [locale, setLocale] = useState<AdminLocale>(() => detectAdminLocale());
   const [searchQuery, setSearchQuery] = useState("");
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
   const deferredSearch = useDeferredValue(searchQuery.trim().toLowerCase());
