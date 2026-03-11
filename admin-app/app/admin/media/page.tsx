@@ -88,6 +88,7 @@ const copy = {
     integrity: "Integrity summary",
     mediaList: "Recent media assets",
     empty: "No media records found.",
+    emptyHint: "Refresh the workspace or upload a new file to repopulate the list.",
     scannedAt: "Scanned at",
     broken: "Broken media",
     leakage: "External leakage",
@@ -178,6 +179,7 @@ const copy = {
     integrity: "สรุปความสมบูรณ์ของสื่อ",
     mediaList: "รายการสื่อล่าสุด",
     empty: "ไม่พบรายการสื่อ",
+    emptyHint: "รีเฟรชพื้นที่งานหรืออัปโหลดไฟล์ใหม่เพื่อเติมรายการ",
     scannedAt: "เวลาสแกน",
     broken: "สื่อเสีย",
     leakage: "สื่อภายนอกที่รั่วเข้าระบบ",
@@ -872,7 +874,7 @@ export default function AdminMediaPage() {
             titleTag="h2"
           >
             {items.length === 0 ? (
-              <div className="state-empty">{t.empty}</div>
+              <div className="state-empty">{`${t.empty} ${t.emptyHint}`}</div>
             ) : (
               <AdminTable caption={t.mediaList}>
                 <table className="dashboard-table">

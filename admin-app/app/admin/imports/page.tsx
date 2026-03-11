@@ -94,6 +94,7 @@ const copy = {
     checkedAt: "Checked at",
     total: "Total",
     empty: "No import records found yet.",
+    emptyHint: "Run an import or relax the filters to load more history.",
     filterStatus: "Status filter",
     filterDryRun: "Dry-run filter",
     sessionActive: "Session active",
@@ -161,6 +162,7 @@ const copy = {
     checkedAt: "เวลาตรวจสอบ",
     total: "ทั้งหมด",
     empty: "ยังไม่มีรายการ import",
+    emptyHint: "เริ่มงานนำเข้าหรือผ่อนตัวกรองเพื่อดูประวัติเพิ่มเติม",
     filterStatus: "กรองสถานะ",
     filterDryRun: "กรอง dry-run",
     sessionActive: "เซสชันพร้อมใช้งาน",
@@ -598,7 +600,7 @@ export default function AdminImportsPage() {
               </label>
             </div>
             {imports.length === 0 ? (
-              <div className="state-empty">{t.empty}</div>
+              <div className="state-empty">{`${t.empty} ${t.emptyHint}`}</div>
             ) : (
               <AdminTable caption={t.imports}>
                 <table className="dashboard-table">

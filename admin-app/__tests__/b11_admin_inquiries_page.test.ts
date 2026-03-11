@@ -51,6 +51,8 @@ describe("B11 admin inquiries page contract", () => {
     expect(filters).toContain('onFilterChange("date_from"');
     expect(filters).toContain('onFilterChange("date_to"');
     expect(filters).toContain('onFilterChange("follow_up_status"');
+    expect(filters).toContain("filtersDescription");
+    expect(filters).toContain("searchPlaceholder");
     expect(utils).toContain('["pending", "scheduled", "completed", "no_response"]');
     expect(contactActions).toContain("selected.whatsapp_url");
     expect(contactActions).toContain("selected.phone_url");
@@ -85,6 +87,9 @@ describe("B11 admin inquiries page contract", () => {
     expect(page).toContain('<main id="main-content"');
     expect(page).toContain("<AdminPageHeader title={t.title}");
     expect(page).toContain('title={t.list}');
+    expect(page).toContain("t.listDescription");
+    expect(page).toContain("t.loadingHint");
+    expect(page).toContain("t.emptyHint");
     expect(page).toContain('title={t.details}');
     expect(page).toContain('className="crm-list"');
     expect(page).toContain('className="crm-detail"');
@@ -95,6 +100,8 @@ describe("B11 admin inquiries page contract", () => {
     expect(page).toContain("state-empty");
     expect(page).toContain("state-loading");
     expect(page).toContain("state-error");
+    expect(copy).toContain('filtersDescription: "Refine the active queue');
+    expect(copy).toContain('filtersDescription: "ปรับคิวงานที่กำลังดู');
     expect(copy).toContain('loginTitle: "Admin sign in"');
     expect(copy).toContain('loginTitle: "เข้าสู่ระบบแอดมิน"');
   });

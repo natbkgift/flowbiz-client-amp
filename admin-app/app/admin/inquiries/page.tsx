@@ -334,12 +334,12 @@ export default function AdminInquiriesPage() {
     <main id="main-content" className="container content-stack">
       <AdminPageHeader title={t.title} description={t.subtitle} icon="message" eyebrow="CRM" />
 
-      <ActionCard
+        <ActionCard
         className="crm-controls"
         title={isAuthenticated ? t.filters : t.loginTitle}
         description={
           isAuthenticated
-            ? "Filter, export, save presets, and switch between table and kanban lead views."
+            ? t.filtersDescription
             : t.loginSubtitle
         }
         icon="message"
@@ -407,7 +407,7 @@ export default function AdminInquiriesPage() {
           <LogCard
             className="crm-list"
             title={t.list}
-            description="Table and kanban views for active lead follow-up."
+            description={t.listDescription}
             icon="table"
             titleTag="h2"
             meta={
@@ -416,8 +416,8 @@ export default function AdminInquiriesPage() {
               </span>
             }
           >
-            {loading ? <div className="state-loading">{t.loading}</div> : null}
-            {!loading && items.length === 0 ? <div className="state-empty">{t.empty}</div> : null}
+            {loading ? <div className="state-loading">{`${t.loading} ${t.loadingHint}`}</div> : null}
+            {!loading && items.length === 0 ? <div className="state-empty">{`${t.empty} ${t.emptyHint}`}</div> : null}
             {!loading && items.length > 0 && viewMode === "table" ? (
               <InquiryListTable t={t} locale={locale} items={items} selectedId={selectedId} onSelect={loadDetails} />
             ) : null}

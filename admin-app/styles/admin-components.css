@@ -2493,6 +2493,13 @@
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 
+  .crm-filter-hint,
+  .crm-table-select-meta {
+    color: var(--admin-text-muted);
+    font-size: var(--admin-font-size-xs);
+    line-height: 1.45;
+  }
+
   .crm-search {
     grid-column: span 3;
   }
@@ -2547,12 +2554,22 @@
   }
 
   .crm-table-select {
+    display: grid;
+    gap: 2px;
     border: 0;
     padding: 0;
     background: transparent;
     cursor: pointer;
     text-align: left;
     font: inherit;
+  }
+
+  .crm-table thead th {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    background: rgba(248, 250, 252, 0.98);
+    backdrop-filter: blur(10px);
   }
 
   .crm-kanban {

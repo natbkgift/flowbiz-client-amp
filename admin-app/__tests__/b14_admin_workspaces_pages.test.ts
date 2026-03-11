@@ -40,6 +40,7 @@ describe("B14 admin workspace pages contract", () => {
     expect(page).toContain("invalidGalleryPayload");
     expect(page).toContain("archiveConfirm");
     expect(page).toContain("window.confirm");
+    expect(page).toContain("emptyHint");
   });
 
   it("imports workspace uses list + import run endpoints", () => {
@@ -61,6 +62,7 @@ describe("B14 admin workspace pages contract", () => {
     expect(page).toContain("state-success");
     expect(page).toContain("setImportNotice");
     expect(page).toContain("importResultHint");
+    expect(page).toContain("emptyHint");
   });
 
   it("domain workspace uses domain CRUD + publish APIs and dashboard summaries", () => {

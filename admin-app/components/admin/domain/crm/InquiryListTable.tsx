@@ -32,8 +32,16 @@ export function InquiryListTable({
           {items.map((item) => (
             <tr key={item.id} className={selectedId === item.id ? "is-active" : ""}>
               <td>
-                <button type="button" className="crm-table-select" onClick={() => void onSelect(item.id)}>
-                  {item.name}
+                <button
+                  type="button"
+                  className="crm-table-select"
+                  aria-pressed={selectedId === item.id}
+                  onClick={() => void onSelect(item.id)}
+                >
+                  <span>{item.name}</span>
+                  <small className="crm-table-select-meta">
+                    {[item.source, item.intent].filter(Boolean).join(" · ") || "-"}
+                  </small>
                 </button>
               </td>
               <td>{item.status}</td>
