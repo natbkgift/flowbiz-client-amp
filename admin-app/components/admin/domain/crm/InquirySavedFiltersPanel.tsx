@@ -27,6 +27,7 @@ export function InquirySavedFiltersPanel({
   return (
     <fieldset className="crm-filters-fieldset" disabled={!isAuthenticated}>
       <legend>{t.savedFilters}</legend>
+      <p className="crm-filter-hint">{t.savedFiltersHint}</p>
       <div className="crm-saved-filters">
         <label className="field" htmlFor="crm-save-filter-name">
           <span>{t.saveAs}</span>
@@ -49,9 +50,10 @@ export function InquirySavedFiltersPanel({
         <button className="btn btn-secondary" type="button" onClick={onLoadFilter} disabled={!activeSavedFilterId}>
           {t.loadFilter}
         </button>
-        <p className="crm-row-meta" role="status" aria-live="polite">
+        <p className="crm-row-meta crm-saved-filters__meta" role="status" aria-live="polite">
           {t.roleScope}: <strong>{role}</strong>
         </p>
+        {!savedFilters.length ? <p className="crm-row-meta crm-saved-filters__empty">{t.savedFiltersEmpty}</p> : null}
       </div>
     </fieldset>
   );

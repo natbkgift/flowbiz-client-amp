@@ -372,22 +372,26 @@ export default function AdminInquiriesPage() {
           onFilterChange={updateFilter}
         />
 
-        <div className="card-actions">
-          <button className="btn" type="button" onClick={() => void loadList()} disabled={!isAuthenticated}>
-            {loading ? t.loading : t.apply}
-          </button>
-          <button className="btn btn-secondary" type="button" onClick={() => void loadList()} disabled={!isAuthenticated}>
-            {t.reload}
-          </button>
-          <button className="btn btn-secondary" type="button" onClick={() => void exportCsv()} disabled={!isAuthenticated || loading}>
-            {t.exportCsv}
-          </button>
-          <button className="btn btn-secondary" type="button" onClick={() => setFilters(EMPTY_FILTERS)} disabled={!isAuthenticated || loading}>
-            {t.clear}
-          </button>
-        </div>
+        <div className="crm-controls-toolbar" role="group" aria-label={t.filters}>
+          <div className="card-actions crm-controls-toolbar__actions">
+            <button className="btn" type="button" onClick={() => void loadList()} disabled={!isAuthenticated}>
+              {loading ? t.loading : t.apply}
+            </button>
+            <button className="btn btn-secondary" type="button" onClick={() => void loadList()} disabled={!isAuthenticated}>
+              {t.reload}
+            </button>
+            <button className="btn btn-secondary" type="button" onClick={() => void exportCsv()} disabled={!isAuthenticated || loading}>
+              {t.exportCsv}
+            </button>
+            <button className="btn btn-secondary" type="button" onClick={() => setFilters(EMPTY_FILTERS)} disabled={!isAuthenticated || loading}>
+              {t.clear}
+            </button>
+          </div>
 
-        <InquiryViewToggle t={t} viewMode={viewMode} onViewModeChange={setViewMode} />
+          <div className="crm-controls-toolbar__views">
+            <InquiryViewToggle t={t} viewMode={viewMode} onViewModeChange={setViewMode} />
+          </div>
+        </div>
 
         <InquirySavedFiltersPanel
           t={t}
@@ -441,7 +445,7 @@ export default function AdminInquiriesPage() {
           <ActionCard
             className="crm-detail"
             title={t.details}
-            description="Selected inquiry metadata, contact actions, follow-up controls, and timeline."
+            description={t.detailsDescription}
             icon="message"
             titleTag="h2"
           >

@@ -82,6 +82,9 @@ describe("B11 admin inquiries page contract", () => {
     expect(page).toContain("saveCurrentFilter");
     expect(page).toContain("loadSavedFilter");
     expect(savedFilters).toContain('id="crm-saved-filter-select"');
+    expect(page).toContain('className="crm-controls-toolbar"');
+    expect(savedFilters).toContain("savedFiltersHint");
+    expect(savedFilters).toContain("savedFiltersEmpty");
   });
 
   it("keeps accessibility and runtime states in EN/TH copy", () => {
@@ -108,6 +111,8 @@ describe("B11 admin inquiries page contract", () => {
     expect(page).toContain("state-error");
     expect(copy).toContain('followUpSaved: "Follow-up updated."');
     expect(copy).toContain('followUpSaved: "บันทึกสถานะติดตามแล้ว"');
+    expect(copy).toContain('sessionHint: "Keep this session active');
+    expect(copy).toContain('sessionHint: "คงเซสชันนี้ไว้');
     expect(copy).toContain('filtersDescription: "Refine the active queue');
     expect(copy).toContain('filtersDescription: "ปรับคิวงานที่กำลังดู');
     expect(copy).toContain('loginTitle: "Admin sign in"');
