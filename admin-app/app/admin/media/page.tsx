@@ -343,7 +343,7 @@ function translateMediaValue(value: string | null | undefined, t: (typeof copy)[
 }
 
 export default function AdminMediaPage() {
-  const [locale, setLocale] = useState<Locale>("en");
+  const [locale, setLocale] = useState<Locale>(() => detectLocale());
   const [authToken, setAuthToken] = useState("");
   const [authEmail, setAuthEmail] = useState("");
   const [loginEmail, setLoginEmail] = useState("");

@@ -59,7 +59,7 @@ async function fetchJson<T>(path: string, token: string): Promise<T> {
 
 export default function AdminInquiriesPage() {
   const savedFilterCounter = useRef(0);
-  const [locale, setLocale] = useState<InquiryLocale>("en");
+  const [locale, setLocale] = useState<InquiryLocale>(() => detectLocale());
   const [loginEmail, setLoginEmail] = useState("");
   const [loginPassword, setLoginPassword] = useState("");
 

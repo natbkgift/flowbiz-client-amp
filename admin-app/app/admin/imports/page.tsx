@@ -267,7 +267,7 @@ function translateImportSource(value: string | null | undefined, t: ImportCopy):
 }
 
 export default function AdminImportsPage() {
-  const [locale, setLocale] = useState<Locale>("en");
+  const [locale, setLocale] = useState<Locale>(() => detectLocale());
   const [authToken, setAuthToken] = useState("");
   const [authEmail, setAuthEmail] = useState("");
   const [loginEmail, setLoginEmail] = useState("");

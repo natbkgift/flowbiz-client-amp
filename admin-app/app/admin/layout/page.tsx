@@ -126,7 +126,7 @@ function prettyDate(value: string | null, locale: Locale): string {
 }
 
 export default function AdminLayoutCmsPage() {
-  const [locale, setLocale] = useState<Locale>("en");
+  const [locale, setLocale] = useState<Locale>(() => detectLocale());
   const [token, setToken] = useState("");
   const [email, setEmail] = useState("");
   const [loginEmail, setLoginEmail] = useState("");

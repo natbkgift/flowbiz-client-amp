@@ -181,7 +181,7 @@ const CREATE_TEMPLATES: Record<EntityType, string> = {
 };
 
 export default function AdminDomainPage() {
-  const [locale, setLocale] = useState<Locale>("en");
+  const [locale, setLocale] = useState<Locale>(() => detectLocale());
   const [token, setToken] = useState("");
   const [email, setEmail] = useState("");
   const [loginEmail, setLoginEmail] = useState("");

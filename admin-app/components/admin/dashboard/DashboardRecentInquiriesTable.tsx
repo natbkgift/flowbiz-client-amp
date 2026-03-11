@@ -96,6 +96,32 @@ const copy = {
   },
 } as const;
 
+function translateInquiryStatus(value: string | null | undefined, locale: AdminLocale): string {
+  const normalized = String(value || "").trim().toLowerCase();
+  if (!normalized) return "-";
+  if (locale === "th") {
+    if (normalized === "new") return "ใหม่";
+    if (normalized === "contacted") return "ติดต่อแล้ว";
+    if (normalized === "qualified") return "ผ่านการคัดกรอง";
+    if (normalized === "closed") return "ปิดงานแล้ว";
+    if (normalized === "lost") return "ไม่สำเร็จ";
+  }
+  return normalized;
+}
+
+function translateInquiryIntent(value: string | null | undefined, locale: AdminLocale): string {
+  const normalized = String(value || "").trim().toLowerCase();
+  if (!normalized) return "-";
+  if (locale === "th") {
+    if (normalized === "general") return "ทั่วไป";
+    if (normalized === "buy") return "ซื้อ";
+    if (normalized === "rent") return "เช่า";
+    if (normalized === "sell") return "ขาย";
+    if (normalized === "invest") return "ลงทุน";
+  }
+  return normalized;
+}
+
 function prettyDate(value: string | null, locale: AdminLocale): string {
   if (!value) return "-";
   const date = new Date(value);
@@ -298,7 +324,7 @@ export function DashboardRecentInquiriesTable({
             <option value={ALL_STATUS_FILTER_VALUE}>{ui.statusAll}</option>
             {statusOptions.map((option) => (
               <option key={option} value={option}>
-                {option}
+                {translateInquiryStatus(option, locale)}
               </option>
             ))}
           </select>
@@ -384,10 +410,10 @@ export function DashboardRecentInquiriesTable({
                     <td>{row.email || row.phone || "-"}</td>
                     <td>
                       <AdminBadge tone="neutral" className="dashboard-table-chip">
-                        {row.status || "-"}
+                        {translateInquiryStatus(row.status, locale)}
                       </AdminBadge>
                     </td>
-                    <td>{row.intent || "-"}</td>
+                    <td>{translateInquiryIntent(row.intent, locale)}</td>
                     <td>{row.source_page || "-"}</td>
                   </tr>
                 ))}
@@ -404,7 +430,7 @@ export function DashboardRecentInquiriesTable({
                     <p>{prettyDate(row.created_at, locale)}</p>
                   </div>
                   <AdminBadge tone="neutral" className="dashboard-table-chip">
-                    {row.status || "-"}
+                    {translateInquiryStatus(row.status, locale)}
                   </AdminBadge>
                 </div>
 
@@ -415,7 +441,7 @@ export function DashboardRecentInquiriesTable({
                   </div>
                   <div>
                     <span>{ui.intent}</span>
-                    <strong>{row.intent || "-"}</strong>
+                    <strong>{translateInquiryIntent(row.intent, locale)}</strong>
                   </div>
                   <div>
                     <span>{ui.sourcePage}</span>

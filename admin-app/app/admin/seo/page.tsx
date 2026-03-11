@@ -258,7 +258,7 @@ async function api<T>(path: string, token: string, init?: RequestInit): Promise<
 }
 
 export default function AdminSeoPage() {
-  const [locale, setLocale] = useState<Locale>("en");
+  const [locale, setLocale] = useState<Locale>(() => detectLocale());
   const [token, setToken] = useState("");
   const [email, setEmail] = useState("");
   const [loginEmail, setLoginEmail] = useState("");

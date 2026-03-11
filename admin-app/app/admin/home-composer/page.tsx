@@ -588,7 +588,7 @@ export default function HomeComposerPage() {
   const [loginPassword, setLoginPassword] = useState('');
   const [authLoading, setAuthLoading] = useState(false);
   const [authError, setAuthError] = useState<string | null>(null);
-  const [locale, setLocale] = useState<LocaleCode>('en');
+  const [locale, setLocale] = useState<LocaleCode>(() => detectLocale());
   const [bundle, setBundle] = useState<ComposerBundle | null>(null);
   const [config, setConfig] = useState<HomeComposerConfig>(defaultConfig());
 
