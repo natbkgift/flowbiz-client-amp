@@ -99,6 +99,8 @@ const copy = {
     sessionActive: "Session active",
     importRunDescription: "Upload a CSV, choose dry-run mode, and review the normalized import result before committing changes.",
     importHistoryDescription: "Recent import executions with status, source file, row counts, and runtime.",
+    importSuccess: "Import request completed.",
+    dryRunSuccess: "Dry-run import completed.",
     source: "Source",
     created: "Created",
     status: "Status",
@@ -163,6 +165,8 @@ const copy = {
     sessionActive: "เซสชันพร้อมใช้งาน",
     importRunDescription: "อัปโหลดไฟล์ CSV เลือกโหมดทดลองรัน และตรวจผลลัพธ์ที่ระบบแปลงก่อนสั่งนำเข้าจริง",
     importHistoryDescription: "ประวัติการรันล่าสุด พร้อมสถานะ ไฟล์ จำนวนแถว และเวลาที่ใช้ในการประมวลผล",
+    importSuccess: "สั่งงานนำเข้าสำเร็จ",
+    dryRunSuccess: "ทดลองรันสำเร็จ",
     source: "แหล่งที่มา",
     created: "สร้างเมื่อ",
     status: "สถานะ",
@@ -276,6 +280,7 @@ export default function AdminImportsPage() {
   const [dryRun, setDryRun] = useState(false);
   const [importBusy, setImportBusy] = useState(false);
   const [importResult, setImportResult] = useState("");
+  const [importNotice, setImportNotice] = useState<string | null>(null);
   const [statusFilter, setStatusFilter] = useState("");
   const [dryRunFilter, setDryRunFilter] = useState("");
 
@@ -372,12 +377,14 @@ export default function AdminImportsPage() {
     setMirrorStatus(undefined);
     setDeployStatus(undefined);
     setImportResult("");
+    setImportNotice(null);
   }
 
   async function runImport() {
     if (!importFile || !authToken.trim()) return;
     setImportBusy(true);
     setPageError(null);
+    setImportNotice(null);
     try {
       const formData = new FormData();
       formData.set("file", importFile);
@@ -387,6 +394,8 @@ export default function AdminImportsPage() {
         { method: "POST", body: formData }
       );
       setImportResult(toPrettyJson(result));
+      setImportNotice(dryRun ? t.dryRunSuccess : t.importSuccess);
+      setImportFile(null);
       await loadWorkspace();
     } catch (error) {
       setPageError(formatWorkspaceErrorMessage(error, t.errorHint));
@@ -551,6 +560,7 @@ export default function AdminImportsPage() {
               <span>{t.importResult}</span>
               <textarea id="imports-result" rows={importResult ? 6 : 3} readOnly value={importResult} />
             </label>
+            {importNotice ? <div className="state-success">{importNotice}</div> : null}
           </ActionCard>
 
           <LogCard

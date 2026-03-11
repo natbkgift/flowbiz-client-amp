@@ -30,6 +30,8 @@ describe("admin home composer surface polish", () => {
 
     expect(page).toContain("const createDraft = useCallback(async");
     expect(page).toContain("const hasComposerBundle = Boolean(bundle);");
+    expect(page).toContain("const saveDisabled = saving || loading || Boolean(heroImageError);");
+    expect(page).toContain("const publishDisabled = publishing || loading || saving || !draftId || Boolean(heroImageError);");
     expect(page).toContain("if (!draftId) {");
     expect(page).toContain("savedDraft = await createDraft(locale, payloadConfig);");
     expect(page).not.toContain("if (!nextBundle.draft) {");

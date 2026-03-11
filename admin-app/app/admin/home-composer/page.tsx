@@ -1045,6 +1045,8 @@ export default function HomeComposerPage() {
 
   const sectionLabel = (section: SectionKey): string => SECTION_LABELS[section]?.[locale] ?? section;
   const pathKeyLabel = (key: string): string => PATH_KEY_LABELS[key]?.[locale] ?? key;
+  const saveDisabled = saving || loading || Boolean(heroImageError);
+  const publishDisabled = publishing || loading || saving || !draftId || Boolean(heroImageError);
 
   return (
     <AdminPage className="home-composer-stack">
@@ -1071,10 +1073,10 @@ export default function HomeComposerPage() {
                 <AdminButton type="button" variant="secondary" icon="refresh" onClick={() => void loadBundle(locale)} disabled={loading}>
                   {loading ? t.refreshing : t.refresh}
                 </AdminButton>
-                <AdminButton type="button" variant="primary" icon="plus" onClick={() => void handleSaveDraft()} disabled={saving || loading}>
+                <AdminButton type="button" variant="primary" icon="plus" onClick={() => void handleSaveDraft()} disabled={saveDisabled}>
                   {saving ? t.saving : t.saveDraft}
                 </AdminButton>
-                <AdminButton type="button" variant="secondary" icon="upload" onClick={() => void handlePublish()} disabled={publishing || loading}>
+                <AdminButton type="button" variant="secondary" icon="upload" onClick={() => void handlePublish()} disabled={publishDisabled}>
                   {publishing ? t.publishing : t.publish}
                 </AdminButton>
                 <AdminButton type="button" variant="secondary" icon="x" onClick={logout}>

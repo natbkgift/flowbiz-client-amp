@@ -114,6 +114,16 @@ const copy = {
     result: "Operation result",
     sessionActive: "Session active",
     operationErrorHint: "Unable to complete the requested media action right now.",
+    invalidPatchJson: "Patch JSON must be valid JSON.",
+    invalidGalleryPayload: "Gallery payload must be valid JSON.",
+    getSuccess: "Media record loaded.",
+    uploadSuccess: "Upload completed.",
+    patchSuccess: "Media record updated.",
+    archiveSuccess: "Media record archived.",
+    restoreSuccess: "Media record restored.",
+    usageSuccess: "Usage details loaded.",
+    replaceSuccess: "File replacement completed.",
+    gallerySuccess: "Gallery updated.",
     operationsDescription: "Run upload, record management, replacement, and gallery sync workflows from one shared control surface.",
     uploadDescription: "Upload a new media asset and optionally attach title metadata before it enters the library.",
     crudTitle: "Media record tools",
@@ -193,6 +203,16 @@ const copy = {
     result: "ผลลัพธ์",
     sessionActive: "เซสชันพร้อมใช้งาน",
     operationErrorHint: "ไม่สามารถดำเนินการคำสั่งสื่อนี้ได้ในขณะนี้",
+    invalidPatchJson: "JSON สำหรับ patch ต้องอยู่ในรูปแบบที่ถูกต้อง",
+    invalidGalleryPayload: "JSON ของแกลเลอรีต้องอยู่ในรูปแบบที่ถูกต้อง",
+    getSuccess: "โหลดข้อมูลรายการสื่อแล้ว",
+    uploadSuccess: "อัปโหลดสำเร็จ",
+    patchSuccess: "อัปเดตรายการสื่อแล้ว",
+    archiveSuccess: "เก็บรายการสื่อเข้าคลังแล้ว",
+    restoreSuccess: "กู้คืนรายการสื่อแล้ว",
+    usageSuccess: "โหลดข้อมูลการใช้งานแล้ว",
+    replaceSuccess: "แทนที่ไฟล์สำเร็จ",
+    gallerySuccess: "อัปเดตแกลเลอรีแล้ว",
     operationsDescription: "สั่งงานอัปโหลด จัดการเรคอร์ด แทนที่ไฟล์ และซิงก์แกลเลอรีจากแผงควบคุมเดียว",
     uploadDescription: "อัปโหลดไฟล์สื่อใหม่ พร้อมใส่ชื่อหรือเมทาดาทาเบื้องต้นก่อนเข้าสู่คลังสื่อ",
     crudTitle: "เครื่องมือจัดการรายการสื่อ",
@@ -330,6 +350,7 @@ export default function AdminMediaPage() {
 
   const [opBusy, setOpBusy] = useState(false);
   const [opError, setOpError] = useState<string | null>(null);
+  const [opNotice, setOpNotice] = useState<string | null>(null);
   const [opResult, setOpResult] = useState<string>("");
   const [uploadFile, setUploadFile] = useState<File | null>(null);
   const [uploadTitle, setUploadTitle] = useState("");
@@ -429,15 +450,32 @@ export default function AdminMediaPage() {
     setIntegrity(null);
     setItems([]);
     setOpError(null);
+    setOpNotice(null);
     setOpResult("");
   }
 
-  async function runAction(action: () => Promise<unknown>) {
+  function parseJsonObject(value: string, invalidMessage: string): Record<string, unknown> | null {
+    try {
+      const parsed = JSON.parse(value) as unknown;
+      if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) {
+        throw new Error("invalid_json_shape");
+      }
+      return parsed as Record<string, unknown>;
+    } catch {
+      setOpError(invalidMessage);
+      return null;
+    }
+  }
+
+  async function runAction(action: () => Promise<unknown>, options?: { successMessage?: string; onSuccess?: () => void }) {
     setOpBusy(true);
     setOpError(null);
+    setOpNotice(null);
     try {
       const result = await action();
       setOpResult(toPrettyJson(result));
+      if (options?.successMessage) setOpNotice(options.successMessage);
+      options?.onSuccess?.();
       await loadWorkspace();
     } catch (error) {
       setOpError(formatWorkspaceErrorMessage(error, t.operationErrorHint));
@@ -607,6 +645,12 @@ export default function AdminMediaPage() {
                         method: "POST",
                         body: formData,
                       });
+                    }, {
+                      successMessage: t.uploadSuccess,
+                      onSuccess: () => {
+                        setUploadFile(null);
+                        setUploadTitle("");
+                      },
                     })
                   }
                 >
@@ -639,7 +683,9 @@ export default function AdminMediaPage() {
                     type="button"
                     disabled={opBusy || !mediaId.trim()}
                     onClick={() =>
-                      void runAction(() => fetchJson(`/admin/media/${mediaId.trim()}`, authToken))
+                      void runAction(() => fetchJson(`/admin/media/${mediaId.trim()}`, authToken), {
+                        successMessage: t.getSuccess,
+                      })
                     }
                   >
                     {t.runGet}
@@ -649,15 +695,19 @@ export default function AdminMediaPage() {
                     icon="refresh"
                     type="button"
                     disabled={opBusy || !mediaId.trim()}
-                    onClick={() =>
-                      void runAction(() =>
-                        fetchJson(`/admin/media/${mediaId.trim()}`, authToken, {
-                          method: "PATCH",
-                          body: patchJson,
-                          headers: { "content-type": "application/json" },
-                        })
-                      )
-                    }
+                    onClick={() => {
+                      const parsedPatch = parseJsonObject(patchJson, t.invalidPatchJson);
+                      if (!parsedPatch) return;
+                      void runAction(
+                        () =>
+                          fetchJson(`/admin/media/${mediaId.trim()}`, authToken, {
+                            method: "PATCH",
+                            body: JSON.stringify(parsedPatch),
+                            headers: { "content-type": "application/json" },
+                          }),
+                        { successMessage: t.patchSuccess },
+                      );
+                    }}
                   >
                     {t.runPatch}
                   </AdminButton>
@@ -670,7 +720,7 @@ export default function AdminMediaPage() {
                       void runAction(() =>
                         fetchJson(`/admin/media/${mediaId.trim()}/archive?block_if_used=false`, authToken, {
                           method: "POST",
-                        })
+                        }), { successMessage: t.archiveSuccess }
                       )
                     }
                   >
@@ -685,7 +735,7 @@ export default function AdminMediaPage() {
                       void runAction(() =>
                         fetchJson(`/admin/media/${mediaId.trim()}/restore`, authToken, {
                           method: "POST",
-                        })
+                        }), { successMessage: t.restoreSuccess }
                       )
                     }
                   >
@@ -697,7 +747,9 @@ export default function AdminMediaPage() {
                     type="button"
                     disabled={opBusy || !mediaId.trim()}
                     onClick={() =>
-                      void runAction(() => fetchJson(`/admin/media/${mediaId.trim()}/usage`, authToken))
+                      void runAction(() => fetchJson(`/admin/media/${mediaId.trim()}/usage`, authToken), {
+                        successMessage: t.usageSuccess,
+                      })
                     }
                   >
                     {t.runUsage}
@@ -727,6 +779,11 @@ export default function AdminMediaPage() {
                         method: "POST",
                         body: formData,
                       });
+                    }, {
+                      successMessage: t.replaceSuccess,
+                      onSuccess: () => {
+                        setReplaceFile(null);
+                      },
                     })
                   }
                 >
@@ -770,9 +827,10 @@ export default function AdminMediaPage() {
                   icon="media"
                   type="button"
                   disabled={opBusy || !galleryTargetId.trim()}
-                  onClick={() =>
+                  onClick={() => {
+                    const payload = parseJsonObject(galleryPayload, t.invalidGalleryPayload);
+                    if (!payload) return;
                     void runAction(() => {
-                      const payload = JSON.parse(galleryPayload) as Record<string, unknown>;
                       const base =
                         galleryTargetType === "project"
                           ? `/admin/media/projects/${galleryTargetId.trim()}/gallery`
@@ -781,8 +839,8 @@ export default function AdminMediaPage() {
                         method: "PUT",
                         body: JSON.stringify(payload),
                       });
-                    })
-                  }
+                    }, { successMessage: t.gallerySuccess });
+                  }}
                 >
                   {t.runGallery}
                 </AdminButton>
@@ -790,6 +848,7 @@ export default function AdminMediaPage() {
             </div>
 
             {opError ? <div className="state-error">{opError}</div> : null}
+            {opNotice ? <div className="state-success">{opNotice}</div> : null}
             <label className="field admin-workspace-result-field" htmlFor="media-op-result">
               <span>{t.result}</span>
               <textarea id="media-op-result" rows={opResult ? 8 : 3} value={opResult} readOnly />
