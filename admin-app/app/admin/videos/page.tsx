@@ -1,4 +1,5 @@
 import { AdminJsonCrudWorkspace } from "@/components/admin/AdminJsonCrudWorkspace";
+import { detectAdminLocale } from "@/app/_lib/admin-i18n";
 
 const VIDEO_CREATE_TEMPLATE = JSON.stringify(
   {
@@ -27,12 +28,17 @@ const VIDEO_PATCH_TEMPLATE = JSON.stringify(
 );
 
 export default function AdminVideosCmsPage() {
+  const locale = detectAdminLocale();
+  const isThai = locale === "th";
+
   return (
     <AdminJsonCrudWorkspace
       config={{
-        title: "Videos CMS",
-        subtitle: "Manage video content via /admin/content/videos APIs.",
-        identifierLabel: "Video slug",
+        title: isThai ? "จัดการวิดีโอ" : "Videos CMS",
+        subtitle: isThai
+          ? "จัดการคอนเทนต์วิดีโอผ่าน /admin/content/videos พร้อม workflow เผยแพร่ในหน้าเดียว"
+          : "Manage video content via /admin/content/videos APIs.",
+        identifierLabel: isThai ? "Slug ของวิดีโอ" : "Video slug",
         identifierPlaceholder: "sample-video-entry",
         identifierField: "slug",
         listPath: "/admin/content/videos",
@@ -45,7 +51,7 @@ export default function AdminVideosCmsPage() {
         defaultListQuery: "limit=40",
         defaultCreatePayload: VIDEO_CREATE_TEMPLATE,
         defaultPatchPayload: VIDEO_PATCH_TEMPLATE,
-        queryHelp: "Supported: status, page, limit",
+        queryHelp: isThai ? "รองรับ query: status, page, limit" : "Supported: status, page, limit",
       }}
     />
   );
