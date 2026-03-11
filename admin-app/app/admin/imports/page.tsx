@@ -99,10 +99,13 @@ const copy = {
     filterDryRun: "Dry-run filter",
     sessionActive: "Session active",
     importRunDescription: "Upload a CSV, choose dry-run mode, and review the normalized import result before committing changes.",
+    importSelectionHint: "Keep one file ready, choose dry-run when validating mappings, then review the response before the live run.",
     importHistoryDescription: "Recent import executions with status, source file, row counts, and runtime.",
     importSuccess: "Import request completed.",
     dryRunSuccess: "Dry-run import completed.",
     importResultHint: "Review the response payload before running the next import.",
+    selectedFile: "Selected file",
+    selectedMode: "Run mode",
     source: "Source",
     created: "Created",
     status: "Status",
@@ -167,10 +170,13 @@ const copy = {
     filterDryRun: "กรอง dry-run",
     sessionActive: "เซสชันพร้อมใช้งาน",
     importRunDescription: "อัปโหลดไฟล์ CSV เลือกโหมดทดลองรัน และตรวจผลลัพธ์ที่ระบบแปลงก่อนสั่งนำเข้าจริง",
+    importSelectionHint: "เตรียมไฟล์ไว้หนึ่งชุด เลือกโหมดทดลองรันเมื่อต้องตรวจ mapping แล้วค่อยดูผลลัพธ์ก่อนสั่งรันจริง",
     importHistoryDescription: "ประวัติการรันล่าสุด พร้อมสถานะ ไฟล์ จำนวนแถว และเวลาที่ใช้ในการประมวลผล",
     importSuccess: "สั่งงานนำเข้าสำเร็จ",
     dryRunSuccess: "ทดลองรันสำเร็จ",
     importResultHint: "ตรวจผลลัพธ์นี้ก่อนเริ่มการนำเข้ารอบถัดไป",
+    selectedFile: "ไฟล์ที่เลือก",
+    selectedMode: "โหมดที่กำลังใช้",
     source: "แหล่งที่มา",
     created: "สร้างเมื่อ",
     status: "สถานะ",
@@ -560,12 +566,23 @@ export default function AdminImportsPage() {
                 </AdminButton>
               </div>
             </div>
-            <label className="field admin-workspace-result-field" htmlFor="imports-result">
-              <span>{t.importResult}</span>
-              <textarea id="imports-result" rows={importResult ? 6 : 3} readOnly value={importResult} />
-            </label>
-            {importResult ? <p className="admin-input__hint">{t.importResultHint}</p> : null}
-            {importNotice ? <div className="state-success">{importNotice}</div> : null}
+            <div className="admin-workspace-inline-meta" role="status" aria-live="polite">
+              <span>
+                {t.selectedFile}: <strong>{importFile?.name || "-"}</strong>
+              </span>
+              <span>
+                {t.selectedMode}: <strong>{dryRun ? t.dryRunValue : t.liveRun}</strong>
+              </span>
+            </div>
+            <p className="admin-input__hint">{t.importSelectionHint}</p>
+            <div className="admin-workspace-result-stack">
+              <label className="field admin-workspace-result-field" htmlFor="imports-result">
+                <span>{t.importResult}</span>
+                <textarea id="imports-result" rows={importResult ? 5 : 2} readOnly value={importResult} />
+              </label>
+              <p className="admin-input__hint">{t.importResultHint}</p>
+              {importNotice ? <div className="state-success">{importNotice}</div> : null}
+            </div>
           </ActionCard>
 
           <LogCard

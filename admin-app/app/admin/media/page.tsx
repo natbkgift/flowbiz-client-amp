@@ -115,6 +115,8 @@ const copy = {
     result: "Operation result",
     sessionActive: "Session active",
     operationErrorHint: "Unable to complete the requested media action right now.",
+    operationResultHint: "Review the response payload before moving on to the next media action.",
+    selectionHint: "Pick a record, run one action at a time, and verify the result before continuing with archive, replace, or gallery sync.",
     invalidPatchJson: "Patch JSON must be valid JSON.",
     invalidGalleryPayload: "Gallery payload must be valid JSON.",
     getSuccess: "Media record loaded.",
@@ -206,6 +208,8 @@ const copy = {
     result: "ผลลัพธ์",
     sessionActive: "เซสชันพร้อมใช้งาน",
     operationErrorHint: "ไม่สามารถดำเนินการคำสั่งสื่อนี้ได้ในขณะนี้",
+    operationResultHint: "ตรวจผลลัพธ์นี้ก่อนเริ่มคำสั่งถัดไปกับรายการสื่อ",
+    selectionHint: "เลือกรายการให้ชัด สั่งงานทีละอย่าง แล้วตรวจผลลัพธ์ก่อนทำ archive แทนที่ไฟล์ หรือซิงก์แกลเลอรีต่อ",
     invalidPatchJson: "JSON สำหรับ patch ต้องอยู่ในรูปแบบที่ถูกต้อง",
     invalidGalleryPayload: "JSON ของแกลเลอรีต้องอยู่ในรูปแบบที่ถูกต้อง",
     getSuccess: "โหลดข้อมูลรายการสื่อแล้ว",
@@ -622,6 +626,7 @@ export default function AdminMediaPage() {
             description={t.operationsDescription}
             icon="media"
           >
+            <p className="admin-input__hint">{t.selectionHint}</p>
             <div className="admin-workspace-action-grid admin-workspace-action-grid--media">
               <ActionCard title={t.upload} description={t.uploadDescription} icon="plus">
                 <label className="field" htmlFor="media-upload-file">
@@ -857,12 +862,15 @@ export default function AdminMediaPage() {
               </ActionCard>
             </div>
 
-            {opError ? <div className="state-error">{opError}</div> : null}
-            {opNotice ? <div className="state-success">{opNotice}</div> : null}
-            <label className="field admin-workspace-result-field" htmlFor="media-op-result">
-              <span>{t.result}</span>
-              <textarea id="media-op-result" rows={opResult ? 8 : 3} value={opResult} readOnly />
-            </label>
+            <div className="admin-workspace-result-stack">
+              {opError ? <div className="state-error">{opError}</div> : null}
+              {opNotice ? <div className="state-success">{opNotice}</div> : null}
+              <label className="field admin-workspace-result-field" htmlFor="media-op-result">
+                <span>{t.result}</span>
+                <textarea id="media-op-result" rows={opResult ? 6 : 2} value={opResult} readOnly />
+              </label>
+              <p className="admin-input__hint">{t.operationResultHint}</p>
+            </div>
           </AdminSectionCard>
 
           <LogCard

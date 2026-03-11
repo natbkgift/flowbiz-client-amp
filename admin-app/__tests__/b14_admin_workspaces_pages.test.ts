@@ -38,6 +38,8 @@ describe("B14 admin workspace pages contract", () => {
     expect(page).toContain("parseJsonObject(");
     expect(page).toContain("invalidPatchJson");
     expect(page).toContain("invalidGalleryPayload");
+    expect(page).toContain("operationResultHint");
+    expect(page).toContain("selectionHint");
     expect(page).toContain("archiveConfirm");
     expect(page).toContain("window.confirm");
     expect(page).toContain("emptyHint");
@@ -62,6 +64,9 @@ describe("B14 admin workspace pages contract", () => {
     expect(page).toContain("state-success");
     expect(page).toContain("setImportNotice");
     expect(page).toContain("importResultHint");
+    expect(page).toContain("importSelectionHint");
+    expect(page).toContain("selectedFile");
+    expect(page).toContain("selectedMode");
     expect(page).toContain("emptyHint");
   });
 

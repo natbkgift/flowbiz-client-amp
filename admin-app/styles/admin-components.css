@@ -2941,6 +2941,29 @@
     justify-content: flex-start;
   }
 
+  .admin-workspace-inline-meta,
+  .admin-workspace-result-stack {
+    display: grid;
+    gap: var(--admin-space-2);
+  }
+
+  .admin-workspace-inline-meta {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    margin-top: calc(var(--admin-space-2) * -1);
+    color: var(--admin-text-muted);
+    font-size: var(--admin-font-size-xs);
+  }
+
+  .admin-workspace-inline-meta span {
+    min-width: 0;
+  }
+
+  .admin-workspace-result-stack .admin-input__hint,
+  .admin-workspace-result-stack .state-success,
+  .admin-workspace-result-stack .state-error {
+    margin: 0;
+  }
+
   .admin-workspace-toggle-field {
     display: flex;
     align-items: center;
@@ -2978,6 +3001,11 @@
 
   .admin-workspace-panel--media-actions .admin-workspace-action-grid--media {
     gap: var(--admin-space-4);
+  }
+
+  .admin-workspace-panel--imports-run .admin-workspace-result-field textarea,
+  .admin-workspace-panel--media-actions .admin-workspace-result-field textarea {
+    min-height: 0;
   }
 
   .home-composer-section-order .home-composer-list-item {
@@ -3258,6 +3286,10 @@
   }
 
   @media (max-width: 900px) {
+    .admin-workspace-inline-meta {
+      grid-template-columns: minmax(0, 1fr);
+    }
+
     .crm-controls-toolbar,
     .crm-saved-filters,
     .crm-filters {
