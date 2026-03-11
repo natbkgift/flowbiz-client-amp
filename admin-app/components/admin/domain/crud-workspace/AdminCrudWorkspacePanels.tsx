@@ -1,5 +1,6 @@
 import { type FormEvent, type KeyboardEvent } from "react";
 
+import { detectAdminLocale } from "@/app/_lib/admin-i18n";
 import { toPrettyJson } from "@/app/_lib/admin-auth";
 import { AdminDataTable, type AdminDataTableColumn } from "@/components/admin/AdminDataTable";
 import {
@@ -23,6 +24,14 @@ import { nestedText } from "@/components/admin/domain/crud-workspace/workspace-u
 // Translation completeness
 // Bulk actions
 // title="Preview"
+
+function getCrudPanelsLocale() {
+  return detectAdminLocale();
+}
+
+function localizeCrudPanelsText(en: string, th: string) {
+  return getCrudPanelsLocale() === "th" ? th : en;
+}
 
 function LocalizedPrimitiveFields({
   idBase,
@@ -264,6 +273,7 @@ export function AdminCrudWorkspaceQueryPanel({
   onListQueryChange: (value: string) => void;
   onLoadList: () => void | Promise<void>;
 }) {
+  const queryPlaceholder = localizeCrudPanelsText("page=1&limit=20", "page=1&limit=20");
   return (
     <AdminSectionCard
       className="admin-workspace-panel admin-workspace-panel--query"
@@ -273,7 +283,7 @@ export function AdminCrudWorkspaceQueryPanel({
     >
       <label className="field" htmlFor={`${idBase}-query`}>
         <span>{copy.listQueryLabel}</span>
-        <input id={`${idBase}-query`} value={listQuery} onChange={(event) => onListQueryChange(event.target.value)} placeholder="page=1&limit=20" />
+        <input id={`${idBase}-query`} value={listQuery} onChange={(event) => onListQueryChange(event.target.value)} placeholder={queryPlaceholder} />
       </label>
       <div className="card-actions">
         <AdminButton variant="secondary" icon="refresh" type="button" onClick={() => void onLoadList()}>
@@ -547,6 +557,16 @@ export function AdminCrudWorkspaceBulkActionsPanel({
   onRunBulkAction: (actionKey: string) => void | Promise<void>;
 }) {
   if (bulkActions.length === 0) return null;
+  const fallbackBulkDescription = localizeCrudPanelsText(
+    "Apply this action to one or more selected record IDs.",
+    "ใช้คำสั่งนี้กับรหัสรายการที่เลือกอย่างน้อยหนึ่งรายการ"
+  );
+  const fallbackBulkIdsLabel = localizeCrudPanelsText(
+    "Property IDs (comma/space/newline separated)",
+    "รหัสรายการ คั่นด้วยจุลภาค เว้นวรรค หรือขึ้นบรรทัดใหม่"
+  );
+  const fallbackBulkIdsPlaceholder = localizeCrudPanelsText("uuid-1, uuid-2", "uuid-1, uuid-2");
+  const runBulkActionLabel = localizeCrudPanelsText("Run", "รัน");
 
   return (
     <AdminSectionCard
@@ -561,7 +581,7 @@ export function AdminCrudWorkspaceBulkActionsPanel({
             key={action.key}
             className="admin-workspace-bulk-card"
             title={action.title}
-            description={action.description || "Apply this action to one or more selected record IDs."}
+            description={action.description || fallbackBulkDescription}
             icon="spark"
             meta={
               <AdminBadge tone="info" icon="table">
@@ -570,12 +590,12 @@ export function AdminCrudWorkspaceBulkActionsPanel({
             }
           >
             <label className="field" htmlFor={`${idBase}-bulk-ids-${action.key}`}>
-              <span>{action.idLabel || "Property IDs (comma/space/newline separated)"}</span>
+              <span>{action.idLabel || fallbackBulkIdsLabel}</span>
               <textarea
                 id={`${idBase}-bulk-ids-${action.key}`}
                 rows={3}
                 value={bulkTargetIdsByAction[action.key] || ""}
-                placeholder={action.idPlaceholder || "uuid-1, uuid-2"}
+                placeholder={action.idPlaceholder || fallbackBulkIdsPlaceholder}
                 onChange={(event) => onBulkTargetIdsChange(action.key, event.target.value)}
               />
             </label>
@@ -592,7 +612,7 @@ export function AdminCrudWorkspaceBulkActionsPanel({
             ))}
             <div className="card-actions">
               <AdminButton variant="secondary" icon="spark" type="button" onClick={() => void onRunBulkAction(action.key)}>
-                Run {action.title}
+                {runBulkActionLabel} {action.title}
               </AdminButton>
             </div>
           </ActionCard>
