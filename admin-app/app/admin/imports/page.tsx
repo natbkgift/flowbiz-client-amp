@@ -526,7 +526,7 @@ export default function AdminImportsPage() {
                   onChange={(event) => setImportFile(event.target.files?.[0] || null)}
                 />
               </label>
-              <label className="field" htmlFor="imports-dryrun">
+              <label className="field admin-workspace-toggle-field" htmlFor="imports-dryrun">
                 <span>{t.dryRun}</span>
                 <input
                   id="imports-dryrun"
@@ -535,7 +535,7 @@ export default function AdminImportsPage() {
                   onChange={(event) => setDryRun(event.target.checked)}
                 />
               </label>
-              <div className="card-actions">
+              <div className="card-actions admin-workspace-inline-actions">
                 <AdminButton
                   variant="primary"
                   icon="imports"
@@ -549,7 +549,7 @@ export default function AdminImportsPage() {
             </div>
             <label className="field admin-workspace-result-field" htmlFor="imports-result">
               <span>{t.importResult}</span>
-              <textarea id="imports-result" rows={importResult ? 8 : 4} readOnly value={importResult} />
+              <textarea id="imports-result" rows={importResult ? 6 : 3} readOnly value={importResult} />
             </label>
           </ActionCard>
 
@@ -561,7 +561,7 @@ export default function AdminImportsPage() {
             icon="table"
             titleTag="h2"
           >
-            <div className="dashboard-grid">
+            <div className="dashboard-grid admin-workspace-filter-grid admin-workspace-filter-grid--imports">
               <label className="field" htmlFor="imports-filter-status">
                 <span>{t.filterStatus}</span>
                 <input

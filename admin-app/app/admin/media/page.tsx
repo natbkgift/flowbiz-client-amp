@@ -627,7 +627,7 @@ export default function AdminMediaPage() {
                   <span>{t.patchJson}</span>
                   <textarea
                     id="media-patch-json"
-                    rows={6}
+                    rows={5}
                     value={patchJson}
                     onChange={(event) => setPatchJson(event.target.value)}
                   />
@@ -760,7 +760,7 @@ export default function AdminMediaPage() {
                   <span>{t.galleryPayload}</span>
                   <textarea
                     id="gallery-payload"
-                    rows={6}
+                    rows={5}
                     value={galleryPayload}
                     onChange={(event) => setGalleryPayload(event.target.value)}
                   />
@@ -792,7 +792,7 @@ export default function AdminMediaPage() {
             {opError ? <div className="state-error">{opError}</div> : null}
             <label className="field admin-workspace-result-field" htmlFor="media-op-result">
               <span>{t.result}</span>
-              <textarea id="media-op-result" rows={opResult ? 10 : 4} value={opResult} readOnly />
+              <textarea id="media-op-result" rows={opResult ? 8 : 3} value={opResult} readOnly />
             </label>
           </AdminSectionCard>
 

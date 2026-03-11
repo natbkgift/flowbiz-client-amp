@@ -210,6 +210,7 @@ function renderNavGroup(
         <ul>
           {items.map((item) => {
             const active = isActiveAdminNav(pathname, item.href);
+            const showDescription = active || searchTerm.length > 0;
             const label = getAdminNavText(item.label, locale);
             const description = getAdminNavText(item.description, locale);
             const resolvedHref = resolveNavHref(item.href, locale);
@@ -220,7 +221,7 @@ function renderNavGroup(
                 <span className="admin-shell-nav-link-icon" aria-hidden="true">
                   <AdminIcon name={item.icon} size={16} />
                 </span>
-                <span className="admin-shell-nav-link-copy">
+                <span className={showDescription ? "admin-shell-nav-link-copy has-description" : "admin-shell-nav-link-copy"}>
                   <strong>{renderHighlightedText(label, searchTerm)}</strong>
                   <small>{renderHighlightedText(description, searchTerm)}</small>
                 </span>

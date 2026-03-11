@@ -62,7 +62,7 @@
     isolation: isolate;
     display: grid;
     grid-template-rows: auto auto 1fr;
-    gap: var(--admin-space-5);
+    gap: var(--admin-space-4);
     min-height: 100vh;
     height: auto;
     overflow: visible;
@@ -160,7 +160,8 @@
   }
 
   .admin-shell-sidebar-meta {
-    padding: 18px;
+    gap: 2px;
+    padding: 12px 14px;
     border: 1px solid rgba(191, 219, 254, 0.72);
     border-radius: calc(var(--admin-radius-lg) + 2px);
     background:
@@ -169,6 +170,10 @@
     box-shadow:
       var(--admin-shadow-xs),
       inset 0 1px 0 rgba(255, 255, 255, 0.88);
+  }
+
+  .admin-shell-sidebar-meta span {
+    display: none;
   }
 
   .admin-shell-brand-copy small,
@@ -229,7 +234,7 @@
   .admin-root .admin-shell-search input[type="search"] {
     width: 100%;
     min-height: 44px;
-    padding-inline-start: 46px;
+    padding-inline-start: 48px;
     padding-inline-end: 14px;
     background: rgba(255, 255, 255, 0.86);
   }
@@ -244,7 +249,7 @@
 
   .admin-shell-sidebar-scroll {
     display: grid;
-    gap: var(--admin-space-4);
+    gap: var(--admin-space-3);
     align-content: start;
     min-height: auto;
     overflow: visible;
@@ -252,7 +257,12 @@
   }
 
   .admin-shell-sidebar-scroll .admin-shell-search {
-    padding-inline: var(--admin-space-2);
+    gap: 6px;
+    padding-inline: 0;
+  }
+
+  .admin-shell-search--sidebar small {
+    display: none;
   }
 
   .admin-shell-nav-section {
@@ -266,7 +276,7 @@
 
   .admin-shell-nav-section h2 {
     margin: 0;
-    padding: 0 var(--admin-space-3);
+    padding: 0 var(--admin-space-2);
     color: var(--admin-text-soft);
     font-size: var(--admin-font-size-xs);
     font-weight: var(--admin-font-weight-semibold);
@@ -277,7 +287,7 @@
   .admin-shell-nav-section ul,
   .home-composer-meta-list {
     display: grid;
-    gap: var(--admin-space-2);
+    gap: var(--admin-space-1);
     list-style: none;
     margin: 0;
     padding: 0;
@@ -287,10 +297,10 @@
   .admin-shell-drawer-link {
     display: grid;
     grid-template-columns: auto auto minmax(0, 1fr) auto;
-    gap: var(--admin-space-3);
+    gap: var(--admin-space-2);
     align-items: center;
-    min-height: 48px;
-    padding: 12px 14px 12px 10px;
+    min-height: 44px;
+    padding: 10px 12px 10px 10px;
     border: 1px solid rgba(226, 232, 240, 0.58);
     border-radius: 16px;
     color: var(--admin-text-base);
@@ -321,7 +331,20 @@
   }
 
   .admin-shell-nav-link-copy small {
-    line-height: 1.5;
+    max-height: 0;
+    opacity: 0;
+    overflow: hidden;
+    line-height: 1.4;
+    transition:
+      max-height var(--admin-duration-fast) var(--admin-ease-standard),
+      opacity var(--admin-duration-fast) var(--admin-ease-standard);
+  }
+
+  .admin-shell-nav-link-copy.has-description small,
+  .admin-shell-nav-link:hover .admin-shell-nav-link-copy small,
+  .admin-shell-nav-link.is-active .admin-shell-nav-link-copy small {
+    max-height: 2.8em;
+    opacity: 1;
   }
 
   .admin-shell-nav-match {
@@ -529,9 +552,9 @@
   .admin-shell-topbar-tools {
     display: grid;
     grid-template-columns: minmax(340px, 1.08fr) minmax(440px, 0.92fr);
-    gap: var(--admin-space-4);
+    gap: var(--admin-space-3);
     align-items: start;
-    padding: var(--admin-space-3) var(--admin-space-4);
+    padding: var(--admin-space-3);
     border: 1px solid rgba(226, 232, 240, 0.84);
     border-radius: 18px;
     background:
@@ -548,7 +571,7 @@
 
   .admin-shell-topbar-utilities {
     display: grid;
-    grid-template-columns: minmax(220px, auto) minmax(320px, 1fr);
+    grid-template-columns: minmax(200px, auto) minmax(300px, 1fr);
     gap: var(--admin-space-3);
     align-items: start;
     min-width: 0;
@@ -2083,7 +2106,7 @@
   }
 
   .admin-workspace-result-field textarea {
-    min-height: 148px;
+    min-height: 112px;
     resize: vertical;
   }
 
@@ -2810,21 +2833,68 @@
   }
 
   .admin-workspace-form-grid--imports {
-    grid-template-columns: minmax(260px, 1.2fr) minmax(140px, 0.48fr) auto;
+    grid-template-columns: minmax(260px, 1.3fr) minmax(110px, auto) auto;
     align-items: end;
-    gap: var(--admin-space-4);
+    gap: var(--admin-space-3);
+  }
+
+  .admin-workspace-form-grid--imports .field,
+  .admin-workspace-filter-grid .field,
+  .admin-workspace-panel--media-actions .field {
+    gap: var(--admin-space-1);
   }
 
   .admin-workspace-form-grid--imports .card-actions {
     justify-content: flex-end;
   }
 
+  .admin-workspace-filter-grid {
+    grid-template-columns: repeat(2, minmax(0, 240px));
+    gap: var(--admin-space-3);
+    align-items: end;
+  }
+
+  .admin-workspace-inline-actions {
+    justify-content: flex-start;
+  }
+
+  .admin-workspace-toggle-field {
+    display: flex;
+    align-items: center;
+    gap: var(--admin-space-2);
+    padding-bottom: 2px;
+  }
+
+  .admin-workspace-toggle-field > span:first-child {
+    order: 1;
+  }
+
+  .admin-workspace-toggle-field > input[type="checkbox"] {
+    order: 0;
+    width: 18px;
+    height: 18px;
+    margin: 0;
+  }
+
   .admin-workspace-panel--media-actions .admin-section-card__body {
     gap: var(--admin-space-3);
   }
 
+  .admin-workspace-panel--imports-run .admin-card-shell__body,
+  .admin-workspace-panel--media-actions .admin-card-shell__body {
+    gap: var(--admin-space-3);
+  }
+
+  .admin-workspace-panel--media-actions .admin-card-shell {
+    min-height: auto;
+  }
+
   .admin-workspace-panel--media-actions .admin-workspace-action-grid--media > .admin-card-shell {
     min-height: 100%;
+  }
+
+  .admin-workspace-panel--media-actions .admin-workspace-action-grid--media {
+    gap: var(--admin-space-4);
   }
 
   .home-composer-section-order .home-composer-list-item {
@@ -2833,6 +2903,10 @@
   }
 
   @media (min-width: 1440px) {
+    .admin-workspace-action-grid--media {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
     .home-composer-section-order {
       grid-template-columns: repeat(2, minmax(0, 1fr));
     }
@@ -3065,6 +3139,7 @@
     .admin-workspace-editor-grid,
     .admin-workspace-output-grid,
     .admin-preview-grid,
+    .admin-workspace-filter-grid,
     .admin-workspace-form-grid--imports,
     .crm-layout,
     .dashboard-controls--auth .admin-section-card__body,
