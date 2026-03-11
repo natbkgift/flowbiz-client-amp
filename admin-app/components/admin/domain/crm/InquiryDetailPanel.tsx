@@ -3,12 +3,13 @@ import { InquiryContactActions } from "@/components/admin/domain/crm/InquiryCont
 import { InquiryFollowUpPanel } from "@/components/admin/domain/crm/InquiryFollowUpPanel";
 import { InquiryTimelinePanel } from "@/components/admin/domain/crm/InquiryTimelinePanel";
 import type { InquiryItem, InquiryLocale, TimelineEvent } from "@/components/admin/domain/crm/inquiries-types";
-import { prettyDate } from "@/components/admin/domain/crm/inquiries-utils";
+import { prettyDate, translateFollowUpStatus, translateInquiryStatus } from "@/components/admin/domain/crm/inquiries-utils";
 
 export function InquiryDetailPanel({
   t,
   locale,
   selected,
+  detailLoading,
   followUpStatus,
   followUpDueAt,
   savingFollowUp,
@@ -23,6 +24,7 @@ export function InquiryDetailPanel({
   t: InquiryCopy;
   locale: InquiryLocale;
   selected: InquiryItem | null;
+  detailLoading: boolean;
   followUpStatus: string;
   followUpDueAt: string;
   savingFollowUp: boolean;
@@ -35,7 +37,7 @@ export function InquiryDetailPanel({
   onSaveFollowUp: () => void | Promise<void>;
 }) {
   if (!selected) {
-    return <div className="state-empty">{t.noDetails}</div>;
+    return detailLoading ? <div className="state-loading">{t.loadingDetails}</div> : <div className="state-empty">{t.noDetails}</div>;
   }
 
   return (
@@ -50,10 +52,10 @@ export function InquiryDetailPanel({
           <strong>{t.intent}:</strong> {selected.purpose || "-"}
         </p>
         <p>
-          <strong>{t.status}:</strong> {selected.status}
+          <strong>{t.status}:</strong> {translateInquiryStatus(selected.status, locale)}
         </p>
         <p>
-          <strong>{t.followUp}:</strong> {selected.follow_up_status || "-"}
+          <strong>{t.followUp}:</strong> {translateFollowUpStatus(selected.follow_up_status, locale)}
         </p>
         <p>
           <strong>{t.followUpDueAt}:</strong> {prettyDate(selected.follow_up_due_at, locale)}
@@ -67,11 +69,13 @@ export function InquiryDetailPanel({
       </div>
 
       <InquiryContactActions t={t} selected={selected} />
-        <InquiryFollowUpPanel
+      <InquiryFollowUpPanel
         t={t}
+        locale={locale}
         followUpStatus={followUpStatus}
         followUpDueAt={followUpDueAt}
         savingFollowUp={savingFollowUp}
+        detailLoading={detailLoading}
         followUpError={followUpError}
         followUpNotice={followUpNotice}
         onFollowUpStatusChange={onFollowUpStatusChange}

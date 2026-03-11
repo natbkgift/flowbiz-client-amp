@@ -1,19 +1,21 @@
 import { AdminTable } from "@/components/admin/AdminPrimitives";
 import type { InquiryCopy } from "@/components/admin/domain/crm/inquiries-copy";
 import type { InquiryItem, InquiryLocale } from "@/components/admin/domain/crm/inquiries-types";
-import { dueClass, prettyDate } from "@/components/admin/domain/crm/inquiries-utils";
+import { dueClass, prettyDate, translateFollowUpStatus, translateInquiryStatus } from "@/components/admin/domain/crm/inquiries-utils";
 
 export function InquiryListTable({
   t,
   locale,
   items,
   selectedId,
+  movingInquiryId,
   onSelect,
 }: {
   t: InquiryCopy;
   locale: InquiryLocale;
   items: InquiryItem[];
   selectedId: string | null;
+  movingInquiryId: string | null;
   onSelect: (id: string) => void | Promise<void>;
 }) {
   return (
@@ -36,18 +38,19 @@ export function InquiryListTable({
                   type="button"
                   className="crm-table-select"
                   aria-pressed={selectedId === item.id}
+                  disabled={movingInquiryId === item.id}
                   onClick={() => void onSelect(item.id)}
                 >
                   <span>{item.name}</span>
                   <small className="crm-table-select-meta">
-                    {[item.source, item.intent].filter(Boolean).join(" · ") || "-"}
+                    {[item.source_page, item.intent].filter(Boolean).join(" · ") || "-"}
                   </small>
                 </button>
               </td>
-              <td>{item.status}</td>
+              <td>{translateInquiryStatus(item.status, locale)}</td>
               <td>
                 <span className={`crm-chip ${item.follow_up_status ? "crm-chip-sla" : "crm-chip-muted"}`}>
-                  {item.follow_up_status || "-"}
+                  {translateFollowUpStatus(item.follow_up_status, locale)}
                 </span>
               </td>
               <td>

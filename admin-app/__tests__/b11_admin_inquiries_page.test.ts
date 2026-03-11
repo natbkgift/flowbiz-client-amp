@@ -55,6 +55,8 @@ describe("B11 admin inquiries page contract", () => {
     expect(filters).toContain("filtersDescription");
     expect(filters).toContain("searchPlaceholder");
     expect(utils).toContain('["pending", "scheduled", "completed", "no_response"]');
+    expect(utils).toContain("translateFollowUpStatus");
+    expect(utils).toContain("translateInquiryStatus");
     expect(contactActions).toContain("selected.whatsapp_url");
     expect(contactActions).toContain("selected.phone_url");
     expect(contactActions).toContain("selected.email_url");
@@ -81,6 +83,8 @@ describe("B11 admin inquiries page contract", () => {
     expect(utils).toContain("readRoleFromToken");
     expect(page).toContain("saveCurrentFilter");
     expect(page).toContain("loadSavedFilter");
+    expect(page).toContain('const [detailLoading, setDetailLoading] = useState(false)');
+    expect(page).toContain('const [movingInquiryId, setMovingInquiryId] = useState<string | null>(null)');
     expect(savedFilters).toContain('id="crm-saved-filter-select"');
     expect(page).toContain('className="crm-controls-toolbar"');
     expect(savedFilters).toContain("savedFiltersHint");
@@ -90,6 +94,8 @@ describe("B11 admin inquiries page contract", () => {
   it("keeps accessibility and runtime states in EN/TH copy", () => {
     const page = read("app/admin/inquiries/page.tsx");
     const controlCenter = read("components/admin/domain/crm/InquiryControlCenter.tsx");
+    const detail = read("components/admin/domain/crm/InquiryDetailPanel.tsx");
+    const followUp = read("components/admin/domain/crm/InquiryFollowUpPanel.tsx");
     const copy = read("components/admin/domain/crm/inquiries-copy.ts");
 
     expect(page).toContain('<main id="main-content"');
@@ -97,11 +103,15 @@ describe("B11 admin inquiries page contract", () => {
     expect(page).toContain('title={t.list}');
     expect(page).toContain("t.listDescription");
     expect(page).toContain("t.loadingHint");
+    expect(page).toContain("t.movingStatus");
     expect(page).toContain("t.emptyHint");
     expect(page).toContain('title={t.details}');
     expect(page).toContain('className="crm-list"');
     expect(page).toContain('className="crm-detail"');
     expect(page).toContain("followUpNotice");
+    expect(detail).toContain("detailLoading");
+    expect(detail).toContain("t.loadingDetails");
+    expect(followUp).toContain("detailLoading");
     expect(controlCenter).toContain('htmlFor="crm-login-email"');
     expect(controlCenter).toContain('htmlFor="crm-login-password"');
     expect(controlCenter).toContain('autoComplete="username"');

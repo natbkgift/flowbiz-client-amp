@@ -69,6 +69,8 @@ export default function AdminInquiriesPage() {
   const [total, setTotal] = useState(0);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [selected, setSelected] = useState<InquiryItem | null>(null);
+  const [detailLoading, setDetailLoading] = useState(false);
+  const [movingInquiryId, setMovingInquiryId] = useState<string | null>(null);
   const [timeline, setTimeline] = useState<TimelineEvent[]>([]);
   const [timelineError, setTimelineError] = useState<string | null>(null);
   const [savingFollowUp, setSavingFollowUp] = useState(false);
@@ -173,6 +175,7 @@ export default function AdminInquiriesPage() {
     }
 
     setSelectedId(id);
+    setDetailLoading(true);
     setTimelineError(null);
     setFollowUpNotice(null);
     try {
@@ -186,6 +189,8 @@ export default function AdminInquiriesPage() {
       setTimeline(timelineBody.data);
     } catch {
       setTimelineError(t.loadTimelineError);
+    } finally {
+      setDetailLoading(false);
     }
   }
 
@@ -264,6 +269,7 @@ export default function AdminInquiriesPage() {
     }
     const current = items.find((item) => item.id === inquiryId);
     if (!current || current.status === nextStatus) return;
+    setMovingInquiryId(inquiryId);
     try {
       const response = await fetch(`/admin/inquiries/${inquiryId}`, {
         method: "PATCH",
@@ -279,6 +285,8 @@ export default function AdminInquiriesPage() {
       setSelected((prev) => (prev && prev.id === body.id ? body : prev));
     } catch {
       setError(t.moveStatusError);
+    } finally {
+      setMovingInquiryId(null);
     }
   }
 
@@ -374,16 +382,16 @@ export default function AdminInquiriesPage() {
 
         <div className="crm-controls-toolbar" role="group" aria-label={t.filters}>
           <div className="card-actions crm-controls-toolbar__actions">
-            <button className="btn" type="button" onClick={() => void loadList()} disabled={!isAuthenticated}>
+            <button className="btn" type="button" onClick={() => void loadList()} disabled={!isAuthenticated || detailLoading || Boolean(movingInquiryId)}>
               {loading ? t.loading : t.apply}
             </button>
-            <button className="btn btn-secondary" type="button" onClick={() => void loadList()} disabled={!isAuthenticated}>
+            <button className="btn btn-secondary" type="button" onClick={() => void loadList()} disabled={!isAuthenticated || detailLoading || Boolean(movingInquiryId)}>
               {t.reload}
             </button>
             <button className="btn btn-secondary" type="button" onClick={() => void exportCsv()} disabled={!isAuthenticated || loading}>
               {t.exportCsv}
             </button>
-            <button className="btn btn-secondary" type="button" onClick={() => setFilters(EMPTY_FILTERS)} disabled={!isAuthenticated || loading}>
+            <button className="btn btn-secondary" type="button" onClick={() => setFilters(EMPTY_FILTERS)} disabled={!isAuthenticated || loading || detailLoading || Boolean(movingInquiryId)}>
               {t.clear}
             </button>
           </div>
@@ -426,9 +434,10 @@ export default function AdminInquiriesPage() {
             }
           >
             {loading ? <div className="state-loading">{`${t.loading} ${t.loadingHint}`}</div> : null}
+            {!loading && movingInquiryId ? <div className="state-loading">{t.movingStatus}</div> : null}
             {!loading && items.length === 0 ? <div className="state-empty">{`${t.empty} ${t.emptyHint}`}</div> : null}
             {!loading && items.length > 0 && viewMode === "table" ? (
-              <InquiryListTable t={t} locale={locale} items={items} selectedId={selectedId} onSelect={loadDetails} />
+              <InquiryListTable t={t} locale={locale} items={items} selectedId={selectedId} movingInquiryId={movingInquiryId} onSelect={loadDetails} />
             ) : null}
             {!loading && items.length > 0 && viewMode === "kanban" ? (
               <InquiryKanbanBoard
@@ -436,6 +445,7 @@ export default function AdminInquiriesPage() {
                 locale={locale}
                 items={items}
                 selectedId={selectedId}
+                movingInquiryId={movingInquiryId}
                 onSelect={loadDetails}
                 onMoveStatus={moveInquiryStatus}
               />
@@ -453,6 +463,7 @@ export default function AdminInquiriesPage() {
               t={t}
               locale={locale}
               selected={selected}
+              detailLoading={detailLoading}
               followUpStatus={followUpStatus}
               followUpDueAt={followUpDueAt}
               savingFollowUp={savingFollowUp}
