@@ -209,6 +209,9 @@ const HOME_COMPOSER_COPY = {
     saveDraftError: 'Unable to save draft',
     publishError: 'Unable to publish',
     publishConfirm: 'Publish the current draft now? This will update the live home page for the selected locale.',
+    unsavedChanges: 'Unsaved changes',
+    unsavedChangesDescription: 'Review and save the current draft before switching locale, refreshing, or leaving this editor.',
+    unsavedLeaveConfirm: 'You have unsaved changes in the current draft. Continue and discard them?',
     heroImageLocalOnlyError: 'Hero image must use local media only.',
     rightsUnknown: 'unknown',
     approvalUnknown: 'unknown',
@@ -324,6 +327,9 @@ const HOME_COMPOSER_COPY = {
     saveDraftError: 'ไม่สามารถบันทึกร่างได้',
     publishError: 'ไม่สามารถเผยแพร่ได้',
     publishConfirm: 'ต้องการเผยแพร่ร่างปัจจุบันตอนนี้หรือไม่ ระบบจะอัปเดตหน้าแรกที่ใช้งานจริงตามภาษาที่เลือก',
+    unsavedChanges: 'มีการแก้ไขที่ยังไม่บันทึก',
+    unsavedChangesDescription: 'ควรตรวจและบันทึกร่างปัจจุบันก่อนสลับภาษา รีเฟรช หรือออกจากหน้าแก้ไขนี้',
+    unsavedLeaveConfirm: 'มีการแก้ไขที่ยังไม่บันทึกในร่างปัจจุบัน ต้องการออกต่อและทิ้งการแก้ไขหรือไม่',
     heroImageLocalOnlyError: 'ภาพฮีโร่ต้องใช้ไฟล์สื่อภายในระบบเท่านั้น',
     rightsUnknown: 'ไม่ทราบสถานะ',
     approvalUnknown: 'ไม่ทราบการอนุมัติ',
@@ -609,6 +615,12 @@ export default function HomeComposerPage() {
   const isAuthenticated = authToken.trim().length > 0;
   const t: HomeComposerCopy = HOME_COMPOSER_COPY[locale];
   const hasComposerBundle = Boolean(bundle);
+  const savedDraftConfigSnapshot = useMemo(
+    () => JSON.stringify(normalizeConfig((bundle?.draft?.config ?? defaultConfig()) as Record<string, unknown>)),
+    [bundle?.draft?.config],
+  );
+  const currentConfigSnapshot = useMemo(() => JSON.stringify(config), [config]);
+  const hasUnsavedChanges = Boolean(draftId) && savedDraftConfigSnapshot !== currentConfigSnapshot;
 
   const selectedProjectIds = useMemo(() => new Set(config.featured_projects.selected_project_ids || []), [config.featured_projects.selected_project_ids]);
   const selectedPropertyIds = useMemo(() => new Set(config.featured_properties.selected_property_ids || []), [config.featured_properties.selected_property_ids]);
@@ -783,14 +795,21 @@ export default function HomeComposerPage() {
     return () => window.removeEventListener('keydown', onKeyDown);
   }, [heroMediaModalOpen]);
 
+  const confirmDiscardChanges = useCallback((): boolean => {
+    if (!hasUnsavedChanges || typeof window === 'undefined') return true;
+    return window.confirm(t.unsavedLeaveConfirm);
+  }, [hasUnsavedChanges, t.unsavedLeaveConfirm]);
+
   const handleLocaleChange = useCallback((nextLocale: LocaleCode): void => {
+    if (nextLocale === locale) return;
+    if (!confirmDiscardChanges()) return;
     setLocale(nextLocale);
     persistAdminLocale(nextLocale);
     if (typeof window === 'undefined') return;
     const nextUrl = new URL(window.location.href);
     nextUrl.searchParams.set('lang', nextLocale);
     window.history.replaceState({}, '', `${nextUrl.pathname}${nextUrl.search}${nextUrl.hash}`);
-  }, []);
+  }, [confirmDiscardChanges, locale]);
 
   async function login(event: FormEvent<HTMLFormElement>): Promise<void> {
     event.preventDefault();
@@ -825,6 +844,7 @@ export default function HomeComposerPage() {
   }
 
   function logout(): void {
+    if (!confirmDiscardChanges()) return;
     setAuthError(null);
     setError(null);
     clearComposerSession();
@@ -1073,7 +1093,16 @@ export default function HomeComposerPage() {
             </label>
             {isAuthenticated ? (
               <>
-                <AdminButton type="button" variant="secondary" icon="refresh" onClick={() => void loadBundle(locale)} disabled={loading}>
+                <AdminButton
+                  type="button"
+                  variant="secondary"
+                  icon="refresh"
+                  onClick={() => {
+                    if (!confirmDiscardChanges()) return;
+                    void loadBundle(locale);
+                  }}
+                  disabled={loading || saving || publishing}
+                >
                   {loading ? t.refreshing : t.refresh}
                 </AdminButton>
                 <AdminButton type="button" variant="primary" icon="plus" onClick={() => void handleSaveDraft()} disabled={saveDisabled}>
@@ -1082,7 +1111,7 @@ export default function HomeComposerPage() {
                 <AdminButton type="button" variant="secondary" icon="upload" onClick={() => void handlePublish()} disabled={publishDisabled}>
                   {publishing ? t.publishing : t.publish}
                 </AdminButton>
-                <AdminButton type="button" variant="secondary" icon="x" onClick={logout}>
+                <AdminButton type="button" variant="secondary" icon="x" onClick={logout} disabled={saving || publishing}>
                   {t.signOut}
                 </AdminButton>
               </>
@@ -1146,6 +1175,7 @@ export default function HomeComposerPage() {
         <AdminPageBody className="home-composer-stack">
           {error && hasComposerBundle ? <div className="home-composer-banner home-composer-banner--error">{error}</div> : null}
           {notice ? <div className="home-composer-banner home-composer-banner--success">{notice}</div> : null}
+          {hasUnsavedChanges ? <div className="home-composer-banner home-composer-banner--warn"><strong>{t.unsavedChanges}</strong> {t.unsavedChangesDescription}</div> : null}
 
           {!loading && !hasComposerBundle ? (
             <ActionCard

@@ -43,6 +43,7 @@ describe("B14 admin workspace pages contract", () => {
     expect(page).toContain("archiveConfirm");
     expect(page).toContain("window.confirm");
     expect(page).toContain("emptyHint");
+    expect(page).toContain("disabled={loading || opBusy}");
   });
 
   it("imports workspace uses list + import run endpoints", () => {
@@ -68,6 +69,7 @@ describe("B14 admin workspace pages contract", () => {
     expect(page).toContain("selectedFile");
     expect(page).toContain("selectedMode");
     expect(page).toContain("emptyHint");
+    expect(page).toContain("disabled={loading || importBusy}");
   });
 
   it("domain workspace uses domain CRUD + publish APIs and dashboard summaries", () => {
@@ -151,6 +153,7 @@ describe("B14 admin workspace pages contract", () => {
     expect(page).toContain("Choose media");
     expect(page).toContain("publishConfirm");
     expect(page).toContain("window.confirm");
+    expect(page).toContain("unsavedLeaveConfirm");
   });
 
   it("login page uses canonical shared admin auth contract", () => {

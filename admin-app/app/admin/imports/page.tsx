@@ -469,10 +469,10 @@ export default function AdminImportsPage() {
                 <span>{t.sessionActive}</span>
               </div>
               <div className="crm-session-panel__quick-actions">
-                <AdminButton variant="secondary" icon="refresh" type="button" onClick={() => void loadWorkspace()}>
+                <AdminButton variant="secondary" icon="refresh" type="button" onClick={() => void loadWorkspace()} disabled={loading || importBusy}>
                   {loading ? t.loading : t.refresh}
                 </AdminButton>
-                <AdminButton variant="secondary" icon="x" type="button" onClick={logout}>
+                <AdminButton variant="secondary" icon="x" type="button" onClick={logout} disabled={loading || importBusy}>
                   {t.signOut}
                 </AdminButton>
               </div>

@@ -558,10 +558,10 @@ export default function AdminMediaPage() {
                 <span>{t.sessionActive}</span>
               </div>
               <div className="crm-session-panel__quick-actions">
-                <AdminButton variant="secondary" icon="refresh" type="button" onClick={() => void loadWorkspace()}>
+                <AdminButton variant="secondary" icon="refresh" type="button" onClick={() => void loadWorkspace()} disabled={loading || opBusy}>
                   {loading ? t.loading : t.refresh}
                 </AdminButton>
-                <AdminButton variant="secondary" icon="x" type="button" onClick={logout}>
+                <AdminButton variant="secondary" icon="x" type="button" onClick={logout} disabled={loading || opBusy}>
                   {t.signOut}
                 </AdminButton>
               </div>
