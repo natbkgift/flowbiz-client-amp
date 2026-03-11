@@ -124,6 +124,7 @@ const copy = {
     usageSuccess: "Usage details loaded.",
     replaceSuccess: "File replacement completed.",
     gallerySuccess: "Gallery updated.",
+    archiveConfirm: "Archive this media record? References will stay intact, but the item will move out of the active library.",
     operationsDescription: "Run upload, record management, replacement, and gallery sync workflows from one shared control surface.",
     uploadDescription: "Upload a new media asset and optionally attach title metadata before it enters the library.",
     crudTitle: "Media record tools",
@@ -213,6 +214,7 @@ const copy = {
     usageSuccess: "โหลดข้อมูลการใช้งานแล้ว",
     replaceSuccess: "แทนที่ไฟล์สำเร็จ",
     gallerySuccess: "อัปเดตแกลเลอรีแล้ว",
+    archiveConfirm: "ต้องการเก็บรายการสื่อนี้เข้าคลังหรือไม่ รายการอ้างอิงจะยังอยู่ แต่สื่อนี้จะถูกย้ายออกจากคลังที่ใช้งานอยู่",
     operationsDescription: "สั่งงานอัปโหลด จัดการเรคอร์ด แทนที่ไฟล์ และซิงก์แกลเลอรีจากแผงควบคุมเดียว",
     uploadDescription: "อัปโหลดไฟล์สื่อใหม่ พร้อมใส่ชื่อหรือเมทาดาทาเบื้องต้นก่อนเข้าสู่คลังสื่อ",
     crudTitle: "เครื่องมือจัดการรายการสื่อ",
@@ -490,6 +492,11 @@ export default function AdminMediaPage() {
     Number(integrity?.invalid_path_format_count || 0) +
     Number(integrity?.empty_file_count || 0);
 
+  function confirmAction(message: string): boolean {
+    if (typeof window === "undefined") return true;
+    return window.confirm(message);
+  }
+
   return (
     <main id="main-content" className="container content-stack">
       <AdminPageHeader title={t.title} description={t.subtitle} icon="media" eyebrow={t.eyebrow} />
@@ -716,13 +723,14 @@ export default function AdminMediaPage() {
                     icon="warning"
                     type="button"
                     disabled={opBusy || !mediaId.trim()}
-                    onClick={() =>
+                    onClick={() => {
+                      if (!confirmAction(t.archiveConfirm)) return;
                       void runAction(() =>
                         fetchJson(`/admin/media/${mediaId.trim()}/archive?block_if_used=false`, authToken, {
                           method: "POST",
                         }), { successMessage: t.archiveSuccess }
-                      )
-                    }
+                      );
+                    }}
                   >
                     {t.runArchive}
                   </AdminButton>

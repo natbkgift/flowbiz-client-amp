@@ -208,6 +208,7 @@ const HOME_COMPOSER_COPY = {
     publishedNotice: 'Published',
     saveDraftError: 'Unable to save draft',
     publishError: 'Unable to publish',
+    publishConfirm: 'Publish the current draft now? This will update the live home page for the selected locale.',
     heroImageLocalOnlyError: 'Hero image must use local media only.',
     rightsUnknown: 'unknown',
     approvalUnknown: 'unknown',
@@ -322,6 +323,7 @@ const HOME_COMPOSER_COPY = {
     publishedNotice: 'เผยแพร่แล้ว',
     saveDraftError: 'ไม่สามารถบันทึกร่างได้',
     publishError: 'ไม่สามารถเผยแพร่ได้',
+    publishConfirm: 'ต้องการเผยแพร่ร่างปัจจุบันตอนนี้หรือไม่ ระบบจะอัปเดตหน้าแรกที่ใช้งานจริงตามภาษาที่เลือก',
     heroImageLocalOnlyError: 'ภาพฮีโร่ต้องใช้ไฟล์สื่อภายในระบบเท่านั้น',
     rightsUnknown: 'ไม่ทราบสถานะ',
     approvalUnknown: 'ไม่ทราบการอนุมัติ',
@@ -960,6 +962,7 @@ export default function HomeComposerPage() {
 
   async function handlePublish(): Promise<void> {
     if (!draftId) return;
+    if (typeof window !== 'undefined' && !window.confirm(t.publishConfirm)) return;
     setPublishing(true);
     setError(null);
     setNotice(null);

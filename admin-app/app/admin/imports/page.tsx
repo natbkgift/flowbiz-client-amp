@@ -101,6 +101,7 @@ const copy = {
     importHistoryDescription: "Recent import executions with status, source file, row counts, and runtime.",
     importSuccess: "Import request completed.",
     dryRunSuccess: "Dry-run import completed.",
+    importResultHint: "Review the response payload before running the next import.",
     source: "Source",
     created: "Created",
     status: "Status",
@@ -167,6 +168,7 @@ const copy = {
     importHistoryDescription: "ประวัติการรันล่าสุด พร้อมสถานะ ไฟล์ จำนวนแถว และเวลาที่ใช้ในการประมวลผล",
     importSuccess: "สั่งงานนำเข้าสำเร็จ",
     dryRunSuccess: "ทดลองรันสำเร็จ",
+    importResultHint: "ตรวจผลลัพธ์นี้ก่อนเริ่มการนำเข้ารอบถัดไป",
     source: "แหล่งที่มา",
     created: "สร้างเมื่อ",
     status: "สถานะ",
@@ -560,6 +562,7 @@ export default function AdminImportsPage() {
               <span>{t.importResult}</span>
               <textarea id="imports-result" rows={importResult ? 6 : 3} readOnly value={importResult} />
             </label>
+            {importResult ? <p className="admin-input__hint">{t.importResultHint}</p> : null}
             {importNotice ? <div className="state-success">{importNotice}</div> : null}
           </ActionCard>
 
