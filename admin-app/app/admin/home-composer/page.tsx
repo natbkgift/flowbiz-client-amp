@@ -606,7 +606,7 @@ export default function HomeComposerPage() {
   const draftId = bundle?.draft?.id ?? null;
   const isAuthenticated = authToken.trim().length > 0;
   const t: HomeComposerCopy = HOME_COMPOSER_COPY[locale];
-  const hasComposerData = Boolean(bundle?.draft || bundle?.published);
+  const hasComposerBundle = Boolean(bundle);
 
   const selectedProjectIds = useMemo(() => new Set(config.featured_projects.selected_project_ids || []), [config.featured_projects.selected_project_ids]);
   const selectedPropertyIds = useMemo(() => new Set(config.featured_properties.selected_property_ids || []), [config.featured_properties.selected_property_ids]);
@@ -642,6 +642,20 @@ export default function HomeComposerPage() {
     return false;
   }, [clearComposerSession, t.sessionExpired]);
 
+  const createDraft = useCallback(async (targetLocale: LocaleCode, payloadConfig: HomeComposerConfig): Promise<ComposerItem> => {
+    const created = await apiRequest<ComposerItem>('/admin/home-composer', {
+      method: 'POST',
+      body: JSON.stringify({ page_key: 'home', locale: targetLocale, config: payloadConfig }),
+    });
+    setBundle((prev) => ({
+      page_key: prev?.page_key || 'home',
+      locale: targetLocale,
+      draft: created,
+      published: prev?.published || null,
+    }));
+    return created;
+  }, []);
+
   const loadBundle = useCallback(async (targetLocale: LocaleCode): Promise<void> => {
     const activeToken = getToken();
     if (!activeToken?.trim()) return;
@@ -655,14 +669,6 @@ export default function HomeComposerPage() {
       } catch (err) {
         if (handleComposerUnauthorized(err)) return;
         throw err;
-      }
-
-      if (!nextBundle.draft) {
-        const created = await apiRequest<ComposerItem>('/admin/home-composer', {
-          method: 'POST',
-          body: JSON.stringify({ page_key: 'home', locale: targetLocale, config: defaultConfig() }),
-        });
-        nextBundle = { ...nextBundle, draft: created };
       }
 
       setBundle(nextBundle);
@@ -908,7 +914,6 @@ export default function HomeComposerPage() {
   }
 
   async function saveDraftRequest(showNotice: boolean): Promise<boolean> {
-    if (!draftId) return false;
     setSaving(true);
     setError(null);
     if (showNotice) {
@@ -916,16 +921,29 @@ export default function HomeComposerPage() {
     }
     try {
       const payloadConfig = readConfigForSave();
-      const res = await apiRequest<SaveResponse>(`/admin/home-composer/${draftId}`, {
-        method: 'PATCH',
-        body: JSON.stringify({ config: payloadConfig }),
-      });
-      setValidation(res.validation);
+      let savedDraft: ComposerItem;
+      let nextValidation: ValidationResult | null = null;
+      if (!draftId) {
+        savedDraft = await createDraft(locale, payloadConfig);
+      } else {
+        const res = await apiRequest<SaveResponse>(`/admin/home-composer/${draftId}`, {
+          method: 'PATCH',
+          body: JSON.stringify({ config: payloadConfig }),
+        });
+        savedDraft = res.item;
+        nextValidation = res.validation;
+      }
+      setValidation(nextValidation);
       if (showNotice) {
         setNotice(t.draftSaved);
       }
-      setBundle((prev) => prev ? ({ ...prev, draft: res.item }) : prev);
-      setConfig(normalizeConfig(res.item.config as Record<string, unknown>));
+      setBundle((prev) => prev ? ({ ...prev, draft: savedDraft }) : ({
+        page_key: 'home',
+        locale,
+        draft: savedDraft,
+        published: null,
+      }));
+      setConfig(normalizeConfig(savedDraft.config as Record<string, unknown>));
       return true;
     } catch (err) {
       if (handleComposerUnauthorized(err)) return false;
@@ -1121,10 +1139,10 @@ export default function HomeComposerPage() {
 
       {isAuthenticated ? (
         <AdminPageBody className="home-composer-stack">
-          {error && hasComposerData ? <div className="home-composer-banner home-composer-banner--error">{error}</div> : null}
+          {error && hasComposerBundle ? <div className="home-composer-banner home-composer-banner--error">{error}</div> : null}
           {notice ? <div className="home-composer-banner home-composer-banner--success">{notice}</div> : null}
 
-          {!loading && !hasComposerData ? (
+          {!loading && !hasComposerBundle ? (
             <ActionCard
               className="home-composer-card"
               title={t.loadComposerError}
@@ -1141,7 +1159,7 @@ export default function HomeComposerPage() {
             </ActionCard>
           ) : null}
 
-          {hasComposerData && validation && (validation.errors.length > 0 || validation.warnings.length > 0 || validation.media_warnings.length > 0) ? (
+          {hasComposerBundle && validation && (validation.errors.length > 0 || validation.warnings.length > 0 || validation.media_warnings.length > 0) ? (
             <ActionCard
               className="home-composer-card home-composer-card--compact"
               title={t.validationTitle}
@@ -1171,7 +1189,7 @@ export default function HomeComposerPage() {
             <div className="home-composer-loading">{t.loadingComposer}</div>
           ) : null}
 
-          {hasComposerData ? (
+          {hasComposerBundle ? (
           <div className="home-composer-split">
           <section className="home-composer-stack">
             <ActionCard

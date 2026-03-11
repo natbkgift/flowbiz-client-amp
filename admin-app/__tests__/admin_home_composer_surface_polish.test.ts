@@ -25,6 +25,16 @@ describe("admin home composer surface polish", () => {
     expect(page).toContain("Promise.allSettled([");
   });
 
+  it("creates drafts lazily on save instead of mutating on initial load", () => {
+    const page = read("app/admin/home-composer/page.tsx");
+
+    expect(page).toContain("const createDraft = useCallback(async");
+    expect(page).toContain("const hasComposerBundle = Boolean(bundle);");
+    expect(page).toContain("if (!draftId) {");
+    expect(page).toContain("savedDraft = await createDraft(locale, payloadConfig);");
+    expect(page).not.toContain("if (!nextBundle.draft) {");
+  });
+
   it("defines reusable page-local polish hooks in admin styles", () => {
     const css = read("styles/admin-components.css");
 
