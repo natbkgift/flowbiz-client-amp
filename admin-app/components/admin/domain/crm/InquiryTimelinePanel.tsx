@@ -14,11 +14,12 @@ export function InquiryTimelinePanel({
   timelineError: string | null;
 }) {
   return (
-    <section aria-label={t.timeline}>
+    <section aria-label={t.timeline} className="crm-detail-section">
       <h3>{t.timeline}</h3>
+      <p className="crm-section-description">{t.timelineDescription}</p>
       {timelineError ? <div className="state-error">{timelineError}</div> : null}
       {timeline.length === 0 ? (
-        <div className="state-empty">-</div>
+        <div className="state-empty">{t.timelineEmpty}</div>
       ) : (
         <ol className="crm-timeline">
           {timeline.map((event) => (

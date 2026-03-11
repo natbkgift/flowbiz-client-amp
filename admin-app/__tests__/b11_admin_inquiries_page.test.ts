@@ -42,6 +42,7 @@ describe("B11 admin inquiries page contract", () => {
     const detail = read("components/admin/domain/crm/InquiryDetailPanel.tsx");
     const contactActions = read("components/admin/domain/crm/InquiryContactActions.tsx");
     const followUp = read("components/admin/domain/crm/InquiryFollowUpPanel.tsx");
+    const timeline = read("components/admin/domain/crm/InquiryTimelinePanel.tsx");
     const utils = read("components/admin/domain/crm/inquiries-utils.ts");
 
     expect(page).toContain("const [filters, setFilters] = useState<InquiryFilters>(EMPTY_FILTERS)");
@@ -58,6 +59,10 @@ describe("B11 admin inquiries page contract", () => {
     expect(contactActions).toContain("selected.phone_url");
     expect(contactActions).toContain("selected.email_url");
     expect(detail).toContain("<InquiryContactActions");
+    expect(detail).toContain("detailsDescription");
+    expect(followUp).toContain("followUpNotice");
+    expect(timeline).toContain("timelineEmpty");
+    expect(contactActions).toContain("contactActionsEmpty");
     expect(followUp).toContain('id="follow-up-status"');
   });
 
@@ -93,6 +98,7 @@ describe("B11 admin inquiries page contract", () => {
     expect(page).toContain('title={t.details}');
     expect(page).toContain('className="crm-list"');
     expect(page).toContain('className="crm-detail"');
+    expect(page).toContain("followUpNotice");
     expect(controlCenter).toContain('htmlFor="crm-login-email"');
     expect(controlCenter).toContain('htmlFor="crm-login-password"');
     expect(controlCenter).toContain('autoComplete="username"');
@@ -100,6 +106,8 @@ describe("B11 admin inquiries page contract", () => {
     expect(page).toContain("state-empty");
     expect(page).toContain("state-loading");
     expect(page).toContain("state-error");
+    expect(copy).toContain('followUpSaved: "Follow-up updated."');
+    expect(copy).toContain('followUpSaved: "บันทึกสถานะติดตามแล้ว"');
     expect(copy).toContain('filtersDescription: "Refine the active queue');
     expect(copy).toContain('filtersDescription: "ปรับคิวงานที่กำลังดู');
     expect(copy).toContain('loginTitle: "Admin sign in"');

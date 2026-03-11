@@ -13,6 +13,7 @@ export function InquiryDetailPanel({
   followUpDueAt,
   savingFollowUp,
   followUpError,
+  followUpNotice,
   timeline,
   timelineError,
   onFollowUpStatusChange,
@@ -26,6 +27,7 @@ export function InquiryDetailPanel({
   followUpDueAt: string;
   savingFollowUp: boolean;
   followUpError: string | null;
+  followUpNotice: string | null;
   timeline: TimelineEvent[];
   timelineError: string | null;
   onFollowUpStatusChange: (value: string) => void;
@@ -38,7 +40,12 @@ export function InquiryDetailPanel({
 
   return (
     <>
-      <div className="crm-meta-grid">
+      <div className="crm-detail-section">
+        <h3>{t.details}</h3>
+        <p className="crm-section-description">{t.detailsDescription}</p>
+      </div>
+
+      <div className="crm-meta-grid crm-meta-grid--detail">
         <p>
           <strong>{t.intent}:</strong> {selected.purpose || "-"}
         </p>
@@ -60,12 +67,13 @@ export function InquiryDetailPanel({
       </div>
 
       <InquiryContactActions t={t} selected={selected} />
-      <InquiryFollowUpPanel
+        <InquiryFollowUpPanel
         t={t}
         followUpStatus={followUpStatus}
         followUpDueAt={followUpDueAt}
         savingFollowUp={savingFollowUp}
         followUpError={followUpError}
+        followUpNotice={followUpNotice}
         onFollowUpStatusChange={onFollowUpStatusChange}
         onFollowUpDueAtChange={onFollowUpDueAtChange}
         onSave={onSaveFollowUp}

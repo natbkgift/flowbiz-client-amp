@@ -2475,6 +2475,7 @@
   .crm-filters,
   .crm-layout,
   .crm-saved-filters,
+  .crm-detail-section,
   .crm-meta-grid,
   .crm-follow-up-grid,
   .home-composer-field-grid,
@@ -2570,6 +2571,24 @@
     z-index: 1;
     background: rgba(248, 250, 252, 0.98);
     backdrop-filter: blur(10px);
+  }
+
+  .crm-detail-section {
+    gap: var(--admin-space-2);
+  }
+
+  .crm-section-description {
+    margin: 0;
+    color: var(--admin-text-muted);
+    font-size: var(--admin-font-size-sm);
+    line-height: 1.55;
+  }
+
+  .crm-meta-grid--detail {
+    padding: var(--admin-space-4);
+    border: 1px solid rgba(226, 232, 240, 0.82);
+    border-radius: var(--admin-radius-lg);
+    background: linear-gradient(180deg, rgba(248, 250, 252, 0.95), rgba(255, 255, 255, 0.98));
   }
 
   .crm-kanban {

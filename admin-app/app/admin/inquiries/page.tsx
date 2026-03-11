@@ -73,6 +73,7 @@ export default function AdminInquiriesPage() {
   const [timelineError, setTimelineError] = useState<string | null>(null);
   const [savingFollowUp, setSavingFollowUp] = useState(false);
   const [followUpError, setFollowUpError] = useState<string | null>(null);
+  const [followUpNotice, setFollowUpNotice] = useState<string | null>(null);
 
   const [filters, setFilters] = useState<InquiryFilters>(EMPTY_FILTERS);
   const [followUpStatus, setFollowUpStatus] = useState("pending");
@@ -173,6 +174,7 @@ export default function AdminInquiriesPage() {
 
     setSelectedId(id);
     setTimelineError(null);
+    setFollowUpNotice(null);
     try {
       const [detailBody, timelineBody] = await Promise.all([
         fetchJson<InquiryItem>(`/admin/inquiries/${id}`, activeToken),
@@ -196,6 +198,7 @@ export default function AdminInquiriesPage() {
 
     setSavingFollowUp(true);
     setFollowUpError(null);
+    setFollowUpNotice(null);
     try {
       const payload = {
         follow_up_status: followUpStatus,
@@ -213,6 +216,7 @@ export default function AdminInquiriesPage() {
       const body = (await response.json()) as InquiryItem;
       setSelected(body);
       setItems((prev) => prev.map((item) => (item.id === body.id ? body : item)));
+      setFollowUpNotice(t.followUpSaved);
       await loadDetails(selectedId);
     } catch {
       setFollowUpError(t.saveFollowUpError);
@@ -328,6 +332,7 @@ export default function AdminInquiriesPage() {
     setTimeline([]);
     setTimelineError(null);
     setFollowUpError(null);
+    setFollowUpNotice(null);
   }
 
   return (
@@ -448,6 +453,7 @@ export default function AdminInquiriesPage() {
               followUpDueAt={followUpDueAt}
               savingFollowUp={savingFollowUp}
               followUpError={followUpError}
+              followUpNotice={followUpNotice}
               timeline={timeline}
               timelineError={timelineError}
               onFollowUpStatusChange={setFollowUpStatus}

@@ -7,6 +7,7 @@ export function InquiryFollowUpPanel({
   followUpDueAt,
   savingFollowUp,
   followUpError,
+  followUpNotice,
   onFollowUpStatusChange,
   onFollowUpDueAtChange,
   onSave,
@@ -16,13 +17,15 @@ export function InquiryFollowUpPanel({
   followUpDueAt: string;
   savingFollowUp: boolean;
   followUpError: string | null;
+  followUpNotice: string | null;
   onFollowUpStatusChange: (value: string) => void;
   onFollowUpDueAtChange: (value: string) => void;
   onSave: () => void | Promise<void>;
 }) {
   return (
-    <section aria-label={t.followUp}>
+    <section aria-label={t.followUp} className="crm-detail-section">
       <h3>{t.followUp}</h3>
+      <p className="crm-section-description">{t.followUpDescription}</p>
       <div className="crm-follow-up-grid">
         <label className="field" htmlFor="follow-up-status">
           <span>{t.followUp}</span>
@@ -40,6 +43,7 @@ export function InquiryFollowUpPanel({
         </label>
       </div>
       {followUpError ? <p className="state-error">{followUpError}</p> : null}
+      {followUpNotice ? <p className="state-success">{followUpNotice}</p> : null}
       <div className="card-actions">
         <button className="btn" type="button" onClick={() => void onSave()} disabled={savingFollowUp}>
           {savingFollowUp ? t.saving : t.saveFollowUp}
