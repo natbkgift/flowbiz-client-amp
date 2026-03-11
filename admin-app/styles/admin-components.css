@@ -160,7 +160,9 @@
   }
 
   .admin-shell-sidebar-meta {
-    gap: 2px;
+    grid-template-columns: auto minmax(0, 1fr);
+    align-items: center;
+    gap: var(--admin-space-3);
     padding: 12px 14px;
     border: 1px solid rgba(191, 219, 254, 0.72);
     border-radius: calc(var(--admin-radius-lg) + 2px);
@@ -172,8 +174,22 @@
       inset 0 1px 0 rgba(255, 255, 255, 0.88);
   }
 
-  .admin-shell-sidebar-meta span {
-    display: none;
+  .admin-shell-sidebar-meta-icon {
+    width: 34px;
+    height: 34px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 12px;
+    background: linear-gradient(180deg, rgba(225, 238, 255, 0.98), rgba(214, 229, 255, 0.92));
+    color: var(--admin-color-primary-700);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.92);
+  }
+
+  .admin-shell-sidebar-meta-copy {
+    display: grid;
+    gap: 2px;
+    min-width: 0;
   }
 
   .admin-shell-brand-copy small,
@@ -571,7 +587,7 @@
 
   .admin-shell-topbar-utilities {
     display: grid;
-    grid-template-columns: minmax(200px, auto) minmax(300px, 1fr);
+    grid-template-columns: minmax(180px, auto) minmax(300px, 1fr);
     gap: var(--admin-space-3);
     align-items: start;
     min-width: 0;
@@ -639,11 +655,7 @@
   }
 
   .admin-shell-toolbar-chip--workspace {
-    gap: var(--admin-space-3);
-  }
-
-  .admin-shell-toolbar-chip--workspace .admin-shell-toolbar-chip-copy {
-    max-width: 11rem;
+    gap: var(--admin-space-2);
   }
 
   .admin-shell-toolbar-chip-copy {

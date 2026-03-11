@@ -332,6 +332,7 @@ export function AdminShell({ children }: { children: ReactNode }) {
   const currentGroupLabel = group ? getAdminNavText(group.label, locale) : ui.admin;
   const currentWorkspaceLabel = item ? getAdminNavText(item.label, locale) : ui.workspace;
   const currentWorkspaceDescription = item ? getAdminNavText(item.description, locale) : ui.workspaceSummary;
+  const currentWorkspaceIcon = item ? item.icon : "workspace";
   const siteHref = locale === "th" ? "/th" : "/en";
   const sidebarUtilityItems = useMemo<AdminNavItem[]>(
     () => [
@@ -437,9 +438,13 @@ export function AdminShell({ children }: { children: ReactNode }) {
         </div>
 
         <div className="admin-shell-sidebar-meta">
-          <p className="admin-shell-sidebar-kicker">{ui.currentWorkspace}</p>
-          <strong>{currentWorkspaceLabel}</strong>
-          <span>{currentWorkspaceDescription}</span>
+          <span className="admin-shell-sidebar-meta-icon" aria-hidden="true">
+            <AdminIcon name={currentWorkspaceIcon} size={16} />
+          </span>
+          <div className="admin-shell-sidebar-meta-copy">
+            <p className="admin-shell-sidebar-kicker">{ui.currentWorkspace}</p>
+            <strong>{currentWorkspaceLabel}</strong>
+          </div>
         </div>
 
         <div className="admin-shell-sidebar-scroll">
@@ -568,11 +573,10 @@ export function AdminShell({ children }: { children: ReactNode }) {
                       <AdminIcon name="workspace" size={16} />
                     </span>
                     <span className="admin-shell-toolbar-chip-copy">
-                      <strong>{currentWorkspaceLabel}</strong>
-                      <small>{currentWorkspaceDescription}</small>
+                      <strong>{ui.workspaceName}</strong>
                     </span>
                     <AdminBadge tone="info" icon="workspace">
-                      {ui.workspaceName}
+                      {currentGroupLabel}
                     </AdminBadge>
                   </div>
                 </div>
