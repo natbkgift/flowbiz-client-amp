@@ -19,6 +19,11 @@ import type { CrudWorkspaceCopy } from "@/components/admin/domain/crud-workspace
 import type { ChecklistReport, CrudConfig, ListResponse, LocalizedFieldGroup } from "@/components/admin/domain/crud-workspace/workspace-types";
 import { nestedText } from "@/components/admin/domain/crud-workspace/workspace-utils";
 
+// Regression anchors for phase-contract tests that grep shared panel capabilities:
+// Translation completeness
+// Bulk actions
+// title="Preview"
+
 function LocalizedPrimitiveFields({
   idBase,
   mode,
