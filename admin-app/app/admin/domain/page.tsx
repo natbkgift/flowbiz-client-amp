@@ -61,10 +61,21 @@ const copy = {
     unpublish: "Unpublish",
     del: "Delete",
     result: "Result",
+    sessionDescription: "Active CRUD workspace session.",
+    loginDescription: "Use admin credentials to manage areas, developers, and projects.",
+    loadingWorkspace: "Loading workspace",
+    editorDescription: "Create, patch, publish, unpublish, or delete selected entities without changing payload shapes.",
+    listDescription: "Latest entity rows for the currently selected workspace type.",
+    adminFallback: "admin",
+    createJson: "Create payload JSON",
+    patchJson: "Patch payload JSON",
+    statsJson: "Area stats JSON",
+    editSelect: "select",
+    deleteConfirm: "Delete this entity now? This action cannot be undone.",
   },
   th: {
     title: "Admin Domain Workspace",
-    subtitle: "รองรับ CRUD สำหรับ areas/developers/projects พร้อม publish controls",
+    subtitle: "รองรับ CRUD สำหรับ areas, developers และ projects พร้อมคำสั่งเผยแพร่ในพื้นที่เดียว",
     loginTitle: "เข้าสู่ระบบแอดมิน",
     email: "อีเมลแอดมิน",
     password: "รหัสผ่าน",
@@ -72,26 +83,34 @@ const copy = {
     signingIn: "กำลังเข้าสู่ระบบ",
     signOut: "ออกจากระบบ",
     refresh: "รีเฟรช",
-    authRequired: "กรุณาเข้าสู่ระบบก่อนใช้งาน",
+    authRequired: "กรุณาเข้าสู่ระบบก่อนใช้งาน domain workspace",
     loadError: "ไม่สามารถโหลดข้อมูล domain ได้",
     errorTitle: "ข้อผิดพลาดของ domain workspace",
     errorHint: "กรุณาลองใหม่ หากยังไม่สำเร็จให้ตรวจสอบ API และเซสชันการเข้าสู่ระบบ",
     retry: "ลองใหม่",
     pending: "รายการแปลที่ค้าง",
-    drafts: "draft ที่ยังไม่เผยแพร่",
-    entity: "Entity",
-    entityId: "Entity ID",
-    createJson: "Create payload JSON",
-    patchJson: "Patch payload JSON",
-    statsJson: "Area stats JSON",
-    create: "Create",
-    get: "Get",
-    patch: "Patch",
-    stats: "Upsert stats",
-    publish: "Publish",
-    unpublish: "Unpublish",
-    del: "Delete",
+    drafts: "ฉบับร่างที่ยังไม่เผยแพร่",
+    entity: "ประเภทข้อมูล",
+    entityId: "รหัสรายการ",
+    createJson: "JSON สำหรับสร้างรายการ",
+    patchJson: "JSON สำหรับอัปเดต",
+    statsJson: "JSON สถิติของ area",
+    create: "สร้าง",
+    get: "ดูข้อมูล",
+    patch: "อัปเดต",
+    stats: "บันทึกสถิติ",
+    publish: "เผยแพร่",
+    unpublish: "ยกเลิกเผยแพร่",
+    del: "ลบ",
     result: "ผลลัพธ์",
+    sessionDescription: "เซสชัน CRUD workspace ที่กำลังใช้งานอยู่",
+    loginDescription: "ใช้บัญชีแอดมินเพื่อจัดการ areas, developers และ projects",
+    loadingWorkspace: "กำลังโหลด workspace",
+    editorDescription: "สร้าง อัปเดต เผยแพร่ ยกเลิกเผยแพร่ หรือลบรายการที่เลือกโดยไม่เปลี่ยนรูปแบบ payload",
+    listDescription: "รายการล่าสุดของ workspace ประเภทที่กำลังเลือก",
+    adminFallback: "แอดมิน",
+    editSelect: "เลือก",
+    deleteConfirm: "ต้องการลบรายการนี้ตอนนี้หรือไม่ การกระทำนี้ย้อนกลับไม่ได้",
   },
 };
 
@@ -309,8 +328,8 @@ export default function AdminDomainPage() {
 
       <ActionCard
         className="dashboard-controls"
-        title={isAuthenticated ? (email || "admin") : t.loginTitle}
-        description={isAuthenticated ? "Active CRUD workspace session." : "Use admin credentials to manage areas, developers, and projects."}
+        title={isAuthenticated ? (email || t.adminFallback) : t.loginTitle}
+        description={isAuthenticated ? t.sessionDescription : t.loginDescription}
         icon={isAuthenticated ? "profile" : "domain"}
         titleTag="h2"
       >
@@ -333,10 +352,10 @@ export default function AdminDomainPage() {
           <div className="crm-session-panel" role="status" aria-live="polite">
             <p className="locale-safe">{email || "admin"}</p>
             <div className="card-actions">
-              <AdminButton variant="secondary" icon="refresh" type="button" onClick={() => void loadWorkspace()}>
+              <AdminButton variant="secondary" icon="refresh" type="button" onClick={() => void loadWorkspace()} disabled={loading || opBusy}>
                 {t.refresh}
               </AdminButton>
-              <AdminButton variant="secondary" icon="x" type="button" onClick={logout}>
+              <AdminButton variant="secondary" icon="x" type="button" onClick={logout} disabled={loading || opBusy}>
                 {t.signOut}
               </AdminButton>
             </div>
@@ -354,7 +373,7 @@ export default function AdminDomainPage() {
           actionDisabled={loading}
         />
       ) : null}
-      {loading ? <div className="state-loading">Loading</div> : null}
+      {loading ? <div className="state-loading">{t.loadingWorkspace}</div> : null}
 
       {isAuthenticated ? (
         <>
@@ -366,7 +385,7 @@ export default function AdminDomainPage() {
           <ActionCard
             className="domain-editor-card"
             title={t.entity}
-            description="Create, patch, publish, unpublish, or delete selected entities without changing payload shapes."
+            description={t.editorDescription}
             icon="domain"
             titleTag="h2"
           >
@@ -395,15 +414,15 @@ export default function AdminDomainPage() {
               {entity !== "projects" ? (
                 <AdminButton variant="secondary" icon="warning" type="button" disabled={opBusy || !entityId.trim()} onClick={() => void runAction(() => fetchJson(`${basePath()}/${entityId.trim()}/unpublish`, token, { method: "POST" }))}>{t.unpublish}</AdminButton>
               ) : null}
-              <AdminButton variant="danger" icon="x" type="button" disabled={opBusy || !entityId.trim()} onClick={() => void runAction(() => fetchJson(`${basePath()}/${entityId.trim()}`, token, { method: "DELETE" }))}>{t.del}</AdminButton>
+              <AdminButton variant="danger" icon="x" type="button" disabled={opBusy || !entityId.trim()} onClick={() => { if (typeof window !== "undefined" && !window.confirm(t.deleteConfirm)) return; void runAction(() => fetchJson(`${basePath()}/${entityId.trim()}`, token, { method: "DELETE" })); }}>{t.del}</AdminButton>
             </div>
             {opError ? <div className="state-error">{opError}</div> : null}
             <label className="field" htmlFor="domain-op-result"><span>{t.result}</span><textarea id="domain-op-result" rows={10} readOnly value={opResult} /></label>
           </ActionCard>
 
-          <LogCard
+            <LogCard
             title={entity}
-            description="Latest entity rows for the currently selected workspace type."
+            description={t.listDescription}
             icon="table"
             titleTag="h2"
           >
@@ -414,7 +433,7 @@ export default function AdminDomainPage() {
                   {(entity === "areas" ? areas : entity === "developers" ? developers : projects).map((row) => (
                     <tr key={row.id}>
                       <td>{row.slug || "-"}</td><td>{row.name || "-"}</td><td>{row.status || "-"}</td><td>{prettyDate(row.updated_at, locale)}</td>
-                      <td><AdminButton variant="secondary" size="sm" icon="search" type="button" onClick={() => setEntityId(row.id)}>select</AdminButton></td>
+                      <td><AdminButton variant="secondary" size="sm" icon="search" type="button" onClick={() => setEntityId(row.id)}>{t.editSelect}</AdminButton></td>
                     </tr>
                   ))}
                 </tbody>

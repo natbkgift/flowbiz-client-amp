@@ -123,6 +123,25 @@ const copy = {
     emptyReport: "No report yet. Run checker when ready.",
     emptySchema: "Schema source is empty. Fill approved business data before publishing.",
     retry: "Retry",
+    sessionDescription: "Active SEO workspace session and refresh controls.",
+    loginDescription: "Use admin credentials to manage overrides, redirects, schema, and broken-link reports.",
+    overridesDescription: "Manage per-path SEO metadata overrides.",
+    redirectsDescription: "Manage redirect rules and preload production mappings.",
+    preloadRedirects: "Preload production redirects",
+    schemaDescription: "Edit approved schema source fields by locale.",
+    schemaBootstrap: "Load approved schema defaults",
+    brokenDescription: "Run the link checker and inspect the latest crawl report.",
+    runChecker: "Run checker",
+    checkedAt: "Checked at",
+    checkedPages: "Checked pages",
+    totalLinks: "Total links",
+    checkerVersion: "Checker version",
+    noBrokenLinks: "No broken links found.",
+    deleteOverrideConfirm: "Delete this SEO override now?",
+    deleteRedirectConfirm: "Delete this redirect rule now?",
+    editing: "Editing",
+    edit: "Edit",
+    del: "Delete",
   },
   th: {
     title: "SEO Controls หลังบ้าน",
@@ -132,22 +151,41 @@ const copy = {
     save: "บันทึก",
     refresh: "รีเฟรช",
     loading: "กำลังโหลด",
-    authRequired: "กรุณาเข้าสู่ระบบก่อนใช้งาน SEO controls",
+    authRequired: "กรุณาเข้าสู่ระบบก่อนใช้งานเครื่องมือ SEO",
     loginTitle: "เข้าสู่ระบบแอดมิน",
     email: "อีเมลแอดมิน",
     password: "รหัสผ่าน",
     loginMissing: "กรอกอีเมลและรหัสผ่านก่อนเข้าสู่ระบบ",
     loginInvalid: "อีเมลหรือรหัสผ่านไม่ถูกต้อง",
     loginError: "ไม่สามารถเข้าสู่ระบบได้ในขณะนี้",
-    sectionOverrides: "SEO overrides",
-    sectionRedirects: "Redirect manager",
-    sectionSchema: "Schema source fields",
+    sectionOverrides: "การตั้งค่า SEO เฉพาะหน้า",
+    sectionRedirects: "จัดการรีไดเรกต์",
+    sectionSchema: "ฟิลด์ต้นทางของ Schema",
     sectionBroken: "รายงานลิงก์เสีย",
     emptyOverrides: "ยังไม่มี overrides เพิ่มหน้าสำคัญเมื่อพร้อม",
     emptyRedirects: "ยังไม่มี redirects เพิ่ม path เดิมเมื่อพร้อม",
     emptyReport: "ยังไม่มีรายงาน ให้รัน checker เมื่อพร้อม",
     emptySchema: "ข้อมูล schema ยังว่าง ให้เติมข้อมูลธุรกิจที่อนุมัติก่อนเผยแพร่",
     retry: "ลองใหม่",
+    sessionDescription: "เซสชันพื้นที่งาน SEO ที่กำลังใช้งานอยู่ พร้อมคำสั่งรีเฟรชข้อมูล",
+    loginDescription: "ใช้บัญชีแอดมินเพื่อจัดการ override, redirect, schema และรายงานลิงก์เสีย",
+    overridesDescription: "จัดการเมทาดาทา SEO แบบเฉพาะหน้าและเฉพาะภาษา",
+    redirectsDescription: "จัดการกฎ redirect และดึง mapping จาก production",
+    preloadRedirects: "ดึง redirect จาก production",
+    schemaDescription: "แก้ไขข้อมูลต้นทางของ Schema ตามภาษาที่เลือก",
+    schemaBootstrap: "โหลดค่า schema ที่อนุมัติแล้ว",
+    brokenDescription: "รันตัวตรวจลิงก์และตรวจรายงาน crawl ล่าสุดจากหน้าเดียว",
+    runChecker: "รันตัวตรวจลิงก์",
+    checkedAt: "เวลาตรวจล่าสุด",
+    checkedPages: "หน้าที่ตรวจ",
+    totalLinks: "ลิงก์ทั้งหมด",
+    checkerVersion: "เวอร์ชันตัวตรวจ",
+    noBrokenLinks: "ไม่พบลิงก์เสีย",
+    deleteOverrideConfirm: "ต้องการลบ SEO override นี้ตอนนี้หรือไม่",
+    deleteRedirectConfirm: "ต้องการลบกฎ redirect นี้ตอนนี้หรือไม่",
+    editing: "กำลังแก้ไข",
+    edit: "แก้ไข",
+    del: "ลบ",
   },
 };
 
@@ -557,7 +595,7 @@ export default function AdminSeoPage() {
 
       <ActionCard
         title={isAuth ? (email || t.authRequired) : t.loginTitle}
-        description={isAuth ? "Active SEO workspace session and refresh controls." : "Use admin credentials to manage overrides, redirects, schema, and broken-link reports."}
+        description={isAuth ? t.sessionDescription : t.loginDescription}
         icon={isAuth ? "profile" : "globe"}
         titleTag="h2"
       >
@@ -604,7 +642,7 @@ export default function AdminSeoPage() {
         <AdminSectionCard
           className="seo-pane"
           title={t.sectionOverrides}
-          description="Manage per-path SEO metadata overrides."
+          description={t.overridesDescription}
           icon="globe"
         >
           <form className="seo-form-grid" onSubmit={(event) => void saveOverride(event)}>
@@ -628,8 +666,8 @@ export default function AdminSeoPage() {
                   <div className="seo-item-head"><strong>{item.path}</strong><AdminBadge tone="info">{item.locale}</AdminBadge></div>
                   <p className="seo-item-meta">{item.title || "-"}</p>
                   <div className="card-actions">
-                    <AdminButton variant="secondary" type="button" onClick={() => { setEditingOverrideId(item.id); setOverrideForm({ path: item.path, locale: item.locale === "th" ? "th" : "en", title: item.title || "", description: item.description || "", canonical: item.canonical || "", robots_index: item.robots_index, robots_follow: item.robots_follow, enabled: item.enabled }); }}>{editingOverrideId === item.id ? "Editing" : "Edit"}</AdminButton>
-                    <AdminButton variant="secondary" type="button" onClick={async () => { await api(`/admin/seo/overrides/${item.id}`, token, { method: "DELETE" }); if (editingOverrideId === item.id) { setEditingOverrideId(null); setOverrideForm(emptyOverride(locale)); } await loadOverrides(token); }}>Delete</AdminButton>
+                    <AdminButton variant="secondary" type="button" onClick={() => { setEditingOverrideId(item.id); setOverrideForm({ path: item.path, locale: item.locale === "th" ? "th" : "en", title: item.title || "", description: item.description || "", canonical: item.canonical || "", robots_index: item.robots_index, robots_follow: item.robots_follow, enabled: item.enabled }); }}>{editingOverrideId === item.id ? t.editing : t.edit}</AdminButton>
+                    <AdminButton variant="secondary" type="button" onClick={async () => { if (typeof window !== "undefined" && !window.confirm(t.deleteOverrideConfirm)) return; await api(`/admin/seo/overrides/${item.id}`, token, { method: "DELETE" }); if (editingOverrideId === item.id) { setEditingOverrideId(null); setOverrideForm(emptyOverride(locale)); } await loadOverrides(token); }}>{t.del}</AdminButton>
                   </div>
                 </li>
               ))}
@@ -640,7 +678,7 @@ export default function AdminSeoPage() {
         <AdminSectionCard
           className="seo-pane"
           title={t.sectionRedirects}
-          description="Manage redirect rules and preload production mappings."
+          description={t.redirectsDescription}
           icon="refresh"
         >
           <form className="seo-form-grid" onSubmit={(event) => void saveRedirect(event)}>
@@ -651,7 +689,7 @@ export default function AdminSeoPage() {
             <label className="seo-inline-check" htmlFor="seo-redirect-enabled"><input id="seo-redirect-enabled" type="checkbox" checked={redirectForm.enabled} onChange={(event) => setRedirectForm((prev) => ({ ...prev, enabled: event.target.checked }))} /><span>enabled</span></label>
             <div className="card-actions seo-actions-wide">
               <AdminButton variant="primary" type="submit" disabled={!isAuth || busy}>{t.save}</AdminButton>
-              <AdminButton variant="secondary" type="button" onClick={() => void preloadRedirectsFromProduction()} disabled={!isAuth || busy}>Preload production redirects</AdminButton>
+              <AdminButton variant="secondary" type="button" onClick={() => void preloadRedirectsFromProduction()} disabled={!isAuth || busy}>{t.preloadRedirects}</AdminButton>
             </div>
           </form>
           {redirects.length === 0 ? <div className="state-empty">{t.emptyRedirects}</div> : null}
@@ -662,8 +700,8 @@ export default function AdminSeoPage() {
                   <div className="seo-item-head"><strong>{item.old_path}</strong><AdminBadge tone={redirectStatusTone(item.status_code)}>{item.status_code}</AdminBadge></div>
                   <p className="seo-item-meta">{item.new_path}</p>
                   <div className="card-actions">
-                    <AdminButton variant="secondary" type="button" onClick={() => { setEditingRedirectId(item.id); setRedirectForm({ old_path: item.old_path, new_path: item.new_path, status_code: item.status_code === 302 ? 302 : 301, preserve_query: item.preserve_query, enabled: item.enabled }); }}>{editingRedirectId === item.id ? "Editing" : "Edit"}</AdminButton>
-                    <AdminButton variant="secondary" type="button" onClick={async () => { await api(`/admin/seo/redirects/${item.id}`, token, { method: "DELETE" }); if (editingRedirectId === item.id) { setEditingRedirectId(null); setRedirectForm(emptyRedirect()); } await loadRedirects(token); }}>Delete</AdminButton>
+                    <AdminButton variant="secondary" type="button" onClick={() => { setEditingRedirectId(item.id); setRedirectForm({ old_path: item.old_path, new_path: item.new_path, status_code: item.status_code === 302 ? 302 : 301, preserve_query: item.preserve_query, enabled: item.enabled }); }}>{editingRedirectId === item.id ? t.editing : t.edit}</AdminButton>
+                    <AdminButton variant="secondary" type="button" onClick={async () => { if (typeof window !== "undefined" && !window.confirm(t.deleteRedirectConfirm)) return; await api(`/admin/seo/redirects/${item.id}`, token, { method: "DELETE" }); if (editingRedirectId === item.id) { setEditingRedirectId(null); setRedirectForm(emptyRedirect()); } await loadRedirects(token); }}>{t.del}</AdminButton>
                   </div>
                 </li>
               ))}
@@ -674,7 +712,7 @@ export default function AdminSeoPage() {
         <AdminSectionCard
           className="seo-pane seo-full"
           title={t.sectionSchema}
-          description="Edit approved schema source fields by locale."
+          description={t.schemaDescription}
           icon="layout"
         >
           <form className="seo-form-grid" onSubmit={(event) => void saveSchema(event)}>
@@ -696,7 +734,7 @@ export default function AdminSeoPage() {
             <label className="field" htmlFor="seo-schema-article-author-url"><span>Article author URL</span><input id="seo-schema-article-author-url" value={schemaForm.schema_article_author_url} onChange={(event) => setSchemaForm((prev) => ({ ...prev, schema_article_author_url: event.target.value }))} /></label>
             <div className="card-actions seo-actions-wide">
               <AdminButton variant="primary" type="submit" disabled={!isAuth || busy}>{t.save}</AdminButton>
-              <AdminButton variant="secondary" type="button" onClick={() => void bootstrapSchemaFromProduction()} disabled={!isAuth || busy}>Load approved schema defaults</AdminButton>
+              <AdminButton variant="secondary" type="button" onClick={() => void bootstrapSchemaFromProduction()} disabled={!isAuth || busy}>{t.schemaBootstrap}</AdminButton>
             </div>
           </form>
           {!schemaHasData ? <div className="state-empty">{t.emptySchema}</div> : null}
@@ -705,12 +743,12 @@ export default function AdminSeoPage() {
         <LogCard
           className="seo-pane seo-full"
           title={t.sectionBroken}
-          description="Run the link checker and inspect the latest crawl report."
+          description={t.brokenDescription}
           icon="warning"
           titleTag="h2"
         >
           <div className="card-actions">
-            <AdminButton variant="primary" type="button" onClick={() => void runBrokenLinks()} disabled={!isAuth || busy}>Run checker</AdminButton>
+            <AdminButton variant="primary" type="button" onClick={() => void runBrokenLinks()} disabled={!isAuth || busy}>{t.runChecker}</AdminButton>
             <AdminButton variant="secondary" type="button" onClick={() => void loadReport(token)} disabled={!isAuth || busy}>{t.refresh}</AdminButton>
           </div>
           {policy ? (
@@ -725,13 +763,13 @@ export default function AdminSeoPage() {
           {report ? (
             <>
               <div className="seo-report-grid" role="status" aria-live="polite">
-                <p><strong>checked_at:</strong> {reportTime}</p>
-                <p><strong>checked_pages:</strong> {report.checked_pages.length}</p>
-                <p><strong>total_links:</strong> {report.total_links}</p>
-                <p><strong>checker_version:</strong> {report.checker_version}</p>
-              </div>
+              <p><strong>{t.checkedAt}:</strong> {reportTime}</p>
+              <p><strong>{t.checkedPages}:</strong> {report.checked_pages.length}</p>
+              <p><strong>{t.totalLinks}:</strong> {report.total_links}</p>
+              <p><strong>{t.checkerVersion}:</strong> {report.checker_version}</p>
+            </div>
               {report.broken_links.length === 0 ? (
-                <div className="state-empty">No broken links found.</div>
+                <div className="state-empty">{t.noBrokenLinks}</div>
               ) : (
                 <AdminTable caption="Broken links report">
                   <table className="admin-table">
