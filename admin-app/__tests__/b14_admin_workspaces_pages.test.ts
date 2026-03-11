@@ -40,6 +40,7 @@ describe("B14 admin workspace pages contract", () => {
     expect(page).toContain("invalidGalleryPayload");
     expect(page).toContain("operationResultHint");
     expect(page).toContain("selectionHint");
+    expect(page).toContain('patchJson: "ข้อมูลอัปเดตแบบ JSON"');
     expect(page).toContain("archiveConfirm");
     expect(page).toContain("window.confirm");
     expect(page).toContain("emptyHint");
@@ -68,6 +69,7 @@ describe("B14 admin workspace pages contract", () => {
     expect(page).toContain("importSelectionHint");
     expect(page).toContain("selectedFile");
     expect(page).toContain("selectedMode");
+    expect(page).toContain('filterDryRun: "กรองโหมดทดลองรัน"');
     expect(page).toContain("emptyHint");
     expect(page).toContain("disabled={loading || importBusy}");
   });

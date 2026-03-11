@@ -21,6 +21,7 @@ describe("admin home composer surface polish", () => {
     expect(page).toContain('className="home-composer-option-label"');
     expect(page).toContain('className="home-composer-search-results"');
     expect(page).toContain('className={`home-composer-media-status-badge ${mediaBadgeClass(asset)}`}');
+    expect(page).toContain("mediaCandidatesEmpty");
     expect(page).toContain("const formatCandidatePropertyTitle =");
     expect(page).toContain("Promise.allSettled([");
   });

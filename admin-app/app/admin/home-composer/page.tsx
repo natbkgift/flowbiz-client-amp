@@ -143,6 +143,7 @@ const HOME_COMPOSER_COPY = {
     chooseHeroImageMedia: 'Choose hero image media',
     heroImagePickerTitle: 'Hero image media picker',
     heroImagePickerDescription: 'Select a media asset for the hero image.',
+    mediaCandidatesEmpty: 'No media candidates match the current search.',
     close: 'Close',
     noMediaItems: 'No media items available.',
     trustItemsLabel: 'Trust micro-strip items (one per line)',
@@ -261,6 +262,7 @@ const HOME_COMPOSER_COPY = {
     chooseHeroImageMedia: 'เลือกสื่อสำหรับภาพฮีโร่',
     heroImagePickerTitle: 'ตัวเลือกสื่อภาพฮีโร่',
     heroImagePickerDescription: 'เลือกไฟล์สื่อภายในระบบเพื่อใช้เป็นภาพหลักของหน้าแรก',
+    mediaCandidatesEmpty: 'ไม่พบไฟล์สื่อที่ตรงกับคำค้นปัจจุบัน',
     close: 'ปิด',
     noMediaItems: 'ยังไม่มีรายการสื่อให้เลือก',
     trustItemsLabel: 'รายการข้อความความน่าเชื่อถือแบบสั้น (หนึ่งบรรทัดต่อหนึ่งรายการ)',
@@ -313,8 +315,8 @@ const HOME_COMPOSER_COPY = {
     selectProperty: 'เลือกทรัพย์',
     selectHeroImage: 'เลือกภาพฮีโร่',
     closeHeroImagePicker: 'ปิดตัวเลือกสื่อภาพฮีโร่',
-    mustBeValidJsonArray: 'ต้องเป็น JSON array ที่ถูกต้อง',
-    mustBeJsonArray: 'ต้องเป็น JSON array',
+    mustBeValidJsonArray: 'ข้อมูลต้องเป็น JSON array ที่ถูกต้อง',
+    mustBeJsonArray: 'ข้อมูลต้องเป็น JSON array',
     sessionExpired: 'เซสชันหมดอายุ กรุณาเข้าสู่ระบบอีกครั้ง',
     loadComposerError: 'ไม่สามารถโหลดคอมโพสหน้าแรกได้',
     loadComposerStateDescription: 'เชื่อมต่อและโหลดข้อมูลคอมโพสให้สำเร็จก่อนเริ่มแก้ไขหน้านี้',
@@ -1511,12 +1513,12 @@ export default function HomeComposerPage() {
             >
               <input value={candidateSearch} onChange={(e) => setCandidateSearch(e.target.value)} placeholder={t.searchPlaceholder} className="home-composer-search-input" />
               <div className="home-composer-search-results">
-                {mediaCandidates.map((asset) => (
+                {mediaCandidates.length > 0 ? mediaCandidates.map((asset) => (
                   <button key={asset.id} type="button" onClick={() => selectHeroMedia(asset.storage_path)} className="home-composer-media-option">
                     <div className="home-composer-code">{asset.storage_path}</div>
                     <div className={`home-composer-media-status-badge ${mediaBadgeClass(asset)}`}>{formatMediaCompliance(asset)}</div>
                   </button>
-                ))}
+                )) : <div className="state-empty">{t.mediaCandidatesEmpty}</div>}
               </div>
             </LogCard>
 
