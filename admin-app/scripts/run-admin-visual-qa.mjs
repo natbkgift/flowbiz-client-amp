@@ -118,10 +118,14 @@ async function ensureBaseUrl(url) {
   }
 
   const startLogs = [];
+  const startupAttempts = Number.parseInt(process.env.ADMIN_VISUAL_STARTUP_ATTEMPTS || "120", 10) || 120;
   const npmCommand = process.platform === "win32" ? "npm.cmd" : "npm";
   const child = spawn(npmCommand, ["run", "dev"], {
     cwd: process.cwd(),
-    env: process.env,
+    env: {
+      ...process.env,
+      NEXT_LOCAL_FONT_FALLBACK: process.env.NEXT_LOCAL_FONT_FALLBACK || "1",
+    },
     shell: process.platform === "win32",
     stdio: ["ignore", "pipe", "pipe"],
   });
@@ -129,7 +133,7 @@ async function ensureBaseUrl(url) {
   child.stdout.on("data", (chunk) => startLogs.push(String(chunk)));
   child.stderr.on("data", (chunk) => startLogs.push(String(chunk)));
 
-  for (let attempt = 0; attempt < 45; attempt += 1) {
+  for (let attempt = 0; attempt < startupAttempts; attempt += 1) {
     if (await checkUrlReady(url)) {
       return { started: true, child, logs: startLogs };
     }

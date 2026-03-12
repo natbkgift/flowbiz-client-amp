@@ -42,11 +42,9 @@ describe('next.config.js security & performance settings', () => {
     expect(c.images?.formats).toContain('image/webp');
   });
 
-  it('has optimizePackageImports configured', () => {
+  it('does not reference optimizePackageImports packages that are not installed', () => {
     const c = config as any;
-    expect(c.experimental?.optimizePackageImports).toEqual(
-      expect.arrayContaining(['@heroicons/react']),
-    );
+    expect(c.experimental?.optimizePackageImports ?? []).not.toContain('@heroicons/react');
   });
 });
 

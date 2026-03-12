@@ -8,19 +8,25 @@ import { Noto_Serif_Thai, Prompt } from 'next/font/google';
 import { headers } from 'next/headers';
 import { getDictionary, normalizeLocale } from '@/app/_lib/i18n/get-dictionary';
 
-const sans = Prompt({
-  subsets: ['thai', 'latin'],
-  weight: ['400', '500', '600', '700'],
-  display: 'swap',
-  variable: '--font-sans',
-});
+const useFallbackFonts = process.env.NEXT_LOCAL_FONT_FALLBACK === '1';
 
-const serif = Noto_Serif_Thai({
-  subsets: ['thai', 'latin'],
-  weight: ['400'],
-  display: 'swap',
-  variable: '--font-serif',
-});
+const sans = useFallbackFonts
+  ? { variable: '' }
+  : Prompt({
+      subsets: ['thai', 'latin'],
+      weight: ['400', '500', '600', '700'],
+      display: 'swap',
+      variable: '--font-sans',
+    });
+
+const serif = useFallbackFonts
+  ? { variable: '' }
+  : Noto_Serif_Thai({
+      subsets: ['thai', 'latin'],
+      weight: ['400'],
+      display: 'swap',
+      variable: '--font-serif',
+    });
 
 const siteBaseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://amppattaya.com';
 
@@ -45,8 +51,9 @@ async function detectLocale(): Promise<string> {
 export default async function RootLayout({ children }: { children: ReactNode }) {
   const lang = await detectLocale();
   const dict = getDictionary(normalizeLocale(lang));
+  const htmlClassName = [sans.variable, serif.variable].filter(Boolean).join(' ');
   return (
-    <html lang={lang} dir="ltr" className={`${sans.variable} ${serif.variable}`}>
+    <html lang={lang} dir="ltr" className={htmlClassName}>
       <head>
         {/* Fonts self-hosted by next/font/google at build time — no external requests needed */}
       </head>
