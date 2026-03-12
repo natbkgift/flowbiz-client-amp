@@ -132,6 +132,7 @@ const HOME_COMPOSER_COPY = {
     down: 'Down',
     heroTitle: 'Hero',
     heroDescription: 'Main heading, CTAs, trust strip, and hero image selection.',
+    heroEyebrowLabel: 'Hero eyebrow',
     heading: 'Heading',
     subheading: 'Subheading',
     primaryCtaLabel: 'Primary CTA label',
@@ -251,6 +252,7 @@ const HOME_COMPOSER_COPY = {
     down: 'เลื่อนลง',
     heroTitle: 'ฮีโร่หลัก',
     heroDescription: 'กำหนดข้อความหลัก ปุ่ม CTA แถบความน่าเชื่อถือ และภาพฮีโร่ของหน้าแรก',
+    heroEyebrowLabel: 'ข้อความคิ้วของฮีโร่',
     heading: 'หัวข้อหลัก',
     subheading: 'หัวข้อรอง',
     primaryCtaLabel: 'ข้อความปุ่มหลัก',
@@ -378,6 +380,7 @@ type HomeComposerConfig = {
   enabled_sections: SectionKey[];
   section_order: SectionKey[];
   hero: {
+    eyebrow?: string;
     heading?: string;
     subheading?: string;
     primary_cta_label?: string;
@@ -435,6 +438,7 @@ function defaultConfig(): HomeComposerConfig {
     enabled_sections: [...SECTION_KEYS],
     section_order: [...SECTION_KEYS],
     hero: {
+      eyebrow: '',
       heading: '',
       subheading: '',
       primary_cta_label: '',
@@ -1286,6 +1290,7 @@ export default function HomeComposerPage() {
               titleTag="h2"
             >
               <div className="home-composer-dual-grid">
+                <label className="home-composer-form-field">{t.heroEyebrowLabel}<input value={config.hero.eyebrow || ''} onChange={(e) => setConfig((prev) => ({ ...prev, hero: { ...prev.hero, eyebrow: e.target.value } }))} className="home-composer-form-control" /></label>
                 <label className="home-composer-form-field">{t.heading}<input value={config.hero.heading || ''} onChange={(e) => setConfig((prev) => ({ ...prev, hero: { ...prev.hero, heading: e.target.value } }))} className="home-composer-form-control" /></label>
                 <label className="home-composer-form-field">{t.subheading}<input value={config.hero.subheading || ''} onChange={(e) => setConfig((prev) => ({ ...prev, hero: { ...prev.hero, subheading: e.target.value } }))} className="home-composer-form-control" /></label>
                 <label className="home-composer-form-field">{t.primaryCtaLabel}<input value={config.hero.primary_cta_label || ''} onChange={(e) => setConfig((prev) => ({ ...prev, hero: { ...prev.hero, primary_cta_label: e.target.value } }))} className="home-composer-form-control" /></label>

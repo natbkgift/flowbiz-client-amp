@@ -23,6 +23,24 @@ export type Dictionary = {
     whatsapp: string;
     line: string;
   };
+  advisory: {
+    heroEyebrow: string;
+    heroSupportingLine: string;
+    trustBar: string[];
+    bestFor: string;
+    nextStep: string;
+    trustSignal: string;
+    browseVerifiedInventory: string;
+    compareOpportunities: string;
+    useSmartFinder: string;
+    teamCtaTitle: string;
+    teamCtaBody: string;
+    teamCtaPrimary: string;
+    teamCtaSecondary: string;
+    noPublishedDataTitle: string;
+    noPublishedDataBody: string;
+    verifiedEditorialUpdate: string;
+  };
   home: {
     heroTitle: string;
     heroSubtitle: string;

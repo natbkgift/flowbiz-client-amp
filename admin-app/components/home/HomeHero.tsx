@@ -1,12 +1,14 @@
 import Image from "next/image";
 import { TrackedLink } from "@/components/analytics/TrackedLink";
+import { buildWhatsAppUrl } from "@/app/_lib/public-cta";
 import { HeroOverlay } from "@/components/home/HeroOverlay";
 import { Container } from "@/components/layout/Container";
 import { withLocale } from "@/app/_lib/i18n/routing";
 
-const HERO_FALLBACK_IMAGE = "/media/project-covers/the-riviera-jomtien/cover_31dde7af340e.jpg";
+const HERO_FALLBACK_IMAGE = "/images/hero-banner.webp";
 
 type HomeHeroComposer = {
+    eyebrow?: string;
     heading?: string;
     subheading?: string;
     primary_cta_label?: string;
@@ -89,11 +91,12 @@ export function HomeHero({
     const heroHeading = typeof composer?.heading === 'string' && composer.heading.trim()
         ? composer.heading.trim()
         : dict.home.heroTitle;
+    const heroEyebrow = typeof composer?.eyebrow === 'string' && composer.eyebrow.trim()
+        ? composer.eyebrow.trim()
+        : dict.advisory.heroEyebrow;
     const heroSubheading = typeof composer?.subheading === 'string' && composer.subheading.trim()
         ? composer.subheading.trim()
-        : (locale === "th"
-            ? "โอกาสอสังหาริมทรัพย์พัทยาที่ผ่านการคัดกรองและตรวจสอบข้อมูลแล้ว พร้อมทีมท้องถิ่นพาชมแบบส่วนตัวตามเป้าหมายของคุณ"
-            : "Curated and verified Pattaya opportunities, guided by a local team that plans private viewings around your goals.");
+        : dict.home.heroSubtitle;
 
     const primaryCtaLabel = typeof composer?.primary_cta_label === 'string' && composer.primary_cta_label.trim()
         ? composer.primary_cta_label.trim()
@@ -111,17 +114,17 @@ export function HomeHero({
 
     const trustItems = Array.isArray(composer?.trust_items) && composer?.trust_items.length
         ? composer.trust_items
-        : [
-            locale === "th" ? "รายการคัดสรร" : "Curated Listings",
-            locale === "th" ? "ข้อมูลตรวจสอบแล้ว" : "Verified Information",
-            locale === "th" ? "ทีมท้องถิ่นพัทยา" : "Local Pattaya Team",
-            locale === "th" ? "พาชมแบบส่วนตัว" : "Private Tours Available",
-        ];
+        : dict.advisory.trustBar;
 
     const pathSelectorEnabled = composer?.path_selector_enabled ?? true;
     const heroImageSrc = typeof composer?.hero_image === 'string' && composer.hero_image.startsWith('/media/')
         ? composer.hero_image
         : HERO_FALLBACK_IMAGE;
+    const whatsAppHref = buildWhatsAppUrl(
+        locale === "th"
+            ? dict.home.whatsAppFallback
+            : dict.home.whatsAppFallback,
+    );
 
     return (
         <section className="relative w-full bg-gray-900 overflow-hidden min-h-[720px] sm:min-h-[760px] md:min-h-[680px] xl:min-h-[720px]">
@@ -146,6 +149,9 @@ export function HomeHero({
             <div className="absolute inset-0 z-20 flex flex-col justify-start md:justify-center pt-[92px] sm:pt-[100px] pb-6 md:py-28">
                 <Container variant="wide">
                     <div className="hero-home-panel max-w-[min(76ch,100%)]">
+                        <p className="hero-home-eyebrow text-white/72 text-[11px] md:text-xs font-semibold tracking-[0.26em] uppercase mb-3 md:mb-4">
+                            {heroEyebrow}
+                        </p>
                         {/* Headline: weight ~500, tight tracking, 1.1 line-height, max-width 14ch for controlled wrapping */}
                         <h1 className={`hero-home-title ${locale === "th" ? "hero-home-title--th" : ""} text-white text-[length:var(--font-h1)] font-medium font-serif mb-4 md:mb-7 leading-[1.05] tracking-tight max-w-[13.5ch]`}>
                             {heroHeading}
@@ -172,6 +178,14 @@ export function HomeHero({
                             >
                                 {secondaryCtaLabel}
                             </TrackedLink>
+                            <a
+                                className="btn btn-tertiary"
+                                href={whatsAppHref}
+                                target="_blank"
+                                rel="noreferrer"
+                            >
+                                {dict.cta.whatsapp}
+                            </a>
                         </div>
 
                         <div className="hero-trust-strip mt-4 md:mt-5" role="note" aria-label={locale === "th" ? "ข้อมูลความน่าเชื่อถือ" : "Trust highlights"}>
@@ -185,7 +199,7 @@ export function HomeHero({
                                         key={card.key}
                                         className="hero-path-card"
                                         href={card.href}
-                                        eventType="path_entry_click"
+                                        eventType="home_intent_selector_click"
                                         eventPayload={card.eventPayload}
                                     >
                                         <div className="hero-path-card__header">

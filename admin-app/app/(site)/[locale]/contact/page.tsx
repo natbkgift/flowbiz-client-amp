@@ -6,8 +6,10 @@ const LeadForm = dynamic(() => import('@/components/forms/LeadForm').then(m => m
   loading: () => <div className="animate-pulse h-48 rounded bg-slate-100" />,
 });
 import { CTA } from '@/app/_lib/public-cta';
+import { buildAdvisorWhatsApp, getAdvisoryLabels, getAdvisoryProofs, withLocaleQuery } from '@/app/_lib/public-advisory';
 import { getDictionary, normalizeLocale } from '@/app/_lib/i18n/get-dictionary';
 import { makePageMetadata } from '@/app/_lib/i18n/metadata';
+import { PublicAdvisoryHero } from '@/components/public/PublicAdvisoryHero';
 
 export const revalidate = 300;
 
@@ -32,6 +34,8 @@ export default async function ContactPage(
   const params = await props.params;
   const locale = normalizeLocale(params.locale);
   const dict = getDictionary(locale);
+  const advisoryLabels = getAdvisoryLabels(locale);
+  const advisoryProofs = getAdvisoryProofs(dict);
   const msg =
     (typeof searchParams?.msg === 'string' ? searchParams.msg : Array.isArray(searchParams?.msg) ? searchParams?.msg[0] : null) ??
     null;
@@ -45,12 +49,54 @@ export default async function ContactPage(
           { label: dict.nav.contact, href: `/${locale}/contact` },
         ]}
       />
-      <section className="hero hero--page">
-        <Container>
-          <h1 className="headline">{dict.contact.title}</h1>
-          <p className="subhead">{dict.contact.subtitle}</p>
-        </Container>
-      </section>
+      <PublicAdvisoryHero
+        eyebrow={dict.advisory.heroEyebrow}
+        title={dict.contact.title}
+        subtitle={dict.contact.subtitle}
+        proofs={advisoryProofs}
+        proofsLabel={advisoryLabels.proofsLabel}
+        guidanceLabel={advisoryLabels.guidanceLabel}
+        signals={[
+          {
+            kicker: dict.advisory.bestFor,
+            title: locale === 'th' ? 'ผู้ซื้อ นักลงทุน และผู้เช่าที่ต้องการ next step ชัด' : 'Buyers, investors, and renters who need the next step',
+            body: locale === 'th'
+              ? 'ใช้หน้านี้เมื่อคุณพร้อมอธิบายงบประมาณ เป้าหมาย และทำเล เพื่อให้ทีมตอบกลับแบบมีทิศทาง'
+              : 'Use this when you are ready to share budget, goals, and preferred areas so the team can respond with direction.',
+            icon: 'users',
+          },
+          {
+            kicker: dict.advisory.nextStep,
+            title: locale === 'th' ? 'เลือกช่องทางที่สะดวกที่สุดได้เลย' : 'Choose the channel that fits your pace',
+            body: locale === 'th'
+              ? 'กรอกฟอร์มไว้ให้ทีมคัด shortlist ต่อ หรือเปิด WhatsApp / LINE เพื่อเริ่มคุยทันที'
+              : 'Use the form for a structured request, or message the team directly through WhatsApp or LINE.',
+            icon: 'check',
+          },
+          {
+            kicker: dict.advisory.trustSignal,
+            title: locale === 'th' ? 'ทีมตอบกลับพร้อม action ไม่ใช่ข้อความทั่วไป' : 'Responses are action-oriented, not generic',
+            body: locale === 'th'
+              ? 'เราออกแบบช่องทางนี้เพื่อส่งต่อไปสู่ shortlist, tour, หรือ consultation ที่ชัดเจน'
+              : 'The goal is to turn your request into a concrete shortlist, tour plan, or consultation step.',
+            icon: 'shield',
+          },
+        ]}
+        primaryAction={{
+          href: '#contact-form',
+          label: dict.contact.formTitle,
+          eventPayload: { cta: 'open_contact_form', from: 'contact_hero' },
+        }}
+        secondaryAction={{
+          href: withLocaleQuery(locale, '/smart-finder', { source: 'contact_hero' }),
+          label: dict.advisory.useSmartFinder,
+          eventPayload: { cta: 'use_smart_finder', from: 'contact_hero' },
+        }}
+        tertiaryAction={{
+          href: buildAdvisorWhatsApp(locale, dict),
+          label: dict.cta.whatsapp,
+        }}
+      />
 
       <section className="section">
         <Container>
@@ -82,7 +128,7 @@ export default async function ContactPage(
               </div>
             </aside>
 
-            <div className="split__main">
+            <div className="split__main" id="contact-form">
               <LeadForm heading={dict.contact.formTitle} defaultMessage={defaultMessage} />
             </div>
           </div>

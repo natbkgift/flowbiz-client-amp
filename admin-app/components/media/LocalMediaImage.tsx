@@ -5,8 +5,8 @@ import { useMemo } from 'react';
 import { pickPrimaryLocalMedia, type LocalMediaInput } from '@/app/_lib/local-media';
 import { SafeCoverImage } from '@/components/media/SafeCoverImage';
 
-const DEFAULT_FALLBACK_SRC = '/media/project-covers/the-riviera-jomtien/cover_31dde7af340e.jpg';
-const CONTRACT_IMAGE_FALLBACK_SRC = '/media/placeholders/image-fallback.webp';
+const DEFAULT_FALLBACK_SRC = '/images/property-placeholder.svg';
+const CONTRACT_IMAGE_FALLBACK_SRC = '/images/project-overview.png';
 const LOCAL_PREFIXES = ['/media/', '/storage/', '/uploads/', '/assets/', '/images/'];
 
 function normalizeRuntimeLocalPath(value: string | null | undefined): string | null {

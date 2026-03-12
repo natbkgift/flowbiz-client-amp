@@ -6,7 +6,7 @@ import type { Dictionary } from '../../app/_lib/i18n/types';
 import { resolveImageUrl } from '../../app/_lib/public-api-shared';
 import { withLocale } from '../../app/_lib/i18n/routing';
 
-const PROPERTY_CARD_FALLBACK = '/media/project-covers/the-riviera-jomtien/cover_31dde7af340e.jpg';
+const PROPERTY_CARD_FALLBACK = '/images/property-placeholder.svg';
 
 function formatPriceTHB(price: number): string {
   if (!Number.isFinite(price)) return '฿-';

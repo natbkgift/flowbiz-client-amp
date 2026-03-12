@@ -1,9 +1,11 @@
 import Link from 'next/link';
 
 import { Container } from '@/components/layout/Container';
+import { buildAdvisorWhatsApp, getAdvisoryLabels, getAdvisoryProofs, withLocaleQuery } from '@/app/_lib/public-advisory';
 import { getDictionary, normalizeLocale } from '@/app/_lib/i18n/get-dictionary';
 import { makePageMetadata } from '@/app/_lib/i18n/metadata';
 import { withLocale } from '@/app/_lib/i18n/routing';
+import { PublicAdvisoryHero } from '@/components/public/PublicAdvisoryHero';
 import {
   fetchSmartFinder,
   type SmartFinderBudget,
@@ -76,6 +78,8 @@ export default async function SmartFinderPage(
   const params = await props.params;
   const locale = normalizeLocale(params.locale);
   const dict = getDictionary(locale);
+  const advisoryLabels = getAdvisoryLabels(locale);
+  const advisoryProofs = getAdvisoryProofs(dict);
 
   const requestedStep = normalizeStep(pickParam(searchParams?.step));
 
@@ -118,14 +122,56 @@ export default async function SmartFinderPage(
 
   return (
     <main id="main-content">
-      <section className="hero hero--page">
-        <Container>
-          <h1 className="headline">{headerTitle}</h1>
-          <p className="subhead">{headerSubtitle}</p>
-        </Container>
-      </section>
+      <PublicAdvisoryHero
+        eyebrow={dict.advisory.heroEyebrow}
+        title={headerTitle}
+        subtitle={headerSubtitle}
+        proofs={advisoryProofs}
+        proofsLabel={advisoryLabels.proofsLabel}
+        guidanceLabel={advisoryLabels.guidanceLabel}
+        signals={[
+          {
+            kicker: dict.advisory.bestFor,
+            title: locale === 'th' ? 'ผู้ซื้อที่ต้องการเริ่มจาก intent ก่อน inventory' : 'Buyers who want to start from intent, not inventory',
+            body: locale === 'th'
+              ? 'เครื่องมือนี้ช่วยคัดกรอบตัดสินใจเบื้องต้นก่อนที่ทีมจะลงลึกไปยัง shortlist จริง'
+              : 'This tool helps qualify the decision before the team moves into a deeper shortlist.',
+            icon: 'trend',
+          },
+          {
+            kicker: dict.advisory.nextStep,
+            title: locale === 'th' ? 'ตอบคำถามไม่กี่ข้อ แล้วค่อยเลือกโครงการ' : 'Answer a few questions before browsing',
+            body: locale === 'th'
+              ? 'ถ้าผลลัพธ์ยังไม่ชัด คุณยังส่งต่อไปยังทีมที่ปรึกษาได้ทันที'
+              : 'If the results are still broad, you can hand the context to an advisor immediately.',
+            icon: 'check',
+          },
+          {
+            kicker: dict.advisory.trustSignal,
+            title: locale === 'th' ? 'ใช้ route เดิม แต่เพิ่ม logic ให้ใช้งานจริงขึ้น' : 'Same route, stronger decision support',
+            body: locale === 'th'
+              ? 'เราไม่เปลี่ยน endpoint เดิม แต่ทำให้เครื่องมือนี้เป็นจุดเริ่มต้นของ funnel ที่ชัดขึ้น'
+              : 'The route and payload stay the same, but the experience now works like a real advisory entry point.',
+            icon: 'shield',
+          },
+        ]}
+        primaryAction={{
+          href: '#finder-steps',
+          label: dict.advisory.useSmartFinder,
+          eventPayload: { cta: 'start_smart_finder', from: 'smart_finder_hero' },
+        }}
+        secondaryAction={{
+          href: withLocaleQuery(locale, '/contact', { intent: 'consultation', source: 'smart_finder_hero' }),
+          label: dict.cta.speakToAdvisor,
+          eventPayload: { cta: 'speak_to_advisor', from: 'smart_finder_hero' },
+        }}
+        tertiaryAction={{
+          href: buildAdvisorWhatsApp(locale, dict),
+          label: dict.cta.whatsapp,
+        }}
+      />
 
-      <section className="section">
+      <section className="section" id="finder-steps">
         <Container>
           <div className="card reveal">
             <h2 className="card-title">{dict.smartFinder.steps}</h2>

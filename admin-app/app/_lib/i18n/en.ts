@@ -4,7 +4,7 @@ export const en: Dictionary = {
   brand: {
     name: 'AMP Pattaya',
     shortName: 'AMP',
-    tagline: 'International Property Investment Authority',
+    tagline: 'Luxury Investment Advisory Platform for Pattaya',
   },
   nav: {
     home: 'Home',
@@ -23,10 +23,35 @@ export const en: Dictionary = {
     whatsapp: 'WhatsApp',
     line: 'LINE',
   },
+  advisory: {
+    heroEyebrow: 'Pattaya Property Advisory for International Buyers',
+    heroSupportingLine: 'Curated and verified Pattaya opportunities with local guidance, private tours, and investment clarity.',
+    trustBar: [
+      'Curated listings',
+      'Verified information',
+      'Local Pattaya team',
+      'Private tours available',
+      'Foreign buyer guidance',
+      'PDPA / GDPR aligned',
+    ],
+    bestFor: 'Best for',
+    nextStep: 'Next step',
+    trustSignal: 'Why trust AMP',
+    browseVerifiedInventory: 'Browse verified inventory',
+    compareOpportunities: 'Compare opportunities',
+    useSmartFinder: 'Use Smart Finder',
+    teamCtaTitle: 'Work with a local advisory team, not a generic property portal',
+    teamCtaBody: 'Tell us whether you are buying, investing, renting, or selling. We will respond with a curated next step, not a listing dump.',
+    teamCtaPrimary: 'Book consultation',
+    teamCtaSecondary: 'Meet the team',
+    noPublishedDataTitle: 'No published content for this section yet',
+    noPublishedDataBody: 'We only surface this section once verified content or system-backed signals are ready for publication.',
+    verifiedEditorialUpdate: 'Verified editorial update',
+  },
   home: {
     heroTitle: 'Find the right Pattaya property in 60 seconds',
     heroSubtitle:
-      'A trusted platform for international buyers seeking secure property ownership and strong investment potential in Thailand.',
+      'Curated and verified Pattaya opportunities with local guidance, private tours, and investment clarity.',
     pathInvest: {
       title: 'Invest',
       desc: 'Evaluate rental demand, yield positioning, and risk factors with clear assumptions.',

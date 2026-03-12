@@ -17,7 +17,7 @@ import { getInternalLinks } from '@/app/_lib/internal-links';
 export const revalidate = 300;
 
 type PageProps = { params: Promise<{ locale: string; slug: string }> };
-const PROPERTY_DETAIL_FALLBACK = '/media/project-covers/the-riviera-jomtien/cover_31dde7af340e.jpg';
+const PROPERTY_DETAIL_FALLBACK = '/images/project-overview.png';
 
 export async function generateMetadata(props: PageProps): Promise<Metadata> {
   const params = await props.params;

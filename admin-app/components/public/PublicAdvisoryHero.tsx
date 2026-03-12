@@ -1,0 +1,147 @@
+import type { ReactNode } from 'react';
+
+import type { EventType } from '@/lib/analytics';
+import { TrackedLink } from '@/components/analytics/TrackedLink';
+import { Container } from '@/components/layout/Container';
+import {
+  IconArrowRight,
+  IconBuilding,
+  IconCheck,
+  IconShield,
+  IconTrendingUp,
+  IconUsers,
+} from '@/components/icons/SvgIcons';
+
+export type HeroAction = {
+  href: string;
+  label: string;
+  eventType?: EventType;
+  eventPayload?: Record<string, unknown>;
+};
+
+export type ExternalAction = {
+  href: string;
+  label: string;
+  ariaLabel?: string;
+};
+
+export type HeroSignal = {
+  kicker: string;
+  title: string;
+  body: string;
+  icon?: 'shield' | 'trend' | 'users' | 'building' | 'check';
+};
+
+function signalIcon(icon?: HeroSignal['icon']): ReactNode {
+  switch (icon) {
+    case 'shield':
+      return <IconShield size="sm" />;
+    case 'trend':
+      return <IconTrendingUp size="sm" />;
+    case 'users':
+      return <IconUsers size="sm" />;
+    case 'building':
+      return <IconBuilding size="sm" />;
+    case 'check':
+    default:
+      return <IconCheck size="sm" />;
+  }
+}
+
+export function PublicAdvisoryHero({
+  eyebrow,
+  title,
+  subtitle,
+  proofs,
+  signals,
+  primaryAction,
+  secondaryAction,
+  tertiaryAction,
+  proofsLabel = 'Trust bar',
+  guidanceLabel = 'Page guidance',
+}: {
+  eyebrow: string;
+  title: string;
+  subtitle: string;
+  proofs: string[];
+  signals: HeroSignal[];
+  primaryAction: HeroAction;
+  secondaryAction?: HeroAction | null;
+  tertiaryAction?: ExternalAction | null;
+  proofsLabel?: string;
+  guidanceLabel?: string;
+}) {
+  return (
+    <section className="hero hero--page hero--advisory">
+      <Container variant="wide">
+        <div className="public-hero">
+          <div className="public-hero__content">
+            <p className="public-hero__eyebrow">{eyebrow}</p>
+            <h1 className="headline public-hero__headline">{title}</h1>
+            <p className="subhead public-hero__subtitle">{subtitle}</p>
+
+            <div className="public-hero__actions cta-row">
+              <TrackedLink
+                className="btn btn-cta"
+                href={primaryAction.href}
+                eventType={primaryAction.eventType ?? 'cta_click'}
+                eventPayload={primaryAction.eventPayload}
+              >
+                {primaryAction.label}
+              </TrackedLink>
+
+              {secondaryAction ? (
+                <TrackedLink
+                  className="btn btn-secondary"
+                  href={secondaryAction.href}
+                  eventType={secondaryAction.eventType ?? 'cta_click'}
+                  eventPayload={secondaryAction.eventPayload}
+                >
+                  {secondaryAction.label}
+                </TrackedLink>
+              ) : null}
+
+              {tertiaryAction ? (
+                <a
+                  className="btn btn-tertiary"
+                  href={tertiaryAction.href}
+                  target="_blank"
+                  rel="noreferrer"
+                  aria-label={tertiaryAction.ariaLabel ?? tertiaryAction.label}
+                >
+                  {tertiaryAction.label}
+                </a>
+              ) : null}
+            </div>
+
+            <div className="public-hero__proofs" role="note" aria-label={proofsLabel}>
+              {proofs.map((proof) => (
+                <span key={proof} className="public-hero__proof">
+                  {proof}
+                </span>
+              ))}
+            </div>
+          </div>
+
+          <aside className="public-hero__rail" aria-label={guidanceLabel}>
+            {signals.map((signal) => (
+              <article key={`${signal.kicker}-${signal.title}`} className="public-hero__signal">
+                <div className="public-hero__signal-icon" aria-hidden="true">
+                  {signalIcon(signal.icon)}
+                </div>
+                <div className="public-hero__signal-copy">
+                  <p className="public-hero__signal-kicker">{signal.kicker}</p>
+                  <h2>{signal.title}</h2>
+                  <p>{signal.body}</p>
+                </div>
+                <span className="public-hero__signal-arrow" aria-hidden="true">
+                  <IconArrowRight size="sm" />
+                </span>
+              </article>
+            ))}
+          </aside>
+        </div>
+      </Container>
+    </section>
+  );
+}

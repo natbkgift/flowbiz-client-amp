@@ -1,11 +1,13 @@
 import Link from 'next/link';
 
 import { Container } from '@/components/layout/Container';
+import { buildAdvisorWhatsApp, getAdvisoryLabels, getAdvisoryProofs, withLocaleQuery } from '@/app/_lib/public-advisory';
 import { getDictionary, normalizeLocale } from '@/app/_lib/i18n/get-dictionary';
 import { makePageMetadata } from '@/app/_lib/i18n/metadata';
 import { withLocale } from '@/app/_lib/i18n/routing';
 import type { Dictionary } from '@/app/_lib/i18n/types';
 import { fetchProjectEvaluation, type ProjectEvaluationResponse } from '@/app/_lib/public-api-server';
+import { PublicAdvisoryHero } from '@/components/public/PublicAdvisoryHero';
 
 export const revalidate = 300;
 
@@ -86,6 +88,8 @@ export default async function ComparePage(
   const params = await props.params;
   const locale = normalizeLocale(params.locale);
   const dict = getDictionary(locale);
+  const advisoryLabels = getAdvisoryLabels(locale);
+  const advisoryProofs = getAdvisoryProofs(dict);
 
   const rawIds = pickParam(searchParams?.ids);
   const ids = parseIds(rawIds);
@@ -93,14 +97,54 @@ export default async function ComparePage(
   if (ids.length < 2) {
     return (
       <main id="main-content">
-        <section className="hero hero--page">
-          <Container>
-            <h1 className="headline">{dict.compare.title}</h1>
-            <p className="subhead">
-              {dict.compare.requiresTwo}
-            </p>
-          </Container>
-        </section>
+        <PublicAdvisoryHero
+          eyebrow={dict.advisory.heroEyebrow}
+          title={dict.compare.title}
+          subtitle={dict.compare.requiresTwo}
+          proofs={advisoryProofs}
+          proofsLabel={advisoryLabels.proofsLabel}
+          guidanceLabel={advisoryLabels.guidanceLabel}
+          signals={[
+            {
+              kicker: dict.advisory.bestFor,
+              title: locale === 'th' ? 'ผู้ซื้อที่ต้องการเทียบโครงการบนเกณฑ์เดียวกัน' : 'Buyers comparing projects on one frame',
+              body: locale === 'th'
+                ? 'เหมาะกับผู้ที่ยังไม่มั่นใจว่าจะใช้ inventory ชุดไหนเป็น shortlist หลัก'
+                : 'Best for buyers who want to frame strengths, weaknesses, and risk side by side first.',
+              icon: 'trend',
+            },
+            {
+              kicker: dict.advisory.nextStep,
+              title: locale === 'th' ? 'เริ่มจาก Smart Finder แล้วค่อยเทียบ' : 'Use Smart Finder before comparing',
+              body: locale === 'th'
+                ? 'ถ้ายังมีโครงการไม่พอสำหรับเทียบ ระบบจะพาคุณกลับไปหา inventory ที่เหมาะกว่า'
+                : 'If you do not have enough projects yet, the tool should push you back into discovery first.',
+              icon: 'check',
+            },
+            {
+              kicker: dict.advisory.trustSignal,
+              title: locale === 'th' ? 'ตารางนี้อ่านเพื่อการตัดสินใจ ไม่ใช่แค่โชว์ข้อมูล' : 'Comparison designed for a real decision',
+              body: locale === 'th'
+                ? 'เราจัดข้อมูลให้ใช้ชั่งน้ำหนักได้จริง ก่อนคุยกับที่ปรึกษา'
+                : 'The comparison is structured to support next actions, not just present data.',
+              icon: 'shield',
+            },
+          ]}
+          primaryAction={{
+            href: withLocale(locale, '/smart-finder'),
+            label: dict.compare.goToSmartFinder,
+            eventPayload: { cta: 'go_to_smart_finder', from: 'compare_hero' },
+          }}
+          secondaryAction={{
+            href: withLocale(locale, '/projects'),
+            label: dict.compare.browseProjects,
+            eventPayload: { cta: 'browse_projects', from: 'compare_hero' },
+          }}
+          tertiaryAction={{
+            href: buildAdvisorWhatsApp(locale, dict),
+            label: dict.cta.whatsapp,
+          }}
+        />
 
         <section className="section">
           <Container>
@@ -130,14 +174,54 @@ export default async function ComparePage(
 
   return (
     <main id="main-content">
-      <section className="hero hero--page">
-        <Container>
-          <h1 className="headline">{dict.compare.title}</h1>
-          <p className="subhead">
-            {dict.compare.readOnlyDesc}
-          </p>
-        </Container>
-      </section>
+      <PublicAdvisoryHero
+        eyebrow={dict.advisory.heroEyebrow}
+        title={dict.compare.title}
+        subtitle={dict.compare.readOnlyDesc}
+        proofs={advisoryProofs}
+        proofsLabel={advisoryLabels.proofsLabel}
+        guidanceLabel={advisoryLabels.guidanceLabel}
+        signals={[
+          {
+            kicker: dict.advisory.bestFor,
+            title: locale === 'th' ? 'นักลงทุนที่ต้องการคัด winner จาก shortlist' : 'Investors narrowing the shortlist to a winner',
+            body: locale === 'th'
+              ? 'เหมาะกับการเทียบ strengths, weaknesses และ risk level ก่อนเข้าสู่การเจรจา'
+              : 'Best for weighing strengths, weaknesses, and risk before moving into negotiation.',
+            icon: 'trend',
+          },
+          {
+            kicker: dict.advisory.nextStep,
+            title: locale === 'th' ? 'เทียบแล้วค่อยคุยกับทีมต่อเรื่อง shortlist' : 'Compare first, then move into advisor review',
+            body: locale === 'th'
+              ? 'หลังจากเห็นตารางแล้ว คุณสามารถส่งต่อ context ไปยังที่ปรึกษาเพื่อปิด shortlist ได้เลย'
+              : 'Once the table is clear, hand the context to the advisor team for the next shortlist cut.',
+            icon: 'check',
+          },
+          {
+            kicker: dict.advisory.trustSignal,
+            title: locale === 'th' ? 'มองเห็นทั้งโอกาสและข้อจำกัดในหน้าเดียว' : 'Opportunity and constraint in one place',
+            body: locale === 'th'
+              ? 'เป้าคือให้ตัดสินใจได้เร็วขึ้น ไม่ใช่สร้างความรู้สึกว่าทุกโครงการดีเท่ากัน'
+              : 'The point is to reveal trade-offs faster, not make every project look equally good.',
+            icon: 'shield',
+          },
+        ]}
+        primaryAction={{
+          href: withLocaleQuery(locale, '/contact', { intent: 'consultation', source: 'compare_hero' }),
+          label: dict.compare.getInvestmentPlan,
+          eventPayload: { cta: 'get_investment_plan', from: 'compare_hero' },
+        }}
+        secondaryAction={{
+          href: withLocale(locale, '/smart-finder'),
+          label: dict.advisory.useSmartFinder,
+          eventPayload: { cta: 'use_smart_finder', from: 'compare_hero' },
+        }}
+        tertiaryAction={{
+          href: buildAdvisorWhatsApp(locale, dict),
+          label: dict.cta.whatsapp,
+        }}
+      />
 
       <section className="section">
         <Container>

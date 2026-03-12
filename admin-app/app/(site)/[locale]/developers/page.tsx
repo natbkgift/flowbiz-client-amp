@@ -1,9 +1,12 @@
 import type { Metadata } from 'next';
 
+import { buildAdvisorWhatsApp, getAdvisoryLabels, getAdvisoryProofs, withLocaleQuery } from '@/app/_lib/public-advisory';
 import { getDictionary, normalizeLocale } from '@/app/_lib/i18n/get-dictionary';
 import { makePageMetadata } from '@/app/_lib/i18n/metadata';
 import { fetchDevelopers } from '@/app/_lib/public-api-server';
 import { Container } from '@/components/layout/Container';
+import { PublicAdvisoryHero } from '@/components/public/PublicAdvisoryHero';
+import { EmptyStateCard } from '@/components/ui/StateBlocks';
 
 export const revalidate = 300;
 
@@ -40,12 +43,63 @@ export default async function DevelopersPage(props: { params: Promise<{ locale: 
   const locale = normalizeLocale(params.locale);
   const dict = getDictionary(locale);
   const copy = pageCopy(locale);
+  const advisoryLabels = getAdvisoryLabels(locale);
+  const advisoryProofs = getAdvisoryProofs(dict);
 
   const developers = await fetchDevelopers().catch(() => []);
   const rows = [...developers].sort((a, b) => a.name.localeCompare(b.name));
 
   return (
-    <main className="section" id="main-content">
+    <main id="main-content">
+      <PublicAdvisoryHero
+        eyebrow={dict.advisory.heroEyebrow}
+        title={copy.title}
+        subtitle={copy.subtitle}
+        proofs={advisoryProofs}
+        proofsLabel={advisoryLabels.proofsLabel}
+        guidanceLabel={advisoryLabels.guidanceLabel}
+        signals={[
+          {
+            kicker: dict.advisory.bestFor,
+            title: locale === 'th' ? 'ผู้ซื้อที่ต้องการเริ่มจากความน่าเชื่อถือของผู้พัฒนา' : 'Buyers starting from developer credibility',
+            body: locale === 'th'
+              ? 'ใช้หน้านี้เมื่อต้องการเทียบ developer name, tier, และ published presence ก่อน'
+              : 'Use this page when developer brand, tier, and published presence matter before unit-level review.',
+            icon: 'building',
+          },
+          {
+            kicker: dict.advisory.nextStep,
+            title: locale === 'th' ? 'เลือก developer แล้วค่อยไปดู projects' : 'Choose the developer, then move into projects',
+            body: locale === 'th'
+              ? 'เมื่อเห็นรายชื่อที่ใช่แล้ว ค่อยไล่ต่อไปยัง inventory หรือปรึกษาทีม'
+              : 'Once the likely developer is clear, move into inventory or advisory consultation.',
+            icon: 'check',
+          },
+          {
+            kicker: dict.advisory.trustSignal,
+            title: locale === 'th' ? 'แสดงเฉพาะข้อมูลผู้พัฒนาที่เผยแพร่แล้ว' : 'Only published developer records appear here',
+            body: locale === 'th'
+              ? 'ถ้ายังไม่มีข้อมูลเผยแพร่ จะขึ้น state ว่างแบบตรงไปตรงมา'
+              : 'If no developer records are published, the page falls back to a clear editorial empty state.',
+            icon: 'shield',
+          },
+        ]}
+        primaryAction={{
+          href: withLocaleQuery(locale, '/contact', { intent: 'developer_shortlist', source: 'developers_hero' }),
+          label: dict.cta.speakToAdvisor,
+          eventPayload: { cta: 'developer_shortlist', from: 'developers_hero' },
+        }}
+        secondaryAction={{
+          href: withLocale(locale, '/projects'),
+          label: dict.advisory.browseVerifiedInventory,
+          eventPayload: { cta: 'browse_verified_inventory', from: 'developers_hero' },
+        }}
+        tertiaryAction={{
+          href: buildAdvisorWhatsApp(locale, dict),
+          label: dict.cta.whatsapp,
+        }}
+      />
+      <section className="section">
       <Container>
         <div className="section-header mb-6">
           <h1 className="section-title">{copy.title}</h1>
@@ -71,9 +125,18 @@ export default async function DevelopersPage(props: { params: Promise<{ locale: 
             ))}
           </div>
         ) : (
-          <p>{dict.listing.noProperties}</p>
+          <EmptyStateCard
+            title={dict.advisory.noPublishedDataTitle}
+            body={dict.advisory.noPublishedDataBody}
+            action={
+              <a className="btn btn-secondary" href={withLocale(locale, '/contact')}>
+                {dict.cta.speakToAdvisor}
+              </a>
+            }
+          />
         )}
       </Container>
+      </section>
     </main>
   );
 }

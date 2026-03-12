@@ -12,6 +12,10 @@
  * - `experiment_exposure`  — User was shown an experiment variant.
  * - `experiment_outcome`   — Conversion attributed to an experiment.
  * - `segment_entry_click`  — User clicks a buyer-segment entry card.
+ * - `home_intent_selector_click` — User chooses an intent path on the home hero.
+ * - `home_trust_proof_click` — User opens a trust/process proof CTA from home.
+ * - `home_advisory_content_click` — User opens advisory content from home.
+ * - `home_final_cta_click` — User clicks a closing CTA from the final conversion block.
  */
 export type EventType =
   | 'page_view'
@@ -24,7 +28,11 @@ export type EventType =
   | 'form_success'
   | 'experiment_exposure'
   | 'experiment_outcome'
-  | 'segment_entry_click';
+  | 'segment_entry_click'
+  | 'home_intent_selector_click'
+  | 'home_trust_proof_click'
+  | 'home_advisory_content_click'
+  | 'home_final_cta_click';
 
 const SESSION_KEY = 'amp_session_id_v1';
 

@@ -12,11 +12,11 @@ function normalizeLocale(value: string): 'en' | 'th' {
 }
 
 const PROPERTY_FALLBACK_IMAGES = [
-  '/media/project-covers/the-riviera-jomtien/cover_31dde7af340e.jpg',
-  '/media/project-covers/the-riviera-monaco/cover_84a7b41c3c79.jpg',
-  '/media/project-covers/copacabana-beach-jomtien/cover_44839d734c2f.jpg',
-  '/media/project-covers/city-garden-pratumnak/cover_19d5cc49057c.webp',
-  '/media/project-covers/grand-solaire/cover_e831b1643816.webp',
+  '/images/project-overview.png',
+  '/images/condo-view.png',
+  '/images/property-exterior.png',
+  '/images/property-interior.png',
+  '/images/property-pool.png',
 ];
 
 export async function generateMetadata({
@@ -108,6 +108,7 @@ export default async function HomePage({
   ]);
   const dict = getDictionary(locale);
   const homeDict = dict.home as Record<string, unknown>;
+  const advisoryDict = dict.advisory;
 
   let composerPayload: Awaited<ReturnType<typeof fetchHomeComposerPublished>> = null;
   try {
@@ -119,6 +120,9 @@ export default async function HomePage({
   const composerConfig = (composerPayload?.config ?? {}) as Record<string, unknown>;
   const composerHero = (composerConfig.hero ?? {}) as Record<string, unknown>;
   const composerPathSelector = (composerConfig.path_selector ?? {}) as Record<string, unknown>;
+  const composerTrustMicroStrip = Array.isArray(composerConfig.trust_micro_strip)
+    ? composerConfig.trust_micro_strip as Array<{ text?: string; key?: string }>
+    : [];
   const composerFeaturedProjects = (composerConfig.featured_projects ?? {}) as Record<string, unknown>;
   const composerFeaturedProperties = (composerConfig.featured_properties ?? {}) as Record<string, unknown>;
   const composerProofTrust = (composerConfig.proof_trust ?? {}) as Record<string, unknown>;
@@ -155,6 +159,9 @@ export default async function HomePage({
     return enabledBySectionFlag && enabledBySectionList;
   };
   const sectionOrderStyle = (key: string): { order: number } => ({ order: sectionOrderMap.get(key) ?? 999 });
+  const heroTrustItems = composerTrustMicroStrip
+    .map((item) => String(item?.text ?? item?.key ?? '').trim())
+    .filter(Boolean);
 
 
   const recommendation = getContentRecommendation();
@@ -555,6 +562,32 @@ export default async function HomePage({
   const whyPattayaStats = composerWhyPattayaStats.length
     ? composerWhyPattayaStats
     : fallbackInvestStats;
+  const whyPattayaNarrativeCards = [
+    {
+      title: locale === 'th' ? 'ดีมานด์จากการท่องเที่ยวและผู้พำนักจริง' : 'Tourism and end-user demand',
+      body: locale === 'th'
+        ? 'พัทยามีทั้งดีมานด์จากนักท่องเที่ยว ผู้ซื้อบ้านพัก และผู้เช่าระยะยาว จึงไม่ยึดกับกลุ่มเดียว'
+        : 'Pattaya benefits from tourism, second-home demand, and longer-stay renters instead of relying on one audience alone.',
+    },
+    {
+      title: locale === 'th' ? 'จุดเข้าเริ่มต้นยังแข่งขันได้' : 'Entry pricing remains competitive',
+      body: locale === 'th'
+        ? 'ตลาดยังมีช่วงราคาให้เลือกตั้งแต่ mass premium ไปจนถึง luxury ทำให้คัดกลยุทธ์ได้ยืดหยุ่น'
+        : 'The market still offers a useful range from mass premium to luxury, which gives room for sharper strategy choices.',
+    },
+    {
+      title: locale === 'th' ? 'โครงสร้างพื้นฐานทำให้แต่ละย่านเด่นต่างกัน' : 'Infrastructure shapes distinct submarkets',
+      body: locale === 'th'
+        ? 'การเข้าถึง โรงพยาบาล ศูนย์การค้า และโซนไลฟ์สไตล์ ทำให้แต่ละย่านมี demand story ต่างกัน'
+        : 'Access, hospitals, retail, and lifestyle clusters give each Pattaya area a different demand story.',
+    },
+    {
+      title: locale === 'th' ? 'ตลาดนี้ชนะด้วยการคัดเลือก ไม่ใช่ดูจำนวนประกาศ' : 'This market rewards curation, not volume',
+      body: locale === 'th'
+        ? 'ไม่ใช่ทุกยูนิตจะเหมาะกับทุกเป้าหมาย การคัดแบบ advisory จึงสำคัญกว่าการไล่ดู listing จำนวนมาก'
+        : 'Not every unit fits every goal, so advisory curation matters more than browsing raw listing volume.',
+    },
+  ];
 
   const composerTrustProofItems = Array.isArray(composerProofTrust.trust_proofs)
     ? composerProofTrust.trust_proofs as Array<{ key?: string; label?: string; value?: string | null }>
@@ -568,56 +601,56 @@ export default async function HomePage({
     : [
       {
         key: 'licensed',
-        label: locale === 'th' ? 'Local licensed team' : 'Local licensed team',
-        value: process.env.NEXT_PUBLIC_LOCAL_LICENSE_STATUS ?? null,
+        label: locale === 'th' ? 'ทีมท้องถิ่นพัทยา' : 'Local Pattaya team',
+        value: locale === 'th' ? 'ช่วยคัด shortlist และพาชมตามเป้าหมายจริง' : 'Curated shortlist planning and private tours around real goals.',
       },
       {
         key: 'years',
-        label: locale === 'th' ? 'Years in Pattaya' : 'Years in Pattaya',
-        value: process.env.NEXT_PUBLIC_YEARS_IN_PATTAYA ?? null,
+        label: locale === 'th' ? 'ขั้นตอนสำหรับต่างชาติ' : 'Foreign-buyer workflow',
+        value: locale === 'th' ? 'ช่วยจัดลำดับสิทธิ์ถือครอง ค่าธรรมเนียม และขั้นตอนต่อไปให้เข้าใจง่าย' : 'Clarifies ownership, fees, and next steps for foreign buyers.',
       },
       {
         key: 'clients',
-        label: locale === 'th' ? '#clients' : '#clients',
-        value: process.env.NEXT_PUBLIC_CLIENT_COUNT ?? null,
+        label: locale === 'th' ? 'การคัดเลือกแบบ advisory' : 'Advisory curation',
+        value: locale === 'th' ? 'ไม่ส่ง listing dump แต่คัดตัวเลือกพร้อม trade-offs ที่มองเห็นได้' : 'Focused options with transparent trade-offs instead of a listing dump.',
       },
       {
         key: 'response',
-        label: locale === 'th' ? 'response time' : 'response time',
-        value: process.env.NEXT_PUBLIC_RESPONSE_TIME_SLA ?? null,
+        label: locale === 'th' ? 'พาชมและประสานดีล' : 'Tour and deal coordination',
+        value: locale === 'th' ? 'ช่วยประสาน private tour รีวิวตัวเลือก และจัด flow การตัดสินใจในจังหวะเดียวกัน' : 'Private tours, shortlist reviews, and deal coordination in one joined-up flow.',
       },
     ];
 
   const marketInsightsHeading =
     typeof composerMarketInsights.heading === 'string' && composerMarketInsights.heading.trim()
       ? composerMarketInsights.heading.trim()
-      : (locale === 'th' ? 'Market Insight Engine' : 'Market Insight Engine');
+      : (locale === 'th' ? 'Area & Insight Engine' : 'Area & Insight Engine');
   const marketInsightsSubcopy =
     typeof composerMarketInsights.subcopy === 'string' && composerMarketInsights.subcopy.trim()
       ? composerMarketInsights.subcopy.trim()
       : (locale === 'th'
-        ? 'โครงคอนเทนต์พร้อมต่อยอด SEO/insights โดยคงน้ำหนักที่ actionable และเชื่อถือได้'
-        : 'Content structure ready for SEO/insight scale while staying practical and trustworthy.');
+        ? 'การ์ดบรรณาธิการสำหรับทำเล ผลตอบแทน และมุมมองตลาด ที่ช่วยลดการเดาจากข้อมูลกระจัดกระจาย'
+        : 'Editorial cards for area intelligence, rental yield, and launch context that reduce guesswork.');
 
   const reviewsHeading =
     typeof composerReviews.heading === 'string' && composerReviews.heading.trim()
       ? composerReviews.heading.trim()
-      : (locale === 'th' ? 'Client Reviews' : 'Client Reviews');
+      : (locale === 'th' ? 'รีวิวจากลูกค้า' : 'Verified Client Reviews');
   const reviewsSubcopy =
     typeof composerReviews.subcopy === 'string' && composerReviews.subcopy.trim()
       ? composerReviews.subcopy.trim()
       : (locale === 'th'
-        ? 'แสดง feedback ที่มีอยู่ พร้อมป้ายแหล่งที่มาแบบระมัดระวัง (ไม่แอบอ้างคะแนนรวม)'
-        : 'Feedback highlights with careful source badges (no unverified aggregate rating claims).');
+        ? 'ใช้เฉพาะ feedback ที่มีบริบทชัดเจน และไม่อ้างคะแนนรวมที่ยังไม่มีหลักฐานรองรับ'
+        : 'We only surface feedback with clear context and avoid unsupported aggregate rating claims.');
 
   const videosHeading =
     typeof composerVideos.heading === 'string' && composerVideos.heading.trim()
       ? composerVideos.heading.trim()
-      : (locale === 'th' ? 'ดูวิดีโอของเรา' : 'See Our Work');
+      : (locale === 'th' ? 'Video / Advisory Content' : 'Video / Advisory Content');
   const videosSubcopy =
     typeof composerVideos.subcopy === 'string' && composerVideos.subcopy.trim()
       ? composerVideos.subcopy.trim()
-      : (locale === 'th' ? 'พอร์ตงานจริงของทีมในรูปแบบเดียวกัน อ่านง่าย และลด layout shift' : 'Consistent portfolio previews with stable layout and clear watch intent.');
+      : (locale === 'th' ? 'วิดีโอคัดสรรที่ช่วยให้เข้าใจกระบวนการ พื้นที่ และวิธีคิดของทีม advisory ได้เร็วขึ้น' : 'Curated videos that explain the team’s process, area thinking, and advisory lens.');
 
   const bottomCtaHeading =
     typeof composerBottomCta.heading === 'string' && composerBottomCta.heading.trim()
@@ -721,7 +754,7 @@ export default async function HomePage({
     const source = (context ?? '').toLowerCase();
     if (source.includes('google')) return 'Google';
     if (source.includes('facebook') || source.includes('fb')) return 'Facebook';
-    return locale === 'th' ? 'Source TBD' : 'Source TBD';
+    return locale === 'th' ? 'รีวิวที่ตรวจสอบแล้ว' : 'Verified review';
   }
 
   function getReviewHighlight(quote: string): string {
@@ -737,13 +770,16 @@ export default async function HomePage({
         locale={locale}
         guidedHref={withLocale(locale, '/?guided=1&step=goal')}
         composer={{
+          eyebrow: typeof composerHero.eyebrow === 'string' ? composerHero.eyebrow : advisoryDict.heroEyebrow,
           heading: typeof composerHero.heading === 'string' ? composerHero.heading : undefined,
           subheading: typeof composerHero.subheading === 'string' ? composerHero.subheading : undefined,
           primary_cta_label: typeof composerHero.primary_cta_label === 'string' ? composerHero.primary_cta_label : undefined,
           primary_cta_url: typeof composerHero.primary_cta_url === 'string' ? composerHero.primary_cta_url : undefined,
           secondary_cta_label: typeof composerHero.secondary_cta_label === 'string' ? composerHero.secondary_cta_label : undefined,
           secondary_cta_url: typeof composerHero.secondary_cta_url === 'string' ? composerHero.secondary_cta_url : undefined,
-          trust_items: Array.isArray(composerHero.trust_items) ? composerHero.trust_items.map((item) => String(item)) : undefined,
+          trust_items: heroTrustItems.length
+            ? heroTrustItems
+            : (Array.isArray(composerHero.trust_items) ? composerHero.trust_items.map((item) => String(item)) : undefined),
           hero_image: typeof composerHero.hero_image === 'string' ? composerHero.hero_image : null,
           path_selector_enabled: typeof composerPathSelector.enabled === 'boolean' ? composerPathSelector.enabled : true,
           paths: Array.isArray(composerPathSelector.paths)
@@ -810,29 +846,36 @@ export default async function HomePage({
             </p>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-5 md:gap-6 border-t border-gray-200 pt-10">
-            {(whyPattayaStats.length > 0 ? whyPattayaStats.slice(0, 4) : Array.from({ length: 4 }).map((_, index) => ({
-              label: locale === 'th' ? `ตัวชี้วัด ${index + 1}` : `Metric ${index + 1}`,
-              value: null,
-            }))).map((stat, index) => (
-              <article key={`${stat.label}-${index}`} className="home-proof-metric reveal rounded-2xl border border-gray-100 bg-white p-6 shadow-sm min-h-[176px] flex flex-col">
-                <div className="text-3xl md:text-4xl font-serif font-semibold text-primary leading-[1.1] min-h-[2.5rem]">
-                  {stat?.value?.trim()
-                    ? stat.value
-                    : (locale === 'th' ? 'รออัปเดตข้อมูลล่าสุด' : 'Latest update in progress')}
-                </div>
-                <div className="text-base md:text-lg font-medium text-gray-900 mt-3 leading-snug min-h-[3rem]">
-                  {stat?.label?.trim()
-                    ? stat.label
-                    : (locale === 'th' ? 'หัวข้อข้อมูลตลาด' : 'Market signal')}
-                </div>
-                <div className="mt-auto pt-4 text-xs text-gray-500 flex items-center gap-2">
-                  <span aria-hidden="true">{statTrendCues[index % statTrendCues.length].split(' ')[0]}</span>
-                  <span>{statTrendCues[index % statTrendCues.length].replace(/^[^\s]+\s*/, '')}</span>
-                </div>
-              </article>
-            ))}
-          </div>
+          {whyPattayaStats.length > 0 ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-5 md:gap-6 border-t border-gray-200 pt-10">
+              {whyPattayaStats.slice(0, 4).map((stat, index) => (
+                <article key={`${stat.label}-${index}`} className="home-proof-metric reveal rounded-2xl border border-gray-100 bg-white p-6 shadow-sm min-h-[176px] flex flex-col">
+                  <div className="text-3xl md:text-4xl font-serif font-semibold text-primary leading-[1.1] min-h-[2.5rem]">
+                    {stat?.value?.trim() ? stat.value : advisoryDict.verifiedEditorialUpdate}
+                  </div>
+                  <div className="text-base md:text-lg font-medium text-gray-900 mt-3 leading-snug min-h-[3rem]">
+                    {stat?.label?.trim()
+                      ? stat.label
+                      : (locale === 'th' ? 'สัญญาณตลาด' : 'Market signal')}
+                  </div>
+                  <div className="mt-auto pt-4 text-xs text-gray-500 flex items-center gap-2">
+                    <span aria-hidden="true">{statTrendCues[index % statTrendCues.length].split(' ')[0]}</span>
+                    <span>{statTrendCues[index % statTrendCues.length].replace(/^[^\s]+\s*/, '')}</span>
+                  </div>
+                </article>
+              ))}
+            </div>
+          ) : (
+            <div className="grid md:grid-cols-2 xl:grid-cols-4 gap-5 md:gap-6 border-t border-gray-200 pt-10">
+              {whyPattayaNarrativeCards.map((card) => (
+                <article key={card.title} className="home-proof-panel reveal rounded-2xl border border-gray-100 bg-white p-6 shadow-sm">
+                  <div className="text-xs uppercase tracking-[0.08em] text-primary mb-3">{locale === 'th' ? 'สัญญาณตลาด' : 'Market cue'}</div>
+                  <h3 className="text-xl font-serif font-medium text-gray-900 mb-3">{card.title}</h3>
+                  <p className="text-sm text-gray-600 leading-relaxed">{card.body}</p>
+                </article>
+              ))}
+            </div>
+          )}
 
           <p className="text-xs text-gray-400 mt-5 text-center md:text-left">
             {locale === 'th'
@@ -844,10 +887,10 @@ export default async function HomePage({
             <TrackedLink
               className="btn btn-cta"
               href={withLocale(locale, '/invest/guides')}
-              eventType="cta_click"
+              eventType="home_trust_proof_click"
               eventPayload={{ cta: 'explore_investment_insights', from: 'home_why_pattaya' }}
             >
-              {locale === 'th' ? 'Explore investment insights' : 'Explore investment insights'}
+              {locale === 'th' ? 'ดูคู่มือลงทุน' : 'Explore investment insights'}
             </TrackedLink>
           </div>
         </Container>
@@ -875,18 +918,11 @@ export default async function HomePage({
                   <div key={item.key} className="rounded-xl border border-gray-100 bg-gray-50 px-4 py-4 min-h-[108px] flex flex-col">
                     <div className="text-xs uppercase tracking-[0.08em] text-gray-500 mb-2">{item.label}</div>
                     <div className="text-base font-semibold text-gray-900 leading-snug">
-                      {item.value?.trim()
-                        ? item.value
-                        : (locale === 'th' ? 'รอยืนยันค่าล่าสุดจากทีม' : 'Latest value pending team confirmation')}
+                      {item.value?.trim() ? item.value : advisoryDict.noPublishedDataBody}
                     </div>
                   </div>
                 ))}
               </div>
-              <p className="text-xs text-gray-400 mt-4">
-                {locale === 'th'
-                  ? '* ข้อมูล proof บางรายการยังรอทีมยืนยันก่อนเผยแพร่'
-                  : '* Some proof values are intentionally pending until verified by the team.'}
-              </p>
             </div>
 
             <div className="home-proof-panel rounded-2xl border border-gray-100 bg-white p-6 md:p-8 shadow-sm">
@@ -909,18 +945,18 @@ export default async function HomePage({
                 <TrackedLink
                   href={withLocale(locale, '/about')}
                   className="btn btn-secondary"
-                  eventType="cta_click"
+                  eventType="home_trust_proof_click"
                   eventPayload={{ cta: 'meet_the_team', from: 'home_trust' }}
                 >
-                  {locale === 'th' ? 'Meet the team' : 'Meet the team'}
+                  {locale === 'th' ? 'รู้จักทีมงาน' : 'Meet the team'}
                 </TrackedLink>
                 <TrackedLink
                   href={withLocale(locale, '/about#how-we-work')}
                   className="btn btn-tertiary"
-                  eventType="cta_click"
+                  eventType="home_trust_proof_click"
                   eventPayload={{ cta: 'how_we_work', from: 'home_trust' }}
                 >
-                  {locale === 'th' ? 'How we work' : 'How we work'}
+                  {locale === 'th' ? 'ดูขั้นตอนการทำงาน' : 'How we work'}
                 </TrackedLink>
               </div>
             </div>
@@ -938,20 +974,18 @@ export default async function HomePage({
                   <article key={card.key} className="home-insight-card card reveal">
                     <div className="text-xs uppercase tracking-[0.08em] text-primary mb-2">{card.title}</div>
                     <p className="card-subtitle mb-4">{card.body}</p>
-                    <p className="text-xs text-gray-400 mb-5">
-                      {card.updatedAt
-                        ? `${locale === 'th' ? 'Last updated' : 'Last updated'}: ${card.updatedAt}`
-                        : (locale === 'th'
-                          ? 'Last updated: ทีมกำลังอัปเดตวันที่ล่าสุด'
-                          : 'Last updated: team update in progress')}
-                    </p>
+                    {card.updatedAt ? (
+                      <p className="text-xs text-gray-400 mb-5">
+                        {`${locale === 'th' ? 'อัปเดตล่าสุด' : 'Last updated'}: ${card.updatedAt}`}
+                      </p>
+                    ) : null}
                     <TrackedLink
                       className="text-primary font-semibold hover:text-primary-dark transition-colors inline-flex items-center gap-2"
                       href={card.href}
-                      eventType="cta_click"
+                      eventType="home_advisory_content_click"
                       eventPayload={{ cta: 'read_insights', from: 'home_insight_engine', topic: card.key }}
                     >
-                      {locale === 'th' ? 'Read insights' : 'Read insights'}
+                      {locale === 'th' ? 'อ่านอินไซต์' : 'Read insight'}
                     </TrackedLink>
                   </article>
                 ))}
@@ -1007,7 +1041,7 @@ export default async function HomePage({
                 eventType="cta_click"
                 eventPayload={{ cta: 'see_all_reviews', from: 'home_reviews' }}
               >
-                {locale === 'th' ? 'See all reviews' : 'See all reviews'}
+                {locale === 'th' ? 'ดูรีวิวทั้งหมด' : 'See all reviews'}
               </TrackedLink>
             </div>
           </div>
@@ -1065,15 +1099,45 @@ export default async function HomePage({
             <TrackedLink
               className="btn btn-secondary"
               href="https://www.youtube.com/@AssetManagementProperty"
-              eventType="cta_click"
+              eventType="home_advisory_content_click"
               eventPayload={{ cta: 'watch_more', from: 'home_video' }}
             >
-              {locale === 'th' ? 'Watch more' : 'Watch more'}
+              {locale === 'th' ? 'ดูวิดีโอเพิ่มเติม' : 'Watch more'}
             </TrackedLink>
           </div>
         </Container>
       </section>
       ) : null}
+
+      <section className="cv-auto py-16 md:py-20 xl:py-24 bg-white">
+        <Container variant="wide">
+          <div className="home-advisory-band reveal">
+            <div className="home-advisory-band__copy">
+              <p className="eyebrow">{locale === 'th' ? 'ที่ปรึกษาท้องถิ่น' : 'Local advisory team'}</p>
+              <h2 className="section-title">{advisoryDict.teamCtaTitle}</h2>
+              <p className="section-subtitle">{advisoryDict.teamCtaBody}</p>
+            </div>
+            <div className="home-advisory-band__actions">
+              <TrackedLink
+                className="btn btn-cta"
+                href={withLocale(locale, '/contact')}
+                eventType="home_trust_proof_click"
+                eventPayload={{ cta: 'team_cta_contact', from: 'home_team_cta' }}
+              >
+                {advisoryDict.teamCtaPrimary}
+              </TrackedLink>
+              <TrackedLink
+                className="btn btn-secondary"
+                href={withLocale(locale, '/about')}
+                eventType="home_trust_proof_click"
+                eventPayload={{ cta: 'team_cta_about', from: 'home_team_cta' }}
+              >
+                {advisoryDict.teamCtaSecondary}
+              </TrackedLink>
+            </div>
+          </div>
+        </Container>
+      </section>
 
       {/* Premium CTA / Conversion Gate */}
       {isSectionEnabled('bottom_cta') ? (
@@ -1091,7 +1155,7 @@ export default async function HomePage({
                 <TrackedLink
                   className="px-6 py-3 bg-white text-gray-900 rounded-full text-sm font-semibold hover:bg-gray-100 transition-colors"
                   href={bottomCtaPrimaryUrl}
-                  eventType="cta_click"
+                  eventType="home_final_cta_click"
                   eventPayload={{ cta: 'book_consultation', from: 'home_bottom' }}
                 >
                   {bottomCtaPrimaryLabel}
@@ -1099,7 +1163,7 @@ export default async function HomePage({
                 <TrackedLink
                   className="px-6 py-3 bg-white/10 hover:bg-white/20 backdrop-blur-md rounded-full text-white text-sm font-medium transition-colors border border-white/20"
                   href={bottomCtaSecondaryUrl}
-                  eventType="cta_click"
+                  eventType="home_final_cta_click"
                   eventPayload={{ cta: 'view_investment_path', from: 'home_bottom' }}
                 >
                   {bottomCtaSecondaryLabel}

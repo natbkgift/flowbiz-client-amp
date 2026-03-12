@@ -3,8 +3,8 @@
 import Image, { type ImageLoaderProps } from 'next/image';
 import { useEffect, useMemo, useState } from 'react';
 
-const DEFAULT_FALLBACK_SRC = '/media/project-covers/the-riviera-jomtien/cover_31dde7af340e.jpg';
-const CONTRACT_FALLBACK_SRC = '/media/placeholders/property-cover.webp';
+const DEFAULT_FALLBACK_SRC = '/images/project-overview.png';
+const CONTRACT_FALLBACK_SRC = '/images/property-exterior.png';
 const LOCAL_SAFE_FALLBACK_SRC = '/images/property-placeholder.svg';
 
 function normalizeSrc(raw: string | null | undefined): string | null {
