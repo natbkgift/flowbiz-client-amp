@@ -9,7 +9,7 @@ from uuid import UUID, uuid4
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from pydantic import BaseModel
-from sqlalchemy import and_, desc, func, or_, select
+from sqlalchemy import desc, func, select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
@@ -359,7 +359,9 @@ def _apply_article_body_metadata(
             else:
                 author_profile.pop("role", None)
         if "author_bio" in updates:
-            author_bio = _coerce_optional_localized_text(payload.author_bio, field_name="author_bio")
+            author_bio = _coerce_optional_localized_text(
+                payload.author_bio, field_name="author_bio"
+            )
             if author_bio:
                 author_profile["bio"] = author_bio
             else:
@@ -412,7 +414,9 @@ def _serialize_article(article: Article) -> dict[str, Any]:
         "tags": body_payload.get("tags"),
         "topics": body_payload.get("topics"),
         "hero_image_url": article.hero_image_url,
-        "hero_media_asset_id": str(article.hero_media_asset_id) if article.hero_media_asset_id else None,
+        "hero_media_asset_id": str(article.hero_media_asset_id)
+        if article.hero_media_asset_id
+        else None,
         "published_at": article.published_at.isoformat() if article.published_at else None,
         "updated_at": article.updated_at.isoformat() if article.updated_at else None,
         "created_at": article.created_at.isoformat() if article.created_at else None,
@@ -464,7 +468,9 @@ def _flatten_for_diff(value: Any, *, prefix: str = "") -> dict[str, Any]:
     return {prefix or "value": value}
 
 
-def _compute_revision_changes(before: dict[str, Any], after: dict[str, Any]) -> list[dict[str, Any]]:
+def _compute_revision_changes(
+    before: dict[str, Any], after: dict[str, Any]
+) -> list[dict[str, Any]]:
     before_flat = _flatten_for_diff(before)
     after_flat = _flatten_for_diff(after)
     all_paths = sorted(set(before_flat.keys()) | set(after_flat.keys()))
@@ -533,29 +539,15 @@ def _article_revision_by_id_or_404(db: Session, *, article_id: str, revision_id:
     return row
 
 
-def _previous_article_revision(db: Session, *, article_id: str, target: AuditLog) -> AuditLog | None:
-    if target.created_at is None:
-        return None
-    candidate = db.scalar(
-        select(AuditLog).where(
-            AuditLog.entity_type == "article",
-            AuditLog.entity_id == article_id,
-            AuditLog.action == _ARTICLE_REVISION_ACTION,
-            or_(
-                AuditLog.created_at < target.created_at,
-                and_(AuditLog.created_at == target.created_at, AuditLog.id < target.id),
-            ),
-        )
-        .order_by(desc(AuditLog.created_at), desc(AuditLog.id))
-        .limit(1)
-    )
-    if candidate is not None and candidate.id != target.id:
-        return candidate
-
+def _previous_article_revision(
+    db: Session, *, article_id: str, target: AuditLog
+) -> AuditLog | None:
     page_size = 200
     offset = 0
     while True:
-        page = db.scalars(_article_revision_log_query(article_id).offset(offset).limit(page_size)).all()
+        page = db.scalars(
+            _article_revision_log_query(article_id).offset(offset).limit(page_size)
+        ).all()
         if not page:
             return None
         for index, row in enumerate(page):
@@ -563,7 +555,9 @@ def _previous_article_revision(db: Session, *, article_id: str, target: AuditLog
                 continue
             if index + 1 < len(page):
                 return page[index + 1]
-            return db.scalar(_article_revision_log_query(article_id).offset(offset + index + 1).limit(1))
+            return db.scalar(
+                _article_revision_log_query(article_id).offset(offset + index + 1).limit(1)
+            )
         offset += len(page)
 
 
@@ -728,7 +722,9 @@ def _apply_article_updates(
         article.slug = new_slug
 
     if "hero_image_url" in updates or "hero_media_asset_id" in updates:
-        path_input = payload.hero_image_url if "hero_image_url" in updates else article.hero_image_url
+        path_input = (
+            payload.hero_image_url if "hero_image_url" in updates else article.hero_image_url
+        )
         media_input = (
             payload.hero_media_asset_id
             if "hero_media_asset_id" in updates
@@ -839,7 +835,9 @@ def create_article(
     slug = _coerce_article_slug(payload.slug)
     conflict = db.scalar(select(Article).where(Article.slug == slug, Article.deleted_at.is_(None)))
     if conflict is not None:
-        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Article slug already exists")
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT, detail="Article slug already exists"
+        )
 
     resolved_hero_path, resolved_hero_media = _resolve_article_hero_media(
         db=db,
@@ -847,7 +845,9 @@ def create_article(
         hero_media_asset_id=payload.hero_media_asset_id,
     )
 
-    initial_status = _normalize_status(payload.status, allowed=_ARTICLE_STATUSES, field_name="status")
+    initial_status = _normalize_status(
+        payload.status, allowed=_ARTICLE_STATUSES, field_name="status"
+    )
     _validate_article_transition(before="draft", after=initial_status)
 
     article = Article(
@@ -1073,16 +1073,24 @@ def restore_article_revision(
     admin: User = Depends(get_current_admin),
 ) -> dict[str, Any]:
     if admin.role != "admin":
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Restore requires admin role")
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN, detail="Restore requires admin role"
+        )
 
     article = _article_by_slug_or_404(db, slug)
-    revision = _article_revision_by_id_or_404(db, article_id=str(article.id), revision_id=revision_id)
+    revision = _article_revision_by_id_or_404(
+        db, article_id=str(article.id), revision_id=revision_id
+    )
     snapshot = _article_revision_snapshot_from_log(revision)
     if snapshot is None:
-        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Revision snapshot unavailable")
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT, detail="Revision snapshot unavailable"
+        )
 
     previous_snapshot = _article_revision_snapshot(article)
-    previous_status = _normalize_status(article.status, allowed=_ARTICLE_STATUSES, field_name="status")
+    previous_status = _normalize_status(
+        article.status, allowed=_ARTICLE_STATUSES, field_name="status"
+    )
 
     snapshot_slug = _coerce_article_slug(snapshot.get("slug"))
     if snapshot_slug != article.slug:
@@ -1100,17 +1108,25 @@ def restore_article_revision(
             )
     article.slug = snapshot_slug
     article.category = _coerce_category(snapshot.get("category"))
-    article.status = _normalize_status(snapshot.get("status"), allowed=_ARTICLE_STATUSES, field_name="status")
+    article.status = _normalize_status(
+        snapshot.get("status"), allowed=_ARTICLE_STATUSES, field_name="status"
+    )
 
     title_snapshot = snapshot.get("title")
     if not isinstance(title_snapshot, dict):
-        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Revision title snapshot unavailable")
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT, detail="Revision title snapshot unavailable"
+        )
     body_snapshot = snapshot.get("body_md")
     if not isinstance(body_snapshot, dict):
-        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Revision body snapshot unavailable")
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT, detail="Revision body snapshot unavailable"
+        )
 
     article.title = dict(title_snapshot)
-    article.excerpt = dict(snapshot.get("excerpt")) if isinstance(snapshot.get("excerpt"), dict) else None
+    article.excerpt = (
+        dict(snapshot.get("excerpt")) if isinstance(snapshot.get("excerpt"), dict) else None
+    )
     article.body_md = dict(body_snapshot)
     restored_hero_image_url = _coerce_optional_text(snapshot.get("hero_image_url"))
     if restored_hero_image_url is not None:
@@ -1322,7 +1338,9 @@ def create_taxonomy(
         kind=kind,
         slug=slug,
         label_i18n=_coerce_localized_text(payload.label, field_name="label"),
-        description_i18n=_coerce_optional_localized_text(payload.description, field_name="description"),
+        description_i18n=_coerce_optional_localized_text(
+            payload.description, field_name="description"
+        ),
         status=_normalize_status(payload.status, allowed=_TAXONOMY_STATUSES, field_name="status"),
         display_order=int(payload.display_order),
     )
@@ -1374,7 +1392,9 @@ def patch_taxonomy(
             )
         )
         if conflict is not None:
-            raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Taxonomy already exists")
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT, detail="Taxonomy already exists"
+            )
 
     if "kind" in updates:
         row.kind = next_kind
@@ -1524,7 +1544,9 @@ def _serialize_video(row: ContentVideo) -> dict[str, Any]:
 
 
 def _video_by_slug_or_404(db: Session, slug: str) -> ContentVideo:
-    row = db.scalar(select(ContentVideo).where(ContentVideo.slug == slug, ContentVideo.deleted_at.is_(None)))
+    row = db.scalar(
+        select(ContentVideo).where(ContentVideo.slug == slug, ContentVideo.deleted_at.is_(None))
+    )
     if row is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Video not found")
     return row
@@ -1561,11 +1583,17 @@ def create_video(
     _admin: User = Depends(get_current_admin),
 ) -> dict[str, Any]:
     slug = _coerce_slug(payload.slug, field_name="slug")
-    conflict = db.scalar(select(ContentVideo).where(ContentVideo.slug == slug, ContentVideo.deleted_at.is_(None)))
+    conflict = db.scalar(
+        select(ContentVideo).where(ContentVideo.slug == slug, ContentVideo.deleted_at.is_(None))
+    )
     if conflict is not None:
-        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Video slug already exists")
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT, detail="Video slug already exists"
+        )
 
-    thumbnail_path = _coerce_optional_local_media_path(payload.thumbnail_path, field_name="thumbnail_path")
+    thumbnail_path = _coerce_optional_local_media_path(
+        payload.thumbnail_path, field_name="thumbnail_path"
+    )
     video_path = _coerce_optional_local_media_path(payload.video_path, field_name="video_path")
     youtube_url = _coerce_optional_text(payload.youtube_url)
     youtube_id = _coerce_youtube_id(youtube_url, payload.youtube_id)
@@ -1638,7 +1666,9 @@ def patch_video(
             )
         )
         if conflict is not None:
-            raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Video slug already exists")
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT, detail="Video slug already exists"
+            )
         row.slug = new_slug
 
     if "status" in updates:
@@ -1660,7 +1690,9 @@ def patch_video(
             field_name="thumbnail_path",
         )
     if "video_path" in updates:
-        row.video_path = _coerce_optional_local_media_path(payload.video_path, field_name="video_path")
+        row.video_path = _coerce_optional_local_media_path(
+            payload.video_path, field_name="video_path"
+        )
     if "tags" in updates:
         row.tags = _coerce_taxonomy(payload.tags) if payload.tags is not None else None
     if "topics" in updates:

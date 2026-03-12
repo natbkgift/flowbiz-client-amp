@@ -21,7 +21,9 @@ def _safe_media_path(value: object | None) -> str | None:
     return candidate
 
 
-def _localized_complete(payload: dict | None, *, required_locales: tuple[str, ...] = ("en", "th")) -> bool:
+def _localized_complete(
+    payload: dict | None, *, required_locales: tuple[str, ...] = ("en", "th")
+) -> bool:
     if not isinstance(payload, dict):
         return False
     return all(bool(payload.get(locale)) for locale in required_locales)

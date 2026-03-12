@@ -7,6 +7,7 @@ from pathlib import Path
 from sqlalchemy import create_engine
 from sqlalchemy.orm import Session, declarative_base, sessionmaker
 
+
 def _default_sqlite_path() -> Path:
     app_env = (os.getenv("APP_ENV") or "").strip().lower()
     is_test_env = app_env in {"test", "ci"} or bool(os.getenv("PYTEST_CURRENT_TEST"))
