@@ -1,4 +1,5 @@
 /** @type {import('next').NextConfig} */
+const useMinimalConfig = process.env.NEXT_LOCAL_CONFIG_MINIMAL === '1';
 const imageHosts = (process.env.NEXT_PUBLIC_IMAGE_HOSTS ?? '')
   .split(',')
   .map((h) => h.trim())
@@ -6,11 +7,11 @@ const imageHosts = (process.env.NEXT_PUBLIC_IMAGE_HOSTS ?? '')
 
 const nextConfig = {
   reactStrictMode: true,
-  output: 'standalone',
+  output: useMinimalConfig ? undefined : 'standalone',
   poweredByHeader: false,
   compress: true,
   skipTrailingSlashRedirect: true,
-  images: {
+  images: useMinimalConfig ? undefined : {
     formats: ['image/avif', 'image/webp'],
     remotePatterns: imageHosts.map((hostname) => ({
       protocol: 'https',
@@ -22,6 +23,7 @@ const nextConfig = {
     imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
   },
   async headers() {
+    if (useMinimalConfig) return [];
     return [
       {
         // CDN + browser caching for static assets
@@ -40,6 +42,7 @@ const nextConfig = {
     ];
   },
   async rewrites() {
+    if (useMinimalConfig) return [];
     const localApiOrigin =
       process.env.LOCAL_API_ORIGIN ||
       (process.env.NODE_ENV === 'development' ? 'http://127.0.0.1:8000' : '');

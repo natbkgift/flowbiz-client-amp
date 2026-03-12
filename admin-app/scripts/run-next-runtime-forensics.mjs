@@ -55,6 +55,7 @@ async function run() {
       ...process.env,
       NEXT_LOCAL_FONT_FALLBACK: process.env.NEXT_LOCAL_FONT_FALLBACK || "1",
       NEXT_LOCAL_RUNTIME_MINIMAL: process.env.NEXT_LOCAL_RUNTIME_MINIMAL || "1",
+      NEXT_LOCAL_CONFIG_MINIMAL: process.env.NEXT_LOCAL_CONFIG_MINIMAL || "1",
     },
     stdio: ["ignore", "pipe", "pipe"],
   });
