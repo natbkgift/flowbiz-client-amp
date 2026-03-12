@@ -7,6 +7,7 @@ import { getDictionary, normalizeLocale } from '@/app/_lib/i18n/get-dictionary';
 import { makePageMetadata } from '@/app/_lib/i18n/metadata';
 import { withLocale } from '@/app/_lib/i18n/routing';
 import { PublicAdvisoryHero } from '@/components/public/PublicAdvisoryHero';
+import { EmptyStateCard } from '@/components/ui/StateBlocks';
 
 const ListingGrid = dynamic(() => import('@/components/listing/ListingGrid').then(m => m.ListingGrid), {
   loading: () => <div className="animate-pulse h-96 rounded bg-slate-100" />,
@@ -41,6 +42,9 @@ export default async function BuyPage(props: { params: Promise<{ locale: string 
   } catch {
     res = { data: [], meta: { page: 1, limit: 60, total: 0 } };  // graceful degradation
   }
+
+  const featuredItems = (res.data ?? []).slice(0, 3);
+  const hiddenItemCount = Math.max(0, (res.data?.length ?? 0) - featuredItems.length);
 
   return (
     <main id="main-content">
@@ -269,7 +273,46 @@ export default async function BuyPage(props: { params: Promise<{ locale: string 
             <h2 className="section-title">{dict.buy.featuredTitle}</h2>
             <p className="section-subtitle">{dict.buy.featuredSubtitle}</p>
           </div>
-          <ListingGrid items={res.data ?? []} />
+
+          {featuredItems.length ? (
+            <>
+              <div className="cta-strip">
+                <div className="cta-strip__text">
+                  {locale === 'th'
+                    ? 'นี่คือ shortlist เริ่มต้นที่คัดจาก inventory ที่ตรวจสอบแล้ว เพื่อช่วยให้เริ่มเปรียบเทียบงบ ทำเล และความพร้อมโอนได้เร็วขึ้น'
+                    : 'This is a starter shortlist from the verified inventory so buyers can compare budget, location, and transfer readiness faster.'}
+                </div>
+                <a className="btn btn-cta" href={withLocale(locale, '/contact')}>
+                  {dict.cta.speakToAdvisor}
+                </a>
+              </div>
+              <ListingGrid items={featuredItems} />
+              <div className="cta-strip mt-6">
+                <div className="cta-strip__text">
+                  {hiddenItemCount > 0
+                    ? locale === 'th'
+                      ? `ยังมีตัวเลือกที่ผ่านเกณฑ์อีก ${hiddenItemCount} รายการ หากต้องการ shortlist ที่ตรงงบและแผนถือครองมากขึ้น ทีมสามารถคัดเพิ่มให้ได้`
+                      : `${hiddenItemCount} more verified options remain, and the team can narrow them into a sharper shortlist for your budget and holding plan.`
+                    : locale === 'th'
+                      ? 'หากยังไม่เจอยูนิตที่ใช่ ทีมสามารถคัด shortlist รอบถัดไปจาก inventory ที่ตรวจสอบแล้วให้ได้'
+                      : 'If this sample is not enough, the team can prepare the next shortlist from the verified inventory.'}
+                </div>
+                <a className="btn btn-secondary" href={withLocale(locale, '/compare')}>
+                  {dict.advisory.compareOpportunities}
+                </a>
+              </div>
+            </>
+          ) : (
+            <EmptyStateCard
+              title={dict.advisory.noPublishedDataTitle}
+              body={dict.advisory.noPublishedDataBody}
+              action={
+                <a className="btn btn-secondary" href={withLocale(locale, '/contact')}>
+                  {dict.cta.speakToAdvisor}
+                </a>
+              }
+            />
+          )}
         </Container>
       </section>
 
