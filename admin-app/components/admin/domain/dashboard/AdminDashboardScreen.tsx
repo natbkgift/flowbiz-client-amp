@@ -561,13 +561,14 @@ export function AdminDashboardScreen({
     );
   }
 
-  function renderSectionState(emptyTitle: string, emptyBody: string) {
+  function renderSectionState(emptyTitle: string, emptyBody: string, options?: { action?: ReactNode; compact?: boolean }) {
     return (
       <DashboardSectionState
         tone="empty"
         title={emptyTitle}
         body={emptyBody}
-        action={renderRefreshButton(t.retry)}
+        action={options?.action}
+        compact={options?.compact}
       />
     );
   }
@@ -841,7 +842,7 @@ export function AdminDashboardScreen({
     }
 
     if (freshnessEntries.length === 0) {
-      return renderSectionState(t.insightsEmptyTitle, t.insightsEmptyBody);
+      return renderSectionState(t.insightsEmptyTitle, t.insightsEmptyBody, { compact: true });
     }
 
     return (
@@ -900,7 +901,7 @@ export function AdminDashboardScreen({
     }
 
     if (!hasTrendData(trendPoints)) {
-      return <DashboardSectionState tone="empty" title={t.trendEmptyTitle} body={t.trendEmptyBody} />;
+      return <DashboardSectionState tone="empty" title={t.trendEmptyTitle} body={t.trendEmptyBody} compact />;
     }
 
     return <DashboardTrendChart points={trendPoints} locale={locale} period={chartPeriod} />;
@@ -939,7 +940,7 @@ export function AdminDashboardScreen({
     }
 
     if ((summary?.warnings || []).length === 0) {
-      return renderSectionState(t.warningsEmptyTitle, t.warningsEmptyBody);
+      return renderSectionState(t.warningsEmptyTitle, t.warningsEmptyBody, { compact: true });
     }
 
     return (
@@ -993,7 +994,14 @@ export function AdminDashboardScreen({
     }
 
     if (totalRecentInquiryCount === 0) {
-      return renderSectionState(t.recentInquiriesEmptyTitle, t.recentInquiriesEmptyBody);
+      return renderSectionState(t.recentInquiriesEmptyTitle, t.recentInquiriesEmptyBody, {
+        compact: true,
+        action: (
+          <Link className={adminButtonClassName({ variant: "secondary", size: "sm" })} href={withAdminLocale("/admin/inquiries", locale)}>
+            {t.openCrm}
+          </Link>
+        ),
+      });
     }
 
     return (
@@ -1039,7 +1047,7 @@ export function AdminDashboardScreen({
     }
 
     if (backgroundTasks.length === 0) {
-      return renderSectionState(t.backgroundTasksEmptyTitle, t.backgroundTasksEmptyBody);
+      return renderSectionState(t.backgroundTasksEmptyTitle, t.backgroundTasksEmptyBody, { compact: true });
     }
 
     return (

@@ -42,31 +42,43 @@ export function InquiryDetailPanel({
 
   return (
     <>
-      <div className="crm-detail-section">
-        <h3>{t.details}</h3>
+      <div className="crm-detail-section crm-detail-summary">
+        <div className="crm-detail-summary__head">
+          <h3>{selected.name || t.details}</h3>
+          <div className="crm-detail-summary__badges">
+            <span className="crm-chip crm-chip-muted">{translateInquiryStatus(selected.status, locale)}</span>
+            <span className="crm-chip crm-chip-sla">{translateFollowUpStatus(selected.follow_up_status, locale)}</span>
+          </div>
+        </div>
         <p className="crm-section-description">{t.detailsDescription}</p>
       </div>
 
-      <div className="crm-meta-grid crm-meta-grid--detail">
-        <p>
-          <strong>{t.intent}:</strong> {selected.purpose || "-"}
-        </p>
-        <p>
-          <strong>{t.status}:</strong> {translateInquiryStatus(selected.status, locale)}
-        </p>
-        <p>
-          <strong>{t.followUp}:</strong> {translateFollowUpStatus(selected.follow_up_status, locale)}
-        </p>
-        <p>
-          <strong>{t.followUpDueAt}:</strong> {prettyDate(selected.follow_up_due_at, locale)}
-        </p>
-        <p>
-          <strong>{t.sourcePage}:</strong> {selected.source_page || "-"}
-        </p>
-        <p>
-          <strong>{t.createdAt}:</strong> {prettyDate(selected.created_at, locale)}
-        </p>
-      </div>
+      <dl className="crm-meta-grid crm-meta-grid--detail">
+        <div>
+          <dt>{t.intent}</dt>
+          <dd>{selected.purpose || selected.intent || "-"}</dd>
+        </div>
+        <div>
+          <dt>{t.sourcePage}</dt>
+          <dd>{selected.source_page || "-"}</dd>
+        </div>
+        <div>
+          <dt>{t.createdAt}</dt>
+          <dd>{prettyDate(selected.created_at, locale)}</dd>
+        </div>
+        <div>
+          <dt>{t.followUpDueAt}</dt>
+          <dd>{prettyDate(selected.follow_up_due_at, locale)}</dd>
+        </div>
+        <div>
+          <dt>{t.emailAction}</dt>
+          <dd>{selected.email || "-"}</dd>
+        </div>
+        <div>
+          <dt>{t.phone}</dt>
+          <dd>{selected.phone || "-"}</dd>
+        </div>
+      </dl>
 
       <InquiryContactActions t={t} selected={selected} />
       <InquiryFollowUpPanel
