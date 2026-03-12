@@ -11,6 +11,28 @@ import { getInternalLinks } from '@/app/_lib/internal-links';
 import { ProjectDeepReview } from '@/components/projects/ProjectDeepReview';
 
 export const revalidate = 300;
+const PROJECT_DETAIL_FETCH_TIMEOUT_MS = 8000;
+
+async function withTimeout<T>(task: Promise<T>, fallback: T, timeoutMs = PROJECT_DETAIL_FETCH_TIMEOUT_MS): Promise<T> {
+  try {
+    return await Promise.race<T>([
+      task,
+      new Promise<T>((resolve) => {
+        setTimeout(() => resolve(fallback), timeoutMs);
+      }),
+    ]);
+  } catch {
+    return fallback;
+  }
+}
+
+function formatSlugTitle(slug: string): string {
+  return slug
+    .split('-')
+    .filter(Boolean)
+    .map((segment) => segment.charAt(0).toUpperCase() + segment.slice(1))
+    .join(' ');
+}
 
 export async function generateMetadata(
   props: {
@@ -64,10 +86,54 @@ export default async function ProjectDetailPage(
 
   const internalLinks = getInternalLinks(locale, dict, { from: 'project_detail', includeProjects: true });
 
-  const project = await fetchProjectBySlug(params.slug);
+  const projectResult = await withTimeout(
+    fetchProjectBySlug(params.slug).then((value) => ({ kind: 'loaded' as const, value })),
+    { kind: 'timeout' as const },
+  );
+  const project = projectResult.kind === 'loaded' ? projectResult.value : null;
 
   const siteUrl = 'https://amppattaya.com';
   const canonicalUrl = `${siteUrl}/${locale}/projects/${encodeURIComponent(params.slug)}`;
+
+  if (projectResult.kind === 'timeout') {
+    const fallbackTitle = locale === 'th' ? 'กำลังเตรียมข้อมูลโครงการนี้' : 'Preparing this project snapshot';
+    const fallbackBody = locale === 'th'
+      ? 'ข้อมูลเชิงลึกของโครงการนี้ยังดึงมาไม่ครบในรอบนี้ แต่คุณยังเปิด shortlist หรือส่งบริบทให้ทีมช่วยจัดทางเลือกต่อได้ทันที'
+      : 'The deeper snapshot for this project is not fully available in this request window yet, but you can still move into shortlist mode or hand context to the team right away.';
+
+    return (
+      <main className="section" id="main-content">
+        <Container>
+          <div className="section-header">
+            <h1 className="section-title">{fallbackTitle}</h1>
+            <p className="section-subtitle">{formatSlugTitle(params.slug)}</p>
+          </div>
+          <div className="card reveal mt-6">
+            <h2 className="card-title">{dict.property.exploreMore}</h2>
+            <p className="card-subtitle">{fallbackBody}</p>
+            <div className="card-actions">
+              <TrackedLink
+                className="btn btn-cta"
+                href={withLocale(locale, '/contact')}
+                eventType="cta_click"
+                eventPayload={{ cta: 'speak_to_advisor', from: 'project_detail_timeout' }}
+              >
+                {dict.cta.speakToAdvisor}
+              </TrackedLink>
+              <TrackedLink
+                className="btn btn-secondary"
+                href={withLocale(locale, '/projects')}
+                eventType="cta_click"
+                eventPayload={{ cta: 'browse_verified_inventory', from: 'project_detail_timeout' }}
+              >
+                {dict.advisory.browseVerifiedInventory}
+              </TrackedLink>
+            </div>
+          </div>
+        </Container>
+      </main>
+    );
+  }
 
   if (!project) {
     return (
@@ -97,7 +163,7 @@ export default async function ProjectDetailPage(
     );
   }
 
-  const evaluation = await fetchProjectEvaluation(project.id);
+  const evaluation = await withTimeout(fetchProjectEvaluation(project.id), null);
 
   const jsonLd = JSON.stringify(
     [
