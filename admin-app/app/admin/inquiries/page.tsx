@@ -358,27 +358,29 @@ export default function AdminInquiriesPage() {
         icon="message"
         titleTag="h2"
       >
-        <InquiryControlCenter
-          t={t}
-          isAuthenticated={isAuthenticated}
-          authEmail={authEmail}
-          loginEmail={loginEmail}
-          loginPassword={loginPassword}
-          authLoading={authLoading}
-          authError={authError}
-          onLoginEmailChange={setLoginEmail}
-          onLoginPasswordChange={setLoginPassword}
-          onLogin={login}
-          onLogout={logout}
-        />
+        <div className="crm-controls-grid">
+          <InquiryControlCenter
+            t={t}
+            isAuthenticated={isAuthenticated}
+            authEmail={authEmail}
+            loginEmail={loginEmail}
+            loginPassword={loginPassword}
+            authLoading={authLoading}
+            authError={authError}
+            onLoginEmailChange={setLoginEmail}
+            onLoginPasswordChange={setLoginPassword}
+            onLogin={login}
+            onLogout={logout}
+          />
 
-        <InquiryFiltersPanel
-          t={t}
-          isAuthenticated={isAuthenticated}
-          filters={filters}
-          loading={loading}
-          onFilterChange={updateFilter}
-        />
+          <InquiryFiltersPanel
+            t={t}
+            isAuthenticated={isAuthenticated}
+            filters={filters}
+            loading={loading}
+            onFilterChange={updateFilter}
+          />
+        </div>
 
         <div className="crm-controls-toolbar" role="group" aria-label={t.filters}>
           <div className="card-actions crm-controls-toolbar__actions">

@@ -1518,7 +1518,7 @@ export default function HomeComposerPage() {
             </ActionCard>
           </section>
 
-          <aside className="home-composer-stack">
+          <aside className="home-composer-stack home-composer-stack--aside">
             <LogCard
               className="home-composer-card"
               bodyClassName="home-composer-stack"

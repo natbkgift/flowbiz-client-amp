@@ -1124,8 +1124,8 @@
     display: grid;
     gap: var(--admin-space-3);
     align-content: start;
-    min-height: 132px;
-    padding: var(--admin-space-4);
+    min-height: 108px;
+    padding: var(--admin-space-3);
     border: 1px dashed var(--admin-border-strong);
     border-radius: var(--admin-radius-lg);
     background: var(--admin-bg-card-muted);
@@ -1147,10 +1147,10 @@
 
   .dashboard-locked-overview {
     display: grid;
-    grid-template-columns: minmax(0, 1.2fr) minmax(300px, 0.8fr);
-    gap: var(--admin-space-5);
+    grid-template-columns: minmax(0, 1.35fr) minmax(260px, 0.65fr);
+    gap: var(--admin-space-4);
     align-items: start;
-    padding: var(--admin-space-5);
+    padding: var(--admin-space-4);
     border: 1px solid rgba(191, 219, 254, 0.68);
     border-radius: calc(var(--admin-radius-lg) + 2px);
     background:
@@ -1237,18 +1237,18 @@
   .dashboard-grid,
   .dashboard-kpi-grid {
     display: grid;
-    gap: var(--admin-space-6);
+    gap: var(--admin-space-5);
     align-items: stretch;
   }
 
   .dashboard-shell-grid {
     display: grid;
-    gap: var(--admin-space-8);
+    gap: var(--admin-space-6);
   }
 
   .dashboard-zone {
     display: grid;
-    gap: var(--admin-space-6);
+    gap: var(--admin-space-5);
   }
 
   .dashboard-zone {
@@ -1319,7 +1319,7 @@
     grid-template-columns: minmax(0, 1.18fr) minmax(300px, 0.82fr);
     gap: var(--admin-space-3);
     align-items: start;
-    padding: var(--admin-space-3) var(--admin-space-4);
+    padding: var(--admin-space-3);
   }
 
   .dashboard-hero .admin-page-header__content {
@@ -1342,8 +1342,8 @@
 
   .dashboard-overview-band {
     display: grid;
-    gap: var(--admin-space-6);
-    padding: var(--admin-space-5) var(--admin-space-6);
+    gap: var(--admin-space-4);
+    padding: var(--admin-space-4) var(--admin-space-5);
     border: 1px solid rgba(191, 219, 254, 0.62);
     border-radius: 24px;
     background:
@@ -1414,8 +1414,8 @@
   .dashboard-hero-toolbar__item {
     display: grid;
     gap: var(--admin-space-1);
-    min-width: 168px;
-    padding: 10px var(--admin-space-3);
+    min-width: 148px;
+    padding: 8px 12px;
     border: 1px solid rgba(203, 213, 225, 0.88);
     border-radius: var(--admin-radius-lg);
     background: rgba(255, 255, 255, 0.82);
@@ -1444,8 +1444,8 @@
 
   .dashboard-operational-card {
     display: grid;
-    gap: var(--admin-space-4);
-    padding: var(--admin-space-4);
+    gap: var(--admin-space-3);
+    padding: var(--admin-space-3);
     border: 1px solid rgba(191, 219, 254, 0.76);
     border-radius: var(--admin-radius-lg);
     background:
@@ -2494,19 +2494,26 @@
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 
+  .crm-controls-grid {
+    display: grid;
+    grid-template-columns: minmax(280px, 0.72fr) minmax(0, 1.28fr);
+    gap: var(--admin-space-4);
+    align-items: start;
+  }
+
   .crm-filters {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 
   .crm-controls .admin-section-card__body {
-    gap: var(--admin-space-4);
+    gap: var(--admin-space-3);
   }
 
   .crm-controls-toolbar {
     display: grid;
     grid-template-columns: minmax(0, 1fr) auto;
-    gap: var(--admin-space-3);
-    align-items: end;
+    gap: var(--admin-space-2);
+    align-items: center;
   }
 
   .crm-controls-toolbar__actions,
@@ -2538,7 +2545,13 @@
 
   .home-composer-split {
     grid-template-columns: minmax(0, var(--home-composer-split-main)) minmax(var(--home-composer-split-side-min), var(--home-composer-split-side));
-    gap: var(--admin-space-4);
+    gap: var(--admin-space-3);
+  }
+
+  .home-composer-stack--aside {
+    position: sticky;
+    top: calc(var(--admin-space-6) + 8px);
+    align-self: start;
   }
 
   .crm-saved-filters {
@@ -2812,9 +2825,9 @@
     grid-template-columns: auto minmax(0, 1fr);
     gap: var(--admin-space-2);
     align-items: start;
-    padding: var(--admin-space-1) var(--admin-space-2);
+    padding: 12px;
     border-radius: var(--admin-radius-xs);
-    min-height: 60px;
+    min-height: 56px;
   }
 
   .home-composer-option:hover {
@@ -3246,6 +3259,7 @@
     .dashboard-kpi-grid,
     .dashboard-locked-overview,
     .dashboard-locked-overview__facts,
+    .crm-controls-grid,
     .admin-workspace-split,
     .admin-workspace-editor-grid,
     .admin-workspace-output-grid,
@@ -3288,6 +3302,11 @@
   @media (max-width: 900px) {
     .admin-workspace-inline-meta {
       grid-template-columns: minmax(0, 1fr);
+    }
+
+    .home-composer-stack--aside {
+      position: static;
+      top: auto;
     }
 
     .crm-controls-toolbar,
