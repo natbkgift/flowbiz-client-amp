@@ -6,6 +6,7 @@ import { spawn } from "node:child_process";
 import { chromium } from "playwright";
 
 const BASE_URL = process.env.ADMIN_VISUAL_BASE_URL || "http://127.0.0.1:3000";
+const READY_PATH = process.env.ADMIN_VISUAL_READY_PATH || "/api/health";
 const ARTIFACT_ROOT = path.resolve(
   process.cwd(),
   process.env.ADMIN_VISUAL_ARTIFACT_DIR || path.join("artifacts", "admin-visual-qa"),
@@ -113,7 +114,8 @@ async function checkUrlReady(url) {
 }
 
 async function ensureBaseUrl(url) {
-  if (await checkUrlReady(url)) {
+  const readyUrl = new URL(READY_PATH, url).toString();
+  if (await checkUrlReady(readyUrl)) {
     return { started: false, child: null, logs: [] };
   }
 
@@ -134,13 +136,13 @@ async function ensureBaseUrl(url) {
   child.stderr.on("data", (chunk) => startLogs.push(String(chunk)));
 
   for (let attempt = 0; attempt < startupAttempts; attempt += 1) {
-    if (await checkUrlReady(url)) {
+    if (await checkUrlReady(readyUrl)) {
       return { started: true, child, logs: startLogs };
     }
     await wait(1000);
   }
 
-  throw new Error(`admin visual qa failed: unable to reach ${url}\n${startLogs.join("")}`);
+  throw new Error(`admin visual qa failed: unable to reach ${readyUrl}\n${startLogs.join("")}`);
 }
 
 function wait(time) {

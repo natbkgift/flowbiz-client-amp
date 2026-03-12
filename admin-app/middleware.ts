@@ -35,6 +35,10 @@ const PUBLIC_FILE = /\.[^/]+$/;
  * 3. Attach 8 security headers (CSP, HSTS, X-Frame-Options, etc.) to localized responses.
  */
 export function middleware(req: NextRequest) {
+  if (process.env.NEXT_LOCAL_RUNTIME_MINIMAL === '1') {
+    return NextResponse.next();
+  }
+
   const { pathname, search } = req.nextUrl;
 
   // Ignore next internals & static assets.
