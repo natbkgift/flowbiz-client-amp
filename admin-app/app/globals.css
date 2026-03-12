@@ -1797,6 +1797,37 @@ summary.mobile-nav__trigger::-webkit-details-marker {
   line-height: 1.6;
 }
 
+.catalogue-card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  min-height: 100%;
+}
+
+.catalogue-card__eyebrow {
+  display: inline-flex;
+  align-items: center;
+  width: fit-content;
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: rgba(164, 133, 69, 0.12);
+  color: #8a6a24;
+  font-size: 0.76rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.catalogue-card__meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin-top: auto;
+  color: var(--color-text-secondary);
+  font-size: var(--font-sm);
+  line-height: 1.6;
+}
+
 .card-actions {
   margin-top: var(--space-4);
   display: flex;

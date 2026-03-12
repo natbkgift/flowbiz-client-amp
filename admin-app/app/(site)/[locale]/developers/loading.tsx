@@ -11,6 +11,11 @@ function resolveCopy(locale: string) {
       contact: 'คุยกับที่ปรึกษา',
       projects: 'ดูโครงการ',
       loading: 'กำลังเตรียมรายชื่อผู้พัฒนา',
+      sampleTitle: 'กำลังรวบรวมผู้พัฒนาที่ควรจับตา',
+      sampleBody: 'ระบบกำลังดึงรายชื่อผู้พัฒนาที่เผยแพร่แล้วเพื่อใช้เทียบความน่าเชื่อถือก่อนลงลึกในแต่ละโครงการ',
+      signalOne: 'รายชื่อผู้พัฒนาที่เผยแพร่และพร้อมให้ review',
+      signalTwo: 'ข้อมูลที่จะพาไปต่อยัง shortlist ของโครงการ',
+      signalThree: 'หากหน้าโหลดช้า ทีมยังช่วยคัด developer shortlist ให้ได้',
     };
   }
 
@@ -20,6 +25,11 @@ function resolveCopy(locale: string) {
     contact: 'Speak to an Advisor',
     projects: 'Browse Projects',
     loading: 'Loading published developers',
+    sampleTitle: 'Preparing the developer watchlist',
+    sampleBody: 'The page is gathering published developers so you can compare credibility before moving into projects.',
+    signalOne: 'Published developers ready for review',
+    signalTwo: 'Context that moves into a project shortlist',
+    signalThree: 'If loading is slow, the team can still curate the developer shortlist',
   };
 }
 
@@ -62,13 +72,20 @@ export default function DevelopersLoading() {
 
       <section className="section">
         <div className="container animate-pulse">
-          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {Array.from({ length: 6 }).map((_, i) => (
-              <div key={i} className="rounded-xl bg-white p-4 shadow-sm">
-                <div className="mb-4 h-32 w-full rounded-lg bg-slate-200" />
-                <div className="mb-2 h-5 w-2/3 rounded bg-slate-200" />
-                <div className="h-4 w-1/2 rounded bg-slate-200" />
-              </div>
+          <div className="section-header mb-6">
+            <h2 className="section-title">{copy.sampleTitle}</h2>
+            <p className="section-subtitle">{copy.sampleBody}</p>
+          </div>
+          <div className="grid grid-3">
+            {[copy.signalOne, copy.signalTwo, copy.signalThree].map((item) => (
+              <article key={item} className="card catalogue-card">
+                <div className="catalogue-card__eyebrow">{copy.loading}</div>
+                <div className="h-5 w-2/3 rounded bg-slate-200" />
+                <p className="card-subtitle">{item}</p>
+                <div className="catalogue-card__meta">
+                  <span>{copy.sampleBody}</span>
+                </div>
+              </article>
             ))}
           </div>
         </div>

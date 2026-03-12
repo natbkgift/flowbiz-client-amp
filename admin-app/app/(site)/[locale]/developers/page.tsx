@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import type { Metadata } from 'next';
 
 import { buildAdvisorWhatsApp, getAdvisoryLabels, getAdvisoryProofs, withLocaleQuery } from '@/app/_lib/public-advisory';
@@ -123,11 +124,21 @@ export default async function DevelopersPage(props: { params: Promise<{ locale: 
         {rows.length ? (
           <div className="grid grid-3">
             {rows.map((developer) => (
-              <article key={developer.id} className="card">
+              <article key={developer.id} className="card catalogue-card">
+                <div className="catalogue-card__eyebrow">
+                  {locale === 'th' ? 'ผู้พัฒนาที่เผยแพร่แล้ว' : 'Published developer'}
+                </div>
                 <h2 className="card-title">{developer.name}</h2>
                 <p className="card-subtitle">
                   {developer.tier?.trim() || (locale === 'th' ? 'ยังไม่ระบุระดับ' : 'Tier not specified')}
                 </p>
+                <div className="catalogue-card__meta">
+                  <span>
+                    {locale === 'th'
+                      ? 'ใช้ข้อมูลผู้พัฒนาเป็นจุดเริ่มต้นก่อนขอดู shortlist โครงการที่ตรงกลยุทธ์'
+                      : 'Use developer context as the starting point before requesting a project shortlist.'}
+                  </span>
+                </div>
                 {developer.website ? (
                   <p className="card-subtitle">
                     <a href={developer.website} rel="noopener noreferrer" target="_blank">
@@ -135,6 +146,18 @@ export default async function DevelopersPage(props: { params: Promise<{ locale: 
                     </a>
                   </p>
                 ) : null}
+                <div className="card-actions">
+                  <Link
+                    className="btn btn-secondary"
+                    href={withLocaleQuery(locale, '/contact', {
+                      intent: 'developer_shortlist',
+                      source: 'developers_grid',
+                      developer: developer.slug,
+                    })}
+                  >
+                    {dict.cta.speakToAdvisor}
+                  </Link>
+                </div>
               </article>
             ))}
           </div>

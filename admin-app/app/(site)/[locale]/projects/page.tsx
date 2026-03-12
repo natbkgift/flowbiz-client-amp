@@ -1,8 +1,8 @@
 import type { Metadata } from 'next';
+import Link from 'next/link';
 import { makePageMetadata } from '@/app/_lib/i18n/metadata';
 import { buildAdvisorWhatsApp, getAdvisoryLabels, getAdvisoryProofs, withLocaleQuery } from '@/app/_lib/public-advisory';
 import { Container } from '@/components/layout/Container';
-import { ProjectCard } from '@/components/project/ProjectCard';
 import { fetchProjects, fetchProperties } from '@/app/_lib/public-api-server';
 
 import { getDictionary, normalizeLocale } from '@/app/_lib/i18n/get-dictionary';
@@ -138,14 +138,47 @@ export default async function ProjectsPage(props: { params: Promise<{ locale: st
 
           <div className="grid grid-3">
             {sorted.map((p) => (
-              <ProjectCard
-                key={p.id}
-                name={p.name}
-                count={0}
-                slug={p.slug}
-                locale={locale}
-                dict={dict}
-              />
+              <article key={p.id} className="card catalogue-card">
+                <div className="catalogue-card__eyebrow">
+                  {locale === 'th' ? 'โครงการที่เผยแพร่แล้ว' : 'Published project'}
+                </div>
+                <h2 className="card-title">{p.name}</h2>
+                <p className="card-subtitle">
+                  {p.status?.trim()
+                    ? locale === 'th'
+                      ? `สถานะ: ${p.status}`
+                      : `Status: ${p.status}`
+                    : locale === 'th'
+                      ? 'พร้อมใช้ต่อสำหรับ shortlist และการเปรียบเทียบ'
+                      : 'Ready for shortlist and comparison work.'}
+                </p>
+                <div className="catalogue-card__meta">
+                  <span>
+                    {p.starting_price && Number.isFinite(p.starting_price)
+                      ? locale === 'th'
+                        ? `เริ่ม ${Math.round(p.starting_price).toLocaleString()} บาท`
+                        : `From THB ${Math.round(p.starting_price).toLocaleString()}`
+                      : locale === 'th'
+                        ? 'ขอราคาและ unit mix จากที่ปรึกษา'
+                        : 'Ask the advisor for pricing and unit mix.'}
+                  </span>
+                </div>
+                <div className="card-actions">
+                  <Link className="btn btn-secondary" href={`/${locale}/projects/${p.slug}`}>
+                    {dict.listing.viewDetails}
+                  </Link>
+                  <Link
+                    className="btn btn-tertiary"
+                    href={withLocaleQuery(locale, '/contact', {
+                      intent: 'project_shortlist',
+                      source: 'projects_grid',
+                      project: p.slug,
+                    })}
+                  >
+                    {dict.cta.speakToAdvisor}
+                  </Link>
+                </div>
+              </article>
             ))}
           </div>
         </Container>
@@ -252,7 +285,36 @@ export default async function ProjectsPage(props: { params: Promise<{ locale: st
         {rows.length ? (
           <div className="grid grid-3">
             {rows.map((r) => (
-              <ProjectCard key={r.name} name={r.name} count={r.count} dict={dict} />
+              <article key={r.name} className="card catalogue-card">
+                <div className="catalogue-card__eyebrow">
+                  {locale === 'th' ? 'ภาพรวมจาก inventory ที่เผยแพร่แล้ว' : 'Published inventory signal'}
+                </div>
+                <h2 className="card-title">{r.name}</h2>
+                <p className="card-subtitle">
+                  {locale === 'th'
+                    ? `พบ ${r.count} รายการที่เกี่ยวข้องใน inventory ปัจจุบัน`
+                    : `${r.count} related listing(s) found in the current inventory.`}
+                </p>
+                <div className="catalogue-card__meta">
+                  <span>
+                    {locale === 'th'
+                      ? 'ใช้หน้านี้เป็นจุดเริ่มต้นก่อนให้ทีมคัด shortlist ที่ตรงงบและกลยุทธ์'
+                      : 'Use this as the starting signal before the team prepares a tighter shortlist.'}
+                  </span>
+                </div>
+                <div className="card-actions">
+                  <Link
+                    className="btn btn-secondary"
+                    href={withLocaleQuery(locale, '/contact', {
+                      intent: 'project_shortlist',
+                      source: 'projects_inventory',
+                      project: r.name,
+                    })}
+                  >
+                    {dict.cta.speakToAdvisor}
+                  </Link>
+                </div>
+              </article>
             ))}
           </div>
         ) : (
