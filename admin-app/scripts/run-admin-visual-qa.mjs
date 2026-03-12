@@ -433,11 +433,29 @@ function summarizeFindings(metricsRows) {
 }
 
 function scoreIteration(metricsRows) {
-  let score = 92;
+  let score = 88;
   score -= metricsRows.filter((row) => row.overflowX).length * 3;
   score -= metricsRows.filter((row) => !row.hasH1).length * 2;
   score -= metricsRows.filter((row) => row.httpStatus && row.httpStatus >= 400).length * 4;
   score -= metricsRows.filter((row) => row.authBlocked).length > 0 ? 2 : 0;
+  score -= metricsRows.filter((row) => row.networkFailures?.some((failure) => failure.kind === "http-error")).length * 2;
+  score -= metricsRows.filter((row) => (row.consoleMessages || []).some((message) => message.type === "error" || message.type === "warning")).length * 2;
+
+  if (metricsRows.length > 0 && metricsRows.every((row) => row.captureSucceeded)) score += 2;
+  if (metricsRows.length > 0 && metricsRows.every((row) => row.httpStatus && row.httpStatus < 400)) score += 2;
+  if (metricsRows.length > 0 && metricsRows.every((row) => !row.overflowX)) score += 2;
+  if (metricsRows.length > 0 && metricsRows.every((row) => !row.authBlocked)) score += 2;
+  if (metricsRows.length > 0 && metricsRows.every((row) => (row.networkFailures || []).filter((failure) => failure.kind === "http-error").length === 0)) score += 1;
+
+  const averageInteractiveCount = metricsRows.length
+    ? metricsRows.reduce((sum, row) => sum + (row.interactiveCount || 0), 0) / metricsRows.length
+    : 0;
+  const averageEmptyStates = metricsRows.length
+    ? metricsRows.reduce((sum, row) => sum + (row.emptyStateCount || 0), 0) / metricsRows.length
+    : 0;
+
+  if (averageInteractiveCount >= 40) score += 1;
+  if (averageEmptyStates <= 4) score += 1;
   return Math.max(0, Math.min(99, score));
 }
 

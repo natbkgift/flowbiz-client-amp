@@ -595,10 +595,18 @@ export default function AdminMediaPage() {
       {isAuthenticated ? (
         <>
           <section className="dashboard-grid" aria-label={t.integrity}>
-            <AdminStatCard label={t.broken} value={brokenCount} badgeLabel={t.watch} icon="warning" tone="warn" />
+            <AdminStatCard
+              label={t.broken}
+              value={brokenCount}
+              detail={`${translateMediaValue(integrity?.missing_file_count ? "blocked" : "approved", t)} · ${t.errors} ${Number(integrity?.error_count || 0)}`}
+              badgeLabel={t.watch}
+              icon="warning"
+              tone="warn"
+            />
             <AdminStatCard
               label={t.leakage}
               value={Number(integrity?.external_leakage_count || 0)}
+              detail={`${t.scannedAt}: ${prettyDate(integrity?.scanned_at || null, locale)}`}
               badgeLabel={t.ready}
               icon="globe"
               tone="neutral"
@@ -606,6 +614,7 @@ export default function AdminMediaPage() {
             <AdminStatCard
               label={t.errors}
               value={Number(integrity?.error_count || 0)}
+              detail={`${t.broken}: ${brokenCount}`}
               badgeLabel={t.blocked}
               icon="x"
               tone="error"
@@ -613,7 +622,7 @@ export default function AdminMediaPage() {
             <AdminStatCard
               label={t.warnings}
               value={Number(integrity?.warn_count || 0)}
-              detail={`${t.scannedAt}: ${prettyDate(integrity?.scanned_at || null, locale)}`}
+              detail={`${t.leakage}: ${Number(integrity?.external_leakage_count || 0)}`}
               badgeLabel={t.live}
               icon="info"
               tone="info"
