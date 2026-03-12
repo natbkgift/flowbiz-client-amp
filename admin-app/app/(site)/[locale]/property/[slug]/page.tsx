@@ -3,6 +3,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 
 import { buildAdvisorWhatsApp, getAdvisoryLabels, getAdvisoryProofs, withLocaleQuery } from '@/app/_lib/public-advisory';
+import { TrackedLink } from '@/components/analytics/TrackedLink';
 import { Container } from '@/components/layout/Container';
 import { Breadcrumbs } from '@/components/layout/Breadcrumbs';
 
@@ -97,6 +98,14 @@ export async function generateMetadata(props: PageProps): Promise<Metadata> {
 function formatPriceTHB(price: number): string {
   if (!Number.isFinite(price)) return '฿-';
   return `฿${Math.round(price).toLocaleString()}`;
+}
+
+function formatListingType(locale: 'en' | 'th', type: string): string {
+  const normalized = String(type || '').toLowerCase();
+  if (normalized === 'rent') return locale === 'th' ? 'เช่า' : 'Rent';
+  if (normalized === 'resale') return locale === 'th' ? 'ขายต่อ' : 'Resale';
+  if (normalized === 'new') return locale === 'th' ? 'โครงการใหม่' : 'New launch';
+  return locale === 'th' ? 'อสังหาฯ ในพัทยา' : 'Pattaya property';
 }
 
 export default async function PropertyPage(props: PageProps) {
@@ -221,6 +230,17 @@ export default async function PropertyPage(props: PageProps) {
 
   const priceNumber = Number(property.price);
   const priceValue = Number.isFinite(priceNumber) ? Math.round(priceNumber) : undefined;
+  const propertySummary = locale === 'th'
+    ? [
+        formatListingType(locale, property.type),
+        property.city || null,
+        dict.property.projectSubtitle,
+      ].filter(Boolean).join(' • ')
+    : [
+        formatListingType(locale, property.type),
+        property.city || null,
+        dict.property.projectSubtitle,
+      ].filter(Boolean).join(' • ');
 
   const jsonLd = JSON.stringify(
     [
@@ -314,10 +334,12 @@ export default async function PropertyPage(props: PageProps) {
 
             <div className="property-header">
               <div className="property-title">
+                <p className="public-hero__eyebrow">{dict.advisory.heroEyebrow}</p>
                 <h1>{property.title}</h1>
                 <p className="property-location">
                   {property.address}, {property.city}
                 </p>
+                <p className="section-subtitle">{propertySummary}</p>
               </div>
               <div className="property-price">{formatPriceTHB(Number(property.price))}</div>
             </div>
@@ -350,6 +372,34 @@ export default async function PropertyPage(props: PageProps) {
                   </div>
                 </div>
               </div>
+            </div>
+
+            <div className="cta-row mb-6">
+              <TrackedLink
+                className="btn btn-cta"
+                href={withLocaleQuery(locale, '/contact', { intent: 'listing_consultation', slug: params.slug })}
+                eventType="cta_click"
+                eventPayload={{ cta: 'speak_to_advisor', from: 'property_detail' }}
+              >
+                {dict.cta.speakToAdvisor}
+              </TrackedLink>
+              <a className="btn btn-secondary" href={buildAdvisorWhatsApp(locale, dict)} target="_blank" rel="noreferrer">
+                {dict.cta.whatsapp}
+              </a>
+            </div>
+
+            <div className="public-hero__proofs mb-6" role="note" aria-label={advisoryLabels.proofsLabel}>
+              <span className="public-hero__proof">{formatListingType(locale, property.type)}</span>
+              <span className="public-hero__proof">{property.city}</span>
+              <span className="public-hero__proof">
+                {locale === 'th' ? `${property.bedrooms ?? '-'} ห้องนอน` : `${property.bedrooms ?? '-'} bedrooms`}
+              </span>
+              <span className="public-hero__proof">
+                {locale === 'th' ? `${property.bathrooms ?? '-'} ห้องน้ำ` : `${property.bathrooms ?? '-'} bathrooms`}
+              </span>
+              <span className="public-hero__proof">
+                {locale === 'th' ? `${property.size ?? '-'} ตร.ม.` : `${property.size ?? '-'} sqm`}
+              </span>
             </div>
 
             <div className="bg-[var(--color-white)] p-6 rounded-xl mb-6">
