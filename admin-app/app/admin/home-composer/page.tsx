@@ -1049,6 +1049,18 @@ export default function HomeComposerPage() {
   const formatCandidateProjectMeta = (item: CandidateProject): string =>
     [item.slug, translateComposerStatus(item.status)].filter(Boolean).join(' · ');
 
+  const formatCandidatePropertyType = (value: string | null | undefined): string => {
+    const normalized = String(value || '').trim().toLowerCase();
+    if (!normalized) return '';
+    if (locale === 'th') {
+      if (normalized === 'rent') return 'เช่า';
+      if (normalized === 'resale') return 'ขายต่อ';
+      if (normalized === 'sale') return 'ขาย';
+      if (normalized === 'buy') return 'ซื้อ';
+    }
+    return normalized.replace(/_/g, ' ');
+  };
+
   const formatCandidatePropertyTitle = (item: CandidateProperty): string => {
     const rawTitle = item.title?.trim();
     if (!rawTitle) return item.source_id || item.id;
@@ -1065,7 +1077,11 @@ export default function HomeComposerPage() {
     const rawTitle = item.title?.trim() || '';
     const codeMatch = rawTitle.match(/(#\S+)/);
 
-    return [codeMatch?.[1] || item.source_id, translateComposerStatus(item.status), item.type].filter(Boolean).join(' · ');
+    return [
+      codeMatch?.[1] || item.source_id,
+      translateComposerStatus(item.status),
+      formatCandidatePropertyType(item.type),
+    ].filter(Boolean).join(' · ');
   };
 
   const sectionLabel = (section: SectionKey): string => SECTION_LABELS[section]?.[locale] ?? section;

@@ -1,5 +1,7 @@
 /** @type {import('next').NextConfig} */
+const path = require('node:path');
 const useMinimalConfig = process.env.NEXT_LOCAL_CONFIG_MINIMAL === '1';
+const localDistDir = process.env.NEXT_LOCAL_DIST_DIR?.trim();
 const imageHosts = (process.env.NEXT_PUBLIC_IMAGE_HOSTS ?? '')
   .split(',')
   .map((h) => h.trim())
@@ -7,6 +9,7 @@ const imageHosts = (process.env.NEXT_PUBLIC_IMAGE_HOSTS ?? '')
 
 const nextConfig = {
   reactStrictMode: true,
+  distDir: localDistDir || '.next',
   output: useMinimalConfig ? undefined : 'standalone',
   poweredByHeader: false,
   compress: true,
@@ -59,6 +62,17 @@ const nextConfig = {
         { source: '/media/:path*', destination: `${localMediaOrigin}/media/:path*` },
       ],
     };
+  },
+  webpack(config) {
+    if (useMinimalConfig) {
+      config.resolve = config.resolve || {};
+      config.resolve.alias = {
+        ...(config.resolve.alias || {}),
+        '@/app/root-styles': path.join(__dirname, 'app', 'root-styles-empty.ts'),
+        '@/app/root-fonts': path.join(__dirname, 'app', 'root-fonts-fallback.ts'),
+      };
+    }
+    return config;
   },
 };
 
