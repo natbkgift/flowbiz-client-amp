@@ -89,6 +89,16 @@ export type ProjectDetail = {
 
   developer_id?: string | null;
   area_id?: string | null;
+  area?: {
+    id: string;
+    slug: string;
+    name: string;
+  } | null;
+  developer?: {
+    id: string;
+    slug: string;
+    name: string;
+  } | null;
 
   created_at: string;
   updated_at: string;
@@ -197,7 +207,14 @@ export async function fetchProjectBySlug(slug: string): Promise<ProjectDetail | 
   const res = await fetchWithRetry(url.toString(), { next: { revalidate: PAGE_REVALIDATE_SECONDS } });
   if (res.status === 404) return null;
   if (!res.ok) throw new Error(`Failed to fetch project (${res.status})`);
-  return (await res.json()) as ProjectDetail;
+  const payload = (await res.json()) as unknown;
+  if (payload && typeof payload === 'object' && 'project' in payload) {
+    const maybe = payload as { project?: unknown };
+    if (maybe.project && typeof maybe.project === 'object') {
+      return maybe.project as ProjectDetail;
+    }
+  }
+  return payload as ProjectDetail;
 }
 
 export type SeoResolvedOverride = {
@@ -350,7 +367,30 @@ export async function fetchProjectEvaluation(projectId: string): Promise<Project
 
   if (res.status === 404) return null;
   if (!res.ok) throw new Error(`Failed to fetch project evaluation (${res.status})`);
-  return (await res.json()) as ProjectEvaluationResponse;
+  const payload = (await res.json()) as unknown;
+  if (payload && typeof payload === 'object') {
+    const maybe = payload as {
+      evaluation?: Partial<ProjectEvaluationResponse> | null;
+      project?: ProjectItem | null;
+      project_id?: string | null;
+    };
+    if (maybe.evaluation) {
+      return {
+        evaluation_version: maybe.evaluation.evaluation_version ?? 'v1',
+        project: maybe.evaluation.project ?? maybe.project ?? {
+          id: maybe.project_id ?? projectId,
+          slug: '',
+          name: '',
+          status: 'published',
+          created_at: '',
+          updated_at: '',
+        },
+        area_statistics: maybe.evaluation.area_statistics ?? null,
+        badges: Array.isArray(maybe.evaluation.badges) ? maybe.evaluation.badges : [],
+      };
+    }
+  }
+  return payload as ProjectEvaluationResponse;
 }
 
 export type AreaItem = {

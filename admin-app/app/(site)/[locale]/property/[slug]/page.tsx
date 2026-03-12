@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import Image from 'next/image';
 
+import { buildAdvisorWhatsApp, getAdvisoryLabels, getAdvisoryProofs, withLocaleQuery } from '@/app/_lib/public-advisory';
 import { Container } from '@/components/layout/Container';
 import { Breadcrumbs } from '@/components/layout/Breadcrumbs';
 
@@ -13,6 +14,7 @@ import { resolveImageUrl } from '@/app/_lib/public-api-shared';
 import { getDictionary, normalizeLocale } from '@/app/_lib/i18n/get-dictionary';
 import { ogLocale } from '@/app/_lib/i18n/routing';
 import { getInternalLinks } from '@/app/_lib/internal-links';
+import { PublicAdvisoryHero } from '@/components/public/PublicAdvisoryHero';
 
 export const revalidate = 300;
 
@@ -101,6 +103,8 @@ export default async function PropertyPage(props: PageProps) {
   const params = await props.params;
   const locale = normalizeLocale(params.locale);
   const dict = getDictionary(locale);
+  const advisoryProofs = getAdvisoryProofs(dict);
+  const advisoryLabels = getAdvisoryLabels(locale);
   const internalLinks = getInternalLinks(locale, dict, { from: 'property_detail', includeProjects: true });
   const propertyResult = await withTimeout(
     fetchPropertyBySlug(params.slug).then((value) => ({ kind: 'loaded' as const, value })),
@@ -124,19 +128,55 @@ export default async function PropertyPage(props: PageProps) {
               { label: formatSlugTitle(params.slug), href: `/${locale}/property/${encodeURIComponent(params.slug)}` },
             ]}
           />
-          <div className="card reveal mt-6">
-            <h1 className="card-title">{fallbackTitle}</h1>
-            <p className="card-subtitle">{fallbackBody}</p>
-            <div className="card-actions">
-              <Link className="btn btn-primary" href={`/${locale}/contact?intent=listing_snapshot&slug=${encodeURIComponent(params.slug)}`}>
-                {dict.cta.speakToAdvisor}
-              </Link>
-              <Link className="btn btn-secondary" href={`/${locale}/buy`}>
-                {dict.advisory.browseVerifiedInventory}
-              </Link>
-            </div>
-          </div>
         </Container>
+        <PublicAdvisoryHero
+          eyebrow={dict.advisory.heroEyebrow}
+          title={fallbackTitle}
+          subtitle={fallbackBody}
+          proofs={advisoryProofs}
+          proofsLabel={advisoryLabels.proofsLabel}
+          guidanceLabel={advisoryLabels.guidanceLabel}
+          signals={[
+            {
+              kicker: dict.advisory.bestFor,
+              title: formatSlugTitle(params.slug),
+              body: locale === 'th'
+                ? 'ใช้ state นี้เมื่อคุณต้องการส่งบริบทของ listing ให้ทีมช่วย shortlist หรือหาทางเลือกใกล้เคียง'
+                : 'Use this state to hand the listing context to the team or pivot into nearby shortlist options.',
+              icon: 'building',
+            },
+            {
+              kicker: dict.advisory.nextStep,
+              title: locale === 'th' ? 'ต่อไปยังคลังรายการหรือพูดคุยกับทีม' : 'Move next into inventory or advisory support',
+              body: locale === 'th'
+                ? 'แม้ snapshot นี้ยังไม่ครบ คุณยังเปิด inventory ที่ตรวจสอบแล้วหรือคุยกับทีมต่อได้ทันที'
+                : 'Even if this snapshot is incomplete, you can still jump into verified inventory or speak with the team right away.',
+              icon: 'check',
+            },
+            {
+              kicker: dict.advisory.trustSignal,
+              title: locale === 'th' ? 'ระบบไม่ fabricate รายละเอียดแทนข้อมูลจริง' : 'The page does not fabricate details',
+              body: locale === 'th'
+                ? 'เมื่อข้อมูลรายการนี้พร้อมครบ หน้านี้จะกลับมาแสดงรายละเอียดเต็มรูปแบบ'
+                : 'When the listing data becomes available, this route returns to the full detail presentation.',
+              icon: 'shield',
+            },
+          ]}
+          primaryAction={{
+            href: withLocaleQuery(locale, '/contact', { intent: 'listing_snapshot', slug: params.slug }),
+            label: dict.cta.speakToAdvisor,
+            eventPayload: { cta: 'listing_snapshot', from: 'property_detail_timeout' },
+          }}
+          secondaryAction={{
+            href: withLocale(locale, '/buy'),
+            label: dict.advisory.browseVerifiedInventory,
+            eventPayload: { cta: 'browse_verified_inventory', from: 'property_detail_timeout' },
+          }}
+          tertiaryAction={{
+            href: buildAdvisorWhatsApp(locale, dict),
+            label: dict.cta.whatsapp,
+          }}
+        />
       </main>
     );
   }

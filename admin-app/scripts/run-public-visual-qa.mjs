@@ -29,6 +29,7 @@ const SUMMARY_PATH = path.join(RUN_DIR, "summary.json");
 const METRICS_PATH = path.join(ITERATION_DIR, "metrics.json");
 const CONSOLE_PATH = path.join(ITERATION_DIR, "console.json");
 const NETWORK_PATH = path.join(ITERATION_DIR, "network-failures.json");
+const PREWARM_ROUTES = String(process.env.PUBLIC_VISUAL_PREWARM || "1") !== "0";
 
 function parseRoutes(raw) {
   const source = String(raw || "")
@@ -214,6 +215,13 @@ async function captureRoute(page, route, width, consoleLog, networkLog) {
   };
 }
 
+async function prewarmRoute(page, route) {
+  const url = new URL(route, BASE_URL).toString();
+  await page.goto(url, { waitUntil: "domcontentloaded", timeout: 30000 }).catch(() => {});
+  await page.waitForLoadState("networkidle", { timeout: 4000 }).catch(() => {});
+  await page.waitForTimeout(500);
+}
+
 function scoreCapture(capture) {
   let score = 100;
   if (capture.httpStatus !== 200) score -= 45;
@@ -254,6 +262,12 @@ async function main() {
 
   const captures = [];
   try {
+    if (PREWARM_ROUTES) {
+      for (const route of ROUTES) {
+        await prewarmRoute(page, route);
+      }
+    }
+
     for (const route of ROUTES) {
       for (const width of BREAKPOINTS) {
         captures.push(await captureRoute(page, route, width, consoleLog, networkLog));
