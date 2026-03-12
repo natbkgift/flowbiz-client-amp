@@ -438,17 +438,13 @@ def _listing_quality_gate_errors(
 ) -> list[str]:
     errors: list[str] = []
     has_local_cover = any(
-        _is_local_media_path(str(path or "").strip())
-        for path in [cover_image_url, cover_image]
+        _is_local_media_path(str(path or "").strip()) for path in [cover_image_url, cover_image]
     )
     if not has_local_cover:
         errors.append("cover media is required and must use local /media path")
 
     has_location_context = bool(
-        area_id
-        or project_id
-        or str(city or "").strip()
-        or str(address or "").strip()
+        area_id or project_id or str(city or "").strip() or str(address or "").strip()
     )
     if not has_location_context:
         errors.append("location context is required (Area, Project, City, or Address)")
@@ -1219,7 +1215,10 @@ def create_property(
         if validation_errors:
             raise HTTPException(
                 status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
-                detail={"code": "property_structured_validation_failed", "errors": validation_errors},
+                detail={
+                    "code": "property_structured_validation_failed",
+                    "errors": validation_errors,
+                },
             )
 
     prop = Property(
@@ -1308,7 +1307,9 @@ def update_property(
         validation_errors = validate_property_fields(
             property_type=data.get("property_type", prop.property_type),
             transaction_type=data.get("type", prop.type),
-            price=data.get("price", float(prop.price) if isinstance(prop.price, Decimal) else prop.price),
+            price=data.get(
+                "price", float(prop.price) if isinstance(prop.price, Decimal) else prop.price
+            ),
             price_period=data.get("price_period", prop.price_period),
             bedrooms=data.get("bedrooms", prop.bedrooms),
             bathrooms=data.get("bathrooms", prop.bathrooms),
@@ -1336,7 +1337,10 @@ def update_property(
         if validation_errors:
             raise HTTPException(
                 status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
-                detail={"code": "property_structured_validation_failed", "errors": validation_errors},
+                detail={
+                    "code": "property_structured_validation_failed",
+                    "errors": validation_errors,
+                },
             )
 
     if "tags" in data:
@@ -1517,7 +1521,10 @@ def bulk_update_property_status(
             if validation_errors:
                 raise HTTPException(
                     status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
-                    detail={"code": "property_structured_validation_failed", "errors": validation_errors},
+                    detail={
+                        "code": "property_structured_validation_failed",
+                        "errors": validation_errors,
+                    },
                 )
 
     updated = 0
@@ -1673,7 +1680,9 @@ def bulk_update_properties(
             validation_errors = validate_property_fields(
                 property_type=data.get("property_type", row.property_type),
                 transaction_type=data.get("type", row.type),
-                price=data.get("price", float(row.price) if isinstance(row.price, Decimal) else row.price),
+                price=data.get(
+                    "price", float(row.price) if isinstance(row.price, Decimal) else row.price
+                ),
                 price_period=data.get("price_period", row.price_period),
                 bedrooms=data.get("bedrooms", row.bedrooms),
                 bathrooms=data.get("bathrooms", row.bathrooms),
@@ -1701,7 +1710,10 @@ def bulk_update_properties(
             if validation_errors:
                 raise HTTPException(
                     status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
-                    detail={"code": "property_structured_validation_failed", "errors": validation_errors},
+                    detail={
+                        "code": "property_structured_validation_failed",
+                        "errors": validation_errors,
+                    },
                 )
 
         if "tags" in data:

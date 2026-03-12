@@ -1,12 +1,13 @@
 import type { InquiryCopy } from "@/components/admin/domain/crm/inquiries-copy";
 import type { InquiryItem, InquiryLocale } from "@/components/admin/domain/crm/inquiries-types";
-import { CRM_STATUSES, dueClass, prettyDate, statusIndex } from "@/components/admin/domain/crm/inquiries-utils";
+import { CRM_STATUSES, dueClass, prettyDate, statusIndex, translateFollowUpStatus, translateInquiryStatus } from "@/components/admin/domain/crm/inquiries-utils";
 
 export function InquiryKanbanBoard({
   t,
   locale,
   items,
   selectedId,
+  movingInquiryId,
   onSelect,
   onMoveStatus,
 }: {
@@ -14,6 +15,7 @@ export function InquiryKanbanBoard({
   locale: InquiryLocale;
   items: InquiryItem[];
   selectedId: string | null;
+  movingInquiryId: string | null;
   onSelect: (id: string) => void | Promise<void>;
   onMoveStatus: (inquiryId: string, nextStatus: string) => void | Promise<void>;
 }) {
@@ -38,7 +40,7 @@ export function InquiryKanbanBoard({
           }}
         >
           <header className="crm-kanban-head">
-            <h3>{column.status}</h3>
+            <h3>{translateInquiryStatus(column.status, locale)}</h3>
             <span>{column.items.length}</span>
           </header>
           <ul className="crm-items">
@@ -48,6 +50,7 @@ export function InquiryKanbanBoard({
                   type="button"
                   draggable
                   className={`crm-row-button ${selectedId === item.id ? "is-active" : ""}`}
+                  disabled={movingInquiryId === item.id}
                   onClick={() => void onSelect(item.id)}
                   onDragStart={(event) => {
                     event.dataTransfer.setData("text/plain", item.id);
@@ -71,7 +74,7 @@ export function InquiryKanbanBoard({
                   <span className="crm-row-meta">{item.purpose || "-"}</span>
                   <span className="crm-row-meta">
                     <span className={`crm-chip ${item.follow_up_status ? "crm-chip-sla" : "crm-chip-muted"}`}>
-                      {item.follow_up_status || "-"}
+                      {translateFollowUpStatus(item.follow_up_status, locale)}
                     </span>
                   </span>
                   <span className="crm-row-meta">
@@ -89,6 +92,7 @@ export function InquiryKanbanBoard({
                   <select
                     aria-label={t.status}
                     value={item.status}
+                    disabled={movingInquiryId === item.id}
                     onChange={(event) => {
                       void onMoveStatus(item.id, event.target.value);
                     }}
@@ -96,7 +100,7 @@ export function InquiryKanbanBoard({
                   >
                     {CRM_STATUSES.map((value) => (
                       <option key={value} value={value}>
-                        {value}
+                        {translateInquiryStatus(value, locale)}
                       </option>
                     ))}
                   </select>

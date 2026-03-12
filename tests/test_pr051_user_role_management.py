@@ -103,7 +103,9 @@ def test_pr051_assign_role_changes_permission_effect(client) -> None:
     assert create_response.status_code == 201, create_response.text
     managed_user_id = create_response.json()["user"]["id"]
 
-    user_headers = {"Authorization": f"Bearer {create_access_token(subject=user_email, role='editor')}"}
+    user_headers = {
+        "Authorization": f"Bearer {create_access_token(subject=user_email, role='editor')}"
+    }
     before = client.get("/admin/users", headers=user_headers)
     assert before.status_code == 403, before.text
 

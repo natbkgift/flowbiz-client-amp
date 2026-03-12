@@ -195,6 +195,7 @@ const widgetCopy: Record<AdminLocale, Record<string, WidgetUiCopy>> = {
       summary: "โปรเจกต์ส่วนใหญ่มีภาพปกภายในระบบที่ตรวจสอบแล้วและพร้อมใช้งาน",
       actions: {
         "/admin/media": "ดูคลังสื่อ",
+        "/admin/domain": "เปิดงานโดเมน",
       },
     },
     broken_media_count: {
@@ -204,11 +205,20 @@ const widgetCopy: Record<AdminLocale, Record<string, WidgetUiCopy>> = {
         "/admin/media": "ดูคลังสื่อ",
       },
     },
+    external_image_leakage_count: {
+      title: "สื่อภายนอกที่รั่วเข้าระบบ",
+      summary: "ไม่พบรูปภาพภายนอกที่รั่วเข้ามาในคลังสื่อของระบบ",
+      actions: {
+        "/admin/media": "ดูคลังสื่อ",
+        "/admin/dashboard": "เปิดแดชบอร์ด",
+      },
+    },
     pending_translations_count: {
       title: "คำแปลที่รอดำเนินการ",
       summary: "คิวคำแปลยังควบคุมได้และมองเห็นรายการที่ต้องตามต่อในรอบนี้",
       actions: {
         "/admin/domain": "เปิดโดเมน",
+        "/admin/dashboard": "เปิดแดชบอร์ด",
       },
     },
     unpublished_drafts_count: {
@@ -237,6 +247,7 @@ const widgetCopy: Record<AdminLocale, Record<string, WidgetUiCopy>> = {
       summary: "รอบนำเข้าล่าสุดมีคำเตือนเล็กน้อย แต่ระบบมิเรอร์ยังคงเสถียร",
       actions: {
         "/admin/imports": "ดูงานนำเข้า",
+        "/admin/dashboard": "เปิดแดชบอร์ด",
       },
     },
     last_deploy_health_status: {
@@ -244,6 +255,7 @@ const widgetCopy: Record<AdminLocale, Record<string, WidgetUiCopy>> = {
       summary: "การดีพลอยและการตรวจสุขภาพระบบรอบล่าสุดยังอยู่ในเกณฑ์ปกติ",
       actions: {
         "/admin/seo": "ดู SEO",
+        "/admin/imports": "ดูงานนำเข้า",
       },
     },
   },
@@ -328,6 +340,14 @@ function compactBuildSha(value: string | null | undefined): string | null {
   const text = String(value || "").trim();
   if (!text) return null;
   return text.slice(0, 7);
+}
+
+function localizeMetricSource(value: string | null | undefined, locale: AdminLocale, fallback: string): string {
+  const normalized = String(value || "").trim().toLowerCase();
+  if (!normalized) return fallback;
+  if (normalized === "telemetry_file_missing") return locale === "th" ? "ไม่พบไฟล์ telemetry" : "Telemetry file missing";
+  if (normalized === "telemetry_file") return locale === "th" ? "จากไฟล์ telemetry" : "Telemetry file";
+  return String(value || "").trim();
 }
 
 function localizeWidget(widget: DashboardWidget, locale: AdminLocale): DashboardWidget {
@@ -519,7 +539,7 @@ function createPresentation(
       ],
       details: [
         `${ui.build}: ${compactBuildSha(metric?.build_sha) || fallback}`,
-        `${ui.source}: ${String(metric?.source || fallback)}`,
+        `${ui.source}: ${localizeMetricSource(metric?.source, locale, fallback)}`,
       ],
     };
   }

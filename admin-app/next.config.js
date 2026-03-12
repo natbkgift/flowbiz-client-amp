@@ -1,4 +1,7 @@
 /** @type {import('next').NextConfig} */
+const path = require('node:path');
+const useMinimalConfig = process.env.NEXT_LOCAL_CONFIG_MINIMAL === '1';
+const localDistDir = process.env.NEXT_LOCAL_DIST_DIR?.trim();
 const imageHosts = (process.env.NEXT_PUBLIC_IMAGE_HOSTS ?? '')
   .split(',')
   .map((h) => h.trim())
@@ -6,11 +9,12 @@ const imageHosts = (process.env.NEXT_PUBLIC_IMAGE_HOSTS ?? '')
 
 const nextConfig = {
   reactStrictMode: true,
-  output: 'standalone',
+  distDir: localDistDir || '.next',
+  output: useMinimalConfig ? undefined : 'standalone',
   poweredByHeader: false,
   compress: true,
   skipTrailingSlashRedirect: true,
-  images: {
+  images: useMinimalConfig ? undefined : {
     formats: ['image/avif', 'image/webp'],
     remotePatterns: imageHosts.map((hostname) => ({
       protocol: 'https',
@@ -21,10 +25,8 @@ const nextConfig = {
     deviceSizes: [640, 750, 828, 1080, 1200, 1920],
     imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
   },
-  experimental: {
-    optimizePackageImports: ['@heroicons/react'],
-  },
   async headers() {
+    if (useMinimalConfig) return [];
     return [
       {
         // CDN + browser caching for static assets
@@ -43,18 +45,34 @@ const nextConfig = {
     ];
   },
   async rewrites() {
-    if (process.env.NODE_ENV !== 'development') return [];
+    if (useMinimalConfig) return [];
+    const localApiOrigin =
+      process.env.LOCAL_API_ORIGIN ||
+      (process.env.NODE_ENV === 'development' ? 'http://127.0.0.1:8000' : '');
+    const localMediaOrigin = process.env.LOCAL_MEDIA_ORIGIN || localApiOrigin;
+    if (!localApiOrigin) return [];
 
-    const devApiOrigin = process.env.LOCAL_API_ORIGIN || 'http://127.0.0.1:8000';
     return {
       fallback: [
-        // Local dev parity with production nginx:
-        // /api/* on frontend should hit backend root (without /api prefix).
-        { source: '/api/:path*', destination: `${devApiOrigin}/:path*` },
-        // If a /media file is missing in Next public/, fall through to backend media mount.
-        { source: '/media/:path*', destination: `${devApiOrigin}/media/:path*` },
+        // Local preview parity with the deployed edge proxy:
+        // LOCAL_API_ORIGIN may point either at a backend root (e.g. localhost:8000)
+        // or a site-prefixed API origin (e.g. https://amppattaya.com/api).
+        { source: '/api/:path*', destination: `${localApiOrigin}/:path*` },
+        // Allow media to use a separate origin when API and site/media are hosted differently.
+        { source: '/media/:path*', destination: `${localMediaOrigin}/media/:path*` },
       ],
     };
+  },
+  webpack(config) {
+    if (useMinimalConfig) {
+      config.resolve = config.resolve || {};
+      config.resolve.alias = {
+        ...(config.resolve.alias || {}),
+        '@/app/root-styles': path.join(__dirname, 'app', 'root-styles-empty.ts'),
+        '@/app/root-fonts': path.join(__dirname, 'app', 'root-fonts-fallback.ts'),
+      };
+    }
+    return config;
   },
 };
 

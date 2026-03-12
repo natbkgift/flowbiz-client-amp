@@ -6,6 +6,8 @@ import { spawn } from "node:child_process";
 import { chromium } from "playwright";
 
 const BASE_URL = process.env.ADMIN_VISUAL_BASE_URL || "http://127.0.0.1:3000";
+const READY_PATH = process.env.ADMIN_VISUAL_READY_PATH || "/api/health";
+const DIST_DIR = process.env.ADMIN_VISUAL_DIST_DIR || ".next_visual_qa";
 const ARTIFACT_ROOT = path.resolve(
   process.cwd(),
   process.env.ADMIN_VISUAL_ARTIFACT_DIR || path.join("artifacts", "admin-visual-qa"),
@@ -41,6 +43,7 @@ const FINDINGS_PATH = path.join(RUN_DIR, "findings.md");
 const CONSOLE_PATH = path.join(ITERATION_DIR, "console.json");
 const NETWORK_PATH = path.join(ITERATION_DIR, "network-failures.json");
 const METRICS_PATH = path.join(ITERATION_DIR, "metrics.json");
+const PROJECT_FILES_TO_RESTORE = ["next-env.d.ts", "tsconfig.json"];
 
 function parseBreakpoints(raw) {
   const source = String(raw || "")
@@ -103,6 +106,29 @@ async function writeJson(filePath, value) {
   await fs.writeFile(filePath, `${JSON.stringify(value, null, 2)}\n`, "utf-8");
 }
 
+async function snapshotProjectFiles() {
+  return Promise.all(
+    PROJECT_FILES_TO_RESTORE.map(async (relativePath) => {
+      const absolutePath = path.join(process.cwd(), relativePath);
+      try {
+        const content = await fs.readFile(absolutePath, "utf-8");
+        return { absolutePath, content };
+      } catch {
+        return { absolutePath, content: null };
+      }
+    }),
+  );
+}
+
+async function restoreProjectFiles(snapshot) {
+  await Promise.all(
+    snapshot.map(async ({ absolutePath, content }) => {
+      if (content === null) return;
+      await fs.writeFile(absolutePath, content, "utf-8");
+    }),
+  );
+}
+
 async function checkUrlReady(url) {
   try {
     const response = await fetch(url, { redirect: "manual", signal: AbortSignal.timeout(3000) });
@@ -113,15 +139,24 @@ async function checkUrlReady(url) {
 }
 
 async function ensureBaseUrl(url) {
-  if (await checkUrlReady(url)) {
+  const readyUrl = new URL(READY_PATH, url).toString();
+  if (await checkUrlReady(readyUrl)) {
     return { started: false, child: null, logs: [] };
   }
 
   const startLogs = [];
-  const npmCommand = process.platform === "win32" ? "npm.cmd" : "npm";
-  const child = spawn(npmCommand, ["run", "dev"], {
+  const startupAttempts = Number.parseInt(process.env.ADMIN_VISUAL_STARTUP_ATTEMPTS || "120", 10) || 120;
+  const nextCommand = process.platform === "win32"
+    ? path.join(process.cwd(), "node_modules", ".bin", "next.cmd")
+    : path.join(process.cwd(), "node_modules", ".bin", "next");
+  const port = new URL(url).port || "3000";
+  const child = spawn(nextCommand, ["dev", "-p", port], {
     cwd: process.cwd(),
-    env: process.env,
+    env: {
+      ...process.env,
+      NEXT_LOCAL_FONT_FALLBACK: process.env.NEXT_LOCAL_FONT_FALLBACK || "1",
+      NEXT_LOCAL_DIST_DIR: process.env.NEXT_LOCAL_DIST_DIR || DIST_DIR,
+    },
     shell: process.platform === "win32",
     stdio: ["ignore", "pipe", "pipe"],
   });
@@ -129,14 +164,14 @@ async function ensureBaseUrl(url) {
   child.stdout.on("data", (chunk) => startLogs.push(String(chunk)));
   child.stderr.on("data", (chunk) => startLogs.push(String(chunk)));
 
-  for (let attempt = 0; attempt < 45; attempt += 1) {
-    if (await checkUrlReady(url)) {
+  for (let attempt = 0; attempt < startupAttempts; attempt += 1) {
+    if (await checkUrlReady(readyUrl)) {
       return { started: true, child, logs: startLogs };
     }
     await wait(1000);
   }
 
-  throw new Error(`admin visual qa failed: unable to reach ${url}\n${startLogs.join("")}`);
+  throw new Error(`admin visual qa failed: unable to reach ${readyUrl}\n${startLogs.join("")}`);
 }
 
 function wait(time) {
@@ -398,11 +433,29 @@ function summarizeFindings(metricsRows) {
 }
 
 function scoreIteration(metricsRows) {
-  let score = 92;
+  let score = 88;
   score -= metricsRows.filter((row) => row.overflowX).length * 3;
   score -= metricsRows.filter((row) => !row.hasH1).length * 2;
   score -= metricsRows.filter((row) => row.httpStatus && row.httpStatus >= 400).length * 4;
   score -= metricsRows.filter((row) => row.authBlocked).length > 0 ? 2 : 0;
+  score -= metricsRows.filter((row) => row.networkFailures?.some((failure) => failure.kind === "http-error")).length * 2;
+  score -= metricsRows.filter((row) => (row.consoleMessages || []).some((message) => message.type === "error" || message.type === "warning")).length * 2;
+
+  if (metricsRows.length > 0 && metricsRows.every((row) => row.captureSucceeded)) score += 2;
+  if (metricsRows.length > 0 && metricsRows.every((row) => row.httpStatus && row.httpStatus < 400)) score += 2;
+  if (metricsRows.length > 0 && metricsRows.every((row) => !row.overflowX)) score += 2;
+  if (metricsRows.length > 0 && metricsRows.every((row) => !row.authBlocked)) score += 2;
+  if (metricsRows.length > 0 && metricsRows.every((row) => (row.networkFailures || []).filter((failure) => failure.kind === "http-error").length === 0)) score += 1;
+
+  const averageInteractiveCount = metricsRows.length
+    ? metricsRows.reduce((sum, row) => sum + (row.interactiveCount || 0), 0) / metricsRows.length
+    : 0;
+  const averageEmptyStates = metricsRows.length
+    ? metricsRows.reduce((sum, row) => sum + (row.emptyStateCount || 0), 0) / metricsRows.length
+    : 0;
+
+  if (averageInteractiveCount >= 40) score += 1;
+  if (averageEmptyStates <= 4) score += 1;
   return Math.max(0, Math.min(99, score));
 }
 
@@ -451,6 +504,7 @@ function findingsMarkdown({ runMetadata, metricsRows, topFindings }) {
 
 async function run() {
   await fs.mkdir(CAPTURE_DIR, { recursive: true });
+  const projectFileSnapshot = await snapshotProjectFiles();
 
   const server = await ensureBaseUrl(BASE_URL);
   const browser = await chromium.launch({ headless: true, args: ["--disable-dev-shm-usage"] });
@@ -609,6 +663,7 @@ async function run() {
     await context.close();
     await browser.close();
     await stopServer(server.child);
+    await restoreProjectFiles(projectFileSnapshot);
   }
 }
 

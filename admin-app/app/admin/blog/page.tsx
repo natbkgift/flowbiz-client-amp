@@ -1,4 +1,5 @@
 import { AdminJsonCrudWorkspace } from "@/components/admin/AdminJsonCrudWorkspace";
+import { detectAdminLocale } from "@/app/_lib/admin-i18n";
 
 const BLOG_CREATE_TEMPLATE = JSON.stringify(
   {
@@ -62,12 +63,17 @@ const BLOG_PATCH_FIELDS = [
 ] as const;
 
 export default function AdminBlogCmsPage() {
+  const locale = detectAdminLocale();
+  const isThai = locale === "th";
+
   return (
     <AdminJsonCrudWorkspace
       config={{
-        title: "Blog CMS",
-        subtitle: "Manage blog and guide articles via /admin/content/articles APIs with taxonomy keys from /admin/content/taxonomies.",
-        identifierLabel: "Article slug",
+        title: isThai ? "จัดการบทความและไกด์" : "Blog CMS",
+        subtitle: isThai
+          ? "จัดการบทความ blog และ guide ผ่าน /admin/content/articles โดยใช้ taxonomy key จาก /admin/content/taxonomies"
+          : "Manage blog and guide articles via /admin/content/articles APIs with taxonomy keys from /admin/content/taxonomies.",
+        identifierLabel: isThai ? "Slug ของบทความ" : "Article slug",
         identifierPlaceholder: "sample-blog-post",
         identifierField: "slug",
         listPath: "/admin/content/articles",
@@ -106,7 +112,7 @@ export default function AdminBlogCmsPage() {
           allowedStatuses: ["approved"],
           allowedCategories: ["blog", "guide"],
         },
-        queryHelp: "Supported: category, status, page, limit",
+        queryHelp: isThai ? "รองรับ query: category, status, page, limit" : "Supported: category, status, page, limit",
       }}
     />
   );

@@ -2,28 +2,14 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { Suspense } from 'react';
 
-import { TrackedLink } from '@/components/analytics/TrackedLink';
-import { HomeHero } from '@/components/home/HomeHero';
-import { FeaturedProjects } from '@/components/home/FeaturedProjects';
-import { LeadForm } from '@/components/forms/LeadForm';
-import { Container } from '@/components/layout/Container';
-import { getDictionary, normalizeLocale } from '@/app/_lib/i18n/get-dictionary';
-import { normalizeLocalMediaPath, pickPrimaryLocalMedia } from '@/app/_lib/local-media';
-import { GuidedOverlay } from './_components/GuidedOverlay';
-import { withLocale } from '@/app/_lib/i18n/routing';
-import { makePageMetadata } from '@/app/_lib/i18n/metadata';
-import { getContentRecommendation } from '@/lib/personalization';
-import {
-  fetchHomeComposerPublished,
-  fetchProjects,
-  fetchProperties as fetchPropertiesAPI,
-  fetchSeoResolvedOverride,
-} from '@/app/_lib/public-api-server';
 import type { PropertyListItem } from '@/app/public/_shared/types';
-import { LocalMediaImage } from '@/components/media/LocalMediaImage';
-import { EmptyStateCard, LoadingCardGrid } from '@/components/ui/StateBlocks';
 
 export const revalidate = 300;
+const useMinimalPublicHome = process.env.NEXT_LOCAL_PUBLIC_HOME_MINIMAL === '1';
+
+function normalizeLocale(value: string): 'en' | 'th' {
+  return value === 'th' ? 'th' : 'en';
+}
 
 const PROPERTY_FALLBACK_IMAGES = [
   '/media/project-covers/the-riviera-jomtien/cover_31dde7af340e.jpg',
@@ -40,6 +26,17 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { locale: rawLocale } = await params;
   const locale = normalizeLocale(rawLocale);
+  if (useMinimalPublicHome) {
+    return {
+      title: `Local forensic home (${locale})`,
+      description: 'Minimal public home used for runtime forensics.',
+    };
+  }
+  const [{ getDictionary }, { makePageMetadata }, { fetchSeoResolvedOverride }] = await Promise.all([
+    import('@/app/_lib/i18n/get-dictionary'),
+    import('@/app/_lib/i18n/metadata'),
+    import('@/app/_lib/public-api-server'),
+  ]);
   const dict = getDictionary(locale);
   const base = makePageMetadata(locale, '', `${dict.brand.name} | ${dict.home.heroTitle}`, dict.home.heroSubtitle, dict.brand.name);
   const resolvedPath = `/${locale}`;
@@ -68,6 +65,47 @@ export default async function HomePage({
 }) {
   const { locale: rawLocale } = await params;
   const locale = normalizeLocale(rawLocale);
+  if (useMinimalPublicHome) {
+    return (
+      <main id="main-content" style={{ padding: '32px', fontFamily: 'system-ui, sans-serif' }}>
+        <h1>Local forensic home</h1>
+        <p>Locale: {locale}</p>
+      </main>
+    );
+  }
+  const [
+    { TrackedLink },
+    { HomeHero },
+    { FeaturedProjects },
+    { LeadForm },
+    { Container },
+    { getDictionary },
+    { normalizeLocalMediaPath, pickPrimaryLocalMedia },
+    { GuidedOverlay },
+    { withLocale },
+    { getContentRecommendation },
+    {
+      fetchHomeComposerPublished,
+      fetchProjects,
+      fetchProperties: fetchPropertiesAPI,
+    },
+    { LocalMediaImage },
+    { EmptyStateCard, LoadingCardGrid },
+  ] = await Promise.all([
+    import('@/components/analytics/TrackedLink'),
+    import('@/components/home/HomeHero'),
+    import('@/components/home/FeaturedProjects'),
+    import('@/components/forms/LeadForm'),
+    import('@/components/layout/Container'),
+    import('@/app/_lib/i18n/get-dictionary'),
+    import('@/app/_lib/local-media'),
+    import('./_components/GuidedOverlay'),
+    import('@/app/_lib/i18n/routing'),
+    import('@/lib/personalization'),
+    import('@/app/_lib/public-api-server'),
+    import('@/components/media/LocalMediaImage'),
+    import('@/components/ui/StateBlocks'),
+  ]);
   const dict = getDictionary(locale);
   const homeDict = dict.home as Record<string, unknown>;
 

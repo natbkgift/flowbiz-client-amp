@@ -60,8 +60,18 @@ def upgrade() -> None:
             sa.Column("description_i18n", sa.JSON(), nullable=True),
             sa.Column("status", sa.String(length=32), nullable=False, server_default="active"),
             sa.Column("display_order", sa.Integer(), nullable=False, server_default="0"),
-            sa.Column("created_at", sa.DateTime(timezone=True), nullable=False, server_default=sa.func.now()),
-            sa.Column("updated_at", sa.DateTime(timezone=True), nullable=False, server_default=sa.func.now()),
+            sa.Column(
+                "created_at",
+                sa.DateTime(timezone=True),
+                nullable=False,
+                server_default=sa.func.now(),
+            ),
+            sa.Column(
+                "updated_at",
+                sa.DateTime(timezone=True),
+                nullable=False,
+                server_default=sa.func.now(),
+            ),
             sa.Column("deleted_at", sa.DateTime(timezone=True), nullable=True),
             sa.PrimaryKeyConstraint("id"),
             sa.UniqueConstraint("kind", "slug", name="uq_content_taxonomies_kind_slug"),
@@ -103,8 +113,18 @@ def upgrade() -> None:
             sa.Column("verification_status", sa.String(length=32), nullable=True),
             sa.Column("display_order", sa.Integer(), nullable=False, server_default="0"),
             sa.Column("published_at", sa.DateTime(timezone=True), nullable=True),
-            sa.Column("created_at", sa.DateTime(timezone=True), nullable=False, server_default=sa.func.now()),
-            sa.Column("updated_at", sa.DateTime(timezone=True), nullable=False, server_default=sa.func.now()),
+            sa.Column(
+                "created_at",
+                sa.DateTime(timezone=True),
+                nullable=False,
+                server_default=sa.func.now(),
+            ),
+            sa.Column(
+                "updated_at",
+                sa.DateTime(timezone=True),
+                nullable=False,
+                server_default=sa.func.now(),
+            ),
             sa.Column("deleted_at", sa.DateTime(timezone=True), nullable=True),
             sa.PrimaryKeyConstraint("id"),
             sa.UniqueConstraint("slug"),
@@ -113,7 +133,9 @@ def upgrade() -> None:
     if not _index_exists("content_videos", "ix_content_videos_slug"):
         op.create_index("ix_content_videos_slug", "content_videos", ["slug"], unique=False)
     if not _index_exists("content_videos", "ix_content_videos_youtube_id"):
-        op.create_index("ix_content_videos_youtube_id", "content_videos", ["youtube_id"], unique=False)
+        op.create_index(
+            "ix_content_videos_youtube_id", "content_videos", ["youtube_id"], unique=False
+        )
     if not _index_exists("content_videos", "ix_content_videos_status_published"):
         op.create_index(
             "ix_content_videos_status_published",

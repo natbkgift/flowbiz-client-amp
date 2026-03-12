@@ -197,7 +197,9 @@ def test_bulk_update_validates_and_updates_structured_fields(client: TestClient)
         },
     )
     assert invalid_active_quality_gate.status_code == 422, invalid_active_quality_gate.text
-    assert "cover media is required and must use local /media path" in str(invalid_active_quality_gate.json())
+    assert "cover media is required and must use local /media path" in str(
+        invalid_active_quality_gate.json()
+    )
 
     ok = client.post(
         "/admin/properties/bulk/update",

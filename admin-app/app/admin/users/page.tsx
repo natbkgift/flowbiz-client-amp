@@ -1,4 +1,5 @@
 import { AdminJsonCrudWorkspace } from "@/components/admin/AdminJsonCrudWorkspace";
+import { detectAdminLocale } from "@/app/_lib/admin-i18n";
 
 const USER_CREATE_TEMPLATE = JSON.stringify(
   {
@@ -47,14 +48,18 @@ const USER_PATCH_FIELDS = [
 ] as const;
 
 export default function AdminUsersPage() {
+  const locale = detectAdminLocale();
+  const isThai = locale === "th";
+
   return (
     <AdminJsonCrudWorkspace
       config={{
-        title: "User & Role Management",
-        subtitle:
-          "Create/update users and assign/unassign roles. Use role_ids to replace assignments. Self role/permission edits are blocked for safety.",
-        identifierLabel: "User ID",
-        identifierPlaceholder: "user UUID",
+        title: isThai ? "จัดการผู้ใช้และบทบาท" : "User & Role Management",
+        subtitle: isThai
+          ? "สร้างหรืออัปเดตผู้ใช้ พร้อมกำหนดหรือถอด role ได้จากหน้าเดียว โดยระบบยังกันการแก้สิทธิ์ของบัญชีตัวเองไว้เพื่อความปลอดภัย"
+          : "Create/update users and assign/unassign roles. Use role_ids to replace assignments. Self role/permission edits are blocked for safety.",
+        identifierLabel: isThai ? "รหัสผู้ใช้" : "User ID",
+        identifierPlaceholder: isThai ? "UUID ของผู้ใช้" : "user UUID",
         identifierField: "id",
         listPath: "/admin/users",
         getPath: "/admin/users/{id}",
@@ -65,7 +70,9 @@ export default function AdminUsersPage() {
         defaultPatchPayload: USER_PATCH_TEMPLATE,
         createFormFields: [...USER_CREATE_FIELDS],
         patchFormFields: [...USER_PATCH_FIELDS],
-        queryHelp: "List roles from /admin/roles, then set role_ids as a JSON array to assign/unassign.",
+        queryHelp: isThai
+          ? "เรียกดู role จาก /admin/roles แล้วใส่ role_ids เป็น JSON array เพื่อกำหนดหรือถอดสิทธิ์"
+          : "List roles from /admin/roles, then set role_ids as a JSON array to assign/unassign.",
       }}
     />
   );

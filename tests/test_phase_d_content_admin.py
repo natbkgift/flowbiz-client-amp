@@ -339,8 +339,16 @@ def test_phase_d_article_patch_to_published_enforces_publish_checklist(client) -
     )
     _assert_201(created)
 
-    _assert_200(client.patch(f"/admin/content/articles/{slug}", headers=headers, json={"status": "in_review"}))
-    _assert_200(client.patch(f"/admin/content/articles/{slug}", headers=headers, json={"status": "approved"}))
+    _assert_200(
+        client.patch(
+            f"/admin/content/articles/{slug}", headers=headers, json={"status": "in_review"}
+        )
+    )
+    _assert_200(
+        client.patch(
+            f"/admin/content/articles/{slug}", headers=headers, json={"status": "approved"}
+        )
+    )
 
     publish_via_patch = client.patch(
         f"/admin/content/articles/{slug}",
@@ -399,8 +407,16 @@ def test_phase_d_article_status_transition_audit_log_records_all_transitions(cli
     _assert_201(created)
 
     article_id = created.json()["article"]["id"]
-    _assert_200(client.patch(f"/admin/content/articles/{slug}", headers=headers, json={"status": "in_review"}))
-    _assert_200(client.patch(f"/admin/content/articles/{slug}", headers=headers, json={"status": "approved"}))
+    _assert_200(
+        client.patch(
+            f"/admin/content/articles/{slug}", headers=headers, json={"status": "in_review"}
+        )
+    )
+    _assert_200(
+        client.patch(
+            f"/admin/content/articles/{slug}", headers=headers, json={"status": "approved"}
+        )
+    )
     _assert_200(client.post(f"/admin/content/articles/{slug}/publish", headers=headers))
     _assert_200(client.post(f"/admin/content/articles/{slug}/unpublish", headers=headers))
 
@@ -499,7 +515,9 @@ def test_phase_d_taxonomy_rejects_invalid_slug_and_kind(client) -> None:
         },
     )
     assert invalid_slug.status_code == 422, invalid_slug.text
-    assert invalid_slug.json()["detail"] == "slug must be lowercase letters, numbers, and hyphen only"
+    assert (
+        invalid_slug.json()["detail"] == "slug must be lowercase letters, numbers, and hyphen only"
+    )
 
     spaced_slug = client.post(
         "/admin/content/taxonomies",
@@ -511,7 +529,9 @@ def test_phase_d_taxonomy_rejects_invalid_slug_and_kind(client) -> None:
         },
     )
     assert spaced_slug.status_code == 422, spaced_slug.text
-    assert spaced_slug.json()["detail"] == "slug must be lowercase letters, numbers, and hyphen only"
+    assert (
+        spaced_slug.json()["detail"] == "slug must be lowercase letters, numbers, and hyphen only"
+    )
 
     invalid_kind = client.post(
         "/admin/content/taxonomies",
@@ -657,7 +677,11 @@ def test_phase_d_article_revision_history_diff_and_restore(client) -> None:
     revision_rows = revisions.json()["data"]
     assert len(revision_rows) >= 3
     target_index = next(
-        (index for index, row in enumerate(revision_rows) if row.get("event") == "update" and index + 1 < len(revision_rows)),
+        (
+            index
+            for index, row in enumerate(revision_rows)
+            if row.get("event") == "update" and index + 1 < len(revision_rows)
+        ),
         None,
     )
     assert target_index is not None
@@ -674,7 +698,9 @@ def test_phase_d_article_revision_history_diff_and_restore(client) -> None:
     _assert_200(diff)
     assert diff.json()["base_revision"]["revision_id"] == expected_base_revision_id
     assert diff.json()["summary"]["changed_fields"] > 0
-    title_change = next((change for change in diff.json()["changes"] if change["path"] == "title.en"), None)
+    title_change = next(
+        (change for change in diff.json()["changes"] if change["path"] == "title.en"), None
+    )
     assert title_change is not None
     assert title_change["before"] != title_change["after"]
 
@@ -728,7 +754,9 @@ def test_phase_d_article_restore_rejects_external_hero_image_url(client) -> None
         )
         assert revision is not None
         payload = dict(revision.diff) if isinstance(revision.diff, dict) else {}
-        snapshot = dict(payload.get("snapshot")) if isinstance(payload.get("snapshot"), dict) else {}
+        snapshot = (
+            dict(payload.get("snapshot")) if isinstance(payload.get("snapshot"), dict) else {}
+        )
         snapshot["hero_image_url"] = "https://cdn.example.test/hero.jpg"
         payload["snapshot"] = snapshot
         revision.diff = payload
@@ -763,7 +791,9 @@ def test_phase_d_article_restore_requires_admin_role(client) -> None:
     )
     _assert_201(created)
 
-    revisions = client.get(f"/admin/content/articles/{slug}/revisions?limit=1", headers=admin_headers)
+    revisions = client.get(
+        f"/admin/content/articles/{slug}/revisions?limit=1", headers=admin_headers
+    )
     _assert_200(revisions)
     revision_id = revisions.json()["data"][0]["revision_id"]
 

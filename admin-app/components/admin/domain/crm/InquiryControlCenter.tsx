@@ -68,8 +68,24 @@ export function InquiryControlCenter({
         </form>
       ) : (
         <div className="crm-session-panel" role="status" aria-live="polite">
-          <p className="locale-safe">{authEmail ? `${t.sessionAs}: ${authEmail}` : t.sessionUnknown}</p>
-          <div className="card-actions">
+          <div className="crm-session-panel__head">
+            <div className="crm-session-panel__copy">
+              <strong>{t.sessionActive}</strong>
+              <p className="locale-safe">{authEmail ? `${t.sessionAs}: ${authEmail}` : t.sessionUnknown}</p>
+              <p className="crm-row-meta">{t.sessionHint}</p>
+            </div>
+          </div>
+          <dl className="crm-session-panel__meta">
+            <div>
+              <dt>{t.sessionRole}</dt>
+              <dd>{authEmail ? "admin" : "-"}</dd>
+            </div>
+            <div>
+              <dt>{t.sessionCoverage}</dt>
+              <dd>{t.sessionCoverageValue}</dd>
+            </div>
+          </dl>
+          <div className="crm-session-panel__quick-actions card-actions">
             <AdminButton variant="secondary" icon="x" type="button" onClick={onLogout}>
               {t.signOut}
             </AdminButton>

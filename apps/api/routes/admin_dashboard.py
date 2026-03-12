@@ -577,7 +577,9 @@ def _collect_recent_inquiries(db: Session) -> dict:
     return {"count": len(items), "items": items, "latest_at": latest_at}
 
 
-def _collect_inquiry_trend_series(db: Session, *, now: datetime) -> dict[str, list[dict[str, int | str]]]:
+def _collect_inquiry_trend_series(
+    db: Session, *, now: datetime
+) -> dict[str, list[dict[str, int | str]]]:
     end_date = now.astimezone(UTC).date()
     start_date = end_date - timedelta(days=29)
     start_at = datetime.combine(start_date, datetime.min.time(), tzinfo=UTC)
@@ -588,11 +590,13 @@ def _collect_inquiry_trend_series(db: Session, *, now: datetime) -> dict[str, li
         select(
             bucket_date_expr.label("bucket_date"),
             func.count().label("count"),
-        ).where(
+        )
+        .where(
             Inquiry.deleted_at.is_(None),
             Inquiry.created_at.is_not(None),
             Inquiry.created_at >= start_at,
-        ).group_by(bucket_date_expr)
+        )
+        .group_by(bucket_date_expr)
     ).all()
 
     counts: dict[str, int] = {}

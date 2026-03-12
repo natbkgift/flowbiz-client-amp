@@ -214,6 +214,7 @@ export function StatCard({
   value,
   metadata,
   action,
+  badgeLabel,
   icon = "info",
   tone = "neutral",
   className,
@@ -222,6 +223,7 @@ export function StatCard({
   value: ReactNode;
   metadata?: ReactNode;
   action?: ReactNode;
+  badgeLabel?: ReactNode;
   icon?: AdminIconName;
   tone?: AdminCardTone;
   className?: string;
@@ -230,7 +232,7 @@ export function StatCard({
     action
   ) : (
     <AdminBadge tone={tone === "neutral" ? "info" : tone} icon={toneIcon(tone)}>
-      {toneLabel(tone)}
+      {badgeLabel ?? toneLabel(tone)}
     </AdminBadge>
   );
 
@@ -257,6 +259,7 @@ export function AdminStatCard({
   label,
   value,
   detail,
+  badgeLabel,
   icon = "info",
   tone = "info",
   className,
@@ -264,6 +267,7 @@ export function AdminStatCard({
   label: ReactNode;
   value: ReactNode;
   detail?: ReactNode;
+  badgeLabel?: ReactNode;
   icon?: AdminIconName;
   tone?: AdminTone;
   className?: string;
@@ -273,6 +277,7 @@ export function AdminStatCard({
       title={label}
       value={value}
       metadata={detail}
+      badgeLabel={badgeLabel}
       icon={icon}
       tone={tone}
       className={className}

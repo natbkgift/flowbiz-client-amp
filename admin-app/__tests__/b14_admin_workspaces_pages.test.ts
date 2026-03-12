@@ -29,9 +29,22 @@ describe("B14 admin workspace pages contract", () => {
     expect(page).toContain("/usage");
     expect(page).toContain("/admin/media/projects/");
     expect(page).toContain("/admin/media/properties/");
+    expect(page).toContain("admin-workspace-panel admin-workspace-panel--actions");
+    expect(page).toContain("admin-workspace-panel admin-workspace-panel--records");
     expect(page).toContain("state-empty");
     expect(page).toContain("state-loading");
     expect(page).toContain("state-error");
+    expect(page).toContain("state-success");
+    expect(page).toContain("parseJsonObject(");
+    expect(page).toContain("invalidPatchJson");
+    expect(page).toContain("invalidGalleryPayload");
+    expect(page).toContain("operationResultHint");
+    expect(page).toContain("selectionHint");
+    expect(page).toContain('patchJson: "ข้อมูลอัปเดตแบบ JSON"');
+    expect(page).toContain("archiveConfirm");
+    expect(page).toContain("window.confirm");
+    expect(page).toContain("emptyHint");
+    expect(page).toContain("disabled={loading || opBusy}");
   });
 
   it("imports workspace uses list + import run endpoints", () => {
@@ -45,9 +58,20 @@ describe("B14 admin workspace pages contract", () => {
     expect(page).toContain("/admin/properties/imports?");
     expect(page).toContain("/admin/properties/import?dry_run=");
     expect(page).toContain("/admin/dashboard/health-summary");
+    expect(page).toContain("admin-workspace-panel admin-workspace-panel--actions");
+    expect(page).toContain("admin-workspace-panel admin-workspace-panel--records");
     expect(page).toContain("state-empty");
     expect(page).toContain("state-loading");
     expect(page).toContain("state-error");
+    expect(page).toContain("state-success");
+    expect(page).toContain("setImportNotice");
+    expect(page).toContain("importResultHint");
+    expect(page).toContain("importSelectionHint");
+    expect(page).toContain("selectedFile");
+    expect(page).toContain("selectedMode");
+    expect(page).toContain('filterDryRun: "กรองโหมดทดลองรัน"');
+    expect(page).toContain("emptyHint");
+    expect(page).toContain("disabled={loading || importBusy}");
   });
 
   it("domain workspace uses domain CRUD + publish APIs and dashboard summaries", () => {
@@ -129,6 +153,9 @@ describe("B14 admin workspace pages contract", () => {
     expect(page).toContain("Hero image media picker");
     expect(page).toContain("Hero image must use local media only.");
     expect(page).toContain("Choose media");
+    expect(page).toContain("publishConfirm");
+    expect(page).toContain("window.confirm");
+    expect(page).toContain("unsavedLeaveConfirm");
   });
 
   it("login page uses canonical shared admin auth contract", () => {

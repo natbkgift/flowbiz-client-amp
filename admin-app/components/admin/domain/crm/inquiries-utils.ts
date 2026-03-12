@@ -71,3 +71,30 @@ export function dueClass(dueAt: string | null): string {
 export function statusIndex(status: string): number {
   return CRM_STATUSES.findIndex((value) => value === status);
 }
+
+export function translateInquiryStatus(value: string | null | undefined, locale: InquiryLocale): string {
+  const raw = String(value || "").trim();
+  if (!raw) return "-";
+  const normalized = raw.toLowerCase();
+  if (locale === "th") {
+    if (normalized === "new") return "ใหม่";
+    if (normalized === "contacted") return "ติดต่อแล้ว";
+    if (normalized === "qualified") return "ผ่านการคัดกรอง";
+    if (normalized === "closed") return "ปิดงานแล้ว";
+    if (normalized === "lost") return "หลุดไปแล้ว";
+  }
+  return raw.replace(/_/g, " ");
+}
+
+export function translateFollowUpStatus(value: string | null | undefined, locale: InquiryLocale): string {
+  const raw = String(value || "").trim();
+  if (!raw) return "-";
+  const normalized = raw.toLowerCase();
+  if (locale === "th") {
+    if (normalized === "pending") return "รอติดตาม";
+    if (normalized === "scheduled") return "นัดหมายแล้ว";
+    if (normalized === "completed") return "ติดตามแล้ว";
+    if (normalized === "no_response") return "ยังไม่ตอบกลับ";
+  }
+  return raw.replace(/_/g, " ");
+}

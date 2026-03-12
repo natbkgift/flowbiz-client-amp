@@ -21,6 +21,24 @@ describe("admin home composer surface polish", () => {
     expect(page).toContain('className="home-composer-option-label"');
     expect(page).toContain('className="home-composer-search-results"');
     expect(page).toContain('className={`home-composer-media-status-badge ${mediaBadgeClass(asset)}`}');
+    expect(page).toContain("mediaCandidatesEmpty");
+    expect(page).toContain("const formatCandidatePropertyTitle =");
+    expect(page).toContain("Promise.allSettled([");
+  });
+
+  it("creates drafts lazily on save instead of mutating on initial load", () => {
+    const page = read("app/admin/home-composer/page.tsx");
+
+    expect(page).toContain("const createDraft = useCallback(async");
+    expect(page).toContain("const hasComposerBundle = Boolean(bundle);");
+    expect(page).toContain("const hasUnsavedChanges = Boolean(draftId)");
+    expect(page).toContain("const confirmDiscardChanges = useCallback((): boolean =>");
+    expect(page).toContain("const saveDisabled = saving || loading || Boolean(heroImageError);");
+    expect(page).toContain("const publishDisabled = publishing || loading || saving || !draftId || Boolean(heroImageError);");
+    expect(page).toContain("unsavedLeaveConfirm");
+    expect(page).toContain("if (!draftId) {");
+    expect(page).toContain("savedDraft = await createDraft(locale, payloadConfig);");
+    expect(page).not.toContain("if (!nextBundle.draft) {");
   });
 
   it("defines reusable page-local polish hooks in admin styles", () => {

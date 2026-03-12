@@ -181,7 +181,11 @@
   .admin-root .btn:disabled,
   .admin-btn:disabled,
   .admin-button:disabled {
-    opacity: 0.6;
+    opacity: 1;
+    background: linear-gradient(180deg, rgba(241, 245, 249, 0.96), rgba(226, 232, 240, 0.96));
+    color: var(--admin-text-soft);
+    border-color: rgba(203, 213, 225, 0.86);
+    box-shadow: none;
     cursor: not-allowed;
     transform: none;
   }
@@ -240,16 +244,25 @@
 
   .admin-root .state-empty,
   .admin-root .state-loading,
+  .admin-root .state-success,
   .admin-root .state-error {
     border-radius: var(--admin-radius-md);
     padding: var(--admin-space-4);
   }
 
   .admin-root .state-empty,
-  .admin-root .state-loading {
+  .admin-root .state-loading,
+  .admin-root .state-success {
     border: 1px dashed var(--admin-border-default);
     background: var(--admin-bg-card-muted);
     color: var(--admin-text-muted);
+  }
+
+  .admin-root .state-success {
+    border-style: solid;
+    border-color: var(--admin-color-success-100);
+    background: var(--admin-color-success-50);
+    color: var(--admin-color-success-700);
   }
 
   .admin-root .state-error {

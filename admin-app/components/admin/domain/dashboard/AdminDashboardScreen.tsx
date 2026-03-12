@@ -68,6 +68,44 @@ function humanizeMetricKey(key: string): string {
     .join(" ");
 }
 
+function localizeFreshnessKey(key: string, locale: Locale): string {
+  if (locale === "th") {
+    const labels: Record<string, string> = {
+      import_feed: "สถานะนำเข้าล่าสุด",
+      media_scan: "การสแกนสื่อ",
+      translation_queue: "คิวคำแปล",
+      deploy_watch: "การเฝ้าดูสถานะดีพลอย",
+      last_import_status: "สถานะนำเข้าล่าสุด",
+      last_mirror_status: "สถานะมิเรอร์ล่าสุด",
+      last_deploy_health_status: "สถานะดีพลอยล่าสุด",
+      media_integrity: "ความสมบูรณ์ของสื่อ",
+      project_cover_coverage: "ความครอบคลุมภาพปกโปรเจกต์",
+      recent_inquiries: "อินไควรีล่าสุด",
+      review_video_source_verification_pending: "การยืนยันแหล่งที่มาวิดีโอ",
+    };
+    return labels[key] || humanizeMetricKey(key);
+  }
+  return humanizeMetricKey(key);
+}
+
+function localizeWarningMessage(value: string, locale: Locale): string {
+  const normalized = value.trim().toLowerCase();
+  if (locale === "th" && normalized === "translation_policy_not_signed_off") {
+    return "นโยบายคำแปลยังไม่ได้รับการลงนามอนุมัติ";
+  }
+  return value;
+}
+
+function localizeTaskMetaValue(value: string | null | undefined, locale: Locale, fallback: string): string {
+  const normalized = String(value || "").trim().toLowerCase();
+  if (!normalized) return fallback;
+  if (locale === "th") {
+    if (normalized === "telemetry_file_missing") return "ไม่พบไฟล์ telemetry";
+    if (normalized === "telemetry_file") return "จากไฟล์ telemetry";
+  }
+  return String(value || "").trim();
+}
+
 function formatAge(value: number | null, locale: Locale, fallback: string): string {
   if (typeof value !== "number" || !Number.isFinite(value) || value < 0) return fallback;
   if (value < 60) return locale === "th" ? `${Math.round(value)} วินาทีที่ผ่านมา` : `${Math.round(value)}s ago`;
@@ -482,7 +520,7 @@ export function AdminDashboardScreen({
         key: "deploy",
         title: t.taskDeploy,
         detail: `${t.latestTask}: ${prettyDate(raw.last_deploy_health_status.deploy_checked_at || null, locale)}`,
-        meta: `${t.taskSource}: ${compactValue(raw.last_deploy_health_status.source, t.unknownValue)} · ${t.taskBuild}: ${compactValue(
+        meta: `${t.taskSource}: ${localizeTaskMetaValue(raw.last_deploy_health_status.source, locale, t.unknownValue)} · ${t.taskBuild}: ${compactValue(
           raw.last_deploy_health_status.build_sha?.slice(0, 7),
           t.unknownValue,
         )}`,
@@ -523,13 +561,14 @@ export function AdminDashboardScreen({
     );
   }
 
-  function renderSectionState(emptyTitle: string, emptyBody: string) {
+  function renderSectionState(emptyTitle: string, emptyBody: string, options?: { action?: ReactNode; compact?: boolean }) {
     return (
       <DashboardSectionState
         tone="empty"
         title={emptyTitle}
         body={emptyBody}
-        action={renderRefreshButton(t.retry)}
+        action={options?.action}
+        compact={options?.compact}
       />
     );
   }
@@ -803,7 +842,7 @@ export function AdminDashboardScreen({
     }
 
     if (freshnessEntries.length === 0) {
-      return renderSectionState(t.insightsEmptyTitle, t.insightsEmptyBody);
+      return renderSectionState(t.insightsEmptyTitle, t.insightsEmptyBody, { compact: true });
     }
 
     return (
@@ -813,7 +852,7 @@ export function AdminDashboardScreen({
           return (
             <li key={key} className="dashboard-insight-item">
               <div className="dashboard-insight-copy">
-                <strong>{humanizeMetricKey(key)}</strong>
+                <strong>{localizeFreshnessKey(key, locale)}</strong>
                 <p>
                   {t.checkedAt}: {prettyDate(item.checked_at, locale)}
                 </p>
@@ -862,7 +901,7 @@ export function AdminDashboardScreen({
     }
 
     if (!hasTrendData(trendPoints)) {
-      return <DashboardSectionState tone="empty" title={t.trendEmptyTitle} body={t.trendEmptyBody} />;
+      return <DashboardSectionState tone="empty" title={t.trendEmptyTitle} body={t.trendEmptyBody} compact />;
     }
 
     return <DashboardTrendChart points={trendPoints} locale={locale} period={chartPeriod} />;
@@ -901,7 +940,7 @@ export function AdminDashboardScreen({
     }
 
     if ((summary?.warnings || []).length === 0) {
-      return renderSectionState(t.warningsEmptyTitle, t.warningsEmptyBody);
+      return renderSectionState(t.warningsEmptyTitle, t.warningsEmptyBody, { compact: true });
     }
 
     return (
@@ -911,7 +950,7 @@ export function AdminDashboardScreen({
             <span className="dashboard-warning-icon" aria-hidden="true">
               <AdminIcon name="warning" size={16} />
             </span>
-            <span>{item}</span>
+            <span>{localizeWarningMessage(item, locale)}</span>
           </li>
         ))}
       </ul>
@@ -955,7 +994,14 @@ export function AdminDashboardScreen({
     }
 
     if (totalRecentInquiryCount === 0) {
-      return renderSectionState(t.recentInquiriesEmptyTitle, t.recentInquiriesEmptyBody);
+      return renderSectionState(t.recentInquiriesEmptyTitle, t.recentInquiriesEmptyBody, {
+        compact: true,
+        action: (
+          <Link className={adminButtonClassName({ variant: "secondary", size: "sm" })} href={withAdminLocale("/admin/inquiries", locale)}>
+            {t.openCrm}
+          </Link>
+        ),
+      });
     }
 
     return (
@@ -1001,7 +1047,7 @@ export function AdminDashboardScreen({
     }
 
     if (backgroundTasks.length === 0) {
-      return renderSectionState(t.backgroundTasksEmptyTitle, t.backgroundTasksEmptyBody);
+      return renderSectionState(t.backgroundTasksEmptyTitle, t.backgroundTasksEmptyBody, { compact: true });
     }
 
     return (

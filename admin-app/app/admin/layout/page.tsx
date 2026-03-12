@@ -54,6 +54,13 @@ const copy = {
     exists: "Record exists",
     missing: "Record will be created on first save",
     updatedAt: "Updated at",
+    sessionDescription: "Current layout CMS session and fetch controls.",
+    loginDescription: "Use admin credentials to edit the shared layout source.",
+    invalidJson: "Invalid JSON",
+    invalidRoot: "JSON root must be an object",
+    previewDescription: "Resolved counts and contact details parsed from the current JSON config.",
+    previewInvalid: "Invalid JSON",
+    adminFallback: "Admin",
   },
   th: {
     title: "Admin Layout CMS",
@@ -82,6 +89,13 @@ const copy = {
     exists: "มี record แล้ว",
     missing: "ยังไม่มี record (ระบบจะสร้างให้เมื่อกดบันทึกครั้งแรก)",
     updatedAt: "อัปเดตล่าสุด",
+    sessionDescription: "เซสชันของ layout CMS ปัจจุบัน พร้อมคำสั่งโหลดข้อมูลล่าสุด",
+    loginDescription: "ใช้บัญชีแอดมินเพื่อแก้ไขข้อมูลต้นทางของ layout ที่ใช้ร่วมกันทั้งระบบ",
+    invalidJson: "JSON ไม่ถูกต้อง",
+    invalidRoot: "ค่า root ของ JSON ต้องเป็น object",
+    previewDescription: "สรุปจำนวนลิงก์และข้อมูลติดต่อที่อ่านได้จาก JSON ปัจจุบัน",
+    previewInvalid: "JSON ไม่ถูกต้อง",
+    adminFallback: "แอดมิน",
   },
 };
 
@@ -112,7 +126,7 @@ function prettyDate(value: string | null, locale: Locale): string {
 }
 
 export default function AdminLayoutCmsPage() {
-  const [locale, setLocale] = useState<Locale>("en");
+  const [locale, setLocale] = useState<Locale>(() => detectLocale());
   const [token, setToken] = useState("");
   const [email, setEmail] = useState("");
   const [loginEmail, setLoginEmail] = useState("");
@@ -243,11 +257,11 @@ export default function AdminLayoutCmsPage() {
     try {
       parsed = JSON.parse(configText);
     } catch {
-      setPageError(`${t.saveError} (invalid JSON)`);
+      setPageError(`${t.saveError} (${t.invalidJson})`);
       return;
     }
     if (!parsed || typeof parsed !== "object") {
-      setPageError(`${t.saveError} (JSON root must be an object)`);
+      setPageError(`${t.saveError} (${t.invalidRoot})`);
       return;
     }
 
@@ -297,8 +311,8 @@ export default function AdminLayoutCmsPage() {
 
       <ActionCard
         className="dashboard-controls"
-        title={isAuthenticated ? (email || "Admin") : t.loginTitle}
-        description={isAuthenticated ? "Current layout CMS session and fetch controls." : "Use admin credentials to edit the shared layout source."}
+        title={isAuthenticated ? (email || t.adminFallback) : t.loginTitle}
+        description={isAuthenticated ? t.sessionDescription : t.loginDescription}
         icon={isAuthenticated ? "profile" : "layout"}
         titleTag="h2"
       >
@@ -339,10 +353,10 @@ export default function AdminLayoutCmsPage() {
           <div className="crm-session-panel" role="status" aria-live="polite">
             <p className="locale-safe">{email ? `${t.email}: ${email}` : t.authRequired}</p>
             <div className="card-actions">
-              <AdminButton variant="secondary" icon="refresh" type="button" onClick={() => void loadCurrent()}>
+              <AdminButton variant="secondary" icon="refresh" type="button" onClick={() => void loadCurrent()} disabled={loading || saving}>
                 {loading ? t.refresh : t.refresh}
               </AdminButton>
-              <AdminButton variant="secondary" icon="x" type="button" onClick={logout}>
+              <AdminButton variant="secondary" icon="x" type="button" onClick={logout} disabled={loading || saving}>
                 {t.signOut}
               </AdminButton>
             </div>
@@ -396,12 +410,12 @@ export default function AdminLayoutCmsPage() {
       {isAuthenticated ? (
         <LogCard
           title={t.preview}
-          description="Resolved counts and contact details parsed from the current JSON config."
+          description={t.previewDescription}
           icon="table"
           titleTag="h2"
         >
           {!preview.ok ? (
-            <div className="state-error">Invalid JSON</div>
+            <div className="state-error">{t.previewInvalid}</div>
           ) : (
             <ul className="bullet-list">
               <li>Header links: {preview.headerLinks}</li>

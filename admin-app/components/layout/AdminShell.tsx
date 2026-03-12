@@ -210,6 +210,7 @@ function renderNavGroup(
         <ul>
           {items.map((item) => {
             const active = isActiveAdminNav(pathname, item.href);
+            const showDescription = active || searchTerm.length > 0;
             const label = getAdminNavText(item.label, locale);
             const description = getAdminNavText(item.description, locale);
             const resolvedHref = resolveNavHref(item.href, locale);
@@ -220,7 +221,7 @@ function renderNavGroup(
                 <span className="admin-shell-nav-link-icon" aria-hidden="true">
                   <AdminIcon name={item.icon} size={16} />
                 </span>
-                <span className="admin-shell-nav-link-copy">
+                <span className={showDescription ? "admin-shell-nav-link-copy has-description" : "admin-shell-nav-link-copy"}>
                   <strong>{renderHighlightedText(label, searchTerm)}</strong>
                   <small>{renderHighlightedText(description, searchTerm)}</small>
                 </span>
@@ -275,7 +276,7 @@ function getCurrentAdminLocation(
 
 export function AdminShell({ children }: { children: ReactNode }) {
   const pathname = usePathname() || "";
-  const [locale, setLocale] = useState<AdminLocale>("en");
+  const [locale, setLocale] = useState<AdminLocale>(() => detectAdminLocale());
   const [searchQuery, setSearchQuery] = useState("");
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
   const deferredSearch = useDeferredValue(searchQuery.trim().toLowerCase());
@@ -331,6 +332,7 @@ export function AdminShell({ children }: { children: ReactNode }) {
   const currentGroupLabel = group ? getAdminNavText(group.label, locale) : ui.admin;
   const currentWorkspaceLabel = item ? getAdminNavText(item.label, locale) : ui.workspace;
   const currentWorkspaceDescription = item ? getAdminNavText(item.description, locale) : ui.workspaceSummary;
+  const currentWorkspaceIcon = item ? item.icon : "workspace";
   const siteHref = locale === "th" ? "/th" : "/en";
   const sidebarUtilityItems = useMemo<AdminNavItem[]>(
     () => [
@@ -350,6 +352,7 @@ export function AdminShell({ children }: { children: ReactNode }) {
   );
   const hasSearchResults =
     filteredNavGroups.some((entry) => entry.items.length > 0) || filteredUtilityItems.length > 0;
+  const showDesktopUtilityNav = deferredSearch.length > 0 && filteredUtilityItems.length > 0;
   const showWorkspaceBreadcrumb = currentGroupLabel !== currentWorkspaceLabel;
 
   useEffect(() => {
@@ -435,9 +438,13 @@ export function AdminShell({ children }: { children: ReactNode }) {
         </div>
 
         <div className="admin-shell-sidebar-meta">
-          <p className="admin-shell-sidebar-kicker">{ui.currentWorkspace}</p>
-          <strong>{currentWorkspaceLabel}</strong>
-          <span>{currentWorkspaceDescription}</span>
+          <span className="admin-shell-sidebar-meta-icon" aria-hidden="true">
+            <AdminIcon name={currentWorkspaceIcon} size={16} />
+          </span>
+          <div className="admin-shell-sidebar-meta-copy">
+            <p className="admin-shell-sidebar-kicker">{ui.currentWorkspace}</p>
+            <strong>{currentWorkspaceLabel}</strong>
+          </div>
         </div>
 
         <div className="admin-shell-sidebar-scroll">
@@ -466,16 +473,18 @@ export function AdminShell({ children }: { children: ReactNode }) {
                 </div>
               ))}
 
-              <nav className="admin-shell-sidebar-footer" aria-label={ui.quickActions}>
-                {renderNavGroup(
-                  ui.quickNavigation,
-                  filteredUtilityItems,
-                  pathname,
-                  locale,
-                  deferredSearch,
-                  { linkClassName: "admin-shell-nav-link admin-shell-nav-link--utility" },
-                )}
-              </nav>
+              {showDesktopUtilityNav ? (
+                <nav className="admin-shell-sidebar-footer" aria-label={ui.quickActions}>
+                  {renderNavGroup(
+                    ui.quickNavigation,
+                    filteredUtilityItems,
+                    pathname,
+                    locale,
+                    deferredSearch,
+                    { linkClassName: "admin-shell-nav-link admin-shell-nav-link--utility" },
+                  )}
+                </nav>
+              ) : null}
             </>
           ) : (
             emptySearchState
@@ -544,61 +553,62 @@ export function AdminShell({ children }: { children: ReactNode }) {
                 </div>
               </label>
 
-              <div className="admin-shell-topbar-status" aria-label={ui.quickActions}>
-                <Link
-                  href={withAdminLocale("/admin/dashboard", locale)}
-                  className="admin-shell-toolbar-chip admin-shell-toolbar-chip--notifications"
-                >
-                  <span className="admin-shell-toolbar-chip-icon" aria-hidden="true">
-                    <AdminIcon name="warning" size={16} />
-                  </span>
-                  <span className="admin-shell-toolbar-chip-copy">
-                    <strong>{ui.notifications}</strong>
-                    <small>{ui.notificationsHint}</small>
-                  </span>
-                </Link>
+              <div className="admin-shell-topbar-utilities">
+                <div className="admin-shell-topbar-status" aria-label={ui.quickActions}>
+                  <Link
+                    href={withAdminLocale("/admin/dashboard", locale)}
+                    className="admin-shell-toolbar-chip admin-shell-toolbar-chip--notifications"
+                  >
+                    <span className="admin-shell-toolbar-chip-icon" aria-hidden="true">
+                      <AdminIcon name="warning" size={16} />
+                    </span>
+                    <span className="admin-shell-toolbar-chip-copy">
+                      <strong>{ui.notifications}</strong>
+                      <small>{ui.notificationsHint}</small>
+                    </span>
+                  </Link>
 
-                <div className="admin-shell-toolbar-chip admin-shell-toolbar-chip--workspace">
-                  <span className="admin-shell-toolbar-chip-icon" aria-hidden="true">
-                    <AdminIcon name="workspace" size={16} />
-                  </span>
-                  <span className="admin-shell-toolbar-chip-copy">
-                    <strong>{currentWorkspaceLabel}</strong>
-                    <small>{currentWorkspaceDescription}</small>
-                  </span>
-                  <AdminBadge tone="info" icon="workspace">
-                    {ui.workspaceName}
-                  </AdminBadge>
-                </div>
-              </div>
-
-              <div className="admin-shell-profile" aria-label={ui.profileLabel}>
-                <div className="admin-shell-profile-head">
-                  <span className="admin-shell-profile-avatar" aria-hidden="true">
-                    <AdminIcon name="profile" size={16} />
-                  </span>
-                  <div>
-                    <p className="admin-shell-profile-kicker">{ui.profileLabel}</p>
-                    <strong>{ui.profileTitle}</strong>
-                    <span>{ui.profileSubtitle}</span>
+                  <div className="admin-shell-toolbar-chip admin-shell-toolbar-chip--workspace">
+                    <span className="admin-shell-toolbar-chip-icon" aria-hidden="true">
+                      <AdminIcon name="workspace" size={16} />
+                    </span>
+                    <span className="admin-shell-toolbar-chip-copy">
+                      <strong>{ui.workspaceName}</strong>
+                    </span>
+                    <AdminBadge tone="info" icon="workspace">
+                      {currentGroupLabel}
+                    </AdminBadge>
                   </div>
                 </div>
-                <div className="admin-shell-profile-badges">
-                  <AdminBadge tone="info" icon="language">
-                    {ui.localeBadge}: {locale.toUpperCase()}
-                  </AdminBadge>
-                </div>
-                <div className="admin-shell-profile-actions">
-                  <Link href={siteHref} className="admin-shell-profile-link">
-                    <AdminIcon name="globe" size={14} />
-                    <span>{ui.visitSite}</span>
-                  </Link>
-                  <div className="admin-shell-locale-control">
-                    <label htmlFor="admin-language-switcher">{ui.language}</label>
-                    <select id="admin-language-switcher" value={locale} onChange={onLanguageChange}>
-                      <option value="en">EN</option>
-                      <option value="th">TH</option>
-                    </select>
+
+                <div className="admin-shell-profile" aria-label={ui.profileLabel}>
+                  <div className="admin-shell-profile-head">
+                    <span className="admin-shell-profile-avatar" aria-hidden="true">
+                      <AdminIcon name="profile" size={16} />
+                    </span>
+                    <div>
+                      <p className="admin-shell-profile-kicker">{ui.profileLabel}</p>
+                      <strong>{ui.profileTitle}</strong>
+                      <span>{ui.profileSubtitle}</span>
+                    </div>
+                  </div>
+                  <div className="admin-shell-profile-badges">
+                    <AdminBadge tone="info" icon="language">
+                      {ui.localeBadge}: {locale.toUpperCase()}
+                    </AdminBadge>
+                  </div>
+                  <div className="admin-shell-profile-actions">
+                    <Link href={siteHref} className="admin-shell-profile-link">
+                      <AdminIcon name="globe" size={14} />
+                      <span>{ui.visitSite}</span>
+                    </Link>
+                    <div className="admin-shell-locale-control">
+                      <label htmlFor="admin-language-switcher">{ui.language}</label>
+                      <select id="admin-language-switcher" value={locale} onChange={onLanguageChange}>
+                        <option value="en">EN</option>
+                        <option value="th">TH</option>
+                      </select>
+                    </div>
                   </div>
                 </div>
               </div>

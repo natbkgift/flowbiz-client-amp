@@ -51,15 +51,17 @@ export function DashboardSectionState({
   title,
   body,
   action,
+  compact = false,
 }: {
   tone?: "empty" | "error" | "info";
   title: string;
   body: string;
   action?: ReactNode;
+  compact?: boolean;
 }) {
   return (
     <div
-      className={joinClasses("dashboard-section-state", `dashboard-section-state--${tone}`)}
+      className={joinClasses("dashboard-section-state", `dashboard-section-state--${tone}`, compact && "dashboard-section-state--compact")}
       role={tone === "error" ? "alert" : "status"}
       aria-live="polite"
     >

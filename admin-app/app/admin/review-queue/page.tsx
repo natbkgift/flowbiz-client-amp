@@ -1,4 +1,5 @@
 import { AdminJsonCrudWorkspace } from "@/components/admin/AdminJsonCrudWorkspace";
+import { detectAdminLocale } from "@/app/_lib/admin-i18n";
 
 const REVIEW_PATCH_TEMPLATE = JSON.stringify(
   {
@@ -18,12 +19,17 @@ const REVIEW_PATCH_FIELDS = [
 ] as const;
 
 export default function AdminReviewQueuePage() {
+  const locale = detectAdminLocale();
+  const isThai = locale === "th";
+
   return (
     <AdminJsonCrudWorkspace
       config={{
-        title: "Editorial Review Queue",
-        subtitle: "Review and approve articles waiting in in_review state.",
-        identifierLabel: "Article slug",
+        title: isThai ? "คิวตรวจทานบทความ" : "Editorial Review Queue",
+        subtitle: isThai
+          ? "ตรวจทานและอนุมัติบทความที่อยู่ในสถานะ in_review จากหน้าเดียว"
+          : "Review and approve articles waiting in in_review state.",
+        identifierLabel: isThai ? "Slug ของบทความ" : "Article slug",
         identifierPlaceholder: "sample-blog-post",
         identifierField: "slug",
         listPath: "/admin/content/articles",
@@ -39,8 +45,9 @@ export default function AdminReviewQueuePage() {
           bodyPath: "body_md",
           locales: ["en", "th"],
         },
-        queryHelp:
-          "Defaults to the review queue (`status=in_review`) for pending approvals. You can adjust the query if needed.",
+        queryHelp: isThai
+          ? "ค่าเริ่มต้นจะเปิดคิว review (`status=in_review`) สำหรับงานที่รออนุมัติ และยังปรับ query เพิ่มได้ตามต้องการ"
+          : "Defaults to the review queue (`status=in_review`) for pending approvals. You can adjust the query if needed.",
       }}
     />
   );

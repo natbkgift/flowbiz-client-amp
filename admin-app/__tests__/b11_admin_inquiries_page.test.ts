@@ -42,6 +42,7 @@ describe("B11 admin inquiries page contract", () => {
     const detail = read("components/admin/domain/crm/InquiryDetailPanel.tsx");
     const contactActions = read("components/admin/domain/crm/InquiryContactActions.tsx");
     const followUp = read("components/admin/domain/crm/InquiryFollowUpPanel.tsx");
+    const timeline = read("components/admin/domain/crm/InquiryTimelinePanel.tsx");
     const utils = read("components/admin/domain/crm/inquiries-utils.ts");
 
     expect(page).toContain("const [filters, setFilters] = useState<InquiryFilters>(EMPTY_FILTERS)");
@@ -51,11 +52,19 @@ describe("B11 admin inquiries page contract", () => {
     expect(filters).toContain('onFilterChange("date_from"');
     expect(filters).toContain('onFilterChange("date_to"');
     expect(filters).toContain('onFilterChange("follow_up_status"');
+    expect(filters).toContain("filtersDescription");
+    expect(filters).toContain("searchPlaceholder");
     expect(utils).toContain('["pending", "scheduled", "completed", "no_response"]');
+    expect(utils).toContain("translateFollowUpStatus");
+    expect(utils).toContain("translateInquiryStatus");
     expect(contactActions).toContain("selected.whatsapp_url");
     expect(contactActions).toContain("selected.phone_url");
     expect(contactActions).toContain("selected.email_url");
     expect(detail).toContain("<InquiryContactActions");
+    expect(detail).toContain("detailsDescription");
+    expect(followUp).toContain("followUpNotice");
+    expect(timeline).toContain("timelineEmpty");
+    expect(contactActions).toContain("contactActionsEmpty");
     expect(followUp).toContain('id="follow-up-status"');
   });
 
@@ -74,20 +83,35 @@ describe("B11 admin inquiries page contract", () => {
     expect(utils).toContain("readRoleFromToken");
     expect(page).toContain("saveCurrentFilter");
     expect(page).toContain("loadSavedFilter");
+    expect(page).toContain('const [detailLoading, setDetailLoading] = useState(false)');
+    expect(page).toContain('const [movingInquiryId, setMovingInquiryId] = useState<string | null>(null)');
     expect(savedFilters).toContain('id="crm-saved-filter-select"');
+    expect(page).toContain('className="crm-controls-toolbar"');
+    expect(savedFilters).toContain("savedFiltersHint");
+    expect(savedFilters).toContain("savedFiltersEmpty");
   });
 
   it("keeps accessibility and runtime states in EN/TH copy", () => {
     const page = read("app/admin/inquiries/page.tsx");
     const controlCenter = read("components/admin/domain/crm/InquiryControlCenter.tsx");
+    const detail = read("components/admin/domain/crm/InquiryDetailPanel.tsx");
+    const followUp = read("components/admin/domain/crm/InquiryFollowUpPanel.tsx");
     const copy = read("components/admin/domain/crm/inquiries-copy.ts");
 
     expect(page).toContain('<main id="main-content"');
     expect(page).toContain("<AdminPageHeader title={t.title}");
     expect(page).toContain('title={t.list}');
+    expect(page).toContain("t.listDescription");
+    expect(page).toContain("t.loadingHint");
+    expect(page).toContain("t.movingStatus");
+    expect(page).toContain("t.emptyHint");
     expect(page).toContain('title={t.details}');
     expect(page).toContain('className="crm-list"');
     expect(page).toContain('className="crm-detail"');
+    expect(page).toContain("followUpNotice");
+    expect(detail).toContain("detailLoading");
+    expect(detail).toContain("t.loadingDetails");
+    expect(followUp).toContain("detailLoading");
     expect(controlCenter).toContain('htmlFor="crm-login-email"');
     expect(controlCenter).toContain('htmlFor="crm-login-password"');
     expect(controlCenter).toContain('autoComplete="username"');
@@ -95,6 +119,12 @@ describe("B11 admin inquiries page contract", () => {
     expect(page).toContain("state-empty");
     expect(page).toContain("state-loading");
     expect(page).toContain("state-error");
+    expect(copy).toContain('followUpSaved: "Follow-up updated."');
+    expect(copy).toContain('followUpSaved: "บันทึกสถานะติดตามแล้ว"');
+    expect(copy).toContain('sessionHint: "Keep this session active');
+    expect(copy).toContain('sessionHint: "คงเซสชันนี้ไว้');
+    expect(copy).toContain('filtersDescription: "Refine the active queue');
+    expect(copy).toContain('filtersDescription: "ปรับคิวงานที่กำลังดู');
     expect(copy).toContain('loginTitle: "Admin sign in"');
     expect(copy).toContain('loginTitle: "เข้าสู่ระบบแอดมิน"');
   });

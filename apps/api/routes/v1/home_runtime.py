@@ -492,11 +492,16 @@ def _runtime_single_link_from_cms(
 def _runtime_footer_contact(locale: str, db: Session | None) -> dict[str, str]:
     doc = _layout_cms_document(db)
     footer = doc.get("footer") if isinstance(doc.get("footer"), dict) else {}
-    contact = footer.get("contact") if isinstance(footer, dict) and isinstance(footer.get("contact"), dict) else {}
-    email = str(contact.get("email") if isinstance(contact, dict) else "").strip() or _DEFAULT_CONTACT_EMAIL
-    raw_facebook = str(
-        contact.get("facebook_url") if isinstance(contact, dict) else ""
-    ).strip()
+    contact = (
+        footer.get("contact")
+        if isinstance(footer, dict) and isinstance(footer.get("contact"), dict)
+        else {}
+    )
+    email = (
+        str(contact.get("email") if isinstance(contact, dict) else "").strip()
+        or _DEFAULT_CONTACT_EMAIL
+    )
+    raw_facebook = str(contact.get("facebook_url") if isinstance(contact, dict) else "").strip()
     parsed = urlparse(raw_facebook)
     if parsed.scheme in {"http", "https"} and str(parsed.hostname or "").lower() in {
         "facebook.com",
@@ -1026,9 +1031,7 @@ def _render(locale: str, request: Request, db: Session, source: str, resolved: d
         f'<a class="btn btn-secondary-hero btn-sm" href="{escape(href)}">{escape(label)}</a>'
         for href, label in _runtime_nav_items(locale, db)
     )
-    nav_html = (
-        f'{nav_links_html}<a class="btn btn-secondary-hero btn-sm" href="{escape(contact_cta_href)}">{escape(contact_cta_label)}</a>'
-    )
+    nav_html = f'{nav_links_html}<a class="btn btn-secondary-hero btn-sm" href="{escape(contact_cta_href)}">{escape(contact_cta_label)}</a>'
     footer_primary_html = "".join(
         f'<a href="{escape(href)}">{escape(label)}</a>'
         for href, label in _runtime_footer_primary_items(locale, db)
@@ -1223,12 +1226,9 @@ def _render_page_shell(
     nav_links_html = "".join(
         f'<a class="btn" href="{escape(href)}">{escape(label)}</a>' for href, label in nav_items
     )
-    nav_html = (
-        f'{nav_links_html}<a class="btn" href="{escape(contact_cta_href)}">{escape(contact_cta_label)}</a>'
-    )
+    nav_html = f'{nav_links_html}<a class="btn" href="{escape(contact_cta_href)}">{escape(contact_cta_label)}</a>'
     footer_primary_html = "".join(
-        f'<a href="{escape(href)}">{escape(label)}</a>'
-        for href, label in footer_primary_items
+        f'<a href="{escape(href)}">{escape(label)}</a>' for href, label in footer_primary_items
     )
     footer_legal_html = "".join(
         f'<a href="{escape(href)}">{escape(label)}</a>' for href, label in footer_legal_items

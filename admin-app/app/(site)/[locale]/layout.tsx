@@ -20,6 +20,8 @@ export function generateStaticParams() {
   return SUPPORTED_LOCALES.map((locale) => ({ locale }));
 }
 
+const useMinimalSiteLocaleLayout = process.env.NEXT_LOCAL_SITE_LAYOUT_MINIMAL === '1';
+
 export default async function SiteLayout(
   props: {
     children: ReactNode;
@@ -34,6 +36,9 @@ export default async function SiteLayout(
 
   const locale = normalizeLocale(params.locale);
   const dict = getDictionary(locale);
+  if (useMinimalSiteLocaleLayout) {
+    return <>{children}</>;
+  }
   const layoutCmsRow = await fetchCompanyInfoBySlug(SITE_LAYOUT_CMS_SLUG).catch(() => null);
   const layoutCms = resolveLayoutCms(locale, dict, layoutCmsRow?.content);
 

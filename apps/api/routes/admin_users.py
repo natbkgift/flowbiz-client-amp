@@ -217,7 +217,9 @@ def admin_list_roles(
     _enforce_user_management_access(db, admin=admin)
     rows = db.scalars(select(Role).order_by(Role.name.asc()).limit(limit)).all()
     permission_map = _permission_keys_by_role_ids(db, role_ids=[row.id for row in rows])
-    return {"data": [_serialize_role(db, row, permission_keys_by_role=permission_map) for row in rows]}
+    return {
+        "data": [_serialize_role(db, row, permission_keys_by_role=permission_map) for row in rows]
+    }
 
 
 @router.get("/users")
@@ -264,7 +266,11 @@ def admin_create_user(
         db.rollback()
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
-            detail={"code": "user_email_conflict", "message": "email already exists", "field": "email"},
+            detail={
+                "code": "user_email_conflict",
+                "message": "email already exists",
+                "field": "email",
+            },
         ) from exc
     db.refresh(row)
     return {"user": _serialize_user(db, row)}
@@ -300,7 +306,11 @@ def admin_patch_user(
         db.rollback()
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
-            detail={"code": "user_email_conflict", "message": "email already exists", "field": "email"},
+            detail={
+                "code": "user_email_conflict",
+                "message": "email already exists",
+                "field": "email",
+            },
         ) from exc
     db.refresh(row)
     return {"user": _serialize_user(db, row)}
@@ -357,9 +367,13 @@ def admin_unassign_role_from_user(
         actor_user_id=admin.id, target_user_id=row.id, changing_privileges=True
     )
 
-    link = db.scalar(select(UserRole).where(UserRole.user_id == row.id, UserRole.role_id == role_id).limit(1))
+    link = db.scalar(
+        select(UserRole).where(UserRole.user_id == row.id, UserRole.role_id == role_id).limit(1)
+    )
     if link is None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User role assignment not found")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="User role assignment not found"
+        )
 
     db.delete(link)
     try:
@@ -369,6 +383,9 @@ def admin_unassign_role_from_user(
         db.rollback()
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
-            detail={"code": "user_role_unassign_failed", "message": "could not unassign role from user"},
+            detail={
+                "code": "user_role_unassign_failed",
+                "message": "could not unassign role from user",
+            },
         ) from exc
     return {"assigned": False, "user": _serialize_user(db, row)}

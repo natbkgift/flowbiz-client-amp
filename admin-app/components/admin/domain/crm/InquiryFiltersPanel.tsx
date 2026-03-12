@@ -18,18 +18,34 @@ export function InquiryFiltersPanel({
   return (
     <fieldset className="crm-filters-fieldset" disabled={!isAuthenticated || loading}>
       <legend>{t.filters}</legend>
+      <p className="crm-filter-hint">{t.filtersDescription}</p>
       <div className="crm-filters">
         <label className="field" htmlFor="crm-status">
           <span>{t.status}</span>
-          <input id="crm-status" value={filters.status} onChange={(event) => onFilterChange("status", event.target.value)} />
+          <input
+            id="crm-status"
+            value={filters.status}
+            placeholder={t.status}
+            onChange={(event) => onFilterChange("status", event.target.value)}
+          />
         </label>
         <label className="field" htmlFor="crm-source">
           <span>{t.source}</span>
-          <input id="crm-source" value={filters.source} onChange={(event) => onFilterChange("source", event.target.value)} />
+          <input
+            id="crm-source"
+            value={filters.source}
+            placeholder={t.source}
+            onChange={(event) => onFilterChange("source", event.target.value)}
+          />
         </label>
         <label className="field" htmlFor="crm-purpose">
           <span>{t.purpose}</span>
-          <input id="crm-purpose" value={filters.purpose} onChange={(event) => onFilterChange("purpose", event.target.value)} />
+          <input
+            id="crm-purpose"
+            value={filters.purpose}
+            placeholder={t.purpose}
+            onChange={(event) => onFilterChange("purpose", event.target.value)}
+          />
         </label>
         <label className="field" htmlFor="crm-date-from">
           <span>{t.dateFrom}</span>
@@ -56,7 +72,12 @@ export function InquiryFiltersPanel({
         </label>
         <label className="field crm-search" htmlFor="crm-search">
           <span>{t.search}</span>
-          <input id="crm-search" value={filters.q} onChange={(event) => onFilterChange("q", event.target.value)} />
+          <input
+            id="crm-search"
+            value={filters.q}
+            placeholder={t.searchPlaceholder}
+            onChange={(event) => onFilterChange("q", event.target.value)}
+          />
         </label>
       </div>
     </fieldset>
