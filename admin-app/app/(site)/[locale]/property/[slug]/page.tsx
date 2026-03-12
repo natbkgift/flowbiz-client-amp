@@ -18,6 +18,28 @@ export const revalidate = 300;
 
 type PageProps = { params: Promise<{ locale: string; slug: string }> };
 const PROPERTY_DETAIL_FALLBACK = '/images/project-overview.png';
+const PROPERTY_FETCH_TIMEOUT_MS = 8000;
+
+async function withTimeout<T>(task: Promise<T>, fallback: T, timeoutMs = PROPERTY_FETCH_TIMEOUT_MS): Promise<T> {
+  try {
+    return await Promise.race<T>([
+      task,
+      new Promise<T>((resolve) => {
+        setTimeout(() => resolve(fallback), timeoutMs);
+      }),
+    ]);
+  } catch {
+    return fallback;
+  }
+}
+
+function formatSlugTitle(slug: string): string {
+  return slug
+    .split('-')
+    .filter(Boolean)
+    .map((segment) => segment.charAt(0).toUpperCase() + segment.slice(1))
+    .join(' ');
+}
 
 export async function generateMetadata(props: PageProps): Promise<Metadata> {
   const params = await props.params;
@@ -80,7 +102,45 @@ export default async function PropertyPage(props: PageProps) {
   const locale = normalizeLocale(params.locale);
   const dict = getDictionary(locale);
   const internalLinks = getInternalLinks(locale, dict, { from: 'property_detail', includeProjects: true });
-  const property = await fetchPropertyBySlug(params.slug);
+  const propertyResult = await withTimeout(
+    fetchPropertyBySlug(params.slug).then((value) => ({ kind: 'loaded' as const, value })),
+    { kind: 'timeout' as const },
+  );
+  const property = propertyResult.kind === 'loaded' ? propertyResult.value : null;
+
+  if (propertyResult.kind === 'timeout') {
+    const fallbackTitle = locale === 'th' ? 'กำลังเตรียมข้อมูลรายการนี้' : 'Preparing this listing snapshot';
+    const fallbackBody = locale === 'th'
+      ? 'รายละเอียดเชิงลึกของรายการนี้ยังดึงมาไม่ครบในรอบนี้ คุณยังเดินต่อไปยัง shortlist หรือส่งบริบทให้ทีมช่วยคัดตัวเลือกได้ทันที'
+      : 'The detailed snapshot for this listing is not fully available in this request window yet. You can still move into shortlist mode or hand the context to the team right away.';
+
+    return (
+      <main className="section" id="main-content">
+        <Container>
+          <Breadcrumbs
+            items={[
+              { label: dict.property.breadcrumbHome, href: `/${locale}` },
+              { label: dict.nav.buy, href: `/${locale}/buy` },
+              { label: formatSlugTitle(params.slug), href: `/${locale}/property/${encodeURIComponent(params.slug)}` },
+            ]}
+          />
+          <div className="card reveal mt-6">
+            <h1 className="card-title">{fallbackTitle}</h1>
+            <p className="card-subtitle">{fallbackBody}</p>
+            <div className="card-actions">
+              <Link className="btn btn-primary" href={`/${locale}/contact?intent=listing_snapshot&slug=${encodeURIComponent(params.slug)}`}>
+                {dict.cta.speakToAdvisor}
+              </Link>
+              <Link className="btn btn-secondary" href={`/${locale}/buy`}>
+                {dict.advisory.browseVerifiedInventory}
+              </Link>
+            </div>
+          </div>
+        </Container>
+      </main>
+    );
+  }
+
   if (!property) {
     return (
       <main className="section" id="main-content">

@@ -9,6 +9,20 @@ import { PublicAdvisoryHero } from '@/components/public/PublicAdvisoryHero';
 import { EmptyStateCard } from '@/components/ui/StateBlocks';
 
 export const revalidate = 300;
+const DEVELOPERS_FETCH_TIMEOUT_MS = 8000;
+
+async function withTimeout<T>(task: Promise<T>, fallback: T, timeoutMs = DEVELOPERS_FETCH_TIMEOUT_MS): Promise<T> {
+  try {
+    return await Promise.race<T>([
+      task,
+      new Promise<T>((resolve) => {
+        setTimeout(() => resolve(fallback), timeoutMs);
+      }),
+    ]);
+  } catch {
+    return fallback;
+  }
+}
 
 function pageCopy(locale: 'en' | 'th'): { title: string; subtitle: string; description: string } {
   if (locale === 'th') {
@@ -46,7 +60,7 @@ export default async function DevelopersPage(props: { params: Promise<{ locale: 
   const advisoryLabels = getAdvisoryLabels(locale);
   const advisoryProofs = getAdvisoryProofs(dict);
 
-  const developers = await fetchDevelopers().catch(() => []);
+  const developers = await withTimeout(fetchDevelopers(), []);
   const rows = [...developers].sort((a, b) => a.name.localeCompare(b.name));
 
   return (

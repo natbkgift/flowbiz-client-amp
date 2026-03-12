@@ -6,24 +6,24 @@ import { useParams } from 'next/navigation';
 function resolveCopy(locale: string) {
   if (locale === 'th') {
     return {
-      title: 'กำลังเตรียมข้อมูลอสังหาฯ รายการนี้',
-      subtitle: 'เรากำลังดึงภาพรวม ราคา และบริบทของรายการนี้เพื่อให้คุณตัดสินใจต่อได้เร็วขึ้น',
+      title: 'ผู้พัฒนาโครงการ',
+      subtitle: 'กำลังโหลดรายชื่อผู้พัฒนาที่เผยแพร่แล้วเพื่อใช้คัด shortlist และเช็กความน่าเชื่อถือของโครงการ',
       contact: 'คุยกับที่ปรึกษา',
-      inventory: 'ดูคลังรายการ',
-      loading: 'กำลังโหลด snapshot ของรายการ',
+      projects: 'ดูโครงการ',
+      loading: 'กำลังเตรียมรายชื่อผู้พัฒนา',
     };
   }
 
   return {
-    title: 'Preparing this listing snapshot',
-    subtitle: 'We are loading the key facts, pricing, and context for this listing so you can decide on the next step quickly.',
+    title: 'Developers',
+    subtitle: 'Loading published developers so you can shortlist trusted brands before reviewing projects.',
     contact: 'Speak to an Advisor',
-    inventory: 'Browse Inventory',
-    loading: 'Loading listing snapshot',
+    projects: 'Browse Projects',
+    loading: 'Loading published developers',
   };
 }
 
-export default function PropertyDetailLoading() {
+export default function DevelopersLoading() {
   const params = useParams<{ locale?: string }>();
   const locale = params?.locale === 'th' ? 'th' : 'en';
   const copy = resolveCopy(locale);
@@ -42,8 +42,8 @@ export default function PropertyDetailLoading() {
                 <Link className="btn btn-cta" href={`${localePrefix}/contact`}>
                   {copy.contact}
                 </Link>
-                <Link className="btn btn-secondary" href={`${localePrefix}/buy`}>
-                  {copy.inventory}
+                <Link className="btn btn-secondary" href={`${localePrefix}/projects`}>
+                  {copy.projects}
                 </Link>
               </div>
             </div>
@@ -62,20 +62,14 @@ export default function PropertyDetailLoading() {
 
       <section className="section">
         <div className="container animate-pulse">
-          <div className="mb-6 h-64 w-full rounded-xl bg-slate-200" />
-          <div className="mb-4 h-8 w-2/3 rounded bg-slate-200" />
-          <div className="mb-3 h-5 w-1/3 rounded bg-slate-200" />
-          <div className="mb-6 h-4 w-1/2 rounded bg-slate-200" />
-          <div className="grid gap-6 sm:grid-cols-2">
-            <div className="space-y-3">
-              <div className="h-4 w-full rounded bg-slate-200" />
-              <div className="h-4 w-5/6 rounded bg-slate-200" />
-              <div className="h-4 w-4/6 rounded bg-slate-200" />
-            </div>
-            <div className="rounded-xl bg-white p-6 shadow-sm">
-              <div className="mb-3 h-6 w-1/2 rounded bg-slate-200" />
-              <div className="h-10 w-full rounded bg-slate-200" />
-            </div>
+          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            {Array.from({ length: 6 }).map((_, i) => (
+              <div key={i} className="rounded-xl bg-white p-4 shadow-sm">
+                <div className="mb-4 h-32 w-full rounded-lg bg-slate-200" />
+                <div className="mb-2 h-5 w-2/3 rounded bg-slate-200" />
+                <div className="h-4 w-1/2 rounded bg-slate-200" />
+              </div>
+            ))}
           </div>
         </div>
       </section>
