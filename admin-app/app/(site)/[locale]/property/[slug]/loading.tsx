@@ -6,20 +6,20 @@ import { useParams } from 'next/navigation';
 function resolveCopy(locale: string) {
   if (locale === 'th') {
     return {
-      title: 'กำลังเตรียมข้อมูลอสังหาฯ รายการนี้',
-      subtitle: 'เรากำลังดึงภาพรวม ราคา และบริบทของรายการนี้เพื่อให้คุณตัดสินใจต่อได้เร็วขึ้น',
+      title: 'มุมมองรายการคัดสรร',
+      subtitle: 'ข้อเท็จจริงหลักของรายการและเส้นทางถัดไปสำหรับการคัด shortlist กับทีมที่ปรึกษา',
       contact: 'คุยกับที่ปรึกษา',
       inventory: 'ดูคลังรายการ',
-      loading: 'กำลังโหลด snapshot ของรายการ',
+      loading: 'AMP Listing View',
     };
   }
 
   return {
-    title: 'Preparing this listing snapshot',
-    subtitle: 'We are loading the key facts, pricing, and context for this listing so you can decide on the next step quickly.',
+    title: 'Curated Listing View',
+    subtitle: 'Key listing facts and the next advisory path for your shortlist.',
     contact: 'Speak to an Advisor',
     inventory: 'Browse Inventory',
-    loading: 'Loading listing snapshot',
+    loading: 'AMP Listing View',
   };
 }
 

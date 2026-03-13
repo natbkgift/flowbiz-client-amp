@@ -103,10 +103,10 @@ export default async function ProjectDetailPage(
   const canonicalUrl = `${siteUrl}/${locale}/projects/${encodeURIComponent(params.slug)}`;
 
   if (projectResult.kind === 'timeout') {
-    const fallbackTitle = locale === 'th' ? 'กำลังเตรียมข้อมูลโครงการนี้' : 'Preparing this project snapshot';
+    const fallbackTitle = formatSlugTitle(params.slug);
     const fallbackBody = locale === 'th'
-      ? 'ข้อมูลเชิงลึกของโครงการนี้ยังดึงมาไม่ครบในรอบนี้ แต่คุณยังเปิด shortlist หรือส่งบริบทให้ทีมช่วยจัดทางเลือกต่อได้ทันที'
-      : 'The deeper snapshot for this project is not fully available in this request window yet, but you can still move into shortlist mode or hand context to the team right away.';
+      ? 'ใช้หน้านี้เพื่อไปต่อยัง shortlist, compare, หรือพูดคุยกับทีมที่ปรึกษาได้ทันที'
+      : 'Use this page to continue into shortlist, compare, or a direct advisory conversation.';
 
     return (
       <main className="section" id="main-content">

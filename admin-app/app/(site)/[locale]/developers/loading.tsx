@@ -7,29 +7,29 @@ function resolveCopy(locale: string) {
   if (locale === 'th') {
     return {
       title: 'ผู้พัฒนาโครงการ',
-      subtitle: 'กำลังโหลดรายชื่อผู้พัฒนาที่เผยแพร่แล้วเพื่อใช้คัด shortlist และเช็กความน่าเชื่อถือของโครงการ',
+      subtitle: 'รายชื่อผู้พัฒนาที่เผยแพร่แล้วเพื่อใช้คัด shortlist และเช็กความน่าเชื่อถือของโครงการ',
       contact: 'คุยกับที่ปรึกษา',
       projects: 'ดูโครงการ',
-      loading: 'กำลังเตรียมรายชื่อผู้พัฒนา',
-      sampleTitle: 'กำลังรวบรวมผู้พัฒนาที่ควรจับตา',
-      sampleBody: 'ระบบกำลังดึงรายชื่อผู้พัฒนาที่เผยแพร่แล้วเพื่อใช้เทียบความน่าเชื่อถือก่อนลงลึกในแต่ละโครงการ',
+      loading: 'AMP Developer View',
+      sampleTitle: 'ผู้พัฒนาที่ควรจับตา',
+      sampleBody: 'ใช้ section นี้เพื่อเทียบความน่าเชื่อถือของผู้พัฒนาก่อนลงลึกในแต่ละโครงการ',
       signalOne: 'รายชื่อผู้พัฒนาที่เผยแพร่และพร้อมให้ review',
       signalTwo: 'ข้อมูลที่จะพาไปต่อยัง shortlist ของโครงการ',
-      signalThree: 'หากหน้าโหลดช้า ทีมยังช่วยคัด developer shortlist ให้ได้',
+      signalThree: 'ทีมยังช่วยคัด developer shortlist ให้ได้ตาม brief ของคุณ',
     };
   }
 
   return {
     title: 'Developers',
-    subtitle: 'Loading published developers so you can shortlist trusted brands before reviewing projects.',
+    subtitle: 'Published developers you can use to shortlist trusted brands before reviewing projects.',
     contact: 'Speak to an Advisor',
     projects: 'Browse Projects',
-    loading: 'Loading published developers',
-    sampleTitle: 'Preparing the developer watchlist',
-    sampleBody: 'The page is gathering published developers so you can compare credibility before moving into projects.',
+    loading: 'AMP Developer View',
+    sampleTitle: 'Developers worth watching',
+    sampleBody: 'Use this section to compare developer credibility before moving deeper into individual projects.',
     signalOne: 'Published developers ready for review',
     signalTwo: 'Context that moves into a project shortlist',
-    signalThree: 'If loading is slow, the team can still curate the developer shortlist',
+    signalThree: 'The team can still curate the developer shortlist from your brief',
   };
 }
 

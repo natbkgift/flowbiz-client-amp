@@ -6,20 +6,20 @@ import { useParams } from 'next/navigation';
 function resolveCopy(locale: string) {
   if (locale === 'th') {
     return {
-      title: 'กำลังเตรียม snapshot ของพื้นที่นี้',
-      subtitle: 'เรากำลังโหลดภาพรวมของทำเล สัญญาณราคา และเส้นทางถัดไปสำหรับพื้นที่นี้',
+      title: 'ภาพรวมทำเล',
+      subtitle: 'บริบทของพื้นที่ สัญญาณราคา และเส้นทางถัดไปสำหรับการเลือกทำเลอย่างมั่นใจ',
       contact: 'คุยกับที่ปรึกษา',
       finder: 'ใช้ Smart Finder',
-      loading: 'กำลังโหลด area snapshot',
+      loading: 'AMP Area View',
     };
   }
 
   return {
-    title: 'Preparing this area snapshot',
-    subtitle: 'We are loading the location overview, pricing signals, and the next decision path for this area.',
+    title: 'Area Overview',
+    subtitle: 'Area context, pricing signals, and the next advisory path for this neighborhood.',
     contact: 'Speak to an Advisor',
     finder: 'Use Smart Finder',
-    loading: 'Loading area snapshot',
+    loading: 'AMP Area View',
   };
 }
 

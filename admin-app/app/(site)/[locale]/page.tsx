@@ -458,7 +458,7 @@ export default async function HomePage({
           {featuredProperties.length === 0 ? (
             <EmptyStateCard
               title={locale === 'th' ? 'ยังไม่มียูนิตคัดสรรในขณะนี้' : 'No curated opportunities available right now'}
-              body={locale === 'th' ? 'ทีมกำลังอัปเดตรายการลงทุนสำหรับหน้านี้' : 'Our team is preparing the next shortlist of investment opportunities.'}
+              body={locale === 'th' ? 'ดูยูนิตที่เผยแพร่แล้วทั้งหมด หรือส่ง brief ให้ทีมช่วยคัด shortlist ตามงบและเป้าหมายของคุณ' : 'Browse published inventory or send your brief to the team for a shortlist matched to your budget and goals.'}
             />
           ) : null}
 
@@ -501,34 +501,33 @@ export default async function HomePage({
                     />
                     <div className="premium-investment-card__media-scrim" aria-hidden="true" />
                     <div className="premium-investment-card__media-meta" aria-hidden="true">
-                      <span>
-                        {hasLocalMedia
-                          ? (locale === 'th' ? 'Curated unit' : 'Curated unit')
-                          : (locale === 'th' ? 'ภาพตัวอย่าง — รอรูปจริง' : 'Preview image — real photo pending')}
-                      </span>
+                      <span>{locale === 'th' ? 'Curated unit' : 'Curated unit'}</span>
                     </div>
                     <span className={`absolute top-3 left-3 text-xs font-semibold px-2.5 py-1 rounded-full ${badgeColor}`}>
                       {typeBadge}
                     </span>
                   </div>
                   <div className="card-content flex flex-col h-full p-6">
-                    <div className="card-price premium-investment-card__price">
-                      {priceFormatted ? `${priceFormatted}${prop.type === 'rent' ? (locale === 'th' ? '/เดือน' : '/mo') : ''}` : (locale === 'th' ? 'รอข้อมูลราคา' : 'Price pending')}
-                    </div>
+                    {priceFormatted ? (
+                      <div className="card-price premium-investment-card__price">
+                        {`${priceFormatted}${prop.type === 'rent' ? (locale === 'th' ? '/เดือน' : '/mo') : ''}`}
+                      </div>
+                    ) : null}
                     <div className="card-title text-lg font-medium text-gray-900 mb-1 line-clamp-2">{prop.title}</div>
-                    <div className="text-sm text-gray-500 mb-3 line-clamp-1">{prop.address || prop.city || (locale === 'th' ? 'ทำเลรอข้อมูล' : 'Location pending')}</div>
+                    {prop.address || prop.city ? (
+                      <div className="text-sm text-gray-500 mb-3 line-clamp-1">{prop.address || prop.city}</div>
+                    ) : null}
 
-                    <div className="premium-investment-card__facts" aria-label={locale === 'th' ? 'ข้อมูลยูนิต' : 'Unit facts'}>
-                      {[statTokens.bed, statTokens.bath, statTokens.size, statTokens.view]
-                        .filter(Boolean)
-                        .slice(0, 4)
-                        .map((token) => (
-                          <span key={token} className="premium-fact-chip">{token}</span>
-                        ))}
-                      {![statTokens.bed, statTokens.bath, statTokens.size, statTokens.view].some(Boolean) ? (
-                        <span className="premium-fact-chip premium-fact-chip--muted">{locale === 'th' ? 'รายละเอียดยูนิตรออัปเดต' : 'Unit facts pending'}</span>
-                      ) : null}
-                    </div>
+                    {[statTokens.bed, statTokens.bath, statTokens.size, statTokens.view].some(Boolean) ? (
+                      <div className="premium-investment-card__facts" aria-label={locale === 'th' ? 'ข้อมูลยูนิต' : 'Unit facts'}>
+                        {[statTokens.bed, statTokens.bath, statTokens.size, statTokens.view]
+                          .filter(Boolean)
+                          .slice(0, 4)
+                          .map((token) => (
+                            <span key={token} className="premium-fact-chip">{token}</span>
+                          ))}
+                      </div>
+                    ) : null}
 
                     {tags.length > 0 ? (
                       <div className="premium-investment-card__tags" aria-label={locale === 'th' ? 'แท็กยูนิต' : 'Unit tags'}>
@@ -555,31 +554,16 @@ export default async function HomePage({
             >
               {locale === 'th' ? 'ดูยูนิตลงทุนทั้งหมด' : 'See all investment picks'}
             </TrackedLink>
-            <TrackedLink
-              className="btn btn-tertiary"
-              href={withLocale(locale, '/invest/calculator')}
-              eventType="cta_click"
-              eventPayload={{ cta: 'open_roi_calculator', from: 'home_properties' }}
-            >
-              {locale === 'th' ? 'ROI Calculator' : 'ROI Calculator'}
-            </TrackedLink>
           </div>
         </Container>
       </section>
     );
   }
 
-  function SectionCardSkeleton({ kind, locale }: { kind: 'project' | 'investment'; locale: 'en' | 'th' }) {
-    const heading = kind === 'project'
-      ? (locale === 'th' ? 'กำลังโหลดโครงการแนะนำ' : 'Loading featured projects')
-      : (locale === 'th' ? 'กำลังโหลดยูนิตคัดสรร' : 'Loading curated opportunities');
-
+  function SectionCardSkeleton({ kind }: { kind: 'project' | 'investment' }) {
     return (
       <section className="py-16 md:py-20 xl:py-24 2xl:py-28 bg-surface">
         <Container variant="wide">
-          <div className="section-header">
-            <h2 className="section-title">{heading}</h2>
-          </div>
           <LoadingCardGrid cards={kind === 'project' ? 6 : 8} />
         </Container>
       </section>
@@ -1332,8 +1316,8 @@ export default async function HomePage({
             </div>
           ) : (
             <div className="premium-empty-state" role="status" aria-live="polite">
-              <h3>{locale === 'th' ? 'กำลังเตรียมรีวิวที่ยืนยันแหล่งข้อมูลแล้ว' : 'Preparing verified review highlights'}</h3>
-              <p>{locale === 'th' ? 'เราจะแสดงรีวิวเพิ่มเติมทันทีเมื่อผ่านการยืนยันแหล่งข้อมูลแล้ว' : 'Additional testimonials will appear as soon as source verification is complete.'}</p>
+              <h3>{locale === 'th' ? 'รีวิวจากลูกค้าที่ตรวจสอบแล้ว' : 'Verified client feedback'}</h3>
+              <p>{locale === 'th' ? 'รีวิวเพิ่มเติมจะปรากฏในส่วนนี้เมื่อพร้อมเผยแพร่' : 'Additional verified testimonials will appear in this section when they are ready to publish.'}</p>
             </div>
           )}
 

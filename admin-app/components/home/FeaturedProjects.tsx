@@ -40,12 +40,11 @@ export function FeaturedProjects({
   };
 
   const labels = {
-    factsPending: locale === 'th' ? 'ข้อมูลรออัปเดต' : 'Data pending',
-    areaPending: locale === 'th' ? 'พื้นที่: รอข้อมูล' : 'Area: pending',
     from: locale === 'th' ? 'เริ่มต้น' : 'From',
     status: locale === 'th' ? 'สถานะ' : 'Status',
     type: locale === 'th' ? 'ประเภท' : 'Type',
     delivery: locale === 'th' ? 'ส่งมอบ' : 'Delivery',
+    curatedLabel: locale === 'th' ? 'AMP Curated' : 'AMP Curated',
   };
 
   if (projects.length === 0) {
@@ -58,7 +57,7 @@ export function FeaturedProjects({
         <EmptyStateCard
           className="ui-empty"
           title={locale === 'th' ? 'ยังไม่มีโครงการแนะนำในขณะนี้' : 'No featured projects available right now'}
-          body={locale === 'th' ? 'กำลังเตรียมรายการคัดสรรสำหรับหน้าแรก' : 'We are curating the next set of premium projects for this section.'}
+          body={locale === 'th' ? 'ดูโครงการที่เผยแพร่แล้วทั้งหมด หรือติดต่อทีมเพื่อให้ช่วยคัด shortlist ที่เหมาะกับเป้าหมายของคุณ' : 'Browse published developments or speak with the team for a curated shortlist matched to your goals.'}
         />
       </div>
     );
@@ -95,7 +94,7 @@ export function FeaturedProjects({
     return result.slice(0, 2);
   }
 
-  function extractAreaLabel(project: ProjectItem): string {
+  function extractAreaLabel(project: ProjectItem): string | null {
     const dynamicProject = project as ProjectItem & {
       area_name?: string | null;
       area?: { name?: string | null } | null;
@@ -104,7 +103,7 @@ export function FeaturedProjects({
     };
 
     const areaName = dynamicProject.area_name || dynamicProject.area?.name || dynamicProject.district || dynamicProject.city;
-    return areaName && areaName.trim() ? areaName : labels.areaPending;
+    return areaName && areaName.trim() ? areaName : null;
   }
 
   function extractQuickFacts(project: ProjectItem): Array<{ label: string; value: string }> {
@@ -118,13 +117,11 @@ export function FeaturedProjects({
     const propertyType = dynamicProject.property_type ? String(dynamicProject.property_type).replace(/_/g, ' ') : null;
     const deliveryRaw = dynamicProject.delivery_date || dynamicProject.handover_date;
 
-    const facts: Array<{ label: string; value: string }> = [
-      { label: labels.status, value: normalizedStatus || labels.factsPending },
-      { label: labels.type, value: propertyType || labels.factsPending },
-      { label: labels.delivery, value: deliveryRaw || labels.factsPending },
-    ];
-
-    return facts;
+    return [
+      { label: labels.status, value: normalizedStatus || '' },
+      { label: labels.type, value: propertyType || '' },
+      { label: labels.delivery, value: deliveryRaw || '' },
+    ].filter((fact) => fact.value.trim().length > 0);
   }
 
   return (
@@ -180,32 +177,32 @@ export function FeaturedProjects({
                   </div>
                 ) : null}
                 <div className="premium-project-card__media-meta" aria-hidden="true">
-                  <span>
-                    {hasLocalMedia
-                      ? (locale === 'th' ? 'AMP Curated' : 'AMP Curated')
-                      : (locale === 'th' ? 'ภาพตัวอย่าง — รอรูปจริง' : 'Preview image — real photo pending')}
-                  </span>
+                  <span>{labels.curatedLabel}</span>
                 </div>
               </div>
               <div className="card-content premium-project-card__body">
                 <div className="premium-project-card__header">
                   <h3 className="card-title premium-project-card__title">{p.name}</h3>
-                  <p className="premium-project-card__area">{area}</p>
+                  {area ? <p className="premium-project-card__area">{area}</p> : null}
                 </div>
 
-                <div className="premium-project-card__price-row">
-                  <span className="premium-project-card__price-label">{labels.from}</span>
-                  <span className="premium-project-card__price-value">{price ?? labels.factsPending}</span>
-                </div>
+                {price ? (
+                  <div className="premium-project-card__price-row">
+                    <span className="premium-project-card__price-label">{labels.from}</span>
+                    <span className="premium-project-card__price-value">{price}</span>
+                  </div>
+                ) : null}
 
-                <div className="premium-project-card__facts" aria-label={locale === 'th' ? 'ข้อมูลสำคัญ' : 'Quick facts'}>
-                  {facts.map((fact) => (
-                    <div key={fact.label} className="premium-project-card__fact-item">
-                      <span className="premium-project-card__fact-label">{fact.label}</span>
-                      <span className="premium-project-card__fact-value">{fact.value}</span>
-                    </div>
-                  ))}
-                </div>
+                {facts.length > 0 ? (
+                  <div className="premium-project-card__facts" aria-label={locale === 'th' ? 'ข้อมูลสำคัญ' : 'Quick facts'}>
+                    {facts.map((fact) => (
+                      <div key={fact.label} className="premium-project-card__fact-item">
+                        <span className="premium-project-card__fact-label">{fact.label}</span>
+                        <span className="premium-project-card__fact-value">{fact.value}</span>
+                      </div>
+                    ))}
+                  </div>
+                ) : null}
               </div>
             </Link>
           );

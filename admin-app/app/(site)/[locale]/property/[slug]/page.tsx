@@ -125,10 +125,10 @@ export default async function PropertyPage(props: PageProps) {
   const property = propertyResult.kind === 'loaded' ? propertyResult.value : null;
 
   if (propertyResult.kind === 'timeout') {
-    const fallbackTitle = locale === 'th' ? 'กำลังเตรียมข้อมูลรายการนี้' : 'Preparing this listing snapshot';
+    const fallbackTitle = formatSlugTitle(params.slug);
     const fallbackBody = locale === 'th'
-      ? 'รายละเอียดเชิงลึกของรายการนี้ยังดึงมาไม่ครบในรอบนี้ คุณยังเดินต่อไปยัง shortlist หรือส่งบริบทให้ทีมช่วยคัดตัวเลือกได้ทันที'
-      : 'The detailed snapshot for this listing is not fully available in this request window yet. You can still move into shortlist mode or hand the context to the team right away.';
+      ? 'ใช้หน้านี้เพื่อไปต่อยัง inventory, shortlist, หรือส่ง brief ให้ทีมช่วยคัดตัวเลือกที่เหมาะกับคุณ'
+      : 'Use this page to continue into inventory, shortlist, or hand your brief to the advisory team.';
 
     return (
       <main className="section" id="main-content">
@@ -428,19 +428,6 @@ export default async function PropertyPage(props: PageProps) {
               </div>
             </div>
 
-            <div>
-              <h2 className="mb-6">{dict.property.similarProperties}</h2>
-              <div className="grid grid-2">
-                <div className="property-card">
-                  <div className="card-content">
-                    <div className="card-title">{dict.property.comingSoon}</div>
-                    <div className="card-location mb-0">
-                      {dict.property.similarComingSoonText}
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
           </div>
 
           <aside className="detail-sidebar">
