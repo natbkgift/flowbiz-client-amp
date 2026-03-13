@@ -3,9 +3,11 @@ import { Container } from '@/components/layout/Container';
 import { Breadcrumbs } from '@/components/layout/Breadcrumbs';
 
 import { LeadForm } from '@/components/forms/LeadForm';
+import { buildAdvisorWhatsApp, getAdvisoryLabels, getAdvisoryProofs, withLocaleQuery } from '@/app/_lib/public-advisory';
 import { getDictionary, normalizeLocale } from '@/app/_lib/i18n/get-dictionary';
 import { makePageMetadata } from '@/app/_lib/i18n/metadata';
 import { withLocale } from '@/app/_lib/i18n/routing';
+import { PublicAdvisoryHero } from '@/components/public/PublicAdvisoryHero';
 
 export const revalidate = 300;
 
@@ -21,6 +23,8 @@ export default async function InvestorPage(props: { params: Promise<{ locale: st
   const locale = normalizeLocale(params.locale);
   const dict = getDictionary(locale);
   const seg = dict.segments.thaiInvestor;
+  const advisoryLabels = getAdvisoryLabels(locale);
+  const advisoryProofs = getAdvisoryProofs(dict);
 
   return (
     <main id="main-content">
@@ -30,20 +34,54 @@ export default async function InvestorPage(props: { params: Promise<{ locale: st
           { label: seg.heroTitle, href: `/${locale}/investor` },
         ]}
       />
-      <section className="hero hero--page">
-        <Container>
-          <h1 className="headline">{seg.heroTitle}</h1>
-          <p className="subhead">{seg.heroSubtitle}</p>
-          <div className="cta-row">
-            <a className="btn btn-cta" href={withLocale(locale, '/contact')}>
-              {dict.cta.getInvestmentPlan}
-            </a>
-            <a className="btn btn-secondary" href={withLocale(locale, '/smart-finder')}>
-              {dict.smartFinder.title}
-            </a>
-          </div>
-        </Container>
-      </section>
+      <PublicAdvisoryHero
+        eyebrow={dict.advisory.heroEyebrow}
+        title={seg.heroTitle}
+        subtitle={seg.heroSubtitle}
+        proofs={advisoryProofs}
+        proofsLabel={advisoryLabels.proofsLabel}
+        guidanceLabel={advisoryLabels.guidanceLabel}
+        signals={[
+          {
+            kicker: dict.advisory.bestFor,
+            title: locale === 'th' ? 'ผู้ลงทุนที่ต้องการเทียบโครงการแบบมีกรอบคิด' : 'Investors who want comparable decision framing',
+            body: locale === 'th'
+              ? 'เหมาะกับผู้ที่ต้องการมอง portfolio fit, yield positioning และจังหวะเข้าซื้อให้เป็นภาพเดียวกัน'
+              : 'Best for investors who need portfolio fit, yield positioning, and timing in one decision frame.',
+            icon: 'trend',
+          },
+          {
+            kicker: dict.advisory.nextStep,
+            title: locale === 'th' ? 'เริ่มจาก smart finder หรือขอแผนลงทุน' : 'Start with Smart Finder or request a plan',
+            body: locale === 'th'
+              ? 'เลือกวิธีที่ตรงกับจังหวะของคุณ แล้วค่อยพาไปสู่ shortlist ที่ลึกขึ้น'
+              : 'Use the tool for self-qualification first, then move into a deeper advisory shortlist.',
+            icon: 'check',
+          },
+          {
+            kicker: dict.advisory.trustSignal,
+            title: locale === 'th' ? 'ทีมช่วยตีความตลาดแบบใช้งานได้จริง' : 'Market interpretation you can act on',
+            body: locale === 'th'
+              ? 'เราแปลข้อมูลโครงการและดีมานด์ให้เป็น next action ไม่ใช่แค่สรุปตัวเลข'
+              : 'We translate project and demand signals into next actions, not just passive dashboards.',
+            icon: 'shield',
+          },
+        ]}
+        primaryAction={{
+          href: withLocaleQuery(locale, '/contact', { intent: 'investor', source: 'investor_hero' }),
+          label: dict.cta.getInvestmentPlan,
+          eventPayload: { cta: 'get_investment_plan', from: 'investor_hero' },
+        }}
+        secondaryAction={{
+          href: withLocale(locale, '/smart-finder'),
+          label: dict.advisory.useSmartFinder,
+          eventPayload: { cta: 'use_smart_finder', from: 'investor_hero' },
+        }}
+        tertiaryAction={{
+          href: buildAdvisorWhatsApp(locale, dict),
+          label: dict.cta.whatsapp,
+        }}
+      />
 
       <section className="section">
         <Container>

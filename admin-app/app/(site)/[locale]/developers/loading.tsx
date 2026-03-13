@@ -6,34 +6,34 @@ import { useParams } from 'next/navigation';
 function resolveCopy(locale: string) {
   if (locale === 'th') {
     return {
-      title: 'โครงการ',
-      subtitle: 'กำลังโหลดคลังโครงการที่เผยแพร่แล้วสำหรับ shortlist และการเปรียบเทียบ',
+      title: 'ผู้พัฒนาโครงการ',
+      subtitle: 'กำลังโหลดรายชื่อผู้พัฒนาที่เผยแพร่แล้วเพื่อใช้คัด shortlist และเช็กความน่าเชื่อถือของโครงการ',
       contact: 'คุยกับที่ปรึกษา',
-      finder: 'ใช้ Smart Finder',
-      loading: 'กำลังเตรียมรายการโครงการ',
-      sampleTitle: 'กำลังรวบรวม shortlist เริ่มต้น',
-      sampleBody: 'ระบบกำลังดึงโครงการที่เผยแพร่แล้วและเรียงลำดับให้เหมาะกับการเปรียบเทียบต่อ',
-      signalOne: 'โครงการที่มีข้อมูลพร้อมสำหรับ review',
-      signalTwo: 'รายละเอียดที่จะพาไป compare หรือ consultation ต่อได้',
-      signalThree: 'หากโหลดช้า ยังสามารถคุยกับทีมเพื่อขอ shortlist ได้ทันที',
+      projects: 'ดูโครงการ',
+      loading: 'กำลังเตรียมรายชื่อผู้พัฒนา',
+      sampleTitle: 'กำลังรวบรวมผู้พัฒนาที่ควรจับตา',
+      sampleBody: 'ระบบกำลังดึงรายชื่อผู้พัฒนาที่เผยแพร่แล้วเพื่อใช้เทียบความน่าเชื่อถือก่อนลงลึกในแต่ละโครงการ',
+      signalOne: 'รายชื่อผู้พัฒนาที่เผยแพร่และพร้อมให้ review',
+      signalTwo: 'ข้อมูลที่จะพาไปต่อยัง shortlist ของโครงการ',
+      signalThree: 'หากหน้าโหลดช้า ทีมยังช่วยคัด developer shortlist ให้ได้',
     };
   }
 
   return {
-    title: 'Projects',
-    subtitle: 'Loading the published project inventory for shortlist and comparison flows.',
+    title: 'Developers',
+    subtitle: 'Loading published developers so you can shortlist trusted brands before reviewing projects.',
     contact: 'Speak to an Advisor',
-    finder: 'Use Smart Finder',
-    loading: 'Loading published projects',
-    sampleTitle: 'Preparing the starter shortlist',
-    sampleBody: 'The page is gathering published projects and arranging them for comparison and advisory review.',
-    signalOne: 'Published projects ready for review',
-    signalTwo: 'Details that can move into compare or consultation',
-    signalThree: 'If loading is slow, the team can still prepare the shortlist directly',
+    projects: 'Browse Projects',
+    loading: 'Loading published developers',
+    sampleTitle: 'Preparing the developer watchlist',
+    sampleBody: 'The page is gathering published developers so you can compare credibility before moving into projects.',
+    signalOne: 'Published developers ready for review',
+    signalTwo: 'Context that moves into a project shortlist',
+    signalThree: 'If loading is slow, the team can still curate the developer shortlist',
   };
 }
 
-export default function ProjectsLoading() {
+export default function DevelopersLoading() {
   const params = useParams<{ locale?: string }>();
   const locale = params?.locale === 'th' ? 'th' : 'en';
   const copy = resolveCopy(locale);
@@ -52,8 +52,8 @@ export default function ProjectsLoading() {
                 <Link className="btn btn-cta" href={`${localePrefix}/contact`}>
                   {copy.contact}
                 </Link>
-                <Link className="btn btn-secondary" href={`${localePrefix}/smart-finder`}>
-                  {copy.finder}
+                <Link className="btn btn-secondary" href={`${localePrefix}/projects`}>
+                  {copy.projects}
                 </Link>
               </div>
             </div>

@@ -1,12 +1,15 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 
+import { buildAdvisorWhatsApp, getAdvisoryLabels, getAdvisoryProofs, withLocaleQuery } from '@/app/_lib/public-advisory';
 import { Container } from '@/components/layout/Container';
 import { getDictionary, normalizeLocale } from '@/app/_lib/i18n/get-dictionary';
 import { withLocale, ogLocale } from '@/app/_lib/i18n/routing';
-import { fetchAreaStatisticsBySlug } from '@/app/_lib/public-api-server';
+import { fetchAreaBySlug } from '@/app/_lib/public-api-server';
+import { PublicAdvisoryHero } from '@/components/public/PublicAdvisoryHero';
 
 export const revalidate = 300;
+const AREA_STATS_TIMEOUT_MS = 8000;
 
 const AREA_SLUGS = ['jomtien', 'pratumnak', 'wongamat', 'central'] as const;
 
@@ -14,6 +17,52 @@ type AreaSlug = (typeof AREA_SLUGS)[number];
 
 function isAreaSlug(slug: string): slug is AreaSlug {
   return (AREA_SLUGS as readonly string[]).includes(slug);
+}
+
+function getFallbackBuyerTypes(locale: 'en' | 'th'): string[] {
+  if (locale === 'th') {
+    return [
+      'ผู้ซื้อที่ต้องการอ่านภาพรวมทำเลก่อน shortlist โครงการ',
+      'ผู้ลงทุนที่ต้องการเช็กสัญญาณราคาและค่าเช่าแบบตรงไปตรงมา',
+      'ผู้ซื้อเพื่ออยู่อาศัยที่ต้องการเปรียบเทียบพื้นที่ก่อนคุยกับที่ปรึกษา',
+    ];
+  }
+
+  return [
+    'Buyers who want the area context before shortlisting projects',
+    'Investors checking pricing and rental signals without sales padding',
+    'Owner-occupiers comparing neighborhoods before speaking with an advisor',
+  ];
+}
+
+function getAreaPageContent(
+  locale: 'en' | 'th',
+  slug: string,
+  fallbackTitle: string,
+  areaName?: string | null,
+) {
+  const dict = getDictionary(locale);
+  if (isAreaSlug(slug)) {
+    return dict.area.areas[slug];
+  }
+
+  return {
+    title: areaName?.trim() || fallbackTitle,
+    buyerTypes: getFallbackBuyerTypes(locale),
+  };
+}
+
+async function withTimeout<T>(task: Promise<T>, fallback: T, timeoutMs = AREA_STATS_TIMEOUT_MS): Promise<T> {
+  try {
+    return await Promise.race<T>([
+      task,
+      new Promise<T>((resolve) => {
+        setTimeout(() => resolve(fallback), timeoutMs);
+      }),
+    ]);
+  } catch {
+    return fallback;
+  }
 }
 
 /** Pre-render all known area pages at build time. */
@@ -35,10 +84,9 @@ export async function generateMetadata(
 
   const slug = params.slug;
   const canonical = `/${locale}/areas/${encodeURIComponent(slug)}`;
-
-  const titleBase = isAreaSlug(slug)
-    ? dict.area.areas[slug].title
-    : dict.area.fallbackTitle;
+  const areaDetail = await withTimeout(fetchAreaBySlug(slug), null);
+  const areaCopy = getAreaPageContent(locale, slug, dict.area.fallbackTitle, areaDetail?.area?.name);
+  const titleBase = areaCopy.title;
 
   return {
     title: `${titleBase} | ${dict.brand.name}`,
@@ -69,8 +117,11 @@ export default async function AreaPage(
   const params = await props.params;
   const locale = normalizeLocale(params.locale);
   const dict = getDictionary(locale);
+  const advisoryProofs = getAdvisoryProofs(dict);
+  const advisoryLabels = getAdvisoryLabels(locale);
+  const areaDetail = await withTimeout(fetchAreaBySlug(params.slug), null);
 
-  if (!isAreaSlug(params.slug)) {
+  if (!areaDetail?.area) {
     return (
       <main className="section" id="main-content">
         <Container>
@@ -86,14 +137,8 @@ export default async function AreaPage(
     );
   }
 
-  const areaCopy = dict.area.areas[params.slug];
-  let stats: Awaited<ReturnType<typeof fetchAreaStatisticsBySlug>>;
-  try {
-    stats = await fetchAreaStatisticsBySlug(params.slug);
-  } catch {
-    stats = null;
-  }
-
+  const areaCopy = getAreaPageContent(locale, params.slug, dict.area.fallbackTitle, areaDetail.area.name);
+  const stats = areaDetail;
   const title = areaCopy.title;
   const buyerTypes = areaCopy.buyerTypes;
 
@@ -101,14 +146,60 @@ export default async function AreaPage(
 
   return (
     <main id="main-content">
-      <section className="hero hero--page">
-        <Container>
-          <h1 className="headline">{title}</h1>
-          <p className="subhead">
-            {dict.area.heroSubtitle}
-          </p>
-        </Container>
-      </section>
+      <PublicAdvisoryHero
+        eyebrow={dict.advisory.heroEyebrow}
+        title={title}
+        subtitle={dict.area.heroSubtitle}
+        proofs={advisoryProofs}
+        proofsLabel={advisoryLabels.proofsLabel}
+        guidanceLabel={advisoryLabels.guidanceLabel}
+        signals={[
+          {
+            kicker: dict.advisory.bestFor,
+            title: locale === 'th' ? 'เริ่มจากพื้นที่ก่อนเลือกโครงการ' : 'Start from the area before choosing projects',
+            body: locale === 'th'
+              ? 'หน้านี้ช่วยให้คุณอ่าน snapshot ของทำเล, buyer fit, และทางเลือกถัดไปก่อนเข้าสู่ shortlist'
+              : 'This page helps you read the area snapshot, buyer fit, and next decision path before moving into shortlist mode.',
+            icon: 'building',
+          },
+          {
+            kicker: dict.advisory.nextStep,
+            title: locale === 'th' ? 'ต่อไปยัง Smart Finder หรือคลังโครงการ' : 'Move next into Smart Finder or project inventory',
+            body: locale === 'th'
+              ? 'เมื่อทำเลเริ่มชัดแล้ว ให้ใช้ Smart Finder หรือเปิดดูโครงการที่เผยแพร่ในพื้นที่ใกล้เคียง'
+              : 'Once the location is clearer, use Smart Finder or browse the published inventory that fits this area.',
+            icon: 'check',
+          },
+          {
+            kicker: dict.advisory.trustSignal,
+            title: hasStats
+              ? locale === 'th' ? 'snapshot นี้มีข้อมูลจริงของพื้นที่' : 'This snapshot includes live area signals'
+              : locale === 'th' ? 'snapshot นี้ยังมีข้อมูลบางส่วนไม่ครบ' : 'This snapshot is currently partial',
+            body: hasStats
+              ? locale === 'th'
+                ? 'ระบบแสดงตัวเลขที่ดึงได้จากข้อมูลจริงของพื้นที่นี้เท่านั้น'
+                : 'The page only surfaces area signals that can be grounded in real system data.'
+              : locale === 'th'
+                ? 'ถ้าตัวเลขยังไม่พร้อม ระบบจะบอกตรง ๆ และพาคุณไปต่อยังเส้นทางที่ใช้ได้ทันที'
+                : 'If the numeric snapshot is not ready, the page says so plainly and still gives you a usable next step.',
+            icon: 'shield',
+          },
+        ]}
+        primaryAction={{
+          href: withLocaleQuery(locale, '/contact', { intent: 'area_consultation', area: params.slug }),
+          label: dict.cta.speakToAdvisor,
+          eventPayload: { cta: 'area_consultation', from: 'area_hero', area: params.slug },
+        }}
+        secondaryAction={{
+          href: withLocale(locale, '/smart-finder'),
+          label: dict.advisory.useSmartFinder,
+          eventPayload: { cta: 'use_smart_finder', from: 'area_hero', area: params.slug },
+        }}
+        tertiaryAction={{
+          href: buildAdvisorWhatsApp(locale, dict),
+          label: dict.cta.whatsapp,
+        }}
+      />
 
       <section className="section">
         <Container>

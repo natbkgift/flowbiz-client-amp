@@ -23,6 +23,66 @@ export type Dictionary = {
     whatsapp: string;
     line: string;
   };
+  advisory: {
+    heroEyebrow: string;
+    heroSupportingLine: string;
+    trustBar: string[];
+    accessibility: {
+      proofsLabel: string;
+      guidanceLabel: string;
+    };
+    loading: {
+      area: {
+        title: string;
+        subtitle: string;
+        loading: string;
+        secondaryActionLabel: string;
+      };
+      developers: {
+        title: string;
+        subtitle: string;
+        loading: string;
+        secondaryActionLabel: string;
+        sampleTitle: string;
+        sampleBody: string;
+        signals: string[];
+      };
+      project: {
+        title: string;
+        subtitle: string;
+        loading: string;
+        secondaryActionLabel: string;
+      };
+      projects: {
+        title: string;
+        subtitle: string;
+        loading: string;
+        secondaryActionLabel: string;
+        sampleTitle: string;
+        sampleBody: string;
+        signals: string[];
+      };
+      property: {
+        title: string;
+        subtitle: string;
+        loading: string;
+        secondaryActionLabel: string;
+      };
+    };
+    bestFor: string;
+    nextStep: string;
+    trustSignal: string;
+    browseVerifiedInventory: string;
+    compareOpportunities: string;
+    useSmartFinder: string;
+    teamCtaTitle: string;
+    teamCtaBody: string;
+    teamCtaPrimary: string;
+    teamCtaSecondary: string;
+    noPublishedDataTitle: string;
+    noPublishedDataBody: string;
+    verifiedEditorialUpdate: string;
+  };
   home: {
     heroTitle: string;
     heroSubtitle: string;
@@ -56,6 +116,10 @@ export type Dictionary = {
     goalPrefix: string;
     budgetPrefix: string;
     timelinePrefix: string;
+    whyPattayaNarrativeCards: { title: string; body: string }[];
+    whyPattayaFallbackTitlePrefix: string;
+    trustProofFallbackLabel: string;
+    trustProofFallbackItems: { key: string; label: string; value: string }[];
   };
   buy: {
     title: string;
@@ -155,6 +219,7 @@ export type Dictionary = {
   about: {
     heroTitle: string;
     heroSubtitle: string;
+    heroSignals: { title: string; body: string }[];
     missionTitle: string;
     missionSubtitle: string;
     missionCards: { title: string; body: string }[];

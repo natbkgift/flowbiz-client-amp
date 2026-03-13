@@ -10,7 +10,8 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:smoke:admin": "node ./scripts/run-admin-smoke-e2e.mjs",
-    "test:visual:admin": "node ./scripts/run-admin-visual-qa.mjs"
+    "test:visual:admin": "node ./scripts/run-admin-visual-qa.mjs",
+    "test:visual:public": "node ./scripts/run-public-visual-qa.mjs"
   },
   "dependencies": {
     "dompurify": "3.3.1",

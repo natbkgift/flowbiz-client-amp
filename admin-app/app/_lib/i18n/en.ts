@@ -4,7 +4,7 @@ export const en: Dictionary = {
   brand: {
     name: 'AMP Pattaya',
     shortName: 'AMP',
-    tagline: 'International Property Investment Authority',
+    tagline: 'Luxury Investment Advisory Platform for Pattaya',
   },
   nav: {
     home: 'Home',
@@ -23,10 +23,85 @@ export const en: Dictionary = {
     whatsapp: 'WhatsApp',
     line: 'LINE',
   },
+  advisory: {
+    heroEyebrow: 'Pattaya Property Advisory for International Buyers',
+    heroSupportingLine: 'Curated and verified Pattaya opportunities with local guidance, private tours, and investment clarity.',
+    trustBar: [
+      'Curated listings',
+      'Verified information',
+      'Local Pattaya team',
+      'Private tours available',
+      'Foreign buyer guidance',
+      'PDPA / GDPR aligned',
+    ],
+    accessibility: {
+      proofsLabel: 'Trust bar',
+      guidanceLabel: 'Page guidance',
+    },
+    loading: {
+      area: {
+        title: 'Preparing this area snapshot',
+        subtitle: 'We are loading the location overview, pricing signals, and the next decision path for this area.',
+        loading: 'Loading area snapshot',
+        secondaryActionLabel: 'Use Smart Finder',
+      },
+      developers: {
+        title: 'Developers',
+        subtitle: 'Loading published developers so you can shortlist trusted brands before reviewing projects.',
+        loading: 'Loading published developers',
+        secondaryActionLabel: 'Browse Projects',
+        sampleTitle: 'Preparing the developer watchlist',
+        sampleBody: 'The page is gathering published developers so you can compare credibility before moving into projects.',
+        signals: [
+          'Published developers ready for review',
+          'Context that moves into a project shortlist',
+          'If loading is slow, the team can still curate the developer shortlist',
+        ],
+      },
+      project: {
+        title: 'Preparing this project snapshot',
+        subtitle: 'We are loading the project overview, deeper review, and context so you can shortlist or compare the opportunity right away.',
+        loading: 'Loading project snapshot',
+        secondaryActionLabel: 'Use Smart Finder',
+      },
+      projects: {
+        title: 'Projects',
+        subtitle: 'Loading the published project inventory for shortlist and comparison flows.',
+        loading: 'Loading published projects',
+        secondaryActionLabel: 'Use Smart Finder',
+        sampleTitle: 'Preparing the starter shortlist',
+        sampleBody: 'The page is gathering published projects and arranging them for comparison and advisory review.',
+        signals: [
+          'Published projects ready for review',
+          'Details that can move into compare or consultation',
+          'If loading is slow, the team can still prepare the shortlist directly',
+        ],
+      },
+      property: {
+        title: 'Preparing this listing snapshot',
+        subtitle: 'We are loading the key facts, pricing, and context for this listing so you can decide on the next step quickly.',
+        loading: 'Loading listing snapshot',
+        secondaryActionLabel: 'Browse Inventory',
+      },
+    },
+    bestFor: 'Best for',
+    nextStep: 'Next step',
+    trustSignal: 'Why trust AMP',
+    browseVerifiedInventory: 'Browse verified inventory',
+    compareOpportunities: 'Compare opportunities',
+    useSmartFinder: 'Use Smart Finder',
+    teamCtaTitle: 'Work with a local advisory team, not a generic property portal',
+    teamCtaBody: 'Tell us whether you are buying, investing, renting, or selling. We will respond with a curated next step, not a listing dump.',
+    teamCtaPrimary: 'Book consultation',
+    teamCtaSecondary: 'Meet the team',
+    noPublishedDataTitle: 'No published content for this section yet',
+    noPublishedDataBody: 'We only surface this section once verified content or system-backed signals are ready for publication.',
+    verifiedEditorialUpdate: 'Verified editorial update',
+  },
   home: {
     heroTitle: 'Find the right Pattaya property in 60 seconds',
     heroSubtitle:
-      'A trusted platform for international buyers seeking secure property ownership and strong investment potential in Thailand.',
+      'Curated and verified Pattaya opportunities with local guidance, private tours, and investment clarity.',
     pathInvest: {
       title: 'Invest',
       desc: 'Evaluate rental demand, yield positioning, and risk factors with clear assumptions.',
@@ -75,6 +150,48 @@ export const en: Dictionary = {
     goalPrefix: 'Goal',
     budgetPrefix: 'Budget',
     timelinePrefix: 'Timeline',
+    whyPattayaNarrativeCards: [
+      {
+        title: 'Tourism and end-user demand',
+        body: 'Pattaya benefits from tourism, second-home demand, and longer-stay renters instead of relying on one audience alone.',
+      },
+      {
+        title: 'Entry pricing remains competitive',
+        body: 'The market still offers a useful range from mass premium to luxury, which gives room for sharper strategy choices.',
+      },
+      {
+        title: 'Infrastructure shapes distinct submarkets',
+        body: 'Access, hospitals, retail, and lifestyle clusters give each Pattaya area a different demand story.',
+      },
+      {
+        title: 'This market rewards curation, not volume',
+        body: 'Not every unit fits every goal, so advisory curation matters more than browsing raw listing volume.',
+      },
+    ],
+    whyPattayaFallbackTitlePrefix: 'Market point',
+    trustProofFallbackLabel: 'Proof',
+    trustProofFallbackItems: [
+      {
+        key: 'licensed',
+        label: 'Local Pattaya team',
+        value: 'Curated shortlist planning and private tours around real goals.',
+      },
+      {
+        key: 'years',
+        label: 'Foreign-buyer workflow',
+        value: 'Clarifies ownership, fees, and next steps for foreign buyers.',
+      },
+      {
+        key: 'clients',
+        label: 'Advisory curation',
+        value: 'Focused options with transparent trade-offs instead of a listing dump.',
+      },
+      {
+        key: 'response',
+        label: 'Tour and deal coordination',
+        value: 'Private tours, shortlist reviews, and deal coordination in one joined-up flow.',
+      },
+    ],
   },
   buy: {
     title: 'Buy Property in Pattaya',
@@ -196,6 +313,20 @@ export const en: Dictionary = {
     heroTitle: 'About AMP Pattaya',
     heroSubtitle:
       'Your trusted property advisory partner in Pattaya. Verified data, transparent guidance, and a commitment to your success.',
+    heroSignals: [
+      {
+        title: 'Buyers who want to know who is guiding the deal',
+        body: 'This page explains how AMP works, how we think, and why the service is more than a listing portal.',
+      },
+      {
+        title: 'Meet the team before building the shortlist',
+        body: 'If you want to understand the advisory method before discussing units, this is the right starting point.',
+      },
+      {
+        title: 'Trust grounded in how we operate',
+        body: 'The team is built around verifiable data, transparent advice, and not overpromising outcomes.',
+      },
+    ],
     missionTitle: 'Our Mission',
     missionSubtitle:
       'We believe every buyer deserves accurate information, transparent pricing, and expert guidance they can trust.',
@@ -385,9 +516,9 @@ export const en: Dictionary = {
   },
   compare: {
     title: 'Compare Projects',
-    requiresTwo: 'Requires at least 2 projects, e.g. /compare?ids=<id1>,<id2>',
+    requiresTwo: 'Choose at least 2 projects to start the comparison.',
     getStarted: 'Get started',
-    getStartedDesc: 'Use Smart Finder to generate top projects and click Compare.',
+    getStartedDesc: 'Start with Smart Finder to shortlist relevant projects, then open the comparison table.',
     goToSmartFinder: 'Go to Smart Finder',
     browseProjects: 'Browse Projects',
     readOnlyDesc: 'Read-only table based on current dataset snapshots.',

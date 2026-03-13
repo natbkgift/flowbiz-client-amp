@@ -3,9 +3,11 @@ import { Container } from '@/components/layout/Container';
 import { Breadcrumbs } from '@/components/layout/Breadcrumbs';
 
 import { LeadForm } from '@/components/forms/LeadForm';
+import { buildAdvisorWhatsApp, getAdvisoryLabels, getAdvisoryProofs, withLocaleQuery } from '@/app/_lib/public-advisory';
 import { getDictionary, normalizeLocale } from '@/app/_lib/i18n/get-dictionary';
 import { makePageMetadata } from '@/app/_lib/i18n/metadata';
 import { withLocale } from '@/app/_lib/i18n/routing';
+import { PublicAdvisoryHero } from '@/components/public/PublicAdvisoryHero';
 
 export const revalidate = 300;
 
@@ -21,6 +23,8 @@ export default async function LuxuryPage(props: { params: Promise<{ locale: stri
   const locale = normalizeLocale(params.locale);
   const dict = getDictionary(locale);
   const seg = dict.segments.luxury;
+  const advisoryLabels = getAdvisoryLabels(locale);
+  const advisoryProofs = getAdvisoryProofs(dict);
 
   return (
     <main id="main-content">
@@ -30,20 +34,54 @@ export default async function LuxuryPage(props: { params: Promise<{ locale: stri
           { label: seg.heroTitle, href: `/${locale}/luxury` },
         ]}
       />
-      <section className="hero hero--page">
-        <Container>
-          <h1 className="headline">{seg.heroTitle}</h1>
-          <p className="subhead">{seg.heroSubtitle}</p>
-          <div className="cta-row">
-            <a className="btn btn-cta" href={withLocale(locale, '/contact')}>
-              {dict.cta.bookPrivateTour}
-            </a>
-            <a className="btn btn-secondary" href={withLocale(locale, '/projects')}>
-              {dict.nav.projects}
-            </a>
-          </div>
-        </Container>
-      </section>
+      <PublicAdvisoryHero
+        eyebrow={dict.advisory.heroEyebrow}
+        title={seg.heroTitle}
+        subtitle={seg.heroSubtitle}
+        proofs={advisoryProofs}
+        proofsLabel={advisoryLabels.proofsLabel}
+        guidanceLabel={advisoryLabels.guidanceLabel}
+        signals={[
+          {
+            kicker: dict.advisory.bestFor,
+            title: locale === 'th' ? 'ผู้ซื้อที่ต้องการ private tour และการคัดแบบ bespoke' : 'Buyers who want bespoke private tours',
+            body: locale === 'th'
+              ? 'เหมาะกับผู้ซื้อ luxury ที่ต้องการคัดยูนิตจากคุณภาพโครงการ วิว และความเป็นส่วนตัว'
+              : 'Best for buyers prioritising building quality, view, privacy, and viewing efficiency.',
+            icon: 'building',
+          },
+          {
+            kicker: dict.advisory.nextStep,
+            title: locale === 'th' ? 'นัด private tour ตาม shortlist' : 'Book a private tour from a curated shortlist',
+            body: locale === 'th'
+              ? 'บอกทำเล งบ และรูปแบบการใช้งาน ทีมจะคัดห้องที่คุ้มเวลาชมจริงให้ก่อน'
+              : 'Share area, budget, and use case, and we will narrow the viewing plan before you tour.',
+            icon: 'check',
+          },
+          {
+            kicker: dict.advisory.trustSignal,
+            title: locale === 'th' ? 'คัด luxury inventory แบบไม่ส่งเกินจำเป็น' : 'Luxury inventory without unnecessary noise',
+            body: locale === 'th'
+              ? 'เราเน้นคุณภาพ shortlist มากกว่าจำนวนประกาศ เพื่อให้แต่ละ viewing มีเหตุผลรองรับ'
+              : 'We keep the shortlist tight so each tour slot has a clear strategic reason.',
+            icon: 'shield',
+          },
+        ]}
+        primaryAction={{
+          href: withLocaleQuery(locale, '/contact', { intent: 'luxury', source: 'luxury_hero' }),
+          label: dict.cta.bookPrivateTour,
+          eventPayload: { cta: 'book_private_tour', from: 'luxury_hero' },
+        }}
+        secondaryAction={{
+          href: withLocale(locale, '/projects'),
+          label: dict.advisory.browseVerifiedInventory,
+          eventPayload: { cta: 'browse_verified_inventory', from: 'luxury_hero' },
+        }}
+        tertiaryAction={{
+          href: buildAdvisorWhatsApp(locale, dict),
+          label: dict.cta.whatsapp,
+        }}
+      />
 
       <section className="section">
         <Container>

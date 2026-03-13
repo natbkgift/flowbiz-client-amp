@@ -5,9 +5,11 @@ import { ForeignQuotaExplainer } from '@/components/knowledge/ForeignQuotaExplai
 import { OwnershipComparison } from '@/components/knowledge/OwnershipComparison';
 
 import { LeadForm } from '@/components/forms/LeadForm';
+import { buildAdvisorWhatsApp, getAdvisoryLabels, getAdvisoryProofs, withLocaleQuery } from '@/app/_lib/public-advisory';
 import { getDictionary, normalizeLocale } from '@/app/_lib/i18n/get-dictionary';
 import { makePageMetadata } from '@/app/_lib/i18n/metadata';
 import { withLocale } from '@/app/_lib/i18n/routing';
+import { PublicAdvisoryHero } from '@/components/public/PublicAdvisoryHero';
 
 export const revalidate = 300;
 
@@ -23,6 +25,8 @@ export default async function InvestmentPage(props: { params: Promise<{ locale: 
   const locale = normalizeLocale(params.locale);
   const dict = getDictionary(locale);
   const seg = dict.segments.investment;
+  const advisoryLabels = getAdvisoryLabels(locale);
+  const advisoryProofs = getAdvisoryProofs(dict);
 
   return (
     <main id="main-content">
@@ -32,20 +36,54 @@ export default async function InvestmentPage(props: { params: Promise<{ locale: 
           { label: seg.heroTitle, href: `/${locale}/investment` },
         ]}
       />
-      <section className="hero hero--page">
-        <Container>
-          <h1 className="headline">{seg.heroTitle}</h1>
-          <p className="subhead">{seg.heroSubtitle}</p>
-          <div className="cta-row">
-            <a className="btn btn-cta" href={withLocale(locale, '/contact')}>
-              {dict.cta.speakToAdvisor}
-            </a>
-            <a className="btn btn-secondary" href={withLocale(locale, '/projects')}>
-              {dict.nav.projects}
-            </a>
-          </div>
-        </Container>
-      </section>
+      <PublicAdvisoryHero
+        eyebrow={dict.advisory.heroEyebrow}
+        title={seg.heroTitle}
+        subtitle={seg.heroSubtitle}
+        proofs={advisoryProofs}
+        proofsLabel={advisoryLabels.proofsLabel}
+        guidanceLabel={advisoryLabels.guidanceLabel}
+        signals={[
+          {
+            kicker: dict.advisory.bestFor,
+            title: locale === 'th' ? 'ผู้ซื้อที่ต้องการเข้าใจ ROI และ ownership' : 'Buyers who need ROI and ownership clarity',
+            body: locale === 'th'
+              ? 'เหมาะกับผู้ที่ต้องการเข้าใจผลตอบแทน โครงสร้างถือครอง และข้อจำกัดของแต่ละทางเลือก'
+              : 'Best for buyers who want ROI logic, ownership context, and legal structure before choosing.',
+            icon: 'trend',
+          },
+          {
+            kicker: dict.advisory.nextStep,
+            title: locale === 'th' ? 'ให้ทีมวางกลยุทธ์ก่อนลงลึกแต่ละโครงการ' : 'Use strategy first, then go deeper',
+            body: locale === 'th'
+              ? 'เริ่มจาก investment plan เพื่อรู้ว่าโครงการแบบไหนเหมาะกับเป้าหมายของคุณจริง'
+              : 'Start with the investment plan so the project shortlist is aligned with the actual objective.',
+            icon: 'check',
+          },
+          {
+            kicker: dict.advisory.trustSignal,
+            title: locale === 'th' ? 'มีทั้งความรู้เชิง ownership และ execution' : 'Ownership context with execution support',
+            body: locale === 'th'
+              ? 'เราเชื่อมข้อมูลเชิงกฎหมายกับการคัด inventory และ flow ปิดดีลให้ต่อกัน'
+              : 'We connect legal framing, inventory curation, and execution steps in one advisory workflow.',
+            icon: 'shield',
+          },
+        ]}
+        primaryAction={{
+          href: withLocaleQuery(locale, '/contact', { intent: 'investment', source: 'investment_hero' }),
+          label: dict.cta.getInvestmentPlan,
+          eventPayload: { cta: 'get_investment_plan', from: 'investment_hero' },
+        }}
+        secondaryAction={{
+          href: withLocale(locale, '/projects'),
+          label: dict.advisory.browseVerifiedInventory,
+          eventPayload: { cta: 'browse_verified_inventory', from: 'investment_hero' },
+        }}
+        tertiaryAction={{
+          href: buildAdvisorWhatsApp(locale, dict),
+          label: dict.cta.whatsapp,
+        }}
+      />
 
       <section className="section">
         <Container>

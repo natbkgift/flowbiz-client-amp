@@ -244,7 +244,7 @@ export function Header({
   }));
   const navConfig = cmsNavConfig.length > 0 ? cmsNavConfig : defaultNavConfig;
   const contactCtaHref = cms?.contactCta?.href || '/contact';
-  const contactCtaLabel = cms?.contactCta?.label || dict.nav.contact;
+  const contactCtaLabel = cms?.contactCta?.label || dict.cta.speakToAdvisor;
 
   const langLabel = locale === 'th' ? dict.common.thai : dict.common.english;
 

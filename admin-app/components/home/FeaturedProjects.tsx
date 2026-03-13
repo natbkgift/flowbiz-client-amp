@@ -14,12 +14,12 @@ function formatPrice(price: number): string {
 }
 
 const PROJECT_FALLBACK_IMAGES = [
-  '/media/project-covers/the-riviera-jomtien/cover_31dde7af340e.jpg',
-  '/media/project-covers/the-riviera-monaco/cover_84a7b41c3c79.jpg',
-  '/media/project-covers/copacabana-beach-jomtien/cover_44839d734c2f.jpg',
-  '/media/project-covers/city-garden-pratumnak/cover_19d5cc49057c.webp',
-  '/media/project-covers/grand-solaire/cover_e831b1643816.webp',
-  '/media/project-covers/wongamat-tower/cover_b688a580f462.jpg',
+  '/images/project-overview.png',
+  '/images/condo-view.png',
+  '/images/property-exterior.png',
+  '/images/property-interior.png',
+  '/images/property-pool.png',
+  '/images/villa-garden.png',
 ];
 
 export function FeaturedProjects({

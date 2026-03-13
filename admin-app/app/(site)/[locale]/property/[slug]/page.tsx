@@ -2,6 +2,8 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import Image from 'next/image';
 
+import { buildAdvisorWhatsApp, getAdvisoryLabels, getAdvisoryProofs, withLocaleQuery } from '@/app/_lib/public-advisory';
+import { TrackedLink } from '@/components/analytics/TrackedLink';
 import { Container } from '@/components/layout/Container';
 import { Breadcrumbs } from '@/components/layout/Breadcrumbs';
 
@@ -11,13 +13,39 @@ import { fetchPropertyBySlug } from '@/app/_lib/public-api-server';
 import { CTA } from '@/app/_lib/public-cta';
 import { resolveImageUrl } from '@/app/_lib/public-api-shared';
 import { getDictionary, normalizeLocale } from '@/app/_lib/i18n/get-dictionary';
-import { ogLocale } from '@/app/_lib/i18n/routing';
+import { ogLocale, withLocale } from '@/app/_lib/i18n/routing';
 import { getInternalLinks } from '@/app/_lib/internal-links';
+import { PublicAdvisoryHero } from '@/components/public/PublicAdvisoryHero';
 
 export const revalidate = 300;
 
 type PageProps = { params: Promise<{ locale: string; slug: string }> };
-const PROPERTY_DETAIL_FALLBACK = '/media/project-covers/the-riviera-jomtien/cover_31dde7af340e.jpg';
+const PROPERTY_DETAIL_FALLBACK = '/images/project-overview.png';
+const PROPERTY_FETCH_TIMEOUT_MS = 8000;
+type PropertyLoadState =
+  | { kind: 'loaded'; value: Awaited<ReturnType<typeof fetchPropertyBySlug>> }
+  | { kind: 'timeout' };
+
+async function withTimeout<T>(task: Promise<T>, fallback: T, timeoutMs = PROPERTY_FETCH_TIMEOUT_MS): Promise<T> {
+  try {
+    return await Promise.race<T>([
+      task,
+      new Promise<T>((resolve) => {
+        setTimeout(() => resolve(fallback), timeoutMs);
+      }),
+    ]);
+  } catch {
+    return fallback;
+  }
+}
+
+function formatSlugTitle(slug: string): string {
+  return slug
+    .split('-')
+    .filter(Boolean)
+    .map((segment) => segment.charAt(0).toUpperCase() + segment.slice(1))
+    .join(' ');
+}
 
 export async function generateMetadata(props: PageProps): Promise<Metadata> {
   const params = await props.params;
@@ -75,12 +103,96 @@ function formatPriceTHB(price: number): string {
   return `฿${Math.round(price).toLocaleString()}`;
 }
 
+function formatListingType(locale: 'en' | 'th', type: string): string {
+  const normalized = String(type || '').toLowerCase();
+  if (normalized === 'rent') return locale === 'th' ? 'เช่า' : 'Rent';
+  if (normalized === 'resale') return locale === 'th' ? 'ขายต่อ' : 'Resale';
+  if (normalized === 'new') return locale === 'th' ? 'โครงการใหม่' : 'New launch';
+  return locale === 'th' ? 'อสังหาฯ ในพัทยา' : 'Pattaya property';
+}
+
 export default async function PropertyPage(props: PageProps) {
   const params = await props.params;
   const locale = normalizeLocale(params.locale);
   const dict = getDictionary(locale);
+  const advisoryProofs = getAdvisoryProofs(dict);
+  const advisoryLabels = getAdvisoryLabels(locale);
   const internalLinks = getInternalLinks(locale, dict, { from: 'property_detail', includeProjects: true });
-  const property = await fetchPropertyBySlug(params.slug);
+  const propertyResult = await withTimeout<PropertyLoadState>(
+    fetchPropertyBySlug(params.slug).then((value) => ({ kind: 'loaded' as const, value })),
+    { kind: 'timeout' as const },
+  );
+  const property = propertyResult.kind === 'loaded' ? propertyResult.value : null;
+
+  if (propertyResult.kind === 'timeout') {
+    const fallbackTitle = locale === 'th' ? 'กำลังเตรียมข้อมูลรายการนี้' : 'Preparing this listing snapshot';
+    const fallbackBody = locale === 'th'
+      ? 'รายละเอียดเชิงลึกของรายการนี้ยังดึงมาไม่ครบในรอบนี้ คุณยังเดินต่อไปยัง shortlist หรือส่งบริบทให้ทีมช่วยคัดตัวเลือกได้ทันที'
+      : 'The detailed snapshot for this listing is not fully available in this request window yet. You can still move into shortlist mode or hand the context to the team right away.';
+
+    return (
+      <main className="section" id="main-content">
+        <Container>
+          <Breadcrumbs
+            items={[
+              { label: dict.property.breadcrumbHome, href: `/${locale}` },
+              { label: dict.nav.buy, href: `/${locale}/buy` },
+              { label: formatSlugTitle(params.slug), href: `/${locale}/property/${encodeURIComponent(params.slug)}` },
+            ]}
+          />
+        </Container>
+        <PublicAdvisoryHero
+          eyebrow={dict.advisory.heroEyebrow}
+          title={fallbackTitle}
+          subtitle={fallbackBody}
+          proofs={advisoryProofs}
+          proofsLabel={advisoryLabels.proofsLabel}
+          guidanceLabel={advisoryLabels.guidanceLabel}
+          signals={[
+            {
+              kicker: dict.advisory.bestFor,
+              title: formatSlugTitle(params.slug),
+              body: locale === 'th'
+                ? 'ใช้ state นี้เมื่อคุณต้องการส่งบริบทของ listing ให้ทีมช่วย shortlist หรือหาทางเลือกใกล้เคียง'
+                : 'Use this state to hand the listing context to the team or pivot into nearby shortlist options.',
+              icon: 'building',
+            },
+            {
+              kicker: dict.advisory.nextStep,
+              title: locale === 'th' ? 'ต่อไปยังคลังรายการหรือพูดคุยกับทีม' : 'Move next into inventory or advisory support',
+              body: locale === 'th'
+                ? 'แม้ snapshot นี้ยังไม่ครบ คุณยังเปิด inventory ที่ตรวจสอบแล้วหรือคุยกับทีมต่อได้ทันที'
+                : 'Even if this snapshot is incomplete, you can still jump into verified inventory or speak with the team right away.',
+              icon: 'check',
+            },
+            {
+              kicker: dict.advisory.trustSignal,
+              title: locale === 'th' ? 'ระบบไม่ fabricate รายละเอียดแทนข้อมูลจริง' : 'The page does not fabricate details',
+              body: locale === 'th'
+                ? 'เมื่อข้อมูลรายการนี้พร้อมครบ หน้านี้จะกลับมาแสดงรายละเอียดเต็มรูปแบบ'
+                : 'When the listing data becomes available, this route returns to the full detail presentation.',
+              icon: 'shield',
+            },
+          ]}
+          primaryAction={{
+            href: withLocaleQuery(locale, '/contact', { intent: 'listing_snapshot', slug: params.slug }),
+            label: dict.cta.speakToAdvisor,
+            eventPayload: { cta: 'listing_snapshot', from: 'property_detail_timeout' },
+          }}
+          secondaryAction={{
+            href: withLocale(locale, '/buy'),
+            label: dict.advisory.browseVerifiedInventory,
+            eventPayload: { cta: 'browse_verified_inventory', from: 'property_detail_timeout' },
+          }}
+          tertiaryAction={{
+            href: buildAdvisorWhatsApp(locale, dict),
+            label: dict.cta.whatsapp,
+          }}
+        />
+      </main>
+    );
+  }
+
   if (!property) {
     return (
       <main className="section" id="main-content">
@@ -121,6 +233,17 @@ export default async function PropertyPage(props: PageProps) {
 
   const priceNumber = Number(property.price);
   const priceValue = Number.isFinite(priceNumber) ? Math.round(priceNumber) : undefined;
+  const propertySummary = locale === 'th'
+    ? [
+        formatListingType(locale, property.type),
+        property.city || null,
+        dict.property.projectSubtitle,
+      ].filter(Boolean).join(' • ')
+    : [
+        formatListingType(locale, property.type),
+        property.city || null,
+        dict.property.projectSubtitle,
+      ].filter(Boolean).join(' • ');
 
   const jsonLd = JSON.stringify(
     [
@@ -214,10 +337,12 @@ export default async function PropertyPage(props: PageProps) {
 
             <div className="property-header">
               <div className="property-title">
+                <p className="public-hero__eyebrow">{dict.advisory.heroEyebrow}</p>
                 <h1>{property.title}</h1>
                 <p className="property-location">
                   {property.address}, {property.city}
                 </p>
+                <p className="section-subtitle">{propertySummary}</p>
               </div>
               <div className="property-price">{formatPriceTHB(Number(property.price))}</div>
             </div>
@@ -250,6 +375,34 @@ export default async function PropertyPage(props: PageProps) {
                   </div>
                 </div>
               </div>
+            </div>
+
+            <div className="cta-row mb-6">
+              <TrackedLink
+                className="btn btn-cta"
+                href={withLocaleQuery(locale, '/contact', { intent: 'listing_consultation', slug: params.slug })}
+                eventType="cta_click"
+                eventPayload={{ cta: 'speak_to_advisor', from: 'property_detail' }}
+              >
+                {dict.cta.speakToAdvisor}
+              </TrackedLink>
+              <a className="btn btn-secondary" href={buildAdvisorWhatsApp(locale, dict)} target="_blank" rel="noreferrer">
+                {dict.cta.whatsapp}
+              </a>
+            </div>
+
+            <div className="public-hero__proofs mb-6" role="note" aria-label={advisoryLabels.proofsLabel}>
+              <span className="public-hero__proof">{formatListingType(locale, property.type)}</span>
+              <span className="public-hero__proof">{property.city}</span>
+              <span className="public-hero__proof">
+                {locale === 'th' ? `${property.bedrooms ?? '-'} ห้องนอน` : `${property.bedrooms ?? '-'} bedrooms`}
+              </span>
+              <span className="public-hero__proof">
+                {locale === 'th' ? `${property.bathrooms ?? '-'} ห้องน้ำ` : `${property.bathrooms ?? '-'} bathrooms`}
+              </span>
+              <span className="public-hero__proof">
+                {locale === 'th' ? `${property.size ?? '-'} ตร.ม.` : `${property.size ?? '-'} sqm`}
+              </span>
             </div>
 
             <div className="bg-[var(--color-white)] p-6 rounded-xl mb-6">
