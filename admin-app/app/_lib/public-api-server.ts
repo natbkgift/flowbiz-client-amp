@@ -416,6 +416,55 @@ export type AreaDetailResponse = {
   map_center?: Record<string, unknown> | null;
 };
 
+function normalizeAreaDetailResponse(payload: unknown): AreaDetailResponse | null {
+  if (!payload || typeof payload !== 'object') {
+    return null;
+  }
+
+  if ('area' in payload) {
+    const nested = payload as {
+      area?: AreaItem;
+      statistics?: AreaStatisticsSnapshot | null;
+      content?: Record<string, unknown> | null;
+      map_center?: Record<string, unknown> | null;
+    };
+    if (nested.area && typeof nested.area === 'object') {
+      return {
+        area: nested.area,
+        statistics: nested.statistics ?? null,
+        content: nested.content ?? null,
+        map_center: nested.map_center ?? null,
+      };
+    }
+  }
+
+  const flat = payload as Partial<AreaItem> & {
+    statistics?: AreaStatisticsSnapshot | null;
+    content?: Record<string, unknown> | null;
+    map_center?: Record<string, unknown> | null;
+  };
+
+  if (typeof flat.id !== 'string' || typeof flat.slug !== 'string' || typeof flat.name !== 'string') {
+    return null;
+  }
+
+  return {
+    area: {
+      id: flat.id,
+      slug: flat.slug,
+      name: flat.name,
+      city: typeof flat.city === 'string' ? flat.city : null,
+      status: typeof flat.status === 'string' ? flat.status : undefined,
+      hero_image_url: typeof flat.hero_image_url === 'string' ? flat.hero_image_url : null,
+      created_at: typeof flat.created_at === 'string' ? flat.created_at : String(flat.updated_at ?? ''),
+      updated_at: typeof flat.updated_at === 'string' ? flat.updated_at : undefined,
+    },
+    statistics: flat.statistics ?? null,
+    content: flat.content ?? null,
+    map_center: flat.map_center ?? null,
+  };
+}
+
 export type DeveloperItem = {
   id: string;
   name: string;
@@ -452,7 +501,7 @@ export async function fetchAreaBySlug(slug: string): Promise<AreaDetailResponse 
   const res = await fetchWithRetry(url.toString(), { next: { revalidate: PAGE_REVALIDATE_SECONDS } });
   if (res.status === 404) return null;
   if (!res.ok) throw new Error(`Failed to fetch area detail (${res.status})`);
-  return (await res.json()) as AreaDetailResponse;
+  return normalizeAreaDetailResponse(await res.json());
 }
 
 export async function fetchDevelopers(): Promise<DeveloperItem[]> {

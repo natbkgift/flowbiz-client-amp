@@ -501,6 +501,120 @@ def test_b6_additive_contract_fields_and_media_allowlist(client) -> None:
     assert invalid_external.status_code == 422, invalid_external.text
 
 
+def test_b6_public_home_blueprint_fields_roundtrip(client) -> None:
+    headers = _make_admin_headers()
+
+    response = client.post(
+        "/admin/home-composer",
+        headers=headers,
+        json={
+            "page_key": "home",
+            "locale": "en",
+            "status": "published",
+            "version": 9,
+            "config": {
+                "enabled_sections": [
+                    "hero",
+                    "trust_micro_strip",
+                    "path_selector",
+                    "featured_projects",
+                    "featured_properties",
+                    "why_pattaya",
+                    "proof_trust",
+                    "market_insights",
+                    "reviews",
+                    "videos",
+                    "team_cta",
+                    "bottom_cta",
+                ],
+                "section_order": [
+                    "hero",
+                    "trust_micro_strip",
+                    "path_selector",
+                    "featured_projects",
+                    "featured_properties",
+                    "why_pattaya",
+                    "proof_trust",
+                    "market_insights",
+                    "reviews",
+                    "videos",
+                    "team_cta",
+                    "bottom_cta",
+                ],
+                "hero": {
+                    "eyebrow": "Advisory-first brief",
+                    "heading": "Curated Pattaya opportunities",
+                    "subheading": "Verified supply, clear next steps.",
+                    "primary_cta_label": "Talk to AMP",
+                    "primary_cta_url": "/contact",
+                    "secondary_cta_label": "Browse deals",
+                    "secondary_cta_url": "/projects",
+                    "hero_image": "/media/library/home/hero-runtime.webp",
+                },
+                "path_selector": {
+                    "enabled": True,
+                    "heading": "Choose the right path",
+                    "subcopy": "Start from your goal, not listing volume.",
+                    "paths": [
+                        {
+                            "key": "invest",
+                            "label": "Invest",
+                            "description": "Compare yield and downside before touring.",
+                            "url": "/invest",
+                        },
+                        {
+                            "key": "buy",
+                            "label": "Buy",
+                            "description": "Clarify quota, fees, and next steps.",
+                            "url": "/buy",
+                        },
+                    ],
+                },
+                "trust_micro_strip": [
+                    {"key": "local-team", "text": {"en": "Local Pattaya team"}},
+                    {"key": "verified", "text": {"en": "Verified inventory only"}},
+                ],
+                "proof_trust": {
+                    "heading": "Advisory proof",
+                    "subcopy": "Signals, process, and trust in one place.",
+                    "primary_cta_label": "Meet the team",
+                    "primary_cta_url": "/about",
+                    "secondary_cta_label": "How we work",
+                    "secondary_cta_url": "/about#how-we-work",
+                },
+                "team_cta": {
+                    "eyebrow": "Local advisory team",
+                    "heading": "Work with specialists, not a listing dump",
+                    "subheading": "We curate the shortlist around your brief.",
+                    "trust_note": "Built around goals, budget, and timeline.",
+                },
+                "bottom_cta": {
+                    "heading": "Ready for a shortlist?",
+                    "subheading": "Share your budget and intent.",
+                    "trust_note": "Reply within one business day.",
+                    "form_heading": "Request private consultation",
+                    "form_body": "Tell us your target budget and timing.",
+                },
+            },
+        },
+    )
+    assert response.status_code == 201, response.text
+
+    public_home = client.get("/v1/home-composer?page_key=home&locale=en")
+    assert public_home.status_code == 200, public_home.text
+    config = public_home.json()["config"]
+
+    assert config["section_order"][1] == "trust_micro_strip"
+    assert config["hero"]["eyebrow"] == "Advisory-first brief"
+    assert config["hero"]["heading"] == "Curated Pattaya opportunities"
+    assert config["path_selector"]["heading"] == "Choose the right path"
+    assert config["path_selector"]["paths"][0]["description"] == "Compare yield and downside before touring."
+    assert config["trust_micro_strip"][0]["text"]["en"] == "Local Pattaya team"
+    assert config["proof_trust"]["primary_cta_label"] == "Meet the team"
+    assert config["team_cta"]["trust_note"] == "Built around goals, budget, and timeline."
+    assert config["bottom_cta"]["form_heading"] == "Request private consultation"
+
+
 def test_b6_events_endpoint_lock(client) -> None:
     response = client.post(
         "/api/v1/events",

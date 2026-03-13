@@ -13,7 +13,7 @@ import { fetchPropertyBySlug } from '@/app/_lib/public-api-server';
 import { CTA } from '@/app/_lib/public-cta';
 import { resolveImageUrl } from '@/app/_lib/public-api-shared';
 import { getDictionary, normalizeLocale } from '@/app/_lib/i18n/get-dictionary';
-import { ogLocale } from '@/app/_lib/i18n/routing';
+import { ogLocale, withLocale } from '@/app/_lib/i18n/routing';
 import { getInternalLinks } from '@/app/_lib/internal-links';
 import { PublicAdvisoryHero } from '@/components/public/PublicAdvisoryHero';
 
@@ -22,6 +22,9 @@ export const revalidate = 300;
 type PageProps = { params: Promise<{ locale: string; slug: string }> };
 const PROPERTY_DETAIL_FALLBACK = '/images/project-overview.png';
 const PROPERTY_FETCH_TIMEOUT_MS = 8000;
+type PropertyLoadState =
+  | { kind: 'loaded'; value: Awaited<ReturnType<typeof fetchPropertyBySlug>> }
+  | { kind: 'timeout' };
 
 async function withTimeout<T>(task: Promise<T>, fallback: T, timeoutMs = PROPERTY_FETCH_TIMEOUT_MS): Promise<T> {
   try {
@@ -115,7 +118,7 @@ export default async function PropertyPage(props: PageProps) {
   const advisoryProofs = getAdvisoryProofs(dict);
   const advisoryLabels = getAdvisoryLabels(locale);
   const internalLinks = getInternalLinks(locale, dict, { from: 'property_detail', includeProjects: true });
-  const propertyResult = await withTimeout(
+  const propertyResult = await withTimeout<PropertyLoadState>(
     fetchPropertyBySlug(params.slug).then((value) => ({ kind: 'loaded' as const, value })),
     { kind: 'timeout' as const },
   );

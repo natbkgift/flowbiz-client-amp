@@ -4,6 +4,7 @@ import type { Metadata } from 'next';
 import { buildAdvisorWhatsApp, getAdvisoryLabels, getAdvisoryProofs, withLocaleQuery } from '@/app/_lib/public-advisory';
 import { getDictionary, normalizeLocale } from '@/app/_lib/i18n/get-dictionary';
 import { makePageMetadata } from '@/app/_lib/i18n/metadata';
+import { withLocale } from '@/app/_lib/i18n/routing';
 import { fetchDevelopers } from '@/app/_lib/public-api-server';
 import { Container } from '@/components/layout/Container';
 import { PublicAdvisoryHero } from '@/components/public/PublicAdvisoryHero';

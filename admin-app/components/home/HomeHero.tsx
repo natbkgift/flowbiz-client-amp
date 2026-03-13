@@ -32,62 +32,6 @@ export function HomeHero({
     guidedHref: string;
     composer?: HomeHeroComposer | null;
 }) {
-    const sellPathDesc = locale === "th"
-        ? "ประเมินทรัพย์และวางแผนขายกับทีมที่เข้าใจตลาดพัทยา"
-        : "Get valuation guidance and a sell strategy from our Pattaya team.";
-
-    const fallbackPathCards = [
-        {
-            key: "buy",
-            href: withLocale(locale, "/buy"),
-            title: dict.home.pathBuy.title,
-            desc: dict.home.pathBuy.desc,
-            result: locale === "th" ? "เช็กลิสต์ผู้ซื้อต่างชาติ" : "Foreign-buyer checklist",
-            icon: "B",
-            eventPayload: { path: "buy", from: "home_hero" },
-        },
-        {
-            key: "invest",
-            href: withLocale(locale, "/invest"),
-            title: dict.home.pathInvest.title,
-            desc: dict.home.pathInvest.desc,
-            result: locale === "th" ? "ชอร์ตลิสต์เน้นผลตอบแทน" : "Yield-focused shortlist",
-            icon: "I",
-            eventPayload: { path: "invest", from: "home_hero" },
-        },
-        {
-            key: "rent",
-            href: withLocale(locale, "/rent"),
-            title: dict.nav.rent,
-            desc: locale === "th"
-                ? "เลือกทำเลและยูนิตเช่าที่เหมาะกับการอยู่อาศัย พร้อมคำแนะนำแบบไม่เสียเวลา"
-                : "Find the right area and rental unit fast, with practical local guidance.",
-            result: locale === "th" ? "ชอร์ตลิสต์เช่าเร็วขึ้น" : "Rental shortlist fast",
-            icon: "R",
-            eventPayload: { path: "rent", from: "home_hero" },
-        },
-        {
-            key: "sell",
-            href: withLocale(locale, "/sell"),
-            title: dict.nav.sell,
-            desc: sellPathDesc,
-            result: locale === "th" ? "ประเมินราคา + แผนขาย" : "Valuation + sell plan",
-            icon: "S",
-            eventPayload: { path: "sell", from: "home_hero" },
-        }
-    ];
-
-    const pathByKey = new Map((composer?.paths ?? []).map((item) => [String(item.key || "").toLowerCase(), item]));
-    const heroPathCards = fallbackPathCards.map((card) => {
-        const override = pathByKey.get(card.key);
-        return {
-            ...card,
-            href: typeof override?.url === 'string' && override.url.trim() ? withLocale(locale, override.url.trim()) : card.href,
-            title: typeof override?.label === 'string' && override.label.trim() ? override.label.trim() : card.title,
-            desc: typeof override?.description === 'string' && override.description.trim() ? override.description.trim() : card.desc,
-        };
-    });
-
     const heroHeading = typeof composer?.heading === 'string' && composer.heading.trim()
         ? composer.heading.trim()
         : dict.home.heroTitle;
@@ -112,11 +56,6 @@ export function HomeHero({
         ? withLocale(locale, composer.secondary_cta_url.trim())
         : withLocale(locale, "/projects");
 
-    const trustItems = Array.isArray(composer?.trust_items) && composer?.trust_items.length
-        ? composer.trust_items
-        : dict.advisory.trustBar;
-
-    const pathSelectorEnabled = composer?.path_selector_enabled ?? true;
     const heroImageSrc = typeof composer?.hero_image === 'string' && composer.hero_image.startsWith('/media/')
         ? composer.hero_image
         : HERO_FALLBACK_IMAGE;
@@ -187,33 +126,6 @@ export function HomeHero({
                                 {dict.cta.whatsapp}
                             </a>
                         </div>
-
-                        <div className="hero-trust-strip mt-4 md:mt-5" role="note" aria-label={locale === "th" ? "ข้อมูลความน่าเชื่อถือ" : "Trust highlights"}>
-                            {trustItems.slice(0, 6).map((item, index) => <span key={`${item}-${index}`}>{item}</span>)}
-                        </div>
-
-                        {pathSelectorEnabled ? (
-                            <div className="hero-path-grid mt-5 md:mt-6" aria-label={locale === "th" ? "เส้นทางหลัก" : "Primary paths"}>
-                                {heroPathCards.map((card) => (
-                                    <TrackedLink
-                                        key={card.key}
-                                        className="hero-path-card"
-                                        href={card.href}
-                                        eventType="home_intent_selector_click"
-                                        eventPayload={card.eventPayload}
-                                    >
-                                        <div className="hero-path-card__header">
-                                            <span className="hero-path-card__icon" aria-hidden="true">{card.icon}</span>
-                                            <h3>{card.title}</h3>
-                                        </div>
-                                        <p>{card.desc}</p>
-                                        <span className="hero-path-card__result">
-                                            {card.result}
-                                        </span>
-                                    </TrackedLink>
-                                ))}
-                            </div>
-                        ) : null}
 
                         {/* 40-56px from CTA group (mt-10 = 40px) */}
                         <TrackedLink

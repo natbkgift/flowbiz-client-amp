@@ -14,6 +14,9 @@ import { PublicAdvisoryHero } from '@/components/public/PublicAdvisoryHero';
 
 export const revalidate = 300;
 const PROJECT_DETAIL_FETCH_TIMEOUT_MS = 8000;
+type ProjectLoadState =
+  | { kind: 'loaded'; value: Awaited<ReturnType<typeof fetchProjectBySlug>> }
+  | { kind: 'timeout' };
 
 async function withTimeout<T>(task: Promise<T>, fallback: T, timeoutMs = PROJECT_DETAIL_FETCH_TIMEOUT_MS): Promise<T> {
   try {
@@ -90,7 +93,7 @@ export default async function ProjectDetailPage(
 
   const internalLinks = getInternalLinks(locale, dict, { from: 'project_detail', includeProjects: true });
 
-  const projectResult = await withTimeout(
+  const projectResult = await withTimeout<ProjectLoadState>(
     fetchProjectBySlug(params.slug).then((value) => ({ kind: 'loaded' as const, value })),
     { kind: 'timeout' as const },
   );
@@ -299,7 +302,7 @@ export default async function ProjectDetailPage(
         }}
         secondaryAction={{
           href: withLocale(locale, '/compare'),
-          label: dict.compare.startCompare,
+          label: dict.advisory.compareOpportunities,
           eventPayload: { cta: 'compare', from: 'project_detail' },
         }}
         tertiaryAction={{

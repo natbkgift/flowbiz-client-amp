@@ -148,8 +148,11 @@ const HOME_COMPOSER_COPY = {
     close: 'Close',
     noMediaItems: 'No media items available.',
     trustItemsLabel: 'Trust micro-strip items (one per line)',
+    trustStripTitle: 'Trust micro-strip',
+    trustStripDescription: 'Configure the short proof band that renders below the home hero.',
     pathSelectorTitle: 'Path selector',
     pathSelectorDescription: 'Configure enabled journeys, labels, descriptions, and destination URLs.',
+    eyebrowLabel: 'Eyebrow',
     label: 'Label',
     descriptionLabel: 'Description',
     url: 'ลิงก์',
@@ -162,11 +165,19 @@ const HOME_COMPOSER_COPY = {
     subcopy: 'Subcopy',
     proofTrustTitle: 'Proof & trust',
     proofTrustDescription: 'Edit metrics, trust proofs, and process timeline blocks for the homepage.',
+    whyPattayaTitle: 'Why Pattaya Right Now',
+    whyPattayaDescription: 'Configure market metrics, editorial narrative cards, and the primary CTA for the Pattaya market section.',
     whyPattayaMetricsJson: 'Why Pattaya metrics JSON',
+    whyPattayaNarrativesJson: 'Why Pattaya narrative cards JSON',
     trustProofsJson: 'Trust proofs JSON',
     processTimelineJson: 'Process timeline JSON',
     supportingSectionsTitle: 'Supporting sections',
     supportingSectionsDescription: 'Configure supporting market, review, and video sections below the hero.',
+    supportingCardsJson: 'Section cards JSON',
+    reviewItemsJson: 'Review items JSON',
+    videoItemsJson: 'Video items JSON',
+    teamCtaTitle: 'Team / advisory CTA',
+    teamCtaDescription: 'Configure the advisory band shown before the final conversion block.',
     bottomCtaTitle: 'Bottom CTA',
     bottomCtaDescription: 'Final call-to-action content shown near the end of the homepage.',
     trustNote: 'Trust note',
@@ -174,6 +185,8 @@ const HOME_COMPOSER_COPY = {
     primaryUrl: 'Primary URL',
     secondaryLabel: 'Secondary label',
     secondaryUrl: 'Secondary URL',
+    formHeadingLabel: 'Form heading',
+    formBodyLabel: 'Form body',
     candidatePanelTitle: 'Media and entity candidates',
     candidatePanelDescription: 'Search media candidates and assign a local hero image.',
     searchPlaceholder: 'Search projects/properties/media',
@@ -268,8 +281,11 @@ const HOME_COMPOSER_COPY = {
     close: 'ปิด',
     noMediaItems: 'ยังไม่มีรายการสื่อให้เลือก',
     trustItemsLabel: 'รายการข้อความความน่าเชื่อถือแบบสั้น (หนึ่งบรรทัดต่อหนึ่งรายการ)',
+    trustStripTitle: 'แถบข้อความความน่าเชื่อถือ',
+    trustStripDescription: 'ตั้งค่าแถบข้อความสั้นที่แสดงถัดจากฮีโร่บนหน้าแรก',
     pathSelectorTitle: 'ตัวเลือกเส้นทางผู้ใช้',
     pathSelectorDescription: 'ตั้งค่าชุดเส้นทางหลัก ข้อความอธิบาย และ URL ที่ใช้บนหน้าแรก',
+    eyebrowLabel: 'ข้อความคิ้ว',
     label: 'ข้อความป้าย',
     descriptionLabel: 'คำอธิบาย',
     url: 'URL',
@@ -282,11 +298,19 @@ const HOME_COMPOSER_COPY = {
     subcopy: 'ข้อความรอง',
     proofTrustTitle: 'ส่วนสร้างความน่าเชื่อถือ',
     proofTrustDescription: 'จัดการข้อมูลตัวเลขยืนยันความน่าสนใจ หลักฐานความน่าเชื่อถือ และลำดับขั้นการทำงานของหน้าแรก',
+    whyPattayaTitle: 'Why Pattaya Right Now',
+    whyPattayaDescription: 'ตั้งค่าตัวเลขตลาด การ์ดบทบรรณาธิการ และ CTA หลักของส่วนเล่าเรื่องตลาดพัทยา',
     whyPattayaMetricsJson: 'JSON ตัวเลข Why Pattaya',
+    whyPattayaNarrativesJson: 'JSON การ์ดเล่าเรื่อง Why Pattaya',
     trustProofsJson: 'JSON หลักฐานความน่าเชื่อถือ',
     processTimelineJson: 'JSON ลำดับขั้นการทำงาน',
     supportingSectionsTitle: 'ส่วนสนับสนุน',
     supportingSectionsDescription: 'ตั้งค่าบล็อกข้อมูลตลาด รีวิว และวิดีโอที่อยู่ถัดจากส่วนหลัก',
+    supportingCardsJson: 'JSON การ์ดของส่วนนี้',
+    reviewItemsJson: 'JSON รายการรีวิว',
+    videoItemsJson: 'JSON รายการวิดีโอ',
+    teamCtaTitle: 'Team / Advisory CTA',
+    teamCtaDescription: 'ตั้งค่าบล็อกชวนคุยกับทีมที่ปรึกษาก่อนถึงส่วนปิดการขายท้ายหน้า',
     bottomCtaTitle: 'ปุ่มท้ายหน้า',
     bottomCtaDescription: 'กำหนดข้อความและปุ่มกระตุ้นการตัดสินใจช่วงท้ายของหน้าแรก',
     trustNote: 'ข้อความสร้างความมั่นใจ',
@@ -294,6 +318,8 @@ const HOME_COMPOSER_COPY = {
     primaryUrl: 'ลิงก์ปุ่มหลัก',
     secondaryLabel: 'ข้อความปุ่มรอง',
     secondaryUrl: 'ลิงก์ปุ่มรอง',
+    formHeadingLabel: 'หัวข้อแบบฟอร์ม',
+    formBodyLabel: 'ข้อความประกอบแบบฟอร์ม',
     candidatePanelTitle: 'ตัวเลือกสื่อและรายการอ้างอิง',
     candidatePanelDescription: 'ค้นหาสื่อ โครงการ และทรัพย์ที่พร้อมนำมาใช้กับภาพฮีโร่',
     searchPlaceholder: 'ค้นหาโครงการ ทรัพย์ หรือสื่อ',
@@ -346,13 +372,16 @@ type HomeComposerCopy = Record<keyof typeof HOME_COMPOSER_COPY.en, string>;
 
 const SECTION_LABELS: Record<SectionKey, Record<LocaleCode, string>> = {
   hero: { en: 'hero', th: 'ฮีโร่หลัก' },
+  trust_micro_strip: { en: 'trust micro-strip', th: 'แถบความน่าเชื่อถือ' },
   path_selector: { en: 'path selector', th: 'ตัวเลือกเส้นทาง' },
   featured_projects: { en: 'featured projects', th: 'โครงการแนะนำ' },
   featured_properties: { en: 'featured properties', th: 'ทรัพย์แนะนำ' },
+  why_pattaya: { en: 'why pattaya', th: 'Why Pattaya Right Now' },
   proof_trust: { en: 'proof & trust', th: 'ส่วนสร้างความน่าเชื่อถือ' },
   market_insights: { en: 'market insights', th: 'ข้อมูลตลาด' },
   reviews: { en: 'reviews', th: 'รีวิว' },
   videos: { en: 'videos', th: 'วิดีโอ' },
+  team_cta: { en: 'team cta', th: 'Team / Advisory CTA' },
   bottom_cta: { en: 'bottom cta', th: 'CTA ท้ายหน้า' },
 };
 
@@ -365,13 +394,16 @@ const PATH_KEY_LABELS: Record<string, Record<LocaleCode, string>> = {
 
 const SECTION_KEYS = [
   'hero',
+  'trust_micro_strip',
   'path_selector',
   'featured_projects',
   'featured_properties',
+  'why_pattaya',
   'proof_trust',
+  'videos',
   'market_insights',
   'reviews',
-  'videos',
+  'team_cta',
   'bottom_cta',
 ] as const;
 type SectionKey = (typeof SECTION_KEYS)[number];
@@ -379,6 +411,7 @@ type SectionKey = (typeof SECTION_KEYS)[number];
 type HomeComposerConfig = {
   enabled_sections: SectionKey[];
   section_order: SectionKey[];
+  trust_micro_strip: Array<{ key: string; text?: string }>;
   hero: {
     eyebrow?: string;
     heading?: string;
@@ -392,6 +425,8 @@ type HomeComposerConfig = {
   };
   path_selector: {
     enabled?: boolean;
+    heading?: string;
+    subcopy?: string;
     paths?: Array<{ key: string; label?: string; description?: string; url?: string }>;
   };
   featured_projects: {
@@ -414,18 +449,64 @@ type HomeComposerConfig = {
   };
   proof_trust: {
     enabled?: boolean;
+    heading?: string;
+    subcopy?: string;
+    primary_cta_label?: string;
+    primary_cta_url?: string;
+    secondary_cta_label?: string;
+    secondary_cta_url?: string;
     why_pattaya_metrics?: Array<Record<string, unknown>>;
     trust_proofs?: Array<Record<string, unknown>>;
     process_timeline?: Array<Record<string, unknown>>;
   };
-  market_insights: { enabled?: boolean; heading?: string; subcopy?: string; mode?: string };
-  reviews: { enabled?: boolean; heading?: string; subcopy?: string; mode?: string };
-  videos: { enabled?: boolean; heading?: string; subcopy?: string; mode?: string };
+  why_pattaya: {
+    enabled?: boolean;
+    heading?: string;
+    subcopy?: string;
+    primary_cta_label?: string;
+    primary_cta_url?: string;
+    metrics?: Array<Record<string, unknown>>;
+    narrative_cards?: Array<Record<string, unknown>>;
+  };
+  market_insights: {
+    enabled?: boolean;
+    heading?: string;
+    subcopy?: string;
+    mode?: string;
+    cards?: Array<Record<string, unknown>>;
+  };
+  reviews: {
+    enabled?: boolean;
+    heading?: string;
+    subcopy?: string;
+    mode?: string;
+    items?: Array<Record<string, unknown>>;
+  };
+  videos: {
+    enabled?: boolean;
+    heading?: string;
+    subcopy?: string;
+    mode?: string;
+    items?: Array<Record<string, unknown>>;
+  };
+  team_cta: {
+    enabled?: boolean;
+    eyebrow?: string;
+    heading?: string;
+    subheading?: string;
+    trust_note?: string;
+    primary_cta_label?: string;
+    primary_cta_url?: string;
+    secondary_cta_label?: string;
+    secondary_cta_url?: string;
+  };
   bottom_cta: {
     enabled?: boolean;
     heading?: string;
     subheading?: string;
     trust_note?: string;
+    form_heading?: string;
+    form_body?: string;
     primary_cta_label?: string;
     primary_cta_url?: string;
     secondary_cta_label?: string;
@@ -437,6 +518,7 @@ function defaultConfig(): HomeComposerConfig {
   return {
     enabled_sections: [...SECTION_KEYS],
     section_order: [...SECTION_KEYS],
+    trust_micro_strip: [],
     hero: {
       eyebrow: '',
       heading: '',
@@ -450,6 +532,8 @@ function defaultConfig(): HomeComposerConfig {
     },
     path_selector: {
       enabled: true,
+      heading: '',
+      subcopy: '',
       paths: [
         { key: 'buy', label: '', description: '', url: '/buy' },
         { key: 'invest', label: '', description: '', url: '/invest' },
@@ -477,18 +561,46 @@ function defaultConfig(): HomeComposerConfig {
     },
     proof_trust: {
       enabled: true,
+      heading: '',
+      subcopy: '',
+      primary_cta_label: '',
+      primary_cta_url: '/about',
+      secondary_cta_label: '',
+      secondary_cta_url: '/about#how-we-work',
       why_pattaya_metrics: [],
       trust_proofs: [],
       process_timeline: [],
     },
-    market_insights: { enabled: true, heading: '', subcopy: '', mode: 'fallback' },
-    reviews: { enabled: true, heading: '', subcopy: '', mode: 'fallback' },
-    videos: { enabled: true, heading: '', subcopy: '', mode: 'fallback' },
+    why_pattaya: {
+      enabled: true,
+      heading: '',
+      subcopy: '',
+      primary_cta_label: '',
+      primary_cta_url: '/invest/guides',
+      metrics: [],
+      narrative_cards: [],
+    },
+    market_insights: { enabled: true, heading: '', subcopy: '', mode: 'fallback', cards: [] },
+    reviews: { enabled: true, heading: '', subcopy: '', mode: 'fallback', items: [] },
+    videos: { enabled: true, heading: '', subcopy: '', mode: 'fallback', items: [] },
+    team_cta: {
+      enabled: true,
+      eyebrow: '',
+      heading: '',
+      subheading: '',
+      trust_note: '',
+      primary_cta_label: '',
+      primary_cta_url: '/contact',
+      secondary_cta_label: '',
+      secondary_cta_url: '/about',
+    },
     bottom_cta: {
       enabled: true,
       heading: '',
       subheading: '',
       trust_note: '',
+      form_heading: '',
+      form_body: '',
       primary_cta_label: '',
       primary_cta_url: '/contact',
       secondary_cta_label: '',
@@ -497,20 +609,63 @@ function defaultConfig(): HomeComposerConfig {
   };
 }
 
+function normalizeTrustMicroStrip(value: unknown, fallbackLines: string[] = []): Array<{ key: string; text?: string }> {
+  if (Array.isArray(value)) {
+    return value
+      .flatMap((item, index) => {
+        if (typeof item === 'string') {
+          return item.trim() ? [{ key: `trust-${index + 1}`, text: item.trim() }] : [];
+        }
+        if (!item || typeof item !== 'object') return [];
+        const row = item as Record<string, unknown>;
+        const localized = row.text;
+        const localizedRow = localized && typeof localized === 'object'
+          ? localized as Record<string, unknown>
+          : null;
+        const text = typeof localized === 'string'
+          ? localized.trim()
+          : [localizedRow?.en, localizedRow?.th]
+              .map((candidate) => String(candidate ?? '').trim())
+              .find(Boolean) ?? '';
+        const key = String(row.key ?? `trust-${index + 1}`).trim() || `trust-${index + 1}`;
+        return text ? [{ key, text }] : [];
+      });
+  }
+
+  return fallbackLines.map((text, index) => ({ key: `trust-${index + 1}`, text }));
+}
+
 function normalizeConfig(input: Record<string, unknown> | null | undefined): HomeComposerConfig {
   const base = defaultConfig();
   if (!input || typeof input !== 'object') return base;
+  const heroInput = (input.hero as Record<string, unknown> | undefined) ?? {};
+  const rawEnabledSections = Array.isArray(input.enabled_sections)
+    ? input.enabled_sections.map((item) => String(item)).filter((item): item is SectionKey => SECTION_KEYS.includes(item as SectionKey))
+    : base.enabled_sections;
+  const rawSectionOrder = Array.isArray(input.section_order)
+    ? input.section_order.map((item) => String(item)).filter((item): item is SectionKey => SECTION_KEYS.includes(item as SectionKey))
+    : base.section_order;
+  const enabled_sections = [...new Set([...rawEnabledSections, ...SECTION_KEYS.filter((key) => base.enabled_sections.includes(key))])];
+  const section_order = [...new Set([...rawSectionOrder, ...SECTION_KEYS])];
+  const heroTrustFallback = Array.isArray(heroInput.trust_items)
+    ? heroInput.trust_items.map((item) => String(item).trim()).filter(Boolean)
+    : [];
   return {
     ...base,
     ...input,
-    hero: { ...base.hero, ...(input.hero as Record<string, unknown> ?? {}) },
+    enabled_sections,
+    section_order,
+    trust_micro_strip: normalizeTrustMicroStrip(input.trust_micro_strip, heroTrustFallback),
+    hero: { ...base.hero, ...heroInput },
     path_selector: { ...base.path_selector, ...(input.path_selector as Record<string, unknown> ?? {}) },
     featured_projects: { ...base.featured_projects, ...(input.featured_projects as Record<string, unknown> ?? {}) },
     featured_properties: { ...base.featured_properties, ...(input.featured_properties as Record<string, unknown> ?? {}) },
     proof_trust: { ...base.proof_trust, ...(input.proof_trust as Record<string, unknown> ?? {}) },
+    why_pattaya: { ...base.why_pattaya, ...(input.why_pattaya as Record<string, unknown> ?? {}) },
     market_insights: { ...base.market_insights, ...(input.market_insights as Record<string, unknown> ?? {}) },
     reviews: { ...base.reviews, ...(input.reviews as Record<string, unknown> ?? {}) },
     videos: { ...base.videos, ...(input.videos as Record<string, unknown> ?? {}) },
+    team_cta: { ...base.team_cta, ...(input.team_cta as Record<string, unknown> ?? {}) },
     bottom_cta: { ...base.bottom_cta, ...(input.bottom_cta as Record<string, unknown> ?? {}) },
   } as HomeComposerConfig;
 }
@@ -544,6 +699,13 @@ function splitLines(value: string): string[] {
     .split('\n')
     .map((line) => line.trim())
     .filter(Boolean);
+}
+
+function buildTrustMicroStrip(lines: string[]): Array<{ key: string; text: string }> {
+  return lines.map((text, index) => ({
+    key: `trust-${index + 1}`,
+    text,
+  }));
 }
 
 function prettyDate(value: string | null | undefined, locale: LocaleCode, t: HomeComposerCopy): string {
@@ -610,8 +772,12 @@ export default function HomeComposerPage() {
   const [candidateSearch, setCandidateSearch] = useState('');
 
   const [metricsText, setMetricsText] = useState('[]');
+  const [whyPattayaNarrativesText, setWhyPattayaNarrativesText] = useState('[]');
   const [trustProofsText, setTrustProofsText] = useState('[]');
   const [processTimelineText, setProcessTimelineText] = useState('[]');
+  const [marketInsightsCardsText, setMarketInsightsCardsText] = useState('[]');
+  const [reviewItemsText, setReviewItemsText] = useState('[]');
+  const [videoItemsText, setVideoItemsText] = useState('[]');
   const [trustItemsText, setTrustItemsText] = useState('');
   const [heroImageError, setHeroImageError] = useState<string | null>(null);
   const [heroMediaModalOpen, setHeroMediaModalOpen] = useState(false);
@@ -694,10 +860,18 @@ export default function HomeComposerPage() {
       setBundle(nextBundle);
       const rawConfig = normalizeConfig((nextBundle.draft?.config ?? nextBundle.published?.config ?? defaultConfig()) as Record<string, unknown>);
       setConfig(rawConfig);
-      setMetricsText(prettyJson(rawConfig.proof_trust.why_pattaya_metrics));
+      setMetricsText(prettyJson(rawConfig.why_pattaya.metrics?.length ? rawConfig.why_pattaya.metrics : rawConfig.proof_trust.why_pattaya_metrics));
+      setWhyPattayaNarrativesText(prettyJson(rawConfig.why_pattaya.narrative_cards));
       setTrustProofsText(prettyJson(rawConfig.proof_trust.trust_proofs));
       setProcessTimelineText(prettyJson(rawConfig.proof_trust.process_timeline));
-      setTrustItemsText((rawConfig.hero.trust_items || []).join('\n'));
+      setMarketInsightsCardsText(prettyJson(rawConfig.market_insights.cards));
+      setReviewItemsText(prettyJson(rawConfig.reviews.items));
+      setVideoItemsText(prettyJson(rawConfig.videos.items));
+      setTrustItemsText(
+        rawConfig.trust_micro_strip.length
+          ? rawConfig.trust_micro_strip.map((item) => item.text || '').filter(Boolean).join('\n')
+          : (rawConfig.hero.trust_items || []).join('\n'),
+      );
       setValidation(null);
       setHeroImageError(null);
       setHeroMediaModalOpen(false);
@@ -921,22 +1095,40 @@ export default function HomeComposerPage() {
   function readConfigForSave(): HomeComposerConfig {
     const heroImageValue = (config.hero.hero_image || '').trim();
     const normalizedHeroImage = heroImageValue ? normalizeLocalMediaPath(heroImageValue) : null;
+    const trustLines = splitLines(trustItemsText);
     if (heroImageValue && !normalizedHeroImage) {
       setHeroImageError(t.heroImageLocalOnlyError);
     }
     const safeHeroImage = heroImageValue && normalizedHeroImage ? normalizedHeroImage : null;
     return {
       ...config,
+      trust_micro_strip: buildTrustMicroStrip(trustLines),
       hero: {
         ...config.hero,
         hero_image: safeHeroImage,
-        trust_items: splitLines(trustItemsText),
+        trust_items: trustLines,
       },
       proof_trust: {
         ...config.proof_trust,
-        why_pattaya_metrics: parseJsonArray(metricsText, t.whyPattayaMetricsJson, t),
         trust_proofs: parseJsonArray(trustProofsText, t.trustProofsJson, t),
         process_timeline: parseJsonArray(processTimelineText, t.processTimelineJson, t),
+      },
+      why_pattaya: {
+        ...config.why_pattaya,
+        metrics: parseJsonArray(metricsText, t.whyPattayaMetricsJson, t),
+        narrative_cards: parseJsonArray(whyPattayaNarrativesText, t.whyPattayaNarrativesJson, t),
+      },
+      market_insights: {
+        ...config.market_insights,
+        cards: parseJsonArray(marketInsightsCardsText, t.supportingCardsJson, t),
+      },
+      reviews: {
+        ...config.reviews,
+        items: parseJsonArray(reviewItemsText, t.reviewItemsJson, t),
+      },
+      videos: {
+        ...config.videos,
+        items: parseJsonArray(videoItemsText, t.videoItemsJson, t),
       },
     };
   }
@@ -1346,6 +1538,16 @@ export default function HomeComposerPage() {
                   </div>
                 </div>
               ) : null}
+            </ActionCard>
+
+            <ActionCard
+              className="home-composer-card"
+              bodyClassName="home-composer-stack"
+              title={t.trustStripTitle}
+              description={t.trustStripDescription}
+              icon="success"
+              titleTag="h2"
+            >
               <label className="home-composer-form-field">{t.trustItemsLabel}
                 <textarea value={trustItemsText} onChange={(e) => setTrustItemsText(e.target.value)} rows={4} className="home-composer-form-control" />
               </label>
@@ -1363,6 +1565,10 @@ export default function HomeComposerPage() {
                 <input type="checkbox" checked={Boolean(config.path_selector.enabled)} onChange={(e) => setConfig((prev) => ({ ...prev, path_selector: { ...prev.path_selector, enabled: e.target.checked } }))} />
                 {t.enabled}
               </label>
+              <div className="home-composer-dual-grid">
+                <label className="home-composer-form-field">{t.heading}<input value={config.path_selector.heading || ''} onChange={(e) => setConfig((prev) => ({ ...prev, path_selector: { ...prev.path_selector, heading: e.target.value } }))} className="home-composer-form-control" /></label>
+                <label className="home-composer-form-field">{t.subcopy}<input value={config.path_selector.subcopy || ''} onChange={(e) => setConfig((prev) => ({ ...prev, path_selector: { ...prev.path_selector, subcopy: e.target.value } }))} className="home-composer-form-control" /></label>
+              </div>
               {(config.path_selector.paths || []).map((path, idx) => (
                 <div key={path.key || idx} className="home-composer-config-block">
                   <div className="home-composer-config-block-kicker">{pathKeyLabel(path.key)}</div>
@@ -1466,14 +1672,49 @@ export default function HomeComposerPage() {
             <ActionCard
               className="home-composer-card"
               bodyClassName="home-composer-stack"
+              title={t.whyPattayaTitle}
+              description={t.whyPattayaDescription}
+              icon="dashboard"
+              titleTag="h2"
+            >
+              <label className="home-composer-toggle-label">
+                <input type="checkbox" checked={Boolean(config.why_pattaya.enabled)} onChange={(e) => setConfig((prev) => ({ ...prev, why_pattaya: { ...prev.why_pattaya, enabled: e.target.checked } }))} />
+                {t.enabled}
+              </label>
+              <div className="home-composer-dual-grid">
+                <label className="home-composer-form-field">{t.heading}<input value={config.why_pattaya.heading || ''} onChange={(e) => setConfig((prev) => ({ ...prev, why_pattaya: { ...prev.why_pattaya, heading: e.target.value } }))} className="home-composer-form-control" /></label>
+                <label className="home-composer-form-field">{t.subcopy}<input value={config.why_pattaya.subcopy || ''} onChange={(e) => setConfig((prev) => ({ ...prev, why_pattaya: { ...prev.why_pattaya, subcopy: e.target.value } }))} className="home-composer-form-control" /></label>
+                <label className="home-composer-form-field">{t.primaryLabel}<input value={config.why_pattaya.primary_cta_label || ''} onChange={(e) => setConfig((prev) => ({ ...prev, why_pattaya: { ...prev.why_pattaya, primary_cta_label: e.target.value } }))} className="home-composer-form-control" /></label>
+                <label className="home-composer-form-field">{t.primaryUrl}<input value={config.why_pattaya.primary_cta_url || ''} onChange={(e) => setConfig((prev) => ({ ...prev, why_pattaya: { ...prev.why_pattaya, primary_cta_url: e.target.value } }))} className="home-composer-form-control" /></label>
+              </div>
+              <label className="home-composer-form-field">{t.whyPattayaMetricsJson}
+                <textarea rows={6} value={metricsText} onChange={(e) => setMetricsText(e.target.value)} className="home-composer-form-control home-composer-form-control--mono" />
+              </label>
+              <label className="home-composer-form-field">{t.whyPattayaNarrativesJson}
+                <textarea rows={6} value={whyPattayaNarrativesText} onChange={(e) => setWhyPattayaNarrativesText(e.target.value)} className="home-composer-form-control home-composer-form-control--mono" />
+              </label>
+            </ActionCard>
+
+            <ActionCard
+              className="home-composer-card"
+              bodyClassName="home-composer-stack"
               title={t.proofTrustTitle}
               description={t.proofTrustDescription}
               icon="success"
               titleTag="h2"
             >
-              <label className="home-composer-form-field">{t.whyPattayaMetricsJson}
-                <textarea rows={6} value={metricsText} onChange={(e) => setMetricsText(e.target.value)} className="home-composer-form-control home-composer-form-control--mono" />
+              <label className="home-composer-toggle-label">
+                <input type="checkbox" checked={Boolean(config.proof_trust.enabled)} onChange={(e) => setConfig((prev) => ({ ...prev, proof_trust: { ...prev.proof_trust, enabled: e.target.checked } }))} />
+                {t.enabled}
               </label>
+              <div className="home-composer-dual-grid">
+                <label className="home-composer-form-field">{t.heading}<input value={config.proof_trust.heading || ''} onChange={(e) => setConfig((prev) => ({ ...prev, proof_trust: { ...prev.proof_trust, heading: e.target.value } }))} className="home-composer-form-control" /></label>
+                <label className="home-composer-form-field">{t.subcopy}<input value={config.proof_trust.subcopy || ''} onChange={(e) => setConfig((prev) => ({ ...prev, proof_trust: { ...prev.proof_trust, subcopy: e.target.value } }))} className="home-composer-form-control" /></label>
+                <label className="home-composer-form-field">{t.primaryLabel}<input value={config.proof_trust.primary_cta_label || ''} onChange={(e) => setConfig((prev) => ({ ...prev, proof_trust: { ...prev.proof_trust, primary_cta_label: e.target.value } }))} className="home-composer-form-control" /></label>
+                <label className="home-composer-form-field">{t.primaryUrl}<input value={config.proof_trust.primary_cta_url || ''} onChange={(e) => setConfig((prev) => ({ ...prev, proof_trust: { ...prev.proof_trust, primary_cta_url: e.target.value } }))} className="home-composer-form-control" /></label>
+                <label className="home-composer-form-field">{t.secondaryLabel}<input value={config.proof_trust.secondary_cta_label || ''} onChange={(e) => setConfig((prev) => ({ ...prev, proof_trust: { ...prev.proof_trust, secondary_cta_label: e.target.value } }))} className="home-composer-form-control" /></label>
+                <label className="home-composer-form-field">{t.secondaryUrl}<input value={config.proof_trust.secondary_cta_url || ''} onChange={(e) => setConfig((prev) => ({ ...prev, proof_trust: { ...prev.proof_trust, secondary_cta_url: e.target.value } }))} className="home-composer-form-control" /></label>
+              </div>
               <label className="home-composer-form-field">{t.trustProofsJson}
                 <textarea rows={6} value={trustProofsText} onChange={(e) => setTrustProofsText(e.target.value)} className="home-composer-form-control home-composer-form-control--mono" />
               </label>
@@ -1502,8 +1743,40 @@ export default function HomeComposerPage() {
                     <label className="home-composer-form-field">{t.subcopy}<input value={config[section].subcopy || ''} onChange={(e) => setConfig((prev) => ({ ...prev, [section]: { ...prev[section], subcopy: e.target.value } }))} className="home-composer-form-control" /></label>
                     <label className="home-composer-form-field">{t.mode}<input value={config[section].mode || ''} onChange={(e) => setConfig((prev) => ({ ...prev, [section]: { ...prev[section], mode: e.target.value } }))} className="home-composer-form-control" /></label>
                   </div>
+                  {section === 'market_insights' ? (
+                    <label className="home-composer-form-field">{t.supportingCardsJson}
+                      <textarea rows={6} value={marketInsightsCardsText} onChange={(e) => setMarketInsightsCardsText(e.target.value)} className="home-composer-form-control home-composer-form-control--mono" />
+                    </label>
+                  ) : null}
+                  {section === 'reviews' ? (
+                    <label className="home-composer-form-field">{t.reviewItemsJson}
+                      <textarea rows={6} value={reviewItemsText} onChange={(e) => setReviewItemsText(e.target.value)} className="home-composer-form-control home-composer-form-control--mono" />
+                    </label>
+                  ) : null}
+                  {section === 'videos' ? (
+                    <label className="home-composer-form-field">{t.videoItemsJson}
+                      <textarea rows={6} value={videoItemsText} onChange={(e) => setVideoItemsText(e.target.value)} className="home-composer-form-control home-composer-form-control--mono" />
+                    </label>
+                  ) : null}
                 </div>
               ))}
+              <div className="home-composer-config-block">
+                <div className="home-composer-config-block-kicker">{sectionLabel('team_cta')}</div>
+                <label className="home-composer-toggle-label">
+                  <input type="checkbox" checked={Boolean(config.team_cta.enabled)} onChange={(e) => setConfig((prev) => ({ ...prev, team_cta: { ...prev.team_cta, enabled: e.target.checked } }))} />
+                  {t.enabled}
+                </label>
+                <div className="home-composer-dual-grid">
+                  <label className="home-composer-form-field">{t.eyebrowLabel}<input value={config.team_cta.eyebrow || ''} onChange={(e) => setConfig((prev) => ({ ...prev, team_cta: { ...prev.team_cta, eyebrow: e.target.value } }))} className="home-composer-form-control" /></label>
+                  <label className="home-composer-form-field">{t.heading}<input value={config.team_cta.heading || ''} onChange={(e) => setConfig((prev) => ({ ...prev, team_cta: { ...prev.team_cta, heading: e.target.value } }))} className="home-composer-form-control" /></label>
+                  <label className="home-composer-form-field">{t.subheading}<input value={config.team_cta.subheading || ''} onChange={(e) => setConfig((prev) => ({ ...prev, team_cta: { ...prev.team_cta, subheading: e.target.value } }))} className="home-composer-form-control" /></label>
+                  <label className="home-composer-form-field">{t.trustNote}<input value={config.team_cta.trust_note || ''} onChange={(e) => setConfig((prev) => ({ ...prev, team_cta: { ...prev.team_cta, trust_note: e.target.value } }))} className="home-composer-form-control" /></label>
+                  <label className="home-composer-form-field">{t.primaryLabel}<input value={config.team_cta.primary_cta_label || ''} onChange={(e) => setConfig((prev) => ({ ...prev, team_cta: { ...prev.team_cta, primary_cta_label: e.target.value } }))} className="home-composer-form-control" /></label>
+                  <label className="home-composer-form-field">{t.primaryUrl}<input value={config.team_cta.primary_cta_url || ''} onChange={(e) => setConfig((prev) => ({ ...prev, team_cta: { ...prev.team_cta, primary_cta_url: e.target.value } }))} className="home-composer-form-control" /></label>
+                  <label className="home-composer-form-field">{t.secondaryLabel}<input value={config.team_cta.secondary_cta_label || ''} onChange={(e) => setConfig((prev) => ({ ...prev, team_cta: { ...prev.team_cta, secondary_cta_label: e.target.value } }))} className="home-composer-form-control" /></label>
+                  <label className="home-composer-form-field">{t.secondaryUrl}<input value={config.team_cta.secondary_cta_url || ''} onChange={(e) => setConfig((prev) => ({ ...prev, team_cta: { ...prev.team_cta, secondary_cta_url: e.target.value } }))} className="home-composer-form-control" /></label>
+                </div>
+              </div>
               <div className="home-composer-config-block">
                 <div className="home-composer-config-block-kicker">{sectionLabel('bottom_cta')}</div>
                 <label className="home-composer-toggle-label">
@@ -1514,6 +1787,8 @@ export default function HomeComposerPage() {
                   <label className="home-composer-form-field">{t.heading}<input value={config.bottom_cta.heading || ''} onChange={(e) => setConfig((prev) => ({ ...prev, bottom_cta: { ...prev.bottom_cta, heading: e.target.value } }))} className="home-composer-form-control" /></label>
                   <label className="home-composer-form-field">{t.subheading}<input value={config.bottom_cta.subheading || ''} onChange={(e) => setConfig((prev) => ({ ...prev, bottom_cta: { ...prev.bottom_cta, subheading: e.target.value } }))} className="home-composer-form-control" /></label>
                   <label className="home-composer-form-field">{t.trustNote}<input value={config.bottom_cta.trust_note || ''} onChange={(e) => setConfig((prev) => ({ ...prev, bottom_cta: { ...prev.bottom_cta, trust_note: e.target.value } }))} className="home-composer-form-control" /></label>
+                  <label className="home-composer-form-field">{t.formHeadingLabel}<input value={config.bottom_cta.form_heading || ''} onChange={(e) => setConfig((prev) => ({ ...prev, bottom_cta: { ...prev.bottom_cta, form_heading: e.target.value } }))} className="home-composer-form-control" /></label>
+                  <label className="home-composer-form-field">{t.formBodyLabel}<input value={config.bottom_cta.form_body || ''} onChange={(e) => setConfig((prev) => ({ ...prev, bottom_cta: { ...prev.bottom_cta, form_body: e.target.value } }))} className="home-composer-form-control" /></label>
                   <label className="home-composer-form-field">{t.primaryLabel}<input value={config.bottom_cta.primary_cta_label || ''} onChange={(e) => setConfig((prev) => ({ ...prev, bottom_cta: { ...prev.bottom_cta, primary_cta_label: e.target.value } }))} className="home-composer-form-control" /></label>
                   <label className="home-composer-form-field">{t.primaryUrl}<input value={config.bottom_cta.primary_cta_url || ''} onChange={(e) => setConfig((prev) => ({ ...prev, bottom_cta: { ...prev.bottom_cta, primary_cta_url: e.target.value } }))} className="home-composer-form-control" /></label>
                   <label className="home-composer-form-field">{t.secondaryLabel}<input value={config.bottom_cta.secondary_cta_label || ''} onChange={(e) => setConfig((prev) => ({ ...prev, bottom_cta: { ...prev.bottom_cta, secondary_cta_label: e.target.value } }))} className="home-composer-form-control" /></label>

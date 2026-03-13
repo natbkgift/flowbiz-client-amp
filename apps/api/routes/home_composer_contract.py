@@ -45,6 +45,18 @@ _ALLOWED_MEDIA_HOSTS = {
     "localhost",
     "127.0.0.1",
 }
+ADDITIVE_PUBLIC_CONFIG_KEYS = (
+    "enabled_sections",
+    "section_order",
+    "featured_projects",
+    "featured_properties",
+    "proof_trust",
+    "why_pattaya",
+    "market_insights",
+    "videos",
+    "team_cta",
+    "bottom_cta",
+)
 
 
 class LocalizedText(BaseModel):
@@ -80,7 +92,7 @@ class CtaConfig(BaseModel):
 
 
 class HeroConfig(BaseModel):
-    model_config = ConfigDict(extra="forbid")
+    model_config = ConfigDict(extra="allow")
 
     headline: LocalizedText = Field(default_factory=LocalizedText)
     subheadline: LocalizedText = Field(default_factory=LocalizedText)
@@ -167,7 +179,7 @@ class ProofAsset(BaseModel):
 
 
 class ReviewsConfig(BaseModel):
-    model_config = ConfigDict(extra="forbid")
+    model_config = ConfigDict(extra="allow")
 
     source: Literal["manual", "disabled"] = "manual"
     source_ids: list[str] = Field(default_factory=list)
@@ -179,7 +191,7 @@ class ReviewsConfig(BaseModel):
 
 
 class VideoConfig(BaseModel):
-    model_config = ConfigDict(extra="forbid")
+    model_config = ConfigDict(extra="allow")
 
     source: Literal["manual", "disabled"] = "disabled"
     video_paths: list[str] = Field(default_factory=list)
@@ -228,7 +240,7 @@ class PathCardConfig(BaseModel):
 
 
 class PathSelectorConfig(BaseModel):
-    model_config = ConfigDict(extra="forbid")
+    model_config = ConfigDict(extra="allow")
 
     cards: list[PathCardConfig] = Field(default_factory=list)
 
@@ -263,7 +275,7 @@ class BottomConsultationConfig(BaseModel):
 
 
 class HomeComposerSchema(BaseModel):
-    model_config = ConfigDict(extra="forbid")
+    model_config = ConfigDict(extra="allow")
 
     sections: list[SectionControl] = Field(default_factory=list)
     hero: HeroConfig = Field(default_factory=HeroConfig)
@@ -557,6 +569,7 @@ def normalize_home_config(raw_config: dict[str, Any] | None) -> HomeComposerSche
     if isinstance(hero, dict):
         cta = hero.get("cta") if isinstance(hero.get("cta"), dict) else {}
         base["hero"] = {
+            **hero,
             "headline": _coerce_localized_text(hero.get("headline")),
             "subheadline": _coerce_localized_text(hero.get("subheadline")),
             "cta": {
@@ -616,6 +629,7 @@ def normalize_home_config(raw_config: dict[str, Any] | None) -> HomeComposerSche
     reviews = incoming.get("reviews")
     if isinstance(reviews, dict):
         base["reviews"] = {
+            **reviews,
             "source": reviews.get("source", "manual"),
             "source_ids": _coerce_string_list(reviews.get("source_ids") or reviews.get("ids")),
         }
@@ -623,6 +637,7 @@ def normalize_home_config(raw_config: dict[str, Any] | None) -> HomeComposerSche
     video = incoming.get("video")
     if isinstance(video, dict):
         base["video"] = {
+            **video,
             "source": video.get("source", "disabled"),
             "video_paths": _coerce_string_list(video.get("video_paths") or video.get("paths")),
         }
@@ -630,6 +645,7 @@ def normalize_home_config(raw_config: dict[str, Any] | None) -> HomeComposerSche
     hero_secondary_cta = incoming.get("hero_secondary_cta")
     if isinstance(hero_secondary_cta, dict):
         base["hero_secondary_cta"] = {
+            **hero_secondary_cta,
             "text": _coerce_localized_text(
                 hero_secondary_cta.get("text") or hero_secondary_cta.get("label")
             ),
@@ -637,20 +653,23 @@ def normalize_home_config(raw_config: dict[str, Any] | None) -> HomeComposerSche
         }
 
     path_selector = incoming.get("path_selector")
-    if isinstance(path_selector, dict) and isinstance(path_selector.get("cards"), list):
-        cards: list[dict[str, Any]] = []
-        for card in path_selector.get("cards", []):
-            if not isinstance(card, dict):
-                continue
-            cards.append(
-                {
-                    "key": _coerce_text(card.get("key")) or "invest",
-                    "fit": _coerce_localized_text(card.get("fit")),
-                    "outcome": _coerce_localized_text(card.get("outcome")),
-                    "href": _coerce_text(card.get("href")) or "/projects",
-                }
-            )
-        base["path_selector"] = {"cards": cards}
+    if isinstance(path_selector, dict):
+        next_path_selector = dict(path_selector)
+        if isinstance(path_selector.get("cards"), list):
+            cards: list[dict[str, Any]] = []
+            for card in path_selector.get("cards", []):
+                if not isinstance(card, dict):
+                    continue
+                cards.append(
+                    {
+                        "key": _coerce_text(card.get("key")) or "invest",
+                        "fit": _coerce_localized_text(card.get("fit")),
+                        "outcome": _coerce_localized_text(card.get("outcome")),
+                        "href": _coerce_text(card.get("href")) or "/projects",
+                    }
+                )
+            next_path_selector["cards"] = cards
+        base["path_selector"] = next_path_selector
 
     trust_micro_strip = incoming.get("trust_micro_strip")
     if isinstance(trust_micro_strip, list):
@@ -663,10 +682,20 @@ def normalize_home_config(raw_config: dict[str, Any] | None) -> HomeComposerSche
     consultation = incoming.get("consultation")
     if isinstance(consultation, dict):
         base["consultation"] = {
+            **consultation,
             "promise_copy": _coerce_localized_text(consultation.get("promise_copy")),
             "trust_note": _coerce_localized_text(consultation.get("trust_note")),
             "submit_text": _coerce_localized_text(consultation.get("submit_text")),
         }
+
+    for key in ADDITIVE_PUBLIC_CONFIG_KEYS:
+        value = incoming.get(key)
+        if key in {"enabled_sections", "section_order"}:
+            if isinstance(value, list):
+                base[key] = [str(item) for item in value]
+            continue
+        if isinstance(value, dict):
+            base[key] = value
 
     updated_at = incoming.get("updated_at")
     if updated_at is not None:

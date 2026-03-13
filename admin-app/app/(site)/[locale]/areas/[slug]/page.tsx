@@ -5,7 +5,7 @@ import { buildAdvisorWhatsApp, getAdvisoryLabels, getAdvisoryProofs, withLocaleQ
 import { Container } from '@/components/layout/Container';
 import { getDictionary, normalizeLocale } from '@/app/_lib/i18n/get-dictionary';
 import { withLocale, ogLocale } from '@/app/_lib/i18n/routing';
-import { fetchAreaStatisticsBySlug } from '@/app/_lib/public-api-server';
+import { fetchAreaBySlug } from '@/app/_lib/public-api-server';
 import { PublicAdvisoryHero } from '@/components/public/PublicAdvisoryHero';
 
 export const revalidate = 300;
@@ -17,6 +17,39 @@ type AreaSlug = (typeof AREA_SLUGS)[number];
 
 function isAreaSlug(slug: string): slug is AreaSlug {
   return (AREA_SLUGS as readonly string[]).includes(slug);
+}
+
+function getFallbackBuyerTypes(locale: 'en' | 'th'): string[] {
+  if (locale === 'th') {
+    return [
+      'ผู้ซื้อที่ต้องการอ่านภาพรวมทำเลก่อน shortlist โครงการ',
+      'ผู้ลงทุนที่ต้องการเช็กสัญญาณราคาและค่าเช่าแบบตรงไปตรงมา',
+      'ผู้ซื้อเพื่ออยู่อาศัยที่ต้องการเปรียบเทียบพื้นที่ก่อนคุยกับที่ปรึกษา',
+    ];
+  }
+
+  return [
+    'Buyers who want the area context before shortlisting projects',
+    'Investors checking pricing and rental signals without sales padding',
+    'Owner-occupiers comparing neighborhoods before speaking with an advisor',
+  ];
+}
+
+function getAreaPageContent(
+  locale: 'en' | 'th',
+  slug: string,
+  fallbackTitle: string,
+  areaName?: string | null,
+) {
+  const dict = getDictionary(locale);
+  if (isAreaSlug(slug)) {
+    return dict.area.areas[slug];
+  }
+
+  return {
+    title: areaName?.trim() || fallbackTitle,
+    buyerTypes: getFallbackBuyerTypes(locale),
+  };
 }
 
 async function withTimeout<T>(task: Promise<T>, fallback: T, timeoutMs = AREA_STATS_TIMEOUT_MS): Promise<T> {
@@ -51,10 +84,9 @@ export async function generateMetadata(
 
   const slug = params.slug;
   const canonical = `/${locale}/areas/${encodeURIComponent(slug)}`;
-
-  const titleBase = isAreaSlug(slug)
-    ? dict.area.areas[slug].title
-    : dict.area.fallbackTitle;
+  const areaDetail = await withTimeout(fetchAreaBySlug(slug), null);
+  const areaCopy = getAreaPageContent(locale, slug, dict.area.fallbackTitle, areaDetail?.area?.name);
+  const titleBase = areaCopy.title;
 
   return {
     title: `${titleBase} | ${dict.brand.name}`,
@@ -87,8 +119,9 @@ export default async function AreaPage(
   const dict = getDictionary(locale);
   const advisoryProofs = getAdvisoryProofs(dict);
   const advisoryLabels = getAdvisoryLabels(locale);
+  const areaDetail = await withTimeout(fetchAreaBySlug(params.slug), null);
 
-  if (!isAreaSlug(params.slug)) {
+  if (!areaDetail?.area) {
     return (
       <main className="section" id="main-content">
         <Container>
@@ -104,9 +137,8 @@ export default async function AreaPage(
     );
   }
 
-  const areaCopy = dict.area.areas[params.slug];
-  const stats = await withTimeout(fetchAreaStatisticsBySlug(params.slug), null);
-
+  const areaCopy = getAreaPageContent(locale, params.slug, dict.area.fallbackTitle, areaDetail.area.name);
+  const stats = areaDetail;
   const title = areaCopy.title;
   const buyerTypes = areaCopy.buyerTypes;
 

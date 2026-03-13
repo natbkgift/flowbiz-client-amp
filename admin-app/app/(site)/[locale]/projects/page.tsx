@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { makePageMetadata } from '@/app/_lib/i18n/metadata';
 import { buildAdvisorWhatsApp, getAdvisoryLabels, getAdvisoryProofs, withLocaleQuery } from '@/app/_lib/public-advisory';
+import { withLocale } from '@/app/_lib/i18n/routing';
 import { Container } from '@/components/layout/Container';
 import { fetchProjects, fetchProperties } from '@/app/_lib/public-api-server';
 
@@ -24,6 +25,9 @@ export async function generateMetadata(
 
 type ProjectRow = { name: string; count: number };
 const PROJECTS_FETCH_TIMEOUT_MS = 8000;
+type ProjectsLoadState =
+  | { kind: 'loaded'; value: Awaited<ReturnType<typeof fetchProjects>> }
+  | { kind: 'timeout' };
 
 async function withTimeout<T>(task: Promise<T>, fallback: T, timeoutMs = PROJECTS_FETCH_TIMEOUT_MS): Promise<T> {
   try {
@@ -50,8 +54,12 @@ export default async function ProjectsPage(props: { params: Promise<{ locale: st
   let projects: Awaited<ReturnType<typeof fetchProjects>>;
   let projectsFetchOk = true;
   const startedAt = Date.now();
-  projects = await withTimeout(fetchProjects({ limit: 100 }), []);
-  if (projects.length === 0) {
+  const projectsResult = await withTimeout<ProjectsLoadState>(
+    fetchProjects({ limit: 100 }).then((value) => ({ kind: 'loaded', value })),
+    { kind: 'timeout' },
+  );
+  projects = projectsResult.kind === 'loaded' ? projectsResult.value : [];
+  if (projectsResult.kind !== 'loaded' || projects.length === 0) {
     projectsFetchOk = false;
   }
   if (projects.length) {
