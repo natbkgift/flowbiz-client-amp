@@ -1,6 +1,6 @@
 import Image from "next/image";
 import { TrackedLink } from "@/components/analytics/TrackedLink";
-import { buildWhatsAppUrl } from "@/app/_lib/public-cta";
+import { buildAdvisorWhatsApp } from "@/app/_lib/public-advisory";
 import { HeroOverlay } from "@/components/home/HeroOverlay";
 import { Container } from "@/components/layout/Container";
 import { withLocale } from "@/app/_lib/i18n/routing";
@@ -59,11 +59,7 @@ export function HomeHero({
     const heroImageSrc = typeof composer?.hero_image === 'string' && composer.hero_image.startsWith('/media/')
         ? composer.hero_image
         : HERO_FALLBACK_IMAGE;
-    const whatsAppHref = buildWhatsAppUrl(
-        locale === "th"
-            ? dict.home.whatsAppFallback
-            : dict.home.whatsAppFallback,
-    );
+    const whatsAppHref = buildAdvisorWhatsApp(locale, dict);
 
     return (
         <section className="relative w-full bg-gray-900 overflow-hidden min-h-[720px] sm:min-h-[760px] md:min-h-[680px] xl:min-h-[720px]">

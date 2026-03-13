@@ -6,11 +6,15 @@ export function getAdvisoryProofs(dict: Dictionary, count = 4): string[] {
   return dict.advisory.trustBar.slice(0, count);
 }
 
-export function getAdvisoryLabels(locale: Locale): {
+export function getAdvisoryLabels(input: Locale | Dictionary): {
   proofsLabel: string;
   guidanceLabel: string;
 } {
-  if (locale === 'th') {
+  if (typeof input !== 'string') {
+    return input.advisory.accessibility;
+  }
+
+  if (input === 'th') {
     return {
       proofsLabel: 'แถบความน่าเชื่อถือ',
       guidanceLabel: 'คำแนะนำของหน้านี้',
@@ -24,10 +28,10 @@ export function getAdvisoryLabels(locale: Locale): {
 }
 
 export function buildAdvisorWhatsApp(locale: Locale, dict: Dictionary, message?: string): string {
-  const fallback = locale === 'th'
+  const fallback = dict.home.whatsAppFallback || (locale === 'th'
     ? 'สวัสดี AMP Pattaya ฉันต้องการคำแนะนำเพื่อคัดอสังหาริมทรัพย์ในพัทยา'
-    : 'Hi AMP Pattaya, I need help curating the right Pattaya property.';
-  return buildWhatsAppUrl(message ?? dict.home.whatsAppFallback ?? fallback);
+    : 'Hi AMP Pattaya, I need help curating the right Pattaya property.');
+  return buildWhatsAppUrl(message ?? fallback);
 }
 
 export function withLocaleQuery(
