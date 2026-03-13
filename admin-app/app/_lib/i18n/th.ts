@@ -403,9 +403,9 @@ export const th: Dictionary = {
   },
   compare: {
     title: 'เปรียบเทียบโครงการ',
-    requiresTwo: 'ต้องมีอย่างน้อย 2 โครงการ เช่น /compare?ids=<id1>,<id2>',
+    requiresTwo: 'ต้องมีอย่างน้อย 2 โครงการเพื่อเริ่มการเปรียบเทียบ',
     getStarted: 'เริ่มต้น',
-    getStartedDesc: 'ไปหน้า Smart Finder เพื่อเลือก top projects แล้วกด Compare',
+    getStartedDesc: 'เริ่มจาก Smart Finder เพื่อคัดโครงการที่เหมาะ แล้วค่อยเปิดตารางเปรียบเทียบ',
     goToSmartFinder: 'ไป Smart Finder',
     browseProjects: 'ดู Projects',
     readOnlyDesc: 'ตารางนี้อ่านอย่างเดียว และอ้างอิงจาก dataset ปัจจุบัน',

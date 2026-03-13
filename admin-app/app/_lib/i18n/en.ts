@@ -410,9 +410,9 @@ export const en: Dictionary = {
   },
   compare: {
     title: 'Compare Projects',
-    requiresTwo: 'Requires at least 2 projects, e.g. /compare?ids=<id1>,<id2>',
+    requiresTwo: 'Choose at least 2 projects to start the comparison.',
     getStarted: 'Get started',
-    getStartedDesc: 'Use Smart Finder to generate top projects and click Compare.',
+    getStartedDesc: 'Start with Smart Finder to shortlist relevant projects, then open the comparison table.',
     goToSmartFinder: 'Go to Smart Finder',
     browseProjects: 'Browse Projects',
     readOnlyDesc: 'Read-only table based on current dataset snapshots.',
