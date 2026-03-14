@@ -84,6 +84,7 @@ export default async function BlogArticlePage(
   const advisoryProofs = getAdvisoryProofs(dict);
   const advisoryLabels = getAdvisoryLabels(locale);
   const post = await fetchBlogPostBySlug(params.slug).catch(() => null);
+  const allPosts = await fetchBlogPosts().catch(() => []);
 
   if (!post) {
     return (
@@ -110,6 +111,31 @@ export default async function BlogArticlePage(
   const publishedText = formatDate(locale, post.published_at);
   const updatedText = formatDate(locale, post.updated_at);
   const bodyParagraphs = getBodyParagraphs(locale, post);
+  const relatedPosts = allPosts
+    .filter((item) => item.slug !== post.slug)
+    .sort((left, right) => {
+      const leftDate = Date.parse(left.published_at ?? left.updated_at ?? '');
+      const rightDate = Date.parse(right.published_at ?? right.updated_at ?? '');
+      return (Number.isFinite(rightDate) ? rightDate : 0) - (Number.isFinite(leftDate) ? leftDate : 0);
+    })
+    .slice(0, 3);
+  const nextStepLinks = [
+    {
+      href: withLocale(locale, '/investment'),
+      title: locale === 'th' ? 'อ่านมุมมองฝั่งลงทุนต่อ' : 'Continue into investment guidance',
+      body: locale === 'th' ? 'ใช้บทความนี้เป็นบริบท แล้วต่อไปยังหน้า investment เพื่อดูกรอบการคัดสินทรัพย์' : 'Use this article as context, then continue into the investment page for a clearer shortlist framework.',
+    },
+    {
+      href: withLocale(locale, '/area-guide'),
+      title: locale === 'th' ? 'ลงลึกต่อที่ area guide' : 'Drill deeper with area guides',
+      body: locale === 'th' ? 'ถ้าประเด็นนี้ผูกกับทำเล ให้ไปต่อที่ area guide เพื่อดูภาพ micro-location' : 'If this topic is location-sensitive, move into the area guides to compare Pattaya zones with more context.',
+    },
+    {
+      href: withLocaleQuery(locale, '/contact', { intent: 'content_consultation', article: post.slug }),
+      title: locale === 'th' ? 'ส่ง brief ให้ advisor' : 'Send the brief to an advisor',
+      body: locale === 'th' ? 'แปลงสิ่งที่อ่านเป็น shortlist โดยส่งงบ จุดประสงค์ และทำเลที่กำลังพิจารณา' : 'Turn the article into a shortlist conversation by sharing your budget, purpose, and preferred area.',
+    },
+  ];
 
   return (
     <main id="main-content">
@@ -195,9 +221,43 @@ export default async function BlogArticlePage(
                   </div>
                 </div>
               ) : null}
+
+              {relatedPosts.length ? (
+                <div className="authority-card reveal">
+                  <h2 className="card-title">{locale === 'th' ? 'อ่านต่อจากบทความนี้' : 'Continue reading'}</h2>
+                  <div className="insight-list mt-3">
+                    {relatedPosts.map((item) => {
+                      const relatedTitle = localizeText(locale, item.title) || item.slug;
+                      const relatedExcerpt = localizeText(locale, item.excerpt ?? null);
+                      return (
+                        <Link
+                          key={item.slug}
+                          href={withLocale(locale, `/blog/${encodeURIComponent(item.slug)}`)}
+                          className="insight-list__item"
+                        >
+                          <span className="insight-list__title">{relatedTitle}</span>
+                          <span className="insight-list__body">{relatedExcerpt || (locale === 'th' ? 'เปิดอ่านบทความฉบับเต็ม' : 'Open the full article.')}</span>
+                        </Link>
+                      );
+                    })}
+                  </div>
+                </div>
+              ) : null}
             </div>
 
             <aside className="detail-sidebar detail-stack">
+              <div className="page-rail-card reveal">
+                <h2 className="card-title">{locale === 'th' ? 'ไปต่อแบบมีบริบท' : 'Move forward with context'}</h2>
+                <div className="insight-list mt-3">
+                  {nextStepLinks.map((item) => (
+                    <Link key={item.href} href={item.href} className="insight-list__item">
+                      <span className="insight-list__title">{item.title}</span>
+                      <span className="insight-list__body">{item.body}</span>
+                    </Link>
+                  ))}
+                </div>
+              </div>
+
               <div className="page-rail-card reveal">
                 <h2 className="card-title">{locale === 'th' ? 'แปลงบทความเป็นแผนต่อ' : 'Turn the article into a next-step brief'}</h2>
                 <p className="card-subtitle">
