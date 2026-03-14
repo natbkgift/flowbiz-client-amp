@@ -90,14 +90,14 @@ function hrefWithQuery(path: string, query: Record<string, string>): string {
 export function GuidedOverlay({ locale, guided, homeKV, ctaKV, closeAriaLabel }: GuidedOverlayProps) {
   const sp = useSearchParams();
 
-  const guidedOpen = sp.get('guided') === '1';
+  const guidedOpen = sp?.get('guided') === '1';
 
   if (!guidedOpen) return null;
 
-  const step = normalizeGuidedStep(pickParam(sp.get('step')));
-  const goal = normalizeGoal(pickParam(sp.get('goal')));
-  const budget = pickParam(sp.get('budget'));
-  const timeline = pickParam(sp.get('timeline'));
+  const step = normalizeGuidedStep(pickParam(sp?.get('step') ?? null));
+  const goal = normalizeGoal(pickParam(sp?.get('goal') ?? null));
+  const budget = pickParam(sp?.get('budget') ?? null);
+  const timeline = pickParam(sp?.get('timeline') ?? null);
 
   const effectiveStep: GuidedStep = goal ? step : 'goal';
 

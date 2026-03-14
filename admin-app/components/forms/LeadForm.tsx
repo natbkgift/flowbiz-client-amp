@@ -16,6 +16,9 @@ type LeadFormProps = {
   propertyId?: string | null;
   defaultMessage?: string;
   defaultPreferredArea?: string;
+  defaultBudgetBand?: string;
+  defaultPurpose?: string;
+  defaultTimeframe?: string;
 };
 
 type LeadFormStatus =
@@ -32,7 +35,15 @@ function normalizeTagToken(value: string): string {
     .replace(/[^a-z0-9_]/g, '');
 }
 
-export function LeadForm({ heading, propertyId, defaultMessage, defaultPreferredArea }: LeadFormProps) {
+export function LeadForm({
+  heading,
+  propertyId,
+  defaultMessage,
+  defaultPreferredArea,
+  defaultBudgetBand,
+  defaultPurpose,
+  defaultTimeframe,
+}: LeadFormProps) {
   const pathname = usePathname() ?? '/';
   const locale = localeFromPathname(pathname);
   const dict = locale === 'th' ? th : en;
@@ -42,10 +53,10 @@ export function LeadForm({ heading, propertyId, defaultMessage, defaultPreferred
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
-  const [budgetBand, setBudgetBand] = useState('');
-  const [purpose, setPurpose] = useState('');
+  const [budgetBand, setBudgetBand] = useState(defaultBudgetBand ?? '');
+  const [purpose, setPurpose] = useState(defaultPurpose ?? '');
   const [preferredArea, setPreferredArea] = useState(defaultPreferredArea ?? '');
-  const [timeframe, setTimeframe] = useState('');
+  const [timeframe, setTimeframe] = useState(defaultTimeframe ?? '');
   const [message, setMessage] = useState(defaultMessage ?? '');
   const [website, setWebsite] = useState('');
   const [consent, setConsent] = useState(false);

@@ -6,7 +6,7 @@ const LeadForm = dynamic(() => import('@/components/forms/LeadForm').then(m => m
   loading: () => <div className="animate-pulse h-48 rounded bg-slate-100" />,
 });
 import { CTA } from '@/app/_lib/public-cta';
-import { buildAdvisorWhatsApp, getAdvisoryLabels, getAdvisoryProofs, withLocaleQuery } from '@/app/_lib/public-advisory';
+import { buildAdvisorWhatsApp, getAdvisoryLabels, getAdvisoryProofs, parseInvestorToolContext, withLocaleQuery } from '@/app/_lib/public-advisory';
 import { getDictionary, normalizeLocale } from '@/app/_lib/i18n/get-dictionary';
 import { makePageMetadata } from '@/app/_lib/i18n/metadata';
 import { PublicAdvisoryHero } from '@/components/public/PublicAdvisoryHero';
@@ -24,6 +24,28 @@ export async function generateMetadata(
   return makePageMetadata(locale, 'contact', dict.nav.contact, dict.contact.subtitle, dict.brand.name);
 }
 
+function formatCurrency(locale: 'en' | 'th', value: number | null | undefined): string | null {
+  if (typeof value !== 'number' || !Number.isFinite(value)) return null;
+  return new Intl.NumberFormat(locale === 'th' ? 'th-TH' : 'en-US', {
+    style: 'currency',
+    currency: 'THB',
+    maximumFractionDigits: 0,
+  }).format(value);
+}
+
+function formatPercent(value: number | null | undefined): string | null {
+  if (typeof value !== 'number' || !Number.isFinite(value)) return null;
+  return `${value.toFixed(2)}%`;
+}
+
+function inferBudgetBand(purchasePrice: number | null | undefined): string | undefined {
+  if (typeof purchasePrice !== 'number' || !Number.isFinite(purchasePrice) || purchasePrice <= 0) return undefined;
+  if (purchasePrice < 3_000_000) return 'lt_3m';
+  if (purchasePrice < 6_000_000) return '3m_6m';
+  if (purchasePrice < 10_000_000) return '6m_10m';
+  return 'gt_10m';
+}
+
 export default async function ContactPage(
   props: {
     params: Promise<{ locale: string }>;
@@ -36,10 +58,49 @@ export default async function ContactPage(
   const dict = getDictionary(locale);
   const advisoryLabels = getAdvisoryLabels(locale);
   const advisoryProofs = getAdvisoryProofs(dict);
+  const investorContext = parseInvestorToolContext(searchParams);
   const msg =
     (typeof searchParams?.msg === 'string' ? searchParams.msg : Array.isArray(searchParams?.msg) ? searchParams?.msg[0] : null) ??
     null;
-  const defaultMessage = msg ? `${msg}` : dict.contact.advisoryBody;
+  const investorLines = [
+    formatCurrency(locale, investorContext.purchasePrice)
+      ? `${locale === 'th' ? 'ราคาซื้อเป้าหมาย' : 'Target purchase price'}: ${formatCurrency(locale, investorContext.purchasePrice)}`
+      : null,
+    formatCurrency(locale, investorContext.monthlyRent)
+      ? `${locale === 'th' ? 'ค่าเช่าต่อเดือน' : 'Monthly rent'}: ${formatCurrency(locale, investorContext.monthlyRent)}`
+      : null,
+    typeof investorContext.occupancyRate === 'number' && Number.isFinite(investorContext.occupancyRate)
+      ? `${locale === 'th' ? 'อัตราปล่อยเช่า' : 'Occupancy'}: ${investorContext.occupancyRate.toFixed(0)}%`
+      : null,
+    formatCurrency(locale, investorContext.annualCosts)
+      ? `${locale === 'th' ? 'ต้นทุนต่อปี' : 'Annual costs'}: ${formatCurrency(locale, investorContext.annualCosts)}`
+      : null,
+    formatPercent(investorContext.grossYield)
+      ? `${locale === 'th' ? 'Gross yield' : 'Gross yield'}: ${formatPercent(investorContext.grossYield)}`
+      : null,
+    formatPercent(investorContext.netYield)
+      ? `${locale === 'th' ? 'Net yield' : 'Net yield'}: ${formatPercent(investorContext.netYield)}`
+      : null,
+    typeof investorContext.paybackYears === 'number' && Number.isFinite(investorContext.paybackYears)
+      ? `${locale === 'th' ? 'Payback' : 'Payback'}: ${investorContext.paybackYears.toFixed(1)} ${locale === 'th' ? 'ปี' : 'years'}`
+      : null,
+    investorContext.ids?.length
+      ? `${locale === 'th' ? 'โครงการที่เทียบ' : 'Compared projects'}: ${investorContext.ids.join(', ')}`
+      : null,
+  ].filter((item): item is string => Boolean(item));
+  const defaultMessage = msg
+    ? `${msg}`
+    : investorLines.length
+      ? [
+          locale === 'th'
+            ? 'ต้องการคุยต่อเรื่องแผนลงทุนและ shortlist จาก investor tools'
+            : 'I want to continue the investment-plan and shortlist conversation from the investor tools.',
+          '',
+          ...investorLines,
+        ].join('\n')
+      : dict.contact.advisoryBody;
+  const defaultBudgetBand = inferBudgetBand(investorContext.purchasePrice);
+  const hasInvestorContext = investorLines.length > 0;
 
   return (
     <main id="main-content">
@@ -105,6 +166,19 @@ export default async function ContactPage(
               <h2 className="section-title">{dict.contact.advisoryTitle}</h2>
               <p className="section-subtitle">{dict.contact.advisoryBody}</p>
 
+              {hasInvestorContext ? (
+                <div className="trust-box">
+                  <h3 className="trust-box__title">
+                    {locale === 'th' ? 'Investor handoff summary' : 'Investor handoff summary'}
+                  </h3>
+                  <ul className="bullet-list">
+                    {investorLines.map((line) => (
+                      <li key={line}>{line}</li>
+                    ))}
+                  </ul>
+                </div>
+              ) : null}
+
               <div className="cta-row">
                 <a className="btn btn-cta" href={CTA.whatsAppUrl} target="_blank" rel="noreferrer">
                   {dict.cta.whatsapp}
@@ -129,7 +203,12 @@ export default async function ContactPage(
             </aside>
 
             <div className="split__main" id="contact-form">
-              <LeadForm heading={dict.contact.formTitle} defaultMessage={defaultMessage} />
+              <LeadForm
+                heading={dict.contact.formTitle}
+                defaultMessage={defaultMessage}
+                defaultBudgetBand={defaultBudgetBand}
+                defaultPurpose={hasInvestorContext ? 'invest' : undefined}
+              />
             </div>
           </div>
         </Container>

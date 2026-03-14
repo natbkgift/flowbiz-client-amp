@@ -4,7 +4,6 @@ import Link from 'next/link';
 import { Container } from '@/components/layout/Container';
 import { getDictionary, normalizeLocale } from '@/app/_lib/i18n/get-dictionary';
 import { makePageMetadata } from '@/app/_lib/i18n/metadata';
-import { withLocale } from '@/app/_lib/i18n/routing';
 import { YieldCalculator } from './_components/YieldCalculator';
 
 export const revalidate = 300;
@@ -37,15 +36,6 @@ export default async function CalculatorPage(props: { params: Promise<{ locale: 
         </div>
 
         <YieldCalculator locale={locale} />
-
-        <div className="cta-row mt-8">
-          <Link className="btn btn-secondary" href={withLocale(locale, '/compare')}>
-            {locale === 'th' ? 'ไปที่ compare' : 'Go to compare'}
-          </Link>
-          <Link className="btn btn-tertiary" href={withLocale(locale, '/contact')}>
-            {locale === 'th' ? 'คุยกับ advisor' : 'Talk to an advisor'}
-          </Link>
-        </div>
       </Container>
     </main>
   );

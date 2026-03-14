@@ -1,6 +1,9 @@
 'use client';
 
+import Link from 'next/link';
 import { useMemo, useState } from 'react';
+
+import { buildInvestorToolQuery, withLocaleQuery } from '@/app/_lib/public-advisory';
 
 export function YieldCalculator({ locale }: { locale: 'en' | 'th' }) {
   const [purchasePrice, setPurchasePrice] = useState('5000000');
@@ -38,6 +41,10 @@ export function YieldCalculator({ locale }: { locale: 'en' | 'th' }) {
         grossYield: 'Gross yield',
         netYield: 'Net yield',
         paybackYears: 'Payback (ปี)',
+        summaryTitle: 'ส่งต่อ brief นี้ไปยัง compare หรือ advisor',
+        summaryBody: 'ตัวเลขชุดเดียวกันจะถูกพาไปต่อทั้ง compare flow และ contact handoff โดยไม่ต้องกรอกใหม่',
+        goToCompare: 'เปิด compare พร้อม brief นี้',
+        talkToAdvisor: 'ส่ง brief ให้ advisor',
       }
     : {
         purchasePrice: 'Purchase price',
@@ -49,7 +56,23 @@ export function YieldCalculator({ locale }: { locale: 'en' | 'th' }) {
         grossYield: 'Gross yield',
         netYield: 'Net yield',
         paybackYears: 'Payback (years)',
+        summaryTitle: 'Carry this brief into compare or advisor handoff',
+        summaryBody: 'The same numbers will move into compare and contact so you do not have to restate them.',
+        goToCompare: 'Open compare with this brief',
+        talkToAdvisor: 'Send brief to advisor',
       };
+
+  const investorToolQuery = buildInvestorToolQuery({
+    purchasePrice: Number(purchasePrice) || 0,
+    monthlyRent: Number(monthlyRent) || 0,
+    occupancyRate: Number(occupancyRate) || 0,
+    annualCosts: Number(annualCosts) || 0,
+    grossYield: result.grossYield,
+    netYield: result.netYield,
+    paybackYears: result.paybackYears,
+    intent: 'investment_plan',
+    source: 'calculator',
+  });
 
   return (
     <div className="detail-layout advisory-detail-layout mt-6">
@@ -99,6 +122,19 @@ export function YieldCalculator({ locale }: { locale: 'en' | 'th' }) {
               <span className="insight-list__title">{labels.paybackYears}</span>
               <span className="insight-list__body">{result.paybackYears ? result.paybackYears.toFixed(1) : (locale === 'th' ? 'คำนวณไม่ได้' : 'Not available')}</span>
             </div>
+          </div>
+        </div>
+
+        <div className="page-rail-card">
+          <h2 className="card-title">{labels.summaryTitle}</h2>
+          <p className="card-subtitle">{labels.summaryBody}</p>
+          <div className="cta-row mt-4">
+            <Link className="btn btn-secondary" href={withLocaleQuery(locale, '/compare', investorToolQuery)}>
+              {labels.goToCompare}
+            </Link>
+            <Link className="btn btn-cta" href={withLocaleQuery(locale, '/contact', investorToolQuery)}>
+              {labels.talkToAdvisor}
+            </Link>
           </div>
         </div>
       </aside>
