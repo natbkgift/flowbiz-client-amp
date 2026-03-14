@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { createElement } from 'react';
-import { renderToStaticMarkup } from 'react-dom/server';
+import { render, screen } from '@testing-library/react';
 
 import { YieldCalculator } from '@/app/(site)/[locale]/calculator/_components/YieldCalculator';
 import ComparePage from '@/app/(site)/[locale]/compare/page';
@@ -13,18 +13,25 @@ import {
 
 describe('investor handoff regression', () => {
   it('keeps calculator compare/contact links aligned with the shared investor query contract', () => {
-    const calculatorMarkup = renderToStaticMarkup(createElement(YieldCalculator, { locale: 'en' }));
+    render(createElement(YieldCalculator, { locale: 'en' }));
 
-    expect(calculatorMarkup).toContain('/en/compare?purchasePrice=5000000');
-    expect(calculatorMarkup).toContain('/en/contact?purchasePrice=5000000');
-    expect(calculatorMarkup).toContain('monthlyRent=30000');
-    expect(calculatorMarkup).toContain('occupancyRate=90');
-    expect(calculatorMarkup).toContain('annualCosts=120000');
-    expect(calculatorMarkup).toContain('grossYield=6.48');
-    expect(calculatorMarkup).toContain('netYield=4.08');
-    expect(calculatorMarkup).toContain('paybackYears=24.5');
-    expect(calculatorMarkup).toContain('intent=investment_plan');
-    expect(calculatorMarkup).toContain('source=calculator');
+    const compareLink = screen.getByRole('link', { name: /open compare with this brief/i });
+    const contactLink = screen.getByRole('link', { name: /send brief to advisor/i });
+
+    for (const value of [
+      'purchasePrice=5000000',
+      'monthlyRent=30000',
+      'occupancyRate=90',
+      'annualCosts=120000',
+      'grossYield=6.48',
+      'netYield=4.08',
+      'paybackYears=24.5',
+      'intent=investment_plan',
+      'source=calculator',
+    ]) {
+      expect(compareLink.getAttribute('href')).toContain(value);
+      expect(contactLink.getAttribute('href')).toContain(value);
+    }
   });
 
   it('round-trips calculator metrics through query helpers', () => {
@@ -81,18 +88,24 @@ describe('investor handoff regression', () => {
       source: 'calculator',
     });
 
-    const compareMarkup = renderToStaticMarkup(
+    render(
       await ComparePage({
         params: Promise.resolve({ locale: 'en' }),
         searchParams: Promise.resolve(calculatorQuery),
       }),
     );
 
-    expect(compareMarkup).toContain('Investment brief carried from calculator');
-    expect(compareMarkup).toContain('Target purchase price');
-    expect(compareMarkup).toContain('Gross yield');
-    expect(compareMarkup).toContain('/en/contact?purchasePrice=5000000');
-    expect(compareMarkup).toContain('source=calculator');
+    expect(
+      screen.getByRole('heading', { name: /investment brief carried from calculator/i }),
+    ).toBeTruthy();
+    expect(screen.getByText(/target purchase price:/i)).toBeTruthy();
+    expect(screen.getByText(/gross yield: 6\.48%/i)).toBeTruthy();
+    expect(screen.getByRole('link', { name: /get investment plan/i }).getAttribute('href')).toContain(
+      '/en/contact?purchasePrice=5000000',
+    );
+    expect(screen.getByRole('link', { name: /get investment plan/i }).getAttribute('href')).toContain(
+      'source=calculator',
+    );
   });
 
   it('keeps investor brief data in compare-to-contact handoff', async () => {
@@ -111,21 +124,31 @@ describe('investor handoff regression', () => {
       ids: 'alpha,beta',
     };
 
-    const compareMarkup = renderToStaticMarkup(
+    const compareScreen = render(
       await ComparePage({
         params: Promise.resolve({ locale: 'en' }),
         searchParams: Promise.resolve(compareSearchParams),
       }),
     );
 
-    expect(compareMarkup).toContain('Target purchase price');
-    expect(compareMarkup).toContain('Monthly rent');
-    expect(compareMarkup).toContain('Gross yield');
-    expect(compareMarkup).toContain('/en/contact?purchasePrice=5000000');
-    expect(compareMarkup).toContain('ids=alpha%2Cbeta');
-    expect(compareMarkup).toContain('source=compare_review');
+    expect(screen.getByText(/target purchase price:/i)).toBeTruthy();
+    expect(screen.getByText(/monthly rent:/i)).toBeTruthy();
+    expect(screen.getByText(/gross yield: 6\.48%/i)).toBeTruthy();
+    const compareReviewLink = screen
+      .getAllByRole('link', { name: /get investment plan/i })
+      .find((link) => link.getAttribute('href')?.includes('source=compare_review'));
 
-    const contactMarkup = renderToStaticMarkup(
+    if (!compareReviewLink) {
+      throw new Error('expected compare page to expose a compare_review investment-plan handoff link');
+    }
+
+    expect(compareReviewLink.getAttribute('href')).toContain('/en/contact?purchasePrice=5000000');
+    expect(compareReviewLink.getAttribute('href')).toContain('ids=alpha%2Cbeta');
+    expect(compareReviewLink.getAttribute('href')).toContain('source=compare_review');
+
+    compareScreen.unmount();
+
+    render(
       await ContactPage({
         params: Promise.resolve({ locale: 'en' }),
         searchParams: Promise.resolve({
@@ -135,11 +158,11 @@ describe('investor handoff regression', () => {
       }),
     );
 
-    expect(contactMarkup).toContain('Investor handoff summary');
-    expect(contactMarkup).toContain('Target purchase price:');
-    expect(contactMarkup).toContain('Monthly rent:');
-    expect(contactMarkup).toContain('Gross yield: 6.48%');
-    expect(contactMarkup).toContain('Net yield: 4.08%');
-    expect(contactMarkup).toContain('Compared projects: alpha, beta');
+    expect(screen.getByRole('heading', { name: /investor handoff summary/i })).toBeTruthy();
+    expect(screen.getByText(/target purchase price:/i)).toBeTruthy();
+    expect(screen.getByText(/monthly rent:/i)).toBeTruthy();
+    expect(screen.getByText(/gross yield: 6\.48%/i)).toBeTruthy();
+    expect(screen.getByText(/net yield: 4\.08%/i)).toBeTruthy();
+    expect(screen.getByText(/compared projects: alpha, beta/i)).toBeTruthy();
   });
 });
