@@ -1,4 +1,8 @@
 node_modules
 .next
+.next_admin_smoke
+.next_forensics
+.next_local_safe
 npm-debug.log*
+build-debug.log
 tsconfig.tsbuildinfo
