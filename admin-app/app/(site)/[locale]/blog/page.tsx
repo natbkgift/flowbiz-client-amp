@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import Link from 'next/link';
 
 import { Container } from '@/components/layout/Container';
 import { getDictionary, normalizeLocale } from '@/app/_lib/i18n/get-dictionary';
@@ -16,6 +17,8 @@ function pageCopy(locale: 'en' | 'th') {
       empty: 'ยังไม่มีบทความที่เผยแพร่',
       publishedAt: 'เผยแพร่',
       updatedAt: 'อัปเดต',
+      readTime: 'เวลาอ่าน',
+      readArticle: 'อ่านบทความ',
     };
   }
   return {
@@ -25,6 +28,8 @@ function pageCopy(locale: 'en' | 'th') {
     empty: 'No published blog posts yet.',
     publishedAt: 'Published',
     updatedAt: 'Updated',
+    readTime: 'Read time',
+    readArticle: 'Read article',
   };
 }
 
@@ -78,22 +83,35 @@ export default async function BlogPage(props: { params: Promise<{ locale: string
         </div>
 
         {rows.length ? (
-          <div className="grid grid-3">
+          <div className="editorial-grid editorial-grid--three-up">
             {rows.map((post) => {
               const title = localizeText(locale, post.title) || post.slug;
               const excerpt = localizeText(locale, post.excerpt ?? null);
+              const category = localizeText(locale, post.category ?? null);
+              const readTime = localizeText(locale, post.read_time ?? null);
               const publishedText = formatDate(locale, post.published_at);
               const updatedText = formatDate(locale, post.updated_at);
               return (
-                <article key={post.slug} className="card">
-                  <h2 className="card-title">{title}</h2>
-                  {excerpt ? <p className="card-subtitle">{excerpt}</p> : null}
-                  <p className="card-subtitle">
-                    {copy.publishedAt}: {publishedText || '-'}
-                  </p>
-                  <p className="card-subtitle">
-                    {copy.updatedAt}: {updatedText || '-'}
-                  </p>
+                <article key={post.slug} className="editorial-card reveal">
+                  <div className="editorial-card__meta">
+                    {category ? <span>{category}</span> : null}
+                    {readTime ? <span>{copy.readTime}: {readTime}</span> : null}
+                  </div>
+                  <h2 className="editorial-card__title">
+                    <Link href={`/${locale}/blog/${encodeURIComponent(post.slug)}`}>
+                      {title}
+                    </Link>
+                  </h2>
+                  {excerpt ? <p className="editorial-card__excerpt">{excerpt}</p> : null}
+                  <div className="editorial-card__footer">
+                    <div>
+                      <p className="card-subtitle">{copy.publishedAt}: {publishedText || '-'}</p>
+                      <p className="card-subtitle">{copy.updatedAt}: {updatedText || '-'}</p>
+                    </div>
+                    <Link className="btn btn-secondary" href={`/${locale}/blog/${encodeURIComponent(post.slug)}`}>
+                      {copy.readArticle}
+                    </Link>
+                  </div>
                 </article>
               );
             })}

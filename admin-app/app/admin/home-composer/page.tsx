@@ -576,7 +576,7 @@ function defaultConfig(): HomeComposerConfig {
       heading: '',
       subcopy: '',
       primary_cta_label: '',
-      primary_cta_url: '/invest/guides',
+      primary_cta_url: '/investment',
       metrics: [],
       narrative_cards: [],
     },

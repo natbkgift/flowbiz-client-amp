@@ -494,7 +494,7 @@ export default async function HomePage({
                     <LocalMediaImage
                       media={media}
                       alt={prop.title}
-                      altFallback={locale === 'th' ? `ภาพประกอบอสังหาฯ ${prop.title}` : `Property preview for ${prop.title}`}
+                      altFallback={locale === 'th' ? `ภาพประกอบอสังหาฯ ${prop.title}` : `Property image for ${prop.title}`}
                       className="media-shell"
                       imageClassName={`absolute inset-0 h-full w-full object-cover ${hasLocalMedia ? '' : 'premium-investment-card__fallback-image'}`}
                       fallbackSrc={fallbackSrc}
@@ -642,7 +642,7 @@ export default async function HomePage({
   const whyPattayaPrimaryUrl =
     typeof composerWhyPattaya.primary_cta_url === 'string' && composerWhyPattaya.primary_cta_url.trim()
       ? withLocale(locale, composerWhyPattaya.primary_cta_url.trim())
-      : withLocale(locale, '/invest/guides');
+      : withLocale(locale, '/investment');
 
   const pathSelectorHeading =
     typeof composerPathSelector.heading === 'string' && composerPathSelector.heading.trim()
@@ -907,7 +907,7 @@ export default async function HomePage({
       body: locale === 'th'
         ? 'สรุปดีมานด์เช่าและช่วงผลตอบแทนแบบไม่ overclaim'
         : 'Rental demand snapshots and yield ranges without overclaiming certainty.',
-      href: withLocale(locale, '/invest/guides'),
+      href: withLocale(locale, '/investment'),
       updatedAt: process.env.NEXT_PUBLIC_INSIGHTS_YIELD_UPDATED_AT ?? null,
     },
     {
@@ -979,7 +979,7 @@ export default async function HomePage({
     {
       key: 'launch_walkthrough',
       title: locale === 'th' ? 'New Project Presale Tour' : 'New Project Presale Tour',
-      caption: locale === 'th' ? 'ดูตัวอย่างการพาโครงการใหม่และสิ่งที่ต้องเช็กก่อนตัดสินใจ' : 'Preview how we review new launches before recommendations.',
+      caption: locale === 'th' ? 'ดูแนวทางการพาโครงการใหม่และสิ่งที่ต้องเช็กก่อนตัดสินใจ' : 'See how the team reviews new launches before making recommendations.',
       ytId: '77If6rT5fdE',
       thumbSrc: '/media/video-thumbs/77If6rT5fdE.jpg',
     },

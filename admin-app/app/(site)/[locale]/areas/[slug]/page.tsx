@@ -7,6 +7,7 @@ import { getDictionary, normalizeLocale } from '@/app/_lib/i18n/get-dictionary';
 import { withLocale, ogLocale } from '@/app/_lib/i18n/routing';
 import { fetchAreaBySlug } from '@/app/_lib/public-api-server';
 import { PublicAdvisoryHero } from '@/components/public/PublicAdvisoryHero';
+import { LeadForm } from '@/components/forms/LeadForm';
 
 export const revalidate = 300;
 const AREA_STATS_TIMEOUT_MS = 8000;
@@ -50,6 +51,36 @@ function getAreaPageContent(
     title: areaName?.trim() || fallbackTitle,
     buyerTypes: getFallbackBuyerTypes(locale),
   };
+}
+
+function formatStat(value: string | number | null | undefined): string | null {
+  if (value === null || value === undefined) return null;
+  if (typeof value === 'number') return new Intl.NumberFormat('en-US').format(value);
+  return value.trim() || null;
+}
+
+function buildAreaMarketRead(locale: 'en' | 'th', areaName: string, hasStats: boolean, roiPercent?: string | null): string[] {
+  if (locale === 'th') {
+    return [
+      hasStats
+        ? `${areaName} มี snapshot ราคาและค่าเช่าจริงในระบบ จึงใช้เป็นจุดตั้งต้นสำหรับการ shortlist ได้`
+        : `${areaName} ยังมีข้อมูลเชิงตัวเลขบางส่วนไม่ครบ จึงควรใช้หน้านี้เพื่ออ่านบริบทและส่งต่อ brief ให้ทีมแทน`,
+      roiPercent
+        ? `หากคุณมองเชิงลงทุน ค่า ROI snapshot ปัจจุบันอยู่ที่ ${roiPercent}`
+        : 'หากโฟกัสผลตอบแทน ควรใช้พื้นที่นี้เป็นจุดเริ่มต้นก่อนไปดูโครงการระดับยูนิต',
+      'พื้นที่ที่เหมาะควรชนะทั้งเรื่องการใช้ชีวิตและความชัดเจนของ next step ไม่ใช่แค่ตัวเลขบนกระดาษ',
+    ];
+  }
+
+  return [
+    hasStats
+      ? `${areaName} has enough live pricing and rental context to act as a starting point for a shortlist conversation.`
+      : `${areaName} is still a partial numeric snapshot, so this page is better used for context-setting before handing the brief to an advisor.`,
+    roiPercent
+      ? `If yield matters, the current ROI snapshot reads ${roiPercent}.`
+      : 'If yield is part of the brief, use this area as a filter before drilling into project-level options.',
+    'The right area should reduce uncertainty around lifestyle, ownership fit, and the next decision step all at once.',
+  ];
 }
 
 async function withTimeout<T>(task: Promise<T>, fallback: T, timeoutMs = AREA_STATS_TIMEOUT_MS): Promise<T> {
@@ -143,6 +174,13 @@ export default async function AreaPage(
   const buyerTypes = areaCopy.buyerTypes;
 
   const hasStats = Boolean(stats?.statistics);
+  const marketRead = buildAreaMarketRead(locale, title, hasStats, stats?.statistics?.roi_percent);
+  const metricCards = [
+    { label: dict.area.avgPrice, value: formatStat(stats?.statistics?.avg_price) },
+    { label: dict.area.avgRent, value: formatStat(stats?.statistics?.avg_rent) },
+    { label: dict.area.roiPercent, value: formatStat(stats?.statistics?.roi_percent) },
+    { label: locale === 'th' ? 'ข้อมูลล่าสุด' : 'Latest snapshot', value: formatStat(stats?.statistics?.as_of) },
+  ].filter((item) => item.value);
 
   return (
     <main id="main-content">
@@ -203,59 +241,77 @@ export default async function AreaPage(
 
       <section className="section">
         <Container>
-          <div className="grid grid-2">
-            <div className="card reveal">
-              <h2 className="card-title">{dict.area.priceTrend}</h2>
-              <p className="card-subtitle">
-                {hasStats
-                  ? dict.area.priceTrendHasData
-                  : dict.area.priceTrendNoData}
-              </p>
-              <ul className="bullet-list mt-3">
-                <li>{dict.area.avgPrice}: {stats?.statistics?.avg_price ?? '—'}</li>
-                <li>{dict.area.asOf}: {stats?.statistics?.as_of ?? '—'}</li>
-              </ul>
+          <div className="detail-layout advisory-detail-layout">
+            <div className="detail-stack">
+              <section className="authority-card reveal">
+                <div className="section-header">
+                  <h2 className="section-title section-title--sm">{locale === 'th' ? 'Authority snapshot' : 'Authority snapshot'}</h2>
+                  <p className="section-subtitle">
+                    {hasStats ? dict.area.priceTrendHasData : dict.area.priceTrendNoData}
+                  </p>
+                </div>
+
+                {metricCards.length ? (
+                  <div className="signal-grid signal-grid--four-up">
+                    {metricCards.map((item) => (
+                      <div key={item.label} className="metric-card">
+                        <span className="metric-card__label">{item.label}</span>
+                        <strong className="metric-card__value">{item.value}</strong>
+                      </div>
+                    ))}
+                  </div>
+                ) : null}
+
+                <div className="insight-list mt-4">
+                  {marketRead.map((item) => (
+                    <div key={item} className="insight-list__item">
+                      <span className="insight-list__body">{item}</span>
+                    </div>
+                  ))}
+                </div>
+              </section>
+
+              <section className="signal-grid signal-grid--two-up reveal">
+                <div className="authority-card">
+                  <h2 className="card-title">{dict.area.suitableBuyer}</h2>
+                  <p className="card-subtitle">{dict.area.suitableBuyerDesc}</p>
+                  <ul className="bullet-list mt-3">
+                    {buyerTypes.map((b) => (
+                      <li key={b}>{b}</li>
+                    ))}
+                  </ul>
+                </div>
+
+                <div className="authority-card">
+                  <h2 className="card-title">{dict.area.nextStep}</h2>
+                  <p className="card-subtitle">{dict.area.nextStepDesc}</p>
+                  <div className="card-actions mt-3">
+                    <Link className="btn btn-cta" href={withLocale(locale, '/smart-finder')}>
+                      {dict.area.goToSmartFinder}
+                    </Link>
+                    <Link className="btn btn-secondary" href={withLocale(locale, '/projects')}>
+                      {dict.area.browseProjects}
+                    </Link>
+                  </div>
+                </div>
+              </section>
             </div>
 
-            <div className="card reveal">
-              <h2 className="card-title">{dict.area.rentalDemand}</h2>
-              <p className="card-subtitle">
-                {hasStats
-                  ? dict.area.rentalHasData
-                  : dict.area.rentalNoData}
-              </p>
-              <ul className="bullet-list mt-3">
-                <li>{dict.area.avgRent}: {stats?.statistics?.avg_rent ?? '—'}</li>
-                <li>{dict.area.roiPercent}: {stats?.statistics?.roi_percent ?? '—'}</li>
-              </ul>
-            </div>
-
-            <div className="card reveal">
-              <h2 className="card-title">{dict.area.suitableBuyer}</h2>
-              <p className="card-subtitle">
-                {dict.area.suitableBuyerDesc}
-              </p>
-              <ul className="bullet-list mt-3">
-                {buyerTypes.map((b) => (
-                  <li key={b}>{b}</li>
-                ))}
-              </ul>
-            </div>
-
-            <div className="card reveal">
-              <h2 className="card-title">{dict.area.nextStep}</h2>
-              <p className="card-subtitle">
-                {dict.area.nextStepDesc}
-              </p>
-              <div className="cta-row mt-3">
-                <Link className="btn btn-cta" href={withLocale(locale, '/smart-finder')}>
-                  {dict.area.goToSmartFinder}
-                </Link>
-                <Link className="btn btn-secondary" href={withLocale(locale, '/projects')}>
-                  {dict.area.browseProjects}
-                </Link>
+            <aside className="detail-sidebar detail-stack">
+              <div className="page-rail-card reveal">
+                <h2 className="card-title">{locale === 'th' ? 'ส่ง brief ของทำเลนี้' : 'Send a brief around this area'}</h2>
+                <p className="card-subtitle">
+                  {locale === 'th'
+                    ? 'กรอกงบ วัตถุประสงค์ และไทม์ไลน์ เพื่อให้ทีมแปลง snapshot ของทำเลเป็น shortlist ที่ใช้งานได้จริง'
+                    : 'Share your budget, purpose, and timing so the team can translate this area snapshot into a shortlist that is actually usable.'}
+                </p>
               </div>
-            </div>
+              <LeadForm
+                heading={locale === 'th' ? `คุยต่อเรื่อง ${title}` : `Talk through ${title}`}
+                defaultPreferredArea={title}
+                defaultMessage={locale === 'th' ? `สนใจทำเล ${title} และอยากได้คำแนะนำว่าเหมาะกับโครงการหรือยูนิตแบบใด` : `I am interested in ${title} and want advice on which projects or unit types fit this area best.`}
+              />
+            </aside>
           </div>
         </Container>
       </section>

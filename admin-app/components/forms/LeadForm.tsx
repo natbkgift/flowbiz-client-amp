@@ -15,6 +15,7 @@ type LeadFormProps = {
   heading?: string;
   propertyId?: string | null;
   defaultMessage?: string;
+  defaultPreferredArea?: string;
 };
 
 type LeadFormStatus =
@@ -23,7 +24,15 @@ type LeadFormStatus =
   | { state: 'success'; id?: string }
   | { state: 'error'; message: string };
 
-export function LeadForm({ heading, propertyId, defaultMessage }: LeadFormProps) {
+function normalizeTagToken(value: string): string {
+  return value
+    .trim()
+    .toLowerCase()
+    .replace(/\s+/g, '_')
+    .replace(/[^a-z0-9_]/g, '');
+}
+
+export function LeadForm({ heading, propertyId, defaultMessage, defaultPreferredArea }: LeadFormProps) {
   const pathname = usePathname() ?? '/';
   const locale = localeFromPathname(pathname);
   const dict = locale === 'th' ? th : en;
@@ -33,6 +42,10 @@ export function LeadForm({ heading, propertyId, defaultMessage }: LeadFormProps)
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
+  const [budgetBand, setBudgetBand] = useState('');
+  const [purpose, setPurpose] = useState('');
+  const [preferredArea, setPreferredArea] = useState(defaultPreferredArea ?? '');
+  const [timeframe, setTimeframe] = useState('');
   const [message, setMessage] = useState(defaultMessage ?? '');
   const [website, setWebsite] = useState('');
   const [consent, setConsent] = useState(false);
@@ -87,6 +100,9 @@ export function LeadForm({ heading, propertyId, defaultMessage }: LeadFormProps)
       property_id: propertyId ?? null,
       has_email: Boolean(email.trim()),
       has_phone: Boolean(phone.trim()),
+      budget_band: budgetBand || null,
+      purpose: purpose || null,
+      timeline: timeframe || null,
     });
 
     // Compute lead quality score for CRM enrichment
@@ -100,6 +116,23 @@ export function LeadForm({ heading, propertyId, defaultMessage }: LeadFormProps)
 
     setStatus({ state: 'submitting' });
 
+    const briefLines = [
+      budgetBand ? `${dict.common.leadForm.budgetLabel}: ${dict.common.leadForm.budgetOptions.find((item) => item.value === budgetBand)?.label ?? budgetBand}` : null,
+      purpose ? `${dict.common.leadForm.purposeLabel}: ${dict.common.leadForm.purposeOptions.find((item) => item.value === purpose)?.label ?? purpose}` : null,
+      preferredArea.trim() ? `${dict.common.leadForm.preferredAreaLabel}: ${preferredArea.trim()}` : null,
+      timeframe ? `${dict.common.leadForm.timeframeLabel}: ${dict.common.leadForm.timeframeOptions.find((item) => item.value === timeframe)?.label ?? timeframe}` : null,
+    ].filter((item): item is string => Boolean(item));
+
+    const composedMessage = briefLines.length
+      ? `${message.trim()}\n\n${dict.common.leadForm.detailsHeading}:\n${briefLines.join('\n')}`
+      : message.trim();
+
+    const normalizedPreferredArea = normalizeTagToken(preferredArea);
+    const inquiryTags = [
+      normalizedPreferredArea ? `preferred_area:${normalizedPreferredArea}` : null,
+      purpose ? `purpose:${normalizeTagToken(purpose)}` : null,
+    ].filter((item): item is string => Boolean(item));
+
     try {
       const res = await fetch('/api/v1/inquiries', {
         method: 'POST',
@@ -109,13 +142,19 @@ export function LeadForm({ heading, propertyId, defaultMessage }: LeadFormProps)
           name,
           email: email.trim() || null,
           phone: phone.trim() || null,
-          message,
+          message: composedMessage,
           consent_given: true,
+          intent: purpose || 'general',
+          budget_band: budgetBand || null,
+          timeline: timeframe || null,
           // Operational metadata (not user PII)
           property_id: propertyId ?? null,
           source_page: safeSourcePage(),
           website: website.trim() || null,
           submit_timestamp: submitIso,
+          locale,
+          source_platform: 'website',
+          tags: inquiryTags,
           // Lead quality score (0–100 + tier)
           lead_score: leadScore.total,
           lead_tier: leadScore.tier,
@@ -217,6 +256,80 @@ export function LeadForm({ heading, propertyId, defaultMessage }: LeadFormProps)
               value={phone}
               onChange={(e) => setPhone(e.target.value)}
             />
+          </div>
+        </div>
+        <div className="form-grid-2">
+          <div>
+            <label htmlFor="lead-budget" className="form-label">
+              {dict.common.leadForm.budgetLabel}
+            </label>
+            <select
+              id="lead-budget"
+              className="form-select"
+              name="budget"
+              value={budgetBand}
+              onChange={(e) => setBudgetBand(e.target.value)}
+            >
+              <option value="">{dict.common.leadForm.budgetPlaceholder}</option>
+              {dict.common.leadForm.budgetOptions.map((option) => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div>
+            <label htmlFor="lead-purpose" className="form-label">
+              {dict.common.leadForm.purposeLabel}
+            </label>
+            <select
+              id="lead-purpose"
+              className="form-select"
+              name="purpose"
+              value={purpose}
+              onChange={(e) => setPurpose(e.target.value)}
+            >
+              <option value="">{dict.common.leadForm.purposePlaceholder}</option>
+              {dict.common.leadForm.purposeOptions.map((option) => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
+          </div>
+        </div>
+        <div className="form-grid-2">
+          <div>
+            <label htmlFor="lead-preferred-area" className="form-label">
+              {dict.common.leadForm.preferredAreaLabel}
+            </label>
+            <input
+              id="lead-preferred-area"
+              className="form-input"
+              name="preferred_area"
+              placeholder={dict.common.leadForm.preferredAreaPlaceholder}
+              value={preferredArea}
+              onChange={(e) => setPreferredArea(e.target.value)}
+            />
+          </div>
+          <div>
+            <label htmlFor="lead-timeframe" className="form-label">
+              {dict.common.leadForm.timeframeLabel}
+            </label>
+            <select
+              id="lead-timeframe"
+              className="form-select"
+              name="timeframe"
+              value={timeframe}
+              onChange={(e) => setTimeframe(e.target.value)}
+            >
+              <option value="">{dict.common.leadForm.timeframePlaceholder}</option>
+              {dict.common.leadForm.timeframeOptions.map((option) => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
           </div>
         </div>
         <label htmlFor="lead-message" className="sr-only">

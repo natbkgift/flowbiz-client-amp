@@ -416,10 +416,22 @@ export type Dictionary = {
     leadForm: {
       headingDefault: string;
       description: string;
+      detailsHeading: string;
       namePlaceholder: string;
       emailPlaceholder: string;
       phonePlaceholder: string;
+      budgetLabel: string;
+      budgetPlaceholder: string;
+      purposeLabel: string;
+      purposePlaceholder: string;
+      preferredAreaLabel: string;
+      preferredAreaPlaceholder: string;
+      timeframeLabel: string;
+      timeframePlaceholder: string;
       messagePlaceholder: string;
+      budgetOptions: { value: string; label: string }[];
+      purposeOptions: { value: string; label: string }[];
+      timeframeOptions: { value: string; label: string }[];
       submit: string;
       submitting: string;
       success: string;
