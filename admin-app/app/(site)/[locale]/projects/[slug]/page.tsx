@@ -177,8 +177,8 @@ export default async function ProjectDetailPage(
               kicker: dict.advisory.nextStep,
               title: locale === 'th' ? 'ต่อไปยัง shortlist หรือ Smart Finder' : 'Move next into shortlist or Smart Finder',
               body: locale === 'th'
-                ? 'แม้รายละเอียดโครงการยังไม่ครบ คุณยังไม่ติด dead-end และไปต่อยังเส้นทางหลักได้ทันที'
-                : 'Even if the deeper project details are not ready yet, you are not stuck in a dead-end state.',
+                ? 'จากหน้านี้คุณยัง shortlist ต่อ หรือส่ง brief ให้ทีมคัดทางเลือกได้ทันที'
+                : 'From here you can keep shortlisting or hand the project brief to the team without losing momentum.',
               icon: 'check',
             },
             {
@@ -274,7 +274,7 @@ export default async function ProjectDetailPage(
   const projectDecisionRead = [
     hasEvaluationSnapshot
       ? locale === 'th' ? 'มี live snapshot จากโครงการ/พื้นที่พอสำหรับใช้คุย shortlist ต่อ' : 'There is enough live project and area snapshot data to support a shortlist discussion.'
-      : locale === 'th' ? 'snapshot ยังไม่ครบทุกมิติ จึงควรใช้หน้านี้เป็น conversion surface มากกว่าหน้าเปรียบเทียบขั้นสุดท้าย' : 'The snapshot is still partial, so this page works better as a conversion-detail surface than a final comparison sheet.',
+      : locale === 'th' ? 'ใช้หน้านี้เป็น project brief เพื่อพาไปต่อยัง compare, shortlist หรือ advisor review' : 'Use this page as the project brief before moving into compare, shortlist, or advisor review.',
     project.area?.name
       ? locale === 'th' ? `พื้นที่หลักของโครงการคือ ${project.area.name} จึงควรอ่านคู่กับบริบทของ area ก่อนตัดสินใจ` : `${project.area.name} remains a core part of the decision, so read this project together with the area context.`
       : null,
@@ -361,21 +361,21 @@ export default async function ProjectDetailPage(
               : 'If this project looks relevant, compare it next or hand the context to the team for a tighter shortlist.',
             icon: 'check',
           },
-          {
-            kicker: dict.advisory.trustSignal,
-            title: hasEvaluationSnapshot
-              ? locale === 'th' ? 'มี snapshot สำหรับ deep review แล้ว' : 'Snapshot signals are available for deep review'
-              : locale === 'th' ? 'deep review ยังอยู่ในโหมด conservative' : 'The deep review is currently conservative',
-            body: hasEvaluationSnapshot
-              ? locale === 'th'
-                ? 'หน้านี้ใช้สัญญาณที่ดึงได้จริงจากโครงการและพื้นที่เพื่อช่วยการตัดสินใจ'
-                : 'The page uses project and area signals grounded in live data to support the decision flow.'
-              : locale === 'th'
-                ? 'เมื่อ snapshot ยังไม่ครบ ระบบจะบอกตามจริงและไม่เติมข้อมูลที่ยืนยันไม่ได้'
-                : 'When the snapshot is partial, the page stays explicit and does not invent missing data.',
-            icon: 'shield',
-          },
-        ]}
+            {
+              kicker: dict.advisory.trustSignal,
+              title: hasEvaluationSnapshot
+                ? locale === 'th' ? 'มี snapshot สำหรับ deep review แล้ว' : 'Snapshot signals are available for deep review'
+                : locale === 'th' ? 'deep review ยังอยู่ในโหมด conservative' : 'The deep review is currently conservative',
+              body: hasEvaluationSnapshot
+                ? locale === 'th'
+                  ? 'หน้านี้ใช้สัญญาณที่ดึงได้จริงจากโครงการและพื้นที่เพื่อช่วยการตัดสินใจ'
+                  : 'The page uses project and area signals grounded in live data to support the decision flow.'
+                : locale === 'th'
+                  ? 'หน้านี้ยังคงยึดกับบริบทของโครงการจริงและพาคุณไปต่อยัง next step ที่เหมาะสม'
+                  : 'The page stays grounded in verified project context and keeps the next step clear.',
+              icon: 'shield',
+            },
+          ]}
         primaryAction={{
           href: withLocaleQuery(locale, '/contact', { intent: 'project_consultation', project: project.slug }),
           label: dict.cta.speakToAdvisor,

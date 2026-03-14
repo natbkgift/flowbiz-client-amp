@@ -482,8 +482,8 @@ export default async function HomePage({
 
           {featuredProperties.length === 0 ? (
             <EmptyStateCard
-              title={locale === 'th' ? 'ยังไม่มียูนิตคัดสรรในขณะนี้' : 'No curated opportunities available right now'}
-              body={locale === 'th' ? 'ดูยูนิตที่เผยแพร่แล้วทั้งหมด หรือส่ง brief ให้ทีมช่วยคัด shortlist ตามงบและเป้าหมายของคุณ' : 'Browse published inventory or send your brief to the team for a shortlist matched to your budget and goals.'}
+              title={locale === 'th' ? 'ให้ทีมจัด shortlist ตาม brief ของคุณ' : 'Let the team assemble your shortlist'}
+              body={locale === 'th' ? 'ดูยูนิตที่เผยแพร่แล้วทั้งหมด หรือส่ง brief ให้ทีมคัดทางเลือกที่เหมาะกับงบ เป้าหมาย และช่วงเวลาของคุณ' : 'Browse published inventory or send your brief so the team can line up options around your budget, goals, and timing.'}
             />
           ) : null}
 

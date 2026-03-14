@@ -120,7 +120,7 @@ export function YieldCalculator({ locale }: { locale: 'en' | 'th' }) {
             </div>
             <div className="insight-list__item">
               <span className="insight-list__title">{labels.paybackYears}</span>
-              <span className="insight-list__body">{result.paybackYears ? result.paybackYears.toFixed(1) : (locale === 'th' ? 'คำนวณไม่ได้' : 'Not available')}</span>
+              <span className="insight-list__body">{result.paybackYears ? result.paybackYears.toFixed(1) : (locale === 'th' ? 'ควรวิเคราะห์เพิ่มเติม' : 'Needs scenario review')}</span>
             </div>
           </div>
         </div>

@@ -166,16 +166,16 @@ export default async function PropertyPage(props: PageProps) {
               kicker: dict.advisory.nextStep,
               title: locale === 'th' ? 'ต่อไปยังคลังรายการหรือพูดคุยกับทีม' : 'Move next into inventory or advisory support',
               body: locale === 'th'
-                ? 'แม้ snapshot นี้ยังไม่ครบ คุณยังเปิด inventory ที่ตรวจสอบแล้วหรือคุยกับทีมต่อได้ทันที'
-                : 'Even if this snapshot is incomplete, you can still jump into verified inventory or speak with the team right away.',
+                ? 'จากหน้านี้คุณยังเปิด inventory ที่ตรวจสอบแล้วหรือคุยกับทีมต่อได้ทันที'
+                : 'From here you can jump straight into verified inventory or advisor review right away.',
               icon: 'check',
             },
             {
               kicker: dict.advisory.trustSignal,
-              title: locale === 'th' ? 'ระบบไม่ fabricate รายละเอียดแทนข้อมูลจริง' : 'The page does not fabricate details',
+              title: locale === 'th' ? 'หน้านี้ยังยึดกับบริบทของ listing จริง' : 'The page stays grounded in verified listing context',
               body: locale === 'th'
-                ? 'เมื่อข้อมูลรายการนี้พร้อมครบ หน้านี้จะกลับมาแสดงรายละเอียดเต็มรูปแบบ'
-                : 'When the listing data becomes available, this route returns to the full detail presentation.',
+                ? 'เมื่อ listing brief ถูกรีเฟรช หน้านี้จะขยายกลับมาเป็นรายละเอียดเต็มรูปแบบ'
+                : 'When the listing brief refreshes, this route expands back into the full detail view.',
               icon: 'shield',
             },
           ]}

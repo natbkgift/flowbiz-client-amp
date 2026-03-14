@@ -56,8 +56,8 @@ export function FeaturedProjects({
         </div>
         <EmptyStateCard
           className="ui-empty"
-          title={locale === 'th' ? 'ยังไม่มีโครงการแนะนำในขณะนี้' : 'No featured projects available right now'}
-          body={locale === 'th' ? 'ดูโครงการที่เผยแพร่แล้วทั้งหมด หรือติดต่อทีมเพื่อให้ช่วยคัด shortlist ที่เหมาะกับเป้าหมายของคุณ' : 'Browse published developments or speak with the team for a curated shortlist matched to your goals.'}
+          title={locale === 'th' ? 'ให้ทีมช่วยคัด shortlist ล่าสุดให้คุณ' : 'Ask the team for today\'s shortlist'}
+          body={locale === 'th' ? 'ดูโครงการที่เผยแพร่แล้วทั้งหมด หรือส่ง brief ให้ทีมจัดชุดโครงการที่เหมาะกับงบและเป้าหมายของคุณ' : 'Browse published developments or send your brief so the team can assemble a shortlist matched to your budget and goals.'}
         />
       </div>
     );

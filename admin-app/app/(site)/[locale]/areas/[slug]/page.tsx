@@ -80,7 +80,7 @@ function buildAreaMarketRead(locale: 'en' | 'th', areaName: string, hasStats: bo
   return [
     hasStats
       ? `${areaName} has enough live pricing and rental context to act as a starting point for a shortlist conversation.`
-      : `${areaName} is still a partial numeric snapshot, so this page is better used for context-setting before handing the brief to an advisor.`,
+      : `${areaName} works best as a location brief first, so you can frame the shortlist before moving into advisor review.`,
     roiPercent
       ? `If yield matters, the current ROI snapshot reads ${roiPercent}.`
       : 'If yield is part of the brief, use this area as a filter before drilling into project-level options.',
@@ -236,14 +236,14 @@ export default async function AreaPage(
             kicker: dict.advisory.trustSignal,
             title: hasStats
               ? locale === 'th' ? 'snapshot นี้มีข้อมูลจริงของพื้นที่' : 'This snapshot includes live area signals'
-              : locale === 'th' ? 'snapshot นี้ยังมีข้อมูลบางส่วนไม่ครบ' : 'This snapshot is currently partial',
+              : locale === 'th' ? 'ใช้หน้านี้เป็น location brief ของพื้นที่นี้' : 'Use this page as the location brief for this area',
             body: hasStats
               ? locale === 'th'
                 ? 'ระบบแสดงตัวเลขที่ดึงได้จากข้อมูลจริงของพื้นที่นี้เท่านั้น'
                 : 'The page only surfaces area signals that can be grounded in real system data.'
               : locale === 'th'
-                ? 'ถ้าตัวเลขยังไม่พร้อม ระบบจะบอกตรง ๆ และพาคุณไปต่อยังเส้นทางที่ใช้ได้ทันที'
-                : 'If the numeric snapshot is not ready, the page says so plainly and still gives you a usable next step.',
+                ? 'หน้านี้ยังคงพาคุณต่อไปยัง buyer fit, inventory และ advisor routing ได้แบบไม่เสียบริบท'
+                : 'The page keeps the area story, buyer fit, and next advisory route clear without losing context.',
             icon: 'shield',
           },
         ]}
