@@ -12,9 +12,16 @@ __pycache__/
 nul
 
 # Node build/runtime artifacts
+.next/
+artifacts/
+pr-body-public-funnel.md
 node_modules/
 admin-app/node_modules/
 admin-app/.next/
+admin-app/.next_admin_smoke/
+admin-app/.next_forensics/
+admin-app/.next_local_safe/
+admin-app/build-debug.log
 admin-app/tsconfig.tsbuildinfo
 admin-app/artifacts/
 admin-app/nul

@@ -113,14 +113,14 @@ export default async function ProjectsPage(props: { params: Promise<{ locale: st
                 : 'If the area or strategy is still unclear, move next into Smart Finder or speak with the team.',
               icon: 'check',
             },
-            {
-              kicker: dict.advisory.trustSignal,
-              title: locale === 'th' ? 'เราดันเฉพาะ inventory ที่เผยแพร่จริง' : 'Only published inventory is surfaced here',
-              body: locale === 'th'
-                ? 'ถ้ายังไม่มีโครงการ เราจะแสดง state ว่างอย่างชัดเจนแทนการยัด placeholder'
-                : 'If there is no published inventory, the page shows a clear empty editorial state instead of fake placeholders.',
-              icon: 'shield',
-            },
+          {
+            kicker: dict.advisory.trustSignal,
+            title: locale === 'th' ? 'เราดันเฉพาะ inventory ที่เผยแพร่จริง' : 'Only published inventory is surfaced here',
+            body: locale === 'th'
+              ? 'หน้านี้คงเส้นทางสู่ shortlist และ advisor review ให้ชัด แม้คุณยังต้องการทีมช่วยคัดเพิ่ม'
+              : 'The page keeps the shortlist route clear and hands the brief to the team when you want tighter curation.',
+            icon: 'shield',
+          },
           ]}
           primaryAction={{
             href: withLocaleQuery(locale, '/contact', { intent: 'shortlist', source: 'projects_hero' }),
@@ -247,8 +247,8 @@ export default async function ProjectsPage(props: { params: Promise<{ locale: st
             kicker: dict.advisory.bestFor,
             title: locale === 'th' ? 'ผู้ใช้ที่กำลังเริ่มจากภาพรวมโครงการ' : 'Visitors starting from a project-level overview',
             body: locale === 'th'
-              ? 'แม้ snapshot นี้ยังไม่ครบ ระบบจะแสดงเฉพาะสิ่งที่ตีความได้จากข้อมูลจริง'
-              : 'Even when the snapshot is incomplete, the page only shows what can be grounded in real system data.',
+              ? 'หน้านี้จัดภาพรวมโครงการให้พร้อมสำหรับการคัด shortlist ต่อจาก brief ของคุณ'
+              : 'The page turns the project overview into a usable shortlist starting point for your brief.',
             icon: 'building',
           },
           {
@@ -261,10 +261,10 @@ export default async function ProjectsPage(props: { params: Promise<{ locale: st
           },
           {
             kicker: dict.advisory.trustSignal,
-            title: locale === 'th' ? 'ไม่มีข้อมูลก็แสดงตรงไปตรงมา' : 'No data is shown transparently',
+            title: locale === 'th' ? 'หน้านี้ยังยึดกับ inventory จริงในระบบ' : 'This page stays grounded in live inventory context',
             body: locale === 'th'
-              ? 'ถ้ายังไม่มีโครงการเผยแพร่ หน้านี้จะไม่แกล้งทำเป็นมีข้อมูล'
-              : 'If there is no published inventory, the page will say so clearly instead of pretending otherwise.',
+              ? 'คุณจะถูกพาไปยัง next move ที่เหมาะ ไม่ว่าจะเป็นดูรายละเอียดโครงการหรือให้ทีมช่วย curate ต่อ'
+              : 'You are routed into the best next move, whether that is a live project page or a concierge shortlist.',
             icon: 'shield',
           },
         ]}

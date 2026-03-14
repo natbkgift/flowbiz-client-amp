@@ -15,26 +15,30 @@ export function StickyMobileCTA() {
 
   return (
     <div className="mobile-cta" role="region" aria-label={dict.common.ctaRegion}>
-      <Link
-        className="btn btn-cta mobile-cta__btn"
-        href={withLocale(locale, '/contact?topic=private_tour')}
-      >
-        {dict.cta.bookPrivateTour}
-      </Link>
-      <a
-        className="btn btn-secondary mobile-cta__btn"
-        href={CTA.whatsAppUrl}
-        target="_blank"
-        rel="noreferrer"
-      >
-        {dict.cta.whatsapp}
-      </a>
-      <Link
-        className="btn btn-secondary mobile-cta__btn"
-        href={withLocale(locale, '/contact?topic=investment_plan')}
-      >
-        {dict.cta.getInvestmentPlan}
-      </Link>
+      <div className="mobile-cta__primary">
+        <Link
+          className="btn btn-cta mobile-cta__btn mobile-cta__btn--primary"
+          href={withLocale(locale, '/contact?topic=private_tour')}
+        >
+          {dict.cta.bookPrivateTour}
+        </Link>
+      </div>
+      <div className="mobile-cta__secondary">
+        <a
+          className="btn btn-secondary mobile-cta__btn"
+          href={CTA.whatsAppUrl}
+          target="_blank"
+          rel="noreferrer"
+        >
+          {dict.cta.whatsapp}
+        </a>
+        <Link
+          className="btn btn-secondary mobile-cta__btn"
+          href={withLocale(locale, '/contact?topic=investment_plan')}
+        >
+          {dict.cta.getInvestmentPlan}
+        </Link>
+      </div>
     </div>
   );
 }

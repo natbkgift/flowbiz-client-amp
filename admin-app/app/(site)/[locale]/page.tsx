@@ -11,6 +11,17 @@ function normalizeLocale(value: string): 'en' | 'th' {
   return value === 'th' ? 'th' : 'en';
 }
 
+function formatEditorialDate(locale: 'en' | 'th', value: string | null | undefined): string | null {
+  if (!value) return null;
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return null;
+  return new Intl.DateTimeFormat(locale === 'th' ? 'th-TH' : 'en-US', {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+  }).format(date);
+}
+
 function resolveComposerText(value: unknown, locale: 'en' | 'th'): string | null {
   if (typeof value === 'string') {
     const trimmed = value.trim();
@@ -100,6 +111,7 @@ export default async function HomePage({
     { getContentRecommendation },
     {
       fetchHomeComposerPublished,
+      fetchBlogPosts,
       fetchProjects,
       fetchProperties: fetchPropertiesAPI,
     },
@@ -205,6 +217,19 @@ export default async function HomePage({
 
 
   const recommendation = getContentRecommendation();
+  let publishedBlogPosts: Awaited<ReturnType<typeof fetchBlogPosts>> = [];
+  try {
+    publishedBlogPosts = await fetchBlogPosts();
+  } catch {
+    publishedBlogPosts = [];
+  }
+  const authorityPosts = [...publishedBlogPosts]
+    .sort((left, right) => {
+      const leftDate = Date.parse(left.published_at ?? left.updated_at ?? '');
+      const rightDate = Date.parse(right.published_at ?? right.updated_at ?? '');
+      return (Number.isFinite(rightDate) ? rightDate : 0) - (Number.isFinite(leftDate) ? leftDate : 0);
+    })
+    .slice(0, 3);
 
   async function FeaturedProjectsSection() {
     let allProjects: Awaited<ReturnType<typeof fetchProjects>> = [];
@@ -457,8 +482,8 @@ export default async function HomePage({
 
           {featuredProperties.length === 0 ? (
             <EmptyStateCard
-              title={locale === 'th' ? 'ยังไม่มียูนิตคัดสรรในขณะนี้' : 'No curated opportunities available right now'}
-              body={locale === 'th' ? 'ทีมกำลังอัปเดตรายการลงทุนสำหรับหน้านี้' : 'Our team is preparing the next shortlist of investment opportunities.'}
+              title={locale === 'th' ? 'ให้ทีมจัด shortlist ตาม brief ของคุณ' : 'Let the team assemble your shortlist'}
+              body={locale === 'th' ? 'ดูยูนิตที่เผยแพร่แล้วทั้งหมด หรือส่ง brief ให้ทีมคัดทางเลือกที่เหมาะกับงบ เป้าหมาย และช่วงเวลาของคุณ' : 'Browse published inventory or send your brief so the team can line up options around your budget, goals, and timing.'}
             />
           ) : null}
 
@@ -494,41 +519,40 @@ export default async function HomePage({
                     <LocalMediaImage
                       media={media}
                       alt={prop.title}
-                      altFallback={locale === 'th' ? `ภาพประกอบอสังหาฯ ${prop.title}` : `Property preview for ${prop.title}`}
+                      altFallback={locale === 'th' ? `ภาพประกอบอสังหาฯ ${prop.title}` : `Property image for ${prop.title}`}
                       className="media-shell"
                       imageClassName={`absolute inset-0 h-full w-full object-cover ${hasLocalMedia ? '' : 'premium-investment-card__fallback-image'}`}
                       fallbackSrc={fallbackSrc}
                     />
                     <div className="premium-investment-card__media-scrim" aria-hidden="true" />
                     <div className="premium-investment-card__media-meta" aria-hidden="true">
-                      <span>
-                        {hasLocalMedia
-                          ? (locale === 'th' ? 'Curated unit' : 'Curated unit')
-                          : (locale === 'th' ? 'ภาพตัวอย่าง — รอรูปจริง' : 'Preview image — real photo pending')}
-                      </span>
+                      <span>{locale === 'th' ? 'Curated unit' : 'Curated unit'}</span>
                     </div>
                     <span className={`absolute top-3 left-3 text-xs font-semibold px-2.5 py-1 rounded-full ${badgeColor}`}>
                       {typeBadge}
                     </span>
                   </div>
                   <div className="card-content flex flex-col h-full p-6">
-                    <div className="card-price premium-investment-card__price">
-                      {priceFormatted ? `${priceFormatted}${prop.type === 'rent' ? (locale === 'th' ? '/เดือน' : '/mo') : ''}` : (locale === 'th' ? 'รอข้อมูลราคา' : 'Price pending')}
-                    </div>
+                    {priceFormatted ? (
+                      <div className="card-price premium-investment-card__price">
+                        {`${priceFormatted}${prop.type === 'rent' ? (locale === 'th' ? '/เดือน' : '/mo') : ''}`}
+                      </div>
+                    ) : null}
                     <div className="card-title text-lg font-medium text-gray-900 mb-1 line-clamp-2">{prop.title}</div>
-                    <div className="text-sm text-gray-500 mb-3 line-clamp-1">{prop.address || prop.city || (locale === 'th' ? 'ทำเลรอข้อมูล' : 'Location pending')}</div>
+                    {prop.address || prop.city ? (
+                      <div className="text-sm text-gray-500 mb-3 line-clamp-1">{prop.address || prop.city}</div>
+                    ) : null}
 
-                    <div className="premium-investment-card__facts" aria-label={locale === 'th' ? 'ข้อมูลยูนิต' : 'Unit facts'}>
-                      {[statTokens.bed, statTokens.bath, statTokens.size, statTokens.view]
-                        .filter(Boolean)
-                        .slice(0, 4)
-                        .map((token) => (
-                          <span key={token} className="premium-fact-chip">{token}</span>
-                        ))}
-                      {![statTokens.bed, statTokens.bath, statTokens.size, statTokens.view].some(Boolean) ? (
-                        <span className="premium-fact-chip premium-fact-chip--muted">{locale === 'th' ? 'รายละเอียดยูนิตรออัปเดต' : 'Unit facts pending'}</span>
-                      ) : null}
-                    </div>
+                    {[statTokens.bed, statTokens.bath, statTokens.size, statTokens.view].some(Boolean) ? (
+                      <div className="premium-investment-card__facts" aria-label={locale === 'th' ? 'ข้อมูลยูนิต' : 'Unit facts'}>
+                        {[statTokens.bed, statTokens.bath, statTokens.size, statTokens.view]
+                          .filter(Boolean)
+                          .slice(0, 4)
+                          .map((token) => (
+                            <span key={token} className="premium-fact-chip">{token}</span>
+                          ))}
+                      </div>
+                    ) : null}
 
                     {tags.length > 0 ? (
                       <div className="premium-investment-card__tags" aria-label={locale === 'th' ? 'แท็กยูนิต' : 'Unit tags'}>
@@ -555,31 +579,16 @@ export default async function HomePage({
             >
               {locale === 'th' ? 'ดูยูนิตลงทุนทั้งหมด' : 'See all investment picks'}
             </TrackedLink>
-            <TrackedLink
-              className="btn btn-tertiary"
-              href={withLocale(locale, '/invest/calculator')}
-              eventType="cta_click"
-              eventPayload={{ cta: 'open_roi_calculator', from: 'home_properties' }}
-            >
-              {locale === 'th' ? 'ROI Calculator' : 'ROI Calculator'}
-            </TrackedLink>
           </div>
         </Container>
       </section>
     );
   }
 
-  function SectionCardSkeleton({ kind, locale }: { kind: 'project' | 'investment'; locale: 'en' | 'th' }) {
-    const heading = kind === 'project'
-      ? (locale === 'th' ? 'กำลังโหลดโครงการแนะนำ' : 'Loading featured projects')
-      : (locale === 'th' ? 'กำลังโหลดยูนิตคัดสรร' : 'Loading curated opportunities');
-
+  function SectionCardSkeleton({ kind }: { kind: 'project' | 'investment' }) {
     return (
       <section className="py-16 md:py-20 xl:py-24 2xl:py-28 bg-surface">
         <Container variant="wide">
-          <div className="section-header">
-            <h2 className="section-title">{heading}</h2>
-          </div>
           <LoadingCardGrid cards={kind === 'project' ? 6 : 8} />
         </Container>
       </section>
@@ -658,7 +667,7 @@ export default async function HomePage({
   const whyPattayaPrimaryUrl =
     typeof composerWhyPattaya.primary_cta_url === 'string' && composerWhyPattaya.primary_cta_url.trim()
       ? withLocale(locale, composerWhyPattaya.primary_cta_url.trim())
-      : withLocale(locale, '/invest/guides');
+      : withLocale(locale, '/investment');
 
   const pathSelectorHeading =
     typeof composerPathSelector.heading === 'string' && composerPathSelector.heading.trim()
@@ -800,7 +809,7 @@ export default async function HomePage({
         ? 'การ์ดบรรณาธิการสำหรับทำเล ผลตอบแทน และมุมมองตลาด ที่ช่วยลดการเดาจากข้อมูลกระจัดกระจาย'
         : 'Editorial cards for area intelligence, rental yield, and launch context that reduce guesswork.');
   const composerMarketInsightCards = Array.isArray(composerMarketInsights.cards)
-    ? composerMarketInsights.cards as Array<{ key?: string; title?: string; body?: string; href?: string; updatedAt?: string | null }>
+    ? composerMarketInsights.cards as Array<{ key?: string; eyebrow?: string; title?: string; body?: string; href?: string; updatedAt?: string | null; actionLabel?: string; signal?: string | null }>
     : [];
 
   const reviewsHeading =
@@ -826,7 +835,7 @@ export default async function HomePage({
       ? composerVideos.subcopy.trim()
       : (locale === 'th' ? 'วิดีโอคัดสรรที่ช่วยให้เข้าใจกระบวนการ พื้นที่ และวิธีคิดของทีม advisory ได้เร็วขึ้น' : 'Curated videos that explain the team’s process, area thinking, and advisory lens.');
   const composerVideoItems = Array.isArray(composerVideos.items)
-    ? composerVideos.items as Array<{ key?: string; title?: string; caption?: string; ytId?: string; thumbSrc?: string }>
+    ? composerVideos.items as Array<{ key?: string; topic?: string; title?: string; caption?: string; ytId?: string; thumbSrc?: string; relatedHref?: string; actionLabel?: string }>
     : [];
 
   const teamCtaHeading =
@@ -907,44 +916,71 @@ export default async function HomePage({
         ? 'กรอกข้อมูลสั้น ๆ แล้วเราจะติดต่อกลับพร้อม shortlist ที่เหมาะกับงบประมาณของคุณ'
         : 'Complete the short form and we will follow up with a curated shortlist matched to your budget.');
 
+  const editorialInsightCards = authorityPosts.map((post, index) => ({
+    key: `editorial-${post.slug}`,
+    eyebrow: resolveComposerText(post.category, locale) || (locale === 'th' ? 'บทความล่าสุด' : 'Latest article'),
+    title: resolveComposerText(post.title, locale) || post.slug,
+    body: resolveComposerText(post.excerpt, locale)
+      || resolveComposerText(post.read_time, locale)
+      || (locale === 'th' ? 'อ่านบทความฉบับเต็มเพื่อดูกรอบคิดเชิง advisory เพิ่มเติม' : 'Open the full article for the complete advisory context.'),
+    href: withLocale(locale, `/blog/${encodeURIComponent(post.slug)}`),
+    updatedAt: formatEditorialDate(locale, post.published_at ?? post.updated_at),
+    actionLabel: locale === 'th' ? 'อ่านบทความ' : 'Read article',
+    signal: index === 0
+      ? (locale === 'th' ? 'Featured authority read' : 'Featured authority read')
+      : (locale === 'th' ? 'Published editorial' : 'Published editorial'),
+  }));
+
   const fallbackInsightCards = [
     {
       key: 'area_intelligence',
+      eyebrow: locale === 'th' ? 'Area authority' : 'Area authority',
       title: locale === 'th' ? 'Area intelligence' : 'Area intelligence',
       body: locale === 'th'
         ? 'โฟกัส micro-location ที่ดีมานด์จริง พร้อมสัญญาณราคาและสภาพคล่อง'
         : 'Micro-location signals, price direction, and liquidity cues for each Pattaya zone.',
       href: withLocale(locale, '/area-guide'),
       updatedAt: process.env.NEXT_PUBLIC_INSIGHTS_AREA_UPDATED_AT ?? null,
+      actionLabel: locale === 'th' ? 'ดู area guide' : 'Open area guide',
+      signal: locale === 'th' ? 'Location system' : 'Location system',
     },
     {
       key: 'yield_rent_demand',
+      eyebrow: locale === 'th' ? 'Investment read' : 'Investment read',
       title: locale === 'th' ? 'Yield & rent demand' : 'Yield & rent demand',
       body: locale === 'th'
         ? 'สรุปดีมานด์เช่าและช่วงผลตอบแทนแบบไม่ overclaim'
         : 'Rental demand snapshots and yield ranges without overclaiming certainty.',
-      href: withLocale(locale, '/invest/guides'),
+      href: withLocale(locale, '/investment'),
       updatedAt: process.env.NEXT_PUBLIC_INSIGHTS_YIELD_UPDATED_AT ?? null,
+      actionLabel: locale === 'th' ? 'ดู investment guide' : 'Open investment guide',
+      signal: locale === 'th' ? 'Yield signal' : 'Yield signal',
     },
     {
       key: 'new_launches',
+      eyebrow: locale === 'th' ? 'Project watch' : 'Project watch',
       title: locale === 'th' ? 'New launches' : 'New launches',
       body: locale === 'th'
         ? 'โครงการเปิดใหม่ที่ทีมคัดกรองแล้ว พร้อมมุมมองความเสี่ยง/โอกาส'
         : 'Curated launch pipeline with practical risk/opportunity notes from the team.',
       href: withLocale(locale, '/projects'),
       updatedAt: process.env.NEXT_PUBLIC_INSIGHTS_LAUNCH_UPDATED_AT ?? null,
+      actionLabel: locale === 'th' ? 'ดูโครงการ' : 'Browse projects',
+      signal: locale === 'th' ? 'Launch pipeline' : 'Launch pipeline',
     },
   ];
   const insightCards = composerMarketInsightCards.length
     ? composerMarketInsightCards.slice(0, 3).map((card, index) => ({
         key: String(card.key ?? `insight-${index + 1}`),
+        eyebrow: typeof card.eyebrow === 'string' && card.eyebrow.trim() ? card.eyebrow.trim() : (locale === 'th' ? 'Editorial signal' : 'Editorial signal'),
         title: String(card.title ?? (locale === 'th' ? `อินไซต์ ${index + 1}` : `Insight ${index + 1}`)),
         body: String(card.body ?? advisoryDict.noPublishedDataBody),
         href: typeof card.href === 'string' && card.href.trim() ? withLocale(locale, card.href.trim()) : withLocale(locale, '/area-guide'),
         updatedAt: card.updatedAt ? String(card.updatedAt) : null,
+        actionLabel: typeof card.actionLabel === 'string' && card.actionLabel.trim() ? card.actionLabel.trim() : (locale === 'th' ? 'อ่านต่อ' : 'Continue'),
+        signal: typeof card.signal === 'string' && card.signal.trim() ? card.signal.trim() : null,
       }))
-    : fallbackInsightCards;
+    : [...editorialInsightCards, ...fallbackInsightCards].slice(0, 3);
 
   const composerProcessTimeline = Array.isArray(composerProofTrust.process_timeline)
     ? composerProofTrust.process_timeline as Array<{ step?: string; title?: string; body?: string }>
@@ -987,17 +1023,23 @@ export default async function HomePage({
   const fallbackVideoItems = [
     {
       key: 'team_story',
+      topic: locale === 'th' ? 'Advisory process' : 'Advisory process',
       title: locale === 'th' ? 'Meet AMP Pattaya Team' : 'Meet AMP Pattaya Team',
       caption: locale === 'th' ? 'ดูทีมที่ปรึกษาและแนวทางการคัดทรัพย์ของเรา' : 'See how the advisory team frames each shortlist.',
       ytId: '_-Yzpo3tCuQ',
       thumbSrc: '/media/video-thumbs/_-Yzpo3tCuQ.jpg',
+      relatedHref: withLocale(locale, '/about'),
+      actionLabel: locale === 'th' ? 'รู้จักทีม' : 'Meet the team',
     },
     {
       key: 'launch_walkthrough',
+      topic: locale === 'th' ? 'Project review' : 'Project review',
       title: locale === 'th' ? 'New Project Presale Tour' : 'New Project Presale Tour',
-      caption: locale === 'th' ? 'ดูตัวอย่างการพาโครงการใหม่และสิ่งที่ต้องเช็กก่อนตัดสินใจ' : 'Preview how we review new launches before recommendations.',
+      caption: locale === 'th' ? 'ดูแนวทางการพาโครงการใหม่และสิ่งที่ต้องเช็กก่อนตัดสินใจ' : 'See how the team reviews new launches before making recommendations.',
       ytId: '77If6rT5fdE',
       thumbSrc: '/media/video-thumbs/77If6rT5fdE.jpg',
+      relatedHref: withLocale(locale, '/projects'),
+      actionLabel: locale === 'th' ? 'ดูโครงการล่าสุด' : 'Browse launches',
     },
   ];
   const videoItems = composerVideoItems.length
@@ -1005,12 +1047,15 @@ export default async function HomePage({
         .slice(0, 2)
         .map((video, index) => ({
           key: String(video.key ?? `video-${index + 1}`),
+          topic: typeof video.topic === 'string' && video.topic.trim() ? video.topic.trim() : (locale === 'th' ? 'Curated media' : 'Curated media'),
           title: String(video.title ?? (locale === 'th' ? `วิดีโอ ${index + 1}` : `Video ${index + 1}`)),
           caption: String(video.caption ?? advisoryDict.noPublishedDataBody),
           ytId: String(video.ytId ?? ''),
           thumbSrc: typeof video.thumbSrc === 'string' && video.thumbSrc.trim()
             ? video.thumbSrc.trim()
             : `/media/video-thumbs/${String(video.ytId ?? '')}.jpg`,
+          relatedHref: typeof video.relatedHref === 'string' && video.relatedHref.trim() ? withLocale(locale, video.relatedHref.trim()) : withLocale(locale, '/contact'),
+          actionLabel: typeof video.actionLabel === 'string' && video.actionLabel.trim() ? video.actionLabel.trim() : (locale === 'th' ? 'คุยกับ advisor' : 'Talk to an advisor'),
         }))
         .filter((video) => video.ytId.trim().length > 0)
     : fallbackVideoItems;
@@ -1123,7 +1168,7 @@ export default async function HomePage({
       {/* Featured Projects — Real Data (streamed) */}
       {isSectionEnabled('featured_projects') ? (
         <div style={sectionOrderStyle('featured_projects')}>
-          <Suspense fallback={<SectionCardSkeleton kind="project" locale={locale} />}>
+          <Suspense fallback={<SectionCardSkeleton kind="project" />}>
             <FeaturedProjectsSection />
           </Suspense>
         </div>
@@ -1132,7 +1177,7 @@ export default async function HomePage({
       {/* Selected Investment Opportunities — Real Properties (streamed) */}
       {isSectionEnabled('featured_properties') ? (
         <div style={sectionOrderStyle('featured_properties')}>
-          <Suspense fallback={<SectionCardSkeleton kind="investment" locale={locale} />}>
+          <Suspense fallback={<SectionCardSkeleton kind="investment" />}>
             <FeaturedPropertiesSection />
           </Suspense>
         </div>
@@ -1273,21 +1318,27 @@ export default async function HomePage({
           <div className="grid md:grid-cols-3 gap-6 md:gap-8">
             {insightCards.map((card) => (
               <article key={card.key} className="home-insight-card card reveal">
-                <div className="text-xs uppercase tracking-[0.08em] text-primary mb-2">{card.title}</div>
+                <div className="home-insight-card__meta">
+                  <span>{card.eyebrow}</span>
+                  {card.signal ? <span>{card.signal}</span> : null}
+                </div>
+                <h3 className="home-insight-card__title">{card.title}</h3>
                 <p className="card-subtitle mb-4">{card.body}</p>
-                {card.updatedAt ? (
-                  <p className="text-xs text-gray-400 mb-5">
-                    {`${locale === 'th' ? 'อัปเดตล่าสุด' : 'Last updated'}: ${card.updatedAt}`}
-                  </p>
-                ) : null}
-                <TrackedLink
-                  className="text-primary font-semibold hover:text-primary-dark transition-colors inline-flex items-center gap-2"
-                  href={card.href}
-                  eventType="home_advisory_content_click"
-                  eventPayload={{ cta: 'read_insights', from: 'home_insight_engine', topic: card.key }}
-                >
-                  {locale === 'th' ? 'อ่านอินไซต์' : 'Read insight'}
-                </TrackedLink>
+                <div className="home-insight-card__footer">
+                  {card.updatedAt ? (
+                    <p className="text-xs text-gray-400">
+                      {`${locale === 'th' ? 'อัปเดตล่าสุด' : 'Last updated'}: ${card.updatedAt}`}
+                    </p>
+                  ) : <span />}
+                  <TrackedLink
+                    className="home-insight-card__link"
+                    href={card.href}
+                    eventType="home_advisory_content_click"
+                    eventPayload={{ cta: 'read_insights', from: 'home_insight_engine', topic: card.key }}
+                  >
+                    {card.actionLabel}
+                  </TrackedLink>
+                </div>
               </article>
             ))}
           </div>
@@ -1332,8 +1383,8 @@ export default async function HomePage({
             </div>
           ) : (
             <div className="premium-empty-state" role="status" aria-live="polite">
-              <h3>{locale === 'th' ? 'กำลังเตรียมรีวิวที่ยืนยันแหล่งข้อมูลแล้ว' : 'Preparing verified review highlights'}</h3>
-              <p>{locale === 'th' ? 'เราจะแสดงรีวิวเพิ่มเติมทันทีเมื่อผ่านการยืนยันแหล่งข้อมูลแล้ว' : 'Additional testimonials will appear as soon as source verification is complete.'}</p>
+              <h3>{locale === 'th' ? 'รีวิวจากลูกค้าที่ตรวจสอบแล้ว' : 'Verified client feedback'}</h3>
+              <p>{locale === 'th' ? 'รีวิวเพิ่มเติมจะปรากฏในส่วนนี้เมื่อพร้อมเผยแพร่' : 'Additional verified testimonials will appear in this section when they are ready to publish.'}</p>
             </div>
           )}
 
@@ -1375,8 +1426,31 @@ export default async function HomePage({
                     srcDoc={`<style>*{padding:0;margin:0;overflow:hidden}html,body{height:100%;background:#111}img,span{position:absolute;left:0;right:0;top:0;bottom:0;margin:auto}img{width:100%;height:100%;object-fit:cover;filter:brightness(.72)}span{height:58px;width:58px;border-radius:999px;background:rgba(255,255,255,.9);display:flex;align-items:center;justify-content:center;font-size:20px;color:#111;font-weight:700;box-shadow:0 8px 24px rgba(0,0,0,.35)}</style><a href='https://www.youtube.com/embed/${video.ytId}?autoplay=1'><img src='${video.thumbSrc}' alt='${video.title}'><span>▶</span></a>`}
                   />
                 </div>
-                <figcaption className="px-5 py-4 text-sm text-gray-600 min-h-[72px] leading-relaxed">
-                  {video.caption}
+                <figcaption className="home-video-card__body px-5 py-4 text-sm text-gray-600 min-h-[72px] leading-relaxed">
+                  <div className="home-video-card__meta">
+                    <span>{video.topic}</span>
+                    <span>{locale === 'th' ? 'Curated advisory media' : 'Curated advisory media'}</span>
+                  </div>
+                  <h3 className="home-video-card__title">{video.title}</h3>
+                  <p>{video.caption}</p>
+                  <div className="home-video-card__actions">
+                    <TrackedLink
+                      className="home-video-card__link"
+                      href={video.relatedHref}
+                      eventType="home_advisory_content_click"
+                      eventPayload={{ cta: 'video_next_step', from: 'home_video', topic: video.key }}
+                    >
+                      {video.actionLabel}
+                    </TrackedLink>
+                    <TrackedLink
+                      className="home-video-card__link home-video-card__link--secondary"
+                      href={`https://www.youtube.com/watch?v=${video.ytId}`}
+                      eventType="home_advisory_content_click"
+                      eventPayload={{ cta: 'watch_on_youtube', from: 'home_video', topic: video.key }}
+                    >
+                      {locale === 'th' ? 'เปิดบน YouTube' : 'Open on YouTube'}
+                    </TrackedLink>
+                  </div>
                 </figcaption>
               </figure>
             ))}

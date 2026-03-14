@@ -608,7 +608,10 @@ def test_b6_public_home_blueprint_fields_roundtrip(client) -> None:
     assert config["hero"]["eyebrow"] == "Advisory-first brief"
     assert config["hero"]["heading"] == "Curated Pattaya opportunities"
     assert config["path_selector"]["heading"] == "Choose the right path"
-    assert config["path_selector"]["paths"][0]["description"] == "Compare yield and downside before touring."
+    assert (
+        config["path_selector"]["paths"][0]["description"]
+        == "Compare yield and downside before touring."
+    )
     assert config["trust_micro_strip"][0]["text"]["en"] == "Local Pattaya team"
     assert config["proof_trust"]["primary_cta_label"] == "Meet the team"
     assert config["team_cta"]["trust_note"] == "Built around goals, budget, and timeline."

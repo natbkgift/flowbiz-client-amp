@@ -1,7 +1,14 @@
 import Link from 'next/link';
 
 import { Container } from '@/components/layout/Container';
-import { buildAdvisorWhatsApp, getAdvisoryLabels, getAdvisoryProofs, withLocaleQuery } from '@/app/_lib/public-advisory';
+import {
+  buildAdvisorWhatsApp,
+  buildInvestorToolQuery,
+  getAdvisoryLabels,
+  getAdvisoryProofs,
+  parseInvestorToolContext,
+  withLocaleQuery,
+} from '@/app/_lib/public-advisory';
 import { getDictionary, normalizeLocale } from '@/app/_lib/i18n/get-dictionary';
 import { makePageMetadata } from '@/app/_lib/i18n/metadata';
 import { withLocale } from '@/app/_lib/i18n/routing';
@@ -48,6 +55,32 @@ function parseIds(raw: string | null): string[] {
   return out.slice(0, 3);
 }
 
+function hasInvestorContext(context: ReturnType<typeof parseInvestorToolContext>): boolean {
+  return [
+    context.purchasePrice,
+    context.monthlyRent,
+    context.occupancyRate,
+    context.annualCosts,
+    context.grossYield,
+    context.netYield,
+    context.paybackYears,
+  ].some((value) => typeof value === 'number' && Number.isFinite(value));
+}
+
+function formatCurrency(locale: 'en' | 'th', value: number | null | undefined): string | null {
+  if (typeof value !== 'number' || !Number.isFinite(value)) return null;
+  return new Intl.NumberFormat(locale === 'th' ? 'th-TH' : 'en-US', {
+    style: 'currency',
+    currency: 'THB',
+    maximumFractionDigits: 0,
+  }).format(value);
+}
+
+function formatPercent(value: number | null | undefined): string | null {
+  if (typeof value !== 'number' || !Number.isFinite(value)) return null;
+  return `${value.toFixed(2)}%`;
+}
+
 function riskLevel(ev: ProjectEvaluationResponse, dict: Dictionary): string {
   const roi = ev.area_statistics?.roi_percent;
   const avgPrice = ev.area_statistics?.avg_price;
@@ -90,9 +123,34 @@ export default async function ComparePage(
   const dict = getDictionary(locale);
   const advisoryLabels = getAdvisoryLabels(locale);
   const advisoryProofs = getAdvisoryProofs(dict);
+  const investorContext = parseInvestorToolContext(searchParams);
+  const investorContextPresent = hasInvestorContext(investorContext);
 
   const rawIds = pickParam(searchParams?.ids);
   const ids = parseIds(rawIds);
+  const contactHref = withLocaleQuery(locale, '/contact', buildInvestorToolQuery({
+    ...investorContext,
+    ids,
+    intent: investorContext.intent ?? 'investment_plan',
+    source: ids.length >= 2 ? 'compare_review' : investorContext.source ?? 'compare_discovery',
+  }));
+  const briefFacts = [
+    formatCurrency(locale, investorContext.purchasePrice)
+      ? `${locale === 'th' ? 'ราคาซื้อเป้าหมาย' : 'Target purchase price'}: ${formatCurrency(locale, investorContext.purchasePrice)}`
+      : null,
+    formatCurrency(locale, investorContext.monthlyRent)
+      ? `${locale === 'th' ? 'ค่าเช่าต่อเดือน' : 'Monthly rent'}: ${formatCurrency(locale, investorContext.monthlyRent)}`
+      : null,
+    formatPercent(investorContext.grossYield)
+      ? `${locale === 'th' ? 'Gross yield' : 'Gross yield'}: ${formatPercent(investorContext.grossYield)}`
+      : null,
+    formatPercent(investorContext.netYield)
+      ? `${locale === 'th' ? 'Net yield' : 'Net yield'}: ${formatPercent(investorContext.netYield)}`
+      : null,
+    typeof investorContext.paybackYears === 'number' && Number.isFinite(investorContext.paybackYears)
+      ? `${locale === 'th' ? 'Payback' : 'Payback'}: ${investorContext.paybackYears.toFixed(1)} ${locale === 'th' ? 'ปี' : 'years'}`
+      : null,
+  ].filter((item): item is string => Boolean(item));
 
   if (ids.length < 2) {
     return (
@@ -148,6 +206,30 @@ export default async function ComparePage(
 
         <section className="section">
           <Container>
+            {investorContextPresent ? (
+              <div className="card reveal mb-4">
+                <h2 className="card-title">{locale === 'th' ? 'Investment brief ที่ส่งมาจาก calculator' : 'Investment brief carried from calculator'}</h2>
+                <p className="card-subtitle">
+                  {locale === 'th'
+                    ? 'คุณยังมีโครงการไม่พอสำหรับเทียบ แต่ brief ตัวเลขจะถูกเก็บไว้ต่อเมื่อไป browse, shortlist หรือส่งให้ advisor'
+                    : 'You do not have enough projects to compare yet, but the calculator brief is preserved for browsing, shortlisting, and advisor handoff.'}
+                </p>
+                <ul className="bullet-list mt-3">
+                  {briefFacts.map((fact) => (
+                    <li key={fact}>{fact}</li>
+                  ))}
+                </ul>
+                <div className="cta-row mt-4">
+                  <Link className="btn btn-secondary" href={withLocale(locale, '/projects')}>
+                    {dict.compare.browseProjects}
+                  </Link>
+                  <Link className="btn btn-cta" href={contactHref}>
+                    {dict.compare.getInvestmentPlan}
+                  </Link>
+                </div>
+              </div>
+            ) : null}
+
             <div className="card reveal">
               <h2 className="card-title">{dict.compare.getStarted}</h2>
               <p className="card-subtitle">
@@ -225,6 +307,22 @@ export default async function ComparePage(
 
       <section className="section">
         <Container>
+          {investorContextPresent ? (
+            <div className="card reveal mb-4">
+              <h2 className="card-title">{locale === 'th' ? 'Investment brief ที่ใช้ประกอบการเทียบ' : 'Investment brief used in this comparison'}</h2>
+              <p className="card-subtitle">
+                {locale === 'th'
+                  ? 'ชุดตัวเลขจาก calculator ถูกพกมาด้วย เพื่อให้คุยต่อกับ advisor ในบริบทเดียวกันหลังจากดูตารางนี้'
+                  : 'The calculator brief travels with this comparison so the advisor sees the same context after you review the table.'}
+              </p>
+              <ul className="bullet-list mt-3">
+                {briefFacts.map((fact) => (
+                  <li key={fact}>{fact}</li>
+                ))}
+              </ul>
+            </div>
+          ) : null}
+
           {missing.length ? (
             <div className="trust-box mb-4">
               <h2 className="trust-box__title">{dict.compare.someNotFound}</h2>
@@ -306,7 +404,7 @@ export default async function ComparePage(
               <Link className="btn btn-secondary" href={withLocale(locale, '/smart-finder')}>
                 {dict.compare.backToSmartFinder}
               </Link>
-              <Link className="btn btn-cta" href={withLocale(locale, '/contact?topic=investment_plan')}>
+              <Link className="btn btn-cta" href={contactHref}>
                 {dict.compare.getInvestmentPlan}
               </Link>
             </div>

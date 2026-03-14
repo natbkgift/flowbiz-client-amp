@@ -53,6 +53,13 @@ export default function AdminDashboardPage() {
     setLocale(detectLocale());
   }, []);
 
+  useEffect(() => {
+    document.documentElement.dataset.adminDashboardHydrated = "true";
+    return () => {
+      delete document.documentElement.dataset.adminDashboardHydrated;
+    };
+  }, []);
+
   const t = dashboardCopy[locale];
   const authError = authErrorCode ? authErrorMessage(t, authErrorCode) : null;
 

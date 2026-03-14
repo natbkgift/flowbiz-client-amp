@@ -95,8 +95,8 @@ export default async function DevelopersPage(props: { params: Promise<{ locale: 
             kicker: dict.advisory.trustSignal,
             title: locale === 'th' ? 'แสดงเฉพาะข้อมูลผู้พัฒนาที่เผยแพร่แล้ว' : 'Only published developer records appear here',
             body: locale === 'th'
-              ? 'ถ้ายังไม่มีข้อมูลเผยแพร่ จะขึ้น state ว่างแบบตรงไปตรงมา'
-              : 'If no developer records are published, the page falls back to a clear editorial empty state.',
+              ? 'หน้านี้คง narrative ของ developer และพาคุณไปต่อยัง shortlist หรือทีมที่ปรึกษาได้ทันที'
+              : 'The page keeps the developer story and next advisory route clear while the shortlist takes shape.',
             icon: 'shield',
           },
         ]}

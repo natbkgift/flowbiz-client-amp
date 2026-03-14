@@ -7,29 +7,29 @@ function resolveCopy(locale: string) {
   if (locale === 'th') {
     return {
       title: 'โครงการ',
-      subtitle: 'กำลังโหลดคลังโครงการที่เผยแพร่แล้วสำหรับ shortlist และการเปรียบเทียบ',
+      subtitle: 'คลังโครงการที่เผยแพร่แล้วสำหรับ shortlist และการเปรียบเทียบ',
       contact: 'คุยกับที่ปรึกษา',
       finder: 'ใช้ Smart Finder',
-      loading: 'กำลังเตรียมรายการโครงการ',
-      sampleTitle: 'กำลังรวบรวม shortlist เริ่มต้น',
-      sampleBody: 'ระบบกำลังดึงโครงการที่เผยแพร่แล้วและเรียงลำดับให้เหมาะกับการเปรียบเทียบต่อ',
+      loading: 'AMP Project Collection',
+      sampleTitle: 'โครงการคัดสรรสำหรับการเปรียบเทียบ',
+      sampleBody: 'ใช้ section นี้เพื่ออ่านบริบทของโครงการและต่อไปยัง shortlist ที่เหมาะกับเป้าหมายของคุณ',
       signalOne: 'โครงการที่มีข้อมูลพร้อมสำหรับ review',
       signalTwo: 'รายละเอียดที่จะพาไป compare หรือ consultation ต่อได้',
-      signalThree: 'หากโหลดช้า ยังสามารถคุยกับทีมเพื่อขอ shortlist ได้ทันที',
+      signalThree: 'ทีมยังช่วยคัด shortlist ให้ได้ตาม brief ของคุณ',
     };
   }
 
   return {
     title: 'Projects',
-    subtitle: 'Loading the published project inventory for shortlist and comparison flows.',
+    subtitle: 'Published project inventory for shortlist and comparison flows.',
     contact: 'Speak to an Advisor',
     finder: 'Use Smart Finder',
-    loading: 'Loading published projects',
-    sampleTitle: 'Preparing the starter shortlist',
-    sampleBody: 'The page is gathering published projects and arranging them for comparison and advisory review.',
+    loading: 'AMP Project Collection',
+    sampleTitle: 'Projects curated for comparison',
+    sampleBody: 'Use this section to review project context and continue into the shortlist that matches your goals.',
     signalOne: 'Published projects ready for review',
     signalTwo: 'Details that can move into compare or consultation',
-    signalThree: 'If loading is slow, the team can still prepare the shortlist directly',
+    signalThree: 'The team can still prepare a shortlist directly from your brief',
   };
 }
 

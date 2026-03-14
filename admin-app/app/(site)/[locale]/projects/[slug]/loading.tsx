@@ -6,20 +6,20 @@ import { useParams } from 'next/navigation';
 function resolveCopy(locale: string) {
   if (locale === 'th') {
     return {
-      title: 'กำลังเตรียมข้อมูลโครงการนี้',
-      subtitle: 'เรากำลังโหลดภาพรวม รีวิวเชิงลึก และบริบทของโครงการนี้เพื่อให้คุณ shortlist หรือเปรียบเทียบต่อได้ทันที',
+      title: 'มุมมองโครงการ',
+      subtitle: 'บริบทของโครงการ สัญญาณสำหรับ shortlist และเส้นทางถัดไปจากทีมที่ปรึกษา',
       contact: 'คุยกับที่ปรึกษา',
       finder: 'ใช้ Smart Finder',
-      loading: 'กำลังโหลด snapshot ของโครงการ',
+      loading: 'AMP Project View',
     };
   }
 
   return {
-    title: 'Preparing this project snapshot',
-    subtitle: 'We are loading the project overview, deeper review, and context so you can shortlist or compare the opportunity right away.',
+    title: 'Project Perspective',
+    subtitle: 'Project context, shortlist signals, and the next advisory path.',
     contact: 'Speak to an Advisor',
     finder: 'Use Smart Finder',
-    loading: 'Loading project snapshot',
+    loading: 'AMP Project View',
   };
 }
 

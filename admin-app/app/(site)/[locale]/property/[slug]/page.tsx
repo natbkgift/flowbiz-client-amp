@@ -9,7 +9,7 @@ import { Breadcrumbs } from '@/components/layout/Breadcrumbs';
 
 import { LeadForm } from '@/components/forms/LeadForm';
 import { IconBed, IconBath, IconArea } from '@/components/icons/SvgIcons';
-import { fetchPropertyBySlug } from '@/app/_lib/public-api-server';
+import { fetchPropertyBySlug, fetchProperties } from '@/app/_lib/public-api-server';
 import { CTA } from '@/app/_lib/public-cta';
 import { resolveImageUrl } from '@/app/_lib/public-api-shared';
 import { getDictionary, normalizeLocale } from '@/app/_lib/i18n/get-dictionary';
@@ -111,6 +111,11 @@ function formatListingType(locale: 'en' | 'th', type: string): string {
   return locale === 'th' ? 'อสังหาฯ ในพัทยา' : 'Pattaya property';
 }
 
+function formatPropertyMeasure(locale: 'en' | 'th', value: number | null | undefined, unit: string): string | null {
+  if (typeof value !== 'number' || Number.isNaN(value)) return null;
+  return `${value.toLocaleString()} ${unit === 'sqm' ? (locale === 'th' ? 'ตร.ม.' : 'sqm') : unit}`;
+}
+
 export default async function PropertyPage(props: PageProps) {
   const params = await props.params;
   const locale = normalizeLocale(params.locale);
@@ -125,10 +130,10 @@ export default async function PropertyPage(props: PageProps) {
   const property = propertyResult.kind === 'loaded' ? propertyResult.value : null;
 
   if (propertyResult.kind === 'timeout') {
-    const fallbackTitle = locale === 'th' ? 'กำลังเตรียมข้อมูลรายการนี้' : 'Preparing this listing snapshot';
+    const fallbackTitle = formatSlugTitle(params.slug);
     const fallbackBody = locale === 'th'
-      ? 'รายละเอียดเชิงลึกของรายการนี้ยังดึงมาไม่ครบในรอบนี้ คุณยังเดินต่อไปยัง shortlist หรือส่งบริบทให้ทีมช่วยคัดตัวเลือกได้ทันที'
-      : 'The detailed snapshot for this listing is not fully available in this request window yet. You can still move into shortlist mode or hand the context to the team right away.';
+      ? 'ใช้หน้านี้เพื่อไปต่อยัง inventory, shortlist, หรือส่ง brief ให้ทีมช่วยคัดตัวเลือกที่เหมาะกับคุณ'
+      : 'Use this page to continue into inventory, shortlist, or hand your brief to the advisory team.';
 
     return (
       <main className="section" id="main-content">
@@ -161,16 +166,16 @@ export default async function PropertyPage(props: PageProps) {
               kicker: dict.advisory.nextStep,
               title: locale === 'th' ? 'ต่อไปยังคลังรายการหรือพูดคุยกับทีม' : 'Move next into inventory or advisory support',
               body: locale === 'th'
-                ? 'แม้ snapshot นี้ยังไม่ครบ คุณยังเปิด inventory ที่ตรวจสอบแล้วหรือคุยกับทีมต่อได้ทันที'
-                : 'Even if this snapshot is incomplete, you can still jump into verified inventory or speak with the team right away.',
+                ? 'จากหน้านี้คุณยังเปิด inventory ที่ตรวจสอบแล้วหรือคุยกับทีมต่อได้ทันที'
+                : 'From here you can jump straight into verified inventory or advisor review right away.',
               icon: 'check',
             },
             {
               kicker: dict.advisory.trustSignal,
-              title: locale === 'th' ? 'ระบบไม่ fabricate รายละเอียดแทนข้อมูลจริง' : 'The page does not fabricate details',
+              title: locale === 'th' ? 'หน้านี้ยังยึดกับบริบทของ listing จริง' : 'The page stays grounded in verified listing context',
               body: locale === 'th'
-                ? 'เมื่อข้อมูลรายการนี้พร้อมครบ หน้านี้จะกลับมาแสดงรายละเอียดเต็มรูปแบบ'
-                : 'When the listing data becomes available, this route returns to the full detail presentation.',
+                ? 'เมื่อ listing brief ถูกรีเฟรช หน้านี้จะขยายกลับมาเป็นรายละเอียดเต็มรูปแบบ'
+                : 'When the listing brief refreshes, this route expands back into the full detail view.',
               icon: 'shield',
             },
           ]}
@@ -244,6 +249,36 @@ export default async function PropertyPage(props: PageProps) {
         property.city || null,
         dict.property.projectSubtitle,
       ].filter(Boolean).join(' • ');
+  const relatedResponse = await withTimeout(
+    fetchProperties({
+      limit: 12,
+      sort: 'newest',
+      type: property.type === 'rent' || property.type === 'resale' ? property.type : undefined,
+    }),
+    { data: [], meta: { page: 1, limit: 0, total: 0 } },
+  );
+  const relatedProperties = relatedResponse.data
+    .filter((item) => item.slug && item.title !== property.title)
+    .sort((left, right) => {
+      const leftScore = Number(left.city === property.city) + Number(left.type === property.type);
+      const rightScore = Number(right.city === property.city) + Number(right.type === property.type);
+      return rightScore - leftScore;
+    })
+    .slice(0, 3);
+  const listingSignals = [
+    typeof property.price === 'number' && Number.isFinite(property.price)
+      ? locale === 'th' ? `ราคาเสนออยู่ที่ ${formatPriceTHB(Number(property.price))}` : `Current asking price is ${formatPriceTHB(Number(property.price))}`
+      : null,
+    property.city
+      ? locale === 'th' ? `ทรัพย์นี้อยู่ในโซน ${property.city}` : `This listing sits in ${property.city}.`
+      : null,
+    formatPropertyMeasure(locale, property.size, 'sqm')
+      ? locale === 'th' ? `ขนาดยูนิต ${formatPropertyMeasure(locale, property.size, 'sqm')}` : `Unit size ${formatPropertyMeasure(locale, property.size, 'sqm')}`
+      : null,
+    property.type === 'rent'
+      ? (locale === 'th' ? 'เหมาะกับผู้เช่าที่ต้องการตัดสินใจเร็วและเปรียบเทียบหลายยูนิตพร้อมกัน' : 'Useful for renters who need a fast shortlist across comparable units.')
+      : (locale === 'th' ? 'เหมาะกับผู้ซื้อที่ต้องการเทียบยูนิตจริงก่อนคุยเรื่องเงื่อนไขต่อรอง' : 'Useful for buyers who want a unit-level comparison before negotiating next steps.'),
+  ].filter((item): item is string => Boolean(item));
 
   const jsonLd = JSON.stringify(
     [
@@ -410,6 +445,65 @@ export default async function PropertyPage(props: PageProps) {
               <p className="mb-0">{property.description ?? '—'}</p>
             </div>
 
+            <section className="signal-grid signal-grid--two-up reveal mb-6">
+              <div className="authority-card">
+                <h2 className="card-title">{locale === 'th' ? 'Listing decision cues' : 'Listing decision cues'}</h2>
+                <p className="card-subtitle">
+                  {locale === 'th'
+                    ? 'ใช้สัญญาณระดับยูนิตนี้เพื่อประเมินว่าควรคุยต่อทันทีหรือเทียบ inventory ใกล้เคียงก่อน'
+                    : 'Use the unit-level signals below to decide whether to move straight into advisor review or compare nearby inventory first.'}
+                </p>
+                <div className="insight-list mt-3">
+                  {listingSignals.map((item) => (
+                    <div key={item} className="insight-list__item">
+                      <span className="insight-list__body">{item}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="authority-card">
+                <h2 className="card-title">{locale === 'th' ? 'Investor tools และ next moves' : 'Investor tools and next moves'}</h2>
+                <p className="card-subtitle">
+                  {locale === 'th'
+                    ? 'ถ้าต้องคำนวณ yield หรือเทียบหลายทางเลือกต่อ ให้ไปยังเครื่องมือและ route ที่ใช้ตัดสินใจต่อได้ทันที'
+                    : 'If you need a yield sense-check or a multi-option comparison, move directly into the supporting tools below.'}
+                </p>
+                <div className="card-actions mt-3">
+                  <Link className="btn btn-secondary" href={withLocale(locale, '/calculator')}>
+                    {locale === 'th' ? 'เปิด calculator' : 'Open calculator'}
+                  </Link>
+                  <Link className="btn btn-tertiary" href={withLocale(locale, '/compare')}>
+                    {locale === 'th' ? 'ไปที่ compare' : 'Go to compare'}
+                  </Link>
+                </div>
+              </div>
+            </section>
+
+            {relatedProperties.length ? (
+              <section className="signal-grid signal-grid--three-up reveal mb-6">
+                {relatedProperties.map((item) => {
+                  const relatedImage = resolveImageUrl(item.cover_image ?? item.local_images?.[0] ?? item.images?.[0]) ?? PROPERTY_DETAIL_FALLBACK;
+                  const relatedHref = item.slug ? withLocale(locale, `/property/${encodeURIComponent(item.slug)}`) : withLocale(locale, item.type === 'rent' ? '/rent' : '/buy');
+                  return (
+                    <Link key={item.id} href={relatedHref} className="authority-card card-interactive">
+                      <div className="card-image relative" style={{ aspectRatio: '4 / 3' }}>
+                        <Image src={relatedImage} alt={item.title} fill unoptimized sizes="(min-width: 1024px) 33vw, 100vw" className="object-cover rounded-[18px]" />
+                      </div>
+                      <div className="mt-4">
+                        <div className="editorial-card__meta">
+                          <span>{formatListingType(locale, item.type)}</span>
+                          {item.city ? <span>{item.city}</span> : null}
+                        </div>
+                        <h3 className="card-title">{item.title}</h3>
+                        <p className="card-subtitle">{formatPriceTHB(Number(item.price))}</p>
+                      </div>
+                    </Link>
+                  );
+                })}
+              </section>
+            ) : null}
+
             <div className="card reveal mb-6">
               <h2 className="card-title">{dict.property.nextSteps}</h2>
               <p className="card-subtitle">{dict.property.exploreRelated}</p>
@@ -428,19 +522,6 @@ export default async function PropertyPage(props: PageProps) {
               </div>
             </div>
 
-            <div>
-              <h2 className="mb-6">{dict.property.similarProperties}</h2>
-              <div className="grid grid-2">
-                <div className="property-card">
-                  <div className="card-content">
-                    <div className="card-title">{dict.property.comingSoon}</div>
-                    <div className="card-location mb-0">
-                      {dict.property.similarComingSoonText}
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
           </div>
 
           <aside className="detail-sidebar">
