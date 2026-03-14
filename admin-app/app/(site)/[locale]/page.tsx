@@ -809,7 +809,7 @@ export default async function HomePage({
         ? 'การ์ดบรรณาธิการสำหรับทำเล ผลตอบแทน และมุมมองตลาด ที่ช่วยลดการเดาจากข้อมูลกระจัดกระจาย'
         : 'Editorial cards for area intelligence, rental yield, and launch context that reduce guesswork.');
   const composerMarketInsightCards = Array.isArray(composerMarketInsights.cards)
-    ? composerMarketInsights.cards as Array<{ key?: string; title?: string; body?: string; href?: string; updatedAt?: string | null }>
+    ? composerMarketInsights.cards as Array<{ key?: string; eyebrow?: string; title?: string; body?: string; href?: string; updatedAt?: string | null; actionLabel?: string; signal?: string | null }>
     : [];
 
   const reviewsHeading =
@@ -835,7 +835,7 @@ export default async function HomePage({
       ? composerVideos.subcopy.trim()
       : (locale === 'th' ? 'วิดีโอคัดสรรที่ช่วยให้เข้าใจกระบวนการ พื้นที่ และวิธีคิดของทีม advisory ได้เร็วขึ้น' : 'Curated videos that explain the team’s process, area thinking, and advisory lens.');
   const composerVideoItems = Array.isArray(composerVideos.items)
-    ? composerVideos.items as Array<{ key?: string; title?: string; caption?: string; ytId?: string; thumbSrc?: string }>
+    ? composerVideos.items as Array<{ key?: string; topic?: string; title?: string; caption?: string; ytId?: string; thumbSrc?: string; relatedHref?: string; actionLabel?: string }>
     : [];
 
   const teamCtaHeading =
@@ -1168,7 +1168,7 @@ export default async function HomePage({
       {/* Featured Projects — Real Data (streamed) */}
       {isSectionEnabled('featured_projects') ? (
         <div style={sectionOrderStyle('featured_projects')}>
-          <Suspense fallback={<SectionCardSkeleton kind="project" locale={locale} />}>
+          <Suspense fallback={<SectionCardSkeleton kind="project" />}>
             <FeaturedProjectsSection />
           </Suspense>
         </div>
@@ -1177,7 +1177,7 @@ export default async function HomePage({
       {/* Selected Investment Opportunities — Real Properties (streamed) */}
       {isSectionEnabled('featured_properties') ? (
         <div style={sectionOrderStyle('featured_properties')}>
-          <Suspense fallback={<SectionCardSkeleton kind="investment" locale={locale} />}>
+          <Suspense fallback={<SectionCardSkeleton kind="investment" />}>
             <FeaturedPropertiesSection />
           </Suspense>
         </div>

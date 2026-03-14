@@ -1,9 +1,9 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 
-import { buildAdvisorWhatsApp, getAdvisoryLabels, getAdvisoryProofs } from '@/app/_lib/public-advisory';
+import { buildAdvisorWhatsApp, getAdvisoryLabels, getAdvisoryProofs, withLocaleQuery } from '@/app/_lib/public-advisory';
 import { getDictionary, normalizeLocale } from '@/app/_lib/i18n/get-dictionary';
-import { ogLocale, withLocale, withLocaleQuery } from '@/app/_lib/i18n/routing';
+import { ogLocale, withLocale } from '@/app/_lib/i18n/routing';
 import { type BlogPostDetailApi, type ContentLocalizedText, fetchBlogPostBySlug, fetchBlogPosts } from '@/app/_lib/public-api-server';
 import { Container } from '@/components/layout/Container';
 import { LeadForm } from '@/components/forms/LeadForm';
@@ -49,7 +49,7 @@ export async function generateMetadata(
   const dict = getDictionary(locale);
   const post = await fetchBlogPostBySlug(params.slug).catch(() => null);
   const title = post ? localizeText(locale, post.title) : dict.brand.name;
-  const description = post ? localizeText(locale, post.excerpt ?? null) : dict.brand.description;
+  const description = post ? localizeText(locale, post.excerpt ?? null) : dict.brand.tagline;
   const canonical = `/${locale}/blog/${encodeURIComponent(params.slug)}`;
 
   return {

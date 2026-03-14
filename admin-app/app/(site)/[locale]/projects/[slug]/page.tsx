@@ -6,7 +6,7 @@ import { Container } from '@/components/layout/Container';
 import { TrackedLink } from '@/components/analytics/TrackedLink';
 import { getDictionary, normalizeLocale } from '@/app/_lib/i18n/get-dictionary';
 import { withLocale, ogLocale } from '@/app/_lib/i18n/routing';
-import { fetchProjectBySlug, fetchProjectEvaluation } from '@/app/_lib/public-api-server';
+import { fetchProjectBySlug, fetchProjectEvaluation, fetchBlogPosts } from '@/app/_lib/public-api-server';
 import { getInternalLinks } from '@/app/_lib/internal-links';
 
 import { ProjectDeepReview } from '@/components/projects/ProjectDeepReview';
@@ -79,6 +79,11 @@ function toKeyValueList(record?: Record<string, unknown> | null): Array<{ label:
       value: formatStatValue(value) ?? '',
     }))
     .filter((item) => item.value);
+}
+
+function containsContext(value: string, query: string | null | undefined): boolean {
+  if (!query) return false;
+  return value.toLowerCase().includes(query.toLowerCase());
 }
 
 export async function generateMetadata(
@@ -233,6 +238,7 @@ export default async function ProjectDetailPage(
   }
 
   const evaluation = await withTimeout(fetchProjectEvaluation(project.id), null);
+  const publishedBlogPosts = await withTimeout(fetchBlogPosts(), []);
   const hasEvaluationSnapshot = Boolean(
     evaluation?.area_statistics?.avg_price ||
     evaluation?.area_statistics?.avg_rent ||
@@ -264,6 +270,25 @@ export default async function ProjectDetailPage(
     { label: locale === 'th' ? 'ก่อสร้างแล้ว' : 'Built', value: formatStatValue(project.year_built) },
     { label: locale === 'th' ? 'ประเภท' : 'Type', value: project.property_type || null },
   ].filter((item) => item.value);
+  const evaluationSignals = evaluation?.badges?.map((badge) => badge.label).slice(0, 4) ?? [];
+  const projectDecisionRead = [
+    hasEvaluationSnapshot
+      ? locale === 'th' ? 'มี live snapshot จากโครงการ/พื้นที่พอสำหรับใช้คุย shortlist ต่อ' : 'There is enough live project and area snapshot data to support a shortlist discussion.'
+      : locale === 'th' ? 'snapshot ยังไม่ครบทุกมิติ จึงควรใช้หน้านี้เป็น conversion surface มากกว่าหน้าเปรียบเทียบขั้นสุดท้าย' : 'The snapshot is still partial, so this page works better as a conversion-detail surface than a final comparison sheet.',
+    project.area?.name
+      ? locale === 'th' ? `พื้นที่หลักของโครงการคือ ${project.area.name} จึงควรอ่านคู่กับบริบทของ area ก่อนตัดสินใจ` : `${project.area.name} remains a core part of the decision, so read this project together with the area context.`
+      : null,
+    startingPriceLabel
+      ? locale === 'th' ? `ราคาเริ่มต้นปัจจุบันคือ ${startingPriceLabel}` : `Current starting price is ${startingPriceLabel}.`
+      : null,
+  ].filter((item): item is string => Boolean(item));
+  const relatedReads = [...publishedBlogPosts]
+    .filter((post) => {
+      const titleText = localizedText(locale, post.title);
+      const excerptText = localizedText(locale, post.excerpt ?? null);
+      return containsContext(titleText, project.name) || containsContext(titleText, project.area?.name) || containsContext(excerptText, project.area?.name);
+    })
+    .slice(0, 2);
 
   const jsonLd = JSON.stringify(
     [
@@ -397,6 +422,46 @@ export default async function ProjectDetailPage(
                   ))}
                 </article>
               ) : null}
+            </section>
+
+            <section className="signal-grid signal-grid--two-up reveal">
+              <div className="authority-card">
+                <h2 className="card-title">{locale === 'th' ? 'Shortlist decision lens' : 'Shortlist decision lens'}</h2>
+                <div className="insight-list mt-3">
+                  {projectDecisionRead.map((item) => (
+                    <div key={item} className="insight-list__item">
+                      <span className="insight-list__body">{item}</span>
+                    </div>
+                  ))}
+                  {evaluationSignals.map((item) => (
+                    <div key={item} className="insight-list__item">
+                      <span className="insight-list__title">{locale === 'th' ? 'Evaluation signal' : 'Evaluation signal'}</span>
+                      <span className="insight-list__body">{item}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="authority-card">
+                <h2 className="card-title">{locale === 'th' ? 'Related advisory reads' : 'Related advisory reads'}</h2>
+                <div className="insight-list mt-3">
+                  {relatedReads.length ? relatedReads.map((post) => (
+                    <Link key={post.slug} href={withLocale(locale, `/blog/${encodeURIComponent(post.slug)}`)} className="insight-list__item">
+                      <span className="insight-list__title">{localizedText(locale, post.title) || post.slug}</span>
+                      <span className="insight-list__body">{localizedText(locale, post.excerpt ?? null) || (locale === 'th' ? 'อ่านบทความฉบับเต็ม' : 'Open the full article.')}</span>
+                    </Link>
+                  )) : (
+                    <div className="insight-list__item">
+                      <span className="insight-list__body">{locale === 'th' ? 'อ่านต่อที่ investment, compare หรือ area guide เพื่อเสริมบริบทของการตัดสินใจ' : 'Continue into investment, compare, or the area guide to widen the decision context.'}</span>
+                    </div>
+                  )}
+                </div>
+                <div className="card-actions mt-3">
+                  <Link className="btn btn-secondary" href={withLocale(locale, '/calculator')}>
+                    {locale === 'th' ? 'เปิด calculator' : 'Open calculator'}
+                  </Link>
+                </div>
+              </div>
             </section>
 
             {(project.amenities?.length ?? 0) > 0 || investmentFacts.length > 0 || locationFacts.length > 0 ? (

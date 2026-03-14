@@ -5,7 +5,7 @@ import { buildAdvisorWhatsApp, getAdvisoryLabels, getAdvisoryProofs, withLocaleQ
 import { Container } from '@/components/layout/Container';
 import { getDictionary, normalizeLocale } from '@/app/_lib/i18n/get-dictionary';
 import { withLocale, ogLocale } from '@/app/_lib/i18n/routing';
-import { fetchAreaBySlug } from '@/app/_lib/public-api-server';
+import { fetchAreaBySlug, fetchBlogPosts } from '@/app/_lib/public-api-server';
 import { PublicAdvisoryHero } from '@/components/public/PublicAdvisoryHero';
 import { LeadForm } from '@/components/forms/LeadForm';
 
@@ -57,6 +57,11 @@ function formatStat(value: string | number | null | undefined): string | null {
   if (value === null || value === undefined) return null;
   if (typeof value === 'number') return new Intl.NumberFormat('en-US').format(value);
   return value.trim() || null;
+}
+
+function localizeText(locale: 'en' | 'th', value?: { en?: string; th?: string } | null): string {
+  if (!value) return '';
+  return value[locale] ?? value.en ?? value.th ?? '';
 }
 
 function buildAreaMarketRead(locale: 'en' | 'th', areaName: string, hasStats: boolean, roiPercent?: string | null): string[] {
@@ -174,6 +179,7 @@ export default async function AreaPage(
   const buyerTypes = areaCopy.buyerTypes;
 
   const hasStats = Boolean(stats?.statistics);
+  const publishedBlogPosts = await withTimeout(fetchBlogPosts(), []);
   const marketRead = buildAreaMarketRead(locale, title, hasStats, stats?.statistics?.roi_percent);
   const metricCards = [
     { label: dict.area.avgPrice, value: formatStat(stats?.statistics?.avg_price) },
@@ -181,6 +187,24 @@ export default async function AreaPage(
     { label: dict.area.roiPercent, value: formatStat(stats?.statistics?.roi_percent) },
     { label: locale === 'th' ? 'ข้อมูลล่าสุด' : 'Latest snapshot', value: formatStat(stats?.statistics?.as_of) },
   ].filter((item) => item.value);
+  const intelligenceSignals = [
+    stats?.statistics?.avg_price
+      ? locale === 'th' ? `ราคาเฉลี่ยในระบบอยู่ที่ ${stats.statistics.avg_price}` : `Average pricing in the current snapshot reads ${stats.statistics.avg_price}.`
+      : null,
+    stats?.statistics?.avg_rent
+      ? locale === 'th' ? `ค่าเช่าเฉลี่ยใน snapshot คือ ${stats.statistics.avg_rent}` : `Average rent in the snapshot reads ${stats.statistics.avg_rent}.`
+      : null,
+    stats?.statistics?.as_of
+      ? locale === 'th' ? `อัปเดตข้อมูลล่าสุด ${stats.statistics.as_of}` : `Snapshot updated ${stats.statistics.as_of}.`
+      : null,
+  ].filter((item): item is string => Boolean(item));
+  const relatedReads = [...publishedBlogPosts]
+    .filter((post) => {
+      const titleText = localizeText(locale, post.title);
+      const excerptText = localizeText(locale, post.excerpt ?? null);
+      return titleText.toLowerCase().includes(title.toLowerCase()) || excerptText.toLowerCase().includes(title.toLowerCase()) || titleText.toLowerCase().includes(params.slug.toLowerCase());
+    })
+    .slice(0, 3);
 
   return (
     <main id="main-content">
@@ -291,6 +315,48 @@ export default async function AreaPage(
                     </Link>
                     <Link className="btn btn-secondary" href={withLocale(locale, '/projects')}>
                       {dict.area.browseProjects}
+                    </Link>
+                  </div>
+                </div>
+              </section>
+
+              <section className="signal-grid signal-grid--two-up reveal">
+                <div className="authority-card">
+                  <h2 className="card-title">{locale === 'th' ? 'Area intelligence read' : 'Area intelligence read'}</h2>
+                  <div className="insight-list mt-3">
+                    {intelligenceSignals.map((item) => (
+                      <div key={item} className="insight-list__item">
+                        <span className="insight-list__body">{item}</span>
+                      </div>
+                    ))}
+                    <div className="insight-list__item">
+                      <span className="insight-list__body">
+                        {locale === 'th'
+                          ? 'ใช้หน้านี้เพื่อกรองพื้นที่ที่เหมาะก่อนค่อยไปลงระดับโครงการหรือยูนิต'
+                          : 'Use this page to narrow the right zone first, then move into projects or unit-level options.'}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="authority-card">
+                  <h2 className="card-title">{locale === 'th' ? 'Related authority reads' : 'Related authority reads'}</h2>
+                  <div className="insight-list mt-3">
+                    {relatedReads.length ? relatedReads.map((post) => (
+                      <Link key={post.slug} href={withLocale(locale, `/blog/${encodeURIComponent(post.slug)}`)} className="insight-list__item">
+                        <span className="insight-list__title">{localizeText(locale, post.title) || post.slug}</span>
+                        <span className="insight-list__body">{localizeText(locale, post.excerpt ?? null) || (locale === 'th' ? 'เปิดอ่านบทความฉบับเต็ม' : 'Open the full article.')}</span>
+                      </Link>
+                    )) : (
+                      <Link href={withLocale(locale, '/blog')} className="insight-list__item">
+                        <span className="insight-list__title">{locale === 'th' ? 'ดูบทความล่าสุดทั้งหมด' : 'See all latest articles'}</span>
+                        <span className="insight-list__body">{locale === 'th' ? 'ไปต่อยังคลังบทความเพื่ออ่านบริบทเชิงพื้นที่และการลงทุนเพิ่มเติม' : 'Continue into the article index for more area and investment context.'}</span>
+                      </Link>
+                    )}
+                  </div>
+                  <div className="card-actions mt-3">
+                    <Link className="btn btn-secondary" href={withLocale(locale, '/calculator')}>
+                      {locale === 'th' ? 'เปิด calculator' : 'Open calculator'}
                     </Link>
                   </div>
                 </div>

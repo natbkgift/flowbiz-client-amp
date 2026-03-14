@@ -72,7 +72,9 @@ describe('A1 shared foundation guards', () => {
 
     expect(localMedia).toContain('raw.startsWith("/media/")');
     expect(localMedia).toContain('raw.startsWith("/storage/")');
-    expect(localMedia).toContain('/media/placeholders/image-fallback.webp');
-    expect(safeCover).toContain('/media/placeholders/property-cover.webp');
+    expect(localMedia).toContain('/images/property-placeholder.svg');
+    expect(localMedia).toContain('/images/project-overview.png');
+    expect(safeCover).toContain('/images/property-placeholder.svg');
+    expect(safeCover).toContain('/images/property-exterior.png');
   });
 });

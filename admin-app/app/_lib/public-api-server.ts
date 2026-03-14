@@ -105,6 +105,18 @@ export type ProjectDetail = {
 };
 
 const DEFAULT_SITE_ORIGIN = 'https://amppattaya.com';
+const useLocalBuildStaticSafe = process.env.NEXT_LOCAL_BUILD_STATIC_SAFE === '1';
+
+const EMPTY_PROPERTY_LIST_RESPONSE: PropertyListResponse = {
+  data: [],
+  meta: { page: 1, limit: 0, total: 0 },
+};
+
+const EMPTY_SMART_FINDER_RESPONSE: SmartFinderResponse = {
+  ranking_version: 'local-safe',
+  query_hash: 'local-safe',
+  items: [],
+};
 
 function getOrigin(): string {
   const env = process.env.NEXT_PUBLIC_SITE_URL;
@@ -129,6 +141,9 @@ export async function fetchProperties(params: {
   sort?: 'price_asc' | 'price_desc' | 'newest' | 'oldest';
   project_id?: string;
 }): Promise<PropertyListResponse> {
+  if (useLocalBuildStaticSafe) {
+    return EMPTY_PROPERTY_LIST_RESPONSE;
+  }
   const origin = getOrigin();
   const base = apiBase();
 
@@ -159,6 +174,9 @@ export async function fetchProperties(params: {
 }
 
 export async function fetchPropertyBySlug(slug: string): Promise<PropertyDetail | null> {
+  if (useLocalBuildStaticSafe) {
+    return null;
+  }
   const origin = getOrigin();
   const base = apiBase();
 
@@ -175,6 +193,9 @@ export async function fetchPropertyBySlug(slug: string): Promise<PropertyDetail 
 }
 
 export async function fetchProjects(params?: { limit?: number; page?: number; status_filter?: string }): Promise<ProjectItem[]> {
+  if (useLocalBuildStaticSafe) {
+    return [];
+  }
   const origin = getOrigin();
   const base = apiBase();
 
@@ -200,6 +221,9 @@ export async function fetchProjects(params?: { limit?: number; page?: number; st
 }
 
 export async function fetchProjectBySlug(slug: string): Promise<ProjectDetail | null> {
+  if (useLocalBuildStaticSafe) {
+    return null;
+  }
   const origin = getOrigin();
   const base = apiBase();
 
@@ -233,6 +257,9 @@ export type SeoResolvedOverride = {
 };
 
 export async function fetchSeoResolvedOverride(path: string, locale: string): Promise<SeoResolvedOverride | null> {
+  if (useLocalBuildStaticSafe) {
+    return null;
+  }
   const origin = getOrigin();
   const base = apiBase();
 
@@ -317,6 +344,9 @@ export type SmartFinderResponse = {
 };
 
 export async function fetchSmartFinder(payload: SmartFinderRequest): Promise<SmartFinderResponse> {
+  if (useLocalBuildStaticSafe) {
+    return EMPTY_SMART_FINDER_RESPONSE;
+  }
   const origin = getOrigin();
   const base = apiBase();
 
@@ -359,6 +389,9 @@ export type ProjectEvaluationResponse = {
 };
 
 export async function fetchProjectEvaluation(projectId: string): Promise<ProjectEvaluationResponse | null> {
+  if (useLocalBuildStaticSafe) {
+    return null;
+  }
   const origin = getOrigin();
   const base = apiBase();
 
@@ -484,6 +517,9 @@ export type DeveloperDetailResponse = {
 };
 
 export async function fetchAreas(): Promise<AreaItem[]> {
+  if (useLocalBuildStaticSafe) {
+    return [];
+  }
   const origin = getOrigin();
   const base = apiBase();
 
@@ -494,6 +530,9 @@ export async function fetchAreas(): Promise<AreaItem[]> {
 }
 
 export async function fetchAreaBySlug(slug: string): Promise<AreaDetailResponse | null> {
+  if (useLocalBuildStaticSafe) {
+    return null;
+  }
   const origin = getOrigin();
   const base = apiBase();
 
@@ -505,6 +544,9 @@ export async function fetchAreaBySlug(slug: string): Promise<AreaDetailResponse 
 }
 
 export async function fetchDevelopers(): Promise<DeveloperItem[]> {
+  if (useLocalBuildStaticSafe) {
+    return [];
+  }
   const origin = getOrigin();
   const base = apiBase();
 
@@ -515,6 +557,9 @@ export async function fetchDevelopers(): Promise<DeveloperItem[]> {
 }
 
 export async function fetchDeveloperBySlug(slug: string): Promise<DeveloperDetailResponse | null> {
+  if (useLocalBuildStaticSafe) {
+    return null;
+  }
   const origin = getOrigin();
   const base = apiBase();
 
@@ -526,6 +571,9 @@ export async function fetchDeveloperBySlug(slug: string): Promise<DeveloperDetai
 }
 
 export async function fetchAreaStatisticsBySlug(slug: string): Promise<AreaStatisticsResponse | null> {
+  if (useLocalBuildStaticSafe) {
+    return null;
+  }
   const origin = getOrigin();
   const base = apiBase();
 
@@ -545,6 +593,9 @@ export type HomeComposerPublishedResponse = {
 };
 
 export async function fetchHomeComposerPublished(locale: 'en' | 'th'): Promise<HomeComposerPublishedResponse | null> {
+  if (useLocalBuildStaticSafe) {
+    return null;
+  }
   const origin = getOrigin();
   const base = apiBase();
 
@@ -574,6 +625,9 @@ export type CompanyInfoItem = {
 };
 
 export async function fetchCompanyInfoBySlug(slug: string): Promise<CompanyInfoItem | null> {
+  if (useLocalBuildStaticSafe) {
+    return null;
+  }
   const origin = getOrigin();
   const base = apiBase();
   const url = new URL(`${base}/v1/company/${encodeURIComponent(slug)}`, origin);
@@ -616,6 +670,9 @@ export type GuideDetailApi = ContentSummaryApiItem & {
 };
 
 export async function fetchBlogPosts(): Promise<ContentSummaryApiItem[]> {
+  if (useLocalBuildStaticSafe) {
+    return [];
+  }
   const origin = getOrigin();
   const base = apiBase();
   const url = new URL(`${base}/v1/content/blog-posts/`, origin);
@@ -629,6 +686,9 @@ export async function fetchBlogPosts(): Promise<ContentSummaryApiItem[]> {
 }
 
 export async function fetchBlogPostBySlug(slug: string): Promise<BlogPostDetailApi | null> {
+  if (useLocalBuildStaticSafe) {
+    return null;
+  }
   const origin = getOrigin();
   const base = apiBase();
   const url = new URL(`${base}/v1/content/blog-posts/${encodeURIComponent(slug)}/`, origin);
@@ -642,6 +702,9 @@ export async function fetchBlogPostBySlug(slug: string): Promise<BlogPostDetailA
 }
 
 export async function fetchGuides(): Promise<ContentSummaryApiItem[]> {
+  if (useLocalBuildStaticSafe) {
+    return [];
+  }
   const origin = getOrigin();
   const base = apiBase();
   const url = new URL(`${base}/v1/content/guides/`, origin);
@@ -655,6 +718,9 @@ export async function fetchGuides(): Promise<ContentSummaryApiItem[]> {
 }
 
 export async function fetchGuideBySlug(slug: string): Promise<GuideDetailApi | null> {
+  if (useLocalBuildStaticSafe) {
+    return null;
+  }
   const origin = getOrigin();
   const base = apiBase();
   const url = new URL(`${base}/v1/content/guides/${encodeURIComponent(slug)}/`, origin);
