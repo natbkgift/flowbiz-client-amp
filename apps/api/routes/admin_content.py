@@ -31,6 +31,7 @@ from packages.core.seo_controls import upsert_slug_redirects
 router = APIRouter(prefix="/admin", tags=["admin"])
 
 _SITE_LAYOUT_CMS_SLUG = "site-layout"
+_HTTP_422_UNPROCESSABLE_CONTENT = getattr(status, "HTTP_422_UNPROCESSABLE_CONTENT", 422)
 _ARTICLE_STATUSES = {"draft", "in_review", "approved", "published", "archived"}
 _ARTICLE_STATUS_TRANSITIONS: dict[str, set[str]] = {
     "draft": {"draft", "in_review"},
@@ -176,7 +177,7 @@ def _coerce_required_text(value: str | None, *, field_name: str) -> str:
     if text:
         return text
     raise HTTPException(
-        status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+        status_code=_HTTP_422_UNPROCESSABLE_CONTENT,
         detail=f"{field_name} must not be empty",
     )
 
@@ -194,7 +195,7 @@ def _coerce_localized_text(
         if text:
             return {"en": text}
         raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            status_code=_HTTP_422_UNPROCESSABLE_CONTENT,
             detail=f"{field_name} must not be empty",
         )
     if isinstance(value, dict):
@@ -206,7 +207,7 @@ def _coerce_localized_text(
         if out:
             return out
     raise HTTPException(
-        status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+        status_code=_HTTP_422_UNPROCESSABLE_CONTENT,
         detail=f"{field_name} must include at least one localized value",
     )
 
@@ -227,7 +228,7 @@ def _coerce_optional_localized_text(
                 out[key] = text
         return out or None
     raise HTTPException(
-        status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+        status_code=_HTTP_422_UNPROCESSABLE_CONTENT,
         detail=f"{field_name} must be localized text",
     )
 
@@ -239,7 +240,7 @@ def _coerce_taxonomy_list(value: Any) -> list[str]:
         values = [part.strip() for part in value.split(",") if part.strip()]
     else:
         raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            status_code=_HTTP_422_UNPROCESSABLE_CONTENT,
             detail="taxonomy must be list, comma-separated string, or localized object",
         )
     out: list[str] = []
@@ -281,7 +282,7 @@ def _normalize_status(value: str | None, *, allowed: set[str], field_name: str) 
         return text
     allowed_text = ", ".join(sorted(allowed))
     raise HTTPException(
-        status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+        status_code=_HTTP_422_UNPROCESSABLE_CONTENT,
         detail=f"{field_name} must be one of: {allowed_text}",
     )
 
@@ -574,7 +575,7 @@ def _coerce_taxonomy_kind(value: str | None, *, field_name: str = "kind") -> str
     text = _coerce_required_text(value, field_name=field_name).lower()
     if not _TAXONOMY_KIND_PATTERN.fullmatch(text):
         raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            status_code=_HTTP_422_UNPROCESSABLE_CONTENT,
             detail=f"{field_name} must use lowercase letters, numbers, hyphen, and underscore",
         )
     return text
@@ -584,7 +585,7 @@ def _coerce_taxonomy_slug(value: str | None, *, field_name: str = "slug") -> str
     text = _coerce_required_text(value, field_name=field_name).lower()
     if not _TAXONOMY_SLUG_PATTERN.fullmatch(text):
         raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            status_code=_HTTP_422_UNPROCESSABLE_CONTENT,
             detail=f"{field_name} must be lowercase letters, numbers, and hyphen only",
         )
     return text
@@ -595,7 +596,7 @@ def _coerce_category(value: str | None) -> str:
     if category not in _ARTICLE_ALLOWED_CATEGORIES:
         allowed_text = ", ".join(sorted(_ARTICLE_ALLOWED_CATEGORIES))
         raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            status_code=_HTTP_422_UNPROCESSABLE_CONTENT,
             detail=f"category must be one of: {allowed_text}",
         )
     return category
@@ -644,7 +645,7 @@ def _ensure_article_publishable(article: Article) -> dict[str, list[str]]:
     checklist = _article_publish_checklist(article)
     if checklist["blocking"]:
         raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            status_code=_HTTP_422_UNPROCESSABLE_CONTENT,
             detail={
                 "message": "Publish checklist failed",
                 "blocking": checklist["blocking"],
@@ -899,7 +900,7 @@ def patch_article(
     updates = set(payload.model_dump(exclude_unset=True).keys())
     if not updates:
         raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            status_code=_HTTP_422_UNPROCESSABLE_CONTENT,
             detail="No editable fields provided",
         )
 
@@ -1060,7 +1061,7 @@ def _parse_revision_uuid(value: Any, *, field_name: str) -> UUID | None:
         return UUID(text)
     except ValueError as exc:
         raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            status_code=_HTTP_422_UNPROCESSABLE_CONTENT,
             detail=f"Revision {field_name} must be a valid UUID format",
         ) from exc
 
@@ -1252,7 +1253,8 @@ def update_article_editorial(
     updates = set(payload.model_dump(exclude_unset=True).keys())
     if not updates:
         raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="No editable fields provided"
+            status_code=_HTTP_422_UNPROCESSABLE_CONTENT,
+            detail="No editable fields provided",
         )
 
     _apply_article_updates(article, payload, updates, db, admin)
@@ -1371,7 +1373,7 @@ def patch_taxonomy(
     updates = payload.model_dump(exclude_unset=True)
     if not updates:
         raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            status_code=_HTTP_422_UNPROCESSABLE_CONTENT,
             detail="No editable fields provided",
         )
 
@@ -1471,7 +1473,7 @@ def _coerce_youtube_id(youtube_url: str | None, youtube_id: str | None) -> str |
             return None
         if not _YOUTUBE_ID_PATTERN.fullmatch(candidate):
             raise HTTPException(
-                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                status_code=_HTTP_422_UNPROCESSABLE_CONTENT,
                 detail="youtube_id must be 11-char YouTube ID",
             )
         return candidate
@@ -1505,7 +1507,7 @@ def _coerce_youtube_id(youtube_url: str | None, youtube_id: str | None) -> str |
     candidate = str(candidate).strip()
     if not _YOUTUBE_ID_PATTERN.fullmatch(candidate):
         raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            status_code=_HTTP_422_UNPROCESSABLE_CONTENT,
             detail="Unable to parse youtube_id from youtube_url",
         )
     return candidate
@@ -1600,7 +1602,7 @@ def create_video(
 
     if youtube_url is None and youtube_id is None and video_path is None:
         raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            status_code=_HTTP_422_UNPROCESSABLE_CONTENT,
             detail="Provide at least one of youtube_url, youtube_id, or video_path",
         )
 
@@ -1652,7 +1654,7 @@ def patch_video(
     updates = payload.model_dump(exclude_unset=True)
     if not updates:
         raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            status_code=_HTTP_422_UNPROCESSABLE_CONTENT,
             detail="No editable fields provided",
         )
 
