@@ -6806,13 +6806,174 @@ def _market_intelligence_report_regions(locale: str) -> list[dict[str, object]]:
     ]
 
 
+def _market_intelligence_overview_chart_copy(locale: str) -> dict[str, str]:
+    if locale == "th":
+        return {
+            "section_title": "Basic market overview charts",
+            "section_intro": "slice นี้เปิด chart structures พื้นฐานสำหรับ market overview โดยใช้เฉพาะ runtime counts และ governed readiness signals ที่อยู่ในขอบเขต public-safe",
+            "source_label": "Source class",
+            "freshness_label": "Freshness tier",
+            "coverage_title": "Published inventory coverage",
+            "coverage_question": "ตอนนี้ public runtime ครอบคลุม inventory ที่เผยแพร่มากน้อยเพียงใด?",
+            "coverage_caveat": "chart นี้สรุปจำนวน records ที่เผยแพร่ใน runtime ปัจจุบัน ไม่ใช่คำแนะนำการลงทุนหรือการคาดการณ์ตลาด",
+            "coverage_areas": "Published areas",
+            "coverage_projects": "Published projects",
+            "coverage_properties": "Active properties",
+            "readiness_title": "Governed signal readiness",
+            "readiness_question": "มี public-safe market signals ที่พร้อมใช้เป็นฐานของ reports ถัดไปอยู่เท่าใด?",
+            "readiness_caveat": "chart นี้แสดงเฉพาะ signals ที่มี source/freshness support ตามกติกาปัจจุบัน และไม่รวม advisor-only context",
+            "readiness_areas": "Areas with verified metrics",
+            "readiness_projects": "Projects with investment snapshot",
+            "bar_label": "Signal value",
+            "fast_tier": "fast",
+            "governed_tier": "governed",
+        }
+    return {
+        "section_title": "Basic market overview charts",
+        "section_intro": "This slice introduces the first market-overview chart structures using only public-safe runtime counts and governed readiness signals.",
+        "source_label": "Source class",
+        "freshness_label": "Freshness tier",
+        "coverage_title": "Published inventory coverage",
+        "coverage_question": "How much published inventory does the current public runtime cover?",
+        "coverage_caveat": "This chart summarizes records currently published in the runtime. It is not investment advice and it is not a market forecast.",
+        "coverage_areas": "Published areas",
+        "coverage_projects": "Published projects",
+        "coverage_properties": "Active properties",
+        "readiness_title": "Governed signal readiness",
+        "readiness_question": "How much public-safe signal coverage is ready to support later reports?",
+        "readiness_caveat": "This chart includes only signals with current source and freshness support. It excludes advisor-only context.",
+        "readiness_areas": "Areas with verified metrics",
+        "readiness_projects": "Projects with investment snapshot",
+        "bar_label": "Signal value",
+        "fast_tier": "fast",
+        "governed_tier": "governed",
+    }
+
+
+def _market_intelligence_overview_charts(locale: str, db: Session) -> list[dict[str, object]]:
+    copy = _market_intelligence_overview_chart_copy(locale)
+    count_lookup = {key: value for key, value in _count_cards(db)}
+    published_areas = db.scalars(
+        select(Area).where(Area.deleted_at.is_(None), Area.status == "published")
+    ).all()
+    stats_by_area = _area_stats_lookup(db, [row.id for row in published_areas])
+    verified_area_count = sum(
+        1
+        for row in published_areas
+        if _has_verified_area_metrics(
+            " ".join(str(row.source_note or "").split()),
+            _area_metrics_cadence(row.content, locale),
+            stats_by_area.get(str(row.id)),
+        )
+    )
+    published_projects = db.scalars(
+        select(Project).where(Project.deleted_at.is_(None), Project.status == "published")
+    ).all()
+    investment_snapshot_count = sum(
+        1 for row in published_projects if _project_investment_snapshot_ready(row)
+    )
+    return [
+        {
+            "title": copy["coverage_title"],
+            "question": copy["coverage_question"],
+            "source_class": "public",
+            "freshness_tier": copy["fast_tier"],
+            "caveat": copy["coverage_caveat"],
+            "series": [
+                {"label": copy["coverage_areas"], "value": int(count_lookup.get("areas", 0))},
+                {"label": copy["coverage_projects"], "value": int(count_lookup.get("projects", 0))},
+                {
+                    "label": copy["coverage_properties"],
+                    "value": int(count_lookup.get("properties", 0)),
+                },
+            ],
+        },
+        {
+            "title": copy["readiness_title"],
+            "question": copy["readiness_question"],
+            "source_class": "public",
+            "freshness_tier": copy["governed_tier"],
+            "caveat": copy["readiness_caveat"],
+            "series": [
+                {"label": copy["readiness_areas"], "value": int(verified_area_count)},
+                {"label": copy["readiness_projects"], "value": int(investment_snapshot_count)},
+            ],
+        },
+    ]
+
+
+def _market_intelligence_chart_series_html(bar_label: str, series: list[dict[str, object]]) -> str:
+    max_value = max((int(item["value"]) for item in series), default=0)
+    rows: list[str] = []
+    for point in series:
+        value = int(point["value"])
+        if max_value <= 0 or value <= 0:
+            width = 0
+        else:
+            width = max(8, round((value / max_value) * 100))
+        rows.append(
+            "".join(
+                [
+                    '<div><div class="grid"><span>',
+                    escape(str(point["label"])),
+                    '</span><strong>',
+                    f"{value:,}",
+                    '</strong></div><div aria-label="',
+                    escape(bar_label),
+                    '" style="height:8px;border-radius:999px;background:#d9e4de;overflow:hidden;">',
+                    '<span style="display:block;height:8px;border-radius:999px;background:#1f5c45;width:',
+                    str(width),
+                    '%;"></span></div></div>',
+                ]
+            )
+        )
+    return "".join(rows)
+
+
+def _market_intelligence_overview_chart_html(
+    *, chart: dict[str, object], labels: dict[str, str]
+) -> str:
+    return "".join(
+        [
+            '<article class="card"><p class="muted">',
+            escape(labels["source_label"]),
+            ": ",
+            escape(str(chart["source_class"])),
+            " • ",
+            escape(labels["freshness_label"]),
+            ": ",
+            escape(str(chart["freshness_tier"])),
+            '</p><h3>',
+            escape(str(chart["title"])),
+            '</h3><p>',
+            escape(str(chart["question"])),
+            '</p><div class="stack">',
+            _market_intelligence_chart_series_html(
+                labels["bar_label"], list(chart["series"])
+            ),
+            '</div><p class="muted">',
+            escape(str(chart["caveat"])),
+            '</p></article>',
+        ]
+    )
+
+
 def _render_market_intelligence_page(locale: str, request: Request, db: Session) -> HTMLResponse:
     copy = _market_intelligence_copy(locale)
+    overview_chart_copy = _market_intelligence_overview_chart_copy(locale)
     source_classes = _market_intelligence_source_classes(locale)
     report_regions = _market_intelligence_report_regions(locale)
+    overview_charts = _market_intelligence_overview_charts(locale, db)
     boundary_html = "".join(f"<li>{escape(point)}</li>" for point in copy["boundary_points"])
     freshness_html = "".join(f"<li>{escape(point)}</li>" for point in copy["freshness_points"])
     next_html = "".join(f"<li>{escape(point)}</li>" for point in copy["next_points"])
+    overview_chart_html = "".join(
+        _market_intelligence_overview_chart_html(
+            chart=chart,
+            labels=overview_chart_copy,
+        )
+        for chart in overview_charts
+    )
     source_class_html = "".join(
         f'<article class="card"><p class="muted">{escape(str(source_class["slug"]))}</p><h3>{escape(str(source_class["title"]))}</h3><p>{escape(str(source_class["summary"]))}</p><p><strong>{"Examples" if locale == "en" else "Examples"}:</strong></p><ul>{"".join(f"<li>{escape(str(example))}</li>" for example in source_class["examples"])}</ul><p><strong>{"Freshness" if locale == "en" else "Freshness"}:</strong> {escape(str(source_class["freshness"]))}</p><p class="muted">{escape(str(source_class["public_note"]))}</p></article>'
         for source_class in source_classes
@@ -6826,6 +6987,7 @@ def _render_market_intelligence_page(locale: str, request: Request, db: Session)
     body = (
         f'<section id="market-intelligence-overview" class="card"><p class="muted">{escape(str(copy["eyebrow"]))}</p><h2>{escape(str(copy["overview_title"]))}</h2><p>{escape(str(copy["overview_body"]))}</p><p class="muted">{escape(str(copy["note"]))}</p></section>'
         f'<section id="market-intelligence-boundary" class="card"><h2>{escape(str(copy["boundary_title"]))}</h2><ul>{boundary_html}</ul></section>'
+        f'<section id="market-intelligence-overview-charts" class="stack"><div class="card"><h2>{escape(overview_chart_copy["section_title"])}</h2><p>{escape(overview_chart_copy["section_intro"])}</p></div><div class="grid">{overview_chart_html}</div></section>'
         f'<section id="market-intelligence-source-classes" class="stack"><div class="card"><h2>{"Source classification layer" if locale == "en" else "Source classification layer"}</h2><p>{"Every public block in this module must resolve to a governed source class before later chart or interpretation slices expand." if locale == "en" else "ทุก block ที่เผยแพร่บน module นี้ต้องผูกกับ source class ที่กำกับได้ก่อนที่ slice ถัดไปจะขยายไปสู่ charts หรือ interpretation"}</p></div><div class="grid">{source_class_html}</div></section>'
         f'<section id="market-intelligence-region-contract" class="stack"><div class="card"><h2>{"Report region contract" if locale == "en" else "Report region contract"}</h2><p>{"This slice prepares the runtime structure for later chart and report regions without enabling those deeper layers yet." if locale == "en" else "slice นี้เตรียมโครงสร้าง runtime สำหรับ report regions ถัดไป โดยยังไม่เปิดใช้งาน layers ที่ลึกกว่านี้"}</p></div><div class="grid">{report_region_html}</div></section>'
         f'<section id="market-intelligence-freshness" class="card"><h2>{escape(str(copy["freshness_title"]))}</h2><ul>{freshness_html}</ul></section>'

@@ -11,9 +11,19 @@ def test_a13_market_intelligence_route_owner_renders_public_safe_shell(client) -
     assert "Public-safe boundary" in en_html
     assert "Source classification layer" in en_html
     assert "Report region contract" in en_html
+    assert "Basic market overview charts" in en_html
     assert "Freshness and methodology framing" in en_html
     assert "What later slices add" in en_html
     assert "This page shell is not a full market report yet" in en_html
+    assert "Published inventory coverage" in en_html
+    assert "Governed signal readiness" in en_html
+    assert "How much published inventory does the current public runtime cover?" in en_html
+    assert "How much public-safe signal coverage is ready to support later reports?" in en_html
+    assert "Published areas" in en_html
+    assert "Projects with investment snapshot" in en_html
+    assert "Freshness tier: fast" in en_html
+    assert "Freshness tier: governed" in en_html
+    assert "This chart summarizes records currently published in the runtime." in en_html
     assert "Approved public inventory counts" in en_html
     assert "Editorial market commentary" in en_html
     assert "Advisor-only" in en_html
@@ -40,9 +50,17 @@ def test_a13_market_intelligence_route_owner_renders_public_safe_shell(client) -
     assert "Public-safe boundary" in th_html
     assert "Source classification layer" in th_html
     assert "Report region contract" in th_html
+    assert "Basic market overview charts" in th_html
     assert "Freshness and methodology framing" in th_html
     assert "สิ่งที่จะตามมาใน slice ถัดไป" in th_html
     assert "page shell นี้ยังไม่ใช่รายงานตลาดฉบับสมบูรณ์" in th_html
+    assert "Published inventory coverage" in th_html
+    assert "Governed signal readiness" in th_html
+    assert "ตอนนี้ public runtime ครอบคลุม inventory ที่เผยแพร่มากน้อยเพียงใด?" in th_html
+    assert "มี public-safe market signals ที่พร้อมใช้เป็นฐานของ reports ถัดไปอยู่เท่าใด?" in th_html
+    assert "Areas with verified metrics" in th_html
+    assert "Projects with investment snapshot" in th_html
+    assert "chart นี้สรุปจำนวน records ที่เผยแพร่ใน runtime ปัจจุบัน" in th_html
     assert "approved public inventory counts" in th_html
     assert "editorial market commentary" in th_html
     assert "จัดเป็น boundary class เพื่อบอกสิ่งที่ห้ามเผยแพร่" in th_html
