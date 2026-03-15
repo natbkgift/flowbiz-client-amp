@@ -12,6 +12,7 @@ services:
     volumes:
       - /opt/flowbiz/storage/media:/app/storage/media
       - /opt/flowbiz/storage/property-images:/opt/flowbiz/storage/property-images:ro
+      - /opt/flowbiz/clients/flowbiz-client-amp/ops/logs:/app/ops/logs:ro
     restart: always
 
   admin-app:
