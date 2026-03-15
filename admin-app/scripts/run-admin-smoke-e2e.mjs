@@ -691,7 +691,12 @@ async function verifyDashboardUi(page, contractSummary, options = {}) {
   if (contractSummary.warningCount > 0) {
     await waitForVisibleText(page, contractSummary.firstWarning);
   } else {
-    await page.getByText(/No active warnings|ไม่มีคำเตือนที่เปิดอยู่/i).first().waitFor({ timeout: 10000 });
+    await page
+      .getByText(
+        /No warnings reported|The current snapshot did not report any warning conditions|รอบนี้ไม่มีคำเตือนที่ระบบรายงาน|สแนปช็อตปัจจุบันไม่พบคำเตือนที่ต้องติดตามต่อ/i,
+      )
+      .first()
+      .waitFor({ timeout: 10000 });
   }
 }
 

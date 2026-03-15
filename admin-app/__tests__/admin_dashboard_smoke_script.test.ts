@@ -47,6 +47,7 @@ describe("admin dashboard smoke script", () => {
     expect(script).toContain('bucket_date:');
     expect(script).toContain('name: `Smoke Inquiry ${index + 1}`');
     expect(script).toContain('warnings: ["Smoke warning check"]');
+    expect(script).toContain("No warnings reported|The current snapshot did not report any warning conditions|รอบนี้ไม่มีคำเตือนที่ระบบรายงาน|สแนปช็อตปัจจุบันไม่พบคำเตือนที่ต้องติดตามต่อ");
     expect(script).toContain("System health \\/ QA overview|Health widgets|ภาพรวมสุขภาพระบบ|วิดเจ็ตสุขภาพระบบ");
     expect(script).toContain("Activity metrics|Lead activity trend|แนวโน้มกิจกรรมของลีด|แนวโน้ม activity ของลีด");
     expect(script).toContain("Logs|Recent leads\\/inquiries|บันทึกเหตุการณ์|ลีด\\/อินไควรีล่าสุด");
