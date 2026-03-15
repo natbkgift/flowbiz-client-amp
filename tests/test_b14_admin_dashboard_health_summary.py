@@ -96,6 +96,10 @@ def test_b14_dashboard_summary_contract(client) -> None:
     for bucket in body["trend_series"]["7d"] + body["trend_series"]["30d"]:
         assert isinstance(bucket.get("bucket_date"), str)
         assert isinstance(bucket.get("count"), int)
+    expected_incomplete_count = sum(
+        1 for row in widget_rows.values() if row.get("status") in {"error", "unknown"}
+    )
+    assert body["incomplete_widget_count"] == expected_incomplete_count
 
 
 def test_b14_dashboard_trend_series_counts_more_than_visible_recent_rows(client) -> None:

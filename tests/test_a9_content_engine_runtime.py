@@ -323,6 +323,8 @@ def test_a9_empty_state_has_publish_safe_fallback(client) -> None:
     response = client.get("/en/blog")
     assert response.status_code == 200, response.text
     html = response.text
-    assert "No published content yet." in html
+    assert "Fresh editorial content is shared directly through the advisory desk." in html
     assert "TODO:" not in html
+    assert "pending publication" not in html
+    assert "not published yet" not in html
     assert 'id="content-empty"' in html

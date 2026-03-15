@@ -991,31 +991,29 @@ def admin_dashboard_health_summary(
     coverage_pct = project_cover.get("projects_real_cover_pct")
     if project_cover.get("dataset_empty"):
         coverage_status = "unknown"
-        coverage_summary = (
-            "No projects found yet. TODO: publish at least one project with cover media."
-        )
+        coverage_summary = "No projects found yet. Seed at least one project with cover media."
     elif coverage_pct is None:
         coverage_status = "unknown"
         coverage_summary = (
-            "Coverage source unavailable. TODO: generate or refresh project coverage report."
+            "Coverage source unavailable. Generate or refresh the project coverage report."
         )
     elif float(coverage_pct) >= 95:
         coverage_status = "ok"
         coverage_summary = "Project cover coverage meets target."
     elif float(coverage_pct) >= 80:
         coverage_status = "warn"
-        coverage_summary = "Coverage below target. TODO: fill missing project covers."
+        coverage_summary = "Coverage is below target. Fill the remaining project covers."
     else:
         coverage_status = "error"
         coverage_summary = (
-            "Coverage critically low. TODO: fix project cover media before next deploy."
+            "Coverage is critically low. Fix project cover media before the next deploy."
         )
 
     broken_media_count = media_integrity.get("broken_media_count")
     if broken_media_count is None:
         broken_media_status = "unknown"
         broken_media_summary = (
-            "Media integrity summary unavailable. TODO: investigate integrity scan failures."
+            "Media integrity summary unavailable. Investigate the integrity scan."
         )
     elif int(broken_media_count) == 0:
         broken_media_status = "ok"
@@ -1023,17 +1021,19 @@ def admin_dashboard_health_summary(
     elif int(broken_media_count) <= 5:
         broken_media_status = "warn"
         broken_media_summary = (
-            "Broken media found. TODO: repair missing/corrupt/invalid media paths."
+            "Broken media found. Repair missing, corrupt, or invalid media paths."
         )
     else:
         broken_media_status = "error"
-        broken_media_summary = "High broken media count. TODO: fix media integrity issues urgently."
+        broken_media_summary = (
+            "Broken media count is high. Fix media integrity issues before the next release."
+        )
 
     external_leakage_count = media_integrity.get("external_image_leakage_count")
     if external_leakage_count is None:
         external_leakage_status = "unknown"
         external_leakage_summary = (
-            "External leakage metric unavailable. TODO: rerun integrity scan and verify results."
+            "External leakage metric unavailable. Rerun the integrity scan and verify the result."
         )
     elif int(external_leakage_count) == 0:
         external_leakage_status = "ok"
@@ -1041,8 +1041,8 @@ def admin_dashboard_health_summary(
     else:
         external_leakage_status = "error"
         external_leakage_summary = (
-            "External image leakage detected. TODO: mirror assets into local media and "
-            "update references."
+            "External image leakage detected. Mirror the assets into local media "
+            "and update the references."
         )
 
     pending_translations = int(translation_metrics.get("total_pending_translations") or 0)
@@ -1055,8 +1055,8 @@ def admin_dashboard_health_summary(
     if translation_policy_approved is not True:
         translation_status = "unknown"
         translation_summary = (
-            "Pending translations is using draft policy. TODO: get content/locale owner "
-            "field-level sign-off for translation policy."
+            "Pending translations is using a draft policy. Get content-owner "
+            "sign-off before treating this as a release gate."
         )
     elif pending_translations == 0:
         translation_status = "ok"
@@ -1064,7 +1064,7 @@ def admin_dashboard_health_summary(
     else:
         translation_status = "warn"
         translation_summary = (
-            "Missing EN/TH content found. TODO: complete translations on impacted records."
+            "Missing EN/TH content found. Complete translations on the impacted records."
         )
 
     total_drafts = int(draft_metrics.get("total_unpublished_drafts") or 0)
@@ -1073,9 +1073,7 @@ def admin_dashboard_health_summary(
         drafts_summary = "No unpublished drafts pending."
     else:
         drafts_status = "warn"
-        drafts_summary = (
-            "Unpublished drafts exist. TODO: review and publish/archive pending drafts."
-        )
+        drafts_summary = "Unpublished drafts still exist. Review and publish or archive them."
 
     recent_count = int(recent_inquiries.get("count") or 0)
     if recent_count == 0:
@@ -1089,8 +1087,8 @@ def admin_dashboard_health_summary(
     if review_video_pending is None:
         review_video_status = "unknown"
         review_video_summary = (
-            "Review/video verification source is unavailable. TODO: configure home composer "
-            "source data."
+            "Review and video verification source is unavailable. Configure "
+            "the home composer source data."
         )
     elif int(review_video_pending) == 0:
         review_video_status = "ok"
@@ -1098,7 +1096,7 @@ def admin_dashboard_health_summary(
     else:
         review_video_status = "warn"
         review_video_summary = (
-            "Pending review/video verification found. TODO: approve rights and source references."
+            "Pending review or video verification found. Approve the rights and source references."
         )
 
     import_status = last_import.get("status")
@@ -1106,17 +1104,18 @@ def admin_dashboard_health_summary(
     if import_status is None and mirror_status is None:
         import_mirror_state = "unknown"
         import_mirror_summary = (
-            "Import/mirror status unavailable. TODO: run import and mirror pipeline at least once."
+            "Import and mirror status is unavailable. Run the import and mirror "
+            "pipeline at least once."
         )
     elif import_status in {"failed"} or mirror_status in {"failed"}:
         import_mirror_state = "error"
         import_mirror_summary = (
-            "Latest import/mirror indicates failures. TODO: review pipeline reports."
+            "The latest import or mirror run indicates failures. Review the pipeline reports."
         )
     elif import_status in {"partial"}:
         import_mirror_state = "warn"
         import_mirror_summary = (
-            "Latest import partially succeeded. TODO: resolve import row errors."
+            "The latest import partially succeeded. Resolve the row-level import errors."
         )
     else:
         import_mirror_state = "ok"
@@ -1126,21 +1125,21 @@ def admin_dashboard_health_summary(
     deploy_status = str(deploy_health.get("deploy_status") or "unknown")
     if health_status != "ok":
         deploy_health_state = "error"
-        deploy_health_summary = "Health endpoint is not OK. TODO: restore runtime health."
+        deploy_health_summary = "The health endpoint is not OK. Restore runtime health."
     elif deploy_status == "ok":
         deploy_health_state = "ok"
         deploy_health_summary = "Health check OK and deploy telemetry reports healthy."
     elif deploy_status == "error":
         deploy_health_state = "error"
         deploy_health_summary = (
-            "Latest deploy telemetry reports failure. TODO: review latest deploy artifact "
-            "and rerun deployment."
+            "Latest deploy telemetry reports a failure. Review the deploy "
+            "artifact and rerun deployment."
         )
     else:
         deploy_health_state = "unknown"
         deploy_health_summary = (
-            "Health check is OK, deploy telemetry status is unknown. TODO: run deploy script "
-            "that writes telemetry record."
+            "Health is OK but deploy telemetry status is unknown. Run the deploy "
+            "flow that writes the telemetry record."
         )
 
     widgets = [
@@ -1289,7 +1288,9 @@ def admin_dashboard_health_summary(
         },
     }
 
-    incomplete_widget_count = sum(1 for widget in widgets if widget["status"] != "ok")
+    incomplete_widget_count = sum(
+        1 for widget in widgets if widget["status"] in {"error", "unknown"}
+    )
     data_freshness = {
         "project_cover_coverage": _freshness(now, project_cover.get("checked_at")),
         "media_integrity": _freshness(now, media_integrity.get("scanned_at")),

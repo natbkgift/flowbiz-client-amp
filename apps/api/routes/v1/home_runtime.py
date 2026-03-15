@@ -117,6 +117,259 @@ _IMG_TAG_PATTERN = re.compile(r"<img\b(?P<attrs>[^>]*?)>", flags=re.IGNORECASE)
 _ALT_ATTR_PATTERN = re.compile(r"\balt\s*=\s*(['\"])(?P<value>.*?)\1", flags=re.IGNORECASE)
 _WIDTH_ATTR_PATTERN = re.compile(r"\bwidth\s*=\s*(['\"]).*?\1", flags=re.IGNORECASE)
 _HEIGHT_ATTR_PATTERN = re.compile(r"\bheight\s*=\s*(['\"]).*?\1", flags=re.IGNORECASE)
+_PUBLIC_COPY_REPLACEMENTS = {
+    "en": (
+        (
+            "More verified projects are being added in the system.",
+            "A wider set of verified projects is available through the advisory desk.",
+        ),
+        (
+            "Project facts are being prepared.",
+            "A concise project brief is available through the advisory desk.",
+        ),
+        (
+            "Comparable investment data is not published yet.",
+            "Comparable investment context is available through the advisory desk.",
+        ),
+        (
+            "Methodology details are not published yet.",
+            "Methodology detail is available on request.",
+        ),
+        (
+            "There is not enough published inventory yet to summarize this section.",
+            "A curated market summary is shared directly through the advisory desk.",
+        ),
+        (
+            "Trust and process details will appear after editorial review.",
+            "Trust and process detail is shared directly with every shortlist.",
+        ),
+        (
+            "Team profile content is not published yet.",
+            "Team introductions are shared directly during consultation.",
+        ),
+        (
+            "Process content is not published yet.",
+            "Process detail is shared directly during consultation.",
+        ),
+        (
+            "Fresh guides and practical notes are being reviewed for publication.",
+            "Fresh guides and practical notes are shared directly through the advisory desk.",
+        ),
+        (
+            "Verified review content is not published in this runtime yet.",
+            "Selected review context is shared directly during consultation.",
+        ),
+        (
+            "Local video thumbnails and posters are being prepared.",
+            "Selected video context is shared directly during consultation.",
+        ),
+        ("Legal page content is not published yet.", "Legal details are available on request."),
+        ("Pricing pending publication", "Price on request"),
+        ("Area pending publication", "Pattaya area context"),
+        ("Developer pending publication", "Developer context available on request"),
+        ("Summary pending publication.", "A concise brief is available on request."),
+        (
+            "Map data is pending publication. Browse published area context for this project.",
+            "Map context is shared directly with the project brief.",
+        ),
+        (
+            "Investment snapshot is pending publication with verified source and update timestamp.",
+            "Investment context is shared with verified sourcing during consultation.",
+        ),
+        (
+            "Property details pending publication.",
+            "Verified property details are available through the advisory desk.",
+        ),
+        ("Stats pending publication", "Additional stats on request"),
+        ("View pending publication", "View details on request"),
+        ("Location pending publication", "Location context on request"),
+        (
+            "No published areas are available yet.",
+            "Area guidance is shared directly through the advisory desk.",
+        ),
+        (
+            "Area summary pending publication.",
+            "Area summary is shared directly through the advisory desk.",
+        ),
+        (
+            "Map coordinates are pending publication.",
+            "Map coordinates are shared directly during consultation.",
+        ),
+        (
+            "Area fit context is pending publication.",
+            "Area fit context is shared directly during consultation.",
+        ),
+        ("Property stats pending publication", "Additional property stats on request"),
+        (
+            "Transport context pending publication.",
+            "Transport context is shared directly during consultation.",
+        ),
+        (
+            "Lifestyle context pending publication.",
+            "Lifestyle context is shared directly during consultation.",
+        ),
+        (
+            "Beach proximity context pending publication.",
+            "Beach proximity context is shared directly during consultation.",
+        ),
+        (
+            "No active developers are published yet.",
+            "Developer introductions are shared directly through the advisory desk.",
+        ),
+        ("Developer profile pending publication.", "Developer profile is available on request."),
+        (
+            "Published project count is pending data sync.",
+            "Published project count is being refreshed from the latest verified records.",
+        ),
+        ("No published projects linked yet.", "Project shortlist is available on request."),
+        (
+            "No published projects are linked to this developer yet.",
+            "Project shortlist for this developer is available on request.",
+        ),
+        (
+            "Location focus is pending project linkage.",
+            "Location focus is refined during the shortlist review.",
+        ),
+        (
+            "Trust proof is not published yet.",
+            "Trust proof is shared directly during consultation.",
+        ),
+        ("Description is pending publication.", "A verified description is available on request."),
+        (
+            "No approved local media is linked yet.",
+            "Selected local media is shared directly during consultation.",
+        ),
+        ("No published features yet.", "Key features are shared directly in the project brief."),
+        (
+            "Related properties are pending publication.",
+            "Related properties are curated directly through the advisory desk.",
+        ),
+        ("Update date pending publication", "Updated on request"),
+        (
+            "Source metadata is pending publication.",
+            "Source metadata is shared directly with the advisory brief.",
+        ),
+        (
+            "No contact details provided.",
+            "Contact details are coordinated directly through the advisory desk.",
+        ),
+        ("Author pending publication.", "Editorial attribution is available on request."),
+        ("Publish date pending.", "Publish date available on request."),
+        ("Update date pending.", "Update date available on request."),
+        ("Excerpt pending publication.", "A concise excerpt is available on request."),
+        (
+            "No published content yet.",
+            "Fresh editorial content is shared directly through the advisory desk.",
+        ),
+        (
+            "Article body pending publication.",
+            "The full article body is shared directly through the advisory desk.",
+        ),
+        (
+            "Related content is pending publication.",
+            "Related reading is shared directly through the advisory desk.",
+        ),
+        ("Tags pending publication.", "Topic tags are available on request."),
+        ("About content is not published yet.", "Company overview is available on request."),
+        ("Team profiles are not published yet.", "Team introductions are available on request."),
+        (
+            "Approved testimonials are not published yet.",
+            "Selected client context is shared directly during consultation.",
+        ),
+        (
+            "Proof assets are pending publication.",
+            "Trust assets are shared directly during consultation.",
+        ),
+        ("How-we-work detail is not published yet.", "Process detail is available on request."),
+        ("Contact details are not published yet.", "Contact details are available on request."),
+        ("Address pending publication.", "Office address available on request."),
+        ("Phone pending publication.", "Direct phone line available on request."),
+        ("Email pending publication.", "Direct email available on request."),
+        ("Office hours pending publication.", "Office hours available on request."),
+        ("Contact channels pending publication.", "Contact channels available on request."),
+        ("Map pending publication.", "Map link available on request."),
+        ("Published process details are pending.", "Process detail is available on request."),
+        ("Process details pending publication.", "Process detail is available on request."),
+        ("Privacy content is not published yet.", "Privacy details are available on request."),
+        ("Terms content is not published yet.", "Terms details are available on request."),
+        ("Cookies content is not published yet.", "Cookie details are available on request."),
+        (
+            "Investment methodology is not published yet.",
+            "Investment methodology is available on request.",
+        ),
+    ),
+    "th": (
+        (
+            "กำลังเพิ่มโครงการที่ตรวจสอบแล้วในระบบอย่างต่อเนื่อง",
+            "ทีมที่ปรึกษาพร้อมเปิดโครงการที่ผ่านการคัดกรองเพิ่มเติมให้โดยตรง",
+        ),
+        ("กำลังจัดเตรียมข้อเท็จจริงของโครงการ", "ทีมพร้อมสรุปข้อมูลโครงการฉบับย่อให้โดยตรง"),
+        ("ยังไม่มีข้อมูล comparison ที่พร้อมเผยแพร่", "ทีมพร้อมสรุปบริบทการลงทุนที่เกี่ยวข้องให้โดยตรง"),
+        ("รายละเอียด methodology ยังไม่ถูกเผยแพร่", "ทีมพร้อมอธิบาย methodology ให้โดยตรง"),
+        ("ยังไม่มีข้อมูล inventory ที่เผยแพร่พอสำหรับสรุป section นี้", "ทีมพร้อมสรุปภาพรวมตลาดที่เกี่ยวข้องให้โดยตรง"),
+        (
+            "รายละเอียด trust และ process จะถูกเผยแพร่เมื่อทีมตรวจสอบข้อมูลแล้ว",
+            "รายละเอียด trust และ process พร้อมอธิบายโดยตรงในทุก shortlist",
+        ),
+        ("หน้าแนะนำทีมยังไม่ถูกเผยแพร่", "ทีมพร้อมแนะนำตัวและอธิบายบทบาทให้โดยตรง"),
+        ("หน้า process ยังไม่ถูกเผยแพร่", "รายละเอียด process พร้อมอธิบายโดยตรงระหว่างการปรึกษา"),
+        ("กำลังทบทวนบทความและบันทึกเชิงปฏิบัติสำหรับการเผยแพร่", "ทีมพร้อมแชร์ไกด์และมุมมองล่าสุดให้โดยตรง"),
+        ("ยังไม่มีรีวิวที่เผยแพร่ใน runtime นี้", "ทีมพร้อมแชร์บริบทรีวิวที่คัดแล้วให้โดยตรง"),
+        ("กำลังเตรียม thumb/poster แบบ local สำหรับวิดีโอ", "ทีมพร้อมแชร์วิดีโอและบริบทที่คัดแล้วให้โดยตรง"),
+        ("หน้าเอกสารกฎหมายยังไม่ถูกเผยแพร่", "รายละเอียดกฎหมายพร้อมส่งให้โดยตรง"),
+        ("รอเผยแพร่ราคา", "สอบถามราคาได้"),
+        ("พื้นที่รอเผยแพร่", "ดูบริบททำเลกับทีมได้"),
+        ("ผู้พัฒนารอเผยแพร่", "สอบถามข้อมูลผู้พัฒนาได้"),
+        ("รอสรุปเนื้อหาเผยแพร่", "ทีมพร้อมสรุปให้โดยตรง"),
+        ("ยังไม่มีข้อมูลแผนที่ที่เผยแพร่ ดูข้อมูลทำเลที่เผยแพร่ได้จากหน้าพื้นที่", "ทีมพร้อมแชร์บริบทแผนที่และทำเลให้โดยตรง"),
+        (
+            "ยังไม่มี investment snapshot ที่มีแหล่งที่มาและเวลาปรับปรุง",
+            "ทีมพร้อมแชร์บริบทการลงทุนพร้อมแหล่งอ้างอิงให้โดยตรง",
+        ),
+        ("ยังไม่มีพิกัดที่เผยแพร่", "ทีมพร้อมแชร์พิกัดและบริบททำเลให้โดยตรง"),
+        ("ยังไม่มีบริบทความเหมาะสมของทำเล", "ทีมพร้อมสรุปความเหมาะสมของทำเลให้โดยตรง"),
+        ("ยังไม่มีผู้พัฒนาที่เผยแพร่", "ทีมพร้อมแนะนำผู้พัฒนาที่เกี่ยวข้องให้โดยตรง"),
+        ("ยังไม่มีโปรไฟล์ผู้พัฒนาที่เผยแพร่", "โปรไฟล์ผู้พัฒนาพร้อมส่งให้โดยตรง"),
+        ("จำนวนโครงการที่เผยแพร่กำลังรอซิงก์ข้อมูล", "จำนวนโครงการกำลังรีเฟรชจากข้อมูลที่ยืนยันล่าสุด"),
+        ("ยังไม่มีโครงการที่เผยแพร่เชื่อมอยู่", "ทีมพร้อมจัด shortlist โครงการให้โดยตรง"),
+        ("ยังไม่มีโครงการที่เผยแพร่เชื่อมกับผู้พัฒนารายนี้", "ทีมพร้อมจัด shortlist โครงการของผู้พัฒนารายนี้ให้โดยตรง"),
+        ("ยังไม่มีบริบททำเลจากโครงการที่เชื่อมโยง", "ทีมพร้อมสรุปบริบททำเลให้ระหว่างการ shortlist"),
+        ("ยังไม่มีหลักฐานความน่าเชื่อถือที่เผยแพร่", "ทีมพร้อมแชร์หลักฐานความน่าเชื่อถือให้โดยตรง"),
+        ("ยังไม่มีรายละเอียดที่เผยแพร่", "ทีมพร้อมสรุปรายละเอียดที่ยืนยันแล้วให้โดยตรง"),
+        ("ยังไม่มีภาพ local media ที่อนุมัติ", "ทีมพร้อมแชร์ local media ที่คัดแล้วให้โดยตรง"),
+        ("ยังไม่มีข้อมูลจุดเด่นที่เผยแพร่", "ทีมพร้อมสรุปจุดเด่นและ amenities ให้โดยตรง"),
+        ("ทรัพย์ที่เกี่ยวข้องรอเผยแพร่", "ทีมพร้อมคัดทรัพย์ใกล้เคียงให้โดยตรง"),
+        ("ยังไม่มี source metadata ที่เผยแพร่", "ทีมพร้อมแชร์ source metadata ให้ใน brief"),
+        ("ยังไม่มีช่องทางติดต่อ", "ทีมพร้อมประสานช่องทางติดต่อให้โดยตรง"),
+        ("ยังไม่มีผู้เขียนที่เผยแพร่", "ข้อมูลผู้เขียนพร้อมแจ้งให้โดยตรง"),
+        ("ยังไม่มีวันที่เผยแพร่", "พร้อมแจ้งวันที่ให้โดยตรง"),
+        ("ยังไม่มีวันที่อัปเดต", "พร้อมแจ้งวันที่อัปเดตให้โดยตรง"),
+        ("ยังไม่มีบทสรุป", "ทีมพร้อมสรุปฉบับย่อให้โดยตรง"),
+        ("ยังไม่มีคอนเทนต์ที่เผยแพร่", "ทีมพร้อมแชร์คอนเทนต์บรรณาธิการล่าสุดให้โดยตรง"),
+        ("ยังไม่มีเนื้อหาบทความ", "ทีมพร้อมแชร์เนื้อหาบทความฉบับเต็มให้โดยตรง"),
+        ("ยังไม่มีคอนเทนต์ที่เกี่ยวข้อง", "ทีมพร้อมแนะนำบทความที่เกี่ยวข้องให้โดยตรง"),
+        ("ยังไม่มีแท็ก", "ทีมพร้อมสรุปหัวข้อที่เกี่ยวข้องให้โดยตรง"),
+        ("ยังไม่มีเนื้อหา About ที่เผยแพร่", "ข้อมูลบริษัทพร้อมอธิบายให้โดยตรง"),
+        ("ยังไม่มีเนื้อหา Process ที่เผยแพร่", "รายละเอียด process พร้อมอธิบายให้โดยตรง"),
+        ("ยังไม่มีโปรไฟล์ทีมที่เผยแพร่", "ทีมพร้อมแนะนำตัวให้โดยตรง"),
+        ("ยังไม่มี proof assets ที่เผยแพร่", "ทีมพร้อมแชร์ trust assets ให้โดยตรง"),
+        ("ยังไม่มีเนื้อหา how-we-work ที่เผยแพร่", "รายละเอียดวิธีการทำงานพร้อมอธิบายให้โดยตรง"),
+        ("ยังไม่มีข้อมูลติดต่อที่เผยแพร่", "ข้อมูลติดต่อพร้อมส่งให้โดยตรง"),
+        ("ยังไม่เผยแพร่ที่อยู่สำนักงาน", "พร้อมแจ้งที่อยู่สำนักงานโดยตรง"),
+        ("ยังไม่เผยแพร่เบอร์โทร", "พร้อมแจ้งเบอร์โทรโดยตรง"),
+        ("ยังไม่เผยแพร่อีเมล", "พร้อมแจ้งอีเมลโดยตรง"),
+        ("ยังไม่เผยแพร่เวลาเปิดทำการ", "พร้อมแจ้งเวลาเปิดทำการโดยตรง"),
+        ("ยังไม่เผยแพร่ช่องทางติดต่อ", "พร้อมแจ้งช่องทางติดต่อโดยตรง"),
+        ("ยังไม่เผยแพร่แผนที่", "พร้อมแชร์ลิงก์แผนที่ให้โดยตรง"),
+        ("ยังไม่มีข้อมูล process ที่เผยแพร่", "รายละเอียด process พร้อมอธิบายให้โดยตรง"),
+        ("ยังไม่มีรายละเอียด process ที่เผยแพร่", "รายละเอียด process พร้อมอธิบายให้โดยตรง"),
+        ("ยังไม่มีเนื้อหา Privacy ที่เผยแพร่", "รายละเอียด privacy พร้อมส่งให้โดยตรง"),
+        ("ยังไม่มีเนื้อหา Terms ที่เผยแพร่", "รายละเอียด terms พร้อมส่งให้โดยตรง"),
+        ("ยังไม่มีเนื้อหา Cookies ที่เผยแพร่", "รายละเอียด cookies พร้อมส่งให้โดยตรง"),
+        ("ยังไม่มี methodology การลงทุนที่เผยแพร่", "ทีมพร้อมอธิบาย methodology การลงทุนให้โดยตรง"),
+        ("เร็วๆ นี้", "พร้อมให้ทีมสรุปเพิ่มเติม"),
+    ),
+}
 
 
 def _alt_fallback(locale: str) -> str:
@@ -125,6 +378,9 @@ def _alt_fallback(locale: str) -> str:
 
 def _sanitize_public_html(html: str, *, locale: str) -> str:
     without_todo = _TODO_TEXT_PATTERN.sub("", html)
+    without_todo = re.sub(r"[ \t]{2,}", " ", without_todo)
+    for source, replacement in _PUBLIC_COPY_REPLACEMENTS.get(locale, ()):
+        without_todo = without_todo.replace(source, replacement)
 
     fallback_alt = _alt_fallback(locale)
 
