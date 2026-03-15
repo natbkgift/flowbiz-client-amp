@@ -5,6 +5,9 @@ Date: 2026-03-15
 Source blueprint:
 `d:\FlowBiz\FlowBiz Company\amp_pattaya_master_ux_blueprint.md`
 
+Governance lock:
+`027ef62f` on `origin/main`
+
 ## Purpose
 
 The source blueprint mixes current website scope, future platform scope, benchmarks, prompts, execution notes, and strategic outcome language in one file.
@@ -65,21 +68,19 @@ The following blueprint content supports delivery but must not be rolled into th
 
 | Term | Meaning | When to use it |
 | --- | --- | --- |
-| `V1 production-ready` | The advisory website is implemented, validated, and usable in production. | Use for the current repo summary. |
-| `V1 largely implemented` | Most V1 scope exists, but a few material UX or readiness gaps remain. | Use for intermediate delivery reports. |
-| `V2 partial` | A V2 module has real implementation or foundations, but is not yet a complete product capability. | Use for smart finder, investor tooling, CRM maturity, or similar in-progress modules. |
-| `V2 missing` | The blueprint module is not implemented as a product feature in this repo. | Use for saved shortlist, deal room, or acquisition system product surfaces. |
+| `V1 closed / production-ready` | The advisory website scope is complete enough to be treated as an operational baseline, not an active redesign track. | Use for the repo top-line status from this point forward. |
+| `V2 roadmap only` | Platform-module scope is not part of the closed V1 baseline and must be treated as future staged expansion work. | Use for all top-line V2 reporting from this point forward. |
 | `Supporting / excluded` | The blueprint content is strategic or operational guidance, not a product scope item. | Use for benchmark lists, prompts, and strategic-outcome appendices. |
 
 ## Canonical Status Sentence
 
 Use this sentence when speaking to the team, stakeholders, or investors:
 
-`AMP Pattaya repo is no longer a redesign prototype; it is a largely implemented V1 advisory website with production-grade CRM/admin foundations, while several V2 platform modules remain partial or missing.`
+`AMP Pattaya repo is no longer a redesign prototype; V1 is closed and production-ready, while V2 is roadmap-only and must be tracked as staged platform expansion.`
 
 Thai rendering:
 
-`AMP Pattaya repo ไม่ใช่ prototype สำหรับงาน redesign แล้ว แต่เป็น V1 advisory website ที่ implement ไปมากและมีฐาน CRM/admin ระดับ production แล้ว ขณะที่ V2 platform modules หลายส่วนยังอยู่ในสถานะ partial หรือยังไม่มี`
+`AMP Pattaya repo ไม่ใช่ prototype สำหรับงาน redesign แล้ว โดย V1 ถูกปิดเป็น production-ready แล้ว ส่วน V2 เป็น roadmap-only และต้องติดตามแยกเป็นงานขยายแพลตฟอร์มตามลำดับ`
 
 ## Reporting Rules
 
@@ -88,11 +89,16 @@ Thai rendering:
 3. `Phase A-E` reporting belongs under `V1` only.
 4. Advanced search, AI, market intelligence, saved shortlist, deal room, and acquisition system must always be reported under `V2`.
 5. Team and investor summaries should use one top-line sentence plus a V1/V2 split, not a raw list of blueprint headings.
+6. Do not reopen or re-scope `V1` unless there is an explicit product decision that replaces this governance lock.
+7. Do not report `master blueprint complete`.
+8. All future status updates must distinguish:
+   - `V1 closed / production-ready`
+   - `V2 roadmap only`
 
 ## Practical Interpretation for This Repo
 
-- Current repo summary: `V1 production-ready`
-- Current platform summary: `V2 partial / missing depending on module`
+- Current repo summary: `V1 closed / production-ready`
+- Current platform summary: `V2 roadmap only`
 - Current admin/CRM summary: `production-grade foundation already present`
 
 This governance file supersedes ambiguous phrases that compress both website delivery and future platform roadmap into one status label.

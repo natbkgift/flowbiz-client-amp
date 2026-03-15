@@ -2,26 +2,29 @@
 
 Date: 2026-03-15
 
+Governance lock:
+`027ef62f` on `origin/main`
+
 ## Executive Summary
 
-AMP Pattaya repo is no longer a redesign prototype; it is a largely implemented V1 advisory website with production-grade CRM/admin foundations, while several V2 platform modules remain partial or missing.
+AMP Pattaya repo is no longer a redesign prototype; V1 is closed and production-ready, while V2 is roadmap-only and must be tracked as staged platform expansion.
 
 Thai executive rendering:
 
-AMP Pattaya repo ไม่ใช่ prototype สำหรับงาน redesign แล้ว แต่เป็น V1 advisory website ที่ implement ไปมากและมีฐาน CRM/admin ระดับ production แล้ว ขณะที่ V2 platform modules หลายส่วนยังอยู่ในสถานะ partial หรือยังไม่มี
+AMP Pattaya repo ไม่ใช่ prototype สำหรับงาน redesign แล้ว โดย V1 ถูกปิดเป็น production-ready แล้ว ส่วน V2 เป็น roadmap-only และต้องติดตามแยกเป็นงานขยายแพลตฟอร์มตามลำดับ
 
 ## What This Means
 
 The current repo should be described as:
 
 - a live advisory website, not a concept build
-- production-ready on the V1 website/advisory scope
+- closed / production-ready on the V1 website/advisory scope
 - already backed by serious admin and CRM operations
 - not yet the full end-to-end proptech platform described by the full master blueprint
 
 ## V1 Status
 
-`V1 — Website / Advisory Experience: production-ready`
+`V1 — Website / Advisory Experience: closed / production-ready`
 
 The implemented V1 surface already includes:
 
@@ -44,9 +47,9 @@ Representative evidence:
 
 ## V2 Status
 
-`V2 — Platform Modules: partial / missing depending on module`
+`V2 — Platform Modules: roadmap only`
 
-Modules with real foundations or partial implementation:
+Modules that have useful foundations for roadmap work:
 
 - advanced search
 - investor tools
@@ -55,7 +58,7 @@ Modules with real foundations or partial implementation:
 - market intelligence signals
 - foreign buyer content/system foundations
 
-Modules still missing as product surfaces:
+Modules still not active as product surfaces:
 
 - saved shortlist
 - deal room / document vault
@@ -78,18 +81,19 @@ Current repo and production proof points support a `V1 production-ready` stateme
 
 Use:
 
-`AMP Pattaya repo is no longer a redesign prototype; it is a largely implemented V1 advisory website with production-grade CRM/admin foundations, while several V2 platform modules remain partial or missing.`
+`AMP Pattaya repo is no longer a redesign prototype; V1 is closed and production-ready, while V2 is roadmap-only and must be tracked as staged platform expansion.`
 
 Avoid:
 
 - `Everything is done`
 - `The whole blueprint is done`
+- `Master blueprint complete`
 - `The redesign is still unfinished`
 
 Those statements collapse two different truths:
 
 - V1 website scope is already real and operational
-- V2 platform scope is still roadmap territory in several areas
+- V2 platform scope is roadmap territory and should not be reported as active shipped scope
 
 ## Recommended Next Priorities
 
