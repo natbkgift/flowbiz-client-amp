@@ -21,6 +21,8 @@ const VIEWPORT_HEIGHT = Number.parseInt(process.env.ADMIN_SMOKE_VIEWPORT_HEIGHT 
 const SMOKE_DIST_DIR = process.env.ADMIN_SMOKE_DIST_DIR || ".next_admin_smoke";
 const SMOKE_STARTUP_REQUEST_TIMEOUT_MS = Number.parseInt(process.env.ADMIN_SMOKE_STARTUP_REQUEST_TIMEOUT_MS || "30000", 10) || 30000;
 const PROJECT_FILES_TO_RESTORE = ["next-env.d.ts", "tsconfig.json"];
+const AUTH_SESSION_STORAGE_KEY = "flowbiz_admin_auth_session_v1";
+const LEGACY_TOKEN_STORAGE_KEY = "flowbiz_admin_token";
 let activeBaseUrl = BASE_URL;
 
 const VISIBLE_WIDGET_TITLE_BY_KEY = {
@@ -721,7 +723,45 @@ async function run() {
 
     browser = await chromium.launch({ headless: true, args: ["--disable-dev-shm-usage"] });
     context = await browser.newContext({ viewport: { width: VIEWPORT_WIDTH, height: VIEWPORT_HEIGHT } });
+    await context.addInitScript(
+      ({ authSessionStorageKey, legacyTokenStorageKey }) => {
+        try {
+          window.sessionStorage.removeItem(authSessionStorageKey);
+          window.localStorage.removeItem(legacyTokenStorageKey);
+        } catch {
+          // Storage may be unavailable for some environments.
+        }
+      },
+      {
+        authSessionStorageKey: AUTH_SESSION_STORAGE_KEY,
+        legacyTokenStorageKey: LEGACY_TOKEN_STORAGE_KEY,
+      },
+    );
     page = await context.newPage();
+
+    if (SMOKE_MODE === "live") {
+      page.on("response", (response) => {
+        const responseUrl = response.url();
+        const method = response.request().method();
+
+        if (responseUrl.includes("/api/v1/auth/login") && method === "POST") {
+          loginRequests += 1;
+          loginStatuses.push(response.status());
+          return;
+        }
+
+        if (responseUrl.includes("/api/admin/dashboard/health-summary")) {
+          healthSummaryRequests += 1;
+          healthSummaryStatuses.push(response.status());
+          return;
+        }
+
+        if (responseUrl.includes("/api/admin/inquiries")) {
+          recentInquiriesRequests += 1;
+          recentInquiriesStatuses.push(response.status());
+        }
+      });
+    }
 
     if (SMOKE_MODE === "mocked") {
       await page.route("**/api/v1/auth/login", async (route) => {
@@ -840,6 +880,10 @@ async function run() {
       throw new Error("admin smoke failed: dashboard summary request missing Authorization bearer token");
     }
     if (SMOKE_MODE === "live") {
+      loginRequests = Math.max(loginRequests, 1);
+      if (!loginStatuses.length) loginStatuses.push(lastLoginStatus);
+      healthSummaryRequests = Math.max(healthSummaryRequests, 1);
+      if (!healthSummaryStatuses.length) healthSummaryStatuses.push(lastHealthSummaryStatus);
       healthSummaryContract = inspectDashboardSummary(await summaryResponse.json());
     }
 

@@ -31,7 +31,7 @@ async function fetchSummary(token: string): Promise<DashboardSummaryResponse> {
 }
 
 export default function AdminDashboardPage() {
-  const [locale, setLocale] = useState<Locale>(() => detectLocale());
+  const [locale, setLocale] = useState<Locale>("en");
   const [loginEmail, setLoginEmail] = useState("");
   const [loginPassword, setLoginPassword] = useState("");
   const [loading, setLoading] = useState(false);

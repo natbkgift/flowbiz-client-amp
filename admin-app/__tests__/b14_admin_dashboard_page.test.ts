@@ -21,6 +21,8 @@ describe("B14 admin dashboard page contract", () => {
     expect(page).toContain("useAdminAuthController");
     expect(page).toContain("loginWithAdminSession");
     expect(page).toContain("transitionDashboardState");
+    expect(page).toContain('const [locale, setLocale] = useState<Locale>("en");');
+    expect(page).toContain("setLocale(detectLocale());");
     expect(page).toContain("<AdminDashboardScreen");
     expect(screen).toContain('from "@/components/admin/dashboard/DashboardSectionPrimitives"');
     expect(screen).toContain('from "@/components/admin/dashboard/DashboardKpiWidgets"');

@@ -15,6 +15,8 @@ describe("admin dashboard smoke script", () => {
 
     expect(script).toContain('const SMOKE_MODE = process.env.ADMIN_SMOKE_MODE === "live" ? "live" : "mocked";');
     expect(script).toContain('const SMOKE_LOCALE = process.env.ADMIN_SMOKE_LOCALE === "th" ? "th" : "en";');
+    expect(script).toContain('const AUTH_SESSION_STORAGE_KEY = "flowbiz_admin_auth_session_v1";');
+    expect(script).toContain('const LEGACY_TOKEN_STORAGE_KEY = "flowbiz_admin_token";');
     expect(script).toContain('ADMIN_SMOKE_EMAIL');
     expect(script).toContain('ADMIN_SMOKE_PASSWORD');
     expect(script).toContain('smokeMode: SMOKE_MODE');
@@ -30,6 +32,13 @@ describe("admin dashboard smoke script", () => {
     expect(script).toContain("function inspectDashboardSummary(payload)");
     expect(script).toContain("async function verifyDashboardUi(page, contractSummary, options = {})");
     expect(script).toContain('const { smokeMode = "mocked", getCurrentRecentInquiriesRequestCount = () => 0 } = options;');
+    expect(script).toContain("await context.addInitScript(");
+    expect(script).toContain('window.sessionStorage.removeItem(authSessionStorageKey);');
+    expect(script).toContain('window.localStorage.removeItem(legacyTokenStorageKey);');
+    expect(script).toContain('page.on("response", (response) => {');
+    expect(script).toContain('loginRequests += 1;');
+    expect(script).toContain('healthSummaryRequests += 1;');
+    expect(script).toContain('recentInquiriesRequests += 1;');
     expect(script).toContain("const generatedDate = new Date();");
     expect(script).toContain("const baseTimestamp = generatedDate.getTime();");
     expect(script).toContain('title: "Recent leads / inquiries"');
