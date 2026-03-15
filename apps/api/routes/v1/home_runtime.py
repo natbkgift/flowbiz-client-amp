@@ -6958,12 +6958,94 @@ def _market_intelligence_overview_chart_html(
     )
 
 
+def _market_intelligence_interpretation_copy(locale: str) -> dict[str, str]:
+    if locale == "th":
+        return {
+            "section_title": "Advisory interpretation blocks",
+            "section_intro": "blocks ด้านล่างช่วยแปลความหมายของ public-safe charts ในระดับภาพรวม โดยไม่ทำหน้าที่แทนคำแนะนำเฉพาะเคสหรือการคาดการณ์ตลาด",
+            "source_label": "Source class",
+            "coverage_title": "Coverage reading",
+            "coverage_body": "public runtime ตอนนี้สะท้อน inventory ที่เผยแพร่แล้ว {areas} ทำเล, {projects} โครงการ, และ {properties} รายการ active ซึ่งช่วยให้เห็น breadth ของข้อมูลที่เปิดเผย แต่ยังไม่ใช่ภาพครบทุกโอกาสในตลาด",
+            "readiness_title": "Readiness reading",
+            "readiness_body": "signals ที่พร้อมใช้เป็นฐานของรายงานสาธารณะมีอยู่แล้วอย่างน้อย {areas_ready} ทำเลที่มี metrics ผ่าน source/freshness guard และ {projects_ready} โครงการที่มี investment snapshot พร้อมใช้เป็น reference เชิงสาธารณะ",
+            "escalation_title": "Nuance and escalation",
+            "escalation_body": "เมื่อผู้ใช้ต้องเทียบหลายทำเล, แปลความหมายของ signal ต่อ decision จริง, หรือแยกความต่างระหว่าง market context กับดีลเฉพาะราย ควรยกระดับไปยัง advisor path เดิมแทนการสรุปจากหน้า public นี้เพียงอย่างเดียว",
+            "note": "interpretation เหล่านี้เป็น descriptive layer ไม่ใช่คำแนะนำลงทุน ไม่ใช่การรับประกันผลตอบแทน และไม่ใช่ความแน่นอนทางกฎหมายหรือการเงิน",
+            "curated_class": "curated",
+        }
+    return {
+        "section_title": "Advisory interpretation blocks",
+        "section_intro": "These blocks help readers interpret the current public-safe charts at a high level without acting as case-specific advice or a market forecast.",
+        "source_label": "Source class",
+        "coverage_title": "Coverage reading",
+        "coverage_body": "The current public runtime reflects published inventory across {areas} areas, {projects} projects, and {properties} active properties. That gives a useful picture of disclosed market breadth, but it does not represent every opportunity in the market.",
+        "readiness_title": "Readiness reading",
+        "readiness_body": "The public module already has at least {areas_ready} areas with governed metric support and {projects_ready} projects with an investment snapshot ready for public reference, which helps define what evidence is mature enough for later reporting layers.",
+        "escalation_title": "Nuance and escalation",
+        "escalation_body": "When a user needs to compare multiple submarkets, translate a signal into a live decision, or separate public context from deal-specific considerations, the next step should be the existing advisor path rather than this public page alone.",
+        "note": "These interpretation blocks are descriptive only. They are not investment recommendations, they do not promise returns, and they do not create legal or financial certainty.",
+        "curated_class": "curated",
+    }
+
+
+def _market_intelligence_interpretations(
+    locale: str, db: Session
+) -> list[dict[str, object]]:
+    count_lookup = {key: value for key, value in _count_cards(db)}
+    published_areas = db.scalars(
+        select(Area).where(Area.deleted_at.is_(None), Area.status == "published")
+    ).all()
+    stats_by_area = _area_stats_lookup(db, [row.id for row in published_areas])
+    verified_area_count = sum(
+        1
+        for row in published_areas
+        if _has_verified_area_metrics(
+            " ".join(str(row.source_note or "").split()),
+            _area_metrics_cadence(row.content, locale),
+            stats_by_area.get(str(row.id)),
+        )
+    )
+    published_projects = db.scalars(
+        select(Project).where(Project.deleted_at.is_(None), Project.status == "published")
+    ).all()
+    investment_snapshot_count = sum(
+        1 for row in published_projects if _project_investment_snapshot_ready(row)
+    )
+    copy = _market_intelligence_interpretation_copy(locale)
+    return [
+        {
+            "title": copy["coverage_title"],
+            "source_class": copy["curated_class"],
+            "body": copy["coverage_body"].format(
+                areas=int(count_lookup.get("areas", 0)),
+                projects=int(count_lookup.get("projects", 0)),
+                properties=int(count_lookup.get("properties", 0)),
+            ),
+        },
+        {
+            "title": copy["readiness_title"],
+            "source_class": copy["curated_class"],
+            "body": copy["readiness_body"].format(
+                areas_ready=int(verified_area_count),
+                projects_ready=int(investment_snapshot_count),
+            ),
+        },
+        {
+            "title": copy["escalation_title"],
+            "source_class": copy["curated_class"],
+            "body": copy["escalation_body"],
+        },
+    ]
+
+
 def _render_market_intelligence_page(locale: str, request: Request, db: Session) -> HTMLResponse:
     copy = _market_intelligence_copy(locale)
     overview_chart_copy = _market_intelligence_overview_chart_copy(locale)
+    interpretation_copy = _market_intelligence_interpretation_copy(locale)
     source_classes = _market_intelligence_source_classes(locale)
     report_regions = _market_intelligence_report_regions(locale)
     overview_charts = _market_intelligence_overview_charts(locale, db)
+    interpretations = _market_intelligence_interpretations(locale, db)
     boundary_html = "".join(f"<li>{escape(point)}</li>" for point in copy["boundary_points"])
     freshness_html = "".join(f"<li>{escape(point)}</li>" for point in copy["freshness_points"])
     next_html = "".join(f"<li>{escape(point)}</li>" for point in copy["next_points"])
@@ -6982,6 +7064,10 @@ def _render_market_intelligence_page(locale: str, request: Request, db: Session)
         f'<article class="card"><h3>{escape(str(region["title"]))}</h3><p><strong>{"Allowed classes" if locale == "en" else "Allowed classes"}:</strong> {escape(str(region["allowed_classes"]))}</p><p>{escape(str(region["rule"]))}</p></article>'
         for region in report_regions
     )
+    interpretation_html = "".join(
+        f'<article class="card"><p class="muted">{escape(interpretation_copy["source_label"])}: {escape(str(block["source_class"]))}</p><h3>{escape(str(block["title"]))}</h3><p>{escape(str(block["body"]))}</p></article>'
+        for block in interpretations
+    )
     contact_href = f"/{locale}/contact?intent=consultation&source=market_intelligence"
     methodology_href = f"/{locale}/investment/methodology?source=market_intelligence"
     body = (
@@ -6990,6 +7076,7 @@ def _render_market_intelligence_page(locale: str, request: Request, db: Session)
         f'<section id="market-intelligence-overview-charts" class="stack"><div class="card"><h2>{escape(overview_chart_copy["section_title"])}</h2><p>{escape(overview_chart_copy["section_intro"])}</p></div><div class="grid">{overview_chart_html}</div></section>'
         f'<section id="market-intelligence-source-classes" class="stack"><div class="card"><h2>{"Source classification layer" if locale == "en" else "Source classification layer"}</h2><p>{"Every public block in this module must resolve to a governed source class before later chart or interpretation slices expand." if locale == "en" else "ทุก block ที่เผยแพร่บน module นี้ต้องผูกกับ source class ที่กำกับได้ก่อนที่ slice ถัดไปจะขยายไปสู่ charts หรือ interpretation"}</p></div><div class="grid">{source_class_html}</div></section>'
         f'<section id="market-intelligence-region-contract" class="stack"><div class="card"><h2>{"Report region contract" if locale == "en" else "Report region contract"}</h2><p>{"This slice prepares the runtime structure for later chart and report regions without enabling those deeper layers yet." if locale == "en" else "slice นี้เตรียมโครงสร้าง runtime สำหรับ report regions ถัดไป โดยยังไม่เปิดใช้งาน layers ที่ลึกกว่านี้"}</p></div><div class="grid">{report_region_html}</div></section>'
+        f'<section id="market-intelligence-interpretation" class="stack"><div class="card"><h2>{escape(interpretation_copy["section_title"])}</h2><p>{escape(interpretation_copy["section_intro"])}</p><p class="muted">{escape(interpretation_copy["note"])}</p></div><div class="grid">{interpretation_html}</div></section>'
         f'<section id="market-intelligence-freshness" class="card"><h2>{escape(str(copy["freshness_title"]))}</h2><ul>{freshness_html}</ul></section>'
         f'<section id="market-intelligence-next" class="card"><h2>{escape(str(copy["next_title"]))}</h2><ul>{next_html}</ul></section>'
         f'<section id="market-intelligence-next-step" class="card"><h2>{"Advisor follow-up" if locale == "en" else "การคุยต่อกับทีมที่ปรึกษา"}</h2><div class="grid"><a class="btn" href="{escape(contact_href)}">{escape(str(copy["primary_cta"]))}</a><a class="btn" href="{escape(methodology_href)}">{escape(str(copy["secondary_cta"]))}</a></div></section>'
