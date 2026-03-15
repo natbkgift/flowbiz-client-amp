@@ -344,7 +344,7 @@ function buildDashboardSmokePayload() {
       pending_translations: {
         total_pending_translations: 8,
         policy: {
-          approved: false,
+          approved: true,
           checked_at: new Date(baseTimestamp - 3 * 60 * 60 * 1000).toISOString(),
         },
         projects_missing_en_th: 3,
@@ -465,8 +465,7 @@ function buildDashboardSmokePayload() {
     },
     recent_inquiries: inquiries.slice(0, 10),
     incomplete_widget_count: 2,
-    // warnings: ["Smoke warning check"]
-    warnings: ["Smoke warning check", "Translation policy sign-off still pending"],
+    warnings: ["Smoke warning check"],
   };
 }
 

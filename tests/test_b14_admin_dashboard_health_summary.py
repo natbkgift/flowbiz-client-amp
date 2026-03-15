@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+from pathlib import Path
 from uuid import uuid4
 
 from packages.core.auth import create_access_token, hash_password
@@ -190,3 +191,24 @@ def test_b14_dashboard_deploy_widget_stays_unknown_without_telemetry(
     assert body["raw_metrics"]["last_deploy_health_status"]["deploy_status"] == "unknown"
     assert body["raw_metrics"]["last_deploy_health_status"]["source"] == "telemetry_file_missing"
     assert body["raw_metrics"]["last_deploy_health_status"]["artifact_path"] == str(artifact_path)
+
+
+def test_b14_dashboard_translation_policy_signed_off_removes_policy_warning(
+    client, tmp_path, monkeypatch
+) -> None:
+    policy_path = tmp_path / "translation_field_policy.json"
+    repo_policy_path = (
+        Path(__file__).resolve().parents[1] / "ops" / "policies" / "translation_field_policy.json"
+    )
+    policy = json.loads(repo_policy_path.read_text(encoding="utf-8"))
+    policy["approved"] = True
+    policy_path.write_text(json.dumps(policy), encoding="utf-8")
+    monkeypatch.setenv("FLOWBIZ_TRANSLATION_POLICY_PATH", str(policy_path))
+    headers = _make_admin_headers()
+
+    response = client.get("/admin/dashboard/health-summary", headers=headers)
+    assert response.status_code == 200, response.text
+    body = response.json()
+
+    assert "translation_policy_not_signed_off" not in body["warnings"]
+    assert body["raw_metrics"]["pending_translations"]["policy"]["approved"] is True

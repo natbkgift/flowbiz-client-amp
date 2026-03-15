@@ -1,9 +1,9 @@
 {
-  "version": "2026-03-01",
+  "version": "2026-03-15",
   "owner_team": "content-locale-owner",
-  "approved": false,
+  "approved": true,
   "required_locales": ["en", "th"],
-  "notes": "TODO: content/locale owner must sign off required fields before this policy is used as a release gate.",
+  "notes": "Signed off for EN/TH release gating on 2026-03-15 by the content locale owner.",
   "entities": [
     {
       "key": "areas",
