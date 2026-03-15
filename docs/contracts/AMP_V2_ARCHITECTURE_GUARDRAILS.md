@@ -5,11 +5,20 @@ Date: 2026-03-15
 Governance lock:
 `027ef62f` on `origin/main`
 
+Active Sprint 1 planning sources:
+
+- `docs/contracts/AMP_V2_SEARCH_SCOPE_BRIEF.md`
+- `docs/contracts/AMP_V2_BUYING_COST_ESTIMATOR_SCOPE.md`
+- `docs/contracts/AMP_V2_EPIC_TO_ISSUE_BREAKDOWN.md`
+- `docs/contracts/AMP_V2_ARCHITECTURE_GUARDRAILS.md`
+
 ## Purpose
 
 This document defines the architectural rules for all V2 work.
 
 Its purpose is to ensure that V2 expands the platform without destabilizing the closed V1 production baseline.
+
+These rules are non-negotiable scope boundaries for Sprint 1 planning and any later V2 implementation approval.
 
 ## Core Guardrails
 

@@ -11,6 +11,17 @@ Status guardrail:
 - `V2` is `roadmap only`
 - this backlog must not reopen or re-scope V1
 
+## Active Source Of Truth For Sprint 1 Planning
+
+The following four files are the only active source of truth for Sprint 1 planning:
+
+- `docs/contracts/AMP_V2_SEARCH_SCOPE_BRIEF.md`
+- `docs/contracts/AMP_V2_BUYING_COST_ESTIMATOR_SCOPE.md`
+- `docs/contracts/AMP_V2_EPIC_TO_ISSUE_BREAKDOWN.md`
+- `docs/contracts/AMP_V2_ARCHITECTURE_GUARDRAILS.md`
+
+If there is any conflict between older roadmap notes and these four files, these four files win.
+
 ## Operating Rule
 
 Sprint planning is active only for `Sprint 1` at this time.
