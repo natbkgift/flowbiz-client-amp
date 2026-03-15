@@ -87,6 +87,25 @@ class PropertyListResponse(BaseModel):
     meta: PaginationMeta
 
 
+class SearchResultItem(BaseModel):
+    id: str
+    title: str
+    project: str | None = None
+    location: str | None = None
+    price: Decimal
+    size: Decimal | None = None
+    bedrooms: int | None = None
+    bathrooms: int | None = None
+    image: str | None = None
+    foreign_quota: bool = False
+
+
+class SearchResponse(BaseModel):
+    total: int
+    page: int
+    results: list[SearchResultItem]
+
+
 class PropertyAdminListResponse(BaseModel):
     data: list[PropertyDetail]
     meta: PaginationMeta
