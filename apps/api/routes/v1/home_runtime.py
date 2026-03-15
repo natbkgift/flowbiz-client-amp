@@ -6488,6 +6488,21 @@ def _foreign_buyer_hub_copy(locale: str) -> dict[str, object]:
                 },
             ],
             "process_note": "workflow นี้เป็นคำอธิบายเชิงโครงสร้าง ไม่ใช่ checklist ทางกฎหมายที่ครบถ้วนสำหรับทุกกรณี",
+            "documents_title": "Document guidance module",
+            "documents_intro": "ส่วนนี้สรุปหมวดเอกสารที่มักถูกถามถึงบ่อย เพื่อช่วยให้ผู้ซื้อต่างชาติเตรียมตัวได้ดีขึ้นโดยไม่สื่อว่าเป็นรายการบังคับครบถ้วนสำหรับทุกดีล",
+            "documents_common_title": "Common preparation categories",
+            "documents_common_points": [
+                "identity/passport baseline สำหรับยืนยันตัวตนและข้อมูลผู้ซื้อ",
+                "หลักฐานการโอนเงินหรือ funds transfer evidence ที่เกี่ยวข้องกับเส้นทางการชำระเงิน",
+                "เอกสารสัญญาหรือเงื่อนไขที่ควรให้ advisor และทนายช่วย review ก่อนลงนาม",
+            ],
+            "documents_case_title": "Case-specific reminders",
+            "documents_case_points": [
+                "โครงการใหม่กับ resale อาจต้องใช้เอกสารประกอบไม่เหมือนกัน แม้จะอยู่ใน budget หรือทำเลใกล้กัน",
+                "บางกรณีอาจต้องมีเอกสารเพิ่มเติมตาม ownership path, ผู้ถือสิทธิ์ร่วม, หรือแหล่งที่มาของเงินโอน",
+                "หากรายการเอกสารยังไม่ชัดเจน ควรยืนยันกับ advisor และ legal review แทนการตีความจาก list ทั่วไปเพียงอย่างเดียว",
+            ],
+            "documents_note": "หมวดเอกสารด้านบนเป็น guidance เพื่อการเตรียมตัว ไม่ใช่คำแนะนำทางกฎหมายหรือรายการที่รับรองว่าเพียงพอในทุกกรณี",
             "review_title": "เมื่อใดที่ต้องขอ legal review",
             "review_points": [
                 "เมื่อ ownership path ไม่ชัดเจนจากข้อมูลโครงการหรือเอกสารเบื้องต้น",
@@ -6532,6 +6547,21 @@ def _foreign_buyer_hub_copy(locale: str) -> dict[str, object]:
             },
         ],
         "process_note": "This workflow is explanatory only. It is not a complete legal checklist or a guarantee that every case follows the same path.",
+        "documents_title": "Document guidance module",
+        "documents_intro": "This section groups the document categories foreign buyers often need to prepare, while keeping the guidance advisory-safe and non-exhaustive.",
+        "documents_common_title": "Common preparation categories",
+        "documents_common_points": [
+            "Identity and passport baseline for confirming buyer identity and core party details.",
+            "Funds-transfer evidence guidance for the payment path and supporting remittance context.",
+            "Contract documents or terms that should be reviewed with an advisor and lawyer before signature.",
+        ],
+        "documents_case_title": "Case-specific reminders",
+        "documents_case_points": [
+            "New-development and resale purchases may require different supporting documents even when they fit the same budget or location brief.",
+            "Some cases need additional supporting records based on the ownership path, co-buyers, or the source of transferred funds.",
+            "If the document list is still unclear, confirm the case with advisor and legal review instead of relying on a generic checklist alone.",
+        ],
+        "documents_note": "These document categories are preparation guidance only. They are not legal instructions and they are not guaranteed to be sufficient for every case.",
         "review_title": "When legal review is required",
         "review_points": [
             "When the ownership path is not clear from project facts or preliminary documents.",
@@ -6554,6 +6584,12 @@ def _render_foreign_buyer_hub_page(locale: str, request: Request, db: Session) -
         f'<article class="card"><h3>{escape(str(step["title"]))}</h3><p>{escape(str(step["body"]))}</p></article>'
         for step in copy["process_steps"]
     )
+    documents_common_html = "".join(
+        f"<li>{escape(point)}</li>" for point in copy["documents_common_points"]
+    )
+    documents_case_html = "".join(
+        f"<li>{escape(point)}</li>" for point in copy["documents_case_points"]
+    )
     review_html = "".join(f"<li>{escape(point)}</li>" for point in copy["review_points"])
     contact_href = f"/{locale}/contact?intent=consultation&source=foreign_buyer_hub"
     projects_href = f"/{locale}/projects?source=foreign_buyer_hub"
@@ -6561,6 +6597,7 @@ def _render_foreign_buyer_hub_page(locale: str, request: Request, db: Session) -
         f'<section id="foreign-buyer-coverage" class="card"><p class="muted">{escape(str(copy["eyebrow"]))}</p><h2>{escape(str(copy["coverage_title"]))}</h2><p>{escape(str(copy["coverage_body"]))}</p></section>'
         f'<section id="foreign-buyer-ownership" class="card"><h2>{escape(str(copy["ownership_title"]))}</h2><ul>{ownership_html}</ul></section>'
         f'<section id="foreign-buyer-process" class="stack"><div class="card"><h2>{escape(str(copy["process_title"]))}</h2><p>{escape(str(copy["process_intro"]))}</p><p class="muted">{escape(str(copy["process_note"]))}</p></div><div class="grid">{process_steps_html}</div></section>'
+        f'<section id="foreign-buyer-documents" class="stack"><div class="card"><h2>{escape(str(copy["documents_title"]))}</h2><p>{escape(str(copy["documents_intro"]))}</p><p class="muted">{escape(str(copy["documents_note"]))}</p></div><div class="grid"><article class="card"><h3>{escape(str(copy["documents_common_title"]))}</h3><ul>{documents_common_html}</ul></article><article class="card"><h3>{escape(str(copy["documents_case_title"]))}</h3><ul>{documents_case_html}</ul></article></div></section>'
         f'<section id="foreign-buyer-legal-review" class="card"><h2>{escape(str(copy["review_title"]))}</h2><ul>{review_html}</ul></section>'
         f'<section id="foreign-buyer-next-step" class="card"><h2>{escape(str(copy["advisory_title"]))}</h2><p>{escape(str(copy["advisory_body"]))}</p><div class="grid"><a class="btn" href="{escape(contact_href)}">{escape(str(copy["primary_cta"]))}</a><a class="btn" href="{escape(projects_href)}">{escape(str(copy["secondary_cta"]))}</a></div></section>'
     )

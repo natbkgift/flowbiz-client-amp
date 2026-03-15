@@ -10,7 +10,7 @@ Governance lock:
 This document opens the Sprint 2 implementation gate for:
 
 1. the completed Saved Shortlist foundation
-2. the first two approved Foreign Buyer Hub implementation slices
+2. the first three approved Foreign Buyer Hub implementation slices
 
 It does not activate Market Intelligence implementation.
 
@@ -21,7 +21,7 @@ It does not activate Market Intelligence implementation.
 Meaning:
 
 - Saved Shortlist foundation is completed and merged on `main`
-- Foreign Buyer Hub is partially unlocked for the approved ownership-basics and buying-process slices only
+- Foreign Buyer Hub is partially unlocked for the approved ownership-basics, buying-process, and document-guidance slices only
 - Market Intelligence Public Module remains planning only
 
 Top-line reporting remains:
@@ -57,6 +57,7 @@ Allowed execution order:
 4. Shortlist share capability
 5. `#453` Foreign Buyer Hub Ownership Basics Slice
 6. `#455` Foreign Buyer Hub Buying Process Module
+7. `#457` Foreign Buyer Hub Document Guidance Module
 
 No later step may begin until the prior step is merged and validated.
 
@@ -76,7 +77,15 @@ Foreign Buyer Hub slice `#455` is constrained to:
 
 The following Foreign Buyer Hub layers remain blocked after `#455` until separately approved and merged:
 
-- document guidance module
+Foreign Buyer Hub slice `#457` is constrained to:
+
+- document categories overview only
+- advisory-safe explanations only
+- the existing contact/advisor CTA path only
+- no legal instructions or upload behavior
+
+The following Foreign Buyer Hub layers remain blocked after `#457` until separately approved and merged:
+
 - FAQ and advisory decision module beyond the approved first slice
 - any calculator, shortlist-integration, or funnel-behavior expansion
 
