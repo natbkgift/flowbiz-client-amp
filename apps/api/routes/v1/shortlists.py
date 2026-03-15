@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import secrets
 from datetime import datetime, timezone
 from uuid import UUID
 
@@ -11,11 +12,15 @@ from apps.api.routes.v1 import properties as property_routes
 from packages.core.database import get_db
 from packages.core.models import Area, Project, Property, Shortlist, ShortlistItem
 from packages.core.schemas.property_api import (
+    SharedShortlistDetail,
+    SharedShortlistResponse,
     ShortlistDetail,
     ShortlistItemSaveRequest,
     ShortlistMutationResponse,
     ShortlistPropertyItem,
     ShortlistResponse,
+    ShortlistShareRequest,
+    ShortlistShareResponse,
 )
 
 router = APIRouter(prefix="/v1", tags=["shortlists"])
@@ -181,6 +186,39 @@ def _reindex_shortlist_items(items: list[ShortlistItem]) -> None:
         shortlist_item.position = index
 
 
+def _serialize_shared_shortlist_detail(
+    db: Session,
+    shortlist: Shortlist,
+    *,
+    locale: str,
+) -> SharedShortlistDetail:
+    detail = _serialize_shortlist_detail(db, shortlist, locale=locale)
+    return SharedShortlistDetail(
+        id=detail.id,
+        title=detail.title,
+        intent=detail.intent,
+        share_mode=shortlist.share_mode,
+        created_at=detail.created_at,
+        updated_at=detail.updated_at,
+        item_count=detail.item_count,
+        items=detail.items,
+    )
+
+
+def _generate_share_token(db: Session) -> str:
+    for _ in range(10):
+        candidate = secrets.token_urlsafe(18)
+        existing = db.scalar(
+            select(Shortlist.id).where(Shortlist.share_token_ref == candidate).limit(1)
+        )
+        if existing is None:
+            return candidate
+    raise HTTPException(
+        status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        detail="Unable to generate shortlist share token",
+    )
+
+
 @router.get("/shortlists/current", response_model=ShortlistResponse)
 def get_current_shortlist(
     owner_type: str = Query(pattern=r"^(session|user)$"),
@@ -308,4 +346,70 @@ def remove_shortlist_item(
     return ShortlistMutationResponse(
         action="removed",
         shortlist=_serialize_shortlist_detail(db, shortlist, locale=locale),
+    )
+
+
+@router.post("/shortlists/current/share", response_model=ShortlistShareResponse)
+def share_current_shortlist(
+    payload: ShortlistShareRequest,
+    locale: str = Query(default="en", pattern=r"^(en|th)$"),
+    db: Session = Depends(get_db),
+) -> ShortlistShareResponse:
+    normalized_owner_key = _normalize_owner_key(payload.owner_key)
+    shortlist = _load_current_shortlist(
+        db,
+        owner_type=payload.owner_type,
+        owner_key=normalized_owner_key,
+    )
+    if shortlist is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Shortlist not found")
+
+    shortlist_items = _load_shortlist_items(db, shortlist.id)
+    if not shortlist_items:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Shortlist is empty")
+
+    if shortlist.share_token_ref is None:
+        shortlist.share_token_ref = _generate_share_token(db)
+        action = "shared"
+    else:
+        action = "already_shared"
+
+    shortlist.share_mode = payload.share_mode
+    _touch_shortlist(shortlist)
+    db.commit()
+    db.refresh(shortlist)
+
+    share_token = str(shortlist.share_token_ref)
+    return ShortlistShareResponse(
+        action=action,
+        share_token=share_token,
+        share_mode=str(shortlist.share_mode or payload.share_mode),
+        share_url=f"/v1/shortlists/shared/{share_token}",
+        shortlist=_serialize_shared_shortlist_detail(db, shortlist, locale=locale),
+    )
+
+
+@router.get("/shortlists/shared/{share_token}", response_model=SharedShortlistResponse)
+def get_shared_shortlist(
+    share_token: str,
+    locale: str = Query(default="en", pattern=r"^(en|th)$"),
+    db: Session = Depends(get_db),
+) -> SharedShortlistResponse:
+    shortlist = db.scalar(
+        select(Shortlist)
+        .where(
+            Shortlist.share_token_ref == share_token,
+            Shortlist.share_mode == "public_read",
+            Shortlist.status == "active",
+        )
+        .limit(1)
+    )
+    if shortlist is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Shared shortlist not found",
+        )
+
+    return SharedShortlistResponse(
+        shortlist=_serialize_shared_shortlist_detail(db, shortlist, locale=locale)
     )

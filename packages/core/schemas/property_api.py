@@ -3,6 +3,7 @@ from __future__ import annotations
 from datetime import datetime
 from decimal import Decimal
 from enum import Enum
+from typing import Literal
 from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field
@@ -157,6 +158,35 @@ class ShortlistItemSaveRequest(BaseModel):
 class ShortlistMutationResponse(BaseModel):
     action: str
     shortlist: ShortlistDetail | None = None
+
+
+class ShortlistShareRequest(BaseModel):
+    owner_type: str
+    owner_key: str
+    share_mode: Literal["public_read"] = "public_read"
+
+
+class SharedShortlistDetail(BaseModel):
+    id: UUID
+    title: str | None = None
+    intent: str | None = None
+    share_mode: str | None = None
+    created_at: datetime
+    updated_at: datetime
+    item_count: int
+    items: list[ShortlistPropertyItem]
+
+
+class ShortlistShareResponse(BaseModel):
+    action: str
+    share_token: str
+    share_mode: str
+    share_url: str
+    shortlist: SharedShortlistDetail
+
+
+class SharedShortlistResponse(BaseModel):
+    shortlist: SharedShortlistDetail
 
 
 class PropertyAdminListResponse(BaseModel):
