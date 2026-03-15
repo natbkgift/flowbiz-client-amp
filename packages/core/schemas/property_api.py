@@ -106,6 +106,44 @@ class SearchResponse(BaseModel):
     results: list[SearchResultItem]
 
 
+class ShortlistPropertyItem(BaseModel):
+    property_id: UUID
+    slug: str | None = None
+    title: str
+    project: str | None = None
+    location: str | None = None
+    price: Decimal
+    size: Decimal | None = None
+    bedrooms: int | None = None
+    bathrooms: int | None = None
+    image: str | None = None
+    status: str
+    foreign_quota: bool = False
+    position: int
+    added_at: datetime
+    source_surface: str | None = None
+
+
+class ShortlistDetail(BaseModel):
+    id: UUID
+    owner_type: str
+    owner_key: str
+    status: str
+    title: str | None = None
+    intent: str | None = None
+    share_mode: str | None = None
+    source_context: dict | None = None
+    created_at: datetime
+    updated_at: datetime
+    last_viewed_at: datetime | None = None
+    item_count: int
+    items: list[ShortlistPropertyItem]
+
+
+class ShortlistResponse(BaseModel):
+    shortlist: ShortlistDetail | None = None
+
+
 class PropertyAdminListResponse(BaseModel):
     data: list[PropertyDetail]
     meta: PaginationMeta
