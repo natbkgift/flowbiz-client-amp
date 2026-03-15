@@ -82,6 +82,30 @@ Thai rendering:
 
 `AMP Pattaya repo ไม่ใช่ prototype สำหรับงาน redesign แล้ว โดย V1 ถูกปิดเป็น production-ready แล้ว ส่วน V2 เป็น roadmap-only และต้องติดตามแยกเป็นงานขยายแพลตฟอร์มตามลำดับ`
 
+## Official Definition Of `Approved`
+
+For Sprint 1 planning, a document or issue set is considered `approved` only when all of the following are true:
+
+1. there is explicit written approval that names the approved document set
+2. there are no open scope objections remaining on those documents
+3. there is no request to add features outside Sprint 1 planning scope
+4. the approver explicitly confirms that implementation may begin later under the active guardrails
+
+The following do not count as approval:
+
+- "ok"
+- "looks good"
+- "go ahead"
+- verbal or chat-only encouragement that does not name the approved documents
+
+For Sprint 1, the minimum document set that must be named explicitly is:
+
+- `docs/contracts/AMP_V2_SEARCH_SCOPE_BRIEF.md`
+- `docs/contracts/AMP_V2_BUYING_COST_ESTIMATOR_SCOPE.md`
+- `docs/contracts/AMP_V2_EPIC_TO_ISSUE_BREAKDOWN.md`
+
+If approval comments introduce net-new scope such as saved search, recommendations, compare sync, CRM changes, or V1 redesign work, approval is not complete and the status remains `planning only`.
+
 ## Reporting Rules
 
 1. Every status update must declare scope first: `V1`, `V2`, or `Supporting / excluded`.
@@ -94,6 +118,7 @@ Thai rendering:
 8. All future status updates must distinguish:
    - `V1 closed / production-ready`
    - `V2 roadmap only`
+9. Do not treat partial owner feedback as approval unless it satisfies the official definition above.
 
 ## Practical Interpretation for This Repo
 

@@ -118,3 +118,86 @@ No V2 implementation work should start until:
 3. owner assigned
 4. V1 impact reviewed
 5. implementation path confirmed as additive
+
+## Standard Approval Message
+
+Use the following message without broadening scope:
+
+```text
+Sprint 1 is currently locked in planning-only status.
+
+Please review and approve these three scope documents before any implementation begins:
+1. AMP_V2_SEARCH_SCOPE_BRIEF.md
+2. AMP_V2_BUYING_COST_ESTIMATOR_SCOPE.md
+3. AMP_V2_EPIC_TO_ISSUE_BREAKDOWN.md
+
+Non-negotiable guardrails remain in effect:
+- V1 stays closed / production-ready
+- V2 remains roadmap only
+- No changes to V1 pages, CRM, core layout, or lead forms
+- No implementation may start before approval
+```
+
+## Owner Approval Checklist
+
+Owners should approve against the following checklist, not against a broad impression.
+
+### Search Scope
+
+- filter set is complete enough for Sprint 1 planning
+- sorting coverage is complete enough for Sprint 1 planning
+- URL-driven search is the correct state model
+- API contract is sufficient for implementation planning
+- non-goals are explicit enough to prevent scope creep
+
+### Buying Cost Estimator
+
+- input set is complete enough for planning
+- calculation scope is sufficient for business use
+- output model matches the buyer/advisor use case
+- assumptions that need explicit disclosure are identified
+
+### Epic Breakdown
+
+- issue coverage is complete enough for Sprint 1 planning
+- owner allocation is correct
+- dependencies are correct
+- priorities are correct
+
+## Approval Enforcement
+
+The team must treat approval as invalid unless all of the following are true:
+
+- there is explicit written approval
+- there are no open scope objections
+- there is no request to add features outside Sprint 1
+- the approver confirms implementation may begin later under these guardrails
+
+Until all four conditions are true, Sprint 1 stays `planning only`.
+
+## Known Failure Modes To Prevent
+
+### 1. Approval followed by immediate scope creep
+
+Blocked examples:
+
+- save search
+- recommendations
+- compare sync expansion
+- any net-new V2 module outside the approved Sprint 1 contract
+
+### 2. Issues exist and someone starts building early
+
+Opening issues does not unlock implementation.
+
+No branch or implementation task should start until the approval gate is satisfied.
+
+### 3. Owner approval is broad but not document-bound
+
+Statements such as "ok" or "go ahead" do not count unless they explicitly approve the three required Sprint 1 scope documents.
+
+### 4. Sprint 2 starts before Sprint 1 approval
+
+This is not allowed.
+
+Sprint 2 remains roadmap placeholder work until Sprint 1 approval is complete.
