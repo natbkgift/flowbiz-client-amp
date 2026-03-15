@@ -144,6 +144,21 @@ class ShortlistResponse(BaseModel):
     shortlist: ShortlistDetail | None = None
 
 
+class ShortlistItemSaveRequest(BaseModel):
+    owner_type: str
+    owner_key: str
+    property_id: UUID
+    source_surface: str | None = None
+    intent: str | None = None
+    title: str | None = None
+    source_context: dict | None = None
+
+
+class ShortlistMutationResponse(BaseModel):
+    action: str
+    shortlist: ShortlistDetail | None = None
+
+
 class PropertyAdminListResponse(BaseModel):
     data: list[PropertyDetail]
     meta: PaginationMeta
