@@ -7,9 +7,12 @@ Governance lock:
 
 ## Purpose
 
-This document opens the Sprint 2 implementation gate for the Saved Shortlist foundation only.
+This document opens the Sprint 2 implementation gate for:
 
-It does not activate Foreign Buyer Hub or Market Intelligence implementation.
+1. the completed Saved Shortlist foundation
+2. the first approved Foreign Buyer Hub implementation slice
+
+It does not activate Market Intelligence implementation.
 
 ## Gate Status
 
@@ -17,8 +20,8 @@ It does not activate Foreign Buyer Hub or Market Intelligence implementation.
 
 Meaning:
 
-- Saved Shortlist foundation work may begin in the approved execution order
-- Foreign Buyer Hub remains planning only
+- Saved Shortlist foundation is completed and merged on `main`
+- Foreign Buyer Hub is partially unlocked for the first approved ownership-basics slice only
 - Market Intelligence Public Module remains planning only
 
 Top-line reporting remains:
@@ -44,7 +47,7 @@ Sprint 1 completion reference:
 
 ## Allowed Implementation Scope
 
-Only the Saved Shortlist foundation is unlocked by this gate.
+Only these Sprint 2 scopes are unlocked by this gate:
 
 Allowed execution order:
 
@@ -52,8 +55,22 @@ Allowed execution order:
 2. Shortlist API
 3. Shortlist save/remove behavior
 4. Shortlist share capability
+5. `#453` Foreign Buyer Hub Ownership Basics Slice
 
 No later step may begin until the prior step is merged and validated.
+
+Foreign Buyer Hub slice `#453` is constrained to:
+
+- a new additive public runtime route family for the hub
+- ownership and eligibility guidance only
+- conservative advisory language only
+- an existing contact/advisor CTA path only
+
+The following Foreign Buyer Hub layers remain blocked after `#453` until separately approved and merged:
+
+- purchase process module expansion
+- document guidance module
+- FAQ and advisory decision module beyond the approved first slice
 
 ## Explicitly Blocked Scope
 
@@ -75,11 +92,11 @@ Every Sprint 2 implementation PR under this gate must:
 1. reference exactly one active Sprint 2 issue as primary scope
 2. state `V1 impact = none` unless an additive shared-surface touch is explicitly justified
 3. confirm no changes to CRM, lead forms, core layout, homepage structure, or advisory funnel
-4. stay within Saved Shortlist foundation scope only
+4. stay within the currently unlocked Sprint 2 slice only
 5. stop after CI and merge before moving to the next issue
 
 ## Exit Rule For This Stage
 
-This partial Sprint 2 gate remains valid only while shortlist foundation is executed in order.
+This partial Sprint 2 gate remains valid only while unlocked Sprint 2 slices are executed in order.
 
-If scope expands beyond shortlist foundation, implementation must stop and return to planning/governance review.
+If scope expands beyond the unlocked shortlist and Foreign Buyer Hub slice boundaries, implementation must stop and return to planning/governance review.

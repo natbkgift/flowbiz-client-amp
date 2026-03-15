@@ -1,0 +1,26 @@
+from __future__ import annotations
+
+
+def test_a12_foreign_buyer_hub_routes_render_conservative_guidance(client) -> None:
+    en_response = client.get("/en/foreign-buyer-hub")
+    assert en_response.status_code == 200, en_response.text
+    en_html = en_response.text
+
+    assert "Foreign Buyer Hub" in en_html
+    assert "ownership and eligibility basics" in en_html
+    assert "It is not a legal, tax, or eligibility guarantee" in en_html
+    assert 'href="/en/contact?intent=consultation&amp;source=foreign_buyer_hub"' in en_html
+    assert 'href="/en/projects?source=foreign_buyer_hub"' in en_html
+    assert "Some condo inventory may fit foreign-quota ownership" in en_html
+    assert "When legal review is required" in en_html
+    assert "<form" not in en_html
+
+    th_response = client.get("/th/foreign-buyer-hub")
+    assert th_response.status_code == 200, th_response.text
+    th_html = th_response.text
+
+    assert "Foreign Buyer Hub" in th_html
+    assert "ศูนย์ข้อมูลนี้เป็น guidance เชิงภาพรวมสำหรับผู้ซื้อต่างชาติในพัทยาเท่านั้น" in th_html
+    assert "Ownership and eligibility basics" in th_html
+    assert 'href="/th/contact?intent=consultation&amp;source=foreign_buyer_hub"' in th_html
+    assert "เมื่อใดที่ต้องขอ legal review" in th_html
