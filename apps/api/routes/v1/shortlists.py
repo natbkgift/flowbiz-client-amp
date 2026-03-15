@@ -1,9 +1,10 @@
 from __future__ import annotations
 
+from datetime import datetime, timezone
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, Query
-from sqlalchemy import asc, desc, select
+from fastapi import APIRouter, Depends, HTTPException, Query, status
+from sqlalchemy import asc, desc, func, select
 from sqlalchemy.orm import Session
 
 from apps.api.routes.v1 import properties as property_routes
@@ -11,6 +12,8 @@ from packages.core.database import get_db
 from packages.core.models import Area, Project, Property, Shortlist, ShortlistItem
 from packages.core.schemas.property_api import (
     ShortlistDetail,
+    ShortlistItemSaveRequest,
+    ShortlistMutationResponse,
     ShortlistPropertyItem,
     ShortlistResponse,
 )
@@ -43,18 +46,12 @@ def _load_shortlist_items(db: Session, shortlist_id: UUID) -> list[ShortlistItem
     ).all()
 
 
-@router.get("/shortlists/current", response_model=ShortlistResponse)
-def get_current_shortlist(
-    owner_type: str = Query(pattern=r"^(session|user)$"),
-    owner_key: str = Query(min_length=1, max_length=128),
-    locale: str = Query(default="en", pattern=r"^(en|th)$"),
-    db: Session = Depends(get_db),
-) -> ShortlistResponse:
-    normalized_owner_key = owner_key.strip()
-    shortlist = _load_current_shortlist(db, owner_type=owner_type, owner_key=normalized_owner_key)
-    if shortlist is None:
-        return ShortlistResponse(shortlist=None)
-
+def _serialize_shortlist_detail(
+    db: Session,
+    shortlist: Shortlist,
+    *,
+    locale: str,
+) -> ShortlistDetail:
     shortlist_items = _load_shortlist_items(db, shortlist.id)
     property_ids = [item.property_id for item in shortlist_items]
     properties = (
@@ -133,20 +130,182 @@ def get_current_shortlist(
             )
         )
 
-    return ShortlistResponse(
-        shortlist=ShortlistDetail(
-            id=shortlist.id,
-            owner_type=shortlist.owner_type,
-            owner_key=shortlist.owner_key,
-            status=shortlist.status,
-            title=shortlist.title,
-            intent=shortlist.intent,
-            share_mode=shortlist.share_mode,
-            source_context=shortlist.source_context,
-            created_at=shortlist.created_at,
-            updated_at=shortlist.updated_at,
-            last_viewed_at=shortlist.last_viewed_at,
-            item_count=len(items),
-            items=items,
+    return ShortlistDetail(
+        id=shortlist.id,
+        owner_type=shortlist.owner_type,
+        owner_key=shortlist.owner_key,
+        status=shortlist.status,
+        title=shortlist.title,
+        intent=shortlist.intent,
+        share_mode=shortlist.share_mode,
+        source_context=shortlist.source_context,
+        created_at=shortlist.created_at,
+        updated_at=shortlist.updated_at,
+        last_viewed_at=shortlist.last_viewed_at,
+        item_count=len(items),
+        items=items,
+    )
+
+
+def _touch_shortlist(shortlist: Shortlist) -> None:
+    shortlist.updated_at = datetime.now(timezone.utc)
+
+
+def _apply_shortlist_metadata(
+    shortlist: Shortlist,
+    *,
+    intent: str | None,
+    title: str | None,
+    source_context: dict | None,
+) -> None:
+    if intent is not None:
+        shortlist.intent = intent.strip() or None
+    if title is not None:
+        shortlist.title = title.strip() or None
+    if source_context is not None:
+        shortlist.source_context = source_context
+
+
+def _normalize_owner_key(owner_key: str) -> str:
+    normalized = owner_key.strip()
+    if normalized:
+        return normalized
+    raise HTTPException(
+        status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+        detail="owner_key must not be blank",
+    )
+
+
+def _reindex_shortlist_items(items: list[ShortlistItem]) -> None:
+    for index, shortlist_item in enumerate(items):
+        shortlist_item.position = index
+
+
+@router.get("/shortlists/current", response_model=ShortlistResponse)
+def get_current_shortlist(
+    owner_type: str = Query(pattern=r"^(session|user)$"),
+    owner_key: str = Query(min_length=1, max_length=128),
+    locale: str = Query(default="en", pattern=r"^(en|th)$"),
+    db: Session = Depends(get_db),
+) -> ShortlistResponse:
+    normalized_owner_key = _normalize_owner_key(owner_key)
+    shortlist = _load_current_shortlist(db, owner_type=owner_type, owner_key=normalized_owner_key)
+    if shortlist is None:
+        return ShortlistResponse(shortlist=None)
+
+    return ShortlistResponse(shortlist=_serialize_shortlist_detail(db, shortlist, locale=locale))
+
+
+@router.post("/shortlists/current/items", response_model=ShortlistMutationResponse)
+def save_shortlist_item(
+    payload: ShortlistItemSaveRequest,
+    locale: str = Query(default="en", pattern=r"^(en|th)$"),
+    db: Session = Depends(get_db),
+) -> ShortlistMutationResponse:
+    normalized_owner_key = _normalize_owner_key(payload.owner_key)
+    property_row = db.get(Property, payload.property_id)
+    if property_row is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Property not found")
+
+    shortlist = _load_current_shortlist(
+        db,
+        owner_type=payload.owner_type,
+        owner_key=normalized_owner_key,
+    )
+    if shortlist is None:
+        shortlist = Shortlist(
+            owner_type=payload.owner_type,
+            owner_key=normalized_owner_key,
+            status="active",
         )
+        db.add(shortlist)
+        db.flush()
+
+    _apply_shortlist_metadata(
+        shortlist,
+        intent=payload.intent,
+        title=payload.title,
+        source_context=payload.source_context,
+    )
+
+    existing_item = db.scalar(
+        select(ShortlistItem)
+        .where(
+            ShortlistItem.shortlist_id == shortlist.id,
+            ShortlistItem.property_id == payload.property_id,
+        )
+        .limit(1)
+    )
+    if existing_item is None:
+        current_max_position = db.scalar(
+            select(func.max(ShortlistItem.position)).where(
+                ShortlistItem.shortlist_id == shortlist.id
+            )
+        )
+        db.add(
+            ShortlistItem(
+                shortlist_id=shortlist.id,
+                property_id=payload.property_id,
+                position=(current_max_position or -1) + 1,
+                source_surface=payload.source_surface,
+            )
+        )
+        action = "saved"
+    else:
+        if payload.source_surface is not None:
+            existing_item.source_surface = payload.source_surface
+        action = "already_saved"
+
+    _touch_shortlist(shortlist)
+    db.commit()
+    db.refresh(shortlist)
+
+    return ShortlistMutationResponse(
+        action=action,
+        shortlist=_serialize_shortlist_detail(db, shortlist, locale=locale),
+    )
+
+
+@router.delete(
+    "/shortlists/current/items/{property_id}",
+    response_model=ShortlistMutationResponse,
+)
+def remove_shortlist_item(
+    property_id: UUID,
+    owner_type: str = Query(pattern=r"^(session|user)$"),
+    owner_key: str = Query(min_length=1, max_length=128),
+    locale: str = Query(default="en", pattern=r"^(en|th)$"),
+    db: Session = Depends(get_db),
+) -> ShortlistMutationResponse:
+    normalized_owner_key = _normalize_owner_key(owner_key)
+    shortlist = _load_current_shortlist(db, owner_type=owner_type, owner_key=normalized_owner_key)
+    if shortlist is None:
+        return ShortlistMutationResponse(action="not_found", shortlist=None)
+
+    shortlist_item = db.scalar(
+        select(ShortlistItem)
+        .where(
+            ShortlistItem.shortlist_id == shortlist.id,
+            ShortlistItem.property_id == property_id,
+        )
+        .limit(1)
+    )
+    if shortlist_item is None:
+        return ShortlistMutationResponse(
+            action="not_found",
+            shortlist=_serialize_shortlist_detail(db, shortlist, locale=locale),
+        )
+
+    db.delete(shortlist_item)
+    db.flush()
+
+    remaining_items = _load_shortlist_items(db, shortlist.id)
+    _reindex_shortlist_items(remaining_items)
+    _touch_shortlist(shortlist)
+    db.commit()
+    db.refresh(shortlist)
+
+    return ShortlistMutationResponse(
+        action="removed",
+        shortlist=_serialize_shortlist_detail(db, shortlist, locale=locale),
     )
