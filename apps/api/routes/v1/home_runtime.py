@@ -6678,16 +6678,156 @@ def _market_intelligence_copy(locale: str) -> dict[str, object]:
     }
 
 
+def _market_intelligence_source_classes(locale: str) -> list[dict[str, object]]:
+    if locale == "th":
+        return [
+            {
+                "slug": "public",
+                "title": "Public",
+                "summary": "ใช้กับข้อมูลที่เผยแพร่สู่สาธารณะได้อยู่แล้วและตรวจสอบซ้ำได้จากแหล่งที่ผ่านการกำกับ",
+                "examples": [
+                    "approved public inventory counts",
+                    "published area or project statistics",
+                    "approved methodology and disclosure copy",
+                ],
+                "freshness": "รองรับ cadence แบบ fast หรือ governed ตามชนิดของข้อมูล",
+                "public_note": "เผยแพร่บนหน้า public ได้เมื่อมี source, freshness, และ disclosure รองรับ",
+            },
+            {
+                "slug": "curated",
+                "title": "Curated",
+                "summary": "ใช้กับบทสรุปหรือ synthesis ที่ผ่านการ review แล้วและปลอดภัยสำหรับ public แม้ไม่ใช่ raw self-serve data",
+                "examples": [
+                    "editorial market commentary",
+                    "governed directional summaries",
+                    "approved narrative interpretation tied to dated inputs",
+                ],
+                "freshness": "ต้องมี review rhythm หรือ freshness disclosure ที่มองเห็นได้",
+                "public_note": "เผยแพร่ได้เมื่อผ่าน governance review และไม่ยกระดับความมั่นใจเกิน source ที่รองรับ",
+            },
+            {
+                "slug": "advisor-only",
+                "title": "Advisor-only",
+                "summary": "ใช้กับข้อมูลภายในที่ช่วยการตีความของทีม แต่ห้ามแสดงออกสู่ public module ใน gate นี้",
+                "examples": [
+                    "unpublished operator observations",
+                    "deal-specific negotiation context",
+                    "private shortlist recommendations",
+                ],
+                "freshness": "ใช้ได้เฉพาะในการ review ภายใน ไม่ใช่ cadence สำหรับ public publication",
+                "public_note": "จัดเป็น boundary class เพื่อบอกสิ่งที่ห้ามเผยแพร่ ไม่ใช่ source class ที่ render เป็น market claim สาธารณะ",
+            },
+        ]
+    return [
+        {
+            "slug": "public",
+            "title": "Public",
+            "summary": "Use this class for information already approved for public presentation and reproducible from governed public-facing sources.",
+            "examples": [
+                "Approved public inventory counts",
+                "Published area or project statistics",
+                "Approved methodology and disclosure copy",
+            ],
+            "freshness": "Supports fast or governed cadence depending on the data type.",
+            "public_note": "This class may appear on the public route when source, freshness, and disclosure support are visible.",
+        },
+        {
+            "slug": "curated",
+            "title": "Curated",
+            "summary": "Use this class for reviewed synthesis that is public-safe even when it is not exposed as raw self-serve data.",
+            "examples": [
+                "Editorial market commentary",
+                "Governed directional summaries",
+                "Approved narrative interpretation tied to dated inputs",
+            ],
+            "freshness": "Requires a visible review rhythm or equivalent freshness disclosure.",
+            "public_note": "This class may publish only after governance review and must not overstate confidence beyond the supporting source inputs.",
+        },
+        {
+            "slug": "advisor-only",
+            "title": "Advisor-only",
+            "summary": "Use this class for internal context that can assist advisory review but must not surface on the public module during this gate.",
+            "examples": [
+                "Unpublished operator observations",
+                "Deal-specific negotiation context",
+                "Private shortlist recommendations",
+            ],
+            "freshness": "Internal review only, not a public publication cadence.",
+            "public_note": "This is a boundary class that defines what stays excluded from public market claims.",
+        },
+    ]
+
+
+def _market_intelligence_report_regions(locale: str) -> list[dict[str, object]]:
+    if locale == "th":
+        return [
+            {
+                "title": "Market overview region",
+                "allowed_classes": "public, curated",
+                "rule": "เริ่มจาก directional snapshot ที่มี source class ชัดเจน และยังไม่ใช้ advisor-only commentary",
+            },
+            {
+                "title": "Area comparison region",
+                "allowed_classes": "public, curated",
+                "rule": "เปรียบเทียบได้เฉพาะสัญญาณที่กำกับแหล่งข้อมูลและความสดใหม่ได้อย่างชัดเจน",
+            },
+            {
+                "title": "Investment signals region",
+                "allowed_classes": "public, curated",
+                "rule": "ใช้ได้เฉพาะ confidence-qualified public context และยังไม่เปิด deal-specific strategy",
+            },
+            {
+                "title": "Methodology / disclaimer region",
+                "allowed_classes": "public",
+                "rule": "ต้องเป็น disclosure ที่อนุมัติแล้วและใช้เป็น boundary ของทั้งหน้า",
+            },
+        ]
+    return [
+        {
+            "title": "Market overview region",
+            "allowed_classes": "public, curated",
+            "rule": "Start with directional snapshots that already carry a clear source class and do not depend on advisor-only commentary.",
+        },
+        {
+            "title": "Area comparison region",
+            "allowed_classes": "public, curated",
+            "rule": "Only compare signals whose source and freshness can be governed clearly on the public route.",
+        },
+        {
+            "title": "Investment signals region",
+            "allowed_classes": "public, curated",
+            "rule": "Use confidence-qualified public context only and keep deal-specific strategy outside this slice.",
+        },
+        {
+            "title": "Methodology / disclaimer region",
+            "allowed_classes": "public",
+            "rule": "This region must stay on approved disclosure language and act as the page-level boundary note.",
+        },
+    ]
+
+
 def _render_market_intelligence_page(locale: str, request: Request, db: Session) -> HTMLResponse:
     copy = _market_intelligence_copy(locale)
+    source_classes = _market_intelligence_source_classes(locale)
+    report_regions = _market_intelligence_report_regions(locale)
     boundary_html = "".join(f"<li>{escape(point)}</li>" for point in copy["boundary_points"])
     freshness_html = "".join(f"<li>{escape(point)}</li>" for point in copy["freshness_points"])
     next_html = "".join(f"<li>{escape(point)}</li>" for point in copy["next_points"])
+    source_class_html = "".join(
+        f'<article class="card"><p class="muted">{escape(str(source_class["slug"]))}</p><h3>{escape(str(source_class["title"]))}</h3><p>{escape(str(source_class["summary"]))}</p><p><strong>{"Examples" if locale == "en" else "Examples"}:</strong></p><ul>{"".join(f"<li>{escape(str(example))}</li>" for example in source_class["examples"])}</ul><p><strong>{"Freshness" if locale == "en" else "Freshness"}:</strong> {escape(str(source_class["freshness"]))}</p><p class="muted">{escape(str(source_class["public_note"]))}</p></article>'
+        for source_class in source_classes
+    )
+    report_region_html = "".join(
+        f'<article class="card"><h3>{escape(str(region["title"]))}</h3><p><strong>{"Allowed classes" if locale == "en" else "Allowed classes"}:</strong> {escape(str(region["allowed_classes"]))}</p><p>{escape(str(region["rule"]))}</p></article>'
+        for region in report_regions
+    )
     contact_href = f"/{locale}/contact?intent=consultation&source=market_intelligence"
     methodology_href = f"/{locale}/investment/methodology?source=market_intelligence"
     body = (
         f'<section id="market-intelligence-overview" class="card"><p class="muted">{escape(str(copy["eyebrow"]))}</p><h2>{escape(str(copy["overview_title"]))}</h2><p>{escape(str(copy["overview_body"]))}</p><p class="muted">{escape(str(copy["note"]))}</p></section>'
         f'<section id="market-intelligence-boundary" class="card"><h2>{escape(str(copy["boundary_title"]))}</h2><ul>{boundary_html}</ul></section>'
+        f'<section id="market-intelligence-source-classes" class="stack"><div class="card"><h2>{"Source classification layer" if locale == "en" else "Source classification layer"}</h2><p>{"Every public block in this module must resolve to a governed source class before later chart or interpretation slices expand." if locale == "en" else "ทุก block ที่เผยแพร่บน module นี้ต้องผูกกับ source class ที่กำกับได้ก่อนที่ slice ถัดไปจะขยายไปสู่ charts หรือ interpretation"}</p></div><div class="grid">{source_class_html}</div></section>'
+        f'<section id="market-intelligence-region-contract" class="stack"><div class="card"><h2>{"Report region contract" if locale == "en" else "Report region contract"}</h2><p>{"This slice prepares the runtime structure for later chart and report regions without enabling those deeper layers yet." if locale == "en" else "slice นี้เตรียมโครงสร้าง runtime สำหรับ report regions ถัดไป โดยยังไม่เปิดใช้งาน layers ที่ลึกกว่านี้"}</p></div><div class="grid">{report_region_html}</div></section>'
         f'<section id="market-intelligence-freshness" class="card"><h2>{escape(str(copy["freshness_title"]))}</h2><ul>{freshness_html}</ul></section>'
         f'<section id="market-intelligence-next" class="card"><h2>{escape(str(copy["next_title"]))}</h2><ul>{next_html}</ul></section>'
         f'<section id="market-intelligence-next-step" class="card"><h2>{"Advisor follow-up" if locale == "en" else "การคุยต่อกับทีมที่ปรึกษา"}</h2><div class="grid"><a class="btn" href="{escape(contact_href)}">{escape(str(copy["primary_cta"]))}</a><a class="btn" href="{escape(methodology_href)}">{escape(str(copy["secondary_cta"]))}</a></div></section>'
