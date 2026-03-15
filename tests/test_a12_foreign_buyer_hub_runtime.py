@@ -13,6 +13,11 @@ def test_a12_foreign_buyer_hub_routes_render_conservative_guidance(client) -> No
     assert "Reservation and due diligence stage" in en_html
     assert "Transfer preparation" in en_html
     assert "Post-transfer support expectations" in en_html
+    assert "Document guidance module" in en_html
+    assert "Common preparation categories" in en_html
+    assert "Identity and passport baseline" in en_html
+    assert "Funds-transfer evidence guidance" in en_html
+    assert "These document categories are preparation guidance only" in en_html
     assert "It is not a legal, tax, or eligibility guarantee" in en_html
     assert "It is not a complete legal checklist" in en_html
     assert 'href="/en/contact?intent=consultation&amp;source=foreign_buyer_hub"' in en_html
@@ -31,6 +36,9 @@ def test_a12_foreign_buyer_hub_routes_render_conservative_guidance(client) -> No
     assert "Buying process module" in th_html
     assert "ลำดับด้านล่างเป็น roadmap เชิงอธิบายสำหรับผู้ซื้อต่างชาติ" in th_html
     assert "1. Discovery and shortlist review" in th_html
+    assert "Document guidance module" in th_html
+    assert "หมวดเอกสารด้านบนเป็น guidance เพื่อการเตรียมตัว" in th_html
+    assert "identity/passport baseline" in th_html
     assert "workflow นี้เป็นคำอธิบายเชิงโครงสร้าง" in th_html
     assert 'href="/th/contact?intent=consultation&amp;source=foreign_buyer_hub"' in th_html
     assert "เมื่อใดที่ต้องขอ legal review" in th_html
