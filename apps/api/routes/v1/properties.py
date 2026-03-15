@@ -1,15 +1,16 @@
 import os
 import time as _time
+from decimal import Decimal
 from pathlib import Path
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
-from sqlalchemy import Select, asc, desc, func, or_, select
+from sqlalchemy import Select, asc, case, desc, func, or_, select
 from sqlalchemy.orm import Session
 
 from packages.core.cache import response_cache
 from packages.core.database import get_db
-from packages.core.models import CompanyInfo, Property
+from packages.core.models import Area, CompanyInfo, Project, Property
 from packages.core.schemas.property_api import (
     CompanyInfoItem,
     CompanyListResponse,
@@ -19,6 +20,8 @@ from packages.core.schemas.property_api import (
     PropertyListResponse,
     PropertyStatus,
     PropertyType,
+    SearchResponse,
+    SearchResultItem,
 )
 
 router = APIRouter(prefix="/v1", tags=["properties", "company"])
@@ -157,6 +160,52 @@ def _extract_view_label(features: object | None) -> str | None:
     return value or None
 
 
+def _has_foreign_quota_indicator(features: object | None, ownership_notes: object | None) -> bool:
+    tags = _extract_tags(features) or []
+    for tag in tags:
+        normalized = tag.strip().lower().replace("_", " ")
+        if "foreign quota" in normalized:
+            return True
+
+    if ownership_notes is None:
+        return False
+    normalized_notes = str(ownership_notes).strip().lower()
+    return "foreign" in normalized_notes and "quota" in normalized_notes
+
+
+def _parse_uuid(value: str | None) -> UUID | None:
+    if not value:
+        return None
+    try:
+        return UUID(str(value).strip())
+    except (TypeError, ValueError, AttributeError):
+        return None
+
+
+def _resolve_project_id(db: Session, project: str | None) -> UUID | None:
+    if not project:
+        return None
+    stripped = project.strip()
+    if not stripped:
+        return None
+    parsed = _parse_uuid(stripped)
+    if parsed is not None:
+        return parsed
+    return db.scalar(select(Project.id).where(Project.slug == stripped))
+
+
+def _resolve_area_id(db: Session, area: str | None) -> UUID | None:
+    if not area:
+        return None
+    stripped = area.strip()
+    if not stripped:
+        return None
+    parsed = _parse_uuid(stripped)
+    if parsed is not None:
+        return parsed
+    return db.scalar(select(Area.id).where(Area.slug == stripped))
+
+
 def _resolve_canonical_cover(
     *, cover_image_url: object | None, cover_image: object | None, merged: list[str]
 ) -> str | None:
@@ -258,6 +307,148 @@ def list_properties(
         data.append(m)
 
     return PropertyListResponse(data=data, meta=PaginationMeta(page=page, limit=limit, total=total))
+
+
+@router.get("/search", response_model=SearchResponse, include_in_schema=False)
+@router.get("/search/", response_model=SearchResponse)
+def search_properties(
+    page: int = Query(1, ge=1),
+    limit: int = Query(20, ge=1, le=100),
+    location: str | None = None,
+    area: str | None = None,
+    project: str | None = None,
+    price_min: Decimal | None = Query(default=None, ge=0),
+    price_max: Decimal | None = Query(default=None, ge=0),
+    bedrooms: int | None = Query(default=None, ge=0),
+    bathrooms: int | None = Query(default=None, ge=0),
+    size_min: Decimal | None = Query(default=None, ge=0),
+    size_max: Decimal | None = Query(default=None, ge=0),
+    view: str | None = None,
+    property_type: str | None = None,
+    sort: str = Query(
+        default="recommended",
+        pattern=r"^(recommended|price_low_to_high|price_high_to_low|size|latest)$",
+    ),
+    locale: str = Query(default="en", pattern=r"^(en|th)$"),
+    db: Session = Depends(get_db),
+) -> SearchResponse:
+    base_query: Select[tuple[Property]] = select(Property).where(
+        Property.status == PropertyStatus.ACTIVE.value,
+        Property.type.in_([PropertyType.NEW.value, PropertyType.RESALE.value]),
+    )
+
+    project_id = _resolve_project_id(db, project)
+    if project and project_id is None:
+        return SearchResponse(total=0, page=page, results=[])
+    if project_id is not None:
+        base_query = base_query.where(Property.project_id == project_id)
+
+    area_id = _resolve_area_id(db, area)
+    if area and area_id is None:
+        return SearchResponse(total=0, page=page, results=[])
+    if area_id is not None:
+        base_query = base_query.where(Property.area_id == area_id)
+
+    if price_min is not None:
+        base_query = base_query.where(Property.price >= price_min)
+    if price_max is not None:
+        base_query = base_query.where(Property.price <= price_max)
+    if bedrooms is not None:
+        base_query = base_query.where(Property.bedrooms == bedrooms)
+    if bathrooms is not None:
+        base_query = base_query.where(Property.bathrooms == bathrooms)
+    if size_min is not None:
+        base_query = base_query.where(func.coalesce(Property.size_sqm, Property.size) >= size_min)
+    if size_max is not None:
+        base_query = base_query.where(func.coalesce(Property.size_sqm, Property.size) <= size_max)
+    if view:
+        base_query = base_query.where(Property.view == view.strip())
+    if property_type:
+        base_query = base_query.where(Property.property_type == property_type.strip())
+
+    if location and location.strip():
+        pattern = f"%{location.strip()}%"
+        matching_project_ids = db.scalars(
+            select(Project.id).where(or_(Project.slug.ilike(pattern), Project.name.ilike(pattern)))
+        ).all()
+        matching_area_ids = db.scalars(
+            select(Area.id).where(
+                or_(Area.slug.ilike(pattern), Area.name.ilike(pattern), Area.city.ilike(pattern))
+            )
+        ).all()
+        location_filters = [Property.city.ilike(pattern), Property.address.ilike(pattern)]
+        if matching_project_ids:
+            location_filters.append(Property.project_id.in_(matching_project_ids))
+        if matching_area_ids:
+            location_filters.append(Property.area_id.in_(matching_area_ids))
+        base_query = base_query.where(or_(*location_filters))
+
+    total = db.scalar(select(func.count()).select_from(base_query.subquery())) or 0
+
+    size_expr = func.coalesce(Property.size_sqm, Property.size)
+    if sort == "price_low_to_high":
+        order_by = (asc(Property.price), desc(Property.id))
+    elif sort == "price_high_to_low":
+        order_by = (desc(Property.price), desc(Property.id))
+    elif sort == "size":
+        order_by = (desc(size_expr), desc(Property.id))
+    elif sort == "latest":
+        order_by = (desc(Property.created_at), desc(Property.id))  # type: ignore[arg-type]
+    else:
+        order_by = (
+            desc(case((Property.project_id.is_not(None), 1), else_=0)),
+            desc(
+                case(
+                    (Property.cover_image_url.is_not(None), 1),
+                    (Property.cover_image.is_not(None), 1),
+                    else_=0,
+                )
+            ),
+            desc(case((size_expr.is_not(None), 1), else_=0)),
+            desc(Property.created_at),  # type: ignore[arg-type]
+            desc(Property.id),
+        )
+
+    items = db.scalars(base_query.order_by(*order_by).offset((page - 1) * limit).limit(limit)).all()
+
+    project_ids = {item.project_id for item in items if item.project_id is not None}
+    area_ids = {item.area_id for item in items if item.area_id is not None}
+    project_names = dict(
+        db.execute(select(Project.id, Project.name).where(Project.id.in_(project_ids))).all()
+    ) if project_ids else {}
+    area_names = dict(db.execute(select(Area.id, Area.name).where(Area.id.in_(area_ids))).all()) if area_ids else {}
+
+    results: list[SearchResultItem] = []
+    for item in items:
+        title_i18n = _normalize_i18n_map(getattr(item, "title_i18n", None))
+        stored_local = _coerce_image_list(getattr(item, "local_images", None))
+        stored_images = _coerce_image_list(getattr(item, "images", None))
+        disk_images = _list_local_images(item.id)
+        merged = _merge_images(stored_local, stored_images, disk_images)
+        image = _resolve_canonical_cover(
+            cover_image_url=getattr(item, "cover_image_url", None),
+            cover_image=getattr(item, "cover_image", None),
+            merged=merged,
+        )
+        results.append(
+            SearchResultItem(
+                id=item.slug or str(item.id),
+                title=_resolve_text_for_locale(title_i18n, getattr(item, "title", None), locale)
+                or item.title,
+                project=project_names.get(item.project_id),
+                location=area_names.get(item.area_id) or item.city,
+                price=item.price,
+                size=getattr(item, "size_sqm", None) or getattr(item, "size", None),
+                bedrooms=item.bedrooms,
+                bathrooms=item.bathrooms,
+                image=image,
+                foreign_quota=_has_foreign_quota_indicator(
+                    getattr(item, "features", None), getattr(item, "ownership_notes", None)
+                ),
+            )
+        )
+
+    return SearchResponse(total=total, page=page, results=results)
 
 
 @router.get("/properties/{property_id}", response_model=PropertyDetail, include_in_schema=False)

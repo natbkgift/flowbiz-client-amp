@@ -32,6 +32,7 @@ from apps.api.routes.v1 import (
     properties,
 )
 from packages.core.database import SessionLocal, init_db
+from packages.core.schemas.property_api import SearchResponse
 from packages.core.seo_controls import resolve_redirect_rule
 
 
@@ -94,6 +95,9 @@ app.include_router(home_composer.router)
 app.include_router(properties.router)
 app.include_router(events.router)
 app.include_router(home_runtime.router)
+
+app.add_api_route("/search", properties.search_properties, methods=["GET"], response_model=SearchResponse)
+app.add_api_route("/search/", properties.search_properties, methods=["GET"], response_model=SearchResponse)
 
 app.include_router(admin_crm.router)
 app.include_router(admin_properties.router)
