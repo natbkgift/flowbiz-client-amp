@@ -64,6 +64,7 @@ _PUBLIC_ROUTE_SUFFIXES = {
     "/cookies",
     "/investment/methodology",
     "/foreign-buyer-hub",
+    "/market-intelligence",
 }
 _DEFAULT_MEDIA_FALLBACK = "/media/library/variants/05032d16-54ae-45f4-bb89-3ae1fc2fa52f.webp"
 _MEDIA_ROOTS = [
@@ -6617,6 +6618,93 @@ def _foreign_buyer_hub_copy(locale: str) -> dict[str, object]:
     }
 
 
+def _market_intelligence_copy(locale: str) -> dict[str, object]:
+    if locale == "th":
+        return {
+            "title": "Market Intelligence",
+            "intro": "หน้านี้เป็น route owner สำหรับ Market Intelligence module ในระดับ public-safe เท่านั้น โดยจะเผยแพร่เฉพาะบริบทตลาดที่ผ่านการกำกับด้านแหล่งข้อมูล ความสดใหม่ และขอบเขตการเปิดเผยแล้ว",
+            "eyebrow": "Market Intelligence",
+            "overview_title": "สิ่งที่เปิดใช้งานใน slice นี้",
+            "overview_body": "slice แรกเปิด route owner และ page shell เพื่อกำหนดพื้นที่ของ market overview, area comparison, investment signals, และ methodology/disclaimer โดยยังไม่ปล่อย charts หรือ data layer เต็มรูปแบบ",
+            "boundary_title": "Public-safe boundary",
+            "boundary_points": [
+                "เผยแพร่ได้เฉพาะ market context ที่อ้างอิงแหล่งข้อมูลได้และผ่านการกำกับแล้ว",
+                "ข้อมูล advisor-only, negotiation notes, หรือดีลเฉพาะรายต้องไม่ปรากฏบนหน้า public นี้",
+                "หากสัญญาณใดยังไม่ชัดเจนพอ หน้านี้จะใช้ถ้อยคำเชิง conservative แทนการแสดง claim ที่แรงเกินจริง",
+            ],
+            "freshness_title": "Freshness and methodology framing",
+            "freshness_points": [
+                "สัญญาณแบบ fast จะต้องผูกกับ cadence ที่กำกับได้ก่อนแสดงบนหน้า public",
+                "บทสรุปเชิง editorial ต้องมีจุดทบทวนรายเดือนหรือ disclosure ที่ชัดเจน",
+                "methodology และ disclosure language จะเปลี่ยนได้เฉพาะเมื่อมี revision ที่อนุมัติแล้ว",
+            ],
+            "next_title": "สิ่งที่จะตามมาใน slice ถัดไป",
+            "next_points": [
+                "data source classification layer",
+                "basic market overview charts",
+                "advisory interpretation blocks",
+            ],
+            "note": "page shell นี้ยังไม่ใช่รายงานตลาดฉบับสมบูรณ์ และยังไม่เผยแพร่ advisor-only insight หรือ chart series เชิงลึก",
+            "primary_cta": "คุยกับทีมที่ปรึกษา",
+            "secondary_cta": "ดู Investment Methodology",
+        }
+    return {
+        "title": "Market Intelligence",
+        "intro": "This route is the public owner for the Market Intelligence module. It is limited to public-safe market context governed by source, freshness, and disclosure boundaries.",
+        "eyebrow": "Market Intelligence",
+        "overview_title": "What this slice activates",
+        "overview_body": "The first slice launches the route owner and page shell for market overview, area comparison, investment signals, and methodology/disclaimer regions without publishing the full chart or data layers yet.",
+        "boundary_title": "Public-safe boundary",
+        "boundary_points": [
+            "Only market context with governed source and disclosure support may appear on this public route.",
+            "Advisor-only signals, negotiation notes, and deal-specific recommendations must stay outside this public page.",
+            "Where confidence is limited, the page must fall back to conservative wording instead of stronger public claims.",
+        ],
+        "freshness_title": "Freshness and methodology framing",
+        "freshness_points": [
+            "Fast signals must be tied to a governed refresh cadence before public publication.",
+            "Editorial summaries must carry a visible review rhythm or equivalent freshness disclosure.",
+            "Methodology and disclosure language change only on approved revision.",
+        ],
+        "next_title": "What later slices add",
+        "next_points": [
+            "Data source classification layer",
+            "Basic market overview charts",
+            "Advisory interpretation blocks",
+        ],
+        "note": "This page shell is not a full market report yet. It does not publish advisor-only insight or deep chart series in this slice.",
+        "primary_cta": "Speak to an Advisor",
+        "secondary_cta": "View Investment Methodology",
+    }
+
+
+def _render_market_intelligence_page(locale: str, request: Request, db: Session) -> HTMLResponse:
+    copy = _market_intelligence_copy(locale)
+    boundary_html = "".join(f"<li>{escape(point)}</li>" for point in copy["boundary_points"])
+    freshness_html = "".join(f"<li>{escape(point)}</li>" for point in copy["freshness_points"])
+    next_html = "".join(f"<li>{escape(point)}</li>" for point in copy["next_points"])
+    contact_href = f"/{locale}/contact?intent=consultation&source=market_intelligence"
+    methodology_href = f"/{locale}/investment/methodology?source=market_intelligence"
+    body = (
+        f'<section id="market-intelligence-overview" class="card"><p class="muted">{escape(str(copy["eyebrow"]))}</p><h2>{escape(str(copy["overview_title"]))}</h2><p>{escape(str(copy["overview_body"]))}</p><p class="muted">{escape(str(copy["note"]))}</p></section>'
+        f'<section id="market-intelligence-boundary" class="card"><h2>{escape(str(copy["boundary_title"]))}</h2><ul>{boundary_html}</ul></section>'
+        f'<section id="market-intelligence-freshness" class="card"><h2>{escape(str(copy["freshness_title"]))}</h2><ul>{freshness_html}</ul></section>'
+        f'<section id="market-intelligence-next" class="card"><h2>{escape(str(copy["next_title"]))}</h2><ul>{next_html}</ul></section>'
+        f'<section id="market-intelligence-next-step" class="card"><h2>{"Advisor follow-up" if locale == "en" else "การคุยต่อกับทีมที่ปรึกษา"}</h2><div class="grid"><a class="btn" href="{escape(contact_href)}">{escape(str(copy["primary_cta"]))}</a><a class="btn" href="{escape(methodology_href)}">{escape(str(copy["secondary_cta"]))}</a></div></section>'
+    )
+    return HTMLResponse(
+        _render_page_shell(
+            locale,
+            title=str(copy["title"]),
+            intro=str(copy["intro"]),
+            body=body,
+            request=request,
+            db=db,
+            meta_description=str(copy["intro"]),
+        )
+    )
+
+
 def _render_foreign_buyer_hub_page(locale: str, request: Request, db: Session) -> HTMLResponse:
     copy = _foreign_buyer_hub_copy(locale)
     ownership_html = "".join(
@@ -7453,3 +7541,10 @@ def render_investment_methodology(request: Request, db: Session = Depends(get_db
 def render_foreign_buyer_hub(request: Request, db: Session = Depends(get_db)) -> HTMLResponse:
     locale = _request_locale(request)
     return _render_foreign_buyer_hub_page(locale, request, db)
+
+
+@router.get("/en/market-intelligence", response_class=HTMLResponse)
+@router.get("/th/market-intelligence", response_class=HTMLResponse)
+def render_market_intelligence(request: Request, db: Session = Depends(get_db)) -> HTMLResponse:
+    locale = _request_locale(request)
+    return _render_market_intelligence_page(locale, request, db)
