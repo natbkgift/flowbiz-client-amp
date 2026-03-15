@@ -10,7 +10,7 @@ Governance lock:
 This document opens the Sprint 2 implementation gate for:
 
 1. the completed Saved Shortlist foundation
-2. the first approved Foreign Buyer Hub implementation slice
+2. the first two approved Foreign Buyer Hub implementation slices
 
 It does not activate Market Intelligence implementation.
 
@@ -21,7 +21,7 @@ It does not activate Market Intelligence implementation.
 Meaning:
 
 - Saved Shortlist foundation is completed and merged on `main`
-- Foreign Buyer Hub is partially unlocked for the first approved ownership-basics slice only
+- Foreign Buyer Hub is partially unlocked for the approved ownership-basics and buying-process slices only
 - Market Intelligence Public Module remains planning only
 
 Top-line reporting remains:
@@ -56,6 +56,7 @@ Allowed execution order:
 3. Shortlist save/remove behavior
 4. Shortlist share capability
 5. `#453` Foreign Buyer Hub Ownership Basics Slice
+6. `#455` Foreign Buyer Hub Buying Process Module
 
 No later step may begin until the prior step is merged and validated.
 
@@ -66,17 +67,23 @@ Foreign Buyer Hub slice `#453` is constrained to:
 - conservative advisory language only
 - an existing contact/advisor CTA path only
 
-The following Foreign Buyer Hub layers remain blocked after `#453` until separately approved and merged:
+Foreign Buyer Hub slice `#455` is constrained to:
 
-- purchase process module expansion
+- process steps only
+- foreign buyer journey explanation only
+- conservative advisory-safe wording only
+- the existing contact/advisor CTA path only
+
+The following Foreign Buyer Hub layers remain blocked after `#455` until separately approved and merged:
+
 - document guidance module
 - FAQ and advisory decision module beyond the approved first slice
+- any calculator, shortlist-integration, or funnel-behavior expansion
 
 ## Explicitly Blocked Scope
 
 The following remain blocked during this gate stage:
 
-- Foreign Buyer Hub implementation
 - Market Intelligence Public Module implementation
 - CRM changes
 - lead-form changes
