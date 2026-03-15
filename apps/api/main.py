@@ -30,6 +30,7 @@ from apps.api.routes.v1 import (
     home_runtime,
     projects,
     properties,
+    shortlists,
 )
 from packages.core.database import SessionLocal, init_db
 from packages.core.schemas.property_api import SearchResponse
@@ -93,6 +94,7 @@ app.include_router(projects.router)
 app.include_router(content.router)
 app.include_router(home_composer.router)
 app.include_router(properties.router)
+app.include_router(shortlists.router)
 app.include_router(events.router)
 app.include_router(home_runtime.router)
 
