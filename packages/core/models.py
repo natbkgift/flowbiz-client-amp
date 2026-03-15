@@ -1044,6 +1044,58 @@ class Comparison(Base):
     )
 
 
+class Shortlist(Base):
+    __tablename__ = "shortlists"
+    __table_args__ = (
+        Index("ix_shortlists_owner_status", "owner_type", "owner_key", "status"),
+        Index("ix_shortlists_updated_at", "updated_at"),
+    )
+
+    id: Mapped[UUID] = mapped_column(primary_key=True, default=uuid4)
+    owner_type: Mapped[str] = mapped_column(String(16), nullable=False, index=True)
+    owner_key: Mapped[str] = mapped_column(String(128), nullable=False, index=True)
+    status: Mapped[str] = mapped_column(
+        String(32), nullable=False, default="active", server_default="active"
+    )
+    title: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    intent: Mapped[str | None] = mapped_column(String(64), nullable=True)
+    last_viewed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    share_mode: Mapped[str | None] = mapped_column(String(32), nullable=True)
+    share_token_ref: Mapped[str | None] = mapped_column(String(128), nullable=True)
+    source_context: Mapped[dict | None] = mapped_column(JSONB, nullable=True)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), nullable=False, server_default=func.now(), index=True
+    )
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        nullable=False,
+        server_default=func.now(),
+        onupdate=func.now(),
+    )
+
+
+class ShortlistItem(Base):
+    __tablename__ = "shortlist_items"
+    __table_args__ = (
+        UniqueConstraint("shortlist_id", "property_id", name="uq_shortlist_items_shortlist_property"),
+        Index("ix_shortlist_items_shortlist_position", "shortlist_id", "position"),
+    )
+
+    id: Mapped[UUID] = mapped_column(primary_key=True, default=uuid4)
+    shortlist_id: Mapped[UUID] = mapped_column(
+        ForeignKey("shortlists.id", ondelete="CASCADE"), nullable=False, index=True
+    )
+    property_id: Mapped[UUID] = mapped_column(
+        ForeignKey("properties.id", ondelete="CASCADE"), nullable=False, index=True
+    )
+    position: Mapped[int] = mapped_column(Integer, nullable=False, default=0, server_default="0")
+    source_surface: Mapped[str | None] = mapped_column(String(64), nullable=True)
+    notes_ref: Mapped[str | None] = mapped_column(String(128), nullable=True)
+    added_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), nullable=False, server_default=func.now(), index=True
+    )
+
+
 class AnalyticsEvent(Base):
     __tablename__ = "analytics_events"
 
