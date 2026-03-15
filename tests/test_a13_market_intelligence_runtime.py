@@ -12,6 +12,7 @@ def test_a13_market_intelligence_route_owner_renders_public_safe_shell(client) -
     assert "Source classification layer" in en_html
     assert "Report region contract" in en_html
     assert "Basic market overview charts" in en_html
+    assert "Advisory interpretation blocks" in en_html
     assert "Freshness and methodology framing" in en_html
     assert "What later slices add" in en_html
     assert "This page shell is not a full market report yet" in en_html
@@ -24,6 +25,13 @@ def test_a13_market_intelligence_route_owner_renders_public_safe_shell(client) -
     assert "Freshness tier: fast" in en_html
     assert "Freshness tier: governed" in en_html
     assert "This chart summarizes records currently published in the runtime." in en_html
+    assert "Coverage reading" in en_html
+    assert "Readiness reading" in en_html
+    assert "Nuance and escalation" in en_html
+    assert "Source class: curated" in en_html
+    assert "The current public runtime reflects published inventory across" in en_html
+    assert "the next step should be the existing advisor path" in en_html
+    assert "They are not investment recommendations" in en_html
     assert "Approved public inventory counts" in en_html
     assert "Editorial market commentary" in en_html
     assert "Advisor-only" in en_html
@@ -51,6 +59,7 @@ def test_a13_market_intelligence_route_owner_renders_public_safe_shell(client) -
     assert "Source classification layer" in th_html
     assert "Report region contract" in th_html
     assert "Basic market overview charts" in th_html
+    assert "Advisory interpretation blocks" in th_html
     assert "Freshness and methodology framing" in th_html
     assert "สิ่งที่จะตามมาใน slice ถัดไป" in th_html
     assert "page shell นี้ยังไม่ใช่รายงานตลาดฉบับสมบูรณ์" in th_html
@@ -61,6 +70,13 @@ def test_a13_market_intelligence_route_owner_renders_public_safe_shell(client) -
     assert "Areas with verified metrics" in th_html
     assert "Projects with investment snapshot" in th_html
     assert "chart นี้สรุปจำนวน records ที่เผยแพร่ใน runtime ปัจจุบัน" in th_html
+    assert "Coverage reading" in th_html
+    assert "Readiness reading" in th_html
+    assert "Nuance and escalation" in th_html
+    assert "Source class: curated" in th_html
+    assert "public runtime ตอนนี้สะท้อน inventory ที่เผยแพร่แล้ว" in th_html
+    assert "ควรยกระดับไปยัง advisor path เดิม" in th_html
+    assert "ไม่ใช่คำแนะนำลงทุน" in th_html
     assert "approved public inventory counts" in th_html
     assert "editorial market commentary" in th_html
     assert "จัดเป็น boundary class เพื่อบอกสิ่งที่ห้ามเผยแพร่" in th_html
