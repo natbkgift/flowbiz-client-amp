@@ -22,13 +22,25 @@ The following four files are the only active source of truth for Sprint 1 planni
 
 If there is any conflict between older roadmap notes and these four files, these four files win.
 
+Sprint 1 implementation is governed separately by:
+
+- `docs/contracts/AMP_V2_SPRINT_1_IMPLEMENTATION_GATE_2026-03-15.md`
+
+This implementation gate does not replace the four planning sources above. It operationalizes the approved planning set for execution.
+
 ## Operating Rule
 
 Sprint planning is active only for `Sprint 1` at this time.
 
 `Sprint 2` to `Sprint 4` are roadmap placeholders with enough structure for sequencing, but they are not active implementation plans yet.
 
-## Sprint 1 (Active Planning Only)
+## Sprint 1 (Approved Planning / Implementation Gate Open)
+
+Planning approval has been recorded and Sprint 1 implementation may begin only within:
+
+- `docs/contracts/AMP_V2_SPRINT_1_IMPLEMENTATION_GATE_2026-03-15.md`
+
+This does not reopen `V1`, does not activate Sprint 2-4, and does not change the top-line status that `V2` remains `roadmap only`.
 
 ### Epic 1: Advanced Search Foundation
 
@@ -202,8 +214,8 @@ Sprint planning is active only for `Sprint 1` at this time.
 
 ## Recommended Execution Order
 
-1. Sprint 1 planning and issue breakdown
-2. Sprint 2 delivery if Sprint 1 confirms the scope
+1. Sprint 1 implementation only within the approved gate
+2. Sprint 2 delivery only after Sprint 1 execution confirms the scope and a new gate is opened
 3. Sprint 3 only after shortlist persistence and CRM direction are approved
 4. Sprint 4 only after data, auth, and storage assumptions are mature enough
 
