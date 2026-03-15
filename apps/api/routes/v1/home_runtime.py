@@ -63,6 +63,7 @@ _PUBLIC_ROUTE_SUFFIXES = {
     "/terms",
     "/cookies",
     "/investment/methodology",
+    "/foreign-buyer-hub",
 }
 _DEFAULT_MEDIA_FALLBACK = "/media/library/variants/05032d16-54ae-45f4-bb89-3ae1fc2fa52f.webp"
 _MEDIA_ROOTS = [
@@ -6452,6 +6453,83 @@ def _render_how_we_work_page(locale: str, request: Request, db: Session) -> HTML
     )
 
 
+def _foreign_buyer_hub_copy(locale: str) -> dict[str, object]:
+    if locale == "th":
+        return {
+            "title": "Foreign Buyer Hub",
+            "intro": "ศูนย์ข้อมูลนี้เป็น guidance เชิงภาพรวมสำหรับผู้ซื้อต่างชาติในพัทยาเท่านั้น ไม่ใช่คำรับรองทางกฎหมาย ภาษี หรือสิทธิ์ที่ใช้ได้กับทุกกรณี",
+            "eyebrow": "Foreign Buyer Advisory",
+            "coverage_title": "สิ่งที่ slice แรกครอบคลุม",
+            "coverage_body": "เริ่มจาก ownership และ eligibility basics ก่อน เพื่อรวม guidance หลักไว้ในจุดเดียวโดยไม่เปลี่ยน funnel เดิมหรือหน้า V1 ที่มีอยู่",
+            "ownership_title": "Ownership and eligibility basics",
+            "ownership_points": [
+                "คอนโดบางยูนิตอาจเข้ากรอบ foreign quota ได้ แต่ availability และเอกสารต้องตรวจสอบเป็นรายทรัพย์",
+                "โครงสร้างการถือครองแบบอื่น เช่น leasehold หรือ company holding ต้องให้ที่ปรึกษาและทนายช่วยประเมินเป็นกรณี",
+                "หน้า hub นี้อธิบายจุดเริ่มต้นของการประเมินสิทธิ์ ไม่ใช่คำยืนยันว่าธุรกรรมจะทำได้โดยอัตโนมัติ",
+            ],
+            "review_title": "เมื่อใดที่ต้องขอ legal review",
+            "review_points": [
+                "เมื่อ ownership path ไม่ชัดเจนจากข้อมูลโครงการหรือเอกสารเบื้องต้น",
+                "เมื่อมีคำถามเรื่อง quota, สัญญา, ภาษี หรือการโอนเงินจากต่างประเทศ",
+                "เมื่อกรณีซื้อมีหลายผู้ถือสิทธิ์ หลายสัญชาติ หรือมีโครงสร้างที่ไม่ใช่มาตรฐาน",
+            ],
+            "advisory_title": "ขั้นตอนถัดไปที่ปลอดภัย",
+            "advisory_body": "หากต้องการประเมิน eligibility ของเคสจริง ให้ใช้ช่องทางติดต่อเดิมเพื่อให้ทีมช่วยคัด inventory ที่เหมาะสมและระบุจุดที่ควรให้ทนายตรวจเพิ่ม",
+            "primary_cta": "คุยกับทีมที่ปรึกษา",
+            "secondary_cta": "ดูโครงการที่เผยแพร่",
+        }
+    return {
+        "title": "Foreign Buyer Hub",
+        "intro": "This hub provides conservative, high-level guidance for foreign buyers in Pattaya. It is not a legal, tax, or eligibility guarantee for every case.",
+        "eyebrow": "Foreign Buyer Advisory",
+        "coverage_title": "What this first slice covers",
+        "coverage_body": "This first implementation slice opens the hub with ownership and eligibility basics only, keeping current V1 pages and the existing advisory funnel unchanged.",
+        "ownership_title": "Ownership and eligibility basics",
+        "ownership_points": [
+            "Some condo inventory may fit foreign-quota ownership, but availability and supporting documents must be checked case by case.",
+            "Other holding paths such as leasehold or company structures require advisor and legal review before they are treated as viable.",
+            "This hub explains the starting framework for ownership review. It does not certify that a transaction is automatically eligible.",
+        ],
+        "review_title": "When legal review is required",
+        "review_points": [
+            "When the ownership path is not clear from project facts or preliminary documents.",
+            "When quota, contract, tax, or funds-transfer questions affect the purchase decision.",
+            "When the purchase involves multiple owners, multiple jurisdictions, or a non-standard holding structure.",
+        ],
+        "advisory_title": "Safe next step",
+        "advisory_body": "For a live case, use the existing advisory path so the team can shortlist eligible inventory and flag where lawyer review is needed.",
+        "primary_cta": "Speak to an Advisor",
+        "secondary_cta": "Browse Published Projects",
+    }
+
+
+def _render_foreign_buyer_hub_page(locale: str, request: Request, db: Session) -> HTMLResponse:
+    copy = _foreign_buyer_hub_copy(locale)
+    ownership_html = "".join(
+        f"<li>{escape(point)}</li>" for point in copy["ownership_points"]
+    )
+    review_html = "".join(f"<li>{escape(point)}</li>" for point in copy["review_points"])
+    contact_href = f"/{locale}/contact?intent=consultation&source=foreign_buyer_hub"
+    projects_href = f"/{locale}/projects?source=foreign_buyer_hub"
+    body = (
+        f'<section id="foreign-buyer-coverage" class="card"><p class="muted">{escape(str(copy["eyebrow"]))}</p><h2>{escape(str(copy["coverage_title"]))}</h2><p>{escape(str(copy["coverage_body"]))}</p></section>'
+        f'<section id="foreign-buyer-ownership" class="card"><h2>{escape(str(copy["ownership_title"]))}</h2><ul>{ownership_html}</ul></section>'
+        f'<section id="foreign-buyer-legal-review" class="card"><h2>{escape(str(copy["review_title"]))}</h2><ul>{review_html}</ul></section>'
+        f'<section id="foreign-buyer-next-step" class="card"><h2>{escape(str(copy["advisory_title"]))}</h2><p>{escape(str(copy["advisory_body"]))}</p><div class="grid"><a class="btn" href="{escape(contact_href)}">{escape(str(copy["primary_cta"]))}</a><a class="btn" href="{escape(projects_href)}">{escape(str(copy["secondary_cta"]))}</a></div></section>'
+    )
+    return HTMLResponse(
+        _render_page_shell(
+            locale,
+            title=str(copy["title"]),
+            intro=str(copy["intro"]),
+            body=body,
+            request=request,
+            db=db,
+            meta_description=str(copy["intro"]),
+        )
+    )
+
+
 def _render_contact_page(locale: str, request: Request, db: Session) -> HTMLResponse:
     row = db.scalar(select(CompanyInfo).where(CompanyInfo.slug == "contact"))
     raw_content = str(row.content if row is not None else "").strip()
@@ -7237,3 +7315,10 @@ def render_investment_methodology(request: Request, db: Session = Depends(get_db
     )
     title = "Investment Methodology" if locale == "en" else "Investment Methodology"
     return _company_page(locale, "investment-methodology", title, fallback, request, db)
+
+
+@router.get("/en/foreign-buyer-hub", response_class=HTMLResponse)
+@router.get("/th/foreign-buyer-hub", response_class=HTMLResponse)
+def render_foreign_buyer_hub(request: Request, db: Session = Depends(get_db)) -> HTMLResponse:
+    locale = _request_locale(request)
+    return _render_foreign_buyer_hub_page(locale, request, db)
