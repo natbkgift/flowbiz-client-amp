@@ -18,6 +18,10 @@ def test_a12_foreign_buyer_hub_routes_render_conservative_guidance(client) -> No
     assert "Identity and passport baseline" in en_html
     assert "Funds-transfer evidence guidance" in en_html
     assert "These document categories are preparation guidance only" in en_html
+    assert "FAQ / clarification module" in en_html
+    assert "How long does a foreign-buyer purchase usually take?" in en_html
+    assert "Which costs should be clarified early?" in en_html
+    assert "This FAQ is for early clarification only" in en_html
     assert "It is not a legal, tax, or eligibility guarantee" in en_html
     assert "It is not a complete legal checklist" in en_html
     assert 'href="/en/contact?intent=consultation&amp;source=foreign_buyer_hub"' in en_html
@@ -39,6 +43,9 @@ def test_a12_foreign_buyer_hub_routes_render_conservative_guidance(client) -> No
     assert "Document guidance module" in th_html
     assert "หมวดเอกสารด้านบนเป็น guidance เพื่อการเตรียมตัว" in th_html
     assert "identity/passport baseline" in th_html
+    assert "FAQ / clarification module" in th_html
+    assert "การซื้อของผู้ซื้อต่างชาติมักใช้เวลานานแค่ไหน?" in th_html
+    assert "FAQ นี้ออกแบบมาเพื่อ clarification ระดับต้น" in th_html
     assert "workflow นี้เป็นคำอธิบายเชิงโครงสร้าง" in th_html
     assert 'href="/th/contact?intent=consultation&amp;source=foreign_buyer_hub"' in th_html
     assert "เมื่อใดที่ต้องขอ legal review" in th_html
