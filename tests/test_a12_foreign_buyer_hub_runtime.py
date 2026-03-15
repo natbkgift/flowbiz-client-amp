@@ -7,8 +7,14 @@ def test_a12_foreign_buyer_hub_routes_render_conservative_guidance(client) -> No
     en_html = en_response.text
 
     assert "Foreign Buyer Hub" in en_html
-    assert "ownership and eligibility basics" in en_html
+    assert "Ownership and eligibility basics" in en_html
+    assert "Buying process module" in en_html
+    assert "Discovery and shortlist review" in en_html
+    assert "Reservation and due diligence stage" in en_html
+    assert "Transfer preparation" in en_html
+    assert "Post-transfer support expectations" in en_html
     assert "It is not a legal, tax, or eligibility guarantee" in en_html
+    assert "It is not a complete legal checklist" in en_html
     assert 'href="/en/contact?intent=consultation&amp;source=foreign_buyer_hub"' in en_html
     assert 'href="/en/projects?source=foreign_buyer_hub"' in en_html
     assert "Some condo inventory may fit foreign-quota ownership" in en_html
@@ -22,5 +28,9 @@ def test_a12_foreign_buyer_hub_routes_render_conservative_guidance(client) -> No
     assert "Foreign Buyer Hub" in th_html
     assert "ศูนย์ข้อมูลนี้เป็น guidance เชิงภาพรวมสำหรับผู้ซื้อต่างชาติในพัทยาเท่านั้น" in th_html
     assert "Ownership and eligibility basics" in th_html
+    assert "Buying process module" in th_html
+    assert "ลำดับด้านล่างเป็น roadmap เชิงอธิบายสำหรับผู้ซื้อต่างชาติ" in th_html
+    assert "1. Discovery and shortlist review" in th_html
+    assert "workflow นี้เป็นคำอธิบายเชิงโครงสร้าง" in th_html
     assert 'href="/th/contact?intent=consultation&amp;source=foreign_buyer_hub"' in th_html
     assert "เมื่อใดที่ต้องขอ legal review" in th_html

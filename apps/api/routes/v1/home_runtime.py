@@ -6459,14 +6459,35 @@ def _foreign_buyer_hub_copy(locale: str) -> dict[str, object]:
             "title": "Foreign Buyer Hub",
             "intro": "ศูนย์ข้อมูลนี้เป็น guidance เชิงภาพรวมสำหรับผู้ซื้อต่างชาติในพัทยาเท่านั้น ไม่ใช่คำรับรองทางกฎหมาย ภาษี หรือสิทธิ์ที่ใช้ได้กับทุกกรณี",
             "eyebrow": "Foreign Buyer Advisory",
-            "coverage_title": "สิ่งที่ slice แรกครอบคลุม",
-            "coverage_body": "เริ่มจาก ownership และ eligibility basics ก่อน เพื่อรวม guidance หลักไว้ในจุดเดียวโดยไม่เปลี่ยน funnel เดิมหรือหน้า V1 ที่มีอยู่",
+            "coverage_title": "สิ่งที่ hub ครอบคลุมตอนนี้",
+            "coverage_body": "hub ตอนนี้ครอบคลุม ownership, eligibility และ buying process basics เพื่อรวม guidance หลักไว้ในจุดเดียวโดยไม่เปลี่ยน funnel เดิมหรือหน้า V1 ที่มีอยู่",
             "ownership_title": "Ownership and eligibility basics",
             "ownership_points": [
                 "คอนโดบางยูนิตอาจเข้ากรอบ foreign quota ได้ แต่ availability และเอกสารต้องตรวจสอบเป็นรายทรัพย์",
                 "โครงสร้างการถือครองแบบอื่น เช่น leasehold หรือ company holding ต้องให้ที่ปรึกษาและทนายช่วยประเมินเป็นกรณี",
                 "หน้า hub นี้อธิบายจุดเริ่มต้นของการประเมินสิทธิ์ ไม่ใช่คำยืนยันว่าธุรกรรมจะทำได้โดยอัตโนมัติ",
             ],
+            "process_title": "Buying process module",
+            "process_intro": "ลำดับด้านล่างเป็น roadmap เชิงอธิบายสำหรับผู้ซื้อต่างชาติ เพื่อช่วยเข้าใจจังหวะการตัดสินใจและจุดที่ควรกลับเข้าสู่ advisor หรือนักกฎหมาย",
+            "process_steps": [
+                {
+                    "title": "1. Discovery and shortlist review",
+                    "body": "เริ่มจากกำหนดเป้าหมาย งบ และประเภท inventory ที่น่าจะสอดคล้องกับ ownership path ก่อนค่อยคัด shortlist ที่ควรตรวจต่อ",
+                },
+                {
+                    "title": "2. Reservation and due diligence stage",
+                    "body": "เมื่อมีทรัพย์ที่สนใจ ควร review reservation terms, project facts, และจุดที่ต้องให้ advisor หรือนักกฎหมายช่วยตรวจเพิ่มเติมก่อน commit",
+                },
+                {
+                    "title": "3. Transfer preparation",
+                    "body": "ก่อนถึงวันโอน ควรเตรียมเอกสาร การโอนเงิน และการตรวจเงื่อนไขสัญญาที่เกี่ยวข้อง โดยยอมรับว่ารายการจริงอาจต่างกันตามเคส",
+                },
+                {
+                    "title": "4. Post-transfer support expectations",
+                    "body": "หลังโอนแล้ว อาจยังมีงานติดตาม เช่น handover, utility setup, หรือ coordination เพิ่มเติม ซึ่งควรถามทีมให้ชัดเจนตั้งแต่ก่อนปิดดีล",
+                },
+            ],
+            "process_note": "workflow นี้เป็นคำอธิบายเชิงโครงสร้าง ไม่ใช่ checklist ทางกฎหมายที่ครบถ้วนสำหรับทุกกรณี",
             "review_title": "เมื่อใดที่ต้องขอ legal review",
             "review_points": [
                 "เมื่อ ownership path ไม่ชัดเจนจากข้อมูลโครงการหรือเอกสารเบื้องต้น",
@@ -6482,14 +6503,35 @@ def _foreign_buyer_hub_copy(locale: str) -> dict[str, object]:
         "title": "Foreign Buyer Hub",
         "intro": "This hub provides conservative, high-level guidance for foreign buyers in Pattaya. It is not a legal, tax, or eligibility guarantee for every case.",
         "eyebrow": "Foreign Buyer Advisory",
-        "coverage_title": "What this first slice covers",
-        "coverage_body": "This first implementation slice opens the hub with ownership and eligibility basics only, keeping current V1 pages and the existing advisory funnel unchanged.",
+        "coverage_title": "What the hub covers now",
+        "coverage_body": "The hub now covers ownership, eligibility, and buying-process basics only, keeping current V1 pages and the existing advisory funnel unchanged.",
         "ownership_title": "Ownership and eligibility basics",
         "ownership_points": [
             "Some condo inventory may fit foreign-quota ownership, but availability and supporting documents must be checked case by case.",
             "Other holding paths such as leasehold or company structures require advisor and legal review before they are treated as viable.",
             "This hub explains the starting framework for ownership review. It does not certify that a transaction is automatically eligible.",
         ],
+        "process_title": "Buying process module",
+        "process_intro": "The sequence below is an advisory-safe roadmap for foreign buyers. It is meant to clarify decision points and when advisor or legal review should re-enter the process.",
+        "process_steps": [
+            {
+                "title": "1. Discovery and shortlist review",
+                "body": "Start by defining purchase goals, budget, and inventory fit before narrowing down which properties deserve deeper review.",
+            },
+            {
+                "title": "2. Reservation and due diligence stage",
+                "body": "Once a candidate property is identified, review reservation terms, project facts, and any points that need advisor or lawyer review before commitment.",
+            },
+            {
+                "title": "3. Transfer preparation",
+                "body": "Before transfer, prepare for document checks, funds-transfer coordination, and contract review, while treating the exact requirement set as case-specific.",
+            },
+            {
+                "title": "4. Post-transfer support expectations",
+                "body": "After transfer, additional coordination may still be needed for handover, utilities, or ownership follow-through, so those expectations should be clarified early.",
+            },
+        ],
+        "process_note": "This workflow is explanatory only. It is not a complete legal checklist or a guarantee that every case follows the same path.",
         "review_title": "When legal review is required",
         "review_points": [
             "When the ownership path is not clear from project facts or preliminary documents.",
@@ -6508,12 +6550,17 @@ def _render_foreign_buyer_hub_page(locale: str, request: Request, db: Session) -
     ownership_html = "".join(
         f"<li>{escape(point)}</li>" for point in copy["ownership_points"]
     )
+    process_steps_html = "".join(
+        f'<article class="card"><h3>{escape(str(step["title"]))}</h3><p>{escape(str(step["body"]))}</p></article>'
+        for step in copy["process_steps"]
+    )
     review_html = "".join(f"<li>{escape(point)}</li>" for point in copy["review_points"])
     contact_href = f"/{locale}/contact?intent=consultation&source=foreign_buyer_hub"
     projects_href = f"/{locale}/projects?source=foreign_buyer_hub"
     body = (
         f'<section id="foreign-buyer-coverage" class="card"><p class="muted">{escape(str(copy["eyebrow"]))}</p><h2>{escape(str(copy["coverage_title"]))}</h2><p>{escape(str(copy["coverage_body"]))}</p></section>'
         f'<section id="foreign-buyer-ownership" class="card"><h2>{escape(str(copy["ownership_title"]))}</h2><ul>{ownership_html}</ul></section>'
+        f'<section id="foreign-buyer-process" class="stack"><div class="card"><h2>{escape(str(copy["process_title"]))}</h2><p>{escape(str(copy["process_intro"]))}</p><p class="muted">{escape(str(copy["process_note"]))}</p></div><div class="grid">{process_steps_html}</div></section>'
         f'<section id="foreign-buyer-legal-review" class="card"><h2>{escape(str(copy["review_title"]))}</h2><ul>{review_html}</ul></section>'
         f'<section id="foreign-buyer-next-step" class="card"><h2>{escape(str(copy["advisory_title"]))}</h2><p>{escape(str(copy["advisory_body"]))}</p><div class="grid"><a class="btn" href="{escape(contact_href)}">{escape(str(copy["primary_cta"]))}</a><a class="btn" href="{escape(projects_href)}">{escape(str(copy["secondary_cta"]))}</a></div></section>'
     )
