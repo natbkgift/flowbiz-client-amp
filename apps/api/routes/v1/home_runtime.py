@@ -6503,6 +6503,27 @@ def _foreign_buyer_hub_copy(locale: str) -> dict[str, object]:
                 "หากรายการเอกสารยังไม่ชัดเจน ควรยืนยันกับ advisor และ legal review แทนการตีความจาก list ทั่วไปเพียงอย่างเดียว",
             ],
             "documents_note": "หมวดเอกสารด้านบนเป็น guidance เพื่อการเตรียมตัว ไม่ใช่คำแนะนำทางกฎหมายหรือรายการที่รับรองว่าเพียงพอในทุกกรณี",
+            "faq_title": "FAQ / clarification module",
+            "faq_intro": "คำถามด้านล่างตอบข้อสงสัยที่พบบ่อยในระดับภาพรวม เพื่อช่วยจัดลำดับการถามทีมที่ปรึกษาโดยไม่แทนคำแนะนำเฉพาะเคส",
+            "faq_items": [
+                {
+                    "question": "การซื้อของผู้ซื้อต่างชาติมักใช้เวลานานแค่ไหน?",
+                    "answer": "timeline ต่างกันตามประเภททรัพย์, readiness ของเอกสาร, และจังหวะ review ของคู่สัญญา จึงควรใช้ช่วงเวลาใน hub นี้เป็นแนวคิด ไม่ใช่กำหนดการที่รับประกันได้",
+                },
+                {
+                    "question": "ควรถามเรื่องค่าใช้จ่ายอะไรตั้งแต่ต้น?",
+                    "answer": "ควรเริ่มจากภาพรวมของราคาซื้อ ค่าจอง ค่าธรรมเนียมวันโอน และค่าใช้จ่ายหลังโอนที่อาจตามมา แต่ตัวเลขจริงต้องยืนยันกับทีมและเอกสารของดีลนั้น",
+                },
+                {
+                    "question": "ถ้ายังไม่แน่ใจเรื่อง ownership path ควรทำอย่างไร?",
+                    "answer": "อย่าตัดสินจากคำอธิบายทั่วไปเพียงอย่างเดียว ควรให้ advisor ช่วยคัด inventory ที่เข้ากรอบเบื้องต้นและชี้จุดที่ต้องมี legal review เพิ่ม",
+                },
+                {
+                    "question": "เมื่อไรควร escalate ไปหา advisor หรือ lawyer?",
+                    "answer": "หากมีความไม่ชัดเจนเรื่องสิทธิ์ถือครอง, ค่าใช้จ่าย, เงื่อนไขสัญญา, หรือเอกสารที่ต้องใช้ ควรกลับเข้าสู่ advisor path เดิมและยกระดับไป legal review ก่อน commit",
+                },
+            ],
+            "faq_note": "FAQ นี้ออกแบบมาเพื่อ clarification ระดับต้น ไม่ใช่ชุดคำตอบทางกฎหมาย การเงิน หรือภาษีที่ใช้แทนการ review รายกรณี",
             "review_title": "เมื่อใดที่ต้องขอ legal review",
             "review_points": [
                 "เมื่อ ownership path ไม่ชัดเจนจากข้อมูลโครงการหรือเอกสารเบื้องต้น",
@@ -6562,6 +6583,27 @@ def _foreign_buyer_hub_copy(locale: str) -> dict[str, object]:
             "If the document list is still unclear, confirm the case with advisor and legal review instead of relying on a generic checklist alone.",
         ],
         "documents_note": "These document categories are preparation guidance only. They are not legal instructions and they are not guaranteed to be sufficient for every case.",
+        "faq_title": "FAQ / clarification module",
+        "faq_intro": "These short answers address recurring foreign-buyer questions at a high level, while preserving the advisor path for case-specific advice.",
+        "faq_items": [
+            {
+                "question": "How long does a foreign-buyer purchase usually take?",
+                "answer": "Timing varies by property type, document readiness, and how quickly the parties can complete reviews, so any timeline here should be treated as orientation only rather than a guarantee.",
+            },
+            {
+                "question": "Which costs should be clarified early?",
+                "answer": "Start with the purchase price, reservation amount, transfer-day fees, and likely post-transfer costs, then confirm the actual numbers against the live deal documents and advisor guidance.",
+            },
+            {
+                "question": "What if the ownership path is still unclear?",
+                "answer": "Do not rely on generic summaries alone. Use the advisor path to narrow eligible inventory first and identify where legal review needs to step in.",
+            },
+            {
+                "question": "When should the case be escalated to an advisor or lawyer?",
+                "answer": "If ownership eligibility, costs, contract terms, or required documents remain unclear, the case should move back into the existing advisor path and legal review before commitment.",
+            },
+        ],
+        "faq_note": "This FAQ is for early clarification only. It is not legal, financial, or tax advice and it should not replace case-specific review.",
         "review_title": "When legal review is required",
         "review_points": [
             "When the ownership path is not clear from project facts or preliminary documents.",
@@ -6590,6 +6632,10 @@ def _render_foreign_buyer_hub_page(locale: str, request: Request, db: Session) -
     documents_case_html = "".join(
         f"<li>{escape(point)}</li>" for point in copy["documents_case_points"]
     )
+    faq_html = "".join(
+        f'<article class="card"><h3>{escape(str(item["question"]))}</h3><p>{escape(str(item["answer"]))}</p></article>'
+        for item in copy["faq_items"]
+    )
     review_html = "".join(f"<li>{escape(point)}</li>" for point in copy["review_points"])
     contact_href = f"/{locale}/contact?intent=consultation&source=foreign_buyer_hub"
     projects_href = f"/{locale}/projects?source=foreign_buyer_hub"
@@ -6598,6 +6644,7 @@ def _render_foreign_buyer_hub_page(locale: str, request: Request, db: Session) -
         f'<section id="foreign-buyer-ownership" class="card"><h2>{escape(str(copy["ownership_title"]))}</h2><ul>{ownership_html}</ul></section>'
         f'<section id="foreign-buyer-process" class="stack"><div class="card"><h2>{escape(str(copy["process_title"]))}</h2><p>{escape(str(copy["process_intro"]))}</p><p class="muted">{escape(str(copy["process_note"]))}</p></div><div class="grid">{process_steps_html}</div></section>'
         f'<section id="foreign-buyer-documents" class="stack"><div class="card"><h2>{escape(str(copy["documents_title"]))}</h2><p>{escape(str(copy["documents_intro"]))}</p><p class="muted">{escape(str(copy["documents_note"]))}</p></div><div class="grid"><article class="card"><h3>{escape(str(copy["documents_common_title"]))}</h3><ul>{documents_common_html}</ul></article><article class="card"><h3>{escape(str(copy["documents_case_title"]))}</h3><ul>{documents_case_html}</ul></article></div></section>'
+        f'<section id="foreign-buyer-faq" class="stack"><div class="card"><h2>{escape(str(copy["faq_title"]))}</h2><p>{escape(str(copy["faq_intro"]))}</p><p class="muted">{escape(str(copy["faq_note"]))}</p></div><div class="grid">{faq_html}</div></section>'
         f'<section id="foreign-buyer-legal-review" class="card"><h2>{escape(str(copy["review_title"]))}</h2><ul>{review_html}</ul></section>'
         f'<section id="foreign-buyer-next-step" class="card"><h2>{escape(str(copy["advisory_title"]))}</h2><p>{escape(str(copy["advisory_body"]))}</p><div class="grid"><a class="btn" href="{escape(contact_href)}">{escape(str(copy["primary_cta"]))}</a><a class="btn" href="{escape(projects_href)}">{escape(str(copy["secondary_cta"]))}</a></div></section>'
     )
