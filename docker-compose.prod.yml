@@ -16,6 +16,10 @@ services:
     restart: always
 
   admin-app:
+    environment:
+      FLOWBIZ_DEPLOY_TELEMETRY_PATH: ${FLOWBIZ_DEPLOY_TELEMETRY_PATH:-/app/ops/logs/deploy_telemetry.json}
     ports:
       - "127.0.0.1:${VPS_ADMIN_PORT:-8002}:3000"
+    volumes:
+      - /opt/flowbiz/clients/flowbiz-client-amp/ops/logs:/app/ops/logs:ro
     restart: always

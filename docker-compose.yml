@@ -55,6 +55,9 @@ services:
       NEXT_PUBLIC_WHATSAPP_URL: ${NEXT_PUBLIC_WHATSAPP_URL:-https://wa.me/66634533526}
       NEXT_PUBLIC_LINE_URL: ${NEXT_PUBLIC_LINE_URL:-https://line.me/ti/p/~@554dksqb}
       NEXT_PUBLIC_PHONE_TEL: ${NEXT_PUBLIC_PHONE_TEL:-tel:+66634533526}
+      FLOWBIZ_BUILD_SHA: ${BUILD_SHA:-local}
+      FLOWBIZ_TARGET_SHA: ${TARGET_SHA:-}
+      FLOWBIZ_DEPLOY_TELEMETRY_PATH: ${FLOWBIZ_DEPLOY_TELEMETRY_PATH:-/app/ops/logs/deploy_telemetry.json}
     restart: unless-stopped
 
 volumes:
