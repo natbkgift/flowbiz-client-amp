@@ -17,20 +17,6 @@ function Remove-PathIfExists([string]$PathValue) {
   }
 }
 
-function Copy-OverlayFile([string]$RepoRoot, [string]$ReleasePath, [string]$RelativePath) {
-  $sourcePath = Join-Path $RepoRoot $RelativePath
-  if (-not (Test-Path $sourcePath)) {
-    return
-  }
-
-  $targetPath = Join-Path $ReleasePath $RelativePath
-  $targetDir = Split-Path -Parent $targetPath
-  if ($targetDir) {
-    New-Item -ItemType Directory -Force -Path $targetDir | Out-Null
-  }
-  Copy-Item -Force $sourcePath $targetPath
-}
-
 function Get-RepoRoot() {
   $root = (& git rev-parse --show-toplevel 2>&1 | Out-String).Trim()
   if ($LASTEXITCODE -ne 0 -or -not $root) {
@@ -81,16 +67,6 @@ try {
     throw "Unable to checkout target SHA in preview release clone."
   }
 
-  @(
-    'docker-compose.preview.yml',
-    'scripts\smoke_preview.ps1',
-    'admin-app\Dockerfile',
-    'admin-app\app\api\platform\version\route.ts',
-    'packages\core\models.py'
-  ) | ForEach-Object {
-    Copy-OverlayFile -RepoRoot $repoRoot -ReleasePath $releasePath -RelativePath $_
-  }
-
   $env:PREVIEW_API_PORT = [string]$PreviewApiPort
   $env:PREVIEW_ADMIN_PORT = [string]$PreviewAdminPort
   $env:FLOWBIZ_PREVIEW_LOGS_PATH = $logsPath
@@ -130,7 +106,8 @@ try {
     }
   } | ConvertTo-Json -Depth 5
 
-  Set-Content -Path (Join-Path $logsPath "deploy_telemetry.json") -Value $telemetry -Encoding utf8
+  $utf8NoBom = New-Object System.Text.UTF8Encoding($false)
+  [System.IO.File]::WriteAllText((Join-Path $logsPath "deploy_telemetry.json"), $telemetry, $utf8NoBom)
 } finally {
   Pop-Location
 }

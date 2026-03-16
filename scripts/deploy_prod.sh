@@ -1,6 +1,9 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+# Public production deploy gate: build/recreate, then require the public smoke
+# contract endpoints to return 200 before the deploy is considered successful.
+
 # API-only production deploy via fresh VPS checkout.
 # The current branch does not contain the legacy Next.js frontend source, so
 # this script rebuilds and replaces only the API container and leaves the
