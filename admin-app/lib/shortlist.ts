@@ -251,6 +251,45 @@ export function readCachedShortlist(): ShortlistDetail | null {
   }
 }
 
+function clearCachedShortlist(): void {
+  const w = safeWindow();
+  if (!w) return;
+
+  try {
+    w.localStorage.removeItem(SHORTLIST_CACHE_KEY);
+  } catch {
+    // ignore storage cleanup failures
+  }
+}
+
+function shortlistMatchesOwnerReference(
+  shortlist: ShortlistDetail,
+  ownerReference: ShortlistOwnerReference,
+): boolean {
+  return (
+    shortlist.owner_type === ownerReference.ownerType &&
+    shortlist.owner_key === ownerReference.ownerKey
+  );
+}
+
+export function readCachedShortlistForCurrentOwner(): ShortlistDetail | null {
+  const shortlist = readCachedShortlist();
+  if (!shortlist) return null;
+
+  const ownerReference = readStoredShortlistOwnerReference();
+  if (!ownerReference) {
+    clearCachedShortlist();
+    return null;
+  }
+
+  if (!shortlistMatchesOwnerReference(shortlist, ownerReference)) {
+    clearCachedShortlist();
+    return null;
+  }
+
+  return shortlist;
+}
+
 export function publishShortlist(shortlist: ShortlistDetail | null): void {
   const w = safeWindow();
   if (!w) return;

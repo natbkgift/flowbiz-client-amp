@@ -6,7 +6,7 @@ import { usePathname } from 'next/navigation';
 
 import { withLocale } from '@/app/_lib/i18n/routing';
 import { trackEvent } from '@/lib/analytics';
-import { SHORTLIST_UPDATED_EVENT, fetchCurrentShortlist, readCachedShortlist, removePropertyFromShortlist, savePropertyToShortlist, type ShortlistDetail } from '@/lib/shortlist';
+import { SHORTLIST_UPDATED_EVENT, fetchCurrentShortlist, readCachedShortlistForCurrentOwner, removePropertyFromShortlist, savePropertyToShortlist, type ShortlistDetail } from '@/lib/shortlist';
 
 type ShortlistSaveButtonProps = {
   locale: 'en' | 'th';
@@ -35,7 +35,7 @@ export function ShortlistSaveButton({
   }, [propertyId]);
 
   useEffect(() => {
-    const cachedShortlist = readCachedShortlist();
+    const cachedShortlist = readCachedShortlistForCurrentOwner();
     if (cachedShortlist) {
       syncFromShortlist(cachedShortlist);
     }
