@@ -59,6 +59,30 @@ export function ProjectDeepReview({
   if (evaluation.area_statistics?.as_of) invLines.push(`${dict.deepReview.asOfLabel}: ${evaluation.area_statistics.as_of}`);
   if (!invLines.length) invLines.push(dict.deepReview.noSnapshots);
 
+  const snapshotExplanation = [
+    evaluation.area_statistics?.roi_percent
+      ? (locale === 'th'
+          ? `ค่า ROI snapshot ที่เห็นตอนนี้เป็นภาพอ่านจากข้อมูลที่เผยแพร่ในปัจจุบัน ไม่ใช่คำรับประกันผลตอบแทนของโครงการ ${evaluation.project.name}`
+          : `The current ROI snapshot is a read of published data in the system, not a promised return for ${evaluation.project.name}.`)
+      : (locale === 'th'
+          ? 'ถ้ายังไม่มี ROI snapshot ให้ใช้บล็อกนี้เพื่อเช็กว่าควรตั้งคำถามอะไรต่อ มากกว่าจะสรุปผลการลงทุนทันที'
+          : 'If ROI is still missing, use this block to frame the next questions rather than force an investment conclusion.'),
+    evaluation.area_statistics?.avg_price || evaluation.area_statistics?.avg_rent
+      ? (locale === 'th'
+          ? 'ตัวเลขราคาและค่าเช่าในบล็อกนี้เหมาะกับการเทียบทางเลือกแบบ side-by-side มากกว่าการใช้เป็นตัวเลขคาดการณ์ล่วงหน้า'
+          : 'The price and rent figures here work best as side-by-side comparison context, not as forward-looking projections.')
+      : (locale === 'th'
+          ? 'เมื่อราคาและค่าเช่ายังไม่ครบ ให้ถือว่าบล็อกนี้อยู่ในโหมด conservative และควรอ่านควบคู่กับ compare หรือ area context'
+          : 'When price and rent data are incomplete, treat this block as conservative context and read it together with compare or area signals.'),
+    evaluation.area_statistics?.as_of
+      ? (locale === 'th'
+          ? `snapshot นี้อิงข้อมูล ณ ${evaluation.area_statistics.as_of} จึงควรใช้เป็นภาพ ณ เวลานั้น ไม่ใช่การันตีว่าตลาดจะเคลื่อนไปทางเดิม`
+          : `This snapshot is anchored to ${evaluation.area_statistics.as_of}, so use it as point-in-time evidence rather than assuming the market will keep moving the same way.`)
+      : (locale === 'th'
+          ? 'หากไม่มีวันที่อัปเดตชัดเจน ให้ยกระดับไปยัง advisor path เดิมก่อนใช้เป็นฐานตัดสินใจขั้นสุดท้าย'
+          : 'If the update date is unclear, escalate through the existing advisor path before treating it as final-decision evidence.'),
+  ];
+
   const riskLabel = score >= 70 ? dict.compare.riskHigh : score >= 35 ? dict.compare.riskMedium : dict.compare.riskLow;
 
   return (
@@ -102,6 +126,14 @@ export function ProjectDeepReview({
             <li key={l}>{l}</li>
           ))}
         </ul>
+
+        <div className="insight-list mt-4" aria-label={locale === 'th' ? 'วิธีอ่าน snapshot นี้' : 'How to read this snapshot'}>
+          {snapshotExplanation.map((line) => (
+            <div key={line} className="insight-list__item">
+              <span className="insight-list__body">{line}</span>
+            </div>
+          ))}
+        </div>
 
         <div className="cta-row mt-3">
           <Link className="btn btn-cta" href={withLocale(locale, '/contact?topic=investment_plan')}>
