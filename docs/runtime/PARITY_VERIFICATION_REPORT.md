@@ -1,12 +1,12 @@
 # Parity Verification Report
 
-วันที่: 2026-03-16
+วันที่: 2026-03-17
 โหมด: Post-Recovery Reconciliation And Release Hardening
 สถานะ: FAIL
 
 ## สรุปแบบสั้น
 
-`main` และ preview อยู่บน recovery baseline เดียวกันแล้ว แต่ production runtime ปัจจุบันยังไม่ตรงกับ baseline นั้น จึงยังไม่มี parity ระหว่าง `main`, preview และ production
+`main`, preview และ production live runtime ตอนนี้ชี้ไป baseline SHA เดียวกันแล้ว แต่ parity closure ยังไม่ผ่านเพราะ production deploy gate รายงาน `error` และ ownership ของ `/api/*` ยังต่างจาก preview อย่างมีนัยสำคัญ
 
 ## Baseline ที่ใช้เทียบ
 
@@ -34,22 +34,26 @@
 ### Production
 
 - public `https://amppattaya.com/api/platform/version` รายงาน
-  - `build_sha = 5864a90`
-  - `target_sha = 5864a900a29a57921100b08c8ab652dde6b0fb15`
+  - `build_sha = 6fb5897`
+  - `target_sha = 6fb5897897518dcc9ecd6f647dad34da8b610e26`
   - `source = scripts/deploy_prod.ps1`
   - `runtime = api`
-- production host repo checkout ปัจจุบันรายงาน `HEAD = 6ce96878f4b9a45777072b7f98a96d7b7829f41c`
-- production host telemetry file ยังชี้ไป release path ของ `5864a900`
+  - `deploy_status = error`
+  - `smoke_passed = false`
+- production host telemetry file ชี้ไป release path ของ `6fb58978`
+- production host telemetry ระบุว่า failed path คือ `/api/v1/shortlists/current?owner_type=session&owner_key=preview-smoke-owner&locale=en` บน `http://127.0.0.1:8002`
+- production host repo checkout ปัจจุบันยังรายงาน `HEAD = 6ce96878f4b9a45777072b7f98a96d7b7829f41c`
 - สถานะ: FAIL
 
 ## Parity gaps ที่พบ
 
-1. `main` กับ preview ตรงกัน แต่ production runtime ยังอยู่คนละ SHA
-2. production host repo checkout กับ production live runtime ยังไม่ตรงกันเอง
-3. production host telemetry file ยังสะท้อน smoke schema เก่าก่อน recovery baseline
+1. deploy identity parity ผ่านที่ระดับ `target_sha` แต่ production gate ไม่ผ่านเพราะ direct admin-app path `127.0.0.1:8002/api/v1/shortlists/current...` ยัง `404`
+2. public production smoke ผ่านครบทุก path บน `https://amppattaya.com` แต่ internal production smoke บน admin-app port ไม่ผ่านครบ จึงมี behavior mismatch ระหว่าง edge กับ app port
+3. preview direct app port และ production public domain ยังมี owner ต่างกันสำหรับ `/api/*` endpoints สำคัญ
+4. production host repo checkout กับ production live runtime ยังไม่ตรงกันเอง
 
 ## ผลสรุป
 
-parity ระหว่าง `main`, preview และ production ยังไม่ผ่าน
+parity ที่ระดับ SHA และ public contract ผ่านแล้ว แต่ parity closure ระดับ runtime architecture และ deploy gate ยังไม่ผ่าน
 
-stop condition สำหรับการ resume งานถัดไปยังคงอยู่จนกว่าจะมี production deploy จาก baseline ใหม่และรัน post-deploy verification ซ้ำอีกครั้ง
+stop condition สำหรับการ resume งานถัดไปยังคงอยู่ เพราะ production ยัง resolve `/api/*` ต่างจาก preview อย่างมีนัยสำคัญ และ hardened production gate ยังได้ผล `error`
