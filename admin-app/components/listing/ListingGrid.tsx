@@ -10,6 +10,7 @@ import { IconFilter } from '../icons/SvgIcons';
 import { en } from '../../app/_lib/i18n/en';
 import { th } from '../../app/_lib/i18n/th';
 import { localeFromPathname } from '../../app/_lib/i18n/routing';
+import { ShortlistStateHydrator } from '../shortlist/ShortlistStateHydrator';
 
 type SortKey = 'newest' | 'price_asc' | 'price_desc';
 
@@ -33,6 +34,8 @@ export function ListingGrid({ items }: { items: PropertyListItem[] }) {
 
   return (
     <>
+      <ShortlistStateHydrator locale={locale} />
+
       <button
         type="button"
         className="btn btn-primary mobile-only w-full mb-6"

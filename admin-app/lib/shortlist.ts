@@ -1,6 +1,9 @@
 'use client';
 
 const SHORTLIST_OWNER_KEY = 'amp_shortlist_owner_v1';
+const SHORTLIST_CACHE_KEY = 'amp_shortlist_cache_v1';
+
+export const SHORTLIST_UPDATED_EVENT = 'amp:shortlist-updated';
 
 export type ShortlistPropertyItem = {
   property_id: string;
@@ -49,6 +52,36 @@ function safeWindow(): Window | null {
   return typeof window === 'undefined' ? null : window;
 }
 
+export function readCachedShortlist(): ShortlistDetail | null {
+  const w = safeWindow();
+  if (!w) return null;
+
+  try {
+    const raw = w.localStorage.getItem(SHORTLIST_CACHE_KEY);
+    if (!raw) return null;
+    return JSON.parse(raw) as ShortlistDetail;
+  } catch {
+    return null;
+  }
+}
+
+export function publishShortlist(shortlist: ShortlistDetail | null): void {
+  const w = safeWindow();
+  if (!w) return;
+
+  try {
+    if (shortlist) {
+      w.localStorage.setItem(SHORTLIST_CACHE_KEY, JSON.stringify(shortlist));
+    } else {
+      w.localStorage.removeItem(SHORTLIST_CACHE_KEY);
+    }
+  } catch {
+    return;
+  }
+
+  w.dispatchEvent(new CustomEvent(SHORTLIST_UPDATED_EVENT, { detail: shortlist }));
+}
+
 export function getOrCreateShortlistOwnerKey(): string {
   const w = safeWindow();
   if (!w) return 'server';
@@ -82,7 +115,9 @@ export async function fetchCurrentShortlist(locale: 'en' | 'th'): Promise<Shortl
     throw new Error(`Failed to load shortlist (${response.status})`);
   }
 
-  return (await response.json()) as ShortlistResponse;
+  const payload = (await response.json()) as ShortlistResponse;
+  publishShortlist(payload.shortlist ?? null);
+  return payload;
 }
 
 export async function savePropertyToShortlist(input: {
@@ -108,5 +143,31 @@ export async function savePropertyToShortlist(input: {
     throw new Error(`Failed to save shortlist item (${response.status})`);
   }
 
-  return (await response.json()) as ShortlistMutationResponse;
+  const payload = (await response.json()) as ShortlistMutationResponse;
+  publishShortlist(payload.shortlist ?? null);
+  return payload;
+}
+
+export async function removePropertyFromShortlist(input: {
+  locale: 'en' | 'th';
+  propertyId: string;
+}): Promise<ShortlistMutationResponse> {
+  const ownerKey = getOrCreateShortlistOwnerKey();
+  const params = new URLSearchParams({
+    owner_type: 'session',
+    owner_key: ownerKey,
+    locale: input.locale,
+  });
+
+  const response = await fetch(`/api/v1/shortlists/current/items/${encodeURIComponent(input.propertyId)}?${params.toString()}`, {
+    method: 'DELETE',
+  });
+
+  if (!response.ok) {
+    throw new Error(`Failed to remove shortlist item (${response.status})`);
+  }
+
+  const payload = (await response.json()) as ShortlistMutationResponse;
+  publishShortlist(payload.shortlist ?? null);
+  return payload;
 }

@@ -1,12 +1,12 @@
 'use client';
 
 import Link from 'next/link';
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { usePathname } from 'next/navigation';
 
 import { withLocale } from '@/app/_lib/i18n/routing';
 import { trackEvent } from '@/lib/analytics';
-import { fetchCurrentShortlist, savePropertyToShortlist } from '@/lib/shortlist';
+import { SHORTLIST_UPDATED_EVENT, fetchCurrentShortlist, readCachedShortlist, removePropertyFromShortlist, savePropertyToShortlist, type ShortlistDetail } from '@/lib/shortlist';
 
 type ShortlistSaveButtonProps = {
   locale: 'en' | 'th';
@@ -24,21 +24,29 @@ export function ShortlistSaveButton({
   readOnMount = false,
 }: ShortlistSaveButtonProps) {
   const pathname = usePathname() ?? '/';
-  const [isSaving, setIsSaving] = useState(false);
+  const [pendingAction, setPendingAction] = useState<'save' | 'remove' | null>(null);
   const [isSaved, setIsSaved] = useState(false);
   const [itemCount, setItemCount] = useState<number | null>(null);
   const [error, setError] = useState<string | null>(null);
 
+  const syncFromShortlist = useCallback((shortlist: ShortlistDetail | null) => {
+    setItemCount(shortlist?.item_count ?? 0);
+    setIsSaved(Boolean(shortlist?.items.some((item) => item.property_id === propertyId)));
+  }, [propertyId]);
+
   useEffect(() => {
+    const cachedShortlist = readCachedShortlist();
+    if (cachedShortlist) {
+      syncFromShortlist(cachedShortlist);
+    }
+
     if (!readOnMount) return;
 
     let isActive = true;
     fetchCurrentShortlist(locale)
       .then((response) => {
         if (!isActive) return;
-        const shortlist = response.shortlist;
-        setItemCount(shortlist?.item_count ?? 0);
-        setIsSaved(Boolean(shortlist?.items.some((item) => item.property_id === propertyId)));
+        syncFromShortlist(response.shortlist);
       })
       .catch(() => {
         if (!isActive) return;
@@ -48,48 +56,79 @@ export function ShortlistSaveButton({
     return () => {
       isActive = false;
     };
-  }, [locale, propertyId, readOnMount]);
+  }, [locale, readOnMount, syncFromShortlist]);
+
+  useEffect(() => {
+    const w = window;
+    const handleUpdate = (event: Event) => {
+      const shortlist = (event as CustomEvent<ShortlistDetail | null>).detail;
+      syncFromShortlist(shortlist);
+    };
+
+    w.addEventListener(SHORTLIST_UPDATED_EVENT, handleUpdate);
+    return () => {
+      w.removeEventListener(SHORTLIST_UPDATED_EVENT, handleUpdate);
+    };
+  }, [syncFromShortlist]);
 
   const label = useMemo(() => {
-    if (isSaving) return locale === 'th' ? 'กำลังบันทึก…' : 'Saving…';
+    if (pendingAction === 'save') return locale === 'th' ? 'กำลังบันทึก…' : 'Saving…';
+    if (pendingAction === 'remove') return locale === 'th' ? 'กำลังนำออก…' : 'Removing…';
     if (isSaved) {
-      if (typeof itemCount === 'number' && itemCount > 0) {
-        return locale === 'th' ? `บันทึกแล้ว (${itemCount})` : `Saved (${itemCount})`;
-      }
-      return locale === 'th' ? 'บันทึกแล้ว' : 'Saved';
+      return locale === 'th' ? 'นำออกจาก shortlist' : 'Remove from shortlist';
     }
     return locale === 'th' ? 'บันทึกลง shortlist' : 'Save to shortlist';
-  }, [isSaved, isSaving, itemCount, locale]);
+  }, [isSaved, locale, pendingAction]);
 
   async function handleClick() {
-    if (isSaving || isSaved) return;
+    if (pendingAction) return;
 
-    setIsSaving(true);
     setError(null);
-    trackEvent('cta_click', pathname, {
-      cta: 'save_to_shortlist',
-      from: sourceSurface,
-      property_id: propertyId,
-    });
 
     try {
-      const response = await savePropertyToShortlist({
-        locale,
-        propertyId,
-        sourceSurface,
-      });
-      setIsSaved(response.action === 'saved' || response.action === 'already_saved');
-      setItemCount(response.shortlist?.item_count ?? itemCount ?? 0);
+      if (isSaved) {
+        setPendingAction('remove');
+        trackEvent('cta_click', pathname, {
+          cta: 'remove_from_shortlist',
+          from: sourceSurface,
+          property_id: propertyId,
+        });
+        const response = await removePropertyFromShortlist({
+          locale,
+          propertyId,
+        });
+        syncFromShortlist(response.shortlist);
+        if (response.action === 'not_found') {
+          setIsSaved(false);
+        }
+      } else {
+        setPendingAction('save');
+        trackEvent('cta_click', pathname, {
+          cta: 'save_to_shortlist',
+          from: sourceSurface,
+          property_id: propertyId,
+        });
+        const response = await savePropertyToShortlist({
+          locale,
+          propertyId,
+          sourceSurface,
+        });
+        syncFromShortlist(response.shortlist);
+      }
     } catch {
-      setError(locale === 'th' ? 'บันทึก shortlist ไม่สำเร็จ' : 'Unable to save to shortlist.');
+      setError(
+        isSaved
+          ? (locale === 'th' ? 'นำ shortlist ออกไม่สำเร็จ' : 'Unable to remove from shortlist.')
+          : (locale === 'th' ? 'บันทึก shortlist ไม่สำเร็จ' : 'Unable to save to shortlist.'),
+      );
     } finally {
-      setIsSaving(false);
+      setPendingAction(null);
     }
   }
 
   return (
     <div>
-      <button type="button" className={className} onClick={handleClick} disabled={isSaving || isSaved}>
+      <button type="button" className={className} onClick={handleClick} disabled={Boolean(pendingAction)}>
         {label}
       </button>
       {typeof itemCount === 'number' && itemCount > 0 ? (
