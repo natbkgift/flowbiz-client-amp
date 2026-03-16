@@ -13,7 +13,7 @@ import { getDictionary, normalizeLocale } from '@/app/_lib/i18n/get-dictionary';
 import { makePageMetadata } from '@/app/_lib/i18n/metadata';
 import { withLocale } from '@/app/_lib/i18n/routing';
 import type { Dictionary } from '@/app/_lib/i18n/types';
-import { fetchProjectEvaluation, type ProjectEvaluationResponse } from '@/app/_lib/public-api-server';
+import { fetchProjectBySlug, fetchProjectEvaluation, type ProjectEvaluationResponse } from '@/app/_lib/public-api-server';
 import { PublicAdvisoryHero } from '@/components/public/PublicAdvisoryHero';
 
 export const revalidate = 300;
@@ -109,6 +109,66 @@ function weaknesses(ev: ProjectEvaluationResponse, dict: Dictionary): string[] {
   if (!keys.has('has_cover_image')) out.push(dict.compare.coverImageMissing);
   if (!out.length) out.push('—');
   return out;
+}
+
+type AreaComparisonEntry = {
+  areaId: string;
+  areaName: string;
+  areaSlug: string | null;
+  projectNames: string[];
+  avgPrice: string | null;
+  avgRent: string | null;
+  roiPercent: string | null;
+  totalProjects: number | null;
+  asOf: string | null;
+};
+
+async function buildAreaComparisonEntries(
+  items: ProjectEvaluationResponse[],
+  locale: 'en' | 'th',
+): Promise<AreaComparisonEntry[]> {
+  const projectDetails = await Promise.all(
+    items.map((item) => (item.project.slug ? fetchProjectBySlug(item.project.slug) : Promise.resolve(null))),
+  );
+
+  const areaMap = new Map<string, AreaComparisonEntry>();
+
+  items.forEach((item, index) => {
+    const detail = projectDetails[index];
+    const stats = item.area_statistics;
+    const areaId = detail?.area?.id ?? stats?.area_id ?? null;
+    if (!areaId) {
+      return;
+    }
+
+    const existing = areaMap.get(areaId);
+    const projectName = item.project.name || item.project.slug || item.project.id;
+    if (existing) {
+      if (!existing.projectNames.includes(projectName)) {
+        existing.projectNames.push(projectName);
+      }
+      if (!existing.avgPrice && stats?.avg_price) existing.avgPrice = stats.avg_price;
+      if (!existing.avgRent && stats?.avg_rent) existing.avgRent = stats.avg_rent;
+      if (!existing.roiPercent && stats?.roi_percent) existing.roiPercent = stats.roi_percent;
+      if (!existing.totalProjects && typeof stats?.total_projects === 'number') existing.totalProjects = stats.total_projects;
+      if (!existing.asOf && stats?.as_of) existing.asOf = stats.as_of;
+      return;
+    }
+
+    areaMap.set(areaId, {
+      areaId,
+      areaName: detail?.area?.name ?? (locale === 'th' ? 'ทำเลกำลังรอรายละเอียด' : 'Area details pending'),
+      areaSlug: detail?.area?.slug ?? null,
+      projectNames: [projectName],
+      avgPrice: stats?.avg_price ?? null,
+      avgRent: stats?.avg_rent ?? null,
+      roiPercent: stats?.roi_percent ?? null,
+      totalProjects: typeof stats?.total_projects === 'number' ? stats.total_projects : null,
+      asOf: stats?.as_of ?? null,
+    });
+  });
+
+  return Array.from(areaMap.values());
 }
 
 export default async function ComparePage(
@@ -256,6 +316,7 @@ export default async function ComparePage(
   const evals = await Promise.all(ids.map((id) => fetchProjectEvaluation(id)));
   const missing = ids.filter((_, idx) => evals[idx] == null);
   const items = evals.filter(Boolean) as ProjectEvaluationResponse[];
+  const areaComparisons = await buildAreaComparisonEntries(items, locale);
 
   return (
     <main id="main-content">
@@ -330,6 +391,81 @@ export default async function ComparePage(
             <div className="trust-box mb-4">
               <h2 className="trust-box__title">{dict.compare.someNotFound}</h2>
               <p className="section-subtitle">ids: {missing.join(', ')}</p>
+            </div>
+          ) : null}
+
+          {areaComparisons.length >= 2 ? (
+            <div className="card reveal mb-4">
+              <h2 className="card-title">{locale === 'th' ? 'Area comparison read' : 'Area comparison read'}</h2>
+              <p className="card-subtitle">
+                {locale === 'th'
+                  ? 'ก่อนตัดสินใจที่ระดับโครงการ ลองอ่านบริบทของแต่ละทำเลแบบ side-by-side จากราคา ค่าเช่า และ ROI snapshot ที่มีอยู่จริง'
+                  : 'Before narrowing the decision at project level, read the location context side by side using live pricing, rent, and ROI snapshots where available.'}
+              </p>
+              <div className="signal-grid signal-grid--two-up mt-4">
+                {areaComparisons.map((area) => (
+                  <section key={area.areaId} className="authority-card">
+                    <div className="section-header">
+                      <h3 className="section-title section-title--sm">{area.areaName}</h3>
+                      <p className="section-subtitle">
+                        {locale === 'th'
+                          ? `กำลังเทียบจาก ${area.projectNames.join(', ')}`
+                          : `Currently represented by ${area.projectNames.join(', ')}`}
+                      </p>
+                    </div>
+                    <div className="signal-grid signal-grid--two-up">
+                      <div className="metric-card">
+                        <span className="metric-card__label">{locale === 'th' ? 'ราคาเฉลี่ย' : 'Average price'}</span>
+                        <strong className="metric-card__value">{area.avgPrice ?? '—'}</strong>
+                      </div>
+                      <div className="metric-card">
+                        <span className="metric-card__label">{locale === 'th' ? 'ค่าเช่าเฉลี่ย' : 'Average rent'}</span>
+                        <strong className="metric-card__value">{area.avgRent ?? '—'}</strong>
+                      </div>
+                      <div className="metric-card">
+                        <span className="metric-card__label">{locale === 'th' ? 'ROI snapshot' : 'ROI snapshot'}</span>
+                        <strong className="metric-card__value">{area.roiPercent ?? '—'}</strong>
+                      </div>
+                      <div className="metric-card">
+                        <span className="metric-card__label">{locale === 'th' ? 'จำนวนโครงการใน snapshot' : 'Projects in snapshot'}</span>
+                        <strong className="metric-card__value">{area.totalProjects ?? '—'}</strong>
+                      </div>
+                    </div>
+                    <div className="insight-list mt-4">
+                      <div className="insight-list__item">
+                        <span className="insight-list__body">
+                          {area.asOf
+                            ? (locale === 'th' ? `อัปเดตข้อมูลล่าสุด ${area.asOf}` : `Snapshot last updated ${area.asOf}.`)
+                            : (locale === 'th' ? 'ใช้เป็นบริบทของทำเล ไม่ใช่คำพยากรณ์ของผลตอบแทน' : 'Use this as location context, not as a forecast of returns.')}
+                        </span>
+                      </div>
+                      <div className="insight-list__item">
+                        <span className="insight-list__body">
+                          {locale === 'th'
+                            ? 'ชั้นนี้ช่วยแยก “ทำเลที่เหมาะ” ออกจาก “โครงการที่เหมาะ” ก่อนเข้าสู่ shortlist รอบถัดไป'
+                            : 'This layer helps separate the right area from the right project before the next shortlist cut.'}
+                        </span>
+                      </div>
+                    </div>
+                    {area.areaSlug ? (
+                      <div className="card-actions mt-3">
+                        <Link className="btn btn-secondary" href={withLocale(locale, `/areas/${encodeURIComponent(area.areaSlug)}`)}>
+                          {locale === 'th' ? 'เปิด area brief' : 'Open area brief'}
+                        </Link>
+                      </div>
+                    ) : null}
+                  </section>
+                ))}
+              </div>
+            </div>
+          ) : areaComparisons.length === 1 ? (
+            <div className="trust-box mb-4">
+              <h2 className="trust-box__title">{locale === 'th' ? 'Area context ยังอยู่ทำเลเดียวกัน' : 'Area context is still concentrated in one zone'}</h2>
+              <p className="section-subtitle">
+                {locale === 'th'
+                  ? `โครงการที่กำลังเทียบตอนนี้ยังผูกอยู่กับ ${areaComparisons[0].areaName} เป็นหลัก ดังนั้นการตัดสินใจรอบนี้ควรอ่านความต่างที่ระดับโครงการเป็นหลัก`
+                  : `The current set still resolves mainly to ${areaComparisons[0].areaName}, so this round of decision-making should focus on project-level trade-offs first.`}
+              </p>
             </div>
           ) : null}
 
