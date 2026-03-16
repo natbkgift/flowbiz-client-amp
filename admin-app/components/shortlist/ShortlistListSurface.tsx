@@ -8,7 +8,7 @@ import { withLocaleQuery } from '@/app/_lib/public-advisory';
 import { resolveImageUrl, formatPriceTHB } from '@/app/_lib/public-api-shared';
 import { withLocale } from '@/app/_lib/i18n/routing';
 import { EmptyStateCard, InlineStatusMessage, LoadingCardGrid } from '@/components/ui/StateBlocks';
-import { SHORTLIST_UPDATED_EVENT, fetchCurrentShortlist, readCachedShortlist, removePropertyFromShortlist, resolveShortlistCompareProjects, shareCurrentShortlist, type ShortlistCompareProject, type ShortlistDetail, type ShortlistPropertyItem } from '@/lib/shortlist';
+import { SHORTLIST_UPDATED_EVENT, fetchCurrentShortlist, readCachedShortlistForCurrentOwner, removePropertyFromShortlist, resolveShortlistCompareProjects, shareCurrentShortlist, type ShortlistCompareProject, type ShortlistDetail, type ShortlistPropertyItem } from '@/lib/shortlist';
 
 const SHORTLIST_FALLBACK_IMAGE = '/images/property-placeholder.svg';
 
@@ -47,7 +47,7 @@ export function ShortlistListSurface({ locale }: { locale: 'en' | 'th' }) {
   useEffect(() => {
     let isActive = true;
 
-    const cachedShortlist = readCachedShortlist();
+    const cachedShortlist = readCachedShortlistForCurrentOwner();
     if (cachedShortlist) {
       syncFromShortlist(cachedShortlist);
       setIsLoading(false);
