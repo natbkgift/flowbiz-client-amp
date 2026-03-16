@@ -86,8 +86,85 @@ export type ShortlistCompareProject = {
   projectName: string | null;
 };
 
+export type ShortlistMetadataInput = {
+  title?: string | null;
+  intent?: string | null;
+  sourceContext?: Record<string, unknown> | null;
+};
+
 function safeWindow(): Window | null {
   return typeof window === 'undefined' ? null : window;
+}
+
+function normalizeShortlistText(value: unknown): string | null {
+  if (typeof value !== 'string') return null;
+  const normalized = value.trim();
+  return normalized ? normalized : null;
+}
+
+function normalizeShortlistSourceContext(value: unknown): Record<string, unknown> | null {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) {
+    return null;
+  }
+
+  return value as Record<string, unknown>;
+}
+
+function normalizeShortlistDetail(value: unknown): ShortlistDetail | null {
+  if (!value || typeof value !== 'object') {
+    return null;
+  }
+
+  const candidate = value as Partial<ShortlistDetail>;
+  if (!candidate.id || typeof candidate.id !== 'string') {
+    return null;
+  }
+
+  if (!isValidShortlistOwnerType(candidate.owner_type)) {
+    return null;
+  }
+
+  if (typeof candidate.owner_key !== 'string' || typeof candidate.status !== 'string') {
+    return null;
+  }
+
+  return {
+    id: candidate.id,
+    owner_type: candidate.owner_type,
+    owner_key: candidate.owner_key,
+    status: candidate.status,
+    title: normalizeShortlistText(candidate.title),
+    intent: normalizeShortlistText(candidate.intent),
+    share_mode: normalizeShortlistText(candidate.share_mode),
+    source_context: normalizeShortlistSourceContext(candidate.source_context),
+    created_at: typeof candidate.created_at === 'string' ? candidate.created_at : '',
+    updated_at: typeof candidate.updated_at === 'string' ? candidate.updated_at : '',
+    last_viewed_at:
+      typeof candidate.last_viewed_at === 'string' ? candidate.last_viewed_at : null,
+    item_count: typeof candidate.item_count === 'number' ? candidate.item_count : 0,
+    items: Array.isArray(candidate.items) ? candidate.items : [],
+  };
+}
+
+function mergeShortlistMetadata(
+  shortlist: ShortlistDetail,
+  metadata: ShortlistMetadataInput,
+): ShortlistDetail {
+  return {
+    ...shortlist,
+    title:
+      metadata.title === undefined
+        ? shortlist.title
+        : normalizeShortlistText(metadata.title),
+    intent:
+      metadata.intent === undefined
+        ? shortlist.intent
+        : normalizeShortlistText(metadata.intent),
+    source_context:
+      metadata.sourceContext === undefined
+        ? shortlist.source_context
+        : normalizeShortlistSourceContext(metadata.sourceContext),
+  };
 }
 
 function isValidShortlistOwnerType(value: unknown): value is ShortlistOwnerType {
@@ -168,7 +245,7 @@ export function readCachedShortlist(): ShortlistDetail | null {
   try {
     const raw = w.localStorage.getItem(SHORTLIST_CACHE_KEY);
     if (!raw) return null;
-    return JSON.parse(raw) as ShortlistDetail;
+    return normalizeShortlistDetail(JSON.parse(raw));
   } catch {
     return null;
   }
@@ -180,7 +257,13 @@ export function publishShortlist(shortlist: ShortlistDetail | null): void {
 
   try {
     if (shortlist) {
-      w.localStorage.setItem(SHORTLIST_CACHE_KEY, JSON.stringify(shortlist));
+      const normalized = normalizeShortlistDetail(shortlist);
+      if (!normalized) {
+        w.localStorage.removeItem(SHORTLIST_CACHE_KEY);
+        return;
+      }
+
+      w.localStorage.setItem(SHORTLIST_CACHE_KEY, JSON.stringify(normalized));
     } else {
       w.localStorage.removeItem(SHORTLIST_CACHE_KEY);
     }
@@ -189,6 +272,17 @@ export function publishShortlist(shortlist: ShortlistDetail | null): void {
   }
 
   w.dispatchEvent(new CustomEvent(SHORTLIST_UPDATED_EVENT, { detail: shortlist }));
+}
+
+export function updateCachedShortlistMetadata(
+  metadata: ShortlistMetadataInput,
+): ShortlistDetail | null {
+  const current = readCachedShortlist();
+  if (!current) return null;
+
+  const next = mergeShortlistMetadata(current, metadata);
+  publishShortlist(next);
+  return next;
 }
 
 export function getOrCreateShortlistOwnerReference(): ShortlistOwnerReference {
@@ -242,6 +336,9 @@ export async function savePropertyToShortlist(input: {
   locale: 'en' | 'th';
   propertyId: string;
   sourceSurface: string;
+  title?: string | null;
+  intent?: string | null;
+  sourceContext?: Record<string, unknown> | null;
 }): Promise<ShortlistMutationResponse> {
   const ownerReference = getOrCreateShortlistOwnerReference();
   const params = new URLSearchParams({ locale: input.locale });
@@ -254,6 +351,9 @@ export async function savePropertyToShortlist(input: {
       owner_key: ownerReference.ownerKey,
       property_id: input.propertyId,
       source_surface: input.sourceSurface,
+      title: input.title,
+      intent: input.intent,
+      source_context: input.sourceContext,
     }),
   });
 
