@@ -15,6 +15,28 @@ export type InvestorToolContext = {
   source?: string | null;
 };
 
+export type BuyingCostAdvisorContext = {
+  intent?: string | null;
+  source?: string | null;
+  tool?: string | null;
+  propertyPrice?: number | null;
+  purchaseContext?: string | null;
+  ownershipType?: string | null;
+  transferSplit?: string | null;
+  financingMode?: string | null;
+  assumptionSetId?: string | null;
+  assumptionVersion?: string | null;
+  governmentFees?: number | null;
+  closingCost?: number | null;
+  totalCashNeeded?: number | null;
+  agentFee?: number | null;
+  lawyerFee?: number | null;
+  bankTransferCost?: number | null;
+  fxEstimate?: number | null;
+  unresolvedItems?: string[];
+  disclaimerKey?: string | null;
+};
+
 function pickQueryValue(value: string | string[] | undefined): string | null {
   if (typeof value === 'string') return value;
   if (Array.isArray(value) && typeof value[0] === 'string') return value[0];
@@ -41,6 +63,14 @@ function parseIds(value: string | null): string[] {
       return true;
     })
     .slice(0, 3);
+}
+
+function parseDelimitedValues(value: string | null): string[] {
+  if (!value) return [];
+  return value
+    .split(',')
+    .map((part) => part.trim())
+    .filter(Boolean);
 }
 
 function serializeMetric(value: number | null | undefined, decimals = 2): string | null {
@@ -85,6 +115,66 @@ export function buildInvestorToolQuery(context: InvestorToolContext): Record<str
   if (context.ids?.length) query.ids = context.ids.join(',');
   if (context.intent) query.intent = context.intent;
   if (context.source) query.source = context.source;
+
+  return query;
+}
+
+export function parseBuyingCostAdvisorContext(
+  searchParams?: Record<string, string | string[] | undefined>,
+): BuyingCostAdvisorContext {
+  return {
+    intent: pickQueryValue(searchParams?.intent),
+    source: pickQueryValue(searchParams?.source),
+    tool: pickQueryValue(searchParams?.tool),
+    propertyPrice: parseFiniteNumber(pickQueryValue(searchParams?.bc_price)),
+    purchaseContext: pickQueryValue(searchParams?.bc_purchase_context),
+    ownershipType: pickQueryValue(searchParams?.bc_ownership_type),
+    transferSplit: pickQueryValue(searchParams?.bc_transfer_split),
+    financingMode: pickQueryValue(searchParams?.bc_financing_mode),
+    assumptionSetId: pickQueryValue(searchParams?.bc_assumption_set),
+    assumptionVersion: pickQueryValue(searchParams?.bc_assumption_version),
+    governmentFees: parseFiniteNumber(pickQueryValue(searchParams?.bc_government_fees)),
+    closingCost: parseFiniteNumber(pickQueryValue(searchParams?.bc_closing_cost)),
+    totalCashNeeded: parseFiniteNumber(pickQueryValue(searchParams?.bc_total_cash_needed)),
+    agentFee: parseFiniteNumber(pickQueryValue(searchParams?.bc_agent_fee)),
+    lawyerFee: parseFiniteNumber(pickQueryValue(searchParams?.bc_lawyer_fee)),
+    bankTransferCost: parseFiniteNumber(pickQueryValue(searchParams?.bc_bank_transfer_cost)),
+    fxEstimate: parseFiniteNumber(pickQueryValue(searchParams?.bc_fx_estimate)),
+    unresolvedItems: parseDelimitedValues(pickQueryValue(searchParams?.bc_unresolved_items)),
+    disclaimerKey: pickQueryValue(searchParams?.bc_disclaimer_key),
+  };
+}
+
+export function buildBuyingCostAdvisorQuery(context: BuyingCostAdvisorContext): Record<string, string> {
+  const query: Record<string, string> = {};
+  const price = serializeMetric(context.propertyPrice, 0);
+  const governmentFees = serializeMetric(context.governmentFees, 0);
+  const closingCost = serializeMetric(context.closingCost, 0);
+  const totalCashNeeded = serializeMetric(context.totalCashNeeded, 0);
+  const agentFee = serializeMetric(context.agentFee, 0);
+  const lawyerFee = serializeMetric(context.lawyerFee, 0);
+  const bankTransferCost = serializeMetric(context.bankTransferCost, 0);
+  const fxEstimate = serializeMetric(context.fxEstimate, 0);
+
+  if (context.intent) query.intent = context.intent;
+  if (context.source) query.source = context.source;
+  if (context.tool) query.tool = context.tool;
+  if (price) query.bc_price = price;
+  if (context.purchaseContext) query.bc_purchase_context = context.purchaseContext;
+  if (context.ownershipType) query.bc_ownership_type = context.ownershipType;
+  if (context.transferSplit) query.bc_transfer_split = context.transferSplit;
+  if (context.financingMode) query.bc_financing_mode = context.financingMode;
+  if (context.assumptionSetId) query.bc_assumption_set = context.assumptionSetId;
+  if (context.assumptionVersion) query.bc_assumption_version = context.assumptionVersion;
+  if (governmentFees) query.bc_government_fees = governmentFees;
+  if (closingCost) query.bc_closing_cost = closingCost;
+  if (totalCashNeeded) query.bc_total_cash_needed = totalCashNeeded;
+  if (agentFee) query.bc_agent_fee = agentFee;
+  if (lawyerFee) query.bc_lawyer_fee = lawyerFee;
+  if (bankTransferCost) query.bc_bank_transfer_cost = bankTransferCost;
+  if (fxEstimate) query.bc_fx_estimate = fxEstimate;
+  if (context.unresolvedItems?.length) query.bc_unresolved_items = context.unresolvedItems.join(',');
+  if (context.disclaimerKey) query.bc_disclaimer_key = context.disclaimerKey;
 
   return query;
 }

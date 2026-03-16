@@ -129,6 +129,8 @@ describe('buying cost estimator page shell', () => {
     expect(fetchMock).toHaveBeenCalled();
     expect(screen.getByLabelText(/shareable estimator url/i).getAttribute('value')).toContain('bc_price=7250000');
     expect(navigationState.replaceMock).toHaveBeenCalled();
+    expect(screen.getByRole('link', { name: /open the current contact route/i }).getAttribute('href')).toContain('intent=buying_cost_review');
+    expect(screen.getByRole('link', { name: /open the current contact route/i }).getAttribute('href')).toContain('bc_total_cash_needed=7342500');
   });
 
   it('reopens approved share state from bc query parameters and blocks silent version changes', async () => {

@@ -6,7 +6,9 @@ import { YieldCalculator } from '@/app/(site)/[locale]/calculator/_components/Yi
 import ComparePage from '@/app/(site)/[locale]/compare/page';
 import ContactPage from '@/app/(site)/[locale]/contact/page';
 import {
+  buildBuyingCostAdvisorQuery,
   buildInvestorToolQuery,
+  parseBuyingCostAdvisorContext,
   parseInvestorToolContext,
   withLocaleQuery,
 } from '@/app/_lib/public-advisory';
@@ -164,5 +166,117 @@ describe('investor handoff regression', () => {
     expect(screen.getByText(/gross yield: 6\.48%/i)).toBeTruthy();
     expect(screen.getByText(/net yield: 4\.08%/i)).toBeTruthy();
     expect(screen.getByText(/compared projects: alpha, beta/i)).toBeTruthy();
+  });
+
+  it('round-trips buying cost handoff metrics through advisory query helpers', () => {
+    const query = buildBuyingCostAdvisorQuery({
+      intent: 'buying_cost_review',
+      source: 'buying_cost_estimator',
+      tool: 'buying_cost_estimator',
+      propertyPrice: 8_200_000,
+      purchaseContext: 'foreign',
+      ownershipType: 'leasehold',
+      transferSplit: 'buyer_pays',
+      financingMode: 'financing',
+      assumptionSetId: 'amp_v2_buying_cost_baseline',
+      assumptionVersion: '2026-03-15',
+      governmentFees: 164_000,
+      closingCost: 304_000,
+      totalCashNeeded: 8_504_000,
+      lawyerFee: 30_000,
+      bankTransferCost: 20_000,
+      fxEstimate: 40_000,
+      unresolvedItems: ['withholding_tax_review', 'mortgage_registration_review'],
+      disclaimerKey: 'buying_cost_estimator.assumption_led_v1',
+    });
+
+    expect(query).toEqual({
+      intent: 'buying_cost_review',
+      source: 'buying_cost_estimator',
+      tool: 'buying_cost_estimator',
+      bc_price: '8200000',
+      bc_purchase_context: 'foreign',
+      bc_ownership_type: 'leasehold',
+      bc_transfer_split: 'buyer_pays',
+      bc_financing_mode: 'financing',
+      bc_assumption_set: 'amp_v2_buying_cost_baseline',
+      bc_assumption_version: '2026-03-15',
+      bc_government_fees: '164000',
+      bc_closing_cost: '304000',
+      bc_total_cash_needed: '8504000',
+      bc_lawyer_fee: '30000',
+      bc_bank_transfer_cost: '20000',
+      bc_fx_estimate: '40000',
+      bc_unresolved_items: 'withholding_tax_review,mortgage_registration_review',
+      bc_disclaimer_key: 'buying_cost_estimator.assumption_led_v1',
+    });
+
+    expect(parseBuyingCostAdvisorContext(query)).toEqual({
+      intent: 'buying_cost_review',
+      source: 'buying_cost_estimator',
+      tool: 'buying_cost_estimator',
+      propertyPrice: 8_200_000,
+      purchaseContext: 'foreign',
+      ownershipType: 'leasehold',
+      transferSplit: 'buyer_pays',
+      financingMode: 'financing',
+      assumptionSetId: 'amp_v2_buying_cost_baseline',
+      assumptionVersion: '2026-03-15',
+      governmentFees: 164_000,
+      closingCost: 304_000,
+      totalCashNeeded: 8_504_000,
+      agentFee: null,
+      lawyerFee: 30_000,
+      bankTransferCost: 20_000,
+      fxEstimate: 40_000,
+      unresolvedItems: ['withholding_tax_review', 'mortgage_registration_review'],
+      disclaimerKey: 'buying_cost_estimator.assumption_led_v1',
+    });
+  });
+
+  it('renders estimator handoff summary above the existing contact form', async () => {
+    const handoffQuery = buildBuyingCostAdvisorQuery({
+      intent: 'buying_cost_review',
+      source: 'buying_cost_share',
+      tool: 'buying_cost_estimator',
+      propertyPrice: 8_200_000,
+      purchaseContext: 'foreign',
+      ownershipType: 'leasehold',
+      transferSplit: 'buyer_pays',
+      financingMode: 'financing',
+      assumptionSetId: 'amp_v2_buying_cost_baseline',
+      assumptionVersion: '2026-03-15',
+      governmentFees: 164_000,
+      closingCost: 304_000,
+      totalCashNeeded: 8_504_000,
+      lawyerFee: 30_000,
+      bankTransferCost: 20_000,
+      fxEstimate: 40_000,
+      unresolvedItems: ['withholding_tax_review', 'mortgage_registration_review'],
+      disclaimerKey: 'buying_cost_estimator.assumption_led_v1',
+    });
+
+    render(
+      await ContactPage({
+        params: Promise.resolve({ locale: 'en' }),
+        searchParams: Promise.resolve(handoffQuery),
+      }),
+    );
+
+    expect(screen.getByRole('heading', { name: /buying cost estimate carried from estimator/i })).toBeTruthy();
+    expect(screen.getByText(/target purchase price:/i)).toBeTruthy();
+    expect(screen.getByText(/government fees:/i)).toBeTruthy();
+    expect(screen.getByText(/total cash needed:/i)).toBeTruthy();
+    expect(screen.getByText(/unresolved items: withholding_tax_review, mortgage_registration_review/i)).toBeTruthy();
+    const summaryHeading = screen.getByRole('heading', {
+      name: /buying cost estimate carried from estimator/i,
+    });
+    const contactFormAnchor = document.getElementById('contact-form');
+
+    expect(contactFormAnchor).toBeTruthy();
+    expect(
+      summaryHeading.compareDocumentPosition(contactFormAnchor as HTMLElement) &
+        Node.DOCUMENT_POSITION_FOLLOWING,
+    ).toBeTruthy();
   });
 });

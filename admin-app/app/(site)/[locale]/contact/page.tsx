@@ -6,7 +6,14 @@ const LeadForm = dynamic(() => import('@/components/forms/LeadForm').then(m => m
   loading: () => <div className="animate-pulse h-48 rounded bg-slate-100" />,
 });
 import { CTA } from '@/app/_lib/public-cta';
-import { buildAdvisorWhatsApp, getAdvisoryLabels, getAdvisoryProofs, parseInvestorToolContext, withLocaleQuery } from '@/app/_lib/public-advisory';
+import {
+  buildAdvisorWhatsApp,
+  getAdvisoryLabels,
+  getAdvisoryProofs,
+  parseBuyingCostAdvisorContext,
+  parseInvestorToolContext,
+  withLocaleQuery,
+} from '@/app/_lib/public-advisory';
 import { getDictionary, normalizeLocale } from '@/app/_lib/i18n/get-dictionary';
 import { makePageMetadata } from '@/app/_lib/i18n/metadata';
 import { PublicAdvisoryHero } from '@/components/public/PublicAdvisoryHero';
@@ -46,6 +53,33 @@ function inferBudgetBand(purchasePrice: number | null | undefined): string | und
   return 'gt_10m';
 }
 
+function humanizeBuyingCostValue(locale: 'en' | 'th', value: string | null | undefined, kind: 'purchase' | 'ownership' | 'transfer' | 'financing'): string | null {
+  if (!value) return null;
+
+  const maps = {
+    purchase: {
+      thai_local: locale === 'th' ? 'Thai / local purchase context' : 'Thai / local purchase context',
+      foreign: locale === 'th' ? 'Foreign purchase context' : 'Foreign purchase context',
+    },
+    ownership: {
+      freehold: 'Freehold / foreign quota',
+      leasehold: 'Leasehold',
+      company_hold: 'Thai company hold',
+    },
+    transfer: {
+      buyer_pays: locale === 'th' ? 'ผู้ซื้อรับภาระหลัก' : 'Buyer-led split',
+      split_equally: locale === 'th' ? 'แบ่งกันคนละครึ่ง' : 'Split equally',
+      seller_pays: locale === 'th' ? 'ผู้ขายรับภาระหลัก' : 'Seller-led split',
+    },
+    financing: {
+      cash: 'Cash purchase',
+      financing: 'Financing scenario',
+    },
+  } as const;
+
+  return maps[kind][value as keyof (typeof maps)[typeof kind]] ?? value;
+}
+
 export default async function ContactPage(
   props: {
     params: Promise<{ locale: string }>;
@@ -59,6 +93,7 @@ export default async function ContactPage(
   const advisoryLabels = getAdvisoryLabels(locale);
   const advisoryProofs = getAdvisoryProofs(dict);
   const investorContext = parseInvestorToolContext(searchParams);
+  const buyingCostContext = parseBuyingCostAdvisorContext(searchParams);
   const msg =
     (typeof searchParams?.msg === 'string' ? searchParams.msg : Array.isArray(searchParams?.msg) ? searchParams?.msg[0] : null) ??
     null;
@@ -88,8 +123,48 @@ export default async function ContactPage(
       ? `${locale === 'th' ? 'โครงการที่เทียบ' : 'Compared projects'}: ${investorContext.ids.join(', ')}`
       : null,
   ].filter((item): item is string => Boolean(item));
+  const buyingCostLines = [
+    formatCurrency(locale, buyingCostContext.propertyPrice)
+      ? `${locale === 'th' ? 'Target purchase price' : 'Target purchase price'}: ${formatCurrency(locale, buyingCostContext.propertyPrice)}`
+      : null,
+    humanizeBuyingCostValue(locale, buyingCostContext.purchaseContext, 'purchase')
+      ? `${locale === 'th' ? 'Purchase context' : 'Purchase context'}: ${humanizeBuyingCostValue(locale, buyingCostContext.purchaseContext, 'purchase')}`
+      : null,
+    humanizeBuyingCostValue(locale, buyingCostContext.ownershipType, 'ownership')
+      ? `${locale === 'th' ? 'Ownership type' : 'Ownership type'}: ${humanizeBuyingCostValue(locale, buyingCostContext.ownershipType, 'ownership')}`
+      : null,
+    humanizeBuyingCostValue(locale, buyingCostContext.transferSplit, 'transfer')
+      ? `${locale === 'th' ? 'Transfer split' : 'Transfer split'}: ${humanizeBuyingCostValue(locale, buyingCostContext.transferSplit, 'transfer')}`
+      : null,
+    humanizeBuyingCostValue(locale, buyingCostContext.financingMode, 'financing')
+      ? `${locale === 'th' ? 'Financing mode' : 'Financing mode'}: ${humanizeBuyingCostValue(locale, buyingCostContext.financingMode, 'financing')}`
+      : null,
+    formatCurrency(locale, buyingCostContext.governmentFees)
+      ? `${locale === 'th' ? 'Government fees' : 'Government fees'}: ${formatCurrency(locale, buyingCostContext.governmentFees)}`
+      : null,
+    formatCurrency(locale, buyingCostContext.closingCost)
+      ? `${locale === 'th' ? 'Closing cost' : 'Closing cost'}: ${formatCurrency(locale, buyingCostContext.closingCost)}`
+      : null,
+    formatCurrency(locale, buyingCostContext.totalCashNeeded)
+      ? `${locale === 'th' ? 'Total cash needed' : 'Total cash needed'}: ${formatCurrency(locale, buyingCostContext.totalCashNeeded)}`
+      : null,
+    buyingCostContext.unresolvedItems?.length
+      ? `${locale === 'th' ? 'Unresolved items' : 'Unresolved items'}: ${buyingCostContext.unresolvedItems.join(', ')}`
+      : null,
+    buyingCostContext.disclaimerKey
+      ? `${locale === 'th' ? 'Disclosure' : 'Disclosure'}: ${buyingCostContext.disclaimerKey}`
+      : null,
+  ].filter((item): item is string => Boolean(item));
   const defaultMessage = msg
     ? `${msg}`
+    : buyingCostLines.length
+      ? [
+          locale === 'th'
+            ? 'I want to continue the buying-cost estimate with an advisor using the assumptions below.'
+            : 'I want to continue the buying-cost estimate with an advisor using the assumptions below.',
+          '',
+          ...buyingCostLines,
+        ].join('\n')
     : investorLines.length
       ? [
           locale === 'th'
@@ -99,8 +174,9 @@ export default async function ContactPage(
           ...investorLines,
         ].join('\n')
       : dict.contact.advisoryBody;
-  const defaultBudgetBand = inferBudgetBand(investorContext.purchasePrice);
+  const defaultBudgetBand = inferBudgetBand(buyingCostContext.propertyPrice ?? investorContext.purchasePrice);
   const hasInvestorContext = investorLines.length > 0;
+  const hasBuyingCostContext = buyingCostLines.length > 0;
 
   return (
     <main id="main-content">
@@ -166,6 +242,19 @@ export default async function ContactPage(
               <h2 className="section-title">{dict.contact.advisoryTitle}</h2>
               <p className="section-subtitle">{dict.contact.advisoryBody}</p>
 
+              {hasBuyingCostContext ? (
+                <div className="trust-box">
+                  <h3 className="trust-box__title">
+                    {locale === 'th' ? 'Buying cost estimate carried from estimator' : 'Buying cost estimate carried from estimator'}
+                  </h3>
+                  <ul className="bullet-list">
+                    {buyingCostLines.map((line) => (
+                      <li key={line}>{line}</li>
+                    ))}
+                  </ul>
+                </div>
+              ) : null}
+
               {hasInvestorContext ? (
                 <div className="trust-box">
                   <h3 className="trust-box__title">
@@ -207,7 +296,7 @@ export default async function ContactPage(
                 heading={dict.contact.formTitle}
                 defaultMessage={defaultMessage}
                 defaultBudgetBand={defaultBudgetBand}
-                defaultPurpose={hasInvestorContext ? 'invest' : undefined}
+                defaultPurpose={hasBuyingCostContext ? 'buy' : hasInvestorContext ? 'invest' : undefined}
               />
             </div>
           </div>
