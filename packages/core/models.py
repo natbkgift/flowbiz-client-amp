@@ -386,10 +386,10 @@ class Project(Base):
 
     # Localized content (jsonb per Blueprint Doc 05)
     # summary NOT NULL — defaults to empty object {}
-    # default=dict provides Python-level default so ORM inserts {} explicitly,
-    # avoiding SQLite RETURNING bug where '{}'::server_default is returned as literal.
+        # default=dict provides Python-level default so ORM inserts {} explicitly,
+        # while text("'{}'") keeps the database default valid for PostgreSQL.
     summary: Mapped[dict] = mapped_column(
-        JSONB, nullable=False, server_default="'{}'", default=dict
+           JSONB, nullable=False, server_default=text("'{}'"), default=dict
     )
     description: Mapped[dict | None] = mapped_column(JSONB, nullable=True)
 

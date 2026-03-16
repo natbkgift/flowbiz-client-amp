@@ -113,31 +113,6 @@ echo "--- recreate api/admin-app"
 "${compose[@]}" up -d --no-deps --force-recreate api admin-app
 
 echo "--- smoke"
-healthz=000
-properties=000
-projects=000
-admin_login=000
-for _ in $(seq 1 30); do
-  healthz="$(curl -sS -o /dev/null -w '%{http_code}' "http://127.0.0.1:${VPS_API_PORT}/healthz" || echo 000)"
-  properties="$(curl -sS -o /dev/null -w '%{http_code}' "http://127.0.0.1:${VPS_API_PORT}/v1/properties?limit=1" || echo 000)"
-  projects="$(curl -sS -o /dev/null -w '%{http_code}' "http://127.0.0.1:${VPS_API_PORT}/v1/projects?limit=1" || echo 000)"
-  admin_login="$(curl -sS -o /dev/null -w '%{http_code}' "http://127.0.0.1:${VPS_ADMIN_PORT}/login" || echo 000)"
-  [[ "$healthz" == "200" && "$properties" == "200" && "$projects" == "200" && "$admin_login" == "200" ]] && break
-  sleep 2
-done
-
-echo "release_path=$release_path"
-echo "build_sha=$BUILD_SHA"
-echo "healthz=$healthz"
-echo "properties=$properties"
-echo "projects=$projects"
-echo "admin_login=$admin_login"
-
-deploy_status="error"
-if [[ "$healthz" == "200" && "$properties" == "200" && "$projects" == "200" && "$admin_login" == "200" ]]; then
-  deploy_status="ok"
-fi
-
 telemetry_dir="${VPS_ACTIVE_PATH}/ops/logs"
 telemetry_file="${telemetry_dir}/deploy_telemetry.json"
 mkdir -p "$telemetry_dir"
@@ -146,31 +121,80 @@ export TARGET_SHA
 export release_path
 export TELEMETRY_DEPLOYED_AT
 TELEMETRY_DEPLOYED_AT="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
-export TELEMETRY_DEPLOY_STATUS="$deploy_status"
+export TELEMETRY_SOURCE="scripts/deploy_prod.sh"
+export VPS_ADMIN_PORT
 python - <<'PY'
 import json
 import os
+import sys
+import time
 from pathlib import Path
+from urllib.error import HTTPError, URLError
+from urllib.request import Request, urlopen
+
+checks = [
+  ("/en/shortlist", 200),
+  ("/en/buying-cost-estimator", 200),
+  ("/api/health", 200),
+  ("/api/ping", 200),
+  ("/api/platform/version", 200),
+  ("/api/v1/shortlists/current?owner_type=session&owner_key=preview-smoke-owner&locale=en", 200),
+]
+base_url = f"http://127.0.0.1:{os.environ['VPS_ADMIN_PORT']}"
+
+
+def fetch_status(url: str) -> int:
+  request = Request(url, method="GET")
+  try:
+    with urlopen(request, timeout=5) as response:
+      return int(getattr(response, "status", 0) or 0)
+  except HTTPError as exc:
+    return int(exc.code)
+  except (URLError, TimeoutError, OSError):
+    return 0
+
+
+results: dict[str, dict[str, int | bool]] = {}
+for _ in range(30):
+  current_results = {}
+  for path, expected in checks:
+    status = fetch_status(f"{base_url}{path}")
+    current_results[path] = {
+      "status": status,
+      "expected": expected,
+      "ok": status == expected,
+    }
+  results = current_results
+  if all(item["ok"] for item in results.values()):
+    break
+  time.sleep(2)
+
+deploy_status = "ok" if all(item["ok"] for item in results.values()) else "error"
+failed_paths = [path for path, item in results.items() if not item["ok"]]
+
+print(f"release_path={os.environ.get('release_path')}")
+print(f"build_sha={os.environ.get('BUILD_SHA')}")
+for path, item in results.items():
+  print(f"smoke[{path}]={item['status']}")
 
 path = Path(os.environ["TELEMETRY_FILE"])
 payload = {
     "generated_at": os.environ["TELEMETRY_DEPLOYED_AT"],
     "deployed_at": os.environ["TELEMETRY_DEPLOYED_AT"],
-    "deploy_status": os.environ["TELEMETRY_DEPLOY_STATUS"],
-    "smoke_passed": os.environ["TELEMETRY_DEPLOY_STATUS"] == "ok",
+  "deploy_status": deploy_status,
+  "smoke_passed": deploy_status == "ok",
     "build_sha": os.environ.get("BUILD_SHA"),
     "target_sha": os.environ.get("TARGET_SHA"),
     "release_path": os.environ.get("release_path"),
-    "source": "scripts/deploy_prod.sh",
+  "source": os.environ.get("TELEMETRY_SOURCE"),
     "smoke": {
-        "healthz_code": os.environ.get("healthz"),
-        "properties_code": os.environ.get("properties"),
-        "projects_code": os.environ.get("projects"),
-        "admin_login_code": os.environ.get("admin_login"),
+    "base_url": base_url,
+    "results": results,
+    "failed_paths": failed_paths,
     },
 }
 path.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
+sys.exit(0 if deploy_status == "ok" else 1)
 PY
 echo "deploy_telemetry=$telemetry_file"
-[[ "$healthz" == "200" && "$properties" == "200" && "$projects" == "200" && "$admin_login" == "200" ]]
 BASH

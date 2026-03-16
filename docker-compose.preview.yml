@@ -1,0 +1,25 @@
+services:
+  postgres:
+    volumes:
+      - ${FLOWBIZ_PREVIEW_POSTGRES_PATH:-D:/FlowBiz/data/postgres/flowbiz-client-amp-preview}:/var/lib/postgresql/data
+
+  api:
+    ports:
+      - "127.0.0.1:${PREVIEW_API_PORT:-8101}:8000"
+    volumes:
+      - ${FLOWBIZ_PREVIEW_LOGS_PATH:-./ops/logs}:/app/ops/logs
+
+  admin-app:
+    build:
+      args:
+        LOCAL_API_ORIGIN: ${LOCAL_API_ORIGIN:-http://api:8000}
+        LOCAL_MEDIA_ORIGIN: ${LOCAL_MEDIA_ORIGIN:-http://api:8000}
+    ports:
+      - "127.0.0.1:${PREVIEW_ADMIN_PORT:-8102}:3000"
+    environment:
+      LOCAL_API_ORIGIN: ${LOCAL_API_ORIGIN:-http://api:8000}
+      LOCAL_MEDIA_ORIGIN: ${LOCAL_MEDIA_ORIGIN:-http://api:8000}
+      NEXT_PUBLIC_SITE_URL: ${NEXT_PUBLIC_SITE_URL:-http://127.0.0.1:8102}
+      FLOWBIZ_DEPLOY_TELEMETRY_PATH: ${FLOWBIZ_DEPLOY_TELEMETRY_PATH:-/app/ops/logs/deploy_telemetry.json}
+    volumes:
+      - ${FLOWBIZ_PREVIEW_LOGS_PATH:-./ops/logs}:/app/ops/logs:ro

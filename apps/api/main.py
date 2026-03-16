@@ -1,7 +1,9 @@
 from __future__ import annotations
 
 from contextlib import asynccontextmanager
+import json
 import mimetypes
+import os
 from pathlib import Path
 
 from fastapi import FastAPI, Request
@@ -61,9 +63,46 @@ def _pick_media_root() -> Path | None:
     return None
 
 
+def _read_deploy_telemetry() -> dict | None:
+    telemetry_path = Path(
+        os.getenv("FLOWBIZ_DEPLOY_TELEMETRY_PATH", "/app/ops/logs/deploy_telemetry.json")
+    )
+    try:
+        payload = json.loads(telemetry_path.read_text(encoding="utf-8"))
+    except Exception:
+        return None
+    return payload if isinstance(payload, dict) else None
+
+
 @app.get("/healthz")
 def healthz() -> dict:
     return {"ok": True}
+
+
+@app.get("/health")
+def health() -> dict:
+    return {"ok": True}
+
+
+@app.get("/ping")
+def ping() -> dict:
+    return {"ok": True}
+
+
+@app.get("/platform/version")
+def platform_version() -> dict:
+    telemetry = _read_deploy_telemetry()
+    return {
+        "ok": True,
+        "generated_at": telemetry.get("generated_at") if telemetry else None,
+        "deployed_at": telemetry.get("deployed_at") if telemetry else None,
+        "deploy_status": telemetry.get("deploy_status") if telemetry else "unknown",
+        "smoke_passed": telemetry.get("smoke_passed") if telemetry else None,
+        "build_sha": telemetry.get("build_sha") if telemetry else os.getenv("FLOWBIZ_BUILD_SHA"),
+        "target_sha": telemetry.get("target_sha") if telemetry else None,
+        "source": telemetry.get("source") if telemetry else "runtime",
+        "runtime": "api",
+    }
 
 
 @app.exception_handler(Exception)

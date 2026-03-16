@@ -47,6 +47,11 @@ This repository is production-critical for `amppattaya.com`.
 - Deploy via existing script:
   - `./scripts/deploy_prod.ps1`
 - Verify smoke post-deploy:
-  - `healthz`, `properties`, `projects`, `admin_login` must all be `200`.
+  - `/en/shortlist` must be `200`
+  - `/en/buying-cost-estimator` must be `200`
+  - `/api/health` must be `200`
+  - `/api/ping` must be `200`
+  - `/api/platform/version` must be `200`
+  - `/api/v1/shortlists/current?owner_type=session&owner_key=preview-smoke-owner&locale=en` must be `200`
 - Confirm telemetry file updates:
   - `/opt/flowbiz/clients/flowbiz-client-amp/ops/logs/deploy_telemetry.json`
