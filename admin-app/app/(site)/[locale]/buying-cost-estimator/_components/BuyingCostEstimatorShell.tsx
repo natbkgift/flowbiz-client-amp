@@ -1,13 +1,17 @@
 'use client';
 
 import Link from 'next/link';
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { useEffect, useMemo, useState } from 'react';
 
 import { withLocale } from '@/app/_lib/i18n/routing';
 import {
+  buildBuyingCostShareQuery,
   DEFAULT_BUYING_COST_ASSUMPTION_SET_ID,
   DEFAULT_BUYING_COST_ASSUMPTION_SET_VERSION,
+  parseBuyingCostShareQuery,
   requestBuyingCostEstimate,
+  stripBuyingCostShareQuery,
   type BuyingCostEstimateResponse,
 } from '@/lib/buying-cost-estimator';
 
@@ -148,7 +152,7 @@ function getShellCopy(locale: Locale) {
       ],
       statusTitle: 'Current slice status',
       statusBody:
-        'Slice 2 เปิดเฉพาะ UI contract และ live form state เท่านั้น สูตรคำนวณ authoritative, share state, และ contact payload จะตามมาใน slices ถัดไป.',
+        'Slice 4 ทำให้ route นี้ถือทั้ง live formula result และ shareable route state โดยยังคง contact handoff ไว้เป็น slice ถัดไปเท่านั้น.',
       assumptionsTitle: 'Assumption discipline',
       assumptions: [
         'ค่าใช้จ่ายที่มี source ชัดเจนเท่านั้นที่จะถูกใส่ใน deterministic total',
@@ -185,17 +189,24 @@ function getShellCopy(locale: Locale) {
       nextStepTitle: 'Next-step region',
       nextStepBody:
         'หากต้องการคุยภาพรวมการซื้อก่อน formula และ handoff slice จะเสร็จ คุณยังใช้ contact route และ investment calculator เดิมได้ตามปกติ',
+      shareTitle: 'Shareable route state',
+      shareBody: 'ลิงก์นี้จะ reopen บน estimator route เดิมพร้อม applied assumptions, assumption version, disclaimer key และ unresolved items ที่ใช้อยู่ล่าสุด',
+      shareLinkLabel: 'Shareable estimator URL',
+      shareReady: 'route state ถูก sync แล้วและสามารถเปิดซ้ำบน estimator route เดิมได้',
+      versionMismatchTitle: 'Assumption version review',
+      versionMismatchBody: 'ลิงก์ที่เปิดอยู่มาจาก assumption version อื่น จึงยังไม่รีคำนวณอัตโนมัติภายใต้ version ปัจจุบันจนกว่าจะกดยืนยัน refresh',
+      refreshAssumptionsLabel: 'Refresh under current assumptions',
       contactLabel: 'ไปหน้า contact เดิม',
       calculatorLabel: 'เปิด investment calculator',
       milestoneTitle: 'What lands next',
       milestones: [
-        'server-authoritative formula boundary',
-        'share-result reopen state on this same route',
         'advisor handoff payload on the existing contact route',
+        'shared estimator state reused by the advisor transition',
+        'current contact route still remains the handoff owner',
       ],
       disclaimerTitle: 'Important note',
       disclaimerBody:
-        'ตัวเลขจริงยังไม่ถูกคำนวณในหน้านี้จนกว่า formula slice จะถูก merge และ validate ตาม gate และ estimator summary ตอนนี้เป็น UI contract preview เท่านั้น.',
+        'ผลลัพธ์จะคำนวณจาก approved formula boundary เท่านั้น และลิงก์แชร์จะพกเฉพาะ applied state ไม่พก formatted totals หรือ hidden server state.',
     };
   }
 
@@ -225,7 +236,7 @@ function getShellCopy(locale: Locale) {
     ],
     statusTitle: 'Current slice status',
     statusBody:
-      'Slice 2 opens only the UI contract and live form state. The authoritative formula, share state, and contact payload arrive in later slices.',
+      'Slice 4 makes this route hold both the live formula result and the shareable route state, while advisor handoff stays in the next slice.',
     assumptionsTitle: 'Assumption discipline',
     assumptions: [
       'Only governed fee inputs may enter the deterministic total.',
@@ -262,22 +273,32 @@ function getShellCopy(locale: Locale) {
     nextStepTitle: 'Next-step region',
     nextStepBody:
       'If you need to discuss the purchase context before the formula and handoff slices land, the existing contact route and investment calculator stay available unchanged.',
+    shareTitle: 'Shareable route state',
+    shareBody: 'This URL reopens on the same estimator route with the latest applied assumptions, assumption version, disclaimer key, and unresolved items.',
+    shareLinkLabel: 'Shareable estimator URL',
+    shareReady: 'Route state is in sync and can be reopened on this estimator route.',
+    versionMismatchTitle: 'Assumption version review',
+    versionMismatchBody: 'This shared link references a different assumption version, so the page will not silently recompute under the current version until you confirm a refresh.',
+    refreshAssumptionsLabel: 'Refresh under current assumptions',
     contactLabel: 'Open the current contact route',
     calculatorLabel: 'Open investment calculator',
     milestoneTitle: 'What lands next',
     milestones: [
-      'server-authoritative formula boundary',
-      'share-result reopen state on this same route',
       'advisor handoff payload on the existing contact route',
+      'shared estimator state reused by the advisor transition',
+      'current contact route still remains the handoff owner',
     ],
     disclaimerTitle: 'Important note',
     disclaimerBody:
-      'No live totals are calculated on this page until the formula slice is merged and validated under the gate, so the summary currently acts as a UI contract preview only.',
+      'Live totals come only from the approved formula boundary, and the share URL carries applied state instead of stale formatted totals or hidden server state.',
   };
 }
 
 export function BuyingCostEstimatorShell({ locale }: { locale: Locale }) {
   const copy = getShellCopy(locale);
+  const pathname = usePathname();
+  const router = useRouter();
+  const searchParams = useSearchParams();
   const [propertyPrice, setPropertyPrice] = useState('6000000');
   const [purchaseContext, setPurchaseContext] = useState<PurchaseContext>('thai_local');
   const [ownershipType, setOwnershipType] = useState<OwnershipType>('freehold');
@@ -289,6 +310,10 @@ export function BuyingCostEstimatorShell({ locale }: { locale: Locale }) {
   const [fxEstimate, setFxEstimate] = useState('25000');
   const [estimate, setEstimate] = useState<BuyingCostEstimateResponse | null>(null);
   const [estimateStatus, setEstimateStatus] = useState<'idle' | 'loading' | 'ready' | 'error'>('idle');
+  const [versionMismatch, setVersionMismatch] = useState<{ assumptionSetId: string; assumptionSetVersion: string } | null>(null);
+  const [sharedUnresolvedItems, setSharedUnresolvedItems] = useState<string[]>([]);
+  const [parsedQueryKey, setParsedQueryKey] = useState<string | null>(null);
+  const [shareStateReady, setShareStateReady] = useState(false);
 
   const ownershipOptions = useMemo(() => getOwnershipOptions(locale), [locale]);
   const transferSplitOptions = useMemo(() => getTransferSplitOptions(locale), [locale]);
@@ -302,7 +327,63 @@ export function BuyingCostEstimatorShell({ locale }: { locale: Locale }) {
   );
 
   useEffect(() => {
-    if (parsedPrice == null) {
+    const nextQueryKey = searchParams?.toString() ?? '';
+    if (parsedQueryKey !== null && nextQueryKey === parsedQueryKey) {
+      return;
+    }
+
+    setParsedQueryKey(nextQueryKey);
+
+    if (!searchParams) {
+      setShareStateReady(true);
+      return;
+    }
+
+    const parsedShareState = parseBuyingCostShareQuery(searchParams);
+    if (!parsedShareState.has_share_state) {
+      setVersionMismatch(null);
+      setSharedUnresolvedItems([]);
+      setShareStateReady(true);
+      return;
+    }
+
+    if (parsedShareState.property_price) setPropertyPrice(String(parsedShareState.property_price));
+    if (parsedShareState.purchase_context) setPurchaseContext(parsedShareState.purchase_context);
+    if (parsedShareState.ownership_type) setOwnershipType(parsedShareState.ownership_type);
+    if (parsedShareState.transfer_split) setTransferSplit(parsedShareState.transfer_split);
+    if (parsedShareState.financing_mode) setFinancingMode(parsedShareState.financing_mode);
+    setAgentFee(String(parsedShareState.agent_fee ?? 0));
+    setLawyerFee(String(parsedShareState.lawyer_fee ?? 20000));
+    setBankTransferCost(String(parsedShareState.bank_transfer_cost ?? 15000));
+    setFxEstimate(String(parsedShareState.fx_estimate ?? 25000));
+    setSharedUnresolvedItems(parsedShareState.unresolved_items ?? []);
+
+    const hasMismatch = Boolean(
+      parsedShareState.assumption_set_id
+      && parsedShareState.assumption_set_version
+      && (
+        parsedShareState.assumption_set_id !== DEFAULT_BUYING_COST_ASSUMPTION_SET_ID
+        || parsedShareState.assumption_set_version !== DEFAULT_BUYING_COST_ASSUMPTION_SET_VERSION
+      ),
+    );
+
+    setVersionMismatch(
+      hasMismatch
+        ? {
+            assumptionSetId: parsedShareState.assumption_set_id ?? DEFAULT_BUYING_COST_ASSUMPTION_SET_ID,
+            assumptionSetVersion: parsedShareState.assumption_set_version ?? DEFAULT_BUYING_COST_ASSUMPTION_SET_VERSION,
+          }
+        : null,
+    );
+    setShareStateReady(true);
+  }, [parsedQueryKey, searchParams]);
+
+  useEffect(() => {
+    if (!shareStateReady) {
+      return;
+    }
+
+    if (parsedPrice == null || versionMismatch) {
       setEstimate(null);
       setEstimateStatus('idle');
       return;
@@ -330,6 +411,7 @@ export function BuyingCostEstimatorShell({ locale }: { locale: Locale }) {
         if (!active) return;
         setEstimate(response);
         setEstimateStatus('ready');
+        setSharedUnresolvedItems(response.unresolved_items);
       })
       .catch(() => {
         if (!active) return;
@@ -339,7 +421,51 @@ export function BuyingCostEstimatorShell({ locale }: { locale: Locale }) {
     return () => {
       active = false;
     };
-  }, [agentFee, bankTransferCost, financingMode, fxEstimate, lawyerFee, ownershipType, parsedPrice, purchaseContext, transferSplit]);
+  }, [agentFee, bankTransferCost, financingMode, fxEstimate, lawyerFee, ownershipType, parsedPrice, purchaseContext, shareStateReady, transferSplit, versionMismatch]);
+
+  const shareQuery = useMemo(() => {
+    if (parsedPrice == null || !estimate || versionMismatch) {
+      return null;
+    }
+
+    return buildBuyingCostShareQuery({
+      purchase_context: purchaseContext,
+      property_price: parsedPrice,
+      ownership_type: ownershipType,
+      transfer_split: transferSplit,
+      financing_mode: financingMode,
+      assumption_set_id: estimate.assumption_set_id,
+      assumption_set_version: estimate.assumption_set_version,
+      agent_fee: Number(agentFee) > 0 ? Number(agentFee) : undefined,
+      lawyer_fee: purchaseContext === 'foreign' && Number(lawyerFee) > 0 ? Number(lawyerFee) : undefined,
+      bank_transfer_cost: purchaseContext === 'foreign' && Number(bankTransferCost) > 0 ? Number(bankTransferCost) : undefined,
+      fx_estimate: purchaseContext === 'foreign' && Number(fxEstimate) > 0 ? Number(fxEstimate) : undefined,
+      disclaimer_key: estimate.disclaimer_key,
+      unresolved_items: estimate.unresolved_items,
+    });
+  }, [agentFee, bankTransferCost, estimate, fxEstimate, lawyerFee, ownershipType, parsedPrice, purchaseContext, transferSplit, financingMode, versionMismatch]);
+
+  useEffect(() => {
+    if (!pathname || !searchParams || !shareStateReady || versionMismatch) {
+      return;
+    }
+
+    const nextParams = stripBuyingCostShareQuery(new URLSearchParams(searchParams.toString()));
+
+    if (shareQuery) {
+      Object.entries(shareQuery).forEach(([key, value]) => {
+        nextParams.set(key, value);
+      });
+    }
+
+    const currentQuery = searchParams.toString();
+    const nextQuery = nextParams.toString();
+    if (currentQuery === nextQuery) {
+      return;
+    }
+
+    router.replace(nextQuery ? `${pathname}?${nextQuery}` : pathname, { scroll: false });
+  }, [pathname, router, searchParams, shareQuery, shareStateReady, versionMismatch]);
 
   const appliedAssumptions = useMemo(() => {
     const items = [
@@ -358,7 +484,24 @@ export function BuyingCostEstimatorShell({ locale }: { locale: Locale }) {
     return items.filter(Boolean) as string[];
   }, [agentFee, bankTransferCost, copy.agentFee, copy.bankTransferCost, copy.financingModeLabel, copy.foreignLabel, copy.fxEstimate, copy.lawyerFee, copy.ownershipTypeLabel, copy.propertyPrice, copy.purchaseContextLabel, copy.thaiLocalLabel, copy.transferSplitLabel, financingMode, financingOptions, fxEstimate, lawyerFee, locale, ownershipOptions, ownershipType, parsedPrice, purchaseContext, transferSplit, transferSplitOptions]);
 
-  const renderedUnresolvedItems = estimate?.unresolved_items?.length ? estimate.unresolved_items : unresolvedItems;
+  const renderedUnresolvedItems = versionMismatch && sharedUnresolvedItems.length
+    ? sharedUnresolvedItems
+    : estimate?.unresolved_items?.length
+      ? estimate.unresolved_items
+      : unresolvedItems;
+
+  const shareUrl = useMemo(() => {
+    if (!pathname || !shareQuery || typeof window === 'undefined') {
+      return '';
+    }
+
+    const params = stripBuyingCostShareQuery(new URLSearchParams(searchParams?.toString() ?? ''));
+    Object.entries(shareQuery).forEach(([key, value]) => {
+      params.set(key, value);
+    });
+
+    return `${window.location.origin}${pathname}${params.toString() ? `?${params.toString()}` : ''}`;
+  }, [pathname, searchParams, shareQuery]);
 
   function formatResultAmount(value: number | null | undefined): string {
     if (typeof value !== 'number' || !Number.isFinite(value)) {
@@ -563,6 +706,30 @@ export function BuyingCostEstimatorShell({ locale }: { locale: Locale }) {
               <li key={item}>{item}</li>
             ))}
           </ul>
+        </div>
+
+        <div className="page-rail-card mt-4">
+          <h2 className="card-title">{copy.shareTitle}</h2>
+          <p className="card-subtitle">{copy.shareBody}</p>
+          {versionMismatch ? (
+            <div className="mt-4">
+              <p className="text-caption text-danger">{copy.versionMismatchTitle}</p>
+              <p className="text-caption mt-2">{`${copy.versionMismatchBody} (${versionMismatch.assumptionSetId} / ${versionMismatch.assumptionSetVersion})`}</p>
+              <button className="btn btn-secondary mt-4" onClick={() => setVersionMismatch(null)} type="button">
+                {copy.refreshAssumptionsLabel}
+              </button>
+            </div>
+          ) : shareUrl ? (
+            <div className="mt-4">
+              <p className="text-caption">{copy.shareReady}</p>
+              <label className="form-label mt-4">
+                {copy.shareLinkLabel}
+                <input className="form-input" readOnly value={shareUrl} />
+              </label>
+            </div>
+          ) : (
+            <p className="text-caption mt-4">{copy.resultConditional}</p>
+          )}
         </div>
 
         <div className="page-rail-card mt-4">
