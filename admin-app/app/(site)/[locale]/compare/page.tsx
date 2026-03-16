@@ -171,6 +171,39 @@ async function buildAreaComparisonEntries(
   return Array.from(areaMap.values());
 }
 
+function buildDecisionSupportSummary(input: {
+  locale: 'en' | 'th';
+  items: ProjectEvaluationResponse[];
+  areaComparisons: AreaComparisonEntry[];
+}): string[] {
+  const roiCount = input.items.filter((item) => Boolean(item.area_statistics?.roi_percent)).length;
+  const areaStatsCount = input.items.filter((item) => Boolean(item.area_statistics?.avg_price || item.area_statistics?.avg_rent)).length;
+  const projectNames = input.items.map((item) => item.project.name).filter(Boolean);
+
+  return [
+    input.locale === 'th'
+      ? `ตอนนี้คุณกำลังอ่าน ${projectNames.length} โครงการในเฟรมเดียวกัน: ${projectNames.join(', ')}`
+      : `You are currently reading ${projectNames.length} projects in one frame: ${projectNames.join(', ')}.`,
+    input.areaComparisons.length >= 2
+      ? (input.locale === 'th'
+          ? `การตัดสินใจยังขึ้นกับทำเลอยู่ เพราะชุดนี้ครอบ ${input.areaComparisons.length} ทำเลที่แตกต่างกัน`
+          : `Location is still an active decision variable because this set spans ${input.areaComparisons.length} different areas.`)
+      : (input.locale === 'th'
+          ? 'ชุดนี้ยังอยู่ในทำเลเดียวกันเป็นหลัก ดังนั้นน้ำหนักการตัดสินใจรอบนี้ควรอยู่ที่ความต่างของโครงการและความครบของ snapshot'
+          : 'This set is still concentrated in one area, so the next decision weight should stay on project-level trade-offs and snapshot completeness.'),
+    input.locale === 'th'
+      ? `${roiCount}/${input.items.length} โครงการมี ROI snapshot และ ${areaStatsCount}/${input.items.length} โครงการมีราคา/ค่าเช่าเพียงพอสำหรับใช้เทียบเชิงบริบท`
+      : `${roiCount}/${input.items.length} projects currently expose ROI snapshots, and ${areaStatsCount}/${input.items.length} projects have enough price or rent context for side-by-side reading.`,
+    roiCount === input.items.length && areaStatsCount === input.items.length
+      ? (input.locale === 'th'
+          ? 'เมื่อ snapshot ครบทุกตัวเลือกแล้ว บล็อกนี้ช่วยชี้ว่าควรพาโครงการไหนไปคุยเชิงลึกต่อ ไม่ได้ชี้ว่าควรซื้อโครงการใด'
+          : 'With snapshot coverage across all options, this layer helps you decide which project deserves deeper discussion next, not which project to buy.')
+      : (input.locale === 'th'
+          ? 'เมื่อ snapshot บางส่วนยังขาด ให้ใช้ summary นี้เพื่อระบุคำถามค้างก่อนยกระดับไป advisor review เดิม'
+          : 'When some snapshot fields are still missing, use this summary to identify the open questions before escalating through the existing advisor review path.'),
+  ];
+}
+
 export default async function ComparePage(
   props: {
     params: Promise<{ locale: string }>;
@@ -317,6 +350,7 @@ export default async function ComparePage(
   const missing = ids.filter((_, idx) => evals[idx] == null);
   const items = evals.filter(Boolean) as ProjectEvaluationResponse[];
   const areaComparisons = await buildAreaComparisonEntries(items, locale);
+  const decisionSupportSummary = buildDecisionSupportSummary({ locale, items, areaComparisons });
 
   return (
     <main id="main-content">
@@ -468,6 +502,22 @@ export default async function ComparePage(
               </p>
             </div>
           ) : null}
+
+          <div className="card reveal mb-4">
+            <h2 className="card-title">{locale === 'th' ? 'Decision support summary' : 'Decision support summary'}</h2>
+            <p className="card-subtitle">
+              {locale === 'th'
+                ? 'สรุปชั้นนี้มีไว้เพื่อจัดลำดับคำถามและ next step ของการเปรียบเทียบ ไม่ใช่เพื่อฟันธงการลงทุน'
+                : 'This layer is meant to organize the remaining questions and next step from the comparison, not to produce an investment verdict.'}
+            </p>
+            <div className="insight-list mt-4">
+              {decisionSupportSummary.map((line) => (
+                <div key={line} className="insight-list__item">
+                  <span className="insight-list__body">{line}</span>
+                </div>
+              ))}
+            </div>
+          </div>
 
           <div className="card reveal">
             <h2 className="card-title">{dict.compare.comparisonTable}</h2>
