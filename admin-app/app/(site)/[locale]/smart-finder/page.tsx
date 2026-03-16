@@ -347,6 +347,11 @@ export default async function SmartFinderPage(
                     {dict.smartFinder.resultsDescription}
                   </p>
                   <p className="guided-dialog__step">query_hash: {results?.query_hash}</p>
+                  <div className="cta-row mt-4">
+                    <Link className="btn btn-secondary" href={withLocale(locale, '/buy')}>
+                      {locale === 'th' ? 'ดู listings ที่ save เข้า shortlist ได้' : 'Browse shortlist-ready listings'}
+                    </Link>
+                  </div>
                 </div>
 
                 {results?.items?.length ? (

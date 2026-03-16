@@ -242,6 +242,9 @@ export default async function ComparePage(
                 <Link className="btn btn-secondary" href={withLocale(locale, '/projects')}>
                   {dict.compare.browseProjects}
                 </Link>
+                <Link className="btn btn-tertiary" href={withLocale(locale, '/buy')}>
+                  {locale === 'th' ? 'ดู listings ที่ save เข้า shortlist ได้' : 'Browse shortlist-ready listings'}
+                </Link>
               </div>
             </div>
           </Container>
@@ -403,6 +406,9 @@ export default async function ComparePage(
             <div className="cta-row mt-4">
               <Link className="btn btn-secondary" href={withLocale(locale, '/smart-finder')}>
                 {dict.compare.backToSmartFinder}
+              </Link>
+              <Link className="btn btn-tertiary" href={withLocale(locale, '/buy')}>
+                {locale === 'th' ? 'ดู listings ที่ save เข้า shortlist ได้' : 'Browse shortlist-ready listings'}
               </Link>
               <Link className="btn btn-cta" href={contactHref}>
                 {dict.compare.getInvestmentPlan}
