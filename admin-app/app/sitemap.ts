@@ -26,6 +26,7 @@ const pages: PageEntry[] = [
   { path: '/area-guide/wongamat', changeFrequency: 'weekly', priority: 0.7 },
   { path: '/projects', changeFrequency: 'daily', priority: 0.9 },
   { path: '/smart-finder', changeFrequency: 'monthly', priority: 0.8 },
+  { path: '/buying-cost-estimator', changeFrequency: 'monthly', priority: 0.6 },
   { path: '/compare', changeFrequency: 'monthly', priority: 0.6 },
   { path: '/contact', changeFrequency: 'monthly', priority: 0.5 },
   { path: '/marketplace', changeFrequency: 'weekly', priority: 0.7 },
