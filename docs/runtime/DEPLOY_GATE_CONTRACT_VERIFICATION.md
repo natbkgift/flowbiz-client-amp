@@ -1,8 +1,8 @@
 # Deploy Gate Contract Verification
 
-วันที่: 2026-03-16
-โหมด: Post-Recovery Reconciliation And Release Hardening
-สถานะ: PARTIAL PASS
+วันที่: 2026-03-17
+โหมด: Baseline Lock And V2 Unlock Preparation
+สถานะ: PASS
 
 ## สิ่งที่ตรวจ
 
@@ -43,17 +43,22 @@
 - public smoke บน `https://amppattaya.com` ตอบ `200` ครบทุก path
 - `https://amppattaya.com/api/platform/version` ตอบกลับ telemetry ที่ใช้งานได้จริงบน live runtime
 
-## เหตุผลที่ยังเป็น PARTIAL PASS
+## หลักฐานหลัง parity closure และ post-merge verification
 
-แม้ gate contract ใน repo จะผ่านและ preview proof ผ่านแล้ว แต่ production runtime ปัจจุบันยังไม่ได้อยู่บน baseline ใหม่ จึงยังยืนยันไม่ได้ว่า live production ล่าสุดถูก deploy ด้วย gate implementation ชุดเดียวกับ `main`
-
-หลักฐานสำคัญ:
-
-- public production version endpoint ยังรายงาน `build_sha = 5864a90`
-- production host telemetry file ยังเป็น schema เก่าที่มี `healthz_code`, `properties_code`, `projects_code`, `admin_login_code`
+1. production ถูก redeploy ด้วย gate รุ่น owner-aligned แล้ว และ live telemetry รายงาน
+  - `deploy_status = ok`
+  - `smoke_passed = true`
+  - `validation_mode = owner-aligned`
+2. post-merge verification หลัง squash merge PR #510 เข้า `main` ยังยืนยันว่า public smoke บน `https://amppattaya.com` ตอบ `200` ครบทุก path
+3. live `https://amppattaya.com/api/platform/version` หลัง merge ยังรายงาน runtime telemetry เดิมที่ผ่านแล้ว
+  - `build_sha = 6fb5897`
+  - `target_sha = 6fb5897897518dcc9ecd6f647dad34da8b610e26`
+  - `deploy_status = ok`
+  - `smoke_passed = true`
+  - `source = scripts/deploy_prod.ps1`
 
 ## ผลสรุป
 
 - สถานะ gate contract ใน repo: PASS
 - สถานะ gate contract บน preview target: PASS
-- สถานะ adoption ของ gate contract บน production runtime ปัจจุบัน: NOT YET VERIFIED AGAINST BASELINE
+- สถานะ adoption ของ gate contract บน production runtime ปัจจุบัน: PASS
