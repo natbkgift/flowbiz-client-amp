@@ -48,6 +48,7 @@ export type PropertyDetail = {
   size: number | null;
   address: string;
   city: string;
+  project_id?: string | null;
   images: string[] | null;
   local_images?: string[] | null;
   cover_image?: string | null;
