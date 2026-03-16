@@ -1,5 +1,7 @@
 'use client';
 
+import type { PropertyDetail } from '@/app/public/_shared/types';
+
 const SHORTLIST_OWNER_KEY = 'amp_shortlist_owner_v1';
 const SHORTLIST_CACHE_KEY = 'amp_shortlist_cache_v1';
 
@@ -69,6 +71,12 @@ export type ShortlistShareResponse = {
 
 export type SharedShortlistResponse = {
   shortlist: SharedShortlistDetail;
+};
+
+export type ShortlistCompareProject = {
+  propertyId: string;
+  projectId: string;
+  projectName: string | null;
 };
 
 function safeWindow(): Window | null {
@@ -234,4 +242,47 @@ export async function fetchSharedShortlist(input: {
   }
 
   return (await response.json()) as SharedShortlistResponse;
+}
+
+export async function resolveShortlistCompareProjects(input: {
+  locale: 'en' | 'th';
+  items: ShortlistPropertyItem[];
+}): Promise<ShortlistCompareProject[]> {
+  const seenProjectIds = new Set<string>();
+  const candidates: ShortlistCompareProject[] = [];
+
+  for (const item of input.items) {
+    if (!item.property_id || candidates.length >= 3) {
+      continue;
+    }
+
+    try {
+      const params = new URLSearchParams({ locale: input.locale });
+      const response = await fetch(`/api/v1/properties/${encodeURIComponent(item.property_id)}?${params.toString()}`, {
+        method: 'GET',
+        cache: 'no-store',
+      });
+
+      if (!response.ok) {
+        continue;
+      }
+
+      const detail = (await response.json()) as PropertyDetail;
+      const projectId = typeof detail.project_id === 'string' ? detail.project_id : null;
+      if (!projectId || seenProjectIds.has(projectId)) {
+        continue;
+      }
+
+      seenProjectIds.add(projectId);
+      candidates.push({
+        propertyId: item.property_id,
+        projectId,
+        projectName: item.project,
+      });
+    } catch {
+      continue;
+    }
+  }
+
+  return candidates;
 }

@@ -2810,6 +2810,39 @@ summary.mobile-nav__trigger::-webkit-details-marker {
   box-shadow: var(--shadow-card);
 }
 
+.shortlist-compare-panel {
+  display: grid;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  border-radius: var(--radius-lg);
+  border: 1px solid rgba(176, 92, 55, 0.16);
+  background: linear-gradient(135deg, rgba(255, 248, 242, 0.98), rgba(255, 255, 255, 0.96));
+  box-shadow: var(--shadow-card);
+}
+
+.shortlist-compare-panel__header {
+  display: grid;
+  gap: var(--space-2);
+}
+
+.shortlist-compare-panel__chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.shortlist-compare-panel__chip {
+  display: inline-flex;
+  align-items: center;
+  min-height: 32px;
+  padding: 0 var(--space-3);
+  border-radius: 999px;
+  background: rgba(176, 92, 55, 0.12);
+  color: var(--color-accent);
+  font-size: var(--font-sm);
+  font-weight: 600;
+}
+
 .shortlist-share-panel__label {
   font-size: var(--font-sm);
   font-weight: 600;

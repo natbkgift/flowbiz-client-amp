@@ -4,10 +4,11 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 
+import { withLocaleQuery } from '@/app/_lib/public-advisory';
 import { resolveImageUrl, formatPriceTHB } from '@/app/_lib/public-api-shared';
 import { withLocale } from '@/app/_lib/i18n/routing';
 import { EmptyStateCard, InlineStatusMessage, LoadingCardGrid } from '@/components/ui/StateBlocks';
-import { SHORTLIST_UPDATED_EVENT, fetchCurrentShortlist, readCachedShortlist, removePropertyFromShortlist, shareCurrentShortlist, type ShortlistDetail, type ShortlistPropertyItem } from '@/lib/shortlist';
+import { SHORTLIST_UPDATED_EVENT, fetchCurrentShortlist, readCachedShortlist, removePropertyFromShortlist, resolveShortlistCompareProjects, shareCurrentShortlist, type ShortlistCompareProject, type ShortlistDetail, type ShortlistPropertyItem } from '@/lib/shortlist';
 
 const SHORTLIST_FALLBACK_IMAGE = '/images/property-placeholder.svg';
 
@@ -29,6 +30,8 @@ function buildPropertyHref(locale: 'en' | 'th', item: ShortlistPropertyItem): st
 
 export function ShortlistListSurface({ locale }: { locale: 'en' | 'th' }) {
   const [items, setItems] = useState<ShortlistPropertyItem[]>([]);
+  const [compareProjects, setCompareProjects] = useState<ShortlistCompareProject[]>([]);
+  const [isResolvingCompare, setIsResolvingCompare] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [pendingPropertyId, setPendingPropertyId] = useState<string | null>(null);
   const [isSharing, setIsSharing] = useState(false);
@@ -81,6 +84,37 @@ export function ShortlistListSurface({ locale }: { locale: 'en' | 'th' }) {
       w.removeEventListener(SHORTLIST_UPDATED_EVENT, handleUpdate);
     };
   }, []);
+
+  useEffect(() => {
+    let isActive = true;
+
+    if (!items.length) {
+      setCompareProjects([]);
+      setIsResolvingCompare(false);
+      return () => {
+        isActive = false;
+      };
+    }
+
+    setIsResolvingCompare(true);
+    resolveShortlistCompareProjects({ locale, items })
+      .then((resolved) => {
+        if (!isActive) return;
+        setCompareProjects(resolved);
+      })
+      .catch(() => {
+        if (!isActive) return;
+        setCompareProjects([]);
+      })
+      .finally(() => {
+        if (!isActive) return;
+        setIsResolvingCompare(false);
+      });
+
+    return () => {
+      isActive = false;
+    };
+  }, [items, locale]);
 
   async function handleRemove(propertyId: string) {
     if (pendingPropertyId) return;
@@ -151,6 +185,17 @@ export function ShortlistListSurface({ locale }: { locale: 'en' | 'th' }) {
     );
   }
 
+  const compareProjectNames = compareProjects
+    .map((item) => item.projectName)
+    .filter((value): value is string => Boolean(value));
+  const compareHref = compareProjects.length >= 2
+    ? withLocaleQuery(locale, '/compare', {
+        ids: compareProjects.map((item) => item.projectId).join(','),
+        intent: 'shortlist_review',
+        source: 'shortlist_compare',
+      })
+    : null;
+
   return (
     <div className="shortlist-surface">
       <div className="cta-strip">
@@ -160,6 +205,13 @@ export function ShortlistListSurface({ locale }: { locale: 'en' | 'th' }) {
             : `This shortlist currently contains ${items.length} listings for review, while remaining separate from contact handoff and CRM flows.`}
         </div>
         <div className="card-actions">
+          {compareHref ? (
+            <Link className="btn btn-primary" href={compareHref}>
+              {locale === 'th'
+                ? `เทียบ ${compareProjects.length} โครงการจาก shortlist`
+                : `Compare ${compareProjects.length} saved projects`}
+            </Link>
+          ) : null}
           <button type="button" className="btn btn-primary" onClick={handleShare} disabled={isSharing}>
             {isSharing
               ? (locale === 'th' ? 'กำลังสร้างลิงก์แชร์…' : 'Creating share link…')
@@ -174,6 +226,44 @@ export function ShortlistListSurface({ locale }: { locale: 'en' | 'th' }) {
             {locale === 'th' ? 'คุยกับที่ปรึกษา' : 'Speak to an advisor'}
           </Link>
         </div>
+      </div>
+
+      <div className="shortlist-compare-panel" aria-live="polite">
+        <div className="shortlist-compare-panel__header">
+          <h2 className="card-title mb-0">
+            {locale === 'th' ? 'เปลี่ยน shortlist ไปเป็น compare surface' : 'Move this shortlist into compare'}
+          </h2>
+          <p className="card-subtitle mb-0">
+            {locale === 'th'
+              ? 'ระบบจะดึงเฉพาะโครงการที่ผูกกับ listing ที่คุณบันทึกไว้ แล้วส่งไปยัง compare แบบ descriptive เท่านั้น'
+              : 'The compare step only carries forward projects that can be resolved from your saved listings, using the existing descriptive compare surface.'}
+          </p>
+        </div>
+
+        {isResolvingCompare ? (
+          <p className="guided-dialog__step mb-0">
+            {locale === 'th' ? 'กำลังเตรียมโครงการที่ compare ได้จาก shortlist…' : 'Preparing compare-ready projects from this shortlist…'}
+          </p>
+        ) : compareProjects.length >= 2 ? (
+          <>
+            <p className="guided-dialog__step mb-0">
+              {locale === 'th'
+                ? `พร้อมเทียบ ${compareProjects.length} โครงการจาก shortlist นี้แบบ side-by-side โดยไม่แตะ contact flow หรือ CRM`
+                : `${compareProjects.length} shortlist projects are ready for a side-by-side comparison without touching contact flow or CRM.`}
+            </p>
+            <div className="shortlist-compare-panel__chips">
+              {compareProjectNames.map((name) => (
+                <span key={name} className="shortlist-compare-panel__chip">{name}</span>
+              ))}
+            </div>
+          </>
+        ) : (
+          <p className="guided-dialog__step mb-0">
+            {locale === 'th'
+              ? 'ตอนนี้ shortlist นี้ยัง resolve ได้ไม่ถึง 2 โครงการสำหรับ compare บันทึกเพิ่มอีกอย่างน้อย 1 โครงการเพื่อเปิดตารางเทียบ'
+              : 'This shortlist does not yet resolve to 2 projects for compare. Save at least one more project-backed listing to open the comparison table.'}
+          </p>
+        )}
       </div>
 
       {shareUrl ? (
