@@ -45,6 +45,8 @@ describe('ShortlistSaveButton', () => {
       expect(screen.getByRole('button', { name: /saved \(2\)/i })).toBeTruthy();
     });
 
+    expect(screen.getByRole('link', { name: /view shortlist \(2\)/i }).getAttribute('href')).toBe('/en/shortlist');
+
     expect(fetchMock).toHaveBeenCalledTimes(1);
     expect(localStorage.getItem('amp_shortlist_owner_v1')).toBeTruthy();
   });
@@ -74,5 +76,7 @@ describe('ShortlistSaveButton', () => {
     await waitFor(() => {
       expect(screen.getByRole('button', { name: /saved \(3\)/i })).toBeTruthy();
     });
+
+    expect(screen.getByRole('link', { name: /view shortlist \(3\)/i }).getAttribute('href')).toBe('/en/shortlist');
   });
 });
