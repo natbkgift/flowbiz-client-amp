@@ -2776,6 +2776,96 @@ summary.mobile-nav__trigger::-webkit-details-marker {
   padding: 0 var(--space-lg) var(--space-lg);
 }
 
+.shortlist-inline-link {
+  display: inline-flex;
+  margin-top: var(--space-2);
+  color: var(--color-primary);
+  font-size: var(--font-sm);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.shortlist-inline-link:hover {
+  color: var(--color-primary-dark);
+  text-decoration: underline;
+}
+
+.shortlist-surface {
+  display: grid;
+  gap: var(--space-5);
+}
+
+.shortlist-surface__items {
+  display: grid;
+  gap: var(--space-4);
+}
+
+.shortlist-item-card {
+  display: grid;
+  gap: var(--space-4);
+  padding: var(--space-4);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--color-gray-100);
+  background: var(--color-white);
+  box-shadow: var(--shadow-card);
+}
+
+.shortlist-item-card__media {
+  position: relative;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  min-height: 220px;
+  background: var(--color-gray-100);
+}
+
+.shortlist-item-card__content {
+  display: grid;
+  gap: var(--space-3);
+}
+
+.shortlist-item-card__eyebrow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.shortlist-item-card__badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 32px;
+  padding: 0 var(--space-3);
+  border-radius: 999px;
+  background: var(--color-primary-light);
+  color: var(--color-primary);
+  font-size: var(--font-sm);
+  font-weight: 600;
+}
+
+.shortlist-item-card__badge--accent {
+  background: rgba(176, 92, 55, 0.12);
+  color: var(--color-accent);
+}
+
+.shortlist-item-card__facts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2) var(--space-4);
+  color: var(--color-text-secondary);
+  font-size: var(--font-sm);
+}
+
+@media (min-width: 900px) {
+  .shortlist-item-card {
+    grid-template-columns: minmax(240px, 280px) 1fr;
+    align-items: stretch;
+  }
+
+  .shortlist-item-card__media {
+    min-height: 100%;
+  }
+}
+
 /* Phase 5 Spec: Restrained hover (-4px Y), no scaling, no opacity fade-ins on mount */
 .property-card:hover {
   transform: translateY(-4px);

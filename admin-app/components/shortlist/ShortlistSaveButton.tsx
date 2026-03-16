@@ -1,8 +1,10 @@
 'use client';
 
+import Link from 'next/link';
 import { useEffect, useMemo, useState } from 'react';
 import { usePathname } from 'next/navigation';
 
+import { withLocale } from '@/app/_lib/i18n/routing';
 import { trackEvent } from '@/lib/analytics';
 import { fetchCurrentShortlist, savePropertyToShortlist } from '@/lib/shortlist';
 
@@ -90,6 +92,13 @@ export function ShortlistSaveButton({
       <button type="button" className={className} onClick={handleClick} disabled={isSaving || isSaved}>
         {label}
       </button>
+      {typeof itemCount === 'number' && itemCount > 0 ? (
+        <div>
+          <Link className="shortlist-inline-link" href={withLocale(locale, '/shortlist')}>
+            {locale === 'th' ? `ดู shortlist (${itemCount})` : `View shortlist (${itemCount})`}
+          </Link>
+        </div>
+      ) : null}
       {error ? <p className="guided-dialog__step mt-2">{error}</p> : null}
     </div>
   );

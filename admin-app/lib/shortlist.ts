@@ -4,10 +4,34 @@ const SHORTLIST_OWNER_KEY = 'amp_shortlist_owner_v1';
 
 export type ShortlistPropertyItem = {
   property_id: string;
+  slug: string | null;
+  title: string;
+  project: string | null;
+  location: string | null;
+  price: number | string;
+  size: number | string | null;
+  bedrooms: number | null;
+  bathrooms: number | null;
+  image: string | null;
+  status: string;
+  foreign_quota: boolean;
   position: number;
+  added_at: string;
+  source_surface: string | null;
 };
 
 export type ShortlistDetail = {
+  id: string;
+  owner_type: string;
+  owner_key: string;
+  status: string;
+  title: string | null;
+  intent: string | null;
+  share_mode: string | null;
+  source_context: Record<string, unknown> | null;
+  created_at: string;
+  updated_at: string;
+  last_viewed_at: string | null;
   item_count: number;
   items: ShortlistPropertyItem[];
 };
