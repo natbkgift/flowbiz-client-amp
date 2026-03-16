@@ -5,6 +5,7 @@ import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { useEffect, useMemo, useState } from 'react';
 
 import { withLocale } from '@/app/_lib/i18n/routing';
+import { buildBuyingCostAdvisorQuery, withLocaleQuery } from '@/app/_lib/public-advisory';
 import {
   buildBuyingCostShareQuery,
   DEFAULT_BUYING_COST_ASSUMPTION_SET_ID,
@@ -314,6 +315,7 @@ export function BuyingCostEstimatorShell({ locale }: { locale: Locale }) {
   const [sharedUnresolvedItems, setSharedUnresolvedItems] = useState<string[]>([]);
   const [parsedQueryKey, setParsedQueryKey] = useState<string | null>(null);
   const [shareStateReady, setShareStateReady] = useState(false);
+  const [openedFromSharedLink, setOpenedFromSharedLink] = useState(false);
 
   const ownershipOptions = useMemo(() => getOwnershipOptions(locale), [locale]);
   const transferSplitOptions = useMemo(() => getTransferSplitOptions(locale), [locale]);
@@ -341,10 +343,17 @@ export function BuyingCostEstimatorShell({ locale }: { locale: Locale }) {
 
     const parsedShareState = parseBuyingCostShareQuery(searchParams);
     if (!parsedShareState.has_share_state) {
+      if (parsedQueryKey === null) {
+        setOpenedFromSharedLink(false);
+      }
       setVersionMismatch(null);
       setSharedUnresolvedItems([]);
       setShareStateReady(true);
       return;
+    }
+
+    if (parsedQueryKey === null) {
+      setOpenedFromSharedLink(true);
     }
 
     if (parsedShareState.property_price) setPropertyPrice(String(parsedShareState.property_price));
@@ -502,6 +511,34 @@ export function BuyingCostEstimatorShell({ locale }: { locale: Locale }) {
 
     return `${window.location.origin}${pathname}${params.toString() ? `?${params.toString()}` : ''}`;
   }, [pathname, searchParams, shareQuery]);
+
+  const contactHref = useMemo(() => {
+    if (!estimate || versionMismatch || parsedPrice == null) {
+      return withLocale(locale, '/contact');
+    }
+
+    return withLocaleQuery(locale, '/contact', buildBuyingCostAdvisorQuery({
+      intent: 'buying_cost_review',
+      source: openedFromSharedLink ? 'buying_cost_share' : 'buying_cost_estimator',
+      tool: 'buying_cost_estimator',
+      propertyPrice: parsedPrice,
+      purchaseContext: purchaseContext,
+      ownershipType: ownershipType,
+      transferSplit: transferSplit,
+      financingMode: financingMode,
+      assumptionSetId: estimate.assumption_set_id,
+      assumptionVersion: estimate.assumption_set_version,
+      governmentFees: estimate.government_fees,
+      closingCost: estimate.closing_cost,
+      totalCashNeeded: estimate.total_cash_needed,
+      agentFee: Number(agentFee) > 0 ? Number(agentFee) : undefined,
+      lawyerFee: purchaseContext === 'foreign' && Number(lawyerFee) > 0 ? Number(lawyerFee) : undefined,
+      bankTransferCost: purchaseContext === 'foreign' && Number(bankTransferCost) > 0 ? Number(bankTransferCost) : undefined,
+      fxEstimate: purchaseContext === 'foreign' && Number(fxEstimate) > 0 ? Number(fxEstimate) : undefined,
+      unresolvedItems: estimate.unresolved_items,
+      disclaimerKey: estimate.disclaimer_key,
+    }));
+  }, [agentFee, bankTransferCost, estimate, financingMode, fxEstimate, lawyerFee, locale, openedFromSharedLink, ownershipType, parsedPrice, purchaseContext, transferSplit, versionMismatch]);
 
   function formatResultAmount(value: number | null | undefined): string {
     if (typeof value !== 'number' || !Number.isFinite(value)) {
@@ -736,7 +773,7 @@ export function BuyingCostEstimatorShell({ locale }: { locale: Locale }) {
           <h2 className="card-title">{copy.nextStepTitle}</h2>
           <p className="card-subtitle">{copy.nextStepBody}</p>
           <div className="cta-row mt-4">
-            <Link className="btn btn-cta" href={withLocale(locale, '/contact')}>
+            <Link className="btn btn-cta" href={contactHref}>
               {copy.contactLabel}
             </Link>
             <Link className="btn btn-secondary" href={withLocale(locale, '/calculator')}>
