@@ -18,6 +18,7 @@ from apps.api.routes import (
     admin_projects,
     admin_properties,
     admin_seo,
+    tools,
     admin_users,
 )
 from apps.api.routes.v1 import (
@@ -97,6 +98,7 @@ app.include_router(properties.router)
 app.include_router(shortlists.router)
 app.include_router(events.router)
 app.include_router(home_runtime.router)
+app.include_router(tools.router)
 
 app.add_api_route("/search", properties.search_properties, methods=["GET"], response_model=SearchResponse)
 app.add_api_route("/search/", properties.search_properties, methods=["GET"], response_model=SearchResponse)

@@ -1,9 +1,15 @@
 'use client';
 
 import Link from 'next/link';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 
 import { withLocale } from '@/app/_lib/i18n/routing';
+import {
+  DEFAULT_BUYING_COST_ASSUMPTION_SET_ID,
+  DEFAULT_BUYING_COST_ASSUMPTION_SET_VERSION,
+  requestBuyingCostEstimate,
+  type BuyingCostEstimateResponse,
+} from '@/lib/buying-cost-estimator';
 
 type Locale = 'en' | 'th';
 
@@ -171,8 +177,11 @@ function getShellCopy(locale: Locale) {
       resultPending: 'จะแสดงเมื่อ formula slice เชื่อมต่อแล้ว',
       resultConditional: 'ขึ้นกับ purchase context และ assumptions ที่เลือก',
       resultLive: 'UI นี้อัปเดตทันที แต่ total จริงยังต้องมาจาก authoritative formula',
+      resultLoading: 'กำลังอัปเดต estimate จาก authoritative formula',
+      resultError: 'estimate ล่าสุดโหลดไม่สำเร็จ จึงคงผลลัพธ์ก่อนหน้าไว้ถ้ามี',
       activeAssumptionsTitle: 'Applied assumptions visible in this scenario',
       unresolvedTitle: 'Unresolved items kept outside deterministic totals',
+      lineItemsTitle: 'Deterministic line items returned by formula',
       nextStepTitle: 'Next-step region',
       nextStepBody:
         'หากต้องการคุยภาพรวมการซื้อก่อน formula และ handoff slice จะเสร็จ คุณยังใช้ contact route และ investment calculator เดิมได้ตามปกติ',
@@ -245,8 +254,11 @@ function getShellCopy(locale: Locale) {
     resultPending: 'Available once the formula slice is connected',
     resultConditional: 'Depends on the selected purchase context and assumptions',
     resultLive: 'This UI updates immediately, but real totals still come from the authoritative formula slice.',
+    resultLoading: 'Updating estimate from the authoritative formula',
+    resultError: 'The latest estimate request failed, so the last good result stays visible when available.',
     activeAssumptionsTitle: 'Applied assumptions visible in this scenario',
     unresolvedTitle: 'Unresolved items kept outside deterministic totals',
+    lineItemsTitle: 'Deterministic line items returned by the formula',
     nextStepTitle: 'Next-step region',
     nextStepBody:
       'If you need to discuss the purchase context before the formula and handoff slices land, the existing contact route and investment calculator stay available unchanged.',
@@ -275,6 +287,8 @@ export function BuyingCostEstimatorShell({ locale }: { locale: Locale }) {
   const [lawyerFee, setLawyerFee] = useState('20000');
   const [bankTransferCost, setBankTransferCost] = useState('15000');
   const [fxEstimate, setFxEstimate] = useState('25000');
+  const [estimate, setEstimate] = useState<BuyingCostEstimateResponse | null>(null);
+  const [estimateStatus, setEstimateStatus] = useState<'idle' | 'loading' | 'ready' | 'error'>('idle');
 
   const ownershipOptions = useMemo(() => getOwnershipOptions(locale), [locale]);
   const transferSplitOptions = useMemo(() => getTransferSplitOptions(locale), [locale]);
@@ -286,6 +300,46 @@ export function BuyingCostEstimatorShell({ locale }: { locale: Locale }) {
     () => buildUnresolvedItems(locale, purchaseContext, ownershipType, financingMode),
     [financingMode, locale, ownershipType, purchaseContext],
   );
+
+  useEffect(() => {
+    if (parsedPrice == null) {
+      setEstimate(null);
+      setEstimateStatus('idle');
+      return;
+    }
+
+    let active = true;
+    setEstimateStatus('loading');
+
+    const request = {
+      purchase_context: purchaseContext,
+      property_price: parsedPrice,
+      ownership_type: ownershipType,
+      transfer_split: transferSplit,
+      financing_mode: financingMode,
+      assumption_set_id: DEFAULT_BUYING_COST_ASSUMPTION_SET_ID,
+      assumption_set_version: DEFAULT_BUYING_COST_ASSUMPTION_SET_VERSION,
+      agent_fee: Number(agentFee) > 0 ? Number(agentFee) : undefined,
+      lawyer_fee: purchaseContext === 'foreign' && Number(lawyerFee) > 0 ? Number(lawyerFee) : undefined,
+      bank_transfer_cost: purchaseContext === 'foreign' && Number(bankTransferCost) > 0 ? Number(bankTransferCost) : undefined,
+      fx_estimate: purchaseContext === 'foreign' && Number(fxEstimate) > 0 ? Number(fxEstimate) : undefined,
+    };
+
+    requestBuyingCostEstimate(request)
+      .then((response) => {
+        if (!active) return;
+        setEstimate(response);
+        setEstimateStatus('ready');
+      })
+      .catch(() => {
+        if (!active) return;
+        setEstimateStatus('error');
+      });
+
+    return () => {
+      active = false;
+    };
+  }, [agentFee, bankTransferCost, financingMode, fxEstimate, lawyerFee, ownershipType, parsedPrice, purchaseContext, transferSplit]);
 
   const appliedAssumptions = useMemo(() => {
     const items = [
@@ -303,6 +357,16 @@ export function BuyingCostEstimatorShell({ locale }: { locale: Locale }) {
 
     return items.filter(Boolean) as string[];
   }, [agentFee, bankTransferCost, copy.agentFee, copy.bankTransferCost, copy.financingModeLabel, copy.foreignLabel, copy.fxEstimate, copy.lawyerFee, copy.ownershipTypeLabel, copy.propertyPrice, copy.purchaseContextLabel, copy.thaiLocalLabel, copy.transferSplitLabel, financingMode, financingOptions, fxEstimate, lawyerFee, locale, ownershipOptions, ownershipType, parsedPrice, purchaseContext, transferSplit, transferSplitOptions]);
+
+  const renderedUnresolvedItems = estimate?.unresolved_items?.length ? estimate.unresolved_items : unresolvedItems;
+
+  function formatResultAmount(value: number | null | undefined): string {
+    if (typeof value !== 'number' || !Number.isFinite(value)) {
+      return copy.resultPending;
+    }
+
+    return formatCurrency(locale, value);
+  }
 
   return (
     <div className="detail-layout advisory-detail-layout mt-6">
@@ -443,7 +507,15 @@ export function BuyingCostEstimatorShell({ locale }: { locale: Locale }) {
       <aside className="page-rail">
         <div className="page-rail-card">
           <h2 className="card-title">{copy.previewStateTitle}</h2>
-          <p className="card-subtitle">{parsedPrice == null ? copy.previewPending : copy.previewReady}</p>
+          <p className="card-subtitle">
+            {parsedPrice == null
+              ? copy.previewPending
+              : estimateStatus === 'loading'
+                ? copy.resultLoading
+                : estimateStatus === 'error'
+                  ? copy.resultError
+                  : copy.previewReady}
+          </p>
           <div className="insight-list mt-4">
             <div className="insight-list__item">
               <span className="insight-list__title">{copy.propertyPrice}</span>
@@ -451,18 +523,28 @@ export function BuyingCostEstimatorShell({ locale }: { locale: Locale }) {
             </div>
             <div className="insight-list__item">
               <span className="insight-list__title">{copy.governmentFeesLabel}</span>
-              <span className="insight-list__body">{copy.resultPending}</span>
+              <span className="insight-list__body">{formatResultAmount(estimate?.government_fees)}</span>
             </div>
             <div className="insight-list__item">
               <span className="insight-list__title">{copy.closingCostLabel}</span>
-              <span className="insight-list__body">{copy.resultConditional}</span>
+              <span className="insight-list__body">{formatResultAmount(estimate?.closing_cost)}</span>
             </div>
             <div className="insight-list__item">
               <span className="insight-list__title">{copy.totalCashNeededLabel}</span>
-              <span className="insight-list__body">{copy.resultPending}</span>
+              <span className="insight-list__body">{formatResultAmount(estimate?.total_cash_needed)}</span>
             </div>
           </div>
           <p className="text-caption mt-4">{copy.resultLive}</p>
+        </div>
+
+        <div className="page-rail-card mt-4">
+          <h2 className="card-title">{copy.lineItemsTitle}</h2>
+          <ul className="bullet-list mt-4">
+            {(estimate?.line_items ?? []).map((item) => (
+              <li key={item.key}>{`${item.label_key}: ${formatCurrency(locale, item.amount)}`}</li>
+            ))}
+            {!estimate?.line_items?.length ? <li>{copy.resultConditional}</li> : null}
+          </ul>
         </div>
 
         <div className="page-rail-card mt-4">
@@ -477,7 +559,7 @@ export function BuyingCostEstimatorShell({ locale }: { locale: Locale }) {
         <div className="page-rail-card mt-4">
           <h2 className="card-title">{copy.unresolvedTitle}</h2>
           <ul className="bullet-list mt-4">
-            {unresolvedItems.map((item) => (
+            {renderedUnresolvedItems.map((item) => (
               <li key={item}>{item}</li>
             ))}
           </ul>
