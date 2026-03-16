@@ -1,8 +1,9 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Public production deploy gate: build/recreate, then require the public smoke
-# contract endpoints to return 200 before the deploy is considered successful.
+# Public production deploy gate: build/recreate, then validate each public
+# contract endpoint against its intended internal owner before the deploy is
+# considered successful.
 
 # API-only production deploy via fresh VPS checkout.
 # The current branch does not contain the legacy Next.js frontend source, so
@@ -136,14 +137,49 @@ from urllib.error import HTTPError, URLError
 from urllib.request import Request, urlopen
 
 checks = [
-  ("/en/shortlist", 200),
-  ("/en/buying-cost-estimator", 200),
-  ("/api/health", 200),
-  ("/api/ping", 200),
-  ("/api/platform/version", 200),
-  ("/api/v1/shortlists/current?owner_type=session&owner_key=preview-smoke-owner&locale=en", 200),
+  {
+    "owner": "admin-app",
+    "public_path": "/en/shortlist",
+    "internal_path": "/en/shortlist",
+    "base_url": f"http://127.0.0.1:{os.environ['VPS_ADMIN_PORT']}",
+    "expected": 200,
+  },
+  {
+    "owner": "admin-app",
+    "public_path": "/en/buying-cost-estimator",
+    "internal_path": "/en/buying-cost-estimator",
+    "base_url": f"http://127.0.0.1:{os.environ['VPS_ADMIN_PORT']}",
+    "expected": 200,
+  },
+  {
+    "owner": "api",
+    "public_path": "/api/health",
+    "internal_path": "/health",
+    "base_url": f"http://127.0.0.1:{os.environ['VPS_API_PORT']}",
+    "expected": 200,
+  },
+  {
+    "owner": "api",
+    "public_path": "/api/ping",
+    "internal_path": "/ping",
+    "base_url": f"http://127.0.0.1:{os.environ['VPS_API_PORT']}",
+    "expected": 200,
+  },
+  {
+    "owner": "api",
+    "public_path": "/api/platform/version",
+    "internal_path": "/platform/version",
+    "base_url": f"http://127.0.0.1:{os.environ['VPS_API_PORT']}",
+    "expected": 200,
+  },
+  {
+    "owner": "api",
+    "public_path": "/api/v1/shortlists/current?owner_type=session&owner_key=preview-smoke-owner&locale=en",
+    "internal_path": "/v1/shortlists/current?owner_type=session&owner_key=preview-smoke-owner&locale=en",
+    "base_url": f"http://127.0.0.1:{os.environ['VPS_API_PORT']}",
+    "expected": 200,
+  },
 ]
-base_url = f"http://127.0.0.1:{os.environ['VPS_ADMIN_PORT']}"
 
 
 def fetch_status(url: str) -> int:
@@ -157,12 +193,20 @@ def fetch_status(url: str) -> int:
     return 0
 
 
-results: dict[str, dict[str, int | bool]] = {}
+results: dict[str, dict[str, int | bool | str]] = {}
 for _ in range(30):
   current_results = {}
-  for path, expected in checks:
-    status = fetch_status(f"{base_url}{path}")
-    current_results[path] = {
+  for check in checks:
+    public_path = check["public_path"]
+    internal_path = check["internal_path"]
+    owner = check["owner"]
+    expected = int(check["expected"])
+    internal_url = f"{check['base_url']}{internal_path}"
+    status = fetch_status(internal_url)
+    current_results[public_path] = {
+      "owner": owner,
+      "internal_path": internal_path,
+      "internal_url": internal_url,
       "status": status,
       "expected": expected,
       "ok": status == expected,
@@ -178,7 +222,9 @@ failed_paths = [path for path, item in results.items() if not item["ok"]]
 print(f"release_path={os.environ.get('release_path')}")
 print(f"build_sha={os.environ.get('BUILD_SHA')}")
 for path, item in results.items():
-  print(f"smoke[{path}]={item['status']}")
+  print(
+    f"owner_check[{item['owner']} {path} -> {item['internal_path']}]={item['status']}"
+  )
 
 path = Path(os.environ["TELEMETRY_FILE"])
 payload = {
@@ -191,7 +237,7 @@ payload = {
     "release_path": os.environ.get("release_path"),
   "source": os.environ.get("TELEMETRY_SOURCE"),
     "smoke": {
-    "base_url": base_url,
+      "validation_mode": "owner-aligned",
     "results": results,
     "failed_paths": failed_paths,
     },
