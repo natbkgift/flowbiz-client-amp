@@ -19,8 +19,13 @@ preview target สำหรับ recovery mode ถูกนิยามเพ�
 
 1. ใช้ compose project name แยก: `flowbiz-client-amp-preview`
 2. ใช้พอร์ต local แยกจาก production (`8001`/`8002`)
-3. ใช้ clean release clone ที่ checkout ตาม SHA ที่ระบุ
+3. ใช้ clean release clone ที่ checkout ตาม SHA ที่ระบุโดยไม่ overlay ไฟล์จาก workspace ทับลงใน release clone
 4. เขียน telemetry แยกใน preview logs path
+
+## ข้อสังเกตด้าน parity
+
+- preview ตรวจชุด public contract เดียวกับ production
+- ปัจจุบัน preview ยังจำลอง public domain edge proxy ไม่ครบทุกชั้น จึงต้องอ่าน ownership map ควบคู่เมื่อใช้ตัดสิน production parity
 
 ## Smoke contract ขั้นต่ำ
 
