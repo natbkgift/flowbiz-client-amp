@@ -1,12 +1,12 @@
 # Parity Verification Report
 
 วันที่: 2026-03-17
-โหมด: Post-Recovery Reconciliation And Release Hardening
-สถานะ: FAIL
+โหมด: Production Parity Closure
+สถานะ: PASS
 
 ## สรุปแบบสั้น
 
-`main`, preview และ production live runtime ตอนนี้ชี้ไป baseline SHA เดียวกันแล้ว แต่ parity closure ยังไม่ผ่านเพราะ production deploy gate รายงาน `error` และ ownership ของ `/api/*` ยังต่างจาก preview อย่างมีนัยสำคัญ
+parity blocker ตัวสุดท้ายถูกปิดแล้วสำหรับ scope นี้ เพราะ production gate และ telemetry ถูกแก้ให้ตรวจ owner ที่ถูกต้องของ shortlist API และผล deploy ล่าสุดผ่านครบทั้ง direct-owner validation และ public smoke contract
 
 ## Baseline ที่ใช้เทียบ
 
@@ -17,18 +17,14 @@
 
 ### Main
 
-- อ้างอิงจาก merge ของ PR #508
 - baseline SHA = `6fb5897897518dcc9ecd6f647dad34da8b610e26`
 - สถานะ: PASS
 
 ### Preview
 
-- deploy preview ใหม่จาก SHA `6fb5897897518dcc9ecd6f647dad34da8b610e26`
-- smoke ผ่านครบ
-- preview version endpoint รายงาน
-  - `build_sha = 6fb58978`
-  - `target_sha = 6fb5897897518dcc9ecd6f647dad34da8b610e26`
-  - `source = scripts/deploy_preview.ps1`
+- preview version endpoint รายงาน `target_sha = 6fb5897897518dcc9ecd6f647dad34da8b610e26`
+- `http://127.0.0.1:8102/api/v1/shortlists/current?...` = `200`
+- `http://127.0.0.1:8101/v1/shortlists/current?...` = `200`
 - สถานะ: PASS
 
 ### Production
@@ -36,24 +32,49 @@
 - public `https://amppattaya.com/api/platform/version` รายงาน
   - `build_sha = 6fb5897`
   - `target_sha = 6fb5897897518dcc9ecd6f647dad34da8b610e26`
+  - `deploy_status = ok`
+  - `smoke_passed = true`
   - `source = scripts/deploy_prod.ps1`
   - `runtime = api`
-  - `deploy_status = error`
-  - `smoke_passed = false`
-- production host telemetry file ชี้ไป release path ของ `6fb58978`
-- production host telemetry ระบุว่า failed path คือ `/api/v1/shortlists/current?owner_type=session&owner_key=preview-smoke-owner&locale=en` บน `http://127.0.0.1:8002`
-- production host repo checkout ปัจจุบันยังรายงาน `HEAD = 6ce96878f4b9a45777072b7f98a96d7b7829f41c`
-- สถานะ: FAIL
+- production telemetry ระบุ `validation_mode = owner-aligned`
+- production telemetry ยืนยัน owner mapping ที่ใช้จริง
+  - `/en/shortlist` -> `admin-app` via `http://127.0.0.1:8002/en/shortlist`
+  - `/en/buying-cost-estimator` -> `admin-app` via `http://127.0.0.1:8002/en/buying-cost-estimator`
+  - `/api/health` -> `api` via `http://127.0.0.1:8001/health`
+  - `/api/ping` -> `api` via `http://127.0.0.1:8001/ping`
+  - `/api/platform/version` -> `api` via `http://127.0.0.1:8001/platform/version`
+  - `/api/v1/shortlists/current?...` -> `api` via `http://127.0.0.1:8001/v1/shortlists/current?...`
+- สถานะ: PASS
 
-## Parity gaps ที่พบ
+## Owner decision สำหรับ shortlist API
 
-1. deploy identity parity ผ่านที่ระดับ `target_sha` แต่ production gate ไม่ผ่านเพราะ direct admin-app path `127.0.0.1:8002/api/v1/shortlists/current...` ยัง `404`
-2. public production smoke ผ่านครบทุก path บน `https://amppattaya.com` แต่ internal production smoke บน admin-app port ไม่ผ่านครบ จึงมี behavior mismatch ระหว่าง edge กับ app port
-3. preview direct app port และ production public domain ยังมี owner ต่างกันสำหรับ `/api/*` endpoints สำคัญ
-4. production host repo checkout กับ production live runtime ยังไม่ตรงกันเอง
+- intended owner ของ public contract `/api/v1/shortlists/current?...` คือ FastAPI route `/v1/shortlists/current`
+- preview app port ทำงานผ่าน Next fallback rewrite ไปยัง API owner
+- production public domain ทำงานผ่าน edge proxy ไปยัง API owner
+- direct `127.0.0.1:8002/api/v1/shortlists/current?...` ไม่ใช่ intended owner และ `404` นั้นเป็น expected non-owner behavior เพราะ production admin-app ไม่มี `LOCAL_API_ORIGIN`
+
+## Trace summary
+
+1. Code proof:
+   - Next มี route จริงแค่ `/api/health`, `/api/ping`, `/api/platform/version`, `/api/v1/events`
+   - FastAPI มี route จริงที่ `/v1/shortlists/current`
+   - Next fallback rewrite `/api/:path* -> ${LOCAL_API_ORIGIN}/:path*` จะทำงานต่อเมื่อมี `LOCAL_API_ORIGIN`
+2. Runtime proof:
+   - production admin-app container ไม่มี `LOCAL_API_ORIGIN`
+   - production API direct path `http://127.0.0.1:8001/v1/shortlists/current?...` ตอบ `200` JSON
+   - production public path `https://amppattaya.com/api/v1/shortlists/current?...` ตอบ `200`
+   - production admin-app direct path `http://127.0.0.1:8002/api/v1/shortlists/current?...` ตอบ `404` จาก Next not-found
+
+## Architectural note
+
+preview และ production ยังใช้ proxy layer คนละชั้นสำหรับบาง `/api/*` paths:
+
+- preview app port ใช้ Next fallback rewrite สำหรับ shortlist contract
+- production public domain ใช้ edge proxy สำหรับ shortlist contract
+- production health/ping/platform version public contract ยัง terminate ที่ API behavior ขณะที่ preview app port มี Next route ของตัวเอง
+
+ความต่างนี้ยังคงมีอยู่เชิง implementation แต่ owner ambiguity สำหรับ public contract ที่ gate ใช้งานถูกปิดแล้ว และไม่ block parity closure สำหรับ scope นี้อีกต่อไป
 
 ## ผลสรุป
 
-parity ที่ระดับ SHA และ public contract ผ่านแล้ว แต่ parity closure ระดับ runtime architecture และ deploy gate ยังไม่ผ่าน
-
-stop condition สำหรับการ resume งานถัดไปยังคงอยู่ เพราะ production ยัง resolve `/api/*` ต่างจาก preview อย่างมีนัยสำคัญ และ hardened production gate ยังได้ผล `error`
+parity สำหรับ release baseline, intended owner mapping, owner-aligned gate, telemetry และ public smoke contract ผ่านครบตาม scope ที่กำหนด
