@@ -7,7 +7,7 @@ import { useEffect, useState } from 'react';
 import { resolveImageUrl, formatPriceTHB } from '@/app/_lib/public-api-shared';
 import { withLocale } from '@/app/_lib/i18n/routing';
 import { EmptyStateCard, InlineStatusMessage, LoadingCardGrid } from '@/components/ui/StateBlocks';
-import { fetchCurrentShortlist, type ShortlistPropertyItem } from '@/lib/shortlist';
+import { SHORTLIST_UPDATED_EVENT, fetchCurrentShortlist, readCachedShortlist, removePropertyFromShortlist, type ShortlistDetail, type ShortlistPropertyItem } from '@/lib/shortlist';
 
 const SHORTLIST_FALLBACK_IMAGE = '/images/property-placeholder.svg';
 
@@ -30,16 +30,27 @@ function buildPropertyHref(locale: 'en' | 'th', item: ShortlistPropertyItem): st
 export function ShortlistListSurface({ locale }: { locale: 'en' | 'th' }) {
   const [items, setItems] = useState<ShortlistPropertyItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [pendingPropertyId, setPendingPropertyId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+
+  function syncFromShortlist(shortlist: ShortlistDetail | null) {
+    const shortlistItems = [...(shortlist?.items ?? [])].sort((left, right) => left.position - right.position);
+    setItems(shortlistItems);
+  }
 
   useEffect(() => {
     let isActive = true;
 
+    const cachedShortlist = readCachedShortlist();
+    if (cachedShortlist) {
+      syncFromShortlist(cachedShortlist);
+      setIsLoading(false);
+    }
+
     fetchCurrentShortlist(locale)
       .then((response) => {
         if (!isActive) return;
-        const shortlistItems = [...(response.shortlist?.items ?? [])].sort((left, right) => left.position - right.position);
-        setItems(shortlistItems);
+        syncFromShortlist(response.shortlist);
       })
       .catch(() => {
         if (!isActive) return;
@@ -54,6 +65,37 @@ export function ShortlistListSurface({ locale }: { locale: 'en' | 'th' }) {
       isActive = false;
     };
   }, [locale]);
+
+  useEffect(() => {
+    const w = window;
+    const handleUpdate = (event: Event) => {
+      syncFromShortlist((event as CustomEvent<ShortlistDetail | null>).detail);
+      setError(null);
+    };
+
+    w.addEventListener(SHORTLIST_UPDATED_EVENT, handleUpdate);
+    return () => {
+      w.removeEventListener(SHORTLIST_UPDATED_EVENT, handleUpdate);
+    };
+  }, []);
+
+  async function handleRemove(propertyId: string) {
+    if (pendingPropertyId) return;
+
+    setPendingPropertyId(propertyId);
+    setError(null);
+    try {
+      const response = await removePropertyFromShortlist({
+        locale,
+        propertyId,
+      });
+      syncFromShortlist(response.shortlist);
+    } catch {
+      setError(locale === 'th' ? 'นำรายการออกจาก shortlist ไม่สำเร็จ' : 'Unable to remove the listing from shortlist.');
+    } finally {
+      setPendingPropertyId(null);
+    }
+  }
 
   if (isLoading) {
     return <LoadingCardGrid cards={3} />;
@@ -149,9 +191,16 @@ export function ShortlistListSurface({ locale }: { locale: 'en' | 'th' }) {
                   <Link className="btn btn-primary" href={propertyHref}>
                     {locale === 'th' ? 'ดูรายละเอียด listing' : 'View listing details'}
                   </Link>
-                  <Link className="btn btn-tertiary" href={withLocale(locale, '/buy')}>
-                    {locale === 'th' ? 'ดู inventory เพิ่ม' : 'Browse more inventory'}
-                  </Link>
+                  <button
+                    type="button"
+                    className="btn btn-secondary"
+                    onClick={() => handleRemove(item.property_id)}
+                    disabled={pendingPropertyId === item.property_id}
+                  >
+                    {pendingPropertyId === item.property_id
+                      ? (locale === 'th' ? 'กำลังนำออก…' : 'Removing…')
+                      : (locale === 'th' ? 'นำออกจาก shortlist' : 'Remove from shortlist')}
+                  </button>
                 </div>
               </div>
             </article>
