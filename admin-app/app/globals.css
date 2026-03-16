@@ -2800,6 +2800,32 @@ summary.mobile-nav__trigger::-webkit-details-marker {
   gap: var(--space-4);
 }
 
+.shortlist-share-panel {
+  display: grid;
+  gap: var(--space-2);
+  padding: var(--space-4);
+  border-radius: var(--radius-lg);
+  border: 1px solid rgba(10, 77, 140, 0.12);
+  background: rgba(255, 255, 255, 0.9);
+  box-shadow: var(--shadow-card);
+}
+
+.shortlist-share-panel__label {
+  font-size: var(--font-sm);
+  font-weight: 600;
+  color: var(--color-text-secondary);
+}
+
+.shortlist-share-panel__input {
+  width: 100%;
+  min-height: 44px;
+  padding: 0 var(--space-3);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-gray-200);
+  background: var(--color-white);
+  color: var(--color-text);
+}
+
 .shortlist-item-card {
   display: grid;
   gap: var(--space-4);

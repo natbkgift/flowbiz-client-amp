@@ -7,7 +7,7 @@ import { useEffect, useState } from 'react';
 import { resolveImageUrl, formatPriceTHB } from '@/app/_lib/public-api-shared';
 import { withLocale } from '@/app/_lib/i18n/routing';
 import { EmptyStateCard, InlineStatusMessage, LoadingCardGrid } from '@/components/ui/StateBlocks';
-import { SHORTLIST_UPDATED_EVENT, fetchCurrentShortlist, readCachedShortlist, removePropertyFromShortlist, type ShortlistDetail, type ShortlistPropertyItem } from '@/lib/shortlist';
+import { SHORTLIST_UPDATED_EVENT, fetchCurrentShortlist, readCachedShortlist, removePropertyFromShortlist, shareCurrentShortlist, type ShortlistDetail, type ShortlistPropertyItem } from '@/lib/shortlist';
 
 const SHORTLIST_FALLBACK_IMAGE = '/images/property-placeholder.svg';
 
@@ -31,6 +31,9 @@ export function ShortlistListSurface({ locale }: { locale: 'en' | 'th' }) {
   const [items, setItems] = useState<ShortlistPropertyItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [pendingPropertyId, setPendingPropertyId] = useState<string | null>(null);
+  const [isSharing, setIsSharing] = useState(false);
+  const [shareUrl, setShareUrl] = useState<string | null>(null);
+  const [shareNotice, setShareNotice] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   function syncFromShortlist(shortlist: ShortlistDetail | null) {
@@ -97,6 +100,31 @@ export function ShortlistListSurface({ locale }: { locale: 'en' | 'th' }) {
     }
   }
 
+  async function handleShare() {
+    if (isSharing) return;
+
+    setIsSharing(true);
+    setError(null);
+    setShareNotice(null);
+
+    try {
+      const response = await shareCurrentShortlist(locale);
+      const nextShareUrl = `${window.location.origin}${withLocale(locale, `/shortlist/shared/${response.share_token}`)}`;
+      setShareUrl(nextShareUrl);
+
+      try {
+        await window.navigator.clipboard?.writeText(nextShareUrl);
+        setShareNotice(locale === 'th' ? 'คัดลอกลิงก์แชร์แล้ว' : 'Share link copied.');
+      } catch {
+        setShareNotice(locale === 'th' ? 'สร้างลิงก์แชร์แล้ว คัดลอกต่อได้ด้านล่าง' : 'Share link created. Copy it below.');
+      }
+    } catch {
+      setError(locale === 'th' ? 'สร้างลิงก์แชร์ shortlist ไม่สำเร็จ' : 'Unable to create a shortlist share link.');
+    } finally {
+      setIsSharing(false);
+    }
+  }
+
   if (isLoading) {
     return <LoadingCardGrid cards={3} />;
   }
@@ -132,6 +160,13 @@ export function ShortlistListSurface({ locale }: { locale: 'en' | 'th' }) {
             : `This shortlist currently contains ${items.length} listings for review, while remaining separate from contact handoff and CRM flows.`}
         </div>
         <div className="card-actions">
+          <button type="button" className="btn btn-primary" onClick={handleShare} disabled={isSharing}>
+            {isSharing
+              ? (locale === 'th' ? 'กำลังสร้างลิงก์แชร์…' : 'Creating share link…')
+              : shareUrl
+                ? (locale === 'th' ? 'คัดลอกลิงก์แชร์อีกครั้ง' : 'Copy share link again')
+                : (locale === 'th' ? 'สร้างลิงก์แชร์' : 'Create share link')}
+          </button>
           <Link className="btn btn-secondary" href={withLocale(locale, '/buy')}>
             {locale === 'th' ? 'ดู buy listings เพิ่ม' : 'Browse buy listings'}
           </Link>
@@ -140,6 +175,25 @@ export function ShortlistListSurface({ locale }: { locale: 'en' | 'th' }) {
           </Link>
         </div>
       </div>
+
+      {shareUrl ? (
+        <div className="shortlist-share-panel" aria-live="polite">
+          <label className="shortlist-share-panel__label" htmlFor="shortlist-share-link">
+            {locale === 'th' ? 'ลิงก์แชร์แบบ read-only' : 'Read-only share link'}
+          </label>
+          <input
+            id="shortlist-share-link"
+            className="shortlist-share-panel__input"
+            type="text"
+            value={shareUrl}
+            readOnly
+            onFocus={(event) => event.currentTarget.select()}
+          />
+          <p className="guided-dialog__step mt-2">
+            {shareNotice ?? (locale === 'th' ? 'ลิงก์นี้เปิด shortlist แบบดูอย่างเดียวและไม่เชื่อมเข้า CRM' : 'This link opens a read-only shortlist view and does not connect to CRM.')}
+          </p>
+        </div>
+      ) : null}
 
       <div className="shortlist-surface__items">
         {items.map((item, index) => {
