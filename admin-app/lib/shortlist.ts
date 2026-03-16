@@ -48,6 +48,29 @@ export type ShortlistMutationResponse = {
   shortlist: ShortlistDetail | null;
 };
 
+export type SharedShortlistDetail = {
+  id: string;
+  title: string | null;
+  intent: string | null;
+  share_mode: string | null;
+  created_at: string;
+  updated_at: string;
+  item_count: number;
+  items: ShortlistPropertyItem[];
+};
+
+export type ShortlistShareResponse = {
+  action: string;
+  share_token: string;
+  share_mode: string;
+  share_url: string;
+  shortlist: SharedShortlistDetail;
+};
+
+export type SharedShortlistResponse = {
+  shortlist: SharedShortlistDetail;
+};
+
 function safeWindow(): Window | null {
   return typeof window === 'undefined' ? null : window;
 }
@@ -170,4 +193,45 @@ export async function removePropertyFromShortlist(input: {
   const payload = (await response.json()) as ShortlistMutationResponse;
   publishShortlist(payload.shortlist ?? null);
   return payload;
+}
+
+export async function shareCurrentShortlist(locale: 'en' | 'th'): Promise<ShortlistShareResponse> {
+  const ownerKey = getOrCreateShortlistOwnerKey();
+  const params = new URLSearchParams({ locale });
+
+  const response = await fetch(`/api/v1/shortlists/current/share?${params.toString()}`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      owner_type: 'session',
+      owner_key: ownerKey,
+      share_mode: 'public_read',
+    }),
+  });
+
+  if (!response.ok) {
+    throw new Error(`Failed to share shortlist (${response.status})`);
+  }
+
+  return (await response.json()) as ShortlistShareResponse;
+}
+
+export async function fetchSharedShortlist(input: {
+  locale: 'en' | 'th';
+  shareToken: string;
+}): Promise<SharedShortlistResponse> {
+  const params = new URLSearchParams({ locale: input.locale });
+  const response = await fetch(
+    `/api/v1/shortlists/shared/${encodeURIComponent(input.shareToken)}?${params.toString()}`,
+    {
+      method: 'GET',
+      cache: 'no-store',
+    },
+  );
+
+  if (!response.ok) {
+    throw new Error(`Failed to load shared shortlist (${response.status})`);
+  }
+
+  return (await response.json()) as SharedShortlistResponse;
 }

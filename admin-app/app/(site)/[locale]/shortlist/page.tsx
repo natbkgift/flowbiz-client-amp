@@ -43,8 +43,8 @@ export default async function ShortlistPage(props: { params: Promise<{ locale: s
           <h1 className="headline">{locale === 'th' ? 'Shortlist ของคุณ' : 'Your shortlist'}</h1>
           <p className="subhead">
             {locale === 'th'
-              ? 'นี่คือ shortlist review surface ของ Slice 2 สำหรับทบทวนลำดับรายการที่บันทึกไว้ โดยยังไม่เปิด share หรือ remove workflow เต็มรูปแบบ'
-              : 'This Slice 2 shortlist review surface lets you review saved listings in order without opening share or full remove workflows yet.'}
+              ? 'ทบทวน shortlist, นำรายการออกเมื่อไม่ต้องการแล้ว, และสร้างลิงก์แชร์แบบ read-only ได้จาก surface นี้โดยไม่แตะ CRM หรือ flow การติดต่อ'
+              : 'Review your shortlist, remove listings when needed, and create a read-only share link from this surface without touching CRM or contact flows.'}
           </p>
         </Container>
       </section>
