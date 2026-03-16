@@ -7,6 +7,13 @@ const SHORTLIST_CACHE_KEY = 'amp_shortlist_cache_v1';
 
 export const SHORTLIST_UPDATED_EVENT = 'amp:shortlist-updated';
 
+export type ShortlistOwnerType = 'session' | 'user';
+
+export type ShortlistOwnerReference = {
+  ownerType: ShortlistOwnerType;
+  ownerKey: string;
+};
+
 export type ShortlistPropertyItem = {
   property_id: string;
   slug: string | null;
@@ -27,7 +34,7 @@ export type ShortlistPropertyItem = {
 
 export type ShortlistDetail = {
   id: string;
-  owner_type: string;
+  owner_type: ShortlistOwnerType;
   owner_key: string;
   status: string;
   title: string | null;
@@ -83,6 +90,77 @@ function safeWindow(): Window | null {
   return typeof window === 'undefined' ? null : window;
 }
 
+function isValidShortlistOwnerType(value: unknown): value is ShortlistOwnerType {
+  return value === 'session' || value === 'user';
+}
+
+function normalizeShortlistOwnerReference(value: unknown): ShortlistOwnerReference | null {
+  if (!value || typeof value !== 'object') {
+    return null;
+  }
+
+  const candidate = value as {
+    ownerType?: unknown;
+    ownerKey?: unknown;
+    owner_type?: unknown;
+    owner_key?: unknown;
+  };
+
+  const ownerType = candidate.ownerType ?? candidate.owner_type;
+  const ownerKey = candidate.ownerKey ?? candidate.owner_key;
+
+  if (!isValidShortlistOwnerType(ownerType)) {
+    return null;
+  }
+
+  if (typeof ownerKey !== 'string' || ownerKey.trim().length < 8) {
+    return null;
+  }
+
+  return {
+    ownerType,
+    ownerKey: ownerKey.trim(),
+  };
+}
+
+function persistShortlistOwnerReference(reference: ShortlistOwnerReference): void {
+  const w = safeWindow();
+  if (!w) return;
+
+  try {
+    w.localStorage.setItem(
+      SHORTLIST_OWNER_KEY,
+      JSON.stringify({
+        owner_type: reference.ownerType,
+        owner_key: reference.ownerKey,
+      }),
+    );
+  } catch {
+    // Ignore storage failures and preserve current runtime behavior.
+  }
+}
+
+export function readStoredShortlistOwnerReference(): ShortlistOwnerReference | null {
+  const w = safeWindow();
+  if (!w) return null;
+
+  try {
+    const raw = w.localStorage.getItem(SHORTLIST_OWNER_KEY);
+    if (!raw) return null;
+
+    const normalizedLegacy = raw.trim();
+    if (normalizedLegacy && !normalizedLegacy.startsWith('{')) {
+      return normalizedLegacy.length >= 8
+        ? { ownerType: 'session', ownerKey: normalizedLegacy }
+        : null;
+    }
+
+    return normalizeShortlistOwnerReference(JSON.parse(raw));
+  } catch {
+    return null;
+  }
+}
+
 export function readCachedShortlist(): ShortlistDetail | null {
   const w = safeWindow();
   if (!w) return null;
@@ -113,27 +191,36 @@ export function publishShortlist(shortlist: ShortlistDetail | null): void {
   w.dispatchEvent(new CustomEvent(SHORTLIST_UPDATED_EVENT, { detail: shortlist }));
 }
 
-export function getOrCreateShortlistOwnerKey(): string {
+export function getOrCreateShortlistOwnerReference(): ShortlistOwnerReference {
   const w = safeWindow();
-  if (!w) return 'server';
+  if (!w) {
+    return { ownerType: 'session', ownerKey: 'server' };
+  }
 
   try {
-    const existing = w.localStorage.getItem(SHORTLIST_OWNER_KEY);
-    if (existing && existing.length >= 8) return existing;
+    const existing = readStoredShortlistOwnerReference();
+    if (existing) {
+      persistShortlistOwnerReference(existing);
+      return existing;
+    }
 
     const next = w.crypto?.randomUUID?.() ?? `shortlist-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
-    w.localStorage.setItem(SHORTLIST_OWNER_KEY, next);
-    return next;
+    const reference = {
+      ownerType: 'session' as const,
+      ownerKey: next,
+    };
+    persistShortlistOwnerReference(reference);
+    return reference;
   } catch {
-    return 'unknown';
+    return { ownerType: 'session', ownerKey: 'unknown' };
   }
 }
 
 export async function fetchCurrentShortlist(locale: 'en' | 'th'): Promise<ShortlistResponse> {
-  const ownerKey = getOrCreateShortlistOwnerKey();
+  const ownerReference = getOrCreateShortlistOwnerReference();
   const params = new URLSearchParams({
-    owner_type: 'session',
-    owner_key: ownerKey,
+    owner_type: ownerReference.ownerType,
+    owner_key: ownerReference.ownerKey,
     locale,
   });
 
@@ -156,15 +243,15 @@ export async function savePropertyToShortlist(input: {
   propertyId: string;
   sourceSurface: string;
 }): Promise<ShortlistMutationResponse> {
-  const ownerKey = getOrCreateShortlistOwnerKey();
+  const ownerReference = getOrCreateShortlistOwnerReference();
   const params = new URLSearchParams({ locale: input.locale });
 
   const response = await fetch(`/api/v1/shortlists/current/items?${params.toString()}`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
-      owner_type: 'session',
-      owner_key: ownerKey,
+      owner_type: ownerReference.ownerType,
+      owner_key: ownerReference.ownerKey,
       property_id: input.propertyId,
       source_surface: input.sourceSurface,
     }),
@@ -183,10 +270,10 @@ export async function removePropertyFromShortlist(input: {
   locale: 'en' | 'th';
   propertyId: string;
 }): Promise<ShortlistMutationResponse> {
-  const ownerKey = getOrCreateShortlistOwnerKey();
+  const ownerReference = getOrCreateShortlistOwnerReference();
   const params = new URLSearchParams({
-    owner_type: 'session',
-    owner_key: ownerKey,
+    owner_type: ownerReference.ownerType,
+    owner_key: ownerReference.ownerKey,
     locale: input.locale,
   });
 
@@ -204,15 +291,15 @@ export async function removePropertyFromShortlist(input: {
 }
 
 export async function shareCurrentShortlist(locale: 'en' | 'th'): Promise<ShortlistShareResponse> {
-  const ownerKey = getOrCreateShortlistOwnerKey();
+  const ownerReference = getOrCreateShortlistOwnerReference();
   const params = new URLSearchParams({ locale });
 
   const response = await fetch(`/api/v1/shortlists/current/share?${params.toString()}`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
-      owner_type: 'session',
-      owner_key: ownerKey,
+      owner_type: ownerReference.ownerType,
+      owner_key: ownerReference.ownerKey,
       share_mode: 'public_read',
     }),
   });

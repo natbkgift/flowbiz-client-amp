@@ -57,6 +57,12 @@ describe('Shortlist share flow', () => {
       .mockImplementationOnce(async () => ({
         ok: true,
         json: async () => ({
+          project_id: 'project-1',
+        }),
+      }))
+      .mockImplementationOnce(async () => ({
+        ok: true,
+        json: async () => ({
           action: 'shared',
           share_token: 'token-123',
           share_mode: 'public_read',
