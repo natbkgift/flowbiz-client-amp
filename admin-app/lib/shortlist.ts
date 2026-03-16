@@ -92,6 +92,28 @@ export type ShortlistMetadataInput = {
   sourceContext?: Record<string, unknown> | null;
 };
 
+export type ShortlistPromotionPreparationStatus = 'ready' | 'blocked';
+
+export type ShortlistPromotionPreparationReason =
+  | 'missing_current_owner'
+  | 'missing_current_shortlist'
+  | 'current_owner_not_session'
+  | 'invalid_target_owner'
+  | 'target_matches_current_owner'
+  | null;
+
+export type ShortlistPromotionPreparation = {
+  status: ShortlistPromotionPreparationStatus;
+  reason: ShortlistPromotionPreparationReason;
+  currentOwner: ShortlistOwnerReference | null;
+  targetOwner: ShortlistOwnerReference | null;
+  shortlistId: string | null;
+  itemCount: number;
+  title: string | null;
+  intent: string | null;
+  sourceContext: Record<string, unknown> | null;
+};
+
 function safeWindow(): Window | null {
   return typeof window === 'undefined' ? null : window;
 }
@@ -347,6 +369,103 @@ export function getOrCreateShortlistOwnerReference(): ShortlistOwnerReference {
   } catch {
     return { ownerType: 'session', ownerKey: 'unknown' };
   }
+}
+
+export function prepareShortlistOwnerPromotion(
+  targetOwnerKey: string,
+): ShortlistPromotionPreparation {
+  const currentOwner = readStoredShortlistOwnerReference();
+  if (!currentOwner) {
+    return {
+      status: 'blocked',
+      reason: 'missing_current_owner',
+      currentOwner: null,
+      targetOwner: null,
+      shortlistId: null,
+      itemCount: 0,
+      title: null,
+      intent: null,
+      sourceContext: null,
+    };
+  }
+
+  const normalizedTargetOwnerKey = normalizeShortlistText(targetOwnerKey);
+  if (!normalizedTargetOwnerKey || normalizedTargetOwnerKey.length < 8) {
+    return {
+      status: 'blocked',
+      reason: 'invalid_target_owner',
+      currentOwner,
+      targetOwner: null,
+      shortlistId: null,
+      itemCount: 0,
+      title: null,
+      intent: null,
+      sourceContext: null,
+    };
+  }
+
+  const targetOwner: ShortlistOwnerReference = {
+    ownerType: 'user',
+    ownerKey: normalizedTargetOwnerKey,
+  };
+
+  if (
+    currentOwner.ownerType === targetOwner.ownerType &&
+    currentOwner.ownerKey === targetOwner.ownerKey
+  ) {
+    return {
+      status: 'blocked',
+      reason: 'target_matches_current_owner',
+      currentOwner,
+      targetOwner,
+      shortlistId: null,
+      itemCount: 0,
+      title: null,
+      intent: null,
+      sourceContext: null,
+    };
+  }
+
+  if (currentOwner.ownerType !== 'session') {
+    return {
+      status: 'blocked',
+      reason: 'current_owner_not_session',
+      currentOwner,
+      targetOwner,
+      shortlistId: null,
+      itemCount: 0,
+      title: null,
+      intent: null,
+      sourceContext: null,
+    };
+  }
+
+  const shortlist = readCachedShortlistForCurrentOwner();
+  if (!shortlist) {
+    return {
+      status: 'blocked',
+      reason: 'missing_current_shortlist',
+      currentOwner,
+      targetOwner,
+      shortlistId: null,
+      itemCount: 0,
+      title: null,
+      intent: null,
+      sourceContext: null,
+    };
+  }
+
+  return {
+    status: 'ready',
+    reason: null,
+    currentOwner,
+    targetOwner,
+    shortlistId: shortlist.id,
+    itemCount: shortlist.item_count,
+    title: shortlist.title,
+    intent: shortlist.intent,
+    sourceContext: shortlist.source_context,
+  };
 }
 
 export async function fetchCurrentShortlist(locale: 'en' | 'th'): Promise<ShortlistResponse> {
