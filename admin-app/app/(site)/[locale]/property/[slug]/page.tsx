@@ -16,6 +16,7 @@ import { getDictionary, normalizeLocale } from '@/app/_lib/i18n/get-dictionary';
 import { ogLocale, withLocale } from '@/app/_lib/i18n/routing';
 import { getInternalLinks } from '@/app/_lib/internal-links';
 import { PublicAdvisoryHero } from '@/components/public/PublicAdvisoryHero';
+import { ShortlistSaveButton } from '@/components/shortlist/ShortlistSaveButton';
 
 export const revalidate = 300;
 
@@ -421,6 +422,13 @@ export default async function PropertyPage(props: PageProps) {
               >
                 {dict.cta.speakToAdvisor}
               </TrackedLink>
+              <ShortlistSaveButton
+                className="btn btn-secondary"
+                locale={locale}
+                propertyId={property.id}
+                sourceSurface="property_detail"
+                readOnMount
+              />
               <a className="btn btn-secondary" href={buildAdvisorWhatsApp(locale, dict)} target="_blank" rel="noreferrer">
                 {dict.cta.whatsapp}
               </a>

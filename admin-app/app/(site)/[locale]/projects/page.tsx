@@ -144,6 +144,17 @@ export default async function ProjectsPage(props: { params: Promise<{ locale: st
             <p className="section-subtitle">{dict.listing.publishedProjects}</p>
           </div>
 
+          <div className="cta-strip mb-6">
+            <div className="cta-strip__text">
+              {locale === 'th'
+                ? 'หากต้องการเริ่ม shortlist ในระดับยูนิต ให้ไปต่อยัง listings ที่ผูกกับ property-based shortlist ได้โดยตรง'
+                : 'If you need to begin the shortlist at unit level, move next into listings that map directly to the property-based shortlist owner.'}
+            </div>
+            <Link className="btn btn-secondary" href={withLocale(locale, '/buy')}>
+              {locale === 'th' ? 'ดู listings ที่ save เข้า shortlist ได้' : 'Browse shortlist-ready listings'}
+            </Link>
+          </div>
+
           <div className="grid grid-3">
             {sorted.map((p) => (
               <article key={p.id} className="card catalogue-card">

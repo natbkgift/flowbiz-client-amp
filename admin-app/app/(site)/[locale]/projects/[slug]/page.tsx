@@ -440,6 +440,14 @@ export default async function ProjectDetailPage(
                     </div>
                   ))}
                 </div>
+                <div className="card-actions mt-3">
+                  <Link className="btn btn-secondary" href={withLocale(locale, '/buy')}>
+                    {locale === 'th' ? 'ดู listings ที่ save เข้า shortlist ได้' : 'Browse shortlist-ready listings'}
+                  </Link>
+                  <Link className="btn btn-tertiary" href={withLocale(locale, '/compare')}>
+                    {dict.advisory.compareOpportunities}
+                  </Link>
+                </div>
               </div>
 
               <div className="authority-card">
