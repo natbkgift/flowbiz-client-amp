@@ -273,3 +273,25 @@ def test_a4_project_detail_th_fallback_and_gallery_hotlink_guard(client) -> None
             assert _is_allowed_media(candidate, host=host), (
                 f"Disallowed media URL in A4 runtime HTML: {candidate}"
             )
+
+
+def test_a4_project_detail_hero_cta_hierarchy_keeps_compare_without_whatsapp(client) -> None:
+    seeded = _seed_a4_detail_fixture()
+
+    response = client.get(f"/en/projects/{seeded['main_project_slug']}")
+    assert response.status_code == 200, response.text
+    html = response.text
+
+    consultation_href = f'/en/contact?intent=consultation&project={seeded["main_project_slug"]}'
+    viewing_href = f'/en/contact?intent=viewing&project={seeded["main_project_slug"]}'
+
+    assert consultation_href in html
+    assert viewing_href in html
+    assert 'Request Consultation' in html
+    assert 'Book Viewing' in html
+    assert 'WhatsApp' not in html
+
+    consultation_index = html.index(consultation_href)
+    viewing_index = html.index(viewing_href)
+    gallery_index = html.index('id="project-gallery"')
+    assert consultation_index < viewing_index < gallery_index
