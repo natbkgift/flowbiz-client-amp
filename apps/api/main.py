@@ -101,6 +101,8 @@ def platform_version() -> dict:
         "build_sha": telemetry.get("build_sha") if telemetry else os.getenv("FLOWBIZ_BUILD_SHA"),
         "target_sha": telemetry.get("target_sha") if telemetry else None,
         "source": telemetry.get("source") if telemetry else "runtime",
+        "validation_mode": telemetry.get("validation_mode") if telemetry else None,
+        "active_repo": telemetry.get("active_repo") if telemetry else None,
         "runtime": "api",
     }
 

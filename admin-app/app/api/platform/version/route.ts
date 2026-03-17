@@ -10,6 +10,15 @@ type DeployTelemetry = {
   build_sha?: string | null;
   target_sha?: string | null;
   source?: string | null;
+  validation_mode?: string | null;
+  active_repo?: {
+    sync_status?: string | null;
+    sync_detail?: string | null;
+    sha?: string | null;
+    branch?: string | null;
+    upstream?: string | null;
+    aligned?: boolean | null;
+  } | null;
 };
 
 const DEFAULT_TELEMETRY_PATH = '/app/ops/logs/deploy_telemetry.json';
@@ -25,6 +34,8 @@ function buildVersionPayload(telemetry: DeployTelemetry | null) {
       telemetry?.build_sha ?? process.env.FLOWBIZ_BUILD_SHA ?? process.env.BUILD_SHA ?? null,
     target_sha: telemetry?.target_sha ?? process.env.FLOWBIZ_TARGET_SHA ?? null,
     source: telemetry?.source ?? 'runtime',
+    validation_mode: telemetry?.validation_mode ?? null,
+    active_repo: telemetry?.active_repo ?? null,
     node_env: process.env.NODE_ENV ?? 'unknown',
   };
 }

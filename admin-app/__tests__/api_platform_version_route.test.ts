@@ -34,6 +34,14 @@ describe('/api/platform/version route', () => {
         build_sha: 'abc1234',
         target_sha: 'abcdef1234567890',
         source: 'tests',
+        validation_mode: 'owner-aligned',
+        active_repo: {
+          sync_status: 'ok',
+          sha: 'abcdef1234567890',
+          branch: 'main',
+          upstream: 'origin/main',
+          aligned: true,
+        },
       }),
       'utf-8',
     );
@@ -52,6 +60,14 @@ describe('/api/platform/version route', () => {
       build_sha: 'abc1234',
       target_sha: 'abcdef1234567890',
       source: 'tests',
+      validation_mode: 'owner-aligned',
+      active_repo: {
+        sync_status: 'ok',
+        sha: 'abcdef1234567890',
+        branch: 'main',
+        upstream: 'origin/main',
+        aligned: true,
+      },
     });
   });
 

@@ -127,6 +127,65 @@ export TELEMETRY_DEPLOYED_AT
 TELEMETRY_DEPLOYED_AT="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
 export TELEMETRY_SOURCE="scripts/deploy_prod.ps1"
 export VPS_ADMIN_PORT
+export ACTIVE_REPO_SYNC_STATUS="unknown"
+export ACTIVE_REPO_SYNC_DETAIL=""
+export ACTIVE_REPO_SHA=""
+export ACTIVE_REPO_BRANCH=""
+export ACTIVE_REPO_UPSTREAM=""
+export ACTIVE_REPO_ALIGNED="false"
+
+if [[ -d "$VPS_ACTIVE_PATH/.git" ]]; then
+  ACTIVE_REPO_BRANCH="$(git -C "$VPS_ACTIVE_PATH" branch --show-current 2>/dev/null || true)"
+  ACTIVE_REPO_SHA="$(git -C "$VPS_ACTIVE_PATH" rev-parse HEAD 2>/dev/null || true)"
+
+  tracked_dirty="$(git -C "$VPS_ACTIVE_PATH" status --porcelain --untracked-files=no 2>/dev/null || true)"
+  if [[ -n "$tracked_dirty" ]]; then
+    ACTIVE_REPO_SYNC_STATUS="skipped"
+    ACTIVE_REPO_SYNC_DETAIL="Active repo has tracked local changes; skipped fast-forward sync."
+  elif [[ -z "$ACTIVE_REPO_BRANCH" ]]; then
+    ACTIVE_REPO_SYNC_STATUS="skipped"
+    ACTIVE_REPO_SYNC_DETAIL="Active repo is not on a named branch; skipped fast-forward sync."
+  else
+    if git -C "$VPS_ACTIVE_PATH" fetch origin main --quiet; then
+      if git -C "$VPS_ACTIVE_PATH" checkout main >/dev/null 2>&1; then
+        if git -C "$VPS_ACTIVE_PATH" merge --ff-only "$TARGET_SHA" >/dev/null 2>&1; then
+          ACTIVE_REPO_SYNC_STATUS="ok"
+          ACTIVE_REPO_SYNC_DETAIL="Active repo fast-forwarded to deployed target SHA."
+          if ! git -C "$VPS_ACTIVE_PATH" rev-parse --abbrev-ref --symbolic-full-name @{u} >/dev/null 2>&1; then
+            git -C "$VPS_ACTIVE_PATH" branch --set-upstream-to=origin/main main >/dev/null 2>&1 || true
+          fi
+        else
+          ACTIVE_REPO_SYNC_STATUS="error"
+          ACTIVE_REPO_SYNC_DETAIL="Active repo could not fast-forward to deployed target SHA."
+        fi
+      else
+        ACTIVE_REPO_SYNC_STATUS="error"
+        ACTIVE_REPO_SYNC_DETAIL="Active repo could not switch to branch main."
+      fi
+    else
+      ACTIVE_REPO_SYNC_STATUS="error"
+      ACTIVE_REPO_SYNC_DETAIL="Active repo could not fetch origin/main."
+    fi
+  fi
+
+  ACTIVE_REPO_SHA="$(git -C "$VPS_ACTIVE_PATH" rev-parse HEAD 2>/dev/null || true)"
+  ACTIVE_REPO_BRANCH="$(git -C "$VPS_ACTIVE_PATH" branch --show-current 2>/dev/null || true)"
+  ACTIVE_REPO_UPSTREAM="$(git -C "$VPS_ACTIVE_PATH" rev-parse --abbrev-ref --symbolic-full-name @{u} 2>/dev/null || true)"
+  if [[ "$ACTIVE_REPO_SHA" == "$TARGET_SHA" ]]; then
+    ACTIVE_REPO_ALIGNED="true"
+  fi
+else
+  ACTIVE_REPO_SYNC_STATUS="missing"
+  ACTIVE_REPO_SYNC_DETAIL="Active repo path is not a git repository."
+fi
+
+export ACTIVE_REPO_SYNC_STATUS
+export ACTIVE_REPO_SYNC_DETAIL
+export ACTIVE_REPO_SHA
+export ACTIVE_REPO_BRANCH
+export ACTIVE_REPO_UPSTREAM
+export ACTIVE_REPO_ALIGNED
+
 python - <<'PY'
 import json
 import os
@@ -235,6 +294,15 @@ payload = {
   "target_sha": os.environ.get("TARGET_SHA"),
   "release_path": os.environ.get("release_path"),
   "source": os.environ.get("TELEMETRY_SOURCE"),
+  "validation_mode": "owner-aligned",
+  "active_repo": {
+    "sync_status": os.environ.get("ACTIVE_REPO_SYNC_STATUS"),
+    "sync_detail": os.environ.get("ACTIVE_REPO_SYNC_DETAIL"),
+    "sha": os.environ.get("ACTIVE_REPO_SHA") or None,
+    "branch": os.environ.get("ACTIVE_REPO_BRANCH") or None,
+    "upstream": os.environ.get("ACTIVE_REPO_UPSTREAM") or None,
+    "aligned": os.environ.get("ACTIVE_REPO_ALIGNED") == "true",
+  },
   "smoke": {
     "validation_mode": "owner-aligned",
     "results": results,

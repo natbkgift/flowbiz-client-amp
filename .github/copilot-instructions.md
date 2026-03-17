@@ -9,7 +9,8 @@ This repository is production-critical for `amppattaya.com`.
 - Frontend tests live under `admin-app/__tests__`; backend tests live under root `tests/`.
 
 ## Branch and PR Rules
-- Create feature branches from `main`.
+- Default to feature branches from `main` for PR-scoped work.
+- Direct commits, pushes, or deploys on `main` are allowed only when the operator explicitly authorizes review/merge-prep, hotfix, or deployment work.
 - Keep PRs small and scoped to a single objective.
 - Never commit secrets, tokens, or environment values.
 

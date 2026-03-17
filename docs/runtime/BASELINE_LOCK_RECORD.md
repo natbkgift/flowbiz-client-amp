@@ -40,3 +40,10 @@
 ## Lock decision
 
 platform baseline v1 ถูก lock แล้วโดยใช้ commit `867ea119e174a1321b03c614deb91b5ddfc6da1b` เป็น governance anchor บน `main` และใช้ runtime SHA `6fb5897897518dcc9ecd6f647dad34da8b610e26` เป็น deployed reference baseline ที่ผ่าน parity closure แล้ว
+
+## Post-deploy update
+
+1. หลังจาก baseline lock ถูกบันทึก มี production deploy ใหม่ที่ target SHA `0691127fac26bd40d1792fc09836feeee18334a9`
+2. governance anchor ของ baseline lock ยังเป็น `867ea119e174a1321b03c614deb91b5ddfc6da1b` ตามเดิม และไม่ได้ถูกแทนที่ด้วย runtime SHA ใหม่นี้
+3. ตั้งแต่รอบ deploy นี้ไป ค่า live runtime ที่ระบบ automation ควรใช้ตรวจสถานะปัจจุบันคือ telemetry `target_sha = 0691127fac26bd40d1792fc09836feeee18334a9`
+4. deploy telemetry รอบใหม่ยังยืนยัน `validation_mode = owner-aligned` และมีข้อมูล `active_repo` เพื่อกัน repo/runtime drift บน VPS

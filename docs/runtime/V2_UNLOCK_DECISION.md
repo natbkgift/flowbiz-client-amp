@@ -28,6 +28,13 @@ parity blocker ตัวสุดท้ายถูกปิดแล้ว, PR 
 
 production และ preview ยังมี proxy topology ต่างกันสำหรับบาง `/api/*` endpoints แต่ความต่างนี้ถูก trace และจัดประเภทแล้วว่าไม่ใช่ blocker ของ parity closure ใน scope นี้ เพราะ owner ที่ intended ถูกพิสูจน์และถูกใช้ใน gate/telemetry แล้ว
 
+## Post-deploy note
+
+1. หลัง unlock decision นี้ มี production deploy ใหม่ที่ target SHA `0691127fac26bd40d1792fc09836feeee18334a9`
+2. unlock decision ยังอ้าง baseline lock เดิมเป็นข้อจำกัดบังคับ แต่ automation ไม่ควรตีความว่า live runtime ยังต้องค้างอยู่ที่ SHA `6fb5897897518dcc9ecd6f647dad34da8b610e26`
+3. ตั้งแต่รอบนี้เป็นต้นไป การตรวจสถานะ production ควรยึดค่าจาก `deploy_telemetry.json` และ `/api/platform/version` เป็นแหล่งจริงของ runtime current state
+4. deploy telemetry ถูกขยายให้บันทึก `validation_mode` และ `active_repo` เพื่อให้ตรวจ drift ระหว่าง VPS checkout กับ deployed target ได้โดยไม่ต้องอาศัยคำสั่งมือ
+
 งาน V2 ที่เริ่มหลังจากนี้ต้องถือ baseline lock เป็นข้อจำกัดบังคับ ไม่ใช่อนุญาตให้เปลี่ยน public contract เดิมโดยไม่มี change control
 
 ## ผลสรุป
