@@ -56,6 +56,12 @@ describe('blog article shell', () => {
     expect(markup).toContain('blog-next-step-links');
     expect(markup).toContain('ส่งบรีฟให้ที่ปรึกษา');
     expect(markup).toContain('แปลงบทความเป็นแผนต่อ');
+    expect(markup).toContain('อ่านมุมมองการลงทุนต่อ');
+    expect(markup).toContain('คู่มือทำเล');
+    expect(markup).toContain('ขั้นตอนถัดไป');
     expect(markup).not.toContain('btn btn-tertiary');
+    expect(markup).not.toContain('area guide');
+    expect(markup).not.toContain('micro-location');
+    expect(markup).not.toContain('next step');
   });
 });

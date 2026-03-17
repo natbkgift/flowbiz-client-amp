@@ -122,18 +122,18 @@ export default async function BlogArticlePage(
   const nextStepLinks = [
     {
       href: withLocale(locale, '/investment'),
-      title: locale === 'th' ? 'อ่านมุมมองฝั่งลงทุนต่อ' : 'Continue into investment guidance',
-      body: locale === 'th' ? 'ใช้บทความนี้เป็นบริบท แล้วต่อไปยังหน้า investment เพื่อดูกรอบการคัดสินทรัพย์' : 'Use this article as context, then continue into the investment page for a clearer shortlist framework.',
+      title: locale === 'th' ? 'อ่านมุมมองการลงทุนต่อ' : 'Continue into investment guidance',
+      body: locale === 'th' ? 'ใช้บทความนี้เป็นบริบท แล้วต่อไปยังหน้ามุมมองการลงทุนเพื่อดูกรอบการคัดสินทรัพย์' : 'Use this article as context, then continue into the investment page for a clearer shortlist framework.',
     },
     {
       href: withLocale(locale, '/area-guide'),
-      title: locale === 'th' ? 'ลงลึกต่อที่ area guide' : 'Drill deeper with area guides',
-      body: locale === 'th' ? 'ถ้าประเด็นนี้ผูกกับทำเล ให้ไปต่อที่ area guide เพื่อดูภาพ micro-location' : 'If this topic is location-sensitive, move into the area guides to compare Pattaya zones with more context.',
+      title: locale === 'th' ? 'ลงลึกต่อที่คู่มือทำเล' : 'Drill deeper with area guides',
+      body: locale === 'th' ? 'ถ้าประเด็นนี้ผูกกับทำเล ให้ไปต่อที่คู่มือทำเลเพื่อดูภาพระดับย่อยของพื้นที่' : 'If this topic is location-sensitive, move into the area guides to compare Pattaya zones with more context.',
     },
     {
       href: withLocaleQuery(locale, '/contact', { intent: 'content_consultation', article: post.slug }),
       title: locale === 'th' ? 'ส่งบรีฟให้ที่ปรึกษา' : 'Send the brief to an advisor',
-      body: locale === 'th' ? 'แปลงสิ่งที่อ่านเป็น shortlist โดยส่งงบ จุดประสงค์ และทำเลที่กำลังพิจารณา' : 'Turn the article into a shortlist conversation by sharing your budget, purpose, and preferred area.',
+      body: locale === 'th' ? 'แปลงสิ่งที่อ่านเป็นรายการคัดไว้ โดยส่งงบ จุดประสงค์ และทำเลที่กำลังพิจารณา' : 'Turn the article into a shortlist conversation by sharing your budget, purpose, and preferred area.',
     },
   ];
 
@@ -165,9 +165,9 @@ export default async function BlogArticlePage(
           },
           {
             kicker: locale === 'th' ? 'จังหวะถัดไป' : 'Next move',
-            title: locale === 'th' ? 'ต่อไปยัง shortlist หรือ contact' : 'Continue into shortlist or advisor contact',
+            title: locale === 'th' ? 'ต่อไปยังรายการคัดไว้หรือหน้าติดต่อ' : 'Continue into shortlist or advisor contact',
             body: locale === 'th'
-              ? 'หากเนื้อหานี้ตรงโจทย์ ให้ส่ง brief ของคุณเพื่อให้ทีมคัดรายการที่เหมาะสม'
+              ? 'หากเนื้อหานี้ตรงโจทย์ ให้ส่งบรีฟของคุณเพื่อให้ทีมคัดรายการที่เหมาะสม'
               : 'If this topic matches your brief, send your requirements and let the team translate it into a tighter shortlist.',
             icon: 'shield',
           },
@@ -260,7 +260,7 @@ export default async function BlogArticlePage(
                 <h2 className="card-title">{locale === 'th' ? 'แปลงบทความเป็นแผนต่อ' : 'Turn the article into a next-step brief'}</h2>
                 <p className="card-subtitle">
                   {locale === 'th'
-                    ? 'ส่งงบ วัตถุประสงค์ และทำเลที่สนใจ แล้วทีมจะสรุป next step ให้ตรงขึ้น'
+                    ? 'ส่งงบ วัตถุประสงค์ และทำเลที่สนใจ แล้วทีมจะสรุปขั้นตอนถัดไปให้ตรงขึ้น'
                     : 'Send your budget, purpose, and preferred area so the team can turn this topic into a concrete next step.'}
                 </p>
               </div>

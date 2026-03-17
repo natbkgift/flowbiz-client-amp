@@ -192,7 +192,7 @@ export default async function AreaPage(
       ? locale === 'th' ? `ราคาเฉลี่ยในระบบอยู่ที่ ${stats.statistics.avg_price}` : `Average pricing in the current snapshot reads ${stats.statistics.avg_price}.`
       : null,
     stats?.statistics?.avg_rent
-      ? locale === 'th' ? `ค่าเช่าเฉลี่ยใน snapshot คือ ${stats.statistics.avg_rent}` : `Average rent in the snapshot reads ${stats.statistics.avg_rent}.`
+      ? locale === 'th' ? `ค่าเช่าเฉลี่ยในข้อมูลล่าสุดคือ ${stats.statistics.avg_rent}` : `Average rent in the snapshot reads ${stats.statistics.avg_rent}.`
       : null,
     stats?.statistics?.as_of
       ? locale === 'th' ? `อัปเดตข้อมูลล่าสุด ${stats.statistics.as_of}` : `Snapshot updated ${stats.statistics.as_of}.`
@@ -220,7 +220,7 @@ export default async function AreaPage(
             kicker: dict.advisory.bestFor,
             title: locale === 'th' ? 'เริ่มจากพื้นที่ก่อนเลือกโครงการ' : 'Start from the area before choosing projects',
             body: locale === 'th'
-              ? 'หน้านี้ช่วยให้คุณอ่าน snapshot ของทำเล, buyer fit, และทางเลือกถัดไปก่อนเข้าสู่ shortlist'
+              ? 'หน้านี้ช่วยให้คุณอ่านภาพรวมของทำเล ความเหมาะกับผู้ซื้อ และทางเลือกถัดไปก่อนเข้าสู่รายการคัดไว้'
               : 'This page helps you read the area snapshot, buyer fit, and next decision path before moving into shortlist mode.',
             icon: 'building',
           },
@@ -235,14 +235,14 @@ export default async function AreaPage(
           {
             kicker: dict.advisory.trustSignal,
             title: hasStats
-              ? locale === 'th' ? 'snapshot นี้มีข้อมูลจริงของพื้นที่' : 'This snapshot includes live area signals'
-              : locale === 'th' ? 'ใช้หน้านี้เป็น location brief ของพื้นที่นี้' : 'Use this page as the location brief for this area',
+              ? locale === 'th' ? 'ข้อมูลชุดนี้มีตัวเลขจริงของพื้นที่' : 'This snapshot includes live area signals'
+              : locale === 'th' ? 'ใช้หน้านี้เป็นสรุปทำเลของพื้นที่นี้' : 'Use this page as the location brief for this area',
             body: hasStats
               ? locale === 'th'
                 ? 'ระบบแสดงตัวเลขที่ดึงได้จากข้อมูลจริงของพื้นที่นี้เท่านั้น'
                 : 'The page only surfaces area signals that can be grounded in real system data.'
               : locale === 'th'
-                ? 'หน้านี้ยังคงพาคุณต่อไปยัง buyer fit, inventory และ advisor routing ได้แบบไม่เสียบริบท'
+                ? 'หน้านี้ยังคงพาคุณต่อไปยังความเหมาะกับผู้ซื้อ รายการโครงการ และเส้นทางคุยกับที่ปรึกษาได้แบบไม่เสียบริบท'
                 : 'The page keeps the area story, buyer fit, and next advisory route clear without losing context.',
             icon: 'shield',
           },
@@ -330,7 +330,7 @@ export default async function AreaPage(
                     <div className="insight-list__item">
                       <span className="insight-list__body">
                         {locale === 'th'
-                          ? 'ใช้หน้านี้เพื่อกรองพื้นที่ที่เหมาะก่อนค่อยไปลงระดับโครงการหรือยูนิต'
+                          ? 'ใช้หน้านี้เพื่อกรองพื้นที่ที่เหมาะก่อนค่อยไปดูรายละเอียดระดับโครงการหรือยูนิต'
                           : 'Use this page to narrow the right zone first, then move into projects or unit-level options.'}
                       </span>
                     </div>
@@ -348,7 +348,7 @@ export default async function AreaPage(
                     )) : (
                       <Link href={withLocale(locale, '/blog')} className="insight-list__item">
                         <span className="insight-list__title">{locale === 'th' ? 'ดูบทความล่าสุดทั้งหมด' : 'See all latest articles'}</span>
-                        <span className="insight-list__body">{locale === 'th' ? 'ไปต่อยังคลังบทความเพื่ออ่านบริบทเชิงพื้นที่และการลงทุนเพิ่มเติม' : 'Continue into the article index for more area and investment context.'}</span>
+                        <span className="insight-list__body">{locale === 'th' ? 'ไปต่อยังคลังบทความเพื่ออ่านบริบทของพื้นที่และการลงทุนเพิ่มเติม' : 'Continue into the article index for more area and investment context.'}</span>
                       </Link>
                     )}
                   </div>
@@ -366,7 +366,7 @@ export default async function AreaPage(
                 <h2 className="card-title">{locale === 'th' ? 'ส่ง brief ของทำเลนี้' : 'Send a brief around this area'}</h2>
                 <p className="card-subtitle">
                   {locale === 'th'
-                    ? 'กรอกงบ วัตถุประสงค์ และไทม์ไลน์ เพื่อให้ทีมแปลง snapshot ของทำเลเป็น shortlist ที่ใช้งานได้จริง'
+                    ? 'กรอกงบ วัตถุประสงค์ และไทม์ไลน์ เพื่อให้ทีมแปลงข้อมูลของทำเลเป็นรายการคัดไว้ที่ใช้งานได้จริง'
                     : 'Share your budget, purpose, and timing so the team can translate this area snapshot into a shortlist that is actually usable.'}
                 </p>
               </div>
