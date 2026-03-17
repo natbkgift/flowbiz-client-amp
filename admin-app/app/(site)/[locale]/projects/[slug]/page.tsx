@@ -152,7 +152,7 @@ export default async function ProjectDetailPage(
   if (projectResult.kind === 'timeout') {
     const fallbackTitle = formatSlugTitle(params.slug);
     const fallbackBody = locale === 'th'
-      ? 'ใช้หน้านี้เพื่อไปต่อยัง shortlist, compare, หรือพูดคุยกับทีมที่ปรึกษาได้ทันที'
+      ? 'ใช้หน้านี้เพื่อไปต่อยังการคัดรายการ หน้าเปรียบเทียบ หรือพูดคุยกับทีมที่ปรึกษาได้ทันที'
       : 'Use this page to continue into shortlist, compare, or a direct advisory conversation.';
 
     return (
@@ -169,15 +169,15 @@ export default async function ProjectDetailPage(
               kicker: dict.advisory.bestFor,
               title: formatSlugTitle(params.slug),
               body: locale === 'th'
-                ? 'ใช้ snapshot นี้เพื่อส่งบริบทให้ทีมช่วยคัด shortlist หรือไปต่อยัง inventory ที่เผยแพร่แล้ว'
+                ? 'ใช้ข้อมูลสรุปนี้เพื่อส่งบริบทให้ทีมช่วยคัดรายการ หรือไปต่อยังโครงการที่เผยแพร่แล้ว'
                 : 'Use this snapshot to hand context to the team or continue into the published inventory.',
               icon: 'building',
             },
             {
               kicker: dict.advisory.nextStep,
-              title: locale === 'th' ? 'ต่อไปยัง shortlist หรือ Smart Finder' : 'Move next into shortlist or Smart Finder',
+              title: locale === 'th' ? 'ต่อไปยังการคัดรายการหรือ Smart Finder' : 'Move next into shortlist or Smart Finder',
               body: locale === 'th'
-                ? 'จากหน้านี้คุณยัง shortlist ต่อ หรือส่ง brief ให้ทีมคัดทางเลือกได้ทันที'
+                ? 'จากหน้านี้คุณยังคัดรายการต่อ หรือส่งบรีฟให้ทีมคัดทางเลือกได้ทันที'
                 : 'From here you can keep shortlisting or hand the project brief to the team without losing momentum.',
               icon: 'check',
             },
@@ -271,10 +271,10 @@ export default async function ProjectDetailPage(
   const evaluationSignals = evaluation?.badges?.map((badge) => badge.label).slice(0, 4) ?? [];
   const projectDecisionRead = [
     hasEvaluationSnapshot
-      ? locale === 'th' ? 'มี live snapshot จากโครงการ/พื้นที่พอสำหรับใช้คุย shortlist ต่อ' : 'There is enough live project and area snapshot data to support a shortlist discussion.'
-      : locale === 'th' ? 'ใช้หน้านี้เป็น project brief เพื่อพาไปต่อยัง compare, shortlist หรือ advisor review' : 'Use this page as the project brief before moving into compare, shortlist, or advisor review.',
+      ? locale === 'th' ? 'มีข้อมูลล่าสุดจากโครงการและพื้นที่เพียงพอสำหรับใช้คุยเรื่องการคัดรายการต่อ' : 'There is enough live project and area snapshot data to support a shortlist discussion.'
+      : locale === 'th' ? 'ใช้หน้านี้เป็นสรุปโครงการเพื่อพาไปต่อยังหน้าเปรียบเทียบ การคัดรายการ หรือการคุยกับทีม' : 'Use this page as the project brief before moving into compare, shortlist, or advisor review.',
     project.area?.name
-      ? locale === 'th' ? `พื้นที่หลักของโครงการคือ ${project.area.name} จึงควรอ่านคู่กับบริบทของ area ก่อนตัดสินใจ` : `${project.area.name} remains a core part of the decision, so read this project together with the area context.`
+      ? locale === 'th' ? `พื้นที่หลักของโครงการคือ ${project.area.name} จึงควรอ่านคู่กับบริบทของทำเลก่อนตัดสินใจ` : `${project.area.name} remains a core part of the decision, so read this project together with the area context.`
       : null,
     startingPriceLabel
       ? locale === 'th' ? `ราคาเริ่มต้นปัจจุบันคือ ${startingPriceLabel}` : `Current starting price is ${startingPriceLabel}.`
@@ -347,29 +347,29 @@ export default async function ProjectDetailPage(
             kicker: dict.advisory.bestFor,
             title: locale === 'th' ? 'เหมาะกับผู้ซื้อที่เริ่มจากโครงการก่อนยูนิต' : 'Best for project-first buyers',
             body: locale === 'th'
-              ? 'ใช้หน้านี้เมื่อคุณต้องการดูความน่าเชื่อถือของโครงการ, บริบทของทำเล, และสัญญาณสำหรับการ shortlist'
+              ? 'ใช้หน้านี้เมื่อคุณต้องการดูความน่าเชื่อถือของโครงการ บริบทของทำเล และสัญญาณสำหรับการคัดรายการ'
               : 'Use this page when the project brand, location context, and shortlist signals matter before unit-level review.',
             icon: 'building',
           },
           {
             kicker: dict.advisory.nextStep,
-            title: locale === 'th' ? 'ต่อไปยัง compare, shortlist, หรือพูดคุยกับทีม' : 'Move next into compare, shortlist, or advisory support',
+            title: locale === 'th' ? 'ต่อไปยังหน้าเปรียบเทียบ การคัดรายการ หรือพูดคุยกับทีม' : 'Move next into compare, shortlist, or advisory support',
             body: locale === 'th'
-              ? 'หากโครงการนี้เริ่มตรงโจทย์ ให้เทียบต่อใน compare หรือส่ง context ให้ทีมช่วยคัดทางเลือก'
+              ? 'หากโครงการนี้เริ่มตรงโจทย์ ให้เทียบต่อในหน้าเปรียบเทียบ หรือส่งบริบทให้ทีมช่วยคัดทางเลือก'
               : 'If this project looks relevant, compare it next or hand the context to the team for a tighter shortlist.',
             icon: 'check',
           },
             {
               kicker: dict.advisory.trustSignal,
               title: hasEvaluationSnapshot
-                ? locale === 'th' ? 'มี snapshot เพียงพอสำหรับรีวิวเชิงลึกแล้ว' : 'Snapshot signals are available for deep review'
-                : locale === 'th' ? 'รีวิวเชิงลึกยังอยู่ในโหมด conservative' : 'The deep review is currently conservative',
+                ? locale === 'th' ? 'มีข้อมูลเพียงพอสำหรับรีวิวเชิงลึกแล้ว' : 'Snapshot signals are available for deep review'
+                : locale === 'th' ? 'รีวิวเชิงลึกยังอยู่ในโหมดระมัดระวัง' : 'The deep review is currently conservative',
               body: hasEvaluationSnapshot
                 ? locale === 'th'
                   ? 'หน้านี้ใช้สัญญาณที่ดึงได้จริงจากโครงการและพื้นที่เพื่อช่วยการตัดสินใจ'
                   : 'The page uses project and area signals grounded in live data to support the decision flow.'
                 : locale === 'th'
-                  ? 'หน้านี้ยังคงยึดกับบริบทของโครงการจริงและพาคุณไปต่อยัง next step ที่เหมาะสม'
+                  ? 'หน้านี้ยังคงยึดกับบริบทของโครงการจริงและพาคุณไปต่อยังขั้นตอนถัดไปที่เหมาะสม'
                   : 'The page stays grounded in verified project context and keeps the next step clear.',
               icon: 'shield',
             },
@@ -392,7 +392,7 @@ export default async function ProjectDetailPage(
           <div className="detail-stack">
             <section id="project-brief-section" className="authority-card reveal">
               <div className="section-header">
-                <h2 className="section-title section-title--sm">{locale === 'th' ? 'สรุปโครงการเพื่อใช้คัด shortlist' : 'Project read for shortlist'}</h2>
+                <h2 className="section-title section-title--sm">{locale === 'th' ? 'สรุปโครงการเพื่อใช้คัดรายการ' : 'Project read for shortlist'}</h2>
                 <p className="section-subtitle">
                   {summary || description || (locale === 'th'
                     ? 'ใช้หน้านี้เพื่อประเมินว่าควรคุยต่อในระดับโครงการหรือย้ายไปเทียบทางเลือกอื่น'
@@ -422,7 +422,7 @@ export default async function ProjectDetailPage(
 
             <section id="project-decision-grid" className="signal-grid signal-grid--two-up reveal">
               <div id="project-decision-lens" className="authority-card">
-                <h2 className="card-title">{locale === 'th' ? 'มุมมองสำหรับตัดสินใจคัด shortlist' : 'Shortlist decision lens'}</h2>
+                <h2 className="card-title">{locale === 'th' ? 'มุมมองสำหรับตัดสินใจคัดรายการ' : 'Shortlist decision lens'}</h2>
                 <div className="insight-list mt-3">
                   {projectDecisionRead.map((item) => (
                     <div key={item} className="insight-list__item">
@@ -438,7 +438,7 @@ export default async function ProjectDetailPage(
                 </div>
                 <div className="card-actions mt-3">
                   <Link className="btn btn-secondary" href={withLocale(locale, '/buy')}>
-                    {locale === 'th' ? 'ดู listings ที่ save เข้า shortlist ได้' : 'Browse shortlist-ready listings'}
+                    {locale === 'th' ? 'ดูรายการที่บันทึกเข้ารายการคัดไว้ได้' : 'Browse shortlist-ready listings'}
                   </Link>
                   <Link className="btn btn-tertiary" href={withLocale(locale, '/compare')}>
                     {dict.advisory.compareOpportunities}
@@ -456,7 +456,7 @@ export default async function ProjectDetailPage(
                     </Link>
                   )) : (
                     <div className="insight-list__item">
-                      <span className="insight-list__body">{locale === 'th' ? 'อ่านต่อที่ investment, compare หรือ area guide เพื่อเสริมบริบทของการตัดสินใจ' : 'Continue into investment, compare, or the area guide to widen the decision context.'}</span>
+                      <span className="insight-list__body">{locale === 'th' ? 'อ่านต่อที่มุมมองการลงทุน หน้าเปรียบเทียบ หรือคู่มือทำเล เพื่อเสริมบริบทของการตัดสินใจ' : 'Continue into investment, compare, or the area guide to widen the decision context.'}</span>
                     </div>
                   )}
                 </div>
@@ -518,7 +518,7 @@ export default async function ProjectDetailPage(
                   <h2 className="card-title">{locale === 'th' ? 'ขั้นตอนถัดไปกับทีมที่ปรึกษา' : 'Advisory next steps'}</h2>
                   <p className="card-subtitle">
                     {locale === 'th'
-                      ? 'ถ้าโครงการนี้ใกล้เคียงโจทย์ ให้เทียบต่อหรือส่ง brief เพื่อให้ทีมคัด shortlist ที่แคบลง'
+                      ? 'ถ้าโครงการนี้ใกล้เคียงโจทย์ ให้เทียบต่อหรือส่งบรีฟเพื่อให้ทีมคัดรายการที่แคบลง'
                       : 'If this project is directionally right, compare it next or send the brief so the team can tighten the shortlist.'}
                   </p>
                   <div className="card-actions mt-3">
@@ -543,15 +543,16 @@ export default async function ProjectDetailPage(
 
           <aside className="detail-sidebar detail-stack">
             <div id="project-advisor-brief" className="page-rail-card reveal">
-              <h2 className="card-title">{locale === 'th' ? 'ส่ง brief โครงการให้ที่ปรึกษา' : 'Advisor project brief'}</h2>
+              <h2 className="card-title">{locale === 'th' ? 'ส่งบรีฟโครงการให้ที่ปรึกษา' : 'Advisor project brief'}</h2>
               <p className="card-subtitle">
                 {locale === 'th'
-                  ? 'ส่งงบ ทำเล และช่วงเวลาเพื่อให้ทีมบอกได้เร็วขึ้นว่าโครงการนี้ควรอยู่ใน shortlist หรือไม่'
+                  ? 'ส่งงบ ทำเล และช่วงเวลาเพื่อให้ทีมบอกได้เร็วขึ้นว่าโครงการนี้ควรอยู่ในรายการคัดไว้หรือไม่'
                   : 'Send your budget, preferred area, and timing so the team can judge quickly whether this project belongs in your shortlist.'}
               </p>
             </div>
             <LeadForm
-              heading={locale === 'th' ? 'ขอ shortlist รอบโครงการนี้' : 'Request a shortlist around this project'}
+              locale={locale}
+              heading={locale === 'th' ? 'ขอรายการคัดไว้รอบโครงการนี้' : 'Request a shortlist around this project'}
               defaultPreferredArea={project.area?.name ?? undefined}
               defaultMessage={locale === 'th' ? `สนใจโครงการ ${project.name} และต้องการเทียบกับตัวเลือกใกล้เคียง` : `I am interested in ${project.name} and want to compare it with similar options.`}
             />

@@ -12,6 +12,7 @@ import { trackExperimentOutcomes } from '../../lib/experiments';
 import { calculateLeadScore } from '../../lib/lead-scoring';
 
 type LeadFormProps = {
+  locale?: 'en' | 'th';
   heading?: string;
   description?: string;
   formId?: string;
@@ -38,6 +39,7 @@ function normalizeTagToken(value: string): string {
 }
 
 export function LeadForm({
+  locale: explicitLocale,
   heading,
   description,
   formId,
@@ -49,7 +51,7 @@ export function LeadForm({
   defaultTimeframe,
 }: LeadFormProps) {
   const pathname = usePathname() ?? '/';
-  const locale = localeFromPathname(pathname);
+  const locale = explicitLocale ?? localeFromPathname(pathname);
   const dict = locale === 'th' ? th : en;
 
   const [didStart, setDidStart] = useState(false);

@@ -133,7 +133,7 @@ export default async function PropertyPage(props: PageProps) {
   if (propertyResult.kind === 'timeout') {
     const fallbackTitle = formatSlugTitle(params.slug);
     const fallbackBody = locale === 'th'
-      ? 'ใช้หน้านี้เพื่อไปต่อยัง inventory, shortlist, หรือส่ง brief ให้ทีมช่วยคัดตัวเลือกที่เหมาะกับคุณ'
+      ? 'ใช้หน้านี้เพื่อไปต่อยังคลังรายการ การคัดรายการ หรือส่งบรีฟให้ทีมช่วยคัดตัวเลือกที่เหมาะกับคุณ'
       : 'Use this page to continue into inventory, shortlist, or hand your brief to the advisory team.';
 
     return (
@@ -159,23 +159,23 @@ export default async function PropertyPage(props: PageProps) {
               kicker: dict.advisory.bestFor,
               title: formatSlugTitle(params.slug),
               body: locale === 'th'
-                ? 'ใช้ state นี้เมื่อคุณต้องการส่งบริบทของ listing ให้ทีมช่วย shortlist หรือหาทางเลือกใกล้เคียง'
+                ? 'ใช้หน้านี้เมื่อคุณต้องการส่งบริบทของรายการให้ทีมช่วยคัดรายการหรือหาทางเลือกใกล้เคียง'
                 : 'Use this state to hand the listing context to the team or pivot into nearby shortlist options.',
               icon: 'building',
             },
             {
               kicker: dict.advisory.nextStep,
-              title: locale === 'th' ? 'ต่อไปยังคลังรายการหรือพูดคุยกับทีม' : 'Move next into inventory or advisory support',
+              title: locale === 'th' ? 'ต่อไปยังคลังรายการหรือคุยกับทีม' : 'Move next into inventory or advisory support',
               body: locale === 'th'
-                ? 'จากหน้านี้คุณยังเปิด inventory ที่ตรวจสอบแล้วหรือคุยกับทีมต่อได้ทันที'
+                ? 'จากหน้านี้คุณยังเปิดคลังรายการที่ตรวจสอบแล้วหรือคุยกับทีมต่อได้ทันที'
                 : 'From here you can jump straight into verified inventory or advisor review right away.',
               icon: 'check',
             },
             {
               kicker: dict.advisory.trustSignal,
-              title: locale === 'th' ? 'หน้านี้ยังยึดกับบริบทของ listing จริง' : 'The page stays grounded in verified listing context',
+              title: locale === 'th' ? 'หน้านี้ยังยึดกับบริบทของรายการจริง' : 'The page stays grounded in verified listing context',
               body: locale === 'th'
-                ? 'เมื่อ listing brief ถูกรีเฟรช หน้านี้จะขยายกลับมาเป็นรายละเอียดเต็มรูปแบบ'
+                ? 'เมื่อสรุปรายการถูกรีเฟรช หน้านี้จะขยายกลับมาเป็นรายละเอียดเต็มรูปแบบ'
                 : 'When the listing brief refreshes, this route expands back into the full detail view.',
               icon: 'shield',
             },
@@ -454,7 +454,7 @@ export default async function PropertyPage(props: PageProps) {
                 <h2 className="card-title">{locale === 'th' ? 'สัญญาณช่วยตัดสินใจระดับยูนิต' : 'Listing decision cues'}</h2>
                 <p className="card-subtitle">
                   {locale === 'th'
-                    ? 'ใช้สัญญาณระดับยูนิตนี้เพื่อประเมินว่าควรคุยต่อทันทีหรือเทียบ inventory ใกล้เคียงก่อน'
+                    ? 'ใช้สัญญาณระดับยูนิตนี้เพื่อประเมินว่าควรคุยต่อทันทีหรือเทียบรายการใกล้เคียงก่อน'
                     : 'Use the unit-level signals below to decide whether to move straight into advisor review or compare nearby inventory first.'}
                 </p>
                 <div className="insight-list mt-3">
@@ -470,7 +470,7 @@ export default async function PropertyPage(props: PageProps) {
                 <h2 className="card-title">{locale === 'th' ? 'เครื่องมือช่วยตัดสินใจและทางไปต่อ' : 'Investor tools and next moves'}</h2>
                 <p className="card-subtitle">
                   {locale === 'th'
-                    ? 'ถ้าต้องคำนวณ yield หรือเทียบหลายทางเลือกต่อ ให้ไปยังเครื่องมือและ route ที่ใช้ตัดสินใจต่อได้ทันที'
+                    ? 'ถ้าต้องคำนวณผลตอบแทนหรือเทียบหลายทางเลือกต่อ ให้ไปยังเครื่องมือและหน้าที่ใช้ตัดสินใจต่อได้ทันที'
                     : 'If you need a yield sense-check or a multi-option comparison, move directly into the supporting tools below.'}
                 </p>
                 <div className="card-actions mt-3">
@@ -478,7 +478,7 @@ export default async function PropertyPage(props: PageProps) {
                     {locale === 'th' ? 'เปิด calculator' : 'Open calculator'}
                   </Link>
                   <Link className="btn btn-tertiary" href={withLocale(locale, '/compare')}>
-                    {locale === 'th' ? 'ไปที่ compare' : 'Go to compare'}
+                    {locale === 'th' ? 'ไปหน้าเปรียบเทียบ' : 'Go to compare'}
                   </Link>
                 </div>
               </div>
@@ -554,6 +554,7 @@ export default async function PropertyPage(props: PageProps) {
 
             <div id="property-lead-form" className="mt-6">
               <LeadForm
+                locale={locale}
                 heading={dict.property.interestedHeading}
                 propertyId={property.id}
                 defaultMessage={dict.property.interestedMessage}

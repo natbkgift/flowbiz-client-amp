@@ -70,4 +70,21 @@ describe('property detail shell', () => {
     expect(container.querySelector('#property-direct-channels')).not.toBeNull();
     expect(container.querySelector('#property-lead-form')).not.toBeNull();
   });
+
+  it('keeps Thai property detail copy free from listing and compare drift', async () => {
+    const { container } = render(
+      await PropertyPage({
+        params: Promise.resolve({ locale: 'th', slug: 'azure-condo' }),
+      }),
+    );
+
+    const markup = container.textContent ?? '';
+
+    expect(markup).toContain('สัญญาณช่วยตัดสินใจระดับยูนิต');
+    expect(markup).toContain('เครื่องมือช่วยตัดสินใจและทางไปต่อ');
+    expect(markup).toContain('ไปหน้าเปรียบเทียบ');
+    expect(markup).not.toContain('inventory');
+    expect(markup).not.toContain('listing brief');
+    expect(markup).not.toContain('next move');
+  });
 });

@@ -99,15 +99,15 @@ export default async function ProjectsPage(props: { params: Promise<{ locale: st
           signals={[
             {
               kicker: dict.advisory.bestFor,
-              title: locale === 'th' ? 'ผู้ซื้อที่ต้องการดู inventory ที่ตรวจสอบแล้ว' : 'Buyers who want verified published inventory',
+              title: locale === 'th' ? 'ผู้ซื้อที่ต้องการดูโครงการที่ตรวจสอบแล้ว' : 'Buyers who want verified published inventory',
               body: locale === 'th'
-                ? 'หน้านี้คือคลังโครงการที่ใช้ต่อยอดไปยัง compare, smart finder, และ consultation'
+                ? 'หน้านี้คือคลังโครงการที่ใช้ต่อยอดไปยังหน้าเปรียบเทียบ Smart Finder และการคุยกับทีม'
                 : 'This page is the working inventory base for compare, smart finder, and advisory consultation.',
               icon: 'building',
             },
             {
               kicker: dict.advisory.nextStep,
-              title: locale === 'th' ? 'เริ่มจากดูโครงการ แล้วค่อยคัด shortlist' : 'Browse projects first, then shortlist',
+              title: locale === 'th' ? 'เริ่มจากดูโครงการ แล้วค่อยคัดรายการ' : 'Browse projects first, then shortlist',
               body: locale === 'th'
                 ? 'หากยังไม่แน่ใจเรื่องทำเลหรือกลยุทธ์ ให้ไปต่อที่ Smart Finder หรือคุยกับทีม'
                 : 'If the area or strategy is still unclear, move next into Smart Finder or speak with the team.',
@@ -115,9 +115,9 @@ export default async function ProjectsPage(props: { params: Promise<{ locale: st
             },
           {
             kicker: dict.advisory.trustSignal,
-            title: locale === 'th' ? 'เราดันเฉพาะ inventory ที่เผยแพร่จริง' : 'Only published inventory is surfaced here',
+            title: locale === 'th' ? 'เราแสดงเฉพาะโครงการที่เผยแพร่จริง' : 'Only published inventory is surfaced here',
             body: locale === 'th'
-              ? 'หน้านี้คงเส้นทางสู่ shortlist และ advisor review ให้ชัด แม้คุณยังต้องการทีมช่วยคัดเพิ่ม'
+              ? 'หน้านี้คงเส้นทางสู่การคัดรายการและการคุยกับทีมให้ชัด แม้คุณยังต้องการให้ทีมช่วยคัดเพิ่ม'
               : 'The page keeps the shortlist route clear and hands the brief to the team when you want tighter curation.',
             icon: 'shield',
           },
@@ -147,11 +147,11 @@ export default async function ProjectsPage(props: { params: Promise<{ locale: st
           <div className="cta-strip mb-6">
             <div className="cta-strip__text">
               {locale === 'th'
-                ? 'หากต้องการเริ่ม shortlist ในระดับยูนิต ให้ไปต่อยัง listings ที่ผูกกับ property-based shortlist ได้โดยตรง'
+                ? 'หากต้องการเริ่มคัดรายการในระดับยูนิต ให้ไปต่อยังหน้ารายการที่บันทึกเข้าสู่รายการคัดไว้ได้โดยตรง'
                 : 'If you need to begin the shortlist at unit level, move next into listings that map directly to the property-based shortlist owner.'}
             </div>
             <Link className="btn btn-secondary" href={withLocale(locale, '/buy')}>
-              {locale === 'th' ? 'ดู listings ที่ save เข้า shortlist ได้' : 'Browse shortlist-ready listings'}
+              {locale === 'th' ? 'ดูรายการที่บันทึกเข้ารายการคัดไว้ได้' : 'Browse shortlist-ready listings'}
             </Link>
           </div>
 
@@ -168,7 +168,7 @@ export default async function ProjectsPage(props: { params: Promise<{ locale: st
                       ? `สถานะ: ${p.status}`
                       : `Status: ${p.status}`
                     : locale === 'th'
-                      ? 'พร้อมใช้ต่อสำหรับ shortlist และการเปรียบเทียบ'
+                      ? 'พร้อมใช้ต่อสำหรับการคัดรายการและการเปรียบเทียบ'
                       : 'Ready for shortlist and comparison work.'}
                 </p>
                 <div className="catalogue-card__meta">
@@ -258,13 +258,13 @@ export default async function ProjectsPage(props: { params: Promise<{ locale: st
             kicker: dict.advisory.bestFor,
             title: locale === 'th' ? 'ผู้ใช้ที่กำลังเริ่มจากภาพรวมโครงการ' : 'Visitors starting from a project-level overview',
             body: locale === 'th'
-              ? 'หน้านี้จัดภาพรวมโครงการให้พร้อมสำหรับการคัด shortlist ต่อจาก brief ของคุณ'
+              ? 'หน้านี้จัดภาพรวมโครงการให้พร้อมสำหรับการคัดรายการต่อจากบรีฟของคุณ'
               : 'The page turns the project overview into a usable shortlist starting point for your brief.',
             icon: 'building',
           },
           {
             kicker: dict.advisory.nextStep,
-            title: locale === 'th' ? 'ใช้รายการนี้เป็นจุดเริ่มต้นของ shortlist' : 'Use the list as the shortlist starting point',
+            title: locale === 'th' ? 'ใช้รายการนี้เป็นจุดเริ่มต้นของการคัดรายการ' : 'Use the list as the shortlist starting point',
             body: locale === 'th'
               ? 'เปิดดูรายละเอียดโครงการ หรือส่งบริบทต่อไปยังทีมเพื่อคัดตัวเลือกเร็วขึ้น'
               : 'Open a project detail page or hand your context to the team to narrow faster.',
@@ -272,9 +272,9 @@ export default async function ProjectsPage(props: { params: Promise<{ locale: st
           },
           {
             kicker: dict.advisory.trustSignal,
-            title: locale === 'th' ? 'หน้านี้ยังยึดกับ inventory จริงในระบบ' : 'This page stays grounded in live inventory context',
+            title: locale === 'th' ? 'หน้านี้ยังยึดกับรายการจริงในระบบ' : 'This page stays grounded in live inventory context',
             body: locale === 'th'
-              ? 'คุณจะถูกพาไปยัง next move ที่เหมาะ ไม่ว่าจะเป็นดูรายละเอียดโครงการหรือให้ทีมช่วย curate ต่อ'
+              ? 'คุณจะถูกพาไปยังขั้นตอนถัดไปที่เหมาะ ไม่ว่าจะเป็นดูรายละเอียดโครงการหรือให้ทีมช่วยคัดต่อ'
               : 'You are routed into the best next move, whether that is a live project page or a concierge shortlist.',
             icon: 'shield',
           },
@@ -306,18 +306,18 @@ export default async function ProjectsPage(props: { params: Promise<{ locale: st
             {rows.map((r) => (
               <article key={r.name} className="card catalogue-card">
                 <div className="catalogue-card__eyebrow">
-                  {locale === 'th' ? 'ภาพรวมจาก inventory ที่เผยแพร่แล้ว' : 'Published inventory signal'}
+                  {locale === 'th' ? 'ภาพรวมจากรายการที่เผยแพร่แล้ว' : 'Published inventory signal'}
                 </div>
                 <h2 className="card-title">{r.name}</h2>
                 <p className="card-subtitle">
                   {locale === 'th'
-                    ? `พบ ${r.count} รายการที่เกี่ยวข้องใน inventory ปัจจุบัน`
+                    ? `พบ ${r.count} รายการที่เกี่ยวข้องในข้อมูลปัจจุบัน`
                     : `${r.count} related listing(s) found in the current inventory.`}
                 </p>
                 <div className="catalogue-card__meta">
                   <span>
                     {locale === 'th'
-                      ? 'ใช้หน้านี้เป็นจุดเริ่มต้นก่อนให้ทีมคัด shortlist ที่ตรงงบและกลยุทธ์'
+                      ? 'ใช้หน้านี้เป็นจุดเริ่มต้นก่อนให้ทีมคัดรายการที่ตรงงบและกลยุทธ์'
                       : 'Use this as the starting signal before the team prepares a tighter shortlist.'}
                   </span>
                 </div>

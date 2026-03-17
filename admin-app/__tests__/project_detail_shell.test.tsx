@@ -42,7 +42,7 @@ vi.mock('@/app/_lib/public-api-server', async () => {
       {
         slug: 'alpha-residence-area-brief',
         title: { en: 'Alpha Residence area brief', th: 'สรุปทำเล Alpha Residence' },
-        excerpt: { en: 'Jomtien context for shortlist decisions.', th: 'บริบท Jomtien สำหรับการ shortlist' },
+        excerpt: { en: 'Jomtien context for shortlist decisions.', th: 'บริบท Jomtien สำหรับการคัดรายการ' },
       },
     ])),
   };
@@ -66,5 +66,24 @@ describe('project detail shell', () => {
     expect(container.querySelector('#project-related-reads')).not.toBeNull();
     expect(container.querySelector('#project-trust-grid')).not.toBeNull();
     expect(container.querySelector('#project-advisor-brief')).not.toBeNull();
+  });
+
+  it('keeps Thai project detail copy free from shortlist and brief drift', async () => {
+    const { container } = render(
+      await ProjectDetailPage({
+        params: Promise.resolve({ locale: 'th', slug: 'alpha-residence' }),
+      }),
+    );
+
+    const markup = container.textContent ?? '';
+
+    expect(markup).toContain('สรุปโครงการเพื่อใช้คัดรายการ');
+    expect(markup).toContain('ขั้นตอนถัดไปกับทีมที่ปรึกษา');
+    expect(markup).toContain('ส่งบรีฟโครงการให้ที่ปรึกษา');
+    expect(markup).toContain('ดูรายการที่บันทึกเข้ารายการคัดไว้ได้');
+    expect(markup).not.toContain('shortlist');
+    expect(markup).not.toContain('inventory');
+    expect(markup).not.toContain('area guide');
+    expect(markup).not.toContain('next step');
   });
 });
