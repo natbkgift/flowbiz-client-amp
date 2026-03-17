@@ -86,3 +86,53 @@ def test_a13_market_intelligence_route_owner_renders_public_safe_shell(client) -
     assert "ข้อมูล advisor-only, negotiation notes" in th_html
     assert "data source classification layer" in th_html
     assert "<form" not in th_html
+
+
+def test_a13_market_intelligence_keeps_page_owned_cta_hierarchy(client) -> None:
+    response = client.get("/en/market-intelligence")
+    assert response.status_code == 200, response.text
+    html = response.text
+
+    assert 'id="market-intelligence-overview"' in html
+    assert 'id="market-intelligence-boundary"' in html
+    assert 'id="market-intelligence-overview-charts"' in html
+    assert 'id="market-intelligence-source-classes"' in html
+    assert 'id="market-intelligence-region-contract"' in html
+    assert 'id="market-intelligence-interpretation"' in html
+    assert 'id="market-intelligence-freshness"' in html
+    assert 'id="market-intelligence-next"' in html
+    assert 'id="market-intelligence-next-step"' in html
+    assert 'href="/en/contact?intent=consultation&amp;source=market_intelligence"' in html
+    assert 'href="/en/investment/methodology?source=market_intelligence"' in html
+
+    overview_index = html.index('id="market-intelligence-overview"')
+    boundary_index = html.index('id="market-intelligence-boundary"')
+    charts_index = html.index('id="market-intelligence-overview-charts"')
+    source_classes_index = html.index('id="market-intelligence-source-classes"')
+    region_contract_index = html.index('id="market-intelligence-region-contract"')
+    interpretation_index = html.index('id="market-intelligence-interpretation"')
+    freshness_index = html.index('id="market-intelligence-freshness"')
+    next_index = html.index('id="market-intelligence-next"')
+    next_step_index = html.index('id="market-intelligence-next-step"')
+    consultation_index = html.index(
+        'href="/en/contact?intent=consultation&amp;source=market_intelligence"'
+    )
+    methodology_index = html.index(
+        'href="/en/investment/methodology?source=market_intelligence"'
+    )
+    assert (
+        overview_index
+        < boundary_index
+        < charts_index
+        < source_classes_index
+        < region_contract_index
+        < interpretation_index
+        < freshness_index
+        < next_index
+        < next_step_index
+    )
+    assert next_step_index < consultation_index < methodology_index
+
+    assert '<form' not in html
+    assert 'https://wa.me/' not in html
+    assert 'https://line.me/' not in html
