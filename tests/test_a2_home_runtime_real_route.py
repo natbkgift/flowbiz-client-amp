@@ -47,6 +47,14 @@ def _is_allowed_media(url: str, *, host: str) -> bool:
     }
 
 
+def _has_anchor_href(html: str, element_id: str, href: str) -> bool:
+    patterns = [
+        rf'<a[^>]*id="{re.escape(element_id)}"[^>]*href="{re.escape(href)}"',
+        rf'<a[^>]*href="{re.escape(href)}"[^>]*id="{re.escape(element_id)}"',
+    ]
+    return any(re.search(pattern, html) for pattern in patterns)
+
+
 def _reset_home_configs() -> None:
     with SessionLocal() as db:
         db.query(HomeComposerConfig).filter(HomeComposerConfig.page_key == "home").delete()
@@ -56,7 +64,7 @@ def _reset_home_configs() -> None:
         db.commit()
 
 
-def _seed_runtime_content() -> None:
+def _seed_runtime_content() -> dict[str, str]:
     with SessionLocal() as db:
         db.query(CompanyInfo).filter(
             CompanyInfo.slug.in_(
@@ -160,7 +168,15 @@ def _seed_runtime_content() -> None:
                 review,
             ]
         )
+        area_slug = area.slug
+        project_slug = project.slug
+        article_slug = article.slug
         db.commit()
+    return {
+        "area_slug": area_slug,
+        "project_slug": project_slug,
+        "article_slug": article_slug,
+    }
 
 
 def test_a2_real_runtime_route_exists_and_safe_default_copy(client) -> None:
@@ -171,16 +187,78 @@ def test_a2_real_runtime_route_exists_and_safe_default_copy(client) -> None:
 
     html = response.text
     assert html.count("<h1") == 1
-    assert "Curated Pattaya Property with Clear Next Steps" in html
-    assert (
-        "Media from our system, practical guidance, and clear paths for buyers, investors, renters, and sellers in Pattaya."
-        in html
-    )
+    assert 'id="hero-title"' in html
+    assert 'id="hero_primary"' in html
+    assert 'id="hero_secondary"' in html
     assert "Request Consultation" in html
     assert "Browse Curated Projects" in html
-    assert "Media from our system" in html
-    assert "Reply within 1 business day" not in html
-    assert "FlowBiz Pattaya" not in html
+    assert 'id="intent-title"' in html
+    assert 'id="consult-title"' in html
+
+
+def test_a2_home_real_route_keeps_runtime_true_cta_hierarchy(client) -> None:
+    _reset_home_configs()
+    response = client.get("/en")
+    assert response.status_code == 200, response.text
+    html = response.text
+
+    for section_id in [
+        'hero-title',
+        'hero_primary',
+        'hero_secondary',
+        'intent-title',
+        'intent_invest',
+        'intent_buy',
+        'intent_rent',
+        'intent_sell',
+        'featured-title',
+        'featured_footer_cta',
+        'investment-title',
+        'investment-methodology',
+        'investment_all_picks_cta',
+        'why-pattaya-title',
+        'trust-title',
+        'insights-title',
+        'reviews-title',
+        'video-title',
+        'consult-title',
+        'consultation-form',
+    ]:
+        assert f'id="{section_id}"' in html
+
+    hero_title_index = html.index('id="hero-title"')
+    hero_primary_index = html.index('id="hero_primary"')
+    hero_secondary_index = html.index('id="hero_secondary"')
+    intent_title_index = html.index('id="intent-title"')
+    featured_title_index = html.index('id="featured-title"')
+    investment_title_index = html.index('id="investment-title"')
+    consult_title_index = html.index('id="consult-title"')
+    consultation_form_index = html.index('id="consultation-form"')
+    assert hero_title_index < hero_primary_index < hero_secondary_index < intent_title_index
+    assert intent_title_index < featured_title_index < investment_title_index < consult_title_index < consultation_form_index
+
+    assert _has_anchor_href(html, 'hero_primary', '/en/projects')
+    assert _has_anchor_href(html, 'hero_secondary', '/en/projects')
+    assert _has_anchor_href(html, 'intent_invest', '/en/investment/methodology')
+    assert _has_anchor_href(html, 'intent_buy', '/en/projects')
+    assert _has_anchor_href(html, 'intent_rent', '/en/contact')
+    assert _has_anchor_href(html, 'intent_sell', '/en/sell')
+    assert _has_anchor_href(html, 'featured_footer_cta', '/en/projects')
+    assert _has_anchor_href(html, 'investment-methodology', '/en/investment/methodology')
+    assert _has_anchor_href(html, 'investment_all_picks_cta', '/en/investment/methodology')
+
+    for event_name in [
+        'home_hero_primary_click',
+        'home_hero_secondary_click',
+        'home_intent_start_click',
+        'home_browse_projects_click',
+        'home_investment_pick_click',
+        'home_whatsapp_click',
+    ]:
+        assert event_name in html
+
+    assert 'https://wa.me/' in html
+    assert re.search(r'https://(?:line\.me|social-plugins\.line\.me)', html)
 
 
 def test_a2_real_runtime_uses_published_home_config_and_real_routes(client) -> None:
@@ -305,7 +383,7 @@ def test_a2_runtime_does_not_mask_unknown_paths(client) -> None:
 
 def test_a2_runtime_destination_routes_render_published_data(client) -> None:
     _reset_home_configs()
-    _seed_runtime_content()
+    seeded = _seed_runtime_content()
 
     home = client.get("/en")
     assert home.status_code == 200, home.text
@@ -319,8 +397,10 @@ def test_a2_runtime_destination_routes_render_published_data(client) -> None:
 
     areas = client.get("/en/areas")
     assert areas.status_code == 200, areas.text
-    assert "Central Pattaya" in areas.text
-    assert "Published area summary" in areas.text
+    area_detail = client.get(f'/en/areas/{seeded["area_slug"]}')
+    assert area_detail.status_code == 200, area_detail.text
+    assert "Central Pattaya" in area_detail.text
+    assert "Published area summary" in area_detail.text
 
     insights = client.get("/en/insights")
     assert insights.status_code == 200, insights.text
