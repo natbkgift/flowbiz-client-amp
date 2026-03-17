@@ -383,18 +383,30 @@ export function LeadForm({
           {status.state === 'submitting' ? dict.common.leadForm.submitting : dict.common.leadForm.submit}
         </button>
 
-        <div className="cta-row">
-          <a
-            className="btn btn-secondary"
-            href={CTA.whatsAppUrl}
-            target="_blank"
-            rel="noreferrer"
-          >
-            {dict.cta.whatsapp}
-          </a>
-          <a className="btn btn-secondary" href={CTA.lineUrl} target="_blank" rel="noreferrer">
-            {dict.cta.line}
-          </a>
+        <div className="mt-4 border-t border-gray-200 pt-4" aria-label="lead-form-support-links">
+          <p className="text-sm text-gray-600 mb-2">
+            {locale === 'th'
+              ? 'ต้องการคุยทันทีแทนการส่งแบบฟอร์ม? ใช้ช่องทางด้านล่างได้'
+              : 'Prefer to talk now instead of submitting the form? Use a direct support channel below.'}
+          </p>
+          <div className="flex flex-wrap items-center gap-4 text-sm">
+            <a
+              className="font-medium text-gray-700 underline-offset-4 hover:text-gray-900 hover:underline"
+              href={CTA.whatsAppUrl}
+              target="_blank"
+              rel="noreferrer"
+            >
+              {dict.cta.whatsapp}
+            </a>
+            <a
+              className="font-medium text-gray-700 underline-offset-4 hover:text-gray-900 hover:underline"
+              href={CTA.lineUrl}
+              target="_blank"
+              rel="noreferrer"
+            >
+              {dict.cta.line}
+            </a>
+          </div>
         </div>
 
         <div id="lead-form-status" aria-live="assertive" aria-atomic="true">

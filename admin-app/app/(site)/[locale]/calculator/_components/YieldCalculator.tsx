@@ -38,13 +38,13 @@ export function YieldCalculator({ locale }: { locale: 'en' | 'th' }) {
         annualCosts: 'ต้นทุนต่อปี',
         grossAnnualRent: 'รายได้ค่าเช่าต่อปี',
         netAnnualIncome: 'รายได้สุทธิต่อปี',
-        grossYield: 'Gross yield',
-        netYield: 'Net yield',
-        paybackYears: 'Payback (ปี)',
-        summaryTitle: 'ส่งต่อ brief นี้ไปยัง compare หรือ advisor',
+        grossYield: 'อัตราผลตอบแทนขั้นต้น',
+        netYield: 'อัตราผลตอบแทนสุทธิ',
+        paybackYears: 'ระยะเวลาคืนทุน (ปี)',
+        summaryTitle: 'ส่งต่อ brief นี้ไปยัง compare หรือที่ปรึกษา',
         summaryBody: 'ตัวเลขชุดเดียวกันจะถูกพาไปต่อทั้ง compare flow และ contact handoff โดยไม่ต้องกรอกใหม่',
         goToCompare: 'เปิด compare พร้อม brief นี้',
-        talkToAdvisor: 'ส่ง brief ให้ advisor',
+        talkToAdvisor: 'ส่ง brief ให้ที่ปรึกษา',
       }
     : {
         purchasePrice: 'Purchase price',
@@ -100,7 +100,7 @@ export function YieldCalculator({ locale }: { locale: 'en' | 'th' }) {
       </div>
 
       <aside className="detail-sidebar detail-stack">
-        <div className="page-rail-card">
+        <div id="calculator-results-card" className="page-rail-card">
           <div className="insight-list">
             <div className="insight-list__item">
               <span className="insight-list__title">{labels.grossAnnualRent}</span>
@@ -125,14 +125,14 @@ export function YieldCalculator({ locale }: { locale: 'en' | 'th' }) {
           </div>
         </div>
 
-        <div className="page-rail-card">
+        <div id="calculator-brief-summary" className="page-rail-card">
           <h2 className="card-title">{labels.summaryTitle}</h2>
           <p className="card-subtitle">{labels.summaryBody}</p>
           <div className="cta-row mt-4">
-            <Link className="btn btn-secondary" href={withLocaleQuery(locale, '/compare', investorToolQuery)}>
+            <Link id="calculator-compare-cta" className="btn btn-secondary" href={withLocaleQuery(locale, '/compare', investorToolQuery)}>
               {labels.goToCompare}
             </Link>
-            <Link className="btn btn-cta" href={withLocaleQuery(locale, '/contact', investorToolQuery)}>
+            <Link id="calculator-contact-cta" className="btn btn-cta" href={withLocaleQuery(locale, '/contact', investorToolQuery)}>
               {labels.talkToAdvisor}
             </Link>
           </div>

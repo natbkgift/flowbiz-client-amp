@@ -362,6 +362,7 @@ def test_a2_accessibility_states_and_forward_paths(client) -> None:
     assert response.status_code == 200, response.text
     html = response.text
     assert ":focus-visible" in html
+    assert 'home-consultation-section' not in html
     assert 'id="consultation-form"' in html
     assert 'id="form-loading"' in html
     assert 'id="form-error"' in html

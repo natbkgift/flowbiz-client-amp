@@ -15,6 +15,7 @@ import {
 export type HeroAction = {
   href: string;
   label: string;
+  id?: string;
   eventType?: EventType;
   eventPayload?: Record<string, unknown>;
 };
@@ -22,6 +23,7 @@ export type HeroAction = {
 export type ExternalAction = {
   href: string;
   label: string;
+  id?: string;
   ariaLabel?: string;
 };
 
@@ -82,6 +84,7 @@ export function PublicAdvisoryHero({
 
             <div className="public-hero__actions cta-row">
               <TrackedLink
+                id={primaryAction.id}
                 className="btn btn-cta"
                 href={primaryAction.href}
                 eventType={primaryAction.eventType ?? 'cta_click'}
@@ -92,6 +95,7 @@ export function PublicAdvisoryHero({
 
               {secondaryAction ? (
                 <TrackedLink
+                  id={secondaryAction.id}
                   className="btn btn-secondary"
                   href={secondaryAction.href}
                   eventType={secondaryAction.eventType ?? 'cta_click'}
@@ -103,6 +107,7 @@ export function PublicAdvisoryHero({
 
               {tertiaryAction ? (
                 <a
+                  id={tertiaryAction.id}
                   className="btn btn-tertiary"
                   href={tertiaryAction.href}
                   target="_blank"

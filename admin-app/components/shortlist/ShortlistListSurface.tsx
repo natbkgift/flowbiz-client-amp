@@ -164,9 +164,9 @@ export function ShortlistListSurface({ locale }: { locale: 'en' | 'th' }) {
 
       try {
         await window.navigator.clipboard?.writeText(nextShareUrl);
-        setShareNotice(locale === 'th' ? 'คัดลอกลิงก์แชร์แล้ว' : 'Share link copied.');
+        setShareNotice(locale === 'th' ? 'คัดลอกลิงก์แชร์แล้ว ลิงก์นี้เปิดแบบดูอย่างเดียวและซ่อนข้อมูลเจ้าของ' : 'Share link copied. This link stays read-only and hides owner identity.');
       } catch {
-        setShareNotice(locale === 'th' ? 'สร้างลิงก์แชร์แล้ว คัดลอกต่อได้ด้านล่าง' : 'Share link created. Copy it below.');
+        setShareNotice(locale === 'th' ? 'สร้างลิงก์แชร์แล้ว คัดลอกต่อได้ด้านล่าง ลิงก์นี้เปิดแบบดูอย่างเดียวและซ่อนข้อมูลเจ้าของ' : 'Share link created. Copy it below. This link stays read-only and hides owner identity.');
       }
     } catch {
       setError(locale === 'th' ? 'สร้างลิงก์แชร์ shortlist ไม่สำเร็จ' : 'Unable to create a shortlist share link.');
@@ -296,7 +296,7 @@ export function ShortlistListSurface({ locale }: { locale: 'en' | 'th' }) {
             onFocus={(event) => event.currentTarget.select()}
           />
           <p className="guided-dialog__step mt-2">
-            {shareNotice ?? (locale === 'th' ? 'ลิงก์นี้เปิด shortlist แบบดูอย่างเดียวและไม่เชื่อมเข้า CRM' : 'This link opens a read-only shortlist view and does not connect to CRM.')}
+            {shareNotice ?? (locale === 'th' ? 'ลิงก์นี้เปิด shortlist แบบดูอย่างเดียว ซ่อนข้อมูลเจ้าของ และไม่เชื่อมเข้า CRM' : 'This link opens a read-only shortlist view, hides owner identity, and does not connect to CRM.')}
           </p>
         </div>
       ) : null}

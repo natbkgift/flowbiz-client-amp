@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 
-import { buildAdvisorWhatsApp, getAdvisoryLabels, getAdvisoryProofs, withLocaleQuery } from '@/app/_lib/public-advisory';
+import { getAdvisoryLabels, getAdvisoryProofs, withLocaleQuery } from '@/app/_lib/public-advisory';
 import { Container } from '@/components/layout/Container';
 import { TrackedLink } from '@/components/analytics/TrackedLink';
 import { getDictionary, normalizeLocale } from '@/app/_lib/i18n/get-dictionary';
@@ -193,16 +193,14 @@ export default async function ProjectDetailPage(
           primaryAction={{
             href: withLocaleQuery(locale, '/contact', { intent: 'project_shortlist', project: params.slug }),
             label: dict.cta.speakToAdvisor,
+            id: 'project_timeout_consultation_primary',
             eventPayload: { cta: 'speak_to_advisor', from: 'project_detail_timeout' },
           }}
           secondaryAction={{
             href: withLocale(locale, '/projects'),
             label: dict.advisory.browseVerifiedInventory,
+            id: 'project_timeout_inventory_secondary',
             eventPayload: { cta: 'browse_verified_inventory', from: 'project_detail_timeout' },
-          }}
-          tertiaryAction={{
-            href: buildAdvisorWhatsApp(locale, dict),
-            label: dict.cta.whatsapp,
           }}
         />
       </main>
@@ -364,8 +362,8 @@ export default async function ProjectDetailPage(
             {
               kicker: dict.advisory.trustSignal,
               title: hasEvaluationSnapshot
-                ? locale === 'th' ? 'มี snapshot สำหรับ deep review แล้ว' : 'Snapshot signals are available for deep review'
-                : locale === 'th' ? 'deep review ยังอยู่ในโหมด conservative' : 'The deep review is currently conservative',
+                ? locale === 'th' ? 'มี snapshot เพียงพอสำหรับรีวิวเชิงลึกแล้ว' : 'Snapshot signals are available for deep review'
+                : locale === 'th' ? 'รีวิวเชิงลึกยังอยู่ในโหมด conservative' : 'The deep review is currently conservative',
               body: hasEvaluationSnapshot
                 ? locale === 'th'
                   ? 'หน้านี้ใช้สัญญาณที่ดึงได้จริงจากโครงการและพื้นที่เพื่อช่วยการตัดสินใจ'
@@ -379,20 +377,22 @@ export default async function ProjectDetailPage(
         primaryAction={{
           href: withLocaleQuery(locale, '/contact', { intent: 'project_consultation', project: project.slug }),
           label: dict.cta.speakToAdvisor,
+          id: 'project_consultation_primary',
           eventPayload: { cta: 'speak_to_advisor', from: 'project_detail' },
         }}
         secondaryAction={{
           href: withLocale(locale, '/compare'),
           label: dict.advisory.compareOpportunities,
+          id: 'project_compare_secondary',
           eventPayload: { cta: 'compare', from: 'project_detail' },
         }}
       />
       <Container>
         <div className="detail-layout advisory-detail-layout mt-6">
           <div className="detail-stack">
-            <section className="authority-card reveal">
+            <section id="project-brief-section" className="authority-card reveal">
               <div className="section-header">
-                <h2 className="section-title section-title--sm">{locale === 'th' ? 'Project read for shortlist' : 'Project read for shortlist'}</h2>
+                <h2 className="section-title section-title--sm">{locale === 'th' ? 'สรุปโครงการเพื่อใช้คัด shortlist' : 'Project read for shortlist'}</h2>
                 <p className="section-subtitle">
                   {summary || description || (locale === 'th'
                     ? 'ใช้หน้านี้เพื่อประเมินว่าควรคุยต่อในระดับโครงการหรือย้ายไปเทียบทางเลือกอื่น'
@@ -420,9 +420,9 @@ export default async function ProjectDetailPage(
               ) : null}
             </section>
 
-            <section className="signal-grid signal-grid--two-up reveal">
-              <div className="authority-card">
-                <h2 className="card-title">{locale === 'th' ? 'Shortlist decision lens' : 'Shortlist decision lens'}</h2>
+            <section id="project-decision-grid" className="signal-grid signal-grid--two-up reveal">
+              <div id="project-decision-lens" className="authority-card">
+                <h2 className="card-title">{locale === 'th' ? 'มุมมองสำหรับตัดสินใจคัด shortlist' : 'Shortlist decision lens'}</h2>
                 <div className="insight-list mt-3">
                   {projectDecisionRead.map((item) => (
                     <div key={item} className="insight-list__item">
@@ -431,7 +431,7 @@ export default async function ProjectDetailPage(
                   ))}
                   {evaluationSignals.map((item) => (
                     <div key={item} className="insight-list__item">
-                      <span className="insight-list__title">{locale === 'th' ? 'Evaluation signal' : 'Evaluation signal'}</span>
+                      <span className="insight-list__title">{locale === 'th' ? 'สัญญาณจาก evaluation' : 'Evaluation signal'}</span>
                       <span className="insight-list__body">{item}</span>
                     </div>
                   ))}
@@ -446,8 +446,8 @@ export default async function ProjectDetailPage(
                 </div>
               </div>
 
-              <div className="authority-card">
-                <h2 className="card-title">{locale === 'th' ? 'Related advisory reads' : 'Related advisory reads'}</h2>
+              <div id="project-related-reads" className="authority-card">
+                <h2 className="card-title">{locale === 'th' ? 'บทความและบริบทที่เกี่ยวข้อง' : 'Related advisory reads'}</h2>
                 <div className="insight-list mt-3">
                   {relatedReads.length ? relatedReads.map((post) => (
                     <Link key={post.slug} href={withLocale(locale, `/blog/${encodeURIComponent(post.slug)}`)} className="insight-list__item">
@@ -469,10 +469,10 @@ export default async function ProjectDetailPage(
             </section>
 
             {(project.amenities?.length ?? 0) > 0 || investmentFacts.length > 0 || locationFacts.length > 0 ? (
-              <section className="signal-grid signal-grid--two-up reveal">
+              <section id="project-trust-grid" className="signal-grid signal-grid--two-up reveal">
                 {(project.amenities?.length ?? 0) > 0 ? (
-                  <div className="authority-card">
-                    <h2 className="card-title">{locale === 'th' ? 'Amenities และ livability' : 'Amenities and livability'}</h2>
+                  <div id="project-amenities" className="authority-card">
+                    <h2 className="card-title">{locale === 'th' ? 'สิ่งอำนวยความสะดวกและคุณภาพการอยู่อาศัย' : 'Amenities and livability'}</h2>
                     <p className="card-subtitle">
                       {locale === 'th'
                         ? 'อ่านสิ่งอำนวยความสะดวกเป็นบริบทการอยู่อาศัย ไม่ใช่เพียง checklist ของโครงการ'
@@ -487,8 +487,8 @@ export default async function ProjectDetailPage(
                 ) : null}
 
                 {investmentFacts.length > 0 ? (
-                  <div className="authority-card">
-                    <h2 className="card-title">{locale === 'th' ? 'Investment snapshot' : 'Investment snapshot'}</h2>
+                  <div id="project-investment-snapshot" className="authority-card">
+                    <h2 className="card-title">{locale === 'th' ? 'ภาพรวมการลงทุนจากข้อมูลล่าสุด' : 'Investment snapshot'}</h2>
                     <div className="insight-list mt-3">
                       {investmentFacts.map((item) => (
                         <div key={item.label} className="insight-list__item">
@@ -501,8 +501,8 @@ export default async function ProjectDetailPage(
                 ) : null}
 
                 {locationFacts.length > 0 ? (
-                  <div className="authority-card">
-                    <h2 className="card-title">{locale === 'th' ? 'Location context' : 'Location context'}</h2>
+                  <div id="project-location-context" className="authority-card">
+                    <h2 className="card-title">{locale === 'th' ? 'บริบทของทำเล' : 'Location context'}</h2>
                     <div className="insight-list mt-3">
                       {locationFacts.map((item) => (
                         <div key={item.label} className="insight-list__item">
@@ -514,8 +514,8 @@ export default async function ProjectDetailPage(
                   </div>
                 ) : null}
 
-                <div className="authority-card">
-                  <h2 className="card-title">{locale === 'th' ? 'Advisory next steps' : 'Advisory next steps'}</h2>
+                <div id="project-next-steps" className="authority-card">
+                  <h2 className="card-title">{locale === 'th' ? 'ขั้นตอนถัดไปกับทีมที่ปรึกษา' : 'Advisory next steps'}</h2>
                   <p className="card-subtitle">
                     {locale === 'th'
                       ? 'ถ้าโครงการนี้ใกล้เคียงโจทย์ ให้เทียบต่อหรือส่ง brief เพื่อให้ทีมคัด shortlist ที่แคบลง'
@@ -542,8 +542,8 @@ export default async function ProjectDetailPage(
           </div>
 
           <aside className="detail-sidebar detail-stack">
-            <div className="page-rail-card reveal">
-              <h2 className="card-title">{locale === 'th' ? 'Project brief สำหรับ advisor' : 'Advisor project brief'}</h2>
+            <div id="project-advisor-brief" className="page-rail-card reveal">
+              <h2 className="card-title">{locale === 'th' ? 'ส่ง brief โครงการให้ที่ปรึกษา' : 'Advisor project brief'}</h2>
               <p className="card-subtitle">
                 {locale === 'th'
                   ? 'ส่งงบ ทำเล และช่วงเวลาเพื่อให้ทีมบอกได้เร็วขึ้นว่าโครงการนี้ควรอยู่ใน shortlist หรือไม่'

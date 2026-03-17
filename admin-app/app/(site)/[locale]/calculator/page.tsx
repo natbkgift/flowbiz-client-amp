@@ -12,9 +12,9 @@ export async function generateMetadata(props: { params: Promise<{ locale: string
   const params = await props.params;
   const locale = normalizeLocale(params.locale);
   const dict = getDictionary(locale);
-  const title = locale === 'th' ? 'Investment Calculator' : 'Investment Calculator';
+  const title = locale === 'th' ? 'เครื่องมือคำนวณผลตอบแทนการลงทุน' : 'Investment Calculator';
   const description = locale === 'th'
-    ? 'เครื่องมือคำนวณ gross yield และ net yield แบบเร็วสำหรับใช้ประกอบการคุยกับ advisor'
+    ? 'เครื่องมือคำนวณอัตราผลตอบแทนเบื้องต้นสำหรับใช้ต่อยอดไปยัง compare และคุยกับที่ปรึกษา'
     : 'A quick gross and net yield calculator for advisory conversations.';
   return makePageMetadata(locale, 'calculator', title, description, dict.brand.name);
 }
@@ -27,10 +27,10 @@ export default async function CalculatorPage(props: { params: Promise<{ locale: 
     <main className="section" id="main-content">
       <Container>
         <div className="section-header">
-          <h1 className="section-title">{locale === 'th' ? 'Investment Calculator' : 'Investment Calculator'}</h1>
+          <h1 id="calculator-page-title" className="section-title">{locale === 'th' ? 'เครื่องมือคำนวณผลตอบแทนการลงทุน' : 'Investment Calculator'}</h1>
           <p className="section-subtitle">
             {locale === 'th'
-              ? 'คำนวณผลตอบแทนเบื้องต้นก่อนนำตัวเลขไปคุยต่อใน compare, project detail หรือกับ advisor'
+              ? 'คำนวณผลตอบแทนเบื้องต้นก่อนนำตัวเลขไปคุยต่อใน compare, หน้าโครงการ, หรือกับที่ปรึกษา'
               : 'Run a quick yield check before taking the numbers into compare, project detail, or an advisor conversation.'}
           </p>
         </div>

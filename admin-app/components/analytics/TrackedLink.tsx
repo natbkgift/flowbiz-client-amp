@@ -1,22 +1,23 @@
 'use client';
 
-import Link, { type LinkProps } from 'next/link';
+import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import type { ReactNode } from 'react';
+import type { ComponentProps, ReactNode } from 'react';
 
 import { trackEvent, type EventType } from '../../lib/analytics';
+
+type TrackedLinkProps = ComponentProps<typeof Link> & {
+  eventType: EventType;
+  eventPayload?: Record<string, unknown>;
+  children: ReactNode;
+};
 
 export function TrackedLink({
   eventType,
   eventPayload,
   children,
   ...props
-}: LinkProps & {
-  eventType: EventType;
-  eventPayload?: Record<string, unknown>;
-  children: ReactNode;
-  className?: string;
-}) {
+}: TrackedLinkProps) {
   const pathname = usePathname() ?? '/';
 
   return (

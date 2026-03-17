@@ -155,4 +155,41 @@ describe('shortlist diagnostics and integrity guards', () => {
       }),
     );
   });
+
+  it('does not warn when fetch adopts a newer authoritative session owner reference', () => {
+    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => undefined);
+
+    localStorage.setItem(
+      'amp_shortlist_owner_v1',
+      JSON.stringify({ owner_type: 'session', owner_key: 'owner-session-old-12345678' }),
+    );
+
+    publishShortlist(
+      {
+        id: 'shortlist-2',
+        owner_type: 'session',
+        owner_key: 'owner-session-new-12345678',
+        status: 'active',
+        title: 'Fresh shortlist',
+        intent: 'shortlist_review',
+        share_mode: null,
+        source_context: { source_surface: 'shortlist_page' },
+        created_at: '2026-03-17T00:00:00Z',
+        updated_at: '2026-03-17T00:00:00Z',
+        last_viewed_at: null,
+        item_count: 1,
+        items: [],
+      },
+      'fetch',
+    );
+
+    expect(readStoredShortlistOwnerReference()).toEqual({
+      ownerType: 'session',
+      ownerKey: 'owner-session-new-12345678',
+    });
+    expect(warnSpy).not.toHaveBeenCalledWith(
+      '[shortlist:publish_owner_mismatch] Published shortlist owner differs from the stored owner reference.',
+      expect.anything(),
+    );
+  });
 });

@@ -192,6 +192,7 @@ describe('A2 home runtime spec locks', () => {
   it('keeps consultation form visible and submit-capable with required fields', async () => {
     const html = await getHtml('/en');
 
+    expect(html).not.toContain('home-consultation-section');
     expect(html).toContain('id="consultation-form"');
     expect(html).toContain('name="name"');
     expect(html).toContain('name="contact"');

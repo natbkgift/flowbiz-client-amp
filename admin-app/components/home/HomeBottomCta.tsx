@@ -11,8 +11,10 @@ export function HomeBottomCta({
   secondaryLabel,
   secondaryUrl,
   trustNote,
+  conversionNote,
   formSlot,
   order,
+  sectionId,
 }: {
   heading: string;
   subheading: string;
@@ -21,15 +23,25 @@ export function HomeBottomCta({
   secondaryLabel: string;
   secondaryUrl: string;
   trustNote: string;
+  conversionNote?: string;
   formSlot: ReactNode;
   order?: number;
+  sectionId?: string;
 }) {
+  const resolvedSectionId = sectionId ?? 'home-bottom-cta';
+  const headingId = `${resolvedSectionId}-title`;
+
   return (
-    <section className="home-bottom-cta cv-auto py-20 md:py-32 bg-gray-900 text-white mt-8" style={order != null ? { order } : undefined}>
+    <section
+      id={resolvedSectionId}
+      className="home-bottom-cta cv-auto py-20 md:py-32 bg-gray-900 text-white mt-8"
+      style={order != null ? { order } : undefined}
+      aria-labelledby={headingId}
+    >
       <Container variant="wide">
         <div className="grid lg:grid-cols-2 gap-16 items-center">
           <div className="reveal">
-            <h2 className="text-3xl md:text-5xl font-serif font-medium mb-6 leading-tight">
+            <h2 id={headingId} className="text-3xl md:text-5xl font-serif font-medium mb-6 leading-tight">
               {heading}
             </h2>
             <p className="text-lg text-white/80 mb-10 max-w-lg leading-relaxed">
@@ -53,10 +65,13 @@ export function HomeBottomCta({
                 {secondaryLabel}
               </TrackedLink>
             </div>
+            {conversionNote ? (
+              <p className="home-bottom-conversion-note mt-4 text-sm text-white/72 max-w-xl">{conversionNote}</p>
+            ) : null}
             <p className="home-bottom-trust-note mt-4 text-sm text-white/70 max-w-xl">{trustNote}</p>
           </div>
           <div className="reveal">
-            <div className="bg-white p-8 md:p-10 rounded-2xl shadow-2xl text-gray-900">
+            <div className="bg-white p-8 md:p-10 rounded-2xl shadow-2xl text-gray-900" aria-label="consultation-form-panel">
               {formSlot}
             </div>
           </div>

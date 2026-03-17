@@ -190,6 +190,7 @@ def test_a11_smart_finder_guided_steps_summary_fallback_and_tracking(client) -> 
     assert "Match score" in html
     assert 'data-event="finder_consultation_cta_click"' in html
     assert 'data-event="finder_compare_cta_click"' in html
+    assert "WhatsApp" not in html
 
     assert "A11 Buy Primary EN" in html
     assert "bad-cdn.example" not in html
@@ -223,6 +224,7 @@ def test_a11_compare_routes_render_table_mobile_collapse_and_tracking(client) ->
     assert "compare_usage" in html
     assert 'data-event="compare_consultation_cta_click"' in html
     assert "/en/contact?intent=consultation&source=compare" in html
+    assert "WhatsApp" not in html
     assert "A11 Buy Primary EN" in html
     assert "A11 Invest Candidate" in html
     assert "bad-cdn.example" not in html

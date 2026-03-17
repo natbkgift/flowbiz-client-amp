@@ -10,7 +10,7 @@ function resolveCopy(locale: string) {
       subtitle: 'บริบทของพื้นที่ สัญญาณราคา และเส้นทางถัดไปสำหรับการเลือกทำเลอย่างมั่นใจ',
       contact: 'คุยกับที่ปรึกษา',
       finder: 'ใช้ Smart Finder',
-      loading: 'AMP Area View',
+      loading: 'ภาพรวมทำเลจาก AMP',
     };
   }
 

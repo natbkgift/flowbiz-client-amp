@@ -39,7 +39,7 @@ export function buildWhatsAppUrl(text: string, baseUrl: string = CTA.whatsAppUrl
   }
 }
 
-export type PublicCtaSurface = 'home' | 'contact' | 'sell' | 'project_detail' | 'property_detail' | 'other';
+export type PublicCtaSurface = 'home' | 'contact' | 'sell' | 'project_detail' | 'property_detail' | 'compare' | 'smart_finder' | 'area_detail' | 'blog_detail' | 'invest' | 'investment' | 'investor' | 'other';
 
 function stripLocaleFromPathname(pathname: string): string {
   const locale = localeFromPathname(pathname);
@@ -53,8 +53,15 @@ export function getPublicCtaSurface(pathname: string): PublicCtaSurface {
   if (path === '/') return 'home';
   if (path === '/contact' || path.startsWith('/contact?')) return 'contact';
   if (path === '/sell' || path.startsWith('/sell?')) return 'sell';
+  if (path === '/compare' || path.startsWith('/compare?')) return 'compare';
+  if (path === '/smart-finder' || path.startsWith('/smart-finder?')) return 'smart_finder';
+  if (path === '/invest' || path.startsWith('/invest?')) return 'invest';
+  if (path === '/investment' || path.startsWith('/investment?')) return 'investment';
+  if (path === '/investor' || path.startsWith('/investor?')) return 'investor';
   if (/^\/projects\/[^/]+$/.test(path)) return 'project_detail';
   if (/^\/property\/[^/]+$/.test(path)) return 'property_detail';
+  if (/^\/areas\/[^/]+$/.test(path)) return 'area_detail';
+  if (/^\/blog\/[^/]+$/.test(path)) return 'blog_detail';
 
   return 'other';
 }

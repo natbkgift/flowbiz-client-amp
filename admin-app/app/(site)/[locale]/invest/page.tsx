@@ -3,7 +3,7 @@ import { Container } from '@/components/layout/Container';
 import { Breadcrumbs } from '@/components/layout/Breadcrumbs';
 
 import { LeadForm } from '@/components/forms/LeadForm';
-import { buildAdvisorWhatsApp, getAdvisoryLabels, getAdvisoryProofs, withLocaleQuery } from '@/app/_lib/public-advisory';
+import { getAdvisoryLabels, getAdvisoryProofs, withLocaleQuery } from '@/app/_lib/public-advisory';
 import { getDictionary, normalizeLocale } from '@/app/_lib/i18n/get-dictionary';
 import { makePageMetadata } from '@/app/_lib/i18n/metadata';
 import { withLocale } from '@/app/_lib/i18n/routing';
@@ -47,7 +47,7 @@ export default async function InvestPage(props: { params: Promise<{ locale: stri
         signals={[
           {
             kicker: dict.advisory.bestFor,
-            title: locale === 'th' ? 'นักลงทุนที่ต้องการอ่านตลาดแบบไม่ overclaim' : 'Investors who want clearer market framing',
+            title: locale === 'th' ? 'นักลงทุนที่ต้องการอ่านตลาดแบบไม่ขายฝันเกินจริง' : 'Investors who want clearer market framing',
             body: locale === 'th'
               ? 'เหมาะกับผู้ที่ต้องการเทียบดีมานด์เช่า ต้นทุน และทางออกการขายต่อแบบเป็นระบบ'
               : 'Best for buyers comparing demand, costs, and realistic exit timelines instead of brochure claims.',
@@ -55,9 +55,9 @@ export default async function InvestPage(props: { params: Promise<{ locale: stri
           },
           {
             kicker: dict.advisory.nextStep,
-            title: locale === 'th' ? 'ขอ investment plan ก่อนเลือกโครงการ' : 'Request an investment plan before choosing',
+            title: locale === 'th' ? 'ขอแผนลงทุนก่อนเลือกโครงการ' : 'Request an investment plan before choosing',
             body: locale === 'th'
-              ? 'ทีมจะสรุป shortlist พร้อมสมมติฐานผลตอบแทนและ trade-offs ที่ต้องรู้ก่อนดูห้องจริง'
+              ? 'ทีมจะสรุป shortlist พร้อมสมมติฐานผลตอบแทนและข้อแลกเปลี่ยนที่ต้องรู้ก่อนดูห้องจริง'
               : 'We prepare a shortlist with yield assumptions and trade-offs before you enter deal discussions.',
             icon: 'check',
           },
@@ -72,17 +72,15 @@ export default async function InvestPage(props: { params: Promise<{ locale: stri
         ]}
         primaryAction={{
           href: withLocaleQuery(locale, '/contact', { intent: 'investment', source: 'invest_hero' }),
+          id: 'invest_plan_primary',
           label: dict.invest.reportCtaTitle,
           eventPayload: { cta: 'investment_plan', from: 'invest_hero' },
         }}
         secondaryAction={{
           href: withLocale(locale, '/smart-finder'),
+          id: 'invest_smart_finder_secondary',
           label: dict.advisory.useSmartFinder,
           eventPayload: { cta: 'use_smart_finder', from: 'invest_hero' },
-        }}
-        tertiaryAction={{
-          href: buildAdvisorWhatsApp(locale, dict),
-          label: dict.cta.whatsapp,
         }}
       />
 

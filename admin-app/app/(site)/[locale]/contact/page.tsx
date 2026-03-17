@@ -58,13 +58,13 @@ function humanizeBuyingCostValue(locale: 'en' | 'th', value: string | null | und
 
   const maps = {
     purchase: {
-      thai_local: locale === 'th' ? 'Thai / local purchase context' : 'Thai / local purchase context',
-      foreign: locale === 'th' ? 'Foreign purchase context' : 'Foreign purchase context',
+      thai_local: locale === 'th' ? 'บริบทการซื้อแบบคนไทย / ผู้ซื้อในประเทศ' : 'Thai / local purchase context',
+      foreign: locale === 'th' ? 'บริบทการซื้อแบบผู้ซื้อต่างชาติ' : 'Foreign purchase context',
     },
     ownership: {
-      freehold: 'Freehold / foreign quota',
-      leasehold: 'Leasehold',
-      company_hold: 'Thai company hold',
+      freehold: locale === 'th' ? 'กรรมสิทธิ์ freehold / foreign quota' : 'Freehold / foreign quota',
+      leasehold: locale === 'th' ? 'สัญญาเช่าระยะยาว' : 'Leasehold',
+      company_hold: locale === 'th' ? 'ถือครองผ่านบริษัทไทย' : 'Thai company hold',
     },
     transfer: {
       buyer_pays: locale === 'th' ? 'ผู้ซื้อรับภาระหลัก' : 'Buyer-led split',
@@ -72,8 +72,8 @@ function humanizeBuyingCostValue(locale: 'en' | 'th', value: string | null | und
       seller_pays: locale === 'th' ? 'ผู้ขายรับภาระหลัก' : 'Seller-led split',
     },
     financing: {
-      cash: 'Cash purchase',
-      financing: 'Financing scenario',
+      cash: locale === 'th' ? 'ซื้อด้วยเงินสด' : 'Cash purchase',
+      financing: locale === 'th' ? 'มีการขอสินเชื่อ / financing' : 'Financing scenario',
     },
   } as const;
 
@@ -111,48 +111,48 @@ export default async function ContactPage(
       ? `${locale === 'th' ? 'ต้นทุนต่อปี' : 'Annual costs'}: ${formatCurrency(locale, investorContext.annualCosts)}`
       : null,
     formatPercent(investorContext.grossYield)
-      ? `${locale === 'th' ? 'Gross yield' : 'Gross yield'}: ${formatPercent(investorContext.grossYield)}`
+      ? `${locale === 'th' ? 'อัตราผลตอบแทนขั้นต้น' : 'Gross yield'}: ${formatPercent(investorContext.grossYield)}`
       : null,
     formatPercent(investorContext.netYield)
-      ? `${locale === 'th' ? 'Net yield' : 'Net yield'}: ${formatPercent(investorContext.netYield)}`
+      ? `${locale === 'th' ? 'อัตราผลตอบแทนสุทธิ' : 'Net yield'}: ${formatPercent(investorContext.netYield)}`
       : null,
     typeof investorContext.paybackYears === 'number' && Number.isFinite(investorContext.paybackYears)
-      ? `${locale === 'th' ? 'Payback' : 'Payback'}: ${investorContext.paybackYears.toFixed(1)} ${locale === 'th' ? 'ปี' : 'years'}`
+      ? `${locale === 'th' ? 'ระยะเวลาคืนทุน' : 'Payback'}: ${investorContext.paybackYears.toFixed(1)} ${locale === 'th' ? 'ปี' : 'years'}`
       : null,
     investorContext.ids?.length
-      ? `${locale === 'th' ? 'โครงการที่เทียบ' : 'Compared projects'}: ${investorContext.ids.join(', ')}`
+      ? `${locale === 'th' ? 'โครงการที่นำมาเทียบ' : 'Compared projects'}: ${investorContext.ids.join(', ')}`
       : null,
   ].filter((item): item is string => Boolean(item));
   const buyingCostLines = [
     formatCurrency(locale, buyingCostContext.propertyPrice)
-      ? `${locale === 'th' ? 'Target purchase price' : 'Target purchase price'}: ${formatCurrency(locale, buyingCostContext.propertyPrice)}`
+      ? `${locale === 'th' ? 'ราคาซื้อเป้าหมาย' : 'Target purchase price'}: ${formatCurrency(locale, buyingCostContext.propertyPrice)}`
       : null,
     humanizeBuyingCostValue(locale, buyingCostContext.purchaseContext, 'purchase')
-      ? `${locale === 'th' ? 'Purchase context' : 'Purchase context'}: ${humanizeBuyingCostValue(locale, buyingCostContext.purchaseContext, 'purchase')}`
+      ? `${locale === 'th' ? 'บริบทการซื้อ' : 'Purchase context'}: ${humanizeBuyingCostValue(locale, buyingCostContext.purchaseContext, 'purchase')}`
       : null,
     humanizeBuyingCostValue(locale, buyingCostContext.ownershipType, 'ownership')
-      ? `${locale === 'th' ? 'Ownership type' : 'Ownership type'}: ${humanizeBuyingCostValue(locale, buyingCostContext.ownershipType, 'ownership')}`
+      ? `${locale === 'th' ? 'รูปแบบการถือครอง' : 'Ownership type'}: ${humanizeBuyingCostValue(locale, buyingCostContext.ownershipType, 'ownership')}`
       : null,
     humanizeBuyingCostValue(locale, buyingCostContext.transferSplit, 'transfer')
-      ? `${locale === 'th' ? 'Transfer split' : 'Transfer split'}: ${humanizeBuyingCostValue(locale, buyingCostContext.transferSplit, 'transfer')}`
+      ? `${locale === 'th' ? 'การแบ่งภาระค่าโอน' : 'Transfer split'}: ${humanizeBuyingCostValue(locale, buyingCostContext.transferSplit, 'transfer')}`
       : null,
     humanizeBuyingCostValue(locale, buyingCostContext.financingMode, 'financing')
-      ? `${locale === 'th' ? 'Financing mode' : 'Financing mode'}: ${humanizeBuyingCostValue(locale, buyingCostContext.financingMode, 'financing')}`
+      ? `${locale === 'th' ? 'รูปแบบการชำระเงิน' : 'Financing mode'}: ${humanizeBuyingCostValue(locale, buyingCostContext.financingMode, 'financing')}`
       : null,
     formatCurrency(locale, buyingCostContext.governmentFees)
-      ? `${locale === 'th' ? 'Government fees' : 'Government fees'}: ${formatCurrency(locale, buyingCostContext.governmentFees)}`
+      ? `${locale === 'th' ? 'ค่าธรรมเนียมภาครัฐ' : 'Government fees'}: ${formatCurrency(locale, buyingCostContext.governmentFees)}`
       : null,
     formatCurrency(locale, buyingCostContext.closingCost)
-      ? `${locale === 'th' ? 'Closing cost' : 'Closing cost'}: ${formatCurrency(locale, buyingCostContext.closingCost)}`
+      ? `${locale === 'th' ? 'ค่าใช้จ่ายวันโอน' : 'Closing cost'}: ${formatCurrency(locale, buyingCostContext.closingCost)}`
       : null,
     formatCurrency(locale, buyingCostContext.totalCashNeeded)
-      ? `${locale === 'th' ? 'Total cash needed' : 'Total cash needed'}: ${formatCurrency(locale, buyingCostContext.totalCashNeeded)}`
+      ? `${locale === 'th' ? 'เงินสดรวมที่ต้องเตรียม' : 'Total cash needed'}: ${formatCurrency(locale, buyingCostContext.totalCashNeeded)}`
       : null,
     buyingCostContext.unresolvedItems?.length
-      ? `${locale === 'th' ? 'Unresolved items' : 'Unresolved items'}: ${buyingCostContext.unresolvedItems.join(', ')}`
+      ? `${locale === 'th' ? 'รายการที่ยังต้องตรวจเพิ่ม' : 'Unresolved items'}: ${buyingCostContext.unresolvedItems.join(', ')}`
       : null,
     buyingCostContext.disclaimerKey
-      ? `${locale === 'th' ? 'Disclosure' : 'Disclosure'}: ${buyingCostContext.disclaimerKey}`
+      ? `${locale === 'th' ? 'หมายเหตุการประเมิน' : 'Disclosure'}: ${buyingCostContext.disclaimerKey}`
       : null,
   ].filter((item): item is string => Boolean(item));
   const defaultMessage = msg
@@ -160,7 +160,7 @@ export default async function ContactPage(
     : buyingCostLines.length
       ? [
           locale === 'th'
-            ? 'I want to continue the buying-cost estimate with an advisor using the assumptions below.'
+            ? 'ต้องการคุยต่อกับที่ปรึกษาโดยอ้างอิงสมมติฐานจากการประเมิน buying cost ด้านล่าง'
             : 'I want to continue the buying-cost estimate with an advisor using the assumptions below.',
           '',
           ...buyingCostLines,
@@ -245,7 +245,7 @@ export default async function ContactPage(
               {hasBuyingCostContext ? (
                 <div className="trust-box">
                   <h3 className="trust-box__title">
-                    {locale === 'th' ? 'Buying cost estimate carried from estimator' : 'Buying cost estimate carried from estimator'}
+                    {locale === 'th' ? 'สรุปการประเมิน buying cost ที่ส่งต่อมาจาก estimator' : 'Buying cost estimate carried from estimator'}
                   </h3>
                   <ul className="bullet-list">
                     {buyingCostLines.map((line) => (
@@ -258,7 +258,7 @@ export default async function ContactPage(
               {hasInvestorContext ? (
                 <div className="trust-box">
                   <h3 className="trust-box__title">
-                    {locale === 'th' ? 'Investor handoff summary' : 'Investor handoff summary'}
+                    {locale === 'th' ? 'สรุปบริบทนักลงทุนที่ส่งต่อมา' : 'Investor handoff summary'}
                   </h3>
                   <ul className="bullet-list">
                     {investorLines.map((line) => (

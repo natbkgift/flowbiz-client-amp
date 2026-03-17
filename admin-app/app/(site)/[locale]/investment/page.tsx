@@ -5,7 +5,7 @@ import { ForeignQuotaExplainer } from '@/components/knowledge/ForeignQuotaExplai
 import { OwnershipComparison } from '@/components/knowledge/OwnershipComparison';
 
 import { LeadForm } from '@/components/forms/LeadForm';
-import { buildAdvisorWhatsApp, getAdvisoryLabels, getAdvisoryProofs, withLocaleQuery } from '@/app/_lib/public-advisory';
+import { getAdvisoryLabels, getAdvisoryProofs, withLocaleQuery } from '@/app/_lib/public-advisory';
 import { getDictionary, normalizeLocale } from '@/app/_lib/i18n/get-dictionary';
 import { makePageMetadata } from '@/app/_lib/i18n/metadata';
 import { withLocale } from '@/app/_lib/i18n/routing';
@@ -46,7 +46,7 @@ export default async function InvestmentPage(props: { params: Promise<{ locale: 
         signals={[
           {
             kicker: dict.advisory.bestFor,
-            title: locale === 'th' ? 'ผู้ซื้อที่ต้องการเข้าใจ ROI และ ownership' : 'Buyers who need ROI and ownership clarity',
+            title: locale === 'th' ? 'ผู้ซื้อที่ต้องการเข้าใจผลตอบแทนและโครงสร้างการถือครอง' : 'Buyers who need ROI and ownership clarity',
             body: locale === 'th'
               ? 'เหมาะกับผู้ที่ต้องการเข้าใจผลตอบแทน โครงสร้างถือครอง และข้อจำกัดของแต่ละทางเลือก'
               : 'Best for buyers who want ROI logic, ownership context, and legal structure before choosing.',
@@ -56,13 +56,13 @@ export default async function InvestmentPage(props: { params: Promise<{ locale: 
             kicker: dict.advisory.nextStep,
             title: locale === 'th' ? 'ให้ทีมวางกลยุทธ์ก่อนลงลึกแต่ละโครงการ' : 'Use strategy first, then go deeper',
             body: locale === 'th'
-              ? 'เริ่มจาก investment plan เพื่อรู้ว่าโครงการแบบไหนเหมาะกับเป้าหมายของคุณจริง'
+              ? 'เริ่มจากแผนลงทุนเพื่อรู้ว่าโครงการแบบไหนเหมาะกับเป้าหมายของคุณจริง'
               : 'Start with the investment plan so the project shortlist is aligned with the actual objective.',
             icon: 'check',
           },
           {
             kicker: dict.advisory.trustSignal,
-            title: locale === 'th' ? 'มีทั้งความรู้เชิง ownership และ execution' : 'Ownership context with execution support',
+            title: locale === 'th' ? 'มีทั้งความรู้เรื่องการถือครองและการปิดดีล' : 'Ownership context with execution support',
             body: locale === 'th'
               ? 'เราเชื่อมข้อมูลเชิงกฎหมายกับการคัด inventory และ flow ปิดดีลให้ต่อกัน'
               : 'We connect legal framing, inventory curation, and execution steps in one advisory workflow.',
@@ -71,17 +71,15 @@ export default async function InvestmentPage(props: { params: Promise<{ locale: 
         ]}
         primaryAction={{
           href: withLocaleQuery(locale, '/contact', { intent: 'investment', source: 'investment_hero' }),
+          id: 'investment_plan_primary',
           label: dict.cta.getInvestmentPlan,
           eventPayload: { cta: 'get_investment_plan', from: 'investment_hero' },
         }}
         secondaryAction={{
           href: withLocale(locale, '/projects'),
+          id: 'investment_projects_secondary',
           label: dict.advisory.browseVerifiedInventory,
           eventPayload: { cta: 'browse_verified_inventory', from: 'investment_hero' },
-        }}
-        tertiaryAction={{
-          href: buildAdvisorWhatsApp(locale, dict),
-          label: dict.cta.whatsapp,
         }}
       />
 

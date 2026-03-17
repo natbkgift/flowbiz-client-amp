@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 
-import { buildAdvisorWhatsApp, getAdvisoryLabels, getAdvisoryProofs, withLocaleQuery } from '@/app/_lib/public-advisory';
+import { getAdvisoryLabels, getAdvisoryProofs, withLocaleQuery } from '@/app/_lib/public-advisory';
 import { Container } from '@/components/layout/Container';
 import { getDictionary, normalizeLocale } from '@/app/_lib/i18n/get-dictionary';
 import { withLocale, ogLocale } from '@/app/_lib/i18n/routing';
@@ -249,27 +249,25 @@ export default async function AreaPage(
         ]}
         primaryAction={{
           href: withLocaleQuery(locale, '/contact', { intent: 'area_consultation', area: params.slug }),
+          id: 'area_consultation_primary',
           label: dict.cta.speakToAdvisor,
           eventPayload: { cta: 'area_consultation', from: 'area_hero', area: params.slug },
         }}
         secondaryAction={{
           href: withLocale(locale, '/smart-finder'),
+          id: 'area_smart_finder_secondary',
           label: dict.advisory.useSmartFinder,
           eventPayload: { cta: 'use_smart_finder', from: 'area_hero', area: params.slug },
         }}
-        tertiaryAction={{
-          href: buildAdvisorWhatsApp(locale, dict),
-          label: dict.cta.whatsapp,
-        }}
       />
 
-      <section className="section">
+      <section className="section" id="area-authority-section">
         <Container>
           <div className="detail-layout advisory-detail-layout">
             <div className="detail-stack">
-              <section className="authority-card reveal">
+              <section className="authority-card reveal" id="area-authority-snapshot">
                 <div className="section-header">
-                  <h2 className="section-title section-title--sm">{locale === 'th' ? 'Authority snapshot' : 'Authority snapshot'}</h2>
+                  <h2 className="section-title section-title--sm">{locale === 'th' ? 'สรุปข้อมูลทำเล' : 'Authority snapshot'}</h2>
                   <p className="section-subtitle">
                     {hasStats ? dict.area.priceTrendHasData : dict.area.priceTrendNoData}
                   </p>
@@ -320,9 +318,9 @@ export default async function AreaPage(
                 </div>
               </section>
 
-              <section className="signal-grid signal-grid--two-up reveal">
+              <section className="signal-grid signal-grid--two-up reveal" id="area-intelligence-summary">
                 <div className="authority-card">
-                  <h2 className="card-title">{locale === 'th' ? 'Area intelligence read' : 'Area intelligence read'}</h2>
+                  <h2 className="card-title">{locale === 'th' ? 'วิธีอ่านข้อมูลทำเล' : 'Area intelligence read'}</h2>
                   <div className="insight-list mt-3">
                     {intelligenceSignals.map((item) => (
                       <div key={item} className="insight-list__item">
@@ -339,8 +337,8 @@ export default async function AreaPage(
                   </div>
                 </div>
 
-                <div className="authority-card">
-                  <h2 className="card-title">{locale === 'th' ? 'Related authority reads' : 'Related authority reads'}</h2>
+                <div className="authority-card" id="area-related-reads">
+                  <h2 className="card-title">{locale === 'th' ? 'บทความที่ช่วยอ่านต่อ' : 'Related authority reads'}</h2>
                   <div className="insight-list mt-3">
                     {relatedReads.length ? relatedReads.map((post) => (
                       <Link key={post.slug} href={withLocale(locale, `/blog/${encodeURIComponent(post.slug)}`)} className="insight-list__item">
@@ -356,7 +354,7 @@ export default async function AreaPage(
                   </div>
                   <div className="card-actions mt-3">
                     <Link className="btn btn-secondary" href={withLocale(locale, '/calculator')}>
-                      {locale === 'th' ? 'เปิด calculator' : 'Open calculator'}
+                      {locale === 'th' ? 'เปิดเครื่องคำนวณ' : 'Open calculator'}
                     </Link>
                   </div>
                 </div>
@@ -364,7 +362,7 @@ export default async function AreaPage(
             </div>
 
             <aside className="detail-sidebar detail-stack">
-              <div className="page-rail-card reveal">
+              <div className="page-rail-card reveal" id="area-advisor-brief">
                 <h2 className="card-title">{locale === 'th' ? 'ส่ง brief ของทำเลนี้' : 'Send a brief around this area'}</h2>
                 <p className="card-subtitle">
                   {locale === 'th'

@@ -25,6 +25,8 @@ describe('HomeBottomCta conversion gate', () => {
         secondaryLabel="See Investment Path"
         secondaryUrl="/en/invest"
         trustNote="Our local advisory team follows up with a shortlist matched to your goals."
+        conversionNote="The primary CTA keeps you on this page and jumps straight to the consultation form so you can brief the team immediately."
+        sectionId="home-consultation-section"
         formSlot={(
           <LeadForm
             formId="home-consultation-form"
@@ -36,8 +38,11 @@ describe('HomeBottomCta conversion gate', () => {
     );
 
     expect(screen.getByRole('link', { name: 'Book Consultation' })).toHaveAttribute('href', '#home-consultation-form');
+    expect(container.querySelector('section#home-consultation-section')).not.toBeNull();
+    expect(container.querySelector('section#home-consultation-section')?.getAttribute('aria-labelledby')).toBe('home-consultation-section-title');
     expect(screen.getByRole('heading', { name: 'Request a Private Consultation' })).toBeInTheDocument();
     expect(screen.getByText('Complete the short form and we will follow up with a curated shortlist matched to your budget.')).toBeInTheDocument();
+    expect(screen.getByText('The primary CTA keeps you on this page and jumps straight to the consultation form so you can brief the team immediately.')).toBeInTheDocument();
     expect(container.querySelectorAll('form#home-consultation-form')).toHaveLength(1);
     expect(container.querySelectorAll('.bg-white h3')).toHaveLength(1);
   });

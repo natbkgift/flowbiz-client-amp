@@ -9,7 +9,7 @@ vi.mock('next/navigation', () => ({
 
 describe('LeadForm custom intro', () => {
   it('renders custom heading, description, and form id when provided', () => {
-    render(
+    const { container } = render(
       <LeadForm
         formId="custom-consultation-form"
         heading="Custom consultation heading"
@@ -20,5 +20,9 @@ describe('LeadForm custom intro', () => {
     expect(screen.getByRole('heading', { name: 'Custom consultation heading' })).toBeInTheDocument();
     expect(screen.getByText('Custom consultation description')).toBeInTheDocument();
     expect(document.querySelector('form#custom-consultation-form')).not.toBeNull();
+    expect(container.querySelector('[aria-label="lead-form-support-links"]')).not.toBeNull();
+    expect(screen.getByRole('link', { name: 'WhatsApp' })).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'LINE' })).toBeInTheDocument();
+    expect(container.querySelectorAll('[aria-label="lead-form-support-links"] .btn')).toHaveLength(0);
   });
 });

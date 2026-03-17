@@ -4,6 +4,9 @@ import { getDictionary, normalizeLocale } from '@/app/_lib/i18n/get-dictionary';
 export function OwnershipComparison({ locale }: { locale: string }) {
   const dict = getDictionary(normalizeLocale(locale));
   const k = dict.knowledge.ownershipComparison;
+  const labels = normalizeLocale(locale) === 'th'
+    ? { pros: 'จุดเด่น', cons: 'ข้อควรระวัง' }
+    : { pros: 'Pros', cons: 'Cons' };
 
   return (
     <section className="section section--alt">
@@ -18,13 +21,13 @@ export function OwnershipComparison({ locale }: { locale: string }) {
               <h3 className="card-title">{opt.type}</h3>
               <p className="card-subtitle">{opt.description}</p>
               <div className="card-details">
-                <strong>Pros</strong>
+                <strong>{labels.pros}</strong>
                 <ul className="bullet-list bullet-list--compact">
                   {opt.pros.map((p) => (
                     <li key={p}>{p}</li>
                   ))}
                 </ul>
-                <strong>Cons</strong>
+                <strong>{labels.cons}</strong>
                 <ul className="bullet-list bullet-list--compact">
                   {opt.cons.map((c) => (
                     <li key={c}>{c}</li>

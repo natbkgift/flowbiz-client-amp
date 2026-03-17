@@ -81,5 +81,9 @@ describe('area detail flat-payload regression', () => {
     expect(markup).toContain('เริ่มจากพื้นที่ก่อนเลือกโครงการ');
     expect(markup).toContain('area_consultation');
     expect(markup).toContain(flatAreaPayload.slug);
+    expect(markup).toContain('area_consultation_primary');
+    expect(markup).toContain('area-authority-snapshot');
+    expect(markup).toContain('สรุปข้อมูลทำเล');
+    expect(markup).not.toContain('btn btn-tertiary');
   });
 });

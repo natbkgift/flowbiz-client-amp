@@ -64,6 +64,9 @@ describe('ShortlistSharedSurface', () => {
     });
 
     expect(screen.getAllByText(/read-only/i).length).toBeGreaterThan(0);
+    expect(screen.getByRole('heading', { name: /shared shortlist context/i })).toBeTruthy();
+    expect(screen.getByText(/hides owner identity/i)).toBeTruthy();
+    expect(screen.getByText(/updated mar 15, 2026/i)).toBeTruthy();
     expect(screen.queryByRole('button', { name: /remove from shortlist/i })).toBeNull();
     expect(screen.getByRole('link', { name: /view listing details/i }).getAttribute('href')).toBe('/en/property/alpha-residence');
   });

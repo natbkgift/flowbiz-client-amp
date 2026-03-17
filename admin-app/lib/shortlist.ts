@@ -400,6 +400,23 @@ function getOwnerReferenceFromShortlist(
   };
 }
 
+function shouldWarnOnPublishedOwnerMismatch(
+  existingOwnerReference: ShortlistOwnerReference,
+  normalized: ShortlistDetail,
+  source: ShortlistContinuityHydrationSource,
+): boolean {
+  const sessionHydrationSource = source === 'fetch' || source === 'save' || source === 'remove';
+  if (
+    sessionHydrationSource
+    && existingOwnerReference.ownerType === 'session'
+    && normalized.owner_type === 'session'
+  ) {
+    return false;
+  }
+
+  return true;
+}
+
 export function readCachedShortlistForCurrentOwner(): ShortlistDetail | null {
   const shortlist = readCachedShortlist();
   if (!shortlist) return null;
@@ -450,6 +467,7 @@ export function publishShortlist(
       if (
         existingOwnerReference
         && !shortlistMatchesOwnerReference(normalized, existingOwnerReference)
+        && shouldWarnOnPublishedOwnerMismatch(existingOwnerReference, normalized, source)
       ) {
         recordShortlistWarning('publish_owner_mismatch', 'Published shortlist owner differs from the stored owner reference.', {
           shortlistId: normalized.id,

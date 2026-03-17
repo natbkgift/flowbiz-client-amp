@@ -279,4 +279,57 @@ describe('investor handoff regression', () => {
         Node.DOCUMENT_POSITION_FOLLOWING,
     ).toBeTruthy();
   });
+
+  it('localizes buying cost and investor handoff summaries on the Thai contact route', async () => {
+    const handoffQuery = {
+      ...buildBuyingCostAdvisorQuery({
+        intent: 'buying_cost_review',
+        source: 'buying_cost_share',
+        tool: 'buying_cost_estimator',
+        propertyPrice: 8_200_000,
+        purchaseContext: 'foreign',
+        ownershipType: 'leasehold',
+        transferSplit: 'buyer_pays',
+        financingMode: 'financing',
+        assumptionSetId: 'amp_v2_buying_cost_baseline',
+        assumptionVersion: '2026-03-15',
+        governmentFees: 164_000,
+        closingCost: 304_000,
+        totalCashNeeded: 8_504_000,
+        lawyerFee: 30_000,
+        bankTransferCost: 20_000,
+        fxEstimate: 40_000,
+        unresolvedItems: ['withholding_tax_review'],
+        disclaimerKey: 'buying_cost_estimator.assumption_led_v1',
+      }),
+      ...buildInvestorToolQuery({
+        purchasePrice: 5_000_000,
+        monthlyRent: 30_000,
+        occupancyRate: 90,
+        annualCosts: 120_000,
+        grossYield: 6.48,
+        netYield: 4.08,
+        paybackYears: 24.5,
+        intent: 'investment_plan',
+        source: 'compare_review',
+      }),
+      ids: 'alpha,beta',
+    };
+
+    render(
+      await ContactPage({
+        params: Promise.resolve({ locale: 'th' }),
+        searchParams: Promise.resolve(handoffQuery),
+      }),
+    );
+
+    expect(screen.getByRole('heading', { name: /สรุปการประเมิน buying cost ที่ส่งต่อมาจาก estimator/i })).toBeTruthy();
+    expect(screen.getByRole('heading', { name: /สรุปบริบทนักลงทุนที่ส่งต่อมา/i })).toBeTruthy();
+    expect(screen.getByText(/ราคาซื้อเป้าหมาย: ฿8,200,000/i)).toBeTruthy();
+    expect(screen.getByText(/บริบทการซื้อ: บริบทการซื้อแบบผู้ซื้อต่างชาติ/i)).toBeTruthy();
+    expect(screen.getByText(/รูปแบบการถือครอง: สัญญาเช่าระยะยาว/i)).toBeTruthy();
+    expect(screen.getByText(/อัตราผลตอบแทนขั้นต้น: 6.48%/i)).toBeTruthy();
+    expect(screen.getByText(/ระยะเวลาคืนทุน: 24.5 ปี/i)).toBeTruthy();
+    expect(screen.getByText(/โครงการที่นำมาเทียบ: alpha, beta/i)).toBeTruthy();
+  });
 });

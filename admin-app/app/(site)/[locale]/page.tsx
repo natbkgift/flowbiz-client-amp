@@ -908,6 +908,12 @@ export default async function HomePage({
       : (locale === 'th'
         ? 'ทีมที่ปรึกษาท้องถิ่นจะติดต่อกลับพร้อม shortlist ที่ตรงกับเป้าหมายของคุณ'
         : 'Our local advisory team follows up with a shortlist matched to your goals.');
+  const bottomCtaConversionNote =
+    typeof composerBottomCta.conversion_note === 'string' && composerBottomCta.conversion_note.trim()
+      ? composerBottomCta.conversion_note.trim()
+      : (locale === 'th'
+        ? 'ปุ่มหลักจะพาคุณเลื่อนลงไปยังฟอร์มด้านขวาในหน้าเดิม เพื่อส่ง brief ให้ทีมได้ทันที'
+        : 'The primary CTA keeps you on this page and jumps straight to the consultation form so you can brief the team immediately.');
   const bottomCtaFormHeading =
     typeof composerBottomCta.form_heading === 'string' && composerBottomCta.form_heading.trim()
       ? composerBottomCta.form_heading.trim()
@@ -1533,7 +1539,9 @@ export default async function HomePage({
         secondaryLabel={bottomCtaSecondaryLabel}
         secondaryUrl={bottomCtaSecondaryUrl}
         trustNote={bottomCtaTrustNote}
+        conversionNote={bottomCtaConversionNote}
         order={sectionOrderStyle('bottom_cta').order}
+        sectionId="home-consultation-section"
         formSlot={(
           <LeadForm
             formId={bottomCtaFormId}

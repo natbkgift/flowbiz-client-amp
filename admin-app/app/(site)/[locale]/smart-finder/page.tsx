@@ -1,7 +1,7 @@
 import Link from 'next/link';
 
 import { Container } from '@/components/layout/Container';
-import { buildAdvisorWhatsApp, getAdvisoryLabels, getAdvisoryProofs, withLocaleQuery } from '@/app/_lib/public-advisory';
+import { getAdvisoryLabels, getAdvisoryProofs, withLocaleQuery } from '@/app/_lib/public-advisory';
 import { getDictionary, normalizeLocale } from '@/app/_lib/i18n/get-dictionary';
 import { makePageMetadata } from '@/app/_lib/i18n/metadata';
 import { withLocale } from '@/app/_lib/i18n/routing';
@@ -148,9 +148,9 @@ export default async function SmartFinderPage(
           },
           {
             kicker: dict.advisory.trustSignal,
-            title: locale === 'th' ? 'ใช้ route เดิม แต่เพิ่ม logic ให้ใช้งานจริงขึ้น' : 'Same route, stronger decision support',
+            title: locale === 'th' ? 'ยังเป็น route เดิม แต่ช่วยตัดสินใจได้ชัดขึ้น' : 'Same route, stronger decision support',
             body: locale === 'th'
-              ? 'เราไม่เปลี่ยน endpoint เดิม แต่ทำให้เครื่องมือนี้เป็นจุดเริ่มต้นของ funnel ที่ชัดขึ้น'
+              ? 'เราไม่เปลี่ยน endpoint เดิม แต่ทำให้เครื่องมือนี้เป็นจุดเริ่มต้นที่ใช้งานได้จริงมากขึ้น'
               : 'The route and payload stay the same, but the experience now works like a real advisory entry point.',
             icon: 'shield',
           },
@@ -158,16 +158,14 @@ export default async function SmartFinderPage(
         primaryAction={{
           href: '#finder-steps',
           label: dict.advisory.useSmartFinder,
+          id: 'smart_finder_start_primary',
           eventPayload: { cta: 'start_smart_finder', from: 'smart_finder_hero' },
         }}
         secondaryAction={{
           href: withLocaleQuery(locale, '/contact', { intent: 'consultation', source: 'smart_finder_hero' }),
           label: dict.cta.speakToAdvisor,
+          id: 'smart_finder_contact_secondary',
           eventPayload: { cta: 'speak_to_advisor', from: 'smart_finder_hero' },
-        }}
-        tertiaryAction={{
-          href: buildAdvisorWhatsApp(locale, dict),
-          label: dict.cta.whatsapp,
         }}
       />
 

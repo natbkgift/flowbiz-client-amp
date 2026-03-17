@@ -3,7 +3,7 @@ import { Container } from '@/components/layout/Container';
 import { Breadcrumbs } from '@/components/layout/Breadcrumbs';
 
 import { LeadForm } from '@/components/forms/LeadForm';
-import { buildAdvisorWhatsApp, getAdvisoryLabels, getAdvisoryProofs, withLocaleQuery } from '@/app/_lib/public-advisory';
+import { getAdvisoryLabels, getAdvisoryProofs, withLocaleQuery } from '@/app/_lib/public-advisory';
 import { getDictionary, normalizeLocale } from '@/app/_lib/i18n/get-dictionary';
 import { makePageMetadata } from '@/app/_lib/i18n/metadata';
 import { withLocale } from '@/app/_lib/i18n/routing';
@@ -46,7 +46,7 @@ export default async function InvestorPage(props: { params: Promise<{ locale: st
             kicker: dict.advisory.bestFor,
             title: locale === 'th' ? 'ผู้ลงทุนที่ต้องการเทียบโครงการแบบมีกรอบคิด' : 'Investors who want comparable decision framing',
             body: locale === 'th'
-              ? 'เหมาะกับผู้ที่ต้องการมอง portfolio fit, yield positioning และจังหวะเข้าซื้อให้เป็นภาพเดียวกัน'
+              ? 'เหมาะกับผู้ที่ต้องการมองความเหมาะกับพอร์ต ระดับผลตอบแทน และจังหวะเข้าซื้อให้เป็นภาพเดียวกัน'
               : 'Best for investors who need portfolio fit, yield positioning, and timing in one decision frame.',
             icon: 'trend',
           },
@@ -62,24 +62,22 @@ export default async function InvestorPage(props: { params: Promise<{ locale: st
             kicker: dict.advisory.trustSignal,
             title: locale === 'th' ? 'ทีมช่วยตีความตลาดแบบใช้งานได้จริง' : 'Market interpretation you can act on',
             body: locale === 'th'
-              ? 'เราแปลข้อมูลโครงการและดีมานด์ให้เป็น next action ไม่ใช่แค่สรุปตัวเลข'
+              ? 'เราแปลข้อมูลโครงการและดีมานด์ให้เป็นขั้นตอนถัดไป ไม่ใช่แค่สรุปตัวเลข'
               : 'We translate project and demand signals into next actions, not just passive dashboards.',
             icon: 'shield',
           },
         ]}
         primaryAction={{
           href: withLocaleQuery(locale, '/contact', { intent: 'investor', source: 'investor_hero' }),
+          id: 'investor_plan_primary',
           label: dict.cta.getInvestmentPlan,
           eventPayload: { cta: 'get_investment_plan', from: 'investor_hero' },
         }}
         secondaryAction={{
           href: withLocale(locale, '/smart-finder'),
+          id: 'investor_smart_finder_secondary',
           label: dict.advisory.useSmartFinder,
           eventPayload: { cta: 'use_smart_finder', from: 'investor_hero' },
-        }}
-        tertiaryAction={{
-          href: buildAdvisorWhatsApp(locale, dict),
-          label: dict.cta.whatsapp,
         }}
       />
 

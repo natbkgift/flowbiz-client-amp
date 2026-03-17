@@ -108,5 +108,6 @@ describe('Shortlist share flow', () => {
 
     expect(window.navigator.clipboard.writeText).toHaveBeenCalledWith('http://localhost:3000/en/shortlist/shared/token-123');
     expect(screen.getByText(/share link copied/i)).toBeTruthy();
+    expect(screen.getByText(/hides owner identity/i)).toBeTruthy();
   });
 });

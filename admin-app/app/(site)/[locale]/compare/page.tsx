@@ -235,13 +235,13 @@ export default async function ComparePage(
       ? `${locale === 'th' ? 'ค่าเช่าต่อเดือน' : 'Monthly rent'}: ${formatCurrency(locale, investorContext.monthlyRent)}`
       : null,
     formatPercent(investorContext.grossYield)
-      ? `${locale === 'th' ? 'Gross yield' : 'Gross yield'}: ${formatPercent(investorContext.grossYield)}`
+      ? `${locale === 'th' ? 'อัตราผลตอบแทนขั้นต้น' : 'Gross yield'}: ${formatPercent(investorContext.grossYield)}`
       : null,
     formatPercent(investorContext.netYield)
-      ? `${locale === 'th' ? 'Net yield' : 'Net yield'}: ${formatPercent(investorContext.netYield)}`
+      ? `${locale === 'th' ? 'อัตราผลตอบแทนสุทธิ' : 'Net yield'}: ${formatPercent(investorContext.netYield)}`
       : null,
     typeof investorContext.paybackYears === 'number' && Number.isFinite(investorContext.paybackYears)
-      ? `${locale === 'th' ? 'Payback' : 'Payback'}: ${investorContext.paybackYears.toFixed(1)} ${locale === 'th' ? 'ปี' : 'years'}`
+      ? `${locale === 'th' ? 'ระยะเวลาคืนทุน' : 'Payback'}: ${investorContext.paybackYears.toFixed(1)} ${locale === 'th' ? 'ปี' : 'years'}`
       : null,
   ].filter((item): item is string => Boolean(item));
 
@@ -284,16 +284,14 @@ export default async function ComparePage(
           primaryAction={{
             href: withLocale(locale, '/smart-finder'),
             label: dict.compare.goToSmartFinder,
+            id: 'compare_go_smart_finder_primary',
             eventPayload: { cta: 'go_to_smart_finder', from: 'compare_hero' },
           }}
           secondaryAction={{
             href: withLocale(locale, '/projects'),
             label: dict.compare.browseProjects,
+            id: 'compare_browse_projects_secondary',
             eventPayload: { cta: 'browse_projects', from: 'compare_hero' },
-          }}
-          tertiaryAction={{
-            href: buildAdvisorWhatsApp(locale, dict),
-            label: dict.cta.whatsapp,
           }}
         />
 
@@ -390,16 +388,14 @@ export default async function ComparePage(
         primaryAction={{
           href: withLocaleQuery(locale, '/contact', { intent: 'consultation', source: 'compare_hero' }),
           label: dict.compare.getInvestmentPlan,
+          id: 'compare_consultation_hero',
           eventPayload: { cta: 'get_investment_plan', from: 'compare_hero' },
         }}
         secondaryAction={{
           href: withLocale(locale, '/smart-finder'),
           label: dict.advisory.useSmartFinder,
+          id: 'compare_open_smart_finder',
           eventPayload: { cta: 'use_smart_finder', from: 'compare_hero' },
-        }}
-        tertiaryAction={{
-          href: buildAdvisorWhatsApp(locale, dict),
-          label: dict.cta.whatsapp,
         }}
       />
 
@@ -429,8 +425,8 @@ export default async function ComparePage(
           ) : null}
 
           {areaComparisons.length >= 2 ? (
-            <div className="card reveal mb-4">
-              <h2 className="card-title">{locale === 'th' ? 'Area comparison read' : 'Area comparison read'}</h2>
+            <div id="compare-area-context" className="card reveal mb-4">
+              <h2 className="card-title">{locale === 'th' ? 'ภาพรวมเปรียบเทียบระดับทำเล' : 'Area comparison read'}</h2>
               <p className="card-subtitle">
                 {locale === 'th'
                   ? 'ก่อนตัดสินใจที่ระดับโครงการ ลองอ่านบริบทของแต่ละทำเลแบบ side-by-side จากราคา ค่าเช่า และ ROI snapshot ที่มีอยู่จริง'
@@ -503,8 +499,8 @@ export default async function ComparePage(
             </div>
           ) : null}
 
-          <div className="card reveal mb-4">
-            <h2 className="card-title">{locale === 'th' ? 'Decision support summary' : 'Decision support summary'}</h2>
+          <div id="compare-decision-summary" className="card reveal mb-4">
+            <h2 className="card-title">{locale === 'th' ? 'สรุปเพื่อช่วยตัดสินใจ' : 'Decision support summary'}</h2>
             <p className="card-subtitle">
               {locale === 'th'
                 ? 'สรุปชั้นนี้มีไว้เพื่อจัดลำดับคำถามและ next step ของการเปรียบเทียบ ไม่ใช่เพื่อฟันธงการลงทุน'

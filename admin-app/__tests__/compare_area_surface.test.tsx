@@ -104,13 +104,16 @@ vi.mock('@/app/_lib/public-api-server', async () => {
 
 describe('compare area surface', () => {
   it('renders an area comparison read when compared projects resolve to different areas', async () => {
-    render(
+    const { container } = render(
       await ComparePage({
         params: Promise.resolve({ locale: 'en' }),
         searchParams: Promise.resolve({ ids: 'project-1,project-2' }),
       }),
     );
 
+    expect(container.querySelector('#compare-area-context')).not.toBeNull();
+    expect(container.querySelector('#compare_consultation_hero')).toHaveAttribute('href', '/en/contact?intent=consultation&source=compare_hero');
+    expect(container.querySelector('#compare_open_smart_finder')).toHaveAttribute('href', '/en/smart-finder');
     expect(screen.getByRole('heading', { name: /area comparison read/i })).toBeTruthy();
     expect(screen.getByRole('heading', { name: 'Jomtien' })).toBeTruthy();
     expect(screen.getByRole('heading', { name: 'Pratumnak' })).toBeTruthy();

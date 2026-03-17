@@ -30,4 +30,17 @@ describe('Header CTA visibility', () => {
     expect(container.querySelector('.header-cta-group')).toBeNull();
     expect(container.querySelector('.mobile-nav__cta')).toBeNull();
   });
+
+  it('suppresses global header CTAs on compare and smart finder routes', () => {
+    mockedPathname = '/en/compare';
+    const compareRender = render(<Header locale="en" dict={en} />);
+    expect(compareRender.container.querySelector('.header-cta-group')).toBeNull();
+    expect(compareRender.container.querySelector('.mobile-nav__cta')).toBeNull();
+    compareRender.unmount();
+
+    mockedPathname = '/en/smart-finder';
+    const finderRender = render(<Header locale="en" dict={en} />);
+    expect(finderRender.container.querySelector('.header-cta-group')).toBeNull();
+    expect(finderRender.container.querySelector('.mobile-nav__cta')).toBeNull();
+  });
 });

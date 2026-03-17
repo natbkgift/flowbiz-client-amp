@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 
-import { buildAdvisorWhatsApp, getAdvisoryLabels, getAdvisoryProofs, withLocaleQuery } from '@/app/_lib/public-advisory';
+import { getAdvisoryLabels, getAdvisoryProofs, withLocaleQuery } from '@/app/_lib/public-advisory';
 import { getDictionary, normalizeLocale } from '@/app/_lib/i18n/get-dictionary';
 import { ogLocale, withLocale } from '@/app/_lib/i18n/routing';
 import { type BlogPostDetailApi, type ContentLocalizedText, fetchBlogPostBySlug, fetchBlogPosts } from '@/app/_lib/public-api-server';
@@ -132,7 +132,7 @@ export default async function BlogArticlePage(
     },
     {
       href: withLocaleQuery(locale, '/contact', { intent: 'content_consultation', article: post.slug }),
-      title: locale === 'th' ? 'ส่ง brief ให้ advisor' : 'Send the brief to an advisor',
+      title: locale === 'th' ? 'ส่งบรีฟให้ที่ปรึกษา' : 'Send the brief to an advisor',
       body: locale === 'th' ? 'แปลงสิ่งที่อ่านเป็น shortlist โดยส่งงบ จุดประสงค์ และทำเลที่กำลังพิจารณา' : 'Turn the article into a shortlist conversation by sharing your budget, purpose, and preferred area.',
     },
   ];
@@ -174,25 +174,23 @@ export default async function BlogArticlePage(
         ]}
         primaryAction={{
           href: withLocaleQuery(locale, '/contact', { intent: 'content_consultation', article: post.slug }),
+          id: 'blog_consultation_primary',
           label: dict.cta.speakToAdvisor,
           eventPayload: { cta: 'content_consultation', from: 'blog_article', article: post.slug },
         }}
         secondaryAction={{
           href: withLocale(locale, '/blog'),
+          id: 'blog_index_secondary',
           label: locale === 'th' ? 'บทความทั้งหมด' : 'All articles',
           eventPayload: { cta: 'back_to_blog', from: 'blog_article', article: post.slug },
         }}
-        tertiaryAction={{
-          href: buildAdvisorWhatsApp(locale, dict),
-          label: dict.cta.whatsapp,
-        }}
       />
 
-      <section className="section">
+      <section className="section" id="blog-article-content">
         <Container>
           <div className="detail-layout advisory-detail-layout">
             <div className="detail-stack">
-              <div className="authority-card reveal">
+              <div className="authority-card reveal" id="blog-article-body">
                 <div className="editorial-card__meta">
                   {publishedText ? <span>{locale === 'th' ? 'เผยแพร่' : 'Published'}: {publishedText}</span> : null}
                   {updatedText ? <span>{locale === 'th' ? 'อัปเดต' : 'Updated'}: {updatedText}</span> : null}
@@ -206,7 +204,7 @@ export default async function BlogArticlePage(
               </div>
 
               {post.links?.length ? (
-                <div className="authority-card reveal">
+                <div className="authority-card reveal" id="blog-related-links">
                   <h2 className="card-title">{locale === 'th' ? 'ลิงก์ที่เกี่ยวข้อง' : 'Related links'}</h2>
                   <div className="insight-list mt-3">
                     {post.links.map((link) => {
@@ -223,7 +221,7 @@ export default async function BlogArticlePage(
               ) : null}
 
               {relatedPosts.length ? (
-                <div className="authority-card reveal">
+                <div className="authority-card reveal" id="blog-related-articles">
                   <h2 className="card-title">{locale === 'th' ? 'อ่านต่อจากบทความนี้' : 'Continue reading'}</h2>
                   <div className="insight-list mt-3">
                     {relatedPosts.map((item) => {
@@ -246,7 +244,7 @@ export default async function BlogArticlePage(
             </div>
 
             <aside className="detail-sidebar detail-stack">
-              <div className="page-rail-card reveal">
+              <div className="page-rail-card reveal" id="blog-next-step-links">
                 <h2 className="card-title">{locale === 'th' ? 'ไปต่อแบบมีบริบท' : 'Move forward with context'}</h2>
                 <div className="insight-list mt-3">
                   {nextStepLinks.map((item) => (
@@ -258,7 +256,7 @@ export default async function BlogArticlePage(
                 </div>
               </div>
 
-              <div className="page-rail-card reveal">
+              <div className="page-rail-card reveal" id="blog-advisor-brief">
                 <h2 className="card-title">{locale === 'th' ? 'แปลงบทความเป็นแผนต่อ' : 'Turn the article into a next-step brief'}</h2>
                 <p className="card-subtitle">
                   {locale === 'th'

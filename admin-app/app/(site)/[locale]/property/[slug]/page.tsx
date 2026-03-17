@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import Image from 'next/image';
 
-import { buildAdvisorWhatsApp, getAdvisoryLabels, getAdvisoryProofs, withLocaleQuery } from '@/app/_lib/public-advisory';
+import { getAdvisoryLabels, getAdvisoryProofs, withLocaleQuery } from '@/app/_lib/public-advisory';
 import { TrackedLink } from '@/components/analytics/TrackedLink';
 import { Container } from '@/components/layout/Container';
 import { Breadcrumbs } from '@/components/layout/Breadcrumbs';
@@ -183,16 +183,14 @@ export default async function PropertyPage(props: PageProps) {
           primaryAction={{
             href: withLocaleQuery(locale, '/contact', { intent: 'listing_snapshot', slug: params.slug }),
             label: dict.cta.speakToAdvisor,
+            id: 'property_timeout_consultation_primary',
             eventPayload: { cta: 'listing_snapshot', from: 'property_detail_timeout' },
           }}
           secondaryAction={{
             href: withLocale(locale, '/buy'),
             label: dict.advisory.browseVerifiedInventory,
+            id: 'property_timeout_inventory_secondary',
             eventPayload: { cta: 'browse_verified_inventory', from: 'property_detail_timeout' },
-          }}
-          tertiaryAction={{
-            href: buildAdvisorWhatsApp(locale, dict),
-            label: dict.cta.whatsapp,
           }}
         />
       </main>
@@ -371,7 +369,7 @@ export default async function PropertyPage(props: PageProps) {
               ) : null}
             </div>
 
-            <div className="property-header">
+            <div id="property-hero" className="property-header">
               <div className="property-title">
                 <p className="public-hero__eyebrow">{dict.advisory.heroEyebrow}</p>
                 <h1>{property.title}</h1>
@@ -383,7 +381,7 @@ export default async function PropertyPage(props: PageProps) {
               <div className="property-price">{formatPriceTHB(Number(property.price))}</div>
             </div>
 
-            <div className="property-facts">
+            <div id="property-core-facts" className="property-facts">
               <div className="flex items-center gap-2">
                 <IconBed size="sm" />
                 <div>
@@ -413,8 +411,9 @@ export default async function PropertyPage(props: PageProps) {
               </div>
             </div>
 
-            <div className="cta-row mb-6">
+            <div id="property-primary-actions" className="cta-row mb-6">
               <TrackedLink
+                id="property_consultation_primary"
                 className="btn btn-cta"
                 href={withLocaleQuery(locale, '/contact', { intent: 'listing_consultation', slug: params.slug })}
                 eventType="cta_click"
@@ -431,7 +430,7 @@ export default async function PropertyPage(props: PageProps) {
               />
             </div>
 
-            <div className="public-hero__proofs mb-6" role="note" aria-label={advisoryLabels.proofsLabel}>
+            <div id="property-trust-cues" className="public-hero__proofs mb-6" role="note" aria-label={advisoryLabels.proofsLabel}>
               <span className="public-hero__proof">{formatListingType(locale, property.type)}</span>
               <span className="public-hero__proof">{property.city}</span>
               <span className="public-hero__proof">
@@ -445,14 +444,14 @@ export default async function PropertyPage(props: PageProps) {
               </span>
             </div>
 
-            <div className="bg-[var(--color-white)] p-6 rounded-xl mb-6">
+            <div id="property-description" className="bg-[var(--color-white)] p-6 rounded-xl mb-6">
               <h2 className="mb-4">{dict.property.description}</h2>
               <p className="mb-0">{property.description ?? '—'}</p>
             </div>
 
-            <section className="signal-grid signal-grid--two-up reveal mb-6">
-              <div className="authority-card">
-                <h2 className="card-title">{locale === 'th' ? 'Listing decision cues' : 'Listing decision cues'}</h2>
+            <section id="property-decision-grid" className="signal-grid signal-grid--two-up reveal mb-6">
+              <div id="property-decision-cues" className="authority-card">
+                <h2 className="card-title">{locale === 'th' ? 'สัญญาณช่วยตัดสินใจระดับยูนิต' : 'Listing decision cues'}</h2>
                 <p className="card-subtitle">
                   {locale === 'th'
                     ? 'ใช้สัญญาณระดับยูนิตนี้เพื่อประเมินว่าควรคุยต่อทันทีหรือเทียบ inventory ใกล้เคียงก่อน'
@@ -467,8 +466,8 @@ export default async function PropertyPage(props: PageProps) {
                 </div>
               </div>
 
-              <div className="authority-card">
-                <h2 className="card-title">{locale === 'th' ? 'Investor tools และ next moves' : 'Investor tools and next moves'}</h2>
+              <div id="property-next-tools" className="authority-card">
+                <h2 className="card-title">{locale === 'th' ? 'เครื่องมือช่วยตัดสินใจและทางไปต่อ' : 'Investor tools and next moves'}</h2>
                 <p className="card-subtitle">
                   {locale === 'th'
                     ? 'ถ้าต้องคำนวณ yield หรือเทียบหลายทางเลือกต่อ ให้ไปยังเครื่องมือและ route ที่ใช้ตัดสินใจต่อได้ทันที'
@@ -486,7 +485,7 @@ export default async function PropertyPage(props: PageProps) {
             </section>
 
             {relatedProperties.length ? (
-              <section className="signal-grid signal-grid--three-up reveal mb-6">
+              <section id="property-related-listings" className="signal-grid signal-grid--three-up reveal mb-6">
                 {relatedProperties.map((item) => {
                   const relatedImage = resolveImageUrl(item.cover_image ?? item.local_images?.[0] ?? item.images?.[0]) ?? PROPERTY_DETAIL_FALLBACK;
                   const relatedHref = item.slug ? withLocale(locale, `/property/${encodeURIComponent(item.slug)}`) : withLocale(locale, item.type === 'rent' ? '/rent' : '/buy');
@@ -509,7 +508,7 @@ export default async function PropertyPage(props: PageProps) {
               </section>
             ) : null}
 
-            <div className="card reveal mb-6">
+            <div id="property-next-steps" className="card reveal mb-6">
               <h2 className="card-title">{dict.property.nextSteps}</h2>
               <p className="card-subtitle">{dict.property.exploreRelated}</p>
               <div className="card-actions">
@@ -530,7 +529,7 @@ export default async function PropertyPage(props: PageProps) {
           </div>
 
           <aside className="detail-sidebar">
-            <div className="agent-card">
+            <div id="property-direct-channels" className="agent-card">
               <div className="flex items-center gap-4 mb-4">
                 <div className="w-16 h-16 rounded-full bg-[var(--color-primary)] text-white flex items-center justify-center font-bold">
                   {dict.brand.shortName}
@@ -553,7 +552,7 @@ export default async function PropertyPage(props: PageProps) {
               </div>
             </div>
 
-            <div className="mt-6">
+            <div id="property-lead-form" className="mt-6">
               <LeadForm
                 heading={dict.property.interestedHeading}
                 propertyId={property.id}

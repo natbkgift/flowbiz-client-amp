@@ -1,5 +1,6 @@
 import { Breadcrumbs } from '@/components/layout/Breadcrumbs';
 import { Container } from '@/components/layout/Container';
+import { TrackedLink } from '@/components/analytics/TrackedLink';
 import { ShortlistListSurface } from '@/components/shortlist/ShortlistListSurface';
 import { getDictionary, normalizeLocale } from '@/app/_lib/i18n/get-dictionary';
 import { makePageMetadata } from '@/app/_lib/i18n/metadata';
@@ -43,13 +44,31 @@ export default async function ShortlistPage(props: { params: Promise<{ locale: s
           <h1 className="headline">{locale === 'th' ? 'Shortlist ของคุณ' : 'Your shortlist'}</h1>
           <p className="subhead">
             {locale === 'th'
-              ? 'ทบทวน shortlist, นำรายการออกเมื่อไม่ต้องการแล้ว, และสร้างลิงก์แชร์แบบ read-only ได้จาก surface นี้โดยไม่แตะ CRM หรือ flow การติดต่อ'
-              : 'Review your shortlist, remove listings when needed, and create a read-only share link from this surface without touching CRM or contact flows.'}
+              ? 'ทบทวนรายการที่บันทึกไว้, ส่งต่อแบบ read-only, และต่อยอดไป compare ได้จากหน้าเดียวโดยไม่เสียบริบทการคัดเลือก'
+              : 'Review saved listings, generate a read-only share link, and move into compare from one shortlist review surface.'}
           </p>
+          <div className="cta-row mt-6">
+            <TrackedLink
+              className="btn btn-primary"
+              href={`/${locale}/buy`}
+              eventType="cta_click"
+              eventPayload={{ cta: 'browse_shortlist_inventory', from: 'shortlist_hero' }}
+            >
+              {locale === 'th' ? 'ดู listings ที่บันทึกเพิ่มได้' : 'Browse shortlist-ready listings'}
+            </TrackedLink>
+            <TrackedLink
+              className="btn btn-secondary"
+              href="#shortlist-review-surface"
+              eventType="cta_click"
+              eventPayload={{ cta: 'review_saved_listings', from: 'shortlist_hero' }}
+            >
+              {locale === 'th' ? 'ไปยังรายการที่บันทึกไว้' : 'Jump to saved listings'}
+            </TrackedLink>
+          </div>
         </Container>
       </section>
 
-      <section className="section section--alt">
+      <section id="shortlist-review-surface" className="section section--alt" aria-label={locale === 'th' ? 'พื้นที่ทบทวน shortlist' : 'Shortlist review surface'}>
         <Container>
           <ShortlistListSurface locale={locale} />
         </Container>

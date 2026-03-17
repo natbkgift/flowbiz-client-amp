@@ -27,6 +27,19 @@ function buildPropertyHref(locale: 'en' | 'th', item: ShortlistPropertyItem): st
   return withLocale(locale, '/buy');
 }
 
+function formatShortlistUpdatedAt(value: string, locale: 'en' | 'th'): string | null {
+  const parsed = Date.parse(value);
+  if (!Number.isFinite(parsed)) {
+    return null;
+  }
+
+  return new Intl.DateTimeFormat(locale === 'th' ? 'th-TH' : 'en-US', {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+  }).format(new Date(parsed));
+}
+
 export function ShortlistSharedSurface({ locale, shareToken }: { locale: 'en' | 'th'; shareToken: string }) {
   const [shortlist, setShortlist] = useState<SharedShortlistDetail | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -86,18 +99,46 @@ export function ShortlistSharedSurface({ locale, shareToken }: { locale: 'en' | 
     );
   }
 
+  const updatedAtLabel = formatShortlistUpdatedAt(shortlist.updated_at, locale);
+
   return (
     <div className="shortlist-surface">
       <div className="cta-strip">
         <div className="cta-strip__text">
           {locale === 'th'
-            ? `ลิงก์นี้แชร์ shortlist แบบดูอย่างเดียวจำนวน ${shortlist.item_count} รายการ โดยไม่เปิดสิทธิ์แก้ไขหรือเชื่อมเข้า CRM`
-            : `This link shares a read-only shortlist with ${shortlist.item_count} listings and does not enable editing or CRM handoff.`}
+            ? `ลิงก์นี้แชร์ shortlist แบบดูอย่างเดียวจำนวน ${shortlist.item_count} รายการ โดยซ่อนข้อมูลเจ้าของและไม่เปิดสิทธิ์แก้ไข`
+            : `This link shares a read-only shortlist with ${shortlist.item_count} listings, hides owner identity, and does not enable editing.`}
         </div>
         <div className="card-actions">
           <Link className="btn btn-secondary" href={withLocale(locale, '/buy')}>
             {locale === 'th' ? 'ดู buy listings' : 'Browse buy listings'}
           </Link>
+        </div>
+      </div>
+
+      <div className="shortlist-compare-panel" aria-live="polite">
+        <div className="shortlist-compare-panel__header">
+          <h2 className="card-title mb-0">
+            {locale === 'th' ? 'บริบทของ shortlist ที่แชร์นี้' : 'Shared shortlist context'}
+          </h2>
+          <p className="card-subtitle mb-0">
+            {locale === 'th'
+              ? 'ใช้หน้านี้เพื่อรีวิวรายการที่ถูกคัดไว้แล้ว จากนั้นค่อยเปิดหน้ารายละเอียด listing ที่ต้องการตรวจเพิ่ม'
+              : 'Use this surface to review the curated set first, then open the listing detail pages that need a deeper check.'}
+          </p>
+        </div>
+        <div className="shortlist-compare-panel__chips">
+          <span className="shortlist-compare-panel__chip">
+            {locale === 'th' ? `จำนวน ${shortlist.item_count} รายการ` : `${shortlist.item_count} listings`}
+          </span>
+          <span className="shortlist-compare-panel__chip">
+            {locale === 'th' ? 'read-only และซ่อนข้อมูลเจ้าของ' : 'Read-only and owner-safe'}
+          </span>
+          {updatedAtLabel ? (
+            <span className="shortlist-compare-panel__chip">
+              {locale === 'th' ? `อัปเดตล่าสุด ${updatedAtLabel}` : `Updated ${updatedAtLabel}`}
+            </span>
+          ) : null}
         </div>
       </div>
 

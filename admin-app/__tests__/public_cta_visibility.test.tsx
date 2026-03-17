@@ -73,6 +73,20 @@ describe('public CTA visibility', () => {
     expect(container.querySelector('.mobile-cta')).toBeNull();
   });
 
+  it('does not render the sticky mobile CTA on compare and smart finder routes', () => {
+    mockedSearch = '';
+    setScrollY(0);
+
+    mockedPathname = '/en/compare';
+    const compareRender = render(<StickyMobileCTA />);
+    expect(compareRender.container.querySelector('.mobile-cta')).toBeNull();
+    compareRender.unmount();
+
+    mockedPathname = '/en/smart-finder';
+    const finderRender = render(<StickyMobileCTA />);
+    expect(finderRender.container.querySelector('.mobile-cta')).toBeNull();
+  });
+
   it('does not render the floating WhatsApp CTA on the localized home route', () => {
     mockedPathname = '/th';
     mockedSearch = '';
@@ -100,5 +114,43 @@ describe('public CTA visibility', () => {
     const { container } = render(<FloatingWhatsAppCTA />);
 
     expect(container.querySelector('.floating-cta')).toBeNull();
+  });
+
+  it('does not render the floating WhatsApp CTA on compare and smart finder routes', () => {
+    mockedSearch = '';
+
+    mockedPathname = '/en/compare';
+    const compareRender = render(<FloatingWhatsAppCTA />);
+    expect(compareRender.container.querySelector('.floating-cta')).toBeNull();
+    compareRender.unmount();
+
+    mockedPathname = '/en/smart-finder';
+    const finderRender = render(<FloatingWhatsAppCTA />);
+    expect(finderRender.container.querySelector('.floating-cta')).toBeNull();
+  });
+
+  it('does not render floating or sticky takeover CTAs on other page-owned advisory routes', () => {
+    mockedSearch = '';
+    setScrollY(0);
+
+    const pageOwnedRoutes = [
+      '/en/areas/jomtien',
+      '/en/blog/pattaya-yields',
+      '/en/invest',
+      '/en/investment',
+      '/en/investor',
+    ];
+
+    for (const pathname of pageOwnedRoutes) {
+      mockedPathname = pathname;
+
+      const stickyRender = render(<StickyMobileCTA />);
+      expect(stickyRender.container.querySelector('.mobile-cta')).toBeNull();
+      stickyRender.unmount();
+
+      const floatingRender = render(<FloatingWhatsAppCTA />);
+      expect(floatingRender.container.querySelector('.floating-cta')).toBeNull();
+      floatingRender.unmount();
+    }
   });
 });

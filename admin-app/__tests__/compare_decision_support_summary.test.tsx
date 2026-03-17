@@ -86,13 +86,17 @@ vi.mock('@/app/_lib/public-api-server', async () => {
 
 describe('compare decision support summary', () => {
   it('renders a descriptive summary layer instead of a recommendation', async () => {
-    render(
+    const { container } = render(
       await ComparePage({
         params: Promise.resolve({ locale: 'en' }),
         searchParams: Promise.resolve({ ids: 'project-1,project-2' }),
       }),
     );
 
+    expect(container.querySelector('#compare-decision-summary')).not.toBeNull();
+    expect(container.querySelector('#compare_consultation_hero')).toHaveAttribute('href', '/en/contact?intent=consultation&source=compare_hero');
+    expect(container.querySelector('#compare_open_smart_finder')).toHaveAttribute('href', '/en/smart-finder');
+    expect(screen.queryByRole('link', { name: /whatsapp/i })).toBeNull();
     expect(screen.getByRole('heading', { name: /decision support summary/i })).toBeTruthy();
     expect(screen.getByText(/you are currently reading 2 projects in one frame: alpha residence, beta bay/i)).toBeTruthy();
     expect(screen.getByText(/location is still an active decision variable because this set spans 2 different areas/i)).toBeTruthy();
