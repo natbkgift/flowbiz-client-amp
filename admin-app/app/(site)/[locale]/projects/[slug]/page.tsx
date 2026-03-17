@@ -386,10 +386,6 @@ export default async function ProjectDetailPage(
           label: dict.advisory.compareOpportunities,
           eventPayload: { cta: 'compare', from: 'project_detail' },
         }}
-        tertiaryAction={{
-          href: buildAdvisorWhatsApp(locale, dict),
-          label: dict.cta.whatsapp,
-        }}
       />
       <Container>
         <div className="detail-layout advisory-detail-layout mt-6">

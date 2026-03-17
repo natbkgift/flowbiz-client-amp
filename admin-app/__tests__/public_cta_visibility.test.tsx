@@ -63,6 +63,16 @@ describe('public CTA visibility', () => {
     expect(region).toHaveClass('mobile-cta--visible');
   });
 
+  it('does not render the sticky mobile CTA on routes that already own the primary conversion path', () => {
+    mockedPathname = '/en/property/azure-condo';
+    mockedSearch = '';
+    setScrollY(0);
+
+    const { container } = render(<StickyMobileCTA />);
+
+    expect(container.querySelector('.mobile-cta')).toBeNull();
+  });
+
   it('does not render the floating WhatsApp CTA on the localized home route', () => {
     mockedPathname = '/th';
     mockedSearch = '';
@@ -81,5 +91,14 @@ describe('public CTA visibility', () => {
 
     expect(link).not.toBeNull();
     expect(link).toHaveAttribute('href', 'https://wa.me/66634533526');
+  });
+
+  it('does not render the floating WhatsApp CTA on page-owned conversion routes', () => {
+    mockedPathname = '/en/contact';
+    mockedSearch = '';
+
+    const { container } = render(<FloatingWhatsAppCTA />);
+
+    expect(container.querySelector('.floating-cta')).toBeNull();
   });
 });

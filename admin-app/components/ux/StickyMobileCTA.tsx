@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { usePathname, useSearchParams } from 'next/navigation';
 
-import { CTA } from '../../app/_lib/public-cta';
+import { CTA, shouldRenderStickyMobileCta } from '../../app/_lib/public-cta';
 import { en } from '../../app/_lib/i18n/en';
 import { th } from '../../app/_lib/i18n/th';
 import { localeFromPathname, withLocale } from '../../app/_lib/i18n/routing';
@@ -16,11 +16,17 @@ export function StickyMobileCTA() {
   const searchParams = useSearchParams();
   const locale = localeFromPathname(pathname);
   const dict = locale === 'th' ? th : en;
+  const shouldRender = shouldRenderStickyMobileCta(pathname);
   const isLocaleHome = pathname === `/${locale}`;
   const isGuidedOverlayOpen = isLocaleHome && searchParams?.get('guided') === '1';
   const [isVisible, setIsVisible] = useState(() => !isLocaleHome);
 
   useEffect(() => {
+    if (!shouldRender) {
+      setIsVisible(false);
+      return;
+    }
+
     if (isGuidedOverlayOpen) {
       setIsVisible(false);
       return;
@@ -41,7 +47,11 @@ export function StickyMobileCTA() {
     return () => {
       window.removeEventListener('scroll', updateVisibility);
     };
-  }, [isGuidedOverlayOpen, isLocaleHome]);
+  }, [isGuidedOverlayOpen, isLocaleHome, shouldRender]);
+
+  if (!shouldRender) {
+    return null;
+  }
 
   return (
     <div

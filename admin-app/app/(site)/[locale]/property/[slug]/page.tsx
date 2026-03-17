@@ -429,9 +429,6 @@ export default async function PropertyPage(props: PageProps) {
                 sourceSurface="property_detail"
                 readOnMount
               />
-              <a className="btn btn-secondary" href={buildAdvisorWhatsApp(locale, dict)} target="_blank" rel="noreferrer">
-                {dict.cta.whatsapp}
-              </a>
             </div>
 
             <div className="public-hero__proofs mb-6" role="note" aria-label={advisoryLabels.proofsLabel}>

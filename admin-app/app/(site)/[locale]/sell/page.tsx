@@ -3,6 +3,7 @@ import { SellerForm } from '@/components/forms/SellerForm';
 import { Container } from '@/components/layout/Container';
 import { getDictionary, normalizeLocale } from '@/app/_lib/i18n/get-dictionary';
 import { makePageMetadata } from '@/app/_lib/i18n/metadata';
+import { buildWhatsAppUrl } from '@/app/_lib/public-cta';
 
 export const revalidate = 300;
 
@@ -29,6 +30,23 @@ export default async function SellPage(props: { params: Promise<{ locale: string
           <p className="eyebrow">{dict.sell.eyebrow}</p>
           <h1 className="headline">{dict.sell.headline}</h1>
           <p className="subhead">{dict.sell.subhead}</p>
+          <div className="cta-row mt-4">
+            <a className="btn btn-cta" href="#seller-form">
+              {dict.sell.formHeading}
+            </a>
+            <a
+              className="btn btn-secondary"
+              href={buildWhatsAppUrl(
+                locale === 'th'
+                  ? 'สวัสดีครับ AMP Pattaya ผมต้องการส่งรายละเอียดอสังหาฯ เพื่อลงขาย'
+                  : 'Hi AMP Pattaya, I want to submit a property for sale review.',
+              )}
+              target="_blank"
+              rel="noreferrer"
+            >
+              {dict.cta.whatsapp}
+            </a>
+          </div>
         </Container>
       </section>
 
@@ -44,7 +62,7 @@ export default async function SellPage(props: { params: Promise<{ locale: string
               </ul>
             </aside>
 
-            <div className="split__main">
+            <div className="split__main" id="seller-form">
               <SellerForm heading={dict.sell.formHeading} />
             </div>
           </div>

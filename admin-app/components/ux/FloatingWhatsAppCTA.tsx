@@ -2,7 +2,7 @@
 
 import { usePathname } from 'next/navigation';
 
-import { CTA } from '../../app/_lib/public-cta';
+import { CTA, shouldRenderFloatingWhatsApp } from '../../app/_lib/public-cta';
 import { en } from '../../app/_lib/i18n/en';
 import { th } from '../../app/_lib/i18n/th';
 import { localeFromPathname } from '../../app/_lib/i18n/routing';
@@ -12,7 +12,7 @@ export function FloatingWhatsAppCTA() {
   const locale = localeFromPathname(pathname);
   const dict = locale === 'th' ? th : en;
 
-  if (pathname === `/${locale}`) {
+  if (!shouldRenderFloatingWhatsApp(pathname)) {
     return null;
   }
 

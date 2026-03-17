@@ -7,7 +7,7 @@ import { useEffect, useRef, useState } from 'react';
 import type { ResolvedLayoutCms } from '../../app/_lib/layout-cms';
 import type { Dictionary, Locale } from '../../app/_lib/i18n/types';
 import { switchLocaleInPathname, withLocale } from '../../app/_lib/i18n/routing';
-import { CTA } from '../../app/_lib/public-cta';
+import { CTA, routeOwnsPrimaryCta } from '../../app/_lib/public-cta';
 
 type DropdownItem = {
   href: string;
@@ -246,6 +246,7 @@ export function Header({
   const navConfig = cmsNavConfig.length > 0 ? cmsNavConfig : defaultNavConfig;
   const contactCtaHref = cms?.contactCta?.href || '/contact';
   const contactCtaLabel = cms?.contactCta?.label || dict.cta.speakToAdvisor;
+  const showGlobalCtas = !routeOwnsPrimaryCta(pathname ?? `/${locale}`);
 
   const langLabel = locale === 'th' ? dict.common.thai : dict.common.english;
 
@@ -297,18 +298,20 @@ export function Header({
           </nav>
 
           <div className="header-actions">
-            <div className="header-cta-group desktop-only">
-              <Link href={CTA.whatsAppUrl} className="header-cta header-cta--secondary" target="_blank" rel="noreferrer">
-                {dict.cta.whatsapp}
-              </Link>
-              <Link
-                href={withLocale(locale, contactCtaHref)}
-                className={`header-cta header-cta--primary ${isActive(contactCtaHref) ? 'header-cta--active' : ''}`}
-                aria-current={isActive(contactCtaHref) ? 'page' : undefined}
-              >
-                {contactCtaLabel}
-              </Link>
-            </div>
+            {showGlobalCtas ? (
+              <div className="header-cta-group desktop-only">
+                <Link href={CTA.whatsAppUrl} className="header-cta header-cta--secondary" target="_blank" rel="noreferrer">
+                  {dict.cta.whatsapp}
+                </Link>
+                <Link
+                  href={withLocale(locale, contactCtaHref)}
+                  className={`header-cta header-cta--primary ${isActive(contactCtaHref) ? 'header-cta--active' : ''}`}
+                  aria-current={isActive(contactCtaHref) ? 'page' : undefined}
+                >
+                  {contactCtaLabel}
+                </Link>
+              </div>
+            ) : null}
             <button
               type="button"
               className="lang-switch"
@@ -348,12 +351,16 @@ export function Header({
           {navConfig.map((group) => (
             <MobileSection key={group.key} group={group} locale={locale} onNavClick={() => setMobileOpen(false)} />
           ))}
-          <Link href={CTA.whatsAppUrl} className="mobile-nav__item" onClick={() => setMobileOpen(false)} target="_blank" rel="noreferrer">
-            {dict.cta.whatsapp}
-          </Link>
-          <Link href={withLocale(locale, contactCtaHref)} className="mobile-nav__cta" onClick={() => setMobileOpen(false)}>
-            {contactCtaLabel}
-          </Link>
+          {showGlobalCtas ? (
+            <>
+              <Link href={CTA.whatsAppUrl} className="mobile-nav__item" onClick={() => setMobileOpen(false)} target="_blank" rel="noreferrer">
+                {dict.cta.whatsapp}
+              </Link>
+              <Link href={withLocale(locale, contactCtaHref)} className="mobile-nav__cta" onClick={() => setMobileOpen(false)}>
+                {contactCtaLabel}
+              </Link>
+            </>
+          ) : null}
         </div>
       </nav>
     </>
