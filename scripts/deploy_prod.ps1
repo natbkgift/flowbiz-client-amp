@@ -36,7 +36,7 @@ if (-not $TargetSha) {
 
 $AlembicTarget = $AlembicTarget.Replace("`r", "").Replace("`n", "")
 
-function Quote-BashArg([string]$Value) {
+function ConvertTo-BashArgument([string]$Value) {
   return "'" + $Value.Replace("'", "'""'""'") + "'"
 }
 
@@ -342,7 +342,7 @@ try {
       throw "Unable to create local overlay archive."
     }
 
-    & ssh -o BatchMode=yes $VpsHost "mkdir -p $(Quote-BashArg $remoteOverlayRoot)"
+    & ssh -o BatchMode=yes $VpsHost "mkdir -p $(ConvertTo-BashArgument $remoteOverlayRoot)"
     if ($LASTEXITCODE -ne 0) {
       throw "Unable to create remote overlay directory."
     }
@@ -353,23 +353,23 @@ try {
       throw "Unable to upload overlay archive to VPS."
     }
 
-    & ssh -o BatchMode=yes $VpsHost "tar -xf $(Quote-BashArg $remoteOverlayArchive) -C $(Quote-BashArg $remoteOverlayRoot) && rm -f $(Quote-BashArg $remoteOverlayArchive)"
+    & ssh -o BatchMode=yes $VpsHost "tar -xf $(ConvertTo-BashArgument $remoteOverlayArchive) -C $(ConvertTo-BashArgument $remoteOverlayRoot) && rm -f $(ConvertTo-BashArgument $remoteOverlayArchive)"
     if ($LASTEXITCODE -ne 0) {
       throw "Unable to extract overlay archive on VPS."
     }
   }
 
-  $qRemoteTmp = Quote-BashArg $remoteTmp
-  $qRemoteArg = Quote-BashArg $remoteArg
-  $qTargetSha = Quote-BashArg $TargetSha
-  $qVpsActivePath = Quote-BashArg $VpsActivePath
-  $qVpsReleaseRoot = Quote-BashArg $VpsReleaseRoot
-  $qVpsApiPort = Quote-BashArg ([string]$VpsApiPort)
-  $qVpsAdminPort = Quote-BashArg ([string]$VpsAdminPort)
-  $qComposeProjectName = Quote-BashArg $ComposeProjectName
-  $qAlembicTarget = Quote-BashArg $AlembicTarget
-  $qRemoteOverlayRoot = Quote-BashArg $(if ($remoteOverlayRoot) { $remoteOverlayRoot } else { "" })
-  $overlayArgs = ($OverlayFiles | ForEach-Object { Quote-BashArg ($_.Replace("\", "/")) }) -join " "
+  $qRemoteTmp = ConvertTo-BashArgument $remoteTmp
+  $qRemoteArg = ConvertTo-BashArgument $remoteArg
+  $qTargetSha = ConvertTo-BashArgument $TargetSha
+  $qVpsActivePath = ConvertTo-BashArgument $VpsActivePath
+  $qVpsReleaseRoot = ConvertTo-BashArgument $VpsReleaseRoot
+  $qVpsApiPort = ConvertTo-BashArgument ([string]$VpsApiPort)
+  $qVpsAdminPort = ConvertTo-BashArgument ([string]$VpsAdminPort)
+  $qComposeProjectName = ConvertTo-BashArgument $ComposeProjectName
+  $qAlembicTarget = ConvertTo-BashArgument $AlembicTarget
+  $qRemoteOverlayRoot = ConvertTo-BashArgument $(if ($remoteOverlayRoot) { $remoteOverlayRoot } else { "" })
+  $overlayArgs = ($OverlayFiles | ForEach-Object { ConvertTo-BashArgument ($_.Replace("\", "/")) }) -join " "
   $remoteCommand = "chmod 700 $qRemoteTmp && bash $qRemoteTmp $qRemoteArg $qTargetSha $qVpsActivePath $qVpsReleaseRoot $qVpsApiPort $qVpsAdminPort $qComposeProjectName $qAlembicTarget $qRemoteOverlayRoot $overlayArgs; status=`$?; rm -f $qRemoteTmp; if [ -n $qRemoteOverlayRoot ]; then rm -rf $qRemoteOverlayRoot; fi; exit `$status"
 
   & ssh -o BatchMode=yes $VpsHost $remoteCommand
@@ -378,10 +378,10 @@ try {
   }
 } finally {
   if ($remoteOverlayRoot) {
-    & ssh -o BatchMode=yes $VpsHost "rm -rf $(Quote-BashArg $remoteOverlayRoot)" | Out-Null
+    & ssh -o BatchMode=yes $VpsHost "rm -rf $(ConvertTo-BashArgument $remoteOverlayRoot)" | Out-Null
   }
   if ($remoteTmp) {
-    & ssh -o BatchMode=yes $VpsHost "rm -f $(Quote-BashArg $remoteTmp)" | Out-Null
+    & ssh -o BatchMode=yes $VpsHost "rm -f $(ConvertTo-BashArgument $remoteTmp)" | Out-Null
   }
   if ($overlayArchive) {
     Remove-Item -Force -ErrorAction SilentlyContinue $overlayArchive
