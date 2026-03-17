@@ -104,7 +104,9 @@ def test_a7_area_guide_listing_routes_tracking_and_metrics_guard(client) -> None
 
     assert client.get("/th/area-guide").status_code == 200
     assert client.get("/en/areas").status_code == 200
-    assert f'href="/en/areas/{slug_verified}"' in html
+    assert re.search(r'href="/en/areas/[^"]+"', html)
+    assert re.search(r'href="/en/projects\?area=[^"]+"', html)
+    assert re.search(r'href="/en/contact\?intent=consultation&area=[^"]+"', html)
     assert 'data-event="area_card_click"' in html
     assert 'data-event="area_cta_click"' in html
     assert 'aria-label="Breadcrumb"' in html
@@ -274,3 +276,114 @@ def test_a7_area_detail_source_less_metrics_show_pending(client) -> None:
     assert "8.1%" not in html
     assert "No published projects are linked to this area yet." in html
     assert "No active properties are linked to this area yet." in html
+
+
+def test_a7_area_listing_and_detail_keep_page_owned_cta_hierarchy(client) -> None:
+    area_slug = f"a7-hierarchy-area-{uuid4()}"
+    project_slug = f"a7-hierarchy-project-{uuid4()}"
+    property_slug = f"a7-hierarchy-property-{uuid4()}"
+
+    with SessionLocal() as db:
+        area = Area(
+            slug=area_slug,
+            name="A7 Hierarchy Area",
+            status="published",
+            summary={"en": "A7 hierarchy summary"},
+            source_note="Internal desk weekly update",
+            map_center={"lat": 12.9345, "lng": 100.8821},
+            cover_image_url=_LOCAL_WEBP,
+            content={
+                "en": {
+                    "why_live_invest": "Balanced owner-occupier and rental demand.",
+                    "transport": "Quick highway access.",
+                    "lifestyle": "Nearby daily conveniences.",
+                    "beach_proximity": "Beach access within 10-15 minutes by car.",
+                    "metrics_update_cadence": "Monthly",
+                }
+            },
+        )
+        db.add(area)
+        db.flush()
+        db.add(
+            AreaStatistic(
+                area_id=area.id,
+                avg_price_sqm=654321,
+                avg_rent_monthly=32000,
+                avg_roi_percent=6.8,
+                total_projects=11,
+                total_units=2500,
+                as_of_date=date(2026, 2, 26),
+            )
+        )
+        db.add(
+            Project(
+                slug=project_slug,
+                name="A7 Hierarchy Project",
+                status="published",
+                area_id=area.id,
+                property_type="condo",
+                cover_image_url=_LOCAL_WEBP,
+                summary={"en": "A7 hierarchy project summary"},
+            )
+        )
+        db.add(
+            Property(
+                source_id=f"a7-hierarchy-source-{uuid4()}",
+                slug=property_slug,
+                title="A7 Hierarchy Property",
+                type="resale",
+                property_type="condo",
+                status="active",
+                price=4900000,
+                address="A7 Hierarchy Address",
+                city="Pattaya",
+                area_id=area.id,
+                cover_image_url=_LOCAL_WEBP,
+                bedrooms=2,
+                bathrooms=2,
+                size_sqm=58,
+            )
+        )
+        db.commit()
+
+    listing_response = client.get("/en/areas")
+    assert listing_response.status_code == 200, listing_response.text
+    listing_html = listing_response.text
+    assert 'id="area-guide-overview"' in listing_html
+    assert 'id="area-guide-listing"' in listing_html
+    assert listing_html.index('id="area-guide-overview"') < listing_html.index('id="area-guide-listing"')
+    area_matches = re.findall(r'href="(/en/areas/[^"]+)"', listing_html)
+    project_matches = re.findall(r'href="(/en/projects\?area=[^"]+)"', listing_html)
+    consult_matches = re.findall(
+        r'href="(/en/contact\?intent=consultation&area=[^"]+)"',
+        listing_html,
+    )
+    assert area_matches
+    assert project_matches
+    assert consult_matches
+    assert listing_html.index(area_matches[0]) < listing_html.index(project_matches[0]) < listing_html.index(consult_matches[0])
+    assert 'https://wa.me/' not in listing_html
+    assert 'https://line.me/' not in listing_html
+
+    detail_response = client.get(f"/en/areas/{area_slug}")
+    assert detail_response.status_code == 200, detail_response.text
+    detail_html = detail_response.text
+    detail_projects_href = '/en/projects'
+
+    overview_index = detail_html.index('id="area-overview"')
+    why_index = detail_html.index('id="area-why-live-invest"')
+    stats_index = detail_html.index('id="area-stats"')
+    featured_projects_index = detail_html.index('id="area-featured-projects"')
+    featured_properties_index = detail_html.index('id="area-featured-properties"')
+    proximity_index = detail_html.index('id="area-proximity"')
+    cta_index = detail_html.index('id="area-cta"')
+    consult_match = re.search(rf'/en/contact\?[^"]*area={area_slug}', detail_html)
+    assert consult_match is not None
+    consult_index = detail_html.index(consult_match.group(0))
+    projects_index = detail_html.rindex(detail_projects_href)
+    assert overview_index < why_index < stats_index < featured_projects_index < featured_properties_index < proximity_index < cta_index
+    assert cta_index < consult_index < projects_index
+    assert f'/en/projects/{project_slug}' in detail_html
+    assert f'/en/property/{property_slug}' in detail_html
+    assert 'https://wa.me/' not in detail_html
+    assert 'https://line.me/' not in detail_html
