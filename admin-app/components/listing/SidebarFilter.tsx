@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useId, useMemo, useRef, useState } from 'react';
 import { usePathname } from 'next/navigation';
 
 import type { PropertyListItem } from '../../app/public/_shared/types';
@@ -22,21 +22,25 @@ export function SidebarFilter({
   items,
   isOpen,
   onClose,
-  onChange,
+  onApply,
 }: {
   items: PropertyListItem[];
   isOpen: boolean;
   onClose: () => void;
-  onChange: (filtered: PropertyListItem[]) => void;
+  onApply: (filtered: PropertyListItem[]) => void;
 }) {
   const prices = useMemo(() => items.map((p) => Number(p.price)).filter((n) => Number.isFinite(n)), [items]);
   const minPrice = prices.length ? Math.min(...prices) : 0;
   const maxPrice = prices.length ? Math.max(...prices) : 0;
 
-  const [priceMin, setPriceMin] = useState(minPrice);
-  const [priceMax, setPriceMax] = useState(maxPrice);
-  const [beds, setBeds] = useState<Set<number>>(new Set());
-  const [areas, setAreas] = useState<Set<string>>(new Set());
+  const [draftPriceMin, setDraftPriceMin] = useState(minPrice);
+  const [draftPriceMax, setDraftPriceMax] = useState(maxPrice);
+  const [draftBeds, setDraftBeds] = useState<Set<number>>(new Set());
+  const [draftAreas, setDraftAreas] = useState<Set<string>>(new Set());
+  const [appliedPriceMin, setAppliedPriceMin] = useState(minPrice);
+  const [appliedPriceMax, setAppliedPriceMax] = useState(maxPrice);
+  const [appliedBeds, setAppliedBeds] = useState<Set<number>>(new Set());
+  const [appliedAreas, setAppliedAreas] = useState<Set<string>>(new Set());
 
   const bedOptions = useMemo(() => {
     const set = new Set<number>();
@@ -56,45 +60,84 @@ export function SidebarFilter({
     return Array.from(set).sort((a, b) => a.localeCompare(b));
   }, [items]);
 
-  const filtered = useMemo(() => {
+  const draftFiltered = useMemo(() => {
     return items.filter((p) => {
       const price = Number(p.price);
       if (Number.isFinite(price)) {
-        if (price < priceMin || price > priceMax) return false;
+        if (price < draftPriceMin || price > draftPriceMax) return false;
       }
 
-      if (beds.size) {
+      if (draftBeds.size) {
         const b = parseBedroomsFromTitle(p.title);
-        if (b == null || !beds.has(b)) return false;
+        if (b == null || !draftBeds.has(b)) return false;
       }
 
-      if (areas.size) {
+      if (draftAreas.size) {
         const a = (p.city || '').trim();
-        if (!a || !areas.has(a)) return false;
+        if (!a || !draftAreas.has(a)) return false;
       }
 
       return true;
     });
-  }, [areas, beds, items, priceMax, priceMin]);
-
-  useEffect(() => {
-    onChange(filtered);
-  }, [filtered, onChange]);
+  }, [draftAreas, draftBeds, draftPriceMax, draftPriceMin, items]);
 
   function clear() {
-    setPriceMin(minPrice);
-    setPriceMax(maxPrice);
-    setBeds(new Set());
-    setAreas(new Set());
+    const resetBeds = new Set<number>();
+    const resetAreas = new Set<string>();
+    setDraftPriceMin(minPrice);
+    setDraftPriceMax(maxPrice);
+    setDraftBeds(resetBeds);
+    setDraftAreas(resetAreas);
+    setAppliedPriceMin(minPrice);
+    setAppliedPriceMax(maxPrice);
+    setAppliedBeds(resetBeds);
+    setAppliedAreas(resetAreas);
+    onApply(items);
+  }
+
+  function apply() {
+    setAppliedPriceMin(draftPriceMin);
+    setAppliedPriceMax(draftPriceMax);
+    setAppliedBeds(new Set(draftBeds));
+    setAppliedAreas(new Set(draftAreas));
+    onApply(draftFiltered);
+    if (isOpen) {
+      onClose();
+    }
+  }
+
+  function handleClose() {
+    setDraftPriceMin(appliedPriceMin);
+    setDraftPriceMax(appliedPriceMax);
+    setDraftBeds(new Set(appliedBeds));
+    setDraftAreas(new Set(appliedAreas));
+    onClose();
   }
 
   const pathname = usePathname() ?? '/';
   const locale = localeFromPathname(pathname);
   const dict = locale === 'th' ? th : en;
+  const headingId = useId();
+  const drawerRef = useRef<HTMLElement | null>(null);
+
+  useEffect(() => {
+    if (!isOpen) return;
+
+    drawerRef.current?.focus();
+  }, [isOpen]);
 
   return (
-    <aside className={isOpen ? 'filter-sidebar active' : 'filter-sidebar'} aria-label={dict.filters.heading}>
-      <h3 className="mb-6">{dict.filters.heading}</h3>
+    <aside
+      id="buy-filter-drawer"
+      ref={drawerRef}
+      className={isOpen ? 'filter-sidebar active' : 'filter-sidebar'}
+      aria-label={dict.filters.heading}
+      aria-labelledby={headingId}
+      aria-modal={isOpen ? 'true' : undefined}
+      role={isOpen ? 'dialog' : 'complementary'}
+      tabIndex={isOpen ? -1 : undefined}
+    >
+      <h3 id={headingId} className="mb-6">{dict.filters.heading}</h3>
 
       <div className="filter-section">
         <h3>{dict.filters.priceRange}</h3>
@@ -104,8 +147,8 @@ export function SidebarFilter({
             <input
               className="form-input"
               inputMode="numeric"
-              value={priceMin}
-              onChange={(e) => setPriceMin(Number(e.target.value) || 0)}
+              value={draftPriceMin}
+              onChange={(e) => setDraftPriceMin(Number(e.target.value) || 0)}
             />
           </label>
           <label>
@@ -113,8 +156,8 @@ export function SidebarFilter({
             <input
               className="form-input"
               inputMode="numeric"
-              value={priceMax}
-              onChange={(e) => setPriceMax(Number(e.target.value) || 0)}
+              value={draftPriceMax}
+              onChange={(e) => setDraftPriceMax(Number(e.target.value) || 0)}
             />
           </label>
         </div>
@@ -124,14 +167,14 @@ export function SidebarFilter({
         <h3>{dict.filters.bedrooms}</h3>
         <div className="chips-group">
           {bedOptions.map((b) => {
-            const active = beds.has(b);
+            const active = draftBeds.has(b);
             return (
               <button
                 key={b}
                 type="button"
                 className={active ? 'chip active' : 'chip'}
                 onClick={() => {
-                  setBeds((prev) => {
+                  setDraftBeds((prev) => {
                     const next = new Set(prev);
                     if (next.has(b)) next.delete(b);
                     else next.add(b);
@@ -153,9 +196,9 @@ export function SidebarFilter({
             <label key={a} className="checkbox-label">
               <input
                 type="checkbox"
-                checked={areas.has(a)}
+                checked={draftAreas.has(a)}
                 onChange={() => {
-                  setAreas((prev) => {
+                  setDraftAreas((prev) => {
                     const next = new Set(prev);
                     if (next.has(a)) next.delete(a);
                     else next.add(a);
@@ -170,10 +213,13 @@ export function SidebarFilter({
       </div>
 
       <div className="flex gap-3">
+        <button type="button" className="btn btn-primary btn-block" onClick={apply}>
+          {dict.filters.apply}
+        </button>
         <button type="button" className="btn btn-secondary btn-block" onClick={clear}>
           {dict.filters.clear}
         </button>
-        <button type="button" className="btn btn-primary btn-block mobile-only" onClick={onClose}>
+        <button type="button" className="btn btn-secondary btn-block mobile-only" onClick={handleClose}>
           {dict.filters.close}
         </button>
       </div>

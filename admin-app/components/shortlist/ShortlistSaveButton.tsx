@@ -6,7 +6,7 @@ import { usePathname } from 'next/navigation';
 
 import { withLocale } from '@/app/_lib/i18n/routing';
 import { trackEvent } from '@/lib/analytics';
-import { SHORTLIST_UPDATED_EVENT, fetchCurrentShortlist, readCachedShortlistForCurrentOwner, removePropertyFromShortlist, savePropertyToShortlist, type ShortlistDetail } from '@/lib/shortlist';
+import { SHORTLIST_UPDATED_EVENT, fetchCurrentShortlist, publishShortlist, readCachedShortlistForCurrentOwner, removePropertyFromShortlist, savePropertyToShortlist, type ShortlistDetail } from '@/lib/shortlist';
 
 type ShortlistSaveButtonProps = {
   locale: 'en' | 'th';
@@ -43,9 +43,10 @@ export function ShortlistSaveButton({
     if (!readOnMount) return;
 
     let isActive = true;
-    fetchCurrentShortlist(locale)
+    fetchCurrentShortlist(locale, { publish: false })
       .then((response) => {
         if (!isActive) return;
+        publishShortlist(response.shortlist ?? null, 'fetch');
         syncFromShortlist(response.shortlist);
       })
       .catch(() => {
@@ -65,9 +66,23 @@ export function ShortlistSaveButton({
       syncFromShortlist(shortlist);
     };
 
+    const handleStorage = (event: StorageEvent) => {
+      if (event.storageArea !== w.localStorage) {
+        return;
+      }
+
+      if (event.key !== 'amp_shortlist_cache_v1' && event.key !== 'amp_shortlist_owner_v1' && event.key !== null) {
+        return;
+      }
+
+      syncFromShortlist(readCachedShortlistForCurrentOwner());
+    };
+
     w.addEventListener(SHORTLIST_UPDATED_EVENT, handleUpdate);
+    w.addEventListener('storage', handleStorage);
     return () => {
       w.removeEventListener(SHORTLIST_UPDATED_EVENT, handleUpdate);
+      w.removeEventListener('storage', handleStorage);
     };
   }, [syncFromShortlist]);
 

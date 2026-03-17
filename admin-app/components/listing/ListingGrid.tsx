@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { usePathname } from 'next/navigation';
 
 import type { PropertyListItem } from '../../app/public/_shared/types';
@@ -18,12 +18,22 @@ export function ListingGrid({ items }: { items: PropertyListItem[] }) {
   const [filtered, setFiltered] = useState<PropertyListItem[]>(items);
   const [sort, setSort] = useState<SortKey>('newest');
   const [filtersOpen, setFiltersOpen] = useState(false);
+  const filterTriggerRef = useRef<HTMLButtonElement | null>(null);
+  const wasFiltersOpenRef = useRef(false);
 
   const pathname = usePathname() ?? '/';
   const locale = localeFromPathname(pathname);
   const dict = locale === 'th' ? th : en;
 
-  const handleFilterChange = useCallback((next: PropertyListItem[]) => setFiltered(next), []);
+  const handleFilterApply = useCallback((next: PropertyListItem[]) => setFiltered(next), []);
+
+  useEffect(() => {
+    if (wasFiltersOpenRef.current && !filtersOpen) {
+      filterTriggerRef.current?.focus();
+    }
+
+    wasFiltersOpenRef.current = filtersOpen;
+  }, [filtersOpen]);
 
   const sorted = useMemo(() => {
     const out = [...filtered];
@@ -37,9 +47,12 @@ export function ListingGrid({ items }: { items: PropertyListItem[] }) {
       <ShortlistStateHydrator locale={locale} />
 
       <button
+        ref={filterTriggerRef}
         type="button"
         className="btn btn-primary mobile-only w-full mb-6"
         onClick={() => setFiltersOpen(true)}
+        aria-controls="buy-filter-drawer"
+        aria-expanded={filtersOpen}
       >
         <IconFilter size="sm" /> {dict.listing.filtersAndSort}
       </button>
@@ -49,7 +62,7 @@ export function ListingGrid({ items }: { items: PropertyListItem[] }) {
           items={items}
           isOpen={filtersOpen}
           onClose={() => setFiltersOpen(false)}
-          onChange={handleFilterChange}
+          onApply={handleFilterApply}
         />
 
         <div>

@@ -8,7 +8,7 @@ import { withLocaleQuery } from '@/app/_lib/public-advisory';
 import { resolveImageUrl, formatPriceTHB } from '@/app/_lib/public-api-shared';
 import { withLocale } from '@/app/_lib/i18n/routing';
 import { EmptyStateCard, InlineStatusMessage, LoadingCardGrid } from '@/components/ui/StateBlocks';
-import { SHORTLIST_UPDATED_EVENT, fetchCurrentShortlist, readCachedShortlistForCurrentOwner, removePropertyFromShortlist, resolveShortlistCompareProjects, shareCurrentShortlist, type ShortlistCompareProject, type ShortlistDetail, type ShortlistPropertyItem } from '@/lib/shortlist';
+import { SHORTLIST_UPDATED_EVENT, fetchCurrentShortlist, publishShortlist, readCachedShortlistForCurrentOwner, removePropertyFromShortlist, resolveShortlistCompareProjects, shareCurrentShortlist, type ShortlistCompareProject, type ShortlistDetail, type ShortlistPropertyItem } from '@/lib/shortlist';
 
 const SHORTLIST_FALLBACK_IMAGE = '/images/property-placeholder.svg';
 
@@ -53,9 +53,10 @@ export function ShortlistListSurface({ locale }: { locale: 'en' | 'th' }) {
       setIsLoading(false);
     }
 
-    fetchCurrentShortlist(locale)
+    fetchCurrentShortlist(locale, { publish: false })
       .then((response) => {
         if (!isActive) return;
+        publishShortlist(response.shortlist ?? null, 'fetch');
         syncFromShortlist(response.shortlist);
       })
       .catch(() => {
@@ -79,9 +80,24 @@ export function ShortlistListSurface({ locale }: { locale: 'en' | 'th' }) {
       setError(null);
     };
 
+    const handleStorage = (event: StorageEvent) => {
+      if (event.storageArea !== w.localStorage) {
+        return;
+      }
+
+      if (event.key !== 'amp_shortlist_cache_v1' && event.key !== 'amp_shortlist_owner_v1' && event.key !== null) {
+        return;
+      }
+
+      syncFromShortlist(readCachedShortlistForCurrentOwner());
+      setError(null);
+    };
+
     w.addEventListener(SHORTLIST_UPDATED_EVENT, handleUpdate);
+    w.addEventListener('storage', handleStorage);
     return () => {
       w.removeEventListener(SHORTLIST_UPDATED_EVENT, handleUpdate);
+      w.removeEventListener('storage', handleStorage);
     };
   }, []);
 

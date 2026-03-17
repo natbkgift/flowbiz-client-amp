@@ -656,6 +656,7 @@ export const en: Dictionary = {
     bedrooms: 'Bedrooms',
     studio: 'Studio',
     area: 'Area',
+    apply: 'Apply filters',
     clear: 'Clear',
     close: 'Close',
   },

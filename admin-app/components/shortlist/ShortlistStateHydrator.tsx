@@ -2,11 +2,25 @@
 
 import { useEffect } from 'react';
 
-import { fetchCurrentShortlist } from '@/lib/shortlist';
+import { fetchCurrentShortlist, publishShortlist } from '@/lib/shortlist';
 
 export function ShortlistStateHydrator({ locale }: { locale: 'en' | 'th' }) {
   useEffect(() => {
-    fetchCurrentShortlist(locale).catch(() => undefined);
+    let isActive = true;
+
+    fetchCurrentShortlist(locale, { publish: false })
+      .then((response) => {
+        if (!isActive) {
+          return;
+        }
+
+        publishShortlist(response.shortlist ?? null, 'fetch');
+      })
+      .catch(() => undefined);
+
+    return () => {
+      isActive = false;
+    };
   }, [locale]);
 
   return null;

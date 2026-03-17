@@ -35,13 +35,19 @@ export function ShortlistSharedSurface({ locale, shareToken }: { locale: 'en' | 
   useEffect(() => {
     let isActive = true;
 
+    setIsLoading(true);
+    setError(null);
+    setShortlist(null);
+
     fetchSharedShortlist({ locale, shareToken })
       .then((response) => {
         if (!isActive) return;
+        setError(null);
         setShortlist(response.shortlist);
       })
       .catch(() => {
         if (!isActive) return;
+        setShortlist(null);
         setError(locale === 'th' ? 'ไม่พบ shortlist ที่แชร์ไว้หรือเปิดลิงก์นี้ไม่ได้แล้ว' : 'This shared shortlist is unavailable or no longer accessible.');
       })
       .finally(() => {

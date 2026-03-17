@@ -649,6 +649,7 @@ export const th: Dictionary = {
     bedrooms: 'ห้องนอน',
     studio: 'สตูดิโอ',
     area: 'ทำเล',
+    apply: 'ใช้ตัวกรอง',
     clear: 'ล้าง',
     close: 'ปิด',
   },

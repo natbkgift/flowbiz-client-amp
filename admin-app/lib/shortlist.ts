@@ -52,6 +52,10 @@ export type ShortlistResponse = {
   shortlist: ShortlistDetail | null;
 };
 
+type ShortlistFetchOptions = {
+  publish?: boolean;
+};
+
 export type ShortlistMutationResponse = {
   action: string;
   shortlist: ShortlistDetail | null;
@@ -114,8 +118,82 @@ export type ShortlistPromotionPreparation = {
   sourceContext: Record<string, unknown> | null;
 };
 
+export type ShortlistContinuityHydrationSource =
+  | 'unknown'
+  | 'publish'
+  | 'cache'
+  | 'fetch'
+  | 'save'
+  | 'remove'
+  | 'metadata';
+
+export type ShortlistContinuityCacheState =
+  | 'missing'
+  | 'valid'
+  | 'corrupted'
+  | 'owner-missing'
+  | 'owner-mismatch';
+
+export type ShortlistContinuityDiagnostics = {
+  ownerReference: ShortlistOwnerReference | null;
+  cacheOwnerReference: ShortlistOwnerReference | null;
+  shortlistId: string | null;
+  itemCount: number;
+  cacheState: ShortlistContinuityCacheState;
+  hydrationSource: ShortlistContinuityHydrationSource;
+  lastPublishAt: string | null;
+  ownerClassification: ShortlistOwnerType | 'unknown';
+  hasCachedShortlist: boolean;
+  warningCount: number;
+  lastWarningCode: string | null;
+};
+
+type ShortlistDiagnosticWarning = {
+  code: string;
+  at: string;
+};
+
 function safeWindow(): Window | null {
   return typeof window === 'undefined' ? null : window;
+}
+
+const shortlistDiagnosticsState: {
+  hydrationSource: ShortlistContinuityHydrationSource;
+  lastPublishAt: string | null;
+  warnings: ShortlistDiagnosticWarning[];
+  warningSignatures: string[];
+} = {
+  hydrationSource: 'unknown',
+  lastPublishAt: null,
+  warnings: [],
+  warningSignatures: [],
+};
+
+function recordShortlistWarning(code: string, message: string, context?: Record<string, unknown>): void {
+  const signature = JSON.stringify({ code, context: context ?? null });
+  if (shortlistDiagnosticsState.warningSignatures.includes(signature)) {
+    return;
+  }
+
+  shortlistDiagnosticsState.warnings = [
+    ...shortlistDiagnosticsState.warnings.slice(-9),
+    { code, at: new Date().toISOString() },
+  ];
+  shortlistDiagnosticsState.warningSignatures = [
+    ...shortlistDiagnosticsState.warningSignatures.slice(-24),
+    signature,
+  ];
+
+  if (process.env.NODE_ENV === 'production') {
+    return;
+  }
+
+  if (context) {
+    console.warn(`[shortlist:${code}] ${message}`, context);
+    return;
+  }
+
+  console.warn(`[shortlist:${code}] ${message}`);
 }
 
 function normalizeShortlistText(value: unknown): string | null {
@@ -254,8 +332,17 @@ export function readStoredShortlistOwnerReference(): ShortlistOwnerReference | n
         : null;
     }
 
-    return normalizeShortlistOwnerReference(JSON.parse(raw));
+    const normalized = normalizeShortlistOwnerReference(JSON.parse(raw));
+    if (!normalized) {
+      recordShortlistWarning('invalid_owner_reference', 'Stored shortlist owner reference is invalid.', {
+        storageKey: SHORTLIST_OWNER_KEY,
+      });
+    }
+    return normalized;
   } catch {
+    recordShortlistWarning('corrupted_owner_storage', 'Stored shortlist owner reference could not be parsed.', {
+      storageKey: SHORTLIST_OWNER_KEY,
+    });
     return null;
   }
 }
@@ -267,8 +354,18 @@ export function readCachedShortlist(): ShortlistDetail | null {
   try {
     const raw = w.localStorage.getItem(SHORTLIST_CACHE_KEY);
     if (!raw) return null;
-    return normalizeShortlistDetail(JSON.parse(raw));
+
+    const normalized = normalizeShortlistDetail(JSON.parse(raw));
+    if (!normalized) {
+      recordShortlistWarning('invalid_cached_shortlist', 'Cached shortlist payload is invalid.', {
+        storageKey: SHORTLIST_CACHE_KEY,
+      });
+    }
+    return normalized;
   } catch {
+    recordShortlistWarning('corrupted_shortlist_cache', 'Cached shortlist payload could not be parsed.', {
+      storageKey: SHORTLIST_CACHE_KEY,
+    });
     return null;
   }
 }
@@ -294,25 +391,49 @@ function shortlistMatchesOwnerReference(
   );
 }
 
+function getOwnerReferenceFromShortlist(
+  shortlist: ShortlistDetail,
+): ShortlistOwnerReference {
+  return {
+    ownerType: shortlist.owner_type,
+    ownerKey: shortlist.owner_key,
+  };
+}
+
 export function readCachedShortlistForCurrentOwner(): ShortlistDetail | null {
   const shortlist = readCachedShortlist();
   if (!shortlist) return null;
 
   const ownerReference = readStoredShortlistOwnerReference();
   if (!ownerReference) {
+    recordShortlistWarning('missing_owner_for_cached_shortlist', 'Cached shortlist exists without a readable owner reference.', {
+      shortlistId: shortlist.id,
+    });
     clearCachedShortlist();
     return null;
   }
 
   if (!shortlistMatchesOwnerReference(shortlist, ownerReference)) {
+    recordShortlistWarning('cached_owner_mismatch', 'Cached shortlist owner does not match stored owner reference.', {
+      shortlistId: shortlist.id,
+      shortlistOwnerType: shortlist.owner_type,
+      shortlistOwnerKey: shortlist.owner_key,
+      storedOwnerType: ownerReference.ownerType,
+      storedOwnerKey: ownerReference.ownerKey,
+    });
     clearCachedShortlist();
     return null;
   }
 
+  shortlistDiagnosticsState.hydrationSource = 'cache';
+
   return shortlist;
 }
 
-export function publishShortlist(shortlist: ShortlistDetail | null): void {
+export function publishShortlist(
+  shortlist: ShortlistDetail | null,
+  source: ShortlistContinuityHydrationSource = 'publish',
+): void {
   const w = safeWindow();
   if (!w) return;
 
@@ -320,19 +441,76 @@ export function publishShortlist(shortlist: ShortlistDetail | null): void {
     if (shortlist) {
       const normalized = normalizeShortlistDetail(shortlist);
       if (!normalized) {
+        recordShortlistWarning('publish_invalid_shortlist', 'Shortlist publish payload is invalid and will be dropped.');
         w.localStorage.removeItem(SHORTLIST_CACHE_KEY);
         return;
       }
 
+      const existingOwnerReference = readStoredShortlistOwnerReference();
+      if (
+        existingOwnerReference
+        && !shortlistMatchesOwnerReference(normalized, existingOwnerReference)
+      ) {
+        recordShortlistWarning('publish_owner_mismatch', 'Published shortlist owner differs from the stored owner reference.', {
+          shortlistId: normalized.id,
+          shortlistOwnerType: normalized.owner_type,
+          shortlistOwnerKey: normalized.owner_key,
+          storedOwnerType: existingOwnerReference.ownerType,
+          storedOwnerKey: existingOwnerReference.ownerKey,
+        });
+      }
+
+      persistShortlistOwnerReference(getOwnerReferenceFromShortlist(normalized));
       w.localStorage.setItem(SHORTLIST_CACHE_KEY, JSON.stringify(normalized));
+      shortlistDiagnosticsState.lastPublishAt = new Date().toISOString();
     } else {
       w.localStorage.removeItem(SHORTLIST_CACHE_KEY);
     }
+
+    shortlistDiagnosticsState.hydrationSource = source;
   } catch {
+    recordShortlistWarning('publish_storage_failure', 'Shortlist publish could not update local storage.');
     return;
   }
 
   w.dispatchEvent(new CustomEvent(SHORTLIST_UPDATED_EVENT, { detail: shortlist }));
+}
+
+export function getShortlistContinuityDiagnostics(): ShortlistContinuityDiagnostics {
+  const ownerReference = readStoredShortlistOwnerReference();
+  const cachedShortlist = readCachedShortlist();
+  const cacheOwnerReference = cachedShortlist ? getOwnerReferenceFromShortlist(cachedShortlist) : null;
+
+  let cacheState: ShortlistContinuityCacheState = 'missing';
+  if (cachedShortlist) {
+    if (!ownerReference) {
+      cacheState = 'owner-missing';
+    } else if (!shortlistMatchesOwnerReference(cachedShortlist, ownerReference)) {
+      cacheState = 'owner-mismatch';
+    } else {
+      cacheState = 'valid';
+    }
+  } else {
+    const w = safeWindow();
+    if (w?.localStorage.getItem(SHORTLIST_CACHE_KEY)) {
+      cacheState = 'corrupted';
+    }
+  }
+
+  return {
+    ownerReference,
+    cacheOwnerReference,
+    shortlistId: cachedShortlist?.id ?? null,
+    itemCount: cachedShortlist?.item_count ?? 0,
+    cacheState,
+    hydrationSource: shortlistDiagnosticsState.hydrationSource,
+    lastPublishAt: shortlistDiagnosticsState.lastPublishAt,
+    ownerClassification: ownerReference?.ownerType ?? 'unknown',
+    hasCachedShortlist: Boolean(cachedShortlist),
+    warningCount: shortlistDiagnosticsState.warnings.length,
+    lastWarningCode:
+      shortlistDiagnosticsState.warnings[shortlistDiagnosticsState.warnings.length - 1]?.code ?? null,
+  };
 }
 
 export function updateCachedShortlistMetadata(
@@ -342,7 +520,7 @@ export function updateCachedShortlistMetadata(
   if (!current) return null;
 
   const next = mergeShortlistMetadata(current, metadata);
-  publishShortlist(next);
+  publishShortlist(next, 'metadata');
   return next;
 }
 
@@ -468,7 +646,10 @@ export function prepareShortlistOwnerPromotion(
   };
 }
 
-export async function fetchCurrentShortlist(locale: 'en' | 'th'): Promise<ShortlistResponse> {
+export async function fetchCurrentShortlist(
+  locale: 'en' | 'th',
+  options: ShortlistFetchOptions = {},
+): Promise<ShortlistResponse> {
   const ownerReference = getOrCreateShortlistOwnerReference();
   const params = new URLSearchParams({
     owner_type: ownerReference.ownerType,
@@ -486,7 +667,9 @@ export async function fetchCurrentShortlist(locale: 'en' | 'th'): Promise<Shortl
   }
 
   const payload = (await response.json()) as ShortlistResponse;
-  publishShortlist(payload.shortlist ?? null);
+  if (options.publish !== false) {
+    publishShortlist(payload.shortlist ?? null, 'fetch');
+  }
   return payload;
 }
 
@@ -520,7 +703,7 @@ export async function savePropertyToShortlist(input: {
   }
 
   const payload = (await response.json()) as ShortlistMutationResponse;
-  publishShortlist(payload.shortlist ?? null);
+  publishShortlist(payload.shortlist ?? null, 'save');
   return payload;
 }
 
@@ -544,7 +727,7 @@ export async function removePropertyFromShortlist(input: {
   }
 
   const payload = (await response.json()) as ShortlistMutationResponse;
-  publishShortlist(payload.shortlist ?? null);
+  publishShortlist(payload.shortlist ?? null, 'remove');
   return payload;
 }
 

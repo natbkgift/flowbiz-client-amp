@@ -483,6 +483,7 @@ export type Dictionary = {
     bedrooms: string;
     studio: string;
     area: string;
+    apply: string;
     clear: string;
     close: string;
   };
