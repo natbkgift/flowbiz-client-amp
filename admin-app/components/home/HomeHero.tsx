@@ -113,8 +113,19 @@ export function HomeHero({
                             >
                                 {secondaryCtaLabel}
                             </TrackedLink>
+                        </div>
+
+                        <div className="hero-support-row flex flex-wrap items-center gap-x-5 gap-y-3 mt-4 md:mt-6">
+                            <TrackedLink
+                                className="hero-guided-trigger inline-flex items-center gap-2 text-white/80 hover:text-white text-sm font-medium transition-colors"
+                                href={guidedHref}
+                                eventType="cta_click"
+                                eventPayload={{ cta: 'open_guided_finder', from: 'home_hero' }}
+                            >
+                                {dict.guided.heroTrigger ?? 'Not sure where to start? Let us guide you →'}
+                            </TrackedLink>
                             <a
-                                className="btn btn-tertiary"
+                                className="hero-whatsapp-link inline-flex items-center gap-2 text-sm font-medium text-white/72 hover:text-white transition-colors"
                                 href={whatsAppHref}
                                 target="_blank"
                                 rel="noreferrer"
@@ -122,16 +133,6 @@ export function HomeHero({
                                 {dict.cta.whatsapp}
                             </a>
                         </div>
-
-                        {/* 40-56px from CTA group (mt-10 = 40px) */}
-                        <TrackedLink
-                            className="hero-guided-trigger inline-flex items-center gap-2 mt-4 md:mt-6 text-white/80 hover:text-white text-sm font-medium transition-colors"
-                            href={guidedHref}
-                            eventType="cta_click"
-                            eventPayload={{ cta: 'open_guided_finder', from: 'home_hero' }}
-                        >
-                            {dict.guided.heroTrigger ?? 'Not sure where to start? Let us guide you →'}
-                        </TrackedLink>
                     </div>
                 </Container>
             </div>

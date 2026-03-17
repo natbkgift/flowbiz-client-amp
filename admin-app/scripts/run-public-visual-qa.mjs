@@ -30,6 +30,7 @@ const METRICS_PATH = path.join(ITERATION_DIR, "metrics.json");
 const CONSOLE_PATH = path.join(ITERATION_DIR, "console.json");
 const NETWORK_PATH = path.join(ITERATION_DIR, "network-failures.json");
 const PREWARM_ROUTES = String(process.env.PUBLIC_VISUAL_PREWARM || "1") !== "0";
+const PROJECT_FILES_TO_RESTORE = ["next-env.d.ts", "tsconfig.json"];
 
 function parseRoutes(raw) {
   const source = String(raw || "")
@@ -64,6 +65,34 @@ function sanitizeRouteForFile(route) {
 
 async function writeJson(filePath, value) {
   await fs.writeFile(filePath, `${JSON.stringify(value, null, 2)}\n`, "utf-8");
+}
+
+async function snapshotProjectFiles() {
+  return Promise.all(
+    PROJECT_FILES_TO_RESTORE.map(async (relativePath) => {
+      const absolutePath = path.join(process.cwd(), relativePath);
+      try {
+        const content = await fs.readFile(absolutePath, "utf-8");
+        return { absolutePath, content };
+      } catch {
+        return { absolutePath, content: null };
+      }
+    }),
+  );
+}
+
+async function restoreProjectFiles(snapshot) {
+  await Promise.all(
+    snapshot.map(async ({ absolutePath, content }) => {
+      if (content === null) return;
+      await fs.writeFile(absolutePath, content, "utf-8");
+    }),
+  );
+}
+
+async function cleanupVisualDistDir() {
+  const absolutePath = path.join(process.cwd(), DIST_DIR);
+  await fs.rm(absolutePath, { recursive: true, force: true }).catch(() => undefined);
 }
 
 async function checkUrlReady(url) {
@@ -236,32 +265,36 @@ function scoreCapture(capture) {
 }
 
 async function main() {
-  await fs.mkdir(CAPTURE_DIR, { recursive: true });
-  const ensured = await ensureBaseUrl(BASE_URL);
+  const snapshot = await snapshotProjectFiles();
+  let ensured = { started: false, child: null };
+  let browser = null;
 
-  const browser = await chromium.launch({ headless: true });
-  const page = await browser.newPage();
-  const consoleLog = [];
-  const networkLog = [];
-
-  page.on("console", (message) => {
-    consoleLog.push({
-      type: message.type(),
-      text: message.text(),
-      location: message.location(),
-    });
-  });
-
-  page.on("requestfailed", (request) => {
-    networkLog.push({
-      url: request.url(),
-      method: request.method(),
-      errorText: request.failure()?.errorText ?? "request failed",
-    });
-  });
-
-  const captures = [];
   try {
+    await fs.mkdir(CAPTURE_DIR, { recursive: true });
+    ensured = await ensureBaseUrl(BASE_URL);
+
+    browser = await chromium.launch({ headless: true });
+    const page = await browser.newPage();
+    const consoleLog = [];
+    const networkLog = [];
+
+    page.on("console", (message) => {
+      consoleLog.push({
+        type: message.type(),
+        text: message.text(),
+        location: message.location(),
+      });
+    });
+
+    page.on("requestfailed", (request) => {
+      networkLog.push({
+        url: request.url(),
+        method: request.method(),
+        errorText: request.failure()?.errorText ?? "request failed",
+      });
+    });
+
+    const captures = [];
     if (PREWARM_ROUTES) {
       for (const route of ROUTES) {
         await prewarmRoute(page, route);
@@ -273,37 +306,41 @@ async function main() {
         captures.push(await captureRoute(page, route, width, consoleLog, networkLog));
       }
     }
+
+    const metrics = captures.map((capture) => ({
+      route: capture.route,
+      width: capture.width,
+      httpStatus: capture.httpStatus,
+      headingText: capture.headingText,
+      overflowX: capture.overflowX,
+      ctaCount: capture.ctaCount,
+      score: scoreCapture(capture),
+    }));
+    const summary = {
+      baseUrl: BASE_URL,
+      routes: ROUTES,
+      breakpoints: BREAKPOINTS,
+      score: Math.round(metrics.reduce((sum, item) => sum + item.score, 0) / Math.max(metrics.length, 1)),
+      captures: metrics,
+      criticalFindings: metrics.filter((item) => item.httpStatus !== 200 || item.overflowX || !item.headingText),
+    };
+
+    await writeJson(SUMMARY_PATH, summary);
+    await writeJson(METRICS_PATH, metrics);
+    await writeJson(CONSOLE_PATH, consoleLog);
+    await writeJson(NETWORK_PATH, networkLog);
+
+    process.stdout.write(`${JSON.stringify(summary, null, 2)}\n`);
   } finally {
-    await browser.close();
+    if (browser) {
+      await browser.close();
+    }
     if (ensured.started) {
       await stopServer(ensured.child);
+      await cleanupVisualDistDir();
     }
+    await restoreProjectFiles(snapshot);
   }
-
-  const metrics = captures.map((capture) => ({
-    route: capture.route,
-    width: capture.width,
-    httpStatus: capture.httpStatus,
-    headingText: capture.headingText,
-    overflowX: capture.overflowX,
-    ctaCount: capture.ctaCount,
-    score: scoreCapture(capture),
-  }));
-  const summary = {
-    baseUrl: BASE_URL,
-    routes: ROUTES,
-    breakpoints: BREAKPOINTS,
-    score: Math.round(metrics.reduce((sum, item) => sum + item.score, 0) / Math.max(metrics.length, 1)),
-    captures: metrics,
-    criticalFindings: metrics.filter((item) => item.httpStatus !== 200 || item.overflowX || !item.headingText),
-  };
-
-  await writeJson(SUMMARY_PATH, summary);
-  await writeJson(METRICS_PATH, metrics);
-  await writeJson(CONSOLE_PATH, consoleLog);
-  await writeJson(NETWORK_PATH, networkLog);
-
-  process.stdout.write(`${JSON.stringify(summary, null, 2)}\n`);
 }
 
 main().catch((error) => {

@@ -81,7 +81,9 @@ export default async function SiteLayout(
       <Footer locale={locale} dict={dict} cms={layoutCms.footer} />
       <div aria-live="polite" aria-atomic="true" id="amp-live-region" className="sr-only" />
       <FloatingWhatsAppCTA />
-      <StickyMobileCTA />
+      <Suspense fallback={null}>
+        <StickyMobileCTA />
+      </Suspense>
       <CookieConsent />
     </>
   );

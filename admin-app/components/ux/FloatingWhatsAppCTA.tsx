@@ -12,6 +12,10 @@ export function FloatingWhatsAppCTA() {
   const locale = localeFromPathname(pathname);
   const dict = locale === 'th' ? th : en;
 
+  if (pathname === `/${locale}`) {
+    return null;
+  }
+
   return (
     <a
       className="floating-cta"

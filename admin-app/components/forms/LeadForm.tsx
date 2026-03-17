@@ -13,6 +13,8 @@ import { calculateLeadScore } from '../../lib/lead-scoring';
 
 type LeadFormProps = {
   heading?: string;
+  description?: string;
+  formId?: string;
   propertyId?: string | null;
   defaultMessage?: string;
   defaultPreferredArea?: string;
@@ -37,6 +39,8 @@ function normalizeTagToken(value: string): string {
 
 export function LeadForm({
   heading,
+  description,
+  formId,
   propertyId,
   defaultMessage,
   defaultPreferredArea,
@@ -202,9 +206,9 @@ export function LeadForm({
   }
 
   return (
-    <form className="inquiry-form" onSubmit={(e) => e.preventDefault()}>
+    <form id={formId} className="inquiry-form" onSubmit={(e) => e.preventDefault()}>
       <h3>{heading ?? dict.common.leadForm.headingDefault}</h3>
-      <p className="form-desc">{dict.common.leadForm.description}</p>
+      <p className="form-desc">{description ?? dict.common.leadForm.description}</p>
 
       <div
         className="form-grid"

@@ -102,6 +102,7 @@ export default async function HomePage({
     { TrackedLink },
     { HomeHero },
     { FeaturedProjects },
+    { HomeBottomCta },
     { LeadForm },
     { Container },
     { getDictionary },
@@ -121,6 +122,7 @@ export default async function HomePage({
     import('@/components/analytics/TrackedLink'),
     import('@/components/home/HomeHero'),
     import('@/components/home/FeaturedProjects'),
+    import('@/components/home/HomeBottomCta'),
     import('@/components/forms/LeadForm'),
     import('@/components/layout/Container'),
     import('@/app/_lib/i18n/get-dictionary'),
@@ -463,12 +465,12 @@ export default async function HomePage({
       };
     }
 
-    function deriveTags(input: PropertyListItem): string[] {
+    function deriveTags(input: PropertyListItem, statTokens: { view: string | null }): string[] {
       const text = `${input.title} ${input.status}`.toLowerCase();
       const tags: string[] = [];
       if (text.includes('high yield')) tags.push(locale === 'th' ? 'ผลตอบแทนสูง' : 'High yield');
       if (text.includes('corner')) tags.push(locale === 'th' ? 'ห้องมุม' : 'Corner');
-      if (text.includes('sea view')) tags.push(locale === 'th' ? 'วิวทะเล' : 'Sea view');
+      if (!statTokens.view && text.includes('sea view')) tags.push(locale === 'th' ? 'วิวทะเล' : 'Sea view');
       return tags.slice(0, 3);
     }
 
@@ -498,7 +500,7 @@ export default async function HomePage({
               const fallbackSrc = PROPERTY_FALLBACK_IMAGES[index % PROPERTY_FALLBACK_IMAGES.length];
               const priceFormatted = prop.price ? `฿${Math.round(prop.price).toLocaleString()}` : null;
               const statTokens = deriveStatTokens(prop);
-              const tags = deriveTags(prop);
+              const tags = deriveTags(prop, { view: statTokens.view });
               const typeBadge = prop.type === 'rent' ? (locale === 'th' ? 'ให้เช่า' : 'For Rent')
                 : prop.type === 'resale' ? (locale === 'th' ? 'ขายต่อ' : 'Resale')
                   : (locale === 'th' ? 'ขาย' : 'For Sale');
@@ -887,10 +889,11 @@ export default async function HomePage({
     typeof composerBottomCta.primary_cta_label === 'string' && composerBottomCta.primary_cta_label.trim()
       ? composerBottomCta.primary_cta_label.trim()
       : (locale === 'th' ? 'นัดคำปรึกษา' : 'Book Consultation');
+  const bottomCtaFormId = 'home-consultation-form';
   const bottomCtaPrimaryUrl =
     typeof composerBottomCta.primary_cta_url === 'string' && composerBottomCta.primary_cta_url.trim()
       ? withLocale(locale, composerBottomCta.primary_cta_url.trim())
-      : withLocale(locale, '/contact');
+      : `#${bottomCtaFormId}`;
   const bottomCtaSecondaryLabel =
     typeof composerBottomCta.secondary_cta_label === 'string' && composerBottomCta.secondary_cta_label.trim()
       ? composerBottomCta.secondary_cta_label.trim()
@@ -915,6 +918,7 @@ export default async function HomePage({
       : (locale === 'th'
         ? 'กรอกข้อมูลสั้น ๆ แล้วเราจะติดต่อกลับพร้อม shortlist ที่เหมาะกับงบประมาณของคุณ'
         : 'Complete the short form and we will follow up with a curated shortlist matched to your budget.');
+  const hasDedicatedBottomConversionGate = isSectionEnabled('bottom_cta');
 
   const editorialInsightCards = authorityPosts.map((post, index) => ({
     key: `editorial-${post.slug}`,
@@ -1488,14 +1492,16 @@ export default async function HomePage({
               <p className="home-advisory-band__note">{teamCtaTrustNote}</p>
             </div>
             <div className="home-advisory-band__actions">
-              <TrackedLink
-                className="btn btn-cta"
-                href={teamCtaPrimaryUrl}
-                eventType="home_trust_proof_click"
-                eventPayload={{ cta: 'team_cta_contact', from: 'home_team_cta' }}
-              >
-                {teamCtaPrimaryLabel}
-              </TrackedLink>
+              {!hasDedicatedBottomConversionGate ? (
+                <TrackedLink
+                  className="btn btn-cta"
+                  href={teamCtaPrimaryUrl}
+                  eventType="home_trust_proof_click"
+                  eventPayload={{ cta: 'team_cta_contact', from: 'home_team_cta' }}
+                >
+                  {teamCtaPrimaryLabel}
+                </TrackedLink>
+              ) : null}
               <TrackedLink
                 className="btn btn-secondary"
                 href={teamCtaSecondaryUrl}
@@ -1504,6 +1510,13 @@ export default async function HomePage({
               >
                 {teamCtaSecondaryLabel}
               </TrackedLink>
+              {hasDedicatedBottomConversionGate ? (
+                <p className="text-sm text-gray-500 max-w-xs">
+                  {locale === 'th'
+                    ? 'พร้อมส่ง brief แล้ว? ใช้ฟอร์มด้านล่างเพื่อให้ทีมจัด shortlist ที่ตรงเป้าหมาย'
+                    : 'Ready to brief the team? Use the consultation form below for a shortlist matched to your goal.'}
+                </p>
+              ) : null}
             </div>
           </div>
         </Container>
@@ -1512,48 +1525,23 @@ export default async function HomePage({
 
       {/* Premium CTA / Conversion Gate */}
       {isSectionEnabled('bottom_cta') ? (
-      <section className="home-bottom-cta cv-auto py-20 md:py-32 bg-gray-900 text-white mt-8" style={sectionOrderStyle('bottom_cta')}>
-        <Container variant="wide">
-          <div className="grid lg:grid-cols-2 gap-16 items-center">
-            <div className="reveal">
-              <h2 className="text-3xl md:text-5xl font-serif font-medium mb-6 leading-tight">
-                {bottomCtaHeading}
-              </h2>
-              <p className="text-lg text-white/80 mb-10 max-w-lg leading-relaxed">
-                {bottomCtaSubheading}
-              </p>
-              <div className="flex flex-wrap gap-4">
-                <TrackedLink
-                  className="px-6 py-3 bg-white text-gray-900 rounded-full text-sm font-semibold hover:bg-gray-100 transition-colors"
-                  href={bottomCtaPrimaryUrl}
-                  eventType="home_final_cta_click"
-                  eventPayload={{ cta: 'book_consultation', from: 'home_bottom' }}
-                >
-                  {bottomCtaPrimaryLabel}
-                </TrackedLink>
-                <TrackedLink
-                  className="px-6 py-3 bg-white/10 hover:bg-white/20 backdrop-blur-md rounded-full text-white text-sm font-medium transition-colors border border-white/20"
-                  href={bottomCtaSecondaryUrl}
-                  eventType="home_final_cta_click"
-                  eventPayload={{ cta: 'view_investment_path', from: 'home_bottom' }}
-                >
-                  {bottomCtaSecondaryLabel}
-                </TrackedLink>
-              </div>
-              <p className="home-bottom-trust-note mt-4 text-sm text-white/70 max-w-xl">{bottomCtaTrustNote}</p>
-            </div>
-            <div className="reveal">
-              <div className="bg-white p-8 md:p-10 rounded-2xl shadow-2xl text-gray-900">
-                <h3 className="text-2xl font-medium mb-2">{bottomCtaFormHeading}</h3>
-                <p className="text-gray-600 mb-8 text-sm">
-                  {bottomCtaFormBody}
-                </p>
-                <LeadForm />
-              </div>
-            </div>
-          </div>
-        </Container>
-      </section>
+      <HomeBottomCta
+        heading={bottomCtaHeading}
+        subheading={bottomCtaSubheading}
+        primaryLabel={bottomCtaPrimaryLabel}
+        primaryUrl={bottomCtaPrimaryUrl}
+        secondaryLabel={bottomCtaSecondaryLabel}
+        secondaryUrl={bottomCtaSecondaryUrl}
+        trustNote={bottomCtaTrustNote}
+        order={sectionOrderStyle('bottom_cta').order}
+        formSlot={(
+          <LeadForm
+            formId={bottomCtaFormId}
+            heading={bottomCtaFormHeading}
+            description={bottomCtaFormBody}
+          />
+        )}
+      />
       ) : null}
     </main>
   );

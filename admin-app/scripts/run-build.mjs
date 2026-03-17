@@ -7,6 +7,7 @@ import { fileURLToPath } from 'node:url';
 const SCRIPT_DIR = path.dirname(fileURLToPath(import.meta.url));
 const PROJECT_ROOT = path.resolve(SCRIPT_DIR, '..');
 const PROJECT_FILES_TO_RESTORE = ['next-env.d.ts', 'tsconfig.json'];
+const LOCAL_SAFE_CLEAN_PATHS = ['.next_public_visual', '.next_local_safe', '.next/cache', 'tsconfig.tsbuildinfo'];
 
 function normalizeFlag(value) {
   return ['1', 'true', 'yes'].includes(String(value || '').trim().toLowerCase());
@@ -23,6 +24,13 @@ function shouldUseLocalSafeBuild() {
 
   const runningInCi = normalizeFlag(process.env.CI) || normalizeFlag(process.env.GITHUB_ACTIONS);
   return process.platform === 'win32' && !runningInCi;
+}
+
+function mergeNodeOptions(baseOptions, requiredOption) {
+  const normalized = String(baseOptions || '').trim();
+  if (!normalized) return requiredOption;
+  if (normalized.includes(requiredOption)) return normalized;
+  return `${normalized} ${requiredOption}`;
 }
 
 async function snapshotProjectFiles() {
@@ -48,6 +56,15 @@ async function restoreProjectFiles(snapshot) {
   );
 }
 
+async function removePathIfExists(relativePath) {
+  const absolutePath = path.join(PROJECT_ROOT, relativePath);
+  await fs.rm(absolutePath, { recursive: true, force: true }).catch(() => undefined);
+}
+
+async function cleanupLocalSafeArtifacts() {
+  await Promise.all(LOCAL_SAFE_CLEAN_PATHS.map((relativePath) => removePathIfExists(relativePath)));
+}
+
 function waitForExit(child) {
   return new Promise((resolve, reject) => {
     child.once('error', reject);
@@ -70,7 +87,9 @@ async function run() {
   };
 
   if (useLocalSafeBuild) {
+    await cleanupLocalSafeArtifacts();
     Object.assign(env, {
+      NODE_OPTIONS: mergeNodeOptions(process.env.NODE_OPTIONS, '--max-old-space-size=8192'),
       NEXT_LOCAL_BUILD_STATIC_SAFE: process.env.NEXT_LOCAL_BUILD_STATIC_SAFE || '1',
       NEXT_LOCAL_CONFIG_MINIMAL: process.env.NEXT_LOCAL_CONFIG_MINIMAL || '1',
       NEXT_LOCAL_APP_ROOT_MINIMAL: process.env.NEXT_LOCAL_APP_ROOT_MINIMAL || '1',

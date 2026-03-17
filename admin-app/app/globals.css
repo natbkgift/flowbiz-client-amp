@@ -2172,6 +2172,21 @@ summary.mobile-nav__trigger::-webkit-details-marker {
   flex: 1 1 160px;
 }
 
+.hero-support-row {
+  padding-top: 2px;
+}
+
+.hero-whatsapp-link,
+.hero-guided-trigger {
+  text-decoration: none;
+}
+
+.hero-whatsapp-link:hover,
+.hero-guided-trigger:hover {
+  text-decoration: underline;
+  text-underline-offset: 0.18em;
+}
+
 .hero-path-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -3926,6 +3941,16 @@ summary.mobile-nav__trigger::-webkit-details-marker {
   display: grid;
   grid-template-columns: 1fr;
   gap: var(--space-2);
+  opacity: 0;
+  transform: translateY(calc(100% + 16px));
+  pointer-events: none;
+  transition: opacity 0.24s ease, transform 0.24s ease;
+}
+
+.mobile-cta--visible {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
 }
 
 .mobile-cta__primary,
@@ -3968,6 +3993,12 @@ summary.mobile-nav__trigger::-webkit-details-marker {
 
   .floating-cta {
     bottom: 24px;
+  }
+}
+
+@media (max-width: 767.98px) {
+  .floating-cta {
+    display: none;
   }
 }
 

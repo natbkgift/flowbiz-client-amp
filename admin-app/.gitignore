@@ -3,6 +3,7 @@ node_modules
 .next_admin_smoke
 .next_forensics
 .next_local_safe
+.next_public_visual
 npm-debug.log*
 build-debug.log
 tsconfig.tsbuildinfo
