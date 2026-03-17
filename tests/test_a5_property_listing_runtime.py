@@ -248,12 +248,14 @@ def test_a5_filter_sort_and_pagination(client) -> None:
     assert "page=1" in page_2.text
 
 
-def test_a5_buy_and_rent_routes_keep_page_owned_cta_hierarchy(client) -> None:
+def test_a5_listing_family_routes_keep_page_owned_cta_hierarchy(client) -> None:
     _seed_a5_fixture()
 
     route_expectations = [
         ("/en/buy", "/en/contact?intent=consultation&source=buy", "/en/smart-finder?intent=buy"),
         ("/en/rent", "/en/contact?intent=consultation&source=rent", "/en/smart-finder?intent=rent"),
+        ("/en/investment", "/en/contact?intent=consultation&source=investment", "/en/smart-finder?intent=invest"),
+        ("/en/marketplace", "/en/contact?intent=consultation&source=marketplace", "/en/smart-finder?intent=buy"),
     ]
 
     for path, consultation_href, finder_href in route_expectations:

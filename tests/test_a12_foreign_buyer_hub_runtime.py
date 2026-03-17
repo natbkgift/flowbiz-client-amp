@@ -49,3 +49,43 @@ def test_a12_foreign_buyer_hub_routes_render_conservative_guidance(client) -> No
     assert "workflow นี้เป็นคำอธิบายเชิงโครงสร้าง" in th_html
     assert 'href="/th/contact?intent=consultation&amp;source=foreign_buyer_hub"' in th_html
     assert "เมื่อใดที่ต้องขอ legal review" in th_html
+
+
+def test_a12_foreign_buyer_hub_keeps_page_owned_cta_hierarchy(client) -> None:
+    response = client.get("/en/foreign-buyer-hub")
+    assert response.status_code == 200, response.text
+    html = response.text
+
+    assert 'id="foreign-buyer-coverage"' in html
+    assert 'id="foreign-buyer-ownership"' in html
+    assert 'id="foreign-buyer-process"' in html
+    assert 'id="foreign-buyer-documents"' in html
+    assert 'id="foreign-buyer-faq"' in html
+    assert 'id="foreign-buyer-legal-review"' in html
+    assert 'id="foreign-buyer-next-step"' in html
+    assert 'href="/en/contact?intent=consultation&amp;source=foreign_buyer_hub"' in html
+    assert 'href="/en/projects?source=foreign_buyer_hub"' in html
+
+    coverage_index = html.index('id="foreign-buyer-coverage"')
+    ownership_index = html.index('id="foreign-buyer-ownership"')
+    process_index = html.index('id="foreign-buyer-process"')
+    documents_index = html.index('id="foreign-buyer-documents"')
+    faq_index = html.index('id="foreign-buyer-faq"')
+    legal_review_index = html.index('id="foreign-buyer-legal-review"')
+    next_step_index = html.index('id="foreign-buyer-next-step"')
+    consultation_index = html.index('href="/en/contact?intent=consultation&amp;source=foreign_buyer_hub"')
+    projects_index = html.index('href="/en/projects?source=foreign_buyer_hub"')
+    assert (
+        coverage_index
+        < ownership_index
+        < process_index
+        < documents_index
+        < faq_index
+        < legal_review_index
+        < next_step_index
+    )
+    assert next_step_index < consultation_index < projects_index
+
+    assert '<form' not in html
+    assert 'https://wa.me/' not in html
+    assert 'https://line.me/' not in html
