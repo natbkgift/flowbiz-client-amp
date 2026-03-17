@@ -248,6 +248,38 @@ def test_a5_filter_sort_and_pagination(client) -> None:
     assert "page=1" in page_2.text
 
 
+def test_a5_buy_and_rent_routes_keep_page_owned_cta_hierarchy(client) -> None:
+    _seed_a5_fixture()
+
+    route_expectations = [
+        ("/en/buy", "/en/contact?intent=consultation&source=buy", "/en/smart-finder?intent=buy"),
+        ("/en/rent", "/en/contact?intent=consultation&source=rent", "/en/smart-finder?intent=rent"),
+    ]
+
+    for path, consultation_href, finder_href in route_expectations:
+        response = client.get(path)
+        assert response.status_code == 200, response.text
+        html = response.text
+
+        assert 'id="listing-hero"' in html
+        assert 'id="listing_consultation"' in html
+        assert 'id="listing_smart_finder"' in html
+        assert 'id="listing-filters-section"' in html
+        assert 'id="listing-results"' in html
+        assert consultation_href in html
+        assert finder_href in html
+
+        hero_index = html.index('id="listing-hero"')
+        consultation_index = html.index(consultation_href)
+        finder_index = html.index(finder_href)
+        filters_index = html.index('id="listing-filters-section"')
+        results_index = html.index('id="listing-results"')
+        assert hero_index < consultation_index < finder_index < filters_index < results_index
+
+        assert 'https://wa.me/' not in html
+        assert 'https://line.me/' not in html
+
+
 def test_a5_card_cta_tracking_states_and_no_hotlink(client) -> None:
     _seed_a5_fixture()
     response = client.get("/en/marketplace?limit=12&sort=price_desc")

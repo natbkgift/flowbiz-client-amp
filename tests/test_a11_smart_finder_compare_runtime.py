@@ -258,6 +258,55 @@ def test_a11_compare_empty_and_incomplete_data_fallback(client) -> None:
     assert ">-<" in incomplete_html
 
 
+def test_a11_smart_finder_and_compare_keep_page_owned_cta_hierarchy(client) -> None:
+    seeded = _seed_a11_fixture()
+
+    finder_response = client.get("/en/smart-finder?intent=buy")
+    assert finder_response.status_code == 200, finder_response.text
+    finder_html = finder_response.text
+
+    assert 'id="finder-summary"' in finder_html
+    assert 'id="finder-shortlist-cta"' in finder_html
+    assert 'id="finder-compare-cta"' in finder_html
+    assert 'id="finder-results"' in finder_html
+    assert '/en/contact?intent=consultation&source=smart-finder' in finder_html
+    assert 'data-event="finder_consultation_cta_click"' in finder_html
+    assert 'data-event="finder_compare_cta_click"' in finder_html
+
+    summary_index = finder_html.index('id="finder-summary"')
+    consultation_index = finder_html.index('id="finder-shortlist-cta"')
+    compare_index = finder_html.index('id="finder-compare-cta"')
+    results_index = finder_html.index('id="finder-results"')
+    assert summary_index < consultation_index < compare_index < results_index
+
+    assert 'https://wa.me/' not in finder_html
+    assert 'https://line.me/' not in finder_html
+
+    compare_response = client.get(
+        f"/en/compare?ids={seeded['buy_slug']},{seeded['invest_slug']}"
+    )
+    assert compare_response.status_code == 200, compare_response.text
+    compare_html = compare_response.text
+
+    assert 'id="compare_consultation_hero"' in compare_html
+    assert 'id="compare_open_smart_finder"' in compare_html
+    assert 'id="compare-table"' in compare_html
+    assert 'id="compare_consultation_footer"' in compare_html
+    assert 'id="compare_adjust_set"' in compare_html
+    assert '/en/contact?intent=consultation&source=compare' in compare_html
+    assert '/en/smart-finder' in compare_html
+
+    hero_index = compare_html.index('id="compare_consultation_hero"')
+    finder_index = compare_html.index('id="compare_open_smart_finder"')
+    table_index = compare_html.index('id="compare-table"')
+    footer_index = compare_html.index('id="compare_consultation_footer"')
+    adjust_index = compare_html.index('id="compare_adjust_set"')
+    assert hero_index < finder_index < table_index < footer_index < adjust_index
+
+    assert 'https://wa.me/' not in compare_html
+    assert 'https://line.me/' not in compare_html
+
+
 def test_a11_keyboard_and_accessibility_baseline(client) -> None:
     _seed_a11_fixture()
     finder = client.get("/en/smart-finder")
