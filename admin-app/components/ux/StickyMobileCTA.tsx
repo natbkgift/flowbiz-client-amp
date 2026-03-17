@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { usePathname, useSearchParams } from 'next/navigation';
 
-import { CTA, shouldRenderStickyMobileCta } from '../../app/_lib/public-cta';
+import { shouldRenderStickyMobileCta } from '../../app/_lib/public-cta';
 import { en } from '../../app/_lib/i18n/en';
 import { th } from '../../app/_lib/i18n/th';
 import { localeFromPathname, withLocale } from '../../app/_lib/i18n/routing';
@@ -68,14 +68,6 @@ export function StickyMobileCTA() {
         </Link>
       </div>
       <div className="mobile-cta__secondary">
-        <a
-          className="btn btn-secondary mobile-cta__btn"
-          href={CTA.whatsAppUrl}
-          target="_blank"
-          rel="noreferrer"
-        >
-          {dict.cta.whatsapp}
-        </a>
         <Link
           className="btn btn-secondary mobile-cta__btn"
           href={withLocale(locale, '/contact?topic=investment_plan')}

@@ -32,7 +32,7 @@ describe('ShortlistListSurface', () => {
             shortlist: {
               id: 'shortlist-1',
               owner_type: 'session',
-              owner_key: 'owner-1',
+              owner_key: 'owner-12345678',
               status: 'active',
               title: null,
               intent: null,
@@ -130,7 +130,7 @@ describe('ShortlistListSurface', () => {
         shortlist: {
           id: 'shortlist-1',
           owner_type: 'session',
-          owner_key: 'owner-1',
+          owner_key: 'owner-12345678',
           status: 'active',
           title: null,
           intent: null,
@@ -166,7 +166,7 @@ describe('ShortlistListSurface', () => {
             shortlist: {
               id: 'shortlist-1',
               owner_type: 'session',
-              owner_key: 'owner-1',
+              owner_key: 'owner-12345678',
               status: 'active',
               title: null,
               intent: null,
@@ -215,7 +215,7 @@ describe('ShortlistListSurface', () => {
             shortlist: {
               id: 'shortlist-1',
               owner_type: 'session',
-              owner_key: 'owner-1',
+              owner_key: 'owner-12345678',
               status: 'active',
               title: null,
               intent: null,
@@ -259,7 +259,7 @@ describe('ShortlistListSurface', () => {
             shortlist: {
               id: 'shortlist-1',
               owner_type: 'session',
-              owner_key: 'owner-1',
+              owner_key: 'owner-12345678',
               status: 'active',
               title: null,
               intent: null,

@@ -56,7 +56,7 @@ export function FeaturedProjects({
         </div>
         <EmptyStateCard
           className="ui-empty"
-          title={locale === 'th' ? 'ให้ทีมช่วยคัด shortlist ล่าสุดให้คุณ' : 'Ask the team for today\'s shortlist'}
+          title={locale === 'th' ? 'ให้ทีมช่วยคัดรายการล่าสุดให้คุณ' : 'Ask the team for today\'s shortlist'}
           body={locale === 'th' ? 'ดูโครงการที่เผยแพร่แล้วทั้งหมด หรือส่ง brief ให้ทีมจัดชุดโครงการที่เหมาะกับงบและเป้าหมายของคุณ' : 'Browse published developments or send your brief so the team can assemble a shortlist matched to your budget and goals.'}
         />
       </div>
@@ -128,7 +128,7 @@ export function FeaturedProjects({
     <div>
       <div className="section-header">
         <div className="inline-block px-3 py-1 bg-gray-100 text-gray-600 text-xs font-medium rounded-full mb-3">
-          {locale === 'th' ? 'รายการคัดสรรของ AMP' : 'AMP curated shortlist'}
+          {locale === 'th' ? 'โครงการคัดสรรของ AMP' : 'AMP curated shortlist'}
         </div>
         <h2 className="section-title">{title}</h2>
         <p className="section-subtitle">{subtitle}</p>

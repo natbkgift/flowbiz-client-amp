@@ -139,6 +139,8 @@ describe('public CTA visibility', () => {
       '/en/invest',
       '/en/investment',
       '/en/investor',
+      '/en/shortlist',
+      '/en/shortlist/shared/share-token-123',
     ];
 
     for (const pathname of pageOwnedRoutes) {
@@ -152,5 +154,16 @@ describe('public CTA visibility', () => {
       expect(floatingRender.container.querySelector('.floating-cta')).toBeNull();
       floatingRender.unmount();
     }
+  });
+
+  it('keeps the sticky mobile tray to one primary and one secondary action', () => {
+    mockedPathname = '/en/projects';
+    mockedSearch = '';
+    setScrollY(0);
+
+    const { container } = render(<StickyMobileCTA />);
+
+    expect(container.querySelectorAll('.mobile-cta__primary a')).toHaveLength(1);
+    expect(container.querySelectorAll('.mobile-cta__secondary a')).toHaveLength(1);
   });
 });

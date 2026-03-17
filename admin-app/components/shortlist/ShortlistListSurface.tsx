@@ -28,6 +28,14 @@ function buildPropertyHref(locale: 'en' | 'th', item: ShortlistPropertyItem): st
   return withLocale(locale, '/buy');
 }
 
+function getPrimaryListingActionLabel(locale: 'en' | 'th', item: ShortlistPropertyItem): string {
+  if (item.slug) {
+    return locale === 'th' ? 'ดูรายละเอียด listing' : 'View listing details';
+  }
+
+  return locale === 'th' ? 'ดู buy listings เพิ่ม' : 'Browse buy listings';
+}
+
 export function ShortlistListSurface({ locale }: { locale: 'en' | 'th' }) {
   const [items, setItems] = useState<ShortlistPropertyItem[]>([]);
   const [compareProjects, setCompareProjects] = useState<ShortlistCompareProject[]>([]);
@@ -349,7 +357,7 @@ export function ShortlistListSurface({ locale }: { locale: 'en' | 'th' }) {
 
                 <div className="card-actions">
                   <Link className="btn btn-primary" href={propertyHref}>
-                    {locale === 'th' ? 'ดูรายละเอียด listing' : 'View listing details'}
+                    {getPrimaryListingActionLabel(locale, item)}
                   </Link>
                   <button
                     type="button"

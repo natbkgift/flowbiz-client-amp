@@ -2,8 +2,12 @@ import { Container } from '@/components/layout/Container';
 import { getDictionary, normalizeLocale } from '@/app/_lib/i18n/get-dictionary';
 
 export function TransferFeesBreakdown({ locale }: { locale: string }) {
-  const dict = getDictionary(normalizeLocale(locale));
+  const resolvedLocale = normalizeLocale(locale);
+  const dict = getDictionary(resolvedLocale);
   const k = dict.knowledge.transferFees;
+  const columnLabels = resolvedLocale === 'th'
+    ? { item: 'รายการ', rate: 'อัตรา', note: 'หมายเหตุ' }
+    : { item: 'Item', rate: 'Rate', note: 'Note' };
 
   return (
     <section className="section">
@@ -16,9 +20,9 @@ export function TransferFeesBreakdown({ locale }: { locale: string }) {
           <table className="info-table" aria-label={k.title}>
             <thead>
               <tr>
-                <th scope="col">Item</th>
-                <th scope="col">Rate</th>
-                <th scope="col">Note</th>
+                <th scope="col">{columnLabels.item}</th>
+                <th scope="col">{columnLabels.rate}</th>
+                <th scope="col">{columnLabels.note}</th>
               </tr>
             </thead>
             <tbody>

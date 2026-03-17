@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { Suspense } from 'react';
 
 import type { PropertyListItem } from '@/app/public/_shared/types';
+import { resolveHomeBottomCtaPrimaryUrl } from '@/app/_lib/home-bottom-cta';
 
 export const revalidate = 300;
 const useMinimalPublicHome = process.env.NEXT_LOCAL_PUBLIC_HOME_MINIMAL === '1';
@@ -856,7 +857,7 @@ export default async function HomePage({
     typeof composerTeamCta.trust_note === 'string' && composerTeamCta.trust_note.trim()
       ? composerTeamCta.trust_note.trim()
       : (locale === 'th'
-        ? 'เริ่มจากโจทย์ของคุณก่อนเสมอ แล้วค่อยจัด shortlist ที่เหมาะจริง'
+        ? 'เริ่มจากโจทย์ของคุณก่อนเสมอ แล้วค่อยจัดรายการคัดสรรที่เหมาะจริง'
         : 'We start from your brief first, then curate the shortlist around it.');
   const teamCtaPrimaryLabel =
     typeof composerTeamCta.primary_cta_label === 'string' && composerTeamCta.primary_cta_label.trim()
@@ -883,17 +884,17 @@ export default async function HomePage({
     typeof composerBottomCta.subheading === 'string' && composerBottomCta.subheading.trim()
       ? composerBottomCta.subheading.trim()
       : (locale === 'th'
-        ? 'แจ้งงบประมาณและวัตถุประสงค์ของคุณ แล้วทีมที่ปรึกษาจะจัด shortlist แบบคัดสรร พร้อมขั้นตอนถัดไปที่ชัดเจน'
+        ? 'แจ้งงบประมาณและวัตถุประสงค์ของคุณ แล้วทีมที่ปรึกษาจะจัดรายการคัดสรรที่เหมาะ พร้อมขั้นตอนถัดไปที่ชัดเจน'
         : 'Share your budget and intent, and our advisory team will prepare a curated shortlist with clear next steps.');
   const bottomCtaPrimaryLabel =
     typeof composerBottomCta.primary_cta_label === 'string' && composerBottomCta.primary_cta_label.trim()
       ? composerBottomCta.primary_cta_label.trim()
       : (locale === 'th' ? 'นัดคำปรึกษา' : 'Book Consultation');
   const bottomCtaFormId = 'home-consultation-form';
-  const bottomCtaPrimaryUrl =
-    typeof composerBottomCta.primary_cta_url === 'string' && composerBottomCta.primary_cta_url.trim()
-      ? withLocale(locale, composerBottomCta.primary_cta_url.trim())
-      : `#${bottomCtaFormId}`;
+  const bottomCtaPrimaryUrl = resolveHomeBottomCtaPrimaryUrl(
+    bottomCtaFormId,
+    typeof composerBottomCta.primary_cta_url === 'string' ? composerBottomCta.primary_cta_url : undefined,
+  );
   const bottomCtaSecondaryLabel =
     typeof composerBottomCta.secondary_cta_label === 'string' && composerBottomCta.secondary_cta_label.trim()
       ? composerBottomCta.secondary_cta_label.trim()
@@ -906,7 +907,7 @@ export default async function HomePage({
     typeof composerBottomCta.trust_note === 'string' && composerBottomCta.trust_note.trim()
       ? composerBottomCta.trust_note.trim()
       : (locale === 'th'
-        ? 'ทีมที่ปรึกษาท้องถิ่นจะติดต่อกลับพร้อม shortlist ที่ตรงกับเป้าหมายของคุณ'
+        ? 'ทีมที่ปรึกษาท้องถิ่นจะติดต่อกลับพร้อมรายการคัดสรรที่ตรงกับเป้าหมายของคุณ'
         : 'Our local advisory team follows up with a shortlist matched to your goals.');
   const bottomCtaConversionNote =
     typeof composerBottomCta.conversion_note === 'string' && composerBottomCta.conversion_note.trim()
@@ -922,7 +923,7 @@ export default async function HomePage({
     typeof composerBottomCta.form_body === 'string' && composerBottomCta.form_body.trim()
       ? composerBottomCta.form_body.trim()
       : (locale === 'th'
-        ? 'กรอกข้อมูลสั้น ๆ แล้วเราจะติดต่อกลับพร้อม shortlist ที่เหมาะกับงบประมาณของคุณ'
+        ? 'กรอกข้อมูลสั้น ๆ แล้วเราจะติดต่อกลับพร้อมรายการคัดสรรที่เหมาะกับงบประมาณของคุณ'
         : 'Complete the short form and we will follow up with a curated shortlist matched to your budget.');
   const hasDedicatedBottomConversionGate = isSectionEnabled('bottom_cta');
 
@@ -1519,7 +1520,7 @@ export default async function HomePage({
               {hasDedicatedBottomConversionGate ? (
                 <p className="text-sm text-gray-500 max-w-xs">
                   {locale === 'th'
-                    ? 'พร้อมส่ง brief แล้ว? ใช้ฟอร์มด้านล่างเพื่อให้ทีมจัด shortlist ที่ตรงเป้าหมาย'
+                    ? 'พร้อมส่ง brief แล้ว? ใช้ฟอร์มด้านล่างเพื่อให้ทีมจัดรายการคัดสรรที่ตรงเป้าหมาย'
                     : 'Ready to brief the team? Use the consultation form below for a shortlist matched to your goal.'}
                 </p>
               ) : null}

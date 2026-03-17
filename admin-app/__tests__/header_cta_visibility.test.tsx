@@ -43,4 +43,17 @@ describe('Header CTA visibility', () => {
     expect(finderRender.container.querySelector('.header-cta-group')).toBeNull();
     expect(finderRender.container.querySelector('.mobile-nav__cta')).toBeNull();
   });
+
+  it('suppresses global header CTAs on shortlist-owned routes', () => {
+    mockedPathname = '/en/shortlist';
+    const shortlistRender = render(<Header locale="en" dict={en} />);
+    expect(shortlistRender.container.querySelector('.header-cta-group')).toBeNull();
+    expect(shortlistRender.container.querySelector('.mobile-nav__cta')).toBeNull();
+    shortlistRender.unmount();
+
+    mockedPathname = '/en/shortlist/shared/share-token-123';
+    const sharedRender = render(<Header locale="en" dict={en} />);
+    expect(sharedRender.container.querySelector('.header-cta-group')).toBeNull();
+    expect(sharedRender.container.querySelector('.mobile-nav__cta')).toBeNull();
+  });
 });
