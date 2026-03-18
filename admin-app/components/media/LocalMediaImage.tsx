@@ -2,7 +2,11 @@
 
 import { useMemo } from 'react';
 
-import { pickPrimaryLocalMedia, type LocalMediaInput } from '@/app/_lib/local-media';
+import {
+  isKnownStalePublicMediaPath,
+  pickRenderableLocalMedia,
+  type LocalMediaInput,
+} from '@/app/_lib/local-media';
 import { SafeCoverImage } from '@/components/media/SafeCoverImage';
 
 const DEFAULT_FALLBACK_SRC = '/images/property-placeholder.svg';
@@ -16,11 +20,17 @@ function normalizeRuntimeLocalPath(value: string | null | undefined): string | n
   if (raw.startsWith('//') || raw.includes('://')) return null;
 
   if (raw.startsWith("/media/") || raw.startsWith("/storage/")) return raw;
-  if (LOCAL_PREFIXES.some((prefix) => raw.startsWith(prefix))) return raw;
+  if (LOCAL_PREFIXES.some((prefix) => raw.startsWith(prefix))) {
+    return isKnownStalePublicMediaPath(raw) ? null : raw;
+  }
 
   const withLeadingSlash = raw.startsWith('/') ? raw : `/${raw}`;
-  if (withLeadingSlash.startsWith("/media/") || withLeadingSlash.startsWith("/storage/")) return withLeadingSlash;
-  if (LOCAL_PREFIXES.some((prefix) => withLeadingSlash.startsWith(prefix))) return withLeadingSlash;
+  if (withLeadingSlash.startsWith("/media/") || withLeadingSlash.startsWith("/storage/")) {
+    return isKnownStalePublicMediaPath(withLeadingSlash) ? null : withLeadingSlash;
+  }
+  if (LOCAL_PREFIXES.some((prefix) => withLeadingSlash.startsWith(prefix))) {
+    return isKnownStalePublicMediaPath(withLeadingSlash) ? null : withLeadingSlash;
+  }
 
   return null;
 }
@@ -59,7 +69,7 @@ export function LocalMediaImage({
       if (normalized) return normalized;
     }
 
-    const picked = pickPrimaryLocalMedia(media);
+    const picked = pickRenderableLocalMedia(media);
     return normalizeRuntimeLocalPath(picked) ?? picked;
   }, [media]);
   const safeAlt = (alt && alt.trim()) || altFallback || 'Property image';

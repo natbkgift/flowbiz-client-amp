@@ -1,4 +1,5 @@
 import type { PropertyListItem } from '../public/_shared/types';
+import { isKnownStalePublicMediaPath } from './local-media';
 
 const LOCAL_MEDIA_PREFIXES = ['/media/', '/uploads/', '/assets/', '/_next/'];
 
@@ -11,6 +12,7 @@ export function resolveImageUrl(image: string | null | undefined): string | null
 
   const normalized = raw.startsWith('/') ? raw : `/${raw}`;
   if (LOCAL_MEDIA_PREFIXES.some((prefix) => normalized.startsWith(prefix))) {
+    if (isKnownStalePublicMediaPath(normalized)) return null;
     return normalized;
   }
   return null;

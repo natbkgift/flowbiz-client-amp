@@ -107,7 +107,7 @@ export default async function HomePage({
     { LeadForm },
     { Container },
     { getDictionary },
-    { normalizeLocalMediaPath, pickPrimaryLocalMedia },
+    { normalizeLocalMediaPath, pickRenderableLocalMedia, resolveRenderableLocalMediaPath },
     { GuidedOverlay },
     { withLocale },
     { getContentRecommendation },
@@ -277,7 +277,7 @@ export default async function HomePage({
     for (const prop of allProperties) {
       const imgCandidates = [prop.cover_image, ...(prop.local_images ?? []), ...(prop.images ?? [])];
       const realImg = imgCandidates
-        .map((candidate) => normalizeLocalMediaPath(candidate))
+        .map((candidate) => resolveRenderableLocalMediaPath(candidate))
         .find((resolved): resolved is string => Boolean(resolved));
       if (!realImg) continue;
       const nextPrice = typeof prop.price === 'number' && Number.isFinite(prop.price) && prop.price > 0
@@ -318,7 +318,7 @@ export default async function HomePage({
 
     const enrichedProjects = allProjects.map((project) => {
       const hint = projectMediaHints.get(project.id);
-      const resolvedCover = normalizeLocalMediaPath(project.cover_image_url ?? null);
+      const resolvedCover = resolveRenderableLocalMediaPath(project.cover_image_url ?? null);
       const hasRealProjectCover = Boolean(resolvedCover);
       return {
         ...project,
@@ -497,7 +497,7 @@ export default async function HomePage({
                 local_images: prop.local_images ?? null,
                 images: prop.images ?? null,
               };
-              const hasLocalMedia = Boolean(pickPrimaryLocalMedia(media));
+              const hasLocalMedia = Boolean(pickRenderableLocalMedia(media));
               const fallbackSrc = PROPERTY_FALLBACK_IMAGES[index % PROPERTY_FALLBACK_IMAGES.length];
               const priceFormatted = prop.price ? `฿${Math.round(prop.price).toLocaleString()}` : null;
               const statTokens = deriveStatTokens(prop);

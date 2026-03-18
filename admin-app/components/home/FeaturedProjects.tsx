@@ -1,6 +1,6 @@
 import Link from 'next/link';
 
-import { pickPrimaryLocalMedia } from '@/app/_lib/local-media';
+import { pickRenderableLocalMedia } from '@/app/_lib/local-media';
 import { withLocale } from '@/app/_lib/i18n/routing';
 import type { ProjectItem } from '@/app/_lib/public-api-server';
 import { LocalMediaImage } from '@/components/media/LocalMediaImage';
@@ -145,7 +145,7 @@ export function FeaturedProjects({
             hero_image_url: dynamicProject.hero_image_url ?? null,
             images: dynamicProject.images ?? null,
           };
-          const hasLocalMedia = Boolean(pickPrimaryLocalMedia(media));
+          const hasLocalMedia = Boolean(pickRenderableLocalMedia(media));
           const price = p.starting_price ? formatPrice(Number(p.starting_price)) : null;
           const badges = extractBadgeSet(p);
           const facts = extractQuickFacts(p);
