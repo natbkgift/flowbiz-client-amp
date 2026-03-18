@@ -38,6 +38,34 @@ SSH_OPTS=(
   -o ServerAliveCountMax=10
   -o TCPKeepAlive=yes
 )
+SCP_OPTS=(
+  -q
+  "${SSH_OPTS[@]}"
+)
+
+SSH_BIN="${FLOWBIZ_SSH_BIN:-ssh}"
+SCP_BIN="${FLOWBIZ_SCP_BIN:-scp}"
+if command -v ssh.exe >/dev/null 2>&1 && command -v scp.exe >/dev/null 2>&1; then
+  SSH_BIN="ssh.exe"
+  SCP_BIN="scp.exe"
+fi
+
+run_ssh() {
+  "$SSH_BIN" "${SSH_OPTS[@]}" "$@"
+}
+
+run_scp() {
+  "$SCP_BIN" "${SCP_OPTS[@]}" "$@"
+}
+
+local_copy_path() {
+  local source_path="$1"
+  if [[ "$SCP_BIN" == *.exe ]] && command -v wslpath >/dev/null 2>&1; then
+    wslpath -w "$source_path"
+  else
+    printf '%s' "$source_path"
+  fi
+}
 
 read_clean_worktree_status() {
   local status_output=""
@@ -94,15 +122,15 @@ deploy_remote_source="scripts/deploy_prod_remote.sh"
 
 cleanup() {
   rm -f "$remote_script_local"
-  ssh "${SSH_OPTS[@]}" "$VPS_HOST" "rm -f $(quote_bash "$remote_script_path")" >/dev/null 2>&1 || true
-  ssh "${SSH_OPTS[@]}" "$VPS_HOST" "rm -f $(quote_bash "$remote_runner_path")" >/dev/null 2>&1 || true
+  run_ssh "$VPS_HOST" "rm -f $(quote_bash "$remote_script_path")" >/dev/null 2>&1 || true
+  run_ssh "$VPS_HOST" "rm -f $(quote_bash "$remote_runner_path")" >/dev/null 2>&1 || true
 }
 trap cleanup EXIT
 
 normalize_lf_copy "$deploy_remote_source" "$remote_script_local"
 
-scp -q "${SSH_OPTS[@]}" "$remote_script_local" "${VPS_HOST}:${remote_script_path}"
-scp -q "${SSH_OPTS[@]}" "scripts/deploy_remote_job.sh" "${VPS_HOST}:${remote_runner_path}"
+run_scp "$(local_copy_path "$remote_script_local")" "${VPS_HOST}:${remote_script_path}"
+run_scp "$(local_copy_path "scripts/deploy_remote_job.sh")" "${VPS_HOST}:${remote_runner_path}"
 
 launch_command=$(
   cat <<EOF
@@ -123,14 +151,14 @@ chmod 700 $(quote_bash "$remote_script_path") $(quote_bash "$remote_runner_path"
     > /dev/null 2>&1 < /dev/null & printf '%s\n' "\$!" > $(quote_bash "$remote_state_dir/pid"); }
 EOF
 )
-ssh "${SSH_OPTS[@]}" "$VPS_HOST" "$launch_command"
+run_ssh "$VPS_HOST" "$launch_command"
 
 deadline=$((SECONDS + DEPLOY_TIMEOUT_SECONDS))
 last_log=""
 
 while (( SECONDS < deadline )); do
   poll_output="$(
-    ssh "${SSH_OPTS[@]}" "$VPS_HOST" "
+    run_ssh "$VPS_HOST" "
 if [ -f $(quote_bash "$remote_state_dir/exit_code") ]; then
   printf 'status=completed\n'
   printf 'exit_code=%s\n' \"\$(cat $(quote_bash "$remote_state_dir/exit_code"))\"
@@ -144,6 +172,7 @@ if [ -f $(quote_bash "$remote_state_dir/deploy.log") ]; then
   tail -n 20 $(quote_bash "$remote_state_dir/deploy.log")
 fi
 "
+    | tr -d '\r'
   )"
 
   status="$(printf '%s\n' "$poll_output" | awk -F= '/^status=/{print $2; exit}')"
@@ -160,7 +189,7 @@ fi
       echo "Production deploy failed." >&2
       exit 1
     fi
-    ssh "${SSH_OPTS[@]}" "$VPS_HOST" "cat $(quote_bash "$telemetry_path")" || true
+    run_ssh "$VPS_HOST" "cat $(quote_bash "$telemetry_path")" | tr -d '\r' || true
     exit 0
   fi
 
