@@ -403,7 +403,7 @@ try {
   $qRemoteExitCode = ConvertTo-BashArgument "$remoteStateDir/exit_code"
   $qRemoteLog = ConvertTo-BashArgument "$remoteStateDir/deploy.log"
   $overlayArgs = ($OverlayFiles | ForEach-Object { ConvertTo-BashArgument ($_.Replace("\", "/")) }) -join " "
-  $remoteCommand = "mkdir -p $qRemoteStateDir && chmod 700 $qRemoteTmp $qRemoteRunner && { nohup bash $qRemoteRunner $qRemoteStateDir $qRemoteTmp $qRemoteOverlayRoot $qRemoteArg $qTargetSha $qVpsActivePath $qVpsReleaseRoot $qVpsApiPort $qVpsAdminPort $qComposeProjectName $qAlembicTarget $qRemoteOverlayRoot $overlayArgs > /dev/null 2>&1 < /dev/null & printf '%s\n' \"`$!\" > $qRemotePid; }"
+  $remoteCommand = "mkdir -p $qRemoteStateDir && chmod 700 $qRemoteTmp $qRemoteRunner && { nohup bash $qRemoteRunner $qRemoteStateDir $qRemoteTmp $qRemoteOverlayRoot $qRemoteArg $qTargetSha $qVpsActivePath $qVpsReleaseRoot $qVpsApiPort $qVpsAdminPort $qComposeProjectName $qAlembicTarget $qRemoteOverlayRoot $overlayArgs > /dev/null 2>&1 < /dev/null & printf '%s\n' `$! > $qRemotePid; }"
 
   & ssh @sshOptions $VpsHost $remoteCommand
   if ($LASTEXITCODE -ne 0) {
@@ -418,8 +418,8 @@ try {
     $pollCommand = @"
 if [ -f $qRemoteExitCode ]; then
   printf 'status=completed\n'
-  printf 'exit_code=%s\n' "\$(cat $qRemoteExitCode)"
-elif [ -f $qRemotePid ] && kill -0 "\$(cat $qRemotePid)" 2>/dev/null; then
+  printf 'exit_code=%s\n' `$(cat $qRemoteExitCode)
+elif [ -f $qRemotePid ] && kill -0 `$(cat $qRemotePid) 2>/dev/null; then
   printf 'status=running\n'
 else
   printf 'status=unknown\n'
