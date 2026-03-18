@@ -274,20 +274,19 @@ launch_command=$(
   cat <<EOF
 mkdir -p $(quote_bash "$remote_state_dir") &&
 chmod 700 $(quote_bash "$remote_script_path") $(quote_bash "$remote_runner_path") &&
-nohup bash $(quote_bash "$remote_runner_path") \
-  $(quote_bash "$remote_state_dir") \
-  $(quote_bash "$remote_script_path") \
-  '' \
-  $(quote_bash "$REMOTE_URL") \
-  $(quote_bash "$TARGET_SHA") \
-  $(quote_bash "$VPS_ACTIVE_PATH") \
-  $(quote_bash "$VPS_RELEASE_ROOT") \
-  $(quote_bash "$VPS_API_PORT") \
-  $(quote_bash "$VPS_ADMIN_PORT") \
-  $(quote_bash "$COMPOSE_PROJECT_NAME") \
-  $(quote_bash "$ALEMBIC_UPGRADE_TARGET") \
-  > /dev/null 2>&1 < /dev/null &
-echo \$! > $(quote_bash "$remote_state_dir/pid")
+{ nohup bash $(quote_bash "$remote_runner_path") \
+    $(quote_bash "$remote_state_dir") \
+    $(quote_bash "$remote_script_path") \
+    '' \
+    $(quote_bash "$REMOTE_URL") \
+    $(quote_bash "$TARGET_SHA") \
+    $(quote_bash "$VPS_ACTIVE_PATH") \
+    $(quote_bash "$VPS_RELEASE_ROOT") \
+    $(quote_bash "$VPS_API_PORT") \
+    $(quote_bash "$VPS_ADMIN_PORT") \
+    $(quote_bash "$COMPOSE_PROJECT_NAME") \
+    $(quote_bash "$ALEMBIC_UPGRADE_TARGET") \
+    > /dev/null 2>&1 < /dev/null & printf '%s\n' "\$!" > $(quote_bash "$remote_state_dir/pid"); }
 EOF
 )
 ssh "${SSH_OPTS[@]}" "$VPS_HOST" "$launch_command"
