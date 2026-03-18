@@ -1,5 +1,5 @@
 import { readdir, readFile } from 'node:fs/promises';
-import { join } from 'node:path';
+import { dirname, join } from 'node:path';
 
 export type DeployTelemetry = {
   generated_at?: string | null;
@@ -35,8 +35,30 @@ export function getDeployTelemetryPath() {
   return process.env.FLOWBIZ_DEPLOY_TELEMETRY_PATH ?? DEFAULT_TELEMETRY_PATH;
 }
 
+function normalizeHistoryDir(candidate: string) {
+  const normalized = candidate.replace(/\\/g, '/');
+
+  if (normalized.endsWith('/deploy_telemetry.json')) {
+    return join(dirname(candidate), 'deploy-history');
+  }
+
+  if (/\/deploy-history\/run-[^/]+$/.test(normalized)) {
+    return dirname(candidate);
+  }
+
+  return candidate;
+}
+
 export function getDeployHistoryDir() {
-  return process.env.FLOWBIZ_DEPLOY_HISTORY_DIR ?? DEFAULT_HISTORY_DIR;
+  const configured = process.env.FLOWBIZ_DEPLOY_HISTORY_DIR;
+  if (configured) return normalizeHistoryDir(configured);
+
+  const telemetryPath = getDeployTelemetryPath();
+  if (telemetryPath !== DEFAULT_TELEMETRY_PATH) {
+    return normalizeHistoryDir(join(dirname(telemetryPath), 'deploy-history'));
+  }
+
+  return DEFAULT_HISTORY_DIR;
 }
 
 export function buildVersionPayload(telemetry: DeployTelemetry | null) {

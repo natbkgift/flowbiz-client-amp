@@ -91,4 +91,33 @@ describe('/api/platform/deploy-history route', () => {
       items: [],
     });
   });
+
+  it('normalizes a run directory env value back to the deploy-history root', async () => {
+    tempDir = mkdtempSync(join(tmpdir(), 'flowbiz-platform-history-normalized-'));
+    const historyDir = join(tempDir, 'deploy-history');
+    const olderRun = join(historyDir, 'run-20260318T001000Z-abc12345');
+    const newerRun = join(historyDir, 'run-20260318T002000Z-def67890');
+
+    mkdirSync(olderRun, { recursive: true });
+    mkdirSync(newerRun, { recursive: true });
+
+    writeFileSync(join(olderRun, 'telemetry.json'), JSON.stringify({ target_sha: 'abc12345' }), 'utf-8');
+    writeFileSync(join(newerRun, 'telemetry.json'), JSON.stringify({ target_sha: 'def67890' }), 'utf-8');
+
+    process.env.FLOWBIZ_DEPLOY_HISTORY_DIR = newerRun;
+
+    const response = await GET(
+      new Request('http://localhost/api/platform/deploy-history?limit=5') as never,
+    );
+    const body = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(body).toMatchObject({
+      ok: true,
+      count: 2,
+      history_dir: historyDir,
+    });
+    expect(body.items[0]).toMatchObject({ target_sha: 'def67890' });
+    expect(body.items[1]).toMatchObject({ target_sha: 'abc12345' });
+  });
 });

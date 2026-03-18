@@ -51,6 +51,10 @@ app = FastAPI(title="FlowBiz API", version="0.1.0", lifespan=lifespan)
 mimetypes.add_type("image/webp", ".webp")
 mimetypes.add_type("image/avif", ".avif")
 
+DEFAULT_DEPLOY_TELEMETRY_PATH = Path("/app/ops/logs/deploy_telemetry.json")
+DEFAULT_DEPLOY_HISTORY_DIR = Path("/app/ops/logs/deploy-history")
+MAX_DEPLOY_HISTORY_LIMIT = 50
+
 
 def _pick_media_root() -> Path | None:
     candidates = [Path("storage/media"), Path("admin-app/public/media")]
@@ -65,13 +69,71 @@ def _pick_media_root() -> Path | None:
 
 def _read_deploy_telemetry() -> dict | None:
     telemetry_path = Path(
-        os.getenv("FLOWBIZ_DEPLOY_TELEMETRY_PATH", "/app/ops/logs/deploy_telemetry.json")
+        os.getenv("FLOWBIZ_DEPLOY_TELEMETRY_PATH", str(DEFAULT_DEPLOY_TELEMETRY_PATH))
     )
     try:
         payload = json.loads(telemetry_path.read_text(encoding="utf-8"))
     except Exception:
         return None
     return payload if isinstance(payload, dict) else None
+
+
+def _normalize_deploy_history_dir(candidate: Path) -> Path:
+    if candidate.name == "deploy_telemetry.json":
+        return candidate.parent / "deploy-history"
+    if candidate.name.startswith("run-") and candidate.parent.name == "deploy-history":
+        return candidate.parent
+    return candidate
+
+
+def _get_deploy_history_dir() -> Path:
+    configured = os.getenv("FLOWBIZ_DEPLOY_HISTORY_DIR")
+    if configured:
+        return _normalize_deploy_history_dir(Path(configured))
+
+    telemetry_path = Path(
+        os.getenv("FLOWBIZ_DEPLOY_TELEMETRY_PATH", str(DEFAULT_DEPLOY_TELEMETRY_PATH))
+    )
+    fallback_history = telemetry_path.parent / "deploy-history"
+    if telemetry_path == DEFAULT_DEPLOY_TELEMETRY_PATH:
+        fallback_history = DEFAULT_DEPLOY_HISTORY_DIR
+    return _normalize_deploy_history_dir(fallback_history)
+
+
+def _parse_deploy_history_limit(raw_limit: int) -> int:
+    return min(max(int(raw_limit or 10), 1), MAX_DEPLOY_HISTORY_LIMIT)
+
+
+def _read_deploy_history(limit: int) -> list[dict]:
+    history_dir = _get_deploy_history_dir()
+    if not history_dir.exists():
+        return []
+
+    history: list[dict] = []
+    for telemetry_path in sorted(history_dir.glob("*/telemetry.json"), reverse=True):
+        try:
+            payload = json.loads(telemetry_path.read_text(encoding="utf-8"))
+        except Exception:
+            continue
+
+        if not isinstance(payload, dict):
+            continue
+
+        run_dir = telemetry_path.parent
+        history.append(
+            {
+                **payload,
+                "history_id": payload.get("history_id") or run_dir.name,
+                "history_dir": payload.get("history_dir") or str(run_dir),
+                "log_path": payload.get("log_path") or str(run_dir / "deploy.log"),
+                "lifecycle_log_path": payload.get("lifecycle_log_path")
+                or str(run_dir / "lifecycle.log"),
+            }
+        )
+        if len(history) >= limit:
+            break
+
+    return history
 
 
 @app.get("/healthz")
@@ -103,6 +165,20 @@ def platform_version() -> dict:
         "source": telemetry.get("source") if telemetry else "runtime",
         "validation_mode": telemetry.get("validation_mode") if telemetry else None,
         "active_repo": telemetry.get("active_repo") if telemetry else None,
+        "runtime": "api",
+    }
+
+
+@app.get("/platform/deploy-history")
+def platform_deploy_history(limit: int = 10) -> dict:
+    parsed_limit = _parse_deploy_history_limit(limit)
+    history = _read_deploy_history(parsed_limit)
+    return {
+        "ok": True,
+        "limit": parsed_limit,
+        "count": len(history),
+        "history_dir": str(_get_deploy_history_dir()),
+        "items": history,
         "runtime": "api",
     }
 
