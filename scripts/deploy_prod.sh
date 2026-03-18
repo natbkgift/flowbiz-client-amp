@@ -37,12 +37,19 @@ done
 
 ALEMBIC_UPGRADE_TARGET="${ALEMBIC_UPGRADE_TARGET//$'\r'/}"
 
+SSH_OPTS=(
+  -o BatchMode=yes
+  -o ServerAliveInterval=15
+  -o ServerAliveCountMax=10
+  -o TCPKeepAlive=yes
+)
+
 if [[ -n "$(git status --short)" ]]; then
   echo "Local worktree must be clean before deploy." >&2
   exit 2
 fi
 
-ssh -o BatchMode=yes "$VPS_HOST" bash -s -- \
+ssh "${SSH_OPTS[@]}" "$VPS_HOST" bash -s -- \
   "$REMOTE_URL" \
   "$TARGET_SHA" \
   "$VPS_ACTIVE_PATH" \

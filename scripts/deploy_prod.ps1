@@ -40,6 +40,21 @@ function ConvertTo-BashArgument([string]$Value) {
   return "'" + $Value.Replace("'", "'""'""'") + "'"
 }
 
+$sshOptions = @(
+  '-o', 'BatchMode=yes',
+  '-o', 'ServerAliveInterval=15',
+  '-o', 'ServerAliveCountMax=10',
+  '-o', 'TCPKeepAlive=yes'
+)
+
+$scpOptions = @(
+  '-q',
+  '-o', 'BatchMode=yes',
+  '-o', 'ServerAliveInterval=15',
+  '-o', 'ServerAliveCountMax=10',
+  '-o', 'TCPKeepAlive=yes'
+)
+
 $remoteScript = @'
 set -euo pipefail
 
@@ -327,7 +342,7 @@ try {
   [System.IO.File]::WriteAllText($tmp.FullName, $remoteScript.Replace("`r`n", "`n").Replace("`r", ""), $utf8NoBom)
   $remoteArg = if ($RemoteUrl) { $RemoteUrl } else { "__AUTO__" }
   $remoteTmp = "/tmp/flowbiz-deploy-$([guid]::NewGuid().ToString('N')).sh"
-  & scp -q $tmp.FullName "${VpsHost}:$remoteTmp"
+  & scp @scpOptions $tmp.FullName "${VpsHost}:$remoteTmp"
   if ($LASTEXITCODE -ne 0) {
     throw "Unable to upload deploy script to VPS."
   }
@@ -342,18 +357,18 @@ try {
       throw "Unable to create local overlay archive."
     }
 
-    & ssh -o BatchMode=yes $VpsHost "mkdir -p $(ConvertTo-BashArgument $remoteOverlayRoot)"
+    & ssh @sshOptions $VpsHost "mkdir -p $(ConvertTo-BashArgument $remoteOverlayRoot)"
     if ($LASTEXITCODE -ne 0) {
       throw "Unable to create remote overlay directory."
     }
 
     $remoteOverlayArchive = "$remoteOverlayRoot/overlay.tar"
-    & scp -q $overlayArchive "${VpsHost}:$remoteOverlayArchive"
+    & scp @scpOptions $overlayArchive "${VpsHost}:$remoteOverlayArchive"
     if ($LASTEXITCODE -ne 0) {
       throw "Unable to upload overlay archive to VPS."
     }
 
-    & ssh -o BatchMode=yes $VpsHost "tar -xf $(ConvertTo-BashArgument $remoteOverlayArchive) -C $(ConvertTo-BashArgument $remoteOverlayRoot) && rm -f $(ConvertTo-BashArgument $remoteOverlayArchive)"
+    & ssh @sshOptions $VpsHost "tar -xf $(ConvertTo-BashArgument $remoteOverlayArchive) -C $(ConvertTo-BashArgument $remoteOverlayRoot) && rm -f $(ConvertTo-BashArgument $remoteOverlayArchive)"
     if ($LASTEXITCODE -ne 0) {
       throw "Unable to extract overlay archive on VPS."
     }
@@ -372,16 +387,16 @@ try {
   $overlayArgs = ($OverlayFiles | ForEach-Object { ConvertTo-BashArgument ($_.Replace("\", "/")) }) -join " "
   $remoteCommand = "chmod 700 $qRemoteTmp && bash $qRemoteTmp $qRemoteArg $qTargetSha $qVpsActivePath $qVpsReleaseRoot $qVpsApiPort $qVpsAdminPort $qComposeProjectName $qAlembicTarget $qRemoteOverlayRoot $overlayArgs; status=`$?; rm -f $qRemoteTmp; if [ -n $qRemoteOverlayRoot ]; then rm -rf $qRemoteOverlayRoot; fi; exit `$status"
 
-  & ssh -o BatchMode=yes $VpsHost $remoteCommand
+  & ssh @sshOptions $VpsHost $remoteCommand
   if ($LASTEXITCODE -ne 0) {
     throw "Production deploy failed."
   }
 } finally {
   if ($remoteOverlayRoot) {
-    & ssh -o BatchMode=yes $VpsHost "rm -rf $(ConvertTo-BashArgument $remoteOverlayRoot)" | Out-Null
+    & ssh @sshOptions $VpsHost "rm -rf $(ConvertTo-BashArgument $remoteOverlayRoot)" | Out-Null
   }
   if ($remoteTmp) {
-    & ssh -o BatchMode=yes $VpsHost "rm -f $(ConvertTo-BashArgument $remoteTmp)" | Out-Null
+    & ssh @sshOptions $VpsHost "rm -f $(ConvertTo-BashArgument $remoteTmp)" | Out-Null
   }
   if ($overlayArchive) {
     Remove-Item -Force -ErrorAction SilentlyContinue $overlayArchive
