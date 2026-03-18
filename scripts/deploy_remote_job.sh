@@ -11,6 +11,7 @@ LOG_FILE="$STATE_DIR/deploy.log"
 EXIT_FILE="$STATE_DIR/exit_code"
 
 set +e
+export FLOWBIZ_DEPLOY_STATE_DIR="$STATE_DIR"
 bash "$REMOTE_SCRIPT" "$@" >>"$LOG_FILE" 2>&1
 status=$?
 set -e
