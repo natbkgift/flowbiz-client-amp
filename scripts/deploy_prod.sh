@@ -157,8 +157,8 @@ deadline=$((SECONDS + DEPLOY_TIMEOUT_SECONDS))
 last_log=""
 
 while (( SECONDS < deadline )); do
-  poll_output="$(
-    run_ssh "$VPS_HOST" "
+  poll_command=$(
+    cat <<EOF
 if [ -f $(quote_bash "$remote_state_dir/exit_code") ]; then
   printf 'status=completed\n'
   printf 'exit_code=%s\n' \"\$(cat $(quote_bash "$remote_state_dir/exit_code"))\"
@@ -171,9 +171,9 @@ if [ -f $(quote_bash "$remote_state_dir/deploy.log") ]; then
   printf -- '---log---\n'
   tail -n 20 $(quote_bash "$remote_state_dir/deploy.log")
 fi
-"
-    | tr -d '\r'
-  )"
+EOF
+  )
+  poll_output="$(run_ssh "$VPS_HOST" "$poll_command" | tr -d '\r')"
 
   status="$(printf '%s\n' "$poll_output" | awk -F= '/^status=/{print $2; exit}')"
   exit_code="$(printf '%s\n' "$poll_output" | awk -F= '/^exit_code=/{print $2; exit}')"
