@@ -39,8 +39,39 @@ SSH_OPTS=(
   -o TCPKeepAlive=yes
 )
 
-if [[ -n "$(git status --short)" ]]; then
+read_clean_worktree_status() {
+  local status_output=""
+
+  status_output="$(git status --short 2>/dev/null || true)"
+  if [[ -z "$status_output" ]]; then
+    return 0
+  fi
+
+  if command -v powershell.exe >/dev/null 2>&1 && command -v wslpath >/dev/null 2>&1; then
+    local repo_root=""
+    local windows_repo_root=""
+    repo_root="$(git rev-parse --show-toplevel 2>/dev/null || true)"
+    windows_repo_root="$(wslpath -w "$repo_root" 2>/dev/null || true)"
+    if [[ -n "$windows_repo_root" ]]; then
+      status_output="$(
+        powershell.exe -NoProfile -Command "\$ErrorActionPreference = 'Stop'; Set-Location -LiteralPath '$windows_repo_root'; \$status = (git status --short 2>&1 | Out-String).Trim(); if (\$status) { Write-Output \$status }" \
+          | tr -d '\r'
+      )"
+      if [[ -z "$status_output" ]]; then
+        return 0
+      fi
+    fi
+  fi
+
+  printf '%s' "$status_output"
+  return 1
+}
+
+if ! worktree_status="$(read_clean_worktree_status)"; then
   echo "Local worktree must be clean before deploy." >&2
+  if [[ -n "$worktree_status" ]]; then
+    printf '%s\n' "$worktree_status" >&2
+  fi
   exit 2
 fi
 
