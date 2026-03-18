@@ -18,6 +18,7 @@ services:
   admin-app:
     environment:
       FLOWBIZ_DEPLOY_TELEMETRY_PATH: ${FLOWBIZ_DEPLOY_TELEMETRY_PATH:-/app/ops/logs/deploy_telemetry.json}
+      FLOWBIZ_DEPLOY_HISTORY_DIR: ${FLOWBIZ_DEPLOY_HISTORY_DIR:-/app/ops/logs/deploy-history}
     ports:
       - "127.0.0.1:${VPS_ADMIN_PORT:-8002}:3000"
     volumes:

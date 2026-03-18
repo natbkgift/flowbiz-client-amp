@@ -1,0 +1,117 @@
+import { readdir, readFile } from 'node:fs/promises';
+import { join } from 'node:path';
+
+export type DeployTelemetry = {
+  generated_at?: string | null;
+  deployed_at?: string | null;
+  deploy_status?: string | null;
+  smoke_passed?: boolean | null;
+  build_sha?: string | null;
+  target_sha?: string | null;
+  source?: string | null;
+  validation_mode?: string | null;
+  duration_seconds?: number | null;
+  history_id?: string | null;
+  history_dir?: string | null;
+  log_path?: string | null;
+  lifecycle_log_path?: string | null;
+  state_dir?: string | null;
+  current_phase?: string | null;
+  active_repo?: {
+    sync_status?: string | null;
+    sync_detail?: string | null;
+    sha?: string | null;
+    branch?: string | null;
+    upstream?: string | null;
+    aligned?: boolean | null;
+  } | null;
+};
+
+const DEFAULT_TELEMETRY_PATH = '/app/ops/logs/deploy_telemetry.json';
+const DEFAULT_HISTORY_DIR = '/app/ops/logs/deploy-history';
+const MAX_HISTORY_LIMIT = 50;
+
+export function getDeployTelemetryPath() {
+  return process.env.FLOWBIZ_DEPLOY_TELEMETRY_PATH ?? DEFAULT_TELEMETRY_PATH;
+}
+
+export function getDeployHistoryDir() {
+  return process.env.FLOWBIZ_DEPLOY_HISTORY_DIR ?? DEFAULT_HISTORY_DIR;
+}
+
+export function buildVersionPayload(telemetry: DeployTelemetry | null) {
+  return {
+    ok: true,
+    generated_at: telemetry?.generated_at ?? null,
+    deployed_at: telemetry?.deployed_at ?? null,
+    deploy_status: telemetry?.deploy_status ?? 'unknown',
+    smoke_passed: telemetry?.smoke_passed ?? null,
+    build_sha:
+      telemetry?.build_sha ?? process.env.FLOWBIZ_BUILD_SHA ?? process.env.BUILD_SHA ?? null,
+    target_sha: telemetry?.target_sha ?? process.env.FLOWBIZ_TARGET_SHA ?? null,
+    source: telemetry?.source ?? 'runtime',
+    validation_mode: telemetry?.validation_mode ?? null,
+    duration_seconds: telemetry?.duration_seconds ?? null,
+    history_id: telemetry?.history_id ?? null,
+    history_dir: telemetry?.history_dir ?? null,
+    log_path: telemetry?.log_path ?? null,
+    lifecycle_log_path: telemetry?.lifecycle_log_path ?? null,
+    state_dir: telemetry?.state_dir ?? null,
+    current_phase: telemetry?.current_phase ?? null,
+    active_repo: telemetry?.active_repo ?? null,
+    node_env: process.env.NODE_ENV ?? 'unknown',
+  };
+}
+
+async function readJsonFile<T>(filePath: string): Promise<T | null> {
+  try {
+    const payload = await readFile(filePath, 'utf-8');
+    const parsed = JSON.parse(payload);
+    return parsed && typeof parsed === 'object' ? (parsed as T) : null;
+  } catch {
+    return null;
+  }
+}
+
+export async function readDeployTelemetry(): Promise<DeployTelemetry | null> {
+  return readJsonFile<DeployTelemetry>(getDeployTelemetryPath());
+}
+
+export function parseHistoryLimit(rawLimit: string | null, fallback = 10) {
+  const parsed = Number.parseInt(rawLimit ?? '', 10);
+  if (!Number.isFinite(parsed)) return fallback;
+  return Math.min(Math.max(parsed, 1), MAX_HISTORY_LIMIT);
+}
+
+export async function readDeployHistory(limit = 10): Promise<DeployTelemetry[]> {
+  const historyDir = getDeployHistoryDir();
+
+  try {
+    const entries = await readdir(historyDir, { withFileTypes: true });
+    const sortedDirs = entries
+      .filter((entry) => entry.isDirectory())
+      .map((entry) => entry.name)
+      .sort((left, right) => right.localeCompare(left));
+
+    const history: DeployTelemetry[] = [];
+    for (const dirName of sortedDirs) {
+      if (history.length >= limit) break;
+
+      const telemetry = await readJsonFile<DeployTelemetry>(join(historyDir, dirName, 'telemetry.json'));
+      if (!telemetry) continue;
+
+      history.push({
+        ...telemetry,
+        history_id: telemetry.history_id ?? dirName,
+        history_dir: telemetry.history_dir ?? join(historyDir, dirName),
+        log_path: telemetry.log_path ?? join(historyDir, dirName, 'deploy.log'),
+        lifecycle_log_path:
+          telemetry.lifecycle_log_path ?? join(historyDir, dirName, 'lifecycle.log'),
+      });
+    }
+
+    return history;
+  } catch {
+    return [];
+  }
+}

@@ -58,6 +58,7 @@ services:
       FLOWBIZ_BUILD_SHA: ${BUILD_SHA:-local}
       FLOWBIZ_TARGET_SHA: ${TARGET_SHA:-}
       FLOWBIZ_DEPLOY_TELEMETRY_PATH: ${FLOWBIZ_DEPLOY_TELEMETRY_PATH:-/app/ops/logs/deploy_telemetry.json}
+      FLOWBIZ_DEPLOY_HISTORY_DIR: ${FLOWBIZ_DEPLOY_HISTORY_DIR:-/app/ops/logs/deploy-history}
     restart: unless-stopped
 
 volumes:
