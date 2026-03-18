@@ -59,6 +59,18 @@ phase() {
   printf -- '--- %s\n' "$name"
 }
 
+run_release_script() {
+  local script_path="$1"
+  shift
+
+  if [[ ! -f "$script_path" ]]; then
+    echo "Missing release script: $script_path" >&2
+    exit 1
+  fi
+
+  bash "$script_path" "$@"
+}
+
 write_telemetry() {
   local deploy_status="$1"
   local smoke_passed="$2"
@@ -209,8 +221,8 @@ if [[ ! -f "$VPS_ACTIVE_PATH/.env" ]]; then
 fi
 
 phase "infra"
-"$release_path/scripts/sync_prod_media_storage.sh"
-"$release_path/scripts/enforce_prod_nginx_media_route.sh" \
+run_release_script "$release_path/scripts/sync_prod_media_storage.sh"
+run_release_script "$release_path/scripts/enforce_prod_nginx_media_route.sh" \
   --config "/etc/nginx/conf.d/amppattaya.com.conf" \
   --snippet "$release_path/ops/nginx/amppattaya-media-location.conf"
 

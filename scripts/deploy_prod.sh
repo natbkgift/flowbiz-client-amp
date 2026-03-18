@@ -1,6 +1,10 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# shellcheck source=scripts/_deploy_lib.sh
+source "$SCRIPT_DIR/_deploy_lib.sh"
+
 VPS_HOST="${VPS_HOST_ALIAS:-flowbiz-vps}"
 VPS_ACTIVE_PATH="${VPS_ACTIVE_PATH:-/opt/flowbiz/clients/flowbiz-client-amp}"
 VPS_RELEASE_ROOT="${VPS_RELEASE_ROOT:-/opt/flowbiz/clients}"
@@ -12,6 +16,10 @@ TARGET_SHA="${TARGET_SHA_OVERRIDE:-$(git rev-parse HEAD)}"
 ALEMBIC_UPGRADE_TARGET="${ALEMBIC_UPGRADE_TARGET:-head}"
 DEPLOY_POLL_SECONDS="${DEPLOY_POLL_SECONDS:-5}"
 DEPLOY_TIMEOUT_SECONDS="${DEPLOY_TIMEOUT_SECONDS:-2700}"
+DEPLOY_RETRY_ATTEMPTS="${FLOWBIZ_DEPLOY_RETRY_ATTEMPTS:-3}"
+DEPLOY_RETRY_BACKOFF_SECONDS="${FLOWBIZ_DEPLOY_RETRY_BACKOFF_SECONDS:-3}"
+FLOWBIZ_VERBOSE="${FLOWBIZ_VERBOSE:-0}"
+SKIP_PREFLIGHT=0
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
@@ -26,11 +34,16 @@ while [[ $# -gt 0 ]]; do
     --alembic-target) ALEMBIC_UPGRADE_TARGET="$2"; shift 2 ;;
     --poll-seconds) DEPLOY_POLL_SECONDS="$2"; shift 2 ;;
     --timeout-seconds) DEPLOY_TIMEOUT_SECONDS="$2"; shift 2 ;;
+    --retry-attempts) DEPLOY_RETRY_ATTEMPTS="$2"; shift 2 ;;
+    --retry-backoff-seconds) DEPLOY_RETRY_BACKOFF_SECONDS="$2"; shift 2 ;;
+    --skip-preflight) SKIP_PREFLIGHT=1; shift ;;
+    --verbose) FLOWBIZ_VERBOSE=1; shift ;;
     *) echo "Unknown arg: $1" >&2; exit 2 ;;
   esac
 done
 
 ALEMBIC_UPGRADE_TARGET="${ALEMBIC_UPGRADE_TARGET//$'\r'/}"
+export FLOWBIZ_VERBOSE
 
 SSH_OPTS=(
   -o BatchMode=yes
@@ -43,69 +56,41 @@ SCP_OPTS=(
   "${SSH_OPTS[@]}"
 )
 
-SSH_BIN="${FLOWBIZ_SSH_BIN:-ssh}"
-SCP_BIN="${FLOWBIZ_SCP_BIN:-scp}"
-if command -v ssh.exe >/dev/null 2>&1 && command -v scp.exe >/dev/null 2>&1; then
-  SSH_BIN="ssh.exe"
-  SCP_BIN="scp.exe"
-fi
+TRANSPORT_ENV="$(flowbiz_detect_env)"
+flowbiz_pick_ssh_tools "$TRANSPORT_ENV"
+SSH_BIN="$FLOWBIZ_SELECTED_SSH_BIN"
+SCP_BIN="$FLOWBIZ_SELECTED_SCP_BIN"
+flowbiz_log "transport_env=${TRANSPORT_ENV} ssh_bin=${SSH_BIN} scp_bin=${SCP_BIN}"
 
 run_ssh() {
-  "$SSH_BIN" "${SSH_OPTS[@]}" "$@"
+  flowbiz_retry_command "$DEPLOY_RETRY_ATTEMPTS" "$DEPLOY_RETRY_BACKOFF_SECONDS" ssh \
+    "$SSH_BIN" "${SSH_OPTS[@]}" "$@"
 }
 
 run_scp() {
-  "$SCP_BIN" "${SCP_OPTS[@]}" "$@"
+  flowbiz_retry_command "$DEPLOY_RETRY_ATTEMPTS" "$DEPLOY_RETRY_BACKOFF_SECONDS" scp \
+    "$SCP_BIN" "${SCP_OPTS[@]}" "$@"
 }
 
-local_copy_path() {
-  local source_path="$1"
-  if [[ "$SCP_BIN" == *.exe ]] && command -v wslpath >/dev/null 2>&1; then
-    wslpath -w "$source_path"
-  else
-    printf '%s' "$source_path"
+if (( SKIP_PREFLIGHT == 0 )); then
+  preflight_args=(
+    --vps-host "$VPS_HOST"
+    --vps-active-path "$VPS_ACTIVE_PATH"
+    --vps-release-root "$VPS_RELEASE_ROOT"
+  )
+  if [[ "$FLOWBIZ_VERBOSE" == '1' ]]; then
+    preflight_args+=(--verbose)
   fi
-}
+  "$SCRIPT_DIR/deploy_preflight_check.sh" "${preflight_args[@]}"
+fi
 
-read_clean_worktree_status() {
-  local status_output=""
-
-  status_output="$(git status --short 2>/dev/null || true)"
-  if [[ -z "$status_output" ]]; then
-    return 0
-  fi
-
-  if command -v powershell.exe >/dev/null 2>&1 && command -v wslpath >/dev/null 2>&1; then
-    local repo_root=""
-    local windows_repo_root=""
-    repo_root="$(git rev-parse --show-toplevel 2>/dev/null || true)"
-    windows_repo_root="$(wslpath -w "$repo_root" 2>/dev/null || true)"
-    if [[ -n "$windows_repo_root" ]]; then
-      status_output="$(
-        powershell.exe -NoProfile -Command "\$ErrorActionPreference = 'Stop'; Set-Location -LiteralPath '$windows_repo_root'; \$status = (git status --short 2>&1 | Out-String).Trim(); if (\$status) { Write-Output \$status }" \
-          | tr -d '\r'
-      )"
-      if [[ -z "$status_output" ]]; then
-        return 0
-      fi
-    fi
-  fi
-
-  printf '%s' "$status_output"
-  return 1
-}
-
-if ! worktree_status="$(read_clean_worktree_status)"; then
+if ! worktree_status="$(flowbiz_read_clean_worktree_status)"; then
   echo "Local worktree must be clean before deploy." >&2
   if [[ -n "$worktree_status" ]]; then
     printf '%s\n' "$worktree_status" >&2
   fi
   exit 2
 fi
-
-quote_bash() {
-  printf "'%s'" "${1//\'/\'\"\'\"\'}"
-}
 
 normalize_lf_copy() {
   local source_path="$1"
@@ -122,33 +107,33 @@ deploy_remote_source="scripts/deploy_prod_remote.sh"
 
 cleanup() {
   rm -f "$remote_script_local"
-  run_ssh "$VPS_HOST" "rm -f $(quote_bash "$remote_script_path")" >/dev/null 2>&1 || true
-  run_ssh "$VPS_HOST" "rm -f $(quote_bash "$remote_runner_path")" >/dev/null 2>&1 || true
+  run_ssh "$VPS_HOST" "rm -f $(flowbiz_quote_bash "$remote_script_path")" >/dev/null 2>&1 || true
+  run_ssh "$VPS_HOST" "rm -f $(flowbiz_quote_bash "$remote_runner_path")" >/dev/null 2>&1 || true
 }
 trap cleanup EXIT
 
 normalize_lf_copy "$deploy_remote_source" "$remote_script_local"
 
-run_scp "$(local_copy_path "$remote_script_local")" "${VPS_HOST}:${remote_script_path}"
-run_scp "$(local_copy_path "scripts/deploy_remote_job.sh")" "${VPS_HOST}:${remote_runner_path}"
+run_scp "$(flowbiz_local_copy_path "$SCP_BIN" "$remote_script_local")" "${VPS_HOST}:${remote_script_path}"
+run_scp "$(flowbiz_local_copy_path "$SCP_BIN" "scripts/deploy_remote_job.sh")" "${VPS_HOST}:${remote_runner_path}"
 
 launch_command=$(
   cat <<EOF
-mkdir -p $(quote_bash "$remote_state_dir") &&
-chmod 700 $(quote_bash "$remote_script_path") $(quote_bash "$remote_runner_path") &&
-{ nohup env FLOWBIZ_DEPLOY_SOURCE=scripts/deploy_prod.sh bash $(quote_bash "$remote_runner_path") \
-    $(quote_bash "$remote_state_dir") \
-    $(quote_bash "$remote_script_path") \
+mkdir -p $(flowbiz_quote_bash "$remote_state_dir") &&
+chmod 700 $(flowbiz_quote_bash "$remote_script_path") $(flowbiz_quote_bash "$remote_runner_path") &&
+{ nohup env FLOWBIZ_DEPLOY_SOURCE=scripts/deploy_prod.sh bash $(flowbiz_quote_bash "$remote_runner_path") \
+    $(flowbiz_quote_bash "$remote_state_dir") \
+    $(flowbiz_quote_bash "$remote_script_path") \
     '' \
-    $(quote_bash "$REMOTE_URL") \
-    $(quote_bash "$TARGET_SHA") \
-    $(quote_bash "$VPS_ACTIVE_PATH") \
-    $(quote_bash "$VPS_RELEASE_ROOT") \
-    $(quote_bash "$VPS_API_PORT") \
-    $(quote_bash "$VPS_ADMIN_PORT") \
-    $(quote_bash "$COMPOSE_PROJECT_NAME") \
-    $(quote_bash "$ALEMBIC_UPGRADE_TARGET") \
-    > /dev/null 2>&1 < /dev/null & printf '%s\n' "\$!" > $(quote_bash "$remote_state_dir/pid"); }
+    $(flowbiz_quote_bash "$REMOTE_URL") \
+    $(flowbiz_quote_bash "$TARGET_SHA") \
+    $(flowbiz_quote_bash "$VPS_ACTIVE_PATH") \
+    $(flowbiz_quote_bash "$VPS_RELEASE_ROOT") \
+    $(flowbiz_quote_bash "$VPS_API_PORT") \
+    $(flowbiz_quote_bash "$VPS_ADMIN_PORT") \
+    $(flowbiz_quote_bash "$COMPOSE_PROJECT_NAME") \
+    $(flowbiz_quote_bash "$ALEMBIC_UPGRADE_TARGET") \
+    > /dev/null 2>&1 < /dev/null & printf '%s\n' "\$!" > $(flowbiz_quote_bash "$remote_state_dir/pid"); }
 EOF
 )
 run_ssh "$VPS_HOST" "$launch_command"
@@ -159,17 +144,17 @@ last_log=""
 while (( SECONDS < deadline )); do
   poll_command=$(
     cat <<EOF
-if [ -f $(quote_bash "$remote_state_dir/exit_code") ]; then
+if [ -f $(flowbiz_quote_bash "$remote_state_dir/exit_code") ]; then
   printf 'status=completed\n'
-  printf 'exit_code=%s\n' \"\$(cat $(quote_bash "$remote_state_dir/exit_code"))\"
-elif [ -f $(quote_bash "$remote_state_dir/pid") ] && kill -0 \"\$(cat $(quote_bash "$remote_state_dir/pid"))\" 2>/dev/null; then
+  printf 'exit_code=%s\n' "\$(cat $(flowbiz_quote_bash "$remote_state_dir/exit_code"))"
+elif [ -f $(flowbiz_quote_bash "$remote_state_dir/pid") ] && kill -0 "\$(cat $(flowbiz_quote_bash "$remote_state_dir/pid"))" 2>/dev/null; then
   printf 'status=running\n'
 else
   printf 'status=unknown\n'
 fi
-if [ -f $(quote_bash "$remote_state_dir/deploy.log") ]; then
+if [ -f $(flowbiz_quote_bash "$remote_state_dir/deploy.log") ]; then
   printf -- '---log---\n'
-  tail -n 20 $(quote_bash "$remote_state_dir/deploy.log")
+  tail -n 20 $(flowbiz_quote_bash "$remote_state_dir/deploy.log")
 fi
 EOF
   )
@@ -189,7 +174,7 @@ EOF
       echo "Production deploy failed." >&2
       exit 1
     fi
-    run_ssh "$VPS_HOST" "cat $(quote_bash "$telemetry_path")" | tr -d '\r' || true
+    run_ssh "$VPS_HOST" "cat $(flowbiz_quote_bash "$telemetry_path")" | tr -d '\r' || true
     exit 0
   fi
 
