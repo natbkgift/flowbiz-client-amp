@@ -57,5 +57,38 @@ describe('HomeHero CTA hierarchy', () => {
     expect(screen.getByRole('link', { name: 'Browse Projects' })).toBeInTheDocument();
     expect(screen.getByRole('link', { name: 'WhatsApp' })).toBeInTheDocument();
     expect(screen.getByRole('link', { name: 'Let us guide you' })).toBeInTheDocument();
+    expect(screen.getByAltText('AMP Pattaya Real Estate')).toHaveAttribute(
+      'src',
+      '/images/hero-banner.webp?v=20260318',
+    );
+  });
+
+  it('keeps a configured local media hero image when composer provides one', () => {
+    const dict = {
+      home: {
+        heroTitle: 'Find the right Pattaya property path',
+        heroSubtitle: 'Structured guidance for buying, investing, and relocating.',
+      },
+      advisory: {
+        heroEyebrow: 'AMP Pattaya',
+      },
+      guided: {
+        heroTrigger: 'Let us guide you',
+      },
+      cta: {
+        whatsapp: 'WhatsApp',
+      },
+    };
+
+    render(
+      <HomeHero
+        dict={dict}
+        locale="en"
+        guidedHref="/en?guided=1"
+        composer={{ hero_image: '/media/library/hero.webp' }}
+      />,
+    );
+
+    expect(screen.getByAltText('AMP Pattaya Real Estate')).toHaveAttribute('src', '/media/library/hero.webp');
   });
 });

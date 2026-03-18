@@ -5,7 +5,8 @@ import { HeroOverlay } from "@/components/home/HeroOverlay";
 import { Container } from "@/components/layout/Container";
 import { withLocale } from "@/app/_lib/i18n/routing";
 
-const HERO_FALLBACK_IMAGE = "/images/hero-banner.webp";
+// Cloudflare cached a stale 404 for the unversioned fallback asset on production.
+const HERO_FALLBACK_IMAGE = "/images/hero-banner.webp?v=20260318";
 
 type HomeHeroComposer = {
     eyebrow?: string;
