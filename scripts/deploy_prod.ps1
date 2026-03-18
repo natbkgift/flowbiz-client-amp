@@ -8,6 +8,8 @@ param(
   [string]$RemoteUrl = "",
   [string]$TargetSha = "",
   [string]$AlembicTarget = "head",
+  [int]$DeployPollSeconds = 5,
+  [int]$DeployTimeoutSeconds = 2700,
   [string[]]$OverlayFiles = @()
 )
 
@@ -334,6 +336,9 @@ echo "deploy_telemetry=$telemetry_file"
 '@
 
 $remoteTmp = $null
+$remoteRunner = $null
+$remoteStateDir = $null
+$telemetryPath = "$VpsActivePath/ops/logs/deploy_telemetry.json"
 $remoteOverlayRoot = $null
 $overlayArchive = $null
 $tmp = New-TemporaryFile
@@ -342,9 +347,16 @@ try {
   [System.IO.File]::WriteAllText($tmp.FullName, $remoteScript.Replace("`r`n", "`n").Replace("`r", ""), $utf8NoBom)
   $remoteArg = if ($RemoteUrl) { $RemoteUrl } else { "__AUTO__" }
   $remoteTmp = "/tmp/flowbiz-deploy-$([guid]::NewGuid().ToString('N')).sh"
+  $remoteRunner = "/tmp/flowbiz-deploy-runner-$([guid]::NewGuid().ToString('N')).sh"
+  $remoteStateDir = "/tmp/flowbiz-deploy-state-$($TargetSha.Substring(0, [Math]::Min(8, $TargetSha.Length)))-$([guid]::NewGuid().ToString('N'))"
   & scp @scpOptions $tmp.FullName "${VpsHost}:$remoteTmp"
   if ($LASTEXITCODE -ne 0) {
     throw "Unable to upload deploy script to VPS."
+  }
+
+  & scp @scpOptions (Join-Path $repoRoot "scripts/deploy_remote_job.sh") "${VpsHost}:$remoteRunner"
+  if ($LASTEXITCODE -ne 0) {
+    throw "Unable to upload deploy runner to VPS."
   }
 
   if ($OverlayFiles.Count -gt 0) {
@@ -384,16 +396,79 @@ try {
   $qComposeProjectName = ConvertTo-BashArgument $ComposeProjectName
   $qAlembicTarget = ConvertTo-BashArgument $AlembicTarget
   $qRemoteOverlayRoot = ConvertTo-BashArgument $(if ($remoteOverlayRoot) { $remoteOverlayRoot } else { "" })
+  $qRemoteRunner = ConvertTo-BashArgument $remoteRunner
+  $qRemoteStateDir = ConvertTo-BashArgument $remoteStateDir
+  $qTelemetryPath = ConvertTo-BashArgument $telemetryPath
+  $qRemotePid = ConvertTo-BashArgument "$remoteStateDir/pid"
+  $qRemoteExitCode = ConvertTo-BashArgument "$remoteStateDir/exit_code"
+  $qRemoteLog = ConvertTo-BashArgument "$remoteStateDir/deploy.log"
   $overlayArgs = ($OverlayFiles | ForEach-Object { ConvertTo-BashArgument ($_.Replace("\", "/")) }) -join " "
-  $remoteCommand = "chmod 700 $qRemoteTmp && bash $qRemoteTmp $qRemoteArg $qTargetSha $qVpsActivePath $qVpsReleaseRoot $qVpsApiPort $qVpsAdminPort $qComposeProjectName $qAlembicTarget $qRemoteOverlayRoot $overlayArgs; status=`$?; rm -f $qRemoteTmp; if [ -n $qRemoteOverlayRoot ]; then rm -rf $qRemoteOverlayRoot; fi; exit `$status"
+  $remoteCommand = "mkdir -p $qRemoteStateDir && chmod 700 $qRemoteTmp $qRemoteRunner && nohup bash $qRemoteRunner $qRemoteStateDir $qRemoteTmp $qRemoteOverlayRoot $qRemoteArg $qTargetSha $qVpsActivePath $qVpsReleaseRoot $qVpsApiPort $qVpsAdminPort $qComposeProjectName $qAlembicTarget $qRemoteOverlayRoot $overlayArgs > /dev/null 2>&1 < /dev/null & echo `$! > $qRemotePid"
 
   & ssh @sshOptions $VpsHost $remoteCommand
   if ($LASTEXITCODE -ne 0) {
-    throw "Production deploy failed."
+    throw "Unable to launch remote production deploy."
+  }
+
+  $deadline = [DateTimeOffset]::UtcNow.AddSeconds($DeployTimeoutSeconds)
+  $lastLog = ""
+  $completed = $false
+
+  while ([DateTimeOffset]::UtcNow -lt $deadline) {
+    $pollCommand = @"
+if [ -f $qRemoteExitCode ]; then
+  printf 'status=completed\n'
+  printf 'exit_code=%s\n' "\$(cat $qRemoteExitCode)"
+elif [ -f $qRemotePid ] && kill -0 "\$(cat $qRemotePid)" 2>/dev/null; then
+  printf 'status=running\n'
+else
+  printf 'status=unknown\n'
+fi
+if [ -f $qRemoteLog ]; then
+  printf -- '---log---\n'
+  tail -n 20 $qRemoteLog
+fi
+"@
+    $pollOutput = (& ssh @sshOptions $VpsHost $pollCommand 2>&1 | Out-String)
+    if ($LASTEXITCODE -ne 0) {
+      throw "Unable to poll production deploy state."
+    }
+
+    $statusMatch = [regex]::Match($pollOutput, '^status=(.+)$', [System.Text.RegularExpressions.RegexOptions]::Multiline)
+    $exitMatch = [regex]::Match($pollOutput, '^exit_code=(.+)$', [System.Text.RegularExpressions.RegexOptions]::Multiline)
+    $status = if ($statusMatch.Success) { $statusMatch.Groups[1].Value.Trim() } else { "" }
+    $exitCode = if ($exitMatch.Success) { $exitMatch.Groups[1].Value.Trim() } else { "" }
+    $logTail = if ($pollOutput -match '(?s)---log---\r?\n(.*)$') { $Matches[1].TrimEnd() } else { "" }
+
+    if ($logTail -and $logTail -ne $lastLog) {
+      Write-Host $logTail
+      $lastLog = $logTail
+    }
+
+    if ($status -eq "completed") {
+      if ($exitCode -ne "0") {
+        throw "Production deploy failed."
+      }
+      & ssh @sshOptions $VpsHost "cat $qTelemetryPath"
+      if ($LASTEXITCODE -ne 0) {
+        throw "Production deploy completed but telemetry could not be read."
+      }
+      $completed = $true
+      break
+    }
+
+    Start-Sleep -Seconds $DeployPollSeconds
+  }
+
+  if (-not $completed) {
+    throw "Production deploy timed out after $DeployTimeoutSeconds seconds."
   }
 } finally {
   if ($remoteOverlayRoot) {
     & ssh @sshOptions $VpsHost "rm -rf $(ConvertTo-BashArgument $remoteOverlayRoot)" | Out-Null
+  }
+  if ($remoteRunner) {
+    & ssh @sshOptions $VpsHost "rm -f $(ConvertTo-BashArgument $remoteRunner)" | Out-Null
   }
   if ($remoteTmp) {
     & ssh @sshOptions $VpsHost "rm -f $(ConvertTo-BashArgument $remoteTmp)" | Out-Null

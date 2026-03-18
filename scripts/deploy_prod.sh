@@ -19,6 +19,8 @@ COMPOSE_PROJECT_NAME="${COMPOSE_PROJECT_NAME:-flowbiz-client-amp}"
 REMOTE_URL="${REMOTE_URL_OVERRIDE:-}"
 TARGET_SHA="${TARGET_SHA_OVERRIDE:-$(git rev-parse HEAD)}"
 ALEMBIC_UPGRADE_TARGET="${ALEMBIC_UPGRADE_TARGET:-head}"
+DEPLOY_POLL_SECONDS="${DEPLOY_POLL_SECONDS:-5}"
+DEPLOY_TIMEOUT_SECONDS="${DEPLOY_TIMEOUT_SECONDS:-2700}"
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
@@ -31,6 +33,8 @@ while [[ $# -gt 0 ]]; do
     --remote-url) REMOTE_URL="$2"; shift 2 ;;
     --target-sha) TARGET_SHA="$2"; shift 2 ;;
     --alembic-target) ALEMBIC_UPGRADE_TARGET="$2"; shift 2 ;;
+    --poll-seconds) DEPLOY_POLL_SECONDS="$2"; shift 2 ;;
+    --timeout-seconds) DEPLOY_TIMEOUT_SECONDS="$2"; shift 2 ;;
     *) echo "Unknown arg: $1" >&2; exit 2 ;;
   esac
 done
@@ -49,15 +53,23 @@ if [[ -n "$(git status --short)" ]]; then
   exit 2
 fi
 
-ssh "${SSH_OPTS[@]}" "$VPS_HOST" bash -s -- \
-  "$REMOTE_URL" \
-  "$TARGET_SHA" \
-  "$VPS_ACTIVE_PATH" \
-  "$VPS_RELEASE_ROOT" \
-  "$VPS_API_PORT" \
-  "$VPS_ADMIN_PORT" \
-  "$COMPOSE_PROJECT_NAME" \
-  "$ALEMBIC_UPGRADE_TARGET" <<'BASH'
+quote_bash() {
+  printf "'%s'" "${1//\'/\'\"\'\"\'}"
+}
+
+remote_script_local="$(mktemp)"
+remote_script_path="/tmp/flowbiz-deploy-$(date +%s)-$RANDOM.sh"
+remote_runner_path="/tmp/flowbiz-deploy-runner-$(date +%s)-$RANDOM.sh"
+remote_state_dir="/tmp/flowbiz-deploy-state-${TARGET_SHA:0:8}-$(date +%s)"
+telemetry_path="${VPS_ACTIVE_PATH}/ops/logs/deploy_telemetry.json"
+
+cleanup() {
+  rm -f "$remote_script_local"
+  ssh "${SSH_OPTS[@]}" "$VPS_HOST" "rm -f $(quote_bash "$remote_runner_path")" >/dev/null 2>&1 || true
+}
+trap cleanup EXIT
+
+cat >"$remote_script_local" <<'BASH'
 set -euo pipefail
 
 REMOTE_URL="$1"
@@ -254,3 +266,73 @@ sys.exit(0 if deploy_status == "ok" else 1)
 PY
 echo "deploy_telemetry=$telemetry_file"
 BASH
+
+scp -q "${SSH_OPTS[@]}" "$remote_script_local" "${VPS_HOST}:${remote_script_path}"
+scp -q "${SSH_OPTS[@]}" "scripts/deploy_remote_job.sh" "${VPS_HOST}:${remote_runner_path}"
+
+launch_command=$(
+  cat <<EOF
+mkdir -p $(quote_bash "$remote_state_dir") &&
+chmod 700 $(quote_bash "$remote_script_path") $(quote_bash "$remote_runner_path") &&
+nohup bash $(quote_bash "$remote_runner_path") \
+  $(quote_bash "$remote_state_dir") \
+  $(quote_bash "$remote_script_path") \
+  '' \
+  $(quote_bash "$REMOTE_URL") \
+  $(quote_bash "$TARGET_SHA") \
+  $(quote_bash "$VPS_ACTIVE_PATH") \
+  $(quote_bash "$VPS_RELEASE_ROOT") \
+  $(quote_bash "$VPS_API_PORT") \
+  $(quote_bash "$VPS_ADMIN_PORT") \
+  $(quote_bash "$COMPOSE_PROJECT_NAME") \
+  $(quote_bash "$ALEMBIC_UPGRADE_TARGET") \
+  > /dev/null 2>&1 < /dev/null &
+echo \$! > $(quote_bash "$remote_state_dir/pid")
+EOF
+)
+ssh "${SSH_OPTS[@]}" "$VPS_HOST" "$launch_command"
+
+deadline=$((SECONDS + DEPLOY_TIMEOUT_SECONDS))
+last_log=""
+
+while (( SECONDS < deadline )); do
+  poll_output="$(
+    ssh "${SSH_OPTS[@]}" "$VPS_HOST" "
+if [ -f $(quote_bash "$remote_state_dir/exit_code") ]; then
+  printf 'status=completed\n'
+  printf 'exit_code=%s\n' \"\$(cat $(quote_bash "$remote_state_dir/exit_code"))\"
+elif [ -f $(quote_bash "$remote_state_dir/pid") ] && kill -0 \"\$(cat $(quote_bash "$remote_state_dir/pid"))\" 2>/dev/null; then
+  printf 'status=running\n'
+else
+  printf 'status=unknown\n'
+fi
+if [ -f $(quote_bash "$remote_state_dir/deploy.log") ]; then
+  printf -- '---log---\n'
+  tail -n 20 $(quote_bash "$remote_state_dir/deploy.log")
+fi
+"
+  )"
+
+  status="$(printf '%s\n' "$poll_output" | awk -F= '/^status=/{print $2; exit}')"
+  exit_code="$(printf '%s\n' "$poll_output" | awk -F= '/^exit_code=/{print $2; exit}')"
+  log_tail="$(printf '%s\n' "$poll_output" | awk 'found{print} /^---log---$/{found=1}')"
+
+  if [[ -n "$log_tail" && "$log_tail" != "$last_log" ]]; then
+    printf '%s\n' "$log_tail"
+    last_log="$log_tail"
+  fi
+
+  if [[ "$status" == "completed" ]]; then
+    if [[ "${exit_code:-1}" != "0" ]]; then
+      echo "Production deploy failed." >&2
+      exit 1
+    fi
+    ssh "${SSH_OPTS[@]}" "$VPS_HOST" "cat $(quote_bash "$telemetry_path")" || true
+    exit 0
+  fi
+
+  sleep "$DEPLOY_POLL_SECONDS"
+done
+
+echo "Production deploy timed out after ${DEPLOY_TIMEOUT_SECONDS}s." >&2
+exit 1
