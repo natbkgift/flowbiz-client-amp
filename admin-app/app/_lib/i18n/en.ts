@@ -367,8 +367,8 @@ export const en: Dictionary = {
     title: 'Deep Review',
     subtitle:
       'Conservative summary from available snapshots (not a guarantee of returns).',
-    pros: 'Pros',
-    cons: 'Cons',
+    verifiedNow: 'Verified now',
+    gapsToConfirm: 'Gaps to confirm',
     riskScore: 'Risk Score',
     riskExplain: 'Higher = more uncertainty / less data.',
     investTitle: 'Investment Analysis (Snapshot)',

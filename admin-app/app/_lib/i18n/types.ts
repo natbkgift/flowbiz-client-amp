@@ -234,8 +234,8 @@ export type Dictionary = {
   deepReview: {
     title: string;
     subtitle: string;
-    pros: string;
-    cons: string;
+    verifiedNow: string;
+    gapsToConfirm: string;
     riskScore: string;
     riskExplain: string;
     investTitle: string;

@@ -80,6 +80,7 @@ describe('project detail shell', () => {
     expect(markup).toContain('สรุปโครงการเพื่อใช้คัดรายการ');
     expect(markup).toContain('ขั้นตอนถัดไปกับทีมที่ปรึกษา');
     expect(markup).toContain('ส่งบรีฟโครงการให้ที่ปรึกษา');
+    expect(markup).toContain('ขอเทียบโครงการนี้กับตัวเลือกใกล้เคียง');
     expect(markup).toContain('ดูรายการที่บันทึกเข้ารายการคัดไว้ได้');
     expect(markup).not.toContain('shortlist');
     expect(markup).not.toContain('inventory');

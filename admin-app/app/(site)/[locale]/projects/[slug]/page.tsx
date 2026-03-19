@@ -15,6 +15,7 @@ import { LeadForm } from '@/components/forms/LeadForm';
 
 export const revalidate = 300;
 const PROJECT_DETAIL_FETCH_TIMEOUT_MS = 8000;
+type ProjectDetailRecord = NonNullable<Awaited<ReturnType<typeof fetchProjectBySlug>>>;
 type ProjectLoadState =
   | { kind: 'loaded'; value: Awaited<ReturnType<typeof fetchProjectBySlug>> }
   | { kind: 'timeout' };
@@ -84,6 +85,125 @@ function toKeyValueList(record?: Record<string, unknown> | null): Array<{ label:
 function containsContext(value: string, query: string | null | undefined): boolean {
   if (!query) return false;
   return value.toLowerCase().includes(query.toLowerCase());
+}
+
+type ProjectDecisionCtaPlan = {
+  title: string;
+  body: string;
+  primaryHref: string;
+  primaryLabel: string;
+  secondaryHref: string;
+  secondaryLabel: string;
+  leadHeading: string;
+  leadMessage: string;
+  sidebarTitle: string;
+  sidebarBody: string;
+};
+
+function uniqueItems(items: Array<string | null>): string[] {
+  return [...new Set(items.filter((item): item is string => Boolean(item)).map((item) => item.trim()).filter(Boolean))];
+}
+
+function buildProjectDecisionCta(
+  locale: 'en' | 'th',
+  project: ProjectDetailRecord,
+  hasEvaluationSnapshot: boolean,
+  hasInvestmentView: boolean,
+  hasEntrySignal: boolean,
+  hasDeliverySignal: boolean,
+): ProjectDecisionCtaPlan {
+  if (hasInvestmentView) {
+    return {
+      title: locale === 'th' ? 'ต่อยอดจาก snapshot นี้เป็นการตัดสินใจที่คมขึ้น' : 'Turn this snapshot into a sharper decision',
+      body: locale === 'th'
+        ? 'ใช้ราคา ค่าเช่า และ ROI ที่มีตอนนี้เพื่อตรวจว่าโครงการนี้ยังควรอยู่ในรายการคัดไว้ เมื่อเทียบกับตัวเลือกใกล้เคียงหรือไม่'
+        : 'Use the visible price, rent, and ROI context to test whether this project still belongs in your shortlist against nearby alternatives.',
+      primaryHref: withLocaleQuery(locale, '/contact', { intent: 'project_investment_check', project: project.slug }),
+      primaryLabel: locale === 'th' ? 'เช็กสมมติฐานลงทุนของโครงการนี้' : 'Pressure-test this project',
+      secondaryHref: withLocale(locale, '/compare'),
+      secondaryLabel: locale === 'th' ? 'เทียบกับโครงการใกล้เคียง' : 'Compare nearby options',
+      leadHeading: locale === 'th' ? 'ขอเทียบโครงการนี้กับตัวเลือกใกล้เคียง' : 'Compare this project with nearby options',
+      leadMessage: locale === 'th'
+        ? `สนใจ ${project.name} และต้องการเทียบราคา ค่าเช่า และมุมมองการลงทุนกับตัวเลือกใกล้เคียงในพื้นที่เดียวกัน`
+        : `I am reviewing ${project.name} and want to compare its price, rent, and investment context against nearby alternatives.`,
+      sidebarTitle: locale === 'th' ? 'ส่งบรีฟโครงการให้ที่ปรึกษา' : 'Advisor project brief',
+      sidebarBody: locale === 'th'
+        ? 'ส่งงบ ทำเล และเหตุผลที่สนใจโครงการนี้เพื่อให้ทีมช่วยเช็กว่าควรอยู่ต่อในรายการคัดไว้หรือควรเทียบกับตัวเลือกอื่น'
+        : 'Share your budget, area, and why this project is on your radar so the team can test whether it survives a tighter shortlist.',
+    };
+  }
+
+  if (hasEntrySignal || hasDeliverySignal || hasEvaluationSnapshot) {
+    return {
+      title: locale === 'th' ? 'เช็กสิ่งที่ยัง active อยู่จริงก่อนขยับต่อ' : 'Check what is actually live before moving forward',
+      body: locale === 'th'
+        ? 'ใช้ราคาเริ่มต้นหรือกำหนดส่งมอบที่เผยแพร่ตอนนี้เป็นจุดเริ่มต้น แล้วให้ทีมช่วยยืนยัน inventory และทางเลือกที่ยังเปิดอยู่จริง'
+        : 'Use the published entry price or delivery timing as the starting point, then verify which units and comparables are genuinely still active.',
+      primaryHref: withLocaleQuery(locale, '/contact', { intent: 'project_availability_check', project: project.slug }),
+      primaryLabel: locale === 'th' ? 'เช็ก availability ของโครงการนี้' : 'Check live availability',
+      secondaryHref: withLocale(locale, '/buy'),
+      secondaryLabel: locale === 'th' ? 'ดูรายการที่พร้อมคัดต่อ' : 'Browse shortlist-ready listings',
+      leadHeading: locale === 'th' ? 'ขอเช็ก availability รอบโครงการนี้' : 'Check live availability around this project',
+      leadMessage: locale === 'th'
+        ? `สนใจ ${project.name} และต้องการยืนยันยูนิต ช่วงราคา และตัวเลือกใกล้เคียงที่ยังเปิดอยู่จริงตอนนี้`
+        : `I am interested in ${project.name} and want to confirm live unit availability, price bands, and nearby alternatives still open now.`,
+      sidebarTitle: locale === 'th' ? 'ส่งบรีฟโครงการให้ที่ปรึกษา' : 'Advisor project brief',
+      sidebarBody: locale === 'th'
+        ? 'ส่งงบ ทำเล และช่วงเวลาที่ต้องการเพื่อให้ทีมช่วยเช็กยูนิตที่ยังเปิดขายและตัวเลือกสำรองที่ไม่หลุดโจทย์'
+        : 'Share your budget, area, and timing so the team can confirm live inventory and backup options without losing the current brief.',
+    };
+  }
+
+  return {
+    title: locale === 'th' ? 'ใช้โครงการนี้เป็นจุดตั้งต้นของ shortlist ที่แคบขึ้น' : 'Use this project as the starting point for a tighter shortlist',
+    body: locale === 'th'
+      ? 'หากโครงการนี้เริ่มใกล้โจทย์ ให้ทีมช่วยคัดตัวเลือกในทำเลเดียวกันหรือระดับราคาใกล้เคียงเพื่อเร่งการตัดสินใจ'
+      : 'If this project is directionally right, turn it into a narrower shortlist of similar options in the same area or price band.',
+    primaryHref: withLocaleQuery(locale, '/contact', { intent: 'project_shortlist', project: project.slug }),
+    primaryLabel: locale === 'th' ? 'ขอ shortlist รอบโครงการนี้' : 'Request a shortlist around this project',
+    secondaryHref: withLocale(locale, '/compare'),
+    secondaryLabel: locale === 'th' ? 'ไปหน้าเปรียบเทียบ' : 'Go to Compare',
+    leadHeading: locale === 'th' ? 'ขอ shortlist รอบโครงการนี้' : 'Request a shortlist around this project',
+    leadMessage: locale === 'th'
+      ? `สนใจโครงการ ${project.name} และต้องการเทียบกับตัวเลือกใกล้เคียงในพื้นที่เดียวกัน`
+      : `I am interested in ${project.name} and want to compare it with similar options in the same area.`,
+    sidebarTitle: locale === 'th' ? 'ส่งบรีฟโครงการให้ที่ปรึกษา' : 'Advisor project brief',
+    sidebarBody: locale === 'th'
+      ? 'ส่งงบ ทำเล และกรอบเวลาของคุณเพื่อให้ทีมช่วยบอกเร็วขึ้นว่าโครงการนี้ควรอยู่ต่อหรือควรถูกแทนด้วยตัวเลือกอื่น'
+      : 'Share your budget, area, and timing so the team can judge quickly whether this project should stay or be replaced by better-fit options.',
+  };
+}
+
+function buildProjectBuyerFit(
+  locale: 'en' | 'th',
+  areaName: string | null | undefined,
+  hasInvestmentView: boolean,
+  hasEntrySignal: boolean,
+  hasDeliverySignal: boolean,
+  hasEvaluationSnapshot: boolean,
+): string[] {
+  const areaLabel = areaName ?? (locale === 'th' ? 'ทำเลนี้' : 'this area');
+
+  return uniqueItems([
+    locale === 'th'
+      ? `ผู้ซื้อที่เริ่มจากโครงการก่อน แล้วต้องการดูบริบทของ ${areaLabel} ก่อนลงลึกถึงระดับยูนิต`
+      : `Project-first buyers who want ${areaLabel} context before going into unit-level review.`,
+    hasInvestmentView
+      ? (locale === 'th'
+        ? 'นักลงทุนที่ต้องการเทียบราคา ค่าเช่า และ ROI กับตัวเลือกใกล้เคียงก่อนตัดสินใจคุยต่อ'
+        : 'Investors comparing visible price, rent, and ROI signals before moving deeper.')
+      : null,
+    hasEntrySignal || hasDeliverySignal
+      ? (locale === 'th'
+        ? 'ผู้ซื้อที่ต้องการยืนยันช่วงราคาเปิดขายหรือกำหนดส่งมอบล่าสุดก่อนนัดดูหรือคัดรายการให้แคบลง'
+        : 'Buyers who need live confirmation on price bands or delivery timing before narrowing the shortlist.')
+      : null,
+    !hasEvaluationSnapshot
+      ? (locale === 'th'
+        ? 'เคสที่ยังต้องให้ทีมช่วยสร้างรายการคัดไว้รอบโครงการนี้ แทนการสรุปจาก snapshot ที่ยังบางเกินไป'
+        : 'Cases where the team should build a tighter shortlist around this project because the current snapshot is still thin.')
+      : null,
+  ]).slice(0, 3);
 }
 
 export async function generateMetadata(
@@ -269,6 +389,59 @@ export default async function ProjectDetailPage(
     { label: locale === 'th' ? 'ประเภท' : 'Type', value: project.property_type || null },
   ].filter((item) => item.value);
   const evaluationSignals = evaluation?.badges?.map((badge) => badge.label).slice(0, 4) ?? [];
+  const hasInvestmentView = Boolean(
+    evaluation?.area_statistics?.avg_price
+    || evaluation?.area_statistics?.avg_rent
+    || evaluation?.area_statistics?.roi_percent,
+  );
+  const verifiedReviewSignals = [
+    project.area?.name
+      ? locale === 'th'
+        ? `ทำเลหลัก: ${project.area.name}`
+        : `Area context: ${project.area.name}`
+      : null,
+    startingPriceLabel
+      ? locale === 'th'
+        ? `ราคาเริ่มต้น: ${startingPriceLabel}`
+        : `Entry price: ${startingPriceLabel}`
+      : null,
+    project.developer?.name
+      ? locale === 'th'
+        ? `ผู้พัฒนา: ${project.developer.name}`
+        : `Published developer: ${project.developer.name}`
+      : null,
+    deliveryLabel
+      ? locale === 'th'
+        ? `กำหนดส่งมอบ: ${deliveryLabel}`
+        : `Published delivery: ${deliveryLabel}`
+      : null,
+  ].filter((item): item is string => Boolean(item));
+  const deepReviewFallbackContext = {
+    projectName: project.name,
+    areaName: project.area?.name ?? null,
+    developerName: project.developer?.name ?? null,
+    startingPriceLabel,
+    deliveryLabel,
+    hasDescription: Boolean(description),
+    hasLocationFacts: locationFacts.length > 0,
+    hasInvestmentFacts: investmentFacts.length > 0,
+  };
+  const projectDecisionCta = buildProjectDecisionCta(
+    locale,
+    project,
+    hasEvaluationSnapshot,
+    hasInvestmentView,
+    Boolean(startingPriceLabel),
+    Boolean(deliveryLabel),
+  );
+  const buyerFitSignals = buildProjectBuyerFit(
+    locale,
+    project.area?.name,
+    hasInvestmentView,
+    Boolean(startingPriceLabel),
+    Boolean(deliveryLabel),
+    hasEvaluationSnapshot,
+  );
   const projectDecisionRead = [
     hasEvaluationSnapshot
       ? locale === 'th' ? 'มีข้อมูลล่าสุดจากโครงการและพื้นที่เพียงพอสำหรับใช้คุยเรื่องการคัดรายการต่อ' : 'There is enough live project and area snapshot data to support a shortlist discussion.'
@@ -538,23 +711,30 @@ export default async function ProjectDetailPage(
               </section>
             ) : null}
 
-            {evaluation ? <ProjectDeepReview locale={locale} evaluation={evaluation} /> : null}
+            {evaluation ? (
+              <ProjectDeepReview
+                locale={locale}
+                evaluation={evaluation}
+                verifiedSignals={verifiedReviewSignals}
+                fallbackContext={deepReviewFallbackContext}
+                buyerFitSignals={buyerFitSignals}
+                ctaPlan={projectDecisionCta}
+              />
+            ) : null}
           </div>
 
           <aside className="detail-sidebar detail-stack">
             <div id="project-advisor-brief" className="page-rail-card reveal">
-              <h2 className="card-title">{locale === 'th' ? 'ส่งบรีฟโครงการให้ที่ปรึกษา' : 'Advisor project brief'}</h2>
+              <h2 className="card-title">{projectDecisionCta.sidebarTitle}</h2>
               <p className="card-subtitle">
-                {locale === 'th'
-                  ? 'ส่งงบ ทำเล และช่วงเวลาเพื่อให้ทีมบอกได้เร็วขึ้นว่าโครงการนี้ควรอยู่ในรายการคัดไว้หรือไม่'
-                  : 'Send your budget, preferred area, and timing so the team can judge quickly whether this project belongs in your shortlist.'}
+                {projectDecisionCta.sidebarBody}
               </p>
             </div>
             <LeadForm
               locale={locale}
-              heading={locale === 'th' ? 'ขอรายการคัดไว้รอบโครงการนี้' : 'Request a shortlist around this project'}
+              heading={projectDecisionCta.leadHeading}
               defaultPreferredArea={project.area?.name ?? undefined}
-              defaultMessage={locale === 'th' ? `สนใจโครงการ ${project.name} และต้องการเทียบกับตัวเลือกใกล้เคียง` : `I am interested in ${project.name} and want to compare it with similar options.`}
+              defaultMessage={projectDecisionCta.leadMessage}
             />
           </aside>
         </div>
