@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 
-import { getAdvisoryLabels, getAdvisoryProofs, withLocaleQuery } from '@/app/_lib/public-advisory';
+import { buildLeadCaptureQuery, getAdvisoryLabels, getAdvisoryProofs, withLocaleQuery } from '@/app/_lib/public-advisory';
 import { Container } from '@/components/layout/Container';
 import { TrackedLink } from '@/components/analytics/TrackedLink';
 import { getDictionary, normalizeLocale } from '@/app/_lib/i18n/get-dictionary';
@@ -98,6 +98,10 @@ type ProjectDecisionCtaPlan = {
   leadMessage: string;
   sidebarTitle: string;
   sidebarBody: string;
+  inquiryIntent: 'project_consultation' | 'project_shortlist';
+  inquirySource: string;
+  buyerFit: string;
+  signalLevel: string;
 };
 
 function uniqueItems(items: Array<string | null>): string[] {
@@ -112,65 +116,106 @@ function buildProjectDecisionCta(
   hasEntrySignal: boolean,
   hasDeliverySignal: boolean,
 ): ProjectDecisionCtaPlan {
+  const projectConsultationSource = hasInvestmentView ? 'project_investment_check' : hasEntrySignal || hasDeliverySignal || hasEvaluationSnapshot ? 'project_availability_check' : 'project_detail';
+
   if (hasInvestmentView) {
+    const leadMessage = locale === 'th'
+      ? `สนใจ ${project.name} และต้องการเทียบราคา ค่าเช่า และมุมมองการลงทุนกับตัวเลือกใกล้เคียงในพื้นที่เดียวกัน`
+      : `I am reviewing ${project.name} and want to compare its price, rent, and investment context against nearby alternatives.`;
     return {
       title: locale === 'th' ? 'ต่อยอดจาก snapshot นี้เป็นการตัดสินใจที่คมขึ้น' : 'Turn this snapshot into a sharper decision',
       body: locale === 'th'
         ? 'ใช้ราคา ค่าเช่า และ ROI ที่มีตอนนี้เพื่อตรวจว่าโครงการนี้ยังควรอยู่ในรายการคัดไว้ เมื่อเทียบกับตัวเลือกใกล้เคียงหรือไม่'
         : 'Use the visible price, rent, and ROI context to test whether this project still belongs in your shortlist against nearby alternatives.',
-      primaryHref: withLocaleQuery(locale, '/contact', { intent: 'project_investment_check', project: project.slug }),
+      primaryHref: withLocaleQuery(locale, '/contact', buildLeadCaptureQuery({
+        intent: 'project_consultation',
+        source: projectConsultationSource,
+        project: project.slug,
+        projects: [project.slug],
+        buyerFit: 'investor_compare',
+        signalLevel: 'high',
+        message: leadMessage,
+      })),
       primaryLabel: locale === 'th' ? 'เช็กสมมติฐานลงทุนของโครงการนี้' : 'Pressure-test this project',
       secondaryHref: withLocale(locale, '/compare'),
       secondaryLabel: locale === 'th' ? 'เทียบกับโครงการใกล้เคียง' : 'Compare nearby options',
       leadHeading: locale === 'th' ? 'ขอเทียบโครงการนี้กับตัวเลือกใกล้เคียง' : 'Compare this project with nearby options',
-      leadMessage: locale === 'th'
-        ? `สนใจ ${project.name} และต้องการเทียบราคา ค่าเช่า และมุมมองการลงทุนกับตัวเลือกใกล้เคียงในพื้นที่เดียวกัน`
-        : `I am reviewing ${project.name} and want to compare its price, rent, and investment context against nearby alternatives.`,
+      leadMessage,
       sidebarTitle: locale === 'th' ? 'ส่งบรีฟโครงการให้ที่ปรึกษา' : 'Advisor project brief',
       sidebarBody: locale === 'th'
         ? 'ส่งงบ ทำเล และเหตุผลที่สนใจโครงการนี้เพื่อให้ทีมช่วยเช็กว่าควรอยู่ต่อในรายการคัดไว้หรือควรเทียบกับตัวเลือกอื่น'
         : 'Share your budget, area, and why this project is on your radar so the team can test whether it survives a tighter shortlist.',
+      inquiryIntent: 'project_consultation',
+      inquirySource: projectConsultationSource,
+      buyerFit: 'investor_compare',
+      signalLevel: 'high',
     };
   }
 
   if (hasEntrySignal || hasDeliverySignal || hasEvaluationSnapshot) {
+    const leadMessage = locale === 'th'
+      ? `สนใจ ${project.name} และต้องการยืนยันยูนิต ช่วงราคา และตัวเลือกใกล้เคียงที่ยังเปิดอยู่จริงตอนนี้`
+      : `I am interested in ${project.name} and want to confirm live unit availability, price bands, and nearby alternatives still open now.`;
     return {
       title: locale === 'th' ? 'เช็กสิ่งที่ยัง active อยู่จริงก่อนขยับต่อ' : 'Check what is actually live before moving forward',
       body: locale === 'th'
         ? 'ใช้ราคาเริ่มต้นหรือกำหนดส่งมอบที่เผยแพร่ตอนนี้เป็นจุดเริ่มต้น แล้วให้ทีมช่วยยืนยัน inventory และทางเลือกที่ยังเปิดอยู่จริง'
         : 'Use the published entry price or delivery timing as the starting point, then verify which units and comparables are genuinely still active.',
-      primaryHref: withLocaleQuery(locale, '/contact', { intent: 'project_availability_check', project: project.slug }),
+      primaryHref: withLocaleQuery(locale, '/contact', buildLeadCaptureQuery({
+        intent: 'project_consultation',
+        source: projectConsultationSource,
+        project: project.slug,
+        projects: [project.slug],
+        buyerFit: 'project_first_buyer',
+        signalLevel: 'medium',
+        message: leadMessage,
+      })),
       primaryLabel: locale === 'th' ? 'เช็ก availability ของโครงการนี้' : 'Check live availability',
       secondaryHref: withLocale(locale, '/buy'),
       secondaryLabel: locale === 'th' ? 'ดูรายการที่พร้อมคัดต่อ' : 'Browse shortlist-ready listings',
       leadHeading: locale === 'th' ? 'ขอเช็ก availability รอบโครงการนี้' : 'Check live availability around this project',
-      leadMessage: locale === 'th'
-        ? `สนใจ ${project.name} และต้องการยืนยันยูนิต ช่วงราคา และตัวเลือกใกล้เคียงที่ยังเปิดอยู่จริงตอนนี้`
-        : `I am interested in ${project.name} and want to confirm live unit availability, price bands, and nearby alternatives still open now.`,
+      leadMessage,
       sidebarTitle: locale === 'th' ? 'ส่งบรีฟโครงการให้ที่ปรึกษา' : 'Advisor project brief',
       sidebarBody: locale === 'th'
         ? 'ส่งงบ ทำเล และช่วงเวลาที่ต้องการเพื่อให้ทีมช่วยเช็กยูนิตที่ยังเปิดขายและตัวเลือกสำรองที่ไม่หลุดโจทย์'
         : 'Share your budget, area, and timing so the team can confirm live inventory and backup options without losing the current brief.',
+      inquiryIntent: 'project_consultation',
+      inquirySource: projectConsultationSource,
+      buyerFit: 'project_first_buyer',
+      signalLevel: 'medium',
     };
   }
 
+  const leadMessage = locale === 'th'
+    ? `สนใจโครงการ ${project.name} และต้องการเทียบกับตัวเลือกใกล้เคียงในพื้นที่เดียวกัน`
+    : `I am interested in ${project.name} and want to compare it with similar options in the same area.`;
   return {
     title: locale === 'th' ? 'ใช้โครงการนี้เป็นจุดตั้งต้นของ shortlist ที่แคบขึ้น' : 'Use this project as the starting point for a tighter shortlist',
     body: locale === 'th'
       ? 'หากโครงการนี้เริ่มใกล้โจทย์ ให้ทีมช่วยคัดตัวเลือกในทำเลเดียวกันหรือระดับราคาใกล้เคียงเพื่อเร่งการตัดสินใจ'
       : 'If this project is directionally right, turn it into a narrower shortlist of similar options in the same area or price band.',
-    primaryHref: withLocaleQuery(locale, '/contact', { intent: 'project_shortlist', project: project.slug }),
+    primaryHref: withLocaleQuery(locale, '/contact', buildLeadCaptureQuery({
+      intent: 'project_shortlist',
+      source: 'project_detail',
+      project: project.slug,
+      projects: [project.slug],
+      buyerFit: 'project_first_buyer',
+      signalLevel: 'low',
+      message: leadMessage,
+    })),
     primaryLabel: locale === 'th' ? 'ขอ shortlist รอบโครงการนี้' : 'Request a shortlist around this project',
     secondaryHref: withLocale(locale, '/compare'),
     secondaryLabel: locale === 'th' ? 'ไปหน้าเปรียบเทียบ' : 'Go to Compare',
     leadHeading: locale === 'th' ? 'ขอ shortlist รอบโครงการนี้' : 'Request a shortlist around this project',
-    leadMessage: locale === 'th'
-      ? `สนใจโครงการ ${project.name} และต้องการเทียบกับตัวเลือกใกล้เคียงในพื้นที่เดียวกัน`
-      : `I am interested in ${project.name} and want to compare it with similar options in the same area.`,
+    leadMessage,
     sidebarTitle: locale === 'th' ? 'ส่งบรีฟโครงการให้ที่ปรึกษา' : 'Advisor project brief',
     sidebarBody: locale === 'th'
       ? 'ส่งงบ ทำเล และกรอบเวลาของคุณเพื่อให้ทีมช่วยบอกเร็วขึ้นว่าโครงการนี้ควรอยู่ต่อหรือควรถูกแทนด้วยตัวเลือกอื่น'
       : 'Share your budget, area, and timing so the team can judge quickly whether this project should stay or be replaced by better-fit options.',
+    inquiryIntent: 'project_shortlist',
+    inquirySource: 'project_detail',
+    buyerFit: 'project_first_buyer',
+    signalLevel: 'low',
   };
 }
 
@@ -311,7 +356,14 @@ export default async function ProjectDetailPage(
             },
           ]}
           primaryAction={{
-            href: withLocaleQuery(locale, '/contact', { intent: 'project_shortlist', project: params.slug }),
+          href: withLocaleQuery(locale, '/contact', buildLeadCaptureQuery({
+            intent: 'project_shortlist',
+            source: 'project_timeout',
+            project: params.slug,
+            projects: [params.slug],
+            buyerFit: 'project_first_buyer',
+            signalLevel: 'low',
+          })),
             label: dict.cta.speakToAdvisor,
             id: 'project_timeout_consultation_primary',
             eventPayload: { cta: 'speak_to_advisor', from: 'project_detail_timeout' },
@@ -548,7 +600,14 @@ export default async function ProjectDetailPage(
             },
           ]}
         primaryAction={{
-          href: withLocaleQuery(locale, '/contact', { intent: 'project_consultation', project: project.slug }),
+          href: withLocaleQuery(locale, '/contact', buildLeadCaptureQuery({
+            intent: 'project_consultation',
+            source: 'project_detail',
+            project: project.slug,
+            projects: [project.slug],
+            buyerFit: 'project_first_buyer',
+            signalLevel: hasEvaluationSnapshot ? 'medium' : 'low',
+          })),
           label: dict.cta.speakToAdvisor,
           id: 'project_consultation_primary',
           eventPayload: { cta: 'speak_to_advisor', from: 'project_detail' },
@@ -735,6 +794,20 @@ export default async function ProjectDetailPage(
               heading={projectDecisionCta.leadHeading}
               defaultPreferredArea={project.area?.name ?? undefined}
               defaultMessage={projectDecisionCta.leadMessage}
+              inquiryIntent={projectDecisionCta.inquiryIntent}
+              inquirySource={projectDecisionCta.inquirySource}
+              inquiryTags={[
+                `project:${project.slug}`,
+                `buyer_fit:${projectDecisionCta.buyerFit}`,
+                `signal_level:${projectDecisionCta.signalLevel}`,
+              ]}
+              contextSummary={[
+                locale === 'th' ? `เส้นทางที่ต้องการ: ${projectDecisionCta.inquiryIntent}` : `Lead path: ${projectDecisionCta.inquiryIntent}`,
+                locale === 'th' ? `โครงการที่กำลังสนใจ: ${project.name}` : `Project in focus: ${project.name}`,
+                locale === 'th' ? `ต้นทางของการส่งต่อ: ${projectDecisionCta.inquirySource}` : `Handoff source: ${projectDecisionCta.inquirySource}`,
+                locale === 'th' ? `ลักษณะผู้ซื้อที่เหมาะ: ${projectDecisionCta.buyerFit}` : `Buyer fit: ${projectDecisionCta.buyerFit}`,
+                locale === 'th' ? `ระดับความชัดของสัญญาณ: ${projectDecisionCta.signalLevel}` : `Signal strength: ${projectDecisionCta.signalLevel}`,
+              ]}
             />
           </aside>
         </div>

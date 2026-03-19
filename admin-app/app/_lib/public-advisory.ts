@@ -37,6 +37,22 @@ export type BuyingCostAdvisorContext = {
   disclaimerKey?: string | null;
 };
 
+export type NormalizedLeadIntent =
+  | 'project_consultation'
+  | 'project_shortlist'
+  | 'project_compare'
+  | 'general_inquiry';
+
+export type LeadCaptureContext = {
+  intent: NormalizedLeadIntent;
+  source?: string | null;
+  project?: string | null;
+  projects?: string[];
+  buyerFit?: string | null;
+  signalLevel?: string | null;
+  message?: string | null;
+};
+
 function pickQueryValue(value: string | string[] | undefined): string | null {
   if (typeof value === 'string') return value;
   if (Array.isArray(value) && typeof value[0] === 'string') return value[0];
@@ -73,9 +89,82 @@ function parseDelimitedValues(value: string | null): string[] {
     .filter(Boolean);
 }
 
+function serializeDelimitedValues(values: Array<string | null | undefined> | undefined): string | null {
+  if (!values?.length) return null;
+  const seen = new Set<string>();
+  const normalized = values
+    .map((value) => String(value || '').trim())
+    .filter(Boolean)
+    .filter((value) => {
+      const key = value.toLowerCase();
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    })
+    .slice(0, 5);
+
+  return normalized.length ? normalized.join(',') : null;
+}
+
 function serializeMetric(value: number | null | undefined, decimals = 2): string | null {
   if (typeof value !== 'number' || !Number.isFinite(value)) return null;
   return value.toFixed(decimals).replace(/\.0+$/, '').replace(/(\.\d*?)0+$/, '$1');
+}
+
+export function normalizeLeadIntent(
+  value: string | null | undefined,
+  fallback: NormalizedLeadIntent = 'general_inquiry',
+): NormalizedLeadIntent {
+  const normalized = String(value || '').trim().toLowerCase();
+
+  if (normalized === 'project_consultation' || normalized === 'project_availability_check' || normalized === 'project_investment_check') {
+    return 'project_consultation';
+  }
+  if (normalized === 'project_shortlist') {
+    return 'project_shortlist';
+  }
+  if (normalized === 'project_compare' || normalized === 'shortlist_review') {
+    return 'project_compare';
+  }
+  if (normalized === 'general_inquiry' || normalized === 'general') {
+    return 'general_inquiry';
+  }
+
+  return fallback;
+}
+
+export function parseLeadCaptureContext(
+  searchParams?: Record<string, string | string[] | undefined>,
+  fallbackIntent: NormalizedLeadIntent = 'general_inquiry',
+): LeadCaptureContext {
+  const project = pickQueryValue(searchParams?.project);
+  const projects = parseDelimitedValues(pickQueryValue(searchParams?.projects));
+
+  return {
+    intent: normalizeLeadIntent(pickQueryValue(searchParams?.intent), fallbackIntent),
+    source: pickQueryValue(searchParams?.source),
+    project,
+    projects: project && !projects.length ? [project] : projects,
+    buyerFit: pickQueryValue(searchParams?.buyer_fit),
+    signalLevel: pickQueryValue(searchParams?.signal_level),
+    message: pickQueryValue(searchParams?.msg),
+  };
+}
+
+export function buildLeadCaptureQuery(context: LeadCaptureContext): Record<string, string> {
+  const query: Record<string, string> = {
+    intent: normalizeLeadIntent(context.intent),
+  };
+  const projects = serializeDelimitedValues(context.projects);
+
+  if (context.source) query.source = context.source;
+  if (context.project) query.project = context.project;
+  if (projects) query.projects = projects;
+  if (context.buyerFit) query.buyer_fit = context.buyerFit;
+  if (context.signalLevel) query.signal_level = context.signalLevel;
+  if (context.message) query.msg = context.message;
+
+  return query;
 }
 
 export function parseInvestorToolContext(

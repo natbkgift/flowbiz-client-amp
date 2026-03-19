@@ -116,9 +116,12 @@ describe('ShortlistListSurface', () => {
     expect(screen.getByText(/foreign quota signal/i)).toBeTruthy();
     await waitFor(() => {
       expect(screen.getByRole('link', { name: /compare 2 saved projects/i }).getAttribute('href')).toBe(
-        '/en/compare?ids=project-1%2Cproject-2&intent=shortlist_review&source=shortlist_compare',
+        '/en/compare?ids=project-1%2Cproject-2&intent=project_compare&source=shortlist_compare&projects=Alpha+Project%2CBeta+Project&buyer_fit=shortlist_narrowing&signal_level=medium',
       );
     });
+    expect(screen.getByRole('link', { name: /speak to an advisor/i }).getAttribute('href')).toBe(
+      '/en/contact?intent=project_shortlist&source=shortlist_contact&projects=Alpha+Project%2CBeta+Project&buyer_fit=shortlist_narrowing&signal_level=medium',
+    );
     expect(screen.getByText('Alpha Project')).toBeTruthy();
     expect(screen.getByText('Beta Project')).toBeTruthy();
   });

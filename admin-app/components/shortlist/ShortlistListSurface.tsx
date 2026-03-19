@@ -4,7 +4,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 
-import { withLocaleQuery } from '@/app/_lib/public-advisory';
+import { buildLeadCaptureQuery, withLocaleQuery } from '@/app/_lib/public-advisory';
 import { resolveImageUrl, formatPriceTHB } from '@/app/_lib/public-api-shared';
 import { withLocale } from '@/app/_lib/i18n/routing';
 import { EmptyStateCard, InlineStatusMessage, LoadingCardGrid } from '@/components/ui/StateBlocks';
@@ -212,13 +212,26 @@ export function ShortlistListSurface({ locale }: { locale: 'en' | 'th' }) {
   const compareProjectNames = compareProjects
     .map((item) => item.projectName)
     .filter((value): value is string => Boolean(value));
+  const shortlistProjectNames = Array.from(new Set(items.map((item) => item.project || item.title).filter(Boolean)));
   const compareHref = compareProjects.length >= 2
     ? withLocaleQuery(locale, '/compare', {
         ids: compareProjects.map((item) => item.projectId).join(','),
-        intent: 'shortlist_review',
-        source: 'shortlist_compare',
+        ...buildLeadCaptureQuery({
+          intent: 'project_compare',
+          source: 'shortlist_compare',
+          projects: compareProjectNames,
+          buyerFit: 'shortlist_narrowing',
+          signalLevel: compareProjects.length >= 3 ? 'high' : 'medium',
+        }),
       })
     : null;
+  const contactHref = withLocaleQuery(locale, '/contact', buildLeadCaptureQuery({
+    intent: 'project_shortlist',
+    source: 'shortlist_contact',
+    projects: shortlistProjectNames,
+    buyerFit: 'shortlist_narrowing',
+    signalLevel: items.length >= 3 ? 'high' : 'medium',
+  }));
 
   return (
     <div className="shortlist-surface">
@@ -246,7 +259,7 @@ export function ShortlistListSurface({ locale }: { locale: 'en' | 'th' }) {
           <Link className="btn btn-secondary" href={withLocale(locale, '/buy')}>
             {locale === 'th' ? 'ดู buy listings เพิ่ม' : 'Browse buy listings'}
           </Link>
-          <Link className="btn btn-tertiary" href={withLocale(locale, '/contact')}>
+          <Link className="btn btn-tertiary" href={contactHref}>
             {locale === 'th' ? 'คุยกับที่ปรึกษา' : 'Speak to an advisor'}
           </Link>
         </div>

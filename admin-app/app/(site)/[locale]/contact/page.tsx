@@ -10,6 +10,7 @@ import {
   buildAdvisorWhatsApp,
   getAdvisoryLabels,
   getAdvisoryProofs,
+  parseLeadCaptureContext,
   parseBuyingCostAdvisorContext,
   parseInvestorToolContext,
   withLocaleQuery,
@@ -80,6 +81,126 @@ function humanizeBuyingCostValue(locale: 'en' | 'th', value: string | null | und
   return maps[kind][value as keyof (typeof maps)[typeof kind]] ?? value;
 }
 
+function normalizeTagToken(value: string): string {
+  return value
+    .trim()
+    .toLowerCase()
+    .replace(/\s+/g, '_')
+    .replace(/[^a-z0-9_]/g, '');
+}
+
+function humanizeToken(locale: 'en' | 'th', value: string | null | undefined): string | null {
+  const text = String(value || '').trim();
+  if (!text) return null;
+
+  const knownLabels: Record<string, { en: string; th: string }> = {
+    compare_hero: { en: 'Compare page', th: 'หน้าเปรียบเทียบ' },
+    compare_review: { en: 'Compare review', th: 'รีวิวจากหน้าเปรียบเทียบ' },
+    shortlist_compare: { en: 'Shortlist compare flow', th: 'เส้นทาง compare จาก shortlist' },
+    shortlist_contact: { en: 'Shortlist page', th: 'หน้า shortlist' },
+    project_detail: { en: 'Project detail page', th: 'หน้าโครงการ' },
+    project_investment_check: { en: 'Project investment snapshot', th: 'snapshot การลงทุนของโครงการ' },
+    project_availability_check: { en: 'Project availability review', th: 'การเช็ก availability ของโครงการ' },
+    project_timeout: { en: 'Project timeout fallback', th: 'หน้าโครงการโหมด fallback' },
+    high: { en: 'High', th: 'สูง' },
+    medium: { en: 'Medium', th: 'กลาง' },
+    low: { en: 'Low', th: 'ต่ำ' },
+    investor_compare: { en: 'Investor compare review', th: 'รีวิว compare สำหรับนักลงทุน' },
+    shortlist_narrowing: { en: 'Shortlist narrowing', th: 'การบีบ shortlist ให้แคบลง' },
+    project_first_buyer: { en: 'Project-first buyer', th: 'ผู้ซื้อที่เริ่มจากโครงการก่อน' },
+  };
+
+  const known = knownLabels[text.toLowerCase()];
+  if (known) {
+    return locale === 'th' ? known.th : known.en;
+  }
+
+  return text
+    .split(/[_\-]+/)
+    .filter(Boolean)
+    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+    .join(' ');
+}
+
+function describeLeadIntent(locale: 'en' | 'th', value: string): string {
+  if (value === 'project_consultation') {
+    return locale === 'th' ? 'คุยต่อจากโครงการที่กำลังพิจารณา' : 'Continue the conversation from a live project review';
+  }
+  if (value === 'project_shortlist') {
+    return locale === 'th' ? 'ขอ shortlist รอบตัวเลือกที่กำลังสนใจ' : 'Request a tighter shortlist around the current options';
+  }
+  if (value === 'project_compare') {
+    return locale === 'th' ? 'คุยต่อจากการเปรียบเทียบหลายโครงการ' : 'Continue from a multi-project comparison';
+  }
+  return locale === 'th' ? 'สอบถามทั่วไป' : 'General inquiry';
+}
+
+function buildLeadDraftMessage(
+  locale: 'en' | 'th',
+  params: {
+    intent: string;
+    projectNames: string[];
+    buyerFit: string | null;
+    signalLevel: string | null;
+  },
+): string {
+  const names = params.projectNames.filter(Boolean);
+
+  if (params.intent === 'project_compare') {
+    if (names.length >= 2) {
+      return locale === 'th'
+        ? `กำลังเทียบ ${names.join(', ')} และต้องการให้ทีมช่วยสรุปว่าควรคุยต่อกับตัวเลือกไหนก่อน พร้อมบอกเหตุผลที่ควรตัดหรือเก็บไว้ต่อ`
+        : `I am comparing ${names.join(', ')} and want the team to clarify which option deserves the next conversation, including what should be kept or cut.`;
+    }
+
+    return locale === 'th'
+      ? 'กำลังเทียบหลายโครงการและต้องการให้ทีมช่วยสรุป next step ที่ชัดขึ้นจากตาราง compare นี้'
+      : 'I am comparing multiple projects and want the team to turn this compare read into a clearer next step.';
+  }
+
+  if (params.intent === 'project_shortlist') {
+    if (names.length) {
+      return locale === 'th'
+        ? `สนใจ ${names.join(', ')} และต้องการ shortlist ที่แคบลงพร้อมตัวเลือกสำรองในกรอบราคาและทำเลใกล้เคียง`
+        : `I am interested in ${names.join(', ')} and want a tighter shortlist with backup options in the same budget and area range.`;
+    }
+
+    return locale === 'th'
+      ? 'ต้องการให้ทีมช่วยคัด shortlist ที่แคบลงจากตัวเลือกที่กำลังดูอยู่'
+      : 'I want the team to tighten the shortlist around the options I am reviewing now.';
+  }
+
+  if (names.length) {
+    return locale === 'th'
+      ? `สนใจ ${names[0]} และต้องการคุยต่อแบบมีบริบทชัด ทั้งเรื่องความเหมาะกับโจทย์และขั้นตอนถัดไป`
+      : `I am interested in ${names[0]} and want to continue with clearer context on fit, trade-offs, and the next step.`;
+  }
+
+  if (params.buyerFit || params.signalLevel) {
+    return locale === 'th'
+      ? 'ต้องการคุยต่อจากบริบทที่ส่งมาจากหน้านี้ โดยคงงบ เป้าหมาย และสัญญาณการตัดสินใจไว้ให้ครบ'
+      : 'I want to continue from the handoff context on this page while keeping the same budget, goals, and decision signals.';
+  }
+
+  return locale === 'th' ? 'ต้องการคุยกับที่ปรึกษาเพื่อไปขั้นตอนถัดไป' : 'I want to speak with an advisor about the next step.';
+}
+
+function inferLeadPurpose(
+  buyingCostLines: string[],
+  investorLines: string[],
+  buyerFit: string | null,
+  source: string | null,
+  intent: string,
+): string | undefined {
+  if (buyingCostLines.length) return 'buy';
+  if (investorLines.length) return 'invest';
+
+  const fit = `${buyerFit ?? ''} ${source ?? ''} ${intent}`.toLowerCase();
+  if (fit.includes('invest')) return 'invest';
+  if (intent === 'general_inquiry') return undefined;
+  return 'buy';
+}
+
 export default async function ContactPage(
   props: {
     params: Promise<{ locale: string }>;
@@ -94,6 +215,7 @@ export default async function ContactPage(
   const advisoryProofs = getAdvisoryProofs(dict);
   const investorContext = parseInvestorToolContext(searchParams);
   const buyingCostContext = parseBuyingCostAdvisorContext(searchParams);
+  const leadCaptureContext = parseLeadCaptureContext(searchParams);
   const msg =
     (typeof searchParams?.msg === 'string' ? searchParams.msg : Array.isArray(searchParams?.msg) ? searchParams?.msg[0] : null) ??
     null;
@@ -155,6 +277,24 @@ export default async function ContactPage(
       ? `${locale === 'th' ? 'หมายเหตุการประเมิน' : 'Disclosure'}: ${buyingCostContext.disclaimerKey}`
       : null,
   ].filter((item): item is string => Boolean(item));
+  const leadProjectNames = (leadCaptureContext.projects?.length ? leadCaptureContext.projects : leadCaptureContext.project ? [leadCaptureContext.project] : [])
+    .filter(Boolean);
+  const leadCaptureLines = [
+    `${locale === 'th' ? 'เส้นทางที่ต้องการ' : 'Lead path'}: ${describeLeadIntent(locale, leadCaptureContext.intent)}`,
+    leadProjectNames.length
+      ? `${locale === 'th' ? (leadProjectNames.length > 1 ? 'โครงการในบริบทนี้' : 'โครงการที่กำลังสนใจ') : (leadProjectNames.length > 1 ? 'Projects in scope' : 'Project in focus')}: ${leadProjectNames.join(', ')}`
+      : null,
+    humanizeToken(locale, leadCaptureContext.source)
+      ? `${locale === 'th' ? 'ต้นทางของการส่งต่อ' : 'Handoff source'}: ${humanizeToken(locale, leadCaptureContext.source)}`
+      : null,
+    humanizeToken(locale, leadCaptureContext.buyerFit)
+      ? `${locale === 'th' ? 'ลักษณะผู้ซื้อที่เหมาะ' : 'Buyer fit'}: ${humanizeToken(locale, leadCaptureContext.buyerFit)}`
+      : null,
+    humanizeToken(locale, leadCaptureContext.signalLevel)
+      ? `${locale === 'th' ? 'ระดับความชัดของสัญญาณ' : 'Signal strength'}: ${humanizeToken(locale, leadCaptureContext.signalLevel)}`
+      : null,
+  ].filter((item): item is string => Boolean(item));
+  const hasLeadCaptureContext = leadCaptureLines.length > 1 || leadCaptureContext.intent !== 'general_inquiry';
   const defaultMessage = msg
     ? `${msg}`
     : buyingCostLines.length
@@ -173,10 +313,37 @@ export default async function ContactPage(
           '',
           ...investorLines,
         ].join('\n')
+      : hasLeadCaptureContext
+        ? buildLeadDraftMessage(locale, {
+            intent: leadCaptureContext.intent,
+            projectNames: leadProjectNames,
+            buyerFit: leadCaptureContext.buyerFit ?? null,
+            signalLevel: leadCaptureContext.signalLevel ?? null,
+          })
       : dict.contact.advisoryBody;
   const defaultBudgetBand = inferBudgetBand(buyingCostContext.propertyPrice ?? investorContext.purchasePrice);
   const hasInvestorContext = investorLines.length > 0;
   const hasBuyingCostContext = buyingCostLines.length > 0;
+  const defaultPurpose = inferLeadPurpose(
+    buyingCostLines,
+    investorLines,
+    leadCaptureContext.buyerFit ?? null,
+    leadCaptureContext.source ?? null,
+    leadCaptureContext.intent,
+  );
+  const inquiryTags = [
+    leadCaptureContext.project ? `project:${normalizeTagToken(leadCaptureContext.project)}` : null,
+    ...(leadProjectNames.length > 1
+      ? leadProjectNames.map((name) => `project_scope:${normalizeTagToken(name)}`)
+      : []),
+    leadCaptureContext.buyerFit ? `buyer_fit:${normalizeTagToken(leadCaptureContext.buyerFit)}` : null,
+    leadCaptureContext.signalLevel ? `signal_level:${normalizeTagToken(leadCaptureContext.signalLevel)}` : null,
+  ].filter((item): item is string => Boolean(item));
+  const formContextSummary = [
+    ...leadCaptureLines,
+    ...investorLines,
+    ...buyingCostLines,
+  ];
 
   return (
     <main id="main-content">
@@ -268,6 +435,19 @@ export default async function ContactPage(
                 </div>
               ) : null}
 
+              {hasLeadCaptureContext ? (
+                <div className="trust-box">
+                  <h3 className="trust-box__title">
+                    {locale === 'th' ? 'สรุปบริบท lead ที่ส่งต่อมา' : 'Lead handoff summary'}
+                  </h3>
+                  <ul className="bullet-list">
+                    {leadCaptureLines.map((line) => (
+                      <li key={line}>{line}</li>
+                    ))}
+                  </ul>
+                </div>
+              ) : null}
+
               <div className="cta-row">
                 <a className="btn btn-cta" href={CTA.whatsAppUrl} target="_blank" rel="noreferrer">
                   {dict.cta.whatsapp}
@@ -296,7 +476,11 @@ export default async function ContactPage(
                 heading={dict.contact.formTitle}
                 defaultMessage={defaultMessage}
                 defaultBudgetBand={defaultBudgetBand}
-                defaultPurpose={hasBuyingCostContext ? 'buy' : hasInvestorContext ? 'invest' : undefined}
+                defaultPurpose={defaultPurpose}
+                inquiryIntent={hasLeadCaptureContext ? leadCaptureContext.intent : undefined}
+                inquirySource={leadCaptureContext.source ?? undefined}
+                inquiryTags={inquiryTags}
+                contextSummary={formContextSummary}
               />
             </div>
           </div>

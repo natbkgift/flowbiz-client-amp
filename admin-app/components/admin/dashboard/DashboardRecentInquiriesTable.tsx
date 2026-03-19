@@ -114,10 +114,14 @@ function translateInquiryIntent(value: string | null | undefined, locale: AdminL
   if (!normalized) return "-";
   if (locale === "th") {
     if (normalized === "general") return "ทั่วไป";
+    if (normalized === "general_inquiry") return "สอบถามทั่วไป";
     if (normalized === "buy") return "ซื้อ";
     if (normalized === "rent") return "เช่า";
     if (normalized === "sell") return "ขาย";
     if (normalized === "invest") return "ลงทุน";
+    if (normalized === "project_consultation") return "คุยต่อจากหน้าโครงการ";
+    if (normalized === "project_shortlist") return "ขอ shortlist จากตัวเลือกที่สนใจ";
+    if (normalized === "project_compare") return "คุยต่อจากการเปรียบเทียบโครงการ";
   }
   return normalized;
 }

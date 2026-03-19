@@ -22,6 +22,10 @@ type LeadFormProps = {
   defaultBudgetBand?: string;
   defaultPurpose?: string;
   defaultTimeframe?: string;
+  inquiryIntent?: string;
+  inquirySource?: string;
+  inquiryTags?: string[];
+  contextSummary?: string[];
 };
 
 type LeadFormStatus =
@@ -49,6 +53,10 @@ export function LeadForm({
   defaultBudgetBand,
   defaultPurpose,
   defaultTimeframe,
+  inquiryIntent,
+  inquirySource,
+  inquiryTags,
+  contextSummary,
 }: LeadFormProps) {
   const pathname = usePathname() ?? '/';
   const locale = explicitLocale ?? localeFromPathname(pathname);
@@ -140,15 +148,27 @@ export function LeadForm({
       timeframe ? `${dict.common.leadForm.timeframeLabel}: ${dict.common.leadForm.timeframeOptions.find((item) => item.value === timeframe)?.label ?? timeframe}` : null,
     ].filter((item): item is string => Boolean(item));
 
-    const composedMessage = briefLines.length
-      ? `${message.trim()}\n\n${dict.common.leadForm.detailsHeading}:\n${briefLines.join('\n')}`
-      : message.trim();
+    const handoffLines = (contextSummary ?? []).map((item) => item.trim()).filter(Boolean);
+    const handoffBlock = handoffLines.length
+      ? `${locale === 'th' ? 'บริบทที่ส่งต่อ' : 'Lead context'}:\n${handoffLines.join('\n')}`
+      : null;
+
+    const composedSections = [
+      message.trim(),
+      handoffBlock,
+      briefLines.length ? `${dict.common.leadForm.detailsHeading}:\n${briefLines.join('\n')}` : null,
+    ].filter((item): item is string => Boolean(item));
+    const composedMessage = composedSections.join('\n\n');
 
     const normalizedPreferredArea = normalizeTagToken(preferredArea);
-    const inquiryTags = [
+    const normalizedContextTags = (inquiryTags ?? []).map((item) => item.trim()).filter(Boolean);
+    const dedupedInquiryTags = Array.from(new Set([
       normalizedPreferredArea ? `preferred_area:${normalizedPreferredArea}` : null,
       purpose ? `purpose:${normalizeTagToken(purpose)}` : null,
-    ].filter((item): item is string => Boolean(item));
+      inquiryIntent ? `intent:${normalizeTagToken(inquiryIntent)}` : null,
+      inquirySource ? `lead_source:${normalizeTagToken(inquirySource)}` : null,
+      ...normalizedContextTags,
+    ].filter((item): item is string => Boolean(item))));
 
     try {
       const res = await fetch('/api/v1/inquiries', {
@@ -161,7 +181,7 @@ export function LeadForm({
           phone: phone.trim() || null,
           message: composedMessage,
           consent_given: true,
-          intent: purpose || 'general',
+          intent: inquiryIntent || purpose || 'general',
           budget_band: budgetBand || null,
           timeline: timeframe || null,
           // Operational metadata (not user PII)
@@ -171,7 +191,7 @@ export function LeadForm({
           submit_timestamp: submitIso,
           locale,
           source_platform: 'website',
-          tags: inquiryTags,
+          tags: dedupedInquiryTags,
           // Lead quality score (0–100 + tier)
           lead_score: leadScore.total,
           lead_tier: leadScore.tier,

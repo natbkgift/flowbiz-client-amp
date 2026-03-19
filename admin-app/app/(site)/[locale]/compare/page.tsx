@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { Container } from '@/components/layout/Container';
 import {
   buildAdvisorWhatsApp,
+  buildLeadCaptureQuery,
   buildInvestorToolQuery,
   getAdvisoryLabels,
   getAdvisoryProofs,
@@ -349,6 +350,19 @@ export default async function ComparePage(
   const items = evals.filter(Boolean) as ProjectEvaluationResponse[];
   const areaComparisons = await buildAreaComparisonEntries(items, locale);
   const decisionSupportSummary = buildDecisionSupportSummary({ locale, items, areaComparisons });
+  const compareContactHref = withLocaleQuery(locale, '/contact', {
+    ...buildInvestorToolQuery({
+      ...investorContext,
+      ids,
+    }),
+    ...buildLeadCaptureQuery({
+      intent: 'project_compare',
+      source: 'compare_hero',
+      projects: items.map((item) => item.project.slug ?? item.project.name),
+      buyerFit: investorContextPresent ? 'investor_compare' : 'shortlist_narrowing',
+      signalLevel: items.length >= 3 ? 'high' : 'medium',
+    }),
+  });
 
   return (
     <main id="main-content">
@@ -386,7 +400,7 @@ export default async function ComparePage(
           },
         ]}
         primaryAction={{
-          href: withLocaleQuery(locale, '/contact', { intent: 'consultation', source: 'compare_hero' }),
+          href: compareContactHref,
           label: dict.compare.getInvestmentPlan,
           id: 'compare_consultation_hero',
           eventPayload: { cta: 'get_investment_plan', from: 'compare_hero' },
