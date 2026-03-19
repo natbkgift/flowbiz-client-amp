@@ -31,8 +31,27 @@ type LeadFormProps = {
 type LeadFormStatus =
   | { state: 'idle' }
   | { state: 'submitting' }
-  | { state: 'success'; id?: string }
+  | {
+      state: 'success';
+      id?: string;
+      confirmationTitle?: string;
+      confirmationBody?: string;
+      autoResponseMessage?: string;
+      responseChannel?: string;
+      responseSlaSeconds?: number;
+    }
   | { state: 'error'; message: string };
+
+type InquirySuccessPayload = {
+  id?: string;
+  sales_automation?: {
+    confirmation_title?: string;
+    confirmation_body?: string;
+    auto_response_message?: string;
+    response_channel?: string;
+    response_sla_seconds?: number;
+  };
+};
 
 function normalizeTagToken(value: string): string {
   return value
@@ -83,6 +102,19 @@ export function LeadForm({
     if (!consent) return false;
     return status.state !== 'submitting';
   }, [email, message, name, phone, consent, status.state]);
+
+  function describeResponseChannel(value: string | undefined): string | null {
+    if (!value) return null;
+    if (locale === 'th') {
+      if (value === 'email_if_connected') return 'ทีมจะเริ่มจากอีเมลก่อนหากช่องทางส่งอัตโนมัติพร้อมใช้งาน';
+      if (value === 'whatsapp_or_line_if_connected') return 'ทีมจะเริ่มจาก WhatsApp หรือ LINE หากช่องทางส่งอัตโนมัติพร้อมใช้งาน';
+      if (value === 'on_page_confirmation') return 'ตอนนี้การยืนยันแรกเกิดขึ้นบนหน้านี้ทันที';
+    }
+    if (value === 'email_if_connected') return 'The team will start with email when the automated sender is connected.';
+    if (value === 'whatsapp_or_line_if_connected') return 'The team will start with WhatsApp or LINE when the automated sender is connected.';
+    if (value === 'on_page_confirmation') return 'The first response is confirmed on this page immediately.';
+    return value;
+  }
 
   function safeSourcePage(): string | null {
     if (typeof window === 'undefined') return null;
@@ -203,15 +235,22 @@ export function LeadForm({
         throw new Error(formatApiError(text) || `HTTP ${res.status}`);
       }
 
-      let id: string | undefined;
+      let parsed: InquirySuccessPayload | null = null;
       try {
-        const parsed = JSON.parse(text) as { id?: string };
-        id = parsed.id;
+        parsed = JSON.parse(text) as InquirySuccessPayload;
       } catch {
         // ignore
       }
 
-      setStatus({ state: 'success', id });
+      setStatus({
+        state: 'success',
+        id: parsed?.id,
+        confirmationTitle: parsed?.sales_automation?.confirmation_title,
+        confirmationBody: parsed?.sales_automation?.confirmation_body,
+        autoResponseMessage: parsed?.sales_automation?.auto_response_message,
+        responseChannel: parsed?.sales_automation?.response_channel,
+        responseSlaSeconds: parsed?.sales_automation?.response_sla_seconds,
+      });
       trackEvent('form_success', pathname, { property_id: propertyId ?? null });
       // Attribute conversion to active experiments
       trackExperimentOutcomes('form_submit', 1, trackEvent, pathname);
@@ -433,7 +472,19 @@ export function LeadForm({
 
         <div id="lead-form-status" aria-live="assertive" aria-atomic="true">
           {status.state === 'success' ? (
-            <p className="form-success" role="status">{dict.common.leadForm.success}{status.id ? ` (id: ${status.id})` : ''}</p>
+            <div className="form-success" role="status">
+              <p><strong>{status.confirmationTitle ?? dict.common.leadForm.success}</strong>{status.id ? ` (id: ${status.id})` : ''}</p>
+              {status.confirmationBody ? <p>{status.confirmationBody}</p> : null}
+              {status.autoResponseMessage ? <p>{status.autoResponseMessage}</p> : null}
+              {status.responseSlaSeconds ? (
+                <p>
+                  {locale === 'th'
+                    ? `ระบบยืนยันคำขอนี้ภายใน ${status.responseSlaSeconds} วินาทีตาม SLA ของ sales layer`
+                    : `This request was confirmed within the ${status.responseSlaSeconds}-second sales-layer SLA.`}
+                </p>
+              ) : null}
+              {describeResponseChannel(status.responseChannel) ? <p>{describeResponseChannel(status.responseChannel)}</p> : null}
+            </div>
           ) : null}
 
           {status.state === 'error' ? (

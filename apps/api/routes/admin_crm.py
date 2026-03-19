@@ -15,7 +15,15 @@ from packages.core.crm_contact_actions import build_contact_action_urls
 from packages.core.crm_follow_up import normalize_follow_up_status
 from packages.core.database import get_db
 from packages.core.models import AuditLog, Inquiry, LeadAssignment, User, Viewing
-from packages.core.schemas.crm import InquiryItem, InquiryStatusUpdate, ViewingItem, ViewingUpdate
+from packages.core.sales_automation import build_sales_automation_snapshot
+from packages.core.schemas.crm import (
+    InquiryItem,
+    InquiryStatusUpdate,
+    SalesAutomationFollowUpStepItem,
+    SalesAutomationItem,
+    ViewingItem,
+    ViewingUpdate,
+)
 from packages.core.schemas.crm_admin import (
     InquiryFollowUpUpdate,
     InquiryNoteCreate,
@@ -57,6 +65,14 @@ def _spam_filter_clause(*, is_spam: bool):
 
 def _to_inquiry_item(inquiry: Inquiry) -> InquiryItem:
     contact_actions = build_contact_action_urls(email=inquiry.email, phone=inquiry.phone)
+    automation = build_sales_automation_snapshot(
+        intent=inquiry.intent,
+        source_page=inquiry.source_page,
+        email=inquiry.email,
+        phone=inquiry.phone,
+        tags=inquiry.tags,
+        lead_score=int(inquiry.score or 0),
+    )
     return InquiryItem(
         id=inquiry.id,
         property_id=inquiry.property_id,
@@ -76,11 +92,44 @@ def _to_inquiry_item(inquiry: Inquiry) -> InquiryItem:
         timeline=inquiry.timeline,
         follow_up_status=inquiry.follow_up_status,
         follow_up_due_at=inquiry.follow_up_due_at,
+        tags=inquiry.tags,
         whatsapp_url=contact_actions["whatsapp_url"],
         phone_url=contact_actions["phone_url"],
         email_url=contact_actions["email_url"],
         is_duplicate_hint=inquiry.duplicate_of_inquiry_id is not None,
         is_spam_hint=_is_spam_hint(inquiry),
+        sales_automation=SalesAutomationItem(
+            locale=automation.locale,
+            intent=automation.intent,
+            source=automation.source,
+            buyer_fit=automation.buyer_fit,
+            signal_level=automation.signal_level,
+            projects=list(automation.projects),
+            primary_project=automation.primary_project,
+            response_channel=automation.response_channel,
+            response_sla_seconds=automation.response_sla_seconds,
+            auto_response_message=automation.auto_response_message,
+            confirmation_title=automation.confirmation_title,
+            confirmation_body=automation.confirmation_body,
+            recommended_approach=automation.recommended_approach,
+            suggested_first_reply=automation.suggested_first_reply,
+            priority_label=automation.priority_label,
+            priority_score=automation.priority_score,
+            route_hint=automation.route_hint,
+            next_follow_up_at=automation.next_follow_up_at,
+            follow_up_status=automation.follow_up_status,
+            follow_up_stage=automation.follow_up_stage,
+            follow_up_plan=[
+                SalesAutomationFollowUpStepItem(
+                    stage=step.stage,
+                    label=step.label,
+                    message=step.message,
+                    due_at=step.due_at,
+                )
+                for step in automation.follow_up_plan
+            ],
+            stop_conditions=list(automation.stop_conditions),
+        ),
         created_at=inquiry.created_at,
         updated_at=inquiry.updated_at,
     )

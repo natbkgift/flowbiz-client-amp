@@ -3,7 +3,39 @@ from __future__ import annotations
 from datetime import datetime
 from uuid import UUID
 
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field
+
+
+class SalesAutomationFollowUpStepItem(BaseModel):
+    stage: str
+    label: str
+    message: str
+    due_at: datetime | None = None
+
+
+class SalesAutomationItem(BaseModel):
+    locale: str
+    intent: str
+    source: str | None = None
+    buyer_fit: str | None = None
+    signal_level: str | None = None
+    projects: list[str] = Field(default_factory=list)
+    primary_project: str | None = None
+    response_channel: str
+    response_sla_seconds: int
+    auto_response_message: str
+    confirmation_title: str
+    confirmation_body: str
+    recommended_approach: str
+    suggested_first_reply: str
+    priority_label: str
+    priority_score: int
+    route_hint: str
+    next_follow_up_at: datetime | None = None
+    follow_up_status: str
+    follow_up_stage: str
+    follow_up_plan: list[SalesAutomationFollowUpStepItem] = Field(default_factory=list)
+    stop_conditions: list[str] = Field(default_factory=list)
 
 
 class InquiryItem(BaseModel):
@@ -27,11 +59,13 @@ class InquiryItem(BaseModel):
     timeline: str | None = None
     follow_up_status: str | None = None
     follow_up_due_at: datetime | None = None
+    tags: list[str] | None = None
     whatsapp_url: str | None = None
     phone_url: str | None = None
     email_url: str | None = None
     is_duplicate_hint: bool = False
     is_spam_hint: bool = False
+    sales_automation: SalesAutomationItem | None = None
     created_at: datetime
     updated_at: datetime
 

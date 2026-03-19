@@ -10,11 +10,22 @@ from pydantic import BaseModel
 from sqlalchemy import and_, select
 from sqlalchemy.orm import Session
 
+from packages.core.audit import write_audit_log
 from packages.core.crm_contact_actions import build_contact_action_urls
 from packages.core.crm_follow_up import CANONICAL_FOLLOW_UP_STATUSES
 from packages.core.database import get_db
 from packages.core.models import Booking, Inquiry, Property, Viewing
-from packages.core.schemas.crm import BookingItem, InquiryItem, ViewingItem
+from packages.core.sales_automation import (
+    build_advisor_summary_note,
+    build_sales_automation_snapshot,
+)
+from packages.core.schemas.crm import (
+    BookingItem,
+    InquiryItem,
+    SalesAutomationFollowUpStepItem,
+    SalesAutomationItem,
+    ViewingItem,
+)
 
 router = APIRouter(prefix="/v1", tags=["crm"])
 
@@ -38,6 +49,8 @@ class InquiryCreate(BaseModel):
     source_platform: str | None = None
     campaign_name: str | None = None
     call_requested: str | bool | None = None
+    lead_score: int | None = None
+    lead_tier: str | None = None
 
 
 class ViewingCreate(BaseModel):
@@ -152,6 +165,14 @@ def _compose_inquiry_tags(payload: InquiryCreate) -> list[str]:
 
 def _to_inquiry_item(inquiry: Inquiry, *, dedupe_hint: bool = False) -> InquiryItem:
     contact_actions = build_contact_action_urls(email=inquiry.email, phone=inquiry.phone)
+    automation = build_sales_automation_snapshot(
+        intent=inquiry.intent,
+        source_page=inquiry.source_page,
+        email=inquiry.email,
+        phone=inquiry.phone,
+        tags=inquiry.tags,
+        lead_score=int(inquiry.score or 0),
+    )
     return InquiryItem(
         id=inquiry.id,
         property_id=inquiry.property_id,
@@ -171,11 +192,44 @@ def _to_inquiry_item(inquiry: Inquiry, *, dedupe_hint: bool = False) -> InquiryI
         timeline=inquiry.timeline,
         follow_up_status=inquiry.follow_up_status,
         follow_up_due_at=inquiry.follow_up_due_at,
+        tags=inquiry.tags,
         whatsapp_url=contact_actions["whatsapp_url"],
         phone_url=contact_actions["phone_url"],
         email_url=contact_actions["email_url"],
         is_duplicate_hint=dedupe_hint or inquiry.duplicate_of_inquiry_id is not None,
         is_spam_hint=False,
+        sales_automation=SalesAutomationItem(
+            locale=automation.locale,
+            intent=automation.intent,
+            source=automation.source,
+            buyer_fit=automation.buyer_fit,
+            signal_level=automation.signal_level,
+            projects=list(automation.projects),
+            primary_project=automation.primary_project,
+            response_channel=automation.response_channel,
+            response_sla_seconds=automation.response_sla_seconds,
+            auto_response_message=automation.auto_response_message,
+            confirmation_title=automation.confirmation_title,
+            confirmation_body=automation.confirmation_body,
+            recommended_approach=automation.recommended_approach,
+            suggested_first_reply=automation.suggested_first_reply,
+            priority_label=automation.priority_label,
+            priority_score=automation.priority_score,
+            route_hint=automation.route_hint,
+            next_follow_up_at=automation.next_follow_up_at,
+            follow_up_status=automation.follow_up_status,
+            follow_up_stage=automation.follow_up_stage,
+            follow_up_plan=[
+                SalesAutomationFollowUpStepItem(
+                    stage=step.stage,
+                    label=step.label,
+                    message=step.message,
+                    due_at=step.due_at,
+                )
+                for step in automation.follow_up_plan
+            ],
+            stop_conditions=list(automation.stop_conditions),
+        ),
         created_at=inquiry.created_at,
         updated_at=inquiry.updated_at,
     )
@@ -237,7 +291,7 @@ def create_inquiry(
         phone=(payload.phone or "").strip() or None,
         message=payload.message.strip(),
         source_page=(payload.source_page or "").strip() or None,
-        score=0,
+        score=max(0, min(int(payload.lead_score or 0), 100)),
         status="new",
         budget_band=(payload.budget_band or "").strip() or None,
         timeline=(payload.timeline or "").strip() or None,
@@ -249,7 +303,29 @@ def create_inquiry(
         phone_hash=_hash_text(payload.phone),
         tags=_compose_inquiry_tags(payload),
     )
+    automation = build_sales_automation_snapshot(
+        intent=inquiry.intent,
+        source_page=inquiry.source_page,
+        email=inquiry.email,
+        phone=inquiry.phone,
+        tags=inquiry.tags,
+        lead_score=int(inquiry.score or 0),
+        now=now,
+    )
+    inquiry.score = automation.priority_score
+    inquiry.follow_up_status = automation.follow_up_status
+    inquiry.follow_up_due_at = automation.next_follow_up_at
+    inquiry.tags = list(dict.fromkeys([*(inquiry.tags or []), *automation.as_tags()]))
     db.add(inquiry)
+    db.flush()
+    write_audit_log(
+        db,
+        actor_user_id=None,
+        entity_type="inquiry",
+        entity_id=str(inquiry.id),
+        action="note_add",
+        diff={"note_id": f"auto-{inquiry.id}", "note": build_advisor_summary_note(automation)},
+    )
     db.commit()
     db.refresh(inquiry)
     response.headers["X-Inquiry-Deduped"] = "false"
