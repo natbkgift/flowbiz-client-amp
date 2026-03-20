@@ -61,6 +61,7 @@ describe('project detail shell', () => {
       '/en/contact?intent=project_consultation&source=project_detail&project=alpha-residence&projects=alpha-residence&buyer_fit=project_first_buyer&signal_level=medium',
     );
     expect(container.querySelector('#project_compare_secondary')).toHaveAttribute('href', '/en/compare');
+    expect(container.querySelector('#project-confidence-pack')).not.toBeNull();
     expect(container.querySelector('#project-brief-section')).not.toBeNull();
     expect(container.querySelector('#project-decision-lens')).not.toBeNull();
     expect(container.querySelector('#project-related-reads')).not.toBeNull();
@@ -82,7 +83,7 @@ describe('project detail shell', () => {
     expect(markup).toContain('ส่งบรีฟโครงการให้ที่ปรึกษา');
     expect(markup).toContain('ขอเทียบโครงการนี้กับตัวเลือกใกล้เคียง');
     expect(markup).toContain('ดูรายการที่บันทึกเข้ารายการคัดไว้ได้');
-    expect(markup).not.toContain('shortlist');
+    expect(markup).not.toContain('listing brief');
     expect(markup).not.toContain('inventory');
     expect(markup).not.toContain('area guide');
     expect(markup).not.toContain('next step');

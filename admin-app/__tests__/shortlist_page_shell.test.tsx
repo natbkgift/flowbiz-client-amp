@@ -18,6 +18,7 @@ describe('Shortlist page shell', () => {
     expect(screen.getByRole('heading', { name: /your shortlist/i })).toBeTruthy();
     expect(screen.getByRole('link', { name: /browse shortlist-ready listings/i }).getAttribute('href')).toBe('/en/buy');
     expect(screen.getByRole('link', { name: /jump to saved listings/i }).getAttribute('href')).toBe('#shortlist-review-surface');
+    expect(container.querySelector('#shortlist-confidence-pack')).not.toBeNull();
     expect(container.querySelector('section#shortlist-review-surface')).not.toBeNull();
     expect(container.querySelector('section#shortlist-review-surface')?.getAttribute('aria-label')).toBe('Shortlist review surface');
     expect(screen.getByTestId('shortlist-list-surface').textContent).toBe('surface:en');

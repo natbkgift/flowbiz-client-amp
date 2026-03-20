@@ -68,6 +68,43 @@ function normalizeQuota(value: string | null): SmartFinderForeignQuota | null {
   return null;
 }
 
+function describeFinderSelection(locale: 'en' | 'th', input: {
+  purpose: SmartFinderPurpose | null;
+  budget: SmartFinderBudget | null;
+  timeline: SmartFinderTimeline | null;
+  risk: SmartFinderRiskTolerance | null;
+  quota: SmartFinderForeignQuota | null;
+}): string[] {
+  const purposeLabel = input.purpose == null
+    ? null
+    : locale === 'th'
+      ? ({ live: 'เป้าหมาย: ซื้อเพื่ออยู่อาศัย', invest: 'เป้าหมาย: ลงทุน', flip: 'เป้าหมาย: ซื้อเพื่อรีโพสิชัน/ขายต่อ' } as const)[input.purpose]
+      : ({ live: 'Goal: live in the property', invest: 'Goal: invest', flip: 'Goal: reposition or resell' } as const)[input.purpose];
+  const budgetLabel = input.budget == null
+    ? null
+    : locale === 'th'
+      ? ({ '<3m': 'งบ: ต่ำกว่า 3 ล้านบาท', '3-5m': 'งบ: 3-5 ล้านบาท', '5-8m': 'งบ: 5-8 ล้านบาท', '8m+': 'งบ: มากกว่า 8 ล้านบาท', not_sure: 'งบ: ยังไม่แน่ใจ' } as const)[input.budget]
+      : ({ '<3m': 'Budget: under THB 3M', '3-5m': 'Budget: THB 3M-5M', '5-8m': 'Budget: THB 5M-8M', '8m+': 'Budget: above THB 8M', not_sure: 'Budget: not sure yet' } as const)[input.budget];
+  const timelineLabel = input.timeline == null
+    ? null
+    : locale === 'th'
+      ? ({ '0-3m': 'ไทม์ไลน์: 0-3 เดือน', '3-6m': 'ไทม์ไลน์: 3-6 เดือน', '6-12m': 'ไทม์ไลน์: 6-12 เดือน', '12m+': 'ไทม์ไลน์: มากกว่า 12 เดือน', flexible: 'ไทม์ไลน์: ยืดหยุ่นได้' } as const)[input.timeline]
+      : ({ '0-3m': 'Timeline: 0-3 months', '3-6m': 'Timeline: 3-6 months', '6-12m': 'Timeline: 6-12 months', '12m+': 'Timeline: 12+ months', flexible: 'Timeline: flexible' } as const)[input.timeline];
+  const riskLabel = input.risk == null
+    ? null
+    : locale === 'th'
+      ? ({ low: 'ความเสี่ยงที่รับได้: ต่ำ', medium: 'ความเสี่ยงที่รับได้: ปานกลาง', high: 'ความเสี่ยงที่รับได้: สูง' } as const)[input.risk]
+      : ({ low: 'Risk tolerance: low', medium: 'Risk tolerance: medium', high: 'Risk tolerance: high' } as const)[input.risk];
+  const quotaLabel = input.quota == null
+    ? null
+    : locale === 'th'
+      ? ({ required: 'โควตาต่างชาติ: ต้องมี', unsure: 'โควตาต่างชาติ: ยังไม่แน่ใจ', not_required: 'โควตาต่างชาติ: ไม่จำเป็น' } as const)[input.quota]
+      : ({ required: 'Foreign quota: required', unsure: 'Foreign quota: unsure', not_required: 'Foreign quota: not required' } as const)[input.quota];
+
+  const summaryLines: Array<string | null> = [purposeLabel, budgetLabel, timelineLabel, riskLabel, quotaLabel];
+  return summaryLines.filter((item): item is string => item !== null);
+}
+
 export default async function SmartFinderPage(
   props: {
     params: Promise<{ locale: string }>;
@@ -107,7 +144,16 @@ export default async function SmartFinderPage(
   const baseAction = withLocale(locale, '/smart-finder');
 
   const headerTitle = dict.smartFinder.title;
-  const headerSubtitle = dict.smartFinder.subtitle;
+  const headerSubtitle = locale === 'th'
+    ? 'ตอบ 5 คำถามเพื่อจัดกรอบโครงการที่ควรดูต่อ ก่อนย้ายไป compare หรือคุยกับทีม'
+    : 'Answer 5 questions to narrow which projects deserve a closer look before compare or advisor review.';
+  const selectionSummary = describeFinderSelection(locale, {
+    purpose,
+    budget,
+    timeline,
+    risk,
+    quota,
+  });
 
   let results: Awaited<ReturnType<typeof fetchSmartFinder>> | null = null;
   let resultsUnavailable = false;
@@ -131,7 +177,7 @@ export default async function SmartFinderPage(
     : null;
 
   return (
-    <main id="main-content">
+    <main id="main-content" className="decision-page decision-page--smart-finder">
       <PublicAdvisoryHero
         eyebrow={dict.advisory.heroEyebrow}
         title={headerTitle}
@@ -204,6 +250,42 @@ export default async function SmartFinderPage(
 
       <section className="section" id="finder-steps">
         <Container>
+          <div id="smart-finder-confidence-pack" className="signal-grid signal-grid--three-up decision-pack mb-4">
+            <section className="authority-card reveal">
+              <h2 className="card-title">{locale === 'th' ? 'หน้านี้ช่วยตัดสินใจอะไร' : 'What this route clarifies'}</h2>
+              <p className="card-subtitle">
+                {locale === 'th'
+                  ? 'Smart Finder ควรช่วยจัดกรอบ intent, งบ, และระดับความเสี่ยงก่อนที่คุณจะเปิด inventory หรือ compare'
+                  : 'Smart Finder should sharpen intent, budget, and risk tolerance before you move into inventory or compare.'}
+              </p>
+            </section>
+
+            <section className="authority-card reveal">
+              <h2 className="card-title">{locale === 'th' ? 'บริบทที่เก็บได้ตอนนี้' : 'Context captured so far'}</h2>
+              <p className="card-subtitle">
+                {selectionSummary.length
+                  ? (locale === 'th' ? 'คำตอบที่เลือกไว้ตอนนี้จะถูกใช้ต่อในผลลัพธ์และการ handoff รอบถัดไป' : 'The answers selected so far will carry forward into the results and the next handoff step.')
+                  : (locale === 'th' ? 'เมื่อเริ่มตอบคำถาม สรุป brief จะเริ่มชัดขึ้นที่บล็อกนี้' : 'As soon as you start answering, the current brief will collect here.')}
+              </p>
+              {selectionSummary.length ? (
+                <ul className="bullet-list mt-3">
+                  {selectionSummary.map((line) => (
+                    <li key={line}>{line}</li>
+                  ))}
+                </ul>
+              ) : null}
+            </section>
+
+            <section className="authority-card reveal">
+              <h2 className="card-title">{locale === 'th' ? 'ทางไปต่อหลังได้ผลลัพธ์' : 'Best next move after results'}</h2>
+              <p className="card-subtitle">
+                {locale === 'th'
+                  ? 'ถ้าผลลัพธ์แคบพอ ให้ยกระดับไป compare หรือเปิด project detail; ถ้ายังไม่ชัด ให้ส่ง brief เดิมต่อให้ที่ปรึกษา'
+                  : 'If the output is narrow enough, move into compare or project detail; if it is still broad, send the same brief to an advisor.'}
+              </p>
+            </section>
+          </div>
+
           <div className="card reveal">
             <h2 className="card-title">{dict.smartFinder.steps}</h2>
             <p className="card-subtitle">{dict.smartFinder.stepBreadcrumb}</p>
@@ -375,7 +457,9 @@ export default async function SmartFinderPage(
                 <div>
                   <h3 className="card-title">{dict.smartFinder.resultsTitle}</h3>
                   <p className="card-subtitle">
-                    {dict.smartFinder.resultsDescription}
+                    {locale === 'th'
+                      ? 'ผลลัพธ์ชุดนี้ช่วยบอกว่าควรเปิดโครงการไหนต่อ หรือพร้อมย้ายไป compare แล้วหรือยัง'
+                      : 'These results are meant to show which projects deserve the next click and whether the set is already ready for compare.'}
                   </p>
                   {results?.query_hash ? <p className="guided-dialog__step">query_hash: {results.query_hash}</p> : null}
                   <div className="cta-row mt-4">
@@ -410,6 +494,27 @@ export default async function SmartFinderPage(
                     <Link className="btn btn-secondary" href={withLocale(locale, '/buy')}>
                       {locale === 'th' ? 'ดู listings ที่ save เข้า shortlist ได้' : 'Browse shortlist-ready listings'}
                     </Link>
+                  </div>
+
+                  <div id="smart-finder-handoff" className="insight-list mt-4">
+                    <div className="insight-list__item">
+                      <span className="insight-list__body">
+                        {compareTopHref
+                          ? (locale === 'th'
+                              ? 'ถ้าผลลัพธ์ชุดนี้ดูใกล้เคียงกันพอแล้ว ให้เทียบ top suggestions ในหน้า compare เดิมต่อทันที'
+                              : 'If this result set already feels narrow enough, move the top suggestions straight into the existing compare route.')
+                          : (locale === 'th'
+                              ? 'ถ้าผลลัพธ์ยังมีเพียง 1 ตัวเลือก ให้เปิด project detail หรือ browse inventory ต่อเพื่อหาตัวเทียบเพิ่ม'
+                              : 'If there is only one result so far, open the project detail or browse inventory to find a second live comparison candidate.')}
+                      </span>
+                    </div>
+                    <div className="insight-list__item">
+                      <span className="insight-list__body">
+                        {locale === 'th'
+                          ? 'Smart Finder มีหน้าที่คัดกรอบการตัดสินใจ ไม่ได้แทนการอ่าน fact pattern ระดับโครงการหรือการคุยกับทีม'
+                          : 'Smart Finder is meant to frame the decision, not replace project-level fact checking or the advisor conversation.'}
+                      </span>
+                    </div>
                   </div>
                 </div>
 
@@ -457,9 +562,9 @@ export default async function SmartFinderPage(
                     </div>
                   </div>
                 ) : results?.items?.length ? (
-                  <div className="grid grid-3">
+                  <div className="grid grid-3 smart-finder-results-grid">
                     {results.items.map((it) => (
-                      <div key={it.project_id} className="card">
+                      <div key={it.project_id} className="authority-card smart-finder-result-card">
                         <div className="card-title">{it.name}</div>
                         <div className="card-subtitle">{dict.smartFinder.scorePrefix}{it.score}</div>
                         <ul className="bullet-list mt-3">
@@ -520,7 +625,7 @@ export default async function SmartFinderPage(
             ) : null}
           </div>
 
-          <div className="card reveal mt-6">
+          <div className="authority-card reveal mt-6">
             <h2 className="card-title">{dict.smartFinder.notesTitle}</h2>
             <p className="card-subtitle">
               {dict.smartFinder.notesDescription}

@@ -85,7 +85,7 @@ export function PublicAdvisoryHero({
             <div className="public-hero__actions cta-row">
               <TrackedLink
                 id={primaryAction.id}
-                className="btn btn-cta"
+                className="btn btn-cta public-hero__action public-hero__action--primary"
                 href={primaryAction.href}
                 eventType={primaryAction.eventType ?? 'cta_click'}
                 eventPayload={primaryAction.eventPayload}
@@ -96,7 +96,7 @@ export function PublicAdvisoryHero({
               {secondaryAction ? (
                 <TrackedLink
                   id={secondaryAction.id}
-                  className="btn btn-secondary"
+                  className="btn btn-secondary public-hero__action public-hero__action--secondary"
                   href={secondaryAction.href}
                   eventType={secondaryAction.eventType ?? 'cta_click'}
                   eventPayload={secondaryAction.eventPayload}
@@ -108,7 +108,7 @@ export function PublicAdvisoryHero({
               {tertiaryAction ? (
                 <a
                   id={tertiaryAction.id}
-                  className="btn btn-tertiary"
+                  className="btn btn-tertiary public-hero__action public-hero__action--tertiary"
                   href={tertiaryAction.href}
                   target="_blank"
                   rel="noreferrer"
