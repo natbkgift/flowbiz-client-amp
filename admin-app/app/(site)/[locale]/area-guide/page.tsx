@@ -2,6 +2,7 @@
 import { Container } from '@/components/layout/Container';
 
 import { LeadForm } from '@/components/forms/LeadForm';
+import { fetchAreas } from '@/app/_lib/public-api-server';
 import { getDictionary, normalizeLocale } from '@/app/_lib/i18n/get-dictionary';
 import { makePageMetadata } from '@/app/_lib/i18n/metadata';
 import { withLocale } from '@/app/_lib/i18n/routing';
@@ -19,31 +20,92 @@ export async function generateMetadata(
   return makePageMetadata(locale, 'area-guide', dict.nav.areaGuide, dict.areaGuide.subtitle, dict.brand.name);
 }
 
+type AreaGuideCard = {
+  slug: string;
+  title: string;
+  lifestyle: string;
+  investment: string;
+  city: string | null;
+};
+
+function buildFallbackAreaCards(locale: 'en' | 'th', dict: ReturnType<typeof getDictionary>): AreaGuideCard[] {
+  return [
+    {
+      slug: 'central',
+      title: dict.areaGuide.centralTitle,
+      lifestyle: dict.areaGuide.centralLifestyle,
+      investment: dict.areaGuide.centralInvestment,
+      city: locale === 'th' ? 'พัทยา' : 'Pattaya',
+    },
+    {
+      slug: 'jomtien',
+      title: dict.areaGuide.jomtienTitle,
+      lifestyle: dict.areaGuide.jomtienLifestyle,
+      investment: dict.areaGuide.jomtienInvestment,
+      city: locale === 'th' ? 'พัทยา' : 'Pattaya',
+    },
+    {
+      slug: 'pratumnak',
+      title: dict.areaGuide.pratumnakTitle,
+      lifestyle: dict.areaGuide.pratumnakLifestyle,
+      investment: dict.areaGuide.pratumnakInvestment,
+      city: locale === 'th' ? 'พัทยา' : 'Pattaya',
+    },
+    {
+      slug: 'wongamat',
+      title: locale === 'th' ? 'วงศ์อมาตย์' : 'Wongamat',
+      lifestyle: locale === 'th' ? 'เหมาะกับผู้ซื้อที่มองหาบรรยากาศพรีเมียมและภาพรวมทำเลริมทะเล' : 'Best for buyers who want a premium beach-adjacent location read before narrowing projects.',
+      investment: locale === 'th' ? 'ใช้เพื่อแยกทำเลคุณภาพสูงออกจากทำเลที่เน้นความคึกคักหรือความคุ้มค่า' : 'Useful when the decision is between premium positioning and more convenience-led or value-led zones.',
+      city: locale === 'th' ? 'พัทยา' : 'Pattaya',
+    },
+  ];
+}
+
+async function buildAreaGuideCards(locale: 'en' | 'th', dict: ReturnType<typeof getDictionary>): Promise<AreaGuideCard[]> {
+  try {
+    const areas = await fetchAreas();
+    if (!areas.length) {
+      return buildFallbackAreaCards(locale, dict);
+    }
+
+    return areas
+      .filter((area) => area.status !== 'draft')
+      .slice(0, 8)
+      .map((area) => ({
+        slug: area.slug,
+        title: area.name,
+        city: area.city,
+        lifestyle: locale === 'th'
+          ? `${area.name} เหมาะกับผู้ซื้อที่ต้องการอ่านบริบทของทำเลก่อนคัดโครงการแบบจริงจัง`
+          : `${area.name} works best for buyers who want the location context before making a real project shortlist.`,
+        investment: locale === 'th'
+          ? 'ใช้หน้า area brief เพื่อแยกความต่างของทำเลก่อนส่งต่อไป Smart Finder, compare, หรือ advisor review'
+          : 'Use the area brief to separate location trade-offs before moving into Smart Finder, compare, or an advisor review.',
+      }));
+  } catch {
+    return buildFallbackAreaCards(locale, dict);
+  }
+}
+
 export default async function AreaGuidePage(props: { params: Promise<{ locale: string }> }) {
   const params = await props.params;
   const locale = normalizeLocale(params.locale);
   const dict = getDictionary(locale);
-
-  const areas = [
-    {
-      title: dict.areaGuide.centralTitle,
-      lifestyle: dict.areaGuide.centralLifestyle,
-      investment: dict.areaGuide.centralInvestment,
-    },
-    {
-      title: dict.areaGuide.jomtienTitle,
-      lifestyle: dict.areaGuide.jomtienLifestyle,
-      investment: dict.areaGuide.jomtienInvestment,
-    },
-    {
-      title: dict.areaGuide.pratumnakTitle,
-      lifestyle: dict.areaGuide.pratumnakLifestyle,
-      investment: dict.areaGuide.pratumnakInvestment,
-    },
-  ];
+  const areas = await buildAreaGuideCards(locale, dict);
+  const confidenceLines = locale === 'th'
+    ? [
+        'เริ่มจากการเลือกทำเลที่ใช่ก่อน แล้วค่อยคัดโครงการในพื้นที่นั้น',
+        'แต่ละ area brief จะต่อเข้ากับ Smart Finder, compare, และ contact flow เดิมได้โดยไม่เสียบริบท',
+        'หน้านี้ควรทำหน้าที่เป็นแผนที่การตัดสินใจ ไม่ใช่แค่รายชื่อทำเลไม่กี่แห่ง',
+      ]
+    : [
+        'Choose the right zone first, then narrow projects inside that area.',
+        'Each area brief should hand cleanly into the existing Smart Finder, compare, and contact flows.',
+        'This page should work like a decision map, not just a short list of neighborhoods.',
+      ];
 
   return (
-    <main id="main-content">
+    <main id="main-content" className="decision-page decision-page--area-guide">
       <section className="hero hero--page">
         <Container>
           <h1 className="headline">{dict.areaGuide.title}</h1>
@@ -52,10 +114,28 @@ export default async function AreaGuidePage(props: { params: Promise<{ locale: s
             <a className="btn btn-cta" href={withLocale(locale, '/contact')}>
               {dict.cta.speakToAdvisor}
             </a>
-            <a className="btn btn-secondary" href={withLocale(locale, '/invest')}>
+            <a className="btn btn-tertiary" href={withLocale(locale, '/invest')}>
               {dict.cta.exploreInvestment}
             </a>
           </div>
+        </Container>
+      </section>
+
+      <section id="area-guide-confidence-pack" className="section">
+        <Container>
+          <section className="authority-card area-guide-guidance reveal">
+            <h2 className="card-title">{locale === 'th' ? 'วิธีใช้หน้า area guide' : 'How to use this area guide'}</h2>
+            <p className="card-subtitle">
+              {locale === 'th'
+                ? 'อ่านบริบทของทำเลให้ชัดก่อน แล้วค่อยเปิด area brief, compare, หรือคุยกับทีมต่อจากหน้าชุดเดียวกัน'
+                : 'Read the location context first, then move into the area brief, compare, or advisor handoff from the same decision path.'}
+            </p>
+            <ul className="bullet-list mt-4">
+              {confidenceLines.map((line) => (
+                <li key={line}>{line}</li>
+              ))}
+            </ul>
+          </section>
         </Container>
       </section>
 
@@ -66,12 +146,18 @@ export default async function AreaGuidePage(props: { params: Promise<{ locale: s
             <p className="section-subtitle">{dict.areaGuide.areasSubtitle}</p>
           </div>
 
-          <div className="grid grid-3">
+          <div className="grid grid-3 area-guide-card-grid">
             {areas.map((a) => (
-              <div key={a.title} className="card">
+              <div key={a.slug} className="authority-card area-guide-card">
                 <h3 className="card-title">{a.title}</h3>
-                <p className="card-subtitle">{a.lifestyle}</p>
-                <p className="card-subtitle">{a.investment}</p>
+                <p className="text-caption">{a.city ?? (locale === 'th' ? 'พัทยา' : 'Pattaya')}</p>
+                <p className="card-subtitle mb-2">{a.lifestyle}</p>
+                <p className="text-caption mb-0">{a.investment}</p>
+                <div className="card-actions mt-4">
+                  <a className="btn btn-secondary" href={withLocale(locale, `/areas/${encodeURIComponent(a.slug)}`)}>
+                    {locale === 'th' ? 'เปิด area brief' : 'Open area brief'}
+                  </a>
+                </div>
               </div>
             ))}
           </div>
@@ -87,14 +173,18 @@ export default async function AreaGuidePage(props: { params: Promise<{ locale: s
 
           <div className="map-grid" role="list">
             {areas.map((a) => (
-              <div key={a.title} className="map-item" role="listitem">
+              <div key={a.slug} className="map-item area-guide-map-item" role="listitem">
                 <div className="map-item__title">{a.title}</div>
                 <div className="map-item__row">
-                  <span className="map-item__label">{dict.areaGuide.mapLabels.lifestyle}</span>
+                  <span className="map-item__label">{locale === 'th' ? 'เมือง:' : 'City:'}</span>
+                  <span className="map-item__value">{a.city ?? (locale === 'th' ? 'พัทยา' : 'Pattaya')}</span>
+                </div>
+                <div className="map-item__row">
+                  <span className="map-item__label">{`${dict.areaGuide.mapLabels.lifestyle}:`}</span>
                   <span className="map-item__value">{a.lifestyle}</span>
                 </div>
                 <div className="map-item__row">
-                  <span className="map-item__label">{dict.areaGuide.mapLabels.investment}</span>
+                  <span className="map-item__label">{`${dict.areaGuide.mapLabels.investment}:`}</span>
                   <span className="map-item__value">{a.investment}</span>
                 </div>
               </div>

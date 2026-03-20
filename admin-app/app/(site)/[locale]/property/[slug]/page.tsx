@@ -117,6 +117,83 @@ function formatPropertyMeasure(locale: 'en' | 'th', value: number | null | undef
   return `${value.toLocaleString()} ${unit === 'sqm' ? (locale === 'th' ? 'ตร.ม.' : 'sqm') : unit}`;
 }
 
+function hasMeaningfulDescription(value: string | null | undefined): boolean {
+  const text = String(value || '').replace(/\s+/g, ' ').trim();
+  return text.length > 0 && !/^[\-—–]+$/.test(text);
+}
+
+function buildPropertyFallbackDescription(
+  locale: 'en' | 'th',
+  property: NonNullable<Awaited<ReturnType<typeof fetchPropertyBySlug>>>,
+): string[] {
+  return [
+    locale === 'th'
+      ? `${property.title} ใช้เป็นหน้าเช็กข้อเท็จจริงระดับยูนิตก่อนคุยต่อเรื่องราคา เงื่อนไข และตัวเลือกใกล้เคียง.`
+      : `${property.title} works as a unit-level fact check before you move into pricing, terms, and nearby alternatives.`,
+    property.city
+      ? (locale === 'th'
+        ? `รายการนี้อยู่ในโซน ${property.city} และควรอ่านคู่กับบริบทของทำเลและ inventory ที่ยัง active.`
+        : `This listing sits in ${property.city} and should be read together with location context and currently active inventory.`)
+      : (locale === 'th'
+        ? 'ใช้รายการนี้เพื่อเช็กว่าควรคุยต่อทันทีหรือเปรียบเทียบกับทางเลือกใกล้เคียงก่อน.'
+        : 'Use this listing to decide whether it deserves an immediate advisor review or a nearby comparison first.'),
+  ];
+}
+
+function buildPropertyVerifiedLines(
+  locale: 'en' | 'th',
+  property: NonNullable<Awaited<ReturnType<typeof fetchPropertyBySlug>>>,
+): string[] {
+  return [
+    Number.isFinite(Number(property.price))
+      ? (locale === 'th'
+        ? `ราคาเสนอปัจจุบัน ${formatPriceTHB(Number(property.price))}`
+        : `Current asking price ${formatPriceTHB(Number(property.price))}`)
+      : null,
+    property.address && property.city
+      ? (locale === 'th'
+        ? `ที่ตั้ง: ${property.address}, ${property.city}`
+        : `Location: ${property.address}, ${property.city}`)
+      : null,
+    formatPropertyMeasure(locale, property.size, 'sqm')
+      ? (locale === 'th'
+        ? `ขนาดยูนิต ${formatPropertyMeasure(locale, property.size, 'sqm')}`
+        : `Unit size ${formatPropertyMeasure(locale, property.size, 'sqm')}`)
+      : null,
+    property.bedrooms != null || property.bathrooms != null
+      ? (locale === 'th'
+        ? `${property.bedrooms ?? '-'} ห้องนอน • ${property.bathrooms ?? '-'} ห้องน้ำ`
+        : `${property.bedrooms ?? '-'} bedrooms • ${property.bathrooms ?? '-'} bathrooms`)
+      : null,
+  ].filter((item): item is string => Boolean(item));
+}
+
+function buildPropertyConfirmNextLines(
+  locale: 'en' | 'th',
+  property: NonNullable<Awaited<ReturnType<typeof fetchPropertyBySlug>>>,
+  galleryCount: number,
+): string[] {
+  return [
+    galleryCount <= 1
+      ? (locale === 'th'
+        ? 'ภาพในหน้านี้ยังมีจำกัด จึงควรขอภาพ walkthrough หรือมุมเพิ่มเติมก่อนนัดดูจริง.'
+        : 'The visual pack is still limited here, so confirm walkthrough images or extra angles before the viewing step.')
+      : (locale === 'th'
+        ? 'ใช้ภาพชุดนี้ร่วมกับข้อเท็จจริงด้านราคาและทำเลก่อนคุยเรื่องเงื่อนไขต่อรอง.'
+        : 'Use the current image set together with the price and location facts before discussing terms.'),
+    locale === 'th'
+      ? `เช็ก availability, เฟอร์นิเจอร์, และเงื่อนไขล่าสุดของ ${property.title} ก่อนตัดสินใจคุยเชิงลึก.`
+      : `Confirm live availability, furnishing, and the latest deal terms for ${property.title} before going deeper.`,
+    property.type === 'rent'
+      ? (locale === 'th'
+        ? 'ถ้าใช้เพื่อเช่า ควรเช็กเงื่อนไขสัญญา ระยะเวลา และความพร้อมเข้าอยู่ทันที.'
+        : 'If this is a rental case, confirm contract terms, duration, and move-in readiness next.')
+      : (locale === 'th'
+        ? 'ถ้าใช้เพื่อซื้อ ควรเช็กค่าโอน ownership fit และตัวเลือกที่ใกล้เคียงในงบเดียวกันต่อ.'
+        : 'If this is a purchase case, confirm transfer costs, ownership fit, and nearby alternatives in the same budget range next.'),
+  ];
+}
+
 export default async function PropertyPage(props: PageProps) {
   const params = await props.params;
   const locale = normalizeLocale(params.locale);
@@ -278,6 +355,11 @@ export default async function PropertyPage(props: PageProps) {
       ? (locale === 'th' ? 'เหมาะกับผู้เช่าที่ต้องการตัดสินใจเร็วและเปรียบเทียบหลายยูนิตพร้อมกัน' : 'Useful for renters who need a fast shortlist across comparable units.')
       : (locale === 'th' ? 'เหมาะกับผู้ซื้อที่ต้องการเทียบยูนิตจริงก่อนคุยเรื่องเงื่อนไขต่อรอง' : 'Useful for buyers who want a unit-level comparison before negotiating next steps.'),
   ].filter((item): item is string => Boolean(item));
+  const descriptionParagraphs = hasMeaningfulDescription(property.description)
+    ? [String(property.description).trim()]
+    : buildPropertyFallbackDescription(locale, property);
+  const propertyVerifiedLines = buildPropertyVerifiedLines(locale, property);
+  const propertyConfirmNextLines = buildPropertyConfirmNextLines(locale, property, gallery.length);
 
   const jsonLd = JSON.stringify(
     [
@@ -332,7 +414,7 @@ export default async function PropertyPage(props: PageProps) {
 
 
   return (
-    <main className="section" id="main-content">
+    <main className="section decision-page decision-page--property" id="main-content">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLd }} />
       <Container>
         <Breadcrumbs
@@ -381,6 +463,25 @@ export default async function PropertyPage(props: PageProps) {
               <div className="property-price">{formatPriceTHB(Number(property.price))}</div>
             </div>
 
+            <div id="property-primary-actions" className="cta-row mb-6">
+              <TrackedLink
+                id="property_consultation_primary"
+                className="btn btn-cta"
+                href={withLocaleQuery(locale, '/contact', { intent: 'listing_consultation', slug: params.slug })}
+                eventType="cta_click"
+                eventPayload={{ cta: 'speak_to_advisor', from: 'property_detail' }}
+              >
+                {dict.cta.speakToAdvisor}
+              </TrackedLink>
+              <ShortlistSaveButton
+                className="btn btn-secondary"
+                locale={locale}
+                propertyId={property.id}
+                sourceSurface="property_detail"
+                readOnMount
+              />
+            </div>
+
             <div id="property-core-facts" className="property-facts">
               <div className="flex items-center gap-2">
                 <IconBed size="sm" />
@@ -411,25 +512,6 @@ export default async function PropertyPage(props: PageProps) {
               </div>
             </div>
 
-            <div id="property-primary-actions" className="cta-row mb-6">
-              <TrackedLink
-                id="property_consultation_primary"
-                className="btn btn-cta"
-                href={withLocaleQuery(locale, '/contact', { intent: 'listing_consultation', slug: params.slug })}
-                eventType="cta_click"
-                eventPayload={{ cta: 'speak_to_advisor', from: 'property_detail' }}
-              >
-                {dict.cta.speakToAdvisor}
-              </TrackedLink>
-              <ShortlistSaveButton
-                className="btn btn-secondary"
-                locale={locale}
-                propertyId={property.id}
-                sourceSurface="property_detail"
-                readOnMount
-              />
-            </div>
-
             <div id="property-trust-cues" className="public-hero__proofs mb-6" role="note" aria-label={advisoryLabels.proofsLabel}>
               <span className="public-hero__proof">{formatListingType(locale, property.type)}</span>
               <span className="public-hero__proof">{property.city}</span>
@@ -444,10 +526,61 @@ export default async function PropertyPage(props: PageProps) {
               </span>
             </div>
 
-            <div id="property-description" className="bg-[var(--color-white)] p-6 rounded-xl mb-6">
-              <h2 className="mb-4">{dict.property.description}</h2>
-              <p className="mb-0">{property.description ?? '—'}</p>
-            </div>
+            {gallery.length <= 1 ? (
+              <div id="property-gallery-status" className="mb-4">
+                <p className="text-caption mb-2">
+                  {locale === 'th' ? 'ภาพประกอบของรายการยังมีจำกัด' : 'The listing media set is still limited'}
+                </p>
+                <p className="card-subtitle mb-0">
+                  {locale === 'th'
+                    ? 'ให้ใช้ข้อเท็จจริงด้านราคา ทำเล และยูนิตในหน้านี้ประกอบการตัดสินใจก่อนขอภาพเพิ่มหรือทัวร์จริง'
+                    : 'The photo pack is still limited on this route, so use the verified price, location, and unit facts below before requesting more visuals or a live tour.'}
+                </p>
+              </div>
+            ) : null}
+
+            <section id="property-confidence-pack" className="signal-grid signal-grid--two-up reveal decision-pack mb-6">
+              <div className="authority-card">
+                <h2 className="card-title">{locale === 'th' ? 'ยืนยันได้ในหน้านี้' : 'Verified on this page'}</h2>
+                <p className="card-subtitle">
+                  {locale === 'th'
+                    ? 'เริ่มจากข้อเท็จจริงที่มีอยู่จริงของยูนิตนี้ก่อน แล้วค่อยเช็กสิ่งที่ต้องยืนยันเพิ่ม'
+                    : 'Start with the facts already visible on this unit before moving into the items that still need confirmation.'}
+                </p>
+                <div className="insight-list mt-3">
+                  {propertyVerifiedLines.map((item) => (
+                    <div key={item} className="insight-list__item">
+                      <span className="insight-list__body">{item}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="authority-card">
+                <h2 className="card-title">{locale === 'th' ? 'ควรเช็กอะไรต่อก่อนคุยเชิงลึก' : 'What to confirm before going deeper'}</h2>
+                <p className="card-subtitle">
+                  {locale === 'th'
+                    ? 'ส่วนนี้ช่วยให้รายการที่ข้อมูลบางยังดูมีทางไปต่อ ไม่ใช่ดูเหมือนหน้าที่ข้อมูลขาด'
+                    : 'This keeps thin-data listings actionable instead of feeling like incomplete pages.'}
+                </p>
+                <div className="insight-list mt-3">
+                  {propertyConfirmNextLines.map((item) => (
+                    <div key={item} className="insight-list__item">
+                      <span className="insight-list__body">{item}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </section>
+
+            <section id="property-description" className="authority-card property-description-card mb-6">
+              <h2 className="card-title">{dict.property.description}</h2>
+              <div className="content-article mb-0">
+                {descriptionParagraphs.map((paragraph) => (
+                  <p key={paragraph}>{paragraph}</p>
+                ))}
+              </div>
+            </section>
 
             <section id="property-decision-grid" className="signal-grid signal-grid--two-up reveal mb-6">
               <div id="property-decision-cues" className="authority-card">
@@ -508,7 +641,7 @@ export default async function PropertyPage(props: PageProps) {
               </section>
             ) : null}
 
-            <div id="property-next-steps" className="card reveal mb-6">
+            <div id="property-next-steps" className="authority-card reveal mb-6">
               <h2 className="card-title">{dict.property.nextSteps}</h2>
               <p className="card-subtitle">{dict.property.exploreRelated}</p>
               <div className="card-actions">
@@ -528,7 +661,7 @@ export default async function PropertyPage(props: PageProps) {
 
           </div>
 
-          <aside className="detail-sidebar">
+          <aside className="detail-sidebar detail-stack">
             <div id="property-direct-channels" className="agent-card">
               <div className="flex items-center gap-4 mb-4">
                 <div className="w-16 h-16 rounded-full bg-[var(--color-primary)] text-white flex items-center justify-center font-bold">
