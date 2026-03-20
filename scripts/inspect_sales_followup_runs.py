@@ -78,6 +78,13 @@ def detect_unit_drift(unit_text: str, active_path: str, wrapper_path: str) -> li
     return sorted(set(issues))
 
 
+def resolve_log_dir(log_dir: str, active_path: str) -> Path:
+    path = Path(log_dir)
+    if path.is_absolute():
+        return path
+    return Path(active_path) / path
+
+
 def _normalize_run_metrics(run: dict[str, object] | None) -> dict[str, object]:
     data = dict(run or {})
     summary = data.get("summary")
@@ -329,7 +336,7 @@ def main() -> int:
     )
     args = parser.parse_args()
 
-    log_dir = Path(args.log_dir)
+    log_dir = resolve_log_dir(args.log_dir, args.active_path)
     payload = collect_runtime_state(
         log_dir=log_dir,
         service_name=args.service_name,

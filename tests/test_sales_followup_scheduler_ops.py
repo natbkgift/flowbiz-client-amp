@@ -8,6 +8,7 @@ from scripts.inspect_sales_followup_runs import (
     compute_health,
     detect_unit_drift,
     expected_service_lines,
+    resolve_log_dir,
     wrapper_flags,
 )
 
@@ -64,6 +65,16 @@ def test_compute_health_flags_stall_and_consecutive_failures() -> None:
 
 def test_installer_contract_detects_missing_wrapper_path() -> None:
     assert wrapper_flags(Path("/tmp/definitely-missing-flowbiz-wrapper.sh")) == ["WRAPPER_MISSING"]
+
+
+def test_resolve_log_dir_anchors_relative_paths_to_active_repo() -> None:
+    active_path = "/opt/flowbiz/clients/flowbiz-client-amp"
+    assert resolve_log_dir("ops/logs/sales-followups", active_path) == Path(
+        "/opt/flowbiz/clients/flowbiz-client-amp/ops/logs/sales-followups"
+    )
+    assert resolve_log_dir("/var/log/flowbiz/sales-followups", active_path) == Path(
+        "/var/log/flowbiz/sales-followups"
+    )
 
 
 def test_artifact_schema_is_stable_for_operator_consumption(tmp_path: Path) -> None:
