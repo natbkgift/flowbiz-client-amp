@@ -55,6 +55,16 @@ export type ProjectItem = {
   name: string;
   developer_id?: string | null;
   area_id?: string | null;
+  developer?: {
+    id: string;
+    slug: string;
+    name: string;
+  } | null;
+  area?: {
+    id: string;
+    slug: string;
+    name: string;
+  } | null;
   status: string;
   cover_image_url?: string | null;
   starting_price?: number | null;
@@ -502,7 +512,21 @@ export type DeveloperItem = {
   id: string;
   name: string;
   slug: string;
+  description?: string | null;
   website: string | null;
+  project_count?: number;
+  primary_areas?: Array<{
+    slug: string;
+    name: string;
+    project_count: number;
+  }>;
+  price_range?: {
+    min: number;
+    max: number;
+    currency: string;
+  } | null;
+  has_active_projects?: boolean;
+  last_updated?: string | null;
   tier?: string | null;
   logo_url?: string | null;
   status?: string;
@@ -550,7 +574,7 @@ export async function fetchDevelopers(): Promise<DeveloperItem[]> {
   const origin = getOrigin();
   const base = apiBase();
 
-  const url = new URL(`${base}/v1/developers/`, origin);
+  const url = new URL(`${base}/v1/developers`, origin);
   const res = await fetchWithRetry(url.toString(), { next: { revalidate: PAGE_REVALIDATE_SECONDS } });
   if (!res.ok) throw new Error(`Failed to fetch developers (${res.status})`);
   return (await res.json()) as DeveloperItem[];
@@ -563,7 +587,7 @@ export async function fetchDeveloperBySlug(slug: string): Promise<DeveloperDetai
   const origin = getOrigin();
   const base = apiBase();
 
-  const url = new URL(`${base}/v1/developers/${encodeURIComponent(slug)}/`, origin);
+  const url = new URL(`${base}/v1/developers/${encodeURIComponent(slug)}`, origin);
   const res = await fetchWithRetry(url.toString(), { next: { revalidate: PAGE_REVALIDATE_SECONDS } });
   if (res.status === 404) return null;
   if (!res.ok) throw new Error(`Failed to fetch developer detail (${res.status})`);

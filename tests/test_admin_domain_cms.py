@@ -178,6 +178,144 @@ def test_flow_a_publish_reflects_public_lists(client) -> None:
     assert developer_detail.status_code == 200, developer_detail.text
 
 
+def test_flow_a_developer_public_contract_supports_trailing_slash_and_structured_fields(client) -> None:
+    headers = _make_admin_headers()
+    hero = f"/media/library/{uuid4()}.jpg"
+    logo = f"/media/library/{uuid4()}.jpg"
+    _add_media_asset(path=hero, rights_status="approved", approval_status="approved")
+    _add_media_asset(path=logo, rights_status="approved", approval_status="approved")
+
+    created_area = client.post(
+        "/admin/areas",
+        headers=headers,
+        json={
+            "name": "Jomtien",
+            "slug": f"jomtien-{uuid4()}",
+            "city": "Pattaya",
+            "status": "draft",
+            "hero_image_url": hero,
+            "source_note": "internal desk",
+            "content": {
+                "en": {
+                    "why_live_invest": "Strong demand.",
+                    "transport": "Fast city links.",
+                    "lifestyle": "Beachfront and dining access.",
+                    "beach_proximity": "Walkable to the beach.",
+                    "metrics_update_cadence": "Monthly",
+                },
+                "th": {
+                    "why_live_invest": "มีดีมานด์ต่อเนื่อง",
+                    "transport": "เข้าเมืองสะดวก",
+                    "lifestyle": "ใกล้หาดและร้านอาหาร",
+                    "beach_proximity": "เดินถึงทะเลได้",
+                    "metrics_update_cadence": "รายเดือน",
+                },
+            },
+        },
+    )
+    assert created_area.status_code == 201, created_area.text
+    area_id = created_area.json()["area"]["id"]
+    area_slug = created_area.json()["area"]["slug"]
+
+    upsert_stat = client.put(
+        f"/admin/areas/{area_id}/statistics",
+        headers=headers,
+        json={
+            "avg_price_sqm": 118000,
+            "avg_rent_monthly": 29000,
+            "avg_roi_percent": 6.2,
+            "total_projects": 8,
+            "total_units": 2100,
+            "as_of_date": "2026-02-28",
+        },
+    )
+    assert upsert_stat.status_code == 200, upsert_stat.text
+
+    created_developer = client.post(
+        "/admin/developers",
+        headers=headers,
+        json={
+            "name": "Riviera Test Dev",
+            "slug": f"riviera-test-{uuid4()}",
+            "status": "inactive",
+            "logo_url": logo,
+            "profile": {
+                "en": "Structured developer profile",
+                "th": "โปรไฟล์ผู้พัฒนาที่ผ่านการตรวจสอบ",
+            },
+            "trust_proof": {
+                "licenses": ["EEC-2026-001"],
+                "approval_status": "approved",
+                "legal_approved": True,
+            },
+            "source_note": "source: legal reviewed developer dossier",
+        },
+    )
+    assert created_developer.status_code == 201, created_developer.text
+    developer_id = created_developer.json()["developer"]["id"]
+    developer_slug = created_developer.json()["developer"]["slug"]
+
+    publish_area = client.post(f"/admin/areas/{area_id}/publish", headers=headers)
+    assert publish_area.status_code == 200, publish_area.text
+
+    first_project = client.post(
+        "/admin/projects",
+        headers=headers,
+        json={
+            "slug": f"riviera-live-{uuid4()}",
+            "name": "Riviera Live One",
+            "status": "published",
+            "property_type": "condo",
+            "area_id": area_id,
+            "developer_id": developer_id,
+            "starting_price": 4500000,
+            "summary": {"en": "First linked project"},
+        },
+    )
+    assert first_project.status_code == 201, first_project.text
+
+    second_project = client.post(
+        "/admin/projects",
+        headers=headers,
+        json={
+            "slug": f"riviera-live-two-{uuid4()}",
+            "name": "Riviera Live Two",
+            "status": "published",
+            "property_type": "condo",
+            "area_id": area_id,
+            "developer_id": developer_id,
+            "starting_price": 7200000,
+            "summary": {"en": "Second linked project"},
+        },
+    )
+    assert second_project.status_code == 201, second_project.text
+
+    publish_developer = client.post(f"/admin/developers/{developer_id}/publish", headers=headers)
+    assert publish_developer.status_code == 200, publish_developer.text
+
+    list_without_slash = client.get("/v1/developers", follow_redirects=False)
+    assert list_without_slash.status_code == 200, list_without_slash.text
+
+    list_with_slash = client.get("/v1/developers/", follow_redirects=False)
+    assert list_with_slash.status_code == 200, list_with_slash.text
+
+    payload = next(item for item in list_with_slash.json() if item["slug"] == developer_slug)
+    assert payload["description"] == "Structured developer profile"
+    assert payload["project_count"] == 2
+    assert payload["has_active_projects"] is True
+    assert payload["price_range"]["min"] == 4500000.0
+    assert payload["price_range"]["max"] == 7200000.0
+    assert payload["price_range"]["currency"] == "THB"
+    assert payload["primary_areas"][0]["slug"] == area_slug
+    assert payload["primary_areas"][0]["name"] == "Jomtien"
+    assert payload["primary_areas"][0]["project_count"] == 2
+    assert payload["last_updated"] is not None
+
+    detail_with_slash = client.get(f"/v1/developers/{developer_slug}/", follow_redirects=False)
+    assert detail_with_slash.status_code == 200, detail_with_slash.text
+    assert detail_with_slash.json()["project_count"] == 2
+
+
 def test_flow_b_statistics_and_summary_reflect_public_endpoints(client) -> None:
     headers = _make_admin_headers()
     hero = f"/media/library/{uuid4()}.jpg"
