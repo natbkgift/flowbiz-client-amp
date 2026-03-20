@@ -6092,6 +6092,37 @@ summary.mobile-nav__trigger::-webkit-details-marker {
   grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
+.crm-assist-stack {
+  display: grid;
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.crm-assist-card {
+  border: 1px solid var(--color-gray-200);
+  border-radius: var(--radius-md);
+  padding: 12px;
+  background: var(--color-white);
+}
+
+.crm-assist-card h4 {
+  margin: 0 0 8px;
+  font-size: var(--font-sm);
+}
+
+.crm-assist-copy {
+  margin: 0;
+}
+
+.crm-assist-copy + .crm-assist-copy {
+  margin-top: 6px;
+}
+
+.crm-timeline--compact {
+  gap: 8px;
+  margin-top: 0;
+}
+
 .crm-timeline {
   margin: 10px 0 0;
   padding-left: 1.1rem;

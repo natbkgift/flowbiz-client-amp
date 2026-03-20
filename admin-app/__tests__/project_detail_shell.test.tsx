@@ -58,7 +58,7 @@ describe('project detail shell', () => {
 
     expect(container.querySelector('#project_consultation_primary')).toHaveAttribute(
       'href',
-      '/en/contact?intent=project_consultation&project=alpha-residence',
+      '/en/contact?intent=project_consultation&source=project_detail&project=alpha-residence&projects=alpha-residence&buyer_fit=project_first_buyer&signal_level=medium',
     );
     expect(container.querySelector('#project_compare_secondary')).toHaveAttribute('href', '/en/compare');
     expect(container.querySelector('#project-brief-section')).not.toBeNull();

@@ -213,7 +213,6 @@ function inferSourceRoute(source: string | null | undefined): LeadHandoff['sourc
   if (normalized.includes('project')) return 'project';
   return 'contact';
 }
-
 export default async function ContactPage(
   props: {
     params: Promise<{ locale: string }>;

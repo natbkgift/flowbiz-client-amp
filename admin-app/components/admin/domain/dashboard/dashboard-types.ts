@@ -23,6 +23,11 @@ export type RecentInquiry = {
   status: string;
   intent: string | null;
   source_page: string | null;
+  sales_automation?: {
+    priority_label?: string | null;
+    next_follow_up_at?: string | null;
+    response_channel?: string | null;
+  };
 };
 
 export type FreshnessItem = {

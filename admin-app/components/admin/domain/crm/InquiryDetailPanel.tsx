@@ -1,4 +1,5 @@
 import type { InquiryCopy } from "@/components/admin/domain/crm/inquiries-copy";
+import { InquiryAdvisorAssistPanel } from "@/components/admin/domain/crm/InquiryAdvisorAssistPanel";
 import { InquiryContactActions } from "@/components/admin/domain/crm/InquiryContactActions";
 import { InquiryFollowUpPanel } from "@/components/admin/domain/crm/InquiryFollowUpPanel";
 import { InquiryTimelinePanel } from "@/components/admin/domain/crm/InquiryTimelinePanel";
@@ -80,6 +81,7 @@ export function InquiryDetailPanel({
         </div>
       </dl>
 
+      <InquiryAdvisorAssistPanel t={t} locale={locale} selected={selected} />
       <InquiryContactActions t={t} selected={selected} />
       <InquiryFollowUpPanel
         t={t}

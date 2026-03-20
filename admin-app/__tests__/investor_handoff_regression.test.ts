@@ -138,15 +138,16 @@ describe('investor handoff regression', () => {
     expect(screen.getByText(/gross yield: 6\.48%/i)).toBeTruthy();
     const compareReviewLink = screen
       .getAllByRole('link', { name: /get investment plan/i })
-      .find((link) => link.getAttribute('href')?.includes('source=compare_review'));
+      .find((link) => link.getAttribute('href')?.includes('source=compare_hero'));
 
     if (!compareReviewLink) {
-      throw new Error('expected compare page to expose a compare_review investment-plan handoff link');
+      throw new Error('expected compare page to expose a normalized compare lead handoff link');
     }
 
     expect(compareReviewLink.getAttribute('href')).toContain('/en/contact?purchasePrice=5000000');
     expect(compareReviewLink.getAttribute('href')).toContain('ids=alpha%2Cbeta');
-    expect(compareReviewLink.getAttribute('href')).toContain('source=compare_review');
+    expect(compareReviewLink.getAttribute('href')).toContain('intent=project_compare');
+    expect(compareReviewLink.getAttribute('href')).toContain('source=compare_hero');
 
     compareScreen.unmount();
 
@@ -155,17 +156,21 @@ describe('investor handoff regression', () => {
         params: Promise.resolve({ locale: 'en' }),
         searchParams: Promise.resolve({
           ...compareSearchParams,
-          source: 'compare_review',
+          intent: 'project_compare',
+          source: 'compare_hero',
+          projects: 'alpha,beta',
         }),
       }),
     );
 
+    expect(screen.getByRole('heading', { name: /lead handoff summary/i })).toBeTruthy();
     expect(screen.getByRole('heading', { name: /investor handoff summary/i })).toBeTruthy();
     expect(screen.getByText(/target purchase price:/i)).toBeTruthy();
     expect(screen.getByText(/monthly rent:/i)).toBeTruthy();
     expect(screen.getByText(/gross yield: 6\.48%/i)).toBeTruthy();
     expect(screen.getByText(/net yield: 4\.08%/i)).toBeTruthy();
     expect(screen.getByText(/compared projects: alpha, beta/i)).toBeTruthy();
+    expect(screen.getByText(/projects in scope: alpha, beta/i)).toBeTruthy();
   });
 
   it('round-trips buying cost handoff metrics through advisory query helpers', () => {

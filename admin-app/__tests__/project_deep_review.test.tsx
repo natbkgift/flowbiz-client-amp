@@ -12,7 +12,7 @@ const defaultBuyerFitSignals = [
 const defaultCtaPlan = {
   title: 'Turn this snapshot into a sharper decision',
   body: 'Use the visible price, rent, and ROI context to test whether this project still belongs in your shortlist against nearby alternatives.',
-  primaryHref: '/en/contact?intent=project_investment_check&project=alpha-residence',
+  primaryHref: '/en/contact?intent=project_consultation&source=project_investment_check&project=alpha-residence&projects=alpha-residence&buyer_fit=investor_compare&signal_level=high&msg=I%20am%20reviewing%20Alpha%20Residence%20and%20want%20to%20compare%20its%20price%2C%20rent%2C%20and%20investment%20context%20against%20nearby%20alternatives.',
   primaryLabel: 'Pressure-test this project',
   secondaryHref: '/en/compare',
   secondaryLabel: 'Compare nearby options',
@@ -75,7 +75,7 @@ describe('ProjectDeepReview', () => {
   expect(screen.getByText(/market snapshot: avg price thb 5.2m/i)).toBeTruthy();
     expect(screen.getByLabelText(/how to read this snapshot/i)).toBeTruthy();
   expect(screen.getByText(/best fit for this page/i)).toBeTruthy();
-  expect(screen.getByRole('link', { name: 'Pressure-test this project' }).getAttribute('href')).toBe('/en/contact?intent=project_investment_check&project=alpha-residence');
+  expect(screen.getByRole('link', { name: 'Pressure-test this project' }).getAttribute('href')).toBe('/en/contact?intent=project_consultation&source=project_investment_check&project=alpha-residence&projects=alpha-residence&buyer_fit=investor_compare&signal_level=high&msg=I%20am%20reviewing%20Alpha%20Residence%20and%20want%20to%20compare%20its%20price%2C%20rent%2C%20and%20investment%20context%20against%20nearby%20alternatives.');
     expect(screen.getByText(/not a promised return for alpha residence/i)).toBeTruthy();
     expect(screen.getByText(/side-by-side comparison context, not as forward-looking projections/i)).toBeTruthy();
     expect(screen.getByText(/anchored to 2026-03-01/i)).toBeTruthy();
@@ -102,7 +102,7 @@ describe('ProjectDeepReview', () => {
         ctaPlan={{
           title: 'ต่อยอดจาก snapshot นี้เป็นการตัดสินใจที่คมขึ้น',
           body: 'ใช้ราคา ค่าเช่า และ ROI ที่มีตอนนี้เพื่อตรวจว่าโครงการนี้ยังน่าอยู่ใน shortlist เมื่อเทียบกับตัวเลือกใกล้เคียงหรือไม่',
-          primaryHref: '/th/contact?intent=project_investment_check&project=alpha-residence',
+          primaryHref: '/th/contact?intent=project_consultation&source=project_investment_check&project=alpha-residence&projects=alpha-residence&buyer_fit=investor_compare&signal_level=high&msg=%E0%B8%AA%E0%B8%99%E0%B9%83%E0%B8%88%20Alpha%20Residence%20%E0%B9%81%E0%B8%A5%E0%B8%B0%E0%B8%95%E0%B9%89%E0%B8%AD%E0%B8%87%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B9%80%E0%B8%97%E0%B8%B5%E0%B8%A2%E0%B8%9A%E0%B8%A3%E0%B8%B2%E0%B8%84%E0%B8%B2%20%E0%B8%84%E0%B9%88%E0%B8%B2%E0%B9%80%E0%B8%8A%E0%B9%88%E0%B8%B2%20%E0%B9%81%E0%B8%A5%E0%B8%B0%E0%B8%A1%E0%B8%B8%E0%B8%A1%E0%B8%A1%E0%B8%AD%E0%B8%87%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B8%A5%E0%B8%87%E0%B8%97%E0%B8%B8%E0%B8%99%E0%B8%81%E0%B8%B1%E0%B8%9A%E0%B8%95%E0%B8%B1%E0%B8%A7%E0%B9%80%E0%B8%A5%E0%B8%B7%E0%B8%AD%E0%B8%81%E0%B9%83%E0%B8%81%E0%B8%A5%E0%B9%89%E0%B9%80%E0%B8%84%E0%B8%B5%E0%B8%A2%E0%B8%87%E0%B9%83%E0%B8%99%E0%B8%9E%E0%B8%B7%E0%B9%89%E0%B8%99%E0%B8%97%E0%B8%B5%E0%B9%88%E0%B9%80%E0%B8%94%E0%B8%B5%E0%B8%A2%E0%B8%A7%E0%B8%81%E0%B8%B1%E0%B8%99',
           primaryLabel: 'เช็กสมมติฐานลงทุนของโครงการนี้',
           secondaryHref: '/th/compare',
           secondaryLabel: 'เทียบกับโครงการใกล้เคียง',
@@ -169,7 +169,7 @@ describe('ProjectDeepReview', () => {
         ctaPlan={{
           title: 'Check what is actually live before moving forward',
           body: 'Use the published entry price or delivery timing as the starting point, then verify which units and comparables are genuinely still active.',
-          primaryHref: '/en/contact?intent=project_availability_check&project=beta-tower',
+          primaryHref: '/en/contact?intent=project_consultation&source=project_availability_check&project=beta-tower&projects=beta-tower&buyer_fit=project_first_buyer&signal_level=medium&msg=I%20am%20interested%20in%20Beta%20Tower%20and%20want%20to%20confirm%20live%20unit%20availability%2C%20price%20bands%2C%20and%20nearby%20alternatives%20still%20open%20now.',
           primaryLabel: 'Check live availability',
           secondaryHref: '/en/buy',
           secondaryLabel: 'Browse shortlist-ready listings',

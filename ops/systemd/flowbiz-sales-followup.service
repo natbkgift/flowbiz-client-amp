@@ -1,0 +1,17 @@
+[Unit]
+Description=FlowBiz sales follow-up processor
+After=docker.service network-online.target
+Requires=docker.service
+ConditionPathExists=__FLOWBIZ_INSTALL_BIN_DIR__/flowbiz-run-sales-followups.sh
+
+[Service]
+Type=oneshot
+WorkingDirectory=__FLOWBIZ_ACTIVE_PATH__
+Environment=COMPOSE_PROJECT_NAME=__FLOWBIZ_COMPOSE_PROJECT_NAME__
+Environment=FLOWBIZ_ACTIVE_PATH=__FLOWBIZ_ACTIVE_PATH__
+ExecStart=/usr/bin/env bash __FLOWBIZ_INSTALL_BIN_DIR__/flowbiz-run-sales-followups.sh --repo-root __FLOWBIZ_ACTIVE_PATH__
+Nice=10
+IOSchedulingClass=best-effort
+TimeoutStartSec=900
+StandardOutput=journal
+StandardError=journal

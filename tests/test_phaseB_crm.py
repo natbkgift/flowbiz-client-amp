@@ -5,7 +5,8 @@ from sqlalchemy import func, select
 
 from apps.api.routes.admin_crm import _spam_filter_clause
 from packages.core.database import SessionLocal
-from packages.core.models import Inquiry, Property
+from packages.core.models import AuditLog, Inquiry, Property
+from scripts.process_sales_followups import run_follow_up_processor
 
 
 def _login_token(client) -> str:
@@ -401,6 +402,213 @@ def test_create_inquiry_accepts_budget_band_and_timeline(client):
     assert inquiry["intent"] == "invest"
     assert inquiry["purpose"] == "invest"
     assert inquiry["follow_up_status"] == "pending"
+
+
+def test_sales_automation_snapshot_is_returned_and_seeded_into_timeline(client):
+    token = _login_token(client)
+    headers = {"Authorization": f"Bearer {token}"}
+
+    inquiry_resp = client.post(
+        "/v1/inquiries",
+        json={
+            "name": "Automation User",
+            "email": "automation@example.com",
+            "message": "Compare these projects for me.",
+            "source_page": "/en/contact",
+            "intent": "project_compare",
+            "tags": [
+                "locale:en",
+                "lead_source:compare_hero",
+                "project_scope:grand-solaire",
+                "project_scope:copacabana-beach-jomtien",
+                "buyer_fit:investor_compare",
+                "signal_level:high",
+            ],
+            "lead_score": 88,
+        },
+    )
+    assert inquiry_resp.status_code == 201, inquiry_resp.text
+    body = inquiry_resp.json()
+
+    assert body["sales_automation"]["intent"] == "project_compare"
+    assert body["sales_automation"]["priority_label"] == "high"
+    assert body["sales_automation"]["response_sla_seconds"] == 5
+    assert body["sales_automation"]["projects"] == ["grand-solaire", "copacabana-beach-jomtien"]
+    assert body["sales_automation"]["follow_up_plan"][0]["stage"] == "t5m"
+
+    timeline = client.get(f"/admin/inquiries/{body['id']}/timeline?limit=20", headers=headers)
+    assert timeline.status_code == 200, timeline.text
+    notes = [event.get("note") or "" for event in timeline.json()["data"]]
+    assert any("Lead Summary:" in note for note in notes)
+    assert any("Suggested First Reply:" in note for note in notes)
+
+
+def test_follow_up_processor_advances_sales_sequence_and_writes_timeline(client):
+    created = client.post(
+        "/v1/inquiries",
+        json={
+            "name": "Follow Up User",
+            "email": "follow-up@example.com",
+            "message": "Need help with shortlist.",
+            "source_page": "/en/contact",
+            "intent": "project_shortlist",
+            "tags": [
+                "locale:en",
+                "lead_source:shortlist_contact",
+                "project_scope:grand-solaire",
+                "buyer_fit:shortlist_narrowing",
+                "signal_level:medium",
+            ],
+            "lead_score": 70,
+        },
+    )
+    assert created.status_code == 201, created.text
+    inquiry_id = UUID(created.json()["id"])
+
+    with SessionLocal() as db:
+        inquiry = db.get(Inquiry, inquiry_id)
+        assert inquiry is not None
+        base_time = datetime(2026, 3, 19, 14, 0, tzinfo=UTC)
+        inquiry.created_at = base_time
+        inquiry.submit_timestamp = base_time
+        inquiry.follow_up_due_at = base_time + timedelta(minutes=5)
+        db.add(inquiry)
+        db.commit()
+
+    first = run_follow_up_processor(
+        as_of=datetime(2026, 3, 19, 14, 6, tzinfo=UTC),
+        inquiry_id=inquiry_id,
+        dry_run=False,
+    )
+    assert first["triggered"] == 1
+
+    with SessionLocal() as db:
+        inquiry = db.get(Inquiry, inquiry_id)
+        assert inquiry is not None
+        assert "follow_up_stage:t1h" in (inquiry.tags or [])
+        assert inquiry.follow_up_status == "scheduled"
+        assert inquiry.follow_up_due_at is not None
+        assert inquiry.follow_up_due_at.replace(tzinfo=UTC) == datetime(
+            2026,
+            3,
+            19,
+            15,
+            0,
+            tzinfo=UTC,
+        )
+        actions = db.scalars(
+            select(AuditLog.action)
+            .where(AuditLog.entity_type == "inquiry", AuditLog.entity_id == str(inquiry_id))
+            .order_by(AuditLog.created_at.asc())
+        ).all()
+        assert "follow_up_triggered" in actions
+
+    second = run_follow_up_processor(
+        as_of=datetime(2026, 3, 19, 15, 1, tzinfo=UTC),
+        inquiry_id=inquiry_id,
+        dry_run=False,
+    )
+    assert second["triggered"] == 1
+
+    with SessionLocal() as db:
+        inquiry = db.get(Inquiry, inquiry_id)
+        assert inquiry is not None
+        assert "follow_up_stage:t24h" in (inquiry.tags or [])
+        assert inquiry.follow_up_due_at is not None
+        assert inquiry.follow_up_due_at.replace(tzinfo=UTC) == datetime(
+            2026,
+            3,
+            20,
+            14,
+            0,
+            tzinfo=UTC,
+        )
+
+
+def test_follow_up_processor_suppresses_validation_test_leads(client):
+    created = client.post(
+        "/v1/inquiries",
+        json={
+            "name": "Validation Lead",
+            "email": "validation-followup@example.com",
+            "message": "This is a validation record.",
+            "source_page": "/en/contact",
+            "intent": "project_consultation",
+            "tags": [
+                "locale:en",
+                "validation:test",
+                "signal_level:high",
+            ],
+            "lead_score": 85,
+        },
+    )
+    assert created.status_code == 201, created.text
+    inquiry_id = UUID(created.json()["id"])
+
+    with SessionLocal() as db:
+        inquiry = db.get(Inquiry, inquiry_id)
+        assert inquiry is not None
+        inquiry.follow_up_due_at = datetime(2026, 3, 19, 14, 5, tzinfo=UTC)
+        inquiry.follow_up_status = "pending"
+        db.add(inquiry)
+        db.commit()
+
+    result = run_follow_up_processor(
+        as_of=datetime(2026, 3, 19, 14, 6, tzinfo=UTC),
+        inquiry_id=inquiry_id,
+        dry_run=False,
+    )
+    assert result["suppressed"] == 1
+    assert result["items"][0]["result"] == "suppressed_validation_test"
+
+    with SessionLocal() as db:
+        inquiry = db.get(Inquiry, inquiry_id)
+        assert inquiry is not None
+        assert inquiry.follow_up_status == "completed"
+        assert inquiry.follow_up_due_at is None
+
+
+def test_follow_up_processor_suppresses_do_not_follow_up_tag(client):
+    created = client.post(
+        "/v1/inquiries",
+        json={
+            "name": "Suppressed Lead",
+            "email": "suppressed-followup@example.com",
+            "message": "Do not follow up on this lead.",
+            "source_page": "/en/contact",
+            "intent": "project_shortlist",
+            "tags": [
+                "locale:en",
+                "signal_level:medium",
+                "do_not_follow_up",
+            ],
+            "lead_score": 65,
+        },
+    )
+    assert created.status_code == 201, created.text
+    inquiry_id = UUID(created.json()["id"])
+
+    with SessionLocal() as db:
+        inquiry = db.get(Inquiry, inquiry_id)
+        assert inquiry is not None
+        inquiry.follow_up_due_at = datetime(2026, 3, 19, 14, 5, tzinfo=UTC)
+        inquiry.follow_up_status = "pending"
+        db.add(inquiry)
+        db.commit()
+
+    result = run_follow_up_processor(
+        as_of=datetime(2026, 3, 19, 14, 6, tzinfo=UTC),
+        inquiry_id=inquiry_id,
+        dry_run=False,
+    )
+    assert result["suppressed"] == 1
+    assert result["items"][0]["result"] == "suppressed_do_not_follow_up"
+
+    with SessionLocal() as db:
+        inquiry = db.get(Inquiry, inquiry_id)
+        assert inquiry is not None
+        assert inquiry.follow_up_status == "completed"
+        assert inquiry.follow_up_due_at is None
 
 
 def test_inquiry_legacy_payload_and_additive_payload_are_both_supported(client):

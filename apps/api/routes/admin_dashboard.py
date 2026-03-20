@@ -28,6 +28,7 @@ from packages.core.models import (
     Testimonial,
     User,
 )
+from packages.core.sales_automation import build_sales_automation_snapshot
 from packages.core.source_rights_registry import normalize_approval_status, normalize_rights_status
 
 router = APIRouter(prefix="/admin", tags=["admin"])
@@ -570,8 +571,24 @@ def _collect_recent_inquiries(db: Session) -> dict:
             "status": row.status,
             "intent": row.intent,
             "source_page": row.source_page,
+            "sales_automation": {
+                "priority_label": automation.priority_label,
+                "next_follow_up_at": _to_iso(automation.next_follow_up_at),
+                "response_channel": automation.response_channel,
+            },
         }
         for row in rows
+        for automation in [
+            build_sales_automation_snapshot(
+                intent=row.intent,
+                source_page=row.source_page,
+                email=row.email,
+                phone=row.phone,
+                tags=row.tags,
+                lead_score=int(row.score or 0),
+                now=row.created_at,
+            )
+        ]
     ]
     latest_at = rows[0].created_at if rows else None
     return {"count": len(items), "items": items, "latest_at": latest_at}

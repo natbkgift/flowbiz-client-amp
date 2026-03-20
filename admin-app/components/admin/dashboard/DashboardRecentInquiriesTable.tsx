@@ -19,6 +19,11 @@ type RecentInquiry = {
   status: string;
   intent: string | null;
   source_page: string | null;
+  sales_automation?: {
+    priority_label?: string | null;
+    next_follow_up_at?: string | null;
+    response_channel?: string | null;
+  };
 };
 
 type SortKey = "created_at" | "status" | "name";
@@ -63,6 +68,8 @@ const copy = {
     sourcePage: "Source page",
     contact: "Contact",
     intent: "Intent",
+    priority: "Priority",
+    nextFollowUp: "Next follow-up",
     createdAt: "Created at",
     name: "Name",
   },
@@ -91,10 +98,23 @@ const copy = {
     sourcePage: "หน้าต้นทาง",
     contact: "ช่องทางติดต่อ",
     intent: "เป้าหมาย",
+    priority: "ความสำคัญ",
+    nextFollowUp: "ติดตามครั้งถัดไป",
     createdAt: "เวลาสร้าง",
     name: "ชื่อ",
   },
 } as const;
+
+function translatePriority(value: string | null | undefined, locale: AdminLocale): string {
+  const normalized = String(value || "").trim().toLowerCase();
+  if (!normalized) return "-";
+  if (locale === "th") {
+    if (normalized === "high") return "สูง";
+    if (normalized === "medium") return "กลาง";
+    if (normalized === "low") return "ต่ำ";
+  }
+  return normalized;
+}
 
 function translateInquiryStatus(value: string | null | undefined, locale: AdminLocale): string {
   const normalized = String(value || "").trim().toLowerCase();
@@ -114,10 +134,14 @@ function translateInquiryIntent(value: string | null | undefined, locale: AdminL
   if (!normalized) return "-";
   if (locale === "th") {
     if (normalized === "general") return "ทั่วไป";
+    if (normalized === "general_inquiry") return "สอบถามทั่วไป";
     if (normalized === "buy") return "ซื้อ";
     if (normalized === "rent") return "เช่า";
     if (normalized === "sell") return "ขาย";
     if (normalized === "invest") return "ลงทุน";
+    if (normalized === "project_consultation") return "คุยต่อจากหน้าโครงการ";
+    if (normalized === "project_shortlist") return "ขอ shortlist จากตัวเลือกที่สนใจ";
+    if (normalized === "project_compare") return "คุยต่อจากการเปรียบเทียบโครงการ";
   }
   return normalized;
 }
@@ -399,6 +423,8 @@ export function DashboardRecentInquiriesTable({
                   <th scope="col">{ui.contact}</th>
                   <th scope="col" aria-sort={sortKey === "status" ? (sortDirection === "asc" ? "ascending" : "descending") : "none"}>{ui.status}</th>
                   <th scope="col">{ui.intent}</th>
+                  <th scope="col">{ui.priority}</th>
+                  <th scope="col">{ui.nextFollowUp}</th>
                   <th scope="col">{ui.sourcePage}</th>
                 </tr>
               </thead>
@@ -414,6 +440,8 @@ export function DashboardRecentInquiriesTable({
                       </AdminBadge>
                     </td>
                     <td>{translateInquiryIntent(row.intent, locale)}</td>
+                    <td>{translatePriority(row.sales_automation?.priority_label, locale)}</td>
+                    <td>{prettyDate(row.sales_automation?.next_follow_up_at ?? null, locale)}</td>
                     <td>{row.source_page || "-"}</td>
                   </tr>
                 ))}
@@ -442,6 +470,14 @@ export function DashboardRecentInquiriesTable({
                   <div>
                     <span>{ui.intent}</span>
                     <strong>{translateInquiryIntent(row.intent, locale)}</strong>
+                  </div>
+                  <div>
+                    <span>{ui.priority}</span>
+                    <strong>{translatePriority(row.sales_automation?.priority_label, locale)}</strong>
+                  </div>
+                  <div>
+                    <span>{ui.nextFollowUp}</span>
+                    <strong>{prettyDate(row.sales_automation?.next_follow_up_at ?? null, locale)}</strong>
                   </div>
                   <div>
                     <span>{ui.sourcePage}</span>
