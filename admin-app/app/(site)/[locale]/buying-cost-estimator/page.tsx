@@ -12,15 +12,15 @@ function getPageCopy(locale: 'en' | 'th') {
   if (locale === 'th') {
     return {
       title: 'Buying Cost Estimator',
-      description: 'คำนวณภาพรวมค่าใช้จ่ายวันโอนและเงินสดที่ต้องเตรียมแบบ conservative ก่อนคุยต่อกับ advisor',
-      subtitle: 'ดูภาพรวมค่าโอน ค่าใช้จ่ายปิดการซื้อ และรายการที่ยังต้องยืนยันเพิ่มเติมใน route ที่แยกจาก investment calculator เดิม',
+      description: 'ดูภาพรวมค่าโอน ค่าใช้จ่ายปิดการซื้อ และเงินสดที่ควรเตรียมก่อนคุยรายละเอียดต่อกับ advisor',
+      subtitle: 'เช็กภาพรวมค่าโอน ค่าใช้จ่ายปิดการซื้อ และประเด็นที่ยังต้องยืนยันเพิ่มเติมสำหรับดีลที่คุณกำลังพิจารณา',
     };
   }
 
   return {
     title: 'Buying Cost Estimator',
-    description: 'Review transfer fees, closing costs, and cash-needed assumptions in a conservative buyer-focused estimator.',
-    subtitle: 'See the expected transfer-fee picture, closing-cost structure, and open questions in a dedicated route separate from the existing investment calculator.',
+    description: 'Review transfer fees, closing costs, and the cash you may need before speaking with an advisor.',
+    subtitle: 'Check the current fee picture, estimated cash needed, and the open questions worth clarifying for your purchase.',
   };
 }
 
@@ -39,7 +39,7 @@ export default async function BuyingCostEstimatorPage(props: { params: Promise<{
   const copy = getPageCopy(locale);
 
   return (
-    <main id="main-content">
+    <main id="main-content" className="decision-page decision-page--buying-cost">
       <Breadcrumbs
         items={[
           { label: dict.nav.home, href: `/${locale}` },
