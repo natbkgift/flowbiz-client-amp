@@ -2,7 +2,9 @@
 import { Container } from '@/components/layout/Container';
 
 import { LeadForm } from '@/components/forms/LeadForm';
+import { TrackedLink } from '@/components/analytics/TrackedLink';
 import { fetchAreas } from '@/app/_lib/public-api-server';
+import { buildLeadCaptureQuery, withLocaleQuery } from '@/app/_lib/public-advisory';
 import { getDictionary, normalizeLocale } from '@/app/_lib/i18n/get-dictionary';
 import { makePageMetadata } from '@/app/_lib/i18n/metadata';
 import { withLocale } from '@/app/_lib/i18n/routing';
@@ -111,12 +113,48 @@ export default async function AreaGuidePage(props: { params: Promise<{ locale: s
           <h1 className="headline">{dict.areaGuide.title}</h1>
           <p className="subhead">{dict.areaGuide.subtitle}</p>
           <div className="cta-row">
-            <a className="btn btn-cta" href={withLocale(locale, '/contact')}>
+            <TrackedLink
+              className="btn btn-cta"
+              href={withLocaleQuery(locale, '/contact', buildLeadCaptureQuery({
+                intent: 'general_inquiry',
+                source: 'area_guide',
+                sourceRoute: 'area-guide',
+                ctaType: 'primary',
+                ctaLabel: dict.cta.speakToAdvisor,
+                entityType: 'route',
+                entityName: 'area-guide',
+                userIntent: 'research',
+                message: locale === 'th'
+                  ? 'ต้องการคุยต่อจากหน้า area guide เพื่อเลือกทำเลที่เหมาะก่อนคัดโครงการ'
+                  : 'I want to continue from the area guide to choose the right location before narrowing projects.',
+              }))}
+              eventType="cta_click"
+              eventPayload={{
+                source_route: 'area-guide',
+                cta_type: 'primary',
+                cta_label: dict.cta.speakToAdvisor,
+                entity_type: 'route',
+                entity_name: 'area-guide',
+                user_intent: 'research',
+              }}
+            >
               {dict.cta.speakToAdvisor}
-            </a>
-            <a className="btn btn-tertiary" href={withLocale(locale, '/invest')}>
+            </TrackedLink>
+            <TrackedLink
+              className="btn btn-tertiary"
+              href={withLocale(locale, '/invest')}
+              eventType="cta_click"
+              eventPayload={{
+                source_route: 'area-guide',
+                cta_type: 'tertiary',
+                cta_label: dict.cta.exploreInvestment,
+                entity_type: 'route',
+                entity_name: 'invest',
+                user_intent: 'invest',
+              }}
+            >
               {dict.cta.exploreInvestment}
-            </a>
+            </TrackedLink>
           </div>
         </Container>
       </section>
@@ -154,7 +192,23 @@ export default async function AreaGuidePage(props: { params: Promise<{ locale: s
                 <p className="card-subtitle mb-2">{a.lifestyle}</p>
                 <p className="text-caption mb-0">{a.investment}</p>
                 <div className="card-actions mt-4">
-                  <a className="btn btn-secondary" href={withLocale(locale, `/areas/${encodeURIComponent(a.slug)}`)}>
+                  <a
+                    className="btn btn-secondary"
+                    href={withLocale(locale, `/areas/${encodeURIComponent(a.slug)}`)}
+                    data-amp-event-type="cta_click"
+                    data-amp-event-payload={JSON.stringify({
+                      source_route: 'area-guide',
+                      cta_type: 'secondary',
+                      cta_label: locale === 'th' ? 'เปิด area brief' : 'Open area brief',
+                      entity_type: 'area',
+                      entity_id: a.slug,
+                      entity_name: a.title,
+                      user_intent: 'research',
+                      context: {
+                        area: a.title,
+                      },
+                    })}
+                  >
                     {locale === 'th' ? 'เปิด area brief' : 'Open area brief'}
                   </a>
                 </div>
@@ -201,7 +255,17 @@ export default async function AreaGuidePage(props: { params: Promise<{ locale: s
               <p className="cta-body">{dict.contact.advisoryBody}</p>
             </div>
             <div className="cta-panel__form">
-              <LeadForm defaultMessage={dict.contact.advisoryBody} />
+              <LeadForm
+                defaultMessage={dict.contact.advisoryBody}
+                handoff={{
+                  sourceRoute: 'area-guide',
+                  ctaType: 'primary',
+                  ctaLabel: dict.cta.speakToAdvisor,
+                  entityType: 'route',
+                  entityName: 'area-guide',
+                  userIntent: 'research',
+                }}
+              />
             </div>
           </div>
         </Container>

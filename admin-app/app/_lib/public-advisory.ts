@@ -37,6 +37,34 @@ export type BuyingCostAdvisorContext = {
   disclaimerKey?: string | null;
 };
 
+export type NormalizedLeadIntent =
+  | 'project_consultation'
+  | 'project_shortlist'
+  | 'project_compare'
+  | 'general_inquiry';
+
+export type LeadCaptureContext = {
+  intent: NormalizedLeadIntent;
+  source?: string | null;
+  sourceRoute?: string | null;
+  ctaType?: string | null;
+  ctaLabel?: string | null;
+  project?: string | null;
+  projects?: string[];
+  entityType?: string | null;
+  entityId?: string | null;
+  entityName?: string | null;
+  userIntent?: string | null;
+  budgetRange?: string | null;
+  bedroom?: string | null;
+  location?: string | null;
+  buyerFit?: string | null;
+  signalLevel?: string | null;
+  compareIds?: string[];
+  area?: string | null;
+  message?: string | null;
+};
+
 function pickQueryValue(value: string | string[] | undefined): string | null {
   if (typeof value === 'string') return value;
   if (Array.isArray(value) && typeof value[0] === 'string') return value[0];
@@ -73,9 +101,125 @@ function parseDelimitedValues(value: string | null): string[] {
     .filter(Boolean);
 }
 
+function serializeDelimitedValues(values: Array<string | null | undefined> | undefined): string | null {
+  if (!values?.length) return null;
+  const seen = new Set<string>();
+  const normalized = values
+    .map((value) => String(value || '').trim())
+    .filter(Boolean)
+    .filter((value) => {
+      const key = value.toLowerCase();
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    })
+    .slice(0, 5);
+
+  return normalized.length ? normalized.join(',') : null;
+}
+
 function serializeMetric(value: number | null | undefined, decimals = 2): string | null {
   if (typeof value !== 'number' || !Number.isFinite(value)) return null;
   return value.toFixed(decimals).replace(/\.0+$/, '').replace(/(\.\d*?)0+$/, '$1');
+}
+
+export function normalizeLeadIntent(
+  value: string | null | undefined,
+  fallback: NormalizedLeadIntent = 'general_inquiry',
+): NormalizedLeadIntent {
+  const normalized = String(value || '').trim().toLowerCase();
+
+  if (normalized === 'project_consultation' || normalized === 'project_availability_check' || normalized === 'project_investment_check') {
+    return 'project_consultation';
+  }
+  if (normalized === 'project_shortlist') {
+    return 'project_shortlist';
+  }
+  if (normalized === 'project_compare' || normalized === 'shortlist_review') {
+    return 'project_compare';
+  }
+  if (normalized === 'general_inquiry' || normalized === 'general') {
+    return 'general_inquiry';
+  }
+
+  return fallback;
+}
+
+export function parseLeadCaptureContext(
+  searchParams?: Record<string, string | string[] | undefined>,
+  fallbackIntent: NormalizedLeadIntent = 'general_inquiry',
+): LeadCaptureContext {
+  const project = pickQueryValue(searchParams?.project);
+  const projects = parseDelimitedValues(pickQueryValue(searchParams?.projects));
+  const context: LeadCaptureContext = {
+    intent: normalizeLeadIntent(pickQueryValue(searchParams?.intent), fallbackIntent),
+  };
+  const source = pickQueryValue(searchParams?.source);
+  const sourceRoute = pickQueryValue(searchParams?.source_route);
+  const ctaType = pickQueryValue(searchParams?.cta_type);
+  const ctaLabel = pickQueryValue(searchParams?.cta_label);
+  const entityType = pickQueryValue(searchParams?.entity_type);
+  const entityId = pickQueryValue(searchParams?.entity_id);
+  const entityName = pickQueryValue(searchParams?.entity_name);
+  const userIntent = pickQueryValue(searchParams?.user_intent);
+  const budgetRange = pickQueryValue(searchParams?.budget_range);
+  const bedroom = pickQueryValue(searchParams?.bedroom);
+  const location = pickQueryValue(searchParams?.location);
+  const buyerFit = pickQueryValue(searchParams?.buyer_fit);
+  const signalLevel = pickQueryValue(searchParams?.signal_level);
+  const compareIds = parseDelimitedValues(pickQueryValue(searchParams?.compare_ids));
+  const area = pickQueryValue(searchParams?.area);
+  const message = pickQueryValue(searchParams?.msg);
+
+  if (source) context.source = source;
+  if (sourceRoute) context.sourceRoute = sourceRoute;
+  if (ctaType) context.ctaType = ctaType;
+  if (ctaLabel) context.ctaLabel = ctaLabel;
+  if (project) context.project = project;
+  if (projects.length || project) context.projects = project && !projects.length ? [project] : projects;
+  if (entityType) context.entityType = entityType;
+  if (entityId) context.entityId = entityId;
+  if (entityName) context.entityName = entityName;
+  if (userIntent) context.userIntent = userIntent;
+  if (budgetRange) context.budgetRange = budgetRange;
+  if (bedroom) context.bedroom = bedroom;
+  if (location) context.location = location;
+  if (buyerFit) context.buyerFit = buyerFit;
+  if (signalLevel) context.signalLevel = signalLevel;
+  if (compareIds.length) context.compareIds = compareIds;
+  if (area) context.area = area;
+  if (message) context.message = message;
+
+  return context;
+}
+
+export function buildLeadCaptureQuery(context: LeadCaptureContext): Record<string, string> {
+  const query: Record<string, string> = {
+    intent: normalizeLeadIntent(context.intent),
+  };
+  const projects = serializeDelimitedValues(context.projects);
+  const compareIds = serializeDelimitedValues(context.compareIds);
+
+  if (context.source) query.source = context.source;
+  if (context.sourceRoute) query.source_route = context.sourceRoute;
+  if (context.ctaType) query.cta_type = context.ctaType;
+  if (context.ctaLabel) query.cta_label = context.ctaLabel;
+  if (context.project) query.project = context.project;
+  if (projects) query.projects = projects;
+  if (context.entityType) query.entity_type = context.entityType;
+  if (context.entityId) query.entity_id = context.entityId;
+  if (context.entityName) query.entity_name = context.entityName;
+  if (context.userIntent) query.user_intent = context.userIntent;
+  if (context.budgetRange) query.budget_range = context.budgetRange;
+  if (context.bedroom) query.bedroom = context.bedroom;
+  if (context.location) query.location = context.location;
+  if (context.buyerFit) query.buyer_fit = context.buyerFit;
+  if (context.signalLevel) query.signal_level = context.signalLevel;
+  if (compareIds) query.compare_ids = compareIds;
+  if (context.area) query.area = context.area;
+  if (context.message) query.msg = context.message;
+
+  return query;
 }
 
 export function parseInvestorToolContext(

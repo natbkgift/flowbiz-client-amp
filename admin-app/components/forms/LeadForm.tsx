@@ -8,6 +8,12 @@ import { en } from '../../app/_lib/i18n/en';
 import { th } from '../../app/_lib/i18n/th';
 import { localeFromPathname } from '../../app/_lib/i18n/routing';
 import { trackEvent } from '../../lib/analytics';
+import {
+  buildLeadHandoffSummary,
+  buildLeadHandoffTags,
+  buildLeadTrackingPayload,
+  type LeadHandoff,
+} from '../../lib/conversion';
 import { trackExperimentOutcomes } from '../../lib/experiments';
 import { calculateLeadScore } from '../../lib/lead-scoring';
 
@@ -22,13 +28,37 @@ type LeadFormProps = {
   defaultBudgetBand?: string;
   defaultPurpose?: string;
   defaultTimeframe?: string;
+  inquiryIntent?: string;
+  inquirySource?: string;
+  inquiryTags?: string[];
+  contextSummary?: string[];
+  handoff?: LeadHandoff;
 };
 
 type LeadFormStatus =
   | { state: 'idle' }
   | { state: 'submitting' }
-  | { state: 'success'; id?: string }
+  | {
+      state: 'success';
+      id?: string;
+      confirmationTitle?: string;
+      confirmationBody?: string;
+      autoResponseMessage?: string;
+      responseChannel?: string;
+      responseSlaSeconds?: number;
+    }
   | { state: 'error'; message: string };
+
+type InquirySuccessPayload = {
+  id?: string;
+  sales_automation?: {
+    confirmation_title?: string;
+    confirmation_body?: string;
+    auto_response_message?: string;
+    response_channel?: string;
+    response_sla_seconds?: number;
+  };
+};
 
 function normalizeTagToken(value: string): string {
   return value
@@ -49,6 +79,11 @@ export function LeadForm({
   defaultBudgetBand,
   defaultPurpose,
   defaultTimeframe,
+  inquiryIntent,
+  inquirySource,
+  inquiryTags,
+  contextSummary,
+  handoff,
 }: LeadFormProps) {
   const pathname = usePathname() ?? '/';
   const locale = explicitLocale ?? localeFromPathname(pathname);
@@ -75,6 +110,19 @@ export function LeadForm({
     if (!consent) return false;
     return status.state !== 'submitting';
   }, [email, message, name, phone, consent, status.state]);
+
+  function describeResponseChannel(value: string | undefined): string | null {
+    if (!value) return null;
+    if (locale === 'th') {
+      if (value === 'email_if_connected') return 'ทีมจะเริ่มจากอีเมลก่อนหากช่องทางส่งอัตโนมัติพร้อมใช้งาน';
+      if (value === 'whatsapp_or_line_if_connected') return 'ทีมจะเริ่มจาก WhatsApp หรือ LINE หากช่องทางส่งอัตโนมัติพร้อมใช้งาน';
+      if (value === 'on_page_confirmation') return 'ตอนนี้การยืนยันแรกเกิดขึ้นบนหน้านี้ทันที';
+    }
+    if (value === 'email_if_connected') return 'The team will start with email when the automated sender is connected.';
+    if (value === 'whatsapp_or_line_if_connected') return 'The team will start with WhatsApp or LINE when the automated sender is connected.';
+    if (value === 'on_page_confirmation') return 'The first response is confirmed on this page immediately.';
+    return value;
+  }
 
   function safeSourcePage(): string | null {
     if (typeof window === 'undefined') return null;
@@ -112,6 +160,13 @@ export function LeadForm({
     if (!canSubmit) return;
 
     const submitIso = new Date().toISOString();
+    const contactPayload = {
+      name,
+      email: email.trim() || undefined,
+      phone: phone.trim() || undefined,
+      line: undefined,
+    };
+    const leadTrackingPayload = buildLeadTrackingPayload(locale, handoff, contactPayload);
 
     trackEvent('form_submit', pathname, {
       property_id: propertyId ?? null,
@@ -121,6 +176,9 @@ export function LeadForm({
       purpose: purpose || null,
       timeline: timeframe || null,
     });
+    if (leadTrackingPayload) {
+      trackEvent('lead_submit', pathname, leadTrackingPayload);
+    }
 
     // Compute lead quality score for CRM enrichment
     const leadScore = calculateLeadScore({
@@ -140,15 +198,42 @@ export function LeadForm({
       timeframe ? `${dict.common.leadForm.timeframeLabel}: ${dict.common.leadForm.timeframeOptions.find((item) => item.value === timeframe)?.label ?? timeframe}` : null,
     ].filter((item): item is string => Boolean(item));
 
-    const composedMessage = briefLines.length
-      ? `${message.trim()}\n\n${dict.common.leadForm.detailsHeading}:\n${briefLines.join('\n')}`
-      : message.trim();
+    const handoffLines = Array.from(
+      new Set([
+        ...buildLeadHandoffSummary(locale, handoff),
+        ...(contextSummary ?? []).map((item) => item.trim()).filter(Boolean),
+      ]),
+    );
+    const handoffBlock = handoffLines.length
+      ? `${locale === 'th' ? 'บริบทที่ส่งต่อ' : 'Lead context'}:\n${handoffLines.join('\n')}`
+      : null;
+
+    const composedSections = [
+      message.trim(),
+      handoffBlock,
+      briefLines.length ? `${dict.common.leadForm.detailsHeading}:\n${briefLines.join('\n')}` : null,
+    ].filter((item): item is string => Boolean(item));
+    const composedMessage = composedSections.join('\n\n');
 
     const normalizedPreferredArea = normalizeTagToken(preferredArea);
-    const inquiryTags = [
+    const normalizedContextTags = (inquiryTags ?? []).map((item) => item.trim()).filter(Boolean);
+    const normalizedHandoffTags = buildLeadHandoffTags(
+      handoff
+        ? {
+            ...handoff,
+            budgetRange: handoff.budgetRange ?? (budgetBand || undefined),
+            location: handoff.location ?? (preferredArea.trim() || undefined),
+          }
+        : undefined,
+    );
+    const dedupedInquiryTags = Array.from(new Set([
       normalizedPreferredArea ? `preferred_area:${normalizedPreferredArea}` : null,
       purpose ? `purpose:${normalizeTagToken(purpose)}` : null,
-    ].filter((item): item is string => Boolean(item));
+      inquiryIntent ? `intent:${normalizeTagToken(inquiryIntent)}` : null,
+      inquirySource ? `lead_source:${normalizeTagToken(inquirySource)}` : null,
+      ...normalizedHandoffTags,
+      ...normalizedContextTags,
+    ].filter((item): item is string => Boolean(item))));
 
     try {
       const res = await fetch('/api/v1/inquiries', {
@@ -161,7 +246,7 @@ export function LeadForm({
           phone: phone.trim() || null,
           message: composedMessage,
           consent_given: true,
-          intent: purpose || 'general',
+          intent: inquiryIntent || purpose || 'general',
           budget_band: budgetBand || null,
           timeline: timeframe || null,
           // Operational metadata (not user PII)
@@ -171,7 +256,7 @@ export function LeadForm({
           submit_timestamp: submitIso,
           locale,
           source_platform: 'website',
-          tags: inquiryTags,
+          tags: dedupedInquiryTags,
           // Lead quality score (0–100 + tier)
           lead_score: leadScore.total,
           lead_tier: leadScore.tier,
@@ -183,22 +268,33 @@ export function LeadForm({
         throw new Error(formatApiError(text) || `HTTP ${res.status}`);
       }
 
-      let id: string | undefined;
+      let parsed: InquirySuccessPayload | null = null;
       try {
-        const parsed = JSON.parse(text) as { id?: string };
-        id = parsed.id;
+        parsed = JSON.parse(text) as InquirySuccessPayload;
       } catch {
         // ignore
       }
 
-      setStatus({ state: 'success', id });
-      trackEvent('form_success', pathname, { property_id: propertyId ?? null });
+      setStatus({
+        state: 'success',
+        id: parsed?.id,
+        confirmationTitle: parsed?.sales_automation?.confirmation_title,
+        confirmationBody: parsed?.sales_automation?.confirmation_body,
+        autoResponseMessage: parsed?.sales_automation?.auto_response_message,
+        responseChannel: parsed?.sales_automation?.response_channel,
+        responseSlaSeconds: parsed?.sales_automation?.response_sla_seconds,
+      });
+      trackEvent('form_success', pathname, {
+        property_id: propertyId ?? null,
+        ...(leadTrackingPayload ?? {}),
+      });
       // Attribute conversion to active experiments
       trackExperimentOutcomes('form_submit', 1, trackEvent, pathname);
     } catch (err) {
       trackEvent('form_error', pathname, {
         property_id: propertyId ?? null,
         message: err instanceof Error ? err.message : 'Failed',
+        ...(leadTrackingPayload ?? {}),
       });
       setStatus({
         state: 'error',
@@ -217,7 +313,10 @@ export function LeadForm({
         onFocusCapture={() => {
           if (didStart) return;
           setDidStart(true);
-          trackEvent('form_start', pathname, { property_id: propertyId ?? null });
+          trackEvent('form_start', pathname, {
+            property_id: propertyId ?? null,
+            ...(buildLeadTrackingPayload(locale, handoff) ?? {}),
+          });
         }}
       >
         {/* Honeypot field (must remain hidden). */}
@@ -413,7 +512,19 @@ export function LeadForm({
 
         <div id="lead-form-status" aria-live="assertive" aria-atomic="true">
           {status.state === 'success' ? (
-            <p className="form-success" role="status">{dict.common.leadForm.success}{status.id ? ` (id: ${status.id})` : ''}</p>
+            <div className="form-success" role="status">
+              <p><strong>{status.confirmationTitle ?? dict.common.leadForm.success}</strong>{status.id ? ` (id: ${status.id})` : ''}</p>
+              {status.confirmationBody ? <p>{status.confirmationBody}</p> : null}
+              {status.autoResponseMessage ? <p>{status.autoResponseMessage}</p> : null}
+              {status.responseSlaSeconds ? (
+                <p>
+                  {locale === 'th'
+                    ? `ระบบยืนยันคำขอนี้ภายใน ${status.responseSlaSeconds} วินาทีตาม SLA ของ sales layer`
+                    : `This request was confirmed within the ${status.responseSlaSeconds}-second sales-layer SLA.`}
+                </p>
+              ) : null}
+              {describeResponseChannel(status.responseChannel) ? <p>{describeResponseChannel(status.responseChannel)}</p> : null}
+            </div>
           ) : null}
 
           {status.state === 'error' ? (

@@ -1,26 +1,18 @@
-/**
- * All tracked event types in the AMP analytics pipeline.
- *
- * - `page_view`           — Fires on every client-side navigation.
- * - `path_entry_click`    — User clicks an investment-path entry (invest/buy/rent).
- * - `cta_click`           — Any call-to-action interaction.
- * - `featured_click`      — Click on a featured project card.
- * - `form_start`          — User focuses the first field in LeadForm.
- * - `form_submit`         — LeadForm submission attempt.
- * - `form_error`          — Server rejected the form submission.
- * - `form_success`        — LeadForm submission succeeded.
- * - `experiment_exposure`  — User was shown an experiment variant.
- * - `experiment_outcome`   — Conversion attributed to an experiment.
- * - `segment_entry_click`  — User clicks a buyer-segment entry card.
- * - `home_intent_selector_click` — User chooses an intent path on the home hero.
- * - `home_trust_proof_click` — User opens a trust/process proof CTA from home.
- * - `home_advisory_content_click` — User opens advisory content from home.
- * - `home_final_cta_click` — User clicks a closing CTA from the final conversion block.
- */
+import {
+  inferDeviceType,
+  inferLocaleFromPath,
+  sanitizeConversionPayload,
+  type ConversionPayload,
+} from './conversion';
+
 export type EventType =
   | 'page_view'
   | 'path_entry_click'
   | 'cta_click'
+  | 'lead_submit'
+  | 'shortlist_action'
+  | 'compare_action'
+  | 'smart_finder_result_click'
   | 'featured_click'
   | 'form_start'
   | 'form_submit'
@@ -35,6 +27,8 @@ export type EventType =
   | 'home_final_cta_click';
 
 const SESSION_KEY = 'amp_session_id_v1';
+const DEDUPE_WINDOW_MS = 1200;
+const recentEvents = new Map<string, number>();
 
 function safeWindow(): Window | null {
   return typeof window === 'undefined' ? null : window;
@@ -87,6 +81,48 @@ function getExperimentContext(): Record<string, string> {
   }
 }
 
+function getLocale(pathname: string): 'en' | 'th' {
+  return inferLocaleFromPath(pathname);
+}
+
+function buildNormalizedPayload(
+  eventName: EventType,
+  page: string,
+  payload?: Record<string, unknown>,
+): ConversionPayload {
+  const base = sanitizeConversionPayload(payload ?? {});
+  const context = sanitizeConversionPayload({
+    ...(typeof base.context === 'object' && base.context ? base.context as Record<string, unknown> : {}),
+  });
+  const device = inferDeviceType(safeWindow()?.innerWidth ?? null);
+  const locale = typeof base.locale === 'string' ? (base.locale as 'en' | 'th') : getLocale(page);
+
+  return {
+    ...base,
+    source_route: typeof base.source_route === 'string' ? base.source_route : 'shared',
+    locale,
+    device: (base.device as ConversionPayload['device']) ?? device,
+    timestamp: new Date().toISOString(),
+    context,
+    debug_event_type: eventName,
+  } as ConversionPayload;
+}
+
+function shouldSkipDuplicate(eventName: EventType, page: string, payload: ConversionPayload): boolean {
+  const fingerprint = JSON.stringify([eventName, page, payload]);
+  const now = Date.now();
+  const previous = recentEvents.get(fingerprint);
+  recentEvents.set(fingerprint, now);
+
+  for (const [key, timestamp] of recentEvents.entries()) {
+    if (now - timestamp > DEDUPE_WINDOW_MS) {
+      recentEvents.delete(key);
+    }
+  }
+
+  return typeof previous === 'number' && now - previous < DEDUPE_WINDOW_MS;
+}
+
 /**
  * Send an analytics event to the backend tracking endpoint.
  *
@@ -103,26 +139,55 @@ export async function trackEvent(event_type: EventType, page: string, payload?: 
   if (!w) return;
 
   const session_id = getOrCreateSessionId();
+  const normalizedPayload = buildNormalizedPayload(event_type, page, payload);
+  if (shouldSkipDuplicate(event_type, page, normalizedPayload)) return;
 
   // Enrich every event with active experiment assignments for downstream analysis
   const experiments = getExperimentContext();
+  const source = sanitizeConversionPayload({
+    page,
+    locale: normalizedPayload.locale,
+    route: normalizedPayload.source_route,
+    event_type,
+  });
+  const actor = sanitizeConversionPayload({
+    anonymous_id: session_id,
+    session_id,
+    device: normalizedPayload.device,
+    user_agent: w.navigator?.userAgent ?? null,
+  });
+  const context = sanitizeConversionPayload({
+    ...(typeof normalizedPayload.context === 'object' && normalizedPayload.context
+      ? normalizedPayload.context as Record<string, unknown>
+      : {}),
+    ...(Object.keys(experiments).length > 0 ? { experiments } : {}),
+  });
 
   try {
-    await fetch('/telemetry', {
+    if (process.env.NODE_ENV !== 'production') {
+      console.info('[TRACK]', event_type, normalizedPayload);
+    }
+
+    const response = await fetch('/api/v1/events', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        event_type,
-        page,
-        session_id,
-        payload: {
-          ...(payload ?? {}),
-          ...(Object.keys(experiments).length > 0 ? { _experiments: experiments } : {}),
-        },
+        event_name: event_type,
+        path: page,
+        locale: normalizedPayload.locale,
+        source,
+        actor,
+        context,
+        payload: normalizedPayload,
       }),
       keepalive: true,
     });
+    if (!response.ok && process.env.NODE_ENV !== 'production') {
+      console.warn('[TRACK_FAIL]', event_type, response.status);
+    }
   } catch {
-    // best-effort only
+    if (process.env.NODE_ENV !== 'production') {
+      console.warn('[TRACK_FAIL]', event_type, normalizedPayload);
+    }
   }
 }

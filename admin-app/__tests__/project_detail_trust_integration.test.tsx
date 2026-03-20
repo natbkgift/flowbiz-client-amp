@@ -126,8 +126,8 @@ describe('project detail trust integration', () => {
     expect(screen.getByRole('heading', { name: 'Gaps to confirm' })).toBeTruthy();
     expect(screen.queryByRole('heading', { name: 'Pros' })).toBeNull();
     expect(screen.queryByRole('heading', { name: 'Cons' })).toBeNull();
-    expect(screen.getByText(/area context: central pattaya/i)).toBeTruthy();
-    expect(screen.getByText(/published developer: beta developments/i)).toBeTruthy();
+    expect(screen.getAllByText(/area context: central pattaya/i).length).toBeGreaterThan(0);
+    expect(screen.getAllByText(/published developer: beta developments/i).length).toBeGreaterThan(0);
     expect(screen.getByText(/check live availability around this project/i)).toBeTruthy();
     expect(screen.getByText(/confirm current rental demand and buyer fit around central pattaya/i)).toBeTruthy();
     expect(screen.getByText(/confirm which unit mix and active availability still match beta tower/i)).toBeTruthy();

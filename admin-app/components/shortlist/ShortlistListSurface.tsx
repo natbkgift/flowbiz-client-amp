@@ -4,10 +4,11 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 
-import { withLocaleQuery } from '@/app/_lib/public-advisory';
+import { buildLeadCaptureQuery, withLocaleQuery } from '@/app/_lib/public-advisory';
 import { resolveImageUrl, formatPriceTHB } from '@/app/_lib/public-api-shared';
 import { withLocale } from '@/app/_lib/i18n/routing';
 import { EmptyStateCard, InlineStatusMessage, LoadingCardGrid } from '@/components/ui/StateBlocks';
+import { trackEvent } from '@/lib/analytics';
 import { SHORTLIST_UPDATED_EVENT, fetchCurrentShortlist, publishShortlist, readCachedShortlistForCurrentOwner, removePropertyFromShortlist, resolveShortlistCompareProjects, shareCurrentShortlist, type ShortlistCompareProject, type ShortlistDetail, type ShortlistPropertyItem } from '@/lib/shortlist';
 
 const SHORTLIST_FALLBACK_IMAGE = '/images/property-placeholder.svg';
@@ -46,6 +47,7 @@ export function ShortlistListSurface({ locale }: { locale: 'en' | 'th' }) {
   const [shareUrl, setShareUrl] = useState<string | null>(null);
   const [shareNotice, setShareNotice] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const compareProjectIds = compareProjects.map((item) => item.projectId).filter(Boolean);
 
   function syncFromShortlist(shortlist: ShortlistDetail | null) {
     const shortlistItems = [...(shortlist?.items ?? [])].sort((left, right) => left.position - right.position);
@@ -145,6 +147,19 @@ export function ShortlistListSurface({ locale }: { locale: 'en' | 'th' }) {
 
     setPendingPropertyId(propertyId);
     setError(null);
+    trackEvent('shortlist_action', window.location.pathname || `/${locale}/shortlist`, {
+      source_route: 'shortlist',
+      cta_type: 'secondary',
+      cta_label: locale === 'th' ? 'นำออกจาก shortlist' : 'Remove from shortlist',
+      entity_type: 'property',
+      entity_id: propertyId,
+      user_intent: 'research',
+      context: {
+        from_shortlist: true,
+        compare_ids: compareProjectIds,
+      },
+      action: 'remove',
+    });
     try {
       const response = await removePropertyFromShortlist({
         locale,
@@ -164,6 +179,18 @@ export function ShortlistListSurface({ locale }: { locale: 'en' | 'th' }) {
     setIsSharing(true);
     setError(null);
     setShareNotice(null);
+    trackEvent('cta_click', window.location.pathname || `/${locale}/shortlist`, {
+      source_route: 'shortlist',
+      cta_type: 'tertiary',
+      cta_label: locale === 'th' ? 'สร้างลิงก์แชร์' : 'Create share link',
+      entity_type: 'shortlist',
+      entity_name: 'shortlist',
+      user_intent: 'research',
+      context: {
+        from_shortlist: true,
+        compare_ids: compareProjectIds,
+      },
+    });
 
     try {
       const response = await shareCurrentShortlist(locale);
@@ -226,43 +253,90 @@ export function ShortlistListSurface({ locale }: { locale: 'en' | 'th' }) {
   const compareProjectNames = compareProjects
     .map((item) => item.projectName)
     .filter((value): value is string => Boolean(value));
+  const shortlistProjectNames = Array.from(new Set(items.map((item) => item.project || item.title).filter(Boolean)));
   const compareHref = compareProjects.length >= 2
     ? withLocaleQuery(locale, '/compare', {
         ids: compareProjects.map((item) => item.projectId).join(','),
-        intent: 'shortlist_review',
-        source: 'shortlist_compare',
+        ...buildLeadCaptureQuery({
+          intent: 'project_compare',
+          source: 'shortlist_compare',
+          projects: compareProjectNames,
+          buyerFit: 'shortlist_narrowing',
+          signalLevel: compareProjects.length >= 3 ? 'high' : 'medium',
+        }),
       })
     : null;
+  const contactHref = withLocaleQuery(locale, '/contact', buildLeadCaptureQuery({
+    intent: 'project_shortlist',
+    source: 'shortlist_contact',
+    projects: shortlistProjectNames,
+    buyerFit: 'shortlist_narrowing',
+    signalLevel: items.length >= 3 ? 'high' : 'medium',
+  }));
 
   return (
     <div className="shortlist-surface">
-      <div className="cta-strip">
+      <div className="cta-strip shortlist-surface__summary">
         <div className="cta-strip__text">
           {locale === 'th'
             ? `Shortlist นี้มี ${items.length} รายการสำหรับทบทวนต่อ โดยยังแยกจาก flow การติดต่อและ CRM ตาม guardrail เดิม`
             : `This shortlist currently contains ${items.length} listings for review, while remaining separate from contact handoff and CRM flows.`}
         </div>
-        <div className="card-actions">
+        <div className="card-actions shortlist-surface__summary-actions">
           {compareHref ? (
-            <Link className="btn btn-primary" href={compareHref}>
+            <Link
+              className="btn btn-cta"
+              href={compareHref}
+              data-amp-event-type="compare_action"
+              data-amp-event-payload={JSON.stringify({
+                source_route: 'shortlist',
+                cta_type: 'primary',
+                cta_label: locale === 'th'
+                  ? `เทียบ ${compareProjects.length} โครงการจาก shortlist`
+                  : `Compare ${compareProjects.length} saved projects`,
+                entity_type: 'shortlist',
+                entity_name: 'shortlist',
+                user_intent: 'compare',
+                context: {
+                  from_shortlist: true,
+                  compare_ids: compareProjectIds,
+                },
+              })}
+            >
               {locale === 'th'
                 ? `เทียบ ${compareProjects.length} โครงการจาก shortlist`
                 : `Compare ${compareProjects.length} saved projects`}
             </Link>
           ) : null}
-          <button type="button" className="btn btn-primary" onClick={handleShare} disabled={isSharing}>
+          <Link
+            className="btn btn-secondary"
+            href={contactHref}
+            data-amp-event-type="cta_click"
+            data-amp-event-payload={JSON.stringify({
+              source_route: 'shortlist',
+              cta_type: 'secondary',
+              cta_label: locale === 'th' ? 'คุยกับที่ปรึกษา' : 'Speak to an advisor',
+              entity_type: 'shortlist',
+              entity_name: 'shortlist',
+              user_intent: compareProjects.length >= 2 ? 'compare' : 'research',
+              context: {
+                from_shortlist: true,
+                compare_ids: compareProjectIds,
+              },
+            })}
+          >
+            {locale === 'th' ? 'คุยกับที่ปรึกษา' : 'Speak to an advisor'}
+          </Link>
+          <Link className="btn btn-tertiary" href={withLocale(locale, '/buy')}>
+            {locale === 'th' ? 'ดู buy listings เพิ่ม' : 'Browse buy listings'}
+          </Link>
+          <button type="button" className="btn btn-tertiary" onClick={handleShare} disabled={isSharing}>
             {isSharing
               ? (locale === 'th' ? 'กำลังสร้างลิงก์แชร์…' : 'Creating share link…')
               : shareUrl
                 ? (locale === 'th' ? 'คัดลอกลิงก์แชร์อีกครั้ง' : 'Copy share link again')
                 : (locale === 'th' ? 'สร้างลิงก์แชร์' : 'Create share link')}
           </button>
-          <Link className="btn btn-secondary" href={withLocale(locale, '/buy')}>
-            {locale === 'th' ? 'ดู buy listings เพิ่ม' : 'Browse buy listings'}
-          </Link>
-          <Link className="btn btn-tertiary" href={withLocale(locale, '/contact')}>
-            {locale === 'th' ? 'คุยกับที่ปรึกษา' : 'Speak to an advisor'}
-          </Link>
         </div>
       </div>
 
@@ -370,7 +444,26 @@ export function ShortlistListSurface({ locale }: { locale: 'en' | 'th' }) {
                 </div>
 
                 <div className="card-actions">
-                  <Link className="btn btn-primary" href={propertyHref}>
+                  <Link
+                    className="btn btn-primary"
+                    href={propertyHref}
+                    data-amp-event-type="cta_click"
+                    data-amp-event-payload={JSON.stringify({
+                      source_route: 'shortlist',
+                      cta_type: 'primary',
+                      cta_label: getPrimaryListingActionLabel(locale, item),
+                      entity_type: 'property',
+                      entity_id: item.property_id,
+                      entity_name: item.title,
+                      user_intent: 'research',
+                      bedroom: item.bedrooms != null ? String(item.bedrooms) : undefined,
+                      location: item.location ?? undefined,
+                      context: {
+                        from_shortlist: true,
+                        compare_ids: compareProjectIds,
+                      },
+                    })}
+                  >
                     {getPrimaryListingActionLabel(locale, item)}
                   </Link>
                   <button

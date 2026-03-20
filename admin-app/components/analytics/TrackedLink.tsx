@@ -5,10 +5,11 @@ import { usePathname } from 'next/navigation';
 import type { ComponentProps, ReactNode } from 'react';
 
 import { trackEvent, type EventType } from '../../lib/analytics';
+import type { ConversionPayload } from '../../lib/conversion';
 
 type TrackedLinkProps = ComponentProps<typeof Link> & {
   eventType: EventType;
-  eventPayload?: Record<string, unknown>;
+  eventPayload?: ConversionPayload | Record<string, unknown>;
   children: ReactNode;
 };
 

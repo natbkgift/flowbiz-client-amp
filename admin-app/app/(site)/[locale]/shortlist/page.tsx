@@ -52,7 +52,17 @@ export default async function ShortlistPage(props: { params: Promise<{ locale: s
               className="btn btn-primary"
               href={`/${locale}/buy`}
               eventType="cta_click"
-              eventPayload={{ cta: 'browse_shortlist_inventory', from: 'shortlist_hero' }}
+              eventPayload={{
+                source_route: 'shortlist',
+                cta_type: 'primary',
+                cta_label: locale === 'th' ? 'ดู listings ที่บันทึกเพิ่มได้' : 'Browse shortlist-ready listings',
+                entity_type: 'shortlist',
+                entity_name: 'shortlist',
+                user_intent: 'research',
+                context: {
+                  from_shortlist: true,
+                },
+              }}
             >
               {locale === 'th' ? 'ดู listings ที่บันทึกเพิ่มได้' : 'Browse shortlist-ready listings'}
             </TrackedLink>
@@ -60,7 +70,17 @@ export default async function ShortlistPage(props: { params: Promise<{ locale: s
               className="btn btn-secondary"
               href="#shortlist-review-surface"
               eventType="cta_click"
-              eventPayload={{ cta: 'review_saved_listings', from: 'shortlist_hero' }}
+              eventPayload={{
+                source_route: 'shortlist',
+                cta_type: 'tertiary',
+                cta_label: locale === 'th' ? 'ไปยังรายการที่บันทึกไว้' : 'Jump to saved listings',
+                entity_type: 'shortlist',
+                entity_name: 'shortlist',
+                user_intent: 'research',
+                context: {
+                  from_shortlist: true,
+                },
+              }}
             >
               {locale === 'th' ? 'ไปยังรายการที่บันทึกไว้' : 'Jump to saved listings'}
             </TrackedLink>

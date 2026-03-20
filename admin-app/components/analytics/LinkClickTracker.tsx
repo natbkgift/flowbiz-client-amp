@@ -3,8 +3,9 @@
 import { useEffect } from 'react';
 
 import { trackEvent, type EventType } from '@/lib/analytics';
+import type { ConversionPayload } from '@/lib/conversion';
 
-function safeParseJson(value: string | null): Record<string, unknown> | undefined {
+function safeParseJson(value: string | null): ConversionPayload | Record<string, unknown> | undefined {
   if (!value) return undefined;
   try {
     const parsed = JSON.parse(value);

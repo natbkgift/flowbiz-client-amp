@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { Container } from '@/components/layout/Container';
 import {
   buildAdvisorWhatsApp,
+  buildLeadCaptureQuery,
   buildInvestorToolQuery,
   getAdvisoryLabels,
   getAdvisoryProofs,
@@ -285,13 +286,27 @@ export default async function ComparePage(
             href: withLocale(locale, '/smart-finder'),
             label: dict.compare.goToSmartFinder,
             id: 'compare_go_smart_finder_primary',
-            eventPayload: { cta: 'go_to_smart_finder', from: 'compare_hero' },
+            eventPayload: {
+              source_route: 'compare',
+              cta_type: 'primary',
+              cta_label: dict.compare.goToSmartFinder,
+              entity_type: 'route',
+              entity_name: 'smart-finder',
+              user_intent: 'research',
+            },
           }}
           secondaryAction={{
             href: withLocale(locale, '/projects'),
             label: dict.compare.browseProjects,
             id: 'compare_browse_projects_secondary',
-            eventPayload: { cta: 'browse_projects', from: 'compare_hero' },
+            eventPayload: {
+              source_route: 'compare',
+              cta_type: 'secondary',
+              cta_label: dict.compare.browseProjects,
+              entity_type: 'route',
+              entity_name: 'projects',
+              user_intent: 'research',
+            },
           }}
         />
 
@@ -311,10 +326,37 @@ export default async function ComparePage(
                   ))}
                 </ul>
                 <div className="cta-row mt-4">
-                  <Link className="btn btn-secondary" href={withLocale(locale, '/projects')}>
+                  <Link
+                    className="btn btn-secondary"
+                    href={withLocale(locale, '/projects')}
+                    data-amp-event-type="cta_click"
+                    data-amp-event-payload={JSON.stringify({
+                      source_route: 'compare',
+                      cta_type: 'secondary',
+                      cta_label: dict.compare.browseProjects,
+                      entity_type: 'route',
+                      entity_name: 'projects',
+                      user_intent: 'research',
+                    })}
+                  >
                     {dict.compare.browseProjects}
                   </Link>
-                  <Link className="btn btn-cta" href={contactHref}>
+                  <Link
+                    className="btn btn-cta"
+                    href={contactHref}
+                    data-amp-event-type="cta_click"
+                    data-amp-event-payload={JSON.stringify({
+                      source_route: 'compare',
+                      cta_type: 'primary',
+                      cta_label: dict.compare.getInvestmentPlan,
+                      entity_type: 'project',
+                      entity_name: ids.join(', '),
+                      user_intent: investorContextPresent ? 'invest' : 'compare',
+                      context: {
+                        compare_ids: ids,
+                      },
+                    })}
+                  >
                     {dict.compare.getInvestmentPlan}
                   </Link>
                 </div>
@@ -349,6 +391,19 @@ export default async function ComparePage(
   const items = evals.filter(Boolean) as ProjectEvaluationResponse[];
   const areaComparisons = await buildAreaComparisonEntries(items, locale);
   const decisionSupportSummary = buildDecisionSupportSummary({ locale, items, areaComparisons });
+  const compareContactHref = withLocaleQuery(locale, '/contact', {
+    ...buildInvestorToolQuery({
+      ...investorContext,
+      ids,
+    }),
+    ...buildLeadCaptureQuery({
+      intent: 'project_compare',
+      source: 'compare_hero',
+      projects: items.map((item) => item.project.slug ?? item.project.name),
+      buyerFit: investorContextPresent ? 'investor_compare' : 'shortlist_narrowing',
+      signalLevel: items.length >= 3 ? 'high' : 'medium',
+    }),
+  });
 
   return (
     <main id="main-content">
@@ -386,16 +441,36 @@ export default async function ComparePage(
           },
         ]}
         primaryAction={{
-          href: withLocaleQuery(locale, '/contact', { intent: 'consultation', source: 'compare_hero' }),
+          href: compareContactHref,
           label: dict.compare.getInvestmentPlan,
           id: 'compare_consultation_hero',
-          eventPayload: { cta: 'get_investment_plan', from: 'compare_hero' },
+          eventPayload: {
+            source_route: 'compare',
+            cta_type: 'primary',
+            cta_label: dict.compare.getInvestmentPlan,
+            entity_type: 'project',
+            entity_name: items.map((item) => item.project.name).join(', '),
+            user_intent: investorContextPresent ? 'invest' : 'compare',
+            context: {
+              compare_ids: ids,
+            },
+          },
         }}
         secondaryAction={{
           href: withLocale(locale, '/smart-finder'),
           label: dict.advisory.useSmartFinder,
           id: 'compare_open_smart_finder',
-          eventPayload: { cta: 'use_smart_finder', from: 'compare_hero' },
+          eventPayload: {
+            source_route: 'compare',
+            cta_type: 'secondary',
+            cta_label: dict.advisory.useSmartFinder,
+            entity_type: 'route',
+            entity_name: 'smart-finder',
+            user_intent: 'research',
+            context: {
+              compare_ids: ids,
+            },
+          },
         }}
       />
 
@@ -479,7 +554,24 @@ export default async function ComparePage(
                     </div>
                     {area.areaSlug ? (
                       <div className="card-actions mt-3">
-                        <Link className="btn btn-secondary" href={withLocale(locale, `/areas/${encodeURIComponent(area.areaSlug)}`)}>
+                        <Link
+                          className="btn btn-secondary"
+                          href={withLocale(locale, `/areas/${encodeURIComponent(area.areaSlug)}`)}
+                          data-amp-event-type="cta_click"
+                          data-amp-event-payload={JSON.stringify({
+                            source_route: 'compare',
+                            cta_type: 'secondary',
+                            cta_label: locale === 'th' ? 'เปิด area brief' : 'Open area brief',
+                            entity_type: 'area',
+                            entity_id: area.areaSlug,
+                            entity_name: area.areaName,
+                            user_intent: 'research',
+                            context: {
+                              compare_ids: ids,
+                              area: area.areaName,
+                            },
+                          })}
+                        >
                           {locale === 'th' ? 'เปิด area brief' : 'Open area brief'}
                         </Link>
                       </div>
@@ -525,7 +617,22 @@ export default async function ComparePage(
                     <th>{dict.compare.field}</th>
                     {items.map((ev) => (
                       <th key={ev.project.id}>
-                        <Link href={withLocale(locale, `/projects/${encodeURIComponent(ev.project.slug)}`)}>
+                        <Link
+                          href={withLocale(locale, `/projects/${encodeURIComponent(ev.project.slug)}`)}
+                          data-amp-event-type="compare_action"
+                          data-amp-event-payload={JSON.stringify({
+                            source_route: 'compare',
+                            cta_type: 'secondary',
+                            cta_label: ev.project.name,
+                            entity_type: 'project',
+                            entity_id: ev.project.id,
+                            entity_name: ev.project.name,
+                            user_intent: 'compare',
+                            context: {
+                              compare_ids: ids,
+                            },
+                          })}
+                        >
                           {ev.project.name}
                         </Link>
                       </th>
@@ -586,13 +693,58 @@ export default async function ComparePage(
             </div>
 
             <div className="cta-row mt-4">
-              <Link className="btn btn-secondary" href={withLocale(locale, '/smart-finder')}>
+              <Link
+                className="btn btn-secondary"
+                href={withLocale(locale, '/smart-finder')}
+                data-amp-event-type="cta_click"
+                data-amp-event-payload={JSON.stringify({
+                  source_route: 'compare',
+                  cta_type: 'secondary',
+                  cta_label: dict.compare.backToSmartFinder,
+                  entity_type: 'route',
+                  entity_name: 'smart-finder',
+                  user_intent: 'research',
+                  context: {
+                    compare_ids: ids,
+                  },
+                })}
+              >
                 {dict.compare.backToSmartFinder}
               </Link>
-              <Link className="btn btn-tertiary" href={withLocale(locale, '/buy')}>
+              <Link
+                className="btn btn-tertiary"
+                href={withLocale(locale, '/buy')}
+                data-amp-event-type="cta_click"
+                data-amp-event-payload={JSON.stringify({
+                  source_route: 'compare',
+                  cta_type: 'tertiary',
+                  cta_label: locale === 'th' ? 'ดู listings ที่ save เข้า shortlist ได้' : 'Browse shortlist-ready listings',
+                  entity_type: 'route',
+                  entity_name: 'buy',
+                  user_intent: 'research',
+                  context: {
+                    compare_ids: ids,
+                  },
+                })}
+              >
                 {locale === 'th' ? 'ดู listings ที่ save เข้า shortlist ได้' : 'Browse shortlist-ready listings'}
               </Link>
-              <Link className="btn btn-cta" href={contactHref}>
+              <Link
+                className="btn btn-cta"
+                href={contactHref}
+                data-amp-event-type="cta_click"
+                data-amp-event-payload={JSON.stringify({
+                  source_route: 'compare',
+                  cta_type: 'primary',
+                  cta_label: dict.compare.getInvestmentPlan,
+                  entity_type: 'project',
+                  entity_name: ids.join(', '),
+                  user_intent: investorContextPresent ? 'invest' : 'compare',
+                  context: {
+                    compare_ids: ids,
+                  },
+                })}
+              >
                 {dict.compare.getInvestmentPlan}
               </Link>
             </div>

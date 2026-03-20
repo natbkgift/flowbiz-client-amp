@@ -6,6 +6,7 @@ import { useEffect, useMemo, useState } from 'react';
 
 import { withLocale } from '@/app/_lib/i18n/routing';
 import { buildBuyingCostAdvisorQuery, withLocaleQuery } from '@/app/_lib/public-advisory';
+import { trackEvent } from '@/lib/analytics';
 import {
   buildBuyingCostShareQuery,
   DEFAULT_BUYING_COST_ASSUMPTION_SET_ID,
@@ -770,10 +771,50 @@ export function BuyingCostEstimatorShell({ locale }: { locale: Locale }) {
           <h2 className="card-title">{copy.nextStepTitle}</h2>
           <p className="card-subtitle">{copy.nextStepBody}</p>
           <div className="cta-row mt-4">
-            <Link className="btn btn-cta" href={contactHref}>
+            <Link
+              className="btn btn-cta"
+              href={contactHref}
+              onClick={() => {
+                trackEvent('cta_click', pathname ?? withLocale(locale, '/buying-cost-estimator'), {
+                  source_route: 'estimator',
+                  cta_type: 'primary',
+                  cta_label: copy.contactLabel,
+                  entity_type: 'estimate',
+                  entity_name: 'buying_cost_estimate',
+                  user_intent: 'buy',
+                  context: {
+                    estimator_result: {
+                      property_price: parsedPrice ?? '',
+                      government_fees: estimate?.government_fees ?? '',
+                      closing_cost: estimate?.closing_cost ?? '',
+                      total_cash_needed: estimate?.total_cash_needed ?? '',
+                    },
+                  },
+                });
+              }}
+            >
               {copy.contactLabel}
             </Link>
-            <Link className="btn btn-secondary" href={withLocale(locale, '/calculator')}>
+            <Link
+              className="btn btn-secondary"
+              href={withLocale(locale, '/calculator')}
+              onClick={() => {
+                trackEvent('cta_click', pathname ?? withLocale(locale, '/buying-cost-estimator'), {
+                  source_route: 'estimator',
+                  cta_type: 'secondary',
+                  cta_label: copy.calculatorLabel,
+                  entity_type: 'route',
+                  entity_name: 'calculator',
+                  user_intent: 'invest',
+                  context: {
+                    estimator_result: {
+                      property_price: parsedPrice ?? '',
+                      total_cash_needed: estimate?.total_cash_needed ?? '',
+                    },
+                  },
+                });
+              }}
+            >
               {copy.calculatorLabel}
             </Link>
           </div>

@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import Image from 'next/image';
 
-import { getAdvisoryLabels, getAdvisoryProofs, withLocaleQuery } from '@/app/_lib/public-advisory';
+import { buildLeadCaptureQuery, getAdvisoryLabels, getAdvisoryProofs, withLocaleQuery } from '@/app/_lib/public-advisory';
 import { TrackedLink } from '@/components/analytics/TrackedLink';
 import { Container } from '@/components/layout/Container';
 import { Breadcrumbs } from '@/components/layout/Breadcrumbs';
@@ -467,9 +467,38 @@ export default async function PropertyPage(props: PageProps) {
               <TrackedLink
                 id="property_consultation_primary"
                 className="btn btn-cta"
-                href={withLocaleQuery(locale, '/contact', { intent: 'listing_consultation', slug: params.slug })}
+                href={withLocaleQuery(locale, '/contact', buildLeadCaptureQuery({
+                  intent: 'project_consultation',
+                  source: 'property_detail',
+                  sourceRoute: 'property',
+                  ctaType: 'primary',
+                  ctaLabel: dict.cta.speakToAdvisor,
+                  entityType: 'property',
+                  entityId: property.id,
+                  entityName: property.title,
+                  userIntent: property.type === 'rent' ? 'research' : 'buy',
+                  bedroom: property.bedrooms != null ? String(property.bedrooms) : undefined,
+                  location: property.city,
+                  area: property.city,
+                  message: locale === 'th'
+                    ? `ต้องการคุยต่อเกี่ยวกับ ${property.title} พร้อมข้อมูลยูนิต ราคา และทางเลือกใกล้เคียง`
+                    : `I want to continue the conversation about ${property.title} with the current unit facts, price, and nearby alternatives.`,
+                }))}
                 eventType="cta_click"
-                eventPayload={{ cta: 'speak_to_advisor', from: 'property_detail' }}
+                eventPayload={{
+                  source_route: 'property',
+                  cta_type: 'primary',
+                  cta_label: dict.cta.speakToAdvisor,
+                  entity_type: 'property',
+                  entity_id: property.id,
+                  entity_name: property.title,
+                  user_intent: property.type === 'rent' ? 'research' : 'buy',
+                  bedroom: property.bedrooms != null ? String(property.bedrooms) : undefined,
+                  location: property.city,
+                  context: {
+                    area: property.city,
+                  },
+                }}
               >
                 {dict.cta.speakToAdvisor}
               </TrackedLink>
@@ -691,6 +720,20 @@ export default async function PropertyPage(props: PageProps) {
                 heading={dict.property.interestedHeading}
                 propertyId={property.id}
                 defaultMessage={dict.property.interestedMessage}
+                handoff={{
+                  sourceRoute: 'property',
+                  ctaType: 'primary',
+                  ctaLabel: dict.property.interestedHeading,
+                  entityType: 'property',
+                  entityId: property.id,
+                  entityName: property.title,
+                  userIntent: property.type === 'rent' ? 'research' : 'buy',
+                  bedroom: property.bedrooms != null ? String(property.bedrooms) : undefined,
+                  location: property.city ?? undefined,
+                  context: {
+                    area: property.city ?? undefined,
+                  },
+                }}
               />
             </div>
           </aside>

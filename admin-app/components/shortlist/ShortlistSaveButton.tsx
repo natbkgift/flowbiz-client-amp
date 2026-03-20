@@ -104,9 +104,15 @@ export function ShortlistSaveButton({
       if (isSaved) {
         setPendingAction('remove');
         trackEvent('cta_click', pathname, {
-          cta: 'remove_from_shortlist',
-          from: sourceSurface,
-          property_id: propertyId,
+          source_route: sourceSurface === 'property_detail' ? 'property' : 'shared',
+          cta_type: 'secondary',
+          cta_label: locale === 'th' ? 'นำออกจาก shortlist' : 'Remove from shortlist',
+          entity_type: 'property',
+          entity_id: propertyId,
+          user_intent: 'research',
+          context: {
+            from_shortlist: true,
+          },
         });
         const response = await removePropertyFromShortlist({
           locale,
@@ -119,9 +125,15 @@ export function ShortlistSaveButton({
       } else {
         setPendingAction('save');
         trackEvent('cta_click', pathname, {
-          cta: 'save_to_shortlist',
-          from: sourceSurface,
-          property_id: propertyId,
+          source_route: sourceSurface === 'property_detail' ? 'property' : 'shared',
+          cta_type: 'secondary',
+          cta_label: locale === 'th' ? 'บันทึกลง shortlist' : 'Save to shortlist',
+          entity_type: 'property',
+          entity_id: propertyId,
+          user_intent: 'research',
+          context: {
+            from_shortlist: true,
+          },
         });
         const response = await savePropertyToShortlist({
           locale,

@@ -112,7 +112,7 @@ describe('compare area surface', () => {
     );
 
     expect(container.querySelector('#compare-area-context')).not.toBeNull();
-    expect(container.querySelector('#compare_consultation_hero')).toHaveAttribute('href', '/en/contact?intent=consultation&source=compare_hero');
+    expect(container.querySelector('#compare_consultation_hero')).toHaveAttribute('href', '/en/contact?ids=project-1%2Cproject-2&intent=project_compare&source=compare_hero&projects=alpha-residence%2Cbeta-bay&buyer_fit=shortlist_narrowing&signal_level=medium');
     expect(container.querySelector('#compare_open_smart_finder')).toHaveAttribute('href', '/en/smart-finder');
     expect(screen.getByRole('heading', { name: /area comparison read/i })).toBeTruthy();
     expect(screen.getByRole('heading', { name: 'Jomtien' })).toBeTruthy();

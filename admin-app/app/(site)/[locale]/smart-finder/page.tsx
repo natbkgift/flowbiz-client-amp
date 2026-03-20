@@ -109,16 +109,26 @@ export default async function SmartFinderPage(
   const headerTitle = dict.smartFinder.title;
   const headerSubtitle = dict.smartFinder.subtitle;
 
-  const results =
-    effectiveStep === 'results'
-      ? await fetchSmartFinder({
-          purpose: purpose!,
-          budget: budget!,
-          timeline: timeline!,
-          risk_tolerance: risk!,
-          foreign_quota: quota!,
-        })
-      : null;
+  let results: Awaited<ReturnType<typeof fetchSmartFinder>> | null = null;
+  let resultsUnavailable = false;
+
+  if (effectiveStep === 'results') {
+    try {
+      results = await fetchSmartFinder({
+        purpose: purpose!,
+        budget: budget!,
+        timeline: timeline!,
+        risk_tolerance: risk!,
+        foreign_quota: quota!,
+      });
+    } catch {
+      resultsUnavailable = true;
+    }
+  }
+  const topResultIds = results?.items?.slice(0, 3).map((item) => item.project_id).filter(Boolean) ?? [];
+  const compareTopHref = topResultIds.length >= 2
+    ? withLocaleQuery(locale, '/compare', { ids: topResultIds.join(',') })
+    : null;
 
   return (
     <main id="main-content">
@@ -159,13 +169,36 @@ export default async function SmartFinderPage(
           href: '#finder-steps',
           label: dict.advisory.useSmartFinder,
           id: 'smart_finder_start_primary',
-          eventPayload: { cta: 'start_smart_finder', from: 'smart_finder_hero' },
+          eventPayload: {
+            source_route: 'smart-finder',
+            cta_type: 'primary',
+            cta_label: dict.advisory.useSmartFinder,
+            entity_type: 'route',
+            entity_name: 'smart-finder',
+            user_intent: 'research',
+          },
         }}
         secondaryAction={{
           href: withLocaleQuery(locale, '/contact', { intent: 'consultation', source: 'smart_finder_hero' }),
           label: dict.cta.speakToAdvisor,
           id: 'smart_finder_contact_secondary',
-          eventPayload: { cta: 'speak_to_advisor', from: 'smart_finder_hero' },
+          eventPayload: {
+            source_route: 'smart-finder',
+            cta_type: 'secondary',
+            cta_label: dict.cta.speakToAdvisor,
+            entity_type: 'route',
+            entity_name: 'smart-finder',
+            user_intent: purpose === 'invest' ? 'invest' : 'research',
+            context: {
+              smart_finder_answers: {
+                purpose: purpose ?? '',
+                budget: budget ?? '',
+                timeline: timeline ?? '',
+                risk_tolerance: risk ?? '',
+                foreign_quota: quota ?? '',
+              },
+            },
+          },
         }}
       />
 
@@ -344,15 +377,86 @@ export default async function SmartFinderPage(
                   <p className="card-subtitle">
                     {dict.smartFinder.resultsDescription}
                   </p>
-                  <p className="guided-dialog__step">query_hash: {results?.query_hash}</p>
+                  {results?.query_hash ? <p className="guided-dialog__step">query_hash: {results.query_hash}</p> : null}
                   <div className="cta-row mt-4">
+                    {compareTopHref ? (
+                      <Link
+                        className="btn btn-cta"
+                        href={compareTopHref}
+                        id="smart_finder_compare_top_results"
+                        data-amp-event-type="compare_action"
+                        data-amp-event-payload={JSON.stringify({
+                          source_route: 'smart-finder',
+                          cta_type: 'primary',
+                          cta_label: locale === 'th' ? 'เทียบตัวเลือกแนะนำชุดนี้' : 'Compare these top suggestions',
+                          entity_type: 'recommendation',
+                          entity_name: 'smart_finder_top_results',
+                          user_intent: 'compare',
+                          context: {
+                            compare_ids: topResultIds,
+                            smart_finder_answers: {
+                              purpose: purpose ?? '',
+                              budget: budget ?? '',
+                              timeline: timeline ?? '',
+                              risk_tolerance: risk ?? '',
+                              foreign_quota: quota ?? '',
+                            },
+                          },
+                        })}
+                      >
+                        {locale === 'th' ? 'เทียบตัวเลือกแนะนำชุดนี้' : 'Compare these top suggestions'}
+                      </Link>
+                    ) : null}
                     <Link className="btn btn-secondary" href={withLocale(locale, '/buy')}>
                       {locale === 'th' ? 'ดู listings ที่ save เข้า shortlist ได้' : 'Browse shortlist-ready listings'}
                     </Link>
                   </div>
                 </div>
 
-                {results?.items?.length ? (
+                {resultsUnavailable ? (
+                  <div className="trust-box">
+                    <h3 className="trust-box__title">
+                      {locale === 'th' ? 'ผลลัพธ์จริงยังโหลดไม่สำเร็จในตอนนี้' : 'Live results are temporarily unavailable'}
+                    </h3>
+                    <p className="section-subtitle">
+                      {locale === 'th'
+                        ? 'เราเก็บ brief ที่คุณเลือกไว้แล้ว คุณสามารถลองใหม่อีกครั้ง เริ่มใหม่ หรือส่งบริบทนี้ต่อให้ที่ปรึกษาได้โดยไม่ต้องเดาเพิ่ม'
+                        : 'Your current brief is still intact. You can retry, start over, or hand this context to an advisor without guessing from a blank screen.'}
+                    </p>
+                    <div className="cta-row mt-4">
+                      <Link className="btn btn-cta" href={withLocale(locale, '/smart-finder')}>
+                        {dict.smartFinder.startOver}
+                      </Link>
+                      <Link
+                        className="btn btn-secondary"
+                        href={withLocaleQuery(locale, '/contact', { intent: 'consultation', source: 'smart_finder_results_error' })}
+                        data-amp-event-type="cta_click"
+                        data-amp-event-payload={JSON.stringify({
+                          source_route: 'smart-finder',
+                          cta_type: 'secondary',
+                          cta_label: dict.cta.speakToAdvisor,
+                          entity_type: 'recommendation',
+                          entity_name: 'smart_finder_results_error',
+                          user_intent: 'research',
+                          context: {
+                            smart_finder_answers: {
+                              purpose: purpose ?? '',
+                              budget: budget ?? '',
+                              timeline: timeline ?? '',
+                              risk_tolerance: risk ?? '',
+                              foreign_quota: quota ?? '',
+                            },
+                          },
+                        })}
+                      >
+                        {dict.cta.speakToAdvisor}
+                      </Link>
+                      <Link className="btn btn-tertiary" href={withLocale(locale, '/buy')}>
+                        {locale === 'th' ? 'ดู inventory เพิ่ม' : 'Browse more inventory'}
+                      </Link>
+                    </div>
+                  </div>
+                ) : results?.items?.length ? (
                   <div className="grid grid-3">
                     {results.items.map((it) => (
                       <div key={it.project_id} className="card">
@@ -364,11 +468,33 @@ export default async function SmartFinderPage(
                           ))}
                         </ul>
                         <div className="card-actions mt-4">
-                          <Link className="btn btn-cta" href={withLocale(locale, `/projects/${encodeURIComponent(it.slug)}`)}>
+                          <Link
+                            className="btn btn-cta"
+                            href={withLocale(locale, `/projects/${encodeURIComponent(it.slug)}`)}
+                            data-amp-event-type="smart_finder_result_click"
+                            data-amp-event-payload={JSON.stringify({
+                              source_route: 'smart-finder',
+                              cta_type: 'primary',
+                              cta_label: dict.smartFinder.viewProject,
+                              entity_type: 'project',
+                              entity_id: it.project_id,
+                              entity_name: it.name,
+                              user_intent: purpose === 'invest' ? 'invest' : 'buy',
+                              context: {
+                                smart_finder_answers: {
+                                  purpose: purpose ?? '',
+                                  budget: budget ?? '',
+                                  timeline: timeline ?? '',
+                                  risk_tolerance: risk ?? '',
+                                  foreign_quota: quota ?? '',
+                                },
+                              },
+                            })}
+                          >
                             {dict.smartFinder.viewProject}
                           </Link>
-                          <Link className="btn btn-secondary" href={withLocale(locale, `/compare?ids=${encodeURIComponent(it.project_id)}`)}>
-                            {dict.smartFinder.compare}
+                          <Link className="btn btn-secondary" href={withLocale(locale, '/buy')}>
+                            {locale === 'th' ? 'ดู inventory เพิ่ม' : 'Browse more inventory'}
                           </Link>
                         </div>
                       </div>

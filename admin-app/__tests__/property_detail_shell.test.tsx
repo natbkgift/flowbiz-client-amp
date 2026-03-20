@@ -60,9 +60,11 @@ describe('property detail shell', () => {
 
     expect(container.querySelector('#property-hero')).not.toBeNull();
     expect(container.querySelector('#property-primary-actions')).not.toBeNull();
-    expect(container.querySelector('#property_consultation_primary')).toHaveAttribute(
-      'href',
-      '/en/contact?intent=listing_consultation&slug=azure-condo',
+    expect(container.querySelector('#property_consultation_primary')?.getAttribute('href')).toContain(
+      '/en/contact?intent=project_consultation',
+    );
+    expect(container.querySelector('#property_consultation_primary')?.getAttribute('href')).toContain(
+      'entity_type=property',
     );
     expect(container.querySelector('#property-trust-cues')).not.toBeNull();
     expect(container.querySelector('#property-decision-cues')).not.toBeNull();
