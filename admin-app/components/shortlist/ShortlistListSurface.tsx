@@ -184,7 +184,21 @@ export function ShortlistListSurface({ locale }: { locale: 'en' | 'th' }) {
   }
 
   if (isLoading) {
-    return <LoadingCardGrid cards={3} />;
+    return (
+      <EmptyStateCard
+        title={locale === 'th' ? 'กำลังเช็ก shortlist ล่าสุด' : 'Checking your latest shortlist'}
+        body={
+          locale === 'th'
+            ? 'ถ้ามีรายการที่เคยบันทึกไว้ ระบบจะดึงกลับมาในหน้านี้อัตโนมัติ คุณยังเปิด inventory ต่อได้ทันทีระหว่างรอ.'
+            : 'If you already saved listings, they will reappear here automatically. You can keep browsing inventory while this page checks the latest shortlist state.'
+        }
+        action={(
+          <Link className="btn btn-secondary" href={withLocale(locale, '/buy')}>
+            {locale === 'th' ? 'ดู listings ที่บันทึกได้' : 'Browse shortlist-ready listings'}
+          </Link>
+        )}
+      />
+    );
   }
 
   if (error) {

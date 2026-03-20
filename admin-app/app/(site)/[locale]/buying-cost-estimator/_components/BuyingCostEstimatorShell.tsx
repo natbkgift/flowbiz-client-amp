@@ -549,16 +549,13 @@ export function BuyingCostEstimatorShell({ locale }: { locale: Locale }) {
   }
 
   return (
-    <div className="detail-layout advisory-detail-layout mt-6">
+    <div className="detail-layout advisory-detail-layout mt-4 decision-estimator-layout">
       <div className="detail-stack">
-        <section className="authority-card" aria-labelledby="buying-cost-estimator-shell-title">
-          <div className="section-header section-header--left">
-            <h2 className="section-title" id="buying-cost-estimator-shell-title">{copy.introTitle}</h2>
-            <p className="section-subtitle">{copy.introBody}</p>
-          </div>
-
-          <div className="grid grid-2 mt-6">
-            <div className="card">
+        <section className="authority-card decision-estimator-intro" aria-labelledby="buying-cost-estimator-shell-title">
+          <h2 className="sr-only" id="buying-cost-estimator-shell-title">{copy.introTitle}</h2>
+          <p className="guided-dialog__step mb-4">{copy.introBody}</p>
+          <div className="grid grid-2">
+            <div className="authority-card decision-mini-card">
               <h3 className="card-title">{copy.plannedInputsTitle}</h3>
               <p className="card-subtitle">{copy.toolLead}</p>
               <div className="form-grid-2 mt-4">
@@ -627,7 +624,7 @@ export function BuyingCostEstimatorShell({ locale }: { locale: Locale }) {
               </div>
             </div>
 
-            <div className="card">
+            <div className="authority-card decision-mini-card">
               <h3 className="card-title">{copy.plannedOutputsTitle}</h3>
               <p className="card-subtitle">{copy.statusBody}</p>
               <ul className="bullet-list mt-4">
@@ -638,7 +635,7 @@ export function BuyingCostEstimatorShell({ locale }: { locale: Locale }) {
             </div>
           </div>
 
-          <details className="card mt-6" open={purchaseContext === 'foreign'}>
+          <details className="authority-card decision-mini-card mt-6" open={purchaseContext === 'foreign'}>
             <summary className="card-title">{copy.advancedToggle}</summary>
             <p className="card-subtitle mt-3">{copy.advancedBody}</p>
             <div className="form-grid-2 mt-4">
@@ -669,7 +666,7 @@ export function BuyingCostEstimatorShell({ locale }: { locale: Locale }) {
           </details>
         </section>
 
-        <section className="card" aria-labelledby="buying-cost-estimator-boundary-title">
+        <section className="authority-card decision-mini-card" aria-labelledby="buying-cost-estimator-boundary-title">
           <h2 className="card-title" id="buying-cost-estimator-boundary-title">{copy.assumptionsTitle}</h2>
           <ul className="bullet-list mt-4">
             {copy.assumptions.map((item) => (
@@ -678,7 +675,7 @@ export function BuyingCostEstimatorShell({ locale }: { locale: Locale }) {
           </ul>
         </section>
 
-        <section className="card" aria-labelledby="buying-cost-estimator-disclaimer-title">
+        <section className="authority-card decision-mini-card" aria-labelledby="buying-cost-estimator-disclaimer-title">
           <h2 className="card-title" id="buying-cost-estimator-disclaimer-title">{copy.disclaimerTitle}</h2>
           <p className="card-subtitle">{copy.disclaimerBody}</p>
         </section>
