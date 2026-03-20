@@ -131,21 +131,21 @@ from pathlib import Path
     failure_type,
 ) = sys.argv[1:]
 
-  summary: dict[str, object] = {}
+summary: dict[str, object] = {}
 stdout_path = Path(stdout_file)
 if stdout_path.exists() and stdout_path.read_text(encoding="utf-8").strip():
     try:
         summary = json.loads(stdout_path.read_text(encoding="utf-8"))
     except json.JSONDecodeError:
-      summary = {"invalid_json": True}
+        summary = {"invalid_json": True}
 
 
-  def metric(name: str) -> int:
+def metric(name: str) -> int:
     value = summary.get(name, 0)
     try:
-      return int(value)
+        return int(value)
     except (TypeError, ValueError):
-      return 0
+        return 0
 
 payload = {
     "run_id": run_id,
