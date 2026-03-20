@@ -525,6 +525,92 @@ def test_follow_up_processor_advances_sales_sequence_and_writes_timeline(client)
         )
 
 
+def test_follow_up_processor_suppresses_validation_test_leads(client):
+    created = client.post(
+        "/v1/inquiries",
+        json={
+            "name": "Validation Lead",
+            "email": "validation-followup@example.com",
+            "message": "This is a validation record.",
+            "source_page": "/en/contact",
+            "intent": "project_consultation",
+            "tags": [
+                "locale:en",
+                "validation:test",
+                "signal_level:high",
+            ],
+            "lead_score": 85,
+        },
+    )
+    assert created.status_code == 201, created.text
+    inquiry_id = UUID(created.json()["id"])
+
+    with SessionLocal() as db:
+        inquiry = db.get(Inquiry, inquiry_id)
+        assert inquiry is not None
+        inquiry.follow_up_due_at = datetime(2026, 3, 19, 14, 5, tzinfo=UTC)
+        inquiry.follow_up_status = "pending"
+        db.add(inquiry)
+        db.commit()
+
+    result = run_follow_up_processor(
+        as_of=datetime(2026, 3, 19, 14, 6, tzinfo=UTC),
+        inquiry_id=inquiry_id,
+        dry_run=False,
+    )
+    assert result["suppressed"] == 1
+    assert result["items"][0]["result"] == "suppressed_validation_test"
+
+    with SessionLocal() as db:
+        inquiry = db.get(Inquiry, inquiry_id)
+        assert inquiry is not None
+        assert inquiry.follow_up_status == "completed"
+        assert inquiry.follow_up_due_at is None
+
+
+def test_follow_up_processor_suppresses_do_not_follow_up_tag(client):
+    created = client.post(
+        "/v1/inquiries",
+        json={
+            "name": "Suppressed Lead",
+            "email": "suppressed-followup@example.com",
+            "message": "Do not follow up on this lead.",
+            "source_page": "/en/contact",
+            "intent": "project_shortlist",
+            "tags": [
+                "locale:en",
+                "signal_level:medium",
+                "do_not_follow_up",
+            ],
+            "lead_score": 65,
+        },
+    )
+    assert created.status_code == 201, created.text
+    inquiry_id = UUID(created.json()["id"])
+
+    with SessionLocal() as db:
+        inquiry = db.get(Inquiry, inquiry_id)
+        assert inquiry is not None
+        inquiry.follow_up_due_at = datetime(2026, 3, 19, 14, 5, tzinfo=UTC)
+        inquiry.follow_up_status = "pending"
+        db.add(inquiry)
+        db.commit()
+
+    result = run_follow_up_processor(
+        as_of=datetime(2026, 3, 19, 14, 6, tzinfo=UTC),
+        inquiry_id=inquiry_id,
+        dry_run=False,
+    )
+    assert result["suppressed"] == 1
+    assert result["items"][0]["result"] == "suppressed_do_not_follow_up"
+
+    with SessionLocal() as db:
+        inquiry = db.get(Inquiry, inquiry_id)
+        assert inquiry is not None
+        assert inquiry.follow_up_status == "completed"
+        assert inquiry.follow_up_due_at is None
+
+
 def test_inquiry_legacy_payload_and_additive_payload_are_both_supported(client):
     legacy = client.post(
         "/v1/inquiries",

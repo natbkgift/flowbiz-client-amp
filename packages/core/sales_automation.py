@@ -16,6 +16,16 @@ FOLLOW_UP_STAGE_DELAYS: dict[FollowUpStage, timedelta | None] = {
     "t24h": timedelta(hours=24),
     "done": None,
 }
+FOLLOW_UP_SUPPRESSION_TAGS: frozenset[str] = frozenset(
+    {
+        "opt_out",
+        "do_not_follow_up",
+        "user_replied",
+        "reply_received",
+        "deal_active",
+        "validation:test",
+    }
+)
 
 
 @dataclass(frozen=True)
@@ -574,16 +584,7 @@ def should_stop_follow_up(
         return True
     if normalized_follow_up_status in {"completed", "no_response"}:
         return True
-    return any(
-        tag in lowered_tags
-        for tag in {
-            "opt_out",
-            "do_not_follow_up",
-            "user_replied",
-            "reply_received",
-            "deal_active",
-        }
-    )
+    return any(tag in lowered_tags for tag in FOLLOW_UP_SUPPRESSION_TAGS)
 
 
 def advance_follow_up_tags(tags: list[str] | None, next_stage: FollowUpStage) -> list[str]:

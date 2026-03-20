@@ -412,6 +412,18 @@ else
   ACTIVE_REPO_SYNC_DETAIL="Active repo path is not a git repository."
 fi
 
+phase "follow-up-scheduler"
+run_release_script "$release_path/scripts/install_prod_sales_followup_scheduler.sh" \
+  "$VPS_ACTIVE_PATH" \
+  "$COMPOSE_PROJECT_NAME"
+
+phase "follow-up-scheduler-verify"
+python3 "$release_path/scripts/inspect_sales_followup_runs.py" \
+  --summary \
+  --assert-healthy \
+  --log-dir "$VPS_ACTIVE_PATH/ops/logs/sales-followups" \
+  --active-path "$VPS_ACTIVE_PATH"
+
 phase "done"
 write_telemetry "ok" "true"
 echo "deploy_telemetry=$latest_telemetry_file"
