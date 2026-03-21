@@ -17,6 +17,8 @@ import { EmptyStateCard } from '@/components/ui/StateBlocks';
 
 export const revalidate = 300;
 const DEVELOPERS_FETCH_TIMEOUT_MS = 8000;
+const PROJECT_SIGNAL_PAGE_LIMIT = 100;
+const PROJECT_SIGNAL_MAX_PAGES = 10;
 
 type ProjectDeveloperSignal = {
   key: string;
@@ -68,6 +70,37 @@ async function withTimeout<T>(task: Promise<T>, fallback: T, timeoutMs = DEVELOP
 
 function normalizeDeveloperToken(value: string | null | undefined): string {
   return (value || '').trim().toLowerCase();
+}
+
+function buildProjectSignalKey(project: ProjectItem): string | null {
+  return project.id || project.slug || normalizeDeveloperToken(project.name);
+}
+
+async function fetchAllProjectSignals(): Promise<ProjectItem[]> {
+  const collected: ProjectItem[] = [];
+  const seen = new Set<string>();
+
+  for (let page = 1; page <= PROJECT_SIGNAL_MAX_PAGES; page += 1) {
+    const batch = await withTimeout(
+      fetchProjects({ limit: PROJECT_SIGNAL_PAGE_LIMIT, page, status_filter: 'published' }),
+      [],
+    );
+
+    if (!batch.length) break;
+
+    let newItems = 0;
+    for (const project of batch) {
+      const key = buildProjectSignalKey(project);
+      if (!key || seen.has(key)) continue;
+      seen.add(key);
+      collected.push(project);
+      newItems += 1;
+    }
+
+    if (batch.length < PROJECT_SIGNAL_PAGE_LIMIT || newItems === 0) break;
+  }
+
+  return collected;
 }
 
 function buildProjectDeveloperSignals(projects: ProjectItem[]): ProjectDeveloperSignal[] {
@@ -235,7 +268,7 @@ export default async function DevelopersPage(props: { params: Promise<{ locale: 
 
   const [developers, projects] = await Promise.all([
     withTimeout(fetchDevelopers(), []),
-    withTimeout(fetchProjects({ limit: 100 }), []),
+    fetchAllProjectSignals(),
   ]);
 
   const publishedProjects = projects.filter((project) => project.slug?.trim() && project.status === 'published');

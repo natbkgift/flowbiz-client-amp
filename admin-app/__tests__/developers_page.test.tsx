@@ -171,4 +171,66 @@ describe('developers page', () => {
     expect(screen.getByText(/visible pricing starts from THB/i)).toBeTruthy();
     expect(screen.queryByRole('link', { name: /review live project/i })).toBeNull();
   });
+
+  it('requests the next project page when the first signal page is full', async () => {
+    publicApiState.fetchDevelopers.mockResolvedValue([]);
+    publicApiState.fetchProjects
+      .mockResolvedValueOnce(
+        Array.from({ length: 100 }, (_, index) => ({
+          id: `project-${index + 1}`,
+          slug: `signal-project-${index + 1}`,
+          name: `Signal Project ${index + 1}`,
+          status: 'published',
+          developer: {
+            id: `developer-${index + 1}`,
+            slug: `developer-${index + 1}`,
+            name: `Developer ${index + 1}`,
+          },
+          area: {
+            id: 'area-central',
+            slug: 'central-pattaya',
+            name: 'Central Pattaya',
+          },
+          starting_price: 3000000 + index,
+          created_at: '2026-01-01T00:00:00Z',
+          updated_at: '2026-01-01T00:00:00Z',
+        })),
+      )
+      .mockResolvedValueOnce([
+        {
+          id: 'project-101',
+          slug: 'signal-project-101',
+          name: 'Signal Project 101',
+          status: 'published',
+          developer: {
+            id: 'developer-101',
+            slug: 'developer-101',
+            name: 'Developer 101',
+          },
+          area: {
+            id: 'area-central',
+            slug: 'central-pattaya',
+            name: 'Central Pattaya',
+          },
+          starting_price: 3100000,
+          created_at: '2026-01-01T00:00:00Z',
+          updated_at: '2026-01-01T00:00:00Z',
+        },
+      ]);
+
+    render(await DevelopersPage({ params: Promise.resolve({ locale: 'en' }) }));
+
+    expect(publicApiState.fetchProjects).toHaveBeenCalledTimes(2);
+    expect(publicApiState.fetchProjects).toHaveBeenNthCalledWith(1, {
+      limit: 100,
+      page: 1,
+      status_filter: 'published',
+    });
+    expect(publicApiState.fetchProjects).toHaveBeenNthCalledWith(2, {
+      limit: 100,
+      page: 2,
+      status_filter: 'published',
+    });
+    expect(screen.getByRole('heading', { name: /developer 101/i })).toBeTruthy();
+  });
 });
