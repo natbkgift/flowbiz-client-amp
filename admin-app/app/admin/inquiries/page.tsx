@@ -537,7 +537,6 @@ export default function AdminInquiriesPage() {
           onLoadFilter={loadSavedFilter}
         />
 
-        {!isAuthenticated ? <div className="state-empty">{t.authRequired}</div> : null}
       </ActionCard>
 
       {error ? <div className="state-error">{error}</div> : null}
