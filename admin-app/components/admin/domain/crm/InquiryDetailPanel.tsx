@@ -10,6 +10,7 @@ export function InquiryDetailPanel({
   t,
   locale,
   selected,
+  emptyStateMessage,
   detailLoading,
   followUpStatus,
   followUpDueAt,
@@ -25,6 +26,7 @@ export function InquiryDetailPanel({
   t: InquiryCopy;
   locale: InquiryLocale;
   selected: InquiryItem | null;
+  emptyStateMessage?: string;
   detailLoading: boolean;
   followUpStatus: string;
   followUpDueAt: string;
@@ -38,7 +40,7 @@ export function InquiryDetailPanel({
   onSaveFollowUp: () => void | Promise<void>;
 }) {
   if (!selected) {
-    return detailLoading ? <div className="state-loading">{t.loadingDetails}</div> : <div className="state-empty">{t.noDetails}</div>;
+    return detailLoading ? <div className="state-loading">{t.loadingDetails}</div> : <div className="state-empty">{emptyStateMessage || t.noDetails}</div>;
   }
 
   return (

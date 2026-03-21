@@ -118,6 +118,16 @@ describe("B11 admin inquiries page contract", () => {
     expect(list).toContain("<span>{primaryLabel}</span>");
   });
 
+  it("aligns the detail empty state with the current queue state", () => {
+    const page = read("app/admin/inquiries/page.tsx");
+    const detail = read("components/admin/domain/crm/InquiryDetailPanel.tsx");
+
+    expect(page).toContain('const detailEmptyStateMessage = !loading && items.length === 0 ? `${t.empty} ${t.emptyHint}` : t.noDetails;');
+    expect(page).toContain("emptyStateMessage={detailEmptyStateMessage}");
+    expect(detail).toContain("emptyStateMessage?: string;");
+    expect(detail).toContain("emptyStateMessage || t.noDetails");
+  });
+
   it("keeps accessibility and runtime states in EN/TH copy", () => {
     const page = read("app/admin/inquiries/page.tsx");
     const controlCenter = read("components/admin/domain/crm/InquiryControlCenter.tsx");

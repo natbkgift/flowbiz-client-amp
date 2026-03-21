@@ -131,6 +131,7 @@ export default function AdminInquiriesPage() {
   const t = inquiriesCopy[locale];
   const authError = authErrorCode ? authErrorMessage(t, authErrorCode) : null;
   const filterQuery = useMemo(() => buildQuery(filters), [filters]);
+  const detailEmptyStateMessage = !loading && items.length === 0 ? `${t.empty} ${t.emptyHint}` : t.noDetails;
 
   function updateFilter<Key extends keyof InquiryFilters>(key: Key, value: InquiryFilters[Key]) {
     setFilters((current) => ({ ...current, [key]: value }));
@@ -476,6 +477,7 @@ export default function AdminInquiriesPage() {
               t={t}
               locale={locale}
               selected={selected}
+              emptyStateMessage={detailEmptyStateMessage}
               detailLoading={detailLoading}
               followUpStatus={followUpStatus}
               followUpDueAt={followUpDueAt}
