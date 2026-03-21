@@ -30,6 +30,10 @@ export function SafeCoverImage({
   sizes,
   loading = 'lazy',
   fallbackSrc = DEFAULT_FALLBACK_SRC,
+  priority = false,
+  fetchPriority,
+  quality,
+  unoptimized = true,
 }: {
   src: string | null | undefined;
   alt: string;
@@ -37,6 +41,10 @@ export function SafeCoverImage({
   sizes?: string;
   loading?: 'lazy' | 'eager';
   fallbackSrc?: string;
+  priority?: boolean;
+  fetchPriority?: 'high' | 'low' | 'auto';
+  quality?: number;
+  unoptimized?: boolean;
 }) {
   const initial = useMemo(() => normalizeSrc(src), [src]);
   const fallbackChain = useMemo(() => {
@@ -66,9 +74,12 @@ export function SafeCoverImage({
       className={className}
       fill
       sizes={sizes ?? '100vw'}
+      priority={priority}
       loading={loading}
+      fetchPriority={fetchPriority}
+      quality={quality}
       loader={passthroughLoader}
-      unoptimized
+      unoptimized={unoptimized}
       onError={() => {
         if (initial && currentSrc === initial) {
           setFallbackIndex(0);

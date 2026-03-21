@@ -1,3 +1,5 @@
+/* eslint-disable @next/next/no-img-element */
+
 import { render, screen } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 
@@ -46,7 +48,18 @@ describe('HomeHero CTA hierarchy', () => {
     };
 
     const { container } = render(
-      <HomeHero dict={dict} locale="en" guidedHref="/en?guided=1" composer={null} />,
+      <HomeHero
+        dict={dict}
+        locale="en"
+        guidedHref="/en?guided=1"
+        composer={{
+          primary_cta_url: '/en/contact?intent=project_consultation&source=home_hero_primary',
+          secondary_cta_url: '/en/projects?source=home_hero_secondary',
+        }}
+        supportLinks={[
+          { label: 'View saved shortlist', href: '/en/shortlist?source=home_hero_support' },
+        ]}
+      />,
     );
 
     expect(container.querySelectorAll('.hero-cta-row .btn')).toHaveLength(2);
@@ -57,6 +70,10 @@ describe('HomeHero CTA hierarchy', () => {
     expect(screen.getByRole('link', { name: 'Browse Projects' })).toBeInTheDocument();
     expect(screen.getByRole('link', { name: 'WhatsApp' })).toBeInTheDocument();
     expect(screen.getByRole('link', { name: 'Let us guide you' })).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'Request Consultation' })).toHaveAttribute('href', '/en/contact?intent=project_consultation&source=home_hero_primary');
+    expect(screen.getByRole('link', { name: 'Browse Projects' })).toHaveAttribute('href', '/en/projects?source=home_hero_secondary');
+    expect(screen.getByRole('link', { name: 'View saved shortlist' })).toHaveAttribute('href', '/en/shortlist?source=home_hero_support');
+    expect(container.querySelector('.hero-support-row .hero-support-link')).not.toHaveClass('btn');
     expect(screen.getByAltText('AMP Pattaya Real Estate')).toHaveAttribute(
       'src',
       '/images/hero-banner.webp?v=20260318',
