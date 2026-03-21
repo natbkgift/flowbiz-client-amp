@@ -44,6 +44,11 @@ export function LocalMediaImage({
   aspectRatio = '4 / 3',
   loading = 'lazy',
   fallbackSrc,
+  sizes,
+  priority = false,
+  fetchPriority,
+  quality,
+  unoptimized = true,
 }: {
   media: LocalMediaInput;
   alt?: string | null;
@@ -53,6 +58,11 @@ export function LocalMediaImage({
   aspectRatio?: string;
   loading?: 'lazy' | 'eager';
   fallbackSrc?: string;
+  sizes?: string;
+  priority?: boolean;
+  fetchPriority?: 'high' | 'low' | 'auto';
+  quality?: number;
+  unoptimized?: boolean;
 }) {
   const src = useMemo(() => {
     const directCandidates: Array<string | null | undefined> = [
@@ -87,7 +97,12 @@ export function LocalMediaImage({
         src={src}
         alt={safeAlt}
         className={imageClassName ?? 'media-shell__img'}
+        sizes={sizes}
+        priority={priority}
         loading={loading}
+        fetchPriority={fetchPriority}
+        quality={quality}
+        unoptimized={unoptimized}
         fallbackSrc={resolvedFallback}
       />
     </div>
