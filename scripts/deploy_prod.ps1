@@ -10,6 +10,8 @@ param(
   [string]$AlembicTarget = "head",
   [int]$DeployPollSeconds = 5,
   [int]$DeployTimeoutSeconds = 2700,
+  [int]$RetryAttempts = 3,
+  [int]$RetryBackoffSeconds = 3,
   [string[]]$OverlayFiles = @()
 )
 
@@ -40,6 +42,90 @@ $AlembicTarget = $AlembicTarget.Replace("`r", "").Replace("`n", "")
 
 function ConvertTo-BashArgument([string]$Value) {
   return "'" + $Value.Replace("'", "'""'""'") + "'"
+}
+
+function Invoke-ExternalCommandWithRetry {
+  param(
+    [string]$Label,
+    [int]$Attempts,
+    [int]$InitialBackoffSeconds,
+    [scriptblock]$Operation,
+    [switch]$CaptureOutput
+  )
+
+  $resolvedAttempts = [Math]::Max(1, $Attempts)
+  $backoffSeconds = [Math]::Max(1, $InitialBackoffSeconds)
+  $attempt = 1
+  $lastOutput = ""
+
+  while ($true) {
+    if ($CaptureOutput) {
+      $lastOutput = (& $Operation 2>&1 | Out-String)
+    } else {
+      & $Operation
+      $lastOutput = ""
+    }
+
+    $exitCode = $LASTEXITCODE
+    if ($exitCode -eq 0) {
+      return $lastOutput
+    }
+
+    if ($attempt -ge $resolvedAttempts) {
+      if ($CaptureOutput -and $lastOutput.Trim()) {
+        throw "Command '$Label' failed after $attempt attempt(s) with exit code $exitCode.`n$($lastOutput.TrimEnd())"
+      }
+      throw "Command '$Label' failed after $attempt attempt(s) with exit code $exitCode."
+    }
+
+    Write-Warning "retry[$Label] attempt=$attempt/$resolvedAttempts status=$exitCode backoff=$backoffSeconds s"
+    Start-Sleep -Seconds $backoffSeconds
+    $attempt += 1
+    $backoffSeconds *= 2
+  }
+}
+
+function ConvertFrom-JsonOutput {
+  param([string]$RawOutput)
+
+  $trimmed = [string]::IsNullOrWhiteSpace($RawOutput) ? "" : $RawOutput.Trim()
+  if (-not $trimmed) {
+    return $null
+  }
+
+  $jsonStart = $trimmed.IndexOf('{')
+  if ($jsonStart -lt 0) {
+    return $null
+  }
+
+  try {
+    return $trimmed.Substring($jsonStart) | ConvertFrom-Json -ErrorAction Stop
+  } catch {
+    return $null
+  }
+}
+
+function Get-RemoteDeployTelemetryRecord {
+  param(
+    [string]$VpsHost,
+    [string[]]$SshOptions,
+    [string]$QuotedTelemetryPath,
+    [int]$Attempts,
+    [int]$InitialBackoffSeconds
+  )
+
+  $rawOutput = Invoke-ExternalCommandWithRetry -Label 'read-deploy-telemetry' -Attempts $Attempts -InitialBackoffSeconds $InitialBackoffSeconds -CaptureOutput -Operation {
+    & ssh @SshOptions $VpsHost "cat $QuotedTelemetryPath"
+  }
+  $payload = ConvertFrom-JsonOutput -RawOutput $rawOutput
+  if ($null -eq $payload) {
+    throw "Production deploy telemetry could not be parsed."
+  }
+
+  return [pscustomobject]@{
+    RawOutput = $rawOutput.TrimEnd()
+    Payload = $payload
+  }
 }
 
 $sshOptions = @(
@@ -80,15 +166,13 @@ try {
   $remoteTmp = "/tmp/flowbiz-deploy-$([guid]::NewGuid().ToString('N')).sh"
   $remoteRunner = "/tmp/flowbiz-deploy-runner-$([guid]::NewGuid().ToString('N')).sh"
   $remoteStateDir = "/tmp/flowbiz-deploy-state-$($TargetSha.Substring(0, [Math]::Min(8, $TargetSha.Length)))-$([guid]::NewGuid().ToString('N'))"
-  & scp @scpOptions $tmp.FullName "${VpsHost}:$remoteTmp"
-  if ($LASTEXITCODE -ne 0) {
-    throw "Unable to upload deploy script to VPS."
-  }
+  Invoke-ExternalCommandWithRetry -Label 'upload-deploy-script' -Attempts $RetryAttempts -InitialBackoffSeconds $RetryBackoffSeconds -Operation {
+    & scp @scpOptions $tmp.FullName "${VpsHost}:$remoteTmp"
+  } | Out-Null
 
-  & scp @scpOptions (Join-Path $repoRoot "scripts/deploy_remote_job.sh") "${VpsHost}:$remoteRunner"
-  if ($LASTEXITCODE -ne 0) {
-    throw "Unable to upload deploy runner to VPS."
-  }
+  Invoke-ExternalCommandWithRetry -Label 'upload-deploy-runner' -Attempts $RetryAttempts -InitialBackoffSeconds $RetryBackoffSeconds -Operation {
+    & scp @scpOptions (Join-Path $repoRoot "scripts/deploy_remote_job.sh") "${VpsHost}:$remoteRunner"
+  } | Out-Null
 
   if ($OverlayFiles.Count -gt 0) {
     $remoteOverlayRoot = "/tmp/flowbiz-overlay-$([guid]::NewGuid().ToString('N'))"
@@ -100,21 +184,18 @@ try {
       throw "Unable to create local overlay archive."
     }
 
-    & ssh @sshOptions $VpsHost "mkdir -p $(ConvertTo-BashArgument $remoteOverlayRoot)"
-    if ($LASTEXITCODE -ne 0) {
-      throw "Unable to create remote overlay directory."
-    }
+    Invoke-ExternalCommandWithRetry -Label 'prepare-overlay-dir' -Attempts $RetryAttempts -InitialBackoffSeconds $RetryBackoffSeconds -Operation {
+      & ssh @sshOptions $VpsHost "mkdir -p $(ConvertTo-BashArgument $remoteOverlayRoot)"
+    } | Out-Null
 
     $remoteOverlayArchive = "$remoteOverlayRoot/overlay.tar"
-    & scp @scpOptions $overlayArchive "${VpsHost}:$remoteOverlayArchive"
-    if ($LASTEXITCODE -ne 0) {
-      throw "Unable to upload overlay archive to VPS."
-    }
+    Invoke-ExternalCommandWithRetry -Label 'upload-overlay-archive' -Attempts $RetryAttempts -InitialBackoffSeconds $RetryBackoffSeconds -Operation {
+      & scp @scpOptions $overlayArchive "${VpsHost}:$remoteOverlayArchive"
+    } | Out-Null
 
-    & ssh @sshOptions $VpsHost "tar -xf $(ConvertTo-BashArgument $remoteOverlayArchive) -C $(ConvertTo-BashArgument $remoteOverlayRoot) && rm -f $(ConvertTo-BashArgument $remoteOverlayArchive)"
-    if ($LASTEXITCODE -ne 0) {
-      throw "Unable to extract overlay archive on VPS."
-    }
+    Invoke-ExternalCommandWithRetry -Label 'extract-overlay-archive' -Attempts $RetryAttempts -InitialBackoffSeconds $RetryBackoffSeconds -Operation {
+      & ssh @sshOptions $VpsHost "tar -xf $(ConvertTo-BashArgument $remoteOverlayArchive) -C $(ConvertTo-BashArgument $remoteOverlayRoot) && rm -f $(ConvertTo-BashArgument $remoteOverlayArchive)"
+    } | Out-Null
   }
 
   $qRemoteTmp = ConvertTo-BashArgument $remoteTmp
@@ -136,10 +217,9 @@ try {
   $overlayArgs = ($OverlayFiles | ForEach-Object { ConvertTo-BashArgument ($_.Replace("\", "/")) }) -join " "
   $remoteCommand = "mkdir -p $qRemoteStateDir && chmod 700 $qRemoteTmp $qRemoteRunner && { nohup env FLOWBIZ_DEPLOY_SOURCE=scripts/deploy_prod.ps1 bash $qRemoteRunner $qRemoteStateDir $qRemoteTmp $qRemoteOverlayRoot $qRemoteArg $qTargetSha $qVpsActivePath $qVpsReleaseRoot $qVpsApiPort $qVpsAdminPort $qComposeProjectName $qAlembicTarget $qRemoteOverlayRoot $overlayArgs > /dev/null 2>&1 < /dev/null & printf '%s\n' `$! > $qRemotePid; }"
 
-  & ssh @sshOptions $VpsHost $remoteCommand
-  if ($LASTEXITCODE -ne 0) {
-    throw "Unable to launch remote production deploy."
-  }
+  Invoke-ExternalCommandWithRetry -Label 'launch-remote-deploy' -Attempts $RetryAttempts -InitialBackoffSeconds $RetryBackoffSeconds -Operation {
+    & ssh @sshOptions $VpsHost $remoteCommand
+  } | Out-Null
 
   $deadline = [DateTimeOffset]::UtcNow.AddSeconds($DeployTimeoutSeconds)
   $lastLog = ""
@@ -160,9 +240,8 @@ if [ -f $qRemoteLog ]; then
   tail -n 20 $qRemoteLog
 fi
 "@
-    $pollOutput = (& ssh @sshOptions $VpsHost $pollCommand 2>&1 | Out-String)
-    if ($LASTEXITCODE -ne 0) {
-      throw "Unable to poll production deploy state."
+    $pollOutput = Invoke-ExternalCommandWithRetry -Label 'poll-deploy-state' -Attempts $RetryAttempts -InitialBackoffSeconds $RetryBackoffSeconds -CaptureOutput -Operation {
+      & ssh @sshOptions $VpsHost $pollCommand
     }
 
     $statusMatch = [regex]::Match($pollOutput, '^status=(.+)$', [System.Text.RegularExpressions.RegexOptions]::Multiline)
@@ -180,15 +259,36 @@ fi
       if ($exitCode -ne "0") {
         throw "Production deploy failed."
       }
-      & ssh @sshOptions $VpsHost "cat $qTelemetryPath"
-      if ($LASTEXITCODE -ne 0) {
-        throw "Production deploy completed but telemetry could not be read."
+      $telemetryRecord = Get-RemoteDeployTelemetryRecord -VpsHost $VpsHost -SshOptions $sshOptions -QuotedTelemetryPath $qTelemetryPath -Attempts $RetryAttempts -InitialBackoffSeconds $RetryBackoffSeconds
+      if ($telemetryRecord.RawOutput) {
+        Write-Host $telemetryRecord.RawOutput
       }
       $completed = $true
       break
     }
 
     Start-Sleep -Seconds $DeployPollSeconds
+  }
+
+  if (-not $completed) {
+    try {
+      $telemetryRecord = Get-RemoteDeployTelemetryRecord -VpsHost $VpsHost -SshOptions $sshOptions -QuotedTelemetryPath $qTelemetryPath -Attempts $RetryAttempts -InitialBackoffSeconds $RetryBackoffSeconds
+      $telemetryPayload = $telemetryRecord.Payload
+      if (
+        $telemetryPayload.state_dir -eq $remoteStateDir -and
+        $telemetryPayload.target_sha -eq $TargetSha -and
+        $telemetryPayload.deploy_status -eq 'ok' -and
+        $telemetryPayload.smoke_passed
+      ) {
+        Write-Host "deploy poll timed out, but remote telemetry confirms success for state dir $remoteStateDir"
+        if ($telemetryRecord.RawOutput) {
+          Write-Host $telemetryRecord.RawOutput
+        }
+        $completed = $true
+      }
+    } catch {
+      Write-Warning $_.Exception.Message
+    }
   }
 
   if (-not $completed) {
