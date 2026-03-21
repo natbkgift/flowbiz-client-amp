@@ -110,9 +110,11 @@ describe('ShortlistSharedSurface', () => {
     render(<ShortlistSharedSurface locale="en" shareToken="token-missing" />);
 
     await waitFor(() => {
-      expect(screen.getByText(/this shared shortlist is unavailable or no longer accessible/i)).toBeTruthy();
+      expect(screen.getByText(/this shared shortlist link has expired/i)).toBeTruthy();
     });
 
+    expect(screen.getByText(/ask the sender to create a new shared link/i)).toBeTruthy();
+    expect(screen.getByRole('link', { name: /browse listings/i }).getAttribute('href')).toBe('/en/buy');
     expect(screen.queryByRole('link', { name: /view listing details/i })).toBeNull();
   });
 
