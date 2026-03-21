@@ -2,6 +2,8 @@ import type { InquiryCopy } from "@/components/admin/domain/crm/inquiries-copy";
 import type { InquiryItem, InquiryLocale } from "@/components/admin/domain/crm/inquiries-types";
 import { CRM_STATUSES, dueClass, getInquiryDisplayLabel, prettyDate, statusIndex, translateFollowUpStatus, translateInquiryStatus } from "@/components/admin/domain/crm/inquiries-utils";
 
+const EMPTY_FIELD_PLACEHOLDER = "-";
+
 export function InquiryKanbanBoard({
   t,
   locale,
@@ -47,8 +49,8 @@ export function InquiryKanbanBoard({
             {column.items.map((item) => {
               const primaryLabel = getInquiryDisplayLabel(item);
               const secondaryLabelParts = [item.source_page, item.intent].filter(Boolean);
-              const secondaryLabel = secondaryLabelParts.length > 0 ? secondaryLabelParts.join(" · ") : "-";
-              const purposeLabel = item.purpose || "-";
+              const secondaryLabel = secondaryLabelParts.length > 0 ? secondaryLabelParts.join(" · ") : EMPTY_FIELD_PLACEHOLDER;
+              const purposeLabel = item.purpose || EMPTY_FIELD_PLACEHOLDER;
               const isMoving = movingInquiryId === item.id;
               const movingStatusId = isMoving ? `crm-moving-status-${item.id}` : undefined;
 

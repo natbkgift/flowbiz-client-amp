@@ -94,9 +94,10 @@ describe("B11 admin inquiries page contract", () => {
     expect(page).toContain('className="crm-controls-toolbar"');
     expect(savedFilters).toContain("savedFiltersHint");
     expect(savedFilters).toContain("savedFiltersEmpty");
+    expect(kanban).toContain('const EMPTY_FIELD_PLACEHOLDER = "-";');
     expect(kanban).toContain("const secondaryLabelParts = [item.source_page, item.intent].filter(Boolean);");
-    expect(kanban).toContain('const secondaryLabel = secondaryLabelParts.length > 0 ? secondaryLabelParts.join(" · ") : "-";');
-    expect(kanban).toContain('const purposeLabel = item.purpose || "-";');
+    expect(kanban).toContain('const secondaryLabel = secondaryLabelParts.length > 0 ? secondaryLabelParts.join(" · ") : EMPTY_FIELD_PLACEHOLDER;');
+    expect(kanban).toContain("const purposeLabel = item.purpose || EMPTY_FIELD_PLACEHOLDER;");
     expect(kanban).toContain('className="crm-row-meta crm-row-meta-secondary"');
     expect(kanban).toContain('className="crm-row-progress" role="status" aria-live="polite"');
     expect(copy).toContain('moveStatusUpdated: "Inquiry status updated."');
