@@ -1,4 +1,4 @@
-import { type InquiryFilters, type InquiryLocale } from "@/components/admin/domain/crm/inquiries-types";
+import { type InquiryFilters, type InquiryItem, type InquiryLocale } from "@/components/admin/domain/crm/inquiries-types";
 
 export const FOLLOW_UP_STATUSES = ["pending", "scheduled", "completed", "no_response"] as const;
 export const CRM_STATUSES = ["new", "contacted", "qualified", "closed", "lost"] as const;
@@ -38,6 +38,10 @@ export function prettyDate(value: string | null, locale: InquiryLocale): string 
     hour: "2-digit",
     minute: "2-digit",
   }).format(date);
+}
+
+export function getInquiryDisplayLabel(item: Pick<InquiryItem, "name" | "email" | "phone" | "id">): string {
+  return item.name || item.email || item.phone || item.id;
 }
 
 export function readRoleFromToken(token: string): string {

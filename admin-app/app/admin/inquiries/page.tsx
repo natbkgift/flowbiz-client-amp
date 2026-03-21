@@ -133,8 +133,12 @@ export default function AdminInquiriesPage() {
   const authError = authErrorCode ? authErrorMessage(t, authErrorCode) : null;
   const filterQuery = useMemo(() => buildQuery(filters), [filters]);
   const detailEmptyStateMessage = !loading && items.length === 0 ? t.emptyDetails : t.noDetails;
-  const hasDirtyFilters = filterQuery !== appliedFilterQuery;
+  const hasUnappliedFilters = filterQuery !== appliedFilterQuery;
   const hasActiveFilters = Object.values(filters).some((value) => value.trim().length > 0);
+  const hasNoFiltersToReset = !hasUnappliedFilters && !hasActiveFilters;
+  const shouldDisableApply = !isAuthenticated || loading || detailLoading || Boolean(movingInquiryId) || !hasUnappliedFilters;
+  const shouldDisableReload = !isAuthenticated || detailLoading || Boolean(movingInquiryId) || hasUnappliedFilters;
+  const shouldDisableClear = !isAuthenticated || loading || detailLoading || Boolean(movingInquiryId) || hasNoFiltersToReset;
 
   function updateFilter<Key extends keyof InquiryFilters>(key: Key, value: InquiryFilters[Key]) {
     setFilters((current) => ({ ...current, [key]: value }));
@@ -159,9 +163,9 @@ export default function AdminInquiriesPage() {
       setItems(body.data);
       setTotal(body.meta.total);
       setAppliedFilterQuery(query);
-      const hasCurrentSelection = body.data.some((item) => item.id === selectedId);
-      if (hasCurrentSelection && selectedId) {
-        await loadDetails(selectedId, activeToken);
+      const selectedIdToRefresh = selectedId && body.data.some((item) => item.id === selectedId) ? selectedId : null;
+      if (selectedIdToRefresh) {
+        await loadDetails(selectedIdToRefresh, activeToken);
       } else {
         const nextSelectedId = body.data[0]?.id ?? null;
         setSelectedId(nextSelectedId);
@@ -405,7 +409,7 @@ export default function AdminInquiriesPage() {
               className="btn"
               type="button"
               onClick={() => void loadList()}
-              disabled={!isAuthenticated || detailLoading || Boolean(movingInquiryId) || (!loading && !hasDirtyFilters)}
+              disabled={shouldDisableApply}
             >
               {loading ? t.loading : t.apply}
             </button>
@@ -413,7 +417,7 @@ export default function AdminInquiriesPage() {
               className="btn btn-secondary"
               type="button"
               onClick={() => void loadList()}
-              disabled={!isAuthenticated || detailLoading || Boolean(movingInquiryId) || hasDirtyFilters}
+              disabled={shouldDisableReload}
             >
               {t.reload}
             </button>
@@ -424,7 +428,7 @@ export default function AdminInquiriesPage() {
               className="btn btn-secondary"
               type="button"
               onClick={clearFilters}
-              disabled={!isAuthenticated || loading || detailLoading || Boolean(movingInquiryId) || (!hasDirtyFilters && !hasActiveFilters)}
+              disabled={shouldDisableClear}
             >
               {t.clear}
             </button>

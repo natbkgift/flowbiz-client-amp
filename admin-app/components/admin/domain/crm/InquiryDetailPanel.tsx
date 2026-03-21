@@ -4,7 +4,7 @@ import { InquiryContactActions } from "@/components/admin/domain/crm/InquiryCont
 import { InquiryFollowUpPanel } from "@/components/admin/domain/crm/InquiryFollowUpPanel";
 import { InquiryTimelinePanel } from "@/components/admin/domain/crm/InquiryTimelinePanel";
 import type { InquiryItem, InquiryLocale, TimelineEvent } from "@/components/admin/domain/crm/inquiries-types";
-import { prettyDate, translateFollowUpStatus, translateInquiryStatus } from "@/components/admin/domain/crm/inquiries-utils";
+import { getInquiryDisplayLabel, prettyDate, translateFollowUpStatus, translateInquiryStatus } from "@/components/admin/domain/crm/inquiries-utils";
 
 export function InquiryDetailPanel({
   t,
@@ -40,10 +40,12 @@ export function InquiryDetailPanel({
   onSaveFollowUp: () => void | Promise<void>;
 }) {
   if (!selected) {
-    return detailLoading ? <div className="state-loading">{t.loadingDetails}</div> : <div className="state-empty">{emptyStateMessage || t.noDetails}</div>;
+    const message = emptyStateMessage ?? t.noDetails;
+
+    return detailLoading ? <div className="state-loading">{t.loadingDetails}</div> : <div className="state-empty">{message}</div>;
   }
 
-  const summaryTitle = selected.name || selected.email || selected.phone || selected.id || t.details;
+  const summaryTitle = getInquiryDisplayLabel(selected);
 
   return (
     <>

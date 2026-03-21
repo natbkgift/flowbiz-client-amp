@@ -1,7 +1,7 @@
 import { AdminTable } from "@/components/admin/AdminPrimitives";
 import type { InquiryCopy } from "@/components/admin/domain/crm/inquiries-copy";
 import type { InquiryItem, InquiryLocale } from "@/components/admin/domain/crm/inquiries-types";
-import { dueClass, prettyDate, translateFollowUpStatus, translateInquiryStatus } from "@/components/admin/domain/crm/inquiries-utils";
+import { dueClass, getInquiryDisplayLabel, prettyDate, translateFollowUpStatus, translateInquiryStatus } from "@/components/admin/domain/crm/inquiries-utils";
 
 export function InquiryListTable({
   t,
@@ -32,7 +32,7 @@ export function InquiryListTable({
         </thead>
         <tbody>
           {items.map((item) => {
-            const primaryLabel = item.name || item.email || item.phone || item.id;
+            const primaryLabel = getInquiryDisplayLabel(item);
 
             return (
               <tr key={item.id} className={selectedId === item.id ? "is-active" : ""}>

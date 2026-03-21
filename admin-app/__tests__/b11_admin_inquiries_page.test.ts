@@ -57,6 +57,7 @@ describe("B11 admin inquiries page contract", () => {
     expect(utils).toContain('["pending", "scheduled", "completed", "no_response"]');
     expect(utils).toContain("translateFollowUpStatus");
     expect(utils).toContain("translateInquiryStatus");
+    expect(utils).toContain("getInquiryDisplayLabel");
     expect(contactActions).toContain("selected.whatsapp_url");
     expect(contactActions).toContain("selected.phone_url");
     expect(contactActions).toContain("selected.email_url");
@@ -95,9 +96,9 @@ describe("B11 admin inquiries page contract", () => {
     const page = read("app/admin/inquiries/page.tsx");
     const copy = read("components/admin/domain/crm/inquiries-copy.ts");
 
-    expect(page).toContain("const hasCurrentSelection = body.data.some((item) => item.id === selectedId);");
-    expect(page).toContain("if (hasCurrentSelection && selectedId) {");
-    expect(page).toContain("await loadDetails(selectedId, activeToken);");
+    expect(page).toContain("const selectedIdToRefresh = selectedId && body.data.some((item) => item.id === selectedId) ? selectedId : null;");
+    expect(page).toContain("if (selectedIdToRefresh) {");
+    expect(page).toContain("await loadDetails(selectedIdToRefresh, activeToken);");
     expect(page).toContain("} else {");
     expect(page).toContain("const nextSelectedId = body.data[0]?.id ?? null;");
     expect(page).toContain("if (nextSelectedId) {");
@@ -120,27 +121,34 @@ describe("B11 admin inquiries page contract", () => {
     const page = read("app/admin/inquiries/page.tsx");
 
     expect(page).toContain('const [appliedFilterQuery, setAppliedFilterQuery] = useState(() => buildQuery(EMPTY_FILTERS));');
-    expect(page).toContain("const hasDirtyFilters = filterQuery !== appliedFilterQuery;");
+    expect(page).toContain("const hasUnappliedFilters = filterQuery !== appliedFilterQuery;");
     expect(page).toContain("setAppliedFilterQuery(query);");
-    expect(page).toContain("disabled={!isAuthenticated || detailLoading || Boolean(movingInquiryId) || (!loading && !hasDirtyFilters)}");
-    expect(page).toContain("disabled={!isAuthenticated || detailLoading || Boolean(movingInquiryId) || hasDirtyFilters}");
+    expect(page).toContain("const shouldDisableApply = !isAuthenticated || loading || detailLoading || Boolean(movingInquiryId) || !hasUnappliedFilters;");
+    expect(page).toContain("const shouldDisableReload = !isAuthenticated || detailLoading || Boolean(movingInquiryId) || hasUnappliedFilters;");
+    expect(page).toContain("disabled={shouldDisableApply}");
+    expect(page).toContain("disabled={shouldDisableReload}");
   });
 
   it("disables clear when there is no active or pending filter to reset", () => {
     const page = read("app/admin/inquiries/page.tsx");
 
     expect(page).toContain("const hasActiveFilters = Object.values(filters).some((value) => value.trim().length > 0);");
-    expect(page).toContain("disabled={!isAuthenticated || loading || detailLoading || Boolean(movingInquiryId) || (!hasDirtyFilters && !hasActiveFilters)}");
+    expect(page).toContain("const hasNoFiltersToReset = !hasUnappliedFilters && !hasActiveFilters;");
+    expect(page).toContain("const shouldDisableClear = !isAuthenticated || loading || detailLoading || Boolean(movingInquiryId) || hasNoFiltersToReset;");
+    expect(page).toContain("disabled={shouldDisableClear}");
   });
 
   it("keeps a readable primary row label even when inquiry name is missing", () => {
     const list = read("components/admin/domain/crm/InquiryListTable.tsx");
     const detail = read("components/admin/domain/crm/InquiryDetailPanel.tsx");
+    const utils = read("components/admin/domain/crm/inquiries-utils.ts");
 
-    expect(list).toContain("const primaryLabel = item.name || item.email || item.phone || item.id;");
+    expect(list).toContain("const primaryLabel = getInquiryDisplayLabel(item);");
     expect(list).toContain("<span>{primaryLabel}</span>");
-    expect(detail).toContain("const summaryTitle = selected.name || selected.email || selected.phone || selected.id || t.details;");
+    expect(detail).toContain("const summaryTitle = getInquiryDisplayLabel(selected);");
     expect(detail).toContain("<h3>{summaryTitle}</h3>");
+    expect(utils).toContain("export function getInquiryDisplayLabel");
+    expect(utils).toContain("return item.name || item.email || item.phone || item.id;");
   });
 
   it("renders inquiry status as a visible chip for faster table scanning", () => {
@@ -156,7 +164,8 @@ describe("B11 admin inquiries page contract", () => {
     expect(page).toContain("const detailEmptyStateMessage = !loading && items.length === 0 ? t.emptyDetails : t.noDetails;");
     expect(page).toContain("emptyStateMessage={detailEmptyStateMessage}");
     expect(detail).toContain("emptyStateMessage?: string;");
-    expect(detail).toContain("emptyStateMessage || t.noDetails");
+    expect(detail).toContain("const message = emptyStateMessage ?? t.noDetails;");
+    expect(detail).toContain("<div className=\"state-empty\">{message}</div>");
   });
 
   it("keeps accessibility and runtime states in EN/TH copy", () => {
