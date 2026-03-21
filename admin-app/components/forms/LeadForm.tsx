@@ -88,6 +88,11 @@ export function LeadForm({
   const pathname = usePathname() ?? '/';
   const locale = explicitLocale ?? localeFromPathname(pathname);
   const dict = locale === 'th' ? th : en;
+  const requiredText = locale === 'th' ? '(จำเป็น)' : '(required)';
+  const contactMethodHelper =
+    locale === 'th'
+      ? 'กรอกอีเมลหรือเบอร์โทรอย่างน้อยหนึ่งช่องทางเพื่อให้ทีมติดต่อกลับได้'
+      : 'Provide at least one contact method so the team can reply.';
 
   const [didStart, setDidStart] = useState(false);
 
@@ -330,8 +335,8 @@ export function LeadForm({
           className="form-honeypot"
         />
 
-        <label htmlFor="lead-name" className="sr-only">
-          {dict.common.leadForm.namePlaceholder}
+        <label htmlFor="lead-name" className="form-label">
+          {dict.common.leadForm.namePlaceholder} <span className="text-gray-500">{requiredText}</span>
         </label>
         <input
           id="lead-name"
@@ -342,9 +347,12 @@ export function LeadForm({
           value={name}
           onChange={(e) => setName(e.target.value)}
         />
+        <div>
+          <p className="text-sm text-gray-600">{contactMethodHelper}</p>
+        </div>
         <div className="form-grid-2">
           <div>
-            <label htmlFor="lead-email" className="sr-only">
+            <label htmlFor="lead-email" className="form-label">
               {dict.common.leadForm.emailPlaceholder}
             </label>
             <input
@@ -359,7 +367,7 @@ export function LeadForm({
             />
           </div>
           <div>
-            <label htmlFor="lead-phone" className="sr-only">
+            <label htmlFor="lead-phone" className="form-label">
               {dict.common.leadForm.phonePlaceholder}
             </label>
             <input
@@ -448,8 +456,8 @@ export function LeadForm({
             </select>
           </div>
         </div>
-        <label htmlFor="lead-message" className="sr-only">
-          {dict.common.leadForm.messagePlaceholder}
+        <label htmlFor="lead-message" className="form-label">
+          {dict.common.leadForm.messagePlaceholder} <span className="text-gray-500">{requiredText}</span>
         </label>
         <textarea
           id="lead-message"
@@ -470,7 +478,8 @@ export function LeadForm({
             aria-required="true"
           />
           <span className="form-consent__text">
-            {dict.common.leadForm.consentText ?? 'I agree to the processing of my personal data in accordance with the Privacy Policy (PDPA/GDPR).'}
+            {dict.common.leadForm.consentText ?? 'I agree to the processing of my personal data in accordance with the Privacy Policy (PDPA/GDPR).'}{' '}
+            <span className="text-gray-500">{requiredText}</span>
           </span>
         </label>
 

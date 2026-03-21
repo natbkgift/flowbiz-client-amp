@@ -22,6 +22,11 @@ export function SellerForm({ heading }: SellerFormProps) {
   const pathname = usePathname() ?? '/';
   const locale = localeFromPathname(pathname);
   const dict = locale === 'th' ? th : en;
+  const requiredText = locale === 'th' ? '(จำเป็น)' : '(required)';
+  const contactMethodHelper =
+    locale === 'th'
+      ? 'กรอกอีเมลหรือเบอร์โทรอย่างน้อยหนึ่งช่องทางเพื่อให้ทีมติดต่อกลับได้'
+      : 'Provide at least one contact method so the team can reply.';
 
   const [didStart, setDidStart] = useState(false);
 
@@ -157,7 +162,9 @@ export function SellerForm({ heading }: SellerFormProps) {
           className="form-honeypot"
         />
 
-        <label htmlFor="seller-name" className="sr-only">{dict.common.leadForm.namePlaceholder}</label>
+        <label htmlFor="seller-name" className="form-label">
+          {dict.common.leadForm.namePlaceholder} <span className="text-gray-500">{requiredText}</span>
+        </label>
         <input
           className="form-input"
           id="seller-name"
@@ -167,10 +174,12 @@ export function SellerForm({ heading }: SellerFormProps) {
           value={name}
           onChange={(e) => setName(e.target.value)}
         />
-
+        <div>
+          <p className="text-sm text-gray-600">{contactMethodHelper}</p>
+        </div>
         <div className="form-grid-2">
           <div>
-            <label htmlFor="seller-email" className="sr-only">{dict.common.leadForm.emailPlaceholder}</label>
+            <label htmlFor="seller-email" className="form-label">{dict.common.leadForm.emailPlaceholder}</label>
             <input
               className="form-input"
               id="seller-email"
@@ -183,7 +192,7 @@ export function SellerForm({ heading }: SellerFormProps) {
             />
           </div>
           <div>
-            <label htmlFor="seller-phone" className="sr-only">{dict.common.leadForm.phonePlaceholder}</label>
+            <label htmlFor="seller-phone" className="form-label">{dict.common.leadForm.phonePlaceholder}</label>
             <input
               className="form-input"
               id="seller-phone"
