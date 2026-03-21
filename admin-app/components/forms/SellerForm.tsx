@@ -7,6 +7,7 @@ import { en } from '@/app/_lib/i18n/en';
 import { th } from '@/app/_lib/i18n/th';
 import { localeFromPathname } from '@/app/_lib/i18n/routing';
 import { trackEvent } from '@/lib/analytics';
+import { isValidEmail, isValidPhone } from '@/lib/contact-validation';
 
 type SellerFormProps = {
   heading?: string;
@@ -27,6 +28,18 @@ export function SellerForm({ heading }: SellerFormProps) {
     locale === 'th'
       ? 'กรอกอีเมลหรือเบอร์โทรอย่างน้อยหนึ่งช่องทางเพื่อให้ทีมติดต่อกลับได้'
       : 'Provide at least one contact method so the team can reply.';
+  const contactMethodRequiredMessage =
+    locale === 'th'
+      ? 'กรุณากรอกอีเมลหรือเบอร์โทรอย่างน้อยหนึ่งช่องทาง'
+      : 'Enter either an email address or a phone number.';
+  const emailInvalidMessage =
+    locale === 'th'
+      ? 'กรุณากรอกอีเมลให้ครบถ้วน เช่น name@example.com'
+      : 'Enter a complete email address, for example name@example.com.';
+  const phoneInvalidMessage =
+    locale === 'th'
+      ? 'กรุณากรอกเบอร์โทรให้มีตัวเลข 7 ถึง 15 หลัก'
+      : 'Enter a phone number with 7 to 15 digits.';
 
   const [didStart, setDidStart] = useState(false);
 
@@ -40,9 +53,16 @@ export function SellerForm({ heading }: SellerFormProps) {
   const [website, setWebsite] = useState('');
   const [status, setStatus] = useState<SellerFormStatus>({ state: 'idle' });
 
+  const emailError = email.trim() && !isValidEmail(email) ? emailInvalidMessage : null;
+  const phoneError = phone.trim() && !isValidPhone(phone) ? phoneInvalidMessage : null;
+  const contactMethodError = didStart && !email.trim() && !phone.trim() ? contactMethodRequiredMessage : null;
+  const validationMessage = emailError ?? phoneError ?? contactMethodError;
+
   const canSubmit = useMemo(() => {
     if (!name.trim()) return false;
     if (!email.trim() && !phone.trim()) return false;
+    if (email.trim() && !isValidEmail(email)) return false;
+    if (phone.trim() && !isValidPhone(phone)) return false;
     return status.state !== 'submitting';
   }, [email, name, phone, status.state]);
 
@@ -81,6 +101,11 @@ export function SellerForm({ heading }: SellerFormProps) {
 
   async function onSubmit() {
     if (!canSubmit) return;
+
+    if (validationMessage) {
+      setStatus({ state: 'error', message: validationMessage });
+      return;
+    }
 
     // Honeypot: bots that fill this should be ignored without revealing behavior.
     if (website.trim()) {
@@ -176,6 +201,11 @@ export function SellerForm({ heading }: SellerFormProps) {
         />
         <div>
           <p className="text-sm text-gray-600">{contactMethodHelper}</p>
+          {contactMethodError ? (
+            <p className="form-error mt-2" role="alert">
+              {contactMethodError}
+            </p>
+          ) : null}
         </div>
         <div className="form-grid-2">
           <div>
@@ -187,9 +217,16 @@ export function SellerForm({ heading }: SellerFormProps) {
               type="email"
               placeholder={dict.common.leadForm.emailPlaceholder}
               aria-required="true"
+              aria-invalid={emailError ? 'true' : 'false'}
+              aria-describedby={emailError ? 'seller-email-error' : undefined}
               value={email}
               onChange={(e) => setEmail(e.target.value)}
             />
+            {emailError ? (
+              <p id="seller-email-error" className="form-error mt-2" role="alert">
+                {emailError}
+              </p>
+            ) : null}
           </div>
           <div>
             <label htmlFor="seller-phone" className="form-label">{dict.common.leadForm.phonePlaceholder}</label>
@@ -200,9 +237,16 @@ export function SellerForm({ heading }: SellerFormProps) {
               type="tel"
               placeholder={dict.common.leadForm.phonePlaceholder}
               aria-required="true"
+              aria-invalid={phoneError ? 'true' : 'false'}
+              aria-describedby={phoneError ? 'seller-phone-error' : undefined}
               value={phone}
               onChange={(e) => setPhone(e.target.value)}
             />
+            {phoneError ? (
+              <p id="seller-phone-error" className="form-error mt-2" role="alert">
+                {phoneError}
+              </p>
+            ) : null}
           </div>
         </div>
 
