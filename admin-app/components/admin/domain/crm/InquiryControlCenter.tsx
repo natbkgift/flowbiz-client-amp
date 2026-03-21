@@ -69,7 +69,7 @@ export function InquiryControlCenter({
               {authLoading ? t.signingIn : t.signIn}
             </AdminButton>
           </div>
-          <div className="dashboard-control-card__helper state-empty" role="status">
+          <div className="dashboard-control-card__helper state-empty">
             <strong>{t.authRequired}</strong>
             <p className="locale-safe">{t.loginSubtitle}</p>
           </div>

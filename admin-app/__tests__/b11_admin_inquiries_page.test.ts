@@ -286,13 +286,15 @@ describe("B11 admin inquiries page contract", () => {
     expect(controlCenter).toContain('aria-live="assertive"');
     expect(controlCenter).toContain('aria-atomic="true"');
     expect(controlCenter).toContain('className="dashboard-control-card__helper state-empty"');
-    expect(controlCenter).toContain("<strong>{t.authRequired}</strong>");
-    expect(controlCenter).toContain("t.loginSubtitle");
     expect(page).toContain("state-empty");
     expect(page).toContain("state-loading");
     expect(page).toContain("state-error");
     expect(copy).toContain('followUpSaved: "Follow-up updated."');
     expect(copy).toContain('followUpSaved: "บันทึกสถานะติดตามแล้ว"');
+    expect(copy).toContain('authRequired: "Sign in to load admin CRM data."');
+    expect(copy).toContain('loginSubtitle: "Use the same admin credentials as /api/v1/auth/login."');
+    expect(copy).toContain('authRequired: "กรุณาเข้าสู่ระบบก่อนใช้งาน CRM หลังบ้าน"');
+    expect(copy).toContain('loginSubtitle: "ใช้บัญชีแอดมินเดียวกับเส้นทาง /api/v1/auth/login"');
     expect(copy).toContain('sessionHint: "Keep this session active');
     expect(copy).toContain('sessionHint: "คงเซสชันนี้ไว้');
     expect(copy).toContain('filtersDescription: "Refine the active queue');

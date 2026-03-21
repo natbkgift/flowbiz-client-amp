@@ -54,13 +54,16 @@ describe("admin auth form semantics", () => {
   it("announces admin auth errors and keeps helper copy inside the login form", () => {
     const dashboardForm = read("components/admin/domain/dashboard/AdminDashboardScreen.tsx");
     const crmForm = read("components/admin/domain/crm/InquiryControlCenter.tsx");
+    const crmCopy = read("components/admin/domain/crm/inquiries-copy.ts");
 
     expect(dashboardForm).toContain('role="alert"');
     expect(crmForm).toContain('role="alert"');
     expect(crmForm).toContain('aria-live="assertive"');
     expect(crmForm).toContain('aria-atomic="true"');
     expect(crmForm).toContain('className="dashboard-control-card__helper state-empty"');
-    expect(crmForm).toContain("<strong>{t.authRequired}</strong>");
-    expect(crmForm).toContain("t.loginSubtitle");
+    expect(crmCopy).toContain('authRequired: "Sign in to load admin CRM data."');
+    expect(crmCopy).toContain('loginSubtitle: "Use the same admin credentials as /api/v1/auth/login."');
+    expect(crmCopy).toContain('authRequired: "กรุณาเข้าสู่ระบบก่อนใช้งาน CRM หลังบ้าน"');
+    expect(crmCopy).toContain('loginSubtitle: "ใช้บัญชีแอดมินเดียวกับเส้นทาง /api/v1/auth/login"');
   });
 });
