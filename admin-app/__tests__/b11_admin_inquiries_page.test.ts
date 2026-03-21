@@ -111,6 +111,13 @@ describe("B11 admin inquiries page contract", () => {
     expect(page).toContain('onClick={clearFilters}');
   });
 
+  it("keeps a readable primary row label even when inquiry name is missing", () => {
+    const list = read("components/admin/domain/crm/InquiryListTable.tsx");
+
+    expect(list).toContain("const primaryLabel = item.name || item.email || item.phone || item.id;");
+    expect(list).toContain("<span>{primaryLabel}</span>");
+  });
+
   it("keeps accessibility and runtime states in EN/TH copy", () => {
     const page = read("app/admin/inquiries/page.tsx");
     const controlCenter = read("components/admin/domain/crm/InquiryControlCenter.tsx");
