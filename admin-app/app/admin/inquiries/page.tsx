@@ -131,7 +131,7 @@ export default function AdminInquiriesPage() {
   const t = inquiriesCopy[locale];
   const authError = authErrorCode ? authErrorMessage(t, authErrorCode) : null;
   const filterQuery = useMemo(() => buildQuery(filters), [filters]);
-  const detailEmptyStateMessage = !loading && items.length === 0 ? `${t.empty} ${t.emptyHint}` : t.noDetails;
+  const detailEmptyStateMessage = !loading && items.length === 0 ? t.emptyDetails : t.noDetails;
 
   function updateFilter<Key extends keyof InquiryFilters>(key: Key, value: InquiryFilters[Key]) {
     setFilters((current) => ({ ...current, [key]: value }));
@@ -156,17 +156,16 @@ export default function AdminInquiriesPage() {
       setItems(body.data);
       setTotal(body.meta.total);
       const hasCurrentSelection = body.data.some((item) => item.id === selectedId);
-      const nextSelectedId = hasCurrentSelection ? selectedId : (body.data[0]?.id ?? null);
-      const shouldRefreshSelection = nextSelectedId !== selectedId;
-      if (shouldRefreshSelection) {
+      if (!hasCurrentSelection) {
+        const nextSelectedId = body.data[0]?.id ?? null;
         setSelectedId(nextSelectedId);
         setSelected(null);
         setTimeline([]);
+        if (nextSelectedId) {
+          await loadDetails(nextSelectedId, activeToken);
+        }
       }
       persistSession(activeToken, (emailOverride ?? authEmail) || loginEmail);
-      if (nextSelectedId && shouldRefreshSelection) {
-        await loadDetails(nextSelectedId, activeToken);
-      }
     } catch {
       setError(t.error);
     } finally {

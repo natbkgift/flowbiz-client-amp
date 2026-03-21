@@ -93,13 +93,16 @@ describe("B11 admin inquiries page contract", () => {
 
   it("auto-opens the first inquiry when the current selection is no longer in the refreshed queue", () => {
     const page = read("app/admin/inquiries/page.tsx");
+    const copy = read("components/admin/domain/crm/inquiries-copy.ts");
 
     expect(page).toContain("const hasCurrentSelection = body.data.some((item) => item.id === selectedId);");
-    expect(page).toContain("const shouldRefreshSelection = nextSelectedId !== selectedId;");
-    expect(page).toContain("if (nextSelectedId && shouldRefreshSelection) {");
+    expect(page).toContain("if (!hasCurrentSelection) {");
+    expect(page).toContain("const nextSelectedId = body.data[0]?.id ?? null;");
+    expect(page).toContain("if (nextSelectedId) {");
     expect(page).toContain("await loadDetails(nextSelectedId, activeToken);");
     expect(page).toContain("async function loadDetails(id: string, tokenOverride?: string)");
     expect(page).toContain('const activeToken = (tokenOverride ?? authToken).trim();');
+    expect(copy).toContain('emptyDetails: "No inquiries match current filters. Adjust filters or reload the queue to fetch the latest leads."');
   });
 
   it("clears filters and immediately reloads the default queue", () => {
@@ -128,7 +131,7 @@ describe("B11 admin inquiries page contract", () => {
     const page = read("app/admin/inquiries/page.tsx");
     const detail = read("components/admin/domain/crm/InquiryDetailPanel.tsx");
 
-    expect(page).toContain('const detailEmptyStateMessage = !loading && items.length === 0 ? `${t.empty} ${t.emptyHint}` : t.noDetails;');
+    expect(page).toContain("const detailEmptyStateMessage = !loading && items.length === 0 ? t.emptyDetails : t.noDetails;");
     expect(page).toContain("emptyStateMessage={detailEmptyStateMessage}");
     expect(detail).toContain("emptyStateMessage?: string;");
     expect(detail).toContain("emptyStateMessage || t.noDetails");
@@ -170,5 +173,6 @@ describe("B11 admin inquiries page contract", () => {
     expect(copy).toContain('filtersDescription: "ปรับคิวงานที่กำลังดู');
     expect(copy).toContain('loginTitle: "Admin sign in"');
     expect(copy).toContain('loginTitle: "เข้าสู่ระบบแอดมิน"');
+    expect(copy).toContain('emptyDetails: "ไม่พบรายการตามตัวกรองปัจจุบัน');
   });
 });
