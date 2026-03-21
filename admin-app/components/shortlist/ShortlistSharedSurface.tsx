@@ -249,7 +249,7 @@ export function ShortlistSharedSurface({ locale, shareToken }: { locale: 'en' | 
                 </div>
 
                 <div className="shortlist-item-card__facts">
-                  <span>{formatPriceTHB(Number(item.price))}</span>
+                  <span>{formatPriceTHB(Number(item.price), locale)}</span>
                   <span>{formatShortlistSize(item.size, locale)}</span>
                   <span>
                     {locale === 'th'

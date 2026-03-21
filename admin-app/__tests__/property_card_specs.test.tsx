@@ -33,6 +33,7 @@ describe('PropertyCard specs', () => {
     );
 
     expect(screen.getByText('Condo')).toBeInTheDocument();
+    expect(screen.getByText('THB 6,500,000')).toBeInTheDocument();
     expect(screen.getByText('2 BR')).toBeInTheDocument();
     expect(screen.getByText('84 sqm')).toBeInTheDocument();
     expect(screen.getByLabelText(/property quick specs/i)).toBeInTheDocument();

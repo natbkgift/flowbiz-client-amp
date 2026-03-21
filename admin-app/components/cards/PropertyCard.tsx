@@ -3,16 +3,11 @@ import Link from 'next/link';
 
 import type { PropertyListItem } from '../../app/public/_shared/types';
 import type { Dictionary } from '../../app/_lib/i18n/types';
-import { resolveImageUrl } from '../../app/_lib/public-api-shared';
+import { formatPriceTHB, resolveImageUrl } from '../../app/_lib/public-api-shared';
 import { withLocale } from '../../app/_lib/i18n/routing';
 import { ShortlistSaveButton } from '@/components/shortlist/ShortlistSaveButton';
 
 const PROPERTY_CARD_FALLBACK = '/images/property-placeholder.svg';
-
-function formatPriceTHB(price: number): string {
-  if (!Number.isFinite(price)) return '฿-';
-  return `฿${Math.round(price).toLocaleString()}`;
-}
 
 function formatPropertyType(value: string | null | undefined, locale: 'en' | 'th'): string | null {
   const normalized = (value ?? '').trim().toLowerCase();
@@ -79,7 +74,7 @@ export function PropertyCard({
         </div>
 
         <div className="card-content">
-          <div className="card-price">{formatPriceTHB(Number(item.price))}</div>
+          <div className="card-price">{formatPriceTHB(Number(item.price), locale)}</div>
           {propertyTypeLabel ? <div className="card-type">{propertyTypeLabel}</div> : null}
           <div className="card-title">{item.title}</div>
           {propertySpecs.length ? (
