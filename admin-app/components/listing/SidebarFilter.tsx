@@ -96,6 +96,10 @@ export function SidebarFilter({
   }
 
   function apply() {
+    if (draftPriceMin > draftPriceMax) {
+      return;
+    }
+
     setAppliedPriceMin(draftPriceMin);
     setAppliedPriceMax(draftPriceMax);
     setAppliedBeds(new Set(draftBeds));
@@ -118,7 +122,14 @@ export function SidebarFilter({
   const locale = localeFromPathname(pathname);
   const dict = locale === 'th' ? th : en;
   const headingId = useId();
+  const priceRangeErrorId = useId();
   const drawerRef = useRef<HTMLElement | null>(null);
+  const priceRangeError =
+    draftPriceMin > draftPriceMax
+      ? locale === 'th'
+        ? 'ราคาเริ่มต้นต้องไม่มากกว่าราคาสูงสุด'
+        : 'Minimum price cannot be greater than maximum price.'
+      : null;
 
   useEffect(() => {
     if (!isOpen) return;
@@ -146,6 +157,8 @@ export function SidebarFilter({
             <div className="text-sm text-[var(--color-text-secondary)] mb-1.5">{dict.filters.min}</div>
             <input
               className="form-input"
+              aria-describedby={priceRangeError ? priceRangeErrorId : undefined}
+              aria-invalid={priceRangeError ? 'true' : 'false'}
               inputMode="numeric"
               value={draftPriceMin}
               onChange={(e) => setDraftPriceMin(Number(e.target.value) || 0)}
@@ -155,12 +168,19 @@ export function SidebarFilter({
             <div className="text-sm text-[var(--color-text-secondary)] mb-1.5">{dict.filters.max}</div>
             <input
               className="form-input"
+              aria-describedby={priceRangeError ? priceRangeErrorId : undefined}
+              aria-invalid={priceRangeError ? 'true' : 'false'}
               inputMode="numeric"
               value={draftPriceMax}
               onChange={(e) => setDraftPriceMax(Number(e.target.value) || 0)}
             />
           </label>
         </div>
+        {priceRangeError ? (
+          <p id={priceRangeErrorId} className="form-helper" role="alert">
+            {priceRangeError}
+          </p>
+        ) : null}
       </div>
 
       <div className="filter-section">
@@ -213,7 +233,7 @@ export function SidebarFilter({
       </div>
 
       <div className="flex gap-3">
-        <button type="button" className="btn btn-primary btn-block" onClick={apply}>
+        <button type="button" className="btn btn-primary btn-block" onClick={apply} disabled={Boolean(priceRangeError)}>
           {dict.filters.apply}
         </button>
         <button type="button" className="btn btn-secondary btn-block" onClick={clear}>
