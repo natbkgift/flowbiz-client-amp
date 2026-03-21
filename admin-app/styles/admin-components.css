@@ -2549,6 +2549,24 @@
     line-height: 1.45;
   }
 
+  .crm-filter-summary {
+    display: grid;
+    gap: var(--admin-space-2);
+  }
+
+  .crm-filter-summary__label {
+    color: var(--admin-text-muted);
+    font-size: var(--admin-font-size-xs);
+    font-weight: var(--admin-font-weight-semibold);
+  }
+
+  .crm-filter-summary__chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--admin-space-2);
+    align-items: center;
+  }
+
   .crm-search {
     grid-column: span 3;
   }
@@ -2557,6 +2575,11 @@
   .home-composer-split {
     grid-template-columns: minmax(280px, 0.95fr) minmax(0, 1.2fr);
     align-items: start;
+  }
+
+  .crm-list.admin-card-shell,
+  .crm-detail.admin-card-shell {
+    min-height: auto;
   }
 
   .home-composer-split {

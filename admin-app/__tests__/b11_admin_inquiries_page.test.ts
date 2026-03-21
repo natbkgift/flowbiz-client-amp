@@ -161,6 +161,39 @@ describe("B11 admin inquiries page contract", () => {
     expect(copy).toContain('filterStateApplied: "คิวปัจจุบันตรงกับตัวกรองที่ใช้งานอยู่แล้ว');
   });
 
+  it("surfaces the applied queue filters as readable summary chips with a pending-draft warning", () => {
+    const page = read("app/admin/inquiries/page.tsx");
+    const copy = read("components/admin/domain/crm/inquiries-copy.ts");
+    const styles = read("styles/admin-components.css");
+
+    expect(page).toContain('translateFollowUpStatus,');
+    expect(page).toContain('translateInquiryStatus,');
+    expect(page).toContain("const appliedFilterSummary = useMemo(() => buildFilterSummary(appliedFilters, t, locale), [appliedFilters, locale, t]);");
+    expect(page).toContain('<div className="crm-filter-summary" aria-live="polite">');
+    expect(page).toContain('<span className="crm-filter-summary__label">{t.appliedQueue}</span>');
+    expect(page).toContain('{hasUnappliedFilters ? <span className="crm-chip crm-chip-warn">{t.draftChangesPending}</span> : null}');
+    expect(page).toContain('<span className="crm-chip crm-chip-muted">{t.appliedQueueDefault}</span>');
+    expect(page).toContain('label: `${t.status}: ${translateInquiryStatus(filters.status, locale)}`');
+    expect(page).toContain('label: `${t.followUp}: ${translateFollowUpStatus(filters.follow_up_status, locale)}`');
+    expect(page).toContain('label: `${t.search}: ${truncateFilterSummaryValue(filters.q)}`');
+    expect(page).toContain("function truncateFilterSummaryValue(value: string): string {");
+    expect(copy).toContain('appliedQueue: "Applied queue"');
+    expect(copy).toContain('appliedQueueDefault: "Default filters"');
+    expect(copy).toContain('draftChangesPending: "Draft changes pending"');
+    expect(copy).toContain('appliedQueue: "คิวที่ใช้งานอยู่"');
+    expect(copy).toContain('draftChangesPending: "มีตัวกรองฉบับรอใช้"');
+    expect(styles).toContain(".crm-filter-summary {");
+    expect(styles).toContain(".crm-filter-summary__chips {");
+  });
+
+  it("keeps CRM list/detail cards compact instead of stretching to full column height", () => {
+    const styles = read("styles/admin-components.css");
+
+    expect(styles).toContain(".crm-list.admin-card-shell,");
+    expect(styles).toContain(".crm-detail.admin-card-shell {");
+    expect(styles).toContain("min-height: auto;");
+  });
+
   it("keeps a readable primary row label even when inquiry name is missing", () => {
     const list = read("components/admin/domain/crm/InquiryListTable.tsx");
     const detail = read("components/admin/domain/crm/InquiryDetailPanel.tsx");
@@ -227,6 +260,8 @@ describe("B11 admin inquiries page contract", () => {
     expect(copy).toContain('filtersDescription: "ปรับคิวงานที่กำลังดู');
     expect(copy).toContain('filterStateDraft: "Draft filters are not applied yet.');
     expect(copy).toContain('filterStateDraft: "ตัวกรองที่แก้ไขไว้ยังไม่ถูกใช้กับคิวปัจจุบัน');
+    expect(copy).toContain('appliedQueue: "Applied queue"');
+    expect(copy).toContain('appliedQueue: "คิวที่ใช้งานอยู่"');
     expect(copy).toContain('loginTitle: "Admin sign in"');
     expect(copy).toContain('loginTitle: "เข้าสู่ระบบแอดมิน"');
     expect(copy).toContain('emptyDetails: "ไม่พบรายการตามตัวกรองปัจจุบัน');

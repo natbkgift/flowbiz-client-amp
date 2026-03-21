@@ -21,6 +21,8 @@ import {
   readRoleFromToken,
   savedFiltersKey,
   toLocalInputDateTime,
+  translateFollowUpStatus,
+  translateInquiryStatus,
 } from "@/components/admin/domain/crm/inquiries-utils";
 import type {
   InquiryFilters,
@@ -137,6 +139,7 @@ export default function AdminInquiriesPage() {
   const hasUnappliedFilters = filterQuery !== appliedFilterQuery;
   const hasActiveFilters = Object.values(filters).some((value) => value.trim().length > 0);
   const hasAppliedFilters = Object.values(appliedFilters).some((value) => value.trim().length > 0);
+  const appliedFilterSummary = useMemo(() => buildFilterSummary(appliedFilters, t, locale), [appliedFilters, locale, t]);
   const hasNoFiltersToReset = !hasUnappliedFilters && !hasActiveFilters;
   const shouldDisableApply = !isAuthenticated || loading || detailLoading || Boolean(movingInquiryId) || !hasUnappliedFilters;
   const shouldDisableReload = !isAuthenticated || detailLoading || Boolean(movingInquiryId) || hasUnappliedFilters;
@@ -454,6 +457,24 @@ export default function AdminInquiriesPage() {
           </div>
         ) : null}
 
+        {isAuthenticated ? (
+          <div className="crm-filter-summary" aria-live="polite">
+            <span className="crm-filter-summary__label">{t.appliedQueue}</span>
+            <div className="crm-filter-summary__chips">
+              {hasUnappliedFilters ? <span className="crm-chip crm-chip-warn">{t.draftChangesPending}</span> : null}
+              {appliedFilterSummary.length > 0 ? (
+                appliedFilterSummary.map((summary) => (
+                  <span key={summary.key} className="crm-chip crm-chip-muted">
+                    {summary.label}
+                  </span>
+                ))
+              ) : (
+                <span className="crm-chip crm-chip-muted">{t.appliedQueueDefault}</span>
+              )}
+            </div>
+          </div>
+        ) : null}
+
         <InquirySavedFiltersPanel
           t={t}
           isAuthenticated={isAuthenticated}
@@ -543,4 +564,44 @@ function authErrorMessage(
   if (code === "missing_credentials") return t.loginMissing;
   if (code === "invalid_credentials") return t.loginInvalid;
   return t.loginError;
+}
+
+function buildFilterSummary(
+  filters: InquiryFilters,
+  t: (typeof inquiriesCopy)[keyof typeof inquiriesCopy],
+  locale: InquiryLocale
+): Array<{ key: keyof InquiryFilters; label: string }> {
+  const summary: Array<{ key: keyof InquiryFilters; label: string }> = [];
+
+  if (filters.status.trim()) {
+    summary.push({ key: "status", label: `${t.status}: ${translateInquiryStatus(filters.status, locale)}` });
+  }
+  if (filters.source.trim()) {
+    summary.push({ key: "source", label: `${t.source}: ${truncateFilterSummaryValue(filters.source)}` });
+  }
+  if (filters.purpose.trim()) {
+    summary.push({ key: "purpose", label: `${t.purpose}: ${truncateFilterSummaryValue(filters.purpose)}` });
+  }
+  if (filters.date_from.trim()) {
+    summary.push({ key: "date_from", label: `${t.dateFrom}: ${filters.date_from}` });
+  }
+  if (filters.date_to.trim()) {
+    summary.push({ key: "date_to", label: `${t.dateTo}: ${filters.date_to}` });
+  }
+  if (filters.follow_up_status.trim()) {
+    summary.push({
+      key: "follow_up_status",
+      label: `${t.followUp}: ${translateFollowUpStatus(filters.follow_up_status, locale)}`,
+    });
+  }
+  if (filters.q.trim()) {
+    summary.push({ key: "q", label: `${t.search}: ${truncateFilterSummaryValue(filters.q)}` });
+  }
+
+  return summary;
+}
+
+function truncateFilterSummaryValue(value: string): string {
+  const trimmed = value.trim();
+  return trimmed.length > 24 ? `${trimmed.slice(0, 21)}…` : trimmed;
 }
