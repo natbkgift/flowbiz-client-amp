@@ -12,6 +12,7 @@ TARGET_SHA=""
 BASE_URL="${FLOWBIZ_PROD_BASE_URL:-https://amppattaya.com}"
 LOG_DIR="${FLOWBIZ_DEPLOY_ROLLBACK_LOG_DIR:-$REPO_ROOT/ops/logs/deploy-rollback}"
 FLOWBIZ_VERBOSE="${FLOWBIZ_VERBOSE:-0}"
+HISTORY_MODE="compatible"
 PASSTHROUGH_ARGS=()
 
 while [[ $# -gt 0 ]]; do
@@ -70,7 +71,7 @@ fi
 "$SCRIPT_DIR/deploy_prod.sh" --target-sha "$TARGET_SHA" "${PASSTHROUGH_ARGS[@]}"
 
 report_path="$LOG_DIR/rollback-$(date -u +%Y%m%dT%H%M%SZ).json"
-"$SCRIPT_DIR/prod_smoke_check.sh" --base-url "$BASE_URL" --expected-build-sha "${TARGET_SHA:0:8}" --output "$report_path"
+"$SCRIPT_DIR/prod_smoke_check.sh" --base-url "$BASE_URL" --expected-build-sha "${TARGET_SHA:0:8}" --history-mode "$HISTORY_MODE" --output "$report_path"
 cp "$report_path" "$LOG_DIR/latest.json"
 
 printf 'rollback=ok target_sha=%s smoke_report=%s\n' "$TARGET_SHA" "$report_path"
