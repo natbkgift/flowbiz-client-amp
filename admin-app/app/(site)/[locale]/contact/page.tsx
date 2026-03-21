@@ -90,6 +90,65 @@ function normalizeTagToken(value: string): string {
     .replace(/[^a-z0-9_]/g, '');
 }
 
+type ContactTopicPreset = {
+  description?: string;
+  draftMessage?: string;
+  purpose?: string;
+  inquiryTag?: string;
+};
+
+function readSingleSearchParam(
+  searchParams: Record<string, string | string[] | undefined> | undefined,
+  key: string,
+): string | null {
+  const value = searchParams?.[key];
+  if (typeof value === 'string') {
+    return value;
+  }
+
+  if (Array.isArray(value)) {
+    return value[0] ?? null;
+  }
+
+  return null;
+}
+
+export function getContactTopicPreset(locale: 'en' | 'th', topic: string | null | undefined): ContactTopicPreset {
+  const normalizedTopic = String(topic || '').trim().toLowerCase();
+
+  if (normalizedTopic === 'private_tour') {
+    return {
+      description:
+        locale === 'th'
+          ? 'ใช้ฟอร์มนี้เพื่อนัด private tour พร้อมแจ้งทำเล งบประมาณ และช่วงเวลาที่สะดวก เพื่อให้ทีมจัด viewing step ที่เหมาะที่สุดต่อได้ทันที'
+          : 'Use this form to request a private tour with your preferred areas, budget, and timing so the team can line up the most relevant viewing step.',
+      draftMessage:
+        locale === 'th'
+          ? 'ต้องการนัด private tour และอยากให้ทีมช่วยคัดตัวเลือกที่ควรเข้าไปดูเป็นลำดับถัดไป'
+          : 'I want to book a private tour and would like the team to narrow down the most relevant properties to view next.',
+      purpose: 'buy',
+      inquiryTag: 'topic:private_tour',
+    };
+  }
+
+  if (normalizedTopic === 'investment_plan') {
+    return {
+      description:
+        locale === 'th'
+          ? 'ใช้ฟอร์มนี้เพื่อคุยแผนการลงทุน โดยแจ้งงบประมาณ ผลตอบแทนที่คาดหวัง และทำเลที่สนใจ เพื่อให้ทีมจัด shortlist ตาม thesis การลงทุนของคุณ'
+          : 'Use this form to request an investment-plan conversation with your budget, target return, and preferred areas so the team can shape the shortlist around your thesis.',
+      draftMessage:
+        locale === 'th'
+          ? 'ต้องการคุยแผนการลงทุนและให้ทีมช่วยจัด shortlist ที่สอดคล้องกับเป้าหมายผลตอบแทนและความเสี่ยงที่รับได้'
+          : 'I want to discuss an investment plan and have the team shape a shortlist around my return goals and risk tolerance.',
+      purpose: 'invest',
+      inquiryTag: 'topic:investment_plan',
+    };
+  }
+
+  return {};
+}
+
 function humanizeToken(locale: 'en' | 'th', value: string | null | undefined): string | null {
   const text = String(value || '').trim();
   if (!text) return null;
@@ -228,9 +287,10 @@ export default async function ContactPage(
   const investorContext = parseInvestorToolContext(searchParams);
   const buyingCostContext = parseBuyingCostAdvisorContext(searchParams);
   const leadCaptureContext = parseLeadCaptureContext(searchParams);
+  const topic = readSingleSearchParam(searchParams, 'topic');
+  const topicPreset = getContactTopicPreset(locale, topic);
   const msg =
-    (typeof searchParams?.msg === 'string' ? searchParams.msg : Array.isArray(searchParams?.msg) ? searchParams?.msg[0] : null) ??
-    null;
+    readSingleSearchParam(searchParams, 'msg') ?? null;
   const investorLines = [
     formatCurrency(locale, investorContext.purchasePrice)
       ? `${locale === 'th' ? 'ราคาซื้อเป้าหมาย' : 'Target purchase price'}: ${formatCurrency(locale, investorContext.purchasePrice)}`
@@ -332,7 +392,7 @@ export default async function ContactPage(
             buyerFit: leadCaptureContext.buyerFit ?? null,
             signalLevel: leadCaptureContext.signalLevel ?? null,
           })
-      : dict.contact.advisoryBody;
+      : topicPreset.draftMessage ?? dict.contact.advisoryBody;
   const defaultBudgetBand = inferBudgetBand(buyingCostContext.propertyPrice ?? investorContext.purchasePrice);
   const hasInvestorContext = investorLines.length > 0;
   const hasBuyingCostContext = buyingCostLines.length > 0;
@@ -342,8 +402,9 @@ export default async function ContactPage(
     leadCaptureContext.buyerFit ?? null,
     leadCaptureContext.source ?? null,
     leadCaptureContext.intent,
-  );
+  ) ?? topicPreset.purpose;
   const inquiryTags = [
+    topicPreset.inquiryTag ?? null,
     leadCaptureContext.project ? `project:${normalizeTagToken(leadCaptureContext.project)}` : null,
     ...(leadProjectNames.length > 1
       ? leadProjectNames.map((name) => `project_scope:${normalizeTagToken(name)}`)
@@ -523,6 +584,7 @@ export default async function ContactPage(
             <div className="split__main" id="contact-form">
               <LeadForm
                 heading={dict.contact.formTitle}
+                description={topicPreset.description}
                 defaultMessage={defaultMessage}
                 defaultBudgetBand={defaultBudgetBand}
                 defaultPurpose={defaultPurpose}
