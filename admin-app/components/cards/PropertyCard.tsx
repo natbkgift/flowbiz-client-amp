@@ -14,6 +14,40 @@ function formatPriceTHB(price: number): string {
   return `฿${Math.round(price).toLocaleString()}`;
 }
 
+function formatPropertyType(value: string | null | undefined, locale: 'en' | 'th'): string | null {
+  const normalized = (value ?? '').trim().toLowerCase();
+  if (!normalized) return null;
+
+  if (locale === 'th') {
+    if (normalized === 'condo' || normalized === 'condominium') return 'คอนโด';
+    if (normalized === 'villa') return 'วิลล่า';
+    if (normalized === 'house') return 'บ้าน';
+    if (normalized === 'townhouse') return 'ทาวน์เฮาส์';
+    if (normalized === 'studio') return 'สตูดิโอ';
+  }
+
+  return normalized
+    .split(/[_\s-]+/)
+    .filter(Boolean)
+    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+    .join(' ');
+}
+
+function formatPropertySpecs(item: PropertyListItem, locale: 'en' | 'th'): string[] {
+  const specs: string[] = [];
+
+  if (typeof item.bedrooms === 'number' && Number.isFinite(item.bedrooms) && item.bedrooms > 0) {
+    specs.push(locale === 'th' ? `${item.bedrooms} ห้องนอน` : `${item.bedrooms} BR`);
+  }
+
+  const sizeValue = Number(item.size_sqm ?? item.size ?? null);
+  if (Number.isFinite(sizeValue) && sizeValue > 0) {
+    specs.push(locale === 'th' ? `${Math.round(sizeValue).toLocaleString()} ตร.ม.` : `${Math.round(sizeValue).toLocaleString()} sqm`);
+  }
+
+  return specs;
+}
+
 export function PropertyCard({
   item,
   dict,
@@ -27,6 +61,8 @@ export function PropertyCard({
     ? withLocale(locale, `/property/${encodeURIComponent(item.slug)}`)
     : withLocale(locale, item.type === 'rent' ? '/rent' : '/buy');
   const img = resolveImageUrl(item.cover_image ?? item.local_images?.[0] ?? item.images?.[0] ?? null) ?? PROPERTY_CARD_FALLBACK;
+  const propertyTypeLabel = formatPropertyType(item.property_type ?? item.type, locale);
+  const propertySpecs = formatPropertySpecs(item, locale);
 
   return (
     <article className="property-card">
@@ -44,7 +80,15 @@ export function PropertyCard({
 
         <div className="card-content">
           <div className="card-price">{formatPriceTHB(Number(item.price))}</div>
+          {propertyTypeLabel ? <div className="card-type">{propertyTypeLabel}</div> : null}
           <div className="card-title">{item.title}</div>
+          {propertySpecs.length ? (
+            <div className="card-specs" aria-label={locale === 'th' ? 'ข้อมูลเบื้องต้นของทรัพย์' : 'Property quick specs'}>
+              {propertySpecs.map((spec) => (
+                <span key={spec} className="card-specs__item">{spec}</span>
+              ))}
+            </div>
+          ) : null}
           <div className="card-location">{item.address}</div>
         </div>
       </Link>
