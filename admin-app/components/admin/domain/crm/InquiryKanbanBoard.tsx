@@ -46,7 +46,8 @@ export function InquiryKanbanBoard({
           <ul className="crm-items">
             {column.items.map((item) => {
               const primaryLabel = getInquiryDisplayLabel(item);
-              const secondaryLabel = [item.source_page, item.intent].filter(Boolean).join(" · ") || "-";
+              const secondaryLabelParts = [item.source_page, item.intent].filter(Boolean);
+              const secondaryLabel = secondaryLabelParts.length > 0 ? secondaryLabelParts.join(" · ") : "-";
               const isMoving = movingInquiryId === item.id;
               const movingStatusId = isMoving ? `crm-moving-status-${item.id}` : undefined;
 
