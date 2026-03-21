@@ -73,6 +73,9 @@ const shellCopy = {
     search: "Search",
     searchPlaceholder: "Search modules, workspaces, or tasks",
     searchHint: "Filter admin navigation instantly",
+    searchSummaryLabel: "Search scope",
+    searchSummaryAll: "Showing every admin workspace and quick action.",
+    searchSummaryMatches: "matching items",
     noResults: "No matching workspaces",
     noResultsHint: "Try Dashboard, Media, SEO, or CRM.",
     openNavigation: "Open navigation",
@@ -106,6 +109,9 @@ const shellCopy = {
     search: "ค้นหา",
     searchPlaceholder: "ค้นหาเมนู พื้นที่ทำงาน หรือรายการงาน",
     searchHint: "ค้นหาและกรองเมนูแอดมินได้ทันที",
+    searchSummaryLabel: "ขอบเขตการค้นหา",
+    searchSummaryAll: "กำลังแสดงทุกพื้นที่ทำงานและคำสั่งลัดของแอดมิน",
+    searchSummaryMatches: "รายการที่ตรงคำค้น",
     noResults: "ไม่พบเมนูที่ตรงคำค้น",
     noResultsHint: "ลองค้นหา แดชบอร์ด คลังสื่อ SEO หรือ CRM",
     openNavigation: "เปิดเมนู",
@@ -299,6 +305,9 @@ export function AdminShell({ children }: { children: ReactNode }) {
       search: getAdminCopyValue(shellCopy, locale, "search"),
       searchPlaceholder: getAdminCopyValue(shellCopy, locale, "searchPlaceholder"),
       searchHint: getAdminCopyValue(shellCopy, locale, "searchHint"),
+      searchSummaryLabel: getAdminCopyValue(shellCopy, locale, "searchSummaryLabel"),
+      searchSummaryAll: getAdminCopyValue(shellCopy, locale, "searchSummaryAll"),
+      searchSummaryMatches: getAdminCopyValue(shellCopy, locale, "searchSummaryMatches"),
       noResults: getAdminCopyValue(shellCopy, locale, "noResults"),
       noResultsHint: getAdminCopyValue(shellCopy, locale, "noResultsHint"),
       openNavigation: getAdminCopyValue(shellCopy, locale, "openNavigation"),
@@ -352,8 +361,16 @@ export function AdminShell({ children }: { children: ReactNode }) {
   );
   const hasSearchResults =
     filteredNavGroups.some((entry) => entry.items.length > 0) || filteredUtilityItems.length > 0;
+  const totalSearchResults =
+    filteredNavGroups.reduce((count, entry) => count + entry.items.length, 0) + filteredUtilityItems.length;
   const showDesktopUtilityNav = deferredSearch.length > 0 && filteredUtilityItems.length > 0;
   const showWorkspaceBreadcrumb = currentGroupLabel !== currentWorkspaceLabel;
+  const trimmedSearchQuery = searchQuery.trim();
+  const searchSummaryMessage = deferredSearch
+    ? locale === "th"
+      ? `พบ ${totalSearchResults} ${ui.searchSummaryMatches} สำหรับ “${trimmedSearchQuery}”`
+      : `${totalSearchResults} ${ui.searchSummaryMatches} for “${trimmedSearchQuery}”`
+    : ui.searchSummaryAll;
 
   useEffect(() => {
     const detectedLocale = detectAdminLocale();
@@ -464,6 +481,10 @@ export function AdminShell({ children }: { children: ReactNode }) {
             </div>
             <small>{ui.searchHint}</small>
           </label>
+          <div className="admin-shell-search-summary" role="status" aria-live="polite">
+            <span className="admin-shell-search-summary__label">{ui.searchSummaryLabel}</span>
+            <strong>{searchSummaryMessage}</strong>
+          </div>
 
           {hasSearchResults ? (
             <>
@@ -655,6 +676,10 @@ export function AdminShell({ children }: { children: ReactNode }) {
             </div>
             <small>{ui.searchHint}</small>
           </label>
+          <div className="admin-shell-search-summary" role="status" aria-live="polite">
+            <span className="admin-shell-search-summary__label">{ui.searchSummaryLabel}</span>
+            <strong>{searchSummaryMessage}</strong>
+          </div>
 
           <div className="admin-shell-mobile-drawer-sections">
             {hasSearchResults ? (

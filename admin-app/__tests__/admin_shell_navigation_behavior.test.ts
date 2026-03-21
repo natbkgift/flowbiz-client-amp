@@ -33,9 +33,14 @@ describe("admin shell navigation behavior", () => {
     const shell = read("components/layout/AdminShell.tsx");
 
     expect(shell).toContain("const hasSearchResults =");
+    expect(shell).toContain("const totalSearchResults =");
     expect(shell).toContain("filteredUtilityItems.length > 0");
     expect(shell).toContain("renderHighlightedText");
     expect(shell).toContain("admin-shell-nav-match");
+    expect(shell).toContain("admin-shell-search-summary");
+    expect(shell).toContain("searchSummaryLabel");
+    expect(shell).toContain("searchSummaryMatches");
+    expect(shell).toContain('aria-live="polite"');
     expect(shell).toContain("admin-shell-nav-empty-icon");
     expect(shell).toContain("hasSearchResults ? (");
     expect(shell).toContain("emptySearchState");
@@ -60,6 +65,8 @@ describe("admin shell navigation behavior", () => {
     expect(css).toContain(".admin-shell-toggle");
     expect(css).toContain(".admin-shell-topbar-tools");
     expect(css).toContain(".admin-shell-search");
+    expect(css).toContain(".admin-shell-search-summary");
+    expect(css).toContain(".admin-shell-search-summary__label");
     expect(css).toContain(".admin-shell-mobile-drawer");
     expect(css).toContain(".admin-shell-backdrop.is-open");
     expect(css).toContain(".admin-btn-danger,");

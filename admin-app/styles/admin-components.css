@@ -281,6 +281,26 @@
     display: none;
   }
 
+  .admin-shell-search-summary {
+    display: grid;
+    gap: 2px;
+    padding: 0 var(--admin-space-2);
+  }
+
+  .admin-shell-search-summary__label {
+    color: var(--admin-text-soft);
+    font-size: var(--admin-font-size-xs);
+    font-weight: var(--admin-font-weight-semibold);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+
+  .admin-shell-search-summary strong {
+    color: var(--admin-text-muted);
+    font-size: var(--admin-font-size-sm);
+    font-weight: var(--admin-font-weight-medium);
+  }
+
   .admin-shell-nav-section {
     display: grid;
     gap: var(--admin-space-2);
