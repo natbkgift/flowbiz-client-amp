@@ -2652,6 +2652,13 @@
     font: inherit;
   }
 
+  .crm-row-button:disabled,
+  .crm-table-select:disabled {
+    opacity: 0.56;
+    color: var(--admin-text-soft);
+    cursor: not-allowed;
+  }
+
   .crm-table thead th {
     position: sticky;
     top: 0;

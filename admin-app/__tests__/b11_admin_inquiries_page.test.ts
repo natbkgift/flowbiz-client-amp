@@ -217,6 +217,19 @@ describe("B11 admin inquiries page contract", () => {
     expect(list).toContain('<span className="crm-chip crm-chip-muted">{translateInquiryStatus(item.status, locale)}</span>');
   });
 
+  it("gives moving rows a visible disabled state in both table and kanban views", () => {
+    const list = read("components/admin/domain/crm/InquiryListTable.tsx");
+    const kanban = read("components/admin/domain/crm/InquiryKanbanBoard.tsx");
+    const styles = read("styles/admin-components.css");
+
+    expect(list).toContain("disabled={movingInquiryId === item.id}");
+    expect(kanban).toContain("disabled={movingInquiryId === item.id}");
+    expect(styles).toContain(".crm-row-button:disabled,");
+    expect(styles).toContain(".crm-table-select:disabled {");
+    expect(styles).toContain("cursor: not-allowed;");
+    expect(styles).toContain("color: var(--admin-text-soft);");
+  });
+
   it("aligns the detail empty state with the current queue state", () => {
     const page = read("app/admin/inquiries/page.tsx");
     const detail = read("components/admin/domain/crm/InquiryDetailPanel.tsx");
