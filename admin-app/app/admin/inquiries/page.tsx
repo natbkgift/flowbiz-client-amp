@@ -78,6 +78,7 @@ export default function AdminInquiriesPage() {
   const [followUpNotice, setFollowUpNotice] = useState<string | null>(null);
 
   const [filters, setFilters] = useState<InquiryFilters>(EMPTY_FILTERS);
+  const [appliedFilters, setAppliedFilters] = useState<InquiryFilters>(EMPTY_FILTERS);
   const [appliedFilterQuery, setAppliedFilterQuery] = useState(() => buildQuery(EMPTY_FILTERS));
   const [followUpStatus, setFollowUpStatus] = useState("pending");
   const [followUpDueAt, setFollowUpDueAt] = useState("");
@@ -148,6 +149,10 @@ export default function AdminInquiriesPage() {
     await loadListWithFilters(filters, tokenOverride, emailOverride);
   }
 
+  async function reloadList(tokenOverride?: string, emailOverride?: string) {
+    await loadListWithFilters(appliedFilters, tokenOverride, emailOverride);
+  }
+
   async function loadListWithFilters(nextFilters: InquiryFilters, tokenOverride?: string, emailOverride?: string) {
     const activeToken = (tokenOverride ?? authToken).trim();
     if (!activeToken) {
@@ -162,6 +167,7 @@ export default function AdminInquiriesPage() {
       const body = await fetchJson<PaginatedResponse<InquiryItem>>(`/admin/inquiries?${query}`, activeToken);
       setItems(body.data);
       setTotal(body.meta.total);
+      setAppliedFilters(nextFilters);
       setAppliedFilterQuery(query);
       const selectedIdToRefresh = selectedId && body.data.some((item) => item.id === selectedId) ? selectedId : null;
       if (selectedIdToRefresh) {
@@ -416,7 +422,7 @@ export default function AdminInquiriesPage() {
             <button
               className="btn btn-secondary"
               type="button"
-              onClick={() => void loadList()}
+              onClick={() => void reloadList()}
               disabled={shouldDisableReload}
             >
               {t.reload}

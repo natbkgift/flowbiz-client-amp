@@ -120,13 +120,18 @@ describe("B11 admin inquiries page contract", () => {
   it("separates apply vs reload based on whether filters are still dirty", () => {
     const page = read("app/admin/inquiries/page.tsx");
 
+    expect(page).toContain("const [appliedFilters, setAppliedFilters] = useState<InquiryFilters>(EMPTY_FILTERS);");
     expect(page).toContain('const [appliedFilterQuery, setAppliedFilterQuery] = useState(() => buildQuery(EMPTY_FILTERS));');
     expect(page).toContain("const hasUnappliedFilters = filterQuery !== appliedFilterQuery;");
+    expect(page).toContain("async function reloadList(tokenOverride?: string, emailOverride?: string) {");
+    expect(page).toContain("await loadListWithFilters(appliedFilters, tokenOverride, emailOverride);");
+    expect(page).toContain("setAppliedFilters(nextFilters);");
     expect(page).toContain("setAppliedFilterQuery(query);");
     expect(page).toContain("const shouldDisableApply = !isAuthenticated || loading || detailLoading || Boolean(movingInquiryId) || !hasUnappliedFilters;");
     expect(page).toContain("const shouldDisableReload = !isAuthenticated || detailLoading || Boolean(movingInquiryId) || hasUnappliedFilters;");
     expect(page).toContain("disabled={shouldDisableApply}");
     expect(page).toContain("disabled={shouldDisableReload}");
+    expect(page).toContain("onClick={() => void reloadList()}");
   });
 
   it("disables clear when there is no active or pending filter to reset", () => {
