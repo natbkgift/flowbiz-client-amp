@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { getContactTopicPreset } from '@/app/(site)/[locale]/contact/page';
+import { getContactTopicPreset } from '@/app/_lib/contact-topic';
 
 describe('contact topic presets', () => {
   it('maps private tour links to a buy-focused preset', () => {
