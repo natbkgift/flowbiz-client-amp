@@ -156,7 +156,9 @@ export default function AdminInquiriesPage() {
       setItems(body.data);
       setTotal(body.meta.total);
       const hasCurrentSelection = body.data.some((item) => item.id === selectedId);
-      if (!hasCurrentSelection) {
+      if (hasCurrentSelection && selectedId) {
+        await loadDetails(selectedId, activeToken);
+      } else {
         const nextSelectedId = body.data[0]?.id ?? null;
         setSelectedId(nextSelectedId);
         setSelected(null);
