@@ -154,12 +154,16 @@ export default function AdminInquiriesPage() {
       const body = await fetchJson<PaginatedResponse<InquiryItem>>(`/admin/inquiries?${query}`, activeToken);
       setItems(body.data);
       setTotal(body.meta.total);
-      if (!body.data.some((item) => item.id === selectedId)) {
-        setSelectedId(null);
+      const nextSelectedId = body.data.some((item) => item.id === selectedId) ? selectedId : (body.data[0]?.id ?? null);
+      if (nextSelectedId !== selectedId) {
+        setSelectedId(nextSelectedId);
         setSelected(null);
         setTimeline([]);
       }
       persistSession(activeToken, (emailOverride ?? authEmail) || loginEmail);
+      if (nextSelectedId && nextSelectedId !== selectedId) {
+        await loadDetails(nextSelectedId, activeToken);
+      }
     } catch {
       setError(t.error);
     } finally {
@@ -167,8 +171,8 @@ export default function AdminInquiriesPage() {
     }
   }
 
-  async function loadDetails(id: string) {
-    const activeToken = authToken.trim();
+  async function loadDetails(id: string, tokenOverride?: string) {
+    const activeToken = (tokenOverride ?? authToken).trim();
     if (!activeToken) {
       setError(t.authRequired);
       return;
