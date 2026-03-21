@@ -136,10 +136,13 @@ export default function AdminInquiriesPage() {
   const detailEmptyStateMessage = !loading && items.length === 0 ? t.emptyDetails : t.noDetails;
   const hasUnappliedFilters = filterQuery !== appliedFilterQuery;
   const hasActiveFilters = Object.values(filters).some((value) => value.trim().length > 0);
+  const hasAppliedFilters = Object.values(appliedFilters).some((value) => value.trim().length > 0);
   const hasNoFiltersToReset = !hasUnappliedFilters && !hasActiveFilters;
   const shouldDisableApply = !isAuthenticated || loading || detailLoading || Boolean(movingInquiryId) || !hasUnappliedFilters;
   const shouldDisableReload = !isAuthenticated || detailLoading || Boolean(movingInquiryId) || hasUnappliedFilters;
   const shouldDisableClear = !isAuthenticated || loading || detailLoading || Boolean(movingInquiryId) || hasNoFiltersToReset;
+  const filterStateMessage = hasUnappliedFilters ? t.filterStateDraft : t.filterStateApplied;
+  const filterScopeMessage = hasAppliedFilters ? t.filterScopeFiltered : t.filterScopeDefault;
 
   function updateFilter<Key extends keyof InquiryFilters>(key: Key, value: InquiryFilters[Key]) {
     setFilters((current) => ({ ...current, [key]: value }));
@@ -324,7 +327,7 @@ export default function AdminInquiriesPage() {
       return;
     }
 
-    const response = await fetch(`/admin/inquiries-export.csv?${filterQuery}`, {
+    const response = await fetch(`/admin/inquiries-export.csv?${appliedFilterQuery}`, {
       headers: { Authorization: `Bearer ${activeToken}` },
       cache: "no-store",
     });
@@ -444,6 +447,12 @@ export default function AdminInquiriesPage() {
             <InquiryViewToggle t={t} viewMode={viewMode} onViewModeChange={setViewMode} />
           </div>
         </div>
+
+        {isAuthenticated ? (
+          <div className="crm-filter-hint" aria-live="polite">
+            <strong>{filterStateMessage}</strong> {filterScopeMessage}
+          </div>
+        ) : null}
 
         <InquirySavedFiltersPanel
           t={t}

@@ -32,7 +32,7 @@ describe("B11 admin inquiries page contract", () => {
     expect(page).toContain("`/admin/inquiries/${id}`");
     expect(page).toContain("`/admin/inquiries/${id}/timeline?limit=30`");
     expect(page).toContain("`/admin/inquiries/${selectedId}/follow-up`");
-    expect(page).toContain("`/admin/inquiries-export.csv?${filterQuery}`");
+    expect(page).toContain("`/admin/inquiries-export.csv?${appliedFilterQuery}`");
     expect(page).toContain("Authorization: `Bearer ${activeToken}`");
   });
 
@@ -127,6 +127,7 @@ describe("B11 admin inquiries page contract", () => {
     expect(page).toContain("await loadListWithFilters(appliedFilters, tokenOverride, emailOverride);");
     expect(page).toContain("setAppliedFilters(nextFilters);");
     expect(page).toContain("setAppliedFilterQuery(query);");
+    expect(page).toContain("`/admin/inquiries-export.csv?${appliedFilterQuery}`");
     expect(page).toContain("const shouldDisableApply = !isAuthenticated || loading || detailLoading || Boolean(movingInquiryId) || !hasUnappliedFilters;");
     expect(page).toContain("const shouldDisableReload = !isAuthenticated || detailLoading || Boolean(movingInquiryId) || hasUnappliedFilters;");
     expect(page).toContain("disabled={shouldDisableApply}");
@@ -141,6 +142,23 @@ describe("B11 admin inquiries page contract", () => {
     expect(page).toContain("const hasNoFiltersToReset = !hasUnappliedFilters && !hasActiveFilters;");
     expect(page).toContain("const shouldDisableClear = !isAuthenticated || loading || detailLoading || Boolean(movingInquiryId) || hasNoFiltersToReset;");
     expect(page).toContain("disabled={shouldDisableClear}");
+  });
+
+  it("shows whether the visible queue is synced with draft filters or still waiting for apply", () => {
+    const page = read("app/admin/inquiries/page.tsx");
+    const copy = read("components/admin/domain/crm/inquiries-copy.ts");
+
+    expect(page).toContain("const hasAppliedFilters = Object.values(appliedFilters).some((value) => value.trim().length > 0);");
+    expect(page).toContain("const filterStateMessage = hasUnappliedFilters ? t.filterStateDraft : t.filterStateApplied;");
+    expect(page).toContain("const filterScopeMessage = hasAppliedFilters ? t.filterScopeFiltered : t.filterScopeDefault;");
+    expect(page).toContain('<div className="crm-filter-hint" aria-live="polite">');
+    expect(page).toContain("<strong>{filterStateMessage}</strong> {filterScopeMessage}");
+    expect(copy).toContain('filterStateDraft: "Draft filters are not applied yet. Apply filters to refresh the visible queue."');
+    expect(copy).toContain('filterStateApplied: "Queue is synced with the current filters. Reload and Export CSV use the visible queue."');
+    expect(copy).toContain('filterScopeDefault: "Current queue uses the default filter set."');
+    expect(copy).toContain('filterScopeFiltered: "Current queue uses a filtered result set."');
+    expect(copy).toContain('filterStateDraft: "ตัวกรองที่แก้ไขไว้ยังไม่ถูกใช้กับคิวปัจจุบัน');
+    expect(copy).toContain('filterStateApplied: "คิวปัจจุบันตรงกับตัวกรองที่ใช้งานอยู่แล้ว');
   });
 
   it("keeps a readable primary row label even when inquiry name is missing", () => {
@@ -207,6 +225,8 @@ describe("B11 admin inquiries page contract", () => {
     expect(copy).toContain('sessionHint: "คงเซสชันนี้ไว้');
     expect(copy).toContain('filtersDescription: "Refine the active queue');
     expect(copy).toContain('filtersDescription: "ปรับคิวงานที่กำลังดู');
+    expect(copy).toContain('filterStateDraft: "Draft filters are not applied yet.');
+    expect(copy).toContain('filterStateDraft: "ตัวกรองที่แก้ไขไว้ยังไม่ถูกใช้กับคิวปัจจุบัน');
     expect(copy).toContain('loginTitle: "Admin sign in"');
     expect(copy).toContain('loginTitle: "เข้าสู่ระบบแอดมิน"');
     expect(copy).toContain('emptyDetails: "ไม่พบรายการตามตัวกรองปัจจุบัน');
