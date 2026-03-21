@@ -434,7 +434,7 @@ export function ShortlistListSurface({ locale }: { locale: 'en' | 'th' }) {
                 </div>
 
                 <div className="shortlist-item-card__facts">
-                  <span>{formatPriceTHB(Number(item.price))}</span>
+                  <span>{formatPriceTHB(Number(item.price), locale)}</span>
                   <span>{formatShortlistSize(item.size, locale)}</span>
                   <span>
                     {locale === 'th'

@@ -39,17 +39,17 @@ export function HomeBottomCta({
       aria-labelledby={headingId}
     >
       <Container variant="wide">
-        <div className="grid lg:grid-cols-2 gap-16 items-center">
-          <div className="reveal">
+        <div className="grid lg:grid-cols-2 gap-16 items-center home-bottom-cta__grid">
+          <div className="reveal home-bottom-cta__content">
             <h2 id={headingId} className="text-3xl md:text-5xl font-serif font-medium mb-6 leading-tight">
               {heading}
             </h2>
             <p className="text-lg text-white/80 mb-10 max-w-lg leading-relaxed">
               {subheading}
             </p>
-            <div className="flex flex-wrap gap-4">
+            <div className="flex flex-wrap gap-4 home-bottom-cta__actions">
               <TrackedLink
-                className="px-6 py-3 bg-white text-gray-900 rounded-full text-sm font-semibold hover:bg-gray-100 transition-colors"
+                className="px-6 py-3 bg-white text-gray-900 rounded-full text-sm font-semibold hover:bg-gray-100 transition-colors home-bottom-cta__primary"
                 href={primaryUrl}
                 eventType="home_final_cta_click"
                 eventPayload={{ cta: 'book_consultation', from: 'home_bottom' }}
@@ -57,7 +57,7 @@ export function HomeBottomCta({
                 {primaryLabel}
               </TrackedLink>
               <TrackedLink
-                className="px-6 py-3 bg-white/10 hover:bg-white/20 backdrop-blur-md rounded-full text-white text-sm font-medium transition-colors border border-white/20"
+                className="px-6 py-3 bg-white/10 hover:bg-white/20 backdrop-blur-md rounded-full text-white text-sm font-medium transition-colors border border-white/20 home-bottom-cta__secondary"
                 href={secondaryUrl}
                 eventType="home_final_cta_click"
                 eventPayload={{ cta: 'view_investment_path', from: 'home_bottom' }}
@@ -70,8 +70,8 @@ export function HomeBottomCta({
             ) : null}
             <p className="home-bottom-trust-note mt-4 text-sm text-white/70 max-w-xl">{trustNote}</p>
           </div>
-          <div className="reveal">
-            <div className="bg-white p-8 md:p-10 rounded-2xl shadow-2xl text-gray-900" aria-label="consultation-form-panel">
+          <div className="reveal home-bottom-cta__form-wrap">
+            <div className="bg-white p-8 md:p-10 rounded-2xl shadow-2xl text-gray-900 home-bottom-cta__panel" aria-label="consultation-form-panel">
               {formSlot}
             </div>
           </div>

@@ -22,16 +22,32 @@ type HomeHeroComposer = {
     paths?: Array<{ key: string; label?: string; description?: string; url?: string }>;
 };
 
+type HomeHeroSupportLink = {
+    label: string;
+    href: string;
+    eventPayload?: Record<string, unknown>;
+};
+
+function resolveLocalizedHref(locale: "en" | "th", href: string): string {
+    if (!href.startsWith('/')) return href;
+    if (href === `/${locale}` || href.startsWith(`/${locale}/`) || href.startsWith(`/${locale}?`)) {
+        return href;
+    }
+    return withLocale(locale, href);
+}
+
 export function HomeHero({
     dict,
     locale,
     guidedHref,
     composer,
+    supportLinks = [],
 }: {
     dict: any;
     locale: "en" | "th";
     guidedHref: string;
     composer?: HomeHeroComposer | null;
+    supportLinks?: HomeHeroSupportLink[];
 }) {
     const heroHeading = typeof composer?.heading === 'string' && composer.heading.trim()
         ? composer.heading.trim()
@@ -47,14 +63,14 @@ export function HomeHero({
         ? composer.primary_cta_label.trim()
         : (locale === "th" ? "ขอคำปรึกษา" : "Request Consultation");
     const primaryCtaUrl = typeof composer?.primary_cta_url === 'string' && composer.primary_cta_url.trim()
-        ? withLocale(locale, composer.primary_cta_url.trim())
+        ? resolveLocalizedHref(locale, composer.primary_cta_url.trim())
         : withLocale(locale, "/contact");
 
     const secondaryCtaLabel = typeof composer?.secondary_cta_label === 'string' && composer.secondary_cta_label.trim()
         ? composer.secondary_cta_label.trim()
         : (locale === "th" ? "ดูโครงการ" : "Browse Projects");
     const secondaryCtaUrl = typeof composer?.secondary_cta_url === 'string' && composer.secondary_cta_url.trim()
-        ? withLocale(locale, composer.secondary_cta_url.trim())
+        ? resolveLocalizedHref(locale, composer.secondary_cta_url.trim())
         : withLocale(locale, "/projects");
 
     const heroImageSrc = typeof composer?.hero_image === 'string' && composer.hero_image.startsWith('/media/')
@@ -63,14 +79,14 @@ export function HomeHero({
     const whatsAppHref = buildAdvisorWhatsApp(locale, dict);
 
     return (
-        <section className="relative w-full bg-gray-900 overflow-hidden min-h-[720px] sm:min-h-[760px] md:min-h-[680px] xl:min-h-[720px]">
+        <section className="relative w-full bg-gray-900 overflow-hidden min-h-[720px] sm:min-h-[760px] md:min-h-[680px] xl:min-h-[720px]" data-home-perf="hero-media">
             <Image
                 src={heroImageSrc}
                 alt="AMP Pattaya Real Estate"
                 fill
                 priority
                 fetchPriority="high"
-                unoptimized
+                quality={82}
                 sizes="100vw"
                 className="absolute inset-0 w-full h-full object-cover object-[64%_center] sm:object-[60%_center] md:object-center block scale-[1.01]"
             />
@@ -99,7 +115,7 @@ export function HomeHero({
 
                         <div className="hero-cta-row flex flex-wrap gap-3 md:gap-4">
                             <TrackedLink
-                                className="btn btn-primary"
+                                className="btn btn-primary hero-cta hero-cta--primary"
                                 href={primaryCtaUrl}
                                 eventType="cta_click"
                                 eventPayload={{ cta: "request_consultation", from: "home_hero" }}
@@ -107,7 +123,7 @@ export function HomeHero({
                                 {primaryCtaLabel}
                             </TrackedLink>
                             <TrackedLink
-                                className="btn btn-secondary"
+                                className="btn btn-secondary hero-cta hero-cta--secondary"
                                 href={secondaryCtaUrl}
                                 eventType="cta_click"
                                 eventPayload={{ cta: "browse_projects", from: "home_hero" }}
@@ -118,7 +134,7 @@ export function HomeHero({
 
                         <div className="hero-support-row flex flex-wrap items-center gap-x-5 gap-y-3 mt-4 md:mt-6">
                             <TrackedLink
-                                className="hero-guided-trigger inline-flex items-center gap-2 text-white/80 hover:text-white text-sm font-medium transition-colors"
+                                className="hero-guided-trigger hero-support-link hero-support-link--pill inline-flex items-center gap-2 text-sm font-medium text-white/72 hover:text-white transition-colors"
                                 href={guidedHref}
                                 eventType="cta_click"
                                 eventPayload={{ cta: 'open_guided_finder', from: 'home_hero' }}
@@ -133,6 +149,17 @@ export function HomeHero({
                             >
                                 {dict.cta.whatsapp}
                             </a>
+                            {supportLinks.map((link) => (
+                                <TrackedLink
+                                    key={`${link.label}-${link.href}`}
+                                    className="hero-support-link hero-support-link--pill inline-flex items-center gap-2 text-sm font-medium text-white/72 hover:text-white transition-colors"
+                                    href={resolveLocalizedHref(locale, link.href)}
+                                    eventType="cta_click"
+                                    eventPayload={link.eventPayload ?? { cta: 'hero_support_link', from: 'home_hero' }}
+                                >
+                                    {link.label}
+                                </TrackedLink>
+                            ))}
                         </div>
                     </div>
                 </Container>

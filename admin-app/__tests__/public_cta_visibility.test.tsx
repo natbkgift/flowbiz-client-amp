@@ -33,7 +33,7 @@ describe('public CTA visibility', () => {
     expect(region).not.toHaveClass('mobile-cta--visible');
 
     act(() => {
-      setScrollY(360);
+      setScrollY(180);
       fireEvent.scroll(window);
     });
 

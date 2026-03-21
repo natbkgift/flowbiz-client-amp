@@ -441,6 +441,8 @@ export type Dictionary = {
     sellerForm: {
       headingDefault: string;
       description: string;
+      trustIntro: string;
+      responsePromise: string;
       propertyTypePlaceholder: string;
       locationPlaceholder: string;
       askingPricePlaceholder: string;

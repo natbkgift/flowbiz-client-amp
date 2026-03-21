@@ -12,6 +12,7 @@
  */
 import { useSearchParams } from 'next/navigation';
 
+import { buildLeadCaptureQuery, withLocaleQuery } from '@/app/_lib/public-advisory';
 import { buildWhatsAppUrl } from '@/app/_lib/public-cta';
 import { withLocale } from '@/app/_lib/i18n/routing';
 import type { Locale } from '@/app/_lib/i18n/types';
@@ -79,6 +80,12 @@ function normalizeGoal(goal: string | null): GuidedGoal | null {
   return null;
 }
 
+function normalizeGuidedIntent(goal: GuidedGoal | null): 'project_consultation' | 'project_shortlist' | 'general_inquiry' {
+  if (goal === 'invest') return 'project_consultation';
+  if (goal === 'buy') return 'project_shortlist';
+  return 'general_inquiry';
+}
+
 function hrefWithQuery(path: string, query: Record<string, string>): string {
   const url = new URL(path, 'https://amppattaya.com');
   for (const [k, v] of Object.entries(query)) url.searchParams.set(k, v);
@@ -112,6 +119,18 @@ export function GuidedOverlay({ locale, guided, homeKV, ctaKV, closeAriaLabel }:
     ? `${homeKV.whatsAppGreeting} — ${summaryText}`
     : homeKV.whatsAppFallback;
   const whatsAppHref = buildWhatsAppUrl(whatsAppText);
+  const advisorHref = withLocaleQuery(locale, '/contact', buildLeadCaptureQuery({
+    intent: normalizeGuidedIntent(goal),
+    source: 'home_guided_contact',
+    sourceRoute: 'home',
+    ctaType: 'primary',
+    ctaLabel: ctaKV.bookPrivateTour,
+    userIntent: goal ?? 'research',
+    budgetRange: budget,
+    buyerFit: 'guided_overlay',
+    signalLevel: goal === 'invest' ? 'high' : 'medium',
+    message: whatsAppText,
+  }));
 
   const closeHref = withLocale(locale, '/');
 
@@ -246,13 +265,7 @@ export function GuidedOverlay({ locale, guided, homeKV, ctaKV, closeAriaLabel }:
               <div className="guided-row">
                 <a
                   className="btn btn-cta"
-                  href={withLocale(
-                    locale,
-                    hrefWithQuery('/contact', {
-                      topic: 'private_consultation',
-                      msg: whatsAppText,
-                    })
-                  )}
+                  href={advisorHref}
                   data-amp-event-type="cta_click"
                   data-amp-event-payload={JSON.stringify({
                     cta: 'book_consultation',

@@ -18,6 +18,7 @@ export function ListingGrid({ items }: { items: PropertyListItem[] }) {
   const [filtered, setFiltered] = useState<PropertyListItem[]>(items);
   const [sort, setSort] = useState<SortKey>('newest');
   const [filtersOpen, setFiltersOpen] = useState(false);
+  const [activeFilterCount, setActiveFilterCount] = useState(0);
   const filterTriggerRef = useRef<HTMLButtonElement | null>(null);
   const wasFiltersOpenRef = useRef(false);
 
@@ -25,7 +26,10 @@ export function ListingGrid({ items }: { items: PropertyListItem[] }) {
   const locale = localeFromPathname(pathname);
   const dict = locale === 'th' ? th : en;
 
-  const handleFilterApply = useCallback((next: PropertyListItem[]) => setFiltered(next), []);
+  const handleFilterApply = useCallback((next: PropertyListItem[], count: number) => {
+    setFiltered(next);
+    setActiveFilterCount(count);
+  }, []);
 
   useEffect(() => {
     if (wasFiltersOpenRef.current && !filtersOpen) {
@@ -54,7 +58,7 @@ export function ListingGrid({ items }: { items: PropertyListItem[] }) {
         aria-controls="buy-filter-drawer"
         aria-expanded={filtersOpen}
       >
-        <IconFilter size="sm" /> {dict.listing.filtersAndSort}
+        <IconFilter size="sm" /> {dict.listing.filtersAndSort}{activeFilterCount > 0 ? ` (${activeFilterCount})` : ''}
       </button>
 
       <div className="listing-layout">

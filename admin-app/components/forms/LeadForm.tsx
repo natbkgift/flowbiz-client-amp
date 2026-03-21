@@ -1,13 +1,15 @@
 'use client';
 
+import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useMemo, useState } from 'react';
 
 import { CTA } from '../../app/_lib/public-cta';
 import { en } from '../../app/_lib/i18n/en';
 import { th } from '../../app/_lib/i18n/th';
-import { localeFromPathname } from '../../app/_lib/i18n/routing';
+import { localeFromPathname, withLocale } from '../../app/_lib/i18n/routing';
 import { trackEvent } from '../../lib/analytics';
+import { isValidEmail, isValidPhone } from '../../lib/contact-validation';
 import {
   buildLeadHandoffSummary,
   buildLeadHandoffTags,
@@ -88,6 +90,23 @@ export function LeadForm({
   const pathname = usePathname() ?? '/';
   const locale = explicitLocale ?? localeFromPathname(pathname);
   const dict = locale === 'th' ? th : en;
+  const requiredText = locale === 'th' ? '(จำเป็น)' : '(required)';
+  const contactMethodHelper =
+    locale === 'th'
+      ? 'กรอกอีเมลหรือเบอร์โทรอย่างน้อยหนึ่งช่องทางเพื่อให้ทีมติดต่อกลับได้'
+      : 'Provide at least one contact method so the team can reply.';
+  const contactMethodRequiredMessage =
+    locale === 'th'
+      ? 'กรุณากรอกอีเมลหรือเบอร์โทรอย่างน้อยหนึ่งช่องทาง'
+      : 'Enter either an email address or a phone number.';
+  const emailInvalidMessage =
+    locale === 'th'
+      ? 'กรุณากรอกอีเมลให้ครบถ้วน เช่น name@example.com'
+      : 'Enter a complete email address, for example name@example.com.';
+  const phoneInvalidMessage =
+    locale === 'th'
+      ? 'กรุณากรอกเบอร์โทรให้มีตัวเลข 7 ถึง 15 หลัก'
+      : 'Enter a phone number with 7 to 15 digits.';
 
   const [didStart, setDidStart] = useState(false);
 
@@ -103,10 +122,17 @@ export function LeadForm({
   const [consent, setConsent] = useState(false);
   const [status, setStatus] = useState<LeadFormStatus>({ state: 'idle' });
 
+  const emailError = email.trim() && !isValidEmail(email) ? emailInvalidMessage : null;
+  const phoneError = phone.trim() && !isValidPhone(phone) ? phoneInvalidMessage : null;
+  const contactMethodError = didStart && !email.trim() && !phone.trim() ? contactMethodRequiredMessage : null;
+  const validationMessage = emailError ?? phoneError ?? contactMethodError;
+
   const canSubmit = useMemo(() => {
     if (!name.trim()) return false;
     if (!message.trim()) return false;
     if (!email.trim() && !phone.trim()) return false;
+    if (email.trim() && !isValidEmail(email)) return false;
+    if (phone.trim() && !isValidPhone(phone)) return false;
     if (!consent) return false;
     return status.state !== 'submitting';
   }, [email, message, name, phone, consent, status.state]);
@@ -129,6 +155,32 @@ export function LeadForm({
     const url = window.location.href;
     if (url.length <= 500) return url;
     return url.slice(0, 500);
+  }
+
+  function buildSuccessActions(): Array<{ href: string; label: string; external?: boolean; primary?: boolean }> {
+    const normalizedPurpose = (purpose || inquiryIntent || '').trim().toLowerCase();
+    const browseHref = withLocale(locale, normalizedPurpose === 'rent' ? '/rent' : '/buy');
+    const browseLabel =
+      locale === 'th'
+        ? normalizedPurpose === 'rent'
+          ? 'ดูรายการเช่าสำหรับขั้นตอนถัดไป'
+          : 'ดู listings ที่เหมาะต่อ'
+        : normalizedPurpose === 'rent'
+          ? 'Browse rental options'
+          : 'Browse matching listings';
+
+    return [
+      { href: browseHref, label: browseLabel, primary: true },
+      {
+        href: withLocale(locale, '/shortlist'),
+        label: locale === 'th' ? 'เปิด shortlist ของคุณ' : 'Open your shortlist',
+      },
+      {
+        href: CTA.whatsAppUrl,
+        label: locale === 'th' ? 'คุยต่อทาง WhatsApp' : 'Continue on WhatsApp',
+        external: true,
+      },
+    ];
   }
 
   function formatApiError(bodyText: string): string {
@@ -158,6 +210,11 @@ export function LeadForm({
 
   async function onSubmit() {
     if (!canSubmit) return;
+
+    if (validationMessage) {
+      setStatus({ state: 'error', message: validationMessage });
+      return;
+    }
 
     const submitIso = new Date().toISOString();
     const contactPayload = {
@@ -303,6 +360,8 @@ export function LeadForm({
     }
   }
 
+  const successActions = buildSuccessActions();
+
   return (
     <form id={formId} className="inquiry-form" onSubmit={(e) => e.preventDefault()}>
       <h3>{heading ?? dict.common.leadForm.headingDefault}</h3>
@@ -330,8 +389,8 @@ export function LeadForm({
           className="form-honeypot"
         />
 
-        <label htmlFor="lead-name" className="sr-only">
-          {dict.common.leadForm.namePlaceholder}
+        <label htmlFor="lead-name" className="form-label">
+          {dict.common.leadForm.namePlaceholder} <span className="text-gray-500">{requiredText}</span>
         </label>
         <input
           id="lead-name"
@@ -342,9 +401,17 @@ export function LeadForm({
           value={name}
           onChange={(e) => setName(e.target.value)}
         />
+        <div>
+          <p className="text-sm text-gray-600">{contactMethodHelper}</p>
+          {contactMethodError ? (
+            <p className="form-error mt-2" role="alert">
+              {contactMethodError}
+            </p>
+          ) : null}
+        </div>
         <div className="form-grid-2">
           <div>
-            <label htmlFor="lead-email" className="sr-only">
+            <label htmlFor="lead-email" className="form-label">
               {dict.common.leadForm.emailPlaceholder}
             </label>
             <input
@@ -354,12 +421,19 @@ export function LeadForm({
               type="email"
               placeholder={dict.common.leadForm.emailPlaceholder}
               aria-required="true"
+              aria-invalid={emailError ? 'true' : 'false'}
+              aria-describedby={emailError ? 'lead-email-error' : undefined}
               value={email}
               onChange={(e) => setEmail(e.target.value)}
             />
+            {emailError ? (
+              <p id="lead-email-error" className="form-error mt-2" role="alert">
+                {emailError}
+              </p>
+            ) : null}
           </div>
           <div>
-            <label htmlFor="lead-phone" className="sr-only">
+            <label htmlFor="lead-phone" className="form-label">
               {dict.common.leadForm.phonePlaceholder}
             </label>
             <input
@@ -369,9 +443,16 @@ export function LeadForm({
               type="tel"
               placeholder={dict.common.leadForm.phonePlaceholder}
               aria-required="true"
+              aria-invalid={phoneError ? 'true' : 'false'}
+              aria-describedby={phoneError ? 'lead-phone-error' : undefined}
               value={phone}
               onChange={(e) => setPhone(e.target.value)}
             />
+            {phoneError ? (
+              <p id="lead-phone-error" className="form-error mt-2" role="alert">
+                {phoneError}
+              </p>
+            ) : null}
           </div>
         </div>
         <div className="form-grid-2">
@@ -448,8 +529,8 @@ export function LeadForm({
             </select>
           </div>
         </div>
-        <label htmlFor="lead-message" className="sr-only">
-          {dict.common.leadForm.messagePlaceholder}
+        <label htmlFor="lead-message" className="form-label">
+          {dict.common.leadForm.messagePlaceholder} <span className="text-gray-500">{requiredText}</span>
         </label>
         <textarea
           id="lead-message"
@@ -470,7 +551,8 @@ export function LeadForm({
             aria-required="true"
           />
           <span className="form-consent__text">
-            {dict.common.leadForm.consentText ?? 'I agree to the processing of my personal data in accordance with the Privacy Policy (PDPA/GDPR).'}
+            {dict.common.leadForm.consentText ?? 'I agree to the processing of my personal data in accordance with the Privacy Policy (PDPA/GDPR).'}{' '}
+            <span className="text-gray-500">{requiredText}</span>
           </span>
         </label>
 
@@ -524,6 +606,29 @@ export function LeadForm({
                 </p>
               ) : null}
               {describeResponseChannel(status.responseChannel) ? <p>{describeResponseChannel(status.responseChannel)}</p> : null}
+              <div className="mt-4 flex flex-wrap gap-3" aria-label="lead-success-actions">
+                {successActions.map((action) => {
+                  if (action.external) {
+                    return (
+                      <a
+                        key={action.label}
+                        className={action.primary ? 'btn btn-primary' : 'btn btn-secondary'}
+                        href={action.href}
+                        target="_blank"
+                        rel="noreferrer"
+                      >
+                        {action.label}
+                      </a>
+                    );
+                  }
+
+                  return (
+                    <Link key={action.label} className={action.primary ? 'btn btn-primary' : 'btn btn-secondary'} href={action.href}>
+                      {action.label}
+                    </Link>
+                  );
+                })}
+              </div>
             </div>
           ) : null}
 

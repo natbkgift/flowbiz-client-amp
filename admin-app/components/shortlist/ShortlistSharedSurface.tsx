@@ -48,10 +48,34 @@ function formatShortlistUpdatedAt(value: string, locale: 'en' | 'th'): string | 
   }).format(new Date(parsed));
 }
 
+function parseSharedShortlistError(error: unknown): { title: string; body: string; tone: 'error' | 'info' } | null {
+  const message = error instanceof Error ? error.message : '';
+  const statusMatch = message.match(/\((\d{3})\)/);
+  const status = statusMatch ? Number(statusMatch[1]) : null;
+
+  if (status === 404) {
+    return {
+      tone: 'error',
+      title: 'expired',
+      body: 'expired',
+    };
+  }
+
+  if (status === 401 || status === 403) {
+    return {
+      tone: 'error',
+      title: 'restricted',
+      body: 'restricted',
+    };
+  }
+
+  return null;
+}
+
 export function ShortlistSharedSurface({ locale, shareToken }: { locale: 'en' | 'th'; shareToken: string }) {
   const [shortlist, setShortlist] = useState<SharedShortlistDetail | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<{ title: string; body: string; tone: 'error' | 'info' } | null>(null);
 
   useEffect(() => {
     let isActive = true;
@@ -66,10 +90,39 @@ export function ShortlistSharedSurface({ locale, shareToken }: { locale: 'en' | 
         setError(null);
         setShortlist(response.shortlist);
       })
-      .catch(() => {
+      .catch((error: unknown) => {
         if (!isActive) return;
         setShortlist(null);
-        setError(locale === 'th' ? 'ไม่พบ shortlist ที่แชร์ไว้หรือเปิดลิงก์นี้ไม่ได้แล้ว' : 'This shared shortlist is unavailable or no longer accessible.');
+        const parsedError = parseSharedShortlistError(error);
+        if (parsedError?.title === 'expired') {
+          setError({
+            tone: 'error',
+            title: locale === 'th' ? 'ลิงก์ shortlist นี้หมดอายุแล้ว' : 'This shared shortlist link has expired',
+            body: locale === 'th'
+              ? 'ขอให้ผู้ส่งสร้างลิงก์แชร์ใหม่เพื่อเปิด shortlist ชุดนี้อีกครั้ง'
+              : 'Ask the sender to create a new shared link so you can reopen this shortlist.',
+          });
+          return;
+        }
+
+        if (parsedError?.title === 'restricted') {
+          setError({
+            tone: 'error',
+            title: locale === 'th' ? 'ลิงก์ shortlist นี้ไม่มีสิทธิ์เข้าถึง' : 'This shared shortlist link is restricted',
+            body: locale === 'th'
+              ? 'ลิงก์นี้อาจถูกจำกัดสิทธิ์หรือถูกปิดการเข้าถึงแล้ว'
+              : 'This link may now be restricted or no longer shared with this audience.',
+          });
+          return;
+        }
+
+        setError({
+          tone: 'error',
+          title: locale === 'th' ? 'ไม่สามารถเปิด shortlist ที่แชร์ไว้ได้' : 'This shared shortlist is unavailable',
+          body: locale === 'th'
+            ? 'ลองใหม่อีกครั้ง หรือกลับไปดูรายการหลักเพื่อเริ่ม shortlist ใหม่'
+            : 'Try again later, or return to the listings overview to start a fresh shortlist.',
+        });
       })
       .finally(() => {
         if (!isActive) return;
@@ -86,7 +139,18 @@ export function ShortlistSharedSurface({ locale, shareToken }: { locale: 'en' | 
   }
 
   if (error) {
-    return <InlineStatusMessage tone="error" message={error} />;
+    return (
+      <EmptyStateCard
+        className="ui-empty"
+        title={error.title}
+        body={error.body}
+        action={
+          <Link className="btn btn-secondary" href={withLocale(locale, '/buy')}>
+            {locale === 'th' ? 'กลับไปดู listings' : 'Browse listings'}
+          </Link>
+        }
+      />
+    );
   }
 
   if (!shortlist || !shortlist.items.length) {
@@ -185,7 +249,7 @@ export function ShortlistSharedSurface({ locale, shareToken }: { locale: 'en' | 
                 </div>
 
                 <div className="shortlist-item-card__facts">
-                  <span>{formatPriceTHB(Number(item.price))}</span>
+                  <span>{formatPriceTHB(Number(item.price), locale)}</span>
                   <span>{formatShortlistSize(item.size, locale)}</span>
                   <span>
                     {locale === 'th'

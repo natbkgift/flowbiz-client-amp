@@ -17,7 +17,13 @@ export type PropertyListItem = {
   source_id: string;
   title: string;
   type: 'new' | 'resale' | 'rent' | string;
+  property_type?: string | null;
   price: number;
+  currency?: string | null;
+  bedrooms?: number | null;
+  bathrooms?: number | null;
+  size_sqm?: number | null;
+  size?: number | null;
   address: string;
   city: string;
   images: string[] | null;

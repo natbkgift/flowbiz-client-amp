@@ -90,7 +90,7 @@ export default async function RentPage(props: { params: Promise<{ locale: string
       <section className="section section--cta">
         <Container>
           <h2 className="section-title mb-3">{dict.rent.formTitle}</h2>
-          <LeadForm defaultMessage={dict.rent.formDefault} />
+          <LeadForm defaultPurpose="rent" defaultMessage={dict.rent.formDefault} />
         </Container>
       </section>
     </main>

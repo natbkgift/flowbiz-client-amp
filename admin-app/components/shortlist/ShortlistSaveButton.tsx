@@ -29,6 +29,40 @@ export function ShortlistSaveButton({
   const [itemCount, setItemCount] = useState<number | null>(null);
   const [error, setError] = useState<string | null>(null);
 
+  const retryLabel = locale === 'th' ? 'ลองอีกครั้ง' : 'Try again';
+
+  function buildShortlistErrorMessage(action: 'save' | 'remove', cause: unknown): string {
+    const fallback =
+      locale === 'th'
+        ? action === 'remove'
+          ? 'ตรวจสอบการเชื่อมต่อแล้วลองนำออกจาก shortlist อีกครั้ง'
+          : 'ตรวจสอบการเชื่อมต่อแล้วลองบันทึก shortlist อีกครั้ง'
+        : action === 'remove'
+          ? 'Check your connection and try removing this item again.'
+          : 'Check your connection and try saving this item again.';
+
+    if (!(cause instanceof Error)) {
+      return fallback;
+    }
+
+    const statusMatch = cause.message.match(/\((\d{3})\)/);
+    const statusCode = statusMatch ? Number(statusMatch[1]) : null;
+
+    if (statusCode && statusCode >= 500) {
+      return locale === 'th'
+        ? 'ระบบ shortlist ใช้งานไม่ได้ชั่วคราว กรุณาลองใหม่อีกครั้ง'
+        : 'Shortlist is temporarily unavailable. Please try again.';
+    }
+
+    if (statusCode && statusCode >= 400) {
+      return locale === 'th'
+        ? 'ข้อมูล shortlist เปลี่ยนไประหว่างทำรายการ กรุณาลองใหม่อีกครั้ง'
+        : 'Your shortlist changed before we could update it. Please try again.';
+    }
+
+    return fallback;
+  }
+
   const syncFromShortlist = useCallback((shortlist: ShortlistDetail | null) => {
     setItemCount(shortlist?.item_count ?? 0);
     setIsSaved(Boolean(shortlist?.items.some((item) => item.property_id === propertyId)));
@@ -142,12 +176,8 @@ export function ShortlistSaveButton({
         });
         syncFromShortlist(response.shortlist);
       }
-    } catch {
-      setError(
-        isSaved
-          ? (locale === 'th' ? 'นำ shortlist ออกไม่สำเร็จ' : 'Unable to remove from shortlist.')
-          : (locale === 'th' ? 'บันทึก shortlist ไม่สำเร็จ' : 'Unable to save to shortlist.'),
-      );
+    } catch (cause) {
+      setError(buildShortlistErrorMessage(isSaved ? 'remove' : 'save', cause));
     } finally {
       setPendingAction(null);
     }
@@ -165,7 +195,14 @@ export function ShortlistSaveButton({
           </Link>
         </div>
       ) : null}
-      {error ? <p className="guided-dialog__step mt-2">{error}</p> : null}
+      {error ? (
+        <div className="guided-dialog__step mt-2" role="alert">
+          <p>{error}</p>
+          <button type="button" className="shortlist-inline-link mt-2" onClick={handleClick}>
+            {retryLabel}
+          </button>
+        </div>
+      ) : null}
     </div>
   );
 }

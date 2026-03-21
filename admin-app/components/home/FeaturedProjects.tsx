@@ -25,11 +25,13 @@ const PROJECT_FALLBACK_IMAGES = [
 export function FeaturedProjects({
   projects,
   locale,
+  kicker,
   title,
   subtitle,
 }: {
   projects: ProjectItem[];
   locale: 'en' | 'th';
+  kicker?: string;
   title: string;
   subtitle: string;
 }) {
@@ -127,6 +129,7 @@ export function FeaturedProjects({
   return (
     <div>
       <div className="section-header">
+        {kicker ? <div className="home-section-kicker">{kicker}</div> : null}
         <div className="inline-block px-3 py-1 bg-gray-100 text-gray-600 text-xs font-medium rounded-full mb-3">
           {locale === 'th' ? 'โครงการคัดสรรของ AMP' : 'AMP curated shortlist'}
         </div>
@@ -166,6 +169,9 @@ export function FeaturedProjects({
                   className="media-shell"
                   imageClassName={`absolute inset-0 h-full w-full object-cover ${hasLocalMedia ? '' : 'premium-project-card__fallback-image'}`}
                   fallbackSrc={fallbackImage}
+                  sizes="(max-width: 767px) 100vw, (max-width: 1279px) 50vw, 33vw"
+                  quality={72}
+                  unoptimized={false}
                 />
                 <div className="premium-project-card__media-scrim" aria-hidden="true" />
                 {badges.length > 0 ? (

@@ -75,6 +75,7 @@ describe('V2 search filters UI', () => {
     fireEvent.click(screen.getByRole('button', { name: /apply filters/i }));
 
     expectResultsCount(1);
+    expect(screen.getByRole('button', { name: /filters & sort \(1\)/i })).toBeTruthy();
     expect(screen.queryByRole('heading', { name: '1 Bedroom Alpha Residence' })).toBeNull();
     expect(screen.getByRole('heading', { name: '2 Bedroom Beta Residence' })).toBeTruthy();
   });
@@ -105,5 +106,16 @@ describe('V2 search filters UI', () => {
     fireEvent.click(screen.getByRole('button', { name: /filters & sort/i }));
 
     expect(screen.getByRole('dialog', { name: /filters/i })).toHaveFocus();
+  });
+
+  it('blocks invalid price ranges and explains the issue before apply', () => {
+    render(<ListingGrid items={[...items]} />);
+
+    fireEvent.change(screen.getByDisplayValue('3000000'), { target: { value: '8000000' } });
+    fireEvent.change(screen.getByDisplayValue('7000000'), { target: { value: '1000000' } });
+
+    expect(screen.getByRole('alert')).toHaveTextContent('Minimum price cannot be greater than maximum price.');
+    expect(screen.getByRole('button', { name: /apply filters/i })).toBeDisabled();
+    expectResultsCount(2);
   });
 });

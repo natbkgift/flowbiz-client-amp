@@ -40,9 +40,10 @@ export function normalizeNoWatermark(url: string): string {
   return url.slice(0, lastSlash + 1) + base.slice(3);
 }
 
-export function formatPriceTHB(price: number): string {
+export function formatPriceTHB(price: number, locale: 'en' | 'th' = 'en'): string {
   if (!Number.isFinite(price)) return '-';
-  return `${Math.round(price).toLocaleString()} THB`;
+  const rounded = Math.round(price).toLocaleString();
+  return locale === 'th' ? `฿${rounded}` : `THB ${rounded}`;
 }
 
 export function toPropertyHref(p: PropertyListItem): string {

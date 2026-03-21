@@ -80,6 +80,7 @@ const INTENT_BASE_SCORE: Record<VisitorIntent, number> = {
   invest: 90,
   buy: 85,
   rent: 70,
+  sell: 78,
   explore: 40,
   unknown: 10,
 };
@@ -147,7 +148,7 @@ export function computeIntentScore(profile: VisitorProfile): IntentScoreResult {
 
   // Confidence: based on number of intent-matching pages
   const intentPages = profile.recentPages.filter((p) =>
-    /\/(invest|buy|rent|property|projects?)\b/i.test(p),
+    /\/(invest|buy|rent|sell|property|projects?)\b/i.test(p),
   ).length;
   const confidence: IntentScoreResult['confidence'] =
     intentPages >= 3 ? 'high' : intentPages >= 1 ? 'medium' : 'low';

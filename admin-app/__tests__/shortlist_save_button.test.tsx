@@ -281,4 +281,47 @@ describe('ShortlistSaveButton', () => {
 
     expect(readCachedShortlist()).toMatchObject({ id: 'shortlist-th' });
   });
+
+  it('shows a retry action with a clearer error message when saving fails temporarily', async () => {
+    const fetchMock = vi
+      .fn()
+      .mockImplementationOnce(async () => ({
+        ok: false,
+        status: 503,
+      }))
+      .mockImplementationOnce(async () => ({
+        ok: true,
+        json: async () => ({
+          action: 'saved',
+          shortlist: {
+            item_count: 1,
+            items: [{ property_id: '66666666-6666-6666-6666-666666666666', position: 0 }],
+          },
+        }),
+      }));
+
+    vi.stubGlobal('fetch', fetchMock);
+
+    render(
+      <ShortlistSaveButton
+        locale="en"
+        propertyId="66666666-6666-6666-6666-666666666666"
+        sourceSurface="property_detail"
+      />,
+    );
+
+    fireEvent.click(screen.getByRole('button', { name: /save to shortlist/i }));
+
+    await waitFor(() => {
+      expect(screen.getByRole('alert')).toHaveTextContent('Shortlist is temporarily unavailable. Please try again.');
+    });
+
+    fireEvent.click(screen.getByRole('button', { name: /try again/i }));
+
+    await waitFor(() => {
+      expect(screen.getByRole('button', { name: /remove from shortlist/i })).toBeTruthy();
+    });
+
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+  });
 });

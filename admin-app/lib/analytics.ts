@@ -7,6 +7,7 @@ import {
 
 export type EventType =
   | 'page_view'
+  | 'web_vitals_probe'
   | 'path_entry_click'
   | 'cta_click'
   | 'lead_submit'

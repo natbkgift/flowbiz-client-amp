@@ -12,7 +12,7 @@
 // Types
 // ---------------------------------------------------------------------------
 
-export type VisitorIntent = 'invest' | 'buy' | 'rent' | 'explore' | 'unknown';
+export type VisitorIntent = 'invest' | 'buy' | 'rent' | 'sell' | 'explore' | 'unknown';
 /** Engagement segment based on session count and recency. */
 export type VisitorSegment = 'new' | 'returning' | 'engaged';
 
@@ -47,6 +47,7 @@ const INTENT_PATTERNS: Array<{ pattern: RegExp; intent: VisitorIntent }> = [
   { pattern: /\/invest/i, intent: 'invest' },
   { pattern: /\/buy/i, intent: 'buy' },
   { pattern: /\/rent/i, intent: 'rent' },
+  { pattern: /\/sell/i, intent: 'sell' },
   { pattern: /\/projects?\//i, intent: 'invest' },
   { pattern: /\/property\//i, intent: 'buy' },
   { pattern: /\/smart-finder/i, intent: 'explore' },
@@ -105,6 +106,7 @@ function detectIntent(pages: string[]): VisitorIntent {
     invest: 0,
     buy: 0,
     rent: 0,
+    sell: 0,
     explore: 0,
     unknown: 0,
   };
@@ -122,7 +124,7 @@ function detectIntent(pages: string[]): VisitorIntent {
   }
 
   // Return the intent with the highest count (excluding 'explore' as default)
-  const candidates = (['invest', 'buy', 'rent'] as const).filter((k) => counts[k] > 0);
+  const candidates = (['invest', 'buy', 'rent', 'sell'] as const).filter((k) => counts[k] > 0);
   if (candidates.length === 0) return 'explore';
   return candidates.reduce((a, b) => (counts[a] >= counts[b] ? a : b));
 }
@@ -329,6 +331,16 @@ export function getContentRecommendation(): ContentRecommendation {
       showSocialProof: false,
       showGuidedPrompt: funnel === 'awareness',
       reason: `intent=rent, funnel=${funnel}, segment=${segment}`,
+    };
+  }
+
+  if (intent === 'sell') {
+    return {
+      emphasis: 'advisory',
+      suggestedCta: 'speakToAdvisor',
+      showSocialProof: true,
+      showGuidedPrompt: false,
+      reason: `intent=sell, funnel=${funnel}, segment=${segment}`,
     };
   }
 

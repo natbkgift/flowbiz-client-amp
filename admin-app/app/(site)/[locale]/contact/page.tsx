@@ -6,6 +6,7 @@ const LeadForm = dynamic(() => import('@/components/forms/LeadForm').then(m => m
   loading: () => <div className="animate-pulse h-48 rounded bg-slate-100" />,
 });
 import { CTA } from '@/app/_lib/public-cta';
+import { getContactTopicPreset } from '@/app/_lib/contact-topic';
 import {
   buildAdvisorWhatsApp,
   getAdvisoryLabels,
@@ -90,6 +91,21 @@ function normalizeTagToken(value: string): string {
     .replace(/[^a-z0-9_]/g, '');
 }
 
+function readSingleSearchParam(
+  searchParams: Record<string, string | string[] | undefined> | undefined,
+  key: string,
+): string | null {
+  const value = searchParams?.[key];
+  if (typeof value === 'string') {
+    return value;
+  }
+
+  if (Array.isArray(value)) {
+    return value[0] ?? null;
+  }
+
+  return null;
+}
 function humanizeToken(locale: 'en' | 'th', value: string | null | undefined): string | null {
   const text = String(value || '').trim();
   if (!text) return null;
@@ -228,9 +244,10 @@ export default async function ContactPage(
   const investorContext = parseInvestorToolContext(searchParams);
   const buyingCostContext = parseBuyingCostAdvisorContext(searchParams);
   const leadCaptureContext = parseLeadCaptureContext(searchParams);
+  const topic = readSingleSearchParam(searchParams, 'topic');
+  const topicPreset = getContactTopicPreset(locale, topic);
   const msg =
-    (typeof searchParams?.msg === 'string' ? searchParams.msg : Array.isArray(searchParams?.msg) ? searchParams?.msg[0] : null) ??
-    null;
+    readSingleSearchParam(searchParams, 'msg') ?? null;
   const investorLines = [
     formatCurrency(locale, investorContext.purchasePrice)
       ? `${locale === 'th' ? 'ราคาซื้อเป้าหมาย' : 'Target purchase price'}: ${formatCurrency(locale, investorContext.purchasePrice)}`
@@ -332,7 +349,7 @@ export default async function ContactPage(
             buyerFit: leadCaptureContext.buyerFit ?? null,
             signalLevel: leadCaptureContext.signalLevel ?? null,
           })
-      : dict.contact.advisoryBody;
+      : topicPreset.draftMessage ?? dict.contact.advisoryBody;
   const defaultBudgetBand = inferBudgetBand(buyingCostContext.propertyPrice ?? investorContext.purchasePrice);
   const hasInvestorContext = investorLines.length > 0;
   const hasBuyingCostContext = buyingCostLines.length > 0;
@@ -342,8 +359,9 @@ export default async function ContactPage(
     leadCaptureContext.buyerFit ?? null,
     leadCaptureContext.source ?? null,
     leadCaptureContext.intent,
-  );
+  ) ?? topicPreset.purpose;
   const inquiryTags = [
+    topicPreset.inquiryTag ?? null,
     leadCaptureContext.project ? `project:${normalizeTagToken(leadCaptureContext.project)}` : null,
     ...(leadProjectNames.length > 1
       ? leadProjectNames.map((name) => `project_scope:${normalizeTagToken(name)}`)
@@ -523,6 +541,7 @@ export default async function ContactPage(
             <div className="split__main" id="contact-form">
               <LeadForm
                 heading={dict.contact.formTitle}
+                description={topicPreset.description}
                 defaultMessage={defaultMessage}
                 defaultBudgetBand={defaultBudgetBand}
                 defaultPurpose={defaultPurpose}

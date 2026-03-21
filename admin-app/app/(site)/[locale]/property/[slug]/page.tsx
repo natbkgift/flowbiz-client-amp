@@ -719,6 +719,7 @@ export default async function PropertyPage(props: PageProps) {
                 locale={locale}
                 heading={dict.property.interestedHeading}
                 propertyId={property.id}
+                defaultPurpose={property.type === 'rent' ? 'rent' : 'buy'}
                 defaultMessage={dict.property.interestedMessage}
                 handoff={{
                   sourceRoute: 'property',

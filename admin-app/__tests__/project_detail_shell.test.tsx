@@ -66,6 +66,7 @@ describe('project detail shell', () => {
     expect(container.querySelector('#project-related-reads')).not.toBeNull();
     expect(container.querySelector('#project-trust-grid')).not.toBeNull();
     expect(container.querySelector('#project-advisor-brief')).not.toBeNull();
+    expect((container.querySelector('#lead-purpose') as HTMLSelectElement | null)?.value).toBe('invest');
   });
 
   it('keeps Thai project detail copy free from shortlist and brief drift', async () => {
