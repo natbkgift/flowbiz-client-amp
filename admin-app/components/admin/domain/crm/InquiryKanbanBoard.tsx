@@ -46,14 +46,22 @@ export function InquiryKanbanBoard({
           <ul className="crm-items">
             {column.items.map((item) => {
               const primaryLabel = getInquiryDisplayLabel(item);
+              const secondaryLabel = [item.source_page, item.intent].filter(Boolean).join(" · ") || "-";
+              const isMoving = movingInquiryId === item.id;
+              const movingStatusId = isMoving ? `crm-moving-status-${item.id}` : undefined;
 
               return (
-                <li key={item.id} className={`crm-row-card ${selectedId === item.id ? "is-active" : ""}`}>
+                <li
+                  key={item.id}
+                  className={`crm-row-card ${selectedId === item.id ? "is-active" : ""} ${isMoving ? "is-busy" : ""}`}
+                  aria-busy={isMoving}
+                >
                   <button
                     type="button"
                     draggable
                     className={`crm-row-button ${selectedId === item.id ? "is-active" : ""}`}
-                    disabled={movingInquiryId === item.id}
+                    disabled={isMoving}
+                    aria-describedby={movingStatusId}
                     onClick={() => void onSelect(item.id)}
                     onDragStart={(event) => {
                       event.dataTransfer.setData("text/plain", item.id);
@@ -74,6 +82,7 @@ export function InquiryKanbanBoard({
                     }}
                   >
                     <span className="crm-row-title">{primaryLabel}</span>
+                    <span className="crm-row-meta crm-row-meta-secondary">{secondaryLabel}</span>
                     <span className="crm-row-meta">{item.purpose || "-"}</span>
                     <span className="crm-row-meta">
                       <span className={`crm-chip ${item.follow_up_status ? "crm-chip-sla" : "crm-chip-muted"}`}>
@@ -95,7 +104,8 @@ export function InquiryKanbanBoard({
                     <select
                       aria-label={t.status}
                       value={item.status}
-                      disabled={movingInquiryId === item.id}
+                      disabled={isMoving}
+                      aria-describedby={movingStatusId}
                       onChange={(event) => {
                         void onMoveStatus(item.id, event.target.value);
                       }}
@@ -108,6 +118,11 @@ export function InquiryKanbanBoard({
                       ))}
                     </select>
                   </label>
+                  {isMoving ? (
+                    <div id={movingStatusId} className="crm-row-progress" role="status" aria-live="polite">
+                      {t.movingStatus}
+                    </div>
+                  ) : null}
                 </li>
               );
             })}
