@@ -4,12 +4,13 @@ import { InquiryContactActions } from "@/components/admin/domain/crm/InquiryCont
 import { InquiryFollowUpPanel } from "@/components/admin/domain/crm/InquiryFollowUpPanel";
 import { InquiryTimelinePanel } from "@/components/admin/domain/crm/InquiryTimelinePanel";
 import type { InquiryItem, InquiryLocale, TimelineEvent } from "@/components/admin/domain/crm/inquiries-types";
-import { prettyDate, translateFollowUpStatus, translateInquiryStatus } from "@/components/admin/domain/crm/inquiries-utils";
+import { getInquiryDisplayLabel, prettyDate, translateFollowUpStatus, translateInquiryStatus } from "@/components/admin/domain/crm/inquiries-utils";
 
 export function InquiryDetailPanel({
   t,
   locale,
   selected,
+  emptyStateMessage,
   detailLoading,
   followUpStatus,
   followUpDueAt,
@@ -25,6 +26,7 @@ export function InquiryDetailPanel({
   t: InquiryCopy;
   locale: InquiryLocale;
   selected: InquiryItem | null;
+  emptyStateMessage?: string;
   detailLoading: boolean;
   followUpStatus: string;
   followUpDueAt: string;
@@ -38,14 +40,18 @@ export function InquiryDetailPanel({
   onSaveFollowUp: () => void | Promise<void>;
 }) {
   if (!selected) {
-    return detailLoading ? <div className="state-loading">{t.loadingDetails}</div> : <div className="state-empty">{t.noDetails}</div>;
+    const message = emptyStateMessage ?? t.noDetails;
+
+    return detailLoading ? <div className="state-loading">{t.loadingDetails}</div> : <div className="state-empty">{message}</div>;
   }
+
+  const summaryTitle = getInquiryDisplayLabel(selected);
 
   return (
     <>
       <div className="crm-detail-section crm-detail-summary">
         <div className="crm-detail-summary__head">
-          <h3>{selected.name || t.details}</h3>
+          <h3>{summaryTitle}</h3>
           <div className="crm-detail-summary__badges">
             <span className="crm-chip crm-chip-muted">{translateInquiryStatus(selected.status, locale)}</span>
             <span className="crm-chip crm-chip-sla">{translateFollowUpStatus(selected.follow_up_status, locale)}</span>

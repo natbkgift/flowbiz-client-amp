@@ -32,7 +32,7 @@ describe("B11 admin inquiries page contract", () => {
     expect(page).toContain("`/admin/inquiries/${id}`");
     expect(page).toContain("`/admin/inquiries/${id}/timeline?limit=30`");
     expect(page).toContain("`/admin/inquiries/${selectedId}/follow-up`");
-    expect(page).toContain("`/admin/inquiries-export.csv?${filterQuery}`");
+    expect(page).toContain("`/admin/inquiries-export.csv?${appliedFilterQuery}`");
     expect(page).toContain("Authorization: `Bearer ${activeToken}`");
   });
 
@@ -57,6 +57,7 @@ describe("B11 admin inquiries page contract", () => {
     expect(utils).toContain('["pending", "scheduled", "completed", "no_response"]');
     expect(utils).toContain("translateFollowUpStatus");
     expect(utils).toContain("translateInquiryStatus");
+    expect(utils).toContain("getInquiryDisplayLabel");
     expect(contactActions).toContain("selected.whatsapp_url");
     expect(contactActions).toContain("selected.phone_url");
     expect(contactActions).toContain("selected.email_url");
@@ -89,6 +90,142 @@ describe("B11 admin inquiries page contract", () => {
     expect(page).toContain('className="crm-controls-toolbar"');
     expect(savedFilters).toContain("savedFiltersHint");
     expect(savedFilters).toContain("savedFiltersEmpty");
+  });
+
+  it("auto-opens the first inquiry when the current selection is no longer in the refreshed queue", () => {
+    const page = read("app/admin/inquiries/page.tsx");
+    const copy = read("components/admin/domain/crm/inquiries-copy.ts");
+
+    expect(page).toContain("const shouldKeepSelection = Boolean(selectedId && body.data.some((item) => item.id === selectedId));");
+    expect(page).toContain("if (shouldKeepSelection && selectedId) {");
+    expect(page).toContain("await loadDetails(selectedId, activeToken);");
+    expect(page).toContain("} else {");
+    expect(page).toContain("const nextSelectedId = body.data[0]?.id ?? null;");
+    expect(page).toContain("if (nextSelectedId) {");
+    expect(page).toContain("await loadDetails(nextSelectedId, activeToken);");
+    expect(page).toContain("async function loadDetails(id: string, tokenOverride?: string)");
+    expect(page).toContain('const activeToken = (tokenOverride ?? authToken).trim();');
+    expect(copy).toContain('emptyDetails: "No inquiries match current filters. Adjust filters or reload the queue to fetch the latest leads."');
+  });
+
+  it("clears filters and immediately reloads the default queue", () => {
+    const page = read("app/admin/inquiries/page.tsx");
+
+    expect(page).toContain("function clearFilters()");
+    expect(page).toContain("setFilters(EMPTY_FILTERS);");
+    expect(page).toContain("void loadListWithFilters(EMPTY_FILTERS);");
+    expect(page).toContain('onClick={clearFilters}');
+  });
+
+  it("separates apply vs reload based on whether filters are still dirty", () => {
+    const page = read("app/admin/inquiries/page.tsx");
+
+    expect(page).toContain("const [appliedFilters, setAppliedFilters] = useState<InquiryFilters>(EMPTY_FILTERS);");
+    expect(page).toContain('const [appliedFilterQuery, setAppliedFilterQuery] = useState(() => buildQuery(EMPTY_FILTERS));');
+    expect(page).toContain("const hasUnappliedFilters = filterQuery !== appliedFilterQuery;");
+    expect(page).toContain("async function applyFilters(tokenOverride?: string, emailOverride?: string) {");
+    expect(page).toContain("async function reloadList(tokenOverride?: string, emailOverride?: string) {");
+    expect(page).toContain("await loadListWithFilters(appliedFilters, tokenOverride, emailOverride);");
+    expect(page).toContain("setAppliedFilters(nextFilters);");
+    expect(page).toContain("setAppliedFilterQuery(query);");
+    expect(page).toContain("`/admin/inquiries-export.csv?${appliedFilterQuery}`");
+    expect(page).toContain("const shouldDisableApply = !isAuthenticated || loading || detailLoading || Boolean(movingInquiryId) || !hasUnappliedFilters;");
+    expect(page).toContain("const shouldDisableReload = !isAuthenticated || detailLoading || Boolean(movingInquiryId) || hasUnappliedFilters;");
+    expect(page).toContain("disabled={shouldDisableApply}");
+    expect(page).toContain("disabled={shouldDisableReload}");
+    expect(page).toContain("onClick={() => void applyFilters()}");
+    expect(page).toContain("onClick={() => void reloadList()}");
+  });
+
+  it("disables clear when there is no active or pending filter to reset", () => {
+    const page = read("app/admin/inquiries/page.tsx");
+
+    expect(page).toContain("const hasActiveFilters = Object.values(filters).some((value) => value.trim().length > 0);");
+    expect(page).toContain("const hasNoFiltersToReset = !hasUnappliedFilters && !hasActiveFilters;");
+    expect(page).toContain("const shouldDisableClear = !isAuthenticated || loading || detailLoading || Boolean(movingInquiryId) || hasNoFiltersToReset;");
+    expect(page).toContain("disabled={shouldDisableClear}");
+  });
+
+  it("shows whether the visible queue is synced with draft filters or still waiting for apply", () => {
+    const page = read("app/admin/inquiries/page.tsx");
+    const copy = read("components/admin/domain/crm/inquiries-copy.ts");
+
+    expect(page).toContain("const hasAppliedFilters = Object.values(appliedFilters).some((value) => value.trim().length > 0);");
+    expect(page).toContain("const filterStateMessage = hasUnappliedFilters ? t.filterStateDraft : t.filterStateApplied;");
+    expect(page).toContain("const filterScopeMessage = hasAppliedFilters ? t.filterScopeFiltered : t.filterScopeDefault;");
+    expect(page).toContain('<div className="crm-filter-hint" aria-live="polite">');
+    expect(page).toContain("<strong>{filterStateMessage}</strong> {filterScopeMessage}");
+    expect(copy).toContain('filterStateDraft: "Draft filters are not applied yet. Apply filters to refresh the visible queue."');
+    expect(copy).toContain('filterStateApplied: "Queue is synced with the current filters. Reload and Export CSV use the visible queue."');
+    expect(copy).toContain('filterScopeDefault: "Current queue uses the default filter set."');
+    expect(copy).toContain('filterScopeFiltered: "Current queue uses a filtered result set."');
+    expect(copy).toContain('filterStateDraft: "ตัวกรองที่แก้ไขไว้ยังไม่ถูกใช้กับคิวปัจจุบัน');
+    expect(copy).toContain('filterStateApplied: "คิวปัจจุบันตรงกับตัวกรองที่ใช้งานอยู่แล้ว');
+  });
+
+  it("surfaces the applied queue filters as readable summary chips with a pending-draft warning", () => {
+    const page = read("app/admin/inquiries/page.tsx");
+    const copy = read("components/admin/domain/crm/inquiries-copy.ts");
+    const styles = read("styles/admin-components.css");
+
+    expect(page).toContain('translateFollowUpStatus,');
+    expect(page).toContain('translateInquiryStatus,');
+    expect(page).toContain("const appliedFilterSummary = buildFilterSummary(appliedFilters, t, locale);");
+    expect(page).toContain('<div className="crm-filter-summary" aria-live="polite">');
+    expect(page).toContain('<span className="crm-filter-summary__label">{t.appliedQueue}</span>');
+    expect(page).toContain('{hasUnappliedFilters ? <span className="crm-chip crm-chip-warn">{t.draftChangesPending}</span> : null}');
+    expect(page).toContain('<span className="crm-chip crm-chip-muted">{t.appliedQueueDefault}</span>');
+    expect(page).toContain('label: `${t.status}: ${translateInquiryStatus(filters.status, locale)}`');
+    expect(page).toContain('label: `${t.followUp}: ${translateFollowUpStatus(filters.follow_up_status, locale)}`');
+    expect(page).toContain('label: `${t.search}: ${truncateFilterSummaryValue(filters.q)}`');
+    expect(page).toContain("const MAX_FILTER_SUMMARY_VALUE_LENGTH = 24;");
+    expect(page).toContain("const TRUNCATED_FILTER_SUMMARY_VALUE_LENGTH = MAX_FILTER_SUMMARY_VALUE_LENGTH - 3;");
+    expect(page).toContain("function truncateFilterSummaryValue(value: string): string {");
+    expect(copy).toContain('appliedQueue: "Applied queue"');
+    expect(copy).toContain('appliedQueueDefault: "Default filters"');
+    expect(copy).toContain('draftChangesPending: "Draft changes pending"');
+    expect(copy).toContain('appliedQueue: "คิวที่ใช้งานอยู่"');
+    expect(copy).toContain('draftChangesPending: "มีตัวกรองฉบับรอใช้"');
+    expect(styles).toContain(".crm-filter-summary {");
+    expect(styles).toContain(".crm-filter-summary__chips {");
+  });
+
+  it("keeps CRM list/detail cards compact instead of stretching to full column height", () => {
+    const styles = read("styles/admin-components.css");
+
+    expect(styles).toContain(".crm-list.admin-card-shell,");
+    expect(styles).toContain(".crm-detail.admin-card-shell {");
+    expect(styles).toContain("min-height: auto;");
+  });
+
+  it("keeps a readable primary row label even when inquiry name is missing", () => {
+    const list = read("components/admin/domain/crm/InquiryListTable.tsx");
+    const detail = read("components/admin/domain/crm/InquiryDetailPanel.tsx");
+    const utils = read("components/admin/domain/crm/inquiries-utils.ts");
+
+    expect(list).toContain("const primaryLabel = getInquiryDisplayLabel(item);");
+    expect(list).toContain("<span>{primaryLabel}</span>");
+    expect(detail).toContain("const summaryTitle = getInquiryDisplayLabel(selected);");
+    expect(detail).toContain("<h3>{summaryTitle}</h3>");
+    expect(utils).toContain("export function getInquiryDisplayLabel");
+    expect(utils).toContain("return item.name || item.email || item.phone || item.id;");
+  });
+
+  it("renders inquiry status as a visible chip for faster table scanning", () => {
+    const list = read("components/admin/domain/crm/InquiryListTable.tsx");
+
+    expect(list).toContain('<span className="crm-chip crm-chip-muted">{translateInquiryStatus(item.status, locale)}</span>');
+  });
+
+  it("aligns the detail empty state with the current queue state", () => {
+    const page = read("app/admin/inquiries/page.tsx");
+    const detail = read("components/admin/domain/crm/InquiryDetailPanel.tsx");
+
+    expect(page).toContain("const detailEmptyStateMessage = !loading && items.length === 0 ? t.emptyDetails : t.noDetails;");
+    expect(page).toContain("emptyStateMessage={detailEmptyStateMessage}");
+    expect(detail).toContain("emptyStateMessage?: string;");
+    expect(detail).toContain("const message = emptyStateMessage ?? t.noDetails;");
+    expect(detail).toContain("<div className=\"state-empty\">{message}</div>");
   });
 
   it("keeps accessibility and runtime states in EN/TH copy", () => {
@@ -125,7 +262,12 @@ describe("B11 admin inquiries page contract", () => {
     expect(copy).toContain('sessionHint: "คงเซสชันนี้ไว้');
     expect(copy).toContain('filtersDescription: "Refine the active queue');
     expect(copy).toContain('filtersDescription: "ปรับคิวงานที่กำลังดู');
+    expect(copy).toContain('filterStateDraft: "Draft filters are not applied yet.');
+    expect(copy).toContain('filterStateDraft: "ตัวกรองที่แก้ไขไว้ยังไม่ถูกใช้กับคิวปัจจุบัน');
+    expect(copy).toContain('appliedQueue: "Applied queue"');
+    expect(copy).toContain('appliedQueue: "คิวที่ใช้งานอยู่"');
     expect(copy).toContain('loginTitle: "Admin sign in"');
     expect(copy).toContain('loginTitle: "เข้าสู่ระบบแอดมิน"');
+    expect(copy).toContain('emptyDetails: "ไม่พบรายการตามตัวกรองปัจจุบัน');
   });
 });

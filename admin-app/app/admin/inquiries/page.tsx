@@ -21,6 +21,8 @@ import {
   readRoleFromToken,
   savedFiltersKey,
   toLocalInputDateTime,
+  translateFollowUpStatus,
+  translateInquiryStatus,
 } from "@/components/admin/domain/crm/inquiries-utils";
 import type {
   InquiryFilters,
@@ -41,6 +43,8 @@ const EMPTY_FILTERS: InquiryFilters = {
   follow_up_status: "",
   q: "",
 };
+const MAX_FILTER_SUMMARY_VALUE_LENGTH = 24;
+const TRUNCATED_FILTER_SUMMARY_VALUE_LENGTH = MAX_FILTER_SUMMARY_VALUE_LENGTH - 3;
 
 function detectLocale(): InquiryLocale {
   return detectAdminLocale();
@@ -55,6 +59,48 @@ async function fetchJson<T>(path: string, token: string): Promise<T> {
     throw new Error(`request_failed:${response.status}`);
   }
   return (await response.json()) as T;
+}
+
+function buildFilterSummary(
+  filters: InquiryFilters,
+  t: (typeof inquiriesCopy)[keyof typeof inquiriesCopy],
+  locale: InquiryLocale
+): Array<{ key: keyof InquiryFilters; label: string }> {
+  const summary: Array<{ key: keyof InquiryFilters; label: string }> = [];
+
+  if (filters.status.trim()) {
+    summary.push({ key: "status", label: `${t.status}: ${translateInquiryStatus(filters.status, locale)}` });
+  }
+  if (filters.source.trim()) {
+    summary.push({ key: "source", label: `${t.source}: ${truncateFilterSummaryValue(filters.source)}` });
+  }
+  if (filters.purpose.trim()) {
+    summary.push({ key: "purpose", label: `${t.purpose}: ${truncateFilterSummaryValue(filters.purpose)}` });
+  }
+  if (filters.date_from.trim()) {
+    summary.push({ key: "date_from", label: `${t.dateFrom}: ${filters.date_from}` });
+  }
+  if (filters.date_to.trim()) {
+    summary.push({ key: "date_to", label: `${t.dateTo}: ${filters.date_to}` });
+  }
+  if (filters.follow_up_status.trim()) {
+    summary.push({
+      key: "follow_up_status",
+      label: `${t.followUp}: ${translateFollowUpStatus(filters.follow_up_status, locale)}`,
+    });
+  }
+  if (filters.q.trim()) {
+    summary.push({ key: "q", label: `${t.search}: ${truncateFilterSummaryValue(filters.q)}` });
+  }
+
+  return summary;
+}
+
+function truncateFilterSummaryValue(value: string): string {
+  const trimmed = value.trim();
+  return trimmed.length > MAX_FILTER_SUMMARY_VALUE_LENGTH
+    ? `${trimmed.slice(0, TRUNCATED_FILTER_SUMMARY_VALUE_LENGTH)}…`
+    : trimmed;
 }
 
 export default function AdminInquiriesPage() {
@@ -78,6 +124,8 @@ export default function AdminInquiriesPage() {
   const [followUpNotice, setFollowUpNotice] = useState<string | null>(null);
 
   const [filters, setFilters] = useState<InquiryFilters>(EMPTY_FILTERS);
+  const [appliedFilters, setAppliedFilters] = useState<InquiryFilters>(EMPTY_FILTERS);
+  const [appliedFilterQuery, setAppliedFilterQuery] = useState(() => buildQuery(EMPTY_FILTERS));
   const [followUpStatus, setFollowUpStatus] = useState("pending");
   const [followUpDueAt, setFollowUpDueAt] = useState("");
   const [viewMode, setViewMode] = useState<InquiryViewMode>("table");
@@ -131,13 +179,28 @@ export default function AdminInquiriesPage() {
   const t = inquiriesCopy[locale];
   const authError = authErrorCode ? authErrorMessage(t, authErrorCode) : null;
   const filterQuery = useMemo(() => buildQuery(filters), [filters]);
+  const detailEmptyStateMessage = !loading && items.length === 0 ? t.emptyDetails : t.noDetails;
+  const hasUnappliedFilters = filterQuery !== appliedFilterQuery;
+  const hasActiveFilters = Object.values(filters).some((value) => value.trim().length > 0);
+  const hasAppliedFilters = Object.values(appliedFilters).some((value) => value.trim().length > 0);
+  const appliedFilterSummary = buildFilterSummary(appliedFilters, t, locale);
+  const hasNoFiltersToReset = !hasUnappliedFilters && !hasActiveFilters;
+  const shouldDisableApply = !isAuthenticated || loading || detailLoading || Boolean(movingInquiryId) || !hasUnappliedFilters;
+  const shouldDisableReload = !isAuthenticated || detailLoading || Boolean(movingInquiryId) || hasUnappliedFilters;
+  const shouldDisableClear = !isAuthenticated || loading || detailLoading || Boolean(movingInquiryId) || hasNoFiltersToReset;
+  const filterStateMessage = hasUnappliedFilters ? t.filterStateDraft : t.filterStateApplied;
+  const filterScopeMessage = hasAppliedFilters ? t.filterScopeFiltered : t.filterScopeDefault;
 
   function updateFilter<Key extends keyof InquiryFilters>(key: Key, value: InquiryFilters[Key]) {
     setFilters((current) => ({ ...current, [key]: value }));
   }
 
-  async function loadList(tokenOverride?: string, emailOverride?: string) {
+  async function applyFilters(tokenOverride?: string, emailOverride?: string) {
     await loadListWithFilters(filters, tokenOverride, emailOverride);
+  }
+
+  async function reloadList(tokenOverride?: string, emailOverride?: string) {
+    await loadListWithFilters(appliedFilters, tokenOverride, emailOverride);
   }
 
   async function loadListWithFilters(nextFilters: InquiryFilters, tokenOverride?: string, emailOverride?: string) {
@@ -154,10 +217,19 @@ export default function AdminInquiriesPage() {
       const body = await fetchJson<PaginatedResponse<InquiryItem>>(`/admin/inquiries?${query}`, activeToken);
       setItems(body.data);
       setTotal(body.meta.total);
-      if (!body.data.some((item) => item.id === selectedId)) {
-        setSelectedId(null);
+      setAppliedFilters(nextFilters);
+      setAppliedFilterQuery(query);
+      const shouldKeepSelection = Boolean(selectedId && body.data.some((item) => item.id === selectedId));
+      if (shouldKeepSelection && selectedId) {
+        await loadDetails(selectedId, activeToken);
+      } else {
+        const nextSelectedId = body.data[0]?.id ?? null;
+        setSelectedId(nextSelectedId);
         setSelected(null);
         setTimeline([]);
+        if (nextSelectedId) {
+          await loadDetails(nextSelectedId, activeToken);
+        }
       }
       persistSession(activeToken, (emailOverride ?? authEmail) || loginEmail);
     } catch {
@@ -167,8 +239,8 @@ export default function AdminInquiriesPage() {
     }
   }
 
-  async function loadDetails(id: string) {
-    const activeToken = authToken.trim();
+  async function loadDetails(id: string, tokenOverride?: string) {
+    const activeToken = (tokenOverride ?? authToken).trim();
     if (!activeToken) {
       setError(t.authRequired);
       return;
@@ -261,6 +333,11 @@ export default function AdminInquiriesPage() {
     void loadListWithFilters(selectedFilter.filters);
   }
 
+  function clearFilters() {
+    setFilters(EMPTY_FILTERS);
+    void loadListWithFilters(EMPTY_FILTERS);
+  }
+
   async function moveInquiryStatus(inquiryId: string, nextStatus: string) {
     const activeToken = authToken.trim();
     if (!activeToken) {
@@ -297,7 +374,7 @@ export default function AdminInquiriesPage() {
       return;
     }
 
-    const response = await fetch(`/admin/inquiries-export.csv?${filterQuery}`, {
+    const response = await fetch(`/admin/inquiries-export.csv?${appliedFilterQuery}`, {
       headers: { Authorization: `Bearer ${activeToken}` },
       cache: "no-store",
     });
@@ -322,7 +399,7 @@ export default function AdminInquiriesPage() {
       const loginResult = await loginWithAdminSession({ email: loginEmail.trim(), password: loginPassword });
       if (!loginResult.ok) return;
       setLoginPassword("");
-      await loadList(loginResult.accessToken, loginResult.email);
+      await applyFilters(loginResult.accessToken, loginResult.email);
     } catch {
       return;
     }
@@ -384,16 +461,31 @@ export default function AdminInquiriesPage() {
 
         <div className="crm-controls-toolbar" role="group" aria-label={t.filters}>
           <div className="card-actions crm-controls-toolbar__actions">
-            <button className="btn" type="button" onClick={() => void loadList()} disabled={!isAuthenticated || detailLoading || Boolean(movingInquiryId)}>
+            <button
+              className="btn"
+              type="button"
+              onClick={() => void applyFilters()}
+              disabled={shouldDisableApply}
+            >
               {loading ? t.loading : t.apply}
             </button>
-            <button className="btn btn-secondary" type="button" onClick={() => void loadList()} disabled={!isAuthenticated || detailLoading || Boolean(movingInquiryId)}>
+            <button
+              className="btn btn-secondary"
+              type="button"
+              onClick={() => void reloadList()}
+              disabled={shouldDisableReload}
+            >
               {t.reload}
             </button>
             <button className="btn btn-secondary" type="button" onClick={() => void exportCsv()} disabled={!isAuthenticated || loading}>
               {t.exportCsv}
             </button>
-            <button className="btn btn-secondary" type="button" onClick={() => setFilters(EMPTY_FILTERS)} disabled={!isAuthenticated || loading || detailLoading || Boolean(movingInquiryId)}>
+            <button
+              className="btn btn-secondary"
+              type="button"
+              onClick={clearFilters}
+              disabled={shouldDisableClear}
+            >
               {t.clear}
             </button>
           </div>
@@ -402,6 +494,30 @@ export default function AdminInquiriesPage() {
             <InquiryViewToggle t={t} viewMode={viewMode} onViewModeChange={setViewMode} />
           </div>
         </div>
+
+        {isAuthenticated ? (
+          <div className="crm-filter-hint" aria-live="polite">
+            <strong>{filterStateMessage}</strong> {filterScopeMessage}
+          </div>
+        ) : null}
+
+        {isAuthenticated ? (
+          <div className="crm-filter-summary" aria-live="polite">
+            <span className="crm-filter-summary__label">{t.appliedQueue}</span>
+            <div className="crm-filter-summary__chips">
+              {hasUnappliedFilters ? <span className="crm-chip crm-chip-warn">{t.draftChangesPending}</span> : null}
+              {appliedFilterSummary.length > 0 ? (
+                appliedFilterSummary.map((summary) => (
+                  <span key={summary.key} className="crm-chip crm-chip-muted">
+                    {summary.label}
+                  </span>
+                ))
+              ) : (
+                <span className="crm-chip crm-chip-muted">{t.appliedQueueDefault}</span>
+              )}
+            </div>
+          </div>
+        ) : null}
 
         <InquirySavedFiltersPanel
           t={t}
@@ -465,6 +581,7 @@ export default function AdminInquiriesPage() {
               t={t}
               locale={locale}
               selected={selected}
+              emptyStateMessage={detailEmptyStateMessage}
               detailLoading={detailLoading}
               followUpStatus={followUpStatus}
               followUpDueAt={followUpDueAt}
