@@ -94,7 +94,9 @@ describe("B11 admin inquiries page contract", () => {
   it("auto-opens the first inquiry when the current selection is no longer in the refreshed queue", () => {
     const page = read("app/admin/inquiries/page.tsx");
 
-    expect(page).toContain('const nextSelectedId = body.data.some((item) => item.id === selectedId) ? selectedId : (body.data[0]?.id ?? null);');
+    expect(page).toContain("const hasCurrentSelection = body.data.some((item) => item.id === selectedId);");
+    expect(page).toContain("const shouldRefreshSelection = nextSelectedId !== selectedId;");
+    expect(page).toContain("if (nextSelectedId && shouldRefreshSelection) {");
     expect(page).toContain("await loadDetails(nextSelectedId, activeToken);");
     expect(page).toContain("async function loadDetails(id: string, tokenOverride?: string)");
     expect(page).toContain('const activeToken = (tokenOverride ?? authToken).trim();');

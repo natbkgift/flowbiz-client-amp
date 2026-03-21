@@ -154,14 +154,16 @@ export default function AdminInquiriesPage() {
       const body = await fetchJson<PaginatedResponse<InquiryItem>>(`/admin/inquiries?${query}`, activeToken);
       setItems(body.data);
       setTotal(body.meta.total);
-      const nextSelectedId = body.data.some((item) => item.id === selectedId) ? selectedId : (body.data[0]?.id ?? null);
-      if (nextSelectedId !== selectedId) {
+      const hasCurrentSelection = body.data.some((item) => item.id === selectedId);
+      const nextSelectedId = hasCurrentSelection ? selectedId : (body.data[0]?.id ?? null);
+      const shouldRefreshSelection = nextSelectedId !== selectedId;
+      if (shouldRefreshSelection) {
         setSelectedId(nextSelectedId);
         setSelected(null);
         setTimeline([]);
       }
       persistSession(activeToken, (emailOverride ?? authEmail) || loginEmail);
-      if (nextSelectedId && nextSelectedId !== selectedId) {
+      if (nextSelectedId && shouldRefreshSelection) {
         await loadDetails(nextSelectedId, activeToken);
       }
     } catch {
