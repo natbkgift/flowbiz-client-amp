@@ -643,7 +643,7 @@ export default async function ProjectDetailPage(
   );
 
   return (
-    <main className="section decision-page decision-page--project" id="main-content">
+    <main className="section decision-page decision-page--project decision-page--confidence" id="main-content">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLd }} />
       <PublicAdvisoryHero
         eyebrow={dict.advisory.heroEyebrow}

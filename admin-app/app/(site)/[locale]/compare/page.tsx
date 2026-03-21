@@ -293,7 +293,7 @@ export default async function ComparePage(
 
   if (ids.length < 2) {
     return (
-      <main id="main-content" className="decision-page decision-page--compare">
+      <main id="main-content" className="decision-page decision-page--compare decision-page--confidence">
         <PublicAdvisoryHero
           eyebrow={dict.advisory.heroEyebrow}
           title={dict.compare.title}
@@ -490,7 +490,7 @@ export default async function ComparePage(
   });
 
   return (
-    <main id="main-content" className="decision-page decision-page--compare">
+    <main id="main-content" className="decision-page decision-page--compare decision-page--confidence">
       <PublicAdvisoryHero
         eyebrow={dict.advisory.heroEyebrow}
         title={dict.compare.title}

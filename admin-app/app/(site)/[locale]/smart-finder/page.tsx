@@ -177,7 +177,7 @@ export default async function SmartFinderPage(
     : null;
 
   return (
-    <main id="main-content" className="decision-page decision-page--smart-finder">
+    <main id="main-content" className="decision-page decision-page--smart-finder decision-page--confidence">
       <PublicAdvisoryHero
         eyebrow={dict.advisory.heroEyebrow}
         title={headerTitle}

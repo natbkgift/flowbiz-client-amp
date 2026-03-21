@@ -3355,220 +3355,185 @@ summary.mobile-nav__trigger::-webkit-details-marker {
   min-height: 48px;
 }
 
-.decision-page .hero.hero--page {
+.decision-page--confidence .hero.hero--page {
   padding: 44px 0 32px;
 }
 
-.decision-page .hero.hero--advisory {
+.decision-page--confidence .hero.hero--advisory {
   padding: clamp(36px, 7vw, 56px) 0 clamp(28px, 5vw, 44px);
 }
 
-.decision-page .headline {
+.decision-page--confidence .headline {
   font-size: clamp(1.95rem, 7vw, 2.6rem);
   line-height: 1.06;
   max-width: 16ch;
 }
 
-.decision-page .subhead {
+.decision-page--confidence .subhead {
   margin-top: 10px;
   font-size: 0.98rem;
   line-height: 1.55;
   max-width: 46ch;
 }
 
-.decision-page .section-header {
+.decision-page--confidence .section-header {
   margin-bottom: 18px;
 }
 
-.decision-page .section-title {
+.decision-page--confidence .section-title {
   font-size: clamp(1.72rem, 6vw, var(--font-h2));
   line-height: 1.08;
   margin-bottom: 10px;
 }
 
-.decision-page .section-title--sm {
+.decision-page--confidence .section-title--sm {
   font-size: clamp(1.28rem, 4.9vw, 1.9rem);
 }
 
-.decision-page .section-subtitle,
-.decision-page .card-subtitle,
-.decision-page .insight-list__body,
-.decision-page .content-article p,
-.decision-page .bullet-list li {
+.decision-page--confidence .section-subtitle,
+.decision-page--confidence .card-subtitle,
+.decision-page--confidence .insight-list__body,
+.decision-page--confidence .content-article p,
+.decision-page--confidence .bullet-list li {
   line-height: 1.55;
 }
 
-.decision-page .content-article p {
+.decision-page--confidence .content-article p {
   margin-bottom: 12px;
 }
 
-.decision-page .cta-row,
-.decision-page .card-actions {
+.decision-page--confidence .cta-row,
+.decision-page--confidence .card-actions {
   gap: 10px;
 }
 
-.decision-page .card-actions {
+.decision-page--confidence .card-actions {
   margin-top: 14px;
 }
 
-.decision-page .hero .cta-row .btn,
-.decision-page .public-hero__actions .public-hero__action {
+.decision-page--confidence .hero .cta-row .btn,
+.decision-page--confidence .public-hero__actions .public-hero__action {
   flex: 1 1 100%;
 }
 
-.decision-page .hero .cta-row .btn:not(:first-child),
-.decision-page .public-hero__actions .public-hero__action--secondary,
-.decision-page .public-hero__actions .public-hero__action--tertiary {
+.decision-page--confidence .hero .cta-row .btn:not(:first-child),
+.decision-page--confidence .public-hero__actions .public-hero__action--secondary,
+.decision-page--confidence .public-hero__actions .public-hero__action--tertiary {
   flex-basis: calc(50% - 5px);
 }
 
-.decision-page .public-hero {
+.decision-page--confidence .public-hero {
   gap: 18px;
 }
 
-.decision-page .public-hero__content {
+.decision-page--confidence .public-hero__content {
   gap: 14px;
 }
 
-.decision-page .public-hero__eyebrow {
+.decision-page--confidence .public-hero__eyebrow {
   letter-spacing: 0.18em;
 }
 
-.decision-page .hero.hero--advisory .public-hero__headline,
-.decision-page .hero.hero--advisory h1.public-hero__headline {
+.decision-page--confidence .hero.hero--advisory .public-hero__headline,
+.decision-page--confidence .hero.hero--advisory h1.public-hero__headline {
   max-width: 16ch;
 }
 
-.decision-page .hero.hero--advisory .public-hero__subtitle,
-.decision-page .hero.hero--advisory p.public-hero__subtitle {
+.decision-page--confidence .hero.hero--advisory .public-hero__subtitle,
+.decision-page--confidence .hero.hero--advisory p.public-hero__subtitle {
   max-width: 46ch;
 }
 
-.decision-page .public-hero__proofs {
+.decision-page--confidence .public-hero__proofs {
   gap: 8px;
 }
 
-.decision-page .public-hero__proof {
+.decision-page--confidence .public-hero__proof {
   min-height: 30px;
   padding: 0 12px;
   font-size: 0.8125rem;
 }
 
-.decision-page .public-hero__rail {
+.decision-page--confidence .public-hero__rail {
   gap: 10px;
 }
 
-.decision-page .public-hero__signal {
+.decision-page--confidence .public-hero__signal {
   gap: 12px;
   padding: 14px;
   border-radius: 16px;
 }
 
-.decision-page .public-hero__signal-icon {
+.decision-page--confidence .public-hero__signal-icon {
   width: 36px;
   height: 36px;
   border-radius: 12px;
 }
 
-.decision-page .public-hero__signal-copy h2 {
+.decision-page--confidence .public-hero__signal-copy h2 {
   margin: 0 0 6px;
   font-size: 1rem;
 }
 
-.decision-page .public-hero__signal-copy p:last-child {
+.decision-page--confidence .public-hero__signal-copy p:last-child {
   font-size: 0.92rem;
   line-height: 1.5;
 }
 
-.decision-page .detail-stack {
+.decision-page--confidence .detail-stack {
   gap: clamp(16px, 3vw, 28px);
 }
 
-.decision-page .signal-grid {
+.decision-page--confidence .signal-grid {
   gap: 14px;
 }
 
-.decision-page .authority-card,
-.decision-page .page-rail-card,
-.decision-page .editorial-card {
+.decision-page--confidence .authority-card,
+.decision-page--confidence .page-rail-card,
+.decision-page--confidence .editorial-card {
   border-radius: 18px;
 }
 
-.decision-page .authority-card,
-.decision-page .page-rail-card {
+.decision-page--confidence .authority-card,
+.decision-page--confidence .page-rail-card {
   padding: clamp(16px, 4vw, 28px);
 }
 
-.decision-page .metric-card {
+.decision-page--confidence .metric-card {
   padding: 14px 16px;
   border-radius: 16px;
 }
 
-.decision-page .insight-list {
+.decision-page--confidence .insight-list {
   gap: 10px;
 }
 
-.decision-page .insight-list__item {
+.decision-page--confidence .insight-list__item {
   padding: 12px 14px;
   border-radius: 14px;
 }
 
-.decision-page .decision-pack {
+.decision-page--confidence .decision-pack {
   gap: 12px;
 }
 
-.decision-page .decision-pack .card-title {
+.decision-page--confidence .decision-pack .card-title {
   font-size: clamp(1.05rem, 4.3vw, 1.24rem);
   margin-bottom: 6px;
 }
 
-.decision-page .decision-pack .card-subtitle {
+.decision-page--confidence .decision-pack .card-subtitle {
   font-size: 0.94rem;
 }
 
-.decision-page .decision-pack .insight-list,
-.decision-page .decision-pack .bullet-list {
+.decision-page--confidence .decision-pack .insight-list,
+.decision-page--confidence .decision-pack .bullet-list {
   margin-top: 10px;
 }
 
-.decision-page .compare-flow-card,
-.decision-page .smart-finder-result-card,
-.decision-page .area-guide-card,
-.decision-page .decision-mini-card {
+.decision-page--confidence .compare-flow-card,
+.decision-page--confidence .smart-finder-result-card {
   padding: clamp(16px, 4vw, 24px);
-}
-
-.decision-page--property .gallery-main {
-  margin-bottom: 12px;
-}
-
-.decision-page--property .gallery-counter {
-  padding: 6px 10px;
-  font-size: var(--font-xs);
-}
-
-.decision-page--property .property-header {
-  gap: 12px;
-  margin-bottom: 14px;
-}
-
-.decision-page--property .property-price {
-  font-size: clamp(1.85rem, 8vw, 2.45rem);
-}
-
-.decision-page--property .property-facts {
-  gap: 10px;
-  padding: 14px;
-  margin-bottom: 14px;
-}
-
-.decision-page--property #property-primary-actions,
-.decision-page--property #property-trust-cues {
-  margin-bottom: 14px !important;
-}
-
-.decision-page--property .property-description-card .content-article {
-  max-width: none;
 }
 
 .decision-page--shortlist .shortlist-surface__summary {
@@ -3600,76 +3565,37 @@ summary.mobile-nav__trigger::-webkit-details-marker {
   margin-top: 10px;
 }
 
-.decision-page--area-guide .area-guide-card-grid {
-  gap: 16px;
-}
-
-.decision-page--area-guide .area-guide-card,
-.decision-page--area-guide .area-guide-map-item {
-  padding: 16px;
-}
-
-.decision-page--area-guide .map-grid {
-  gap: 14px;
-}
-
-.decision-page--buying-cost .decision-estimator-layout {
-  gap: 18px;
-}
-
-.decision-page--buying-cost .page-rail {
-  order: -1;
-}
-
-.decision-page--buying-cost .decision-estimator-intro .grid {
-  gap: 16px;
-}
-
-.decision-page--buying-cost .decision-mini-card .bullet-list,
-.decision-page--buying-cost .decision-mini-card .form-grid-2,
-.decision-page--buying-cost .decision-mini-card .insight-list {
-  margin-top: 12px;
-}
-
-.decision-page--buying-cost .decision-mini-card summary.card-title {
-  cursor: pointer;
-}
-
 @media (min-width: 768px) {
-  .decision-page .hero.hero--page {
+  .decision-page--confidence .hero.hero--page {
     padding: 56px 0 44px;
   }
 
-  .decision-page .hero.hero--advisory {
+  .decision-page--confidence .hero.hero--advisory {
     padding: clamp(48px, 6vw, 72px) 0 clamp(38px, 4vw, 56px);
   }
 
-  .decision-page .hero .cta-row .btn,
-  .decision-page .hero .cta-row .btn:not(:first-child),
-  .decision-page .public-hero__actions .public-hero__action,
-  .decision-page .public-hero__actions .public-hero__action--secondary,
-  .decision-page .public-hero__actions .public-hero__action--tertiary {
+  .decision-page--confidence .hero .cta-row .btn,
+  .decision-page--confidence .hero .cta-row .btn:not(:first-child),
+  .decision-page--confidence .public-hero__actions .public-hero__action,
+  .decision-page--confidence .public-hero__actions .public-hero__action--secondary,
+  .decision-page--confidence .public-hero__actions .public-hero__action--tertiary {
     flex: 0 1 auto;
   }
 
-  .decision-page .headline {
+  .decision-page--confidence .headline {
     max-width: 18ch;
   }
 
-  .decision-page .public-hero {
+  .decision-page--confidence .public-hero {
     gap: 22px;
   }
 
-  .decision-page .signal-grid {
+  .decision-page--confidence .signal-grid {
     gap: 16px;
   }
 
   .decision-page--shortlist .shortlist-surface__summary-actions {
     width: auto;
-  }
-
-  .decision-page--buying-cost .page-rail {
-    order: 0;
   }
 }
 

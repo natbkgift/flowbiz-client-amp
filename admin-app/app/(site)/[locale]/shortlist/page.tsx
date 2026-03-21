@@ -60,7 +60,7 @@ export default async function ShortlistPage(props: { params: Promise<{ locale: s
       ];
 
   return (
-    <main id="main-content" className="decision-page decision-page--shortlist">
+    <main id="main-content" className="decision-page decision-page--shortlist decision-page--confidence">
       <Breadcrumbs
         items={[
           { label: locale === 'th' ? 'หน้าแรก' : 'Home', href: `/${locale}` },
