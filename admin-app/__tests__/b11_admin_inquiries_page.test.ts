@@ -176,6 +176,8 @@ describe("B11 admin inquiries page contract", () => {
     expect(page).toContain('label: `${t.status}: ${translateInquiryStatus(filters.status, locale)}`');
     expect(page).toContain('label: `${t.followUp}: ${translateFollowUpStatus(filters.follow_up_status, locale)}`');
     expect(page).toContain('label: `${t.search}: ${truncateFilterSummaryValue(filters.q)}`');
+    expect(page).toContain("const MAX_FILTER_SUMMARY_VALUE_LENGTH = 24;");
+    expect(page).toContain("const TRUNCATED_FILTER_SUMMARY_VALUE_LENGTH = MAX_FILTER_SUMMARY_VALUE_LENGTH - 3;");
     expect(page).toContain("function truncateFilterSummaryValue(value: string): string {");
     expect(copy).toContain('appliedQueue: "Applied queue"');
     expect(copy).toContain('appliedQueueDefault: "Default filters"');

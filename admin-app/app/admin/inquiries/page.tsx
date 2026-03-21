@@ -43,6 +43,8 @@ const EMPTY_FILTERS: InquiryFilters = {
   follow_up_status: "",
   q: "",
 };
+const MAX_FILTER_SUMMARY_VALUE_LENGTH = 24;
+const TRUNCATED_FILTER_SUMMARY_VALUE_LENGTH = MAX_FILTER_SUMMARY_VALUE_LENGTH - 3;
 
 function detectLocale(): InquiryLocale {
   return detectAdminLocale();
@@ -57,6 +59,48 @@ async function fetchJson<T>(path: string, token: string): Promise<T> {
     throw new Error(`request_failed:${response.status}`);
   }
   return (await response.json()) as T;
+}
+
+function buildFilterSummary(
+  filters: InquiryFilters,
+  t: (typeof inquiriesCopy)[keyof typeof inquiriesCopy],
+  locale: InquiryLocale
+): Array<{ key: keyof InquiryFilters; label: string }> {
+  const summary: Array<{ key: keyof InquiryFilters; label: string }> = [];
+
+  if (filters.status.trim()) {
+    summary.push({ key: "status", label: `${t.status}: ${translateInquiryStatus(filters.status, locale)}` });
+  }
+  if (filters.source.trim()) {
+    summary.push({ key: "source", label: `${t.source}: ${truncateFilterSummaryValue(filters.source)}` });
+  }
+  if (filters.purpose.trim()) {
+    summary.push({ key: "purpose", label: `${t.purpose}: ${truncateFilterSummaryValue(filters.purpose)}` });
+  }
+  if (filters.date_from.trim()) {
+    summary.push({ key: "date_from", label: `${t.dateFrom}: ${filters.date_from}` });
+  }
+  if (filters.date_to.trim()) {
+    summary.push({ key: "date_to", label: `${t.dateTo}: ${filters.date_to}` });
+  }
+  if (filters.follow_up_status.trim()) {
+    summary.push({
+      key: "follow_up_status",
+      label: `${t.followUp}: ${translateFollowUpStatus(filters.follow_up_status, locale)}`,
+    });
+  }
+  if (filters.q.trim()) {
+    summary.push({ key: "q", label: `${t.search}: ${truncateFilterSummaryValue(filters.q)}` });
+  }
+
+  return summary;
+}
+
+function truncateFilterSummaryValue(value: string): string {
+  const trimmed = value.trim();
+  return trimmed.length > MAX_FILTER_SUMMARY_VALUE_LENGTH
+    ? `${trimmed.slice(0, TRUNCATED_FILTER_SUMMARY_VALUE_LENGTH)}…`
+    : trimmed;
 }
 
 export default function AdminInquiriesPage() {
@@ -564,44 +608,4 @@ function authErrorMessage(
   if (code === "missing_credentials") return t.loginMissing;
   if (code === "invalid_credentials") return t.loginInvalid;
   return t.loginError;
-}
-
-function buildFilterSummary(
-  filters: InquiryFilters,
-  t: (typeof inquiriesCopy)[keyof typeof inquiriesCopy],
-  locale: InquiryLocale
-): Array<{ key: keyof InquiryFilters; label: string }> {
-  const summary: Array<{ key: keyof InquiryFilters; label: string }> = [];
-
-  if (filters.status.trim()) {
-    summary.push({ key: "status", label: `${t.status}: ${translateInquiryStatus(filters.status, locale)}` });
-  }
-  if (filters.source.trim()) {
-    summary.push({ key: "source", label: `${t.source}: ${truncateFilterSummaryValue(filters.source)}` });
-  }
-  if (filters.purpose.trim()) {
-    summary.push({ key: "purpose", label: `${t.purpose}: ${truncateFilterSummaryValue(filters.purpose)}` });
-  }
-  if (filters.date_from.trim()) {
-    summary.push({ key: "date_from", label: `${t.dateFrom}: ${filters.date_from}` });
-  }
-  if (filters.date_to.trim()) {
-    summary.push({ key: "date_to", label: `${t.dateTo}: ${filters.date_to}` });
-  }
-  if (filters.follow_up_status.trim()) {
-    summary.push({
-      key: "follow_up_status",
-      label: `${t.followUp}: ${translateFollowUpStatus(filters.follow_up_status, locale)}`,
-    });
-  }
-  if (filters.q.trim()) {
-    summary.push({ key: "q", label: `${t.search}: ${truncateFilterSummaryValue(filters.q)}` });
-  }
-
-  return summary;
-}
-
-function truncateFilterSummaryValue(value: string): string {
-  const trimmed = value.trim();
-  return trimmed.length > 24 ? `${trimmed.slice(0, 21)}…` : trimmed;
 }
