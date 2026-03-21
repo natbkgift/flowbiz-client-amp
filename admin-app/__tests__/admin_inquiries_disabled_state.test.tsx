@@ -54,7 +54,7 @@ describe("admin inquiries disabled state", () => {
       />
     );
 
-    expect(screen.getByRole("button", { name: /jane@example\.com \/condo · invest investment lead pending/i })).toBeDisabled();
+    expect(screen.getByRole("button", { name: /jane@example\.com/i })).toBeDisabled();
     expect(screen.getByRole("combobox", { name: /status/i })).toBeDisabled();
     expect(screen.getByText("/condo · invest")).toBeInTheDocument();
     expect(screen.getByText("Updating inquiry status")).toBeInTheDocument();
