@@ -43,11 +43,13 @@ export function InquiryDetailPanel({
     return detailLoading ? <div className="state-loading">{t.loadingDetails}</div> : <div className="state-empty">{emptyStateMessage || t.noDetails}</div>;
   }
 
+  const summaryTitle = selected.name || selected.email || selected.phone || selected.id || t.details;
+
   return (
     <>
       <div className="crm-detail-section crm-detail-summary">
         <div className="crm-detail-summary__head">
-          <h3>{selected.name || t.details}</h3>
+          <h3>{summaryTitle}</h3>
           <div className="crm-detail-summary__badges">
             <span className="crm-chip crm-chip-muted">{translateInquiryStatus(selected.status, locale)}</span>
             <span className="crm-chip crm-chip-sla">{translateFollowUpStatus(selected.follow_up_status, locale)}</span>

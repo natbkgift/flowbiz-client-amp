@@ -118,9 +118,12 @@ describe("B11 admin inquiries page contract", () => {
 
   it("keeps a readable primary row label even when inquiry name is missing", () => {
     const list = read("components/admin/domain/crm/InquiryListTable.tsx");
+    const detail = read("components/admin/domain/crm/InquiryDetailPanel.tsx");
 
     expect(list).toContain("const primaryLabel = item.name || item.email || item.phone || item.id;");
     expect(list).toContain("<span>{primaryLabel}</span>");
+    expect(detail).toContain("const summaryTitle = selected.name || selected.email || selected.phone || selected.id || t.details;");
+    expect(detail).toContain("<h3>{summaryTitle}</h3>");
   });
 
   it("renders inquiry status as a visible chip for faster table scanning", () => {
