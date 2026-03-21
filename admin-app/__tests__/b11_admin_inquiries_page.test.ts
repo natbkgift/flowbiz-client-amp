@@ -118,6 +118,12 @@ describe("B11 admin inquiries page contract", () => {
     expect(list).toContain("<span>{primaryLabel}</span>");
   });
 
+  it("renders inquiry status as a visible chip for faster table scanning", () => {
+    const list = read("components/admin/domain/crm/InquiryListTable.tsx");
+
+    expect(list).toContain('<span className="crm-chip crm-chip-muted">{translateInquiryStatus(item.status, locale)}</span>');
+  });
+
   it("aligns the detail empty state with the current queue state", () => {
     const page = read("app/admin/inquiries/page.tsx");
     const detail = read("components/admin/domain/crm/InquiryDetailPanel.tsx");

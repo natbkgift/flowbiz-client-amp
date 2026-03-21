@@ -50,7 +50,9 @@ export function InquiryListTable({
                     </small>
                   </button>
                 </td>
-                <td>{translateInquiryStatus(item.status, locale)}</td>
+                <td>
+                  <span className="crm-chip crm-chip-muted">{translateInquiryStatus(item.status, locale)}</span>
+                </td>
                 <td>
                   <span className={`crm-chip ${item.follow_up_status ? "crm-chip-sla" : "crm-chip-muted"}`}>
                     {translateFollowUpStatus(item.follow_up_status, locale)}
