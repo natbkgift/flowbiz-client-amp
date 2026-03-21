@@ -219,9 +219,9 @@ export default function AdminInquiriesPage() {
       setTotal(body.meta.total);
       setAppliedFilters(nextFilters);
       setAppliedFilterQuery(query);
-      const existingSelectionId = selectedId && body.data.some((item) => item.id === selectedId) ? selectedId : null;
-      if (existingSelectionId) {
-        await loadDetails(existingSelectionId, activeToken);
+      const shouldKeepSelection = Boolean(selectedId && body.data.some((item) => item.id === selectedId));
+      if (shouldKeepSelection && selectedId) {
+        await loadDetails(selectedId, activeToken);
       } else {
         const nextSelectedId = body.data[0]?.id ?? null;
         setSelectedId(nextSelectedId);

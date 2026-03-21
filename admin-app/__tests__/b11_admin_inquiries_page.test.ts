@@ -96,9 +96,9 @@ describe("B11 admin inquiries page contract", () => {
     const page = read("app/admin/inquiries/page.tsx");
     const copy = read("components/admin/domain/crm/inquiries-copy.ts");
 
-    expect(page).toContain("const existingSelectionId = selectedId && body.data.some((item) => item.id === selectedId) ? selectedId : null;");
-    expect(page).toContain("if (existingSelectionId) {");
-    expect(page).toContain("await loadDetails(existingSelectionId, activeToken);");
+    expect(page).toContain("const shouldKeepSelection = Boolean(selectedId && body.data.some((item) => item.id === selectedId));");
+    expect(page).toContain("if (shouldKeepSelection && selectedId) {");
+    expect(page).toContain("await loadDetails(selectedId, activeToken);");
     expect(page).toContain("} else {");
     expect(page).toContain("const nextSelectedId = body.data[0]?.id ?? null;");
     expect(page).toContain("if (nextSelectedId) {");
