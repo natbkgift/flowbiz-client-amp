@@ -116,6 +116,23 @@ describe("B11 admin inquiries page contract", () => {
     expect(page).toContain('onClick={clearFilters}');
   });
 
+  it("separates apply vs reload based on whether filters are still dirty", () => {
+    const page = read("app/admin/inquiries/page.tsx");
+
+    expect(page).toContain('const [appliedFilterQuery, setAppliedFilterQuery] = useState(() => buildQuery(EMPTY_FILTERS));');
+    expect(page).toContain("const hasDirtyFilters = filterQuery !== appliedFilterQuery;");
+    expect(page).toContain("setAppliedFilterQuery(query);");
+    expect(page).toContain("disabled={!isAuthenticated || detailLoading || Boolean(movingInquiryId) || (!loading && !hasDirtyFilters)}");
+    expect(page).toContain("disabled={!isAuthenticated || detailLoading || Boolean(movingInquiryId) || hasDirtyFilters}");
+  });
+
+  it("disables clear when there is no active or pending filter to reset", () => {
+    const page = read("app/admin/inquiries/page.tsx");
+
+    expect(page).toContain("const hasActiveFilters = Object.values(filters).some((value) => value.trim().length > 0);");
+    expect(page).toContain("disabled={!isAuthenticated || loading || detailLoading || Boolean(movingInquiryId) || (!hasDirtyFilters && !hasActiveFilters)}");
+  });
+
   it("keeps a readable primary row label even when inquiry name is missing", () => {
     const list = read("components/admin/domain/crm/InquiryListTable.tsx");
     const detail = read("components/admin/domain/crm/InquiryDetailPanel.tsx");

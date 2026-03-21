@@ -78,6 +78,7 @@ export default function AdminInquiriesPage() {
   const [followUpNotice, setFollowUpNotice] = useState<string | null>(null);
 
   const [filters, setFilters] = useState<InquiryFilters>(EMPTY_FILTERS);
+  const [appliedFilterQuery, setAppliedFilterQuery] = useState(() => buildQuery(EMPTY_FILTERS));
   const [followUpStatus, setFollowUpStatus] = useState("pending");
   const [followUpDueAt, setFollowUpDueAt] = useState("");
   const [viewMode, setViewMode] = useState<InquiryViewMode>("table");
@@ -132,6 +133,8 @@ export default function AdminInquiriesPage() {
   const authError = authErrorCode ? authErrorMessage(t, authErrorCode) : null;
   const filterQuery = useMemo(() => buildQuery(filters), [filters]);
   const detailEmptyStateMessage = !loading && items.length === 0 ? t.emptyDetails : t.noDetails;
+  const hasDirtyFilters = filterQuery !== appliedFilterQuery;
+  const hasActiveFilters = Object.values(filters).some((value) => value.trim().length > 0);
 
   function updateFilter<Key extends keyof InquiryFilters>(key: Key, value: InquiryFilters[Key]) {
     setFilters((current) => ({ ...current, [key]: value }));
@@ -155,6 +158,7 @@ export default function AdminInquiriesPage() {
       const body = await fetchJson<PaginatedResponse<InquiryItem>>(`/admin/inquiries?${query}`, activeToken);
       setItems(body.data);
       setTotal(body.meta.total);
+      setAppliedFilterQuery(query);
       const hasCurrentSelection = body.data.some((item) => item.id === selectedId);
       if (hasCurrentSelection && selectedId) {
         await loadDetails(selectedId, activeToken);
@@ -397,16 +401,31 @@ export default function AdminInquiriesPage() {
 
         <div className="crm-controls-toolbar" role="group" aria-label={t.filters}>
           <div className="card-actions crm-controls-toolbar__actions">
-            <button className="btn" type="button" onClick={() => void loadList()} disabled={!isAuthenticated || detailLoading || Boolean(movingInquiryId)}>
+            <button
+              className="btn"
+              type="button"
+              onClick={() => void loadList()}
+              disabled={!isAuthenticated || detailLoading || Boolean(movingInquiryId) || (!loading && !hasDirtyFilters)}
+            >
               {loading ? t.loading : t.apply}
             </button>
-            <button className="btn btn-secondary" type="button" onClick={() => void loadList()} disabled={!isAuthenticated || detailLoading || Boolean(movingInquiryId)}>
+            <button
+              className="btn btn-secondary"
+              type="button"
+              onClick={() => void loadList()}
+              disabled={!isAuthenticated || detailLoading || Boolean(movingInquiryId) || hasDirtyFilters}
+            >
               {t.reload}
             </button>
             <button className="btn btn-secondary" type="button" onClick={() => void exportCsv()} disabled={!isAuthenticated || loading}>
               {t.exportCsv}
             </button>
-            <button className="btn btn-secondary" type="button" onClick={clearFilters} disabled={!isAuthenticated || loading || detailLoading || Boolean(movingInquiryId)}>
+            <button
+              className="btn btn-secondary"
+              type="button"
+              onClick={clearFilters}
+              disabled={!isAuthenticated || loading || detailLoading || Boolean(movingInquiryId) || (!hasDirtyFilters && !hasActiveFilters)}
+            >
               {t.clear}
             </button>
           </div>
