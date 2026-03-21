@@ -282,6 +282,12 @@ describe("B11 admin inquiries page contract", () => {
     expect(controlCenter).toContain('htmlFor="crm-login-password"');
     expect(controlCenter).toContain('autoComplete="username"');
     expect(controlCenter).toContain('autoComplete="current-password"');
+    expect(controlCenter).toContain('role="alert"');
+    expect(controlCenter).toContain('aria-live="assertive"');
+    expect(controlCenter).toContain('aria-atomic="true"');
+    expect(controlCenter).toContain('className="dashboard-control-card__helper state-empty"');
+    expect(controlCenter).toContain("<strong>{t.authRequired}</strong>");
+    expect(controlCenter).toContain("t.loginSubtitle");
     expect(page).toContain("state-empty");
     expect(page).toContain("state-loading");
     expect(page).toContain("state-error");

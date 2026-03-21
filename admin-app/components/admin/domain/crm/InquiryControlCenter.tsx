@@ -58,12 +58,20 @@ export function InquiryControlCenter({
             />
           </label>
 
-          {authError ? <div className="state-error">{authError}</div> : null}
+          {authError ? (
+            <div className="state-error" role="alert" aria-live="assertive" aria-atomic="true">
+              {authError}
+            </div>
+          ) : null}
 
           <div className="card-actions">
             <AdminButton variant="primary" icon="workspace" type="submit" disabled={authLoading}>
               {authLoading ? t.signingIn : t.signIn}
             </AdminButton>
+          </div>
+          <div className="dashboard-control-card__helper state-empty" role="status">
+            <strong>{t.authRequired}</strong>
+            <p className="locale-safe">{t.loginSubtitle}</p>
           </div>
         </form>
       ) : (

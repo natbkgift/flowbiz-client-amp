@@ -50,4 +50,17 @@ describe("admin auth form semantics", () => {
       expect(page).toContain("htmlFor=");
     }
   });
+
+  it("announces admin auth errors and keeps helper copy inside the login form", () => {
+    const dashboardForm = read("components/admin/domain/dashboard/AdminDashboardScreen.tsx");
+    const crmForm = read("components/admin/domain/crm/InquiryControlCenter.tsx");
+
+    expect(dashboardForm).toContain('role="alert"');
+    expect(crmForm).toContain('role="alert"');
+    expect(crmForm).toContain('aria-live="assertive"');
+    expect(crmForm).toContain('aria-atomic="true"');
+    expect(crmForm).toContain('className="dashboard-control-card__helper state-empty"');
+    expect(crmForm).toContain("<strong>{t.authRequired}</strong>");
+    expect(crmForm).toContain("t.loginSubtitle");
+  });
 });
