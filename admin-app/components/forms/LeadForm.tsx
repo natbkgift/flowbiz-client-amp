@@ -1,12 +1,13 @@
 'use client';
 
+import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useMemo, useState } from 'react';
 
 import { CTA } from '../../app/_lib/public-cta';
 import { en } from '../../app/_lib/i18n/en';
 import { th } from '../../app/_lib/i18n/th';
-import { localeFromPathname } from '../../app/_lib/i18n/routing';
+import { localeFromPathname, withLocale } from '../../app/_lib/i18n/routing';
 import { trackEvent } from '../../lib/analytics';
 import { isValidEmail, isValidPhone } from '../../lib/contact-validation';
 import {
@@ -154,6 +155,32 @@ export function LeadForm({
     const url = window.location.href;
     if (url.length <= 500) return url;
     return url.slice(0, 500);
+  }
+
+  function buildSuccessActions(): Array<{ href: string; label: string; external?: boolean; primary?: boolean }> {
+    const normalizedPurpose = (purpose || inquiryIntent || '').trim().toLowerCase();
+    const browseHref = withLocale(locale, normalizedPurpose === 'rent' ? '/rent' : '/buy');
+    const browseLabel =
+      locale === 'th'
+        ? normalizedPurpose === 'rent'
+          ? 'ดูรายการเช่าสำหรับขั้นตอนถัดไป'
+          : 'ดู listings ที่เหมาะต่อ'
+        : normalizedPurpose === 'rent'
+          ? 'Browse rental options'
+          : 'Browse matching listings';
+
+    return [
+      { href: browseHref, label: browseLabel, primary: true },
+      {
+        href: withLocale(locale, '/shortlist'),
+        label: locale === 'th' ? 'เปิด shortlist ของคุณ' : 'Open your shortlist',
+      },
+      {
+        href: CTA.whatsAppUrl,
+        label: locale === 'th' ? 'คุยต่อทาง WhatsApp' : 'Continue on WhatsApp',
+        external: true,
+      },
+    ];
   }
 
   function formatApiError(bodyText: string): string {
@@ -332,6 +359,8 @@ export function LeadForm({
       });
     }
   }
+
+  const successActions = buildSuccessActions();
 
   return (
     <form id={formId} className="inquiry-form" onSubmit={(e) => e.preventDefault()}>
@@ -577,6 +606,29 @@ export function LeadForm({
                 </p>
               ) : null}
               {describeResponseChannel(status.responseChannel) ? <p>{describeResponseChannel(status.responseChannel)}</p> : null}
+              <div className="mt-4 flex flex-wrap gap-3" aria-label="lead-success-actions">
+                {successActions.map((action) => {
+                  if (action.external) {
+                    return (
+                      <a
+                        key={action.label}
+                        className={action.primary ? 'btn btn-primary' : 'btn btn-secondary'}
+                        href={action.href}
+                        target="_blank"
+                        rel="noreferrer"
+                      >
+                        {action.label}
+                      </a>
+                    );
+                  }
+
+                  return (
+                    <Link key={action.label} className={action.primary ? 'btn btn-primary' : 'btn btn-secondary'} href={action.href}>
+                      {action.label}
+                    </Link>
+                  );
+                })}
+              </div>
             </div>
           ) : null}
 

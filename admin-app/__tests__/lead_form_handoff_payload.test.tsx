@@ -76,5 +76,8 @@ describe('LeadForm handoff payload', () => {
     expect(screen.getByText(/we received your request about alpha residence/i)).toBeTruthy();
     expect(screen.getByText(/side-by-side recommendation/i)).toBeTruthy();
     expect(screen.getByText(/5-second sales-layer sla/i)).toBeTruthy();
+    expect(screen.getByRole('link', { name: /browse matching listings/i })).toHaveAttribute('href', '/en/buy');
+    expect(screen.getByRole('link', { name: /open your shortlist/i })).toHaveAttribute('href', '/en/shortlist');
+    expect(screen.getByRole('link', { name: /continue on whatsapp/i })).toHaveAttribute('href', expect.stringContaining('wa.me'));
   });
 });
