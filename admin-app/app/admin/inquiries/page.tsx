@@ -365,7 +365,6 @@ export default function AdminInquiriesPage() {
       setSelected((prev) => (prev && prev.id === body.id ? body : prev));
       setMoveStatusNotice(t.moveStatusUpdated);
     } catch {
-      setMoveStatusNotice(null);
       setError(t.moveStatusError);
     } finally {
       setMovingInquiryId(null);

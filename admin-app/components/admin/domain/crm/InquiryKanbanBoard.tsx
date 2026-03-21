@@ -48,6 +48,7 @@ export function InquiryKanbanBoard({
               const primaryLabel = getInquiryDisplayLabel(item);
               const secondaryLabelParts = [item.source_page, item.intent].filter(Boolean);
               const secondaryLabel = secondaryLabelParts.length > 0 ? secondaryLabelParts.join(" · ") : "-";
+              const purposeLabel = item.purpose || "-";
               const isMoving = movingInquiryId === item.id;
               const movingStatusId = isMoving ? `crm-moving-status-${item.id}` : undefined;
 
@@ -81,10 +82,10 @@ export function InquiryKanbanBoard({
                       event.preventDefault();
                       void onMoveStatus(item.id, nextStatus);
                     }}
-                  >
+                    >
                     <span className="crm-row-title">{primaryLabel}</span>
                     <span className="crm-row-meta crm-row-meta-secondary">{secondaryLabel}</span>
-                    <span className="crm-row-meta">{item.purpose || "-"}</span>
+                    <span className="crm-row-meta">{purposeLabel}</span>
                     <span className="crm-row-meta">
                       <span className={`crm-chip ${item.follow_up_status ? "crm-chip-sla" : "crm-chip-muted"}`}>
                         {translateFollowUpStatus(item.follow_up_status, locale)}

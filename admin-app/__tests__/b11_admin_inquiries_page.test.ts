@@ -96,6 +96,7 @@ describe("B11 admin inquiries page contract", () => {
     expect(savedFilters).toContain("savedFiltersEmpty");
     expect(kanban).toContain("const secondaryLabelParts = [item.source_page, item.intent].filter(Boolean);");
     expect(kanban).toContain('const secondaryLabel = secondaryLabelParts.length > 0 ? secondaryLabelParts.join(" · ") : "-";');
+    expect(kanban).toContain('const purposeLabel = item.purpose || "-";');
     expect(kanban).toContain('className="crm-row-meta crm-row-meta-secondary"');
     expect(kanban).toContain('className="crm-row-progress" role="status" aria-live="polite"');
     expect(copy).toContain('moveStatusUpdated: "Inquiry status updated."');
