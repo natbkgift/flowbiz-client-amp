@@ -72,6 +72,7 @@ describe("B11 admin inquiries page contract", () => {
   it("supports table + kanban board with saved filters and status move wiring", () => {
     const page = read("app/admin/inquiries/page.tsx");
     const kanban = read("components/admin/domain/crm/InquiryKanbanBoard.tsx");
+    const copy = read("components/admin/domain/crm/inquiries-copy.ts");
     const savedFilters = read("components/admin/domain/crm/InquirySavedFiltersPanel.tsx");
     const utils = read("components/admin/domain/crm/inquiries-utils.ts");
 
@@ -86,10 +87,21 @@ describe("B11 admin inquiries page contract", () => {
     expect(page).toContain("loadSavedFilter");
     expect(page).toContain('const [detailLoading, setDetailLoading] = useState(false)');
     expect(page).toContain('const [movingInquiryId, setMovingInquiryId] = useState<string | null>(null)');
+    expect(page).toContain('const [moveStatusNotice, setMoveStatusNotice] = useState<string | null>(null)');
+    expect(page).toContain("setMoveStatusNotice(t.moveStatusUpdated);");
+    expect(page).toContain('{!loading && !movingInquiryId && moveStatusNotice ? <div className="state-success">{moveStatusNotice}</div> : null}');
     expect(savedFilters).toContain('id="crm-saved-filter-select"');
     expect(page).toContain('className="crm-controls-toolbar"');
     expect(savedFilters).toContain("savedFiltersHint");
     expect(savedFilters).toContain("savedFiltersEmpty");
+    expect(kanban).toContain('const EMPTY_FIELD_PLACEHOLDER = "-";');
+    expect(kanban).toContain("const secondaryLabelParts = [item.source_page, item.intent].filter(Boolean);");
+    expect(kanban).toContain('const secondaryLabel = secondaryLabelParts.length > 0 ? secondaryLabelParts.join(" · ") : EMPTY_FIELD_PLACEHOLDER;');
+    expect(kanban).toContain("const purposeLabel = item.purpose || EMPTY_FIELD_PLACEHOLDER;");
+    expect(kanban).toContain('className="crm-row-meta crm-row-meta-secondary"');
+    expect(kanban).toContain('className="crm-row-progress" role="status" aria-live="polite"');
+    expect(copy).toContain('moveStatusUpdated: "Inquiry status updated."');
+    expect(copy).toContain('moveStatusUpdated: "อัปเดตสถานะรายการแล้ว"');
   });
 
   it("auto-opens the first inquiry when the current selection is no longer in the refreshed queue", () => {
@@ -200,11 +212,14 @@ describe("B11 admin inquiries page contract", () => {
 
   it("keeps a readable primary row label even when inquiry name is missing", () => {
     const list = read("components/admin/domain/crm/InquiryListTable.tsx");
+    const kanban = read("components/admin/domain/crm/InquiryKanbanBoard.tsx");
     const detail = read("components/admin/domain/crm/InquiryDetailPanel.tsx");
     const utils = read("components/admin/domain/crm/inquiries-utils.ts");
 
     expect(list).toContain("const primaryLabel = getInquiryDisplayLabel(item);");
     expect(list).toContain("<span>{primaryLabel}</span>");
+    expect(kanban).toContain("const primaryLabel = getInquiryDisplayLabel(item);");
+    expect(kanban).toContain('<span className="crm-row-title">{primaryLabel}</span>');
     expect(detail).toContain("const summaryTitle = getInquiryDisplayLabel(selected);");
     expect(detail).toContain("<h3>{summaryTitle}</h3>");
     expect(utils).toContain("export function getInquiryDisplayLabel");
@@ -215,6 +230,20 @@ describe("B11 admin inquiries page contract", () => {
     const list = read("components/admin/domain/crm/InquiryListTable.tsx");
 
     expect(list).toContain('<span className="crm-chip crm-chip-muted">{translateInquiryStatus(item.status, locale)}</span>');
+  });
+
+  it("gives moving rows a visible disabled state in both table and kanban views", () => {
+    const list = read("components/admin/domain/crm/InquiryListTable.tsx");
+    const kanban = read("components/admin/domain/crm/InquiryKanbanBoard.tsx");
+    const styles = read("styles/admin-components.css");
+
+    expect(list).toContain("disabled={movingInquiryId === item.id}");
+    expect(kanban).toContain("const isMoving = movingInquiryId === item.id;");
+    expect(kanban).toContain("disabled={isMoving}");
+    expect(styles).toContain(".crm-row-button:disabled,");
+    expect(styles).toContain(".crm-table-select:disabled {");
+    expect(styles).toContain("cursor: not-allowed;");
+    expect(styles).toContain("color: var(--admin-text-soft);");
   });
 
   it("aligns the detail empty state with the current queue state", () => {

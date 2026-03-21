@@ -122,6 +122,7 @@ export default function AdminInquiriesPage() {
   const [savingFollowUp, setSavingFollowUp] = useState(false);
   const [followUpError, setFollowUpError] = useState<string | null>(null);
   const [followUpNotice, setFollowUpNotice] = useState<string | null>(null);
+  const [moveStatusNotice, setMoveStatusNotice] = useState<string | null>(null);
 
   const [filters, setFilters] = useState<InquiryFilters>(EMPTY_FILTERS);
   const [appliedFilters, setAppliedFilters] = useState<InquiryFilters>(EMPTY_FILTERS);
@@ -250,6 +251,7 @@ export default function AdminInquiriesPage() {
     setDetailLoading(true);
     setTimelineError(null);
     setFollowUpNotice(null);
+    setMoveStatusNotice(null);
     try {
       const [detailBody, timelineBody] = await Promise.all([
         fetchJson<InquiryItem>(`/admin/inquiries/${id}`, activeToken),
@@ -347,6 +349,7 @@ export default function AdminInquiriesPage() {
     const current = items.find((item) => item.id === inquiryId);
     if (!current || current.status === nextStatus) return;
     setMovingInquiryId(inquiryId);
+    setMoveStatusNotice(null);
     try {
       const response = await fetch(`/admin/inquiries/${inquiryId}`, {
         method: "PATCH",
@@ -360,6 +363,7 @@ export default function AdminInquiriesPage() {
       const body = (await response.json()) as InquiryItem;
       setItems((prev) => prev.map((item) => (item.id === body.id ? body : item)));
       setSelected((prev) => (prev && prev.id === body.id ? body : prev));
+      setMoveStatusNotice(t.moveStatusUpdated);
     } catch {
       setError(t.moveStatusError);
     } finally {
@@ -418,6 +422,7 @@ export default function AdminInquiriesPage() {
     setTimelineError(null);
     setFollowUpError(null);
     setFollowUpNotice(null);
+    setMoveStatusNotice(null);
   }
 
   return (
@@ -553,6 +558,7 @@ export default function AdminInquiriesPage() {
           >
             {loading ? <div className="state-loading">{`${t.loading} ${t.loadingHint}`}</div> : null}
             {!loading && movingInquiryId ? <div className="state-loading">{t.movingStatus}</div> : null}
+            {!loading && !movingInquiryId && moveStatusNotice ? <div className="state-success">{moveStatusNotice}</div> : null}
             {!loading && items.length === 0 ? <div className="state-empty">{`${t.empty} ${t.emptyHint}`}</div> : null}
             {!loading && items.length > 0 && viewMode === "table" ? (
               <InquiryListTable t={t} locale={locale} items={items} selectedId={selectedId} movingInquiryId={movingInquiryId} onSelect={loadDetails} />

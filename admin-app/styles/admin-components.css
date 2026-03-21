@@ -2652,6 +2652,33 @@
     font: inherit;
   }
 
+  .crm-row-button:disabled,
+  .crm-table-select:disabled {
+    opacity: 0.56;
+    color: var(--admin-text-soft);
+    cursor: not-allowed;
+  }
+
+  .crm-row-card.is-busy {
+    border-color: var(--admin-color-primary-100);
+    background: var(--admin-bg-card-muted);
+  }
+
+  .crm-row-meta-secondary {
+    color: var(--admin-text-soft);
+    font-size: var(--admin-font-size-xs);
+  }
+
+  .crm-row-progress {
+    margin-top: var(--admin-space-2);
+    padding: 10px 12px;
+    border: 1px dashed var(--admin-border-default);
+    border-radius: var(--admin-radius-md);
+    background: var(--admin-bg-card-muted);
+    color: var(--admin-text-muted);
+    font-size: var(--admin-font-size-xs);
+  }
+
   .crm-table thead th {
     position: sticky;
     top: 0;
