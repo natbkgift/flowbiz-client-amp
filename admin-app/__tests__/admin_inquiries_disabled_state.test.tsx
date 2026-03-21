@@ -54,7 +54,7 @@ describe("admin inquiries disabled state", () => {
       />
     );
 
-    expect(screen.getByRole("button", { name: /investment lead pending/i })).toBeDisabled();
+    expect(screen.getByRole("button", { name: /jane@example\.com investment lead pending/i })).toBeDisabled();
     expect(screen.getByRole("combobox", { name: /status/i })).toBeDisabled();
   });
 });

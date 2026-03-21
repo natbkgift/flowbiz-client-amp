@@ -200,11 +200,14 @@ describe("B11 admin inquiries page contract", () => {
 
   it("keeps a readable primary row label even when inquiry name is missing", () => {
     const list = read("components/admin/domain/crm/InquiryListTable.tsx");
+    const kanban = read("components/admin/domain/crm/InquiryKanbanBoard.tsx");
     const detail = read("components/admin/domain/crm/InquiryDetailPanel.tsx");
     const utils = read("components/admin/domain/crm/inquiries-utils.ts");
 
     expect(list).toContain("const primaryLabel = getInquiryDisplayLabel(item);");
     expect(list).toContain("<span>{primaryLabel}</span>");
+    expect(kanban).toContain("const primaryLabel = getInquiryDisplayLabel(item);");
+    expect(kanban).toContain('<span className="crm-row-title">{primaryLabel}</span>');
     expect(detail).toContain("const summaryTitle = getInquiryDisplayLabel(selected);");
     expect(detail).toContain("<h3>{summaryTitle}</h3>");
     expect(utils).toContain("export function getInquiryDisplayLabel");
