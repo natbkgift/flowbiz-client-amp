@@ -56,13 +56,14 @@ vi.mock('@/app/_lib/public-api-server', async () => {
 
 describe('shortlist entry surfaces', () => {
   it('compare exposes a shortlist-ready inventory link when comparison has not started', async () => {
-    render(
+    const { container } = render(
       await ComparePage({
         params: Promise.resolve({ locale: 'en' }),
         searchParams: Promise.resolve({}),
       }),
     );
 
+    expect(container.querySelector('#compare-readiness-pack')).not.toBeNull();
     expect(screen.getByRole('link', { name: /browse shortlist-ready listings/i }).getAttribute('href')).toBe('/en/buy');
   });
 

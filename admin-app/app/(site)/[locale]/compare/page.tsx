@@ -205,6 +205,46 @@ function buildDecisionSupportSummary(input: {
   ];
 }
 
+function buildCompareReadinessLines(input: {
+  locale: 'en' | 'th';
+  investorContextPresent: boolean;
+  briefFacts: string[];
+}): { verified: string[]; next: string[]; handoff: string[] } {
+  const verified = input.locale === 'th'
+    ? [
+        'หน้า compare นี้จะเริ่มมีน้ำหนักเมื่อมีอย่างน้อย 2 โครงการในเฟรมเดียวกัน',
+        'เราใช้หน้าเดิมเพื่ออ่านความต่างเชิงทำเล, snapshot, และ risk side by side ไม่ใช่เพื่อสรุปว่าโครงการไหนชนะทันที',
+      ]
+    : [
+        'This compare route becomes decision-useful once at least 2 projects are in the same frame.',
+        'The goal is to read location, snapshot, and risk differences side by side before a human review, not to declare an instant winner.',
+      ];
+
+  const next = input.locale === 'th'
+    ? [
+        'ถ้ายังไม่มีตัวเลือกพอ ให้เริ่มจาก Smart Finder เพื่อจัดกรอบ intent ก่อน แล้วค่อยกลับมา compare',
+        'ถ้ามี shortlist อยู่แล้ว ให้เลือกโครงการที่น่าเข้าสู่รอบตัดสินใจจริง 2-3 ตัวเลือก',
+      ]
+    : [
+        'If you do not yet have enough options, use Smart Finder to shape the intent first and then return to compare.',
+        'If you already have a shortlist, bring forward the 2-3 projects that deserve a real decision round.',
+      ];
+
+  const handoffBase = input.investorContextPresent && input.briefFacts.length
+    ? input.briefFacts
+    : [
+        input.locale === 'th'
+          ? 'ยังไม่มี investment brief แนบมากับหน้านี้ ดังนั้น step ที่คุ้มที่สุดตอนนี้คือคัดตัวเลือกให้พอสำหรับการเทียบ'
+          : 'No investment brief is attached to this page yet, so the highest-value next move is to assemble enough candidates for a real comparison.',
+      ];
+
+  return {
+    verified,
+    next,
+    handoff: handoffBase,
+  };
+}
+
 export default async function ComparePage(
   props: {
     params: Promise<{ locale: string }>;
@@ -245,10 +285,15 @@ export default async function ComparePage(
       ? `${locale === 'th' ? 'ระยะเวลาคืนทุน' : 'Payback'}: ${investorContext.paybackYears.toFixed(1)} ${locale === 'th' ? 'ปี' : 'years'}`
       : null,
   ].filter((item): item is string => Boolean(item));
+  const readinessLines = buildCompareReadinessLines({
+    locale,
+    investorContextPresent,
+    briefFacts,
+  });
 
   if (ids.length < 2) {
     return (
-      <main id="main-content">
+      <main id="main-content" className="decision-page decision-page--compare decision-page--confidence">
         <PublicAdvisoryHero
           eyebrow={dict.advisory.heroEyebrow}
           title={dict.compare.title}
@@ -312,8 +357,52 @@ export default async function ComparePage(
 
         <section className="section">
           <Container>
+            <div id="compare-readiness-pack" className="signal-grid signal-grid--three-up decision-pack mb-4">
+              <section className="authority-card reveal">
+                <h2 className="card-title">{locale === 'th' ? 'เมื่อไรหน้า compare จะเริ่มคุ้มค่า' : 'When compare becomes useful'}</h2>
+                <p className="card-subtitle">
+                  {locale === 'th'
+                    ? 'เริ่มจากสิ่งที่ยืนยันได้ก่อน เพื่อไม่ให้ compare กลายเป็นหน้าที่มีแต่ตารางเปล่า'
+                    : 'Start from the conditions that make this route decision-useful instead of opening an empty table.'}
+                </p>
+                <ul className="bullet-list mt-3">
+                  {readinessLines.verified.map((line) => (
+                    <li key={line}>{line}</li>
+                  ))}
+                </ul>
+              </section>
+
+              <section className="authority-card reveal">
+                <h2 className="card-title">{locale === 'th' ? 'ควรทำอะไรก่อน' : 'Best next move first'}</h2>
+                <p className="card-subtitle">
+                  {locale === 'th'
+                    ? 'หน้าถัดไปขึ้นกับว่าคุณยังอยู่ใน discovery หรือเริ่มมีตัวเลือกจริงแล้ว'
+                    : 'The right next step depends on whether you are still discovering options or already narrowing real candidates.'}
+                </p>
+                <ul className="bullet-list mt-3">
+                  {readinessLines.next.map((line) => (
+                    <li key={line}>{line}</li>
+                  ))}
+                </ul>
+              </section>
+
+              <section className="authority-card reveal">
+                <h2 className="card-title">{locale === 'th' ? 'บริบทที่จะถูกพกต่อไป' : 'Context that carries forward'}</h2>
+                <p className="card-subtitle">
+                  {locale === 'th'
+                    ? 'เมื่อคุณมี brief จาก calculator หรือ intent ชัดขึ้น ระบบจะพกข้อมูลนี้ต่อไปยัง shortlist และ advisor handoff'
+                    : 'Calculator or buyer-intent context can travel forward into shortlist review and advisor handoff once it exists.'}
+                </p>
+                <ul className="bullet-list mt-3">
+                  {readinessLines.handoff.map((line) => (
+                    <li key={line}>{line}</li>
+                  ))}
+                </ul>
+              </section>
+            </div>
+
             {investorContextPresent ? (
-              <div className="card reveal mb-4">
+              <div className="authority-card reveal compare-flow-card mb-4">
                 <h2 className="card-title">{locale === 'th' ? 'Investment brief ที่ส่งมาจาก calculator' : 'Investment brief carried from calculator'}</h2>
                 <p className="card-subtitle">
                   {locale === 'th'
@@ -363,23 +452,18 @@ export default async function ComparePage(
               </div>
             ) : null}
 
-            <div className="card reveal">
-              <h2 className="card-title">{dict.compare.getStarted}</h2>
-              <p className="card-subtitle">
-                {dict.compare.getStartedDesc}
-              </p>
-              <div className="cta-row">
-                <Link className="btn btn-cta" href={withLocale(locale, '/smart-finder')}>
-                  {dict.compare.goToSmartFinder}
-                </Link>
-                <Link className="btn btn-secondary" href={withLocale(locale, '/projects')}>
-                  {dict.compare.browseProjects}
-                </Link>
+            {investorContextPresent ? null : (
+              <div className="cta-strip compare-empty-followup reveal">
+                <div className="cta-strip__text">
+                  {locale === 'th'
+                    ? 'ถ้ายังอยากดู inventory ก่อน compare ให้ไปที่ browse listings แล้วค่อยกลับมาเมื่อมีอย่างน้อย 2 โครงการในเฟรมเดียวกัน'
+                    : 'If you want to inspect live inventory before comparing, browse listings first and return once at least 2 projects belong in the same frame.'}
+                </div>
                 <Link className="btn btn-tertiary" href={withLocale(locale, '/buy')}>
                   {locale === 'th' ? 'ดู listings ที่ save เข้า shortlist ได้' : 'Browse shortlist-ready listings'}
                 </Link>
               </div>
-            </div>
+            )}
           </Container>
         </section>
       </main>
@@ -406,7 +490,7 @@ export default async function ComparePage(
   });
 
   return (
-    <main id="main-content">
+    <main id="main-content" className="decision-page decision-page--compare decision-page--confidence">
       <PublicAdvisoryHero
         eyebrow={dict.advisory.heroEyebrow}
         title={dict.compare.title}
@@ -477,7 +561,7 @@ export default async function ComparePage(
       <section className="section">
         <Container>
           {investorContextPresent ? (
-            <div className="card reveal mb-4">
+            <div className="authority-card reveal compare-flow-card mb-4">
               <h2 className="card-title">{locale === 'th' ? 'Investment brief ที่ใช้ประกอบการเทียบ' : 'Investment brief used in this comparison'}</h2>
               <p className="card-subtitle">
                 {locale === 'th'
@@ -500,7 +584,7 @@ export default async function ComparePage(
           ) : null}
 
           {areaComparisons.length >= 2 ? (
-            <div id="compare-area-context" className="card reveal mb-4">
+            <div id="compare-area-context" className="authority-card reveal compare-flow-card mb-4">
               <h2 className="card-title">{locale === 'th' ? 'ภาพรวมเปรียบเทียบระดับทำเล' : 'Area comparison read'}</h2>
               <p className="card-subtitle">
                 {locale === 'th'

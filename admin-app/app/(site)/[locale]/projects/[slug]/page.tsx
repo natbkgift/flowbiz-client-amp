@@ -108,6 +108,78 @@ function uniqueItems(items: Array<string | null>): string[] {
   return [...new Set(items.filter((item): item is string => Boolean(item)).map((item) => item.trim()).filter(Boolean))];
 }
 
+function hasMeaningfulCopy(value: string | null | undefined): boolean {
+  const text = String(value || '').replace(/\s+/g, ' ').trim();
+  return text.length > 0 && !/^[\-—–]+$/.test(text);
+}
+
+function buildProjectWhyConsiderLines(
+  locale: 'en' | 'th',
+  project: ProjectDetailRecord,
+  summary: string,
+  description: string,
+  hasEvaluationSnapshot: boolean,
+): string[] {
+  if (hasMeaningfulCopy(summary)) {
+    return [summary];
+  }
+
+  if (hasMeaningfulCopy(description)) {
+    return [description];
+  }
+
+  return uniqueItems([
+    project.area?.name
+      ? (locale === 'th'
+        ? `${project.name} ใช้เพื่ออ่านบริบทของทำเล ${project.area.name} ก่อนลงลึกถึงระดับยูนิตและราคา live.`
+        : `${project.name} works best as a project-first read for the ${project.area.name} context before moving into unit-level checks.`)
+      : null,
+    project.developer?.name
+      ? (locale === 'th'
+        ? `ผู้พัฒนา ${project.developer.name} เป็นสัญญาณตั้งต้นของความน่าเชื่อถือและควรอ่านคู่กับ availability ปัจจุบันของโครงการ.`
+        : `Published developer context from ${project.developer.name} gives this page credibility before you confirm live availability.`)
+      : null,
+    hasEvaluationSnapshot
+      ? (locale === 'th'
+        ? 'มี snapshot จากพื้นที่หรือโครงการเพียงพอให้ใช้ตัดสินใจว่าควรคุยต่อในรอบ advisory หรือเทียบกับทางเลือกใกล้เคียง.'
+        : 'There is enough live snapshot context to judge whether this project deserves advisor time or a side-by-side compare next.')
+      : (locale === 'th'
+        ? 'แม้ข้อมูลเชิงลึกยังไม่ครบ หน้านี้ยังช่วยบอกได้ว่าโครงการนี้ควรอยู่ต่อใน shortlist หรือควรถูกแทนด้วยตัวเลือกใกล้เคียง.'
+        : 'Even when deeper fields are still thin, this page should tell you whether the project stays on the shortlist or gets replaced by nearby options.'),
+  ]).slice(0, 3);
+}
+
+function buildProjectAvailabilityLines(
+  locale: 'en' | 'th',
+  project: ProjectDetailRecord,
+  startingPriceLabel: string | null,
+  deliveryLabel: string | null,
+): string[] {
+  return uniqueItems([
+    startingPriceLabel
+      ? (locale === 'th'
+        ? `ราคาเริ่มต้นที่เผยแพร่อยู่ตอนนี้คือ ${startingPriceLabel}`
+        : `Published starting price currently reads ${startingPriceLabel}.`)
+      : (locale === 'th'
+        ? 'ยังไม่มีราคาเริ่มต้นใน snapshot นี้ จึงควรใช้หน้านี้เพื่อเช็กว่าควรขอช่วงราคาหรือ unit mix ต่อหรือไม่'
+        : 'A starting price is not surfaced in this snapshot yet, so use this page to decide whether it is worth requesting live price bands or unit mix next.'),
+    deliveryLabel
+      ? (locale === 'th'
+        ? `กำหนดส่งมอบที่เผยแพร่คือ ${deliveryLabel}`
+        : `Published delivery timing is ${deliveryLabel}.`)
+      : (locale === 'th'
+        ? 'กำหนดส่งมอบยังไม่ถูกยืนยันในเส้นทางนี้ จึงควรเช็ก handover timing ก่อนลด shortlist ให้แคบลง'
+        : 'Delivery timing is not confirmed on this route yet, so handover timing should be checked before narrowing the shortlist.'),
+    project.unit_count
+      ? (locale === 'th'
+        ? `มีข้อมูลจำนวนยูนิต ${project.unit_count.toLocaleString()} ยูนิตให้ใช้เป็นสัญญาณเรื่องสเกลของโครงการ`
+        : `Published unit count of ${project.unit_count.toLocaleString()} helps frame the scale of the project.`)
+      : (locale === 'th'
+        ? 'ข้อมูล unit mix ยังไม่ครบใน route นี้ จึงควรใช้บริบทของทำเลและผู้พัฒนาเป็นตัวกรองก่อนเช็ก inventory live'
+        : 'Unit-mix detail is still thin on this route, so use the location and developer context as the filter before checking live inventory.'),
+  ]).slice(0, 3);
+}
+
 function buildProjectDecisionCta(
   locale: 'en' | 'th',
   project: ProjectDetailRecord,
@@ -355,7 +427,7 @@ export default async function ProjectDetailPage(
               icon: 'shield',
             },
           ]}
-        primaryAction={{
+          primaryAction={{
           href: withLocaleQuery(locale, '/contact', buildLeadCaptureQuery({
             intent: 'project_shortlist',
             source: 'project_timeout',
@@ -512,6 +584,19 @@ export default async function ProjectDetailPage(
       return containsContext(titleText, project.name) || containsContext(titleText, project.area?.name) || containsContext(excerptText, project.area?.name);
     })
     .slice(0, 2);
+  const whyConsiderLines = buildProjectWhyConsiderLines(
+    locale,
+    project,
+    summary,
+    description,
+    hasEvaluationSnapshot,
+  );
+  const availabilityLines = buildProjectAvailabilityLines(
+    locale,
+    project,
+    startingPriceLabel,
+    deliveryLabel,
+  );
 
   const jsonLd = JSON.stringify(
     [
@@ -558,7 +643,7 @@ export default async function ProjectDetailPage(
   );
 
   return (
-    <main className="section" id="main-content">
+    <main className="section decision-page decision-page--project decision-page--confidence" id="main-content">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLd }} />
       <PublicAdvisoryHero
         eyebrow={dict.advisory.heroEyebrow}
@@ -647,6 +732,56 @@ export default async function ProjectDetailPage(
       <Container>
         <div className="detail-layout advisory-detail-layout mt-6">
           <div className="detail-stack">
+            <section id="project-confidence-pack" className="signal-grid signal-grid--three-up reveal decision-pack">
+              <div className="authority-card">
+                <h2 className="card-title">{locale === 'th' ? 'ยืนยันได้ในหน้านี้' : 'Verified on this page'}</h2>
+                <p className="card-subtitle">
+                  {locale === 'th'
+                    ? 'เริ่มจากข้อเท็จจริงที่ยืนยันได้ก่อน แล้วค่อยอ่านส่วนที่ยังต้องเช็กเพิ่ม'
+                    : 'Start with the facts that are already visible here before moving into what still needs confirmation.'}
+                </p>
+                <div className="insight-list mt-3">
+                  {verifiedReviewSignals.map((item) => (
+                    <div key={item} className="insight-list__item">
+                      <span className="insight-list__body">{item}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="authority-card">
+                <h2 className="card-title">{locale === 'th' ? 'ราคาและ availability context' : 'Pricing and availability context'}</h2>
+                <p className="card-subtitle">
+                  {locale === 'th'
+                    ? 'ส่วนนี้บอกว่ามีอะไรยืนยันได้แล้ว และอะไรควรเช็กต่อก่อนคุยระดับยูนิต'
+                    : 'This block shows what is already surfaced and what still needs checking before you move into unit-level review.'}
+                </p>
+                <div className="insight-list mt-3">
+                  {availabilityLines.map((item) => (
+                    <div key={item} className="insight-list__item">
+                      <span className="insight-list__body">{item}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="authority-card">
+                <h2 className="card-title">{locale === 'th' ? 'เหตุผลที่ควรพิจารณาโครงการนี้' : 'Why this project is worth considering'}</h2>
+                <p className="card-subtitle">
+                  {locale === 'th'
+                    ? 'แม้ข้อมูลบางส่วนยังบาง หน้านี้ควรช่วยบอกได้ว่าเหตุใดโครงการนี้ยังควรอยู่ใน shortlist'
+                    : 'Even when some fields are still thin, this page should explain why the project still deserves shortlist attention.'}
+                </p>
+                <div className="insight-list mt-3">
+                  {whyConsiderLines.map((item) => (
+                    <div key={item} className="insight-list__item">
+                      <span className="insight-list__body">{item}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </section>
+
             <section id="project-brief-section" className="authority-card reveal">
               <div className="section-header">
                 <h2 className="section-title section-title--sm">{locale === 'th' ? 'สรุปโครงการเพื่อใช้คัดรายการ' : 'Project read for shortlist'}</h2>
