@@ -102,6 +102,15 @@ describe("B11 admin inquiries page contract", () => {
     expect(page).toContain('const activeToken = (tokenOverride ?? authToken).trim();');
   });
 
+  it("clears filters and immediately reloads the default queue", () => {
+    const page = read("app/admin/inquiries/page.tsx");
+
+    expect(page).toContain("function clearFilters()");
+    expect(page).toContain("setFilters(EMPTY_FILTERS);");
+    expect(page).toContain("void loadListWithFilters(EMPTY_FILTERS);");
+    expect(page).toContain('onClick={clearFilters}');
+  });
+
   it("keeps accessibility and runtime states in EN/TH copy", () => {
     const page = read("app/admin/inquiries/page.tsx");
     const controlCenter = read("components/admin/domain/crm/InquiryControlCenter.tsx");

@@ -267,6 +267,11 @@ export default function AdminInquiriesPage() {
     void loadListWithFilters(selectedFilter.filters);
   }
 
+  function clearFilters() {
+    setFilters(EMPTY_FILTERS);
+    void loadListWithFilters(EMPTY_FILTERS);
+  }
+
   async function moveInquiryStatus(inquiryId: string, nextStatus: string) {
     const activeToken = authToken.trim();
     if (!activeToken) {
@@ -399,7 +404,7 @@ export default function AdminInquiriesPage() {
             <button className="btn btn-secondary" type="button" onClick={() => void exportCsv()} disabled={!isAuthenticated || loading}>
               {t.exportCsv}
             </button>
-            <button className="btn btn-secondary" type="button" onClick={() => setFilters(EMPTY_FILTERS)} disabled={!isAuthenticated || loading || detailLoading || Boolean(movingInquiryId)}>
+            <button className="btn btn-secondary" type="button" onClick={clearFilters} disabled={!isAuthenticated || loading || detailLoading || Boolean(movingInquiryId)}>
               {t.clear}
             </button>
           </div>
