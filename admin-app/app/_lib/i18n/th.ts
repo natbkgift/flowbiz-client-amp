@@ -595,6 +595,8 @@ export const th: Dictionary = {
     sellerForm: {
       headingDefault: 'ขายกับเรา',
       description: 'ส่งรายละเอียดอสังหาฯ เพื่อให้ทีมเราตรวจสอบ',
+      trustIntro: 'advisor ในพื้นที่จะช่วยดูเรื่องราคา การวางตำแหน่ง และขั้นตอนถัดไปที่เหมาะที่สุดก่อนติดต่อกลับ',
+      responsePromise: 'คาดว่าจะมีทีมติดต่อกลับภายใน 24 ชั่วโมงพร้อมข้อเสนอแนะที่นำไปใช้ต่อได้ทันที',
       propertyTypePlaceholder: 'ประเภทอสังหาฯ (คอนโด / บ้าน / ที่ดิน)',
       locationPlaceholder: 'ทำเล',
       askingPricePlaceholder: 'ราคาที่ต้องการ (บาท)',

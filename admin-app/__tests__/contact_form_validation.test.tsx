@@ -32,6 +32,9 @@ describe('contact form validation', () => {
 
     render(<SellerForm />);
 
+    expect(screen.getByText(/local advisor will review pricing/i)).toBeInTheDocument();
+    expect(screen.getByText(/follow-up within 24 hours/i)).toBeInTheDocument();
+
     fireEvent.focus(screen.getByPlaceholderText('Your name'));
     fireEvent.change(screen.getByPlaceholderText('Your name'), { target: { value: 'Nina' } });
     fireEvent.change(screen.getByLabelText('Phone (optional if email provided)'), { target: { value: '12345' } });

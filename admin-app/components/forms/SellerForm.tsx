@@ -167,6 +167,10 @@ export function SellerForm({ heading }: SellerFormProps) {
     <form className="inquiry-form" onSubmit={(e) => e.preventDefault()}>
       <h3>{heading ?? dict.common.sellerForm.headingDefault}</h3>
       <p className="form-desc">{dict.common.sellerForm.description}</p>
+      <div className="mb-4 rounded-2xl border border-[rgba(10,77,140,0.12)] bg-[rgba(10,77,140,0.04)] px-4 py-3 text-sm text-[var(--color-text-secondary)]">
+        <p className="mb-1 font-medium text-[var(--color-text)]">{dict.common.sellerForm.trustIntro}</p>
+        <p className="mb-0">{dict.common.sellerForm.responsePromise}</p>
+      </div>
 
       <div
         className="form-grid"
@@ -310,7 +314,7 @@ export function SellerForm({ heading }: SellerFormProps) {
         <div id="seller-form-status" aria-live="assertive" aria-atomic="true">
           {status.state === 'success' ? (
             <p className="form-success" role="status">
-              {dict.common.sellerForm.success}{status.id ? ` (id: ${status.id})` : ''}
+              {dict.common.sellerForm.success}{status.id ? ` (id: ${status.id})` : ''} {dict.common.sellerForm.responsePromise}
             </p>
           ) : null}
 

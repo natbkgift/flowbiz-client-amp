@@ -817,6 +817,7 @@ export default async function ProjectDetailPage(
             <LeadForm
               locale={locale}
               heading={projectDecisionCta.leadHeading}
+              defaultPurpose={hasInvestmentView ? 'invest' : 'buy'}
               defaultPreferredArea={project.area?.name ?? undefined}
               defaultMessage={projectDecisionCta.leadMessage}
               inquiryIntent={projectDecisionCta.inquiryIntent}

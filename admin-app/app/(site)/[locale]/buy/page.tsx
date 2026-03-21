@@ -324,7 +324,7 @@ export default async function BuyPage(props: { params: Promise<{ locale: string 
               <p className="cta-body">{dict.buy.advisoryCtaBody}</p>
             </div>
             <div className="cta-panel__form">
-              <LeadForm defaultMessage={dict.buy.advisoryCtaBody} />
+              <LeadForm defaultPurpose="buy" defaultMessage={dict.buy.advisoryCtaBody} />
             </div>
           </div>
         </Container>

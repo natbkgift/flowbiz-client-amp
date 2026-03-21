@@ -99,6 +99,7 @@ describe('property detail shell', () => {
     expect(container.querySelector('#property-next-tools')).not.toBeNull();
     expect(container.querySelector('#property-direct-channels')).not.toBeNull();
     expect(container.querySelector('#property-lead-form')).not.toBeNull();
+    expect((container.querySelector('#lead-purpose') as HTMLSelectElement | null)?.value).toBe('buy');
   });
 
   it('keeps Thai property detail copy free from listing and compare drift', async () => {

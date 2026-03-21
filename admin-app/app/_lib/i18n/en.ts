@@ -602,6 +602,8 @@ export const en: Dictionary = {
     sellerForm: {
       headingDefault: 'Sell with us',
       description: 'Submit your property details for review by our team.',
+      trustIntro: 'A local advisor will review pricing, positioning, and the cleanest next step before coming back to you.',
+      responsePromise: 'Expect a follow-up within 24 hours with a practical recommendation for your next move.',
       propertyTypePlaceholder: 'Property type (condo / house / land)',
       locationPlaceholder: 'Location',
       askingPricePlaceholder: 'Asking price (THB)',
