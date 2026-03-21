@@ -96,9 +96,9 @@ describe("B11 admin inquiries page contract", () => {
     const page = read("app/admin/inquiries/page.tsx");
     const copy = read("components/admin/domain/crm/inquiries-copy.ts");
 
-    expect(page).toContain("const selectedIdToRefresh = selectedId && body.data.some((item) => item.id === selectedId) ? selectedId : null;");
-    expect(page).toContain("if (selectedIdToRefresh) {");
-    expect(page).toContain("await loadDetails(selectedIdToRefresh, activeToken);");
+    expect(page).toContain("const existingSelectionId = selectedId && body.data.some((item) => item.id === selectedId) ? selectedId : null;");
+    expect(page).toContain("if (existingSelectionId) {");
+    expect(page).toContain("await loadDetails(existingSelectionId, activeToken);");
     expect(page).toContain("} else {");
     expect(page).toContain("const nextSelectedId = body.data[0]?.id ?? null;");
     expect(page).toContain("if (nextSelectedId) {");
@@ -123,6 +123,7 @@ describe("B11 admin inquiries page contract", () => {
     expect(page).toContain("const [appliedFilters, setAppliedFilters] = useState<InquiryFilters>(EMPTY_FILTERS);");
     expect(page).toContain('const [appliedFilterQuery, setAppliedFilterQuery] = useState(() => buildQuery(EMPTY_FILTERS));');
     expect(page).toContain("const hasUnappliedFilters = filterQuery !== appliedFilterQuery;");
+    expect(page).toContain("async function applyFilters(tokenOverride?: string, emailOverride?: string) {");
     expect(page).toContain("async function reloadList(tokenOverride?: string, emailOverride?: string) {");
     expect(page).toContain("await loadListWithFilters(appliedFilters, tokenOverride, emailOverride);");
     expect(page).toContain("setAppliedFilters(nextFilters);");
@@ -132,6 +133,7 @@ describe("B11 admin inquiries page contract", () => {
     expect(page).toContain("const shouldDisableReload = !isAuthenticated || detailLoading || Boolean(movingInquiryId) || hasUnappliedFilters;");
     expect(page).toContain("disabled={shouldDisableApply}");
     expect(page).toContain("disabled={shouldDisableReload}");
+    expect(page).toContain("onClick={() => void applyFilters()}");
     expect(page).toContain("onClick={() => void reloadList()}");
   });
 
@@ -168,7 +170,7 @@ describe("B11 admin inquiries page contract", () => {
 
     expect(page).toContain('translateFollowUpStatus,');
     expect(page).toContain('translateInquiryStatus,');
-    expect(page).toContain("const appliedFilterSummary = useMemo(() => buildFilterSummary(appliedFilters, t, locale), [appliedFilters, locale, t]);");
+    expect(page).toContain("const appliedFilterSummary = buildFilterSummary(appliedFilters, t, locale);");
     expect(page).toContain('<div className="crm-filter-summary" aria-live="polite">');
     expect(page).toContain('<span className="crm-filter-summary__label">{t.appliedQueue}</span>');
     expect(page).toContain('{hasUnappliedFilters ? <span className="crm-chip crm-chip-warn">{t.draftChangesPending}</span> : null}');

@@ -183,7 +183,7 @@ export default function AdminInquiriesPage() {
   const hasUnappliedFilters = filterQuery !== appliedFilterQuery;
   const hasActiveFilters = Object.values(filters).some((value) => value.trim().length > 0);
   const hasAppliedFilters = Object.values(appliedFilters).some((value) => value.trim().length > 0);
-  const appliedFilterSummary = useMemo(() => buildFilterSummary(appliedFilters, t, locale), [appliedFilters, locale, t]);
+  const appliedFilterSummary = buildFilterSummary(appliedFilters, t, locale);
   const hasNoFiltersToReset = !hasUnappliedFilters && !hasActiveFilters;
   const shouldDisableApply = !isAuthenticated || loading || detailLoading || Boolean(movingInquiryId) || !hasUnappliedFilters;
   const shouldDisableReload = !isAuthenticated || detailLoading || Boolean(movingInquiryId) || hasUnappliedFilters;
@@ -195,7 +195,7 @@ export default function AdminInquiriesPage() {
     setFilters((current) => ({ ...current, [key]: value }));
   }
 
-  async function loadList(tokenOverride?: string, emailOverride?: string) {
+  async function applyFilters(tokenOverride?: string, emailOverride?: string) {
     await loadListWithFilters(filters, tokenOverride, emailOverride);
   }
 
@@ -219,9 +219,9 @@ export default function AdminInquiriesPage() {
       setTotal(body.meta.total);
       setAppliedFilters(nextFilters);
       setAppliedFilterQuery(query);
-      const selectedIdToRefresh = selectedId && body.data.some((item) => item.id === selectedId) ? selectedId : null;
-      if (selectedIdToRefresh) {
-        await loadDetails(selectedIdToRefresh, activeToken);
+      const existingSelectionId = selectedId && body.data.some((item) => item.id === selectedId) ? selectedId : null;
+      if (existingSelectionId) {
+        await loadDetails(existingSelectionId, activeToken);
       } else {
         const nextSelectedId = body.data[0]?.id ?? null;
         setSelectedId(nextSelectedId);
@@ -399,7 +399,7 @@ export default function AdminInquiriesPage() {
       const loginResult = await loginWithAdminSession({ email: loginEmail.trim(), password: loginPassword });
       if (!loginResult.ok) return;
       setLoginPassword("");
-      await loadList(loginResult.accessToken, loginResult.email);
+      await applyFilters(loginResult.accessToken, loginResult.email);
     } catch {
       return;
     }
@@ -464,7 +464,7 @@ export default function AdminInquiriesPage() {
             <button
               className="btn"
               type="button"
-              onClick={() => void loadList()}
+              onClick={() => void applyFilters()}
               disabled={shouldDisableApply}
             >
               {loading ? t.loading : t.apply}
