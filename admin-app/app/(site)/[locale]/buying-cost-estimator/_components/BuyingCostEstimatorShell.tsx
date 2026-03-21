@@ -93,10 +93,10 @@ function buildUnresolvedItems(
 ): string[] {
   const items = locale === 'th'
     ? [
-        'ภาษีหรือค่าใช้จ่ายที่ยังขึ้นกับข้อเท็จจริงเฉพาะเคสจะยังไม่ถูกรวมใน total',
+        'ภาษีหรือค่าใช้จ่ายที่ยังขึ้นกับข้อเท็จจริงเฉพาะเคสจะยังไม่ถูกรวมในยอดประมาณการนี้',
       ]
     : [
-        'Case-specific taxes or fees stay outside the deterministic total until the governed formula slice lands.',
+        'Case-specific taxes or fees stay outside this estimate until the transaction facts are confirmed.',
       ];
 
   if (purchaseContext === 'foreign') {
@@ -118,8 +118,8 @@ function buildUnresolvedItems(
   if (financingMode === 'financing') {
     items.push(
       locale === 'th'
-        ? 'ค่าจดจำนองหรือค่าใช้จ่ายฝั่งสินเชื่อยังไม่ถูกคำนวณจนกว่า formula contract จะเปิดใช้'
-        : 'Mortgage-registration or loan-side fees are not calculated until the formula contract is active.',
+        ? 'ค่าจดจำนองหรือค่าใช้จ่ายฝั่งสินเชื่อยังไม่ถูกรวมจนกว่าจะยืนยันเงื่อนไขสินเชื่อจริง'
+        : 'Mortgage-registration or loan-side fees stay outside this estimate until financing terms are confirmed.',
     );
   }
 
@@ -129,13 +129,13 @@ function buildUnresolvedItems(
 function getShellCopy(locale: Locale) {
   if (locale === 'th') {
     return {
-      introTitle: 'Estimator UI สำหรับผู้ซื้อที่ต้องการเห็น cash-needed picture ก่อน',
+      introTitle: 'ประมาณการค่าใช้จ่ายสำหรับผู้ซื้อที่ต้องการเห็นภาพเงินสดที่ต้องเตรียม',
       introBody:
-        'หน้าใหม่นี้เป็น owner route ของเครื่องมือคำนวณค่าโอนและค่าใช้จ่ายปิดการซื้อ โดย slice นี้เปิด form contract และ result structure ก่อนเชื่อม formula ฝั่ง server',
-      toolTitle: 'Live estimator form',
+        'ใช้หน้านี้เพื่อดูภาพรวมค่าโอน ค่าใช้จ่ายวันปิดการซื้อ และยอดเงินสดที่ควรเตรียมก่อนคุยรายละเอียดต่อกับ advisor.',
+      toolTitle: 'แบบฟอร์มประเมินค่าใช้จ่าย',
       toolLead:
-        'โครงสร้างผลลัพธ์จะแยก deterministic line items ออกจาก unresolved items อย่างชัดเจน เพื่อไม่ให้ตัวเลขดูเหมือนข้อสรุปทางกฎหมายหรือการเงิน',
-      plannedInputsTitle: 'Primary inputs',
+        'ผลลัพธ์จะแยกรายการที่ประเมินได้ชัดเจนออกจากประเด็นที่ยังต้องยืนยันเพิ่ม เพื่อให้ตัวเลขอ่านง่ายแต่ไม่เกินข้อเท็จจริง.',
+      plannedInputsTitle: 'ข้อมูลหลักที่ใช้ประเมิน',
       plannedInputs: [
         'ราคาทรัพย์',
         'purchase context',
@@ -143,23 +143,23 @@ function getShellCopy(locale: Locale) {
         'transfer split',
         'financing mode',
       ],
-      advancedTitle: 'Advanced assumptions',
-      advancedBody: 'สมมติฐานที่แก้ไขได้จะถูกแยกจากค่าใช้จ่ายภาครัฐเสมอ และเปิดใช้เป็น section รองบน mobile',
-      plannedOutputsTitle: 'Result summary structure',
+      advancedTitle: 'สมมติฐานเพิ่มเติม',
+      advancedBody: 'สมมติฐานที่ปรับได้จะถูกแยกจากค่าธรรมเนียมภาครัฐอย่างชัดเจน เพื่อให้ตรวจสอบต้นทางของตัวเลขได้ง่าย.',
+      plannedOutputsTitle: 'สิ่งที่สรุปให้ในหน้านี้',
       plannedOutputs: [
         'purchase price',
         'government fees',
         'estimated closing cost',
         'total cash needed',
       ],
-      statusTitle: 'Current slice status',
+      statusTitle: 'วิธีใช้ผลลัพธ์นี้',
       statusBody:
-        'Slice 4 ทำให้ route นี้ถือทั้ง live formula result และ shareable route state โดยยังคง contact handoff ไว้เป็น slice ถัดไปเท่านั้น.',
-      assumptionsTitle: 'Assumption discipline',
+        'หน้านี้สรุปค่าธรรมเนียมหลัก ยอดประมาณการปิดการซื้อ และรายการที่ยังต้องถามต่อ เพื่อช่วยให้คุยกับทีมได้ตรงประเด็นขึ้น.',
+      assumptionsTitle: 'วิธีอ่านประมาณการนี้',
       assumptions: [
-        'ค่าใช้จ่ายที่มี source ชัดเจนเท่านั้นที่จะถูกใส่ใน deterministic total',
-        'รายการที่ยังมี legal/commercial ambiguity จะถูกแสดงแยกเป็น unresolved items',
-        'route นี้ยังไม่แทน advisor review และยังไม่แก้ไข contact payload เดิมใน slice นี้',
+        'ค่าใช้จ่ายที่มีต้นทางชัดเจนเท่านั้นที่จะถูกรวมในยอดประมาณการหลักของหน้านี้',
+        'รายการที่ยังมีความไม่ชัดด้านกฎหมายหรือเงื่อนไขการค้า จะถูกแยกไว้ให้ถามต่อ',
+        'หน้านี้ใช้เพื่อเตรียมคำถามและบริบทก่อนคุยกับ advisor ต่อ',
       ],
       propertyPrice: 'Property price',
       purchaseContextLabel: 'Purchase context',
@@ -174,52 +174,52 @@ function getShellCopy(locale: Locale) {
       bankTransferCost: 'Bank transfer cost assumption',
       fxEstimate: 'FX estimate',
       invalidPrice: 'กรุณากรอกราคาทรัพย์เป็นตัวเลขมากกว่า 0',
-      previewStateTitle: 'Live UI preview',
-      previewReady: 'form state พร้อมสำหรับ formula slice',
-      previewPending: 'กรอกราคาทรัพย์ก่อนเพื่อเปิด deterministic preview path',
+      previewStateTitle: 'ผลประเมินล่าสุด',
+      previewReady: 'ผลประเมินพร้อมแล้วและอ้างอิงจากข้อมูลที่เลือกอยู่ตอนนี้',
+      previewPending: 'กรอกราคาทรัพย์ก่อนเพื่อดูผลประเมินเบื้องต้น',
       governmentFeesLabel: 'Government fees',
       closingCostLabel: 'Estimated closing cost',
       totalCashNeededLabel: 'Total cash needed',
-      resultPending: 'จะแสดงเมื่อ formula slice เชื่อมต่อแล้ว',
-      resultConditional: 'ขึ้นกับ purchase context และ assumptions ที่เลือก',
-      resultLive: 'UI นี้อัปเดตทันที แต่ total จริงยังต้องมาจาก authoritative formula',
-      resultLoading: 'กำลังอัปเดต estimate จาก authoritative formula',
+      resultPending: 'รอผลประเมินจากข้อมูลล่าสุด',
+      resultConditional: 'ผลลัพธ์ขึ้นกับ purchase context และ assumptions ที่เลือก',
+      resultLive: 'ตัวเลขจะอัปเดตตามข้อมูลที่เลือก และควรใช้คู่กับการตรวจเอกสารและเงื่อนไขจริงก่อนตัดสินใจ',
+      resultLoading: 'กำลังอัปเดตผลประเมินล่าสุด',
       resultError: 'estimate ล่าสุดโหลดไม่สำเร็จ จึงคงผลลัพธ์ก่อนหน้าไว้ถ้ามี',
       activeAssumptionsTitle: 'Applied assumptions visible in this scenario',
-      unresolvedTitle: 'Unresolved items kept outside deterministic totals',
-      lineItemsTitle: 'Deterministic line items returned by formula',
-      nextStepTitle: 'Next-step region',
+      unresolvedTitle: 'Items still outside the current estimate',
+      lineItemsTitle: 'รายการที่รวมอยู่ในประมาณการนี้',
+      nextStepTitle: 'คุยต่อจากประมาณการนี้',
       nextStepBody:
-        'หากต้องการคุยภาพรวมการซื้อก่อน formula และ handoff slice จะเสร็จ คุณยังใช้ contact route และ investment calculator เดิมได้ตามปกติ',
-      shareTitle: 'Shareable route state',
-      shareBody: 'ลิงก์นี้จะ reopen บน estimator route เดิมพร้อม applied assumptions, assumption version, disclaimer key และ unresolved items ที่ใช้อยู่ล่าสุด',
-      shareLinkLabel: 'Shareable estimator URL',
-      shareReady: 'route state ถูก sync แล้วและสามารถเปิดซ้ำบน estimator route เดิมได้',
+        'หากต้องการตรวจต่อเรื่อง quota, fee split หรือเอกสารที่ต้องใช้ คุณสามารถส่งบริบทชุดนี้ต่อให้ advisor ได้ทันที.',
+      shareTitle: 'แชร์ประมาณการนี้',
+      shareBody: 'ลิงก์นี้จะเปิดกลับมาที่หน้าประมาณการเดิมพร้อม assumptions และ unresolved items ล่าสุด',
+      shareLinkLabel: 'ลิงก์สำหรับแชร์ประมาณการ',
+      shareReady: 'ลิงก์พร้อมใช้งานและเปิดกลับมาที่ประมาณการเดิมได้',
       versionMismatchTitle: 'Assumption version review',
       versionMismatchBody: 'ลิงก์ที่เปิดอยู่มาจาก assumption version อื่น จึงยังไม่รีคำนวณอัตโนมัติภายใต้ version ปัจจุบันจนกว่าจะกดยืนยัน refresh',
       refreshAssumptionsLabel: 'Refresh under current assumptions',
-      contactLabel: 'ไปหน้า contact เดิม',
+      contactLabel: 'คุยกับ advisor เกี่ยวกับประมาณการนี้',
       calculatorLabel: 'เปิด investment calculator',
-      milestoneTitle: 'What lands next',
+      milestoneTitle: 'ประมาณการนี้ช่วยตัดสินใจอะไรได้บ้าง',
       milestones: [
-        'advisor handoff payload on the existing contact route',
-        'shared estimator state reused by the advisor transition',
-        'current contact route still remains the handoff owner',
+        'ดูภาพรวมค่าโอนและเงินสดที่ควรเตรียมก่อน shortlist',
+        'แยกค่าใช้จ่ายที่ชัดเจนออกจากประเด็นที่ยังต้องถามต่อ',
+        'ส่งต่อบริบทเดิมให้ advisor โดยไม่ต้องอธิบายใหม่ทั้งหมด',
       ],
       disclaimerTitle: 'Important note',
       disclaimerBody:
-        'ผลลัพธ์จะคำนวณจาก approved formula boundary เท่านั้น และลิงก์แชร์จะพกเฉพาะ applied state ไม่พก formatted totals หรือ hidden server state.',
+        'ผลลัพธ์นี้เป็นประมาณการจากข้อมูลที่เลือกอยู่ตอนนี้ และลิงก์แชร์จะพกเฉพาะบริบทที่จำเป็นเพื่อกลับมาอ่านหน้าชุดเดิมได้ต่อเนื่อง.',
     };
   }
 
   return {
-    introTitle: 'Estimator UI for buyers who need a cash-needed picture first',
+    introTitle: 'A buyer-focused estimate for transfer fees and cash needed',
     introBody:
-      'This route is the approved owner for transfer-fee and closing-cost estimation, and this slice now opens the live UI contract before the server-authoritative formula is connected.',
-    toolTitle: 'Live estimator form',
+      'Use this page to review transfer fees, closing costs, and the cash you may need before moving into advisor review.',
+    toolTitle: 'Cost estimate form',
     toolLead:
-      'Deterministic line items and unresolved items stay visibly separate so the output does not read like legal or financial certainty.',
-    plannedInputsTitle: 'Primary inputs',
+      'Clear line items stay separate from unresolved questions so the estimate remains useful without overstating certainty.',
+    plannedInputsTitle: 'Core inputs',
     plannedInputs: [
       'property price',
       'purchase context',
@@ -227,23 +227,23 @@ function getShellCopy(locale: Locale) {
       'transfer split',
       'financing mode',
     ],
-    advancedTitle: 'Advanced assumptions',
-    advancedBody: 'Editable assumptions remain separate from government-fee items and sit in a secondary section for mobile clarity.',
-    plannedOutputsTitle: 'Result summary structure',
+    advancedTitle: 'Optional assumptions',
+    advancedBody: 'Editable assumptions stay separate from government fees so it is always clear which figures are fixed and which still need confirmation.',
+    plannedOutputsTitle: 'What this page summarizes',
     plannedOutputs: [
       'purchase price',
       'government fees',
       'estimated closing cost',
       'total cash needed',
     ],
-    statusTitle: 'Current slice status',
+    statusTitle: 'How to use this estimate',
     statusBody:
-      'Slice 4 makes this route hold both the live formula result and the shareable route state, while advisor handoff stays in the next slice.',
-    assumptionsTitle: 'Assumption discipline',
+      'This page gives you the current fee picture, a practical cash-needed view, and the follow-up questions worth raising with an advisor.',
+    assumptionsTitle: 'How to read this estimate',
     assumptions: [
-      'Only governed fee inputs may enter the deterministic total.',
-      'Legal or commercial ambiguity stays visible as unresolved items.',
-      'This route does not replace advisor review or change the current contact payload in this slice.',
+      'Only fee inputs with a clear basis are included in the main estimate shown on this page.',
+      'Legal or commercial ambiguity stays visible as follow-up items instead of being hidden inside the total.',
+      'Use this page to prepare the advisor conversation, not to replace document or legal review.',
     ],
     propertyPrice: 'Property price',
     purchaseContextLabel: 'Purchase context',
@@ -258,41 +258,41 @@ function getShellCopy(locale: Locale) {
     bankTransferCost: 'Bank transfer cost assumption',
     fxEstimate: 'FX estimate',
     invalidPrice: 'Enter a property price greater than 0.',
-    previewStateTitle: 'Live UI preview',
-    previewReady: 'form state is ready for the formula slice',
-    previewPending: 'enter a property price to open the deterministic preview path',
+    previewStateTitle: 'Current estimate',
+    previewReady: 'The estimate is ready for the details selected above.',
+    previewPending: 'Enter a property price to see the estimate update.',
     governmentFeesLabel: 'Government fees',
     closingCostLabel: 'Estimated closing cost',
     totalCashNeededLabel: 'Total cash needed',
-    resultPending: 'Available once the formula slice is connected',
+    resultPending: 'Waiting for the current estimate.',
     resultConditional: 'Depends on the selected purchase context and assumptions',
-    resultLive: 'This UI updates immediately, but real totals still come from the authoritative formula slice.',
-    resultLoading: 'Updating estimate from the authoritative formula',
+    resultLive: 'The estimate updates with your selected inputs and should be checked against live transaction terms before you commit.',
+    resultLoading: 'Updating the latest estimate',
     resultError: 'The latest estimate request failed, so the last good result stays visible when available.',
     activeAssumptionsTitle: 'Applied assumptions visible in this scenario',
-    unresolvedTitle: 'Unresolved items kept outside deterministic totals',
-    lineItemsTitle: 'Deterministic line items returned by the formula',
-    nextStepTitle: 'Next-step region',
+    unresolvedTitle: 'Items still outside the current estimate',
+    lineItemsTitle: 'Included line items',
+    nextStepTitle: 'Talk through this estimate',
     nextStepBody:
-      'If you need to discuss the purchase context before the formula and handoff slices land, the existing contact route and investment calculator stay available unchanged.',
-    shareTitle: 'Shareable route state',
-    shareBody: 'This URL reopens on the same estimator route with the latest applied assumptions, assumption version, disclaimer key, and unresolved items.',
-    shareLinkLabel: 'Shareable estimator URL',
-    shareReady: 'Route state is in sync and can be reopened on this estimator route.',
+      'If you want to confirm quota, fee split, or document readiness, send this exact context to an advisor and continue from the same assumptions.',
+    shareTitle: 'Share this estimate',
+    shareBody: 'This URL reopens the same estimate with the current assumptions, version details, and unresolved items intact.',
+    shareLinkLabel: 'Shareable estimate URL',
+    shareReady: 'The share link is ready and reopens this same estimate view.',
     versionMismatchTitle: 'Assumption version review',
     versionMismatchBody: 'This shared link references a different assumption version, so the page will not silently recompute under the current version until you confirm a refresh.',
     refreshAssumptionsLabel: 'Refresh under current assumptions',
-    contactLabel: 'Open the current contact route',
+    contactLabel: 'Discuss this estimate with an advisor',
     calculatorLabel: 'Open investment calculator',
-    milestoneTitle: 'What lands next',
+    milestoneTitle: 'What this estimate helps you decide',
     milestones: [
-      'advisor handoff payload on the existing contact route',
-      'shared estimator state reused by the advisor transition',
-      'current contact route still remains the handoff owner',
+      'How much cash you may need before the shortlist narrows',
+      'Which fees are already clear and which still need confirmation',
+      'What context to carry into the advisor conversation without restating everything',
     ],
     disclaimerTitle: 'Important note',
     disclaimerBody:
-      'Live totals come only from the approved formula boundary, and the share URL carries applied state instead of stale formatted totals or hidden server state.',
+      'This estimate reflects the inputs currently selected on the page, and the share URL only carries the context needed to reopen the same scenario cleanly.',
   };
 }
 
@@ -716,58 +716,6 @@ export function BuyingCostEstimatorShell({ locale }: { locale: Locale }) {
         </div>
 
         <div className="page-rail-card mt-4">
-          <h2 className="card-title">{copy.lineItemsTitle}</h2>
-          <ul className="bullet-list mt-4">
-            {(estimate?.line_items ?? []).map((item) => (
-              <li key={item.key}>{`${item.label_key}: ${formatCurrency(locale, item.amount)}`}</li>
-            ))}
-            {!estimate?.line_items?.length ? <li>{copy.resultConditional}</li> : null}
-          </ul>
-        </div>
-
-        <div className="page-rail-card mt-4">
-          <h2 className="card-title">{copy.activeAssumptionsTitle}</h2>
-          <ul className="bullet-list mt-4">
-            {appliedAssumptions.map((item) => (
-              <li key={item}>{item}</li>
-            ))}
-          </ul>
-        </div>
-
-        <div className="page-rail-card mt-4">
-          <h2 className="card-title">{copy.unresolvedTitle}</h2>
-          <ul className="bullet-list mt-4">
-            {renderedUnresolvedItems.map((item) => (
-              <li key={item}>{item}</li>
-            ))}
-          </ul>
-        </div>
-
-        <div className="page-rail-card mt-4">
-          <h2 className="card-title">{copy.shareTitle}</h2>
-          <p className="card-subtitle">{copy.shareBody}</p>
-          {versionMismatch ? (
-            <div className="mt-4">
-              <p className="text-caption text-danger">{copy.versionMismatchTitle}</p>
-              <p className="text-caption mt-2">{`${copy.versionMismatchBody} (${versionMismatch.assumptionSetId} / ${versionMismatch.assumptionSetVersion})`}</p>
-              <button className="btn btn-secondary mt-4" onClick={() => setVersionMismatch(null)} type="button">
-                {copy.refreshAssumptionsLabel}
-              </button>
-            </div>
-          ) : shareUrl ? (
-            <div className="mt-4">
-              <p className="text-caption">{copy.shareReady}</p>
-              <label className="form-label mt-4">
-                {copy.shareLinkLabel}
-                <input className="form-input" readOnly value={shareUrl} />
-              </label>
-            </div>
-          ) : (
-            <p className="text-caption mt-4">{copy.resultConditional}</p>
-          )}
-        </div>
-
-        <div className="page-rail-card mt-4">
           <h2 className="card-title">{copy.nextStepTitle}</h2>
           <p className="card-subtitle">{copy.nextStepBody}</p>
           <div className="cta-row mt-4">
@@ -818,6 +766,58 @@ export function BuyingCostEstimatorShell({ locale }: { locale: Locale }) {
               {copy.calculatorLabel}
             </Link>
           </div>
+        </div>
+
+        <div className="page-rail-card mt-4">
+          <h2 className="card-title">{copy.lineItemsTitle}</h2>
+          <ul className="bullet-list mt-4">
+            {(estimate?.line_items ?? []).map((item) => (
+              <li key={item.key}>{`${item.label_key}: ${formatCurrency(locale, item.amount)}`}</li>
+            ))}
+            {!estimate?.line_items?.length ? <li>{copy.resultConditional}</li> : null}
+          </ul>
+        </div>
+
+        <div className="page-rail-card mt-4">
+          <h2 className="card-title">{copy.activeAssumptionsTitle}</h2>
+          <ul className="bullet-list mt-4">
+            {appliedAssumptions.map((item) => (
+              <li key={item}>{item}</li>
+            ))}
+          </ul>
+        </div>
+
+        <div className="page-rail-card mt-4">
+          <h2 className="card-title">{copy.unresolvedTitle}</h2>
+          <ul className="bullet-list mt-4">
+            {renderedUnresolvedItems.map((item) => (
+              <li key={item}>{item}</li>
+            ))}
+          </ul>
+        </div>
+
+        <div className="page-rail-card mt-4">
+          <h2 className="card-title">{copy.shareTitle}</h2>
+          <p className="card-subtitle">{copy.shareBody}</p>
+          {versionMismatch ? (
+            <div className="mt-4">
+              <p className="text-caption text-danger">{copy.versionMismatchTitle}</p>
+              <p className="text-caption mt-2">{`${copy.versionMismatchBody} (${versionMismatch.assumptionSetId} / ${versionMismatch.assumptionSetVersion})`}</p>
+              <button className="btn btn-secondary mt-4" onClick={() => setVersionMismatch(null)} type="button">
+                {copy.refreshAssumptionsLabel}
+              </button>
+            </div>
+          ) : shareUrl ? (
+            <div className="mt-4">
+              <p className="text-caption">{copy.shareReady}</p>
+              <label className="form-label mt-4">
+                {copy.shareLinkLabel}
+                <input className="form-input" readOnly value={shareUrl} />
+              </label>
+            </div>
+          ) : (
+            <p className="text-caption mt-4">{copy.resultConditional}</p>
+          )}
         </div>
 
         <div className="page-rail-card mt-4">

@@ -55,8 +55,8 @@ describe('buying cost estimator page shell', () => {
     );
 
     expect(screen.getByRole('heading', { name: /buying cost estimator/i })).toBeTruthy();
-    expect(screen.getByText(/this route is the approved owner for transfer-fee and closing-cost estimation/i)).toBeTruthy();
-    expect(screen.getByRole('link', { name: /open the current contact route/i }).getAttribute('href')).toBe('/en/contact');
+    expect(screen.getByText(/use this page to review transfer fees, closing costs, and the cash you may need/i)).toBeTruthy();
+    expect(screen.getByRole('link', { name: /discuss this estimate with an advisor/i }).getAttribute('href')).toBe('/en/contact');
     expect(screen.getByRole('link', { name: /open investment calculator/i }).getAttribute('href')).toBe('/en/calculator');
     await waitFor(() => {
       expect(fetchMock).toHaveBeenCalled();
@@ -73,8 +73,8 @@ describe('buying cost estimator page shell', () => {
     );
 
     expect(screen.getByRole('heading', { name: /buying cost estimator/i })).toBeTruthy();
-    expect(screen.getByText(/slice 4 ทำให้ route นี้ถือทั้ง live formula result และ shareable route state/i)).toBeTruthy();
-    expect(screen.getByRole('link', { name: /ไปหน้า contact เดิม/i }).getAttribute('href')).toBe('/th/contact');
+    expect(screen.getByText(/ใช้หน้านี้เพื่อดูภาพรวมค่าโอน ค่าใช้จ่ายวันปิดการซื้อ/i)).toBeTruthy();
+    expect(screen.getByRole('link', { name: /คุยกับ advisor เกี่ยวกับประมาณการนี้/i }).getAttribute('href')).toBe('/th/contact');
     await waitFor(() => {
       expect(fetchMock).toHaveBeenCalled();
     });
@@ -127,10 +127,10 @@ describe('buying cost estimator page shell', () => {
 
     expect(screen.getByText(/withholding_tax_review/i)).toBeTruthy();
     expect(fetchMock).toHaveBeenCalled();
-    expect(screen.getByLabelText(/shareable estimator url/i).getAttribute('value')).toContain('bc_price=7250000');
+    expect(screen.getByLabelText(/shareable estimate url/i).getAttribute('value')).toContain('bc_price=7250000');
     expect(navigationState.replaceMock).toHaveBeenCalled();
-    expect(screen.getByRole('link', { name: /open the current contact route/i }).getAttribute('href')).toContain('intent=buying_cost_review');
-    expect(screen.getByRole('link', { name: /open the current contact route/i }).getAttribute('href')).toContain('bc_total_cash_needed=7342500');
+    expect(screen.getByRole('link', { name: /discuss this estimate with an advisor/i }).getAttribute('href')).toContain('intent=buying_cost_review');
+    expect(screen.getByRole('link', { name: /discuss this estimate with an advisor/i }).getAttribute('href')).toContain('bc_total_cash_needed=7342500');
   });
 
   it('reopens approved share state from bc query parameters and blocks silent version changes', async () => {
@@ -159,7 +159,7 @@ describe('buying cost estimator page shell', () => {
 
     await waitFor(() => {
       expect(fetchMock).toHaveBeenCalled();
-      expect(screen.getByLabelText(/shareable estimator url/i).getAttribute('value')).toContain('bc_assumption_version=2026-03-15');
+      expect(screen.getByLabelText(/shareable estimate url/i).getAttribute('value')).toContain('bc_assumption_version=2026-03-15');
     });
   });
 });
