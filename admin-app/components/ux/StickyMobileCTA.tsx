@@ -9,7 +9,7 @@ import { en } from '../../app/_lib/i18n/en';
 import { th } from '../../app/_lib/i18n/th';
 import { localeFromPathname, withLocale } from '../../app/_lib/i18n/routing';
 
-const HOME_MOBILE_CTA_REVEAL_SCROLL = 320;
+const HOME_MOBILE_CTA_REVEAL_SCROLL = 160;
 
 export function StickyMobileCTA() {
   const pathname = usePathname() ?? '/';
