@@ -27,7 +27,7 @@ export function SidebarFilter({
   items: PropertyListItem[];
   isOpen: boolean;
   onClose: () => void;
-  onApply: (filtered: PropertyListItem[]) => void;
+  onApply: (filtered: PropertyListItem[], activeFilterCount: number) => void;
 }) {
   const prices = useMemo(() => items.map((p) => Number(p.price)).filter((n) => Number.isFinite(n)), [items]);
   const minPrice = prices.length ? Math.min(...prices) : 0;
@@ -92,7 +92,7 @@ export function SidebarFilter({
     setAppliedPriceMax(maxPrice);
     setAppliedBeds(resetBeds);
     setAppliedAreas(resetAreas);
-    onApply(items);
+    onApply(items, 0);
   }
 
   function apply() {
@@ -100,11 +100,13 @@ export function SidebarFilter({
       return;
     }
 
+    const activeFilterCount = Number(draftPriceMin > minPrice || draftPriceMax < maxPrice) + draftBeds.size + draftAreas.size;
+
     setAppliedPriceMin(draftPriceMin);
     setAppliedPriceMax(draftPriceMax);
     setAppliedBeds(new Set(draftBeds));
     setAppliedAreas(new Set(draftAreas));
-    onApply(draftFiltered);
+    onApply(draftFiltered, activeFilterCount);
     if (isOpen) {
       onClose();
     }
