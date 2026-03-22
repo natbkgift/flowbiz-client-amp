@@ -29,6 +29,29 @@ export default function AdminReviewQueuePage() {
         subtitle: isThai
           ? "ตรวจทานและอนุมัติบทความที่อยู่ในสถานะ in_review จากหน้าเดียว"
           : "Review and approve articles waiting in in_review state.",
+        followUpLinks: [
+          {
+            href: "/admin/blog",
+            label: isThai ? "กลับไปจัดการบทความ" : "Open article workspace",
+            description: isThai
+              ? "กลับไปแก้เนื้อหาและ metadata ของบทความที่กำลังตรวจทาน"
+              : "Return to the article editor to adjust content and metadata before approval.",
+          },
+          {
+            href: "/admin/seo",
+            label: isThai ? "ตรวจ SEO" : "Open SEO workspace",
+            description: isThai
+              ? "เช็ก redirect, schema และ broken links ก่อนอนุมัติ"
+              : "Check redirects, schema, and broken links before approving.",
+          },
+          {
+            href: "/admin/dashboard",
+            label: isThai ? "เปิดแดชบอร์ด" : "Open dashboard",
+            description: isThai
+              ? "กลับไปดู watchlist และ freshness signal ก่อนตัดสินใจ"
+              : "Review watchlist and freshness signals before making the final decision.",
+          },
+        ],
         identifierLabel: isThai ? "Slug ของบทความ" : "Article slug",
         identifierPlaceholder: "sample-blog-post",
         identifierField: "slug",

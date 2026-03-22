@@ -57,7 +57,7 @@ Success:
 ## [UX-007] Cross-surface action handoff is inconsistent
 Type: workflow continuity
 Priority: MEDIUM
-Status: OPEN
+Status: DONE
 Modules: dashboard, shared CRUD workspaces, review queue
 Success:
 - operators can move from overview signals into list, patch, or import actions with fewer dead ends
@@ -66,8 +66,26 @@ Success:
 ## [UX-008] Review and CRUD follow-on routes are still implicit
 Type: workflow continuity
 Priority: MEDIUM
-Status: OPEN
+Status: DONE
 Modules: review queue, shared CRUD workspaces, dashboard
 Success:
 - review-oriented pages expose clearer follow-on actions after list inspection or approval work
 - shared CRUD surfaces point operators back to the most relevant dashboards or queues
+
+## [UX-009] Shared CRUD success states still end in raw payloads
+Type: workflow continuity
+Priority: MEDIUM
+Status: OPEN
+Modules: shared CRUD workspaces, result panels
+Success:
+- create/patch/publish/unpublish/restore outcomes explain the recommended next verification step
+- operators can move from a successful mutation into the right queue, dashboard, or validation surface without guessing
+
+## [UX-010] Secondary CRUD workspaces still use generic routing
+Type: workflow continuity
+Priority: MEDIUM
+Status: OPEN
+Modules: taxonomy, videos, company, testimonials, users
+Success:
+- secondary CRUD pages expose route-specific follow-up destinations
+- operators can move into the right operational surface after inspecting or updating records

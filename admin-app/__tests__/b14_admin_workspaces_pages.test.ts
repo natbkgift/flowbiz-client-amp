@@ -146,12 +146,18 @@ describe("B14 admin workspace pages contract", () => {
 
   it("review queue workspace targets in_review items awaiting approval", () => {
     const page = read("app/admin/review-queue/page.tsx");
+    const panels = read("components/admin/domain/crud-workspace/AdminCrudWorkspacePanels.tsx");
     const nav = read("app/_lib/admin-nav.ts");
 
     expect(page).toContain("Editorial Review Queue");
     expect(page).toContain("defaultListQuery: \"status=in_review&limit=40\"");
     expect(page).toContain("options: [\"approved\"]");
     expect(page).toContain("/admin/content/articles");
+    expect(page).toContain('href: "/admin/blog"');
+    expect(page).toContain('href: "/admin/seo"');
+    expect(page).toContain('href: "/admin/dashboard"');
+    expect(panels).toContain("function CrudWorkspaceFollowUpLinks(");
+    expect(panels).toContain('className="admin-workspace-next-steps"');
     expect(nav).toContain("/admin/review-queue");
   });
 
@@ -160,6 +166,26 @@ describe("B14 admin workspace pages contract", () => {
     expect(page).toContain("/admin/content/articles/{id}/revisions");
     expect(page).toContain("/admin/content/articles/{id}/revisions/{revisionId}/diff");
     expect(page).toContain("/admin/content/articles/{id}/revisions/{revisionId}/restore");
+    expect(page).toContain('href: "/admin/review-queue"');
+    expect(page).toContain('href: "/admin/seo"');
+    expect(page).toContain('href: "/admin/dashboard"');
+  });
+
+  it("shared CRUD workspaces expose follow-up links for downstream publish handoffs", () => {
+    const types = read("components/admin/domain/crud-workspace/workspace-types.ts");
+    const panels = read("components/admin/domain/crud-workspace/AdminCrudWorkspacePanels.tsx");
+    const propertiesPage = read("app/admin/properties/page.tsx");
+    const projectsPage = read("app/admin/projects/page.tsx");
+
+    expect(types).toContain("followUpLinks?: ReadonlyArray");
+    expect(panels).toContain("copy.nextStepsTitle");
+    expect(panels).toContain("copy.nextStepsIdleBody");
+    expect(panels).toContain("copy.nextStepsRecordsBody");
+    expect(panels).toContain("copy.nextStepsRevisionsBody");
+    expect(propertiesPage).toContain('href: "/admin/projects"');
+    expect(propertiesPage).toContain('href: "/admin/media"');
+    expect(projectsPage).toContain('href: "/admin/properties"');
+    expect(projectsPage).toContain('href: "/admin/dashboard"');
   });
 
   it("users workspace avoids default credentials and masks password fields", () => {

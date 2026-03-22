@@ -612,6 +612,7 @@ export function AdminJsonCrudWorkspace({ config }: { config: CrudConfig }) {
 
           <div className={hasOutputSidecar ? "admin-workspace-output-grid admin-workspace-output-grid--split" : "admin-workspace-output-grid"}>
             <AdminCrudWorkspaceRecordsPanel
+              config={config}
               copy={t}
               items={items}
               hasLoadedRecords={Boolean(meta)}
@@ -622,6 +623,7 @@ export function AdminJsonCrudWorkspace({ config }: { config: CrudConfig }) {
               <div className="admin-workspace-output-sidecar">
                 <AdminCrudWorkspaceResultPanel copy={t} result={result} />
                 <AdminCrudWorkspaceRevisionsPanel
+                  config={config}
                   copy={t}
                   idBase={idBase}
                   identifier={identifier}

@@ -4,7 +4,7 @@
 FlowBiz Admin UX Refactor
 
 ## Current Phase
-Phase 4 - Cross-surface navigation and operational guidance
+Phase 5 - Review handoff and shared workspace routing
 
 ## Active Branch
 copilot/improve-admin-ux-design
@@ -36,13 +36,23 @@ PR #521 - Improve inquiry workflow and admin table discoverability
 - added imports workspace session guidance and history empty-state recovery links
 - added media workspace session guidance and empty-state recovery links
 - added SEO workspace structured empty-state guidance for overrides, redirects, schema, and broken-link reports
+- added reusable shared CRUD follow-up links in header, record actions, records empty states, and revisions empty states
+- connected review queue, blog, areas, developers, properties, and projects workspaces to their next operational destinations
+- added dashboard trend and recent-inquiry follow-on actions so operators can jump straight into CRM review flows
 - added regression coverage for inquiry, shared CRUD, dashboard, and shell contract behavior
 - added regression coverage for imports and SEO workflow guidance contracts
+- added regression coverage for shared CRUD follow-up routing and dashboard review handoff actions
 
 ## Files Changed So Far
 - admin-app/app/admin/inquiries/page.tsx
+- admin-app/app/admin/areas/page.tsx
+- admin-app/app/admin/blog/page.tsx
+- admin-app/app/admin/developers/page.tsx
 - admin-app/app/admin/imports/page.tsx
 - admin-app/app/admin/media/page.tsx
+- admin-app/app/admin/projects/page.tsx
+- admin-app/app/admin/properties/page.tsx
+- admin-app/app/admin/review-queue/page.tsx
 - admin-app/app/admin/seo/page.tsx
 - admin-app/components/admin/AdminDataTable.tsx
 - admin-app/components/admin/AdminJsonCrudWorkspace.tsx
@@ -55,6 +65,8 @@ PR #521 - Improve inquiry workflow and admin table discoverability
 - admin-app/components/admin/domain/crud-workspace/AdminCrudWorkspacePanels.tsx
 - admin-app/components/admin/domain/crud-workspace/crud-workspace-copy.ts
 - admin-app/components/admin/domain/dashboard/AdminDashboardScreen.tsx
+- admin-app/components/admin/domain/dashboard/dashboard-copy.ts
+- admin-app/components/admin/domain/crud-workspace/workspace-types.ts
 - admin-app/styles/admin-components.css
 - admin-app/__tests__/b10_admin_seo_page.test.ts
 - admin-app/__tests__/admin_data_table_integration.test.tsx
@@ -64,9 +76,10 @@ PR #521 - Improve inquiry workflow and admin table discoverability
 - admin-app/__tests__/b14_admin_workspaces_pages.test.ts
 
 ## Last Run Summary
-- expanded dashboard drill-down actions so freshness, warnings, and background-task states point directly to imports, media, and SEO workspaces
-- added stronger next-step guidance to imports, media, and SEO surfaces without changing backend contracts
-- validated the new workflow links and empty-state guidance with targeted tests plus build
+- added reusable follow-up navigation to shared CRUD so operators see related queue, dashboard, and downstream workspace links near the state that needs a decision
+- connected review queue and article/property/domain workspaces to concrete next destinations instead of leaving follow-on routing implicit
+- extended dashboard trend and recent-inquiry idle/empty states with direct CRM review actions
+- validated with targeted dashboard/workspace tests and a successful admin build
 
 ## Do Not Repeat
 - shell-only improvements
@@ -79,16 +92,18 @@ PR #521 - Improve inquiry workflow and admin table discoverability
 - already completed basic dashboard empty-state recovery actions
 - already completed dashboard drill-down links for imports, media, and SEO
 - already completed imports/media/SEO structured empty-state guidance
+- already completed shared CRUD follow-up links for review queue, blog, areas, developers, properties, and projects
+- already completed dashboard review handoff actions for trend and recent inquiries
 
 ## Known Weaknesses
-- review queue still depends heavily on shared CRUD defaults rather than review-specific next-step cues
-- shared CRUD workspaces still do not point operators back to the most relevant dashboard or queue after record inspection
-- dashboard trend and recent inquiry areas are clearer, but not all operator paths expose explicit follow-on actions after review
-- workflow handoff between list summaries, publish readiness, and approval actions can still be clearer
+- generic shared CRUD result payloads still do not summarize the recommended next move after create, patch, publish, or restore succeeds
+- taxonomy, videos, testimonials, and company workspaces still rely on generic shared CRUD routing instead of route-specific operational handoffs
+- bulk-action heavy workspaces like properties still surface strong actions, but their post-run recovery flow is still buried in the result payload
+- workflow handoff between successful mutations and the next verification step can still be clearer
 
 ## Open Workflow Blockers
-- review-oriented admin pages still need clearer follow-on actions after inspection or approval work
-- shared CRUD workspaces still need stronger round-trip navigation between queue, detail, patch, and publish flows
+- mutation success states still do not tell operators which validation or downstream workspace to open next
+- several secondary shared CRUD pages still need route-specific follow-up destinations
 
 ## Risks
 - avoid breaking shared table and shared workspace components
@@ -97,7 +112,7 @@ PR #521 - Improve inquiry workflow and admin table discoverability
 - preserve existing review and publish flows while adding navigation cues
 
 ## Preferred Expansion Areas
-- review queue workflow guidance
-- shared CRUD next-step navigation after load, patch, revision, and publish actions
-- dashboard follow-on actions for trend and recent inquiry review flows
-- publish-readiness and approval handoff clarity
+- shared CRUD result-panel next-step guidance after create, patch, publish, unpublish, and restore actions
+- route-specific follow-up links for taxonomy, videos, company, and testimonials workspaces
+- bulk-action recovery guidance for listing and user-management workflows
+- success-state handoff clarity between mutation results and validation surfaces

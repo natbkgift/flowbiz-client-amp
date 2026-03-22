@@ -121,6 +121,14 @@ const CRUD_WORKSPACE_COPY = {
     totalMetric: "total",
     recordActionsTitle: "Record actions",
     recordActionsDescription: "Select one record ID and run safe read/write actions.",
+    nextStepsTitle: "Next steps",
+    nextStepsDescription: "Jump to the related workspace that usually comes next in this workflow.",
+    nextStepsIdleBody:
+      "No record is selected yet. Load one from the list or move directly into the linked workspace that handles the next handoff.",
+    nextStepsRecordsBody:
+      "Use these linked workspaces when the current list is empty or when you need to continue the workflow outside this editor.",
+    nextStepsRevisionsBody:
+      "Open the related workspace if you need to review content state, approvals, or publish blockers before returning here.",
     getDetail: "Get detail",
     checkReadiness: "Check readiness",
     publish: "Publish",
@@ -198,6 +206,12 @@ const CRUD_WORKSPACE_COPY = {
     totalMetric: "ทั้งหมด",
     recordActionsTitle: "คำสั่งต่อรายการ",
     recordActionsDescription: "เลือกรหัสรายการหนึ่งรายการ แล้วสั่งอ่านหรือแก้ไขอย่างปลอดภัย",
+    nextStepsTitle: "ขั้นตอนถัดไป",
+    nextStepsDescription: "ข้ามไปยัง workspace ที่มักเป็นปลายทางถัดไปของ workflow นี้ได้ทันที",
+    nextStepsIdleBody: "ยังไม่ได้เลือกรายการ โหลดจากตารางก่อน หรือข้ามไปยัง workspace ที่รับช่วงงานถัดไปได้เลย",
+    nextStepsRecordsBody: "ใช้ลิงก์เหล่านี้เมื่อรายการปัจจุบันว่าง หรือเมื่อจำเป็นต้องไปทำงานต่อใน workspace อื่น",
+    nextStepsRevisionsBody:
+      "เปิด workspace ที่เกี่ยวข้องเมื่อต้องรีวิวสถานะคอนเทนต์ การอนุมัติ หรือ blocker ก่อนกลับมาทำงานต่อที่นี่",
     getDetail: "ดูรายละเอียด",
     checkReadiness: "ตรวจความพร้อม",
     publish: "เผยแพร่",

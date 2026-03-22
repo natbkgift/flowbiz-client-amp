@@ -1,6 +1,7 @@
 import { type FormEvent, type KeyboardEvent } from "react";
+import Link from "next/link";
 
-import { detectAdminLocale } from "@/app/_lib/admin-i18n";
+import { detectAdminLocale, withAdminLocale } from "@/app/_lib/admin-i18n";
 import { toPrettyJson } from "@/app/_lib/admin-auth";
 import { AdminDataTable, type AdminDataTableColumn } from "@/components/admin/AdminDataTable";
 import {
@@ -13,6 +14,7 @@ import {
   AdminTabSwitch,
   LogCard,
   MetricCard,
+  adminButtonClassName,
 } from "@/components/admin/AdminPrimitives";
 import { AdminIcon } from "@/components/admin/AdminIcons";
 import { AdminFormPrimitiveInput } from "@/components/admin/AdminFormPrimitives";
@@ -31,6 +33,41 @@ function getCrudPanelsLocale() {
 
 function localizeCrudPanelsText(en: string, th: string) {
   return getCrudPanelsLocale() === "th" ? th : en;
+}
+
+function CrudWorkspaceFollowUpLinks({
+  title,
+  description,
+  links,
+}: {
+  title: string;
+  description?: string;
+  links: NonNullable<CrudConfig["followUpLinks"]>;
+}) {
+  const locale = getCrudPanelsLocale();
+
+  if (links.length === 0) return null;
+
+  return (
+    <div className="admin-workspace-next-steps" role="status">
+      <div className="admin-workspace-next-steps__copy">
+        <strong>{title}</strong>
+        {description ? <p className="locale-safe">{description}</p> : null}
+      </div>
+      <div className="admin-workspace-next-steps__actions">
+        {links.map((link) => (
+          <Link
+            key={`${link.href}:${link.label}`}
+            className={adminButtonClassName({ variant: "secondary", size: "sm" })}
+            href={withAdminLocale(link.href, locale)}
+            title={link.description}
+          >
+            {link.label}
+          </Link>
+        ))}
+      </div>
+    </div>
+  );
 }
 
 function LocalizedPrimitiveFields({
@@ -177,6 +214,11 @@ export function AdminCrudWorkspaceHeader({
             </AdminBadge>
           ) : null}
         </>
+      }
+      actions={
+        config.followUpLinks?.length ? (
+          <CrudWorkspaceFollowUpLinks title={copy.nextStepsTitle} description={copy.nextStepsDescription} links={config.followUpLinks} />
+        ) : null
       }
     />
   );
@@ -406,6 +448,9 @@ export function AdminCrudWorkspaceRecordActionsPanel({
           </AdminButton>
         ) : null}
       </div>
+      {!identifier.trim() && config.followUpLinks?.length ? (
+        <CrudWorkspaceFollowUpLinks title={copy.nextStepsTitle} description={copy.nextStepsIdleBody} links={config.followUpLinks} />
+      ) : null}
     </AdminSectionCard>
   );
 }
@@ -675,12 +720,14 @@ export function AdminCrudWorkspaceBulkActionsPanel({
 }
 
 export function AdminCrudWorkspaceRecordsPanel({
+  config,
   copy,
   items,
   hasLoadedRecords,
   tableColumns,
   pickIdentifierFromRow,
 }: {
+  config: CrudConfig;
   copy: CrudWorkspaceCopy;
   items: unknown[];
   hasLoadedRecords: boolean;
@@ -710,6 +757,9 @@ export function AdminCrudWorkspaceRecordsPanel({
                   "เริ่มจากแผงคิวรีรายการ แล้วกดโหลดข้อมูลก่อนใช้คำสั่งต่อรายการ การแก้ไข หรือการอัปเดตแบบกลุ่ม"
                 )}
           </p>
+          {config.followUpLinks?.length ? (
+            <CrudWorkspaceFollowUpLinks title={copy.nextStepsTitle} description={copy.nextStepsRecordsBody} links={config.followUpLinks} />
+          ) : null}
         </div>
       ) : (
         <AdminTable caption={copy.recordsTitle}>
@@ -743,6 +793,7 @@ export function AdminCrudWorkspaceResultPanel({ copy, result }: { copy: CrudWork
 }
 
 export function AdminCrudWorkspaceRevisionsPanel({
+  config,
   copy,
   idBase,
   identifier,
@@ -753,6 +804,7 @@ export function AdminCrudWorkspaceRevisionsPanel({
   onShowDiff,
   onRestoreRevision,
 }: {
+  config: CrudConfig;
   copy: CrudWorkspaceCopy;
   idBase: string;
   identifier: string;
@@ -775,7 +827,12 @@ export function AdminCrudWorkspaceRevisionsPanel({
       titleTag="h2"
     >
       {revisions.length === 0 ? (
-        <div className="state-empty">{copy.revisionsEmpty}</div>
+        <div className="state-empty admin-workspace-empty-state" role="status">
+          <strong>{copy.revisionsEmpty}</strong>
+          {config.followUpLinks?.length ? (
+            <CrudWorkspaceFollowUpLinks title={copy.nextStepsTitle} description={copy.nextStepsRevisionsBody} links={config.followUpLinks} />
+          ) : null}
+        </div>
       ) : (
         <>
           <label className="field" htmlFor={`${idBase}-revision-id`}>

@@ -925,12 +925,21 @@ export function AdminDashboardScreen({
         value: chartPeriod === "7d" ? t.trendPeriod7d : t.trendPeriod30d,
         detail: t.trendHint,
         updatedAt: latestOperationalLabel,
-        action: renderRefreshButton(),
+        action: renderActionGroup([
+          renderRefreshButton(t.comparePeriods),
+          renderWorkspaceLink("/admin/inquiries", t.trendReviewAction),
+        ]),
       });
     }
 
     if (!hasTrendData(trendPoints)) {
-      return <DashboardSectionState tone="empty" title={t.trendEmptyTitle} body={t.trendEmptyBody} compact />;
+      return renderSectionState(t.trendEmptyTitle, t.trendEmptyBody, {
+        compact: true,
+        action: renderActionGroup([
+          renderRefreshButton(t.comparePeriods),
+          renderWorkspaceLink("/admin/inquiries", t.trendReviewAction),
+        ]),
+      });
     }
 
     return <DashboardTrendChart points={trendPoints} locale={locale} period={chartPeriod} />;
@@ -1025,22 +1034,20 @@ export function AdminDashboardScreen({
         updatedAt: summary?.raw_metrics?.recent_inquiries?.latest_at
           ? prettyDate(summary.raw_metrics.recent_inquiries.latest_at, locale)
           : t.noSnapshotYet,
-        action: (
-          <Link className={adminButtonClassName({ variant: "secondary", size: "sm" })} href={withAdminLocale("/admin/inquiries", locale)}>
-            {t.openCrm}
-          </Link>
-        ),
+        action: renderActionGroup([
+          renderWorkspaceLink("/admin/inquiries", t.recentInquiriesReviewAction),
+          renderRefreshButton(t.retry),
+        ]),
       });
     }
 
     if (totalRecentInquiryCount === 0) {
       return renderSectionState(t.recentInquiriesEmptyTitle, t.recentInquiriesEmptyBody, {
         compact: true,
-        action: (
-          <Link className={adminButtonClassName({ variant: "secondary", size: "sm" })} href={withAdminLocale("/admin/inquiries", locale)}>
-            {t.openCrm}
-          </Link>
-        ),
+        action: renderActionGroup([
+          renderWorkspaceLink("/admin/inquiries", t.recentInquiriesReviewAction),
+          renderRefreshButton(t.retry),
+        ]),
       });
     }
 

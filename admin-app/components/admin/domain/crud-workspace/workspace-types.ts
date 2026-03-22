@@ -10,6 +10,11 @@ export type CrudConfig = {
   title: string;
   idBase?: string;
   subtitle: string;
+  followUpLinks?: ReadonlyArray<{
+    href: string;
+    label: string;
+    description?: string;
+  }>;
   identifierLabel: string;
   identifierPlaceholder: string;
   identifierField: string;

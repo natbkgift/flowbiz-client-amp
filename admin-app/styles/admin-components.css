@@ -2115,10 +2115,30 @@
 
   .admin-workspace-form-intro,
   .admin-workspace-empty-state,
+  .admin-workspace-next-steps,
   .crm-detail-empty-state {
     display: grid;
     gap: var(--admin-space-2);
     align-content: start;
+  }
+
+  .admin-workspace-next-steps__copy {
+    display: grid;
+    gap: var(--admin-space-1);
+  }
+
+  .admin-workspace-next-steps__copy p {
+    margin: 0;
+    color: var(--admin-text-muted);
+    font-size: var(--admin-font-size-sm);
+    line-height: 1.5;
+  }
+
+  .admin-workspace-next-steps__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--admin-space-2);
+    align-items: center;
   }
 
   .admin-workspace-form-section {

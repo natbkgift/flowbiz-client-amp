@@ -73,6 +73,29 @@ export default function AdminBlogCmsPage() {
         subtitle: isThai
           ? "จัดการบทความ blog และ guide ผ่าน /admin/content/articles โดยใช้ taxonomy key จาก /admin/content/taxonomies"
           : "Manage blog and guide articles via /admin/content/articles APIs with taxonomy keys from /admin/content/taxonomies.",
+        followUpLinks: [
+          {
+            href: "/admin/review-queue",
+            label: isThai ? "เปิดคิวรีวิว" : "Open review queue",
+            description: isThai
+              ? "ส่งต่อไปยังคิวรีวิวเมื่อบทความพร้อมให้ทีมอนุมัติ"
+              : "Move into the editorial queue when an article is ready for approval.",
+          },
+          {
+            href: "/admin/seo",
+            label: isThai ? "ตรวจ SEO" : "Open SEO workspace",
+            description: isThai
+              ? "ตรวจ redirect, schema และรายงาน broken links หลังแก้บทความ"
+              : "Check redirects, schema, and broken-link reports after editing.",
+          },
+          {
+            href: "/admin/dashboard",
+            label: isThai ? "ดูแดชบอร์ด" : "Open dashboard",
+            description: isThai
+              ? "ยืนยัน freshness และ watchlist signal ก่อน publish"
+              : "Confirm freshness and watchlist signals before publishing.",
+          },
+        ],
         identifierLabel: isThai ? "Slug ของบทความ" : "Article slug",
         identifierPlaceholder: "sample-blog-post",
         identifierField: "slug",
