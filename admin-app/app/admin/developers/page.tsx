@@ -79,6 +79,23 @@ export default function AdminDevelopersCmsPage() {
         title: "Developers CMS",
         subtitle:
           "Form-first editor for localized profiles and trust/legal metadata. Use readiness before publish to verify policy checks.",
+        followUpLinks: [
+          {
+            href: "/admin/projects",
+            label: "Open projects",
+            description: "Inspect project records tied to this developer before publishing profile changes.",
+          },
+          {
+            href: "/admin/media",
+            label: "Open media",
+            description: "Check logo and cover assets in the local library before publish.",
+          },
+          {
+            href: "/admin/dashboard",
+            label: "Open dashboard",
+            description: "Review watchlist signals and operational freshness before publishing.",
+          },
+        ],
         identifierLabel: "Developer ID",
         identifierPlaceholder: "developer UUID",
         identifierField: "id",

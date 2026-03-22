@@ -38,6 +38,40 @@ export default function AdminVideosCmsPage() {
         subtitle: isThai
           ? "จัดการคอนเทนต์วิดีโอผ่าน /admin/content/videos พร้อม workflow เผยแพร่ในหน้าเดียว"
           : "Manage video content via /admin/content/videos APIs.",
+        followUpLinks: [
+          {
+            href: "/admin/media",
+            label: isThai ? "ดูคลังสื่อ" : "Open media",
+            description: isThai
+              ? "ตรวจ thumbnail และ asset ท้องถิ่นก่อนเผยแพร่วิดีโอ"
+              : "Verify thumbnails and local assets before publishing video changes.",
+          },
+          {
+            href: "/admin/taxonomy",
+            label: isThai ? "ดู taxonomy" : "Open taxonomy",
+            description: isThai
+              ? "ยืนยันการจับคู่ topics และ tags หลังแก้ไขวิดีโอ"
+              : "Confirm topic and tag relationships after editing video records.",
+          },
+          {
+            href: "/admin/dashboard",
+            label: isThai ? "เปิดแดชบอร์ด" : "Open dashboard",
+            description: isThai
+              ? "กลับไปดูสัญญาณปฏิบัติการหลังอัปเดตคอนเทนต์วิดีโอ"
+              : "Review operational signals after updating video content.",
+          },
+        ],
+        prerequisiteHints: {
+          authSignedOut: isThai
+            ? "เข้าสู่ระบบก่อน แล้วตรวจว่าคลิปนี้ใช้ taxonomy และสื่อท้องถิ่นชุดไหนก่อนเริ่มแก้ไข"
+            : "Sign in first, then confirm which taxonomy terms and local media assets this video depends on before editing it.",
+          authSignedIn: isThai
+            ? "ยืนยัน thumbnail, topics และ tags ก่อนเผยแพร่ เพื่อไม่ให้คอนเทนต์วิดีโอหลุดจาก workflow ปลายทาง"
+            : "Verify thumbnails, topics, and tags before publishing so the video stays aligned with downstream workflows.",
+          query: isThai
+            ? "กรองตาม status ก่อน แล้วโหลด slug ที่ต้องการเพื่อยืนยัน record เป้าหมายก่อน patch หรือ publish"
+            : "Filter by status first, then load the target slug so patch and publish actions land on the intended video record.",
+        },
         identifierLabel: isThai ? "Slug ของวิดีโอ" : "Video slug",
         identifierPlaceholder: "sample-video-entry",
         identifierField: "slug",

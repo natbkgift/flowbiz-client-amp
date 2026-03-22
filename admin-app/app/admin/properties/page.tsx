@@ -82,6 +82,23 @@ export default function AdminPropertiesCmsPage() {
       config={{
         title: "Properties CMS",
         subtitle: "Manage listings via existing /admin/properties APIs (property_type from taxonomy /admin/content/taxonomies).",
+        followUpLinks: [
+          {
+            href: "/admin/projects",
+            label: "Open projects",
+            description: "Verify the linked project before publishing or bulk-updating listings.",
+          },
+          {
+            href: "/admin/media",
+            label: "Open media",
+            description: "Confirm cover assets and library usage before publishing properties.",
+          },
+          {
+            href: "/admin/dashboard",
+            label: "Open dashboard",
+            description: "Review import freshness and warnings before pushing listing changes live.",
+          },
+        ],
         identifierLabel: "Property ID",
         identifierPlaceholder: "property UUID",
         identifierField: "id",

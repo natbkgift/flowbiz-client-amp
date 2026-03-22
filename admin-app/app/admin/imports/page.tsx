@@ -1,9 +1,10 @@
 "use client";
 
 import { type FormEvent, useEffect, useState } from "react";
+import Link from "next/link";
 
 import { clearAuthSession, loginAdmin, persistAuthSession, readAuthSession } from "@/app/_lib/admin-auth";
-import { detectAdminLocale, type AdminLocale } from "@/app/_lib/admin-i18n";
+import { detectAdminLocale, type AdminLocale, withAdminLocale } from "@/app/_lib/admin-i18n";
 import { formatWorkspaceErrorMessage } from "@/app/_lib/admin-workspace-error";
 import AdminWorkspaceErrorState from "@/components/admin/AdminWorkspaceErrorState";
 import {
@@ -104,6 +105,8 @@ const copy = {
     importSuccess: "Import request completed.",
     dryRunSuccess: "Dry-run import completed.",
     importResultHint: "Review the response payload before running the next import.",
+    importSuccessTitle: "Next verification",
+    importSuccessBody: "Use dashboard and media to confirm the latest import did not introduce downstream content or asset regressions before running the next file.",
     selectedFile: "Selected file",
     selectedMode: "Run mode",
     source: "Source",
@@ -127,6 +130,12 @@ const copy = {
     sourceTelemetryMissing: "Telemetry file missing",
     sourceTelemetryFile: "Telemetry file",
     sourceUnknown: "Unknown source",
+    openDashboard: "Open dashboard",
+    openMedia: "Open media",
+    authWorkspaceHint: "Sign in first, then use this workspace to run an import, verify the result, and compare follow-on health in media or dashboard views.",
+    sessionHint: "Use dashboard for health context, then come back here to run or review imports without losing the current admin session.",
+    historyEmptyTitle: "No import history loaded yet",
+    historyEmptyBody: "Start with one CSV run or refresh the workspace, then use dashboard and media views to verify the follow-on system state.",
     all: "all",
     true: "Dry run",
     false: "Live run",
@@ -175,6 +184,8 @@ const copy = {
     importSuccess: "สั่งงานนำเข้าสำเร็จ",
     dryRunSuccess: "ทดลองรันสำเร็จ",
     importResultHint: "ตรวจผลลัพธ์นี้ก่อนเริ่มการนำเข้ารอบถัดไป",
+    importSuccessTitle: "จุดตรวจถัดไป",
+    importSuccessBody: "ใช้ dashboard และ media เพื่อตรวจว่าการนำเข้ารอบล่าสุดไม่สร้างปัญหาปลายทางด้านคอนเทนต์หรือไฟล์สื่อ ก่อนเริ่มไฟล์ถัดไป",
     selectedFile: "ไฟล์ที่เลือก",
     selectedMode: "โหมดที่กำลังใช้",
     source: "แหล่งที่มา",
@@ -198,6 +209,12 @@ const copy = {
     sourceTelemetryMissing: "ไม่พบไฟล์ telemetry",
     sourceTelemetryFile: "จากไฟล์ telemetry",
     sourceUnknown: "ไม่ทราบแหล่งที่มา",
+    openDashboard: "ดูแดชบอร์ด",
+    openMedia: "ดูคลังสื่อ",
+    authWorkspaceHint: "เข้าสู่ระบบก่อน แล้วใช้หน้านี้รัน import ตรวจผลลัพธ์ และสลับไปดูสถานะต่อเนื่องใน media หรือ dashboard ได้ทันที",
+    sessionHint: "ใช้แดชบอร์ดดูภาพรวมสุขภาพระบบ แล้วกลับมารันหรือทบทวน import ต่อในหน้านี้ได้โดยไม่หลุดจากเซสชันแอดมิน",
+    historyEmptyTitle: "ยังไม่มีประวัติ import ที่โหลดเข้ามา",
+    historyEmptyBody: "เริ่มจากรัน CSV หนึ่งชุดหรือรีเฟรช workspace ก่อน แล้วค่อยใช้ dashboard และ media เพื่อตรวจสถานะต่อเนื่องของระบบ",
     all: "ทั้งหมด",
     true: "ทดลองรัน",
     false: "รันจริง",
@@ -487,9 +504,23 @@ export default function AdminImportsPage() {
                 <dd>{prettyDate(deployStatus?.deploy_checked_at || mirrorStatus?.checked_at, locale)}</dd>
               </div>
             </dl>
+            <p className="admin-input__hint locale-safe">{t.sessionHint}</p>
+            <div className="crm-session-panel__quick-actions">
+              <Link className="admin-button admin-button--secondary admin-button--sm" href={withAdminLocale("/admin/dashboard", locale)}>
+                {t.openDashboard}
+              </Link>
+              <Link className="admin-button admin-button--secondary admin-button--sm" href={withAdminLocale("/admin/media", locale)}>
+                {t.openMedia}
+              </Link>
+            </div>
           </div>
         )}
-        {!isAuthenticated ? <div className="state-empty">{t.authRequired}</div> : null}
+        {!isAuthenticated ? (
+          <div className="state-empty admin-workspace-empty-state" role="status">
+            <strong>{t.authRequired}</strong>
+            <p className="locale-safe">{t.authWorkspaceHint}</p>
+          </div>
+        ) : null}
       </ActionCard>
 
       {pageError ? (
@@ -582,6 +613,20 @@ export default function AdminImportsPage() {
               </label>
               <p className="admin-input__hint">{t.importResultHint}</p>
               {importNotice ? <div className="state-success">{importNotice}</div> : null}
+              {importNotice ? (
+                <div className="admin-workspace-success-handoff" role="status">
+                  <strong>{t.importSuccessTitle}</strong>
+                  <p className="locale-safe">{t.importSuccessBody}</p>
+                  <div className="card-actions">
+                    <Link className="admin-button admin-button--secondary admin-button--sm" href={withAdminLocale("/admin/dashboard", locale)}>
+                      {t.openDashboard}
+                    </Link>
+                    <Link className="admin-button admin-button--secondary admin-button--sm" href={withAdminLocale("/admin/media", locale)}>
+                      {t.openMedia}
+                    </Link>
+                  </div>
+                </div>
+              ) : null}
             </div>
           </ActionCard>
 
@@ -617,7 +662,18 @@ export default function AdminImportsPage() {
               </label>
             </div>
             {imports.length === 0 ? (
-              <div className="state-empty">{`${t.empty} ${t.emptyHint}`}</div>
+              <div className="state-empty admin-workspace-empty-state" role="status">
+                <strong>{t.historyEmptyTitle}</strong>
+                <p className="locale-safe">{t.historyEmptyBody}</p>
+                <div className="card-actions">
+                  <Link className="admin-button admin-button--secondary admin-button--sm" href={withAdminLocale("/admin/dashboard", locale)}>
+                    {t.openDashboard}
+                  </Link>
+                  <Link className="admin-button admin-button--secondary admin-button--sm" href={withAdminLocale("/admin/media", locale)}>
+                    {t.openMedia}
+                  </Link>
+                </div>
+              </div>
             ) : (
               <AdminTable caption={t.imports}>
                 <table className="dashboard-table">

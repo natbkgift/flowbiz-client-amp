@@ -1,9 +1,20 @@
-import { type InquiryFilters, type InquiryItem, type InquiryLocale } from "@/components/admin/domain/crm/inquiries-types";
+import { type InquiryFilters, type InquiryItem, type InquiryLocale, type InquiryViewMode } from "@/components/admin/domain/crm/inquiries-types";
 
 export const FOLLOW_UP_STATUSES = ["pending", "scheduled", "completed", "no_response"] as const;
 export const CRM_STATUSES = ["new", "contacted", "qualified", "closed", "lost"] as const;
 export const SAVED_FILTERS_STORAGE_KEY = "flowbiz_crm_saved_filters_v1";
+export const WORKSPACE_STATE_STORAGE_KEY = "flowbiz_crm_workspace_state_v1";
 export const MAX_SAVED_FILTERS = 10;
+
+const EMPTY_FILTERS: InquiryFilters = {
+  status: "",
+  source: "",
+  purpose: "",
+  date_from: "",
+  date_to: "",
+  follow_up_status: "",
+  q: "",
+};
 
 export function buildQuery(filters: InquiryFilters): string {
   const params = new URLSearchParams();
@@ -62,6 +73,27 @@ export function readRoleFromToken(token: string): string {
 
 export function savedFiltersKey(role: string): string {
   return `${SAVED_FILTERS_STORAGE_KEY}:${role}`;
+}
+
+export function workspaceStateKey(role: string): string {
+  return `${WORKSPACE_STATE_STORAGE_KEY}:${role}`;
+}
+
+export function normalizeInquiryFilters(value: Partial<InquiryFilters> | null | undefined): InquiryFilters {
+  return {
+    status: typeof value?.status === "string" ? value.status : EMPTY_FILTERS.status,
+    source: typeof value?.source === "string" ? value.source : EMPTY_FILTERS.source,
+    purpose: typeof value?.purpose === "string" ? value.purpose : EMPTY_FILTERS.purpose,
+    date_from: typeof value?.date_from === "string" ? value.date_from : EMPTY_FILTERS.date_from,
+    date_to: typeof value?.date_to === "string" ? value.date_to : EMPTY_FILTERS.date_to,
+    follow_up_status:
+      typeof value?.follow_up_status === "string" ? value.follow_up_status : EMPTY_FILTERS.follow_up_status,
+    q: typeof value?.q === "string" ? value.q : EMPTY_FILTERS.q,
+  };
+}
+
+export function isInquiryViewMode(value: unknown): value is InquiryViewMode {
+  return value === "table" || value === "kanban";
 }
 
 export function dueClass(dueAt: string | null): string {

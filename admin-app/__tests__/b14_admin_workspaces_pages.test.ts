@@ -45,6 +45,13 @@ describe("B14 admin workspace pages contract", () => {
     expect(page).toContain("window.confirm");
     expect(page).toContain("emptyHint");
     expect(page).toContain("disabled={loading || opBusy}");
+    expect(page).toContain('className="state-empty admin-workspace-empty-state"');
+    expect(page).toContain("listEmptyTitle");
+    expect(page).toContain("openDashboard");
+    expect(page).toContain("openSeo");
+    expect(page).toContain('href={withAdminLocale("/admin/dashboard", locale)}');
+    expect(page).toContain("operationSuccessTitle");
+    expect(page).toContain('className="admin-workspace-success-handoff"');
   });
 
   it("imports workspace uses list + import run endpoints", () => {
@@ -72,6 +79,13 @@ describe("B14 admin workspace pages contract", () => {
     expect(page).toContain('filterDryRun: "กรองโหมดทดลองรัน"');
     expect(page).toContain("emptyHint");
     expect(page).toContain("disabled={loading || importBusy}");
+    expect(page).toContain('className="state-empty admin-workspace-empty-state"');
+    expect(page).toContain("historyEmptyTitle");
+    expect(page).toContain("openDashboard");
+    expect(page).toContain("openMedia");
+    expect(page).toContain('href={withAdminLocale("/admin/dashboard", locale)}');
+    expect(page).toContain("importSuccessTitle");
+    expect(page).toContain('className="admin-workspace-success-handoff"');
   });
 
   it("domain workspace uses domain CRUD + publish APIs and dashboard summaries", () => {
@@ -92,12 +106,19 @@ describe("B14 admin workspace pages contract", () => {
     expect(page).toContain("/publish");
     expect(page).toContain("/unpublish");
     expect(page).toContain("/statistics");
+    expect(page).toContain("prerequisiteTitle");
+    expect(page).toContain("resultGuidanceTitle");
+    expect(page).toContain('className="admin-workspace-prerequisite"');
+    expect(page).toContain('className="admin-workspace-success-handoff"');
+    expect(page).toContain('href={withAdminLocale(entity === "areas" ? "/admin/areas" : entity === "developers" ? "/admin/developers" : "/admin/projects", locale)}');
+    expect(page).toContain('href={withAdminLocale(entity === "projects" ? "/admin/review-queue" : "/admin/dashboard", locale)}');
     expect(page).toContain("state-loading");
     expect(page).toContain("state-error");
   });
 
   it("areas and developers workspaces use form-first localized editors with readiness checks", () => {
     const areasPage = read("app/admin/areas/page.tsx");
+    const panels = read("components/admin/domain/crud-workspace/AdminCrudWorkspacePanels.tsx");
     expect(areasPage).toContain("createFormFields");
     expect(areasPage).toContain("patchFormFields");
     expect(areasPage).toContain("content.en.why_live_invest");
@@ -115,16 +136,38 @@ describe("B14 admin workspace pages contract", () => {
     expect(developersPage).toContain("/admin/developers/{id}/publish-readiness");
     expect(developersPage).toContain("/admin/developers/{id}/publish");
     expect(developersPage).toContain("/admin/developers/{id}/unpublish");
+    expect(panels).toContain('const baseFieldsTitle = localizeCrudPanelsText("Base fields", "ข้อมูลหลัก")');
+    expect(panels).toContain('const localizedFieldsTitle = localizeCrudPanelsText("Localized content", "เนื้อหาตามภาษา")');
+    expect(panels).toContain('className="admin-workspace-form-section"');
+    expect(panels).toContain('className="admin-workspace-form-intro state-empty"');
+  });
+
+  it("shared CRUD records and patch forms guide the next step when records are not loaded or selected yet", () => {
+    const panels = read("components/admin/domain/crud-workspace/AdminCrudWorkspacePanels.tsx");
+    const styles = read("styles/admin-components.css");
+
+    expect(panels).toContain('const patchIntroTitle = localizeCrudPanelsText("Update flow", "ลำดับการแก้ไขรายการ")');
+    expect(panels).toContain('Load one record ID from the list first, then update grouped fields with a safer patch flow.');
+    expect(panels).toContain('className="state-empty admin-workspace-empty-state"');
+    expect(panels).toContain('Start from the list query panel, then load records before using record actions, patch, or bulk updates.');
+    expect(styles).toContain('.admin-workspace-form-section {');
+    expect(styles).toContain('.admin-workspace-empty-state,');
   });
 
   it("review queue workspace targets in_review items awaiting approval", () => {
     const page = read("app/admin/review-queue/page.tsx");
+    const panels = read("components/admin/domain/crud-workspace/AdminCrudWorkspacePanels.tsx");
     const nav = read("app/_lib/admin-nav.ts");
 
     expect(page).toContain("Editorial Review Queue");
     expect(page).toContain("defaultListQuery: \"status=in_review&limit=40\"");
     expect(page).toContain("options: [\"approved\"]");
     expect(page).toContain("/admin/content/articles");
+    expect(page).toContain('href: "/admin/blog"');
+    expect(page).toContain('href: "/admin/seo"');
+    expect(page).toContain('href: "/admin/dashboard"');
+    expect(panels).toContain("function CrudWorkspaceFollowUpLinks(");
+    expect(panels).toContain('className="admin-workspace-next-steps"');
     expect(nav).toContain("/admin/review-queue");
   });
 
@@ -133,6 +176,54 @@ describe("B14 admin workspace pages contract", () => {
     expect(page).toContain("/admin/content/articles/{id}/revisions");
     expect(page).toContain("/admin/content/articles/{id}/revisions/{revisionId}/diff");
     expect(page).toContain("/admin/content/articles/{id}/revisions/{revisionId}/restore");
+    expect(page).toContain('href: "/admin/review-queue"');
+    expect(page).toContain('href: "/admin/seo"');
+    expect(page).toContain('href: "/admin/dashboard"');
+  });
+
+  it("shared CRUD workspaces expose follow-up links for downstream publish handoffs", () => {
+    const types = read("components/admin/domain/crud-workspace/workspace-types.ts");
+    const panels = read("components/admin/domain/crud-workspace/AdminCrudWorkspacePanels.tsx");
+    const propertiesPage = read("app/admin/properties/page.tsx");
+    const projectsPage = read("app/admin/projects/page.tsx");
+    const taxonomyPage = read("app/admin/taxonomy/page.tsx");
+    const videosPage = read("app/admin/videos/page.tsx");
+    const companyPage = read("app/admin/company/page.tsx");
+    const testimonialsPage = read("app/admin/testimonials/page.tsx");
+    const usersPage = read("app/admin/users/page.tsx");
+
+    expect(types).toContain("followUpLinks?: ReadonlyArray");
+    expect(types).toContain("prerequisiteHints?: {");
+    expect(types).toContain('| "restore-revision";');
+    expect(panels).toContain("copy.nextStepsTitle");
+    expect(panels).toContain("copy.nextStepsIdleBody");
+    expect(panels).toContain("copy.nextStepsRecordsBody");
+    expect(panels).toContain("copy.nextStepsRevisionsBody");
+    expect(panels).toContain("copy.resultNextStepsTitle");
+    expect(panels).toContain("function CrudWorkspacePrerequisiteHint(");
+    expect(panels).toContain("function resultGuidanceBody(actionKey: CrudWorkspaceActionKey | null)");
+    expect(panels).toContain('className="admin-workspace-result-guidance"');
+    expect(panels).toContain("config.prerequisiteHints?.authSignedOut");
+    expect(panels).toContain("config.prerequisiteHints?.query");
+    expect(propertiesPage).toContain('href: "/admin/projects"');
+    expect(propertiesPage).toContain('href: "/admin/media"');
+    expect(projectsPage).toContain('href: "/admin/properties"');
+    expect(projectsPage).toContain('href: "/admin/dashboard"');
+    expect(taxonomyPage).toContain('href: "/admin/blog"');
+    expect(taxonomyPage).toContain('href: "/admin/videos"');
+    expect(videosPage).toContain('href: "/admin/media"');
+    expect(videosPage).toContain('href: "/admin/taxonomy"');
+    expect(companyPage).toContain('href: "/admin/layout"');
+    expect(companyPage).toContain('href: "/admin/home-composer"');
+    expect(testimonialsPage).toContain('href: "/admin/properties"');
+    expect(testimonialsPage).toContain('href: "/admin/media"');
+    expect(usersPage).toContain('href: "/admin/inquiries"');
+    expect(usersPage).toContain('href: "/admin/imports"');
+    expect(companyPage).toContain("prerequisiteHints");
+    expect(taxonomyPage).toContain("prerequisiteHints");
+    expect(testimonialsPage).toContain("prerequisiteHints");
+    expect(usersPage).toContain("prerequisiteHints");
+    expect(videosPage).toContain("prerequisiteHints");
   });
 
   it("users workspace avoids default credentials and masks password fields", () => {
@@ -156,6 +247,10 @@ describe("B14 admin workspace pages contract", () => {
     expect(page).toContain("publishConfirm");
     expect(page).toContain("window.confirm");
     expect(page).toContain("unsavedLeaveConfirm");
+    expect(page).toContain("successTitle");
+    expect(page).toContain("draftSuccessBody");
+    expect(page).toContain('href={withAdminLocale(\'/admin/layout\', locale)}');
+    expect(page).toContain('className="admin-workspace-success-handoff"');
   });
 
   it("login page uses canonical shared admin auth contract", () => {

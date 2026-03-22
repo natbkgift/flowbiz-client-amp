@@ -46,6 +46,17 @@ describe("B10 admin SEO page contract", () => {
     expect(page).toContain("readRequestFailedStatus");
     expect(page).toContain("{t.retry}");
     expect(page).toContain('overflowWrap: "anywhere"');
+    expect(page).toContain('className="state-empty admin-workspace-empty-state"');
+    expect(page).toContain("overridesEmptyHint");
+    expect(page).toContain("redirectsEmptyHint");
+    expect(page).toContain("schemaEmptyHint");
+    expect(page).toContain("reportEmptyHint");
+    expect(page).toContain('href={withAdminLocale("/admin/dashboard", locale)}');
+    expect(page).toContain('href={withAdminLocale("/admin/review-queue", locale)}');
+    expect(page).toContain("successTitle");
+    expect(page).toContain("overrideSaved");
+    expect(page).toContain("reportReady");
+    expect(page).toContain('className="admin-workspace-success-handoff"');
   });
 
   it("includes basic accessible labels and EN/TH copy", () => {

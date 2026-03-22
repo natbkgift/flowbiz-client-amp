@@ -1,6 +1,7 @@
 import { type FormEvent, type KeyboardEvent } from "react";
+import Link from "next/link";
 
-import { detectAdminLocale } from "@/app/_lib/admin-i18n";
+import { detectAdminLocale, withAdminLocale } from "@/app/_lib/admin-i18n";
 import { toPrettyJson } from "@/app/_lib/admin-auth";
 import { AdminDataTable, type AdminDataTableColumn } from "@/components/admin/AdminDataTable";
 import {
@@ -13,11 +14,12 @@ import {
   AdminTabSwitch,
   LogCard,
   MetricCard,
+  adminButtonClassName,
 } from "@/components/admin/AdminPrimitives";
 import { AdminIcon } from "@/components/admin/AdminIcons";
 import { AdminFormPrimitiveInput } from "@/components/admin/AdminFormPrimitives";
 import type { CrudWorkspaceCopy } from "@/components/admin/domain/crud-workspace/crud-workspace-copy";
-import type { ChecklistReport, CrudConfig, ListResponse, LocalizedFieldGroup } from "@/components/admin/domain/crud-workspace/workspace-types";
+import type { ChecklistReport, CrudConfig, CrudWorkspaceActionKey, ListResponse, LocalizedFieldGroup } from "@/components/admin/domain/crud-workspace/workspace-types";
 import { nestedText } from "@/components/admin/domain/crud-workspace/workspace-utils";
 
 // Regression anchors for phase-contract tests that grep shared panel capabilities:
@@ -31,6 +33,50 @@ function getCrudPanelsLocale() {
 
 function localizeCrudPanelsText(en: string, th: string) {
   return getCrudPanelsLocale() === "th" ? th : en;
+}
+
+function CrudWorkspaceFollowUpLinks({
+  title,
+  description,
+  links,
+}: {
+  title: string;
+  description?: string;
+  links: NonNullable<CrudConfig["followUpLinks"]>;
+}) {
+  const locale = getCrudPanelsLocale();
+
+  if (links.length === 0) return null;
+
+  return (
+    <div className="admin-workspace-next-steps" role="status">
+      <div className="admin-workspace-next-steps__copy">
+        <strong>{title}</strong>
+        {description ? <p className="locale-safe">{description}</p> : null}
+      </div>
+      <div className="admin-workspace-next-steps__actions">
+        {links.map((link) => (
+          <Link
+            key={`${link.href}:${link.label}`}
+            className={adminButtonClassName({ variant: "secondary", size: "sm" })}
+            href={withAdminLocale(link.href, locale)}
+            title={link.description}
+          >
+            {link.label}
+          </Link>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function CrudWorkspacePrerequisiteHint({ title, body }: { title: string; body: string }) {
+  return (
+    <div className="admin-workspace-prerequisite" role="status">
+      <strong>{title}</strong>
+      <p className="locale-safe">{body}</p>
+    </div>
+  );
 }
 
 function LocalizedPrimitiveFields({
@@ -62,21 +108,46 @@ function LocalizedPrimitiveFields({
   ) => void;
   onFieldChange: (name: string, value: string) => void;
 }) {
+  const baseFieldsTitle = localizeCrudPanelsText("Base fields", "ข้อมูลหลัก");
+  const baseFieldsHint = localizeCrudPanelsText(
+    "Complete the shared identifiers and operational fields before moving into locale-specific content.",
+    "กรอกข้อมูลอ้างอิงและฟิลด์ปฏิบัติการหลักก่อน แล้วค่อยลงรายละเอียดตามภาษา"
+  );
+  const localizedFieldsTitle = localizeCrudPanelsText("Localized content", "เนื้อหาตามภาษา");
+  const localizedFieldsHint = localizeCrudPanelsText(
+    "Switch locale tabs to finish the visible language content without losing the rest of the form.",
+    "สลับแท็บภาษาเพื่อกรอกเนื้อหาของภาษาที่แสดงอยู่ โดยไม่ทำให้ฟิลด์อื่นหายไป"
+  );
+
   return (
     <>
-      {fields.baseFields.map((field) => (
-        <AdminFormPrimitiveInput
-          key={field.name}
-          idPrefix={`${idBase}-${mode}`}
-          field={field}
-          value={values[field.name] || ""}
-          error={errors[field.name]}
-          authToken={authToken}
-          onChange={onFieldChange}
-        />
-      ))}
+      {fields.baseFields.length > 0 ? (
+        <section className="admin-workspace-form-section" aria-label={baseFieldsTitle}>
+          <div className="admin-workspace-form-section__header">
+            <h3>{baseFieldsTitle}</h3>
+            <p className="locale-safe">{baseFieldsHint}</p>
+          </div>
+          <div className="admin-workspace-form-grid admin-workspace-form-grid--grouped">
+            {fields.baseFields.map((field) => (
+              <AdminFormPrimitiveInput
+                key={field.name}
+                idPrefix={`${idBase}-${mode}`}
+                field={field}
+                value={values[field.name] || ""}
+                error={errors[field.name]}
+                authToken={authToken}
+                onChange={onFieldChange}
+              />
+            ))}
+          </div>
+        </section>
+      ) : null}
       {fields.localeOrder.length > 0 ? (
-        <>
+        <section className="admin-workspace-form-section" aria-label={localizedFieldsTitle}>
+          <div className="admin-workspace-form-section__header">
+            <h3>{localizedFieldsTitle}</h3>
+            <p className="locale-safe">{localizedFieldsHint}</p>
+          </div>
           <AdminTabSwitch
             ariaLabel={mode === "create" ? "Create locale tabs" : "Update locale tabs"}
             value={activeLocale}
@@ -97,19 +168,21 @@ function LocalizedPrimitiveFields({
             }))}
           />
           <div id={`${idBase}-${mode}-panel-${activeLocale}`} role="tabpanel" aria-labelledby={`${idBase}-${mode}-tab-${activeLocale}`}>
-            {(fields.byLocale[activeLocale] || []).map((field) => (
-              <AdminFormPrimitiveInput
-                key={field.name}
-                idPrefix={`${idBase}-${mode}`}
-                field={field}
-                value={values[field.name] || ""}
-                error={errors[field.name]}
-                authToken={authToken}
-                onChange={onFieldChange}
-              />
-            ))}
+            <div className="admin-workspace-form-grid admin-workspace-form-grid--grouped">
+              {(fields.byLocale[activeLocale] || []).map((field) => (
+                <AdminFormPrimitiveInput
+                  key={field.name}
+                  idPrefix={`${idBase}-${mode}`}
+                  field={field}
+                  value={values[field.name] || ""}
+                  error={errors[field.name]}
+                  authToken={authToken}
+                  onChange={onFieldChange}
+                />
+              ))}
+            </div>
           </div>
-        </>
+        </section>
       ) : null}
     </>
   );
@@ -151,11 +224,17 @@ export function AdminCrudWorkspaceHeader({
           ) : null}
         </>
       }
+      actions={
+        config.followUpLinks?.length ? (
+          <CrudWorkspaceFollowUpLinks title={copy.nextStepsTitle} description={copy.nextStepsDescription} links={config.followUpLinks} />
+        ) : null
+      }
     />
   );
 }
 
 export function AdminCrudWorkspaceAuthPanel({
+  config,
   idBase,
   copy,
   isAuthenticated,
@@ -171,6 +250,7 @@ export function AdminCrudWorkspaceAuthPanel({
   onRefreshList,
   onLogout,
 }: {
+  config: CrudConfig;
   idBase: string;
   copy: CrudWorkspaceCopy;
   isAuthenticated: boolean;
@@ -252,11 +332,18 @@ export function AdminCrudWorkspaceAuthPanel({
           </div>
         </div>
       ) : null}
+      {!isAuthenticated && config.prerequisiteHints?.authSignedOut ? (
+        <CrudWorkspacePrerequisiteHint title={copy.prerequisiteTitle} body={config.prerequisiteHints.authSignedOut} />
+      ) : null}
+      {isAuthenticated && config.prerequisiteHints?.authSignedIn ? (
+        <CrudWorkspacePrerequisiteHint title={copy.prerequisiteTitle} body={config.prerequisiteHints.authSignedIn} />
+      ) : null}
     </AdminSectionCard>
   );
 }
 
 export function AdminCrudWorkspaceQueryPanel({
+  config,
   idBase,
   copy,
   listQuery,
@@ -265,6 +352,7 @@ export function AdminCrudWorkspaceQueryPanel({
   onListQueryChange,
   onLoadList,
 }: {
+  config: CrudConfig;
   idBase: string;
   copy: CrudWorkspaceCopy;
   listQuery: string;
@@ -290,6 +378,7 @@ export function AdminCrudWorkspaceQueryPanel({
           {copy.loadList}
         </AdminButton>
       </div>
+      {config.prerequisiteHints?.query ? <CrudWorkspacePrerequisiteHint title={copy.prerequisiteTitle} body={config.prerequisiteHints.query} /> : null}
       {meta ? (
         <div className="admin-workspace-inline-metrics" aria-label="List query metadata">
           <AdminBadge tone="info" icon="table">
@@ -379,6 +468,9 @@ export function AdminCrudWorkspaceRecordActionsPanel({
           </AdminButton>
         ) : null}
       </div>
+      {!identifier.trim() && config.followUpLinks?.length ? (
+        <CrudWorkspaceFollowUpLinks title={copy.nextStepsTitle} description={copy.nextStepsIdleBody} links={config.followUpLinks} />
+      ) : null}
     </AdminSectionCard>
   );
 }
@@ -422,6 +514,12 @@ export function AdminCrudWorkspaceCreatePanel({
 }) {
   if (!config.createPath) return null;
 
+  const createIntroTitle = localizeCrudPanelsText("Creation flow", "ลำดับการสร้างรายการ");
+  const createIntroBody = localizeCrudPanelsText(
+    "Start with shared record fields, then complete locale content before saving the new record.",
+    "เริ่มจากฟิลด์หลักของรายการ แล้วค่อยกรอกเนื้อหาตามภาษาให้ครบก่อนบันทึกสร้างรายการ"
+  );
+
   return (
     <AdminSectionCard
       className="admin-workspace-panel admin-workspace-panel--create"
@@ -429,6 +527,10 @@ export function AdminCrudWorkspaceCreatePanel({
       description={copy.createRecordDescription}
       icon="plus"
     >
+      <div className="admin-workspace-form-intro state-empty" role="status">
+        <strong>{createIntroTitle}</strong>
+        <p className="locale-safe">{createIntroBody}</p>
+      </div>
       {Array.isArray(config.createFormFields) && config.createFormFields.length > 0 ? (
         <LocalizedPrimitiveFields
           idBase={idBase}
@@ -498,6 +600,17 @@ export function AdminCrudWorkspacePatchPanel({
 }) {
   if (!config.patchPath) return null;
 
+  const patchIntroTitle = localizeCrudPanelsText("Update flow", "ลำดับการแก้ไขรายการ");
+  const patchIntroBody = identifier.trim()
+    ? localizeCrudPanelsText(
+        "You are editing the selected record. Review grouped fields, then apply the patch when the critical values are ready.",
+        "คุณกำลังแก้ไขรายการที่เลือกอยู่ ตรวจฟิลด์เป็นกลุ่มก่อน แล้วค่อยบันทึก patch เมื่อค่าหลักพร้อมแล้ว"
+      )
+    : localizeCrudPanelsText(
+        "Load one record ID from the list first, then update grouped fields with a safer patch flow.",
+        "เลือกรายการจากตารางหรือกรอกรหัสก่อน แล้วค่อยแก้ฟิลด์แบบเป็นกลุ่มเพื่อให้ patch ปลอดภัยกว่าเดิม"
+      );
+
   return (
     <AdminSectionCard
       className="admin-workspace-panel admin-workspace-panel--patch"
@@ -505,6 +618,10 @@ export function AdminCrudWorkspacePatchPanel({
       description={copy.updateRecordDescription}
       icon="refresh"
     >
+      <div className="admin-workspace-form-intro state-empty" role="status">
+        <strong>{patchIntroTitle}</strong>
+        <p className="locale-safe">{patchIntroBody}</p>
+      </div>
       {Array.isArray(config.patchFormFields) && config.patchFormFields.length > 0 ? (
         <LocalizedPrimitiveFields
           idBase={idBase}
@@ -623,12 +740,14 @@ export function AdminCrudWorkspaceBulkActionsPanel({
 }
 
 export function AdminCrudWorkspaceRecordsPanel({
+  config,
   copy,
   items,
   hasLoadedRecords,
   tableColumns,
   pickIdentifierFromRow,
 }: {
+  config: CrudConfig;
   copy: CrudWorkspaceCopy;
   items: unknown[];
   hasLoadedRecords: boolean;
@@ -645,7 +764,23 @@ export function AdminCrudWorkspaceRecordsPanel({
       titleTag="h2"
     >
       {items.length === 0 ? (
-        <div className="state-empty">{hasLoadedRecords ? copy.recordsEmpty : copy.recordsIdle}</div>
+        <div className="state-empty admin-workspace-empty-state" role="status">
+          <strong>{hasLoadedRecords ? copy.recordsEmpty : copy.recordsIdle}</strong>
+          <p className="locale-safe">
+            {hasLoadedRecords
+              ? localizeCrudPanelsText(
+                  "Adjust the list query or reload the workspace to bring matching records back into view.",
+                  "ปรับคิวรีรายการหรือกดโหลดใหม่ เพื่อดึงรายการที่ตรงเงื่อนไขกลับมาแสดงอีกครั้ง"
+                )
+              : localizeCrudPanelsText(
+                  "Start from the list query panel, then load records before using record actions, patch, or bulk updates.",
+                  "เริ่มจากแผงคิวรีรายการ แล้วกดโหลดข้อมูลก่อนใช้คำสั่งต่อรายการ การแก้ไข หรือการอัปเดตแบบกลุ่ม"
+                )}
+          </p>
+          {config.followUpLinks?.length ? (
+            <CrudWorkspaceFollowUpLinks title={copy.nextStepsTitle} description={copy.nextStepsRecordsBody} links={config.followUpLinks} />
+          ) : null}
+        </div>
       ) : (
         <AdminTable caption={copy.recordsTitle}>
           <AdminDataTable
@@ -660,7 +795,78 @@ export function AdminCrudWorkspaceRecordsPanel({
   );
 }
 
-export function AdminCrudWorkspaceResultPanel({ copy, result }: { copy: CrudWorkspaceCopy; result: string }) {
+function resultGuidanceBody(actionKey: CrudWorkspaceActionKey | null) {
+  switch (actionKey) {
+    case "create":
+      return localizeCrudPanelsText(
+        "Review the created record, then verify its downstream dependencies in the linked workspaces below before moving on.",
+        "ตรวจรายการที่สร้างแล้ว จากนั้นไปยืนยัน dependency ปลายทางใน workspace ที่ลิงก์ไว้ก่อนทำงานต่อ"
+      );
+    case "patch":
+      return localizeCrudPanelsText(
+        "Reload detail or readiness for the selected record, then confirm the updated state in the linked workspaces below.",
+        "โหลดรายละเอียดหรือ readiness ของรายการนี้ใหม่ แล้วค่อยยืนยันสถานะล่าสุดใน workspace ที่ลิงก์ไว้ด้านล่าง"
+      );
+    case "publish":
+      return localizeCrudPanelsText(
+        "Confirm the live-ready state in the linked validation surfaces below before leaving this record.",
+        "ยืนยันสถานะพร้อมใช้งานจริงผ่านหน้าตรวจสอบที่ลิงก์ไว้ด้านล่างก่อนออกจากรายการนี้"
+      );
+    case "unpublish":
+      return localizeCrudPanelsText(
+        "Check the downstream queue, dashboard, or validation surfaces below to confirm this record is no longer treated as live.",
+        "ตรวจ queue, dashboard หรือหน้าตรวจสอบปลายทางด้านล่างเพื่อยืนยันว่าระเบียนนี้ไม่ถูกมองว่า live แล้ว"
+      );
+    case "restore-revision":
+      return localizeCrudPanelsText(
+        "Review the restored state, then use the linked workspaces below to confirm the rollback is reflected where operators expect it.",
+        "ตรวจสถานะหลัง restore แล้วใช้ workspace ที่ลิงก์ไว้ด้านล่างเพื่อยืนยันว่าผล rollback สะท้อนในจุดที่ผู้ดูแลใช้งานจริง"
+      );
+    case "bulk":
+      return localizeCrudPanelsText(
+        "Reload the list and spot-check downstream surfaces with the linked workspaces below so batch changes do not hide regressions.",
+        "โหลดรายการใหม่แล้วสุ่มตรวจหน้าปลายทางผ่าน workspace ที่ลิงก์ไว้ด้านล่าง เพื่อไม่ให้การแก้แบบกลุ่มซ่อน regression"
+      );
+    case "check-readiness":
+      return localizeCrudPanelsText(
+        "Use this checklist result to decide whether to patch the record here or continue into a linked validation workspace.",
+        "ใช้ผล checklist นี้เพื่อตัดสินใจว่าจะ patch ต่อในหน้านี้ หรือไปตรวจต่อใน workspace ที่ลิงก์ไว้"
+      );
+    case "get-detail":
+      return localizeCrudPanelsText(
+        "Confirm the identifier and payload shape here, then continue with patch, readiness, or the linked operational workspaces below.",
+        "ยืนยันรหัสอ้างอิงและโครง payload ตรงนี้ก่อน แล้วค่อยไปต่อที่ patch, readiness หรือ workspace ปฏิบัติการที่ลิงก์ไว้ด้านล่าง"
+      );
+    case "load-revisions":
+    case "show-diff":
+      return localizeCrudPanelsText(
+        "Use the revision data to decide whether a restore is needed, then verify the affected workflow in the linked workspaces below.",
+        "ใช้ข้อมูล revision เพื่อตัดสินใจว่าต้อง restore หรือไม่ แล้วค่อยไปยืนยัน workflow ที่ได้รับผลใน workspace ที่ลิงก์ไว้ด้านล่าง"
+      );
+    case "delete":
+      return localizeCrudPanelsText(
+        "Reload the list and confirm downstream references in the linked workspaces below so this removal does not leave orphaned states.",
+        "โหลดรายการใหม่แล้วตรวจ reference ปลายทางผ่าน workspace ที่ลิงก์ไว้ด้านล่าง เพื่อไม่ให้การลบทิ้ง state ค้าง"
+      );
+    default:
+      return localizeCrudPanelsText(
+        "Review the latest response here, then use the linked workspaces below to verify the next operational step.",
+        "ตรวจผลตอบกลับล่าสุดตรงนี้ แล้วใช้ workspace ที่ลิงก์ไว้ด้านล่างเพื่อตรวจขั้นตอนปฏิบัติการถัดไป"
+      );
+  }
+}
+
+export function AdminCrudWorkspaceResultPanel({
+  copy,
+  result,
+  actionKey,
+  followUpLinks,
+}: {
+  copy: CrudWorkspaceCopy;
+  result: string;
+  actionKey: CrudWorkspaceActionKey | null;
+  followUpLinks?: CrudConfig["followUpLinks"];
+}) {
   if (!result) return null;
 
   return (
@@ -672,12 +878,20 @@ export function AdminCrudWorkspaceResultPanel({ copy, result }: { copy: CrudWork
       icon="info"
       titleTag="h2"
     >
+      <div className="admin-workspace-result-guidance" role="status">
+        <strong>{copy.resultNextStepsTitle}</strong>
+        <p className="locale-safe">{resultGuidanceBody(actionKey)}</p>
+        {followUpLinks?.length ? (
+          <CrudWorkspaceFollowUpLinks title={copy.nextStepsTitle} description={copy.nextStepsDescription} links={followUpLinks} />
+        ) : null}
+      </div>
       <pre>{result}</pre>
     </LogCard>
   );
 }
 
 export function AdminCrudWorkspaceRevisionsPanel({
+  config,
   copy,
   idBase,
   identifier,
@@ -688,6 +902,7 @@ export function AdminCrudWorkspaceRevisionsPanel({
   onShowDiff,
   onRestoreRevision,
 }: {
+  config: CrudConfig;
   copy: CrudWorkspaceCopy;
   idBase: string;
   identifier: string;
@@ -710,7 +925,12 @@ export function AdminCrudWorkspaceRevisionsPanel({
       titleTag="h2"
     >
       {revisions.length === 0 ? (
-        <div className="state-empty">{copy.revisionsEmpty}</div>
+        <div className="state-empty admin-workspace-empty-state" role="status">
+          <strong>{copy.revisionsEmpty}</strong>
+          {config.followUpLinks?.length ? (
+            <CrudWorkspaceFollowUpLinks title={copy.nextStepsTitle} description={copy.nextStepsRevisionsBody} links={config.followUpLinks} />
+          ) : null}
+        </div>
       ) : (
         <>
           <label className="field" htmlFor={`${idBase}-revision-id`}>

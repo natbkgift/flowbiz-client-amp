@@ -75,6 +75,23 @@ export default function AdminProjectsCmsPage() {
       config={{
         title: "Projects CMS",
         subtitle: "Manage projects via existing /admin/projects APIs (property_type from taxonomy /admin/content/taxonomies).",
+        followUpLinks: [
+          {
+            href: "/admin/properties",
+            label: "Open properties",
+            description: "Check downstream listings that depend on this project before publishing updates.",
+          },
+          {
+            href: "/admin/media",
+            label: "Open media",
+            description: "Verify hero media coverage and asset usage before publish.",
+          },
+          {
+            href: "/admin/dashboard",
+            label: "Open dashboard",
+            description: "Review warnings and freshness signals tied to project content updates.",
+          },
+        ],
         identifierLabel: "Project ID",
         identifierPlaceholder: "project UUID",
         identifierField: "id",

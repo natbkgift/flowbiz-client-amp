@@ -137,4 +137,26 @@ describe("B14 admin dashboard page contract", () => {
     expect(screen).toContain("if (backgroundTasks.length === 0)");
     expect(screen).toContain("backgroundTasksEmptyTitle");
   });
+
+  it("adds recovery actions to empty dashboard sections so operators can keep moving", () => {
+    const screen = read("components/admin/domain/dashboard/AdminDashboardScreen.tsx");
+    const copy = read("components/admin/domain/dashboard/dashboard-copy.ts");
+    const styles = read("styles/admin-components.css");
+
+    expect(screen).toContain("function renderWorkspaceLink(href: string, label: string)");
+    expect(screen).toContain("function renderActionGroup(actions: ReactNode[])");
+    expect(screen).toContain("return renderSectionState(t.overviewEmptyTitle, t.overviewEmptyBody, {");
+    expect(screen).toContain("action: renderRefreshButton(t.retry),");
+    expect(screen).toContain("return renderSectionState(t.widgetsEmptyTitle, t.widgetsEmptyBody, {");
+    expect(screen).toContain("return renderSectionState(t.insightsEmptyTitle, t.insightsEmptyBody, {");
+    expect(screen).toContain('renderWorkspaceLink("/admin/imports", t.openImports)');
+    expect(screen).toContain('renderWorkspaceLink("/admin/media", t.openMedia)');
+    expect(screen).toContain('renderWorkspaceLink("/admin/seo", t.openSeo)');
+    expect(screen).toContain('renderWorkspaceLink("/admin/inquiries", t.trendReviewAction)');
+    expect(screen).toContain('renderWorkspaceLink("/admin/inquiries", t.recentInquiriesReviewAction)');
+    expect(copy).toContain('trendReviewAction: "Review CRM flow"');
+    expect(copy).toContain('recentInquiriesReviewAction: "Review inquiry queue"');
+    expect(screen).toContain('className="dashboard-empty-actions"');
+    expect(styles).toContain('.dashboard-empty-actions,');
+  });
 });

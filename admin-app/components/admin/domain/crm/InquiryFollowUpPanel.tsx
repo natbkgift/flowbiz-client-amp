@@ -31,6 +31,10 @@ export function InquiryFollowUpPanel({
     <section aria-label={t.followUp} className="crm-detail-section">
       <h3>{t.followUp}</h3>
       <p className="crm-section-description">{t.followUpDescription}</p>
+      <div className="crm-detail-callout crm-detail-callout--followup">
+        <strong>{t.saveFollowUp}</strong>
+        <p className="crm-section-description">{t.followUpActionHint}</p>
+      </div>
       <div className="crm-follow-up-grid">
         <label className="field" htmlFor="follow-up-status">
           <span>{t.followUp}</span>

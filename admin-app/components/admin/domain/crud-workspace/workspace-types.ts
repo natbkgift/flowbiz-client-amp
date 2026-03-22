@@ -6,10 +6,33 @@ export type ListResponse = {
   meta?: { page?: number; limit?: number; total?: number } | null;
 };
 
+export type CrudWorkspaceActionKey =
+  | "get-detail"
+  | "check-readiness"
+  | "publish"
+  | "unpublish"
+  | "delete"
+  | "load-revisions"
+  | "create"
+  | "patch"
+  | "bulk"
+  | "show-diff"
+  | "restore-revision";
+
 export type CrudConfig = {
   title: string;
   idBase?: string;
   subtitle: string;
+  followUpLinks?: ReadonlyArray<{
+    href: string;
+    label: string;
+    description?: string;
+  }>;
+  prerequisiteHints?: {
+    authSignedOut?: string;
+    authSignedIn?: string;
+    query?: string;
+  };
   identifierLabel: string;
   identifierPlaceholder: string;
   identifierField: string;

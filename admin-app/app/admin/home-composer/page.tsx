@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { type FormEvent, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import {
@@ -9,7 +10,7 @@ import {
   persistAuthSession,
   readAuthSession,
 } from '@/app/_lib/admin-auth';
-import { detectAdminLocale, persistAdminLocale } from '@/app/_lib/admin-i18n';
+import { detectAdminLocale, persistAdminLocale, withAdminLocale } from '@/app/_lib/admin-i18n';
 import { normalizeLocalMediaPath } from '@/app/_lib/local-media';
 import { ActionCard, AdminButton, AdminPage, AdminPageBody, AdminPageHeader, LogCard } from '@/components/admin/AdminPrimitives';
 import { apiRequest } from '../../../lib/api';
@@ -98,6 +99,8 @@ type MediaWorkspaceItem = {
 type MediaWorkspaceListResponse = {
   items?: MediaWorkspaceItem[];
 };
+
+type ComposerSuccessKey = 'draft' | 'publish';
 
 const HOME_COMPOSER_COPY = {
   en: {
@@ -221,6 +224,12 @@ const HOME_COMPOSER_COPY = {
     loginError: 'Unable to sign in right now.',
     draftSaved: 'Draft saved',
     publishedNotice: 'Published',
+    successTitle: 'Next verification',
+    draftSuccessBody: 'Use layout and media to confirm the draft still lines up with the current homepage structure and approved assets before the next edit round.',
+    publishSuccessBody: 'Use dashboard and layout to confirm the published homepage is aligned with the current release checklist and downstream content owners.',
+    openDashboard: 'Open dashboard',
+    openLayout: 'Open layout',
+    openMedia: 'Open media',
     saveDraftError: 'Unable to save draft',
     publishError: 'Unable to publish',
     publishConfirm: 'Publish the current draft now? This will update the live home page for the selected locale.',
@@ -354,6 +363,12 @@ const HOME_COMPOSER_COPY = {
     loginError: 'ไม่สามารถเข้าสู่ระบบได้ในขณะนี้',
     draftSaved: 'บันทึกร่างแล้ว',
     publishedNotice: 'เผยแพร่แล้ว',
+    successTitle: 'จุดตรวจถัดไป',
+    draftSuccessBody: 'ใช้ layout และ media เพื่อตรวจว่าร่างล่าสุดยังสอดคล้องกับโครงหน้าแรกและไฟล์ที่อนุมัติแล้วก่อนเริ่มรอบแก้ไขถัดไป',
+    publishSuccessBody: 'ใช้ dashboard และ layout เพื่อตรวจว่าหน้าแรกที่เผยแพร่แล้วสอดคล้องกับ release checklist ปัจจุบันและทีมคอนเทนต์ปลายทาง',
+    openDashboard: 'ดูแดชบอร์ด',
+    openLayout: 'ดู layout',
+    openMedia: 'ดู media',
     saveDraftError: 'ไม่สามารถบันทึกร่างได้',
     publishError: 'ไม่สามารถเผยแพร่ได้',
     publishConfirm: 'ต้องการเผยแพร่ร่างปัจจุบันตอนนี้หรือไม่ ระบบจะอัปเดตหน้าแรกที่ใช้งานจริงตามภาษาที่เลือก',
@@ -764,6 +779,7 @@ export default function HomeComposerPage() {
 
   const [error, setError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
+  const [successKey, setSuccessKey] = useState<ComposerSuccessKey | null>(null);
   const [validation, setValidation] = useState<ValidationResult | null>(null);
 
   const [projectCandidates, setProjectCandidates] = useState<CandidateProject[]>([]);
@@ -1138,6 +1154,7 @@ export default function HomeComposerPage() {
     setError(null);
     if (showNotice) {
       setNotice(null);
+      setSuccessKey(null);
     }
     try {
       const payloadConfig = readConfigForSave();
@@ -1156,6 +1173,7 @@ export default function HomeComposerPage() {
       setValidation(nextValidation);
       if (showNotice) {
         setNotice(t.draftSaved);
+        setSuccessKey('draft');
       }
       setBundle((prev) => prev ? ({ ...prev, draft: savedDraft }) : ({
         page_key: 'home',
@@ -1184,6 +1202,7 @@ export default function HomeComposerPage() {
     setPublishing(true);
     setError(null);
     setNotice(null);
+    setSuccessKey(null);
     try {
       const saved = await saveDraftRequest(false);
       if (!saved) return;
@@ -1192,6 +1211,7 @@ export default function HomeComposerPage() {
       });
       setValidation(res.validation);
       setNotice(t.publishedNotice);
+      setSuccessKey('publish');
       setBundle((prev) => prev ? ({ ...prev, published: res.item }) : prev);
     } catch (err) {
       if (handleComposerUnauthorized(err)) return;
@@ -1284,6 +1304,7 @@ export default function HomeComposerPage() {
   const pathKeyLabel = (key: string): string => PATH_KEY_LABELS[key]?.[locale] ?? key;
   const saveDisabled = saving || loading || Boolean(heroImageError);
   const publishDisabled = publishing || loading || saving || !draftId || Boolean(heroImageError);
+  const successBody = successKey === 'publish' ? t.publishSuccessBody : t.draftSuccessBody;
 
   return (
     <AdminPage className="home-composer-stack">
@@ -1389,6 +1410,25 @@ export default function HomeComposerPage() {
         <AdminPageBody className="home-composer-stack">
           {error && hasComposerBundle ? <div className="home-composer-banner home-composer-banner--error">{error}</div> : null}
           {notice ? <div className="home-composer-banner home-composer-banner--success">{notice}</div> : null}
+          {notice ? (
+            <div className="admin-workspace-success-handoff" role="status">
+              <strong>{t.successTitle}</strong>
+              <p className="locale-safe">{successBody}</p>
+              <div className="card-actions">
+                {successKey === 'publish' ? (
+                  <Link className="admin-button admin-button--secondary admin-button--sm" href={withAdminLocale('/admin/dashboard', locale)}>
+                    {t.openDashboard}
+                  </Link>
+                ) : null}
+                <Link className="admin-button admin-button--secondary admin-button--sm" href={withAdminLocale('/admin/layout', locale)}>
+                  {t.openLayout}
+                </Link>
+                <Link className="admin-button admin-button--secondary admin-button--sm" href={withAdminLocale('/admin/media', locale)}>
+                  {t.openMedia}
+                </Link>
+              </div>
+            </div>
+          ) : null}
           {hasUnsavedChanges ? <div className="home-composer-banner home-composer-banner--warn"><strong>{t.unsavedChanges}</strong> {t.unsavedChangesDescription}</div> : null}
 
           {!loading && !hasComposerBundle ? (

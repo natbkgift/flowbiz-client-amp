@@ -561,6 +561,18 @@ export function AdminDashboardScreen({
     );
   }
 
+  function renderWorkspaceLink(href: string, label: string) {
+    return (
+      <Link className={adminButtonClassName({ variant: "secondary", size: "sm" })} href={withAdminLocale(href, locale)}>
+        {label}
+      </Link>
+    );
+  }
+
+  function renderActionGroup(actions: ReactNode[]) {
+    return <div className="dashboard-empty-actions">{actions}</div>;
+  }
+
   function renderSectionState(emptyTitle: string, emptyBody: string, options?: { action?: ReactNode; compact?: boolean }) {
     return (
       <DashboardSectionState
@@ -746,7 +758,9 @@ export function AdminDashboardScreen({
     }
 
     if (dashboardState === "empty") {
-      return renderSectionState(t.overviewEmptyTitle, t.overviewEmptyBody);
+      return renderSectionState(t.overviewEmptyTitle, t.overviewEmptyBody, {
+        action: renderRefreshButton(t.retry),
+      });
     }
 
     return (
@@ -798,7 +812,9 @@ export function AdminDashboardScreen({
     }
 
     if (widgets.length === 0) {
-      return renderSectionState(t.widgetsEmptyTitle, t.widgetsEmptyBody);
+      return renderSectionState(t.widgetsEmptyTitle, t.widgetsEmptyBody, {
+        action: renderRefreshButton(t.retry),
+      });
     }
 
     return (
@@ -837,12 +853,25 @@ export function AdminDashboardScreen({
         value: freshnessEntries.length > 0 ? String(freshnessEntries.length) : t.unknownValue,
         detail: t.insightsHint,
         updatedAt: latestOperationalLabel,
-        action: renderRefreshButton(),
+        action: renderActionGroup([
+          renderRefreshButton(),
+          renderWorkspaceLink("/admin/imports", t.openImports),
+          renderWorkspaceLink("/admin/media", t.openMedia),
+          renderWorkspaceLink("/admin/seo", t.openSeo),
+        ]),
       });
     }
 
     if (freshnessEntries.length === 0) {
-      return renderSectionState(t.insightsEmptyTitle, t.insightsEmptyBody, { compact: true });
+      return renderSectionState(t.insightsEmptyTitle, t.insightsEmptyBody, {
+        compact: true,
+        action: renderActionGroup([
+          renderRefreshButton(t.retry),
+          renderWorkspaceLink("/admin/imports", t.openImports),
+          renderWorkspaceLink("/admin/media", t.openMedia),
+          renderWorkspaceLink("/admin/seo", t.openSeo),
+        ]),
+      });
     }
 
     return (
@@ -896,12 +925,21 @@ export function AdminDashboardScreen({
         value: chartPeriod === "7d" ? t.trendPeriod7d : t.trendPeriod30d,
         detail: t.trendHint,
         updatedAt: latestOperationalLabel,
-        action: renderRefreshButton(),
+        action: renderActionGroup([
+          renderRefreshButton(t.comparePeriods),
+          renderWorkspaceLink("/admin/inquiries", t.trendReviewAction),
+        ]),
       });
     }
 
     if (!hasTrendData(trendPoints)) {
-      return <DashboardSectionState tone="empty" title={t.trendEmptyTitle} body={t.trendEmptyBody} compact />;
+      return renderSectionState(t.trendEmptyTitle, t.trendEmptyBody, {
+        compact: true,
+        action: renderActionGroup([
+          renderRefreshButton(t.comparePeriods),
+          renderWorkspaceLink("/admin/inquiries", t.trendReviewAction),
+        ]),
+      });
     }
 
     return <DashboardTrendChart points={trendPoints} locale={locale} period={chartPeriod} />;
@@ -933,14 +971,25 @@ export function AdminDashboardScreen({
         value: summary ? String(summary.warnings.length) : t.unknownValue,
         detail: t.watchlistHint,
         updatedAt: latestOperationalLabel,
-        action: renderRefreshButton(t.reviewWatchlist),
+        action: renderActionGroup([
+          renderRefreshButton(t.reviewWatchlist),
+          renderWorkspaceLink("/admin/media", t.openMedia),
+          renderWorkspaceLink("/admin/seo", t.openSeo),
+        ]),
         statusTone: (summary?.warnings?.length || 0) > 0 ? "warn" : "info",
         statusLabel: (summary?.warnings?.length || 0) > 0 ? t.warningStatus : t.refreshRequired,
       });
     }
 
     if ((summary?.warnings || []).length === 0) {
-      return renderSectionState(t.warningsEmptyTitle, t.warningsEmptyBody, { compact: true });
+      return renderSectionState(t.warningsEmptyTitle, t.warningsEmptyBody, {
+        compact: true,
+        action: renderActionGroup([
+          renderRefreshButton(t.reviewWatchlist),
+          renderWorkspaceLink("/admin/media", t.openMedia),
+          renderWorkspaceLink("/admin/seo", t.openSeo),
+        ]),
+      });
     }
 
     return (
@@ -985,22 +1034,20 @@ export function AdminDashboardScreen({
         updatedAt: summary?.raw_metrics?.recent_inquiries?.latest_at
           ? prettyDate(summary.raw_metrics.recent_inquiries.latest_at, locale)
           : t.noSnapshotYet,
-        action: (
-          <Link className={adminButtonClassName({ variant: "secondary", size: "sm" })} href={withAdminLocale("/admin/inquiries", locale)}>
-            {t.openCrm}
-          </Link>
-        ),
+        action: renderActionGroup([
+          renderWorkspaceLink("/admin/inquiries", t.recentInquiriesReviewAction),
+          renderRefreshButton(t.retry),
+        ]),
       });
     }
 
     if (totalRecentInquiryCount === 0) {
       return renderSectionState(t.recentInquiriesEmptyTitle, t.recentInquiriesEmptyBody, {
         compact: true,
-        action: (
-          <Link className={adminButtonClassName({ variant: "secondary", size: "sm" })} href={withAdminLocale("/admin/inquiries", locale)}>
-            {t.openCrm}
-          </Link>
-        ),
+        action: renderActionGroup([
+          renderWorkspaceLink("/admin/inquiries", t.recentInquiriesReviewAction),
+          renderRefreshButton(t.retry),
+        ]),
       });
     }
 
@@ -1047,7 +1094,15 @@ export function AdminDashboardScreen({
     }
 
     if (backgroundTasks.length === 0) {
-      return renderSectionState(t.backgroundTasksEmptyTitle, t.backgroundTasksEmptyBody, { compact: true });
+      return renderSectionState(t.backgroundTasksEmptyTitle, t.backgroundTasksEmptyBody, {
+        compact: true,
+        action: renderActionGroup([
+          renderRefreshButton(t.retry),
+          renderWorkspaceLink("/admin/imports", t.openImports),
+          renderWorkspaceLink("/admin/media", t.openMedia),
+          renderWorkspaceLink("/admin/seo", t.openSeo),
+        ]),
+      });
     }
 
     return (

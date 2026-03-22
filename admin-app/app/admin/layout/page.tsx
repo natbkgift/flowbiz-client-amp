@@ -1,9 +1,10 @@
 "use client";
 
+import Link from "next/link";
 import { type FormEvent, useEffect, useMemo, useState } from "react";
 
 import { clearAuthSession, loginAdmin, persistAuthSession, readAuthSession } from "@/app/_lib/admin-auth";
-import { detectAdminLocale, type AdminLocale } from "@/app/_lib/admin-i18n";
+import { detectAdminLocale, type AdminLocale, withAdminLocale } from "@/app/_lib/admin-i18n";
 import { SITE_LAYOUT_CMS_SLUG, SITE_LAYOUT_CMS_TEMPLATE } from "@/app/_lib/layout-cms";
 import {
   ActionCard,
@@ -47,6 +48,8 @@ const copy = {
     loadError: "Unable to load layout CMS data.",
     saveError: "Unable to save layout CMS data.",
     saveSuccess: "Layout CMS saved.",
+    successTitle: "Next verification",
+    successBody: "Check the shared company and homepage surfaces that reuse this layout source before closing the update.",
     configLabel: "site-layout JSON",
     sourceHint:
       "Stored in /admin/company/site-layout.content. Use internal paths only (example: /invest).",
@@ -61,6 +64,8 @@ const copy = {
     previewDescription: "Resolved counts and contact details parsed from the current JSON config.",
     previewInvalid: "Invalid JSON",
     adminFallback: "Admin",
+    openCompany: "Open company CMS",
+    openHomeComposer: "Open home composer",
   },
   th: {
     title: "Admin Layout CMS",
@@ -82,6 +87,8 @@ const copy = {
     loadError: "ไม่สามารถโหลดข้อมูล layout CMS ได้",
     saveError: "ไม่สามารถบันทึก layout CMS ได้",
     saveSuccess: "บันทึก layout CMS สำเร็จ",
+    successTitle: "จุดตรวจถัดไป",
+    successBody: "ตรวจหน้าบริษัทและหน้าแรกที่ใช้ layout source นี้ร่วมกันก่อนปิดงานอัปเดตครั้งนี้",
     configLabel: "JSON ของ site-layout",
     sourceHint:
       "ข้อมูลถูกเก็บใน /admin/company/site-layout.content กรุณาใช้ internal path เท่านั้น (เช่น /invest)",
@@ -96,6 +103,8 @@ const copy = {
     previewDescription: "สรุปจำนวนลิงก์และข้อมูลติดต่อที่อ่านได้จาก JSON ปัจจุบัน",
     previewInvalid: "JSON ไม่ถูกต้อง",
     adminFallback: "แอดมิน",
+    openCompany: "ดู company CMS",
+    openHomeComposer: "ดู home composer",
   },
 };
 
@@ -404,6 +413,20 @@ export default function AdminLayoutCmsPage() {
           </div>
           {pageError ? <div className="state-error">{pageError}</div> : null}
           {resultMessage ? <div className="state-success">{resultMessage}</div> : null}
+          {resultMessage ? (
+            <div className="admin-workspace-success-handoff" role="status">
+              <strong>{t.successTitle}</strong>
+              <p className="locale-safe">{t.successBody}</p>
+              <div className="card-actions">
+                <Link className="admin-button admin-button--secondary admin-button--sm" href={withAdminLocale("/admin/company", locale)}>
+                  {t.openCompany}
+                </Link>
+                <Link className="admin-button admin-button--secondary admin-button--sm" href={withAdminLocale("/admin/home-composer", locale)}>
+                  {t.openHomeComposer}
+                </Link>
+              </div>
+            </div>
+          ) : null}
         </ActionCard>
       ) : null}
 

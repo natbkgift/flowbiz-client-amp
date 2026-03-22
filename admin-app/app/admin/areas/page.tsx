@@ -106,6 +106,23 @@ export default function AdminAreasCmsPage() {
         title: "Areas CMS",
         subtitle:
           "Form-first editor for EN/TH area guide content. Run readiness before publish to confirm content and statistics requirements.",
+        followUpLinks: [
+          {
+            href: "/admin/projects",
+            label: "Open projects",
+            description: "Review downstream projects that depend on this area before publishing.",
+          },
+          {
+            href: "/admin/media",
+            label: "Open media",
+            description: "Check local media coverage for area hero and cover assets.",
+          },
+          {
+            href: "/admin/dashboard",
+            label: "Open dashboard",
+            description: "Confirm translation and watchlist signals before pushing the area live.",
+          },
+        ],
         identifierLabel: "Area ID",
         identifierPlaceholder: "area UUID",
         identifierField: "id",

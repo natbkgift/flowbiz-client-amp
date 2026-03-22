@@ -25,7 +25,7 @@ import {
   getCrudWorkspaceCopy,
   getCrudWorkspaceDisplayConfig,
 } from "@/components/admin/domain/crud-workspace/crud-workspace-copy";
-import type { CrudConfig, ListResponse } from "@/components/admin/domain/crud-workspace/workspace-types";
+import type { CrudConfig, CrudWorkspaceActionKey, ListResponse } from "@/components/admin/domain/crud-workspace/workspace-types";
 import {
   buildListPath,
   checklistReport,
@@ -101,6 +101,7 @@ export function AdminJsonCrudWorkspace({ config }: { config: CrudConfig }) {
   const [items, setItems] = useState<unknown[]>([]);
   const [meta, setMeta] = useState<ListResponse["meta"]>(null);
   const [result, setResult] = useState("");
+  const [lastActionKey, setLastActionKey] = useState<CrudWorkspaceActionKey | null>(null);
   const [publishWarningSignature, setPublishWarningSignature] = useState("");
   const [previewRecord, setPreviewRecord] = useState<Record<string, unknown> | null>(null);
   const [revisions, setRevisions] = useState<Record<string, unknown>[]>([]);
@@ -199,13 +200,15 @@ export function AdminJsonCrudWorkspace({ config }: { config: CrudConfig }) {
     setItems([]);
     setMeta(null);
     setResult("");
+    setLastActionKey(null);
   }
 
-  async function runAction(action: () => Promise<unknown>): Promise<void> {
+  async function runAction(actionKey: CrudWorkspaceActionKey, action: () => Promise<unknown>): Promise<void> {
     setError(null);
     try {
       const output = await action();
       setResult(toPrettyJson(output));
+      setLastActionKey(actionKey);
       const configuredRecordPath = config.previewConfig?.recordPath || config.publishChecklistConfig?.recordPath;
       const candidate = configuredRecordPath ? normalizeRecordCandidate(normalizeRecordCandidate(output)?.[configuredRecordPath]) : normalizeRecordCandidate(output);
       if (candidate) setPreviewRecord(candidate);
@@ -300,10 +303,20 @@ export function AdminJsonCrudWorkspace({ config }: { config: CrudConfig }) {
         label: t.use,
         renderCell: (item) => {
           const id = pickIdentifierFromRow(item);
+          const isActiveRecord = Boolean(id && id === identifier);
           return (
-            <button className="btn btn-secondary" type="button" onClick={() => setIdentifier(id)} disabled={!id}>
-              {t.use}
-            </button>
+            <div className="admin-data-table-row-action">
+              <button
+                className={`btn ${isActiveRecord ? "btn" : "btn-secondary"}`}
+                type="button"
+                onClick={() => setIdentifier(id)}
+                disabled={!id}
+                aria-pressed={isActiveRecord}
+              >
+                {isActiveRecord ? t.activeRecord : t.use}
+              </button>
+              <span className="admin-data-table-row-action__hint">{t.useRecordHint}</span>
+            </div>
           );
         },
         getSortValue: (item) => pickIdentifierFromRow(item),
@@ -367,7 +380,7 @@ export function AdminJsonCrudWorkspace({ config }: { config: CrudConfig }) {
         },
       },
     ],
-    [pickIdentifierFromRow, t.identifier, t.nameTitle, t.slug, t.statusUpdated, t.use]
+    [identifier, pickIdentifierFromRow, t.activeRecord, t.identifier, t.nameTitle, t.slug, t.statusUpdated, t.use, t.useRecordHint]
   );
 
   const hasOutputSidecar = Boolean(result) || Boolean(revisionConfig);
@@ -415,6 +428,7 @@ export function AdminJsonCrudWorkspace({ config }: { config: CrudConfig }) {
       />
 
       <AdminCrudWorkspaceAuthPanel
+        config={config}
         idBase={idBase}
         copy={t}
         isAuthenticated={isAuthenticated}
@@ -435,6 +449,7 @@ export function AdminJsonCrudWorkspace({ config }: { config: CrudConfig }) {
         <>
           <div className="admin-workspace-split">
             <AdminCrudWorkspaceQueryPanel
+              config={config}
               idBase={idBase}
               copy={t}
               listQuery={listQuery}
@@ -452,25 +467,25 @@ export function AdminJsonCrudWorkspace({ config }: { config: CrudConfig }) {
               readinessPath={readinessPath}
               revisionConfig={revisionConfig}
               onIdentifierChange={setIdentifier}
-              onGetDetail={() => void runAction(() => fetchJson(withIdentifier(config.getPath, identifier), token.trim()))}
-              onCheckReadiness={() => void runAction(() => fetchJson(withIdentifier(readinessPath, identifier), token.trim()))}
-              onPublish={() => void runAction(() => publishRecord())}
+              onGetDetail={() => void runAction("get-detail", () => fetchJson(withIdentifier(config.getPath, identifier), token.trim()))}
+              onCheckReadiness={() => void runAction("check-readiness", () => fetchJson(withIdentifier(readinessPath, identifier), token.trim()))}
+              onPublish={() => void runAction("publish", () => publishRecord())}
               onUnpublish={() =>
-                void runAction(() =>
+                void runAction("unpublish", () =>
                   fetchJson(withIdentifier(config.unpublishPath || "", identifier), token.trim(), {
                     method: "POST",
                   })
                 )
               }
               onDelete={() =>
-                void runAction(() =>
+                void runAction("delete", () =>
                   fetchJson(withIdentifier(config.deletePath || "", identifier), token.trim(), {
                     method: "DELETE",
                   })
                 )
               }
               onLoadRevisions={() =>
-                void runAction(async () => {
+                void runAction("load-revisions", async () => {
                   await loadRevisions();
                   return { revisions_loaded: true };
                 })
@@ -494,7 +509,7 @@ export function AdminJsonCrudWorkspace({ config }: { config: CrudConfig }) {
               onLocaleTabKeyDown={onLocaleTabKeyDown}
               onCreateFieldChange={handleCreateFieldChange}
               onCreate={() =>
-                void runAction(() =>
+                void runAction("create", () =>
                   fetchJson(config.createPath || "", token.trim(), {
                     method: "POST",
                     body: JSON.stringify(
@@ -530,7 +545,7 @@ export function AdminJsonCrudWorkspace({ config }: { config: CrudConfig }) {
               onLocaleTabKeyDown={onLocaleTabKeyDown}
               onPatchFieldChange={handlePatchFieldChange}
               onPatch={() =>
-                void runAction(() =>
+                void runAction("patch", () =>
                   fetchJson(withIdentifier(config.patchPath || "", identifier), token.trim(), {
                     method: "PATCH",
                     body: JSON.stringify(
@@ -567,7 +582,7 @@ export function AdminJsonCrudWorkspace({ config }: { config: CrudConfig }) {
             }
             onBulkFieldChange={handleBulkFieldChange}
             onRunBulkAction={(actionKey) =>
-              void runAction(async () => {
+              void runAction("bulk", async () => {
                 const action = bulkActions.find((candidate) => candidate.key === actionKey);
                 if (!action) throw new Error("Bulk action is unavailable.");
                 const ids = parseIdentifierList(bulkTargetIdsByAction[action.key] || "");
@@ -602,6 +617,7 @@ export function AdminJsonCrudWorkspace({ config }: { config: CrudConfig }) {
 
           <div className={hasOutputSidecar ? "admin-workspace-output-grid admin-workspace-output-grid--split" : "admin-workspace-output-grid"}>
             <AdminCrudWorkspaceRecordsPanel
+              config={config}
               copy={t}
               items={items}
               hasLoadedRecords={Boolean(meta)}
@@ -610,8 +626,9 @@ export function AdminJsonCrudWorkspace({ config }: { config: CrudConfig }) {
             />
             {hasOutputSidecar ? (
               <div className="admin-workspace-output-sidecar">
-                <AdminCrudWorkspaceResultPanel copy={t} result={result} />
+                <AdminCrudWorkspaceResultPanel copy={t} result={result} actionKey={lastActionKey} followUpLinks={config.followUpLinks} />
                 <AdminCrudWorkspaceRevisionsPanel
+                  config={config}
                   copy={t}
                   idBase={idBase}
                   identifier={identifier}
@@ -620,12 +637,12 @@ export function AdminJsonCrudWorkspace({ config }: { config: CrudConfig }) {
                   selectedRevisionId={selectedRevisionId}
                   onSelectedRevisionIdChange={setSelectedRevisionId}
                   onShowDiff={() =>
-                    void runAction(() =>
+                    void runAction("show-diff", () =>
                       fetchJson(withRevisionIdentifier(revisionConfig?.diffPath || "", identifier, selectedRevisionId), token.trim())
                     )
                   }
                   onRestoreRevision={() =>
-                    void runAction(async () => {
+                    void runAction("restore-revision", async () => {
                       const restored = await fetchJson(
                         withRevisionIdentifier(revisionConfig?.restorePath || "", identifier, selectedRevisionId),
                         token.trim(),

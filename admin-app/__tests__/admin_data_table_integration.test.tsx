@@ -45,12 +45,24 @@ describe("AdminDataTable integration", () => {
   it("supports sort/filter/pagination/bulk select with accessible labels", () => {
     render(<AdminDataTable rows={rows} columns={columns} getRowId={(row) => row.id} emptyLabel="No rows" pageSize={2} />);
 
+    expect(screen.getAllByText("Showing all 3 loaded rows")).toHaveLength(2);
+    expect(screen.getByText("Selected: 0")).toBeInTheDocument();
+
     const sortByName = screen.getByRole("button", { name: "Sort by Name" });
     fireEvent.click(sortByName);
     fireEvent.keyDown(sortByName, { key: "Enter" });
 
     fireEvent.change(screen.getByLabelText("Filter table rows"), { target: { value: "run" } });
     expect(screen.getByText("running")).toBeInTheDocument();
+    expect(screen.getAllByText("Showing 1 of 3 loaded rows")).toHaveLength(2);
+    expect(screen.getAllByRole("button", { name: "Clear filter" }).length).toBeGreaterThan(0);
+
+    fireEvent.change(screen.getByLabelText("Filter table rows"), { target: { value: "zzz" } });
+    expect(screen.getByText('No loaded rows match "zzz".')).toBeInTheDocument();
+    expect(screen.getAllByRole("button", { name: "Clear filter" })).toHaveLength(2);
+
+    fireEvent.click(screen.getAllByRole("button", { name: "Clear filter" })[0]);
+    expect(screen.getAllByText("Showing all 3 loaded rows")).toHaveLength(2);
 
     fireEvent.change(screen.getByLabelText("Filter table rows"), { target: { value: "" } });
     fireEvent.click(screen.getByRole("button", { name: "Next" }));
@@ -64,13 +76,21 @@ describe("AdminDataTable integration", () => {
 
   it("is used in shared CRUD workspace so it applies across multiple admin workspaces", () => {
     const workspace = read("components/admin/AdminJsonCrudWorkspace.tsx");
+    const recordsPanel = read("components/admin/domain/crud-workspace/AdminCrudWorkspacePanels.tsx");
+    const copy = read("components/admin/domain/crud-workspace/crud-workspace-copy.ts");
     const propertiesPage = read("app/admin/properties/page.tsx");
     const projectsPage = read("app/admin/projects/page.tsx");
     const developersPage = read("app/admin/developers/page.tsx");
 
     expect(workspace).toContain("AdminDataTable");
+    expect(workspace).toContain('className={`btn ${isActiveRecord ? "btn" : "btn-secondary"}`}');
+    expect(workspace).toContain('aria-pressed={isActiveRecord}');
+    expect(workspace).toContain('className="admin-data-table-row-action"');
+    expect(recordsPanel).toContain("<AdminDataTable");
     expect(propertiesPage).toContain("AdminJsonCrudWorkspace");
     expect(projectsPage).toContain("AdminJsonCrudWorkspace");
     expect(developersPage).toContain("AdminJsonCrudWorkspace");
+    expect(copy).toContain('useRecordHint: "Load this row into the action panels"');
+    expect(copy).toContain('activeRecord: "Active record"');
   });
 });

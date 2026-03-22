@@ -17,18 +17,22 @@ import { inquiriesCopy } from "@/components/admin/domain/crm/inquiries-copy";
 import { InquiryViewToggle } from "@/components/admin/domain/crm/InquiryViewToggle";
 import {
   buildQuery,
+  isInquiryViewMode,
   MAX_SAVED_FILTERS,
+  normalizeInquiryFilters,
   readRoleFromToken,
   savedFiltersKey,
   toLocalInputDateTime,
   translateFollowUpStatus,
   translateInquiryStatus,
+  workspaceStateKey,
 } from "@/components/admin/domain/crm/inquiries-utils";
 import type {
   InquiryFilters,
   InquiryItem,
   InquiryLocale,
   InquiryViewMode,
+  InquiryWorkspaceState,
   PaginatedResponse,
   SavedFilter,
   TimelineEvent,
@@ -105,6 +109,8 @@ function truncateFilterSummaryValue(value: string): string {
 
 export default function AdminInquiriesPage() {
   const savedFilterCounter = useRef(0);
+  const hasHydratedWorkspace = useRef(false);
+  const hasBootstrappedQueue = useRef(false);
   const [locale, setLocale] = useState<InquiryLocale>(() => detectLocale());
   const [loginEmail, setLoginEmail] = useState("");
   const [loginPassword, setLoginPassword] = useState("");
@@ -159,7 +165,6 @@ export default function AdminInquiriesPage() {
 
   useEffect(() => {
     if (typeof window === "undefined") return;
-    setActiveSavedFilterId("");
     const raw = window.localStorage.getItem(savedFiltersKey(role));
     if (!raw) {
       setSavedFilters([]);
@@ -177,6 +182,69 @@ export default function AdminInquiriesPage() {
     }
   }, [role]);
 
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    hasHydratedWorkspace.current = false;
+    const storageKey = workspaceStateKey(role);
+    const raw = window.localStorage.getItem(storageKey);
+    if (!raw) {
+      setFilters(EMPTY_FILTERS);
+      setAppliedFilters(EMPTY_FILTERS);
+      setAppliedFilterQuery(buildQuery(EMPTY_FILTERS));
+      setViewMode("table");
+      setActiveSavedFilterId("");
+      hasHydratedWorkspace.current = true;
+      hasBootstrappedQueue.current = false;
+      return;
+    }
+
+    try {
+      const parsed = JSON.parse(raw) as Partial<InquiryWorkspaceState>;
+      const nextDraftFilters = normalizeInquiryFilters(parsed.draftFilters);
+      const nextAppliedFilters = normalizeInquiryFilters(parsed.appliedFilters);
+      setFilters(nextDraftFilters);
+      setAppliedFilters(nextAppliedFilters);
+      setAppliedFilterQuery(buildQuery(nextAppliedFilters));
+      setViewMode(isInquiryViewMode(parsed.viewMode) ? parsed.viewMode : "table");
+      setActiveSavedFilterId(typeof parsed.activeSavedFilterId === "string" ? parsed.activeSavedFilterId : "");
+    } catch {
+      window.localStorage.removeItem(storageKey);
+      setFilters(EMPTY_FILTERS);
+      setAppliedFilters(EMPTY_FILTERS);
+      setAppliedFilterQuery(buildQuery(EMPTY_FILTERS));
+      setViewMode("table");
+      setActiveSavedFilterId("");
+    }
+
+    hasHydratedWorkspace.current = true;
+    hasBootstrappedQueue.current = false;
+  }, [role]);
+
+  useEffect(() => {
+    if (typeof window === "undefined" || !hasHydratedWorkspace.current) return;
+
+    const snapshot: InquiryWorkspaceState = {
+      draftFilters: filters,
+      appliedFilters,
+      viewMode,
+      activeSavedFilterId,
+    };
+
+    try {
+      window.localStorage.setItem(workspaceStateKey(role), JSON.stringify(snapshot));
+    } catch {
+      return;
+    }
+  }, [activeSavedFilterId, appliedFilters, filters, role, viewMode]);
+
+  useEffect(() => {
+    if (!isAuthenticated || !authToken.trim() || !hasHydratedWorkspace.current || hasBootstrappedQueue.current) {
+      return;
+    }
+    hasBootstrappedQueue.current = true;
+    void loadListWithFilters(appliedFilters, authToken, authEmail);
+  }, [appliedFilters, authEmail, authToken, isAuthenticated, loadListWithFilters]);
+
   const t = inquiriesCopy[locale];
   const authError = authErrorCode ? authErrorMessage(t, authErrorCode) : null;
   const filterQuery = useMemo(() => buildQuery(filters), [filters]);
@@ -184,6 +252,7 @@ export default function AdminInquiriesPage() {
   const hasUnappliedFilters = filterQuery !== appliedFilterQuery;
   const hasActiveFilters = Object.values(filters).some((value) => value.trim().length > 0);
   const hasAppliedFilters = Object.values(appliedFilters).some((value) => value.trim().length > 0);
+  const draftFilterSummary = buildFilterSummary(filters, t, locale);
   const appliedFilterSummary = buildFilterSummary(appliedFilters, t, locale);
   const hasNoFiltersToReset = !hasUnappliedFilters && !hasActiveFilters;
   const shouldDisableApply = !isAuthenticated || loading || detailLoading || Boolean(movingInquiryId) || !hasUnappliedFilters;
@@ -194,6 +263,11 @@ export default function AdminInquiriesPage() {
 
   function updateFilter<Key extends keyof InquiryFilters>(key: Key, value: InquiryFilters[Key]) {
     setFilters((current) => ({ ...current, [key]: value }));
+  }
+
+  function clearFilterChip<Key extends keyof InquiryFilters>(key: Key) {
+    setActiveSavedFilterId("");
+    setFilters((current) => ({ ...current, [key]: "" }));
   }
 
   async function applyFilters(tokenOverride?: string, emailOverride?: string) {
@@ -336,6 +410,7 @@ export default function AdminInquiriesPage() {
   }
 
   function clearFilters() {
+    setActiveSavedFilterId("");
     setFilters(EMPTY_FILTERS);
     void loadListWithFilters(EMPTY_FILTERS);
   }
@@ -411,6 +486,7 @@ export default function AdminInquiriesPage() {
 
   function logout() {
     clearAdminSession();
+    hasBootstrappedQueue.current = false;
     setRole("admin");
     setLoginPassword("");
     setError(null);
@@ -507,19 +583,44 @@ export default function AdminInquiriesPage() {
         ) : null}
 
         {isAuthenticated ? (
-          <div className="crm-filter-summary" aria-live="polite">
-            <span className="crm-filter-summary__label">{t.appliedQueue}</span>
-            <div className="crm-filter-summary__chips">
-              {hasUnappliedFilters ? <span className="crm-chip crm-chip-warn">{t.draftChangesPending}</span> : null}
-              {appliedFilterSummary.length > 0 ? (
-                appliedFilterSummary.map((summary) => (
-                  <span key={summary.key} className="crm-chip crm-chip-muted">
-                    {summary.label}
-                  </span>
-                ))
-              ) : (
-                <span className="crm-chip crm-chip-muted">{t.appliedQueueDefault}</span>
-              )}
+          <div className="crm-filter-summary-grid" aria-live="polite">
+            <div className="crm-filter-summary">
+              <span className="crm-filter-summary__label">{t.currentDraft}</span>
+              <div className="crm-filter-summary__chips">
+                {draftFilterSummary.length > 0 ? (
+                  draftFilterSummary.map((summary) => (
+                    <button
+                      key={summary.key}
+                      type="button"
+                      className="crm-filter-chip-button"
+                      onClick={() => clearFilterChip(summary.key)}
+                      disabled={!isAuthenticated || loading || detailLoading || Boolean(movingInquiryId)}
+                      aria-label={`${t.removeFilter}: ${summary.label}`}
+                    >
+                      <span>{summary.label}</span>
+                      <span aria-hidden="true">×</span>
+                    </button>
+                  ))
+                ) : (
+                  <span className="crm-chip crm-chip-muted">{t.currentDraftDefault}</span>
+                )}
+              </div>
+            </div>
+
+            <div className="crm-filter-summary">
+              <span className="crm-filter-summary__label">{t.appliedQueue}</span>
+              <div className="crm-filter-summary__chips">
+                {hasUnappliedFilters ? <span className="crm-chip crm-chip-warn">{t.draftChangesPending}</span> : null}
+                {appliedFilterSummary.length > 0 ? (
+                  appliedFilterSummary.map((summary) => (
+                    <span key={summary.key} className="crm-chip crm-chip-muted">
+                      {summary.label}
+                    </span>
+                  ))
+                ) : (
+                  <span className="crm-chip crm-chip-muted">{t.appliedQueueDefault}</span>
+                )}
+              </div>
             </div>
           </div>
         ) : null}
