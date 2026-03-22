@@ -1,8 +1,14 @@
 from __future__ import annotations
 
 import importlib.util
+import json
+import os
+import shutil
+import subprocess
 import sys
 from pathlib import Path
+
+import pytest
 
 ROOT = Path(__file__).resolve().parents[1]
 MODULE_PATH = ROOT / "tools" / "refactor_runner.py"
@@ -178,3 +184,181 @@ def test_stale_round_count_resets_when_worktree_or_blocker_changes() -> None:
         worktree_clean=True,
         blocked=False,
     ) == 2
+
+
+@pytest.mark.skipif(
+    shutil.which("pwsh") is None,
+    reason="pwsh is required for wrapper regression coverage",
+)
+@pytest.mark.parametrize(
+    ("command_template", "expects_override"),
+    [
+        ("", False),
+        ("custom-cli --prompt {prompt_file}", True),
+    ],
+)
+def test_run_refactor_wrapper_only_forwards_command_template_when_explicitly_supplied(
+    tmp_path: Path,
+    command_template: str,
+    expects_override: bool,
+) -> None:
+    repo_root = tmp_path / "repo"
+    repo_root.mkdir()
+    capture_path = tmp_path / "captured-args.json"
+    fake_bin = tmp_path / "bin"
+    fake_bin.mkdir()
+    fake_python = fake_bin / "python"
+    fake_python.write_text(
+        "\n".join(
+            [
+                "#!/usr/bin/env python3",
+                "import json",
+                "import os",
+                "import sys",
+                "from pathlib import Path",
+                (
+                    'Path(os.environ["CAPTURE_ARGS_PATH"]).write_text('
+                    'json.dumps(sys.argv[1:]), encoding="utf-8")'
+                ),
+            ]
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+    fake_python.chmod(0o755)
+
+    env = os.environ.copy()
+    env["PATH"] = f"{fake_bin}{os.pathsep}{env['PATH']}"
+    env["CAPTURE_ARGS_PATH"] = str(capture_path)
+
+    cmd = [
+        "pwsh",
+        "-NoProfile",
+        "-File",
+        str(ROOT / "tools" / "run-refactor.ps1"),
+        "-RepoRoot",
+        str(repo_root),
+        "-PromptFile",
+        "tools/prompts/refactor_loop_v3.txt",
+        "-DryRun",
+        "-NoWatchStatus",
+    ]
+    if command_template:
+        cmd.extend(["-CommandTemplate", command_template])
+
+    result = subprocess.run(
+        cmd,
+        cwd=ROOT,
+        env=env,
+        text=True,
+        capture_output=True,
+        check=False,
+    )
+
+    assert result.returncode == 0, result.stderr
+    captured_args = json.loads(capture_path.read_text(encoding="utf-8"))
+    assert "--dry-run" in captured_args
+    assert captured_args[:2] == ["tools/refactor_runner.py", "--repo-root"]
+
+    if expects_override:
+        index = captured_args.index("--command-template")
+        assert captured_args[index + 1] == command_template
+    else:
+        assert "--command-template" not in captured_args
+
+
+def test_main_retry_countdown_updates_live_status_runtime_artifacts(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    repo_root = tmp_path
+    ai_dir = repo_root / ".ai"
+    ai_dir.mkdir()
+    prompt_file = repo_root / "tools" / "prompts" / "refactor_loop_v3.txt"
+    prompt_file.parent.mkdir(parents=True)
+    prompt_file.write_text("Base controller prompt", encoding="utf-8")
+    (ai_dir / "refactor-state.md").write_text("# state\n", encoding="utf-8")
+    (ai_dir / "refactor-queue.md").write_text("# queue\n", encoding="utf-8")
+    (ai_dir / "next-run.md").write_text("# next\n", encoding="utf-8")
+
+    agent_results = [
+        subprocess.CompletedProcess(
+            args="fake-agent",
+            returncode=1,
+            stdout="",
+            stderr="first failure",
+        ),
+        subprocess.CompletedProcess(
+            args="fake-agent",
+            returncode=0,
+            stdout=(
+                "issue fixed: retry countdown artifacts verified\n"
+                "validation: pytest tests/test_refactor_runner.py (passed)\n"
+                "commit: none\n"
+                "next: inspect any remaining runner observability gap\n"
+            ),
+            stderr="",
+        ),
+    ]
+    executed_commands: list[str] = []
+    retry_snapshots: list[dict[str, object]] = []
+
+    def fake_run_cmd(
+        cmd: str,
+        cwd: Path,
+        timeout_sec: int | None = None,
+    ) -> subprocess.CompletedProcess[str]:
+        assert cwd == repo_root
+        assert timeout_sec is None
+        executed_commands.append(cmd)
+        return agent_results.pop(0)
+
+    def fake_sleep(seconds: int) -> None:
+        assert seconds == 1
+        payload = json.loads((ai_dir / "refactor-live-status.json").read_text(encoding="utf-8"))
+        retry_snapshots.append(payload)
+
+    monkeypatch.setattr(RUNNER, "run_cmd", fake_run_cmd)
+    monkeypatch.setattr(RUNNER, "git_branch", lambda _: "copilot/refactor-implementation-quality")
+    monkeypatch.setattr(RUNNER, "git_worktree_clean", lambda _: True)
+    monkeypatch.setattr(RUNNER, "last_commit", lambda _: "abc1234")
+    monkeypatch.setattr(RUNNER.time, "sleep", fake_sleep)
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        [
+            "refactor_runner.py",
+            "--repo-root",
+            str(repo_root),
+            "--prompt-file",
+            str(prompt_file),
+            "--rounds",
+            "1",
+            "--retry-limit",
+            "1",
+            "--retry-backoff-sec",
+            "3",
+            "--max-stale-rounds",
+            "5",
+            "--command-template",
+            "fake-agent --prompt {prompt_file}",
+        ],
+    )
+
+    exit_code = RUNNER.main()
+
+    assert exit_code == 0
+    assert len(executed_commands) == 2
+    assert [snapshot["retry_countdown_sec"] for snapshot in retry_snapshots] == [3, 2, 1]
+    assert {snapshot["next_retry_attempt"] for snapshot in retry_snapshots} == {2}
+    assert {snapshot["status"] for snapshot in retry_snapshots} == {"retry-wait"}
+    assert all(snapshot["current_prompt_file"] for snapshot in retry_snapshots)
+    assert all(snapshot["last_message_file"] for snapshot in retry_snapshots)
+
+    final_payload = json.loads((ai_dir / "refactor-live-status.json").read_text(encoding="utf-8"))
+    assert final_payload["status"] == "stopped"
+    assert final_payload["last_validated_round"] == 1
+    assert (
+        final_payload["last_validation_summary"]
+        == "worktree_clean=True; smoke=skipped; agent_validations=1"
+    )

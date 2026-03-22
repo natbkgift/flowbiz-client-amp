@@ -1,9 +1,9 @@
 # Next Run
 
 Focus:
-1. add dedicated regression coverage for the PowerShell wrapper path when `-CommandTemplate` is explicitly supplied
-2. validate a real retry-wait cycle end to end so countdown and next-attempt fields are proven from runtime artifacts, not only unit rendering coverage
-3. only expand runner observability or wrapper logic where a concrete controller or validation gap can be demonstrated from the current implementation
+1. only rerun a real controller session if CI or operator evidence shows a concrete runtime gap in runner observability, retry state, or controller contract handling
+2. keep future runner changes limited to demonstrated defects; avoid broad churn now that wrapper override coverage and retry runtime artifact coverage are in place
+3. if a new gap appears, prefer targeted regression coverage first before changing runner logic
 
 Do not repeat:
 - shell polish

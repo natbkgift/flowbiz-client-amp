@@ -148,7 +148,7 @@ Success:
 ## [RUNNER-003] Wrapper override path still lacks dedicated regression coverage
 Type: validation / argument passing
 Priority: LOW
-Status: OPEN
+Status: DONE
 Modules: PowerShell wrapper, runner integration
 Success:
 - explicit wrapper `-CommandTemplate` forwarding is covered by an automated regression path
