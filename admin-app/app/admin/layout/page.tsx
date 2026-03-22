@@ -402,7 +402,7 @@ export default function AdminLayoutCmsPage() {
               <AdminButton type="submit">{t.signIn}</AdminButton>
             </form>
           }
-          sessionContent={session ? <AdminBadge tone="success">{session.email || t.statusReady}</AdminBadge> : null}
+          sessionContent={session ? <AdminBadge tone="ok">{session.email || t.statusReady}</AdminBadge> : null}
         >
           <AdminPrimaryActionBar
             title={t.title}
