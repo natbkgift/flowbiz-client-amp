@@ -301,6 +301,7 @@ def test_main_retry_countdown_updates_live_status_runtime_artifacts(
         ),
     ]
     executed_commands: list[str] = []
+    command_sleep_counts: list[int] = []
     retry_snapshots: list[dict[str, object]] = []
     sleep_calls: list[int] = []
 
@@ -312,6 +313,7 @@ def test_main_retry_countdown_updates_live_status_runtime_artifacts(
         assert cwd == repo_root
         assert timeout_sec is None
         executed_commands.append(cmd)
+        command_sleep_counts.append(len(sleep_calls))
         return agent_results.pop(0)
 
     def fake_sleep(seconds: int) -> None:
@@ -353,6 +355,7 @@ def test_main_retry_countdown_updates_live_status_runtime_artifacts(
 
     assert exit_code == 0
     assert len(executed_commands) == 2
+    assert command_sleep_counts == [0, 3]
     assert sleep_calls == [1, 1, 1]
     assert len(retry_snapshots) == 3
     assert [snapshot["retry_countdown_sec"] for snapshot in retry_snapshots] == [3, 2, 1]
