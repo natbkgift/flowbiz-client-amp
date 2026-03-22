@@ -25,6 +25,9 @@ PR #521 - Improve inquiry workflow and admin table discoverability
 - secondary shared CRUD workspaces
 
 ## Completed Improvements
+- hardened refactor runner codex auto-detect so the default template pins the repo root, disables ANSI color noise, and preserves config overrides that bypass broken local user config
+- clarified refactor runner live-status rendering so active versus final states are clearly differentiated while preserving the existing status fields
+- added targeted refactor runner regression coverage for CLI precedence, codex auto-detect template shape, and live-status rendering
 - rebalanced topbar layout and shell spacing
 - improved inquiry row action visibility with direct contact actions
 - added inquiry workspace and filter persistence
@@ -57,6 +60,8 @@ PR #521 - Improve inquiry workflow and admin table discoverability
 - added regression coverage for domain and layout workflow guidance contracts
 
 ## Files Changed So Far
+- tools/refactor_runner.py
+- tests/test_refactor_runner.py
 - admin-app/app/admin/inquiries/page.tsx
 - admin-app/app/admin/areas/page.tsx
 - admin-app/app/admin/blog/page.tsx
@@ -98,6 +103,9 @@ PR #521 - Improve inquiry workflow and admin table discoverability
 - admin-app/__tests__/b15_admin_layout_cms_page.test.ts
 
 ## Last Run Summary
+- hardened the refactor runner default codex template with explicit repo-root and clean-output flags while preserving user-supplied command-template overrides
+- made live-status markdown clearly distinguish active versus final states and validated the wrapper dry-run path without passing an explicit command template
+- validated the runner changes with targeted pytest coverage plus a PowerShell wrapper dry-run that auto-detected codex and wrote coherent live-status artifacts
 - added entity-aware prerequisite guidance and post-action handoff panels to the bespoke domain workspace so areas, developers, and projects now point to the right verification surfaces after successful actions
 - added layout CMS success handoff links so a saved shared layout can move straight into company CMS or home composer verification work
 - validated the new domain and layout guidance with targeted workspace tests, targeted layout CMS tests, and a successful admin build
@@ -123,7 +131,7 @@ PR #521 - Improve inquiry workflow and admin table discoverability
 - already completed layout CMS success-state handoff guidance
 
 ## Known Weaknesses
-- no additional high-confidence workflow gaps are currently captured in the queue
+- explicit wrapper `-CommandTemplate` forwarding still relies on manual validation rather than dedicated regression coverage
 
 ## Open Workflow Blockers
 - none in the current queue

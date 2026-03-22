@@ -18,6 +18,13 @@ VALIDATION_PREFIX = "validation:"
 COMMIT_PREFIX = "commit:"
 NEXT_PREFIX = "next:"
 STOP_SENTINEL = "STOP"
+TERMINAL_STATUSES = {
+    "bootstrap_failed",
+    "completed",
+    "dry-run-complete",
+    "failed",
+    "stopped",
+}
 
 
 class RunnerError(Exception):
@@ -104,8 +111,11 @@ def update_session_file(path: Path, **updates: Any) -> None:
 
 
 def render_live_status(payload: dict[str, Any]) -> str:
-    lines = ["# Refactor Runner Live Status", ""]
-    lines.append(f"- status: {payload.get('status', 'unknown')}")
+    status = str(payload.get("status", "unknown"))
+    lifecycle = "final" if status in TERMINAL_STATUSES else "active"
+    lines = [f"# Refactor Runner Live Status ({lifecycle.title()})", ""]
+    lines.append(f"- status: {status}")
+    lines.append(f"- lifecycle: {lifecycle}")
 
     selected_cli = payload.get("selected_cli")
     if selected_cli:
@@ -283,6 +293,8 @@ def detect_command_template() -> tuple[str, str, str]:
                 'cmd /d /s /c "codex exec -c mcp_servers={} '
                 '-c model_reasoning_effort=high '
                 '-c shell_environment_policy.inherit=all '
+                '--color never '
+                '-C {repo_root} '
                 '--output-last-message {last_message_file} - < {prompt_file} '
                 '&& type {last_message_file}"'
             ),

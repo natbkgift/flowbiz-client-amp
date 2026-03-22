@@ -1,12 +1,13 @@
 # Next Run
 
 Focus:
-1. discover any new admin UX issues not already captured in the completed queue
-2. validate whether operators still hit dead ends in less-used admin screens outside the now-covered workflow set
-3. only expand guidance patterns where a concrete workflow gap can be demonstrated in a real existing admin surface
+1. add dedicated regression coverage for the PowerShell wrapper path when `-CommandTemplate` is explicitly supplied
+2. validate a real retry-wait cycle end to end so countdown and next-attempt fields are proven from runtime artifacts, not only unit rendering coverage
+3. only expand runner observability or wrapper logic where a concrete controller or validation gap can be demonstrated from the current implementation
 
 Do not repeat:
 - shell polish
+- already completed codex auto-detect hardening and active/final live-status differentiation
 - already improved inquiry row actions
 - already improved inquiry filter persistence
 - already completed inquiry detail grouping

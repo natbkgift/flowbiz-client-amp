@@ -125,3 +125,31 @@ Modules: layout CMS, company/home composer handoff
 Success:
 - successful layout saves explain which downstream surfaces should be checked next
 - operators can jump directly from the save confirmation into company CMS or home composer validation work
+
+## [RUNNER-001] Auto-detected CLI flow was not explicit enough under codex fallback
+Type: tooling / execution safety
+Priority: HIGH
+Status: DONE
+Modules: refactor runner, PowerShell wrapper validation
+Success:
+- omitting `--command-template` still auto-detects supported CLIs in the right precedence order
+- detected codex runs with repo-root pinning and config overrides that bypass broken local user config on this machine
+- wrapper dry-run leaves auto-detect in control unless the caller explicitly provides an override
+
+## [RUNNER-002] Live status did not clearly separate active and final states
+Type: observability / workflow continuity
+Priority: MEDIUM
+Status: DONE
+Modules: refactor runner status markdown and tests
+Success:
+- live status remains useful while active and is visually distinct after completion
+- required fields stay coherent between markdown rendering and JSON payloads
+
+## [RUNNER-003] Wrapper override path still lacks dedicated regression coverage
+Type: validation / argument passing
+Priority: LOW
+Status: OPEN
+Modules: PowerShell wrapper, runner integration
+Success:
+- explicit wrapper `-CommandTemplate` forwarding is covered by an automated regression path
+- default wrapper behavior continues to omit `--command-template` unless the caller opts in
