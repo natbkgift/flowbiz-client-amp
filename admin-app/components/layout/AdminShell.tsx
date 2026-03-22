@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
   type ChangeEvent,
+  type MouseEvent,
   type ReactNode,
   useDeferredValue,
   useEffect,
@@ -79,6 +80,7 @@ const shellCopy = {
     searchSummaryTemplate: "{{count}} {{matches}} for “{{query}}”",
     noResults: "No matching workspaces",
     noResultsHint: "Try Dashboard, Media, SEO, or CRM.",
+    clearSearch: "Clear search",
     openNavigation: "Open navigation",
     closeNavigation: "Close navigation",
     navigationPanel: "Admin navigation panel",
@@ -116,6 +118,7 @@ const shellCopy = {
     searchSummaryTemplate: "พบ {{count}} {{matches}} สำหรับ “{{query}}”",
     noResults: "ไม่พบเมนูที่ตรงคำค้น",
     noResultsHint: "ลองค้นหา แดชบอร์ด คลังสื่อ SEO หรือ CRM",
+    clearSearch: "ล้างคำค้น",
     openNavigation: "เปิดเมนู",
     closeNavigation: "ปิดเมนู",
     navigationPanel: "แผงเมนูแอดมิน",
@@ -328,6 +331,7 @@ export function AdminShell({ children }: { children: ReactNode }) {
       searchSummaryTemplate: getAdminCopyValue(shellCopy, locale, "searchSummaryTemplate"),
       noResults: getAdminCopyValue(shellCopy, locale, "noResults"),
       noResultsHint: getAdminCopyValue(shellCopy, locale, "noResultsHint"),
+      clearSearch: getAdminCopyValue(shellCopy, locale, "clearSearch"),
       openNavigation: getAdminCopyValue(shellCopy, locale, "openNavigation"),
       closeNavigation: getAdminCopyValue(shellCopy, locale, "closeNavigation"),
       navigationPanel: getAdminCopyValue(shellCopy, locale, "navigationPanel"),
@@ -442,6 +446,14 @@ export function AdminShell({ children }: { children: ReactNode }) {
     setSearchQuery(event.target.value);
   }
 
+  function clearSearch() {
+    setSearchQuery("");
+  }
+
+  function onClearSearchMouseDown(event: MouseEvent<HTMLButtonElement>) {
+    event.preventDefault();
+  }
+
   function closeMobileNav() {
     setMobileNavOpen(false);
   }
@@ -499,6 +511,18 @@ export function AdminShell({ children }: { children: ReactNode }) {
                 onChange={onSearchChange}
                 placeholder={ui.searchPlaceholder}
               />
+              {trimmedSearchQuery ? (
+                <button
+                  type="button"
+                  className="admin-shell-search-clear"
+                  aria-label={ui.clearSearch}
+                  title={ui.clearSearch}
+                  onMouseDown={onClearSearchMouseDown}
+                  onClick={clearSearch}
+                >
+                  <AdminIcon name="x" size={14} />
+                </button>
+              ) : null}
             </div>
             <small>{ui.searchHint}</small>
           </label>
@@ -592,6 +616,18 @@ export function AdminShell({ children }: { children: ReactNode }) {
                     onChange={onSearchChange}
                     placeholder={ui.searchPlaceholder}
                   />
+                  {trimmedSearchQuery ? (
+                    <button
+                      type="button"
+                      className="admin-shell-search-clear"
+                      aria-label={ui.clearSearch}
+                      title={ui.clearSearch}
+                      onMouseDown={onClearSearchMouseDown}
+                      onClick={clearSearch}
+                    >
+                      <AdminIcon name="x" size={14} />
+                    </button>
+                  ) : null}
                 </div>
               </label>
 
@@ -694,6 +730,18 @@ export function AdminShell({ children }: { children: ReactNode }) {
                 onChange={onSearchChange}
                 placeholder={ui.searchPlaceholder}
               />
+              {trimmedSearchQuery ? (
+                <button
+                  type="button"
+                  className="admin-shell-search-clear"
+                  aria-label={ui.clearSearch}
+                  title={ui.clearSearch}
+                  onMouseDown={onClearSearchMouseDown}
+                  onClick={clearSearch}
+                >
+                  <AdminIcon name="x" size={14} />
+                </button>
+              ) : null}
             </div>
             <small>{ui.searchHint}</small>
           </label>

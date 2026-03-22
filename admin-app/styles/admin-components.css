@@ -251,8 +251,37 @@
     width: 100%;
     min-height: 44px;
     padding-inline-start: 48px;
-    padding-inline-end: 14px;
+    padding-inline-end: 48px;
     background: rgba(255, 255, 255, 0.86);
+  }
+
+  .admin-shell-search-clear {
+    position: absolute;
+    right: 10px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    padding: 0;
+    border: 0;
+    border-radius: 999px;
+    background: transparent;
+    color: var(--admin-text-soft);
+    cursor: pointer;
+    transition:
+      background-color 140ms ease,
+      color 140ms ease,
+      transform 140ms ease;
+  }
+
+  .admin-shell-search-clear:hover {
+    background: rgba(15, 23, 42, 0.08);
+    color: var(--admin-text-strong);
+  }
+
+  .admin-shell-search-clear:active {
+    transform: scale(0.96);
   }
 
   .admin-root .admin-shell-search input[type="search"]::-webkit-search-decoration,
