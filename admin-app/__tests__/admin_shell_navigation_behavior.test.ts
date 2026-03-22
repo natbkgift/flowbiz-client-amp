@@ -23,6 +23,8 @@ describe("admin shell navigation behavior", () => {
 
     expect(shell).toContain("ADMIN_QUICK_ACTIONS");
     expect(shell).toContain("searchPlaceholder");
+    expect(shell).toContain("clearSearch");
+    expect(shell).toContain("admin-shell-search-clear");
     expect(shell).toContain("admin-shell-search--sidebar");
     expect(shell).toContain("admin-shell-search--topbar");
     expect(shell).toContain("admin-shell-profile");
@@ -66,6 +68,7 @@ describe("admin shell navigation behavior", () => {
     expect(css).toContain(".admin-shell-toggle");
     expect(css).toContain(".admin-shell-topbar-tools");
     expect(css).toContain(".admin-shell-search");
+    expect(css).toContain(".admin-shell-search-clear");
     expect(css).toContain(".admin-shell-search-summary");
     expect(css).toContain(".admin-shell-search-summary__label");
     expect(css).toContain(".admin-shell-mobile-drawer");
