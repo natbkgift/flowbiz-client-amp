@@ -98,6 +98,7 @@ describe("B14 admin workspace pages contract", () => {
 
   it("areas and developers workspaces use form-first localized editors with readiness checks", () => {
     const areasPage = read("app/admin/areas/page.tsx");
+    const panels = read("components/admin/domain/crud-workspace/AdminCrudWorkspacePanels.tsx");
     expect(areasPage).toContain("createFormFields");
     expect(areasPage).toContain("patchFormFields");
     expect(areasPage).toContain("content.en.why_live_invest");
@@ -115,6 +116,22 @@ describe("B14 admin workspace pages contract", () => {
     expect(developersPage).toContain("/admin/developers/{id}/publish-readiness");
     expect(developersPage).toContain("/admin/developers/{id}/publish");
     expect(developersPage).toContain("/admin/developers/{id}/unpublish");
+    expect(panels).toContain('const baseFieldsTitle = localizeCrudPanelsText("Base fields", "ข้อมูลหลัก")');
+    expect(panels).toContain('const localizedFieldsTitle = localizeCrudPanelsText("Localized content", "เนื้อหาตามภาษา")');
+    expect(panels).toContain('className="admin-workspace-form-section"');
+    expect(panels).toContain('className="admin-workspace-form-intro state-empty"');
+  });
+
+  it("shared CRUD records and patch forms guide the next step when records are not loaded or selected yet", () => {
+    const panels = read("components/admin/domain/crud-workspace/AdminCrudWorkspacePanels.tsx");
+    const styles = read("styles/admin-components.css");
+
+    expect(panels).toContain('const patchIntroTitle = localizeCrudPanelsText("Update flow", "ลำดับการแก้ไขรายการ")');
+    expect(panels).toContain('Load one record ID from the list first, then update grouped fields with a safer patch flow.');
+    expect(panels).toContain('className="state-empty admin-workspace-empty-state"');
+    expect(panels).toContain('Start from the list query panel, then load records before using record actions, patch, or bulk updates.');
+    expect(styles).toContain('.admin-workspace-form-section {');
+    expect(styles).toContain('.admin-workspace-empty-state,');
   });
 
   it("review queue workspace targets in_review items awaiting approval", () => {

@@ -137,4 +137,18 @@ describe("B14 admin dashboard page contract", () => {
     expect(screen).toContain("if (backgroundTasks.length === 0)");
     expect(screen).toContain("backgroundTasksEmptyTitle");
   });
+
+  it("adds recovery actions to empty dashboard sections so operators can keep moving", () => {
+    const screen = read("components/admin/domain/dashboard/AdminDashboardScreen.tsx");
+    const styles = read("styles/admin-components.css");
+
+    expect(screen).toContain("return renderSectionState(t.overviewEmptyTitle, t.overviewEmptyBody, {");
+    expect(screen).toContain("action: renderRefreshButton(t.retry),");
+    expect(screen).toContain("return renderSectionState(t.widgetsEmptyTitle, t.widgetsEmptyBody, {");
+    expect(screen).toContain("return renderSectionState(t.insightsEmptyTitle, t.insightsEmptyBody, {");
+    expect(screen).toContain("action: renderRefreshButton(t.reviewWatchlist),");
+    expect(screen).toContain('className="dashboard-empty-actions"');
+    expect(screen).toContain('href={withAdminLocale("/admin/imports", locale)}');
+    expect(styles).toContain('.dashboard-empty-actions,');
+  });
 });

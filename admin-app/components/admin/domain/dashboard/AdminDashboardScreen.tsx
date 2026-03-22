@@ -746,7 +746,9 @@ export function AdminDashboardScreen({
     }
 
     if (dashboardState === "empty") {
-      return renderSectionState(t.overviewEmptyTitle, t.overviewEmptyBody);
+      return renderSectionState(t.overviewEmptyTitle, t.overviewEmptyBody, {
+        action: renderRefreshButton(t.retry),
+      });
     }
 
     return (
@@ -798,7 +800,9 @@ export function AdminDashboardScreen({
     }
 
     if (widgets.length === 0) {
-      return renderSectionState(t.widgetsEmptyTitle, t.widgetsEmptyBody);
+      return renderSectionState(t.widgetsEmptyTitle, t.widgetsEmptyBody, {
+        action: renderRefreshButton(t.retry),
+      });
     }
 
     return (
@@ -842,7 +846,10 @@ export function AdminDashboardScreen({
     }
 
     if (freshnessEntries.length === 0) {
-      return renderSectionState(t.insightsEmptyTitle, t.insightsEmptyBody, { compact: true });
+      return renderSectionState(t.insightsEmptyTitle, t.insightsEmptyBody, {
+        compact: true,
+        action: renderRefreshButton(t.retry),
+      });
     }
 
     return (
@@ -940,7 +947,10 @@ export function AdminDashboardScreen({
     }
 
     if ((summary?.warnings || []).length === 0) {
-      return renderSectionState(t.warningsEmptyTitle, t.warningsEmptyBody, { compact: true });
+      return renderSectionState(t.warningsEmptyTitle, t.warningsEmptyBody, {
+        compact: true,
+        action: renderRefreshButton(t.reviewWatchlist),
+      });
     }
 
     return (
@@ -1047,7 +1057,17 @@ export function AdminDashboardScreen({
     }
 
     if (backgroundTasks.length === 0) {
-      return renderSectionState(t.backgroundTasksEmptyTitle, t.backgroundTasksEmptyBody, { compact: true });
+      return renderSectionState(t.backgroundTasksEmptyTitle, t.backgroundTasksEmptyBody, {
+        compact: true,
+        action: (
+          <div className="dashboard-empty-actions">
+            {renderRefreshButton(t.retry)}
+            <Link className={adminButtonClassName({ variant: "secondary", size: "sm" })} href={withAdminLocale("/admin/imports", locale)}>
+              {t.openImports}
+            </Link>
+          </div>
+        ),
+      });
     }
 
     return (

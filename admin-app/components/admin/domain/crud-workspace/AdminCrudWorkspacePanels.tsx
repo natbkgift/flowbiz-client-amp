@@ -62,21 +62,46 @@ function LocalizedPrimitiveFields({
   ) => void;
   onFieldChange: (name: string, value: string) => void;
 }) {
+  const baseFieldsTitle = localizeCrudPanelsText("Base fields", "ข้อมูลหลัก");
+  const baseFieldsHint = localizeCrudPanelsText(
+    "Complete the shared identifiers and operational fields before moving into locale-specific content.",
+    "กรอกข้อมูลอ้างอิงและฟิลด์ปฏิบัติการหลักก่อน แล้วค่อยลงรายละเอียดตามภาษา"
+  );
+  const localizedFieldsTitle = localizeCrudPanelsText("Localized content", "เนื้อหาตามภาษา");
+  const localizedFieldsHint = localizeCrudPanelsText(
+    "Switch locale tabs to finish the visible language content without losing the rest of the form.",
+    "สลับแท็บภาษาเพื่อกรอกเนื้อหาของภาษาที่แสดงอยู่ โดยไม่ทำให้ฟิลด์อื่นหายไป"
+  );
+
   return (
     <>
-      {fields.baseFields.map((field) => (
-        <AdminFormPrimitiveInput
-          key={field.name}
-          idPrefix={`${idBase}-${mode}`}
-          field={field}
-          value={values[field.name] || ""}
-          error={errors[field.name]}
-          authToken={authToken}
-          onChange={onFieldChange}
-        />
-      ))}
+      {fields.baseFields.length > 0 ? (
+        <section className="admin-workspace-form-section" aria-label={baseFieldsTitle}>
+          <div className="admin-workspace-form-section__header">
+            <h3>{baseFieldsTitle}</h3>
+            <p className="locale-safe">{baseFieldsHint}</p>
+          </div>
+          <div className="admin-workspace-form-grid admin-workspace-form-grid--grouped">
+            {fields.baseFields.map((field) => (
+              <AdminFormPrimitiveInput
+                key={field.name}
+                idPrefix={`${idBase}-${mode}`}
+                field={field}
+                value={values[field.name] || ""}
+                error={errors[field.name]}
+                authToken={authToken}
+                onChange={onFieldChange}
+              />
+            ))}
+          </div>
+        </section>
+      ) : null}
       {fields.localeOrder.length > 0 ? (
-        <>
+        <section className="admin-workspace-form-section" aria-label={localizedFieldsTitle}>
+          <div className="admin-workspace-form-section__header">
+            <h3>{localizedFieldsTitle}</h3>
+            <p className="locale-safe">{localizedFieldsHint}</p>
+          </div>
           <AdminTabSwitch
             ariaLabel={mode === "create" ? "Create locale tabs" : "Update locale tabs"}
             value={activeLocale}
@@ -97,19 +122,21 @@ function LocalizedPrimitiveFields({
             }))}
           />
           <div id={`${idBase}-${mode}-panel-${activeLocale}`} role="tabpanel" aria-labelledby={`${idBase}-${mode}-tab-${activeLocale}`}>
-            {(fields.byLocale[activeLocale] || []).map((field) => (
-              <AdminFormPrimitiveInput
-                key={field.name}
-                idPrefix={`${idBase}-${mode}`}
-                field={field}
-                value={values[field.name] || ""}
-                error={errors[field.name]}
-                authToken={authToken}
-                onChange={onFieldChange}
-              />
-            ))}
+            <div className="admin-workspace-form-grid admin-workspace-form-grid--grouped">
+              {(fields.byLocale[activeLocale] || []).map((field) => (
+                <AdminFormPrimitiveInput
+                  key={field.name}
+                  idPrefix={`${idBase}-${mode}`}
+                  field={field}
+                  value={values[field.name] || ""}
+                  error={errors[field.name]}
+                  authToken={authToken}
+                  onChange={onFieldChange}
+                />
+              ))}
+            </div>
           </div>
-        </>
+        </section>
       ) : null}
     </>
   );
@@ -422,6 +449,12 @@ export function AdminCrudWorkspaceCreatePanel({
 }) {
   if (!config.createPath) return null;
 
+  const createIntroTitle = localizeCrudPanelsText("Creation flow", "ลำดับการสร้างรายการ");
+  const createIntroBody = localizeCrudPanelsText(
+    "Start with shared record fields, then complete locale content before saving the new record.",
+    "เริ่มจากฟิลด์หลักของรายการ แล้วค่อยกรอกเนื้อหาตามภาษาให้ครบก่อนบันทึกสร้างรายการ"
+  );
+
   return (
     <AdminSectionCard
       className="admin-workspace-panel admin-workspace-panel--create"
@@ -429,6 +462,10 @@ export function AdminCrudWorkspaceCreatePanel({
       description={copy.createRecordDescription}
       icon="plus"
     >
+      <div className="admin-workspace-form-intro state-empty" role="status">
+        <strong>{createIntroTitle}</strong>
+        <p className="locale-safe">{createIntroBody}</p>
+      </div>
       {Array.isArray(config.createFormFields) && config.createFormFields.length > 0 ? (
         <LocalizedPrimitiveFields
           idBase={idBase}
@@ -498,6 +535,17 @@ export function AdminCrudWorkspacePatchPanel({
 }) {
   if (!config.patchPath) return null;
 
+  const patchIntroTitle = localizeCrudPanelsText("Update flow", "ลำดับการแก้ไขรายการ");
+  const patchIntroBody = identifier.trim()
+    ? localizeCrudPanelsText(
+        "You are editing the selected record. Review grouped fields, then apply the patch when the critical values are ready.",
+        "คุณกำลังแก้ไขรายการที่เลือกอยู่ ตรวจฟิลด์เป็นกลุ่มก่อน แล้วค่อยบันทึก patch เมื่อค่าหลักพร้อมแล้ว"
+      )
+    : localizeCrudPanelsText(
+        "Load one record ID from the list first, then update grouped fields with a safer patch flow.",
+        "เลือกรายการจากตารางหรือกรอกรหัสก่อน แล้วค่อยแก้ฟิลด์แบบเป็นกลุ่มเพื่อให้ patch ปลอดภัยกว่าเดิม"
+      );
+
   return (
     <AdminSectionCard
       className="admin-workspace-panel admin-workspace-panel--patch"
@@ -505,6 +553,10 @@ export function AdminCrudWorkspacePatchPanel({
       description={copy.updateRecordDescription}
       icon="refresh"
     >
+      <div className="admin-workspace-form-intro state-empty" role="status">
+        <strong>{patchIntroTitle}</strong>
+        <p className="locale-safe">{patchIntroBody}</p>
+      </div>
       {Array.isArray(config.patchFormFields) && config.patchFormFields.length > 0 ? (
         <LocalizedPrimitiveFields
           idBase={idBase}
@@ -645,7 +697,20 @@ export function AdminCrudWorkspaceRecordsPanel({
       titleTag="h2"
     >
       {items.length === 0 ? (
-        <div className="state-empty">{hasLoadedRecords ? copy.recordsEmpty : copy.recordsIdle}</div>
+        <div className="state-empty admin-workspace-empty-state" role="status">
+          <strong>{hasLoadedRecords ? copy.recordsEmpty : copy.recordsIdle}</strong>
+          <p className="locale-safe">
+            {hasLoadedRecords
+              ? localizeCrudPanelsText(
+                  "Adjust the list query or reload the workspace to bring matching records back into view.",
+                  "ปรับคิวรีรายการหรือกดโหลดใหม่ เพื่อดึงรายการที่ตรงเงื่อนไขกลับมาแสดงอีกครั้ง"
+                )
+              : localizeCrudPanelsText(
+                  "Start from the list query panel, then load records before using record actions, patch, or bulk updates.",
+                  "เริ่มจากแผงคิวรีรายการ แล้วกดโหลดข้อมูลก่อนใช้คำสั่งต่อรายการ การแก้ไข หรือการอัปเดตแบบกลุ่ม"
+                )}
+          </p>
+        </div>
       ) : (
         <AdminTable caption={copy.recordsTitle}>
           <AdminDataTable

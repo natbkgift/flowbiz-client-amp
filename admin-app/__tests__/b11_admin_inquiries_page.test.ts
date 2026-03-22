@@ -63,7 +63,11 @@ describe("B11 admin inquiries page contract", () => {
     expect(contactActions).toContain("selected.email_url");
     expect(detail).toContain("<InquiryContactActions");
     expect(detail).toContain("detailsDescription");
+    expect(detail).toContain("detailSnapshotTitle");
+    expect(detail).toContain("detailActionsTitle");
+    expect(detail).toContain("detailContextTitle");
     expect(followUp).toContain("followUpNotice");
+    expect(followUp).toContain("followUpActionHint");
     expect(timeline).toContain("timelineEmpty");
     expect(contactActions).toContain("contactActionsEmpty");
     expect(followUp).toContain('id="follow-up-status"');
@@ -322,7 +326,31 @@ describe("B11 admin inquiries page contract", () => {
     expect(page).toContain("emptyStateMessage={detailEmptyStateMessage}");
     expect(detail).toContain("emptyStateMessage?: string;");
     expect(detail).toContain("const message = emptyStateMessage ?? t.noDetails;");
-    expect(detail).toContain("<div className=\"state-empty\">{message}</div>");
+    expect(detail).toContain('className="state-empty crm-detail-empty-state"');
+    expect(detail).toContain("<strong>{t.details}</strong>");
+    expect(detail).toContain("<p className=\"crm-section-description\">{message}</p>");
+  });
+
+  it("groups inquiry detail into snapshot, actions, and advisory context sections", () => {
+    const detail = read("components/admin/domain/crm/InquiryDetailPanel.tsx");
+    const followUp = read("components/admin/domain/crm/InquiryFollowUpPanel.tsx");
+    const copy = read("components/admin/domain/crm/inquiries-copy.ts");
+    const styles = read("styles/admin-components.css");
+
+    expect(detail).toContain('aria-label={t.detailSnapshotTitle}');
+    expect(detail).toContain('aria-label={t.detailActionsTitle}');
+    expect(detail).toContain('aria-label={t.detailContextTitle}');
+    expect(detail).toContain('className="crm-detail-action-grid"');
+    expect(followUp).toContain('className="crm-detail-callout crm-detail-callout--followup"');
+    expect(copy).toContain('detailSnapshotTitle: "Lead snapshot"');
+    expect(copy).toContain('detailActionsTitle: "Operator actions"');
+    expect(copy).toContain('detailContextTitle: "Advisory context and timeline"');
+    expect(copy).toContain('followUpActionHint: "Save the next action after adjusting status or due time so the queue stays current."');
+    expect(copy).toContain('detailSnapshotTitle: "สรุปข้อมูลลีด"');
+    expect(copy).toContain('detailActionsTitle: "คำสั่งที่ควรทำก่อน"');
+    expect(styles).toContain('.crm-detail-section--grouped {');
+    expect(styles).toContain('.crm-detail-action-grid {');
+    expect(styles).toContain('.crm-detail-callout {');
   });
 
   it("keeps accessibility and runtime states in EN/TH copy", () => {
