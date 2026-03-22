@@ -28,6 +28,11 @@ export type CrudConfig = {
     label: string;
     description?: string;
   }>;
+  prerequisiteHints?: {
+    authSignedOut?: string;
+    authSignedIn?: string;
+    query?: string;
+  };
   identifierLabel: string;
   identifierPlaceholder: string;
   identifierField: string;

@@ -61,6 +61,17 @@ export default function AdminVideosCmsPage() {
               : "Review operational signals after updating video content.",
           },
         ],
+        prerequisiteHints: {
+          authSignedOut: isThai
+            ? "เข้าสู่ระบบก่อน แล้วตรวจว่าคลิปนี้ใช้ taxonomy และสื่อท้องถิ่นชุดไหนก่อนเริ่มแก้ไข"
+            : "Sign in first, then confirm which taxonomy terms and local media assets this video depends on before editing it.",
+          authSignedIn: isThai
+            ? "ยืนยัน thumbnail, topics และ tags ก่อนเผยแพร่ เพื่อไม่ให้คอนเทนต์วิดีโอหลุดจาก workflow ปลายทาง"
+            : "Verify thumbnails, topics, and tags before publishing so the video stays aligned with downstream workflows.",
+          query: isThai
+            ? "กรองตาม status ก่อน แล้วโหลด slug ที่ต้องการเพื่อยืนยัน record เป้าหมายก่อน patch หรือ publish"
+            : "Filter by status first, then load the target slug so patch and publish actions land on the intended video record.",
+        },
         identifierLabel: isThai ? "Slug ของวิดีโอ" : "Video slug",
         identifierPlaceholder: "sample-video-entry",
         identifierField: "slug",

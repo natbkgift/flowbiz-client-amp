@@ -45,6 +45,11 @@ export default function AdminTaxonomyCmsPage() {
             description: "Check topic and tag usage in video records after taxonomy edits.",
           },
         ],
+        prerequisiteHints: {
+          authSignedOut: "Sign in first, then decide which article, project, or video workflows will inherit this taxonomy change before editing shared terms.",
+          authSignedIn: "Confirm downstream consumers in blog, projects, or videos before changing shared tags, topics, facilities, or type registry values.",
+          query: "Use kind and status filters to isolate the exact registry slice first so shared taxonomy edits do not spill into unrelated content flows.",
+        },
         identifierLabel: "Taxonomy ID",
         identifierPlaceholder: "taxonomy UUID",
         identifierField: "id",

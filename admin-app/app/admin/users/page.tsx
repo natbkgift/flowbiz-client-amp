@@ -81,6 +81,17 @@ export default function AdminUsersPage() {
               : "Confirm operations users can still access import workflows as expected.",
           },
         ],
+        prerequisiteHints: {
+          authSignedOut: isThai
+            ? "เข้าสู่ระบบก่อน แล้วตรวจว่าการปรับสิทธิ์รอบนี้จะกระทบ workflow ของทีม CRM หรือ import ตรงไหนบ้าง"
+            : "Sign in first, then check which CRM or import workflows this permission change will affect before editing user access.",
+          authSignedIn: isThai
+            ? "ยืนยัน role_ids และผลกระทบต่อ workflow ของทีมปฏิบัติการก่อนบันทึกสิทธิ์ผู้ใช้"
+            : "Confirm role_ids and the downstream operational workflows they affect before saving user permissions.",
+          query: isThai
+            ? "โหลดรายการผู้ใช้ก่อน แล้วอ้างอิง role จาก /admin/roles เพื่อหลีกเลี่ยงการเปลี่ยนสิทธิ์ผิดบัญชี"
+            : "Load the user list first, then cross-check role IDs from /admin/roles so permission changes land on the intended account.",
+        },
         identifierLabel: isThai ? "รหัสผู้ใช้" : "User ID",
         identifierPlaceholder: isThai ? "UUID ของผู้ใช้" : "user UUID",
         identifierField: "id",

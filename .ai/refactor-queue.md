@@ -93,7 +93,7 @@ Success:
 ## [UX-011] Non-shared admin workspaces still diverge on success-state handoff
 Type: workflow continuity
 Priority: MEDIUM
-Status: OPEN
+Status: DONE
 Modules: imports, media, SEO, home composer
 Success:
 - successful non-shared admin actions explain the next verification step instead of stopping at raw output or ad hoc notices
@@ -102,7 +102,7 @@ Success:
 ## [UX-012] Shared CRUD prerequisite guidance is still too generic
 Type: workflow continuity
 Priority: MEDIUM
-Status: OPEN
+Status: DONE
 Modules: shared CRUD auth/query panels, secondary CRUD pages
 Success:
 - route-specific prerequisites are visible before operators run high-impact mutations

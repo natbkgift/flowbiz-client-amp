@@ -1,9 +1,9 @@
 # Next Run
 
 Focus:
-1. success-state handoff parity for imports, media, SEO, and home composer
-2. route-specific prerequisite guidance in shared CRUD auth and query panels
-3. stronger pre-mutation validation cues for secondary CRUD pages with downstream dependencies
+1. discover any new admin UX issues not already captured in the completed queue
+2. deepen field-level validation cues only where real downstream dependencies still remain ambiguous
+3. audit bespoke admin notices for any remaining places that should reuse the newer shared workflow guidance patterns
 
 Do not repeat:
 - shell polish
@@ -18,3 +18,5 @@ Do not repeat:
 - already completed dashboard review handoff actions for trend and recent inquiries
 - already completed shared CRUD result guidance for action outcomes
 - already completed route-specific follow-up links for company, taxonomy, testimonials, users, and videos
+- already completed shared CRUD prerequisite hints for secondary CRUD pages
+- already completed bespoke success-state handoff parity for imports, media, SEO, and home composer

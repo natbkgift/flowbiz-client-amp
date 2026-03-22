@@ -70,6 +70,15 @@ function CrudWorkspaceFollowUpLinks({
   );
 }
 
+function CrudWorkspacePrerequisiteHint({ title, body }: { title: string; body: string }) {
+  return (
+    <div className="admin-workspace-prerequisite" role="status">
+      <strong>{title}</strong>
+      <p className="locale-safe">{body}</p>
+    </div>
+  );
+}
+
 function LocalizedPrimitiveFields({
   idBase,
   mode,
@@ -225,6 +234,7 @@ export function AdminCrudWorkspaceHeader({
 }
 
 export function AdminCrudWorkspaceAuthPanel({
+  config,
   idBase,
   copy,
   isAuthenticated,
@@ -240,6 +250,7 @@ export function AdminCrudWorkspaceAuthPanel({
   onRefreshList,
   onLogout,
 }: {
+  config: CrudConfig;
   idBase: string;
   copy: CrudWorkspaceCopy;
   isAuthenticated: boolean;
@@ -321,11 +332,18 @@ export function AdminCrudWorkspaceAuthPanel({
           </div>
         </div>
       ) : null}
+      {!isAuthenticated && config.prerequisiteHints?.authSignedOut ? (
+        <CrudWorkspacePrerequisiteHint title={copy.prerequisiteTitle} body={config.prerequisiteHints.authSignedOut} />
+      ) : null}
+      {isAuthenticated && config.prerequisiteHints?.authSignedIn ? (
+        <CrudWorkspacePrerequisiteHint title={copy.prerequisiteTitle} body={config.prerequisiteHints.authSignedIn} />
+      ) : null}
     </AdminSectionCard>
   );
 }
 
 export function AdminCrudWorkspaceQueryPanel({
+  config,
   idBase,
   copy,
   listQuery,
@@ -334,6 +352,7 @@ export function AdminCrudWorkspaceQueryPanel({
   onListQueryChange,
   onLoadList,
 }: {
+  config: CrudConfig;
   idBase: string;
   copy: CrudWorkspaceCopy;
   listQuery: string;
@@ -359,6 +378,7 @@ export function AdminCrudWorkspaceQueryPanel({
           {copy.loadList}
         </AdminButton>
       </div>
+      {config.prerequisiteHints?.query ? <CrudWorkspacePrerequisiteHint title={copy.prerequisiteTitle} body={config.prerequisiteHints.query} /> : null}
       {meta ? (
         <div className="admin-workspace-inline-metrics" aria-label="List query metadata">
           <AdminBadge tone="info" icon="table">

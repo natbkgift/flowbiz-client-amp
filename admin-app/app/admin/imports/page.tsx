@@ -105,6 +105,8 @@ const copy = {
     importSuccess: "Import request completed.",
     dryRunSuccess: "Dry-run import completed.",
     importResultHint: "Review the response payload before running the next import.",
+    importSuccessTitle: "Next verification",
+    importSuccessBody: "Use dashboard and media to confirm the latest import did not introduce downstream content or asset regressions before running the next file.",
     selectedFile: "Selected file",
     selectedMode: "Run mode",
     source: "Source",
@@ -182,6 +184,8 @@ const copy = {
     importSuccess: "สั่งงานนำเข้าสำเร็จ",
     dryRunSuccess: "ทดลองรันสำเร็จ",
     importResultHint: "ตรวจผลลัพธ์นี้ก่อนเริ่มการนำเข้ารอบถัดไป",
+    importSuccessTitle: "จุดตรวจถัดไป",
+    importSuccessBody: "ใช้ dashboard และ media เพื่อตรวจว่าการนำเข้ารอบล่าสุดไม่สร้างปัญหาปลายทางด้านคอนเทนต์หรือไฟล์สื่อ ก่อนเริ่มไฟล์ถัดไป",
     selectedFile: "ไฟล์ที่เลือก",
     selectedMode: "โหมดที่กำลังใช้",
     source: "แหล่งที่มา",
@@ -609,6 +613,20 @@ export default function AdminImportsPage() {
               </label>
               <p className="admin-input__hint">{t.importResultHint}</p>
               {importNotice ? <div className="state-success">{importNotice}</div> : null}
+              {importNotice ? (
+                <div className="admin-workspace-success-handoff" role="status">
+                  <strong>{t.importSuccessTitle}</strong>
+                  <p className="locale-safe">{t.importSuccessBody}</p>
+                  <div className="card-actions">
+                    <Link className="admin-button admin-button--secondary admin-button--sm" href={withAdminLocale("/admin/dashboard", locale)}>
+                      {t.openDashboard}
+                    </Link>
+                    <Link className="admin-button admin-button--secondary admin-button--sm" href={withAdminLocale("/admin/media", locale)}>
+                      {t.openMedia}
+                    </Link>
+                  </div>
+                </div>
+              ) : null}
             </div>
           </ActionCard>
 

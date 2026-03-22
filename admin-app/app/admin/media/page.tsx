@@ -117,6 +117,8 @@ const copy = {
     sessionActive: "Session active",
     operationErrorHint: "Unable to complete the requested media action right now.",
     operationResultHint: "Review the response payload before moving on to the next media action.",
+    operationSuccessTitle: "Next verification",
+    operationSuccessBody: "Use dashboard and SEO to confirm the latest media change did not leave rights, integrity, or publishing issues behind.",
     selectionHint: "Pick a record, run one action at a time, and verify the result before continuing with archive, replace, or gallery sync.",
     invalidPatchJson: "Patch JSON must be valid JSON.",
     invalidGalleryPayload: "Gallery payload must be valid JSON.",
@@ -216,6 +218,8 @@ const copy = {
     sessionActive: "เซสชันพร้อมใช้งาน",
     operationErrorHint: "ไม่สามารถดำเนินการคำสั่งสื่อนี้ได้ในขณะนี้",
     operationResultHint: "ตรวจผลลัพธ์นี้ก่อนเริ่มคำสั่งถัดไปกับรายการสื่อ",
+    operationSuccessTitle: "จุดตรวจถัดไป",
+    operationSuccessBody: "ใช้ dashboard และ SEO เพื่อตรวจว่าการเปลี่ยนแปลงสื่อล่าสุดไม่ทิ้งปัญหาเรื่องสิทธิ์ integrity หรือการเผยแพร่ไว้ด้านหลัง",
     selectionHint: "เลือกรายการให้ชัด สั่งงานทีละอย่าง แล้วตรวจผลลัพธ์ก่อนทำ archive แทนที่ไฟล์ หรือซิงก์แกลเลอรีต่อ",
     invalidPatchJson: "ข้อมูลอัปเดตต้องอยู่ในรูปแบบ JSON ที่ถูกต้อง",
     invalidGalleryPayload: "ข้อมูลแกลเลอรีต้องอยู่ในรูปแบบ JSON ที่ถูกต้อง",
@@ -906,6 +910,20 @@ export default function AdminMediaPage() {
                 <textarea id="media-op-result" rows={opResult ? 6 : 2} value={opResult} readOnly />
               </label>
               <p className="admin-input__hint">{t.operationResultHint}</p>
+              {opNotice ? (
+                <div className="admin-workspace-success-handoff" role="status">
+                  <strong>{t.operationSuccessTitle}</strong>
+                  <p className="locale-safe">{t.operationSuccessBody}</p>
+                  <div className="card-actions">
+                    <Link className="admin-button admin-button--secondary admin-button--sm" href={withAdminLocale("/admin/dashboard", locale)}>
+                      {t.openDashboard}
+                    </Link>
+                    <Link className="admin-button admin-button--secondary admin-button--sm" href={withAdminLocale("/admin/seo", locale)}>
+                      {t.openSeo}
+                    </Link>
+                  </div>
+                </div>
+              ) : null}
             </div>
           </AdminSectionCard>
 

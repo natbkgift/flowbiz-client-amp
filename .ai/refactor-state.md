@@ -4,7 +4,7 @@
 FlowBiz Admin UX Refactor
 
 ## Current Phase
-Phase 6 - Success-state guidance and secondary CRUD routing
+Phase 7 - Success-state handoff parity and prerequisite guidance
 
 ## Active Branch
 copilot/improve-admin-ux-design
@@ -42,10 +42,14 @@ PR #521 - Improve inquiry workflow and admin table discoverability
 - added dashboard trend and recent-inquiry follow-on actions so operators can jump straight into CRM review flows
 - added action-aware shared CRUD result guidance so successful create, patch, publish, bulk, diff, and restore flows do not end in raw payloads alone
 - connected company, taxonomy, testimonials, users, and videos workspaces to route-specific downstream destinations instead of leaving them on generic shared routing
+- added shared CRUD prerequisite hints so auth and query panels can explain route-specific dependencies before operators mutate records
+- added route-specific prerequisite guidance for company, taxonomy, testimonials, users, and videos workspaces
+- added consistent success-state handoff guidance for imports, media, SEO, and home composer so bespoke admin flows now point to real validation surfaces after successful actions
 - added regression coverage for inquiry, shared CRUD, dashboard, and shell contract behavior
 - added regression coverage for imports and SEO workflow guidance contracts
 - added regression coverage for shared CRUD follow-up routing and dashboard review handoff actions
 - added regression coverage for secondary CRUD routing and shared result-panel guidance
+- added regression coverage for shared CRUD prerequisite hints and bespoke success handoff affordances
 
 ## Files Changed So Far
 - admin-app/app/admin/inquiries/page.tsx
@@ -59,6 +63,7 @@ PR #521 - Improve inquiry workflow and admin table discoverability
 - admin-app/app/admin/properties/page.tsx
 - admin-app/app/admin/review-queue/page.tsx
 - admin-app/app/admin/seo/page.tsx
+- admin-app/app/admin/home-composer/page.tsx
 - admin-app/app/admin/taxonomy/page.tsx
 - admin-app/app/admin/testimonials/page.tsx
 - admin-app/app/admin/users/page.tsx
@@ -85,9 +90,9 @@ PR #521 - Improve inquiry workflow and admin table discoverability
 - admin-app/__tests__/b14_admin_workspaces_pages.test.ts
 
 ## Last Run Summary
-- added shared CRUD result-panel guidance so successful actions now explain the next verification step instead of ending at raw JSON only
-- connected the remaining secondary CRUD workspaces to route-specific downstream destinations inside real admin surfaces
-- validated the new routing and result guidance with targeted workspace tests and a successful admin build
+- added route-specific prerequisite hints to shared CRUD auth and query panels, then wired company, taxonomy, testimonials, users, and videos into those prerequisites
+- added success-state handoff panels to imports, media, SEO, and home composer so successful mutations point operators to dashboard, media, layout, review queue, or SEO follow-up surfaces
+- validated the new prerequisite and success guidance with targeted workspace tests, targeted SEO tests, and a successful admin build
 
 ## Do Not Repeat
 - shell-only improvements
@@ -104,15 +109,14 @@ PR #521 - Improve inquiry workflow and admin table discoverability
 - already completed dashboard review handoff actions for trend and recent inquiries
 - already completed shared CRUD result guidance for action outcomes
 - already completed route-specific follow-up links for company, taxonomy, testimonials, users, and videos
+- already completed shared CRUD prerequisite hints for secondary CRUD pages
+- already completed bespoke success-state handoff parity for imports, media, SEO, and home composer
 
 ## Known Weaknesses
-- non-shared admin workspaces such as imports, media, SEO, and home composer still use bespoke success states rather than one consistent handoff model
-- shared CRUD auth and query panels still rely on generic copy even when a workspace has route-specific operational prerequisites
 - some secondary workspaces still surface minimal field-level guidance before operators make mutations that affect downstream validation
 
 ## Open Workflow Blockers
-- non-shared admin workspaces still need clearer next-step guidance after successful mutations
-- secondary CRUD workspaces still need stronger prerequisite guidance before operators trigger high-impact changes
+- none in the current queue
 
 ## Risks
 - avoid breaking shared table and shared workspace components
@@ -121,7 +125,5 @@ PR #521 - Improve inquiry workflow and admin table discoverability
 - preserve existing review and publish flows while adding navigation cues
 
 ## Preferred Expansion Areas
-- success-state handoff parity for imports, media, SEO, and home composer
-- route-specific prerequisite guidance in shared CRUD auth and query panels
 - stronger pre-mutation validation cues for secondary CRUD pages with downstream dependencies
-- consistency between bespoke admin workspaces and shared CRUD workflow guidance
+- consistency audits for remaining bespoke admin notices versus shared workspace patterns

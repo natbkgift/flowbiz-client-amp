@@ -50,6 +50,8 @@ describe("B14 admin workspace pages contract", () => {
     expect(page).toContain("openDashboard");
     expect(page).toContain("openSeo");
     expect(page).toContain('href={withAdminLocale("/admin/dashboard", locale)}');
+    expect(page).toContain("operationSuccessTitle");
+    expect(page).toContain('className="admin-workspace-success-handoff"');
   });
 
   it("imports workspace uses list + import run endpoints", () => {
@@ -82,6 +84,8 @@ describe("B14 admin workspace pages contract", () => {
     expect(page).toContain("openDashboard");
     expect(page).toContain("openMedia");
     expect(page).toContain('href={withAdminLocale("/admin/dashboard", locale)}');
+    expect(page).toContain("importSuccessTitle");
+    expect(page).toContain('className="admin-workspace-success-handoff"');
   });
 
   it("domain workspace uses domain CRUD + publish APIs and dashboard summaries", () => {
@@ -183,14 +187,18 @@ describe("B14 admin workspace pages contract", () => {
     const usersPage = read("app/admin/users/page.tsx");
 
     expect(types).toContain("followUpLinks?: ReadonlyArray");
+    expect(types).toContain("prerequisiteHints?: {");
     expect(types).toContain('| "restore-revision";');
     expect(panels).toContain("copy.nextStepsTitle");
     expect(panels).toContain("copy.nextStepsIdleBody");
     expect(panels).toContain("copy.nextStepsRecordsBody");
     expect(panels).toContain("copy.nextStepsRevisionsBody");
     expect(panels).toContain("copy.resultNextStepsTitle");
+    expect(panels).toContain("function CrudWorkspacePrerequisiteHint(");
     expect(panels).toContain("function resultGuidanceBody(actionKey: CrudWorkspaceActionKey | null)");
     expect(panels).toContain('className="admin-workspace-result-guidance"');
+    expect(panels).toContain("config.prerequisiteHints?.authSignedOut");
+    expect(panels).toContain("config.prerequisiteHints?.query");
     expect(propertiesPage).toContain('href: "/admin/projects"');
     expect(propertiesPage).toContain('href: "/admin/media"');
     expect(projectsPage).toContain('href: "/admin/properties"');
@@ -205,6 +213,11 @@ describe("B14 admin workspace pages contract", () => {
     expect(testimonialsPage).toContain('href: "/admin/media"');
     expect(usersPage).toContain('href: "/admin/inquiries"');
     expect(usersPage).toContain('href: "/admin/imports"');
+    expect(companyPage).toContain("prerequisiteHints");
+    expect(taxonomyPage).toContain("prerequisiteHints");
+    expect(testimonialsPage).toContain("prerequisiteHints");
+    expect(usersPage).toContain("prerequisiteHints");
+    expect(videosPage).toContain("prerequisiteHints");
   });
 
   it("users workspace avoids default credentials and masks password fields", () => {
@@ -228,6 +241,10 @@ describe("B14 admin workspace pages contract", () => {
     expect(page).toContain("publishConfirm");
     expect(page).toContain("window.confirm");
     expect(page).toContain("unsavedLeaveConfirm");
+    expect(page).toContain("successTitle");
+    expect(page).toContain("draftSuccessBody");
+    expect(page).toContain('href={withAdminLocale(\'/admin/layout\', locale)}');
+    expect(page).toContain('className="admin-workspace-success-handoff"');
   });
 
   it("login page uses canonical shared admin auth contract", () => {

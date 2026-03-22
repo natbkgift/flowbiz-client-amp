@@ -64,6 +64,11 @@ export default function AdminTestimonialsCmsPage() {
             description: "Review downstream operational signals after updating testimonial content.",
           },
         ],
+        prerequisiteHints: {
+          authSignedOut: "Sign in first, then confirm which property context and supporting media should stay aligned with the testimonial before editing it.",
+          authSignedIn: "Verify linked property and avatar media dependencies before publishing or unpublishing testimonial changes.",
+          query: "Load the testimonial record first, then confirm its property and media references before patching quote, status, or attribution fields.",
+        },
         identifierLabel: "Testimonial ID",
         identifierPlaceholder: "testimonial UUID",
         identifierField: "id",

@@ -428,6 +428,7 @@ export function AdminJsonCrudWorkspace({ config }: { config: CrudConfig }) {
       />
 
       <AdminCrudWorkspaceAuthPanel
+        config={config}
         idBase={idBase}
         copy={t}
         isAuthenticated={isAuthenticated}
@@ -448,6 +449,7 @@ export function AdminJsonCrudWorkspace({ config }: { config: CrudConfig }) {
         <>
           <div className="admin-workspace-split">
             <AdminCrudWorkspaceQueryPanel
+              config={config}
               idBase={idBase}
               copy={t}
               listQuery={listQuery}

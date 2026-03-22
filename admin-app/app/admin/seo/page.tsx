@@ -99,6 +99,8 @@ type SchemaForm = {
   schema_article_author_url: string;
 };
 
+type SeoSuccessKey = "override" | "redirect" | "schema" | "report";
+
 const copy = {
   en: {
     title: "SEO Controls",
@@ -131,6 +133,17 @@ const copy = {
     preloadRedirects: "Preload production redirects",
     openDashboard: "Open dashboard",
     openReviewQueue: "Open review queue",
+    successTitle: "Next verification",
+    overrideSaved: "SEO override saved.",
+    redirectSaved: "Redirect rule saved.",
+    redirectsPreloaded: "Production redirects loaded.",
+    schemaSaved: "Schema source saved.",
+    schemaBootstrapped: "Approved schema defaults loaded.",
+    reportReady: "Broken-link report refreshed.",
+    overrideSuccessBody: "Review dashboard and review queue to confirm the updated path metadata still lines up with the current publishing plan.",
+    redirectSuccessBody: "Check dashboard and review queue for any affected legacy journeys before closing this redirect task.",
+    schemaSuccessBody: "Use dashboard and review queue to confirm schema source changes still match current content and publishing priorities.",
+    reportSuccessBody: "Use dashboard and review queue to hand off any pages that still need content fixes after this checker run.",
     authHint: "Sign in first, then use overrides, redirects, schema, and broken-link tools from one owner workspace.",
     overridesEmptyHint: "Start with one high-traffic path, then return to dashboard or review queue to verify the next content action.",
     redirectsEmptyHint: "Load production redirects first or add one legacy path now so operators do not need to leave this page to start cleanup.",
@@ -182,6 +195,17 @@ const copy = {
     preloadRedirects: "ดึง redirect จาก production",
     openDashboard: "ดูแดชบอร์ด",
     openReviewQueue: "ดูคิวตรวจทาน",
+    successTitle: "จุดตรวจถัดไป",
+    overrideSaved: "บันทึก SEO override แล้ว",
+    redirectSaved: "บันทึกกฎ redirect แล้ว",
+    redirectsPreloaded: "โหลด redirect จาก production แล้ว",
+    schemaSaved: "บันทึก schema source แล้ว",
+    schemaBootstrapped: "โหลดค่า schema ที่อนุมัติแล้วเรียบร้อย",
+    reportReady: "อัปเดตรายงานลิงก์เสียแล้ว",
+    overrideSuccessBody: "ตรวจ dashboard และ review queue เพื่อยืนยันว่าเมทาดาทาของ path ที่แก้ยังสอดคล้องกับแผนเผยแพร่ปัจจุบัน",
+    redirectSuccessBody: "ตรวจ dashboard และ review queue สำหรับเส้นทาง legacy ที่ได้รับผลกระทบก่อนปิดงาน redirect นี้",
+    schemaSuccessBody: "ใช้ dashboard และ review queue เพื่อตรวจว่าการเปลี่ยน schema source ยังตรงกับคอนเทนต์และลำดับการเผยแพร่ปัจจุบัน",
+    reportSuccessBody: "ใช้ dashboard และ review queue เพื่อส่งต่องานให้หน้าที่ยังต้องแก้คอนเทนต์หลังจากรัน checker รอบนี้",
     authHint: "เข้าสู่ระบบก่อน แล้วใช้หน้าเดียวนี้จัดการ override, redirect, schema และ broken-link tools สำหรับ owner",
     overridesEmptyHint: "เริ่มจาก path สำคัญสักหนึ่งหน้า แล้วค่อยกลับไปดู dashboard หรือ review queue เพื่อทำงานต่อกับคอนเทนต์ที่เกี่ยวข้อง",
     redirectsEmptyHint: "ดึง redirect จาก production ก่อน หรือเพิ่ม legacy path แรกจากหน้านี้ได้ทันทีโดยไม่ต้องสลับหน้า",
@@ -295,6 +319,8 @@ export default function AdminSeoPage() {
   const [loading, setLoading] = useState(false);
   const [busy, setBusy] = useState(false);
   const [pageError, setPageError] = useState<string | null>(null);
+  const [pageNotice, setPageNotice] = useState<string | null>(null);
+  const [successKey, setSuccessKey] = useState<SeoSuccessKey | null>(null);
 
   useEffect(() => {
     const l = detectLocale();
@@ -309,6 +335,13 @@ export default function AdminSeoPage() {
 
   const t = copy[locale];
   const isAuth = token.trim().length > 0;
+
+  function successBody(key: SeoSuccessKey | null): string {
+    if (key === "redirect") return t.redirectSuccessBody;
+    if (key === "schema") return t.schemaSuccessBody;
+    if (key === "report") return t.reportSuccessBody;
+    return t.overrideSuccessBody;
+  }
 
   async function login(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -351,6 +384,8 @@ export default function AdminSeoPage() {
     setEditingOverrideId(null);
     setEditingRedirectId(null);
     setPageError(null);
+    setPageNotice(null);
+    setSuccessKey(null);
   }
 
   async function loadOverrides(activeToken: string) {
@@ -440,6 +475,7 @@ export default function AdminSeoPage() {
     if (!isAuth) return;
     setBusy(true);
     setPageError(null);
+    setPageNotice(null);
     try {
       const payload = {
         path: overrideForm.path.startsWith("/") ? overrideForm.path.trim() : `/${overrideForm.path.trim()}`,
@@ -462,6 +498,8 @@ export default function AdminSeoPage() {
       setEditingOverrideId(null);
       setOverrideForm(emptyOverride(locale));
       await loadOverrides(token);
+      setPageNotice(t.overrideSaved);
+      setSuccessKey("override");
     } catch (error) {
       setPageError(formatSeoApiError(error));
     } finally {
@@ -474,6 +512,7 @@ export default function AdminSeoPage() {
     if (!isAuth) return;
     setBusy(true);
     setPageError(null);
+    setPageNotice(null);
     try {
       const payload = {
         old_path: redirectForm.old_path.startsWith("/") ? redirectForm.old_path.trim() : `/${redirectForm.old_path.trim()}`,
@@ -493,6 +532,8 @@ export default function AdminSeoPage() {
       setEditingRedirectId(null);
       setRedirectForm(emptyRedirect());
       await loadRedirects(token);
+      setPageNotice(t.redirectSaved);
+      setSuccessKey("redirect");
     } catch (error) {
       setPageError(formatSeoApiError(error));
     } finally {
@@ -504,12 +545,15 @@ export default function AdminSeoPage() {
     if (!isAuth) return;
     setBusy(true);
     setPageError(null);
+    setPageNotice(null);
     try {
       await api("/admin/seo/redirects/preload-production", token, {
         method: "POST",
         body: JSON.stringify({ dry_run: false, overwrite_existing: true }),
       });
       await loadRedirects(token);
+      setPageNotice(t.redirectsPreloaded);
+      setSuccessKey("redirect");
     } catch (error) {
       setPageError(formatSeoApiError(error));
     } finally {
@@ -522,6 +566,7 @@ export default function AdminSeoPage() {
     if (!isAuth) return;
     setBusy(true);
     setPageError(null);
+    setPageNotice(null);
     try {
       await api("/admin/seo/schema-source", token, {
         method: "PUT",
@@ -545,6 +590,8 @@ export default function AdminSeoPage() {
         }),
       });
       await loadSchema(token, schemaForm.locale);
+      setPageNotice(t.schemaSaved);
+      setSuccessKey("schema");
     } catch (error) {
       setPageError(formatSeoApiError(error));
     } finally {
@@ -556,12 +603,15 @@ export default function AdminSeoPage() {
     if (!isAuth) return;
     setBusy(true);
     setPageError(null);
+    setPageNotice(null);
     try {
       await api("/admin/seo/schema-source/bootstrap-production", token, {
         method: "POST",
         body: JSON.stringify({ locale: schemaForm.locale, overwrite_existing: true }),
       });
       await loadSchema(token, schemaForm.locale);
+      setPageNotice(t.schemaBootstrapped);
+      setSuccessKey("schema");
     } catch (error) {
       setPageError(formatSeoApiError(error));
     } finally {
@@ -573,11 +623,14 @@ export default function AdminSeoPage() {
     if (!isAuth) return;
     setBusy(true);
     setPageError(null);
+    setPageNotice(null);
     try {
       const body = await api<{ report: BrokenLinkReport }>("/admin/seo/broken-links/run", token, {
         method: "POST",
       });
       setReport(body.report || null);
+      setPageNotice(t.reportReady);
+      setSuccessKey("report");
     } catch (error) {
       setPageError(formatSeoApiError(error));
     } finally {
@@ -656,6 +709,21 @@ export default function AdminSeoPage() {
             </div>
           </div>
         ) : null}
+      {pageNotice ? (
+        <div className="admin-workspace-success-handoff" role="status">
+          <div className="state-success">{pageNotice}</div>
+          <strong>{t.successTitle}</strong>
+          <p className="locale-safe">{successBody(successKey)}</p>
+          <div className="card-actions">
+            <Link className="admin-button admin-button--secondary admin-button--sm" href={withAdminLocale("/admin/dashboard", locale)}>
+              {t.openDashboard}
+            </Link>
+            <Link className="admin-button admin-button--secondary admin-button--sm" href={withAdminLocale("/admin/review-queue", locale)}>
+              {t.openReviewQueue}
+            </Link>
+          </div>
+        </div>
+      ) : null}
       {loading ? <div className="state-loading">{t.loading}</div> : null}
 
       <section className="seo-layout">

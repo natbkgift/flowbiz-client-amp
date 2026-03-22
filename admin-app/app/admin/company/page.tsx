@@ -44,6 +44,11 @@ export default function AdminCompanyCmsPage() {
             description: "Review operational status after updating company-facing content.",
           },
         ],
+        prerequisiteHints: {
+          authSignedOut: "Sign in first, then confirm whether company copy changes should stay aligned with layout and homepage messaging before saving.",
+          authSignedIn: "Check layout and homepage dependencies before patching company content so shared brand copy stays consistent across owner-facing surfaces.",
+          query: "Load the target company slug first, then confirm the record belongs to the surface you intend to update before patching or creating content.",
+        },
         identifierLabel: "Company slug",
         identifierPlaceholder: "site-layout",
         identifierField: "slug",
