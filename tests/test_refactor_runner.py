@@ -315,7 +315,9 @@ def test_main_retry_countdown_updates_live_status_runtime_artifacts(
 
     def fake_sleep(seconds: int) -> None:
         assert seconds == 1
-        payload = json.loads((ai_dir / "refactor-live-status.json").read_text(encoding="utf-8"))
+        live_status_path = ai_dir / "refactor-live-status.json"
+        assert live_status_path.exists()
+        payload = json.loads(live_status_path.read_text(encoding="utf-8"))
         retry_snapshots.append(payload)
 
     monkeypatch.setattr(RUNNER, "run_cmd", fake_run_cmd)
@@ -349,6 +351,7 @@ def test_main_retry_countdown_updates_live_status_runtime_artifacts(
 
     assert exit_code == 0
     assert len(executed_commands) == 2
+    assert len(retry_snapshots) == 3
     assert [snapshot["retry_countdown_sec"] for snapshot in retry_snapshots] == [3, 2, 1]
     assert {snapshot["next_retry_attempt"] for snapshot in retry_snapshots} == {2}
     assert {snapshot["status"] for snapshot in retry_snapshots} == {"retry-wait"}
