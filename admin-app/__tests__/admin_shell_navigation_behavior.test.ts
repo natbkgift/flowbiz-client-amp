@@ -67,12 +67,17 @@ describe("admin shell navigation behavior", () => {
 
     expect(css).toContain(".admin-shell-toggle");
     expect(css).toContain(".admin-shell-topbar-tools");
+    expect(css).toContain("grid-template-columns: minmax(320px, 1.02fr) minmax(420px, 0.98fr)");
+    expect(css).toContain("grid-template-columns: repeat(2, minmax(0, 1fr))");
     expect(css).toContain(".admin-shell-search");
     expect(css).toContain(".admin-shell-search-clear");
     expect(css).toContain(".admin-shell-search-summary");
     expect(css).toContain(".admin-shell-search-summary__label");
     expect(css).toContain(".admin-shell-mobile-drawer");
     expect(css).toContain(".admin-shell-backdrop.is-open");
+    expect(css).toContain(".admin-shell-topbar-status,\n  .admin-shell-profile {");
+    expect(css).toContain("height: 100%;");
+    expect(css).toContain("box-shadow: 4px 0 18px rgba(15, 23, 42, 0.03)");
     expect(css).toContain(".admin-btn-danger,");
     expect(css).toContain(".admin-button--danger {");
   });
