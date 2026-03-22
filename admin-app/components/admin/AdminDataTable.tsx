@@ -66,11 +66,18 @@ export function AdminDataTable<T>({
     return <div className="state-empty">{emptyLabel}</div>;
   }
 
+  const filteredCount = sortedRows.length;
+
   return (
     <AdminTable
       toolbar={
         <AdminTableToolbar className="card-actions">
-          <AdminInput htmlFor={filterInputId} label={filterLabel} icon="search">
+          <AdminInput
+            htmlFor={filterInputId}
+            label={filterLabel}
+            icon="search"
+            hint={`Showing ${filteredCount} of ${rows.length} loaded rows`}
+          >
             <input
               id={filterInputId}
               aria-label={filterLabel}
@@ -78,7 +85,12 @@ export function AdminDataTable<T>({
               onChange={(event) => setFilterQuery(event.target.value)}
             />
           </AdminInput>
-          <p className="locale-safe" aria-live="polite">
+          {filterQuery ? (
+            <AdminButton variant="secondary" size="sm" onClick={() => setFilterQuery("")}>
+              Clear filter
+            </AdminButton>
+          ) : null}
+          <p className="locale-safe" role="status" aria-live="polite">
             Selected: {selectedIds.size}
           </p>
         </AdminTableToolbar>

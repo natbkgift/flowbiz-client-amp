@@ -45,12 +45,19 @@ describe("AdminDataTable integration", () => {
   it("supports sort/filter/pagination/bulk select with accessible labels", () => {
     render(<AdminDataTable rows={rows} columns={columns} getRowId={(row) => row.id} emptyLabel="No rows" pageSize={2} />);
 
+    expect(screen.getByText("Showing 3 of 3 loaded rows")).toBeInTheDocument();
+
     const sortByName = screen.getByRole("button", { name: "Sort by Name" });
     fireEvent.click(sortByName);
     fireEvent.keyDown(sortByName, { key: "Enter" });
 
     fireEvent.change(screen.getByLabelText("Filter table rows"), { target: { value: "run" } });
     expect(screen.getByText("running")).toBeInTheDocument();
+    expect(screen.getByText("Showing 1 of 3 loaded rows")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Clear filter" })).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: "Clear filter" }));
+    expect(screen.getByText("Showing 3 of 3 loaded rows")).toBeInTheDocument();
 
     fireEvent.change(screen.getByLabelText("Filter table rows"), { target: { value: "" } });
     fireEvent.click(screen.getByRole("button", { name: "Next" }));
@@ -64,11 +71,13 @@ describe("AdminDataTable integration", () => {
 
   it("is used in shared CRUD workspace so it applies across multiple admin workspaces", () => {
     const workspace = read("components/admin/AdminJsonCrudWorkspace.tsx");
+    const recordsPanel = read("components/admin/domain/crud-workspace/AdminCrudWorkspacePanels.tsx");
     const propertiesPage = read("app/admin/properties/page.tsx");
     const projectsPage = read("app/admin/projects/page.tsx");
     const developersPage = read("app/admin/developers/page.tsx");
 
     expect(workspace).toContain("AdminDataTable");
+    expect(recordsPanel).toContain("<AdminDataTable");
     expect(propertiesPage).toContain("AdminJsonCrudWorkspace");
     expect(projectsPage).toContain("AdminJsonCrudWorkspace");
     expect(developersPage).toContain("AdminJsonCrudWorkspace");

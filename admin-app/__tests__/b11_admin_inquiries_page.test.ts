@@ -183,7 +183,14 @@ describe("B11 admin inquiries page contract", () => {
     expect(page).toContain('translateFollowUpStatus,');
     expect(page).toContain('translateInquiryStatus,');
     expect(page).toContain("const appliedFilterSummary = buildFilterSummary(appliedFilters, t, locale);");
-    expect(page).toContain('<div className="crm-filter-summary" aria-live="polite">');
+    expect(page).toContain("const draftFilterSummary = buildFilterSummary(filters, t, locale);");
+    expect(page).toContain('<div className="crm-filter-summary-grid" aria-live="polite">');
+    expect(page).toContain('<span className="crm-filter-summary__label">{t.currentDraft}</span>');
+    expect(page).toContain('className="crm-filter-chip-button"');
+    expect(page).toContain('aria-label={`${t.removeFilter}: ${summary.label}`}');
+    expect(page).toContain("function clearFilterChip<Key extends keyof InquiryFilters>(key: Key) {");
+    expect(page).toContain('setFilters((current) => ({ ...current, [key]: "" }));');
+    expect(page).toContain('<span className="crm-chip crm-chip-muted">{t.currentDraftDefault}</span>');
     expect(page).toContain('<span className="crm-filter-summary__label">{t.appliedQueue}</span>');
     expect(page).toContain('{hasUnappliedFilters ? <span className="crm-chip crm-chip-warn">{t.draftChangesPending}</span> : null}');
     expect(page).toContain('<span className="crm-chip crm-chip-muted">{t.appliedQueueDefault}</span>');
@@ -195,10 +202,17 @@ describe("B11 admin inquiries page contract", () => {
     expect(page).toContain("function truncateFilterSummaryValue(value: string): string {");
     expect(copy).toContain('appliedQueue: "Applied queue"');
     expect(copy).toContain('appliedQueueDefault: "Default filters"');
+    expect(copy).toContain('currentDraft: "Current draft"');
+    expect(copy).toContain('currentDraftDefault: "No draft filters yet"');
     expect(copy).toContain('draftChangesPending: "Draft changes pending"');
+    expect(copy).toContain('removeFilter: "Remove filter"');
     expect(copy).toContain('appliedQueue: "คิวที่ใช้งานอยู่"');
+    expect(copy).toContain('currentDraft: "ฉบับร่างปัจจุบัน"');
     expect(copy).toContain('draftChangesPending: "มีตัวกรองฉบับรอใช้"');
+    expect(copy).toContain('removeFilter: "ลบตัวกรอง"');
+    expect(styles).toContain(".crm-filter-summary-grid {");
     expect(styles).toContain(".crm-filter-summary {");
+    expect(styles).toContain(".crm-filter-chip-button {");
     expect(styles).toContain(".crm-filter-summary__chips {");
   });
 
@@ -228,8 +242,20 @@ describe("B11 admin inquiries page contract", () => {
 
   it("renders inquiry status as a visible chip for faster table scanning", () => {
     const list = read("components/admin/domain/crm/InquiryListTable.tsx");
+    const copy = read("components/admin/domain/crm/inquiries-copy.ts");
+    const styles = read("styles/admin-components.css");
 
     expect(list).toContain('<span className="crm-chip crm-chip-muted">{translateInquiryStatus(item.status, locale)}</span>');
+    expect(list).toContain("<AdminTableToolbar");
+    expect(list).toContain("t.rowActionHint");
+    expect(list).toContain("t.openDetails");
+    expect(list).toContain("t.viewingDetails");
+    expect(list).toContain('className="crm-table-select-action"');
+    expect(copy).toContain('rowActionHint: "Select a row to open details, contact actions, and follow-up controls in the next panel."');
+    expect(copy).toContain('openDetails: "Open details"');
+    expect(copy).toContain('viewingDetails: "Viewing details"');
+    expect(styles).toContain(".crm-table-toolbar {");
+    expect(styles).toContain(".crm-table-select-action {");
   });
 
   it("gives moving rows a visible disabled state in both table and kanban views", () => {
@@ -241,7 +267,8 @@ describe("B11 admin inquiries page contract", () => {
     expect(kanban).toContain("const isMoving = movingInquiryId === item.id;");
     expect(kanban).toContain("disabled={isMoving}");
     expect(styles).toContain(".crm-row-button:disabled,");
-    expect(styles).toContain(".crm-table-select:disabled {");
+    expect(styles).toContain(".crm-table-select:disabled,");
+    expect(styles).toContain(".crm-filter-chip-button:disabled {");
     expect(styles).toContain("cursor: not-allowed;");
     expect(styles).toContain("color: var(--admin-text-soft);");
   });

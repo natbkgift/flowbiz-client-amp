@@ -184,6 +184,7 @@ export default function AdminInquiriesPage() {
   const hasUnappliedFilters = filterQuery !== appliedFilterQuery;
   const hasActiveFilters = Object.values(filters).some((value) => value.trim().length > 0);
   const hasAppliedFilters = Object.values(appliedFilters).some((value) => value.trim().length > 0);
+  const draftFilterSummary = buildFilterSummary(filters, t, locale);
   const appliedFilterSummary = buildFilterSummary(appliedFilters, t, locale);
   const hasNoFiltersToReset = !hasUnappliedFilters && !hasActiveFilters;
   const shouldDisableApply = !isAuthenticated || loading || detailLoading || Boolean(movingInquiryId) || !hasUnappliedFilters;
@@ -194,6 +195,11 @@ export default function AdminInquiriesPage() {
 
   function updateFilter<Key extends keyof InquiryFilters>(key: Key, value: InquiryFilters[Key]) {
     setFilters((current) => ({ ...current, [key]: value }));
+  }
+
+  function clearFilterChip<Key extends keyof InquiryFilters>(key: Key) {
+    setActiveSavedFilterId("");
+    setFilters((current) => ({ ...current, [key]: "" }));
   }
 
   async function applyFilters(tokenOverride?: string, emailOverride?: string) {
@@ -507,19 +513,44 @@ export default function AdminInquiriesPage() {
         ) : null}
 
         {isAuthenticated ? (
-          <div className="crm-filter-summary" aria-live="polite">
-            <span className="crm-filter-summary__label">{t.appliedQueue}</span>
-            <div className="crm-filter-summary__chips">
-              {hasUnappliedFilters ? <span className="crm-chip crm-chip-warn">{t.draftChangesPending}</span> : null}
-              {appliedFilterSummary.length > 0 ? (
-                appliedFilterSummary.map((summary) => (
-                  <span key={summary.key} className="crm-chip crm-chip-muted">
-                    {summary.label}
-                  </span>
-                ))
-              ) : (
-                <span className="crm-chip crm-chip-muted">{t.appliedQueueDefault}</span>
-              )}
+          <div className="crm-filter-summary-grid" aria-live="polite">
+            <div className="crm-filter-summary">
+              <span className="crm-filter-summary__label">{t.currentDraft}</span>
+              <div className="crm-filter-summary__chips">
+                {draftFilterSummary.length > 0 ? (
+                  draftFilterSummary.map((summary) => (
+                    <button
+                      key={summary.key}
+                      type="button"
+                      className="crm-filter-chip-button"
+                      onClick={() => clearFilterChip(summary.key)}
+                      disabled={!isAuthenticated || loading || detailLoading || Boolean(movingInquiryId)}
+                      aria-label={`${t.removeFilter}: ${summary.label}`}
+                    >
+                      <span>{summary.label}</span>
+                      <span aria-hidden="true">×</span>
+                    </button>
+                  ))
+                ) : (
+                  <span className="crm-chip crm-chip-muted">{t.currentDraftDefault}</span>
+                )}
+              </div>
+            </div>
+
+            <div className="crm-filter-summary">
+              <span className="crm-filter-summary__label">{t.appliedQueue}</span>
+              <div className="crm-filter-summary__chips">
+                {hasUnappliedFilters ? <span className="crm-chip crm-chip-warn">{t.draftChangesPending}</span> : null}
+                {appliedFilterSummary.length > 0 ? (
+                  appliedFilterSummary.map((summary) => (
+                    <span key={summary.key} className="crm-chip crm-chip-muted">
+                      {summary.label}
+                    </span>
+                  ))
+                ) : (
+                  <span className="crm-chip crm-chip-muted">{t.appliedQueueDefault}</span>
+                )}
+              </div>
             </div>
           </div>
         ) : null}

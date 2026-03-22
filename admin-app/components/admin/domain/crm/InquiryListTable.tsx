@@ -1,4 +1,4 @@
-import { AdminTable } from "@/components/admin/AdminPrimitives";
+import { AdminTable, AdminTableToolbar } from "@/components/admin/AdminPrimitives";
 import type { InquiryCopy } from "@/components/admin/domain/crm/inquiries-copy";
 import type { InquiryItem, InquiryLocale } from "@/components/admin/domain/crm/inquiries-types";
 import { dueClass, getInquiryDisplayLabel, prettyDate, translateFollowUpStatus, translateInquiryStatus } from "@/components/admin/domain/crm/inquiries-utils";
@@ -19,7 +19,18 @@ export function InquiryListTable({
   onSelect: (id: string) => void | Promise<void>;
 }) {
   return (
-    <AdminTable caption={t.list} className="crm-table-wrap">
+    <AdminTable
+      caption={t.list}
+      className="crm-table-wrap"
+      toolbar={
+        <AdminTableToolbar className="crm-table-toolbar" aria-label={t.list}>
+          <span className={`crm-chip ${selectedId ? "crm-chip-sla" : "crm-chip-muted"}`}>
+            {selectedId ? t.viewingDetails : t.openDetails}
+          </span>
+          <p className="crm-filter-hint">{t.rowActionHint}</p>
+        </AdminTableToolbar>
+      }
+    >
       <table className="dashboard-table crm-table" aria-label={t.list}>
         <thead>
           <tr>
@@ -40,6 +51,7 @@ export function InquiryListTable({
                   <button
                     type="button"
                     className="crm-table-select"
+                    aria-label={`${selectedId === item.id ? t.viewingDetails : t.openDetails}: ${primaryLabel}`}
                     aria-pressed={selectedId === item.id}
                     disabled={movingInquiryId === item.id}
                     onClick={() => void onSelect(item.id)}
@@ -47,6 +59,9 @@ export function InquiryListTable({
                     <span>{primaryLabel}</span>
                     <small className="crm-table-select-meta">
                       {[item.source_page, item.intent].filter(Boolean).join(" · ") || "-"}
+                    </small>
+                    <small className="crm-table-select-action">
+                      {selectedId === item.id ? t.viewingDetails : t.openDetails}
                     </small>
                   </button>
                 </td>
