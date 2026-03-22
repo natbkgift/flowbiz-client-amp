@@ -127,6 +127,28 @@ describe("B11 admin inquiries page contract", () => {
     expect(page).toContain("setFilters(EMPTY_FILTERS);");
     expect(page).toContain("void loadListWithFilters(EMPTY_FILTERS);");
     expect(page).toContain('onClick={clearFilters}');
+    expect(page).toContain('setActiveSavedFilterId("");');
+  });
+
+  it("restores the last inquiry workspace state and auto-loads the saved queue for active sessions", () => {
+    const page = read("app/admin/inquiries/page.tsx");
+    const utils = read("components/admin/domain/crm/inquiries-utils.ts");
+    const types = read("components/admin/domain/crm/inquiries-types.ts");
+
+    expect(page).toContain("const hasHydratedWorkspace = useRef(false);");
+    expect(page).toContain("const hasBootstrappedQueue = useRef(false);");
+    expect(page).toContain("const storageKey = workspaceStateKey(role);");
+    expect(page).toContain("const parsed = JSON.parse(raw) as Partial<InquiryWorkspaceState>;");
+    expect(page).toContain("const nextDraftFilters = normalizeInquiryFilters(parsed.draftFilters);");
+    expect(page).toContain("setAppliedFilterQuery(buildQuery(nextAppliedFilters));");
+    expect(page).toContain("setViewMode(isInquiryViewMode(parsed.viewMode) ? parsed.viewMode : \"table\");");
+    expect(page).toContain("window.localStorage.setItem(workspaceStateKey(role), JSON.stringify(snapshot));");
+    expect(page).toContain("void loadListWithFilters(appliedFilters, authToken, authEmail);");
+    expect(utils).toContain('WORKSPACE_STATE_STORAGE_KEY = "flowbiz_crm_workspace_state_v1"');
+    expect(utils).toContain("export function workspaceStateKey(role: string)");
+    expect(utils).toContain("export function normalizeInquiryFilters");
+    expect(utils).toContain("export function isInquiryViewMode");
+    expect(types).toContain("export type InquiryWorkspaceState = {");
   });
 
   it("separates apply vs reload based on whether filters are still dirty", () => {
@@ -256,6 +278,25 @@ describe("B11 admin inquiries page contract", () => {
     expect(copy).toContain('viewingDetails: "Viewing details"');
     expect(styles).toContain(".crm-table-toolbar {");
     expect(styles).toContain(".crm-table-select-action {");
+  });
+
+  it("adds dedicated row actions so operators can open details or jump straight to contact routes", () => {
+    const list = read("components/admin/domain/crm/InquiryListTable.tsx");
+    const copy = read("components/admin/domain/crm/inquiries-copy.ts");
+    const styles = read("styles/admin-components.css");
+
+    expect(list).toContain('<th scope="col">{t.rowActions}</th>');
+    expect(list).toContain('className="crm-row-actions"');
+    expect(list).toContain('className="btn btn-secondary crm-row-actions__primary"');
+    expect(list).toContain('className="crm-row-action-link" href={item.whatsapp_url}');
+    expect(list).toContain('className="crm-row-action-link" href={item.phone_url}');
+    expect(list).toContain('className="crm-row-action-link" href={item.email_url}');
+    expect(list).toContain('className="crm-row-actions__empty"');
+    expect(copy).toContain('rowActions: "Next steps"');
+    expect(copy).toContain('noRowActions: "No direct contact route"');
+    expect(copy).toContain('rowActions: "ขั้นตอนถัดไป"');
+    expect(styles).toContain('.crm-row-actions,');
+    expect(styles).toContain('.crm-row-action-link,');
   });
 
   it("gives moving rows a visible disabled state in both table and kanban views", () => {

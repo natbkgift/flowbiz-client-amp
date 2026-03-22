@@ -17,18 +17,22 @@ import { inquiriesCopy } from "@/components/admin/domain/crm/inquiries-copy";
 import { InquiryViewToggle } from "@/components/admin/domain/crm/InquiryViewToggle";
 import {
   buildQuery,
+  isInquiryViewMode,
   MAX_SAVED_FILTERS,
+  normalizeInquiryFilters,
   readRoleFromToken,
   savedFiltersKey,
   toLocalInputDateTime,
   translateFollowUpStatus,
   translateInquiryStatus,
+  workspaceStateKey,
 } from "@/components/admin/domain/crm/inquiries-utils";
 import type {
   InquiryFilters,
   InquiryItem,
   InquiryLocale,
   InquiryViewMode,
+  InquiryWorkspaceState,
   PaginatedResponse,
   SavedFilter,
   TimelineEvent,
@@ -105,6 +109,8 @@ function truncateFilterSummaryValue(value: string): string {
 
 export default function AdminInquiriesPage() {
   const savedFilterCounter = useRef(0);
+  const hasHydratedWorkspace = useRef(false);
+  const hasBootstrappedQueue = useRef(false);
   const [locale, setLocale] = useState<InquiryLocale>(() => detectLocale());
   const [loginEmail, setLoginEmail] = useState("");
   const [loginPassword, setLoginPassword] = useState("");
@@ -159,7 +165,6 @@ export default function AdminInquiriesPage() {
 
   useEffect(() => {
     if (typeof window === "undefined") return;
-    setActiveSavedFilterId("");
     const raw = window.localStorage.getItem(savedFiltersKey(role));
     if (!raw) {
       setSavedFilters([]);
@@ -176,6 +181,69 @@ export default function AdminInquiriesPage() {
       window.localStorage.removeItem(savedFiltersKey(role));
     }
   }, [role]);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    hasHydratedWorkspace.current = false;
+    const storageKey = workspaceStateKey(role);
+    const raw = window.localStorage.getItem(storageKey);
+    if (!raw) {
+      setFilters(EMPTY_FILTERS);
+      setAppliedFilters(EMPTY_FILTERS);
+      setAppliedFilterQuery(buildQuery(EMPTY_FILTERS));
+      setViewMode("table");
+      setActiveSavedFilterId("");
+      hasHydratedWorkspace.current = true;
+      hasBootstrappedQueue.current = false;
+      return;
+    }
+
+    try {
+      const parsed = JSON.parse(raw) as Partial<InquiryWorkspaceState>;
+      const nextDraftFilters = normalizeInquiryFilters(parsed.draftFilters);
+      const nextAppliedFilters = normalizeInquiryFilters(parsed.appliedFilters);
+      setFilters(nextDraftFilters);
+      setAppliedFilters(nextAppliedFilters);
+      setAppliedFilterQuery(buildQuery(nextAppliedFilters));
+      setViewMode(isInquiryViewMode(parsed.viewMode) ? parsed.viewMode : "table");
+      setActiveSavedFilterId(typeof parsed.activeSavedFilterId === "string" ? parsed.activeSavedFilterId : "");
+    } catch {
+      window.localStorage.removeItem(storageKey);
+      setFilters(EMPTY_FILTERS);
+      setAppliedFilters(EMPTY_FILTERS);
+      setAppliedFilterQuery(buildQuery(EMPTY_FILTERS));
+      setViewMode("table");
+      setActiveSavedFilterId("");
+    }
+
+    hasHydratedWorkspace.current = true;
+    hasBootstrappedQueue.current = false;
+  }, [role]);
+
+  useEffect(() => {
+    if (typeof window === "undefined" || !hasHydratedWorkspace.current) return;
+
+    const snapshot: InquiryWorkspaceState = {
+      draftFilters: filters,
+      appliedFilters,
+      viewMode,
+      activeSavedFilterId,
+    };
+
+    try {
+      window.localStorage.setItem(workspaceStateKey(role), JSON.stringify(snapshot));
+    } catch {
+      return;
+    }
+  }, [activeSavedFilterId, appliedFilters, filters, role, viewMode]);
+
+  useEffect(() => {
+    if (!isAuthenticated || !authToken.trim() || !hasHydratedWorkspace.current || hasBootstrappedQueue.current) {
+      return;
+    }
+    hasBootstrappedQueue.current = true;
+    void loadListWithFilters(appliedFilters, authToken, authEmail);
+  }, [appliedFilters, authEmail, authToken, isAuthenticated, loadListWithFilters]);
 
   const t = inquiriesCopy[locale];
   const authError = authErrorCode ? authErrorMessage(t, authErrorCode) : null;
@@ -342,6 +410,7 @@ export default function AdminInquiriesPage() {
   }
 
   function clearFilters() {
+    setActiveSavedFilterId("");
     setFilters(EMPTY_FILTERS);
     void loadListWithFilters(EMPTY_FILTERS);
   }
@@ -417,6 +486,7 @@ export default function AdminInquiriesPage() {
 
   function logout() {
     clearAdminSession();
+    hasBootstrappedQueue.current = false;
     setRole("admin");
     setLoginPassword("");
     setError(null);

@@ -2610,6 +2610,38 @@
     align-items: center;
   }
 
+  .admin-data-table-toolbar {
+    grid-template-columns: minmax(220px, 1.3fr) auto minmax(0, 1fr);
+    align-items: end;
+  }
+
+  .admin-data-table-toolbar__summary {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: var(--admin-space-2);
+  }
+
+  .admin-data-table-pill {
+    display: inline-flex;
+    align-items: center;
+    min-height: 32px;
+    padding: 0.3rem 0.7rem;
+    border-radius: var(--admin-radius-pill);
+    background: var(--admin-bg-card-muted);
+    border: 1px solid var(--admin-border-subtle);
+    color: var(--admin-text-muted);
+    font-size: var(--admin-font-size-xs);
+    font-weight: var(--admin-font-weight-semibold);
+    line-height: 1.35;
+  }
+
+  .admin-data-table-empty-state {
+    display: grid;
+    gap: var(--admin-space-2);
+    justify-items: start;
+  }
+
   .crm-filter-summary-grid,
   .crm-filter-summary {
     display: grid;
@@ -2779,6 +2811,56 @@
     z-index: 1;
     background: rgba(248, 250, 252, 0.98);
     backdrop-filter: blur(10px);
+  }
+
+  .crm-row-actions,
+  .crm-row-actions__quick,
+  .admin-data-table-row-action {
+    display: grid;
+    gap: var(--admin-space-1);
+  }
+
+  .crm-row-actions {
+    min-width: 180px;
+  }
+
+  .crm-row-actions__primary {
+    justify-content: center;
+  }
+
+  .crm-row-actions__quick {
+    grid-template-columns: repeat(auto-fit, minmax(72px, max-content));
+  }
+
+  .crm-row-action-link,
+  .crm-row-actions__empty,
+  .admin-data-table-row-action__hint {
+    color: var(--admin-text-muted);
+    font-size: var(--admin-font-size-xs);
+    line-height: 1.4;
+  }
+
+  .crm-row-action-link {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 30px;
+    padding: 0.28rem 0.55rem;
+    border-radius: var(--admin-radius-pill);
+    border: 1px solid var(--admin-border-default);
+    background: var(--admin-bg-card);
+    color: var(--admin-text-strong);
+    text-decoration: none;
+  }
+
+  .crm-row-action-link:hover,
+  .crm-row-action-link:focus-visible {
+    border-color: var(--admin-color-primary-200);
+    background: var(--admin-bg-active);
+  }
+
+  .admin-data-table-row-action__hint {
+    max-width: 16rem;
   }
 
   .crm-detail-section {

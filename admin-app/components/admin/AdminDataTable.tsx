@@ -39,6 +39,7 @@ export function AdminDataTable<T>({
   onBulkSelectionChange,
 }: AdminDataTableProps<T>) {
   const filterInputId = useId();
+  const tableId = useId();
   const {
     hasColumns,
     filterQuery,
@@ -67,16 +68,20 @@ export function AdminDataTable<T>({
   }
 
   const filteredCount = sortedRows.length;
+  const hasActiveFilter = filterQuery.trim().length > 0;
+  const tableSummary = hasActiveFilter
+    ? `Showing ${filteredCount} of ${rows.length} loaded rows`
+    : `Showing all ${rows.length} loaded rows`;
 
   return (
     <AdminTable
       toolbar={
-        <AdminTableToolbar className="card-actions">
+        <AdminTableToolbar className="card-actions admin-data-table-toolbar">
           <AdminInput
             htmlFor={filterInputId}
             label={filterLabel}
             icon="search"
-            hint={`Showing ${filteredCount} of ${rows.length} loaded rows`}
+            hint={tableSummary}
           >
             <input
               id={filterInputId}
@@ -90,17 +95,27 @@ export function AdminDataTable<T>({
               Clear filter
             </AdminButton>
           ) : null}
-          <p className="locale-safe" role="status" aria-live="polite">
-            Selected: {selectedIds.size}
-          </p>
+          <div className="admin-data-table-toolbar__summary" role="status" aria-live="polite">
+            <span className="admin-data-table-pill">{tableSummary}</span>
+            <span className="admin-data-table-pill">Selected: {selectedIds.size}</span>
+          </div>
         </AdminTableToolbar>
       }
     >
       {sortedRows.length === 0 ? (
-        <div className="state-empty">{emptyLabel}</div>
+        <div className="admin-data-table-empty-state">
+          <div className="state-empty">
+            {hasActiveFilter ? `No loaded rows match \"${filterQuery}\".` : emptyLabel}
+          </div>
+          {hasActiveFilter ? (
+            <AdminButton variant="secondary" size="sm" onClick={() => setFilterQuery("")}>
+              Clear filter
+            </AdminButton>
+          ) : null}
+        </div>
       ) : (
         <>
-          <table className="dashboard-table">
+          <table id={tableId} className="dashboard-table">
             <thead>
               <tr>
                 <th>
@@ -156,6 +171,7 @@ export function AdminDataTable<T>({
             previousDisabled={effectivePage <= 1}
             nextDisabled={effectivePage >= totalPages}
             summary={`Page ${effectivePage} of ${totalPages}`}
+            controlsId={tableId}
           />
         </>
       )}

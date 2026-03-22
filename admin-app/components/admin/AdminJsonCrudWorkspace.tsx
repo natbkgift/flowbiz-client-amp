@@ -300,10 +300,20 @@ export function AdminJsonCrudWorkspace({ config }: { config: CrudConfig }) {
         label: t.use,
         renderCell: (item) => {
           const id = pickIdentifierFromRow(item);
+          const isActiveRecord = Boolean(id && id === identifier);
           return (
-            <button className="btn btn-secondary" type="button" onClick={() => setIdentifier(id)} disabled={!id}>
-              {t.use}
-            </button>
+            <div className="admin-data-table-row-action">
+              <button
+                className={`btn ${isActiveRecord ? "btn" : "btn-secondary"}`}
+                type="button"
+                onClick={() => setIdentifier(id)}
+                disabled={!id}
+                aria-pressed={isActiveRecord}
+              >
+                {isActiveRecord ? t.activeRecord : t.use}
+              </button>
+              <span className="admin-data-table-row-action__hint">{t.useRecordHint}</span>
+            </div>
           );
         },
         getSortValue: (item) => pickIdentifierFromRow(item),
@@ -367,7 +377,7 @@ export function AdminJsonCrudWorkspace({ config }: { config: CrudConfig }) {
         },
       },
     ],
-    [pickIdentifierFromRow, t.identifier, t.nameTitle, t.slug, t.statusUpdated, t.use]
+    [identifier, pickIdentifierFromRow, t.activeRecord, t.identifier, t.nameTitle, t.slug, t.statusUpdated, t.use, t.useRecordHint]
   );
 
   const hasOutputSidecar = Boolean(result) || Boolean(revisionConfig);

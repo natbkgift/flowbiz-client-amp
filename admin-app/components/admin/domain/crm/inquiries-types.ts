@@ -91,3 +91,10 @@ export type PaginatedResponse<T> = {
 };
 
 export type InquiryViewMode = "table" | "kanban";
+
+export type InquiryWorkspaceState = {
+  draftFilters: InquiryFilters;
+  appliedFilters: InquiryFilters;
+  viewMode: InquiryViewMode;
+  activeSavedFilterId: string;
+};

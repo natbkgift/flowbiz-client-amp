@@ -39,11 +39,13 @@ export function InquiryListTable({
             <th scope="col">{t.followUp}</th>
             <th scope="col">{t.followUpDueAt}</th>
             <th scope="col">{t.createdAt}</th>
+            <th scope="col">{t.rowActions}</th>
           </tr>
         </thead>
         <tbody>
           {items.map((item) => {
             const primaryLabel = getInquiryDisplayLabel(item);
+            const hasContactActions = Boolean(item.whatsapp_url || item.phone_url || item.email_url);
 
             return (
               <tr key={item.id} className={selectedId === item.id ? "is-active" : ""}>
@@ -79,6 +81,38 @@ export function InquiryListTable({
                   </span>
                 </td>
                 <td>{prettyDate(item.created_at, locale)}</td>
+                <td>
+                  <div className="crm-row-actions">
+                    <button
+                      type="button"
+                      className="btn btn-secondary crm-row-actions__primary"
+                      aria-label={`${selectedId === item.id ? t.viewingDetails : t.openDetails}: ${primaryLabel}`}
+                      aria-pressed={selectedId === item.id}
+                      disabled={movingInquiryId === item.id}
+                      onClick={() => void onSelect(item.id)}
+                    >
+                      {selectedId === item.id ? t.viewingDetails : t.openDetails}
+                    </button>
+                    <div className="crm-row-actions__quick">
+                      {item.whatsapp_url ? (
+                        <a className="crm-row-action-link" href={item.whatsapp_url} target="_blank" rel="noreferrer">
+                          {t.whatsapp}
+                        </a>
+                      ) : null}
+                      {item.phone_url ? (
+                        <a className="crm-row-action-link" href={item.phone_url}>
+                          {t.phone}
+                        </a>
+                      ) : null}
+                      {item.email_url ? (
+                        <a className="crm-row-action-link" href={item.email_url}>
+                          {t.emailAction}
+                        </a>
+                      ) : null}
+                      {!hasContactActions ? <span className="crm-row-actions__empty">{t.noRowActions}</span> : null}
+                    </div>
+                  </div>
+                </td>
               </tr>
             );
           })}
