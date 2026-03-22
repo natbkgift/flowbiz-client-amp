@@ -128,6 +128,25 @@ function Get-RemoteDeployTelemetryRecord {
   }
 }
 
+function Test-DeployTelemetrySuccess {
+  param(
+    [pscustomobject]$TelemetryPayload,
+    [string]$ExpectedStateDir,
+    [string]$ExpectedTargetSha
+  )
+
+  if ($null -eq $TelemetryPayload) {
+    return $false
+  }
+
+  return (
+    $TelemetryPayload.state_dir -eq $ExpectedStateDir -and
+    $TelemetryPayload.target_sha -eq $ExpectedTargetSha -and
+    $TelemetryPayload.deploy_status -eq 'ok' -and
+    $TelemetryPayload.smoke_passed
+  )
+}
+
 $sshOptions = @(
   '-o', 'BatchMode=yes',
   '-o', 'ServerAliveInterval=15',
@@ -257,7 +276,22 @@ fi
 
     if ($status -eq "completed") {
       if ($exitCode -ne "0") {
-        throw "Production deploy failed."
+        try {
+          $telemetryRecord = Get-RemoteDeployTelemetryRecord -VpsHost $VpsHost -SshOptions $sshOptions -QuotedTelemetryPath $qTelemetryPath -Attempts $RetryAttempts -InitialBackoffSeconds $RetryBackoffSeconds
+          if (Test-DeployTelemetrySuccess -TelemetryPayload $telemetryRecord.Payload -ExpectedStateDir $remoteStateDir -ExpectedTargetSha $TargetSha) {
+            Write-Warning "deploy runner exited with code $exitCode, but remote telemetry confirms success for state dir $remoteStateDir"
+            if ($telemetryRecord.RawOutput) {
+              Write-Host $telemetryRecord.RawOutput
+            }
+            $completed = $true
+            break
+          }
+
+          $phase = [string]($telemetryRecord.Payload.current_phase ?? 'unknown')
+          throw "Production deploy failed with remote exit code $exitCode during phase '$phase'."
+        } catch {
+          throw "Production deploy failed with remote exit code $exitCode. $($_.Exception.Message)"
+        }
       }
       $telemetryRecord = Get-RemoteDeployTelemetryRecord -VpsHost $VpsHost -SshOptions $sshOptions -QuotedTelemetryPath $qTelemetryPath -Attempts $RetryAttempts -InitialBackoffSeconds $RetryBackoffSeconds
       if ($telemetryRecord.RawOutput) {
@@ -273,13 +307,7 @@ fi
   if (-not $completed) {
     try {
       $telemetryRecord = Get-RemoteDeployTelemetryRecord -VpsHost $VpsHost -SshOptions $sshOptions -QuotedTelemetryPath $qTelemetryPath -Attempts $RetryAttempts -InitialBackoffSeconds $RetryBackoffSeconds
-      $telemetryPayload = $telemetryRecord.Payload
-      if (
-        $telemetryPayload.state_dir -eq $remoteStateDir -and
-        $telemetryPayload.target_sha -eq $TargetSha -and
-        $telemetryPayload.deploy_status -eq 'ok' -and
-        $telemetryPayload.smoke_passed
-      ) {
+      if (Test-DeployTelemetrySuccess -TelemetryPayload $telemetryRecord.Payload -ExpectedStateDir $remoteStateDir -ExpectedTargetSha $TargetSha) {
         Write-Host "deploy poll timed out, but remote telemetry confirms success for state dir $remoteStateDir"
         if ($telemetryRecord.RawOutput) {
           Write-Host $telemetryRecord.RawOutput
