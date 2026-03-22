@@ -7,10 +7,10 @@ FlowBiz Admin UX Refactor
 Phase 8 - Domain and layout workflow guidance parity
 
 ## Active Branch
-copilot/improve-admin-ux-design
+copilot/refactor-implementation-quality
 
 ## Active PR
-PR #521 - Improve inquiry workflow and admin table discoverability
+PR #522 - [WIP] Refactor implementation quality of refactor runner
 
 ## Completed Modules
 - admin shell
@@ -28,6 +28,8 @@ PR #521 - Improve inquiry workflow and admin table discoverability
 - hardened refactor runner codex auto-detect so the default template pins the repo root, disables ANSI color noise, and preserves config overrides that bypass broken local user config
 - clarified refactor runner live-status rendering so active versus final states are clearly differentiated while preserving the existing status fields
 - added targeted refactor runner regression coverage for CLI precedence, codex auto-detect template shape, and live-status rendering
+- added PowerShell wrapper regression coverage proving default runs omit `--command-template` while explicit `-CommandTemplate` values still forward intact
+- added retry countdown integration coverage that reads `.ai/refactor-live-status.json` during backoff to prove countdown and next-attempt runtime artifacts
 - rebalanced topbar layout and shell spacing
 - improved inquiry row action visibility with direct contact actions
 - added inquiry workspace and filter persistence
@@ -103,9 +105,9 @@ PR #521 - Improve inquiry workflow and admin table discoverability
 - admin-app/__tests__/b15_admin_layout_cms_page.test.ts
 
 ## Last Run Summary
-- hardened the refactor runner default codex template with explicit repo-root and clean-output flags while preserving user-supplied command-template overrides
-- made live-status markdown clearly distinguish active versus final states and validated the wrapper dry-run path without passing an explicit command template
-- validated the runner changes with targeted pytest coverage plus a PowerShell wrapper dry-run that auto-detected codex and wrote coherent live-status artifacts
+- added automated PowerShell wrapper coverage so the default path still omits `--command-template` while explicit overrides are forwarded unchanged
+- added retry backoff coverage that inspects live status runtime artifacts during countdown and verifies `retry_countdown_sec`, `next_retry_attempt`, and validation summary fields
+- validated the runner updates with `python -m pytest -q tests/test_refactor_runner.py` and `python -m ruff check tools/refactor_runner.py tests/test_refactor_runner.py`
 - added entity-aware prerequisite guidance and post-action handoff panels to the bespoke domain workspace so areas, developers, and projects now point to the right verification surfaces after successful actions
 - added layout CMS success handoff links so a saved shared layout can move straight into company CMS or home composer verification work
 - validated the new domain and layout guidance with targeted workspace tests, targeted layout CMS tests, and a successful admin build
@@ -131,7 +133,7 @@ PR #521 - Improve inquiry workflow and admin table discoverability
 - already completed layout CMS success-state handoff guidance
 
 ## Known Weaknesses
-- explicit wrapper `-CommandTemplate` forwarding still relies on manual validation rather than dedicated regression coverage
+- no concrete runner validation gap is currently open in the queue
 
 ## Open Workflow Blockers
 - none in the current queue
@@ -143,5 +145,5 @@ PR #521 - Improve inquiry workflow and admin table discoverability
 - preserve existing review and publish flows while adding navigation cues
 
 ## Preferred Expansion Areas
-- discover any newly emerging operator friction after the current workflow guidance set lands in review
-- consistency audits for future bespoke admin notices versus the shared handoff and prerequisite patterns now in place
+- rerun a real controller session only when a concrete runtime observability gap appears in CI or operator logs
+- keep future runner changes scoped to demonstrated controller contract or retry-state regressions
