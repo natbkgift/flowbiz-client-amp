@@ -75,7 +75,7 @@ Success:
 ## [UX-009] Shared CRUD success states still end in raw payloads
 Type: workflow continuity
 Priority: MEDIUM
-Status: OPEN
+Status: DONE
 Modules: shared CRUD workspaces, result panels
 Success:
 - create/patch/publish/unpublish/restore outcomes explain the recommended next verification step
@@ -84,8 +84,26 @@ Success:
 ## [UX-010] Secondary CRUD workspaces still use generic routing
 Type: workflow continuity
 Priority: MEDIUM
-Status: OPEN
+Status: DONE
 Modules: taxonomy, videos, company, testimonials, users
 Success:
 - secondary CRUD pages expose route-specific follow-up destinations
 - operators can move into the right operational surface after inspecting or updating records
+
+## [UX-011] Non-shared admin workspaces still diverge on success-state handoff
+Type: workflow continuity
+Priority: MEDIUM
+Status: OPEN
+Modules: imports, media, SEO, home composer
+Success:
+- successful non-shared admin actions explain the next verification step instead of stopping at raw output or ad hoc notices
+- operators can move from mutation success into the right validation surface with consistent cues
+
+## [UX-012] Shared CRUD prerequisite guidance is still too generic
+Type: workflow continuity
+Priority: MEDIUM
+Status: OPEN
+Modules: shared CRUD auth/query panels, secondary CRUD pages
+Success:
+- route-specific prerequisites are visible before operators run high-impact mutations
+- secondary CRUD pages explain what should be verified first when content depends on media, taxonomy, or downstream operational checks

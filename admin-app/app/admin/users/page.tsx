@@ -58,6 +58,29 @@ export default function AdminUsersPage() {
         subtitle: isThai
           ? "สร้างหรืออัปเดตผู้ใช้ พร้อมกำหนดหรือถอด role ได้จากหน้าเดียว โดยระบบยังกันการแก้สิทธิ์ของบัญชีตัวเองไว้เพื่อความปลอดภัย"
           : "Create/update users and assign/unassign roles. Use role_ids to replace assignments. Self role/permission edits are blocked for safety.",
+        followUpLinks: [
+          {
+            href: "/admin/dashboard",
+            label: isThai ? "เปิดแดชบอร์ด" : "Open dashboard",
+            description: isThai
+              ? "กลับไปตรวจสถานะระบบหลังปรับสิทธิ์ผู้ใช้หรือทีมปฏิบัติการ"
+              : "Review the operational dashboard after changing user or operator access.",
+          },
+          {
+            href: "/admin/inquiries",
+            label: isThai ? "เปิด CRM" : "Open CRM",
+            description: isThai
+              ? "ยืนยัน workflow ของทีมขายหรือทีมตอบลีดหลังแก้สิทธิ์"
+              : "Verify CRM workflows after changing sales or operator access.",
+          },
+          {
+            href: "/admin/imports",
+            label: isThai ? "ดูงานนำเข้า" : "Open imports",
+            description: isThai
+              ? "ตรวจว่าผู้ใช้งานฝั่ง operations ยังเข้าถึง import workflow ได้ตามคาด"
+              : "Confirm operations users can still access import workflows as expected.",
+          },
+        ],
         identifierLabel: isThai ? "รหัสผู้ใช้" : "User ID",
         identifierPlaceholder: isThai ? "UUID ของผู้ใช้" : "user UUID",
         identifierField: "id",

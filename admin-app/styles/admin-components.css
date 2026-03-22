@@ -2141,6 +2141,22 @@
     align-items: center;
   }
 
+  .admin-workspace-result-guidance {
+    display: grid;
+    gap: var(--admin-space-2);
+    padding: var(--admin-space-3);
+    border: 1px solid rgba(191, 219, 254, 0.9);
+    border-radius: var(--admin-radius-lg);
+    background: linear-gradient(180deg, rgba(239, 246, 255, 0.92), rgba(248, 250, 252, 0.98));
+  }
+
+  .admin-workspace-result-guidance p {
+    margin: 0;
+    color: var(--admin-text-muted);
+    font-size: var(--admin-font-size-sm);
+    line-height: 1.5;
+  }
+
   .admin-workspace-form-section {
     display: grid;
     gap: var(--admin-space-3);

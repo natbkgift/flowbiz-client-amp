@@ -19,7 +19,7 @@ import {
 import { AdminIcon } from "@/components/admin/AdminIcons";
 import { AdminFormPrimitiveInput } from "@/components/admin/AdminFormPrimitives";
 import type { CrudWorkspaceCopy } from "@/components/admin/domain/crud-workspace/crud-workspace-copy";
-import type { ChecklistReport, CrudConfig, ListResponse, LocalizedFieldGroup } from "@/components/admin/domain/crud-workspace/workspace-types";
+import type { ChecklistReport, CrudConfig, CrudWorkspaceActionKey, ListResponse, LocalizedFieldGroup } from "@/components/admin/domain/crud-workspace/workspace-types";
 import { nestedText } from "@/components/admin/domain/crud-workspace/workspace-utils";
 
 // Regression anchors for phase-contract tests that grep shared panel capabilities:
@@ -775,7 +775,78 @@ export function AdminCrudWorkspaceRecordsPanel({
   );
 }
 
-export function AdminCrudWorkspaceResultPanel({ copy, result }: { copy: CrudWorkspaceCopy; result: string }) {
+function resultGuidanceBody(actionKey: CrudWorkspaceActionKey | null) {
+  switch (actionKey) {
+    case "create":
+      return localizeCrudPanelsText(
+        "Review the created record, then verify its downstream dependencies in the linked workspaces below before moving on.",
+        "ตรวจรายการที่สร้างแล้ว จากนั้นไปยืนยัน dependency ปลายทางใน workspace ที่ลิงก์ไว้ก่อนทำงานต่อ"
+      );
+    case "patch":
+      return localizeCrudPanelsText(
+        "Reload detail or readiness for the selected record, then confirm the updated state in the linked workspaces below.",
+        "โหลดรายละเอียดหรือ readiness ของรายการนี้ใหม่ แล้วค่อยยืนยันสถานะล่าสุดใน workspace ที่ลิงก์ไว้ด้านล่าง"
+      );
+    case "publish":
+      return localizeCrudPanelsText(
+        "Confirm the live-ready state in the linked validation surfaces below before leaving this record.",
+        "ยืนยันสถานะพร้อมใช้งานจริงผ่านหน้าตรวจสอบที่ลิงก์ไว้ด้านล่างก่อนออกจากรายการนี้"
+      );
+    case "unpublish":
+      return localizeCrudPanelsText(
+        "Check the downstream queue, dashboard, or validation surfaces below to confirm this record is no longer treated as live.",
+        "ตรวจ queue, dashboard หรือหน้าตรวจสอบปลายทางด้านล่างเพื่อยืนยันว่าระเบียนนี้ไม่ถูกมองว่า live แล้ว"
+      );
+    case "restore-revision":
+      return localizeCrudPanelsText(
+        "Review the restored state, then use the linked workspaces below to confirm the rollback is reflected where operators expect it.",
+        "ตรวจสถานะหลัง restore แล้วใช้ workspace ที่ลิงก์ไว้ด้านล่างเพื่อยืนยันว่าผล rollback สะท้อนในจุดที่ผู้ดูแลใช้งานจริง"
+      );
+    case "bulk":
+      return localizeCrudPanelsText(
+        "Reload the list and spot-check downstream surfaces with the linked workspaces below so batch changes do not hide regressions.",
+        "โหลดรายการใหม่แล้วสุ่มตรวจหน้าปลายทางผ่าน workspace ที่ลิงก์ไว้ด้านล่าง เพื่อไม่ให้การแก้แบบกลุ่มซ่อน regression"
+      );
+    case "check-readiness":
+      return localizeCrudPanelsText(
+        "Use this checklist result to decide whether to patch the record here or continue into a linked validation workspace.",
+        "ใช้ผล checklist นี้เพื่อตัดสินใจว่าจะ patch ต่อในหน้านี้ หรือไปตรวจต่อใน workspace ที่ลิงก์ไว้"
+      );
+    case "get-detail":
+      return localizeCrudPanelsText(
+        "Confirm the identifier and payload shape here, then continue with patch, readiness, or the linked operational workspaces below.",
+        "ยืนยันรหัสอ้างอิงและโครง payload ตรงนี้ก่อน แล้วค่อยไปต่อที่ patch, readiness หรือ workspace ปฏิบัติการที่ลิงก์ไว้ด้านล่าง"
+      );
+    case "load-revisions":
+    case "show-diff":
+      return localizeCrudPanelsText(
+        "Use the revision data to decide whether a restore is needed, then verify the affected workflow in the linked workspaces below.",
+        "ใช้ข้อมูล revision เพื่อตัดสินใจว่าต้อง restore หรือไม่ แล้วค่อยไปยืนยัน workflow ที่ได้รับผลใน workspace ที่ลิงก์ไว้ด้านล่าง"
+      );
+    case "delete":
+      return localizeCrudPanelsText(
+        "Reload the list and confirm downstream references in the linked workspaces below so this removal does not leave orphaned states.",
+        "โหลดรายการใหม่แล้วตรวจ reference ปลายทางผ่าน workspace ที่ลิงก์ไว้ด้านล่าง เพื่อไม่ให้การลบทิ้ง state ค้าง"
+      );
+    default:
+      return localizeCrudPanelsText(
+        "Review the latest response here, then use the linked workspaces below to verify the next operational step.",
+        "ตรวจผลตอบกลับล่าสุดตรงนี้ แล้วใช้ workspace ที่ลิงก์ไว้ด้านล่างเพื่อตรวจขั้นตอนปฏิบัติการถัดไป"
+      );
+  }
+}
+
+export function AdminCrudWorkspaceResultPanel({
+  copy,
+  result,
+  actionKey,
+  followUpLinks,
+}: {
+  copy: CrudWorkspaceCopy;
+  result: string;
+  actionKey: CrudWorkspaceActionKey | null;
+  followUpLinks?: CrudConfig["followUpLinks"];
+}) {
   if (!result) return null;
 
   return (
@@ -787,6 +858,13 @@ export function AdminCrudWorkspaceResultPanel({ copy, result }: { copy: CrudWork
       icon="info"
       titleTag="h2"
     >
+      <div className="admin-workspace-result-guidance" role="status">
+        <strong>{copy.resultNextStepsTitle}</strong>
+        <p className="locale-safe">{resultGuidanceBody(actionKey)}</p>
+        {followUpLinks?.length ? (
+          <CrudWorkspaceFollowUpLinks title={copy.nextStepsTitle} description={copy.nextStepsDescription} links={followUpLinks} />
+        ) : null}
+      </div>
       <pre>{result}</pre>
     </LogCard>
   );

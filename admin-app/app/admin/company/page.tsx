@@ -27,6 +27,23 @@ export default function AdminCompanyCmsPage() {
       config={{
         title: "Company CMS",
         subtitle: "Manage company pages via existing /admin/company APIs.",
+        followUpLinks: [
+          {
+            href: "/admin/layout",
+            label: "Open layout CMS",
+            description: "Check shared layout content that is rendered alongside company page updates.",
+          },
+          {
+            href: "/admin/home-composer",
+            label: "Open home composer",
+            description: "Verify homepage callouts and supporting content after changing company copy.",
+          },
+          {
+            href: "/admin/dashboard",
+            label: "Open dashboard",
+            description: "Review operational status after updating company-facing content.",
+          },
+        ],
         identifierLabel: "Company slug",
         identifierPlaceholder: "site-layout",
         identifierField: "slug",

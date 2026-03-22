@@ -4,7 +4,7 @@
 FlowBiz Admin UX Refactor
 
 ## Current Phase
-Phase 5 - Review handoff and shared workspace routing
+Phase 6 - Success-state guidance and secondary CRUD routing
 
 ## Active Branch
 copilot/improve-admin-ux-design
@@ -20,6 +20,7 @@ PR #521 - Improve inquiry workflow and admin table discoverability
 - admin imports workspace
 - admin media workspace
 - admin SEO workspace
+- secondary shared CRUD workspaces
 
 ## Completed Improvements
 - rebalanced topbar layout and shell spacing
@@ -39,14 +40,18 @@ PR #521 - Improve inquiry workflow and admin table discoverability
 - added reusable shared CRUD follow-up links in header, record actions, records empty states, and revisions empty states
 - connected review queue, blog, areas, developers, properties, and projects workspaces to their next operational destinations
 - added dashboard trend and recent-inquiry follow-on actions so operators can jump straight into CRM review flows
+- added action-aware shared CRUD result guidance so successful create, patch, publish, bulk, diff, and restore flows do not end in raw payloads alone
+- connected company, taxonomy, testimonials, users, and videos workspaces to route-specific downstream destinations instead of leaving them on generic shared routing
 - added regression coverage for inquiry, shared CRUD, dashboard, and shell contract behavior
 - added regression coverage for imports and SEO workflow guidance contracts
 - added regression coverage for shared CRUD follow-up routing and dashboard review handoff actions
+- added regression coverage for secondary CRUD routing and shared result-panel guidance
 
 ## Files Changed So Far
 - admin-app/app/admin/inquiries/page.tsx
 - admin-app/app/admin/areas/page.tsx
 - admin-app/app/admin/blog/page.tsx
+- admin-app/app/admin/company/page.tsx
 - admin-app/app/admin/developers/page.tsx
 - admin-app/app/admin/imports/page.tsx
 - admin-app/app/admin/media/page.tsx
@@ -54,6 +59,10 @@ PR #521 - Improve inquiry workflow and admin table discoverability
 - admin-app/app/admin/properties/page.tsx
 - admin-app/app/admin/review-queue/page.tsx
 - admin-app/app/admin/seo/page.tsx
+- admin-app/app/admin/taxonomy/page.tsx
+- admin-app/app/admin/testimonials/page.tsx
+- admin-app/app/admin/users/page.tsx
+- admin-app/app/admin/videos/page.tsx
 - admin-app/components/admin/AdminDataTable.tsx
 - admin-app/components/admin/AdminJsonCrudWorkspace.tsx
 - admin-app/components/admin/domain/crm/InquiryDetailPanel.tsx
@@ -76,10 +85,9 @@ PR #521 - Improve inquiry workflow and admin table discoverability
 - admin-app/__tests__/b14_admin_workspaces_pages.test.ts
 
 ## Last Run Summary
-- added reusable follow-up navigation to shared CRUD so operators see related queue, dashboard, and downstream workspace links near the state that needs a decision
-- connected review queue and article/property/domain workspaces to concrete next destinations instead of leaving follow-on routing implicit
-- extended dashboard trend and recent-inquiry idle/empty states with direct CRM review actions
-- validated with targeted dashboard/workspace tests and a successful admin build
+- added shared CRUD result-panel guidance so successful actions now explain the next verification step instead of ending at raw JSON only
+- connected the remaining secondary CRUD workspaces to route-specific downstream destinations inside real admin surfaces
+- validated the new routing and result guidance with targeted workspace tests and a successful admin build
 
 ## Do Not Repeat
 - shell-only improvements
@@ -94,16 +102,17 @@ PR #521 - Improve inquiry workflow and admin table discoverability
 - already completed imports/media/SEO structured empty-state guidance
 - already completed shared CRUD follow-up links for review queue, blog, areas, developers, properties, and projects
 - already completed dashboard review handoff actions for trend and recent inquiries
+- already completed shared CRUD result guidance for action outcomes
+- already completed route-specific follow-up links for company, taxonomy, testimonials, users, and videos
 
 ## Known Weaknesses
-- generic shared CRUD result payloads still do not summarize the recommended next move after create, patch, publish, or restore succeeds
-- taxonomy, videos, testimonials, and company workspaces still rely on generic shared CRUD routing instead of route-specific operational handoffs
-- bulk-action heavy workspaces like properties still surface strong actions, but their post-run recovery flow is still buried in the result payload
-- workflow handoff between successful mutations and the next verification step can still be clearer
+- non-shared admin workspaces such as imports, media, SEO, and home composer still use bespoke success states rather than one consistent handoff model
+- shared CRUD auth and query panels still rely on generic copy even when a workspace has route-specific operational prerequisites
+- some secondary workspaces still surface minimal field-level guidance before operators make mutations that affect downstream validation
 
 ## Open Workflow Blockers
-- mutation success states still do not tell operators which validation or downstream workspace to open next
-- several secondary shared CRUD pages still need route-specific follow-up destinations
+- non-shared admin workspaces still need clearer next-step guidance after successful mutations
+- secondary CRUD workspaces still need stronger prerequisite guidance before operators trigger high-impact changes
 
 ## Risks
 - avoid breaking shared table and shared workspace components
@@ -112,7 +121,7 @@ PR #521 - Improve inquiry workflow and admin table discoverability
 - preserve existing review and publish flows while adding navigation cues
 
 ## Preferred Expansion Areas
-- shared CRUD result-panel next-step guidance after create, patch, publish, unpublish, and restore actions
-- route-specific follow-up links for taxonomy, videos, company, and testimonials workspaces
-- bulk-action recovery guidance for listing and user-management workflows
-- success-state handoff clarity between mutation results and validation surfaces
+- success-state handoff parity for imports, media, SEO, and home composer
+- route-specific prerequisite guidance in shared CRUD auth and query panels
+- stronger pre-mutation validation cues for secondary CRUD pages with downstream dependencies
+- consistency between bespoke admin workspaces and shared CRUD workflow guidance

@@ -38,6 +38,29 @@ export default function AdminVideosCmsPage() {
         subtitle: isThai
           ? "จัดการคอนเทนต์วิดีโอผ่าน /admin/content/videos พร้อม workflow เผยแพร่ในหน้าเดียว"
           : "Manage video content via /admin/content/videos APIs.",
+        followUpLinks: [
+          {
+            href: "/admin/media",
+            label: isThai ? "ดูคลังสื่อ" : "Open media",
+            description: isThai
+              ? "ตรวจ thumbnail และ asset ท้องถิ่นก่อนเผยแพร่วิดีโอ"
+              : "Verify thumbnails and local assets before publishing video changes.",
+          },
+          {
+            href: "/admin/taxonomy",
+            label: isThai ? "ดู taxonomy" : "Open taxonomy",
+            description: isThai
+              ? "ยืนยันการจับคู่ topics และ tags หลังแก้ไขวิดีโอ"
+              : "Confirm topic and tag relationships after editing video records.",
+          },
+          {
+            href: "/admin/dashboard",
+            label: isThai ? "เปิดแดชบอร์ด" : "Open dashboard",
+            description: isThai
+              ? "กลับไปดูสัญญาณปฏิบัติการหลังอัปเดตคอนเทนต์วิดีโอ"
+              : "Review operational signals after updating video content.",
+          },
+        ],
         identifierLabel: isThai ? "Slug ของวิดีโอ" : "Video slug",
         identifierPlaceholder: "sample-video-entry",
         identifierField: "slug",

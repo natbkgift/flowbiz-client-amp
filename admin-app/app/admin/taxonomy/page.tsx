@@ -28,6 +28,23 @@ export default function AdminTaxonomyCmsPage() {
       config={{
         title: "Taxonomy CMS",
         subtitle: "Manage shared tags/topics/facilities/type registry via /admin/content/taxonomies APIs.",
+        followUpLinks: [
+          {
+            href: "/admin/blog",
+            label: "Open blog",
+            description: "Verify article tags, topics, and category relationships after taxonomy updates.",
+          },
+          {
+            href: "/admin/projects",
+            label: "Open projects",
+            description: "Confirm property-type and facility references after taxonomy changes.",
+          },
+          {
+            href: "/admin/videos",
+            label: "Open videos",
+            description: "Check topic and tag usage in video records after taxonomy edits.",
+          },
+        ],
         identifierLabel: "Taxonomy ID",
         identifierPlaceholder: "taxonomy UUID",
         identifierField: "id",

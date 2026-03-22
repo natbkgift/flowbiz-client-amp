@@ -47,6 +47,23 @@ export default function AdminTestimonialsCmsPage() {
       config={{
         title: "Testimonials CMS",
         subtitle: "Manage testimonials via existing /admin/testimonials APIs.",
+        followUpLinks: [
+          {
+            href: "/admin/properties",
+            label: "Open properties",
+            description: "Confirm the linked property context shown with this testimonial.",
+          },
+          {
+            href: "/admin/media",
+            label: "Open media",
+            description: "Verify avatar or supporting media assets before publishing testimonial changes.",
+          },
+          {
+            href: "/admin/dashboard",
+            label: "Open dashboard",
+            description: "Review downstream operational signals after updating testimonial content.",
+          },
+        ],
         identifierLabel: "Testimonial ID",
         identifierPlaceholder: "testimonial UUID",
         identifierField: "id",

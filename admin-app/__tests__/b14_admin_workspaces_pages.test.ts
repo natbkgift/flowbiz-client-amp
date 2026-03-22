@@ -176,16 +176,35 @@ describe("B14 admin workspace pages contract", () => {
     const panels = read("components/admin/domain/crud-workspace/AdminCrudWorkspacePanels.tsx");
     const propertiesPage = read("app/admin/properties/page.tsx");
     const projectsPage = read("app/admin/projects/page.tsx");
+    const taxonomyPage = read("app/admin/taxonomy/page.tsx");
+    const videosPage = read("app/admin/videos/page.tsx");
+    const companyPage = read("app/admin/company/page.tsx");
+    const testimonialsPage = read("app/admin/testimonials/page.tsx");
+    const usersPage = read("app/admin/users/page.tsx");
 
     expect(types).toContain("followUpLinks?: ReadonlyArray");
+    expect(types).toContain('| "restore-revision";');
     expect(panels).toContain("copy.nextStepsTitle");
     expect(panels).toContain("copy.nextStepsIdleBody");
     expect(panels).toContain("copy.nextStepsRecordsBody");
     expect(panels).toContain("copy.nextStepsRevisionsBody");
+    expect(panels).toContain("copy.resultNextStepsTitle");
+    expect(panels).toContain("function resultGuidanceBody(actionKey: CrudWorkspaceActionKey | null)");
+    expect(panels).toContain('className="admin-workspace-result-guidance"');
     expect(propertiesPage).toContain('href: "/admin/projects"');
     expect(propertiesPage).toContain('href: "/admin/media"');
     expect(projectsPage).toContain('href: "/admin/properties"');
     expect(projectsPage).toContain('href: "/admin/dashboard"');
+    expect(taxonomyPage).toContain('href: "/admin/blog"');
+    expect(taxonomyPage).toContain('href: "/admin/videos"');
+    expect(videosPage).toContain('href: "/admin/media"');
+    expect(videosPage).toContain('href: "/admin/taxonomy"');
+    expect(companyPage).toContain('href: "/admin/layout"');
+    expect(companyPage).toContain('href: "/admin/home-composer"');
+    expect(testimonialsPage).toContain('href: "/admin/properties"');
+    expect(testimonialsPage).toContain('href: "/admin/media"');
+    expect(usersPage).toContain('href: "/admin/inquiries"');
+    expect(usersPage).toContain('href: "/admin/imports"');
   });
 
   it("users workspace avoids default credentials and masks password fields", () => {
