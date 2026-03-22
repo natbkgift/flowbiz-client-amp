@@ -153,3 +153,12 @@ Modules: PowerShell wrapper, runner integration
 Success:
 - explicit wrapper `-CommandTemplate` forwarding is covered by an automated regression path
 - default wrapper behavior continues to omit `--command-template` unless the caller opts in
+
+## [UX-015] Inquiries queue bootstrap still depended on an unstable loader callback
+Type: workflow continuity / validation
+Priority: LOW
+Status: DONE
+Modules: CRM inquiries
+Success:
+- the inquiries bootstrap effect depends on memoized loaders instead of recreating them every render
+- admin build completes without the previous hook dependency warning on `app/admin/inquiries/page.tsx`

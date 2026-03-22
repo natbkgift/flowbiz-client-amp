@@ -2,7 +2,7 @@
 
 // TODO(admin-architecture phase 2): split CRM page orchestration into page/section/domain blocks without changing routes or API contracts.
 
-import { type FormEvent, useEffect, useMemo, useRef, useState } from "react";
+import { type FormEvent, useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { type AdminAuthErrorCode, useAdminAuthController } from "@/app/_lib/admin-auth-hooks";
 import { detectAdminLocale } from "@/app/_lib/admin-i18n";
@@ -150,6 +150,77 @@ export default function AdminInquiriesPage() {
     login: loginWithAdminSession,
     logout: clearAdminSession,
   } = useAdminAuthController();
+  const t = inquiriesCopy[locale];
+
+  const loadDetails = useCallback(
+    async (id: string, tokenOverride?: string) => {
+      const activeToken = (tokenOverride ?? authToken).trim();
+      if (!activeToken) {
+        setError(t.authRequired);
+        return;
+      }
+
+      setSelectedId(id);
+      setDetailLoading(true);
+      setTimelineError(null);
+      setFollowUpNotice(null);
+      setMoveStatusNotice(null);
+      try {
+        const [detailBody, timelineBody] = await Promise.all([
+          fetchJson<InquiryItem>(`/admin/inquiries/${id}`, activeToken),
+          fetchJson<PaginatedResponse<TimelineEvent>>(`/admin/inquiries/${id}/timeline?limit=30`, activeToken),
+        ]);
+        setSelected(detailBody);
+        setFollowUpStatus(detailBody.follow_up_status || "pending");
+        setFollowUpDueAt(toLocalInputDateTime(detailBody.follow_up_due_at));
+        setTimeline(timelineBody.data);
+      } catch {
+        setTimelineError(t.loadTimelineError);
+      } finally {
+        setDetailLoading(false);
+      }
+    },
+    [authToken, t]
+  );
+
+  const loadListWithFilters = useCallback(
+    async (nextFilters: InquiryFilters, tokenOverride?: string, emailOverride?: string) => {
+      const activeToken = (tokenOverride ?? authToken).trim();
+      if (!activeToken) {
+        setError(t.authRequired);
+        return;
+      }
+
+      setLoading(true);
+      setError(null);
+      try {
+        const query = buildQuery(nextFilters);
+        const body = await fetchJson<PaginatedResponse<InquiryItem>>(`/admin/inquiries?${query}`, activeToken);
+        setItems(body.data);
+        setTotal(body.meta.total);
+        setAppliedFilters(nextFilters);
+        setAppliedFilterQuery(query);
+        const shouldKeepSelection = Boolean(selectedId && body.data.some((item) => item.id === selectedId));
+        if (shouldKeepSelection && selectedId) {
+          await loadDetails(selectedId, activeToken);
+        } else {
+          const nextSelectedId = body.data[0]?.id ?? null;
+          setSelectedId(nextSelectedId);
+          setSelected(null);
+          setTimeline([]);
+          if (nextSelectedId) {
+            await loadDetails(nextSelectedId, activeToken);
+          }
+        }
+        persistSession(activeToken, (emailOverride ?? authEmail) || loginEmail);
+      } catch {
+        setError(t.error);
+      } finally {
+        setLoading(false);
+      }
+    },
+    [authEmail, authToken, loadDetails, loginEmail, persistSession, selectedId, t]
+  );
 
   useEffect(() => {
     setLocale(detectLocale());
@@ -245,7 +316,6 @@ export default function AdminInquiriesPage() {
     void loadListWithFilters(appliedFilters, authToken, authEmail);
   }, [appliedFilters, authEmail, authToken, isAuthenticated, loadListWithFilters]);
 
-  const t = inquiriesCopy[locale];
   const authError = authErrorCode ? authErrorMessage(t, authErrorCode) : null;
   const filterQuery = useMemo(() => buildQuery(filters), [filters]);
   const detailEmptyStateMessage = !loading && items.length === 0 ? t.emptyDetails : t.noDetails;
@@ -276,70 +346,6 @@ export default function AdminInquiriesPage() {
 
   async function reloadList(tokenOverride?: string, emailOverride?: string) {
     await loadListWithFilters(appliedFilters, tokenOverride, emailOverride);
-  }
-
-  async function loadListWithFilters(nextFilters: InquiryFilters, tokenOverride?: string, emailOverride?: string) {
-    const activeToken = (tokenOverride ?? authToken).trim();
-    if (!activeToken) {
-      setError(t.authRequired);
-      return;
-    }
-
-    setLoading(true);
-    setError(null);
-    try {
-      const query = buildQuery(nextFilters);
-      const body = await fetchJson<PaginatedResponse<InquiryItem>>(`/admin/inquiries?${query}`, activeToken);
-      setItems(body.data);
-      setTotal(body.meta.total);
-      setAppliedFilters(nextFilters);
-      setAppliedFilterQuery(query);
-      const shouldKeepSelection = Boolean(selectedId && body.data.some((item) => item.id === selectedId));
-      if (shouldKeepSelection && selectedId) {
-        await loadDetails(selectedId, activeToken);
-      } else {
-        const nextSelectedId = body.data[0]?.id ?? null;
-        setSelectedId(nextSelectedId);
-        setSelected(null);
-        setTimeline([]);
-        if (nextSelectedId) {
-          await loadDetails(nextSelectedId, activeToken);
-        }
-      }
-      persistSession(activeToken, (emailOverride ?? authEmail) || loginEmail);
-    } catch {
-      setError(t.error);
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  async function loadDetails(id: string, tokenOverride?: string) {
-    const activeToken = (tokenOverride ?? authToken).trim();
-    if (!activeToken) {
-      setError(t.authRequired);
-      return;
-    }
-
-    setSelectedId(id);
-    setDetailLoading(true);
-    setTimelineError(null);
-    setFollowUpNotice(null);
-    setMoveStatusNotice(null);
-    try {
-      const [detailBody, timelineBody] = await Promise.all([
-        fetchJson<InquiryItem>(`/admin/inquiries/${id}`, activeToken),
-        fetchJson<PaginatedResponse<TimelineEvent>>(`/admin/inquiries/${id}/timeline?limit=30`, activeToken),
-      ]);
-      setSelected(detailBody);
-      setFollowUpStatus(detailBody.follow_up_status || "pending");
-      setFollowUpDueAt(toLocalInputDateTime(detailBody.follow_up_due_at));
-      setTimeline(timelineBody.data);
-    } catch {
-      setTimelineError(t.loadTimelineError);
-    } finally {
-      setDetailLoading(false);
-    }
   }
 
   async function saveFollowUp() {

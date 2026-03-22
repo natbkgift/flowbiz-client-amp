@@ -119,7 +119,7 @@ describe("B11 admin inquiries page contract", () => {
     expect(page).toContain("const nextSelectedId = body.data[0]?.id ?? null;");
     expect(page).toContain("if (nextSelectedId) {");
     expect(page).toContain("await loadDetails(nextSelectedId, activeToken);");
-    expect(page).toContain("async function loadDetails(id: string, tokenOverride?: string)");
+    expect(page).toContain("const loadDetails = useCallback(");
     expect(page).toContain('const activeToken = (tokenOverride ?? authToken).trim();');
     expect(copy).toContain('emptyDetails: "No inquiries match current filters. Adjust filters or reload the queue to fetch the latest leads."');
   });
@@ -147,6 +147,8 @@ describe("B11 admin inquiries page contract", () => {
     expect(page).toContain("setAppliedFilterQuery(buildQuery(nextAppliedFilters));");
     expect(page).toContain("setViewMode(isInquiryViewMode(parsed.viewMode) ? parsed.viewMode : \"table\");");
     expect(page).toContain("window.localStorage.setItem(workspaceStateKey(role), JSON.stringify(snapshot));");
+    expect(page).toContain("const loadListWithFilters = useCallback(");
+    expect(page).toContain("const loadDetails = useCallback(");
     expect(page).toContain("void loadListWithFilters(appliedFilters, authToken, authEmail);");
     expect(utils).toContain('WORKSPACE_STATE_STORAGE_KEY = "flowbiz_crm_workspace_state_v1"');
     expect(utils).toContain("export function workspaceStateKey(role: string)");

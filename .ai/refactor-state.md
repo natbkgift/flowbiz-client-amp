@@ -7,7 +7,7 @@ FlowBiz Admin UX Refactor
 Phase 8 - Domain and layout workflow guidance parity
 
 ## Active Branch
-copilot/refactor-implementation-quality
+copilot/refactor-admin-workflow
 
 ## Active PR
 PR #522 - [WIP] Refactor implementation quality of refactor runner
@@ -60,6 +60,8 @@ PR #522 - [WIP] Refactor implementation quality of refactor runner
 - added regression coverage for secondary CRUD routing and shared result-panel guidance
 - added regression coverage for shared CRUD prerequisite hints and bespoke success handoff affordances
 - added regression coverage for domain and layout workflow guidance contracts
+- stabilized the inquiries queue bootstrap loaders with `useCallback` so the page no longer emits a build-time hook dependency warning
+- tightened inquiry disabled-state coverage so duplicate row/detail action labels assert both buttons stay disabled during move states
 
 ## Files Changed So Far
 - tools/refactor_runner.py
@@ -111,6 +113,9 @@ PR #522 - [WIP] Refactor implementation quality of refactor runner
 - added entity-aware prerequisite guidance and post-action handoff panels to the bespoke domain workspace so areas, developers, and projects now point to the right verification surfaces after successful actions
 - added layout CMS success handoff links so a saved shared layout can move straight into company CMS or home composer verification work
 - validated the new domain and layout guidance with targeted workspace tests, targeted layout CMS tests, and a successful admin build
+- memoized the inquiries list/detail loaders to remove the remaining admin build warning without changing routing, auth, or API wiring
+- updated inquiry contract coverage to lock the memoized bootstrap path and the duplicate disabled-button state in table rows
+- validated the inquiries changes with `npm --prefix admin-app run test -- __tests__/b11_admin_inquiries_page.test.ts __tests__/admin_inquiries_disabled_state.test.tsx` and `npm --prefix admin-app run build`
 
 ## Do Not Repeat
 - shell-only improvements
@@ -131,9 +136,11 @@ PR #522 - [WIP] Refactor implementation quality of refactor runner
 - already completed bespoke success-state handoff parity for imports, media, SEO, and home composer
 - already completed domain workspace prerequisite and success handoff guidance
 - already completed layout CMS success-state handoff guidance
+- already completed inquiries bootstrap loader memoization and duplicate disabled-button regression coverage
 
 ## Known Weaknesses
 - no concrete runner validation gap is currently open in the queue
+- no concrete admin workflow gap is currently open in the queue after the inquiries build warning was removed
 
 ## Open Workflow Blockers
 - none in the current queue
@@ -147,3 +154,4 @@ PR #522 - [WIP] Refactor implementation quality of refactor runner
 ## Preferred Expansion Areas
 - rerun a real controller session only when a concrete runtime observability gap appears in CI or operator logs
 - keep future runner changes scoped to demonstrated controller contract or retry-state regressions
+- only reopen admin inquiries work if CI or operator evidence shows a real regression beyond the now-resolved hook-dependency warning

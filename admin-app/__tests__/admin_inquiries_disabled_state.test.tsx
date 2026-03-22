@@ -38,7 +38,9 @@ describe("admin inquiries disabled state", () => {
       />
     );
 
-    expect(screen.getByRole("button", { name: /jane@example\.com/i })).toBeDisabled();
+    screen.getAllByRole("button", { name: /jane@example\.com/i }).forEach((button) => {
+      expect(button).toBeDisabled();
+    });
   });
 
   it("disables the moving inquiry card and status select in kanban view", () => {
