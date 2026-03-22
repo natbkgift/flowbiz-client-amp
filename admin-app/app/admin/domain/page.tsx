@@ -1,8 +1,9 @@
 "use client";
 
+import Link from "next/link";
 import { type FormEvent, useEffect, useState } from "react";
 import { ADMIN_AUTH_LOGIN_PATH } from "@/app/_lib/admin-auth";
-import { detectAdminLocale, type AdminLocale } from "@/app/_lib/admin-i18n";
+import { detectAdminLocale, type AdminLocale, withAdminLocale } from "@/app/_lib/admin-i18n";
 import { formatWorkspaceErrorMessage } from "@/app/_lib/admin-workspace-error";
 import AdminWorkspaceErrorState from "@/components/admin/AdminWorkspaceErrorState";
 import {
@@ -20,6 +21,7 @@ type EntityType = "areas" | "developers" | "projects";
 type AuthSession = { token: string; email: string };
 type LoginResponse = { access_token: string; token_type: string };
 type EntityRow = { id: string; slug: string; name: string; status: string; updated_at: string | null };
+type DomainActionKey = "create" | "get" | "patch" | "stats" | "publish" | "unpublish" | "delete";
 type DashboardSummaryResponse = {
   raw_metrics: {
     pending_translations?: { total_pending_translations?: number };
@@ -66,9 +68,16 @@ const copy = {
     loadingWorkspace: "Loading workspace",
     editorDescription: "Create, patch, publish, unpublish, or delete selected entities without changing payload shapes.",
     listDescription: "Latest entity rows for the currently selected workspace type.",
+    prerequisiteTitle: "Before you continue",
+    resultGuidanceTitle: "Next verification",
     adminFallback: "admin",
     editSelect: "select",
     deleteConfirm: "Delete this entity now? This action cannot be undone.",
+    openDashboard: "Open dashboard",
+    openAreas: "Open areas workspace",
+    openDevelopers: "Open developers workspace",
+    openProjects: "Open projects workspace",
+    openReviewQueue: "Open review queue",
   },
   th: {
     title: "Admin Domain Workspace",
@@ -105,9 +114,16 @@ const copy = {
     loadingWorkspace: "กำลังโหลด workspace",
     editorDescription: "สร้าง อัปเดต เผยแพร่ ยกเลิกเผยแพร่ หรือลบรายการที่เลือกโดยไม่เปลี่ยนรูปแบบ payload",
     listDescription: "รายการล่าสุดของ workspace ประเภทที่กำลังเลือก",
+    prerequisiteTitle: "ก่อนดำเนินการต่อ",
+    resultGuidanceTitle: "จุดตรวจถัดไป",
     adminFallback: "แอดมิน",
     editSelect: "เลือก",
     deleteConfirm: "ต้องการลบรายการนี้ตอนนี้หรือไม่ การกระทำนี้ย้อนกลับไม่ได้",
+    openDashboard: "ดูแดชบอร์ด",
+    openAreas: "ดู areas workspace",
+    openDevelopers: "ดู developers workspace",
+    openProjects: "ดู projects workspace",
+    openReviewQueue: "ดูคิวตรวจทาน",
   },
 };
 
@@ -204,6 +220,7 @@ export default function AdminDomainPage() {
   const [opBusy, setOpBusy] = useState(false);
   const [opError, setOpError] = useState<string | null>(null);
   const [opResult, setOpResult] = useState("");
+  const [lastActionKey, setLastActionKey] = useState<DomainActionKey | null>(null);
 
   useEffect(() => {
     setLocale(detectLocale());
@@ -305,12 +322,53 @@ export default function AdminDomainPage() {
     return entity === "areas" ? "/admin/areas" : entity === "developers" ? "/admin/developers" : "/admin/projects";
   }
 
-  async function runAction(action: () => Promise<unknown>) {
+  function prerequisiteBody(): string {
+    if (entity === "areas") {
+      return locale === "th"
+        ? "ยืนยันก่อนว่า area นี้จะมีผลต่อสถิติ โครงการ และเส้นทางการเผยแพร่ใดบ้าง แล้วจึงค่อย create, patch หรือ publish"
+        : "Confirm which statistics, project pages, and publish checks this area change will affect before you create, patch, or publish it.";
+    }
+    if (entity === "developers") {
+      return locale === "th"
+        ? "ตรวจ profile, trust proof และโครงการที่เชื่อมโยงอยู่ก่อนแก้ไข เพื่อไม่ให้ข้อมูลนักพัฒนาหลุดจาก workflow ปลายทาง"
+        : "Review linked profile copy, trust proof, and downstream project references before updating developer records.";
+    }
+    return locale === "th"
+      ? "ยืนยัน slug, property type และคอนเทนต์ประกอบก่อนเผยแพร่ เพื่อให้โครงการยังสอดคล้องกับ review queue และ dashboard"
+      : "Confirm slug, property type, and supporting content before publishing so project changes stay aligned with review queue and dashboard follow-up.";
+  }
+
+  function resultGuidanceBody(): string {
+    if (entity === "areas") {
+      return lastActionKey === "stats"
+        ? (locale === "th"
+            ? "เปิด areas workspace หรือ dashboard เพื่อตรวจว่าค่าสถิติใหม่สะท้อนใน workflow ปลายทางแล้ว"
+            : "Open the areas workspace or dashboard to confirm the updated statistics now line up with downstream workflow signals.")
+        : (locale === "th"
+            ? "เปิด areas workspace หรือ dashboard เพื่อตรวจว่าการเปลี่ยนแปลง area นี้พร้อมสำหรับการใช้งานต่อ"
+            : "Open the areas workspace or dashboard to verify this area change is ready for the next operational step.");
+    }
+    if (entity === "developers") {
+      return locale === "th"
+        ? "เปิด developers workspace หรือ dashboard เพื่อตรวจว่าโปรไฟล์และสถานะเผยแพร่ยังตรงกับโครงการที่เกี่ยวข้อง"
+        : "Open the developers workspace or dashboard to verify the updated profile and publish state still match the related projects.";
+    }
+    return lastActionKey === "publish"
+      ? (locale === "th"
+          ? "เปิด projects workspace และ review queue เพื่อตรวจว่าโครงการที่เผยแพร่แล้วพร้อมสำหรับการตรวจทานคอนเทนต์ต่อ"
+          : "Open the projects workspace and review queue to confirm the published project is ready for the next content review step.")
+      : (locale === "th"
+          ? "เปิด projects workspace หรือ dashboard เพื่อตรวจว่าโครงการที่แก้ไขยังสอดคล้องกับ workflow ปลายทาง"
+          : "Open the projects workspace or dashboard to verify the updated project still matches downstream workflow expectations.");
+  }
+
+  async function runAction(actionKey: DomainActionKey, action: () => Promise<unknown>) {
     setOpBusy(true);
     setOpError(null);
     try {
       const result = await action();
       setOpResult(JSON.stringify(result, null, 2));
+      setLastActionKey(actionKey);
       await loadWorkspace();
     } catch (error) {
       setOpError(error instanceof Error ? error.message : "operation_failed");
@@ -400,21 +458,39 @@ export default function AdminDomainPage() {
             {entity === "areas" ? (
               <label className="field" htmlFor="domain-stats-json"><span>{t.statsJson}</span><textarea id="domain-stats-json" rows={6} value={statsJson} onChange={(event) => setStatsJson(event.target.value)} /></label>
             ) : null}
+            <div className="admin-workspace-prerequisite" role="status">
+              <strong>{t.prerequisiteTitle}</strong>
+              <p className="locale-safe">{prerequisiteBody()}</p>
+            </div>
             <div className="card-actions">
-              <AdminButton variant="primary" icon="plus" type="button" disabled={opBusy} onClick={() => void runAction(() => fetchJson(basePath(), token, { method: "POST", body: createJson }))}>{t.create}</AdminButton>
-              <AdminButton variant="secondary" icon="search" type="button" disabled={opBusy || !entityId.trim()} onClick={() => void runAction(() => fetchJson(`${basePath()}/${entityId.trim()}`, token))}>{t.get}</AdminButton>
-              <AdminButton variant="secondary" icon="refresh" type="button" disabled={opBusy || !entityId.trim()} onClick={() => void runAction(() => fetchJson(`${basePath()}/${entityId.trim()}`, token, { method: "PATCH", body: patchJson }))}>{t.patch}</AdminButton>
+              <AdminButton variant="primary" icon="plus" type="button" disabled={opBusy} onClick={() => void runAction("create", () => fetchJson(basePath(), token, { method: "POST", body: createJson }))}>{t.create}</AdminButton>
+              <AdminButton variant="secondary" icon="search" type="button" disabled={opBusy || !entityId.trim()} onClick={() => void runAction("get", () => fetchJson(`${basePath()}/${entityId.trim()}`, token))}>{t.get}</AdminButton>
+              <AdminButton variant="secondary" icon="refresh" type="button" disabled={opBusy || !entityId.trim()} onClick={() => void runAction("patch", () => fetchJson(`${basePath()}/${entityId.trim()}`, token, { method: "PATCH", body: patchJson }))}>{t.patch}</AdminButton>
               {entity === "areas" ? (
-                <AdminButton variant="secondary" icon="table" type="button" disabled={opBusy || !entityId.trim()} onClick={() => void runAction(() => fetchJson(`${basePath()}/${entityId.trim()}/statistics`, token, { method: "PUT", body: statsJson }))}>{t.stats}</AdminButton>
+                <AdminButton variant="secondary" icon="table" type="button" disabled={opBusy || !entityId.trim()} onClick={() => void runAction("stats", () => fetchJson(`${basePath()}/${entityId.trim()}/statistics`, token, { method: "PUT", body: statsJson }))}>{t.stats}</AdminButton>
               ) : null}
-              <AdminButton variant="secondary" icon="success" type="button" disabled={opBusy || !entityId.trim()} onClick={() => void runAction(() => fetchJson(`${basePath()}/${entityId.trim()}/publish`, token, { method: "POST" }))}>{t.publish}</AdminButton>
+              <AdminButton variant="secondary" icon="success" type="button" disabled={opBusy || !entityId.trim()} onClick={() => void runAction("publish", () => fetchJson(`${basePath()}/${entityId.trim()}/publish`, token, { method: "POST" }))}>{t.publish}</AdminButton>
               {entity !== "projects" ? (
-                <AdminButton variant="secondary" icon="warning" type="button" disabled={opBusy || !entityId.trim()} onClick={() => void runAction(() => fetchJson(`${basePath()}/${entityId.trim()}/unpublish`, token, { method: "POST" }))}>{t.unpublish}</AdminButton>
+                <AdminButton variant="secondary" icon="warning" type="button" disabled={opBusy || !entityId.trim()} onClick={() => void runAction("unpublish", () => fetchJson(`${basePath()}/${entityId.trim()}/unpublish`, token, { method: "POST" }))}>{t.unpublish}</AdminButton>
               ) : null}
-              <AdminButton variant="danger" icon="x" type="button" disabled={opBusy || !entityId.trim()} onClick={() => { if (typeof window !== "undefined" && !window.confirm(t.deleteConfirm)) return; void runAction(() => fetchJson(`${basePath()}/${entityId.trim()}`, token, { method: "DELETE" })); }}>{t.del}</AdminButton>
+              <AdminButton variant="danger" icon="x" type="button" disabled={opBusy || !entityId.trim()} onClick={() => { if (typeof window !== "undefined" && !window.confirm(t.deleteConfirm)) return; void runAction("delete", () => fetchJson(`${basePath()}/${entityId.trim()}`, token, { method: "DELETE" })); }}>{t.del}</AdminButton>
             </div>
             {opError ? <div className="state-error">{opError}</div> : null}
             <label className="field" htmlFor="domain-op-result"><span>{t.result}</span><textarea id="domain-op-result" rows={10} readOnly value={opResult} /></label>
+            {opResult ? (
+              <div className="admin-workspace-success-handoff" role="status">
+                <strong>{t.resultGuidanceTitle}</strong>
+                <p className="locale-safe">{resultGuidanceBody()}</p>
+                <div className="card-actions">
+                  <Link className="admin-button admin-button--secondary admin-button--sm" href={withAdminLocale(entity === "areas" ? "/admin/areas" : entity === "developers" ? "/admin/developers" : "/admin/projects", locale)}>
+                    {entity === "areas" ? t.openAreas : entity === "developers" ? t.openDevelopers : t.openProjects}
+                  </Link>
+                  <Link className="admin-button admin-button--secondary admin-button--sm" href={withAdminLocale(entity === "projects" ? "/admin/review-queue" : "/admin/dashboard", locale)}>
+                    {entity === "projects" ? t.openReviewQueue : t.openDashboard}
+                  </Link>
+                </div>
+              </div>
+            ) : null}
           </ActionCard>
 
             <LogCard

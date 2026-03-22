@@ -4,7 +4,7 @@
 FlowBiz Admin UX Refactor
 
 ## Current Phase
-Phase 7 - Success-state handoff parity and prerequisite guidance
+Phase 8 - Domain and layout workflow guidance parity
 
 ## Active Branch
 copilot/improve-admin-ux-design
@@ -20,6 +20,8 @@ PR #521 - Improve inquiry workflow and admin table discoverability
 - admin imports workspace
 - admin media workspace
 - admin SEO workspace
+- admin domain workspace
+- admin layout CMS workspace
 - secondary shared CRUD workspaces
 
 ## Completed Improvements
@@ -45,11 +47,14 @@ PR #521 - Improve inquiry workflow and admin table discoverability
 - added shared CRUD prerequisite hints so auth and query panels can explain route-specific dependencies before operators mutate records
 - added route-specific prerequisite guidance for company, taxonomy, testimonials, users, and videos workspaces
 - added consistent success-state handoff guidance for imports, media, SEO, and home composer so bespoke admin flows now point to real validation surfaces after successful actions
+- added entity-specific prerequisite guidance and post-action handoff links inside the bespoke domain workspace for areas, developers, and projects
+- added layout CMS success-state handoff links so shared layout saves point operators into company CMS and home composer verification flows
 - added regression coverage for inquiry, shared CRUD, dashboard, and shell contract behavior
 - added regression coverage for imports and SEO workflow guidance contracts
 - added regression coverage for shared CRUD follow-up routing and dashboard review handoff actions
 - added regression coverage for secondary CRUD routing and shared result-panel guidance
 - added regression coverage for shared CRUD prerequisite hints and bespoke success handoff affordances
+- added regression coverage for domain and layout workflow guidance contracts
 
 ## Files Changed So Far
 - admin-app/app/admin/inquiries/page.tsx
@@ -58,7 +63,9 @@ PR #521 - Improve inquiry workflow and admin table discoverability
 - admin-app/app/admin/company/page.tsx
 - admin-app/app/admin/developers/page.tsx
 - admin-app/app/admin/imports/page.tsx
+- admin-app/app/admin/layout/page.tsx
 - admin-app/app/admin/media/page.tsx
+- admin-app/app/admin/domain/page.tsx
 - admin-app/app/admin/projects/page.tsx
 - admin-app/app/admin/properties/page.tsx
 - admin-app/app/admin/review-queue/page.tsx
@@ -88,11 +95,12 @@ PR #521 - Improve inquiry workflow and admin table discoverability
 - admin-app/__tests__/b11_admin_inquiries_page.test.ts
 - admin-app/__tests__/b14_admin_dashboard_page.test.ts
 - admin-app/__tests__/b14_admin_workspaces_pages.test.ts
+- admin-app/__tests__/b15_admin_layout_cms_page.test.ts
 
 ## Last Run Summary
-- added route-specific prerequisite hints to shared CRUD auth and query panels, then wired company, taxonomy, testimonials, users, and videos into those prerequisites
-- added success-state handoff panels to imports, media, SEO, and home composer so successful mutations point operators to dashboard, media, layout, review queue, or SEO follow-up surfaces
-- validated the new prerequisite and success guidance with targeted workspace tests, targeted SEO tests, and a successful admin build
+- added entity-aware prerequisite guidance and post-action handoff panels to the bespoke domain workspace so areas, developers, and projects now point to the right verification surfaces after successful actions
+- added layout CMS success handoff links so a saved shared layout can move straight into company CMS or home composer verification work
+- validated the new domain and layout guidance with targeted workspace tests, targeted layout CMS tests, and a successful admin build
 
 ## Do Not Repeat
 - shell-only improvements
@@ -111,9 +119,11 @@ PR #521 - Improve inquiry workflow and admin table discoverability
 - already completed route-specific follow-up links for company, taxonomy, testimonials, users, and videos
 - already completed shared CRUD prerequisite hints for secondary CRUD pages
 - already completed bespoke success-state handoff parity for imports, media, SEO, and home composer
+- already completed domain workspace prerequisite and success handoff guidance
+- already completed layout CMS success-state handoff guidance
 
 ## Known Weaknesses
-- some secondary workspaces still surface minimal field-level guidance before operators make mutations that affect downstream validation
+- no additional high-confidence workflow gaps are currently captured in the queue
 
 ## Open Workflow Blockers
 - none in the current queue
@@ -125,5 +135,5 @@ PR #521 - Improve inquiry workflow and admin table discoverability
 - preserve existing review and publish flows while adding navigation cues
 
 ## Preferred Expansion Areas
-- stronger pre-mutation validation cues for secondary CRUD pages with downstream dependencies
-- consistency audits for remaining bespoke admin notices versus shared workspace patterns
+- discover any newly emerging operator friction after the current workflow guidance set lands in review
+- consistency audits for future bespoke admin notices versus the shared handoff and prerequisite patterns now in place

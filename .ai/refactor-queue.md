@@ -107,3 +107,21 @@ Modules: shared CRUD auth/query panels, secondary CRUD pages
 Success:
 - route-specific prerequisites are visible before operators run high-impact mutations
 - secondary CRUD pages explain what should be verified first when content depends on media, taxonomy, or downstream operational checks
+
+## [UX-013] Domain workspace mutations still lack entity-aware guidance
+Type: workflow continuity
+Priority: MEDIUM
+Status: DONE
+Modules: domain workspace, areas/developers/projects handoff flow
+Success:
+- operators see entity-specific prerequisites before create, patch, statistics, or publish actions
+- successful domain actions point back to the right workspace or verification surface instead of ending at raw JSON alone
+
+## [UX-014] Layout CMS save flow still ends at a bare success state
+Type: workflow continuity
+Priority: MEDIUM
+Status: DONE
+Modules: layout CMS, company/home composer handoff
+Success:
+- successful layout saves explain which downstream surfaces should be checked next
+- operators can jump directly from the save confirmation into company CMS or home composer validation work

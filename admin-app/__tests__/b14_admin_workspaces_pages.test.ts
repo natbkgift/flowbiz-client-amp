@@ -106,6 +106,12 @@ describe("B14 admin workspace pages contract", () => {
     expect(page).toContain("/publish");
     expect(page).toContain("/unpublish");
     expect(page).toContain("/statistics");
+    expect(page).toContain("prerequisiteTitle");
+    expect(page).toContain("resultGuidanceTitle");
+    expect(page).toContain('className="admin-workspace-prerequisite"');
+    expect(page).toContain('className="admin-workspace-success-handoff"');
+    expect(page).toContain('href={withAdminLocale(entity === "areas" ? "/admin/areas" : entity === "developers" ? "/admin/developers" : "/admin/projects", locale)}');
+    expect(page).toContain('href={withAdminLocale(entity === "projects" ? "/admin/review-queue" : "/admin/dashboard", locale)}');
     expect(page).toContain("state-loading");
     expect(page).toContain("state-error");
   });

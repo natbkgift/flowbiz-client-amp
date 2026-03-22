@@ -23,6 +23,10 @@ describe("B15 admin layout cms workspace contract", () => {
     expect(page).toContain("legal_links");
     expect(page).toContain("SITE_LAYOUT_CMS_TEMPLATE");
     expect(page).toContain("state-error");
+    expect(page).toContain("successTitle");
+    expect(page).toContain('className="admin-workspace-success-handoff"');
+    expect(page).toContain('href={withAdminLocale("/admin/company", locale)}');
+    expect(page).toContain('href={withAdminLocale("/admin/home-composer", locale)}');
   });
 
   it("exposes a non-admin alias route for environments that rewrite /admin/*", () => {
