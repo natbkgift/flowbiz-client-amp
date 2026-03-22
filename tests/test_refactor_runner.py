@@ -269,7 +269,7 @@ def test_run_refactor_wrapper_only_forwards_command_template_when_explicitly_sup
 
 def test_main_retry_countdown_updates_live_status_runtime_artifacts(
     tmp_path: Path,
-    monkeypatch,
+    monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     repo_root = tmp_path
     ai_dir = repo_root / ".ai"
@@ -302,6 +302,7 @@ def test_main_retry_countdown_updates_live_status_runtime_artifacts(
     ]
     executed_commands: list[str] = []
     retry_snapshots: list[dict[str, object]] = []
+    sleep_calls: list[int] = []
 
     def fake_run_cmd(
         cmd: str,
@@ -315,6 +316,7 @@ def test_main_retry_countdown_updates_live_status_runtime_artifacts(
 
     def fake_sleep(seconds: int) -> None:
         assert seconds == 1
+        sleep_calls.append(seconds)
         live_status_path = ai_dir / "refactor-live-status.json"
         assert live_status_path.exists()
         payload = json.loads(live_status_path.read_text(encoding="utf-8"))
@@ -351,6 +353,7 @@ def test_main_retry_countdown_updates_live_status_runtime_artifacts(
 
     assert exit_code == 0
     assert len(executed_commands) == 2
+    assert sleep_calls == [1, 1, 1]
     assert len(retry_snapshots) == 3
     assert [snapshot["retry_countdown_sec"] for snapshot in retry_snapshots] == [3, 2, 1]
     assert {snapshot["next_retry_attempt"] for snapshot in retry_snapshots} == {2}
