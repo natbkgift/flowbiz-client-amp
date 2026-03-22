@@ -1,9 +1,10 @@
 "use client";
 
 import { type FormEvent, useEffect, useState } from "react";
+import Link from "next/link";
 
 import { clearAuthSession, loginAdmin, persistAuthSession, readAuthSession } from "@/app/_lib/admin-auth";
-import { detectAdminLocale, type AdminLocale } from "@/app/_lib/admin-i18n";
+import { detectAdminLocale, type AdminLocale, withAdminLocale } from "@/app/_lib/admin-i18n";
 import {
   ActionCard,
   AdminBadge,
@@ -128,6 +129,13 @@ const copy = {
     overridesDescription: "Manage per-path SEO metadata overrides.",
     redirectsDescription: "Manage redirect rules and preload production mappings.",
     preloadRedirects: "Preload production redirects",
+    openDashboard: "Open dashboard",
+    openReviewQueue: "Open review queue",
+    authHint: "Sign in first, then use overrides, redirects, schema, and broken-link tools from one owner workspace.",
+    overridesEmptyHint: "Start with one high-traffic path, then return to dashboard or review queue to verify the next content action.",
+    redirectsEmptyHint: "Load production redirects first or add one legacy path now so operators do not need to leave this page to start cleanup.",
+    schemaEmptyHint: "Bootstrap the approved schema source first, then review locale fields before publishing related content changes.",
+    reportEmptyHint: "Run the checker here, then use dashboard or review queue to follow up on pages that need content fixes.",
     schemaDescription: "Edit approved schema source fields by locale.",
     schemaBootstrap: "Load approved schema defaults",
     brokenDescription: "Run the link checker and inspect the latest crawl report.",
@@ -172,6 +180,13 @@ const copy = {
     overridesDescription: "จัดการเมทาดาทา SEO แบบเฉพาะหน้าและเฉพาะภาษา",
     redirectsDescription: "จัดการกฎ redirect และดึง mapping จาก production",
     preloadRedirects: "ดึง redirect จาก production",
+    openDashboard: "ดูแดชบอร์ด",
+    openReviewQueue: "ดูคิวตรวจทาน",
+    authHint: "เข้าสู่ระบบก่อน แล้วใช้หน้าเดียวนี้จัดการ override, redirect, schema และ broken-link tools สำหรับ owner",
+    overridesEmptyHint: "เริ่มจาก path สำคัญสักหนึ่งหน้า แล้วค่อยกลับไปดู dashboard หรือ review queue เพื่อทำงานต่อกับคอนเทนต์ที่เกี่ยวข้อง",
+    redirectsEmptyHint: "ดึง redirect จาก production ก่อน หรือเพิ่ม legacy path แรกจากหน้านี้ได้ทันทีโดยไม่ต้องสลับหน้า",
+    schemaEmptyHint: "โหลด schema source ที่อนุมัติแล้วก่อน แล้วค่อยทบทวนฟิลด์ตามภาษาให้พร้อมก่อนเผยแพร่คอนเทนต์ที่เกี่ยวข้อง",
+    reportEmptyHint: "รันตัวตรวจจากหน้านี้ แล้วใช้ dashboard หรือ review queue เพื่อตามงานหน้าที่ต้องแก้คอนเทนต์ต่อ",
     schemaDescription: "แก้ไขข้อมูลต้นทางของ Schema ตามภาษาที่เลือก",
     schemaBootstrap: "โหลดค่า schema ที่อนุมัติแล้ว",
     brokenDescription: "รันตัวตรวจลิงก์และตรวจรายงาน crawl ล่าสุดจากหน้าเดียว",
@@ -623,7 +638,12 @@ export default function AdminSeoPage() {
             </div>
           </div>
         )}
-        {!isAuth ? <div className="state-empty">{t.authRequired}</div> : null}
+        {!isAuth ? (
+          <div className="state-empty admin-workspace-empty-state" role="status">
+            <strong>{t.authRequired}</strong>
+            <p className="locale-safe">{t.authHint}</p>
+          </div>
+        ) : null}
       </ActionCard>
 
       {pageError ? (
@@ -658,7 +678,20 @@ export default function AdminSeoPage() {
               <AdminButton variant="primary" type="submit" disabled={!isAuth || busy}>{t.save}</AdminButton>
             </div>
           </form>
-          {overrides.length === 0 ? <div className="state-empty">{t.emptyOverrides}</div> : null}
+          {overrides.length === 0 ? (
+            <div className="state-empty admin-workspace-empty-state" role="status">
+              <strong>{t.emptyOverrides}</strong>
+              <p className="locale-safe">{t.overridesEmptyHint}</p>
+              <div className="card-actions">
+                <Link className="admin-button admin-button--secondary admin-button--sm" href={withAdminLocale("/admin/dashboard", locale)}>
+                  {t.openDashboard}
+                </Link>
+                <Link className="admin-button admin-button--secondary admin-button--sm" href={withAdminLocale("/admin/review-queue", locale)}>
+                  {t.openReviewQueue}
+                </Link>
+              </div>
+            </div>
+          ) : null}
           {overrides.length > 0 ? (
             <ul className="seo-item-list" aria-label={t.sectionOverrides}>
               {overrides.map((item) => (
@@ -692,7 +725,17 @@ export default function AdminSeoPage() {
               <AdminButton variant="secondary" type="button" onClick={() => void preloadRedirectsFromProduction()} disabled={!isAuth || busy}>{t.preloadRedirects}</AdminButton>
             </div>
           </form>
-          {redirects.length === 0 ? <div className="state-empty">{t.emptyRedirects}</div> : null}
+          {redirects.length === 0 ? (
+            <div className="state-empty admin-workspace-empty-state" role="status">
+              <strong>{t.emptyRedirects}</strong>
+              <p className="locale-safe">{t.redirectsEmptyHint}</p>
+              <div className="card-actions">
+                <AdminButton variant="secondary" type="button" onClick={() => void preloadRedirectsFromProduction()} disabled={!isAuth || busy}>
+                  {t.preloadRedirects}
+                </AdminButton>
+              </div>
+            </div>
+          ) : null}
           {redirects.length > 0 ? (
             <ul className="seo-item-list" aria-label={t.sectionRedirects}>
               {redirects.map((item) => (
@@ -737,7 +780,17 @@ export default function AdminSeoPage() {
               <AdminButton variant="secondary" type="button" onClick={() => void bootstrapSchemaFromProduction()} disabled={!isAuth || busy}>{t.schemaBootstrap}</AdminButton>
             </div>
           </form>
-          {!schemaHasData ? <div className="state-empty">{t.emptySchema}</div> : null}
+          {!schemaHasData ? (
+            <div className="state-empty admin-workspace-empty-state" role="status">
+              <strong>{t.emptySchema}</strong>
+              <p className="locale-safe">{t.schemaEmptyHint}</p>
+              <div className="card-actions">
+                <AdminButton variant="secondary" type="button" onClick={() => void bootstrapSchemaFromProduction()} disabled={!isAuth || busy}>
+                  {t.schemaBootstrap}
+                </AdminButton>
+              </div>
+            </div>
+          ) : null}
         </AdminSectionCard>
 
         <LogCard
@@ -759,7 +812,20 @@ export default function AdminSeoPage() {
               <p><strong>max_link_checks:</strong> {policy.max_link_checks}</p>
             </div>
           ) : null}
-          {!report ? <div className="state-empty">{t.emptyReport}</div> : null}
+          {!report ? (
+            <div className="state-empty admin-workspace-empty-state" role="status">
+              <strong>{t.emptyReport}</strong>
+              <p className="locale-safe">{t.reportEmptyHint}</p>
+              <div className="card-actions">
+                <AdminButton variant="secondary" type="button" onClick={() => void runBrokenLinks()} disabled={!isAuth || busy}>
+                  {t.runChecker}
+                </AdminButton>
+                <Link className="admin-button admin-button--secondary admin-button--sm" href={withAdminLocale("/admin/dashboard", locale)}>
+                  {t.openDashboard}
+                </Link>
+              </div>
+            </div>
+          ) : null}
           {report ? (
             <>
               <div className="seo-report-grid" role="status" aria-live="polite">

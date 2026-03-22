@@ -142,13 +142,16 @@ describe("B14 admin dashboard page contract", () => {
     const screen = read("components/admin/domain/dashboard/AdminDashboardScreen.tsx");
     const styles = read("styles/admin-components.css");
 
+    expect(screen).toContain("function renderWorkspaceLink(href: string, label: string)");
+    expect(screen).toContain("function renderActionGroup(actions: ReactNode[])");
     expect(screen).toContain("return renderSectionState(t.overviewEmptyTitle, t.overviewEmptyBody, {");
     expect(screen).toContain("action: renderRefreshButton(t.retry),");
     expect(screen).toContain("return renderSectionState(t.widgetsEmptyTitle, t.widgetsEmptyBody, {");
     expect(screen).toContain("return renderSectionState(t.insightsEmptyTitle, t.insightsEmptyBody, {");
-    expect(screen).toContain("action: renderRefreshButton(t.reviewWatchlist),");
+    expect(screen).toContain('renderWorkspaceLink("/admin/imports", t.openImports)');
+    expect(screen).toContain('renderWorkspaceLink("/admin/media", t.openMedia)');
+    expect(screen).toContain('renderWorkspaceLink("/admin/seo", t.openSeo)');
     expect(screen).toContain('className="dashboard-empty-actions"');
-    expect(screen).toContain('href={withAdminLocale("/admin/imports", locale)}');
     expect(styles).toContain('.dashboard-empty-actions,');
   });
 });

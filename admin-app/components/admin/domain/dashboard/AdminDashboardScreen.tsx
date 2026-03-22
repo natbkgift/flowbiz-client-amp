@@ -561,6 +561,18 @@ export function AdminDashboardScreen({
     );
   }
 
+  function renderWorkspaceLink(href: string, label: string) {
+    return (
+      <Link className={adminButtonClassName({ variant: "secondary", size: "sm" })} href={withAdminLocale(href, locale)}>
+        {label}
+      </Link>
+    );
+  }
+
+  function renderActionGroup(actions: ReactNode[]) {
+    return <div className="dashboard-empty-actions">{actions}</div>;
+  }
+
   function renderSectionState(emptyTitle: string, emptyBody: string, options?: { action?: ReactNode; compact?: boolean }) {
     return (
       <DashboardSectionState
@@ -841,14 +853,24 @@ export function AdminDashboardScreen({
         value: freshnessEntries.length > 0 ? String(freshnessEntries.length) : t.unknownValue,
         detail: t.insightsHint,
         updatedAt: latestOperationalLabel,
-        action: renderRefreshButton(),
+        action: renderActionGroup([
+          renderRefreshButton(),
+          renderWorkspaceLink("/admin/imports", t.openImports),
+          renderWorkspaceLink("/admin/media", t.openMedia),
+          renderWorkspaceLink("/admin/seo", t.openSeo),
+        ]),
       });
     }
 
     if (freshnessEntries.length === 0) {
       return renderSectionState(t.insightsEmptyTitle, t.insightsEmptyBody, {
         compact: true,
-        action: renderRefreshButton(t.retry),
+        action: renderActionGroup([
+          renderRefreshButton(t.retry),
+          renderWorkspaceLink("/admin/imports", t.openImports),
+          renderWorkspaceLink("/admin/media", t.openMedia),
+          renderWorkspaceLink("/admin/seo", t.openSeo),
+        ]),
       });
     }
 
@@ -940,7 +962,11 @@ export function AdminDashboardScreen({
         value: summary ? String(summary.warnings.length) : t.unknownValue,
         detail: t.watchlistHint,
         updatedAt: latestOperationalLabel,
-        action: renderRefreshButton(t.reviewWatchlist),
+        action: renderActionGroup([
+          renderRefreshButton(t.reviewWatchlist),
+          renderWorkspaceLink("/admin/media", t.openMedia),
+          renderWorkspaceLink("/admin/seo", t.openSeo),
+        ]),
         statusTone: (summary?.warnings?.length || 0) > 0 ? "warn" : "info",
         statusLabel: (summary?.warnings?.length || 0) > 0 ? t.warningStatus : t.refreshRequired,
       });
@@ -949,7 +975,11 @@ export function AdminDashboardScreen({
     if ((summary?.warnings || []).length === 0) {
       return renderSectionState(t.warningsEmptyTitle, t.warningsEmptyBody, {
         compact: true,
-        action: renderRefreshButton(t.reviewWatchlist),
+        action: renderActionGroup([
+          renderRefreshButton(t.reviewWatchlist),
+          renderWorkspaceLink("/admin/media", t.openMedia),
+          renderWorkspaceLink("/admin/seo", t.openSeo),
+        ]),
       });
     }
 
@@ -1059,14 +1089,12 @@ export function AdminDashboardScreen({
     if (backgroundTasks.length === 0) {
       return renderSectionState(t.backgroundTasksEmptyTitle, t.backgroundTasksEmptyBody, {
         compact: true,
-        action: (
-          <div className="dashboard-empty-actions">
-            {renderRefreshButton(t.retry)}
-            <Link className={adminButtonClassName({ variant: "secondary", size: "sm" })} href={withAdminLocale("/admin/imports", locale)}>
-              {t.openImports}
-            </Link>
-          </div>
-        ),
+        action: renderActionGroup([
+          renderRefreshButton(t.retry),
+          renderWorkspaceLink("/admin/imports", t.openImports),
+          renderWorkspaceLink("/admin/media", t.openMedia),
+          renderWorkspaceLink("/admin/seo", t.openSeo),
+        ]),
       });
     }
 

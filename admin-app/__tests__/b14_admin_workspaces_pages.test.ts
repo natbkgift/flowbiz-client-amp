@@ -45,6 +45,11 @@ describe("B14 admin workspace pages contract", () => {
     expect(page).toContain("window.confirm");
     expect(page).toContain("emptyHint");
     expect(page).toContain("disabled={loading || opBusy}");
+    expect(page).toContain('className="state-empty admin-workspace-empty-state"');
+    expect(page).toContain("listEmptyTitle");
+    expect(page).toContain("openDashboard");
+    expect(page).toContain("openSeo");
+    expect(page).toContain('href={withAdminLocale("/admin/dashboard", locale)}');
   });
 
   it("imports workspace uses list + import run endpoints", () => {
@@ -72,6 +77,11 @@ describe("B14 admin workspace pages contract", () => {
     expect(page).toContain('filterDryRun: "กรองโหมดทดลองรัน"');
     expect(page).toContain("emptyHint");
     expect(page).toContain("disabled={loading || importBusy}");
+    expect(page).toContain('className="state-empty admin-workspace-empty-state"');
+    expect(page).toContain("historyEmptyTitle");
+    expect(page).toContain("openDashboard");
+    expect(page).toContain("openMedia");
+    expect(page).toContain('href={withAdminLocale("/admin/dashboard", locale)}');
   });
 
   it("domain workspace uses domain CRUD + publish APIs and dashboard summaries", () => {

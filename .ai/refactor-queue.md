@@ -39,7 +39,7 @@ Success:
 ## [UX-005] Dashboard drill-down paths are still shallow
 Type: navigation / workflow
 Priority: HIGH
-Status: OPEN
+Status: DONE
 Modules: dashboard, inquiries, imports, media
 Success:
 - key dashboard states link operators to the correct next workspace
@@ -48,7 +48,7 @@ Success:
 ## [UX-006] Secondary admin surfaces still use generic empty guidance
 Type: feedback / state
 Priority: MEDIUM
-Status: OPEN
+Status: DONE
 Modules: imports, media, SEO, review queue
 Success:
 - empty states explain what to do next
@@ -58,7 +58,16 @@ Success:
 Type: workflow continuity
 Priority: MEDIUM
 Status: OPEN
-Modules: dashboard, shared CRUD workspaces
+Modules: dashboard, shared CRUD workspaces, review queue
 Success:
 - operators can move from overview signals into list, patch, or import actions with fewer dead ends
 - next actions are visible near the state that triggered them
+
+## [UX-008] Review and CRUD follow-on routes are still implicit
+Type: workflow continuity
+Priority: MEDIUM
+Status: OPEN
+Modules: review queue, shared CRUD workspaces, dashboard
+Success:
+- review-oriented pages expose clearer follow-on actions after list inspection or approval work
+- shared CRUD surfaces point operators back to the most relevant dashboards or queues
