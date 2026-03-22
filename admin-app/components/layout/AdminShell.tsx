@@ -76,6 +76,7 @@ const shellCopy = {
     searchSummaryLabel: "Search scope",
     searchSummaryAll: "Showing every admin workspace and quick action.",
     searchSummaryMatches: "matching items",
+    searchSummaryTemplate: "{{count}} {{matches}} for “{{query}}”",
     noResults: "No matching workspaces",
     noResultsHint: "Try Dashboard, Media, SEO, or CRM.",
     openNavigation: "Open navigation",
@@ -112,6 +113,7 @@ const shellCopy = {
     searchSummaryLabel: "ขอบเขตการค้นหา",
     searchSummaryAll: "กำลังแสดงทุกพื้นที่ทำงานและคำสั่งลัดของแอดมิน",
     searchSummaryMatches: "รายการที่ตรงคำค้น",
+    searchSummaryTemplate: "พบ {{count}} {{matches}} สำหรับ “{{query}}”",
     noResults: "ไม่พบเมนูที่ตรงคำค้น",
     noResultsHint: "ลองค้นหา แดชบอร์ด คลังสื่อ SEO หรือ CRM",
     openNavigation: "เปิดเมนู",
@@ -142,6 +144,20 @@ type FilteredNavGroup = {
   group: AdminNavGroup;
   items: AdminNavItem[];
 };
+
+function formatSearchSummaryMessage(
+  searchQuery: string,
+  totalSearchResults: number,
+  ui: { searchSummaryAll: string; searchSummaryMatches: string; searchSummaryTemplate: string },
+): string {
+  if (!searchQuery) return ui.searchSummaryAll;
+  const replacements: Record<string, string> = {
+    count: String(totalSearchResults),
+    matches: ui.searchSummaryMatches,
+    query: searchQuery,
+  };
+  return ui.searchSummaryTemplate.replace(/\{\{(\w+)\}\}/g, (_placeholder, key) => replacements[key] ?? "");
+}
 
 function renderHighlightedText(text: string, searchTerm: string): ReactNode {
   if (!searchTerm) return text;
@@ -285,7 +301,8 @@ export function AdminShell({ children }: { children: ReactNode }) {
   const [locale, setLocale] = useState<AdminLocale>(() => detectAdminLocale());
   const [searchQuery, setSearchQuery] = useState("");
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
-  const deferredSearch = useDeferredValue(searchQuery.trim().toLowerCase());
+  const trimmedSearchQuery = searchQuery.trim();
+  const deferredSearch = useDeferredValue(trimmedSearchQuery.toLowerCase());
   const drawerSearchRef = useRef<HTMLInputElement | null>(null);
   const { group, item } = getCurrentAdminLocation(pathname);
 
@@ -308,6 +325,7 @@ export function AdminShell({ children }: { children: ReactNode }) {
       searchSummaryLabel: getAdminCopyValue(shellCopy, locale, "searchSummaryLabel"),
       searchSummaryAll: getAdminCopyValue(shellCopy, locale, "searchSummaryAll"),
       searchSummaryMatches: getAdminCopyValue(shellCopy, locale, "searchSummaryMatches"),
+      searchSummaryTemplate: getAdminCopyValue(shellCopy, locale, "searchSummaryTemplate"),
       noResults: getAdminCopyValue(shellCopy, locale, "noResults"),
       noResultsHint: getAdminCopyValue(shellCopy, locale, "noResultsHint"),
       openNavigation: getAdminCopyValue(shellCopy, locale, "openNavigation"),
@@ -365,12 +383,15 @@ export function AdminShell({ children }: { children: ReactNode }) {
     filteredNavGroups.reduce((count, entry) => count + entry.items.length, 0) + filteredUtilityItems.length;
   const showDesktopUtilityNav = deferredSearch.length > 0 && filteredUtilityItems.length > 0;
   const showWorkspaceBreadcrumb = currentGroupLabel !== currentWorkspaceLabel;
-  const trimmedSearchQuery = searchQuery.trim();
-  const searchSummaryMessage = deferredSearch
-    ? locale === "th"
-      ? `พบ ${totalSearchResults} ${ui.searchSummaryMatches} สำหรับ “${trimmedSearchQuery}”`
-      : `${totalSearchResults} ${ui.searchSummaryMatches} for “${trimmedSearchQuery}”`
-    : ui.searchSummaryAll;
+  const searchSummaryMessage = useMemo(
+    () =>
+      formatSearchSummaryMessage(trimmedSearchQuery, totalSearchResults, {
+        searchSummaryAll: ui.searchSummaryAll,
+        searchSummaryMatches: ui.searchSummaryMatches,
+        searchSummaryTemplate: ui.searchSummaryTemplate,
+      }),
+    [trimmedSearchQuery, totalSearchResults, ui],
+  );
 
   useEffect(() => {
     const detectedLocale = detectAdminLocale();

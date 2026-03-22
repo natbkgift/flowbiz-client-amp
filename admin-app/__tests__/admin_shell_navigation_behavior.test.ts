@@ -40,6 +40,7 @@ describe("admin shell navigation behavior", () => {
     expect(shell).toContain("admin-shell-search-summary");
     expect(shell).toContain("searchSummaryLabel");
     expect(shell).toContain("searchSummaryMatches");
+    expect(shell).toContain("searchSummaryTemplate");
     expect(shell).toContain('aria-live="polite"');
     expect(shell).toContain("admin-shell-nav-empty-icon");
     expect(shell).toContain("hasSearchResults ? (");
