@@ -66,7 +66,7 @@ describe("B10 admin SEO page contract", () => {
     expect(page).toContain('htmlFor="seo-override-path"');
     expect(page).toContain('htmlFor="seo-redirect-old-path"');
     expect(page).toContain('htmlFor="seo-schema-org-name"');
-    expect(page).toContain('title: "SEO Controls"');
-    expect(page).toContain('title: "SEO Controls หลังบ้าน"');
+    expect(page).toContain('title: "Search Visibility"');
+    expect(page).toContain('title: "การมองเห็นบน Search"');
   });
 });

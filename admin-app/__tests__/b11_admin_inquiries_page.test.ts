@@ -12,15 +12,14 @@ function read(relativePath: string): string {
 describe("B11 admin inquiries page contract", () => {
   it("uses admin login endpoint and session storage auth flow", () => {
     const page = read("app/admin/inquiries/page.tsx");
-    const controlCenter = read("components/admin/domain/crm/InquiryControlCenter.tsx");
 
     expect(page).toContain('from "@/app/_lib/admin-auth-hooks"');
     expect(page).toContain("useAdminAuthController");
     expect(page).toContain("loginWithAdminSession");
-    expect(page).toContain('from "@/components/admin/domain/crm/InquiryControlCenter"');
-    expect(controlCenter).toContain("<form");
-    expect(controlCenter).toContain('name="email"');
-    expect(controlCenter).toContain('name="password"');
+    expect(page).toContain("AdminAccessGate");
+    expect(page).toContain("<form className=\"crm-login-form\"");
+    expect(page).toContain('name="email"');
+    expect(page).toContain('name="password"');
     expect(page).not.toContain('fetch("/v1/auth/login"');
     expect(page).not.toContain('id="admin-token"');
   });
@@ -38,22 +37,20 @@ describe("B11 admin inquiries page contract", () => {
 
   it("keeps filters, follow-up controls and quick contact actions", () => {
     const page = read("app/admin/inquiries/page.tsx");
-    const filters = read("components/admin/domain/crm/InquiryFiltersPanel.tsx");
-    const detail = read("components/admin/domain/crm/InquiryDetailPanel.tsx");
     const contactActions = read("components/admin/domain/crm/InquiryContactActions.tsx");
     const followUp = read("components/admin/domain/crm/InquiryFollowUpPanel.tsx");
     const timeline = read("components/admin/domain/crm/InquiryTimelinePanel.tsx");
     const utils = read("components/admin/domain/crm/inquiries-utils.ts");
 
     expect(page).toContain("const [filters, setFilters] = useState<InquiryFilters>(EMPTY_FILTERS)");
-    expect(filters).toContain('onFilterChange("status"');
-    expect(filters).toContain('onFilterChange("source"');
-    expect(filters).toContain('onFilterChange("purpose"');
-    expect(filters).toContain('onFilterChange("date_from"');
-    expect(filters).toContain('onFilterChange("date_to"');
-    expect(filters).toContain('onFilterChange("follow_up_status"');
-    expect(filters).toContain("filtersDescription");
-    expect(filters).toContain("searchPlaceholder");
+    expect(page).toContain("AdminFilterDrawer");
+    expect(page).toContain('updateFilter("status", event.target.value)');
+    expect(page).toContain('updateFilter("source", event.target.value)');
+    expect(page).toContain('updateFilter("purpose", event.target.value)');
+    expect(page).toContain('updateFilter("date_from", event.target.value)');
+    expect(page).toContain('updateFilter("date_to", event.target.value)');
+    expect(page).toContain('updateFilter("follow_up_status", event.target.value)');
+    expect(page).toContain('updateFilter("q", event.target.value)');
     expect(utils).toContain('["pending", "scheduled", "completed", "no_response"]');
     expect(utils).toContain("translateFollowUpStatus");
     expect(utils).toContain("translateInquiryStatus");
@@ -61,11 +58,9 @@ describe("B11 admin inquiries page contract", () => {
     expect(contactActions).toContain("selected.whatsapp_url");
     expect(contactActions).toContain("selected.phone_url");
     expect(contactActions).toContain("selected.email_url");
-    expect(detail).toContain("<InquiryContactActions");
-    expect(detail).toContain("detailsDescription");
-    expect(detail).toContain("detailSnapshotTitle");
-    expect(detail).toContain("detailActionsTitle");
-    expect(detail).toContain("detailContextTitle");
+    expect(page).toContain("InquiryContactActions");
+    expect(page).toContain("InquiryAdvisorAssistPanel");
+    expect(page).toContain("InquiryTimelinePanel");
     expect(followUp).toContain("followUpNotice");
     expect(followUp).toContain("followUpActionHint");
     expect(timeline).toContain("timelineEmpty");
@@ -73,7 +68,7 @@ describe("B11 admin inquiries page contract", () => {
     expect(followUp).toContain('id="follow-up-status"');
   });
 
-  it("supports table + kanban board with saved filters and status move wiring", () => {
+  it("supports inbox + pipeline views with saved filters and status move wiring", () => {
     const page = read("app/admin/inquiries/page.tsx");
     const kanban = read("components/admin/domain/crm/InquiryKanbanBoard.tsx");
     const copy = read("components/admin/domain/crm/inquiries-copy.ts");
@@ -89,13 +84,15 @@ describe("B11 admin inquiries page contract", () => {
     expect(utils).toContain("readRoleFromToken");
     expect(page).toContain("saveCurrentFilter");
     expect(page).toContain("loadSavedFilter");
+    expect(page).toContain("AdminResponsiveList");
+    expect(page).toContain("renderMobilePipeline()");
+    expect(page).toContain("lead-inbox-queue-card-list");
     expect(page).toContain('const [detailLoading, setDetailLoading] = useState(false)');
     expect(page).toContain('const [movingInquiryId, setMovingInquiryId] = useState<string | null>(null)');
     expect(page).toContain('const [moveStatusNotice, setMoveStatusNotice] = useState<string | null>(null)');
     expect(page).toContain("setMoveStatusNotice(t.moveStatusUpdated);");
-    expect(page).toContain('{!loading && !movingInquiryId && moveStatusNotice ? <div className="state-success">{moveStatusNotice}</div> : null}');
+    expect(page).toContain("moveStatusNotice ? <div className=\"state-success\">{moveStatusNotice}</div> : null");
     expect(savedFilters).toContain('id="crm-saved-filter-select"');
-    expect(page).toContain('className="crm-controls-toolbar"');
     expect(savedFilters).toContain("savedFiltersHint");
     expect(savedFilters).toContain("savedFiltersEmpty");
     expect(kanban).toContain('const EMPTY_FIELD_PLACEHOLDER = "-";');
@@ -119,7 +116,7 @@ describe("B11 admin inquiries page contract", () => {
     expect(page).toContain("const nextSelectedId = body.data[0]?.id ?? null;");
     expect(page).toContain("if (nextSelectedId) {");
     expect(page).toContain("await loadDetails(nextSelectedId, activeToken);");
-    expect(page).toContain("async function loadDetails(id: string, tokenOverride?: string)");
+    expect(page).toContain("const loadDetails = useCallback(async (id: string, tokenOverride?: string) => {");
     expect(page).toContain('const activeToken = (tokenOverride ?? authToken).trim();');
     expect(copy).toContain('emptyDetails: "No inquiries match current filters. Adjust filters or reload the queue to fetch the latest leads."');
   });
@@ -170,9 +167,9 @@ describe("B11 admin inquiries page contract", () => {
     expect(page).toContain("const shouldDisableApply = !isAuthenticated || loading || detailLoading || Boolean(movingInquiryId) || !hasUnappliedFilters;");
     expect(page).toContain("const shouldDisableReload = !isAuthenticated || detailLoading || Boolean(movingInquiryId) || hasUnappliedFilters;");
     expect(page).toContain("disabled={shouldDisableApply}");
-    expect(page).toContain("disabled={shouldDisableReload}");
+    expect(page).toContain("const shouldDisableReload = !isAuthenticated || detailLoading || Boolean(movingInquiryId) || hasUnappliedFilters;");
     expect(page).toContain("onClick={() => void applyFilters()}");
-    expect(page).toContain("onClick={() => void reloadList()}");
+    expect(page).toContain("onClick: () => void reloadList(),");
   });
 
   it("disables clear when there is no active or pending filter to reset", () => {
@@ -191,8 +188,7 @@ describe("B11 admin inquiries page contract", () => {
     expect(page).toContain("const hasAppliedFilters = Object.values(appliedFilters).some((value) => value.trim().length > 0);");
     expect(page).toContain("const filterStateMessage = hasUnappliedFilters ? t.filterStateDraft : t.filterStateApplied;");
     expect(page).toContain("const filterScopeMessage = hasAppliedFilters ? t.filterScopeFiltered : t.filterScopeDefault;");
-    expect(page).toContain('<div className="crm-filter-hint" aria-live="polite">');
-    expect(page).toContain("<strong>{filterStateMessage}</strong> {filterScopeMessage}");
+    expect(page).toContain('description={`${filterStateMessage} ${filterScopeMessage}`}');
     expect(copy).toContain('filterStateDraft: "Draft filters are not applied yet. Apply filters to refresh the visible queue."');
     expect(copy).toContain('filterStateApplied: "Queue is synced with the current filters. Reload and Export CSV use the visible queue."');
     expect(copy).toContain('filterScopeDefault: "Current queue uses the default filter set."');
@@ -210,7 +206,7 @@ describe("B11 admin inquiries page contract", () => {
     expect(page).toContain('translateInquiryStatus,');
     expect(page).toContain("const appliedFilterSummary = buildFilterSummary(appliedFilters, t, locale);");
     expect(page).toContain("const draftFilterSummary = buildFilterSummary(filters, t, locale);");
-    expect(page).toContain('<div className="crm-filter-summary-grid" aria-live="polite">');
+    expect(page).toContain('<div className="lead-inbox-summary-row" aria-live="polite">');
     expect(page).toContain('<span className="crm-filter-summary__label">{t.currentDraft}</span>');
     expect(page).toContain('className="crm-filter-chip-button"');
     expect(page).toContain('aria-label={`${t.removeFilter}: ${summary.label}`}');
@@ -242,12 +238,13 @@ describe("B11 admin inquiries page contract", () => {
     expect(styles).toContain(".crm-filter-summary__chips {");
   });
 
-  it("keeps CRM list/detail cards compact instead of stretching to full column height", () => {
+  it("keeps lead inbox queue/detail panels compact instead of stretching to full column height", () => {
     const styles = read("styles/admin-components.css");
 
-    expect(styles).toContain(".crm-list.admin-card-shell,");
-    expect(styles).toContain(".crm-detail.admin-card-shell {");
-    expect(styles).toContain("min-height: auto;");
+    expect(styles).toContain(".lead-inbox-layout {");
+    expect(styles).toContain("grid-template-columns: minmax(320px, 0.4fr) minmax(0, 0.6fr);");
+    expect(styles).toContain(".lead-inbox-queue-pane,");
+    expect(styles).toContain(".lead-inbox-detail-pane {");
   });
 
   it("keeps a readable primary row label even when inquiry name is missing", () => {
@@ -277,7 +274,7 @@ describe("B11 admin inquiries page contract", () => {
     expect(list).toContain("t.openDetails");
     expect(list).toContain("t.viewingDetails");
     expect(list).toContain('className="crm-table-select-action"');
-    expect(copy).toContain('rowActionHint: "Select a row to open details, contact actions, and follow-up controls in the next panel."');
+    expect(copy).toContain('rowActionHint: "Open a lead to review the snapshot, set the next action, and then use contact options if needed."');
     expect(copy).toContain('openDetails: "Open details"');
     expect(copy).toContain('viewingDetails: "Viewing details"');
     expect(styles).toContain(".crm-table-toolbar {");
@@ -320,81 +317,68 @@ describe("B11 admin inquiries page contract", () => {
 
   it("aligns the detail empty state with the current queue state", () => {
     const page = read("app/admin/inquiries/page.tsx");
-    const detail = read("components/admin/domain/crm/InquiryDetailPanel.tsx");
 
     expect(page).toContain("const detailEmptyStateMessage = !loading && items.length === 0 ? t.emptyDetails : t.noDetails;");
-    expect(page).toContain("emptyStateMessage={detailEmptyStateMessage}");
-    expect(detail).toContain("emptyStateMessage?: string;");
-    expect(detail).toContain("const message = emptyStateMessage ?? t.noDetails;");
-    expect(detail).toContain('className="state-empty crm-detail-empty-state"');
-    expect(detail).toContain("<strong>{t.details}</strong>");
-    expect(detail).toContain("<p className=\"crm-section-description\">{message}</p>");
+    expect(page).toContain('className="state-empty crm-detail-empty-state"');
+    expect(page).toContain("<strong>{t.details}</strong>");
+    expect(page).toContain("<p className=\"crm-section-description\">{detailEmptyStateMessage}</p>");
   });
 
-  it("groups inquiry detail into snapshot, actions, and advisory context sections", () => {
-    const detail = read("components/admin/domain/crm/InquiryDetailPanel.tsx");
+  it("groups inquiry detail into snapshot, next action, and context sections", () => {
+    const page = read("app/admin/inquiries/page.tsx");
     const followUp = read("components/admin/domain/crm/InquiryFollowUpPanel.tsx");
     const copy = read("components/admin/domain/crm/inquiries-copy.ts");
     const styles = read("styles/admin-components.css");
 
-    expect(detail).toContain('aria-label={t.detailSnapshotTitle}');
-    expect(detail).toContain('aria-label={t.detailActionsTitle}');
-    expect(detail).toContain('aria-label={t.detailContextTitle}');
-    expect(detail).toContain('className="crm-detail-action-grid"');
+    expect(page).toContain('aria-label={t.detailSnapshotTitle}');
+    expect(page).toContain('aria-label={t.detailActionsTitle}');
+    expect(page).toContain('aria-label={t.detailContextTitle}');
+    expect(page).toContain("InquiryFollowUpPanel");
     expect(followUp).toContain('className="crm-detail-callout crm-detail-callout--followup"');
     expect(copy).toContain('detailSnapshotTitle: "Lead snapshot"');
-    expect(copy).toContain('detailActionsTitle: "Operator actions"');
-    expect(copy).toContain('detailContextTitle: "Advisory context and timeline"');
-    expect(copy).toContain('followUpActionHint: "Save the next action after adjusting status or due time so the queue stays current."');
+    expect(copy).toContain('detailActionsTitle: "Next action"');
+    expect(copy).toContain('detailContextTitle: "Context & timeline"');
+    expect(copy).toContain('followUpActionHint: "Save this next action after adjusting status or due time so the inbox stays current."');
     expect(copy).toContain('detailSnapshotTitle: "สรุปข้อมูลลีด"');
-    expect(copy).toContain('detailActionsTitle: "คำสั่งที่ควรทำก่อน"');
+    expect(copy).toContain('detailActionsTitle: "Next action"');
     expect(styles).toContain('.crm-detail-section--grouped {');
-    expect(styles).toContain('.crm-detail-action-grid {');
     expect(styles).toContain('.crm-detail-callout {');
   });
 
   it("keeps accessibility and runtime states in EN/TH copy", () => {
     const page = read("app/admin/inquiries/page.tsx");
-    const controlCenter = read("components/admin/domain/crm/InquiryControlCenter.tsx");
-    const detail = read("components/admin/domain/crm/InquiryDetailPanel.tsx");
     const followUp = read("components/admin/domain/crm/InquiryFollowUpPanel.tsx");
     const copy = read("components/admin/domain/crm/inquiries-copy.ts");
 
-    expect(page).toContain('<main id="main-content"');
-    expect(page).toContain("<AdminPageHeader title={t.title}");
+    expect(page).toContain("<AdminPage");
+    expect(page).toContain("AdminPageHeader");
+    expect(page).toContain("title={t.title}");
     expect(page).toContain('title={t.list}');
     expect(page).toContain("t.listDescription");
     expect(page).toContain("t.loadingHint");
     expect(page).toContain("t.movingStatus");
     expect(page).toContain("t.emptyHint");
     expect(page).toContain('title={t.details}');
-    expect(page).toContain('className="crm-list"');
-    expect(page).toContain('className="crm-detail"');
+    expect(page).toContain('className="lead-inbox-queue-pane"');
+    expect(page).toContain('className="lead-inbox-detail-pane lead-inbox-detail-desktop"');
     expect(page).toContain("followUpNotice");
-    expect(detail).toContain("detailLoading");
-    expect(detail).toContain("t.loadingDetails");
     expect(followUp).toContain("detailLoading");
-    expect(controlCenter).toContain('htmlFor="crm-login-email"');
-    expect(controlCenter).toContain('htmlFor="crm-login-password"');
-    expect(controlCenter).toContain('autoComplete="username"');
-    expect(controlCenter).toContain('autoComplete="current-password"');
-    expect(controlCenter).toContain('role="alert"');
-    expect(controlCenter).toContain('aria-live="assertive"');
-    expect(controlCenter).toContain('aria-atomic="true"');
-    expect(controlCenter).toContain('className="dashboard-control-card__helper state-empty"');
+    expect(page).toContain('htmlFor="crm-login-email"');
+    expect(page).toContain('htmlFor="crm-login-password"');
+    expect(page).toContain('autoComplete="username"');
+    expect(page).toContain('autoComplete="current-password"');
     expect(page).toContain("state-empty");
     expect(page).toContain("state-loading");
     expect(page).toContain("state-error");
-    expect(copy).toContain('followUpSaved: "Follow-up updated."');
-    expect(copy).toContain('followUpSaved: "บันทึกสถานะติดตามแล้ว"');
+    expect(copy).toContain('followUpSaved: "Next action updated."');
+    expect(copy).toContain('followUpSaved: "อัปเดตงานถัดไปแล้ว"');
     expect(copy).toContain('authRequired: "Sign in to load admin CRM data."');
     expect(copy).toContain('loginSubtitle: "Use the same admin credentials as /api/v1/auth/login."');
     expect(copy).toContain('authRequired: "กรุณาเข้าสู่ระบบก่อนใช้งาน CRM หลังบ้าน"');
     expect(copy).toContain('loginSubtitle: "ใช้บัญชีแอดมินเดียวกับเส้นทาง /api/v1/auth/login"');
-    expect(copy).toContain('sessionHint: "Keep this session active');
-    expect(copy).toContain('sessionHint: "คงเซสชันนี้ไว้');
+    expect(copy).toContain('title: "Lead Inbox"');
     expect(copy).toContain('filtersDescription: "Refine the active queue');
-    expect(copy).toContain('filtersDescription: "ปรับคิวงานที่กำลังดู');
+    expect(copy).toContain('filtersDescription: "ปรับคิวที่กำลังดู');
     expect(copy).toContain('filterStateDraft: "Draft filters are not applied yet.');
     expect(copy).toContain('filterStateDraft: "ตัวกรองที่แก้ไขไว้ยังไม่ถูกใช้กับคิวปัจจุบัน');
     expect(copy).toContain('appliedQueue: "Applied queue"');

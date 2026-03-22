@@ -8,9 +8,13 @@ import { formatWorkspaceErrorMessage } from "@/app/_lib/admin-workspace-error";
 import AdminWorkspaceErrorState from "@/components/admin/AdminWorkspaceErrorState";
 import {
   ActionCard,
+  AdminAccessGate,
+  AdminBadge,
   AdminButton,
   AdminPageHeader,
+  AdminPrimaryActionBar,
   AdminSectionCard,
+  AdminSectionTabs,
   AdminStatCard,
   AdminTable,
   LogCard,
@@ -64,9 +68,9 @@ const LEGACY_TOKEN_STORAGE_KEY = "flowbiz_admin_token";
 const copy = {
   en: {
     eyebrow: "Media operations",
-    title: "Admin Media Workspace",
+    title: "Media Library",
     subtitle:
-      "Manage uploads, metadata updates, file replacement, usage checks, and gallery sync from one workspace.",
+      "Find the right asset, run one media task, and verify integrity without bouncing across tools.",
     loginTitle: "Admin sign in",
     loginSubtitle: "Use the same credentials as /api/v1/auth/login.",
     sessionTitle: "Admin",
@@ -166,8 +170,8 @@ const copy = {
   },
   th: {
     eyebrow: "งานจัดการสื่อ",
-    title: "จัดการสื่อ",
-    subtitle: "ดูแลงานอัปโหลด แก้เมทาดาทา เก็บเข้าคลัง กู้คืน แทนที่ไฟล์ ตรวจการใช้งาน และซิงก์แกลเลอรีจากพื้นที่งานเดียว",
+    title: "Media Library",
+    subtitle: "ค้นหาไฟล์ที่ถูกต้อง จัดการงานสื่อทีละอย่าง และยืนยันความสมบูรณ์จากหน้าเดียว",
     loginTitle: "เข้าสู่ระบบแอดมิน",
     loginSubtitle: "ใช้บัญชีเดียวกับ /api/v1/auth/login",
     sessionTitle: "เซสชันแอดมิน",
@@ -361,6 +365,7 @@ function translateMediaValue(value: string | null | undefined, t: (typeof copy)[
 
 export default function AdminMediaPage() {
   const [locale, setLocale] = useState<Locale>(() => detectLocale());
+  const [activeTab, setActiveTab] = useState<"library" | "upload" | "record" | "gallery">("library");
   const [authToken, setAuthToken] = useState("");
   const [authEmail, setAuthEmail] = useState("");
   const [loginEmail, setLoginEmail] = useState("");
@@ -515,23 +520,134 @@ export default function AdminMediaPage() {
     Number(integrity?.invalid_path_format_count || 0) +
     Number(integrity?.empty_file_count || 0);
 
+  async function runUploadAction() {
+    if (!uploadFile) return;
+    await runAction(async () => {
+      const formData = new FormData();
+      formData.set("file", uploadFile as File);
+      if (uploadTitle.trim()) formData.set("title", uploadTitle.trim());
+      return fetchJson("/admin/media/upload", authToken, {
+        method: "POST",
+        body: formData,
+      });
+    }, {
+      successMessage: t.uploadSuccess,
+      onSuccess: () => {
+        setUploadFile(null);
+        setUploadTitle("");
+      },
+    });
+  }
+
+  async function runGetAction() {
+    if (!mediaId.trim()) return;
+    await runAction(() => fetchJson(`/admin/media/${mediaId.trim()}`, authToken), {
+      successMessage: t.getSuccess,
+    });
+  }
+
+  async function runPatchAction() {
+    if (!mediaId.trim()) return;
+    const parsedPatch = parseJsonObject(patchJson, t.invalidPatchJson);
+    if (!parsedPatch) return;
+    await runAction(
+      () =>
+        fetchJson(`/admin/media/${mediaId.trim()}`, authToken, {
+          method: "PATCH",
+          body: JSON.stringify(parsedPatch),
+          headers: { "content-type": "application/json" },
+        }),
+      { successMessage: t.patchSuccess },
+    );
+  }
+
+  async function runArchiveAction() {
+    if (!mediaId.trim()) return;
+    if (!confirmAction(t.archiveConfirm)) return;
+    await runAction(
+      () =>
+        fetchJson(`/admin/media/${mediaId.trim()}/archive?block_if_used=false`, authToken, {
+          method: "POST",
+        }),
+      { successMessage: t.archiveSuccess },
+    );
+  }
+
+  async function runRestoreAction() {
+    if (!mediaId.trim()) return;
+    await runAction(
+      () =>
+        fetchJson(`/admin/media/${mediaId.trim()}/restore`, authToken, {
+          method: "POST",
+        }),
+      { successMessage: t.restoreSuccess },
+    );
+  }
+
+  async function runUsageAction() {
+    if (!mediaId.trim()) return;
+    await runAction(() => fetchJson(`/admin/media/${mediaId.trim()}/usage`, authToken), {
+      successMessage: t.usageSuccess,
+    });
+  }
+
+  async function runReplaceAction() {
+    if (!mediaId.trim() || !replaceFile) return;
+    await runAction(async () => {
+      const formData = new FormData();
+      formData.set("file", replaceFile as File);
+      return fetchJson(`/admin/media/${mediaId.trim()}/replace`, authToken, {
+        method: "POST",
+        body: formData,
+      });
+    }, {
+      successMessage: t.replaceSuccess,
+      onSuccess: () => {
+        setReplaceFile(null);
+      },
+    });
+  }
+
+  async function runGalleryAction() {
+    if (!galleryTargetId.trim()) return;
+    const payload = parseJsonObject(galleryPayload, t.invalidGalleryPayload);
+    if (!payload) return;
+    await runAction(() => {
+      const base =
+        galleryTargetType === "project"
+          ? `/admin/media/projects/${galleryTargetId.trim()}/gallery`
+          : `/admin/media/properties/${galleryTargetId.trim()}/gallery`;
+      return fetchJson(base, authToken, {
+        method: "PUT",
+        body: JSON.stringify(payload),
+      });
+    }, { successMessage: t.gallerySuccess });
+  }
+
   function confirmAction(message: string): boolean {
     if (typeof window === "undefined") return true;
     return window.confirm(message);
   }
 
+  const stickyPrimaryAction =
+    activeTab === "upload"
+      ? { label: t.upload, onClick: () => void runUploadAction() }
+      : activeTab === "record"
+        ? { label: t.runPatch, onClick: () => void runPatchAction() }
+        : activeTab === "gallery"
+          ? { label: t.runGallery, onClick: () => void runGalleryAction() }
+          : { label: t.refresh, onClick: () => void loadWorkspace() };
+
   return (
     <main id="main-content" className="container content-stack">
       <AdminPageHeader title={t.title} description={t.subtitle} icon="media" eyebrow={t.eyebrow} />
-
-      <ActionCard
-        className="admin-workspace-panel admin-workspace-panel--auth dashboard-controls dashboard-controls--session"
-        title={isAuthenticated ? (authEmail || t.sessionTitle) : t.loginTitle}
-        description={isAuthenticated ? t.sessionDescription : t.loginSubtitle}
-        icon={isAuthenticated ? "profile" : "media"}
-        titleTag="h2"
-      >
-        {!isAuthenticated ? (
+      <AdminAccessGate
+        isAuthenticated={isAuthenticated}
+        authTitle={t.loginTitle}
+        authDescription={t.loginSubtitle}
+        sessionTitle={authEmail || t.sessionTitle}
+        sessionDescription={t.sessionDescription}
+        authContent={
           <form className="crm-login-form" method="post" onSubmit={(event) => void login(event)}>
             <label className="field" htmlFor="media-login-email">
               <span>{t.email}</span>
@@ -545,7 +661,6 @@ export default function AdminMediaPage() {
                 onChange={(event) => setLoginEmail(event.target.value)}
               />
             </label>
-
             <label className="field" htmlFor="media-login-password">
               <span>{t.password}</span>
               <input
@@ -558,59 +673,41 @@ export default function AdminMediaPage() {
                 onChange={(event) => setLoginPassword(event.target.value)}
               />
             </label>
-
             {authError ? <div className="state-error">{authError}</div> : null}
-
             <div className="card-actions">
               <AdminButton variant="primary" icon="workspace" type="submit" disabled={authLoading}>
                 {authLoading ? t.signingIn : t.signIn}
               </AdminButton>
             </div>
+            <div className="state-empty admin-workspace-empty-state" role="status">
+              <strong>{t.authRequired}</strong>
+              <p className="locale-safe">{t.authWorkspaceHint}</p>
+            </div>
           </form>
-        ) : (
-          <div className="crm-session-panel" role="status" aria-live="polite">
-            <div className="crm-session-panel__head">
-              <div className="crm-session-panel__copy">
-                <strong>{authEmail || t.sessionTitle}</strong>
-                <span>{t.sessionActive}</span>
-              </div>
-              <div className="crm-session-panel__quick-actions">
-                <AdminButton variant="secondary" icon="refresh" type="button" onClick={() => void loadWorkspace()} disabled={loading || opBusy}>
-                  {loading ? t.loading : t.refresh}
-                </AdminButton>
-                <AdminButton variant="secondary" icon="x" type="button" onClick={logout} disabled={loading || opBusy}>
-                  {t.signOut}
-                </AdminButton>
-              </div>
-            </div>
-            <dl className="crm-session-panel__meta">
-              <div>
-                <dt>{t.mediaList}</dt>
-                <dd>{items.length}</dd>
-              </div>
-              <div>
-                <dt>{t.scannedAt}</dt>
-                <dd>{prettyDate(integrity?.scanned_at || null, locale)}</dd>
-              </div>
-            </dl>
-            <p className="admin-input__hint locale-safe">{t.sessionHint}</p>
-            <div className="crm-session-panel__quick-actions">
-              <Link className="admin-button admin-button--secondary admin-button--sm" href={withAdminLocale("/admin/dashboard", locale)}>
-                {t.openDashboard}
-              </Link>
-              <Link className="admin-button admin-button--secondary admin-button--sm" href={withAdminLocale("/admin/seo", locale)}>
-                {t.openSeo}
-              </Link>
-            </div>
-          </div>
-        )}
-        {!isAuthenticated ? (
-          <div className="state-empty admin-workspace-empty-state" role="status">
-            <strong>{t.authRequired}</strong>
-            <p className="locale-safe">{t.authWorkspaceHint}</p>
-          </div>
-        ) : null}
-      </ActionCard>
+        }
+        sessionContent={isAuthenticated ? <AdminButton variant="secondary" size="sm" icon="media" type="button">{items.length} {t.mediaList}</AdminButton> : null}
+      >
+        <AdminPrimaryActionBar
+          title={t.title}
+          description={t.subtitle}
+          primaryAction={{ ...stickyPrimaryAction, disabled: !isAuthenticated || opBusy || loading || (activeTab === "upload" ? !uploadFile : activeTab === "record" ? !mediaId.trim() : activeTab === "gallery" ? !galleryTargetId.trim() : false) }}
+          secondaryActions={[
+            { label: t.refresh, onClick: () => void loadWorkspace(), disabled: !isAuthenticated || loading || opBusy },
+            { label: t.signOut, onClick: logout, disabled: loading || opBusy },
+          ]}
+          meta={<AdminBadge tone="info">{prettyDate(integrity?.scanned_at || null, locale)}</AdminBadge>}
+          mobileBottom
+        />
+        <AdminSectionTabs
+          activeTab={activeTab}
+          onChange={(key) => setActiveTab(key as "library" | "upload" | "record" | "gallery")}
+          tabs={[
+            { key: "library", label: t.mediaList, count: items.length },
+            { key: "upload", label: t.upload },
+            { key: "record", label: t.crudTitle },
+            { key: "gallery", label: t.galleryOps },
+          ]}
+        />
 
       {pageError ? (
         <AdminWorkspaceErrorState
@@ -660,6 +757,7 @@ export default function AdminMediaPage() {
             />
           </section>
 
+          {activeTab === "upload" || activeTab === "record" || activeTab === "gallery" ? (
           <AdminSectionCard
             className="admin-workspace-panel admin-workspace-panel--actions admin-workspace-panel--media-actions"
             title={t.operations}
@@ -690,23 +788,7 @@ export default function AdminMediaPage() {
                   icon="plus"
                   type="button"
                   disabled={opBusy || !uploadFile}
-                  onClick={() =>
-                    void runAction(async () => {
-                      const formData = new FormData();
-                      formData.set("file", uploadFile as File);
-                      if (uploadTitle.trim()) formData.set("title", uploadTitle.trim());
-                      return fetchJson("/admin/media/upload", authToken, {
-                        method: "POST",
-                        body: formData,
-                      });
-                    }, {
-                      successMessage: t.uploadSuccess,
-                      onSuccess: () => {
-                        setUploadFile(null);
-                        setUploadTitle("");
-                      },
-                    })
-                  }
+                  onClick={() => void runUploadAction()}
                 >
                   {t.upload}
                 </AdminButton>
@@ -736,11 +818,7 @@ export default function AdminMediaPage() {
                     icon="search"
                     type="button"
                     disabled={opBusy || !mediaId.trim()}
-                    onClick={() =>
-                      void runAction(() => fetchJson(`/admin/media/${mediaId.trim()}`, authToken), {
-                        successMessage: t.getSuccess,
-                      })
-                    }
+                    onClick={() => void runGetAction()}
                   >
                     {t.runGet}
                   </AdminButton>
@@ -749,19 +827,7 @@ export default function AdminMediaPage() {
                     icon="refresh"
                     type="button"
                     disabled={opBusy || !mediaId.trim()}
-                    onClick={() => {
-                      const parsedPatch = parseJsonObject(patchJson, t.invalidPatchJson);
-                      if (!parsedPatch) return;
-                      void runAction(
-                        () =>
-                          fetchJson(`/admin/media/${mediaId.trim()}`, authToken, {
-                            method: "PATCH",
-                            body: JSON.stringify(parsedPatch),
-                            headers: { "content-type": "application/json" },
-                          }),
-                        { successMessage: t.patchSuccess },
-                      );
-                    }}
+                    onClick={() => void runPatchAction()}
                   >
                     {t.runPatch}
                   </AdminButton>
@@ -770,14 +836,7 @@ export default function AdminMediaPage() {
                     icon="warning"
                     type="button"
                     disabled={opBusy || !mediaId.trim()}
-                    onClick={() => {
-                      if (!confirmAction(t.archiveConfirm)) return;
-                      void runAction(() =>
-                        fetchJson(`/admin/media/${mediaId.trim()}/archive?block_if_used=false`, authToken, {
-                          method: "POST",
-                        }), { successMessage: t.archiveSuccess }
-                      );
-                    }}
+                    onClick={() => void runArchiveAction()}
                   >
                     {t.runArchive}
                   </AdminButton>
@@ -786,13 +845,7 @@ export default function AdminMediaPage() {
                     icon="success"
                     type="button"
                     disabled={opBusy || !mediaId.trim()}
-                    onClick={() =>
-                      void runAction(() =>
-                        fetchJson(`/admin/media/${mediaId.trim()}/restore`, authToken, {
-                          method: "POST",
-                        }), { successMessage: t.restoreSuccess }
-                      )
-                    }
+                    onClick={() => void runRestoreAction()}
                   >
                     {t.runRestore}
                   </AdminButton>
@@ -801,11 +854,7 @@ export default function AdminMediaPage() {
                     icon="table"
                     type="button"
                     disabled={opBusy || !mediaId.trim()}
-                    onClick={() =>
-                      void runAction(() => fetchJson(`/admin/media/${mediaId.trim()}/usage`, authToken), {
-                        successMessage: t.usageSuccess,
-                      })
-                    }
+                    onClick={() => void runUsageAction()}
                   >
                     {t.runUsage}
                   </AdminButton>
@@ -826,21 +875,7 @@ export default function AdminMediaPage() {
                   icon="refresh"
                   type="button"
                   disabled={opBusy || !mediaId.trim() || !replaceFile}
-                  onClick={() =>
-                    void runAction(async () => {
-                      const formData = new FormData();
-                      formData.set("file", replaceFile as File);
-                      return fetchJson(`/admin/media/${mediaId.trim()}/replace`, authToken, {
-                        method: "POST",
-                        body: formData,
-                      });
-                    }, {
-                      successMessage: t.replaceSuccess,
-                      onSuccess: () => {
-                        setReplaceFile(null);
-                      },
-                    })
-                  }
+                  onClick={() => void runReplaceAction()}
                 >
                   {t.runReplace}
                 </AdminButton>
@@ -882,20 +917,7 @@ export default function AdminMediaPage() {
                   icon="media"
                   type="button"
                   disabled={opBusy || !galleryTargetId.trim()}
-                  onClick={() => {
-                    const payload = parseJsonObject(galleryPayload, t.invalidGalleryPayload);
-                    if (!payload) return;
-                    void runAction(() => {
-                      const base =
-                        galleryTargetType === "project"
-                          ? `/admin/media/projects/${galleryTargetId.trim()}/gallery`
-                          : `/admin/media/properties/${galleryTargetId.trim()}/gallery`;
-                      return fetchJson(base, authToken, {
-                        method: "PUT",
-                        body: JSON.stringify(payload),
-                      });
-                    }, { successMessage: t.gallerySuccess });
-                  }}
+                  onClick={() => void runGalleryAction()}
                 >
                   {t.runGallery}
                 </AdminButton>
@@ -926,7 +948,9 @@ export default function AdminMediaPage() {
               ) : null}
             </div>
           </AdminSectionCard>
+          ) : null}
 
+          {activeTab === "library" ? (
           <LogCard
             className="admin-workspace-panel admin-workspace-panel--records"
             bodyClassName="admin-workspace-log-body"
@@ -981,8 +1005,10 @@ export default function AdminMediaPage() {
               </AdminTable>
             )}
           </LogCard>
+          ) : null}
         </>
       ) : null}
+      </AdminAccessGate>
     </main>
   );
 }

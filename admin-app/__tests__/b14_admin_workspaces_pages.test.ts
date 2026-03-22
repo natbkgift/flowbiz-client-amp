@@ -29,6 +29,9 @@ describe("B14 admin workspace pages contract", () => {
     expect(page).toContain("/usage");
     expect(page).toContain("/admin/media/projects/");
     expect(page).toContain("/admin/media/properties/");
+    expect(page).toContain("AdminAccessGate");
+    expect(page).toContain("AdminPrimaryActionBar");
+    expect(page).toContain("AdminSectionTabs");
     expect(page).toContain("admin-workspace-panel admin-workspace-panel--actions");
     expect(page).toContain("admin-workspace-panel admin-workspace-panel--records");
     expect(page).toContain("state-empty");
@@ -44,7 +47,7 @@ describe("B14 admin workspace pages contract", () => {
     expect(page).toContain("archiveConfirm");
     expect(page).toContain("window.confirm");
     expect(page).toContain("emptyHint");
-    expect(page).toContain("disabled={loading || opBusy}");
+    expect(page).toContain('primaryAction={{ ...stickyPrimaryAction, disabled: !isAuthenticated || opBusy || loading');
     expect(page).toContain('className="state-empty admin-workspace-empty-state"');
     expect(page).toContain("listEmptyTitle");
     expect(page).toContain("openDashboard");
@@ -76,7 +79,9 @@ describe("B14 admin workspace pages contract", () => {
     expect(page).toContain("importSelectionHint");
     expect(page).toContain("selectedFile");
     expect(page).toContain("selectedMode");
-    expect(page).toContain('filterDryRun: "กรองโหมดทดลองรัน"');
+    expect(page).toContain('title: "Import Monitor"');
+    expect(page).toContain('title: "ติดตามการนำเข้า"');
+    expect(page).toContain('filterDryRun: "โหมดการรัน"');
     expect(page).toContain("emptyHint");
     expect(page).toContain("disabled={loading || importBusy}");
     expect(page).toContain('className="state-empty admin-workspace-empty-state"');
@@ -228,7 +233,7 @@ describe("B14 admin workspace pages contract", () => {
 
   it("users workspace avoids default credentials and masks password fields", () => {
     const page = read("app/admin/users/page.tsx");
-    expect(page).toContain("User & Role Management");
+    expect(page).toContain("People & Roles");
     expect(page).toContain("/admin/users");
     expect(page).not.toContain("new-admin@example.com");
     expect(page).not.toContain("initial-password-123");
@@ -249,7 +254,6 @@ describe("B14 admin workspace pages contract", () => {
     expect(page).toContain("unsavedLeaveConfirm");
     expect(page).toContain("successTitle");
     expect(page).toContain("draftSuccessBody");
-    expect(page).toContain('href={withAdminLocale(\'/admin/layout\', locale)}');
     expect(page).toContain('className="admin-workspace-success-handoff"');
   });
 
@@ -284,8 +288,8 @@ describe("B14 admin workspace pages contract", () => {
     for (const { stateFile, formFile } of loginPages) {
       const page = read(stateFile);
       const formSource = read(formFile || stateFile);
-      expect(page).toMatch(/\[loginEmail,\s*setLoginEmail\]\s*=\s*useState\((["'])\1\);/);
-      expect(page).toMatch(/\[loginPassword,\s*setLoginPassword\]\s*=\s*useState\((["'])\1\);/);
+      expect(page).toMatch(/\[(loginEmail|email),\s*set[A-Za-z]+\]\s*=\s*useState\((["'])\2\);/);
+      expect(page).toMatch(/\[(loginPassword|password),\s*set[A-Za-z]+\]\s*=\s*useState\((["'])\2\);/);
       expect(page).not.toMatch(/setLoginEmail\([^)]*\.email[^)]*\)/);
       expect(formSource).toContain('name="email"');
       expect(formSource).toContain('name="password"');

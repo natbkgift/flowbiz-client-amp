@@ -1,7 +1,8 @@
 'use client';
 
+import Image from 'next/image';
 import Link from 'next/link';
-import { type FormEvent, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { type Dispatch, type FormEvent, type SetStateAction, useCallback, useEffect, useMemo, useState } from 'react';
 
 import {
   clearAuthSession,
@@ -12,7 +13,20 @@ import {
 } from '@/app/_lib/admin-auth';
 import { detectAdminLocale, persistAdminLocale, withAdminLocale } from '@/app/_lib/admin-i18n';
 import { normalizeLocalMediaPath } from '@/app/_lib/local-media';
-import { ActionCard, AdminButton, AdminPage, AdminPageBody, AdminPageHeader, LogCard } from '@/components/admin/AdminPrimitives';
+import {
+  ActionCard,
+  AdminAccessGate,
+  AdminBadge,
+  AdminButton,
+  AdminPage,
+  AdminPageBody,
+  AdminPageHeader,
+  AdminPrimaryActionBar,
+  AdminRepeaterEditor,
+  AdminSearchablePicker,
+  AdminSectionTabs,
+  AdminSelectionDrawer,
+} from '@/components/admin/AdminPrimitives';
 import { apiRequest } from '../../../lib/api';
 import { getToken, setToken } from '../../../lib/auth-store';
 
@@ -104,9 +118,9 @@ type ComposerSuccessKey = 'draft' | 'publish';
 
 const HOME_COMPOSER_COPY = {
   en: {
-    eyebrow: 'Content orchestration',
-    pageTitle: 'Home Composer',
-    pageDescription: 'Compose Home sections, hero copy/media, and featured entity selections with governance-aware publish checks.',
+    eyebrow: 'Homepage workflow',
+    pageTitle: 'Landing Builder',
+    pageDescription: 'Plan, edit, and publish the homepage narrative for one locale from a guided builder.',
     localeLabel: 'Locale',
     refresh: 'Refresh',
     refreshing: 'Refreshing…',
@@ -158,7 +172,7 @@ const HOME_COMPOSER_COPY = {
     eyebrowLabel: 'Eyebrow',
     label: 'Label',
     descriptionLabel: 'Description',
-    url: 'ลิงก์',
+    url: 'URL',
     featuredProjectsTitle: 'Featured Projects',
     featuredProjectsDescription: 'Choose project selection mode, copy, and manual featured items.',
     featuredPropertiesTitle: 'Featured Properties',
@@ -170,15 +184,15 @@ const HOME_COMPOSER_COPY = {
     proofTrustDescription: 'Edit metrics, trust proofs, and process timeline blocks for the homepage.',
     whyPattayaTitle: 'Why Pattaya Right Now',
     whyPattayaDescription: 'Configure market metrics, editorial narrative cards, and the primary CTA for the Pattaya market section.',
-    whyPattayaMetricsJson: 'Why Pattaya metrics JSON',
-    whyPattayaNarrativesJson: 'Why Pattaya narrative cards JSON',
-    trustProofsJson: 'Trust proofs JSON',
-    processTimelineJson: 'Process timeline JSON',
+    whyPattayaMetricsJson: 'Market metrics',
+    whyPattayaNarrativesJson: 'Narrative cards',
+    trustProofsJson: 'Trust proof items',
+    processTimelineJson: 'Process timeline',
     supportingSectionsTitle: 'Supporting sections',
     supportingSectionsDescription: 'Configure supporting market, review, and video sections below the hero.',
-    supportingCardsJson: 'Section cards JSON',
-    reviewItemsJson: 'Review items JSON',
-    videoItemsJson: 'Video items JSON',
+    supportingCardsJson: 'Insight cards',
+    reviewItemsJson: 'Review cards',
+    videoItemsJson: 'Video cards',
     teamCtaTitle: 'Team / advisory CTA',
     teamCtaDescription: 'Configure the advisory band shown before the final conversion block.',
     bottomCtaTitle: 'Bottom CTA',
@@ -213,8 +227,8 @@ const HOME_COMPOSER_COPY = {
     selectProperty: 'Select property',
     selectHeroImage: 'Select hero image',
     closeHeroImagePicker: 'Close hero image media picker',
-    mustBeValidJsonArray: 'must be valid JSON array',
-    mustBeJsonArray: 'must be a JSON array',
+    mustBeValidJsonArray: 'Item list is invalid',
+    mustBeJsonArray: 'Item list must be an array',
     sessionExpired: 'Session expired. Please sign in again.',
     loadComposerError: 'Unable to load home composer',
     loadComposerStateDescription: 'Reconnect and load the composer bundle before editing this page.',
@@ -244,8 +258,8 @@ const HOME_COMPOSER_COPY = {
   },
   th: {
     eyebrow: 'จัดวางคอนเทนต์หน้าแรก',
-    pageTitle: 'คอมโพสหน้าแรก',
-    pageDescription: 'จัดการส่วนประกอบหน้าแรก ข้อความฮีโร่ สื่อหลัก และรายการแนะนำ พร้อมตรวจสอบก่อนเผยแพร่',
+    pageTitle: 'Landing Builder',
+    pageDescription: 'วางแผน แก้ไข และเผยแพร่เรื่องราวของหน้าแรกตามภาษาที่เลือกจาก builder เดียว',
     localeLabel: 'ภาษา',
     refresh: 'รีเฟรช',
     refreshing: 'กำลังรีเฟรช…',
@@ -309,15 +323,15 @@ const HOME_COMPOSER_COPY = {
     proofTrustDescription: 'จัดการข้อมูลตัวเลขยืนยันความน่าสนใจ หลักฐานความน่าเชื่อถือ และลำดับขั้นการทำงานของหน้าแรก',
     whyPattayaTitle: 'Why Pattaya Right Now',
     whyPattayaDescription: 'ตั้งค่าตัวเลขตลาด การ์ดบทบรรณาธิการ และ CTA หลักของส่วนเล่าเรื่องตลาดพัทยา',
-    whyPattayaMetricsJson: 'JSON ตัวเลข Why Pattaya',
-    whyPattayaNarrativesJson: 'JSON การ์ดเล่าเรื่อง Why Pattaya',
-    trustProofsJson: 'JSON หลักฐานความน่าเชื่อถือ',
-    processTimelineJson: 'JSON ลำดับขั้นการทำงาน',
+    whyPattayaMetricsJson: 'ตัวเลขตลาด',
+    whyPattayaNarrativesJson: 'การ์ดเล่าเรื่อง',
+    trustProofsJson: 'รายการหลักฐานความน่าเชื่อถือ',
+    processTimelineJson: 'ลำดับขั้นการทำงาน',
     supportingSectionsTitle: 'ส่วนสนับสนุน',
     supportingSectionsDescription: 'ตั้งค่าบล็อกข้อมูลตลาด รีวิว และวิดีโอที่อยู่ถัดจากส่วนหลัก',
-    supportingCardsJson: 'JSON การ์ดของส่วนนี้',
-    reviewItemsJson: 'JSON รายการรีวิว',
-    videoItemsJson: 'JSON รายการวิดีโอ',
+    supportingCardsJson: 'การ์ดอินไซต์',
+    reviewItemsJson: 'การ์ดรีวิว',
+    videoItemsJson: 'การ์ดวิดีโอ',
     teamCtaTitle: 'Team / Advisory CTA',
     teamCtaDescription: 'ตั้งค่าบล็อกชวนคุยกับทีมที่ปรึกษาก่อนถึงส่วนปิดการขายท้ายหน้า',
     bottomCtaTitle: 'ปุ่มท้ายหน้า',
@@ -352,8 +366,8 @@ const HOME_COMPOSER_COPY = {
     selectProperty: 'เลือกทรัพย์',
     selectHeroImage: 'เลือกภาพฮีโร่',
     closeHeroImagePicker: 'ปิดตัวเลือกสื่อภาพฮีโร่',
-    mustBeValidJsonArray: 'ข้อมูลต้องเป็น JSON array ที่ถูกต้อง',
-    mustBeJsonArray: 'ข้อมูลต้องเป็น JSON array',
+    mustBeValidJsonArray: 'รายการนี้มีข้อมูลไม่ถูกต้อง',
+    mustBeJsonArray: 'รายการนี้ต้องเป็นลิสต์ข้อมูล',
     sessionExpired: 'เซสชันหมดอายุ กรุณาเข้าสู่ระบบอีกครั้ง',
     loadComposerError: 'ไม่สามารถโหลดคอมโพสหน้าแรกได้',
     loadComposerStateDescription: 'เชื่อมต่อและโหลดข้อมูลคอมโพสให้สำเร็จก่อนเริ่มแก้ไขหน้านี้',
@@ -422,6 +436,8 @@ const SECTION_KEYS = [
   'bottom_cta',
 ] as const;
 type SectionKey = (typeof SECTION_KEYS)[number];
+
+type BuilderTabKey = 'overview' | 'hero' | 'journeys' | 'featured' | 'market-story' | 'social-proof' | 'conversion';
 
 type HomeComposerConfig = {
   enabled_sections: SectionKey[];
@@ -736,6 +752,52 @@ function prettyDate(value: string | null | undefined, locale: LocaleCode, t: Hom
   }).format(date);
 }
 
+function safeParseEditorItems(text: string): Array<Record<string, unknown>> {
+  const raw = text.trim();
+  if (!raw) return [];
+  try {
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) ? (parsed as Array<Record<string, unknown>>) : [];
+  } catch {
+    return [];
+  }
+}
+
+function serializeEditorItems(items: Array<Record<string, unknown>>): string {
+  if (items.length === 0) return '[]';
+  return JSON.stringify(items, null, 2);
+}
+
+function coerceEditorValue(value: string): unknown {
+  const trimmed = value.trim();
+  if (!trimmed) return '';
+  if (trimmed === 'true') return true;
+  if (trimmed === 'false') return false;
+  if (trimmed === 'null') return null;
+  if (/^-?\d+(\.\d+)?$/.test(trimmed)) return Number(trimmed);
+  if ((trimmed.startsWith('{') && trimmed.endsWith('}')) || (trimmed.startsWith('[') && trimmed.endsWith(']'))) {
+    try {
+      return JSON.parse(trimmed);
+    } catch {
+      return value;
+    }
+  }
+  return value;
+}
+
+function formatEditorValue(value: unknown): string {
+  if (value === null || typeof value === 'undefined') return '';
+  if (typeof value === 'object') return JSON.stringify(value);
+  return String(value);
+}
+
+function applyEditorUpdate(
+  setter: Dispatch<SetStateAction<string>>,
+  updater: (items: Array<Record<string, unknown>>) => Array<Record<string, unknown>>,
+): void {
+  setter((current) => serializeEditorItems(updater(safeParseEditorItems(current))));
+}
+
 function syncLegacyTokenFromUnifiedSession(): SeededAuthSession | null {
   if (typeof window === 'undefined') return null;
   const session = readAuthSession();
@@ -797,7 +859,9 @@ export default function HomeComposerPage() {
   const [trustItemsText, setTrustItemsText] = useState('');
   const [heroImageError, setHeroImageError] = useState<string | null>(null);
   const [heroMediaModalOpen, setHeroMediaModalOpen] = useState(false);
-  const heroMediaCloseButtonRef = useRef<HTMLButtonElement | null>(null);
+  const [projectPickerOpen, setProjectPickerOpen] = useState(false);
+  const [propertyPickerOpen, setPropertyPickerOpen] = useState(false);
+  const [activeTab, setActiveTab] = useState<BuilderTabKey>('overview');
 
   const draftId = bundle?.draft?.id ?? null;
   const isAuthenticated = authToken.trim().length > 0;
@@ -812,6 +876,17 @@ export default function HomeComposerPage() {
 
   const selectedProjectIds = useMemo(() => new Set(config.featured_projects.selected_project_ids || []), [config.featured_projects.selected_project_ids]);
   const selectedPropertyIds = useMemo(() => new Set(config.featured_properties.selected_property_ids || []), [config.featured_properties.selected_property_ids]);
+  const trustStripItems = useMemo(
+    () => splitLines(trustItemsText).map((text, index) => ({ key: `trust-${index + 1}`, text })),
+    [trustItemsText],
+  );
+  const metricsItems = useMemo(() => safeParseEditorItems(metricsText), [metricsText]);
+  const whyPattayaNarrativesItems = useMemo(() => safeParseEditorItems(whyPattayaNarrativesText), [whyPattayaNarrativesText]);
+  const trustProofItems = useMemo(() => safeParseEditorItems(trustProofsText), [trustProofsText]);
+  const processTimelineItems = useMemo(() => safeParseEditorItems(processTimelineText), [processTimelineText]);
+  const marketInsightItems = useMemo(() => safeParseEditorItems(marketInsightsCardsText), [marketInsightsCardsText]);
+  const reviewItems = useMemo(() => safeParseEditorItems(reviewItemsText), [reviewItemsText]);
+  const videoItems = useMemo(() => safeParseEditorItems(videoItemsText), [videoItemsText]);
 
   const clearComposerSession = useCallback((nextAuthError?: string): void => {
     setToken(null);
@@ -974,22 +1049,6 @@ export default function HomeComposerPage() {
     }, 250);
     return () => clearTimeout(timer);
   }, [candidateSearch, isAuthenticated, loadCandidates]);
-
-  useEffect(() => {
-    if (!heroMediaModalOpen) return;
-    heroMediaCloseButtonRef.current?.focus();
-  }, [heroMediaModalOpen]);
-
-  useEffect(() => {
-    if (!heroMediaModalOpen) return;
-    const onKeyDown = (event: KeyboardEvent): void => {
-      if (event.key !== 'Escape') return;
-      event.preventDefault();
-      setHeroMediaModalOpen(false);
-    };
-    window.addEventListener('keydown', onKeyDown);
-    return () => window.removeEventListener('keydown', onKeyDown);
-  }, [heroMediaModalOpen]);
 
   const confirmDiscardChanges = useCallback((): boolean => {
     if (!hasUnsavedChanges || typeof window === 'undefined') return true;
@@ -1302,19 +1361,237 @@ export default function HomeComposerPage() {
 
   const sectionLabel = (section: SectionKey): string => SECTION_LABELS[section]?.[locale] ?? section;
   const pathKeyLabel = (key: string): string => PATH_KEY_LABELS[key]?.[locale] ?? key;
+  const tabItems = locale === 'th'
+    ? [
+        { key: 'overview', label: 'ภาพรวม' },
+        { key: 'hero', label: 'ฮีโร่' },
+        { key: 'journeys', label: 'เส้นทาง' },
+        { key: 'featured', label: 'คัดสรร' },
+        { key: 'market-story', label: 'เรื่องราวตลาด' },
+        { key: 'social-proof', label: 'รีวิวและความน่าเชื่อถือ' },
+        { key: 'conversion', label: 'เปลี่ยนเป็นดีล' },
+      ]
+    : [
+        { key: 'overview', label: 'Overview' },
+        { key: 'hero', label: 'Hero' },
+        { key: 'journeys', label: 'Journeys' },
+        { key: 'featured', label: 'Featured' },
+        { key: 'market-story', label: 'Market Story' },
+        { key: 'social-proof', label: 'Social Proof' },
+        { key: 'conversion', label: 'Conversion' },
+      ];
+  const livePageHref = locale === 'th' ? '/th' : '/en';
+  const selectedProjectSummary = projectCandidates.filter((item) => selectedProjectIds.has(item.id));
+  const selectedPropertySummary = propertyCandidates.filter((item) => selectedPropertyIds.has(item.id));
   const saveDisabled = saving || loading || Boolean(heroImageError);
   const publishDisabled = publishing || loading || saving || !draftId || Boolean(heroImageError);
   const successBody = successKey === 'publish' ? t.publishSuccessBody : t.draftSuccessBody;
 
+  const editorLabels = locale === 'th'
+    ? {
+        addItem: 'เพิ่มรายการ',
+        addField: 'เพิ่มฟิลด์',
+        emptyItem: 'ยังไม่มีรายการ',
+        emptyFields: 'เพิ่มรายการแรกเพื่อเริ่มแก้ไข',
+        fieldName: 'ชื่อฟิลด์',
+        fieldValue: 'ค่า',
+        removeField: 'ลบฟิลด์',
+        removeItem: 'ลบรายการ',
+        chooseItems: 'เลือกรายการ',
+        selected: 'เลือกแล้ว',
+        selectedCount: 'รายการที่เลือก',
+      }
+    : {
+        addItem: 'Add item',
+        addField: 'Add field',
+        emptyItem: 'No items yet',
+        emptyFields: 'Add the first item to start editing this section.',
+        fieldName: 'Field name',
+        fieldValue: 'Value',
+        removeField: 'Remove field',
+        removeItem: 'Remove item',
+        chooseItems: 'Choose items',
+        selected: 'Selected',
+        selectedCount: 'Selected items',
+      };
+
+  function updateTrustStripItems(nextItems: Array<{ key: string; text?: string }>): void {
+    setTrustItemsText(nextItems.map((item) => item.text?.trim() || '').filter(Boolean).join('\n'));
+  }
+
+  function updatePathItem(index: number, key: 'label' | 'description' | 'url', value: string): void {
+    setConfig((prev) => {
+      const nextPaths = [...(prev.path_selector.paths || [])];
+      nextPaths[index] = { ...nextPaths[index], [key]: value };
+      return { ...prev, path_selector: { ...prev.path_selector, paths: nextPaths } };
+    });
+  }
+
+  function addPathItem(): void {
+    setConfig((prev) => ({
+      ...prev,
+      path_selector: {
+        ...prev.path_selector,
+        paths: [...(prev.path_selector.paths || []), { key: `custom-${(prev.path_selector.paths || []).length + 1}`, label: '', description: '', url: '' }],
+      },
+    }));
+  }
+
+  function removePathItem(index: number): void {
+    setConfig((prev) => ({
+      ...prev,
+      path_selector: {
+        ...prev.path_selector,
+        paths: (prev.path_selector.paths || []).filter((_, itemIndex) => itemIndex !== index),
+      },
+    }));
+  }
+
+  function movePathItem(index: number, direction: -1 | 1): void {
+    setConfig((prev) => {
+      const nextPaths = [...(prev.path_selector.paths || [])];
+      const nextIndex = index + direction;
+      if (nextIndex < 0 || nextIndex >= nextPaths.length) {
+        return prev;
+      }
+      [nextPaths[index], nextPaths[nextIndex]] = [nextPaths[nextIndex], nextPaths[index]];
+      return { ...prev, path_selector: { ...prev.path_selector, paths: nextPaths } };
+    });
+  }
+
+  function toggleProjectDrawerSelection(id: string): void {
+    toggleProjectSelection(id);
+  }
+
+  function togglePropertyDrawerSelection(id: string): void {
+    togglePropertySelection(id);
+  }
+
+  function renderObjectRepeater(
+    title: string,
+    items: Array<Record<string, unknown>>,
+    setter: Dispatch<SetStateAction<string>>,
+  ) {
+    return (
+      <AdminRepeaterEditor
+        items={items}
+        addLabel={editorLabels.addItem}
+        emptyTitle={editorLabels.emptyItem}
+        emptyDescription={editorLabels.emptyFields}
+        onAdd={() => applyEditorUpdate(setter, (current) => [...current, { label: '', value: '' }])}
+        onRemove={(index) => applyEditorUpdate(setter, (current) => current.filter((_, itemIndex) => itemIndex !== index))}
+        onMove={(index, direction) =>
+          applyEditorUpdate(setter, (current) => {
+            const next = [...current];
+            const targetIndex = index + direction;
+            if (targetIndex < 0 || targetIndex >= next.length) return next;
+            [next[index], next[targetIndex]] = [next[targetIndex], next[index]];
+            return next;
+          })
+        }
+        getKey={(_item, index) => `${title}-${index}`}
+        getItemLabel={(_item, index) => `${title} ${index + 1}`}
+        renderItem={(item, index) => (
+          <div className="home-composer-record-list">
+            {Object.entries(item).map(([fieldKey, fieldValue]) => (
+              <div key={`${title}-${index}-${fieldKey}`} className="home-composer-record-row">
+                <label className="home-composer-form-field">
+                  {editorLabels.fieldName}
+                  <input
+                    value={fieldKey}
+                    onChange={(event) =>
+                      applyEditorUpdate(setter, (current) => {
+                        const next = [...current];
+                        const nextItem = { ...next[index] };
+                        const value = nextItem[fieldKey];
+                        delete nextItem[fieldKey];
+                        nextItem[event.target.value || fieldKey] = value;
+                        next[index] = nextItem;
+                        return next;
+                      })
+                    }
+                    className="home-composer-form-control"
+                  />
+                </label>
+                <label className="home-composer-form-field">
+                  {editorLabels.fieldValue}
+                  <input
+                    value={formatEditorValue(fieldValue)}
+                    onChange={(event) =>
+                      applyEditorUpdate(setter, (current) => {
+                        const next = [...current];
+                        next[index] = { ...next[index], [fieldKey]: coerceEditorValue(event.target.value) };
+                        return next;
+                      })
+                    }
+                    className="home-composer-form-control"
+                  />
+                </label>
+                <AdminButton
+                  type="button"
+                  variant="secondary"
+                  size="sm"
+                  onClick={() =>
+                    applyEditorUpdate(setter, (current) => {
+                      const next = [...current];
+                      const nextItem = { ...next[index] };
+                      delete nextItem[fieldKey];
+                      next[index] = nextItem;
+                      return next;
+                    })
+                  }
+                >
+                  {editorLabels.removeField}
+                </AdminButton>
+              </div>
+            ))}
+            <div className="home-composer-record-actions">
+              <AdminButton
+                type="button"
+                variant="secondary"
+                size="sm"
+                icon="plus"
+                onClick={() =>
+                  applyEditorUpdate(setter, (current) => {
+                    const next = [...current];
+                    const itemDraft = { ...next[index] };
+                    itemDraft[`field_${Object.keys(itemDraft).length + 1}`] = '';
+                    next[index] = itemDraft;
+                    return next;
+                  })
+                }
+              >
+                {editorLabels.addField}
+              </AdminButton>
+            </div>
+          </div>
+        )}
+      />
+    );
+  }
+
   return (
-    <AdminPage className="home-composer-stack">
+    <AdminPage className="home-composer-stack home-composer-builder-page">
       <AdminPageHeader
         title={t.pageTitle}
         description={t.pageDescription}
         icon="spark"
         eyebrow={t.eyebrow}
+        meta={
+          <div className="home-composer-header-meta">
+            <AdminBadge tone={bundle?.draft ? 'info' : 'neutral'} icon="workspace">
+              {locale.toUpperCase()}
+            </AdminBadge>
+            <AdminBadge tone={bundle?.draft ? 'ok' : 'neutral'} icon="info">
+              {`Draft ${bundle?.draft?.version ?? 'N/A'}`}
+            </AdminBadge>
+            <AdminBadge tone={bundle?.published ? 'ok' : 'neutral'} icon="success">
+              {`Published ${bundle?.published?.version ?? 'N/A'}`}
+            </AdminBadge>
+          </div>
+        }
         actions={
-          <div className="home-composer-toolbar">
+          <div className="home-composer-header-actions">
             <label className="home-composer-form-field home-composer-inline-field">
               {t.localeLabel}
               <select
@@ -1326,109 +1603,112 @@ export default function HomeComposerPage() {
                 <option value="th">TH</option>
               </select>
             </label>
-            {isAuthenticated ? (
-              <>
-                <AdminButton
-                  type="button"
-                  variant="secondary"
-                  icon="refresh"
-                  onClick={() => {
-                    if (!confirmDiscardChanges()) return;
-                    void loadBundle(locale);
-                  }}
-                  disabled={loading || saving || publishing}
-                >
-                  {loading ? t.refreshing : t.refresh}
-                </AdminButton>
-                <AdminButton type="button" variant="primary" icon="plus" onClick={() => void handleSaveDraft()} disabled={saveDisabled}>
-                  {saving ? t.saving : t.saveDraft}
-                </AdminButton>
-                <AdminButton type="button" variant="secondary" icon="upload" onClick={() => void handlePublish()} disabled={publishDisabled}>
-                  {publishing ? t.publishing : t.publish}
-                </AdminButton>
-                <AdminButton type="button" variant="secondary" icon="x" onClick={logout} disabled={saving || publishing}>
-                  {t.signOut}
-                </AdminButton>
-              </>
-            ) : null}
+            <Link className="admin-button admin-button--secondary" href={livePageHref} target="_blank" rel="noreferrer">
+              Open live page
+            </Link>
           </div>
         }
       />
 
-      <ActionCard
-        className="dashboard-controls"
-        title={isAuthenticated ? (authEmail || t.signedInFallback) : t.loginTitle}
-        description={isAuthenticated ? t.signedInDescription : t.loginSubtitle}
-        icon={isAuthenticated ? 'profile' : 'home'}
-        titleTag="h2"
-      >
-        {!isAuthenticated ? (
-          <form className="crm-login-form" method="post" onSubmit={(event) => void login(event)}>
-            <label className="field" htmlFor="home-composer-login-email">
-              <span>{t.adminEmail}</span>
-              <input
-                id="home-composer-login-email"
-                name="email"
-                type="email"
-                autoComplete="username"
-                required
-                value={loginEmail}
-                onChange={(event) => setLoginEmail(event.target.value)}
-              />
-            </label>
+      {!isAuthenticated ? (
+        <AdminAccessGate
+          isAuthenticated={false}
+          authTitle={t.loginTitle}
+          authDescription={t.loginSubtitle}
+          authContent={
+            <form className="crm-login-form" method="post" onSubmit={(event) => void login(event)}>
+              <label className="field" htmlFor="home-composer-login-email">
+                <span>{t.adminEmail}</span>
+                <input
+                  id="home-composer-login-email"
+                  name="email"
+                  type="email"
+                  autoComplete="username"
+                  required
+                  value={loginEmail}
+                  onChange={(event) => setLoginEmail(event.target.value)}
+                />
+              </label>
 
-            <label className="field" htmlFor="home-composer-login-password">
-              <span>{t.password}</span>
-              <input
-                id="home-composer-login-password"
-                name="password"
-                type="password"
-                autoComplete="current-password"
-                required
-                value={loginPassword}
-                onChange={(event) => setLoginPassword(event.target.value)}
-              />
-            </label>
+              <label className="field" htmlFor="home-composer-login-password">
+                <span>{t.password}</span>
+                <input
+                  id="home-composer-login-password"
+                  name="password"
+                  type="password"
+                  autoComplete="current-password"
+                  required
+                  value={loginPassword}
+                  onChange={(event) => setLoginPassword(event.target.value)}
+                />
+              </label>
 
-            {authError ? <div className="state-error">{authError}</div> : null}
+              {authError ? <div className="state-error">{authError}</div> : null}
 
-            <div className="card-actions">
-              <AdminButton variant="primary" icon="workspace" type="submit" disabled={authLoading}>
-                {authLoading ? t.signingIn : t.signIn}
-              </AdminButton>
-            </div>
-          </form>
-        ) : (
-          <div className="crm-session-panel" role="status" aria-live="polite">
-            <p className="locale-safe">{authEmail ? `${t.signedInAs} ${authEmail}` : t.signedInSessionActive}</p>
-          </div>
-        )}
-        {!isAuthenticated ? <div className="state-empty">{t.signInRequired}</div> : null}
-      </ActionCard>
+              <div className="card-actions">
+                <AdminButton variant="primary" icon="workspace" type="submit" disabled={authLoading}>
+                  {authLoading ? t.signingIn : t.signIn}
+                </AdminButton>
+              </div>
+              <div className="state-empty">{t.signInRequired}</div>
+            </form>
+          }
+        />
+      ) : (
+        <>
+          <AdminPrimaryActionBar
+            title={locale === 'th' ? 'พร้อมบันทึกหรือเผยแพร่หน้าแรกของภาษานี้' : 'Keep this locale homepage ready to save or publish'}
+            description={authEmail ? `${t.signedInAs} ${authEmail}` : t.signedInDescription}
+            mobileBottom
+            primaryAction={{
+              label: saving ? t.saving : t.saveDraft,
+              icon: 'plus',
+              onClick: () => void handleSaveDraft(),
+              disabled: saveDisabled,
+            }}
+            secondaryActions={[
+              {
+                label: publishing ? t.publishing : t.publish,
+                icon: 'upload',
+                onClick: () => void handlePublish(),
+                disabled: publishDisabled,
+              },
+              {
+                label: loading ? t.refreshing : t.refresh,
+                icon: 'refresh',
+                onClick: () => {
+                  if (!confirmDiscardChanges()) return;
+                  void loadBundle(locale);
+                },
+                disabled: loading || saving || publishing,
+              },
+              {
+                label: t.signOut,
+                icon: 'x',
+                onClick: logout,
+                disabled: saving || publishing,
+              },
+            ]}
+            meta={
+              <>
+                <AdminBadge tone={hasUnsavedChanges ? 'warn' : 'neutral'} icon="info">
+                  {hasUnsavedChanges ? t.unsavedChanges : (locale === 'th' ? 'ซิงก์ล่าสุดแล้ว' : 'Synced')}
+                </AdminBadge>
+                <AdminBadge tone={validation?.errors.length ? 'error' : 'ok'} icon={validation?.errors.length ? 'warning' : 'success'}>
+                  {validation?.errors.length
+                    ? (locale === 'th' ? `มี ${validation.errors.length} จุดที่ต้องแก้` : `${validation.errors.length} issues to fix`)
+                    : (locale === 'th' ? 'พร้อมตรวจทาน' : 'Ready to review')}
+                </AdminBadge>
+              </>
+            }
+          />
 
-      {isAuthenticated ? (
-        <AdminPageBody className="home-composer-stack">
+          <AdminSectionTabs tabs={tabItems} activeTab={activeTab} onChange={(key) => setActiveTab(key as BuilderTabKey)} />
+
+          <AdminPageBody className="home-composer-stack home-composer-tab-panel">
           {error && hasComposerBundle ? <div className="home-composer-banner home-composer-banner--error">{error}</div> : null}
           {notice ? <div className="home-composer-banner home-composer-banner--success">{notice}</div> : null}
-          {notice ? (
-            <div className="admin-workspace-success-handoff" role="status">
-              <strong>{t.successTitle}</strong>
-              <p className="locale-safe">{successBody}</p>
-              <div className="card-actions">
-                {successKey === 'publish' ? (
-                  <Link className="admin-button admin-button--secondary admin-button--sm" href={withAdminLocale('/admin/dashboard', locale)}>
-                    {t.openDashboard}
-                  </Link>
-                ) : null}
-                <Link className="admin-button admin-button--secondary admin-button--sm" href={withAdminLocale('/admin/layout', locale)}>
-                  {t.openLayout}
-                </Link>
-                <Link className="admin-button admin-button--secondary admin-button--sm" href={withAdminLocale('/admin/media', locale)}>
-                  {t.openMedia}
-                </Link>
-              </div>
-            </div>
-          ) : null}
+          {notice ? <div className="admin-workspace-success-handoff" role="status"><strong>{t.successTitle}</strong><p className="locale-safe">{successBody}</p></div> : null}
           {hasUnsavedChanges ? <div className="home-composer-banner home-composer-banner--warn"><strong>{t.unsavedChanges}</strong> {t.unsavedChangesDescription}</div> : null}
 
           {!loading && !hasComposerBundle ? (
@@ -1479,406 +1759,324 @@ export default function HomeComposerPage() {
           ) : null}
 
           {hasComposerBundle ? (
-          <div className="home-composer-split">
-          <section className="home-composer-stack">
-            <ActionCard
-              className="home-composer-card"
-              bodyClassName="home-composer-stack"
-              title={t.sectionControlsTitle}
-              description={t.sectionControlsDescription}
-              icon="settings"
-              titleTag="h2"
-            >
-              <div className="home-composer-section-order">
-                {(config.section_order || SECTION_KEYS).map((section, idx) => (
-                  <div key={section} className="home-composer-config-block home-composer-list-item">
-                    <label className="home-composer-toggle-label">
-                      <input
-                        type="checkbox"
-                        checked={(config.enabled_sections || []).includes(section)}
-                        onChange={(e) => updateSectionEnabled(section, e.target.checked)}
-                      />
-                      {sectionLabel(section)}
-                    </label>
-                    <div className="home-composer-button-group">
-                      <AdminButton type="button" variant="secondary" size="sm" onClick={() => moveSection(section, -1)} disabled={idx === 0}>
-                        {t.up}
-                      </AdminButton>
-                      <AdminButton type="button" variant="secondary" size="sm" onClick={() => moveSection(section, 1)} disabled={idx === (config.section_order || SECTION_KEYS).length - 1}>
-                        {t.down}
-                      </AdminButton>
+            <div className="home-composer-task-layout">
+              {activeTab === 'overview' ? (
+                <div className="home-composer-overview-grid">
+                  <ActionCard className="home-composer-card" bodyClassName="home-composer-stack" title={t.validationTitle} description={t.validationDescription} icon="warning" titleTag="h2">
+                    {validation && (validation.errors.length > 0 || validation.warnings.length > 0 || validation.media_warnings.length > 0) ? (
+                      <>
+                        {validation.errors.length > 0 ? <ul className="home-composer-validation-list home-composer-validation-list--error">{validation.errors.map((item, index) => <li key={`error-${index}`}>{item}</li>)}</ul> : null}
+                        {validation.warnings.length > 0 ? <ul className="home-composer-validation-list home-composer-validation-list--warn">{validation.warnings.map((item, index) => <li key={`warn-${index}`}>{item}</li>)}</ul> : null}
+                        {validation.media_warnings.length > 0 ? <ul className="home-composer-validation-list home-composer-validation-list--warn">{validation.media_warnings.map((item, index) => <li key={`media-${index}`}>{item.path} - {item.detail}</li>)}</ul> : null}
+                      </>
+                    ) : <div className="state-success">{locale === 'th' ? 'ยังไม่พบข้อผิดพลาดหรือคำเตือนสำหรับร่างนี้' : 'No draft validation issues are currently blocking review.'}</div>}
+                  </ActionCard>
+                  <ActionCard className="home-composer-card" bodyClassName="home-composer-stack" title={t.workspaceStatusTitle} description={t.workspaceStatusDescription} icon="info" titleTag="h2">
+                    <ul className="home-composer-status-list">
+                      <li>{t.pageKey}: {bundle?.page_key || 'home'}</li>
+                      <li>{t.localeLabel}: {bundle?.locale || locale}</li>
+                      <li>{t.draftVersion}: {bundle?.draft?.version ?? t.notAvailable}</li>
+                      <li>{t.publishedVersion}: {bundle?.published?.version ?? t.notAvailable}</li>
+                      <li>{t.publishedAt}: {prettyDate(bundle?.published?.published_at, locale, t)}</li>
+                    </ul>
+                  </ActionCard>
+                  <ActionCard className="home-composer-card" bodyClassName="home-composer-stack" title={t.sectionControlsTitle} description={t.sectionControlsDescription} icon="settings" titleTag="h2">
+                    <div className="home-composer-section-order">
+                      {(config.section_order || SECTION_KEYS).map((section, idx) => (
+                        <div key={section} className="home-composer-config-block home-composer-list-item">
+                          <label className="home-composer-toggle-label">
+                            <input type="checkbox" checked={(config.enabled_sections || []).includes(section)} onChange={(e) => updateSectionEnabled(section, e.target.checked)} />
+                            {sectionLabel(section)}
+                          </label>
+                          <div className="home-composer-button-group">
+                            <AdminButton type="button" variant="secondary" size="sm" onClick={() => moveSection(section, -1)} disabled={idx === 0}>{t.up}</AdminButton>
+                            <AdminButton type="button" variant="secondary" size="sm" onClick={() => moveSection(section, 1)} disabled={idx === (config.section_order || SECTION_KEYS).length - 1}>{t.down}</AdminButton>
+                          </div>
+                        </div>
+                      ))}
                     </div>
-                  </div>
-                ))}
-              </div>
-            </ActionCard>
-
-            <ActionCard
-              className="home-composer-card"
-              bodyClassName="home-composer-stack"
-              title={t.heroTitle}
-              description={t.heroDescription}
-              icon="home"
-              titleTag="h2"
-            >
-              <div className="home-composer-dual-grid">
-                <label className="home-composer-form-field">{t.heroEyebrowLabel}<input value={config.hero.eyebrow || ''} onChange={(e) => setConfig((prev) => ({ ...prev, hero: { ...prev.hero, eyebrow: e.target.value } }))} className="home-composer-form-control" /></label>
-                <label className="home-composer-form-field">{t.heading}<input value={config.hero.heading || ''} onChange={(e) => setConfig((prev) => ({ ...prev, hero: { ...prev.hero, heading: e.target.value } }))} className="home-composer-form-control" /></label>
-                <label className="home-composer-form-field">{t.subheading}<input value={config.hero.subheading || ''} onChange={(e) => setConfig((prev) => ({ ...prev, hero: { ...prev.hero, subheading: e.target.value } }))} className="home-composer-form-control" /></label>
-                <label className="home-composer-form-field">{t.primaryCtaLabel}<input value={config.hero.primary_cta_label || ''} onChange={(e) => setConfig((prev) => ({ ...prev, hero: { ...prev.hero, primary_cta_label: e.target.value } }))} className="home-composer-form-control" /></label>
-                <label className="home-composer-form-field">{t.primaryCtaUrl}<input value={config.hero.primary_cta_url || ''} onChange={(e) => setConfig((prev) => ({ ...prev, hero: { ...prev.hero, primary_cta_url: e.target.value } }))} className="home-composer-form-control" /></label>
-                <label className="home-composer-form-field">{t.secondaryCtaLabel}<input value={config.hero.secondary_cta_label || ''} onChange={(e) => setConfig((prev) => ({ ...prev, hero: { ...prev.hero, secondary_cta_label: e.target.value } }))} className="home-composer-form-control" /></label>
-                <label className="home-composer-form-field">{t.secondaryCtaUrl}<input value={config.hero.secondary_cta_url || ''} onChange={(e) => setConfig((prev) => ({ ...prev, hero: { ...prev.hero, secondary_cta_url: e.target.value } }))} className="home-composer-form-control" /></label>
-              </div>
-              <label className="home-composer-form-field">{t.heroImageLabel}
-                <div className="home-composer-inline-field">
-                  <input
-                    value={config.hero.hero_image || ''}
-                    onChange={(e) => updateHeroImage(e.target.value)}
-                    className="home-composer-form-control"
-                    aria-invalid={!!heroImageError}
-                    aria-describedby={heroImageError ? 'hero-image-error' : undefined}
-                  />
-                  <AdminButton type="button" variant="secondary" size="sm" aria-label={t.chooseHeroImageMedia} onClick={() => setHeroMediaModalOpen(true)}>
-                    {t.chooseMedia}
-                  </AdminButton>
-                </div>
-              </label>
-              {heroImageError ? (
-                <p id="hero-image-error" className="home-composer-banner home-composer-banner--error" role="alert">
-                  {heroImageError}
-                </p>
-              ) : null}
-              {heroMediaModalOpen ? (
-                <div
-                  className="home-composer-media-dialog"
-                  role="dialog"
-                  aria-modal="true"
-                  aria-label={t.heroImagePickerTitle}
-                >
-                  <div className="home-composer-dialog-head">
-                    <p className="home-composer-note">{t.heroImagePickerDescription}</p>
-                    <button ref={heroMediaCloseButtonRef} type="button" aria-label={t.closeHeroImagePicker} className="btn btn-secondary admin-btn-sm" onClick={() => setHeroMediaModalOpen(false)}>
-                      {t.close}
-                    </button>
-                  </div>
-                  <div className="home-composer-media-list">
-                    {mediaCandidates.length > 0 ? mediaCandidates.map((asset) => (
-                      <button
-                        key={asset.id}
-                        type="button"
-                        aria-label={`${t.selectHeroImage} ${asset.storage_path || asset.id}`}
-                        onClick={() => selectHeroMedia(asset.storage_path)}
-                        className="home-composer-media-option"
-                      >
-                        <div className="home-composer-code">{asset.storage_path}</div>
-                        <div className={`home-composer-media-status-badge ${mediaBadgeClass(asset)}`}>{formatMediaCompliance(asset)}</div>
-                      </button>
-                    )) : <div className="home-composer-note">{t.noMediaItems}</div>}
-                  </div>
+                  </ActionCard>
                 </div>
               ) : null}
-            </ActionCard>
 
-            <ActionCard
-              className="home-composer-card"
-              bodyClassName="home-composer-stack"
-              title={t.trustStripTitle}
-              description={t.trustStripDescription}
-              icon="success"
-              titleTag="h2"
-            >
-              <label className="home-composer-form-field">{t.trustItemsLabel}
-                <textarea value={trustItemsText} onChange={(e) => setTrustItemsText(e.target.value)} rows={4} className="home-composer-form-control" />
-              </label>
-            </ActionCard>
+              {activeTab === 'hero' ? (
+                <div className="home-composer-stack">
+                  <ActionCard className="home-composer-card" bodyClassName="home-composer-stack" title={t.heroTitle} description={t.heroDescription} icon="home" titleTag="h2">
+                    <div className="home-composer-dual-grid">
+                      <label className="home-composer-form-field">{t.heroEyebrowLabel}<input value={config.hero.eyebrow || ''} onChange={(e) => setConfig((prev) => ({ ...prev, hero: { ...prev.hero, eyebrow: e.target.value } }))} className="home-composer-form-control" /></label>
+                      <label className="home-composer-form-field">{t.heading}<input value={config.hero.heading || ''} onChange={(e) => setConfig((prev) => ({ ...prev, hero: { ...prev.hero, heading: e.target.value } }))} className="home-composer-form-control" /></label>
+                      <label className="home-composer-form-field">{t.subheading}<input value={config.hero.subheading || ''} onChange={(e) => setConfig((prev) => ({ ...prev, hero: { ...prev.hero, subheading: e.target.value } }))} className="home-composer-form-control" /></label>
+                      <label className="home-composer-form-field">{t.primaryCtaLabel}<input value={config.hero.primary_cta_label || ''} onChange={(e) => setConfig((prev) => ({ ...prev, hero: { ...prev.hero, primary_cta_label: e.target.value } }))} className="home-composer-form-control" /></label>
+                      <label className="home-composer-form-field">{t.primaryCtaUrl}<input value={config.hero.primary_cta_url || ''} onChange={(e) => setConfig((prev) => ({ ...prev, hero: { ...prev.hero, primary_cta_url: e.target.value } }))} className="home-composer-form-control" /></label>
+                      <label className="home-composer-form-field">{t.secondaryCtaLabel}<input value={config.hero.secondary_cta_label || ''} onChange={(e) => setConfig((prev) => ({ ...prev, hero: { ...prev.hero, secondary_cta_label: e.target.value } }))} className="home-composer-form-control" /></label>
+                      <label className="home-composer-form-field">{t.secondaryCtaUrl}<input value={config.hero.secondary_cta_url || ''} onChange={(e) => setConfig((prev) => ({ ...prev, hero: { ...prev.hero, secondary_cta_url: e.target.value } }))} className="home-composer-form-control" /></label>
+                    </div>
+                    <div className="home-composer-hero-media-panel admin-surface-muted">
+                      <div className="home-composer-hero-media-copy">
+                        <strong>{t.heroImageLabel}</strong>
+                        <p className="locale-safe">{config.hero.hero_image || t.noMediaItems}</p>
+                      </div>
+                      <div className="home-composer-hero-media-actions">
+                        <AdminButton type="button" variant="secondary" size="sm" icon="media" onClick={() => setHeroMediaModalOpen(true)}>
+                          {t.chooseMedia}
+                        </AdminButton>
+                      </div>
+                      {config.hero.hero_image ? (
+                        <Image
+                          className="home-composer-hero-media-preview"
+                          src={config.hero.hero_image}
+                          alt="Hero preview"
+                          width={1200}
+                          height={675}
+                          unoptimized
+                        />
+                      ) : null}
+                      {heroImageError ? <p id="hero-image-error" className="home-composer-banner home-composer-banner--error" role="alert">{heroImageError}</p> : null}
+                    </div>
+                  </ActionCard>
 
-            <ActionCard
-              className="home-composer-card"
-              bodyClassName="home-composer-stack"
-              title={t.pathSelectorTitle}
-              description={t.pathSelectorDescription}
-              icon="filter"
-              titleTag="h2"
-            >
-              <label className="home-composer-toggle-label">
-                <input type="checkbox" checked={Boolean(config.path_selector.enabled)} onChange={(e) => setConfig((prev) => ({ ...prev, path_selector: { ...prev.path_selector, enabled: e.target.checked } }))} />
-                {t.enabled}
-              </label>
-              <div className="home-composer-dual-grid">
-                <label className="home-composer-form-field">{t.heading}<input value={config.path_selector.heading || ''} onChange={(e) => setConfig((prev) => ({ ...prev, path_selector: { ...prev.path_selector, heading: e.target.value } }))} className="home-composer-form-control" /></label>
-                <label className="home-composer-form-field">{t.subcopy}<input value={config.path_selector.subcopy || ''} onChange={(e) => setConfig((prev) => ({ ...prev, path_selector: { ...prev.path_selector, subcopy: e.target.value } }))} className="home-composer-form-control" /></label>
-              </div>
-              {(config.path_selector.paths || []).map((path, idx) => (
-                <div key={path.key || idx} className="home-composer-config-block">
-                  <div className="home-composer-config-block-kicker">{pathKeyLabel(path.key)}</div>
-                  <div className="home-composer-triple-grid">
-                    <label className="home-composer-form-field">{t.label}<input value={path.label || ''} onChange={(e) => setConfig((prev) => {
-                      const nextPaths = [...(prev.path_selector.paths || [])];
-                      nextPaths[idx] = { ...nextPaths[idx], label: e.target.value };
-                      return { ...prev, path_selector: { ...prev.path_selector, paths: nextPaths } };
-                    })} className="home-composer-form-control" /></label>
-                    <label className="home-composer-form-field">{t.descriptionLabel}<input value={path.description || ''} onChange={(e) => setConfig((prev) => {
-                      const nextPaths = [...(prev.path_selector.paths || [])];
-                      nextPaths[idx] = { ...nextPaths[idx], description: e.target.value };
-                      return { ...prev, path_selector: { ...prev.path_selector, paths: nextPaths } };
-                    })} className="home-composer-form-control" /></label>
-                    <label className="home-composer-form-field">{t.url}<input value={path.url || ''} onChange={(e) => setConfig((prev) => {
-                      const nextPaths = [...(prev.path_selector.paths || [])];
-                      nextPaths[idx] = { ...nextPaths[idx], url: e.target.value };
-                      return { ...prev, path_selector: { ...prev.path_selector, paths: nextPaths } };
-                    })} className="home-composer-form-control" /></label>
-                  </div>
+                  <ActionCard className="home-composer-card" bodyClassName="home-composer-stack" title={t.trustStripTitle} description={t.trustStripDescription} icon="success" titleTag="h2">
+                    <AdminRepeaterEditor
+                      items={trustStripItems}
+                      addLabel={editorLabels.addItem}
+                      emptyTitle={editorLabels.emptyItem}
+                      emptyDescription={editorLabels.emptyFields}
+                      onAdd={() => updateTrustStripItems([...trustStripItems, { key: `trust-${trustStripItems.length + 1}`, text: '' }])}
+                      onRemove={(index) => updateTrustStripItems(trustStripItems.filter((_, itemIndex) => itemIndex !== index))}
+                      onMove={(index, direction) => {
+                        const next = [...trustStripItems];
+                        const targetIndex = index + direction;
+                        if (targetIndex < 0 || targetIndex >= next.length) return;
+                        [next[index], next[targetIndex]] = [next[targetIndex], next[index]];
+                        updateTrustStripItems(next);
+                      }}
+                      getKey={(item, index) => item.key || `trust-${index}`}
+                      getItemLabel={(_item, index) => `${t.trustStripTitle} ${index + 1}`}
+                      renderItem={(item, index) => (
+                        <div className="home-composer-dual-grid">
+                          <label className="home-composer-form-field">Key<input value={item.key || ''} onChange={(e) => updateTrustStripItems(trustStripItems.map((row, rowIndex) => rowIndex === index ? { ...row, key: e.target.value } : row))} className="home-composer-form-control" /></label>
+                          <label className="home-composer-form-field">{t.label}<input value={item.text || ''} onChange={(e) => updateTrustStripItems(trustStripItems.map((row, rowIndex) => rowIndex === index ? { ...row, text: e.target.value } : row))} className="home-composer-form-control" /></label>
+                        </div>
+                      )}
+                    />
+                  </ActionCard>
                 </div>
-              ))}
-            </ActionCard>
+              ) : null}
 
-            <ActionCard
-              className="home-composer-card"
-              bodyClassName="home-composer-stack"
-              title={t.featuredProjectsTitle}
-              description={t.featuredProjectsDescription}
-              icon="projects"
-              titleTag="h2"
-            >
-              <div className="home-composer-dual-grid">
-                <label className="home-composer-form-field">{t.mode}
-                  <select value={config.featured_projects.mode || 'auto'} onChange={(e) => setConfig((prev) => ({ ...prev, featured_projects: { ...prev.featured_projects, mode: e.target.value as 'manual' | 'auto' } }))} className="home-composer-form-control">
-                    <option value="auto">{t.auto}</option>
-                    <option value="manual">{t.manual}</option>
-                  </select>
-                </label>
-                <label className="home-composer-form-field">{t.fallbackRule}<input value={config.featured_projects.fallback_rule || ''} onChange={(e) => setConfig((prev) => ({ ...prev, featured_projects: { ...prev.featured_projects, fallback_rule: e.target.value } }))} className="home-composer-form-control" /></label>
-                <label className="home-composer-form-field">{t.heading}<input value={config.featured_projects.heading || ''} onChange={(e) => setConfig((prev) => ({ ...prev, featured_projects: { ...prev.featured_projects, heading: e.target.value } }))} className="home-composer-form-control" /></label>
-                <label className="home-composer-form-field">{t.subcopy}<input value={config.featured_projects.subcopy || ''} onChange={(e) => setConfig((prev) => ({ ...prev, featured_projects: { ...prev.featured_projects, subcopy: e.target.value } }))} className="home-composer-form-control" /></label>
-              </div>
-              <div className="home-composer-option-list">
-                {projectCandidates.map((item) => (
-                  <div key={item.id} className="home-composer-option">
-                    <input
-                      id={`featured-project-${item.id}`}
-                      type="checkbox"
-                      checked={selectedProjectIds.has(item.id)}
-                      onChange={() => toggleProjectSelection(item.id)}
-                      aria-label={`${t.selectProject} ${item.name || item.slug || item.id}`}
-                    />
-                    <label htmlFor={`featured-project-${item.id}`} className="home-composer-option-label">
-                      <span className="home-composer-option-title">{item.name || item.slug || item.id}</span>
-                      <span className="home-composer-option-meta">{formatCandidateProjectMeta(item)}</span>
-                    </label>
-                  </div>
-                ))}
-              </div>
-            </ActionCard>
-
-            <ActionCard
-              className="home-composer-card"
-              bodyClassName="home-composer-stack"
-              title={t.featuredPropertiesTitle}
-              description={t.featuredPropertiesDescription}
-              icon="properties"
-              titleTag="h2"
-            >
-              <div className="home-composer-dual-grid">
-                <label className="home-composer-form-field">{t.mode}
-                  <select value={config.featured_properties.mode || 'auto'} onChange={(e) => setConfig((prev) => ({ ...prev, featured_properties: { ...prev.featured_properties, mode: e.target.value as 'manual' | 'auto' } }))} className="home-composer-form-control">
-                    <option value="auto">{t.auto}</option>
-                    <option value="manual">{t.manual}</option>
-                  </select>
-                </label>
-                <label className="home-composer-form-field">{t.fallbackRule}<input value={config.featured_properties.fallback_rule || ''} onChange={(e) => setConfig((prev) => ({ ...prev, featured_properties: { ...prev.featured_properties, fallback_rule: e.target.value } }))} className="home-composer-form-control" /></label>
-                <label className="home-composer-form-field">{t.heading}<input value={config.featured_properties.heading || ''} onChange={(e) => setConfig((prev) => ({ ...prev, featured_properties: { ...prev.featured_properties, heading: e.target.value } }))} className="home-composer-form-control" /></label>
-                <label className="home-composer-form-field">{t.subcopy}<input value={config.featured_properties.subcopy || ''} onChange={(e) => setConfig((prev) => ({ ...prev, featured_properties: { ...prev.featured_properties, subcopy: e.target.value } }))} className="home-composer-form-control" /></label>
-              </div>
-              <div className="home-composer-option-list">
-                {propertyCandidates.map((item) => (
-                  <div key={item.id} className="home-composer-option">
-                    <input
-                      id={`featured-property-${item.id}`}
-                      type="checkbox"
-                      checked={selectedPropertyIds.has(item.id)}
-                      onChange={() => togglePropertySelection(item.id)}
-                      aria-label={`${t.selectProperty} ${item.title || item.source_id || item.id}`}
-                    />
-                    <label htmlFor={`featured-property-${item.id}`} className="home-composer-option-label">
-                      <span className="home-composer-option-title">{formatCandidatePropertyTitle(item)}</span>
-                      <span className="home-composer-option-meta">{formatCandidatePropertyMeta(item)}</span>
-                    </label>
-                  </div>
-                ))}
-              </div>
-            </ActionCard>
-
-            <ActionCard
-              className="home-composer-card"
-              bodyClassName="home-composer-stack"
-              title={t.whyPattayaTitle}
-              description={t.whyPattayaDescription}
-              icon="dashboard"
-              titleTag="h2"
-            >
-              <label className="home-composer-toggle-label">
-                <input type="checkbox" checked={Boolean(config.why_pattaya.enabled)} onChange={(e) => setConfig((prev) => ({ ...prev, why_pattaya: { ...prev.why_pattaya, enabled: e.target.checked } }))} />
-                {t.enabled}
-              </label>
-              <div className="home-composer-dual-grid">
-                <label className="home-composer-form-field">{t.heading}<input value={config.why_pattaya.heading || ''} onChange={(e) => setConfig((prev) => ({ ...prev, why_pattaya: { ...prev.why_pattaya, heading: e.target.value } }))} className="home-composer-form-control" /></label>
-                <label className="home-composer-form-field">{t.subcopy}<input value={config.why_pattaya.subcopy || ''} onChange={(e) => setConfig((prev) => ({ ...prev, why_pattaya: { ...prev.why_pattaya, subcopy: e.target.value } }))} className="home-composer-form-control" /></label>
-                <label className="home-composer-form-field">{t.primaryLabel}<input value={config.why_pattaya.primary_cta_label || ''} onChange={(e) => setConfig((prev) => ({ ...prev, why_pattaya: { ...prev.why_pattaya, primary_cta_label: e.target.value } }))} className="home-composer-form-control" /></label>
-                <label className="home-composer-form-field">{t.primaryUrl}<input value={config.why_pattaya.primary_cta_url || ''} onChange={(e) => setConfig((prev) => ({ ...prev, why_pattaya: { ...prev.why_pattaya, primary_cta_url: e.target.value } }))} className="home-composer-form-control" /></label>
-              </div>
-              <label className="home-composer-form-field">{t.whyPattayaMetricsJson}
-                <textarea rows={6} value={metricsText} onChange={(e) => setMetricsText(e.target.value)} className="home-composer-form-control home-composer-form-control--mono" />
-              </label>
-              <label className="home-composer-form-field">{t.whyPattayaNarrativesJson}
-                <textarea rows={6} value={whyPattayaNarrativesText} onChange={(e) => setWhyPattayaNarrativesText(e.target.value)} className="home-composer-form-control home-composer-form-control--mono" />
-              </label>
-            </ActionCard>
-
-            <ActionCard
-              className="home-composer-card"
-              bodyClassName="home-composer-stack"
-              title={t.proofTrustTitle}
-              description={t.proofTrustDescription}
-              icon="success"
-              titleTag="h2"
-            >
-              <label className="home-composer-toggle-label">
-                <input type="checkbox" checked={Boolean(config.proof_trust.enabled)} onChange={(e) => setConfig((prev) => ({ ...prev, proof_trust: { ...prev.proof_trust, enabled: e.target.checked } }))} />
-                {t.enabled}
-              </label>
-              <div className="home-composer-dual-grid">
-                <label className="home-composer-form-field">{t.heading}<input value={config.proof_trust.heading || ''} onChange={(e) => setConfig((prev) => ({ ...prev, proof_trust: { ...prev.proof_trust, heading: e.target.value } }))} className="home-composer-form-control" /></label>
-                <label className="home-composer-form-field">{t.subcopy}<input value={config.proof_trust.subcopy || ''} onChange={(e) => setConfig((prev) => ({ ...prev, proof_trust: { ...prev.proof_trust, subcopy: e.target.value } }))} className="home-composer-form-control" /></label>
-                <label className="home-composer-form-field">{t.primaryLabel}<input value={config.proof_trust.primary_cta_label || ''} onChange={(e) => setConfig((prev) => ({ ...prev, proof_trust: { ...prev.proof_trust, primary_cta_label: e.target.value } }))} className="home-composer-form-control" /></label>
-                <label className="home-composer-form-field">{t.primaryUrl}<input value={config.proof_trust.primary_cta_url || ''} onChange={(e) => setConfig((prev) => ({ ...prev, proof_trust: { ...prev.proof_trust, primary_cta_url: e.target.value } }))} className="home-composer-form-control" /></label>
-                <label className="home-composer-form-field">{t.secondaryLabel}<input value={config.proof_trust.secondary_cta_label || ''} onChange={(e) => setConfig((prev) => ({ ...prev, proof_trust: { ...prev.proof_trust, secondary_cta_label: e.target.value } }))} className="home-composer-form-control" /></label>
-                <label className="home-composer-form-field">{t.secondaryUrl}<input value={config.proof_trust.secondary_cta_url || ''} onChange={(e) => setConfig((prev) => ({ ...prev, proof_trust: { ...prev.proof_trust, secondary_cta_url: e.target.value } }))} className="home-composer-form-control" /></label>
-              </div>
-              <label className="home-composer-form-field">{t.trustProofsJson}
-                <textarea rows={6} value={trustProofsText} onChange={(e) => setTrustProofsText(e.target.value)} className="home-composer-form-control home-composer-form-control--mono" />
-              </label>
-              <label className="home-composer-form-field">{t.processTimelineJson}
-                <textarea rows={6} value={processTimelineText} onChange={(e) => setProcessTimelineText(e.target.value)} className="home-composer-form-control home-composer-form-control--mono" />
-              </label>
-            </ActionCard>
-
-            <ActionCard
-              className="home-composer-card"
-              bodyClassName="home-composer-stack"
-              title={t.supportingEditorTitle}
-              description={t.supportingEditorDescription}
-              icon="dashboard"
-              titleTag="h2"
-            >
-              {(['market_insights', 'reviews', 'videos'] as const).map((section) => (
-                <div key={section} className="home-composer-config-block">
-                  <div className="home-composer-config-block-kicker">{sectionLabel(section)}</div>
+              {activeTab === 'journeys' ? (
+                <ActionCard className="home-composer-card" bodyClassName="home-composer-stack" title={t.pathSelectorTitle} description={t.pathSelectorDescription} icon="filter" titleTag="h2">
                   <label className="home-composer-toggle-label">
-                    <input type="checkbox" checked={Boolean(config[section].enabled)} onChange={(e) => setConfig((prev) => ({ ...prev, [section]: { ...prev[section], enabled: e.target.checked } }))} />
+                    <input type="checkbox" checked={Boolean(config.path_selector.enabled)} onChange={(e) => setConfig((prev) => ({ ...prev, path_selector: { ...prev.path_selector, enabled: e.target.checked } }))} />
                     {t.enabled}
                   </label>
-                  <div className="home-composer-triple-grid">
-                    <label className="home-composer-form-field">{t.heading}<input value={config[section].heading || ''} onChange={(e) => setConfig((prev) => ({ ...prev, [section]: { ...prev[section], heading: e.target.value } }))} className="home-composer-form-control" /></label>
-                    <label className="home-composer-form-field">{t.subcopy}<input value={config[section].subcopy || ''} onChange={(e) => setConfig((prev) => ({ ...prev, [section]: { ...prev[section], subcopy: e.target.value } }))} className="home-composer-form-control" /></label>
-                    <label className="home-composer-form-field">{t.mode}<input value={config[section].mode || ''} onChange={(e) => setConfig((prev) => ({ ...prev, [section]: { ...prev[section], mode: e.target.value } }))} className="home-composer-form-control" /></label>
+                  <div className="home-composer-dual-grid">
+                    <label className="home-composer-form-field">{t.heading}<input value={config.path_selector.heading || ''} onChange={(e) => setConfig((prev) => ({ ...prev, path_selector: { ...prev.path_selector, heading: e.target.value } }))} className="home-composer-form-control" /></label>
+                    <label className="home-composer-form-field">{t.subcopy}<input value={config.path_selector.subcopy || ''} onChange={(e) => setConfig((prev) => ({ ...prev, path_selector: { ...prev.path_selector, subcopy: e.target.value } }))} className="home-composer-form-control" /></label>
                   </div>
-                  {section === 'market_insights' ? (
-                    <label className="home-composer-form-field">{t.supportingCardsJson}
-                      <textarea rows={6} value={marketInsightsCardsText} onChange={(e) => setMarketInsightsCardsText(e.target.value)} className="home-composer-form-control home-composer-form-control--mono" />
-                    </label>
-                  ) : null}
-                  {section === 'reviews' ? (
-                    <label className="home-composer-form-field">{t.reviewItemsJson}
-                      <textarea rows={6} value={reviewItemsText} onChange={(e) => setReviewItemsText(e.target.value)} className="home-composer-form-control home-composer-form-control--mono" />
-                    </label>
-                  ) : null}
-                  {section === 'videos' ? (
-                    <label className="home-composer-form-field">{t.videoItemsJson}
-                      <textarea rows={6} value={videoItemsText} onChange={(e) => setVideoItemsText(e.target.value)} className="home-composer-form-control home-composer-form-control--mono" />
-                    </label>
-                  ) : null}
-                </div>
-              ))}
-              <div className="home-composer-config-block">
-                <div className="home-composer-config-block-kicker">{sectionLabel('team_cta')}</div>
-                <label className="home-composer-toggle-label">
-                  <input type="checkbox" checked={Boolean(config.team_cta.enabled)} onChange={(e) => setConfig((prev) => ({ ...prev, team_cta: { ...prev.team_cta, enabled: e.target.checked } }))} />
-                  {t.enabled}
-                </label>
-                <div className="home-composer-dual-grid">
-                  <label className="home-composer-form-field">{t.eyebrowLabel}<input value={config.team_cta.eyebrow || ''} onChange={(e) => setConfig((prev) => ({ ...prev, team_cta: { ...prev.team_cta, eyebrow: e.target.value } }))} className="home-composer-form-control" /></label>
-                  <label className="home-composer-form-field">{t.heading}<input value={config.team_cta.heading || ''} onChange={(e) => setConfig((prev) => ({ ...prev, team_cta: { ...prev.team_cta, heading: e.target.value } }))} className="home-composer-form-control" /></label>
-                  <label className="home-composer-form-field">{t.subheading}<input value={config.team_cta.subheading || ''} onChange={(e) => setConfig((prev) => ({ ...prev, team_cta: { ...prev.team_cta, subheading: e.target.value } }))} className="home-composer-form-control" /></label>
-                  <label className="home-composer-form-field">{t.trustNote}<input value={config.team_cta.trust_note || ''} onChange={(e) => setConfig((prev) => ({ ...prev, team_cta: { ...prev.team_cta, trust_note: e.target.value } }))} className="home-composer-form-control" /></label>
-                  <label className="home-composer-form-field">{t.primaryLabel}<input value={config.team_cta.primary_cta_label || ''} onChange={(e) => setConfig((prev) => ({ ...prev, team_cta: { ...prev.team_cta, primary_cta_label: e.target.value } }))} className="home-composer-form-control" /></label>
-                  <label className="home-composer-form-field">{t.primaryUrl}<input value={config.team_cta.primary_cta_url || ''} onChange={(e) => setConfig((prev) => ({ ...prev, team_cta: { ...prev.team_cta, primary_cta_url: e.target.value } }))} className="home-composer-form-control" /></label>
-                  <label className="home-composer-form-field">{t.secondaryLabel}<input value={config.team_cta.secondary_cta_label || ''} onChange={(e) => setConfig((prev) => ({ ...prev, team_cta: { ...prev.team_cta, secondary_cta_label: e.target.value } }))} className="home-composer-form-control" /></label>
-                  <label className="home-composer-form-field">{t.secondaryUrl}<input value={config.team_cta.secondary_cta_url || ''} onChange={(e) => setConfig((prev) => ({ ...prev, team_cta: { ...prev.team_cta, secondary_cta_url: e.target.value } }))} className="home-composer-form-control" /></label>
-                </div>
-              </div>
-              <div className="home-composer-config-block">
-                <div className="home-composer-config-block-kicker">{sectionLabel('bottom_cta')}</div>
-                <label className="home-composer-toggle-label">
-                  <input type="checkbox" checked={Boolean(config.bottom_cta.enabled)} onChange={(e) => setConfig((prev) => ({ ...prev, bottom_cta: { ...prev.bottom_cta, enabled: e.target.checked } }))} />
-                  {t.enabled}
-                </label>
-                <div className="home-composer-dual-grid">
-                  <label className="home-composer-form-field">{t.heading}<input value={config.bottom_cta.heading || ''} onChange={(e) => setConfig((prev) => ({ ...prev, bottom_cta: { ...prev.bottom_cta, heading: e.target.value } }))} className="home-composer-form-control" /></label>
-                  <label className="home-composer-form-field">{t.subheading}<input value={config.bottom_cta.subheading || ''} onChange={(e) => setConfig((prev) => ({ ...prev, bottom_cta: { ...prev.bottom_cta, subheading: e.target.value } }))} className="home-composer-form-control" /></label>
-                  <label className="home-composer-form-field">{t.trustNote}<input value={config.bottom_cta.trust_note || ''} onChange={(e) => setConfig((prev) => ({ ...prev, bottom_cta: { ...prev.bottom_cta, trust_note: e.target.value } }))} className="home-composer-form-control" /></label>
-                  <label className="home-composer-form-field">{t.formHeadingLabel}<input value={config.bottom_cta.form_heading || ''} onChange={(e) => setConfig((prev) => ({ ...prev, bottom_cta: { ...prev.bottom_cta, form_heading: e.target.value } }))} className="home-composer-form-control" /></label>
-                  <label className="home-composer-form-field">{t.formBodyLabel}<input value={config.bottom_cta.form_body || ''} onChange={(e) => setConfig((prev) => ({ ...prev, bottom_cta: { ...prev.bottom_cta, form_body: e.target.value } }))} className="home-composer-form-control" /></label>
-                  <label className="home-composer-form-field">{t.primaryLabel}<input value={config.bottom_cta.primary_cta_label || ''} onChange={(e) => setConfig((prev) => ({ ...prev, bottom_cta: { ...prev.bottom_cta, primary_cta_label: e.target.value } }))} className="home-composer-form-control" /></label>
-                  <label className="home-composer-form-field">{t.primaryUrl}<input value={config.bottom_cta.primary_cta_url || ''} onChange={(e) => setConfig((prev) => ({ ...prev, bottom_cta: { ...prev.bottom_cta, primary_cta_url: e.target.value } }))} className="home-composer-form-control" /></label>
-                  <label className="home-composer-form-field">{t.secondaryLabel}<input value={config.bottom_cta.secondary_cta_label || ''} onChange={(e) => setConfig((prev) => ({ ...prev, bottom_cta: { ...prev.bottom_cta, secondary_cta_label: e.target.value } }))} className="home-composer-form-control" /></label>
-                  <label className="home-composer-form-field">{t.secondaryUrl}<input value={config.bottom_cta.secondary_cta_url || ''} onChange={(e) => setConfig((prev) => ({ ...prev, bottom_cta: { ...prev.bottom_cta, secondary_cta_url: e.target.value } }))} className="home-composer-form-control" /></label>
-                </div>
-              </div>
-            </ActionCard>
-          </section>
+                  <AdminRepeaterEditor
+                    items={config.path_selector.paths || []}
+                    addLabel={editorLabels.addItem}
+                    emptyTitle={editorLabels.emptyItem}
+                    emptyDescription={editorLabels.emptyFields}
+                    onAdd={addPathItem}
+                    onRemove={removePathItem}
+                    onMove={movePathItem}
+                    getKey={(item, index) => item.key || `path-${index}`}
+                    getItemLabel={(item) => pathKeyLabel(item.key || 'path')}
+                    renderItem={(item, index) => (
+                      <div className="home-composer-triple-grid">
+                        <label className="home-composer-form-field">Key<input value={item.key || ''} onChange={(e) => setConfig((prev) => {
+                          const nextPaths = [...(prev.path_selector.paths || [])];
+                          nextPaths[index] = { ...nextPaths[index], key: e.target.value };
+                          return { ...prev, path_selector: { ...prev.path_selector, paths: nextPaths } };
+                        })} className="home-composer-form-control" /></label>
+                        <label className="home-composer-form-field">{t.label}<input value={item.label || ''} onChange={(e) => updatePathItem(index, 'label', e.target.value)} className="home-composer-form-control" /></label>
+                        <label className="home-composer-form-field">{t.descriptionLabel}<input value={item.description || ''} onChange={(e) => updatePathItem(index, 'description', e.target.value)} className="home-composer-form-control" /></label>
+                        <label className="home-composer-form-field home-composer-record-row--wide">{t.url}<input value={item.url || ''} onChange={(e) => updatePathItem(index, 'url', e.target.value)} className="home-composer-form-control" /></label>
+                      </div>
+                    )}
+                  />
+                </ActionCard>
+              ) : null}
 
-          <aside className="home-composer-stack home-composer-stack--aside">
-            <LogCard
-              className="home-composer-card"
-              bodyClassName="home-composer-stack"
-              title={t.mediaPickerTitle}
-              description={t.mediaPickerDescription}
-              icon="media"
-              titleTag="h2"
-            >
-              <input value={candidateSearch} onChange={(e) => setCandidateSearch(e.target.value)} placeholder={t.searchPlaceholder} className="home-composer-search-input" />
-              <div className="home-composer-search-results">
-                {mediaCandidates.length > 0 ? mediaCandidates.map((asset) => (
-                  <button key={asset.id} type="button" onClick={() => selectHeroMedia(asset.storage_path)} className="home-composer-media-option">
-                    <div className="home-composer-code">{asset.storage_path}</div>
-                    <div className={`home-composer-media-status-badge ${mediaBadgeClass(asset)}`}>{formatMediaCompliance(asset)}</div>
-                  </button>
-                )) : <div className="state-empty">{t.mediaCandidatesEmpty}</div>}
-              </div>
-            </LogCard>
+              {activeTab === 'featured' ? (
+                <div className="home-composer-stack">
+                  <ActionCard className="home-composer-card" bodyClassName="home-composer-stack" title={t.featuredProjectsTitle} description={t.featuredProjectsDescription} icon="projects" titleTag="h2">
+                    <div className="home-composer-dual-grid">
+                      <label className="home-composer-form-field">{t.mode}<select value={config.featured_projects.mode || 'auto'} onChange={(e) => setConfig((prev) => ({ ...prev, featured_projects: { ...prev.featured_projects, mode: e.target.value as 'manual' | 'auto' } }))} className="home-composer-form-control"><option value="auto">{t.auto}</option><option value="manual">{t.manual}</option></select></label>
+                      <label className="home-composer-form-field">{t.fallbackRule}<input value={config.featured_projects.fallback_rule || ''} onChange={(e) => setConfig((prev) => ({ ...prev, featured_projects: { ...prev.featured_projects, fallback_rule: e.target.value } }))} className="home-composer-form-control" /></label>
+                      <label className="home-composer-form-field">{t.heading}<input value={config.featured_projects.heading || ''} onChange={(e) => setConfig((prev) => ({ ...prev, featured_projects: { ...prev.featured_projects, heading: e.target.value } }))} className="home-composer-form-control" /></label>
+                      <label className="home-composer-form-field">{t.subcopy}<input value={config.featured_projects.subcopy || ''} onChange={(e) => setConfig((prev) => ({ ...prev, featured_projects: { ...prev.featured_projects, subcopy: e.target.value } }))} className="home-composer-form-control" /></label>
+                    </div>
+                    <div className="home-composer-selection-summary">
+                      <div>
+                        <strong>{editorLabels.selectedCount}</strong>
+                        <div className="home-composer-selection-chips">{selectedProjectSummary.length > 0 ? selectedProjectSummary.map((item) => <span key={item.id} className="crm-chip crm-chip-muted">{item.name || item.slug || item.id}</span>) : <span className="crm-chip crm-chip-muted">{t.notAvailable}</span>}</div>
+                      </div>
+                      <AdminButton type="button" variant="secondary" icon="search" onClick={() => setProjectPickerOpen(true)}>{editorLabels.chooseItems}</AdminButton>
+                    </div>
+                  </ActionCard>
 
-            <LogCard
-              className="home-composer-card"
-              bodyClassName="home-composer-stack home-composer-status-card"
-              title={t.composerStatusTitle}
-              description={t.composerStatusDescription}
-              icon="info"
-              titleTag="h2"
-            >
-              <ul className="home-composer-status-list">
-                <li>{t.pageKey}: {bundle?.page_key || 'home'}</li>
-                <li>{t.localeLabel}: {bundle?.locale || locale}</li>
-                <li>{t.draftVersion}: {bundle?.draft?.version ?? t.notAvailable}</li>
-                <li>{t.publishedVersion}: {bundle?.published?.version ?? t.notAvailable}</li>
-                <li>{t.publishedAt}: {prettyDate(bundle?.published?.published_at, locale, t)}</li>
-              </ul>
-            </LogCard>
-          </aside>
-        </div>
+                  <ActionCard className="home-composer-card" bodyClassName="home-composer-stack" title={t.featuredPropertiesTitle} description={t.featuredPropertiesDescription} icon="properties" titleTag="h2">
+                    <div className="home-composer-dual-grid">
+                      <label className="home-composer-form-field">{t.mode}<select value={config.featured_properties.mode || 'auto'} onChange={(e) => setConfig((prev) => ({ ...prev, featured_properties: { ...prev.featured_properties, mode: e.target.value as 'manual' | 'auto' } }))} className="home-composer-form-control"><option value="auto">{t.auto}</option><option value="manual">{t.manual}</option></select></label>
+                      <label className="home-composer-form-field">{t.fallbackRule}<input value={config.featured_properties.fallback_rule || ''} onChange={(e) => setConfig((prev) => ({ ...prev, featured_properties: { ...prev.featured_properties, fallback_rule: e.target.value } }))} className="home-composer-form-control" /></label>
+                      <label className="home-composer-form-field">{t.heading}<input value={config.featured_properties.heading || ''} onChange={(e) => setConfig((prev) => ({ ...prev, featured_properties: { ...prev.featured_properties, heading: e.target.value } }))} className="home-composer-form-control" /></label>
+                      <label className="home-composer-form-field">{t.subcopy}<input value={config.featured_properties.subcopy || ''} onChange={(e) => setConfig((prev) => ({ ...prev, featured_properties: { ...prev.featured_properties, subcopy: e.target.value } }))} className="home-composer-form-control" /></label>
+                    </div>
+                    <div className="home-composer-selection-summary">
+                      <div>
+                        <strong>{editorLabels.selectedCount}</strong>
+                        <div className="home-composer-selection-chips">{selectedPropertySummary.length > 0 ? selectedPropertySummary.map((item) => <span key={item.id} className="crm-chip crm-chip-muted">{formatCandidatePropertyTitle(item)}</span>) : <span className="crm-chip crm-chip-muted">{t.notAvailable}</span>}</div>
+                      </div>
+                      <AdminButton type="button" variant="secondary" icon="search" onClick={() => setPropertyPickerOpen(true)}>{editorLabels.chooseItems}</AdminButton>
+                    </div>
+                  </ActionCard>
+                </div>
+              ) : null}
+
+              {activeTab === 'market-story' ? (
+                <div className="home-composer-stack">
+                  <ActionCard className="home-composer-card" bodyClassName="home-composer-stack" title={t.whyPattayaTitle} description={t.whyPattayaDescription} icon="dashboard" titleTag="h2">
+                    <label className="home-composer-toggle-label"><input type="checkbox" checked={Boolean(config.why_pattaya.enabled)} onChange={(e) => setConfig((prev) => ({ ...prev, why_pattaya: { ...prev.why_pattaya, enabled: e.target.checked } }))} />{t.enabled}</label>
+                    <div className="home-composer-dual-grid">
+                      <label className="home-composer-form-field">{t.heading}<input value={config.why_pattaya.heading || ''} onChange={(e) => setConfig((prev) => ({ ...prev, why_pattaya: { ...prev.why_pattaya, heading: e.target.value } }))} className="home-composer-form-control" /></label>
+                      <label className="home-composer-form-field">{t.subcopy}<input value={config.why_pattaya.subcopy || ''} onChange={(e) => setConfig((prev) => ({ ...prev, why_pattaya: { ...prev.why_pattaya, subcopy: e.target.value } }))} className="home-composer-form-control" /></label>
+                      <label className="home-composer-form-field">{t.primaryLabel}<input value={config.why_pattaya.primary_cta_label || ''} onChange={(e) => setConfig((prev) => ({ ...prev, why_pattaya: { ...prev.why_pattaya, primary_cta_label: e.target.value } }))} className="home-composer-form-control" /></label>
+                      <label className="home-composer-form-field">{t.primaryUrl}<input value={config.why_pattaya.primary_cta_url || ''} onChange={(e) => setConfig((prev) => ({ ...prev, why_pattaya: { ...prev.why_pattaya, primary_cta_url: e.target.value } }))} className="home-composer-form-control" /></label>
+                    </div>
+                    {renderObjectRepeater(t.whyPattayaMetricsJson, metricsItems, setMetricsText)}
+                    {renderObjectRepeater(t.whyPattayaNarrativesJson, whyPattayaNarrativesItems, setWhyPattayaNarrativesText)}
+                  </ActionCard>
+                  <ActionCard className="home-composer-card" bodyClassName="home-composer-stack" title={t.proofTrustTitle} description={t.proofTrustDescription} icon="success" titleTag="h2">
+                    <label className="home-composer-toggle-label"><input type="checkbox" checked={Boolean(config.proof_trust.enabled)} onChange={(e) => setConfig((prev) => ({ ...prev, proof_trust: { ...prev.proof_trust, enabled: e.target.checked } }))} />{t.enabled}</label>
+                    <div className="home-composer-dual-grid">
+                      <label className="home-composer-form-field">{t.heading}<input value={config.proof_trust.heading || ''} onChange={(e) => setConfig((prev) => ({ ...prev, proof_trust: { ...prev.proof_trust, heading: e.target.value } }))} className="home-composer-form-control" /></label>
+                      <label className="home-composer-form-field">{t.subcopy}<input value={config.proof_trust.subcopy || ''} onChange={(e) => setConfig((prev) => ({ ...prev, proof_trust: { ...prev.proof_trust, subcopy: e.target.value } }))} className="home-composer-form-control" /></label>
+                      <label className="home-composer-form-field">{t.primaryLabel}<input value={config.proof_trust.primary_cta_label || ''} onChange={(e) => setConfig((prev) => ({ ...prev, proof_trust: { ...prev.proof_trust, primary_cta_label: e.target.value } }))} className="home-composer-form-control" /></label>
+                      <label className="home-composer-form-field">{t.primaryUrl}<input value={config.proof_trust.primary_cta_url || ''} onChange={(e) => setConfig((prev) => ({ ...prev, proof_trust: { ...prev.proof_trust, primary_cta_url: e.target.value } }))} className="home-composer-form-control" /></label>
+                      <label className="home-composer-form-field">{t.secondaryLabel}<input value={config.proof_trust.secondary_cta_label || ''} onChange={(e) => setConfig((prev) => ({ ...prev, proof_trust: { ...prev.proof_trust, secondary_cta_label: e.target.value } }))} className="home-composer-form-control" /></label>
+                      <label className="home-composer-form-field">{t.secondaryUrl}<input value={config.proof_trust.secondary_cta_url || ''} onChange={(e) => setConfig((prev) => ({ ...prev, proof_trust: { ...prev.proof_trust, secondary_cta_url: e.target.value } }))} className="home-composer-form-control" /></label>
+                    </div>
+                    {renderObjectRepeater(t.trustProofsJson, trustProofItems, setTrustProofsText)}
+                    {renderObjectRepeater(t.processTimelineJson, processTimelineItems, setProcessTimelineText)}
+                  </ActionCard>
+                  <ActionCard className="home-composer-card" bodyClassName="home-composer-stack" title={sectionLabel('market_insights')} description={t.supportingEditorDescription} icon="dashboard" titleTag="h2">
+                    <label className="home-composer-toggle-label"><input type="checkbox" checked={Boolean(config.market_insights.enabled)} onChange={(e) => setConfig((prev) => ({ ...prev, market_insights: { ...prev.market_insights, enabled: e.target.checked } }))} />{t.enabled}</label>
+                    <div className="home-composer-triple-grid">
+                      <label className="home-composer-form-field">{t.heading}<input value={config.market_insights.heading || ''} onChange={(e) => setConfig((prev) => ({ ...prev, market_insights: { ...prev.market_insights, heading: e.target.value } }))} className="home-composer-form-control" /></label>
+                      <label className="home-composer-form-field">{t.subcopy}<input value={config.market_insights.subcopy || ''} onChange={(e) => setConfig((prev) => ({ ...prev, market_insights: { ...prev.market_insights, subcopy: e.target.value } }))} className="home-composer-form-control" /></label>
+                      <label className="home-composer-form-field">{t.mode}<input value={config.market_insights.mode || ''} onChange={(e) => setConfig((prev) => ({ ...prev, market_insights: { ...prev.market_insights, mode: e.target.value } }))} className="home-composer-form-control" /></label>
+                    </div>
+                    {renderObjectRepeater(t.supportingCardsJson, marketInsightItems, setMarketInsightsCardsText)}
+                  </ActionCard>
+                </div>
+              ) : null}
+
+              {activeTab === 'social-proof' ? (
+                <div className="home-composer-stack">
+                  <ActionCard className="home-composer-card" bodyClassName="home-composer-stack" title={sectionLabel('reviews')} description={t.supportingSectionsDescription} icon="testimonials" titleTag="h2">
+                    <label className="home-composer-toggle-label"><input type="checkbox" checked={Boolean(config.reviews.enabled)} onChange={(e) => setConfig((prev) => ({ ...prev, reviews: { ...prev.reviews, enabled: e.target.checked } }))} />{t.enabled}</label>
+                    <div className="home-composer-triple-grid">
+                      <label className="home-composer-form-field">{t.heading}<input value={config.reviews.heading || ''} onChange={(e) => setConfig((prev) => ({ ...prev, reviews: { ...prev.reviews, heading: e.target.value } }))} className="home-composer-form-control" /></label>
+                      <label className="home-composer-form-field">{t.subcopy}<input value={config.reviews.subcopy || ''} onChange={(e) => setConfig((prev) => ({ ...prev, reviews: { ...prev.reviews, subcopy: e.target.value } }))} className="home-composer-form-control" /></label>
+                      <label className="home-composer-form-field">{t.mode}<input value={config.reviews.mode || ''} onChange={(e) => setConfig((prev) => ({ ...prev, reviews: { ...prev.reviews, mode: e.target.value } }))} className="home-composer-form-control" /></label>
+                    </div>
+                    {renderObjectRepeater(t.reviewItemsJson, reviewItems, setReviewItemsText)}
+                  </ActionCard>
+                  <ActionCard className="home-composer-card" bodyClassName="home-composer-stack" title={sectionLabel('videos')} description={t.supportingSectionsDescription} icon="videos" titleTag="h2">
+                    <label className="home-composer-toggle-label"><input type="checkbox" checked={Boolean(config.videos.enabled)} onChange={(e) => setConfig((prev) => ({ ...prev, videos: { ...prev.videos, enabled: e.target.checked } }))} />{t.enabled}</label>
+                    <div className="home-composer-triple-grid">
+                      <label className="home-composer-form-field">{t.heading}<input value={config.videos.heading || ''} onChange={(e) => setConfig((prev) => ({ ...prev, videos: { ...prev.videos, heading: e.target.value } }))} className="home-composer-form-control" /></label>
+                      <label className="home-composer-form-field">{t.subcopy}<input value={config.videos.subcopy || ''} onChange={(e) => setConfig((prev) => ({ ...prev, videos: { ...prev.videos, subcopy: e.target.value } }))} className="home-composer-form-control" /></label>
+                      <label className="home-composer-form-field">{t.mode}<input value={config.videos.mode || ''} onChange={(e) => setConfig((prev) => ({ ...prev, videos: { ...prev.videos, mode: e.target.value } }))} className="home-composer-form-control" /></label>
+                    </div>
+                    {renderObjectRepeater(t.videoItemsJson, videoItems, setVideoItemsText)}
+                  </ActionCard>
+                </div>
+              ) : null}
+
+              {activeTab === 'conversion' ? (
+                <div className="home-composer-stack">
+                  <ActionCard className="home-composer-card" bodyClassName="home-composer-stack" title={t.teamCtaTitle} description={t.teamCtaDescription} icon="message" titleTag="h2">
+                    <label className="home-composer-toggle-label"><input type="checkbox" checked={Boolean(config.team_cta.enabled)} onChange={(e) => setConfig((prev) => ({ ...prev, team_cta: { ...prev.team_cta, enabled: e.target.checked } }))} />{t.enabled}</label>
+                    <div className="home-composer-dual-grid">
+                      <label className="home-composer-form-field">{t.eyebrowLabel}<input value={config.team_cta.eyebrow || ''} onChange={(e) => setConfig((prev) => ({ ...prev, team_cta: { ...prev.team_cta, eyebrow: e.target.value } }))} className="home-composer-form-control" /></label>
+                      <label className="home-composer-form-field">{t.heading}<input value={config.team_cta.heading || ''} onChange={(e) => setConfig((prev) => ({ ...prev, team_cta: { ...prev.team_cta, heading: e.target.value } }))} className="home-composer-form-control" /></label>
+                      <label className="home-composer-form-field">{t.subheading}<input value={config.team_cta.subheading || ''} onChange={(e) => setConfig((prev) => ({ ...prev, team_cta: { ...prev.team_cta, subheading: e.target.value } }))} className="home-composer-form-control" /></label>
+                      <label className="home-composer-form-field">{t.trustNote}<input value={config.team_cta.trust_note || ''} onChange={(e) => setConfig((prev) => ({ ...prev, team_cta: { ...prev.team_cta, trust_note: e.target.value } }))} className="home-composer-form-control" /></label>
+                      <label className="home-composer-form-field">{t.primaryLabel}<input value={config.team_cta.primary_cta_label || ''} onChange={(e) => setConfig((prev) => ({ ...prev, team_cta: { ...prev.team_cta, primary_cta_label: e.target.value } }))} className="home-composer-form-control" /></label>
+                      <label className="home-composer-form-field">{t.primaryUrl}<input value={config.team_cta.primary_cta_url || ''} onChange={(e) => setConfig((prev) => ({ ...prev, team_cta: { ...prev.team_cta, primary_cta_url: e.target.value } }))} className="home-composer-form-control" /></label>
+                      <label className="home-composer-form-field">{t.secondaryLabel}<input value={config.team_cta.secondary_cta_label || ''} onChange={(e) => setConfig((prev) => ({ ...prev, team_cta: { ...prev.team_cta, secondary_cta_label: e.target.value } }))} className="home-composer-form-control" /></label>
+                      <label className="home-composer-form-field">{t.secondaryUrl}<input value={config.team_cta.secondary_cta_url || ''} onChange={(e) => setConfig((prev) => ({ ...prev, team_cta: { ...prev.team_cta, secondary_cta_url: e.target.value } }))} className="home-composer-form-control" /></label>
+                    </div>
+                  </ActionCard>
+                  <ActionCard className="home-composer-card" bodyClassName="home-composer-stack" title={t.bottomCtaTitle} description={t.bottomCtaDescription} icon="upload" titleTag="h2">
+                    <label className="home-composer-toggle-label"><input type="checkbox" checked={Boolean(config.bottom_cta.enabled)} onChange={(e) => setConfig((prev) => ({ ...prev, bottom_cta: { ...prev.bottom_cta, enabled: e.target.checked } }))} />{t.enabled}</label>
+                    <div className="home-composer-dual-grid">
+                      <label className="home-composer-form-field">{t.heading}<input value={config.bottom_cta.heading || ''} onChange={(e) => setConfig((prev) => ({ ...prev, bottom_cta: { ...prev.bottom_cta, heading: e.target.value } }))} className="home-composer-form-control" /></label>
+                      <label className="home-composer-form-field">{t.subheading}<input value={config.bottom_cta.subheading || ''} onChange={(e) => setConfig((prev) => ({ ...prev, bottom_cta: { ...prev.bottom_cta, subheading: e.target.value } }))} className="home-composer-form-control" /></label>
+                      <label className="home-composer-form-field">{t.trustNote}<input value={config.bottom_cta.trust_note || ''} onChange={(e) => setConfig((prev) => ({ ...prev, bottom_cta: { ...prev.bottom_cta, trust_note: e.target.value } }))} className="home-composer-form-control" /></label>
+                      <label className="home-composer-form-field">{t.formHeadingLabel}<input value={config.bottom_cta.form_heading || ''} onChange={(e) => setConfig((prev) => ({ ...prev, bottom_cta: { ...prev.bottom_cta, form_heading: e.target.value } }))} className="home-composer-form-control" /></label>
+                      <label className="home-composer-form-field">{t.formBodyLabel}<input value={config.bottom_cta.form_body || ''} onChange={(e) => setConfig((prev) => ({ ...prev, bottom_cta: { ...prev.bottom_cta, form_body: e.target.value } }))} className="home-composer-form-control" /></label>
+                      <label className="home-composer-form-field">{t.primaryLabel}<input value={config.bottom_cta.primary_cta_label || ''} onChange={(e) => setConfig((prev) => ({ ...prev, bottom_cta: { ...prev.bottom_cta, primary_cta_label: e.target.value } }))} className="home-composer-form-control" /></label>
+                      <label className="home-composer-form-field">{t.primaryUrl}<input value={config.bottom_cta.primary_cta_url || ''} onChange={(e) => setConfig((prev) => ({ ...prev, bottom_cta: { ...prev.bottom_cta, primary_cta_url: e.target.value } }))} className="home-composer-form-control" /></label>
+                      <label className="home-composer-form-field">{t.secondaryLabel}<input value={config.bottom_cta.secondary_cta_label || ''} onChange={(e) => setConfig((prev) => ({ ...prev, bottom_cta: { ...prev.bottom_cta, secondary_cta_label: e.target.value } }))} className="home-composer-form-control" /></label>
+                      <label className="home-composer-form-field">{t.secondaryUrl}<input value={config.bottom_cta.secondary_cta_url || ''} onChange={(e) => setConfig((prev) => ({ ...prev, bottom_cta: { ...prev.bottom_cta, secondary_cta_url: e.target.value } }))} className="home-composer-form-control" /></label>
+                    </div>
+                  </ActionCard>
+                </div>
+              ) : null}
+            </div>
           ) : null}
         </AdminPageBody>
-      ) : null}
+
+          <AdminSelectionDrawer open={heroMediaModalOpen} title={t.heroImagePickerTitle} description={t.heroImagePickerDescription} onClose={() => setHeroMediaModalOpen(false)} closeLabel={t.close}>
+            <AdminSearchablePicker
+              query={candidateSearch}
+              onQueryChange={setCandidateSearch}
+              queryPlaceholder={t.searchPlaceholder}
+              items={mediaCandidates}
+              getKey={(asset) => asset.id}
+              getLabel={(asset) => asset.storage_path}
+              getMeta={(asset) => formatMediaCompliance(asset)}
+              getBadge={(asset) => <span className={`home-composer-media-status-badge ${mediaBadgeClass(asset)}`}>{formatMediaCompliance(asset)}</span>}
+              onSelect={(asset) => selectHeroMedia(asset.storage_path)}
+              emptyMessage={t.mediaCandidatesEmpty}
+            />
+          </AdminSelectionDrawer>
+
+          <AdminSelectionDrawer open={projectPickerOpen} title={t.featuredProjectsTitle} description={t.featuredProjectsDescription} onClose={() => setProjectPickerOpen(false)} closeLabel={t.close}>
+            <AdminSearchablePicker
+              query={candidateSearch}
+              onQueryChange={setCandidateSearch}
+              queryPlaceholder={t.searchPlaceholder}
+              items={projectCandidates}
+              getKey={(item) => item.id}
+              getLabel={(item) => item.name || item.slug || item.id}
+              getMeta={(item) => formatCandidateProjectMeta(item)}
+              getBadge={(item) => selectedProjectIds.has(item.id) ? editorLabels.selected : ''}
+              onSelect={(item) => toggleProjectDrawerSelection(item.id)}
+              emptyMessage={t.mediaCandidatesEmpty}
+            />
+          </AdminSelectionDrawer>
+
+          <AdminSelectionDrawer open={propertyPickerOpen} title={t.featuredPropertiesTitle} description={t.featuredPropertiesDescription} onClose={() => setPropertyPickerOpen(false)} closeLabel={t.close}>
+            <AdminSearchablePicker
+              query={candidateSearch}
+              onQueryChange={setCandidateSearch}
+              queryPlaceholder={t.searchPlaceholder}
+              items={propertyCandidates}
+              getKey={(item) => item.id}
+              getLabel={(item) => formatCandidatePropertyTitle(item)}
+              getMeta={(item) => formatCandidatePropertyMeta(item)}
+              getBadge={(item) => selectedPropertyIds.has(item.id) ? editorLabels.selected : ''}
+              onSelect={(item) => togglePropertyDrawerSelection(item.id)}
+              emptyMessage={t.mediaCandidatesEmpty}
+            />
+          </AdminSelectionDrawer>
+        </>
+      )}
     </AdminPage>
   );
 }

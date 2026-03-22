@@ -9,6 +9,7 @@ import { AdminButton, adminButtonClassName } from "@/components/admin/forms/Admi
 import { AdminTabSwitch } from "@/components/admin/navigation/AdminTabSwitch";
 import { AdminPage, AdminPageBody, AdminPageHeader } from "@/components/admin/page/AdminPage";
 import { AdminSectionGrid } from "@/components/admin/section/AdminSection";
+import { AdminPrimaryActionBar } from "@/components/admin/task/AdminTaskToolkit";
 import {
   DashboardInsightSkeletonList,
   DashboardMetricSkeletonRow,
@@ -1148,6 +1149,22 @@ export function AdminDashboardScreen({
       />
 
       <AdminPageBody>
+        <AdminPrimaryActionBar
+          title={t.title}
+          description={t.subtitle}
+          primaryAction={{ label: t.refresh, onClick: () => void onRefresh(), disabled: loading }}
+          secondaryActions={[
+            { label: t.openCrm, href: withAdminLocale("/admin/inquiries", locale), disabled: !isAuthenticated },
+            { label: t.openImports, href: withAdminLocale("/admin/imports", locale), disabled: !isAuthenticated },
+            { label: t.openMedia, href: withAdminLocale("/admin/media", locale), disabled: !isAuthenticated },
+          ]}
+          meta={
+            <AdminBadge tone={badgeTone(overallTone)} icon={badgeIcon(overallTone)}>
+              {toneLabel(overallTone, t)}
+            </AdminBadge>
+          }
+          mobileBottom
+        />
         <section className="dashboard-overview-band" aria-label={locale === "th" ? "ภาพรวมปฏิบัติการ" : "Operational overview"}>
           {renderOverviewPanel()}
         </section>

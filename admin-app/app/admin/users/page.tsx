@@ -22,12 +22,12 @@ const USER_PATCH_TEMPLATE = JSON.stringify(
 );
 
 const USER_CREATE_FIELDS = [
-  { name: "email", label: "Email", type: "text", required: true, placeholder: "user@example.com" },
-  { name: "password", label: "Password", type: "password", required: true, placeholder: "minimum 6 characters" },
-  { name: "role", label: "Legacy role", type: "text", required: true, placeholder: "admin/editor/ops" },
+  { name: "email", label: "Work email", type: "text", required: true, placeholder: "user@example.com" },
+  { name: "password", label: "Temporary password", type: "password", required: true, placeholder: "minimum 6 characters" },
+  { name: "role", label: "Primary access role", type: "text", required: true, placeholder: "admin/editor/ops" },
   {
     name: "role_ids",
-    label: "Assigned role IDs (JSON array)",
+    label: "Additional access roles",
     type: "json",
     placeholder: '["role-uuid-1"]',
     rows: 3,
@@ -35,12 +35,12 @@ const USER_CREATE_FIELDS = [
 ] as const;
 
 const USER_PATCH_FIELDS = [
-  { name: "email", label: "Email", type: "text", placeholder: "user@example.com" },
-  { name: "password", label: "Password", type: "password", placeholder: "minimum 6 characters" },
-  { name: "role", label: "Legacy role", type: "text", placeholder: "admin/editor/ops" },
+  { name: "email", label: "Work email", type: "text", placeholder: "user@example.com" },
+  { name: "password", label: "Temporary password", type: "password", placeholder: "minimum 6 characters" },
+  { name: "role", label: "Primary access role", type: "text", placeholder: "admin/editor/ops" },
   {
     name: "role_ids",
-    label: "Assigned role IDs (JSON array)",
+    label: "Additional access roles",
     type: "json",
     placeholder: '["role-uuid-1"]',
     rows: 3,
@@ -54,28 +54,28 @@ export default function AdminUsersPage() {
   return (
     <AdminJsonCrudWorkspace
       config={{
-        title: isThai ? "จัดการผู้ใช้และบทบาท" : "User & Role Management",
+        title: isThai ? "ทีมและสิทธิ์" : "People & Roles",
         subtitle: isThai
-          ? "สร้างหรืออัปเดตผู้ใช้ พร้อมกำหนดหรือถอด role ได้จากหน้าเดียว โดยระบบยังกันการแก้สิทธิ์ของบัญชีตัวเองไว้เพื่อความปลอดภัย"
-          : "Create/update users and assign/unassign roles. Use role_ids to replace assignments. Self role/permission edits are blocked for safety.",
+          ? "จัดการการเข้าถึงของทีม สร้างผู้ใช้ใหม่ และอัปเดตสิทธิ์จากหน้าเดียว โดยระบบยังป้องกันการแก้สิทธิ์ของบัญชีตัวเองไว้เพื่อความปลอดภัย"
+          : "Manage team access, create people records, and update role assignments from one page. Self permission changes remain blocked for safety.",
         followUpLinks: [
           {
             href: "/admin/dashboard",
             label: isThai ? "เปิดแดชบอร์ด" : "Open dashboard",
             description: isThai
-              ? "กลับไปตรวจสถานะระบบหลังปรับสิทธิ์ผู้ใช้หรือทีมปฏิบัติการ"
-              : "Review the operational dashboard after changing user or operator access.",
+              ? "กลับไปตรวจสถานะระบบหลังปรับสิทธิ์ของทีม"
+              : "Review the operational dashboard after changing team access.",
           },
           {
             href: "/admin/inquiries",
-            label: isThai ? "เปิด CRM" : "Open CRM",
+            label: isThai ? "เปิด Lead Inbox" : "Open Lead Inbox",
             description: isThai
               ? "ยืนยัน workflow ของทีมขายหรือทีมตอบลีดหลังแก้สิทธิ์"
-              : "Verify CRM workflows after changing sales or operator access.",
+              : "Verify lead workflows after changing sales or operator access.",
           },
           {
             href: "/admin/imports",
-            label: isThai ? "ดูงานนำเข้า" : "Open imports",
+            label: isThai ? "ดู Import Monitor" : "Open Import Monitor",
             description: isThai
               ? "ตรวจว่าผู้ใช้งานฝั่ง operations ยังเข้าถึง import workflow ได้ตามคาด"
               : "Confirm operations users can still access import workflows as expected.",
@@ -83,17 +83,17 @@ export default function AdminUsersPage() {
         ],
         prerequisiteHints: {
           authSignedOut: isThai
-            ? "เข้าสู่ระบบก่อน แล้วตรวจว่าการปรับสิทธิ์รอบนี้จะกระทบ workflow ของทีม CRM หรือ import ตรงไหนบ้าง"
-            : "Sign in first, then check which CRM or import workflows this permission change will affect before editing user access.",
+            ? "เข้าสู่ระบบก่อน แล้วระบุให้ชัดว่าการเปลี่ยนสิทธิ์รอบนี้กระทบทีมไหนและงานใดบ้าง"
+            : "Sign in first, then identify which team workflows this access change will affect before editing permissions.",
           authSignedIn: isThai
-            ? "ยืนยัน role_ids และผลกระทบต่อ workflow ของทีมปฏิบัติการก่อนบันทึกสิทธิ์ผู้ใช้"
-            : "Confirm role_ids and the downstream operational workflows they affect before saving user permissions.",
+            ? "ยืนยันบทบาทหลักและบทบาทเสริมก่อนบันทึกสิทธิ์ของคนในทีม"
+            : "Confirm the primary and additional role assignments before saving team access.",
           query: isThai
-            ? "โหลดรายการผู้ใช้ก่อน แล้วอ้างอิง role จาก /admin/roles เพื่อหลีกเลี่ยงการเปลี่ยนสิทธิ์ผิดบัญชี"
-            : "Load the user list first, then cross-check role IDs from /admin/roles so permission changes land on the intended account.",
+            ? "โหลดรายการผู้ใช้ก่อน แล้วอ้างอิงบทบาทจาก /admin/roles เพื่อหลีกเลี่ยงการแก้สิทธิ์ผิดคน"
+            : "Load the people list first, then cross-check roles from /admin/roles so access changes land on the intended person.",
         },
-        identifierLabel: isThai ? "รหัสผู้ใช้" : "User ID",
-        identifierPlaceholder: isThai ? "UUID ของผู้ใช้" : "user UUID",
+        identifierLabel: isThai ? "รหัสบุคคล" : "Person ID",
+        identifierPlaceholder: isThai ? "UUID ของบุคคล" : "person UUID",
         identifierField: "id",
         listPath: "/admin/users",
         getPath: "/admin/users/{id}",
@@ -105,8 +105,8 @@ export default function AdminUsersPage() {
         createFormFields: [...USER_CREATE_FIELDS],
         patchFormFields: [...USER_PATCH_FIELDS],
         queryHelp: isThai
-          ? "เรียกดู role จาก /admin/roles แล้วใส่ role_ids เป็น JSON array เพื่อกำหนดหรือถอดสิทธิ์"
-          : "List roles from /admin/roles, then set role_ids as a JSON array to assign/unassign.",
+          ? "เรียกดูบทบาทจาก /admin/roles แล้วใส่รหัสบทบาทเสริมในช่อง Additional access roles"
+          : "List roles from /admin/roles, then enter the additional role IDs in the Additional access roles field.",
       }}
     />
   );

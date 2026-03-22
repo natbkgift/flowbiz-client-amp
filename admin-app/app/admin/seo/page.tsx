@@ -7,10 +7,13 @@ import { clearAuthSession, loginAdmin, persistAuthSession, readAuthSession } fro
 import { detectAdminLocale, type AdminLocale, withAdminLocale } from "@/app/_lib/admin-i18n";
 import {
   ActionCard,
+  AdminAccessGate,
   AdminBadge,
   AdminButton,
+  AdminPrimaryActionBar,
   AdminPageHeader,
   AdminSectionCard,
+  AdminSectionTabs,
   AdminTable,
   LogCard,
 } from "@/components/admin/AdminPrimitives";
@@ -103,8 +106,8 @@ type SeoSuccessKey = "override" | "redirect" | "schema" | "report";
 
 const copy = {
   en: {
-    title: "SEO Controls",
-    subtitle: "Owner controls for SEO overrides, redirects, schema source, and broken-link reports.",
+    title: "Search Visibility",
+    subtitle: "Manage search metadata, redirects, schema, and broken-link recovery one task at a time.",
     signIn: "Sign in",
     signOut: "Sign out",
     save: "Save",
@@ -165,8 +168,8 @@ const copy = {
     del: "Delete",
   },
   th: {
-    title: "SEO Controls หลังบ้าน",
-    subtitle: "หน้าควบคุม SEO สำหรับ owner ครบ override, redirect, schema source และรายงานลิงก์เสีย.",
+    title: "การมองเห็นบน Search",
+    subtitle: "จัดการเมทาดาทา การส่งต่อ Schema และงานตามลิงก์เสียแบบทีละงานจากหน้าเดียว",
     signIn: "เข้าสู่ระบบ",
     signOut: "ออกจากระบบ",
     save: "บันทึก",
@@ -298,6 +301,7 @@ async function api<T>(path: string, token: string, init?: RequestInit): Promise<
 
 export default function AdminSeoPage() {
   const [locale, setLocale] = useState<Locale>(() => detectLocale());
+  const [activeTab, setActiveTab] = useState<"overrides" | "redirects" | "schema" | "broken">("overrides");
   const [token, setToken] = useState("");
   const [email, setEmail] = useState("");
   const [loginEmail, setLoginEmail] = useState("");
@@ -470,8 +474,7 @@ export default function AdminSeoPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [token]);
 
-  async function saveOverride(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
+  async function saveOverrideAction() {
     if (!isAuth) return;
     setBusy(true);
     setPageError(null);
@@ -507,8 +510,12 @@ export default function AdminSeoPage() {
     }
   }
 
-  async function saveRedirect(event: FormEvent<HTMLFormElement>) {
+  async function saveOverride(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    await saveOverrideAction();
+  }
+
+  async function saveRedirectAction() {
     if (!isAuth) return;
     setBusy(true);
     setPageError(null);
@@ -541,6 +548,11 @@ export default function AdminSeoPage() {
     }
   }
 
+  async function saveRedirect(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    await saveRedirectAction();
+  }
+
   async function preloadRedirectsFromProduction() {
     if (!isAuth) return;
     setBusy(true);
@@ -561,8 +573,7 @@ export default function AdminSeoPage() {
     }
   }
 
-  async function saveSchema(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
+  async function saveSchemaAction() {
     if (!isAuth) return;
     setBusy(true);
     setPageError(null);
@@ -597,6 +608,11 @@ export default function AdminSeoPage() {
     } finally {
       setBusy(false);
     }
+  }
+
+  async function saveSchema(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    await saveSchemaAction();
   }
 
   async function bootstrapSchemaFromProduction() {
@@ -656,18 +672,43 @@ export default function AdminSeoPage() {
   ].some((v) => v.trim().length > 0);
 
   const reportTime = report?.checked_at ? new Date(report.checked_at).toLocaleString() : "-";
+  const stickyPrimaryAction =
+    activeTab === "redirects"
+      ? { label: t.save, onClick: () => void saveRedirectAction() }
+      : activeTab === "schema"
+        ? { label: t.save, onClick: () => void saveSchemaAction() }
+        : activeTab === "broken"
+          ? { label: t.runChecker, onClick: () => void runBrokenLinks() }
+          : { label: t.save, onClick: () => void saveOverrideAction() };
+  const stickySecondaryActions =
+    activeTab === "redirects"
+      ? [
+          { label: t.preloadRedirects, onClick: () => void preloadRedirectsFromProduction(), disabled: !isAuth || busy },
+          { label: t.refresh, onClick: () => void refreshAll(), disabled: !isAuth || loading || busy },
+          { label: t.signOut, onClick: logout, disabled: busy },
+        ]
+      : activeTab === "schema"
+        ? [
+            { label: t.schemaBootstrap, onClick: () => void bootstrapSchemaFromProduction(), disabled: !isAuth || busy },
+            { label: t.refresh, onClick: () => void refreshAll(), disabled: !isAuth || loading || busy },
+            { label: t.signOut, onClick: logout, disabled: busy },
+          ]
+        : [
+            { label: t.refresh, onClick: () => void refreshAll(), disabled: !isAuth || loading || busy },
+            { label: t.signOut, onClick: logout, disabled: busy },
+          ];
 
   return (
     <main id="main-content" className="container content-stack admin-overflow-guard">
-      <AdminPageHeader title={t.title} description={t.subtitle} icon="globe" eyebrow="SEO controls" />
+      <AdminPageHeader title={t.title} description={t.subtitle} icon="globe" eyebrow="Search workflow" />
 
-      <ActionCard
-        title={isAuth ? (email || t.authRequired) : t.loginTitle}
-        description={isAuth ? t.sessionDescription : t.loginDescription}
-        icon={isAuth ? "profile" : "globe"}
-        titleTag="h2"
-      >
-        {!isAuth ? (
+      <AdminAccessGate
+        isAuthenticated={isAuth}
+        authTitle={t.loginTitle}
+        authDescription={t.loginDescription}
+        sessionTitle={email || t.authRequired}
+        sessionDescription={t.sessionDescription}
+        authContent={
           <form className="crm-login-form" method="post" onSubmit={(event) => void login(event)}>
             <label className="field" htmlFor="seo-login-email">
               <span>{t.email}</span>
@@ -677,27 +718,36 @@ export default function AdminSeoPage() {
               <span>{t.password}</span>
               <input id="seo-login-password" name="password" type="password" autoComplete="current-password" required value={loginPassword} onChange={(event) => setLoginPassword(event.target.value)} />
             </label>
-            {authError ? <div className="state-error">{authError}</div> : null}
+            {authError ? <div className="state-error" role="alert">{authError}</div> : null}
             <div className="card-actions">
               <AdminButton variant="primary" icon="workspace" type="submit" disabled={busy}>{t.signIn}</AdminButton>
             </div>
-          </form>
-        ) : (
-          <div className="crm-session-panel" role="status" aria-live="polite">
-            <p className="locale-safe">{email || t.authRequired}</p>
-            <div className="card-actions">
-              <AdminButton variant="secondary" icon="x" type="button" onClick={logout}>{t.signOut}</AdminButton>
-              <AdminButton variant="secondary" icon="refresh" type="button" onClick={() => void refreshAll()} disabled={loading}>{loading ? t.loading : t.refresh}</AdminButton>
+            <div className="state-empty admin-workspace-empty-state" role="status">
+              <strong>{t.authRequired}</strong>
+              <p className="locale-safe">{t.authHint}</p>
             </div>
-          </div>
-        )}
-        {!isAuth ? (
-          <div className="state-empty admin-workspace-empty-state" role="status">
-            <strong>{t.authRequired}</strong>
-            <p className="locale-safe">{t.authHint}</p>
-          </div>
-        ) : null}
-      </ActionCard>
+          </form>
+        }
+        sessionContent={isAuth ? <AdminBadge tone="ok">{email || t.authRequired}</AdminBadge> : null}
+      >
+        <AdminPrimaryActionBar
+          title={t.title}
+          description={t.subtitle}
+          primaryAction={{ ...stickyPrimaryAction, disabled: !isAuth || busy || loading }}
+          secondaryActions={stickySecondaryActions}
+          meta={<AdminBadge tone={pageNotice ? "ok" : "info"}>{pageNotice || t.sessionDescription}</AdminBadge>}
+          mobileBottom
+        />
+        <AdminSectionTabs
+          activeTab={activeTab}
+          onChange={(key) => setActiveTab(key as "overrides" | "redirects" | "schema" | "broken")}
+          tabs={[
+            { key: "overrides", label: t.sectionOverrides, count: overrides.length },
+            { key: "redirects", label: t.sectionRedirects, count: redirects.length },
+            { key: "schema", label: t.sectionSchema },
+            { key: "broken", label: t.sectionBroken, count: report?.broken_links.length ?? 0 },
+          ]}
+        />
 
       {pageError ? (
           <div className="state-error" role="alert">
@@ -727,6 +777,7 @@ export default function AdminSeoPage() {
       {loading ? <div className="state-loading">{t.loading}</div> : null}
 
       <section className="seo-layout">
+        {activeTab === "overrides" ? (
         <AdminSectionCard
           className="seo-pane"
           title={t.sectionOverrides}
@@ -775,7 +826,9 @@ export default function AdminSeoPage() {
             </ul>
           ) : null}
         </AdminSectionCard>
+        ) : null}
 
+        {activeTab === "redirects" ? (
         <AdminSectionCard
           className="seo-pane"
           title={t.sectionRedirects}
@@ -819,7 +872,9 @@ export default function AdminSeoPage() {
             </ul>
           ) : null}
         </AdminSectionCard>
+        ) : null}
 
+        {activeTab === "schema" ? (
         <AdminSectionCard
           className="seo-pane seo-full"
           title={t.sectionSchema}
@@ -860,7 +915,9 @@ export default function AdminSeoPage() {
             </div>
           ) : null}
         </AdminSectionCard>
+        ) : null}
 
+        {activeTab === "broken" ? (
         <LogCard
           className="seo-pane seo-full"
           title={t.sectionBroken}
@@ -924,7 +981,9 @@ export default function AdminSeoPage() {
             </>
           ) : null}
         </LogCard>
+        ) : null}
       </section>
+      </AdminAccessGate>
     </main>
   );
 }

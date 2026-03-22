@@ -104,17 +104,18 @@ describe("B14 admin dashboard page contract", () => {
     expect(screen).toContain("dashboardState === \"empty\"");
     expect(copy).toContain("retry: \"Retry\"");
     expect(copy).toContain("retry: \"ลองใหม่\"");
-    expect(copy).toContain('title: "Admin Health / QA Dashboard"');
-    expect(copy).toContain('title: "แดชบอร์ดสุขภาพระบบและ QA"');
+    expect(copy).toContain('title: "Operations Hub"');
+    expect(copy).toContain("See what needs attention now across lead flow");
+    expect(copy).toContain('subtitle: "ดูว่าตอนนี้อะไรต้องจัดการก่อนใน lead flow สุขภาพคอนเทนต์ และงานเบื้องหลัง"');
     expect(copy).toContain('overviewLockedBody: "เข้าสู่ระบบเพื่อดูสถานะสุขภาพล่าสุด สแนปช็อตเวลาอัปเดต และเครื่องมือควบคุมของผู้ดูแล"');
     expect(copy).toContain('widgetsLockedBody: "ปลดล็อกมุมมองคอนเทนต์ สื่อ คำแปล และความพร้อมก่อนดีพลอยของ workspace นี้"');
-    expect(copy).toContain('subtitle: "ศูนย์ควบคุมสุขภาพระบบ ภาพรวมคิวงาน รายการเฝ้าระวัง และกิจกรรมล่าสุดของทีมแอดมิน"');
+    expect(copy).not.toContain('subtitle: "ศูนย์ควบคุมสุขภาพระบบ ภาพรวมคิวงาน รายการเฝ้าระวัง และกิจกรรมล่าสุดของทีมแอดมิน"');
     expect(copy).toContain('trendTitle: "แนวโน้มกิจกรรมของลีด"');
     expect(copy).toContain('trendHint: "Lead activity trend backed by backend-provided daily inquiry buckets."');
     expect(copy).toContain('insightsTitle: "Pipeline summary"');
     expect(copy).toContain('insightsTitle: "สรุปคิวงาน"');
-    expect(copy).toContain('watchlistTitle: "รายการเฝ้าระวัง"');
-    expect(copy).toContain('backgroundTasksTitle: "Background tasks"');
+    expect(copy).toContain('watchlistTitle: "Needs attention"');
+    expect(copy).toContain('backgroundTasksTitle: "Background jobs"');
     expect(copy).toContain('lastUpdated: "Last updated"');
     expect(copy).toContain('quickActions: "Quick actions"');
     expect(copy).toContain('refreshRequired: "Refresh required"');
@@ -124,6 +125,7 @@ describe("B14 admin dashboard page contract", () => {
     expect(copy).toContain('lastUpdated: "อัปเดตล่าสุด"');
     expect(copy).toContain('quickActions: "การดำเนินการด่วน"');
     expect(page).toContain("dashboardCopy[locale]");
+    expect(screen).toContain("<AdminPrimaryActionBar");
   });
 
   it("only renders background tasks when the backend provides task payloads", () => {

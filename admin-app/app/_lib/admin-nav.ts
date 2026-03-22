@@ -26,15 +26,15 @@ const DASHBOARD_NAV: AdminNavItem = {
 const USERS_NAV: AdminNavItem = {
   href: "/admin/users",
   icon: "users",
-  label: { en: "Users & Roles", th: "ผู้ใช้และสิทธิ์" },
-  description: { en: "User accounts and role assignments", th: "บัญชีผู้ใช้และการกำหนดบทบาท" },
+  label: { en: "People & Roles", th: "ทีมและสิทธิ์" },
+  description: { en: "People access and role assignments", th: "สิทธิ์การเข้าถึงและบทบาทของทีม" },
 };
 
 const CRM_NAV: AdminNavItem = {
   href: "/admin/inquiries",
   icon: "message",
-  label: { en: "CRM", th: "CRM" },
-  description: { en: "Leads and inquiries workflow", th: "เวิร์กโฟลว์ลีดและลูกค้าสนใจ" },
+  label: { en: "Lead Inbox", th: "Lead Inbox" },
+  description: { en: "Lead queue and next actions", th: "คิวลีดและงานถัดไป" },
 };
 
 const PROJECTS_NAV: AdminNavItem = {
@@ -117,8 +117,8 @@ const MEDIA_NAV: AdminNavItem = {
 const IMPORTS_NAV: AdminNavItem = {
   href: "/admin/imports",
   icon: "imports",
-  label: { en: "Imports", th: "นำเข้าข้อมูล" },
-  description: { en: "Import + mirror operations", th: "งานนำเข้าและมิเรอร์" },
+  label: { en: "Import Monitor", th: "ติดตามการนำเข้า" },
+  description: { en: "Run imports and monitor health", th: "รันงานนำเข้าและติดตามสถานะ" },
 };
 
 const DOMAIN_NAV: AdminNavItem = {
@@ -131,22 +131,22 @@ const DOMAIN_NAV: AdminNavItem = {
 const LAYOUT_NAV: AdminNavItem = {
   href: "/admin/layout",
   icon: "layout",
-  label: { en: "Header/Footer", th: "หัวเว็บ/ท้ายเว็บ" },
-  description: { en: "Layout CMS config", th: "ตั้งค่าเลย์เอาต์เว็บไซต์" },
+  label: { en: "Site Chrome", th: "Site Chrome" },
+  description: { en: "Header and footer experience", th: "จัดการประสบการณ์ส่วนหัวและส่วนท้าย" },
 };
 
 const HOME_COMPOSER_NAV: AdminNavItem = {
   href: "/admin/home-composer",
   icon: "spark",
-  label: { en: "Home Composer", th: "คอมโพสหน้าแรก" },
-  description: { en: "Hero and sections", th: "ฮีโร่และส่วนประกอบหน้าแรก" },
+  label: { en: "Landing Builder", th: "Landing Builder" },
+  description: { en: "Homepage story and sections", th: "เรื่องราวและส่วนประกอบหน้าแรก" },
 };
 
 const SEO_NAV: AdminNavItem = {
   href: "/admin/seo",
   icon: "globe",
-  label: { en: "SEO", th: "SEO" },
-  description: { en: "Overrides, redirects, schema", th: "จัดการ override, redirect และ schema" },
+  label: { en: "Search Visibility", th: "การมองเห็นบน Search" },
+  description: { en: "Search metadata, redirects, broken links", th: "เมทาดาทา การส่งต่อ และลิงก์เสีย" },
 };
 
 export const ADMIN_PRIMARY_NAV: AdminNavItem[] = [

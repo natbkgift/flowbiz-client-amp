@@ -12,3 +12,14 @@ export {
   AdminSectionHeader,
 } from "@/components/admin/section/AdminSection";
 export { AdminTabSwitch } from "@/components/admin/navigation/AdminTabSwitch";
+export {
+  AdminAccessGate,
+  AdminFilterDrawer,
+  AdminPrimaryActionBar,
+  AdminRepeaterEditor,
+  AdminResponsiveList,
+  AdminSearchablePicker,
+  AdminSectionTabs,
+  AdminSelectionDrawer,
+  type AdminSectionTab,
+} from "@/components/admin/task/AdminTaskToolkit";

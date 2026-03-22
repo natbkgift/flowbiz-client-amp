@@ -10,18 +10,21 @@ function read(relativePath: string): string {
 }
 
 describe("admin home composer surface polish", () => {
-  it("uses shared admin page/layout primitives and page-local admin classes", () => {
+  it("uses the task toolkit primitives for the new Landing Builder flow", () => {
     const page = read("app/admin/home-composer/page.tsx");
 
     expect(page).toContain("AdminPage");
     expect(page).toContain("AdminPageBody");
-    expect(page).toContain("home-composer-toolbar");
-    expect(page).toContain('className="home-composer-split"');
-    expect(page).toContain('className="home-composer-stack"');
-    expect(page).toContain('className="home-composer-option-label"');
-    expect(page).toContain('className="home-composer-search-results"');
-    expect(page).toContain('className={`home-composer-media-status-badge ${mediaBadgeClass(asset)}`}');
-    expect(page).toContain("mediaCandidatesEmpty");
+    expect(page).toContain("AdminAccessGate");
+    expect(page).toContain("AdminPrimaryActionBar");
+    expect(page).toContain("AdminSectionTabs");
+    expect(page).toContain("AdminSearchablePicker");
+    expect(page).toContain("AdminRepeaterEditor");
+    expect(page).toContain("AdminSelectionDrawer");
+    expect(page).toContain("const [activeTab, setActiveTab] = useState<BuilderTabKey>('overview')");
+    expect(page).toContain("home-composer-task-layout");
+    expect(page).toContain("home-composer-overview-grid");
+    expect(page).toContain("home-composer-hero-media-preview");
     expect(page).toContain("const formatCandidatePropertyTitle =");
     expect(page).toContain("Promise.allSettled([");
   });
@@ -41,14 +44,17 @@ describe("admin home composer surface polish", () => {
     expect(page).not.toContain("if (!nextBundle.draft) {");
   });
 
-  it("defines reusable page-local polish hooks in admin styles", () => {
+  it("defines reusable builder layout hooks in admin styles", () => {
     const css = read("styles/admin-components.css");
 
-    expect(css).toContain(".home-composer-stack--compact");
+    expect(css).toContain(".home-composer-builder-page");
+    expect(css).toContain(".home-composer-tab-panel");
+    expect(css).toContain(".home-composer-overview-grid");
+    expect(css).toContain(".home-composer-header-actions");
+    expect(css).toContain(".home-composer-hero-media-panel");
+    expect(css).toContain(".home-composer-record-row");
     expect(css).toContain(".home-composer-button-group");
-    expect(css).toContain(".home-composer-search-results");
     expect(css).toContain(".home-composer-status-list");
-    expect(css).toContain(".home-composer-form-field input:focus-visible");
     expect(css).toContain(".home-composer-media-status-badge");
     expect(css).toContain("--home-composer-split-main");
     expect(css).toContain("--home-composer-surface-subtle");

@@ -18,37 +18,28 @@ function readAdminStyles(): string {
 }
 
 describe("admin shell navigation behavior", () => {
-  it("includes searchable nav, quick actions, and workspace profile slots", () => {
+  it("keeps a slim task shell with grouped navigation and a session menu", () => {
     const shell = read("components/layout/AdminShell.tsx");
 
-    expect(shell).toContain("ADMIN_QUICK_ACTIONS");
-    expect(shell).toContain("searchPlaceholder");
-    expect(shell).toContain("clearSearch");
-    expect(shell).toContain("admin-shell-search-clear");
-    expect(shell).toContain("admin-shell-search--sidebar");
-    expect(shell).toContain("admin-shell-search--topbar");
-    expect(shell).toContain("admin-shell-profile");
-    expect(shell).toContain("admin-shell-sidebar-footer");
+    expect(shell).toContain("ADMIN_NAV_GROUPS");
+    expect(shell).toContain("admin-shell-sidebar");
+    expect(shell).toContain("admin-shell-sidebar-scroll");
+    expect(shell).toContain("admin-shell-topbar");
+    expect(shell).toContain("admin-shell-session-menu");
+    expect(shell).toContain("admin-shell-profile-head");
+    expect(shell).toContain("admin-shell-locale-control");
+    expect(shell).toContain("admin-shell-mobile-drawer-sections");
   });
 
-  it("shows the empty search state in both desktop and mobile navigation", () => {
+  it("derives page context from the shared nav registry", () => {
     const shell = read("components/layout/AdminShell.tsx");
 
-    expect(shell).toContain("const hasSearchResults =");
-    expect(shell).toContain("const totalSearchResults =");
-    expect(shell).toContain("filteredUtilityItems.length > 0");
-    expect(shell).toContain("renderHighlightedText");
-    expect(shell).toContain("admin-shell-nav-match");
-    expect(shell).toContain("admin-shell-search-summary");
-    expect(shell).toContain("searchSummaryLabel");
-    expect(shell).toContain("searchSummaryMatches");
-    expect(shell).toContain("searchSummaryTemplate");
-    expect(shell).toContain('aria-live="polite"');
-    expect(shell).toContain("admin-shell-nav-empty-icon");
-    expect(shell).toContain("hasSearchResults ? (");
-    expect(shell).toContain("emptySearchState");
-    expect(shell).toContain("admin-shell-sidebar-scroll");
-    expect(shell).toContain("admin-shell-mobile-drawer-sections");
+    expect(shell).toContain("getCurrentAdminLocation");
+    expect(shell).toContain("currentGroupLabel");
+    expect(shell).toContain("currentWorkspaceLabel");
+    expect(shell).toContain("showWorkspaceBreadcrumb");
+    expect(shell).toContain("admin-shell-page-heading");
+    expect(shell).toContain("admin-shell-breadcrumb");
   });
 
   it("implements mobile drawer toggle and close behavior", () => {
@@ -59,25 +50,21 @@ describe("admin shell navigation behavior", () => {
     expect(shell).toContain("lockBodyScroll()");
     expect(shell).toContain('id="admin-shell-mobile-drawer"');
     expect(shell).toContain("closeMobileNav");
-    expect(shell).toContain("body.style.paddingRight");
+    expect(shell).toContain("window.document.body.style.overflow = \"hidden\"");
   });
 
-  it("styles drawer and topbar shell controls in globals.css", () => {
+  it("styles the simplified drawer and topbar shell controls in admin styles", () => {
+    const shell = read("components/layout/AdminShell.tsx");
     const css = readAdminStyles();
 
     expect(css).toContain(".admin-shell-toggle");
-    expect(css).toContain(".admin-shell-topbar-tools");
-    expect(css).toContain("grid-template-columns: minmax(320px, 1.02fr) minmax(420px, 0.98fr)");
-    expect(css).toContain("grid-template-columns: repeat(2, minmax(0, 1fr))");
-    expect(css).toContain(".admin-shell-search");
-    expect(css).toContain(".admin-shell-search-clear");
-    expect(css).toContain(".admin-shell-search-summary");
-    expect(css).toContain(".admin-shell-search-summary__label");
+    expect(css).toContain(".admin-shell-sidebar {");
+    expect(css).toContain(".admin-shell-topbar {");
+    expect(shell).toContain("admin-shell-topbar-inner--compact");
     expect(css).toContain(".admin-shell-mobile-drawer");
     expect(css).toContain(".admin-shell-backdrop.is-open");
-    expect(css).toContain(".admin-shell-topbar-status,");
     expect(css).toContain(".admin-shell-profile {");
-    expect(css).toContain("height: 100%;");
+    expect(shell).toContain("admin-shell-session-menu");
     expect(css).toContain("border-right: 1px solid rgba(203, 213, 225, 0.82)");
     expect(css).toContain("box-shadow: 4px 0 18px rgba(15, 23, 42, 0.03)");
     expect(css).toContain(".admin-btn-danger,");
