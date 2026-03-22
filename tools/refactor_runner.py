@@ -4,6 +4,7 @@ from __future__ import annotations
 import argparse
 import datetime as dt
 import json
+import shutil
 import subprocess
 import sys
 import time
@@ -31,10 +32,14 @@ class RunnerConfig:
     state_file: Path
     queue_file: Path
     next_run_file: Path
+    live_status_file: Path
+    live_status_json_file: Path
     rounds: int
     retry_limit: int
     retry_backoff_sec: int
     command_template: str
+    command_template_source: str
+    selected_cli: str
     max_stale_rounds: int
     smoke_command: str | None = None
     command_timeout_sec: int | None = None
@@ -58,6 +63,10 @@ def now_ts() -> str:
 
 def iso_now() -> str:
     return dt.datetime.now(dt.timezone.utc).isoformat()
+
+
+def utc_now() -> dt.datetime:
+    return dt.datetime.now(dt.timezone.utc)
 
 
 def read_text(path: Path) -> str:
@@ -92,6 +101,196 @@ def update_session_file(path: Path, **updates: Any) -> None:
     payload.update(updates)
     payload["updated_at"] = iso_now()
     write_json(path, payload)
+
+
+def render_live_status(payload: dict[str, Any]) -> str:
+    lines = ["# Refactor Runner Live Status", ""]
+    lines.append(f"- status: {payload.get('status', 'unknown')}")
+
+    selected_cli = payload.get("selected_cli")
+    if selected_cli:
+        lines.append(f"- cli: {selected_cli}")
+
+    command_template_source = payload.get("command_template_source")
+    if command_template_source:
+        lines.append(f"- command template source: {command_template_source}")
+
+    branch = payload.get("branch")
+    if branch:
+        lines.append(f"- branch: {branch}")
+
+    started_at = payload.get("started_at")
+    if started_at:
+        lines.append(f"- started at: {started_at}")
+
+    elapsed_seconds = payload.get("elapsed_seconds")
+    if elapsed_seconds is not None:
+        lines.append(f"- elapsed: {format_duration(int(elapsed_seconds))}")
+
+    round_limit = payload.get("round_limit")
+    current_round = payload.get("current_round")
+    if current_round:
+        if round_limit:
+            lines.append(f"- round: {current_round} of {round_limit}")
+        else:
+            lines.append(f"- round: {current_round}")
+
+    attempt = payload.get("current_attempt")
+    attempt_limit = payload.get("attempt_limit")
+    if attempt:
+        if attempt_limit:
+            lines.append(f"- attempt: {attempt} of {attempt_limit}")
+        else:
+            lines.append(f"- attempt: {attempt}")
+
+    retry_countdown_sec = payload.get("retry_countdown_sec")
+    if retry_countdown_sec is not None:
+        lines.append(f"- retry countdown: {retry_countdown_sec}s")
+
+    next_retry_attempt = payload.get("next_retry_attempt")
+    if next_retry_attempt:
+        lines.append(f"- next retry attempt: {next_retry_attempt}")
+
+    rounds_completed = payload.get("rounds_completed")
+    if rounds_completed is not None:
+        lines.append(f"- rounds completed: {rounds_completed}")
+
+    stale_rounds = payload.get("stale_rounds")
+    if stale_rounds is not None:
+        lines.append(f"- stale rounds: {stale_rounds}")
+
+    last_commit_value = payload.get("last_commit")
+    if last_commit_value:
+        lines.append(f"- last commit: {last_commit_value}")
+
+    updated_at = payload.get("updated_at")
+    if updated_at:
+        lines.append(f"- updated at: {updated_at}")
+
+    log_dir = payload.get("log_dir")
+    if log_dir:
+        lines.append(f"- log dir: {log_dir}")
+
+    session_file = payload.get("session_file")
+    if session_file:
+        lines.append(f"- session file: {session_file}")
+
+    current_prompt_file = payload.get("current_prompt_file")
+    if current_prompt_file:
+        lines.append(f"- current prompt file: {current_prompt_file}")
+
+    last_message_file = payload.get("last_message_file")
+    if last_message_file:
+        lines.append(f"- last message file: {last_message_file}")
+
+    last_validated_round = payload.get("last_validated_round")
+    if last_validated_round is not None:
+        lines.append(f"- last validated round: {last_validated_round}")
+
+    last_validation_summary = payload.get("last_validation_summary")
+    if last_validation_summary:
+        lines.append(f"- last validation summary: {last_validation_summary}")
+
+    current_activity = payload.get("current_activity")
+    if current_activity:
+        lines.extend(["", "## Current Activity", str(current_activity)])
+
+    last_output = payload.get("last_output") or {}
+    if last_output:
+        lines.extend(["", "## Last Agent Output"])
+        parsed_status = last_output.get("status")
+        if parsed_status:
+            lines.append(f"- parsed status: {parsed_status}")
+        for item in last_output.get("issues_fixed") or []:
+            lines.append(f"- issue fixed: {item}")
+        for item in last_output.get("issues_blocked") or []:
+            lines.append(f"- issue blocked: {item}")
+        for item in last_output.get("validations") or []:
+            lines.append(f"- validation: {item}")
+        last_output_commit = last_output.get("commit")
+        if last_output_commit:
+            lines.append(f"- commit: {last_output_commit}")
+        for item in last_output.get("next_steps") or []:
+            lines.append(f"- next: {item}")
+        missing_fields = last_output.get("missing_fields") or []
+        if missing_fields:
+            lines.append(f"- missing fields: {', '.join(missing_fields)}")
+
+    last_error = payload.get("last_error")
+    if last_error:
+        lines.extend(["", "## Last Error", str(last_error)])
+
+    stop_reason = payload.get("stop_reason")
+    if stop_reason:
+        lines.extend(["", "## Stop Reason", str(stop_reason)])
+
+    return "\n".join(lines).strip() + "\n"
+
+
+def update_live_status(cfg: RunnerConfig, **updates: Any) -> None:
+    payload: dict[str, Any] = {}
+    if cfg.live_status_json_file.exists():
+        try:
+            payload = json.loads(cfg.live_status_json_file.read_text(encoding="utf-8"))
+        except json.JSONDecodeError:
+            payload = {}
+
+    payload.update(updates)
+    payload["log_dir"] = str(cfg.log_dir)
+    payload["session_file"] = str(cfg.log_dir / "session.json")
+    payload["round_limit"] = cfg.rounds
+    payload["attempt_limit"] = cfg.retry_limit + 1
+    payload["selected_cli"] = cfg.selected_cli
+    payload["command_template_source"] = cfg.command_template_source
+    payload.setdefault("started_at", iso_now())
+    started_at_raw = payload.get("started_at")
+    if isinstance(started_at_raw, str):
+        try:
+            started_at_value = dt.datetime.fromisoformat(started_at_raw)
+            payload["elapsed_seconds"] = max(
+                0,
+                int((utc_now() - started_at_value).total_seconds()),
+            )
+        except ValueError:
+            payload["elapsed_seconds"] = None
+    payload["updated_at"] = iso_now()
+
+    write_json(cfg.live_status_json_file, payload)
+    write_text(cfg.live_status_file, render_live_status(payload))
+
+
+def format_duration(total_seconds: int) -> str:
+    minutes, seconds = divmod(max(0, total_seconds), 60)
+    hours, minutes = divmod(minutes, 60)
+    if hours:
+        return f"{hours}h {minutes}m {seconds}s"
+    if minutes:
+        return f"{minutes}m {seconds}s"
+    return f"{seconds}s"
+
+
+def detect_command_template() -> tuple[str, str, str]:
+    if shutil.which("claude"):
+        return (
+            "claude code --print --input-file {prompt_file}",
+            "auto-detected",
+            "claude",
+        )
+
+    if shutil.which("codex"):
+        return (
+            (
+                'cmd /d /s /c "codex exec -c mcp_servers={} '
+                '-c model_reasoning_effort=high '
+                '-c shell_environment_policy.inherit=all '
+                '--output-last-message {last_message_file} - < {prompt_file} '
+                '&& type {last_message_file}"'
+            ),
+            "auto-detected",
+            "codex",
+        )
+
+    raise RunnerError("No supported agent CLI found on PATH. Checked: claude, codex")
 
 
 def run_cmd(
@@ -216,11 +415,19 @@ CURRENT CONTROL FILE SNAPSHOT
 """.strip()
 
 
-def build_command(command_template: str, prompt_path: Path, repo_root: Path) -> str:
+def build_command(
+    command_template: str,
+    prompt_path: Path,
+    repo_root: Path,
+    last_message_path: Path,
+) -> str:
     quoted_prompt = subprocess.list2cmdline([str(prompt_path)])
     quoted_repo = subprocess.list2cmdline([str(repo_root)])
+    quoted_last_message = subprocess.list2cmdline([str(last_message_path)])
     return (
-        command_template.replace("{prompt_file}", quoted_prompt).replace("{repo_root}", quoted_repo)
+        command_template.replace("{prompt_file}", quoted_prompt)
+        .replace("{repo_root}", quoted_repo)
+        .replace("{last_message_file}", quoted_last_message)
     )
 
 
@@ -285,6 +492,29 @@ def validate_control_files(cfg: RunnerConfig) -> None:
         _ = read_text(required_path)
 
 
+def sleep_with_retry_countdown(
+    cfg: RunnerConfig,
+    round_no: int,
+    attempt: int,
+    current_prompt_file: Path,
+) -> None:
+    for seconds_remaining in range(cfg.retry_backoff_sec, 0, -1):
+        update_live_status(
+            cfg,
+            status="retry-wait",
+            current_round=round_no,
+            current_attempt=attempt,
+            current_prompt_file=str(current_prompt_file),
+            retry_countdown_sec=seconds_remaining,
+            next_retry_attempt=attempt + 1,
+            current_activity=(
+                f"Round {round_no} attempt {attempt} failed. "
+                f"Retrying in {seconds_remaining} seconds."
+            ),
+        )
+        time.sleep(1)
+
+
 def emit_stop(reason: str, repo_root: Path) -> None:
     print(f"STOP\nreason: {reason}\nlast_commit: {last_commit(repo_root) or 'none'}")
 
@@ -303,10 +533,11 @@ def main() -> int:
     )
     parser.add_argument(
         "--command-template",
-        required=True,
         help=(
             "Shell command template to invoke your Claude or agent CLI. "
-            "Use {prompt_file} for the generated runtime prompt and {repo_root} when needed."
+            "Use {prompt_file} for the generated runtime prompt, {repo_root} when needed, "
+            "and {last_message_file} when the CLI can write a final response to a file. "
+            "If omitted, the runner auto-detects a supported CLI."
         ),
     )
     parser.add_argument(
@@ -337,6 +568,16 @@ def main() -> int:
     log_dir = (repo_root / "logs" / "refactor_runner" / now_ts()).resolve()
     log_dir.mkdir(parents=True, exist_ok=True)
 
+    try:
+        command_template, command_template_source, selected_cli = (
+            (args.command_template, "user-supplied", "custom")
+            if args.command_template
+            else detect_command_template()
+        )
+    except RunnerError as exc:
+        print(f"Runner bootstrap failed: {exc}", file=sys.stderr)
+        return 1
+
     cfg = RunnerConfig(
         repo_root=repo_root,
         prompt_file=prompt_file,
@@ -344,10 +585,14 @@ def main() -> int:
         state_file=repo_root / ".ai" / "refactor-state.md",
         queue_file=repo_root / ".ai" / "refactor-queue.md",
         next_run_file=repo_root / ".ai" / "next-run.md",
+        live_status_file=repo_root / ".ai" / "refactor-live-status.md",
+        live_status_json_file=repo_root / ".ai" / "refactor-live-status.json",
         rounds=args.rounds,
         retry_limit=args.retry_limit,
         retry_backoff_sec=args.retry_backoff_sec,
-        command_template=args.command_template,
+        command_template=command_template,
+        command_template_source=command_template_source,
+        selected_cli=selected_cli,
         max_stale_rounds=args.max_stale_rounds,
         smoke_command=args.smoke_command,
         command_timeout_sec=args.command_timeout_sec or None,
@@ -369,6 +614,27 @@ def main() -> int:
         smoke_command=cfg.smoke_command,
         dry_run=cfg.dry_run,
     )
+    update_live_status(
+        cfg,
+        status="bootstrapping",
+        started_at=iso_now(),
+        branch=None,
+        current_round=0,
+        current_attempt=0,
+        rounds_completed=0,
+        stale_rounds=0,
+        last_commit=None,
+        current_prompt_file=None,
+        retry_countdown_sec=None,
+        next_retry_attempt=None,
+        last_validated_round=None,
+        last_validation_summary=None,
+        last_message_file=None,
+        current_activity="Verifying control files and repository state before the loop starts.",
+        stop_reason=None,
+        last_error=None,
+        last_output=None,
+    )
 
     try:
         validate_control_files(cfg)
@@ -378,6 +644,13 @@ def main() -> int:
         starting_commit = last_commit(cfg.repo_root)
     except Exception as exc:
         update_session_file(session_path, status="bootstrap_failed", stop_reason=str(exc))
+        update_live_status(
+            cfg,
+            status="bootstrap_failed",
+            current_activity="Bootstrap failed before the refactor loop could start.",
+            stop_reason=str(exc),
+            last_error=str(exc),
+        )
         print(f"Runner bootstrap failed: {exc}", file=sys.stderr)
         return 1
 
@@ -387,6 +660,8 @@ def main() -> int:
     runner_log(cfg.log_dir, f"prompt_file={cfg.prompt_file}")
     runner_log(cfg.log_dir, f"round_limit={cfg.rounds}")
     runner_log(cfg.log_dir, f"max_stale_rounds={cfg.max_stale_rounds}")
+    runner_log(cfg.log_dir, f"selected_cli={cfg.selected_cli}")
+    runner_log(cfg.log_dir, f"command_template_source={cfg.command_template_source}")
     update_session_file(
         session_path,
         status="running",
@@ -396,9 +671,25 @@ def main() -> int:
         rounds_completed=0,
         stale_rounds=0,
     )
+    update_live_status(
+        cfg,
+        status="running",
+        branch=branch,
+        current_round=0,
+        current_attempt=0,
+        rounds_completed=0,
+        stale_rounds=0,
+        last_commit=starting_commit,
+        current_prompt_file=None,
+        current_activity="Runner is ready. Waiting to start round 1.",
+    )
 
     if not clean:
         runner_log(cfg.log_dir, "WARNING: worktree not clean at startup")
+        update_live_status(
+            cfg,
+            current_activity="Runner started with a dirty worktree. Proceed carefully.",
+        )
 
     previous_commit = starting_commit
     stale_rounds = 0
@@ -412,24 +703,69 @@ def main() -> int:
             current_round=round_no,
             last_prompt_file=str(runtime_prompt_path),
         )
+        update_live_status(
+            cfg,
+            status="running",
+            current_round=round_no,
+            current_attempt=0,
+            current_prompt_file=str(runtime_prompt_path),
+            retry_countdown_sec=None,
+            next_retry_attempt=None,
+            current_activity=(
+                f"Round {round_no}: built the runtime prompt and is waiting "
+                "to launch the agent command."
+            ),
+            last_error=None,
+        )
 
         if cfg.dry_run:
             runner_log(cfg.log_dir, f"dry_run round={round_no}")
+            update_live_status(
+                cfg,
+                status="dry_run",
+                rounds_completed=round_no,
+                current_prompt_file=str(runtime_prompt_path),
+                current_activity=f"Dry run only: generated prompt for round {round_no}.",
+            )
             print(f"[dry-run] generated prompt: {runtime_prompt_path}")
             continue
-
-        cmd = build_command(cfg.command_template, runtime_prompt_path, cfg.repo_root)
-        runner_log(cfg.log_dir, f"round={round_no} command={cmd}")
 
         success = False
         stdout = ""
         stderr = ""
 
         for attempt in range(1, cfg.retry_limit + 2):
+            last_message_path = (
+                cfg.log_dir
+                / f"round-{round_no:03d}"
+                / f"attempt-{attempt:02d}"
+                / "last-message.txt"
+            )
+            cmd = build_command(
+                cfg.command_template,
+                runtime_prompt_path,
+                cfg.repo_root,
+                last_message_path,
+            )
+            runner_log(cfg.log_dir, f"round={round_no} attempt={attempt} command={cmd}")
             runner_log(cfg.log_dir, f"round={round_no} attempt={attempt} started")
             attempt_started_at = iso_now()
             timed_out = False
             returncode = -1
+            update_live_status(
+                cfg,
+                status="running",
+                current_round=round_no,
+                current_attempt=attempt,
+                current_prompt_file=str(runtime_prompt_path),
+                last_message_file=str(last_message_path),
+                retry_countdown_sec=None,
+                next_retry_attempt=None,
+                current_activity=(
+                    f"Round {round_no} attempt {attempt}: waiting for the agent CLI to finish."
+                ),
+                last_error=None,
+            )
 
             try:
                 result = run_cmd(cmd, cfg.repo_root, cfg.command_timeout_sec)
@@ -458,6 +794,7 @@ def main() -> int:
                     "round": round_no,
                     "started_at": attempt_started_at,
                     "finished_at": iso_now(),
+                    "last_message_file": str(last_message_path),
                     "timed_out": timed_out,
                 },
             )
@@ -468,6 +805,19 @@ def main() -> int:
                     f"round={round_no} attempt={attempt} "
                     f"returncode={returncode} timed_out={timed_out}"
                 ),
+            )
+            update_live_status(
+                cfg,
+                current_round=round_no,
+                current_attempt=attempt,
+                current_prompt_file=str(runtime_prompt_path),
+                last_message_file=str(last_message_path),
+                retry_countdown_sec=None,
+                next_retry_attempt=None,
+                current_activity=(
+                    f"Round {round_no} attempt {attempt} finished with exit code {returncode}."
+                ),
+                last_error=(stderr.strip() or None) if returncode != 0 else None,
             )
 
             if returncode == 0:
@@ -482,7 +832,12 @@ def main() -> int:
                         f"backing off {cfg.retry_backoff_sec}s"
                     ),
                 )
-                time.sleep(cfg.retry_backoff_sec)
+                update_live_status(
+                    cfg,
+                    current_prompt_file=str(runtime_prompt_path),
+                    last_message_file=str(last_message_path),
+                )
+                sleep_with_retry_countdown(cfg, round_no, attempt, runtime_prompt_path)
 
         if not success:
             stop_reason = f"agent command failed after retries on round {round_no}"
@@ -495,12 +850,39 @@ def main() -> int:
                 last_commit=last_commit(cfg.repo_root),
                 stale_rounds=stale_rounds,
             )
+            update_live_status(
+                cfg,
+                status="failed",
+                current_round=round_no,
+                current_attempt=cfg.retry_limit + 1,
+                rounds_completed=round_no - 1,
+                stale_rounds=stale_rounds,
+                last_commit=last_commit(cfg.repo_root),
+                current_prompt_file=str(runtime_prompt_path),
+                retry_countdown_sec=None,
+                next_retry_attempt=None,
+                current_activity=(
+                    f"Round {round_no} exhausted all retries and the runner is stopping."
+                ),
+                stop_reason=stop_reason,
+            )
             emit_stop(stop_reason, cfg.repo_root)
             return 2
 
         parsed_output = parse_agent_output(stdout)
         save_round_contract(cfg.log_dir, round_no, parsed_output)
         runner_log(cfg.log_dir, f"round={round_no} parsed_status={parsed_output.status}")
+        update_live_status(
+            cfg,
+            current_round=round_no,
+            current_attempt=0,
+            current_prompt_file=str(runtime_prompt_path),
+            retry_countdown_sec=None,
+            next_retry_attempt=None,
+            current_activity=f"Round {round_no}: agent output received and parsed.",
+            last_output=asdict(parsed_output),
+            last_error=None,
+        )
 
         print(f"\n===== ROUND {round_no} OUTPUT START =====\n")
         print(stdout.strip())
@@ -517,6 +899,17 @@ def main() -> int:
                 last_commit=last_commit(cfg.repo_root),
                 stale_rounds=stale_rounds,
             )
+            update_live_status(
+                cfg,
+                status="completed",
+                current_round=round_no,
+                rounds_completed=round_no,
+                stale_rounds=stale_rounds,
+                last_commit=last_commit(cfg.repo_root),
+                current_prompt_file=str(runtime_prompt_path),
+                current_activity="The agent requested STOP and the runner finished cleanly.",
+                stop_reason=stop_reason,
+            )
             return 0
 
         if parsed_output.status == "unknown":
@@ -530,6 +923,17 @@ def main() -> int:
                 rounds_completed=round_no - 1,
                 last_commit=last_commit(cfg.repo_root),
                 stale_rounds=stale_rounds,
+            )
+            update_live_status(
+                cfg,
+                status="stopped",
+                current_round=round_no,
+                rounds_completed=round_no - 1,
+                stale_rounds=stale_rounds,
+                last_commit=last_commit(cfg.repo_root),
+                current_prompt_file=str(runtime_prompt_path),
+                current_activity="The agent output did not satisfy the required contract.",
+                stop_reason=stop_reason,
             )
             emit_stop(stop_reason, cfg.repo_root)
             return 3
@@ -550,6 +954,18 @@ def main() -> int:
                 last_commit=last_commit(cfg.repo_root),
                 stale_rounds=stale_rounds,
             )
+            update_live_status(
+                cfg,
+                status="stopped",
+                current_round=round_no,
+                rounds_completed=round_no - 1,
+                stale_rounds=stale_rounds,
+                last_commit=last_commit(cfg.repo_root),
+                current_prompt_file=str(runtime_prompt_path),
+                current_activity="Post-round repository checks failed.",
+                stop_reason=stop_reason,
+                last_error=str(exc),
+            )
             emit_stop(stop_reason, cfg.repo_root)
             return 4
 
@@ -567,11 +983,28 @@ def main() -> int:
                 last_commit=current_commit,
                 stale_rounds=stale_rounds,
             )
+            update_live_status(
+                cfg,
+                status="stopped",
+                current_round=round_no,
+                rounds_completed=round_no - 1,
+                stale_rounds=stale_rounds,
+                last_commit=current_commit,
+                current_prompt_file=str(runtime_prompt_path),
+                current_activity="The checked out branch changed while the runner was active.",
+                stop_reason=stop_reason,
+            )
             emit_stop(stop_reason, cfg.repo_root)
             return 5
 
         if cfg.smoke_command:
             runner_log(cfg.log_dir, f"round={round_no} smoke_command={cfg.smoke_command}")
+            update_live_status(
+                cfg,
+                current_round=round_no,
+                current_prompt_file=str(runtime_prompt_path),
+                current_activity=f"Round {round_no}: running smoke command.",
+            )
             smoke = run_cmd(cfg.smoke_command, cfg.repo_root)
             save_smoke_artifacts(
                 cfg.log_dir,
@@ -592,8 +1025,27 @@ def main() -> int:
                     last_commit=current_commit,
                     stale_rounds=stale_rounds,
                 )
+                update_live_status(
+                    cfg,
+                    status="stopped",
+                    current_round=round_no,
+                    rounds_completed=round_no - 1,
+                    stale_rounds=stale_rounds,
+                    last_commit=current_commit,
+                    current_prompt_file=str(runtime_prompt_path),
+                    current_activity="Smoke validation failed and the runner stopped.",
+                    stop_reason=stop_reason,
+                    last_error=(smoke.stderr or "").strip() or None,
+                )
                 emit_stop(stop_reason, cfg.repo_root)
                 return 6
+            update_live_status(
+                cfg,
+                current_round=round_no,
+                current_prompt_file=str(runtime_prompt_path),
+                current_activity=f"Round {round_no}: smoke command passed.",
+                last_error=None,
+            )
 
         stale_rounds = stale_round_count(
             stale_rounds,
@@ -619,6 +1071,26 @@ def main() -> int:
             last_contract=asdict(parsed_output),
             worktree_clean_after_round=worktree_clean_after,
         )
+        validation_summary = (
+            "worktree_clean="
+            f"{worktree_clean_after}; "
+            f"smoke={'passed' if cfg.smoke_command else 'skipped'}; "
+            f"agent_validations={len(parsed_output.validations)}"
+        )
+        update_live_status(
+            cfg,
+            status="running",
+            current_round=round_no,
+            rounds_completed=round_no,
+            stale_rounds=stale_rounds,
+            last_commit=current_commit,
+            current_prompt_file=str(runtime_prompt_path),
+            last_validated_round=round_no,
+            last_validation_summary=validation_summary,
+            current_activity=(
+                f"Round {round_no} complete. Preparing the next round if the watchdog allows it."
+            ),
+        )
 
         if stale_rounds >= cfg.max_stale_rounds:
             stop_reason = (
@@ -634,6 +1106,17 @@ def main() -> int:
                 last_commit=current_commit,
                 stale_rounds=stale_rounds,
             )
+            update_live_status(
+                cfg,
+                status="stopped",
+                current_round=round_no,
+                rounds_completed=round_no,
+                stale_rounds=stale_rounds,
+                last_commit=current_commit,
+                current_prompt_file=str(runtime_prompt_path),
+                current_activity="The stale-round watchdog stopped the loop.",
+                stop_reason=stop_reason,
+            )
             emit_stop(stop_reason, cfg.repo_root)
             return 7
 
@@ -644,6 +1127,15 @@ def main() -> int:
             rounds_completed=cfg.rounds,
             stop_reason="dry run completed",
             last_commit=last_commit(cfg.repo_root),
+        )
+        update_live_status(
+            cfg,
+            status="dry-run-complete",
+            rounds_completed=cfg.rounds,
+            last_commit=last_commit(cfg.repo_root),
+            current_prompt_file=str(runtime_prompt_path),
+            current_activity="Dry run completed successfully.",
+            stop_reason="dry run completed",
         )
         print(f"[dry-run] completed {cfg.rounds} prompt generation rounds in {cfg.log_dir}")
         return 0
@@ -657,6 +1149,17 @@ def main() -> int:
         rounds_completed=cfg.rounds,
         last_commit=last_commit(cfg.repo_root),
         stale_rounds=stale_rounds,
+    )
+    update_live_status(
+        cfg,
+        status="stopped",
+        current_round=cfg.rounds,
+        rounds_completed=cfg.rounds,
+        stale_rounds=stale_rounds,
+        last_commit=last_commit(cfg.repo_root),
+        current_prompt_file=str(runtime_prompt_path),
+        current_activity="The configured round limit was reached.",
+        stop_reason=stop_reason,
     )
     emit_stop(stop_reason, cfg.repo_root)
     return 0
