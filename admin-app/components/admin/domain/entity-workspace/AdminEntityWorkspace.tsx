@@ -222,6 +222,21 @@ function withIdentifier(path: string, id: string): string {
   return path.replace("{id}", encodeURIComponent(id));
 }
 
+function resolveEntityApiPath(path: string): string {
+  const trimmedPath = path.trim();
+  if (!trimmedPath) return trimmedPath;
+  if (trimmedPath.startsWith("/api/") || trimmedPath.startsWith("http://") || trimmedPath.startsWith("https://")) {
+    return trimmedPath;
+  }
+  if (trimmedPath.startsWith("/admin/")) {
+    return `/api${trimmedPath}`;
+  }
+  if (trimmedPath.startsWith("admin/")) {
+    return `/api/${trimmedPath}`;
+  }
+  return trimmedPath;
+}
+
 function formatDate(value: string, locale: AdminLocale): string {
   if (!value) return "-";
   const date = new Date(value);
@@ -358,7 +373,10 @@ export function AdminEntityWorkspace({
     setLoading(true);
     setError(null);
     try {
-      const body = await fetchJson<{ data?: EntityRow[] }>(buildListPath(config.listPath, config.baseListQuery), activeToken);
+      const body = await fetchJson<{ data?: EntityRow[] }>(
+        resolveEntityApiPath(buildListPath(config.listPath, config.baseListQuery)),
+        activeToken,
+      );
       const rows = Array.isArray(body.data) ? body.data.filter(Boolean) : [];
       setItems(rows);
       persistSession(activeToken, email || loginEmail);
@@ -374,7 +392,7 @@ export function AdminEntityWorkspace({
     setDetailLoading(true);
     setError(null);
     try {
-      const body = await fetchJson<EntityRow>(withIdentifier(config.getPath, id.trim()), token.trim());
+      const body = await fetchJson<EntityRow>(resolveEntityApiPath(withIdentifier(config.getPath, id.trim())), token.trim());
       setSelectedId(id.trim());
       setSelectedRecord(body);
       setPatchValues(initializePrimitiveValues(config.patchFormFields, JSON.stringify(body)));
@@ -401,7 +419,7 @@ export function AdminEntityWorkspace({
     if (Object.keys(errors).length > 0) return;
     try {
       const payload = toPrimitivePayload(config.createFormFields, createValues);
-      const response = await fetchJson<EntityRow>(config.createPath, token.trim(), {
+      const response = await fetchJson<EntityRow>(resolveEntityApiPath(config.createPath), token.trim(), {
         method: "POST",
         body: JSON.stringify(payload),
       });
@@ -425,7 +443,7 @@ export function AdminEntityWorkspace({
     if (Object.keys(errors).length > 0) return;
     try {
       const payload = toPrimitivePayload(config.patchFormFields, patchValues);
-      const response = await fetchJson<EntityRow>(withIdentifier(config.patchPath, selectedId.trim()), token.trim(), {
+      const response = await fetchJson<EntityRow>(resolveEntityApiPath(withIdentifier(config.patchPath, selectedId.trim())), token.trim(), {
         method: "PATCH",
         body: JSON.stringify(payload),
       });
@@ -441,7 +459,9 @@ export function AdminEntityWorkspace({
   async function runSimpleAction(path: string, method: "POST" | "DELETE"): Promise<void> {
     if (!selectedId.trim()) return;
     try {
-      const response = await fetchJson<EntityRow>(withIdentifier(path, selectedId.trim()), token.trim(), { method });
+      const response = await fetchJson<EntityRow>(resolveEntityApiPath(withIdentifier(path, selectedId.trim())), token.trim(), {
+        method,
+      });
       setResult(JSON.stringify(response, null, 2));
       await loadList();
       setActiveTab("review");
@@ -467,7 +487,7 @@ export function AdminEntityWorkspace({
     }
     try {
       const payload = toPrimitivePayload(action.fields, values);
-      const response = await fetchJson<Record<string, unknown>>(action.path, token.trim(), {
+      const response = await fetchJson<Record<string, unknown>>(resolveEntityApiPath(action.path), token.trim(), {
         method: action.method || "POST",
         body: JSON.stringify({
           [action.idsPayloadKey || `${config.identifierField}s`]: ids,

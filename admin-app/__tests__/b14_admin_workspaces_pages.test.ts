@@ -261,6 +261,9 @@ describe("B14 admin workspace pages contract", () => {
     expect(entityWorkspace).toContain("handleBulkAction");
     expect(entityWorkspace).toContain("parseIdentifierList");
     expect(entityWorkspace).toContain("withCurrentSelectOptions");
+    expect(entityWorkspace).toContain("resolveEntityApiPath");
+    expect(entityWorkspace).toContain('trimmedPath.startsWith("/admin/")');
+    expect(entityWorkspace).toContain('return `/api${trimmedPath}`;');
     expect(propertiesPage).toContain("/admin/properties/bulk/status");
     expect(propertiesPage).toContain("/admin/properties/bulk/tags");
     expect(propertiesPage).toContain("/admin/properties/bulk/update");
