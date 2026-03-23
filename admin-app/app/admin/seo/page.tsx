@@ -17,7 +17,7 @@ import {
   AdminTable,
   LogCard,
 } from "@/components/admin/AdminPrimitives";
-import { formatSeoApiError, readRequestFailedStatus } from "./error-utils";
+import { formatSeoApiError } from "./error-utils";
 
 type Locale = AdminLocale;
 
@@ -430,19 +430,6 @@ export default function AdminSeoPage() {
     });
   }
 
-  async function loadReport(activeToken: string) {
-    try {
-      const body = await api<{ report: BrokenLinkReport }>("/admin/seo/broken-links/latest", activeToken);
-      setReport(body.report || null);
-    } catch (error) {
-      if (readRequestFailedStatus(error) === 404) {
-        setReport(null);
-        return;
-      }
-      throw error;
-    }
-  }
-
   async function loadPolicy(activeToken: string) {
     const body = await api<{ policy: BrokenLinkPolicy }>("/admin/seo/broken-links/policy", activeToken);
     setPolicy(body.policy || null);
@@ -458,7 +445,6 @@ export default function AdminSeoPage() {
         loadOverrides(activeToken),
         loadRedirects(activeToken),
         loadSchema(activeToken, schemaForm.locale),
-        loadReport(activeToken),
         loadPolicy(activeToken),
       ]);
     } catch (error) {
@@ -927,7 +913,7 @@ export default function AdminSeoPage() {
         >
           <div className="card-actions">
             <AdminButton variant="primary" type="button" onClick={() => void runBrokenLinks()} disabled={!isAuth || busy}>{t.runChecker}</AdminButton>
-            <AdminButton variant="secondary" type="button" onClick={() => void loadReport(token)} disabled={!isAuth || busy}>{t.refresh}</AdminButton>
+            <AdminButton variant="secondary" type="button" onClick={() => void refreshAll()} disabled={!isAuth || busy || loading}>{t.refresh}</AdminButton>
           </div>
           {policy ? (
             <div className="seo-report-grid" role="status" aria-live="polite">

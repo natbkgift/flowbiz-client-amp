@@ -1161,6 +1161,7 @@
     vertical-align: middle;
     text-align: left;
     line-height: 1.55;
+    overflow-wrap: anywhere;
   }
 
   .dashboard-table th,
@@ -2877,6 +2878,25 @@
     .admin-drawer {
       width: min(100%, 100vw);
     }
+
+    .admin-section-tabs {
+      flex-wrap: wrap;
+      overflow-x: visible;
+    }
+
+    .admin-section-tabs__tab {
+      flex: 1 1 148px;
+      justify-content: center;
+      min-width: 0;
+      white-space: normal;
+      text-align: center;
+      padding-block: 10px;
+    }
+
+    .admin-mobile-record-card__meta,
+    .dashboard-table-card-meta {
+      grid-template-columns: minmax(0, 1fr);
+    }
   }
 
   @media (min-width: 1800px) {
@@ -3161,6 +3181,20 @@
 
   .dashboard-table-card-meta {
     grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .admin-mobile-record-list {
+    display: grid;
+    gap: var(--admin-space-3);
+  }
+
+  .admin-mobile-record-card {
+    display: grid;
+    gap: var(--admin-space-3);
+  }
+
+  .admin-mobile-record-card__meta {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .crm-controls-grid {

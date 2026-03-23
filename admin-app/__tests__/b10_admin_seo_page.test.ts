@@ -26,7 +26,6 @@ describe("B10 admin SEO page contract", () => {
     expect(page).toContain('"/admin/seo/schema-source"');
     expect(page).toContain('"/admin/seo/schema-source/bootstrap-production"');
     expect(page).toContain('"/admin/seo/broken-links/run"');
-    expect(page).toContain('"/admin/seo/broken-links/latest"');
     expect(page).toContain('"/admin/seo/broken-links/policy"');
     expect(page).toContain('"/admin/seo/redirects/preload-production"');
   });
@@ -43,7 +42,6 @@ describe("B10 admin SEO page contract", () => {
     expect(page).toContain("state-loading");
     expect(page).toContain("state-error");
     expect(page).toContain("formatSeoApiError");
-    expect(page).toContain("readRequestFailedStatus");
     expect(page).toContain("{t.retry}");
     expect(page).toContain('overflowWrap: "anywhere"');
     expect(page).toContain('className="state-empty admin-workspace-empty-state"');

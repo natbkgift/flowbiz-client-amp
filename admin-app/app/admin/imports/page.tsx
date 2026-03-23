@@ -9,8 +9,10 @@ import { formatWorkspaceErrorMessage } from "@/app/_lib/admin-workspace-error";
 import AdminWorkspaceErrorState from "@/components/admin/AdminWorkspaceErrorState";
 import {
   ActionCard,
+  AdminBadge,
   AdminButton,
   AdminPageHeader,
+  AdminResponsiveList,
   AdminStatCard,
   AdminTable,
   LogCard,
@@ -675,34 +677,73 @@ export default function AdminImportsPage() {
                 </div>
               </div>
             ) : (
-              <AdminTable caption={t.imports}>
-                <table className="dashboard-table">
-                  <thead>
-                    <tr>
-                      <th>{t.created}</th>
-                      <th>{t.status}</th>
-                      <th>{t.file}</th>
-                      <th>{t.rows}</th>
-                      <th>{t.createdRows}</th>
-                      <th>{t.updatedRows}</th>
-                      <th>{t.durationMs}</th>
-                    </tr>
-                  </thead>
-                  <tbody>
+              <AdminResponsiveList
+                desktop={(
+                  <AdminTable caption={t.imports}>
+                    <table className="dashboard-table">
+                      <thead>
+                        <tr>
+                          <th>{t.created}</th>
+                          <th>{t.status}</th>
+                          <th>{t.file}</th>
+                          <th>{t.rows}</th>
+                          <th>{t.createdRows}</th>
+                          <th>{t.updatedRows}</th>
+                          <th>{t.durationMs}</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {imports.map((row) => (
+                          <tr key={row.id}>
+                            <td>{prettyDate(row.created_at, locale)}</td>
+                            <td>{translateImportStatus(row.status, t)}</td>
+                            <td>{row.filename || "-"}</td>
+                            <td>{row.rows_total}</td>
+                            <td>{row.rows_created}</td>
+                            <td>{row.rows_updated}</td>
+                            <td>{row.duration_ms}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </AdminTable>
+                )}
+                mobile={(
+                  <div className="admin-mobile-record-list" aria-label={t.imports}>
                     {imports.map((row) => (
-                      <tr key={row.id}>
-                        <td>{prettyDate(row.created_at, locale)}</td>
-                        <td>{translateImportStatus(row.status, t)}</td>
-                        <td>{row.filename || "-"}</td>
-                        <td>{row.rows_total}</td>
-                        <td>{row.rows_created}</td>
-                        <td>{row.rows_updated}</td>
-                        <td>{row.duration_ms}</td>
-                      </tr>
+                      <article key={row.id} className="dashboard-table-card admin-mobile-record-card">
+                        <div className="dashboard-table-card-head">
+                          <div>
+                            <h3 className="dashboard-table-card-name">{row.filename || "-"}</h3>
+                            <p>{prettyDate(row.created_at, locale)}</p>
+                          </div>
+                          <AdminBadge tone={row.status === "failed" ? "error" : row.status === "partial" ? "warn" : "ok"}>
+                            {translateImportStatus(row.status, t)}
+                          </AdminBadge>
+                        </div>
+                        <div className="dashboard-table-card-meta admin-mobile-record-card__meta">
+                          <div>
+                            <span>{t.rows}</span>
+                            <strong>{row.rows_total}</strong>
+                          </div>
+                          <div>
+                            <span>{t.createdRows}</span>
+                            <strong>{row.rows_created}</strong>
+                          </div>
+                          <div>
+                            <span>{t.updatedRows}</span>
+                            <strong>{row.rows_updated}</strong>
+                          </div>
+                          <div>
+                            <span>{t.durationMs}</span>
+                            <strong>{row.duration_ms}</strong>
+                          </div>
+                        </div>
+                      </article>
                     ))}
-                  </tbody>
-                </table>
-              </AdminTable>
+                  </div>
+                )}
+              />
             )}
           </LogCard>
         </>

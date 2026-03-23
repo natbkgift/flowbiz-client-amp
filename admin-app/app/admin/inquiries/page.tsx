@@ -71,7 +71,7 @@ function detectLocale(): InquiryLocale {
 }
 
 async function fetchJson<T>(path: string, token: string): Promise<T> {
-  const response = await fetch(path, {
+  const response = await fetch(`/api${path}`, {
     headers: { Authorization: `Bearer ${token}` },
     cache: "no-store",
   });
@@ -393,7 +393,7 @@ export default function AdminInquiriesPage() {
         follow_up_status: followUpStatus,
         follow_up_due_at: followUpDueAt ? new Date(followUpDueAt).toISOString() : null,
       };
-      const response = await fetch(`/admin/inquiries/${selectedId}/follow-up`, {
+      const response = await fetch(`/api/admin/inquiries/${selectedId}/follow-up`, {
         method: "PATCH",
         headers: {
           "content-type": "application/json",
@@ -462,7 +462,7 @@ export default function AdminInquiriesPage() {
     setMovingInquiryId(inquiryId);
     setMoveStatusNotice(null);
     try {
-      const response = await fetch(`/admin/inquiries/${inquiryId}`, {
+      const response = await fetch(`/api/admin/inquiries/${inquiryId}`, {
         method: "PATCH",
         headers: {
           "content-type": "application/json",
@@ -489,7 +489,7 @@ export default function AdminInquiriesPage() {
       return;
     }
 
-    const response = await fetch(`/admin/inquiries-export.csv?${appliedFilterQuery}`, {
+    const response = await fetch(`/api/admin/inquiries-export.csv?${appliedFilterQuery}`, {
       headers: { Authorization: `Bearer ${activeToken}` },
       cache: "no-store",
     });

@@ -27,11 +27,12 @@ describe("B11 admin inquiries page contract", () => {
   it("keeps required admin inquiry API wiring", () => {
     const page = read("app/admin/inquiries/page.tsx");
 
+    expect(page).toContain('fetch(`/api${path}`');
     expect(page).toContain("`/admin/inquiries?${query}`");
     expect(page).toContain("`/admin/inquiries/${id}`");
     expect(page).toContain("`/admin/inquiries/${id}/timeline?limit=30`");
-    expect(page).toContain("`/admin/inquiries/${selectedId}/follow-up`");
-    expect(page).toContain("`/admin/inquiries-export.csv?${appliedFilterQuery}`");
+    expect(page).toContain("`/api/admin/inquiries/${selectedId}/follow-up`");
+    expect(page).toContain("`/api/admin/inquiries-export.csv?${appliedFilterQuery}`");
     expect(page).toContain("Authorization: `Bearer ${activeToken}`");
   });
 
@@ -78,7 +79,7 @@ describe("B11 admin inquiries page contract", () => {
     expect(page).toContain('const [viewMode, setViewMode] = useState<InquiryViewMode>("table")');
     expect(kanban).toContain("CRM_STATUSES");
     expect(page).toContain('method: "PATCH"');
-    expect(page).toContain("`/admin/inquiries/${inquiryId}`");
+    expect(page).toContain("`/api/admin/inquiries/${inquiryId}`");
     expect(page).toContain('body: JSON.stringify({ status: nextStatus })');
     expect(utils).toContain("flowbiz_crm_saved_filters_v1");
     expect(utils).toContain("readRoleFromToken");
@@ -163,7 +164,7 @@ describe("B11 admin inquiries page contract", () => {
     expect(page).toContain("await loadListWithFilters(appliedFilters, tokenOverride, emailOverride);");
     expect(page).toContain("setAppliedFilters(nextFilters);");
     expect(page).toContain("setAppliedFilterQuery(query);");
-    expect(page).toContain("`/admin/inquiries-export.csv?${appliedFilterQuery}`");
+    expect(page).toContain("`/api/admin/inquiries-export.csv?${appliedFilterQuery}`");
     expect(page).toContain("const shouldDisableApply = !isAuthenticated || loading || detailLoading || Boolean(movingInquiryId) || !hasUnappliedFilters;");
     expect(page).toContain("const shouldDisableReload = !isAuthenticated || detailLoading || Boolean(movingInquiryId) || hasUnappliedFilters;");
     expect(page).toContain("disabled={shouldDisableApply}");

@@ -13,6 +13,7 @@ import {
   AdminButton,
   AdminPageHeader,
   AdminPrimaryActionBar,
+  AdminResponsiveList,
   AdminSectionCard,
   AdminSectionTabs,
   AdminStatCard,
@@ -977,36 +978,71 @@ export default function AdminMediaPage() {
                 </div>
               </div>
             ) : (
-              <AdminTable caption={t.mediaList}>
-                <table className="dashboard-table">
-                  <thead>
-                    <tr>
-                      <th>{t.path}</th>
-                      <th>{t.status}</th>
-                      <th>{t.approval}</th>
-                      <th>{t.rights}</th>
-                      <th>{t.updated}</th>
-                      <th>{t.action}</th>
-                    </tr>
-                  </thead>
-                  <tbody>
+              <AdminResponsiveList
+                desktop={(
+                  <AdminTable caption={t.mediaList}>
+                    <table className="dashboard-table">
+                      <thead>
+                        <tr>
+                          <th>{t.path}</th>
+                          <th>{t.status}</th>
+                          <th>{t.approval}</th>
+                          <th>{t.rights}</th>
+                          <th>{t.updated}</th>
+                          <th>{t.action}</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {items.map((item) => (
+                          <tr key={item.id}>
+                            <td>{item.storage_path || "-"}</td>
+                            <td>{translateMediaValue(item.status, t)}</td>
+                            <td>{translateMediaValue(item.approval_status, t)}</td>
+                            <td>{translateMediaValue(item.rights_status, t)}</td>
+                            <td>{prettyDate(item.updated_at, locale)}</td>
+                            <td>
+                              <AdminButton variant="secondary" size="sm" icon="search" type="button" onClick={() => setMediaId(item.id)}>
+                                {t.select}
+                              </AdminButton>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </AdminTable>
+                )}
+                mobile={(
+                  <div className="admin-mobile-record-list" aria-label={t.mediaList}>
                     {items.map((item) => (
-                      <tr key={item.id}>
-                        <td>{item.storage_path || "-"}</td>
-                        <td>{translateMediaValue(item.status, t)}</td>
-                        <td>{translateMediaValue(item.approval_status, t)}</td>
-                        <td>{translateMediaValue(item.rights_status, t)}</td>
-                        <td>{prettyDate(item.updated_at, locale)}</td>
-                        <td>
+                      <article key={item.id} className="dashboard-table-card admin-mobile-record-card">
+                        <div className="dashboard-table-card-head">
+                          <div>
+                            <h3 className="dashboard-table-card-name">{item.storage_path || "-"}</h3>
+                            <p>{prettyDate(item.updated_at, locale)}</p>
+                          </div>
                           <AdminButton variant="secondary" size="sm" icon="search" type="button" onClick={() => setMediaId(item.id)}>
                             {t.select}
                           </AdminButton>
-                        </td>
-                      </tr>
+                        </div>
+                        <div className="dashboard-table-card-meta admin-mobile-record-card__meta">
+                          <div>
+                            <span>{t.status}</span>
+                            <strong>{translateMediaValue(item.status, t)}</strong>
+                          </div>
+                          <div>
+                            <span>{t.approval}</span>
+                            <strong>{translateMediaValue(item.approval_status, t)}</strong>
+                          </div>
+                          <div>
+                            <span>{t.rights}</span>
+                            <strong>{translateMediaValue(item.rights_status, t)}</strong>
+                          </div>
+                        </div>
+                      </article>
                     ))}
-                  </tbody>
-                </table>
-              </AdminTable>
+                  </div>
+                )}
+              />
             )}
           </LogCard>
           ) : null}

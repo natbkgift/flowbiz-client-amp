@@ -31,6 +31,7 @@ describe("B14 admin workspace pages contract", () => {
     expect(page).toContain("/admin/media/properties/");
     expect(page).toContain("AdminAccessGate");
     expect(page).toContain("AdminPrimaryActionBar");
+    expect(page).toContain("AdminResponsiveList");
     expect(page).toContain("AdminSectionTabs");
     expect(page).toContain("admin-workspace-panel admin-workspace-panel--actions");
     expect(page).toContain("admin-workspace-panel admin-workspace-panel--records");
@@ -38,6 +39,7 @@ describe("B14 admin workspace pages contract", () => {
     expect(page).toContain("state-loading");
     expect(page).toContain("state-error");
     expect(page).toContain("state-success");
+    expect(page).toContain("admin-mobile-record-list");
     expect(page).toContain("parseJsonObject(");
     expect(page).toContain("invalidPatchJson");
     expect(page).toContain("invalidGalleryPayload");
@@ -70,6 +72,8 @@ describe("B14 admin workspace pages contract", () => {
     expect(page).toContain("/admin/dashboard/health-summary");
     expect(page).toContain("admin-workspace-panel admin-workspace-panel--actions");
     expect(page).toContain("admin-workspace-panel admin-workspace-panel--records");
+    expect(page).toContain("AdminResponsiveList");
+    expect(page).toContain("admin-mobile-record-list");
     expect(page).toContain("state-empty");
     expect(page).toContain("state-loading");
     expect(page).toContain("state-error");
