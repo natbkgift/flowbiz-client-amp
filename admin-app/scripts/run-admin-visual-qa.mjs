@@ -307,6 +307,13 @@ async function captureRoute(page, route, locale, width, captureLog, networkLog) 
   await page.waitForTimeout(900);
   await page.locator("main").first().waitFor({ timeout: 10000 }).catch(() => {});
   await page.waitForLoadState("networkidle", { timeout: 5000 }).catch(() => {});
+  await page.evaluate(async () => {
+    if (document.fonts?.ready) {
+      await document.fonts.ready.catch(() => {});
+    }
+    await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+  });
+  await page.waitForTimeout(250);
 
   const metrics = await page.evaluate(() => {
     function isVisible(element) {

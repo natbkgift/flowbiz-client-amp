@@ -685,7 +685,7 @@ export default function AdminSeoPage() {
           ];
 
   return (
-    <main id="main-content" className="container content-stack admin-overflow-guard">
+    <main id="main-content" className="container content-stack admin-overflow-guard admin-seo-page">
       <AdminPageHeader title={t.title} description={t.subtitle} icon="globe" eyebrow="Search workflow" />
 
       <AdminAccessGate
