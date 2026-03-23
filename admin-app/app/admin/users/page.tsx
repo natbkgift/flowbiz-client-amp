@@ -24,12 +24,12 @@ const USER_PATCH_TEMPLATE = JSON.stringify(
 const USER_CREATE_FIELDS = [
   { name: "email", label: "Work email", type: "text", required: true, placeholder: "user@example.com" },
   { name: "password", label: "Temporary password", type: "password", required: true, placeholder: "minimum 6 characters" },
-  { name: "role", label: "Primary access role", type: "text", required: true, placeholder: "admin/editor/ops" },
+  { name: "role", label: "Primary access role", type: "select", required: true, options: ["admin", "editor", "ops"] },
   {
     name: "role_ids",
-    label: "Additional access roles",
-    type: "json",
-    placeholder: '["role-uuid-1"]',
+    label: "Additional access IDs",
+    type: "chips",
+    placeholder: "role-id-1, role-id-2",
     rows: 3,
   },
 ] as const;
@@ -37,12 +37,12 @@ const USER_CREATE_FIELDS = [
 const USER_PATCH_FIELDS = [
   { name: "email", label: "Work email", type: "text", placeholder: "user@example.com" },
   { name: "password", label: "Temporary password", type: "password", placeholder: "minimum 6 characters" },
-  { name: "role", label: "Primary access role", type: "text", placeholder: "admin/editor/ops" },
+  { name: "role", label: "Primary access role", type: "select", options: ["admin", "editor", "ops"] },
   {
     name: "role_ids",
-    label: "Additional access roles",
-    type: "json",
-    placeholder: '["role-uuid-1"]',
+    label: "Additional access IDs",
+    type: "chips",
+    placeholder: "role-id-1, role-id-2",
     rows: 3,
   },
 ] as const;
@@ -89,8 +89,8 @@ export default function AdminUsersPage() {
             ? "ยืนยันบทบาทหลักและบทบาทเสริมก่อนบันทึกสิทธิ์ของคนในทีม"
             : "Confirm the primary and additional role assignments before saving team access.",
           query: isThai
-            ? "โหลดรายการผู้ใช้ก่อน แล้วอ้างอิงบทบาทจาก /admin/roles เพื่อหลีกเลี่ยงการแก้สิทธิ์ผิดคน"
-            : "Load the people list first, then cross-check roles from /admin/roles so access changes land on the intended person.",
+            ? "โหลดรายการผู้ใช้ก่อน ตรวจบทบาทหลักของแต่ละคนจากรายการ แล้วค่อยแก้สิทธิ์ของคนที่เลือกเพื่อหลีกเลี่ยงการอัปเดตผิดบัญชี"
+            : "Load the people list first, confirm the current primary role in the list, then update access on the selected person.",
         },
         identifierLabel: isThai ? "รหัสบุคคล" : "Person ID",
         identifierPlaceholder: isThai ? "UUID ของบุคคล" : "person UUID",
@@ -105,8 +105,8 @@ export default function AdminUsersPage() {
         createFormFields: [...USER_CREATE_FIELDS],
         patchFormFields: [...USER_PATCH_FIELDS],
         queryHelp: isThai
-          ? "เรียกดูบทบาทจาก /admin/roles แล้วใส่รหัสบทบาทเสริมในช่อง Additional access roles"
-          : "List roles from /admin/roles, then enter the additional role IDs in the Additional access roles field.",
+          ? "บทบาทหลักใช้ตัวเลือกมาตรฐานของระบบ ส่วนรหัสสิทธิ์เสริมให้กรอกเป็นรายการคั่นด้วยจุลภาคหรือขึ้นบรรทัดใหม่"
+          : "Use the built-in primary role options. Enter any advanced access IDs as a comma-separated list only when needed.",
       }}
     />
   );

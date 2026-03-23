@@ -8,6 +8,7 @@ import { fetchJson, toPrettyJson } from "@/app/_lib/admin-auth";
 import { useAdminAuthController } from "@/app/_lib/admin-auth-hooks";
 import { detectAdminLocale } from "@/app/_lib/admin-i18n";
 import { type AdminDataTableColumn } from "@/components/admin/AdminDataTable";
+import { AdminSectionTabs } from "@/components/admin/AdminPrimitives";
 import {
   AdminCrudWorkspaceAuthPanel,
   AdminCrudWorkspaceBulkActionsPanel,
@@ -121,6 +122,7 @@ export function AdminJsonCrudWorkspace({ config }: { config: CrudConfig }) {
   const patchFieldGroups = useMemo(() => groupLocalizedFields(config.patchFormFields, checklistLocales), [checklistLocales, config.patchFormFields]);
   const [createLocaleTab, setCreateLocaleTab] = useState(createFieldGroups.localeOrder[0] || "en");
   const [patchLocaleTab, setPatchLocaleTab] = useState(patchFieldGroups.localeOrder[0] || "en");
+  const [activeWorkspaceTab, setActiveWorkspaceTab] = useState<"browse" | "create" | "update" | "review">("browse");
   const previewChecklist = previewRecord && config.publishChecklistConfig ? checklistReport(config.publishChecklistConfig, previewRecord) : null;
 
   useEffect(() => {
@@ -309,7 +311,10 @@ export function AdminJsonCrudWorkspace({ config }: { config: CrudConfig }) {
               <button
                 className={`btn ${isActiveRecord ? "btn" : "btn-secondary"}`}
                 type="button"
-                onClick={() => setIdentifier(id)}
+                onClick={() => {
+                  setIdentifier(id);
+                  setActiveWorkspaceTab("update");
+                }}
                 disabled={!id}
                 aria-pressed={isActiveRecord}
               >
@@ -384,6 +389,16 @@ export function AdminJsonCrudWorkspace({ config }: { config: CrudConfig }) {
   );
 
   const hasOutputSidecar = Boolean(result) || Boolean(revisionConfig);
+  const workspaceTabs = useMemo(
+    () =>
+      [
+        { key: "browse", label: t.tabBrowse, count: Array.isArray(items) ? items.length : undefined },
+        config.createPath ? { key: "create", label: t.tabCreate } : null,
+        config.patchPath ? { key: "update", label: t.tabUpdate } : null,
+        { key: "review", label: t.tabReview },
+      ].filter(Boolean) as Array<{ key: string; label: string; count?: number }>,
+    [config.createPath, config.patchPath, items, t.tabBrowse, t.tabCreate, t.tabReview, t.tabUpdate]
+  );
 
   function clearSingleFieldError(name: string, setErrors: Dispatch<SetStateAction<Record<string, string>>>) {
     setErrors((current) => {
@@ -447,216 +462,305 @@ export function AdminJsonCrudWorkspace({ config }: { config: CrudConfig }) {
 
       {isAuthenticated ? (
         <>
-          <div className="admin-workspace-split">
-            <AdminCrudWorkspaceQueryPanel
-              config={config}
-              idBase={idBase}
-              copy={t}
-              listQuery={listQuery}
-              meta={meta}
-              queryHelp={displayConfig.queryHelp}
-              onListQueryChange={setListQuery}
-              onLoadList={() => void loadList()}
-            />
-            <AdminCrudWorkspaceRecordActionsPanel
-              idBase={idBase}
-              copy={t}
-              config={config}
-              identifierLabel={displayConfig.identifierLabel}
-              identifier={identifier}
-              readinessPath={readinessPath}
-              revisionConfig={revisionConfig}
-              onIdentifierChange={setIdentifier}
-              onGetDetail={() => void runAction("get-detail", () => fetchJson(withIdentifier(config.getPath, identifier), token.trim()))}
-              onCheckReadiness={() => void runAction("check-readiness", () => fetchJson(withIdentifier(readinessPath, identifier), token.trim()))}
-              onPublish={() => void runAction("publish", () => publishRecord())}
-              onUnpublish={() =>
-                void runAction("unpublish", () =>
-                  fetchJson(withIdentifier(config.unpublishPath || "", identifier), token.trim(), {
-                    method: "POST",
-                  })
-                )
-              }
-              onDelete={() =>
-                void runAction("delete", () =>
-                  fetchJson(withIdentifier(config.deletePath || "", identifier), token.trim(), {
-                    method: "DELETE",
-                  })
-                )
-              }
-              onLoadRevisions={() =>
-                void runAction("load-revisions", async () => {
-                  await loadRevisions();
-                  return { revisions_loaded: true };
-                })
-              }
-            />
-          </div>
-
-          <div className="admin-workspace-editor-grid">
-            <AdminCrudWorkspaceCreatePanel
-              idBase={idBase}
-              copy={t}
-              config={config}
-              token={token}
-              createPayload={createPayload}
-              createFieldGroups={createFieldGroups}
-              createFormValues={createFormValues}
-              createFormErrors={createFormErrors}
-              createLocaleTab={createLocaleTab}
-              onCreatePayloadChange={setCreatePayload}
-              onCreateLocaleTabChange={setCreateLocaleTab}
-              onLocaleTabKeyDown={onLocaleTabKeyDown}
-              onCreateFieldChange={handleCreateFieldChange}
-              onCreate={() =>
-                void runAction("create", () =>
-                  fetchJson(config.createPath || "", token.trim(), {
-                    method: "POST",
-                    body: JSON.stringify(
-                      Array.isArray(config.createFormFields) && config.createFormFields.length > 0
-                        ? (() => {
-                            const errors = validatePrimitiveValues(config.createFormFields, createFormValues);
-                            setCreateFormErrors(errors);
-                            if (Object.keys(errors).length > 0) {
-                              throw new Error(t.fixFields);
-                            }
-                            return toPrimitivePayload(config.createFormFields, createFormValues);
-                          })()
-                        : parseJsonInput(createPayload)
-                    ),
-                  })
-                )
-              }
-            />
-
-            <AdminCrudWorkspacePatchPanel
-              idBase={idBase}
-              copy={t}
-              config={config}
-              identifier={identifier}
-              token={token}
-              patchPayload={patchPayload}
-              patchFieldGroups={patchFieldGroups}
-              patchFormValues={patchFormValues}
-              patchFormErrors={patchFormErrors}
-              patchLocaleTab={patchLocaleTab}
-              onPatchPayloadChange={setPatchPayload}
-              onPatchLocaleTabChange={setPatchLocaleTab}
-              onLocaleTabKeyDown={onLocaleTabKeyDown}
-              onPatchFieldChange={handlePatchFieldChange}
-              onPatch={() =>
-                void runAction("patch", () =>
-                  fetchJson(withIdentifier(config.patchPath || "", identifier), token.trim(), {
-                    method: "PATCH",
-                    body: JSON.stringify(
-                      Array.isArray(config.patchFormFields) && config.patchFormFields.length > 0
-                        ? (() => {
-                            const errors = validatePrimitiveValues(config.patchFormFields, patchFormValues);
-                            setPatchFormErrors(errors);
-                            if (Object.keys(errors).length > 0) {
-                              throw new Error(t.fixFields);
-                            }
-                            return toPrimitivePayload(config.patchFormFields, patchFormValues);
-                          })()
-                        : parseJsonInput(patchPayload)
-                    ),
-                  })
-                )
-              }
-            />
-          </div>
-
-          <AdminCrudWorkspaceBulkActionsPanel
-            idBase={idBase}
-            copy={t}
-            bulkActions={bulkActions}
-            bulkTargetIdsByAction={bulkTargetIdsByAction}
-            bulkFormValues={bulkFormValues}
-            bulkFormErrors={bulkFormErrors}
-            token={token}
-            onBulkTargetIdsChange={(actionKey, value) =>
-              setBulkTargetIdsByAction((current) => ({
-                ...current,
-                [actionKey]: value,
-              }))
-            }
-            onBulkFieldChange={handleBulkFieldChange}
-            onRunBulkAction={(actionKey) =>
-              void runAction("bulk", async () => {
-                const action = bulkActions.find((candidate) => candidate.key === actionKey);
-                if (!action) throw new Error("Bulk action is unavailable.");
-                const ids = parseIdentifierList(bulkTargetIdsByAction[action.key] || "");
-                if (ids.length === 0) {
-                  throw new Error("At least one property ID is required.");
-                }
-                const values = bulkFormValues[action.key] || {};
-                const errors = validatePrimitiveValues(action.fields, values);
-                setBulkFormErrors((current) => ({ ...current, [action.key]: errors }));
-                if (Object.keys(errors).length > 0) {
-                  throw new Error(t.fixFields);
-                }
-                const payload = toPrimitivePayload(action.fields, values);
-                const response = await fetchJson(action.path, token.trim(), {
-                  method: action.method || "POST",
-                  body: JSON.stringify({
-                    property_ids: ids,
-                    ...payload,
-                  }),
-                });
-                setBulkTargetIdsByAction((current) => ({
-                  ...current,
-                  [action.key]: "",
-                }));
-                return response;
-              })
-            }
+          <AdminSectionTabs
+            tabs={workspaceTabs}
+            activeTab={activeWorkspaceTab}
+            onChange={(key) => setActiveWorkspaceTab(key as "browse" | "create" | "update" | "review")}
           />
 
-          {error ? <div className="state-error">{error}</div> : null}
-          {loading ? <div className="state-loading">{t.loading}</div> : null}
-
-          <div className={hasOutputSidecar ? "admin-workspace-output-grid admin-workspace-output-grid--split" : "admin-workspace-output-grid"}>
-            <AdminCrudWorkspaceRecordsPanel
-              config={config}
-              copy={t}
-              items={items}
-              hasLoadedRecords={Boolean(meta)}
-              tableColumns={tableColumns}
-              pickIdentifierFromRow={pickIdentifierFromRow}
-            />
-            {hasOutputSidecar ? (
-              <div className="admin-workspace-output-sidecar">
-                <AdminCrudWorkspaceResultPanel copy={t} result={result} actionKey={lastActionKey} followUpLinks={config.followUpLinks} />
-                <AdminCrudWorkspaceRevisionsPanel
+          {activeWorkspaceTab === "browse" ? (
+            <>
+              <div className="admin-workspace-split">
+                <AdminCrudWorkspaceQueryPanel
                   config={config}
-                  copy={t}
                   idBase={idBase}
+                  copy={t}
+                  listQuery={listQuery}
+                  meta={meta}
+                  queryHelp={displayConfig.queryHelp}
+                  onListQueryChange={setListQuery}
+                  onLoadList={() => void loadList()}
+                />
+                <AdminCrudWorkspaceRecordActionsPanel
+                  idBase={idBase}
+                  copy={t}
+                  config={config}
+                  identifierLabel={displayConfig.identifierLabel}
                   identifier={identifier}
+                  readinessPath={readinessPath}
                   revisionConfig={revisionConfig}
-                  revisions={revisions}
-                  selectedRevisionId={selectedRevisionId}
-                  onSelectedRevisionIdChange={setSelectedRevisionId}
-                  onShowDiff={() =>
-                    void runAction("show-diff", () =>
-                      fetchJson(withRevisionIdentifier(revisionConfig?.diffPath || "", identifier, selectedRevisionId), token.trim())
+                  onIdentifierChange={setIdentifier}
+                  onGetDetail={() => void runAction("get-detail", () => fetchJson(withIdentifier(config.getPath, identifier), token.trim()))}
+                  onCheckReadiness={() => void runAction("check-readiness", () => fetchJson(withIdentifier(readinessPath, identifier), token.trim()))}
+                  onPublish={() => void runAction("publish", () => publishRecord())}
+                  onUnpublish={() =>
+                    void runAction("unpublish", () =>
+                      fetchJson(withIdentifier(config.unpublishPath || "", identifier), token.trim(), {
+                        method: "POST",
+                      })
                     )
                   }
-                  onRestoreRevision={() =>
-                    void runAction("restore-revision", async () => {
-                      const restored = await fetchJson(
-                        withRevisionIdentifier(revisionConfig?.restorePath || "", identifier, selectedRevisionId),
-                        token.trim(),
-                        { method: "POST" }
-                      );
+                  onDelete={() =>
+                    void runAction("delete", () =>
+                      fetchJson(withIdentifier(config.deletePath || "", identifier), token.trim(), {
+                        method: "DELETE",
+                      })
+                    )
+                  }
+                  onLoadRevisions={() =>
+                    void runAction("load-revisions", async () => {
                       await loadRevisions();
-                      return restored;
+                      setActiveWorkspaceTab("review");
+                      return { revisions_loaded: true };
                     })
                   }
                 />
               </div>
-            ) : null}
-          </div>
-          <AdminCrudWorkspacePreviewPanel copy={t} previewConfig={previewConfig} previewRecord={previewRecord} previewChecklist={previewChecklist} />
+              <div className={hasOutputSidecar ? "admin-workspace-output-grid admin-workspace-output-grid--split" : "admin-workspace-output-grid"}>
+                <AdminCrudWorkspaceRecordsPanel
+                  config={config}
+                  copy={t}
+                  items={items}
+                  hasLoadedRecords={Boolean(meta)}
+                  tableColumns={tableColumns}
+                  pickIdentifierFromRow={pickIdentifierFromRow}
+                />
+                {hasOutputSidecar ? (
+                  <div className="admin-workspace-output-sidecar">
+                    <AdminCrudWorkspaceResultPanel copy={t} result={result} actionKey={lastActionKey} followUpLinks={config.followUpLinks} />
+                    <AdminCrudWorkspaceRevisionsPanel
+                      config={config}
+                      copy={t}
+                      idBase={idBase}
+                      identifier={identifier}
+                      revisionConfig={revisionConfig}
+                      revisions={revisions}
+                      selectedRevisionId={selectedRevisionId}
+                      onSelectedRevisionIdChange={setSelectedRevisionId}
+                      onShowDiff={() =>
+                        void runAction("show-diff", () =>
+                          fetchJson(withRevisionIdentifier(revisionConfig?.diffPath || "", identifier, selectedRevisionId), token.trim())
+                        )
+                      }
+                      onRestoreRevision={() =>
+                        void runAction("restore-revision", async () => {
+                          const restored = await fetchJson(
+                            withRevisionIdentifier(revisionConfig?.restorePath || "", identifier, selectedRevisionId),
+                            token.trim(),
+                            { method: "POST" }
+                          );
+                          await loadRevisions();
+                          return restored;
+                        })
+                      }
+                    />
+                  </div>
+                ) : null}
+              </div>
+            </>
+          ) : null}
+
+          {activeWorkspaceTab === "create" && config.createPath ? (
+            <div className="admin-workspace-editor-grid">
+              <AdminCrudWorkspaceCreatePanel
+                idBase={idBase}
+                copy={t}
+                config={config}
+                token={token}
+                createPayload={createPayload}
+                createFieldGroups={createFieldGroups}
+                createFormValues={createFormValues}
+                createFormErrors={createFormErrors}
+                createLocaleTab={createLocaleTab}
+                onCreatePayloadChange={setCreatePayload}
+                onCreateLocaleTabChange={setCreateLocaleTab}
+                onLocaleTabKeyDown={onLocaleTabKeyDown}
+                onCreateFieldChange={handleCreateFieldChange}
+                onCreate={() =>
+                  void runAction("create", async () => {
+                    const response = await fetchJson(config.createPath || "", token.trim(), {
+                      method: "POST",
+                      body: JSON.stringify(
+                        Array.isArray(config.createFormFields) && config.createFormFields.length > 0
+                          ? (() => {
+                              const errors = validatePrimitiveValues(config.createFormFields, createFormValues);
+                              setCreateFormErrors(errors);
+                              if (Object.keys(errors).length > 0) {
+                                throw new Error(t.fixFields);
+                              }
+                              return toPrimitivePayload(config.createFormFields, createFormValues);
+                            })()
+                          : parseJsonInput(createPayload)
+                      ),
+                    });
+                    setActiveWorkspaceTab("review");
+                    return response;
+                  })
+                }
+              />
+            </div>
+          ) : null}
+
+          {activeWorkspaceTab === "update" && config.patchPath ? (
+            <div className="admin-workspace-editor-grid">
+              <AdminCrudWorkspaceRecordActionsPanel
+                idBase={idBase}
+                copy={t}
+                config={config}
+                identifierLabel={displayConfig.identifierLabel}
+                identifier={identifier}
+                readinessPath={readinessPath}
+                revisionConfig={revisionConfig}
+                onIdentifierChange={setIdentifier}
+                onGetDetail={() => void runAction("get-detail", () => fetchJson(withIdentifier(config.getPath, identifier), token.trim()))}
+                onCheckReadiness={() => void runAction("check-readiness", () => fetchJson(withIdentifier(readinessPath, identifier), token.trim()))}
+                onPublish={() => void runAction("publish", () => publishRecord())}
+                onUnpublish={() =>
+                  void runAction("unpublish", () =>
+                    fetchJson(withIdentifier(config.unpublishPath || "", identifier), token.trim(), {
+                      method: "POST",
+                    })
+                  )
+                }
+                onDelete={() =>
+                  void runAction("delete", () =>
+                    fetchJson(withIdentifier(config.deletePath || "", identifier), token.trim(), {
+                      method: "DELETE",
+                    })
+                  )
+                }
+                onLoadRevisions={() =>
+                  void runAction("load-revisions", async () => {
+                    await loadRevisions();
+                    setActiveWorkspaceTab("review");
+                    return { revisions_loaded: true };
+                  })
+                }
+              />
+              <AdminCrudWorkspacePatchPanel
+                idBase={idBase}
+                copy={t}
+                config={config}
+                identifier={identifier}
+                token={token}
+                patchPayload={patchPayload}
+                patchFieldGroups={patchFieldGroups}
+                patchFormValues={patchFormValues}
+                patchFormErrors={patchFormErrors}
+                patchLocaleTab={patchLocaleTab}
+                onPatchPayloadChange={setPatchPayload}
+                onPatchLocaleTabChange={setPatchLocaleTab}
+                onLocaleTabKeyDown={onLocaleTabKeyDown}
+                onPatchFieldChange={handlePatchFieldChange}
+                onPatch={() =>
+                  void runAction("patch", async () => {
+                    const response = await fetchJson(withIdentifier(config.patchPath || "", identifier), token.trim(), {
+                      method: "PATCH",
+                      body: JSON.stringify(
+                        Array.isArray(config.patchFormFields) && config.patchFormFields.length > 0
+                          ? (() => {
+                              const errors = validatePrimitiveValues(config.patchFormFields, patchFormValues);
+                              setPatchFormErrors(errors);
+                              if (Object.keys(errors).length > 0) {
+                                throw new Error(t.fixFields);
+                              }
+                              return toPrimitivePayload(config.patchFormFields, patchFormValues);
+                            })()
+                          : parseJsonInput(patchPayload)
+                      ),
+                    });
+                    setActiveWorkspaceTab("review");
+                    return response;
+                  })
+                }
+              />
+            </div>
+          ) : null}
+
+          {activeWorkspaceTab === "review" ? (
+            <>
+              <AdminCrudWorkspaceBulkActionsPanel
+                idBase={idBase}
+                copy={t}
+                bulkActions={bulkActions}
+                bulkTargetIdsByAction={bulkTargetIdsByAction}
+                bulkFormValues={bulkFormValues}
+                bulkFormErrors={bulkFormErrors}
+                token={token}
+                onBulkTargetIdsChange={(actionKey, value) =>
+                  setBulkTargetIdsByAction((current) => ({
+                    ...current,
+                    [actionKey]: value,
+                  }))
+                }
+                onBulkFieldChange={handleBulkFieldChange}
+                onRunBulkAction={(actionKey) =>
+                  void runAction("bulk", async () => {
+                    const action = bulkActions.find((candidate) => candidate.key === actionKey);
+                    if (!action) throw new Error("Bulk action is unavailable.");
+                    const ids = parseIdentifierList(bulkTargetIdsByAction[action.key] || "");
+                    if (ids.length === 0) {
+                      throw new Error("At least one property ID is required.");
+                    }
+                    const values = bulkFormValues[action.key] || {};
+                    const errors = validatePrimitiveValues(action.fields, values);
+                    setBulkFormErrors((current) => ({ ...current, [action.key]: errors }));
+                    if (Object.keys(errors).length > 0) {
+                      throw new Error(t.fixFields);
+                    }
+                    const payload = toPrimitivePayload(action.fields, values);
+                    const response = await fetchJson(action.path, token.trim(), {
+                      method: action.method || "POST",
+                      body: JSON.stringify({
+                        property_ids: ids,
+                        ...payload,
+                      }),
+                    });
+                    setBulkTargetIdsByAction((current) => ({
+                      ...current,
+                      [action.key]: "",
+                    }));
+                    return response;
+                  })
+                }
+              />
+              <div className={hasOutputSidecar ? "admin-workspace-output-grid admin-workspace-output-grid--split" : "admin-workspace-output-grid"}>
+                <AdminCrudWorkspaceResultPanel copy={t} result={result} actionKey={lastActionKey} followUpLinks={config.followUpLinks} />
+                {hasOutputSidecar ? (
+                  <AdminCrudWorkspaceRevisionsPanel
+                    config={config}
+                    copy={t}
+                    idBase={idBase}
+                    identifier={identifier}
+                    revisionConfig={revisionConfig}
+                    revisions={revisions}
+                    selectedRevisionId={selectedRevisionId}
+                    onSelectedRevisionIdChange={setSelectedRevisionId}
+                    onShowDiff={() =>
+                      void runAction("show-diff", () =>
+                        fetchJson(withRevisionIdentifier(revisionConfig?.diffPath || "", identifier, selectedRevisionId), token.trim())
+                      )
+                    }
+                    onRestoreRevision={() =>
+                      void runAction("restore-revision", async () => {
+                        const restored = await fetchJson(
+                          withRevisionIdentifier(revisionConfig?.restorePath || "", identifier, selectedRevisionId),
+                          token.trim(),
+                          { method: "POST" }
+                        );
+                        await loadRevisions();
+                        return restored;
+                      })
+                    }
+                  />
+                ) : null}
+              </div>
+              <AdminCrudWorkspacePreviewPanel copy={t} previewConfig={previewConfig} previewRecord={previewRecord} previewChecklist={previewChecklist} />
+            </>
+          ) : null}
+
+          {error ? <div className="state-error">{error}</div> : null}
+          {loading ? <div className="state-loading">{t.loading}</div> : null}
         </>
       ) : null}
     </main>

@@ -40,14 +40,14 @@ describe("admin auth form semantics", () => {
   it("uses proper login field attributes for password managers and a11y", () => {
     for (const { stateFile, formFile } of AUTH_FORM_PAGES) {
       const page = read(formFile || stateFile);
-      expect(page).toContain("name=\"email\"");
-      expect(page).toContain("name=\"password\"");
-      expect(page).toContain("type=\"email\"");
-      expect(page).toContain("type=\"password\"");
-      expect(page).toContain("autoComplete=\"username\"");
-      expect(page).toContain("autoComplete=\"current-password\"");
+      expect(page).toMatch(/name=["']email["']/);
+      expect(page).toMatch(/name=["']password["']/);
+      expect(page).toMatch(/type=["']email["']/);
+      expect(page).toMatch(/type=["']password["']/);
+      expect(page).toMatch(/autoComplete=["']username["']/);
+      expect(page).toMatch(/autoComplete=["']current-password["']/);
       expect(page).toContain("required");
-      expect(page).toContain("htmlFor=");
+      expect(page.includes("htmlFor=") || page.includes("AdminInput label=")).toBe(true);
     }
   });
 

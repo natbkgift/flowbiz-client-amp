@@ -33,7 +33,7 @@ const USERS_NAV: AdminNavItem = {
 const CRM_NAV: AdminNavItem = {
   href: "/admin/inquiries",
   icon: "message",
-  label: { en: "Lead Inbox", th: "Lead Inbox" },
+  label: { en: "Lead Inbox", th: "กล่องลีด" },
   description: { en: "Lead queue and next actions", th: "คิวลีดและงานถัดไป" },
 };
 
@@ -131,14 +131,14 @@ const DOMAIN_NAV: AdminNavItem = {
 const LAYOUT_NAV: AdminNavItem = {
   href: "/admin/layout",
   icon: "layout",
-  label: { en: "Site Chrome", th: "Site Chrome" },
+  label: { en: "Site Chrome", th: "ส่วนหัวและส่วนท้าย" },
   description: { en: "Header and footer experience", th: "จัดการประสบการณ์ส่วนหัวและส่วนท้าย" },
 };
 
 const HOME_COMPOSER_NAV: AdminNavItem = {
   href: "/admin/home-composer",
   icon: "spark",
-  label: { en: "Landing Builder", th: "Landing Builder" },
+  label: { en: "Landing Builder", th: "ตัวจัดหน้าแลนดิ้ง" },
   description: { en: "Homepage story and sections", th: "เรื่องราวและส่วนประกอบหน้าแรก" },
 };
 
@@ -168,7 +168,6 @@ export const ADMIN_PRIMARY_NAV: AdminNavItem[] = [
 ];
 
 export const ADMIN_SECONDARY_NAV: AdminNavItem[] = [
-  DOMAIN_NAV,
   LAYOUT_NAV,
   HOME_COMPOSER_NAV,
   SEO_NAV,
@@ -209,7 +208,7 @@ export const ADMIN_NAV_GROUPS: AdminNavGroup[] = [
   {
     key: "system",
     label: { en: "System", th: "ระบบ" },
-    items: [USERS_NAV, SEO_NAV, DOMAIN_NAV],
+    items: [USERS_NAV, SEO_NAV],
   },
 ];
 

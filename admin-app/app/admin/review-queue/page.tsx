@@ -32,14 +32,14 @@ export default function AdminReviewQueuePage() {
         followUpLinks: [
           {
             href: "/admin/blog",
-            label: isThai ? "กลับไปจัดการบทความ" : "Open article workspace",
+            label: isThai ? "กลับไปจัดการบทความ" : "Open Blog",
             description: isThai
               ? "กลับไปแก้เนื้อหาและ metadata ของบทความที่กำลังตรวจทาน"
               : "Return to the article editor to adjust content and metadata before approval.",
           },
           {
             href: "/admin/seo",
-            label: isThai ? "ตรวจ SEO" : "Open SEO workspace",
+            label: isThai ? "เปิด Search Visibility" : "Open Search Visibility",
             description: isThai
               ? "เช็ก redirect, schema และ broken links ก่อนอนุมัติ"
               : "Check redirects, schema, and broken links before approving.",

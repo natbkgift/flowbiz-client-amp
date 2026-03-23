@@ -97,30 +97,30 @@ describe("B14 admin workspace pages contract", () => {
     expect(page).toContain('className="admin-workspace-success-handoff"');
   });
 
-  it("domain workspace uses domain CRUD + publish APIs and dashboard summaries", () => {
+  it("domain route is a read-only legacy hub that hands work off to the focused workspaces", () => {
     const page = read("app/admin/domain/page.tsx");
     expect(page).toContain('from "@/app/_lib/admin-auth"');
-    expect(page).toContain("ADMIN_AUTH_LOGIN_PATH");
+    expect(page).toContain('from "@/app/_lib/admin-auth-hooks"');
     expect(page).toContain("admin-overflow-guard");
-    expect(page).toContain("domain-editor-card");
-    expect(page).toContain("AdminWorkspaceErrorState");
+    expect(page).toContain("AdminAccessGate");
+    expect(page).toContain("AdminPrimaryActionBar");
+    expect(page).toContain("AdminResponsiveList");
+    expect(page).toContain("AdminSectionTabs");
     expect(page).toContain("formatWorkspaceErrorMessage");
-    expect(page).not.toContain('fetch("/v1/auth/login"');
-    expect(page).toContain("/admin/areas?limit=40");
-    expect(page).toContain("/admin/developers?limit=40");
-    expect(page).toContain("/admin/projects?limit=40");
-    expect(page).toContain("/admin/dashboard/health-summary");
+    expect(page).toContain('"/api/admin/areas?limit=5"');
+    expect(page).toContain('"/api/admin/developers?limit=5"');
+    expect(page).toContain('"/api/admin/projects?limit=5"');
+    expect(page).toContain('"/api/admin/dashboard/health-summary"');
     expect(page).toContain("pending_translations");
     expect(page).toContain("unpublished_drafts");
-    expect(page).toContain("/publish");
-    expect(page).toContain("/unpublish");
-    expect(page).toContain("/statistics");
-    expect(page).toContain("prerequisiteTitle");
-    expect(page).toContain("resultGuidanceTitle");
-    expect(page).toContain('className="admin-workspace-prerequisite"');
-    expect(page).toContain('className="admin-workspace-success-handoff"');
-    expect(page).toContain('href={withAdminLocale(entity === "areas" ? "/admin/areas" : entity === "developers" ? "/admin/developers" : "/admin/projects", locale)}');
-    expect(page).toContain('href={withAdminLocale(entity === "projects" ? "/admin/review-queue" : "/admin/dashboard", locale)}');
+    expect(page).not.toContain("/statistics");
+    expect(page).not.toContain("/publish");
+    expect(page).not.toContain("/unpublish");
+    expect(page).not.toContain("JSON editor");
+    expect(page).toContain('href: "/admin/areas"');
+    expect(page).toContain('href: "/admin/developers"');
+    expect(page).toContain('href: "/admin/projects"');
+    expect(page).toContain('href: withAdminLocale("/admin/dashboard", locale)');
     expect(page).toContain("state-loading");
     expect(page).toContain("state-error");
   });
@@ -242,6 +242,24 @@ describe("B14 admin workspace pages contract", () => {
     expect(page).not.toContain("new-admin@example.com");
     expect(page).not.toContain("initial-password-123");
     expect(page).toContain('type: "password"');
+    expect(page).toContain('type: "chips"');
+    expect(page).toContain("Additional access IDs");
+    expect(page).not.toContain("/admin/roles");
+  });
+
+  it("shared CRUD workspace uses task tabs instead of stacking every tool in one scroll path", () => {
+    const workspace = read("components/admin/AdminJsonCrudWorkspace.tsx");
+    const copy = read("components/admin/domain/crud-workspace/crud-workspace-copy.ts");
+    expect(workspace).toContain("AdminSectionTabs");
+    expect(workspace).toContain('setActiveWorkspaceTab("update")');
+    expect(workspace).toContain('activeWorkspaceTab === "browse"');
+    expect(workspace).toContain('activeWorkspaceTab === "create"');
+    expect(workspace).toContain('activeWorkspaceTab === "update"');
+    expect(workspace).toContain('activeWorkspaceTab === "review"');
+    expect(copy).toContain('tabBrowse: "Browse"');
+    expect(copy).toContain('tabCreate: "Create"');
+    expect(copy).toContain('tabUpdate: "Update"');
+    expect(copy).toContain('tabReview: "Review"');
   });
 
   it("home composer workspace uses shared admin auth helper", () => {

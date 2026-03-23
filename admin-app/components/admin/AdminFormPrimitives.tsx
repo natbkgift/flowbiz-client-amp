@@ -15,6 +15,7 @@ export type PrimitiveFieldType =
   | "status"
   | "relation"
   | "media"
+  | "chips"
   | "json";
 
 export type AdminFormPrimitiveField = {
@@ -133,10 +134,10 @@ const ADMIN_FORM_LABEL_TRANSLATIONS: Partial<Record<AdminLocale, Record<string, 
     Category: "หมวดหมู่",
     Intent: "เจตนา",
     "Legacy role": "บทบาทเดิม",
-    "Facilities (JSON array)": "สิ่งอำนวยความสะดวก (JSON array)",
+    Facilities: "สิ่งอำนวยความสะดวก",
     "Investment snapshot (JSON)": "สรุปข้อมูลการลงทุน (JSON)",
     "Map center (JSON)": "จุดศูนย์กลางแผนที่ (JSON)",
-    "Tags (JSON array)": "แท็ก (JSON array)",
+    Tags: "แท็ก",
     "Profile (EN)": "โปรไฟล์ (EN)",
     "Profile (TH)": "โปรไฟล์ (TH)",
     "Transport (EN)": "การเดินทาง (EN)",
@@ -154,7 +155,7 @@ const ADMIN_FORM_LABEL_TRANSLATIONS: Partial<Record<AdminLocale, Record<string, 
     "Tags (TH comma separated)": "แท็ก (TH คั่นด้วยจุลภาค)",
     "Topics (EN comma separated)": "หัวข้อ (EN คั่นด้วยจุลภาค)",
     "Topics (TH comma separated)": "หัวข้อ (TH คั่นด้วยจุลภาค)",
-    "Assigned role IDs (JSON array)": "รหัสบทบาทที่กำหนด (JSON array)",
+    "Additional access IDs": "รหัสสิทธิ์เสริม",
   },
 };
 
@@ -188,6 +189,9 @@ const ADMIN_FORM_PLACEHOLDER_TRANSLATIONS: Partial<Record<AdminLocale, Record<st
     "user@example.com": "user@example.com",
     "admin/editor/ops": "admin/editor/ops",
     "[\"role-uuid-1\"]": "[\"role-uuid-1\"]",
+    "role-id-1, role-id-2": "role-id-1, role-id-2",
+    "pool, gym": "สระว่ายน้ำ, ฟิตเนส",
+    "high_yield, sea_view": "high_yield, sea_view",
     "cms-sample-001": "cms-sample-001",
     "1500000": "1500000",
     "1750000": "1750000",
@@ -293,6 +297,14 @@ export function initializePrimitiveValues(
 
   return fields.reduce<Record<string, string>>((acc, field) => {
     const current = getValue(field.name);
+    if (field.type === "chips" && Array.isArray(current)) {
+      acc[field.name] = current
+        .filter((item): item is string | number => typeof item === "string" || typeof item === "number")
+        .map((item) => String(item).trim())
+        .filter(Boolean)
+        .join(", ");
+      return acc;
+    }
     if (field.type === "json" && current && typeof current === "object") {
       acc[field.name] = JSON.stringify(current, null, 2);
       return acc;
@@ -385,6 +397,11 @@ export function toPrimitivePayload(
         throw new Error(`Invalid number value for field "${field.name}".`);
       }
       value = numericValue;
+    } else if (field.type === "chips") {
+      value = trimmed
+        .split(/[\n,]/)
+        .map((item) => item.trim())
+        .filter(Boolean);
     } else if (field.type === "json") {
       try {
         value = JSON.parse(trimmed);
@@ -620,6 +637,21 @@ export function AdminFormPrimitiveInput(props: AdminFormPrimitiveProps) {
         <textarea
           id={id}
           rows={props.field.rows || 4}
+          value={props.value}
+          placeholder={props.field.placeholder ? localizePlaceholder(props.field.placeholder, locale) : undefined}
+          aria-invalid={props.error ? "true" : "false"}
+          aria-describedby={props.error ? errorId : undefined}
+          onChange={(event) => onInputChange(event, props.field.name, props.onChange)}
+        />
+      </InputFrame>
+    );
+  }
+  if (props.field.type === "chips") {
+    return (
+      <InputFrame {...props}>
+        <textarea
+          id={id}
+          rows={props.field.rows || 3}
           value={props.value}
           placeholder={props.field.placeholder ? localizePlaceholder(props.field.placeholder, locale) : undefined}
           aria-invalid={props.error ? "true" : "false"}

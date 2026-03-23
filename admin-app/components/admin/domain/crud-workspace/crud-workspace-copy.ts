@@ -23,9 +23,9 @@ const ROUTE_COPY_BY_TITLE: Record<string, Partial<Record<AdminLocale, WorkspaceD
   "User & Role Management": {
     th: {
       title: "จัดการผู้ใช้และสิทธิ์",
-      subtitle: "สร้างและปรับสิทธิ์ผู้ใช้ผ่านสัญญา API เดิม โดยใช้ role_ids สำหรับอัปเดตการกำหนดบทบาท",
+      subtitle: "สร้างผู้ใช้ใหม่และปรับสิทธิ์ของทีมผ่านสัญญา API เดิม โดยแยกบทบาทหลักออกจากสิทธิ์เสริมให้ชัดเจน",
       identifierLabel: "รหัสผู้ใช้",
-      queryHelp: "ดึง role จาก /admin/roles แล้วส่ง role_ids เป็น JSON array เพื่อกำหนดหรือถอดสิทธิ์",
+      queryHelp: "เลือกบทบาทหลักจากตัวเลือกมาตรฐานของระบบ แล้วกรอกรหัสสิทธิ์เสริมเป็นรายการเมื่อจำเป็น",
     },
   },
   "Areas CMS": {
@@ -124,6 +124,10 @@ const CRUD_WORKSPACE_COPY = {
     recordActionsDescription: "Select one record ID and run safe read/write actions.",
     nextStepsTitle: "Next steps",
     nextStepsDescription: "Jump to the related workspace that usually comes next in this workflow.",
+    tabBrowse: "Browse",
+    tabCreate: "Create",
+    tabUpdate: "Update",
+    tabReview: "Review",
     nextStepsIdleBody:
       "No record is selected yet. Load one from the list or move directly into the linked workspace that handles the next handoff.",
     nextStepsRecordsBody:
@@ -211,6 +215,10 @@ const CRUD_WORKSPACE_COPY = {
     recordActionsDescription: "เลือกรหัสรายการหนึ่งรายการ แล้วสั่งอ่านหรือแก้ไขอย่างปลอดภัย",
     nextStepsTitle: "ขั้นตอนถัดไป",
     nextStepsDescription: "ข้ามไปยัง workspace ที่มักเป็นปลายทางถัดไปของ workflow นี้ได้ทันที",
+    tabBrowse: "ดูรายการ",
+    tabCreate: "สร้าง",
+    tabUpdate: "แก้ไข",
+    tabReview: "ตรวจผล",
     nextStepsIdleBody: "ยังไม่ได้เลือกรายการ โหลดจากตารางก่อน หรือข้ามไปยัง workspace ที่รับช่วงงานถัดไปได้เลย",
     nextStepsRecordsBody: "ใช้ลิงก์เหล่านี้เมื่อรายการปัจจุบันว่าง หรือเมื่อจำเป็นต้องไปทำงานต่อใน workspace อื่น",
     nextStepsRevisionsBody:

@@ -383,8 +383,10 @@ export default function AdminLayoutCmsPage() {
             <form className="admin-form-stack" onSubmit={handleLogin}>
               <AdminInput label={t.adminEmail}>
                 <input
+                  type="email"
                   name="email"
                   autoComplete="username"
+                  required
                   value={email}
                   onChange={(event) => setEmail(event.target.value)}
                 />
@@ -394,6 +396,7 @@ export default function AdminLayoutCmsPage() {
                   type="password"
                   name="password"
                   autoComplete="current-password"
+                  required
                   value={password}
                   onChange={(event) => setPassword(event.target.value)}
                 />

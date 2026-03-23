@@ -140,7 +140,7 @@ export default function AdminPropertiesCmsPage() {
             defaultPayload: JSON.stringify({ operation: "set", tags: ["high_yield"] }, null, 2),
             fields: [
               { name: "operation", label: "Operation", type: "select", required: true, options: ["add", "remove", "set"] },
-              { name: "tags", label: "Tags (JSON array)", type: "json", required: true, rows: 3, placeholder: "[\"high_yield\"]" },
+              { name: "tags", label: "Tags", type: "chips", required: true, rows: 3, placeholder: "high_yield, sea_view" },
             ],
           },
           {
@@ -162,7 +162,7 @@ export default function AdminPropertiesCmsPage() {
               { name: "fields.area_id", label: "Area ID", type: "relation", placeholder: "optional area UUID" },
               { name: "fields.developer_id", label: "Developer ID", type: "relation", placeholder: "optional developer UUID" },
               { name: "fields.cover_image", label: "Cover media", type: "media", placeholder: "/media/library/property-cover.jpg" },
-              { name: "fields.tags", label: "Tags (JSON array)", type: "json", rows: 3, placeholder: "[\"sea_view\"]" },
+              { name: "fields.tags", label: "Tags", type: "chips", rows: 3, placeholder: "high_yield, sea_view" },
             ],
           },
         ],

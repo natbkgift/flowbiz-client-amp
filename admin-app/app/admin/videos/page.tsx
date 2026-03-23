@@ -48,7 +48,7 @@ export default function AdminVideosCmsPage() {
           },
           {
             href: "/admin/taxonomy",
-            label: isThai ? "ดู taxonomy" : "Open taxonomy",
+            label: isThai ? "เปิดหมวดหมู่กลาง" : "Open taxonomy",
             description: isThai
               ? "ยืนยันการจับคู่ topics และ tags หลังแก้ไขวิดีโอ"
               : "Confirm topic and tag relationships after editing video records.",

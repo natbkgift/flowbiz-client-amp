@@ -83,7 +83,7 @@ export default function AdminBlogCmsPage() {
           },
           {
             href: "/admin/seo",
-            label: isThai ? "ตรวจ SEO" : "Open SEO workspace",
+            label: isThai ? "เปิด Search Visibility" : "Open Search Visibility",
             description: isThai
               ? "ตรวจ redirect, schema และรายงาน broken links หลังแก้บทความ"
               : "Check redirects, schema, and broken-link reports after editing.",

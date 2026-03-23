@@ -29,9 +29,9 @@ const PROJECT_CREATE_FIELDS = [
   { name: "developer_id", label: "Developer ID", type: "relation", placeholder: "optional developer UUID" },
   {
     name: "amenities",
-    label: "Facilities (JSON array)",
-    type: "json",
-    placeholder: '[\"pool\", \"gym\"]',
+    label: "Facilities",
+    type: "chips",
+    placeholder: "pool, gym",
     rows: 3,
   },
   {
@@ -54,9 +54,9 @@ const PROJECT_PATCH_FIELDS = [
   { name: "developer_id", label: "Developer ID", type: "relation", placeholder: "optional developer UUID" },
   {
     name: "amenities",
-    label: "Facilities (JSON array)",
-    type: "json",
-    placeholder: '[\"pool\", \"gym\"]',
+    label: "Facilities",
+    type: "chips",
+    placeholder: "pool, gym",
     rows: 3,
   },
   {
