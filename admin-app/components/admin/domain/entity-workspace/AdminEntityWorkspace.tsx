@@ -28,6 +28,8 @@ import {
   validatePrimitiveValues,
 } from "@/components/admin/AdminFormPrimitives";
 import type { AdminIconName } from "@/components/admin/AdminIcons";
+import { checklistReport, nestedText, parseIdentifierList } from "@/components/admin/domain/crud-workspace/workspace-utils";
+import type { CrudConfig } from "@/components/admin/domain/crud-workspace/workspace-types";
 
 type EntityRow = Record<string, unknown>;
 
@@ -50,6 +52,19 @@ type EntityWorkspaceConfig = {
   metaPaths?: string[];
   statusPath?: string;
   detailSummaryPaths?: Array<{ label: string; path: string }>;
+  previewConfig?: CrudConfig["previewConfig"];
+  publishChecklistConfig?: CrudConfig["publishChecklistConfig"];
+  bulkActions?: ReadonlyArray<{
+    key: string;
+    title: string;
+    path: string;
+    method?: "POST" | "PATCH" | "PUT";
+    description?: string;
+    idLabel?: string;
+    idPlaceholder?: string;
+    idsPayloadKey?: string;
+    fields: AdminFormPrimitiveField[];
+  }>;
   createFormFields: AdminFormPrimitiveField[];
   patchFormFields: AdminFormPrimitiveField[];
   defaultCreatePayload: string;
@@ -111,6 +126,21 @@ const copy = {
     search: "Search records",
     status: "Status",
     updated: "Updated",
+    reviewReadinessTitle: "Publish readiness",
+    reviewReadinessDescription: "Use this checklist to decide whether the selected record is ready for publish.",
+    readinessBlocked: "Blocking issues",
+    readinessWarnings: "Warnings",
+    readinessClear: "No blocking checklist issues were found for the selected record.",
+    previewTitle: "Content preview",
+    previewDescription: "Review the current localized content before you publish or hand work off.",
+    previewLocaleDescription: "Preview locale",
+    bulkActionsTitle: "Queue-wide actions",
+    bulkActionsDescription: "Run scoped batch updates without leaving this workspace.",
+    bulkIdsLabel: "Target record IDs",
+    bulkResultEmpty: "No queue-wide action has run yet.",
+    bulkRun: "Run",
+    fixFields: "Fix the highlighted fields before continuing.",
+    bulkIdsRequired: "Add at least one target record ID before running a queue-wide action.",
   },
   th: {
     authTitle: "เข้าสู่ระบบแอดมิน",
@@ -154,6 +184,21 @@ const copy = {
     search: "ค้นหารายการ",
     status: "สถานะ",
     updated: "อัปเดตล่าสุด",
+    reviewReadinessTitle: "ความพร้อมก่อนเผยแพร่",
+    reviewReadinessDescription: "ใช้ checklist นี้ตัดสินใจก่อนเผยแพร่หรือส่งต่องานของรายการที่เลือก",
+    readinessBlocked: "จุดที่ยังบล็อก",
+    readinessWarnings: "คำเตือน",
+    readinessClear: "ไม่พบปัญหาแบบบล็อกจาก checklist ของรายการที่เลือก",
+    previewTitle: "ตัวอย่างเนื้อหา",
+    previewDescription: "ดูเนื้อหาหลายภาษาปัจจุบันก่อนเผยแพร่หรือส่งต่องาน",
+    previewLocaleDescription: "ตัวอย่างตามภาษา",
+    bulkActionsTitle: "คำสั่งทั้งคิว",
+    bulkActionsDescription: "สั่งอัปเดตแบบกลุ่มจาก workspace นี้โดยไม่ต้องออกไปหน้าอื่น",
+    bulkIdsLabel: "รหัสรายการเป้าหมาย",
+    bulkResultEmpty: "ยังไม่มีการรันคำสั่งแบบกลุ่มจากหน้านี้",
+    bulkRun: "รัน",
+    fixFields: "กรอกฟิลด์ที่ไฮไลต์ให้ครบก่อนดำเนินการต่อ",
+    bulkIdsRequired: "กรอกรหัสรายการเป้าหมายอย่างน้อยหนึ่งรายการก่อนรันคำสั่งทั้งคิว",
   },
 } as const;
 
@@ -195,6 +240,20 @@ function buildListPath(basePath: string, query?: string): string {
   return `${basePath}${basePath.includes("?") ? "&" : "?"}${query.trim()}`;
 }
 
+function withCurrentSelectOptions(fields: AdminFormPrimitiveField[], values: Record<string, string>): AdminFormPrimitiveField[] {
+  return fields.map((field) => {
+    if (field.type !== "select" && field.type !== "status") return field;
+    const currentValue = (values[field.name] || "").trim();
+    if (!currentValue) return field;
+    const options = Array.isArray(field.options) ? [...field.options] : [];
+    if (options.includes(currentValue)) return field;
+    return {
+      ...field,
+      options: [...options, currentValue],
+    };
+  });
+}
+
 export function AdminEntityWorkspace({
   locale,
   config,
@@ -222,6 +281,19 @@ export function AdminEntityWorkspace({
   );
   const [createErrors, setCreateErrors] = useState<Record<string, string>>({});
   const [patchErrors, setPatchErrors] = useState<Record<string, string>>({});
+  const [bulkTargetIdsByAction, setBulkTargetIdsByAction] = useState<Record<string, string>>(() =>
+    (config.bulkActions || []).reduce<Record<string, string>>((acc, action) => {
+      acc[action.key] = "";
+      return acc;
+    }, {}),
+  );
+  const [bulkFormValues, setBulkFormValues] = useState<Record<string, Record<string, string>>>(() =>
+    (config.bulkActions || []).reduce<Record<string, Record<string, string>>>((acc, action) => {
+      acc[action.key] = initializePrimitiveValues(action.fields, "{}");
+      return acc;
+    }, {}),
+  );
+  const [bulkFormErrors, setBulkFormErrors] = useState<Record<string, Record<string, string>>>({});
 
   const {
     token,
@@ -256,6 +328,20 @@ export function AdminEntityWorkspace({
       return candidates.some((value) => value.toLowerCase().includes(keyword));
     });
   }, [config.identifierField, config.metaPaths, config.statusPath, config.titlePaths, items, searchValue]);
+  const patchFormFields = useMemo(
+    () => withCurrentSelectOptions(config.patchFormFields, patchValues),
+    [config.patchFormFields, patchValues],
+  );
+  const createFormFields = useMemo(
+    () => withCurrentSelectOptions(config.createFormFields, createValues),
+    [config.createFormFields, createValues],
+  );
+  const previewChecklist = useMemo(
+    () => (selectedRecord && config.publishChecklistConfig ? checklistReport(config.publishChecklistConfig, selectedRecord) : null),
+    [config.publishChecklistConfig, selectedRecord],
+  );
+  const previewLocales = config.previewConfig?.locales || ["en", "th"];
+  const publishBlocked = Boolean(previewChecklist && previewChecklist.blocking.length > 0);
 
   useEffect(() => {
     if (!isAuthenticated) return;
@@ -364,6 +450,39 @@ export function AdminEntityWorkspace({
     }
   }
 
+  async function handleBulkAction(actionKey: string): Promise<void> {
+    const action = (config.bulkActions || []).find((candidate) => candidate.key === actionKey);
+    if (!action) return;
+    const ids = parseIdentifierList(bulkTargetIdsByAction[actionKey] || "");
+    if (ids.length === 0) {
+      setError(t.bulkIdsRequired);
+      return;
+    }
+    const values = bulkFormValues[actionKey] || {};
+    const errors = validatePrimitiveValues(action.fields, values);
+    setBulkFormErrors((current) => ({ ...current, [actionKey]: errors }));
+    if (Object.keys(errors).length > 0) {
+      setError(t.fixFields);
+      return;
+    }
+    try {
+      const payload = toPrimitivePayload(action.fields, values);
+      const response = await fetchJson<Record<string, unknown>>(action.path, token.trim(), {
+        method: action.method || "POST",
+        body: JSON.stringify({
+          [action.idsPayloadKey || `${config.identifierField}s`]: ids,
+          ...payload,
+        }),
+      });
+      setResult(JSON.stringify(response, null, 2));
+      setBulkTargetIdsByAction((current) => ({ ...current, [actionKey]: "" }));
+      setActiveTab("review");
+      await loadList();
+    } catch (requestError) {
+      setError(formatWorkspaceErrorMessage(requestError, t.authRequired));
+    }
+  }
+
   const selectedTitle =
     config.titlePaths.map((path) => pickString(selectedRecord, path)).find(Boolean) || selectedId || t.noSelection;
 
@@ -377,8 +496,12 @@ export function AdminEntityWorkspace({
   const secondaryActions = [
     { label: t.refresh, onClick: () => void loadList(), disabled: !isAuthenticated || loading },
     { label: t.tabCreate, onClick: () => setActiveTab("create"), disabled: !isAuthenticated },
-    ...(config.publishPath && selectedId ? [{ label: config.publishLabel || t.publishReady, onClick: () => void runSimpleAction(config.publishPath!, "POST") }] : []),
-    ...(config.unpublishPath && selectedId ? [{ label: config.unpublishLabel || "Unpublish", onClick: () => void runSimpleAction(config.unpublishPath!, "POST") }] : []),
+    ...(config.publishPath && selectedId
+      ? [{ label: config.publishLabel || t.publishReady, onClick: () => void runSimpleAction(config.publishPath!, "POST"), disabled: publishBlocked }]
+      : []),
+    ...(config.unpublishPath && selectedId
+      ? [{ label: config.unpublishLabel || "Unpublish", onClick: () => void runSimpleAction(config.unpublishPath!, "POST"), disabled: !isAuthenticated || detailLoading }]
+      : []),
     ...(config.deletePath && selectedId
       ? [
           {
@@ -570,7 +693,7 @@ export function AdminEntityWorkspace({
             {activeTab === "create" ? (
               <AdminSectionCard title={t.createTitle} description={config.createHint} icon="plus">
                 <div className="admin-workspace-form-grid admin-workspace-form-grid--grouped">
-                  {config.createFormFields.map((field) => (
+                  {createFormFields.map((field) => (
                     <AdminFormPrimitiveInput
                       key={field.name}
                       idPrefix={`${config.identifierField}-create`}
@@ -593,6 +716,129 @@ export function AdminEntityWorkspace({
                 ) : (
                   <div className="state-empty admin-workspace-empty-state">{t.resultEmpty}</div>
                 )}
+                {previewChecklist ? (
+                  <div className="admin-grid-layout admin-grid-layout--two">
+                    <div className="admin-workspace-prerequisite">
+                      <strong>{t.reviewReadinessTitle}</strong>
+                      <p className="locale-safe">{t.reviewReadinessDescription}</p>
+                      {previewChecklist.blocking.length > 0 ? (
+                        <>
+                          <p><strong>{t.readinessBlocked}</strong></p>
+                          <ul className="admin-bullet-list">
+                            {previewChecklist.blocking.map((item) => (
+                              <li key={item} className="locale-safe">{item}</li>
+                            ))}
+                          </ul>
+                        </>
+                      ) : (
+                        <p className="locale-safe">{t.readinessClear}</p>
+                      )}
+                      {previewChecklist.warnings.length > 0 ? (
+                        <>
+                          <p><strong>{t.readinessWarnings}</strong></p>
+                          <ul className="admin-bullet-list">
+                            {previewChecklist.warnings.map((item) => (
+                              <li key={item} className="locale-safe">{item}</li>
+                            ))}
+                          </ul>
+                        </>
+                      ) : null}
+                    </div>
+                    {config.previewConfig ? (
+                      <div className="admin-workspace-prerequisite">
+                        <strong>{t.previewTitle}</strong>
+                        <p className="locale-safe">{t.previewDescription}</p>
+                        <div className="admin-preview-grid">
+                          {previewLocales.map((localeKey) => (
+                            <div key={localeKey} className="admin-workspace-preview-card">
+                              <strong>{localeKey.toUpperCase()}</strong>
+                              <p className="admin-type-helper">{t.previewLocaleDescription}</p>
+                              <p className="locale-safe">
+                                <strong>{nestedText(selectedRecord || {}, `${config.previewConfig!.titlePath}.${localeKey}`) || "-"}</strong>
+                              </p>
+                              {config.previewConfig?.excerptPath ? (
+                                <p className="locale-safe">{nestedText(selectedRecord || {}, `${config.previewConfig.excerptPath}.${localeKey}`) || "-"}</p>
+                              ) : null}
+                              {config.previewConfig?.bodyPath ? (
+                                <pre>{nestedText(selectedRecord || {}, `${config.previewConfig.bodyPath}.${localeKey}`) || "-"}</pre>
+                              ) : null}
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    ) : null}
+                  </div>
+                ) : config.previewConfig ? (
+                  <div className="admin-workspace-prerequisite">
+                    <strong>{t.previewTitle}</strong>
+                    <p className="locale-safe">{t.previewDescription}</p>
+                    <div className="admin-preview-grid">
+                      {previewLocales.map((localeKey) => (
+                        <div key={localeKey} className="admin-workspace-preview-card">
+                          <strong>{localeKey.toUpperCase()}</strong>
+                          <p className="admin-type-helper">{t.previewLocaleDescription}</p>
+                          <p className="locale-safe">
+                            <strong>{nestedText(selectedRecord || {}, `${config.previewConfig!.titlePath}.${localeKey}`) || "-"}</strong>
+                          </p>
+                          {config.previewConfig?.excerptPath ? (
+                            <p className="locale-safe">{nestedText(selectedRecord || {}, `${config.previewConfig.excerptPath}.${localeKey}`) || "-"}</p>
+                          ) : null}
+                          {config.previewConfig?.bodyPath ? (
+                            <pre>{nestedText(selectedRecord || {}, `${config.previewConfig.bodyPath}.${localeKey}`) || "-"}</pre>
+                          ) : null}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ) : null}
+                {config.bulkActions?.length ? (
+                  <AdminSectionCard title={t.bulkActionsTitle} description={t.bulkActionsDescription} icon="spark">
+                    <div className="admin-grid-layout admin-grid-layout--two">
+                      {config.bulkActions.map((action) => (
+                        <div key={action.key} className="admin-workspace-bulk-card">
+                          <strong>{action.title}</strong>
+                          {action.description ? <p className="locale-safe">{action.description}</p> : null}
+                          <AdminInput htmlFor={`${config.identifierField}-bulk-${action.key}`} label={action.idLabel || t.bulkIdsLabel}>
+                            <textarea
+                              id={`${config.identifierField}-bulk-${action.key}`}
+                              rows={3}
+                              value={bulkTargetIdsByAction[action.key] || ""}
+                              placeholder={action.idPlaceholder || "uuid-1, uuid-2"}
+                              onChange={(event) =>
+                                setBulkTargetIdsByAction((current) => ({ ...current, [action.key]: event.target.value }))
+                              }
+                            />
+                          </AdminInput>
+                          <div className="admin-workspace-form-grid admin-workspace-form-grid--grouped">
+                            {action.fields.map((field) => (
+                              <AdminFormPrimitiveInput
+                                key={`${action.key}-${field.name}`}
+                                idPrefix={`${config.identifierField}-bulk-${action.key}`}
+                                field={field}
+                                value={bulkFormValues[action.key]?.[field.name] || ""}
+                                error={bulkFormErrors[action.key]?.[field.name]}
+                                authToken={token}
+                                onChange={(name, value) => {
+                                  setBulkFormValues((current) => ({
+                                    ...current,
+                                    [action.key]: { ...(current[action.key] || {}), [name]: value },
+                                  }));
+                                  setBulkFormErrors((current) => ({
+                                    ...current,
+                                    [action.key]: { ...(current[action.key] || {}), [name]: "" },
+                                  }));
+                                }}
+                              />
+                            ))}
+                          </div>
+                          <AdminButton type="button" variant="secondary" onClick={() => void handleBulkAction(action.key)}>
+                            {t.bulkRun} {action.title}
+                          </AdminButton>
+                        </div>
+                      ))}
+                    </div>
+                  </AdminSectionCard>
+                ) : null}
                 {config.followUpLinks?.length ? (
                   <div className="card-actions">
                     {config.followUpLinks.map((link) => (
@@ -628,7 +874,7 @@ export function AdminEntityWorkspace({
                       </div>
                     ) : null}
                     <div className="admin-workspace-form-grid admin-workspace-form-grid--grouped">
-                      {config.patchFormFields.map((field) => (
+                      {patchFormFields.map((field) => (
                         <AdminFormPrimitiveInput
                           key={field.name}
                           idPrefix={`${config.identifierField}-patch`}

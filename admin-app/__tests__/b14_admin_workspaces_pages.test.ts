@@ -239,6 +239,7 @@ describe("B14 admin workspace pages contract", () => {
 
   it("users workspace avoids default credentials and masks password fields", () => {
     const page = read("app/admin/users/page.tsx");
+    const entityWorkspace = read("components/admin/domain/entity-workspace/AdminEntityWorkspace.tsx");
     expect(page).toContain("People & Roles");
     expect(page).toContain("/admin/users");
     expect(page).not.toContain("new-admin@example.com");
@@ -247,6 +248,25 @@ describe("B14 admin workspace pages contract", () => {
     expect(page).toContain('type: "chips"');
     expect(page).toContain("Additional access IDs");
     expect(page).not.toContain("/admin/roles");
+    expect(entityWorkspace).toContain("withCurrentSelectOptions");
+  });
+
+  it("page-specific entity workspace supports review readiness, localized preview, and queue-wide actions", () => {
+    const entityWorkspace = read("components/admin/domain/entity-workspace/AdminEntityWorkspace.tsx");
+    const projectsPage = read("app/admin/projects/page.tsx");
+    const propertiesPage = read("app/admin/properties/page.tsx");
+
+    expect(entityWorkspace).toContain("publishChecklistConfig");
+    expect(entityWorkspace).toContain("previewConfig");
+    expect(entityWorkspace).toContain("handleBulkAction");
+    expect(entityWorkspace).toContain("parseIdentifierList");
+    expect(entityWorkspace).toContain("withCurrentSelectOptions");
+    expect(propertiesPage).toContain("/admin/properties/bulk/status");
+    expect(propertiesPage).toContain("/admin/properties/bulk/tags");
+    expect(propertiesPage).toContain("/admin/properties/bulk/update");
+    expect(projectsPage).toContain("investment_snapshot.source");
+    expect(projectsPage).toContain("investment_snapshot.updated_at");
+    expect(projectsPage).not.toContain("Investment snapshot (JSON)");
   });
 
   it("shared CRUD workspace uses task tabs instead of stacking every tool in one scroll path", () => {

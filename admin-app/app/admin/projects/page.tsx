@@ -9,6 +9,7 @@ const PROJECT_CREATE_TEMPLATE = JSON.stringify(
     slug: "sample-project-cms",
     status: "draft",
     property_type: "condo",
+    investment_snapshot: { source: "Internal Desk", updated_at: "2026-03-01" },
     summary: { en: "Summary", th: "สรุป" },
   },
   null,
@@ -25,7 +26,8 @@ const PROJECT_CREATE_FIELDS = [
   { name: "area_id", label: "Area ID", type: "relation", placeholder: "optional area UUID" },
   { name: "developer_id", label: "Developer ID", type: "relation", placeholder: "optional developer UUID" },
   { name: "amenities", label: "Facilities", type: "chips", placeholder: "pool, gym", rows: 3 },
-  { name: "investment_snapshot", label: "Investment snapshot (JSON)", type: "json", placeholder: "{\"source\":\"Internal Desk\",\"updated_at\":\"2026-03-01\"}", rows: 4 },
+  { name: "investment_snapshot.source", label: "Investment source", type: "text", placeholder: "Internal Desk" },
+  { name: "investment_snapshot.updated_at", label: "Investment snapshot updated", type: "text", placeholder: "2026-03-01" },
   { name: "hero_media_id", label: "Hero media", type: "media", placeholder: "optional media ID/path" },
   { name: "summary.en", label: "Summary (EN)", type: "textarea", rows: 3 },
   { name: "summary.th", label: "Summary (TH)", type: "textarea", rows: 3 },
@@ -38,8 +40,11 @@ const PROJECT_PATCH_FIELDS = [
   { name: "area_id", label: "Area ID", type: "relation", placeholder: "optional area UUID" },
   { name: "developer_id", label: "Developer ID", type: "relation", placeholder: "optional developer UUID" },
   { name: "amenities", label: "Facilities", type: "chips", placeholder: "pool, gym", rows: 3 },
-  { name: "investment_snapshot", label: "Investment snapshot (JSON)", type: "json", placeholder: "{\"source\":\"Internal Desk\",\"updated_at\":\"2026-03-01\"}", rows: 4 },
+  { name: "investment_snapshot.source", label: "Investment source", type: "text", placeholder: "Internal Desk" },
+  { name: "investment_snapshot.updated_at", label: "Investment snapshot updated", type: "text", placeholder: "2026-03-01" },
   { name: "hero_media_id", label: "Hero media", type: "media", placeholder: "optional media ID/path" },
+  { name: "summary.en", label: "Summary (EN)", type: "textarea", rows: 3 },
+  { name: "summary.th", label: "Summary (TH)", type: "textarea", rows: 3 },
 ] as const;
 
 export default function AdminProjectsCmsPage() {
@@ -74,6 +79,10 @@ export default function AdminProjectsCmsPage() {
           { label: isThai ? "สรุป EN" : "Summary EN", path: "summary.en" },
           { label: isThai ? "สรุป TH" : "Summary TH", path: "summary.th" },
         ],
+        previewConfig: {
+          titlePath: "summary",
+          locales: ["en", "th"],
+        },
         createFormFields: [...PROJECT_CREATE_FIELDS],
         patchFormFields: [...PROJECT_PATCH_FIELDS],
         defaultCreatePayload: PROJECT_CREATE_TEMPLATE,

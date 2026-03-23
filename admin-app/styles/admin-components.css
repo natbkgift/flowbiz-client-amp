@@ -2164,6 +2164,15 @@
     line-height: 1.5;
   }
 
+  .admin-bullet-list {
+    margin: 0.5rem 0 0;
+    padding-left: 1rem;
+  }
+
+  .admin-bullet-list li + li {
+    margin-top: 0.25rem;
+  }
+
   .admin-workspace-result-guidance {
     display: grid;
     gap: var(--admin-space-2);

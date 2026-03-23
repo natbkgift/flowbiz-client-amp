@@ -55,7 +55,11 @@ describe("Phase C missing CMS pages", () => {
 
     for (const check of routeChecks) {
       const page = read(check.file);
-      expect(page).toContain("AdminJsonCrudWorkspace");
+      if (["app/admin/projects/page.tsx", "app/admin/properties/page.tsx"].includes(check.file)) {
+        expect(page).toContain("AdminEntityWorkspace");
+      } else {
+        expect(page).toContain("AdminJsonCrudWorkspace");
+      }
       for (const endpoint of check.expected) {
         expect(page).toContain(endpoint);
       }
@@ -66,17 +70,21 @@ describe("Phase C missing CMS pages", () => {
     const projects = read("app/admin/projects/page.tsx");
     const properties = read("app/admin/properties/page.tsx");
     const testimonials = read("app/admin/testimonials/page.tsx");
+    const entityWorkspace = read("components/admin/domain/entity-workspace/AdminEntityWorkspace.tsx");
     const workspace = read("components/admin/AdminJsonCrudWorkspace.tsx");
     const panels = read("components/admin/domain/crud-workspace/AdminCrudWorkspacePanels.tsx");
 
     expect(panels).toContain("AdminFormPrimitiveInput");
     expect(workspace).toContain("validatePrimitiveValues");
     expect(workspace).toContain("toPrimitivePayload");
+    expect(entityWorkspace).toContain("validatePrimitiveValues");
+    expect(entityWorkspace).toContain("toPrimitivePayload");
 
     expect(projects).toContain("createFormFields");
     expect(projects).toContain("type: \"status\"");
     expect(projects).toContain("type: \"relation\"");
     expect(projects).toContain("type: \"media\"");
+    expect(projects).not.toContain("Investment snapshot (JSON)");
 
     expect(properties).toContain("createFormFields");
     expect(properties).toContain("type: \"status\"");
@@ -117,18 +125,16 @@ describe("Phase C missing CMS pages", () => {
     expect(blog).toContain("kind=tag");
     expect(blog).toContain("kind=topic");
 
-    expect(projects).toContain("/admin/content/taxonomies");
-    expect(projects).toContain("kind=property_type");
+    expect(projects).toContain("taxonomy slug from kind=property_type");
     expect(projects).toMatch(/name:\s*"property_type"[\s\S]*?type:\s*"text"/);
 
-    expect(properties).toContain("/admin/content/taxonomies");
-    expect(properties).toContain("kind=property_type");
+    expect(properties).toContain("taxonomy slug from kind=property_type");
     expect(properties).toMatch(/name:\s*"property_type"[\s\S]*?type:\s*"text"/);
   });
 
   it("enables property listing publish quality gate and bulk action endpoints in UI config", () => {
     const properties = read("app/admin/properties/page.tsx");
-    const panels = read("components/admin/domain/crud-workspace/AdminCrudWorkspacePanels.tsx");
+    const entityWorkspace = read("components/admin/domain/entity-workspace/AdminEntityWorkspace.tsx");
 
     expect(properties).toContain("publishChecklistConfig");
     expect(properties).toContain("requiredNumericGreaterThanZeroPaths");
@@ -138,6 +144,7 @@ describe("Phase C missing CMS pages", () => {
     expect(properties).toContain("/admin/properties/bulk/status");
     expect(properties).toContain("/admin/properties/bulk/tags");
     expect(properties).toContain("/admin/properties/bulk/update");
-    expect(panels).toContain("Bulk actions");
+    expect(entityWorkspace).toContain("bulkActions");
+    expect(entityWorkspace).toContain("parseIdentifierList");
   });
 });
