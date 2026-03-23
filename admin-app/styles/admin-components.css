@@ -2447,6 +2447,16 @@
     padding: var(--admin-space-5);
   }
 
+  .admin-access-gate__header,
+  .admin-access-gate__body,
+  .admin-access-gate__content,
+  .admin-access-gate__copy,
+  .admin-primary-action-bar__copy,
+  .admin-section-tabs {
+    min-width: 0;
+    max-width: 100%;
+  }
+
   .admin-access-gate__header {
     display: grid;
     grid-template-columns: auto minmax(0, 1fr);
@@ -2481,6 +2491,18 @@
   .admin-repeater-editor__empty p {
     margin: 0;
     color: var(--admin-text-muted);
+  }
+
+  .admin-access-gate__copy strong,
+  .admin-access-gate__copy p,
+  .admin-primary-action-bar__copy strong,
+  .admin-primary-action-bar__copy p,
+  .admin-section-tabs__tab span,
+  .admin-section-tabs__tab small {
+    min-width: 0;
+    max-width: 100%;
+    overflow-wrap: anywhere;
+    word-break: break-word;
   }
 
   .admin-primary-action-bar {
