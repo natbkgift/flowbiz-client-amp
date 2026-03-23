@@ -755,6 +755,11 @@
     align-items: center;
   }
 
+  .admin-shell-session-menu {
+    display: grid;
+    gap: var(--admin-space-2);
+  }
+
   .admin-shell-profile-badges {
     display: flex;
     flex-wrap: wrap;
@@ -4217,58 +4222,226 @@
   }
 
   @media (max-width: 720px) {
-  .admin-shell-profile {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr);
-    gap: var(--admin-space-3);
-  }
+    .admin-shell-topbar {
+      padding: 12px 12px 14px;
+    }
 
-  .admin-shell-profile-actions {
-    justify-content: flex-start;
-  }
+    .admin-shell-topbar-inner {
+      gap: 10px;
+    }
 
-  .admin-shell-topbar-main {
-    padding: var(--admin-space-4);
-  }
+    .admin-shell-topbar-row {
+      gap: 10px;
+      align-items: start;
+    }
 
-  .admin-shell-topbar-section,
-  .admin-shell-breadcrumb {
-    display: none;
-  }
+    .admin-shell-profile {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr);
+      gap: var(--admin-space-3);
+    }
 
-  .admin-shell-search--topbar span,
-  .admin-shell-search--topbar small {
-    display: none;
-  }
+    .admin-shell-session-menu {
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 10px 12px;
+      align-items: center;
+    }
 
-  .admin-page-header,
-  .admin-page-header__content,
-  .admin-page-header__actions,
-  .admin-card-shell__header,
-  .admin-section-header,
-  .dashboard-task-item__head,
-  .dashboard-chart-stats,
-  .home-composer-dual-grid,
-  .home-composer-triple-grid {
-    grid-template-columns: 1fr;
-    flex-direction: column;
-  }
+    .admin-shell-profile-head {
+      gap: 10px;
+    }
 
-  .dashboard-summary-grid {
-    grid-template-columns: 1fr;
-  }
+    .admin-shell-profile-actions {
+      justify-content: flex-end;
+      gap: 10px;
+      align-self: center;
+    }
+
+    .admin-shell-topbar-main {
+      padding: 0;
+      border-radius: 0;
+      background: transparent;
+      box-shadow: none;
+    }
+
+    .admin-shell-page-heading {
+      gap: 10px;
+    }
+
+    .admin-shell-page-title {
+      font-size: 1.06rem;
+      line-height: 1.15;
+    }
+
+    .admin-shell-page-subtitle,
+    .admin-shell-profile-kicker,
+    .admin-shell-profile-head > div > span,
+    .admin-shell-locale-control label,
+    .admin-shell-topbar-section,
+    .admin-shell-breadcrumb {
+      display: none;
+    }
+
+    .admin-shell-profile-head strong {
+      font-size: 0.96rem;
+      line-height: 1.2;
+    }
+
+    .admin-shell-page-icon,
+    .admin-shell-profile-avatar {
+      width: 34px;
+      height: 34px;
+      border-radius: 12px;
+    }
+
+    .admin-shell-search--topbar span,
+    .admin-shell-search--topbar small {
+      display: none;
+    }
+
+    .admin-page-header,
+    .admin-page-header__content,
+    .admin-page-header__actions,
+    .admin-card-shell__header,
+    .admin-section-header,
+    .dashboard-task-item__head,
+    .dashboard-chart-stats,
+    .home-composer-dual-grid,
+    .home-composer-triple-grid {
+      grid-template-columns: 1fr;
+      flex-direction: column;
+    }
+
+    .admin-page-header {
+      gap: 12px;
+      padding: var(--admin-space-4);
+      border-radius: 18px;
+    }
+
+    .admin-page-header__copy {
+      gap: 6px;
+    }
+
+    .admin-page-header__icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 14px;
+    }
+
+    .dashboard-summary-grid {
+      grid-template-columns: 1fr;
+    }
 
     .dashboard-overview-band {
       padding: var(--admin-space-4);
     }
 
-  .dashboard-summary-card--primary {
-    grid-column: span 1;
-  }
+    .dashboard-summary-card--primary {
+      grid-column: span 1;
+    }
 
-  .dashboard-hero-toolbar,
-  .dashboard-hero-toolbar__actions,
-  .dashboard-insight-item__status {
-    width: 100%;
+    .dashboard-hero-toolbar,
+    .dashboard-hero-toolbar__actions,
+    .dashboard-insight-item__status {
+      width: 100%;
+    }
+
+    .dashboard-hero .admin-page-header__actions {
+      display: none;
+    }
+
+    .dashboard-hero .admin-page-header__eyebrow,
+    .home-composer-builder-page > .admin-page-header .admin-page-header__eyebrow,
+    .admin-media-library-page > .admin-page-header .admin-page-header__eyebrow {
+      display: none;
+    }
+
+    .admin-page > .dashboard-hero + .content-stack .admin-primary-action-bar,
+    .home-composer-builder-page > .admin-primary-action-bar,
+    .admin-media-library-page .admin-primary-action-bar {
+      gap: 12px;
+      padding: 14px 16px;
+    }
+
+    .admin-page > .dashboard-hero + .content-stack .admin-primary-action-bar .admin-primary-action-bar__copy p,
+    .home-composer-builder-page > .admin-primary-action-bar .admin-primary-action-bar__copy p,
+    .admin-media-library-page .admin-primary-action-bar .admin-primary-action-bar__copy p {
+      display: none;
+    }
+
+    .admin-page > .dashboard-hero + .content-stack .admin-primary-action-bar .admin-primary-action-bar__copy strong,
+    .home-composer-builder-page > .admin-primary-action-bar .admin-primary-action-bar__copy strong,
+    .admin-media-library-page .admin-primary-action-bar .admin-primary-action-bar__copy strong {
+      font-size: var(--admin-font-size-sm);
+      line-height: 1.3;
+    }
+
+    .admin-page > .dashboard-hero + .content-stack .admin-primary-action-bar .admin-primary-action-bar__meta,
+    .home-composer-builder-page > .admin-primary-action-bar .admin-primary-action-bar__meta,
+    .admin-media-library-page .admin-primary-action-bar .admin-primary-action-bar__meta {
+      gap: 8px;
+    }
+
+    .home-composer-builder-page > .admin-page-header .admin-page-header__description,
+    .dashboard-hero .admin-page-header__description,
+    .admin-media-library-page > .admin-page-header .admin-page-header__description {
+      max-width: none;
+      font-size: 0.98rem;
+      line-height: 1.55;
+    }
+
+    .home-composer-builder-page .home-composer-header-meta {
+      gap: 8px;
+    }
+
+    .home-composer-builder-page .home-composer-header-actions {
+      display: flex;
+      justify-content: flex-start;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .home-composer-builder-page .home-composer-header-actions > * {
+      flex: 0 0 auto;
+    }
+
+    .home-composer-builder-page .home-composer-inline-field {
+      max-width: 104px;
+    }
+
+    .admin-media-library-page > .admin-page-header {
+      margin-bottom: 0;
+    }
+
+    .admin-media-library-page > .admin-media-library-access-gate {
+      gap: 12px;
+      padding: 0;
+      border: 0;
+      background: transparent;
+      box-shadow: none;
+    }
+
+    .admin-media-library-page > .admin-media-library-access-gate .admin-access-gate__header {
+      gap: 10px;
+      padding: 12px 14px;
+      border: 1px solid rgba(226, 232, 240, 0.8);
+      border-radius: 16px;
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(247, 250, 255, 0.94));
+    }
+
+    .admin-media-library-page > .admin-media-library-access-gate .admin-access-gate__icon {
+      width: 34px;
+      height: 34px;
+      border-radius: 12px;
+    }
+
+    .admin-media-library-page > .admin-media-library-access-gate .admin-access-gate__copy p {
+      margin-top: 2px;
+      font-size: var(--admin-font-size-sm);
+    }
+
+    .admin-media-library-page > .admin-media-library-access-gate .admin-access-gate__content {
+      display: grid;
+      gap: 12px;
+    }
   }
-}

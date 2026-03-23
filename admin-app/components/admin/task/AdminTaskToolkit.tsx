@@ -99,6 +99,8 @@ export function AdminAccessGate({
   children?: ReactNode;
   className?: string;
 }) {
+  const bodyContent = isAuthenticated ? sessionContent : authContent;
+
   return (
     <section className={cx("admin-access-gate admin-surface", className)}>
       <div className="admin-access-gate__header">
@@ -110,7 +112,7 @@ export function AdminAccessGate({
           <p className="locale-safe">{isAuthenticated ? sessionDescription ?? authDescription : authDescription}</p>
         </div>
       </div>
-      <div className="admin-access-gate__body">{isAuthenticated ? sessionContent : authContent}</div>
+      {bodyContent ? <div className="admin-access-gate__body">{bodyContent}</div> : null}
       {isAuthenticated && children ? <div className="admin-access-gate__content">{children}</div> : null}
     </section>
   );

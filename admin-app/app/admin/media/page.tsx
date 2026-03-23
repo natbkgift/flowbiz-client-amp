@@ -634,14 +634,22 @@ export default function AdminMediaPage() {
       ? { label: t.upload, onClick: () => void runUploadAction() }
       : activeTab === "record"
         ? { label: t.runPatch, onClick: () => void runPatchAction() }
-        : activeTab === "gallery"
+      : activeTab === "gallery"
           ? { label: t.runGallery, onClick: () => void runGalleryAction() }
           : { label: t.refresh, onClick: () => void loadWorkspace() };
+  const stickySecondaryActions =
+    activeTab === "library"
+      ? [{ label: t.signOut, onClick: logout, disabled: loading || opBusy }]
+      : [
+          { label: t.refresh, onClick: () => void loadWorkspace(), disabled: !isAuthenticated || loading || opBusy },
+          { label: t.signOut, onClick: logout, disabled: loading || opBusy },
+        ];
 
   return (
-    <main id="main-content" className="container content-stack">
+    <main id="main-content" className="container content-stack admin-media-library-page">
       <AdminPageHeader title={t.title} description={t.subtitle} icon="media" eyebrow={t.eyebrow} />
       <AdminAccessGate
+        className="admin-media-library-access-gate"
         isAuthenticated={isAuthenticated}
         authTitle={t.loginTitle}
         authDescription={t.loginSubtitle}
@@ -685,16 +693,12 @@ export default function AdminMediaPage() {
             </div>
           </form>
         }
-        sessionContent={isAuthenticated ? <AdminButton variant="secondary" size="sm" icon="media" type="button">{items.length} {t.mediaList}</AdminButton> : null}
       >
         <AdminPrimaryActionBar
           title={t.title}
           description={t.subtitle}
           primaryAction={{ ...stickyPrimaryAction, disabled: !isAuthenticated || opBusy || loading || (activeTab === "upload" ? !uploadFile : activeTab === "record" ? !mediaId.trim() : activeTab === "gallery" ? !galleryTargetId.trim() : false) }}
-          secondaryActions={[
-            { label: t.refresh, onClick: () => void loadWorkspace(), disabled: !isAuthenticated || loading || opBusy },
-            { label: t.signOut, onClick: logout, disabled: loading || opBusy },
-          ]}
+          secondaryActions={stickySecondaryActions}
           meta={<AdminBadge tone="info">{prettyDate(integrity?.scanned_at || null, locale)}</AdminBadge>}
           mobileBottom
         />
