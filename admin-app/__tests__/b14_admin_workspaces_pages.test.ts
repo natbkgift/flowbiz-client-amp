@@ -231,7 +231,9 @@ describe("B14 admin workspace pages contract", () => {
     expect(companyPage).toContain("prerequisiteHints");
     expect(taxonomyPage).toContain("prerequisiteHints");
     expect(testimonialsPage).toContain("prerequisiteHints");
-    expect(usersPage).toContain("prerequisiteHints");
+    expect(usersPage).toContain("listHint");
+    expect(usersPage).toContain("detailHint");
+    expect(usersPage).toContain("reviewHint");
     expect(videosPage).toContain("prerequisiteHints");
   });
 
