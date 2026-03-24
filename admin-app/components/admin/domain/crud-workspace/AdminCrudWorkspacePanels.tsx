@@ -3,6 +3,7 @@ import Link from "next/link";
 
 import { detectAdminLocale, withAdminLocale } from "@/app/_lib/admin-i18n";
 import { toPrettyJson } from "@/app/_lib/admin-auth";
+import { AdminRecordMediaPreview } from "@/components/admin/AdminRecordMediaPreview";
 import { AdminDataTable, type AdminDataTableColumn } from "@/components/admin/AdminDataTable";
 import {
   ActionCard,
@@ -987,6 +988,7 @@ export function AdminCrudWorkspacePreviewPanel({
       icon="workspace"
       titleTag="h2"
     >
+      <AdminRecordMediaPreview record={previewRecord} />
       {previewChecklist && previewChecklist.completeness.total > 0 ? (
         <MetricCard
           className="admin-workspace-preview-card"

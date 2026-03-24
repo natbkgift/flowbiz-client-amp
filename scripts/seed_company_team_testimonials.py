@@ -2,9 +2,15 @@ from __future__ import annotations
 
 import argparse
 import json
+import sys
 from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
+
+_SCRIPT_DIR = Path(__file__).resolve().parent
+_PROJECT_ROOT = _SCRIPT_DIR.parent
+if str(_PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(_PROJECT_ROOT))
 
 from sqlalchemy import delete, select
 from sqlalchemy.orm import Session
@@ -13,7 +19,7 @@ from packages.core.database import SessionLocal, init_db
 from packages.core.media_library import require_local_media_path
 from packages.core.models import Article, CompanyInfo, TeamMember, Testimonial
 
-_SYNCABLE_ENTITIES = {"company_info", "team_members", "testimonials"}
+_SYNCABLE_ENTITIES = {"company_info", "team_members", "testimonials", "articles"}
 _MANAGED_COMPANY_SLUGS = {
     "about",
     "how-we-work",
@@ -375,6 +381,20 @@ def _sync_testimonials(db: Session, rows: list[dict[str, Any]], *, dry_run: bool
     return int(result.rowcount or 0)
 
 
+def _sync_articles(db: Session, rows: list[dict[str, Any]], *, dry_run: bool) -> int:
+    slugs = {
+        str(row.get("slug") or "").strip() for row in rows if str(row.get("slug") or "").strip()
+    }
+    existing_rows = db.scalars(select(Article).where(Article.deleted_at.is_(None))).all()
+    removable_ids = [row.id for row in existing_rows if row.slug not in slugs]
+    if dry_run:
+        return len(removable_ids)
+    if not removable_ids:
+        return 0
+    result = db.execute(delete(Article).where(Article.id.in_(removable_ids)))
+    return int(result.rowcount or 0)
+
+
 def seed_content(
     *, input_dir: Path, dry_run: bool, sync_entities: set[str] | None = None
 ) -> dict[str, dict[str, int]]:
@@ -407,6 +427,11 @@ def seed_content(
             if "testimonials" in sync_entities
             else 0
         )
+        article_removed = (
+            _sync_articles(db, article_rows, dry_run=dry_run)
+            if "articles" in sync_entities
+            else 0
+        )
         if not dry_run:
             db.commit()
 
@@ -422,7 +447,11 @@ def seed_content(
             "updated": testimonial_updated,
             "removed": testimonial_removed,
         },
-        "articles": {"created": article_created, "updated": article_updated},
+        "articles": {
+            "created": article_created,
+            "updated": article_updated,
+            "removed": article_removed,
+        },
     }
 
 

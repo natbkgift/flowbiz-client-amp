@@ -150,6 +150,7 @@ export default async function HomePage({
       fetchBlogPosts,
       fetchProjects,
       fetchProperties: fetchPropertiesAPI,
+      fetchPublishedTestimonials,
     },
     { LocalMediaImage },
     { EmptyStateCard, LoadingCardGrid },
@@ -319,6 +320,12 @@ export default async function HomePage({
     publishedBlogPosts = await fetchBlogPosts();
   } catch {
     publishedBlogPosts = [];
+  }
+  let publishedTestimonials: Awaited<ReturnType<typeof fetchPublishedTestimonials>> = [];
+  try {
+    publishedTestimonials = await fetchPublishedTestimonials({ limit: 6 });
+  } catch {
+    publishedTestimonials = [];
   }
   const authorityPosts = [...publishedBlogPosts]
     .sort((left, right) => {
@@ -1253,7 +1260,13 @@ export default async function HomePage({
           name: String(item.name ?? (locale === 'th' ? 'ลูกค้า AMP' : 'AMP Client')),
           context: String(item.context ?? (locale === 'th' ? 'รีวิวที่ยืนยันแหล่งข้อมูลแล้ว' : 'Verified client feedback')),
         }))
-    : dict.common.testimonials;
+    : publishedTestimonials.length
+      ? publishedTestimonials.slice(0, 3).map((item) => ({
+          quote: item.quote,
+          name: item.attribution_name || (locale === 'th' ? 'ลูกค้า AMP' : 'AMP Client'),
+          context: item.context || (locale === 'th' ? 'รีวิวที่เผยแพร่แล้วจากระบบ' : 'Published feedback from the live system'),
+        }))
+      : dict.common.testimonials;
 
   const fallbackVideoItems = [
     {
@@ -1813,7 +1826,7 @@ export default async function HomePage({
           <div className="cta-row cta-row--center mt-8">
             <TrackedLink
               className="btn btn-secondary"
-              href={withLocale(locale, '/about#reviews')}
+              href={withLocale(locale, '/about#client-reviews')}
               eventType="cta_click"
               eventPayload={{ cta: 'see_all_reviews', from: 'home_reviews' }}
             >

@@ -26,7 +26,7 @@ import subprocess
 import sys
 import time
 from dataclasses import dataclass, field
-from datetime import datetime, timezone
+from datetime import date, datetime, timezone
 from decimal import Decimal, InvalidOperation
 from pathlib import Path
 from typing import Any
@@ -117,6 +117,61 @@ def _check_slug_unique(slugs_seen: set[str], slug: str, label: str) -> str | Non
     return None
 
 
+def _coerce_json_object(value: Any) -> dict[str, Any] | None:
+    return value if isinstance(value, dict) else None
+
+
+def _coerce_json_list(value: Any) -> list[Any] | None:
+    return value if isinstance(value, list) else None
+
+
+def _coerce_int(value: Any) -> int | None:
+    if value in (None, ""):
+        return None
+    try:
+        return int(round(float(value)))
+    except (TypeError, ValueError):
+        return None
+
+
+def _coerce_bool(value: Any, *, default: bool = False) -> bool:
+    if isinstance(value, bool):
+        return value
+    if value in (None, ""):
+        return default
+    text = str(value).strip().lower()
+    if text in {"1", "true", "yes", "y", "on"}:
+        return True
+    if text in {"0", "false", "no", "n", "off"}:
+        return False
+    return default
+
+
+def _parse_optional_date(value: Any) -> date | None:
+    raw = str(value or "").strip()
+    if not raw:
+        return None
+    try:
+        return date.fromisoformat(raw[:10])
+    except ValueError:
+        return None
+
+
+def _parse_optional_datetime(value: Any) -> datetime | None:
+    raw = str(value or "").strip()
+    if not raw:
+        return None
+    if raw.endswith("Z"):
+        raw = raw[:-1] + "+00:00"
+    try:
+        parsed = datetime.fromisoformat(raw)
+    except ValueError:
+        return None
+    if parsed.tzinfo is None:
+        return parsed.replace(tzinfo=timezone.utc)
+    return parsed.astimezone(timezone.utc)
+
+
 def _resolve_fk(
     db: Session,
     model: type,
@@ -203,7 +258,13 @@ def import_developers(db: Session, rows: list[dict], *, dry_run: bool) -> StepRe
             {
                 "name": str(row["name"]).strip(),
                 "website": str(row.get("website") or "").strip() or None,
+                "summary": _coerce_json_object(row.get("summary")),
+                "profile": _coerce_json_object(row.get("profile")),
+                "source_note": str(row.get("source_note") or "").strip() or None,
+                "trust_proof": _coerce_json_object(row.get("trust_proof")),
+                "tier": str(row.get("tier") or "").strip() or None,
                 "logo_url": str(row.get("logo_url") or "").strip() or None,
+                "cover_image_url": str(row.get("cover_image_url") or "").strip() or None,
                 "status": status,
             },
         )
@@ -254,6 +315,12 @@ def import_areas(db: Session, rows: list[dict], *, dry_run: bool) -> StepResult:
             {
                 "name": str(row["name"]).strip(),
                 "city": str(row.get("city") or "Pattaya").strip(),
+                "content": _coerce_json_object(row.get("content")),
+                "summary": _coerce_json_object(row.get("summary")),
+                "source_note": str(row.get("source_note") or "").strip() or None,
+                "map_center": _coerce_json_object(row.get("map_center")),
+                "hero_image_url": str(row.get("hero_image_url") or "").strip() or None,
+                "cover_image_url": str(row.get("cover_image_url") or "").strip() or None,
                 "status": status,
             },
         )
@@ -320,6 +387,10 @@ def import_projects(db: Session, rows: list[dict], *, dry_run: bool) -> StepResu
         if status not in ("draft", "published", "archived"):
             status = "published"
 
+        property_type = str(row.get("property_type") or "condo").strip().lower() or "condo"
+        if property_type not in {"condo", "villa", "house", "land", "hotel", "shop", "office"}:
+            property_type = "condo"
+
         starting_price = None
         raw_starting_price = row.get("starting_price")
         if raw_starting_price not in (None, ""):
@@ -329,6 +400,9 @@ def import_projects(db: Session, rows: list[dict], *, dry_run: bool) -> StepResu
                 result.errors.append(f"{label}: invalid starting_price '{raw_starting_price}'")
                 continue
 
+        delivery_date = _parse_optional_date(row.get("delivery_date"))
+        claims_updated_at = _parse_optional_datetime(row.get("claims_updated_at"))
+
         _, is_new = _upsert_by_slug(
             db,
             Project,
@@ -337,7 +411,26 @@ def import_projects(db: Session, rows: list[dict], *, dry_run: bool) -> StepResu
                 "name": str(row["name"]).strip(),
                 "developer_id": developer_id,
                 "area_id": area_id,
+                "property_type": property_type,
+                "delivery_date": delivery_date,
                 "cover_image_url": str(row.get("cover_image_url") or "").strip() or None,
+                "hero_image_url": str(row.get("hero_image_url") or "").strip() or None,
+                "images": _coerce_json_list(row.get("images")),
+                "summary": _coerce_json_object(row.get("summary")) or {},
+                "description": _coerce_json_object(row.get("description")),
+                "badges": _coerce_json_list(row.get("badges")),
+                "highlights": _coerce_json_list(row.get("highlights")),
+                "quick_facts": _coerce_json_list(row.get("quick_facts")),
+                "amenities": _coerce_json_list(row.get("amenities")),
+                "trust_proof": _coerce_json_list(row.get("trust_proof")),
+                "source_notes": _coerce_json_object(row.get("source_notes")),
+                "claims_updated_at": claims_updated_at,
+                "investment_snapshot": _coerce_json_object(row.get("investment_snapshot")),
+                "location": _coerce_json_object(row.get("location")),
+                "unit_count": _coerce_int(row.get("unit_count")),
+                "floors": _coerce_int(row.get("floors")),
+                "year_built": _coerce_int(row.get("year_built")),
+                "is_featured": _coerce_bool(row.get("is_featured")),
                 "starting_price": starting_price,
                 "status": status,
             },
@@ -388,8 +481,8 @@ def _import_units(
 
         # Validate status
         prop_status = str(row.get("status") or "active").strip()
-        if prop_status not in ("active", "inactive"):
-            errs.append(f"{label}: invalid status '{prop_status}' (must be active/inactive)")
+        if prop_status not in ("active", "inactive", "archived"):
+            errs.append(f"{label}: invalid status '{prop_status}' (must be active/inactive/archived)")
 
         # Resolve FK dependencies (all optional)
         project_id, err = _resolve_fk(
@@ -443,22 +536,49 @@ def _import_units(
         bedrooms = row.get("bedrooms")
         bathrooms = row.get("bathrooms")
         size_val = row.get("size_sqm") or row.get("size")
+        floor = row.get("floor")
+        floor_number = row.get("floor_number")
+        floors = row.get("floors")
+        property_type = str(row.get("property_type") or "condo").strip().lower() or "condo"
+        if property_type not in {"condo", "villa", "house", "land", "hotel", "shop", "office"}:
+            property_type = "condo"
+        last_synced_at = _parse_optional_datetime(row.get("last_synced_at"))
 
         values = {
             "title": str(row["title"]).strip(),
             "description": str(row.get("description") or "").strip() or None,
+            "title_i18n": _coerce_json_object(row.get("title_i18n")),
+            "description_i18n": _coerce_json_object(row.get("description_i18n")),
             "type": prop_type,
+            "property_type": property_type,
             "price": price,
+            "currency": str(row.get("currency") or "THB").strip() or "THB",
+            "price_period": str(row.get("price_period") or "").strip() or None,
             "bedrooms": int(bedrooms) if bedrooms is not None else None,
             "bathrooms": int(bathrooms) if bathrooms is not None else None,
+            "size_sqm": Decimal(str(size_val)) if size_val is not None else None,
             "size": Decimal(str(size_val)) if size_val is not None else None,
+            "floor": _coerce_int(floor),
+            "floor_number": _coerce_int(floor_number if floor_number is not None else floor),
+            "floors": _coerce_int(floors),
+            "furnishing": str(row.get("furnishing") or "").strip() or None,
+            "unit_type": str(row.get("unit_type") or "").strip() or None,
+            "view": str(row.get("view") or row.get("view_label") or "").strip() or None,
             "address": str(row["address"]).strip(),
             "city": str(row["city"]).strip(),
             "area_id": area_id,
             "developer_id": developer_id,
             "project_id": project_id,
             "slug": str(row.get("slug") or "").strip() or None,
+            "ownership_notes": str(row.get("ownership_notes") or "").strip() or None,
+            "fee_notes": str(row.get("fee_notes") or "").strip() or None,
+            "cover_image_url": str(row.get("cover_image_url") or "").strip() or None,
+            "cover_image": str(row.get("cover_image") or "").strip() or None,
             "status": prop_status,
+            "local_images": _coerce_json_list(row.get("local_images")),
+            "features": _coerce_json_object(row.get("features")),
+            "source_meta": _coerce_json_object(row.get("source_meta")),
+            "last_synced_at": last_synced_at,
         }
 
         images = row.get("images")

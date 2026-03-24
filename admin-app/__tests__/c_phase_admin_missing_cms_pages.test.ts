@@ -17,10 +17,11 @@ describe("Phase C missing CMS pages", () => {
     expect(nav).toContain("/admin/areas");
     expect(nav).toContain("/admin/developers");
     expect(nav).toContain("/admin/company");
+    expect(nav).toContain("/admin/team-members");
     expect(nav).toContain("/admin/testimonials");
   });
 
-  it("provides projects/properties/areas/developers/company/testimonials pages under /admin", () => {
+  it("provides projects/properties/areas/developers/company/team-members/testimonials pages under /admin", () => {
     const routeChecks: Array<{ file: string; expected: string[] }> = [
       {
         file: "app/admin/projects/page.tsx",
@@ -48,6 +49,15 @@ describe("Phase C missing CMS pages", () => {
         expected: ["/admin/company", "/admin/company/{id}"],
       },
       {
+        file: "app/admin/team-members/page.tsx",
+        expected: [
+          "/admin/team-members",
+          "/admin/team-members/{id}",
+          "/admin/team-members/{id}/publish",
+          "/admin/team-members/{id}/unpublish",
+        ],
+      },
+      {
         file: "app/admin/testimonials/page.tsx",
         expected: ["/admin/testimonials", "/admin/testimonials/{id}", "/admin/testimonials/{id}/publish"],
       },
@@ -69,6 +79,7 @@ describe("Phase C missing CMS pages", () => {
   it("migrates selected admin pages to shared form primitives instead of direct JSON editing", () => {
     const projects = read("app/admin/projects/page.tsx");
     const properties = read("app/admin/properties/page.tsx");
+    const teamMembers = read("app/admin/team-members/page.tsx");
     const testimonials = read("app/admin/testimonials/page.tsx");
     const entityWorkspace = read("components/admin/domain/entity-workspace/AdminEntityWorkspace.tsx");
     const workspace = read("components/admin/AdminJsonCrudWorkspace.tsx");
@@ -91,10 +102,19 @@ describe("Phase C missing CMS pages", () => {
     expect(properties).toContain("type: \"relation\"");
     expect(properties).toContain("type: \"media\"");
 
+    expect(teamMembers).toContain("createFormFields");
+    expect(teamMembers).toContain("type: \"status\"");
+    expect(teamMembers).toContain("type: \"media\"");
+    expect(teamMembers).toContain("type: \"chips\"");
+    expect(teamMembers).toContain("photo_url");
+    expect(teamMembers).toContain("bio.en");
+
     expect(testimonials).toContain("createFormFields");
     expect(testimonials).toContain("type: \"status\"");
-    expect(testimonials).toContain("type: \"relation\"");
-    expect(testimonials).toContain("type: \"media\"");
+    expect(testimonials).toContain("type: \"select\"");
+    expect(testimonials).toContain("display_order");
+    expect(testimonials).not.toContain("property_id");
+    expect(testimonials).not.toContain("avatar_media_id");
   });
 
   it("configures blog workspace as form-first with preview and publish checklist", () => {

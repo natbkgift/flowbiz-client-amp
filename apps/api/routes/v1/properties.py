@@ -10,7 +10,7 @@ from sqlalchemy.orm import Session
 
 from packages.core.cache import response_cache
 from packages.core.database import get_db
-from packages.core.models import Area, CompanyInfo, Project, Property
+from packages.core.models import Area, CompanyInfo, Project, Property, TeamMember, Testimonial
 from packages.core.schemas.property_api import (
     CompanyInfoItem,
     CompanyListResponse,
@@ -22,6 +22,10 @@ from packages.core.schemas.property_api import (
     PropertyType,
     SearchResponse,
     SearchResultItem,
+    TeamMemberItem,
+    TeamMemberListResponse,
+    TestimonialItem,
+    TestimonialListResponse,
 )
 
 router = APIRouter(prefix="/v1", tags=["properties", "company"])
@@ -553,3 +557,36 @@ def get_company_info(
     if item is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Company info not found")
     return CompanyInfoItem.model_validate(item)
+
+
+@router.get("/team-members", response_model=TeamMemberListResponse)
+def list_public_team_members(
+    limit: int = Query(default=50, ge=1, le=200),
+    db: Session = Depends(get_db),
+) -> TeamMemberListResponse:
+    rows = db.scalars(
+        select(TeamMember)
+        .where(TeamMember.deleted_at.is_(None), TeamMember.status == "active")
+        .order_by(asc(TeamMember.display_order), asc(TeamMember.name))
+        .limit(limit)
+    ).all()
+    return TeamMemberListResponse(data=[TeamMemberItem.model_validate(row) for row in rows])
+
+
+@router.get("/testimonials", response_model=TestimonialListResponse)
+def list_public_testimonials(
+    limit: int = Query(default=50, ge=1, le=200),
+    intent: str | None = Query(default=None),
+    db: Session = Depends(get_db),
+) -> TestimonialListResponse:
+    query = select(Testimonial).where(
+        Testimonial.deleted_at.is_(None),
+        Testimonial.status == "published",
+    )
+    if intent and intent.strip():
+        query = query.where(Testimonial.intent == intent.strip())
+
+    rows = db.scalars(
+        query.order_by(asc(Testimonial.display_order), desc(Testimonial.created_at)).limit(limit)
+    ).all()
+    return TestimonialListResponse(data=[TestimonialItem.model_validate(row) for row in rows])

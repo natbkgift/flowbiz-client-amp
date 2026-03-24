@@ -67,10 +67,14 @@ export type ProjectItem = {
   } | null;
   status: string;
   cover_image_url?: string | null;
+  hero_image_url?: string | null;
+  images?: string[] | null;
   starting_price?: number | null;
   is_featured?: boolean;
-  created_at: string;
-  updated_at: string;
+  summary?: Record<string, unknown> | null;
+  description?: Record<string, unknown> | null;
+  created_at: string | null;
+  updated_at: string | null;
 };
 
 export type ProjectDetail = {
@@ -86,8 +90,8 @@ export type ProjectDetail = {
   hero_image_url?: string | null;
   images?: string[] | null;
 
-  summary: Record<string, string>;
-  description?: Record<string, string> | null;
+  summary: Record<string, unknown>;
+  description?: Record<string, unknown> | null;
 
   amenities?: string[] | null;
   investment_snapshot?: Record<string, unknown> | null;
@@ -110,8 +114,8 @@ export type ProjectDetail = {
     name: string;
   } | null;
 
-  created_at: string;
-  updated_at: string;
+  created_at: string | null;
+  updated_at: string | null;
 };
 
 const DEFAULT_SITE_ORIGIN = 'https://amppattaya.com';
@@ -662,6 +666,73 @@ export async function fetchCompanyInfoBySlug(slug: string): Promise<CompanyInfoI
   if (res.status === 404) return null;
   if (!res.ok) throw new Error(`Failed to fetch company info (${res.status})`);
   return (await res.json()) as CompanyInfoItem;
+}
+
+export type TeamMemberItem = {
+  id: string;
+  name: string;
+  role_title: string;
+  bio?: Record<string, unknown> | null;
+  photo_url?: string | null;
+  languages?: string[] | null;
+  specialties?: string[] | null;
+  display_order: number;
+  status: string;
+  created_at: string;
+  updated_at: string;
+};
+
+export type TestimonialItem = {
+  id: string;
+  status: string;
+  persona: string;
+  intent: string;
+  quote: string;
+  attribution_name?: string | null;
+  context?: string | null;
+  display_order: number;
+  created_at: string;
+  updated_at: string;
+};
+
+export async function fetchPublishedTeamMembers(): Promise<TeamMemberItem[]> {
+  if (useLocalBuildStaticSafe) {
+    return [];
+  }
+  const origin = getOrigin();
+  const base = apiBase();
+  const url = new URL(`${base}/v1/team-members`, origin);
+  const res = await fetchWithRetry(url.toString(), {
+    next: { revalidate: PAGE_REVALIDATE_SECONDS },
+    retryOn5xx: false,
+  });
+  if (!res.ok) throw new Error(`Failed to fetch team members (${res.status})`);
+  const payload = (await res.json()) as { data?: unknown } | unknown;
+  if (payload && typeof payload === 'object' && Array.isArray((payload as { data?: unknown }).data)) {
+    return (payload as { data: TeamMemberItem[] }).data;
+  }
+  return [];
+}
+
+export async function fetchPublishedTestimonials(params?: { intent?: string; limit?: number }): Promise<TestimonialItem[]> {
+  if (useLocalBuildStaticSafe) {
+    return [];
+  }
+  const origin = getOrigin();
+  const base = apiBase();
+  const url = new URL(`${base}/v1/testimonials`, origin);
+  if (params?.intent) url.searchParams.set('intent', params.intent);
+  if (params?.limit) url.searchParams.set('limit', String(params.limit));
+  const res = await fetchWithRetry(url.toString(), {
+    next: { revalidate: PAGE_REVALIDATE_SECONDS },
+    retryOn5xx: false,
+  });
+  if (!res.ok) throw new Error(`Failed to fetch testimonials (${res.status})`);
+  const payload = (await res.json()) as { data?: unknown } | unknown;
+  if (payload && typeof payload === 'object' && Array.isArray((payload as { data?: unknown }).data)) {
+    return (payload as { data: TestimonialItem[] }).data;
+  }
+  return [];
 }
 
 export type ContentLink = {

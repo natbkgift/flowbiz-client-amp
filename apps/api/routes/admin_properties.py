@@ -1,5 +1,6 @@
 import csv
 import hashlib
+import json
 import io
 import threading
 import time
@@ -67,6 +68,68 @@ from packages.core.schemas.property_import import PropertyImportResult, Property
 
 router = APIRouter(prefix="/admin", tags=["admin"])
 
+_SITE_LAYOUT_CMS_SLUG = "site-layout"
+_SITE_LAYOUT_CMS_TITLE = "Site Layout CMS"
+_SITE_LAYOUT_CMS_META_DESCRIPTION = "Header/Footer CMS source of truth"
+_SITE_LAYOUT_CMS_FALLBACK_CONTENT = json.dumps(
+    {
+        "header": {
+            "primary_links": [
+                {"href": "/invest", "label": {"en": "Invest", "th": "ลงทุน"}, "enabled": True},
+                {"href": "/buy", "label": {"en": "Buy", "th": "ซื้อ"}, "enabled": True},
+                {
+                    "href": "/projects",
+                    "label": {"en": "Projects", "th": "โครงการ"},
+                    "enabled": True,
+                },
+                {
+                    "href": "/area-guide",
+                    "label": {"en": "Area Guide", "th": "ทำเล"},
+                    "enabled": True,
+                },
+            ],
+            "contact_cta": {
+                "href": "/contact",
+                "label": {"en": "Contact", "th": "ติดต่อ"},
+                "enabled": True,
+            },
+        },
+        "footer": {
+            "quick_links": [
+                {"href": "/invest", "label": {"en": "Invest", "th": "ลงทุน"}, "enabled": True},
+                {"href": "/buy", "label": {"en": "Buy", "th": "ซื้อ"}, "enabled": True},
+                {
+                    "href": "/projects",
+                    "label": {"en": "Projects", "th": "โครงการ"},
+                    "enabled": True,
+                },
+            ],
+            "legal_links": [
+                {
+                    "href": "/privacy",
+                    "label": {"en": "Privacy Policy", "th": "นโยบายความเป็นส่วนตัว"},
+                    "enabled": True,
+                },
+                {
+                    "href": "/terms",
+                    "label": {"en": "Terms of Service", "th": "ข้อกำหนดการใช้บริการ"},
+                    "enabled": True,
+                },
+            ],
+            "contact": {
+                "email": "info@amppattaya.com",
+                "facebook_url": "https://facebook.com/flowbiz",
+                "facebook_label": {
+                    "en": "facebook.com/flowbiz",
+                    "th": "facebook.com/flowbiz",
+                },
+            },
+        },
+    },
+    ensure_ascii=False,
+    indent=2,
+)
+
 
 EXPECTED_HEADER = [
     "source_id",
@@ -99,6 +162,42 @@ def _commit_or_conflict(db: Session, *, detail: str) -> None:
     except IntegrityError as exc:
         db.rollback()
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=detail) from exc
+
+
+def _site_layout_company_info_fallback() -> CompanyInfoItem:
+    now = datetime.now(timezone.utc)
+    return CompanyInfoItem(
+        id=UUID("00000000-0000-0000-0000-000000000000"),
+        title=_SITE_LAYOUT_CMS_TITLE,
+        slug=_SITE_LAYOUT_CMS_SLUG,
+        content=_SITE_LAYOUT_CMS_FALLBACK_CONTENT,
+        meta_title=_SITE_LAYOUT_CMS_TITLE,
+        meta_description=_SITE_LAYOUT_CMS_META_DESCRIPTION,
+        created_at=now,
+        updated_at=now,
+    )
+
+
+def _materialize_site_layout_company_info(payload: CompanyInfoUpdate | None = None) -> CompanyInfo:
+    return CompanyInfo(
+        title=(payload.title if payload and payload.title is not None else _SITE_LAYOUT_CMS_TITLE),
+        slug=_SITE_LAYOUT_CMS_SLUG,
+        content=(
+            payload.content
+            if payload and payload.content is not None
+            else _SITE_LAYOUT_CMS_FALLBACK_CONTENT
+        ),
+        meta_title=(
+            payload.meta_title
+            if payload and payload.meta_title is not None
+            else _SITE_LAYOUT_CMS_TITLE
+        ),
+        meta_description=(
+            payload.meta_description
+            if payload and payload.meta_description is not None
+            else _SITE_LAYOUT_CMS_META_DESCRIPTION
+        ),
+    )
 
 
 def _summarize_errors(errors: list[str]) -> str | None:
@@ -1799,7 +1898,11 @@ def list_company_info(
     _admin: User = Depends(get_current_admin),
 ) -> CompanyListResponse:
     rows = db.scalars(select(CompanyInfo).order_by(CompanyInfo.slug.asc())).all()
-    return CompanyListResponse(data=[CompanyInfoItem.model_validate(row) for row in rows])
+    items = [CompanyInfoItem.model_validate(row) for row in rows]
+    if all(item.slug != _SITE_LAYOUT_CMS_SLUG for item in items):
+        items.append(_site_layout_company_info_fallback())
+        items.sort(key=lambda item: item.slug)
+    return CompanyListResponse(data=items)
 
 
 @router.get("/company/{slug}", response_model=CompanyInfoItem)
@@ -1810,6 +1913,8 @@ def get_company_info(
 ) -> CompanyInfoItem:
     row = db.scalar(select(CompanyInfo).where(CompanyInfo.slug == slug))
     if row is None:
+        if slug == _SITE_LAYOUT_CMS_SLUG:
+            return _site_layout_company_info_fallback()
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Company info not found")
     return CompanyInfoItem.model_validate(row)
 
@@ -1823,7 +1928,9 @@ def update_company_info(
 ) -> CompanyInfoItem:
     info = db.scalar(select(CompanyInfo).where(CompanyInfo.slug == slug))
     if info is None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Company info not found")
+        if slug != _SITE_LAYOUT_CMS_SLUG:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Company info not found")
+        info = _materialize_site_layout_company_info(payload)
 
     for field, value in payload.model_dump(exclude_unset=True).items():
         setattr(info, field, value)

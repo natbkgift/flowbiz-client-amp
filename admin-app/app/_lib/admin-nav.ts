@@ -72,6 +72,13 @@ const COMPANY_NAV: AdminNavItem = {
   description: { en: "Company content records", th: "เนื้อหาและข้อมูลบริษัท" },
 };
 
+const TEAM_MEMBERS_NAV: AdminNavItem = {
+  href: "/admin/team-members",
+  icon: "users",
+  label: { en: "Team Members", th: "ทีมงาน" },
+  description: { en: "Team profiles and bios", th: "จัดการโปรไฟล์และประวัติทีมงาน" },
+};
+
 const TESTIMONIALS_NAV: AdminNavItem = {
   href: "/admin/testimonials",
   icon: "testimonials",
@@ -158,6 +165,7 @@ export const ADMIN_PRIMARY_NAV: AdminNavItem[] = [
   AREAS_NAV,
   DEVELOPERS_NAV,
   COMPANY_NAV,
+  TEAM_MEMBERS_NAV,
   TESTIMONIALS_NAV,
   BLOG_NAV,
   REVIEW_QUEUE_NAV,
@@ -196,6 +204,7 @@ export const ADMIN_NAV_GROUPS: AdminNavGroup[] = [
       AREAS_NAV,
       DEVELOPERS_NAV,
       COMPANY_NAV,
+      TEAM_MEMBERS_NAV,
       TESTIMONIALS_NAV,
       BLOG_NAV,
       REVIEW_QUEUE_NAV,

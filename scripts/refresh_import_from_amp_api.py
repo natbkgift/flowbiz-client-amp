@@ -120,10 +120,34 @@ def _normalize_text(value: Any) -> str:
 
 @dataclass
 class FetchSummary:
+    developers: int = 0
+    areas: int = 0
     projects: int = 0
     properties: int = 0
     property_details_ok: int = 0
     property_details_failed: int = 0
+
+
+def _extract_rows(payload: Any) -> list[dict[str, Any]]:
+    if isinstance(payload, list):
+        return [row for row in payload if isinstance(row, dict)]
+    if isinstance(payload, dict):
+        data = payload.get("data") or payload.get("items")
+        if isinstance(data, list):
+            return [row for row in data if isinstance(row, dict)]
+    return []
+
+
+def _coalesce(*values: Any) -> Any:
+    for value in values:
+        if value is None:
+            continue
+        if isinstance(value, str) and not value.strip():
+            continue
+        if isinstance(value, (list, dict)) and not value:
+            continue
+        return value
+    return None
 
 
 def fetch_projects(base_url: str) -> list[dict[str, Any]]:
@@ -143,13 +167,15 @@ def fetch_projects(base_url: str) -> list[dict[str, Any]]:
         if last_error:
             raise last_error
         return []
-    if isinstance(payload, dict):
-        data = payload.get("data") or payload.get("items")
-        if isinstance(data, list):
-            return data
-    if isinstance(payload, list):
-        return payload
-    return []
+    return _extract_rows(payload)
+
+
+def fetch_areas(base_url: str) -> list[dict[str, Any]]:
+    return _extract_rows(_http_get_json(f"{base_url.rstrip('/')}/v1/areas"))
+
+
+def fetch_developers(base_url: str) -> list[dict[str, Any]]:
+    return _extract_rows(_http_get_json(f"{base_url.rstrip('/')}/v1/developers"))
 
 
 def fetch_all_properties(base_url: str, *, limit: int) -> list[dict[str, Any]]:
@@ -240,6 +266,11 @@ def main() -> int:
         "--skip-report", action="store_true", help="Do not invoke B13 report step after refresh"
     )
     parser.add_argument(
+        "--skip-asset-mirror",
+        action="store_true",
+        help="Do not mirror missing project/unit media assets into local frontend public storage",
+    )
+    parser.add_argument(
         "--write",
         nargs="?",
         const=str(DEFAULT_WRITE),
@@ -250,11 +281,23 @@ def main() -> int:
     import_dir = Path(args.import_dir)
     import_dir.mkdir(parents=True, exist_ok=True)
 
+    old_developers = _read_json(import_dir / "developers.json")
+    old_areas = _read_json(import_dir / "areas.json")
     old_projects = _read_json(import_dir / "projects.json")
     old_buy = _read_json(import_dir / "units_buy.json")
     old_rent = _read_json(import_dir / "units_rent.json")
     cover_source_map = _read_cover_source_map(import_dir / "project_cover_sources.json")
 
+    old_developers_by_slug = {
+        str(r.get("slug") or "").strip(): r
+        for r in old_developers
+        if str(r.get("slug") or "").strip()
+    }
+    old_areas_by_slug = {
+        str(r.get("slug") or "").strip(): r
+        for r in old_areas
+        if str(r.get("slug") or "").strip()
+    }
     old_projects_by_slug = {
         str(r.get("slug") or "").strip(): r
         for r in old_projects
@@ -269,12 +312,16 @@ def main() -> int:
     summary = FetchSummary()
 
     try:
+        api_developers = fetch_developers(args.base_url)
+        api_areas = fetch_areas(args.base_url)
         api_projects = fetch_projects(args.base_url)
         api_properties = fetch_all_properties(args.base_url, limit=min(100, max(20, args.limit)))
     except Exception as exc:  # noqa: BLE001
         print(f"[ERROR] Failed fetching AMP API data: {exc}", file=sys.stderr)
         return 1
 
+    summary.developers = len(api_developers)
+    summary.areas = len(api_areas)
     summary.projects = len(api_projects)
     summary.properties = len(api_properties)
 
@@ -365,6 +412,90 @@ def main() -> int:
                 include_price=include_in_project_price,
             )
 
+    # Merge developers
+    old_developer_order = {str(r.get("slug") or ""): i for i, r in enumerate(old_developers)}
+    merged_developers: list[dict[str, Any]] = []
+    seen_developer_slugs: set[str] = set()
+
+    for row in sorted(
+        api_developers, key=lambda r: old_developer_order.get(str(r.get("slug") or ""), 10_000)
+    ):
+        slug = str(row.get("slug") or "").strip()
+        name = str(row.get("name") or "").strip()
+        if not slug or not name:
+            continue
+        seen_developer_slugs.add(slug)
+        old = old_developers_by_slug.get(slug, {})
+        merged_developers.append(
+            {
+                "name": name,
+                "slug": slug,
+                "website": str(_coalesce(row.get("website"), old.get("website")) or "").strip()
+                or None,
+                "summary": _coalesce(row.get("summary"), old.get("summary")),
+                "profile": _coalesce(row.get("profile"), old.get("profile")),
+                "source_note": str(
+                    _coalesce(row.get("source_note"), old.get("source_note")) or ""
+                ).strip()
+                or None,
+                "trust_proof": _coalesce(row.get("trust_proof"), old.get("trust_proof")),
+                "tier": str(_coalesce(row.get("tier"), old.get("tier")) or "").strip() or None,
+                "logo_url": str(_coalesce(row.get("logo_url"), old.get("logo_url")) or "").strip()
+                or None,
+                "cover_image_url": str(
+                    _coalesce(row.get("cover_image_url"), old.get("cover_image_url")) or ""
+                ).strip()
+                or None,
+                "status": str(_coalesce(row.get("status"), old.get("status"), "active")),
+            }
+        )
+
+    for old in old_developers:
+        slug = str(old.get("slug") or "").strip()
+        if slug and slug not in seen_developer_slugs:
+            merged_developers.append(old)
+
+    # Merge areas
+    old_area_order = {str(r.get("slug") or ""): i for i, r in enumerate(old_areas)}
+    merged_areas: list[dict[str, Any]] = []
+    seen_area_slugs: set[str] = set()
+
+    for row in sorted(api_areas, key=lambda r: old_area_order.get(str(r.get("slug") or ""), 10_000)):
+        slug = str(row.get("slug") or "").strip()
+        name = str(row.get("name") or "").strip()
+        if not slug or not name:
+            continue
+        seen_area_slugs.add(slug)
+        old = old_areas_by_slug.get(slug, {})
+        merged_areas.append(
+            {
+                "name": name,
+                "slug": slug,
+                "city": str(_coalesce(row.get("city"), old.get("city"), "Pattaya")).strip(),
+                "status": str(_coalesce(row.get("status"), old.get("status"), "published")),
+                "content": _coalesce(row.get("content"), old.get("content")),
+                "summary": _coalesce(row.get("summary"), old.get("summary")),
+                "source_note": str(
+                    _coalesce(row.get("source_note"), old.get("source_note")) or ""
+                ).strip()
+                or None,
+                "map_center": _coalesce(row.get("map_center"), old.get("map_center")),
+                "hero_image_url": str(
+                    _coalesce(row.get("hero_image_url"), old.get("hero_image_url")) or ""
+                ).strip()
+                or None,
+                "cover_image_url": str(
+                    _coalesce(row.get("cover_image_url"), old.get("cover_image_url")) or ""
+                ).strip()
+                or None,
+            }
+        )
+
+    for old in old_areas:
+        slug = str(old.get("slug") or "").strip()
+        if slug and slug not in seen_area_slugs:
+            merged_areas.append(old)
+
     # Merge projects
     old_order = {str(r.get("slug") or ""): i for i, r in enumerate(old_projects)}
     merged_projects: list[dict[str, Any]] = []
@@ -395,13 +526,56 @@ def main() -> int:
         old_starting = _to_float(old.get("starting_price"))
         starting_price = live_starting or hint_starting or old_starting
 
+        nested_area = p.get("area") if isinstance(p.get("area"), dict) else {}
+        nested_developer = p.get("developer") if isinstance(p.get("developer"), dict) else {}
         row: dict[str, Any] = {
             "name": name,
             "slug": slug,
-            "developer_slug": old.get("developer_slug"),
-            "area_slug": old.get("area_slug"),
+            "developer_slug": str(
+                _coalesce(
+                    nested_developer.get("slug"),
+                    p.get("developer_slug"),
+                    old.get("developer_slug"),
+                )
+                or ""
+            ).strip()
+            or None,
+            "area_slug": str(
+                _coalesce(nested_area.get("slug"), p.get("area_slug"), old.get("area_slug")) or ""
+            ).strip()
+            or None,
             "cover_image_url": cover or old.get("cover_image_url") or None,
             "status": str(p.get("status") or old.get("status") or "published"),
+            "property_type": str(
+                _coalesce(p.get("property_type"), old.get("property_type"), "condo")
+            ).strip()
+            or "condo",
+            "hero_image_url": str(
+                _coalesce(p.get("hero_image_url"), old.get("hero_image_url")) or ""
+            ).strip()
+            or None,
+            "images": _coalesce(p.get("images"), old.get("images")) or None,
+            "summary": _coalesce(p.get("summary"), old.get("summary")) or {},
+            "description": _coalesce(p.get("description"), old.get("description")) or None,
+            "badges": _coalesce(p.get("badges"), old.get("badges")) or None,
+            "highlights": _coalesce(p.get("highlights"), old.get("highlights")) or None,
+            "quick_facts": _coalesce(p.get("quick_facts"), old.get("quick_facts")) or None,
+            "amenities": _coalesce(p.get("amenities"), old.get("amenities")) or None,
+            "trust_proof": _coalesce(p.get("trust_proof"), old.get("trust_proof")) or None,
+            "source_notes": _coalesce(p.get("source_notes"), old.get("source_notes")) or None,
+            "claims_updated_at": _coalesce(
+                p.get("claims_updated_at"), old.get("claims_updated_at")
+            ),
+            "investment_snapshot": _coalesce(
+                p.get("investment_snapshot"), old.get("investment_snapshot")
+            )
+            or None,
+            "location": _coalesce(p.get("location"), old.get("location")) or None,
+            "delivery_date": _coalesce(p.get("delivery_date"), old.get("delivery_date")),
+            "unit_count": _to_int_if_whole(_coalesce(p.get("unit_count"), old.get("unit_count"))),
+            "floors": _to_int_if_whole(_coalesce(p.get("floors"), old.get("floors"))),
+            "year_built": _to_int_if_whole(_coalesce(p.get("year_built"), old.get("year_built"))),
+            "is_featured": bool(_coalesce(p.get("is_featured"), old.get("is_featured"), False)),
         }
         if starting_price is not None and starting_price > 0:
             row["starting_price"] = int(round(starting_price))
@@ -530,16 +704,21 @@ def main() -> int:
     merged_rent = merge_legacy(live_rent, old_rent)
 
     # Stable sorting for diffs: source_id asc.
+    merged_developers.sort(key=lambda r: str(r.get("slug") or ""))
+    merged_areas.sort(key=lambda r: str(r.get("slug") or ""))
     merged_buy.sort(key=lambda r: str(r.get("source_id") or ""))
     merged_rent.sort(key=lambda r: str(r.get("source_id") or ""))
     merged_projects.sort(key=lambda r: str(r.get("slug") or ""))
 
     if not args.no_write:
+        _write_json(import_dir / "developers.json", merged_developers)
+        _write_json(import_dir / "areas.json", merged_areas)
         _write_json(import_dir / "projects.json", merged_projects)
         _write_json(import_dir / "units_buy.json", merged_buy)
         _write_json(import_dir / "units_rent.json", merged_rent)
 
     mirror_gate_code = 0
+    asset_mirror_gate_code = 0
     coverage_gate_code = 0
 
     # Mirror external project covers into local /media paths so import data never hotlinks.
@@ -561,6 +740,21 @@ def main() -> int:
         except Exception:
             if args.strict or args.fail_on_warn:
                 mirror_gate_code = 1
+
+    if not args.skip_asset_mirror:
+        try:
+            asset_mirror_cmd = [
+                sys.executable,
+                str(REPO_ROOT / "scripts" / "mirror_import_media_assets.py"),
+                "--input-dir",
+                str(import_dir),
+                "--write-report",
+            ]
+            asset_mirror_proc = subprocess.run(asset_mirror_cmd, check=False)
+            asset_mirror_gate_code = int(asset_mirror_proc.returncode)
+        except Exception:
+            if args.strict or args.fail_on_warn:
+                asset_mirror_gate_code = 1
 
     # Auto-generate coverage report after refresh so homepage media quality can be tracked over time.
     if not args.skip_report:
@@ -587,6 +781,8 @@ def main() -> int:
         warnings.append("dataset_empty")
     if mirror_gate_code != 0:
         warnings.append("mirror_gate_failed")
+    if asset_mirror_gate_code != 0:
+        warnings.append("asset_mirror_gate_failed")
     if coverage_gate_code != 0:
         warnings.append("coverage_gate_failed")
 
@@ -594,12 +790,16 @@ def main() -> int:
         "generated_at": datetime.now(timezone.utc).isoformat(),
         "base_url": args.base_url,
         "fetched": {
+            "developers": summary.developers,
+            "areas": summary.areas,
             "projects": summary.projects,
             "properties": summary.properties,
             "property_details_ok": summary.property_details_ok,
             "property_details_failed": summary.property_details_failed,
         },
         "written": {
+            "developers": len(merged_developers),
+            "areas": len(merged_areas),
             "projects": len(merged_projects),
             "units_buy": len(merged_buy),
             "units_rent": len(merged_rent),
@@ -612,6 +812,7 @@ def main() -> int:
     if not args.quiet:
         print(
             "B13 Refresh Summary | "
+            f"developers={summary.developers} areas={summary.areas} "
             f"projects={summary.projects} properties={summary.properties} "
             f"writes={'on' if not args.no_write else 'off'}"
         )
@@ -626,7 +827,11 @@ def main() -> int:
 
     has_warn = bool(report["warnings"])
     has_error = summary.projects == 0 and summary.properties == 0
-    gate_failed = (mirror_gate_code != 0) or (coverage_gate_code != 0)
+    gate_failed = (
+        (mirror_gate_code != 0)
+        or (asset_mirror_gate_code != 0)
+        or (coverage_gate_code != 0)
+    )
     if args.fail_on_warn and (has_warn or has_error or gate_failed):
         return 2
     if args.strict and (has_error or gate_failed):

@@ -22,6 +22,7 @@ admin-app/.next_admin_smoke/
 admin-app/.next_forensics/
 admin-app/.next_local_safe/
 admin-app/.next_public_visual/
+admin-app/.next_visual_qa/
 admin-app/build-debug.log
 admin-app/tsconfig.tsbuildinfo
 admin-app/artifacts/

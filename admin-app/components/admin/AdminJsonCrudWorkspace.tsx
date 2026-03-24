@@ -7,6 +7,7 @@ import { type Dispatch, type FormEvent, type KeyboardEvent, type SetStateAction,
 import { fetchJson, toPrettyJson } from "@/app/_lib/admin-auth";
 import { useAdminAuthController } from "@/app/_lib/admin-auth-hooks";
 import { detectAdminLocale } from "@/app/_lib/admin-i18n";
+import { AdminRecordMediaPreview } from "@/components/admin/AdminRecordMediaPreview";
 import { type AdminDataTableColumn } from "@/components/admin/AdminDataTable";
 import { AdminSectionTabs } from "@/components/admin/AdminPrimitives";
 import {
@@ -352,6 +353,31 @@ export function AdminJsonCrudWorkspace({ config }: { config: CrudConfig }) {
         },
         getSortValue: (item) => pickIdentifierFromRow(item),
         getFilterValue: (item) => pickIdentifierFromRow(item),
+      },
+      {
+        key: "media",
+        label: "Media",
+        renderCell: (item) => <AdminRecordMediaPreview record={item} compact />,
+        getSortValue: (item) =>
+          item && typeof item === "object"
+            ? [
+                pickString(item as Record<string, unknown>, "photo_url"),
+                pickString(item as Record<string, unknown>, "logo_url"),
+                pickString(item as Record<string, unknown>, "cover_image_url"),
+                pickString(item as Record<string, unknown>, "hero_image_url"),
+                pickString(item as Record<string, unknown>, "image_url"),
+              ].find(Boolean) || ""
+            : "",
+        getFilterValue: (item) =>
+          item && typeof item === "object"
+            ? [
+                pickString(item as Record<string, unknown>, "photo_url"),
+                pickString(item as Record<string, unknown>, "logo_url"),
+                pickString(item as Record<string, unknown>, "cover_image_url"),
+                pickString(item as Record<string, unknown>, "hero_image_url"),
+                pickString(item as Record<string, unknown>, "image_url"),
+              ].find(Boolean) || ""
+            : "",
       },
       {
         key: "identifier",

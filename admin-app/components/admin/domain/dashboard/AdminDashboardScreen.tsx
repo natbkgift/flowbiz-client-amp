@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { type FormEvent, type ReactNode, useMemo } from "react";
+import { Fragment, type FormEvent, type ReactNode, useMemo } from "react";
 
 import { type AdminLocale, withAdminLocale } from "@/app/_lib/admin-i18n";
 import type { DashboardState } from "@/app/admin/dashboard/state-utils";
@@ -571,7 +571,13 @@ export function AdminDashboardScreen({
   }
 
   function renderActionGroup(actions: ReactNode[]) {
-    return <div className="dashboard-empty-actions">{actions}</div>;
+    return (
+      <div className="dashboard-empty-actions">
+        {actions.map((action, index) => (
+          <Fragment key={`dashboard-action-${index}`}>{action}</Fragment>
+        ))}
+      </div>
+    );
   }
 
   function renderSectionState(emptyTitle: string, emptyBody: string, options?: { action?: ReactNode; compact?: boolean }) {

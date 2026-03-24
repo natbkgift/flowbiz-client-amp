@@ -7,6 +7,7 @@ import { fetchJson } from "@/app/_lib/admin-auth";
 import { type AdminLocale, withAdminLocale } from "@/app/_lib/admin-i18n";
 import { formatWorkspaceErrorMessage } from "@/app/_lib/admin-workspace-error";
 import { useAdminAuthController } from "@/app/_lib/admin-auth-hooks";
+import { AdminRecordMediaPreview } from "@/components/admin/AdminRecordMediaPreview";
 import {
   AdminAccessGate,
   AdminBadge,
@@ -650,12 +651,17 @@ export function AdminEntityWorkspace({
                             return (
                               <tr key={id}>
                                 <td>
-                                  <strong>{rowTitle}</strong>
-                                  {config.metaPaths?.length ? (
-                                    <div className="admin-type-helper">
-                                      {config.metaPaths.map((path) => pickString(row, path)).filter(Boolean).join(" • ")}
+                                  <div className="admin-record-summary-cell">
+                                    <AdminRecordMediaPreview record={row} compact />
+                                    <div className="admin-record-summary-cell__copy">
+                                      <strong>{rowTitle}</strong>
+                                      {config.metaPaths?.length ? (
+                                        <div className="admin-type-helper">
+                                          {config.metaPaths.map((path) => pickString(row, path)).filter(Boolean).join(" • ")}
+                                        </div>
+                                      ) : null}
                                     </div>
-                                  ) : null}
+                                  </div>
                                 </td>
                                 <td>{rowStatus || "-"}</td>
                                 <td>{formatDate(rowUpdated, locale)}</td>
@@ -683,6 +689,7 @@ export function AdminEntityWorkspace({
                         const rowStatus = config.statusPath ? pickString(row, config.statusPath) : "-";
                         return (
                           <article key={id} className="admin-mobile-record-card">
+                            <AdminRecordMediaPreview record={row} compact />
                             <div className="admin-mobile-record-card__header">
                               <strong>{rowTitle}</strong>
                               <AdminBadge tone="neutral">{rowStatus || "-"}</AdminBadge>
@@ -736,6 +743,7 @@ export function AdminEntityWorkspace({
                 ) : (
                   <div className="state-empty admin-workspace-empty-state">{t.resultEmpty}</div>
                 )}
+                <AdminRecordMediaPreview record={selectedRecord} />
                 {previewChecklist ? (
                   <div className="admin-grid-layout admin-grid-layout--two">
                     <div className="admin-workspace-prerequisite">
@@ -879,6 +887,7 @@ export function AdminEntityWorkspace({
                   <div className="state-empty admin-workspace-empty-state">{t.noSelection}</div>
                 ) : (
                   <>
+                    <AdminRecordMediaPreview record={selectedRecord} />
                     <div className="admin-workspace-inline-metrics" aria-label={t.summaryTitle}>
                       <AdminBadge tone="info">{config.identifierLabel}: {selectedId}</AdminBadge>
                       {config.statusPath ? <AdminBadge tone="neutral">{pickString(selectedRecord, config.statusPath) || "-"}</AdminBadge> : null}

@@ -102,6 +102,12 @@ def test_b14_admin_content_publish_flow_reflects_about_page(client) -> None:
     assert about_before.status_code == 200, about_before.text
     assert "Mali Advisor" not in about_before.text
     assert "Published testimonial quote" not in about_before.text
+    public_team_before = client.get("/v1/team-members")
+    assert public_team_before.status_code == 200, public_team_before.text
+    assert public_team_before.json()["data"] == []
+    public_testimonials_before = client.get("/v1/testimonials?intent=invest")
+    assert public_testimonials_before.status_code == 200, public_testimonials_before.text
+    assert public_testimonials_before.json()["data"] == []
 
     publish_team = client.post(f"/admin/team-members/{team_id}/publish", headers=headers)
     assert publish_team.status_code == 200, publish_team.text
@@ -115,6 +121,14 @@ def test_b14_admin_content_publish_flow_reflects_about_page(client) -> None:
     assert "Published company overview from CMS" in about_after.text
     assert "Mali Advisor" in about_after.text
     assert "Published testimonial quote" in about_after.text
+    public_team_after = client.get("/v1/team-members")
+    assert public_team_after.status_code == 200, public_team_after.text
+    assert any(item["id"] == team_id for item in public_team_after.json()["data"])
+    public_testimonials_after = client.get("/v1/testimonials?intent=invest")
+    assert public_testimonials_after.status_code == 200, public_testimonials_after.text
+    assert any(
+        item["id"] == testimonial_id for item in public_testimonials_after.json()["data"]
+    )
 
     unpublish_team = client.post(f"/admin/team-members/{team_id}/unpublish", headers=headers)
     assert unpublish_team.status_code == 200, unpublish_team.text
@@ -127,6 +141,14 @@ def test_b14_admin_content_publish_flow_reflects_about_page(client) -> None:
     assert about_unpublished.status_code == 200, about_unpublished.text
     assert "Mali Advisor" not in about_unpublished.text
     assert "Published testimonial quote" not in about_unpublished.text
+    public_team_unpublished = client.get("/v1/team-members")
+    assert public_team_unpublished.status_code == 200, public_team_unpublished.text
+    assert not any(item["id"] == team_id for item in public_team_unpublished.json()["data"])
+    public_testimonials_unpublished = client.get("/v1/testimonials?intent=invest")
+    assert public_testimonials_unpublished.status_code == 200, public_testimonials_unpublished.text
+    assert not any(
+        item["id"] == testimonial_id for item in public_testimonials_unpublished.json()["data"]
+    )
 
 
 def test_b14_seed_content_upserts_company_team_testimonials(tmp_path: Path) -> None:

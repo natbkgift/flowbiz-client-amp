@@ -633,6 +633,32 @@ def test_phase_d_logo_endpoint_updates_site_layout_record(client) -> None:
     assert parsed["header"]["logo"]["storage_path"] == "/media/library/logo/amp-logo.webp"
 
 
+def test_phase_d_company_site_layout_falls_back_and_patch_materializes_record(client) -> None:
+    headers = _make_admin_headers()
+
+    get_resp = client.get("/admin/company/site-layout", headers=headers)
+    _assert_200(get_resp)
+    payload = get_resp.json()
+    assert payload["slug"] == "site-layout"
+    parsed = json.loads(payload["content"])
+    assert parsed["header"]["primary_links"][0]["href"] == "/invest"
+
+    patch_resp = client.patch(
+        "/admin/company/site-layout",
+        headers=headers,
+        json={
+            "title": "Site Layout CMS",
+            "content": json.dumps({"header": {"primary_links": []}, "footer": {"quick_links": []}}),
+        },
+    )
+    _assert_200(patch_resp)
+
+    with SessionLocal() as db:
+        row = db.scalar(select(CompanyInfo).where(CompanyInfo.slug == "site-layout"))
+        assert row is not None
+        assert row.title == "Site Layout CMS"
+
+
 def test_phase_d_article_revision_history_diff_and_restore(client) -> None:
     headers = _make_admin_headers()
     slug = f"phase-d-revision-{uuid4()}"

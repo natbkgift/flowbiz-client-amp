@@ -31,15 +31,17 @@ const TESTIMONIAL_CREATE_FIELDS = [
   { name: "quote", label: "Quote", type: "textarea", required: true, rows: 3 },
   { name: "attribution_name", label: "Attribution name", type: "text", required: true, placeholder: "Client A" },
   { name: "context", label: "Context", type: "text", placeholder: "Sample context" },
-  { name: "property_id", label: "Property ID", type: "relation", placeholder: "optional property UUID" },
-  { name: "avatar_media_id", label: "Avatar media", type: "media", placeholder: "optional media ID/path" },
+  { name: "display_order", label: "Display order", type: "number", placeholder: "0" },
 ] as const;
 
 const TESTIMONIAL_PATCH_FIELDS = [
   { name: "quote", label: "Quote", type: "textarea", rows: 3 },
   { name: "status", label: "Status", type: "status", options: ["draft", "inactive", "active"] },
-  { name: "property_id", label: "Property ID", type: "relation", placeholder: "optional property UUID" },
-  { name: "avatar_media_id", label: "Avatar media", type: "media", placeholder: "optional media ID/path" },
+  { name: "persona", label: "Persona", type: "text", placeholder: "investor" },
+  { name: "intent", label: "Intent", type: "select", options: ["buy", "rent", "sell"] },
+  { name: "attribution_name", label: "Attribution name", type: "text", placeholder: "Client A" },
+  { name: "context", label: "Context", type: "text", placeholder: "Sample context" },
+  { name: "display_order", label: "Display order", type: "number", placeholder: "0" },
 ] as const;
 
 export default function AdminTestimonialsCmsPage() {
@@ -53,18 +55,18 @@ export default function AdminTestimonialsCmsPage() {
         subtitle: isThai ? "จัดการรีวิวและคำรับรองผ่าน API เดิมของระบบ" : "Manage testimonials via existing /admin/testimonials APIs.",
         followUpLinks: [
           {
-            href: "/admin/properties",
-            label: isThai ? "เปิดทรัพย์" : "Open properties",
+            href: "/admin/team-members",
+            label: isThai ? "เปิดทีมงาน" : "Open team members",
             description: isThai
-              ? "ยืนยันบริบทของทรัพย์ที่ผูกกับรีวิวนี้ก่อนเผยแพร่"
-              : "Confirm the linked property context shown with this testimonial.",
+              ? "ตรวจทีมที่แสดงคู่กับรีวิวในหน้า about ก่อนเผยแพร่"
+              : "Review the team roster that appears alongside these testimonials on the about page.",
           },
           {
-            href: "/admin/media",
-            label: isThai ? "เปิดคลังสื่อ" : "Open media",
+            href: "/admin/company",
+            label: isThai ? "เปิด Company" : "Open company",
             description: isThai
-              ? "ตรวจรูปโปรไฟล์และสื่อประกอบก่อนเผยแพร่การเปลี่ยนแปลง"
-              : "Verify avatar or supporting media assets before publishing testimonial changes.",
+              ? "ตรวจข้อความบริษัทและ proof sections ที่ใช้รีวิวร่วมกัน"
+              : "Check the company copy and proof sections that reuse these testimonials.",
           },
           {
             href: "/admin/dashboard",
@@ -76,14 +78,14 @@ export default function AdminTestimonialsCmsPage() {
         ],
         prerequisiteHints: {
           authSignedOut: isThai
-            ? "เข้าสู่ระบบก่อน แล้วตรวจว่าต้องคงบริบทของทรัพย์และสื่อประกอบชุดไหนไว้กับรีวิวนี้ก่อนเริ่มแก้"
-            : "Sign in first, then confirm which property context and supporting media should stay aligned with the testimonial before editing it.",
+            ? "เข้าสู่ระบบก่อน แล้วตรวจ quote, attribution, intent และลำดับการแสดงของรีวิวที่จะขึ้นหน้า public"
+            : "Sign in first, then confirm the quote, attribution, intent, and display order that should appear on public pages.",
           authSignedIn: isThai
-            ? "ยืนยันความเชื่อมโยงกับทรัพย์และรูปโปรไฟล์ก่อนเผยแพร่หรือยกเลิกเผยแพร่รีวิว"
-            : "Verify linked property and avatar media dependencies before publishing or unpublishing testimonial changes.",
+            ? "ยืนยัน quote, attribution และลำดับการแสดงก่อน publish หรือ unpublish รีวิว"
+            : "Verify quote, attribution, and display order before publishing or unpublishing testimonial changes.",
           query: isThai
-            ? "โหลด record ของรีวิวก่อน แล้วค่อยยืนยัน property และ media ที่เกี่ยวข้องก่อน patch quote, status หรือ attribution"
-            : "Load the testimonial record first, then confirm its property and media references before patching quote, status, or attribution fields.",
+            ? "โหลด record ของรีวิวก่อน แล้วค่อย patch quote, persona, intent, attribution, context และลำดับการแสดง"
+            : "Load the testimonial record first, then patch quote, persona, intent, attribution, context, and display order.",
         },
         identifierLabel: isThai ? "รหัสรีวิว" : "Testimonial ID",
         identifierPlaceholder: "testimonial UUID",

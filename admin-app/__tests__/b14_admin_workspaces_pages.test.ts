@@ -224,8 +224,8 @@ describe("B14 admin workspace pages contract", () => {
     expect(videosPage).toContain('href: "/admin/taxonomy"');
     expect(companyPage).toContain('href: "/admin/layout"');
     expect(companyPage).toContain('href: "/admin/home-composer"');
-    expect(testimonialsPage).toContain('href: "/admin/properties"');
-    expect(testimonialsPage).toContain('href: "/admin/media"');
+    expect(testimonialsPage).toContain('href: "/admin/team-members"');
+    expect(testimonialsPage).toContain('href: "/admin/company"');
     expect(usersPage).toContain('href: "/admin/inquiries"');
     expect(usersPage).toContain('href: "/admin/imports"');
     expect(companyPage).toContain("prerequisiteHints");

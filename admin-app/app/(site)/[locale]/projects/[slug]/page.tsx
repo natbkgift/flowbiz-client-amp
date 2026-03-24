@@ -6,12 +6,14 @@ import { Container } from '@/components/layout/Container';
 import { TrackedLink } from '@/components/analytics/TrackedLink';
 import { getDictionary, normalizeLocale } from '@/app/_lib/i18n/get-dictionary';
 import { withLocale, ogLocale } from '@/app/_lib/i18n/routing';
+import { resolveLocalizedText } from '@/app/_lib/public-content';
 import { fetchProjectBySlug, fetchProjectEvaluation, fetchBlogPosts } from '@/app/_lib/public-api-server';
 import { getInternalLinks } from '@/app/_lib/internal-links';
 
 import { ProjectDeepReview } from '@/components/projects/ProjectDeepReview';
 import { PublicAdvisoryHero } from '@/components/public/PublicAdvisoryHero';
 import { LeadForm } from '@/components/forms/LeadForm';
+import { LocalMediaImage } from '@/components/media/LocalMediaImage';
 
 export const revalidate = 300;
 const PROJECT_DETAIL_FETCH_TIMEOUT_MS = 8000;
@@ -41,9 +43,8 @@ function formatSlugTitle(slug: string): string {
     .join(' ');
 }
 
-function localizedText(locale: 'en' | 'th', value?: Record<string, string> | null): string {
-  if (!value) return '';
-  return value[locale] ?? value.en ?? value.th ?? Object.values(value)[0] ?? '';
+function localizedText(locale: 'en' | 'th', value?: unknown): string {
+  return resolveLocalizedText(value ?? null, locale);
 }
 
 function formatCurrency(locale: 'en' | 'th', value?: number | null): string | null {
@@ -498,8 +499,13 @@ export default async function ProjectDetailPage(
         project.developer?.name ? `Developer: ${project.developer.name}` : null,
         dict.property.projectSubtitle,
       ].filter(Boolean).join(' • ');
-  const summary = localizedText(locale, project.summary);
-  const description = localizedText(locale, project.description ?? null);
+  const summary = resolveLocalizedText(project.summary, locale);
+  const description = resolveLocalizedText(project.description ?? null, locale);
+  const projectMedia = [...new Set([
+    project.hero_image_url,
+    project.cover_image_url,
+    ...(project.images ?? []),
+  ].filter((item): item is string => typeof item === 'string' && item.trim().length > 0))];
   const deliveryLabel = formatDateLabel(locale, project.delivery_date);
   const startingPriceLabel = formatCurrency(locale, project.starting_price);
   const investmentFacts = toKeyValueList(project.investment_snapshot);
@@ -730,6 +736,35 @@ export default async function ProjectDetailPage(
         }}
       />
       <Container>
+        {projectMedia.length > 0 ? (
+          <section className="mt-6 reveal" aria-label={locale === 'th' ? 'แกลเลอรีโครงการ' : 'Project gallery'}>
+            <div className="grid gap-4 md:grid-cols-[minmax(0,1.65fr)_minmax(0,1fr)]">
+              <LocalMediaImage
+                media={{ image_url: projectMedia[0] }}
+                alt={project.name}
+                className="media-shell rounded-3xl overflow-hidden border border-slate-200 bg-white shadow-sm"
+                imageClassName="media-shell__img"
+                aspectRatio="16 / 10"
+                priority
+                loading="eager"
+              />
+              {projectMedia.length > 1 ? (
+                <div className="grid grid-cols-2 gap-4">
+                  {projectMedia.slice(1, 5).map((item, index) => (
+                    <LocalMediaImage
+                      key={`${project.id}-media-${index + 1}`}
+                      media={{ image_url: item }}
+                      alt={`${project.name} ${index + 2}`}
+                      className="media-shell rounded-3xl overflow-hidden border border-slate-200 bg-white shadow-sm"
+                      imageClassName="media-shell__img"
+                      aspectRatio="4 / 3"
+                    />
+                  ))}
+                </div>
+              ) : null}
+            </div>
+          </section>
+        ) : null}
         <div className="detail-layout advisory-detail-layout mt-6">
           <div className="detail-stack">
             <section id="project-confidence-pack" className="signal-grid signal-grid--three-up reveal decision-pack">

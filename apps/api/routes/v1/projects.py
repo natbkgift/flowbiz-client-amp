@@ -56,6 +56,42 @@ def _safe_media_list(value: object | None) -> list[str]:
     return out
 
 
+def _serialize_project(row: Project, db: Session) -> dict:
+    return {
+        "id": str(row.id),
+        "slug": row.slug,
+        "name": row.name,
+        "status": row.status,
+        "property_type": row.property_type,
+        "delivery_date": row.delivery_date.isoformat() if row.delivery_date else None,
+        "starting_price": float(row.starting_price) if row.starting_price is not None else None,
+        "cover_image_url": _safe_media_path(row.cover_image_url),
+        "hero_image_url": _safe_media_path(row.hero_image_url),
+        "images": _safe_media_list(row.images),
+        "summary": row.summary or {},
+        "description": row.description or {},
+        "badges": row.badges or [],
+        "highlights": row.highlights or [],
+        "quick_facts": row.quick_facts or [],
+        "amenities": row.amenities or [],
+        "trust_proof": row.trust_proof or [],
+        "source_notes": row.source_notes or {},
+        "claims_updated_at": row.claims_updated_at.isoformat() if row.claims_updated_at else None,
+        "investment_snapshot": row.investment_snapshot or {},
+        "location": row.location or {},
+        "unit_count": row.unit_count,
+        "floors": row.floors,
+        "year_built": row.year_built,
+        "is_featured": bool(row.is_featured),
+        "area_id": str(row.area_id) if row.area_id else None,
+        "developer_id": str(row.developer_id) if row.developer_id else None,
+        "area": _linked_area(row, db),
+        "developer": _linked_developer(row, db),
+        "created_at": row.created_at.isoformat() if row.created_at else None,
+        "updated_at": row.updated_at.isoformat() if row.updated_at else None,
+    }
+
+
 @router.get("/projects")
 def list_projects(
     page: int = Query(1, ge=1),
@@ -71,38 +107,7 @@ def list_projects(
         .limit(limit)
     ).all()
     return {
-        "data": [
-            {
-                "id": str(row.id),
-                "slug": row.slug,
-                "name": row.name,
-                "status": row.status,
-                "property_type": row.property_type,
-                "area_id": str(row.area_id) if row.area_id else None,
-                "developer_id": str(row.developer_id) if row.developer_id else None,
-                "area": _linked_area(row, db),
-                "developer": _linked_developer(row, db),
-                "starting_price": float(row.starting_price)
-                if row.starting_price is not None
-                else None,
-                "cover_image_url": _safe_media_path(row.cover_image_url),
-                "hero_image_url": _safe_media_path(row.hero_image_url),
-                "images": _safe_media_list(row.images),
-                "summary": row.summary or {},
-                "description": row.description or {},
-                "badges": row.badges or [],
-                "highlights": row.highlights or [],
-                "quick_facts": row.quick_facts or [],
-                "amenities": row.amenities or [],
-                "trust_proof": row.trust_proof or [],
-                "source_notes": row.source_notes or {},
-                "claims_updated_at": row.claims_updated_at.isoformat()
-                if row.claims_updated_at
-                else None,
-                "updated_at": row.updated_at.isoformat() if row.updated_at else None,
-            }
-            for row in rows
-        ],
+        "data": [_serialize_project(row, db) for row in rows],
         "meta": {"page": page, "limit": limit, "total": int(total)},
     }
 
@@ -128,50 +133,13 @@ def _project_or_404(
 @router.get("/projects/{project_id}")
 def get_project(project_id: str, db: Session = Depends(get_db)) -> dict:
     row = _project_or_404(db, project_ref=project_id)
-    return {
-        "project": {
-            "id": str(row.id),
-            "slug": row.slug,
-            "name": row.name,
-            "status": row.status,
-            "area_id": str(row.area_id) if row.area_id else None,
-            "developer_id": str(row.developer_id) if row.developer_id else None,
-            "area": _linked_area(row, db),
-            "developer": _linked_developer(row, db),
-            "property_type": row.property_type,
-            "summary": row.summary or {},
-            "description": row.description or {},
-            "cover_image_url": _safe_media_path(row.cover_image_url),
-            "hero_image_url": _safe_media_path(row.hero_image_url),
-            "images": _safe_media_list(row.images),
-            "badges": row.badges or [],
-            "highlights": row.highlights or [],
-            "quick_facts": row.quick_facts or [],
-            "amenities": row.amenities or [],
-            "trust_proof": row.trust_proof or [],
-            "source_notes": row.source_notes or {},
-            "claims_updated_at": row.claims_updated_at.isoformat()
-            if row.claims_updated_at
-            else None,
-        }
-    }
+    return {"project": _serialize_project(row, db)}
 
 
 @router.get("/projects/slug/{slug}")
 def get_project_by_slug(slug: str, db: Session = Depends(get_db)) -> dict:
     row = _project_or_404(db, slug=slug)
-    return {
-        "project": {
-            "id": str(row.id),
-            "slug": row.slug,
-            "name": row.name,
-            "status": row.status,
-            "area_id": str(row.area_id) if row.area_id else None,
-            "developer_id": str(row.developer_id) if row.developer_id else None,
-            "area": _linked_area(row, db),
-            "developer": _linked_developer(row, db),
-        }
-    }
+    return {"project": _serialize_project(row, db)}
 
 
 @router.get("/projects/{project_id}/evaluation")

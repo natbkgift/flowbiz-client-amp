@@ -4,11 +4,12 @@ import { makePageMetadata } from '@/app/_lib/i18n/metadata';
 import { buildAdvisorWhatsApp, getAdvisoryLabels, getAdvisoryProofs, withLocaleQuery } from '@/app/_lib/public-advisory';
 import { withLocale } from '@/app/_lib/i18n/routing';
 import { Container } from '@/components/layout/Container';
-import { fetchProjects, fetchProperties } from '@/app/_lib/public-api-server';
+import { fetchProjects } from '@/app/_lib/public-api-server';
 
 import { getDictionary, normalizeLocale } from '@/app/_lib/i18n/get-dictionary';
 import { PublicAdvisoryHero } from '@/components/public/PublicAdvisoryHero';
 import { EmptyStateCard } from '@/components/ui/StateBlocks';
+import { LocalMediaImage } from '@/components/media/LocalMediaImage';
 
 export const revalidate = 300;
 
@@ -23,7 +24,6 @@ export async function generateMetadata(
   return makePageMetadata(locale, 'projects', dict.nav.projects, dict.listing.exploreProjectsDesc, dict.brand.name);
 }
 
-type ProjectRow = { name: string; count: number };
 const PROJECTS_FETCH_TIMEOUT_MS = 8000;
 type ProjectsLoadState =
   | { kind: 'loaded'; value: Awaited<ReturnType<typeof fetchProjects>> }
@@ -53,7 +53,6 @@ export default async function ProjectsPage(props: { params: Promise<{ locale: st
 
   let projects: Awaited<ReturnType<typeof fetchProjects>>;
   let projectsFetchOk = true;
-  const startedAt = Date.now();
   const projectsResult = await withTimeout<ProjectsLoadState>(
     fetchProjects({ limit: 100 }).then((value) => ({ kind: 'loaded', value })),
     { kind: 'timeout' },
@@ -158,6 +157,17 @@ export default async function ProjectsPage(props: { params: Promise<{ locale: st
           <div className="grid grid-3">
             {sorted.map((p) => (
               <article key={p.id} className="card catalogue-card">
+                <LocalMediaImage
+                  media={{
+                    cover_image_url: p.cover_image_url,
+                    hero_image_url: p.hero_image_url,
+                    images: p.images,
+                  }}
+                  alt={p.name}
+                  className="media-shell"
+                  imageClassName="media-shell__img"
+                  aspectRatio="16 / 10"
+                />
                 <div className="catalogue-card__eyebrow">
                   {locale === 'th' ? 'โครงการที่เผยแพร่แล้ว' : 'Published project'}
                 </div>
@@ -205,27 +215,6 @@ export default async function ProjectsPage(props: { params: Promise<{ locale: st
       </main>
     );
   }
-
-  const projectsElapsedMs = Date.now() - startedAt;
-  const shouldAttemptPropertyFallback = projectsFetchOk && projectsElapsedMs < 20_000;
-
-  const res: Awaited<ReturnType<typeof fetchProperties>> = shouldAttemptPropertyFallback
-    ? await withTimeout(
-        fetchProperties({ limit: 100, sort: 'newest' }),
-        { data: [], meta: { page: 1, limit: 100, total: 0 } },
-      )
-    : { data: [], meta: { page: 1, limit: 100, total: 0 } };
-
-  const byName = new Map<string, number>();
-  for (const p of res.data ?? []) {
-    const name = (p.address || '').trim();
-    if (!name) continue;
-    byName.set(name, (byName.get(name) ?? 0) + 1);
-  }
-
-  const rows: ProjectRow[] = Array.from(byName.entries())
-    .map(([name, count]) => ({ name, count }))
-    .sort((a, b) => b.count - a.count || a.name.localeCompare(b.name));
 
   const jsonLd = JSON.stringify(
     {
@@ -300,53 +289,19 @@ export default async function ProjectsPage(props: { params: Promise<{ locale: st
           <h1 className="section-title">{dict.nav.projects}</h1>
           <p className="section-subtitle">{dict.listing.projectsSubtitle}</p>
         </div>
-
-        {rows.length ? (
-          <div className="grid grid-3">
-            {rows.map((r) => (
-              <article key={r.name} className="card catalogue-card">
-                <div className="catalogue-card__eyebrow">
-                  {locale === 'th' ? 'ภาพรวมจากรายการที่เผยแพร่แล้ว' : 'Published inventory signal'}
-                </div>
-                <h2 className="card-title">{r.name}</h2>
-                <p className="card-subtitle">
-                  {locale === 'th'
-                    ? `พบ ${r.count} รายการที่เกี่ยวข้องในข้อมูลปัจจุบัน`
-                    : `${r.count} related listing(s) found in the current inventory.`}
-                </p>
-                <div className="catalogue-card__meta">
-                  <span>
-                    {locale === 'th'
-                      ? 'ใช้หน้านี้เป็นจุดเริ่มต้นก่อนให้ทีมคัดรายการที่ตรงงบและกลยุทธ์'
-                      : 'Use this as the starting signal before the team prepares a tighter shortlist.'}
-                  </span>
-                </div>
-                <div className="card-actions">
-                  <Link
-                    className="btn btn-secondary"
-                    href={withLocaleQuery(locale, '/contact', {
-                      intent: 'project_shortlist',
-                      source: 'projects_inventory',
-                      project: r.name,
-                    })}
-                  >
-                    {dict.cta.speakToAdvisor}
-                  </Link>
-                </div>
-              </article>
-            ))}
-          </div>
-        ) : (
-          <EmptyStateCard
-            title={dict.advisory.noPublishedDataTitle}
-            body={dict.advisory.noPublishedDataBody}
-            action={
-              <a className="btn btn-secondary" href={withLocale(locale, '/contact')}>
-                {dict.cta.speakToAdvisor}
-              </a>
-            }
-          />
-        )}
+        <EmptyStateCard
+          title={dict.advisory.noPublishedDataTitle}
+          body={projectsFetchOk
+            ? dict.advisory.noPublishedDataBody
+            : (locale === 'th'
+              ? 'ไม่สามารถโหลดรายการโครงการที่เผยแพร่ได้ในขณะนี้ หน้านี้จึงไม่แสดง fallback ที่อาจทำให้เข้าใจว่าเป็นโครงการจริง'
+              : 'Published project data could not be loaded right now, so this page intentionally avoids showing a misleading fallback.')}
+          action={
+            <a className="btn btn-secondary" href={withLocale(locale, '/contact')}>
+              {dict.cta.speakToAdvisor}
+            </a>
+          }
+        />
       </Container>
       </section>
     </main>

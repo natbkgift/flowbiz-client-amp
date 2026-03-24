@@ -4558,3 +4558,49 @@
       gap: 12px;
     }
   }
+
+  .admin-record-media {
+    width: 100%;
+  }
+
+  .admin-record-media--compact {
+    width: 84px;
+    min-width: 84px;
+    max-width: 84px;
+  }
+
+  .admin-record-media--full {
+    max-width: min(100%, 320px);
+    margin-bottom: var(--admin-space-3);
+  }
+
+  .admin-record-media__frame {
+    position: relative;
+    width: 100%;
+    overflow: hidden;
+    border: 1px solid rgba(226, 232, 240, 0.92);
+    border-radius: 18px;
+    background: linear-gradient(180deg, rgba(248, 250, 252, 0.96), rgba(255, 255, 255, 0.98));
+    box-shadow:
+      0 10px 18px rgba(15, 23, 42, 0.05),
+      inset 0 1px 0 rgba(255, 255, 255, 0.92);
+  }
+
+  .admin-record-media__image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .admin-record-summary-cell {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: var(--admin-space-3);
+    align-items: start;
+  }
+
+  .admin-record-summary-cell__copy {
+    display: grid;
+    gap: 4px;
+    min-width: 0;
+  }
