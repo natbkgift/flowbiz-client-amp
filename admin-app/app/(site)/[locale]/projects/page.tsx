@@ -165,7 +165,7 @@ export default async function ProjectsPage(props: { params: Promise<{ locale: st
           ]}
           primaryAction={{
             href: withLocaleQuery(locale, '/contact', { intent: 'shortlist', source: 'projects_hero' }),
-            label: dict.cta.speakToAdvisor,
+            label: locale === 'th' ? 'คัด shortlist โครงการ' : 'Build project shortlist',
             eventPayload: { cta: 'projects_shortlist', from: 'projects_hero' },
           }}
           secondaryAction={{
@@ -177,6 +177,9 @@ export default async function ProjectsPage(props: { params: Promise<{ locale: st
             href: buildAdvisorWhatsApp(locale, dict),
             label: dict.cta.whatsapp,
           }}
+          supportNote={locale === 'th'
+            ? 'ส่งชื่อโครงการที่ชอบมาได้เลย แล้วทีมจะช่วยบีบ shortlist, compare route, หรือ private tour ให้คมขึ้น'
+            : 'Share the projects you like and the team will tighten the shortlist, compare route, or private-tour path from there.'}
         />
         <section className="section">
         <Container>

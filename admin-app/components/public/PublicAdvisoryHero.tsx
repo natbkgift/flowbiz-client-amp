@@ -59,6 +59,7 @@ export function PublicAdvisoryHero({
   primaryAction,
   secondaryAction,
   tertiaryAction,
+  supportNote,
   proofsLabel = 'Trust bar',
   guidanceLabel = 'Page guidance',
 }: {
@@ -70,6 +71,7 @@ export function PublicAdvisoryHero({
   primaryAction: HeroAction;
   secondaryAction?: HeroAction | null;
   tertiaryAction?: ExternalAction | null;
+  supportNote?: string;
   proofsLabel?: string;
   guidanceLabel?: string;
 }) {
@@ -118,6 +120,10 @@ export function PublicAdvisoryHero({
                 </a>
               ) : null}
             </div>
+
+            {supportNote ? (
+              <p className="public-hero__support-note">{supportNote}</p>
+            ) : null}
 
             <div className="public-hero__proofs" role="note" aria-label={proofsLabel}>
               {proofs.map((proof) => (

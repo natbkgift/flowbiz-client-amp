@@ -565,7 +565,7 @@ export default async function ContactPage(
         ]}
         primaryAction={{
           href: '#contact-form',
-          label: dict.contact.formTitle,
+          label: locale === 'th' ? 'ส่ง brief ของคุณ' : 'Send your brief',
           eventPayload: { cta: 'open_contact_form', from: 'contact_hero' },
         }}
         secondaryAction={{
@@ -577,6 +577,9 @@ export default async function ContactPage(
           href: buildAdvisorWhatsApp(locale, dict),
           label: dict.cta.whatsapp,
         }}
+        supportNote={locale === 'th'
+          ? 'อธิบายโจทย์ครั้งเดียวก็พอ ทีมจะตอบกลับด้วย shortlist, viewing plan, หรือ next step ที่ชัดกว่าเดิม'
+          : 'One brief is enough. The team will reply with a shortlist, a viewing plan, or the clearest next step.'}
       />
 
       <section className="section section--alt">

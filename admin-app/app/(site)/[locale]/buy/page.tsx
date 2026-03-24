@@ -119,18 +119,21 @@ export default async function BuyPage(props: { params: Promise<{ locale: string 
         ]}
         primaryAction={{
           href: withLocaleQuery(locale, '/contact', { intent: 'buy', source: 'buy_hero' }),
-          label: dict.cta.speakToAdvisor,
+          label: locale === 'th' ? 'คัด shortlist ฝั่งซื้อ' : 'Get buy-ready shortlist',
           eventPayload: { cta: 'buy_consultation', from: 'buy_hero' },
         }}
         secondaryAction={{
           href: withLocale(locale, '/projects'),
-          label: dict.advisory.browseVerifiedInventory,
+          label: locale === 'th' ? 'ดูโครงการที่เผยแพร่แล้ว' : 'See published projects',
           eventPayload: { cta: 'browse_verified_inventory', from: 'buy_hero' },
         }}
         tertiaryAction={{
           href: buildAdvisorWhatsApp(locale, dict),
           label: dict.cta.whatsapp,
         }}
+        supportNote={locale === 'th'
+          ? 'ส่งงบประมาณ ทำเล และช่วงเวลาเพียงครั้งเดียว แล้วทีมจะตอบกลับด้วย shortlist ที่พร้อมคุยต่อเรื่อง quota ค่าโอน และ next step'
+          : 'Share budget, area, and timing once. The team replies with a shortlist ready for quota, transfer-cost, and next-step discussion.'}
       />
 
       <section className="section">

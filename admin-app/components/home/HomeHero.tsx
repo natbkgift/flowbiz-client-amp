@@ -79,7 +79,7 @@ export function HomeHero({
     const whatsAppHref = buildAdvisorWhatsApp(locale, dict);
 
     return (
-        <section className="relative w-full bg-gray-900 overflow-hidden min-h-[720px] sm:min-h-[760px] md:min-h-[680px] xl:min-h-[720px]" data-home-perf="hero-media">
+        <section className="relative w-full bg-gray-900 overflow-hidden min-h-[640px] sm:min-h-[700px] md:min-h-[680px] xl:min-h-[720px]" data-home-perf="hero-media">
             <Image
                 src={heroImageSrc}
                 alt="AMP Pattaya Real Estate"
@@ -98,7 +98,7 @@ export function HomeHero({
             <div className="absolute inset-y-0 left-0 right-0 z-10 pointer-events-none bg-gradient-to-r from-black/70 via-black/25 to-transparent md:from-black/60 md:via-black/15 md:to-transparent" />
 
             {/* Content overlay — absolutely positioned, no layout impact */}
-            <div className="absolute inset-0 z-20 flex flex-col justify-start md:justify-center pt-[92px] sm:pt-[100px] pb-6 md:py-28">
+            <div className="absolute inset-0 z-20 flex flex-col justify-start md:justify-center pt-[84px] sm:pt-[96px] pb-5 md:py-28">
                 <Container variant="wide">
                     <div className="hero-home-panel max-w-[min(76ch,100%)]">
                         <p className="hero-home-eyebrow text-white/72 text-[11px] md:text-xs font-semibold tracking-[0.26em] uppercase mb-3 md:mb-4">

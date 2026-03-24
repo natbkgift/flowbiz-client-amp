@@ -28,8 +28,8 @@ export function CookieConsent() {
         setState(stored);
         setVisible(false);
       } else {
-        // Show banner after a short delay so it doesn't interfere with initial paint
-        const timer = setTimeout(() => setVisible(true), 1500);
+        // Let the hero settle before the consent tray appears on small screens.
+        const timer = setTimeout(() => setVisible(true), 2600);
         return () => clearTimeout(timer);
       }
     } catch {
@@ -73,8 +73,8 @@ export function CookieConsent() {
       <div className="cookie-consent__inner">
         <p className="cookie-consent__text">
           {isEn
-            ? 'We use essential cookies and local storage to improve your experience. No third-party tracking cookies are used.'
-            : 'เราใช้คุกกี้ที่จำเป็นและ local storage เพื่อปรับปรุงประสบการณ์ของคุณ ไม่มีการใช้คุกกี้ติดตามจากบุคคลที่สาม'}
+            ? 'We only use essential cookies and local storage. No third-party tracking cookies are used.'
+            : 'เราใช้เฉพาะคุกกี้ที่จำเป็นและ local storage เท่านั้น ไม่มีการใช้คุกกี้ติดตามจากบุคคลที่สาม'}
         </p>
         <div className="cookie-consent__actions">
           <button

@@ -1418,7 +1418,9 @@ export default async function HomePage({
                 : (locale === 'th'
                   ? 'เปิดดูโครงการ live, luxury picks, และ foreign-buyer next steps ในหน้าเดียว แล้วค่อย handoff ไปยัง consultation หรือ private tour'
                   : 'See live projects, luxury-ready opportunities, and foreign-buyer next steps in one place, then hand off into consultation or a private tour.'),
-              primary_cta_label: typeof composerHero.primary_cta_label === 'string' ? composerHero.primary_cta_label : undefined,
+              primary_cta_label: typeof composerHero.primary_cta_label === 'string' && composerHero.primary_cta_label.trim()
+                ? composerHero.primary_cta_label
+                : (locale === 'th' ? 'เริ่มคัด shortlist' : 'Build my shortlist'),
               primary_cta_url: typeof composerHero.primary_cta_url === 'string'
                 ? composerHero.primary_cta_url
                 : withLocaleQuery(locale, '/contact', buildLeadCaptureQuery({
@@ -1426,14 +1428,16 @@ export default async function HomePage({
                   source: 'home_hero_primary',
                   sourceRoute: 'home',
                   ctaType: 'primary',
-                  ctaLabel: locale === 'th' ? 'ขอคำปรึกษา' : 'Request Consultation',
+                  ctaLabel: locale === 'th' ? 'เริ่มคัด shortlist' : 'Build my shortlist',
                   entityType: 'route',
                   entityName: 'home',
                   userIntent: 'research',
                   buyerFit: 'home_entry',
                   signalLevel: 'medium',
                 })),
-              secondary_cta_label: typeof composerHero.secondary_cta_label === 'string' ? composerHero.secondary_cta_label : undefined,
+              secondary_cta_label: typeof composerHero.secondary_cta_label === 'string' && composerHero.secondary_cta_label.trim()
+                ? composerHero.secondary_cta_label
+                : (locale === 'th' ? 'ดูโครงการ live' : 'Browse live projects'),
               secondary_cta_url: typeof composerHero.secondary_cta_url === 'string'
                 ? composerHero.secondary_cta_url
                 : withLocaleQuery(locale, '/projects', { source: 'home_hero_secondary' }),
