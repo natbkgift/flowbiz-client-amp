@@ -484,6 +484,43 @@ export default async function ContactPage(
       action: locale === 'th' ? 'ใช้ contact route หลัก' : 'Use the main contact route',
     },
   ];
+  const contactAdvisoryTitle = isPrivateTourTopic
+    ? (locale === 'th' ? 'Private-tour handoff' : 'Private-tour handoff')
+    : isInvestmentPlanTopic
+      ? (locale === 'th' ? 'Investment-plan handoff' : 'Investment-plan handoff')
+      : dict.contact.advisoryTitle;
+  const contactAdvisoryBody = isPrivateTourTopic
+    ? (locale === 'th'
+      ? 'ส่งทำเล งบประมาณ และช่วงเวลาที่สะดวก แล้วทีมจะกลับมาพร้อม shortlist ที่สั้นกว่าและ route การพาชมที่พร้อมใช้งาน'
+      : 'Share preferred areas, budget, and timing and the team will reply with a shorter shortlist and a viewing route you can act on.')
+    : isInvestmentPlanTopic
+      ? (locale === 'th'
+        ? 'ส่งงบประมาณ ผลตอบแทนที่คาดหวัง และ downside ที่กังวล แล้วทีมจะตอบกลับด้วย shortlist และ next step ที่ยึดตาม thesis การลงทุน'
+        : 'Share budget, return goals, and downside concerns and the team will respond with a shortlist and next step shaped around your investment thesis.')
+      : dict.contact.advisoryBody;
+  const contactTrustTitle = isPrivateTourTopic
+    ? (locale === 'th' ? 'Private-tour standards' : 'Private-tour standards')
+    : isInvestmentPlanTopic
+      ? (locale === 'th' ? 'Investor response standard' : 'Investor response standard')
+      : dict.contact.trustTitle;
+  const contactTrustBullets = isPrivateTourTopic
+    ? [
+        locale === 'th' ? 'เริ่มจาก shortlist ที่แคบลงก่อนนัดดูจริง' : 'Starts from a tighter shortlist before the viewing is booked',
+        locale === 'th' ? 'คุยผ่าน WhatsApp / LINE หรือฟอร์มได้ตามจังหวะของคุณ' : 'Works through WhatsApp, LINE, or form without repeating your context',
+        locale === 'th' ? 'ออกแบบเพื่อพาไปสู่ viewing plan ไม่ใช่ตอบกลับแบบกว้าง ๆ' : 'Designed to end in a viewing plan, not another generic reply',
+      ]
+    : isInvestmentPlanTopic
+      ? [
+          locale === 'th' ? 'เริ่มจากงบประมาณ ผลตอบแทน และ downside ที่ยอมรับได้' : 'Starts from budget, return targets, and acceptable downside',
+          locale === 'th' ? 'ตอบกลับด้วย shortlist และจุดที่ควรเช็กต่อ ไม่ใช่ listing dump' : 'Replies with a shortlist and checks that matter, not a listing dump',
+          locale === 'th' ? 'รองรับการคุยต่อทาง WhatsApp / LINE เมื่ออยากลงรายละเอียด' : 'Supports deeper follow-up on WhatsApp or LINE when needed',
+        ]
+      : dict.contact.trustBullets;
+  const contactFormHeading = isPrivateTourTopic
+    ? (locale === 'th' ? 'Send your private-tour brief' : 'Send your private-tour brief')
+    : isInvestmentPlanTopic
+      ? (locale === 'th' ? 'Send your investment brief' : 'Send your investment brief')
+      : dict.contact.formTitle;
 
   return (
     <main id="main-content">
@@ -570,8 +607,8 @@ export default async function ContactPage(
         <Container>
           <div className="split">
             <aside className="split__aside">
-              <h2 className="section-title">{dict.contact.advisoryTitle}</h2>
-              <p className="section-subtitle">{dict.contact.advisoryBody}</p>
+              <h2 className="section-title">{contactAdvisoryTitle}</h2>
+              <p className="section-subtitle">{contactAdvisoryBody}</p>
 
               {hasBuyingCostContext ? (
                 <div className="trust-box">
@@ -626,9 +663,9 @@ export default async function ContactPage(
               </a>
 
               <div className="trust-box">
-                <h3 className="trust-box__title">{dict.contact.trustTitle}</h3>
+                <h3 className="trust-box__title">{contactTrustTitle}</h3>
                 <ul className="bullet-list">
-                  {dict.contact.trustBullets.map((b) => (
+                  {contactTrustBullets.map((b) => (
                     <li key={b}>{b}</li>
                   ))}
                 </ul>
@@ -637,7 +674,7 @@ export default async function ContactPage(
 
             <div className="split__main" id="contact-form">
               <LeadForm
-                heading={dict.contact.formTitle}
+                heading={contactFormHeading}
                 description={topicPreset.description}
                 defaultMessage={defaultMessage}
                 defaultBudgetBand={defaultBudgetBand}

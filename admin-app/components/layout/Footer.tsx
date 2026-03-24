@@ -44,6 +44,7 @@ export function Footer({
   const facebookLabel = /flowbiz/i.test(facebookLabelRaw)
     ? (locale === 'th' ? 'Facebook' : 'Facebook')
     : facebookLabelRaw;
+  const showFacebookLink = facebookUrl && !/flowbiz/i.test(facebookUrl);
 
   return (
     <footer className="footer" role="contentinfo">
@@ -103,12 +104,16 @@ export function Footer({
             <dd>{contactEmail}</dd>
             <dt>{locale === 'th' ? 'Support' : 'Support'}</dt>
             <dd>{locale === 'th' ? 'Private tour, shortlist, WhatsApp, LINE' : 'Private tour, shortlist, WhatsApp, LINE'}</dd>
-            <dt>Facebook</dt>
-            <dd>
-              <a href={facebookUrl} target="_blank" rel="noreferrer">
-                {facebookLabel}
-              </a>
-            </dd>
+            {showFacebookLink ? (
+              <>
+                <dt>Facebook</dt>
+                <dd>
+                  <a href={facebookUrl} target="_blank" rel="noreferrer">
+                    {facebookLabel}
+                  </a>
+                </dd>
+              </>
+            ) : null}
           </dl>
         </section>
 

@@ -26,7 +26,15 @@ export async function generateMetadata(
   const params = await props.params;
   const locale = normalizeLocale(params.locale);
   const dict = getDictionary(locale);
-  return makePageMetadata(locale, 'buy', dict.nav.buy, dict.buy.subtitle, dict.brand.name);
+  return makePageMetadata(
+    locale,
+    'buy',
+    locale === 'th' ? 'Foreign-buyer inventory that is easier to act on' : 'Foreign-buyer inventory that is easier to act on',
+    locale === 'th'
+      ? 'เริ่มจาก inventory ที่พร้อมคุยต่อ เรื่อง foreign quota ค่าโอน และ shortlist โดยไม่ต้องเสียเวลาไล่ดู listing ที่ไม่เกี่ยว'
+      : 'Start from buy-ready Pattaya inventory with clearer next steps on foreign quota, fees, shortlist, and private tour.',
+    dict.brand.name
+  );
 }
 
 export default async function BuyPage(props: { params: Promise<{ locale: string }> }) {
@@ -58,6 +66,13 @@ export default async function BuyPage(props: { params: Promise<{ locale: string 
     luxuryReadyCount > 0 ? `${luxuryReadyCount} luxury-ready options` : null,
     ...advisoryProofs,
   ].filter((item): item is string => Boolean(item)).slice(0, 4);
+  const buyFormHeading = locale === 'th' ? 'Send your buy-side brief' : 'Send your buy-side brief';
+  const buyFormDescription = locale === 'th'
+    ? 'ส่งงบประมาณ ทำเล และช่วงเวลาที่สะดวก แล้วทีมจะตอบกลับด้วย shortlist ที่พร้อมคุยเรื่อง quota, ค่าโอน, และ next step ต่อทันที'
+    : 'Share budget, preferred areas, and timing so the team can respond with a shortlist ready for quota, fee, and next-step discussion.';
+  const buyFormDefaultMessage = locale === 'th'
+    ? 'ต้องการให้ทีมคัด shortlist ฝั่งผู้ซื้อที่เหมาะกับงบ ทำเล และช่วงเวลาของผม/ฉัน พร้อมบอกสิ่งที่ควรเช็กต่อเรื่อง quota และค่าโอน'
+    : 'I want the team to prepare a buy-side shortlist that fits my budget, area, and timing, together with the next checks on quota and transfer costs.';
 
   return (
     <main id="main-content">
@@ -345,11 +360,22 @@ export default async function BuyPage(props: { params: Promise<{ locale: string 
         <Container>
           <div className="cta-panel">
             <div>
-              <h2 className="cta-title">{dict.buy.advisoryCtaTitle}</h2>
-              <p className="cta-body">{dict.buy.advisoryCtaBody}</p>
+              <h2 className="cta-title">
+                {locale === 'th' ? 'Brief the team for a cleaner buy-side shortlist' : 'Brief the team for a cleaner buy-side shortlist'}
+              </h2>
+              <p className="cta-body">
+                {locale === 'th'
+                  ? 'ใช้บล็อกนี้เมื่อพร้อมให้ทีมคัดยูนิตที่ควรดูต่อ พร้อมสรุป quota, ค่าโอน, และ step ที่ควรเช็กก่อนคุยลึก'
+                  : 'Use this block when you are ready for the team to narrow the units worth seeing next and frame the quota, fee, and diligence checks before the next call.'}
+              </p>
             </div>
             <div className="cta-panel__form">
-              <LeadForm defaultPurpose="buy" defaultMessage={dict.buy.advisoryCtaBody} />
+              <LeadForm
+                heading={buyFormHeading}
+                description={buyFormDescription}
+                defaultPurpose="buy"
+                defaultMessage={buyFormDefaultMessage}
+              />
             </div>
           </div>
         </Container>
