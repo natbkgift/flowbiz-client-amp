@@ -99,7 +99,7 @@ export const en: Dictionary = {
     verifiedEditorialUpdate: 'Verified editorial update',
   },
   home: {
-    heroTitle: 'Find the right Pattaya property in 60 seconds',
+    heroTitle: 'Start with the right Pattaya inventory and route',
     heroSubtitle:
       'Curated and verified Pattaya opportunities with local guidance, private tours, and investment clarity.',
     pathInvest: {
@@ -631,7 +631,7 @@ export const en: Dictionary = {
     pdpaNotice: 'PDPA & GDPR Compliant',
     contactEmail: 'info@amppattaya.com',
     facebookUrl: 'https://facebook.com/flowbiz',
-    facebookLabel: 'facebook.com/flowbiz',
+    facebookLabel: 'Facebook',
   },
   listing: {
     filtersAndSort: 'Filters & Sort',

@@ -163,6 +163,8 @@ export function defaultLayoutCms(_locale: Locale, dict: Dictionary): ResolvedLay
         { href: '/invest', label: dict.nav.invest },
         { href: '/buy', label: dict.nav.buy },
         { href: '/projects', label: dict.nav.projects },
+        { href: '/area-guide', label: dict.nav.areaGuide },
+        { href: '/contact', label: dict.nav.contact },
       ],
       legalLinks: [
         { href: '/privacy', label: dict.common.privacyPolicy },
@@ -240,6 +242,8 @@ export const SITE_LAYOUT_CMS_TEMPLATE = JSON.stringify(
         { href: '/invest', label: { en: 'Invest', th: 'ลงทุน' }, enabled: true },
         { href: '/buy', label: { en: 'Buy', th: 'ซื้อ' }, enabled: true },
         { href: '/projects', label: { en: 'Projects', th: 'โครงการ' }, enabled: true },
+        { href: '/area-guide', label: { en: 'Area Guide', th: 'ทำเล' }, enabled: true },
+        { href: '/contact', label: { en: 'Contact', th: 'ติดต่อ' }, enabled: true },
       ],
       legal_links: [
         {
@@ -257,8 +261,8 @@ export const SITE_LAYOUT_CMS_TEMPLATE = JSON.stringify(
         email: 'info@amppattaya.com',
         facebook_url: 'https://facebook.com/flowbiz',
         facebook_label: {
-          en: 'facebook.com/flowbiz',
-          th: 'facebook.com/flowbiz',
+          en: 'Facebook',
+          th: 'Facebook',
         },
       },
     },

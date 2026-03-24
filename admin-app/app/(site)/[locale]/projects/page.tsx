@@ -21,7 +21,15 @@ export async function generateMetadata(
   const params = await props.params;
   const locale = normalizeLocale(params.locale);
   const dict = getDictionary(locale);
-  return makePageMetadata(locale, 'projects', dict.nav.projects, dict.listing.exploreProjectsDesc, dict.brand.name);
+  return makePageMetadata(
+    locale,
+    'projects',
+    locale === 'th' ? 'Published Pattaya projects, arranged for real decisions' : 'Published Pattaya projects, arranged for real decisions',
+    locale === 'th'
+      ? 'เริ่มจากโครงการที่เผยแพร่แล้ว เห็นบริบทราคา ทำเล และ handoff ไปยัง shortlist หรือ private tour ได้ทันที'
+      : 'Start from published Pattaya developments with clearer pricing context, location cues, and a faster handoff into shortlist or private tour.',
+    dict.brand.name
+  );
 }
 
 const PROJECTS_FETCH_TIMEOUT_MS = 8000;

@@ -27,12 +27,30 @@ export const revalidate = 300;
 export async function generateMetadata(
   props: {
     params: Promise<{ locale: string }>;
+    searchParams?: Promise<Record<string, string | string[] | undefined>>;
   }
 ) {
   const params = await props.params;
+  const searchParams = await props.searchParams;
   const locale = normalizeLocale(params.locale);
   const dict = getDictionary(locale);
-  return makePageMetadata(locale, 'contact', dict.nav.contact, dict.contact.subtitle, dict.brand.name);
+  const topic = readSingleSearchParam(searchParams, 'topic');
+  const normalizedTopic = String(topic || '').trim().toLowerCase();
+  const title = normalizedTopic === 'private_tour'
+    ? (locale === 'th' ? 'Book a private tour with the right shortlist first' : 'Book a private tour with the right shortlist first')
+    : normalizedTopic === 'investment_plan'
+      ? (locale === 'th' ? 'Discuss your Pattaya investment plan with context already in place' : 'Discuss your Pattaya investment plan with context already in place')
+      : (locale === 'th' ? 'Talk to AMP Pattaya about the next serious step' : 'Talk to AMP Pattaya about the next serious step');
+  const description = normalizedTopic === 'private_tour'
+    ? (locale === 'th'
+      ? 'ส่งงบประมาณ ทำเล และช่วงเวลาที่สะดวกเพื่อให้ทีมคัด shortlist และจัด private tour ที่เหมาะก่อนนัดจริง'
+      : 'Share budget, preferred areas, and timing so the team can shape the shortlist and line up the right private tour before you visit.')
+    : normalizedTopic === 'investment_plan'
+      ? (locale === 'th'
+        ? 'เริ่มจากงบประมาณและเป้าหมายผลตอบแทน เพื่อให้ทีมเตรียม shortlist และ next step ที่คมขึ้นตั้งแต่รอบแรก'
+        : 'Start from your budget and return goals so the team can respond with a sharper shortlist and next step from the first reply.')
+      : dict.contact.subtitle;
+  return makePageMetadata(locale, 'contact', title, description, dict.brand.name);
 }
 
 function formatCurrency(locale: 'en' | 'th', value: number | null | undefined): string | null {

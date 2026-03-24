@@ -16,15 +16,22 @@ export function Footer({
   dict: Dictionary;
   cms?: FooterCms;
 }) {
-  const quickLinks = (cms?.quickLinks?.length
-    ? cms.quickLinks
-    : [
-        { href: '/invest', label: dict.nav.invest },
-        { href: '/buy', label: dict.nav.buy },
-        { href: '/projects', label: dict.nav.projects },
-        { href: '/area-guide', label: dict.nav.areaGuide ?? 'Area Guide' },
-        { href: '/contact', label: dict.nav.contact },
-      ]);
+  const defaultQuickLinks = [
+    { href: '/invest', label: dict.nav.invest },
+    { href: '/buy', label: dict.nav.buy },
+    { href: '/projects', label: dict.nav.projects },
+    { href: '/area-guide', label: dict.nav.areaGuide ?? 'Area Guide' },
+    { href: '/contact', label: dict.nav.contact },
+  ];
+  const quickLinks = (() => {
+    const merged = [...(cms?.quickLinks ?? []), ...defaultQuickLinks];
+    const seen = new Set<string>();
+    return merged.filter((item) => {
+      if (!item?.href || seen.has(item.href)) return false;
+      seen.add(item.href);
+      return true;
+    });
+  })();
   const legalLinks = (cms?.legalLinks?.length
     ? cms.legalLinks
     : [
@@ -33,7 +40,10 @@ export function Footer({
       ]);
   const contactEmail = cms?.contact?.email || dict.common.contactEmail;
   const facebookUrl = cms?.contact?.facebookUrl || dict.common.facebookUrl;
-  const facebookLabel = cms?.contact?.facebookLabel || dict.common.facebookLabel;
+  const facebookLabelRaw = cms?.contact?.facebookLabel || dict.common.facebookLabel;
+  const facebookLabel = /flowbiz/i.test(facebookLabelRaw)
+    ? (locale === 'th' ? 'Facebook' : 'Facebook')
+    : facebookLabelRaw;
 
   return (
     <footer className="footer" role="contentinfo">
