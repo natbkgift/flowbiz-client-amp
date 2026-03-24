@@ -2433,7 +2433,7 @@ summary.mobile-nav__trigger::-webkit-details-marker {
 }
 
 .home-mobile-intent-rail__intro {
-  min-height: 150px;
+  min-height: 128px;
 }
 
 .home-mobile-intent-rail__eyebrow {
@@ -2592,6 +2592,27 @@ summary.mobile-nav__trigger::-webkit-details-marker {
   align-items: center;
   gap: 10px;
   margin-bottom: 12px;
+}
+
+.home-intent-card__stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 14px;
+}
+
+.home-intent-card__stat {
+  display: inline-flex;
+  align-items: center;
+  min-height: 30px;
+  padding: 0 10px;
+  border-radius: 999px;
+  background: rgba(10, 77, 140, 0.07);
+  border: 1px solid rgba(10, 77, 140, 0.1);
+  color: rgba(10, 77, 140, 0.92);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.03em;
 }
 
 .home-intent-card__icon {
@@ -3430,6 +3451,10 @@ summary.mobile-nav__trigger::-webkit-details-marker {
 @media (max-width: 767px) {
   .home-mobile-intent-rail {
     display: block;
+  }
+
+  .home-mobile-intent-rail__intro {
+    min-height: 0;
   }
 
   .home-page .section-header {

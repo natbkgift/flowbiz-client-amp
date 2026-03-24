@@ -8,19 +8,19 @@ import { TrackedLink } from '@/components/analytics/TrackedLink';
 import { trackEvent } from '@/lib/analytics';
 import { getContentRecommendation, getVisitorIntent, type VisitorIntent } from '@/lib/personalization';
 
-type RailAudience = 'buyer' | 'investor' | 'seller';
+type RailAudience = 'buyer' | 'investor' | 'luxury';
 
 function resolveAudience(intent: VisitorIntent): RailAudience | null {
   if (intent === 'invest') return 'investor';
   if (intent === 'buy' || intent === 'rent') return 'buyer';
-  if (intent === 'sell') return 'seller';
+  if (intent === 'sell') return 'luxury';
   return null;
 }
 
 function resolveAudienceFromRecommendation(): RailAudience {
   const recommendation = getContentRecommendation();
   if (recommendation.emphasis === 'roi_data') return 'investor';
-  if (recommendation.emphasis === 'advisory') return 'seller';
+  if (recommendation.emphasis === 'advisory') return 'luxury';
   return 'buyer';
 }
 
@@ -86,14 +86,14 @@ export function HomeMobileIntentRail({ locale }: { locale: 'en' | 'th' }) {
 
   const audienceConfig = {
     buyer: {
-      eyebrow: locale === 'th' ? 'Buyer momentum' : 'Buyer momentum',
+      eyebrow: locale === 'th' ? 'Lifestyle track' : 'Lifestyle track',
       title: locale === 'th'
-        ? 'เปิดยูนิตที่พร้อมซื้อก่อน แล้วค่อยลงรายละเอียดลึก'
-        : 'Open buy-ready inventory first, then go deeper only when it matters.',
+        ? 'เริ่มจากยูนิตที่อยู่จริงได้ก่อน แล้วค่อยลงลึกเฉพาะสิ่งที่ยังไม่ชัด'
+        : 'Open the livable inventory first, then go deeper only where you still need certainty.',
       copy: locale === 'th'
-        ? 'ลำดับนี้ดัน inventory และ shortlist path ขึ้นก่อน เพื่อให้ผู้ซื้อไม่เสีย momentum ไปกับการเปิดหลาย route โดยยังไม่เห็นตัวเลือกที่ใช้ได้จริง'
-        : 'This order pushes inventory and shortlist actions first so buyers do not lose momentum before seeing workable options.',
-      order: ['buyer', 'investor', 'seller'] as RailAudience[],
+        ? 'ลำดับนี้ช่วยให้ผู้ซื้ออยู่อาศัยจริงเห็นทำเลและตัวเลือกที่ใช้งานได้ก่อน ไม่ต้องไหลไปกับหน้าเนื้อหาที่ยาวเกินจำเป็น'
+        : 'This order gets end-users and retirees into workable locations and ready options before the long-scroll content takes over.',
+      order: ['buyer', 'investor', 'luxury'] as RailAudience[],
     },
     investor: {
       eyebrow: locale === 'th' ? 'Investor lens' : 'Investor lens',
@@ -103,17 +103,17 @@ export function HomeMobileIntentRail({ locale }: { locale: 'en' | 'th' }) {
       copy: locale === 'th'
         ? 'ลำดับนี้เอา ROI และ market lens ขึ้นก่อน เพื่อให้นักลงทุนคัดความเสี่ยงและจังหวะได้ก่อนกดดูยูนิตจำนวนมาก'
         : 'This order leads with ROI and market context so investors can filter risk and timing before opening more listings.',
-      order: ['investor', 'buyer', 'seller'] as RailAudience[],
+      order: ['investor', 'buyer', 'luxury'] as RailAudience[],
     },
-    seller: {
-      eyebrow: locale === 'th' ? 'Seller advisory' : 'Seller advisory',
+    luxury: {
+      eyebrow: locale === 'th' ? 'Luxury handoff' : 'Luxury handoff',
       title: locale === 'th'
-        ? 'เริ่มจาก valuation confidence แล้วค่อยเลือกทางลัดที่เหมาะกับจังหวะขาย'
-        : 'Start from valuation confidence, then choose the quickest route for your sell timing.',
+        ? 'เริ่มจาก private tour และ shortlist ระดับบน แทนการไล่ดู inventory แบบพอร์ทัล'
+        : 'Start from a private tour and a shorter luxury shortlist instead of browsing like a portal.',
       copy: locale === 'th'
-        ? 'ลำดับนี้ดัน valuation brief ขึ้นก่อน เพื่อให้เจ้าของทรัพย์เริ่มจากราคา จังหวะปล่อย และ handoff ที่ทีมช่วยต่อได้จริง'
-        : 'This order leads with the valuation brief so owners start from pricing, launch timing, and a clearer advisory handoff.',
-      order: ['seller', 'buyer', 'investor'] as RailAudience[],
+        ? 'เส้นทางนี้เหมาะกับผู้ซื้อระดับบนที่ต้องการความเป็นส่วนตัว ภาพลักษณ์ และทีมช่วยคัดรายการก่อนนัดดูจริง'
+        : 'This route is built for prestige buyers who want privacy, better brand feel, and a discreet handoff into the right inventory.',
+      order: ['luxury', 'buyer', 'investor'] as RailAudience[],
     },
   };
 
@@ -134,13 +134,13 @@ export function HomeMobileIntentRail({ locale }: { locale: 'en' | 'th' }) {
       href: withLocale(locale, '/invest?source=home_mobile_investor'),
       eventPayload: { cta: 'home_mobile_investor', from: 'home_mobile_intent_rail' },
     },
-    seller: {
-      key: 'seller' as const,
-      eyebrow: locale === 'th' ? 'Seller' : 'Seller',
-      label: locale === 'th' ? 'เริ่ม valuation brief' : 'Start valuation brief',
-      detail: locale === 'th' ? 'ราคา + จังหวะขาย + handoff' : 'Pricing + launch timing + handoff',
-      href: withLocale(locale, '/sell?source=home_mobile_seller'),
-      eventPayload: { cta: 'home_mobile_seller', from: 'home_mobile_intent_rail' },
+    luxury: {
+      key: 'luxury' as const,
+      eyebrow: locale === 'th' ? 'High-end' : 'High-end',
+      label: locale === 'th' ? 'เปิด private tour route' : 'Open private tour route',
+      detail: locale === 'th' ? 'Luxury shortlist + discreet handoff' : 'Luxury shortlist + discreet handoff',
+      href: withLocale(locale, '/contact?topic=private_tour&source=home_mobile_luxury'),
+      eventPayload: { cta: 'home_mobile_luxury', from: 'home_mobile_intent_rail' },
     },
   };
   const activeConfig = activeAudience
@@ -151,9 +151,9 @@ export function HomeMobileIntentRail({ locale }: { locale: 'en' | 'th' }) {
           ? 'เลือกเส้นทางที่ตรงโจทย์ก่อน แล้วระบบค่อยเรียง next step ให้'
           : 'Choose the path that fits first, then let the next step tighten around it.',
         copy: locale === 'th'
-          ? 'บล็อกนี้จะปรับตาม intent หลัง hydrate เสร็จ เพื่อหลีกเลี่ยง buyer flash ที่ทำให้หน้าไม่นิ่ง'
-          : 'This block settles after hydration so the page does not flash the wrong buyer-first variant.',
-        order: ['buyer', 'investor', 'seller'] as RailAudience[],
+          ? 'บล็อกนี้จะเรียงลำดับตาม intent เพื่อให้คุณไปยัง investor, lifestyle หรือ luxury route ที่เหมาะกว่า'
+          : 'This block settles around intent so you land in the most relevant investor, lifestyle, or luxury route.',
+        order: ['buyer', 'investor', 'luxury'] as RailAudience[],
       };
   const orderedItems = activeConfig.order.map((key) => items[key]);
 

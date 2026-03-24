@@ -24,6 +24,11 @@ function formatEditorialDate(locale: 'en' | 'th', value: string | null | undefin
   }).format(date);
 }
 
+function formatCompactPrice(value: number | null | undefined): string | null {
+  if (typeof value !== 'number' || !Number.isFinite(value) || value <= 0) return null;
+  return `฿${Math.round(value).toLocaleString()}`;
+}
+
 function resolveComposerText(value: unknown, locale: 'en' | 'th'): string | null {
   if (typeof value === 'string') {
     const trimmed = value.trim();
@@ -327,6 +332,19 @@ export default async function HomePage({
   } catch {
     publishedTestimonials = [];
   }
+  let homeProjectsSnapshot: Awaited<ReturnType<typeof fetchProjects>> = [];
+  let homePropertiesSnapshot: PropertyListItem[] = [];
+  try {
+    const [projectsRes, propertiesRes] = await Promise.all([
+      fetchProjects({ limit: 24 }),
+      fetchPropertiesAPI({ limit: 100, sort: 'newest' }),
+    ]);
+    homeProjectsSnapshot = projectsRes;
+    homePropertiesSnapshot = propertiesRes.data || [];
+  } catch {
+    homeProjectsSnapshot = [];
+    homePropertiesSnapshot = [];
+  }
   const authorityPosts = [...publishedBlogPosts]
     .sort((left, right) => {
       const leftDate = Date.parse(left.published_at ?? left.updated_at ?? '');
@@ -335,20 +353,43 @@ export default async function HomePage({
     })
     .slice(0, 3);
 
+  const liveProjectCount = homeProjectsSnapshot.length;
+  const saleProperties = homePropertiesSnapshot.filter((property) => property.type !== 'rent');
+  const rentProperties = homePropertiesSnapshot.filter((property) => property.type === 'rent');
+  const luxuryProperties = homePropertiesSnapshot.filter((property) =>
+    typeof property.price === 'number' && Number.isFinite(property.price) && property.price >= 10_000_000
+  );
+  const propertyPrices = homePropertiesSnapshot
+    .map((property) => property.price)
+    .filter((price): price is number => typeof price === 'number' && Number.isFinite(price) && price > 0);
+  const projectStartingPrices = homeProjectsSnapshot
+    .map((project) => project.starting_price)
+    .filter((price): price is number => typeof price === 'number' && Number.isFinite(price) && price > 0);
+  const entryPriceValue = [...propertyPrices, ...projectStartingPrices].sort((left, right) => left - right)[0] ?? null;
+  const luxuryEntryPriceValue = luxuryProperties
+    .map((property) => property.price)
+    .filter((price): price is number => typeof price === 'number' && Number.isFinite(price) && price > 0)
+    .sort((left, right) => left - right)[0] ?? null;
+  const liveInventoryCount = saleProperties.length + rentProperties.length;
+  const runtimeTrustMicroStrip = [
+    liveProjectCount > 0
+      ? (locale === 'th' ? `${liveProjectCount} โครงการ live` : `${liveProjectCount} live projects`)
+      : null,
+    entryPriceValue
+      ? (locale === 'th' ? `เริ่มเห็นราคาได้ตั้งแต่ ${formatCompactPrice(entryPriceValue)}` : `Live entry points from ${formatCompactPrice(entryPriceValue)}`)
+      : null,
+    luxuryProperties.length > 0
+      ? (locale === 'th' ? `${luxuryProperties.length} luxury picks พร้อม private tour` : `${luxuryProperties.length} luxury picks ready for private tour`)
+      : null,
+    liveInventoryCount > 0
+      ? (locale === 'th' ? `${liveInventoryCount} ยูนิตคัดสรรในระบบ` : `${liveInventoryCount} curated live listings`)
+      : null,
+    ...resolvedTrustMicroStrip,
+  ].filter((item): item is string => Boolean(item));
+
   async function FeaturedProjectsSection() {
-    let allProjects: Awaited<ReturnType<typeof fetchProjects>> = [];
-    let allProperties: PropertyListItem[] = [];
-    try {
-      const [projectsRes, propertiesRes] = await Promise.all([
-        fetchProjects({ limit: 24 }),
-        fetchPropertiesAPI({ limit: 100, sort: 'newest' }),
-      ]);
-      allProjects = projectsRes;
-      allProperties = propertiesRes.data || [];
-    } catch {
-      allProjects = [];
-      allProperties = [];
-    }
+    const allProjects = homeProjectsSnapshot;
+    const allProperties = homePropertiesSnapshot;
 
     const PROJECT_PRIORITY = [
       'the-riviera-jomtien',
@@ -564,32 +605,21 @@ export default async function HomePage({
 
   async function FeaturedPropertiesSection() {
     let featuredProperties: PropertyListItem[] = [];
-    let allPropertyCandidates: PropertyListItem[] = [];
-    try {
-      const [saleRes, rentRes, allRes] = await Promise.all([
-        fetchPropertiesAPI({ limit: 5, type: 'resale', sort: 'newest' }),
-        fetchPropertiesAPI({ limit: 4, type: 'rent', sort: 'newest' }),
-        fetchPropertiesAPI({ limit: 100, sort: 'newest' }),
-      ]);
-      const sales = saleRes.data || [];
-      const rents = rentRes.data || [];
-      allPropertyCandidates = allRes.data || [];
-      const mixed: PropertyListItem[] = [];
-      let si = 0;
-      let ri = 0;
-      while (mixed.length < 8 && (si < sales.length || ri < rents.length)) {
-        for (let k = 0; k < 2 && si < sales.length && mixed.length < 8; k++) {
-          mixed.push(sales[si++]);
-        }
-        if (ri < rents.length && mixed.length < 8) {
-          mixed.push(rents[ri++]);
-        }
+    const allPropertyCandidates = homePropertiesSnapshot;
+    const sales = allPropertyCandidates.filter((property) => property.type !== 'rent');
+    const rents = allPropertyCandidates.filter((property) => property.type === 'rent');
+    const mixed: PropertyListItem[] = [];
+    let si = 0;
+    let ri = 0;
+    while (mixed.length < 8 && (si < sales.length || ri < rents.length)) {
+      for (let k = 0; k < 2 && si < sales.length && mixed.length < 8; k++) {
+        mixed.push(sales[si++]);
       }
-      featuredProperties = mixed;
-    } catch {
-      featuredProperties = [];
-      allPropertyCandidates = [];
+      if (ri < rents.length && mixed.length < 8) {
+        mixed.push(rents[ri++]);
+      }
     }
+    featuredProperties = mixed;
 
     const propertyMode = String(composerFeaturedProperties.mode ?? 'auto').toLowerCase();
     const selectedPropertyIds = Array.isArray(composerFeaturedProperties.selected_property_ids)
@@ -896,11 +926,13 @@ export default async function HomePage({
   const pathSelectorHeading =
     typeof composerPathSelector.heading === 'string' && composerPathSelector.heading.trim()
       ? composerPathSelector.heading.trim()
-      : dict.home.pathSectionTitle;
+      : (locale === 'th' ? 'เลือกเส้นทางที่ตรงกับวิธีตัดสินใจของคุณ' : 'Choose the buyer track that matches how you decide');
   const pathSelectorSubcopy =
     typeof composerPathSelector.subcopy === 'string' && composerPathSelector.subcopy.trim()
       ? composerPathSelector.subcopy.trim()
-      : dict.home.pathSectionSubtitle;
+      : (locale === 'th'
+        ? 'เริ่มจากเส้นทางที่ใช่สำหรับผลตอบแทน การอยู่อาศัย หรือ private tour ระดับบน แล้วค่อยเปิด inventory ที่เกี่ยวข้องเท่านั้น'
+        : 'Start with the route built for ROI, lifestyle, or a private luxury tour so you only open the inventory that fits.');
   const pathSelectorSource = Array.isArray(composerPathSelector.paths)
     ? composerPathSelector.paths as Array<{ key?: string; label?: string; description?: string; url?: string }>
     : Array.isArray(composerPathSelector.cards)
@@ -918,48 +950,61 @@ export default async function HomePage({
   );
   const pathSelectorCards = [
     {
-      key: 'buy',
-      href: withLocaleQuery(locale, '/buy', { source: 'home_path_selector_buy' }),
-      title: dict.home.pathBuy.title,
-      desc: dict.home.pathBuy.desc,
-      result: locale === 'th' ? 'เช็กลิสต์ผู้ซื้อต่างชาติ' : 'Foreign-buyer checklist',
-      fit: locale === 'th' ? 'เหมาะกับผู้ซื้อที่ต้องการขั้นตอนชัดเจนก่อนตัดสินใจ' : 'Best for buyers who want clear next steps before committing.',
-      start: locale === 'th' ? 'เริ่มจาก buy inventory ที่คัดแล้ว' : 'Start from curated buy inventory',
-      icon: 'B',
-    },
-    {
       key: 'invest',
-      href: withLocaleQuery(locale, '/invest', { source: 'home_path_selector_invest' }),
-      title: dict.home.pathInvest.title,
-      desc: dict.home.pathInvest.desc,
-      result: locale === 'th' ? 'ชอร์ตลิสต์เน้นผลตอบแทน' : 'Yield-focused shortlist',
-      fit: locale === 'th' ? 'เหมาะกับผู้ลงทุนที่ต้องชั่งผลตอบแทนกับความเสี่ยงอย่างโปร่งใส' : 'Best for investors balancing yield, demand, and downside risk.',
-      start: locale === 'th' ? 'เริ่มจาก investment lens' : 'Start with an investment lens',
+      href: withLocaleQuery(locale, '/invest', { source: 'home_path_selector_investor' }),
+      title: locale === 'th' ? 'Investor track' : 'Investor track',
+      desc: locale === 'th'
+        ? 'ดู inventory ที่มีราคาเริ่มต้นชัดและ route สำหรับ ROI ก่อน แล้วค่อยคุย shortlist แบบเน้นผลตอบแทน'
+        : 'Start with live entry pricing and the ROI route first, then move into a shortlist built around yield and downside control.',
+      result: locale === 'th' ? 'ROI brief + shortlist ที่คัดตาม thesis' : 'ROI brief + shortlist matched to the thesis',
+      fit: locale === 'th' ? 'เหมาะกับนักลงทุนต่างชาติที่ต้องการตัวเลขก่อนอารมณ์' : 'Best for foreign investors who want numbers before narrative.',
+      start: entryPriceValue
+        ? (locale === 'th' ? `เริ่มจากราคา live ตั้งแต่ ${formatCompactPrice(entryPriceValue)}` : `Start with live entry points from ${formatCompactPrice(entryPriceValue)}`)
+        : (locale === 'th' ? 'เริ่มจาก investment lens' : 'Start with the investment lens'),
       icon: 'I',
+      stats: [
+        liveProjectCount > 0 ? (locale === 'th' ? `${liveProjectCount} โครงการที่เปิดดูได้` : `${liveProjectCount} live projects`) : null,
+        saleProperties.length > 0 ? (locale === 'th' ? `${saleProperties.length} sale picks ในระบบ` : `${saleProperties.length} sale picks in system`) : null,
+      ],
     },
     {
-      key: 'rent',
-      href: withLocaleQuery(locale, '/rent', { source: 'home_path_selector_rent' }),
-      title: locale === 'th' ? 'เช่า' : 'Rent',
+      key: 'live',
+      href: withLocaleQuery(locale, '/buy', { source: 'home_path_selector_lifestyle' }),
+      title: locale === 'th' ? 'Lifestyle / retiree track' : 'Lifestyle / retiree track',
       desc: locale === 'th'
-        ? 'เลือกทำเลและยูนิตเช่าที่เหมาะกับการอยู่อาศัย พร้อมคำแนะนำแบบไม่เสียเวลา'
-        : 'Find the right area and rental unit fast, with practical local guidance.',
-      result: locale === 'th' ? 'ชอร์ตลิสต์เช่าเร็วขึ้น' : 'Rental shortlist fast',
-      fit: locale === 'th' ? 'เหมาะกับผู้เช่าที่อยากลดเวลาลองผิดลองถูกระหว่างทำเล' : 'Best for renters who want to narrow location choices quickly.',
-      start: locale === 'th' ? 'เริ่มจาก rental shortlist' : 'Start with a rental shortlist',
-      icon: 'R',
+        ? 'เหมาะกับผู้ซื้ออยู่อาศัยจริงหรือย้ายมาอยู่พัทยาที่ต้องการทำเล ความสบาย และ next step ที่ไม่ซับซ้อน'
+        : 'Built for end-users, expats, and retirees who care about comfort, location, and a clean next step more than browsing volume.',
+      result: locale === 'th' ? 'ทำเล + ยูนิตที่พร้อมนัดดู' : 'Location-first shortlist ready for viewing',
+      fit: locale === 'th' ? 'เหมาะกับคนที่อยากเห็นตัวเลือกที่อยู่จริงได้ก่อน แล้วค่อยลงลึกเรื่องกฎหมาย' : 'Best for buyers who want livability and workable options before legal detail.',
+      start: rentProperties.length > 0
+        ? (locale === 'th' ? `เริ่มจาก ${rentProperties.length} rental / move-ready picks` : `Start with ${rentProperties.length} move-ready rental and buy picks`)
+        : (locale === 'th' ? 'เริ่มจากทำเลและยูนิตที่อยู่จริงได้' : 'Start with livable areas and ready units'),
+      icon: 'L',
+      stats: [
+        rentProperties.length > 0 ? (locale === 'th' ? `${rentProperties.length} rental picks` : `${rentProperties.length} rental picks`) : null,
+        saleProperties.length > 0 ? (locale === 'th' ? `${saleProperties.length} buy-ready options` : `${saleProperties.length} buy-ready options`) : null,
+      ],
     },
     {
-      key: 'sell',
-      href: withLocaleQuery(locale, '/sell', { source: 'home_path_selector_sell' }),
-      title: locale === 'th' ? 'ขาย' : 'Sell',
+      key: 'luxury',
+      href: withLocaleQuery(locale, '/contact', {
+        topic: 'private_tour',
+        source: 'home_path_selector_luxury',
+      }),
+      title: locale === 'th' ? 'High-end / private tour track' : 'High-end / private tour track',
       desc: locale === 'th'
-        ? 'ประเมินทรัพย์และวางแผนขายกับทีมที่เข้าใจตลาดพัทยา'
-        : 'Get valuation guidance and a sell strategy from our Pattaya team.',
-      result: locale === 'th' ? 'ประเมินราคา + แผนขาย' : 'Valuation + sell plan',
-      fit: locale === 'th' ? 'เหมาะกับเจ้าของทรัพย์ที่ต้องการมุมมองราคาและจังหวะขาย' : 'Best for owners who need pricing and launch timing guidance.',
-      start: locale === 'th' ? 'เริ่มจาก valuation brief' : 'Start with a valuation brief',
-      icon: 'S',
+        ? 'สำหรับผู้ซื้อที่ต้องการความเป็นส่วนตัว ภาพลักษณ์ และ shortlist ระดับบนก่อนนัดดูทรัพย์จริง'
+        : 'For prestige-driven buyers who want privacy, stronger visual quality, and a short private-tour route into top-tier inventory.',
+      result: locale === 'th' ? 'private tour + curated luxury shortlist' : 'Private tour + curated luxury shortlist',
+      fit: locale === 'th' ? 'เหมาะกับผู้ซื้อระดับบนที่ไม่ต้องการไล่ดูรายการแบบพอร์ทัลทั่วไป' : 'Best for high-end buyers who do not want a mass-portal browsing experience.',
+      start: luxuryEntryPriceValue
+        ? (locale === 'th' ? `เริ่มจาก luxury picks ตั้งแต่ ${formatCompactPrice(luxuryEntryPriceValue)}` : `Start with luxury picks from ${formatCompactPrice(luxuryEntryPriceValue)}`)
+        : (locale === 'th' ? 'เริ่มจาก private tour brief' : 'Start with a private tour brief'),
+      icon: 'H',
+      stats: [
+        luxuryProperties.length > 0 ? (locale === 'th' ? `${luxuryProperties.length} luxury picks` : `${luxuryProperties.length} luxury picks`) : null,
+        locale === 'th' ? 'Private tour + discreet handoff' : 'Private tour + discreet handoff',
+      ],
     },
   ].map((card) => {
     const override = pathSelectorByKey.get(card.key);
@@ -971,6 +1016,7 @@ export default async function HomePage({
       result: typeof override?.result === 'string' && override.result.trim() ? override.result.trim() : card.result,
       fit: typeof override?.fit === 'string' && override.fit.trim() ? override.fit.trim() : card.fit,
       start: typeof override?.start === 'string' && override.start.trim() ? override.start.trim() : card.start,
+      stats: Array.isArray(card.stats) ? card.stats.filter((item): item is string => Boolean(item)) : [],
     };
   });
 
@@ -1343,15 +1389,35 @@ export default async function HomePage({
             guidedHref={withLocale(locale, '/?guided=1&step=goal')}
             supportLinks={[
               {
+                label: locale === 'th' ? 'นัด private tour' : 'Book private tour',
+                href: withLocaleQuery(locale, '/contact', { topic: 'private_tour', source: 'home_hero_private_tour' }),
+                eventPayload: { cta: 'hero_private_tour', from: 'home_hero' },
+              },
+              {
+                label: locale === 'th' ? 'ขอ investment plan' : 'Get investment plan',
+                href: withLocaleQuery(locale, '/contact', { topic: 'investment_plan', source: 'home_hero_investment_plan' }),
+                eventPayload: { cta: 'hero_investment_plan', from: 'home_hero' },
+              },
+              {
                 label: locale === 'th' ? 'ดู shortlist ที่บันทึกไว้' : 'View saved shortlist',
                 href: withLocaleQuery(locale, '/shortlist', { source: 'home_hero_support' }),
                 eventPayload: { cta: 'hero_saved_shortlist', from: 'home_hero' },
               },
             ]}
             composer={{
-              eyebrow: typeof composerHero.eyebrow === 'string' ? composerHero.eyebrow : advisoryDict.heroEyebrow,
-              heading: typeof composerHero.heading === 'string' ? composerHero.heading : undefined,
-              subheading: typeof composerHero.subheading === 'string' ? composerHero.subheading : undefined,
+              eyebrow: typeof composerHero.eyebrow === 'string'
+                ? composerHero.eyebrow
+                : (locale === 'th' ? 'Pattaya advisory สำหรับ investor, end-user และ private tour' : 'Pattaya advisory for investors, end-users, and private tours'),
+              heading: typeof composerHero.heading === 'string' && composerHero.heading.trim()
+                ? composerHero.heading
+                : (locale === 'th'
+                  ? 'เริ่มจาก inventory และเส้นทางที่ตรงเป้าหมาย ก่อนเสียเวลากับการดูเกินจำเป็น'
+                  : 'Start with the right Pattaya inventory and route before the browsing loop wastes your time'),
+              subheading: typeof composerHero.subheading === 'string' && composerHero.subheading.trim()
+                ? composerHero.subheading
+                : (locale === 'th'
+                  ? 'เปิดดูโครงการ live, luxury picks, และ foreign-buyer next steps ในหน้าเดียว แล้วค่อย handoff ไปยัง consultation หรือ private tour'
+                  : 'See live projects, luxury-ready opportunities, and foreign-buyer next steps in one place, then hand off into consultation or a private tour.'),
               primary_cta_label: typeof composerHero.primary_cta_label === 'string' ? composerHero.primary_cta_label : undefined,
               primary_cta_url: typeof composerHero.primary_cta_url === 'string'
                 ? composerHero.primary_cta_url
@@ -1381,7 +1447,7 @@ export default async function HomePage({
         <section className="home-trust-strip-section" style={sectionOrderStyle('trust_micro_strip')}>
           <Container variant="wide">
             <div className="home-trust-strip" role="note" aria-label={locale === 'th' ? 'ข้อมูลความน่าเชื่อถือ' : 'Trust highlights'} data-home-perf="trust-strip">
-              {resolvedTrustMicroStrip.slice(0, 6).map((item, index) => (
+              {runtimeTrustMicroStrip.slice(0, 6).map((item, index) => (
                 <span key={`${item}-${index}`} className="home-trust-pill">{item}</span>
               ))}
             </div>
@@ -1415,6 +1481,13 @@ export default async function HomePage({
                     <h3>{card.title}</h3>
                   </div>
                   <p>{card.desc}</p>
+                  {card.stats.length > 0 ? (
+                    <div className="home-intent-card__stats" aria-label={locale === 'th' ? 'สรุปแบบเร็ว' : 'Quick stats'}>
+                      {card.stats.map((stat) => (
+                        <span key={`${card.key}-${stat}`} className="home-intent-card__stat">{stat}</span>
+                      ))}
+                    </div>
+                  ) : null}
                   <div className="home-intent-card__eyebrow text-xs uppercase tracking-[0.08em] text-primary/80 mt-4">
                     {locale === 'th' ? 'เหมาะกับใคร' : 'Best for'}
                   </div>
@@ -1431,9 +1504,9 @@ export default async function HomePage({
             </div>
 
             {renderConfidenceRow([
-              locale === 'th' ? 'buyer / investor / seller แยกเส้นทางชัดเจน' : 'Buyer, investor, and seller paths stay separated',
-              locale === 'th' ? 'แต่ละการ์ดบอก fit, outcome และ start ชัดเจน' : 'Each card states fit, outcome, and start clearly',
-              locale === 'th' ? 'ใช้ source tagging แยกตามเส้นทาง' : 'Path-specific source tagging stays intact',
+              locale === 'th' ? 'เส้นทางแยกตาม investor / lifestyle / high-end ชัดเจน' : 'Investor, lifestyle, and high-end routes are separated clearly',
+              locale === 'th' ? 'แต่ละการ์ดให้ fit, outcome และจุดเริ่มต้นที่ใช้ได้จริง' : 'Each card states fit, outcome, and a practical starting point',
+              locale === 'th' ? 'ทุกเส้นทางพาไปยัง inventory หรือ handoff ที่เกี่ยวข้องทันที' : 'Every route moves straight into relevant inventory or handoff',
             ])}
           </Container>
         </section>
