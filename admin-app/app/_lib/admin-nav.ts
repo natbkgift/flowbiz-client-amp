@@ -19,7 +19,7 @@ export type AdminNavGroup = {
 const DASHBOARD_NAV: AdminNavItem = {
   href: "/admin/dashboard",
   icon: "dashboard",
-  label: { en: "Dashboard", th: "แดชบอร์ด" },
+  label: { en: "Operations Hub", th: "ศูนย์ปฏิบัติการ" },
   description: { en: "Health + QA overview", th: "ภาพรวมสุขภาพระบบและ QA" },
 };
 
@@ -176,7 +176,7 @@ export const ADMIN_SECONDARY_NAV: AdminNavItem[] = [
 export const ADMIN_NAV_GROUPS: AdminNavGroup[] = [
   {
     key: "dashboard",
-    label: { en: "Dashboard", th: "แดชบอร์ด" },
+    label: { en: "Operations", th: "ปฏิบัติการ" },
     items: [DASHBOARD_NAV],
   },
   {

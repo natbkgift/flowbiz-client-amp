@@ -62,11 +62,16 @@ const AREA_CREATE_FIELDS = [
   },
   { name: "source_note", label: "Source note", type: "textarea", rows: 2, required: true },
   {
-    name: "map_center",
-    label: "Map center (JSON)",
-    type: "json",
-    placeholder: '{"lat":12.9236,"lng":100.8825}',
-    rows: 3,
+    name: "map_center.lat",
+    label: "Map latitude",
+    type: "number",
+    placeholder: "12.9236",
+  },
+  {
+    name: "map_center.lng",
+    label: "Map longitude",
+    type: "number",
+    placeholder: "100.8825",
   },
 ] as const;
 
@@ -91,11 +96,16 @@ const AREA_PATCH_FIELDS = [
   { name: "content.th.metrics_update_cadence", label: "Metrics update cadence (TH)", type: "text" },
   { name: "source_note", label: "Source note", type: "textarea", rows: 2 },
   {
-    name: "map_center",
-    label: "Map center (JSON)",
-    type: "json",
-    placeholder: '{"lat":12.9236,"lng":100.8825}',
-    rows: 3,
+    name: "map_center.lat",
+    label: "Map latitude",
+    type: "number",
+    placeholder: "12.9236",
+  },
+  {
+    name: "map_center.lng",
+    label: "Map longitude",
+    type: "number",
+    placeholder: "100.8825",
   },
 ] as const;
 

@@ -40,13 +40,30 @@ const DEVELOPER_CREATE_FIELDS = [
   { name: "summary.th", label: "Summary (TH)", type: "textarea", rows: 3 },
   { name: "source_note", label: "Source note", type: "textarea", rows: 2, required: true },
   {
-    name: "trust_proof",
-    label: "Trust proof (JSON: include en/th + approval)",
-    type: "json",
+    name: "trust_proof.en",
+    label: "Trust proof (EN)",
+    type: "textarea",
     required: true,
-    placeholder:
-      '{"en":"Legal profile verification complete.","th":"ตรวจสอบเอกสารทางกฎหมายเรียบร้อยแล้ว","approval_status":"approved","legal_approved":true}',
-    rows: 4,
+    rows: 3,
+  },
+  {
+    name: "trust_proof.th",
+    label: "Trust proof (TH)",
+    type: "textarea",
+    required: true,
+    rows: 3,
+  },
+  {
+    name: "trust_proof.approval_status",
+    label: "Trust approval status",
+    type: "status",
+    required: true,
+    options: ["approved", "pending", "rejected"],
+  },
+  {
+    name: "trust_proof.legal_approved",
+    label: "Legal approval confirmed",
+    type: "checkbox",
   },
 ] as const;
 
@@ -63,12 +80,27 @@ const DEVELOPER_PATCH_FIELDS = [
   { name: "summary.th", label: "Summary (TH)", type: "textarea", rows: 3 },
   { name: "source_note", label: "Source note", type: "textarea", rows: 2 },
   {
-    name: "trust_proof",
-    label: "Trust proof (JSON: include en/th + approval)",
-    type: "json",
-    placeholder:
-      '{"en":"Legal profile verification complete.","th":"ตรวจสอบเอกสารทางกฎหมายเรียบร้อยแล้ว","approval_status":"approved","legal_approved":true}',
-    rows: 4,
+    name: "trust_proof.en",
+    label: "Trust proof (EN)",
+    type: "textarea",
+    rows: 3,
+  },
+  {
+    name: "trust_proof.th",
+    label: "Trust proof (TH)",
+    type: "textarea",
+    rows: 3,
+  },
+  {
+    name: "trust_proof.approval_status",
+    label: "Trust approval status",
+    type: "status",
+    options: ["approved", "pending", "rejected"],
+  },
+  {
+    name: "trust_proof.legal_approved",
+    label: "Legal approval confirmed",
+    type: "checkbox",
   },
 ] as const;
 

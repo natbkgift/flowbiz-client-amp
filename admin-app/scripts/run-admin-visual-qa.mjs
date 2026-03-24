@@ -14,8 +14,17 @@ const ARTIFACT_ROOT = path.resolve(
 );
 const DEFAULT_ROUTES = [
   "/admin/dashboard",
+  "/admin/domain",
   "/admin/projects",
   "/admin/properties",
+  "/admin/areas",
+  "/admin/developers",
+  "/admin/company",
+  "/admin/testimonials",
+  "/admin/blog",
+  "/admin/review-queue",
+  "/admin/videos",
+  "/admin/taxonomy",
   "/admin/media",
   "/admin/inquiries",
   "/admin/imports",

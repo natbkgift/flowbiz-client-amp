@@ -98,7 +98,7 @@ function parseDashboardChunkPath(html) {
 
 async function isAdminRuntimeReady(baseUrl) {
   const html = await readText(new URL("/admin/dashboard", baseUrl).toString());
-  if (!html || !html.includes("Admin Health / QA Dashboard")) return false;
+  if (!html || (!html.includes("Operations Hub") && !html.includes("Dashboard"))) return false;
 
   const dashboardChunk = parseDashboardChunkPath(html);
   if (!dashboardChunk) return false;
@@ -636,12 +636,15 @@ async function waitForVisibleTextMatch(page, values) {
 async function verifyDashboardUi(page, contractSummary, options = {}) {
   const { smokeMode = "mocked", getCurrentRecentInquiriesRequestCount = () => 0 } = options;
   await page.getByRole("button", { name: /sign out|ออกจากระบบ/i }).waitFor({ timeout: 10000 });
-  await page.getByRole("button", { name: /refresh dashboard|รีเฟรชแดชบอร์ด/i }).first().waitFor({ timeout: 10000 });
+  await page
+    .getByRole("button", { name: /refresh dashboard|refresh operations hub|รีเฟรชแดชบอร์ด|รีเฟรชศูนย์ปฏิบัติการ/i })
+    .first()
+    .waitFor({ timeout: 10000 });
   await waitForVisibleTextMatch(page, [
-    "Admin Health / QA Dashboard",
-    "Admin Health and QA Dashboard",
-    "แดชบอร์ดสุขภาพระบบและ QA",
-    "แดชบอร์ดสุขภาพระบบ / QA",
+    "Operations Hub",
+    "ศูนย์ปฏิบัติการ",
+    "Dashboard",
+    "แดชบอร์ด",
   ]);
   await page
     .getByRole("heading", { name: /System health \/ QA overview|Health widgets|ภาพรวมสุขภาพระบบ|วิดเจ็ตสุขภาพระบบ/i })

@@ -11,6 +11,7 @@ export type PrimitiveFieldType =
   | "password"
   | "textarea"
   | "number"
+  | "checkbox"
   | "select"
   | "status"
   | "relation"
@@ -137,11 +138,16 @@ const ADMIN_FORM_LABEL_TRANSLATIONS: Partial<Record<AdminLocale, Record<string, 
     Facilities: "สิ่งอำนวยความสะดวก",
     "Investment source": "แหล่งข้อมูลการลงทุน",
     "Investment snapshot updated": "อัปเดตข้อมูลการลงทุนล่าสุด",
-    "Investment snapshot (JSON)": "สรุปข้อมูลการลงทุน (JSON)",
-    "Map center (JSON)": "จุดศูนย์กลางแผนที่ (JSON)",
+    "Investment snapshot": "สรุปข้อมูลการลงทุน",
+    "Map latitude": "ละติจูดของแผนที่",
+    "Map longitude": "ลองจิจูดของแผนที่",
     Tags: "แท็ก",
     "Profile (EN)": "โปรไฟล์ (EN)",
     "Profile (TH)": "โปรไฟล์ (TH)",
+    "Trust proof (EN)": "หลักฐานความน่าเชื่อถือ (EN)",
+    "Trust proof (TH)": "หลักฐานความน่าเชื่อถือ (TH)",
+    "Trust approval status": "สถานะอนุมัติหลักฐานความน่าเชื่อถือ",
+    "Legal approval confirmed": "ยืนยันการอนุมัติทางกฎหมายแล้ว",
     "Transport (EN)": "การเดินทาง (EN)",
     "Transport (TH)": "การเดินทาง (TH)",
     "Beach proximity (EN)": "ความใกล้ชายหาด (EN)",
@@ -152,7 +158,6 @@ const ADMIN_FORM_LABEL_TRANSLATIONS: Partial<Record<AdminLocale, Record<string, 
     "Why live/invest (TH)": "เหตุผลที่เหมาะอยู่อาศัย/ลงทุน (TH)",
     "Metrics update cadence (EN)": "รอบอัปเดตข้อมูล (EN)",
     "Metrics update cadence (TH)": "รอบอัปเดตข้อมูล (TH)",
-    "Trust proof (JSON: include en/th + approval)": "หลักฐานความน่าเชื่อถือ (JSON: รวม en/th + approval)",
     "Tags (EN comma separated)": "แท็ก (EN คั่นด้วยจุลภาค)",
     "Tags (TH comma separated)": "แท็ก (TH คั่นด้วยจุลภาค)",
     "Topics (EN comma separated)": "หัวข้อ (EN คั่นด้วยจุลภาค)",
@@ -195,6 +200,8 @@ const ADMIN_FORM_PLACEHOLDER_TRANSLATIONS: Partial<Record<AdminLocale, Record<st
     "pool, gym": "สระว่ายน้ำ, ฟิตเนส",
     "Internal Desk": "ทีมภายใน",
     "2026-03-01": "2026-03-01",
+    "12.9236": "12.9236",
+    "100.8825": "100.8825",
     "high_yield, sea_view": "high_yield, sea_view",
     "cms-sample-001": "cms-sample-001",
     "1500000": "1500000",
@@ -220,6 +227,9 @@ const STATUS_OPTION_LABELS: Partial<Record<AdminLocale, Record<string, string>>>
     inactive: "ปิดใช้งาน",
     active: "ใช้งาน",
     published: "เผยแพร่",
+    approved: "อนุมัติแล้ว",
+    pending: "รอตรวจสอบ",
+    rejected: "ไม่ผ่าน",
   },
 };
 
@@ -309,6 +319,10 @@ export function initializePrimitiveValues(
         .join(", ");
       return acc;
     }
+    if (field.type === "checkbox" && typeof current === "boolean") {
+      acc[field.name] = current ? "true" : "false";
+      return acc;
+    }
     if (field.type === "json" && current && typeof current === "object") {
       acc[field.name] = JSON.stringify(current, null, 2);
       return acc;
@@ -345,6 +359,10 @@ export function validatePrimitiveValues(
       }
     }
     if (field.type === "number" && Number.isNaN(Number(value))) {
+      errors[field.name] = validationMessage(field.label, "invalid");
+      continue;
+    }
+    if (field.type === "checkbox" && !["true", "false"].includes(value)) {
       errors[field.name] = validationMessage(field.label, "invalid");
       continue;
     }
@@ -401,6 +419,8 @@ export function toPrimitivePayload(
         throw new Error(`Invalid number value for field "${field.name}".`);
       }
       value = numericValue;
+    } else if (field.type === "checkbox") {
+      value = trimmed === "true";
     } else if (field.type === "chips") {
       value = trimmed
         .split(/[\n,]/)
@@ -662,6 +682,23 @@ export function AdminFormPrimitiveInput(props: AdminFormPrimitiveProps) {
           aria-describedby={props.error ? errorId : undefined}
           onChange={(event) => onInputChange(event, props.field.name, props.onChange)}
         />
+      </InputFrame>
+    );
+  }
+  if (props.field.type === "checkbox") {
+    return (
+      <InputFrame {...props}>
+        <label className="admin-checkbox-field">
+          <input
+            id={id}
+            type="checkbox"
+            checked={props.value === "true"}
+            aria-invalid={props.error ? "true" : "false"}
+            aria-describedby={props.error ? errorId : undefined}
+            onChange={(event) => props.onChange(props.field.name, event.target.checked ? "true" : "false")}
+          />
+          <span>{localizeFieldLabel(props.field.label, locale)}</span>
+        </label>
       </InputFrame>
     );
   }

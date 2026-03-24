@@ -49,6 +49,21 @@ import {
 export { checklistReport } from "@/components/admin/domain/crud-workspace/workspace-utils";
 export type { CrudConfig } from "@/components/admin/domain/crud-workspace/workspace-types";
 
+function resolveCrudApiPath(path: string): string {
+  const trimmedPath = path.trim();
+  if (!trimmedPath) return trimmedPath;
+  if (trimmedPath.startsWith("/api/") || trimmedPath.startsWith("http://") || trimmedPath.startsWith("https://")) {
+    return trimmedPath;
+  }
+  if (trimmedPath.startsWith("/admin/")) {
+    return `/api${trimmedPath}`;
+  }
+  if (trimmedPath.startsWith("admin/")) {
+    return `/api/${trimmedPath}`;
+  }
+  return trimmedPath;
+}
+
 export function AdminJsonCrudWorkspace({ config }: { config: CrudConfig }) {
   const locale = detectAdminLocale();
   const t = getCrudWorkspaceCopy(locale);
@@ -157,7 +172,10 @@ export function AdminJsonCrudWorkspace({ config }: { config: CrudConfig }) {
     []
   );
 
-  const listPath = useMemo(() => buildListPath(config.listPath, listQuery), [config.listPath, listQuery]);
+  const listPath = useMemo(
+    () => resolveCrudApiPath(buildListPath(config.listPath, listQuery)),
+    [config.listPath, listQuery]
+  );
   const idBase = useMemo(() => toDomIdToken(config.idBase || config.title), [config.idBase, config.title]);
   const readinessPath = config.readinessPath || "";
 
@@ -224,7 +242,10 @@ export function AdminJsonCrudWorkspace({ config }: { config: CrudConfig }) {
     if (!revisionConfig) return;
     const activeIdentifier = identifier.trim();
     if (!activeIdentifier) return;
-    const body = await fetchJson<{ data?: unknown[] }>(withIdentifier(revisionConfig.listPath, activeIdentifier), token.trim());
+    const body = await fetchJson<{ data?: unknown[] }>(
+      resolveCrudApiPath(withIdentifier(revisionConfig.listPath, activeIdentifier)),
+      token.trim()
+    );
     const rows = Array.isArray(body.data)
       ? body.data.filter((row) => row && typeof row === "object").map((row) => row as Record<string, unknown>)
       : [];
@@ -245,7 +266,10 @@ export function AdminJsonCrudWorkspace({ config }: { config: CrudConfig }) {
     const activeIdentifier = identifier.trim();
     if (!activeIdentifier) return null;
     if (config.publishChecklistConfig) {
-      const detail = await fetchJson<Record<string, unknown>>(withIdentifier(config.getPath, activeIdentifier), token.trim());
+      const detail = await fetchJson<Record<string, unknown>>(
+        resolveCrudApiPath(withIdentifier(config.getPath, activeIdentifier)),
+        token.trim()
+      );
       const recordPath = config.publishChecklistConfig.recordPath;
       const resolvedRecord = recordPath ? normalizeRecordCandidate(detail[recordPath]) : normalizeRecordCandidate(detail);
       if (resolvedRecord) setPreviewRecord(resolvedRecord);
@@ -284,7 +308,9 @@ export function AdminJsonCrudWorkspace({ config }: { config: CrudConfig }) {
         setPublishWarningSignature("");
       }
     }
-    const published = await fetchJson(withIdentifier(config.publishPath, activeIdentifier), token.trim(), { method: "POST" });
+    const published = await fetchJson(resolveCrudApiPath(withIdentifier(config.publishPath, activeIdentifier)), token.trim(), {
+      method: "POST",
+    });
     setPublishWarningSignature("");
     return published;
   }
@@ -490,19 +516,23 @@ export function AdminJsonCrudWorkspace({ config }: { config: CrudConfig }) {
                   readinessPath={readinessPath}
                   revisionConfig={revisionConfig}
                   onIdentifierChange={setIdentifier}
-                  onGetDetail={() => void runAction("get-detail", () => fetchJson(withIdentifier(config.getPath, identifier), token.trim()))}
-                  onCheckReadiness={() => void runAction("check-readiness", () => fetchJson(withIdentifier(readinessPath, identifier), token.trim()))}
+                  onGetDetail={() =>
+                    void runAction("get-detail", () => fetchJson(resolveCrudApiPath(withIdentifier(config.getPath, identifier)), token.trim()))
+                  }
+                  onCheckReadiness={() =>
+                    void runAction("check-readiness", () => fetchJson(resolveCrudApiPath(withIdentifier(readinessPath, identifier)), token.trim()))
+                  }
                   onPublish={() => void runAction("publish", () => publishRecord())}
                   onUnpublish={() =>
                     void runAction("unpublish", () =>
-                      fetchJson(withIdentifier(config.unpublishPath || "", identifier), token.trim(), {
+                      fetchJson(resolveCrudApiPath(withIdentifier(config.unpublishPath || "", identifier)), token.trim(), {
                         method: "POST",
                       })
                     )
                   }
                   onDelete={() =>
                     void runAction("delete", () =>
-                      fetchJson(withIdentifier(config.deletePath || "", identifier), token.trim(), {
+                      fetchJson(resolveCrudApiPath(withIdentifier(config.deletePath || "", identifier)), token.trim(), {
                         method: "DELETE",
                       })
                     )
@@ -539,13 +569,18 @@ export function AdminJsonCrudWorkspace({ config }: { config: CrudConfig }) {
                       onSelectedRevisionIdChange={setSelectedRevisionId}
                       onShowDiff={() =>
                         void runAction("show-diff", () =>
-                          fetchJson(withRevisionIdentifier(revisionConfig?.diffPath || "", identifier, selectedRevisionId), token.trim())
+                          fetchJson(
+                            resolveCrudApiPath(withRevisionIdentifier(revisionConfig?.diffPath || "", identifier, selectedRevisionId)),
+                            token.trim()
+                          )
                         )
                       }
                       onRestoreRevision={() =>
                         void runAction("restore-revision", async () => {
                           const restored = await fetchJson(
-                            withRevisionIdentifier(revisionConfig?.restorePath || "", identifier, selectedRevisionId),
+                            resolveCrudApiPath(
+                              withRevisionIdentifier(revisionConfig?.restorePath || "", identifier, selectedRevisionId)
+                            ),
                             token.trim(),
                             { method: "POST" }
                           );
@@ -578,7 +613,7 @@ export function AdminJsonCrudWorkspace({ config }: { config: CrudConfig }) {
                 onCreateFieldChange={handleCreateFieldChange}
                 onCreate={() =>
                   void runAction("create", async () => {
-                    const response = await fetchJson(config.createPath || "", token.trim(), {
+                    const response = await fetchJson(resolveCrudApiPath(config.createPath || ""), token.trim(), {
                       method: "POST",
                       body: JSON.stringify(
                         Array.isArray(config.createFormFields) && config.createFormFields.length > 0
@@ -612,19 +647,23 @@ export function AdminJsonCrudWorkspace({ config }: { config: CrudConfig }) {
                 readinessPath={readinessPath}
                 revisionConfig={revisionConfig}
                 onIdentifierChange={setIdentifier}
-                onGetDetail={() => void runAction("get-detail", () => fetchJson(withIdentifier(config.getPath, identifier), token.trim()))}
-                onCheckReadiness={() => void runAction("check-readiness", () => fetchJson(withIdentifier(readinessPath, identifier), token.trim()))}
+                onGetDetail={() =>
+                  void runAction("get-detail", () => fetchJson(resolveCrudApiPath(withIdentifier(config.getPath, identifier)), token.trim()))
+                }
+                onCheckReadiness={() =>
+                  void runAction("check-readiness", () => fetchJson(resolveCrudApiPath(withIdentifier(readinessPath, identifier)), token.trim()))
+                }
                 onPublish={() => void runAction("publish", () => publishRecord())}
                 onUnpublish={() =>
                   void runAction("unpublish", () =>
-                    fetchJson(withIdentifier(config.unpublishPath || "", identifier), token.trim(), {
+                    fetchJson(resolveCrudApiPath(withIdentifier(config.unpublishPath || "", identifier)), token.trim(), {
                       method: "POST",
                     })
                   )
                 }
                 onDelete={() =>
                   void runAction("delete", () =>
-                    fetchJson(withIdentifier(config.deletePath || "", identifier), token.trim(), {
+                    fetchJson(resolveCrudApiPath(withIdentifier(config.deletePath || "", identifier)), token.trim(), {
                       method: "DELETE",
                     })
                   )
@@ -654,7 +693,7 @@ export function AdminJsonCrudWorkspace({ config }: { config: CrudConfig }) {
                 onPatchFieldChange={handlePatchFieldChange}
                 onPatch={() =>
                   void runAction("patch", async () => {
-                    const response = await fetchJson(withIdentifier(config.patchPath || "", identifier), token.trim(), {
+                    const response = await fetchJson(resolveCrudApiPath(withIdentifier(config.patchPath || "", identifier)), token.trim(), {
                       method: "PATCH",
                       body: JSON.stringify(
                         Array.isArray(config.patchFormFields) && config.patchFormFields.length > 0
@@ -709,7 +748,7 @@ export function AdminJsonCrudWorkspace({ config }: { config: CrudConfig }) {
                       throw new Error(t.fixFields);
                     }
                     const payload = toPrimitivePayload(action.fields, values);
-                    const response = await fetchJson(action.path, token.trim(), {
+                    const response = await fetchJson(resolveCrudApiPath(action.path), token.trim(), {
                       method: action.method || "POST",
                       body: JSON.stringify({
                         property_ids: ids,
@@ -738,13 +777,18 @@ export function AdminJsonCrudWorkspace({ config }: { config: CrudConfig }) {
                     onSelectedRevisionIdChange={setSelectedRevisionId}
                     onShowDiff={() =>
                       void runAction("show-diff", () =>
-                        fetchJson(withRevisionIdentifier(revisionConfig?.diffPath || "", identifier, selectedRevisionId), token.trim())
+                        fetchJson(
+                          resolveCrudApiPath(withRevisionIdentifier(revisionConfig?.diffPath || "", identifier, selectedRevisionId)),
+                          token.trim()
+                        )
                       )
                     }
                     onRestoreRevision={() =>
                       void runAction("restore-revision", async () => {
                         const restored = await fetchJson(
-                          withRevisionIdentifier(revisionConfig?.restorePath || "", identifier, selectedRevisionId),
+                          resolveCrudApiPath(
+                            withRevisionIdentifier(revisionConfig?.restorePath || "", identifier, selectedRevisionId)
+                          ),
                           token.trim(),
                           { method: "POST" }
                         );
