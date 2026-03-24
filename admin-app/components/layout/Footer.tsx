@@ -22,6 +22,8 @@ export function Footer({
         { href: '/invest', label: dict.nav.invest },
         { href: '/buy', label: dict.nav.buy },
         { href: '/projects', label: dict.nav.projects },
+        { href: '/area-guide', label: dict.nav.areaGuide ?? 'Area Guide' },
+        { href: '/contact', label: dict.nav.contact },
       ]);
   const legalLinks = (cms?.legalLinks?.length
     ? cms.legalLinks
@@ -40,6 +42,17 @@ export function Footer({
           <div>
             <h3>{dict.brand.name}</h3>
             <p className="text-muted-on-dark">{dict.brand.tagline}</p>
+            <div className="footer-social-row" style={{ marginTop: '16px' }}>
+              <Link className="footer-social-link" href={withLocale(locale, '/contact')}>
+                {dict.nav.contact}
+              </Link>
+              <Link className="footer-social-link" href={withLocale(locale, '/contact?topic=private_tour')}>
+                {locale === 'th' ? 'Private tour' : 'Private tour'}
+              </Link>
+              <a className="footer-social-link" href={`mailto:${contactEmail}`}>
+                {locale === 'th' ? 'Email team' : 'Email team'}
+              </a>
+            </div>
           </div>
 
           <nav aria-label={dict.common.footerNavigation}>
@@ -78,6 +91,8 @@ export function Footer({
             <dd>{dict.brand.name}</dd>
             <dt>Email</dt>
             <dd>{contactEmail}</dd>
+            <dt>{locale === 'th' ? 'Support' : 'Support'}</dt>
+            <dd>{locale === 'th' ? 'Private tour, shortlist, WhatsApp, LINE' : 'Private tour, shortlist, WhatsApp, LINE'}</dd>
             <dt>Facebook</dt>
             <dd>
               <a href={facebookUrl} target="_blank" rel="noreferrer">

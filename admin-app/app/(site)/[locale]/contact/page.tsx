@@ -18,6 +18,7 @@ import {
 } from '@/app/_lib/public-advisory';
 import { getDictionary, normalizeLocale } from '@/app/_lib/i18n/get-dictionary';
 import { makePageMetadata } from '@/app/_lib/i18n/metadata';
+import { withLocale } from '@/app/_lib/i18n/routing';
 import { PublicAdvisoryHero } from '@/components/public/PublicAdvisoryHero';
 import type { LeadHandoff } from '@/lib/conversion';
 
@@ -246,6 +247,8 @@ export default async function ContactPage(
   const leadCaptureContext = parseLeadCaptureContext(searchParams);
   const topic = readSingleSearchParam(searchParams, 'topic');
   const topicPreset = getContactTopicPreset(locale, topic);
+  const isPrivateTourTopic = String(topic || '').trim().toLowerCase() === 'private_tour';
+  const isInvestmentPlanTopic = String(topic || '').trim().toLowerCase() === 'investment_plan';
   const msg =
     readSingleSearchParam(searchParams, 'msg') ?? null;
   const investorLines = [
@@ -412,6 +415,58 @@ export default async function ContactPage(
         }
       : undefined;
 
+  const contactHeroTitle = isPrivateTourTopic
+    ? (locale === 'th' ? 'Book a private tour with the right shortlist first' : 'Book a private tour with the right shortlist first')
+    : isInvestmentPlanTopic
+      ? (locale === 'th' ? 'Discuss your Pattaya investment plan with context already in place' : 'Discuss your Pattaya investment plan with context already in place')
+      : (locale === 'th' ? 'Talk to AMP Pattaya about the next serious step' : 'Talk to AMP Pattaya about the next serious step');
+  const contactHeroSubtitle = isPrivateTourTopic
+    ? (locale === 'th'
+      ? 'ส่งทำเล งบประมาณ และช่วงเวลาที่สะดวก แล้วทีมจะคัด viewing route ที่เหมาะก่อนนัดดูจริง'
+      : 'Share your preferred areas, budget, and timing so the team can line up the right viewing route before the tour.')
+    : isInvestmentPlanTopic
+      ? (locale === 'th'
+        ? 'เริ่มจากงบประมาณ ผลตอบแทนที่คาดหวัง และ thesis การลงทุน เพื่อให้ shortlist ที่ได้คมขึ้นตั้งแต่รอบแรก'
+        : 'Start from your budget, return goals, and thesis so the first shortlist is sharper and more credible.')
+      : (locale === 'th'
+        ? 'เลือกเส้นทางที่ตรงกับโจทย์ของคุณ แล้วทีมจะตอบกลับด้วย shortlist, private tour, หรือ next step ที่ชัดเจน'
+        : 'Choose the route that fits your goal and the team will come back with a shortlist, private tour, or a clear next step.');
+  const contactProofs = [
+    locale === 'th' ? 'Local Pattaya team' : 'Local Pattaya team',
+    locale === 'th' ? 'WhatsApp / LINE / private tour' : 'WhatsApp / LINE / private tour',
+    locale === 'th' ? 'PDPA / GDPR aligned' : 'PDPA / GDPR aligned',
+    locale === 'th' ? 'Action-oriented replies' : 'Action-oriented replies',
+  ];
+  const contactRouteCards = [
+    {
+      key: 'investment',
+      title: locale === 'th' ? 'Investment plan' : 'Investment plan',
+      body: locale === 'th'
+        ? 'เหมาะกับผู้ลงทุนที่ต้องการเริ่มจาก ROI, downside, และ shortlist ตาม thesis'
+        : 'For investors who want to start from ROI, downside, and a shortlist built around the thesis.',
+      href: withLocaleQuery(locale, '/contact', { topic: 'investment_plan' }),
+      action: locale === 'th' ? 'เปิด investment route' : 'Open investment route',
+    },
+    {
+      key: 'private-tour',
+      title: locale === 'th' ? 'Private tour' : 'Private tour',
+      body: locale === 'th'
+        ? 'เหมาะกับผู้ซื้อระดับบนที่ต้องการ shortlist สั้นและนัดดูแบบมี privacy'
+        : 'For high-end buyers who want a shorter shortlist and a more private viewing handoff.',
+      href: withLocaleQuery(locale, '/contact', { topic: 'private_tour' }),
+      action: locale === 'th' ? 'เปิด private tour route' : 'Open private tour route',
+    },
+    {
+      key: 'general',
+      title: locale === 'th' ? 'Curated shortlist' : 'Curated shortlist',
+      body: locale === 'th'
+        ? 'เหมาะกับผู้ซื้ออยู่อาศัยจริงหรือย้ายมาอยู่ ที่ต้องการเริ่มจากทำเล งบ และขั้นตอนที่ชัด'
+        : 'For end-users and relocators who want to start from area, budget, and a cleaner next step.',
+      href: withLocale(locale, '/contact'),
+      action: locale === 'th' ? 'ใช้ contact route หลัก' : 'Use the main contact route',
+    },
+  ];
+
   return (
     <main id="main-content">
       <Breadcrumbs
@@ -422,34 +477,34 @@ export default async function ContactPage(
       />
       <PublicAdvisoryHero
         eyebrow={dict.advisory.heroEyebrow}
-        title={dict.contact.title}
-        subtitle={dict.contact.subtitle}
-        proofs={advisoryProofs}
+        title={contactHeroTitle}
+        subtitle={contactHeroSubtitle}
+        proofs={contactProofs.length ? contactProofs : advisoryProofs}
         proofsLabel={advisoryLabels.proofsLabel}
         guidanceLabel={advisoryLabels.guidanceLabel}
         signals={[
           {
             kicker: dict.advisory.bestFor,
-            title: locale === 'th' ? 'ผู้ซื้อ นักลงทุน และผู้เช่าที่ต้องการ next step ชัด' : 'Buyers, investors, and renters who need the next step',
+            title: locale === 'th' ? 'Investor, end-user, และ private-tour buyer ที่ต้องการ next step ชัด' : 'Investors, end-users, and private-tour buyers who need a clearer next step',
             body: locale === 'th'
-              ? 'ใช้หน้านี้เมื่อคุณพร้อมอธิบายงบประมาณ เป้าหมาย และทำเล เพื่อให้ทีมตอบกลับแบบมีทิศทาง'
-              : 'Use this when you are ready to share budget, goals, and preferred areas so the team can respond with direction.',
+              ? 'ใช้หน้านี้เมื่อพร้อมส่งงบ เป้าหมาย และทำเล เพื่อให้ทีมตอบกลับด้วย shortlist หรือ viewing plan ที่ใช้ต่อได้จริง'
+              : 'Use this when you are ready to share budget, goals, and areas so the team can reply with a shortlist or viewing plan you can act on.',
             icon: 'users',
           },
           {
             kicker: dict.advisory.nextStep,
-            title: locale === 'th' ? 'เลือกช่องทางที่สะดวกที่สุดได้เลย' : 'Choose the channel that fits your pace',
+            title: locale === 'th' ? 'เลือกเส้นทางที่ตรงกับวิธีตัดสินใจของคุณ' : 'Choose the route that matches how you decide',
             body: locale === 'th'
-              ? 'กรอกฟอร์มไว้ให้ทีมคัด shortlist ต่อ หรือเปิด WhatsApp / LINE เพื่อเริ่มคุยทันที'
-              : 'Use the form for a structured request, or message the team directly through WhatsApp or LINE.',
+              ? 'จะเริ่มจาก investment brief, private tour, หรือ contact route หลักก็ได้ โดยไม่ต้องส่งคำอธิบายซ้ำหลายรอบ'
+              : 'Start from an investment brief, a private-tour route, or the main contact path without repeating the same context.',
             icon: 'check',
           },
           {
             kicker: dict.advisory.trustSignal,
-            title: locale === 'th' ? 'ทีมตอบกลับพร้อม action ไม่ใช่ข้อความทั่วไป' : 'Responses are action-oriented, not generic',
+            title: locale === 'th' ? 'ทีมตอบกลับพร้อม shortlist, viewing plan, หรือ next step ที่ชัด' : 'The team replies with a shortlist, viewing plan, or a concrete next step',
             body: locale === 'th'
-              ? 'เราออกแบบช่องทางนี้เพื่อส่งต่อไปสู่ shortlist, tour, หรือ consultation ที่ชัดเจน'
-              : 'The goal is to turn your request into a concrete shortlist, tour plan, or consultation step.',
+              ? 'หน้านี้ถูกออกแบบให้ปิดความลังเล ไม่ใช่เพิ่มข้อความกลาง ๆ ที่ยังไม่ช่วยให้ตัดสินใจ'
+              : 'This page is designed to close hesitation, not generate another round of generic back-and-forth.',
             icon: 'shield',
           },
         ]}
@@ -468,6 +523,30 @@ export default async function ContactPage(
           label: dict.cta.whatsapp,
         }}
       />
+
+      <section className="section section--alt">
+        <Container>
+          <div className="section-header">
+            <h2 className="section-title">{locale === 'th' ? 'Start from the route that fits' : 'Start from the route that fits'}</h2>
+            <p className="section-subtitle">
+              {locale === 'th'
+                ? 'เลือกเส้นทางที่ตรงกับเป้าหมายก่อนกรอกฟอร์ม เพื่อให้ทีมรับ brief ที่คมขึ้นตั้งแต่รอบแรก'
+                : 'Pick the route that fits your goal before filling the form so the team receives a sharper brief on the first pass.'}
+            </p>
+          </div>
+          <div className="grid grid-3">
+            {contactRouteCards.map((card) => (
+              <article key={card.key} className="card">
+                <h3 className="card-title">{card.title}</h3>
+                <p className="card-subtitle">{card.body}</p>
+                <div className="card-actions">
+                  <a className="btn btn-secondary" href={card.href}>{card.action}</a>
+                </div>
+              </article>
+            ))}
+          </div>
+        </Container>
+      </section>
 
       <section className="section">
         <Container>

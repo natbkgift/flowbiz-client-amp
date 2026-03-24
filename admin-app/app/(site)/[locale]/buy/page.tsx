@@ -45,6 +45,19 @@ export default async function BuyPage(props: { params: Promise<{ locale: string 
 
   const featuredItems = (res.data ?? []).slice(0, 3);
   const hiddenItemCount = Math.max(0, (res.data?.length ?? 0) - featuredItems.length);
+  const liveEntryPrice = (res.data ?? [])
+    .map((item) => item.price)
+    .filter((value): value is number => typeof value === 'number' && Number.isFinite(value) && value > 0)
+    .sort((left, right) => left - right)[0] ?? null;
+  const luxuryReadyCount = (res.data ?? []).filter((item) =>
+    typeof item.price === 'number' && Number.isFinite(item.price) && item.price >= 10_000_000
+  ).length;
+  const buyProofs = [
+    locale === 'th' ? `${res.data?.length ?? 0} buy-ready listings` : `${res.data?.length ?? 0} buy-ready listings`,
+    liveEntryPrice ? `${locale === 'th' ? 'Entry from' : 'Entry from'} THB ${Math.round(liveEntryPrice).toLocaleString()}` : null,
+    luxuryReadyCount > 0 ? `${luxuryReadyCount} luxury-ready options` : null,
+    ...advisoryProofs,
+  ].filter((item): item is string => Boolean(item)).slice(0, 4);
 
   return (
     <main id="main-content">
@@ -56,34 +69,36 @@ export default async function BuyPage(props: { params: Promise<{ locale: string 
       />
       <PublicAdvisoryHero
         eyebrow={dict.advisory.heroEyebrow}
-        title={dict.buy.title}
-        subtitle={dict.buy.subtitle}
-        proofs={advisoryProofs}
+        title={locale === 'th' ? 'Foreign-buyer inventory that is easier to act on' : 'Foreign-buyer inventory that is easier to act on'}
+        subtitle={locale === 'th'
+          ? 'เปิดดูยูนิตขายที่พร้อมใช้ต่อสำหรับ shortlist, legal review, และ private tour โดยไม่ต้องเริ่มจาก listing dump'
+          : 'Browse resale and buy-ready units that can move directly into shortlist, legal review, and a private tour without starting from a listing dump.'}
+        proofs={buyProofs}
         proofsLabel={advisoryLabels.proofsLabel}
         guidanceLabel={advisoryLabels.guidanceLabel}
         signals={[
           {
             kicker: dict.advisory.bestFor,
-            title: locale === 'th' ? 'ผู้ซื้อต่างชาติที่ต้องการขั้นตอนชัดเจน' : 'Foreign buyers who need clear process control',
+            title: locale === 'th' ? 'ผู้ซื้อต่างชาติที่ต้องการ inventory พร้อม next step' : 'Foreign buyers who want inventory with a clear next step',
             body: locale === 'th'
-              ? 'เหมาะกับผู้ที่ต้องการเข้าใจ foreign quota ค่าใช้จ่าย และลำดับเอกสารก่อนตัดสินใจ'
-              : 'Best for buyers who need foreign quota, transfer cost, and due-diligence clarity before committing.',
+              ? 'เหมาะกับผู้ที่ต้องการเข้าใจ foreign quota ค่าใช้จ่าย และลำดับการตรวจเอกสาร โดยยังเห็นตัวเลือกที่ใช้ได้จริงก่อน'
+              : 'Best for buyers who need foreign quota, transfer-cost, and due-diligence clarity while still seeing workable options first.',
             icon: 'users',
           },
           {
             kicker: dict.advisory.nextStep,
-            title: locale === 'th' ? 'เริ่มจาก shortlist และ fee map' : 'Start with a shortlist and fee map',
+            title: locale === 'th' ? 'เริ่มจาก shortlist ที่สั้นกว่าและ fee map ที่ชัด' : 'Start with a shorter shortlist and a clearer fee map',
             body: locale === 'th'
-              ? 'ส่งงบประมาณและ timeline มา แล้วทีมจะคัดโครงการพร้อมขั้นตอนถัดไปที่เข้าใจง่าย'
-              : 'Share your budget and timing, and we will return a shortlist with the next legal and commercial checks.',
+              ? 'ส่งงบประมาณและ timeline มา แล้วทีมจะคัดยูนิตที่ควรดูต่อ พร้อมสิ่งที่ต้องเช็กก่อนคุยลึก'
+              : 'Share your budget and timing and the team will narrow the units worth seeing next, together with the checks that matter.',
             icon: 'check',
           },
           {
             kicker: dict.advisory.trustSignal,
-            title: locale === 'th' ? 'ทีม advisory ท้องถิ่นช่วยลดความคลุมเครือ' : 'Local advisory support removes ambiguity',
+            title: locale === 'th' ? 'ทีม local advisory ช่วยคัดก่อนที่จะเกิด decision fatigue' : 'Local advisory support reduces decision fatigue before it starts',
             body: locale === 'th'
-              ? 'เราไม่ส่ง listing จำนวนมาก แต่คัดตัวเลือกที่ผ่านบริบท foreign buyer และพาชมต่อได้ทันที'
-              : 'We filter options through a foreign-buyer lens instead of sending raw listing volume.',
+              ? 'เราไม่ส่ง listing จำนวนมาก แต่คัดตัวเลือกผ่านเลนส์ของ foreign buyer และ viewing readiness'
+              : 'We filter options through a foreign-buyer and viewing-readiness lens instead of sending raw listing volume.',
             icon: 'shield',
           },
         ]}
@@ -105,6 +120,16 @@ export default async function BuyPage(props: { params: Promise<{ locale: string 
 
       <section className="section">
         <Container>
+          <div className="cta-strip mb-6">
+            <div className="cta-strip__text">
+              {locale === 'th'
+                ? 'เริ่มจากยูนิตที่พร้อมคุยต่อ แล้วค่อยไปยัง quota, ค่าใช้จ่าย, และการตรวจสัญญาเมื่อเหลือตัวเลือกที่ใช่จริง'
+                : 'Start from units worth discussing first, then move into quota, fees, and contract checks once the shortlist is tighter.'}
+            </div>
+            <a className="btn btn-secondary" href={withLocaleQuery(locale, '/contact', { topic: 'private_tour', source: 'buy_top_strip' })}>
+              {locale === 'th' ? 'Book private tour' : 'Book private tour'}
+            </a>
+          </div>
           <div className="section-header">
             <h2 className="section-title">{dict.buy.processTitle}</h2>
             <p className="section-subtitle">{dict.buy.processSubtitle}</p>
