@@ -40,29 +40,46 @@ checks: list[dict[str, object]] = []
 failures: list[str] = []
 
 
-def fetch(path: str) -> tuple[int, str, str]:
+def fetch(
+    path: str,
+    *,
+    method: str = "GET",
+    body: str | None = None,
+    headers: dict[str, str] | None = None,
+) -> tuple[int, str, str]:
     url = urljoin(base_url + "/", path.lstrip("/"))
     curl_bin = shutil.which("curl") or shutil.which("curl.exe")
+    request_headers = {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0 Safari/537.36",
+        "Accept": "text/html,application/json;q=0.9,*/*;q=0.8",
+        "Cache-Control": "no-cache",
+        "Pragma": "no-cache",
+    }
+    if headers:
+        request_headers.update(headers)
     if curl_bin:
         marker = "__FLOWBIZ_STATUS__"
+        command = [
+            curl_bin,
+            "--silent",
+            "--show-error",
+            "--location",
+            "--write-out",
+            f"\n{marker}:%{{http_code}}",
+            "-A",
+            request_headers["User-Agent"],
+        ]
+        for name, value in request_headers.items():
+            if name == "User-Agent":
+                continue
+            command.extend(["-H", f"{name}: {value}"])
+        if method.upper() != "GET":
+            command.extend(["-X", method.upper()])
+        if body is not None:
+            command.extend(["--data-raw", body])
+        command.append(url)
         completed = subprocess.run(
-            [
-                curl_bin,
-                "--silent",
-                "--show-error",
-                "--location",
-                "--write-out",
-                f"\n{marker}:%{{http_code}}",
-                "-A",
-                "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0 Safari/537.36",
-                "-H",
-                "Accept: text/html,application/json;q=0.9,*/*;q=0.8",
-                "-H",
-                "Cache-Control: no-cache",
-                "-H",
-                "Pragma: no-cache",
-                url,
-            ],
+            command,
             check=False,
             capture_output=True,
             text=True,
@@ -80,13 +97,9 @@ def fetch(path: str) -> tuple[int, str, str]:
 
     request = Request(
         url,
-        method="GET",
-        headers={
-            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0 Safari/537.36",
-            "Accept": "text/html,application/json;q=0.9,*/*;q=0.8",
-            "Cache-Control": "no-cache",
-            "Pragma": "no-cache",
-        },
+        method=method.upper(),
+        headers=request_headers,
+        data=body.encode("utf-8") if body is not None else None,
     )
     try:
         with urlopen(request, timeout=20) as response:
@@ -109,10 +122,22 @@ def has_no_blank_sections(html: str) -> bool:
     return re.search(r"<section\b[^>]*>\s*</section>", html, re.I) is None
 
 
-def expect_status(path: str, expected: int, name: str) -> tuple[int, str, str]:
-    status, body, url = fetch(path)
-    record(name, status == expected, {"path": path, "url": url, "status": status, "expected": expected})
-    return status, body, url
+def expect_status(
+    path: str,
+    expected: int,
+    name: str,
+    *,
+    method: str = "GET",
+    body: str | None = None,
+    headers: dict[str, str] | None = None,
+) -> tuple[int, str, str]:
+    status, body_text, url = fetch(path, method=method, body=body, headers=headers)
+    record(
+        name,
+        status == expected,
+        {"path": path, "url": url, "status": status, "expected": expected, "method": method.upper()},
+    )
+    return status, body_text, url
 
 
 def history_is_compatible_missing(status: int, build_sha: str) -> bool:
@@ -213,6 +238,31 @@ if version_status == 200:
             build_sha.startswith(expected_build_sha) or expected_build_sha.startswith(build_sha),
             {"build_sha": build_sha, "expected_build_sha": expected_build_sha},
         )
+
+events_status, events_body, _ = expect_status(
+    "/api/v1/events",
+    202,
+    "api_v1_events",
+    method="POST",
+    headers={"Content-Type": "application/json"},
+    body=json.dumps(
+        {
+            "event_name": "prod_smoke_event",
+            "source": {"app": "prod-smoke", "page": "/en", "locale": "en"},
+            "payload": {"placement": "prod_smoke"},
+        }
+    ),
+)
+if events_status == 202:
+    try:
+        events_payload = json.loads(events_body)
+    except json.JSONDecodeError:
+        events_payload = {}
+    record(
+        "api_v1_events_payload",
+        bool(events_payload.get("ok")) and str(events_payload.get("endpoint") or "") == "/api/v1/events",
+        {"endpoint": events_payload.get("endpoint"), "event_name": events_payload.get("event_name")},
+    )
 
 history_path = "/api/platform/deploy-history?limit=3"
 history_status, history_body, history_url = fetch(history_path)

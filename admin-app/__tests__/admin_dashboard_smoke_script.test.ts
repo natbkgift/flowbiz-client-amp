@@ -52,7 +52,7 @@ describe("admin dashboard smoke script", () => {
     expect(script).toContain("ศูนย์ปฏิบัติการ");
     expect(script).toContain("System health \\/ QA overview|Health widgets|ภาพรวมสุขภาพระบบ|วิดเจ็ตสุขภาพระบบ");
     expect(script).toContain("Activity metrics|Lead activity trend|แนวโน้มกิจกรรมของลีด|แนวโน้ม activity ของลีด");
-    expect(script).toContain("Logs|Recent leads\\/inquiries|บันทึกเหตุการณ์|ลีด\\/อินไควรีล่าสุด");
+    expect(script).toContain("Logs|Lead activity|Recent leads\\s*\\/\\s*inquiries|บันทึกเหตุการณ์|กิจกรรมของลีด|ลีด\\s*\\/\\s*อินไควรีล่าสุด");
     expect(script).toContain("getByPlaceholder(");
     expect(script).toContain('page.locator(".dashboard-table-pagination").getByRole("button", { name: /Next|ถัดไป/i }).click()');
     expect(script).toContain('getCurrentRecentInquiriesRequestCount() <= requestsBeforePagination');

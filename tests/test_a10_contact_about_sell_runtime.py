@@ -239,7 +239,7 @@ def test_a10_submit_paths_work_for_contact_and_sell_intents(client) -> None:
     _seed_a10_runtime_content()
 
     event_response = client.post(
-        "/api/v1/events",
+        "/v1/events",
         json={
             "event_name": "contact_form_submit",
             "source": {"app": "flowbiz-public-runtime", "page": "/en/contact", "locale": "en"},

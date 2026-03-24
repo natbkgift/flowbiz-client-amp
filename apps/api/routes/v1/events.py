@@ -14,7 +14,7 @@ from sqlalchemy.orm import Session
 from packages.core.database import get_db
 from packages.core.models import AnalyticsEvent
 
-router = APIRouter(prefix="/api/v1", tags=["events"])
+router = APIRouter(prefix="/v1", tags=["events"])
 logger = logging.getLogger("flowbiz.events")
 
 _RESERVED_EVENT_FIELDS = {

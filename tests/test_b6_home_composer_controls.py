@@ -620,7 +620,7 @@ def test_b6_public_home_blueprint_fields_roundtrip(client) -> None:
 
 def test_b6_events_endpoint_lock(client) -> None:
     response = client.post(
-        "/api/v1/events",
+        "/v1/events",
         json={
             "event": "home_hero_primary_click",
             "label": "Request Consultation",
@@ -637,7 +637,7 @@ def test_b6_events_endpoint_lock(client) -> None:
 
 def test_b6_events_endpoint_backfills_legacy_flattened_payload_metadata(client) -> None:
     first = client.post(
-        "/api/v1/events",
+        "/v1/events",
         json={
             "event": "home_browse_projects_click",
             "locale": "en",
@@ -649,7 +649,7 @@ def test_b6_events_endpoint_backfills_legacy_flattened_payload_metadata(client) 
         },
     )
     second = client.post(
-        "/api/v1/events",
+        "/v1/events",
         json={
             "event": "home_browse_projects_click",
             "locale": "en",
@@ -671,7 +671,7 @@ def test_b6_events_endpoint_backfills_legacy_flattened_payload_metadata(client) 
 
 def test_b6_events_endpoint_accepts_spec_envelope(client) -> None:
     response = client.post(
-        "/api/v1/events",
+        "/v1/events",
         json={
             "schema_version": "1.0",
             "event_id": "evt_test_123",
@@ -719,7 +719,7 @@ def test_b6_events_endpoint_accepts_spec_envelope(client) -> None:
 
 def test_b6_events_endpoint_persists_area_taxonomy_payload(client) -> None:
     response = client.post(
-        "/api/v1/events",
+        "/v1/events",
         json={
             "event_name": "area_cta_click",
             "source": {

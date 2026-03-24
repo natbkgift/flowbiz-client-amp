@@ -655,7 +655,7 @@ async function verifyDashboardUi(page, contractSummary, options = {}) {
     .first()
     .waitFor({ timeout: 10000 });
   await page
-    .getByRole("heading", { name: /Logs|Recent leads\/inquiries|บันทึกเหตุการณ์|ลีด\/อินไควรีล่าสุด/i })
+    .getByRole("heading", { name: /Logs|Lead activity|Recent leads\s*\/\s*inquiries|บันทึกเหตุการณ์|กิจกรรมของลีด|ลีด\s*\/\s*อินไควรีล่าสุด/i })
     .first()
     .waitFor({ timeout: 10000 });
   await page

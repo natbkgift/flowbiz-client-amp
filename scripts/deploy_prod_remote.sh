@@ -309,11 +309,34 @@ checks = [
     "base_url": f"http://127.0.0.1:{os.environ['VPS_API_PORT']}",
     "expected": 200,
   },
+  {
+    "owner": "api",
+    "public_path": "/api/v1/events",
+    "internal_path": "/v1/events",
+    "base_url": f"http://127.0.0.1:{os.environ['VPS_API_PORT']}",
+    "expected": 202,
+    "method": "POST",
+    "headers": {"Content-Type": "application/json"},
+    "body": json.dumps(
+      {
+        "event_name": "deploy_smoke_event",
+        "source": {"app": "deploy-smoke", "page": "/en", "locale": "en"},
+        "payload": {"placement": "deploy_smoke"},
+      }
+    ),
+  },
 ]
 
 
-def fetch_status(url: str) -> int:
-    request = Request(url, method="GET")
+def fetch_status(
+    url: str,
+    *,
+    method: str = "GET",
+    headers: dict[str, str] | None = None,
+    body: str | None = None,
+) -> int:
+    payload = body.encode("utf-8") if body is not None else None
+    request = Request(url, method=method, data=payload, headers=headers or {})
     try:
         with urlopen(request, timeout=5) as response:
             return int(getattr(response, "status", 0) or 0)
@@ -332,7 +355,12 @@ for _ in range(30):
         owner = check["owner"]
         expected = int(check["expected"])
         internal_url = f"{check['base_url']}{internal_path}"
-        status = fetch_status(internal_url)
+        status = fetch_status(
+            internal_url,
+            method=str(check.get("method") or "GET"),
+            headers=check.get("headers"),
+            body=check.get("body"),
+        )
         current_results[public_path] = {
             "owner": owner,
             "internal_path": internal_path,
