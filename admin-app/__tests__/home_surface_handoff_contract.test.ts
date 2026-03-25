@@ -8,7 +8,7 @@ function read(relativePath: string): string {
 }
 
 describe('home surface handoff contract', () => {
-  it('keeps structured home handoff routes wired across hero, trust, projects, and segmentation', () => {
+  it('keeps structured home handoff routes wired across hero, trust, projects, and the final conversion gate', () => {
     const page = read('app/(site)/[locale]/page.tsx');
     const perfProbe = read('components/home/HomePerfProbe.tsx');
 
@@ -18,28 +18,21 @@ describe('home surface handoff contract', () => {
     expect(page).toContain('home_featured_projects_advisor');
     expect(page).toContain('home_hero_primary');
     expect(page).toContain('home_hero_secondary');
-    expect(page).toContain('home_trust_team');
-    expect(page).toContain('home_trust_process');
-    expect(page).toContain('home_segment_insights');
-    expect(page).toContain('home_segment_video_teaser');
-    expect(page).toContain('home_path_selector_investor');
-    expect(page).toContain('home_path_selector_lifestyle');
-    expect(page).toContain('home_path_selector_luxury');
-    expect(page).toContain('home-trust-layer-grid');
-    expect(page).toContain('home-featured-route-note');
-    expect(page).toContain('home-segmentation-note');
+    expect(page).toContain('home_bottom_secondary');
+    expect(page).toContain('home-trust-snapshot-grid');
     expect(perfProbe).toContain('amp_home_perf_probe_latest_v1');
     expect(perfProbe).toContain('follow_up_target');
   });
 
-  it('keeps the path selector framed with best-for, outcome, and start cues', () => {
+  it('keeps the trust snapshot and final cta framed as decision cues instead of a route selector', () => {
     const page = read('app/(site)/[locale]/page.tsx');
 
-    expect(page).toContain("Best for");
-    expect(page).toContain("Outcome");
-    expect(page).toContain("Start:");
-    expect(page).toContain('home-intent-card__eyebrow');
-    expect(page).toContain('home-intent-card__start');
+    expect(page).toContain('Verified listings only');
+    expect(page).toContain('Price & floor plans ready');
+    expect(page).toContain('Ready to find your property?');
+    expect(page).toContain('Talk to an Advisor Now');
+    expect(page).not.toContain('home-intent-card__eyebrow');
+    expect(page).not.toContain('home-intent-card__start');
   });
 
   it('keeps guided overlay contact handoff mapped through structured lead capture query building', () => {
@@ -62,7 +55,7 @@ describe('home surface handoff contract', () => {
     expect(hero).toContain('quality={82}');
     expect(hero).toContain('data-home-perf="hero-media"');
     expect(featuredProjects).toContain('unoptimized={false}');
-    expect(featuredProjects).toContain('premium-project-card__linkhint');
+    expect(featuredProjects).toContain('premium-project-card__cta');
     expect(localMedia).toContain('fetchPriority');
     expect(safeCoverImage).toContain('unoptimized = true');
     expect(personalization).toContain("intent === 'sell'");

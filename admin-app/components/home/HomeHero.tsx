@@ -49,7 +49,7 @@ export function HomeHero({
 }: {
     dict: any;
     locale: "en" | "th";
-    guidedHref: string;
+    guidedHref?: string;
     guidedLabel?: string;
     primaryEventPayload?: Record<string, unknown>;
     secondaryEventPayload?: Record<string, unknown>;
@@ -85,11 +85,14 @@ export function HomeHero({
         ? composer.hero_image
         : HERO_FALLBACK_IMAGE;
     const whatsAppHref = buildAdvisorWhatsApp(locale, dict);
+    const resolvedGuidedHref = typeof guidedHref === 'string' ? guidedHref.trim() : '';
+    const showGuidedTrigger = resolvedGuidedHref.length > 0;
     const guidedTriggerLabel = typeof guidedLabel === 'string' && guidedLabel.trim()
         ? guidedLabel.trim()
         : (dict.guided.heroTrigger ?? 'Not sure where to start? Let us guide you →');
     const resolvedPrimaryEventPayload = primaryEventPayload ?? { cta: "request_consultation", from: "home_hero" };
     const resolvedSecondaryEventPayload = secondaryEventPayload ?? { cta: "browse_projects", from: "home_hero" };
+    const hasSupportRow = showGuidedTrigger || supportLinks.length > 0 || whatsAppHref.trim().length > 0;
 
     return (
         <section className="relative w-full bg-gray-900 overflow-hidden min-h-[640px] sm:min-h-[700px] md:min-h-[680px] xl:min-h-[720px]" data-home-perf="hero-media">
@@ -151,35 +154,39 @@ export function HomeHero({
                             </p>
                         ) : null}
 
-                        <div className="hero-support-row flex flex-wrap items-center gap-x-5 gap-y-3 mt-4 md:mt-6">
-                            <TrackedLink
-                                className="hero-guided-trigger hero-support-link hero-support-link--pill inline-flex items-center gap-2 text-sm font-medium text-white/72 hover:text-white transition-colors"
-                                href={guidedHref}
-                                eventType="cta_click"
-                                eventPayload={{ cta: 'open_guided_finder', from: 'home_hero' }}
-                            >
-                                {guidedTriggerLabel}
-                            </TrackedLink>
-                            <a
-                                className="hero-whatsapp-link inline-flex items-center gap-2 text-sm font-medium text-white/72 hover:text-white transition-colors"
-                                href={whatsAppHref}
-                                target="_blank"
-                                rel="noreferrer"
-                            >
-                                {dict.cta.whatsapp}
-                            </a>
-                            {supportLinks.map((link) => (
-                                <TrackedLink
-                                    key={`${link.label}-${link.href}`}
-                                    className="hero-support-link hero-support-link--pill inline-flex items-center gap-2 text-sm font-medium text-white/72 hover:text-white transition-colors"
-                                    href={resolveLocalizedHref(locale, link.href)}
-                                    eventType="cta_click"
-                                    eventPayload={link.eventPayload ?? { cta: 'hero_support_link', from: 'home_hero' }}
+                        {hasSupportRow ? (
+                            <div className="hero-support-row flex flex-wrap items-center gap-x-5 gap-y-3 mt-4 md:mt-6">
+                                {showGuidedTrigger ? (
+                                    <TrackedLink
+                                        className="hero-guided-trigger hero-support-link hero-support-link--pill inline-flex items-center gap-2 text-sm font-medium text-white/72 hover:text-white transition-colors"
+                                        href={resolvedGuidedHref}
+                                        eventType="cta_click"
+                                        eventPayload={{ cta: 'open_guided_finder', from: 'home_hero' }}
+                                    >
+                                        {guidedTriggerLabel}
+                                    </TrackedLink>
+                                ) : null}
+                                <a
+                                    className="hero-whatsapp-link inline-flex items-center gap-2 text-sm font-medium text-white/72 hover:text-white transition-colors"
+                                    href={whatsAppHref}
+                                    target="_blank"
+                                    rel="noreferrer"
                                 >
-                                    {link.label}
-                                </TrackedLink>
-                            ))}
-                        </div>
+                                    {dict.cta.whatsapp}
+                                </a>
+                                {supportLinks.map((link) => (
+                                    <TrackedLink
+                                        key={`${link.label}-${link.href}`}
+                                        className="hero-support-link hero-support-link--pill inline-flex items-center gap-2 text-sm font-medium text-white/72 hover:text-white transition-colors"
+                                        href={resolveLocalizedHref(locale, link.href)}
+                                        eventType="cta_click"
+                                        eventPayload={link.eventPayload ?? { cta: 'hero_support_link', from: 'home_hero' }}
+                                    >
+                                        {link.label}
+                                    </TrackedLink>
+                                ))}
+                            </div>
+                        ) : null}
                     </div>
                 </Container>
             </div>

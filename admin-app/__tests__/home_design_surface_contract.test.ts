@@ -8,17 +8,20 @@ function read(relativePath: string): string {
 }
 
 describe('home design surface contract', () => {
-  it('keeps the compressed funnel surfaces and reveal hooks on the home page', () => {
+  it('keeps the hard-reset four-section funnel and removes the old route selector', () => {
     const page = read('app/(site)/[locale]/page.tsx');
 
     expect(page).toContain('home-section-kicker');
-    expect(page).toContain('home-confidence-row');
-    expect(page).toContain('home-trust-layer-grid');
-    expect(page).toContain('home-intent-card reveal');
+    expect(page).toContain('home-trust-snapshot-grid');
     expect(page).toContain('Luxury condos in Pattaya from 4M');
-    expect(page).toContain('Choose the next route by buyer intent');
-    expect(page).toContain('home-featured-route-note');
-    expect(page).toContain('home-segmentation-note');
+    expect(page).toContain('Sea View • High ROI • Foreign Buyer Friendly');
+    expect(page).toContain('Verified listings. Local guidance. Faster decisions.');
+    expect(page).toContain('Ready to find your property?');
+    expect(page).toContain('Talk to an Advisor Now');
+    expect(page).toContain('home-trust-snapshot__item');
+    expect(page).not.toContain('Choose the next route by buyer intent');
+    expect(page).not.toContain('home-intent-card reveal');
+    expect(page).not.toContain('home-segmentation-note');
   });
 
   it('keeps home hero and bottom cta class hooks for mobile ergonomics and visual hierarchy', () => {
@@ -27,29 +30,29 @@ describe('home design surface contract', () => {
 
     expect(hero).toContain('hero-cta hero-cta--primary');
     expect(hero).toContain('hero-cta hero-cta--secondary');
-    expect(hero).toContain('hero-home-guidance');
-    expect(hero).toContain('hero-support-link--pill');
+    expect(hero).toContain('hero-whatsapp-link');
+    expect(hero).toContain('showGuidedTrigger');
 
     expect(bottomCta).toContain('home-bottom-cta__grid');
     expect(bottomCta).toContain('home-bottom-cta__actions');
     expect(bottomCta).toContain('home-bottom-cta__panel');
+    expect(bottomCta).toContain('primaryEventPayload');
+    expect(bottomCta).toContain('secondaryEventPayload');
   });
 
   it('keeps the home globals css selectors that drive mobile polish and motion', () => {
     const css = read('app/globals.css');
 
     expect(css).toContain('.home-section-kicker');
-    expect(css).toContain('.home-confidence-row');
-    expect(css).toContain('.home-trust-layer-grid');
-    expect(css).toContain('.home-trust-proof-item');
-    expect(css).toContain('.home-featured-route-note');
-    expect(css).toContain('.home-segmentation-note');
+    expect(css).toContain('.home-trust-snapshot-grid');
+    expect(css).toContain('.home-trust-snapshot__item');
     expect(css).toContain('.home-section-utility');
     expect(css).toContain('.home-section-utility__link');
-    expect(css).toContain('.premium-project-card__footer');
+    expect(css).toContain('.premium-project-card__signals');
+    expect(css).toContain('.premium-project-card__cta');
     expect(css).toContain('@keyframes home-hero-panel-in');
     expect(css).toContain('@keyframes home-band-in');
     expect(css).toContain('.home-page .home-bottom-cta__actions > a');
-    expect(css).toContain('.hero-guided-trigger,');
+    expect(css).toContain('.hero-cta--primary');
   });
 });

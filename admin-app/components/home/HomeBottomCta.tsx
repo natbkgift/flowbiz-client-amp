@@ -15,6 +15,8 @@ export function HomeBottomCta({
   formSlot,
   order,
   sectionId,
+  primaryEventPayload,
+  secondaryEventPayload,
 }: {
   heading: string;
   subheading: string;
@@ -27,6 +29,8 @@ export function HomeBottomCta({
   formSlot: ReactNode;
   order?: number;
   sectionId?: string;
+  primaryEventPayload?: Record<string, unknown>;
+  secondaryEventPayload?: Record<string, unknown>;
 }) {
   const resolvedSectionId = sectionId ?? 'home-bottom-cta';
   const headingId = `${resolvedSectionId}-title`;
@@ -52,7 +56,7 @@ export function HomeBottomCta({
                 className="px-6 py-3 bg-white text-gray-900 rounded-full text-sm font-semibold hover:bg-gray-100 transition-colors home-bottom-cta__primary"
                 href={primaryUrl}
                 eventType="home_final_cta_click"
-                eventPayload={{ cta: 'book_consultation', from: 'home_bottom' }}
+                eventPayload={primaryEventPayload ?? { cta: 'book_consultation', from: 'home_bottom' }}
               >
                 {primaryLabel}
               </TrackedLink>
@@ -60,7 +64,7 @@ export function HomeBottomCta({
                 className="px-6 py-3 bg-white/10 hover:bg-white/20 backdrop-blur-md rounded-full text-white text-sm font-medium transition-colors border border-white/20 home-bottom-cta__secondary"
                 href={secondaryUrl}
                 eventType="home_final_cta_click"
-                eventPayload={{ cta: 'view_investment_path', from: 'home_bottom' }}
+                eventPayload={secondaryEventPayload ?? { cta: 'view_investment_path', from: 'home_bottom' }}
               >
                 {secondaryLabel}
               </TrackedLink>

@@ -69,6 +69,25 @@ export function FeaturedProjects({
     return String(input ?? '').trim().toLowerCase().replace(/[\s_-]+/g, ' ');
   }
 
+  function collectProjectTokens(project: ProjectItem, area: string | null): string[] {
+    const dynamicProject = project as ProjectItem & {
+      tags?: string[];
+      badges?: string[];
+      features?: string[];
+      label?: string | null;
+    };
+
+    return [
+      project.name,
+      project.status,
+      dynamicProject.label,
+      area,
+      ...(dynamicProject.tags ?? []),
+      ...(dynamicProject.badges ?? []),
+      ...(dynamicProject.features ?? []),
+    ].map((token) => normalizeToken(token));
+  }
+
   function extractBadgeSet(project: ProjectItem): BadgeLabel[] {
     const dynamicProject = project as ProjectItem & {
       tags?: string[];
@@ -126,6 +145,26 @@ export function FeaturedProjects({
     ].filter((fact) => fact.value.trim().length > 0);
   }
 
+  function extractDecisionSignals(project: ProjectItem, index: number, area: string | null): string[] {
+    const tokens = collectProjectTokens(project, area);
+    const signals: string[] = [];
+
+    if (index === 0) {
+      signals.push(locale === 'th' ? 'Best Pick' : 'Best Pick');
+    }
+    if (tokens.some((token) => token.includes('roi') || token.includes('yield') || token.includes('invest'))) {
+      signals.push(locale === 'th' ? 'High ROI' : 'High ROI');
+    }
+    if (tokens.some((token) => token.includes('beachfront') || token.includes('sea view') || token.includes('ocean view') || token.includes('beach'))) {
+      signals.push(locale === 'th' ? 'Sea View' : 'Sea View');
+    }
+    if (!signals.length && index < 3) {
+      signals.push(locale === 'th' ? 'Best Pick' : 'Best Pick');
+    }
+
+    return [...new Set(signals)].slice(0, 3);
+  }
+
   return (
     <div>
       <div className="section-header">
@@ -153,6 +192,7 @@ export function FeaturedProjects({
           const badges = extractBadgeSet(p);
           const facts = extractQuickFacts(p);
           const area = extractAreaLabel(p);
+          const decisionSignals = extractDecisionSignals(p, index, area);
           const fallbackImage = PROJECT_FALLBACK_IMAGES[index % PROJECT_FALLBACK_IMAGES.length];
 
           return (
@@ -199,6 +239,14 @@ export function FeaturedProjects({
                   </div>
                 ) : null}
 
+                {decisionSignals.length > 0 ? (
+                  <div className="premium-project-card__signals" aria-label={locale === 'th' ? 'สัญญาณการตัดสินใจ' : 'Decision signals'}>
+                    {decisionSignals.map((signal) => (
+                      <span key={`${p.id}-${signal}`} className="premium-project-card__signal">{signal}</span>
+                    ))}
+                  </div>
+                ) : null}
+
                 {facts.length > 0 ? (
                   <div className="premium-project-card__facts" aria-label={locale === 'th' ? 'ข้อมูลสำคัญ' : 'Quick facts'}>
                     {facts.map((fact) => (
@@ -211,10 +259,10 @@ export function FeaturedProjects({
                 ) : null}
                 <div className="premium-project-card__footer">
                   <span className="premium-project-card__footer-label">
-                    {locale === 'th' ? 'เปิดการ์ดเพื่อดูยูนิต live' : 'Open the project for live units'}
+                    {locale === 'th' ? 'ราคา ทำเล และ highlights อยู่บนการ์ดก่อนกด' : 'Price, location, and highlights show before you click'}
                   </span>
-                  <span className="premium-project-card__linkhint">
-                    {locale === 'th' ? 'ดูยูนิตและราคา' : 'View units & pricing'}
+                  <span className="premium-project-card__cta">
+                    {locale === 'th' ? 'ดูดีเทล' : 'View Details'}
                   </span>
                 </div>
               </div>

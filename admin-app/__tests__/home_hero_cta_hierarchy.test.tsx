@@ -30,7 +30,7 @@ vi.mock('@/components/home/HeroOverlay', () => ({
 }));
 
 describe('HomeHero CTA hierarchy', () => {
-  it('keeps only two button CTAs in the main hero row and demotes WhatsApp to a support link', () => {
+  it('keeps only two button CTAs in the main hero row and allows the hard-reset hero to run with WhatsApp only', () => {
     const dict = {
       home: {
         heroTitle: 'Find the right Pattaya property path',
@@ -51,29 +51,25 @@ describe('HomeHero CTA hierarchy', () => {
       <HomeHero
         dict={dict}
         locale="en"
-        guidedHref="/en?guided=1"
         composer={{
-          primary_cta_url: '/en/contact?intent=project_consultation&source=home_hero_primary',
-          secondary_cta_url: '/en/projects?source=home_hero_secondary',
+          primary_cta_label: 'View Available Units',
+          secondary_cta_label: 'Get Price & Floor Plan',
+          primary_cta_url: '/en/projects?source=home_hero_primary',
+          secondary_cta_url: '/en/contact?topic=price_floor_plan&source=home_hero_secondary',
         }}
-        supportLinks={[
-          { label: 'View saved shortlist', href: '/en/shortlist?source=home_hero_support' },
-        ]}
       />,
     );
 
     expect(container.querySelectorAll('.hero-cta-row .btn')).toHaveLength(2);
     expect(container.querySelector('.hero-support-row .hero-whatsapp-link')).not.toBeNull();
     expect(container.querySelector('.hero-support-row .hero-whatsapp-link')).not.toHaveClass('btn');
+    expect(container.querySelector('.hero-support-row .hero-guided-trigger')).toBeNull();
 
-    expect(screen.getByRole('link', { name: 'Request Consultation' })).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: 'Browse Projects' })).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'View Available Units' })).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'Get Price & Floor Plan' })).toBeInTheDocument();
     expect(screen.getByRole('link', { name: 'WhatsApp' })).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: 'Let us guide you' })).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: 'Request Consultation' })).toHaveAttribute('href', '/en/contact?intent=project_consultation&source=home_hero_primary');
-    expect(screen.getByRole('link', { name: 'Browse Projects' })).toHaveAttribute('href', '/en/projects?source=home_hero_secondary');
-    expect(screen.getByRole('link', { name: 'View saved shortlist' })).toHaveAttribute('href', '/en/shortlist?source=home_hero_support');
-    expect(container.querySelector('.hero-support-row .hero-support-link')).not.toHaveClass('btn');
+    expect(screen.getByRole('link', { name: 'View Available Units' })).toHaveAttribute('href', '/en/projects?source=home_hero_primary');
+    expect(screen.getByRole('link', { name: 'Get Price & Floor Plan' })).toHaveAttribute('href', '/en/contact?topic=price_floor_plan&source=home_hero_secondary');
     expect(screen.getByAltText('AMP Pattaya Real Estate')).toHaveAttribute(
       'src',
       '/images/hero-banner.webp?v=20260318',
@@ -101,7 +97,6 @@ describe('HomeHero CTA hierarchy', () => {
       <HomeHero
         dict={dict}
         locale="en"
-        guidedHref="/en?guided=1"
         composer={{ hero_image: '/media/library/hero.webp' }}
       />,
     );
