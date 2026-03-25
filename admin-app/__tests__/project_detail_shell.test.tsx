@@ -67,6 +67,7 @@ describe('project detail shell', () => {
     expect(container.querySelector('#project-related-reads')).not.toBeNull();
     expect(container.querySelector('#project-trust-grid')).not.toBeNull();
     expect(container.querySelector('#project-advisor-brief')).not.toBeNull();
+    expect(container.querySelector('#project-mobile-cta')).not.toBeNull();
     expect((container.querySelector('#lead-purpose') as HTMLSelectElement | null)?.value).toBe('invest');
   });
 
@@ -84,6 +85,7 @@ describe('project detail shell', () => {
     expect(markup).toContain('ส่งบรีฟโครงการให้ที่ปรึกษา');
     expect(markup).toContain('ขอเทียบโครงการนี้กับตัวเลือกใกล้เคียง');
     expect(markup).toContain('ดูรายการที่บันทึกเข้ารายการคัดไว้ได้');
+    expect(markup).toContain('การส่งบรีฟจากหน้านี้จะพกชื่อโครงการ บริบทของทำเล');
     expect(markup).not.toContain('listing brief');
     expect(markup).not.toContain('inventory');
     expect(markup).not.toContain('area guide');

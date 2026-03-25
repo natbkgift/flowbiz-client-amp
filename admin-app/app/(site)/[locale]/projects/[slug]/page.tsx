@@ -14,6 +14,7 @@ import { ProjectDeepReview } from '@/components/projects/ProjectDeepReview';
 import { PublicAdvisoryHero } from '@/components/public/PublicAdvisoryHero';
 import { LeadForm } from '@/components/forms/LeadForm';
 import { LocalMediaImage } from '@/components/media/LocalMediaImage';
+import { PageOwnedMobileCTA } from '@/components/ux/PageOwnedMobileCTA';
 
 export const revalidate = 300;
 const PROJECT_DETAIL_FETCH_TIMEOUT_MS = 8000;
@@ -603,6 +604,44 @@ export default async function ProjectDetailPage(
     startingPriceLabel,
     deliveryLabel,
   );
+  const projectHeroPrimaryHref = withLocaleQuery(locale, '/contact', buildLeadCaptureQuery({
+    intent: 'project_consultation',
+    source: 'project_detail',
+    project: project.slug,
+    projects: [project.slug],
+    buyerFit: 'project_first_buyer',
+    signalLevel: hasEvaluationSnapshot ? 'medium' : 'low',
+  }));
+  const projectHeroPrimaryPayload = {
+    source_route: 'project',
+    cta_type: 'primary',
+    cta_label: dict.cta.speakToAdvisor,
+    entity_type: 'project',
+    entity_id: project.id,
+    entity_name: project.name,
+    user_intent: hasInvestmentView ? 'invest' : 'buy',
+    location: project.area?.name ?? undefined,
+    context: {
+      area: project.area?.name ?? undefined,
+    },
+  };
+  const projectHeroSecondaryPayload = {
+    source_route: 'project',
+    cta_type: 'secondary',
+    cta_label: dict.advisory.compareOpportunities,
+    entity_type: 'project',
+    entity_id: project.id,
+    entity_name: project.name,
+    user_intent: 'compare',
+    location: project.area?.name ?? undefined,
+    context: {
+      compare_ids: [project.slug],
+      area: project.area?.name ?? undefined,
+    },
+  };
+  const projectHeroSupportNote = locale === 'th'
+    ? 'การส่งบรีฟจากหน้านี้จะพกชื่อโครงการ บริบทของทำเล และเส้นทางการคัดรายการไปกับ inquiry เดียวกันก่อนคุณจะเทียบตัวเลือกใกล้เคียงต่อ.'
+    : 'This handoff carries the project name, area context, and shortlist path into the same inquiry before you move into nearby comparisons.';
 
   const jsonLd = JSON.stringify(
     [
@@ -655,6 +694,7 @@ export default async function ProjectDetailPage(
         eyebrow={dict.advisory.heroEyebrow}
         title={project.name}
         subtitle={projectSubtitle}
+        supportNote={projectHeroSupportNote}
         proofs={advisoryProofs}
         proofsLabel={advisoryLabels.proofsLabel}
         guidanceLabel={advisoryLabels.guidanceLabel}
@@ -691,48 +731,16 @@ export default async function ProjectDetailPage(
             },
           ]}
         primaryAction={{
-          href: withLocaleQuery(locale, '/contact', buildLeadCaptureQuery({
-            intent: 'project_consultation',
-            source: 'project_detail',
-            project: project.slug,
-            projects: [project.slug],
-            buyerFit: 'project_first_buyer',
-            signalLevel: hasEvaluationSnapshot ? 'medium' : 'low',
-          })),
+          href: projectHeroPrimaryHref,
           label: dict.cta.speakToAdvisor,
           id: 'project_consultation_primary',
-          eventPayload: {
-            source_route: 'project',
-            cta_type: 'primary',
-            cta_label: dict.cta.speakToAdvisor,
-            entity_type: 'project',
-            entity_id: project.id,
-            entity_name: project.name,
-            user_intent: hasInvestmentView ? 'invest' : 'buy',
-            location: project.area?.name ?? undefined,
-            context: {
-              area: project.area?.name ?? undefined,
-            },
-          },
+          eventPayload: projectHeroPrimaryPayload,
         }}
         secondaryAction={{
           href: withLocale(locale, '/compare'),
           label: dict.advisory.compareOpportunities,
           id: 'project_compare_secondary',
-          eventPayload: {
-            source_route: 'project',
-            cta_type: 'secondary',
-            cta_label: dict.advisory.compareOpportunities,
-            entity_type: 'project',
-            entity_id: project.id,
-            entity_name: project.name,
-            user_intent: 'compare',
-            location: project.area?.name ?? undefined,
-            context: {
-              compare_ids: [project.slug],
-              area: project.area?.name ?? undefined,
-            },
-          },
+          eventPayload: projectHeroSecondaryPayload,
         }}
       />
       <Container>
@@ -1021,6 +1029,52 @@ export default async function ProjectDetailPage(
           </aside>
         </div>
       </Container>
+      <PageOwnedMobileCTA
+        id="project-mobile-cta"
+        title={locale === 'th' ? 'พร้อมคุยต่อจาก snapshot นี้' : 'Ready to act on this project snapshot'}
+        description={locale === 'th'
+          ? 'ใช้ทางลัดนี้เพื่อส่งบรีฟของโครงการให้ทีมทันที หรือเปิดหน้าเปรียบเทียบเพื่อคัดตัวเลือกใกล้เคียงต่อ.'
+          : 'Use the fast handoff to send this project brief to the team, or move into compare when you want nearby alternatives side by side.'}
+        primaryAction={{
+          id: 'project_mobile_primary',
+          href: projectDecisionCta.primaryHref,
+          label: projectDecisionCta.primaryLabel,
+          eventPayload: {
+            source_route: 'project',
+            cta_type: 'primary',
+            cta_label: projectDecisionCta.primaryLabel,
+            entity_type: 'project',
+            entity_id: project.id,
+            entity_name: project.name,
+            user_intent: hasInvestmentView ? 'invest' : 'buy',
+            location: project.area?.name ?? undefined,
+            context: {
+              area: project.area?.name ?? undefined,
+              buyer_fit: projectDecisionCta.buyerFit,
+              signal_level: projectDecisionCta.signalLevel,
+            },
+          },
+        }}
+        secondaryAction={{
+          id: 'project_mobile_secondary',
+          href: projectDecisionCta.secondaryHref,
+          label: projectDecisionCta.secondaryLabel,
+          eventPayload: {
+            source_route: 'project',
+            cta_type: 'secondary',
+            cta_label: projectDecisionCta.secondaryLabel,
+            entity_type: 'project',
+            entity_id: project.id,
+            entity_name: project.name,
+            user_intent: projectDecisionCta.secondaryHref.includes('/compare') ? 'compare' : 'buy',
+            location: project.area?.name ?? undefined,
+            context: {
+              area: project.area?.name ?? undefined,
+              compare_ids: [project.slug],
+            },
+          },
+        }}
+      />
     </main>
   );
 }

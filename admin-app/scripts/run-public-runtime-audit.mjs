@@ -139,8 +139,11 @@ function classifyMismatch(label, href) {
   const safeHref = String(href || "").trim();
   if (!safeLabel || !safeHref) return null;
 
-  const isContactLabel = /(advisor|consult|private tour|speak|contact|brief|talk|whatsapp|line|call|ปรึกษา|ติดต่อ|นัดชม|โทร)/i.test(safeLabel);
-  const isBrowseLabel = /(view|browse|inventory|details|project|listing|shortlist|ดู|รายการ|รายละเอียด|โครงการ)/i.test(safeLabel);
+  const isShortlistHandoffLabel = /(build|turn|request|ask|send).{0,24}shortlist|shortlist.{0,24}(team|brief|advisor|tour)/i.test(safeLabel);
+  const isContactLabel = /(advisor|consult|private tour|speak|contact|brief|talk|whatsapp|line|call|viewing plan|tour plan|ปรึกษา|ติดต่อ|นัดชม|โทร)/i.test(safeLabel)
+    || isShortlistHandoffLabel;
+  const isBrowseLabel = /(view|browse|inventory|details|project|listing|saved shortlist|shortlist-ready|ดู|รายการ|รายละเอียด|โครงการ)/i.test(safeLabel)
+    && !isShortlistHandoffLabel;
   const isContactHref = /^#/.test(safeHref)
     || /^tel:/i.test(safeHref)
     || /wa\.me|line\.me/i.test(safeHref)

@@ -17,6 +17,7 @@ import { ogLocale, withLocale } from '@/app/_lib/i18n/routing';
 import { getInternalLinks } from '@/app/_lib/internal-links';
 import { PublicAdvisoryHero } from '@/components/public/PublicAdvisoryHero';
 import { ShortlistSaveButton } from '@/components/shortlist/ShortlistSaveButton';
+import { PageOwnedMobileCTA } from '@/components/ux/PageOwnedMobileCTA';
 
 export const revalidate = 300;
 
@@ -360,6 +361,40 @@ export default async function PropertyPage(props: PageProps) {
     : buildPropertyFallbackDescription(locale, property);
   const propertyVerifiedLines = buildPropertyVerifiedLines(locale, property);
   const propertyConfirmNextLines = buildPropertyConfirmNextLines(locale, property, gallery.length);
+  const propertyConsultationHref = withLocaleQuery(locale, '/contact', buildLeadCaptureQuery({
+    intent: 'project_consultation',
+    source: 'property_detail',
+    sourceRoute: 'property',
+    ctaType: 'primary',
+    ctaLabel: dict.cta.speakToAdvisor,
+    entityType: 'property',
+    entityId: property.id,
+    entityName: property.title,
+    userIntent: property.type === 'rent' ? 'research' : 'buy',
+    bedroom: property.bedrooms != null ? String(property.bedrooms) : undefined,
+    location: property.city,
+    area: property.city,
+    message: locale === 'th'
+      ? `ต้องการคุยต่อเกี่ยวกับ ${property.title} พร้อมข้อมูลยูนิต ราคา และทางเลือกใกล้เคียง`
+      : `I want to continue the conversation about ${property.title} with the current unit facts, price, and nearby alternatives.`,
+  }));
+  const propertyConsultationPayload = {
+    source_route: 'property',
+    cta_type: 'primary',
+    cta_label: dict.cta.speakToAdvisor,
+    entity_type: 'property',
+    entity_id: property.id,
+    entity_name: property.title,
+    user_intent: property.type === 'rent' ? 'research' : 'buy',
+    bedroom: property.bedrooms != null ? String(property.bedrooms) : undefined,
+    location: property.city,
+    context: {
+      area: property.city,
+    },
+  };
+  const propertyActionNote = locale === 'th'
+    ? 'การส่งบรีฟจากหน้านี้จะพกชื่อรายการ ราคา และบริบทของยูนิตไปกับ inquiry เดียวกัน หรือจะบันทึกลง shortlist ก่อนแล้วค่อยส่งต่อก็ได้.'
+    : 'This handoff carries the listing title, price, and unit context into the same inquiry, or you can save it to the shortlist first and continue later.';
 
   const jsonLd = JSON.stringify(
     [
@@ -467,38 +502,9 @@ export default async function PropertyPage(props: PageProps) {
               <TrackedLink
                 id="property_consultation_primary"
                 className="btn btn-cta"
-                href={withLocaleQuery(locale, '/contact', buildLeadCaptureQuery({
-                  intent: 'project_consultation',
-                  source: 'property_detail',
-                  sourceRoute: 'property',
-                  ctaType: 'primary',
-                  ctaLabel: dict.cta.speakToAdvisor,
-                  entityType: 'property',
-                  entityId: property.id,
-                  entityName: property.title,
-                  userIntent: property.type === 'rent' ? 'research' : 'buy',
-                  bedroom: property.bedrooms != null ? String(property.bedrooms) : undefined,
-                  location: property.city,
-                  area: property.city,
-                  message: locale === 'th'
-                    ? `ต้องการคุยต่อเกี่ยวกับ ${property.title} พร้อมข้อมูลยูนิต ราคา และทางเลือกใกล้เคียง`
-                    : `I want to continue the conversation about ${property.title} with the current unit facts, price, and nearby alternatives.`,
-                }))}
+                href={propertyConsultationHref}
                 eventType="cta_click"
-                eventPayload={{
-                  source_route: 'property',
-                  cta_type: 'primary',
-                  cta_label: dict.cta.speakToAdvisor,
-                  entity_type: 'property',
-                  entity_id: property.id,
-                  entity_name: property.title,
-                  user_intent: property.type === 'rent' ? 'research' : 'buy',
-                  bedroom: property.bedrooms != null ? String(property.bedrooms) : undefined,
-                  location: property.city,
-                  context: {
-                    area: property.city,
-                  },
-                }}
+                eventPayload={propertyConsultationPayload}
               >
                 {dict.cta.speakToAdvisor}
               </TrackedLink>
@@ -510,6 +516,9 @@ export default async function PropertyPage(props: PageProps) {
                 readOnMount
               />
             </div>
+            <p id="property-action-note" className="decision-page__support-note mb-6">
+              {propertyActionNote}
+            </p>
 
             <div id="property-core-facts" className="property-facts">
               <div className="flex items-center gap-2">
@@ -740,6 +749,24 @@ export default async function PropertyPage(props: PageProps) {
           </aside>
         </div>
       </Container>
+      <PageOwnedMobileCTA
+        id="property-mobile-cta"
+        title={locale === 'th' ? 'พร้อมคุยต่อเกี่ยวกับยูนิตนี้' : 'Ready to move forward on this unit'}
+        description={locale === 'th'
+          ? 'กดคุยกับทีมเพื่อส่งต่อข้อมูลยูนิตชุดนี้ทันที หรือโทรหาที่ปรึกษาในจังหวะที่พร้อม.'
+          : 'Open an advisor brief with this unit context attached, or call the advisory desk when you are ready.'}
+        primaryAction={{
+          id: 'property_mobile_consultation_primary',
+          href: propertyConsultationHref,
+          label: dict.cta.speakToAdvisor,
+          eventPayload: propertyConsultationPayload,
+        }}
+        secondaryAction={{
+          id: 'property_mobile_call_secondary',
+          href: CTA.phoneTel,
+          label: dict.property.callAgent,
+        }}
+      />
     </main>
   );
 }

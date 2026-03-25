@@ -97,8 +97,10 @@ describe('property detail shell', () => {
     expect(container.querySelector('#property-trust-cues')).not.toBeNull();
     expect(container.querySelector('#property-decision-cues')).not.toBeNull();
     expect(container.querySelector('#property-next-tools')).not.toBeNull();
+    expect(container.querySelector('#property-action-note')).not.toBeNull();
     expect(container.querySelector('#property-direct-channels')).not.toBeNull();
     expect(container.querySelector('#property-lead-form')).not.toBeNull();
+    expect(container.querySelector('#property-mobile-cta')).not.toBeNull();
     expect((container.querySelector('#lead-purpose') as HTMLSelectElement | null)?.value).toBe('buy');
   });
 
@@ -116,6 +118,7 @@ describe('property detail shell', () => {
     expect(markup).toContain('สัญญาณช่วยตัดสินใจระดับยูนิต');
     expect(markup).toContain('เครื่องมือช่วยตัดสินใจและทางไปต่อ');
     expect(markup).toContain('ไปหน้าเปรียบเทียบ');
+    expect(markup).toContain('การส่งบรีฟจากหน้านี้จะพกชื่อรายการ ราคา และบริบทของยูนิต');
     expect(markup).not.toContain('inventory');
     expect(markup).not.toContain('listing brief');
     expect(markup).not.toContain('next move');
