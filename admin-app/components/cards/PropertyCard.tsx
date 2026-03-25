@@ -89,11 +89,12 @@ export function PropertyCard({
       </Link>
 
       <div className="property-card__actions">
-        <div className="card-actions">
-          <Link className="btn btn-primary" href={href}>
+        <div className="card-actions property-card__decision-ladder">
+          <Link className="btn btn-primary property-card__primary-action" href={href}>
             {dict.listing.viewDetails}
           </Link>
           <ShortlistSaveButton
+            className="property-card__secondary-action"
             locale={locale}
             propertyId={item.id}
             sourceSurface={item.type === 'rent' ? 'rent_listing_card' : 'buy_listing_card'}

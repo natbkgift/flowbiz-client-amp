@@ -8,10 +8,13 @@ function read(relativePath: string): string {
 }
 
 describe('buy and rent lead form intent wiring', () => {
-  it('preselects buy intent on the buy page CTA form', () => {
+  it('keeps the buy page brief form wired to buy intent and shortlist-first follow-up', () => {
     const page = read('app/(site)/[locale]/buy/page.tsx');
 
-    expect(page).toContain('<LeadForm defaultPurpose="buy" defaultMessage={dict.buy.advisoryCtaBody} />');
+    expect(page).toContain('defaultPurpose="buy"');
+    expect(page).toContain('defaultMessage={buyFormDefaultMessage}');
+    expect(page).toContain("withLocale(locale, '/shortlist')");
+    expect(page).toContain('Review your shortlist before compare');
   });
 
   it('preselects rent intent on the rent page CTA form', () => {

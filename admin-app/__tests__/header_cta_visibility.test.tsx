@@ -31,6 +31,15 @@ describe('Header CTA visibility', () => {
     expect(container.querySelector('.mobile-nav__cta')).toBeNull();
   });
 
+  it('suppresses global header CTAs on the buy route so cards can own the decision point', () => {
+    mockedPathname = '/en/buy';
+
+    const { container } = render(<Header locale="en" dict={en} />);
+
+    expect(container.querySelector('.header-cta-group')).toBeNull();
+    expect(container.querySelector('.mobile-nav__cta')).toBeNull();
+  });
+
   it('suppresses global header CTAs on compare and smart finder routes', () => {
     mockedPathname = '/en/compare';
     const compareRender = render(<Header locale="en" dict={en} />);

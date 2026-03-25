@@ -234,16 +234,18 @@ export function SidebarFilter({
         </div>
       </div>
 
-      <div className="flex gap-3">
+      <div className="filter-sidebar__actions">
         <button type="button" className="btn btn-primary btn-block" onClick={apply} disabled={Boolean(priceRangeError)}>
           {dict.filters.apply}
         </button>
-        <button type="button" className="btn btn-secondary btn-block" onClick={clear}>
-          {dict.filters.clear}
-        </button>
-        <button type="button" className="btn btn-secondary btn-block mobile-only" onClick={handleClose}>
-          {dict.filters.close}
-        </button>
+        <div className="filter-sidebar__utility">
+          <button type="button" className="filter-sidebar__text-action" onClick={clear}>
+            {dict.filters.clear}
+          </button>
+          <button type="button" className="filter-sidebar__text-action mobile-only" onClick={handleClose}>
+            {dict.filters.close}
+          </button>
+        </div>
       </div>
     </aside>
   );

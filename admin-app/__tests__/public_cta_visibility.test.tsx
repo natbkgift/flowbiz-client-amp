@@ -73,6 +73,19 @@ describe('public CTA visibility', () => {
     expect(container.querySelector('.mobile-cta')).toBeNull();
   });
 
+  it('does not render the sticky or floating takeover CTAs on the buy route', () => {
+    mockedPathname = '/en/buy';
+    mockedSearch = '';
+    setScrollY(0);
+
+    const stickyRender = render(<StickyMobileCTA />);
+    expect(stickyRender.container.querySelector('.mobile-cta')).toBeNull();
+    stickyRender.unmount();
+
+    const floatingRender = render(<FloatingWhatsAppCTA />);
+    expect(floatingRender.container.querySelector('.floating-cta')).toBeNull();
+  });
+
   it('does not render the sticky mobile CTA on compare and smart finder routes', () => {
     mockedSearch = '';
     setScrollY(0);

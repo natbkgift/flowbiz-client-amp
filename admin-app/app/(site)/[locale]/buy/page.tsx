@@ -138,15 +138,15 @@ export default async function BuyPage(props: { params: Promise<{ locale: string 
 
       <section className="section">
         <Container>
-          <div className="cta-strip mb-6">
-            <div className="cta-strip__text">
+          <div className="buy-scan-note buy-scan-note--hero mb-6" aria-label={locale === 'th' ? 'โหมดสแกนก่อนตัดสินใจ' : 'Scan mode before acting'}>
+            <p className="buy-scan-note__eyebrow">
+              {locale === 'th' ? 'Scan mode first' : 'Scan mode first'}
+            </p>
+            <p className="buy-scan-note__body">
               {locale === 'th'
-                ? 'เริ่มจากยูนิตที่พร้อมคุยต่อ แล้วค่อยไปยัง quota, ค่าใช้จ่าย, และการตรวจสัญญาเมื่อเหลือตัวเลือกที่ใช่จริง'
-                : 'Start from units worth discussing first, then move into quota, fees, and contract checks once the shortlist is tighter.'}
-            </div>
-            <a className="btn btn-secondary" href={withLocaleQuery(locale, '/contact', { topic: 'private_tour', source: 'buy_top_strip' })}>
-              {locale === 'th' ? 'Book private tour' : 'Book private tour'}
-            </a>
+                ? 'เริ่มจากการสแกนยูนิตที่พร้อมคุยต่อก่อน แล้วค่อยใช้ advisory เมื่อมีตัวเลือกที่ผ่าน first pass จริง'
+                : 'Start by scanning units worth a second look, then use advisory support only once a few options survive the first pass.'}
+            </p>
           </div>
           <div className="section-header">
             <h2 className="section-title">{dict.buy.processTitle}</h2>
@@ -162,11 +162,17 @@ export default async function BuyPage(props: { params: Promise<{ locale: string 
             ))}
           </div>
 
-          <div className="cta-strip">
-            <div className="cta-strip__text">{dict.buy.advisoryCtaBody}</div>
-            <a className="btn btn-cta" href={withLocale(locale, '/contact')}>
-              {dict.cta.speakToAdvisor}
-            </a>
+          <div className="buy-flow-utility" aria-label={locale === 'th' ? 'เส้นทางช่วยตัดสินใจหลังดูขั้นตอน' : 'Process support path'}>
+            <div className="buy-flow-utility__text">
+              {locale === 'th'
+                ? 'เมื่อเห็น flow ชัดแล้ว ให้เก็บการคุยกับทีมไว้หลังจาก shortlist เริ่มแคบลง จะทำให้คำแนะนำตรงกว่า'
+                : 'Once the flow is clear, use the team after the shortlist tightens so the advice can stay specific.'}
+            </div>
+            <div className="buy-flow-utility__links">
+              <a className="buy-flow-utility__link" href={withLocale(locale, '/contact')}>
+                {locale === 'th' ? 'คุยกับที่ปรึกษาหลัง shortlist เริ่มชัด' : 'Talk to an advisor after the shortlist tightens'}
+              </a>
+            </div>
           </div>
         </Container>
       </section>
@@ -299,13 +305,20 @@ export default async function BuyPage(props: { params: Promise<{ locale: string 
             ))}
           </ul>
 
-          <div className="cta-row">
-            <a className="btn btn-cta" href={withLocale(locale, '/contact')}>
-              {dict.cta.speakToAdvisor}
-            </a>
-            <a className="btn btn-secondary" href={withLocale(locale, '/invest')}>
-              {dict.cta.exploreInvestment}
-            </a>
+          <div className="buy-flow-utility mt-6" aria-label={locale === 'th' ? 'เส้นทางต่อหลัง legal checks' : 'Legal follow-up path'}>
+            <div className="buy-flow-utility__text">
+              {locale === 'th'
+                ? 'หลัง legal checks ให้เลือกว่าจะคุยกับทีมต่อ หรือเปิดมุมมองการลงทุนเพิ่ม ไม่ต้องมีปุ่มหลักซ้ำอีกชุด'
+                : 'After the legal checks, choose whether to brief the team or open the investment angle without adding another full CTA stack.'}
+            </div>
+            <div className="buy-flow-utility__links">
+              <a className="buy-flow-utility__link" href={withLocale(locale, '/contact')}>
+                {dict.cta.speakToAdvisor}
+              </a>
+              <a className="buy-flow-utility__link" href={withLocale(locale, '/invest')}>
+                {dict.cta.exploreInvestment}
+              </a>
+            </div>
           </div>
         </Container>
       </section>
@@ -319,19 +332,19 @@ export default async function BuyPage(props: { params: Promise<{ locale: string 
 
           {featuredItems.length ? (
             <>
-              <div className="cta-strip">
-                <div className="cta-strip__text">
+              <div className="buy-scan-note" aria-label={locale === 'th' ? 'โซนสแกนรายการซื้อ' : 'Listing scan zone'}>
+                <p className="buy-scan-note__eyebrow">
+                  {locale === 'th' ? 'Card decision zone' : 'Card decision zone'}
+                </p>
+                <p className="buy-scan-note__body">
                   {locale === 'th'
-                    ? 'นี่คือ shortlist เริ่มต้นที่คัดจาก inventory ที่ตรวจสอบแล้ว เพื่อช่วยให้เริ่มเปรียบเทียบงบ ทำเล และความพร้อมโอนได้เร็วขึ้น'
-                    : 'This is a starter shortlist from the verified inventory so buyers can compare budget, location, and transfer readiness faster.'}
-                </div>
-                <a className="btn btn-cta" href={withLocale(locale, '/contact')}>
-                  {dict.cta.speakToAdvisor}
-                </a>
+                    ? 'ใช้การ์ดเป็นจุดตัดสินใจหลัก: เปิดรายละเอียดก่อน แล้วค่อยบันทึก shortlist เมื่อยูนิตนั้นผ่าน first pass'
+                    : 'Use each card as the main decision point: open details first, then save to shortlist only when the unit survives the first pass.'}
+                </p>
               </div>
               <ListingGrid items={featuredItems} />
-              <div className="cta-strip mt-6">
-                <div className="cta-strip__text">
+              <div className="buy-flow-utility mt-6" aria-label={locale === 'th' ? 'เส้นทางทบทวน shortlist' : 'Shortlist review path'}>
+                <div className="buy-flow-utility__text">
                   {hiddenItemCount > 0
                     ? locale === 'th'
                       ? `ยังมีตัวเลือกที่ผ่านเกณฑ์อีก ${hiddenItemCount} รายการ หากต้องการ shortlist ที่ตรงงบและแผนถือครองมากขึ้น ทีมสามารถคัดเพิ่มให้ได้`
@@ -340,9 +353,11 @@ export default async function BuyPage(props: { params: Promise<{ locale: string 
                       ? 'หากยังไม่เจอยูนิตที่ใช่ ทีมสามารถคัด shortlist รอบถัดไปจาก inventory ที่ตรวจสอบแล้วให้ได้'
                       : 'If this sample is not enough, the team can prepare the next shortlist from the verified inventory.'}
                 </div>
-                <a className="btn btn-secondary" href={withLocale(locale, '/compare')}>
-                  {dict.advisory.compareOpportunities}
-                </a>
+                <div className="buy-flow-utility__links">
+                  <a className="buy-flow-utility__link" href={withLocale(locale, '/shortlist')}>
+                    {locale === 'th' ? 'ทบทวน shortlist ก่อนค่อย compare' : 'Review your shortlist before compare'}
+                  </a>
+                </div>
               </div>
             </>
           ) : (

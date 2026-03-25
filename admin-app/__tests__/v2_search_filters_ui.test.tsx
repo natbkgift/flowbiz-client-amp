@@ -87,7 +87,7 @@ describe('V2 search filters UI', () => {
 
     fireEvent.click(trigger);
     fireEvent.click(screen.getByRole('button', { name: '2' }));
-    fireEvent.click(screen.getByRole('button', { name: /close/i }));
+    fireEvent.click(screen.getByRole('button', { name: /^close$/i }));
 
     expectResultsCount(2);
     expect(trigger).toHaveFocus();
@@ -106,6 +106,13 @@ describe('V2 search filters UI', () => {
     fireEvent.click(screen.getByRole('button', { name: /filters & sort/i }));
 
     expect(screen.getByRole('dialog', { name: /filters/i })).toHaveFocus();
+  });
+
+  it('keeps the list header in scan mode and demotes the mobile filter trigger', () => {
+    render(<ListingGrid items={[...items]} />);
+
+    expect(screen.getByText(/scan the cards first/i)).toBeTruthy();
+    expect(screen.getByRole('button', { name: /filters & sort/i })).toHaveClass('listing-filter-trigger');
   });
 
   it('blocks invalid price ranges and explains the issue before apply', () => {

@@ -41,6 +41,7 @@ export function buildWhatsAppUrl(text: string, baseUrl: string = CTA.whatsAppUrl
 
 export type PublicCtaSurface =
   | 'home'
+  | 'buy'
   | 'contact'
   | 'sell'
   | 'project_detail'
@@ -66,6 +67,7 @@ export function getPublicCtaSurface(pathname: string): PublicCtaSurface {
   const path = stripLocaleFromPathname(pathname);
 
   if (path === '/') return 'home';
+  if (path === '/buy' || path.startsWith('/buy?')) return 'buy';
   if (path === '/contact' || path.startsWith('/contact?')) return 'contact';
   if (path === '/sell' || path.startsWith('/sell?')) return 'sell';
   if (path === '/compare' || path.startsWith('/compare?')) return 'compare';
