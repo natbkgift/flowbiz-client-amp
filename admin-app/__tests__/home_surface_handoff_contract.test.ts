@@ -8,44 +8,26 @@ function read(relativePath: string): string {
 }
 
 describe('home surface handoff contract', () => {
-  it('keeps structured home handoff routes wired across hero, featured sections, reviews, and videos', () => {
+  it('keeps structured home handoff routes wired across hero, trust, projects, and segmentation', () => {
     const page = read('app/(site)/[locale]/page.tsx');
-    const mobileRail = read('components/home/HomeMobileIntentRail.tsx');
     const perfProbe = read('components/home/HomePerfProbe.tsx');
-    const homeVideoCard = read('components/home/HomeVideoEmbedCard.tsx');
 
-    expect(page).toContain('HomeMobileIntentRail');
     expect(page).toContain('HomePerfProbe');
-    expect(mobileRail).toContain('home_mobile_buyer');
-    expect(mobileRail).toContain('home_mobile_investor');
-    expect(mobileRail).toContain('home_mobile_luxury');
-    expect(mobileRail).toContain('home_mobile_intent_order_v2');
-    expect(mobileRail).toContain('matchMedia');
     expect(perfProbe).toContain("entity_name: 'home_perf_probe'");
     expect(perfProbe).toContain("trackEvent('web_vitals_probe'");
-    expect(homeVideoCard).not.toContain('srcDoc');
-    expect(page).toContain('home_featured_projects_compare');
     expect(page).toContain('home_featured_projects_advisor');
-    expect(page).toContain('home_featured_properties_advisor');
     expect(page).toContain('home_hero_primary');
-    expect(page).toContain('home_hero_support');
-    expect(page).toContain('home_insights_browse_all');
-    expect(page).toContain('home_proof_trust_contact');
-    expect(page).toContain('home_proof_trust_smart_finder');
-    expect(page).toContain('home_reviews_contact');
-    expect(page).toContain('home_reviews_smart_finder');
-    expect(page).toContain('home_videos_handoff_smart_finder');
-    expect(page).toContain('home_videos_contact');
-    expect(page).toContain('home_insights_contact');
-    expect(page).toContain('home_insights_smart_finder');
-    expect(page).toContain('home_proof_trust_valuation');
-    expect(page).toContain('home_insights_valuation');
-    expect(page).toContain('home_reviews_valuation');
-    expect(page).toContain('home_videos_valuation');
-    expect(page).toContain('renderProofHandoffBand');
-    expect(page).toContain('renderProofContinuationStrip');
-    expect(page.match(/renderProofHandoffBand\(\{/g)?.length ?? 0).toBe(2);
-    expect(page.match(/renderProofContinuationStrip\(\{/g)?.length ?? 0).toBe(2);
+    expect(page).toContain('home_hero_secondary');
+    expect(page).toContain('home_trust_team');
+    expect(page).toContain('home_trust_process');
+    expect(page).toContain('home_segment_insights');
+    expect(page).toContain('home_segment_video_teaser');
+    expect(page).toContain('home_path_selector_investor');
+    expect(page).toContain('home_path_selector_lifestyle');
+    expect(page).toContain('home_path_selector_luxury');
+    expect(page).toContain('home-trust-layer-grid');
+    expect(page).toContain('home-featured-route-note');
+    expect(page).toContain('home-segmentation-note');
     expect(perfProbe).toContain('amp_home_perf_probe_latest_v1');
     expect(perfProbe).toContain('follow_up_target');
   });
@@ -80,11 +62,11 @@ describe('home surface handoff contract', () => {
     expect(hero).toContain('quality={82}');
     expect(hero).toContain('data-home-perf="hero-media"');
     expect(featuredProjects).toContain('unoptimized={false}');
+    expect(featuredProjects).toContain('premium-project-card__linkhint');
     expect(localMedia).toContain('fetchPriority');
     expect(safeCoverImage).toContain('unoptimized = true');
     expect(personalization).toContain("intent === 'sell'");
-    expect(page).toContain('proofSequenceLabels');
-    expect(page).toContain('data-home-perf="reviews"');
-    expect(page).toContain('Step 1 of 4');
+    expect(page).toContain('data-home-perf="trust-layer"');
+    expect(page).toContain('data-home-perf="trust-strip"');
   });
 });

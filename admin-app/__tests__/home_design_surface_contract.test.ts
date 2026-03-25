@@ -8,15 +8,17 @@ function read(relativePath: string): string {
 }
 
 describe('home design surface contract', () => {
-  it('keeps section kicker hierarchy and reveal hooks on the home page', () => {
+  it('keeps the compressed funnel surfaces and reveal hooks on the home page', () => {
     const page = read('app/(site)/[locale]/page.tsx');
 
     expect(page).toContain('home-section-kicker');
     expect(page).toContain('home-confidence-row');
+    expect(page).toContain('home-trust-layer-grid');
     expect(page).toContain('home-intent-card reveal');
-    expect(page).toContain('Choose the right path before opening the full inventory');
-    expect(page).toContain('Read Pattaya through a market lens built for decisions');
-    expect(page).toContain('Editorial signals that reduce guesswork');
+    expect(page).toContain('Luxury condos in Pattaya from 4M');
+    expect(page).toContain('Choose the next route by buyer intent');
+    expect(page).toContain('home-featured-route-note');
+    expect(page).toContain('home-segmentation-note');
   });
 
   it('keeps home hero and bottom cta class hooks for mobile ergonomics and visual hierarchy', () => {
@@ -38,11 +40,13 @@ describe('home design surface contract', () => {
 
     expect(css).toContain('.home-section-kicker');
     expect(css).toContain('.home-confidence-row');
-    expect(css).toContain('.home-proof-continue');
-    expect(css).toContain('.home-proof-continue__link--primary');
+    expect(css).toContain('.home-trust-layer-grid');
+    expect(css).toContain('.home-trust-proof-item');
+    expect(css).toContain('.home-featured-route-note');
+    expect(css).toContain('.home-segmentation-note');
     expect(css).toContain('.home-section-utility');
     expect(css).toContain('.home-section-utility__link');
-    expect(css).toContain('.home-mobile-intent-rail');
+    expect(css).toContain('.premium-project-card__footer');
     expect(css).toContain('@keyframes home-hero-panel-in');
     expect(css).toContain('@keyframes home-band-in');
     expect(css).toContain('.home-page .home-bottom-cta__actions > a');

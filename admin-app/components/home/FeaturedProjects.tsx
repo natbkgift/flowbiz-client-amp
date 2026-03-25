@@ -209,6 +209,14 @@ export function FeaturedProjects({
                     ))}
                   </div>
                 ) : null}
+                <div className="premium-project-card__footer">
+                  <span className="premium-project-card__footer-label">
+                    {locale === 'th' ? 'เปิดการ์ดเพื่อดูยูนิต live' : 'Open the project for live units'}
+                  </span>
+                  <span className="premium-project-card__linkhint">
+                    {locale === 'th' ? 'ดูยูนิตและราคา' : 'View units & pricing'}
+                  </span>
+                </div>
               </div>
             </Link>
           );
