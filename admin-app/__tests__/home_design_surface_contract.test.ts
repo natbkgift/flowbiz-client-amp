@@ -38,6 +38,8 @@ describe('home design surface contract', () => {
 
     expect(css).toContain('.home-section-kicker');
     expect(css).toContain('.home-confidence-row');
+    expect(css).toContain('.home-proof-continue');
+    expect(css).toContain('.home-proof-continue__link--primary');
     expect(css).toContain('.home-section-utility');
     expect(css).toContain('.home-section-utility__link');
     expect(css).toContain('.home-mobile-intent-rail');

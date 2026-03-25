@@ -320,6 +320,55 @@ export default async function HomePage({
       </div>
     </div>
   );
+  const renderProofContinuationStrip = ({
+    eyebrow,
+    title,
+    body,
+    primaryHref,
+    primaryLabel,
+    primaryEventPayload,
+    secondaryHref,
+    secondaryLabel,
+    secondaryEventPayload,
+  }: {
+    eyebrow: string;
+    title: string;
+    body: string;
+    primaryHref: string;
+    primaryLabel: string;
+    primaryEventPayload: Record<string, unknown>;
+    secondaryHref?: string;
+    secondaryLabel?: string;
+    secondaryEventPayload?: Record<string, unknown>;
+  }) => (
+    <div className="home-proof-continue mt-6">
+      <div className="home-proof-continue__copy">
+        <p className="home-proof-continue__eyebrow">{eyebrow}</p>
+        <h3 className="home-proof-continue__title">{title}</h3>
+        <p className="home-proof-continue__body">{body}</p>
+      </div>
+      <div className="home-proof-continue__actions">
+        <TrackedLink
+          className="home-proof-continue__link home-proof-continue__link--primary"
+          href={primaryHref}
+          eventType="cta_click"
+          eventPayload={primaryEventPayload}
+        >
+          {primaryLabel}
+        </TrackedLink>
+        {secondaryHref && secondaryLabel && secondaryEventPayload ? (
+          <TrackedLink
+            className="home-proof-continue__link"
+            href={secondaryHref}
+            eventType="cta_click"
+            eventPayload={secondaryEventPayload}
+          >
+            {secondaryLabel}
+          </TrackedLink>
+        ) : null}
+      </div>
+    </div>
+  );
   let publishedBlogPosts: Awaited<ReturnType<typeof fetchBlogPosts>> = [];
   try {
     publishedBlogPosts = await fetchBlogPosts();
@@ -1813,14 +1862,14 @@ export default async function HomePage({
             </TrackedLink>
           </div>
 
-          {renderProofHandoffBand({
+          {renderProofContinuationStrip({
             eyebrow: locale === 'th' ? 'อย่าปล่อยให้ insight กลายเป็น loop ใหม่' : 'Do not let insight turn into a new loop',
             title: useAdvisoryContinuation
-              ? (locale === 'th' ? 'ถ้าอ่านพอแล้ว ให้ handoff ออกไปที่ contact หรือ valuation brief ทันที' : 'If you have enough context, hand off to contact or the valuation brief immediately.')
-              : (locale === 'th' ? 'ถ้าอ่านพอแล้ว ให้ handoff ออกไปที่ contact หรือ smart finder ทันที' : 'If you have enough context, hand off to contact or smart finder immediately.'),
+              ? (locale === 'th' ? 'ถ้าพอแล้ว ให้ส่ง brief หรือเปิด valuation brief ต่อจากตรงนี้' : 'If this is enough, hand off into a brief or open the valuation brief from here.')
+              : (locale === 'th' ? 'ถ้าพอแล้ว ให้ส่ง brief หรือให้ smart finder คัด step ถัดไปต่อจากตรงนี้' : 'If this is enough, send the brief or let smart finder narrow the next step from here.'),
             body: locale === 'th'
-              ? 'อินไซต์ชุดนี้ควรทำหน้าที่ปิดช่องว่าง ไม่ใช่ยืดเวลาตัดสินใจออกไปอีก'
-              : 'These insights should close the remaining gap, not stretch the decision path any longer.',
+              ? 'อินไซต์ชุดนี้ควรปิดช่องว่างสุดท้ายแล้วส่งต่อ ไม่ใช่สร้าง CTA band ใหญ่เพิ่มอีกชุด'
+              : 'These insights should close the last gap and pass the decision forward, not open another oversized CTA band.',
             primaryHref: withLocaleQuery(locale, '/contact', buildLeadCaptureQuery({
               intent: 'project_consultation',
               source: 'home_insights_contact',
@@ -1833,7 +1882,7 @@ export default async function HomePage({
               buyerFit: 'insights_to_contact',
               signalLevel: 'high',
             })),
-            primaryLabel: locale === 'th' ? 'ส่ง brief หลังอ่าน insight' : 'Send your brief after this insight',
+            primaryLabel: locale === 'th' ? 'ส่ง brief หลัง insight นี้' : 'Send your brief after this insight',
             primaryEventPayload: { cta: 'home_insights_contact', from: 'home_insight_engine' },
             secondaryHref: useAdvisoryContinuation
               ? withLocaleQuery(locale, '/sell', { source: 'home_insights_valuation' })
@@ -1841,10 +1890,10 @@ export default async function HomePage({
                   source: 'home_insights_smart_finder',
                   step: 'purpose',
                   purpose: proofSmartFinderPurpose ?? 'invest',
-                }),
+              }),
             secondaryLabel: useAdvisoryContinuation
-              ? (locale === 'th' ? 'เปิด valuation brief ต่อจาก insight นี้' : 'Open the valuation brief from this insight')
-              : (locale === 'th' ? 'หรือให้ smart finder คัดต่อจาก insight นี้' : 'Or let smart finder continue from this insight'),
+              ? (locale === 'th' ? 'เปิด valuation brief ต่อ' : 'Open valuation brief next')
+              : (locale === 'th' ? 'หรือให้ smart finder คัดต่อ' : 'Or let smart finder narrow it'),
             secondaryEventPayload: useAdvisoryContinuation
               ? { cta: 'home_insights_valuation', from: 'home_insight_engine' }
               : { cta: 'home_insights_smart_finder', from: 'home_insight_engine' },
@@ -2012,12 +2061,12 @@ export default async function HomePage({
             </TrackedLink>
           </div>
 
-          {renderProofHandoffBand({
+          {renderProofContinuationStrip({
             eyebrow: locale === 'th' ? 'พร้อมไป step ถัดไปหลังดู video แล้ว' : 'Ready for the next step after the video?',
-            title: locale === 'th' ? 'ถ้าวิดีโอช่วยให้ภาพชัดแล้ว ให้ handoff เข้า brief ต่อทันที' : 'If the video clarified the path, hand the brief forward immediately.',
+            title: locale === 'th' ? 'ถ้าวิดีโอช่วยให้ภาพชัดแล้ว ให้ส่งต่อเข้าหาทีมหรือ route ที่เหมาะทันที' : 'If the video clarified the path, move straight into the right handoff.',
             body: locale === 'th'
-              ? 'ถ้าวิดีโอทำให้ภาพรวมชัดพอแล้ว ให้ส่งต่อเข้าระบบคัดกรองหรือคุยกับทีมโดยไม่ต้องวนกลับไปหา CTA ด้านบน'
-              : 'If the video already clarifies the path, move into the screening flow or contact the team without looping back upward.',
+              ? 'วิดีโอควรช่วยให้ตัดสินใจได้เร็วขึ้น ไม่ใช่ตามมาด้วย CTA ใหญ่ซ้ำกับ block ก่อนหน้า'
+              : 'The video should accelerate the decision, not be followed by another oversized CTA that repeats the previous blocks.',
             primaryHref: withLocaleQuery(locale, '/contact', buildLeadCaptureQuery({
               intent: 'project_consultation',
               source: 'home_videos_contact',
@@ -2030,7 +2079,7 @@ export default async function HomePage({
               buyerFit: 'video_to_contact',
               signalLevel: 'medium',
             })),
-            primaryLabel: locale === 'th' ? 'ส่ง brief จาก video block นี้' : 'Send your brief from this video block',
+            primaryLabel: locale === 'th' ? 'ส่ง brief หลังดูวิดีโอนี้' : 'Send your brief after this video',
             primaryEventPayload: { cta: 'home_videos_contact', from: 'home_video' },
             secondaryHref: useAdvisoryContinuation
               ? withLocaleQuery(locale, '/sell', { source: 'home_videos_valuation' })
@@ -2038,9 +2087,9 @@ export default async function HomePage({
                   source: 'home_videos_handoff_smart_finder',
                   step: 'purpose',
                   purpose: proofSmartFinderPurpose ?? 'invest',
-                }),
+              }),
             secondaryLabel: useAdvisoryContinuation
-              ? (locale === 'th' ? 'เปิด valuation brief หลังดู video' : 'Open the valuation brief after this video')
+              ? (locale === 'th' ? 'เปิด valuation brief ต่อ' : 'Open valuation brief next')
               : (locale === 'th' ? 'หรือคัด route ต่อด้วย smart finder' : 'Or narrow the route with smart finder'),
             secondaryEventPayload: useAdvisoryContinuation
               ? { cta: 'home_videos_valuation', from: 'home_video' }

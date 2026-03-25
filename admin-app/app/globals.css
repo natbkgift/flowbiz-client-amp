@@ -3078,6 +3078,73 @@ summary.mobile-nav__trigger::-webkit-details-marker {
   text-underline-offset: 0.18em;
 }
 
+.home-proof-continue {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px 22px;
+  padding: 16px 18px;
+  border-top: 1px solid rgba(10, 77, 140, 0.12);
+  border-bottom: 1px solid rgba(10, 77, 140, 0.08);
+  background: linear-gradient(180deg, rgba(248, 250, 252, 0.92), rgba(255, 255, 255, 0.98));
+}
+
+.home-proof-continue__copy {
+  flex: 1 1 320px;
+}
+
+.home-proof-continue__eyebrow {
+  margin: 0 0 6px;
+  color: rgba(10, 77, 140, 0.74);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.home-proof-continue__title {
+  margin: 0;
+  font-size: clamp(1.02rem, 1.5vw, 1.18rem);
+  line-height: 1.35;
+  color: var(--color-text);
+}
+
+.home-proof-continue__body {
+  margin: 6px 0 0;
+  color: var(--color-text-secondary);
+  font-size: var(--font-sm);
+  line-height: 1.68;
+  max-width: 64ch;
+}
+
+.home-proof-continue__actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px 16px;
+}
+
+.home-proof-continue__link {
+  display: inline-flex;
+  align-items: center;
+  min-height: 36px;
+  color: rgba(10, 77, 140, 0.92);
+  font-size: var(--font-sm);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.home-proof-continue__link--primary {
+  color: var(--color-text);
+  font-weight: 700;
+}
+
+.home-proof-continue__link:hover {
+  text-decoration: underline;
+  text-underline-offset: 0.18em;
+}
+
 .home-section-utility {
   display: flex;
   flex-wrap: wrap;
@@ -3696,6 +3763,28 @@ summary.mobile-nav__trigger::-webkit-details-marker {
     width: 100%;
     justify-content: center;
     min-height: 46px;
+  }
+
+  .home-proof-continue {
+    padding: 14px 0 0;
+    gap: 12px;
+    border-bottom: 0;
+    background: transparent;
+  }
+
+  .home-proof-continue__copy {
+    flex-basis: 100%;
+  }
+
+  .home-proof-continue__actions {
+    width: 100%;
+    gap: 8px;
+  }
+
+  .home-proof-continue__link {
+    width: 100%;
+    justify-content: center;
+    min-height: 38px;
   }
 
   .hero-support-row {

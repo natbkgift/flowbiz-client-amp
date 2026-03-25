@@ -43,6 +43,9 @@ describe('home surface handoff contract', () => {
     expect(page).toContain('home_reviews_valuation');
     expect(page).toContain('home_videos_valuation');
     expect(page).toContain('renderProofHandoffBand');
+    expect(page).toContain('renderProofContinuationStrip');
+    expect(page.match(/renderProofHandoffBand\(\{/g)?.length ?? 0).toBe(2);
+    expect(page.match(/renderProofContinuationStrip\(\{/g)?.length ?? 0).toBe(2);
     expect(perfProbe).toContain('amp_home_perf_probe_latest_v1');
     expect(perfProbe).toContain('follow_up_target');
   });
