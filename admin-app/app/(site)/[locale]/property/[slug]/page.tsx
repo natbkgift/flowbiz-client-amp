@@ -361,6 +361,9 @@ export default async function PropertyPage(props: PageProps) {
     : buildPropertyFallbackDescription(locale, property);
   const propertyVerifiedLines = buildPropertyVerifiedLines(locale, property);
   const propertyConfirmNextLines = buildPropertyConfirmNextLines(locale, property, gallery.length);
+  const priorityInternalLinks = internalLinks.filter((item) => (
+    item.href.endsWith('/buy') || item.href.endsWith('/invest') || item.href.endsWith('/contact')
+  ));
   const propertyConsultationHref = withLocaleQuery(locale, '/contact', buildLeadCaptureQuery({
     intent: 'project_consultation',
     source: 'property_detail',
@@ -683,7 +686,7 @@ export default async function PropertyPage(props: PageProps) {
               <h2 className="card-title">{dict.property.nextSteps}</h2>
               <p className="card-subtitle">{dict.property.exploreRelated}</p>
               <div className="card-actions">
-                {internalLinks.map((it) => (
+                {priorityInternalLinks.map((it) => (
                   <Link
                     key={it.href}
                     className={it.variant === 'secondary' ? 'btn btn-secondary' : 'btn btn-tertiary'}

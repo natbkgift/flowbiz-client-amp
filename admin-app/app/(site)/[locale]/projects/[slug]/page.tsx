@@ -573,6 +573,9 @@ export default async function ProjectDetailPage(
     Boolean(deliveryLabel),
     hasEvaluationSnapshot,
   );
+  const priorityInternalLinks = internalLinks.filter((item) => (
+    item.href.endsWith('/buy') || item.href.endsWith('/invest') || item.href.endsWith('/contact')
+  ));
   const projectDecisionRead = [
     hasEvaluationSnapshot
       ? locale === 'th' ? 'มีข้อมูลล่าสุดจากโครงการและพื้นที่เพียงพอสำหรับใช้คุยเรื่องการคัดรายการต่อ' : 'There is enough live project and area snapshot data to support a shortlist discussion.'
@@ -957,7 +960,7 @@ export default async function ProjectDetailPage(
                       : 'If this project is directionally right, compare it next or send the brief so the team can tighten the shortlist.'}
                   </p>
                   <div className="card-actions mt-3">
-                    {internalLinks.map((it) => (
+                    {priorityInternalLinks.map((it) => (
                       <Link
                         key={it.href}
                         className={it.variant === 'secondary' ? 'btn btn-secondary' : 'btn btn-tertiary'}
