@@ -589,8 +589,10 @@ export default async function HomePage({
             >
               {featuredProjectsAdvisorLabel}
             </TrackedLink>
+          </div>
+          <div className="home-section-utility mt-4" aria-label={locale === 'th' ? 'เส้นทางรองของโครงการคัดสรร' : 'Featured project support paths'}>
             <TrackedLink
-              className="btn btn-tertiary btn-featured-section"
+              className="home-section-utility__link"
               href={withLocale(locale, '/projects')}
               eventType="cta_click"
               eventPayload={{ cta: 'view_all_projects', from: 'home_featured' }}
@@ -1387,6 +1389,9 @@ export default async function HomePage({
             dict={dict}
             locale={locale}
             guidedHref={withLocale(locale, '/?guided=1&step=goal')}
+            guidanceNote={locale === 'th'
+              ? 'เริ่มจากปุ่มหลักถ้าต้องการให้ทีมช่วยคัด shortlist ทันที ส่วนปุ่มรองใช้เมื่อยังต้องการดูโครงการ live ก่อนตัดสินใจส่ง brief.'
+              : 'Use the primary action when you want the team to start the shortlist now. Use the secondary action only if you still need a quick pass through live projects first.'}
             supportLinks={[
               {
                 label: locale === 'th' ? 'นัด private tour' : 'Book private tour',
@@ -1437,7 +1442,7 @@ export default async function HomePage({
                 })),
               secondary_cta_label: typeof composerHero.secondary_cta_label === 'string' && composerHero.secondary_cta_label.trim()
                 ? composerHero.secondary_cta_label
-                : (locale === 'th' ? 'ดูโครงการ live' : 'Browse live projects'),
+                : (locale === 'th' ? 'ดูโครงการ live ก่อน' : 'See live projects first'),
               secondary_cta_url: typeof composerHero.secondary_cta_url === 'string'
                 ? composerHero.secondary_cta_url
                 : withLocaleQuery(locale, '/projects', { source: 'home_hero_secondary' }),
@@ -1686,10 +1691,10 @@ export default async function HomePage({
             locale === 'th' ? 'ไม่ใช้คะแนนรวมที่ไม่มีหลักฐานรองรับ' : 'No unsupported aggregate rating claims',
           ])}
 
-          <div className="cta-row cta-row--center mt-8">
+          <div className="home-section-utility mt-8" aria-label={locale === 'th' ? 'เส้นทางประกอบหลังอ่าน proof' : 'Trust support paths'}>
             <TrackedLink
               href={proofTrustPrimaryUrl}
-              className="btn btn-secondary"
+              className="home-section-utility__link"
               eventType="home_trust_proof_click"
               eventPayload={{ cta: 'meet_the_team', from: 'home_trust' }}
             >
@@ -1697,7 +1702,7 @@ export default async function HomePage({
             </TrackedLink>
             <TrackedLink
               href={proofTrustSecondaryUrl}
-              className="btn btn-tertiary"
+              className="home-section-utility__link"
               eventType="home_trust_proof_click"
               eventPayload={{ cta: 'how_we_work', from: 'home_trust' }}
             >
@@ -1797,9 +1802,9 @@ export default async function HomePage({
             locale === 'th' ? 'ลดการเดาจากข้อมูลกระจัดกระจาย' : 'Reduces guesswork from scattered information',
           ])}
 
-          <div className="cta-row cta-row--center mt-8">
+          <div className="home-section-utility mt-8" aria-label={locale === 'th' ? 'เส้นทางเสริมของ insight' : 'Insight support path'}>
             <TrackedLink
-              className="btn btn-secondary"
+              className="home-section-utility__link"
               href={withLocaleQuery(locale, '/blog', { source: 'home_insights_browse_all' })}
               eventType="home_advisory_content_click"
               eventPayload={{ cta: 'browse_all_insights', from: 'home_insight_engine' }}
@@ -1900,9 +1905,9 @@ export default async function HomePage({
             locale === 'th' ? 'ไม่มี badge คะแนนรวมแบบสังเคราะห์' : 'No synthetic aggregate rating badge',
           ])}
 
-          <div className="cta-row cta-row--center mt-8">
+          <div className="home-section-utility mt-8" aria-label={locale === 'th' ? 'เส้นทางเสริมของ feedback' : 'Review support path'}>
             <TrackedLink
-              className="btn btn-secondary"
+              className="home-section-utility__link"
               href={withLocale(locale, '/about#client-reviews')}
               eventType="cta_click"
               eventPayload={{ cta: 'see_all_reviews', from: 'home_reviews' }}
@@ -1996,9 +2001,9 @@ export default async function HomePage({
             locale === 'th' ? 'ทุกวิดีโอมี next step ต่อให้ทันที' : 'Every video carries an immediate next step',
           ])}
 
-          <div className="cta-row cta-row--center mt-6">
+          <div className="home-section-utility mt-6" aria-label={locale === 'th' ? 'เส้นทางเสริมของวิดีโอ' : 'Video support path'}>
             <TrackedLink
-              className="btn btn-secondary"
+              className="home-section-utility__link"
               href="https://www.youtube.com/@AssetManagementProperty"
               eventType="home_advisory_content_click"
               eventPayload={{ cta: 'watch_more', from: 'home_video' }}

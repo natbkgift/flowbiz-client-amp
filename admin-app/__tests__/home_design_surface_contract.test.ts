@@ -25,6 +25,7 @@ describe('home design surface contract', () => {
 
     expect(hero).toContain('hero-cta hero-cta--primary');
     expect(hero).toContain('hero-cta hero-cta--secondary');
+    expect(hero).toContain('hero-home-guidance');
     expect(hero).toContain('hero-support-link--pill');
 
     expect(bottomCta).toContain('home-bottom-cta__grid');
@@ -37,6 +38,8 @@ describe('home design surface contract', () => {
 
     expect(css).toContain('.home-section-kicker');
     expect(css).toContain('.home-confidence-row');
+    expect(css).toContain('.home-section-utility');
+    expect(css).toContain('.home-section-utility__link');
     expect(css).toContain('.home-mobile-intent-rail');
     expect(css).toContain('@keyframes home-hero-panel-in');
     expect(css).toContain('@keyframes home-band-in');

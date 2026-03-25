@@ -18,7 +18,7 @@ describe('home surface handoff contract', () => {
     expect(page).toContain('HomePerfProbe');
     expect(mobileRail).toContain('home_mobile_buyer');
     expect(mobileRail).toContain('home_mobile_investor');
-    expect(mobileRail).toContain('home_mobile_seller');
+    expect(mobileRail).toContain('home_mobile_luxury');
     expect(mobileRail).toContain('home_mobile_intent_order_v2');
     expect(mobileRail).toContain('matchMedia');
     expect(perfProbe).toContain("entity_name: 'home_perf_probe'");

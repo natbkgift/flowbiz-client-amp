@@ -2286,6 +2286,14 @@ summary.mobile-nav__trigger::-webkit-details-marker {
   text-wrap: pretty;
 }
 
+.hero-home-guidance {
+  margin: 0;
+  max-width: 56ch;
+  color: rgba(255, 255, 255, 0.78);
+  font-size: 0.9rem;
+  line-height: 1.65;
+}
+
 .hero-home-eyebrow {
   display: inline-flex;
   align-items: center;
@@ -3070,6 +3078,28 @@ summary.mobile-nav__trigger::-webkit-details-marker {
   text-underline-offset: 0.18em;
 }
 
+.home-section-utility {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 12px 18px;
+}
+
+.home-section-utility__link {
+  display: inline-flex;
+  align-items: center;
+  min-height: 34px;
+  color: rgba(10, 77, 140, 0.86);
+  font-size: var(--font-sm);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.home-section-utility__link:hover {
+  text-decoration: underline;
+  text-underline-offset: 0.18em;
+}
+
 .home-perf-debug__source {
   display: inline-flex;
   align-items: center;
@@ -3677,6 +3707,10 @@ summary.mobile-nav__trigger::-webkit-details-marker {
     padding: 16px 16px 12px;
   }
 
+  .hero-home-guidance {
+    font-size: 0.85rem;
+  }
+
   .home-page .hero-home-title {
     max-width: 10.8ch;
   }
@@ -3697,6 +3731,17 @@ summary.mobile-nav__trigger::-webkit-details-marker {
     width: 100%;
     justify-content: center;
     min-height: 38px;
+  }
+
+  .home-section-utility {
+    justify-content: stretch;
+    gap: 10px;
+  }
+
+  .home-section-utility__link {
+    width: 100%;
+    justify-content: center;
+    min-height: 40px;
   }
 
   .hero-home-panel {

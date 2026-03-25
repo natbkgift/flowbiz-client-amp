@@ -42,12 +42,14 @@ export function HomeHero({
     guidedHref,
     composer,
     supportLinks = [],
+    guidanceNote,
 }: {
     dict: any;
     locale: "en" | "th";
     guidedHref: string;
     composer?: HomeHeroComposer | null;
     supportLinks?: HomeHeroSupportLink[];
+    guidanceNote?: string;
 }) {
     const heroHeading = typeof composer?.heading === 'string' && composer.heading.trim()
         ? composer.heading.trim()
@@ -131,6 +133,12 @@ export function HomeHero({
                                 {secondaryCtaLabel}
                             </TrackedLink>
                         </div>
+
+                        {guidanceNote ? (
+                            <p className="hero-home-guidance text-white/78 text-sm leading-relaxed mt-3 md:mt-4 max-w-[56ch]">
+                                {guidanceNote}
+                            </p>
+                        ) : null}
 
                         <div className="hero-support-row flex flex-wrap items-center gap-x-5 gap-y-3 mt-4 md:mt-6">
                             <TrackedLink
