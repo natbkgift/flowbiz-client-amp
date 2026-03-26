@@ -40,25 +40,25 @@ export function HomeBottomCta({
   return (
     <section
       id={resolvedSectionId}
-      className="home-bottom-cta cv-auto py-20 md:py-32 bg-gray-900 text-white mt-8"
+      className="home-bottom-cta cv-auto py-[60px] md:py-20 xl:py-24 bg-gray-900 text-white mt-8"
       style={order != null ? { order } : undefined}
       aria-labelledby={headingId}
     >
       <Container variant="wide">
         <div className="grid lg:grid-cols-2 gap-16 items-center home-bottom-cta__grid">
           <div className="reveal home-bottom-cta__content">
-            <h2 id={headingId} className="text-3xl md:text-5xl font-serif font-medium mb-6 leading-tight">
+            <h2 id={headingId} className="home-bottom-cta__title text-3xl md:text-5xl font-serif font-semibold mb-6 leading-tight">
               {heading}
             </h2>
-            <p className="text-lg text-white/80 mb-6 max-w-lg leading-relaxed">
+            <p className="home-bottom-cta__lede text-lg text-white/80 mb-6 max-w-lg leading-relaxed">
               {subheading}
             </p>
             {benefits.length > 0 ? (
-              <ul className="mb-8 grid gap-3 max-w-xl text-sm text-white/82 leading-relaxed" aria-label="consultation benefits">
+              <ul className="home-bottom-cta__benefits mb-8 grid gap-3 max-w-xl text-sm text-white/82 leading-relaxed" aria-label="consultation benefits">
                 {benefits.map((benefit) => (
-                  <li key={benefit} className="flex items-start gap-3">
-                    <span className="mt-[2px] inline-flex h-5 w-5 flex-none items-center justify-center rounded-full border border-white/20 bg-white/10 text-[11px] font-semibold text-white">+</span>
-                    <span>{benefit}</span>
+                  <li key={benefit} className="home-bottom-cta__benefit flex items-start gap-3">
+                    <span className="home-bottom-cta__benefit-mark mt-[2px] inline-flex h-5 w-5 flex-none items-center justify-center rounded-full border border-white/20 bg-white/10 text-[11px] font-semibold text-white">+</span>
+                    <span className="home-bottom-cta__benefit-text">{benefit}</span>
                   </li>
                 ))}
               </ul>

@@ -108,10 +108,10 @@ export function HomeHero({
             />
 
             {/* Gradient overlay — absolutely positioned, no layout impact */}
-            <div className="absolute inset-0 z-10 pointer-events-none bg-gradient-to-b from-black/78 via-black/55 to-black/78 md:from-black/68 md:via-black/44 md:to-black/72">
+            <div className="absolute inset-0 z-10 pointer-events-none bg-gradient-to-b from-black/86 via-black/66 to-black/84 md:from-black/78 md:via-black/54 md:to-black/82">
                 <HeroOverlay />
             </div>
-            <div className="absolute inset-y-0 left-0 right-0 z-10 pointer-events-none bg-gradient-to-r from-black/70 via-black/25 to-transparent md:from-black/60 md:via-black/15 md:to-transparent" />
+            <div className="absolute inset-y-0 left-0 right-0 z-10 pointer-events-none bg-gradient-to-r from-black/78 via-black/38 to-transparent md:from-black/70 md:via-black/22 md:to-transparent" />
 
             {/* Content overlay — absolutely positioned, no layout impact */}
             <div className="absolute inset-0 z-20 flex flex-col justify-start md:justify-center pt-[84px] sm:pt-[96px] pb-5 md:py-28">
@@ -121,11 +121,11 @@ export function HomeHero({
                             {heroEyebrow}
                         </p>
                         {/* Headline: weight ~500, tight tracking, 1.1 line-height, max-width 14ch for controlled wrapping */}
-                        <h1 className={`hero-home-title ${locale === "th" ? "hero-home-title--th" : ""} text-white text-[length:var(--font-h1)] font-medium font-serif mb-4 md:mb-7 leading-[1.05] tracking-tight max-w-[13.5ch]`}>
+                        <h1 className={`hero-home-title ${locale === "th" ? "hero-home-title--th" : ""} text-white text-[length:var(--font-h1)] font-semibold font-serif mb-4 md:mb-7 leading-[0.98] tracking-[-0.03em] max-w-[13.5ch]`}>
                             {heroHeading}
                         </h1>
                         {/* Subcopy: 18px (text-lg), 1.6 lh, neutral opacity, 24px bottom spacing */}
-                        <p className="hero-home-subtitle text-white/90 text-base sm:text-[15px] md:text-lg leading-relaxed mb-5 md:mb-6 max-w-[58ch]">
+                        <p className="hero-home-subtitle text-white/92 text-base sm:text-[15px] md:text-lg leading-[1.5] mb-5 md:mb-6 max-w-[58ch]">
                             {heroSubheading}
                         </p>
 

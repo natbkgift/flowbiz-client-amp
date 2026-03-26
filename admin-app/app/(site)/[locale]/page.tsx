@@ -428,7 +428,7 @@ export default async function HomePage({
       : 'Not sure which project fits? Send your budget and goal, and we will point you to the 2-3 projects worth opening first.';
 
     return (
-      <section className="py-16 md:py-20 xl:py-24 2xl:py-28">
+      <section className="py-[60px] md:py-20 xl:py-24 2xl:py-28">
         <Container variant="wide">
           <FeaturedProjects
             projects={featuredProjects}
@@ -961,8 +961,8 @@ export default async function HomePage({
     typeof composerBottomCta.conversion_note === 'string' && composerBottomCta.conversion_note.trim()
       ? composerBottomCta.conversion_note.trim()
       : (locale === 'th'
-        ? 'กรอก brief สั้น ๆ ครั้งเดียวเพื่อรับราคา current ยูนิตที่น่าสนใจ และ shortlist ที่เหมาะกับคุณ'
-        : 'Use one short brief to get current pricing, the best available units, and a shortlist matched to your goal.');
+        ? 'ยูนิตมีจำนวนจำกัด - ขอราคา current ตอนนี้เพื่อไม่ให้พลาดรอบที่ใช่'
+        : 'Limited units available - request current pricing now.');
   const bottomCtaFormHeading =
     typeof composerBottomCta.form_heading === 'string' && composerBottomCta.form_heading.trim()
       ? composerBottomCta.form_heading.trim()
@@ -1228,7 +1228,7 @@ export default async function HomePage({
       ) : null}
 
       {showHomeTrustLayer ? (
-        <section className="home-trust-layer-section cv-auto py-16 md:py-20 xl:py-24 bg-surface" style={sectionOrderStyle('trust_micro_strip')} id="home-trust-layer" data-home-perf="trust-layer">
+        <section className="home-trust-layer-section cv-auto py-[60px] md:py-20 xl:py-24 bg-surface" style={sectionOrderStyle('trust_micro_strip')} id="home-trust-layer" data-home-perf="trust-layer">
           <Container variant="wide">
             <div className="home-trust-snapshot reveal rounded-[28px] border border-gray-100 bg-white p-6 md:p-8 xl:p-10 shadow-sm">
               <div className="section-header">

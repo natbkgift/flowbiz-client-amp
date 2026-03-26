@@ -19,6 +19,7 @@ describe('home design surface contract', () => {
     expect(page).toContain('Verified stock, local guidance, and clear next steps from the start.');
     expect(page).toContain('Get current pricing and the shortlist worth seeing now');
     expect(page).toContain('Get Pricing & Shortlist');
+    expect(page).toContain('Limited units available - request current pricing now.');
     expect(page).toContain('home-trust-snapshot__item');
     expect(page).not.toContain('Choose the next route by buyer intent');
     expect(page).not.toContain('home-intent-card reveal');
@@ -37,6 +38,7 @@ describe('home design surface contract', () => {
     expect(bottomCta).toContain('home-bottom-cta__grid');
     expect(bottomCta).toContain('home-bottom-cta__actions');
     expect(bottomCta).toContain('home-bottom-cta__panel');
+    expect(bottomCta).toContain('home-bottom-cta__benefits');
     expect(bottomCta).toContain('primaryEventPayload');
     expect(bottomCta).toContain('secondaryEventPayload');
   });
@@ -51,6 +53,7 @@ describe('home design surface contract', () => {
     expect(css).toContain('.home-section-utility__link');
     expect(css).toContain('.premium-project-card__signals');
     expect(css).toContain('.premium-project-card__cta');
+    expect(css).toContain('.home-bottom-cta__benefits');
     expect(css).toContain('@keyframes home-hero-panel-in');
     expect(css).toContain('@keyframes home-band-in');
     expect(css).toContain('.home-page .home-bottom-cta__actions > a');
