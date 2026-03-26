@@ -428,7 +428,7 @@ export default async function HomePage({
       : 'Not sure which project fits? Send your budget and goal, and we will point you to the 2-3 projects worth opening first.';
 
     return (
-      <section className="py-[60px] md:py-20 xl:py-24 2xl:py-28">
+      <section className="home-project-selection-section py-[60px] md:py-20 xl:py-24 2xl:py-28">
         <Container variant="wide">
           <FeaturedProjects
             projects={featuredProjects}
@@ -445,7 +445,7 @@ export default async function HomePage({
               ? (locale === 'th' ? `${projectsWithVisuals} รายการมี local media ที่ยืนยันแล้ว` : `${projectsWithVisuals} items with verified local media`)
               : (locale === 'th' ? 'ใช้ข้อมูลโครงการที่เผยแพร่แล้ว' : 'Uses live published project data'),
           ])}
-          <div className="home-section-utility mt-5" aria-label={locale === 'th' ? 'เส้นทางรองของโครงการคัดสรร' : 'Featured project support paths'}>
+          <div className="home-project-selection-support home-section-utility mt-5" aria-label={locale === 'th' ? 'เส้นทางรองของโครงการคัดสรร' : 'Featured project support paths'}>
             <p className="text-sm text-gray-600 max-w-3xl mb-3">
               {featuredProjectsBridgeLine}
             </p>

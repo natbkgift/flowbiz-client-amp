@@ -95,7 +95,7 @@ export function HomeHero({
     const hasSupportRow = showGuidedTrigger || supportLinks.length > 0 || whatsAppHref.trim().length > 0;
 
     return (
-        <section className="relative w-full bg-gray-900 overflow-hidden min-h-[640px] sm:min-h-[700px] md:min-h-[680px] xl:min-h-[720px]" data-home-perf="hero-media">
+        <section className="home-hero-section relative w-full bg-gray-900 overflow-hidden min-h-[640px] sm:min-h-[700px] md:min-h-[680px] xl:min-h-[720px]" data-home-perf="hero-media">
             <Image
                 src={heroImageSrc}
                 alt="AMP Pattaya Real Estate"

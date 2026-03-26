@@ -191,14 +191,15 @@ export function FeaturedProjects({
     <div>
       <div className="section-header">
         {kicker ? <div className="home-section-kicker">{kicker}</div> : null}
-        <div className="inline-block px-3 py-1 bg-gray-100 text-gray-600 text-xs font-medium rounded-full mb-3">
+        <div className="home-section-collection-tag">
           {locale === 'th' ? 'โครงการคัดสรรของ AMP' : 'AMP curated shortlist'}
         </div>
         <h2 className="section-title">{title}</h2>
         <p className="section-subtitle">{subtitle}</p>
       </div>
 
-      <div className="project-grid-premium">
+      <div className="home-project-grid-shell">
+        <div className="project-grid-premium">
         {projects.map((p, index) => {
           const dynamicProject = p as ProjectItem & {
             hero_image_url?: string | null;
@@ -291,6 +292,7 @@ export function FeaturedProjects({
             </Link>
           );
         })}
+        </div>
       </div>
     </div>
   );
