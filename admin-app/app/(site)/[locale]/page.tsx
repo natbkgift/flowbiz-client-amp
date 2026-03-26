@@ -701,11 +701,11 @@ export default async function HomePage({
 
   function SectionCardSkeleton({ kind }: { kind: 'project' | 'investment' }) {
     return (
-      <section className="py-16 md:py-20 xl:py-24 2xl:py-28 bg-surface">
+      <div className="py-[60px] md:py-20 xl:py-24 2xl:py-28 bg-surface">
         <Container variant="wide">
           <LoadingCardGrid cards={kind === 'project' ? 6 : 8} />
         </Container>
-      </section>
+      </div>
     );
   }
 
