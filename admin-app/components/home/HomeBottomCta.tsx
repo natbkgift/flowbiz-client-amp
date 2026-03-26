@@ -6,6 +6,7 @@ import { Container } from '@/components/layout/Container';
 export function HomeBottomCta({
   heading,
   subheading,
+  benefits = [],
   primaryLabel,
   primaryUrl,
   secondaryLabel,
@@ -20,6 +21,7 @@ export function HomeBottomCta({
 }: {
   heading: string;
   subheading: string;
+  benefits?: string[];
   primaryLabel: string;
   primaryUrl: string;
   secondaryLabel: string;
@@ -48,9 +50,19 @@ export function HomeBottomCta({
             <h2 id={headingId} className="text-3xl md:text-5xl font-serif font-medium mb-6 leading-tight">
               {heading}
             </h2>
-            <p className="text-lg text-white/80 mb-10 max-w-lg leading-relaxed">
+            <p className="text-lg text-white/80 mb-6 max-w-lg leading-relaxed">
               {subheading}
             </p>
+            {benefits.length > 0 ? (
+              <ul className="mb-8 grid gap-3 max-w-xl text-sm text-white/82 leading-relaxed" aria-label="consultation benefits">
+                {benefits.map((benefit) => (
+                  <li key={benefit} className="flex items-start gap-3">
+                    <span className="mt-[2px] inline-flex h-5 w-5 flex-none items-center justify-center rounded-full border border-white/20 bg-white/10 text-[11px] font-semibold text-white">+</span>
+                    <span>{benefit}</span>
+                  </li>
+                ))}
+              </ul>
+            ) : null}
             <div className="flex flex-wrap gap-4 home-bottom-cta__actions">
               <TrackedLink
                 className="px-6 py-3 bg-white text-gray-900 rounded-full text-sm font-semibold hover:bg-gray-100 transition-colors home-bottom-cta__primary"

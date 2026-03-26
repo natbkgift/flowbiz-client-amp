@@ -28,9 +28,9 @@ describe('home surface handoff contract', () => {
     const page = read('app/(site)/[locale]/page.tsx');
 
     expect(page).toContain('Verified listings only');
-    expect(page).toContain('Price & floor plans ready');
-    expect(page).toContain('Ready to find your property?');
-    expect(page).toContain('Talk to an Advisor Now');
+    expect(page).toContain('No fake or outdated stock');
+    expect(page).toContain('Get current pricing and the shortlist worth seeing now');
+    expect(page).toContain('Get Pricing & Shortlist');
     expect(page).not.toContain('home-intent-card__eyebrow');
     expect(page).not.toContain('home-intent-card__start');
   });

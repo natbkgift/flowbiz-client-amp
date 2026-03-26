@@ -15,9 +15,10 @@ describe('home design surface contract', () => {
     expect(page).toContain('home-trust-snapshot-grid');
     expect(page).toContain('Luxury condos in Pattaya from 4M');
     expect(page).toContain('Sea View • High ROI • Foreign Buyer Friendly');
-    expect(page).toContain('Verified listings. Local guidance. Faster decisions.');
-    expect(page).toContain('Ready to find your property?');
-    expect(page).toContain('Talk to an Advisor Now');
+    expect(page).toContain('Availability changes quickly. Start with verified projects, not guesswork.');
+    expect(page).toContain('Verified stock, local guidance, and clear next steps from the start.');
+    expect(page).toContain('Get current pricing and the shortlist worth seeing now');
+    expect(page).toContain('Get Pricing & Shortlist');
     expect(page).toContain('home-trust-snapshot__item');
     expect(page).not.toContain('Choose the next route by buyer intent');
     expect(page).not.toContain('home-intent-card reveal');

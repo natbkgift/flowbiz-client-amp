@@ -42,11 +42,12 @@ export function FeaturedProjects({
   };
 
   const labels = {
-    from: locale === 'th' ? 'เริ่มต้น' : 'From',
+    from: locale === 'th' ? 'ราคา live เริ่มต้น' : 'From live pricing',
     status: locale === 'th' ? 'สถานะ' : 'Status',
     type: locale === 'th' ? 'ประเภท' : 'Type',
     delivery: locale === 'th' ? 'ส่งมอบ' : 'Delivery',
-    curatedLabel: locale === 'th' ? 'AMP Curated' : 'AMP Curated',
+    curatedLabel: locale === 'th' ? 'พร้อม shortlist' : 'Shortlist ready',
+    locationPrefix: locale === 'th' ? 'ทำเล' : 'Location',
   };
 
   if (projects.length === 0) {
@@ -127,7 +128,7 @@ export function FeaturedProjects({
     return areaName && areaName.trim() ? areaName : null;
   }
 
-  function extractQuickFacts(project: ProjectItem): Array<{ label: string; value: string }> {
+  function extractProjectHighlights(project: ProjectItem, area: string | null, decisionSignals: string[], index: number): string[] {
     const dynamicProject = project as ProjectItem & {
       property_type?: string | null;
       delivery_date?: string | null;
@@ -137,12 +138,33 @@ export function FeaturedProjects({
     const normalizedStatus = project.status ? project.status.replace(/_/g, ' ') : null;
     const propertyType = dynamicProject.property_type ? String(dynamicProject.property_type).replace(/_/g, ' ') : null;
     const deliveryRaw = dynamicProject.delivery_date || dynamicProject.handover_date;
+    const highlights: string[] = [];
 
-    return [
-      { label: labels.status, value: normalizedStatus || '' },
-      { label: labels.type, value: propertyType || '' },
-      { label: labels.delivery, value: deliveryRaw || '' },
-    ].filter((fact) => fact.value.trim().length > 0);
+    if (decisionSignals.includes(locale === 'th' ? 'High ROI' : 'High ROI')) {
+      highlights.push(locale === 'th' ? 'เหมาะกับผู้ซื้อที่โฟกัสผลตอบแทนและปล่อยเช่า' : 'Worth opening for ROI-focused buyers and rental demand.');
+    }
+    if (decisionSignals.includes(locale === 'th' ? 'Sea View' : 'Sea View')) {
+      highlights.push(locale === 'th' ? 'ตำแหน่งวิวทะเลที่ดึงทั้ง end-user และ resale appeal' : 'Sea-view positioning that supports both end use and resale appeal.');
+    }
+    if (!highlights.length) {
+      highlights.push(
+        index === 0
+          ? (locale === 'th' ? 'ตัวเลือกแรกที่ควรเปิดดูถ้าคุณกำลังเริ่ม shortlist' : 'A strong first-look option when you are building a shortlist.')
+          : (locale === 'th' ? 'เหมาะกับการเทียบราคา ทำเล และสเปกในคลิกเดียว' : 'Useful for comparing price, location, and fit in one click.'),
+      );
+    }
+    if (normalizedStatus) {
+      highlights.push(`${labels.status}: ${normalizedStatus}`);
+    } else if (propertyType) {
+      highlights.push(locale === 'th' ? `${propertyType} พร้อมรายละเอียดโครงการที่ยืนยันแล้ว` : `${propertyType} with verified project detail ready.`);
+    }
+    if (deliveryRaw) {
+      highlights.push(`${labels.delivery}: ${deliveryRaw}`);
+    } else if (area) {
+      highlights.push(locale === 'th' ? `เปิดดีเทลจริงเพื่อดูยูนิต แปลน และราคา current ของ ${area}` : `Open the live detail page for units, floor plans, and current pricing in ${area}.`);
+    }
+
+    return [...new Set(highlights)].slice(0, 3);
   }
 
   function extractDecisionSignals(project: ProjectItem, index: number, area: string | null): string[] {
@@ -190,9 +212,9 @@ export function FeaturedProjects({
           const hasLocalMedia = Boolean(pickRenderableLocalMedia(media));
           const price = p.starting_price ? formatPrice(Number(p.starting_price)) : null;
           const badges = extractBadgeSet(p);
-          const facts = extractQuickFacts(p);
           const area = extractAreaLabel(p);
           const decisionSignals = extractDecisionSignals(p, index, area);
+          const highlights = extractProjectHighlights(p, area, decisionSignals, index);
           const fallbackImage = PROJECT_FALLBACK_IMAGES[index % PROJECT_FALLBACK_IMAGES.length];
 
           return (
@@ -229,7 +251,7 @@ export function FeaturedProjects({
               <div className="card-content premium-project-card__body">
                 <div className="premium-project-card__header">
                   <h3 className="card-title premium-project-card__title">{p.name}</h3>
-                  {area ? <p className="premium-project-card__area">{area}</p> : null}
+                  {area ? <p className="premium-project-card__area">{labels.locationPrefix} • {area}</p> : null}
                 </div>
 
                 {price ? (
@@ -247,19 +269,19 @@ export function FeaturedProjects({
                   </div>
                 ) : null}
 
-                {facts.length > 0 ? (
-                  <div className="premium-project-card__facts" aria-label={locale === 'th' ? 'ข้อมูลสำคัญ' : 'Quick facts'}>
-                    {facts.map((fact) => (
-                      <div key={fact.label} className="premium-project-card__fact-item">
-                        <span className="premium-project-card__fact-label">{fact.label}</span>
-                        <span className="premium-project-card__fact-value">{fact.value}</span>
-                      </div>
+                {highlights.length > 0 ? (
+                  <ul className="premium-project-card__facts" aria-label={locale === 'th' ? 'เหตุผลที่ควรเปิดดูต่อ' : 'Why this belongs on a shortlist'}>
+                    {highlights.map((highlight) => (
+                      <li key={highlight} className="premium-project-card__fact-item">
+                        <span className="premium-project-card__fact-label" aria-hidden="true">+</span>
+                        <span className="premium-project-card__fact-value text-left">{highlight}</span>
+                      </li>
                     ))}
-                  </div>
+                  </ul>
                 ) : null}
                 <div className="premium-project-card__footer">
                   <span className="premium-project-card__footer-label">
-                    {locale === 'th' ? 'ราคา ทำเล และ highlights อยู่บนการ์ดก่อนกด' : 'Price, location, and highlights show before you click'}
+                    {locale === 'th' ? 'เปิดดูดีเทลจริงเพื่อเช็กยูนิต ราคา current และ floor plan' : 'Open the live detail page for units, current pricing, and floor plans.'}
                   </span>
                   <span className="premium-project-card__cta">
                     {locale === 'th' ? 'ดูดีเทล' : 'View Details'}
