@@ -1246,10 +1246,10 @@ export default async function HomePage({
               </div>
               <div className="home-trust-snapshot-grid mt-8">
                 {trustSnapshotItems.map((item) => (
-                  <article key={item.label} className="home-trust-snapshot__item">
+                  <div key={item.label} className="home-trust-snapshot__item">
                     <p className="home-trust-snapshot__label">{item.label}</p>
                     <p className="home-trust-snapshot__value">{item.value}</p>
-                  </article>
+                  </div>
                 ))}
               </div>
             </div>
