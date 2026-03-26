@@ -87,7 +87,7 @@ export function getPublicCtaSurface(pathname: string): PublicCtaSurface {
 
 export function routeOwnsPrimaryCta(pathname: string): boolean {
   const surface = getPublicCtaSurface(pathname);
-  return surface !== 'home' && surface !== 'other';
+  return surface !== 'other';
 }
 
 export function shouldRenderFloatingWhatsApp(pathname: string): boolean {
@@ -96,5 +96,5 @@ export function shouldRenderFloatingWhatsApp(pathname: string): boolean {
 
 export function shouldRenderStickyMobileCta(pathname: string): boolean {
   const surface = getPublicCtaSurface(pathname);
-  return surface === 'home' || surface === 'other';
+  return surface === 'other';
 }

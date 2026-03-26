@@ -1,53 +1,18 @@
 'use client';
 
 import Link from 'next/link';
-import { useEffect, useState } from 'react';
-import { usePathname, useSearchParams } from 'next/navigation';
+import { usePathname } from 'next/navigation';
 
 import { shouldRenderStickyMobileCta } from '../../app/_lib/public-cta';
 import { en } from '../../app/_lib/i18n/en';
 import { th } from '../../app/_lib/i18n/th';
 import { localeFromPathname, withLocale } from '../../app/_lib/i18n/routing';
 
-const HOME_MOBILE_CTA_REVEAL_SCROLL = 160;
-
 export function StickyMobileCTA() {
   const pathname = usePathname() ?? '/';
-  const searchParams = useSearchParams();
   const locale = localeFromPathname(pathname);
   const dict = locale === 'th' ? th : en;
   const shouldRender = shouldRenderStickyMobileCta(pathname);
-  const isLocaleHome = pathname === `/${locale}`;
-  const isGuidedOverlayOpen = isLocaleHome && searchParams?.get('guided') === '1';
-  const [isVisible, setIsVisible] = useState(() => !isLocaleHome);
-
-  useEffect(() => {
-    if (!shouldRender) {
-      setIsVisible(false);
-      return;
-    }
-
-    if (isGuidedOverlayOpen) {
-      setIsVisible(false);
-      return;
-    }
-
-    if (!isLocaleHome) {
-      setIsVisible(true);
-      return;
-    }
-
-    const updateVisibility = () => {
-      setIsVisible(window.scrollY >= HOME_MOBILE_CTA_REVEAL_SCROLL);
-    };
-
-    updateVisibility();
-    window.addEventListener('scroll', updateVisibility, { passive: true });
-
-    return () => {
-      window.removeEventListener('scroll', updateVisibility);
-    };
-  }, [isGuidedOverlayOpen, isLocaleHome, shouldRender]);
 
   if (!shouldRender) {
     return null;
@@ -55,7 +20,7 @@ export function StickyMobileCTA() {
 
   return (
     <div
-      className={`mobile-cta${isVisible ? ' mobile-cta--visible' : ''}`}
+      className="mobile-cta mobile-cta--visible"
       role="region"
       aria-label={dict.common.ctaRegion}
     >

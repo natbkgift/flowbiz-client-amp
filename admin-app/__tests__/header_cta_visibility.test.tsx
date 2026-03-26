@@ -13,6 +13,15 @@ vi.mock('next/navigation', () => ({
 }));
 
 describe('Header CTA visibility', () => {
+  it('suppresses global header CTAs on the localized home route so home owns the conversion path', () => {
+    mockedPathname = '/en';
+
+    const { container } = render(<Header locale="en" dict={en} />);
+
+    expect(container.querySelector('.header-cta-group')).toBeNull();
+    expect(container.querySelector('.mobile-nav__cta')).toBeNull();
+  });
+
   it('keeps global header CTAs visible on generic inner routes', () => {
     mockedPathname = '/en/projects';
 
