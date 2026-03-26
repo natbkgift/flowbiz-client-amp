@@ -3739,6 +3739,19 @@ summary.mobile-nav__trigger::-webkit-details-marker {
   padding-top: 66%;
 }
 
+.home-page .project-grid-premium > :first-child .premium-project-card {
+  border-color: rgba(176, 141, 87, 0.24);
+  box-shadow: 0 32px 72px rgba(15, 23, 42, 0.14);
+}
+
+.home-page .project-grid-premium > :first-child .premium-project-card__media {
+  padding-top: 70%;
+}
+
+.home-page .project-grid-premium > :first-child .premium-project-card__price-value {
+  font-size: clamp(2.28rem, 6vw, 2.8rem);
+}
+
 .home-page .premium-badge,
 .home-page .premium-project-card__signal,
 .home-page .premium-project-card__media-meta span {
@@ -4086,6 +4099,7 @@ summary.mobile-nav__trigger::-webkit-details-marker {
   margin-top: clamp(1.5rem, 2vw, 2.2rem);
   position: relative;
   overflow: hidden;
+  padding-block: clamp(3.75rem, 5vw, 5rem);
   background:
     radial-gradient(circle at top right, rgba(176, 141, 87, 0.28), transparent 28%),
     radial-gradient(circle at bottom left, rgba(255, 255, 255, 0.12), transparent 26%),
@@ -4104,12 +4118,16 @@ summary.mobile-nav__trigger::-webkit-details-marker {
 .home-page .home-bottom-cta::after {
   content: '';
   position: absolute;
-  inset: 18% -6% -12% 46%;
+  inset: 12% -6% -8% 44%;
   pointer-events: none;
   background:
-    radial-gradient(circle at top left, rgba(226, 187, 130, 0.16), transparent 24%),
-    radial-gradient(circle at bottom right, rgba(255, 255, 255, 0.08), transparent 28%);
-  filter: blur(4px);
+    linear-gradient(135deg, rgba(3, 9, 19, 0.2), rgba(3, 9, 19, 0.72)),
+    url('/images/hero-banner.webp?v=20260318');
+  background-size: cover;
+  background-position: 78% center;
+  opacity: 0.18;
+  mix-blend-mode: screen;
+  filter: saturate(0.88);
 }
 
 .home-bottom-cta__grid,
@@ -4121,10 +4139,12 @@ summary.mobile-nav__trigger::-webkit-details-marker {
 
 .home-bottom-cta__grid {
   align-items: start;
+  gap: clamp(2.5rem, 3vw, 4.5rem);
 }
 
 .home-bottom-cta__content {
   padding-top: clamp(0.2rem, 1vw, 0.8rem);
+  max-width: 33rem;
 }
 
 .home-bottom-cta__form-wrap::before {
@@ -4565,18 +4585,23 @@ summary.mobile-nav__trigger::-webkit-details-marker {
 
   .home-page .hero-cta-row .hero-cta--primary {
     min-height: 64px;
+    width: 100%;
+    flex: 1 1 100%;
   }
 
   .home-page .hero-cta-row .hero-cta--secondary {
     min-height: 54px;
+    width: auto;
+    flex: 0 0 auto;
+    align-self: flex-start;
   }
 
   .hero-guided-trigger,
   .hero-whatsapp-link,
   .hero-support-link--pill {
-    width: 100%;
-    justify-content: center;
-    min-height: 38px;
+    width: auto;
+    justify-content: flex-start;
+    min-height: 34px;
   }
 
   .home-section-utility {
@@ -4632,6 +4657,10 @@ summary.mobile-nav__trigger::-webkit-details-marker {
   .home-page .home-proof-panel,
   .home-page .home-proof-metric {
     border-radius: 20px;
+  }
+
+  .home-page .home-bottom-cta {
+    padding-block: 3.5rem;
   }
 }
 
