@@ -7,7 +7,7 @@ import { useEffect, useRef, useState } from 'react';
 import type { ResolvedLayoutCms } from '../../app/_lib/layout-cms';
 import type { Dictionary, Locale } from '../../app/_lib/i18n/types';
 import { switchLocaleInPathname, withLocale } from '../../app/_lib/i18n/routing';
-import { CTA, routeOwnsPrimaryCta } from '../../app/_lib/public-cta';
+import { CTA, getPublicCtaSurface, routeOwnsPrimaryCta } from '../../app/_lib/public-cta';
 
 type DropdownItem = {
   href: string;
@@ -194,10 +194,12 @@ export function Header({
   cms?: HeaderCms;
 }) {
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [homeHeaderScrolled, setHomeHeaderScrolled] = useState(false);
   const mobileMenuRef = useRef<HTMLDivElement>(null);
   const hamburgerRef = useRef<HTMLButtonElement>(null);
   const router = useRouter();
   const pathname = usePathname();
+  const currentPathname = pathname ?? `/${locale}`;
 
   const investLabel = locale === 'th' ? 'คู่มือลงทุน' : 'Investment Guides';
   const smartFinderLabel = locale === 'th' ? 'ค้นหาอัจฉริยะ' : 'Smart Finder';
@@ -246,7 +248,9 @@ export function Header({
   const navConfig = cmsNavConfig.length > 0 ? cmsNavConfig : defaultNavConfig;
   const contactCtaHref = cms?.contactCta?.href || '/contact';
   const contactCtaLabel = cms?.contactCta?.label || dict.cta.speakToAdvisor;
-  const showGlobalCtas = !routeOwnsPrimaryCta(pathname ?? `/${locale}`);
+  const currentSurface = getPublicCtaSurface(currentPathname);
+  const isHomeSurface = currentSurface === 'home';
+  const showGlobalCtas = !routeOwnsPrimaryCta(currentPathname);
 
   const langLabel = locale === 'th' ? dict.common.thai : dict.common.english;
 
@@ -264,6 +268,21 @@ export function Header({
     // Close mobile menu on navigation.
     setMobileOpen(false);
   }, [pathname]);
+
+  useEffect(() => {
+    if (!isHomeSurface) {
+      setHomeHeaderScrolled(false);
+      return;
+    }
+
+    const handleScroll = () => {
+      setHomeHeaderScrolled(window.scrollY > 28);
+    };
+
+    handleScroll();
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [isHomeSurface]);
 
   // Close mobile menu on Escape key
   useEffect(() => {
@@ -284,8 +303,11 @@ export function Header({
         {dict.common.skipLink}
       </a>
 
-      <header className="header">
-        <div className="header-content">
+      <header
+        className={`header${isHomeSurface ? ' header--home' : ''}${isHomeSurface && homeHeaderScrolled ? ' header--home-scrolled' : ''}`}
+        data-surface={currentSurface}
+      >
+        <div className={`header-content${isHomeSurface ? ' header-content--home' : ''}`}>
           <Link href={withLocale(locale, '/')} className="logo" aria-label={dict.brand.name}>
             <span className="logo-mark">AMP</span>
             <span className="logo-name">{dict.brand.name}</span>

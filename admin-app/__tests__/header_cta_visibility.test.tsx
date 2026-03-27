@@ -18,6 +18,7 @@ describe('Header CTA visibility', () => {
 
     const { container } = render(<Header locale="en" dict={en} />);
 
+    expect(container.querySelector('header.header--home')).not.toBeNull();
     expect(container.querySelector('.header-cta-group')).toBeNull();
     expect(container.querySelector('.mobile-nav__cta')).toBeNull();
   });
@@ -27,6 +28,7 @@ describe('Header CTA visibility', () => {
 
     const { container } = render(<Header locale="en" dict={en} />);
 
+    expect(container.querySelector('header.header--home')).toBeNull();
     expect(container.querySelector('.header-cta-group')).not.toBeNull();
     expect(container.querySelector('.mobile-nav__cta')).not.toBeNull();
   });

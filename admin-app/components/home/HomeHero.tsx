@@ -116,7 +116,8 @@ export function HomeHero({
             {/* Content overlay — absolutely positioned, no layout impact */}
             <div className="absolute inset-0 z-20 flex flex-col justify-start md:justify-center pt-[84px] sm:pt-[96px] pb-5 md:py-28">
                 <Container variant="wide">
-                    <div className="hero-home-panel max-w-[min(76ch,100%)]">
+                    <div className="hero-home-layout">
+                        <div className="hero-home-panel max-w-[min(76ch,100%)]">
                         <p className="hero-home-eyebrow text-white/72 text-[11px] md:text-xs font-semibold tracking-[0.26em] uppercase mb-3 md:mb-4">
                             {heroEyebrow}
                         </p>
@@ -187,6 +188,11 @@ export function HomeHero({
                                 ))}
                             </div>
                         ) : null}
+                    </div>
+                        <div className="hero-home-atmosphere" aria-hidden="true">
+                            <span className="hero-home-atmosphere__beam" />
+                            <span className="hero-home-atmosphere__orb" />
+                        </div>
                     </div>
                 </Container>
             </div>

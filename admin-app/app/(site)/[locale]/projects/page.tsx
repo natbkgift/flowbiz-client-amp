@@ -126,7 +126,7 @@ export default async function ProjectsPage(props: { params: Promise<{ locale: st
     );
 
     return (
-      <main id="main-content">
+      <main id="main-content" className="projects-page decision-page--confidence">
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLd }} />
         <PublicAdvisoryHero
           eyebrow={dict.advisory.heroEyebrow}
@@ -181,7 +181,7 @@ export default async function ProjectsPage(props: { params: Promise<{ locale: st
             ? 'ส่งชื่อโครงการที่ชอบมาได้เลย แล้วทีมจะช่วยบีบ shortlist, compare route, หรือ private tour ให้คมขึ้น'
             : 'Share the projects you like and the team will tighten the shortlist, compare route, or private-tour path from there.'}
         />
-        <section className="section">
+        <section className="section projects-catalogue-section">
         <Container>
           <div className="section-header mb-6">
             <h2 className="section-title">{locale === 'th' ? 'Project catalogue' : 'Project catalogue'}</h2>
@@ -192,7 +192,7 @@ export default async function ProjectsPage(props: { params: Promise<{ locale: st
             </p>
           </div>
 
-          <div className="cta-strip mb-6">
+          <div className="cta-strip projects-catalogue-strip mb-6">
             <div className="cta-strip__text">
               {locale === 'th'
                 ? 'ถ้าต้องการไล่จากยูนิตจริงหรือเริ่มจาก private tour route ให้ขยับต่อจากตรงนี้ได้ทันที'
@@ -208,59 +208,80 @@ export default async function ProjectsPage(props: { params: Promise<{ locale: st
             </div>
           </div>
 
-          <div className="grid grid-3">
-            {sorted.map((p) => (
-              <article key={p.id} className="card catalogue-card">
-                <LocalMediaImage
-                  media={{
-                    cover_image_url: p.cover_image_url,
-                    hero_image_url: p.hero_image_url,
-                    images: p.images,
-                  }}
-                  alt={p.name}
-                  className="media-shell"
-                  imageClassName="media-shell__img"
-                  aspectRatio="16 / 10"
-                />
-                <div className="catalogue-card__eyebrow">
-                  {resolveProjectArea(p as unknown as Record<string, unknown>) || (locale === 'th' ? 'Published project' : 'Published project')}
-                </div>
-                <h2 className="card-title">{p.name}</h2>
-                <p className="card-subtitle">
-                  {p.status?.trim()
-                    ? locale === 'th'
-                      ? `Status: ${p.status} · ${resolveProjectArea(p as unknown as Record<string, unknown>) || 'Pattaya'}`
-                      : `Status: ${p.status} · ${resolveProjectArea(p as unknown as Record<string, unknown>) || 'Pattaya'}`
-                    : locale === 'th'
-                      ? `ใช้ต่อสำหรับ shortlist, compare, และ team handoff · ${resolveProjectArea(p as unknown as Record<string, unknown>) || 'Pattaya'}`
-                      : `Ready for shortlist, compare, and team handoff · ${resolveProjectArea(p as unknown as Record<string, unknown>) || 'Pattaya'}`}
-                </p>
-                <div className="catalogue-card__meta">
-                  <span>
-                    {p.starting_price && Number.isFinite(p.starting_price)
-                      ? `${locale === 'th' ? 'Entry from' : 'Entry from'} ${formatCompactPrice(p.starting_price)}`
-                      : locale === 'th'
-                        ? 'Price on request · verify unit mix with the team'
-                        : 'Price on request · verify unit mix with the team'}
-                  </span>
-                </div>
-                <div className="card-actions">
-                  <Link className="btn btn-secondary" href={`/${locale}/projects/${p.slug}`}>
-                    {dict.listing.viewDetails}
-                  </Link>
-                  <Link
-                    className="btn btn-tertiary"
-                    href={withLocaleQuery(locale, '/contact', {
-                      intent: 'project_shortlist',
-                      source: 'projects_grid',
-                      project: p.slug,
-                    })}
-                  >
-                    {dict.cta.speakToAdvisor}
-                  </Link>
-                </div>
-              </article>
-            ))}
+          <div className="grid grid-3 projects-catalogue-grid">
+            {sorted.map((p, index) => {
+              const area = resolveProjectArea(p as unknown as Record<string, unknown>) || 'Pattaya';
+              const hasEntryPrice = Boolean(p.starting_price && Number.isFinite(p.starting_price));
+              return (
+                <article
+                  key={p.id}
+                  className={`card catalogue-card project-catalogue-card${index === 0 ? ' project-catalogue-card--lead' : index < 3 ? ' project-catalogue-card--priority' : ''}`}
+                >
+                  <div className="card-image project-catalogue-card__visual">
+                    <LocalMediaImage
+                      media={{
+                        cover_image_url: p.cover_image_url,
+                        hero_image_url: p.hero_image_url,
+                        images: p.images,
+                      }}
+                      alt={p.name}
+                      className="media-shell project-catalogue-card__media"
+                      imageClassName="media-shell__img"
+                      aspectRatio="16 / 10"
+                    />
+                    <div className="project-catalogue-card__media-scrim" aria-hidden="true" />
+                    <div className="project-catalogue-card__chips">
+                      <span className="project-catalogue-card__chip">{area}</span>
+                      <span className="project-catalogue-card__chip project-catalogue-card__chip--value">
+                        {hasEntryPrice
+                          ? `${locale === 'th' ? 'เริ่ม' : 'Entry'} ${formatCompactPrice(p.starting_price ?? null)}`
+                          : (locale === 'th' ? 'ราคาเมื่อขอ' : 'Price on request')}
+                      </span>
+                    </div>
+                  </div>
+                  <div className="project-catalogue-card__copy">
+                    <div className="catalogue-card__eyebrow project-catalogue-card__eyebrow">
+                      {p.status?.trim()
+                        ? `Status • ${p.status}`
+                        : (locale === 'th' ? 'โครงการที่เผยแพร่แล้ว' : 'Published project')}
+                    </div>
+                    <h2 className="card-title project-catalogue-card__title">{p.name}</h2>
+                    <p className="card-subtitle project-catalogue-card__summary">
+                      {hasEntryPrice
+                        ? (locale === 'th'
+                          ? `เริ่มจากราคาและทำเลที่ชัดก่อน แล้วค่อยเปิดดีเทลเพื่อดูยูนิตจริงกับแปลนห้อง`
+                          : `Start from live entry pricing and location context, then open the detail page for real units and floor plans.`)
+                        : (locale === 'th'
+                          ? `ดูบริบทโครงการและทำเลก่อน แล้วให้ทีมยืนยันราคาและยูนิตที่พร้อมคุยต่อ`
+                          : `Open the project context first, then let the team confirm live pricing and the units worth carrying forward.`)}
+                    </p>
+                    <div className="catalogue-card__meta project-catalogue-card__meta">
+                      <span>{area}</span>
+                      <span>
+                        {hasEntryPrice
+                          ? `${locale === 'th' ? 'ราคาเริ่มต้นจริง' : 'Live entry pricing'}`
+                          : (locale === 'th' ? 'ยืนยันราคาและ mix ยูนิตกับทีม' : 'Confirm pricing and unit mix with the team')}
+                      </span>
+                    </div>
+                    <div className="card-actions project-catalogue-card__actions">
+                      <Link className="btn btn-secondary" href={`/${locale}/projects/${p.slug}`}>
+                        {dict.listing.viewDetails}
+                      </Link>
+                      <Link
+                        className="btn btn-tertiary"
+                        href={withLocaleQuery(locale, '/contact', {
+                          intent: 'project_shortlist',
+                          source: 'projects_grid',
+                          project: p.slug,
+                        })}
+                      >
+                        {dict.cta.speakToAdvisor}
+                      </Link>
+                    </div>
+                  </div>
+                </article>
+              );
+            })}
           </div>
         </Container>
         </section>

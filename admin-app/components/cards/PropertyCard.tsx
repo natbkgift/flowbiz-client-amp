@@ -62,29 +62,37 @@ export function PropertyCard({
   return (
     <article className="property-card">
       <Link href={href} className="property-card__link">
-        <div className="card-image">
+        <div className="card-image property-card__media">
           <Image
             src={img}
             alt={item.title}
             fill
             unoptimized
             sizes="(min-width: 1024px) 33vw, (min-width: 768px) 50vw, 100vw"
-            className="object-cover"
+            className="object-cover property-card__image"
           />
+          <div className="property-card__media-scrim" aria-hidden="true" />
+          <div className="property-card__media-topline" aria-hidden="true">
+            {propertyTypeLabel ? <span className="property-card__media-chip">{propertyTypeLabel}</span> : null}
+          </div>
         </div>
 
-        <div className="card-content">
-          <div className="card-price">{formatPriceTHB(Number(item.price), locale)}</div>
-          {propertyTypeLabel ? <div className="card-type">{propertyTypeLabel}</div> : null}
-          <div className="card-title">{item.title}</div>
+        <div className="card-content property-card__body">
+          <div className="property-card__price-block">
+            <div className="property-card__price-label">{locale === 'th' ? 'ราคา live' : 'Live price'}</div>
+            <div className="card-price property-card__price">{formatPriceTHB(Number(item.price), locale)}</div>
+          </div>
+          <div className="property-card__copy">
+            <div className="card-title property-card__title">{item.title}</div>
+            <div className="card-location property-card__location">{item.address}</div>
+          </div>
           {propertySpecs.length ? (
-            <div className="card-specs" aria-label={locale === 'th' ? 'ข้อมูลเบื้องต้นของทรัพย์' : 'Property quick specs'}>
+            <div className="card-specs property-card__specs" aria-label={locale === 'th' ? 'ข้อมูลเบื้องต้นของทรัพย์' : 'Property quick specs'}>
               {propertySpecs.map((spec) => (
                 <span key={spec} className="card-specs__item">{spec}</span>
               ))}
             </div>
           ) : null}
-          <div className="card-location">{item.address}</div>
         </div>
       </Link>
 

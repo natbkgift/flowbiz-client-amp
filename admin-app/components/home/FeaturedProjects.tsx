@@ -141,16 +141,16 @@ export function FeaturedProjects({
     const highlights: string[] = [];
 
     if (decisionSignals.includes(locale === 'th' ? 'High ROI' : 'High ROI')) {
-      highlights.push(locale === 'th' ? 'เหมาะกับผู้ซื้อที่โฟกัสผลตอบแทนและปล่อยเช่า' : 'Worth opening for ROI-focused buyers and rental demand.');
+      highlights.push(locale === 'th' ? 'เหมาะกับสายผลตอบแทนและปล่อยเช่า' : 'High rental-demand fit for ROI-led shortlists.');
     }
     if (decisionSignals.includes(locale === 'th' ? 'Sea View' : 'Sea View')) {
-      highlights.push(locale === 'th' ? 'ตำแหน่งวิวทะเลที่ดึงทั้ง end-user และ resale appeal' : 'Sea-view positioning that supports both end use and resale appeal.');
+      highlights.push(locale === 'th' ? 'วิวทะเลที่ช่วยทั้งอยู่อาศัยและ resale' : 'Sea-view positioning with stronger resale appeal.');
     }
     if (!highlights.length) {
       highlights.push(
         index === 0
-          ? (locale === 'th' ? 'ตัวเลือกแรกที่ควรเปิดดูถ้าคุณกำลังเริ่ม shortlist' : 'A strong first-look option when you are building a shortlist.')
-          : (locale === 'th' ? 'เหมาะกับการเทียบราคา ทำเล และสเปกในคลิกเดียว' : 'Useful for comparing price, location, and fit in one click.'),
+          ? (locale === 'th' ? 'ตัวเลือกแรกที่ควรเปิดเมื่อเริ่ม shortlist' : 'A strong first shortlist option.')
+          : (locale === 'th' ? 'เหมาะกับการเทียบราคา ทำเล และจังหวะเข้าดู' : 'Useful for fast price-and-location comparison.'),
       );
     }
     if (normalizedStatus) {
@@ -161,10 +161,10 @@ export function FeaturedProjects({
     if (deliveryRaw) {
       highlights.push(`${labels.delivery}: ${deliveryRaw}`);
     } else if (area) {
-      highlights.push(locale === 'th' ? `เปิดดีเทลจริงเพื่อดูยูนิต แปลน และราคา current ของ ${area}` : `Open the live detail page for units, floor plans, and current pricing in ${area}.`);
+      highlights.push(locale === 'th' ? `ดูยูนิต ราคา current และแปลนของ ${area}` : `Live units, pricing, and plans in ${area}.`);
     }
 
-    return [...new Set(highlights)].slice(0, 3);
+    return [...new Set(highlights)].slice(0, 2);
   }
 
   function extractDecisionSignals(project: ProjectItem, index: number, area: string | null): string[] {
@@ -198,7 +198,7 @@ export function FeaturedProjects({
         <p className="section-subtitle">{subtitle}</p>
       </div>
 
-      <div className="home-project-grid-shell">
+        <div className="home-project-grid-shell">
         <div className="project-grid-premium">
         {projects.map((p, index) => {
           const dynamicProject = p as ProjectItem & {
@@ -217,12 +217,17 @@ export function FeaturedProjects({
           const decisionSignals = extractDecisionSignals(p, index, area);
           const highlights = extractProjectHighlights(p, area, decisionSignals, index);
           const fallbackImage = PROJECT_FALLBACK_IMAGES[index % PROJECT_FALLBACK_IMAGES.length];
+          const cardVariantClass = index === 0
+            ? 'premium-project-card--lead'
+            : index < 3
+              ? 'premium-project-card--priority'
+              : 'premium-project-card--standard';
 
           return (
             <Link
               key={p.id}
               href={withLocale(locale, `/projects/${encodeURIComponent(p.slug)}`)}
-              className="premium-project-card reveal card-interactive"
+              className={`premium-project-card ${cardVariantClass} reveal card-interactive`}
             >
               <div className="card-image premium-project-card__media">
                 <LocalMediaImage
@@ -282,7 +287,7 @@ export function FeaturedProjects({
                 ) : null}
                 <div className="premium-project-card__footer">
                   <span className="premium-project-card__footer-label">
-                    {locale === 'th' ? 'เปิดดูดีเทลจริงเพื่อเช็กยูนิต ราคา current และ floor plan' : 'Open the live detail page for units, current pricing, and floor plans.'}
+                    {locale === 'th' ? 'ยูนิต ราคา current และแปลน' : 'Live units, pricing, and floor plans'}
                   </span>
                   <span className="premium-project-card__cta">
                     {locale === 'th' ? 'ดูดีเทล' : 'View Details'}

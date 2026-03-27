@@ -75,7 +75,7 @@ export default async function BuyPage(props: { params: Promise<{ locale: string 
     : 'I want the team to prepare a buy-side shortlist that fits my budget, area, and timing, together with the next checks on quota and transfer costs.';
 
   return (
-    <main id="main-content">
+    <main id="main-content" className="buy-page decision-page--confidence">
       <Breadcrumbs
         items={[
           { label: dict.nav.home, href: `/${locale}` },
