@@ -252,6 +252,12 @@ phase "migrations"
   -e ALEMBIC_UPGRADE_TARGET="$ALEMBIC_UPGRADE_TARGET" \
   api sh -lc 'python -m alembic upgrade "$ALEMBIC_UPGRADE_TARGET"'
 
+phase "seed-data"
+"${compose[@]}" run --rm --no-deps \
+  -e AMP_ALLOW_IMPORT=1 \
+  -e AMP_SKIP_PROJECT_COVER_MIRROR=1 \
+  api sh -lc 'python scripts/import_seed_data.py --input data/import'
+
 phase "switch"
 "${compose[@]}" up -d --no-deps --force-recreate api admin-app
 

@@ -147,6 +147,10 @@ def _coerce_bool(value: Any, *, default: bool = False) -> bool:
     return default
 
 
+def _normalize_flag(value: Any) -> bool:
+    return str(value or "").strip().lower() in {"1", "true", "yes", "y", "on"}
+
+
 def _parse_optional_date(value: Any) -> date | None:
     raw = str(value or "").strip()
     if not raw:
@@ -170,6 +174,35 @@ def _parse_optional_datetime(value: Any) -> datetime | None:
     if parsed.tzinfo is None:
         return parsed.replace(tzinfo=timezone.utc)
     return parsed.astimezone(timezone.utc)
+
+
+def _truncate_optional_text(value: Any, max_length: int) -> str | None:
+    text = str(value or "").strip()
+    if not text:
+        return None
+    return text[:max_length]
+
+
+def _normalize_property_view(value: Any) -> str | None:
+    raw = str(value or "").strip()
+    if not raw:
+        return None
+
+    normalized = raw.lower().replace("-", " ").replace("_", " ")
+    normalized = " ".join(normalized.split())
+    if "sea view" in normalized:
+        return "Sea View"
+    if "bay view" in normalized:
+        return "Bay View"
+    if "city view" in normalized:
+        return "City View"
+    if "garden view" in normalized:
+        return "Garden View"
+    if "pool view" in normalized:
+        return "Pool View"
+    if "river view" in normalized:
+        return "River View"
+    return _truncate_optional_text(raw, 20)
 
 
 def _resolve_fk(
@@ -553,7 +586,7 @@ def _import_units(
             "property_type": property_type,
             "price": price,
             "currency": str(row.get("currency") or "THB").strip() or "THB",
-            "price_period": str(row.get("price_period") or "").strip() or None,
+            "price_period": _truncate_optional_text(row.get("price_period"), 20),
             "bedrooms": int(bedrooms) if bedrooms is not None else None,
             "bathrooms": int(bathrooms) if bathrooms is not None else None,
             "size_sqm": Decimal(str(size_val)) if size_val is not None else None,
@@ -561,9 +594,9 @@ def _import_units(
             "floor": _coerce_int(floor),
             "floor_number": _coerce_int(floor_number if floor_number is not None else floor),
             "floors": _coerce_int(floors),
-            "furnishing": str(row.get("furnishing") or "").strip() or None,
-            "unit_type": str(row.get("unit_type") or "").strip() or None,
-            "view": str(row.get("view") or row.get("view_label") or "").strip() or None,
+            "furnishing": _truncate_optional_text(row.get("furnishing"), 32),
+            "unit_type": _truncate_optional_text(row.get("unit_type"), 20),
+            "view": _normalize_property_view(row.get("view") or row.get("view_label")),
             "address": str(row["address"]).strip(),
             "city": str(row["city"]).strip(),
             "area_id": area_id,
@@ -806,7 +839,14 @@ def main() -> int:
 
     # Best-effort media mirroring before any import step touches DB.
     # This keeps project cover_image_url local (/media/...) and prevents public hotlinks.
-    if "projects" in steps_to_run:
+    project_rows_path = input_dir / "projects.json"
+    external_project_covers = _find_external_project_covers(project_rows_path)
+    project_public_root = _PROJECT_ROOT / "admin-app" / "public"
+    skip_project_cover_mirror = _normalize_flag(os.environ.get("AMP_SKIP_PROJECT_COVER_MIRROR"))
+
+    if "projects" in steps_to_run and not (
+        skip_project_cover_mirror or (not project_public_root.exists() and not external_project_covers)
+    ):
         try:
             mirror_cmd = [
                 sys.executable,
@@ -838,22 +878,28 @@ def main() -> int:
             if args.strict or args.fail_on_warn:
                 log.exception("Preflight cover mirror gate failed.")
                 return 1
+    elif "projects" in steps_to_run:
+        log.info(
+            "Skipping project cover mirror preflight (skip=%s public_root_exists=%s external_covers=%d).",
+            skip_project_cover_mirror,
+            project_public_root.exists(),
+            len(external_project_covers),
+        )
 
-        external_project_covers = _find_external_project_covers(input_dir / "projects.json")
-        if (
-            external_project_covers
-            and not os.environ.get("AMP_ALLOW_EXTERNAL_PROJECT_COVERS", "").strip()
-        ):
-            log.error(
-                "Refusing import: %d project cover(s) still use external URLs. "
-                "Run scripts/mirror_project_cover_images.py or set AMP_ALLOW_EXTERNAL_PROJECT_COVERS=1 to override.",
-                len(external_project_covers),
-            )
-            for row in external_project_covers[:20]:
-                log.error("  - %s -> %s", row.get("slug"), row.get("cover_image_url"))
-            if len(external_project_covers) > 20:
-                log.error("  ... and %d more", len(external_project_covers) - 20)
-            return 1
+    if (
+        external_project_covers
+        and not os.environ.get("AMP_ALLOW_EXTERNAL_PROJECT_COVERS", "").strip()
+    ):
+        log.error(
+            "Refusing import: %d project cover(s) still use external URLs. "
+            "Run scripts/mirror_project_cover_images.py or set AMP_ALLOW_EXTERNAL_PROJECT_COVERS=1 to override.",
+            len(external_project_covers),
+        )
+        for row in external_project_covers[:20]:
+            log.error("  - %s -> %s", row.get("slug"), row.get("cover_image_url"))
+        if len(external_project_covers) > 20:
+            log.error("  ... and %d more", len(external_project_covers) - 20)
+        return 1
 
     def _slug_set(filename: str) -> set[str]:
         rows = _load_json(input_dir / filename)

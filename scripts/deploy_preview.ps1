@@ -84,6 +84,11 @@ try {
     throw "Preview compose up failed."
   }
 
+  & $DockerExe compose -p $ComposeProjectName -f docker-compose.yml -f docker-compose.preview.yml exec -T api sh -lc "AMP_ALLOW_IMPORT=1 AMP_SKIP_PROJECT_COVER_MIRROR=1 python scripts/import_seed_data.py --input data/import"
+  if ($LASTEXITCODE -ne 0) {
+    throw "Preview data import failed."
+  }
+
   $smokeScript = Join-Path $releasePath "scripts\smoke_preview.ps1"
   & powershell -NoProfile -ExecutionPolicy Bypass -File $smokeScript -BaseUrl "http://127.0.0.1:$PreviewAdminPort"
   if ($LASTEXITCODE -ne 0) {

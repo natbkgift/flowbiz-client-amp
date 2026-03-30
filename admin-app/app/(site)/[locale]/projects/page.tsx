@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
+import { unstable_noStore as noStore } from 'next/cache';
 import { makePageMetadata } from '@/app/_lib/i18n/metadata';
 import { buildAdvisorWhatsApp, getAdvisoryLabels, getAdvisoryProofs, withLocaleQuery } from '@/app/_lib/public-advisory';
 import { withLocale } from '@/app/_lib/i18n/routing';
@@ -12,6 +13,7 @@ import { EmptyStateCard } from '@/components/ui/StateBlocks';
 import { LocalMediaImage } from '@/components/media/LocalMediaImage';
 
 export const revalidate = 300;
+export const dynamic = 'force-dynamic';
 
 export async function generateMetadata(
   props: {
@@ -123,6 +125,7 @@ function resolveProjectArea(project: Record<string, unknown>): string | null {
 }
 
 export default async function ProjectsPage(props: { params: Promise<{ locale: string }> }) {
+  noStore();
   const params = await props.params;
   const locale = normalizeLocale(params.locale);
   const dict = getDictionary(locale);

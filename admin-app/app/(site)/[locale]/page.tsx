@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
+import { unstable_noStore as noStore } from 'next/cache';
 import { Suspense } from 'react';
 
 import type { PropertyListItem } from '@/app/public/_shared/types';
@@ -7,6 +8,7 @@ import { resolveHomeBottomCtaPrimaryUrl } from '@/app/_lib/home-bottom-cta';
 import { buildLeadCaptureQuery, withLocaleQuery } from '@/app/_lib/public-advisory';
 
 export const revalidate = 300;
+export const dynamic = 'force-dynamic';
 const useMinimalPublicHome = process.env.NEXT_LOCAL_PUBLIC_HOME_MINIMAL === '1';
 
 function normalizeLocale(value: string): 'en' | 'th' {
@@ -233,6 +235,7 @@ export default async function HomePage({
 }: {
   params: Promise<{ locale: string }>;
 }) {
+  noStore();
   const { locale: rawLocale } = await params;
   const locale = normalizeLocale(rawLocale);
   if (useMinimalPublicHome) {
