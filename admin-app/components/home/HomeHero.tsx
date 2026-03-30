@@ -5,8 +5,8 @@ import { HeroOverlay } from "@/components/home/HeroOverlay";
 import { Container } from "@/components/layout/Container";
 import { withLocale } from "@/app/_lib/i18n/routing";
 
-// Cloudflare cached a stale 404 for the unversioned fallback asset on production.
-const HERO_FALLBACK_IMAGE = "/images/hero-banner.webp?v=20260318";
+// Keep the fallback asset versioned in the filename so production can serve it directly.
+const HERO_FALLBACK_IMAGE = "/images/hero-banner-20260318.webp";
 
 type HomeHeroComposer = {
     eyebrow?: string;
@@ -93,9 +93,19 @@ export function HomeHero({
     const resolvedPrimaryEventPayload = primaryEventPayload ?? { cta: "request_consultation", from: "home_hero" };
     const resolvedSecondaryEventPayload = secondaryEventPayload ?? { cta: "browse_projects", from: "home_hero" };
     const hasSupportRow = showGuidedTrigger || supportLinks.length > 0 || whatsAppHref.trim().length > 0;
+    const heroTrustItems = Array.isArray(composer?.trust_items) && composer.trust_items.length > 0
+        ? composer.trust_items.map((item) => String(item).trim()).filter(Boolean).slice(0, 3)
+        : (locale === 'th'
+            ? ['คัดเฉพาะรายการที่ยืนยันแล้ว', 'รองรับผู้ซื้อชาวต่างชาติ', 'มีทีมพัทยาดูแลต่อจนถึงการเข้าชม']
+            : ['Verified live stock only', 'Foreign-buyer ready', 'Local handoff to viewing']);
+    const atmosphereLabel = locale === 'th' ? 'บรีฟโต๊ะที่ปรึกษา' : 'Advisory desk note';
+    const atmosphereTitle = locale === 'th' ? 'เริ่มจากเส้นทางที่ใช่ ไม่ใช่หน้ารวมประกาศ' : 'Start from the right route, not a listing dump';
+    const atmosphereBody = locale === 'th'
+        ? 'ซื้อ ลงทุน เช่า และขาย ถูกแยกเส้นทางให้ชัดตั้งแต่หน้าจอแรก เพื่อให้ทีมรับช่วงต่อได้แม่นกว่า'
+        : 'Buying, investing, renting, and selling are separated early so the next handoff stays specific.';
 
     return (
-        <section className="home-hero-section relative w-full bg-gray-900 overflow-hidden min-h-[640px] sm:min-h-[700px] md:min-h-[680px] xl:min-h-[720px]" data-home-perf="hero-media">
+        <section className="home-hero-section relative w-full bg-gray-900 overflow-hidden min-h-[620px] sm:min-h-[680px] md:min-h-[700px] xl:min-h-[760px]" data-home-perf="hero-media">
             <Image
                 src={heroImageSrc}
                 alt="AMP Pattaya Real Estate"
@@ -104,7 +114,7 @@ export function HomeHero({
                 fetchPriority="high"
                 quality={82}
                 sizes="100vw"
-                className="absolute inset-0 w-full h-full object-cover object-[64%_center] sm:object-[60%_center] md:object-center block scale-[1.01]"
+                className="absolute inset-0 w-full h-full object-cover object-[68%_center] sm:object-[60%_center] md:object-center block scale-[1.03]"
             />
 
             {/* Gradient overlay — absolutely positioned, no layout impact */}
@@ -114,7 +124,7 @@ export function HomeHero({
             <div className="absolute inset-y-0 left-0 right-0 z-10 pointer-events-none bg-gradient-to-r from-black/78 via-black/38 to-transparent md:from-black/70 md:via-black/22 md:to-transparent" />
 
             {/* Content overlay — absolutely positioned, no layout impact */}
-            <div className="absolute inset-0 z-20 flex flex-col justify-start md:justify-center pt-[84px] sm:pt-[96px] pb-5 md:py-28">
+            <div className="absolute inset-0 z-20 flex flex-col justify-start md:justify-center pt-[78px] sm:pt-[88px] pb-5 md:py-28">
                 <Container variant="wide">
                     <div className="hero-home-layout">
                         <div className="hero-home-panel max-w-[min(76ch,100%)]">
@@ -129,6 +139,16 @@ export function HomeHero({
                         <p className="hero-home-subtitle text-white/92 text-base sm:text-[15px] md:text-lg leading-[1.5] mb-5 md:mb-6 max-w-[58ch]">
                             {heroSubheading}
                         </p>
+                        {heroTrustItems.length > 0 ? (
+                            <div className="hero-home-meta" role="list" aria-label={locale === 'th' ? 'เหตุผลที่ควรเริ่มจากหน้านี้' : 'Why start from this page'}>
+                                {heroTrustItems.map((item, index) => (
+                                    <span key={`${item}-${index + 1}`} className="hero-home-meta__item" role="listitem">
+                                        <span className="hero-home-meta__index">{String(index + 1).padStart(2, '0')}</span>
+                                        <span className="hero-home-meta__text">{item}</span>
+                                    </span>
+                                ))}
+                            </div>
+                        ) : null}
 
                         <div className="hero-cta-row flex flex-wrap gap-3 md:gap-4">
                             <TrackedLink
@@ -190,8 +210,14 @@ export function HomeHero({
                         ) : null}
                     </div>
                         <div className="hero-home-atmosphere" aria-hidden="true">
-                            <span className="hero-home-atmosphere__beam" />
+                            <span className="hero-home-atmosphere__frame" />
+                            <span className="hero-home-atmosphere__line" />
                             <span className="hero-home-atmosphere__orb" />
+                            <div className="hero-home-atmosphere__caption">
+                                <span className="hero-home-atmosphere__caption-label">{atmosphereLabel}</span>
+                                <strong>{atmosphereTitle}</strong>
+                                <span>{atmosphereBody}</span>
+                            </div>
                         </div>
                     </div>
                 </Container>

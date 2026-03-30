@@ -72,7 +72,7 @@ describe('HomeHero CTA hierarchy', () => {
     expect(screen.getByRole('link', { name: 'Get Price & Floor Plan' })).toHaveAttribute('href', '/en/contact?topic=price_floor_plan&source=home_hero_secondary');
     expect(screen.getByAltText('AMP Pattaya Real Estate')).toHaveAttribute(
       'src',
-      '/images/hero-banner.webp?v=20260318',
+      '/images/hero-banner-20260318.webp',
     );
   });
 

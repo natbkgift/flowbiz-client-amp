@@ -29,8 +29,8 @@ describe('home surface handoff contract', () => {
 
     expect(page).toContain('Verified listings only');
     expect(page).toContain('No fake or outdated stock');
-    expect(page).toContain('Get current pricing and the shortlist worth seeing now');
-    expect(page).toContain('Get Pricing & Shortlist');
+    expect(page).toContain('Get current pricing, availability, and the clearest next step');
+    expect(page).toContain('Get Pricing & Next Step');
     expect(page).not.toContain('home-intent-card__eyebrow');
     expect(page).not.toContain('home-intent-card__start');
   });

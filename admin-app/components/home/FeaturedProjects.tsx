@@ -46,9 +46,28 @@ export function FeaturedProjects({
     status: locale === 'th' ? 'สถานะ' : 'Status',
     type: locale === 'th' ? 'ประเภท' : 'Type',
     delivery: locale === 'th' ? 'ส่งมอบ' : 'Delivery',
-    curatedLabel: locale === 'th' ? 'พร้อม shortlist' : 'Shortlist ready',
+    curatedLabel: locale === 'th' ? 'พร้อมเปิดดูต่อ' : 'Shortlist ready',
     locationPrefix: locale === 'th' ? 'ทำเล' : 'Location',
   };
+  const emptyStatePrimaryHref = withLocale(locale, '/projects');
+  const emptyStateSecondaryHref = withLocale(locale, '/contact');
+  const emptyStateSignals = locale === 'th'
+    ? [
+        'เปิดรายการที่เผยแพร่ล่าสุดได้ทันที',
+        'ส่งโจทย์งบและทำเลให้ทีมได้เลย',
+        'รับตัวเลือกที่พร้อมเช็กราคาต่อ',
+      ]
+    : [
+        'Open the latest published inventory instantly',
+        'Send the team your budget and location brief',
+        'Get matched options ready for price checks',
+      ];
+  const emptyStatePreviewTitle = locale === 'th'
+    ? 'ทีมจะคัดโครงการที่ควรเปิดก่อนให้คุณ'
+    : 'The team will line up the next projects worth opening';
+  const emptyStatePreviewBody = locale === 'th'
+    ? 'ถ้าโครงการที่เหมาะยังไม่ขึ้นบนหน้าในตอนนี้ ส่ง brief แล้วทีมจะช่วยคัดราคา fit และ next step ที่ควรทำต่อ'
+    : 'If the right launch is not already surfaced, send the brief and get pricing, fit, and the clearest next step in one reply.';
 
   if (projects.length === 0) {
     return (
@@ -57,11 +76,42 @@ export function FeaturedProjects({
           <h2 className="section-title">{title}</h2>
           <p className="section-subtitle">{subtitle}</p>
         </div>
-        <EmptyStateCard
-          className="ui-empty"
-          title={locale === 'th' ? 'ให้ทีมช่วยคัดรายการล่าสุดให้คุณ' : 'Ask the team for today\'s shortlist'}
-          body={locale === 'th' ? 'ดูโครงการที่เผยแพร่แล้วทั้งหมด หรือส่ง brief ให้ทีมจัดชุดโครงการที่เหมาะกับงบและเป้าหมายของคุณ' : 'Browse published developments or send your brief so the team can assemble a shortlist matched to your budget and goals.'}
-        />
+        <div className="home-project-empty reveal">
+          <div className="home-project-empty__copy">
+            <p className="home-project-empty__eyebrow">
+              {locale === 'th' ? 'โต๊ะคัดโครงการของ AMP' : 'AMP advisory desk'}
+            </p>
+            <EmptyStateCard
+              className="premium-empty-state home-project-empty__card"
+              title={locale === 'th' ? 'ให้ทีมช่วยคัดรายการล่าสุดให้คุณ' : 'Ask the team for today\'s matched picks'}
+              body={locale === 'th' ? 'ดูโครงการที่เผยแพร่แล้วทั้งหมด หรือส่ง brief ให้ทีมจัดชุดโครงการที่เหมาะกับงบและเป้าหมายของคุณ' : 'Browse published developments or send your brief so the team can assemble options matched to your budget and goals.'}
+              action={(
+                <div className="home-project-empty__actions">
+                  <Link href={emptyStatePrimaryHref} className="home-project-empty__action home-project-empty__action--primary">
+                    {locale === 'th' ? 'เปิดโครงการทั้งหมด' : 'Browse live projects'}
+                  </Link>
+                  <Link href={emptyStateSecondaryHref} className="home-project-empty__action home-project-empty__action--secondary">
+                    {locale === 'th' ? 'ส่งโจทย์ให้ทีม' : 'Send the team your brief'}
+                  </Link>
+                </div>
+              )}
+            />
+          </div>
+          <div className="home-project-empty__preview" aria-hidden="true">
+            <div className="home-project-empty__preview-card">
+              <span className="home-project-empty__preview-kicker">
+                {locale === 'th' ? 'เส้นทางต่อจาก stock ที่ตรวจแล้ว' : 'Verified live handoff'}
+              </span>
+              <strong className="home-project-empty__preview-title">{emptyStatePreviewTitle}</strong>
+              <p className="home-project-empty__preview-body">{emptyStatePreviewBody}</p>
+              <div className="home-project-empty__signal-list">
+                {emptyStateSignals.map((item) => (
+                  <span key={item} className="home-project-empty__signal">{item}</span>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     );
   }
@@ -149,7 +199,7 @@ export function FeaturedProjects({
     if (!highlights.length) {
       highlights.push(
         index === 0
-          ? (locale === 'th' ? 'ตัวเลือกแรกที่ควรเปิดเมื่อเริ่ม shortlist' : 'A strong first shortlist option.')
+          ? (locale === 'th' ? 'ตัวเลือกแรกที่ควรเปิดเมื่อเริ่มคัดโครงการ' : 'A strong first shortlist option.')
           : (locale === 'th' ? 'เหมาะกับการเทียบราคา ทำเล และจังหวะเข้าดู' : 'Useful for fast price-and-location comparison.'),
       );
     }

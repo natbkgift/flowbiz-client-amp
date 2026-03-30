@@ -8,18 +8,22 @@ function read(relativePath: string): string {
 }
 
 describe('home design surface contract', () => {
-  it('keeps the hard-reset four-section funnel and removes the old route selector', () => {
+  it('keeps a premium home funnel with hero, route clarity, trust, projects, and a final conversion gate', () => {
     const page = read('app/(site)/[locale]/page.tsx');
 
     expect(page).toContain('home-section-kicker');
+    expect(page).toContain('home-pathways-grid');
+    expect(page).toContain('home-pathway-card');
     expect(page).toContain('home-trust-snapshot-grid');
-    expect(page).toContain('Luxury condos in Pattaya from 4M');
-    expect(page).toContain('Sea View • High ROI • Foreign Buyer Friendly');
-    expect(page).toContain('Availability changes quickly. Start with verified projects, not guesswork.');
+    expect(page).toContain('Pattaya property advisory for buying, investing, renting, and selling.');
+    expect(page).toContain('Speak to a Pattaya advisor');
+    expect(page).toContain('View curated units');
+    expect(page).toContain('home-pathways-support__link');
+    expect(page).toContain('home_paths_sell');
     expect(page).toContain('Verified stock, local guidance, and clear next steps from the start.');
-    expect(page).toContain('Get current pricing and the shortlist worth seeing now');
-    expect(page).toContain('Get Pricing & Shortlist');
-    expect(page).toContain('Limited units available - request current pricing now.');
+    expect(page).toContain('Get current pricing, availability, and the clearest next step');
+    expect(page).toContain('Get Pricing & Next Step');
+    expect(page).toContain('Send one brief and get current availability, pricing, and the clearest next step from the team.');
     expect(page).toContain('home-trust-snapshot__item');
     expect(page).not.toContain('Choose the next route by buyer intent');
     expect(page).not.toContain('home-intent-card reveal');

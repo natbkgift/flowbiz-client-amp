@@ -22,6 +22,12 @@ type NavGroup = {
   items?: DropdownItem[];
 };
 
+type QuickPath = {
+  href: string;
+  label: string;
+  detail: string;
+};
+
 function ChevronDown({ open }: { open: boolean }) {
   return (
     <svg
@@ -205,30 +211,34 @@ export function Header({
   const smartFinderLabel = locale === 'th' ? 'ค้นหาอัจฉริยะ' : 'Smart Finder';
   const compareLabel = locale === 'th' ? 'เปรียบเทียบ' : 'Compare';
   const marketplaceLabel = locale === 'th' ? 'ทุกประกาศ' : 'Marketplace';
+  const rentLabel = locale === 'th' ? 'เช่า / ย้ายมาอยู่' : 'Rent / Relocate';
+  const sellLabel = locale === 'th' ? 'ขายกับ AMP' : 'Sell with AMP';
+  const homeAreaLabel = locale === 'th' ? 'พื้นที่' : 'Areas';
 
   const defaultNavConfig: NavGroup[] = [
+    {
+      key: 'buy',
+      label: dict.nav.buy,
+      href: '/buy',
+      items: [
+        { href: '/buy', label: dict.nav.buy, desc: locale === 'th' ? 'เส้นทางซื้อสำหรับผู้ซื้อชาวต่างชาติและ second-home buyer' : 'Buyer route for foreign nationals and second-home clients' },
+        { href: '/projects', label: dict.nav.projects, desc: locale === 'th' ? 'ดูโครงการใหม่และโครงการที่ผ่านการคัดกรอง' : 'Review vetted projects and launches first' },
+        { href: '/marketplace', label: marketplaceLabel, desc: locale === 'th' ? 'ดู stock ที่ยัง active ทั้งระบบ' : 'Open active inventory across the catalogue' },
+      ],
+    },
     {
       key: 'invest',
       label: dict.nav.invest,
       href: '/invest',
       items: [
         { href: '/invest', label: dict.nav.invest, desc: locale === 'th' ? 'เส้นทางลงทุนสำหรับผู้ซื้อระหว่างประเทศ' : 'Investment-first path for international buyers' },
-        { href: '/investment', label: investLabel, desc: locale === 'th' ? 'โอกาสลงทุนคัดสรรพร้อมบริบทตลาด' : 'Curated opportunities with market context' },
-        { href: '/smart-finder', label: smartFinderLabel, desc: locale === 'th' ? 'ช่วยเลือกจากงบประมาณและเป้าหมาย' : 'Guided matching by budget and goals' },
+        { href: '/investment', label: investLabel, desc: locale === 'th' ? 'กรอบคิดเรื่อง yield ดีมานด์ และความเสี่ยง' : 'Yield, demand, and risk framing for Pattaya' },
+        { href: '/smart-finder', label: smartFinderLabel, desc: locale === 'th' ? 'ช่วยเลือกจากงบประมาณและ thesis การลงทุน' : 'Guided matching by budget and investment thesis' },
         { href: '/compare', label: compareLabel, desc: locale === 'th' ? 'เทียบตัวเลือกแบบ side-by-side' : 'Compare options side-by-side' },
       ],
     },
-    {
-      key: 'buy',
-      label: dict.nav.buy,
-      href: '/buy',
-      items: [
-        { href: '/buy', label: dict.nav.buy, desc: locale === 'th' ? 'แนวทางซื้อสำหรับชาวต่างชาติ' : 'Buyer path for foreign nationals' },
-        { href: '/projects', label: dict.nav.projects, desc: locale === 'th' ? 'ดูโครงการที่ผ่านการคัดกรอง' : 'Browse vetted project catalogue' },
-        { href: '/marketplace', label: marketplaceLabel, desc: locale === 'th' ? 'รวมประกาศทั้งหมดในระบบ' : 'All active listings in one view' },
-        { href: '/rent', label: dict.nav.live, desc: locale === 'th' ? 'เปรียบเทียบยูนิตเช่าพร้อมอยู่' : 'Explore active rental options' },
-      ],
-    },
+    { key: 'rent', label: rentLabel, href: '/rent' },
+    { key: 'sell', label: sellLabel, href: '/sell' },
     { key: 'projects', label: dict.nav.projects, href: '/projects' },
     {
       key: 'area-guide',
@@ -245,12 +255,48 @@ export function Header({
     label: item.label,
     href: item.href,
   }));
-  const navConfig = cmsNavConfig.length > 0 ? cmsNavConfig : defaultNavConfig;
+  const fullNavConfig = cmsNavConfig.length > 0 ? cmsNavConfig : defaultNavConfig;
+  const homeNavConfig: NavGroup[] = [
+    { key: 'home-buy', label: dict.nav.buy, href: '/buy' },
+    { key: 'home-invest', label: dict.nav.invest, href: '/invest' },
+    { key: 'home-rent', label: locale === 'th' ? 'เช่า' : 'Rent', href: '/rent' },
+    { key: 'home-sell', label: locale === 'th' ? 'ขาย' : 'Sell', href: '/sell' },
+    { key: 'home-projects', label: dict.nav.projects, href: '/projects' },
+    { key: 'home-areas', label: homeAreaLabel, href: '/area-guide' },
+  ];
+  const homeMobileNavConfig: NavGroup[] = [
+    { key: 'home-mobile-projects', label: dict.nav.projects, href: '/projects' },
+    { key: 'home-mobile-areas', label: homeAreaLabel, href: '/area-guide' },
+  ];
+  const mobileQuickPaths: QuickPath[] = [
+    {
+      href: '/buy',
+      label: locale === 'th' ? 'ซื้อ' : 'Buy',
+      detail: locale === 'th' ? 'foreign buyer route' : 'foreign-buyer route',
+    },
+    {
+      href: '/invest',
+      label: locale === 'th' ? 'ลงทุน' : 'Invest',
+      detail: locale === 'th' ? 'yield + demand' : 'yield + demand',
+    },
+    {
+      href: '/rent',
+      label: locale === 'th' ? 'เช่า' : 'Rent',
+      detail: locale === 'th' ? 'relocate-ready' : 'relocate-ready',
+    },
+    {
+      href: '/sell',
+      label: locale === 'th' ? 'ขาย' : 'Sell',
+      detail: locale === 'th' ? 'owner brief' : 'owner brief',
+    },
+  ];
   const contactCtaHref = cms?.contactCta?.href || '/contact';
   const contactCtaLabel = cms?.contactCta?.label || dict.cta.speakToAdvisor;
   const currentSurface = getPublicCtaSurface(currentPathname);
   const isHomeSurface = currentSurface === 'home';
   const showGlobalCtas = !routeOwnsPrimaryCta(currentPathname);
+  const desktopNavConfig = isHomeSurface ? homeNavConfig : fullNavConfig;
+  const mobileNavConfig = isHomeSurface ? homeMobileNavConfig : fullNavConfig;
 
   const langLabel = locale === 'th' ? dict.common.thai : dict.common.english;
 
@@ -314,7 +360,7 @@ export function Header({
           </Link>
 
           <nav className="nav" aria-label={dict.common.mainNavigation}>
-            {navConfig.map((group) => (
+            {desktopNavConfig.map((group) => (
               <DesktopNavGroup key={group.key} group={group} locale={locale} isActive={isActive} />
             ))}
           </nav>
@@ -370,7 +416,44 @@ export function Header({
         aria-label={dict.common.mainNavigation}
       >
         <div className="mobile-menu__inner">
-          {navConfig.map((group) => (
+          <div className="mobile-menu__intro">
+            <p className="mobile-menu__eyebrow">
+              {locale === 'th' ? 'Pattaya real estate routes' : 'Pattaya real estate routes'}
+            </p>
+            <p className="mobile-menu__title">
+              {locale === 'th'
+                ? 'เลือกเส้นทางที่ตรงกับเป้าหมายของคุณก่อน'
+                : 'Choose the route that matches your goal first.'}
+            </p>
+            <div className="mobile-menu__quick-grid">
+              {mobileQuickPaths.map((item) => (
+                <Link
+                  key={item.href}
+                  href={withLocale(locale, item.href)}
+                  className="mobile-menu__quick-link"
+                  onClick={() => setMobileOpen(false)}
+                >
+                  <strong>{item.label}</strong>
+                  <span>{item.detail}</span>
+                </Link>
+              ))}
+            </div>
+            {isHomeSurface ? (
+              <Link
+                href={withLocale(locale, '/contact')}
+                className="mobile-menu__advisor-link"
+                onClick={() => setMobileOpen(false)}
+              >
+                <strong>{locale === 'th' ? 'คุยกับที่ปรึกษา' : 'Speak to an advisor'}</strong>
+                <span>
+                  {locale === 'th'
+                    ? 'ส่งโจทย์ถึงทีมพัทยา แล้วให้เราชี้ next step ที่ชัดที่สุด'
+                    : 'Send your brief to the Pattaya team and get the clearest next step.'}
+                </span>
+              </Link>
+            ) : null}
+          </div>
+          {mobileNavConfig.map((group) => (
             <MobileSection key={group.key} group={group} locale={locale} onNavClick={() => setMobileOpen(false)} />
           ))}
           {showGlobalCtas ? (
