@@ -10,6 +10,16 @@
     "status": "active"
   },
   {
+    "name": "Empire Group",
+    "slug": "empire-group",
+    "website": "https://empiregroupth.com/th/",
+    "summary": {
+      "en": "Official developer source used for Embassy Life.",
+      "th": "ใช้เป็นแหล่งอ้างอิงผู้พัฒนาอย่างเป็นทางการของ Embassy Life"
+    },
+    "status": "active"
+  },
+  {
     "name": "Baan Dusit",
     "slug": "baan-dusit",
     "website": null,
@@ -41,10 +51,40 @@
     "status": "active"
   },
   {
+    "name": "HONOUR THAILAND",
+    "slug": "honour-thailand",
+    "website": "https://oncewongamatpattaya.com/",
+    "summary": {
+      "en": "Official developer source used for Once Wongamat.",
+      "th": "ใช้เป็นแหล่งอ้างอิงผู้พัฒนาอย่างเป็นทางการของ Once Wongamat"
+    },
+    "status": "active"
+  },
+  {
     "name": "Matrix Developments",
     "slug": "matrix-developments",
     "website": "https://matrixdevelopments.com",
     "summary": null,
+    "status": "active"
+  },
+  {
+    "name": "J Plus Property",
+    "slug": "j-plus-property",
+    "website": "https://thelavishpattaya.com/",
+    "summary": {
+      "en": "Official developer source used for The Lavish.",
+      "th": "ใช้เป็นแหล่งอ้างอิงผู้พัฒนาอย่างเป็นทางการของ The Lavish"
+    },
+    "status": "active"
+  },
+  {
+    "name": "Mr. Maimon David Marsiano",
+    "slug": "maimon-david-marsiano",
+    "website": "https://avenueboutiqueofficial.com/",
+    "summary": {
+      "en": "Official developer source used for Avenue Boutique.",
+      "th": "ใช้เป็นแหล่งอ้างอิงผู้พัฒนาอย่างเป็นทางการของ Avenue Boutique"
+    },
     "status": "active"
   },
   {
@@ -92,6 +132,16 @@
     "summary": {
       "en": "Official developer source used for The Riviera Palm Beach and The Riviera Beverly Hills.",
       "th": "ใช้เป็นแหล่งอ้างอิงผู้พัฒนาอย่างเป็นทางการของ The Riviera Palm Beach และ The Riviera Beverly Hills"
+    },
+    "status": "active"
+  },
+  {
+    "name": "Siam Inter World Asset Co., Ltd.",
+    "slug": "siam-inter-world-asset",
+    "website": "https://www.wyndhamjomtienpattaya.com/condominium/",
+    "summary": {
+      "en": "Official developer source used for Wyndham Jomtien Pattaya.",
+      "th": "ใช้เป็นแหล่งอ้างอิงผู้พัฒนาอย่างเป็นทางการของ Wyndham Jomtien Pattaya"
     },
     "status": "active"
   },

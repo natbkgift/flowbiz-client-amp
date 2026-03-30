@@ -118,6 +118,7 @@
     "name": "Embassy Life",
     "slug": "embassy-life",
     "area_slug": "jomtien",
+    "developer_slug": "empire-group",
     "cover_image_url": "/media/project-covers/embassy-life/cover_9ec84c2a667c.jpg",
     "status": "published",
     "property_type": "condo",
@@ -150,9 +151,10 @@
     ],
     "source_notes": {
       "official_url": "https://www.embassylife-pattaya.com/",
+      "developer_source_url": "https://empiregroupth.com/th/",
       "source_domain": "embassylife-pattaya.com",
       "media_source": "official project website",
-      "notes": "Distance to beach and land-size claims taken from the official project website on 2026-03-30."
+      "notes": "Distance to beach and land-size claims taken from the official project website on 2026-03-30. Developer reference confirmed from Empire Group's official site on 2026-03-30."
     },
     "claims_updated_at": "2026-03-30T00:00:00Z",
     "investment_snapshot": {
@@ -173,6 +175,7 @@
     "name": "Avenue Boutique",
     "slug": "avenue-boutique",
     "area_slug": "central-pattaya",
+    "developer_slug": "maimon-david-marsiano",
     "cover_image_url": "/media/project-covers/avenue-boutique/cover_342167dd4443.jpg",
     "status": "published",
     "property_type": "condo",
@@ -205,9 +208,10 @@
     ],
     "source_notes": {
       "official_url": "https://avenueboutiquecondominium.com/",
+      "developer_source_url": "https://avenueboutiqueofficial.com/",
       "source_domain": "avenueboutiquecondominium.com",
       "media_source": "official project website",
-      "notes": "Entry price and foreign quota references taken from the official site on 2026-03-30."
+      "notes": "Entry price and foreign quota references taken from the official site on 2026-03-30. Developer reference confirmed from Avenue Boutique Official on 2026-03-30."
     },
     "claims_updated_at": "2026-03-30T00:00:00Z",
     "investment_snapshot": {
@@ -396,6 +400,7 @@
     "name": "The Lavish",
     "slug": "the-lavish",
     "area_slug": "north-pattaya",
+    "developer_slug": "j-plus-property",
     "cover_image_url": "/media/project-covers/the-lavish/cover_c363e8835b38.webp",
     "status": "published",
     "property_type": "house",
@@ -427,9 +432,10 @@
     ],
     "source_notes": {
       "official_url": "https://thelavishpattaya.com/",
+      "developer_source_url": "https://thelavishpattaya.com/",
       "source_domain": "thelavishpattaya.com",
       "media_source": "official project website",
-      "notes": "Starting price and house-type sizes checked on 2026-03-30."
+      "notes": "Starting price and house-type sizes checked on 2026-03-30. Developer reference confirmed from the official project website footer on 2026-03-30."
     },
     "claims_updated_at": "2026-03-30T00:00:00Z",
     "investment_snapshot": {
@@ -451,6 +457,7 @@
     "name": "Once Wongamat",
     "slug": "once-wongamat",
     "area_slug": "wongamat",
+    "developer_slug": "honour-thailand",
     "cover_image_url": "/media/project-covers/once-wongamat/cover_b4ef0491685f.jpg",
     "status": "published",
     "property_type": "condo",
@@ -482,9 +489,10 @@
     ],
     "source_notes": {
       "official_url": "https://oncewongamatpattaya.com/",
+      "developer_source_url": "https://oncewongamatpattaya.com/",
       "source_domain": "oncewongamatpattaya.com",
       "media_source": "official project website",
-      "notes": "Freehold, Terminal 21 distance, and facility-floor claims checked on 2026-03-30."
+      "notes": "Freehold, Terminal 21 distance, and facility-floor claims checked on 2026-03-30. Developer reference confirmed from the official project information section on 2026-03-30."
     },
     "claims_updated_at": "2026-03-30T00:00:00Z",
     "investment_snapshot": {
@@ -615,6 +623,7 @@
     "name": "Wyndham Jomtien Pattaya",
     "slug": "wyndham-jomtien-pattaya",
     "area_slug": "jomtien",
+    "developer_slug": "siam-inter-world-asset",
     "cover_image_url": "/media/project-covers/wyndham-jomtien-pattaya/cover_f20721152575.jpg",
     "status": "published",
     "property_type": "condo",
@@ -647,9 +656,10 @@
     ],
     "source_notes": {
       "official_url": "https://www.wyndhamjomtienpattaya.com/condominium",
+      "developer_source_url": "https://www.wyndhamjomtienpattaya.com/condominium/",
       "source_domain": "wyndhamjomtienpattaya.com",
       "media_source": "official condominium website",
-      "notes": "Investment-program terms checked on 2026-03-30."
+      "notes": "Investment-program terms checked on 2026-03-30. Developer reference confirmed from the official condominium site on 2026-03-30."
     },
     "claims_updated_at": "2026-03-30T00:00:00Z",
     "investment_snapshot": {
