@@ -86,7 +86,7 @@ export function HomeMobileIntentRail({ locale }: { locale: 'en' | 'th' }) {
 
   const audienceConfig = {
     buyer: {
-      eyebrow: locale === 'th' ? 'Lifestyle track' : 'Lifestyle track',
+      eyebrow: locale === 'th' ? 'เส้นทางอยู่อาศัย' : 'Lifestyle track',
       title: locale === 'th'
         ? 'เริ่มจากยูนิตที่อยู่จริงได้ก่อน แล้วค่อยลงลึกเฉพาะสิ่งที่ยังไม่ชัด'
         : 'Open the livable inventory first, then go deeper only where you still need certainty.',
@@ -96,19 +96,19 @@ export function HomeMobileIntentRail({ locale }: { locale: 'en' | 'th' }) {
       order: ['buyer', 'investor', 'luxury'] as RailAudience[],
     },
     investor: {
-      eyebrow: locale === 'th' ? 'Investor lens' : 'Investor lens',
+      eyebrow: locale === 'th' ? 'มุมมองนักลงทุน' : 'Investor lens',
       title: locale === 'th'
-        ? 'เริ่มจาก yield signal ก่อน แล้วค่อยเปิด inventory ที่คุ้มกับ thesis'
+        ? 'เริ่มจากสัญญาณผลตอบแทนก่อน แล้วค่อยเปิดยูนิตที่เหมาะกับแผนลงทุน'
         : 'Start with yield signals first, then open the inventory that fits the thesis.',
       copy: locale === 'th'
-        ? 'ลำดับนี้เอา ROI และ market lens ขึ้นก่อน เพื่อให้นักลงทุนคัดความเสี่ยงและจังหวะได้ก่อนกดดูยูนิตจำนวนมาก'
+        ? 'ลำดับนี้ยกเรื่องผลตอบแทนและภาพตลาดขึ้นก่อน เพื่อให้นักลงทุนคัดความเสี่ยงและจังหวะได้ก่อนเปิดดูยูนิตจำนวนมาก'
         : 'This order leads with ROI and market context so investors can filter risk and timing before opening more listings.',
       order: ['investor', 'buyer', 'luxury'] as RailAudience[],
     },
     luxury: {
-      eyebrow: locale === 'th' ? 'Luxury handoff' : 'Luxury handoff',
+      eyebrow: locale === 'th' ? 'เส้นทางพรีเมียม' : 'Luxury handoff',
       title: locale === 'th'
-        ? 'เริ่มจาก private tour และ shortlist ระดับบน แทนการไล่ดู inventory แบบพอร์ทัล'
+        ? 'เริ่มจากการนัดชมแบบเป็นส่วนตัวและตัวเลือกชุดสั้น แทนการไล่ดูยูนิตแบบพอร์ทัล'
         : 'Start from a private tour and a shorter luxury shortlist instead of browsing like a portal.',
       copy: locale === 'th'
         ? 'เส้นทางนี้เหมาะกับผู้ซื้อระดับบนที่ต้องการความเป็นส่วนตัว ภาพลักษณ์ และทีมช่วยคัดรายการก่อนนัดดูจริง'
@@ -120,25 +120,25 @@ export function HomeMobileIntentRail({ locale }: { locale: 'en' | 'th' }) {
   const items = {
     buyer: {
       key: 'buyer' as const,
-      eyebrow: locale === 'th' ? 'Buyer' : 'Buyer',
-      label: locale === 'th' ? 'เปิด buy-ready inventory' : 'Open buy-ready inventory',
-      detail: locale === 'th' ? 'Checklist + ตัวเลือกคัดสรร' : 'Checklist + curated options',
+      eyebrow: locale === 'th' ? 'ซื้ออยู่เอง' : 'Buyer',
+      label: locale === 'th' ? 'เปิดยูนิตที่พร้อมซื้อ' : 'Open buy-ready inventory',
+      detail: locale === 'th' ? 'เช็กลิสต์ + ตัวเลือกคัดสรร' : 'Checklist + curated options',
       href: withLocale(locale, '/buy?source=home_mobile_buyer'),
       eventPayload: { cta: 'home_mobile_buyer', from: 'home_mobile_intent_rail' },
     },
     investor: {
       key: 'investor' as const,
-      eyebrow: locale === 'th' ? 'Investor' : 'Investor',
-      label: locale === 'th' ? 'เปิด ROI / investment path' : 'Open ROI / investment path',
-      detail: locale === 'th' ? 'Brief ตลาด + เส้นทางลงทุน' : 'Market brief + investment path',
+      eyebrow: locale === 'th' ? 'ลงทุน' : 'Investor',
+      label: locale === 'th' ? 'เปิดเส้นทางลงทุน' : 'Open ROI / investment path',
+      detail: locale === 'th' ? 'ภาพตลาด + แนวทางลงทุน' : 'Market brief + investment path',
       href: withLocale(locale, '/invest?source=home_mobile_investor'),
       eventPayload: { cta: 'home_mobile_investor', from: 'home_mobile_intent_rail' },
     },
     luxury: {
       key: 'luxury' as const,
-      eyebrow: locale === 'th' ? 'High-end' : 'High-end',
-      label: locale === 'th' ? 'เปิด private tour route' : 'Open private tour route',
-      detail: locale === 'th' ? 'Luxury shortlist + discreet handoff' : 'Luxury shortlist + discreet handoff',
+      eyebrow: locale === 'th' ? 'พรีเมียม' : 'High-end',
+      label: locale === 'th' ? 'เปิดเส้นทางนัดชมแบบส่วนตัว' : 'Open private tour route',
+      detail: locale === 'th' ? 'ตัวเลือกชุดสั้น + การประสานงานแบบตรงจุด' : 'Luxury shortlist + discreet handoff',
       href: withLocale(locale, '/contact?topic=private_tour&source=home_mobile_luxury'),
       eventPayload: { cta: 'home_mobile_luxury', from: 'home_mobile_intent_rail' },
     },
@@ -146,12 +146,12 @@ export function HomeMobileIntentRail({ locale }: { locale: 'en' | 'th' }) {
   const activeConfig = activeAudience
     ? audienceConfig[activeAudience]
     : {
-        eyebrow: locale === 'th' ? 'Mobile shortlist paths' : 'Mobile shortlist paths',
+        eyebrow: locale === 'th' ? 'เส้นทางหลักบนมือถือ' : 'Mobile shortlist paths',
         title: locale === 'th'
-          ? 'เลือกเส้นทางที่ตรงโจทย์ก่อน แล้วระบบค่อยเรียง next step ให้'
+          ? 'เลือกเส้นทางที่ตรงโจทย์ก่อน แล้วค่อยไปยังขั้นตอนถัดไปที่เหมาะกว่า'
           : 'Choose the path that fits first, then let the next step tighten around it.',
         copy: locale === 'th'
-          ? 'บล็อกนี้จะเรียงลำดับตาม intent เพื่อให้คุณไปยัง investor, lifestyle หรือ luxury route ที่เหมาะกว่า'
+          ? 'บล็อกนี้จะจัดลำดับตามความสนใจ เพื่อพาคุณไปยังเส้นทางอยู่อาศัย ลงทุน หรือพรีเมียมที่เหมาะกว่า'
           : 'This block settles around intent so you land in the most relevant investor, lifestyle, or luxury route.',
         order: ['buyer', 'investor', 'luxury'] as RailAudience[],
       };

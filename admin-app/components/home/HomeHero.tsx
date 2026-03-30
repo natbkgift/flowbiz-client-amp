@@ -98,17 +98,17 @@ export function HomeHero({
         : (locale === 'th'
             ? ['คัดเฉพาะรายการที่ยืนยันแล้ว', 'รองรับผู้ซื้อชาวต่างชาติ', 'มีทีมพัทยาดูแลต่อจนถึงการเข้าชม']
             : ['Verified live stock only', 'Foreign-buyer ready', 'Local handoff to viewing']);
-    const atmosphereLabel = locale === 'th' ? 'บรีฟโต๊ะที่ปรึกษา' : 'Advisory desk note';
-    const atmosphereTitle = locale === 'th' ? 'เริ่มจากเส้นทางที่ใช่ ไม่ใช่หน้ารวมประกาศ' : 'Start from the right route, not a listing dump';
+    const atmosphereLabel = locale === 'th' ? 'โต๊ะที่ปรึกษา AMP Pattaya' : 'Advisory desk note';
+    const atmosphereTitle = locale === 'th' ? 'เริ่มจากเส้นทางที่เหมาะกับคุณ ไม่ใช่กองประกาศ' : 'Start from the right route, not a listing dump';
     const atmosphereBody = locale === 'th'
-        ? 'ซื้อ ลงทุน เช่า และขาย ถูกแยกเส้นทางให้ชัดตั้งแต่หน้าจอแรก เพื่อให้ทีมรับช่วงต่อได้แม่นกว่า'
+        ? 'ซื้อ ลงทุน เช่า และขาย ถูกแยกเป็นเส้นทางชัดเจนตั้งแต่หน้าจอแรก เพื่อให้ทีมรับช่วงต่อได้ตรงประเด็นกว่า'
         : 'Buying, investing, renting, and selling are separated early so the next handoff stays specific.';
 
     return (
         <section className="home-hero-section relative w-full bg-gray-900 overflow-hidden min-h-[620px] sm:min-h-[680px] md:min-h-[700px] xl:min-h-[760px]" data-home-perf="hero-media">
             <Image
                 src={heroImageSrc}
-                alt="AMP Pattaya Real Estate"
+                alt={locale === 'th' ? 'ภาพบรรยากาศอสังหาริมทรัพย์พัทยาโดย AMP Pattaya' : 'AMP Pattaya Real Estate'}
                 fill
                 priority
                 fetchPriority="high"
@@ -127,12 +127,12 @@ export function HomeHero({
             <div className="absolute inset-0 z-20 flex flex-col justify-start md:justify-center pt-[78px] sm:pt-[88px] pb-5 md:py-28">
                 <Container variant="wide">
                     <div className="hero-home-layout">
-                        <div className="hero-home-panel max-w-[min(76ch,100%)]">
+                        <div className={`hero-home-panel ${locale === 'th' ? 'hero-home-panel--th' : ''} max-w-[min(76ch,100%)]`}>
                         <p className="hero-home-eyebrow text-white/72 text-[11px] md:text-xs font-semibold tracking-[0.26em] uppercase mb-3 md:mb-4">
                             {heroEyebrow}
                         </p>
                         {/* Headline: weight ~500, tight tracking, 1.1 line-height, max-width 14ch for controlled wrapping */}
-                        <h1 className={`hero-home-title ${locale === "th" ? "hero-home-title--th" : ""} text-white text-[length:var(--font-h1)] font-semibold font-serif mb-4 md:mb-7 leading-[0.98] tracking-[-0.03em] max-w-[13.5ch]`}>
+                        <h1 className={`hero-home-title ${locale === "th" ? "hero-home-title--th font-sans" : "font-serif"} text-white text-[length:var(--font-h1)] font-semibold mb-4 md:mb-7 leading-[0.98] tracking-[-0.03em] max-w-[13.5ch]`}>
                             {heroHeading}
                         </h1>
                         {/* Subcopy: 18px (text-lg), 1.6 lh, neutral opacity, 24px bottom spacing */}

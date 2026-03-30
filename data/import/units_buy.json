@@ -1,0 +1,985 @@
+[
+  {
+    "source_id": "AMP-S010126",
+    "title": "1BR Condo - AROM JOMTIEN (Panoramic Jomtien Sea View)",
+    "description": "Resale unit at AROM JOMTIEN. Includes 1 bedroom, 1 bathroom, 39.22 sqm, floor 38, panoramic jomtien sea view, Foreign Quota. Location context: Jomtien Pattaya. 🌊 FOR SALE | Arom Jomtien Beachfront Condo (Resale – FQ) 🌊 💰 Hot Discount / Price: 7.5 MB (Foreign Quota) 🏖️ Prime Beachfront Location",
+    "title_i18n": {
+      "en": "1BR Condo - AROM JOMTIEN (Panoramic Jomtien Sea View)",
+      "th": "คอนโด 1 ห้องนอน ที่ AROM JOMTIEN (วิวทะเลจอมเทียนแบบพาโนรามา)"
+    },
+    "description_i18n": {
+      "en": "Resale unit at AROM JOMTIEN. Includes 1 bedroom, 1 bathroom, 39.22 sqm, floor 38, panoramic jomtien sea view, Foreign Quota. Location context: Jomtien Pattaya. 🌊 FOR SALE | Arom Jomtien Beachfront Condo (Resale – FQ) 🌊 💰 Hot Discount / Price: 7.5 MB (Foreign Quota) 🏖️ Prime Beachfront Location",
+      "th": "ยูนิตขายต่อของโครงการ AROM JOMTIEN พร้อมรายละเอียดหลักคือ 1 ห้องนอน 1 ห้องน้ำ 39.22 ตร.ม. ชั้น 38 วิวทะเลจอมเทียนแบบพาโนรามา โควตาต่างชาติ โซน Jomtien Pattaya"
+    },
+    "type": "resale",
+    "property_type": "condo",
+    "price": 7500000,
+    "currency": "THB",
+    "price_period": null,
+    "bedrooms": 1,
+    "bathrooms": 1,
+    "size_sqm": 39.22,
+    "floor": 38,
+    "view": "Panoramic Jomtien Sea View",
+    "furnishing": null,
+    "address": "AROM JOMTIEN",
+    "city": "Pattaya",
+    "project_slug": null,
+    "area_slug": "jomtien",
+    "developer_slug": null,
+    "slug": "amp-s010126-arom-jomtien",
+    "status": "active",
+    "ownership_notes": "Foreign Quota",
+    "cover_image_url": "/media/import-assets/units-buy/amp-s010126-arom-jomtien/asset_243dee6db6de.jpg",
+    "cover_image": "/media/import-assets/units-buy/amp-s010126-arom-jomtien/asset_243dee6db6de.jpg",
+    "images": [
+      "/media/import-assets/units-buy/amp-s010126-arom-jomtien/asset_243dee6db6de.jpg",
+      "/media/import-assets/units-buy/amp-s010126-arom-jomtien/asset_ee3843fba37d.jpg",
+      "/media/import-assets/units-buy/amp-s010126-arom-jomtien/asset_841f95a2ceda.jpg",
+      "/media/import-assets/units-buy/amp-s010126-arom-jomtien/asset_43acb1c447a2.jpg",
+      "/media/import-assets/units-buy/amp-s010126-arom-jomtien/asset_5e280aca6a31.jpg",
+      "/media/import-assets/units-buy/amp-s010126-arom-jomtien/asset_19abb0a5cf9d.jpg",
+      "/media/import-assets/units-buy/amp-s010126-arom-jomtien/asset_3edbeeee0538.jpg",
+      "/media/import-assets/units-buy/amp-s010126-arom-jomtien/asset_b624d48aee82.jpg"
+    ],
+    "local_images": [
+      "/media/import-assets/units-buy/amp-s010126-arom-jomtien/asset_243dee6db6de.jpg",
+      "/media/import-assets/units-buy/amp-s010126-arom-jomtien/asset_ee3843fba37d.jpg",
+      "/media/import-assets/units-buy/amp-s010126-arom-jomtien/asset_841f95a2ceda.jpg",
+      "/media/import-assets/units-buy/amp-s010126-arom-jomtien/asset_43acb1c447a2.jpg",
+      "/media/import-assets/units-buy/amp-s010126-arom-jomtien/asset_5e280aca6a31.jpg",
+      "/media/import-assets/units-buy/amp-s010126-arom-jomtien/asset_19abb0a5cf9d.jpg",
+      "/media/import-assets/units-buy/amp-s010126-arom-jomtien/asset_3edbeeee0538.jpg",
+      "/media/import-assets/units-buy/amp-s010126-arom-jomtien/asset_b624d48aee82.jpg"
+    ],
+    "features": {
+      "highlights": [
+        "Condo",
+        "1 bedroom",
+        "1 bathroom",
+        "39.22 sqm",
+        "Floor 38",
+        "Panoramic Jomtien Sea View",
+        "Foreign Quota"
+      ],
+      "amenities": [
+        "car park",
+        "children's area",
+        "gym",
+        "security",
+        "swimming pool"
+      ],
+      "surroundings": [
+        "sea",
+        "main street"
+      ],
+      "video_urls": []
+    },
+    "source_meta": {
+      "source_url": "https://drive.google.com/drive/folders/1jXFYypS-ufiF8bDtmC-nj3RNnz4DvfuQ?usp=sharing",
+      "source_domain": "drive.google.com",
+      "rights_status": "company-public-drive",
+      "approval_status": "approved-public-share",
+      "folder_id": "1jXFYypS-ufiF8bDtmC-nj3RNnz4DvfuQ",
+      "folder_name": "AMP-S010126",
+      "root_folder_id": "1nyIDkgHf-uC-q81vhRDcOTDCYvkcR0BP",
+      "root_public_url": "https://drive.google.com/drive/folders/1nyIDkgHf-uC-q81vhRDcOTDCYvkcR0BP?usp=sharing",
+      "info_file_id": "1v85sPlcaWVKLlwqWX4086rsH92-3T-Cq",
+      "proppit_file_id": "1EY0LqqoSEDg1sPzKH8wFJi9f11T_mjD6",
+      "image_file_ids": [
+        "1AwkPhmrZpWav2lUV16-G_j1I_CduZhN5",
+        "1M0vtn5-MxcuU0yjc0cGB5sCtQb-EfiYl",
+        "1V-3-TMPzm4IYgrhaQhYzEiz4-XoRjI6H",
+        "188gIMhlSC5UTwF4O5EZ_z8M65U2jPTfQ",
+        "1IGK8uyjdyZ_rCcmdRwsBMw6lbCbvYqr5",
+        "1XO3KSchjdAV6BxJItZD03xGW_QgfDYDz",
+        "1pGVt311JEWer43b1BjpBSOvltsXqbdDQ",
+        "1mzJ7mI32Pz5N9-A2PLVsChq90-jrFoB3",
+        "1AcYhjcxcDKsL8vcc1CJVKyYIWdfpIal8",
+        "1RnEsa71qWDqMKwL60x3NIQ94wiiO8jL0",
+        "1Tg367o_0CraDJHEsWn7-zNSwtGpfvVWA",
+        "1lkAnCk6caD4TcQNDoi7PGOOwOpuydUAB",
+        "17OBmery4EKJDZCU5JcYo3by-aRPnM8f3",
+        "1ITl-wCOIAyXqCEV6rhXEmtakesHMI4-E"
+      ],
+      "facebook_pack_folder_id": "1OCne3MJsZJC0Qg8J0QlNTPyGbNFE5YhS",
+      "facebook_pack_image_ids": [],
+      "video_file_ids": [],
+      "facebook_pack_video_ids": [],
+      "project_name": "AROM JOMTIEN",
+      "location_marketing": "Jomtien Pattaya",
+      "quality_score": 115,
+      "selected_for_homepage": true
+    }
+  },
+  {
+    "source_id": "AMP-S020126",
+    "title": "1BR Condo - Grand Solaire Pattaya (Bay View)",
+    "description": "Resale unit at Grand Solaire Pattaya. Includes 1 bedroom, 1 bathroom, 29.00 sqm, floor 34, bay view. Location context: Pattaya. Grand Solaire GS 3412 & 3413 34 floor Pattaya Bay view 29 sq.m.",
+    "title_i18n": {
+      "en": "1BR Condo - Grand Solaire Pattaya (Bay View)",
+      "th": "คอนโด 1 ห้องนอน ที่ Grand Solaire Pattaya (วิวอ่าว)"
+    },
+    "description_i18n": {
+      "en": "Resale unit at Grand Solaire Pattaya. Includes 1 bedroom, 1 bathroom, 29.00 sqm, floor 34, bay view. Location context: Pattaya. Grand Solaire GS 3412 & 3413 34 floor Pattaya Bay view 29 sq.m.",
+      "th": "ยูนิตขายต่อของโครงการ Grand Solaire Pattaya พร้อมรายละเอียดหลักคือ 1 ห้องนอน 1 ห้องน้ำ 29 ตร.ม. ชั้น 34 วิวอ่าว โซน Pattaya"
+    },
+    "type": "resale",
+    "property_type": "condo",
+    "price": 3800000,
+    "currency": "THB",
+    "price_period": null,
+    "bedrooms": 1,
+    "bathrooms": 1,
+    "size_sqm": 29.0,
+    "floor": 34,
+    "view": "Bay View",
+    "furnishing": null,
+    "address": "Grand Solaire Pattaya",
+    "city": "Pattaya",
+    "project_slug": null,
+    "area_slug": "central-pattaya",
+    "developer_slug": null,
+    "slug": "amp-s020126-grand-solaire-pattaya",
+    "status": "active",
+    "ownership_notes": null,
+    "cover_image_url": "/media/import-assets/units-buy/amp-s020126-grand-solaire-pattaya/asset_519ffbb705c0.jpg",
+    "cover_image": "/media/import-assets/units-buy/amp-s020126-grand-solaire-pattaya/asset_519ffbb705c0.jpg",
+    "images": [
+      "/media/import-assets/units-buy/amp-s020126-grand-solaire-pattaya/asset_519ffbb705c0.jpg",
+      "/media/import-assets/units-buy/amp-s020126-grand-solaire-pattaya/asset_755f5856da11.jpg",
+      "/media/import-assets/units-buy/amp-s020126-grand-solaire-pattaya/asset_d361c0c36c31.jpg",
+      "/media/import-assets/units-buy/amp-s020126-grand-solaire-pattaya/asset_4e29e45b2eae.jpg",
+      "/media/import-assets/units-buy/amp-s020126-grand-solaire-pattaya/asset_0fc2f3db904b.jpg",
+      "/media/import-assets/units-buy/amp-s020126-grand-solaire-pattaya/asset_0a8ffdcc94a1.jpg",
+      "/media/import-assets/units-buy/amp-s020126-grand-solaire-pattaya/asset_073d4ee684de.jpg",
+      "/media/import-assets/units-buy/amp-s020126-grand-solaire-pattaya/asset_d8ad5a770637.jpg"
+    ],
+    "local_images": [
+      "/media/import-assets/units-buy/amp-s020126-grand-solaire-pattaya/asset_519ffbb705c0.jpg",
+      "/media/import-assets/units-buy/amp-s020126-grand-solaire-pattaya/asset_755f5856da11.jpg",
+      "/media/import-assets/units-buy/amp-s020126-grand-solaire-pattaya/asset_d361c0c36c31.jpg",
+      "/media/import-assets/units-buy/amp-s020126-grand-solaire-pattaya/asset_4e29e45b2eae.jpg",
+      "/media/import-assets/units-buy/amp-s020126-grand-solaire-pattaya/asset_0fc2f3db904b.jpg",
+      "/media/import-assets/units-buy/amp-s020126-grand-solaire-pattaya/asset_0a8ffdcc94a1.jpg",
+      "/media/import-assets/units-buy/amp-s020126-grand-solaire-pattaya/asset_073d4ee684de.jpg",
+      "/media/import-assets/units-buy/amp-s020126-grand-solaire-pattaya/asset_d8ad5a770637.jpg"
+    ],
+    "features": {
+      "highlights": [
+        "Condo",
+        "1 bedroom",
+        "1 bathroom",
+        "29.00 sqm",
+        "Floor 34",
+        "Bay View"
+      ],
+      "amenities": [
+        "car park",
+        "gym",
+        "security",
+        "swimming pool"
+      ],
+      "surroundings": [
+        "main street"
+      ],
+      "video_urls": []
+    },
+    "source_meta": {
+      "source_url": "https://drive.google.com/drive/folders/1kn3puCXyS2qOZ5rrJPqp-rC9kfaTx2ez?usp=sharing",
+      "source_domain": "drive.google.com",
+      "rights_status": "company-public-drive",
+      "approval_status": "approved-public-share",
+      "folder_id": "1kn3puCXyS2qOZ5rrJPqp-rC9kfaTx2ez",
+      "folder_name": "AMP-S020126",
+      "root_folder_id": "1nyIDkgHf-uC-q81vhRDcOTDCYvkcR0BP",
+      "root_public_url": "https://drive.google.com/drive/folders/1nyIDkgHf-uC-q81vhRDcOTDCYvkcR0BP?usp=sharing",
+      "info_file_id": "1QQ1jAw77eru6oMradNPgsl6-QaC_58ER",
+      "proppit_file_id": "1oBNaqusNhIlMEDD_Naoe7euGu39oJmt5",
+      "image_file_ids": [
+        "1MkCuHkz1mQh9edHe7V8PqyH5wLaArj6B",
+        "1dwH3JQ0_0i0ht3wgLsqIl2q4Dmp0uLJh",
+        "1jUm_4pwQJSdEqXj_a9L2H4_FqMK1Zx2p",
+        "1JSWUfp5u8hZGaxgporocauG0CQHg-YGh",
+        "1xSN0mJybG6Bs4s0Y6Wj-3ODsCqiDa1yz",
+        "1rVq_vy9Su32GQotvUfBPZJyBKA3Py2NU",
+        "1ARm4xH0tZeF4YJAGBCUZualQCQQF8p2F",
+        "1n3z3Yrt9B6_Q8sqLESGM21mt5o6S-CYC",
+        "1smexna5b5ObCqmMP8LKz45ZOCarZHx5V"
+      ],
+      "facebook_pack_folder_id": "1bLJ3D47nYHrOqgyUgA6NI90Q272GKsJl",
+      "facebook_pack_image_ids": [],
+      "video_file_ids": [],
+      "facebook_pack_video_ids": [],
+      "project_name": "Grand Solaire Pattaya",
+      "location_marketing": "Pattaya",
+      "quality_score": 115,
+      "selected_for_homepage": true
+    }
+  },
+  {
+    "source_id": "AMP-S012926",
+    "title": "2BR Condo - Andromeda Condominium",
+    "description": "Resale unit at Andromeda Condominium. Includes 2 bedroom, 2 bathroom, 74.00 sqm, floor 30, Foreign Quota. Location context: Pratumnak Pattaya. Andromeda Pratumnak area 2 bedroom 2 bathroom",
+    "title_i18n": {
+      "en": "2BR Condo - Andromeda Condominium",
+      "th": "คอนโด 2 ห้องนอน ที่ Andromeda Condominium"
+    },
+    "description_i18n": {
+      "en": "Resale unit at Andromeda Condominium. Includes 2 bedroom, 2 bathroom, 74.00 sqm, floor 30, Foreign Quota. Location context: Pratumnak Pattaya. Andromeda Pratumnak area 2 bedroom 2 bathroom",
+      "th": "ยูนิตขายต่อของโครงการ Andromeda Condominium พร้อมรายละเอียดหลักคือ 2 ห้องนอน 2 ห้องน้ำ 74 ตร.ม. ชั้น 30 โควตาต่างชาติ โซน Pratumnak Pattaya"
+    },
+    "type": "resale",
+    "property_type": "condo",
+    "price": 14995000,
+    "currency": "THB",
+    "price_period": null,
+    "bedrooms": 2,
+    "bathrooms": 2,
+    "size_sqm": 74.0,
+    "floor": 30,
+    "view": null,
+    "furnishing": null,
+    "address": "Andromeda Condominium",
+    "city": "Pattaya",
+    "project_slug": null,
+    "area_slug": "pratumnak",
+    "developer_slug": null,
+    "slug": "amp-s012926-andromeda-condominium",
+    "status": "active",
+    "ownership_notes": "Foreign Quota",
+    "cover_image_url": "/media/import-assets/units-buy/amp-s012926-andromeda-condominium/asset_38a66df91186.jpg",
+    "cover_image": "/media/import-assets/units-buy/amp-s012926-andromeda-condominium/asset_38a66df91186.jpg",
+    "images": [
+      "/media/import-assets/units-buy/amp-s012926-andromeda-condominium/asset_38a66df91186.jpg",
+      "/media/import-assets/units-buy/amp-s012926-andromeda-condominium/asset_9837301d6253.jpg",
+      "/media/import-assets/units-buy/amp-s012926-andromeda-condominium/asset_3a000f3c74d6.jpg",
+      "/media/import-assets/units-buy/amp-s012926-andromeda-condominium/asset_997ce9db0528.jpg",
+      "/media/import-assets/units-buy/amp-s012926-andromeda-condominium/asset_4e2dc719d47e.jpg",
+      "/media/import-assets/units-buy/amp-s012926-andromeda-condominium/asset_76eb79e8f1c2.jpg",
+      "/media/import-assets/units-buy/amp-s012926-andromeda-condominium/asset_ce48d37f5f2f.jpg",
+      "/media/import-assets/units-buy/amp-s012926-andromeda-condominium/asset_fec82a6c7508.jpg"
+    ],
+    "local_images": [
+      "/media/import-assets/units-buy/amp-s012926-andromeda-condominium/asset_38a66df91186.jpg",
+      "/media/import-assets/units-buy/amp-s012926-andromeda-condominium/asset_9837301d6253.jpg",
+      "/media/import-assets/units-buy/amp-s012926-andromeda-condominium/asset_3a000f3c74d6.jpg",
+      "/media/import-assets/units-buy/amp-s012926-andromeda-condominium/asset_997ce9db0528.jpg",
+      "/media/import-assets/units-buy/amp-s012926-andromeda-condominium/asset_4e2dc719d47e.jpg",
+      "/media/import-assets/units-buy/amp-s012926-andromeda-condominium/asset_76eb79e8f1c2.jpg",
+      "/media/import-assets/units-buy/amp-s012926-andromeda-condominium/asset_ce48d37f5f2f.jpg",
+      "/media/import-assets/units-buy/amp-s012926-andromeda-condominium/asset_fec82a6c7508.jpg"
+    ],
+    "features": {
+      "highlights": [
+        "Condo",
+        "2 bedroom",
+        "2 bathroom",
+        "74.00 sqm",
+        "Floor 30",
+        "Foreign Quota"
+      ],
+      "amenities": [
+        "car park",
+        "gym",
+        "security",
+        "swimming pool"
+      ],
+      "surroundings": [
+        "sea",
+        "main street"
+      ],
+      "video_urls": []
+    },
+    "source_meta": {
+      "source_url": "https://drive.google.com/drive/folders/1q591NfUKglgt_G1HUvxPUhhHS8QKJBpt?usp=sharing",
+      "source_domain": "drive.google.com",
+      "rights_status": "company-public-drive",
+      "approval_status": "approved-public-share",
+      "folder_id": "1q591NfUKglgt_G1HUvxPUhhHS8QKJBpt",
+      "folder_name": "AMP-S012926",
+      "root_folder_id": "1nyIDkgHf-uC-q81vhRDcOTDCYvkcR0BP",
+      "root_public_url": "https://drive.google.com/drive/folders/1nyIDkgHf-uC-q81vhRDcOTDCYvkcR0BP?usp=sharing",
+      "info_file_id": "1sOyqNBRXwoL4SikovWsYyt3Y9ZDuZgX-",
+      "proppit_file_id": "12vTOeMjuoSy1TyXHfReCvmuM_HEXWdGP",
+      "image_file_ids": [
+        "1H-ZXSmefMeczS4a96KLej1HST0zf7isT",
+        "1GvzDFXM_gVyVhdrARhKiEADktU8Wrvfr",
+        "1d-7Wg3FyiNUDi-_75fDvjABKsWq0JnXV",
+        "1oL8PHLhj5un2V-dth0_ip7Du-dkTRvSM",
+        "1x6pxZ8f_h_OqMjrVoY56Ea1r56aCa_yd",
+        "1iqzRqDLG62LQGHzrTPdGBYAg7sTExbAb",
+        "1TzbitWRv-CSf574QYP08LWxIqWxofiD_",
+        "1jUYDFhVrPBPvM-Bf2sYqC_QShBOb-b50",
+        "1qcGOuC2Y9_LCAjePtZtcYvy2o4h2mvjQ",
+        "1oYl69qnr-9Sl0aEJLiuyIbaRy-PWhoGj",
+        "1nJX1hzZHywHXjjbULVgIfi6TgdRt2oav",
+        "1A7U6Reh0kaxHhxUFdgGS06ltznk96JJF",
+        "1yK1xo7qDW8G1RqQw_3yaNna1h_HbGOjM",
+        "1PV5w5w0HvhBS5Ru6HgdbAzgma--z7uQh"
+      ],
+      "facebook_pack_folder_id": "1vv7omwTlUotJLBqYSKabhdwwfMRKK01-",
+      "facebook_pack_image_ids": [],
+      "video_file_ids": [],
+      "facebook_pack_video_ids": [],
+      "project_name": "Andromeda Condominium",
+      "location_marketing": "Pratumnak Pattaya",
+      "quality_score": 110,
+      "selected_for_homepage": true
+    }
+  },
+  {
+    "source_id": "AMP-S030526",
+    "title": "1BR Condo - PTY Residence Sai 1",
+    "description": "Resale unit at PTY Residence Sai 1. Includes 1 bedroom, 1 bathroom, 28.00 sqm, floor 16, fully furnished, Foreign Quota. Location context: Central Pattaya. PTY Residence Sai 1 Unit No.011608 🛏️ 1 bedroom |  1 bathroom",
+    "title_i18n": {
+      "en": "1BR Condo - PTY Residence Sai 1",
+      "th": "คอนโด 1 ห้องนอน ที่ PTY Residence Sai 1"
+    },
+    "description_i18n": {
+      "en": "Resale unit at PTY Residence Sai 1. Includes 1 bedroom, 1 bathroom, 28.00 sqm, floor 16, fully furnished, Foreign Quota. Location context: Central Pattaya. PTY Residence Sai 1 Unit No.011608 🛏️ 1 bedroom |  1 bathroom",
+      "th": "ยูนิตขายต่อของโครงการ PTY Residence Sai 1 พร้อมรายละเอียดหลักคือ 1 ห้องนอน 1 ห้องน้ำ 28 ตร.ม. ชั้น 16 พร้อมเฟอร์นิเจอร์ โควตาต่างชาติ โซน Central Pattaya"
+    },
+    "type": "resale",
+    "property_type": "condo",
+    "price": 6800000,
+    "currency": "THB",
+    "price_period": null,
+    "bedrooms": 1,
+    "bathrooms": 1,
+    "size_sqm": 28.0,
+    "floor": 16,
+    "view": null,
+    "furnishing": "Fully furnished",
+    "address": "PTY Residence Sai 1",
+    "city": "Pattaya",
+    "project_slug": null,
+    "area_slug": "central-pattaya",
+    "developer_slug": null,
+    "slug": "amp-s030526-pty-residence-sai-1",
+    "status": "active",
+    "ownership_notes": "Foreign Quota",
+    "cover_image_url": "/media/import-assets/units-buy/amp-s030526-pty-residence-sai-1/asset_2588c4c67fea.jpg",
+    "cover_image": "/media/import-assets/units-buy/amp-s030526-pty-residence-sai-1/asset_2588c4c67fea.jpg",
+    "images": [
+      "/media/import-assets/units-buy/amp-s030526-pty-residence-sai-1/asset_2588c4c67fea.jpg",
+      "/media/import-assets/units-buy/amp-s030526-pty-residence-sai-1/asset_431fe94952ab.jpg",
+      "/media/import-assets/units-buy/amp-s030526-pty-residence-sai-1/asset_adf735167cc2.jpg",
+      "/media/import-assets/units-buy/amp-s030526-pty-residence-sai-1/asset_0f1d615ade27.jpg",
+      "/media/import-assets/units-buy/amp-s030526-pty-residence-sai-1/asset_9c324a0e0182.jpg",
+      "/media/import-assets/units-buy/amp-s030526-pty-residence-sai-1/asset_8d5339e31dcc.jpg",
+      "/media/import-assets/units-buy/amp-s030526-pty-residence-sai-1/asset_468f368dcd16.jpg"
+    ],
+    "local_images": [
+      "/media/import-assets/units-buy/amp-s030526-pty-residence-sai-1/asset_2588c4c67fea.jpg",
+      "/media/import-assets/units-buy/amp-s030526-pty-residence-sai-1/asset_431fe94952ab.jpg",
+      "/media/import-assets/units-buy/amp-s030526-pty-residence-sai-1/asset_adf735167cc2.jpg",
+      "/media/import-assets/units-buy/amp-s030526-pty-residence-sai-1/asset_0f1d615ade27.jpg",
+      "/media/import-assets/units-buy/amp-s030526-pty-residence-sai-1/asset_9c324a0e0182.jpg",
+      "/media/import-assets/units-buy/amp-s030526-pty-residence-sai-1/asset_8d5339e31dcc.jpg",
+      "/media/import-assets/units-buy/amp-s030526-pty-residence-sai-1/asset_468f368dcd16.jpg"
+    ],
+    "features": {
+      "highlights": [
+        "Condo",
+        "1 bedroom",
+        "1 bathroom",
+        "28.00 sqm",
+        "Floor 16",
+        "Fully furnished",
+        "Foreign Quota"
+      ],
+      "amenities": [
+        "car park",
+        "security"
+      ],
+      "surroundings": [
+        "sea",
+        "main street",
+        "shopping mall"
+      ],
+      "video_urls": []
+    },
+    "source_meta": {
+      "source_url": "https://drive.google.com/drive/folders/1jSoWnzG1IA73j5aRGFPzi4Su6fVsmREi?usp=sharing",
+      "source_domain": "drive.google.com",
+      "rights_status": "company-public-drive",
+      "approval_status": "approved-public-share",
+      "folder_id": "1jSoWnzG1IA73j5aRGFPzi4Su6fVsmREi",
+      "folder_name": "AMP-S030526",
+      "root_folder_id": "1nyIDkgHf-uC-q81vhRDcOTDCYvkcR0BP",
+      "root_public_url": "https://drive.google.com/drive/folders/1nyIDkgHf-uC-q81vhRDcOTDCYvkcR0BP?usp=sharing",
+      "info_file_id": "1aFIO_AdMA44YsjBi8Z3oMJiNS-_oYFGN",
+      "proppit_file_id": "17eQjC4TaGtgql1vYtgfGlKB8fnmntnRu",
+      "image_file_ids": [
+        "1Rfa2KjoYIAq7wygK_Fq8BQNIiwMDZtuQ",
+        "18ohY03vIaYWYj4zJ0Aqe80AY4WvAD10U",
+        "1bRINogl2LlnQbvzrqYKjwMv8oAz_D45f",
+        "13CmFwfv74VVkOLqoB4q0li8Rx5-XbzD4",
+        "11e4-4pWXSlH67O9UBNGsOxKObTd7yh2J",
+        "1ObKIJZIJCQulHXloyDM2Jzi-gQL7giy_",
+        "1rFuTbLWmdLat2lJ3vS9piufUvPTHAba4"
+      ],
+      "facebook_pack_folder_id": "1BKN7vAVy6ScOQ7d8bDzydmqaRGe6RQqy",
+      "facebook_pack_image_ids": [],
+      "video_file_ids": [],
+      "facebook_pack_video_ids": [],
+      "project_name": "PTY Residence Sai 1",
+      "location_marketing": "Central Pattaya",
+      "quality_score": 110,
+      "selected_for_homepage": true
+    }
+  },
+  {
+    "source_id": "AMP-S010726",
+    "title": "1BR Condo - Grand Solaire Pattaya (Bay View)",
+    "description": "Resale unit at Grand Solaire Pattaya. Includes 1 bedroom, 1 bathroom, 29.00 sqm, floor 43, bay view. Location context: Pattaya. Grand Solaire GS 4312 & 4313 43rd floor Pattaya Bay view 29 sq.m.",
+    "title_i18n": {
+      "en": "1BR Condo - Grand Solaire Pattaya (Bay View)",
+      "th": "คอนโด 1 ห้องนอน ที่ Grand Solaire Pattaya (วิวอ่าว)"
+    },
+    "description_i18n": {
+      "en": "Resale unit at Grand Solaire Pattaya. Includes 1 bedroom, 1 bathroom, 29.00 sqm, floor 43, bay view. Location context: Pattaya. Grand Solaire GS 4312 & 4313 43rd floor Pattaya Bay view 29 sq.m.",
+      "th": "ยูนิตขายต่อของโครงการ Grand Solaire Pattaya พร้อมรายละเอียดหลักคือ 1 ห้องนอน 1 ห้องน้ำ 29 ตร.ม. ชั้น 43 วิวอ่าว โซน Pattaya"
+    },
+    "type": "resale",
+    "property_type": "condo",
+    "price": 4990000,
+    "currency": "THB",
+    "price_period": null,
+    "bedrooms": 1,
+    "bathrooms": 1,
+    "size_sqm": 29.0,
+    "floor": 43,
+    "view": "Bay View",
+    "furnishing": null,
+    "address": "Grand Solaire Pattaya",
+    "city": "Pattaya",
+    "project_slug": null,
+    "area_slug": "central-pattaya",
+    "developer_slug": null,
+    "slug": "amp-s010726-grand-solaire-pattaya",
+    "status": "active",
+    "ownership_notes": null,
+    "cover_image_url": "/media/import-assets/units-buy/amp-s010726-grand-solaire-pattaya/asset_aacbd8ad47f0.jpg",
+    "cover_image": "/media/import-assets/units-buy/amp-s010726-grand-solaire-pattaya/asset_aacbd8ad47f0.jpg",
+    "images": [
+      "/media/import-assets/units-buy/amp-s010726-grand-solaire-pattaya/asset_aacbd8ad47f0.jpg",
+      "/media/import-assets/units-buy/amp-s010726-grand-solaire-pattaya/asset_7cc163abfa8d.jpg",
+      "/media/import-assets/units-buy/amp-s010726-grand-solaire-pattaya/asset_4f131eb7400b.jpg",
+      "/media/import-assets/units-buy/amp-s010726-grand-solaire-pattaya/asset_63612404b68a.jpg",
+      "/media/import-assets/units-buy/amp-s010726-grand-solaire-pattaya/asset_68b6a5fcce3c.jpg",
+      "/media/import-assets/units-buy/amp-s010726-grand-solaire-pattaya/asset_bbf6697a3c8b.jpg",
+      "/media/import-assets/units-buy/amp-s010726-grand-solaire-pattaya/asset_6d768b5a1023.jpg",
+      "/media/import-assets/units-buy/amp-s010726-grand-solaire-pattaya/asset_7ff73ef87d90.jpg"
+    ],
+    "local_images": [
+      "/media/import-assets/units-buy/amp-s010726-grand-solaire-pattaya/asset_aacbd8ad47f0.jpg",
+      "/media/import-assets/units-buy/amp-s010726-grand-solaire-pattaya/asset_7cc163abfa8d.jpg",
+      "/media/import-assets/units-buy/amp-s010726-grand-solaire-pattaya/asset_4f131eb7400b.jpg",
+      "/media/import-assets/units-buy/amp-s010726-grand-solaire-pattaya/asset_63612404b68a.jpg",
+      "/media/import-assets/units-buy/amp-s010726-grand-solaire-pattaya/asset_68b6a5fcce3c.jpg",
+      "/media/import-assets/units-buy/amp-s010726-grand-solaire-pattaya/asset_bbf6697a3c8b.jpg",
+      "/media/import-assets/units-buy/amp-s010726-grand-solaire-pattaya/asset_6d768b5a1023.jpg",
+      "/media/import-assets/units-buy/amp-s010726-grand-solaire-pattaya/asset_7ff73ef87d90.jpg"
+    ],
+    "features": {
+      "highlights": [
+        "Condo",
+        "1 bedroom",
+        "1 bathroom",
+        "29.00 sqm",
+        "Floor 43",
+        "Bay View"
+      ],
+      "amenities": [
+        "car park",
+        "gym",
+        "security",
+        "swimming pool"
+      ],
+      "surroundings": [
+        "main street"
+      ],
+      "video_urls": []
+    },
+    "source_meta": {
+      "source_url": "https://drive.google.com/drive/folders/1ruFCxZAPct2ecB0EKyvietV-zkPkIMxA?usp=sharing",
+      "source_domain": "drive.google.com",
+      "rights_status": "company-public-drive",
+      "approval_status": "approved-public-share",
+      "folder_id": "1ruFCxZAPct2ecB0EKyvietV-zkPkIMxA",
+      "folder_name": "AMP-S010726",
+      "root_folder_id": "1nyIDkgHf-uC-q81vhRDcOTDCYvkcR0BP",
+      "root_public_url": "https://drive.google.com/drive/folders/1nyIDkgHf-uC-q81vhRDcOTDCYvkcR0BP?usp=sharing",
+      "info_file_id": "1DVt407aTxP-Ivl1eemOvkIUQlwaG0bJE",
+      "proppit_file_id": "1p7G5oJdwoSHfFUHgLwPLfYPYoaOQ_Hpp",
+      "image_file_ids": [
+        "1g3hjD-vvCwAHkKT7mNs6AFF5mHkCSsh7",
+        "1HhuWIPUTdvpl8owv3Sm2yMfb_Lg2axmX",
+        "1VgXJJIIV0yiw7pqqp6x3h7IcMky1BCIV",
+        "1fTW4ymKpvZ8KNp_bNolYCYdSkgw5Xhth",
+        "1bcZJRjbcTGGNbrFrrdKazcH1UW4PVpZc",
+        "16gEThkM4lxwVcF6lJnggOAm8Bpt3wyJU",
+        "10GYliJ6-Dbz8cWG5zXCG1b7tcYzv42nF",
+        "1WCCMTyOiehDp2OHR0k7QodpqjAp-jpPy"
+      ],
+      "facebook_pack_folder_id": "1c1ZauEqyVKoTUeRfcN_Ia5Pswn6U5hfo",
+      "facebook_pack_image_ids": [],
+      "video_file_ids": [],
+      "facebook_pack_video_ids": [],
+      "project_name": "Grand Solaire Pattaya",
+      "location_marketing": "Pattaya",
+      "quality_score": 115,
+      "selected_for_homepage": false
+    }
+  },
+  {
+    "source_id": "AMP-S012826",
+    "title": "1BR Condo - AROM JOMTIEN (Front Sea View)",
+    "description": "Resale unit at AROM JOMTIEN. Includes 1 bedroom, 1 bathroom, 47.47 sqm, floor 43, front sea view, Foreign Quota. Location context: Jomtien Pattaya. Arom Jomtien 4305 & 4306 43rd floor Front sea view 47.47 sq.m.",
+    "title_i18n": {
+      "en": "1BR Condo - AROM JOMTIEN (Front Sea View)",
+      "th": "คอนโด 1 ห้องนอน ที่ AROM JOMTIEN (วิวทะเลด้านหน้า)"
+    },
+    "description_i18n": {
+      "en": "Resale unit at AROM JOMTIEN. Includes 1 bedroom, 1 bathroom, 47.47 sqm, floor 43, front sea view, Foreign Quota. Location context: Jomtien Pattaya. Arom Jomtien 4305 & 4306 43rd floor Front sea view 47.47 sq.m.",
+      "th": "ยูนิตขายต่อของโครงการ AROM JOMTIEN พร้อมรายละเอียดหลักคือ 1 ห้องนอน 1 ห้องน้ำ 47.47 ตร.ม. ชั้น 43 วิวทะเลด้านหน้า โควตาต่างชาติ โซน Jomtien Pattaya"
+    },
+    "type": "resale",
+    "property_type": "condo",
+    "price": 11800000,
+    "currency": "THB",
+    "price_period": null,
+    "bedrooms": 1,
+    "bathrooms": 1,
+    "size_sqm": 47.47,
+    "floor": 43,
+    "view": "Front Sea View",
+    "furnishing": null,
+    "address": "AROM JOMTIEN",
+    "city": "Pattaya",
+    "project_slug": null,
+    "area_slug": "jomtien",
+    "developer_slug": null,
+    "slug": "amp-s012826-arom-jomtien",
+    "status": "active",
+    "ownership_notes": "Foreign Quota",
+    "cover_image_url": "/media/import-assets/units-buy/amp-s012826-arom-jomtien/asset_89e7807f3818.jpg",
+    "cover_image": "/media/import-assets/units-buy/amp-s012826-arom-jomtien/asset_89e7807f3818.jpg",
+    "images": [
+      "/media/import-assets/units-buy/amp-s012826-arom-jomtien/asset_89e7807f3818.jpg",
+      "/media/import-assets/units-buy/amp-s012826-arom-jomtien/asset_87aea0e23ade.jpg",
+      "/media/import-assets/units-buy/amp-s012826-arom-jomtien/asset_19e4060936f4.jpg",
+      "/media/import-assets/units-buy/amp-s012826-arom-jomtien/asset_bc0ef0324bf9.jpg",
+      "/media/import-assets/units-buy/amp-s012826-arom-jomtien/asset_072e942b8666.jpg",
+      "/media/import-assets/units-buy/amp-s012826-arom-jomtien/asset_9785da630287.jpg",
+      "/media/import-assets/units-buy/amp-s012826-arom-jomtien/asset_9339c2e5f497.jpg",
+      "/media/import-assets/units-buy/amp-s012826-arom-jomtien/asset_a141811518a0.jpg"
+    ],
+    "local_images": [
+      "/media/import-assets/units-buy/amp-s012826-arom-jomtien/asset_89e7807f3818.jpg",
+      "/media/import-assets/units-buy/amp-s012826-arom-jomtien/asset_87aea0e23ade.jpg",
+      "/media/import-assets/units-buy/amp-s012826-arom-jomtien/asset_19e4060936f4.jpg",
+      "/media/import-assets/units-buy/amp-s012826-arom-jomtien/asset_bc0ef0324bf9.jpg",
+      "/media/import-assets/units-buy/amp-s012826-arom-jomtien/asset_072e942b8666.jpg",
+      "/media/import-assets/units-buy/amp-s012826-arom-jomtien/asset_9785da630287.jpg",
+      "/media/import-assets/units-buy/amp-s012826-arom-jomtien/asset_9339c2e5f497.jpg",
+      "/media/import-assets/units-buy/amp-s012826-arom-jomtien/asset_a141811518a0.jpg"
+    ],
+    "features": {
+      "highlights": [
+        "Condo",
+        "1 bedroom",
+        "1 bathroom",
+        "47.47 sqm",
+        "Floor 43",
+        "Front Sea View",
+        "Foreign Quota"
+      ],
+      "amenities": [
+        "car park",
+        "children's area",
+        "gym",
+        "security",
+        "swimming pool"
+      ],
+      "surroundings": [
+        "sea",
+        "main street"
+      ],
+      "video_urls": []
+    },
+    "source_meta": {
+      "source_url": "https://drive.google.com/drive/folders/1yzMZGcoLtkE5IqbPItgQDQcZaneBTqbT?usp=sharing",
+      "source_domain": "drive.google.com",
+      "rights_status": "company-public-drive",
+      "approval_status": "approved-public-share",
+      "folder_id": "1yzMZGcoLtkE5IqbPItgQDQcZaneBTqbT",
+      "folder_name": "AMP-S012826",
+      "root_folder_id": "1nyIDkgHf-uC-q81vhRDcOTDCYvkcR0BP",
+      "root_public_url": "https://drive.google.com/drive/folders/1nyIDkgHf-uC-q81vhRDcOTDCYvkcR0BP?usp=sharing",
+      "info_file_id": "1MCOt-5UbFo8iJfX-Z8GLohTSOBE4s73O",
+      "proppit_file_id": "1Nv7NyMYtY3S3z3L9Vdz4Ed6YKIwzzK0H",
+      "image_file_ids": [
+        "1UvupyVMBS7ehNi0RTqEapkJYVd2WPm5D",
+        "1Wa8SB3kaNochJerC96NfwJRZP8QEL4_t",
+        "1XSy9nFWg0wXWd7ksDDnoW-3Zv4xS9YyK",
+        "1hj9oJYIRdeVOvVKNda_22J-aMZZOWwYh",
+        "1DXxfbuvo0h2W45h44zbDkg26YT9HT7Jd",
+        "1oanQwhjT8RLwaLvFC5UVnP01uQ4JZ5pz",
+        "1HGVDlzbSx0Gs45zUbC_uIuyM-zMC4Mfw",
+        "176-JmfQiKkxqMwgy4BmNOwiOG-3Tv2ge",
+        "1Cq66oPWaBxTDAQbWlrEqJvwYw3BzDvkF",
+        "1v2HEjzPyL9bLfX1L9vDUw9O4Q6oUT1Jr",
+        "1YaMupVlOjj30EEAzIrJcvKONpIpo5SHi",
+        "19FnVuFmna-ZffUhIL9HXMdMBPXHGVyk5",
+        "1BCyyn5gwv4lwRL0L9L0ZqZuqRMLn9T1h",
+        "1RISjIAGPTgrWSW4Kw_0tzk5iwz9oKWn8",
+        "1fm2G882fZ5G8AJFhwNpaGordDKF8Md20"
+      ],
+      "facebook_pack_folder_id": "1MC3Gi4VrcN25WP0Uu8_nV5hzSOWH1cYg",
+      "facebook_pack_image_ids": [],
+      "video_file_ids": [],
+      "facebook_pack_video_ids": [],
+      "project_name": "AROM JOMTIEN",
+      "location_marketing": "Jomtien Pattaya",
+      "quality_score": 115,
+      "selected_for_homepage": false
+    }
+  },
+  {
+    "source_id": "AMP-S030126",
+    "title": "2BR Condo - AROM JOMTIEN (Panoramic Jomtien Sea View)",
+    "description": "Resale unit at AROM JOMTIEN. Includes 2 bedroom, 2 bathroom, 74.16 sqm, floor 38, panoramic jomtien sea view, Foreign Quota. Location context: Jomtien Pattaya. 🌊 FOR SALE | Arom Jomtien Beachfront Condo (Resale – FQ) 🌊 💰 Price: 19.8 MB (Foreign Quota) 🏖️ Prime Beachfront Location",
+    "title_i18n": {
+      "en": "2BR Condo - AROM JOMTIEN (Panoramic Jomtien Sea View)",
+      "th": "คอนโด 2 ห้องนอน ที่ AROM JOMTIEN (วิวทะเลจอมเทียนแบบพาโนรามา)"
+    },
+    "description_i18n": {
+      "en": "Resale unit at AROM JOMTIEN. Includes 2 bedroom, 2 bathroom, 74.16 sqm, floor 38, panoramic jomtien sea view, Foreign Quota. Location context: Jomtien Pattaya. 🌊 FOR SALE | Arom Jomtien Beachfront Condo (Resale – FQ) 🌊 💰 Price: 19.8 MB (Foreign Quota) 🏖️ Prime Beachfront Location",
+      "th": "ยูนิตขายต่อของโครงการ AROM JOMTIEN พร้อมรายละเอียดหลักคือ 2 ห้องนอน 2 ห้องน้ำ 74.16 ตร.ม. ชั้น 38 วิวทะเลจอมเทียนแบบพาโนรามา โควตาต่างชาติ โซน Jomtien Pattaya"
+    },
+    "type": "resale",
+    "property_type": "condo",
+    "price": 19800000,
+    "currency": "THB",
+    "price_period": null,
+    "bedrooms": 2,
+    "bathrooms": 2,
+    "size_sqm": 74.16,
+    "floor": 38,
+    "view": "Panoramic Jomtien Sea View",
+    "furnishing": null,
+    "address": "AROM JOMTIEN",
+    "city": "Pattaya",
+    "project_slug": null,
+    "area_slug": "jomtien",
+    "developer_slug": null,
+    "slug": "amp-s030126-arom-jomtien",
+    "status": "active",
+    "ownership_notes": "Foreign Quota",
+    "cover_image_url": "/media/import-assets/units-buy/amp-s030126-arom-jomtien/asset_9767b1955da1.jpg",
+    "cover_image": "/media/import-assets/units-buy/amp-s030126-arom-jomtien/asset_9767b1955da1.jpg",
+    "images": [
+      "/media/import-assets/units-buy/amp-s030126-arom-jomtien/asset_9767b1955da1.jpg",
+      "/media/import-assets/units-buy/amp-s030126-arom-jomtien/asset_b723c98825b8.jpg",
+      "/media/import-assets/units-buy/amp-s030126-arom-jomtien/asset_cfbd0b4512b2.jpg",
+      "/media/import-assets/units-buy/amp-s030126-arom-jomtien/asset_2a3a6bbd1fb9.jpg",
+      "/media/import-assets/units-buy/amp-s030126-arom-jomtien/asset_0432e052d474.jpg",
+      "/media/import-assets/units-buy/amp-s030126-arom-jomtien/asset_bd2adbe63edb.jpg",
+      "/media/import-assets/units-buy/amp-s030126-arom-jomtien/asset_e07a34c27455.jpg",
+      "/media/import-assets/units-buy/amp-s030126-arom-jomtien/asset_ac69c9f7ad8f.jpg"
+    ],
+    "local_images": [
+      "/media/import-assets/units-buy/amp-s030126-arom-jomtien/asset_9767b1955da1.jpg",
+      "/media/import-assets/units-buy/amp-s030126-arom-jomtien/asset_b723c98825b8.jpg",
+      "/media/import-assets/units-buy/amp-s030126-arom-jomtien/asset_cfbd0b4512b2.jpg",
+      "/media/import-assets/units-buy/amp-s030126-arom-jomtien/asset_2a3a6bbd1fb9.jpg",
+      "/media/import-assets/units-buy/amp-s030126-arom-jomtien/asset_0432e052d474.jpg",
+      "/media/import-assets/units-buy/amp-s030126-arom-jomtien/asset_bd2adbe63edb.jpg",
+      "/media/import-assets/units-buy/amp-s030126-arom-jomtien/asset_e07a34c27455.jpg",
+      "/media/import-assets/units-buy/amp-s030126-arom-jomtien/asset_ac69c9f7ad8f.jpg"
+    ],
+    "features": {
+      "highlights": [
+        "Condo",
+        "2 bedroom",
+        "2 bathroom",
+        "74.16 sqm",
+        "Floor 38",
+        "Panoramic Jomtien Sea View",
+        "Foreign Quota"
+      ],
+      "amenities": [
+        "car park",
+        "children's area",
+        "gym",
+        "security",
+        "swimming pool"
+      ],
+      "surroundings": [
+        "sea",
+        "main street"
+      ],
+      "video_urls": []
+    },
+    "source_meta": {
+      "source_url": "https://drive.google.com/drive/folders/1OtfVj9PWlfHia9HpUhpoqK6RFfqNpIS7?usp=sharing",
+      "source_domain": "drive.google.com",
+      "rights_status": "company-public-drive",
+      "approval_status": "approved-public-share",
+      "folder_id": "1OtfVj9PWlfHia9HpUhpoqK6RFfqNpIS7",
+      "folder_name": "AMP-S030126",
+      "root_folder_id": "1nyIDkgHf-uC-q81vhRDcOTDCYvkcR0BP",
+      "root_public_url": "https://drive.google.com/drive/folders/1nyIDkgHf-uC-q81vhRDcOTDCYvkcR0BP?usp=sharing",
+      "info_file_id": "1NzKGy98A9wjkN0yj1i9_bx0h8Tui2Qtj",
+      "proppit_file_id": "1LoJJlT-5wbb05zMiwn7MG0HxbUYXpOn7",
+      "image_file_ids": [
+        "1-k6rS2Rsbh6ERVcL9TqCv5omDxSWav85",
+        "1R4njcKXU3kf1miV1w1oHxuRltfpjtoK9",
+        "185mN3kfdAGfm1cgXyOD-3zkUXi0UTdM4",
+        "1cTCdKMl8YceqB0LSdLMUf-kf_dGHL24Z",
+        "1BHet6VlArB8fQ7X0yTuVaM5IyOw6-a3H",
+        "1rq4f6LqO8du_QLMqGC2LCB7RAJlyr-Wo",
+        "1Ip-8-t9tMiwPBwN9bDd8FIwfHRVHB1I2",
+        "1WlMdsQQpqMUmraaNDOXh56O4WMNfakY8",
+        "1ZA5glRdGLEbqyQO3CKSGN_yPqJTay3O3",
+        "1abd8rbCLpXhygN9mJ9ZmlE6rWTeI5dIU",
+        "13UbRXwlRUtwkKEGeQR5z5w27epdGDTO0",
+        "1jo-zqvlOObMLMAq0qqqBYfJdes7WQpgG",
+        "1yEYSDkKBngpLm9BWHS7hK6d7d13wZByc",
+        "1W_A2K-joPjZ4llCV1niMZ4WD05fwqNKV",
+        "1YoYdyYriRaljwLnX4-fjrOQcFpH8ExeC",
+        "1O1oWQ70BqmGrkFoDQ28xnFHsMQafP_UN"
+      ],
+      "facebook_pack_folder_id": null,
+      "facebook_pack_image_ids": [],
+      "video_file_ids": [],
+      "facebook_pack_video_ids": [],
+      "project_name": "AROM JOMTIEN",
+      "location_marketing": "Jomtien Pattaya",
+      "quality_score": 115,
+      "selected_for_homepage": false
+    }
+  },
+  {
+    "source_id": "AMP-S030226",
+    "title": "1BR Condo - The Riviera Malibu Residences (Sea View)",
+    "description": "Resale unit at The Riviera Malibu Residences. Includes 1 bedroom, 1 bathroom, 33.00 sqm, floor 21, sea view, fully furnished, Foreign Quota. Location context: Pratumnak Pattaya. The Riviera Malibu Price 5.8 Mb. 1 Bedroom, 1 Bathroom",
+    "title_i18n": {
+      "en": "1BR Condo - The Riviera Malibu Residences (Sea View)",
+      "th": "คอนโด 1 ห้องนอน ที่ The Riviera Malibu Residences (วิวทะเล)"
+    },
+    "description_i18n": {
+      "en": "Resale unit at The Riviera Malibu Residences. Includes 1 bedroom, 1 bathroom, 33.00 sqm, floor 21, sea view, fully furnished, Foreign Quota. Location context: Pratumnak Pattaya. The Riviera Malibu Price 5.8 Mb. 1 Bedroom, 1 Bathroom",
+      "th": "ยูนิตขายต่อของโครงการ The Riviera Malibu Residences พร้อมรายละเอียดหลักคือ 1 ห้องนอน 1 ห้องน้ำ 33 ตร.ม. ชั้น 21 วิวทะเล พร้อมเฟอร์นิเจอร์ โควตาต่างชาติ โซน Pratumnak Pattaya"
+    },
+    "type": "resale",
+    "property_type": "condo",
+    "price": 5800000,
+    "currency": "THB",
+    "price_period": null,
+    "bedrooms": 1,
+    "bathrooms": 1,
+    "size_sqm": 33.0,
+    "floor": 21,
+    "view": "Sea View",
+    "furnishing": "Fully furnished",
+    "address": "The Riviera Malibu Residences",
+    "city": "Pattaya",
+    "project_slug": null,
+    "area_slug": "pratumnak",
+    "developer_slug": null,
+    "slug": "amp-s030226-the-riviera-malibu-residences",
+    "status": "active",
+    "ownership_notes": "Foreign Quota",
+    "cover_image_url": "/media/import-assets/units-buy/amp-s030226-the-riviera-malibu-residences/asset_8a447cd93e5a.jpg",
+    "cover_image": "/media/import-assets/units-buy/amp-s030226-the-riviera-malibu-residences/asset_8a447cd93e5a.jpg",
+    "images": [
+      "/media/import-assets/units-buy/amp-s030226-the-riviera-malibu-residences/asset_8a447cd93e5a.jpg",
+      "/media/import-assets/units-buy/amp-s030226-the-riviera-malibu-residences/asset_50450cefece4.jpg",
+      "/media/import-assets/units-buy/amp-s030226-the-riviera-malibu-residences/asset_6eb6d9b7e10c.jpg",
+      "/media/import-assets/units-buy/amp-s030226-the-riviera-malibu-residences/asset_6b96501d1581.jpg",
+      "/media/import-assets/units-buy/amp-s030226-the-riviera-malibu-residences/asset_001714c27f63.jpg",
+      "/media/import-assets/units-buy/amp-s030226-the-riviera-malibu-residences/asset_970644aafdc3.jpg",
+      "/media/import-assets/units-buy/amp-s030226-the-riviera-malibu-residences/asset_2c63ff6a02e8.jpg",
+      "/media/import-assets/units-buy/amp-s030226-the-riviera-malibu-residences/asset_570226d99921.jpg"
+    ],
+    "local_images": [
+      "/media/import-assets/units-buy/amp-s030226-the-riviera-malibu-residences/asset_8a447cd93e5a.jpg",
+      "/media/import-assets/units-buy/amp-s030226-the-riviera-malibu-residences/asset_50450cefece4.jpg",
+      "/media/import-assets/units-buy/amp-s030226-the-riviera-malibu-residences/asset_6eb6d9b7e10c.jpg",
+      "/media/import-assets/units-buy/amp-s030226-the-riviera-malibu-residences/asset_6b96501d1581.jpg",
+      "/media/import-assets/units-buy/amp-s030226-the-riviera-malibu-residences/asset_001714c27f63.jpg",
+      "/media/import-assets/units-buy/amp-s030226-the-riviera-malibu-residences/asset_970644aafdc3.jpg",
+      "/media/import-assets/units-buy/amp-s030226-the-riviera-malibu-residences/asset_2c63ff6a02e8.jpg",
+      "/media/import-assets/units-buy/amp-s030226-the-riviera-malibu-residences/asset_570226d99921.jpg"
+    ],
+    "features": {
+      "highlights": [
+        "Condo",
+        "1 bedroom",
+        "1 bathroom",
+        "33.00 sqm",
+        "Floor 21",
+        "Sea View",
+        "Fully furnished",
+        "Foreign Quota"
+      ],
+      "amenities": [
+        "car park",
+        "children's area",
+        "gym",
+        "security",
+        "swimming pool"
+      ],
+      "surroundings": [
+        "sea",
+        "main street"
+      ],
+      "video_urls": []
+    },
+    "source_meta": {
+      "source_url": "https://drive.google.com/drive/folders/10JwHK-h7X6dVMzr0DTWI9suXUY-OExke?usp=sharing",
+      "source_domain": "drive.google.com",
+      "rights_status": "company-public-drive",
+      "approval_status": "approved-public-share",
+      "folder_id": "10JwHK-h7X6dVMzr0DTWI9suXUY-OExke",
+      "folder_name": "AMP-S030226",
+      "root_folder_id": "1nyIDkgHf-uC-q81vhRDcOTDCYvkcR0BP",
+      "root_public_url": "https://drive.google.com/drive/folders/1nyIDkgHf-uC-q81vhRDcOTDCYvkcR0BP?usp=sharing",
+      "info_file_id": "1b8Sd4qP01x1VsBVntn2pRwbyyrnBrVcn",
+      "proppit_file_id": "1Nagetwo3KfYV7aVVi7lfxE2Tch5wTOWN",
+      "image_file_ids": [
+        "1xKmGjqU5fTyYQZJqR2U5YjZDmu-cNEqU",
+        "1avDvxQYipcsQ11orLZv0M-mY-pRDUqxC",
+        "1H2tMqPp7Odgr1wQh8KkmsqSSb_o_opYJ",
+        "1MqgQ4BqjqPYpoZ6a-SXUuhseNEt9lNUZ",
+        "1bmAw9HouQYKpYDSNzLavJ5dNXVGA9ksE",
+        "1BnMg4eDoez-Z-0OeEIvo0C1tGb59yxH5",
+        "1djBSRQeFp41RG6TUbyCuVq_-2PitmIaF",
+        "1t0F6rEbZQ0NbEFnJNC6Hjvq8n8qmjUtd"
+      ],
+      "facebook_pack_folder_id": "1VSNY3KZ3Nvn5SiiBSMqRZmdTPTTKnaaY",
+      "facebook_pack_image_ids": [],
+      "video_file_ids": [],
+      "facebook_pack_video_ids": [],
+      "project_name": "The Riviera Malibu Residences",
+      "location_marketing": "Pratumnak Pattaya",
+      "quality_score": 115,
+      "selected_for_homepage": false
+    }
+  },
+  {
+    "source_id": "AMP-S030326",
+    "title": "3BR Condo - The Riviera Malibu Residences",
+    "description": "Resale unit at The Riviera Malibu Residences. Includes 3 bedroom, 3 bathroom, 113.00 sqm, Foreign Quota. Location context: Pratumnak Pattaya. Argent sale Riviera Malibu 3bedroom 3 bathrooms FQ",
+    "title_i18n": {
+      "en": "3BR Condo - The Riviera Malibu Residences",
+      "th": "คอนโด 3 ห้องนอน ที่ The Riviera Malibu Residences"
+    },
+    "description_i18n": {
+      "en": "Resale unit at The Riviera Malibu Residences. Includes 3 bedroom, 3 bathroom, 113.00 sqm, Foreign Quota. Location context: Pratumnak Pattaya. Argent sale Riviera Malibu 3bedroom 3 bathrooms FQ",
+      "th": "ยูนิตขายต่อของโครงการ The Riviera Malibu Residences พร้อมรายละเอียดหลักคือ 3 ห้องนอน 3 ห้องน้ำ 113 ตร.ม. โควตาต่างชาติ โซน Pratumnak Pattaya"
+    },
+    "type": "resale",
+    "property_type": "condo",
+    "price": 21000000,
+    "currency": "THB",
+    "price_period": null,
+    "bedrooms": 3,
+    "bathrooms": 3,
+    "size_sqm": 113.0,
+    "floor": null,
+    "view": null,
+    "furnishing": null,
+    "address": "The Riviera Malibu Residences",
+    "city": "Pattaya",
+    "project_slug": null,
+    "area_slug": "pratumnak",
+    "developer_slug": null,
+    "slug": "amp-s030326-the-riviera-malibu-residences",
+    "status": "active",
+    "ownership_notes": "Foreign Quota",
+    "cover_image_url": "/media/import-assets/units-buy/amp-s030326-the-riviera-malibu-residences/asset_41f0c735b72a.jpg",
+    "cover_image": "/media/import-assets/units-buy/amp-s030326-the-riviera-malibu-residences/asset_41f0c735b72a.jpg",
+    "images": [
+      "/media/import-assets/units-buy/amp-s030326-the-riviera-malibu-residences/asset_41f0c735b72a.jpg",
+      "/media/import-assets/units-buy/amp-s030326-the-riviera-malibu-residences/asset_09cc89ca68f0.jpg",
+      "/media/import-assets/units-buy/amp-s030326-the-riviera-malibu-residences/asset_b357d7f166db.jpg",
+      "/media/import-assets/units-buy/amp-s030326-the-riviera-malibu-residences/asset_b384461e5763.jpg",
+      "/media/import-assets/units-buy/amp-s030326-the-riviera-malibu-residences/asset_b39433e6cea1.jpg",
+      "/media/import-assets/units-buy/amp-s030326-the-riviera-malibu-residences/asset_51861a02dc34.jpg",
+      "/media/import-assets/units-buy/amp-s030326-the-riviera-malibu-residences/asset_c6cb2407accf.jpg",
+      "/media/import-assets/units-buy/amp-s030326-the-riviera-malibu-residences/asset_21d07b1c0a98.jpg"
+    ],
+    "local_images": [
+      "/media/import-assets/units-buy/amp-s030326-the-riviera-malibu-residences/asset_41f0c735b72a.jpg",
+      "/media/import-assets/units-buy/amp-s030326-the-riviera-malibu-residences/asset_09cc89ca68f0.jpg",
+      "/media/import-assets/units-buy/amp-s030326-the-riviera-malibu-residences/asset_b357d7f166db.jpg",
+      "/media/import-assets/units-buy/amp-s030326-the-riviera-malibu-residences/asset_b384461e5763.jpg",
+      "/media/import-assets/units-buy/amp-s030326-the-riviera-malibu-residences/asset_b39433e6cea1.jpg",
+      "/media/import-assets/units-buy/amp-s030326-the-riviera-malibu-residences/asset_51861a02dc34.jpg",
+      "/media/import-assets/units-buy/amp-s030326-the-riviera-malibu-residences/asset_c6cb2407accf.jpg",
+      "/media/import-assets/units-buy/amp-s030326-the-riviera-malibu-residences/asset_21d07b1c0a98.jpg"
+    ],
+    "features": {
+      "highlights": [
+        "Condo",
+        "3 bedroom",
+        "3 bathroom",
+        "113.00 sqm",
+        "Foreign Quota"
+      ],
+      "amenities": [
+        "car park",
+        "children's area",
+        "gym",
+        "security",
+        "swimming pool"
+      ],
+      "surroundings": [
+        "sea",
+        "main street"
+      ],
+      "video_urls": []
+    },
+    "source_meta": {
+      "source_url": "https://drive.google.com/drive/folders/11OyDovWXVkJ9K-Ggu_GWR6afQaguXbE1?usp=sharing",
+      "source_domain": "drive.google.com",
+      "rights_status": "company-public-drive",
+      "approval_status": "approved-public-share",
+      "folder_id": "11OyDovWXVkJ9K-Ggu_GWR6afQaguXbE1",
+      "folder_name": "AMP-S030326",
+      "root_folder_id": "1nyIDkgHf-uC-q81vhRDcOTDCYvkcR0BP",
+      "root_public_url": "https://drive.google.com/drive/folders/1nyIDkgHf-uC-q81vhRDcOTDCYvkcR0BP?usp=sharing",
+      "info_file_id": "1gz7z0cKYg3gyzd6y63QQvyhXeaB73D24",
+      "proppit_file_id": "1FUmeTwCNW95sFG3eV8OUOnbJNtV6fXhS",
+      "image_file_ids": [
+        "1fw0Up2iDXOM6p3QXoXH4PcomMZfvzYg_",
+        "1_mmY-_6QiJFnUWCEINrk2cfNtEe7TdfC",
+        "1LgTY47F0eNF4fHF62dVjPUd_EkcJ8cYv",
+        "1AxN_uJ0LPJNdHLZ0PUrTpcBhjWo7I1ZG",
+        "1UMYMpP0ohSAzIOTOlkhMRIyW_ZpII5C5",
+        "13hsN6_GVKokdE9lJ2FLkj5PY9vXQTbQ4",
+        "17CTYIbOttgNfOVnfzcHqWT_QMqL8LgmD",
+        "1AP-ZAYAMlULaQMabuIm_N-SpaF7bHFzI",
+        "1X9y0qiWjTmCdn9pDlUK_N6yA5kjKz4A0",
+        "1QW5rJmoZehwWfKRdMhUQyDI3tkIs5KQ5",
+        "13Gv2qp7eO6WkmU2b9eO-JsnWcGA-arSj",
+        "17j0UXEe2la-9u5QN2gOYzWn47bxkBU5Q",
+        "1RzLHjQSDVGJohz03QKFJwNrFEJ1JX1nX",
+        "1XFM2AZqr5aqI5ncXoPqLbBRWgs4y11L-"
+      ],
+      "facebook_pack_folder_id": "1vVaDKjPNYbd7FPG95z9gnMHwVT5L3W-Q",
+      "facebook_pack_image_ids": [],
+      "video_file_ids": [],
+      "facebook_pack_video_ids": [],
+      "project_name": "The Riviera Malibu Residences",
+      "location_marketing": "Pratumnak Pattaya",
+      "quality_score": 105,
+      "selected_for_homepage": false
+    }
+  }
+]

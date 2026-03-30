@@ -1,0 +1,669 @@
+[
+  {
+    "name": "The Riviera Palm Beach",
+    "slug": "the-riviera-palm-beach",
+    "developer_slug": "the-riviera-group",
+    "area_slug": "wongamat",
+    "cover_image_url": "/media/project-covers/the-riviera-palm-beach/cover_1789e74af538.jpg",
+    "status": "published",
+    "property_type": "condo",
+    "images": [
+      "/media/import-assets/projects/the-riviera-palm-beach/asset_4ad08f67bd17.jpg",
+      "/media/import-assets/projects/the-riviera-palm-beach/asset_8f83e1400a44.jpg"
+    ],
+    "summary": {
+      "en": "Official Riviera beachfront launch in Wongamat positioned as a 47-storey high-rise condominium.",
+      "th": "โครงการเปิดตัวใหม่ของ The Riviera บนทำเล Wongamat ในรูปแบบคอนโดมิเนียมไฮไรส์สูง 47 ชั้น"
+    },
+    "description": {
+      "en": "The official project website presents The Riviera Palm Beach as an upscale high-rise condominium on Wongamat Beach, Pattaya with published gallery, facilities, floor plans, and unit plans.",
+      "th": "เว็บไซต์โครงการอย่างเป็นทางการนำเสนอ The Riviera Palm Beach เป็นคอนโดมิเนียมไฮไรส์ระดับบนบนหาด Wongamat พร้อมแกลเลอรี สิ่งอำนวยความสะดวก แปลนชั้น และแปลนยูนิตที่เผยแพร่ไว้ชัดเจน"
+    },
+    "highlights": [
+      "47-storey high-rise condominium on Wongamat Beach",
+      "Official published starting price from 7,060,000 Baht",
+      "Official gallery, facilities, floor plans, and unit plans available"
+    ],
+    "quick_facts": [
+      "Wongamat Beach, Pattaya",
+      "High-rise condominium",
+      "47 storeys"
+    ],
+    "trust_proof": [
+      "Official project website is live",
+      "Published price list starts from 7,060,000 Baht",
+      "Official sales brochure and floor plans are linked on-site"
+    ],
+    "source_notes": {
+      "official_url": "https://www.the-riviera-palm-beach.com/",
+      "source_domain": "the-riviera-palm-beach.com",
+      "media_source": "official project website",
+      "notes": "Starting price and storey count taken from the official project website on 2026-03-30."
+    },
+    "claims_updated_at": "2026-03-30T00:00:00Z",
+    "investment_snapshot": {
+      "Source": "Official project website",
+      "Entry price": "From 7,060,000 Baht",
+      "Location": "Wongamat Beach, Pattaya",
+      "Format": "47-storey high-rise condominium",
+      "Updated": "2026-03-30"
+    },
+    "location": {
+      "city": "Pattaya",
+      "area": "Wongamat",
+      "address": "Wongamat Beach, Pattaya"
+    },
+    "floors": 47,
+    "is_featured": true,
+    "starting_price": 7060000
+  },
+  {
+    "name": "The Riviera Beverly Hills",
+    "slug": "the-riviera-beverly-hills",
+    "developer_slug": "the-riviera-group",
+    "area_slug": "jomtien",
+    "cover_image_url": "/media/project-covers/the-riviera-beverly-hills/cover_7cdacbe8818f.webp",
+    "status": "published",
+    "property_type": "condo",
+    "images": [
+      "/media/import-assets/projects/the-riviera-beverly-hills/asset_7cdacbe8818f.webp",
+      "/media/import-assets/projects/the-riviera-beverly-hills/asset_d42e1d1f851a.webp"
+    ],
+    "summary": {
+      "en": "Jomtien high-rise positioning from The Riviera Group with official emphasis on living, holiday use, and investment.",
+      "th": "โครงการของ The Riviera Group ในโซนจอมเทียนที่วางตำแหน่งชัดทั้งอยู่อาศัย บ้านพักตากอากาศ และการลงทุน"
+    },
+    "description": {
+      "en": "The official website frames The Riviera Beverly Hills as luxury condos in Jomtien with strong lifestyle and investment appeal, supported by gallery, unit plans, facilities, and location pages.",
+      "th": "เว็บไซต์โครงการอย่างเป็นทางการวาง The Riviera Beverly Hills เป็นลักชัวรีคอนโดในจอมเทียนที่ตอบทั้งการอยู่อาศัยและการลงทุน พร้อมหน้าแกลเลอรี แบบห้อง สิ่งอำนวยความสะดวก และข้อมูลทำเล"
+    },
+    "highlights": [
+      "Official Jomtien luxury condo launch",
+      "Official published entry price from 2.3M",
+      "Gallery, unit plans, facilities, and location pages available"
+    ],
+    "quick_facts": [
+      "Jomtien, Pattaya",
+      "Luxury condominium",
+      "Official viewing form on project site"
+    ],
+    "trust_proof": [
+      "Official project website is live",
+      "Published entry pricing from 2.3M",
+      "Official unit-plan and gallery pages available"
+    ],
+    "source_notes": {
+      "official_url": "https://rivierabeverlyhills-pattaya.com/",
+      "source_domain": "rivierabeverlyhills-pattaya.com",
+      "media_source": "official project website",
+      "notes": "Entry pricing taken from the official website on 2026-03-30."
+    },
+    "claims_updated_at": "2026-03-30T00:00:00Z",
+    "investment_snapshot": {
+      "Source": "Official project website",
+      "Entry price": "From 2.3M",
+      "Location": "Jomtien, Pattaya",
+      "Use case": "Living, holiday home, or premium investment",
+      "Updated": "2026-03-30"
+    },
+    "location": {
+      "city": "Pattaya",
+      "area": "Jomtien",
+      "address": "Jomtien, Pattaya"
+    },
+    "is_featured": true,
+    "starting_price": 2300000
+  },
+  {
+    "name": "Embassy Life",
+    "slug": "embassy-life",
+    "area_slug": "jomtien",
+    "cover_image_url": "/media/project-covers/embassy-life/cover_9ec84c2a667c.jpg",
+    "status": "published",
+    "property_type": "condo",
+    "images": [
+      "/media/import-assets/projects/embassy-life/asset_9ec84c2a667c.jpg",
+      "/media/import-assets/projects/embassy-life/asset_81006320dc6a.png"
+    ],
+    "summary": {
+      "en": "Wellness-led Jomtien condominium positioned near the beach and Jomtien Second Road.",
+      "th": "คอนโดมิเนียมในโซนจอมเทียนที่วางแนวคิดเรื่อง wellness และอยู่ใกล้หาดจอมเทียนกับถนนจอมเทียนสายสอง"
+    },
+    "description": {
+      "en": "The official Embassy Life website describes the project as a luxury condominium near Jomtien Beach with wellness-inspired design, over 7 rai of land, and Jomtien Second Road connectivity.",
+      "th": "เว็บไซต์ Embassy Life อย่างเป็นทางการอธิบายโครงการว่าเป็นลักชัวรีคอนโดใกล้หาดจอมเทียน บนแนวคิด wellness-inspired design บนที่ดินกว่า 7 ไร่ และเชื่อมต่อจอมเทียนสายสองได้สะดวก"
+    },
+    "highlights": [
+      "Official site states 500 meters from Jomtien Beach",
+      "Set on over 7 rai of land",
+      "Wellness-inspired design on Jomtien Second Road"
+    ],
+    "quick_facts": [
+      "Jomtien Second Road",
+      "500 meters from Jomtien Beach",
+      "Over 7 rai of land"
+    ],
+    "trust_proof": [
+      "Official project website is live",
+      "Project narrative and location details are published on-site",
+      "Official contact channel is published on-site"
+    ],
+    "source_notes": {
+      "official_url": "https://www.embassylife-pattaya.com/",
+      "source_domain": "embassylife-pattaya.com",
+      "media_source": "official project website",
+      "notes": "Distance to beach and land-size claims taken from the official project website on 2026-03-30."
+    },
+    "claims_updated_at": "2026-03-30T00:00:00Z",
+    "investment_snapshot": {
+      "Source": "Official project website",
+      "Location": "Jomtien Second Road",
+      "Beach access": "500 meters from Jomtien Beach",
+      "Project setting": "Over 7 rai of land",
+      "Updated": "2026-03-30"
+    },
+    "location": {
+      "city": "Pattaya",
+      "area": "Jomtien",
+      "address": "Jomtien Second Road"
+    },
+    "is_featured": true
+  },
+  {
+    "name": "Avenue Boutique",
+    "slug": "avenue-boutique",
+    "area_slug": "central-pattaya",
+    "cover_image_url": "/media/project-covers/avenue-boutique/cover_342167dd4443.jpg",
+    "status": "published",
+    "property_type": "condo",
+    "images": [
+      "/media/import-assets/projects/avenue-boutique/asset_342167dd4443.jpg",
+      "/media/import-assets/projects/avenue-boutique/asset_d13d3a5d7ded.jpg"
+    ],
+    "summary": {
+      "en": "Central Pattaya condominium positioned for city living and investment with a clearly published pre-sale proposition.",
+      "th": "คอนโดมิเนียมในใจกลางพัทยาที่วางตำแหน่งชัดทั้งการอยู่อาศัยแบบ city living และการลงทุน พร้อมข้อเสนอ pre-sale ที่เผยแพร่ชัดเจน"
+    },
+    "description": {
+      "en": "The official Avenue Boutique Condominium website positions the project as Central Pattaya’s newest luxury address, with published pre-sale pricing, foreign-quota allocation, and developer financing terms.",
+      "th": "เว็บไซต์ Avenue Boutique Condominium อย่างเป็นทางการวางโครงการเป็นที่อยู่หรูใหม่ในใจกลางพัทยา พร้อมราคา pre-sale โควตาต่างชาติ และเงื่อนไขผ่อนกับผู้พัฒนาที่ประกาศชัดเจน"
+    },
+    "highlights": [
+      "Pre-sale from 2,565,000 THB",
+      "Official site states 20 foreign quota units",
+      "Official site states 0% interest developer financing"
+    ],
+    "quick_facts": [
+      "Central Pattaya",
+      "Pre-sale pricing published",
+      "Foreign quota and financing terms published"
+    ],
+    "trust_proof": [
+      "Official project website is live",
+      "Pre-sale entry price from 2,565,000 THB is published",
+      "Foreign quota and developer financing terms are published"
+    ],
+    "source_notes": {
+      "official_url": "https://avenueboutiquecondominium.com/",
+      "source_domain": "avenueboutiquecondominium.com",
+      "media_source": "official project website",
+      "notes": "Entry price and foreign quota references taken from the official site on 2026-03-30."
+    },
+    "claims_updated_at": "2026-03-30T00:00:00Z",
+    "investment_snapshot": {
+      "Source": "Official project website",
+      "Entry price": "From 2,565,000 THB",
+      "Buyer signal": "20 foreign quota units published",
+      "Financing": "0% interest developer financing published",
+      "Updated": "2026-03-30"
+    },
+    "location": {
+      "city": "Pattaya",
+      "area": "Central Pattaya",
+      "address": "Central Pattaya"
+    },
+    "is_featured": false,
+    "starting_price": 2565000
+  },
+  {
+    "name": "Aquarous Jomtien Pattaya",
+    "slug": "aquarous-jomtien-pattaya",
+    "developer_slug": "assetwise",
+    "area_slug": "jomtien",
+    "cover_image_url": "/media/project-covers/aquarous-jomtien-pattaya/cover_57bb60153ffc.jpg",
+    "status": "published",
+    "property_type": "condo",
+    "images": [
+      "/media/import-assets/projects/aquarous-jomtien-pattaya/asset_57bb60153ffc.jpg"
+    ],
+    "summary": {
+      "en": "Official AssetWise project listing for Jomtien with published entry pricing and developer-backed source context.",
+      "th": "รายชื่อโครงการอย่างเป็นทางการของ AssetWise ในโซนจอมเทียนที่มีราคาเริ่มต้นเผยแพร่ชัดเจนและอ้างอิงตรงจากผู้พัฒนา"
+    },
+    "description": {
+      "en": "AssetWise lists Aquarous Jomtien Pattaya on the official project-type page with published Pattaya location and entry pricing, making it a defensible source for the public catalogue.",
+      "th": "AssetWise แสดง Aquarous Jomtien Pattaya บนหน้ารายชื่อโครงการอย่างเป็นทางการ พร้อมระบุทำเลพัทยาและราคาเริ่มต้น จึงใช้เป็นแหล่งข้อมูลสาธารณะที่เชื่อถือได้สำหรับแคตตาล็อก"
+    },
+    "highlights": [
+      "Official AssetWise source",
+      "Published entry price 4.21 ล้านบาท",
+      "Official hero media on AssetWise CDN"
+    ],
+    "quick_facts": [
+      "Jomtien, Pattaya",
+      "AssetWise official project listing",
+      "Published starting price 4.21 ล้านบาท"
+    ],
+    "trust_proof": [
+      "Official AssetWise project page is live",
+      "Published Pattaya location and entry price on AssetWise",
+      "Official hero media hosted on AssetWise CDN"
+    ],
+    "source_notes": {
+      "official_url": "https://assetwise.co.th/project-type/aquarous-jomtien-pattaya/",
+      "source_domain": "assetwise.co.th",
+      "media_source": "official developer website",
+      "notes": "Entry price taken from the official AssetWise project card on 2026-03-30."
+    },
+    "claims_updated_at": "2026-03-30T00:00:00Z",
+    "investment_snapshot": {
+      "Source": "Official AssetWise project page",
+      "Entry price": "4.21 ล้านบาท",
+      "Location": "Pattaya / Jomtien",
+      "Publisher": "AssetWise",
+      "Updated": "2026-03-30"
+    },
+    "location": {
+      "city": "Pattaya",
+      "area": "Jomtien",
+      "address": "Jomtien Pattaya"
+    },
+    "is_featured": true,
+    "starting_price": 4210000
+  },
+  {
+    "name": "Pristine Park III",
+    "slug": "pristine-park-iii",
+    "developer_slug": "dusit-group",
+    "area_slug": "jomtien",
+    "cover_image_url": "/media/project-covers/pristine-park-iii/cover_37f272a13863.jpg",
+    "status": "published",
+    "property_type": "condo",
+    "images": [
+      "/media/import-assets/projects/pristine-park-iii/asset_37f272a13863.jpg",
+      "/media/import-assets/projects/pristine-park-iii/asset_bd1abcd0c919.jpg"
+    ],
+    "summary": {
+      "en": "New Jomtien condominium from Dusit Group positioned for living and investment near the beach corridor.",
+      "th": "คอนโดมิเนียมใหม่ของ Dusit Group ในโซนจอมเทียนที่วางตำแหน่งทั้งอยู่อาศัยและลงทุนใกล้แนวชายหาด"
+    },
+    "description": {
+      "en": "Official Pristine Park III sources describe the project as a modern residential complex about 1.7 km from Jomtien Beach, with unit plans spanning studio to 2-bedroom layouts and an estimated 2028 completion window.",
+      "th": "แหล่งทางการของ Pristine Park III อธิบายโครงการว่าเป็นคอมเพล็กซ์ที่พักอาศัยสมัยใหม่ห่างหาดจอมเทียนราว 1.7 กิโลเมตร มีแบบห้องตั้งแต่สตูดิโอถึง 2 ห้องนอน และระบุกรอบการแล้วเสร็จไว้ราวปี 2028"
+    },
+    "highlights": [
+      "Official site states 1.7 km from Jomtien Beach",
+      "Studio, 1-bedroom, and 2-bedroom plans are published",
+      "Estimated completion 2028 on official site"
+    ],
+    "quick_facts": [
+      "Between Thepprasit Soi 5 and 7",
+      "Near Jomtien Beach corridor",
+      "Unit plans from studio to 2-bedroom"
+    ],
+    "trust_proof": [
+      "Official project page is live",
+      "Official floor-plan sizes are published",
+      "Construction update date is published on the official page"
+    ],
+    "source_notes": {
+      "official_url": "https://pristine-park.com/en/",
+      "source_domain": "pristine-park.com",
+      "media_source": "official project website and Dusit Group project page",
+      "notes": "Distance to beach, unit-plan mix, and completion guidance checked on 2026-03-30."
+    },
+    "claims_updated_at": "2026-03-30T00:00:00Z",
+    "investment_snapshot": {
+      "Source": "Official project website",
+      "Beach distance": "1.7 km from Jomtien Beach",
+      "Unit mix": "Studio / 1-bedroom / 2-bedroom",
+      "Completion guidance": "Estimated 2028",
+      "Updated": "2026-03-30"
+    },
+    "location": {
+      "city": "Pattaya",
+      "area": "Jomtien",
+      "address": "Between Thepprasit Soi 5 and 7"
+    },
+    "is_featured": false
+  },
+  {
+    "name": "Seaspire Jomtien",
+    "slug": "seaspire-jomtien",
+    "developer_slug": "dusit-group",
+    "area_slug": "jomtien",
+    "cover_image_url": "/media/project-covers/seaspire-jomtien/cover_b40e08123c81.jpg",
+    "status": "published",
+    "property_type": "condo",
+    "images": [
+      "/media/import-assets/projects/seaspire-jomtien/asset_b40e08123c81.jpg"
+    ],
+    "summary": {
+      "en": "Upcoming beachfront Jomtien project surfaced on the official Dusit Group projects page.",
+      "th": "โครงการริมหาดจอมเทียนที่เผยแพร่บนหน้าโครงการอย่างเป็นทางการของ Dusit Group"
+    },
+    "description": {
+      "en": "Dusit Group presents Seaspire Jomtien on the official projects page as its next beachfront project, already marked EIA approved with sales-gallery timing published.",
+      "th": "Dusit Group นำเสนอ Seaspire Jomtien บนหน้าโครงการอย่างเป็นทางการว่าเป็นโครงการริมหาดถัดไปของแบรนด์ พร้อมสถานะ EIA approved และช่วงเวลาเปิด sales gallery ที่เผยแพร่ไว้"
+    },
+    "highlights": [
+      "Official page marks the project EIA Approved",
+      "Presented as Pattaya's next beachfront project",
+      "Official sales-gallery timing is published"
+    ],
+    "quick_facts": [
+      "Jomtien, Pattaya",
+      "Dusit Group official projects page",
+      "Beachfront positioning"
+    ],
+    "trust_proof": [
+      "Official developer projects page is live",
+      "EIA approved is stated on the official page",
+      "Official project image is published on Dusit Group domain"
+    ],
+    "source_notes": {
+      "official_url": "https://dusit-group.com/projects/",
+      "source_domain": "dusit-group.com",
+      "media_source": "official developer projects page",
+      "notes": "Project status and Seaspire image checked on 2026-03-30."
+    },
+    "claims_updated_at": "2026-03-30T00:00:00Z",
+    "investment_snapshot": {
+      "Source": "Official Dusit Group projects page",
+      "Status": "EIA Approved",
+      "Positioning": "Next beachfront project",
+      "Sales gallery": "Published on official page",
+      "Updated": "2026-03-30"
+    },
+    "location": {
+      "city": "Pattaya",
+      "area": "Jomtien",
+      "address": "Jomtien, Pattaya"
+    },
+    "is_featured": false
+  },
+  {
+    "name": "The Lavish",
+    "slug": "the-lavish",
+    "area_slug": "north-pattaya",
+    "cover_image_url": "/media/project-covers/the-lavish/cover_c363e8835b38.webp",
+    "status": "published",
+    "property_type": "house",
+    "images": [
+      "/media/import-assets/projects/the-lavish/asset_c363e8835b38.webp"
+    ],
+    "summary": {
+      "en": "North Pattaya luxury detached-home project with large living areas and clearly published house-type data.",
+      "th": "โครงการบ้านเดี่ยวหรูในพัทยาเหนือที่เผยแพร่ข้อมูลแบบบ้านและพื้นที่ใช้สอยขนาดใหญ่ไว้อย่างชัดเจน"
+    },
+    "description": {
+      "en": "The official The Lavish Pattaya website presents a modern contemporary luxury detached-home project on Sukhumvit 19, North Pattaya, with house types reaching up to 400 sqm of living space.",
+      "th": "เว็บไซต์ The Lavish Pattaya อย่างเป็นทางการนำเสนอโครงการบ้านเดี่ยวหรูสไตล์ modern contemporary luxury บนสุขุมวิท 19 พัทยาเหนือ พร้อมแบบบ้านที่มีพื้นที่ใช้สอยสูงสุดถึง 400 ตร.ม."
+    },
+    "highlights": [
+      "Official starting price START 15.95 MB",
+      "North Pattaya / Sukhumvit 19 positioning",
+      "House types with living space up to 400 sqm"
+    ],
+    "quick_facts": [
+      "Sukhumvit 19, North Pattaya",
+      "Detached luxury homes",
+      "Living space up to 400 sqm"
+    ],
+    "trust_proof": [
+      "Official project website is live",
+      "House-type sizes and land-size ranges are published",
+      "Official starting price 15.95 MB is published"
+    ],
+    "source_notes": {
+      "official_url": "https://thelavishpattaya.com/",
+      "source_domain": "thelavishpattaya.com",
+      "media_source": "official project website",
+      "notes": "Starting price and house-type sizes checked on 2026-03-30."
+    },
+    "claims_updated_at": "2026-03-30T00:00:00Z",
+    "investment_snapshot": {
+      "Source": "Official project website",
+      "Entry price": "START 15.95 MB",
+      "Location": "Sukhumvit 19 - North Pattaya",
+      "Largest home": "400 sqm living space",
+      "Updated": "2026-03-30"
+    },
+    "location": {
+      "city": "Pattaya",
+      "area": "North Pattaya",
+      "address": "Sukhumvit 19, North Pattaya"
+    },
+    "is_featured": false,
+    "starting_price": 15950000
+  },
+  {
+    "name": "Once Wongamat",
+    "slug": "once-wongamat",
+    "area_slug": "wongamat",
+    "cover_image_url": "/media/project-covers/once-wongamat/cover_b4ef0491685f.jpg",
+    "status": "published",
+    "property_type": "condo",
+    "images": [
+      "/media/import-assets/projects/once-wongamat/asset_b4ef0491685f.jpg"
+    ],
+    "summary": {
+      "en": "Freehold sea-view tower in North Pattaya / Wongamat with strong brand-led positioning and official project context.",
+      "th": "คอนโดฟรีโฮลด์วิวทะเลในโซนพัทยาเหนือ / Wongamat ที่มี positioning ชัดและมีบริบทโครงการจากแหล่งทางการครบ"
+    },
+    "description": {
+      "en": "The official Once Wongamat website describes the project as a super-luxury freehold in prime North Pattaya, 150 metres from Terminal 21 Pattaya, with 8 floors of lifestyle facilities and 100% sea-view units.",
+      "th": "เว็บไซต์ Once Wongamat อย่างเป็นทางการอธิบายโครงการว่าเป็นซูเปอร์ลักชัวรีฟรีโฮลด์ในพัทยาเหนือ ห่าง Terminal 21 Pattaya เพียง 150 เมตร พร้อมชั้นสิ่งอำนวยความสะดวก 8 ชั้นและยูนิตวิวทะเลทั้งหมด"
+    },
+    "highlights": [
+      "Freehold positioning published on official site",
+      "150 metres from Terminal 21 Pattaya",
+      "8 floors of lifestyle facilities and 100% sea-view units"
+    ],
+    "quick_facts": [
+      "Prime North Pattaya / Wongamat",
+      "150 metres from Terminal 21 Pattaya",
+      "100% sea-view units"
+    ],
+    "trust_proof": [
+      "Official project website is live",
+      "Project description includes freehold and location claims",
+      "Official media published on project domain"
+    ],
+    "source_notes": {
+      "official_url": "https://oncewongamatpattaya.com/",
+      "source_domain": "oncewongamatpattaya.com",
+      "media_source": "official project website",
+      "notes": "Freehold, Terminal 21 distance, and facility-floor claims checked on 2026-03-30."
+    },
+    "claims_updated_at": "2026-03-30T00:00:00Z",
+    "investment_snapshot": {
+      "Source": "Official project website",
+      "Ownership": "Freehold",
+      "Location": "150 m from Terminal 21 Pattaya",
+      "Facilities": "8 floors of lifestyle facilities",
+      "Updated": "2026-03-30"
+    },
+    "location": {
+      "city": "Pattaya",
+      "area": "Wongamat",
+      "address": "Prime North Pattaya"
+    },
+    "is_featured": true
+  },
+  {
+    "name": "Chieftain",
+    "slug": "chieftain",
+    "developer_slug": "patta",
+    "area_slug": "nong-plalai",
+    "cover_image_url": "/media/project-covers/chieftain/cover_2a1d8ab95997.jpg",
+    "status": "published",
+    "property_type": "house",
+    "images": [
+      "/media/import-assets/projects/chieftain/asset_2a1d8ab95997.jpg"
+    ],
+    "summary": {
+      "en": "Art Deco detached-home project from Patta in the Highway 36 / Nong Plalai catchment.",
+      "th": "โครงการบ้านเดี่ยวสไตล์ Art Deco จาก Patta ในโซนใกล้ทางหลวง 36 และ Nong Plalai"
+    },
+    "description": {
+      "en": "Patta’s official Chieftain page presents luxury family homes with Art Deco styling, main-road access, underground utilities, and proximity to international schools in the Pattaya catchment.",
+      "th": "หน้า Chieftain ของ Patta อย่างเป็นทางการนำเสนอบ้านครอบครัวระดับบนสไตล์ Art Deco พร้อมทางเข้าถนนหลัก ระบบสาธารณูปโภคใต้ดิน และความใกล้กับโรงเรียนนานาชาติในโซนพัทยา"
+    },
+    "highlights": [
+      "Art Deco detached-home concept",
+      "Main-road access and underground utilities",
+      "Nearby international schools"
+    ],
+    "quick_facts": [
+      "Nong Plalai, Bang Lamung",
+      "Detached houses",
+      "Patta official project page"
+    ],
+    "trust_proof": [
+      "Official Patta project page is live",
+      "Project location and concept are published on-site",
+      "Official project imagery is hosted on Patta domain"
+    ],
+    "source_notes": {
+      "official_url": "https://patta.co.th/project/chieftain/",
+      "source_domain": "patta.co.th",
+      "media_source": "official developer website",
+      "notes": "Concept and location references checked on 2026-03-30."
+    },
+    "claims_updated_at": "2026-03-30T00:00:00Z",
+    "investment_snapshot": {
+      "Source": "Official Patta project page",
+      "Location": "Nong Plalai, Bang Lamung",
+      "Home type": "Detached houses",
+      "Access": "Main-road access",
+      "Updated": "2026-03-30"
+    },
+    "location": {
+      "city": "Pattaya",
+      "area": "Nong Plalai",
+      "address": "Nong Plalai, Bang Lamung, Chon Buri 20150"
+    },
+    "is_featured": false
+  },
+  {
+    "name": "Horizon",
+    "slug": "horizon",
+    "developer_slug": "patta",
+    "area_slug": "nong-plalai",
+    "cover_image_url": "/media/project-covers/horizon/cover_64a53f498421.jpg",
+    "status": "published",
+    "property_type": "house",
+    "images": [
+      "/media/import-assets/projects/horizon/asset_64a53f498421.jpg"
+    ],
+    "summary": {
+      "en": "Family-oriented contemporary homes from Patta near international schools and Motorway 7.",
+      "th": "โครงการบ้านร่วมสมัยจาก Patta ที่เน้นครอบครัวและอยู่ใกล้โรงเรียนนานาชาติกับ Motorway 7"
+    },
+    "description": {
+      "en": "Patta’s official Horizon page presents contemporary homes with family-friendly planning, underground power, and a location near international schools and Motorway 7.",
+      "th": "หน้า Horizon ของ Patta อย่างเป็นทางการนำเสนอบ้านสไตล์ contemporary ที่วางผังเพื่อการอยู่อาศัยของครอบครัว พร้อมระบบไฟฟ้าใต้ดิน และทำเลใกล้โรงเรียนนานาชาติกับ Motorway 7"
+    },
+    "highlights": [
+      "Contemporary family-home concept",
+      "Near international schools and Motorway 7",
+      "Underground power on official project page"
+    ],
+    "quick_facts": [
+      "Nong Plalai catchment",
+      "Detached homes",
+      "Motorway 7 connectivity"
+    ],
+    "trust_proof": [
+      "Official Patta project page is live",
+      "School and road-access context is published on-site",
+      "Official project imagery is hosted on Patta domain"
+    ],
+    "source_notes": {
+      "official_url": "https://patta.co.th/project/horizon/",
+      "source_domain": "patta.co.th",
+      "media_source": "official developer website",
+      "notes": "Concept and access references checked on 2026-03-30."
+    },
+    "claims_updated_at": "2026-03-30T00:00:00Z",
+    "investment_snapshot": {
+      "Source": "Official Patta project page",
+      "Location": "Near international schools and Motorway 7",
+      "Home type": "Detached homes",
+      "Planning": "Family-friendly design",
+      "Updated": "2026-03-30"
+    },
+    "location": {
+      "city": "Pattaya",
+      "area": "Nong Plalai",
+      "address": "Pattaya catchment near Motorway 7"
+    },
+    "is_featured": false
+  },
+  {
+    "name": "Wyndham Jomtien Pattaya",
+    "slug": "wyndham-jomtien-pattaya",
+    "area_slug": "jomtien",
+    "cover_image_url": "/media/project-covers/wyndham-jomtien-pattaya/cover_f20721152575.jpg",
+    "status": "published",
+    "property_type": "condo",
+    "images": [
+      "/media/import-assets/projects/wyndham-jomtien-pattaya/asset_f20721152575.jpg",
+      "/media/import-assets/projects/wyndham-jomtien-pattaya/asset_95355d425ee1.jpg"
+    ],
+    "summary": {
+      "en": "Hotel-branded condominium resort positioning in Jomtien with an official condominium site and investment-program details.",
+      "th": "โครงการคอนโดมิเนียมรีสอร์ตแบรนด์โรงแรมในโซนจอมเทียนที่มีเว็บไซต์ condominium อย่างเป็นทางการและเผยแพร่รายละเอียด investment program"
+    },
+    "description": {
+      "en": "The official Wyndham Jomtien Pattaya condominium site describes the project as a 5-star luxury condominium resort and publishes investment-program terms including a 6% return for 8 years and 15 days of owner stay.",
+      "th": "เว็บไซต์ condominium ของ Wyndham Jomtien Pattaya อย่างเป็นทางการอธิบายโครงการว่าเป็นคอนโดมิเนียมรีสอร์ตหรูระดับ 5 ดาว พร้อมเผยแพร่เงื่อนไข investment program เช่นผลตอบแทน 6% นาน 8 ปี และสิทธิ์เข้าพักเจ้าของ 15 วัน"
+    },
+    "highlights": [
+      "5-star luxury condominium resort positioning",
+      "Official investment-program terms published",
+      "Official condominium and hotel split entry pages"
+    ],
+    "quick_facts": [
+      "Jomtien, Pattaya",
+      "Hotel-branded condominium resort",
+      "Official 6% for 8 years investment-program reference"
+    ],
+    "trust_proof": [
+      "Official condominium website is live",
+      "Official investment-program details are published",
+      "Official project imagery is hosted on Wyndham Jomtien Pattaya domain"
+    ],
+    "source_notes": {
+      "official_url": "https://www.wyndhamjomtienpattaya.com/condominium",
+      "source_domain": "wyndhamjomtienpattaya.com",
+      "media_source": "official condominium website",
+      "notes": "Investment-program terms checked on 2026-03-30."
+    },
+    "claims_updated_at": "2026-03-30T00:00:00Z",
+    "investment_snapshot": {
+      "Source": "Official condominium website",
+      "Program return": "6% for 8 years",
+      "Owner use": "15 days free stay",
+      "Positioning": "5-star luxury condominium resort",
+      "Updated": "2026-03-30"
+    },
+    "location": {
+      "city": "Pattaya",
+      "area": "Jomtien",
+      "address": "Jomtien, Pattaya"
+    },
+    "is_featured": true
+  }
+]

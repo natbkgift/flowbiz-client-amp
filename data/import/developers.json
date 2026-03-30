@@ -1,0 +1,105 @@
+[
+  {
+    "name": "AssetWise",
+    "slug": "assetwise",
+    "website": "https://assetwise.co.th",
+    "summary": {
+      "en": "Official developer source used for Aquarous Jomtien Pattaya.",
+      "th": "ใช้เป็นแหล่งอ้างอิงผู้พัฒนาอย่างเป็นทางการของ Aquarous Jomtien Pattaya"
+    },
+    "status": "active"
+  },
+  {
+    "name": "Baan Dusit",
+    "slug": "baan-dusit",
+    "website": null,
+    "summary": null,
+    "status": "active"
+  },
+  {
+    "name": "Dusit Group",
+    "slug": "dusit-group",
+    "website": "https://dusit-group.com",
+    "summary": {
+      "en": "Official developer source used for Pristine Park III and Seaspire Jomtien.",
+      "th": "ใช้เป็นแหล่งอ้างอิงผู้พัฒนาอย่างเป็นทางการของ Pristine Park III และ Seaspire Jomtien"
+    },
+    "status": "active"
+  },
+  {
+    "name": "Global Top Group",
+    "slug": "global-top-group",
+    "website": "https://globaltopgroup.com",
+    "summary": null,
+    "status": "active"
+  },
+  {
+    "name": "Heights Holdings",
+    "slug": "heights-holdings",
+    "website": "https://heightsholdings.com",
+    "summary": null,
+    "status": "active"
+  },
+  {
+    "name": "Matrix Developments",
+    "slug": "matrix-developments",
+    "website": "https://matrixdevelopments.com",
+    "summary": null,
+    "status": "active"
+  },
+  {
+    "name": "Nova Group",
+    "slug": "nova-group",
+    "website": "https://novagroup.co.th",
+    "summary": null,
+    "status": "active"
+  },
+  {
+    "name": "Ocean Property",
+    "slug": "ocean-property",
+    "website": null,
+    "summary": null,
+    "status": "active"
+  },
+  {
+    "name": "Patta",
+    "slug": "patta",
+    "website": "https://patta.co.th",
+    "summary": {
+      "en": "Official developer source used for Chieftain and Horizon.",
+      "th": "ใช้เป็นแหล่งอ้างอิงผู้พัฒนาอย่างเป็นทางการของ Chieftain และ Horizon"
+    },
+    "status": "active"
+  },
+  {
+    "name": "Pattaya Prestige Properties",
+    "slug": "pattaya-prestige",
+    "website": null,
+    "summary": null,
+    "status": "active"
+  },
+  {
+    "name": "Siam Oriental",
+    "slug": "siam-oriental",
+    "website": null,
+    "summary": null,
+    "status": "active"
+  },
+  {
+    "name": "The Riviera Group",
+    "slug": "the-riviera-group",
+    "website": "https://therivieragroup.co.th",
+    "summary": {
+      "en": "Official developer source used for The Riviera Palm Beach and The Riviera Beverly Hills.",
+      "th": "ใช้เป็นแหล่งอ้างอิงผู้พัฒนาอย่างเป็นทางการของ The Riviera Palm Beach และ The Riviera Beverly Hills"
+    },
+    "status": "active"
+  },
+  {
+    "name": "Urban Attitude",
+    "slug": "urban-attitude",
+    "website": null,
+    "summary": null,
+    "status": "active"
+  }
+]

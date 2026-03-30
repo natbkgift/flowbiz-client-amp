@@ -224,9 +224,9 @@ export function Header({
       label: dict.nav.buy,
       href: '/buy',
       items: [
-        { href: '/buy', label: dict.nav.buy, desc: locale === 'th' ? 'เส้นทางซื้อสำหรับผู้ซื้อชาวต่างชาติและ second-home buyer' : 'Buyer route for foreign nationals and second-home clients' },
+        { href: '/buy', label: dict.nav.buy, desc: locale === 'th' ? 'เส้นทางซื้อสำหรับผู้ซื้อชาวต่างชาติและผู้ที่มองหาบ้านพักตากอากาศ' : 'Buyer route for foreign nationals and second-home clients' },
         { href: '/projects', label: dict.nav.projects, desc: locale === 'th' ? 'ดูโครงการใหม่และโครงการที่ผ่านการคัดกรอง' : 'Review vetted projects and launches first' },
-        { href: '/marketplace', label: marketplaceLabel, desc: locale === 'th' ? 'ดู stock ที่ยัง active ทั้งระบบ' : 'Open active inventory across the catalogue' },
+        { href: '/marketplace', label: marketplaceLabel, desc: locale === 'th' ? 'ดูรายการที่ยังเปิดขายอยู่ในระบบ' : 'Open active inventory across the catalogue' },
       ],
     },
     {
@@ -235,9 +235,9 @@ export function Header({
       href: '/invest',
       items: [
         { href: '/invest', label: dict.nav.invest, desc: locale === 'th' ? 'เส้นทางลงทุนสำหรับผู้ซื้อระหว่างประเทศ' : 'Investment-first path for international buyers' },
-        { href: '/investment', label: investLabel, desc: locale === 'th' ? 'กรอบคิดเรื่อง yield ดีมานด์ และความเสี่ยง' : 'Yield, demand, and risk framing for Pattaya' },
-        { href: '/smart-finder', label: smartFinderLabel, desc: locale === 'th' ? 'ช่วยเลือกจากงบประมาณและ thesis การลงทุน' : 'Guided matching by budget and investment thesis' },
-        { href: '/compare', label: compareLabel, desc: locale === 'th' ? 'เทียบตัวเลือกแบบ side-by-side' : 'Compare options side-by-side' },
+        { href: '/investment', label: investLabel, desc: locale === 'th' ? 'กรอบคิดเรื่องผลตอบแทน ดีมานด์ และความเสี่ยงของพัทยา' : 'Yield, demand, and risk framing for Pattaya' },
+        { href: '/smart-finder', label: smartFinderLabel, desc: locale === 'th' ? 'ช่วยคัดจากงบประมาณและโจทย์การลงทุนของคุณ' : 'Guided matching by budget and investment thesis' },
+        { href: '/compare', label: compareLabel, desc: locale === 'th' ? 'เทียบตัวเลือกแบบวางข้างกันอย่างชัดเจน' : 'Compare options side-by-side' },
       ],
     },
     { key: 'rent', label: rentLabel, href: '/rent' },
@@ -275,22 +275,22 @@ export function Header({
     {
       href: '/buy',
       label: locale === 'th' ? 'ซื้อ' : 'Buy',
-      detail: locale === 'th' ? 'foreign buyer route' : 'foreign-buyer route',
+      detail: locale === 'th' ? 'เส้นทางสำหรับผู้ซื้อชาวต่างชาติ' : 'foreign-buyer route',
     },
     {
       href: '/invest',
       label: locale === 'th' ? 'ลงทุน' : 'Invest',
-      detail: locale === 'th' ? 'yield + demand' : 'yield + demand',
+      detail: locale === 'th' ? 'ดูดีมานด์และช่วงราคาเข้า' : 'yield + demand',
     },
     {
       href: '/rent',
       label: locale === 'th' ? 'เช่า' : 'Rent',
-      detail: locale === 'th' ? 'relocate-ready' : 'relocate-ready',
+      detail: locale === 'th' ? 'พร้อมย้ายเข้าอยู่และเทียบทำเล' : 'relocate-ready',
     },
     {
       href: '/sell',
       label: locale === 'th' ? 'ขาย' : 'Sell',
-      detail: locale === 'th' ? 'owner brief' : 'owner brief',
+      detail: locale === 'th' ? 'เริ่มต้นสำหรับเจ้าของทรัพย์' : 'owner brief',
     },
   ];
   const contactCtaHref = cms?.contactCta?.href || '/contact';
@@ -346,6 +346,15 @@ export function Header({
     return () => document.removeEventListener('keydown', onKeyDown);
   }, [mobileOpen]);
 
+  useEffect(() => {
+    document.body.classList.toggle('mobile-menu-open', mobileOpen);
+    document.documentElement.classList.toggle('mobile-menu-open', mobileOpen);
+    return () => {
+      document.body.classList.remove('mobile-menu-open');
+      document.documentElement.classList.remove('mobile-menu-open');
+    };
+  }, [mobileOpen]);
+
   return (
     <>
       <a href="#main-content" className="skip-link">
@@ -355,6 +364,7 @@ export function Header({
       <header
         className={`header${isHomeSurface ? ' header--home' : ''}${isHomeSurface && homeHeaderScrolled ? ' header--home-scrolled' : ''}`}
         data-surface={currentSurface}
+        data-locale={locale}
       >
         <div className={`header-content${isHomeSurface ? ' header-content--home' : ''}`}>
           <Link href={withLocale(locale, '/')} className="logo" aria-label={dict.brand.name}>
@@ -411,17 +421,28 @@ export function Header({
         </div>
       </header>
 
+      <button
+        type="button"
+        className={mobileOpen ? 'mobile-overlay active' : 'mobile-overlay'}
+        aria-label={locale === 'th' ? 'ปิดเมนู' : 'Close menu'}
+        aria-hidden={!mobileOpen}
+        tabIndex={mobileOpen ? 0 : -1}
+        onClick={() => setMobileOpen(false)}
+      />
+
       <nav
         ref={mobileMenuRef}
         className={mobileOpen ? 'mobile-menu active' : 'mobile-menu'}
         id="mobile-menu"
         role="navigation"
         aria-label={dict.common.mainNavigation}
+        aria-hidden={!mobileOpen}
+        data-locale={locale}
       >
         <div className="mobile-menu__inner">
           <div className="mobile-menu__intro">
             <p className="mobile-menu__eyebrow">
-              {locale === 'th' ? 'Pattaya real estate routes' : 'Pattaya real estate routes'}
+              {locale === 'th' ? 'เส้นทางอสังหาริมทรัพย์พัทยา' : 'Pattaya real estate routes'}
             </p>
             <p className="mobile-menu__title">
               {locale === 'th'
@@ -450,7 +471,7 @@ export function Header({
                 <strong>{locale === 'th' ? 'คุยกับที่ปรึกษา' : 'Speak to an advisor'}</strong>
                 <span>
                   {locale === 'th'
-                    ? 'ส่งโจทย์ถึงทีมพัทยา แล้วให้เราชี้ next step ที่ชัดที่สุด'
+                    ? 'ส่งโจทย์ถึงทีมพัทยา แล้วให้เราชี้ขั้นตอนถัดไปที่ชัดที่สุด'
                     : 'Send your brief to the Pattaya team and get the clearest next step.'}
                 </span>
               </Link>

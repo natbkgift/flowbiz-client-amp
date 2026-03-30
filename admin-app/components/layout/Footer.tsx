@@ -55,11 +55,11 @@ export function Footer({
     ? 'ที่ปรึกษาอสังหาฯ พัทยาสำหรับผู้ซื้อ นักลงทุน ผู้เช่า และเจ้าของ'
     : 'Pattaya real estate advisory for buyers, investors, renters, and owners';
   const brandBody = locale === 'th'
-    ? 'ซื้อ ลงทุน เช่า หรือขายในพัทยาผ่าน advisory route เดียวที่ชัดกว่า พร้อม next step ที่ทีมคัดให้ตรงโจทย์'
+    ? 'ซื้อ ลงทุน เช่า หรือขายในพัทยาผ่านทีมที่ช่วยคัดเส้นทาง โครงการ และยูนิตให้ชัดตั้งแต่เริ่มต้น'
     : 'Buy, invest, rent, or sell in Pattaya through one clearer advisory route with a sharper next step from the team.';
   const routeLinks = quickLinks.filter((item) => ['/invest', '/buy', '/rent', '/sell', '/projects', '/area-guide'].includes(item.href));
   const supportLinks = [
-    { href: '/investment', label: locale === 'th' ? 'Why Pattaya' : 'Why Pattaya' },
+    { href: '/investment', label: locale === 'th' ? 'ทำไมพัทยายังน่าลงทุน' : 'Why Pattaya' },
     { href: '/about', label: locale === 'th' ? 'รู้จัก AMP' : 'About AMP' },
     { href: '/contact', label: dict.nav.contact },
   ];
@@ -69,7 +69,7 @@ export function Footer({
   ];
 
   return (
-    <footer className="footer" role="contentinfo">
+    <footer className="footer" role="contentinfo" data-locale={locale}>
       <Container>
         <div className="footer-top-grid">
           <div className="footer-brand">
@@ -91,7 +91,7 @@ export function Footer({
 
           <div className="footer-columns">
             <div>
-              <p className="footer-column-title">{locale === 'th' ? 'Routes' : 'Routes'}</p>
+              <p className="footer-column-title">{locale === 'th' ? 'เส้นทางหลัก' : 'Routes'}</p>
               <ul className="footer-links">
                 {routeLinks.map((item) => (
                   <li key={item.href}>
@@ -102,7 +102,7 @@ export function Footer({
             </div>
 
             <div>
-              <p className="footer-column-title">{locale === 'th' ? 'Research' : 'Research'}</p>
+              <p className="footer-column-title">{locale === 'th' ? 'ข้อมูลประกอบการตัดสินใจ' : 'Research'}</p>
               <ul className="footer-links">
                 {supportLinks.map((item) => (
                   <li key={item.href}>
@@ -136,10 +136,10 @@ export function Footer({
           <dl className="footer-nap-list">
             <dt>{dict.common.contactHeading}</dt>
             <dd>{dict.brand.name}</dd>
-            <dt>Email</dt>
+            <dt>{locale === 'th' ? 'อีเมล' : 'Email'}</dt>
             <dd>{contactEmail}</dd>
-            <dt>{locale === 'th' ? 'Support' : 'Support'}</dt>
-            <dd>{locale === 'th' ? 'Advisory, private tour, WhatsApp, LINE' : 'Advisory, private tour, WhatsApp, LINE'}</dd>
+            <dt>{locale === 'th' ? 'ช่องทางดูแล' : 'Support'}</dt>
+            <dd>{locale === 'th' ? 'ที่ปรึกษา นัดชมทรัพย์แบบส่วนตัว WhatsApp และ LINE' : 'Advisory, private tour, WhatsApp, LINE'}</dd>
             {showFacebookLink ? (
               <>
                 <dt>Facebook</dt>

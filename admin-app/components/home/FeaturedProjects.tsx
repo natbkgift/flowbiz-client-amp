@@ -8,8 +8,49 @@ import { EmptyStateCard } from '@/components/ui/StateBlocks';
 
 type BadgeLabel = 'New' | 'Hot' | 'Beachfront';
 
-function formatPrice(price: number): string {
+function localizeAreaLabel(locale: 'en' | 'th', value: string | null | undefined): string | null {
+  const trimmed = String(value ?? '').trim();
+  if (!trimmed) return null;
+  if (locale !== 'th') return trimmed;
+
+  const normalized = trimmed
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+
+  const areaMap: Record<string, string> = {
+    'wongamat': 'วงศ์อมาตย์',
+    'wong amat': 'วงศ์อมาตย์',
+    'jomtien': 'จอมเทียน',
+    'na jomtien': 'นาจอมเทียน',
+    'north pattaya': 'พัทยาเหนือ',
+    'central pattaya': 'พัทยากลาง',
+    'south pattaya': 'พัทยาใต้',
+    'east pattaya': 'พัทยาตะวันออก',
+    'pratumnak': 'พระตำหนัก',
+    'pratamnak': 'พระตำหนัก',
+    'huay yai': 'ห้วยใหญ่',
+    'bang saray': 'บางเสร่',
+    'pattaya': 'พัทยา',
+  };
+
+  return areaMap[normalized] ?? trimmed;
+}
+
+function formatPrice(price: number, locale: 'en' | 'th'): string {
   if (!Number.isFinite(price)) return '';
+  if (locale === 'th') {
+    if (price >= 1_000_000) {
+      const millionValue = price / 1_000_000;
+      const decimals = millionValue >= 10 || Math.round(millionValue * 10) % 10 === 0 ? 0 : 1;
+      return `${millionValue.toLocaleString('th-TH', {
+        minimumFractionDigits: 0,
+        maximumFractionDigits: decimals,
+      })} ล้านบาท`;
+    }
+    return `${Math.round(price).toLocaleString('th-TH')} บาท`;
+  }
   return `฿${Math.round(price).toLocaleString()}`;
 }
 
@@ -42,11 +83,11 @@ export function FeaturedProjects({
   };
 
   const labels = {
-    from: locale === 'th' ? 'ราคา live เริ่มต้น' : 'From live pricing',
+    from: locale === 'th' ? 'ราคาเริ่มต้นล่าสุด' : 'From live pricing',
     status: locale === 'th' ? 'สถานะ' : 'Status',
     type: locale === 'th' ? 'ประเภท' : 'Type',
     delivery: locale === 'th' ? 'ส่งมอบ' : 'Delivery',
-    curatedLabel: locale === 'th' ? 'พร้อมเปิดดูต่อ' : 'Shortlist ready',
+    curatedLabel: locale === 'th' ? 'พร้อมดูรายละเอียด' : 'Shortlist ready',
     locationPrefix: locale === 'th' ? 'ทำเล' : 'Location',
   };
   const emptyStatePrimaryHref = withLocale(locale, '/projects');
@@ -55,7 +96,7 @@ export function FeaturedProjects({
     ? [
         'เปิดรายการที่เผยแพร่ล่าสุดได้ทันที',
         'ส่งโจทย์งบและทำเลให้ทีมได้เลย',
-        'รับตัวเลือกที่พร้อมเช็กราคาต่อ',
+        'รับตัวเลือกที่พร้อมเช็กราคาและเอกสารต่อ',
       ]
     : [
         'Open the latest published inventory instantly',
@@ -66,7 +107,7 @@ export function FeaturedProjects({
     ? 'ทีมจะคัดโครงการที่ควรเปิดก่อนให้คุณ'
     : 'The team will line up the next projects worth opening';
   const emptyStatePreviewBody = locale === 'th'
-    ? 'ถ้าโครงการที่เหมาะยังไม่ขึ้นบนหน้าในตอนนี้ ส่ง brief แล้วทีมจะช่วยคัดราคา fit และ next step ที่ควรทำต่อ'
+    ? 'ถ้าโครงการที่เหมาะยังไม่ขึ้นบนหน้าในตอนนี้ ส่งรายละเอียดเบื้องต้นแล้วทีมจะช่วยคัดราคา ความเหมาะสม และลำดับการดูต่อให้ชัดขึ้น'
     : 'If the right launch is not already surfaced, send the brief and get pricing, fit, and the clearest next step in one reply.';
 
   if (projects.length === 0) {
@@ -84,7 +125,7 @@ export function FeaturedProjects({
             <EmptyStateCard
               className="premium-empty-state home-project-empty__card"
               title={locale === 'th' ? 'ให้ทีมช่วยคัดรายการล่าสุดให้คุณ' : 'Ask the team for today\'s matched picks'}
-              body={locale === 'th' ? 'ดูโครงการที่เผยแพร่แล้วทั้งหมด หรือส่ง brief ให้ทีมจัดชุดโครงการที่เหมาะกับงบและเป้าหมายของคุณ' : 'Browse published developments or send your brief so the team can assemble options matched to your budget and goals.'}
+              body={locale === 'th' ? 'ดูโครงการที่เผยแพร่แล้วทั้งหมด หรือส่งโจทย์ให้ทีมจัดชุดโครงการที่เหมาะกับงบและเป้าหมายของคุณ' : 'Browse published developments or send your brief so the team can assemble options matched to your budget and goals.'}
               action={(
                 <div className="home-project-empty__actions">
                   <Link href={emptyStatePrimaryHref} className="home-project-empty__action home-project-empty__action--primary">
@@ -100,7 +141,7 @@ export function FeaturedProjects({
           <div className="home-project-empty__preview" aria-hidden="true">
             <div className="home-project-empty__preview-card">
               <span className="home-project-empty__preview-kicker">
-                {locale === 'th' ? 'เส้นทางต่อจาก stock ที่ตรวจแล้ว' : 'Verified live handoff'}
+                {locale === 'th' ? 'เส้นทางต่อจากรายการที่ยืนยันแล้ว' : 'Verified live handoff'}
               </span>
               <strong className="home-project-empty__preview-title">{emptyStatePreviewTitle}</strong>
               <p className="home-project-empty__preview-body">{emptyStatePreviewBody}</p>
@@ -175,7 +216,7 @@ export function FeaturedProjects({
     };
 
     const areaName = dynamicProject.area_name || dynamicProject.area?.name || dynamicProject.district || dynamicProject.city;
-    return areaName && areaName.trim() ? areaName : null;
+    return localizeAreaLabel(locale, areaName);
   }
 
   function extractProjectHighlights(project: ProjectItem, area: string | null, decisionSignals: string[], index: number): string[] {
@@ -186,15 +227,24 @@ export function FeaturedProjects({
     };
 
     const normalizedStatus = project.status ? project.status.replace(/_/g, ' ') : null;
-    const propertyType = dynamicProject.property_type ? String(dynamicProject.property_type).replace(/_/g, ' ') : null;
+    const propertyType = dynamicProject.property_type
+      ? String(dynamicProject.property_type).replace(/_/g, ' ')
+      : null;
+    const localizedPropertyType = propertyType && locale === 'th'
+      ? propertyType
+        .replace(/condo/gi, 'คอนโดมิเนียม')
+        .replace(/villa/gi, 'วิลล่า')
+        .replace(/house/gi, 'บ้าน')
+        .replace(/townhome/gi, 'ทาวน์โฮม')
+      : propertyType;
     const deliveryRaw = dynamicProject.delivery_date || dynamicProject.handover_date;
     const highlights: string[] = [];
 
-    if (decisionSignals.includes(locale === 'th' ? 'High ROI' : 'High ROI')) {
-      highlights.push(locale === 'th' ? 'เหมาะกับสายผลตอบแทนและปล่อยเช่า' : 'High rental-demand fit for ROI-led shortlists.');
+    if (decisionSignals.includes(locale === 'th' ? 'เด่นด้านการลงทุน' : 'High ROI')) {
+      highlights.push(locale === 'th' ? 'เหมาะกับการปล่อยเช่าและการคัดดีลเพื่อผลตอบแทน' : 'High rental-demand fit for ROI-led shortlists.');
     }
-    if (decisionSignals.includes(locale === 'th' ? 'Sea View' : 'Sea View')) {
-      highlights.push(locale === 'th' ? 'วิวทะเลที่ช่วยทั้งอยู่อาศัยและ resale' : 'Sea-view positioning with stronger resale appeal.');
+    if (decisionSignals.includes(locale === 'th' ? 'วิวทะเล' : 'Sea View')) {
+      highlights.push(locale === 'th' ? 'วิวทะเลที่ช่วยทั้งการอยู่อาศัยและมูลค่าขายต่อ' : 'Sea-view positioning with stronger resale appeal.');
     }
     if (!highlights.length) {
       highlights.push(
@@ -204,14 +254,18 @@ export function FeaturedProjects({
       );
     }
     if (normalizedStatus) {
-      highlights.push(`${labels.status}: ${normalizedStatus}`);
-    } else if (propertyType) {
-      highlights.push(locale === 'th' ? `${propertyType} พร้อมรายละเอียดโครงการที่ยืนยันแล้ว` : `${propertyType} with verified project detail ready.`);
+      if (normalizedStatus === 'published') {
+        highlights.push(locale === 'th' ? 'ข้อมูลโครงการเผยแพร่และยืนยันแล้ว' : 'Published and verified project information.');
+      } else {
+        highlights.push(`${labels.status}: ${normalizedStatus}`);
+      }
+    } else if (localizedPropertyType) {
+      highlights.push(locale === 'th' ? `${localizedPropertyType} พร้อมรายละเอียดโครงการที่ยืนยันแล้ว` : `${localizedPropertyType} with verified project detail ready.`);
     }
     if (deliveryRaw) {
       highlights.push(`${labels.delivery}: ${deliveryRaw}`);
     } else if (area) {
-      highlights.push(locale === 'th' ? `ดูยูนิต ราคา current และแปลนของ ${area}` : `Live units, pricing, and plans in ${area}.`);
+      highlights.push(locale === 'th' ? `ดูยูนิต ราคาอัปเดต และแปลนของ ${area}` : `Live units, pricing, and plans in ${area}.`);
     }
 
     return [...new Set(highlights)].slice(0, 2);
@@ -222,16 +276,16 @@ export function FeaturedProjects({
     const signals: string[] = [];
 
     if (index === 0) {
-      signals.push(locale === 'th' ? 'Best Pick' : 'Best Pick');
+      signals.push(locale === 'th' ? 'ตัวเลือกเด่น' : 'Best Pick');
     }
     if (tokens.some((token) => token.includes('roi') || token.includes('yield') || token.includes('invest'))) {
-      signals.push(locale === 'th' ? 'High ROI' : 'High ROI');
+      signals.push(locale === 'th' ? 'เด่นด้านการลงทุน' : 'High ROI');
     }
     if (tokens.some((token) => token.includes('beachfront') || token.includes('sea view') || token.includes('ocean view') || token.includes('beach'))) {
-      signals.push(locale === 'th' ? 'Sea View' : 'Sea View');
+      signals.push(locale === 'th' ? 'วิวทะเล' : 'Sea View');
     }
     if (!signals.length && index < 3) {
-      signals.push(locale === 'th' ? 'Best Pick' : 'Best Pick');
+      signals.push(locale === 'th' ? 'ตัวเลือกเด่น' : 'Best Pick');
     }
 
     return [...new Set(signals)].slice(0, 3);
@@ -261,7 +315,7 @@ export function FeaturedProjects({
             images: dynamicProject.images ?? null,
           };
           const hasLocalMedia = Boolean(pickRenderableLocalMedia(media));
-          const price = p.starting_price ? formatPrice(Number(p.starting_price)) : null;
+          const price = p.starting_price ? formatPrice(Number(p.starting_price), locale) : null;
           const badges = extractBadgeSet(p);
           const area = extractAreaLabel(p);
           const decisionSignals = extractDecisionSignals(p, index, area);
@@ -337,10 +391,10 @@ export function FeaturedProjects({
                 ) : null}
                 <div className="premium-project-card__footer">
                   <span className="premium-project-card__footer-label">
-                    {locale === 'th' ? 'ยูนิต ราคา current และแปลน' : 'Live units, pricing, and floor plans'}
+                    {locale === 'th' ? 'ยูนิต ราคาอัปเดต และแปลน' : 'Live units, pricing, and floor plans'}
                   </span>
                   <span className="premium-project-card__cta">
-                    {locale === 'th' ? 'ดูดีเทล' : 'View Details'}
+                    {locale === 'th' ? 'ดูรายละเอียด' : 'View Details'}
                   </span>
                 </div>
               </div>

@@ -1,0 +1,102 @@
+[
+  {
+    "name": "Bang Saray",
+    "slug": "bang-saray",
+    "city": "Pattaya",
+    "status": "published",
+    "summary": {
+      "en": "Southern Pattaya coast with a quieter low-rise and villa feel.",
+      "th": "โซนชายฝั่งด้านใต้ของพัทยาที่บรรยากาศสงบกว่าและเหมาะกับวิลล่าหรือโครงการแนวพักผ่อน"
+    }
+  },
+  {
+    "name": "Central Pattaya",
+    "slug": "central-pattaya",
+    "city": "Pattaya",
+    "status": "published",
+    "summary": {
+      "en": "City-centre Pattaya with stronger retail, transport, and walkable daily convenience.",
+      "th": "แกนใจกลางเมืองพัทยาที่เด่นเรื่องความสะดวก การค้าปลีก และการเดินทางในชีวิตประจำวัน"
+    }
+  },
+  {
+    "name": "East Pattaya",
+    "slug": "east-pattaya",
+    "city": "Pattaya",
+    "status": "published",
+    "summary": {
+      "en": "Residential inland Pattaya with family housing and local neighbourhood demand.",
+      "th": "โซนที่อยู่อาศัยฝั่งในของพัทยา เหมาะกับบ้านพักอาศัยและดีมานด์จากชุมชนท้องถิ่น"
+    }
+  },
+  {
+    "name": "Jomtien",
+    "slug": "jomtien",
+    "city": "Pattaya",
+    "status": "published",
+    "summary": {
+      "en": "Beachfront and near-beach Pattaya submarket with strong foreign-buyer and rental appeal.",
+      "th": "ซับมาร์เก็ตชายหาดและใกล้ชายหาดที่เด่นทั้งฝั่งผู้ซื้อชาวต่างชาติและตลาดเช่า"
+    }
+  },
+  {
+    "name": "Na Jomtien",
+    "slug": "na-jomtien",
+    "city": "Pattaya",
+    "status": "published",
+    "summary": {
+      "en": "Southern coastal strip beyond Jomtien with resort-style projects and larger seafront parcels.",
+      "th": "แนวชายฝั่งด้านใต้ต่อจากจอมเทียนที่เด่นเรื่องโครงการสไตล์รีสอร์ตและที่ดินหน้าทะเลขนาดใหญ่กว่า"
+    }
+  },
+  {
+    "name": "Nong Plalai",
+    "slug": "nong-plalai",
+    "city": "Pattaya",
+    "status": "published",
+    "summary": {
+      "en": "Low-density housing catchment near Highway 36 and international-school access routes.",
+      "th": "โซนบ้านแนวราบความหนาแน่นต่ำ ใกล้ทางหลวงหมายเลข 36 และเส้นทางไปโรงเรียนนานาชาติ"
+    }
+  },
+  {
+    "name": "North Pattaya",
+    "slug": "north-pattaya",
+    "city": "Pattaya",
+    "status": "published",
+    "summary": {
+      "en": "Northern Pattaya city zone linking Wongamat, Terminal 21, and established family housing pockets.",
+      "th": "โซนเมืองตอนเหนือของพัทยาที่เชื่อม Wongamat, Terminal 21 และย่านบ้านพักอาศัยที่พัฒนาแล้ว"
+    }
+  },
+  {
+    "name": "Pratumnak",
+    "slug": "pratumnak",
+    "city": "Pattaya",
+    "status": "published",
+    "summary": {
+      "en": "Hillside Pattaya district between city and beach with privacy-led condo and villa demand.",
+      "th": "ย่านเนินเขาระหว่างเมืองและชายหาดที่เด่นเรื่องความเป็นส่วนตัว ทั้งคอนโดและบ้านระดับบน"
+    }
+  },
+  {
+    "name": "South Pattaya",
+    "slug": "south-pattaya",
+    "city": "Pattaya",
+    "status": "published",
+    "summary": {
+      "en": "Urban-southern Pattaya zone with mixed condo stock and practical long-stay rental demand.",
+      "th": "โซนเมืองฝั่งใต้ของพัทยาที่มีคอนโดหลากหลายและรองรับตลาดเช่าระยะยาวได้ดี"
+    }
+  },
+  {
+    "name": "Wongamat",
+    "slug": "wongamat",
+    "city": "Pattaya",
+    "status": "published",
+    "summary": {
+      "en": "Prime northern beachfront pocket known for higher-end towers and sea-view positioning.",
+      "th": "ชายหาดฝั่งเหนือระดับพรีเมียมที่เด่นเรื่องอาคารสูงคุณภาพและยูนิตวิวทะเล"
+    }
+  }
+]

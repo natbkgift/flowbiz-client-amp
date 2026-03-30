@@ -38,9 +38,9 @@ export function HomeBottomCta({
   const headingId = `${resolvedSectionId}-title`;
   const isThai = /[\u0E00-\u0E7F]/.test(`${heading} ${subheading} ${primaryLabel} ${secondaryLabel} ${trustNote}`);
   const eyebrow = isThai ? 'ปรึกษากับทีมพัทยาโดยตรง' : 'Private advisory handoff';
-  const formBadge = isThai ? 'ช่องทางส่งโจทย์ถึงทีม AMP' : 'AMP advisory intake';
+  const formBadge = isThai ? 'ช่องทางส่งโจทย์ถึงทีม AMP Pattaya' : 'AMP advisory intake';
   const signalItems = isThai
-    ? ['ราคา current', 'ยูนิตที่ยังว่าง', 'ขั้นตอนถัดไปชัด']
+    ? ['ราคาอัปเดต', 'ยูนิตที่ยังเปิดอยู่', 'ขั้นตอนถัดไปชัดเจน']
     : ['Current pricing', 'Available units', 'Clear next step'];
 
   return (
@@ -61,14 +61,17 @@ export function HomeBottomCta({
                 ))}
               </div>
             </div>
-            <h2 id={headingId} className="home-bottom-cta__title text-3xl md:text-5xl font-serif font-semibold mb-6 leading-tight">
+            <h2 id={headingId} className={`home-bottom-cta__title text-3xl md:text-5xl ${isThai ? 'font-sans' : 'font-serif'} font-semibold mb-6 leading-tight`}>
               {heading}
             </h2>
             <p className="home-bottom-cta__lede text-lg text-white/80 mb-5 max-w-lg leading-relaxed">
               {subheading}
             </p>
             {benefits.length > 0 ? (
-              <ul className="home-bottom-cta__benefits mb-6 grid gap-3 max-w-xl text-sm text-white/82 leading-relaxed" aria-label="consultation benefits">
+              <ul
+                className="home-bottom-cta__benefits mb-6 grid gap-3 max-w-xl text-sm text-white/82 leading-relaxed"
+                aria-label={isThai ? 'ประโยชน์จากการคุยกับทีม' : 'consultation benefits'}
+              >
                 {benefits.map((benefit) => (
                   <li key={benefit} className="home-bottom-cta__benefit flex items-start gap-3">
                     <span className="home-bottom-cta__benefit-mark mt-[2px] inline-flex h-5 w-5 flex-none items-center justify-center rounded-full border border-white/20 bg-white/10 text-[11px] font-semibold text-white">+</span>

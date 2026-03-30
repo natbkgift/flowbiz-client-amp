@@ -74,7 +74,7 @@ export function CookieConsent() {
         <p className="cookie-consent__text">
           {isEn
             ? 'We only use essential cookies and local storage. No third-party tracking cookies are used.'
-            : 'เราใช้เฉพาะคุกกี้ที่จำเป็นและ local storage เท่านั้น ไม่มีการใช้คุกกี้ติดตามจากบุคคลที่สาม'}
+            : 'เราใช้เฉพาะคุกกี้ที่จำเป็นและพื้นที่จัดเก็บข้อมูลในอุปกรณ์เท่านั้น ไม่มีการใช้คุกกี้ติดตามจากบุคคลที่สาม'}
         </p>
         <div className="cookie-consent__actions">
           <button
