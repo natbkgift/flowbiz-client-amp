@@ -55,20 +55,15 @@ describe('/api/platform/version route', () => {
     expect(response.headers.get('Cache-Control')).toBe('no-store');
     expect(body).toMatchObject({
       ok: true,
+      deployed_at: '2026-03-16T12:01:00Z',
       deploy_status: 'ok',
       smoke_passed: true,
       build_sha: 'abc1234',
-      target_sha: 'abcdef1234567890',
-      source: 'tests',
-      validation_mode: 'owner-aligned',
-      active_repo: {
-        sync_status: 'ok',
-        sha: 'abcdef1234567890',
-        branch: 'main',
-        upstream: 'origin/main',
-        aligned: true,
-      },
     });
+    expect(body).not.toHaveProperty('target_sha');
+    expect(body).not.toHaveProperty('active_repo');
+    expect(body).not.toHaveProperty('history_dir');
+    expect(body).not.toHaveProperty('log_path');
   });
 
   it('falls back to runtime environment values when telemetry is missing', async () => {
@@ -84,9 +79,8 @@ describe('/api/platform/version route', () => {
       ok: true,
       deploy_status: 'unknown',
       build_sha: 'build999',
-      target_sha: 'target999',
-      source: 'runtime',
     });
     expect(body.deployed_at).toBeNull();
+    expect(body).not.toHaveProperty('target_sha');
   });
 });

@@ -4,21 +4,20 @@ set -euo pipefail
 BASE_URL="${FLOWBIZ_PROD_BASE_URL:-https://amppattaya.com}"
 OUTPUT_PATH="${FLOWBIZ_PROD_SMOKE_REPORT:-ops/deploy-smoke-report.json}"
 EXPECTED_BUILD_SHA="${EXPECTED_BUILD_SHA:-}"
-HISTORY_MODE="strict"
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
     --base-url) BASE_URL="$2"; shift 2 ;;
     --output) OUTPUT_PATH="$2"; shift 2 ;;
     --expected-build-sha) EXPECTED_BUILD_SHA="$2"; shift 2 ;;
-        --history-mode) HISTORY_MODE="$2"; shift 2 ;;
+    --history-mode) shift 2 ;;
     *) echo "Unknown arg: $1" >&2; exit 2 ;;
   esac
 done
 
 mkdir -p "$(dirname "$OUTPUT_PATH")"
 
-python3 - <<'PY' "$BASE_URL" "$OUTPUT_PATH" "$EXPECTED_BUILD_SHA" "$HISTORY_MODE"
+python3 - <<'PY' "$BASE_URL" "$OUTPUT_PATH" "$EXPECTED_BUILD_SHA"
 from __future__ import annotations
 
 import json
@@ -35,7 +34,6 @@ from urllib.request import Request, urlopen
 base_url = sys.argv[1].rstrip("/")
 output_path = Path(sys.argv[2])
 expected_build_sha = sys.argv[3]
-history_mode = sys.argv[4]
 checks: list[dict[str, object]] = []
 failures: list[str] = []
 
@@ -138,18 +136,6 @@ def expect_status(
         {"path": path, "url": url, "status": status, "expected": expected, "method": method.upper()},
     )
     return status, body_text, url
-
-
-def history_is_compatible_missing(status: int, build_sha: str) -> bool:
-    if history_mode != "compatible":
-        return False
-    if status != 404:
-        return False
-    if not build_sha:
-        return False
-    if expected_build_sha:
-        return build_sha.startswith(expected_build_sha) or expected_build_sha.startswith(build_sha)
-    return True
 
 
 home_status, home_html, _ = expect_status("/en", 200, "route_home")
@@ -271,41 +257,25 @@ if events_status == 202:
 
 history_path = "/api/platform/deploy-history?limit=3"
 history_status, history_body, history_url = fetch(history_path)
-history_compatible_missing = history_is_compatible_missing(history_status, build_sha)
 record(
     "api_platform_deploy_history",
-    history_status == 200 or history_compatible_missing,
+    history_status == 404,
     {
         "path": history_path,
         "url": history_url,
         "status": history_status,
-        "expected": 200,
-        "history_mode": history_mode,
-        "compatible_missing": history_compatible_missing,
+        "expected": 404,
     },
 )
-if history_status == 200:
-    try:
-        history_payload = json.loads(history_body)
-    except json.JSONDecodeError:
-        history_payload = {}
-    items = history_payload.get("items") if isinstance(history_payload, dict) else []
-    record(
-        "api_platform_deploy_history_payload",
-        bool(history_payload.get("ok")) and isinstance(items, list) and len(items) >= 1,
-        {"count": len(items) if isinstance(items, list) else 0},
-    )
-elif history_compatible_missing:
-    record(
-        "api_platform_deploy_history_payload",
-        True,
-        {"count": 0, "history_mode": history_mode, "compatible_missing": True},
-    )
+record(
+    "api_platform_deploy_history_payload",
+    history_status == 404 and "Not Found" in history_body,
+    {"status": history_status},
+)
 
 payload = {
     "base_url": base_url,
     "expected_build_sha": expected_build_sha or None,
-    "history_mode": history_mode,
     "ok": not failures,
     "failed_checks": failures,
     "checks": checks,

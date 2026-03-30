@@ -57,7 +57,8 @@ const nextConfig = {
         // Local preview parity with the deployed edge proxy:
         // LOCAL_API_ORIGIN may point either at a backend root (e.g. localhost:8000)
         // or a site-prefixed API origin (e.g. https://amppattaya.com/api).
-        { source: '/api/:path*', destination: `${localApiOrigin}/:path*` },
+        // Keep sanitized public platform endpoints inside Next route handlers.
+        { source: '/api/:path((?!platform/version(?:/)?$|platform/deploy-history(?:/)?$).*)', destination: `${localApiOrigin}/:path` },
         // Allow media to use a separate origin when API and site/media are hosted differently.
         { source: '/media/:path*', destination: `${localMediaOrigin}/media/:path*` },
       ],

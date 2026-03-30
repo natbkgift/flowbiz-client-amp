@@ -5,7 +5,7 @@ import { Suspense } from 'react';
 
 import type { PropertyListItem } from '@/app/public/_shared/types';
 import { resolveHomeBottomCtaPrimaryUrl } from '@/app/_lib/home-bottom-cta';
-import { buildLeadCaptureQuery, withLocaleQuery } from '@/app/_lib/public-advisory';
+import { withLocaleQuery } from '@/app/_lib/public-advisory';
 
 export const revalidate = 300;
 export const dynamic = 'force-dynamic';
@@ -474,24 +474,6 @@ export default async function HomePage({
       ? (locale === 'th' ? `ราคาเข้าเริ่มต้นในระบบ ${formatCompactPrice(entryPriceValue, locale)}` : `Live entry pricing from ${formatCompactPrice(entryPriceValue, locale)}`)
       : (locale === 'th' ? 'ดูตามงบและเป้าหมาย' : 'Matched by budget and goal'),
   ];
-  const homeSupportRoutes = [
-    {
-      label: locale === 'th' ? 'ดูยูนิตคัดสรร' : 'View curated units',
-      href: withLocaleQuery(locale, '/buy', { source: 'home_paths_curated_units' }),
-    },
-    {
-      label: locale === 'th' ? 'สำรวจโครงการใหม่' : 'Explore new developments',
-      href: withLocaleQuery(locale, '/projects', { source: 'home_paths_projects' }),
-    },
-    {
-      label: locale === 'th' ? 'ดูว่าพัทยาน่าลงทุนอย่างไร' : 'Understand why Pattaya is investable',
-      href: withLocaleQuery(locale, '/investment', { source: 'home_paths_why_pattaya' }),
-    },
-    {
-      label: locale === 'th' ? 'คุยกับที่ปรึกษา' : 'Speak to an advisor',
-      href: withLocaleQuery(locale, '/contact', { source: 'home_paths_advisor' }),
-    },
-  ];
   const showFeaturedProjectsSection = isSectionEnabled('featured_projects');
   const showFeaturedPropertiesSection = isSectionEnabled('featured_properties');
   const showCuratedOpportunities = showFeaturedProjectsSection || showFeaturedPropertiesSection;
@@ -539,6 +521,7 @@ export default async function HomePage({
                   key={`${card.href}-${card.title}`}
                   className="home-pathway-card card-interactive"
                   href={card.href}
+                  prefetch={false}
                   eventType="cta_click"
                   eventPayload={{ cta: 'home_pathway_card', from: 'home_pathways', target: card.href }}
                   role="listitem"
@@ -550,20 +533,6 @@ export default async function HomePage({
                     <span className="home-pathway-card__signal">{card.signal}</span>
                     <span className="home-pathway-card__cta">{card.ctaLabel}</span>
                   </div>
-                </TrackedLink>
-              ))}
-            </div>
-
-            <div className="home-pathways-support">
-              {homeSupportRoutes.map((item) => (
-                <TrackedLink
-                  key={item.href}
-                  className="home-pathways-support__link"
-                  href={item.href}
-                  eventType="cta_click"
-                  eventPayload={{ cta: 'home_pathways_support', from: 'home_pathways', target: item.href }}
-                >
-                  {item.label}
                 </TrackedLink>
               ))}
             </div>
@@ -674,21 +643,6 @@ export default async function HomePage({
     const featuredProjects = (projectMode === 'manual' && manualProjects.length > 0)
       ? manualProjects.slice(0, 6)
       : (defaultProjects.length > 0 ? defaultProjects.slice(0, 6) : sortedProjects.slice(0, 6));
-    const totalProjectCount = allProjects.length;
-    const compareProjectNames = featuredProjects.slice(0, 3).map((project) => project.name).filter(Boolean);
-    const featuredProjectsAdvisorHref = withLocaleQuery(locale, '/contact', buildLeadCaptureQuery({
-      intent: 'project_shortlist',
-      source: 'home_featured_projects_advisor',
-      sourceRoute: 'home',
-      ctaType: 'secondary',
-      ctaLabel: locale === 'th' ? 'ให้ทีมคัดโครงการให้' : 'Ask the team to shortlist these projects',
-      projects: compareProjectNames.length ? compareProjectNames : featuredProjects.map((project) => project.name),
-      entityType: 'section',
-      entityName: 'home_featured_projects',
-      userIntent: 'research',
-      buyerFit: 'featured_projects',
-      signalLevel: featuredProjects.length >= 3 ? 'high' : 'medium',
-    }));
     const featuredProjectsTitle =
       typeof composerFeaturedProjects.heading === 'string' && composerFeaturedProjects.heading.trim()
         ? composerFeaturedProjects.heading.trim()
@@ -702,13 +656,6 @@ export default async function HomePage({
     const projectsWithVisuals = featuredProjects.filter((project) =>
       Boolean(resolveRenderableLocalMediaPath(project.cover_image_url ?? null))
     ).length;
-    const featuredProjectsAdvisorLabel = locale === 'th'
-      ? 'ขอทีมคัดตัวเลือกตามงบของคุณ'
-      : 'Ask for a matched shortlist';
-    const featuredProjectsBridgeLine = locale === 'th'
-      ? 'ยังไม่ชัวร์ว่าโครงการไหนเหมาะที่สุด? ส่งงบและเป้าหมาย แล้วทีมจะชี้ 2-3 ตัวเลือกที่ควรเปิดก่อน'
-      : 'Not sure which project fits? Send your budget and goal, and we will point you to the 2-3 projects worth opening first.';
-
     const content = (
       <>
         <FeaturedProjects
@@ -726,19 +673,6 @@ export default async function HomePage({
             ? (locale === 'th' ? `${projectsWithVisuals} รายการมีสื่อในระบบที่ยืนยันแล้ว` : `${projectsWithVisuals} items with verified local media`)
             : (locale === 'th' ? 'ใช้ข้อมูลโครงการที่เผยแพร่แล้ว' : 'Uses live published project data'),
         ])}
-        <div className="home-project-selection-support home-section-utility mt-5" aria-label={locale === 'th' ? 'เส้นทางรองของโครงการคัดสรร' : 'Featured project support paths'}>
-          <p className="text-sm text-gray-600 max-w-3xl mb-3">
-            {featuredProjectsBridgeLine}
-          </p>
-          <TrackedLink
-            className="home-section-utility__link"
-            href={featuredProjectsAdvisorHref}
-            eventType="cta_click"
-            eventPayload={{ cta: 'featured_projects_advisor', from: 'home_featured_projects' }}
-          >
-            {featuredProjectsAdvisorLabel}
-          </TrackedLink>
-        </div>
       </>
     );
 
@@ -807,15 +741,11 @@ export default async function HomePage({
       typeof composerFeaturedProperties.subcopy === 'string' && composerFeaturedProperties.subcopy.trim()
         ? composerFeaturedProperties.subcopy.trim()
         : (locale === 'th' ? 'รวมยูนิตขายและเช่าที่ช่วยให้คุณเห็นราคา รูปแบบห้อง และความเหมาะกับโจทย์ ก่อนคุยกับทีมต่อ' : 'A tighter mix of sale and rental units framed around price, layout, and fit before the next conversation.');
-    const featuredPropertyTitles = featuredProperties.map((property) => property.title).filter(Boolean);
     const saleCount = featuredProperties.filter((property) => property.type !== 'rent').length;
     const rentCount = featuredProperties.filter((property) => property.type === 'rent').length;
     const featuredPropertyIntent = featuredProperties.filter((property) => property.type === 'rent').length > featuredProperties.length / 2
       ? 'rent'
       : 'buy';
-    const featuredPropertiesAdvisorLabel = locale === 'th'
-      ? 'ให้ทีมคัดยูนิตจากชุดนี้'
-      : 'Ask the team to shortlist these units';
     const browseAllUnitsLabel = featuredPropertyIntent === 'rent'
       ? (locale === 'th' ? 'ดูยูนิตเช่าทั้งหมด' : 'Browse all rental picks')
       : (locale === 'th' ? 'ดูยูนิตขายทั้งหมด' : 'Browse all buy-ready units');
@@ -838,20 +768,6 @@ export default async function HomePage({
     const featuredPropertiesEmptyPreviewBody = locale === 'th'
       ? 'ถ้ายูนิตที่เหมาะยังไม่ขึ้นบนหน้า ทีมยังช่วยคัดราคา รูปแบบห้อง และทำเลที่ควรเทียบก่อนให้คุณได้'
       : 'If the right unit is not already surfaced, the team can still narrow the first comparison around price, layout, and location.';
-    const featuredPropertiesAdvisorHref = withLocaleQuery(locale, '/contact', buildLeadCaptureQuery({
-      intent: 'project_shortlist',
-      source: 'home_featured_properties_advisor',
-      sourceRoute: 'home',
-      ctaType: 'primary',
-      ctaLabel: locale === 'th' ? 'ขอตัวเลือกชุดแรกจากยูนิตชุดนี้' : 'Build a shortlist from these units',
-      projects: featuredPropertyTitles,
-      entityType: 'section',
-      entityName: 'home_featured_properties',
-      userIntent: featuredPropertyIntent,
-      buyerFit: 'featured_properties',
-      signalLevel: featuredPropertyTitles.length >= 4 ? 'high' : 'medium',
-    }));
-
     function deriveStatTokens(input: PropertyListItem): { bed: string | null; bath: string | null; size: string | null; floor: string | null; view: string | null } {
       const dynamicInput = input as PropertyListItem & {
         floor?: string | number | null;
@@ -925,12 +841,12 @@ export default async function HomePage({
                 body={locale === 'th' ? 'ดูรายการที่เผยแพร่แล้วทั้งหมด หรือส่งโจทย์ให้ทีมคัดตัวเลือกที่เหมาะกับงบ เป้าหมาย และช่วงเวลาของคุณ' : 'Browse published inventory or send your brief so the team can line up options around your budget, goals, and timing.'}
                 action={(
                   <div className="home-project-empty__actions">
-                    <Link href={featuredPropertiesEmptyStatePrimaryHref} className="home-project-empty__action home-project-empty__action--primary">
-                      {browseAllUnitsLabel}
-                    </Link>
-                    <Link href={featuredPropertiesEmptyStateSecondaryHref} className="home-project-empty__action home-project-empty__action--secondary">
-                      {locale === 'th' ? 'ส่งโจทย์ให้ทีม' : 'Send the team your brief'}
-                    </Link>
+                        <Link href={featuredPropertiesEmptyStatePrimaryHref} prefetch={false} className="home-project-empty__action home-project-empty__action--primary">
+                          {browseAllUnitsLabel}
+                        </Link>
+                        <Link href={featuredPropertiesEmptyStateSecondaryHref} prefetch={false} className="home-project-empty__action home-project-empty__action--secondary">
+                          {locale === 'th' ? 'ส่งโจทย์ให้ทีม' : 'Send the team your brief'}
+                        </Link>
                   </div>
                 )}
               />
@@ -984,6 +900,7 @@ export default async function HomePage({
                 <Link
                   key={prop.id}
                   href={propertyHref}
+                  prefetch={false}
                   className="property-card reveal premium-investment-card card-interactive"
                 >
                   <div className="card-image card-image--featured relative">
@@ -1054,19 +971,10 @@ export default async function HomePage({
 
         {featuredProperties.length > 0 ? (
           <div className="cta-row cta-row--center mt-6">
-            {featuredPropertyTitles.length ? (
-              <TrackedLink
-                className="btn btn-cta"
-                href={featuredPropertiesAdvisorHref}
-                eventType="cta_click"
-                eventPayload={{ cta: 'featured_properties_advisor', from: 'home_properties' }}
-              >
-                {featuredPropertiesAdvisorLabel}
-              </TrackedLink>
-            ) : null}
             <TrackedLink
               className="btn btn-secondary"
               href={withLocale(locale, featuredPropertyIntent === 'rent' ? '/rent' : '/buy')}
+              prefetch={false}
               eventType="cta_click"
               eventPayload={{ cta: 'see_all_investment_picks', from: 'home_properties' }}
             >
@@ -1146,10 +1054,10 @@ export default async function HomePage({
                     body={curatedEmptyBody}
                     action={(
                       <div className="home-project-empty__actions">
-                        <Link href={curatedEmptyPrimaryHref} className="home-project-empty__action home-project-empty__action--primary">
+                        <Link href={curatedEmptyPrimaryHref} prefetch={false} className="home-project-empty__action home-project-empty__action--primary">
                           {locale === 'th' ? 'สำรวจโครงการใหม่' : 'Explore new developments'}
                         </Link>
-                        <Link href={curatedEmptySecondaryHref} className="home-project-empty__action home-project-empty__action--secondary">
+                        <Link href={curatedEmptySecondaryHref} prefetch={false} className="home-project-empty__action home-project-empty__action--secondary">
                           {locale === 'th' ? 'คุยกับที่ปรึกษา' : 'Speak to an advisor'}
                         </Link>
                       </div>
@@ -1241,18 +1149,11 @@ export default async function HomePage({
                   <TrackedLink
                     className="btn btn-cta"
                     href={whyPattayaPrimaryUrl}
+                    prefetch={false}
                     eventType="cta_click"
                     eventPayload={{ cta: 'home_market_primary', from: 'home_market' }}
                   >
                     {whyPattayaPrimaryLabel}
-                  </TrackedLink>
-                  <TrackedLink
-                    className="btn btn-secondary"
-                    href={withLocale(locale, '/area-guide')}
-                    eventType="cta_click"
-                    eventPayload={{ cta: 'home_market_area_guide', from: 'home_market' }}
-                  >
-                    {locale === 'th' ? 'ดูคู่มือทำเล' : 'Open area guide'}
                   </TrackedLink>
                 </div>
               </div>
@@ -1341,6 +1242,7 @@ export default async function HomePage({
                   key={card.href}
                   className="home-owner-card"
                   href={card.href}
+                  prefetch={false}
                   eventType="cta_click"
                   eventPayload={{ cta: 'home_owner_card', from: 'home_owner', target: card.href }}
                 >

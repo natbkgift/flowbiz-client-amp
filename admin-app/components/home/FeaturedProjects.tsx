@@ -87,7 +87,9 @@ export function FeaturedProjects({
     status: locale === 'th' ? 'สถานะ' : 'Status',
     type: locale === 'th' ? 'ประเภท' : 'Type',
     delivery: locale === 'th' ? 'ส่งมอบ' : 'Delivery',
-    curatedLabel: locale === 'th' ? 'พร้อมดูรายละเอียด' : 'Shortlist ready',
+    developer: locale === 'th' ? 'ผู้พัฒนา' : 'Developer',
+    projectDetail: locale === 'th' ? 'เปิดหน้าโครงการ' : 'Open project detail',
+    publishedProject: locale === 'th' ? 'โครงการที่เผยแพร่แล้ว' : 'Published project',
     locationPrefix: locale === 'th' ? 'ทำเล' : 'Location',
   };
   const emptyStatePrimaryHref = withLocale(locale, '/projects');
@@ -128,10 +130,10 @@ export function FeaturedProjects({
               body={locale === 'th' ? 'ดูโครงการที่เผยแพร่แล้วทั้งหมด หรือส่งโจทย์ให้ทีมจัดชุดโครงการที่เหมาะกับงบและเป้าหมายของคุณ' : 'Browse published developments or send your brief so the team can assemble options matched to your budget and goals.'}
               action={(
                 <div className="home-project-empty__actions">
-                  <Link href={emptyStatePrimaryHref} className="home-project-empty__action home-project-empty__action--primary">
+                  <Link href={emptyStatePrimaryHref} prefetch={false} className="home-project-empty__action home-project-empty__action--primary">
                     {locale === 'th' ? 'เปิดโครงการทั้งหมด' : 'Browse live projects'}
                   </Link>
-                  <Link href={emptyStateSecondaryHref} className="home-project-empty__action home-project-empty__action--secondary">
+                  <Link href={emptyStateSecondaryHref} prefetch={false} className="home-project-empty__action home-project-empty__action--secondary">
                     {locale === 'th' ? 'ส่งโจทย์ให้ทีม' : 'Send the team your brief'}
                   </Link>
                 </div>
@@ -141,7 +143,7 @@ export function FeaturedProjects({
           <div className="home-project-empty__preview" aria-hidden="true">
             <div className="home-project-empty__preview-card">
               <span className="home-project-empty__preview-kicker">
-                {locale === 'th' ? 'เส้นทางต่อจากรายการที่ยืนยันแล้ว' : 'Verified live handoff'}
+                {locale === 'th' ? 'เส้นทางต่อจากรายการที่ยืนยันแล้ว' : 'Verified live route'}
               </span>
               <strong className="home-project-empty__preview-title">{emptyStatePreviewTitle}</strong>
               <p className="home-project-empty__preview-body">{emptyStatePreviewBody}</p>
@@ -159,25 +161,6 @@ export function FeaturedProjects({
 
   function normalizeToken(input: string | null | undefined): string {
     return String(input ?? '').trim().toLowerCase().replace(/[\s_-]+/g, ' ');
-  }
-
-  function collectProjectTokens(project: ProjectItem, area: string | null): string[] {
-    const dynamicProject = project as ProjectItem & {
-      tags?: string[];
-      badges?: string[];
-      features?: string[];
-      label?: string | null;
-    };
-
-    return [
-      project.name,
-      project.status,
-      dynamicProject.label,
-      area,
-      ...(dynamicProject.tags ?? []),
-      ...(dynamicProject.badges ?? []),
-      ...(dynamicProject.features ?? []),
-    ].map((token) => normalizeToken(token));
   }
 
   function extractBadgeSet(project: ProjectItem): BadgeLabel[] {
@@ -219,76 +202,95 @@ export function FeaturedProjects({
     return localizeAreaLabel(locale, areaName);
   }
 
-  function extractProjectHighlights(project: ProjectItem, area: string | null, decisionSignals: string[], index: number): string[] {
+  function resolveLocalizedProjectText(input: Record<string, unknown> | null | undefined): string | null {
+    if (!input) return null;
+    for (const key of [locale, 'en', 'th']) {
+      const candidate = typeof input[key] === 'string' ? input[key].trim() : '';
+      if (candidate) return candidate;
+    }
+    return null;
+  }
+
+  function humanizeToken(value: string): string {
+    return value
+      .replace(/_/g, ' ')
+      .replace(/\s+/g, ' ')
+      .trim();
+  }
+
+  function localizePropertyType(value: string | null): string | null {
+    if (!value) return null;
+    if (locale !== 'th') return value;
+    return value
+      .replace(/condo/gi, 'คอนโดมิเนียม')
+      .replace(/villa/gi, 'วิลล่า')
+      .replace(/house/gi, 'บ้าน')
+      .replace(/townhome/gi, 'ทาวน์โฮม')
+      .replace(/apartment/gi, 'อพาร์ตเมนต์');
+  }
+
+  function localizeStatus(value: string | null): string | null {
+    if (!value) return null;
+    if (locale !== 'th') return value;
+    if (value === 'published') return 'เผยแพร่แล้ว';
+    if (value === 'draft') return 'ฉบับร่าง';
+    if (value === 'archived') return 'เก็บถาวร';
+    return value;
+  }
+
+  function extractProjectSummary(project: ProjectItem, area: string | null): string | null {
     const dynamicProject = project as ProjectItem & {
       property_type?: string | null;
       delivery_date?: string | null;
       handover_date?: string | null;
+      developer?: { name?: string | null } | null;
     };
 
-    const normalizedStatus = project.status ? project.status.replace(/_/g, ' ') : null;
-    const propertyType = dynamicProject.property_type
-      ? String(dynamicProject.property_type).replace(/_/g, ' ')
-      : null;
-    const localizedPropertyType = propertyType && locale === 'th'
-      ? propertyType
-        .replace(/condo/gi, 'คอนโดมิเนียม')
-        .replace(/villa/gi, 'วิลล่า')
-        .replace(/house/gi, 'บ้าน')
-        .replace(/townhome/gi, 'ทาวน์โฮม')
-      : propertyType;
-    const deliveryRaw = dynamicProject.delivery_date || dynamicProject.handover_date;
-    const highlights: string[] = [];
+    const summaryText = resolveLocalizedProjectText(project.summary) || resolveLocalizedProjectText(project.description);
+    if (summaryText) return summaryText;
 
-    if (decisionSignals.includes(locale === 'th' ? 'เด่นด้านการลงทุน' : 'High ROI')) {
-      highlights.push(locale === 'th' ? 'เหมาะกับการปล่อยเช่าและการคัดดีลเพื่อผลตอบแทน' : 'High rental-demand fit for ROI-led shortlists.');
+    const propertyType = localizePropertyType(dynamicProject.property_type ? humanizeToken(dynamicProject.property_type) : null);
+    const developerName = String(dynamicProject.developer?.name ?? '').trim();
+    if (propertyType && area) {
+      return locale === 'th'
+        ? `${propertyType}ใน${area} พร้อมรายละเอียดโครงการที่เผยแพร่แล้ว`
+        : `${propertyType} in ${area} with published project detail ready.`;
     }
-    if (decisionSignals.includes(locale === 'th' ? 'วิวทะเล' : 'Sea View')) {
-      highlights.push(locale === 'th' ? 'วิวทะเลที่ช่วยทั้งการอยู่อาศัยและมูลค่าขายต่อ' : 'Sea-view positioning with stronger resale appeal.');
+    if (propertyType && developerName) {
+      return locale === 'th'
+        ? `${propertyType}จาก ${developerName} พร้อมข้อมูลโครงการที่เผยแพร่แล้ว`
+        : `${propertyType} from ${developerName} with published project detail ready.`;
     }
-    if (!highlights.length) {
-      highlights.push(
-        index === 0
-          ? (locale === 'th' ? 'ตัวเลือกแรกที่ควรเปิดเมื่อเริ่มคัดโครงการ' : 'A strong first shortlist option.')
-          : (locale === 'th' ? 'เหมาะกับการเทียบราคา ทำเล และจังหวะเข้าดู' : 'Useful for fast price-and-location comparison.'),
-      );
+    if (area) {
+      return locale === 'th'
+        ? `ดูบริบทโครงการใน${area}ก่อน แล้วค่อยเปิดราคาและยูนิตที่เกี่ยวข้องต่อ`
+        : `Use the project page for ${area} context before opening pricing and related units.`;
     }
-    if (normalizedStatus) {
-      if (normalizedStatus === 'published') {
-        highlights.push(locale === 'th' ? 'ข้อมูลโครงการเผยแพร่และยืนยันแล้ว' : 'Published and verified project information.');
-      } else {
-        highlights.push(`${labels.status}: ${normalizedStatus}`);
-      }
-    } else if (localizedPropertyType) {
-      highlights.push(locale === 'th' ? `${localizedPropertyType} พร้อมรายละเอียดโครงการที่ยืนยันแล้ว` : `${localizedPropertyType} with verified project detail ready.`);
-    }
-    if (deliveryRaw) {
-      highlights.push(`${labels.delivery}: ${deliveryRaw}`);
-    } else if (area) {
-      highlights.push(locale === 'th' ? `ดูยูนิต ราคาอัปเดต และแปลนของ ${area}` : `Live units, pricing, and plans in ${area}.`);
-    }
-
-    return [...new Set(highlights)].slice(0, 2);
+    return null;
   }
 
-  function extractDecisionSignals(project: ProjectItem, index: number, area: string | null): string[] {
-    const tokens = collectProjectTokens(project, area);
-    const signals: string[] = [];
+  function extractProjectFacts(project: ProjectItem): string[] {
+    const dynamicProject = project as ProjectItem & {
+      property_type?: string | null;
+      delivery_date?: string | null;
+      handover_date?: string | null;
+      developer?: { name?: string | null } | null;
+    };
 
-    if (index === 0) {
-      signals.push(locale === 'th' ? 'ตัวเลือกเด่น' : 'Best Pick');
-    }
-    if (tokens.some((token) => token.includes('roi') || token.includes('yield') || token.includes('invest'))) {
-      signals.push(locale === 'th' ? 'เด่นด้านการลงทุน' : 'High ROI');
-    }
-    if (tokens.some((token) => token.includes('beachfront') || token.includes('sea view') || token.includes('ocean view') || token.includes('beach'))) {
-      signals.push(locale === 'th' ? 'วิวทะเล' : 'Sea View');
-    }
-    if (!signals.length && index < 3) {
-      signals.push(locale === 'th' ? 'ตัวเลือกเด่น' : 'Best Pick');
+    const propertyType = localizePropertyType(dynamicProject.property_type ? humanizeToken(dynamicProject.property_type) : null);
+    const deliveryRaw = String(dynamicProject.delivery_date ?? dynamicProject.handover_date ?? '').trim();
+    const developerName = String(dynamicProject.developer?.name ?? '').trim();
+    const normalizedStatus = project.status ? localizeStatus(humanizeToken(project.status).toLowerCase()) : null;
+    const facts: string[] = [];
+
+    if (propertyType) facts.push(`${labels.type}: ${propertyType}`);
+    if (deliveryRaw) facts.push(`${labels.delivery}: ${deliveryRaw}`);
+    if (developerName) facts.push(`${labels.developer}: ${developerName}`);
+    if (normalizedStatus && normalizedStatus !== localizeStatus('published')) {
+      facts.push(`${labels.status}: ${normalizedStatus}`);
     }
 
-    return [...new Set(signals)].slice(0, 3);
+    return [...new Set(facts)].slice(0, 3);
   }
 
   return (
@@ -318,8 +320,8 @@ export function FeaturedProjects({
           const price = p.starting_price ? formatPrice(Number(p.starting_price), locale) : null;
           const badges = extractBadgeSet(p);
           const area = extractAreaLabel(p);
-          const decisionSignals = extractDecisionSignals(p, index, area);
-          const highlights = extractProjectHighlights(p, area, decisionSignals, index);
+          const projectSummary = extractProjectSummary(p, area);
+          const facts = extractProjectFacts(p);
           const fallbackImage = PROJECT_FALLBACK_IMAGES[index % PROJECT_FALLBACK_IMAGES.length];
           const cardVariantClass = index === 0
             ? 'premium-project-card--lead'
@@ -331,6 +333,7 @@ export function FeaturedProjects({
             <Link
               key={p.id}
               href={withLocale(locale, `/projects/${encodeURIComponent(p.slug)}`)}
+              prefetch={false}
               className={`premium-project-card ${cardVariantClass} reveal card-interactive`}
             >
               <div className="card-image premium-project-card__media">
@@ -355,7 +358,7 @@ export function FeaturedProjects({
                   </div>
                 ) : null}
                 <div className="premium-project-card__media-meta" aria-hidden="true">
-                  <span>{labels.curatedLabel}</span>
+                  <span>{labels.publishedProject}</span>
                 </div>
               </div>
               <div className="card-content premium-project-card__body">
@@ -371,30 +374,25 @@ export function FeaturedProjects({
                   </div>
                 ) : null}
 
-                {decisionSignals.length > 0 ? (
-                  <div className="premium-project-card__signals" aria-label={locale === 'th' ? 'สัญญาณการตัดสินใจ' : 'Decision signals'}>
-                    {decisionSignals.map((signal) => (
-                      <span key={`${p.id}-${signal}`} className="premium-project-card__signal">{signal}</span>
-                    ))}
-                  </div>
+                {projectSummary ? (
+                  <p className="premium-project-card__summary line-clamp-3">
+                    {projectSummary}
+                  </p>
                 ) : null}
 
-                {highlights.length > 0 ? (
-                  <ul className="premium-project-card__facts" aria-label={locale === 'th' ? 'เหตุผลที่ควรเปิดดูต่อ' : 'Why this belongs on a shortlist'}>
-                    {highlights.map((highlight) => (
-                      <li key={highlight} className="premium-project-card__fact-item">
+                {facts.length > 0 ? (
+                  <ul className="premium-project-card__facts" aria-label={locale === 'th' ? 'ข้อเท็จจริงของโครงการ' : 'Project facts'}>
+                    {facts.map((fact) => (
+                      <li key={fact} className="premium-project-card__fact-item">
                         <span className="premium-project-card__fact-label" aria-hidden="true">+</span>
-                        <span className="premium-project-card__fact-value text-left">{highlight}</span>
+                        <span className="premium-project-card__fact-value text-left">{fact}</span>
                       </li>
                     ))}
                   </ul>
                 ) : null}
                 <div className="premium-project-card__footer">
-                  <span className="premium-project-card__footer-label">
-                    {locale === 'th' ? 'ยูนิต ราคาอัปเดต และแปลน' : 'Live units, pricing, and floor plans'}
-                  </span>
                   <span className="premium-project-card__cta">
-                    {locale === 'th' ? 'ดูรายละเอียด' : 'View Details'}
+                    {labels.projectDetail}
                   </span>
                 </div>
               </div>

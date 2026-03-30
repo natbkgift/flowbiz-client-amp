@@ -15,11 +15,11 @@ describe('home surface handoff contract', () => {
     expect(page).toContain('HomePerfProbe');
     expect(perfProbe).toContain("entity_name: 'home_perf_probe'");
     expect(perfProbe).toContain("trackEvent('web_vitals_probe'");
-    expect(page).toContain('home_featured_projects_advisor');
     expect(page).toContain('home_hero_primary');
     expect(page).toContain('home_hero_secondary');
     expect(page).toContain('home_bottom_secondary');
     expect(page).toContain('home-trust-snapshot-grid');
+    expect(page).not.toContain('home_featured_projects_advisor');
     expect(perfProbe).toContain('amp_home_perf_probe_latest_v1');
     expect(perfProbe).toContain('follow_up_target');
   });
@@ -51,9 +51,10 @@ describe('home surface handoff contract', () => {
     const personalization = read('lib/personalization.ts');
     const page = read('app/(site)/[locale]/page.tsx');
 
-    expect(hero).toContain('fetchPriority="high"');
+    expect(hero).not.toContain('fetchPriority="high"');
     expect(hero).toContain('quality={82}');
     expect(hero).toContain('data-home-perf="hero-media"');
+    expect(hero).toContain('prefetch');
     expect(featuredProjects).toContain('unoptimized={false}');
     expect(featuredProjects).toContain('premium-project-card__cta');
     expect(localMedia).toContain('fetchPriority');

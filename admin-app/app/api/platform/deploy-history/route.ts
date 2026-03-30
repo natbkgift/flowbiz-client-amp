@@ -1,25 +1,11 @@
 import { NextResponse } from 'next/server';
 
-import {
-  getDeployHistoryDir,
-  parseHistoryLimit,
-  readDeployHistory,
-} from '@/app/api/platform/_lib/deploy-telemetry';
-
 export async function GET(request: Request) {
-  const limit = parseHistoryLimit(new URL(request.url).searchParams.get('limit'));
-  const history = await readDeployHistory(limit);
-
+  void request;
   return NextResponse.json(
+    { detail: 'Not Found' },
     {
-      ok: true,
-      limit,
-      count: history.length,
-      history_dir: getDeployHistoryDir(),
-      items: history,
-    },
-    {
-      status: 200,
+      status: 404,
       headers: {
         'Cache-Control': 'no-store',
       },

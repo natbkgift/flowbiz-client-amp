@@ -21,6 +21,7 @@ describe('Header CTA visibility', () => {
     expect(container.querySelector('header.header--home')).not.toBeNull();
     expect(container.querySelector('.header-cta-group')).toBeNull();
     expect(container.querySelector('.mobile-nav__cta')).toBeNull();
+    expect(container.querySelector('a[href="#main-content"]')).toBeNull();
   });
 
   it('keeps global header CTAs visible on generic inner routes', () => {

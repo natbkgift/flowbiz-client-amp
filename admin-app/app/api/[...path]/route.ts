@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { buildVersionPayload, readDeployTelemetry } from '../platform/_lib/deploy-telemetry';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -38,6 +39,14 @@ function buildUpstreamHeaders(request: NextRequest): Headers {
   return headers;
 }
 
+function isPlatformVersionRoute(path: string[]) {
+  return path.length === 2 && path[0] === 'platform' && path[1] === 'version';
+}
+
+function isPlatformDeployHistoryRoute(path: string[]) {
+  return path.length === 2 && path[0] === 'platform' && path[1] === 'deploy-history';
+}
+
 async function proxyRequest(
   request: NextRequest,
   context: { params: Promise<{ path: string[] }> },
@@ -50,6 +59,27 @@ async function proxyRequest(
   const { path } = await context.params;
   if (!Array.isArray(path) || path.length === 0) {
     return NextResponse.json({ detail: 'Not found' }, { status: 404 });
+  }
+
+  if (isPlatformVersionRoute(path)) {
+    const telemetry = await readDeployTelemetry();
+    return NextResponse.json(buildVersionPayload(telemetry), {
+      headers: {
+        'Cache-Control': 'no-store',
+      },
+    });
+  }
+
+  if (isPlatformDeployHistoryRoute(path)) {
+    return NextResponse.json(
+      { detail: 'Not Found' },
+      {
+        status: 404,
+        headers: {
+          'Cache-Control': 'no-store',
+        },
+      },
+    );
   }
 
   const upstreamUrl = new URL(`${upstreamBase}/${path.map(encodeURIComponent).join('/')}`);

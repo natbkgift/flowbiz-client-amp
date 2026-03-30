@@ -178,6 +178,7 @@ export function HomeMobileIntentRail({ locale }: { locale: 'en' | 'th' }) {
               key={item.key}
               className={`home-mobile-intent-chip home-mobile-intent-chip--${item.key}${isActive ? ' home-mobile-intent-chip--active' : ''}`}
               href={item.href}
+              prefetch={false}
               eventType="cta_click"
               eventPayload={item.eventPayload}
             >

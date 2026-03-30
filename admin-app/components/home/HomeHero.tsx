@@ -97,12 +97,12 @@ export function HomeHero({
         ? composer.trust_items.map((item) => String(item).trim()).filter(Boolean).slice(0, 3)
         : (locale === 'th'
             ? ['คัดเฉพาะรายการที่ยืนยันแล้ว', 'รองรับผู้ซื้อชาวต่างชาติ', 'มีทีมพัทยาดูแลต่อจนถึงการเข้าชม']
-            : ['Verified live stock only', 'Foreign-buyer ready', 'Local handoff to viewing']);
+            : ['Verified live stock only', 'Foreign-buyer ready', 'Local team through viewing']);
     const atmosphereLabel = locale === 'th' ? 'โต๊ะที่ปรึกษา AMP Pattaya' : 'Advisory desk note';
     const atmosphereTitle = locale === 'th' ? 'เริ่มจากเส้นทางที่เหมาะกับคุณ ไม่ใช่กองประกาศ' : 'Start from the right route, not a listing dump';
     const atmosphereBody = locale === 'th'
         ? 'ซื้อ ลงทุน เช่า และขาย ถูกแยกเป็นเส้นทางชัดเจนตั้งแต่หน้าจอแรก เพื่อให้ทีมรับช่วงต่อได้ตรงประเด็นกว่า'
-        : 'Buying, investing, renting, and selling are separated early so the next handoff stays specific.';
+        : 'Buying, investing, renting, and selling are separated early so the next step stays specific.';
 
     return (
         <section className="home-hero-section relative w-full bg-gray-900 overflow-hidden min-h-[620px] sm:min-h-[680px] md:min-h-[700px] xl:min-h-[760px]" data-home-perf="hero-media">
@@ -110,8 +110,6 @@ export function HomeHero({
                 src={heroImageSrc}
                 alt={locale === 'th' ? 'ภาพบรรยากาศอสังหาริมทรัพย์พัทยาโดย AMP Pattaya' : 'AMP Pattaya Real Estate'}
                 fill
-                priority
-                fetchPriority="high"
                 quality={82}
                 sizes="100vw"
                 className="absolute inset-0 w-full h-full object-cover object-[68%_center] sm:object-[60%_center] md:object-center block scale-[1.03]"
@@ -154,6 +152,7 @@ export function HomeHero({
                             <TrackedLink
                                 className="btn btn-primary hero-cta hero-cta--primary"
                                 href={primaryCtaUrl}
+                                prefetch
                                 eventType="cta_click"
                                 eventPayload={resolvedPrimaryEventPayload}
                             >
@@ -162,6 +161,7 @@ export function HomeHero({
                             <TrackedLink
                                 className="btn btn-secondary hero-cta hero-cta--secondary"
                                 href={secondaryCtaUrl}
+                                prefetch
                                 eventType="cta_click"
                                 eventPayload={resolvedSecondaryEventPayload}
                             >
@@ -181,6 +181,7 @@ export function HomeHero({
                                     <TrackedLink
                                         className="hero-guided-trigger hero-support-link hero-support-link--pill inline-flex items-center gap-2 text-sm font-medium text-white/72 hover:text-white transition-colors"
                                         href={resolvedGuidedHref}
+                                        prefetch={false}
                                         eventType="cta_click"
                                         eventPayload={{ cta: 'open_guided_finder', from: 'home_hero' }}
                                     >
@@ -200,6 +201,7 @@ export function HomeHero({
                                         key={`${link.label}-${link.href}`}
                                         className="hero-support-link hero-support-link--pill inline-flex items-center gap-2 text-sm font-medium text-white/72 hover:text-white transition-colors"
                                         href={resolveLocalizedHref(locale, link.href)}
+                                        prefetch={false}
                                         eventType="cta_click"
                                         eventPayload={link.eventPayload ?? { cta: 'hero_support_link', from: 'home_hero' }}
                                     >

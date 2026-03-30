@@ -64,24 +64,11 @@ export function getDeployHistoryDir() {
 export function buildVersionPayload(telemetry: DeployTelemetry | null) {
   return {
     ok: true,
-    generated_at: telemetry?.generated_at ?? null,
     deployed_at: telemetry?.deployed_at ?? null,
     deploy_status: telemetry?.deploy_status ?? 'unknown',
     smoke_passed: telemetry?.smoke_passed ?? null,
     build_sha:
       telemetry?.build_sha ?? process.env.FLOWBIZ_BUILD_SHA ?? process.env.BUILD_SHA ?? null,
-    target_sha: telemetry?.target_sha ?? process.env.FLOWBIZ_TARGET_SHA ?? null,
-    source: telemetry?.source ?? 'runtime',
-    validation_mode: telemetry?.validation_mode ?? null,
-    duration_seconds: telemetry?.duration_seconds ?? null,
-    history_id: telemetry?.history_id ?? null,
-    history_dir: telemetry?.history_dir ?? null,
-    log_path: telemetry?.log_path ?? null,
-    lifecycle_log_path: telemetry?.lifecycle_log_path ?? null,
-    state_dir: telemetry?.state_dir ?? null,
-    current_phase: telemetry?.current_phase ?? null,
-    active_repo: telemetry?.active_repo ?? null,
-    node_env: process.env.NODE_ENV ?? 'unknown',
   };
 }
 

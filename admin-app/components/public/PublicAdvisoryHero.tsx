@@ -18,6 +18,7 @@ export type HeroAction = {
   id?: string;
   eventType?: EventType;
   eventPayload?: Record<string, unknown>;
+  prefetch?: boolean;
 };
 
 export type ExternalAction = {
@@ -89,6 +90,7 @@ export function PublicAdvisoryHero({
                 id={primaryAction.id}
                 className="btn btn-cta public-hero__action public-hero__action--primary"
                 href={primaryAction.href}
+                prefetch={primaryAction.prefetch ?? false}
                 eventType={primaryAction.eventType ?? 'cta_click'}
                 eventPayload={primaryAction.eventPayload}
               >
@@ -100,6 +102,7 @@ export function PublicAdvisoryHero({
                   id={secondaryAction.id}
                   className="btn btn-secondary public-hero__action public-hero__action--secondary"
                   href={secondaryAction.href}
+                  prefetch={secondaryAction.prefetch ?? false}
                   eventType={secondaryAction.eventType ?? 'cta_click'}
                   eventPayload={secondaryAction.eventPayload}
                 >

@@ -37,7 +37,7 @@ export function HomeBottomCta({
   const resolvedSectionId = sectionId ?? 'home-bottom-cta';
   const headingId = `${resolvedSectionId}-title`;
   const isThai = /[\u0E00-\u0E7F]/.test(`${heading} ${subheading} ${primaryLabel} ${secondaryLabel} ${trustNote}`);
-  const eyebrow = isThai ? 'ปรึกษากับทีมพัทยาโดยตรง' : 'Private advisory handoff';
+  const eyebrow = isThai ? 'ปรึกษากับทีมพัทยาโดยตรง' : 'Private advisory route';
   const formBadge = isThai ? 'ช่องทางส่งโจทย์ถึงทีม AMP Pattaya' : 'AMP advisory intake';
   const signalItems = isThai
     ? ['ราคาอัปเดต', 'ยูนิตที่ยังเปิดอยู่', 'ขั้นตอนถัดไปชัดเจน']
@@ -84,6 +84,7 @@ export function HomeBottomCta({
               <TrackedLink
                 className="px-6 py-3 bg-white text-gray-900 rounded-full text-sm font-semibold hover:bg-gray-100 transition-colors home-bottom-cta__primary"
                 href={primaryUrl}
+                prefetch={false}
                 eventType="home_final_cta_click"
                 eventPayload={primaryEventPayload ?? { cta: 'book_consultation', from: 'home_bottom' }}
               >
@@ -92,6 +93,7 @@ export function HomeBottomCta({
               <TrackedLink
                 className="px-6 py-3 bg-white/10 hover:bg-white/20 backdrop-blur-md rounded-full text-white text-sm font-medium transition-colors border border-white/20 home-bottom-cta__secondary"
                 href={secondaryUrl}
+                prefetch={false}
                 eventType="home_final_cta_click"
                 eventPayload={secondaryEventPayload ?? { cta: 'view_investment_path', from: 'home_bottom' }}
               >

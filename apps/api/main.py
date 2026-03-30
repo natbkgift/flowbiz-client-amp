@@ -153,34 +153,20 @@ def ping() -> dict:
 
 @app.get("/platform/version")
 def platform_version() -> dict:
-    telemetry = _read_deploy_telemetry()
+    telemetry = _read_deploy_telemetry() or {}
     return {
         "ok": True,
-        "generated_at": telemetry.get("generated_at") if telemetry else None,
-        "deployed_at": telemetry.get("deployed_at") if telemetry else None,
-        "deploy_status": telemetry.get("deploy_status") if telemetry else "unknown",
-        "smoke_passed": telemetry.get("smoke_passed") if telemetry else None,
-        "build_sha": telemetry.get("build_sha") if telemetry else os.getenv("FLOWBIZ_BUILD_SHA"),
-        "target_sha": telemetry.get("target_sha") if telemetry else None,
-        "source": telemetry.get("source") if telemetry else "runtime",
-        "validation_mode": telemetry.get("validation_mode") if telemetry else None,
-        "active_repo": telemetry.get("active_repo") if telemetry else None,
-        "runtime": "api",
+        "deployed_at": telemetry.get("deployed_at"),
+        "deploy_status": telemetry.get("deploy_status") or "unknown",
+        "smoke_passed": telemetry.get("smoke_passed"),
+        "build_sha": telemetry.get("build_sha") or os.getenv("FLOWBIZ_BUILD_SHA"),
     }
 
 
 @app.get("/platform/deploy-history")
-def platform_deploy_history(limit: int = 10) -> dict:
-    parsed_limit = _parse_deploy_history_limit(limit)
-    history = _read_deploy_history(parsed_limit)
-    return {
-        "ok": True,
-        "limit": parsed_limit,
-        "count": len(history),
-        "history_dir": str(_get_deploy_history_dir()),
-        "items": history,
-        "runtime": "api",
-    }
+def platform_deploy_history(limit: int = 10) -> JSONResponse:
+    _ = limit
+    return JSONResponse(status_code=404, content={"detail": "Not Found"})
 
 
 @app.exception_handler(Exception)

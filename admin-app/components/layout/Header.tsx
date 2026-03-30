@@ -94,6 +94,7 @@ function DesktopNavGroup({
     return (
       <Link
         href={withLocale(locale, group.href ?? '/')}
+        prefetch={false}
         className="nav-link locale-safe"
         aria-current={active ? 'page' : undefined}
       >
@@ -135,7 +136,7 @@ function DesktopNavGroup({
       <div className={`dropdown-panel ${open ? 'dropdown-panel--open' : ''}`} role="menu">
         <div className="dropdown-list">
           {group.items!.map((item) => (
-            <Link key={item.href} href={withLocale(locale, item.href)} className="dropdown-item" role="menuitem" onClick={() => setOpen(false)}>
+            <Link key={item.href} href={withLocale(locale, item.href)} prefetch={false} className="dropdown-item" role="menuitem" onClick={() => setOpen(false)}>
               <span className="dropdown-item__label">{item.label}</span>
               {item.desc ? <span className="dropdown-item__desc">{item.desc}</span> : null}
             </Link>
@@ -159,7 +160,7 @@ function MobileSection({
 
   if (!group.items?.length) {
     return (
-      <Link href={withLocale(locale, group.href ?? '/')} className="mobile-nav__item" onClick={onNavClick}>
+      <Link href={withLocale(locale, group.href ?? '/')} prefetch={false} className="mobile-nav__item" onClick={onNavClick}>
         {group.label}
       </Link>
     );
@@ -179,7 +180,7 @@ function MobileSection({
       {expanded ? (
         <div className="mobile-nav__sub">
           {group.items.map((item) => (
-            <Link key={item.href} href={withLocale(locale, item.href)} className="mobile-nav__sub-item" onClick={onNavClick}>
+            <Link key={item.href} href={withLocale(locale, item.href)} prefetch={false} className="mobile-nav__sub-item" onClick={onNavClick}>
               <span className="mobile-nav__sub-label">{item.label}</span>
               {item.desc ? <span className="mobile-nav__sub-desc">{item.desc}</span> : null}
             </Link>
@@ -275,22 +276,22 @@ export function Header({
     {
       href: '/buy',
       label: locale === 'th' ? 'ซื้อ' : 'Buy',
-      detail: locale === 'th' ? 'เส้นทางสำหรับผู้ซื้อชาวต่างชาติ' : 'foreign-buyer route',
+      detail: locale === 'th' ? 'ซื้อในพัทยา' : 'Buy in Pattaya',
     },
     {
       href: '/invest',
       label: locale === 'th' ? 'ลงทุน' : 'Invest',
-      detail: locale === 'th' ? 'ดูดีมานด์และช่วงราคาเข้า' : 'yield + demand',
+      detail: locale === 'th' ? 'เส้นทางการลงทุน' : 'Investment route',
     },
     {
       href: '/rent',
       label: locale === 'th' ? 'เช่า' : 'Rent',
-      detail: locale === 'th' ? 'พร้อมย้ายเข้าอยู่และเทียบทำเล' : 'relocate-ready',
+      detail: locale === 'th' ? 'เช่าหรือย้ายมาอยู่' : 'Rent or relocate',
     },
     {
       href: '/sell',
       label: locale === 'th' ? 'ขาย' : 'Sell',
-      detail: locale === 'th' ? 'เริ่มต้นสำหรับเจ้าของทรัพย์' : 'owner brief',
+      detail: locale === 'th' ? 'บริการสำหรับเจ้าของ' : 'Owner services',
     },
   ];
   const contactCtaHref = cms?.contactCta?.href || '/contact';
@@ -357,17 +358,13 @@ export function Header({
 
   return (
     <>
-      <a href="#main-content" className="skip-link">
-        {dict.common.skipLink}
-      </a>
-
       <header
         className={`header${isHomeSurface ? ' header--home' : ''}${isHomeSurface && homeHeaderScrolled ? ' header--home-scrolled' : ''}`}
         data-surface={currentSurface}
         data-locale={locale}
       >
         <div className={`header-content${isHomeSurface ? ' header-content--home' : ''}`}>
-          <Link href={withLocale(locale, '/')} className="logo" aria-label={dict.brand.name}>
+          <Link href={withLocale(locale, '/')} prefetch={false} className="logo" aria-label={dict.brand.name}>
             <span className="logo-mark">AMP</span>
             <span className="logo-name">{dict.brand.name}</span>
           </Link>
@@ -386,6 +383,7 @@ export function Header({
                 </Link>
                 <Link
                   href={withLocale(locale, contactCtaHref)}
+                  prefetch={false}
                   className={`header-cta header-cta--primary ${isActive(contactCtaHref) ? 'header-cta--active' : ''}`}
                   aria-current={isActive(contactCtaHref) ? 'page' : undefined}
                 >
@@ -399,6 +397,8 @@ export function Header({
               onClick={() => {
                 const next = locale === 'en' ? 'th' : 'en';
                 const nextPath = switchLocaleInPathname(pathname ?? '/', next);
+                const secureFlag = typeof window !== 'undefined' && window.location.protocol === 'https:' ? '; Secure' : '';
+                document.cookie = `amp_locale=${next}; Path=/; Max-Age=31536000; SameSite=Lax${secureFlag}`;
                 router.push(nextPath);
               }}
               aria-label={dict.common.language}
@@ -454,6 +454,7 @@ export function Header({
                 <Link
                   key={item.href}
                   href={withLocale(locale, item.href)}
+                  prefetch={false}
                   className="mobile-menu__quick-link"
                   onClick={() => setMobileOpen(false)}
                 >
@@ -465,6 +466,7 @@ export function Header({
             {isHomeSurface ? (
               <Link
                 href={withLocale(locale, '/contact')}
+                prefetch={false}
                 className="mobile-menu__advisor-link"
                 onClick={() => setMobileOpen(false)}
               >
@@ -485,7 +487,7 @@ export function Header({
               <Link href={CTA.whatsAppUrl} className="mobile-nav__item" onClick={() => setMobileOpen(false)} target="_blank" rel="noreferrer">
                 {dict.cta.whatsapp}
               </Link>
-              <Link href={withLocale(locale, contactCtaHref)} className="mobile-nav__cta" onClick={() => setMobileOpen(false)}>
+              <Link href={withLocale(locale, contactCtaHref)} prefetch={false} className="mobile-nav__cta" onClick={() => setMobileOpen(false)}>
                 {contactCtaLabel}
               </Link>
             </>

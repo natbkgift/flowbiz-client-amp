@@ -3,6 +3,8 @@ import { checkRateLimit } from './lib/rate-limiter';
 
 const LOCALES = ['en', 'th'] as const;
 type Locale = (typeof LOCALES)[number];
+export const LOCALE_COOKIE_NAME = 'amp_locale';
+const LOCALE_COOKIE_TTL_SECONDS = 60 * 60 * 24 * 365;
 const NON_LOCALIZED_ROUTE_PREFIXES = [
   '/v1',
   '/login',
@@ -25,6 +27,66 @@ function hasRoutePrefix(pathname: string, prefix: string): boolean {
 }
 
 const PUBLIC_FILE = /\.[^/]+$/;
+
+function appendVary(existing: string | null, values: string[]): string {
+  const normalized = new Set(
+    String(existing ?? '')
+      .split(',')
+      .map((item) => item.trim())
+      .filter(Boolean),
+  );
+  for (const value of values) normalized.add(value);
+  return [...normalized].join(', ');
+}
+
+export function resolveLocaleFromAcceptLanguage(value: string | null | undefined): Locale | null {
+  if (!value) return null;
+
+  const preferences = value
+    .split(',')
+    .map((segment) => {
+      const [rawLang, ...params] = segment.trim().split(';');
+      const base = rawLang.toLowerCase().split('-')[0];
+      const qParam = params.find((param) => param.trim().startsWith('q='));
+      const quality = qParam ? Number.parseFloat(qParam.split('=')[1] ?? '1') : 1;
+      return { lang: base, quality: Number.isFinite(quality) ? quality : 0 };
+    })
+    .sort((left, right) => right.quality - left.quality);
+
+  for (const preference of preferences) {
+    if (isLocale(preference.lang)) {
+      return preference.lang;
+    }
+  }
+  return null;
+}
+
+export function resolvePreferredLocale(req: Pick<NextRequest, 'headers' | 'cookies'>): Locale {
+  const cookieLocale = req.cookies.get(LOCALE_COOKIE_NAME)?.value;
+  if (isLocale(cookieLocale)) {
+    return cookieLocale;
+  }
+  return resolveLocaleFromAcceptLanguage(req.headers.get('accept-language')) ?? 'en';
+}
+
+function isSecureRequest(req: NextRequest): boolean {
+  const forwardedProto = req.headers.get('x-forwarded-proto');
+  if (forwardedProto) {
+    return forwardedProto.toLowerCase() === 'https';
+  }
+  return req.nextUrl.protocol === 'https:';
+}
+
+function persistLocaleCookie(res: NextResponse, req: NextRequest, locale: Locale) {
+  res.cookies.set({
+    name: LOCALE_COOKIE_NAME,
+    value: locale,
+    path: '/',
+    maxAge: LOCALE_COOKIE_TTL_SECONDS,
+    sameSite: 'lax',
+    secure: isSecureRequest(req),
+  });
+}
 
 /**
  * Next.js Edge Middleware — locale detection, redirect, and security headers.
@@ -96,14 +158,18 @@ export function middleware(req: NextRequest) {
     response.headers.set('x-next-pathname', pathname);
     setSecurityHeaders(response);
     setCacheHeaders(response);
+    persistLocaleCookie(response, req, first);
     return response;
   }
 
-  // Default locale: English.
+  const preferredLocale = resolvePreferredLocale(req);
   const url = req.nextUrl.clone();
-  url.pathname = `/en${pathname === '/' ? '' : pathname}`;
+  url.pathname = `/${preferredLocale}${pathname === '/' ? '' : pathname}`;
   url.search = search;
-  return NextResponse.redirect(url);
+  const response = NextResponse.redirect(url);
+  response.headers.set('Vary', appendVary(response.headers.get('Vary'), ['Accept-Language', 'Cookie']));
+  persistLocaleCookie(response, req, preferredLocale);
+  return response;
 }
 
 /** Attach all security response headers (incl. CSP + cross-origin isolation). */

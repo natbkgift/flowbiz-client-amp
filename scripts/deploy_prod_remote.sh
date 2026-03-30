@@ -311,6 +311,13 @@ checks = [
   },
   {
     "owner": "api",
+    "public_path": "/api/platform/deploy-history?limit=1",
+    "internal_path": "/platform/deploy-history?limit=1",
+    "base_url": f"http://127.0.0.1:{os.environ['VPS_API_PORT']}",
+    "expected": 404,
+  },
+  {
+    "owner": "api",
     "public_path": "/api/v1/shortlists/current?owner_type=session&owner_key=preview-smoke-owner&locale=en",
     "internal_path": "/v1/shortlists/current?owner_type=session&owner_key=preview-smoke-owner&locale=en",
     "base_url": f"http://127.0.0.1:{os.environ['VPS_API_PORT']}",

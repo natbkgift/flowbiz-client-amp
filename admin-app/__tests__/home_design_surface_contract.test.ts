@@ -18,13 +18,13 @@ describe('home design surface contract', () => {
     expect(page).toContain('Pattaya property advisory for buying, investing, renting, and selling.');
     expect(page).toContain('Speak to a Pattaya advisor');
     expect(page).toContain('View curated units');
-    expect(page).toContain('home-pathways-support__link');
     expect(page).toContain('home_paths_sell');
     expect(page).toContain('Verified stock, local guidance, and clear next steps from the start.');
     expect(page).toContain('Get current pricing, availability, and the clearest next step');
     expect(page).toContain('Get Pricing & Next Step');
     expect(page).toContain('Send one brief and get current availability, pricing, and the clearest next step from the team.');
     expect(page).toContain('home-trust-snapshot__item');
+    expect(page).not.toContain('home-pathways-support__link');
     expect(page).not.toContain('Choose the next route by buyer intent');
     expect(page).not.toContain('home-intent-card reveal');
     expect(page).not.toContain('home-segmentation-note');

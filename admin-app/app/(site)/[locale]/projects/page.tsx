@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { unstable_noStore as noStore } from 'next/cache';
 import { makePageMetadata } from '@/app/_lib/i18n/metadata';
-import { buildAdvisorWhatsApp, getAdvisoryLabels, getAdvisoryProofs, withLocaleQuery } from '@/app/_lib/public-advisory';
+import { getAdvisoryLabels, getAdvisoryProofs, withLocaleQuery } from '@/app/_lib/public-advisory';
 import { withLocale } from '@/app/_lib/i18n/routing';
 import { Container } from '@/components/layout/Container';
 import { fetchProjects } from '@/app/_lib/public-api-server';
@@ -29,7 +29,7 @@ export async function generateMetadata(
     locale === 'th' ? 'โครงการพัทยาที่เผยแพร่แล้ว จัดให้พร้อมสำหรับการตัดสินใจจริง' : 'Published Pattaya projects, arranged for real decisions',
     locale === 'th'
       ? 'เริ่มจากโครงการที่เผยแพร่แล้ว เห็นบริบทราคา ทำเล และไปต่อสู่รายการคัดสรรหรือการนัดชมแบบส่วนตัวได้ทันที'
-      : 'Start from published Pattaya developments with clearer pricing context, location cues, and a faster handoff into shortlist or private tour.',
+      : 'Start from published Pattaya developments with clearer pricing context, location cues, and a faster move into compare, advisor review, or a private tour.',
     dict.brand.name
   );
 }
@@ -189,7 +189,7 @@ export default async function ProjectsPage(props: { params: Promise<{ locale: st
           title={locale === 'th' ? 'โครงการพัทยาที่เผยแพร่แล้ว จัดให้พร้อมสำหรับการตัดสินใจจริง' : 'Published Pattaya projects, arranged for real decisions'}
           subtitle={locale === 'th'
             ? 'ใช้หน้านี้เพื่อเริ่มจากโครงการที่เผยแพร่แล้ว เห็นราคาเริ่มต้นเท่าที่มี และไปต่อสู่การเปรียบเทียบ รายการคัดสรร หรือการนัดชมแบบส่วนตัวได้ทันที'
-            : 'Use this page to start from published developments, see live entry pricing where available, and move straight into compare, shortlist, or a private tour.'}
+            : 'Use this page to start from published developments, see live entry pricing where available, and move straight into compare, advisor review, or a private tour.'}
           proofs={projectProofs}
           proofsLabel={advisoryLabels.proofsLabel}
           guidanceLabel={advisoryLabels.guidanceLabel}
@@ -199,7 +199,7 @@ export default async function ProjectsPage(props: { params: Promise<{ locale: st
               title: locale === 'th' ? 'ผู้ซื้อที่ต้องการเริ่มจากโครงการที่เผยแพร่แล้วจริง' : 'Buyers who want to start from genuinely published inventory',
               body: locale === 'th'
                 ? 'หน้านี้ควรเป็นฐานเริ่มต้นของการเปรียบเทียบ การใช้ Smart Finder และการคุยกับทีม ไม่ใช่แค่รายการชื่อโครงการ'
-                : 'This page should be the working base for compare, smart finder, and team handoff, not just a list of project names.',
+                : 'This page should be the working base for compare, smart finder, and advisor review, not just a list of project names.',
               icon: 'building',
             },
             {
@@ -207,35 +207,33 @@ export default async function ProjectsPage(props: { params: Promise<{ locale: st
               title: locale === 'th' ? 'เลือกจากโครงการ แล้วค่อยไปต่อสู่ยูนิตหรือการนัดชมแบบส่วนตัว' : 'Choose the development first, then move into units or a private tour',
               body: locale === 'th'
                 ? 'หากยังไม่ชัดเรื่องทำเลหรือแนวทาง ให้ไปต่อที่ Smart Finder หรือให้ทีมช่วยคัดรายการต่อจากบริบทนี้'
-                : 'If the area or strategy is still unclear, continue into Smart Finder or let the team narrow the shortlist from this context.',
+                : 'If the area or strategy is still unclear, continue into Smart Finder or let the team narrow the right projects from this page.',
               icon: 'check',
             },
           {
             kicker: dict.advisory.trustSignal,
             title: locale === 'th' ? 'ทุกการ์ดควรบอกให้พอว่าจะคุยต่อหรือคัดออก' : 'Each card should give enough context to continue or cut',
             body: locale === 'th'
-              ? 'เราเก็บทางไปสู่รายการคัดสรรและการส่งต่อให้ทีมไว้ชัด แม้บางโครงการยังไม่มีราคาเริ่มต้นครบ'
-              : 'The shortlist and team-handoff route stays visible even when some projects still need direct pricing confirmation.',
+              ? 'เราเก็บบริบทสำคัญไว้บนการ์ดให้พอว่าจะดูต่อหรือคัดออก แม้บางโครงการยังไม่มีราคาเริ่มต้นครบ'
+              : 'Each card still gives enough context to continue or move on, even when some projects need direct price confirmation.',
             icon: 'shield',
           },
           ]}
           primaryAction={{
             href: withLocaleQuery(locale, '/contact', { intent: 'shortlist', source: 'projects_hero' }),
-            label: locale === 'th' ? 'ให้ทีมคัดโครงการ' : 'Build project shortlist',
+            label: locale === 'th' ? 'ให้ทีมคัดโครงการ' : 'Narrow the right projects',
             eventPayload: { cta: 'projects_shortlist', from: 'projects_hero' },
+            prefetch: false,
           }}
           secondaryAction={{
             href: withLocale(locale, '/smart-finder'),
             label: dict.advisory.useSmartFinder,
             eventPayload: { cta: 'use_smart_finder', from: 'projects_hero' },
-          }}
-          tertiaryAction={{
-            href: buildAdvisorWhatsApp(locale, dict),
-            label: dict.cta.whatsapp,
+            prefetch: false,
           }}
           supportNote={locale === 'th'
             ? 'ส่งชื่อโครงการที่ชอบมาได้เลย แล้วทีมจะช่วยบีบรายการคัดสรร เส้นทางเปรียบเทียบ หรือการนัดชมแบบส่วนตัวให้คมขึ้น'
-            : 'Share the projects you like and the team will tighten the shortlist, compare route, or private-tour path from there.'}
+            : 'Share the projects you like and the team will tighten the next comparison and viewing options from there.'}
         />
         <section className="section projects-catalogue-section">
         <Container>
@@ -244,26 +242,9 @@ export default async function ProjectsPage(props: { params: Promise<{ locale: st
             <p className="section-subtitle">
               {locale === 'th'
                 ? 'เรียงโครงการที่เผยแพร่แล้วเพื่อให้คุณเห็นทำเล ราคาเริ่มต้น และขั้นตอนถัดไปได้เร็วขึ้น'
-                : 'Published inventory arranged so you can scan location, entry pricing, and the next handoff faster.'}
+                : 'Published inventory arranged so you can scan location, entry pricing, and the next useful move faster.'}
             </p>
           </div>
-
-          <div className="cta-strip projects-catalogue-strip mb-6">
-            <div className="cta-strip__text">
-              {locale === 'th'
-                ? 'หากต้องการขยับจากระดับโครงการไปดูยูนิตจริง หรือเริ่มจากการนัดชมแบบส่วนตัว ให้ไปต่อจากตรงนี้ได้ทันที'
-                : 'If you want to move from development-level browsing into real units or a private-tour handoff, use the next action here.'}
-            </div>
-            <div className="cta-row">
-              <Link className="btn btn-secondary" href={withLocale(locale, '/buy')}>
-                {locale === 'th' ? 'ดูยูนิตคัดสรร' : 'Browse shortlist-ready listings'}
-              </Link>
-              <Link className="btn btn-tertiary" href={withLocaleQuery(locale, '/contact', { topic: 'private_tour', source: 'projects_catalogue' })}>
-                {locale === 'th' ? 'จองนัดชมแบบส่วนตัว' : 'Book private tour'}
-              </Link>
-            </div>
-          </div>
-
           <div className="grid grid-3 projects-catalogue-grid">
             {sorted.map((p, index) => {
               const area = localizeAreaLabel(locale, resolveProjectArea(p as unknown as Record<string, unknown>)) || (locale === 'th' ? 'พัทยา' : 'Pattaya');
@@ -321,18 +302,8 @@ export default async function ProjectsPage(props: { params: Promise<{ locale: st
                       </span>
                     </div>
                     <div className="card-actions project-catalogue-card__actions">
-                      <Link className="btn btn-secondary" href={`/${locale}/projects/${p.slug}`}>
+                      <Link className="btn btn-secondary" href={`/${locale}/projects/${p.slug}`} prefetch={false}>
                         {dict.listing.viewDetails}
-                      </Link>
-                      <Link
-                        className="btn btn-tertiary"
-                        href={withLocaleQuery(locale, '/contact', {
-                          intent: 'project_shortlist',
-                          source: 'projects_grid',
-                          project: p.slug,
-                        })}
-                      >
-                        {dict.cta.speakToAdvisor}
                       </Link>
                     </div>
                   </div>
@@ -378,12 +349,12 @@ export default async function ProjectsPage(props: { params: Promise<{ locale: st
             title: locale === 'th' ? 'ผู้ใช้ที่กำลังเริ่มจากภาพรวมโครงการ' : 'Visitors starting from a project-level overview',
             body: locale === 'th'
               ? 'หน้านี้จัดภาพรวมโครงการให้พร้อมสำหรับการคัดรายการต่อจากบรีฟของคุณ'
-              : 'The page turns the project overview into a usable shortlist starting point for your brief.',
+              : 'The page turns the project overview into a usable starting point for your brief.',
             icon: 'building',
           },
           {
             kicker: dict.advisory.nextStep,
-            title: locale === 'th' ? 'ใช้รายการนี้เป็นจุดเริ่มต้นของการคัดรายการ' : 'Use the list as the shortlist starting point',
+            title: locale === 'th' ? 'ใช้รายการนี้เป็นจุดเริ่มต้นของการคัดรายการ' : 'Use the list as the project selection starting point',
             body: locale === 'th'
               ? 'เปิดดูรายละเอียดโครงการ หรือส่งบริบทต่อไปยังทีมเพื่อคัดตัวเลือกเร็วขึ้น'
               : 'Open a project detail page or hand your context to the team to narrow faster.',
@@ -394,7 +365,7 @@ export default async function ProjectsPage(props: { params: Promise<{ locale: st
             title: locale === 'th' ? 'หน้านี้ยังยึดกับรายการจริงในระบบ' : 'This page stays grounded in live inventory context',
             body: locale === 'th'
               ? 'คุณจะถูกพาไปยังขั้นตอนถัดไปที่เหมาะ ไม่ว่าจะเป็นดูรายละเอียดโครงการหรือให้ทีมช่วยคัดต่อ'
-              : 'You are routed into the best next move, whether that is a live project page or a concierge shortlist.',
+              : 'You are routed into the best next move, whether that is a live project page or an advisor review.',
             icon: 'shield',
           },
         ]}
@@ -402,15 +373,13 @@ export default async function ProjectsPage(props: { params: Promise<{ locale: st
           href: withLocaleQuery(locale, '/contact', { intent: 'shortlist', source: 'projects_hero' }),
           label: dict.cta.speakToAdvisor,
           eventPayload: { cta: 'projects_shortlist', from: 'projects_hero' },
+          prefetch: false,
         }}
         secondaryAction={{
           href: withLocale(locale, '/smart-finder'),
           label: dict.advisory.useSmartFinder,
           eventPayload: { cta: 'use_smart_finder', from: 'projects_hero' },
-        }}
-        tertiaryAction={{
-          href: buildAdvisorWhatsApp(locale, dict),
-          label: dict.cta.whatsapp,
+          prefetch: false,
         }}
       />
       <section className="section">
@@ -427,9 +396,9 @@ export default async function ProjectsPage(props: { params: Promise<{ locale: st
               ? 'ไม่สามารถโหลดรายการโครงการที่เผยแพร่ได้ในขณะนี้ หน้านี้จึงไม่แสดง fallback ที่อาจทำให้เข้าใจว่าเป็นโครงการจริง'
               : 'Published project data could not be loaded right now, so this page intentionally avoids showing a misleading fallback.')}
           action={
-            <a className="btn btn-secondary" href={withLocale(locale, '/contact')}>
+            <Link className="btn btn-secondary" href={withLocale(locale, '/contact')} prefetch={false}>
               {dict.cta.speakToAdvisor}
-            </a>
+            </Link>
           }
         />
       </Container>
