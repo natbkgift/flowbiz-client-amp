@@ -24,6 +24,7 @@ import logging
 import os
 import subprocess
 import sys
+import tempfile
 import time
 from dataclasses import dataclass, field
 from datetime import date, datetime, timezone
@@ -150,6 +151,43 @@ def _coerce_bool(value: Any, *, default: bool = False) -> bool:
 
 def _normalize_flag(value: Any) -> bool:
     return str(value or "").strip().lower() in {"1", "true", "yes", "y", "on"}
+
+
+def _write_json_with_fallback(
+    path: Path, payload: dict[str, Any], *, quiet: bool = False, label: str = "Summary"
+) -> None:
+    serialized = json.dumps(payload, ensure_ascii=False, indent=2) + "\n"
+    targets = [path]
+    fallback = Path(tempfile.gettempdir()) / path.name
+    if fallback not in targets:
+        targets.append(fallback)
+
+    last_error: Exception | None = None
+    for target in targets:
+        try:
+            target.parent.mkdir(parents=True, exist_ok=True)
+            target.write_text(serialized, encoding="utf-8")
+            if not quiet:
+                if target == path:
+                    log.info("%s written -> %s", label, target)
+                else:
+                    log.warning(
+                        "%s path %s was not writable; wrote fallback artifact -> %s",
+                        label,
+                        path,
+                        target,
+                    )
+            return
+        except OSError as exc:
+            last_error = exc
+
+    if not quiet:
+        log.warning(
+            "%s could not be written to %s or fallback temp path (%s)",
+            label,
+            path,
+            last_error,
+        )
 
 
 def _parse_optional_date(value: Any) -> date | None:
@@ -1180,12 +1218,12 @@ def main() -> int:
         out_path = Path(args.write)
         if not out_path.is_absolute():
             out_path = _PROJECT_ROOT / out_path
-        out_path.parent.mkdir(parents=True, exist_ok=True)
-        out_path.write_text(
-            json.dumps(summary, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
+        _write_json_with_fallback(
+            out_path,
+            summary,
+            quiet=bool(args.quiet),
+            label="Summary",
         )
-        if not args.quiet:
-            log.info("Summary written -> %s", out_path)
 
     coverage_gate_code = 0
     # Auto-generate project cover coverage report after refresh/import cycles.

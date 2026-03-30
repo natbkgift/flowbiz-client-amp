@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import tempfile
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
@@ -201,6 +202,29 @@ def _exit_code_for_policy(report: dict[str, Any], *, strict: bool, fail_on_warn:
     return 0
 
 
+def _write_report_with_fallback(path: Path, report: dict[str, Any]) -> None:
+    payload = json.dumps(report, ensure_ascii=False, indent=2) + "\n"
+    targets = [path]
+    fallback = Path(tempfile.gettempdir()) / path.name
+    if fallback not in targets:
+        targets.append(fallback)
+
+    last_error: Exception | None = None
+    for target in targets:
+        try:
+            target.parent.mkdir(parents=True, exist_ok=True)
+            target.write_text(payload, encoding="utf-8")
+            if target == path:
+                print(f"\nWROTE:{target}")
+            else:
+                print(f"\nWRITE-FALLBACK:{target} (requested {path})")
+            return
+        except OSError as exc:
+            last_error = exc
+
+    print(f"\nWRITE-SKIPPED:{path} ({last_error})")
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(
         description="Report real-cover coverage for project seed data."
@@ -246,11 +270,7 @@ def main() -> int:
         out_path = Path(args.write)
         if not out_path.is_absolute():
             out_path = REPO_ROOT / out_path
-        out_path.parent.mkdir(parents=True, exist_ok=True)
-        out_path.write_text(
-            json.dumps(report, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
-        )
-        print(f"\nWROTE:{out_path}")
+        _write_report_with_fallback(out_path, report)
 
     return _exit_code_for_policy(
         report, strict=bool(args.strict), fail_on_warn=bool(args.fail_on_warn)
