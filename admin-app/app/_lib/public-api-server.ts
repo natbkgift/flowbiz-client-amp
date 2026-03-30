@@ -143,8 +143,11 @@ function getOrigin(): string {
 }
 
 function apiBase(): string {
-  // Use same-origin /api when behind nginx; allow override for local dev.
-  return process.env.NEXT_PUBLIC_API_BASE || '/api';
+  // This module is server-only, so prefer the direct internal API origin when
+  // the runtime provides one (preview/prod containers expose the API as
+  // http://api:8000). Falling back to same-origin /api keeps local dev and
+  // browser-equivalent environments working without extra configuration.
+  return process.env.LOCAL_API_ORIGIN || process.env.NEXT_PUBLIC_API_BASE || '/api';
 }
 
 export async function fetchProperties(params: {
