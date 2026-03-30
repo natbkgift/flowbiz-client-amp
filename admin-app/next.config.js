@@ -53,7 +53,7 @@ const nextConfig = {
     if (!localApiOrigin) return [];
 
     return {
-      fallback: [
+      afterFiles: [
         // Local preview parity with the deployed edge proxy:
         // LOCAL_API_ORIGIN may point either at a backend root (e.g. localhost:8000)
         // or a site-prefixed API origin (e.g. https://amppattaya.com/api).
