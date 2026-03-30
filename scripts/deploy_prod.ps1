@@ -88,7 +88,10 @@ function Invoke-ExternalCommandWithRetry {
 function ConvertFrom-JsonOutput {
   param([string]$RawOutput)
 
-  $trimmed = [string]::IsNullOrWhiteSpace($RawOutput) ? "" : $RawOutput.Trim()
+  $trimmed = ""
+  if (-not [string]::IsNullOrWhiteSpace($RawOutput)) {
+    $trimmed = $RawOutput.Trim()
+  }
   if (-not $trimmed) {
     return $null
   }
@@ -287,7 +290,10 @@ fi
             break
           }
 
-          $phase = [string]($telemetryRecord.Payload.current_phase ?? 'unknown')
+          $phase = 'unknown'
+          if ($null -ne $telemetryRecord.Payload -and $null -ne $telemetryRecord.Payload.current_phase) {
+            $phase = [string]$telemetryRecord.Payload.current_phase
+          }
           throw "Production deploy failed with remote exit code $exitCode during phase '$phase'."
         } catch {
           throw "Production deploy failed with remote exit code $exitCode. $($_.Exception.Message)"
