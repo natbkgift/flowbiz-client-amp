@@ -284,9 +284,13 @@ export async function fetchSeoResolvedOverride(path: string, locale: string): Pr
   url.searchParams.set('path', path);
   url.searchParams.set('locale', locale);
 
-  const res = await fetchWithRetry(url.toString(), { next: { revalidate: 30 }, retryOn5xx: false });
-  if (!res.ok) return null;
-  return (await res.json()) as SeoResolvedOverride;
+  try {
+    const res = await fetchWithRetry(url.toString(), { next: { revalidate: 30 }, retryOn5xx: false });
+    if (!res.ok) return null;
+    return (await res.json()) as SeoResolvedOverride;
+  } catch {
+    return null;
+  }
 }
 
 export type MarketplaceCategoryItem = {

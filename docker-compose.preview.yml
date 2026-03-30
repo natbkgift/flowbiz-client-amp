@@ -10,10 +10,6 @@ services:
       - ${FLOWBIZ_PREVIEW_LOGS_PATH:-./ops/logs}:/app/ops/logs
 
   admin-app:
-    build:
-      args:
-        LOCAL_API_ORIGIN: ${LOCAL_API_ORIGIN:-http://api:8000}
-        LOCAL_MEDIA_ORIGIN: ${LOCAL_MEDIA_ORIGIN:-http://api:8000}
     ports:
       - "127.0.0.1:${PREVIEW_ADMIN_PORT:-8102}:3000"
     environment:
