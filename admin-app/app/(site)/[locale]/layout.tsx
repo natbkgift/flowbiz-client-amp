@@ -70,7 +70,7 @@ export default async function SiteLayout(
   return (
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLd }} />
-      <Header locale={locale} dict={dict} cms={layoutCms.header} />
+      <Header locale={locale} cms={layoutCms.header} />
       <Suspense fallback={null}>
         <SiteAnalytics />
       </Suspense>
@@ -78,7 +78,7 @@ export default async function SiteLayout(
       <ExperimentProvider />
       <ScrollReveal />
       {children}
-      <Footer locale={locale} dict={dict} cms={layoutCms.footer} />
+      <Footer locale={locale} cms={layoutCms.footer} />
       <div aria-live="polite" aria-atomic="true" id="amp-live-region" className="sr-only" />
       <FloatingWhatsAppCTA />
       <Suspense fallback={null}>

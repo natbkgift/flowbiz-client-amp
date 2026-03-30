@@ -8,6 +8,8 @@ import type { ResolvedLayoutCms } from '../../app/_lib/layout-cms';
 import type { Dictionary, Locale } from '../../app/_lib/i18n/types';
 import { switchLocaleInPathname, withLocale } from '../../app/_lib/i18n/routing';
 import { CTA, getPublicCtaSurface, routeOwnsPrimaryCta } from '../../app/_lib/public-cta';
+import { en } from '../../app/_lib/i18n/en';
+import { th } from '../../app/_lib/i18n/th';
 
 type DropdownItem = {
   href: string;
@@ -192,13 +194,14 @@ type HeaderCms = ResolvedLayoutCms['header'];
 
 export function Header({
   locale,
-  dict,
+  dict: dictProp,
   cms,
 }: {
   locale: Locale;
-  dict: Dictionary;
+  dict?: Dictionary;
   cms?: HeaderCms;
 }) {
+  const dict = dictProp ?? (locale === 'th' ? th : en);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [homeHeaderScrolled, setHomeHeaderScrolled] = useState(false);
   const mobileMenuRef = useRef<HTMLDivElement>(null);

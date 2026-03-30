@@ -5,18 +5,21 @@ import type { ResolvedLayoutCms } from '../../app/_lib/layout-cms';
 import type { Dictionary, Locale } from '../../app/_lib/i18n/types';
 import { withLocale } from '../../app/_lib/i18n/routing';
 import { CTA } from '../../app/_lib/public-cta';
+import { en } from '../../app/_lib/i18n/en';
+import { th } from '../../app/_lib/i18n/th';
 
 type FooterCms = ResolvedLayoutCms['footer'];
 
 export function Footer({
   locale,
-  dict,
+  dict: dictProp,
   cms,
 }: {
   locale: Locale;
-  dict: Dictionary;
+  dict?: Dictionary;
   cms?: FooterCms;
 }) {
+  const dict = dictProp ?? (locale === 'th' ? th : en);
   const defaultQuickLinks = [
     { href: '/buy', label: dict.nav.buy },
     { href: '/invest', label: dict.nav.invest },
