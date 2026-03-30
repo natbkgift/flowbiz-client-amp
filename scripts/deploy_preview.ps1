@@ -84,7 +84,7 @@ try {
     throw "Preview compose up failed."
   }
 
-  & $DockerExe compose -p $ComposeProjectName -f docker-compose.yml -f docker-compose.preview.yml exec -T api sh -lc "AMP_ALLOW_IMPORT=1 AMP_SKIP_PROJECT_COVER_MIRROR=1 python scripts/import_seed_data.py --input data/import"
+  & $DockerExe compose -p $ComposeProjectName -f docker-compose.yml -f docker-compose.preview.yml exec -T api sh -lc "AMP_ALLOW_IMPORT=1 AMP_SKIP_PROJECT_COVER_MIRROR=1 AMP_PURGE_PREVIEW_DEMO=1 python scripts/import_seed_data.py --input data/import"
   if ($LASTEXITCODE -ne 0) {
     throw "Preview data import failed."
   }

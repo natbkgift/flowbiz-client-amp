@@ -33,6 +33,7 @@ from typing import Any
 from uuid import UUID
 
 from sqlalchemy import create_engine
+from sqlalchemy import or_
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 from sqlalchemy.orm import sessionmaker
@@ -737,6 +738,41 @@ def _warning_skipped_steps(results: list[StepResult], *, warn_on_optional_skip: 
     return [s for s in skipped_steps if s not in OPTIONAL_SKIP_WARNING_STEPS]
 
 
+def _purge_preview_demo_rows(db: Session, *, dry_run: bool) -> dict[str, int]:
+    demo_project_ids = [
+        row[0]
+        for row in db.query(Project.id).filter(Project.slug.like("demo-%")).all()
+    ]
+
+    property_filters = [Property.slug.like("demo-%"), Property.source_id.like("demo-local-%")]
+    if demo_project_ids:
+        property_filters.append(Property.project_id.in_(demo_project_ids))
+
+    property_query = db.query(Property).filter(or_(*property_filters))
+    project_query = db.query(Project).filter(Project.slug.like("demo-%"))
+    developer_query = db.query(Developer).filter(
+        or_(
+            Developer.slug.like("demo-%"),
+            Developer.source_note.ilike("%preview reseed%"),
+        )
+    )
+
+    counts = {
+        "properties": property_query.count(),
+        "projects": project_query.count(),
+        "developers": developer_query.count(),
+    }
+
+    if dry_run:
+        return counts
+
+    counts["properties"] = property_query.delete(synchronize_session=False)
+    counts["projects"] = project_query.delete(synchronize_session=False)
+    counts["developers"] = developer_query.delete(synchronize_session=False)
+    db.flush()
+    return counts
+
+
 # ── Main ─────────────────────────────────────────────────────────────────
 def main() -> int:
     parser = argparse.ArgumentParser(
@@ -796,6 +832,12 @@ def main() -> int:
         "--write",
         default="ops/logs/b13_import_seed_summary.json",
         help="Summary JSON path (default: %(default)s)",
+    )
+    parser.add_argument(
+        "--purge-preview-demo",
+        action="store_true",
+        dest="purge_preview_demo",
+        help="Delete preview reseed demo projects/properties/developers before importing real data",
     )
     args = parser.parse_args()
 
@@ -994,6 +1036,17 @@ def main() -> int:
     db = _session_factory()()
 
     try:
+        purge_preview_demo = bool(args.purge_preview_demo) or _normalize_flag(os.environ.get("AMP_PURGE_PREVIEW_DEMO"))
+        if purge_preview_demo:
+            purged = _purge_preview_demo_rows(db, dry_run=dry_run)
+            log.info(
+                "Preview demo purge %s — properties=%d projects=%d developers=%d",
+                "planned" if dry_run else "applied",
+                purged["properties"],
+                purged["projects"],
+                purged["developers"],
+            )
+
         for step in steps_to_run:
             filename = file_map[step]
             filepath = input_dir / filename
