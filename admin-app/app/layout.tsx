@@ -34,7 +34,7 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
   return (
     <html lang={lang} dir="ltr" className={htmlClassName}>
       <head>
-        {/* Fonts self-hosted by next/font/google at build time — no external requests needed */}
+        {/* Fonts are bundled locally to keep public builds deterministic. */}
       </head>
       <body>
         {dict ? (
