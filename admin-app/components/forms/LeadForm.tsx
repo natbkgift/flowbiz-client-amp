@@ -23,6 +23,7 @@ type LeadFormProps = {
   locale?: 'en' | 'th';
   heading?: string;
   description?: string;
+  variant?: 'default' | 'compact';
   formId?: string;
   propertyId?: string | null;
   defaultMessage?: string;
@@ -74,6 +75,7 @@ export function LeadForm({
   locale: explicitLocale,
   heading,
   description,
+  variant = 'default',
   formId,
   propertyId,
   defaultMessage,
@@ -121,6 +123,7 @@ export function LeadForm({
   const [website, setWebsite] = useState('');
   const [consent, setConsent] = useState(false);
   const [status, setStatus] = useState<LeadFormStatus>({ state: 'idle' });
+  const isCompact = variant === 'compact';
 
   const emailError = email.trim() && !isValidEmail(email) ? emailInvalidMessage : null;
   const phoneError = phone.trim() && !isValidPhone(phone) ? phoneInvalidMessage : null;
@@ -455,26 +458,7 @@ export function LeadForm({
             ) : null}
           </div>
         </div>
-        <div className="form-grid-2">
-          <div>
-            <label htmlFor="lead-budget" className="form-label">
-              {dict.common.leadForm.budgetLabel}
-            </label>
-            <select
-              id="lead-budget"
-              className="form-select"
-              name="budget"
-              value={budgetBand}
-              onChange={(e) => setBudgetBand(e.target.value)}
-            >
-              <option value="">{dict.common.leadForm.budgetPlaceholder}</option>
-              {dict.common.leadForm.budgetOptions.map((option) => (
-                <option key={option.value} value={option.value}>
-                  {option.label}
-                </option>
-              ))}
-            </select>
-          </div>
+        {isCompact ? (
           <div>
             <label htmlFor="lead-purpose" className="form-label">
               {dict.common.leadForm.purposeLabel}
@@ -494,41 +478,84 @@ export function LeadForm({
               ))}
             </select>
           </div>
-        </div>
-        <div className="form-grid-2">
-          <div>
-            <label htmlFor="lead-preferred-area" className="form-label">
-              {dict.common.leadForm.preferredAreaLabel}
-            </label>
-            <input
-              id="lead-preferred-area"
-              className="form-input"
-              name="preferred_area"
-              placeholder={dict.common.leadForm.preferredAreaPlaceholder}
-              value={preferredArea}
-              onChange={(e) => setPreferredArea(e.target.value)}
-            />
-          </div>
-          <div>
-            <label htmlFor="lead-timeframe" className="form-label">
-              {dict.common.leadForm.timeframeLabel}
-            </label>
-            <select
-              id="lead-timeframe"
-              className="form-select"
-              name="timeframe"
-              value={timeframe}
-              onChange={(e) => setTimeframe(e.target.value)}
-            >
-              <option value="">{dict.common.leadForm.timeframePlaceholder}</option>
-              {dict.common.leadForm.timeframeOptions.map((option) => (
-                <option key={option.value} value={option.value}>
-                  {option.label}
-                </option>
-              ))}
-            </select>
-          </div>
-        </div>
+        ) : (
+          <>
+            <div className="form-grid-2">
+              <div>
+                <label htmlFor="lead-budget" className="form-label">
+                  {dict.common.leadForm.budgetLabel}
+                </label>
+                <select
+                  id="lead-budget"
+                  className="form-select"
+                  name="budget"
+                  value={budgetBand}
+                  onChange={(e) => setBudgetBand(e.target.value)}
+                >
+                  <option value="">{dict.common.leadForm.budgetPlaceholder}</option>
+                  {dict.common.leadForm.budgetOptions.map((option) => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label htmlFor="lead-purpose" className="form-label">
+                  {dict.common.leadForm.purposeLabel}
+                </label>
+                <select
+                  id="lead-purpose"
+                  className="form-select"
+                  name="purpose"
+                  value={purpose}
+                  onChange={(e) => setPurpose(e.target.value)}
+                >
+                  <option value="">{dict.common.leadForm.purposePlaceholder}</option>
+                  {dict.common.leadForm.purposeOptions.map((option) => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+            <div className="form-grid-2">
+              <div>
+                <label htmlFor="lead-preferred-area" className="form-label">
+                  {dict.common.leadForm.preferredAreaLabel}
+                </label>
+                <input
+                  id="lead-preferred-area"
+                  className="form-input"
+                  name="preferred_area"
+                  placeholder={dict.common.leadForm.preferredAreaPlaceholder}
+                  value={preferredArea}
+                  onChange={(e) => setPreferredArea(e.target.value)}
+                />
+              </div>
+              <div>
+                <label htmlFor="lead-timeframe" className="form-label">
+                  {dict.common.leadForm.timeframeLabel}
+                </label>
+                <select
+                  id="lead-timeframe"
+                  className="form-select"
+                  name="timeframe"
+                  value={timeframe}
+                  onChange={(e) => setTimeframe(e.target.value)}
+                >
+                  <option value="">{dict.common.leadForm.timeframePlaceholder}</option>
+                  {dict.common.leadForm.timeframeOptions.map((option) => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+          </>
+        )}
         <label htmlFor="lead-message" className="form-label">
           {dict.common.leadForm.messagePlaceholder} <span className="text-gray-500">{requiredText}</span>
         </label>

@@ -15,13 +15,13 @@ describe('home design surface contract', () => {
     expect(page).toContain('home-pathways-grid');
     expect(page).toContain('home-pathway-card');
     expect(page).toContain('home-trust-snapshot-grid');
-    expect(page).toContain('Choose the right Pattaya property route first.');
+    expect(page).toContain('Pattaya property advice, curated before you browse.');
     expect(page).toContain('Speak to a Pattaya advisor');
     expect(page).toContain('View curated units');
     expect(page).toContain('home_paths_sell');
-    expect(page).toContain('Choose the right route first.');
-    expect(page).toContain('Send your brief');
-    expect(page).toContain('Browse live opportunities');
+    expect(page).toContain('Choose your route.');
+    expect(page).toContain('Share your brief');
+    expect(page).toContain('View all projects');
     expect(page).not.toContain('One brief is enough.');
     expect(page).toContain('home-trust-snapshot__item');
     expect(page).not.toContain('home-pathways-highlight-row');
@@ -30,7 +30,7 @@ describe('home design surface contract', () => {
     expect(page).not.toContain('home-pathways-support__link');
     expect(page).not.toContain('Choose the next route by buyer intent');
     expect(page).not.toContain('home-intent-card reveal');
-    expect(page).not.toContain('home-segmentation-note');
+    expect(page).toContain('home-segmentation-note');
   });
 
   it('keeps home hero and bottom cta class hooks for mobile ergonomics and visual hierarchy', () => {

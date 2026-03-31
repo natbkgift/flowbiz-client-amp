@@ -29,8 +29,8 @@ describe('home surface handoff contract', () => {
 
     expect(page).toContain('Verified listings only');
     expect(page).toContain('No fake or outdated stock');
-    expect(page).toContain('Send your brief');
-    expect(page).toContain('Browse live opportunities');
+    expect(page).toContain('Share your brief');
+    expect(page).toContain('View all projects');
     expect(page).not.toContain('home-pathways-highlight-row');
     expect(page).not.toContain('home-curated-shell__signal-row');
     expect(page).not.toContain('home-confidence-row');
@@ -55,14 +55,13 @@ describe('home surface handoff contract', () => {
     const page = read('app/(site)/[locale]/page.tsx');
 
     expect(hero).not.toContain('fetchPriority="high"');
-    expect(hero).toContain('quality={76}');
     expect(hero).toContain('data-home-perf="hero-media"');
     expect(hero).toContain('prefetch');
     expect(featuredProjects).toContain('unoptimized={false}');
     expect(featuredProjects).toContain('premium-project-card__cta');
     expect(featuredProjects).not.toContain('premium-project-card__fact-label" aria-hidden="true">+</span>');
     expect(localMedia).toContain('fetchPriority');
-    expect(safeCoverImage).toContain('unoptimized = true');
+    expect(safeCoverImage).toContain('loader={unoptimized ? passthroughLoader : undefined}');
     expect(personalization).toContain("intent === 'sell'");
     expect(page).toContain('data-home-perf="trust-layer"');
     expect(page).toContain('data-home-perf="trust-strip"');

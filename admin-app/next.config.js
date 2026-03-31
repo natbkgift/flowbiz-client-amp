@@ -16,6 +16,7 @@ const nextConfig = {
   skipTrailingSlashRedirect: true,
   images: useMinimalConfig ? undefined : {
     formats: ['image/avif', 'image/webp'],
+    qualities: [72, 75, 76],
     remotePatterns: imageHosts.map((hostname) => ({
       protocol: 'https',
       hostname,

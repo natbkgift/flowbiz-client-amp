@@ -51,11 +51,11 @@ export function Footer({
     : facebookLabelRaw;
   const showFacebookLink = facebookUrl && !/flowbiz/i.test(facebookUrl);
   const brandTitle = locale === 'th'
-    ? 'ที่ปรึกษาอสังหาฯ พัทยาสำหรับผู้ซื้อ นักลงทุน ผู้เช่า และเจ้าของ'
-    : 'Pattaya real estate advisory for buyers, investors, renters, and owners';
+    ? 'ที่ปรึกษาอสังหาฯ พัทยา'
+    : 'Pattaya real estate advisory';
   const brandBody = locale === 'th'
-    ? 'ซื้อ ลงทุน เช่า หรือขายในพัทยาผ่านทีมที่ช่วยคัดเส้นทาง โครงการ และยูนิตให้ชัดตั้งแต่เริ่มต้น'
-    : 'Buy, invest, rent, or sell in Pattaya through one clearer advisory route with a sharper next step from the team.';
+    ? 'โครงการ ยูนิต และคำแนะนำสำหรับซื้อ ลงทุน เช่า หรือขายในพัทยา'
+    : 'Projects, units, and guidance for buying, investing, renting, or selling in Pattaya.';
   const routeLinks = quickLinks.filter((item) => ['/invest', '/buy', '/rent', '/sell', '/projects', '/area-guide'].includes(item.href));
   const footerRouteLinks = routeLinks.filter((item) => ['/buy', '/invest', '/rent', '/sell', '/projects'].includes(item.href));
   const contactLinks = [

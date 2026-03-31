@@ -14,7 +14,7 @@ describe('FeaturedProjects Thai copy', () => {
       />,
     );
 
-    expect(screen.getByText('เปิดโครงการที่มีอยู่ก่อน')).toBeInTheDocument();
+    expect(screen.getByText('ดูโครงการที่เผยแพร่แล้วก่อน')).toBeInTheDocument();
     expect(screen.queryByText(/shortlist/i)).toBeNull();
   });
 

@@ -54,6 +54,21 @@ function formatPrice(price: number, locale: 'en' | 'th'): string {
   return `฿${Math.round(price).toLocaleString()}`;
 }
 
+function isLowValueSummary(input: string): boolean {
+  const normalized = input.toLowerCase();
+  return [
+    'published project',
+    'published data',
+    'project information',
+    'next step',
+    'clearer context',
+    'shortlist',
+    'worth opening',
+    'worth reviewing',
+    'before opening details',
+  ].some((token) => normalized.includes(token));
+}
+
 const PROJECT_FALLBACK_IMAGES = [
   '/images/project-overview.png',
   '/images/condo-view.png',
@@ -106,10 +121,10 @@ export function FeaturedProjects({
       ];
   const emptyStatePreviewTitle = locale === 'th'
     ? 'เริ่มจากโครงการที่เกี่ยวข้อง'
-    : 'The team will line up the next projects worth opening';
+    : 'Tell the team what to review';
   const emptyStatePreviewBody = locale === 'th'
     ? 'ถ้าโครงการที่เหมาะยังไม่ขึ้นบนหน้า ทีมจะช่วยคัดชุดแรกให้ดู'
-    : 'If the right launch is not already surfaced, send the brief and get pricing, fit, and the clearest next step in one reply.';
+    : 'If the right launch is not already surfaced, the team can narrow the first set around pricing, fit, and location.';
 
   if (projects.length === 0) {
     return (
@@ -125,15 +140,15 @@ export function FeaturedProjects({
             </p>
             <EmptyStateCard
               className="premium-empty-state home-project-empty__card"
-              title={locale === 'th' ? 'เปิดโครงการที่มีอยู่ก่อน' : 'Start from the published projects'}
-              body={locale === 'th' ? 'ถ้ายังไม่เจอสิ่งที่ใช่ ใช้บรีฟสั้น ๆ เพื่อให้ทีมช่วยคัดต่อ' : 'Browse the current list first, then send a short brief if you need a tighter filter.'}
+              title={locale === 'th' ? 'ดูโครงการที่เผยแพร่แล้วก่อน' : 'Review the published projects first'}
+              body={locale === 'th' ? 'ถ้ายังไม่เจอสิ่งที่ใช่ บอกงบและทำเลให้ทีมช่วยคัดต่อได้' : 'Review the current list first, then share your budget and area if you need a tighter match.'}
               action={(
                 <div className="home-project-empty__actions">
                   <Link href={emptyStatePrimaryHref} prefetch={false} className="home-project-empty__action home-project-empty__action--primary">
-                    {locale === 'th' ? 'ดูโครงการทั้งหมด' : 'Browse live projects'}
+                    {locale === 'th' ? 'ดูโครงการทั้งหมด' : 'View all projects'}
                   </Link>
                   <Link href={emptyStateSecondaryHref} prefetch={false} className="home-project-empty__action home-project-empty__action--secondary">
-                    {locale === 'th' ? 'คุยกับทีม' : 'Send the team your brief'}
+                    {locale === 'th' ? 'คุยกับทีม' : 'Speak with the team'}
                   </Link>
                 </div>
               )}
@@ -214,8 +229,9 @@ export function FeaturedProjects({
     const normalized = String(input ?? '').replace(/\s+/g, ' ').trim();
     if (!normalized) return null;
     const firstSentence = normalized.split(/(?<=[.!?])\s+/)[0]?.trim() || normalized;
-    if (firstSentence.length <= 56) return firstSentence;
-    return `${firstSentence.slice(0, 56).trim().replace(/[,:;.\s]+$/g, '')}…`;
+    if (isLowValueSummary(firstSentence)) return null;
+    if (firstSentence.length <= 72) return firstSentence;
+    return `${firstSentence.slice(0, 72).trim().replace(/[,:;.\s]+$/g, '')}…`;
   }
 
   function humanizeToken(value: string): string {
@@ -260,10 +276,20 @@ export function FeaturedProjects({
 
     const propertyType = localizePropertyType(dynamicProject.property_type ? humanizeToken(dynamicProject.property_type) : null);
     const developerName = String(dynamicProject.developer?.name ?? '').trim();
+    if (propertyType && area && developerName) {
+      return locale === 'th'
+        ? `${propertyType}ใน${area} จาก ${developerName}`
+        : `${propertyType} in ${area} by ${developerName}`;
+    }
     if (propertyType && developerName) {
       return locale === 'th'
         ? `${propertyType}จาก ${developerName}`
         : `${propertyType} from ${developerName}`;
+    }
+    if (propertyType && area) {
+      return locale === 'th'
+        ? `${propertyType}ใน${area}`
+        : `${propertyType} in ${area}`;
     }
     return null;
   }
@@ -319,18 +345,12 @@ export function FeaturedProjects({
           const projectSummary = extractProjectSummary(p, area);
           const facts = extractProjectFacts(p);
           const fallbackImage = PROJECT_FALLBACK_IMAGES[index % PROJECT_FALLBACK_IMAGES.length];
-          const cardVariantClass = index === 0
-            ? 'premium-project-card--lead'
-            : index < 3
-              ? 'premium-project-card--priority'
-              : 'premium-project-card--standard';
-
           return (
             <Link
               key={p.id}
               href={withLocale(locale, `/projects/${encodeURIComponent(p.slug)}`)}
               prefetch={false}
-              className={`premium-project-card ${cardVariantClass} reveal card-interactive`}
+              className="premium-project-card reveal card-interactive"
             >
               <div className="card-image premium-project-card__media">
                 <LocalMediaImage
@@ -341,7 +361,6 @@ export function FeaturedProjects({
                   imageClassName={`absolute inset-0 h-full w-full object-cover ${hasLocalMedia ? '' : 'premium-project-card__fallback-image'}`}
                   fallbackSrc={fallbackImage}
                   sizes="(max-width: 767px) 100vw, (max-width: 1279px) 50vw, 33vw"
-                  quality={72}
                   unoptimized={false}
                 />
                 <div className="premium-project-card__media-scrim" aria-hidden="true" />
@@ -368,7 +387,7 @@ export function FeaturedProjects({
                 ) : null}
 
                 {projectSummary ? (
-                  <p className="premium-project-card__summary line-clamp-3">
+                  <p className="premium-project-card__summary line-clamp-2">
                     {projectSummary}
                   </p>
                 ) : null}

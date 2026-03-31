@@ -98,6 +98,17 @@ export function HomeHero({
   const touchStartX = useRef<number | null>(null);
   const slideCount = resolvedSlides.length;
   const activeSlide = resolvedSlides[Math.min(activeIndex, resolvedSlides.length - 1)] ?? resolvedSlides[0];
+  const stableHeading = typeof composer?.heading === 'string' && composer.heading.trim()
+    ? composer.heading.trim()
+    : dict.home.heroTitle;
+  const stableSubheading = typeof composer?.subheading === 'string' && composer.subheading.trim()
+    ? composer.subheading.trim()
+    : dict.home.heroSubtitle;
+  const contextualLineCandidates = [
+    typeof activeSlide.heading === 'string' ? activeSlide.heading.trim() : '',
+    typeof activeSlide.subheading === 'string' ? activeSlide.subheading.trim() : '',
+  ].filter(Boolean);
+  const contextualLine = contextualLineCandidates.find((item) => item !== stableHeading && item !== stableSubheading) ?? '';
 
   useEffect(() => {
     setActiveIndex((current) => Math.min(current, Math.max(resolvedSlides.length - 1, 0)));
@@ -209,7 +220,6 @@ export function HomeHero({
                   src={slide.imageSrc}
                   alt={slide.imageAlt ?? (locale === 'th' ? 'ภาพอสังหาริมทรัพย์พัทยาโดย AMP Pattaya' : 'AMP Pattaya Real Estate')}
                   fill
-                  quality={76}
                   sizes="100vw"
                   className="home-hero-slider__image"
                 />
@@ -225,10 +235,11 @@ export function HomeHero({
         <Container variant="wide">
           <div className="home-hero-slider__panel">
             <p className="home-hero-slider__eyebrow">{activeSlide.eyebrow}</p>
+            {contextualLine ? <p className="home-hero-slider__context">{contextualLine}</p> : null}
             <h1 className={`home-hero-slider__title ${locale === 'th' ? 'home-hero-slider__title--th' : ''}`}>
-              {activeSlide.heading}
+              {stableHeading}
             </h1>
-            <p className="home-hero-slider__subtitle">{activeSlide.subheading}</p>
+            <p className="home-hero-slider__subtitle">{stableSubheading}</p>
 
             <div className="hero-cta-row home-hero-slider__actions">
               <TrackedLink

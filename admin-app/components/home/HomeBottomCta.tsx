@@ -37,8 +37,7 @@ export function HomeBottomCta({
   const resolvedSectionId = sectionId ?? 'home-bottom-cta';
   const headingId = `${resolvedSectionId}-title`;
   const isThai = /[\u0E00-\u0E7F]/.test(`${heading} ${subheading} ${primaryLabel} ${secondaryLabel} ${trustNote}`);
-  const eyebrow = isThai ? 'คุยกับทีมพัทยา' : 'Private advisory route';
-  const formBadge = isThai ? 'ส่งโจทย์ถึงทีม AMP Pattaya' : 'AMP advisory intake';
+  const eyebrow = isThai ? 'ทีมพัทยา' : 'Pattaya team';
 
   return (
     <section
@@ -98,8 +97,7 @@ export function HomeBottomCta({
             <p className="home-bottom-trust-note mt-4 text-sm text-white/70 max-w-xl">{trustNote}</p>
           </div>
           <div className="reveal home-bottom-cta__form-wrap">
-            <div className="home-bottom-cta__form-badge" aria-hidden="true">{formBadge}</div>
-            <div className="bg-white p-6 md:p-10 rounded-2xl shadow-2xl text-gray-900 home-bottom-cta__panel" aria-label="consultation-form-panel">
+            <div className="bg-white p-5 md:p-8 rounded-2xl shadow-2xl text-gray-900 home-bottom-cta__panel" aria-label="consultation-form-panel">
               {formSlot}
             </div>
           </div>

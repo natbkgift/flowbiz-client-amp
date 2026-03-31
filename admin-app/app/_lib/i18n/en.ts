@@ -99,9 +99,9 @@ export const en: Dictionary = {
     verifiedEditorialUpdate: 'Verified editorial update',
   },
   home: {
-    heroTitle: 'Start with the right Pattaya inventory and route',
+    heroTitle: 'Pattaya property advice, curated before you browse.',
     heroSubtitle:
-      'Curated and verified Pattaya opportunities with local guidance, private tours, and investment clarity.',
+      'Buy, invest, rent, or sell through verified Pattaya projects and units with local guidance.',
     pathInvest: {
       title: 'Invest',
       desc: 'Evaluate rental demand, yield positioning, and risk factors with clear assumptions.',

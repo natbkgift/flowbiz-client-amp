@@ -291,7 +291,7 @@ export function Header({
     {
       href: '/sell',
       label: locale === 'th' ? 'ขาย' : 'Sell',
-      detail: locale === 'th' ? 'บริการสำหรับเจ้าของ' : 'Owner services',
+      detail: locale === 'th' ? 'ขายหรือปล่อยเช่า' : 'Sell or rent out',
     },
   ];
   const contactCtaHref = cms?.contactCta?.href || '/contact';

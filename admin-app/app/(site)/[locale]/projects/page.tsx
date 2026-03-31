@@ -24,10 +24,10 @@ export async function generateMetadata(
   return makePageMetadata(
     locale,
     'projects',
-    locale === 'th' ? 'โครงการพัทยาที่เปิดอยู่' : 'Published Pattaya projects, arranged for real decisions',
+    locale === 'th' ? 'โครงการพัทยาที่เปิดอยู่' : 'Published Pattaya projects',
     locale === 'th'
       ? 'ดูทำเล ราคาเริ่มต้น และภาพรวมของโครงการพัทยาที่เปิดอยู่ก่อนเปิดรายละเอียด'
-      : 'Review Pattaya developments through location, entry pricing, and concise project context before opening details.',
+      : 'See location, entry pricing, and a short project summary before opening details.',
     dict.brand.name
   );
 }
@@ -132,14 +132,30 @@ function resolveLocalizedText(locale: 'en' | 'th', value: unknown): string | nul
   return null;
 }
 
+function isLowValueSummary(input: string): boolean {
+  const normalized = input.toLowerCase();
+  return [
+    'published project',
+    'published data',
+    'project information',
+    'next step',
+    'clearer context',
+    'shortlist',
+    'worth opening',
+    'worth reviewing',
+    'before opening details',
+  ].some((token) => normalized.includes(token));
+}
+
 function summarizeProject(locale: 'en' | 'th', project: Record<string, unknown>): string | null {
   const localizedSummary = resolveLocalizedText(locale, project.summary);
   const localizedDescription = resolveLocalizedText(locale, project.description);
   const candidate = String(localizedSummary || localizedDescription || '').replace(/\s+/g, ' ').trim();
   if (!candidate) return null;
   const firstSentence = candidate.split(/(?<=[.!?])\s+/)[0]?.trim() || candidate;
-  if (firstSentence.length <= 58) return firstSentence;
-  return `${firstSentence.slice(0, 58).trim().replace(/[,:;.\s]+$/g, '')}…`;
+  if (isLowValueSummary(firstSentence)) return null;
+  if (firstSentence.length <= 72) return firstSentence;
+  return `${firstSentence.slice(0, 72).trim().replace(/[,:;.\s]+$/g, '')}…`;
 }
 
 function humanizeToken(value: string): string {
@@ -242,17 +258,17 @@ export default async function ProjectsPage(props: { params: Promise<{ locale: st
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLd }} />
         <PublicAdvisoryHero
           eyebrow={locale === 'th' ? 'โครงการพัทยา' : 'Pattaya projects'}
-          title={locale === 'th' ? 'โครงการที่เปิดอยู่' : 'Projects in focus'}
+          title={locale === 'th' ? 'โครงการที่เปิดอยู่' : 'Published projects'}
           subtitle={locale === 'th'
-            ? 'ดูทำเล ราคาเริ่มต้น และจุดเด่นแบบสั้น'
-            : 'Review location, entry pricing, and the key point before opening details.'}
+            ? 'ดูทำเล ราคาเริ่มต้น และสรุปสั้นก่อนเปิดรายละเอียด'
+            : 'See location, entry pricing, and a short summary before opening details.'}
           proofs={projectProofs}
           proofsLabel={advisoryLabels.proofsLabel}
           guidanceLabel={advisoryLabels.guidanceLabel}
           signals={[]}
           primaryAction={{
             href: withLocaleQuery(locale, '/contact', { intent: 'shortlist', source: 'projects_hero' }),
-            label: locale === 'th' ? 'ส่งโจทย์ให้ทีม' : 'Send your brief',
+            label: locale === 'th' ? 'คุยกับทีม' : 'Talk with the team',
             eventPayload: { cta: 'projects_shortlist', from: 'projects_hero' },
             prefetch: false,
           }}
@@ -275,7 +291,7 @@ export default async function ProjectsPage(props: { params: Promise<{ locale: st
               return (
                 <article
                   key={p.id}
-                  className={`card catalogue-card project-catalogue-card${index === 0 ? ' project-catalogue-card--lead' : index < 3 ? ' project-catalogue-card--priority' : ''}`}
+                  className="card catalogue-card project-catalogue-card"
                 >
                   <div className="card-image project-catalogue-card__visual">
                     <LocalMediaImage
@@ -291,12 +307,12 @@ export default async function ProjectsPage(props: { params: Promise<{ locale: st
                     />
                     <div className="project-catalogue-card__media-scrim" aria-hidden="true" />
                     <div className="project-catalogue-card__chips">
-                      <span className="project-catalogue-card__chip">{area}</span>
-                      <span className="project-catalogue-card__chip project-catalogue-card__chip--value">
-                        {hasEntryPrice
-                          ? `${locale === 'th' ? 'เริ่ม' : 'Entry'} ${formatCompactPrice(p.starting_price ?? null, locale)}`
-                          : (locale === 'th' ? 'ราคาเมื่อขอ' : 'Price on request')}
-                      </span>
+                      {area ? <span className="project-catalogue-card__chip">{area}</span> : null}
+                      {hasEntryPrice ? (
+                        <span className="project-catalogue-card__chip project-catalogue-card__chip--value">
+                          {`${locale === 'th' ? 'เริ่ม' : 'Entry'} ${formatCompactPrice(p.starting_price ?? null, locale)}`}
+                        </span>
+                      ) : null}
                     </div>
                   </div>
                   <div className="project-catalogue-card__copy">
@@ -307,12 +323,13 @@ export default async function ProjectsPage(props: { params: Promise<{ locale: st
                     </div>
                     <h2 className="card-title project-catalogue-card__title">{p.name}</h2>
                     {summary ? <p className="card-subtitle project-catalogue-card__summary">{summary}</p> : null}
-                    <div className="catalogue-card__meta project-catalogue-card__meta">
-                      <span>{area}</span>
-                      {facts.map((fact) => (
-                        <span key={`${p.id}-${fact}`}>{fact}</span>
-                      ))}
-                    </div>
+                    {facts.length > 0 ? (
+                      <div className="catalogue-card__meta project-catalogue-card__meta">
+                        {facts.map((fact) => (
+                          <span key={`${p.id}-${fact}`}>{fact}</span>
+                        ))}
+                      </div>
+                    ) : null}
                     <div className="card-actions project-catalogue-card__actions">
                       <Link className="btn btn-secondary" href={`/${locale}/projects/${p.slug}`} prefetch={false}>
                         {dict.listing.viewDetails}
@@ -350,7 +367,7 @@ export default async function ProjectsPage(props: { params: Promise<{ locale: st
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLd }} />
       <PublicAdvisoryHero
         eyebrow={locale === 'th' ? 'โครงการพัทยา' : 'Pattaya projects'}
-        title={locale === 'th' ? 'โครงการที่เปิดอยู่' : 'Projects in focus'}
+        title={locale === 'th' ? 'โครงการที่เปิดอยู่' : 'Published projects'}
         subtitle={locale === 'th'
           ? 'รายการยังไม่พร้อมในขณะนี้'
           : 'Published project data is temporarily unavailable right now.'}

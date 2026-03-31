@@ -118,6 +118,8 @@ describe('HomeHero CTA hierarchy', () => {
 
     const images = screen.getAllByAltText('AMP Pattaya Real Estate');
     expect(images[0]).toHaveAttribute('src', '/media/library/hero.webp');
+    expect(screen.getByRole('heading', { name: 'Find the right Pattaya property path' })).toBeInTheDocument();
+    expect(screen.getByText('Open a sharper coastal route')).toBeInTheDocument();
     expect(screen.getByLabelText('Hero slide controls')).toBeInTheDocument();
   });
 });

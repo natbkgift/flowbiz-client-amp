@@ -52,9 +52,9 @@ describe('public Thai catalogue copy', () => {
     const { container } = render(await ProjectsPage({ params: Promise.resolve({ locale: 'th' }) }));
     const markup = container.textContent ?? '';
 
-    expect(markup).toContain('ผู้ซื้อที่ต้องการดูโครงการที่ตรวจสอบแล้ว');
-    expect(markup).toContain('เริ่มจากดูโครงการ แล้วค่อยคัดรายการ');
-    expect(markup).toContain('ดูรายการที่บันทึกเข้ารายการคัดไว้ได้');
+    expect(markup).toContain('โครงการที่เปิดอยู่');
+    expect(markup).toContain('ดูทำเล ราคาเริ่มต้น และสรุปสั้นก่อนเปิดรายละเอียด');
+    expect(markup).toContain('คุยกับทีม');
     expect(markup).not.toContain('inventory');
     expect(markup).not.toContain('shortlist');
     expect(markup).not.toContain('next move');

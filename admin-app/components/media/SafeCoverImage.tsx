@@ -20,8 +20,8 @@ function passthroughLoader({ src }: ImageLoaderProps): string {
 /**
  * Production-safe cover image renderer:
  * - Always shows a luxury placeholder when src is missing or fails to load.
- * - Uses unoptimized next/image with a passthrough loader so remote host config
- *   does not block runtime fallback handling.
+ * - Uses a passthrough loader only when rendering unoptimized assets so local
+ *   optimized images do not trigger loader warnings in test/build environments.
  */
 export function SafeCoverImage({
   src,
@@ -78,7 +78,7 @@ export function SafeCoverImage({
       loading={loading}
       fetchPriority={fetchPriority}
       quality={quality}
-      loader={passthroughLoader}
+      loader={unoptimized ? passthroughLoader : undefined}
       unoptimized={unoptimized}
       onError={() => {
         if (initial && currentSrc === initial) {
