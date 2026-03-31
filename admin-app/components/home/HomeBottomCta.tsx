@@ -37,11 +37,8 @@ export function HomeBottomCta({
   const resolvedSectionId = sectionId ?? 'home-bottom-cta';
   const headingId = `${resolvedSectionId}-title`;
   const isThai = /[\u0E00-\u0E7F]/.test(`${heading} ${subheading} ${primaryLabel} ${secondaryLabel} ${trustNote}`);
-  const eyebrow = isThai ? 'ปรึกษากับทีมพัทยาโดยตรง' : 'Private advisory route';
-  const formBadge = isThai ? 'ช่องทางส่งโจทย์ถึงทีม AMP Pattaya' : 'AMP advisory intake';
-  const signalItems = isThai
-    ? ['ราคาอัปเดต', 'ยูนิตที่ยังเปิดอยู่', 'ขั้นตอนถัดไปชัดเจน']
-    : ['Current pricing', 'Available units', 'Clear next step'];
+  const eyebrow = isThai ? 'คุยกับทีมพัทยา' : 'Private advisory route';
+  const formBadge = isThai ? 'ส่งโจทย์ถึงทีม AMP Pattaya' : 'AMP advisory intake';
 
   return (
     <section
@@ -55,11 +52,6 @@ export function HomeBottomCta({
           <div className="reveal home-bottom-cta__content">
             <div className="home-bottom-cta__topline">
               <p className="home-bottom-cta__eyebrow">{eyebrow}</p>
-              <div className="home-bottom-cta__signal-row" aria-hidden="true">
-                {signalItems.map((item) => (
-                  <span key={item} className="home-bottom-cta__signal">{item}</span>
-                ))}
-              </div>
             </div>
             <h2 id={headingId} className={`home-bottom-cta__title text-3xl md:text-5xl ${isThai ? 'font-sans' : 'font-serif'} font-semibold mb-6 leading-tight`}>
               {heading}
@@ -74,7 +66,7 @@ export function HomeBottomCta({
               >
                 {benefits.map((benefit) => (
                   <li key={benefit} className="home-bottom-cta__benefit flex items-start gap-3">
-                    <span className="home-bottom-cta__benefit-mark mt-[2px] inline-flex h-5 w-5 flex-none items-center justify-center rounded-full border border-white/20 bg-white/10 text-[11px] font-semibold text-white">+</span>
+                    <span className="home-bottom-cta__benefit-mark" aria-hidden="true" />
                     <span className="home-bottom-cta__benefit-text">{benefit}</span>
                   </li>
                 ))}

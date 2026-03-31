@@ -12,7 +12,7 @@ describe('home surface handoff contract', () => {
     const page = read('app/(site)/[locale]/page.tsx');
     const perfProbe = read('components/home/HomePerfProbe.tsx');
 
-    expect(page).toContain('HomePerfProbe');
+    expect(page).toContain('NEXT_PUBLIC_HOME_METRICS_DEBUG');
     expect(perfProbe).toContain("entity_name: 'home_perf_probe'");
     expect(perfProbe).toContain("trackEvent('web_vitals_probe'");
     expect(page).toContain('home_hero_primary');
@@ -29,8 +29,11 @@ describe('home surface handoff contract', () => {
 
     expect(page).toContain('Verified listings only');
     expect(page).toContain('No fake or outdated stock');
-    expect(page).toContain('Get current pricing, availability, and the clearest next step');
-    expect(page).toContain('Get Pricing & Next Step');
+    expect(page).toContain('Send your brief');
+    expect(page).toContain('Browse live opportunities');
+    expect(page).not.toContain('home-pathways-highlight-row');
+    expect(page).not.toContain('home-curated-shell__signal-row');
+    expect(page).not.toContain('home-confidence-row');
     expect(page).not.toContain('home-intent-card__eyebrow');
     expect(page).not.toContain('home-intent-card__start');
   });
@@ -52,15 +55,20 @@ describe('home surface handoff contract', () => {
     const page = read('app/(site)/[locale]/page.tsx');
 
     expect(hero).not.toContain('fetchPriority="high"');
-    expect(hero).toContain('quality={82}');
+    expect(hero).toContain('quality={76}');
     expect(hero).toContain('data-home-perf="hero-media"');
     expect(hero).toContain('prefetch');
     expect(featuredProjects).toContain('unoptimized={false}');
     expect(featuredProjects).toContain('premium-project-card__cta');
+    expect(featuredProjects).not.toContain('premium-project-card__fact-label" aria-hidden="true">+</span>');
     expect(localMedia).toContain('fetchPriority');
     expect(safeCoverImage).toContain('unoptimized = true');
     expect(personalization).toContain("intent === 'sell'");
     expect(page).toContain('data-home-perf="trust-layer"');
     expect(page).toContain('data-home-perf="trust-strip"');
+    expect(page).not.toContain('fetchBlogPosts');
+    expect(page).not.toContain('fetchPublishedTestimonials');
+    expect(page).not.toContain("dynamic = 'force-dynamic'");
+    expect(page).not.toContain('noStore()');
   });
 });

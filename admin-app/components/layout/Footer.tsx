@@ -44,7 +44,6 @@ export function Footer({
         { href: '/privacy', label: dict.common.privacyPolicy ?? 'Privacy Policy' },
         { href: '/terms', label: dict.common.termsOfService ?? 'Terms of Service' },
       ]);
-  const contactEmail = cms?.contact?.email || dict.common.contactEmail;
   const facebookUrl = cms?.contact?.facebookUrl || dict.common.facebookUrl;
   const facebookLabelRaw = cms?.contact?.facebookLabel || dict.common.facebookLabel;
   const facebookLabel = /flowbiz/i.test(facebookLabelRaw)
@@ -105,7 +104,6 @@ export function Footer({
                     <Link href={withLocale(locale, item.href)} prefetch={false}>{item.label}</Link>
                   </li>
                 ))}
-                <li><span className="text-muted-on-dark">{contactEmail}</span></li>
               </ul>
             </div>
           </div>

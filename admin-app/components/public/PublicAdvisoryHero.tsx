@@ -76,6 +76,8 @@ export function PublicAdvisoryHero({
   proofsLabel?: string;
   guidanceLabel?: string;
 }) {
+  const hasSignals = signals.length > 0;
+
   return (
     <section className="hero hero--page hero--advisory">
       <Container variant="wide">
@@ -137,23 +139,25 @@ export function PublicAdvisoryHero({
             </div>
           </div>
 
-          <aside className="public-hero__rail" aria-label={guidanceLabel}>
-            {signals.map((signal) => (
-              <article key={`${signal.kicker}-${signal.title}`} className="public-hero__signal">
-                <div className="public-hero__signal-icon" aria-hidden="true">
-                  {signalIcon(signal.icon)}
-                </div>
-                <div className="public-hero__signal-copy">
-                  <p className="public-hero__signal-kicker">{signal.kicker}</p>
-                  <h2>{signal.title}</h2>
-                  <p>{signal.body}</p>
-                </div>
-                <span className="public-hero__signal-arrow" aria-hidden="true">
-                  <IconArrowRight size="sm" />
-                </span>
-              </article>
-            ))}
-          </aside>
+          {hasSignals ? (
+            <aside className="public-hero__rail" aria-label={guidanceLabel}>
+              {signals.map((signal) => (
+                <article key={`${signal.kicker}-${signal.title}`} className="public-hero__signal">
+                  <div className="public-hero__signal-icon" aria-hidden="true">
+                    {signalIcon(signal.icon)}
+                  </div>
+                  <div className="public-hero__signal-copy">
+                    <p className="public-hero__signal-kicker">{signal.kicker}</p>
+                    <h2>{signal.title}</h2>
+                    <p>{signal.body}</p>
+                  </div>
+                  <span className="public-hero__signal-arrow" aria-hidden="true">
+                    <IconArrowRight size="sm" />
+                  </span>
+                </article>
+              ))}
+            </aside>
+          ) : null}
         </div>
       </Container>
     </section>

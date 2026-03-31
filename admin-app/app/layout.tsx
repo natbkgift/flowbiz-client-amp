@@ -30,7 +30,7 @@ async function detectLocale(): Promise<string> {
 export default async function RootLayout({ children }: { children: ReactNode }) {
   const lang = useMinimalRootLayout ? 'en' : await detectLocale();
   const dict = useMinimalRootLayout ? null : getDictionary(normalizeLocale(lang));
-  const htmlClassName = [sans.variable, serif.variable].filter(Boolean).join(' ');
+  const htmlClassName = [sans.variable, lang === 'en' ? serif.variable : ''].filter(Boolean).join(' ');
   return (
     <html lang={lang} dir="ltr" className={htmlClassName}>
       <head>

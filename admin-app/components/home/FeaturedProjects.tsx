@@ -83,14 +83,13 @@ export function FeaturedProjects({
   };
 
   const labels = {
-    from: locale === 'th' ? 'ราคาเริ่มต้นล่าสุด' : 'From live pricing',
+    from: locale === 'th' ? 'เริ่มต้น' : 'From',
     status: locale === 'th' ? 'สถานะ' : 'Status',
     type: locale === 'th' ? 'ประเภท' : 'Type',
     delivery: locale === 'th' ? 'ส่งมอบ' : 'Delivery',
     developer: locale === 'th' ? 'ผู้พัฒนา' : 'Developer',
-    projectDetail: locale === 'th' ? 'เปิดหน้าโครงการ' : 'Open project detail',
+    projectDetail: locale === 'th' ? 'ดูโครงการ' : 'View project',
     publishedProject: locale === 'th' ? 'โครงการที่เผยแพร่แล้ว' : 'Published project',
-    locationPrefix: locale === 'th' ? 'ทำเล' : 'Location',
   };
   const emptyStatePrimaryHref = withLocale(locale, '/projects');
   const emptyStateSecondaryHref = withLocale(locale, '/contact');
@@ -106,10 +105,10 @@ export function FeaturedProjects({
         'Get matched options ready for price checks',
       ];
   const emptyStatePreviewTitle = locale === 'th'
-    ? 'ทีมจะคัดโครงการที่ควรเปิดก่อนให้คุณ'
+    ? 'เริ่มจากโครงการที่เกี่ยวข้อง'
     : 'The team will line up the next projects worth opening';
   const emptyStatePreviewBody = locale === 'th'
-    ? 'ถ้าโครงการที่เหมาะยังไม่ขึ้นบนหน้าในตอนนี้ ส่งรายละเอียดเบื้องต้นแล้วทีมจะช่วยคัดราคา ความเหมาะสม และลำดับการดูต่อให้ชัดขึ้น'
+    ? 'ถ้าโครงการที่เหมาะยังไม่ขึ้นบนหน้า ทีมจะช่วยคัดชุดแรกให้ดู'
     : 'If the right launch is not already surfaced, send the brief and get pricing, fit, and the clearest next step in one reply.';
 
   if (projects.length === 0) {
@@ -126,15 +125,15 @@ export function FeaturedProjects({
             </p>
             <EmptyStateCard
               className="premium-empty-state home-project-empty__card"
-              title={locale === 'th' ? 'ให้ทีมช่วยคัดรายการล่าสุดให้คุณ' : 'Ask the team for today\'s matched picks'}
-              body={locale === 'th' ? 'ดูโครงการที่เผยแพร่แล้วทั้งหมด หรือส่งโจทย์ให้ทีมจัดชุดโครงการที่เหมาะกับงบและเป้าหมายของคุณ' : 'Browse published developments or send your brief so the team can assemble options matched to your budget and goals.'}
+              title={locale === 'th' ? 'เปิดโครงการที่มีอยู่ก่อน' : 'Start from the published projects'}
+              body={locale === 'th' ? 'ถ้ายังไม่เจอสิ่งที่ใช่ ใช้บรีฟสั้น ๆ เพื่อให้ทีมช่วยคัดต่อ' : 'Browse the current list first, then send a short brief if you need a tighter filter.'}
               action={(
                 <div className="home-project-empty__actions">
                   <Link href={emptyStatePrimaryHref} prefetch={false} className="home-project-empty__action home-project-empty__action--primary">
-                    {locale === 'th' ? 'เปิดโครงการทั้งหมด' : 'Browse live projects'}
+                    {locale === 'th' ? 'ดูโครงการทั้งหมด' : 'Browse live projects'}
                   </Link>
                   <Link href={emptyStateSecondaryHref} prefetch={false} className="home-project-empty__action home-project-empty__action--secondary">
-                    {locale === 'th' ? 'ส่งโจทย์ให้ทีม' : 'Send the team your brief'}
+                    {locale === 'th' ? 'คุยกับทีม' : 'Send the team your brief'}
                   </Link>
                 </div>
               )}
@@ -143,7 +142,7 @@ export function FeaturedProjects({
           <div className="home-project-empty__preview" aria-hidden="true">
             <div className="home-project-empty__preview-card">
               <span className="home-project-empty__preview-kicker">
-                {locale === 'th' ? 'เส้นทางต่อจากรายการที่ยืนยันแล้ว' : 'Verified live route'}
+                {locale === 'th' ? 'ทางเลือกถัดไป' : 'Verified live route'}
               </span>
               <strong className="home-project-empty__preview-title">{emptyStatePreviewTitle}</strong>
               <p className="home-project-empty__preview-body">{emptyStatePreviewBody}</p>
@@ -211,6 +210,14 @@ export function FeaturedProjects({
     return null;
   }
 
+  function normalizeSummaryText(input: string | null | undefined): string | null {
+    const normalized = String(input ?? '').replace(/\s+/g, ' ').trim();
+    if (!normalized) return null;
+    const firstSentence = normalized.split(/(?<=[.!?])\s+/)[0]?.trim() || normalized;
+    if (firstSentence.length <= 56) return firstSentence;
+    return `${firstSentence.slice(0, 56).trim().replace(/[,:;.\s]+$/g, '')}…`;
+  }
+
   function humanizeToken(value: string): string {
     return value
       .replace(/_/g, ' ')
@@ -246,25 +253,17 @@ export function FeaturedProjects({
       developer?: { name?: string | null } | null;
     };
 
-    const summaryText = resolveLocalizedProjectText(project.summary) || resolveLocalizedProjectText(project.description);
+    const summaryText = normalizeSummaryText(resolveLocalizedProjectText(project.summary));
     if (summaryText) return summaryText;
+    const descriptionText = normalizeSummaryText(resolveLocalizedProjectText(project.description));
+    if (descriptionText) return descriptionText;
 
     const propertyType = localizePropertyType(dynamicProject.property_type ? humanizeToken(dynamicProject.property_type) : null);
     const developerName = String(dynamicProject.developer?.name ?? '').trim();
-    if (propertyType && area) {
-      return locale === 'th'
-        ? `${propertyType}ใน${area} พร้อมรายละเอียดโครงการที่เผยแพร่แล้ว`
-        : `${propertyType} in ${area} with published project detail ready.`;
-    }
     if (propertyType && developerName) {
       return locale === 'th'
-        ? `${propertyType}จาก ${developerName} พร้อมข้อมูลโครงการที่เผยแพร่แล้ว`
-        : `${propertyType} from ${developerName} with published project detail ready.`;
-    }
-    if (area) {
-      return locale === 'th'
-        ? `ดูบริบทโครงการใน${area}ก่อน แล้วค่อยเปิดราคาและยูนิตที่เกี่ยวข้องต่อ`
-        : `Use the project page for ${area} context before opening pricing and related units.`;
+        ? `${propertyType}จาก ${developerName}`
+        : `${propertyType} from ${developerName}`;
     }
     return null;
   }
@@ -290,21 +289,18 @@ export function FeaturedProjects({
       facts.push(`${labels.status}: ${normalizedStatus}`);
     }
 
-    return [...new Set(facts)].slice(0, 3);
+    return [...new Set(facts)].slice(0, 2);
   }
 
   return (
     <div>
       <div className="section-header">
         {kicker ? <div className="home-section-kicker">{kicker}</div> : null}
-        <div className="home-section-collection-tag">
-          {locale === 'th' ? 'โครงการคัดสรรของ AMP' : 'AMP curated shortlist'}
-        </div>
         <h2 className="section-title">{title}</h2>
         <p className="section-subtitle">{subtitle}</p>
       </div>
 
-        <div className="home-project-grid-shell">
+      <div className="home-project-grid-shell">
         <div className="project-grid-premium">
         {projects.map((p, index) => {
           const dynamicProject = p as ProjectItem & {
@@ -357,14 +353,11 @@ export function FeaturedProjects({
                     })}
                   </div>
                 ) : null}
-                <div className="premium-project-card__media-meta" aria-hidden="true">
-                  <span>{labels.publishedProject}</span>
-                </div>
               </div>
               <div className="card-content premium-project-card__body">
                 <div className="premium-project-card__header">
                   <h3 className="card-title premium-project-card__title">{p.name}</h3>
-                  {area ? <p className="premium-project-card__area">{labels.locationPrefix} • {area}</p> : null}
+                  {area ? <p className="premium-project-card__area">{area}</p> : null}
                 </div>
 
                 {price ? (
@@ -384,7 +377,6 @@ export function FeaturedProjects({
                   <ul className="premium-project-card__facts" aria-label={locale === 'th' ? 'ข้อเท็จจริงของโครงการ' : 'Project facts'}>
                     {facts.map((fact) => (
                       <li key={fact} className="premium-project-card__fact-item">
-                        <span className="premium-project-card__fact-label" aria-hidden="true">+</span>
                         <span className="premium-project-card__fact-value text-left">{fact}</span>
                       </li>
                     ))}

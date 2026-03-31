@@ -72,7 +72,7 @@ _MEDIA_ROOTS = [
     Path("admin-app/public/media"),
 ]
 _SITE_LAYOUT_CMS_SLUG = "site-layout"
-_DEFAULT_CONTACT_EMAIL = "info@amppattaya.com"
+_DEFAULT_CONTACT_EMAIL = ""
 _DEFAULT_FACEBOOK_URL = "https://facebook.com/flowbiz"
 _DEFAULT_FACEBOOK_LABEL = "facebook.com/flowbiz"
 
@@ -1299,10 +1299,15 @@ def _render(locale: str, request: Request, db: Session, source: str, resolved: d
         for href, label in _runtime_footer_legal_items(locale, db)
     )
     footer_contact = _runtime_footer_contact(locale, db)
-    footer_contact_html = (
-        f'<p class="muted">{escape(footer_contact["email"])}</p>'
+    footer_contact_parts: list[str] = []
+    if footer_contact["email"]:
+        footer_contact_parts.append(
+            f'<p class="muted">{escape(footer_contact["email"])}</p>'
+        )
+    footer_contact_parts.append(
         f'<a href="{escape(footer_contact["facebook_url"])}" target="_blank" rel="noopener noreferrer">{escape(footer_contact["facebook_label"])}</a>'
     )
+    footer_contact_html = "".join(footer_contact_parts)
     main_nav_label = "Main navigation" if locale == "en" else "เมนูหลัก"
     footer_nav_label = "Footer navigation" if locale == "en" else "เมนูท้ายหน้า"
     html = f"""<!doctype html>
@@ -1492,10 +1497,15 @@ def _render_page_shell(
         f'<a href="{escape(href)}">{escape(label)}</a>' for href, label in footer_legal_items
     )
     footer_contact = _runtime_footer_contact(locale, db)
-    footer_contact_html = (
-        f'<p class="muted">{escape(footer_contact["email"])}</p>'
+    footer_contact_parts: list[str] = []
+    if footer_contact["email"]:
+        footer_contact_parts.append(
+            f'<p class="muted">{escape(footer_contact["email"])}</p>'
+        )
+    footer_contact_parts.append(
         f'<a href="{escape(footer_contact["facebook_url"])}" target="_blank" rel="noopener noreferrer">{escape(footer_contact["facebook_label"])}</a>'
     )
+    footer_contact_html = "".join(footer_contact_parts)
     main_nav_label = "Main navigation" if locale == "en" else "เมนูหลัก"
     footer_nav_label = "Footer navigation" if locale == "en" else "เมนูท้ายหน้า"
     canonical_line = (

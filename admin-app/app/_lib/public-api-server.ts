@@ -638,7 +638,7 @@ export async function fetchHomeComposerPublished(locale: 'en' | 'th'): Promise<H
   url.searchParams.set('page_key', 'home');
   url.searchParams.set('locale', locale);
 
-  const res = await fetchWithRetry(url.toString(), { cache: 'no-store' });
+  const res = await fetchWithRetry(url.toString(), { next: { revalidate: PAGE_REVALIDATE_SECONDS } });
   if (res.status === 404) return null;
   if (!res.ok) throw new Error(`Failed to fetch home composer (${res.status})`);
   return (await res.json()) as HomeComposerPublishedResponse;

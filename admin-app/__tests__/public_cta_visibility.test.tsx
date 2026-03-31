@@ -19,21 +19,20 @@ describe('public CTA visibility', () => {
     expect(container.querySelector('.mobile-cta')).toBeNull();
   });
 
-  it('shows the sticky mobile CTA immediately on inner public routes', () => {
+  it('does not render the sticky mobile CTA on the projects listing route', () => {
     mockedPathname = '/en/projects';
-
-    const { container } = render(<StickyMobileCTA />);
-    const region = container.querySelector('.mobile-cta');
-
-    expect(region).toHaveClass('mobile-cta--visible');
-  });
-
-  it('does not render the sticky mobile CTA on routes that already own the primary conversion path', () => {
-    mockedPathname = '/en/property/azure-condo';
 
     const { container } = render(<StickyMobileCTA />);
 
     expect(container.querySelector('.mobile-cta')).toBeNull();
+  });
+
+  it('shows the sticky mobile CTA on other inner public routes', () => {
+    mockedPathname = '/en/about';
+
+    const { container } = render(<StickyMobileCTA />);
+
+    expect(container.querySelector('.mobile-cta')).toHaveClass('mobile-cta--visible');
   });
 
   it('does not render the sticky or floating takeover CTAs on the buy route', () => {
@@ -66,8 +65,15 @@ describe('public CTA visibility', () => {
     expect(container.querySelector('.floating-cta')).toBeNull();
   });
 
-  it('renders the floating WhatsApp CTA on inner public routes', () => {
+  it('does not render the floating WhatsApp CTA on the projects listing route', () => {
     mockedPathname = '/en/projects';
+
+    const { container } = render(<FloatingWhatsAppCTA />);
+    expect(container.querySelector('.floating-cta')).toBeNull();
+  });
+
+  it('renders the floating WhatsApp CTA on generic inner public routes', () => {
+    mockedPathname = '/en/about';
 
     const { container } = render(<FloatingWhatsAppCTA />);
     const link = container.querySelector('.floating-cta');
@@ -121,7 +127,7 @@ describe('public CTA visibility', () => {
   });
 
   it('keeps the sticky mobile tray to one primary and one secondary action', () => {
-    mockedPathname = '/en/projects';
+    mockedPathname = '/en/about';
 
     const { container } = render(<StickyMobileCTA />);
 

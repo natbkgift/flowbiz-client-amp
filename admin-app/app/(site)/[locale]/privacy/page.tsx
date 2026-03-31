@@ -73,8 +73,8 @@ export default async function PrivacyPage(
             <h2>{isTh ? 'การถอนความยินยอม' : 'Consent Withdrawal'}</h2>
             <p>
               {isTh
-                ? 'ท่านสามารถถอนความยินยอมได้ทุกเมื่อโดยติดต่อเราที่ info@amppattaya.com หรือผ่านแบบฟอร์มติดต่อบนเว็บไซต์'
-                : 'You may withdraw your consent at any time by contacting us at info@amppattaya.com or through our contact form.'}
+                ? 'ท่านสามารถถอนความยินยอมได้ทุกเมื่อผ่านแบบฟอร์มติดต่อบนเว็บไซต์'
+                : 'You may withdraw your consent at any time through our contact form.'}
             </p>
 
             <h2>{isTh ? 'การเก็บรักษาข้อมูล' : 'Data Retention'}</h2>
@@ -87,8 +87,8 @@ export default async function PrivacyPage(
             <h2>{isTh ? 'ติดต่อเจ้าหน้าที่คุ้มครองข้อมูล' : 'Contact Data Protection Officer'}</h2>
             <p>
               {isTh
-                ? 'หากท่านมีคำถามเกี่ยวกับความเป็นส่วนตัวหรือต้องการใช้สิทธิ์ของท่าน กรุณาติดต่อ: info@amppattaya.com'
-                : 'For privacy questions or to exercise your rights, please contact: info@amppattaya.com'}
+                ? 'หากท่านมีคำถามเกี่ยวกับความเป็นส่วนตัวหรือต้องการใช้สิทธิ์ของท่าน กรุณาใช้แบบฟอร์มติดต่อบนเว็บไซต์'
+                : 'For privacy questions or to exercise your rights, please use the contact form on this website.'}
             </p>
           </div>
         </Container>

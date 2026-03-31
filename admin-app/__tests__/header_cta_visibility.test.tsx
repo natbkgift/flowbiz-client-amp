@@ -24,14 +24,14 @@ describe('Header CTA visibility', () => {
     expect(container.querySelector('a[href="#main-content"]')).toBeNull();
   });
 
-  it('keeps global header CTAs visible on generic inner routes', () => {
+  it('suppresses global header CTAs on the projects listing route so the page owns the action', () => {
     mockedPathname = '/en/projects';
 
     const { container } = render(<Header locale="en" dict={en} />);
 
     expect(container.querySelector('header.header--home')).toBeNull();
-    expect(container.querySelector('.header-cta-group')).not.toBeNull();
-    expect(container.querySelector('.mobile-nav__cta')).not.toBeNull();
+    expect(container.querySelector('.header-cta-group')).toBeNull();
+    expect(container.querySelector('.mobile-nav__cta')).toBeNull();
   });
 
   it('suppresses global header CTAs when the current route owns the primary conversion action', () => {

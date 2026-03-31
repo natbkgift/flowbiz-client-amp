@@ -41,6 +41,7 @@ export function buildWhatsAppUrl(text: string, baseUrl: string = CTA.whatsAppUrl
 
 export type PublicCtaSurface =
   | 'home'
+  | 'projects'
   | 'buy'
   | 'contact'
   | 'sell'
@@ -67,6 +68,7 @@ export function getPublicCtaSurface(pathname: string): PublicCtaSurface {
   const path = stripLocaleFromPathname(pathname);
 
   if (path === '/') return 'home';
+  if (path === '/projects' || path.startsWith('/projects?')) return 'projects';
   if (path === '/buy' || path.startsWith('/buy?')) return 'buy';
   if (path === '/contact' || path.startsWith('/contact?')) return 'contact';
   if (path === '/sell' || path.startsWith('/sell?')) return 'sell';
@@ -95,6 +97,10 @@ export function shouldRenderFloatingWhatsApp(pathname: string): boolean {
 }
 
 export function shouldRenderStickyMobileCta(pathname: string): boolean {
+  const path = stripLocaleFromPathname(pathname);
+  if (path === '/' || path === '/projects' || path.startsWith('/projects?')) {
+    return false;
+  }
   const surface = getPublicCtaSurface(pathname);
   return surface === 'other';
 }

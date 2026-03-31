@@ -15,15 +15,18 @@ describe('home design surface contract', () => {
     expect(page).toContain('home-pathways-grid');
     expect(page).toContain('home-pathway-card');
     expect(page).toContain('home-trust-snapshot-grid');
-    expect(page).toContain('Pattaya property advisory for buying, investing, renting, and selling.');
+    expect(page).toContain('Choose the right Pattaya property route first.');
     expect(page).toContain('Speak to a Pattaya advisor');
     expect(page).toContain('View curated units');
     expect(page).toContain('home_paths_sell');
-    expect(page).toContain('Verified stock, local guidance, and clear next steps from the start.');
-    expect(page).toContain('Get current pricing, availability, and the clearest next step');
-    expect(page).toContain('Get Pricing & Next Step');
-    expect(page).toContain('Send one brief and get current availability, pricing, and the clearest next step from the team.');
+    expect(page).toContain('Choose the right route first.');
+    expect(page).toContain('Send your brief');
+    expect(page).toContain('Browse live opportunities');
+    expect(page).not.toContain('One brief is enough.');
     expect(page).toContain('home-trust-snapshot__item');
+    expect(page).not.toContain('home-pathways-highlight-row');
+    expect(page).not.toContain('home-curated-shell__signal-row');
+    expect(page).not.toContain('home-confidence-row');
     expect(page).not.toContain('home-pathways-support__link');
     expect(page).not.toContain('Choose the next route by buyer intent');
     expect(page).not.toContain('home-intent-card reveal');
@@ -37,7 +40,9 @@ describe('home design surface contract', () => {
     expect(hero).toContain('hero-cta hero-cta--primary');
     expect(hero).toContain('hero-cta hero-cta--secondary');
     expect(hero).toContain('hero-whatsapp-link');
-    expect(hero).toContain('showGuidedTrigger');
+    expect(hero).toContain('home-hero-slider__controls');
+    expect(hero).toContain('AUTOPLAY_MS = 7000');
+    expect(hero).toContain('SWIPE_THRESHOLD = 42');
 
     expect(bottomCta).toContain('home-bottom-cta__grid');
     expect(bottomCta).toContain('home-bottom-cta__actions');
@@ -58,8 +63,8 @@ describe('home design surface contract', () => {
     expect(css).toContain('.premium-project-card__signals');
     expect(css).toContain('.premium-project-card__cta');
     expect(css).toContain('.home-bottom-cta__benefits');
-    expect(css).toContain('@keyframes home-hero-panel-in');
-    expect(css).toContain('@keyframes home-band-in');
+    expect(css).toContain('.home-hero-slider__panel');
+    expect(css).toContain('.home-hero-slider__controls');
     expect(css).toContain('.home-page .home-bottom-cta__actions > a');
     expect(css).toContain('.hero-cta--primary');
   });

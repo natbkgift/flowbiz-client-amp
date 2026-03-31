@@ -14,12 +14,15 @@ describe('public prefetch policy', () => {
     const featuredProjects = read('components/home/FeaturedProjects.tsx');
     const mobileIntentRail = read('components/home/HomeMobileIntentRail.tsx');
     const homePage = read('app/(site)/[locale]/page.tsx');
+    const projectsPage = read('app/(site)/[locale]/projects/page.tsx');
 
     expect(header).toContain('prefetch={false}');
     expect(footer).toContain('prefetch={false}');
     expect(featuredProjects).toContain('prefetch={false}');
     expect(mobileIntentRail).toContain('prefetch={false}');
     expect(homePage).toContain('prefetch={false}');
+    expect(homePage).not.toContain("dynamic = 'force-dynamic'");
+    expect(projectsPage).not.toContain("dynamic = 'force-dynamic'");
   });
 
   it('keeps hero as the only place where primary browse actions may still prefetch', () => {

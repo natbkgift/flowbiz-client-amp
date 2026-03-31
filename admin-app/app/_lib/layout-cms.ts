@@ -258,7 +258,7 @@ export const SITE_LAYOUT_CMS_TEMPLATE = JSON.stringify(
         },
       ],
       contact: {
-        email: 'info@amppattaya.com',
+        email: '',
         facebook_url: 'https://facebook.com/flowbiz',
         facebook_label: {
           en: 'Facebook',

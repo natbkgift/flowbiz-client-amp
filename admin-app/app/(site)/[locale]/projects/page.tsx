@@ -1,6 +1,5 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { unstable_noStore as noStore } from 'next/cache';
 import { makePageMetadata } from '@/app/_lib/i18n/metadata';
 import { getAdvisoryLabels, getAdvisoryProofs, withLocaleQuery } from '@/app/_lib/public-advisory';
 import { withLocale } from '@/app/_lib/i18n/routing';
@@ -13,7 +12,6 @@ import { EmptyStateCard } from '@/components/ui/StateBlocks';
 import { LocalMediaImage } from '@/components/media/LocalMediaImage';
 
 export const revalidate = 300;
-export const dynamic = 'force-dynamic';
 
 export async function generateMetadata(
   props: {
@@ -26,10 +24,10 @@ export async function generateMetadata(
   return makePageMetadata(
     locale,
     'projects',
-    locale === 'th' ? 'โครงการพัทยาที่เผยแพร่แล้ว จัดให้พร้อมสำหรับการตัดสินใจจริง' : 'Published Pattaya projects, arranged for real decisions',
+    locale === 'th' ? 'โครงการพัทยาที่เปิดอยู่' : 'Published Pattaya projects, arranged for real decisions',
     locale === 'th'
-      ? 'เริ่มจากโครงการที่เผยแพร่แล้ว เห็นบริบทราคา ทำเล และไปต่อสู่รายการคัดสรรหรือการนัดชมแบบส่วนตัวได้ทันที'
-      : 'Start from published Pattaya developments with clearer pricing context, location cues, and a faster move into compare, advisor review, or a private tour.',
+      ? 'ดูทำเล ราคาเริ่มต้น และภาพรวมของโครงการพัทยาที่เปิดอยู่ก่อนเปิดรายละเอียด'
+      : 'Review Pattaya developments through location, entry pricing, and concise project context before opening details.',
     dict.brand.name
   );
 }
@@ -124,8 +122,66 @@ function resolveProjectArea(project: Record<string, unknown>): string | null {
   return city || null;
 }
 
+function resolveLocalizedText(locale: 'en' | 'th', value: unknown): string | null {
+  if (!value || typeof value !== 'object') return null;
+  const row = value as Record<string, unknown>;
+  for (const key of [locale, 'en', 'th']) {
+    const candidate = typeof row[key] === 'string' ? row[key].trim() : '';
+    if (candidate) return candidate;
+  }
+  return null;
+}
+
+function summarizeProject(locale: 'en' | 'th', project: Record<string, unknown>): string | null {
+  const localizedSummary = resolveLocalizedText(locale, project.summary);
+  const localizedDescription = resolveLocalizedText(locale, project.description);
+  const candidate = String(localizedSummary || localizedDescription || '').replace(/\s+/g, ' ').trim();
+  if (!candidate) return null;
+  const firstSentence = candidate.split(/(?<=[.!?])\s+/)[0]?.trim() || candidate;
+  if (firstSentence.length <= 58) return firstSentence;
+  return `${firstSentence.slice(0, 58).trim().replace(/[,:;.\s]+$/g, '')}…`;
+}
+
+function humanizeToken(value: string): string {
+  return value
+    .replace(/_/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+function localizePropertyType(locale: 'en' | 'th', value: string | null): string | null {
+  if (!value) return null;
+  if (locale !== 'th') return value;
+  return value
+    .replace(/condo/gi, 'คอนโดมิเนียม')
+    .replace(/villa/gi, 'วิลล่า')
+    .replace(/house/gi, 'บ้าน')
+    .replace(/townhome/gi, 'ทาวน์โฮม')
+    .replace(/apartment/gi, 'อพาร์ตเมนต์');
+}
+
+function extractProjectFacts(locale: 'en' | 'th', project: Record<string, unknown>): string[] {
+  const propertyType = localizePropertyType(
+    locale,
+    typeof project.property_type === 'string' ? humanizeToken(project.property_type) : null,
+  );
+  const deliveryRaw = typeof project.delivery_date === 'string'
+    ? project.delivery_date.trim()
+    : typeof project.handover_date === 'string'
+      ? project.handover_date.trim()
+      : '';
+  const developerName = project.developer && typeof project.developer === 'object' && typeof (project.developer as { name?: unknown }).name === 'string'
+    ? String((project.developer as { name?: unknown }).name).trim()
+    : '';
+
+  const facts: string[] = [];
+  if (propertyType) facts.push(propertyType);
+  if (developerName) facts.push(locale === 'th' ? `ผู้พัฒนา ${developerName}` : `Developer ${developerName}`);
+  if (deliveryRaw) facts.push(locale === 'th' ? `กำหนดแล้วเสร็จ ${deliveryRaw}` : `Delivery ${deliveryRaw}`);
+  return [...new Set(facts)].slice(0, 2);
+}
+
 export default async function ProjectsPage(props: { params: Promise<{ locale: string }> }) {
-  noStore();
   const params = await props.params;
   const locale = normalizeLocale(params.locale);
   const dict = getDictionary(locale);
@@ -158,7 +214,7 @@ export default async function ProjectsPage(props: { params: Promise<{ locale: st
       liveEntryPrice ? `${locale === 'th' ? 'เริ่มต้น' : 'Entry from'} ${formatCompactPrice(liveEntryPrice, locale)}` : null,
       luxuryProjectCount > 0 ? (locale === 'th' ? `${luxuryProjectCount} โครงการกลุ่มลักชัวรี` : `${luxuryProjectCount} luxury-led projects`) : null,
       ...advisoryProofs,
-    ].filter((item): item is string => Boolean(item)).slice(0, 4);
+    ].filter((item): item is string => Boolean(item)).slice(0, 2);
     const jsonLd = JSON.stringify(
       {
         '@context': 'https://schema.org',
@@ -185,43 +241,18 @@ export default async function ProjectsPage(props: { params: Promise<{ locale: st
       <main id="main-content" className="projects-page decision-page--confidence">
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLd }} />
         <PublicAdvisoryHero
-          eyebrow={dict.advisory.heroEyebrow}
-          title={locale === 'th' ? 'โครงการพัทยาที่เผยแพร่แล้ว จัดให้พร้อมสำหรับการตัดสินใจจริง' : 'Published Pattaya projects, arranged for real decisions'}
+          eyebrow={locale === 'th' ? 'โครงการพัทยา' : 'Pattaya projects'}
+          title={locale === 'th' ? 'โครงการที่เปิดอยู่' : 'Projects in focus'}
           subtitle={locale === 'th'
-            ? 'ใช้หน้านี้เพื่อเริ่มจากโครงการที่เผยแพร่แล้ว เห็นราคาเริ่มต้นเท่าที่มี และไปต่อสู่การเปรียบเทียบ รายการคัดสรร หรือการนัดชมแบบส่วนตัวได้ทันที'
-            : 'Use this page to start from published developments, see live entry pricing where available, and move straight into compare, advisor review, or a private tour.'}
+            ? 'ดูทำเล ราคาเริ่มต้น และจุดเด่นแบบสั้น'
+            : 'Review location, entry pricing, and the key point before opening details.'}
           proofs={projectProofs}
           proofsLabel={advisoryLabels.proofsLabel}
           guidanceLabel={advisoryLabels.guidanceLabel}
-          signals={[
-            {
-              kicker: dict.advisory.bestFor,
-              title: locale === 'th' ? 'ผู้ซื้อที่ต้องการเริ่มจากโครงการที่เผยแพร่แล้วจริง' : 'Buyers who want to start from genuinely published inventory',
-              body: locale === 'th'
-                ? 'หน้านี้ควรเป็นฐานเริ่มต้นของการเปรียบเทียบ การใช้ Smart Finder และการคุยกับทีม ไม่ใช่แค่รายการชื่อโครงการ'
-                : 'This page should be the working base for compare, smart finder, and advisor review, not just a list of project names.',
-              icon: 'building',
-            },
-            {
-              kicker: dict.advisory.nextStep,
-              title: locale === 'th' ? 'เลือกจากโครงการ แล้วค่อยไปต่อสู่ยูนิตหรือการนัดชมแบบส่วนตัว' : 'Choose the development first, then move into units or a private tour',
-              body: locale === 'th'
-                ? 'หากยังไม่ชัดเรื่องทำเลหรือแนวทาง ให้ไปต่อที่ Smart Finder หรือให้ทีมช่วยคัดรายการต่อจากบริบทนี้'
-                : 'If the area or strategy is still unclear, continue into Smart Finder or let the team narrow the right projects from this page.',
-              icon: 'check',
-            },
-          {
-            kicker: dict.advisory.trustSignal,
-            title: locale === 'th' ? 'ทุกการ์ดควรบอกให้พอว่าจะคุยต่อหรือคัดออก' : 'Each card should give enough context to continue or cut',
-            body: locale === 'th'
-              ? 'เราเก็บบริบทสำคัญไว้บนการ์ดให้พอว่าจะดูต่อหรือคัดออก แม้บางโครงการยังไม่มีราคาเริ่มต้นครบ'
-              : 'Each card still gives enough context to continue or move on, even when some projects need direct price confirmation.',
-            icon: 'shield',
-          },
-          ]}
+          signals={[]}
           primaryAction={{
             href: withLocaleQuery(locale, '/contact', { intent: 'shortlist', source: 'projects_hero' }),
-            label: locale === 'th' ? 'ให้ทีมคัดโครงการ' : 'Narrow the right projects',
+            label: locale === 'th' ? 'ส่งโจทย์ให้ทีม' : 'Send your brief',
             eventPayload: { cta: 'projects_shortlist', from: 'projects_hero' },
             prefetch: false,
           }}
@@ -231,25 +262,16 @@ export default async function ProjectsPage(props: { params: Promise<{ locale: st
             eventPayload: { cta: 'use_smart_finder', from: 'projects_hero' },
             prefetch: false,
           }}
-          supportNote={locale === 'th'
-            ? 'ส่งชื่อโครงการที่ชอบมาได้เลย แล้วทีมจะช่วยบีบรายการคัดสรร เส้นทางเปรียบเทียบ หรือการนัดชมแบบส่วนตัวให้คมขึ้น'
-            : 'Share the projects you like and the team will tighten the next comparison and viewing options from there.'}
         />
         <section className="section projects-catalogue-section">
         <Container>
-          <div className="section-header mb-6">
-            <h2 className="section-title">{locale === 'th' ? 'รายการโครงการ' : 'Project catalogue'}</h2>
-            <p className="section-subtitle">
-              {locale === 'th'
-                ? 'เรียงโครงการที่เผยแพร่แล้วเพื่อให้คุณเห็นทำเล ราคาเริ่มต้น และขั้นตอนถัดไปได้เร็วขึ้น'
-                : 'Published inventory arranged so you can scan location, entry pricing, and the next useful move faster.'}
-            </p>
-          </div>
           <div className="grid grid-3 projects-catalogue-grid">
             {sorted.map((p, index) => {
               const area = localizeAreaLabel(locale, resolveProjectArea(p as unknown as Record<string, unknown>)) || (locale === 'th' ? 'พัทยา' : 'Pattaya');
               const hasEntryPrice = Boolean(p.starting_price && Number.isFinite(p.starting_price));
               const localizedStatus = localizeProjectStatus(locale, p.status);
+              const summary = summarizeProject(locale, p as unknown as Record<string, unknown>);
+              const facts = extractProjectFacts(locale, p as unknown as Record<string, unknown>);
               return (
                 <article
                   key={p.id}
@@ -265,7 +287,7 @@ export default async function ProjectsPage(props: { params: Promise<{ locale: st
                       alt={p.name}
                       className="media-shell project-catalogue-card__media"
                       imageClassName="media-shell__img"
-                      aspectRatio="16 / 10"
+                      aspectRatio="16 / 9"
                     />
                     <div className="project-catalogue-card__media-scrim" aria-hidden="true" />
                     <div className="project-catalogue-card__chips">
@@ -284,22 +306,12 @@ export default async function ProjectsPage(props: { params: Promise<{ locale: st
                         : (locale === 'th' ? 'โครงการที่เผยแพร่แล้ว' : 'Published project')}
                     </div>
                     <h2 className="card-title project-catalogue-card__title">{p.name}</h2>
-                    <p className="card-subtitle project-catalogue-card__summary">
-                      {hasEntryPrice
-                        ? (locale === 'th'
-                          ? 'เริ่มจากราคาและทำเลที่ชัดก่อน แล้วค่อยเปิดรายละเอียดเพื่อดูยูนิตจริงกับแปลนห้อง'
-                          : `Start from live entry pricing and location context, then open the detail page for real units and floor plans.`)
-                        : (locale === 'th'
-                          ? 'ดูบริบทโครงการและทำเลก่อน แล้วให้ทีมยืนยันราคาและยูนิตที่พร้อมคุยต่อ'
-                          : `Open the project context first, then let the team confirm live pricing and the units worth carrying forward.`)}
-                    </p>
+                    {summary ? <p className="card-subtitle project-catalogue-card__summary">{summary}</p> : null}
                     <div className="catalogue-card__meta project-catalogue-card__meta">
                       <span>{area}</span>
-                      <span>
-                        {hasEntryPrice
-                          ? `${locale === 'th' ? 'ราคาเริ่มต้นล่าสุด' : 'Live entry pricing'}`
-                          : (locale === 'th' ? 'ยืนยันราคาและประเภทห้องกับทีม' : 'Confirm pricing and unit mix with the team')}
-                      </span>
+                      {facts.map((fact) => (
+                        <span key={`${p.id}-${fact}`}>{fact}</span>
+                      ))}
                     </div>
                     <div className="card-actions project-catalogue-card__actions">
                       <Link className="btn btn-secondary" href={`/${locale}/projects/${p.slug}`} prefetch={false}>
@@ -337,41 +349,21 @@ export default async function ProjectsPage(props: { params: Promise<{ locale: st
     <main id="main-content">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLd }} />
       <PublicAdvisoryHero
-        eyebrow={dict.advisory.heroEyebrow}
-        title={dict.nav.projects}
-        subtitle={dict.listing.projectsSubtitle}
-        proofs={advisoryProofs}
+        eyebrow={locale === 'th' ? 'โครงการพัทยา' : 'Pattaya projects'}
+        title={locale === 'th' ? 'โครงการที่เปิดอยู่' : 'Projects in focus'}
+        subtitle={locale === 'th'
+          ? 'รายการยังไม่พร้อมในขณะนี้'
+          : 'Published project data is temporarily unavailable right now.'}
+        proofs={[
+          locale === 'th' ? 'ข้อมูลตรวจสอบแล้ว' : 'Verified data',
+          locale === 'th' ? 'คุยกับทีมได้ทันที' : 'Advisor support available',
+        ]}
         proofsLabel={advisoryLabels.proofsLabel}
         guidanceLabel={advisoryLabels.guidanceLabel}
-        signals={[
-          {
-            kicker: dict.advisory.bestFor,
-            title: locale === 'th' ? 'ผู้ใช้ที่กำลังเริ่มจากภาพรวมโครงการ' : 'Visitors starting from a project-level overview',
-            body: locale === 'th'
-              ? 'หน้านี้จัดภาพรวมโครงการให้พร้อมสำหรับการคัดรายการต่อจากบรีฟของคุณ'
-              : 'The page turns the project overview into a usable starting point for your brief.',
-            icon: 'building',
-          },
-          {
-            kicker: dict.advisory.nextStep,
-            title: locale === 'th' ? 'ใช้รายการนี้เป็นจุดเริ่มต้นของการคัดรายการ' : 'Use the list as the project selection starting point',
-            body: locale === 'th'
-              ? 'เปิดดูรายละเอียดโครงการ หรือส่งบริบทต่อไปยังทีมเพื่อคัดตัวเลือกเร็วขึ้น'
-              : 'Open a project detail page or hand your context to the team to narrow faster.',
-            icon: 'check',
-          },
-          {
-            kicker: dict.advisory.trustSignal,
-            title: locale === 'th' ? 'หน้านี้ยังยึดกับรายการจริงในระบบ' : 'This page stays grounded in live inventory context',
-            body: locale === 'th'
-              ? 'คุณจะถูกพาไปยังขั้นตอนถัดไปที่เหมาะ ไม่ว่าจะเป็นดูรายละเอียดโครงการหรือให้ทีมช่วยคัดต่อ'
-              : 'You are routed into the best next move, whether that is a live project page or an advisor review.',
-            icon: 'shield',
-          },
-        ]}
+        signals={[]}
         primaryAction={{
           href: withLocaleQuery(locale, '/contact', { intent: 'shortlist', source: 'projects_hero' }),
-          label: dict.cta.speakToAdvisor,
+          label: locale === 'th' ? 'คุยกับที่ปรึกษา' : dict.cta.speakToAdvisor,
           eventPayload: { cta: 'projects_shortlist', from: 'projects_hero' },
           prefetch: false,
         }}
@@ -385,15 +377,19 @@ export default async function ProjectsPage(props: { params: Promise<{ locale: st
       <section className="section">
       <Container>
         <div className="section-header mb-6">
-          <h1 className="section-title">{dict.nav.projects}</h1>
-          <p className="section-subtitle">{dict.listing.projectsSubtitle}</p>
+          <h1 className="section-title">{locale === 'th' ? 'รายการโครงการยังไม่พร้อม' : dict.nav.projects}</h1>
+          <p className="section-subtitle">
+            {locale === 'th'
+              ? 'ลองใหม่อีกครั้ง หรือใช้ทีมช่วยเช็กโครงการที่สนใจให้ก่อน'
+              : dict.listing.projectsSubtitle}
+          </p>
         </div>
         <EmptyStateCard
-          title={dict.advisory.noPublishedDataTitle}
+          title={locale === 'th' ? 'ยังโหลดคลังโครงการไม่สำเร็จ' : dict.advisory.noPublishedDataTitle}
           body={projectsFetchOk
             ? dict.advisory.noPublishedDataBody
             : (locale === 'th'
-              ? 'ไม่สามารถโหลดรายการโครงการที่เผยแพร่ได้ในขณะนี้ หน้านี้จึงไม่แสดง fallback ที่อาจทำให้เข้าใจว่าเป็นโครงการจริง'
+              ? 'ระบบยังดึงรายการโครงการไม่สำเร็จในขณะนี้ จึงยังไม่แสดงรายการแทนที่อาจทำให้เข้าใจคลาดเคลื่อน'
               : 'Published project data could not be loaded right now, so this page intentionally avoids showing a misleading fallback.')}
           action={
             <Link className="btn btn-secondary" href={withLocale(locale, '/contact')} prefetch={false}>

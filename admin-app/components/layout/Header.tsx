@@ -446,8 +446,8 @@ export function Header({
             </p>
             <p className="mobile-menu__title">
               {locale === 'th'
-                ? 'เลือกเส้นทางที่ตรงกับเป้าหมายของคุณก่อน'
-                : 'Choose the route that matches your goal first.'}
+                ? 'เลือกเส้นทางที่ใช่ก่อน'
+                : 'Choose the right route first.'}
             </p>
             <div className="mobile-menu__quick-grid">
               {mobileQuickPaths.map((item) => (
@@ -473,8 +473,8 @@ export function Header({
                 <strong>{locale === 'th' ? 'คุยกับที่ปรึกษา' : 'Speak to an advisor'}</strong>
                 <span>
                   {locale === 'th'
-                    ? 'ส่งโจทย์ถึงทีมพัทยา แล้วให้เราชี้ขั้นตอนถัดไปที่ชัดที่สุด'
-                    : 'Send your brief to the Pattaya team and get the clearest next step.'}
+                    ? 'ส่งโจทย์สั้น ๆ แล้วให้ทีมช่วยคัดทางต่อ'
+                    : 'Send a short brief and let the team narrow the next step.'}
                 </span>
               </Link>
             ) : null}

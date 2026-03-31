@@ -1,15 +1,10 @@
 import type { ReactNode } from 'react';
 import { Suspense } from 'react';
+import { headers } from 'next/headers';
 
 import { Footer } from '@/components/layout/Footer';
 import { Header } from '@/components/layout/Header';
-import { SiteAnalytics } from '@/components/analytics/SiteAnalytics';
-import { LinkClickTracker } from '@/components/analytics/LinkClickTracker';
-import { ExperimentProvider } from '@/components/analytics/ExperimentProvider';
-import { FloatingWhatsAppCTA } from '@/components/ux/FloatingWhatsAppCTA';
-import { StickyMobileCTA } from '@/components/ux/StickyMobileCTA';
-import { ScrollReveal } from '@/components/ux/ScrollReveal';
-import { CookieConsent } from '@/components/ux/CookieConsent';
+import { PublicClientEnhancements } from '@/components/layout/PublicClientEnhancements';
 import { resolveLayoutCms, SITE_LAYOUT_CMS_SLUG } from '@/app/_lib/layout-cms';
 import { fetchCompanyInfoBySlug } from '@/app/_lib/public-api-server';
 import { getDictionary, normalizeLocale } from '@/app/_lib/i18n/get-dictionary';
@@ -21,6 +16,18 @@ export function generateStaticParams() {
 }
 
 const useMinimalSiteLocaleLayout = process.env.NEXT_LOCAL_SITE_LAYOUT_MINIMAL === '1';
+
+async function detectCurrentPathWithoutLocale(locale: 'en' | 'th'): Promise<string> {
+  try {
+    const headerList = await headers();
+    const pathname = headerList.get('x-next-pathname') ?? headerList.get('x-invoke-path') ?? '';
+    const localizedPrefix = new RegExp(`^/${locale}(?=/|$)`);
+    const stripped = pathname.replace(localizedPrefix, '') || '/';
+    return stripped.startsWith('/') ? stripped : '/';
+  } catch {
+    return '/';
+  }
+}
 
 export default async function SiteLayout(
   props: {
@@ -39,7 +46,11 @@ export default async function SiteLayout(
   if (useMinimalSiteLocaleLayout) {
     return <>{children}</>;
   }
-  const layoutCmsRow = await fetchCompanyInfoBySlug(SITE_LAYOUT_CMS_SLUG).catch(() => null);
+  const currentPath = await detectCurrentPathWithoutLocale(locale);
+  const useFallbackLayoutCms = currentPath === '/' || currentPath === '/projects';
+  const layoutCmsRow = useFallbackLayoutCms
+    ? null
+    : await fetchCompanyInfoBySlug(SITE_LAYOUT_CMS_SLUG).catch(() => null);
   const layoutCms = resolveLayoutCms(locale, dict, layoutCmsRow?.content);
 
   const siteUrl = 'https://amppattaya.com';
@@ -71,20 +82,12 @@ export default async function SiteLayout(
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLd }} />
       <Header locale={locale} cms={layoutCms.header} />
-      <Suspense fallback={null}>
-        <SiteAnalytics />
-      </Suspense>
-      <LinkClickTracker />
-      <ExperimentProvider />
-      <ScrollReveal />
       {children}
       <Footer locale={locale} cms={layoutCms.footer} />
       <div aria-live="polite" aria-atomic="true" id="amp-live-region" className="sr-only" />
-      <FloatingWhatsAppCTA />
       <Suspense fallback={null}>
-        <StickyMobileCTA />
+        <PublicClientEnhancements />
       </Suspense>
-      <CookieConsent />
     </>
   );
 }

@@ -1,229 +1,315 @@
-import Image from "next/image";
-import { TrackedLink } from "@/components/analytics/TrackedLink";
-import { buildAdvisorWhatsApp } from "@/app/_lib/public-advisory";
-import { HeroOverlay } from "@/components/home/HeroOverlay";
-import { Container } from "@/components/layout/Container";
-import { withLocale } from "@/app/_lib/i18n/routing";
+'use client';
 
-// Keep the fallback asset versioned in the filename so production can serve it directly.
-const HERO_FALLBACK_IMAGE = "/images/hero-banner-20260318.webp";
+import { useEffect, useMemo, useRef, useState } from 'react';
+import Image from 'next/image';
+
+import { buildAdvisorWhatsApp } from '@/app/_lib/public-advisory';
+import { Container } from '@/components/layout/Container';
+import { TrackedLink } from '@/components/analytics/TrackedLink';
+import { withLocale } from '@/app/_lib/i18n/routing';
+
+const HERO_FALLBACK_IMAGE = '/images/hero-banner-20260318.webp';
+const AUTOPLAY_MS = 7000;
+const SWIPE_THRESHOLD = 42;
 
 type HomeHeroComposer = {
-    eyebrow?: string;
-    heading?: string;
-    subheading?: string;
-    primary_cta_label?: string;
-    primary_cta_url?: string;
-    secondary_cta_label?: string;
-    secondary_cta_url?: string;
-    trust_items?: string[];
-    hero_image?: string | null;
-    path_selector_enabled?: boolean;
-    paths?: Array<{ key: string; label?: string; description?: string; url?: string }>;
+  eyebrow?: string;
+  heading?: string;
+  subheading?: string;
+  primary_cta_label?: string;
+  primary_cta_url?: string;
+  secondary_cta_label?: string;
+  secondary_cta_url?: string;
+  trust_items?: string[];
+  hero_image?: string | null;
 };
 
-type HomeHeroSupportLink = {
-    label: string;
-    href: string;
-    eventPayload?: Record<string, unknown>;
+type HomeHeroSlide = {
+  key: string;
+  eyebrow: string;
+  heading: string;
+  subheading: string;
+  imageSrc: string;
+  imageAlt?: string;
 };
 
-function resolveLocalizedHref(locale: "en" | "th", href: string): string {
-    if (!href.startsWith('/')) return href;
-    if (href === `/${locale}` || href.startsWith(`/${locale}/`) || href.startsWith(`/${locale}?`)) {
-        return href;
-    }
-    return withLocale(locale, href);
+function resolveLocalizedHref(locale: 'en' | 'th', href: string): string {
+  if (!href.startsWith('/')) return href;
+  if (href === `/${locale}` || href.startsWith(`/${locale}/`) || href.startsWith(`/${locale}?`)) {
+    return href;
+  }
+  return withLocale(locale, href);
+}
+
+function createFallbackSlide(locale: 'en' | 'th', dict: any, composer?: HomeHeroComposer | null): HomeHeroSlide {
+  const heading = typeof composer?.heading === 'string' && composer.heading.trim()
+    ? composer.heading.trim()
+    : dict.home.heroTitle;
+  const eyebrow = typeof composer?.eyebrow === 'string' && composer.eyebrow.trim()
+    ? composer.eyebrow.trim()
+    : dict.advisory.heroEyebrow;
+  const subheading = typeof composer?.subheading === 'string' && composer.subheading.trim()
+    ? composer.subheading.trim()
+    : dict.home.heroSubtitle;
+
+  return {
+    key: 'fallback',
+    eyebrow,
+    heading,
+    subheading,
+    imageSrc: typeof composer?.hero_image === 'string' && composer.hero_image.startsWith('/media/')
+      ? composer.hero_image
+      : HERO_FALLBACK_IMAGE,
+    imageAlt: locale === 'th' ? 'ภาพอสังหาริมทรัพย์พัทยาโดย AMP Pattaya' : 'AMP Pattaya Real Estate',
+  };
 }
 
 export function HomeHero({
-    dict,
-    locale,
-    guidedHref,
-    guidedLabel,
-    primaryEventPayload,
-    secondaryEventPayload,
-    composer,
-    supportLinks = [],
-    guidanceNote,
+  dict,
+  locale,
+  primaryEventPayload,
+  secondaryEventPayload,
+  composer,
+  slides,
 }: {
-    dict: any;
-    locale: "en" | "th";
-    guidedHref?: string;
-    guidedLabel?: string;
-    primaryEventPayload?: Record<string, unknown>;
-    secondaryEventPayload?: Record<string, unknown>;
-    composer?: HomeHeroComposer | null;
-    supportLinks?: HomeHeroSupportLink[];
-    guidanceNote?: string;
+  dict: any;
+  locale: 'en' | 'th';
+  primaryEventPayload?: Record<string, unknown>;
+  secondaryEventPayload?: Record<string, unknown>;
+  composer?: HomeHeroComposer | null;
+  slides?: HomeHeroSlide[];
 }) {
-    const heroHeading = typeof composer?.heading === 'string' && composer.heading.trim()
-        ? composer.heading.trim()
-        : dict.home.heroTitle;
-    const heroEyebrow = typeof composer?.eyebrow === 'string' && composer.eyebrow.trim()
-        ? composer.eyebrow.trim()
-        : dict.advisory.heroEyebrow;
-    const heroSubheading = typeof composer?.subheading === 'string' && composer.subheading.trim()
-        ? composer.subheading.trim()
-        : dict.home.heroSubtitle;
+  const resolvedSlides = useMemo(() => {
+    if (Array.isArray(slides) && slides.length > 0) {
+      return slides.map((slide, index) => ({
+        ...slide,
+        key: slide.key || `hero-slide-${index + 1}`,
+        imageSrc: slide.imageSrc || HERO_FALLBACK_IMAGE,
+        imageAlt: slide.imageAlt || (locale === 'th' ? 'ภาพประกอบอสังหาริมทรัพย์พัทยา' : 'AMP Pattaya Real Estate'),
+      }));
+    }
+    return [createFallbackSlide(locale, dict, composer)];
+  }, [composer, dict, locale, slides]);
 
-    const primaryCtaLabel = typeof composer?.primary_cta_label === 'string' && composer.primary_cta_label.trim()
-        ? composer.primary_cta_label.trim()
-        : (locale === "th" ? "ขอคำปรึกษา" : "Request Consultation");
-    const primaryCtaUrl = typeof composer?.primary_cta_url === 'string' && composer.primary_cta_url.trim()
-        ? resolveLocalizedHref(locale, composer.primary_cta_url.trim())
-        : withLocale(locale, "/contact");
+  const [activeIndex, setActiveIndex] = useState(0);
+  const [autoplayPaused, setAutoplayPaused] = useState(false);
+  const [documentVisible, setDocumentVisible] = useState(true);
+  const [loadedSlides, setLoadedSlides] = useState<Set<number>>(() => new Set([0]));
+  const touchStartX = useRef<number | null>(null);
+  const slideCount = resolvedSlides.length;
+  const activeSlide = resolvedSlides[Math.min(activeIndex, resolvedSlides.length - 1)] ?? resolvedSlides[0];
 
-    const secondaryCtaLabel = typeof composer?.secondary_cta_label === 'string' && composer.secondary_cta_label.trim()
-        ? composer.secondary_cta_label.trim()
-        : (locale === "th" ? "ดูโครงการ" : "Browse Projects");
-    const secondaryCtaUrl = typeof composer?.secondary_cta_url === 'string' && composer.secondary_cta_url.trim()
-        ? resolveLocalizedHref(locale, composer.secondary_cta_url.trim())
-        : withLocale(locale, "/projects");
+  useEffect(() => {
+    setActiveIndex((current) => Math.min(current, Math.max(resolvedSlides.length - 1, 0)));
+  }, [resolvedSlides.length]);
 
-    const heroImageSrc = typeof composer?.hero_image === 'string' && composer.hero_image.startsWith('/media/')
-        ? composer.hero_image
-        : HERO_FALLBACK_IMAGE;
-    const whatsAppHref = buildAdvisorWhatsApp(locale, dict);
-    const resolvedGuidedHref = typeof guidedHref === 'string' ? guidedHref.trim() : '';
-    const showGuidedTrigger = resolvedGuidedHref.length > 0;
-    const guidedTriggerLabel = typeof guidedLabel === 'string' && guidedLabel.trim()
-        ? guidedLabel.trim()
-        : (dict.guided.heroTrigger ?? 'Not sure where to start? Let us guide you →');
-    const resolvedPrimaryEventPayload = primaryEventPayload ?? { cta: "request_consultation", from: "home_hero" };
-    const resolvedSecondaryEventPayload = secondaryEventPayload ?? { cta: "browse_projects", from: "home_hero" };
-    const hasSupportRow = showGuidedTrigger || supportLinks.length > 0 || whatsAppHref.trim().length > 0;
-    const heroTrustItems = Array.isArray(composer?.trust_items) && composer.trust_items.length > 0
-        ? composer.trust_items.map((item) => String(item).trim()).filter(Boolean).slice(0, 3)
-        : (locale === 'th'
-            ? ['คัดเฉพาะรายการที่ยืนยันแล้ว', 'รองรับผู้ซื้อชาวต่างชาติ', 'มีทีมพัทยาดูแลต่อจนถึงการเข้าชม']
-            : ['Verified live stock only', 'Foreign-buyer ready', 'Local team through viewing']);
-    const atmosphereLabel = locale === 'th' ? 'โต๊ะที่ปรึกษา AMP Pattaya' : 'Advisory desk note';
-    const atmosphereTitle = locale === 'th' ? 'เริ่มจากเส้นทางที่เหมาะกับคุณ ไม่ใช่กองประกาศ' : 'Start from the right route, not a listing dump';
-    const atmosphereBody = locale === 'th'
-        ? 'ซื้อ ลงทุน เช่า และขาย ถูกแยกเป็นเส้นทางชัดเจนตั้งแต่หน้าจอแรก เพื่อให้ทีมรับช่วงต่อได้ตรงประเด็นกว่า'
-        : 'Buying, investing, renting, and selling are separated early so the next step stays specific.';
+  useEffect(() => {
+    setLoadedSlides(new Set([0]));
+  }, [resolvedSlides]);
 
-    return (
-        <section className="home-hero-section relative w-full bg-gray-900 overflow-hidden min-h-[620px] sm:min-h-[680px] md:min-h-[700px] xl:min-h-[760px]" data-home-perf="hero-media">
-            <Image
-                src={heroImageSrc}
-                alt={locale === 'th' ? 'ภาพบรรยากาศอสังหาริมทรัพย์พัทยาโดย AMP Pattaya' : 'AMP Pattaya Real Estate'}
-                fill
-                quality={82}
-                sizes="100vw"
-                className="absolute inset-0 w-full h-full object-cover object-[68%_center] sm:object-[60%_center] md:object-center block scale-[1.03]"
-            />
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      setDocumentVisible(document.visibilityState === 'visible');
+    };
+    handleVisibilityChange();
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
+  }, []);
 
-            {/* Gradient overlay — absolutely positioned, no layout impact */}
-            <div className="absolute inset-0 z-10 pointer-events-none bg-gradient-to-b from-black/86 via-black/66 to-black/84 md:from-black/78 md:via-black/54 md:to-black/82">
-                <HeroOverlay />
+  useEffect(() => {
+    if (slideCount <= 1 || autoplayPaused || !documentVisible) {
+      return undefined;
+    }
+    const timer = window.setInterval(() => {
+      setActiveIndex((current) => (current + 1) % slideCount);
+    }, AUTOPLAY_MS);
+    return () => window.clearInterval(timer);
+  }, [autoplayPaused, documentVisible, slideCount]);
+
+  useEffect(() => {
+    setLoadedSlides((current) => {
+      const next = new Set(current);
+      next.add(activeIndex);
+      return next;
+    });
+
+    if (slideCount <= 1) return undefined;
+
+    const nextIndex = (activeIndex + 1) % slideCount;
+    const timer = window.setTimeout(() => {
+      setLoadedSlides((current) => {
+        const next = new Set(current);
+        next.add(nextIndex);
+        return next;
+      });
+    }, 900);
+
+    return () => window.clearTimeout(timer);
+  }, [activeIndex, slideCount]);
+
+  const primaryCtaLabel = typeof composer?.primary_cta_label === 'string' && composer.primary_cta_label.trim()
+    ? composer.primary_cta_label.trim()
+    : (locale === 'th' ? 'คุยกับที่ปรึกษา' : 'Speak to an advisor');
+  const primaryCtaUrl = typeof composer?.primary_cta_url === 'string' && composer.primary_cta_url.trim()
+    ? resolveLocalizedHref(locale, composer.primary_cta_url.trim())
+    : withLocale(locale, '/contact');
+  const secondaryCtaLabel = typeof composer?.secondary_cta_label === 'string' && composer.secondary_cta_label.trim()
+    ? composer.secondary_cta_label.trim()
+    : (locale === 'th' ? 'ดูยูนิตคัดสรร' : 'View curated units');
+  const secondaryCtaUrl = typeof composer?.secondary_cta_url === 'string' && composer.secondary_cta_url.trim()
+    ? resolveLocalizedHref(locale, composer.secondary_cta_url.trim())
+    : withLocale(locale, '/projects');
+  const whatsAppHref = buildAdvisorWhatsApp(locale, dict);
+
+  function stepTo(nextIndex: number) {
+    setActiveIndex((nextIndex + slideCount) % slideCount);
+  }
+
+  function handleTouchStart(clientX: number) {
+    touchStartX.current = clientX;
+    setAutoplayPaused(true);
+  }
+
+  function handleTouchEnd(clientX: number) {
+    if (touchStartX.current == null) return;
+    const delta = clientX - touchStartX.current;
+    touchStartX.current = null;
+    if (Math.abs(delta) < SWIPE_THRESHOLD) {
+      setAutoplayPaused(false);
+      return;
+    }
+    if (delta < 0) {
+      stepTo(activeIndex + 1);
+    } else {
+      stepTo(activeIndex - 1);
+    }
+  }
+
+  return (
+    <section
+      className="home-hero-section home-hero-slider"
+      data-home-perf="hero-media"
+      onMouseEnter={() => setAutoplayPaused(true)}
+      onMouseLeave={() => setAutoplayPaused(false)}
+      onFocusCapture={() => setAutoplayPaused(true)}
+      onBlurCapture={() => setAutoplayPaused(false)}
+      onTouchStart={(event) => handleTouchStart(event.touches[0]?.clientX ?? 0)}
+      onTouchEnd={(event) => handleTouchEnd(event.changedTouches[0]?.clientX ?? 0)}
+    >
+      <div className="home-hero-slider__media-stack" aria-hidden="true">
+        {resolvedSlides.map((slide, index) => {
+          const isActive = index === activeIndex;
+          return (
+            <div
+              key={slide.key}
+              className={`home-hero-slider__media${isActive ? ' home-hero-slider__media--active' : ''}`}
+            >
+              {loadedSlides.has(index) ? (
+                <Image
+                  src={slide.imageSrc}
+                  alt={slide.imageAlt ?? (locale === 'th' ? 'ภาพอสังหาริมทรัพย์พัทยาโดย AMP Pattaya' : 'AMP Pattaya Real Estate')}
+                  fill
+                  quality={76}
+                  sizes="100vw"
+                  className="home-hero-slider__image"
+                />
+              ) : null}
             </div>
-            <div className="absolute inset-y-0 left-0 right-0 z-10 pointer-events-none bg-gradient-to-r from-black/78 via-black/38 to-transparent md:from-black/70 md:via-black/22 md:to-transparent" />
+          );
+        })}
+        <div className="home-hero-slider__scrim" />
+        <div className="home-hero-slider__scrim home-hero-slider__scrim--side" />
+      </div>
 
-            {/* Content overlay — absolutely positioned, no layout impact */}
-            <div className="absolute inset-0 z-20 flex flex-col justify-start md:justify-center pt-[78px] sm:pt-[88px] pb-5 md:py-28">
-                <Container variant="wide">
-                    <div className="hero-home-layout">
-                        <div className={`hero-home-panel ${locale === 'th' ? 'hero-home-panel--th' : ''} max-w-[min(76ch,100%)]`}>
-                        <p className="hero-home-eyebrow text-white/72 text-[11px] md:text-xs font-semibold tracking-[0.26em] uppercase mb-3 md:mb-4">
-                            {heroEyebrow}
-                        </p>
-                        {/* Headline: weight ~500, tight tracking, 1.1 line-height, max-width 14ch for controlled wrapping */}
-                        <h1 className={`hero-home-title ${locale === "th" ? "hero-home-title--th font-sans" : "font-serif"} text-white text-[length:var(--font-h1)] font-semibold mb-4 md:mb-7 leading-[0.98] tracking-[-0.03em] max-w-[13.5ch]`}>
-                            {heroHeading}
-                        </h1>
-                        {/* Subcopy: 18px (text-lg), 1.6 lh, neutral opacity, 24px bottom spacing */}
-                        <p className="hero-home-subtitle text-white/92 text-base sm:text-[15px] md:text-lg leading-[1.5] mb-5 md:mb-6 max-w-[58ch]">
-                            {heroSubheading}
-                        </p>
-                        {heroTrustItems.length > 0 ? (
-                            <div className="hero-home-meta" role="list" aria-label={locale === 'th' ? 'เหตุผลที่ควรเริ่มจากหน้านี้' : 'Why start from this page'}>
-                                {heroTrustItems.map((item, index) => (
-                                    <span key={`${item}-${index + 1}`} className="hero-home-meta__item" role="listitem">
-                                        <span className="hero-home-meta__index">{String(index + 1).padStart(2, '0')}</span>
-                                        <span className="hero-home-meta__text">{item}</span>
-                                    </span>
-                                ))}
-                            </div>
-                        ) : null}
+      <div className="home-hero-slider__content">
+        <Container variant="wide">
+          <div className="home-hero-slider__panel">
+            <p className="home-hero-slider__eyebrow">{activeSlide.eyebrow}</p>
+            <h1 className={`home-hero-slider__title ${locale === 'th' ? 'home-hero-slider__title--th' : ''}`}>
+              {activeSlide.heading}
+            </h1>
+            <p className="home-hero-slider__subtitle">{activeSlide.subheading}</p>
 
-                        <div className="hero-cta-row flex flex-wrap gap-3 md:gap-4">
-                            <TrackedLink
-                                className="btn btn-primary hero-cta hero-cta--primary"
-                                href={primaryCtaUrl}
-                                prefetch
-                                eventType="cta_click"
-                                eventPayload={resolvedPrimaryEventPayload}
-                            >
-                                {primaryCtaLabel}
-                            </TrackedLink>
-                            <TrackedLink
-                                className="btn btn-secondary hero-cta hero-cta--secondary"
-                                href={secondaryCtaUrl}
-                                prefetch
-                                eventType="cta_click"
-                                eventPayload={resolvedSecondaryEventPayload}
-                            >
-                                {secondaryCtaLabel}
-                            </TrackedLink>
-                        </div>
-
-                        {guidanceNote ? (
-                            <p className="hero-home-guidance text-white/78 text-sm leading-relaxed mt-3 md:mt-4 max-w-[56ch]">
-                                {guidanceNote}
-                            </p>
-                        ) : null}
-
-                        {hasSupportRow ? (
-                            <div className="hero-support-row flex flex-wrap items-center gap-x-5 gap-y-3 mt-4 md:mt-6">
-                                {showGuidedTrigger ? (
-                                    <TrackedLink
-                                        className="hero-guided-trigger hero-support-link hero-support-link--pill inline-flex items-center gap-2 text-sm font-medium text-white/72 hover:text-white transition-colors"
-                                        href={resolvedGuidedHref}
-                                        prefetch={false}
-                                        eventType="cta_click"
-                                        eventPayload={{ cta: 'open_guided_finder', from: 'home_hero' }}
-                                    >
-                                        {guidedTriggerLabel}
-                                    </TrackedLink>
-                                ) : null}
-                                <a
-                                    className="hero-whatsapp-link inline-flex items-center gap-2 text-sm font-medium text-white/72 hover:text-white transition-colors"
-                                    href={whatsAppHref}
-                                    target="_blank"
-                                    rel="noreferrer"
-                                >
-                                    {dict.cta.whatsapp}
-                                </a>
-                                {supportLinks.map((link) => (
-                                    <TrackedLink
-                                        key={`${link.label}-${link.href}`}
-                                        className="hero-support-link hero-support-link--pill inline-flex items-center gap-2 text-sm font-medium text-white/72 hover:text-white transition-colors"
-                                        href={resolveLocalizedHref(locale, link.href)}
-                                        prefetch={false}
-                                        eventType="cta_click"
-                                        eventPayload={link.eventPayload ?? { cta: 'hero_support_link', from: 'home_hero' }}
-                                    >
-                                        {link.label}
-                                    </TrackedLink>
-                                ))}
-                            </div>
-                        ) : null}
-                    </div>
-                        <div className="hero-home-atmosphere" aria-hidden="true">
-                            <span className="hero-home-atmosphere__frame" />
-                            <span className="hero-home-atmosphere__line" />
-                            <span className="hero-home-atmosphere__orb" />
-                            <div className="hero-home-atmosphere__caption">
-                                <span className="hero-home-atmosphere__caption-label">{atmosphereLabel}</span>
-                                <strong>{atmosphereTitle}</strong>
-                                <span>{atmosphereBody}</span>
-                            </div>
-                        </div>
-                    </div>
-                </Container>
+            <div className="hero-cta-row home-hero-slider__actions">
+              <TrackedLink
+                className="btn btn-primary hero-cta hero-cta--primary"
+                href={primaryCtaUrl}
+                prefetch
+                eventType="cta_click"
+                eventPayload={primaryEventPayload ?? { cta: 'request_consultation', from: 'home_hero' }}
+              >
+                {primaryCtaLabel}
+              </TrackedLink>
+              <TrackedLink
+                className="btn btn-secondary hero-cta hero-cta--secondary"
+                href={secondaryCtaUrl}
+                prefetch
+                eventType="cta_click"
+                eventPayload={secondaryEventPayload ?? { cta: 'browse_projects', from: 'home_hero' }}
+              >
+                {secondaryCtaLabel}
+              </TrackedLink>
             </div>
-        </section>
-    );
+
+            <div className="home-hero-slider__support">
+              <a
+                className="hero-whatsapp-link home-hero-slider__support-link"
+                href={whatsAppHref}
+                target="_blank"
+                rel="noreferrer"
+              >
+                {dict.cta.whatsapp}
+              </a>
+            </div>
+
+            {slideCount > 1 ? (
+              <div className="home-hero-slider__controls" aria-label={locale === 'th' ? 'ตัวควบคุมสไลด์' : 'Hero slide controls'}>
+                <button
+                  type="button"
+                  className="home-hero-slider__nav"
+                  aria-label={locale === 'th' ? 'สไลด์ก่อนหน้า' : 'Previous slide'}
+                  onClick={() => {
+                    setAutoplayPaused(true);
+                    stepTo(activeIndex - 1);
+                  }}
+                >
+                  <span aria-hidden="true">←</span>
+                </button>
+                <div className="home-hero-slider__dots" role="tablist" aria-label={locale === 'th' ? 'เลือกสไลด์' : 'Choose hero slide'}>
+                  {resolvedSlides.map((slide, index) => {
+                    const selected = index === activeIndex;
+                    return (
+                      <button
+                        key={`${slide.key}-dot`}
+                        type="button"
+                        role="tab"
+                        aria-selected={selected}
+                        aria-label={`${locale === 'th' ? 'สไลด์' : 'Slide'} ${index + 1}`}
+                        className={`home-hero-slider__dot${selected ? ' home-hero-slider__dot--active' : ''}`}
+                        onClick={() => {
+                          setAutoplayPaused(true);
+                          setActiveIndex(index);
+                        }}
+                      />
+                    );
+                  })}
+                </div>
+                <button
+                  type="button"
+                  className="home-hero-slider__nav"
+                  aria-label={locale === 'th' ? 'สไลด์ถัดไป' : 'Next slide'}
+                  onClick={() => {
+                    setAutoplayPaused(true);
+                    stepTo(activeIndex + 1);
+                  }}
+                >
+                  <span aria-hidden="true">→</span>
+                </button>
+              </div>
+            ) : null}
+          </div>
+        </Container>
+      </div>
+    </section>
+  );
 }

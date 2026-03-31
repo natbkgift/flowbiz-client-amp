@@ -14,12 +14,12 @@ describe('FeaturedProjects Thai copy', () => {
       />,
     );
 
-    expect(screen.getByText('ให้ทีมช่วยคัดรายการล่าสุดให้คุณ')).toBeInTheDocument();
+    expect(screen.getByText('เปิดโครงการที่มีอยู่ก่อน')).toBeInTheDocument();
     expect(screen.queryByText(/shortlist/i)).toBeNull();
   });
 
-  it('keeps the Thai curated label localized on populated cards', () => {
-    render(
+  it('keeps populated project cards localized without shortlist jargon', () => {
+    const { container } = render(
       <FeaturedProjects
         locale="th"
         title="โครงการแนะนำ"
@@ -32,12 +32,16 @@ describe('FeaturedProjects Thai copy', () => {
             status: 'published',
             cover_image_url: null,
             starting_price: 6900000,
+            summary: { th: 'คอนโดทำเลจอมเทียนที่มีข้อมูลโครงการเผยแพร่ชัดเจน' },
+            area: { id: 'area-1', slug: 'jomtien', name: 'Jomtien' },
+            property_type: 'condo',
           } as never,
         ]}
       />,
     );
 
-    expect(screen.getByText('โครงการคัดสรรของ AMP')).toBeInTheDocument();
+    expect(screen.getByText('โครงการแนะนำ')).toBeInTheDocument();
     expect(screen.queryByText(/shortlist/i)).toBeNull();
+    expect(container.querySelector('.premium-project-card__fact-label')).toBeNull();
   });
 });

@@ -30,7 +30,7 @@ vi.mock('@/components/home/HeroOverlay', () => ({
 }));
 
 describe('HomeHero CTA hierarchy', () => {
-  it('keeps only two button CTAs in the main hero row and allows the hard-reset hero to run with WhatsApp only', () => {
+  it('keeps only two button CTAs in the main hero row and keeps WhatsApp as a text link', () => {
     const dict = {
       home: {
         heroTitle: 'Find the right Pattaya property path',
@@ -61,9 +61,9 @@ describe('HomeHero CTA hierarchy', () => {
     );
 
     expect(container.querySelectorAll('.hero-cta-row .btn')).toHaveLength(2);
-    expect(container.querySelector('.hero-support-row .hero-whatsapp-link')).not.toBeNull();
-    expect(container.querySelector('.hero-support-row .hero-whatsapp-link')).not.toHaveClass('btn');
-    expect(container.querySelector('.hero-support-row .hero-guided-trigger')).toBeNull();
+    expect(container.querySelector('.home-hero-slider__support .hero-whatsapp-link')).not.toBeNull();
+    expect(container.querySelector('.home-hero-slider__support .hero-whatsapp-link')).not.toHaveClass('btn');
+    expect(container.querySelector('.home-hero-slider__controls')).toBeNull();
 
     expect(screen.getByRole('link', { name: 'View Available Units' })).toBeInTheDocument();
     expect(screen.getByRole('link', { name: 'Get Price & Floor Plan' })).toBeInTheDocument();
@@ -76,7 +76,7 @@ describe('HomeHero CTA hierarchy', () => {
     );
   });
 
-  it('keeps a configured local media hero image when composer provides one', () => {
+  it('keeps a configured local media hero image and renders controls when multiple slides exist', () => {
     const dict = {
       home: {
         heroTitle: 'Find the right Pattaya property path',
@@ -97,10 +97,27 @@ describe('HomeHero CTA hierarchy', () => {
       <HomeHero
         dict={dict}
         locale="en"
-        composer={{ hero_image: '/media/library/hero.webp' }}
+        slides={[
+          {
+            key: 'custom-slide',
+            eyebrow: 'Wongamat',
+            heading: 'Open a sharper coastal route',
+            subheading: 'One calmer slide for the premium Pattaya route.',
+            imageSrc: '/media/library/hero.webp',
+          },
+          {
+            key: 'custom-slide-2',
+            eyebrow: 'Jomtien',
+            heading: 'Second slide',
+            subheading: 'Used to verify controls render when multiple slides are present.',
+            imageSrc: '/media/library/hero-2.webp',
+          },
+        ]}
       />,
     );
 
-    expect(screen.getByAltText('AMP Pattaya Real Estate')).toHaveAttribute('src', '/media/library/hero.webp');
+    const images = screen.getAllByAltText('AMP Pattaya Real Estate');
+    expect(images[0]).toHaveAttribute('src', '/media/library/hero.webp');
+    expect(screen.getByLabelText('Hero slide controls')).toBeInTheDocument();
   });
 });

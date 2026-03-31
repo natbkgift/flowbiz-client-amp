@@ -9,6 +9,11 @@ import {
 } from '@/lib/experiments';
 import { getOrCreateSessionId, trackEvent } from '@/lib/analytics';
 
+type IdleCapableWindow = Window & typeof globalThis & {
+  requestIdleCallback?: (callback: IdleRequestCallback, options?: IdleRequestOptions) => number;
+  cancelIdleCallback?: (handle: number) => void;
+};
+
 /**
  * ExperimentProvider — headless client component.
  *
@@ -24,37 +29,56 @@ export function ExperimentProvider() {
   const tracked = useRef<Set<string>>(new Set());
 
   useEffect(() => {
-    const sessionId = getOrCreateSessionId();
-    const experiments = getActiveExperiments();
+    let cancelled = false;
+    const win = window as IdleCapableWindow;
+    const run = () => {
+      if (cancelled) return;
+      const sessionId = getOrCreateSessionId();
+      const experiments = getActiveExperiments();
 
-    for (const experiment of experiments) {
-      // Check if this page is targeted by the experiment
-      const isTargeted = experiment.targetPages.some((pattern) => {
-        if (pattern.includes('*')) {
-          const regex = new RegExp(
-            '^' + pattern.replace(/\*/g, '.*') + '$',
-          );
-          return regex.test(pathname);
-        }
-        return pathname === pattern || pathname.startsWith(pattern);
-      });
-
-      if (!isTargeted) continue;
-
-      const assignment = getOrAssignVariant(experiment.id, sessionId);
-      if (!assignment) continue;
-
-      // Track exposure once per experiment per component lifecycle
-      const key = `${experiment.id}:${assignment.variantId}`;
-      if (!tracked.current.has(key)) {
-        tracked.current.add(key);
-        trackEvent('experiment_exposure', pathname, {
-          experiment_id: experiment.id,
-          variant_id: assignment.variantId,
-          experiment_name: experiment.name,
+      for (const experiment of experiments) {
+        const isTargeted = experiment.targetPages.some((pattern) => {
+          if (pattern.includes('*')) {
+            const regex = new RegExp(
+              '^' + pattern.replace(/\*/g, '.*') + '$',
+            );
+            return regex.test(pathname);
+          }
+          return pathname === pattern || pathname.startsWith(pattern);
         });
+
+        if (!isTargeted) continue;
+
+        const assignment = getOrAssignVariant(experiment.id, sessionId);
+        if (!assignment) continue;
+
+        const key = `${experiment.id}:${assignment.variantId}`;
+        if (!tracked.current.has(key)) {
+          tracked.current.add(key);
+          trackEvent('experiment_exposure', pathname, {
+            experiment_id: experiment.id,
+            variant_id: assignment.variantId,
+            experiment_name: experiment.name,
+          });
+        }
       }
+    };
+
+    if (typeof win.requestIdleCallback === 'function') {
+      const idleId = win.requestIdleCallback(run, { timeout: 1200 });
+      return () => {
+        cancelled = true;
+        if (typeof win.cancelIdleCallback === 'function') {
+          win.cancelIdleCallback(idleId);
+        }
+      };
     }
+
+    const timeoutId = win.setTimeout(run, 300);
+    return () => {
+      cancelled = true;
+      win.clearTimeout(timeoutId);
+    };
   }, [pathname]);
 
   return null;
