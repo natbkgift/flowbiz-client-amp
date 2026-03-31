@@ -248,20 +248,18 @@ try {
   $completed = $false
 
   while ([DateTimeOffset]::UtcNow -lt $deadline) {
-    $pollCommand = @"
-if [ -f $qRemoteExitCode ]; then
-  printf 'status=completed\n'
-  printf 'exit_code=%s\n' `$(cat $qRemoteExitCode)
-elif [ -f $qRemotePid ] && kill -0 `$(cat $qRemotePid) 2>/dev/null; then
-  printf 'status=running\n'
-else
-  printf 'status=unknown\n'
-fi
-if [ -f $qRemoteLog ]; then
-  printf -- '---log---\n'
-  tail -n 20 $qRemoteLog
-fi
-"@
+    $pollCommand = "if [ -f $qRemoteExitCode ]; then " +
+      "printf 'status=completed\n'; " +
+      "printf 'exit_code=%s\n' `$(cat $qRemoteExitCode); " +
+      "elif [ -f $qRemotePid ] && kill -0 `$(cat $qRemotePid) 2>/dev/null; then " +
+      "printf 'status=running\n'; " +
+      "else " +
+      "printf 'status=unknown\n'; " +
+      "fi; " +
+      "if [ -f $qRemoteLog ]; then " +
+      "printf -- '---log---\n'; " +
+      "tail -n 20 $qRemoteLog; " +
+      "fi"
     $pollOutput = Invoke-ExternalCommandWithRetry -Label 'poll-deploy-state' -Attempts $RetryAttempts -InitialBackoffSeconds $RetryBackoffSeconds -CaptureOutput -Operation {
       & ssh @sshOptions $VpsHost $pollCommand
     }
