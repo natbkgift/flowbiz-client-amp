@@ -412,6 +412,16 @@ export function FeaturedProjects({
                   </div>
                 ) : null}
 
+                {signals.length > 0 ? (
+                  <div className="premium-project-card__signals" aria-label={locale === 'th' ? 'สัญญาณการตัดสินใจของโครงการ' : 'Project decision cues'}>
+                    {signals.map((signal) => (
+                      <span key={signal} className="premium-project-card__signal">
+                        {signal}
+                      </span>
+                    ))}
+                  </div>
+                ) : null}
+
                 {projectSummary ? (
                   <p className="premium-project-card__summary line-clamp-2">
                     {projectSummary}
@@ -426,15 +436,6 @@ export function FeaturedProjects({
                       </li>
                     ))}
                   </ul>
-                ) : null}
-                {signals.length > 0 ? (
-                  <div className="premium-project-card__signals" aria-label={locale === 'th' ? 'สัญญาณการตัดสินใจของโครงการ' : 'Project decision cues'}>
-                    {signals.map((signal) => (
-                      <span key={signal} className="premium-project-card__signal">
-                        {signal}
-                      </span>
-                    ))}
-                  </div>
                 ) : null}
                 <div className="premium-project-card__footer">
                   <span className="premium-project-card__cta">

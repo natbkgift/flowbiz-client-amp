@@ -1746,6 +1746,17 @@ export default async function HomePage({
         : 'Quota, transfer, and paperwork are explained early.',
     },
   ];
+  const heroTrustItems = locale === 'th'
+    ? [
+        liveProjectCount > 0 ? `${liveProjectCount} โครงการที่ยังเปิดอยู่` : 'คัดเฉพาะโครงการที่ยังตรวจต่อได้',
+        liveInventoryCount > 0 ? `${liveInventoryCount} รายการที่ทีมเช็กแล้ว` : 'คัดทั้งโครงการและยูนิตพร้อมอยู่',
+        'รองรับผู้ซื้อไทยและต่างชาติ',
+      ]
+    : [
+        liveProjectCount > 0 ? `${liveProjectCount} live projects in view` : 'Live projects reviewed before sharing',
+        liveInventoryCount > 0 ? `${liveInventoryCount} listings checked` : 'Curated projects and ready units',
+        'Foreign-buyer guidance built in',
+      ];
 
   function getReviewHighlight(quote: string): string {
     const normalized = quote.replace(/\s+/g, ' ').trim();
@@ -1796,19 +1807,7 @@ export default async function HomePage({
                 : withLocaleQuery(locale, '/projects', {
                   source: 'home_hero_secondary',
                 }),
-              trust_items: Array.isArray(composerHero.trust_items)
-                ? composerHero.trust_items as string[]
-                : (locale === 'th'
-                  ? [
-                      'เหมาะกับผู้ซื้อไทยและต่างชาติ',
-                      'คัดทั้งโครงการและยูนิตพร้อมอยู่',
-                      'มีคำแนะนำที่ไปต่อได้จริง',
-                    ]
-                  : [
-                      'Foreign-buyer friendly guidance',
-                      'Curated projects and ready units',
-                      'Clear next steps, not just listings',
-                    ]),
+              trust_items: heroTrustItems,
               hero_image: typeof composerHero.hero_image === 'string' ? composerHero.hero_image : null,
             }}
           />
