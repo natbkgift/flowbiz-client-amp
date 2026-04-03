@@ -126,16 +126,18 @@ export function PublicAdvisoryHero({
               ) : null}
             </div>
 
-            {supportNote ? (
-              <p className="public-hero__support-note">{supportNote}</p>
-            ) : null}
+            <div className="public-hero__meta">
+              {supportNote ? (
+                <p className="public-hero__support-note">{supportNote}</p>
+              ) : null}
 
-            <div className="public-hero__proofs" role="note" aria-label={proofsLabel}>
-              {proofs.map((proof) => (
-                <span key={proof} className="public-hero__proof">
-                  {proof}
-                </span>
-              ))}
+              <div className="public-hero__proofs" role="note" aria-label={proofsLabel}>
+                {proofs.map((proof) => (
+                  <span key={proof} className="public-hero__proof">
+                    {proof}
+                  </span>
+                ))}
+              </div>
             </div>
           </div>
 
