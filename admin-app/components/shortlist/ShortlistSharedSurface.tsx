@@ -35,6 +35,18 @@ function getPrimaryListingActionLabel(locale: 'en' | 'th', item: ShortlistProper
   return locale === 'th' ? 'ดู buy listings เพิ่ม' : 'Browse buy listings';
 }
 
+function getSharedShortlistSummary(locale: 'en' | 'th', itemCount: number) {
+  return {
+    title: locale === 'th'
+      ? 'เริ่มจากรีวิว shortlist ที่แชร์นี้ก่อน'
+      : 'Review the shared shortlist first',
+    body: locale === 'th'
+      ? `ลิงก์นี้เปิดให้ดู ${itemCount} รายการแบบ read-only โดยซ่อนข้อมูลเจ้าของไว้ ใช้หน้านี้เพื่ออ่านว่ามี listing ไหนควรเปิดเช็กต่อ แล้วค่อยเริ่ม shortlist ของคุณเองถ้าต้องการคัดตัวเลือกเพิ่ม`
+      : `This owner-safe link opens ${itemCount} saved listing${itemCount === 1 ? '' : 's'} in read-only mode. Use it to decide which listings deserve a deeper check, then start your own shortlist if you want to compare alternatives on your side.`,
+    actionLabel: locale === 'th' ? 'เริ่ม shortlist ของคุณ' : 'Start your own shortlist',
+  };
+}
+
 function formatShortlistUpdatedAt(value: string, locale: 'en' | 'th'): string | null {
   const parsed = Date.parse(value);
   if (!Number.isFinite(parsed)) {
@@ -146,7 +158,7 @@ export function ShortlistSharedSurface({ locale, shareToken }: { locale: 'en' | 
         body={error.body}
         action={
           <Link className="btn btn-secondary" href={withLocale(locale, '/buy')}>
-            {locale === 'th' ? 'กลับไปดู listings' : 'Browse listings'}
+            {locale === 'th' ? 'เริ่ม shortlist ของคุณ' : 'Start your own shortlist'}
           </Link>
         }
       />
@@ -164,7 +176,7 @@ export function ShortlistSharedSurface({ locale, shareToken }: { locale: 'en' | 
         }
         action={
           <Link className="btn btn-secondary" href={withLocale(locale, '/buy')}>
-            {locale === 'th' ? 'ดู listings' : 'Browse listings'}
+            {locale === 'th' ? 'เริ่ม shortlist ของคุณ' : 'Start your own shortlist'}
           </Link>
         }
       />
@@ -172,18 +184,18 @@ export function ShortlistSharedSurface({ locale, shareToken }: { locale: 'en' | 
   }
 
   const updatedAtLabel = formatShortlistUpdatedAt(shortlist.updated_at, locale);
+  const shortlistSummary = getSharedShortlistSummary(locale, shortlist.item_count);
 
   return (
     <div className="shortlist-surface">
-      <div className="cta-strip">
+      <div className="cta-strip shortlist-surface__summary">
         <div className="cta-strip__text">
-          {locale === 'th'
-            ? `ลิงก์นี้แชร์ shortlist แบบดูอย่างเดียวจำนวน ${shortlist.item_count} รายการ โดยซ่อนข้อมูลเจ้าของและไม่เปิดสิทธิ์แก้ไข`
-            : `This link shares a read-only shortlist with ${shortlist.item_count} listings, hides owner identity, and does not enable editing.`}
+          <strong className="shortlist-surface__summary-title">{shortlistSummary.title}</strong>
+          <span>{shortlistSummary.body}</span>
         </div>
-        <div className="card-actions">
+        <div className="card-actions shortlist-surface__summary-actions">
           <Link className="btn btn-secondary" href={withLocale(locale, '/buy')}>
-            {locale === 'th' ? 'ดู buy listings' : 'Browse buy listings'}
+            {shortlistSummary.actionLabel}
           </Link>
         </div>
       </div>
@@ -191,12 +203,12 @@ export function ShortlistSharedSurface({ locale, shareToken }: { locale: 'en' | 
       <div className="shortlist-compare-panel" aria-live="polite">
         <div className="shortlist-compare-panel__header">
           <h2 className="card-title mb-0">
-            {locale === 'th' ? 'บริบทของ shortlist ที่แชร์นี้' : 'Shared shortlist context'}
+            {locale === 'th' ? 'วิธีใช้ shortlist ที่แชร์นี้' : 'How to use this shared shortlist'}
           </h2>
           <p className="card-subtitle mb-0">
             {locale === 'th'
-              ? 'ใช้หน้านี้เพื่อรีวิวรายการที่ถูกคัดไว้แล้ว จากนั้นค่อยเปิดหน้ารายละเอียด listing ที่ต้องการตรวจเพิ่ม'
-              : 'Use this surface to review the curated set first, then open the listing detail pages that need a deeper check.'}
+              ? 'รีวิวรายการที่ถูกคัดไว้แล้วก่อน เปิด listing ที่ต้องการตรวจเพิ่ม และเริ่ม shortlist ของคุณเองเมื่ออยากเก็บตัวเลือกหรือส่งต่อให้ทีมในบริบทของคุณ'
+              : 'Read the curated set first, open the listings that need a deeper check, and start your own shortlist once you want to save alternatives or hand the context to the team on your side.'}
           </p>
         </div>
         <div className="shortlist-compare-panel__chips">

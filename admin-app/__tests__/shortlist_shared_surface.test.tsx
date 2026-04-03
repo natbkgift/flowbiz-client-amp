@@ -63,9 +63,11 @@ describe('ShortlistSharedSurface', () => {
       expect(screen.getByRole('heading', { name: 'Alpha Residence' })).toBeTruthy();
     });
 
+    expect(screen.getByText(/review the shared shortlist first/i)).toBeTruthy();
     expect(screen.getAllByText(/read-only/i).length).toBeGreaterThan(0);
-    expect(screen.getByRole('heading', { name: /shared shortlist context/i })).toBeTruthy();
-    expect(screen.getByText(/hides owner identity/i)).toBeTruthy();
+    expect(screen.getByRole('heading', { name: /how to use this shared shortlist/i })).toBeTruthy();
+    expect(screen.getByText(/this owner-safe link opens 1 saved listing in read-only mode/i)).toBeTruthy();
+    expect(screen.getByRole('link', { name: /start your own shortlist/i }).getAttribute('href')).toBe('/en/buy');
     expect(screen.getByText(/updated mar 15, 2026/i)).toBeTruthy();
     expect(screen.queryByRole('button', { name: /remove from shortlist/i })).toBeNull();
     expect(screen.getByRole('link', { name: /view listing details/i }).getAttribute('href')).toBe('/en/property/alpha-residence');
@@ -96,7 +98,7 @@ describe('ShortlistSharedSurface', () => {
       expect(screen.getByText(/this shared shortlist has no listings/i)).toBeTruthy();
     });
 
-    expect(screen.getByRole('link', { name: /browse listings/i }).getAttribute('href')).toBe('/en/buy');
+    expect(screen.getByRole('link', { name: /start your own shortlist/i }).getAttribute('href')).toBe('/en/buy');
   });
 
   it('renders an unavailable message when the shared shortlist request fails', async () => {
@@ -114,7 +116,7 @@ describe('ShortlistSharedSurface', () => {
     });
 
     expect(screen.getByText(/ask the sender to create a new shared link/i)).toBeTruthy();
-    expect(screen.getByRole('link', { name: /browse listings/i }).getAttribute('href')).toBe('/en/buy');
+    expect(screen.getByRole('link', { name: /start your own shortlist/i }).getAttribute('href')).toBe('/en/buy');
     expect(screen.queryByRole('link', { name: /view listing details/i })).toBeNull();
   });
 

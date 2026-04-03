@@ -19,8 +19,8 @@ export async function generateMetadata(
     'shortlist',
     locale === 'th' ? 'Shortlist ที่แชร์' : 'Shared shortlist',
     locale === 'th'
-      ? 'ดู shortlist แบบ read-only จากลิงก์ที่แชร์ไว้ โดยไม่เปิดการแก้ไขหรือ CRM flow'
-      : 'Open a read-only shortlist from a shared link without enabling editing or CRM flow.',
+      ? 'รีวิว shortlist ที่แชร์มาแบบ read-only โดยซ่อนข้อมูลเจ้าของ แล้วค่อยเปิด listing ที่ต้องการเช็กต่อหรือเริ่ม shortlist ของคุณเอง'
+      : 'Review an owner-safe shared shortlist in read-only mode, then open the listings that deserve a deeper check or start your own shortlist.',
     dict.brand.name,
   );
 }
@@ -45,8 +45,8 @@ export default async function SharedShortlistPage(props: {
           <h1 className="headline">{locale === 'th' ? 'Shortlist ที่แชร์' : 'Shared shortlist'}</h1>
           <p className="subhead">
             {locale === 'th'
-              ? 'หน้านี้เปิด shortlist แบบดูอย่างเดียวจากลิงก์ที่แชร์ไว้ โดยไม่เปิด save, remove, หรือ CRM workflow ใด ๆ'
-              : 'This page opens a read-only shortlist from a shared link without exposing save, remove, or CRM workflows.'}
+              ? 'รีวิว shortlist ที่แชร์มาแบบ read-only โดยซ่อนข้อมูลเจ้าของไว้ก่อน แล้วค่อยเปิด listing ที่ต้องการเช็กต่อหรือเริ่ม shortlist ของคุณเอง'
+              : 'Review an owner-safe shortlist in read-only mode first, then open the listings that deserve a deeper check or start your own shortlist.'}
           </p>
         </Container>
       </section>
