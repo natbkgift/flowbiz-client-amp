@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useEffect, useState } from 'react';
 
 import { resolveImageUrl, formatPriceTHB } from '@/app/_lib/public-api-shared';
+import { buildLeadCaptureQuery, withLocaleQuery } from '@/app/_lib/public-advisory';
 import { withLocale } from '@/app/_lib/i18n/routing';
 import { EmptyStateCard, InlineStatusMessage, LoadingCardGrid } from '@/components/ui/StateBlocks';
 import { fetchSharedShortlist, type SharedShortlistDetail, type ShortlistPropertyItem } from '@/lib/shortlist';
@@ -43,6 +44,7 @@ function getSharedShortlistSummary(locale: 'en' | 'th', itemCount: number) {
     body: locale === 'th'
       ? `ลิงก์นี้เปิดให้ดู ${itemCount} รายการแบบ read-only โดยซ่อนข้อมูลเจ้าของไว้ ใช้หน้านี้เพื่ออ่านว่ามี listing ไหนควรเปิดเช็กต่อ แล้วค่อยเริ่ม shortlist ของคุณเองถ้าต้องการคัดตัวเลือกเพิ่ม`
       : `This owner-safe link opens ${itemCount} saved listing${itemCount === 1 ? '' : 's'} in read-only mode. Use it to decide which listings deserve a deeper check, then start your own shortlist if you want to compare alternatives on your side.`,
+    advisorLabel: locale === 'th' ? 'ให้ AMP Pattaya ช่วยรีวิว shortlist นี้' : 'Ask AMP Pattaya to review this shortlist',
     actionLabel: locale === 'th' ? 'เริ่ม shortlist ของคุณ' : 'Start your own shortlist',
   };
 }
@@ -185,6 +187,16 @@ export function ShortlistSharedSurface({ locale, shareToken }: { locale: 'en' | 
 
   const updatedAtLabel = formatShortlistUpdatedAt(shortlist.updated_at, locale);
   const shortlistSummary = getSharedShortlistSummary(locale, shortlist.item_count);
+  const shortlistProjectNames = Array.from(
+    new Set(shortlist.items.map((item) => item.project || item.title).filter(Boolean)),
+  );
+  const contactHref = withLocaleQuery(locale, '/contact', buildLeadCaptureQuery({
+    intent: 'project_shortlist',
+    source: 'shortlist_shared',
+    projects: shortlistProjectNames,
+    buyerFit: 'shortlist_narrowing',
+    signalLevel: shortlist.item_count >= 3 ? 'high' : 'medium',
+  }));
 
   return (
     <div className="shortlist-surface">
@@ -194,6 +206,9 @@ export function ShortlistSharedSurface({ locale, shareToken }: { locale: 'en' | 
           <span>{shortlistSummary.body}</span>
         </div>
         <div className="card-actions shortlist-surface__summary-actions">
+          <Link className="btn btn-cta" href={contactHref}>
+            {shortlistSummary.advisorLabel}
+          </Link>
           <Link className="btn btn-secondary" href={withLocale(locale, '/buy')}>
             {shortlistSummary.actionLabel}
           </Link>
@@ -207,8 +222,8 @@ export function ShortlistSharedSurface({ locale, shareToken }: { locale: 'en' | 
           </h2>
           <p className="card-subtitle mb-0">
             {locale === 'th'
-              ? 'รีวิวรายการที่ถูกคัดไว้แล้วก่อน เปิด listing ที่ต้องการตรวจเพิ่ม และเริ่ม shortlist ของคุณเองเมื่ออยากเก็บตัวเลือกหรือส่งต่อให้ทีมในบริบทของคุณ'
-              : 'Read the curated set first, open the listings that need a deeper check, and start your own shortlist once you want to save alternatives or hand the context to the team on your side.'}
+              ? 'รีวิวรายการที่ถูกคัดไว้แล้วก่อน เปิด listing ที่ต้องการตรวจเพิ่ม แล้วเลือกว่าจะให้ทีมช่วยรีวิว shortlist นี้ต่อ หรือเริ่ม shortlist ของคุณเองเมื่ออยากคัดตัวเลือกเพิ่มในบริบทของคุณ'
+              : 'Read the curated set first, open the listings that need a deeper check, then either ask the team to review this shortlist or start your own shortlist when you want to save alternatives on your side.'}
           </p>
         </div>
         <div className="shortlist-compare-panel__chips">

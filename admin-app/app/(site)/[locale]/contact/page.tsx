@@ -135,6 +135,7 @@ function humanizeToken(locale: 'en' | 'th', value: string | null | undefined): s
     compare_review: { en: 'Compare review', th: 'รีวิวจากหน้าเปรียบเทียบ' },
     shortlist_compare: { en: 'Shortlist compare flow', th: 'เส้นทาง compare จาก shortlist' },
     shortlist_contact: { en: 'Shortlist page', th: 'หน้า shortlist' },
+    shortlist_shared: { en: 'Shared shortlist link', th: 'ลิงก์ shortlist ที่แชร์' },
     project_detail: { en: 'Project detail page', th: 'หน้าโครงการ' },
     project_investment_check: { en: 'Project investment snapshot', th: 'snapshot การลงทุนของโครงการ' },
     project_availability_check: { en: 'Project availability review', th: 'การเช็ก availability ของโครงการ' },

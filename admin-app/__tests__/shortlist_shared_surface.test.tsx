@@ -67,6 +67,11 @@ describe('ShortlistSharedSurface', () => {
     expect(screen.getAllByText(/read-only/i).length).toBeGreaterThan(0);
     expect(screen.getByRole('heading', { name: /how to use this shared shortlist/i })).toBeTruthy();
     expect(screen.getByText(/this owner-safe link opens 1 saved listing in read-only mode/i)).toBeTruthy();
+    const advisorLink = screen.getByRole('link', { name: /ask amp pattaya to review this shortlist/i });
+    expect(advisorLink.getAttribute('href')).toContain('/en/contact?');
+    expect(advisorLink.getAttribute('href')).toContain('intent=project_shortlist');
+    expect(advisorLink.getAttribute('href')).toContain('source=shortlist_shared');
+    expect(advisorLink.getAttribute('href')).toContain('projects=Alpha+Project');
     expect(screen.getByRole('link', { name: /start your own shortlist/i }).getAttribute('href')).toBe('/en/buy');
     expect(screen.getByText(/updated mar 15, 2026/i)).toBeTruthy();
     expect(screen.queryByRole('button', { name: /remove from shortlist/i })).toBeNull();

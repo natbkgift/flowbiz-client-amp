@@ -67,4 +67,22 @@ describe('contact page shell', () => {
     expect(screen.getByRole('link', { name: /ส่ง brief การลงทุน/i }).getAttribute('href')).toBe('#contact-form');
     expect(screen.getByRole('heading', { name: /ส่งต่อโจทย์การลงทุน/i })).toBeTruthy();
   });
+
+  it('humanizes shared shortlist handoff context on the contact route', async () => {
+    render(
+      await ContactPage({
+        params: Promise.resolve({ locale: 'en' }),
+        searchParams: Promise.resolve({
+          intent: 'project_shortlist',
+          source: 'shortlist_shared',
+          projects: 'Alpha Project',
+        }),
+      }),
+    );
+
+    expect(screen.queryByRole('heading', { name: /start from the route that fits/i })).toBeNull();
+    expect(screen.getByRole('heading', { name: /lead handoff summary/i })).toBeTruthy();
+    expect(screen.getByText(/handoff source: shared shortlist link/i)).toBeTruthy();
+    expect(screen.getByText(/project in focus: alpha project/i)).toBeTruthy();
+  });
 });
