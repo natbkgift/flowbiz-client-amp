@@ -587,6 +587,33 @@ export default async function ProjectDetailPage(
       ? locale === 'th' ? `ราคาเริ่มต้นปัจจุบันคือ ${startingPriceLabel}` : `Current starting price is ${startingPriceLabel}.`
       : null,
   ].filter((item): item is string => Boolean(item));
+  const projectHeroProofs = uniqueItems([
+    project.area?.name
+      ? locale === 'th'
+        ? `ทำเล ${project.area.name}`
+        : `Area ${project.area.name}`
+      : null,
+    startingPriceLabel
+      ? locale === 'th'
+        ? `ราคาเริ่มต้น ${startingPriceLabel}`
+        : `Entry ${startingPriceLabel}`
+      : null,
+    hasInvestmentView
+      ? locale === 'th'
+        ? 'มี market snapshot แล้ว'
+        : 'Market snapshot available'
+      : null,
+    project.developer?.name
+      ? locale === 'th'
+        ? `ผู้พัฒนา ${project.developer.name}`
+        : `Developer ${project.developer.name}`
+      : null,
+    deliveryLabel
+      ? locale === 'th'
+        ? `ส่งมอบ ${deliveryLabel}`
+        : `Delivery ${deliveryLabel}`
+      : null,
+  ]).slice(0, 3);
   const relatedReads = [...publishedBlogPosts]
     .filter((post) => {
       const titleText = localizedText(locale, post.title);
@@ -607,18 +634,10 @@ export default async function ProjectDetailPage(
     startingPriceLabel,
     deliveryLabel,
   );
-  const projectHeroPrimaryHref = withLocaleQuery(locale, '/contact', buildLeadCaptureQuery({
-    intent: 'project_consultation',
-    source: 'project_detail',
-    project: project.slug,
-    projects: [project.slug],
-    buyerFit: 'project_first_buyer',
-    signalLevel: hasEvaluationSnapshot ? 'medium' : 'low',
-  }));
   const projectHeroPrimaryPayload = {
     source_route: 'project',
     cta_type: 'primary',
-    cta_label: dict.cta.speakToAdvisor,
+    cta_label: projectDecisionCta.primaryLabel,
     entity_type: 'project',
     entity_id: project.id,
     entity_name: project.name,
@@ -626,25 +645,27 @@ export default async function ProjectDetailPage(
     location: project.area?.name ?? undefined,
     context: {
       area: project.area?.name ?? undefined,
+      buyer_fit: projectDecisionCta.buyerFit,
+      signal_level: projectDecisionCta.signalLevel,
     },
   };
   const projectHeroSecondaryPayload = {
     source_route: 'project',
     cta_type: 'secondary',
-    cta_label: dict.advisory.compareOpportunities,
+    cta_label: projectDecisionCta.secondaryLabel,
     entity_type: 'project',
     entity_id: project.id,
     entity_name: project.name,
-    user_intent: 'compare',
+    user_intent: projectDecisionCta.secondaryHref.includes('/compare') ? 'compare' : 'buy',
     location: project.area?.name ?? undefined,
     context: {
-      compare_ids: [project.slug],
       area: project.area?.name ?? undefined,
+      compare_ids: projectDecisionCta.secondaryHref.includes('/compare') ? [project.slug] : undefined,
     },
   };
   const projectHeroSupportNote = locale === 'th'
-    ? 'การส่งบรีฟจากหน้านี้จะพกชื่อโครงการ บริบทของทำเล และเส้นทางการคัดรายการไปกับ inquiry เดียวกันก่อนคุณจะเทียบตัวเลือกใกล้เคียงต่อ.'
-    : 'This handoff carries the project name, area context, and shortlist path into the same inquiry before you move into nearby comparisons.';
+    ? 'การส่งต่อจากหน้านี้จะพกชื่อโครงการ ทำเล และจังหวะถัดไปของการตัดสินใจไปใน inquiry เดียวกัน'
+    : 'This handoff keeps the project, area, and next-step intent in one inquiry.';
 
   const jsonLd = JSON.stringify(
     [
@@ -698,7 +719,7 @@ export default async function ProjectDetailPage(
         title={project.name}
         subtitle={projectSubtitle}
         supportNote={projectHeroSupportNote}
-        proofs={advisoryProofs}
+        proofs={projectHeroProofs}
         proofsLabel={advisoryLabels.proofsLabel}
         guidanceLabel={advisoryLabels.guidanceLabel}
         signals={[
@@ -734,14 +755,14 @@ export default async function ProjectDetailPage(
             },
           ]}
         primaryAction={{
-          href: projectHeroPrimaryHref,
-          label: dict.cta.speakToAdvisor,
+          href: projectDecisionCta.primaryHref,
+          label: projectDecisionCta.primaryLabel,
           id: 'project_consultation_primary',
           eventPayload: projectHeroPrimaryPayload,
         }}
         secondaryAction={{
-          href: withLocale(locale, '/compare'),
-          label: dict.advisory.compareOpportunities,
+          href: projectDecisionCta.secondaryHref,
+          label: projectDecisionCta.secondaryLabel,
           id: 'project_compare_secondary',
           eventPayload: projectHeroSecondaryPayload,
         }}

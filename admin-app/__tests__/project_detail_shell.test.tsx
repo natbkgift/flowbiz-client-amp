@@ -58,9 +58,10 @@ describe('project detail shell', () => {
 
     expect(container.querySelector('#project_consultation_primary')).toHaveAttribute(
       'href',
-      '/en/contact?intent=project_consultation&source=project_detail&project=alpha-residence&projects=alpha-residence&buyer_fit=project_first_buyer&signal_level=medium',
+      '/en/contact?intent=project_consultation&source=project_investment_check&project=alpha-residence&projects=alpha-residence&buyer_fit=investor_compare&signal_level=high&msg=I+am+reviewing+Alpha+Residence+and+want+to+compare+its+price%2C+rent%2C+and+investment+context+against+nearby+alternatives.',
     );
     expect(container.querySelector('#project_compare_secondary')).toHaveAttribute('href', '/en/compare');
+    expect(container.textContent ?? '').toContain('Market snapshot available');
     expect(container.querySelector('#project-confidence-pack')).not.toBeNull();
     expect(container.querySelector('#project-brief-section')).not.toBeNull();
     expect(container.querySelector('#project-decision-lens')).not.toBeNull();
@@ -86,7 +87,7 @@ describe('project detail shell', () => {
     expect(markup).toContain('ส่งบรีฟโครงการให้ที่ปรึกษา');
     expect(markup).toContain('ขอเทียบโครงการนี้กับตัวเลือกใกล้เคียง');
     expect(markup).toContain('ดูรายการที่บันทึกเข้ารายการคัดไว้ได้');
-    expect(markup).toContain('การส่งบรีฟจากหน้านี้จะพกชื่อโครงการ บริบทของทำเล');
+    expect(markup).toContain('การส่งต่อจากหน้านี้จะพกชื่อโครงการ ทำเล และจังหวะถัดไปของการตัดสินใจไปใน inquiry เดียวกัน');
     expect(markup).not.toContain('listing brief');
     expect(markup).not.toContain('inventory');
     expect(markup).not.toContain('area guide');
