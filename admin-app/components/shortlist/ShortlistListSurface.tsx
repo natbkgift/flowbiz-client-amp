@@ -37,6 +37,49 @@ function getPrimaryListingActionLabel(locale: 'en' | 'th', item: ShortlistProper
   return locale === 'th' ? 'ดู buy listings เพิ่ม' : 'Browse buy listings';
 }
 
+function getShortlistAdvisorLabel(locale: 'en' | 'th', compareReady: boolean): string {
+  if (compareReady) {
+    return locale === 'th' ? 'ส่ง shortlist นี้ให้ที่ปรึกษาช่วยรีวิว' : 'Send this shortlist for advisor review';
+  }
+
+  return locale === 'th' ? 'รีวิว shortlist นี้กับที่ปรึกษา' : 'Review this shortlist with an advisor';
+}
+
+function getShortlistSummaryContent(input: {
+  locale: 'en' | 'th';
+  itemCount: number;
+  compareProjectCount: number;
+}) {
+  const { locale, itemCount, compareProjectCount } = input;
+  const compareReady = compareProjectCount >= 2;
+
+  if (compareReady) {
+    return {
+      title: locale === 'th'
+        ? `ขั้นถัดไปที่คุ้มสุด: เทียบ ${compareProjectCount} โครงการจาก shortlist นี้`
+        : `Best next move: compare ${compareProjectCount} saved projects`,
+      body: locale === 'th'
+        ? `ตอนนี้ shortlist นี้มี ${itemCount} รายการและ resolve ได้ ${compareProjectCount} โครงการแล้ว จึงควรอ่าน trade-off แบบ side-by-side ก่อน แล้วค่อยส่ง context เดิมต่อให้ที่ปรึกษาถ้ายังต้อง pressure-test ผู้ชนะ`
+        : `This shortlist now holds ${itemCount} saved listings and already resolves to ${compareProjectCount} projects, so the highest-value next step is a side-by-side compare before handing the same context to an advisor if a winner still needs pressure-testing.`,
+      primaryLabel: locale === 'th'
+        ? `เทียบ ${compareProjectCount} โครงการจาก shortlist`
+        : `Compare ${compareProjectCount} saved projects`,
+      browseUtilityLabel: locale === 'th' ? 'ดู listings เพิ่มต่อ' : 'Keep adding listings',
+    };
+  }
+
+  return {
+    title: locale === 'th'
+      ? 'ขั้นถัดไปที่คุ้มสุด: เพิ่มอีก 1 ตัวเลือกที่ผูกกับโครงการ'
+      : 'Best next move: add one more project-backed listing',
+    body: locale === 'th'
+      ? `ตอนนี้ shortlist นี้มี ${itemCount} รายการ แต่ compare จะเริ่มคุ้มเมื่อ resolve ได้อย่างน้อย 2 โครงการในเฟรมเดียวกัน เพิ่มอีก 1 ตัวเลือกก่อน หรือส่ง shortlist นี้ให้ทีมช่วยรีวิวถ้าการค้นหาเริ่มแคบแล้ว`
+      : `This shortlist currently has ${itemCount} saved listing${itemCount === 1 ? '' : 's'}, but compare only becomes decision-useful once at least 2 projects resolve in the same frame. Add one more strong option first, or send this shortlist to the team if the search is already narrowing.`,
+    primaryLabel: locale === 'th' ? 'เพิ่มอีก 1 ตัวเลือกก่อน' : 'Add one more listing first',
+    browseUtilityLabel: null,
+  };
+}
+
 export function ShortlistListSurface({ locale }: { locale: 'en' | 'th' }) {
   const [items, setItems] = useState<ShortlistPropertyItem[]>([]);
   const [compareProjects, setCompareProjects] = useState<ShortlistCompareProject[]>([]);
@@ -254,6 +297,13 @@ export function ShortlistListSurface({ locale }: { locale: 'en' | 'th' }) {
     .map((item) => item.projectName)
     .filter((value): value is string => Boolean(value));
   const shortlistProjectNames = Array.from(new Set(items.map((item) => item.project || item.title).filter(Boolean)));
+  const compareReady = compareProjects.length >= 2;
+  const shortlistSummary = getShortlistSummaryContent({
+    locale,
+    itemCount: items.length,
+    compareProjectCount: compareProjects.length,
+  });
+  const advisorLabel = getShortlistAdvisorLabel(locale, compareReady);
   const compareHref = compareProjects.length >= 2
     ? withLocaleQuery(locale, '/compare', {
         ids: compareProjects.map((item) => item.projectId).join(','),
@@ -278,22 +328,19 @@ export function ShortlistListSurface({ locale }: { locale: 'en' | 'th' }) {
     <div className="shortlist-surface">
       <div className="cta-strip shortlist-surface__summary">
         <div className="cta-strip__text">
-          {locale === 'th'
-            ? `Shortlist นี้มี ${items.length} รายการสำหรับทบทวนต่อ โดยยังแยกจาก flow การติดต่อและ CRM ตาม guardrail เดิม`
-            : `This shortlist currently contains ${items.length} listings for review, while remaining separate from contact handoff and CRM flows.`}
+          <strong className="shortlist-surface__summary-title">{shortlistSummary.title}</strong>
+          <span>{shortlistSummary.body}</span>
         </div>
         <div className="card-actions shortlist-surface__summary-actions">
-          {compareHref ? (
+          {compareReady ? (
             <Link
               className="btn btn-cta"
-              href={compareHref}
+              href={compareHref ?? withLocale(locale, '/compare')}
               data-amp-event-type="compare_action"
               data-amp-event-payload={JSON.stringify({
                 source_route: 'shortlist',
                 cta_type: 'primary',
-                cta_label: locale === 'th'
-                  ? `เทียบ ${compareProjects.length} โครงการจาก shortlist`
-                  : `Compare ${compareProjects.length} saved projects`,
+                cta_label: shortlistSummary.primaryLabel,
                 entity_type: 'shortlist',
                 entity_name: 'shortlist',
                 user_intent: 'compare',
@@ -303,11 +350,13 @@ export function ShortlistListSurface({ locale }: { locale: 'en' | 'th' }) {
                 },
               })}
             >
-              {locale === 'th'
-                ? `เทียบ ${compareProjects.length} โครงการจาก shortlist`
-                : `Compare ${compareProjects.length} saved projects`}
+              {shortlistSummary.primaryLabel}
             </Link>
-          ) : null}
+          ) : (
+            <Link className="btn btn-cta" href={withLocale(locale, '/buy')}>
+              {shortlistSummary.primaryLabel}
+            </Link>
+          )}
           <Link
             className="btn btn-secondary"
             href={contactHref}
@@ -315,7 +364,7 @@ export function ShortlistListSurface({ locale }: { locale: 'en' | 'th' }) {
             data-amp-event-payload={JSON.stringify({
               source_route: 'shortlist',
               cta_type: 'secondary',
-              cta_label: locale === 'th' ? 'คุยกับที่ปรึกษา' : 'Speak to an advisor',
+              cta_label: advisorLabel,
               entity_type: 'shortlist',
               entity_name: 'shortlist',
               user_intent: compareProjects.length >= 2 ? 'compare' : 'research',
@@ -325,30 +374,26 @@ export function ShortlistListSurface({ locale }: { locale: 'en' | 'th' }) {
               },
             })}
           >
-            {locale === 'th' ? 'คุยกับที่ปรึกษา' : 'Speak to an advisor'}
+            {advisorLabel}
           </Link>
-          <Link className="btn btn-tertiary" href={withLocale(locale, '/buy')}>
-            {locale === 'th' ? 'ดู buy listings เพิ่ม' : 'Browse buy listings'}
-          </Link>
-          <button type="button" className="btn btn-tertiary" onClick={handleShare} disabled={isSharing}>
-            {isSharing
-              ? (locale === 'th' ? 'กำลังสร้างลิงก์แชร์…' : 'Creating share link…')
-              : shareUrl
-                ? (locale === 'th' ? 'คัดลอกลิงก์แชร์อีกครั้ง' : 'Copy share link again')
-                : (locale === 'th' ? 'สร้างลิงก์แชร์' : 'Create share link')}
-          </button>
         </div>
       </div>
 
       <div className="shortlist-compare-panel" aria-live="polite">
         <div className="shortlist-compare-panel__header">
           <h2 className="card-title mb-0">
-            {locale === 'th' ? 'เปลี่ยน shortlist ไปเป็น compare surface' : 'Move this shortlist into compare'}
+            {compareReady
+              ? (locale === 'th' ? 'โครงการชุดนี้พร้อมเข้า compare แล้ว' : 'These saved projects are ready for compare')
+              : (locale === 'th' ? 'ยังขาดอีก 1 โครงการก่อนเข้า compare' : 'You still need one more project before compare')}
           </h2>
           <p className="card-subtitle mb-0">
-            {locale === 'th'
-              ? 'ระบบจะดึงเฉพาะโครงการที่ผูกกับ listing ที่คุณบันทึกไว้ แล้วส่งไปยัง compare แบบ descriptive เท่านั้น'
-              : 'The compare step only carries forward projects that can be resolved from your saved listings, using the existing descriptive compare surface.'}
+            {compareReady
+              ? (locale === 'th'
+                  ? 'ระบบ resolve เฉพาะโครงการที่ผูกกับ listing ที่คุณบันทึกไว้ และพาไปอ่าน trade-off แบบ side-by-side โดยยังไม่แตะ contact flow'
+                  : 'Only project-backed saves are carried into compare, so you can read trade-offs side by side before touching the contact flow.')
+              : (locale === 'th'
+                  ? 'ตอนนี้ shortlist นี้ยัง resolve ได้ไม่พอสำหรับ compare แบบมีน้ำหนัก จึงควรเพิ่มอีก 1 ตัวเลือกหรือส่ง shortlist นี้ให้ทีมช่วยรีวิว'
+                  : 'This shortlist does not yet resolve enough project-backed options for a useful compare read, so the next move is either one more save or an advisor review.')}
           </p>
         </div>
 
@@ -376,6 +421,21 @@ export function ShortlistListSurface({ locale }: { locale: 'en' | 'th' }) {
               : 'This shortlist does not yet resolve to 2 projects for compare. Save at least one more project-backed listing to open the comparison table.'}
           </p>
         )}
+      </div>
+
+      <div className="card-actions shortlist-surface__utility-actions">
+        {shortlistSummary.browseUtilityLabel ? (
+          <Link className="btn btn-tertiary" href={withLocale(locale, '/buy')}>
+            {shortlistSummary.browseUtilityLabel}
+          </Link>
+        ) : null}
+        <button type="button" className="btn btn-tertiary" onClick={handleShare} disabled={isSharing}>
+          {isSharing
+            ? (locale === 'th' ? 'กำลังสร้างลิงก์แชร์…' : 'Creating share link…')
+            : shareUrl
+              ? (locale === 'th' ? 'คัดลอกลิงก์แชร์อีกครั้ง' : 'Copy share link again')
+              : (locale === 'th' ? 'สร้างลิงก์แชร์' : 'Create share link')}
+        </button>
       </div>
 
       {shareUrl ? (

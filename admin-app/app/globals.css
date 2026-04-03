@@ -7441,8 +7441,21 @@ summary.mobile-nav__trigger::-webkit-details-marker {
   gap: 14px;
 }
 
+.decision-page--shortlist .shortlist-surface__summary-title {
+  display: block;
+  margin-bottom: 6px;
+  color: rgba(7, 19, 39, 0.96);
+  font-size: 0.98rem;
+  line-height: 1.45;
+}
+
 .decision-page--shortlist .shortlist-surface__summary-actions {
   width: 100%;
+}
+
+.decision-page--shortlist .shortlist-surface__utility-actions {
+  margin-top: 12px;
+  margin-bottom: 16px;
 }
 
 .decision-page--shortlist .shortlist-compare-panel,

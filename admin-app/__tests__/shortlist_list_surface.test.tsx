@@ -119,9 +119,11 @@ describe('ShortlistListSurface', () => {
         '/en/compare?ids=project-1%2Cproject-2&intent=project_compare&source=shortlist_compare&projects=Alpha+Project%2CBeta+Project&buyer_fit=shortlist_narrowing&signal_level=medium',
       );
     });
-    expect(screen.getByRole('link', { name: /speak to an advisor/i }).getAttribute('href')).toBe(
+    expect(screen.getByText(/best next move: compare 2 saved projects/i)).toBeTruthy();
+    expect(screen.getByRole('link', { name: /send this shortlist for advisor review/i }).getAttribute('href')).toBe(
       '/en/contact?intent=project_shortlist&source=shortlist_contact&projects=Alpha+Project%2CBeta+Project&buyer_fit=shortlist_narrowing&signal_level=medium',
     );
+    expect(screen.getByRole('link', { name: /keep adding listings/i }).getAttribute('href')).toBe('/en/buy');
     expect(screen.getByText('Alpha Project')).toBeTruthy();
     expect(screen.getByText('Beta Project')).toBeTruthy();
   });
@@ -319,6 +321,10 @@ describe('ShortlistListSurface', () => {
     });
 
     expect(screen.queryByRole('link', { name: /compare saved projects/i })).toBeNull();
+    expect(screen.getByRole('link', { name: /add one more listing first/i }).getAttribute('href')).toBe('/en/buy');
+    expect(screen.getByRole('link', { name: /review this shortlist with an advisor/i }).getAttribute('href')).toBe(
+      '/en/contact?intent=project_shortlist&source=shortlist_contact&projects=Alpha+Project&buyer_fit=shortlist_narrowing&signal_level=medium',
+    );
   });
 
   it('syncs shortlist items from storage updates across tabs', async () => {

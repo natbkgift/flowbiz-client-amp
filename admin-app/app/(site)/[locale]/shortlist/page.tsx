@@ -79,11 +79,29 @@ export default async function ShortlistPage(props: { params: Promise<{ locale: s
           <div className="cta-row mt-6">
             <TrackedLink
               className="btn btn-cta"
-              href={`/${locale}/buy`}
+              href="#shortlist-review-surface"
               eventType="cta_click"
               eventPayload={{
                 source_route: 'shortlist',
                 cta_type: 'primary',
+                cta_label: locale === 'th' ? 'เปิดรายการที่บันทึกไว้' : 'Review saved listings',
+                entity_type: 'shortlist',
+                entity_name: 'shortlist',
+                user_intent: 'research',
+                context: {
+                  from_shortlist: true,
+                },
+              }}
+            >
+              {locale === 'th' ? 'เปิดรายการที่บันทึกไว้' : 'Review saved listings'}
+            </TrackedLink>
+            <TrackedLink
+              className="btn btn-tertiary"
+              href={`/${locale}/buy`}
+              eventType="cta_click"
+              eventPayload={{
+                source_route: 'shortlist',
+                cta_type: 'tertiary',
                 cta_label: locale === 'th' ? 'ดู listings ที่บันทึกเพิ่มได้' : 'Browse shortlist-ready listings',
                 entity_type: 'shortlist',
                 entity_name: 'shortlist',
@@ -94,24 +112,6 @@ export default async function ShortlistPage(props: { params: Promise<{ locale: s
               }}
             >
               {locale === 'th' ? 'ดู listings ที่บันทึกเพิ่มได้' : 'Browse shortlist-ready listings'}
-            </TrackedLink>
-            <TrackedLink
-              className="btn btn-tertiary"
-              href="#shortlist-review-surface"
-              eventType="cta_click"
-              eventPayload={{
-                source_route: 'shortlist',
-                cta_type: 'tertiary',
-                cta_label: locale === 'th' ? 'ไปยังรายการที่บันทึกไว้' : 'Jump to saved listings',
-                entity_type: 'shortlist',
-                entity_name: 'shortlist',
-                user_intent: 'research',
-                context: {
-                  from_shortlist: true,
-                },
-              }}
-            >
-              {locale === 'th' ? 'ไปยังรายการที่บันทึกไว้' : 'Jump to saved listings'}
             </TrackedLink>
           </div>
         </Container>
