@@ -8115,10 +8115,26 @@ summary.mobile-nav__trigger::-webkit-details-marker {
   gap: var(--space-5);
 }
 
+.split--form-priority .split__main {
+  order: 1;
+}
+
+.split--form-priority .split__aside {
+  order: 2;
+}
+
 @media (min-width: 1024px) {
   .split {
     grid-template-columns: 0.9fr 1.1fr;
     align-items: start;
+  }
+
+  .split--form-priority .split__aside {
+    order: 1;
+  }
+
+  .split--form-priority .split__main {
+    order: 2;
   }
 }
 

@@ -521,6 +521,21 @@ export default async function ContactPage(
     : isInvestmentPlanTopic
       ? (locale === 'th' ? 'Send your investment brief' : 'Send your investment brief')
       : dict.contact.formTitle;
+  const hasSpecializedContactContext =
+    isPrivateTourTopic
+    || isInvestmentPlanTopic
+    || hasLeadCaptureContext
+    || hasInvestorContext
+    || hasBuyingCostContext;
+  const contactHeroPrimaryLabel = isPrivateTourTopic
+    ? (locale === 'th' ? 'ส่ง private-tour brief' : 'Send private-tour brief')
+    : isInvestmentPlanTopic
+      ? (locale === 'th' ? 'ส่ง investment brief' : 'Send investment brief')
+      : leadCaptureContext.intent === 'project_compare'
+        ? (locale === 'th' ? 'ส่งบรีฟจาก compare นี้' : 'Continue with this compare brief')
+        : hasLeadCaptureContext || hasInvestorContext || hasBuyingCostContext
+          ? (locale === 'th' ? 'ส่งบรีฟต่อจากบริบทนี้' : 'Continue with this brief')
+          : dict.contact.formTitle;
 
   return (
     <main id="main-content">
@@ -565,7 +580,7 @@ export default async function ContactPage(
         ]}
         primaryAction={{
           href: '#contact-form',
-          label: locale === 'th' ? 'ส่ง brief ของคุณ' : 'Send your brief',
+          label: contactHeroPrimaryLabel,
           eventPayload: { cta: 'open_contact_form', from: 'contact_hero' },
         }}
         secondaryAction={{
@@ -582,33 +597,35 @@ export default async function ContactPage(
           : 'One brief is enough. The team will reply with a shortlist, a viewing plan, or the clearest next step.'}
       />
 
-      <section className="section section--alt">
-        <Container>
-          <div className="section-header">
-            <h2 className="section-title">{locale === 'th' ? 'Start from the route that fits' : 'Start from the route that fits'}</h2>
-            <p className="section-subtitle">
-              {locale === 'th'
-                ? 'เลือกเส้นทางที่ตรงกับเป้าหมายก่อนกรอกฟอร์ม เพื่อให้ทีมรับ brief ที่คมขึ้นตั้งแต่รอบแรก'
-                : 'Pick the route that fits your goal before filling the form so the team receives a sharper brief on the first pass.'}
-            </p>
-          </div>
-          <div className="grid grid-3">
-            {contactRouteCards.map((card) => (
-              <article key={card.key} className="card">
-                <h3 className="card-title">{card.title}</h3>
-                <p className="card-subtitle">{card.body}</p>
-                <div className="card-actions">
-                  <a className="btn btn-secondary" href={card.href}>{card.action}</a>
-                </div>
-              </article>
-            ))}
-          </div>
-        </Container>
-      </section>
+      {!hasSpecializedContactContext ? (
+        <section className="section section--alt">
+          <Container>
+            <div className="section-header">
+              <h2 className="section-title">{locale === 'th' ? 'Start from the route that fits' : 'Start from the route that fits'}</h2>
+              <p className="section-subtitle">
+                {locale === 'th'
+                  ? 'เลือกเส้นทางที่ตรงกับเป้าหมายก่อนกรอกฟอร์ม เพื่อให้ทีมรับ brief ที่คมขึ้นตั้งแต่รอบแรก'
+                  : 'Pick the route that fits your goal before filling the form so the team receives a sharper brief on the first pass.'}
+              </p>
+            </div>
+            <div className="grid grid-3">
+              {contactRouteCards.map((card) => (
+                <article key={card.key} className="card">
+                  <h3 className="card-title">{card.title}</h3>
+                  <p className="card-subtitle">{card.body}</p>
+                  <div className="card-actions">
+                    <a className="btn btn-secondary" href={card.href}>{card.action}</a>
+                  </div>
+                </article>
+              ))}
+            </div>
+          </Container>
+        </section>
+      ) : null}
 
       <section className="section">
         <Container>
-          <div className="split">
+          <div className="split split--form-priority">
             <aside className="split__aside">
               <h2 className="section-title">{contactAdvisoryTitle}</h2>
               <p className="section-subtitle">{contactAdvisoryBody}</p>
