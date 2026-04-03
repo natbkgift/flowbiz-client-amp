@@ -37,6 +37,10 @@ vi.mock('@/app/_lib/public-api-server', async () => {
         };
       }
 
+      if (projectId === 'project-stale') {
+        throw new Error('Failed to fetch project evaluation (500)');
+      }
+
       return {
         evaluation_version: 'v1',
         project: {
@@ -132,5 +136,25 @@ describe('compare area surface', () => {
       '/en/areas/pratumnak',
     ]);
     expect(screen.queryByRole('link', { name: /browse shortlist-ready listings/i })).toBeNull();
+  });
+
+  it('recovers into a shortlist-safe next step when a compare project no longer resolves', async () => {
+    render(
+      await ComparePage({
+        params: Promise.resolve({ locale: 'en' }),
+        searchParams: Promise.resolve({
+          ids: 'project-1,project-stale',
+          source: 'shortlist_compare',
+          purchasePrice: '5000000',
+        }),
+      }),
+    );
+
+    expect(screen.getByText(/this compare link now resolves to only 1 live project/i)).toBeTruthy();
+    expect(screen.getByText(/projects that need a fresh check: project-stale/i)).toBeTruthy();
+    expect(screen.getAllByRole('link', { name: /return to shortlist review/i })[0].getAttribute('href')).toBe('/en/shortlist');
+    expect(screen.getAllByRole('link', { name: /get investment plan/i })[0].getAttribute('href')).toContain('/en/contact?purchasePrice=5000000');
+    expect(screen.getAllByRole('link', { name: /get investment plan/i })[0].getAttribute('href')).toContain('ids=project-1');
+    expect(screen.queryByRole('heading', { name: /area comparison read/i })).toBeNull();
   });
 });

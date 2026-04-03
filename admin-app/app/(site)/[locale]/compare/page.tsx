@@ -291,6 +291,66 @@ function getCompareSupportNote(input: {
     : 'When you are ready to contact the team, the current compare set carries into the contact route without rebuilding the brief.';
 }
 
+function getCompareRecoveryCopy(input: {
+  locale: 'en' | 'th';
+  resolvedCount: number;
+  missingCount: number;
+}) {
+  if (input.locale === 'th') {
+    if (input.resolvedCount === 1) {
+      return {
+        title: 'ลิงก์ compare นี้เหลือโครงการที่ใช้งานได้เพียง 1 โครงการ',
+        body: 'compare จะเริ่มมีน้ำหนักเมื่อมีอย่างน้อย 2 โครงการที่ยัง resolve ได้ในเฟรมเดียวกัน ดังนั้นตอนนี้ควรกลับไปเติม shortlist เดิมหรือคัดตัวเลือกใหม่ก่อน',
+      };
+    }
+
+    return {
+      title: input.missingCount > 0 ? 'ลิงก์ compare นี้ไม่สามารถโหลดโครงการเดิมได้ครบ' : 'ลิงก์ compare นี้ยังไม่พร้อมสำหรับการตัดสินใจ',
+      body: 'บางโครงการอาจถูกถอดออกหรือ snapshot ใช้งานไม่ได้แล้ว ให้กลับไป shortlist เดิมหรือเลือกตัวเลือกใหม่ก่อนเปิด compare อีกครั้ง',
+    };
+  }
+
+  if (input.resolvedCount === 1) {
+    return {
+      title: 'This compare link now resolves to only 1 live project',
+      body: 'Compare becomes decision-useful only when at least 2 projects still resolve in the same frame, so the next move is to return to the shortlist or add one more live option first.',
+    };
+  }
+
+  return {
+    title: input.missingCount > 0 ? 'This compare link can no longer load the full project set' : 'This compare link is not decision-ready yet',
+    body: 'Some projects may have been removed or their current evaluation snapshot is unavailable, so the best move is to return to the shortlist or add fresh options before reopening compare.',
+  };
+}
+
+async function loadCompareEvaluations(ids: string[]) {
+  const settled = await Promise.allSettled(
+    ids.map(async (id) => ({
+      id,
+      evaluation: await fetchProjectEvaluation(id),
+    })),
+  );
+
+  const items: ProjectEvaluationResponse[] = [];
+  const missing: string[] = [];
+
+  settled.forEach((result, index) => {
+    const fallbackId = ids[index];
+    if (result.status === 'rejected') {
+      missing.push(fallbackId);
+      return;
+    }
+
+    if (!result.value.evaluation) {
+      missing.push(result.value.id);
+      return;
+    }
+
+    items.push(result.value.evaluation);
+  });
+
+  return { items, missing };
+}
 export default async function ComparePage(
   props: {
     params: Promise<{ locale: string }>;
@@ -517,9 +577,214 @@ export default async function ComparePage(
     );
   }
 
-  const evals = await Promise.all(ids.map((id) => fetchProjectEvaluation(id)));
-  const missing = ids.filter((_, idx) => evals[idx] == null);
-  const items = evals.filter(Boolean) as ProjectEvaluationResponse[];
+  const compareContinuationAction = getCompareContinuationAction({
+    locale,
+    source: compareSource,
+  });
+  const { items, missing } = await loadCompareEvaluations(ids);
+
+  if (items.length < 2) {
+    const recoveryCopy = getCompareRecoveryCopy({
+      locale,
+      resolvedCount: items.length,
+      missingCount: missing.length,
+    });
+    const recoveryIds = items.map((item) => item.project.id).filter(Boolean);
+    const recoveryContactHref = withLocaleQuery(locale, '/contact', buildInvestorToolQuery({
+      ...investorContext,
+      ids: recoveryIds,
+      intent: investorContext.intent ?? 'investment_plan',
+      source: investorContext.source ?? 'compare_unavailable',
+    }));
+
+    return (
+      <main id="main-content" className="decision-page decision-page--compare decision-page--confidence">
+        <PublicAdvisoryHero
+          eyebrow={dict.advisory.heroEyebrow}
+          title={dict.compare.title}
+          subtitle={dict.compare.requiresTwo}
+          proofs={advisoryProofs}
+          proofsLabel={advisoryLabels.proofsLabel}
+          guidanceLabel={advisoryLabels.guidanceLabel}
+          signals={[
+            {
+              kicker: dict.advisory.bestFor,
+              title: locale === 'th' ? 'ลิงก์ compare ต้องมีอย่างน้อย 2 โครงการที่ยังใช้งานได้' : 'Compare needs at least 2 live projects in the frame',
+              body: locale === 'th'
+                ? 'ถ้าบางโครงการหายไปหรือ snapshot ใช้งานไม่ได้ หน้านี้ควรพากลับไปเติมตัวเลือกก่อน ไม่ใช่ค้างอยู่บนหน้าเปล่า'
+                : 'If some projects disappear or their snapshots fail, this route should send you back to a stronger candidate set instead of leaving you on a broken screen.',
+              icon: 'trend',
+            },
+            {
+              kicker: dict.advisory.nextStep,
+              title: locale === 'th' ? compareContinuationAction.label : compareContinuationAction.label,
+              body: compareContinuationAction.note,
+              icon: 'check',
+            },
+            {
+              kicker: dict.advisory.trustSignal,
+              title: locale === 'th' ? 'brief เดิมยังพกต่อไปได้' : 'The existing brief still carries forward',
+              body: locale === 'th'
+                ? 'ถ้าคุณมาจาก calculator หรือมี context อยู่แล้ว ระบบยังพกข้อมูลชุดเดิมต่อไปยัง advisor handoff ได้'
+                : 'If you came from calculator or already carry investor context, the same brief can still move into advisor handoff.',
+              icon: 'shield',
+            },
+          ]}
+          primaryAction={{
+            href: compareContinuationAction.href,
+            label: compareContinuationAction.label,
+            id: 'compare_recovery_primary',
+            eventPayload: {
+              source_route: 'compare',
+              cta_type: 'primary',
+              cta_label: compareContinuationAction.label,
+              entity_type: 'route',
+              entity_name: compareContinuationAction.href.includes('/shortlist') ? 'shortlist' : 'buy',
+              user_intent: 'research',
+              context: {
+                compare_ids: ids,
+                recovery_mode: true,
+              },
+            },
+          }}
+          secondaryAction={investorContextPresent ? {
+            href: recoveryContactHref,
+            label: dict.compare.getInvestmentPlan,
+            id: 'compare_recovery_contact',
+            eventPayload: {
+              source_route: 'compare',
+              cta_type: 'secondary',
+              cta_label: dict.compare.getInvestmentPlan,
+              entity_type: 'route',
+              entity_name: 'contact',
+              user_intent: 'invest',
+              context: {
+                compare_ids: recoveryIds,
+                recovery_mode: true,
+              },
+            },
+          } : null}
+          supportNote={locale === 'th'
+            ? 'ถ้าลิงก์ compare นี้เก่าหรือ snapshot บางตัวหาย ระบบจะไม่ทิ้งคุณไว้บนหน้าเสีย แต่จะพากลับไปยังขั้นถัดไปที่ยังใช้งานได้'
+            : 'If this compare link is stale or some snapshots disappear, the route should recover into a usable next step instead of leaving you on a broken page.'}
+        />
+
+        <section className="section">
+          <Container>
+            <div className="trust-box mb-4">
+              <h2 className="trust-box__title">{recoveryCopy.title}</h2>
+              <p className="section-subtitle">{recoveryCopy.body}</p>
+              {missing.length ? (
+                <p className="guided-dialog__step mt-2.5">
+                  {locale === 'th'
+                    ? `รายการที่ต้องเช็กใหม่: ${missing.join(', ')}`
+                    : `Projects that need a fresh check: ${missing.join(', ')}`}
+                </p>
+              ) : null}
+            </div>
+
+            <div id="compare-readiness-pack" className="signal-grid signal-grid--three-up decision-pack mb-4">
+              <section className="authority-card reveal">
+                <h2 className="card-title">{locale === 'th' ? 'เกิดอะไรขึ้นกับ compare ชุดนี้' : 'What changed in this compare set'}</h2>
+                <p className="card-subtitle">
+                  {locale === 'th'
+                    ? 'หน้านี้ยังเปิดอยู่ แต่จำนวนโครงการที่ resolve ได้ไม่พอสำหรับตารางเทียบที่เชื่อถือได้'
+                    : 'This route is still available, but the number of live projects is no longer enough for a credible side-by-side compare.'}
+                </p>
+                <ul className="bullet-list mt-3">
+                  <li>{locale === 'th' ? `โครงการที่ยังใช้งานได้ตอนนี้: ${items.length}` : `Projects still resolving now: ${items.length}`}</li>
+                  <li>{locale === 'th' ? `โครงการที่ต้องเช็กใหม่: ${missing.length}` : `Projects that need a fresh check: ${missing.length}`}</li>
+                </ul>
+              </section>
+
+              <section className="authority-card reveal">
+                <h2 className="card-title">{locale === 'th' ? 'ขั้นถัดไปที่คุ้มกว่า' : 'Higher-value next move'}</h2>
+                <p className="card-subtitle">
+                  {locale === 'th'
+                    ? 'กลับไป shortlist เดิมหรือเพิ่มตัวเลือกใหม่ก่อน เพื่อให้ compare รอบถัดไปมีน้ำหนักจริง'
+                    : 'Return to the shortlist or add a fresh option first so the next compare round is actually decision-useful.'}
+                </p>
+                <ul className="bullet-list mt-3">
+                  <li>{compareContinuationAction.note}</li>
+                </ul>
+              </section>
+
+              <section className="authority-card reveal">
+                <h2 className="card-title">{locale === 'th' ? 'ถ้าต้องการคุยกับทีมตอนนี้' : 'If you need the team now'}</h2>
+                <p className="card-subtitle">
+                  {locale === 'th'
+                    ? 'investment brief ที่พกมาจากหน้าเดิมยังส่งต่อไป advisor ได้ แม้ compare ชุดนี้จะยังไม่สมบูรณ์'
+                    : 'Any investor brief carried into this route can still move into advisor handoff even when the compare set is no longer complete.'}
+                </p>
+                <ul className="bullet-list mt-3">
+                  {readinessLines.handoff.map((line) => (
+                    <li key={line}>{line}</li>
+                  ))}
+                </ul>
+              </section>
+            </div>
+
+            {investorContextPresent ? (
+              <div className="authority-card reveal compare-flow-card mb-4">
+                <h2 className="card-title">{locale === 'th' ? 'Investment brief ที่ยังพกต่อได้' : 'Investment brief that still carries forward'}</h2>
+                <p className="card-subtitle">
+                  {locale === 'th'
+                    ? 'แม้ compare ชุดนี้จะยังเปิดตารางไม่ได้ แต่ชุดตัวเลขจาก calculator หรือ brief เดิมยังส่งต่อให้ทีมได้ทันที'
+                    : 'Even though this compare set cannot open a full table right now, the calculator or investor brief can still move straight into the team handoff.'}
+                </p>
+                <ul className="bullet-list mt-3">
+                  {briefFacts.map((fact) => (
+                    <li key={fact}>{fact}</li>
+                  ))}
+                </ul>
+                <div className="cta-row mt-4">
+                  <Link
+                    className="btn btn-secondary"
+                    href={compareContinuationAction.href}
+                    data-amp-event-type="cta_click"
+                    data-amp-event-payload={JSON.stringify({
+                      source_route: 'compare',
+                      cta_type: 'secondary',
+                      cta_label: compareContinuationAction.label,
+                      entity_type: 'route',
+                      entity_name: compareContinuationAction.href.includes('/shortlist') ? 'shortlist' : 'buy',
+                      user_intent: 'research',
+                      context: {
+                        compare_ids: ids,
+                        recovery_mode: true,
+                      },
+                    })}
+                  >
+                    {compareContinuationAction.label}
+                  </Link>
+                  <Link
+                    className="btn btn-cta"
+                    href={recoveryContactHref}
+                    data-amp-event-type="cta_click"
+                    data-amp-event-payload={JSON.stringify({
+                      source_route: 'compare',
+                      cta_type: 'primary',
+                      cta_label: dict.compare.getInvestmentPlan,
+                      entity_type: 'route',
+                      entity_name: 'contact',
+                      user_intent: 'invest',
+                      context: {
+                        compare_ids: recoveryIds,
+                        recovery_mode: true,
+                      },
+                    })}
+                  >
+                    {dict.compare.getInvestmentPlan}
+                  </Link>
+                </div>
+              </div>
+            ) : null}
+          </Container>
+        </section>
+      </main>
+    );
+  }
+
   const areaComparisons = await buildAreaComparisonEntries(items, locale);
   const decisionSupportSummary = buildDecisionSupportSummary({ locale, items, areaComparisons });
   const compareContactHref = withLocaleQuery(locale, '/contact', {
@@ -534,10 +799,6 @@ export default async function ComparePage(
       buyerFit: investorContextPresent ? 'investor_compare' : 'shortlist_narrowing',
       signalLevel: items.length >= 3 ? 'high' : 'medium',
     }),
-  });
-  const compareContinuationAction = getCompareContinuationAction({
-    locale,
-    source: compareSource,
   });
   const compareSupportNote = getCompareSupportNote({
     locale,
