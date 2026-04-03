@@ -92,16 +92,22 @@ describe('compare decision support summary', () => {
         searchParams: Promise.resolve({ ids: 'project-1,project-2', source: 'shortlist_compare' }),
       }),
     );
+    const expectedContactHref = '/en/contact?ids=project-1%2Cproject-2&source=compare_hero&intent=project_compare&projects=alpha-residence%2Cbeta-bay&buyer_fit=shortlist_narrowing&signal_level=medium';
+    const compareContactLinks = screen.getAllByRole('link', { name: /get investment plan/i });
 
     expect(container.querySelector('#compare-decision-summary')).not.toBeNull();
-    expect(container.querySelector('#compare_consultation_hero')).toHaveAttribute('href', '/en/contact?ids=project-1%2Cproject-2&source=compare_hero&intent=project_compare&projects=alpha-residence%2Cbeta-bay&buyer_fit=shortlist_narrowing&signal_level=medium');
+    expect(container.querySelector('#compare_consultation_hero')).toHaveAttribute('href', expectedContactHref);
     expect(container.querySelector('#compare_continue_secondary')).toHaveAttribute('href', '/en/shortlist');
+    expect(compareContactLinks).toHaveLength(2);
+    compareContactLinks.forEach((link) => expect(link).toHaveAttribute('href', expectedContactHref));
     expect(screen.queryByRole('link', { name: /whatsapp/i })).toBeNull();
     expect(screen.getByRole('heading', { name: /decision support summary/i })).toBeTruthy();
     expect(screen.getByText(/you are currently reading 2 projects in one frame: alpha residence, beta bay/i)).toBeTruthy();
     expect(screen.getByText(/location is still an active decision variable because this set spans 2 different areas/i)).toBeTruthy();
     expect(screen.getByText(/1\/2 projects currently expose ROI snapshots, and 2\/2 projects have enough price or rent context/i)).toBeTruthy();
     expect(screen.getByText(/not to produce an investment verdict/i)).toBeTruthy();
+    expect(screen.getByText(/send the same shortlist and compare brief to the team without rebuilding the context/i)).toBeTruthy();
     expect(screen.getByText(/return to the shortlist to remove weaker options/i)).toBeTruthy();
+    expect(screen.queryByRole('link', { name: /browse shortlist-ready listings/i })).toBeNull();
   });
 });

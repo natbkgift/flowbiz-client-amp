@@ -274,6 +274,23 @@ function getCompareContinuationAction(input: {
   };
 }
 
+function getCompareSupportNote(input: {
+  locale: 'en' | 'th';
+  source: string | null;
+}) {
+  const fromShortlist = input.source?.startsWith('shortlist_') ?? false;
+
+  if (fromShortlist) {
+    return input.locale === 'th'
+      ? 'หลังอ่านตารางนี้แล้ว คุณส่ง shortlist เดิมพร้อม compare brief ชุดเดียวกันให้ทีมต่อได้เลย โดยไม่ต้องเริ่มอธิบายใหม่'
+      : 'After reading this table, you can send the same shortlist and compare brief to the team without rebuilding the context.';
+  }
+
+  return input.locale === 'th'
+    ? 'เมื่อพร้อมคุยกับทีม ระบบจะพกชุดโครงการที่กำลังเทียบอยู่หน้านี้ต่อไปยัง contact route โดยไม่ต้องกรอก context ซ้ำ'
+    : 'When you are ready to contact the team, the current compare set carries into the contact route without rebuilding the brief.';
+}
+
 export default async function ComparePage(
   props: {
     params: Promise<{ locale: string }>;
@@ -522,6 +539,10 @@ export default async function ComparePage(
     locale,
     source: compareSource,
   });
+  const compareSupportNote = getCompareSupportNote({
+    locale,
+    source: compareSource,
+  });
 
   return (
     <main id="main-content" className="decision-page decision-page--compare decision-page--confidence">
@@ -590,6 +611,7 @@ export default async function ComparePage(
             },
           },
         }}
+        supportNote={compareSupportNote}
       />
 
       <section className="section">
@@ -836,26 +858,8 @@ export default async function ComparePage(
                 {compareContinuationAction.label}
               </Link>
               <Link
-                className="btn btn-tertiary"
-                href={withLocale(locale, '/buy')}
-                data-amp-event-type="cta_click"
-                data-amp-event-payload={JSON.stringify({
-                  source_route: 'compare',
-                  cta_type: 'tertiary',
-                  cta_label: locale === 'th' ? 'ดูตัวเลือกที่พร้อมบันทึกไว้เทียบต่อ' : 'Browse shortlist-ready listings',
-                  entity_type: 'route',
-                  entity_name: 'buy',
-                  user_intent: 'research',
-                  context: {
-                    compare_ids: ids,
-                  },
-                })}
-              >
-                {locale === 'th' ? 'ดูตัวเลือกที่พร้อมบันทึกไว้เทียบต่อ' : 'Browse shortlist-ready listings'}
-              </Link>
-              <Link
                 className="btn btn-cta"
-                href={contactHref}
+                href={compareContactHref}
                 data-amp-event-type="cta_click"
                 data-amp-event-payload={JSON.stringify({
                   source_route: 'compare',

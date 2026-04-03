@@ -136,18 +136,21 @@ describe('investor handoff regression', () => {
     expect(screen.getByText(/target purchase price:/i)).toBeTruthy();
     expect(screen.getByText(/monthly rent:/i)).toBeTruthy();
     expect(screen.getByText(/gross yield: 6\.48%/i)).toBeTruthy();
-    const compareReviewLink = screen
+    const compareReviewLinks = screen
       .getAllByRole('link', { name: /get investment plan/i })
-      .find((link) => link.getAttribute('href')?.includes('source=compare_hero'));
+      .filter((link) => link.getAttribute('href')?.includes('source=compare_hero'));
 
-    if (!compareReviewLink) {
+    if (!compareReviewLinks.length) {
       throw new Error('expected compare page to expose a normalized compare lead handoff link');
     }
 
-    expect(compareReviewLink.getAttribute('href')).toContain('/en/contact?purchasePrice=5000000');
-    expect(compareReviewLink.getAttribute('href')).toContain('ids=alpha%2Cbeta');
-    expect(compareReviewLink.getAttribute('href')).toContain('intent=project_compare');
-    expect(compareReviewLink.getAttribute('href')).toContain('source=compare_hero');
+    expect(compareReviewLinks).toHaveLength(2);
+    compareReviewLinks.forEach((link) => {
+      expect(link.getAttribute('href')).toContain('/en/contact?purchasePrice=5000000');
+      expect(link.getAttribute('href')).toContain('ids=alpha%2Cbeta');
+      expect(link.getAttribute('href')).toContain('intent=project_compare');
+      expect(link.getAttribute('href')).toContain('source=compare_hero');
+    });
 
     compareScreen.unmount();
 

@@ -110,11 +110,16 @@ describe('compare area surface', () => {
         searchParams: Promise.resolve({ ids: 'project-1,project-2' }),
       }),
     );
+    const expectedContactHref = '/en/contact?ids=project-1%2Cproject-2&intent=project_compare&source=compare_hero&projects=alpha-residence%2Cbeta-bay&buyer_fit=shortlist_narrowing&signal_level=medium';
+    const compareContactLinks = screen.getAllByRole('link', { name: /get investment plan/i });
 
     expect(container.querySelector('#compare-area-context')).not.toBeNull();
-    expect(container.querySelector('#compare_consultation_hero')).toHaveAttribute('href', '/en/contact?ids=project-1%2Cproject-2&intent=project_compare&source=compare_hero&projects=alpha-residence%2Cbeta-bay&buyer_fit=shortlist_narrowing&signal_level=medium');
+    expect(container.querySelector('#compare_consultation_hero')).toHaveAttribute('href', expectedContactHref);
     expect(container.querySelector('#compare_continue_secondary')).toHaveAttribute('href', '/en/buy');
+    expect(compareContactLinks).toHaveLength(2);
+    compareContactLinks.forEach((link) => expect(link).toHaveAttribute('href', expectedContactHref));
     expect(screen.getByRole('heading', { name: /area comparison read/i })).toBeTruthy();
+    expect(screen.getByText(/current compare set carries into the contact route without rebuilding the brief/i)).toBeTruthy();
     expect(screen.getByText(/if this comparison still needs more context/i)).toBeTruthy();
     expect(screen.getByRole('heading', { name: 'Jomtien' })).toBeTruthy();
     expect(screen.getByRole('heading', { name: 'Pratumnak' })).toBeTruthy();
@@ -126,5 +131,6 @@ describe('compare area surface', () => {
       '/en/areas/jomtien',
       '/en/areas/pratumnak',
     ]);
+    expect(screen.queryByRole('link', { name: /browse shortlist-ready listings/i })).toBeNull();
   });
 });
