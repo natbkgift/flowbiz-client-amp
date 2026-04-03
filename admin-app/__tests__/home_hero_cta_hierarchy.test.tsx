@@ -120,6 +120,8 @@ describe('HomeHero CTA hierarchy', () => {
     expect(images[0]).toHaveAttribute('src', '/media/library/hero.webp');
     expect(screen.getByRole('heading', { name: 'Find the right Pattaya property path' })).toBeInTheDocument();
     expect(screen.getByText('Open a sharper coastal route')).toBeInTheDocument();
+    expect(screen.getByText('AMP Pattaya')).toBeInTheDocument();
+    expect(screen.queryByText('Wongamat')).toBeNull();
     expect(screen.getByLabelText('Hero slide controls')).toBeInTheDocument();
   });
 });

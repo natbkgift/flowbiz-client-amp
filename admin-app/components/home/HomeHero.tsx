@@ -98,6 +98,9 @@ export function HomeHero({
   const touchStartX = useRef<number | null>(null);
   const slideCount = resolvedSlides.length;
   const activeSlide = resolvedSlides[Math.min(activeIndex, resolvedSlides.length - 1)] ?? resolvedSlides[0];
+  const stableEyebrow = typeof composer?.eyebrow === 'string' && composer.eyebrow.trim()
+    ? composer.eyebrow.trim()
+    : dict.advisory.heroEyebrow;
   const stableHeading = typeof composer?.heading === 'string' && composer.heading.trim()
     ? composer.heading.trim()
     : dict.home.heroTitle;
@@ -237,7 +240,7 @@ export function HomeHero({
       <div className="home-hero-slider__content">
         <Container variant="wide">
           <div className="home-hero-slider__panel">
-            <p className="home-hero-slider__eyebrow">{activeSlide.eyebrow}</p>
+            <p className="home-hero-slider__eyebrow">{stableEyebrow}</p>
             {contextualLine ? <p className="home-hero-slider__context">{contextualLine}</p> : null}
             <h1 className={`home-hero-slider__title ${locale === 'th' ? 'home-hero-slider__title--th' : ''}`}>
               {stableHeading}
