@@ -439,6 +439,10 @@ export default async function ContactPage(
     ? (locale === 'th' ? 'นัด private tour บน shortlist ที่เหมาะก่อน' : 'Book a private tour with the right shortlist first')
     : isInvestmentPlanTopic
       ? (locale === 'th' ? 'คุยแผนลงทุนพัทยา โดยมีบริบทพร้อมแล้ว' : 'Discuss your Pattaya investment plan with context already in place')
+      : leadCaptureContext.intent === 'project_compare'
+        ? (locale === 'th' ? 'คุยต่อจาก compare นี้กับ AMP Pattaya' : 'Continue from this comparison with AMP Pattaya')
+        : leadCaptureContext.intent === 'project_shortlist'
+          ? (locale === 'th' ? 'คุย shortlist นี้ต่อกับ AMP Pattaya' : 'Review this shortlist with AMP Pattaya')
       : (locale === 'th' ? 'คุยกับ AMP Pattaya เพื่อไปขั้นถัดไปที่ชัดกว่า' : 'Talk to AMP Pattaya about the next serious step');
   const contactHeroSubtitle = isPrivateTourTopic
     ? (locale === 'th'
@@ -448,6 +452,14 @@ export default async function ContactPage(
       ? (locale === 'th'
         ? 'เริ่มจากงบประมาณ ผลตอบแทนที่คาดหวัง และ thesis การลงทุน เพื่อให้ shortlist ที่ได้คมขึ้นตั้งแต่รอบแรก'
         : 'Start from your budget, return goals, and thesis so the first shortlist is sharper and more credible.')
+      : leadCaptureContext.intent === 'project_compare'
+        ? (locale === 'th'
+          ? 'ระบบจะพก compare brief เดิมต่อไป เพื่อให้ทีมช่วยบีบ shortlist และชี้ next step โดยไม่ต้องอธิบาย context ซ้ำ'
+          : 'The same compare brief carries forward so the team can tighten the shortlist and point to the next step without rebuilding the context.')
+        : leadCaptureContext.intent === 'project_shortlist'
+          ? (locale === 'th'
+            ? 'ระบบจะพก shortlist ที่คุณกำลังดูอยู่ต่อไป เพื่อให้ทีมช่วยคัดตัวเลือกที่ควรเก็บ ควรตัด และควรเช็กต่อ'
+            : 'The same shortlist context carries forward so the team can help decide what to keep, cut, and check next.')
       : (locale === 'th'
         ? 'เลือกเส้นทางที่ตรงกับโจทย์ของคุณ แล้วทีมจะตอบกลับด้วย shortlist, private tour, หรือ next step ที่ชัดเจน'
         : 'Choose the route that fits your goal and the team will come back with a shortlist, private tour, or a clear next step.');
@@ -522,6 +534,8 @@ export default async function ContactPage(
     ? (locale === 'th' ? 'ส่ง brief สำหรับ private tour' : 'Send your private-tour brief')
     : isInvestmentPlanTopic
       ? (locale === 'th' ? 'ส่ง brief การลงทุน' : 'Send your investment brief')
+      : leadCaptureContext.intent === 'project_shortlist'
+        ? (locale === 'th' ? 'ส่งบรีฟ shortlist นี้' : 'Send your shortlist brief')
       : dict.contact.formTitle;
   const hasSpecializedContactContext =
     isPrivateTourTopic
@@ -533,6 +547,8 @@ export default async function ContactPage(
     ? (locale === 'th' ? 'ส่งโจทย์ private tour' : 'Send private-tour brief')
     : isInvestmentPlanTopic
       ? (locale === 'th' ? 'ส่ง brief การลงทุน' : 'Send investment brief')
+      : leadCaptureContext.intent === 'project_shortlist'
+        ? (locale === 'th' ? 'ส่งบรีฟ shortlist นี้' : 'Continue with this shortlist brief')
       : leadCaptureContext.intent === 'project_compare'
         ? (locale === 'th' ? 'ส่งบรีฟจาก compare นี้' : 'Continue with this compare brief')
         : hasLeadCaptureContext || hasInvestorContext || hasBuyingCostContext

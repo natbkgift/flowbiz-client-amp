@@ -34,6 +34,7 @@ describe('contact page shell', () => {
     );
 
     expect(screen.queryByRole('heading', { name: /start from the route that fits/i })).toBeNull();
+    expect(screen.getByRole('heading', { name: /continue from this comparison with amp pattaya/i })).toBeTruthy();
     expect(screen.getByRole('link', { name: /continue with this compare brief/i }).getAttribute('href')).toBe('#contact-form');
     expect(screen.queryByRole('link', { name: /use smart finder/i })).toBeNull();
     expect(container.querySelector('.public-hero__action--secondary')).toBeNull();
@@ -81,7 +82,9 @@ describe('contact page shell', () => {
     );
 
     expect(screen.queryByRole('heading', { name: /start from the route that fits/i })).toBeNull();
+    expect(screen.getByRole('heading', { name: /review this shortlist with amp pattaya/i })).toBeTruthy();
     expect(screen.getByRole('heading', { name: /lead handoff summary/i })).toBeTruthy();
+    expect(screen.getByRole('link', { name: /continue with this shortlist brief/i }).getAttribute('href')).toBe('#contact-form');
     expect(screen.getByText(/handoff source: shared shortlist link/i)).toBeTruthy();
     expect(screen.getByText(/project in focus: alpha project/i)).toBeTruthy();
   });
