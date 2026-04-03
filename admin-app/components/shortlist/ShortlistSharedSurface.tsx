@@ -200,7 +200,7 @@ export function ShortlistSharedSurface({ locale, shareToken }: { locale: 'en' | 
 
   return (
     <div className="shortlist-surface">
-      <div className="cta-strip shortlist-surface__summary">
+      <div id="shared-shortlist-summary" className="cta-strip shortlist-surface__summary">
         <div className="cta-strip__text">
           <strong className="shortlist-surface__summary-title">{shortlistSummary.title}</strong>
           <span>{shortlistSummary.body}</span>

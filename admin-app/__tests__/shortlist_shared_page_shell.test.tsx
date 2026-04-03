@@ -19,6 +19,10 @@ describe('shared shortlist page shell', () => {
 
     expect(screen.getByRole('heading', { name: /shared shortlist/i })).toBeTruthy();
     expect(screen.getByText(/review an owner-safe shortlist in read-only mode first/i)).toBeTruthy();
+    expect(screen.getByRole('link', { name: /review this shared shortlist/i }).getAttribute('href')).toBe('#shared-shortlist-summary');
+    expect(screen.getByRole('link', { name: /start your own shortlist/i }).getAttribute('href')).toBe('/en/buy');
+    expect(screen.getByText(/owner-safe shared link/i)).toBeTruthy();
+    expect(screen.getByText(/read-only review mode/i)).toBeTruthy();
     expect(screen.getByTestId('shared-shortlist-surface').textContent).toBe('en:token-123');
   });
 });
