@@ -54,7 +54,7 @@ describe('public Thai catalogue copy', () => {
 
     expect(markup).toContain('โครงการที่เปิดอยู่');
     expect(markup).toContain('ดูทำเล ราคาเริ่มต้น และสรุปสั้นก่อนเปิดรายละเอียด');
-    expect(markup).toContain('คุยกับทีม');
+    expect(markup).toContain('ขอคำแนะนำคัดโครงการ');
     expect(markup).not.toContain('inventory');
     expect(markup).not.toContain('shortlist');
     expect(markup).not.toContain('next move');

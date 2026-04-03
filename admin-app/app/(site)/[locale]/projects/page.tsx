@@ -227,10 +227,11 @@ export default async function ProjectsPage(props: { params: Promise<{ locale: st
     ).length;
     const projectProofs = [
       locale === 'th' ? `${sorted.length} โครงการที่เผยแพร่แล้ว` : `${sorted.length} published projects`,
+      advisoryProofs[1] ?? null,
       liveEntryPrice ? `${locale === 'th' ? 'เริ่มต้น' : 'Entry from'} ${formatCompactPrice(liveEntryPrice, locale)}` : null,
       luxuryProjectCount > 0 ? (locale === 'th' ? `${luxuryProjectCount} โครงการกลุ่มลักชัวรี` : `${luxuryProjectCount} luxury-led projects`) : null,
-      ...advisoryProofs,
-    ].filter((item): item is string => Boolean(item)).slice(0, 2);
+      advisoryProofs[2] ?? null,
+    ].filter((item): item is string => Boolean(item)).slice(0, 3);
     const jsonLd = JSON.stringify(
       {
         '@context': 'https://schema.org',
@@ -263,12 +264,15 @@ export default async function ProjectsPage(props: { params: Promise<{ locale: st
             ? 'ดูทำเล ราคาเริ่มต้น และสรุปสั้นก่อนเปิดรายละเอียด'
             : 'See location, entry pricing, and a short summary before opening details.'}
           proofs={projectProofs}
+          supportNote={locale === 'th'
+            ? 'เริ่มจากโครงการที่ตรวจข้อมูลแล้ว แล้วค่อยคุยต่อเฉพาะตัวเลือกที่เหมาะกับงบ ทำเล และเป้าหมายของคุณ'
+            : 'Start with verified project snapshots, then narrow the next conversation around fit, location, and budget.'}
           proofsLabel={advisoryLabels.proofsLabel}
           guidanceLabel={advisoryLabels.guidanceLabel}
           signals={[]}
           primaryAction={{
             href: withLocaleQuery(locale, '/contact', { intent: 'shortlist', source: 'projects_hero' }),
-            label: locale === 'th' ? 'คุยกับทีม' : 'Talk with the team',
+            label: locale === 'th' ? 'ขอคำแนะนำคัดโครงการ' : 'Request project guidance',
             eventPayload: { cta: 'projects_shortlist', from: 'projects_hero' },
             prefetch: false,
           }}
@@ -337,7 +341,7 @@ export default async function ProjectsPage(props: { params: Promise<{ locale: st
                     ) : null}
                     <div className="card-actions project-catalogue-card__actions">
                       <Link className="btn btn-secondary" href={`/${locale}/projects/${p.slug}`} prefetch={false}>
-                        {dict.listing.viewDetails}
+                        {locale === 'th' ? 'ดูสรุปโครงการ' : 'Review project'}
                       </Link>
                     </div>
                   </div>
@@ -424,4 +428,3 @@ export default async function ProjectsPage(props: { params: Promise<{ locale: st
     </main>
   );
 }
-
