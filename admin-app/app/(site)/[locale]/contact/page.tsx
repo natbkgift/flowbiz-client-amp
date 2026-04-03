@@ -37,10 +37,10 @@ export async function generateMetadata(
   const topic = readSingleSearchParam(searchParams, 'topic');
   const normalizedTopic = String(topic || '').trim().toLowerCase();
   const title = normalizedTopic === 'private_tour'
-    ? (locale === 'th' ? 'Book a private tour with the right shortlist first' : 'Book a private tour with the right shortlist first')
+    ? (locale === 'th' ? 'นัด private tour บน shortlist ที่เหมาะก่อน' : 'Book a private tour with the right shortlist first')
     : normalizedTopic === 'investment_plan'
-      ? (locale === 'th' ? 'Discuss your Pattaya investment plan with context already in place' : 'Discuss your Pattaya investment plan with context already in place')
-      : (locale === 'th' ? 'Talk to AMP Pattaya about the next serious step' : 'Talk to AMP Pattaya about the next serious step');
+      ? (locale === 'th' ? 'คุยแผนลงทุนพัทยา โดยมีบริบทพร้อมแล้ว' : 'Discuss your Pattaya investment plan with context already in place')
+      : (locale === 'th' ? 'คุยกับ AMP Pattaya เพื่อไปขั้นถัดไปที่ชัดกว่า' : 'Talk to AMP Pattaya about the next serious step');
   const description = normalizedTopic === 'private_tour'
     ? (locale === 'th'
       ? 'ส่งงบประมาณ ทำเล และช่วงเวลาที่สะดวกเพื่อให้ทีมคัด shortlist และจัด private tour ที่เหมาะก่อนนัดจริง'
@@ -434,10 +434,10 @@ export default async function ContactPage(
       : undefined;
 
   const contactHeroTitle = isPrivateTourTopic
-    ? (locale === 'th' ? 'Book a private tour with the right shortlist first' : 'Book a private tour with the right shortlist first')
+    ? (locale === 'th' ? 'นัด private tour บน shortlist ที่เหมาะก่อน' : 'Book a private tour with the right shortlist first')
     : isInvestmentPlanTopic
-      ? (locale === 'th' ? 'Discuss your Pattaya investment plan with context already in place' : 'Discuss your Pattaya investment plan with context already in place')
-      : (locale === 'th' ? 'Talk to AMP Pattaya about the next serious step' : 'Talk to AMP Pattaya about the next serious step');
+      ? (locale === 'th' ? 'คุยแผนลงทุนพัทยา โดยมีบริบทพร้อมแล้ว' : 'Discuss your Pattaya investment plan with context already in place')
+      : (locale === 'th' ? 'คุยกับ AMP Pattaya เพื่อไปขั้นถัดไปที่ชัดกว่า' : 'Talk to AMP Pattaya about the next serious step');
   const contactHeroSubtitle = isPrivateTourTopic
     ? (locale === 'th'
       ? 'ส่งทำเล งบประมาณ และช่วงเวลาที่สะดวก แล้วทีมจะคัด viewing route ที่เหมาะก่อนนัดดูจริง'
@@ -450,15 +450,15 @@ export default async function ContactPage(
         ? 'เลือกเส้นทางที่ตรงกับโจทย์ของคุณ แล้วทีมจะตอบกลับด้วย shortlist, private tour, หรือ next step ที่ชัดเจน'
         : 'Choose the route that fits your goal and the team will come back with a shortlist, private tour, or a clear next step.');
   const contactProofs = [
-    locale === 'th' ? 'Local Pattaya team' : 'Local Pattaya team',
+    locale === 'th' ? 'ทีมพัทยาที่ดูแลในพื้นที่' : 'Local Pattaya team',
     locale === 'th' ? 'WhatsApp / LINE / private tour' : 'WhatsApp / LINE / private tour',
-    locale === 'th' ? 'PDPA / GDPR aligned' : 'PDPA / GDPR aligned',
-    locale === 'th' ? 'Action-oriented replies' : 'Action-oriented replies',
+    locale === 'th' ? 'สอดคล้อง PDPA / GDPR' : 'PDPA / GDPR aligned',
+    locale === 'th' ? 'ตอบกลับแบบมี action ชัด' : 'Action-oriented replies',
   ];
   const contactRouteCards = [
     {
       key: 'investment',
-      title: locale === 'th' ? 'Investment plan' : 'Investment plan',
+      title: locale === 'th' ? 'แผนลงทุน' : 'Investment plan',
       body: locale === 'th'
         ? 'เหมาะกับผู้ลงทุนที่ต้องการเริ่มจาก ROI, downside, และ shortlist ตาม thesis'
         : 'For investors who want to start from ROI, downside, and a shortlist built around the thesis.',
@@ -467,7 +467,7 @@ export default async function ContactPage(
     },
     {
       key: 'private-tour',
-      title: locale === 'th' ? 'Private tour' : 'Private tour',
+      title: locale === 'th' ? 'Private tour แบบคัดมาก่อน' : 'Private tour',
       body: locale === 'th'
         ? 'เหมาะกับผู้ซื้อระดับบนที่ต้องการ shortlist สั้นและนัดดูแบบมี privacy'
         : 'For high-end buyers who want a shorter shortlist and a more private viewing handoff.',
@@ -476,7 +476,7 @@ export default async function ContactPage(
     },
     {
       key: 'general',
-      title: locale === 'th' ? 'Curated shortlist' : 'Curated shortlist',
+      title: locale === 'th' ? 'Shortlist ที่คัดตามโจทย์' : 'Curated shortlist',
       body: locale === 'th'
         ? 'เหมาะกับผู้ซื้ออยู่อาศัยจริงหรือย้ายมาอยู่ ที่ต้องการเริ่มจากทำเล งบ และขั้นตอนที่ชัด'
         : 'For end-users and relocators who want to start from area, budget, and a cleaner next step.',
@@ -485,9 +485,9 @@ export default async function ContactPage(
     },
   ];
   const contactAdvisoryTitle = isPrivateTourTopic
-    ? (locale === 'th' ? 'Private-tour handoff' : 'Private-tour handoff')
+    ? (locale === 'th' ? 'ส่งต่อโจทย์ private tour' : 'Private-tour handoff')
     : isInvestmentPlanTopic
-      ? (locale === 'th' ? 'Investment-plan handoff' : 'Investment-plan handoff')
+      ? (locale === 'th' ? 'ส่งต่อโจทย์การลงทุน' : 'Investment-plan handoff')
       : dict.contact.advisoryTitle;
   const contactAdvisoryBody = isPrivateTourTopic
     ? (locale === 'th'
@@ -499,9 +499,9 @@ export default async function ContactPage(
         : 'Share budget, return goals, and downside concerns and the team will respond with a shortlist and next step shaped around your investment thesis.')
       : dict.contact.advisoryBody;
   const contactTrustTitle = isPrivateTourTopic
-    ? (locale === 'th' ? 'Private-tour standards' : 'Private-tour standards')
+    ? (locale === 'th' ? 'มาตรฐานการจัด private tour' : 'Private-tour standards')
     : isInvestmentPlanTopic
-      ? (locale === 'th' ? 'Investor response standard' : 'Investor response standard')
+      ? (locale === 'th' ? 'มาตรฐานการตอบกลับสำหรับนักลงทุน' : 'Investor response standard')
       : dict.contact.trustTitle;
   const contactTrustBullets = isPrivateTourTopic
     ? [
@@ -517,9 +517,9 @@ export default async function ContactPage(
         ]
       : dict.contact.trustBullets;
   const contactFormHeading = isPrivateTourTopic
-    ? (locale === 'th' ? 'Send your private-tour brief' : 'Send your private-tour brief')
+    ? (locale === 'th' ? 'ส่ง brief สำหรับ private tour' : 'Send your private-tour brief')
     : isInvestmentPlanTopic
-      ? (locale === 'th' ? 'Send your investment brief' : 'Send your investment brief')
+      ? (locale === 'th' ? 'ส่ง brief การลงทุน' : 'Send your investment brief')
       : dict.contact.formTitle;
   const hasSpecializedContactContext =
     isPrivateTourTopic
@@ -528,9 +528,9 @@ export default async function ContactPage(
     || hasInvestorContext
     || hasBuyingCostContext;
   const contactHeroPrimaryLabel = isPrivateTourTopic
-    ? (locale === 'th' ? 'ส่ง private-tour brief' : 'Send private-tour brief')
+    ? (locale === 'th' ? 'ส่งโจทย์ private tour' : 'Send private-tour brief')
     : isInvestmentPlanTopic
-      ? (locale === 'th' ? 'ส่ง investment brief' : 'Send investment brief')
+      ? (locale === 'th' ? 'ส่ง brief การลงทุน' : 'Send investment brief')
       : leadCaptureContext.intent === 'project_compare'
         ? (locale === 'th' ? 'ส่งบรีฟจาก compare นี้' : 'Continue with this compare brief')
         : hasLeadCaptureContext || hasInvestorContext || hasBuyingCostContext
@@ -601,7 +601,7 @@ export default async function ContactPage(
         <section className="section section--alt">
           <Container>
             <div className="section-header">
-              <h2 className="section-title">{locale === 'th' ? 'Start from the route that fits' : 'Start from the route that fits'}</h2>
+              <h2 className="section-title">{locale === 'th' ? 'เริ่มจากเส้นทางที่ตรงกับโจทย์' : 'Start from the route that fits'}</h2>
               <p className="section-subtitle">
                 {locale === 'th'
                   ? 'เลือกเส้นทางที่ตรงกับเป้าหมายก่อนกรอกฟอร์ม เพื่อให้ทีมรับ brief ที่คมขึ้นตั้งแต่รอบแรก'
