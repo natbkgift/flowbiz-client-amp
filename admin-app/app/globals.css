@@ -7435,6 +7435,35 @@ summary.mobile-nav__trigger::-webkit-details-marker {
   padding: clamp(16px, 4vw, 24px);
 }
 
+.contact-route-card {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-height: 100%;
+  text-decoration: none;
+  transition: transform 0.22s ease, box-shadow 0.22s ease, border-color 0.22s ease;
+}
+
+.contact-route-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 20px 42px rgba(15, 23, 42, 0.08);
+}
+
+.contact-route-card__action {
+  margin-top: auto;
+  display: inline-flex;
+  align-items: center;
+  min-height: 40px;
+  width: fit-content;
+  padding: 0 14px;
+  border-radius: 999px;
+  border: 1px solid rgba(7, 19, 39, 0.1);
+  background: rgba(7, 19, 39, 0.04);
+  color: rgba(7, 19, 39, 0.9);
+  font-size: 0.88rem;
+  font-weight: 600;
+}
+
 .decision-page--shortlist .shortlist-surface__summary {
   margin-top: 0;
   padding: 16px;

@@ -14,11 +14,15 @@ describe('contact page shell', () => {
 
     expect(screen.getByRole('heading', { name: /start from the route that fits/i })).toBeTruthy();
     expect(screen.getByRole('link', { name: /send your request/i }).getAttribute('href')).toBe('#contact-form');
+    expect(screen.queryByRole('link', { name: /use smart finder/i })).toBeNull();
+    expect(container.querySelector('.public-hero__action--secondary')).toBeNull();
+    expect(container.querySelector('.public-hero__action--tertiary')).toBeNull();
+    expect(screen.getByRole('link', { name: /open investment route/i }).getAttribute('href')).toBe('/en/contact?topic=investment_plan');
     expect(container.querySelector('.split.split--form-priority')).not.toBeNull();
   });
 
   it('hides the route chooser when a compare handoff is already in place', async () => {
-    render(
+    const { container } = render(
       await ContactPage({
         params: Promise.resolve({ locale: 'en' }),
         searchParams: Promise.resolve({
@@ -31,6 +35,9 @@ describe('contact page shell', () => {
 
     expect(screen.queryByRole('heading', { name: /start from the route that fits/i })).toBeNull();
     expect(screen.getByRole('link', { name: /continue with this compare brief/i }).getAttribute('href')).toBe('#contact-form');
+    expect(screen.queryByRole('link', { name: /use smart finder/i })).toBeNull();
+    expect(container.querySelector('.public-hero__action--secondary')).toBeNull();
+    expect(container.querySelector('.public-hero__action--tertiary')).toBeNull();
     expect(screen.getByRole('heading', { name: /lead handoff summary/i })).toBeTruthy();
   });
 

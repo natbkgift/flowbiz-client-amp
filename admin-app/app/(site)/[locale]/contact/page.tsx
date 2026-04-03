@@ -1,4 +1,5 @@
 import dynamic from 'next/dynamic';
+import Link from 'next/link';
 
 import { Container } from '@/components/layout/Container';
 import { Breadcrumbs } from '@/components/layout/Breadcrumbs';
@@ -583,18 +584,9 @@ export default async function ContactPage(
           label: contactHeroPrimaryLabel,
           eventPayload: { cta: 'open_contact_form', from: 'contact_hero' },
         }}
-        secondaryAction={{
-          href: withLocaleQuery(locale, '/smart-finder', { source: 'contact_hero' }),
-          label: dict.advisory.useSmartFinder,
-          eventPayload: { cta: 'use_smart_finder', from: 'contact_hero' },
-        }}
-        tertiaryAction={{
-          href: buildAdvisorWhatsApp(locale, dict),
-          label: dict.cta.whatsapp,
-        }}
         supportNote={locale === 'th'
-          ? 'อธิบายโจทย์ครั้งเดียวก็พอ ทีมจะตอบกลับด้วย shortlist, viewing plan, หรือ next step ที่ชัดกว่าเดิม'
-          : 'One brief is enough. The team will reply with a shortlist, a viewing plan, or the clearest next step.'}
+          ? 'อธิบายโจทย์ครั้งเดียวก็พอ ทีมจะตอบกลับด้วย shortlist, viewing plan, หรือ next step ที่ชัดกว่าเดิม หากต้องการคุยเร็วขึ้น ยังใช้ WhatsApp หรือ LINE ด้านล่างได้'
+          : 'One brief is enough. The team will reply with a shortlist, a viewing plan, or the clearest next step. If you prefer a faster async follow-up, use WhatsApp or LINE below.'}
       />
 
       {!hasSpecializedContactContext ? (
@@ -610,13 +602,11 @@ export default async function ContactPage(
             </div>
             <div className="grid grid-3">
               {contactRouteCards.map((card) => (
-                <article key={card.key} className="card">
+                <Link key={card.key} className="card contact-route-card" href={card.href} aria-label={card.action}>
                   <h3 className="card-title">{card.title}</h3>
                   <p className="card-subtitle">{card.body}</p>
-                  <div className="card-actions">
-                    <a className="btn btn-secondary" href={card.href}>{card.action}</a>
-                  </div>
-                </article>
+                  <span className="contact-route-card__action">{card.action}</span>
+                </Link>
               ))}
             </div>
           </Container>
