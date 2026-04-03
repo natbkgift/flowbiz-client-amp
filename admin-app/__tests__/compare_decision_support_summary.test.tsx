@@ -89,18 +89,19 @@ describe('compare decision support summary', () => {
     const { container } = render(
       await ComparePage({
         params: Promise.resolve({ locale: 'en' }),
-        searchParams: Promise.resolve({ ids: 'project-1,project-2' }),
+        searchParams: Promise.resolve({ ids: 'project-1,project-2', source: 'shortlist_compare' }),
       }),
     );
 
     expect(container.querySelector('#compare-decision-summary')).not.toBeNull();
-    expect(container.querySelector('#compare_consultation_hero')).toHaveAttribute('href', '/en/contact?ids=project-1%2Cproject-2&intent=project_compare&source=compare_hero&projects=alpha-residence%2Cbeta-bay&buyer_fit=shortlist_narrowing&signal_level=medium');
-    expect(container.querySelector('#compare_open_smart_finder')).toHaveAttribute('href', '/en/smart-finder');
+    expect(container.querySelector('#compare_consultation_hero')).toHaveAttribute('href', '/en/contact?ids=project-1%2Cproject-2&source=compare_hero&intent=project_compare&projects=alpha-residence%2Cbeta-bay&buyer_fit=shortlist_narrowing&signal_level=medium');
+    expect(container.querySelector('#compare_continue_secondary')).toHaveAttribute('href', '/en/shortlist');
     expect(screen.queryByRole('link', { name: /whatsapp/i })).toBeNull();
     expect(screen.getByRole('heading', { name: /decision support summary/i })).toBeTruthy();
     expect(screen.getByText(/you are currently reading 2 projects in one frame: alpha residence, beta bay/i)).toBeTruthy();
     expect(screen.getByText(/location is still an active decision variable because this set spans 2 different areas/i)).toBeTruthy();
     expect(screen.getByText(/1\/2 projects currently expose ROI snapshots, and 2\/2 projects have enough price or rent context/i)).toBeTruthy();
     expect(screen.getByText(/not to produce an investment verdict/i)).toBeTruthy();
+    expect(screen.getByText(/return to the shortlist to remove weaker options/i)).toBeTruthy();
   });
 });

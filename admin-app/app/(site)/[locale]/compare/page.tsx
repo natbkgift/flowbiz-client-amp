@@ -249,6 +249,31 @@ function buildCompareReadinessLines(input: {
   };
 }
 
+function getCompareContinuationAction(input: {
+  locale: 'en' | 'th';
+  source: string | null;
+}) {
+  const fromShortlist = input.source?.startsWith('shortlist_') ?? false;
+
+  if (fromShortlist) {
+    return {
+      href: withLocale(input.locale, '/shortlist'),
+      label: input.locale === 'th' ? 'กลับไปทบทวน shortlist' : 'Return to shortlist review',
+      note: input.locale === 'th'
+        ? 'หลังอ่านตารางนี้แล้ว ให้กลับไปตัดรายการที่อ่อนลงใน shortlist เดิมก่อนส่งต่อให้ทีม'
+        : 'After reading this table, return to the shortlist to remove weaker options before sending the same context to the team.',
+    };
+  }
+
+  return {
+    href: withLocale(input.locale, '/buy'),
+    label: input.locale === 'th' ? 'เพิ่มตัวเลือกที่พร้อมบันทึกไว้เทียบต่อ' : 'Add more shortlist-ready options',
+    note: input.locale === 'th'
+      ? 'ถ้าผลเทียบยังไม่พอชัด ขั้นถัดไปคือเพิ่มตัวเลือกที่ save เข้า shortlist ได้ก่อนส่งต่อให้ทีม'
+      : 'If this comparison still needs more context, the next move is to add one more shortlist-ready option before advisor handoff.',
+  };
+}
+
 export default async function ComparePage(
   props: {
     params: Promise<{ locale: string }>;
@@ -263,6 +288,7 @@ export default async function ComparePage(
   const advisoryProofs = getAdvisoryProofs(dict);
   const investorContext = parseInvestorToolContext(searchParams);
   const investorContextPresent = hasInvestorContext(investorContext);
+  const compareSource = pickParam(searchParams?.source);
 
   const rawIds = pickParam(searchParams?.ids);
   const ids = parseIds(rawIds);
@@ -492,6 +518,10 @@ export default async function ComparePage(
       signalLevel: items.length >= 3 ? 'high' : 'medium',
     }),
   });
+  const compareContinuationAction = getCompareContinuationAction({
+    locale,
+    source: compareSource,
+  });
 
   return (
     <main id="main-content" className="decision-page decision-page--compare decision-page--confidence">
@@ -545,15 +575,15 @@ export default async function ComparePage(
           },
         }}
         secondaryAction={{
-          href: withLocale(locale, '/smart-finder'),
-          label: dict.advisory.useSmartFinder,
-          id: 'compare_open_smart_finder',
+          href: compareContinuationAction.href,
+          label: compareContinuationAction.label,
+          id: 'compare_continue_secondary',
           eventPayload: {
             source_route: 'compare',
             cta_type: 'secondary',
-            cta_label: dict.advisory.useSmartFinder,
+            cta_label: compareContinuationAction.label,
             entity_type: 'route',
-            entity_name: 'smart-finder',
+            entity_name: compareContinuationAction.href.includes('/shortlist') ? 'shortlist' : 'buy',
             user_intent: 'research',
             context: {
               compare_ids: ids,
@@ -693,6 +723,12 @@ export default async function ComparePage(
                 </div>
               ))}
             </div>
+            <div className="cta-strip compare-empty-followup reveal mt-4">
+              <div className="cta-strip__text">{compareContinuationAction.note}</div>
+              <Link className="btn btn-tertiary" href={compareContinuationAction.href}>
+                {compareContinuationAction.label}
+              </Link>
+            </div>
           </div>
 
           <div className="card reveal">
@@ -783,21 +819,21 @@ export default async function ComparePage(
             <div className="cta-row mt-4">
               <Link
                 className="btn btn-secondary"
-                href={withLocale(locale, '/smart-finder')}
+                href={compareContinuationAction.href}
                 data-amp-event-type="cta_click"
                 data-amp-event-payload={JSON.stringify({
                   source_route: 'compare',
                   cta_type: 'secondary',
-                  cta_label: dict.compare.backToSmartFinder,
+                  cta_label: compareContinuationAction.label,
                   entity_type: 'route',
-                  entity_name: 'smart-finder',
+                  entity_name: compareContinuationAction.href.includes('/shortlist') ? 'shortlist' : 'buy',
                   user_intent: 'research',
                   context: {
                     compare_ids: ids,
                   },
                 })}
               >
-                {dict.compare.backToSmartFinder}
+                {compareContinuationAction.label}
               </Link>
               <Link
                 className="btn btn-tertiary"
@@ -846,4 +882,3 @@ export default async function ComparePage(
     </main>
   );
 }
-

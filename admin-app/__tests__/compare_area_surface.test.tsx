@@ -113,8 +113,9 @@ describe('compare area surface', () => {
 
     expect(container.querySelector('#compare-area-context')).not.toBeNull();
     expect(container.querySelector('#compare_consultation_hero')).toHaveAttribute('href', '/en/contact?ids=project-1%2Cproject-2&intent=project_compare&source=compare_hero&projects=alpha-residence%2Cbeta-bay&buyer_fit=shortlist_narrowing&signal_level=medium');
-    expect(container.querySelector('#compare_open_smart_finder')).toHaveAttribute('href', '/en/smart-finder');
+    expect(container.querySelector('#compare_continue_secondary')).toHaveAttribute('href', '/en/buy');
     expect(screen.getByRole('heading', { name: /area comparison read/i })).toBeTruthy();
+    expect(screen.getByText(/if this comparison still needs more context/i)).toBeTruthy();
     expect(screen.getByRole('heading', { name: 'Jomtien' })).toBeTruthy();
     expect(screen.getByRole('heading', { name: 'Pratumnak' })).toBeTruthy();
     expect(screen.getByText(/currently represented by alpha residence/i)).toBeTruthy();
