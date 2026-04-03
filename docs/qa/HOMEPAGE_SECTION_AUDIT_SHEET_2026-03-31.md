@@ -1,199 +1,250 @@
 # Homepage Section Audit Sheet
 
-อัปเดต: 2026-04-01 06:00 ICT  
-เส้นทางที่ตรวจ: `https://amppattaya.com/en`, `https://amppattaya.com/th`, `https://amppattaya.com/en/projects`, `https://amppattaya.com/th/projects`  
-บริบทที่ใช้: latest implemented homepage passes + browser QA + visual QA รอบล่าสุด
+อัปเดต: `2026-04-02`
+บทบาทเอกสาร: `Live evidence + section-level PASS/FAIL`
 
-## วิธีใช้
+## Status Snapshot
 
-- คอลัมน์ `สถานะ` ใช้แค่ `PASS` หรือ `FAIL`
-- sheet นี้สะท้อนสถานะล่าสุดหลังปิด pass หลัก `P0-P7` แล้ว
-- ถ้าจะเปิดงานรอบใหม่ ให้ใช้ `FAIL` ที่เหลือเป็น backlog ระดับต่ำก่อน
-- ถ้าข้อไหนถูกแก้แล้ว ให้คง `PASS` และเติมหมายเหตุเฉพาะเมื่อมีบริบทสำคัญจริง
+- สถานะรวม: `Production live refreshed after media-fix redeploy; no open fail items remain for homepage round`
+- คะแนน weighted ล่าสุดของ deployed-live after-deploy evidence:
+  - `EN 86/100`
+  - `TH 84/100`
+  - `รวม 85/100`
+- checklist completion note:
+  - open fail items `0` บน deployed-live evidence ล่าสุด
+  - sections with open fail items `0`
+  - preview deploy ผ่าน smoke และ production overlay deploy ล่าสุดปิดด้วย `deploy_status=ok`
+  - after-deploy browser QA ยืนยันว่า major P0-P2 fixes ขึ้น production แล้ว
+  - after-media-fix probe ปิด `CU-02 / HOME-P2-04` แล้ว และ `H-03 / HOME-P3-02`, `C-02 / HOME-P3-01` ยังคงผ่าน release threshold
+- next gate สูงสุด:
+  - ไม่มี release gate เปิดค้างใน homepage round ปัจจุบัน; คง review block omitted จนกว่าจะ source-ready
 
-## สถานะล่าสุด
+## Evidence Rules
 
-- สถานะรวม: `Homepage redesign closed`
-- คะแนนล่าสุดจาก visual/copy passes: `99/100`
-- Validation ล่าสุด:
-  - [x] `npm run test -- __tests__/contact_form_validation.test.tsx __tests__/lead_form_custom_intro.test.tsx __tests__/lead_form_handoff_payload.test.tsx __tests__/home_bottom_cta_conversion_gate.test.tsx __tests__/home_design_surface_contract.test.ts __tests__/home_surface_handoff_contract.test.ts __tests__/home_hero_cta_hierarchy.test.tsx __tests__/featured_projects_th_copy.test.tsx __tests__/public_catalogue_th_copy.test.tsx __tests__/public_prefetch_policy.test.ts`
-  - [x] `npm run build`
-  - [x] `npm run test:visual:public` ที่ `/en,/th,/en/projects,/th/projects` บน `390 / 1024 / 1440`
-- งานที่ปิดในรอบสุดท้าย:
-  - [x] ย่อ field ใน homepage form ลงเป็น compact variant
-  - [x] rewrite summary ระดับ data ของทั้ง 12 โครงการ
-  - [x] เก็บ warning ของ `next/image` ใน test/build path
+- เอกสารนี้ authoritative สำหรับ `live-current observations`, `PASS/FAIL`, และ `evidence rows`
+- [HOMEPAGE_IMPLEMENTATION_TASK_LIST_2026-03-31.md](d:/FlowBiz/flowbiz-client-amp/docs/qa/HOMEPAGE_IMPLEMENTATION_TASK_LIST_2026-03-31.md) authoritative สำหรับ `priority`, `sequencing`, `copy target`, `acceptance`
+- target-state copy ไม่เขียนซ้ำใน main body ของเอกสารนี้
+- stale external claims ไม่ใช้เป็น source of truth ถ้าไม่ reproduce บน live current
+- review/proof block ยังถือเป็น optional จนกว่าจะมี source-ready proof จริง
+- `FAIL` rows ใน main body นี้อ้างอิง deployed-live after-deploy evidence ล่าสุด
 
 ## 1. Header / Top Bar
 
-| ลำดับ | รายการตรวจ | สถานะ | ผลตรวจล่าสุด | หมายเหตุ |
-|---|---|---|---|---|
-| H-01 | โลโก้ชัดแต่ไม่กินพื้นที่แนวตั้งเกินไป | PASS | PASS | ผ่าน |
-| H-02 | language switcher ไม่เด่นกว่า CTA หลัก | PASS | PASS | ผ่าน |
-| H-03 | header ไม่บีบพื้นที่ hero | PASS | PASS | hero มี safe padding แล้ว |
-| H-04 | ชื่อเมนูตรงไปตรงมา | PASS | PASS | ผ่าน |
-| H-05 | sticky behavior ไม่บังเนื้อหาส่วนบน | PASS | PASS | ผ่าน |
-| H-06 | mobile tap target ใช้งานจริงได้ | PASS | PASS | ผ่าน |
-| H-07 | top bar มีของเท่าที่จำเป็น | PASS | PASS | ผ่าน |
-| H-08 | header background/blur ช่วยอ่าน ไม่เพิ่ม noise | PASS | PASS | ผ่าน |
+| Evidence ID | Check | Status | Priority | Maps to task | Live evidence | Impact | Fix direction |
+|---|---|---|---|---|---|---|---|
+| H-01 | client-side language switch ต้องอัปเดต `html lang` ถูกต้อง | PASS | P0 | `HOME-P0-01` | after-deploy live QA: กดปุ่ม `Language` บน `/en` แล้ว URL ไป `/th`, H1 เป็นไทย, และ `document.documentElement.lang` เปลี่ยนเป็น `th` | semantic blocker หลักถูกปิดแล้ว | คง regression coverage และ deploy probe ไว้ |
+| H-02 | language switch และ hero controls ต้องมี tap target ระดับ mobile-safe | PASS | P1 | `HOME-P1-04` | after-deploy live DOM: language button `80x44`; hero arrows `44x44` | tap confidence กลับเข้า mobile-safe range | คง control sizing ไว้ |
+| H-03 | nav/header ต้องมีน้ำหนักพอสำหรับ premium advisory surface | PASS | P3 | `HOME-P3-02` | final visual review บน deployed live ยืนยันว่า nav ยังเบากว่า hero เล็กน้อย แต่ยังชัดพอและไม่กด CTA หลักลง | header ผ่าน release threshold แล้ว; ที่เหลือเป็น polish debt | archive เป็น optional future polish เท่านั้น |
+| H-04 | menu state และ accessible labels ต้องครบ | PASS | P3 | `—` | ปุ่ม `Menu`, `Close menu`, และ nav labels ถูกตั้งชื่อแล้ว | ใช้งาน mobile nav ได้จริง | คงไว้ |
 
 ## 2. Hero
 
-| ลำดับ | รายการตรวจ | สถานะ | ผลตรวจล่าสุด | หมายเหตุ |
-|---|---|---|---|---|
-| HE-01 | headline หลักคงที่ทุก slide | PASS | PASS | H1 คงที่แล้ว |
-| HE-02 | slide เปลี่ยนเฉพาะภาพและ supporting line | PASS | PASS | ผ่าน |
-| HE-03 | headline ตอบว่าเว็บนี้คืออะไร ช่วยใคร และช่วยอย่างไร | PASS | PASS | ผ่าน |
-| HE-04 | headline สั้นพอและจำได้ | PASS | PASS | ผ่าน |
-| HE-05 | subheadline ขยายความ ไม่พูดซ้ำ | PASS | PASS | ผ่าน |
-| HE-06 | subheadline ไม่เกิน 1-2 บรรทัดบน mobile | PASS | PASS | ผ่าน |
-| HE-07 | text block มี safe padding รอบด้าน | PASS | PASS | ผ่าน |
-| HE-08 | text ไม่ชิดซ้าย/บนจนดูอึดอัด | PASS | PASS | ผ่าน |
-| HE-09 | overlay ไม่ทำให้ข้อความหายหรือจม | PASS | PASS | ผ่าน |
-| HE-10 | hero สูงพอดี ไม่เปลืองพื้นที่มืดเกินไป | PASS | PASS | ผ่าน |
-| HE-11 | CTA หลักเห็นได้ทันทีใน first viewport | PASS | PASS | ผ่าน |
-| HE-12 | CTA รองทำหน้าที่ browse ไม่แข่ง CTA หลัก | PASS | PASS | ผ่าน |
-| HE-13 | WhatsApp link เบากว่า CTA หลัก | PASS | PASS | ผ่าน |
-| HE-14 | arrows/dots ไม่แย่งความสนใจ | PASS | PASS | controls เบาลงแล้ว |
-| HE-15 | hero ไม่มีองค์ประกอบเกินจำเป็น | PASS | PASS | ผ่าน |
-| HE-16 | hero ทำหน้าที่ตั้งเรื่อง ไม่พยายามอธิบายทุกอย่าง | PASS | PASS | ผ่าน |
+| Evidence ID | Check | Status | Priority | Maps to task | Live evidence | Impact | Fix direction |
+|---|---|---|---|---|---|---|---|
+| HE-01 | hero promise ต้องตอบ `who + outcome + next step` เร็วกว่านี้ | PASS | P1 | `HOME-P1-01` | after-deploy live QA: EN H1 = `Find the right Pattaya property faster`; TH H1 = `เลือกอสังหาพัทยาได้เร็วขึ้น ด้วย shortlist ที่คัดตามเป้าหมายของคุณ`; CTA pair ตรง approved set ทั้งสองภาษา | first impression และ click intent align กับ target แล้ว | คง composer precedence แต่ monitor drift |
+| HE-02 | hero ต้องคง premium tone โดยไม่รก | PASS | P2 | `—` | visual direction, imagery, และ contrast โดยรวมดี | ช่วยตั้ง tone ของแบรนด์ | คงไว้ |
+| HE-03 | hero ต้องมี H1 เดียวและ CTA เห็นใน first viewport | PASS | P2 | `—` | H1 คงที่ต่อ locale และ CTA ยังเห็นบน `390px` | foundation ด้าน structure ยังดี | คงไว้ |
 
 ## 3. Journey Cards
 
-| ลำดับ | รายการตรวจ | สถานะ | ผลตรวจล่าสุด | หมายเหตุ |
-|---|---|---|---|---|
-| J-01 | section title สั้นและคม | PASS | PASS | ผ่าน |
-| J-02 | subtitle ไม่ซ้ำคำจาก hero | PASS | PASS | ผ่าน |
-| J-03 | แต่ละ card ตอบว่าใครเหมาะกับเส้นทางนี้ | PASS | PASS | ผ่าน |
-| J-04 | แต่ละ card ตอบว่าผู้ใช้จะได้อะไร | PASS | PASS | ผ่าน |
-| J-05 | card copy สแกนจบเร็ว | PASS | PASS | ผ่าน |
-| J-06 | metric line ใช้เฉพาะที่ช่วยตัดสินใจจริง | PASS | PASS | ผ่าน |
-| J-07 | card ไม่ดูเหมือน dashboard tiles | PASS | PASS | visual weight เบาลงแล้ว |
-| J-08 | 4 cards มีน้ำหนัก visual ที่เหมาะสม | PASS | PASS | ผ่าน |
-| J-09 | mobile card heights สมดุล | PASS | PASS | ผ่าน |
-| J-10 | CTA ใน card เป็นภาษาธรรมชาติ | PASS | PASS | ผ่าน |
+| Evidence ID | Check | Status | Priority | Maps to task | Live evidence | Impact | Fix direction |
+|---|---|---|---|---|---|---|---|
+| J-01 | primary intents ต้อง parity กันระหว่าง EN/TH | PASS | P2 | `—` | ทั้งสองภาษาใช้ `buy / invest / rent-relocate / sell` แล้ว | โครง funnel เสถียรขึ้น | คงไว้ |
+| J-02 | micro text ใน cards ต้องอ่านง่ายขึ้นบน mobile | PASS | P1 | `HOME-P1-04` | after-deploy live DOM: journey meta lines ที่ sampled อยู่ราว `12.48px / 17.47px` | scan speed และ readability ดีขึ้นจาก baseline | คง type scale ปัจจุบันไว้ |
+| J-03 | cards ต้องตอบว่า route นี้เหมาะกับใคร | PASS | P2 | `—` | copy แต่ละ card บอก persona/route ได้ชัด | intent segmentation ใช้งานได้จริง | คงไว้ |
 
 ## 4. Trust Snapshot
 
-| ลำดับ | รายการตรวจ | สถานะ | ผลตรวจล่าสุด | หมายเหตุ |
-|---|---|---|---|---|
-| T-01 | section นี้อ่านเร็วกว่า featured content | PASS | PASS | ผ่าน |
-| T-02 | title ชัดและน่าเชื่อถือ | PASS | PASS | ผ่าน |
-| T-03 | body สั้นและจับใจความได้ทันที | PASS | PASS | ผ่าน |
-| T-04 | proof points ใช้ข้อมูลจริง | PASS | PASS | ผ่าน |
-| T-05 | tone ไม่แข็งหรือขายตัวเองเกินไป | PASS | PASS | ผ่าน |
-| T-06 | spacing ของ trust section เบากว่า featured sections | PASS | PASS | ผ่าน |
+| Evidence ID | Check | Status | Priority | Maps to task | Live evidence | Impact | Fix direction |
+|---|---|---|---|---|---|---|---|
+| T-01 | trust proof ต้องมาเร็วกว่านี้ใน scroll | PASS | P1 | `HOME-P1-02` | after-deploy heading order บน live คือ `H1 -> journey cards -> Verified stock first. -> featured` | trust ถูกดึงเข้ามาช่วย early conversion flow แล้ว | คง order ปัจจุบันไว้ |
+| T-02 | proof points ต้องใช้ข้อมูลจริงและกระชับ | PASS | P2 | `—` | `22 live projects / 53 listings checked` และ supporting lines อ่านเข้าใจได้ | trust content ใช้ได้ | คงไว้ |
 
 ## 5. Featured Projects
 
-| ลำดับ | รายการตรวจ | สถานะ | ผลตรวจล่าสุด | หมายเหตุ |
-|---|---|---|---|---|
-| FP-01 | section title สั้นและไม่เป็น funnel copy | PASS | PASS | ผ่าน |
-| FP-02 | subtitle บอกสิ่งที่จะได้รู้จริง | PASS | PASS | ผ่าน |
-| FP-03 | mobile layout ลำดับสายตาชัด | PASS | PASS | ผ่าน |
-| FP-04 | ไม่ใช้ card size หลายแบบจนอ่านยาก | PASS | PASS | ผ่าน |
-| FP-05 | image ratio ไม่สูงเกินจำเป็น | PASS | PASS | ผ่าน |
-| FP-06 | พื้นที่รอบรูปถูกใช้มีประโยชน์ | PASS | PASS | ผ่าน |
-| FP-07 | โครงสร้างทุกการ์ดเหมือนกัน | PASS | PASS | ผ่าน |
-| FP-08 | ชื่อโครงการเด่นที่สุดใน card | PASS | PASS | ผ่าน |
-| FP-09 | area label อ่านง่าย | PASS | PASS | ผ่าน |
-| FP-10 | ราคาแสดงเฉพาะเมื่อ verified | PASS | PASS | ผ่าน |
-| FP-11 | summary เฉพาะตัวโครงการจริง | PASS | PASS | ผ่านใน surface layer |
-| FP-12 | facts rows ไม่ทำให้การ์ดสูงเกิน | PASS | PASS | ผ่าน |
-| FP-13 | CTA ต่อการ์ดมีเพียงจุดเดียว | PASS | PASS | ผ่าน |
-| FP-14 | ทั้ง section ให้ความรู้สึก curated editorial | PASS | PASS | ผ่าน |
+| Evidence ID | Check | Status | Priority | Maps to task | Live evidence | Impact | Fix direction |
+|---|---|---|---|---|---|---|---|
+| FP-01 | จำนวน cards บน home ต้องน้อยกว่านี้ | PASS | P1 | `HOME-P1-03` | after-deploy live QA surfacing `View project = 4` cards ซึ่งต่ำกว่า `6 max` | featured zone สั้นลงจาก baseline | คง clamp และ prefer omission |
+| FP-02 | featured zone ต้องมี hierarchy ที่คมกว่าเดิม | PASS | P2 | `HOME-P2-03` | after-deploy live DOM: `Verified stock first.` = `H2`; `Projects worth reviewing first` = `H3`; `Top picks for serious next steps` = `H3` | outline และ scan rhythm อ่านง่ายขึ้น | คง hierarchy model นี้ |
+| FP-03 | featured cards ต้องช่วยตัดสินใจ ไม่ใช่แค่แสดง inventory | PASS | P2 | `HOME-P2-01` | after-deploy live cards มี data-backed cues เช่น `Under THB 5M`, `Sea View option`, `Ready to move in` | user ได้ decision cue เพิ่มโดยไม่พึ่ง guesswork | keep cues data-backed only |
+| FP-04 | card facts หลักต้องอ่านเร็วและคงเส้น | PASS | P2 | `—` | price, location, type, developer ยังอ่านง่าย | โครงข้อมูลพื้นฐานยังดี | คงไว้ |
 
 ## 6. Curated Units
 
-| ลำดับ | รายการตรวจ | สถานะ | ผลตรวจล่าสุด | หมายเหตุ |
-|---|---|---|---|---|
-| CU-01 | title สั้นลงกว่านี้ได้ | PASS | PASS | ผ่าน |
-| CU-02 | subtitle ไม่ขายหนักเกิน | PASS | PASS | ผ่าน |
-| CU-03 | resale กับ rent แยก perception ชัด | PASS | PASS | ผ่าน |
-| CU-04 | badge เบาแต่ชัด | PASS | PASS | ผ่าน |
-| CU-05 | card ข้อมูลไม่แน่นเกินบน mobile | PASS | PASS | ผ่าน |
-| CU-06 | image ratio เตี้ยลงพอสมควร | PASS | PASS | ผ่าน |
-| CU-07 | fact line สแกนง่าย | PASS | PASS | ผ่าน |
-| CU-08 | data missing ไม่ทำให้ layout กระโดด | PASS | PASS | ผ่าน |
-| CU-09 | price formatting คงเส้นคงวา | PASS | PASS | ผ่าน |
-| CU-10 | card title อ่านธรรมชาติ | PASS | PASS | ผ่าน |
-| CU-11 | section-level CTA ไม่แรงเกินจำเป็น | PASS | PASS | ผ่าน |
+| Evidence ID | Check | Status | Priority | Maps to task | Live evidence | Impact | Fix direction |
+|---|---|---|---|---|---|---|---|
+| CU-01 | units stack ต้องสั้นลงสำหรับ home | PASS | P1 | `HOME-P1-03` | after-deploy live QA surfacing `View unit = 6` cards | owner CTA และ final form มาเร็วขึ้นจาก baseline | คง 6-card cap |
+| CU-02 | home cards ต้องไม่ให้ความรู้สึกว่า media ยังไม่พร้อม | PASS | P2 | `HOME-P2-04` | after-media-fix production recheck แบบ `normal initial load + slow-3g lazy-media scroll` ไม่พบ visible images ที่ `complete=false` หรือ `naturalWidth=0` แล้ว | ปิด performance/perception risk หลักของ featured card stack ได้ | คง media preload + SSR primary-start strategy ปัจจุบันไว้ |
+| CU-03 | resale และ rent ต้องแยก perception ได้ชัด | PASS | P2 | `—` | sale/resale กับ rent แยกเป็นสองช่วงชัด | user แยก intent ได้ | คงไว้ |
 
 ## 7. Why Pattaya
 
-| ลำดับ | รายการตรวจ | สถานะ | ผลตรวจล่าสุด | หมายเหตุ |
-|---|---|---|---|---|
-| WP-01 | title สั้นและจับต้องได้ | PASS | PASS | ผ่าน |
-| WP-02 | section นี้ช่วยคิดจริง ไม่ใช่ strategic slogan | PASS | PASS | ผ่าน |
-| WP-03 | demand mix อธิบายแบบจับต้องได้ | PASS | PASS | ผ่าน |
-| WP-04 | submarket spread โยงพื้นที่จริง | PASS | PASS | ผ่าน |
-| WP-05 | entry range อธิบายที่มาอย่างพอดี | PASS | PASS | ผ่าน |
-| WP-06 | right-side process panel ไม่ทำให้หน้าดูเป็น framework | PASS | PASS | ผ่าน |
+| Evidence ID | Check | Status | Priority | Maps to task | Live evidence | Impact | Fix direction |
+|---|---|---|---|---|---|---|---|
+| WP-01 | section นี้ต้องช่วยคิดจริง ไม่ใช่แค่ slogan | PASS | P2 | `—` | current bullets อ่านเป็น buyer guidance ได้ | supporting section ใช้งานได้ | คงไว้ |
+| WP-02 | EN/TH ต้องสื่อเรื่องเดียวกันในระดับ section | PASS | P3 | `—` | structure และ meaning broad-level ใกล้กันแล้ว | parity ดีขึ้นจากรอบก่อน | คงไว้ |
+| WP-03 | section นี้ควรถูก reframe ให้ explicit แบบ `How We Help You Decide` มากขึ้นหรือไม่ | PASS | P3 | `HOME-P3-03` | after-deploy live heading ใช้ `Better decisions start with better framing` / `การตัดสินใจที่ดี เริ่มจากการวางกรอบให้ถูก` พร้อม 4 decision blocks | advisor positioning ตรง target state มากขึ้นแล้ว | คง framing ปัจจุบันและ monitor drift |
 
-## 8. Owner Route
+## 8. Client Proof / Reviews
 
-| ลำดับ | รายการตรวจ | สถานะ | ผลตรวจล่าสุด | หมายเหตุ |
-|---|---|---|---|---|
-| OR-01 | title ชัดกว่านี้ได้ | PASS | PASS | ผ่าน |
-| OR-02 | แยก seller / landlord / undecided ชัด | PASS | PASS | ผ่าน |
-| OR-03 | copy สั้นและตรง | PASS | PASS | ผ่าน |
-| OR-04 | 2 owner actions ไม่ซ้ำกับ final CTA | PASS | PASS | ผ่าน |
-| OR-05 | section นี้ช่วยคัด intent ไม่สร้าง funnel ใหม่ | PASS | PASS | ผ่าน |
+| Evidence ID | Check | Status | Priority | Maps to task | Live evidence | Impact | Fix direction |
+|---|---|---|---|---|---|---|---|
+| CP-01 | absence ของ review block ตอนนี้ถือว่า safer than weak proof | PASS | P3 | `HOME-P3-04` | live current ไม่แสดง testimonial/review block และไม่พบ source-ready proof บน home | หลีกเลี่ยง social proof ปลอม/อ่อน | คง omission ไว้จนกว่าจะมี proof จริง |
+| CP-02 | ถ้าจะเพิ่ม review block ภายหลัง ต้อง source-ready และ parity-matched | PASS | P3 | `HOME-P3-04` | current live ยังไม่ควรเปิดใช้ review block | ลด risk จาก unsourced testimonials | เปิดใช้ได้เฉพาะเมื่อมี moderation/source rule ชัด |
 
-## 9. Final CTA + Form
+## 9. Owner Route
 
-| ลำดับ | รายการตรวจ | สถานะ | ผลตรวจล่าสุด | หมายเหตุ |
-|---|---|---|---|---|
-| FC-01 | final CTA สงบและชัด | PASS | PASS | ผ่าน |
-| FC-02 | benefit lines สั้นและมีประโยชน์จริง | PASS | PASS | ผ่าน |
-| FC-03 | form สั้นพอสำหรับ homepage | PASS | PASS | homepage ใช้ compact variant แล้ว |
-| FC-04 | labels/help text เป็นภาษาคน | PASS | PASS | ผ่าน |
-| FC-05 | direct contact options มีแต่ไม่แย่งฟอร์ม | PASS | PASS | ผ่าน |
-| FC-06 | final CTA เป็นทางออกสุดท้าย ไม่ปิดการขายซ้ำ | PASS | PASS | ผ่าน |
+| Evidence ID | Check | Status | Priority | Maps to task | Live evidence | Impact | Fix direction |
+|---|---|---|---|---|---|---|---|
+| OR-01 | owner actions ต้องชัดและไม่ซ้ำ final CTA | PASS | P2 | `—` | `Share owner details` และ `Talk through the options` แยกหน้าที่ชัด | supply-side path ใช้ได้ | คงไว้ |
+| OR-02 | owner route ต้องไม่ถูกดันลึกเกินเพราะ content ก่อนหน้าเยอะไป | PASS | P2 | `HOME-P1-03` | after-deploy home surfaces `4` project cards + `6` unit cards ก่อน owner CTA | owner route มาเร็วขึ้นและไม่ buried แบบ baseline | คง density ปัจจุบันไว้ |
 
-## 10. Footer
+## 10. Final CTA + Form
 
-| ลำดับ | รายการตรวจ | สถานะ | ผลตรวจล่าสุด | หมายเหตุ |
-|---|---|---|---|---|
-| F-01 | brand statement สั้นพอ | PASS | PASS | ผ่าน |
-| F-02 | route links เหลือเฉพาะ core routes | PASS | PASS | ผ่าน |
-| F-03 | contact/legal block กระชับ | PASS | PASS | ผ่าน |
-| F-04 | footer ไม่ขายซ้ำ | PASS | PASS | ผ่าน |
-| F-05 | หน้า “จบอย่างนิ่ง” | PASS | PASS | ผ่าน |
+| Evidence ID | Check | Status | Priority | Maps to task | Live evidence | Impact | Fix direction |
+|---|---|---|---|---|---|---|---|
+| FC-01 | fields ที่ label ว่า required ต้องมี native required semantics | PASS | P2 | `HOME-P2-02` | after-deploy live DOM: `name`, `message`, `consent` ใช้ native `required`; `email`/`phone` คง shared validation pair พร้อม `aria-describedby` | browser validation และ assistive cues ตรง target | คง form semantics ปัจจุบันไว้ |
+| FC-02 | form และ contact channels ต้องพร้อมใช้งาน | PASS | P2 | `—` | form, WhatsApp, LINE, browse path ยังอยู่ครบ | final conversion surface ใช้งานได้ | คงไว้ |
+| FC-03 | final lead capture ต้องไม่มาสายเกิน | PASS | P2 | `HOME-P1-03` | after-deploy home ลด featured density เหลือ `4 + 6` cards ทำให้ final CTA/form มาเร็วขึ้นจาก baseline | high-intent user ไม่ต้องเลื่อนลึกเท่าเดิม | คง density ปัจจุบันไว้ |
 
-## 11. Mobile-specific
+## 11. Footer
 
-| ลำดับ | รายการตรวจ | สถานะ | ผลตรวจล่าสุด | หมายเหตุ |
-|---|---|---|---|---|
-| M-01 | hero text ไม่ชิดขอบ | PASS | PASS | ผ่าน |
-| M-02 | CTA หลักยังเห็นใน first screen | PASS | PASS | ผ่าน |
-| M-03 | slide controls ไม่รก | PASS | PASS | ผ่าน |
-| M-04 | journey cards ไม่สูงเกิน | PASS | PASS | ผ่าน |
-| M-05 | featured projects ไม่ใช้ pattern อ่านยาก | PASS | PASS | ผ่าน |
-| M-06 | units cards ไม่แน่นเกิน | PASS | PASS | ผ่าน |
-| M-07 | spacing ระหว่าง section สม่ำเสมอ | PASS | PASS | ผ่าน |
-| M-08 | headings ไม่ยาวเกิน | PASS | PASS | ผ่าน |
-| M-09 | tap targets ใช้งานได้จริง | PASS | PASS | ผ่าน |
-| M-10 | หน้าให้ความรู้สึก mobile-first จริง | PASS | PASS | ผ่าน |
+| Evidence ID | Check | Status | Priority | Maps to task | Live evidence | Impact | Fix direction |
+|---|---|---|---|---|---|---|---|
+| F-01 | footer ต้องจบหน้าอย่างสงบและไม่ขายซ้ำ | PASS | P3 | `—` | current footer calm และไม่แย่ง CTA หลัก | ช่วยให้หน้าจบเรียบร้อย | คงไว้ |
 
-## 12. Copywriting ทั้งหน้า
+## 12. Mobile-specific
 
-| ลำดับ | รายการตรวจ | สถานะ | ผลตรวจล่าสุด | หมายเหตุ |
-|---|---|---|---|---|
-| C-01 | ตัดคำซ้ำ `start / first / route / clearer / worth opening` | PASS | PASS | ผ่าน |
-| C-02 | ไม่มีภาษาคล้าย process document | PASS | PASS | ผ่าน |
-| C-03 | ทุก section มีประโยคหลักที่จำได้ | PASS | PASS | ผ่าน |
-| C-04 | ทุกประโยคมีหน้าที่เดียวชัด | PASS | PASS | ผ่าน |
-| C-05 | tone สุขุม มั่นใจ ไม่ push เกิน | PASS | PASS | ผ่าน |
-| C-06 | โครงการแต่ละใบมี summary ที่แทนกันไม่ได้ | PASS | PASS | ผ่านใน surface layer |
+| Evidence ID | Check | Status | Priority | Maps to task | Live evidence | Impact | Fix direction |
+|---|---|---|---|---|---|---|---|
+| M-01 | homepage ต้องไม่ยาวจนเสียบทบาท landing page | PASS | P1 | `HOME-P1-03` | after-deploy live QA: featured stack ถูกลดเหลือ `4 projects + 6 units` | landing-page role ดีขึ้นชัดจาก baseline | keep current density guardrails |
+| M-02 | small tap targets ต้องถูกเก็บให้หมด | PASS | P1 | `HOME-P1-04` | after-deploy live DOM: language switch และ hero arrows อยู่ที่ `44px` class แล้ว | usability บนมือถือจริงดีขึ้นตาม target | keep control sizing thresholds |
+| M-03 | first viewport ต้องยังชี้ทางหลักได้ | PASS | P2 | `—` | CTA หลักยังอยู่ above the fold | first-screen foundation ยังพอใช้ | คงไว้ |
+
+## 13. Copywriting / Localization
+
+| Evidence ID | Check | Status | Priority | Maps to task | Live evidence | Impact | Fix direction |
+|---|---|---|---|---|---|---|---|
+| C-01 | hero และ CTA verbs ต้องคมขึ้นในเชิงผลลัพธ์ | PASS | P1 | `HOME-P1-01` | after-deploy live ใช้ CTA ชุดใหม่ `Get My Shortlist` / `Browse Verified Projects` และ `รับ Shortlist ของฉัน` / `ดูโครงการที่คัดแล้ว` | outcome-led CTA ขึ้น production แล้ว | keep approved CTA set as baseline |
+| C-02 | EN/TH tone ต้อง one-to-one มากขึ้น | PASS | P3 | `HOME-P3-01` | final side-by-side review ยืนยันว่า section order, hero promise, CTA hierarchy, owner route, และ decision-support framing aligned พอสำหรับ release; nuance ที่เหลืออยู่ระดับ rhythm/tone | parity ผ่าน release threshold แล้ว แม้ยังไม่ perfect 1:1 | archive เป็น optional future copy sweep เท่านั้น |
+| C-03 | placeholder trust/source text จาก audit เก่าต้องไม่อยู่บน live current home | PASS | P2 | `HOME-P2-05` | spot-check current live แล้วไม่พบข้อความ `Source TBD` / `กำลังโหลด...` บน home | ลด false alarm จากเอกสารเก่า | keep monitoring เท่านั้น |
+| C-04 | audit ภายนอกที่อ้าง section หรือ claim เก่าต้องไม่ถูกใช้เป็น source of truth โดยไม่ cross-check live | PASS | P3 | `—` | current live ไม่ตรงกับ claim เก่าบางรายการจาก audit ภายนอก | ลดการ reopen issue จากข้อมูลเก่า | ใช้ live browser QA เป็นตัวตัดสินเสมอ |
+| C-05 | blueprint และ rewrite pack ต้องถูกใช้เป็น target state ไม่ใช่ current-state assumption | PASS | P3 | `—` | direction ดี แต่ไม่ใช่สิ่งที่ live ปัจจุบันทำสำเร็จแล้ว | ลดการสรุปผิดว่า current live ผ่านแล้ว | ใช้เป็น implementation reference เท่านั้น |
 
 ## Summary
 
-- จำนวน `PASS`: 81
-- จำนวน `FAIL`: 0
-- คะแนนเชิง binary ล่าสุด: `81/81`
-- fail ที่ยังเหลือ: `ไม่มี`
+- checklist completion note:
+  - `0` fail items remain บน deployed-live evidence ล่าสุด
+  - weighted UX score ของ deployed live ขยับขึ้นมาราว `85/100`
+  - `HOME-P0-01` ถึง `HOME-P2-03`, `HOME-P2-05`, และ `HOME-P3-03` ถูกยืนยันบน production live แล้ว
+  - `HOME-P2-04` ถูกปิดแล้วหลัง media-fix redeploy + live slow-network recheck
+  - `HOME-P3-01` และ `HOME-P3-02` ถูกปิดเป็น accepted non-blocking polish debt สำหรับรอบ homepage นี้
+- fail clusters ที่ยังเปิดอยู่:
+  - ไม่มี open fail cluster สำหรับ homepage round ปัจจุบัน
 
 ## Remaining Follow-up
 
-1. ไม่มี backlog เชิง redesign ค้างในชุดนี้
+1. ถ้าจะเปิด `Client Proof / Reviews` ภายหลัง ให้เปิดก็ต่อเมื่อผ่าน source-readiness gate และ parity review ทั้ง EN/TH
+2. ถ้ามีการเปลี่ยน media policy, card gating, หรือ loading strategy รอบใหม่ ให้ rerun slow-network probe ชุด `run-20260402-p204-after-media-fix`
+
+## Appendix / Provenance
+
+### Post-Implementation Local Verification (`2026-04-02`)
+
+| Scope | Related evidence / task | Local branch status | Verification source | Next gate |
+|---|---|---|---|---|
+| Locale semantics | `H-01` / `HOME-P0-01` | Implemented locally | [public_client_enhancements_locale_semantics.test.tsx](/d:/FlowBiz/flowbiz-client-amp/admin-app/__tests__/public_client_enhancements_locale_semantics.test.tsx) + local browser QA | verify preview/live locale switch |
+| Above-the-fold conversion | `HE-01`, `T-01`, `H-02`, `J-02`, `M-02` / `HOME-P1-01` ถึง `HOME-P1-04` | Implemented locally | local visual QA on `/en`, `/th` at `390`, `430`, `1440` | preview/live screenshot signoff |
+| Featured density and gating | `FP-01`, `FP-02`, `FP-03`, `CU-01`, `CU-02`, `FC-03`, `M-01`, `OR-02` / `HOME-P1-03`, `HOME-P2-01`, `HOME-P2-03`, `HOME-P2-04`, `HOME-P2-05` | Implemented locally | branch code gating in [page.tsx](/d:/FlowBiz/flowbiz-client-amp/admin-app/app/(site)/[locale]/page.tsx) and [FeaturedProjects.tsx](/d:/FlowBiz/flowbiz-client-amp/admin-app/components/home/FeaturedProjects.tsx) + local visual QA | closed after production recheck |
+| Form semantics | `FC-01` / `HOME-P2-02` | Implemented locally | [contact_form_validation.test.tsx](/d:/FlowBiz/flowbiz-client-amp/admin-app/__tests__/contact_form_validation.test.tsx), [lead_form_custom_intro.test.tsx](/d:/FlowBiz/flowbiz-client-amp/admin-app/__tests__/lead_form_custom_intro.test.tsx), [lead_form_handoff_payload.test.tsx](/d:/FlowBiz/flowbiz-client-amp/admin-app/__tests__/lead_form_handoff_payload.test.tsx) | preview/live manual form QA |
+| Header and decision-support polish | `H-03`, `WP-03` / `HOME-P3-02`, `HOME-P3-03` | Accepted for release after deployed review | branch copy/CSS updates + deployed visual QA | optional future polish only |
+| EN/TH microcopy parity | `C-02` / `HOME-P3-01` | Accepted for release after deployed review | hero, owner, decision-support, and CTA parity reviewed side-by-side on deployed live | optional future copy sweep only |
+| Reviews | `CP-01`, `CP-02` / `HOME-P3-04` | Intentionally omitted locally | no review block launched in branch implementation | reopen only when proof is source-ready |
+
+### 2026-04-02 Preview + Production Deploy Verification
+
+- preview deploy จาก workspace ปัจจุบันสำเร็จและ smoke ผ่าน
+- production overlay deploy ล่าสุด telemetry:
+  - `deploy_status: ok`
+  - `smoke_passed: true`
+  - `build_sha: 8a5b4bc`
+  - `duration_seconds: 5925`
+- production containers หลัง switch รัน image `flowbiz-client-amp-api:8a5b4bc` และ `flowbiz-client-amp-admin-app:8a5b4bc`
+
+### 2026-04-02 Production Live After-Deploy QA
+
+- verified ด้วย real-browser automation บน `https://amppattaya.com/en` และ `https://amppattaya.com/th`
+- after-deploy evidence:
+  - EN title = `AMP Pattaya | Find the right Pattaya property faster | AMP Pattaya`
+  - TH title = `AMP Pattaya | เลือกอสังหาพัทยาได้เร็วขึ้น ด้วย shortlist ที่คัดตามเป้าหมายของคุณ | AMP Pattaya`
+  - EN H1 = `Find the right Pattaya property faster`
+  - TH H1 = `เลือกอสังหาพัทยาได้เร็วขึ้น ด้วย shortlist ที่คัดตามเป้าหมายของคุณ`
+  - EN CTA pair = `Get My Shortlist` / `Browse Verified Projects`
+  - TH CTA pair = `รับ Shortlist ของฉัน` / `ดูโครงการที่คัดแล้ว`
+  - `/en -> /th` language switch อัปเดต `document.documentElement.lang` จาก `en` เป็น `th`
+  - after-deploy captures ไม่พบ `overflowX` และไม่พบ console errors
+- artifacts:
+  - [summary.json](/d:/FlowBiz/flowbiz-client-amp/admin-app/artifacts/public-live-qa/run-20260402-after-deploy/summary.json)
+  - [en__390.png](/d:/FlowBiz/flowbiz-client-amp/admin-app/artifacts/public-live-qa/run-20260402-after-deploy/en__390.png)
+  - [th__390.png](/d:/FlowBiz/flowbiz-client-amp/admin-app/artifacts/public-live-qa/run-20260402-after-deploy/th__390.png)
+  - [en__1440.png](/d:/FlowBiz/flowbiz-client-amp/admin-app/artifacts/public-live-qa/run-20260402-after-deploy/en__1440.png)
+  - [th__1440.png](/d:/FlowBiz/flowbiz-client-amp/admin-app/artifacts/public-live-qa/run-20260402-after-deploy/th__1440.png)
+  - [language-switch-en-to-th.png](/d:/FlowBiz/flowbiz-client-amp/admin-app/artifacts/public-live-qa/run-20260402-after-deploy/language-switch-en-to-th.png)
+
+### 2026-04-02 Final Closeout Slow-Network + Release Decision
+
+- final closeout probe ใช้ profile `normal initial load + slow-3g lazy-media scroll`
+- results:
+  - initial final-closeout probe ก่อน media tune เคย fail ที่ `CU-02 / HOME-P2-04`: visible images บางส่วนบน project/unit stack ยัง `complete=false` แม้ให้ dwell time ต่อ viewport แล้ว
+  - `H-03 / HOME-P3-02` ผ่าน release threshold และย้ายเป็น accepted non-blocking visual debt
+  - `C-02 / HOME-P3-01` ผ่าน release threshold และย้ายเป็น accepted non-blocking copy debt
+- artifacts:
+  - [summary.json](/d:/FlowBiz/flowbiz-client-amp/admin-app/artifacts/public-live-qa/run-20260402-final-closeout/summary.json)
+  - [en__390_slow-scroll.png](/d:/FlowBiz/flowbiz-client-amp/admin-app/artifacts/public-live-qa/run-20260402-final-closeout/en__390_slow-scroll.png)
+  - [th__390_slow-scroll.png](/d:/FlowBiz/flowbiz-client-amp/admin-app/artifacts/public-live-qa/run-20260402-final-closeout/th__390_slow-scroll.png)
+  - [language-switch-en-to-th-final.png](/d:/FlowBiz/flowbiz-client-amp/admin-app/artifacts/public-live-qa/run-20260402-final-closeout/language-switch-en-to-th-final.png)
+
+### 2026-04-02 Media-Fix Redeploy + Final P2-04 Recheck
+
+- production overlay deploy ล่าสุดปิดด้วย telemetry:
+  - `deploy_status: ok`
+  - `smoke_passed: true`
+  - `build_sha: 8a5b4bc`
+  - `duration_seconds: 5925`
+- recheck ใช้ slow-network probe ชุดเดียวกับที่เคยทำให้ `CU-02 / HOME-P2-04` fail ก่อนหน้า
+- results:
+  - EN: `relevantCount = 1`, `incompleteVisibleCount = 0`
+  - TH: `relevantCount = 0`, `incompleteVisibleCount = 0`
+  - ไม่พบ visible incomplete card images แล้ว
+- artifacts:
+  - [summary.json](/d:/FlowBiz/flowbiz-client-amp/admin-app/artifacts/public-live-qa/run-20260402-p204-after-media-fix/summary.json)
+
+### Current Live Facts Used by This Sheet
+
+- EN/TH ใช้โครงหลักเดียวกันแล้ว
+- canonical / `hreflang` / OG metadata ถูกต้องเมื่อเปิด route ตรง
+- placeholder trust/source text จาก audit เก่าไม่ reproduce บนหน้า home live ปัจจุบัน
+- current root/EN ไม่ใช้ claim `Find the right Pattaya property in 60 seconds`
+
+### External 100-Point Audit
+
+ใช้เป็น `supporting opinion only`
+
+- รับเข้าเฉพาะประเด็นที่ reproduce ได้จริง เช่น hero, trust, listing gate
+- ไม่ใช้ claims ที่ไม่ตรงกับ live current เช่น `Market Insight`, `Testimonials`, หรือ `60 seconds`
+
+### Strategic Blueprint
+
+ใช้เป็น `target-state architecture and governance`
+
+- รองรับ canonical section model, outcome-driven CTA, และ content gating
+- ไม่ override หลักฐานจาก live current
+- `Client Proof / Reviews` ยังเป็น optional future module
+
+### Section-by-Section Rewrite Pack
+
+ใช้เป็น `approved copy source in task list`
+
+- ไม่เขียน target-state copy ซ้ำใน main body ของเอกสารนี้
+- example review quotes ถือเป็น sample-only และไม่ publish-ready
+- implementer ต้องอ้างกลับไปที่ task list สำหรับ copy target

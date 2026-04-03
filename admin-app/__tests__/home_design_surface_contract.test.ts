@@ -15,13 +15,15 @@ describe('home design surface contract', () => {
     expect(page).toContain('home-pathways-grid');
     expect(page).toContain('home-pathway-card');
     expect(page).toContain('home-trust-snapshot-grid');
-    expect(page).toContain('Pattaya property advice, curated before you browse.');
-    expect(page).toContain('Speak to a Pattaya advisor');
-    expect(page).toContain('View curated units');
+    expect(page).toContain('Find the right Pattaya property faster');
+    expect(page).toContain('Get My Shortlist');
+    expect(page).toContain('Browse Verified Projects');
     expect(page).toContain('home_paths_sell');
-    expect(page).toContain('Choose your route.');
-    expect(page).toContain('Share your brief');
-    expect(page).toContain('View all projects');
+    expect(page).toContain('Start with the goal that fits you');
+    expect(page).toContain('Better decisions start with better framing');
+    expect(page).toContain('Sell or rent out with clearer positioning');
+    expect(page).toContain('Tell us what you are looking for');
+    expect(page).toContain('Request My Shortlist');
     expect(page).not.toContain('One brief is enough.');
     expect(page).toContain('home-trust-snapshot__item');
     expect(page).not.toContain('home-pathways-highlight-row');
@@ -40,6 +42,7 @@ describe('home design surface contract', () => {
     expect(hero).toContain('hero-cta hero-cta--primary');
     expect(hero).toContain('hero-cta hero-cta--secondary');
     expect(hero).toContain('hero-whatsapp-link');
+    expect(hero).toContain('home-hero-slider__trust-list');
     expect(hero).toContain('home-hero-slider__controls');
     expect(hero).toContain('AUTOPLAY_MS = 7000');
     expect(hero).toContain('SWIPE_THRESHOLD = 42');
@@ -65,6 +68,7 @@ describe('home design surface contract', () => {
     expect(css).toContain('.home-bottom-cta__benefits');
     expect(css).toContain('.home-hero-slider__panel');
     expect(css).toContain('.home-hero-slider__controls');
+    expect(css).toContain('.home-hero-slider__trust-list');
     expect(css).toContain('.home-page .home-bottom-cta__actions > a');
     expect(css).toContain('.hero-cta--primary');
   });

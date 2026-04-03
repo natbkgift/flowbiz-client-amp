@@ -399,6 +399,7 @@ export function Header({
                 const nextPath = switchLocaleInPathname(pathname ?? '/', next);
                 const secureFlag = typeof window !== 'undefined' && window.location.protocol === 'https:' ? '; Secure' : '';
                 document.cookie = `amp_locale=${next}; Path=/; Max-Age=31536000; SameSite=Lax${secureFlag}`;
+                document.documentElement.setAttribute('lang', next);
                 router.push(nextPath);
               }}
               aria-label={dict.common.language}

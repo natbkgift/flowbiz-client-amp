@@ -87,8 +87,8 @@ describe("AdminDataTable integration", () => {
     expect(workspace).toContain('aria-pressed={isActiveRecord}');
     expect(workspace).toContain('className="admin-data-table-row-action"');
     expect(recordsPanel).toContain("<AdminDataTable");
-    expect(propertiesPage).toContain("AdminJsonCrudWorkspace");
-    expect(projectsPage).toContain("AdminJsonCrudWorkspace");
+    expect(propertiesPage).toContain("AdminEntityWorkspace");
+    expect(projectsPage).toContain("AdminEntityWorkspace");
     expect(developersPage).toContain("AdminJsonCrudWorkspace");
     expect(copy).toContain('useRecordHint: "Load this row into the action panels"');
     expect(copy).toContain('activeRecord: "Active record"');

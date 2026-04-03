@@ -281,6 +281,11 @@ export default async function ProjectsPage(props: { params: Promise<{ locale: st
         />
         <section className="section projects-catalogue-section">
         <Container>
+          <div className="card-actions mb-4">
+            <Link className="btn btn-tertiary" href={withLocale(locale, '/buy')} prefetch={false}>
+              {locale === 'th' ? 'ดูตัวเลือกที่พร้อมบันทึกไว้เทียบต่อ' : 'Browse shortlist-ready listings'}
+            </Link>
+          </div>
           <div className="grid grid-3 projects-catalogue-grid">
             {sorted.map((p, index) => {
               const area = localizeAreaLabel(locale, resolveProjectArea(p as unknown as Record<string, unknown>)) || (locale === 'th' ? 'พัทยา' : 'Pattaya');

@@ -160,16 +160,19 @@ export function HomeHero({
 
   const primaryCtaLabel = typeof composer?.primary_cta_label === 'string' && composer.primary_cta_label.trim()
     ? composer.primary_cta_label.trim()
-    : (locale === 'th' ? 'คุยกับที่ปรึกษา' : 'Speak to an advisor');
+    : (locale === 'th' ? 'รับ Shortlist ของฉัน' : 'Get My Shortlist');
   const primaryCtaUrl = typeof composer?.primary_cta_url === 'string' && composer.primary_cta_url.trim()
     ? resolveLocalizedHref(locale, composer.primary_cta_url.trim())
     : withLocale(locale, '/contact');
   const secondaryCtaLabel = typeof composer?.secondary_cta_label === 'string' && composer.secondary_cta_label.trim()
     ? composer.secondary_cta_label.trim()
-    : (locale === 'th' ? 'ดูยูนิตคัดสรร' : 'View curated units');
+    : (locale === 'th' ? 'ดูโครงการที่คัดแล้ว' : 'Browse Verified Projects');
   const secondaryCtaUrl = typeof composer?.secondary_cta_url === 'string' && composer.secondary_cta_url.trim()
     ? resolveLocalizedHref(locale, composer.secondary_cta_url.trim())
     : withLocale(locale, '/projects');
+  const trustItems = Array.isArray(composer?.trust_items)
+    ? composer.trust_items.map((item) => String(item).trim()).filter(Boolean).slice(0, 3)
+    : [];
   const whatsAppHref = buildAdvisorWhatsApp(locale, dict);
 
   function stepTo(nextIndex: number) {
@@ -261,6 +264,17 @@ export function HomeHero({
                 {secondaryCtaLabel}
               </TrackedLink>
             </div>
+
+            {trustItems.length > 0 ? (
+              <ul className="home-hero-slider__trust-list" aria-label={locale === 'th' ? 'เหตุผลที่ช่วยให้ตัดสินใจง่ายขึ้น' : 'Quick trust signals'}>
+                {trustItems.map((item) => (
+                  <li key={item} className="home-hero-slider__trust-item">
+                    <span className="home-hero-slider__trust-mark" aria-hidden="true" />
+                    <span>{item}</span>
+                  </li>
+                ))}
+              </ul>
+            ) : null}
 
             <div className="home-hero-slider__support">
               <a

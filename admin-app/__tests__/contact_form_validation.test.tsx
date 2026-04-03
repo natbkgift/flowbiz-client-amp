@@ -18,12 +18,35 @@ describe('contact form validation', () => {
     fireEvent.focus(screen.getByPlaceholderText('Your name'));
     fireEvent.change(screen.getByPlaceholderText('Your name'), { target: { value: 'Alex' } });
     fireEvent.change(screen.getByLabelText('Email (optional if phone provided)'), { target: { value: 'alex@' } });
-    fireEvent.change(screen.getByPlaceholderText('Message'), { target: { value: 'Need advice on available condos.' } });
+    fireEvent.change(screen.getByPlaceholderText('Tell us what matters most to you'), { target: { value: 'Need advice on available condos.' } });
     fireEvent.click(screen.getByRole('checkbox'));
 
     expect(screen.getByText(/complete email address/i)).toBeInTheDocument();
+    expect(screen.getByPlaceholderText('Your name')).toBeRequired();
+    expect(screen.getByPlaceholderText('Tell us what matters most to you')).toBeRequired();
+    expect(screen.getByRole('checkbox')).toBeRequired();
+    expect(screen.getByLabelText('Email (optional if phone provided)')).not.toBeRequired();
+    expect(screen.getByLabelText('Phone (optional if email provided)')).not.toBeRequired();
     expect(screen.getByRole('button', { name: 'Submit' })).toBeDisabled();
     expect(fetchMock.mock.calls.some((call) => call[0] === '/api/v1/inquiries')).toBe(false);
+  });
+
+  it('marks both contact fields invalid when neither email nor phone is provided', () => {
+    render(<LeadForm />);
+
+    const nameField = screen.getByPlaceholderText('Your name');
+    const emailField = screen.getByLabelText('Email (optional if phone provided)');
+    const phoneField = screen.getByLabelText('Phone (optional if email provided)');
+
+    fireEvent.focus(nameField);
+
+    expect(screen.getByText(/enter either an email address or a phone number/i)).toBeInTheDocument();
+    expect(emailField).toHaveAttribute('aria-invalid', 'true');
+    expect(phoneField).toHaveAttribute('aria-invalid', 'true');
+    expect(emailField.getAttribute('aria-describedby')).toContain('lead-form-contact-helper');
+    expect(emailField.getAttribute('aria-describedby')).toContain('lead-form-contact-error');
+    expect(phoneField.getAttribute('aria-describedby')).toContain('lead-form-contact-helper');
+    expect(phoneField.getAttribute('aria-describedby')).toContain('lead-form-contact-error');
   });
 
   it('blocks seller submission when phone number is too short', () => {

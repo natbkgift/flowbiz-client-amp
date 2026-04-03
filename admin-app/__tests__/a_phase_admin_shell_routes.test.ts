@@ -34,10 +34,10 @@ describe("Admin shell + route consolidation (Phase A)", () => {
     expect(nav).toContain("ADMIN_NAV_GROUPS");
     expect(shell).toContain("ADMIN_NAV_GROUPS");
     expect(shell).toContain("admin-shell-topbar");
-    expect(shell).toContain("admin-shell-search--topbar");
     expect(shell).toContain("admin-shell-page-title");
-    expect(shell).toContain("admin-shell-toolbar-chip--notifications");
-    expect(shell).toContain("admin-shell-profile");
+    expect(shell).toContain("admin-shell-session-menu");
+    expect(shell).toContain("admin-shell-profile-head");
+    expect(shell).toContain("admin-shell-profile-actions");
     expect(shell).toContain("admin-shell-mobile-drawer");
     expect(shell).toContain("aria-label={ui.breadcrumb}");
     expect(shell).toContain("admin-shell-nav-section is-active");

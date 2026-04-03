@@ -193,6 +193,10 @@ const DEFAULT_FEATURED_PROPERTY_SOURCE_IDS = [
   'AMP-R032226',
 ];
 
+const MAX_HOME_FEATURED_PROJECTS = 6;
+const MAX_HOME_FEATURED_PROPERTIES = 6;
+const HOME_PROPERTY_MEDIA_PRELOAD_COUNT = 6;
+
 export async function generateMetadata({
   params,
 }: {
@@ -415,6 +419,123 @@ export default async function HomePage({
     ? homePropertiesResponse.meta.total
     : saleProperties.length + rentProperties.length;
   const projectBySlug = new Map(homeProjectsSnapshot.map((project) => [project.slug, project]));
+
+  function normalizeProjectLookupText(input: string | null | undefined): string {
+    return String(input ?? '')
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, ' ')
+      .replace(/\s+/g, ' ')
+      .trim();
+  }
+
+  function buildRenderableHomeProjects(
+    projects: typeof homeProjectsSnapshot,
+    properties: PropertyListItem[],
+  ) {
+    const projectMediaHints = new Map<string, { coverImageUrl?: string; startingPrice?: number }>();
+    const projectsById = new Map(projects.map((project) => [project.id, project]));
+    const projectNameIndex = projects.map((project) => ({
+      id: project.id,
+      normalizedName: normalizeProjectLookupText(project.name),
+    }));
+
+    for (const property of properties) {
+      const imageCandidates = [property.cover_image, ...(property.local_images ?? []), ...(property.images ?? [])];
+      const renderableImage = imageCandidates
+        .map((candidate) => resolveRenderableLocalMediaPath(candidate))
+        .find((resolved): resolved is string => Boolean(resolved));
+      if (!renderableImage) continue;
+
+      const nextPrice = typeof property.price === 'number' && Number.isFinite(property.price) && property.price > 0
+        ? Number(property.price)
+        : undefined;
+
+      const applyHint = (projectId: string) => {
+        if (!projectId || !projectsById.has(projectId)) return;
+        const existing = projectMediaHints.get(projectId) ?? {};
+        projectMediaHints.set(projectId, {
+          coverImageUrl: existing.coverImageUrl ?? renderableImage ?? undefined,
+          startingPrice: existing.startingPrice != null && nextPrice != null
+            ? Math.min(existing.startingPrice, nextPrice)
+            : (existing.startingPrice ?? nextPrice),
+        });
+      };
+
+      const propertyWithProject = property as PropertyListItem & {
+        project_id?: string | null;
+        project?: { id?: string | null } | null;
+      };
+      const linkedProjectId = propertyWithProject.project_id ?? propertyWithProject.project?.id ?? null;
+      if (linkedProjectId) {
+        applyHint(linkedProjectId);
+        continue;
+      }
+
+      const haystack = normalizeProjectLookupText(`${property.title} ${property.address ?? ''}`);
+      if (!haystack) continue;
+
+      const matches = projectNameIndex.filter((entry) =>
+        entry.normalizedName.length >= 8 && haystack.includes(entry.normalizedName)
+      );
+      if (matches.length === 1) {
+        applyHint(matches[0].id);
+      }
+    }
+
+    const enrichedProjects = projects.map((project) => {
+      const hint = projectMediaHints.get(project.id);
+      const resolvedCover = resolveRenderableLocalMediaPath(project.cover_image_url ?? null);
+      const hasRealProjectCover = Boolean(resolvedCover);
+      return {
+        ...project,
+        cover_image_url: hasRealProjectCover ? project.cover_image_url : (hint?.coverImageUrl ?? project.cover_image_url),
+        starting_price: project.starting_price ?? hint?.startingPrice ?? null,
+      };
+    });
+
+    const sortedProjects = [...enrichedProjects].sort((left, right) => {
+      const leftIndex = DEFAULT_FEATURED_PROJECT_SLUGS.indexOf(left.slug);
+      const rightIndex = DEFAULT_FEATURED_PROJECT_SLUGS.indexOf(right.slug);
+      if (leftIndex === -1 && rightIndex === -1) return 0;
+      if (leftIndex === -1) return 1;
+      if (rightIndex === -1) return -1;
+      return leftIndex - rightIndex;
+    });
+
+    return sortedProjects.filter((project) => {
+      const projectMedia = {
+        cover_image_url: project.cover_image_url ?? null,
+        hero_image_url: (project as typeof project & { hero_image_url?: string | null }).hero_image_url ?? null,
+        images: (project as typeof project & { images?: Array<string | null | undefined> | null }).images ?? null,
+      };
+      const hasRenderableMedia = Boolean(pickRenderableLocalMedia(projectMedia));
+      const hasStartingPrice = toFiniteNumber(project.starting_price) != null;
+
+      return Boolean(project.slug && project.name.trim() && hasRenderableMedia && hasStartingPrice);
+    });
+  }
+
+  function buildRenderableHomeProperties(properties: PropertyListItem[]) {
+    return properties.filter((property) => {
+      const propertyMedia = {
+        cover_image: property.cover_image ?? null,
+        local_images: property.local_images ?? null,
+        images: property.images ?? null,
+      };
+      const hasRenderableMedia = Boolean(pickRenderableLocalMedia(propertyMedia));
+      const hasCoreMetadata = Boolean(
+        property.slug
+        && property.title.trim()
+        && toFiniteNumber(property.price) != null
+        && (String(property.city ?? '').trim() || String(property.address ?? '').trim()),
+      );
+
+      return hasRenderableMedia && hasCoreMetadata;
+    });
+  }
+
+  const homeRenderableProjects = buildRenderableHomeProjects(homeProjectsSnapshot, homePropertiesSnapshot);
+  const homeRenderableProperties = buildRenderableHomeProperties(homePropertiesSnapshot);
   const heroSlides = [
     {
       key: 'wongamat-premium',
@@ -450,11 +571,11 @@ export default async function HomePage({
   const heroClientDict = {
     home: {
       heroTitle: locale === 'th'
-        ? 'ที่ปรึกษาอสังหาฯ พัทยา คัดให้ก่อนเริ่มดู'
-        : 'Pattaya property advice, curated before you browse.',
+        ? 'เลือกอสังหาพัทยาได้เร็วขึ้น ด้วย shortlist ที่คัดตามเป้าหมายของคุณ'
+        : 'Find the right Pattaya property faster',
       heroSubtitle: locale === 'th'
-        ? 'ซื้อ ลงทุน เช่า หรือขาย ผ่านโครงการและยูนิตพัทยาที่คัดแล้ว พร้อมทีมท้องถิ่นช่วยดู'
-        : 'Buy, invest, rent, or sell through verified Pattaya projects and units with local guidance.',
+        ? 'สำหรับผู้ซื้อ นักลงทุน และต่างชาติที่ต้องการข้อมูลชัด ตัวเลือกคัดจริง และขั้นตอนที่ไปต่อได้ทันที'
+        : 'Curated guidance for buyers, investors, and foreign purchasers who want clearer options, verified projects, and fewer wrong turns.',
     },
     advisory: {
       heroEyebrow: locale === 'th' ? 'อสังหาริมทรัพย์พัทยา' : 'Pattaya real estate advisory',
@@ -465,58 +586,58 @@ export default async function HomePage({
   };
   const homeJourneyCards = [
     {
-      eyebrow: locale === 'th' ? 'ซื้อในพัทยา' : 'Buy in Pattaya',
-      title: locale === 'th' ? 'ตัวเลือกสำหรับซื้อ' : 'Homes to buy',
+      eyebrow: locale === 'th' ? 'ซื้อ' : 'Buy',
+      title: locale === 'th' ? 'ซื้อ' : 'Buy',
       body: locale === 'th'
-        ? 'เหมาะกับคนซื้ออยู่เอง บ้านพัก หรือบ้านหลังที่สอง'
-        : 'For end-use buyers and second-home searches.',
+        ? 'ค้นหาบ้านและคอนโดที่ตรงงบ ทำเลที่ต้องการ และเป้าหมายการถือครองของคุณ'
+        : 'Find homes and condos that match your budget, preferred area, and ownership goals.',
       signal: saleProperties.length > 0
         ? (locale === 'th' ? `${saleProperties.length} รายการขายที่ยังเปิดอยู่` : `${saleProperties.length} sale listings live`)
-        : (locale === 'th' ? 'อยู่เองหรือบ้านพัก' : 'End-use and second-home fit'),
+        : (locale === 'th' ? 'อยู่เอง บ้านพัก หรือบ้านหลังที่สอง' : 'End-use and second-home fit'),
       href: withLocaleQuery(locale, '/buy', { source: 'home_paths_buy' }),
-      ctaLabel: locale === 'th' ? 'ดูรายการขาย' : 'Browse sales',
+      ctaLabel: locale === 'th' ? 'ดูตัวเลือกสำหรับซื้อ' : 'Explore buying options',
     },
     {
       eyebrow: locale === 'th' ? 'ลงทุน' : 'Invest',
-      title: locale === 'th' ? 'ราคาเข้าและทำเล' : 'Entry price and area',
+      title: locale === 'th' ? 'ลงทุน' : 'Invest',
       body: locale === 'th'
-        ? 'สำหรับคนดูราคาเริ่มต้น ทำเล และภาพเช่าก่อนตัดสินใจ'
-        : 'For investors comparing launch pricing, area fit, and rental context.',
+        ? 'ดูโครงการที่มีศักยภาพด้านปล่อยเช่า ขายต่อ และถือระยะยาวได้ดีกว่า'
+        : 'Review projects with stronger rental, resale, and long-term positioning.',
       signal: entryPriceValue
         ? (locale === 'th' ? `เริ่มต้น ${formatCompactPrice(entryPriceValue, locale)}` : `Entry from ${formatCompactPrice(entryPriceValue, locale)}`)
-        : (locale === 'th' ? 'ดูราคาเข้าและย่าน' : 'Area and entry-price view'),
+        : (locale === 'th' ? 'เปรียบเทียบราคาเข้าและทำเล' : 'Entry price and area context'),
       href: withLocaleQuery(locale, '/invest', { source: 'home_paths_invest' }),
-      ctaLabel: locale === 'th' ? 'ดูสำหรับลงทุน' : 'Browse investment',
+      ctaLabel: locale === 'th' ? 'ดูตัวเลือกเพื่อลงทุน' : 'See investment picks',
     },
     {
-      eyebrow: locale === 'th' ? 'เช่า / ย้ายมาอยู่' : 'Rent / Relocate',
-      title: locale === 'th' ? 'ยูนิตพร้อมอยู่' : 'Move-in rentals',
+      eyebrow: locale === 'th' ? 'เช่า / อยู่เอง' : 'Rent / Live',
+      title: locale === 'th' ? 'เช่า / อยู่เอง' : 'Rent / Live',
       body: locale === 'th'
-        ? 'สำหรับคนย้ายมาอยู่หรือมองหายูนิตเช่าระยะยาว'
-        : 'For relocations and long-stay renters who need ready homes.',
+        ? 'ดูยูนิตพร้อมอยู่สำหรับย้ายเข้า ทดลองอยู่ในย่าน หรือย้ายถิ่นฐานได้สะดวกขึ้น'
+        : 'Explore ready units for living now, testing neighborhoods, or relocating smoothly.',
       signal: rentProperties.length > 0
         ? (locale === 'th' ? `${rentProperties.length} รายการเช่าที่กำลังเปิดอยู่` : `${rentProperties.length} rental listings live`)
-        : (locale === 'th' ? 'เช่าเพื่ออยู่จริง' : 'Ready-to-move rental view'),
+        : (locale === 'th' ? 'ย้ายเข้า ทดลองอยู่ หรือเช่าระยะยาว' : 'Ready-to-move rental view'),
       href: withLocaleQuery(locale, '/rent', { source: 'home_paths_rent' }),
-      ctaLabel: locale === 'th' ? 'ดูรายการเช่า' : 'Browse rentals',
+      ctaLabel: locale === 'th' ? 'ดูยูนิตพร้อมอยู่' : 'Browse ready units',
     },
     {
-      eyebrow: locale === 'th' ? 'ขายกับ AMP' : 'Sell with AMP',
-      title: locale === 'th' ? 'สำหรับเจ้าของ' : 'For owners',
+      eyebrow: locale === 'th' ? 'ขาย' : 'Sell',
+      title: locale === 'th' ? 'ขาย' : 'Sell',
       body: locale === 'th'
-        ? 'สำหรับคนที่กำลังตัดสินใจว่าจะขายหรือปล่อยเช่าในพัทยา'
-        : 'For owners deciding whether to sell or rent out in Pattaya.',
+        ? 'ประเมินราคา วางตำแหน่งทรัพย์ และดูว่าควรขายหรือปล่อยเช่าดีกว่า'
+        : 'Talk through pricing, positioning, and whether selling or renting out makes more sense.',
       signal: locale === 'th' ? 'ขายหรือปล่อยเช่า' : 'Sell or rent out',
       href: withLocaleQuery(locale, '/sell', { source: 'home_paths_sell' }),
-      ctaLabel: locale === 'th' ? 'ดูสำหรับเจ้าของ' : 'See owner page',
+      ctaLabel: locale === 'th' ? 'พูดคุยทางเลือกของคุณ' : 'Discuss your options',
     },
   ];
   const showFeaturedProjectsSection = isSectionEnabled('featured_projects');
   const showFeaturedPropertiesSection = isSectionEnabled('featured_properties');
   const showCuratedOpportunities = showFeaturedProjectsSection || showFeaturedPropertiesSection;
   const showCombinedCuratedEmpty = showCuratedOpportunities
-    && (!showFeaturedProjectsSection || homeProjectsSnapshot.length === 0)
-    && (!showFeaturedPropertiesSection || homePropertiesSnapshot.length === 0);
+    && (!showFeaturedProjectsSection || homeRenderableProjects.length === 0)
+    && (!showFeaturedPropertiesSection || homeRenderableProperties.length === 0);
   const curatedOpportunitiesOrder = Math.min(
     sectionOrderStyle('featured_projects').order,
     sectionOrderStyle('featured_properties').order,
@@ -532,17 +653,17 @@ export default async function HomePage({
           <div className="home-pathways-shell reveal">
             <div className="section-header home-pathways-shell__header">
               <div className="home-section-kicker">
-                {locale === 'th' ? 'เลือกทางหลัก' : 'Choose your route'}
+                {locale === 'th' ? 'เลือกเส้นทางของคุณ' : 'Choose your path'}
               </div>
               <h2 id="home-pathways-title" className="section-title">
                 {locale === 'th'
-                  ? 'เลือกทางที่ใช่ก่อน'
-                  : 'Choose your route.'}
+                  ? 'เริ่มจากเป้าหมายที่ตรงกับคุณ'
+                  : 'Start with the goal that fits you'}
               </h2>
               <p className="section-subtitle">
                 {locale === 'th'
-                  ? 'ซื้อ ลงทุน เช่า หรือขายในพัทยา'
-                  : 'Buy, invest, rent, or sell in Pattaya.'}
+                  ? 'ไม่ว่าคุณจะซื้อ ลงทุน เช่าเพื่ออยู่เอง หรือกำลังคิดจะขาย เราจะช่วยให้คุณเริ่มจากขั้นตอนที่เหมาะกว่า'
+                  : 'Whether you are buying, investing, relocating, or planning to sell, we’ll help you focus on the right next step.'}
               </p>
             </div>
 
@@ -574,86 +695,7 @@ export default async function HomePage({
   }
 
   async function FeaturedProjectsSection({ embedded = false }: { embedded?: boolean } = {}) {
-    const allProjects = homeProjectsSnapshot;
-    const allProperties = homePropertiesSnapshot;
-
-    const PROJECT_PRIORITY = DEFAULT_FEATURED_PROJECT_SLUGS;
-
-    function normalizeProjectText(input: string | null | undefined): string {
-      return String(input ?? '')
-        .toLowerCase()
-        .replace(/[^a-z0-9]+/g, ' ')
-        .replace(/\s+/g, ' ')
-        .trim();
-    }
-
-    const projectMediaHints = new Map<string, { coverImageUrl?: string; startingPrice?: number }>();
-    const projectsById = new Map(allProjects.map((project) => [project.id, project]));
-    const projectNameIndex = allProjects.map((project) => ({
-      id: project.id,
-      normalizedName: normalizeProjectText(project.name),
-    }));
-    for (const prop of allProperties) {
-      const imgCandidates = [prop.cover_image, ...(prop.local_images ?? []), ...(prop.images ?? [])];
-      const realImg = imgCandidates
-        .map((candidate) => resolveRenderableLocalMediaPath(candidate))
-        .find((resolved): resolved is string => Boolean(resolved));
-      if (!realImg) continue;
-      const nextPrice = typeof prop.price === 'number' && Number.isFinite(prop.price) && prop.price > 0
-        ? Number(prop.price)
-        : undefined;
-
-      const applyHint = (projectId: string) => {
-        if (!projectId || !projectsById.has(projectId)) return;
-        const existing = projectMediaHints.get(projectId) ?? {};
-        projectMediaHints.set(projectId, {
-          coverImageUrl: existing.coverImageUrl ?? realImg ?? undefined,
-          startingPrice: existing.startingPrice != null && nextPrice != null
-            ? Math.min(existing.startingPrice, nextPrice)
-            : (existing.startingPrice ?? nextPrice),
-        });
-      };
-
-      const propWithProject = prop as PropertyListItem & {
-        project_id?: string | null;
-        project?: { id?: string | null } | null;
-      };
-      const linkedProjectId = propWithProject.project_id ?? propWithProject.project?.id ?? null;
-      if (linkedProjectId) {
-        applyHint(linkedProjectId);
-        continue;
-      }
-
-      const haystack = normalizeProjectText(`${prop.title} ${prop.address ?? ''}`);
-      if (!haystack) continue;
-
-      const matches = projectNameIndex.filter((entry) =>
-        entry.normalizedName.length >= 8 && haystack.includes(entry.normalizedName)
-      );
-      if (matches.length === 1) {
-        applyHint(matches[0].id);
-      }
-    }
-
-    const enrichedProjects = allProjects.map((project) => {
-      const hint = projectMediaHints.get(project.id);
-      const resolvedCover = resolveRenderableLocalMediaPath(project.cover_image_url ?? null);
-      const hasRealProjectCover = Boolean(resolvedCover);
-      return {
-        ...project,
-        cover_image_url: hasRealProjectCover ? project.cover_image_url : (hint?.coverImageUrl ?? project.cover_image_url),
-        starting_price: project.starting_price ?? hint?.startingPrice ?? null,
-      };
-    });
-
-    const sortedProjects = [...enrichedProjects].sort((a, b) => {
-      const aIdx = PROJECT_PRIORITY.indexOf(a.slug);
-      const bIdx = PROJECT_PRIORITY.indexOf(b.slug);
-      if (aIdx === -1 && bIdx === -1) return 0;
-      if (aIdx === -1) return 1;
-      if (bIdx === -1) return -1;
-      return aIdx - bIdx;
-    });
+    const renderableProjects = homeRenderableProjects;
 
     const projectMode = String(composerFeaturedProjects.mode ?? 'auto').toLowerCase();
     const selectedProjectIds = Array.isArray(composerFeaturedProjects.selected_project_ids)
@@ -663,35 +705,38 @@ export default async function HomePage({
       ? composerFeaturedProjects.selected_project_slugs.map((item) => String(item))
       : [];
 
-    const byId = new Map(sortedProjects.map((item) => [item.id, item]));
-    const bySlug = new Map(sortedProjects.map((item) => [item.slug, item]));
+    const byId = new Map(renderableProjects.map((item) => [item.id, item]));
+    const bySlug = new Map(renderableProjects.map((item) => [item.slug, item]));
     const manualProjects = [...selectedProjectIds.map((id) => byId.get(id)), ...selectedProjectSlugs.map((slug) => bySlug.get(slug))]
-      .filter((item): item is (typeof sortedProjects)[number] => Boolean(item));
+      .filter((item): item is (typeof renderableProjects)[number] => Boolean(item));
 
     const defaultProjects = DEFAULT_FEATURED_PROJECT_SLUGS
       .map((slug) => bySlug.get(slug))
-      .filter((item): item is (typeof sortedProjects)[number] => Boolean(item));
+      .filter((item): item is (typeof renderableProjects)[number] => Boolean(item));
     const featuredProjects = (projectMode === 'manual' && manualProjects.length > 0)
-      ? manualProjects.slice(0, 6)
-      : (defaultProjects.length > 0 ? defaultProjects.slice(0, 6) : sortedProjects.slice(0, 6));
+      ? manualProjects.slice(0, MAX_HOME_FEATURED_PROJECTS)
+      : (defaultProjects.length > 0
+        ? defaultProjects.slice(0, MAX_HOME_FEATURED_PROJECTS)
+        : renderableProjects.slice(0, MAX_HOME_FEATURED_PROJECTS));
     const featuredProjectsTitle =
       typeof composerFeaturedProjects.heading === 'string' && composerFeaturedProjects.heading.trim()
         ? composerFeaturedProjects.heading.trim()
-        : (locale === 'th' ? 'โครงการที่ควรดูตอนนี้' : 'Projects to review');
+        : (locale === 'th' ? 'โครงการที่ควรดูจริงก่อน' : 'Projects worth reviewing first');
     const featuredProjectsSubtitle =
       typeof composerFeaturedProjects.subcopy === 'string' && composerFeaturedProjects.subcopy.trim()
         ? composerFeaturedProjects.subcopy.trim()
         : (locale === 'th'
-          ? 'ดูทำเล ราคาเริ่มต้น และจุดเด่นแบบสั้น'
-          : 'See location, entry pricing, and the key point before opening more detail.');
+          ? 'คัดเฉพาะโครงการที่น่าสนใจจากความเหมาะกับผู้ซื้อ ศักยภาพของทำเล และความเกี่ยวข้องกับการตัดสินใจของคุณ'
+          : 'A tighter selection of developments chosen for buyer fit, area strength, and decision relevance.');
     const content = (
       <>
         <FeaturedProjects
           projects={featuredProjects}
           locale={locale}
-          kicker={locale === 'th' ? 'คัดโครงการ' : 'Project selection'}
+          kicker={locale === 'th' ? 'โครงการที่คัดแล้ว' : 'Curated projects'}
           title={featuredProjectsTitle}
           subtitle={featuredProjectsSubtitle}
+          headingLevel={embedded ? 'h3' : 'h2'}
         />
       </>
     );
@@ -709,17 +754,17 @@ export default async function HomePage({
 
   async function FeaturedPropertiesSection({ embedded = false }: { embedded?: boolean } = {}) {
     let featuredProperties: PropertyListItem[] = [];
-    const allPropertyCandidates = homePropertiesSnapshot;
+    const allPropertyCandidates = homeRenderableProperties;
     const sales = allPropertyCandidates.filter((property) => property.type !== 'rent');
     const rents = allPropertyCandidates.filter((property) => property.type === 'rent');
     const mixed: PropertyListItem[] = [];
     let si = 0;
     let ri = 0;
-    while (mixed.length < 8 && (si < sales.length || ri < rents.length)) {
-      for (let k = 0; k < 2 && si < sales.length && mixed.length < 8; k++) {
+    while (mixed.length < MAX_HOME_FEATURED_PROPERTIES && (si < sales.length || ri < rents.length)) {
+      for (let k = 0; k < 2 && si < sales.length && mixed.length < MAX_HOME_FEATURED_PROPERTIES; k++) {
         mixed.push(sales[si++]);
       }
-      if (ri < rents.length && mixed.length < 8) {
+      if (ri < rents.length && mixed.length < MAX_HOME_FEATURED_PROPERTIES) {
         mixed.push(rents[ri++]);
       }
     }
@@ -742,25 +787,27 @@ export default async function HomePage({
         ...selectedSourceIds.map((sourceId) => bySource.get(sourceId)),
       ].filter((item): item is PropertyListItem => Boolean(item));
       if (manual.length > 0) {
-        featuredProperties = manual.slice(0, 8);
+        featuredProperties = manual.slice(0, MAX_HOME_FEATURED_PROPERTIES);
       }
     } else {
       const defaultFeatured = DEFAULT_FEATURED_PROPERTY_SOURCE_IDS
         .map((sourceId) => bySource.get(sourceId))
         .filter((item): item is PropertyListItem => Boolean(item));
       if (defaultFeatured.length > 0) {
-        featuredProperties = defaultFeatured.slice(0, 8);
+        featuredProperties = defaultFeatured.slice(0, MAX_HOME_FEATURED_PROPERTIES);
       }
     }
 
     const featuredPropertiesTitle =
       typeof composerFeaturedProperties.heading === 'string' && composerFeaturedProperties.heading.trim()
         ? composerFeaturedProperties.heading.trim()
-        : (locale === 'th' ? 'ยูนิตที่พร้อมดูต่อ' : 'Ready units to review');
+        : (locale === 'th' ? 'ตัวเลือกที่เหมาะกับการไปต่อจริง' : 'Top picks for serious next steps');
     const featuredPropertiesSubtitle =
       typeof composerFeaturedProperties.subcopy === 'string' && composerFeaturedProperties.subcopy.trim()
         ? composerFeaturedProperties.subcopy.trim()
-        : (locale === 'th' ? 'แยกขายและเช่าให้อ่านราคา ขนาด และทำเลได้เร็ว' : 'Sale and rental units, separated for a quicker read.');
+        : (locale === 'th'
+          ? 'คัดยูนิตสำหรับผู้ซื้อและผู้เช่าที่ต้องการตัวเลือกชัดขึ้น และพร้อมตัดสินใจในขั้นถัดไป'
+          : 'Selected units for buyers and renters who want clearer options they can act on now.');
     const saleCount = featuredProperties.filter((property) => property.type !== 'rent').length;
     const rentCount = featuredProperties.filter((property) => property.type === 'rent').length;
     const featuredPropertyIntent = featuredProperties.filter((property) => property.type === 'rent').length > featuredProperties.length / 2
@@ -849,19 +896,26 @@ export default async function HomePage({
     function deriveTags(input: PropertyListItem, statTokens: { view: string | null }): string[] {
       const text = `${input.title} ${input.status}`.toLowerCase();
       const tags: string[] = [];
-      if (text.includes('high yield')) tags.push(locale === 'th' ? 'ผลตอบแทนสูง' : 'High yield');
-      if (text.includes('corner')) tags.push(locale === 'th' ? 'ห้องมุม' : 'Corner');
-      if (!statTokens.view && text.includes('sea view')) tags.push(locale === 'th' ? 'วิวทะเล' : 'Sea view');
-      return tags.slice(0, 3);
+      if (input.type === 'rent') tags.push(locale === 'th' ? 'พร้อมเข้าอยู่' : 'Ready to move in');
+      if (input.type !== 'rent' && typeof input.price === 'number' && Number.isFinite(input.price) && input.price > 0 && input.price <= 5_000_000) {
+        tags.push(locale === 'th' ? 'งบไม่เกิน 5 ล้าน' : 'Under THB 5M');
+      }
+      if (statTokens.view) {
+        tags.push(locale === 'th' ? `มี${statTokens.view}` : `${statTokens.view} option`);
+      } else if (text.includes('sea view')) {
+        tags.push(locale === 'th' ? 'มีวิวทะเล' : 'Sea view option');
+      }
+      return [...new Set(tags)].slice(0, 2);
     }
 
+    const FeaturedPropertiesHeading = embedded ? 'h3' : 'h2';
     const content = (
       <>
         <div className="section-header">
           <div className="home-section-kicker">
-            {locale === 'th' ? 'ยูนิตคัดสรร' : 'Curated units'}
+            {locale === 'th' ? 'ยูนิตพร้อมดู' : 'Ready units'}
           </div>
-          <h2 className="section-title">{featuredPropertiesTitle}</h2>
+          <FeaturedPropertiesHeading className="section-title">{featuredPropertiesTitle}</FeaturedPropertiesHeading>
           <p className="section-subtitle">{featuredPropertiesSubtitle}</p>
         </div>
 
@@ -941,7 +995,7 @@ export default async function HomePage({
               const visibleFacts = [statTokens.bed, statTokens.bath, statTokens.size, statTokens.floor, statTokens.view]
                 .filter(Boolean)
                 .slice(0, 2);
-              const visibleTags = visibleFacts.length === 0 ? tags.slice(0, 1) : [];
+              const visibleTags = tags.slice(0, 2);
               const typeBadge = prop.type === 'rent' ? (locale === 'th' ? 'ให้เช่า' : 'For Rent')
                 : prop.type === 'resale' ? (locale === 'th' ? 'ขายต่อ' : 'Resale')
                   : (locale === 'th' ? 'ขาย' : 'For Sale');
@@ -952,6 +1006,7 @@ export default async function HomePage({
                 ? withLocale(locale, `/property/${encodeURIComponent(prop.slug)}`)
                 : withLocale(locale, prop.type === 'rent' ? '/rent' : '/buy');
               const areaLine = localizeAreaLabel(locale, prop.city) ?? prop.address ?? null;
+              const shouldPreloadMedia = index < HOME_PROPERTY_MEDIA_PRELOAD_COUNT;
 
               return (
                 <Link
@@ -968,8 +1023,13 @@ export default async function HomePage({
                       className="media-shell"
                       imageClassName={`absolute inset-0 h-full w-full object-cover ${hasLocalMedia ? '' : 'premium-investment-card__fallback-image'}`}
                       fallbackSrc={fallbackSrc}
-                      sizes="(max-width: 767px) 100vw, (max-width: 1279px) 50vw, 25vw"
+                      sizes="(max-width: 767px) 92vw, (max-width: 1279px) 48vw, 24vw"
+                      loading={shouldPreloadMedia ? 'eager' : 'lazy'}
+                      priority={group.key === 'sale' && index === 0}
+                      fetchPriority={group.key === 'sale' && index === 0 ? 'high' : (shouldPreloadMedia ? 'low' : 'auto')}
+                      quality={60}
                       unoptimized={false}
+                      ssrStartWithPrimary={shouldPreloadMedia}
                     />
                     <div className="premium-investment-card__media-scrim" aria-hidden="true" />
                     <span className={`absolute top-3 left-3 text-xs font-semibold px-2.5 py-1 rounded-full ${badgeColor}`}>
@@ -1067,17 +1127,17 @@ export default async function HomePage({
           <div className="home-curated-shell reveal">
             <div className="section-header home-curated-shell__header">
               <div className="home-section-kicker">
-                {locale === 'th' ? 'โอกาสที่ทีมคัดไว้' : 'Curated opportunities'}
+                {locale === 'th' ? 'โครงการและยูนิตที่คัดแล้ว' : 'Curated opportunities'}
               </div>
               <h2 id="home-curated-title" className="section-title">
                 {locale === 'th'
-                  ? 'ดูโครงการก่อน แล้วค่อยดูยูนิต'
-                  : 'Projects first. Units next.'}
+                  ? 'เริ่มจากโครงการ แล้วค่อยดูยูนิตที่พร้อมไปต่อ'
+                  : 'Start with curated projects, then move into ready units.'}
               </h2>
               <p className="section-subtitle">
                 {locale === 'th'
-                  ? 'แยกโครงการใหม่และยูนิตพร้อมดูให้อ่านง่ายขึ้น'
-                  : 'Split new launches and ready units into two calmer reads.'}
+                  ? 'แยกโครงการและยูนิตที่พร้อมจริงให้อ่านง่ายขึ้น โดยไม่พาคุณไปไกลกว่าที่จำเป็น'
+                  : 'Keep new developments and ready units in two calmer reads so the next step stays clear.'}
               </p>
             </div>
 
@@ -1146,33 +1206,13 @@ export default async function HomePage({
   }
 
   function HomeMarketClaritySection() {
-    const whyPattayaStatItems = [
-      {
-        label: locale === 'th' ? 'โครงสร้างดีมานด์' : 'Demand mix',
-        value: locale === 'th' ? 'ท่องเที่ยวและพำนักจริง' : 'Tourism and end-user',
-        note: locale === 'th' ? 'จึงต้องคัดตามเป้าหมายของผู้ซื้อ' : 'Demand is not driven by one audience, so matching the buyer thesis matters.',
-      },
-      {
-        label: locale === 'th' ? 'ความต่างของแต่ละย่าน' : 'Submarket spread',
-        value: locale === 'th' ? 'แต่ละย่านเด่นไม่เหมือนกัน' : 'Distinct area profiles',
-        note: locale === 'th' ? 'แต่ละโซนเหมาะกับโจทย์ไม่เหมือนกัน' : 'Different Pattaya zones fit different renter, end-user, and investor stories.',
-      },
-      {
-        label: locale === 'th' ? 'ช่วงราคาเริ่มต้น' : 'Entry range',
-        value: entryPriceValue ? formatCompactPrice(entryPriceValue, locale) ?? '—' : (locale === 'th' ? 'ตั้งแต่ระดับแมสพรีเมียมถึงลักชัวรี' : 'Mass premium to luxury'),
-        note: entryPriceValue
-          ? (locale === 'th' ? 'อิงจากรายการที่ยังใช้งานอยู่ในระบบ' : 'Derived from current live entry points in the system, not brochure claims.')
-          : (locale === 'th' ? 'ช่วงราคากว้างพอให้เลือกกลยุทธ์ได้หลายแบบ' : 'The range stays broad enough to support different buying strategies.'),
-      },
-    ];
-
     return (
       <section className="home-market-section" aria-labelledby="home-market-title">
         <Container variant="wide">
           <div className="home-market-shell reveal">
             <div className="section-header home-market-shell__header">
               <div className="home-section-kicker">
-                {locale === 'th' ? 'ดูพัทยาให้ชัด' : 'Why Pattaya'}
+                {locale === 'th' ? 'เราช่วยให้คุณตัดสินใจอย่างไร' : 'How we help you decide'}
               </div>
               <h2 id="home-market-title" className="section-title">{whyPattayaHeading}</h2>
               <p className="section-subtitle">{whyPattayaSubcopy}</p>
@@ -1180,34 +1220,23 @@ export default async function HomePage({
 
             <div className="home-market-grid">
               <div className="home-market-story">
-                <div className="home-market-stats">
-                  {whyPattayaStatItems.slice(0, 2).map((item) => (
-                    <div key={`${item.label}-${item.value}`} className="home-market-stat">
-                      <span className="home-market-stat__label">{item.label}</span>
-                      <strong className="home-market-stat__value">{item.value}</strong>
-                      <span className="home-market-stat__note">{item.note}</span>
-                    </div>
-                  ))}
-                </div>
-
                 <div className="home-market-narratives">
-                  {whyPattayaNarrativeCards.slice(0, 2).map((card) => (
+                  {whyPattayaNarrativeCards.map((card) => (
                     <article key={`${card.title}-${card.body}`} className="home-market-card">
                       <h3 className="home-market-card__title">{card.title}</h3>
                       <p className="home-market-card__body">{card.body}</p>
                     </article>
                   ))}
                 </div>
-
               </div>
 
-              <aside className="home-market-proof" aria-label={locale === 'th' ? 'วิธีที่ทีมอ่านตลาด' : 'How the team reads the market'}>
+              <aside className="home-market-proof" aria-label={locale === 'th' ? 'กรอบการตัดสินใจของทีม' : 'How the team frames the decision'}>
                 <div className="home-market-proof__intro">
-                  <p className="home-market-proof__eyebrow">{locale === 'th' ? 'วิธีที่ทีมอ่านตลาด' : 'How the team reads it'}</p>
+                  <p className="home-market-proof__eyebrow">{locale === 'th' ? 'กรอบการตัดสินใจ' : 'Decision frame'}</p>
                   <h3 className="home-market-proof__title">
                     {locale === 'th'
-                      ? 'เริ่มจากงบ ทำเล แล้วค่อยคัด'
-                      : 'Budget, area, then options.'}
+                      ? 'เริ่มจากการวางกรอบให้ถูก ก่อนค่อยไล่ดูตัวเลือก'
+                      : 'Start with the right frame before you browse deeper.'}
                   </h3>
                 </div>
 
@@ -1230,20 +1259,20 @@ export default async function HomePage({
   function HomeOwnerAdvisorySection() {
     const ownerCards = [
       {
-        title: locale === 'th' ? 'ส่งข้อมูลทรัพย์' : 'Share owner details',
+        title: locale === 'th' ? 'ขายด้วยการวางตำแหน่งที่ดีกว่า' : 'Sell with better positioning',
         body: locale === 'th'
-          ? 'บอกทรัพย์ ช่วงราคา และช่วงเวลา'
-          : 'Property, price range, and timing.',
+          ? 'ประเมินราคา กลุ่มผู้ซื้อที่เหมาะ และวิธีนำเสนอทรัพย์ให้น่าสนใจขึ้น'
+          : 'Review pricing, buyer fit, and how to present the property more effectively.',
         href: withLocaleQuery(locale, '/sell', { source: 'home_owner_sell' }),
-        ctaLabel: locale === 'th' ? 'ส่งข้อมูล' : 'Send details',
+        ctaLabel: locale === 'th' ? 'พูดคุยเรื่องการขาย' : 'Discuss selling options',
       },
       {
-        title: locale === 'th' ? 'คุยก่อนว่าจะขายหรือปล่อยเช่า' : 'Talk through the options',
+        title: locale === 'th' ? 'ปล่อยเช่าด้วยแนวทางที่เหมาะกว่า' : 'Rent out with better fit',
         body: locale === 'th'
-          ? 'เหมาะกับคนที่ยังตัดสินใจว่าจะขาย ถือไว้ หรือปล่อยเช่า'
-          : 'For owners still deciding whether to sell, hold, or rent out.',
+          ? 'ดูว่าทรัพย์ของคุณควรปล่อยเช่าตอนนี้หรือไม่ ตามประเภท ทำเล และดีมานด์'
+          : 'See whether renting out now makes more sense based on type, area, and demand.',
         href: withLocaleQuery(locale, '/contact', { source: 'home_owner_consult' }),
-        ctaLabel: locale === 'th' ? 'คุยกับทีม' : 'Speak with the team',
+        ctaLabel: locale === 'th' ? 'ดูแนวทางปล่อยเช่า' : 'Review rental strategy',
       },
     ];
 
@@ -1257,13 +1286,13 @@ export default async function HomePage({
               </div>
               <h2 id="home-owner-title" className="section-title">
                 {locale === 'th'
-                  ? 'ขายหรือปล่อยเช่า'
-                  : 'Sell or rent out'}
+                  ? 'ขายหรือปล่อยเช่าด้วยการวางตำแหน่งที่ชัดกว่า'
+                  : 'Sell or rent out with clearer positioning'}
               </h2>
               <p className="section-subtitle">
                 {locale === 'th'
-                  ? 'สำหรับเจ้าของที่กำลังตัดสินใจว่าจะจัดการทรัพย์ในพัทยาอย่างไร'
-                  : 'For owners deciding how to handle a Pattaya property.'}
+                  ? 'หากคุณมีอสังหาในพัทยาอยู่แล้ว เราช่วยคิดต่อเรื่องราคา การนำเสนอ และขั้นตอนถัดไปที่เหมาะกว่าได้'
+                  : 'If you already own property in Pattaya, we can help you think through pricing, presentation, and the next practical move.'}
               </p>
             </div>
 
@@ -1299,42 +1328,30 @@ export default async function HomePage({
     );
   }
 
-  const statTrendCues = [
-    locale === 'th' ? '↗ แนวโน้มบวก' : '↗ Positive trend cue',
-    locale === 'th' ? '→ ทรงตัว' : '→ Stable trend cue',
-    locale === 'th' ? '↗ ดีมานด์เพิ่ม' : '↗ Demand trend cue',
-    locale === 'th' ? '→ ติดตามต่อเนื่อง' : '→ Monitoring trend cue',
-  ];
-
-  const composerWhyPattayaStats = Array.isArray(composerWhyPattaya.metrics)
-    ? composerWhyPattaya.metrics as Array<{ label?: string; value?: string }>
-    : Array.isArray(composerProofTrust.why_pattaya_metrics)
-      ? composerProofTrust.why_pattaya_metrics as Array<{ label?: string; value?: string }>
-    : [];
-  const fallbackInvestStats = Array.isArray(homeDict.investStats)
-    ? (homeDict.investStats as Array<{ label?: string; value?: string }>)
-    : [];
-  const whyPattayaStats = composerWhyPattayaStats.length
-    ? composerWhyPattayaStats
-    : fallbackInvestStats;
   const fallbackWhyPattayaNarrativeCards = [
     {
-      title: locale === 'th' ? 'ดีมานด์หลายกลุ่ม' : 'Demand has more than one driver',
+      title: locale === 'th' ? 'ความเหมาะของทำเล' : 'Area fit',
       body: locale === 'th'
-        ? 'มีทั้งนักท่องเที่ยว ผู้ซื้อบ้านพัก และผู้เช่าระยะยาว ไม่ได้พึ่งกลุ่มเดียว'
-        : 'Tourism, second-home demand, and longer-stay renters all matter here.',
+        ? 'เปรียบเทียบย่านต่าง ๆ ตามไลฟ์สไตล์ การเดินทาง บรรยากาศ และประเภทผู้ซื้อหรือผู้เช่าที่ดึงดูด'
+        : 'Compare neighborhoods by lifestyle, access, atmosphere, and the type of buyer or renter they attract.',
     },
     {
-      title: locale === 'th' ? 'แต่ละย่านทำงานต่างกัน' : 'Areas play different roles',
+      title: locale === 'th' ? 'ความจริงของงบประมาณ' : 'Budget reality',
       body: locale === 'th'
-        ? 'การเข้าถึง โรงพยาบาล ศูนย์การค้า และโซนไลฟ์สไตล์ ทำให้ความต้องการของแต่ละย่านต่างกัน'
-        : 'Access, hospitals, retail, and lifestyle clusters shift demand by area.',
+        ? 'เห็นภาพว่างบของคุณเปิดตัวเลือกอะไรได้จริง และจุดไหนที่ควรปรับความคาดหวัง'
+        : 'See what your budget actually opens up, and where expectations may need to shift.',
     },
     {
-      title: locale === 'th' ? 'คัดให้ตรงยังสำคัญ' : 'Curation still matters',
+      title: locale === 'th' ? 'เส้นทางการถือครอง' : 'Ownership path',
       body: locale === 'th'
-        ? 'ไม่ใช่ทุกยูนิตจะเหมาะกับทุกเป้าหมาย การคัดให้ตรงจึงสำคัญกว่าการไล่ดูจำนวนมาก'
-        : 'Not every unit fits every goal, so selection matters more than raw volume.',
+        ? 'เข้าใจคำถามเชิงปฏิบัติที่สำคัญ ก่อนจะเปลี่ยนจากความสนใจไปสู่การลงมือจริง'
+        : 'Understand the practical questions that matter before moving from interest to action.',
+    },
+    {
+      title: locale === 'th' ? 'อยู่เอง ปล่อยเช่า หรือขายต่อ' : 'Living, yield, or resale',
+      body: locale === 'th'
+        ? 'คัดตัวเลือกตามผลลัพธ์ที่คุณต้องการจริง ไม่ใช่แค่เพราะประกาศแรกดูน่าสนใจ'
+        : 'Filter options according to the outcome you care about most, not just the listing that looks good first.',
     },
   ];
   const composerWhyPattayaNarrativeCards = Array.isArray(composerWhyPattaya.narrative_cards)
@@ -1342,22 +1359,22 @@ export default async function HomePage({
     : [];
   const whyPattayaNarrativeCards = composerWhyPattayaNarrativeCards.length
     ? composerWhyPattayaNarrativeCards
-        .slice(0, 3)
+        .slice(0, 4)
         .map((card, index) => ({
-          title: String(card.title ?? (locale === 'th' ? `ประเด็นตลาด ${index + 1}` : `Market point ${index + 1}`)),
+          title: String(card.title ?? (locale === 'th' ? `ประเด็นช่วยตัดสินใจ ${index + 1}` : `Decision block ${index + 1}`)),
           body: String(card.body ?? advisoryDict.noPublishedDataBody),
         }))
     : fallbackWhyPattayaNarrativeCards;
   const whyPattayaHeading =
     typeof composerWhyPattaya.heading === 'string' && composerWhyPattaya.heading.trim()
       ? composerWhyPattaya.heading.trim()
-      : (locale === 'th' ? 'ทำไมพัทยายังน่าสนใจ' : 'Why Pattaya');
+      : (locale === 'th' ? 'การตัดสินใจที่ดี เริ่มจากการวางกรอบให้ถูก' : 'Better decisions start with better framing');
   const whyPattayaSubcopy =
     typeof composerWhyPattaya.subcopy === 'string' && composerWhyPattaya.subcopy.trim()
       ? composerWhyPattaya.subcopy.trim()
       : (locale === 'th'
-        ? 'ทำเล ดีมานด์ และช่วงราคา ยังทำให้ตัดสินใจต่างกัน'
-        : 'Area, demand, and entry pricing still vary enough to matter.');
+        ? 'shortlist ที่ดีไม่ได้เกิดจากการดูเยอะที่สุด แต่เกิดจากการจับคู่ตัวเลือกให้ตรงกับทำเล งบ เส้นทางการถือครอง และเป้าหมายระยะยาว'
+        : 'A stronger shortlist comes from matching property choices to area fit, budget reality, ownership path, and long-term intent.');
   const composerTrustProofItems = Array.isArray(composerProofTrust.trust_proofs)
     ? composerProofTrust.trust_proofs as Array<{ key?: string; label?: string; value?: string | null }>
     : [];
@@ -1494,20 +1511,30 @@ export default async function HomePage({
   const bottomCtaHeading =
     typeof composerBottomCta.heading === 'string' && composerBottomCta.heading.trim()
       ? composerBottomCta.heading.trim()
-      : (locale === 'th' ? 'บอกโจทย์ของคุณ' : 'Share your brief');
+      : (locale === 'th' ? 'เล่าให้เราฟังว่าคุณกำลังมองหาอะไร' : 'Tell us what you are looking for');
   const bottomCtaSubheading =
     typeof composerBottomCta.subheading === 'string' && composerBottomCta.subheading.trim()
       ? composerBottomCta.subheading.trim()
       : (locale === 'th'
-        ? 'ชื่อ ช่องทางติดต่อ และโน้ตสั้น ๆ พอสำหรับคำตอบแรกจากทีม'
-        : 'Name, contact, and a short note are enough for the first reply.');
+        ? 'แจ้งงบ เป้าหมาย ทำเลที่สนใจ และช่วงเวลาของคุณ แล้วเราจะกลับมาพร้อม shortlist ที่คัดแล้วและขั้นตอนถัดไปที่ชัดเจน'
+        : 'Share your budget, goal, preferred area, and timing. We’ll reply with a tighter shortlist and clearer next steps.');
   const bottomCtaBenefits = Array.isArray(composerBottomCta.benefit_bullets)
-    ? composerBottomCta.benefit_bullets.map((item) => String(item).trim()).filter(Boolean).slice(0, 2)
-    : [];
+    ? composerBottomCta.benefit_bullets.map((item) => String(item).trim()).filter(Boolean).slice(0, 3)
+    : (locale === 'th'
+      ? [
+          'ใช้ได้ทั้งสำหรับซื้อ ลงทุน เช่า หรือขาย',
+          'เหมาะทั้งลูกค้าไทยและต่างชาติ',
+          'เริ่มจากเป้าหมายของคุณ ไม่ใช่การค้นหาที่ยาวเกินจำเป็น',
+        ]
+      : [
+          'For buying, investing, renting, or selling',
+          'Helpful for both Thai and foreign clients',
+          'Start with your goal, not a long search',
+        ]);
   const bottomCtaPrimaryLabel =
     typeof composerBottomCta.primary_cta_label === 'string' && composerBottomCta.primary_cta_label.trim()
       ? composerBottomCta.primary_cta_label.trim()
-      : (locale === 'th' ? 'ส่งโจทย์' : 'Send brief');
+      : (locale === 'th' ? 'ขอ Shortlist ของฉัน' : 'Request My Shortlist');
   const bottomCtaFormId = 'home-consultation-form';
   const bottomCtaPrimaryUrl = resolveHomeBottomCtaPrimaryUrl(
     bottomCtaFormId,
@@ -1516,7 +1543,7 @@ export default async function HomePage({
   const bottomCtaSecondaryLabel =
     typeof composerBottomCta.secondary_cta_label === 'string' && composerBottomCta.secondary_cta_label.trim()
       ? composerBottomCta.secondary_cta_label.trim()
-      : (locale === 'th' ? 'ดูโครงการทั้งหมด' : 'View all projects');
+      : (locale === 'th' ? 'ดูโครงการที่คัดแล้ว' : 'Browse Verified Projects');
   const bottomCtaSecondaryUrl =
     typeof composerBottomCta.secondary_cta_url === 'string' && composerBottomCta.secondary_cta_url.trim()
       ? withLocale(locale, composerBottomCta.secondary_cta_url.trim())
@@ -1534,13 +1561,13 @@ export default async function HomePage({
   const bottomCtaFormHeading =
     typeof composerBottomCta.form_heading === 'string' && composerBottomCta.form_heading.trim()
       ? composerBottomCta.form_heading.trim()
-      : (locale === 'th' ? 'ความต้องการของคุณ' : 'Your requirements');
+      : (locale === 'th' ? 'บอกเราว่าคุณต้องการอะไร' : 'Tell us what you need');
   const bottomCtaFormBody =
     typeof composerBottomCta.form_body === 'string' && composerBottomCta.form_body.trim()
       ? composerBottomCta.form_body.trim()
       : (locale === 'th'
-        ? 'กรอกสั้น ๆ เพื่อให้ทีมเริ่มคัดชุดแรกให้ได้'
-        : 'A short form is enough to start the first shortlist.');
+        ? 'ฟอร์มสั้นพอสำหรับให้ทีมเริ่มคัด shortlist ชุดแรกได้'
+        : 'A short form is enough for the team to start the first shortlist.');
   const hasDedicatedBottomConversionGate = isSectionEnabled('bottom_cta');
 
   const editorialInsightCards = authorityPosts.map((post, index) => ({
@@ -1695,7 +1722,6 @@ export default async function HomePage({
   const latestInsightUpdate = insightCards
     .map((card) => card.updatedAt)
     .find((value): value is string => Boolean(value));
-  const whyPattayaSignalCount = whyPattayaStats.length > 0 ? whyPattayaStats.length : whyPattayaNarrativeCards.length;
   const showHomeTrustLayer = ['trust_micro_strip', 'proof_trust', 'reviews'].some((key) => isSectionEnabled(key));
   const trustSnapshotIntro = locale === 'th'
     ? 'รายการที่ยังตรวจต่อได้ และขั้นตอนที่อธิบายได้ตั้งแต่ต้น'
@@ -1737,27 +1763,25 @@ export default async function HomePage({
             dict={heroClientDict}
             locale={locale}
             slides={heroSlides}
-            primaryEventPayload={{ cta: 'speak_to_pattaya_advisor', from: 'home_hero' }}
-            secondaryEventPayload={{ cta: 'view_curated_units', from: 'home_hero' }}
+            primaryEventPayload={{ cta: 'request_shortlist', from: 'home_hero' }}
+            secondaryEventPayload={{ cta: 'browse_verified_projects', from: 'home_hero' }}
             composer={{
               eyebrow: typeof composerHero.eyebrow === 'string'
                 ? composerHero.eyebrow
-                : (locale === 'th'
-                  ? 'อสังหาริมทรัพย์พัทยา'
-                  : 'Pattaya real estate advisory'),
+                : 'AMP Pattaya',
               heading: typeof composerHero.heading === 'string' && composerHero.heading.trim()
                 ? composerHero.heading
                 : (locale === 'th'
-                  ? 'ที่ปรึกษาอสังหาฯ พัทยา คัดให้ก่อนเริ่มดู'
-                  : 'Pattaya property advice, curated before you browse.'),
+                  ? 'เลือกอสังหาพัทยาได้เร็วขึ้น ด้วย shortlist ที่คัดตามเป้าหมายของคุณ'
+                  : 'Find the right Pattaya property faster'),
               subheading: typeof composerHero.subheading === 'string' && composerHero.subheading.trim()
                 ? composerHero.subheading
                 : (locale === 'th'
-                  ? 'ซื้อ ลงทุน เช่า หรือขาย ผ่านโครงการและยูนิตพัทยาที่คัดแล้ว พร้อมทีมท้องถิ่นช่วยดู'
-                  : 'Buy, invest, rent, or sell through verified Pattaya projects and units with local guidance.'),
+                  ? 'สำหรับผู้ซื้อ นักลงทุน และต่างชาติที่ต้องการข้อมูลชัด ตัวเลือกคัดจริง และขั้นตอนที่ไปต่อได้ทันที'
+                  : 'Curated guidance for buyers, investors, and foreign purchasers who want clearer options, verified projects, and fewer wrong turns.'),
               primary_cta_label: typeof composerHero.primary_cta_label === 'string' && composerHero.primary_cta_label.trim()
                 ? composerHero.primary_cta_label
-                : (locale === 'th' ? 'คุยกับทีมพัทยา' : 'Speak to a Pattaya advisor'),
+                : (locale === 'th' ? 'รับ Shortlist ของฉัน' : 'Get My Shortlist'),
               primary_cta_url: typeof composerHero.primary_cta_url === 'string'
                 ? composerHero.primary_cta_url
                 : withLocaleQuery(locale, '/contact', {
@@ -1766,24 +1790,24 @@ export default async function HomePage({
                 }),
               secondary_cta_label: typeof composerHero.secondary_cta_label === 'string' && composerHero.secondary_cta_label.trim()
                 ? composerHero.secondary_cta_label
-                : (locale === 'th' ? 'ดูยูนิตคัดสรร' : 'View curated units'),
+                : (locale === 'th' ? 'ดูโครงการที่คัดแล้ว' : 'Browse Verified Projects'),
               secondary_cta_url: typeof composerHero.secondary_cta_url === 'string'
                 ? composerHero.secondary_cta_url
-                : withLocaleQuery(locale, '/buy', {
+                : withLocaleQuery(locale, '/projects', {
                   source: 'home_hero_secondary',
                 }),
               trust_items: Array.isArray(composerHero.trust_items)
                 ? composerHero.trust_items as string[]
                 : (locale === 'th'
                   ? [
-                      'คัดเฉพาะรายการที่ยังเปิดอยู่และยืนยันแล้ว',
-                      'รองรับผู้ซื้อชาวต่างชาติและโควตาต่างชาติ',
-                      'ชัดเรื่องราคาอัปเดต การเข้าชม และการโอน',
+                      'เหมาะกับผู้ซื้อไทยและต่างชาติ',
+                      'คัดทั้งโครงการและยูนิตพร้อมอยู่',
+                      'มีคำแนะนำที่ไปต่อได้จริง',
                     ]
                   : [
-                      'Verified live stock only',
-                      'Foreign-buyer ready guidance',
-                      'Clear pricing, viewing, and transfer steps',
+                      'Foreign-buyer friendly guidance',
+                      'Curated projects and ready units',
+                      'Clear next steps, not just listings',
                     ]),
               hero_image: typeof composerHero.hero_image === 'string' ? composerHero.hero_image : null,
             }}
@@ -1796,7 +1820,7 @@ export default async function HomePage({
       </div>
 
       {showHomeTrustLayer ? (
-        <section className="home-trust-layer-section py-[60px] md:py-20 xl:py-24 bg-surface" style={sectionOrderStyle('trust_micro_strip')} id="home-trust-layer" data-home-perf="trust-layer">
+        <section className="home-trust-layer-section py-12 md:py-16 xl:py-20 bg-surface" style={sectionOrderStyle('trust_micro_strip')} id="home-trust-layer" data-home-perf="trust-layer">
           <Container variant="wide">
             <div className="home-trust-snapshot reveal rounded-[28px] border border-gray-100 bg-white p-6 md:p-8 xl:p-10 shadow-sm">
               <div className="section-header">
@@ -1877,8 +1901,8 @@ export default async function HomePage({
         secondaryUrl={bottomCtaSecondaryUrl}
         trustNote={bottomCtaTrustNote}
         conversionNote={bottomCtaConversionNote}
-        primaryEventPayload={{ cta: 'talk_to_advisor_now', from: 'home_bottom' }}
-        secondaryEventPayload={{ cta: 'view_available_units', from: 'home_bottom' }}
+        primaryEventPayload={{ cta: 'request_shortlist', from: 'home_bottom' }}
+        secondaryEventPayload={{ cta: 'browse_verified_projects', from: 'home_bottom' }}
         order={sectionOrderStyle('bottom_cta').order}
         sectionId="home-consultation-section"
         formSlot={(
@@ -1886,6 +1910,7 @@ export default async function HomePage({
             formId={bottomCtaFormId}
             heading={bottomCtaFormHeading}
             description={bottomCtaFormBody}
+            submitLabel={bottomCtaPrimaryLabel}
             variant="compact"
           />
         )}

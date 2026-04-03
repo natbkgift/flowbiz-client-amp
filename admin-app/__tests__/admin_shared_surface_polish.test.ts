@@ -21,7 +21,8 @@ describe("admin shared surface polish", () => {
     const table = read("components/admin/AdminDataTable.tsx");
     const primitives = read("components/admin/data-display/AdminTable.tsx");
 
-    expect(table).toContain('label={filterLabel} icon="search"');
+    expect(table).toContain('label={filterLabel}');
+    expect(table).toContain('icon="search"');
     expect(table).toContain('summary={`Page ${effectivePage} of ${totalPages}`}');
     expect(primitives).toContain('aria-label={`Currently viewing page ${currentPage} of ${totalPages} total pages`}');
   });

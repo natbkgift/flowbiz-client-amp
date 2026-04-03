@@ -49,6 +49,7 @@ export function LocalMediaImage({
   fetchPriority,
   quality,
   unoptimized = true,
+  ssrStartWithPrimary = false,
 }: {
   media: LocalMediaInput;
   alt?: string | null;
@@ -63,6 +64,7 @@ export function LocalMediaImage({
   fetchPriority?: 'high' | 'low' | 'auto';
   quality?: number;
   unoptimized?: boolean;
+  ssrStartWithPrimary?: boolean;
 }) {
   const src = useMemo(() => {
     const directCandidates: Array<string | null | undefined> = [
@@ -104,6 +106,7 @@ export function LocalMediaImage({
         quality={quality}
         unoptimized={unoptimized}
         fallbackSrc={resolvedFallback}
+        ssrStartWithPrimary={ssrStartWithPrimary}
       />
     </div>
   );

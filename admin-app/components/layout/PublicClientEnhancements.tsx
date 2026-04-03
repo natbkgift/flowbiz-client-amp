@@ -4,6 +4,7 @@ import dynamic from 'next/dynamic';
 import { useEffect, useState } from 'react';
 import { usePathname } from 'next/navigation';
 
+import { localeFromPathname } from '@/app/_lib/i18n/routing';
 import { shouldRenderFloatingWhatsApp, shouldRenderStickyMobileCta } from '@/app/_lib/public-cta';
 
 type IdleCapableWindow = Window & typeof globalThis & {
@@ -49,6 +50,11 @@ export function PublicClientEnhancements() {
   const showStickyMobileCta = shouldRenderStickyMobileCta(pathname);
   const pathWithoutLocale = pathname.replace(/^\/(en|th)(?=\/|$)/, '') || '/';
   const isCalmerSurface = pathWithoutLocale === '/' || pathWithoutLocale === '/projects';
+
+  useEffect(() => {
+    const locale = localeFromPathname(pathname);
+    document.documentElement.setAttribute('lang', locale);
+  }, [pathname]);
 
   useEffect(() => {
     if (isCalmerSurface) {

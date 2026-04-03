@@ -8,19 +8,19 @@ import { TrackedLink } from '@/components/analytics/TrackedLink';
 import { trackEvent } from '@/lib/analytics';
 import { getContentRecommendation, getVisitorIntent, type VisitorIntent } from '@/lib/personalization';
 
-type RailAudience = 'buyer' | 'investor' | 'luxury';
+type RailAudience = 'buyer' | 'investor' | 'seller';
 
 function resolveAudience(intent: VisitorIntent): RailAudience | null {
   if (intent === 'invest') return 'investor';
   if (intent === 'buy' || intent === 'rent') return 'buyer';
-  if (intent === 'sell') return 'luxury';
+  if (intent === 'sell') return 'seller';
   return null;
 }
 
 function resolveAudienceFromRecommendation(): RailAudience {
   const recommendation = getContentRecommendation();
   if (recommendation.emphasis === 'roi_data') return 'investor';
-  if (recommendation.emphasis === 'advisory') return 'luxury';
+  if (recommendation.emphasis === 'advisory') return 'seller';
   return 'buyer';
 }
 
@@ -93,7 +93,7 @@ export function HomeMobileIntentRail({ locale }: { locale: 'en' | 'th' }) {
       copy: locale === 'th'
         ? 'ลำดับนี้ช่วยให้ผู้ซื้ออยู่อาศัยจริงเห็นทำเลและตัวเลือกที่ใช้งานได้ก่อน ไม่ต้องไหลไปกับหน้าเนื้อหาที่ยาวเกินจำเป็น'
         : 'This order gets end-users and retirees into workable locations and ready options before the long-scroll content takes over.',
-      order: ['buyer', 'investor', 'luxury'] as RailAudience[],
+      order: ['buyer', 'investor', 'seller'] as RailAudience[],
     },
     investor: {
       eyebrow: locale === 'th' ? 'มุมมองนักลงทุน' : 'Investor lens',
@@ -103,17 +103,17 @@ export function HomeMobileIntentRail({ locale }: { locale: 'en' | 'th' }) {
       copy: locale === 'th'
         ? 'ลำดับนี้ยกเรื่องผลตอบแทนและภาพตลาดขึ้นก่อน เพื่อให้นักลงทุนคัดความเสี่ยงและจังหวะได้ก่อนเปิดดูยูนิตจำนวนมาก'
         : 'This order leads with ROI and market context so investors can filter risk and timing before opening more listings.',
-      order: ['investor', 'buyer', 'luxury'] as RailAudience[],
+      order: ['investor', 'buyer', 'seller'] as RailAudience[],
     },
-    luxury: {
-      eyebrow: locale === 'th' ? 'เส้นทางพรีเมียม' : 'Luxury handoff',
+    seller: {
+      eyebrow: locale === 'th' ? 'เส้นทางเจ้าของทรัพย์' : 'Seller route',
       title: locale === 'th'
-        ? 'เริ่มจากการนัดชมแบบเป็นส่วนตัวและตัวเลือกชุดสั้น แทนการไล่ดูยูนิตแบบพอร์ทัล'
-        : 'Start from a private tour and a shorter luxury shortlist instead of browsing like a portal.',
+        ? 'เริ่มจากความมั่นใจเรื่องการประเมินราคา แล้วค่อยตัดสินใจว่าจะขายหรือปล่อยเช่า'
+        : 'Start from valuation confidence, then decide whether to sell or rent out.',
       copy: locale === 'th'
-        ? 'เส้นทางนี้เหมาะกับผู้ซื้อระดับบนที่ต้องการความเป็นส่วนตัว ภาพลักษณ์ และทีมช่วยคัดรายการก่อนนัดดูจริง'
-        : 'This route is built for prestige buyers who want privacy, better brand feel, and a discreet handoff into the right inventory.',
-      order: ['luxury', 'buyer', 'investor'] as RailAudience[],
+        ? 'เส้นทางนี้เหมาะกับเจ้าของทรัพย์ที่ต้องการประเมินราคา วางตำแหน่ง และเลือกทางไปต่ออย่างมีเหตุผลก่อนส่งบรีฟ'
+        : 'This route is built for owners who need a clearer valuation brief, positioning read, and next-step decision before they hand anything off.',
+      order: ['seller', 'buyer', 'investor'] as RailAudience[],
     },
   };
 
@@ -134,13 +134,13 @@ export function HomeMobileIntentRail({ locale }: { locale: 'en' | 'th' }) {
       href: withLocale(locale, '/invest?source=home_mobile_investor'),
       eventPayload: { cta: 'home_mobile_investor', from: 'home_mobile_intent_rail' },
     },
-    luxury: {
-      key: 'luxury' as const,
-      eyebrow: locale === 'th' ? 'พรีเมียม' : 'High-end',
-      label: locale === 'th' ? 'เปิดเส้นทางนัดชมแบบส่วนตัว' : 'Open private tour route',
-      detail: locale === 'th' ? 'ตัวเลือกชุดสั้นและการประสานงานแบบตรงจุด' : 'Luxury shortlist and discreet guidance',
-      href: withLocale(locale, '/contact?topic=private_tour&source=home_mobile_luxury'),
-      eventPayload: { cta: 'home_mobile_luxury', from: 'home_mobile_intent_rail' },
+    seller: {
+      key: 'seller' as const,
+      eyebrow: locale === 'th' ? 'ขาย' : 'Seller',
+      label: locale === 'th' ? 'เริ่มบรีฟประเมินราคา' : 'Start valuation brief',
+      detail: locale === 'th' ? 'ประเมินราคาและทางเลือกของเจ้าของทรัพย์' : 'Owner pricing and next-step guidance',
+      href: withLocale(locale, '/sell?source=home_mobile_seller'),
+      eventPayload: { cta: 'home_mobile_seller', from: 'home_mobile_intent_rail' },
     },
   };
   const activeConfig = activeAudience
@@ -151,9 +151,9 @@ export function HomeMobileIntentRail({ locale }: { locale: 'en' | 'th' }) {
           ? 'เลือกเส้นทางที่ตรงโจทย์ก่อน แล้วค่อยไปยังขั้นตอนถัดไปที่เหมาะกว่า'
           : 'Choose the path that fits first, then let the next step tighten around it.',
         copy: locale === 'th'
-          ? 'บล็อกนี้จะจัดลำดับตามความสนใจ เพื่อพาคุณไปยังเส้นทางอยู่อาศัย ลงทุน หรือพรีเมียมที่เหมาะกว่า'
-          : 'This block settles around intent so you land in the most relevant investor, lifestyle, or luxury route.',
-        order: ['buyer', 'investor', 'luxury'] as RailAudience[],
+          ? 'บล็อกนี้จะจัดลำดับตามความสนใจ เพื่อพาคุณไปยังเส้นทางซื้อ ลงทุน หรือขายที่เหมาะกว่า'
+          : 'This block settles around intent so you land in the most relevant buyer, investor, or seller route.',
+        order: ['buyer', 'investor', 'seller'] as RailAudience[],
       };
   const orderedItems = activeConfig.order.map((key) => items[key]);
 

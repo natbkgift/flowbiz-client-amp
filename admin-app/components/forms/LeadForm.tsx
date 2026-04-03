@@ -23,6 +23,7 @@ type LeadFormProps = {
   locale?: 'en' | 'th';
   heading?: string;
   description?: string;
+  submitLabel?: string;
   variant?: 'default' | 'compact';
   formId?: string;
   propertyId?: string | null;
@@ -75,6 +76,7 @@ export function LeadForm({
   locale: explicitLocale,
   heading,
   description,
+  submitLabel,
   variant = 'default',
   formId,
   propertyId,
@@ -124,11 +126,23 @@ export function LeadForm({
   const [consent, setConsent] = useState(false);
   const [status, setStatus] = useState<LeadFormStatus>({ state: 'idle' });
   const isCompact = variant === 'compact';
+  const contactHelperId = `${formId ?? 'lead-form'}-contact-helper`;
+  const contactErrorId = `${formId ?? 'lead-form'}-contact-error`;
+  const emailErrorId = `${formId ?? 'lead-form'}-email-error`;
+  const phoneErrorId = `${formId ?? 'lead-form'}-phone-error`;
 
   const emailError = email.trim() && !isValidEmail(email) ? emailInvalidMessage : null;
   const phoneError = phone.trim() && !isValidPhone(phone) ? phoneInvalidMessage : null;
   const contactMethodError = didStart && !email.trim() && !phone.trim() ? contactMethodRequiredMessage : null;
   const validationMessage = emailError ?? phoneError ?? contactMethodError;
+  const emailDescribedBy = [contactHelperId, contactMethodError ? contactErrorId : null, emailError ? emailErrorId : null]
+    .filter(Boolean)
+    .join(' ') || undefined;
+  const phoneDescribedBy = [contactHelperId, contactMethodError ? contactErrorId : null, phoneError ? phoneErrorId : null]
+    .filter(Boolean)
+    .join(' ') || undefined;
+  const emailInvalid = Boolean(emailError || contactMethodError);
+  const phoneInvalid = Boolean(phoneError || contactMethodError);
 
   const canSubmit = useMemo(() => {
     if (!name.trim()) return false;
@@ -366,7 +380,14 @@ export function LeadForm({
   const successActions = buildSuccessActions();
 
   return (
-    <form id={formId} className="inquiry-form" onSubmit={(e) => e.preventDefault()}>
+    <form
+      id={formId}
+      className="inquiry-form"
+      onSubmit={(e) => {
+        e.preventDefault();
+        void onSubmit();
+      }}
+    >
       <h3>{heading ?? dict.common.leadForm.headingDefault}</h3>
       <p className="form-desc">{description ?? dict.common.leadForm.description}</p>
 
@@ -400,14 +421,14 @@ export function LeadForm({
           className="form-input"
           name="name"
           placeholder={dict.common.leadForm.namePlaceholder}
-          aria-required="true"
+          required
           value={name}
           onChange={(e) => setName(e.target.value)}
         />
         <div>
-          <p className="text-sm text-gray-600">{contactMethodHelper}</p>
+          <p id={contactHelperId} className="text-sm text-gray-600">{contactMethodHelper}</p>
           {contactMethodError ? (
-            <p className="form-error mt-2" role="alert">
+            <p id={contactErrorId} className="form-error mt-2" role="alert">
               {contactMethodError}
             </p>
           ) : null}
@@ -423,14 +444,13 @@ export function LeadForm({
               name="email"
               type="email"
               placeholder={dict.common.leadForm.emailPlaceholder}
-              aria-required="true"
-              aria-invalid={emailError ? 'true' : 'false'}
-              aria-describedby={emailError ? 'lead-email-error' : undefined}
+              aria-invalid={emailInvalid ? 'true' : 'false'}
+              aria-describedby={emailDescribedBy}
               value={email}
               onChange={(e) => setEmail(e.target.value)}
             />
             {emailError ? (
-              <p id="lead-email-error" className="form-error mt-2" role="alert">
+              <p id={emailErrorId} className="form-error mt-2" role="alert">
                 {emailError}
               </p>
             ) : null}
@@ -445,14 +465,13 @@ export function LeadForm({
               name="phone"
               type="tel"
               placeholder={dict.common.leadForm.phonePlaceholder}
-              aria-required="true"
-              aria-invalid={phoneError ? 'true' : 'false'}
-              aria-describedby={phoneError ? 'lead-phone-error' : undefined}
+              aria-invalid={phoneInvalid ? 'true' : 'false'}
+              aria-describedby={phoneDescribedBy}
               value={phone}
               onChange={(e) => setPhone(e.target.value)}
             />
             {phoneError ? (
-              <p id="lead-phone-error" className="form-error mt-2" role="alert">
+              <p id={phoneErrorId} className="form-error mt-2" role="alert">
                 {phoneError}
               </p>
             ) : null}
@@ -564,7 +583,7 @@ export function LeadForm({
           className="form-textarea"
           name="message"
           placeholder={dict.common.leadForm.messagePlaceholder}
-          aria-required="true"
+          required
           value={message}
           onChange={(e) => setMessage(e.target.value)}
           rows={4}
@@ -575,7 +594,7 @@ export function LeadForm({
             type="checkbox"
             checked={consent}
             onChange={(e) => setConsent(e.target.checked)}
-            aria-required="true"
+            required
           />
           <span className="form-consent__text">
             {dict.common.leadForm.consentText ?? 'I agree to the processing of my personal data in accordance with the Privacy Policy (PDPA/GDPR).'}{' '}
@@ -584,20 +603,19 @@ export function LeadForm({
         </label>
 
         <button
-          type="button"
+          type="submit"
           className="btn btn-primary btn-block"
-          onClick={onSubmit}
           disabled={!canSubmit}
           aria-describedby="lead-form-status"
         >
-          {status.state === 'submitting' ? dict.common.leadForm.submitting : dict.common.leadForm.submit}
+          {status.state === 'submitting' ? dict.common.leadForm.submitting : (submitLabel ?? dict.common.leadForm.submit)}
         </button>
 
         <div className="mt-4 border-t border-gray-200 pt-4" aria-label="lead-form-support-links">
           <p className="text-sm text-gray-600 mb-2">
             {locale === 'th'
-              ? 'ต้องการคุยทันทีแทนการส่งแบบฟอร์ม? ใช้ช่องทางด้านล่างได้'
-              : 'Prefer to talk now instead of submitting the form? Use a direct support channel below.'}
+              ? 'ถ้าคุณอยากคุยก่อน ติดต่อเราได้ทาง WhatsApp หรือ LINE'
+              : 'Prefer to talk first? Reach us on WhatsApp or LINE.'}
           </p>
           <div className="flex flex-wrap items-center gap-4 text-sm">
             <a

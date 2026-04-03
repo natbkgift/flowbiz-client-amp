@@ -34,6 +34,7 @@ export function SafeCoverImage({
   fetchPriority,
   quality,
   unoptimized = true,
+  ssrStartWithPrimary = false,
 }: {
   src: string | null | undefined;
   alt: string;
@@ -45,6 +46,7 @@ export function SafeCoverImage({
   fetchPriority?: 'high' | 'low' | 'auto';
   quality?: number;
   unoptimized?: boolean;
+  ssrStartWithPrimary?: boolean;
 }) {
   const initial = useMemo(() => normalizeSrc(src), [src]);
   const fallbackChain = useMemo(() => {
@@ -57,9 +59,10 @@ export function SafeCoverImage({
     return Array.from(new Set(candidates));
   }, [fallbackSrc]);
   const primaryFallback = fallbackChain[0] ?? LOCAL_SAFE_FALLBACK_SRC;
-  // SSR-safe: always render the fallback first so the browser never shows a
-  // broken-image icon before React hydration attaches the onError handler.
-  const [currentSrc, setCurrentSrc] = useState<string>(primaryFallback);
+  // Allow selected critical surfaces to start fetching the real asset during SSR.
+  const [currentSrc, setCurrentSrc] = useState<string>(
+    ssrStartWithPrimary ? (initial ?? primaryFallback) : primaryFallback,
+  );
   const [fallbackIndex, setFallbackIndex] = useState(0);
 
   useEffect(() => {

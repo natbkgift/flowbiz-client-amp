@@ -231,7 +231,11 @@ function buildCompareReadinessLines(input: {
       ];
 
   const handoffBase = input.investorContextPresent && input.briefFacts.length
-    ? input.briefFacts
+    ? [
+        input.locale === 'th'
+          ? 'เมื่อมี investment brief แล้ว ระบบจะพก context นี้ต่อไปยัง shortlist และ advisor handoff โดยไม่ต้องกรอกซ้ำ'
+          : 'When an investment brief exists, the same context carries forward into shortlist review and advisor handoff without re-entry.',
+      ]
     : [
         input.locale === 'th'
           ? 'ยังไม่มี investment brief แนบมากับหน้านี้ ดังนั้น step ที่คุ้มที่สุดตอนนี้คือคัดตัวเลือกให้พอสำหรับการเทียบ'
@@ -802,7 +806,7 @@ export default async function ComparePage(
                 data-amp-event-payload={JSON.stringify({
                   source_route: 'compare',
                   cta_type: 'tertiary',
-                  cta_label: locale === 'th' ? 'ดู listings ที่ save เข้า shortlist ได้' : 'Browse shortlist-ready listings',
+                  cta_label: locale === 'th' ? 'ดูตัวเลือกที่พร้อมบันทึกไว้เทียบต่อ' : 'Browse shortlist-ready listings',
                   entity_type: 'route',
                   entity_name: 'buy',
                   user_intent: 'research',
@@ -811,7 +815,7 @@ export default async function ComparePage(
                   },
                 })}
               >
-                {locale === 'th' ? 'ดู listings ที่ save เข้า shortlist ได้' : 'Browse shortlist-ready listings'}
+                {locale === 'th' ? 'ดูตัวเลือกที่พร้อมบันทึกไว้เทียบต่อ' : 'Browse shortlist-ready listings'}
               </Link>
               <Link
                 className="btn btn-cta"

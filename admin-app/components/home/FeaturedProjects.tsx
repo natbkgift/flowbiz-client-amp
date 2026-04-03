@@ -77,6 +77,7 @@ const PROJECT_FALLBACK_IMAGES = [
   '/images/property-pool.png',
   '/images/villa-garden.png',
 ];
+const HOME_PROJECT_MEDIA_PRELOAD_COUNT = 4;
 
 export function FeaturedProjects({
   projects,
@@ -84,13 +85,16 @@ export function FeaturedProjects({
   kicker,
   title,
   subtitle,
+  headingLevel = 'h2',
 }: {
   projects: ProjectItem[];
   locale: 'en' | 'th';
   kicker?: string;
   title: string;
   subtitle: string;
+  headingLevel?: 'h2' | 'h3';
 }) {
+  const HeadingTag = headingLevel;
   const badgeLabels = {
     new: locale === 'th' ? 'ใหม่' : 'New',
     hot: locale === 'th' ? 'มาแรง' : 'Hot',
@@ -318,11 +322,26 @@ export function FeaturedProjects({
     return [...new Set(facts)].slice(0, 2);
   }
 
+  function extractProjectSignals(project: ProjectItem): string[] {
+    const normalizedStatus = String(project.status ?? '').trim().toLowerCase();
+    const signals: string[] = [];
+    const numericStartingPrice = Number(project.starting_price);
+
+    if (Number.isFinite(numericStartingPrice) && numericStartingPrice > 0 && numericStartingPrice <= 5_000_000) {
+      signals.push(locale === 'th' ? 'งบไม่เกิน 5 ล้าน' : 'Under THB 5M');
+    }
+    if (normalizedStatus.includes('completed') || normalizedStatus.includes('ready')) {
+      signals.push(locale === 'th' ? 'พร้อมดูต่อ' : 'Ready to review');
+    }
+
+    return signals.slice(0, 2);
+  }
+
   return (
     <div>
       <div className="section-header">
         {kicker ? <div className="home-section-kicker">{kicker}</div> : null}
-        <h2 className="section-title">{title}</h2>
+        <HeadingTag className="section-title">{title}</HeadingTag>
         <p className="section-subtitle">{subtitle}</p>
       </div>
 
@@ -344,7 +363,9 @@ export function FeaturedProjects({
           const area = extractAreaLabel(p);
           const projectSummary = extractProjectSummary(p, area);
           const facts = extractProjectFacts(p);
+          const signals = extractProjectSignals(p);
           const fallbackImage = PROJECT_FALLBACK_IMAGES[index % PROJECT_FALLBACK_IMAGES.length];
+          const shouldPreloadMedia = index < HOME_PROJECT_MEDIA_PRELOAD_COUNT;
           return (
             <Link
               key={p.id}
@@ -360,8 +381,13 @@ export function FeaturedProjects({
                   className="media-shell"
                   imageClassName={`absolute inset-0 h-full w-full object-cover ${hasLocalMedia ? '' : 'premium-project-card__fallback-image'}`}
                   fallbackSrc={fallbackImage}
-                  sizes="(max-width: 767px) 100vw, (max-width: 1279px) 50vw, 33vw"
+                  sizes="(max-width: 767px) 92vw, (max-width: 1279px) 48vw, 31vw"
+                  loading={shouldPreloadMedia ? 'eager' : 'lazy'}
+                  priority={index === 0}
+                  fetchPriority={index === 0 ? 'high' : (shouldPreloadMedia ? 'low' : 'auto')}
+                  quality={60}
                   unoptimized={false}
+                  ssrStartWithPrimary={shouldPreloadMedia}
                 />
                 <div className="premium-project-card__media-scrim" aria-hidden="true" />
                 {badges.length > 0 ? (
@@ -400,6 +426,15 @@ export function FeaturedProjects({
                       </li>
                     ))}
                   </ul>
+                ) : null}
+                {signals.length > 0 ? (
+                  <div className="premium-project-card__signals" aria-label={locale === 'th' ? 'สัญญาณการตัดสินใจของโครงการ' : 'Project decision cues'}>
+                    {signals.map((signal) => (
+                      <span key={signal} className="premium-project-card__signal">
+                        {signal}
+                      </span>
+                    ))}
+                  </div>
                 ) : null}
                 <div className="premium-project-card__footer">
                   <span className="premium-project-card__cta">
