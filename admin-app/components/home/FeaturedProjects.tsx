@@ -107,7 +107,7 @@ export function FeaturedProjects({
     type: locale === 'th' ? 'ประเภท' : 'Type',
     delivery: locale === 'th' ? 'ส่งมอบ' : 'Delivery',
     developer: locale === 'th' ? 'ผู้พัฒนา' : 'Developer',
-    projectDetail: locale === 'th' ? 'ดูโครงการ' : 'View project',
+    projectDetail: locale === 'th' ? 'ดูสรุปโครงการ' : 'Review project',
     publishedProject: locale === 'th' ? 'โครงการที่เผยแพร่แล้ว' : 'Published project',
   };
   const emptyStatePrimaryHref = withLocale(locale, '/projects');

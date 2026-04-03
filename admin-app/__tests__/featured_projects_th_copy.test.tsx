@@ -41,6 +41,7 @@ describe('FeaturedProjects Thai copy', () => {
     );
 
     expect(screen.getByText('โครงการแนะนำ')).toBeInTheDocument();
+    expect(screen.getByText('ดูสรุปโครงการ')).toBeInTheDocument();
     expect(screen.queryByText(/shortlist/i)).toBeNull();
     expect(container.querySelector('.premium-project-card__fact-label')).toBeNull();
   });

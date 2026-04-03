@@ -830,8 +830,8 @@ export default async function HomePage({
       },
     ].filter((group) => group.items.length > 0);
     const browseAllUnitsLabel = featuredPropertyIntent === 'rent'
-      ? (locale === 'th' ? 'ดูยูนิตเช่าทั้งหมด' : 'View all rental units')
-      : (locale === 'th' ? 'ดูยูนิตขายทั้งหมด' : 'View all sale units');
+      ? (locale === 'th' ? 'ดูยูนิตเช่าทั้งหมดแบบคัดแล้ว' : 'Review all rental units')
+      : (locale === 'th' ? 'ดูยูนิตขายทั้งหมดแบบคัดแล้ว' : 'Review all sale units');
     const featuredPropertiesEmptyStatePrimaryHref = withLocale(locale, featuredPropertyIntent === 'rent' ? '/rent' : '/buy');
     const featuredPropertiesEmptyStateSecondaryHref = withLocale(locale, '/contact');
     const featuredPropertiesEmptySignals = locale === 'th'
@@ -1062,7 +1062,7 @@ export default async function HomePage({
                     ) : null}
 
                      <div className="flex items-center justify-start gap-3 mt-auto pt-4 border-t border-gray-100">
-                       <span className="premium-investment-card__linkhint">{locale === 'th' ? 'ดูยูนิต' : 'View unit'}</span>
+                       <span className="premium-investment-card__linkhint">{locale === 'th' ? 'ดูสรุปยูนิต' : 'Review unit'}</span>
                      </div>
                    </div>
                 </Link>
