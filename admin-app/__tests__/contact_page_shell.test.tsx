@@ -82,10 +82,28 @@ describe('contact page shell', () => {
     );
 
     expect(screen.queryByRole('heading', { name: /start from the route that fits/i })).toBeNull();
-    expect(screen.getByRole('heading', { name: /review this shortlist with amp pattaya/i })).toBeTruthy();
+    expect(screen.getByRole('heading', { name: /review this shared shortlist with amp pattaya/i })).toBeTruthy();
     expect(screen.getByRole('heading', { name: /lead handoff summary/i })).toBeTruthy();
-    expect(screen.getByRole('link', { name: /continue with this shortlist brief/i }).getAttribute('href')).toBe('#contact-form');
+    expect(screen.getByRole('link', { name: /continue with this shared shortlist/i }).getAttribute('href')).toBe('#contact-form');
     expect(screen.getByText(/handoff source: shared shortlist link/i)).toBeTruthy();
     expect(screen.getByText(/project in focus: alpha project/i)).toBeTruthy();
+  });
+
+  it('humanizes compare recovery handoff context on the contact route', async () => {
+    render(
+      await ContactPage({
+        params: Promise.resolve({ locale: 'en' }),
+        searchParams: Promise.resolve({
+          intent: 'project_compare',
+          source: 'compare_recovery',
+          projects: 'Alpha Project',
+        }),
+      }),
+    );
+
+    expect(screen.queryByRole('heading', { name: /start from the route that fits/i })).toBeNull();
+    expect(screen.getByRole('heading', { name: /recover the next step from this compare brief/i })).toBeTruthy();
+    expect(screen.getByRole('link', { name: /continue with this compare recovery brief/i }).getAttribute('href')).toBe('#contact-form');
+    expect(screen.getByText(/handoff source: compare recovery page/i)).toBeTruthy();
   });
 });

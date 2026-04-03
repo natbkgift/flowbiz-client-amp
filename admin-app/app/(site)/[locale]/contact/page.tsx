@@ -133,6 +133,7 @@ function humanizeToken(locale: 'en' | 'th', value: string | null | undefined): s
   const knownLabels: Record<string, { en: string; th: string }> = {
     compare_hero: { en: 'Compare page', th: 'หน้าเปรียบเทียบ' },
     compare_review: { en: 'Compare review', th: 'รีวิวจากหน้าเปรียบเทียบ' },
+    compare_recovery: { en: 'Compare recovery page', th: 'หน้า compare โหมดกู้คืน' },
     shortlist_compare: { en: 'Shortlist compare flow', th: 'เส้นทาง compare จาก shortlist' },
     shortlist_contact: { en: 'Shortlist page', th: 'หน้า shortlist' },
     shortlist_shared: { en: 'Shared shortlist link', th: 'ลิงก์ shortlist ที่แชร์' },
@@ -178,11 +179,37 @@ function buildLeadDraftMessage(
   params: {
     intent: string;
     projectNames: string[];
+    source: string | null;
     buyerFit: string | null;
     signalLevel: string | null;
   },
 ): string {
   const names = params.projectNames.filter(Boolean);
+  const source = String(params.source || '').toLowerCase();
+
+  if (params.intent === 'project_compare' && source === 'compare_recovery') {
+    if (names.length >= 1) {
+      return locale === 'th'
+        ? `compare เดิมของ ${names.join(', ')} ใช้งานต่อไม่ได้ครบแล้ว และต้องการให้ทีมช่วยกู้ context นี้กลับมาเป็น shortlist ที่ใช้งานต่อได้`
+        : `The original compare around ${names.join(', ')} no longer resolves cleanly, and I want the team to recover this context into a shortlist I can keep working from.`;
+    }
+
+    return locale === 'th'
+      ? 'ลิงก์ compare เดิมใช้งานต่อไม่ได้ครบแล้ว และต้องการให้ทีมช่วยกู้ brief นี้กลับมาเป็น shortlist ที่ใช้งานต่อได้'
+      : 'The original compare link no longer resolves cleanly, and I want the team to recover this brief into a usable shortlist.';
+  }
+
+  if (params.intent === 'project_shortlist' && source === 'shortlist_shared') {
+    if (names.length) {
+      return locale === 'th'
+        ? `ได้รับ shared shortlist ของ ${names.join(', ')} และต้องการให้ทีมช่วยรีวิวว่าควรเก็บ ตัด หรือเช็กตัวเลือกไหนต่อ`
+        : `I received a shared shortlist around ${names.join(', ')} and want the team to review what should be kept, cut, or checked next.`;
+    }
+
+    return locale === 'th'
+      ? 'ได้รับ shared shortlist และต้องการให้ทีมช่วยรีวิวว่าควรเก็บ ตัด หรือเช็กตัวเลือกไหนต่อ'
+      : 'I received a shared shortlist and want the team to review what should be kept, cut, or checked next.';
+  }
 
   if (params.intent === 'project_compare') {
     if (names.length >= 2) {
@@ -369,6 +396,7 @@ export default async function ContactPage(
         ? buildLeadDraftMessage(locale, {
             intent: leadCaptureContext.intent,
             projectNames: leadProjectNames,
+            source: leadCaptureContext.source ?? null,
             buyerFit: leadCaptureContext.buyerFit ?? null,
             signalLevel: leadCaptureContext.signalLevel ?? null,
           })
@@ -439,10 +467,14 @@ export default async function ContactPage(
     ? (locale === 'th' ? 'นัด private tour บน shortlist ที่เหมาะก่อน' : 'Book a private tour with the right shortlist first')
     : isInvestmentPlanTopic
       ? (locale === 'th' ? 'คุยแผนลงทุนพัทยา โดยมีบริบทพร้อมแล้ว' : 'Discuss your Pattaya investment plan with context already in place')
-      : leadCaptureContext.intent === 'project_compare'
-        ? (locale === 'th' ? 'คุยต่อจาก compare นี้กับ AMP Pattaya' : 'Continue from this comparison with AMP Pattaya')
-        : leadCaptureContext.intent === 'project_shortlist'
-          ? (locale === 'th' ? 'คุย shortlist นี้ต่อกับ AMP Pattaya' : 'Review this shortlist with AMP Pattaya')
+      : leadCaptureContext.source === 'compare_recovery'
+        ? (locale === 'th' ? 'กู้ next step จาก compare นี้กับ AMP Pattaya' : 'Recover the next step from this compare brief')
+        : leadCaptureContext.source === 'shortlist_shared'
+          ? (locale === 'th' ? 'คุย shortlist ที่แชร์นี้ต่อกับ AMP Pattaya' : 'Review this shared shortlist with AMP Pattaya')
+        : leadCaptureContext.intent === 'project_compare'
+          ? (locale === 'th' ? 'คุยต่อจาก compare นี้กับ AMP Pattaya' : 'Continue from this comparison with AMP Pattaya')
+          : leadCaptureContext.intent === 'project_shortlist'
+            ? (locale === 'th' ? 'คุย shortlist นี้ต่อกับ AMP Pattaya' : 'Review this shortlist with AMP Pattaya')
       : (locale === 'th' ? 'คุยกับ AMP Pattaya เพื่อไปขั้นถัดไปที่ชัดกว่า' : 'Talk to AMP Pattaya about the next serious step');
   const contactHeroSubtitle = isPrivateTourTopic
     ? (locale === 'th'
@@ -452,8 +484,16 @@ export default async function ContactPage(
       ? (locale === 'th'
         ? 'เริ่มจากงบประมาณ ผลตอบแทนที่คาดหวัง และ thesis การลงทุน เพื่อให้ shortlist ที่ได้คมขึ้นตั้งแต่รอบแรก'
         : 'Start from your budget, return goals, and thesis so the first shortlist is sharper and more credible.')
-      : leadCaptureContext.intent === 'project_compare'
+      : leadCaptureContext.source === 'compare_recovery'
         ? (locale === 'th'
+          ? 'บางโครงการใน compare เดิมอาจหายไปหรือ snapshot ใช้งานไม่ได้แล้ว แต่ทีมยังใช้ brief ที่พกมาช่วยกู้ shortlist ใหม่และชี้ next step ให้ต่อได้'
+          : 'Some projects in the original compare may have disappeared or lost their snapshot, but the team can still use the carried brief to rebuild the shortlist and point to the next step.')
+        : leadCaptureContext.source === 'shortlist_shared'
+          ? (locale === 'th'
+            ? 'บริบทจาก shared shortlist จะถูกพกต่อไป เพื่อให้ทีมช่วยอ่านว่าควรเก็บ ตัด หรือเช็ก listing ไหนต่อ โดยไม่ทำให้บริบทของลิงก์แชร์หายไป'
+            : 'The shared-shortlist context carries forward so the team can review what to keep, cut, or check next without losing the context of the shared link.')
+        : leadCaptureContext.intent === 'project_compare'
+          ? (locale === 'th'
           ? 'ระบบจะพก compare brief เดิมต่อไป เพื่อให้ทีมช่วยบีบ shortlist และชี้ next step โดยไม่ต้องอธิบาย context ซ้ำ'
           : 'The same compare brief carries forward so the team can tighten the shortlist and point to the next step without rebuilding the context.')
         : leadCaptureContext.intent === 'project_shortlist'
@@ -534,6 +574,10 @@ export default async function ContactPage(
     ? (locale === 'th' ? 'ส่ง brief สำหรับ private tour' : 'Send your private-tour brief')
     : isInvestmentPlanTopic
       ? (locale === 'th' ? 'ส่ง brief การลงทุน' : 'Send your investment brief')
+      : leadCaptureContext.source === 'shortlist_shared'
+        ? (locale === 'th' ? 'ส่งบรีฟ shortlist ที่แชร์นี้' : 'Send this shared-shortlist brief')
+      : leadCaptureContext.source === 'compare_recovery'
+        ? (locale === 'th' ? 'ส่งบรีฟเพื่อกู้ compare นี้' : 'Send this compare-recovery brief')
       : leadCaptureContext.intent === 'project_shortlist'
         ? (locale === 'th' ? 'ส่งบรีฟ shortlist นี้' : 'Send your shortlist brief')
       : dict.contact.formTitle;
@@ -547,6 +591,10 @@ export default async function ContactPage(
     ? (locale === 'th' ? 'ส่งโจทย์ private tour' : 'Send private-tour brief')
     : isInvestmentPlanTopic
       ? (locale === 'th' ? 'ส่ง brief การลงทุน' : 'Send investment brief')
+      : leadCaptureContext.source === 'shortlist_shared'
+        ? (locale === 'th' ? 'ส่งบรีฟ shortlist ที่แชร์นี้' : 'Continue with this shared shortlist')
+      : leadCaptureContext.source === 'compare_recovery'
+        ? (locale === 'th' ? 'ส่งบรีฟเพื่อกู้ compare นี้' : 'Continue with this compare recovery brief')
       : leadCaptureContext.intent === 'project_shortlist'
         ? (locale === 'th' ? 'ส่งบรีฟ shortlist นี้' : 'Continue with this shortlist brief')
       : leadCaptureContext.intent === 'project_compare'
