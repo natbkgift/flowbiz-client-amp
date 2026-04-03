@@ -512,6 +512,7 @@ export default async function ContactPage(
   const contactRouteCards = [
     {
       key: 'investment',
+      eyebrow: locale === 'th' ? 'สำหรับนักลงทุน' : 'Investor route',
       title: locale === 'th' ? 'แผนลงทุน' : 'Investment plan',
       body: locale === 'th'
         ? 'เหมาะกับผู้ลงทุนที่ต้องการเริ่มจาก ROI, downside, และ shortlist ตาม thesis'
@@ -521,6 +522,7 @@ export default async function ContactPage(
     },
     {
       key: 'private-tour',
+      eyebrow: locale === 'th' ? 'สำหรับ private tour' : 'Private-tour route',
       title: locale === 'th' ? 'Private tour แบบคัดมาก่อน' : 'Private tour',
       body: locale === 'th'
         ? 'เหมาะกับผู้ซื้อระดับบนที่ต้องการ shortlist สั้นและนัดดูแบบมี privacy'
@@ -530,6 +532,7 @@ export default async function ContactPage(
     },
     {
       key: 'general',
+      eyebrow: locale === 'th' ? 'สำหรับผู้ซื้อทั่วไป' : 'General route',
       title: locale === 'th' ? 'Shortlist ที่คัดตามโจทย์' : 'Curated shortlist',
       body: locale === 'th'
         ? 'เหมาะกับผู้ซื้ออยู่อาศัยจริงหรือย้ายมาอยู่ ที่ต้องการเริ่มจากทำเล งบ และขั้นตอนที่ชัด'
@@ -655,7 +658,7 @@ export default async function ContactPage(
       />
 
       {!hasSpecializedContactContext ? (
-        <section className="section section--alt">
+        <section className="section section--alt contact-route-section">
           <Container>
             <div className="section-header">
               <h2 className="section-title">{locale === 'th' ? 'เริ่มจากเส้นทางที่ตรงกับโจทย์' : 'Start from the route that fits'}</h2>
@@ -665,9 +668,10 @@ export default async function ContactPage(
                   : 'Pick the route that fits your goal before filling the form so the team receives a sharper brief on the first pass.'}
               </p>
             </div>
-            <div className="grid grid-3">
+            <div className="grid grid-3 contact-route-grid">
               {contactRouteCards.map((card) => (
                 <Link key={card.key} className="card contact-route-card" href={card.href} aria-label={card.action}>
+                  <span className="contact-route-card__eyebrow">{card.eyebrow}</span>
                   <h3 className="card-title">{card.title}</h3>
                   <p className="card-subtitle">{card.body}</p>
                   <span className="contact-route-card__action">{card.action}</span>
@@ -724,18 +728,20 @@ export default async function ContactPage(
                 </div>
               ) : null}
 
-              <div className="cta-row">
-                <a className="btn btn-cta" href={CTA.whatsAppUrl} target="_blank" rel="noreferrer">
-                  {dict.cta.whatsapp}
-                </a>
-                <a className="btn btn-secondary" href={CTA.lineUrl} target="_blank" rel="noreferrer">
-                  {dict.cta.line}
+              <div className="contact-support-actions">
+                <div className="cta-row">
+                  <a className="btn btn-cta" href={CTA.whatsAppUrl} target="_blank" rel="noreferrer">
+                    {dict.cta.whatsapp}
+                  </a>
+                  <a className="btn btn-secondary" href={CTA.lineUrl} target="_blank" rel="noreferrer">
+                    {dict.cta.line}
+                  </a>
+                </div>
+
+                <a className="btn btn-tertiary contact-support-actions__phone" href={CTA.phoneTel}>
+                  {CTA.phoneTel}
                 </a>
               </div>
-
-              <a className="btn btn-tertiary" href={CTA.phoneTel}>
-                {CTA.phoneTel}
-              </a>
 
               <div className="trust-box">
                 <h3 className="trust-box__title">{contactTrustTitle}</h3>

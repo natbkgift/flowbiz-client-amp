@@ -7480,8 +7480,9 @@ summary.mobile-nav__trigger::-webkit-details-marker {
 .contact-route-card {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 10px;
   min-height: 100%;
+  padding: clamp(18px, 3vw, 24px);
   text-decoration: none;
   transition: transform 0.22s ease, box-shadow 0.22s ease, border-color 0.22s ease;
 }
@@ -7491,19 +7492,66 @@ summary.mobile-nav__trigger::-webkit-details-marker {
   box-shadow: 0 20px 42px rgba(15, 23, 42, 0.08);
 }
 
+.contact-route-section .section-header {
+  max-width: 42rem;
+}
+
+.contact-route-grid {
+  gap: 16px;
+}
+
+.contact-route-card__eyebrow {
+  display: inline-flex;
+  align-items: center;
+  width: fit-content;
+  min-height: 28px;
+  padding: 0 10px;
+  border-radius: 999px;
+  background: rgba(244, 238, 227, 0.88);
+  border: 1px solid rgba(199, 173, 120, 0.24);
+  color: rgba(120, 92, 47, 0.94);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.contact-route-card .card-title {
+  margin-bottom: 0;
+}
+
+.contact-route-card .card-subtitle {
+  max-width: 32ch;
+  color: rgba(7, 19, 39, 0.72);
+}
+
 .contact-route-card__action {
   margin-top: auto;
   display: inline-flex;
   align-items: center;
-  min-height: 40px;
+  gap: 8px;
+  min-height: 32px;
   width: fit-content;
-  padding: 0 14px;
-  border-radius: 999px;
-  border: 1px solid rgba(7, 19, 39, 0.1);
-  background: rgba(7, 19, 39, 0.04);
-  color: rgba(7, 19, 39, 0.9);
-  font-size: 0.88rem;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: rgba(10, 77, 140, 0.92);
+  font-size: 0.9rem;
   font-weight: 600;
+}
+
+.contact-route-card__action::after {
+  content: '→';
+  font-size: 0.95em;
+}
+
+.contact-support-actions {
+  display: grid;
+  gap: 10px;
+}
+
+.contact-support-actions__phone {
+  width: fit-content;
 }
 
 .decision-page--shortlist .shortlist-surface__summary {
@@ -7585,6 +7633,26 @@ summary.mobile-nav__trigger::-webkit-details-marker {
 .cta-row--contacts {
   justify-content: flex-start;
   gap: 10px;
+}
+
+@media (max-width: 767px) {
+  .contact-route-grid {
+    gap: 12px;
+  }
+
+  .contact-route-card {
+    gap: 9px;
+    padding: 18px;
+  }
+
+  .contact-route-card .card-subtitle {
+    max-width: none;
+  }
+
+  .contact-support-actions__phone {
+    width: 100%;
+    justify-content: center;
+  }
 }
 
 .form-contact-link {
