@@ -364,12 +364,15 @@ export default async function PropertyPage(props: PageProps) {
   const priorityInternalLinks = internalLinks.filter((item) => (
     item.href.endsWith('/buy') || item.href.endsWith('/invest') || item.href.endsWith('/contact')
   ));
+  const propertyPrimaryCtaLabel = property.type === 'rent'
+    ? (locale === 'th' ? 'เช็กเงื่อนไขเช่าล่าสุด' : 'Check live rental terms')
+    : (locale === 'th' ? 'คุยต่อเกี่ยวกับยูนิตนี้' : 'Review this unit with advisor');
   const propertyConsultationHref = withLocaleQuery(locale, '/contact', buildLeadCaptureQuery({
     intent: 'project_consultation',
     source: 'property_detail',
     sourceRoute: 'property',
     ctaType: 'primary',
-    ctaLabel: dict.cta.speakToAdvisor,
+    ctaLabel: propertyPrimaryCtaLabel,
     entityType: 'property',
     entityId: property.id,
     entityName: property.title,
@@ -384,7 +387,7 @@ export default async function PropertyPage(props: PageProps) {
   const propertyConsultationPayload = {
     source_route: 'property',
     cta_type: 'primary',
-    cta_label: dict.cta.speakToAdvisor,
+    cta_label: propertyPrimaryCtaLabel,
     entity_type: 'property',
     entity_id: property.id,
     entity_name: property.title,
@@ -509,7 +512,7 @@ export default async function PropertyPage(props: PageProps) {
                 eventType="cta_click"
                 eventPayload={propertyConsultationPayload}
               >
-                {dict.cta.speakToAdvisor}
+                {propertyPrimaryCtaLabel}
               </TrackedLink>
               <ShortlistSaveButton
                 className="btn btn-secondary"
@@ -761,7 +764,7 @@ export default async function PropertyPage(props: PageProps) {
         primaryAction={{
           id: 'property_mobile_consultation_primary',
           href: propertyConsultationHref,
-          label: dict.cta.speakToAdvisor,
+          label: propertyPrimaryCtaLabel,
           eventPayload: propertyConsultationPayload,
         }}
         secondaryAction={{

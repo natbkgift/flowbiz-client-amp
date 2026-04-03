@@ -93,6 +93,7 @@ describe('property detail shell', () => {
     expect(container.querySelector('#property_consultation_primary')?.getAttribute('href')).toContain(
       'entity_type=property',
     );
+    expect(container.textContent ?? '').toContain('Review this unit with advisor');
     expect(container.querySelector('#property-confidence-pack')).not.toBeNull();
     expect(container.querySelector('#property-trust-cues')).not.toBeNull();
     expect(container.querySelector('#property-decision-cues')).not.toBeNull();
@@ -118,6 +119,7 @@ describe('property detail shell', () => {
 
     expect(markup).toContain('สัญญาณช่วยตัดสินใจระดับยูนิต');
     expect(markup).toContain('เครื่องมือช่วยตัดสินใจและทางไปต่อ');
+    expect(markup).toContain('คุยต่อเกี่ยวกับยูนิตนี้');
     expect(markup).toContain('ไปหน้าเปรียบเทียบ');
     expect(markup).toContain('การส่งบรีฟจากหน้านี้จะพกชื่อรายการ ราคา และบริบทของยูนิต');
     expect(markup).not.toContain('inventory');
