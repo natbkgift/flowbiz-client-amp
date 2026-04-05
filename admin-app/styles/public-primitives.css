@@ -601,6 +601,16 @@ html[lang='th'] .decision-page .public-hero__signal-copy p:last-child,
 
 .decision-page--compare .metric-card {
   border-radius: var(--public-radius-card-sm);
+  gap: 8px;
+  padding: 18px 18px 16px;
+}
+
+.decision-page--compare .metric-card__label {
+  color: rgba(7, 19, 39, 0.58);
+}
+
+.decision-page--compare .metric-card__value {
+  font-size: clamp(1.46rem, 2vw, 1.86rem);
 }
 
 .decision-page--compare .compare-empty-followup {
@@ -609,6 +619,11 @@ html[lang='th'] .decision-page .public-hero__signal-copy p:last-child,
   border-radius: var(--public-radius-card-sm);
   background: linear-gradient(180deg, rgba(250, 247, 241, 0.98), rgba(244, 240, 232, 0.94));
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.76);
+}
+
+.decision-page--compare .compare-empty-followup .cta-strip__text {
+  max-width: 58ch;
+  color: rgba(7, 19, 39, 0.76);
 }
 
 .contact-route-card {
@@ -911,7 +926,7 @@ html[lang='th'] .decision-page .public-hero__signal-copy p:last-child,
 
 .home-page .section-title {
   font-family: var(--font-serif), Georgia, 'Times New Roman', serif;
-  font-size: clamp(1.46rem, 1.88vw, 1.9rem);
+  font-size: clamp(1.54rem, 2.02vw, 1.98rem);
   line-height: 1.12;
   letter-spacing: -0.032em;
   max-width: 15ch;
@@ -1428,7 +1443,7 @@ html[lang='th'] .decision-page .public-hero__signal-copy p:last-child,
 
 .home-hero-slider__title--th {
   max-width: 11.8ch;
-  font-size: clamp(1.92rem, 2.45vw, 2.72rem);
+  font-size: clamp(2rem, 2.7vw, 2.92rem);
   line-height: 1.1;
   letter-spacing: -0.018em;
 }

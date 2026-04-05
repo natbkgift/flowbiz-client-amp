@@ -34,6 +34,7 @@ ops/previews/
 ops/__pycache__/
 admin-app/ops/
 logs/refactor_runner/
+dev-server.log
 
 # B13 generated artifacts
 admin-app/public/media/project-covers/
