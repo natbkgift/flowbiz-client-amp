@@ -509,6 +509,128 @@ html[lang='th'] .decision-page .public-hero__signal-copy p:last-child,
   border-color: var(--public-border-strong);
 }
 
+/* Surface consistency pass: projects, compare, and contact should share the
+   same warm-card grammar instead of mixing legacy card treatments. */
+.projects-page .project-catalogue-card,
+.decision-page--compare .card,
+.decision-page--compare .trust-box,
+.decision-page--compare .compare-flow-card,
+.contact-route-card,
+.split--form-priority .trust-box {
+  border: 1px solid var(--public-border-soft);
+  background:
+    radial-gradient(circle at top right, rgba(226, 187, 130, 0.14), transparent 24%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.994), rgba(249, 246, 240, 0.986));
+  box-shadow: var(--public-shadow-soft);
+}
+
+.projects-page .project-catalogue-card,
+.decision-page--compare .card,
+.decision-page--compare .trust-box,
+.decision-page--compare .compare-flow-card,
+.contact-route-card {
+  border-radius: var(--public-radius-card-md);
+}
+
+.decision-page--compare .card {
+  overflow: hidden;
+}
+
+.projects-page .project-catalogue-card:hover,
+.decision-page--compare .compare-flow-card:hover,
+.contact-route-card:hover {
+  border-color: var(--public-border-strong);
+  box-shadow: var(--public-shadow-lift);
+}
+
+.projects-page .project-catalogue-card {
+  overflow: hidden;
+}
+
+.projects-page .project-catalogue-card__media {
+  border-bottom: 1px solid rgba(7, 19, 39, 0.08);
+  background: linear-gradient(180deg, rgba(228, 236, 244, 0.74), rgba(247, 249, 252, 0.98));
+}
+
+.projects-page .project-catalogue-card__media-scrim {
+  background: linear-gradient(180deg, rgba(7, 19, 39, 0.05) 0%, rgba(7, 19, 39, 0.02) 28%, rgba(7, 19, 39, 0.62) 100%);
+}
+
+.projects-page .project-catalogue-card__chip {
+  border-color: rgba(255, 255, 255, 0.16);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06);
+}
+
+.projects-page .project-catalogue-card__copy {
+  gap: var(--public-space-3);
+}
+
+.projects-page .project-catalogue-card__meta {
+  gap: 8px 12px;
+  color: rgba(7, 19, 39, 0.68);
+}
+
+.projects-page .project-catalogue-card__actions {
+  padding-top: 10px;
+  border-top: 1px solid rgba(7, 19, 39, 0.08);
+}
+
+.decision-page--compare .compare-flow-card,
+.contact-route-card {
+  position: relative;
+  overflow: hidden;
+}
+
+.decision-page--compare .compare-flow-card::before,
+.contact-route-card::before {
+  content: '';
+  position: absolute;
+  inset: 0 0 auto;
+  height: 1px;
+  background: linear-gradient(90deg, rgba(176, 141, 87, 0.32), rgba(255, 255, 255, 0) 28%, rgba(255, 255, 255, 0) 72%, rgba(7, 19, 39, 0.08));
+  opacity: 0.92;
+}
+
+.decision-page--compare .compare-flow-card .authority-card,
+.decision-page--compare .metric-card,
+.decision-page--compare .insight-list__item {
+  border: 1px solid rgba(7, 19, 39, 0.08);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(248, 244, 238, 0.92));
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.76);
+}
+
+.decision-page--compare .metric-card {
+  border-radius: var(--public-radius-card-sm);
+}
+
+.decision-page--compare .compare-empty-followup {
+  margin-top: var(--public-space-4);
+  border: 1px solid rgba(7, 19, 39, 0.08);
+  border-radius: var(--public-radius-card-sm);
+  background: linear-gradient(180deg, rgba(250, 247, 241, 0.98), rgba(244, 240, 232, 0.94));
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.76);
+}
+
+.contact-route-card {
+  background:
+    radial-gradient(circle at top right, rgba(226, 187, 130, 0.12), transparent 24%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.994), rgba(248, 244, 238, 0.986));
+}
+
+.contact-support-actions {
+  gap: var(--public-space-2);
+}
+
+.contact-support-actions__phone {
+  min-height: 44px;
+  padding-inline: 16px;
+  justify-content: center;
+}
+
+.split--form-priority .trust-box {
+  border-radius: var(--public-radius-card-sm);
+}
+
 .home-pathway-card {
   gap: var(--public-space-2);
   padding: var(--public-space-4);
