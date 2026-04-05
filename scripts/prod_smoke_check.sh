@@ -147,12 +147,12 @@ if home_status == 200:
         bool(
             hero_primary_link
             and hero_secondary_link
-            and "/en/projects" in hero_primary_link.group(1)
-            and "/en/contact" in hero_secondary_link.group(1)
+            and "/en/contact" in hero_primary_link.group(1)
+            and "/en/projects" in hero_secondary_link.group(1)
         ),
         {
-            "projects_href": hero_primary_link.group(1) if hero_primary_link else None,
-            "consultation_href": hero_secondary_link.group(1) if hero_secondary_link else None,
+            "consultation_href": hero_primary_link.group(1) if hero_primary_link else None,
+            "projects_href": hero_secondary_link.group(1) if hero_secondary_link else None,
         },
     )
     record("home_non_blank_sections", has_no_blank_sections(home_html), {"path": "/en"})
