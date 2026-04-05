@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 
-import { buildLeadCaptureQuery, getAdvisoryLabels, getAdvisoryProofs, withLocaleQuery } from '@/app/_lib/public-advisory';
+import { buildAdvisorWhatsApp, buildLeadCaptureQuery, getAdvisoryLabels, getAdvisoryProofs, withLocaleQuery } from '@/app/_lib/public-advisory';
 import { Container } from '@/components/layout/Container';
 import { TrackedLink } from '@/components/analytics/TrackedLink';
 import { getDictionary, normalizeLocale } from '@/app/_lib/i18n/get-dictionary';
@@ -447,6 +447,11 @@ export default async function ProjectDetailPage(
             label: dict.advisory.browseVerifiedInventory,
             id: 'project_timeout_inventory_secondary',
             eventPayload: { cta: 'browse_verified_inventory', from: 'project_detail_timeout' },
+          }}
+          tertiaryAction={{
+            href: buildAdvisorWhatsApp(locale, dict),
+            label: dict.cta.whatsapp,
+            id: 'project_timeout_whatsapp_tertiary',
           }}
         />
       </main>

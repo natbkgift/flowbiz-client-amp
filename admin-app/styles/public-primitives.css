@@ -181,9 +181,9 @@
 .decision-page--confidence .section-title,
 .buy-page .section-title {
   font-family: var(--font-serif), Georgia, 'Times New Roman', serif;
-  font-size: clamp(1.54rem, 2.2vw, 2.18rem);
-  line-height: 1.1;
-  letter-spacing: -0.032em;
+  font-size: clamp(1.48rem, 2.05vw, 2.04rem);
+  line-height: 1.12;
+  letter-spacing: -0.03em;
   font-weight: var(--public-font-weight-semibold);
   color: var(--color-ink);
   max-width: var(--public-title-measure);
@@ -208,30 +208,32 @@
 .decision-page--confidence .content-article p,
 .decision-page--confidence .bullet-list li {
   font-family: var(--font-sans), 'Prompt', system-ui, sans-serif;
-  font-size: 0.98rem;
-  line-height: 1.72;
-  color: rgba(7, 19, 39, 0.68);
+  font-size: 1rem;
+  line-height: 1.76;
+  color: rgba(7, 19, 39, 0.74);
   max-width: var(--public-copy-measure);
   text-wrap: pretty;
 }
 
 .home-page[data-locale='th'] .section-title,
 .home-page[data-locale='th'] .home-bottom-cta__title,
-.projects-page[data-locale='th'] .section-title,
-.decision-page[data-locale='th'] .section-title,
-.decision-page[data-locale='th'] .public-hero__headline,
-.decision-page[data-locale='th'] .public-hero__signal-copy h2,
+html[lang='th'] .projects-page .section-title,
+html[lang='th'] .decision-page .section-title,
+html[lang='th'] .decision-page .public-hero__headline,
+html[lang='th'] .decision-page .public-hero__signal-title,
 .home-page[data-locale='th'] .home-pathway-card__title,
 .home-page[data-locale='th'] .home-market-card__title,
 .home-page[data-locale='th'] .home-owner-card__title {
   font-family: var(--font-sans), 'Prompt', system-ui, sans-serif;
+  font-weight: 600;
+  letter-spacing: -0.018em;
 }
 
 .home-page[data-locale='th'] .section-subtitle,
-.projects-page[data-locale='th'] .section-subtitle,
-.decision-page[data-locale='th'] .section-subtitle,
-.decision-page[data-locale='th'] .public-hero__subtitle,
-.decision-page[data-locale='th'] .public-hero__signal-copy p:last-child,
+html[lang='th'] .projects-page .section-subtitle,
+html[lang='th'] .decision-page .section-subtitle,
+html[lang='th'] .decision-page .public-hero__subtitle,
+html[lang='th'] .decision-page .public-hero__signal-copy p:last-child,
 .home-page[data-locale='th'] .home-hero-slider__subtitle,
 .home-page[data-locale='th'] .home-hero-slider__trust-item,
 .home-page[data-locale='th'] .home-pathway-card__body,
@@ -376,21 +378,24 @@
   border-radius: 14px;
 }
 
-.public-hero__signal-copy h2 {
-  margin: 0 0 4px;
-  font-size: 1rem;
-  line-height: 1.2;
+.public-hero__signal-title {
+  margin: 0 0 6px;
+  font-size: 1.02rem;
+  line-height: 1.24;
+  font-weight: 600;
+  letter-spacing: -0.012em;
 }
 
 .public-hero__signal-copy p:last-child {
-  font-size: 0.9rem;
-  line-height: 1.58;
-  color: rgba(255, 255, 255, 0.8);
+  font-size: 0.92rem;
+  line-height: 1.62;
+  color: rgba(255, 255, 255, 0.86);
 }
 
 .decision-page--confidence .hero.hero--page,
 .decision-page--confidence .hero.hero--advisory {
-  padding-block: clamp(40px, 6vw, 64px);
+  padding-block: clamp(56px, 7vw, 88px);
+  margin-bottom: clamp(16px, 2vw, 28px);
 }
 
 .decision-page--confidence .public-hero {
@@ -410,6 +415,39 @@
 .decision-page--confidence .public-hero__actions .public-hero__action--tertiary,
 .decision-page--confidence .hero .cta-row .btn:not(:first-child) {
   flex-basis: calc(50% - 6px);
+}
+
+@media (min-width: 768px) {
+  .home-page[data-locale='th'] .section-title {
+    font-size: clamp(1.74rem, 2.7vw, 2.36rem);
+    line-height: 1.12;
+  }
+
+  .home-page[data-locale='th'] .home-pathways-section {
+    padding-top: 24px;
+  }
+
+  .home-page[data-locale='th'] .home-market-section {
+    padding-top: 48px;
+  }
+
+  .home-page[data-locale='th'] .home-owner-section {
+    padding-top: 32px;
+  }
+
+  .decision-page--confidence .hero.hero--page,
+  .decision-page--confidence .hero.hero--advisory {
+    display: flex;
+    align-items: center;
+    min-height: clamp(620px, 80vh, 760px);
+    padding-block: clamp(96px, 10vw, 128px);
+    margin-bottom: clamp(40px, 4vw, 56px);
+  }
+
+  .decision-page--confidence .hero.hero--page > *,
+  .decision-page--confidence .hero.hero--advisory > * {
+    width: 100%;
+  }
 }
 
 .authority-card,
@@ -489,19 +527,14 @@
   text-underline-offset: 0.18em;
 }
 
-.home-market-section,
-.home-owner-section,
-.home-pathways-section {
-  padding-top: 48px;
-}
-
 .home-market-section {
-  padding-bottom: clamp(0.85rem, 1.8vw, 1.35rem);
+  padding-top: 48px;
+  padding-bottom: 24px;
 }
 
 .home-owner-section {
-  padding-top: clamp(2rem, 3vw, 2.6rem);
-  padding-bottom: clamp(1rem, 2vw, 1.45rem);
+  padding-top: 32px;
+  padding-bottom: 8px;
   background: linear-gradient(180deg, rgba(247, 245, 240, 0) 0%, rgba(246, 241, 233, 0.82) 100%);
 }
 
@@ -553,22 +586,26 @@
 
 .home-hero-slider__title {
   font-family: var(--font-serif), Georgia, 'Times New Roman', serif;
-  font-size: clamp(2.2rem, 3.4vw, 3.5rem);
-  line-height: 1;
-  letter-spacing: -0.04em;
-  max-width: 12ch;
+  font-size: clamp(2.16rem, 3.15vw, 3.28rem);
+  line-height: 0.98;
+  letter-spacing: -0.046em;
+  font-weight: 500;
+  max-width: 10.8ch;
+  text-wrap: balance;
 }
 
 .home-hero-slider__title--th {
-  font-size: clamp(1.62rem, 2.4vw, 2.26rem);
-  line-height: 1.2;
-  max-width: 13ch;
+  font-size: clamp(1.92rem, 2.55vw, 2.7rem);
+  line-height: 1.1;
+  letter-spacing: -0.018em;
+  font-weight: 600;
+  max-width: 11.8ch;
 }
 
 .home-hero-slider__subtitle {
-  max-width: 30rem;
+  max-width: 29rem;
   font-size: 0.98rem;
-  line-height: 1.7;
+  line-height: 1.68;
 }
 
 .home-hero-slider__actions > .hero-cta--primary {
@@ -596,9 +633,9 @@
 }
 
 .home-hero-slider__trust-item {
-  color: rgba(255, 255, 255, 0.82);
-  font-size: 0.92rem;
-  line-height: 1.58;
+  color: rgba(255, 255, 255, 0.86);
+  font-size: 0.9rem;
+  line-height: 1.62;
 }
 
 .home-hero-slider__nav {
@@ -646,11 +683,15 @@
 }
 
 .home-bottom-cta {
-  margin-top: var(--public-space-4);
-  padding-block: clamp(3.2rem, 4vw, 4.4rem);
+  margin-top: 0;
   background:
     radial-gradient(circle at top right, rgba(176, 141, 87, 0.22), transparent 24%),
     linear-gradient(145deg, #030913 0%, #071327 46%, #10253f 100%);
+}
+
+.home-page .home-bottom-cta {
+  margin-top: 0;
+  padding-block: 48px;
 }
 
 .home-bottom-cta__grid {
@@ -748,28 +789,41 @@
 
 .home-page .section-title {
   font-family: var(--font-serif), Georgia, 'Times New Roman', serif;
-  font-size: clamp(1.56rem, 2.1vw, 2.06rem);
-  line-height: 1.08;
-  letter-spacing: -0.035em;
-  max-width: 16ch;
+  font-size: clamp(1.46rem, 1.88vw, 1.9rem);
+  line-height: 1.12;
+  letter-spacing: -0.032em;
+  max-width: 15ch;
 }
 
 .home-page[data-locale='th'] .section-title {
   font-family: var(--font-sans), 'Prompt', system-ui, sans-serif;
-  font-size: clamp(1.42rem, 1.85vw, 1.84rem);
-  max-width: 14ch;
+  font-size: clamp(1.64rem, 2.3vw, 2.18rem);
+  line-height: 1.16;
+  max-width: 13ch;
+}
+
+.home-page[data-locale='th'] .home-pathways-section {
+  padding-top: 24px;
+}
+
+.home-page[data-locale='th'] .home-market-section {
+  padding-top: 48px;
+}
+
+.home-page[data-locale='th'] .home-owner-section {
+  padding-top: 32px;
 }
 
 .home-page .section-subtitle {
-  max-width: 42ch;
-  font-size: 0.96rem;
-  line-height: 1.7;
-  color: rgba(7, 19, 39, 0.64);
+  max-width: 39ch;
+  font-size: 0.98rem;
+  line-height: 1.74;
+  color: rgba(7, 19, 39, 0.72);
 }
 
 .home-page[data-locale='th'] .section-subtitle {
-  max-width: 40ch;
-  line-height: 1.74;
+  max-width: 38ch;
+  line-height: 1.78;
 }
 
 .home-trust-layer-section,
@@ -822,21 +876,22 @@
 }
 
 .home-trust-snapshot__label {
-  font-size: 0.72rem;
+  font-size: 0.68rem;
   font-weight: var(--public-font-weight-bold);
-  letter-spacing: 0.14em;
+  line-height: 1.5;
+  letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: rgba(7, 19, 39, 0.52);
+  color: rgba(7, 19, 39, 0.58);
 }
 
 .home-page .home-trust-snapshot__value {
-  font-size: 0.92rem;
-  line-height: 1.62;
-  color: rgba(7, 19, 39, 0.7);
+  font-size: 0.96rem;
+  line-height: 1.56;
+  color: rgba(7, 19, 39, 0.8);
 }
 
 .home-pathways-section {
-  padding-top: 18px;
+  padding-block: 24px;
   background: linear-gradient(180deg, rgba(247, 249, 252, 0), rgba(247, 249, 252, 0.86));
 }
 
@@ -1235,27 +1290,32 @@
 }
 
 .home-hero-slider__context {
-  max-width: 28rem;
-  color: rgba(255, 255, 255, 0.72);
-  font-size: 0.84rem;
-  line-height: 1.6;
+  max-width: 26rem;
+  color: rgba(255, 255, 255, 0.79);
+  font-size: 0.8rem;
+  line-height: 1.58;
+  letter-spacing: 0.01em;
 }
 
 .home-hero-slider__title {
-  max-width: 11ch;
-  font-size: clamp(2.35rem, 3.6vw, 3.85rem);
-  line-height: 0.96;
+  max-width: 10.6ch;
+  font-size: clamp(2.26rem, 3.3vw, 3.56rem);
+  line-height: 0.97;
+  letter-spacing: -0.046em;
 }
 
 .home-hero-slider__title--th {
-  max-width: 12.6ch;
-  font-size: clamp(1.7rem, 2.5vw, 2.34rem);
+  max-width: 11.8ch;
+  font-size: clamp(1.92rem, 2.45vw, 2.72rem);
+  line-height: 1.1;
+  letter-spacing: -0.018em;
 }
 
 .home-hero-slider__subtitle {
-  max-width: 34rem;
-  font-size: 1.01rem;
-  color: rgba(255, 255, 255, 0.82);
+  max-width: 31rem;
+  font-size: 1rem;
+  line-height: 1.7;
+  color: rgba(255, 255, 255, 0.88);
 }
 
 .home-hero-slider__actions {
@@ -1275,7 +1335,8 @@
 }
 
 .home-hero-slider__trust-item {
-  line-height: 1.6;
+  font-size: 0.9rem;
+  line-height: 1.62;
 }
 
 .home-hero-slider__meta-bar {
@@ -1348,7 +1409,7 @@
 }
 
 .home-bottom-cta {
-  margin-top: var(--public-space-4);
+  margin-top: 0;
 }
 
 .site-footer.footer {
@@ -1486,16 +1547,17 @@
   .home-hero-slider__title,
   .home-hero-slider__title--th {
     order: 2;
-    max-width: 11.5ch;
-    font-size: clamp(1.56rem, 6.1vw, 2.02rem);
-    line-height: 1.12;
+    max-width: 11.4ch;
+    font-size: clamp(1.54rem, 5.6vw, 1.98rem);
+    line-height: 1.08;
+    letter-spacing: -0.03em;
   }
 
   .home-hero-slider__subtitle {
     order: 3;
     max-width: 30ch;
-    font-size: 0.9rem;
-    line-height: 1.62;
+    font-size: 0.92rem;
+    line-height: 1.64;
   }
 
   .home-hero-slider__actions {
@@ -1505,7 +1567,7 @@
   }
 
   .home-hero-slider__context {
-    order: 5;
+    display: none;
   }
 
   .home-hero-slider__trust-list {

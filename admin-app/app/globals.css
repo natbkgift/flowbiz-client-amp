@@ -1453,17 +1453,20 @@ summary.mobile-nav__trigger::-webkit-details-marker {
 .hero.hero--advisory .public-hero__headline,
 .hero.hero--advisory h1.public-hero__headline {
   color: var(--color-ink);
-  max-width: 12.5ch;
+  max-width: 11.8ch;
   margin-bottom: 0;
-  line-height: 1.02;
-  letter-spacing: -0.038em;
+  line-height: 1.01;
+  letter-spacing: -0.04em;
+  text-wrap: balance;
 }
 
 .hero.hero--advisory .public-hero__subtitle,
 .hero.hero--advisory p.public-hero__subtitle {
-  color: rgba(7, 19, 39, 0.72);
-  max-width: 44ch;
+  color: rgba(7, 19, 39, 0.78);
+  max-width: 40ch;
   margin-top: 0;
+  font-size: clamp(0.99rem, 1.02vw, 1.06rem);
+  line-height: 1.72;
 }
 
 .public-hero__actions {
@@ -1481,18 +1484,18 @@ summary.mobile-nav__trigger::-webkit-details-marker {
 
 .public-hero__support-note {
   margin: 0;
-  max-width: 44ch;
-  color: rgba(7, 19, 39, 0.66);
-  font-size: var(--font-sm);
-  line-height: 1.72;
+  max-width: 42ch;
+  color: rgba(7, 19, 39, 0.74);
+  font-size: 0.92rem;
+  line-height: 1.74;
 }
 
 .decision-page__support-note {
   margin: -8px 0 0;
-  max-width: 62ch;
-  color: rgba(15, 23, 42, 0.72);
-  font-size: 0.94rem;
-  line-height: 1.68;
+  max-width: 58ch;
+  color: rgba(15, 23, 42, 0.76);
+  font-size: 0.92rem;
+  line-height: 1.72;
 }
 
 .public-hero__proofs {
@@ -1563,7 +1566,7 @@ summary.mobile-nav__trigger::-webkit-details-marker {
   box-shadow: 0 12px 24px rgba(7, 19, 39, 0.08);
 }
 
-.public-hero__signal-copy h2 {
+.public-hero__signal-title {
   margin: 2px 0 8px;
   color: var(--color-ink);
   font-size: var(--font-lg);
@@ -1571,7 +1574,7 @@ summary.mobile-nav__trigger::-webkit-details-marker {
 }
 
 .public-hero__signal-copy p:last-child {
-  color: rgba(7, 19, 39, 0.7);
+  color: rgba(7, 19, 39, 0.76);
   font-size: var(--font-sm);
   line-height: 1.65;
 }
@@ -1732,7 +1735,7 @@ summary.mobile-nav__trigger::-webkit-details-marker {
     padding: 24px;
   }
 
-  .public-hero__signal-copy h2 {
+  .public-hero__signal-title {
     font-size: 1.35rem;
   }
 }
@@ -2346,12 +2349,14 @@ summary.mobile-nav__trigger::-webkit-details-marker {
   font-weight: 600;
   margin-bottom: var(--space-2);
   color: var(--color-ink);
-  letter-spacing: -0.02em;
+  line-height: 1.24;
+  letter-spacing: -0.024em;
 }
 
 .card-subtitle {
-  color: rgba(7, 19, 39, 0.68);
-  line-height: 1.68;
+  color: rgba(7, 19, 39, 0.72);
+  font-size: 0.96rem;
+  line-height: 1.72;
 }
 
 .catalogue-card {
@@ -2394,7 +2399,7 @@ summary.mobile-nav__trigger::-webkit-details-marker {
 
 .projects-page .section-subtitle,
 .buy-page .section-subtitle {
-  color: rgba(7, 19, 39, 0.68);
+  color: rgba(7, 19, 39, 0.74);
 }
 
 .projects-catalogue-strip {
@@ -2729,7 +2734,8 @@ summary.mobile-nav__trigger::-webkit-details-marker {
 .buy-flow-utility__link {
   display: inline-flex;
   align-items: center;
-  min-height: 34px;
+  min-height: 44px;
+  padding: 6px 0;
   color: rgba(10, 77, 140, 0.9);
   font-size: var(--font-sm);
   font-weight: 600;
@@ -2776,7 +2782,7 @@ summary.mobile-nav__trigger::-webkit-details-marker {
   .buy-flow-utility__link {
     width: 100%;
     justify-content: center;
-    min-height: 38px;
+    min-height: 44px;
   }
 }
 
@@ -7304,17 +7310,19 @@ summary.mobile-nav__trigger::-webkit-details-marker {
   padding: clamp(36px, 7vw, 56px) 0 clamp(28px, 5vw, 44px);
 }
 
+.decision-page--confidence .hero.hero--advisory .headline,
 .decision-page--confidence .headline {
-  font-size: clamp(1.95rem, 7vw, 2.6rem);
-  line-height: 1.06;
-  max-width: 16ch;
+  font-size: clamp(2.02rem, 6.4vw, 2.78rem);
+  line-height: 1.02;
+  max-width: 14.5ch;
+  letter-spacing: -0.042em;
 }
 
 .decision-page--confidence .subhead {
   margin-top: 10px;
-  font-size: 0.98rem;
-  line-height: 1.55;
-  max-width: 46ch;
+  font-size: 1rem;
+  line-height: 1.64;
+  max-width: 43ch;
 }
 
 .decision-page--confidence .section-header {
@@ -7377,12 +7385,12 @@ summary.mobile-nav__trigger::-webkit-details-marker {
 
 .decision-page--confidence .hero.hero--advisory .public-hero__headline,
 .decision-page--confidence .hero.hero--advisory h1.public-hero__headline {
-  max-width: 16ch;
+  max-width: 14.5ch;
 }
 
 .decision-page--confidence .hero.hero--advisory .public-hero__subtitle,
 .decision-page--confidence .hero.hero--advisory p.public-hero__subtitle {
-  max-width: 46ch;
+  max-width: 43ch;
 }
 
 .decision-page--confidence .public-hero__proofs {
@@ -7411,14 +7419,17 @@ summary.mobile-nav__trigger::-webkit-details-marker {
   border-radius: 12px;
 }
 
-.decision-page--confidence .public-hero__signal-copy h2 {
+.decision-page--confidence .public-hero__signal-title {
   margin: 0 0 6px;
-  font-size: 1rem;
+  font-size: 1.02rem;
+  line-height: 1.24;
+  letter-spacing: -0.01em;
 }
 
 .decision-page--confidence .public-hero__signal-copy p:last-child {
-  font-size: 0.88rem;
-  line-height: 1.45;
+  color: rgba(7, 19, 39, 0.78);
+  font-size: 0.9rem;
+  line-height: 1.56;
 }
 
 .decision-page--confidence .detail-stack {
@@ -7459,12 +7470,14 @@ summary.mobile-nav__trigger::-webkit-details-marker {
 }
 
 .decision-page--confidence .decision-pack .card-title {
-  font-size: clamp(1.05rem, 4.3vw, 1.24rem);
+  font-size: clamp(1.08rem, 4vw, 1.26rem);
+  line-height: 1.2;
   margin-bottom: 6px;
 }
 
 .decision-page--confidence .decision-pack .card-subtitle {
-  font-size: 0.94rem;
+  font-size: 0.95rem;
+  line-height: 1.68;
 }
 
 .decision-page--confidence .decision-pack .insight-list,
@@ -7480,7 +7493,7 @@ summary.mobile-nav__trigger::-webkit-details-marker {
 .contact-route-card {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 12px;
   min-height: 100%;
   padding: clamp(18px, 3vw, 24px);
   text-decoration: none;
@@ -7510,19 +7523,26 @@ summary.mobile-nav__trigger::-webkit-details-marker {
   background: rgba(244, 238, 227, 0.88);
   border: 1px solid rgba(199, 173, 120, 0.24);
   color: rgba(120, 92, 47, 0.94);
-  font-size: 0.72rem;
+  font-size: 0.68rem;
   font-weight: 700;
-  letter-spacing: 0.1em;
+  letter-spacing: 0.12em;
   text-transform: uppercase;
 }
 
 .contact-route-card .card-title {
   margin-bottom: 0;
+  font-family: var(--font-serif), Georgia, 'Times New Roman', serif;
+  font-size: clamp(1.12rem, 1.38vw, 1.32rem);
+  line-height: 1.14;
+  letter-spacing: -0.026em;
+  max-width: 14ch;
 }
 
 .contact-route-card .card-subtitle {
-  max-width: 32ch;
-  color: rgba(7, 19, 39, 0.72);
+  max-width: 30ch;
+  color: rgba(7, 19, 39, 0.76);
+  font-size: 0.95rem;
+  line-height: 1.66;
 }
 
 .contact-route-card__action {
@@ -7536,8 +7556,9 @@ summary.mobile-nav__trigger::-webkit-details-marker {
   border: 0;
   background: transparent;
   color: rgba(10, 77, 140, 0.92);
-  font-size: 0.9rem;
+  font-size: 0.88rem;
   font-weight: 600;
+  letter-spacing: 0.01em;
 }
 
 .contact-route-card__action::after {
@@ -8930,6 +8951,13 @@ summary.mobile-nav__trigger::-webkit-details-marker {
 }
 
 .breadcrumbs-link {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  min-width: 44px;
+  justify-content: center;
+  padding: 6px 10px;
+  border-radius: 999px;
   font-size: var(--font-sm);
   color: var(--color-text-secondary);
   transition: color 0.15s ease;
@@ -8951,6 +8979,13 @@ summary.mobile-nav__trigger::-webkit-details-marker {
 }
 
 .breadcrumbs-item>span[aria-current="page"] {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  min-width: 44px;
+  justify-content: center;
+  padding: 6px 10px;
+  border-radius: 999px;
   font-size: var(--font-sm);
   color: var(--color-text);
   font-weight: 500;
@@ -11155,8 +11190,8 @@ summary.mobile-nav__trigger::-webkit-details-marker {
 }
 
 .project-catalogue-card__copy {
-  gap: 8px;
-  padding: 15px 15px 14px;
+  gap: 10px;
+  padding: 16px 16px 15px;
 }
 
 .premium-project-card__summary,
@@ -11168,16 +11203,30 @@ summary.mobile-nav__trigger::-webkit-details-marker {
 }
 
 .project-catalogue-card__summary {
-  line-height: 1.5;
+  max-width: 33ch;
+  color: rgba(7, 19, 39, 0.75);
+  font-size: 0.94rem;
+  line-height: 1.58;
 }
 
 .project-catalogue-card__title {
-  font-size: clamp(1.06rem, 1.6vw, 1.32rem);
-  line-height: 1.1;
+  font-family: var(--font-serif), Georgia, 'Times New Roman', serif;
+  font-size: clamp(1.12rem, 1.65vw, 1.36rem);
+  line-height: 1.14;
+  letter-spacing: -0.028em;
+  max-width: 16ch;
 }
 
 .project-catalogue-card--lead .project-catalogue-card__title {
-  font-size: clamp(1.18rem, 1.9vw, 1.46rem);
+  font-size: clamp(1.24rem, 1.95vw, 1.5rem);
+}
+
+html[lang='th'] .projects-page .project-catalogue-card__title,
+html[lang='th'] .contact-route-card .card-title {
+  font-family: var(--font-sans), 'Prompt', system-ui, sans-serif;
+  font-weight: 600;
+  line-height: 1.18;
+  letter-spacing: -0.016em;
 }
 
 .premium-project-card__fact-item {
