@@ -2,6 +2,7 @@
 
 import Image, { type ImageLoaderProps } from 'next/image';
 import { useEffect, useMemo, useState } from 'react';
+import { toRuntimeLocalMediaPath } from '@/app/_lib/local-media';
 
 const DEFAULT_FALLBACK_SRC = '/images/project-overview.png';
 const CONTRACT_FALLBACK_SRC = '/images/property-exterior.png';
@@ -10,7 +11,8 @@ const LOCAL_SAFE_FALLBACK_SRC = '/images/property-placeholder.svg';
 function normalizeSrc(raw: string | null | undefined): string | null {
   if (!raw) return null;
   const s = String(raw).trim();
-  return s ? s : null;
+  if (!s) return null;
+  return toRuntimeLocalMediaPath(s) ?? s;
 }
 
 function passthroughLoader({ src }: ImageLoaderProps): string {

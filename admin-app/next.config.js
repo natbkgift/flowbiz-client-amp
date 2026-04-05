@@ -7,6 +7,37 @@ const imageHosts = (process.env.NEXT_PUBLIC_IMAGE_HOSTS ?? '')
   .map((h) => h.trim())
   .filter(Boolean);
 
+function normalizeAbsoluteUrl(value) {
+  const raw = String(value || '').trim();
+  if (!raw) return null;
+  try {
+    const parsed = new URL(raw);
+    if (parsed.protocol !== 'http:' && parsed.protocol !== 'https:') return null;
+    return parsed.toString().replace(/\/+$/, '');
+  } catch {
+    return null;
+  }
+}
+
+function resolveApiRewriteBase() {
+  return (
+    normalizeAbsoluteUrl(process.env.LOCAL_API_ORIGIN) ||
+    normalizeAbsoluteUrl(process.env.NEXT_PUBLIC_API_BASE) ||
+    (process.env.NODE_ENV === 'development' ? 'http://127.0.0.1:8000' : null)
+  );
+}
+
+function resolveMediaRewriteBase(apiRewriteBase) {
+  const explicitMediaOrigin = normalizeAbsoluteUrl(process.env.LOCAL_MEDIA_ORIGIN);
+  if (explicitMediaOrigin) return explicitMediaOrigin;
+  if (!apiRewriteBase) return null;
+  try {
+    return new URL(apiRewriteBase).origin;
+  } catch {
+    return null;
+  }
+}
+
 const nextConfig = {
   reactStrictMode: true,
   distDir: localDistDir || '.next',
@@ -16,7 +47,7 @@ const nextConfig = {
   skipTrailingSlashRedirect: true,
   images: useMinimalConfig ? undefined : {
     formats: ['image/avif', 'image/webp'],
-    qualities: [72, 75, 76],
+    qualities: [60, 72, 75, 76],
     remotePatterns: imageHosts.map((hostname) => ({
       protocol: 'https',
       hostname,
@@ -47,22 +78,33 @@ const nextConfig = {
   },
   async rewrites() {
     if (useMinimalConfig) return [];
-    const localApiOrigin =
-      process.env.LOCAL_API_ORIGIN ||
-      (process.env.NODE_ENV === 'development' ? 'http://127.0.0.1:8000' : '');
-    const localMediaOrigin = process.env.LOCAL_MEDIA_ORIGIN || localApiOrigin;
-    if (!localApiOrigin) return [];
+    const apiRewriteBase = resolveApiRewriteBase();
+    const mediaRewriteBase = resolveMediaRewriteBase(apiRewriteBase);
+    if (!apiRewriteBase && !mediaRewriteBase) return [];
 
-    return {
-      afterFiles: [
+    const beforeFiles = [];
+    const afterFiles = [];
+    if (apiRewriteBase) {
+      afterFiles.push(
         // Local preview parity with the deployed edge proxy:
         // LOCAL_API_ORIGIN may point either at a backend root (e.g. localhost:8000)
         // or a site-prefixed API origin (e.g. https://amppattaya.com/api).
+        // NEXT_PUBLIC_API_BASE may also provide the absolute upstream base during standalone QA.
         // Keep sanitized public platform endpoints inside Next route handlers.
-        { source: '/api/:path((?!platform/version(?:/)?$|platform/deploy-history(?:/)?$).*)', destination: `${localApiOrigin}/:path` },
-        // Allow media to use a separate origin when API and site/media are hosted differently.
-        { source: '/media/:path*', destination: `${localMediaOrigin}/media/:path*` },
-      ],
+        { source: '/api/:path((?!platform/version(?:/)?$|platform/deploy-history(?:/)?$|media(?:/|$)).*)', destination: `${apiRewriteBase}/:path` },
+      );
+    }
+    if (mediaRewriteBase) {
+      beforeFiles.push(
+        // Media paths often end with real file extensions, so this rewrite must run
+        // before filesystem/public-file resolution in standalone QA and local preview.
+        { source: '/media/:path*', destination: `${mediaRewriteBase}/media/:path*` },
+      );
+    }
+
+    return {
+      beforeFiles,
+      afterFiles,
     };
   },
   webpack(config) {

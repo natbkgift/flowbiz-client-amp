@@ -160,30 +160,42 @@ def test_render_live_status_marks_active_and_final_states() -> None:
 
 
 def test_stale_round_count_resets_when_worktree_or_blocker_changes() -> None:
-    assert RUNNER.stale_round_count(
-        1,
-        commit_changed=True,
-        worktree_clean=True,
-        blocked=False,
-    ) == 0
-    assert RUNNER.stale_round_count(
-        1,
-        commit_changed=False,
-        worktree_clean=False,
-        blocked=False,
-    ) == 0
-    assert RUNNER.stale_round_count(
-        1,
-        commit_changed=False,
-        worktree_clean=True,
-        blocked=True,
-    ) == 0
-    assert RUNNER.stale_round_count(
-        1,
-        commit_changed=False,
-        worktree_clean=True,
-        blocked=False,
-    ) == 2
+    assert (
+        RUNNER.stale_round_count(
+            1,
+            commit_changed=True,
+            worktree_clean=True,
+            blocked=False,
+        )
+        == 0
+    )
+    assert (
+        RUNNER.stale_round_count(
+            1,
+            commit_changed=False,
+            worktree_clean=False,
+            blocked=False,
+        )
+        == 0
+    )
+    assert (
+        RUNNER.stale_round_count(
+            1,
+            commit_changed=False,
+            worktree_clean=True,
+            blocked=True,
+        )
+        == 0
+    )
+    assert (
+        RUNNER.stale_round_count(
+            1,
+            commit_changed=False,
+            worktree_clean=True,
+            blocked=False,
+        )
+        == 2
+    )
 
 
 @pytest.mark.skipif(

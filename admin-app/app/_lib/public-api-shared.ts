@@ -1,21 +1,8 @@
 import type { PropertyListItem } from '../public/_shared/types';
-import { isKnownStalePublicMediaPath } from './local-media';
-
-const LOCAL_MEDIA_PREFIXES = ['/media/', '/uploads/', '/assets/', '/_next/'];
+import { resolveRenderableLocalMediaPath } from './local-media';
 
 export function resolveImageUrl(image: string | null | undefined): string | null {
-  if (!image) return null;
-
-  const raw = String(image).trim();
-  if (!raw) return null;
-  if (raw.includes('://') || raw.startsWith('//')) return null;
-
-  const normalized = raw.startsWith('/') ? raw : `/${raw}`;
-  if (LOCAL_MEDIA_PREFIXES.some((prefix) => normalized.startsWith(prefix))) {
-    if (isKnownStalePublicMediaPath(normalized)) return null;
-    return normalized;
-  }
-  return null;
+  return resolveRenderableLocalMediaPath(image);
 }
 
 export function pickCoverImage(p: {

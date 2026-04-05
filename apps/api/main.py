@@ -165,8 +165,17 @@ def platform_version() -> dict:
 
 @app.get("/platform/deploy-history")
 def platform_deploy_history(limit: int = 10) -> JSONResponse:
-    _ = limit
-    return JSONResponse(status_code=404, content={"detail": "Not Found"})
+    history_dir = _get_deploy_history_dir()
+    items = _read_deploy_history(_parse_deploy_history_limit(limit))
+    return JSONResponse(
+        status_code=200,
+        content={
+            "ok": True,
+            "count": len(items),
+            "history_dir": str(history_dir),
+            "items": items,
+        },
+    )
 
 
 @app.exception_handler(Exception)
@@ -203,8 +212,12 @@ app.include_router(events.router)
 app.include_router(home_runtime.router)
 app.include_router(tools.router)
 
-app.add_api_route("/search", properties.search_properties, methods=["GET"], response_model=SearchResponse)
-app.add_api_route("/search/", properties.search_properties, methods=["GET"], response_model=SearchResponse)
+app.add_api_route(
+    "/search", properties.search_properties, methods=["GET"], response_model=SearchResponse
+)
+app.add_api_route(
+    "/search/", properties.search_properties, methods=["GET"], response_model=SearchResponse
+)
 
 app.include_router(admin_crm.router)
 app.include_router(admin_properties.router)

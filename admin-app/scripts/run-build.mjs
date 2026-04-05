@@ -7,7 +7,7 @@ import { fileURLToPath } from 'node:url';
 const SCRIPT_DIR = path.dirname(fileURLToPath(import.meta.url));
 const PROJECT_ROOT = path.resolve(SCRIPT_DIR, '..');
 const PROJECT_FILES_TO_RESTORE = ['next-env.d.ts', 'tsconfig.json'];
-const LOCAL_SAFE_CLEAN_PATHS = ['.next_public_visual', '.next_local_safe', '.next/cache', 'tsconfig.tsbuildinfo'];
+const LOCAL_SAFE_CLEAN_PATHS = ['.next_public_visual', '.next_local_safe', '.next/types', '.next/cache', 'tsconfig.tsbuildinfo'];
 
 function normalizeFlag(value) {
   return ['1', 'true', 'yes'].includes(String(value || '').trim().toLowerCase());

@@ -264,8 +264,7 @@ def test_admin_sample_reseed_upserts_existing_developer_and_property(monkeypatch
     assert property_ids == {"demo-property": "property-existing"}
     assert ("/admin/developers/developer-existing",) == (client.patch_calls[0][0],)
     assert any(
-        path == "/admin/properties/property-existing"
-        for path, _payload in client.patch_calls
+        path == "/admin/properties/property-existing" for path, _payload in client.patch_calls
     )
     assert not any(path == "/admin/developers" for path, _json, _files, _data in client.post_calls)
     assert not any(path == "/admin/properties" for path, _json, _files, _data in client.post_calls)
@@ -290,8 +289,7 @@ def test_admin_sample_reseed_main_rerun_keeps_counts_stable(monkeypatch, tmp_pat
             for index, row in enumerate(mod.DEVELOPERS)
         ],
         "areas": [
-            {"id": f"area-{index}", "slug": row["slug"]}
-            for index, row in enumerate(mod.AREAS)
+            {"id": f"area-{index}", "slug": row["slug"]} for index, row in enumerate(mod.AREAS)
         ],
         "projects": [
             {"id": f"project-{index}", "slug": row["slug"]}

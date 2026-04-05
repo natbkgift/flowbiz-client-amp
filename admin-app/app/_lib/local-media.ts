@@ -39,6 +39,15 @@ export function normalizeLocalMediaPath(value: string | null | undefined): strin
   return null;
 }
 
+export function toRuntimeLocalMediaPath(value: string | null | undefined): string | null {
+  const normalized = normalizeLocalMediaPath(value);
+  if (!normalized) return null;
+  if (normalized.startsWith('/media/')) {
+    return `/api/media/${normalized.slice('/media/'.length)}`;
+  }
+  return normalized;
+}
+
 export function isKnownStalePublicMediaPath(value: string | null | undefined): boolean {
   if (!value) return false;
   const normalized = normalizeLocalMediaPath(value);
@@ -50,7 +59,7 @@ export function resolveRenderableLocalMediaPath(value: string | null | undefined
   const normalized = normalizeLocalMediaPath(value);
   if (!normalized) return null;
   if (isKnownStalePublicMediaPath(normalized)) return null;
-  return normalized;
+  return toRuntimeLocalMediaPath(normalized) ?? normalized;
 }
 
 export function pickPrimaryLocalMedia(input: LocalMediaInput): string | null {

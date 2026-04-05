@@ -243,8 +243,7 @@ def render_summary(payload: dict[str, Any]) -> str:
     flags = payload["flags"]
     next_run = scheduler["next_run"] or "unavailable"
     timer_state = (
-        f"{scheduler['timer_active'] or 'unknown'}/"
-        f"{scheduler['timer_enabled'] or 'unknown'}"
+        f"{scheduler['timer_active'] or 'unknown'}/{scheduler['timer_enabled'] or 'unknown'}"
     )
     last_success_at = health["last_success_at"] or "never"
     last_failure_at = health["last_failure_at"] or "never"
@@ -349,9 +348,7 @@ def main() -> int:
 
     if args.failures:
         recent = [
-            item
-            for item in recent
-            if str(item.get("status")) not in {"ok", "skipped_locked"}
+            item for item in recent if str(item.get("status")) not in {"ok", "skipped_locked"}
         ]
         payload["recent"] = recent[: max(1, args.limit)]
     else:

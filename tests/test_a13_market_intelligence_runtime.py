@@ -117,9 +117,7 @@ def test_a13_market_intelligence_keeps_page_owned_cta_hierarchy(client) -> None:
     consultation_index = html.index(
         'href="/en/contact?intent=consultation&amp;source=market_intelligence"'
     )
-    methodology_index = html.index(
-        'href="/en/investment/methodology?source=market_intelligence"'
-    )
+    methodology_index = html.index('href="/en/investment/methodology?source=market_intelligence"')
     assert (
         overview_index
         < boundary_index
@@ -133,6 +131,6 @@ def test_a13_market_intelligence_keeps_page_owned_cta_hierarchy(client) -> None:
     )
     assert next_step_index < consultation_index < methodology_index
 
-    assert '<form' not in html
-    assert 'https://wa.me/' not in html
-    assert 'https://line.me/' not in html
+    assert "<form" not in html
+    assert "https://wa.me/" not in html
+    assert "https://line.me/" not in html

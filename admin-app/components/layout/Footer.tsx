@@ -64,7 +64,7 @@ export function Footer({
   ];
 
   return (
-    <footer className="footer" role="contentinfo" data-locale={locale}>
+    <footer className="site-footer footer" role="contentinfo" data-locale={locale}>
       <Container>
         <div className="footer-top-grid">
           <div className="footer-brand">

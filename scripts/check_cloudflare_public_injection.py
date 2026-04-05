@@ -15,7 +15,6 @@ from typing import Iterable
 from urllib.error import HTTPError, URLError
 from urllib.request import Request, urlopen
 
-
 DEFAULT_URLS = [
     "https://amppattaya.com/",
     "https://amppattaya.com/en",
@@ -26,7 +25,9 @@ DEFAULT_URLS = [
 
 PATTERNS = {
     "cloudflare_insights": re.compile(r"static\.cloudflareinsights\.com|beacon\.min\.js", re.I),
-    "email_obfuscation": re.compile(r"/cdn-cgi/scripts/.+?/cloudflare-static/email-decode\.min\.js", re.I),
+    "email_obfuscation": re.compile(
+        r"/cdn-cgi/scripts/.+?/cloudflare-static/email-decode\.min\.js", re.I
+    ),
 }
 
 

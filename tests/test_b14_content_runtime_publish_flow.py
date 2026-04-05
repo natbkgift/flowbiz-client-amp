@@ -126,9 +126,7 @@ def test_b14_admin_content_publish_flow_reflects_about_page(client) -> None:
     assert any(item["id"] == team_id for item in public_team_after.json()["data"])
     public_testimonials_after = client.get("/v1/testimonials?intent=invest")
     assert public_testimonials_after.status_code == 200, public_testimonials_after.text
-    assert any(
-        item["id"] == testimonial_id for item in public_testimonials_after.json()["data"]
-    )
+    assert any(item["id"] == testimonial_id for item in public_testimonials_after.json()["data"])
 
     unpublish_team = client.post(f"/admin/team-members/{team_id}/unpublish", headers=headers)
     assert unpublish_team.status_code == 200, unpublish_team.text

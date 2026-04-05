@@ -291,11 +291,11 @@ def detect_command_template() -> tuple[str, str, str]:
         return (
             (
                 'cmd /d /s /c "codex exec -c mcp_servers={} '
-                '-c model_reasoning_effort=high '
-                '-c shell_environment_policy.inherit=all '
-                '--color never '
-                '-C {repo_root} '
-                '--output-last-message {last_message_file} - < {prompt_file} '
+                "-c model_reasoning_effort=high "
+                "-c shell_environment_policy.inherit=all "
+                "--color never "
+                "-C {repo_root} "
+                "--output-last-message {last_message_file} - < {prompt_file} "
                 '&& type {last_message_file}"'
             ),
             "auto-detected",
@@ -983,8 +983,7 @@ def main() -> int:
 
         if current_branch != branch:
             stop_reason = (
-                f"branch changed during execution on round {round_no}: "
-                f"{branch} -> {current_branch}"
+                f"branch changed during execution on round {round_no}: {branch} -> {current_branch}"
             )
             runner_log(cfg.log_dir, f"STOP: {stop_reason}")
             update_session_file(
@@ -1106,8 +1105,7 @@ def main() -> int:
 
         if stale_rounds >= cfg.max_stale_rounds:
             stop_reason = (
-                f"watchdog detected {stale_rounds} consecutive clean rounds "
-                "without a new commit"
+                f"watchdog detected {stale_rounds} consecutive clean rounds without a new commit"
             )
             runner_log(cfg.log_dir, f"STOP: {stop_reason}")
             update_session_file(

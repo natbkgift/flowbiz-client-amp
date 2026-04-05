@@ -89,15 +89,19 @@ def _build_developer_project_lookup(db: Session, developer_ids: list) -> dict:
     ).all()
 
     area_ids = {row.area_id for row in project_rows if row.area_id is not None}
-    area_lookup = {
-        row.id: {"slug": row.slug, "name": row.name}
-        for row in db.execute(
-            select(Area.id, Area.slug, Area.name).where(
-                Area.deleted_at.is_(None),
-                Area.id.in_(area_ids),
-            )
-        ).all()
-    } if area_ids else {}
+    area_lookup = (
+        {
+            row.id: {"slug": row.slug, "name": row.name}
+            for row in db.execute(
+                select(Area.id, Area.slug, Area.name).where(
+                    Area.deleted_at.is_(None),
+                    Area.id.in_(area_ids),
+                )
+            ).all()
+        }
+        if area_ids
+        else {}
+    )
 
     summary_lookup: dict = {}
 
@@ -125,8 +129,12 @@ def _build_developer_project_lookup(db: Session, developer_ids: list) -> dict:
 
         price = _coerce_positive_price(row.starting_price)
         if price is not None:
-            current["min_price"] = price if current["min_price"] is None else min(current["min_price"], price)
-            current["max_price"] = price if current["max_price"] is None else max(current["max_price"], price)
+            current["min_price"] = (
+                price if current["min_price"] is None else min(current["min_price"], price)
+            )
+            current["max_price"] = (
+                price if current["max_price"] is None else max(current["max_price"], price)
+            )
 
     out: dict = {}
     for developer_id, current in summary_lookup.items():
@@ -199,8 +207,12 @@ def _serialize_developer(row: Developer, locale: str, project_summary: dict | No
     project_count = int(project_summary.get("project_count", 0)) if project_summary else 0
     primary_areas = project_summary.get("primary_areas", []) if project_summary else []
     price_range = project_summary.get("price_range") if project_summary else None
-    has_active_projects = bool(project_summary.get("has_active_projects")) if project_summary else False
-    last_updated = _max_datetime(row.updated_at, project_summary.get("project_updated_at") if project_summary else None)
+    has_active_projects = (
+        bool(project_summary.get("has_active_projects")) if project_summary else False
+    )
+    last_updated = _max_datetime(
+        row.updated_at, project_summary.get("project_updated_at") if project_summary else None
+    )
     return {
         "id": str(row.id),
         "slug": row.slug,

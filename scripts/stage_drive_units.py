@@ -11,7 +11,6 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
-
 REPO_ROOT = Path(__file__).resolve().parent.parent
 IMPORT_DIR = REPO_ROOT / "data" / "import"
 STAGING_DIR = REPO_ROOT / "data" / "staging" / "drive-units"
@@ -189,7 +188,9 @@ def _extract_sale_price(lines: list[str]) -> int | None:
             fallback_lines.append(line)
     for line in keyword_lines + fallback_lines:
         lower = line.lower()
-        match = re.search(r"([0-9]+(?:[.,][0-9]+)?)\s*(?:mb|m\b|million|ล้านบาท|ล้าน)", lower, flags=re.I)
+        match = re.search(
+            r"([0-9]+(?:[.,][0-9]+)?)\s*(?:mb|m\b|million|ล้านบาท|ล้าน)", lower, flags=re.I
+        )
         if match:
             amount = _parse_amount(match.group(1), million_hint=True)
             if amount and amount >= 500_000:
@@ -223,13 +224,19 @@ def _extract_rent_price(lines: list[str]) -> int | None:
     monthly_candidates: list[int] = []
     for line in lines:
         lower = line.lower()
-        if any(token in lower for token in ("deposit", "ประกัน", "commission", "คอมมิชชั่น")) and not any(token in lower for token in ("rent", "ค่าเช่า", "month", "เดือน", "lease", "year")):
+        if any(
+            token in lower for token in ("deposit", "ประกัน", "commission", "คอมมิชชั่น")
+        ) and not any(
+            token in lower for token in ("rent", "ค่าเช่า", "month", "เดือน", "lease", "year")
+        ):
             continue
         amounts = [amount for amount in amounts_from_line(line) if 5_000 <= amount <= 1_000_000]
         if not amounts:
             continue
         primary_amount = amounts[0]
-        if any(token in lower for token in ("year", "yearly", "1 year", "12 month", "1 yr", "lease")):
+        if any(
+            token in lower for token in ("year", "yearly", "1 year", "12 month", "1 yr", "lease")
+        ):
             yearly_candidates.append(primary_amount)
         elif any(token in lower for token in ("month", "เดือน", "rent", "ค่าเช่า")):
             monthly_candidates.append(primary_amount)
@@ -343,7 +350,9 @@ def _extract_furnishing(text: str) -> str | None:
 
 
 def _extract_ownership(text: str, proppit: dict[str, Any]) -> str | None:
-    ownership = str(proppit.get("ownership_marketing") or proppit.get("ownership_label") or "").strip()
+    ownership = str(
+        proppit.get("ownership_marketing") or proppit.get("ownership_label") or ""
+    ).strip()
     if ownership:
         return ownership
     lower = text.lower()
@@ -354,8 +363,12 @@ def _extract_ownership(text: str, proppit: dict[str, Any]) -> str | None:
     return None
 
 
-def _extract_project_name(info_lines: list[str], proppit: dict[str, Any], searchable_text: str, fallback: str) -> str:
-    canonical_source = str(proppit.get("project_name") or proppit.get("address_query") or "").strip()
+def _extract_project_name(
+    info_lines: list[str], proppit: dict[str, Any], searchable_text: str, fallback: str
+) -> str:
+    canonical_source = str(
+        proppit.get("project_name") or proppit.get("address_query") or ""
+    ).strip()
     haystack = _normalize_whitespace(f"{canonical_source} {searchable_text} {fallback}").lower()
     for token, canonical in KNOWN_PROJECT_NAMES.items():
         if token in haystack:
@@ -368,7 +381,24 @@ def _extract_project_name(info_lines: list[str], proppit: dict[str, Any], search
         if not cleaned:
             continue
         lower = cleaned.lower()
-        if any(token in lower for token in ("rent", "sale", "price", "contact", "available", "month", "year", "commission", "deposit", "bed", "bath", "sqm", "sq.m")):
+        if any(
+            token in lower
+            for token in (
+                "rent",
+                "sale",
+                "price",
+                "contact",
+                "available",
+                "month",
+                "year",
+                "commission",
+                "deposit",
+                "bed",
+                "bath",
+                "sqm",
+                "sq.m",
+            )
+        ):
             continue
         if len(cleaned) >= 4:
             return cleaned
@@ -440,7 +470,9 @@ def _build_english_title(
     bedrooms: int | None,
     view: str | None,
 ) -> str:
-    type_label = "House" if property_type == "house" else "Villa" if property_type == "villa" else "Condo"
+    type_label = (
+        "House" if property_type == "house" else "Villa" if property_type == "villa" else "Condo"
+    )
     if bedrooms == 0:
         bed_label = "Studio"
     elif bedrooms is None:
@@ -467,10 +499,7 @@ def _translate_view_to_th(view: str | None) -> str | None:
 def _translate_ownership_to_th(value: str | None) -> str | None:
     if not value:
         return None
-    return (
-        value.replace("Foreign Quota", "โควตาต่างชาติ")
-        .replace("Freehold", "ฟรีโฮลด์")
-    )
+    return value.replace("Foreign Quota", "โควตาต่างชาติ").replace("Freehold", "ฟรีโฮลด์")
 
 
 def _build_thai_title(
@@ -480,7 +509,9 @@ def _build_thai_title(
     bedrooms: int | None,
     view: str | None,
 ) -> str:
-    type_label = "บ้าน" if property_type == "house" else "วิลล่า" if property_type == "villa" else "คอนโด"
+    type_label = (
+        "บ้าน" if property_type == "house" else "วิลล่า" if property_type == "villa" else "คอนโด"
+    )
     if bedrooms == 0:
         room_label = "สตูดิโอ"
     elif bedrooms is None:
@@ -488,7 +519,11 @@ def _build_thai_title(
     else:
         room_label = f"{type_label} {bedrooms} ห้องนอน"
     view_label = _translate_view_to_th(view)
-    return f"{room_label} ที่ {project_name} ({view_label})" if view_label else f"{room_label} ที่ {project_name}"
+    return (
+        f"{room_label} ที่ {project_name} ({view_label})"
+        if view_label
+        else f"{room_label} ที่ {project_name}"
+    )
 
 
 def _build_english_description(
@@ -642,7 +677,8 @@ def build_import_rows(*, write_changes: bool) -> dict[str, Any]:
         folders = [
             entry
             for entry in root_entries
-            if entry.mime == "application/vnd.google-apps.folder" and entry.name.upper().startswith("AMP-")
+            if entry.mime == "application/vnd.google-apps.folder"
+            and entry.name.upper().startswith("AMP-")
         ]
         dataset_type = str(dataset_config["type"])
         staged_units: list[dict[str, Any]] = []
@@ -652,7 +688,11 @@ def build_import_rows(*, write_changes: bool) -> dict[str, Any]:
             by_name = {entry.name: entry for entry in folder_entries}
             info_entry = by_name.get("info.txt")
             proppit_entry = by_name.get("proppit.json")
-            info_text = _fetch_text(_drive_download_url(info_entry.id)).replace("\r", "").strip() if info_entry else ""
+            info_text = (
+                _fetch_text(_drive_download_url(info_entry.id)).replace("\r", "").strip()
+                if info_entry
+                else ""
+            )
             proppit = _load_json_file(proppit_entry.id) if proppit_entry else {}
 
             image_entries = [entry for entry in folder_entries if entry.mime.startswith("image/")]
@@ -662,12 +702,18 @@ def build_import_rows(*, write_changes: bool) -> dict[str, Any]:
             facebook_videos: list[DriveEntry] = []
             if facebook_pack and facebook_pack.mime == "application/vnd.google-apps.folder":
                 sub_entries = _list_drive_folder(facebook_pack.id)
-                facebook_images = [entry for entry in sub_entries if entry.mime.startswith("image/")]
-                facebook_videos = [entry for entry in sub_entries if entry.mime.startswith("video/")]
+                facebook_images = [
+                    entry for entry in sub_entries if entry.mime.startswith("image/")
+                ]
+                facebook_videos = [
+                    entry for entry in sub_entries if entry.mime.startswith("video/")
+                ]
 
             root_image_urls = [_drive_download_url(entry.id) for entry in image_entries[:8]]
             facebook_image_urls = [_drive_download_url(entry.id) for entry in facebook_images[:4]]
-            video_urls = [_drive_download_url(entry.id) for entry in (video_entries[:2] + facebook_videos[:2])]
+            video_urls = [
+                _drive_download_url(entry.id) for entry in (video_entries[:2] + facebook_videos[:2])
+            ]
             gallery_urls = _dedupe(root_image_urls + facebook_image_urls)
 
             info_lines = [line.strip() for line in info_text.splitlines() if line.strip()]
@@ -675,13 +721,29 @@ def build_import_rows(*, write_changes: bool) -> dict[str, Any]:
             project_name = _extract_project_name(info_lines, proppit, searchable_text, folder.name)
             location_marketing = str(proppit.get("location_marketing") or "").strip() or None
 
-            price = _extract_rent_price(info_lines) if dataset_type == "rent" else _extract_sale_price(info_lines)
+            price = (
+                _extract_rent_price(info_lines)
+                if dataset_type == "rent"
+                else _extract_sale_price(info_lines)
+            )
             if dataset_name == "units_rent" and folder.name == "AMP-R032526" and price is None:
                 price = 16_000
             price_period = "month" if dataset_type == "rent" else None
-            size_sqm = float(proppit["size_sqm"]) if "size_sqm" in proppit and proppit["size_sqm"] not in (None, "") else _extract_size_sqm(searchable_text)
-            bedrooms = int(proppit["bedrooms"]) if proppit.get("bedrooms") not in (None, "") else _extract_bedrooms(searchable_text)
-            bathrooms = int(proppit["bathrooms"]) if proppit.get("bathrooms") not in (None, "") else _extract_bathrooms(searchable_text)
+            size_sqm = (
+                float(proppit["size_sqm"])
+                if "size_sqm" in proppit and proppit["size_sqm"] not in (None, "")
+                else _extract_size_sqm(searchable_text)
+            )
+            bedrooms = (
+                int(proppit["bedrooms"])
+                if proppit.get("bedrooms") not in (None, "")
+                else _extract_bedrooms(searchable_text)
+            )
+            bathrooms = (
+                int(proppit["bathrooms"])
+                if proppit.get("bathrooms") not in (None, "")
+                else _extract_bathrooms(searchable_text)
+            )
             floor = _extract_floor(searchable_text)
             view = _extract_view(searchable_text)
             furnishing = _extract_furnishing(searchable_text)
@@ -689,8 +751,12 @@ def build_import_rows(*, write_changes: bool) -> dict[str, Any]:
             property_type = _infer_property_type(project_name, searchable_text)
             area_slug = _resolve_area_slug(project_name, location_marketing or "", searchable_text)
 
-            english_title = _build_english_title(project_name=project_name, property_type=property_type, bedrooms=bedrooms, view=view)
-            thai_title = _build_thai_title(project_name=project_name, property_type=property_type, bedrooms=bedrooms, view=view)
+            english_title = _build_english_title(
+                project_name=project_name, property_type=property_type, bedrooms=bedrooms, view=view
+            )
+            thai_title = _build_thai_title(
+                project_name=project_name, property_type=property_type, bedrooms=bedrooms, view=view
+            )
             english_description = _build_english_description(
                 source_type=dataset_type,
                 project_name=project_name,
@@ -728,8 +794,12 @@ def build_import_rows(*, write_changes: bool) -> dict[str, Any]:
                     ownership=ownership,
                     property_type=property_type,
                 ),
-                "amenities": proppit.get("amenities") if isinstance(proppit.get("amenities"), list) else [],
-                "surroundings": proppit.get("surroundings") if isinstance(proppit.get("surroundings"), list) else [],
+                "amenities": proppit.get("amenities")
+                if isinstance(proppit.get("amenities"), list)
+                else [],
+                "surroundings": proppit.get("surroundings")
+                if isinstance(proppit.get("surroundings"), list)
+                else [],
                 "video_urls": video_urls,
             }
             quality_score = _format_quality_score(
@@ -795,7 +865,13 @@ def build_import_rows(*, write_changes: bool) -> dict[str, Any]:
                     "selected_for_homepage": folder.name in FEATURED_SOURCE_IDS[dataset_name],
                 },
             }
-            if row["price"] is None or len(gallery_urls) < 6 or not (row["area_slug"] or row["project_slug"]) or not thai_title or not thai_description:
+            if (
+                row["price"] is None
+                or len(gallery_urls) < 6
+                or not (row["area_slug"] or row["project_slug"])
+                or not thai_title
+                or not thai_description
+            ):
                 continue
             staged_units.append(row)
 
@@ -858,7 +934,9 @@ def build_import_rows(*, write_changes: bool) -> dict[str, Any]:
 
 def main() -> int:
     parser = argparse.ArgumentParser(description="Stage AMP public Drive units into import JSON.")
-    parser.add_argument("--dry-run", action="store_true", help="Do not write staging or import files")
+    parser.add_argument(
+        "--dry-run", action="store_true", help="Do not write staging or import files"
+    )
     args = parser.parse_args()
 
     report = build_import_rows(write_changes=not bool(args.dry_run))

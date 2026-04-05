@@ -554,7 +554,9 @@ def _import_units(
         # Validate status
         prop_status = str(row.get("status") or "active").strip()
         if prop_status not in ("active", "inactive", "archived"):
-            errs.append(f"{label}: invalid status '{prop_status}' (must be active/inactive/archived)")
+            errs.append(
+                f"{label}: invalid status '{prop_status}' (must be active/inactive/archived)"
+            )
 
         # Resolve FK dependencies (all optional)
         project_id, err = _resolve_fk(
@@ -778,8 +780,7 @@ def _warning_skipped_steps(results: list[StepResult], *, warn_on_optional_skip: 
 
 def _purge_preview_demo_rows(db: Session, *, dry_run: bool) -> dict[str, int]:
     demo_project_ids = [
-        row[0]
-        for row in db.query(Project.id).filter(Project.slug.like("demo-%")).all()
+        row[0] for row in db.query(Project.id).filter(Project.slug.like("demo-%")).all()
     ]
 
     property_filters = [Property.slug.like("demo-%"), Property.source_id.like("demo-local-%")]
@@ -925,7 +926,8 @@ def main() -> int:
     skip_project_cover_mirror = _normalize_flag(os.environ.get("AMP_SKIP_PROJECT_COVER_MIRROR"))
 
     if "projects" in steps_to_run and not (
-        skip_project_cover_mirror or (not project_public_root.exists() and not external_project_covers)
+        skip_project_cover_mirror
+        or (not project_public_root.exists() and not external_project_covers)
     ):
         try:
             mirror_cmd = [
@@ -1074,7 +1076,9 @@ def main() -> int:
     db = _session_factory()()
 
     try:
-        purge_preview_demo = bool(args.purge_preview_demo) or _normalize_flag(os.environ.get("AMP_PURGE_PREVIEW_DEMO"))
+        purge_preview_demo = bool(args.purge_preview_demo) or _normalize_flag(
+            os.environ.get("AMP_PURGE_PREVIEW_DEMO")
+        )
         if purge_preview_demo:
             purged = _purge_preview_demo_rows(db, dry_run=dry_run)
             log.info(

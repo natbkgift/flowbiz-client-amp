@@ -417,9 +417,7 @@ def build_sales_automation_snapshot(
     signal_level = str(context["signal_level"])
     project_names = tuple(str(item) for item in context["projects"])
     primary_project = (
-        context["primary_project"]
-        if isinstance(context["primary_project"], str)
-        else None
+        context["primary_project"] if isinstance(context["primary_project"], str) else None
     )
     buyer_fit = context["buyer_fit"] if isinstance(context["buyer_fit"], str) else None
     source = context["source"] if isinstance(context["source"], str) else None
@@ -432,12 +430,17 @@ def build_sales_automation_snapshot(
         SalesAutomationFollowUpStep(
             stage=stage,
             label=(
-                "T+5 นาที" if stage == "t5m" and locale == "th" else
-                "T+1 ชั่วโมง" if stage == "t1h" and locale == "th" else
-                "T+24 ชั่วโมง" if stage == "t24h" and locale == "th" else
-                "T+5 min" if stage == "t5m" else
-                "T+1 hour" if stage == "t1h" else
-                "T+24 hours"
+                "T+5 นาที"
+                if stage == "t5m" and locale == "th"
+                else "T+1 ชั่วโมง"
+                if stage == "t1h" and locale == "th"
+                else "T+24 ชั่วโมง"
+                if stage == "t24h" and locale == "th"
+                else "T+5 min"
+                if stage == "t5m"
+                else "T+1 hour"
+                if stage == "t1h"
+                else "T+24 hours"
             ),
             message=_follow_up_message(locale, normalized_intent, stage, project_names),
             due_at=(
@@ -450,10 +453,13 @@ def build_sales_automation_snapshot(
     )
     primary_label = _decode_slug(primary_project)
     confirmation_title = (
-        f"รับคำขอเกี่ยวกับ {primary_label} แล้ว" if locale == "th" and primary_label else
-        "รับคำขอเรียบร้อยแล้ว" if locale == "th" else
-        f"We received your request about {primary_label}" if primary_label else
-        "We received your request"
+        f"รับคำขอเกี่ยวกับ {primary_label} แล้ว"
+        if locale == "th" and primary_label
+        else "รับคำขอเรียบร้อยแล้ว"
+        if locale == "th"
+        else f"We received your request about {primary_label}"
+        if primary_label
+        else "We received your request"
     )
     confirmation_body = (
         f"ที่ปรึกษาจะติดต่อกลับพร้อมบริบทของ {primary_label} ในไม่ช้า"
@@ -517,10 +523,7 @@ def build_advisor_summary_note(snapshot: SalesAutomationSnapshot) -> str:
                 f"- {snapshot.suggested_first_reply}",
                 "",
                 "Follow-up Plan:",
-                *[
-                    f"- {step.label}: {step.message}"
-                    for step in snapshot.follow_up_plan
-                ],
+                *[f"- {step.label}: {step.message}" for step in snapshot.follow_up_plan],
             ]
         )
     return "\n".join(
@@ -538,10 +541,7 @@ def build_advisor_summary_note(snapshot: SalesAutomationSnapshot) -> str:
             f"- {snapshot.suggested_first_reply}",
             "",
             "Follow-up Plan:",
-            *[
-                f"- {step.label}: {step.message}"
-                for step in snapshot.follow_up_plan
-            ],
+            *[f"- {step.label}: {step.message}" for step in snapshot.follow_up_plan],
         ]
     )
 

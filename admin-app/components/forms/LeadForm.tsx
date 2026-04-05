@@ -619,7 +619,7 @@ export function LeadForm({
           </p>
           <div className="flex flex-wrap items-center gap-4 text-sm">
             <a
-              className="font-medium text-gray-700 underline-offset-4 hover:text-gray-900 hover:underline"
+              className="font-medium text-gray-700 underline-offset-4 hover:text-gray-900 hover:underline lead-form__support-link"
               href={CTA.whatsAppUrl}
               target="_blank"
               rel="noreferrer"
@@ -627,7 +627,7 @@ export function LeadForm({
               {dict.cta.whatsapp}
             </a>
             <a
-              className="font-medium text-gray-700 underline-offset-4 hover:text-gray-900 hover:underline"
+              className="font-medium text-gray-700 underline-offset-4 hover:text-gray-900 hover:underline lead-form__support-link"
               href={CTA.lineUrl}
               target="_blank"
               rel="noreferrer"

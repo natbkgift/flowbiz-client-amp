@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { buildVersionPayload, readDeployTelemetry } from '../platform/_lib/deploy-telemetry';
+import { buildMediaUpstreamUrl } from '@/app/api/_lib/media-proxy';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -47,15 +48,14 @@ function isPlatformDeployHistoryRoute(path: string[]) {
   return path.length === 2 && path[0] === 'platform' && path[1] === 'deploy-history';
 }
 
+function isMediaRoute(path: string[]) {
+  return path[0] === 'media';
+}
+
 async function proxyRequest(
   request: NextRequest,
   context: { params: Promise<{ path: string[] }> },
 ): Promise<NextResponse> {
-  const upstreamBase = resolveUpstreamBase();
-  if (!upstreamBase) {
-    return NextResponse.json({ detail: 'Not found' }, { status: 404 });
-  }
-
   const { path } = await context.params;
   if (!Array.isArray(path) || path.length === 0) {
     return NextResponse.json({ detail: 'Not found' }, { status: 404 });
@@ -82,8 +82,17 @@ async function proxyRequest(
     );
   }
 
-  const upstreamUrl = new URL(`${upstreamBase}/${path.map(encodeURIComponent).join('/')}`);
-  upstreamUrl.search = request.nextUrl.search;
+  const upstreamBase = resolveUpstreamBase();
+  if (!isMediaRoute(path) && !upstreamBase) {
+    return NextResponse.json({ detail: 'Not found' }, { status: 404 });
+  }
+
+  const upstreamUrl = isMediaRoute(path)
+    ? new URL(buildMediaUpstreamUrl(path.slice(1), request.nextUrl.search))
+    : new URL(`${upstreamBase}/${path.map(encodeURIComponent).join('/')}`);
+  if (!isMediaRoute(path)) {
+    upstreamUrl.search = request.nextUrl.search;
+  }
 
   const init: RequestInit = {
     method: request.method,

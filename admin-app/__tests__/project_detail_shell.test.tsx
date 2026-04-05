@@ -69,6 +69,8 @@ describe('project detail shell', () => {
     expect(container.querySelector('#project-trust-grid')).not.toBeNull();
     expect(container.querySelector('#project-advisor-brief')).not.toBeNull();
     expect(container.querySelector('#project-mobile-cta')).not.toBeNull();
+    expect(container.querySelector('.public-hero__content.public-surface-card')).not.toBeNull();
+    expect(container.querySelector('.public-hero__actions .btn.btn-primary')).not.toBeNull();
     expect(container.querySelectorAll('#project-next-steps a')).toHaveLength(3);
     expect((container.querySelector('#lead-purpose') as HTMLSelectElement | null)?.value).toBe('invest');
   });

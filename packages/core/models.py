@@ -386,10 +386,10 @@ class Project(Base):
 
     # Localized content (jsonb per Blueprint Doc 05)
     # summary NOT NULL — defaults to empty object {}
-        # default=dict provides Python-level default so ORM inserts {} explicitly,
-        # while text("'{}'") keeps the database default valid for PostgreSQL.
+    # default=dict provides Python-level default so ORM inserts {} explicitly,
+    # while text("'{}'") keeps the database default valid for PostgreSQL.
     summary: Mapped[dict] = mapped_column(
-           JSONB, nullable=False, server_default=text("'{}'"), default=dict
+        JSONB, nullable=False, server_default=text("'{}'"), default=dict
     )
     description: Mapped[dict | None] = mapped_column(JSONB, nullable=True)
 
@@ -1077,7 +1077,9 @@ class Shortlist(Base):
 class ShortlistItem(Base):
     __tablename__ = "shortlist_items"
     __table_args__ = (
-        UniqueConstraint("shortlist_id", "property_id", name="uq_shortlist_items_shortlist_property"),
+        UniqueConstraint(
+            "shortlist_id", "property_id", name="uq_shortlist_items_shortlist_property"
+        ),
         Index("ix_shortlist_items_shortlist_position", "shortlist_id", "position"),
     )
 

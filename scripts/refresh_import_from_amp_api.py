@@ -294,9 +294,7 @@ def main() -> int:
         if str(r.get("slug") or "").strip()
     }
     old_areas_by_slug = {
-        str(r.get("slug") or "").strip(): r
-        for r in old_areas
-        if str(r.get("slug") or "").strip()
+        str(r.get("slug") or "").strip(): r for r in old_areas if str(r.get("slug") or "").strip()
     }
     old_projects_by_slug = {
         str(r.get("slug") or "").strip(): r
@@ -460,7 +458,9 @@ def main() -> int:
     merged_areas: list[dict[str, Any]] = []
     seen_area_slugs: set[str] = set()
 
-    for row in sorted(api_areas, key=lambda r: old_area_order.get(str(r.get("slug") or ""), 10_000)):
+    for row in sorted(
+        api_areas, key=lambda r: old_area_order.get(str(r.get("slug") or ""), 10_000)
+    ):
         slug = str(row.get("slug") or "").strip()
         name = str(row.get("name") or "").strip()
         if not slug or not name:
@@ -828,9 +828,7 @@ def main() -> int:
     has_warn = bool(report["warnings"])
     has_error = summary.projects == 0 and summary.properties == 0
     gate_failed = (
-        (mirror_gate_code != 0)
-        or (asset_mirror_gate_code != 0)
-        or (coverage_gate_code != 0)
+        (mirror_gate_code != 0) or (asset_mirror_gate_code != 0) or (coverage_gate_code != 0)
     )
     if args.fail_on_warn and (has_warn or has_error or gate_failed):
         return 2

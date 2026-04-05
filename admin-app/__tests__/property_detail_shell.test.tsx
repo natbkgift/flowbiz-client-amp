@@ -102,6 +102,9 @@ describe('property detail shell', () => {
     expect(container.querySelector('#property-direct-channels')).not.toBeNull();
     expect(container.querySelector('#property-lead-form')).not.toBeNull();
     expect(container.querySelector('#property-mobile-cta')).not.toBeNull();
+    expect(container.querySelector('#property-hero.public-surface-card')).not.toBeNull();
+    expect(container.querySelector('#property-primary-actions.public-action-row')).not.toBeNull();
+    expect(container.querySelector('#property-primary-actions .btn.btn-primary')).not.toBeNull();
     expect(container.querySelectorAll('#property-next-steps a')).toHaveLength(3);
     expect((container.querySelector('#lead-purpose') as HTMLSelectElement | null)?.value).toBe('buy');
   });

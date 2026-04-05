@@ -8,7 +8,6 @@ from packages.core.schemas.buying_cost_estimator import (
     BuyingCostEstimatorResponse,
 )
 
-
 router = APIRouter(prefix="/tools", tags=["tools"])
 
 

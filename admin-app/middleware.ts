@@ -11,6 +11,7 @@ const NON_LOCALIZED_ROUTE_PREFIXES = [
   '/leads',
   '/inquiries',
   '/analytics',
+  '/media',
   '/public',
   '/admin',
   '/layout-cms',

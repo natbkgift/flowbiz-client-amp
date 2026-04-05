@@ -5,6 +5,9 @@ import type { PropertyListItem } from '../../app/public/_shared/types';
 import type { Dictionary } from '../../app/_lib/i18n/types';
 import { formatPriceTHB, resolveImageUrl } from '../../app/_lib/public-api-shared';
 import { withLocale } from '../../app/_lib/i18n/routing';
+import { PublicActionRow } from '@/components/public/PublicActionRow';
+import { PublicChip } from '@/components/public/PublicChip';
+import { PublicSurfaceCard } from '@/components/public/PublicSurfaceCard';
 import { ShortlistSaveButton } from '@/components/shortlist/ShortlistSaveButton';
 
 const PROPERTY_CARD_FALLBACK = '/images/property-placeholder.svg';
@@ -60,7 +63,7 @@ export function PropertyCard({
   const propertySpecs = formatPropertySpecs(item, locale);
 
   return (
-    <article className="property-card">
+    <PublicSurfaceCard as="article" tone="warm" interactive className="property-card">
       <Link href={href} className="property-card__link">
         <div className="card-image property-card__media">
           <Image
@@ -73,7 +76,11 @@ export function PropertyCard({
           />
           <div className="property-card__media-scrim" aria-hidden="true" />
           <div className="property-card__media-topline" aria-hidden="true">
-            {propertyTypeLabel ? <span className="property-card__media-chip">{propertyTypeLabel}</span> : null}
+            {propertyTypeLabel ? (
+              <PublicChip tone="deep" size="sm" className="property-card__media-chip">
+                {propertyTypeLabel}
+              </PublicChip>
+            ) : null}
           </div>
         </div>
 
@@ -89,7 +96,9 @@ export function PropertyCard({
           {propertySpecs.length ? (
             <div className="card-specs property-card__specs" aria-label={locale === 'th' ? 'ข้อมูลเบื้องต้นของทรัพย์' : 'Property quick specs'}>
               {propertySpecs.map((spec) => (
-                <span key={spec} className="card-specs__item">{spec}</span>
+                <PublicChip key={spec} className="card-specs__item property-card__spec-chip" size="sm">
+                  {spec}
+                </PublicChip>
               ))}
             </div>
           ) : null}
@@ -97,7 +106,7 @@ export function PropertyCard({
       </Link>
 
       <div className="property-card__actions">
-        <div className="card-actions property-card__decision-ladder">
+        <PublicActionRow className="card-actions property-card__decision-ladder" stackOnMobile>
           <Link className="btn btn-primary property-card__primary-action" href={href}>
             {dict.listing.viewDetails}
           </Link>
@@ -107,8 +116,8 @@ export function PropertyCard({
             propertyId={item.id}
             sourceSurface={item.type === 'rent' ? 'rent_listing_card' : 'buy_listing_card'}
           />
-        </div>
+        </PublicActionRow>
       </div>
-    </article>
+    </PublicSurfaceCard>
   );
 }

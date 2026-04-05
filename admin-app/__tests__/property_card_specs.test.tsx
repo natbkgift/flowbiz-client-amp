@@ -10,7 +10,7 @@ vi.mock('next/image', () => ({
 
 describe('PropertyCard specs', () => {
   it('surfaces property type, bedrooms, and size when listing data includes them', () => {
-    render(
+    const { container } = render(
       <PropertyCard
         locale="en"
         dict={en}
@@ -37,5 +37,9 @@ describe('PropertyCard specs', () => {
     expect(screen.getByText('2 BR')).toBeInTheDocument();
     expect(screen.getByText('84 sqm')).toBeInTheDocument();
     expect(screen.getByLabelText(/property quick specs/i)).toBeInTheDocument();
+    expect(container.querySelector('article.public-surface-card.property-card')).not.toBeNull();
+    expect(container.querySelector('.property-card__media-chip.public-chip')).not.toBeNull();
+    expect(container.querySelectorAll('.property-card__specs .public-chip')).toHaveLength(2);
+    expect(container.querySelector('.property-card__decision-ladder.public-action-row')).not.toBeNull();
   });
 });

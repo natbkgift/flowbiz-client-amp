@@ -1,0 +1,49 @@
+:root {
+  --public-space-1: 8px;
+  --public-space-2: 12px;
+  --public-space-3: 16px;
+  --public-space-4: 24px;
+  --public-space-5: 32px;
+  --public-space-6: 48px;
+  --public-space-7: 64px;
+  --public-space-8: 80px;
+  --public-space-9: 96px;
+
+  --public-radius-chip: 999px;
+  --public-radius-card-sm: 18px;
+  --public-radius-card-md: 24px;
+  --public-radius-card-lg: 32px;
+
+  --public-border-soft: rgba(7, 19, 39, 0.08);
+  --public-border-strong: rgba(7, 19, 39, 0.14);
+  --public-border-inverse: rgba(255, 255, 255, 0.14);
+
+  --public-surface-light:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.99), rgba(248, 250, 253, 0.98));
+  --public-surface-warm:
+    radial-gradient(circle at top right, rgba(231, 220, 199, 0.24), transparent 28%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.995), rgba(249, 247, 242, 0.985));
+  --public-surface-deep:
+    radial-gradient(circle at top right, rgba(176, 141, 87, 0.18), transparent 24%),
+    linear-gradient(180deg, #071327 0%, #091a30 58%, #0f2745 100%);
+  --public-surface-deep-soft:
+    linear-gradient(180deg, rgba(7, 19, 39, 0.72), rgba(7, 19, 39, 0.4));
+
+  --public-shadow-soft: 0 18px 40px rgba(7, 19, 39, 0.07);
+  --public-shadow-lift: 0 24px 56px rgba(7, 19, 39, 0.1);
+  --public-shadow-deep: 0 32px 80px rgba(3, 8, 18, 0.2);
+  --public-shadow-inner: inset 0 1px 0 rgba(255, 255, 255, 0.78);
+
+  --public-motion-fast: 180ms;
+  --public-motion-base: 220ms;
+  --public-ease-standard: cubic-bezier(0.22, 1, 0.36, 1);
+
+  --public-title-measure: 15ch;
+  --public-title-measure-wide: 18ch;
+  --public-copy-measure: 48ch;
+  --public-copy-measure-wide: 62ch;
+
+  --public-font-weight-regular: 400;
+  --public-font-weight-semibold: 600;
+  --public-font-weight-bold: 700;
+}

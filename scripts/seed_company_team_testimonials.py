@@ -12,12 +12,12 @@ _PROJECT_ROOT = _SCRIPT_DIR.parent
 if str(_PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(_PROJECT_ROOT))
 
-from sqlalchemy import delete, select
-from sqlalchemy.orm import Session
+from sqlalchemy import delete, select  # noqa: E402
+from sqlalchemy.orm import Session  # noqa: E402
 
-from packages.core.database import SessionLocal, init_db
-from packages.core.media_library import require_local_media_path
-from packages.core.models import Article, CompanyInfo, TeamMember, Testimonial
+from packages.core.database import SessionLocal, init_db  # noqa: E402
+from packages.core.media_library import require_local_media_path  # noqa: E402
+from packages.core.models import Article, CompanyInfo, TeamMember, Testimonial  # noqa: E402
 
 _SYNCABLE_ENTITIES = {"company_info", "team_members", "testimonials", "articles"}
 _MANAGED_COMPANY_SLUGS = {
@@ -428,9 +428,7 @@ def seed_content(
             else 0
         )
         article_removed = (
-            _sync_articles(db, article_rows, dry_run=dry_run)
-            if "articles" in sync_entities
-            else 0
+            _sync_articles(db, article_rows, dry_run=dry_run) if "articles" in sync_entities else 0
         )
         if not dry_run:
             db.commit()

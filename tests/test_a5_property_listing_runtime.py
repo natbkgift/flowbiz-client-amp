@@ -254,8 +254,16 @@ def test_a5_listing_family_routes_keep_page_owned_cta_hierarchy(client) -> None:
     route_expectations = [
         ("/en/buy", "/en/contact?intent=consultation&source=buy", "/en/smart-finder?intent=buy"),
         ("/en/rent", "/en/contact?intent=consultation&source=rent", "/en/smart-finder?intent=rent"),
-        ("/en/investment", "/en/contact?intent=consultation&source=investment", "/en/smart-finder?intent=invest"),
-        ("/en/marketplace", "/en/contact?intent=consultation&source=marketplace", "/en/smart-finder?intent=buy"),
+        (
+            "/en/investment",
+            "/en/contact?intent=consultation&source=investment",
+            "/en/smart-finder?intent=invest",
+        ),
+        (
+            "/en/marketplace",
+            "/en/contact?intent=consultation&source=marketplace",
+            "/en/smart-finder?intent=buy",
+        ),
     ]
 
     for path, consultation_href, finder_href in route_expectations:
@@ -278,8 +286,8 @@ def test_a5_listing_family_routes_keep_page_owned_cta_hierarchy(client) -> None:
         results_index = html.index('id="listing-results"')
         assert hero_index < consultation_index < finder_index < filters_index < results_index
 
-        assert 'https://wa.me/' not in html
-        assert 'https://line.me/' not in html
+        assert "https://wa.me/" not in html
+        assert "https://line.me/" not in html
 
 
 def test_a5_card_cta_tracking_states_and_no_hotlink(client) -> None:

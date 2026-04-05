@@ -279,8 +279,8 @@ def test_a6_property_detail_primary_cta_row_stays_two_step_without_whatsapp(clie
     assert 'data-property-intent="inquiry"' in html
     assert 'data-property-intent="viewing"' in html
     assert 'href="#property-inquiry-form"' in html
-    assert 'Book Viewing' in html
-    assert 'Inquiry' in html
+    assert "Book Viewing" in html
+    assert "Inquiry" in html
 
     inquiry_index = html.index('data-property-intent="inquiry"')
     viewing_index = html.index('data-property-intent="viewing"')
@@ -288,5 +288,5 @@ def test_a6_property_detail_primary_cta_row_stays_two_step_without_whatsapp(clie
     freshness_index = html.index('id="property-freshness"')
     assert inquiry_index < viewing_index < form_index < freshness_index
 
-    assert html.count('https://wa.me/') == 0
-    assert 'https://social-plugins.line.me/lineit/share?' in html
+    assert html.count("https://wa.me/") == 0
+    assert "https://social-plugins.line.me/lineit/share?" in html

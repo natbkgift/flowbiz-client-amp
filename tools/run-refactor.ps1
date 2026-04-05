@@ -63,6 +63,28 @@ function Show-AppendedFileContent {
   Show-Block -Title $Title -Content $content
 }
 
+function Resolve-PythonInvocation {
+  $pythonCommand = Get-Command python -ErrorAction Stop
+  $pythonSource = $pythonCommand.Source
+  $shimScript = $null
+
+  if ($IsWindows -and [string]::IsNullOrEmpty([System.IO.Path]::GetExtension($pythonSource))) {
+    $pythonHost = Get-Command python.exe -ErrorAction SilentlyContinue
+    if ($null -eq $pythonHost) {
+      $pythonHost = Get-Command py -ErrorAction SilentlyContinue
+    }
+    if ($null -ne $pythonHost) {
+      $shimScript = $pythonSource
+      $pythonSource = $pythonHost.Source
+    }
+  }
+
+  return @{
+    Executable = $pythonSource
+    ShimScript = $shimScript
+  }
+}
+
 $resolvedRepoRoot = [System.IO.Path]::GetFullPath((Resolve-Path $RepoRoot).Path)
 $resolvedStatusFile = Get-FullPath -BasePath $resolvedRepoRoot -CandidatePath $StatusFile
 
@@ -97,7 +119,13 @@ if ($DryRun) {
 }
 
 if ($NoWatchStatus) {
-  python @arguments
+  $pythonInvocation = Resolve-PythonInvocation
+  $commandArgs = @()
+  if ($pythonInvocation.ShimScript) {
+    $commandArgs += $pythonInvocation.ShimScript
+  }
+  $commandArgs += $arguments
+  & $pythonInvocation.Executable @commandArgs
   exit $LASTEXITCODE
 }
 
@@ -111,11 +139,16 @@ New-Item -ItemType File -Path $stdoutPath -Force | Out-Null
 New-Item -ItemType File -Path $stderrPath -Force | Out-Null
 
 $startInfo = [System.Diagnostics.ProcessStartInfo]::new()
-$startInfo.FileName = "python"
+$pythonInvocation = Resolve-PythonInvocation
+$startInfo.FileName = $pythonInvocation.Executable
 $startInfo.WorkingDirectory = $resolvedRepoRoot
 $startInfo.UseShellExecute = $false
 $startInfo.RedirectStandardOutput = $true
 $startInfo.RedirectStandardError = $true
+
+if ($pythonInvocation.ShimScript) {
+  $null = $startInfo.ArgumentList.Add([string]$pythonInvocation.ShimScript)
+}
 
 foreach ($item in $arguments) {
   $null = $startInfo.ArgumentList.Add([string]$item)

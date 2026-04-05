@@ -62,6 +62,15 @@ describe('middleware locale routing', () => {
     expect(response.cookies.get(LOCALE_COOKIE_NAME)?.value).toBe('th');
   });
 
+  it('bypasses locale redirects for media proxy routes', () => {
+    const request = new NextRequest('https://amppattaya.com/media/project-covers/hero.webp');
+
+    const response = middleware(request);
+
+    expect(response.status).toBe(200);
+    expect(response.headers.get('location')).toBeNull();
+  });
+
   it('parses weighted Accept-Language headers safely', () => {
     expect(resolveLocaleFromAcceptLanguage('en-US;q=0.7,th-TH;q=0.9')).toBe('th');
     expect(resolveLocaleFromAcceptLanguage('de-DE,de;q=0.9')).toBeNull();

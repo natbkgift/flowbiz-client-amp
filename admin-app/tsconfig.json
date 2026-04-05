@@ -35,8 +35,9 @@
     "**/*.ts",
     "**/*.tsx",
     ".next/types/**/*.ts",
+    ".next_admin_smoke/types/**/*.ts",
     "next-env.d.ts",
-    ".next_admin_smoke/types/**/*.ts"
+    ".next_public_visual/types/**/*.ts"
   ],
   "exclude": [
     "node_modules"

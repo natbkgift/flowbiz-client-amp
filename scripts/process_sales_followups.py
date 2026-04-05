@@ -120,9 +120,7 @@ def run_follow_up_processor(
                     "status": inquiry.status,
                     "follow_up_status": inquiry.follow_up_status,
                     "follow_up_due_at": (
-                        inquiry.follow_up_due_at.isoformat()
-                        if inquiry.follow_up_due_at
-                        else None
+                        inquiry.follow_up_due_at.isoformat() if inquiry.follow_up_due_at else None
                     ),
                 }
 

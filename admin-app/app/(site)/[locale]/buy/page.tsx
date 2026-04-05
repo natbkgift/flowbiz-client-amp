@@ -29,9 +29,9 @@ export async function generateMetadata(
   return makePageMetadata(
     locale,
     'buy',
-    locale === 'th' ? 'Foreign-buyer inventory that is easier to act on' : 'Foreign-buyer inventory that is easier to act on',
+    locale === 'th' ? 'รายการซื้อสำหรับผู้ซื้อต่างชาติที่พร้อมไปต่อได้ง่ายขึ้น' : 'Foreign-buyer inventory that is easier to act on',
     locale === 'th'
-      ? 'เริ่มจาก inventory ที่พร้อมคุยต่อ เรื่อง foreign quota ค่าโอน และ shortlist โดยไม่ต้องเสียเวลาไล่ดู listing ที่ไม่เกี่ยว'
+      ? 'เริ่มจากรายการซื้อที่พร้อมคุยต่อเรื่องโควตาต่างชาติ ค่าโอน และรายการคัดไว้ โดยไม่ต้องเสียเวลาไล่ดูรายการที่ไม่เกี่ยว'
       : 'Start from buy-ready Pattaya inventory with clearer next steps on foreign quota, fees, shortlist, and private tour.',
     dict.brand.name
   );
@@ -61,17 +61,25 @@ export default async function BuyPage(props: { params: Promise<{ locale: string 
     typeof item.price === 'number' && Number.isFinite(item.price) && item.price >= 10_000_000
   ).length;
   const buyProofs = [
-    locale === 'th' ? `${res.data?.length ?? 0} buy-ready listings` : `${res.data?.length ?? 0} buy-ready listings`,
-    liveEntryPrice ? `${locale === 'th' ? 'Entry from' : 'Entry from'} THB ${Math.round(liveEntryPrice).toLocaleString()}` : null,
-    luxuryReadyCount > 0 ? `${luxuryReadyCount} luxury-ready options` : null,
+    locale === 'th'
+      ? `${res.data?.length ?? 0} รายการซื้อที่พร้อมคุยต่อ`
+      : `${res.data?.length ?? 0} buy-ready listings`,
+    liveEntryPrice
+      ? (locale === 'th'
+        ? `เริ่มต้นที่ THB ${Math.round(liveEntryPrice).toLocaleString()}`
+        : `Entry from THB ${Math.round(liveEntryPrice).toLocaleString()}`)
+      : null,
+    luxuryReadyCount > 0
+      ? (locale === 'th' ? `${luxuryReadyCount} ตัวเลือกระดับลักชัวรี` : `${luxuryReadyCount} luxury-ready options`)
+      : null,
     ...advisoryProofs,
   ].filter((item): item is string => Boolean(item)).slice(0, 4);
-  const buyFormHeading = locale === 'th' ? 'Send your buy-side brief' : 'Send your buy-side brief';
+  const buyFormHeading = locale === 'th' ? 'ส่งบรีฟฝั่งซื้อของคุณ' : 'Send your buy-side brief';
   const buyFormDescription = locale === 'th'
-    ? 'ส่งงบประมาณ ทำเล และช่วงเวลาที่สะดวก แล้วทีมจะตอบกลับด้วย shortlist ที่พร้อมคุยเรื่อง quota, ค่าโอน, และ next step ต่อทันที'
+    ? 'ส่งงบประมาณ ทำเล และช่วงเวลาที่สะดวก แล้วทีมจะตอบกลับด้วยรายการคัดไว้ที่พร้อมคุยเรื่องโควตาต่างชาติ ค่าโอน และขั้นถัดไปได้ทันที'
     : 'Share budget, preferred areas, and timing so the team can respond with a shortlist ready for quota, fee, and next-step discussion.';
   const buyFormDefaultMessage = locale === 'th'
-    ? 'ต้องการให้ทีมคัด shortlist ฝั่งผู้ซื้อที่เหมาะกับงบ ทำเล และช่วงเวลาของผม/ฉัน พร้อมบอกสิ่งที่ควรเช็กต่อเรื่อง quota และค่าโอน'
+    ? 'ต้องการให้ทีมคัดรายการคัดไว้ฝั่งผู้ซื้อที่เหมาะกับงบ ทำเล และช่วงเวลาของผม/ฉัน พร้อมบอกสิ่งที่ควรเช็กต่อเรื่องโควตาต่างชาติและค่าโอน'
     : 'I want the team to prepare a buy-side shortlist that fits my budget, area, and timing, together with the next checks on quota and transfer costs.';
 
   return (
@@ -84,9 +92,9 @@ export default async function BuyPage(props: { params: Promise<{ locale: string 
       />
       <PublicAdvisoryHero
         eyebrow={dict.advisory.heroEyebrow}
-        title={locale === 'th' ? 'Foreign-buyer inventory that is easier to act on' : 'Foreign-buyer inventory that is easier to act on'}
+        title={locale === 'th' ? 'รายการซื้อสำหรับผู้ซื้อต่างชาติที่พร้อมไปต่อได้ง่ายขึ้น' : 'Foreign-buyer inventory that is easier to act on'}
         subtitle={locale === 'th'
-          ? 'เปิดดูยูนิตขายที่พร้อมใช้ต่อสำหรับ shortlist, legal review, และ private tour โดยไม่ต้องเริ่มจาก listing dump'
+          ? 'เปิดดูยูนิตขายที่พร้อมใช้ต่อสำหรับรายการคัดไว้ การตรวจเอกสาร และการนัดชมแบบส่วนตัว โดยไม่ต้องเริ่มจากกองรายการจำนวนมาก'
           : 'Browse resale and buy-ready units that can move directly into shortlist, legal review, and a private tour without starting from a listing dump.'}
         proofs={buyProofs}
         proofsLabel={advisoryLabels.proofsLabel}
@@ -94,25 +102,25 @@ export default async function BuyPage(props: { params: Promise<{ locale: string 
         signals={[
           {
             kicker: dict.advisory.bestFor,
-            title: locale === 'th' ? 'ผู้ซื้อต่างชาติที่ต้องการ inventory พร้อม next step' : 'Foreign buyers who want inventory with a clear next step',
+            title: locale === 'th' ? 'ผู้ซื้อต่างชาติที่ต้องการรายการพร้อมขั้นถัดไปที่ชัด' : 'Foreign buyers who want inventory with a clear next step',
             body: locale === 'th'
-              ? 'เหมาะกับผู้ที่ต้องการเข้าใจ foreign quota ค่าใช้จ่าย และลำดับการตรวจเอกสาร โดยยังเห็นตัวเลือกที่ใช้ได้จริงก่อน'
+              ? 'เหมาะกับผู้ที่ต้องการเข้าใจโควตาต่างชาติ ค่าใช้จ่าย และลำดับการตรวจเอกสาร โดยยังเห็นตัวเลือกที่ใช้ได้จริงก่อน'
               : 'Best for buyers who need foreign quota, transfer-cost, and due-diligence clarity while still seeing workable options first.',
             icon: 'users',
           },
           {
             kicker: dict.advisory.nextStep,
-            title: locale === 'th' ? 'เริ่มจาก shortlist ที่สั้นกว่าและ fee map ที่ชัด' : 'Start with a shorter shortlist and a clearer fee map',
+            title: locale === 'th' ? 'เริ่มจากรายการคัดไว้ที่สั้นกว่าและแผนค่าใช้จ่ายที่ชัด' : 'Start with a shorter shortlist and a clearer fee map',
             body: locale === 'th'
-              ? 'ส่งงบประมาณและ timeline มา แล้วทีมจะคัดยูนิตที่ควรดูต่อ พร้อมสิ่งที่ต้องเช็กก่อนคุยลึก'
+              ? 'ส่งงบประมาณและช่วงเวลามา แล้วทีมจะคัดยูนิตที่ควรดูต่อ พร้อมสิ่งที่ต้องเช็กก่อนคุยลึก'
               : 'Share your budget and timing and the team will narrow the units worth seeing next, together with the checks that matter.',
             icon: 'check',
           },
           {
             kicker: dict.advisory.trustSignal,
-            title: locale === 'th' ? 'ทีม local advisory ช่วยคัดก่อนที่จะเกิด decision fatigue' : 'Local advisory support reduces decision fatigue before it starts',
+            title: locale === 'th' ? 'ทีมที่ปรึกษาในพื้นที่ช่วยคัดก่อนเกิดความล้าในการตัดสินใจ' : 'Local advisory support reduces decision fatigue before it starts',
             body: locale === 'th'
-              ? 'เราไม่ส่ง listing จำนวนมาก แต่คัดตัวเลือกผ่านเลนส์ของ foreign buyer และ viewing readiness'
+              ? 'เราไม่ส่งรายการจำนวนมาก แต่คัดตัวเลือกผ่านมุมมองของผู้ซื้อต่างชาติและความพร้อมในการเข้าชม'
               : 'We filter options through a foreign-buyer and viewing-readiness lens instead of sending raw listing volume.',
             icon: 'shield',
           },
@@ -132,7 +140,7 @@ export default async function BuyPage(props: { params: Promise<{ locale: string 
           label: dict.cta.whatsapp,
         }}
         supportNote={locale === 'th'
-          ? 'ส่งงบประมาณ ทำเล และช่วงเวลาเพียงครั้งเดียว แล้วทีมจะตอบกลับด้วย shortlist ที่พร้อมคุยต่อเรื่อง quota ค่าโอน และ next step'
+          ? 'ส่งงบประมาณ ทำเล และช่วงเวลาเพียงครั้งเดียว แล้วทีมจะตอบกลับด้วยรายการคัดไว้ที่พร้อมคุยต่อเรื่องโควตาต่างชาติ ค่าโอน และขั้นถัดไป'
           : 'Share budget, area, and timing once. The team replies with a shortlist ready for quota, transfer-cost, and next-step discussion.'}
       />
 
@@ -140,7 +148,7 @@ export default async function BuyPage(props: { params: Promise<{ locale: string 
         <Container>
           <div className="buy-scan-note buy-scan-note--hero mb-6" aria-label={locale === 'th' ? 'โหมดสแกนก่อนตัดสินใจ' : 'Scan mode before acting'}>
             <p className="buy-scan-note__eyebrow">
-              {locale === 'th' ? 'Scan mode first' : 'Scan mode first'}
+              {locale === 'th' ? 'เริ่มจากโหมดสแกน' : 'Scan mode first'}
             </p>
             <p className="buy-scan-note__body">
               {locale === 'th'
@@ -334,7 +342,7 @@ export default async function BuyPage(props: { params: Promise<{ locale: string 
             <>
               <div className="buy-scan-note" aria-label={locale === 'th' ? 'โซนสแกนรายการซื้อ' : 'Listing scan zone'}>
                 <p className="buy-scan-note__eyebrow">
-                  {locale === 'th' ? 'Card decision zone' : 'Card decision zone'}
+                  {locale === 'th' ? 'โซนตัดสินใจจากการ์ด' : 'Card decision zone'}
                 </p>
                 <p className="buy-scan-note__body">
                   {locale === 'th'
@@ -379,7 +387,7 @@ export default async function BuyPage(props: { params: Promise<{ locale: string 
           <div className="cta-panel">
             <div>
               <h2 className="cta-title">
-                {locale === 'th' ? 'Brief the team for a cleaner buy-side shortlist' : 'Brief the team for a cleaner buy-side shortlist'}
+                {locale === 'th' ? 'ส่งบรีฟให้ทีม เพื่อได้รายการคัดฝั่งซื้อที่ชัดขึ้น' : 'Brief the team for a cleaner buy-side shortlist'}
               </h2>
               <p className="cta-body">
                 {locale === 'th'

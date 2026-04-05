@@ -1301,9 +1301,7 @@ def _render(locale: str, request: Request, db: Session, source: str, resolved: d
     footer_contact = _runtime_footer_contact(locale, db)
     footer_contact_parts: list[str] = []
     if footer_contact["email"]:
-        footer_contact_parts.append(
-            f'<p class="muted">{escape(footer_contact["email"])}</p>'
-        )
+        footer_contact_parts.append(f'<p class="muted">{escape(footer_contact["email"])}</p>')
     footer_contact_parts.append(
         f'<a href="{escape(footer_contact["facebook_url"])}" target="_blank" rel="noopener noreferrer">{escape(footer_contact["facebook_label"])}</a>'
     )
@@ -1499,9 +1497,7 @@ def _render_page_shell(
     footer_contact = _runtime_footer_contact(locale, db)
     footer_contact_parts: list[str] = []
     if footer_contact["email"]:
-        footer_contact_parts.append(
-            f'<p class="muted">{escape(footer_contact["email"])}</p>'
-        )
+        footer_contact_parts.append(f'<p class="muted">{escape(footer_contact["email"])}</p>')
     footer_contact_parts.append(
         f'<a href="{escape(footer_contact["facebook_url"])}" target="_blank" rel="noopener noreferrer">{escape(footer_contact["facebook_label"])}</a>'
     )
@@ -6926,7 +6922,7 @@ def _market_intelligence_chart_series_html(bar_label: str, series: list[dict[str
                 [
                     '<div><div class="grid"><span>',
                     escape(str(point["label"])),
-                    '</span><strong>',
+                    "</span><strong>",
                     f"{value:,}",
                     '</strong></div><div aria-label="',
                     escape(bar_label),
@@ -6953,17 +6949,15 @@ def _market_intelligence_overview_chart_html(
             escape(labels["freshness_label"]),
             ": ",
             escape(str(chart["freshness_tier"])),
-            '</p><h3>',
+            "</p><h3>",
             escape(str(chart["title"])),
-            '</h3><p>',
+            "</h3><p>",
             escape(str(chart["question"])),
             '</p><div class="stack">',
-            _market_intelligence_chart_series_html(
-                labels["bar_label"], list(chart["series"])
-            ),
+            _market_intelligence_chart_series_html(labels["bar_label"], list(chart["series"])),
             '</div><p class="muted">',
             escape(str(chart["caveat"])),
-            '</p></article>',
+            "</p></article>",
         ]
     )
 
@@ -6998,9 +6992,7 @@ def _market_intelligence_interpretation_copy(locale: str) -> dict[str, str]:
     }
 
 
-def _market_intelligence_interpretations(
-    locale: str, db: Session
-) -> list[dict[str, object]]:
+def _market_intelligence_interpretations(locale: str, db: Session) -> list[dict[str, object]]:
     count_lookup = {key: value for key, value in _count_cards(db)}
     published_areas = db.scalars(
         select(Area).where(Area.deleted_at.is_(None), Area.status == "published")
@@ -7106,9 +7098,7 @@ def _render_market_intelligence_page(locale: str, request: Request, db: Session)
 
 def _render_foreign_buyer_hub_page(locale: str, request: Request, db: Session) -> HTMLResponse:
     copy = _foreign_buyer_hub_copy(locale)
-    ownership_html = "".join(
-        f"<li>{escape(point)}</li>" for point in copy["ownership_points"]
-    )
+    ownership_html = "".join(f"<li>{escape(point)}</li>" for point in copy["ownership_points"])
     process_steps_html = "".join(
         f'<article class="card"><h3>{escape(str(step["title"]))}</h3><p>{escape(str(step["body"]))}</p></article>'
         for step in copy["process_steps"]

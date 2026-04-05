@@ -351,7 +351,9 @@ def test_a7_area_listing_and_detail_keep_page_owned_cta_hierarchy(client) -> Non
     listing_html = listing_response.text
     assert 'id="area-guide-overview"' in listing_html
     assert 'id="area-guide-listing"' in listing_html
-    assert listing_html.index('id="area-guide-overview"') < listing_html.index('id="area-guide-listing"')
+    assert listing_html.index('id="area-guide-overview"') < listing_html.index(
+        'id="area-guide-listing"'
+    )
     area_matches = re.findall(r'href="(/en/areas/[^"]+)"', listing_html)
     project_matches = re.findall(r'href="(/en/projects\?area=[^"]+)"', listing_html)
     consult_matches = re.findall(
@@ -361,14 +363,18 @@ def test_a7_area_listing_and_detail_keep_page_owned_cta_hierarchy(client) -> Non
     assert area_matches
     assert project_matches
     assert consult_matches
-    assert listing_html.index(area_matches[0]) < listing_html.index(project_matches[0]) < listing_html.index(consult_matches[0])
-    assert 'https://wa.me/' not in listing_html
-    assert 'https://line.me/' not in listing_html
+    assert (
+        listing_html.index(area_matches[0])
+        < listing_html.index(project_matches[0])
+        < listing_html.index(consult_matches[0])
+    )
+    assert "https://wa.me/" not in listing_html
+    assert "https://line.me/" not in listing_html
 
     detail_response = client.get(f"/en/areas/{area_slug}")
     assert detail_response.status_code == 200, detail_response.text
     detail_html = detail_response.text
-    detail_projects_href = '/en/projects'
+    detail_projects_href = "/en/projects"
 
     overview_index = detail_html.index('id="area-overview"')
     why_index = detail_html.index('id="area-why-live-invest"')
@@ -381,9 +387,17 @@ def test_a7_area_listing_and_detail_keep_page_owned_cta_hierarchy(client) -> Non
     assert consult_match is not None
     consult_index = detail_html.index(consult_match.group(0))
     projects_index = detail_html.rindex(detail_projects_href)
-    assert overview_index < why_index < stats_index < featured_projects_index < featured_properties_index < proximity_index < cta_index
+    assert (
+        overview_index
+        < why_index
+        < stats_index
+        < featured_projects_index
+        < featured_properties_index
+        < proximity_index
+        < cta_index
+    )
     assert cta_index < consult_index < projects_index
-    assert f'/en/projects/{project_slug}' in detail_html
-    assert f'/en/property/{property_slug}' in detail_html
-    assert 'https://wa.me/' not in detail_html
-    assert 'https://line.me/' not in detail_html
+    assert f"/en/projects/{project_slug}" in detail_html
+    assert f"/en/property/{property_slug}" in detail_html
+    assert "https://wa.me/" not in detail_html
+    assert "https://line.me/" not in detail_html

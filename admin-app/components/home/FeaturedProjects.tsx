@@ -4,6 +4,8 @@ import { pickRenderableLocalMedia } from '@/app/_lib/local-media';
 import { withLocale } from '@/app/_lib/i18n/routing';
 import type { ProjectItem } from '@/app/_lib/public-api-server';
 import { LocalMediaImage } from '@/components/media/LocalMediaImage';
+import { PublicChip } from '@/components/public/PublicChip';
+import { PublicSectionHeader } from '@/components/public/PublicSectionHeader';
 import { EmptyStateCard } from '@/components/ui/StateBlocks';
 
 type BadgeLabel = 'New' | 'Hot' | 'Beachfront';
@@ -133,10 +135,13 @@ export function FeaturedProjects({
   if (projects.length === 0) {
     return (
       <div>
-        <div className="section-header">
-          <h2 className="section-title">{title}</h2>
-          <p className="section-subtitle">{subtitle}</p>
-        </div>
+        <PublicSectionHeader
+          kicker={kicker}
+          kickerClassName="home-section-kicker"
+          title={title}
+          titleAs={HeadingTag}
+          subtitle={subtitle}
+        />
         <div className="home-project-empty reveal">
           <div className="home-project-empty__copy">
             <p className="home-project-empty__eyebrow">
@@ -167,7 +172,7 @@ export function FeaturedProjects({
               <p className="home-project-empty__preview-body">{emptyStatePreviewBody}</p>
               <div className="home-project-empty__signal-list">
                 {emptyStateSignals.map((item) => (
-                  <span key={item} className="home-project-empty__signal">{item}</span>
+                  <PublicChip key={item} as="span" size="sm" className="home-project-empty__signal">{item}</PublicChip>
                 ))}
               </div>
             </div>
@@ -339,11 +344,13 @@ export function FeaturedProjects({
 
   return (
     <div>
-      <div className="section-header">
-        {kicker ? <div className="home-section-kicker">{kicker}</div> : null}
-        <HeadingTag className="section-title">{title}</HeadingTag>
-        <p className="section-subtitle">{subtitle}</p>
-      </div>
+      <PublicSectionHeader
+        kicker={kicker}
+        kickerClassName="home-section-kicker"
+        title={title}
+        titleAs={HeadingTag}
+        subtitle={subtitle}
+      />
 
       <div className="home-project-grid-shell">
         <div className="project-grid-premium">
@@ -371,7 +378,7 @@ export function FeaturedProjects({
               key={p.id}
               href={withLocale(locale, `/projects/${encodeURIComponent(p.slug)}`)}
               prefetch={false}
-              className="premium-project-card reveal card-interactive"
+              className="premium-project-card reveal card-interactive public-surface-card public-surface-card--interactive public-surface-card--warm"
             >
               <div className="card-image premium-project-card__media">
                 <LocalMediaImage
@@ -383,8 +390,7 @@ export function FeaturedProjects({
                   fallbackSrc={fallbackImage}
                   sizes="(max-width: 767px) 92vw, (max-width: 1279px) 48vw, 31vw"
                   loading={shouldPreloadMedia ? 'eager' : 'lazy'}
-                  priority={index === 0}
-                  fetchPriority={index === 0 ? 'high' : (shouldPreloadMedia ? 'low' : 'auto')}
+                  fetchPriority={shouldPreloadMedia ? 'low' : 'auto'}
                   quality={60}
                   unoptimized={false}
                   ssrStartWithPrimary={shouldPreloadMedia}
@@ -394,7 +400,11 @@ export function FeaturedProjects({
                   <div className="premium-project-card__badges" aria-label={locale === 'th' ? 'ป้ายกำกับโครงการ' : 'Project badges'}>
                     {badges.map((badge) => {
                       const key = badge.toLowerCase() as 'new' | 'hot' | 'beachfront';
-                      return <span key={badge} className="premium-badge">{badgeLabels[key]}</span>;
+                      return (
+                        <PublicChip key={badge} as="span" tone="accent" size="sm" className="premium-badge">
+                          {badgeLabels[key]}
+                        </PublicChip>
+                      );
                     })}
                   </div>
                 ) : null}
@@ -415,9 +425,9 @@ export function FeaturedProjects({
                 {signals.length > 0 ? (
                   <div className="premium-project-card__signals" aria-label={locale === 'th' ? 'สัญญาณการตัดสินใจของโครงการ' : 'Project decision cues'}>
                     {signals.map((signal) => (
-                      <span key={signal} className="premium-project-card__signal">
+                      <PublicChip key={signal} as="span" size="sm" className="premium-project-card__signal">
                         {signal}
-                      </span>
+                      </PublicChip>
                     ))}
                   </div>
                 ) : null}

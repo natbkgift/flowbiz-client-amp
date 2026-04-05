@@ -5,6 +5,9 @@ import { Suspense } from 'react';
 import type { PropertyListItem, PropertyListResponse } from '@/app/public/_shared/types';
 import { resolveHomeBottomCtaPrimaryUrl } from '@/app/_lib/home-bottom-cta';
 import { withLocaleQuery } from '@/app/_lib/public-advisory';
+import { PublicChip } from '@/components/public/PublicChip';
+import { PublicSectionHeader } from '@/components/public/PublicSectionHeader';
+import { PublicSurfaceCard } from '@/components/public/PublicSurfaceCard';
 
 export const revalidate = 300;
 const useMinimalPublicHome = process.env.NEXT_LOCAL_PUBLIC_HOME_MINIMAL === '1';
@@ -651,27 +654,25 @@ export default async function HomePage({
       <section className="home-pathways-section" aria-labelledby="home-pathways-title">
         <Container variant="wide">
           <div className="home-pathways-shell reveal">
-            <div className="section-header home-pathways-shell__header">
-              <div className="home-section-kicker">
-                {locale === 'th' ? 'เลือกเส้นทางของคุณ' : 'Choose your path'}
-              </div>
-              <h2 id="home-pathways-title" className="section-title">
-                {locale === 'th'
-                  ? 'เริ่มจากเป้าหมายที่ตรงกับคุณ'
-                  : 'Start with the goal that fits you'}
-              </h2>
-              <p className="section-subtitle">
-                {locale === 'th'
-                  ? 'ไม่ว่าคุณจะซื้อ ลงทุน เช่าเพื่ออยู่เอง หรือกำลังคิดจะขาย เราจะช่วยให้คุณเริ่มจากขั้นตอนที่เหมาะกว่า'
-                  : 'Whether you are buying, investing, relocating, or planning to sell, we’ll help you focus on the right next step.'}
-              </p>
-            </div>
+            <PublicSectionHeader
+              align="start"
+              className="home-pathways-shell__header"
+              kicker={locale === 'th' ? 'เลือกเส้นทางของคุณ' : 'Choose your path'}
+              kickerClassName="home-section-kicker"
+              title={locale === 'th'
+                ? 'เริ่มจากเป้าหมายที่ตรงกับคุณ'
+                : 'Start with the goal that fits you'}
+              titleId="home-pathways-title"
+              subtitle={locale === 'th'
+                ? 'ไม่ว่าคุณจะซื้อ ลงทุน เช่าเพื่ออยู่เอง หรือกำลังคิดจะขาย เราจะช่วยให้คุณเริ่มจากขั้นตอนที่เหมาะกว่า'
+                : 'Whether you are buying, investing, relocating, or planning to sell, we’ll help you focus on the right next step.'}
+            />
 
             <div className="home-pathways-grid" role="list" aria-label={locale === 'th' ? 'เส้นทางหลักหน้าแรก' : 'Primary home paths'}>
               {homeJourneyCards.map((card) => (
                 <TrackedLink
                   key={`${card.href}-${card.title}`}
-                  className="home-pathway-card card-interactive"
+                  className="home-pathway-card card-interactive public-surface-card public-surface-card--interactive public-surface-card--warm"
                   href={card.href}
                   prefetch={false}
                   eventType="cta_click"
@@ -682,7 +683,7 @@ export default async function HomePage({
                   <h3 className="home-pathway-card__title">{card.title}</h3>
                   <p className="home-pathway-card__body">{card.body}</p>
                   <div className="home-pathway-card__footer">
-                    <span className="home-pathway-card__signal">{card.signal}</span>
+                    <PublicChip as="span" size="sm" className="home-pathway-card__signal">{card.signal}</PublicChip>
                     <span className="home-pathway-card__cta">{card.ctaLabel}</span>
                   </div>
                 </TrackedLink>
@@ -911,13 +912,14 @@ export default async function HomePage({
     const FeaturedPropertiesHeading = embedded ? 'h3' : 'h2';
     const content = (
       <>
-        <div className="section-header">
-          <div className="home-section-kicker">
-            {locale === 'th' ? 'ยูนิตพร้อมดู' : 'Ready units'}
-          </div>
-          <FeaturedPropertiesHeading className="section-title">{featuredPropertiesTitle}</FeaturedPropertiesHeading>
-          <p className="section-subtitle">{featuredPropertiesSubtitle}</p>
-        </div>
+        <PublicSectionHeader
+          align="start"
+          kicker={locale === 'th' ? 'ยูนิตพร้อมดู' : 'Ready units'}
+          kickerClassName="home-section-kicker"
+          title={featuredPropertiesTitle}
+          titleAs={FeaturedPropertiesHeading}
+          subtitle={featuredPropertiesSubtitle}
+        />
 
         {featuredProperties.length === 0 ? (
           <div className="home-project-empty home-project-empty--properties reveal">
@@ -961,17 +963,17 @@ export default async function HomePage({
         {featuredPropertyGroups.length > 0 ? (
           <div className="home-unit-groups">
             {featuredPropertyGroups.map((group) => (
-              <div key={group.key} className="home-unit-group">
+              <div key={group.key} className="home-unit-group public-surface-card public-surface-card--warm">
                 <div className="home-unit-group__header">
                   <div>
                     <div className="home-unit-group__eyebrow">{group.eyebrow}</div>
                     <h3 className="home-unit-group__title">{group.title}</h3>
                   </div>
-                  <div className="home-unit-group__count">
+                  <PublicChip as="span" size="sm" className="home-unit-group__count">
                     {locale === 'th'
                       ? `${group.count} รายการ`
                       : `${group.count} ${group.count === 1 ? 'listing' : 'listings'}`}
-                  </div>
+                  </PublicChip>
                 </div>
                 <div className="home-unit-group__grid">
                   {group.items.map((prop, index) => {
@@ -999,9 +1001,6 @@ export default async function HomePage({
               const typeBadge = prop.type === 'rent' ? (locale === 'th' ? 'ให้เช่า' : 'For Rent')
                 : prop.type === 'resale' ? (locale === 'th' ? 'ขายต่อ' : 'Resale')
                   : (locale === 'th' ? 'ขาย' : 'For Sale');
-              const badgeColor = prop.type === 'rent'
-                ? 'bg-blue-50 text-blue-700'
-                : 'bg-emerald-50 text-emerald-700';
               const propertyHref = prop.slug
                 ? withLocale(locale, `/property/${encodeURIComponent(prop.slug)}`)
                 : withLocale(locale, prop.type === 'rent' ? '/rent' : '/buy');
@@ -1013,7 +1012,7 @@ export default async function HomePage({
                   key={`${group.key}-${prop.id}`}
                   href={propertyHref}
                   prefetch={false}
-                  className="property-card reveal premium-investment-card card-interactive"
+                  className="property-card reveal premium-investment-card card-interactive public-surface-card public-surface-card--interactive public-surface-card--warm"
                 >
                   <div className="card-image card-image--featured relative">
                     <LocalMediaImage
@@ -1025,16 +1024,20 @@ export default async function HomePage({
                       fallbackSrc={fallbackSrc}
                       sizes="(max-width: 767px) 92vw, (max-width: 1279px) 48vw, 24vw"
                       loading={shouldPreloadMedia ? 'eager' : 'lazy'}
-                      priority={group.key === 'sale' && index === 0}
-                      fetchPriority={group.key === 'sale' && index === 0 ? 'high' : (shouldPreloadMedia ? 'low' : 'auto')}
+                      fetchPriority={shouldPreloadMedia ? 'low' : 'auto'}
                       quality={60}
                       unoptimized={false}
                       ssrStartWithPrimary={shouldPreloadMedia}
                     />
                     <div className="premium-investment-card__media-scrim" aria-hidden="true" />
-                    <span className={`absolute top-3 left-3 text-xs font-semibold px-2.5 py-1 rounded-full ${badgeColor}`}>
+                    <PublicChip
+                      as="span"
+                      tone={prop.type === 'rent' ? 'deep' : 'accent'}
+                      size="sm"
+                      className="absolute top-3 left-3"
+                    >
                       {typeBadge}
-                    </span>
+                    </PublicChip>
                   </div>
                   <div className="card-content flex flex-col h-full p-5 md:p-6">
                     {priceFormatted ? (
@@ -1050,18 +1053,20 @@ export default async function HomePage({
                     {visibleFacts.length > 0 ? (
                       <div className="premium-investment-card__facts" aria-label={locale === 'th' ? 'ข้อมูลยูนิต' : 'Unit facts'}>
                         {visibleFacts.map((token) => (
-                          <span key={token} className="premium-fact-chip">{token}</span>
+                          <PublicChip key={token} size="sm" className="premium-fact-chip">{token}</PublicChip>
                         ))}
                       </div>
                     ) : null}
 
                     {visibleTags.length > 0 ? (
                       <div className="premium-investment-card__tags" aria-label={locale === 'th' ? 'แท็กยูนิต' : 'Unit tags'}>
-                        {visibleTags.map((tag) => <span key={tag} className="premium-tag-chip">{tag}</span>)}
+                        {visibleTags.map((tag) => (
+                          <PublicChip key={tag} tone="accent" size="sm" className="premium-tag-chip">{tag}</PublicChip>
+                        ))}
                       </div>
                     ) : null}
 
-                     <div className="flex items-center justify-start gap-3 mt-auto pt-4 border-t border-gray-100">
+                     <div className="premium-investment-card__footer">
                        <span className="premium-investment-card__linkhint">{locale === 'th' ? 'ดูสรุปยูนิต' : 'Review unit'}</span>
                      </div>
                    </div>
@@ -1125,21 +1130,19 @@ export default async function HomePage({
       >
         <Container variant="wide">
           <div className="home-curated-shell reveal">
-            <div className="section-header home-curated-shell__header">
-              <div className="home-section-kicker">
-                {locale === 'th' ? 'โครงการและยูนิตที่คัดแล้ว' : 'Curated opportunities'}
-              </div>
-              <h2 id="home-curated-title" className="section-title">
-                {locale === 'th'
-                  ? 'เริ่มจากโครงการ แล้วค่อยดูยูนิตที่พร้อมไปต่อ'
-                  : 'Start with curated projects, then move into ready units.'}
-              </h2>
-              <p className="section-subtitle">
-                {locale === 'th'
-                  ? 'แยกโครงการและยูนิตที่พร้อมจริงให้อ่านง่ายขึ้น โดยไม่พาคุณไปไกลกว่าที่จำเป็น'
-                  : 'Keep new developments and ready units in two calmer reads so the next step stays clear.'}
-              </p>
-            </div>
+            <PublicSectionHeader
+              align="start"
+              className="home-curated-shell__header"
+              kicker={locale === 'th' ? 'โครงการและยูนิตที่คัดแล้ว' : 'Curated opportunities'}
+              kickerClassName="home-section-kicker"
+              title={locale === 'th'
+                ? 'เริ่มจากโครงการ แล้วค่อยดูยูนิตที่พร้อมไปต่อ'
+                : 'Start with curated projects, then move into ready units.'}
+              titleId="home-curated-title"
+              subtitle={locale === 'th'
+                ? 'แยกโครงการและยูนิตที่พร้อมจริงให้อ่านง่ายขึ้น โดยไม่พาคุณไปไกลกว่าที่จำเป็น'
+                : 'Keep new developments and ready units in two calmer reads so the next step stays clear.'}
+            />
 
             {showCombinedCuratedEmpty ? (
               <div className="home-project-empty home-curated-empty">
@@ -1172,7 +1175,7 @@ export default async function HomePage({
                     <p className="home-project-empty__preview-body">{curatedEmptyPreviewBody}</p>
                     <div className="home-project-empty__signal-list">
                       {curatedOpportunitySignals.map((item) => (
-                        <span key={item} className="home-project-empty__signal">{item}</span>
+                        <PublicChip key={item} as="span" size="sm" className="home-project-empty__signal">{item}</PublicChip>
                       ))}
                     </div>
                   </div>
@@ -1182,7 +1185,7 @@ export default async function HomePage({
               <div className="home-curated-stack">
                 {showFeaturedProjectsSection ? <FeaturedProjectsSection embedded /> : null}
                 {showFeaturedProjectsSection && showFeaturedPropertiesSection ? (
-                  <div className="home-segmentation-note" role="note" aria-label={locale === 'th' ? 'คำอธิบายการแยกเนื้อหา' : 'Content split note'}>
+                  <div className="home-segmentation-note public-surface-card public-surface-card--deep" role="note" aria-label={locale === 'th' ? 'คำอธิบายการแยกเนื้อหา' : 'Content split note'}>
                     <p className="home-segmentation-note__title">
                       {locale === 'th' ? 'จากโครงการใหม่ ไปสู่ยูนิตพร้อมดู' : 'From launches to ready units'}
                     </p>
@@ -1191,7 +1194,7 @@ export default async function HomePage({
                         ? ['โครงการใหม่', 'ขายและขายต่อ', 'เช่า']
                         : ['New developments', 'Sale and resale', 'Rent']
                       ).map((item) => (
-                        <span key={item} className="home-segmentation-note__signal">{item}</span>
+                        <PublicChip key={item} as="span" size="sm" className="home-segmentation-note__signal">{item}</PublicChip>
                       ))}
                     </div>
                   </div>
@@ -1210,19 +1213,21 @@ export default async function HomePage({
       <section className="home-market-section" aria-labelledby="home-market-title">
         <Container variant="wide">
           <div className="home-market-shell reveal">
-            <div className="section-header home-market-shell__header">
-              <div className="home-section-kicker">
-                {locale === 'th' ? 'เราช่วยให้คุณตัดสินใจอย่างไร' : 'How we help you decide'}
-              </div>
-              <h2 id="home-market-title" className="section-title">{whyPattayaHeading}</h2>
-              <p className="section-subtitle">{whyPattayaSubcopy}</p>
-            </div>
+            <PublicSectionHeader
+              align="start"
+              className="home-market-shell__header"
+              kicker={locale === 'th' ? 'เราช่วยให้คุณตัดสินใจอย่างไร' : 'How we help you decide'}
+              kickerClassName="home-section-kicker"
+              title={whyPattayaHeading}
+              titleId="home-market-title"
+              subtitle={whyPattayaSubcopy}
+            />
 
             <div className="home-market-grid">
               <div className="home-market-story">
                 <div className="home-market-narratives">
                   {whyPattayaNarrativeCards.map((card) => (
-                    <article key={`${card.title}-${card.body}`} className="home-market-card">
+                    <article key={`${card.title}-${card.body}`} className="home-market-card public-surface-card public-surface-card--warm">
                       <h3 className="home-market-card__title">{card.title}</h3>
                       <p className="home-market-card__body">{card.body}</p>
                     </article>
@@ -1230,7 +1235,7 @@ export default async function HomePage({
                 </div>
               </div>
 
-              <aside className="home-market-proof" aria-label={locale === 'th' ? 'กรอบการตัดสินใจของทีม' : 'How the team frames the decision'}>
+              <PublicSurfaceCard as="aside" tone="deep" className="home-market-proof" aria-label={locale === 'th' ? 'กรอบการตัดสินใจของทีม' : 'How the team frames the decision'}>
                 <div className="home-market-proof__intro">
                   <p className="home-market-proof__eyebrow">{locale === 'th' ? 'กรอบการตัดสินใจ' : 'Decision frame'}</p>
                   <h3 className="home-market-proof__title">
@@ -1248,7 +1253,7 @@ export default async function HomePage({
                     </div>
                   ))}
                 </div>
-              </aside>
+              </PublicSurfaceCard>
             </div>
           </div>
         </Container>
@@ -1280,27 +1285,25 @@ export default async function HomePage({
       <section className="home-owner-section" aria-labelledby="home-owner-title">
         <Container variant="wide">
           <div className="home-owner-shell reveal">
-            <div className="section-header home-owner-shell__header">
-              <div className="home-section-kicker">
-                {locale === 'th' ? 'สำหรับเจ้าของทรัพย์' : 'For owners'}
-              </div>
-              <h2 id="home-owner-title" className="section-title">
-                {locale === 'th'
-                  ? 'ขายหรือปล่อยเช่าด้วยการวางตำแหน่งที่ชัดกว่า'
-                  : 'Sell or rent out with clearer positioning'}
-              </h2>
-              <p className="section-subtitle">
-                {locale === 'th'
-                  ? 'หากคุณมีอสังหาในพัทยาอยู่แล้ว เราช่วยคิดต่อเรื่องราคา การนำเสนอ และขั้นตอนถัดไปที่เหมาะกว่าได้'
-                  : 'If you already own property in Pattaya, we can help you think through pricing, presentation, and the next practical move.'}
-              </p>
-            </div>
+            <PublicSectionHeader
+              align="start"
+              className="home-owner-shell__header"
+              kicker={locale === 'th' ? 'สำหรับเจ้าของทรัพย์' : 'For owners'}
+              kickerClassName="home-section-kicker"
+              title={locale === 'th'
+                ? 'ขายหรือปล่อยเช่าด้วยการวางตำแหน่งที่ชัดกว่า'
+                : 'Sell or rent out with clearer positioning'}
+              titleId="home-owner-title"
+              subtitle={locale === 'th'
+                ? 'หากคุณมีอสังหาในพัทยาอยู่แล้ว เราช่วยคิดต่อเรื่องราคา การนำเสนอ และขั้นตอนถัดไปที่เหมาะกว่าได้'
+                : 'If you already own property in Pattaya, we can help you think through pricing, presentation, and the next practical move.'}
+            />
 
             <div className="home-owner-grid">
               {ownerCards.map((card) => (
                 <TrackedLink
                   key={card.href}
-                  className="home-owner-card"
+                  className="home-owner-card public-surface-card public-surface-card--interactive public-surface-card--warm"
                   href={card.href}
                   prefetch={false}
                   eventType="cta_click"
@@ -1821,20 +1824,22 @@ export default async function HomePage({
       {showHomeTrustLayer ? (
         <section className="home-trust-layer-section py-12 md:py-16 xl:py-20 bg-surface" style={sectionOrderStyle('trust_micro_strip')} id="home-trust-layer" data-home-perf="trust-layer">
           <Container variant="wide">
-            <div className="home-trust-snapshot reveal rounded-[28px] border border-gray-100 bg-white p-6 md:p-8 xl:p-10 shadow-sm">
-              <div className="section-header">
-                <div className="home-section-kicker">
-                  {locale === 'th' ? 'ภาพรวมความน่าเชื่อถือ' : 'Trust snapshot'}
-                </div>
-                <h2 className="section-title">
-                  {locale === 'th'
-                    ? 'คัดเฉพาะรายการที่ตรวจแล้ว'
-                    : 'Verified stock first.'}
-                </h2>
-                <p className="section-subtitle max-w-3xl mt-3" role="note" aria-label={locale === 'th' ? 'ข้อมูลความน่าเชื่อถือ' : 'Trust highlights'} data-home-perf="trust-strip">
-                  {trustSnapshotIntro}
-                </p>
-              </div>
+            <PublicSurfaceCard as="div" tone="warm" className="home-trust-snapshot reveal">
+              <PublicSectionHeader
+                align="start"
+                kicker={locale === 'th' ? 'ภาพรวมความน่าเชื่อถือ' : 'Trust snapshot'}
+                kickerClassName="home-section-kicker"
+                title={locale === 'th'
+                  ? 'คัดเฉพาะรายการที่ตรวจแล้ว'
+                  : 'Verified stock first.'}
+                subtitle={trustSnapshotIntro}
+                subtitleClassName="max-w-3xl mt-3"
+                subtitleProps={{
+                  role: 'note',
+                  'aria-label': locale === 'th' ? 'ข้อมูลความน่าเชื่อถือ' : 'Trust highlights',
+                  'data-home-perf': 'trust-strip',
+                }}
+              />
               <div className="home-trust-snapshot-grid mt-8">
                 {trustSnapshotItems.map((item) => (
                   <div key={item.label} className="home-trust-snapshot__item">
@@ -1843,7 +1848,7 @@ export default async function HomePage({
                   </div>
                 ))}
               </div>
-            </div>
+            </PublicSurfaceCard>
           </Container>
         </section>
       ) : null}

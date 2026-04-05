@@ -4,7 +4,9 @@ import json
 from pathlib import Path
 
 
-def test_platform_deploy_history_normalizes_run_dir_env(client, monkeypatch, tmp_path: Path) -> None:
+def test_platform_deploy_history_normalizes_run_dir_env(
+    client, monkeypatch, tmp_path: Path
+) -> None:
     history_dir = tmp_path / "deploy-history"
     older_run = history_dir / "run-20260318T001000Z-abc12345"
     newer_run = history_dir / "run-20260318T002000Z-def67890"

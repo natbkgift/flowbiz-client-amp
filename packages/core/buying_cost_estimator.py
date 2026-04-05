@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from decimal import Decimal, ROUND_HALF_UP
+from decimal import ROUND_HALF_UP, Decimal
 
 from packages.core.schemas.buying_cost_estimator import (
     BuyingCostEstimatorRequest,
@@ -10,7 +10,6 @@ from packages.core.schemas.buying_cost_estimator import (
     PurchaseContext,
     TransferSplit,
 )
-
 
 DEFAULT_ASSUMPTION_SET_ID = "amp_v2_buying_cost_baseline"
 DEFAULT_ASSUMPTION_SET_VERSION = "2026-03-15"
@@ -66,11 +65,17 @@ def calculate_buying_cost_estimate(
 
     editable_inputs = [
         ("agent_fee", "buying_cost.agent_fee", payload.agent_fee),
-        ("lawyer_fee", "buying_cost.lawyer_fee", payload.lawyer_fee if payload.purchase_context == PurchaseContext.FOREIGN else None),
+        (
+            "lawyer_fee",
+            "buying_cost.lawyer_fee",
+            payload.lawyer_fee if payload.purchase_context == PurchaseContext.FOREIGN else None,
+        ),
         (
             "bank_transfer_cost",
             "buying_cost.bank_transfer_cost",
-            payload.bank_transfer_cost if payload.purchase_context == PurchaseContext.FOREIGN else None,
+            payload.bank_transfer_cost
+            if payload.purchase_context == PurchaseContext.FOREIGN
+            else None,
         ),
         (
             "fx_estimate",

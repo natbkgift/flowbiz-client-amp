@@ -2,6 +2,9 @@ import type { ReactNode } from 'react';
 
 import { TrackedLink } from '@/components/analytics/TrackedLink';
 import { Container } from '@/components/layout/Container';
+import { PublicActionRow } from '@/components/public/PublicActionRow';
+import { PublicChip } from '@/components/public/PublicChip';
+import { PublicSurfaceCard } from '@/components/public/PublicSurfaceCard';
 
 export function HomeBottomCta({
   heading,
@@ -50,7 +53,9 @@ export function HomeBottomCta({
         <div className="grid lg:grid-cols-2 gap-10 md:gap-16 items-center home-bottom-cta__grid">
           <div className="reveal home-bottom-cta__content">
             <div className="home-bottom-cta__topline">
-              <p className="home-bottom-cta__eyebrow">{eyebrow}</p>
+              <PublicChip as="span" tone="accent" size="sm" className="home-bottom-cta__eyebrow">
+                {eyebrow}
+              </PublicChip>
             </div>
             <h2 id={headingId} className={`home-bottom-cta__title text-3xl md:text-5xl ${isThai ? 'font-sans' : 'font-serif'} font-semibold mb-6 leading-tight`}>
               {heading}
@@ -71,7 +76,7 @@ export function HomeBottomCta({
                 ))}
               </ul>
             ) : null}
-            <div className="flex flex-wrap gap-4 home-bottom-cta__actions">
+            <PublicActionRow className="home-bottom-cta__actions" stackOnMobile>
               <TrackedLink
                 className="px-6 py-3 bg-white text-gray-900 rounded-full text-sm font-semibold hover:bg-gray-100 transition-colors home-bottom-cta__primary"
                 href={primaryUrl}
@@ -90,16 +95,16 @@ export function HomeBottomCta({
               >
                 {secondaryLabel}
               </TrackedLink>
-            </div>
+            </PublicActionRow>
             {conversionNote ? (
               <p className="home-bottom-conversion-note mt-4 text-sm text-white/72 max-w-xl">{conversionNote}</p>
             ) : null}
             <p className="home-bottom-trust-note mt-4 text-sm text-white/70 max-w-xl">{trustNote}</p>
           </div>
           <div className="reveal home-bottom-cta__form-wrap">
-            <div className="bg-white p-5 md:p-8 rounded-2xl shadow-2xl text-gray-900 home-bottom-cta__panel" aria-label="consultation-form-panel">
+            <PublicSurfaceCard as="div" tone="warm" className="bg-white p-5 md:p-8 rounded-2xl shadow-2xl text-gray-900 home-bottom-cta__panel" aria-label="consultation-form-panel">
               {formSlot}
-            </div>
+            </PublicSurfaceCard>
           </div>
         </div>
       </Container>

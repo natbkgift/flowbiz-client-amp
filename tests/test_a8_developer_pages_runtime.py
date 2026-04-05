@@ -133,7 +133,7 @@ def _seed_a8_developers_fixture() -> dict[str, str]:
 
 
 def test_a8_developer_listing_default_locale_project_count_and_runtime_guards(client) -> None:
-    seeded = _seed_a8_developers_fixture()
+    _seed_a8_developers_fixture()
 
     response = client.get("/developers")
     assert response.status_code == 200, response.text
@@ -144,7 +144,7 @@ def test_a8_developer_listing_default_locale_project_count_and_runtime_guards(cl
     assert re.search(r'href="/en/developers/[^"]+"', html)
     assert re.search(r'href="/en/projects\?developer=[^"]+"', html)
     assert "2 published projects linked." in html
-    assert re.search(r'\d+ published projects linked\.', html)
+    assert re.search(r"\d+ published projects linked\.", html)
     assert "TODO:" not in html
     assert "pending publication" not in html
     assert "not published yet" not in html
@@ -224,20 +224,22 @@ def test_a8_developer_listing_and_detail_keep_page_owned_cta_hierarchy(client) -
     listing_html = listing_response.text
     assert 'id="developer-list-overview"' in listing_html
     assert 'id="developer-listing"' in listing_html
-    assert listing_html.index('id="developer-list-overview"') < listing_html.index('id="developer-listing"')
+    assert listing_html.index('id="developer-list-overview"') < listing_html.index(
+        'id="developer-listing"'
+    )
     detail_matches = re.findall(r'href="(/en/developers/[^"]+)"', listing_html)
     browse_matches = re.findall(r'href="(/en/projects\?developer=[^"]+)"', listing_html)
     assert detail_matches
     assert browse_matches
     assert listing_html.index(detail_matches[0]) < listing_html.index(browse_matches[0])
-    assert 'https://wa.me/' not in listing_html
-    assert 'https://line.me/' not in listing_html
+    assert "https://wa.me/" not in listing_html
+    assert "https://line.me/" not in listing_html
 
     detail_response = client.get(f"/en/developers/{primary_slug}")
     assert detail_response.status_code == 200, detail_response.text
     detail_html = detail_response.text
-    consult_href = f'/en/contact?intent=consultation&developer={primary_slug}'
-    detail_projects_href = f'/en/projects?developer={primary_slug}'
+    consult_href = f"/en/contact?intent=consultation&developer={primary_slug}"
+    detail_projects_href = f"/en/projects?developer={primary_slug}"
 
     overview_index = detail_html.index('id="developer-overview"')
     location_index = detail_html.index('id="developer-location-focus"')
@@ -248,9 +250,9 @@ def test_a8_developer_listing_and_detail_keep_page_owned_cta_hierarchy(client) -
     browse_index = detail_html.index(detail_projects_href)
     assert overview_index < location_index < trust_index < projects_index < cta_index
     assert cta_index < consult_index < browse_index
-    assert f'/en/areas/{seeded["area_main_slug"]}' in detail_html
-    assert f'/en/areas/{seeded["area_secondary_slug"]}' in detail_html
-    assert f'/en/projects/{seeded["project_a_slug"]}' in detail_html
-    assert f'/en/projects/{seeded["project_b_slug"]}' in detail_html
-    assert 'https://wa.me/' not in detail_html
-    assert 'https://line.me/' not in detail_html
+    assert f"/en/areas/{seeded['area_main_slug']}" in detail_html
+    assert f"/en/areas/{seeded['area_secondary_slug']}" in detail_html
+    assert f"/en/projects/{seeded['project_a_slug']}" in detail_html
+    assert f"/en/projects/{seeded['project_b_slug']}" in detail_html
+    assert "https://wa.me/" not in detail_html
+    assert "https://line.me/" not in detail_html

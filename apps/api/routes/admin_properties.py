@@ -1929,7 +1929,9 @@ def update_company_info(
     info = db.scalar(select(CompanyInfo).where(CompanyInfo.slug == slug))
     if info is None:
         if slug != _SITE_LAYOUT_CMS_SLUG:
-            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Company info not found")
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND, detail="Company info not found"
+            )
         info = _materialize_site_layout_company_info(payload)
 
     for field, value in payload.model_dump(exclude_unset=True).items():

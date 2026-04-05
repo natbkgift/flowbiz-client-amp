@@ -61,6 +61,9 @@ describe('HomeHero CTA hierarchy', () => {
     );
 
     expect(container.querySelectorAll('.hero-cta-row .btn')).toHaveLength(2);
+    expect(container.querySelector('.hero-cta-row.public-action-row')).not.toBeNull();
+    expect(container.querySelector('.home-hero-slider__panel.public-surface-card')).not.toBeNull();
+    expect(container.querySelector('.home-hero-slider__meta-bar')).not.toBeNull();
     expect(container.querySelector('.home-hero-slider__support .hero-whatsapp-link')).not.toBeNull();
     expect(container.querySelector('.home-hero-slider__support .hero-whatsapp-link')).not.toHaveClass('btn');
     expect(container.querySelector('.home-hero-slider__controls')).toBeNull();
@@ -117,11 +120,12 @@ describe('HomeHero CTA hierarchy', () => {
     );
 
     const images = screen.getAllByAltText('AMP Pattaya Real Estate');
-    expect(images[0]).toHaveAttribute('src', '/media/library/hero.webp');
+    expect(images[0]).toHaveAttribute('src', '/api/media/library/hero.webp');
     expect(screen.getByRole('heading', { name: 'Find the right Pattaya property path' })).toBeInTheDocument();
     expect(screen.getByText('Open a sharper coastal route')).toBeInTheDocument();
     expect(screen.getByText('AMP Pattaya')).toBeInTheDocument();
     expect(screen.queryByText('Wongamat')).toBeNull();
     expect(screen.getByLabelText('Hero slide controls')).toBeInTheDocument();
+    expect(document.querySelector('.home-hero-slider__meta-bar')).not.toBeNull();
   });
 });

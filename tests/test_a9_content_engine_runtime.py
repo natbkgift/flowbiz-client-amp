@@ -333,25 +333,25 @@ def test_a9_empty_state_has_publish_safe_fallback(client) -> None:
 def test_a9_listing_and_detail_keep_page_owned_cta_hierarchy(client) -> None:
     seeded = _seed_a9_articles()
 
-    listing_response = client.get('/en/blog')
+    listing_response = client.get("/en/blog")
     assert listing_response.status_code == 200, listing_response.text
     listing_html = listing_response.text
 
     assert 'id="content_consult_header"' in listing_html
     assert 'id="content_consult_card"' in listing_html
-    assert f'/en/blog/{seeded["blog_slug"]}' in listing_html
-    assert f'/en/contact?intent=consultation&article={seeded["blog_slug"]}' in listing_html
+    assert f"/en/blog/{seeded['blog_slug']}" in listing_html
+    assert f"/en/contact?intent=consultation&article={seeded['blog_slug']}" in listing_html
     header_index = listing_html.index('id="content_consult_header"')
-    first_article_index = listing_html.index(f'/en/blog/{seeded["blog_slug"]}')
+    first_article_index = listing_html.index(f"/en/blog/{seeded['blog_slug']}")
     first_article_consult_index = listing_html.index(
-        f'/en/contact?intent=consultation&article={seeded["blog_slug"]}'
+        f"/en/contact?intent=consultation&article={seeded['blog_slug']}"
     )
     consult_card_index = listing_html.rindex('id="content_consult_card"')
     assert header_index < first_article_index < first_article_consult_index < consult_card_index
-    assert 'https://wa.me/' not in listing_html
-    assert 'https://line.me/' not in listing_html
+    assert "https://wa.me/" not in listing_html
+    assert "https://line.me/" not in listing_html
 
-    detail_response = client.get(f'/en/blog/{seeded["blog_slug"]}')
+    detail_response = client.get(f"/en/blog/{seeded['blog_slug']}")
     assert detail_response.status_code == 200, detail_response.text
     detail_html = detail_response.text
 
@@ -361,15 +361,22 @@ def test_a9_listing_and_detail_keep_page_owned_cta_hierarchy(client) -> None:
     assert 'id="article-body"' in detail_html
     assert 'id="article-related"' in detail_html
     assert 'id="article_consultation_footer"' in detail_html
-    assert f'/en/contact?intent=consultation&article={seeded["blog_slug"]}' in detail_html
-    assert f'/en/blog/sample-blog-related-a9' in detail_html
+    assert f"/en/contact?intent=consultation&article={seeded['blog_slug']}" in detail_html
+    assert "/en/blog/sample-blog-related-a9" in detail_html
     hero_index = detail_html.index('id="article-hero"')
     consult_hero_index = detail_html.index('id="article_consultation_hero"')
     toc_index = detail_html.index('id="article-toc"')
     body_index = detail_html.index('id="article-body"')
     related_index = detail_html.index('id="article-related"')
     consult_footer_index = detail_html.index('id="article_consultation_footer"')
-    assert hero_index < consult_hero_index < toc_index < body_index < related_index < consult_footer_index
-    assert detail_html.count(f'/en/contact?intent=consultation&article={seeded["blog_slug"]}') >= 2
-    assert 'https://wa.me/' not in detail_html
-    assert 'https://line.me/' not in detail_html
+    assert (
+        hero_index
+        < consult_hero_index
+        < toc_index
+        < body_index
+        < related_index
+        < consult_footer_index
+    )
+    assert detail_html.count(f"/en/contact?intent=consultation&article={seeded['blog_slug']}") >= 2
+    assert "https://wa.me/" not in detail_html
+    assert "https://line.me/" not in detail_html

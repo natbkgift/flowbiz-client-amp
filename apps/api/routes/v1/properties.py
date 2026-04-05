@@ -417,10 +417,16 @@ def search_properties(
 
     project_ids = {item.project_id for item in items if item.project_id is not None}
     area_ids = {item.area_id for item in items if item.area_id is not None}
-    project_names = dict(
-        db.execute(select(Project.id, Project.name).where(Project.id.in_(project_ids))).all()
-    ) if project_ids else {}
-    area_names = dict(db.execute(select(Area.id, Area.name).where(Area.id.in_(area_ids))).all()) if area_ids else {}
+    project_names = (
+        dict(db.execute(select(Project.id, Project.name).where(Project.id.in_(project_ids))).all())
+        if project_ids
+        else {}
+    )
+    area_names = (
+        dict(db.execute(select(Area.id, Area.name).where(Area.id.in_(area_ids))).all())
+        if area_ids
+        else {}
+    )
 
     results: list[SearchResultItem] = []
     for item in items:

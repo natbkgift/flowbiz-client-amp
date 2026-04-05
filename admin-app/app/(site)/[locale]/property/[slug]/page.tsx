@@ -15,7 +15,9 @@ import { resolveImageUrl } from '@/app/_lib/public-api-shared';
 import { getDictionary, normalizeLocale } from '@/app/_lib/i18n/get-dictionary';
 import { ogLocale, withLocale } from '@/app/_lib/i18n/routing';
 import { getInternalLinks } from '@/app/_lib/internal-links';
+import { PublicActionRow } from '@/components/public/PublicActionRow';
 import { PublicAdvisoryHero } from '@/components/public/PublicAdvisoryHero';
+import { PublicSurfaceCard } from '@/components/public/PublicSurfaceCard';
 import { ShortlistSaveButton } from '@/components/shortlist/ShortlistSaveButton';
 import { PageOwnedMobileCTA } from '@/components/ux/PageOwnedMobileCTA';
 
@@ -492,7 +494,7 @@ export default async function PropertyPage(props: PageProps) {
               ) : null}
             </div>
 
-            <div id="property-hero" className="property-header">
+            <PublicSurfaceCard as="div" tone="warm" id="property-hero" className="property-header">
               <div className="property-title">
                 <p className="public-hero__eyebrow">{dict.advisory.heroEyebrow}</p>
                 <h1>{property.title}</h1>
@@ -502,12 +504,12 @@ export default async function PropertyPage(props: PageProps) {
                 <p className="section-subtitle">{propertySummary}</p>
               </div>
               <div className="property-price">{formatPriceTHB(Number(property.price))}</div>
-            </div>
+            </PublicSurfaceCard>
 
-            <div id="property-primary-actions" className="cta-row mb-6">
+            <PublicActionRow id="property-primary-actions" className="cta-row mb-6" stackOnMobile>
               <TrackedLink
                 id="property_consultation_primary"
-                className="btn btn-cta"
+                className="btn btn-primary"
                 href={propertyConsultationHref}
                 eventType="cta_click"
                 eventPayload={propertyConsultationPayload}
@@ -521,7 +523,7 @@ export default async function PropertyPage(props: PageProps) {
                 sourceSurface="property_detail"
                 readOnMount
               />
-            </div>
+            </PublicActionRow>
             <p id="property-action-note" className="decision-page__support-note mb-6">
               {propertyActionNote}
             </p>

@@ -77,8 +77,9 @@ describe("Admin shell + route consolidation (Phase A)", () => {
   it("allows LOCAL_API_ORIGIN to power /api rewrites in local preview builds", () => {
     const nextConfig = read("next.config.js");
     expect(nextConfig).toContain("process.env.LOCAL_API_ORIGIN");
-    expect(nextConfig).toContain("process.env.LOCAL_MEDIA_ORIGIN || localApiOrigin");
-    expect(nextConfig).toContain("process.env.NODE_ENV === 'development' ? 'http://127.0.0.1:8000' : ''");
-    expect(nextConfig).toContain("if (!localApiOrigin) return []");
+    expect(nextConfig).toContain("process.env.NEXT_PUBLIC_API_BASE");
+    expect(nextConfig).toContain("resolveMediaRewriteBase");
+    expect(nextConfig).toContain("(process.env.NODE_ENV === 'development' ? 'http://127.0.0.1:8000' : null)");
+    expect(nextConfig).toContain("if (!apiRewriteBase && !mediaRewriteBase) return []");
   });
 });

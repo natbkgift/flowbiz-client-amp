@@ -6,7 +6,10 @@ import Image from 'next/image';
 import { buildAdvisorWhatsApp } from '@/app/_lib/public-advisory';
 import { Container } from '@/components/layout/Container';
 import { TrackedLink } from '@/components/analytics/TrackedLink';
+import { PublicActionRow } from '@/components/public/PublicActionRow';
+import { PublicSurfaceCard } from '@/components/public/PublicSurfaceCard';
 import { withLocale } from '@/app/_lib/i18n/routing';
+import { resolveRenderableLocalMediaPath } from '@/app/_lib/local-media';
 
 const HERO_FALLBACK_IMAGE = '/images/hero-banner-20260318.webp';
 const AUTOPLAY_MS = 7000;
@@ -57,9 +60,7 @@ function createFallbackSlide(locale: 'en' | 'th', dict: any, composer?: HomeHero
     eyebrow,
     heading,
     subheading,
-    imageSrc: typeof composer?.hero_image === 'string' && composer.hero_image.startsWith('/media/')
-      ? composer.hero_image
-      : HERO_FALLBACK_IMAGE,
+    imageSrc: resolveRenderableLocalMediaPath(composer?.hero_image) ?? HERO_FALLBACK_IMAGE,
     imageAlt: locale === 'th' ? 'ภาพอสังหาริมทรัพย์พัทยาโดย AMP Pattaya' : 'AMP Pattaya Real Estate',
   };
 }
@@ -84,7 +85,7 @@ export function HomeHero({
       return slides.map((slide, index) => ({
         ...slide,
         key: slide.key || `hero-slide-${index + 1}`,
-        imageSrc: slide.imageSrc || HERO_FALLBACK_IMAGE,
+        imageSrc: (resolveRenderableLocalMediaPath(slide.imageSrc) ?? slide.imageSrc) || HERO_FALLBACK_IMAGE,
         imageAlt: slide.imageAlt || (locale === 'th' ? 'ภาพประกอบอสังหาริมทรัพย์พัทยา' : 'AMP Pattaya Real Estate'),
       }));
     }
@@ -239,7 +240,7 @@ export function HomeHero({
 
       <div className="home-hero-slider__content">
         <Container variant="wide">
-          <div className="home-hero-slider__panel">
+          <PublicSurfaceCard as="div" tone="deep" className="home-hero-slider__panel">
             <p className="home-hero-slider__eyebrow">{stableEyebrow}</p>
             {contextualLine ? <p className="home-hero-slider__context">{contextualLine}</p> : null}
             <h1 className={`home-hero-slider__title ${locale === 'th' ? 'home-hero-slider__title--th' : ''}`}>
@@ -247,7 +248,7 @@ export function HomeHero({
             </h1>
             <p className="home-hero-slider__subtitle">{stableSubheading}</p>
 
-            <div className="hero-cta-row home-hero-slider__actions">
+            <PublicActionRow className="hero-cta-row home-hero-slider__actions" stackOnMobile>
               <TrackedLink
                 className="btn btn-primary hero-cta hero-cta--primary"
                 href={primaryCtaUrl}
@@ -266,7 +267,7 @@ export function HomeHero({
               >
                 {secondaryCtaLabel}
               </TrackedLink>
-            </div>
+            </PublicActionRow>
 
             {trustItems.length > 0 ? (
               <ul className="home-hero-slider__trust-list" aria-label={locale === 'th' ? 'เหตุผลที่ช่วยให้ตัดสินใจง่ายขึ้น' : 'Quick trust signals'}>
@@ -279,63 +280,65 @@ export function HomeHero({
               </ul>
             ) : null}
 
-            <div className="home-hero-slider__support">
-              <a
-                className="hero-whatsapp-link home-hero-slider__support-link"
-                href={whatsAppHref}
-                target="_blank"
-                rel="noreferrer"
-              >
-                {dict.cta.whatsapp}
-              </a>
-            </div>
-
-            {slideCount > 1 ? (
-              <div className="home-hero-slider__controls" aria-label={locale === 'th' ? 'ตัวควบคุมสไลด์' : 'Hero slide controls'}>
-                <button
-                  type="button"
-                  className="home-hero-slider__nav"
-                  aria-label={locale === 'th' ? 'สไลด์ก่อนหน้า' : 'Previous slide'}
-                  onClick={() => {
-                    setAutoplayPaused(true);
-                    stepTo(activeIndex - 1);
-                  }}
+            <div className="home-hero-slider__meta-bar">
+              <div className="home-hero-slider__support">
+                <a
+                  className="hero-whatsapp-link home-hero-slider__support-link"
+                  href={whatsAppHref}
+                  target="_blank"
+                  rel="noreferrer"
                 >
-                  <span aria-hidden="true">←</span>
-                </button>
-                <div className="home-hero-slider__dots" role="tablist" aria-label={locale === 'th' ? 'เลือกสไลด์' : 'Choose hero slide'}>
-                  {resolvedSlides.map((slide, index) => {
-                    const selected = index === activeIndex;
-                    return (
-                      <button
-                        key={`${slide.key}-dot`}
-                        type="button"
-                        role="tab"
-                        aria-selected={selected}
-                        aria-label={`${locale === 'th' ? 'สไลด์' : 'Slide'} ${index + 1}`}
-                        className={`home-hero-slider__dot${selected ? ' home-hero-slider__dot--active' : ''}`}
-                        onClick={() => {
-                          setAutoplayPaused(true);
-                          setActiveIndex(index);
-                        }}
-                      />
-                    );
-                  })}
-                </div>
-                <button
-                  type="button"
-                  className="home-hero-slider__nav"
-                  aria-label={locale === 'th' ? 'สไลด์ถัดไป' : 'Next slide'}
-                  onClick={() => {
-                    setAutoplayPaused(true);
-                    stepTo(activeIndex + 1);
-                  }}
-                >
-                  <span aria-hidden="true">→</span>
-                </button>
+                  {dict.cta.whatsapp}
+                </a>
               </div>
-            ) : null}
-          </div>
+
+              {slideCount > 1 ? (
+                <div className="home-hero-slider__controls" aria-label={locale === 'th' ? 'ตัวควบคุมสไลด์' : 'Hero slide controls'}>
+                  <button
+                    type="button"
+                    className="home-hero-slider__nav"
+                    aria-label={locale === 'th' ? 'สไลด์ก่อนหน้า' : 'Previous slide'}
+                    onClick={() => {
+                      setAutoplayPaused(true);
+                      stepTo(activeIndex - 1);
+                    }}
+                  >
+                    <span aria-hidden="true">←</span>
+                  </button>
+                  <div className="home-hero-slider__dots" role="tablist" aria-label={locale === 'th' ? 'เลือกสไลด์' : 'Choose hero slide'}>
+                    {resolvedSlides.map((slide, index) => {
+                      const selected = index === activeIndex;
+                      return (
+                        <button
+                          key={`${slide.key}-dot`}
+                          type="button"
+                          role="tab"
+                          aria-selected={selected}
+                          aria-label={`${locale === 'th' ? 'สไลด์' : 'Slide'} ${index + 1}`}
+                          className={`home-hero-slider__dot${selected ? ' home-hero-slider__dot--active' : ''}`}
+                          onClick={() => {
+                            setAutoplayPaused(true);
+                            setActiveIndex(index);
+                          }}
+                        />
+                      );
+                    })}
+                  </div>
+                  <button
+                    type="button"
+                    className="home-hero-slider__nav"
+                    aria-label={locale === 'th' ? 'สไลด์ถัดไป' : 'Next slide'}
+                    onClick={() => {
+                      setAutoplayPaused(true);
+                      stepTo(activeIndex + 1);
+                    }}
+                  >
+                    <span aria-hidden="true">→</span>
+                  </button>
+                </div>
+              ) : null}
+            </div>
+          </PublicSurfaceCard>
         </Container>
       </div>
     </section>

@@ -33,7 +33,9 @@ def _bind():
 def _table_exists(table_name: str) -> bool:
     bind = _bind()
     if bind.dialect.name == "postgresql":
-        result = bind.execute(text("SELECT to_regclass(:name)"), {"name": f"public.{table_name}"}).scalar()
+        result = bind.execute(
+            text("SELECT to_regclass(:name)"), {"name": f"public.{table_name}"}
+        ).scalar()
         return result is not None
     return inspect(bind).has_table(table_name)
 

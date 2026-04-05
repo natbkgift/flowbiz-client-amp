@@ -282,14 +282,14 @@ def test_a4_project_detail_hero_cta_hierarchy_keeps_compare_without_whatsapp(cli
     assert response.status_code == 200, response.text
     html = response.text
 
-    consultation_href = f'/en/contact?intent=consultation&project={seeded["main_project_slug"]}'
-    viewing_href = f'/en/contact?intent=viewing&project={seeded["main_project_slug"]}'
+    consultation_href = f"/en/contact?intent=consultation&project={seeded['main_project_slug']}"
+    viewing_href = f"/en/contact?intent=viewing&project={seeded['main_project_slug']}"
 
     assert consultation_href in html
     assert viewing_href in html
-    assert 'Request Consultation' in html
-    assert 'Book Viewing' in html
-    assert 'WhatsApp' not in html
+    assert "Request Consultation" in html
+    assert "Book Viewing" in html
+    assert "WhatsApp" not in html
 
     consultation_index = html.index(consultation_href)
     viewing_index = html.index(viewing_href)

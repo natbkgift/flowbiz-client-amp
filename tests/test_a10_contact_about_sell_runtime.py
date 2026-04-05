@@ -279,13 +279,13 @@ def test_a10_submit_paths_work_for_contact_and_sell_intents(client) -> None:
 def test_a10_contact_and_sell_pages_keep_page_owned_cta_hierarchy(client) -> None:
     _seed_a10_runtime_content()
 
-    contact_html = client.get('/en/contact').text
+    contact_html = client.get("/en/contact").text
     assert 'id="contact-nap"' in contact_html
     assert 'id="contact-channels"' in contact_html
     assert 'id="contact-map"' in contact_html
     assert 'id="contact-form"' in contact_html
-    assert 'https://wa.me/6680000001' in contact_html
-    assert 'https://line.me/R/ti/p/@flowbiz' in contact_html
+    assert "https://wa.me/6680000001" in contact_html
+    assert "https://line.me/R/ti/p/@flowbiz" in contact_html
     assert 'data-cta-id="open_map"' in contact_html
 
     nap_index = contact_html.index('id="contact-nap"')
@@ -294,15 +294,15 @@ def test_a10_contact_and_sell_pages_keep_page_owned_cta_hierarchy(client) -> Non
     form_index = contact_html.index('id="contact-form"')
     assert nap_index < channels_index < map_index < form_index
 
-    sell_html = client.get('/en/sell').text
+    sell_html = client.get("/en/sell").text
     assert 'id="seller-intent"' in sell_html
     assert 'id="seller-process"' in sell_html
     assert 'id="seller-docs"' in sell_html
     assert 'id="seller-trust"' in sell_html
     assert 'id="seller-cta"' in sell_html
-    assert '/en/sell/list-property' in sell_html
-    assert '/en/sell/valuation' in sell_html
-    assert '/en/contact?intent=sell' in sell_html
+    assert "/en/sell/list-property" in sell_html
+    assert "/en/sell/valuation" in sell_html
+    assert "/en/contact?intent=sell" in sell_html
 
     intent_index = sell_html.index('id="seller-intent"')
     process_index = sell_html.index('id="seller-process"')

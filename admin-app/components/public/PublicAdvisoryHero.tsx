@@ -3,6 +3,9 @@ import type { ReactNode } from 'react';
 import type { EventType } from '@/lib/analytics';
 import { TrackedLink } from '@/components/analytics/TrackedLink';
 import { Container } from '@/components/layout/Container';
+import { PublicActionRow } from '@/components/public/PublicActionRow';
+import { PublicChip } from '@/components/public/PublicChip';
+import { PublicSurfaceCard } from '@/components/public/PublicSurfaceCard';
 import {
   IconArrowRight,
   IconBuilding,
@@ -82,15 +85,15 @@ export function PublicAdvisoryHero({
     <section className="hero hero--page hero--advisory">
       <Container variant="wide">
         <div className="public-hero">
-          <div className="public-hero__content">
+          <PublicSurfaceCard as="div" tone="warm" className="public-hero__content">
             <p className="public-hero__eyebrow">{eyebrow}</p>
             <h1 className="headline public-hero__headline">{title}</h1>
             <p className="subhead public-hero__subtitle">{subtitle}</p>
 
-            <div className="public-hero__actions cta-row">
+            <PublicActionRow className="public-hero__actions cta-row" stackOnMobile>
               <TrackedLink
                 id={primaryAction.id}
-                className="btn btn-cta public-hero__action public-hero__action--primary"
+                className="btn btn-primary public-hero__action public-hero__action--primary"
                 href={primaryAction.href}
                 prefetch={primaryAction.prefetch ?? false}
                 eventType={primaryAction.eventType ?? 'cta_click'}
@@ -124,7 +127,7 @@ export function PublicAdvisoryHero({
                   {tertiaryAction.label}
                 </a>
               ) : null}
-            </div>
+            </PublicActionRow>
 
             <div className="public-hero__meta">
               {supportNote ? (
@@ -133,16 +136,16 @@ export function PublicAdvisoryHero({
 
               <div className="public-hero__proofs" role="note" aria-label={proofsLabel}>
                 {proofs.map((proof) => (
-                  <span key={proof} className="public-hero__proof">
+                  <PublicChip key={proof} className="public-hero__proof">
                     {proof}
-                  </span>
+                  </PublicChip>
                 ))}
               </div>
             </div>
-          </div>
+          </PublicSurfaceCard>
 
           {hasSignals ? (
-            <aside className="public-hero__rail" aria-label={guidanceLabel}>
+            <PublicSurfaceCard as="aside" tone="deep" className="public-hero__rail" aria-label={guidanceLabel}>
               {signals.map((signal) => (
                 <article key={`${signal.kicker}-${signal.title}`} className="public-hero__signal">
                   <div className="public-hero__signal-icon" aria-hidden="true">
@@ -158,7 +161,7 @@ export function PublicAdvisoryHero({
                   </span>
                 </article>
               ))}
-            </aside>
+            </PublicSurfaceCard>
           ) : null}
         </div>
       </Container>

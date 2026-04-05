@@ -203,26 +203,26 @@ def test_a2_home_real_route_keeps_runtime_true_cta_hierarchy(client) -> None:
     html = response.text
 
     for section_id in [
-        'hero-title',
-        'hero_primary',
-        'hero_secondary',
-        'intent-title',
-        'intent_invest',
-        'intent_buy',
-        'intent_rent',
-        'intent_sell',
-        'featured-title',
-        'featured_footer_cta',
-        'investment-title',
-        'investment-methodology',
-        'investment_all_picks_cta',
-        'why-pattaya-title',
-        'trust-title',
-        'insights-title',
-        'reviews-title',
-        'video-title',
-        'consult-title',
-        'consultation-form',
+        "hero-title",
+        "hero_primary",
+        "hero_secondary",
+        "intent-title",
+        "intent_invest",
+        "intent_buy",
+        "intent_rent",
+        "intent_sell",
+        "featured-title",
+        "featured_footer_cta",
+        "investment-title",
+        "investment-methodology",
+        "investment_all_picks_cta",
+        "why-pattaya-title",
+        "trust-title",
+        "insights-title",
+        "reviews-title",
+        "video-title",
+        "consult-title",
+        "consultation-form",
     ]:
         assert f'id="{section_id}"' in html
 
@@ -235,30 +235,36 @@ def test_a2_home_real_route_keeps_runtime_true_cta_hierarchy(client) -> None:
     consult_title_index = html.index('id="consult-title"')
     consultation_form_index = html.index('id="consultation-form"')
     assert hero_title_index < hero_primary_index < hero_secondary_index < intent_title_index
-    assert intent_title_index < featured_title_index < investment_title_index < consult_title_index < consultation_form_index
+    assert (
+        intent_title_index
+        < featured_title_index
+        < investment_title_index
+        < consult_title_index
+        < consultation_form_index
+    )
 
-    assert _has_anchor_href(html, 'hero_primary', '/en/projects')
-    assert _has_anchor_href(html, 'hero_secondary', '/en/projects')
-    assert _has_anchor_href(html, 'intent_invest', '/en/investment/methodology')
-    assert _has_anchor_href(html, 'intent_buy', '/en/projects')
-    assert _has_anchor_href(html, 'intent_rent', '/en/contact')
-    assert _has_anchor_href(html, 'intent_sell', '/en/sell')
-    assert _has_anchor_href(html, 'featured_footer_cta', '/en/projects')
-    assert _has_anchor_href(html, 'investment-methodology', '/en/investment/methodology')
-    assert _has_anchor_href(html, 'investment_all_picks_cta', '/en/investment/methodology')
+    assert _has_anchor_href(html, "hero_primary", "/en/projects")
+    assert _has_anchor_href(html, "hero_secondary", "/en/projects")
+    assert _has_anchor_href(html, "intent_invest", "/en/investment/methodology")
+    assert _has_anchor_href(html, "intent_buy", "/en/projects")
+    assert _has_anchor_href(html, "intent_rent", "/en/contact")
+    assert _has_anchor_href(html, "intent_sell", "/en/sell")
+    assert _has_anchor_href(html, "featured_footer_cta", "/en/projects")
+    assert _has_anchor_href(html, "investment-methodology", "/en/investment/methodology")
+    assert _has_anchor_href(html, "investment_all_picks_cta", "/en/investment/methodology")
 
     for event_name in [
-        'home_hero_primary_click',
-        'home_hero_secondary_click',
-        'home_intent_start_click',
-        'home_browse_projects_click',
-        'home_investment_pick_click',
-        'home_whatsapp_click',
+        "home_hero_primary_click",
+        "home_hero_secondary_click",
+        "home_intent_start_click",
+        "home_browse_projects_click",
+        "home_investment_pick_click",
+        "home_whatsapp_click",
     ]:
         assert event_name in html
 
-    assert 'https://wa.me/' in html
-    assert re.search(r'https://(?:line\.me|social-plugins\.line\.me)', html)
+    assert "https://wa.me/" in html
+    assert re.search(r"https://(?:line\.me|social-plugins\.line\.me)", html)
 
 
 def test_a2_real_runtime_uses_published_home_config_and_real_routes(client) -> None:
@@ -362,7 +368,7 @@ def test_a2_accessibility_states_and_forward_paths(client) -> None:
     assert response.status_code == 200, response.text
     html = response.text
     assert ":focus-visible" in html
-    assert 'home-consultation-section' not in html
+    assert "home-consultation-section" not in html
     assert 'id="consultation-form"' in html
     assert 'id="form-loading"' in html
     assert 'id="form-error"' in html
@@ -398,7 +404,7 @@ def test_a2_runtime_destination_routes_render_published_data(client) -> None:
 
     areas = client.get("/en/areas")
     assert areas.status_code == 200, areas.text
-    area_detail = client.get(f'/en/areas/{seeded["area_slug"]}')
+    area_detail = client.get(f"/en/areas/{seeded['area_slug']}")
     assert area_detail.status_code == 200, area_detail.text
     assert "Central Pattaya" in area_detail.text
     assert "Published area summary" in area_detail.text

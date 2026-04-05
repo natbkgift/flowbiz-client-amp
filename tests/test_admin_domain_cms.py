@@ -178,7 +178,9 @@ def test_flow_a_publish_reflects_public_lists(client) -> None:
     assert developer_detail.status_code == 200, developer_detail.text
 
 
-def test_flow_a_developer_public_contract_supports_trailing_slash_and_structured_fields(client) -> None:
+def test_flow_a_developer_public_contract_supports_trailing_slash_and_structured_fields(
+    client,
+) -> None:
     headers = _make_admin_headers()
     hero = f"/media/library/{uuid4()}.jpg"
     logo = f"/media/library/{uuid4()}.jpg"

@@ -73,7 +73,9 @@ def test_a12_foreign_buyer_hub_keeps_page_owned_cta_hierarchy(client) -> None:
     faq_index = html.index('id="foreign-buyer-faq"')
     legal_review_index = html.index('id="foreign-buyer-legal-review"')
     next_step_index = html.index('id="foreign-buyer-next-step"')
-    consultation_index = html.index('href="/en/contact?intent=consultation&amp;source=foreign_buyer_hub"')
+    consultation_index = html.index(
+        'href="/en/contact?intent=consultation&amp;source=foreign_buyer_hub"'
+    )
     projects_index = html.index('href="/en/projects?source=foreign_buyer_hub"')
     assert (
         coverage_index
@@ -86,6 +88,6 @@ def test_a12_foreign_buyer_hub_keeps_page_owned_cta_hierarchy(client) -> None:
     )
     assert next_step_index < consultation_index < projects_index
 
-    assert '<form' not in html
-    assert 'https://wa.me/' not in html
-    assert 'https://line.me/' not in html
+    assert "<form" not in html
+    assert "https://wa.me/" not in html
+    assert "https://line.me/" not in html

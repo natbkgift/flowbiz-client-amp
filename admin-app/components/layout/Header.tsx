@@ -359,11 +359,11 @@ export function Header({
   return (
     <>
       <header
-        className={`header${isHomeSurface ? ' header--home' : ''}${isHomeSurface && homeHeaderScrolled ? ' header--home-scrolled' : ''}`}
+        className={`site-header header${isHomeSurface ? ' header--home' : ''}${isHomeSurface && homeHeaderScrolled ? ' header--home-scrolled' : ''}`}
         data-surface={currentSurface}
         data-locale={locale}
       >
-        <div className={`header-content${isHomeSurface ? ' header-content--home' : ''}`}>
+        <div className={`site-header__content header-content${isHomeSurface ? ' header-content--home' : ''}`}>
           <Link href={withLocale(locale, '/')} prefetch={false} className="logo" aria-label={dict.brand.name}>
             <span className="logo-mark">AMP</span>
             <span className="logo-name">{dict.brand.name}</span>

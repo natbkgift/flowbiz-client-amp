@@ -25,7 +25,6 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
-
 REPO_ROOT = Path(__file__).resolve().parent.parent
 IMPORT_DIR = REPO_ROOT / "data" / "import"
 DEFAULT_PUBLIC_ROOT = REPO_ROOT / "admin-app" / "public"
@@ -250,13 +249,19 @@ def _mirror_value(
     )
 
     if provisional_file.exists() and provisional_file.stat().st_size > 0 and not force:
-        return RewriteResult(value=provisional_url, changed=provisional_url != raw, mirrored=False, reused=True)
+        return RewriteResult(
+            value=provisional_url, changed=provisional_url != raw, mirrored=False, reused=True
+        )
 
     if not write_changes:
-        return RewriteResult(value=provisional_url, changed=provisional_url != raw, mirrored=True, reused=False)
+        return RewriteResult(
+            value=provisional_url, changed=provisional_url != raw, mirrored=True, reused=False
+        )
 
     try:
-        bytes_written, content_type = _download_to_file(source_url, provisional_file, timeout=timeout)
+        bytes_written, content_type = _download_to_file(
+            source_url, provisional_file, timeout=timeout
+        )
         final_file, final_url = _build_local_path(
             public_root=public_root,
             media_prefix=media_prefix,
@@ -486,22 +491,36 @@ def main() -> int:
         description="Mirror missing import media assets into local frontend public storage."
     )
     parser.add_argument("--input-dir", default=str(IMPORT_DIR), help="Import JSON dir")
-    parser.add_argument("--public-root", default=str(DEFAULT_PUBLIC_ROOT), help="Frontend public root")
-    parser.add_argument("--media-prefix", default=DEFAULT_MEDIA_PREFIX, help="Public media URL prefix")
-    parser.add_argument("--media-subdir", default=DEFAULT_MEDIA_SUBDIR, help="Subdirectory under media prefix")
+    parser.add_argument(
+        "--public-root", default=str(DEFAULT_PUBLIC_ROOT), help="Frontend public root"
+    )
+    parser.add_argument(
+        "--media-prefix", default=DEFAULT_MEDIA_PREFIX, help="Public media URL prefix"
+    )
+    parser.add_argument(
+        "--media-subdir", default=DEFAULT_MEDIA_SUBDIR, help="Subdirectory under media prefix"
+    )
     parser.add_argument(
         "--origin-for-local-media",
         default=DEFAULT_ORIGIN,
         help="Origin used to fetch missing /media/... assets",
     )
     parser.add_argument("--timeout", type=int, default=45, help="HTTP timeout seconds")
-    parser.add_argument("--force", action="store_true", help="Re-download even if mirrored file exists")
-    parser.add_argument("--dry-run", action="store_true", help="Report planned rewrites without writing files")
+    parser.add_argument(
+        "--force", action="store_true", help="Re-download even if mirrored file exists"
+    )
+    parser.add_argument(
+        "--dry-run", action="store_true", help="Report planned rewrites without writing files"
+    )
     parser.add_argument(
         "--write-report",
         nargs="?",
         const=str(DEFAULT_REPORT_PATH),
-        help="Write report JSON (default when flag present without value: ops/logs/import_media_asset_mirror_report.json)",
+        help=(
+            "Write report JSON "
+            "(default when flag present without value: "
+            "ops/logs/import_media_asset_mirror_report.json)"
+        ),
     )
     args = parser.parse_args()
 
@@ -523,7 +542,9 @@ def main() -> int:
         if not out_path.is_absolute():
             out_path = REPO_ROOT / out_path
         out_path.parent.mkdir(parents=True, exist_ok=True)
-        out_path.write_text(json.dumps(report, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+        out_path.write_text(
+            json.dumps(report, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
+        )
         print(f"\nWROTE:{out_path}")
 
     return _exit_code_for_report(report)
