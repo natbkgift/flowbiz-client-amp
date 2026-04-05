@@ -1528,7 +1528,7 @@ summary.mobile-nav__trigger::-webkit-details-marker {
   background: rgba(161, 132, 82, 0.92);
 }
 
-.projects-page[data-locale='th'] .public-hero__eyebrow {
+html[lang='th'] .projects-page .public-hero__eyebrow {
   text-transform: none;
   letter-spacing: 0.08em;
   font-size: 0.76rem;
@@ -11312,7 +11312,7 @@ summary.mobile-nav__trigger::-webkit-details-marker {
 }
 
 .home-page[data-locale='th'] .section-title,
-.projects-page[data-locale='th'] .section-title {
+html[lang='th'] .projects-page .section-title {
   max-width: 12ch;
 }
 
@@ -11345,7 +11345,7 @@ summary.mobile-nav__trigger::-webkit-details-marker {
 }
 
 .home-page[data-locale='th'] .section-subtitle,
-.projects-page[data-locale='th'] .section-subtitle {
+html[lang='th'] .projects-page .section-subtitle {
   font-family: var(--font-sans), 'Prompt', sans-serif;
   max-width: 34ch;
   line-height: 1.66;
