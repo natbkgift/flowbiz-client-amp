@@ -910,7 +910,7 @@ export default async function ComparePage(
               </p>
               <div className="signal-grid signal-grid--two-up mt-4">
                 {areaComparisons.map((area) => (
-                  <section key={area.areaId} className="authority-card">
+                  <section key={area.areaId} className="authority-card compare-area-card">
                     <div className="section-header">
                       <h3 className="section-title section-title--sm">{area.areaName}</h3>
                       <p className="section-subtitle">
@@ -992,7 +992,7 @@ export default async function ComparePage(
             </div>
           ) : null}
 
-          <div id="compare-decision-summary" className="card reveal mb-4">
+          <div id="compare-decision-summary" className="card reveal compare-summary-card mb-4">
             <h2 className="card-title">{locale === 'th' ? 'สรุปเพื่อช่วยตัดสินใจ' : 'Decision support summary'}</h2>
             <p className="card-subtitle">
               {locale === 'th'
@@ -1014,9 +1014,9 @@ export default async function ComparePage(
             </div>
           </div>
 
-          <div className="card reveal">
+          <div className="card reveal compare-table-card">
             <h2 className="card-title">{dict.compare.comparisonTable}</h2>
-            <div className="overflow-x-auto mt-3">
+            <div className="compare-table-shell overflow-x-auto mt-3">
               <table className="compare-table" aria-label={dict.compare.comparisonTable}>
                 <caption className="sr-only">{dict.compare.comparisonTable}</caption>
                 <thead>

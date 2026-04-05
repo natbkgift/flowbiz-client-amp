@@ -3,6 +3,37 @@
 อัปเดต: `2026-04-05`  
 บทบาทเอกสาร: `Execution brief for visual polish passes without touching business logic`
 
+## Execution Status
+
+สถานะล่าสุดของแผนนี้ ณ `2026-04-05`:
+
+- `Pass 1: Typography Pass` เสร็จแล้ว
+  อ้างอิงงาน: `eb2c6fa9`
+- `Pass 2: Contrast Pass` เสร็จแล้ว
+  อ้างอิงงาน: `eb2c6fa9`
+- `Pass 3: Surface Consistency Pass` เสร็จแล้ว
+  อ้างอิงงาน: `701150ec`
+- `Pass 4: Media Pass` ยังไม่ได้รันเป็น dedicated pass ภายใต้ brief นี้
+  หมายเหตุ: baseline recovery เดิมมี media clean-up บางส่วนแล้ว แต่ยังไม่ถือว่าจบ standalone media round ตามเอกสารนี้
+- `Pass 5: Data Presentation Pass` เสร็จแล้ว
+  อ้างอิงงาน: `fa191708`
+- `Pass 6: Locale Premium Parity Pass` เสร็จแล้ว
+  อ้างอิงงาน: `3406c4c9`
+
+Current QA baseline:
+
+- `100/100`
+- `elite`
+- latest summary: `admin-app/artifacts/public-visual-qa/run-20260405-150746/summary.json`
+- latest review file: `docs/qa/public-visual-review.full.json`
+
+Route-level polish logged:
+
+- `Compare route micro-polish`
+  สถานะ: `applied after Pass 6`
+  ขอบเขต: staged reading ของ `area comparison`, `decision summary`, และ `comparison table`
+  ไฟล์หลัก: `admin-app/app/(site)/[locale]/compare/page.tsx`, `admin-app/app/globals.css`
+
 ## Purpose
 
 เอกสารนี้ใช้เป็นแผนลงมือปรับ `public surface` เชิงความงามและความสม่ำเสมอของระบบ โดยยังคง:
@@ -512,12 +543,21 @@ Project detail:
 
 ลำดับที่ต้องทำ:
 
-1. Typography pass
-2. Contrast pass
-3. Surface consistency pass
-4. Media pass
-5. Data presentation pass
-6. Locale premium parity pass
+1. `Typography pass` `[complete]`
+2. `Contrast pass` `[complete]`
+3. `Surface consistency pass` `[complete]`
+4. `Media pass` `[standalone round not yet executed]`
+5. `Data presentation pass` `[complete]`
+6. `Locale premium parity pass` `[complete]`
+
+## Next Optional Round
+
+หลังจาก baseline ขึ้น `100/100` แล้ว งานถัดไปควรเป็น route-level micro-polish แบบแคบ ไม่ใช่ system rewrite:
+
+- `Homepage TH micro-polish`
+  โฟกัส: ทำให้ TH first viewport ดูนิ่งขึ้นอีกโดยไม่ไล่ parity แบบ pixel-identical
+- `Property detail media micro-polish`
+  โฟกัส: ทำให้ gallery และ facts block ดู curated กว่า listing product page
 
 เหตุผล:
 

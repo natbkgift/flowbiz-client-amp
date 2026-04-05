@@ -8709,6 +8709,53 @@ html[lang='th'] .projects-page .public-hero__eyebrow {
   background: var(--color-surface);
 }
 
+.decision-page--compare .compare-area-card .section-header {
+  margin-bottom: 16px;
+  max-width: 30rem;
+}
+
+.decision-page--compare .compare-area-card .section-title {
+  max-width: 14ch;
+}
+
+.decision-page--compare .compare-area-card .section-subtitle {
+  max-width: 34ch;
+}
+
+.decision-page--compare .compare-summary-card,
+.decision-page--compare .compare-table-card {
+  padding: clamp(18px, 4vw, 28px);
+}
+
+.decision-page--compare .compare-summary-card .card-title,
+.decision-page--compare .compare-table-card .card-title {
+  max-width: 17ch;
+}
+
+.decision-page--compare .compare-summary-card .card-subtitle,
+.decision-page--compare .compare-table-card .card-subtitle {
+  max-width: 62ch;
+}
+
+.decision-page--compare .compare-summary-card .insight-list {
+  gap: 12px;
+}
+
+.decision-page--compare .compare-summary-card .insight-list__item {
+  padding: 14px 16px;
+}
+
+.decision-page--compare .compare-table-shell {
+  margin-top: 16px;
+  padding: 8px;
+  border-radius: 24px;
+  border: 1px solid rgba(7, 19, 39, 0.08);
+  background: linear-gradient(180deg, rgba(249, 247, 242, 0.86), rgba(241, 236, 228, 0.92));
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.84),
+    0 10px 24px rgba(15, 23, 42, 0.04);
+}
+
 /* ======================== COMPARE TABLE ======================== */
 
 .compare-table {
@@ -8790,9 +8837,30 @@ html[lang='th'] .projects-page .public-hero__eyebrow {
 
 .compare-table th a {
   display: inline-block;
+  max-width: 16ch;
   color: var(--color-ink);
   font-weight: 600;
   text-decoration: none;
+}
+
+.compare-table .bullet-list {
+  margin: 0;
+  gap: 6px;
+  padding-left: 1.1rem;
+}
+
+.compare-table tbody td:not(:first-child) {
+  font-size: 0.92rem;
+  line-height: 1.72;
+}
+
+.decision-page--compare .compare-table-card .cta-row {
+  margin-top: clamp(18px, 3vw, 24px);
+}
+
+.decision-page--compare .compare-table-card .guided-dialog__step {
+  max-width: 62ch;
+  color: rgba(7, 19, 39, 0.7);
 }
 
 .compare-table th a:hover {
@@ -8801,6 +8869,11 @@ html[lang='th'] .projects-page .public-hero__eyebrow {
 }
 
 @media (max-width: 767px) {
+  .decision-page--compare .compare-table-shell {
+    padding: 6px;
+    border-radius: 20px;
+  }
+
   .compare-table th,
   .compare-table td {
     padding: 12px 13px;
