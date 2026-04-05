@@ -13,8 +13,8 @@
   อ้างอิงงาน: `eb2c6fa9`
 - `Pass 3: Surface Consistency Pass` เสร็จแล้ว
   อ้างอิงงาน: `701150ec`
-- `Pass 4: Media Pass` ยังไม่ได้รันเป็น dedicated pass ภายใต้ brief นี้
-  หมายเหตุ: baseline recovery เดิมมี media clean-up บางส่วนแล้ว แต่ยังไม่ถือว่าจบ standalone media round ตามเอกสารนี้
+- `Pass 4: Media Pass` เสร็จแล้ว
+  หมายเหตุ: ปิดเป็น dedicated round หลัง compare micro-polish โดยยกระดับ home hero, projects listing, project detail gallery, และ property detail gallery
 - `Pass 5: Data Presentation Pass` เสร็จแล้ว
   อ้างอิงงาน: `fa191708`
 - `Pass 6: Locale Premium Parity Pass` เสร็จแล้ว
@@ -24,7 +24,7 @@ Current QA baseline:
 
 - `100/100`
 - `elite`
-- latest summary: `admin-app/artifacts/public-visual-qa/run-20260405-150746/summary.json`
+- latest summary: `admin-app/artifacts/public-visual-qa/run-20260405-152601/summary.json`
 - latest review file: `docs/qa/public-visual-review.full.json`
 
 Route-level polish logged:
@@ -33,6 +33,10 @@ Route-level polish logged:
   สถานะ: `applied after Pass 6`
   ขอบเขต: staged reading ของ `area comparison`, `decision summary`, และ `comparison table`
   ไฟล์หลัก: `admin-app/app/(site)/[locale]/compare/page.tsx`, `admin-app/app/globals.css`
+- `Property detail media micro-polish`
+  สถานะ: `applied during dedicated Media Pass`
+  ขอบเขต: gallery shell, counter, thumbnail cadence, และ limited-media state
+  ไฟล์หลัก: `admin-app/app/(site)/[locale]/property/[slug]/page.tsx`, `admin-app/app/globals.css`
 
 ## Purpose
 
@@ -546,7 +550,7 @@ Project detail:
 1. `Typography pass` `[complete]`
 2. `Contrast pass` `[complete]`
 3. `Surface consistency pass` `[complete]`
-4. `Media pass` `[standalone round not yet executed]`
+4. `Media pass` `[complete]`
 5. `Data presentation pass` `[complete]`
 6. `Locale premium parity pass` `[complete]`
 
@@ -556,8 +560,8 @@ Project detail:
 
 - `Homepage TH micro-polish`
   โฟกัส: ทำให้ TH first viewport ดูนิ่งขึ้นอีกโดยไม่ไล่ parity แบบ pixel-identical
-- `Property detail media micro-polish`
-  โฟกัส: ทำให้ gallery และ facts block ดู curated กว่า listing product page
+- `Project detail gallery micro-polish`
+  โฟกัส: ทำให้ supporting media rail และ lead image ของ project detail มี hierarchy ที่เด่นขึ้นอีกขั้น
 
 เหตุผล:
 

@@ -469,25 +469,33 @@ export default async function PropertyPage(props: PageProps) {
         />
         <div className="detail-layout">
           <div className="detail-main">
-            <div id="gallery-section">
-              <div className="gallery-main">
+            <div id="gallery-section" className="property-gallery">
+              <div className="gallery-main property-gallery__main">
                 <Image
                   src={main}
                   alt={property.title}
                   fill
                   unoptimized
                   sizes="(min-width: 1024px) 70vw, 100vw"
-                  className="object-cover"
+                  className="property-gallery__main-image object-cover"
                   priority
                 />
-                <div className="gallery-counter">1 / {Math.max(gallery.length, 1)}</div>
+                <div className="gallery-counter property-gallery__counter">1 / {Math.max(gallery.length, 1)}</div>
               </div>
 
               {gallery.length > 1 ? (
-                <div className="gallery-thumbnails">
+                <div className="gallery-thumbnails property-gallery__thumbnails">
                   {gallery.slice(0, 12).map((src, idx) => (
-                    <div key={src} className={idx === 0 ? 'gallery-thumbnail active' : 'gallery-thumbnail'}>
-                      <Image src={src} alt={`${dict.property.galleryPhoto} ${idx + 1}`} width={80} height={60} unoptimized className="object-cover" loading="lazy" />
+                    <div key={src} className={idx === 0 ? 'gallery-thumbnail property-gallery__thumb active' : 'gallery-thumbnail property-gallery__thumb'}>
+                      <Image
+                        src={src}
+                        alt={`${dict.property.galleryPhoto} ${idx + 1}`}
+                        width={80}
+                        height={60}
+                        unoptimized
+                        className="property-gallery__thumb-image object-cover"
+                        loading="lazy"
+                      />
                     </div>
                   ))}
                 </div>
@@ -573,7 +581,7 @@ export default async function PropertyPage(props: PageProps) {
             </div>
 
             {gallery.length <= 1 ? (
-              <div id="property-gallery-status" className="mb-4">
+              <div id="property-gallery-status" className="property-gallery__status mb-4">
                 <p className="text-caption mb-2">
                   {locale === 'th' ? 'ภาพประกอบของรายการยังมีจำกัด' : 'The listing media set is still limited'}
                 </p>

@@ -774,25 +774,25 @@ export default async function ProjectDetailPage(
       />
       <Container>
         {projectMedia.length > 0 ? (
-          <section className="mt-6 reveal" aria-label={locale === 'th' ? 'แกลเลอรีโครงการ' : 'Project gallery'}>
-            <div className="grid gap-4 md:grid-cols-[minmax(0,1.65fr)_minmax(0,1fr)]">
+          <section className="project-gallery mt-6 reveal" aria-label={locale === 'th' ? 'แกลเลอรีโครงการ' : 'Project gallery'}>
+            <div className="project-gallery__grid grid gap-4 md:grid-cols-[minmax(0,1.65fr)_minmax(0,1fr)]">
               <LocalMediaImage
                 media={{ image_url: projectMedia[0] }}
                 alt={project.name}
-                className="media-shell rounded-3xl overflow-hidden border border-slate-200 bg-white shadow-sm"
+                className="project-gallery__lead media-shell rounded-3xl overflow-hidden border border-slate-200 bg-white shadow-sm"
                 imageClassName="media-shell__img"
                 aspectRatio="16 / 10"
                 priority
                 loading="eager"
               />
               {projectMedia.length > 1 ? (
-                <div className="grid grid-cols-2 gap-4">
+                <div className="project-gallery__rail grid grid-cols-2 gap-4">
                   {projectMedia.slice(1, 5).map((item, index) => (
                     <LocalMediaImage
                       key={`${project.id}-media-${index + 1}`}
                       media={{ image_url: item }}
                       alt={`${project.name} ${index + 2}`}
-                      className="media-shell rounded-3xl overflow-hidden border border-slate-200 bg-white shadow-sm"
+                      className="project-gallery__tile media-shell rounded-3xl overflow-hidden border border-slate-200 bg-white shadow-sm"
                       imageClassName="media-shell__img"
                       aspectRatio="4 / 3"
                     />
