@@ -259,19 +259,36 @@ history_path = "/api/platform/deploy-history?limit=3"
 history_status, history_body, history_url = fetch(history_path)
 record(
     "api_platform_deploy_history",
-    history_status == 404,
+    history_status == 200,
     {
         "path": history_path,
         "url": history_url,
         "status": history_status,
-        "expected": 404,
+        "expected": 200,
     },
 )
-record(
-    "api_platform_deploy_history_payload",
-    history_status == 404 and "Not Found" in history_body,
-    {"status": history_status},
-)
+if history_status == 200:
+    try:
+        history_payload = json.loads(history_body)
+    except json.JSONDecodeError:
+        history_payload = {}
+    record(
+        "api_platform_deploy_history_payload",
+        bool(history_payload.get("ok"))
+        and isinstance(history_payload.get("items"), list)
+        and isinstance(history_payload.get("count"), int),
+        {
+            "status": history_status,
+            "count": history_payload.get("count"),
+            "history_dir": history_payload.get("history_dir"),
+        },
+    )
+else:
+    record(
+        "api_platform_deploy_history_payload",
+        False,
+        {"status": history_status},
+    )
 
 payload = {
     "base_url": base_url,

@@ -314,7 +314,7 @@ checks = [
     "public_path": "/api/platform/deploy-history?limit=1",
     "internal_path": "/platform/deploy-history?limit=1",
     "base_url": f"http://127.0.0.1:{os.environ['VPS_API_PORT']}",
-    "expected": 404,
+    "expected": 200,
   },
   {
     "owner": "api",

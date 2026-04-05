@@ -11,7 +11,7 @@ $checks = @(
   @{ Path = "/api/health"; Expected = 200 },
   @{ Path = "/api/ping"; Expected = 200 },
   @{ Path = "/api/platform/version"; Expected = 200 },
-  @{ Path = "/api/platform/deploy-history"; Expected = 404 },
+  @{ Path = "/api/platform/deploy-history"; Expected = 200 },
   @{ Path = "/api/v1/shortlists/current?owner_type=session&owner_key=preview-smoke-owner&locale=en"; Expected = 200 }
 )
 
