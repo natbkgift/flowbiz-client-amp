@@ -24,7 +24,7 @@ Current QA baseline:
 
 - `100/100`
 - `elite`
-- latest summary: `admin-app/artifacts/public-visual-qa/run-20260407-004038/summary.json`
+- latest summary: `admin-app/artifacts/public-visual-qa/run-20260407-005744/summary.json`
 - latest review file: `docs/qa/public-visual-review.full.json`
 
 Route-level polish logged:
@@ -85,6 +85,10 @@ Route-level polish logged:
   สถานะ: `applied after Buying cost estimator route micro-polish`
   ขอบเขต: mobile CTA bridge, property next-step compression, และ advisor rail handoff ของ route รายการให้ปิด lower funnel แบบต่อเนื่องขึ้นบน mobile
   ไฟล์หลัก: `admin-app/app/(site)/[locale]/property/[slug]/page.tsx`, `admin-app/components/ux/PageOwnedMobileCTA.tsx`, `admin-app/app/globals.css`
+- `Project mobile CTA hierarchy micro-polish`
+  สถานะ: `applied after Property mobile CTA handoff micro-polish`
+  ขอบเขต: mobile CTA hierarchy, advisor-brief bridge, และ next-step compression ของ route โครงการให้ปิด mobile lower funnel แบบสงบขึ้น
+  ไฟล์หลัก: `admin-app/app/(site)/[locale]/projects/[slug]/page.tsx`, `admin-app/app/globals.css`
 
 ## Purpose
 
@@ -608,8 +612,8 @@ Project detail:
 
 - `Estimator share-state reference micro-polish`
   โฟกัส: ทำให้ share/version-mismatch/milestone cards ตอนท้าย estimator rail ดูเป็น reference deck เดียวกันมากขึ้น ไม่แตกเป็น utility cards หลายใบ
-- `Project mobile CTA hierarchy micro-polish`
-  โฟกัส: ทำให้ mobile CTA ของ route โครงการขึ้นชั้นกับ confidence pack และ advisor handoff ได้เนียนขึ้นเท่าฝั่ง property โดยไม่เพิ่ม chrome เกินจำเป็น
+- `Project advisory reads micro-polish`
+  โฟกัส: ทำให้ `decision lens`, `related reads`, และ `advisory next steps` ของ route โครงการอ่านเป็น editorial continuation เดียวกันมากขึ้นบนทั้ง mobile และ desktop
 
 เหตุผล:
 

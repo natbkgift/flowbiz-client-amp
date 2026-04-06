@@ -10099,6 +10099,51 @@ html[lang='th'] .projects-page .public-hero__eyebrow {
   box-shadow: 0 14px 28px rgba(10, 77, 140, 0.16);
 }
 
+.detail-mobile-cta--project {
+  position: fixed;
+  overflow: hidden;
+  gap: 11px;
+  border-top-color: rgba(10, 77, 140, 0.16);
+  background:
+    radial-gradient(circle at 88% 0%, rgba(10, 77, 140, 0.14), transparent 28%),
+    radial-gradient(circle at 14% 0%, rgba(232, 199, 141, 0.14), transparent 26%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.965), rgba(246, 243, 237, 0.992));
+  box-shadow:
+    0 -18px 42px rgba(15, 23, 42, 0.12),
+    inset 0 1px 0 rgba(255, 255, 255, 0.72);
+}
+
+.detail-mobile-cta--project::before {
+  content: '';
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 3px;
+  background: linear-gradient(90deg, rgba(10, 77, 140, 0.78), rgba(232, 199, 141, 0.62));
+  opacity: 0.92;
+}
+
+.detail-mobile-cta--project .detail-mobile-cta__meta {
+  gap: 4px;
+  max-width: 40ch;
+}
+
+.detail-mobile-cta--project .detail-mobile-cta__title {
+  font-size: 0.96rem;
+  line-height: 1.26;
+}
+
+.detail-mobile-cta--project .detail-mobile-cta__description {
+  color: rgba(51, 65, 85, 0.82);
+}
+
+.detail-mobile-cta--project .detail-mobile-cta__actions {
+  grid-template-columns: minmax(0, 1.28fr) minmax(0, 0.94fr);
+}
+
+.detail-mobile-cta--project .detail-mobile-cta__btn--primary {
+  box-shadow: 0 14px 28px rgba(10, 77, 140, 0.16);
+}
+
 .mobile-cta--visible {
   opacity: 1;
   transform: translateY(0);
@@ -10166,11 +10211,57 @@ html[lang='th'] .projects-page .public-hero__eyebrow {
   }
 
   .decision-page--project {
-    padding-bottom: calc(152px + env(safe-area-inset-bottom, 0px));
+    padding-bottom: calc(178px + env(safe-area-inset-bottom, 0px));
   }
 
   .decision-page--property {
     padding-bottom: calc(178px + env(safe-area-inset-bottom, 0px));
+  }
+
+  .decision-page--project .project-confidence-pack {
+    gap: 12px;
+  }
+
+  .decision-page--project .project-advisor-rail {
+    gap: 12px;
+  }
+
+  .decision-page--project .project-advisor-brief {
+    position: relative;
+    overflow: hidden;
+    padding: 18px 16px 16px;
+  }
+
+  .decision-page--project .project-advisor-brief::after {
+    content: '';
+    position: absolute;
+    inset: 0 0 auto 0;
+    height: 3px;
+    background: linear-gradient(90deg, rgba(10, 77, 140, 0.54), rgba(232, 199, 141, 0.38));
+    opacity: 0.78;
+  }
+
+  .decision-page--project .project-next-steps-card {
+    position: relative;
+    overflow: hidden;
+  }
+
+  .decision-page--project .project-next-steps-card::before {
+    content: '';
+    position: absolute;
+    inset: 0 0 auto 0;
+    height: 3px;
+    background: linear-gradient(90deg, rgba(10, 77, 140, 0.48), rgba(232, 199, 141, 0.34));
+    opacity: 0.74;
+  }
+
+  .decision-page--project #project-decision-lens .card-actions > .btn,
+  .decision-page--project #project-decision-lens .card-actions > a,
+  .decision-page--project #project-related-reads .card-actions > .btn,
+  .decision-page--project #project-related-reads .card-actions > a,
+  .decision-page--project .project-next-steps-card .card-actions > .btn,
+  .decision-page--project .project-next-steps-card .card-actions > a {
+    flex: 1 1 100%;
   }
 
   .decision-page--property .property-decision-card__actions > .btn,

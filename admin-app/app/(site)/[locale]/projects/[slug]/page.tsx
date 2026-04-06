@@ -978,7 +978,7 @@ export default async function ProjectDetailPage(
                   </div>
                 ) : null}
 
-                <div id="project-next-steps" className="authority-card">
+                <div id="project-next-steps" className="authority-card project-next-steps-card">
                   <h2 className="card-title">{locale === 'th' ? 'ขั้นตอนถัดไปกับทีมที่ปรึกษา' : 'Advisory next steps'}</h2>
                   <p className="card-subtitle">
                     {locale === 'th'
@@ -1062,10 +1062,12 @@ export default async function ProjectDetailPage(
       </Container>
       <PageOwnedMobileCTA
         id="project-mobile-cta"
+        eyebrow={locale === 'th' ? 'ส่งต่อ snapshot ไปยัง advisor' : 'Advisor snapshot handoff'}
+        variant="project"
         title={locale === 'th' ? 'พร้อมคุยต่อจาก snapshot นี้' : 'Ready to act on this project snapshot'}
         description={locale === 'th'
-          ? 'ใช้ทางลัดนี้เพื่อส่งบรีฟของโครงการให้ทีมทันที หรือเปิดหน้าเปรียบเทียบเพื่อคัดตัวเลือกใกล้เคียงต่อ.'
-          : 'Use the fast handoff to send this project brief to the team, or move into compare when you want nearby alternatives side by side.'}
+          ? 'ส่งบรีฟโครงการนี้ให้ทีมทันที หรือไปหน้าเปรียบเทียบเมื่ออยากคัดตัวเลือกใกล้เคียงต่อ.'
+          : 'Send this project brief to the team now, or move into compare when you want nearby alternatives side by side.'}
         primaryAction={{
           id: 'project_mobile_primary',
           href: projectDecisionCta.primaryHref,
