@@ -24,7 +24,7 @@ Current QA baseline:
 
 - `100/100`
 - `elite`
-- latest summary: `admin-app/artifacts/public-visual-qa/run-20260407-001206/summary.json`
+- latest summary: `admin-app/artifacts/public-visual-qa/run-20260407-004038/summary.json`
 - latest review file: `docs/qa/public-visual-review.full.json`
 
 Route-level polish logged:
@@ -81,6 +81,10 @@ Route-level polish logged:
   สถานะ: `applied after Property related listings micro-polish`
   ขอบเขต: estimator summary cadence, unresolved item staging, และ action handoff ของ route estimator ให้ขึ้นกับ buy advisory language มากขึ้น
   ไฟล์หลัก: `admin-app/app/(site)/[locale]/buying-cost-estimator/page.tsx`, `admin-app/app/(site)/[locale]/buying-cost-estimator/_components/BuyingCostEstimatorShell.tsx`, `admin-app/app/globals.css`
+- `Property mobile CTA handoff micro-polish`
+  สถานะ: `applied after Buying cost estimator route micro-polish`
+  ขอบเขต: mobile CTA bridge, property next-step compression, และ advisor rail handoff ของ route รายการให้ปิด lower funnel แบบต่อเนื่องขึ้นบน mobile
+  ไฟล์หลัก: `admin-app/app/(site)/[locale]/property/[slug]/page.tsx`, `admin-app/components/ux/PageOwnedMobileCTA.tsx`, `admin-app/app/globals.css`
 
 ## Purpose
 
@@ -602,10 +606,10 @@ Project detail:
 
 หลังจาก baseline ขึ้น `100/100` แล้ว งานถัดไปควรเป็น route-level micro-polish แบบแคบ ไม่ใช่ system rewrite:
 
-- `Property mobile CTA handoff micro-polish`
-  โฟกัส: ทำให้ mobile lower funnel ของ route รายการคุมลำดับ `advisor rail -> next tools -> CTA handoff` ให้กระชับขึ้นอีกหนึ่งชั้นโดยไม่เสีย calmness
 - `Estimator share-state reference micro-polish`
   โฟกัส: ทำให้ share/version-mismatch/milestone cards ตอนท้าย estimator rail ดูเป็น reference deck เดียวกันมากขึ้น ไม่แตกเป็น utility cards หลายใบ
+- `Project mobile CTA hierarchy micro-polish`
+  โฟกัส: ทำให้ mobile CTA ของ route โครงการขึ้นชั้นกับ confidence pack และ advisor handoff ได้เนียนขึ้นเท่าฝั่ง property โดยไม่เพิ่ม chrome เกินจำเป็น
 
 เหตุผล:
 

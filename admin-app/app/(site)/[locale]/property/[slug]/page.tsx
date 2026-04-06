@@ -785,10 +785,12 @@ export default async function PropertyPage(props: PageProps) {
       </Container>
       <PageOwnedMobileCTA
         id="property-mobile-cta"
+        eyebrow={locale === 'th' ? 'ส่งต่อไปยัง advisor' : 'Advisor handoff'}
+        variant="property"
         title={locale === 'th' ? 'พร้อมคุยต่อเกี่ยวกับยูนิตนี้' : 'Ready to move forward on this unit'}
         description={locale === 'th'
-          ? 'กดคุยกับทีมเพื่อส่งต่อข้อมูลยูนิตชุดนี้ทันที หรือโทรหาที่ปรึกษาในจังหวะที่พร้อม.'
-          : 'Open an advisor brief with this unit context attached, or call the advisory desk when you are ready.'}
+          ? 'ส่งต่อสรุปยูนิตนี้ให้ทีมทันที หรือโทรหาที่ปรึกษาเมื่อพร้อมยืนยันขั้นถัดไป.'
+          : 'Send this unit brief to the advisory team now, or call when you are ready to confirm the next step.'}
         primaryAction={{
           id: 'property_mobile_consultation_primary',
           href: propertyConsultationHref,
