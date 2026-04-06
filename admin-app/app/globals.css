@@ -7746,6 +7746,7 @@ html[lang='th'] .projects-page .public-hero__eyebrow {
 }
 
 .project-advisor-form-shell::before,
+.property-advisor-form-shell::before,
 .contact-form-shell::before {
   content: '';
   position: absolute;
@@ -7760,6 +7761,84 @@ html[lang='th'] .projects-page .public-hero__eyebrow {
   position: relative;
   overflow: hidden;
   border-radius: 24px;
+}
+
+.property-advisor-rail {
+  display: grid;
+  gap: 16px;
+  align-content: start;
+}
+
+.property-advisor-card {
+  display: grid;
+  gap: 16px;
+  background:
+    radial-gradient(circle at 86% 10%, rgba(232, 199, 141, 0.16), transparent 28%),
+    radial-gradient(circle at 16% 82%, rgba(10, 77, 140, 0.06), transparent 24%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.992), rgba(248, 244, 238, 0.976));
+}
+
+.property-advisor-card__identity {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.property-advisor-avatar {
+  display: grid;
+  place-items: center;
+  width: 64px;
+  height: 64px;
+  flex: 0 0 auto;
+  border-radius: 999px;
+  background:
+    linear-gradient(180deg, rgba(10, 77, 140, 0.96), rgba(7, 45, 82, 0.98)),
+    var(--color-primary);
+  color: rgba(255, 255, 255, 0.96);
+  font-size: 1.02rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.22),
+    0 16px 28px rgba(7, 19, 39, 0.16);
+}
+
+.property-advisor-role {
+  color: rgba(7, 19, 39, 0.62) !important;
+  font-size: 0.78rem;
+  font-weight: 600;
+  line-height: 1.5;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.property-advisor-actions {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  gap: 10px;
+}
+
+.property-advisor-note {
+  position: relative;
+  z-index: 1;
+  padding-top: 14px;
+  border-top: 1px solid rgba(7, 19, 39, 0.08);
+  color: rgba(7, 19, 39, 0.68);
+  font-size: 0.84rem;
+  line-height: 1.62;
+}
+
+.property-advisor-form-shell {
+  position: relative;
+  overflow: hidden;
+  border-radius: 24px;
+}
+
+.property-advisor-form-shell .inquiry-form {
+  position: relative;
 }
 
 .contact-concierge-rail {
@@ -9638,10 +9717,35 @@ html[lang='th'] .projects-page .public-hero__eyebrow {
   }
 
   .project-advisor-form-shell::before,
+  .property-advisor-form-shell::before,
   .contact-form-shell::before {
     inset: 0 0 auto 0;
     height: 32px;
     border-radius: 18px;
+  }
+
+  .property-advisor-card {
+    gap: 14px;
+  }
+
+  .property-advisor-card__identity {
+    gap: 14px;
+  }
+
+  .property-advisor-avatar {
+    width: 56px;
+    height: 56px;
+    font-size: 0.92rem;
+  }
+
+  .property-advisor-role {
+    font-size: 0.72rem;
+    letter-spacing: 0.06em;
+  }
+
+  .property-advisor-note {
+    padding-top: 12px;
+    font-size: 0.8rem;
   }
 
   .decision-page--compare .compare-table-shell {

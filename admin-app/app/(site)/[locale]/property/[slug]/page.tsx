@@ -403,6 +403,9 @@ export default async function PropertyPage(props: PageProps) {
   const propertyActionNote = locale === 'th'
     ? 'การส่งบรีฟจากหน้านี้จะพกชื่อรายการ ราคา และบริบทของยูนิตไปกับ inquiry เดียวกัน หรือจะบันทึกลง shortlist ก่อนแล้วค่อยส่งต่อก็ได้.'
     : 'This handoff carries the listing title, price, and unit context into the same inquiry, or you can save it to the shortlist first and continue later.';
+  const propertyRailNote = locale === 'th'
+    ? 'เริ่มจากการคุยตรงกับทีมได้ทันที หรือส่งบรีฟด้านล่างเมื่ออยากให้ทีมถือบริบทของยูนิตนี้ไปต่อแบบครบกว่าเดิม.'
+    : 'Start with a direct message now, or use the brief below when you want the team to carry this unit context forward in one handoff.';
 
   const jsonLd = JSON.stringify(
     [
@@ -729,21 +732,21 @@ export default async function PropertyPage(props: PageProps) {
 
           </div>
 
-          <aside className="detail-sidebar detail-stack">
-            <div id="property-direct-channels" className="agent-card">
-              <div className="flex items-center gap-4 mb-4">
-                <div className="w-16 h-16 rounded-full bg-[var(--color-primary)] text-white flex items-center justify-center font-bold">
+          <aside className="detail-sidebar detail-stack property-advisor-rail">
+            <div id="property-direct-channels" className="agent-card property-advisor-card property-advisor-card--channels">
+              <div className="property-advisor-card__identity">
+                <div className="property-advisor-avatar">
                   {dict.brand.shortName}
                 </div>
                 <div>
                   <h3 className="mb-1">{dict.property.agentName}</h3>
-                  <p className="mb-0 text-[var(--color-text-secondary)] text-sm">
+                  <p className="mb-0 property-advisor-role">
                     {dict.property.agentRole}
                   </p>
                 </div>
               </div>
 
-              <div className="flex flex-col gap-2">
+              <div className="property-advisor-actions">
                 <a href={CTA.lineUrl} className="btn btn-primary btn-block" target="_blank" rel="noreferrer">
                   {dict.property.lineChat}
                 </a>
@@ -751,9 +754,10 @@ export default async function PropertyPage(props: PageProps) {
                   {dict.property.callAgent}
                 </a>
               </div>
+              <p className="property-advisor-note mb-0">{propertyRailNote}</p>
             </div>
 
-            <div id="property-lead-form" className="mt-6">
+            <div id="property-lead-form" className="property-advisor-form-shell mt-6">
               <LeadForm
                 locale={locale}
                 heading={dict.property.interestedHeading}
