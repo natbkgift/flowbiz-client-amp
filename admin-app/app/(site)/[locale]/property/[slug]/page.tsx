@@ -689,22 +689,22 @@ export default async function PropertyPage(props: PageProps) {
             </section>
 
             {relatedProperties.length ? (
-              <section id="property-related-listings" className="signal-grid signal-grid--three-up reveal mb-6">
+              <section id="property-related-listings" className="signal-grid signal-grid--three-up reveal property-related-listings mb-6">
                 {relatedProperties.map((item) => {
                   const relatedImage = resolveImageUrl(item.cover_image ?? item.local_images?.[0] ?? item.images?.[0]) ?? PROPERTY_DETAIL_FALLBACK;
                   const relatedHref = item.slug ? withLocale(locale, `/property/${encodeURIComponent(item.slug)}`) : withLocale(locale, item.type === 'rent' ? '/rent' : '/buy');
                   return (
-                    <Link key={item.id} href={relatedHref} className="authority-card card-interactive">
-                      <div className="card-image relative" style={{ aspectRatio: '4 / 3' }}>
-                        <Image src={relatedImage} alt={item.title} fill unoptimized sizes="(min-width: 1024px) 33vw, 100vw" className="object-cover rounded-[18px]" />
+                    <Link key={item.id} href={relatedHref} className="authority-card card-interactive property-related-listing-card">
+                      <div className="card-image property-related-listing-card__image relative" style={{ aspectRatio: '4 / 3' }}>
+                        <Image src={relatedImage} alt={item.title} fill unoptimized sizes="(min-width: 1024px) 33vw, 100vw" className="object-cover rounded-[18px] property-related-listing-card__img" />
                       </div>
-                      <div className="mt-4">
-                        <div className="editorial-card__meta">
+                      <div className="mt-4 property-related-listing-card__body">
+                        <div className="editorial-card__meta property-related-listing-card__meta">
                           <span>{formatListingType(locale, item.type)}</span>
                           {item.city ? <span>{item.city}</span> : null}
                         </div>
-                        <h3 className="card-title">{item.title}</h3>
-                        <p className="card-subtitle">{formatPriceTHB(Number(item.price))}</p>
+                        <h3 className="card-title property-related-listing-card__title">{item.title}</h3>
+                        <p className="card-subtitle property-related-listing-card__price">{formatPriceTHB(Number(item.price))}</p>
                       </div>
                     </Link>
                   );

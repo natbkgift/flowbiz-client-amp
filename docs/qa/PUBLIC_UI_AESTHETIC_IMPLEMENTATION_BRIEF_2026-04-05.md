@@ -24,7 +24,7 @@ Current QA baseline:
 
 - `100/100`
 - `elite`
-- latest summary: `admin-app/artifacts/public-visual-qa/run-20260406-222420/summary.json`
+- latest summary: `admin-app/artifacts/public-visual-qa/run-20260406-231830/summary.json`
 - latest review file: `docs/qa/public-visual-review.full.json`
 
 Route-level polish logged:
@@ -72,6 +72,10 @@ Route-level polish logged:
 - `Property decision grid cadence micro-polish`
   สถานะ: `applied after Buy closing CTA panel micro-polish`
   ขอบเขต: decision cues, next tools, confidence pack, description bridge, และ next-step handoff ของ property detail lower funnel ให้ staged เป็น sequence เดียวกันมากขึ้น
+  ไฟล์หลัก: `admin-app/app/(site)/[locale]/property/[slug]/page.tsx`, `admin-app/app/globals.css`
+- `Property related listings micro-polish`
+  สถานะ: `applied after Property decision grid cadence micro-polish`
+  ขอบเขต: related listing continuation, supporting image framing, และ next-step bridge ของ property detail ให้ปลายทางยังอ่านเป็น curated advisory continuation
   ไฟล์หลัก: `admin-app/app/(site)/[locale]/property/[slug]/page.tsx`, `admin-app/app/globals.css`
 
 ## Purpose
@@ -596,8 +600,8 @@ Project detail:
 
 - `Buying cost estimator route micro-polish`
   โฟกัส: ทำให้ estimator route เองมี cadence ที่ขึ้นกับ buy advisory system มากขึ้น โดยเฉพาะ result summary, unresolved items, และ action handoff
-- `Property related listings micro-polish`
-  โฟกัส: ทำให้ related listing cards และ next-step bridge หลัง decision grid อ่านเป็น curated continuation มากขึ้น ไม่กลับไปมี catalogue feel
+- `Property mobile CTA handoff micro-polish`
+  โฟกัส: ทำให้ mobile lower funnel ของ route รายการคุมลำดับ `advisor rail -> next tools -> CTA handoff` ให้กระชับขึ้นอีกหนึ่งชั้นโดยไม่เสีย calmness
 
 เหตุผล:
 
