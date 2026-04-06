@@ -11,7 +11,7 @@
           "status": "pass",
           "message": "Latest mobile hero reads calmer after trimming the extra context line from the first viewport.",
           "evidence": {
-            "screenshot": "admin-app/artifacts/public-visual-qa/run-20260407-013131/iteration-01/after/en__390.png",
+            "screenshot": "admin-app/artifacts/public-visual-qa/run-20260407-014923/iteration-01/after/en__390.png",
             "paragraphsInViewport": 8,
             "smallTapTargetCount": 0
           }
@@ -22,7 +22,7 @@
           "status": "pass",
           "message": "Header chrome stays subordinate to the hero on the latest English mobile capture.",
           "evidence": {
-            "screenshot": "admin-app/artifacts/public-visual-qa/run-20260407-013131/iteration-01/after/en__390.png"
+            "screenshot": "admin-app/artifacts/public-visual-qa/run-20260407-014923/iteration-01/after/en__390.png"
           }
         },
         {
@@ -51,7 +51,7 @@
           "status": "pass",
           "message": "Latest mobile screenshot reads as a cohesive section stack with a cleaner shared rhythm between the advisory layers.",
           "evidence": {
-            "screenshot": "admin-app/artifacts/public-visual-qa/run-20260407-013131/iteration-01/after/en__390.png"
+            "screenshot": "admin-app/artifacts/public-visual-qa/run-20260407-014923/iteration-01/after/en__390.png"
           }
         },
         {
@@ -132,7 +132,7 @@
           "status": "pass",
           "message": "Detail routes are now present in the latest screenshot set and stay aligned with the shared public system.",
           "evidence": {
-            "detailScreenshot": "admin-app/artifacts/public-visual-qa/run-20260407-013131/iteration-01/after/en__property__visual-qa-property__390.png",
+            "detailScreenshot": "admin-app/artifacts/public-visual-qa/run-20260407-014923/iteration-01/after/en__property__visual-qa-property__390.png",
             "detailScore": 100
           }
         },
@@ -168,7 +168,7 @@
           "status": "pass",
           "message": "Thai mobile hero now lands as a cleaner poster-like opening.",
           "evidence": {
-            "screenshot": "admin-app/artifacts/public-visual-qa/run-20260407-013131/iteration-01/after/th__390.png",
+            "screenshot": "admin-app/artifacts/public-visual-qa/run-20260407-014923/iteration-01/after/th__390.png",
             "paragraphsInViewport": 7,
             "smallTapTargetCount": 0
           }
@@ -179,7 +179,7 @@
           "status": "pass",
           "message": "Header chrome remains subordinate to the Thai hero headline.",
           "evidence": {
-            "screenshot": "admin-app/artifacts/public-visual-qa/run-20260407-013131/iteration-01/after/th__390.png"
+            "screenshot": "admin-app/artifacts/public-visual-qa/run-20260407-014923/iteration-01/after/th__390.png"
           }
         },
         {
@@ -207,7 +207,7 @@
           "status": "pass",
           "message": "Thai mobile cadence reads coherent in the latest screenshot set.",
           "evidence": {
-            "screenshot": "admin-app/artifacts/public-visual-qa/run-20260407-013131/iteration-01/after/th__390.png"
+            "screenshot": "admin-app/artifacts/public-visual-qa/run-20260407-014923/iteration-01/after/th__390.png"
           }
         },
         {
@@ -287,7 +287,7 @@
           "status": "pass",
           "message": "Thai detail route now appears in the latest screenshot set and stays on-system.",
           "evidence": {
-            "detailScreenshot": "admin-app/artifacts/public-visual-qa/run-20260407-013131/iteration-01/after/th__property__visual-qa-property__390.png",
+            "detailScreenshot": "admin-app/artifacts/public-visual-qa/run-20260407-014923/iteration-01/after/th__property__visual-qa-property__390.png",
             "detailScore": 100
           }
         },
@@ -323,7 +323,7 @@
           "status": "pass",
           "message": "Desktop homepage now carries a calmer editorial cadence with the owner bridge resolved into the closing CTA.",
           "evidence": {
-            "screenshot": "admin-app/artifacts/public-visual-qa/run-20260407-013131/iteration-01/after/en__1366.png",
+            "screenshot": "admin-app/artifacts/public-visual-qa/run-20260407-014923/iteration-01/after/en__1366.png",
             "paragraphsInViewport": 7,
             "ownerToBottomGap": 90.94
           }
@@ -340,7 +340,7 @@
           "status": "pass",
           "message": "Thai desktop homepage keeps the same composed editorial balance as English.",
           "evidence": {
-            "screenshot": "admin-app/artifacts/public-visual-qa/run-20260407-013131/iteration-01/after/th__1366.png",
+            "screenshot": "admin-app/artifacts/public-visual-qa/run-20260407-014923/iteration-01/after/th__1366.png",
             "paragraphsInViewport": 7,
             "ownerToBottomGap": 90.94
           }

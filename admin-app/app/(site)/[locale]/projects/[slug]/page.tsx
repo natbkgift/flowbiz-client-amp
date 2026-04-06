@@ -943,16 +943,16 @@ export default async function ProjectDetailPage(
             </section>
 
             {(project.amenities?.length ?? 0) > 0 || investmentFacts.length > 0 || locationFacts.length > 0 ? (
-              <section id="project-trust-grid" className="signal-grid signal-grid--two-up reveal project-advisory-followthrough">
+              <section id="project-trust-grid" className="signal-grid signal-grid--two-up reveal project-advisory-followthrough project-supporting-facts-grid">
                 {(project.amenities?.length ?? 0) > 0 ? (
-                  <div id="project-amenities" className="authority-card">
+                  <div id="project-amenities" className="authority-card project-supporting-fact-card project-supporting-fact-card--livability">
                     <h2 className="card-title">{locale === 'th' ? 'สิ่งอำนวยความสะดวกและคุณภาพการอยู่อาศัย' : 'Amenities and livability'}</h2>
                     <p className="card-subtitle">
                       {locale === 'th'
                         ? 'อ่านสิ่งอำนวยความสะดวกเป็นบริบทการอยู่อาศัย ไม่ใช่เพียง checklist ของโครงการ'
                         : 'Read the amenity mix as a livability signal, not just a project checklist.'}
                     </p>
-                    <div className="chip-list mt-3">
+                    <div className="chip-list project-amenities-list mt-3">
                       {project.amenities?.map((item) => (
                         <span key={item} className="chip-list__item">{item}</span>
                       ))}
@@ -961,9 +961,14 @@ export default async function ProjectDetailPage(
                 ) : null}
 
                 {investmentFacts.length > 0 ? (
-                  <div id="project-investment-snapshot" className="authority-card">
+                  <div id="project-investment-snapshot" className="authority-card project-supporting-fact-card project-supporting-fact-card--investment">
                     <h2 className="card-title">{locale === 'th' ? 'ภาพรวมการลงทุนจากข้อมูลล่าสุด' : 'Investment snapshot'}</h2>
-                    <div className="insight-list mt-3">
+                    <p className="card-subtitle">
+                      {locale === 'th'
+                        ? 'ใช้ชุดตัวเลขนี้เพื่อดูความต่างเชิงผลตอบแทนและความเสี่ยง ก่อนขยับไปสู่การเทียบหรือติดต่อทีม'
+                        : 'Use these figures to read yield and risk differences before you compare further or move into the team handoff.'}
+                    </p>
+                    <div className="insight-list project-supporting-fact-list mt-3">
                       {investmentFacts.map((item) => (
                         <div key={item.label} className="insight-list__item">
                           <span className="insight-list__title">{item.label}</span>
@@ -975,9 +980,14 @@ export default async function ProjectDetailPage(
                 ) : null}
 
                 {locationFacts.length > 0 ? (
-                  <div id="project-location-context" className="authority-card">
+                  <div id="project-location-context" className="authority-card project-supporting-fact-card project-supporting-fact-card--location">
                     <h2 className="card-title">{locale === 'th' ? 'บริบทของทำเล' : 'Location context'}</h2>
-                    <div className="insight-list mt-3">
+                    <p className="card-subtitle">
+                      {locale === 'th'
+                        ? 'อ่านบริบทนี้เพื่อวางโครงการในเฟรมของย่านจริง ไม่ใช่มองเป็นตัวเลขหรือราคาเดี่ยวๆ'
+                        : 'Read this context to place the project inside the real district frame, not as a price point in isolation.'}
+                    </p>
+                    <div className="insight-list project-supporting-fact-list mt-3">
                       {locationFacts.map((item) => (
                         <div key={item.label} className="insight-list__item">
                           <span className="insight-list__title">{item.label}</span>

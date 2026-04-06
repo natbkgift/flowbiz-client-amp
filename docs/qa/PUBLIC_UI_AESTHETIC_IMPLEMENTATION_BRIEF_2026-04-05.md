@@ -24,7 +24,7 @@ Current QA baseline:
 
 - `100/100`
 - `elite`
-- latest summary: `admin-app/artifacts/public-visual-qa/run-20260407-013131/summary.json`
+- latest summary: `admin-app/artifacts/public-visual-qa/run-20260407-014923/summary.json`
 - latest review file: `docs/qa/public-visual-review.full.json`
 
 Route-level polish logged:
@@ -100,6 +100,14 @@ Route-level polish logged:
 - `Compare desktop editorial pacing micro-polish`
   สถานะ: `applied after Project advisory reads micro-polish`
   ขอบเขต: decision support summary, compare table shell, และ closing handoff ของ route compare บน desktop ให้ staged เป็น decision folio ที่สงบขึ้น โดยไม่เปลี่ยนข้อมูลหรือ flow หลัก
+  ไฟล์หลัก: `admin-app/app/(site)/[locale]/compare/page.tsx`, `admin-app/app/globals.css`
+- `Project supporting facts editorial cadence micro-polish`
+  สถานะ: `applied after Compare desktop editorial pacing micro-polish`
+  ขอบเขต: amenities, investment snapshot, และ location context ของ route โครงการให้กลายเป็น supporting facts folio ที่สงบขึ้น และให้ next-step panel ปิดท้าย section แบบมีชั้นเชิงกว่าเดิม
+  ไฟล์หลัก: `admin-app/app/(site)/[locale]/projects/[slug]/page.tsx`, `admin-app/app/globals.css`
+- `Compare area-context continuity micro-polish`
+  สถานะ: `applied after Project supporting facts editorial cadence micro-polish`
+  ขอบเขต: area comparison deck, area insight cards, และ transition จาก area context ไปยัง decision summary ให้ไหลเป็น opening folio เดียวกันมากขึ้นบน desktop
   ไฟล์หลัก: `admin-app/app/(site)/[locale]/compare/page.tsx`, `admin-app/app/globals.css`
 
 ## Purpose
@@ -622,10 +630,10 @@ Project detail:
 
 หลังจาก baseline ขึ้น `100/100` แล้ว งานถัดไปควรเป็น route-level micro-polish แบบแคบ ไม่ใช่ system rewrite:
 
-- `Project supporting facts editorial cadence micro-polish`
-  โฟกัส: ทำให้ `amenities`, `investment snapshot`, และ `location context` ของ route โครงการไหลต่อจาก brief/reads/next-steps อย่างสงบขึ้น โดยลดความรู้สึกว่าเป็น fact cards วางคู่กันเฉยๆ
-- `Compare area-context continuity micro-polish`
-  โฟกัส: ทำให้ `area context`, `decision summary`, และ `table` ของ route compare รับส่งกันลื่นขึ้นอีกขั้น โดยเฉพาะจังหวะก่อนเข้าสู่ side-by-side table บน desktop
+- `Project deep review editorial cadence micro-polish`
+  โฟกัส: ทำให้ `ProjectDeepReview` อ่านต่อจาก supporting facts/next-step handoff อย่างกลมกลืนขึ้น โดยลดความรู้สึกว่าเป็น analytical module แทรกกลาง narrative
+- `Compare recovery-state calmness micro-polish`
+  โฟกัส: ทำให้ empty/recovery compare states อ่านเป็น calm decision fallback มากขึ้น และใกล้กับ main compare route ในแง่ cadence และ closing CTA behavior
 
 เหตุผล:
 

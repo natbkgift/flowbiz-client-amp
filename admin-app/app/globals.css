@@ -8116,6 +8116,10 @@ html[lang='th'] .projects-page .public-hero__eyebrow {
   align-items: start;
 }
 
+.decision-page--project .project-supporting-facts-grid {
+  margin-top: 2px;
+}
+
 .decision-page--project .project-decision-lens-card,
 .decision-page--project .project-related-reads-card,
 .decision-page--project .project-next-steps-card {
@@ -8223,12 +8227,101 @@ html[lang='th'] .projects-page .public-hero__eyebrow {
   background: linear-gradient(90deg, rgba(10, 77, 140, 0.52), rgba(232, 199, 141, 0.4));
 }
 
+.decision-page--project .project-supporting-fact-card {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid rgba(7, 19, 39, 0.08);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.82),
+    0 16px 34px rgba(7, 19, 39, 0.055);
+}
+
+.decision-page--project .project-supporting-fact-card::before {
+  content: '';
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 3px;
+  opacity: 0.72;
+}
+
+.decision-page--project .project-supporting-fact-card .card-subtitle {
+  max-width: 42ch;
+  color: rgba(7, 19, 39, 0.7);
+}
+
+.decision-page--project .project-supporting-fact-list {
+  gap: 10px;
+}
+
+.decision-page--project .project-supporting-fact-list .insight-list__item {
+  padding: 13px 15px;
+  border-radius: 16px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.88), rgba(249, 246, 240, 0.82));
+  border-color: rgba(7, 19, 39, 0.06);
+}
+
+.decision-page--project .project-supporting-fact-list .insight-list__title {
+  color: rgba(7, 19, 39, 0.6);
+}
+
+.decision-page--project .project-supporting-fact-list .insight-list__body {
+  color: rgba(7, 19, 39, 0.8);
+}
+
+.decision-page--project .project-amenities-list {
+  gap: 10px;
+}
+
+.decision-page--project .project-amenities-list .chip-list__item {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.92), rgba(249, 246, 240, 0.84));
+  border-color: rgba(7, 19, 39, 0.07);
+}
+
+.decision-page--project .project-supporting-fact-card--livability {
+  background:
+    radial-gradient(circle at 88% 12%, rgba(232, 199, 141, 0.16), transparent 28%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.992), rgba(248, 244, 238, 0.968));
+}
+
+.decision-page--project .project-supporting-fact-card--livability::before {
+  background: linear-gradient(90deg, rgba(232, 199, 141, 0.58), rgba(120, 92, 47, 0.28));
+}
+
+.decision-page--project .project-supporting-fact-card--investment {
+  background:
+    radial-gradient(circle at 86% 14%, rgba(10, 77, 140, 0.09), transparent 26%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.994), rgba(247, 243, 236, 0.972));
+}
+
+.decision-page--project .project-supporting-fact-card--investment::before {
+  background: linear-gradient(90deg, rgba(10, 77, 140, 0.54), rgba(232, 199, 141, 0.26));
+}
+
+.decision-page--project .project-supporting-fact-card--location {
+  background:
+    radial-gradient(circle at 12% 82%, rgba(10, 77, 140, 0.06), transparent 24%),
+    radial-gradient(circle at 88% 12%, rgba(232, 199, 141, 0.14), transparent 26%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.992), rgba(248, 245, 240, 0.968));
+}
+
+.decision-page--project .project-supporting-fact-card--location::before {
+  background: linear-gradient(90deg, rgba(120, 92, 47, 0.5), rgba(10, 77, 140, 0.24));
+}
+
 @media (min-width: 1024px) {
   .decision-page--project .project-advisory-reads-grid {
     grid-template-columns: minmax(0, 1.16fr) minmax(0, 0.84fr);
   }
 
+  .decision-page--project .project-supporting-facts-grid {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  }
+
   .decision-page--project .project-advisory-followthrough #project-next-steps {
+    grid-column: 1 / -1;
+  }
+
+  .decision-page--project .project-supporting-fact-card--livability {
     grid-column: 1 / -1;
   }
 
@@ -10661,12 +10754,87 @@ html[lang='th'] .projects-page .public-hero__eyebrow {
   max-width: 30rem;
 }
 
+.decision-page--compare .compare-area-context-card {
+  position: relative;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 90% 12%, rgba(232, 199, 141, 0.17), transparent 26%),
+    radial-gradient(circle at 10% 84%, rgba(10, 77, 140, 0.07), transparent 22%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.994), rgba(247, 243, 236, 0.97));
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.84),
+    0 18px 40px rgba(7, 19, 39, 0.06);
+}
+
+.decision-page--compare .compare-area-context-card::before {
+  content: '';
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 3px;
+  background: linear-gradient(90deg, rgba(232, 199, 141, 0.58), rgba(10, 77, 140, 0.24));
+  opacity: 0.74;
+}
+
+.decision-page--compare .compare-area-context-card .card-subtitle {
+  max-width: 56ch;
+}
+
+.decision-page--compare .compare-area-grid {
+  gap: 14px;
+}
+
+.decision-page--compare .compare-area-card {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid rgba(7, 19, 39, 0.08);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.92), rgba(249, 246, 240, 0.86)),
+    rgba(255, 255, 255, 0.94);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.82),
+    0 12px 28px rgba(7, 19, 39, 0.05);
+}
+
+.decision-page--compare .compare-area-card::before {
+  content: '';
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 3px;
+  background: linear-gradient(90deg, rgba(10, 77, 140, 0.44), rgba(232, 199, 141, 0.28));
+  opacity: 0.72;
+}
+
 .decision-page--compare .compare-area-card .section-title {
   max-width: 14ch;
 }
 
 .decision-page--compare .compare-area-card .section-subtitle {
   max-width: 34ch;
+}
+
+.decision-page--compare .compare-area-metrics {
+  gap: 10px;
+}
+
+.decision-page--compare .compare-area-metrics .metric-card {
+  min-height: 100%;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.92), rgba(249, 246, 240, 0.84));
+}
+
+.decision-page--compare .compare-area-insights {
+  gap: 10px;
+}
+
+.decision-page--compare .compare-area-insights .insight-list__item {
+  padding: 13px 15px;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.78);
+  border-color: rgba(7, 19, 39, 0.06);
+}
+
+.decision-page--compare .compare-area-actions {
+  gap: 10px;
+  align-items: flex-start;
 }
 
 .decision-page--compare .compare-summary-card,
@@ -10839,9 +11007,32 @@ html[lang='th'] .projects-page .public-hero__eyebrow {
 }
 
 @media (min-width: 1024px) {
+  .decision-page--compare #compare-area-context,
   .decision-page--compare #compare-decision-summary {
     max-width: 72rem;
     margin-bottom: 22px;
+  }
+
+  .decision-page--compare #compare-area-context {
+    background:
+      radial-gradient(circle at 92% 10%, rgba(232, 199, 141, 0.18), transparent 26%),
+      radial-gradient(circle at 10% 82%, rgba(10, 77, 140, 0.08), transparent 22%),
+      linear-gradient(180deg, rgba(255, 255, 255, 0.995), rgba(247, 243, 236, 0.972));
+  }
+
+  .decision-page--compare .compare-area-grid {
+    gap: 16px;
+  }
+
+  .decision-page--compare .compare-area-card {
+    padding: 20px 20px 18px;
+  }
+
+  .decision-page--compare .compare-area-insights .insight-list__item {
+    min-height: 100%;
+  }
+
+  .decision-page--compare #compare-decision-summary {
     background:
       radial-gradient(circle at 90% 12%, rgba(232, 199, 141, 0.17), transparent 26%),
       linear-gradient(180deg, rgba(255, 255, 255, 0.995), rgba(247, 243, 236, 0.972));

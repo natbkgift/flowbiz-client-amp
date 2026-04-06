@@ -901,14 +901,14 @@ export default async function ComparePage(
           ) : null}
 
           {areaComparisons.length >= 2 ? (
-            <div id="compare-area-context" className="authority-card reveal compare-flow-card mb-4">
+            <div id="compare-area-context" className="authority-card reveal compare-flow-card compare-area-context-card mb-4">
               <h2 className="card-title">{locale === 'th' ? 'ภาพรวมเปรียบเทียบระดับทำเล' : 'Area comparison read'}</h2>
               <p className="card-subtitle">
                 {locale === 'th'
                   ? 'ก่อนตัดสินใจที่ระดับโครงการ ลองอ่านบริบทของแต่ละทำเลแบบ side-by-side จากราคา ค่าเช่า และ ROI snapshot ที่มีอยู่จริง'
                   : 'Before narrowing the decision at project level, read the location context side by side using live pricing, rent, and ROI snapshots where available.'}
               </p>
-              <div className="signal-grid signal-grid--two-up mt-4">
+              <div className="signal-grid signal-grid--two-up compare-area-grid mt-4">
                 {areaComparisons.map((area) => (
                   <section key={area.areaId} className="authority-card compare-area-card">
                     <div className="section-header">
@@ -919,7 +919,7 @@ export default async function ComparePage(
                           : `Currently represented by ${area.projectNames.join(', ')}`}
                       </p>
                     </div>
-                    <div className="signal-grid signal-grid--two-up">
+                    <div className="signal-grid signal-grid--two-up compare-area-metrics">
                       <div className="metric-card">
                         <span className="metric-card__label">{locale === 'th' ? 'ราคาเฉลี่ย' : 'Average price'}</span>
                         <strong className="metric-card__value">{area.avgPrice ?? '—'}</strong>
@@ -937,7 +937,7 @@ export default async function ComparePage(
                         <strong className="metric-card__value">{area.totalProjects ?? '—'}</strong>
                       </div>
                     </div>
-                    <div className="insight-list mt-4">
+                    <div className="insight-list compare-area-insights mt-4">
                       <div className="insight-list__item">
                         <span className="insight-list__body">
                           {area.asOf
@@ -954,7 +954,7 @@ export default async function ComparePage(
                       </div>
                     </div>
                     {area.areaSlug ? (
-                      <div className="card-actions mt-3">
+                      <div className="card-actions compare-area-actions mt-3">
                         <Link
                           className="btn btn-secondary"
                           href={withLocale(locale, `/areas/${encodeURIComponent(area.areaSlug)}`)}
