@@ -2702,8 +2702,8 @@ html[lang='th'] .projects-page .public-hero__eyebrow {
   display: grid;
   position: relative;
   overflow: hidden;
-  gap: 8px;
-  padding: 18px 20px;
+  gap: 10px;
+  padding: 18px 20px 18px 22px;
   border-radius: 24px;
   border: 1px solid rgba(7, 19, 39, 0.08);
   background:
@@ -2712,6 +2712,17 @@ html[lang='th'] .projects-page .public-hero__eyebrow {
   box-shadow:
     0 18px 38px rgba(7, 19, 39, 0.05),
     inset 0 1px 0 rgba(255, 255, 255, 0.76);
+}
+
+.buy-scan-note::after,
+.buy-flow-utility::after {
+  content: '';
+  position: absolute;
+  inset: 14px auto 14px 0;
+  width: 4px;
+  border-radius: 999px;
+  background: linear-gradient(180deg, rgba(176, 141, 87, 0.52), rgba(10, 77, 140, 0.14));
+  opacity: 0.82;
 }
 
 .buy-scan-note::before,
@@ -2728,6 +2739,20 @@ html[lang='th'] .projects-page .public-hero__eyebrow {
   margin-top: -2px;
 }
 
+.buy-scan-note--process {
+  background:
+    radial-gradient(circle at 88% 14%, rgba(232, 199, 141, 0.12), transparent 26%),
+    radial-gradient(circle at top left, rgba(231, 220, 199, 0.16), transparent 24%),
+    linear-gradient(180deg, rgba(248, 250, 252, 0.96), rgba(255, 255, 255, 0.98));
+}
+
+.buy-scan-note--cards {
+  background:
+    radial-gradient(circle at 86% 16%, rgba(10, 77, 140, 0.08), transparent 24%),
+    radial-gradient(circle at top left, rgba(231, 220, 199, 0.18), transparent 24%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.992), rgba(248, 245, 239, 0.978));
+}
+
 .buy-scan-note__eyebrow {
   margin: 0;
   color: rgba(10, 77, 140, 0.78);
@@ -2739,10 +2764,10 @@ html[lang='th'] .projects-page .public-hero__eyebrow {
 
 .buy-scan-note__body {
   margin: 0;
-  color: rgba(7, 19, 39, 0.76);
+  color: rgba(7, 19, 39, 0.78);
   font-size: var(--font-sm);
-  line-height: 1.74;
-  max-width: 66ch;
+  line-height: 1.72;
+  max-width: 62ch;
 }
 
 .buy-flow-utility {
@@ -2764,12 +2789,33 @@ html[lang='th'] .projects-page .public-hero__eyebrow {
     inset 0 1px 0 rgba(255, 255, 255, 0.76);
 }
 
+.buy-flow-utility--process {
+  background:
+    radial-gradient(circle at 88% 16%, rgba(232, 199, 141, 0.16), transparent 26%),
+    radial-gradient(circle at top left, rgba(231, 220, 199, 0.18), transparent 22%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.99), rgba(249, 247, 242, 0.98));
+}
+
+.buy-flow-utility--legal {
+  background:
+    radial-gradient(circle at 86% 14%, rgba(10, 77, 140, 0.08), transparent 24%),
+    radial-gradient(circle at top left, rgba(231, 220, 199, 0.18), transparent 22%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.992), rgba(247, 245, 240, 0.976));
+}
+
+.buy-flow-utility--shortlist {
+  background:
+    radial-gradient(circle at 88% 14%, rgba(176, 141, 87, 0.14), transparent 22%),
+    radial-gradient(circle at 12% 84%, rgba(10, 77, 140, 0.06), transparent 24%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.992), rgba(248, 244, 238, 0.978));
+}
+
 .buy-flow-utility__text {
   flex: 1 1 320px;
-  max-width: 58ch;
-  color: rgba(7, 19, 39, 0.76);
+  max-width: 54ch;
+  color: rgba(7, 19, 39, 0.78);
   font-size: var(--font-sm);
-  line-height: 1.72;
+  line-height: 1.68;
 }
 
 .buy-flow-utility__links {
@@ -2838,6 +2884,12 @@ html[lang='th'] .projects-page .public-hero__eyebrow {
   .buy-scan-note,
   .buy-flow-utility {
     padding: 14px 16px;
+  }
+
+  .buy-scan-note::after,
+  .buy-flow-utility::after {
+    inset: 12px auto 12px 0;
+    width: 3px;
   }
 
   .buy-flow-utility__links {
@@ -8293,6 +8345,76 @@ html[lang='th'] .projects-page .public-hero__eyebrow {
 
 .buy-page .buy-flow-utility {
   gap: 14px 18px;
+}
+
+.buy-reference-grid {
+  align-items: stretch;
+}
+
+.buy-reference-card {
+  position: relative;
+  overflow: hidden;
+  display: grid;
+  gap: 16px;
+  padding: 22px;
+  border-radius: 24px;
+  border: 1px solid rgba(7, 19, 39, 0.08);
+  background:
+    radial-gradient(circle at 88% 12%, rgba(232, 199, 141, 0.12), transparent 24%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.994), rgba(248, 245, 239, 0.982));
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.82),
+    0 18px 36px rgba(7, 19, 39, 0.06);
+}
+
+.buy-reference-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.18), rgba(255, 255, 255, 0)),
+    radial-gradient(circle at 14% 16%, rgba(10, 77, 140, 0.04), transparent 24%);
+}
+
+.buy-reference-card--closing {
+  background:
+    radial-gradient(circle at 86% 14%, rgba(10, 77, 140, 0.08), transparent 24%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.994), rgba(247, 244, 239, 0.982));
+}
+
+.buy-reference-card .card-title,
+.buy-reference-card .card-subtitle,
+.buy-reference-card__table,
+.buy-reference-card__caption {
+  position: relative;
+  z-index: 1;
+}
+
+.buy-reference-card .card-title {
+  margin-bottom: 2px;
+}
+
+.buy-reference-card .card-subtitle {
+  max-width: 48ch;
+}
+
+.buy-reference-card__table {
+  margin: 0;
+}
+
+.buy-reference-card__caption {
+  margin-top: 0;
+  padding-top: 12px;
+  border-top: 1px solid rgba(7, 19, 39, 0.08);
+}
+
+.buy-legal-list {
+  max-width: 64rem;
+}
+
+.buy-legal-list li {
+  color: rgba(7, 19, 39, 0.8);
 }
 
 /* ======================== DETAIL PAGE ======================== */

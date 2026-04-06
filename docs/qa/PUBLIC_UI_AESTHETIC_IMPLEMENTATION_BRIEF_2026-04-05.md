@@ -24,7 +24,7 @@ Current QA baseline:
 
 - `100/100`
 - `elite`
-- latest summary: `admin-app/artifacts/public-visual-qa/run-20260406-213301/summary.json`
+- latest summary: `admin-app/artifacts/public-visual-qa/run-20260406-214539/summary.json`
 - latest review file: `docs/qa/public-visual-review.full.json`
 
 Route-level polish logged:
@@ -61,6 +61,10 @@ Route-level polish logged:
   สถานะ: `applied after Concierge side-rail micro-polish`
   ขอบเขต: property advisor rail, direct-channel card, rail note, และ lead-form shell ให้ขึ้นมาอยู่ใน concierge grammar เดียวกับ project/contact
   ไฟล์หลัก: `admin-app/app/(site)/[locale]/property/[slug]/page.tsx`, `admin-app/app/globals.css`
+- `Buy decision helper micro-polish`
+  สถานะ: `applied after Property advisor rail micro-polish`
+  ขอบเขต: helper strips, estimator reference cards, legal follow-up utility, และ shortlist nudges ของ buy route ให้ staged เป็น advisory path เดียวกันมากขึ้น
+  ไฟล์หลัก: `admin-app/app/(site)/[locale]/buy/page.tsx`, `admin-app/app/globals.css`
 
 ## Purpose
 
@@ -582,10 +586,10 @@ Project detail:
 
 หลังจาก baseline ขึ้น `100/100` แล้ว งานถัดไปควรเป็น route-level micro-polish แบบแคบ ไม่ใช่ system rewrite:
 
-- `Buy decision helper micro-polish`
-  โฟกัส: ทำให้ helper strips, estimator support blocks, และ decision nudges ของ buy route staged เป็น premium advisory path มากขึ้น
 - `Property decision grid cadence micro-polish`
   โฟกัส: ทำให้ decision cues, next tools, และ lower-funnel article handoff ของ property detail main column สงบและ staged ขึ้นอีกขั้น
+- `Buy closing CTA panel micro-polish`
+  โฟกัส: ทำให้ final brief panel และ estimator-to-form handoff ของ buy route ดูเป็น closing advisory deck มากขึ้น โดยไม่เพิ่ม CTA noise
 
 เหตุผล:
 
