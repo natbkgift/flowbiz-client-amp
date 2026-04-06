@@ -506,12 +506,20 @@ export default async function PropertyPage(props: PageProps) {
               <div className="property-title">
                 <p className="public-hero__eyebrow">{dict.advisory.heroEyebrow}</p>
                 <h1>{property.title}</h1>
-                <p className="property-location">
+                <p className="property-location property-location--primary">
                   {property.address}, {property.city}
                 </p>
                 <p className="section-subtitle">{propertySummary}</p>
               </div>
-              <div className="property-price">{formatPriceTHB(Number(property.price))}</div>
+              <div className="property-price-block">
+                <p className="property-price-label">{locale === 'th' ? 'ราคาอ้างอิง' : 'Guide price'}</p>
+                <div className="property-price">{formatPriceTHB(Number(property.price))}</div>
+                <p className="property-price-note">
+                  {locale === 'th'
+                    ? 'ใช้ราคาในหน้านี้เป็นฐานก่อนเช็ก availability และยูนิตที่ยังเปิดอยู่จริง'
+                    : 'Use this price as the starting point before confirming live availability and active units.'}
+                </p>
+              </div>
             </PublicSurfaceCard>
 
             <PublicActionRow id="property-primary-actions" className="cta-row mb-6" stackOnMobile>
@@ -537,29 +545,35 @@ export default async function PropertyPage(props: PageProps) {
             </p>
 
             <div id="property-core-facts" className="property-facts">
-              <div className="flex items-center gap-2">
-                <IconBed size="sm" />
-                <div>
-                  <strong>{property.bedrooms ?? '-'}</strong>
-                  <div className="text-sm text-[var(--color-text-secondary)]">
+              <div className="property-fact-card">
+                <div className="property-fact-card__icon">
+                  <IconBed size="sm" />
+                </div>
+                <div className="property-fact-card__content">
+                  <strong className="property-fact-card__value">{property.bedrooms ?? '-'}</strong>
+                  <div className="property-fact-card__label text-sm text-[var(--color-text-secondary)]">
                     {dict.property.bedrooms}
                   </div>
                 </div>
               </div>
-              <div className="flex items-center gap-2">
-                <IconBath size="sm" />
-                <div>
-                  <strong>{property.bathrooms ?? '-'}</strong>
-                  <div className="text-sm text-[var(--color-text-secondary)]">
+              <div className="property-fact-card">
+                <div className="property-fact-card__icon">
+                  <IconBath size="sm" />
+                </div>
+                <div className="property-fact-card__content">
+                  <strong className="property-fact-card__value">{property.bathrooms ?? '-'}</strong>
+                  <div className="property-fact-card__label text-sm text-[var(--color-text-secondary)]">
                     {dict.property.bathrooms}
                   </div>
                 </div>
               </div>
-              <div className="flex items-center gap-2">
-                <IconArea size="sm" />
-                <div>
-                  <strong>{property.size ?? '-'}</strong>
-                  <div className="text-sm text-[var(--color-text-secondary)]">
+              <div className="property-fact-card">
+                <div className="property-fact-card__icon">
+                  <IconArea size="sm" />
+                </div>
+                <div className="property-fact-card__content">
+                  <strong className="property-fact-card__value">{property.size ?? '-'}</strong>
+                  <div className="property-fact-card__label text-sm text-[var(--color-text-secondary)]">
                     {dict.property.sqm}
                   </div>
                 </div>

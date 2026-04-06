@@ -1,11 +1,11 @@
 # Public UI Aesthetic Implementation Brief
 
-อัปเดต: `2026-04-05`  
+อัปเดต: `2026-04-06`  
 บทบาทเอกสาร: `Execution brief for visual polish passes without touching business logic`
 
 ## Execution Status
 
-สถานะล่าสุดของแผนนี้ ณ `2026-04-05`:
+สถานะล่าสุดของแผนนี้ ณ `2026-04-06`:
 
 - `Pass 1: Typography Pass` เสร็จแล้ว
   อ้างอิงงาน: `eb2c6fa9`
@@ -24,7 +24,7 @@ Current QA baseline:
 
 - `100/100`
 - `elite`
-- latest summary: `admin-app/artifacts/public-visual-qa/run-20260405-152601/summary.json`
+- latest summary: `admin-app/artifacts/public-visual-qa/run-20260406-184338/summary.json`
 - latest review file: `docs/qa/public-visual-review.full.json`
 
 Route-level polish logged:
@@ -36,6 +36,18 @@ Route-level polish logged:
 - `Property detail media micro-polish`
   สถานะ: `applied during dedicated Media Pass`
   ขอบเขต: gallery shell, counter, thumbnail cadence, และ limited-media state
+  ไฟล์หลัก: `admin-app/app/(site)/[locale]/property/[slug]/page.tsx`, `admin-app/app/globals.css`
+- `Homepage TH micro-polish`
+  สถานะ: `applied after dedicated Media Pass`
+  ขอบเขต: first viewport cadence, TH hero line-length, trust snapshot rhythm, และ pathway card cadence
+  ไฟล์หลัก: `admin-app/styles/public-primitives.css`
+- `Project detail gallery micro-polish`
+  สถานะ: `applied after Homepage TH micro-polish`
+  ขอบเขต: lead image dominance, supporting media rail hierarchy, และ gallery shell framing ของ route โครงการ
+  ไฟล์หลัก: `admin-app/app/globals.css`
+- `Property detail facts micro-polish`
+  สถานะ: `applied after Project detail gallery micro-polish`
+  ขอบเขต: price block cadence, facts row cards, และ location hierarchy ของ route รายการ
   ไฟล์หลัก: `admin-app/app/(site)/[locale]/property/[slug]/page.tsx`, `admin-app/app/globals.css`
 
 ## Purpose
@@ -558,10 +570,10 @@ Project detail:
 
 หลังจาก baseline ขึ้น `100/100` แล้ว งานถัดไปควรเป็น route-level micro-polish แบบแคบ ไม่ใช่ system rewrite:
 
-- `Homepage TH micro-polish`
-  โฟกัส: ทำให้ TH first viewport ดูนิ่งขึ้นอีกโดยไม่ไล่ parity แบบ pixel-identical
-- `Project detail gallery micro-polish`
-  โฟกัส: ทำให้ supporting media rail และ lead image ของ project detail มี hierarchy ที่เด่นขึ้นอีกขั้น
+- `Project detail confidence pack micro-polish`
+  โฟกัส: ทำให้ authority cards และช่วง handoff หลัง gallery สงบขึ้นอีกขั้นโดยไม่เสีย clarity ของ decision flow
+- `Contact concierge micro-polish`
+  โฟกัส: ทำให้ direct channel card, agent card, และ form-side support ของ contact/property side rail ดูเป็น concierge handoff มากขึ้น
 
 เหตุผล:
 
