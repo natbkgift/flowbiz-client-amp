@@ -610,8 +610,8 @@ export default async function PropertyPage(props: PageProps) {
               </div>
             ) : null}
 
-            <section id="property-confidence-pack" className="signal-grid signal-grid--two-up reveal decision-pack mb-6">
-              <div className="authority-card">
+            <section id="property-confidence-pack" className="signal-grid signal-grid--two-up reveal decision-pack property-confidence-pack mb-6">
+              <div className="authority-card property-confidence-card property-confidence-card--verified">
                 <h2 className="card-title">{locale === 'th' ? 'ยืนยันได้ในหน้านี้' : 'Verified on this page'}</h2>
                 <p className="card-subtitle">
                   {locale === 'th'
@@ -627,7 +627,7 @@ export default async function PropertyPage(props: PageProps) {
                 </div>
               </div>
 
-              <div className="authority-card">
+              <div className="authority-card property-confidence-card property-confidence-card--confirm">
                 <h2 className="card-title">{locale === 'th' ? 'ควรเช็กอะไรต่อก่อนคุยเชิงลึก' : 'What to confirm before going deeper'}</h2>
                 <p className="card-subtitle">
                   {locale === 'th'
@@ -644,7 +644,7 @@ export default async function PropertyPage(props: PageProps) {
               </div>
             </section>
 
-            <section id="property-description" className="authority-card property-description-card mb-6">
+            <section id="property-description" className="authority-card property-description-card property-description-card--bridge mb-6">
               <h2 className="card-title">{dict.property.description}</h2>
               <div className="content-article mb-0">
                 {descriptionParagraphs.map((paragraph) => (
@@ -653,8 +653,8 @@ export default async function PropertyPage(props: PageProps) {
               </div>
             </section>
 
-            <section id="property-decision-grid" className="signal-grid signal-grid--two-up reveal mb-6">
-              <div id="property-decision-cues" className="authority-card">
+            <section id="property-decision-grid" className="signal-grid signal-grid--two-up reveal property-decision-grid mb-6">
+              <div id="property-decision-cues" className="authority-card property-decision-card property-decision-card--lead">
                 <h2 className="card-title">{locale === 'th' ? 'สัญญาณช่วยตัดสินใจระดับยูนิต' : 'Listing decision cues'}</h2>
                 <p className="card-subtitle">
                   {locale === 'th'
@@ -670,14 +670,14 @@ export default async function PropertyPage(props: PageProps) {
                 </div>
               </div>
 
-              <div id="property-next-tools" className="authority-card">
+              <div id="property-next-tools" className="authority-card property-decision-card property-decision-card--tools">
                 <h2 className="card-title">{locale === 'th' ? 'เครื่องมือช่วยตัดสินใจและทางไปต่อ' : 'Investor tools and next moves'}</h2>
                 <p className="card-subtitle">
                   {locale === 'th'
                     ? 'ถ้าต้องคำนวณผลตอบแทนหรือเทียบหลายทางเลือกต่อ ให้ไปยังเครื่องมือและหน้าที่ใช้ตัดสินใจต่อได้ทันที'
                     : 'If you need a yield sense-check or a multi-option comparison, move directly into the supporting tools below.'}
                 </p>
-                <div className="card-actions mt-3">
+                <div className="card-actions property-decision-card__actions mt-3">
                   <Link className="btn btn-secondary" href={withLocale(locale, '/calculator')}>
                     {locale === 'th' ? 'เปิด calculator' : 'Open calculator'}
                   </Link>
@@ -712,10 +712,10 @@ export default async function PropertyPage(props: PageProps) {
               </section>
             ) : null}
 
-            <div id="property-next-steps" className="authority-card reveal mb-6">
+            <div id="property-next-steps" className="authority-card property-next-steps-card reveal mb-6">
               <h2 className="card-title">{dict.property.nextSteps}</h2>
               <p className="card-subtitle">{dict.property.exploreRelated}</p>
-              <div className="card-actions">
+              <div className="card-actions property-next-steps-card__actions">
                 {priorityInternalLinks.map((it) => (
                   <Link
                     key={it.href}

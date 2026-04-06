@@ -24,7 +24,7 @@ Current QA baseline:
 
 - `100/100`
 - `elite`
-- latest summary: `admin-app/artifacts/public-visual-qa/run-20260406-220628/summary.json`
+- latest summary: `admin-app/artifacts/public-visual-qa/run-20260406-222420/summary.json`
 - latest review file: `docs/qa/public-visual-review.full.json`
 
 Route-level polish logged:
@@ -69,6 +69,10 @@ Route-level polish logged:
   สถานะ: `applied after Buy decision helper micro-polish`
   ขอบเขต: final brief panel, closing copy shell, และ form handoff surface ของ buy route ให้ปิดหน้าด้วย advisory deck ที่สงบขึ้น
   ไฟล์หลัก: `admin-app/app/(site)/[locale]/buy/page.tsx`, `admin-app/app/globals.css`
+- `Property decision grid cadence micro-polish`
+  สถานะ: `applied after Buy closing CTA panel micro-polish`
+  ขอบเขต: decision cues, next tools, confidence pack, description bridge, และ next-step handoff ของ property detail lower funnel ให้ staged เป็น sequence เดียวกันมากขึ้น
+  ไฟล์หลัก: `admin-app/app/(site)/[locale]/property/[slug]/page.tsx`, `admin-app/app/globals.css`
 
 ## Purpose
 
@@ -590,10 +594,10 @@ Project detail:
 
 หลังจาก baseline ขึ้น `100/100` แล้ว งานถัดไปควรเป็น route-level micro-polish แบบแคบ ไม่ใช่ system rewrite:
 
-- `Property decision grid cadence micro-polish`
-  โฟกัส: ทำให้ decision cues, next tools, และ lower-funnel article handoff ของ property detail main column สงบและ staged ขึ้นอีกขั้น
 - `Buying cost estimator route micro-polish`
   โฟกัส: ทำให้ estimator route เองมี cadence ที่ขึ้นกับ buy advisory system มากขึ้น โดยเฉพาะ result summary, unresolved items, และ action handoff
+- `Property related listings micro-polish`
+  โฟกัส: ทำให้ related listing cards และ next-step bridge หลัง decision grid อ่านเป็น curated continuation มากขึ้น ไม่กลับไปมี catalogue feel
 
 เหตุผล:
 
