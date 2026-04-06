@@ -8417,6 +8417,131 @@ html[lang='th'] .projects-page .public-hero__eyebrow {
   color: rgba(7, 19, 39, 0.8);
 }
 
+.buy-closing-cta-section {
+  position: relative;
+}
+
+.buy-closing-cta-panel {
+  position: relative;
+  overflow: hidden;
+  gap: clamp(20px, 3vw, 30px);
+  padding: clamp(22px, 3vw, 32px);
+  border-radius: 28px;
+  border: 1px solid rgba(7, 19, 39, 0.08);
+  background:
+    radial-gradient(circle at 88% 12%, rgba(232, 199, 141, 0.18), transparent 24%),
+    radial-gradient(circle at 14% 84%, rgba(10, 77, 140, 0.08), transparent 26%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.994), rgba(248, 244, 238, 0.982));
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.82),
+    0 24px 54px rgba(7, 19, 39, 0.08);
+}
+
+.buy-closing-cta-panel::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0)),
+    radial-gradient(circle at 12% 14%, rgba(10, 77, 140, 0.05), transparent 24%);
+}
+
+.buy-closing-cta-panel__copy,
+.buy-closing-cta-panel__form {
+  position: relative;
+  z-index: 1;
+}
+
+.buy-closing-cta-panel__copy {
+  display: grid;
+  gap: 14px;
+  align-content: start;
+  max-width: 40rem;
+}
+
+.buy-closing-cta-panel__eyebrow {
+  margin: 0;
+  color: rgba(120, 92, 47, 0.86);
+  font-size: 0.72rem;
+  font-weight: 700;
+  line-height: 1.2;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.buy-closing-cta-panel .cta-title {
+  max-width: 16ch;
+  margin-bottom: 0;
+  font-size: clamp(1.8rem, 2.6vw, 2.45rem);
+  line-height: 1.02;
+  letter-spacing: -0.04em;
+}
+
+.buy-closing-cta-panel .cta-body {
+  max-width: 43ch;
+  color: rgba(7, 19, 39, 0.8);
+  line-height: 1.68;
+}
+
+.buy-closing-cta-panel__note {
+  max-width: 46ch;
+  margin: 0;
+  padding-top: 14px;
+  border-top: 1px solid rgba(7, 19, 39, 0.08);
+  color: rgba(7, 19, 39, 0.68);
+  font-size: 0.84rem;
+  line-height: 1.64;
+}
+
+.buy-closing-cta-panel__form {
+  align-self: stretch;
+}
+
+.buy-closing-cta-panel__form .inquiry-form {
+  min-height: 100%;
+  border-radius: 24px;
+  border: 1px solid rgba(7, 19, 39, 0.08);
+  background:
+    radial-gradient(circle at top right, rgba(231, 220, 199, 0.16), transparent 24%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.992), rgba(248, 245, 239, 0.978));
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.82),
+    0 18px 40px rgba(7, 19, 39, 0.05);
+}
+
+@media (min-width: 1024px) {
+  .buy-closing-cta-panel {
+    grid-template-columns: minmax(0, 1.08fr) minmax(320px, 0.92fr);
+    align-items: stretch;
+  }
+}
+
+@media (max-width: 767px) {
+  .buy-closing-cta-panel {
+    padding: 18px 16px;
+    border-radius: 22px;
+  }
+
+  .buy-closing-cta-panel__copy {
+    gap: 12px;
+  }
+
+  .buy-closing-cta-panel .cta-title {
+    max-width: none;
+    font-size: clamp(1.56rem, 8vw, 1.92rem);
+  }
+
+  .buy-closing-cta-panel__note {
+    padding-top: 12px;
+    font-size: 0.8rem;
+  }
+
+  .buy-closing-cta-panel__form .inquiry-form {
+    border-radius: 20px;
+  }
+}
+
 /* ======================== DETAIL PAGE ======================== */
 
 .detail-layout {

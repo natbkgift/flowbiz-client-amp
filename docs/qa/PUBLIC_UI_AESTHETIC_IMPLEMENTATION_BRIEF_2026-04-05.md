@@ -24,7 +24,7 @@ Current QA baseline:
 
 - `100/100`
 - `elite`
-- latest summary: `admin-app/artifacts/public-visual-qa/run-20260406-214539/summary.json`
+- latest summary: `admin-app/artifacts/public-visual-qa/run-20260406-220628/summary.json`
 - latest review file: `docs/qa/public-visual-review.full.json`
 
 Route-level polish logged:
@@ -64,6 +64,10 @@ Route-level polish logged:
 - `Buy decision helper micro-polish`
   สถานะ: `applied after Property advisor rail micro-polish`
   ขอบเขต: helper strips, estimator reference cards, legal follow-up utility, และ shortlist nudges ของ buy route ให้ staged เป็น advisory path เดียวกันมากขึ้น
+  ไฟล์หลัก: `admin-app/app/(site)/[locale]/buy/page.tsx`, `admin-app/app/globals.css`
+- `Buy closing CTA panel micro-polish`
+  สถานะ: `applied after Buy decision helper micro-polish`
+  ขอบเขต: final brief panel, closing copy shell, และ form handoff surface ของ buy route ให้ปิดหน้าด้วย advisory deck ที่สงบขึ้น
   ไฟล์หลัก: `admin-app/app/(site)/[locale]/buy/page.tsx`, `admin-app/app/globals.css`
 
 ## Purpose
@@ -588,8 +592,8 @@ Project detail:
 
 - `Property decision grid cadence micro-polish`
   โฟกัส: ทำให้ decision cues, next tools, และ lower-funnel article handoff ของ property detail main column สงบและ staged ขึ้นอีกขั้น
-- `Buy closing CTA panel micro-polish`
-  โฟกัส: ทำให้ final brief panel และ estimator-to-form handoff ของ buy route ดูเป็น closing advisory deck มากขึ้น โดยไม่เพิ่ม CTA noise
+- `Buying cost estimator route micro-polish`
+  โฟกัส: ทำให้ estimator route เองมี cadence ที่ขึ้นกับ buy advisory system มากขึ้น โดยเฉพาะ result summary, unresolved items, และ action handoff
 
 เหตุผล:
 

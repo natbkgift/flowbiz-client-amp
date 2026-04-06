@@ -81,6 +81,12 @@ export default async function BuyPage(props: { params: Promise<{ locale: string 
   const buyFormDefaultMessage = locale === 'th'
     ? 'ต้องการให้ทีมคัดรายการคัดไว้ฝั่งผู้ซื้อที่เหมาะกับงบ ทำเล และช่วงเวลาของผม/ฉัน พร้อมบอกสิ่งที่ควรเช็กต่อเรื่องโควตาต่างชาติและค่าโอน'
     : 'I want the team to prepare a buy-side shortlist that fits my budget, area, and timing, together with the next checks on quota and transfer costs.';
+  const buyClosingEyebrow = locale === 'th'
+    ? 'ส่งต่อหลัง shortlist เริ่มชัด'
+    : 'Hand off once the shortlist is clearer';
+  const buyClosingNote = locale === 'th'
+    ? 'ทีมจะใช้บรีฟนี้กลับไปจัด shortlist พร้อมกรอบ quota ค่าโอน และประเด็นที่ควรคุยต่อในสายถัดไป โดยไม่ต้องเริ่มอธิบายใหม่ทั้งหมด.'
+    : 'The team uses this brief to return with a shortlist framed around quota, transfer costs, and the checks worth covering on the next call without restarting the conversation.';
 
   return (
     <main id="main-content" className="buy-page decision-page--confidence">
@@ -382,10 +388,11 @@ export default async function BuyPage(props: { params: Promise<{ locale: string 
         </Container>
       </section>
 
-      <section className="section section--cta">
+      <section className="section section--cta buy-closing-cta-section">
         <Container>
-          <div className="cta-panel">
-            <div>
+          <div className="cta-panel buy-closing-cta-panel">
+            <div className="buy-closing-cta-panel__copy">
+              <p className="buy-closing-cta-panel__eyebrow">{buyClosingEyebrow}</p>
               <h2 className="cta-title">
                 {locale === 'th' ? 'ส่งบรีฟให้ทีม เพื่อได้รายการคัดฝั่งซื้อที่ชัดขึ้น' : 'Brief the team for a cleaner buy-side shortlist'}
               </h2>
@@ -394,8 +401,9 @@ export default async function BuyPage(props: { params: Promise<{ locale: string 
                   ? 'ใช้บล็อกนี้เมื่อพร้อมให้ทีมคัดยูนิตที่ควรดูต่อ พร้อมสรุป quota, ค่าโอน, และ step ที่ควรเช็กก่อนคุยลึก'
                   : 'Use this block when you are ready for the team to narrow the units worth seeing next and frame the quota, fee, and diligence checks before the next call.'}
               </p>
+              <p className="buy-closing-cta-panel__note">{buyClosingNote}</p>
             </div>
-            <div className="cta-panel__form">
+            <div className="cta-panel__form buy-closing-cta-panel__form">
               <LeadForm
                 heading={buyFormHeading}
                 description={buyFormDescription}
