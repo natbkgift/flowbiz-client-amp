@@ -804,8 +804,8 @@ export default async function ProjectDetailPage(
         ) : null}
         <div className="detail-layout advisory-detail-layout mt-6">
           <div className="detail-stack">
-            <section id="project-confidence-pack" className="signal-grid signal-grid--three-up reveal decision-pack">
-              <div className="authority-card">
+            <section id="project-confidence-pack" className="signal-grid signal-grid--three-up reveal decision-pack project-confidence-pack">
+              <div className="authority-card project-confidence-card project-confidence-card--lead">
                 <h2 className="card-title">{locale === 'th' ? 'ยืนยันได้ในหน้านี้' : 'Verified on this page'}</h2>
                 <p className="card-subtitle">
                   {locale === 'th'
@@ -821,7 +821,7 @@ export default async function ProjectDetailPage(
                 </div>
               </div>
 
-              <div className="authority-card">
+              <div className="authority-card project-confidence-card project-confidence-card--availability">
                 <h2 className="card-title">{locale === 'th' ? 'ราคาและ availability context' : 'Pricing and availability context'}</h2>
                 <p className="card-subtitle">
                   {locale === 'th'
@@ -837,7 +837,7 @@ export default async function ProjectDetailPage(
                 </div>
               </div>
 
-              <div className="authority-card">
+              <div className="authority-card project-confidence-card project-confidence-card--consider">
                 <h2 className="card-title">{locale === 'th' ? 'เหตุผลที่ควรพิจารณาโครงการนี้' : 'Why this project is worth considering'}</h2>
                 <p className="card-subtitle">
                   {locale === 'th'
@@ -854,7 +854,7 @@ export default async function ProjectDetailPage(
               </div>
             </section>
 
-            <section id="project-brief-section" className="authority-card reveal">
+            <section id="project-brief-section" className="authority-card reveal project-brief-section">
               <div className="section-header">
                 <h2 className="section-title section-title--sm">{locale === 'th' ? 'สรุปโครงการเพื่อใช้คัดรายการ' : 'Project read for shortlist'}</h2>
                 <p className="section-subtitle">
@@ -865,7 +865,7 @@ export default async function ProjectDetailPage(
               </div>
 
               {projectMetrics.length ? (
-                <div className="signal-grid signal-grid--three-up">
+                <div className="signal-grid signal-grid--three-up project-brief-section__metrics">
                   {projectMetrics.map((metric) => (
                     <div key={metric.label} className="metric-card">
                       <span className="metric-card__label">{metric.label}</span>
@@ -1014,47 +1014,49 @@ export default async function ProjectDetailPage(
             ) : null}
           </div>
 
-          <aside className="detail-sidebar detail-stack">
-            <div id="project-advisor-brief" className="page-rail-card reveal">
+          <aside className="detail-sidebar detail-stack project-advisor-rail">
+            <div id="project-advisor-brief" className="page-rail-card reveal project-advisor-brief">
               <h2 className="card-title">{projectDecisionCta.sidebarTitle}</h2>
               <p className="card-subtitle">
                 {projectDecisionCta.sidebarBody}
               </p>
             </div>
-            <LeadForm
-              locale={locale}
-              heading={projectDecisionCta.leadHeading}
-              defaultPurpose={hasInvestmentView ? 'invest' : 'buy'}
-              defaultPreferredArea={project.area?.name ?? undefined}
-              defaultMessage={projectDecisionCta.leadMessage}
-              inquiryIntent={projectDecisionCta.inquiryIntent}
-              inquirySource={projectDecisionCta.inquirySource}
-              inquiryTags={[
-                `project:${project.slug}`,
-                `buyer_fit:${projectDecisionCta.buyerFit}`,
-                `signal_level:${projectDecisionCta.signalLevel}`,
-              ]}
-              contextSummary={[
-                locale === 'th' ? `เส้นทางที่ต้องการ: ${projectDecisionCta.inquiryIntent}` : `Lead path: ${projectDecisionCta.inquiryIntent}`,
-                locale === 'th' ? `โครงการที่กำลังสนใจ: ${project.name}` : `Project in focus: ${project.name}`,
-                locale === 'th' ? `ต้นทางของการส่งต่อ: ${projectDecisionCta.inquirySource}` : `Handoff source: ${projectDecisionCta.inquirySource}`,
-                locale === 'th' ? `ลักษณะผู้ซื้อที่เหมาะ: ${projectDecisionCta.buyerFit}` : `Buyer fit: ${projectDecisionCta.buyerFit}`,
-                locale === 'th' ? `ระดับความชัดของสัญญาณ: ${projectDecisionCta.signalLevel}` : `Signal strength: ${projectDecisionCta.signalLevel}`,
-              ]}
-              handoff={{
-                sourceRoute: 'project',
-                ctaType: 'primary',
-                ctaLabel: projectDecisionCta.leadHeading,
-                entityType: 'project',
-                entityId: project.id,
-                entityName: project.name,
-                userIntent: hasInvestmentView ? 'invest' : 'buy',
-                location: project.area?.name ?? undefined,
-                context: {
-                  area: project.area?.name ?? undefined,
-                },
-              }}
-            />
+            <div className="project-advisor-form-shell">
+              <LeadForm
+                locale={locale}
+                heading={projectDecisionCta.leadHeading}
+                defaultPurpose={hasInvestmentView ? 'invest' : 'buy'}
+                defaultPreferredArea={project.area?.name ?? undefined}
+                defaultMessage={projectDecisionCta.leadMessage}
+                inquiryIntent={projectDecisionCta.inquiryIntent}
+                inquirySource={projectDecisionCta.inquirySource}
+                inquiryTags={[
+                  `project:${project.slug}`,
+                  `buyer_fit:${projectDecisionCta.buyerFit}`,
+                  `signal_level:${projectDecisionCta.signalLevel}`,
+                ]}
+                contextSummary={[
+                  locale === 'th' ? `เส้นทางที่ต้องการ: ${projectDecisionCta.inquiryIntent}` : `Lead path: ${projectDecisionCta.inquiryIntent}`,
+                  locale === 'th' ? `โครงการที่กำลังสนใจ: ${project.name}` : `Project in focus: ${project.name}`,
+                  locale === 'th' ? `ต้นทางของการส่งต่อ: ${projectDecisionCta.inquirySource}` : `Handoff source: ${projectDecisionCta.inquirySource}`,
+                  locale === 'th' ? `ลักษณะผู้ซื้อที่เหมาะ: ${projectDecisionCta.buyerFit}` : `Buyer fit: ${projectDecisionCta.buyerFit}`,
+                  locale === 'th' ? `ระดับความชัดของสัญญาณ: ${projectDecisionCta.signalLevel}` : `Signal strength: ${projectDecisionCta.signalLevel}`,
+                ]}
+                handoff={{
+                  sourceRoute: 'project',
+                  ctaType: 'primary',
+                  ctaLabel: projectDecisionCta.leadHeading,
+                  entityType: 'project',
+                  entityId: project.id,
+                  entityName: project.name,
+                  userIntent: hasInvestmentView ? 'invest' : 'buy',
+                  location: project.area?.name ?? undefined,
+                  context: {
+                    area: project.area?.name ?? undefined,
+                  },
+                }}
+              />
+            </div>
           </aside>
         </div>
       </Container>

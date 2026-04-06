@@ -24,7 +24,7 @@ Current QA baseline:
 
 - `100/100`
 - `elite`
-- latest summary: `admin-app/artifacts/public-visual-qa/run-20260406-184338/summary.json`
+- latest summary: `admin-app/artifacts/public-visual-qa/run-20260406-211757/summary.json`
 - latest review file: `docs/qa/public-visual-review.full.json`
 
 Route-level polish logged:
@@ -49,6 +49,14 @@ Route-level polish logged:
   สถานะ: `applied after Project detail gallery micro-polish`
   ขอบเขต: price block cadence, facts row cards, และ location hierarchy ของ route รายการ
   ไฟล์หลัก: `admin-app/app/(site)/[locale]/property/[slug]/page.tsx`, `admin-app/app/globals.css`
+- `Project detail confidence pack micro-polish`
+  สถานะ: `applied after Property detail facts micro-polish`
+  ขอบเขต: authority-card hierarchy, lead/support card balance, และ handoff จาก gallery ไปยัง project brief
+  ไฟล์หลัก: `admin-app/app/(site)/[locale]/projects/[slug]/page.tsx`, `admin-app/app/globals.css`
+- `Concierge side-rail micro-polish`
+  สถานะ: `applied after Project detail confidence pack micro-polish`
+  ขอบเขต: project advisor rail, contact concierge rail, และ lead-form handoff shell ให้กลายเป็น transition เดียวกันมากขึ้น
+  ไฟล์หลัก: `admin-app/app/(site)/[locale]/projects/[slug]/page.tsx`, `admin-app/app/(site)/[locale]/contact/page.tsx`, `admin-app/app/globals.css`
 
 ## Purpose
 
@@ -570,10 +578,10 @@ Project detail:
 
 หลังจาก baseline ขึ้น `100/100` แล้ว งานถัดไปควรเป็น route-level micro-polish แบบแคบ ไม่ใช่ system rewrite:
 
-- `Project detail confidence pack micro-polish`
-  โฟกัส: ทำให้ authority cards และช่วง handoff หลัง gallery สงบขึ้นอีกขั้นโดยไม่เสีย clarity ของ decision flow
-- `Contact concierge micro-polish`
-  โฟกัส: ทำให้ direct channel card, agent card, และ form-side support ของ contact/property side rail ดูเป็น concierge handoff มากขึ้น
+- `Property advisor rail micro-polish`
+  โฟกัส: ทำให้ agent card, lead form shell, และ supporting signals ของ property detail side rail ขึ้นมาอยู่ใน concierge grammar เดียวกับ project/contact
+- `Buy decision helper micro-polish`
+  โฟกัส: ทำให้ helper strips, estimator support blocks, และ decision nudges ของ buy route staged เป็น premium advisory path มากขึ้น
 
 เหตุผล:
 

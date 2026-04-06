@@ -7562,6 +7562,269 @@ html[lang='th'] .projects-page .public-hero__eyebrow {
   padding: clamp(16px, 4vw, 24px);
 }
 
+.decision-page--project .project-confidence-pack {
+  position: relative;
+  gap: clamp(12px, 1.7vw, 18px);
+}
+
+.decision-page--project .project-confidence-pack::before {
+  content: '';
+  position: absolute;
+  inset: -6px;
+  border-radius: 24px;
+  background:
+    radial-gradient(circle at 10% 10%, rgba(232, 199, 141, 0.16), transparent 26%),
+    linear-gradient(180deg, rgba(249, 247, 242, 0.88), rgba(245, 241, 233, 0.34));
+  opacity: 0.7;
+  pointer-events: none;
+}
+
+.decision-page--project .project-confidence-card {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  align-content: start;
+  gap: 10px;
+  min-height: 100%;
+  padding: clamp(18px, 2.8vw, 28px);
+  border-color: rgba(7, 19, 39, 0.08);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.985), rgba(248, 245, 239, 0.96)),
+    rgba(255, 255, 255, 0.96);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.82),
+    0 18px 40px rgba(7, 19, 39, 0.05);
+}
+
+.decision-page--project .project-confidence-card .card-subtitle {
+  max-width: 29ch;
+  margin-bottom: 0;
+}
+
+.decision-page--project .project-confidence-card .insight-list {
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.decision-page--project .project-confidence-card .insight-list__item {
+  padding: 12px 13px;
+  border-radius: 15px;
+  background: rgba(255, 255, 255, 0.78);
+  border-color: rgba(7, 19, 39, 0.06);
+}
+
+.decision-page--project .project-confidence-card--lead {
+  background:
+    radial-gradient(circle at 86% 14%, rgba(232, 199, 141, 0.16), transparent 30%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.995), rgba(246, 241, 233, 0.97));
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.84),
+    0 24px 52px rgba(7, 19, 39, 0.07);
+}
+
+.decision-page--project .project-confidence-card--lead .card-title {
+  font-size: clamp(1.14rem, 1.6vw, 1.38rem);
+}
+
+.decision-page--project .project-confidence-card--lead .insight-list__item {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.9), rgba(249, 246, 239, 0.84));
+}
+
+.decision-page--project .project-confidence-card--availability,
+.decision-page--project .project-confidence-card--consider {
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.975), rgba(247, 244, 238, 0.95)),
+    rgba(255, 255, 255, 0.95);
+}
+
+.decision-page--project .project-brief-section {
+  position: relative;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 88% 8%, rgba(10, 77, 140, 0.07), transparent 24%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.992), rgba(248, 245, 239, 0.972));
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.82),
+    0 20px 44px rgba(7, 19, 39, 0.06);
+}
+
+.decision-page--project .project-brief-section .section-header {
+  max-width: 42rem;
+}
+
+.decision-page--project .project-brief-section .section-subtitle {
+  max-width: 38ch;
+}
+
+.decision-page--project .project-brief-section__metrics {
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.decision-page--project .project-brief-section .metric-card {
+  min-height: 100%;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.9), rgba(249, 246, 240, 0.88));
+  border-color: rgba(7, 19, 39, 0.07);
+}
+
+.decision-page--project .project-brief-section .content-article {
+  max-width: 64ch;
+}
+
+.detail-sidebar {
+  gap: clamp(16px, 2vw, 22px);
+}
+
+.detail-sidebar .inquiry-form,
+.split--form-priority .split__main .inquiry-form {
+  border-radius: 24px;
+  border: 1px solid rgba(7, 19, 39, 0.08);
+  background:
+    radial-gradient(circle at top right, rgba(231, 220, 199, 0.16), transparent 26%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.992), rgba(248, 245, 239, 0.978));
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.82),
+    0 22px 48px rgba(7, 19, 39, 0.06);
+}
+
+.detail-sidebar .inquiry-form .form-desc,
+.split--form-priority .split__main .inquiry-form .form-desc {
+  max-width: 52ch;
+  color: rgba(7, 19, 39, 0.7);
+}
+
+.project-advisor-rail .project-advisor-brief,
+.detail-sidebar .agent-card,
+.contact-concierge-rail .contact-concierge-box {
+  position: relative;
+  overflow: hidden;
+  border-radius: 24px;
+  border: 1px solid rgba(7, 19, 39, 0.08);
+  background:
+    radial-gradient(circle at 88% 10%, rgba(232, 199, 141, 0.18), transparent 28%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.992), rgba(248, 244, 238, 0.972));
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.82),
+    0 18px 40px rgba(7, 19, 39, 0.06);
+}
+
+.project-advisor-rail .project-advisor-brief::before,
+.detail-sidebar .agent-card::before,
+.contact-concierge-rail .contact-concierge-box::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.16), rgba(255, 255, 255, 0)),
+    radial-gradient(circle at 12% 14%, rgba(10, 77, 140, 0.05), transparent 24%);
+}
+
+.project-advisor-rail .project-advisor-brief,
+.detail-sidebar .agent-card {
+  padding: 20px 20px 18px;
+}
+
+.project-advisor-rail .project-advisor-brief .card-title,
+.detail-sidebar .agent-card h3 {
+  position: relative;
+  z-index: 1;
+  margin-bottom: 8px;
+}
+
+.project-advisor-rail .project-advisor-brief .card-subtitle,
+.detail-sidebar .agent-card p,
+.contact-concierge-rail .contact-concierge-box .bullet-list {
+  position: relative;
+  z-index: 1;
+}
+
+.project-advisor-form-shell {
+  position: relative;
+  overflow: hidden;
+  border-radius: 24px;
+}
+
+.project-advisor-form-shell::before,
+.contact-form-shell::before {
+  content: '';
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 44px;
+  border-radius: 22px;
+  background: linear-gradient(180deg, rgba(232, 199, 141, 0.16), rgba(232, 199, 141, 0));
+  pointer-events: none;
+}
+
+.contact-form-shell {
+  position: relative;
+  overflow: hidden;
+  border-radius: 24px;
+}
+
+.contact-concierge-rail {
+  display: grid;
+  gap: 14px;
+  align-content: start;
+}
+
+.contact-concierge-rail .section-title,
+.contact-concierge-rail .section-subtitle {
+  text-align: left;
+  margin-left: 0;
+  margin-right: 0;
+}
+
+.contact-concierge-rail .section-subtitle {
+  max-width: 38ch;
+}
+
+.contact-concierge-rail .contact-concierge-box {
+  padding: 18px 18px 16px;
+}
+
+.contact-concierge-rail .contact-concierge-box .trust-box__title {
+  position: relative;
+  z-index: 1;
+  margin-bottom: 10px;
+}
+
+.contact-concierge-rail .contact-concierge-box .bullet-list {
+  gap: 8px;
+}
+
+.contact-concierge-rail .contact-concierge-box .bullet-list li {
+  color: rgba(7, 19, 39, 0.74);
+}
+
+.contact-concierge-rail .contact-concierge-box--trust {
+  background:
+    radial-gradient(circle at 86% 12%, rgba(10, 77, 140, 0.09), transparent 26%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.992), rgba(247, 245, 240, 0.972));
+}
+
+.contact-support-actions {
+  gap: 12px;
+  padding: 18px 18px 16px;
+  border-radius: 22px;
+  border: 1px solid rgba(7, 19, 39, 0.08);
+  background:
+    radial-gradient(circle at top right, rgba(231, 220, 199, 0.18), transparent 24%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.992), rgba(248, 245, 239, 0.976));
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.82),
+    0 16px 34px rgba(7, 19, 39, 0.05);
+}
+
+.contact-support-actions .cta-row {
+  margin-top: 0;
+}
+
+.contact-support-actions__phone {
+  min-height: 42px;
+  justify-content: center;
+}
+
 .contact-route-card {
   display: flex;
   flex-direction: column;
@@ -7718,8 +7981,23 @@ html[lang='th'] .projects-page .public-hero__eyebrow {
     gap: 16px;
   }
 
+  .decision-page--project .project-confidence-pack {
+    gap: 16px;
+  }
+
+  .detail-sidebar {
+    gap: 18px;
+  }
+
   .decision-page--shortlist .shortlist-surface__summary-actions {
     width: auto;
+  }
+}
+
+@media (min-width: 1024px) {
+  .decision-page--project .project-confidence-pack {
+    grid-template-columns: minmax(0, 1.12fr) minmax(0, 0.94fr) minmax(0, 0.94fr);
+    align-items: stretch;
   }
 }
 
@@ -9323,6 +9601,47 @@ html[lang='th'] .projects-page .public-hero__eyebrow {
 
   .decision-page--project .project-gallery__tile {
     border-radius: 18px !important;
+  }
+
+  .decision-page--project .project-confidence-pack::before {
+    inset: -4px;
+    border-radius: 20px;
+  }
+
+  .decision-page--project .project-confidence-card {
+    padding: 16px;
+    gap: 8px;
+  }
+
+  .decision-page--project .project-confidence-card .card-subtitle {
+    max-width: none;
+  }
+
+  .decision-page--project .project-brief-section__metrics {
+    gap: 10px;
+  }
+
+  .project-advisor-rail .project-advisor-brief,
+  .detail-sidebar .agent-card,
+  .contact-concierge-rail .contact-concierge-box,
+  .contact-support-actions,
+  .detail-sidebar .inquiry-form,
+  .split--form-priority .split__main .inquiry-form {
+    border-radius: 20px;
+  }
+
+  .project-advisor-rail .project-advisor-brief,
+  .detail-sidebar .agent-card,
+  .contact-concierge-rail .contact-concierge-box,
+  .contact-support-actions {
+    padding: 16px;
+  }
+
+  .project-advisor-form-shell::before,
+  .contact-form-shell::before {
+    inset: 0 0 auto 0;
+    height: 32px;
+    border-radius: 18px;
   }
 
   .decision-page--compare .compare-table-shell {
