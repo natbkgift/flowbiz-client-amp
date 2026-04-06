@@ -24,7 +24,7 @@ Current QA baseline:
 
 - `100/100`
 - `elite`
-- latest summary: `admin-app/artifacts/public-visual-qa/run-20260407-010827/summary.json`
+- latest summary: `admin-app/artifacts/public-visual-qa/run-20260407-013131/summary.json`
 - latest review file: `docs/qa/public-visual-review.full.json`
 
 Route-level polish logged:
@@ -93,6 +93,14 @@ Route-level polish logged:
   สถานะ: `applied after Project mobile CTA hierarchy micro-polish`
   ขอบเขต: share state, version mismatch, active assumptions, และ milestone cards ตอนท้าย estimator rail ให้ staged เป็น reference deck เดียวกันมากขึ้น
   ไฟล์หลัก: `admin-app/app/(site)/[locale]/buying-cost-estimator/_components/BuyingCostEstimatorShell.tsx`, `admin-app/app/globals.css`
+- `Project advisory reads micro-polish`
+  สถานะ: `applied after Estimator share-state reference micro-polish`
+  ขอบเขต: decision lens, related advisory reads, และ next-step closing panel ของ route โครงการให้ staged เป็น editorial continuation เดียวกันมากขึ้น โดยให้ closing CTA panel รับบทปิดจังหวะท้ายแบบเต็มชั้น
+  ไฟล์หลัก: `admin-app/app/(site)/[locale]/projects/[slug]/page.tsx`, `admin-app/app/globals.css`
+- `Compare desktop editorial pacing micro-polish`
+  สถานะ: `applied after Project advisory reads micro-polish`
+  ขอบเขต: decision support summary, compare table shell, และ closing handoff ของ route compare บน desktop ให้ staged เป็น decision folio ที่สงบขึ้น โดยไม่เปลี่ยนข้อมูลหรือ flow หลัก
+  ไฟล์หลัก: `admin-app/app/(site)/[locale]/compare/page.tsx`, `admin-app/app/globals.css`
 
 ## Purpose
 
@@ -614,10 +622,10 @@ Project detail:
 
 หลังจาก baseline ขึ้น `100/100` แล้ว งานถัดไปควรเป็น route-level micro-polish แบบแคบ ไม่ใช่ system rewrite:
 
-- `Project advisory reads micro-polish`
-  โฟกัส: ทำให้ `decision lens`, `related reads`, และ `advisory next steps` ของ route โครงการอ่านเป็น editorial continuation เดียวกันมากขึ้นบนทั้ง mobile และ desktop
-- `Compare desktop editorial pacing micro-polish`
-  โฟกัส: ทำให้ `compare` route บน `1366/1440` มีลำดับ section, table breathing room, และ closing cadence ที่สงบขึ้นอีกขั้นโดยไม่กลับไปเป็น utility dashboard
+- `Project supporting facts editorial cadence micro-polish`
+  โฟกัส: ทำให้ `amenities`, `investment snapshot`, และ `location context` ของ route โครงการไหลต่อจาก brief/reads/next-steps อย่างสงบขึ้น โดยลดความรู้สึกว่าเป็น fact cards วางคู่กันเฉยๆ
+- `Compare area-context continuity micro-polish`
+  โฟกัส: ทำให้ `area context`, `decision summary`, และ `table` ของ route compare รับส่งกันลื่นขึ้นอีกขั้น โดยเฉพาะจังหวะก่อนเข้าสู่ side-by-side table บน desktop
 
 เหตุผล:
 

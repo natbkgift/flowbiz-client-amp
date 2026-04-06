@@ -999,14 +999,14 @@ export default async function ComparePage(
                 ? 'สรุปชั้นนี้มีไว้เพื่อจัดลำดับคำถามและ next step ของการเปรียบเทียบ ไม่ใช่เพื่อฟันธงการลงทุน'
                 : 'This layer is meant to organize the remaining questions and next step from the comparison, not to produce an investment verdict.'}
             </p>
-            <div className="insight-list mt-4">
+            <div className="insight-list compare-summary-list mt-4">
               {decisionSupportSummary.map((line) => (
                 <div key={line} className="insight-list__item">
                   <span className="insight-list__body">{line}</span>
                 </div>
               ))}
             </div>
-            <div className="cta-strip compare-empty-followup reveal mt-4">
+            <div className="cta-strip compare-empty-followup compare-summary-followup reveal mt-4">
               <div className="cta-strip__text">{compareContinuationAction.note}</div>
               <Link className="btn btn-tertiary" href={compareContinuationAction.href}>
                 {compareContinuationAction.label}
@@ -1099,7 +1099,7 @@ export default async function ComparePage(
               </table>
             </div>
 
-            <div className="cta-row mt-4">
+            <div className="cta-row compare-table-actions mt-4">
               <Link
                 className="btn btn-secondary"
                 href={compareContinuationAction.href}
@@ -1138,7 +1138,7 @@ export default async function ComparePage(
               </Link>
             </div>
 
-            <p className="guided-dialog__step mt-2.5">
+            <p className="guided-dialog__step compare-completion-note mt-2.5">
               {dict.compare.completionNote}
             </p>
           </div>

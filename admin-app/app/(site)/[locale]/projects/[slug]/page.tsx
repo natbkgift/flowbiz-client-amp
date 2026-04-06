@@ -884,10 +884,15 @@ export default async function ProjectDetailPage(
               ) : null}
             </section>
 
-            <section id="project-decision-grid" className="signal-grid signal-grid--two-up reveal">
-              <div id="project-decision-lens" className="authority-card">
+            <section id="project-decision-grid" className="signal-grid signal-grid--two-up reveal project-advisory-reads-grid">
+              <div id="project-decision-lens" className="authority-card project-decision-lens-card">
                 <h2 className="card-title">{locale === 'th' ? 'มุมมองสำหรับตัดสินใจคัดรายการ' : 'Shortlist decision lens'}</h2>
-                <div className="insight-list mt-3">
+                <p className="card-subtitle">
+                  {locale === 'th'
+                    ? 'อ่านชุดสัญญาณนี้เพื่อดูว่าโครงการควรไปต่อใน shortlist หรือเก็บไว้เป็นเพียงตัวเทียบอ้างอิง'
+                    : 'Read these signals to decide whether the project earns a shortlist slot or stays as a reference only.'}
+                </p>
+                <div className="insight-list project-decision-lens-list mt-3">
                   {projectDecisionRead.map((item) => (
                     <div key={item} className="insight-list__item">
                       <span className="insight-list__body">{item}</span>
@@ -900,7 +905,7 @@ export default async function ProjectDetailPage(
                     </div>
                   ))}
                 </div>
-                <div className="card-actions mt-3">
+                <div className="card-actions project-decision-lens-actions mt-3">
                   <Link className="btn btn-secondary" href={withLocale(locale, '/buy')}>
                     {locale === 'th' ? 'ดูรายการที่บันทึกเข้ารายการคัดไว้ได้' : 'Browse shortlist-ready listings'}
                   </Link>
@@ -910,21 +915,26 @@ export default async function ProjectDetailPage(
                 </div>
               </div>
 
-              <div id="project-related-reads" className="authority-card">
+              <div id="project-related-reads" className="authority-card project-related-reads-card">
                 <h2 className="card-title">{locale === 'th' ? 'บทความและบริบทที่เกี่ยวข้อง' : 'Related advisory reads'}</h2>
-                <div className="insight-list mt-3">
+                <p className="card-subtitle">
+                  {locale === 'th'
+                    ? 'ใช้บทความและคู่มือที่เกี่ยวข้องเพื่อขยายบริบท ก่อนเทียบต่อหรือส่งบรีฟให้ทีมช่วยคัดรายการ'
+                    : 'Use these reads to widen the context before you compare options or hand a brief to the team.'}
+                </p>
+                <div className="insight-list project-related-reads-list mt-3">
                   {relatedReads.length ? relatedReads.map((post) => (
-                    <Link key={post.slug} href={withLocale(locale, `/blog/${encodeURIComponent(post.slug)}`)} className="insight-list__item">
+                    <Link key={post.slug} href={withLocale(locale, `/blog/${encodeURIComponent(post.slug)}`)} className="insight-list__item project-related-read">
                       <span className="insight-list__title">{localizedText(locale, post.title) || post.slug}</span>
                       <span className="insight-list__body">{localizedText(locale, post.excerpt ?? null) || (locale === 'th' ? 'อ่านบทความฉบับเต็ม' : 'Open the full article.')}</span>
                     </Link>
                   )) : (
-                    <div className="insight-list__item">
+                    <div className="insight-list__item project-related-read">
                       <span className="insight-list__body">{locale === 'th' ? 'อ่านต่อที่มุมมองการลงทุน หน้าเปรียบเทียบ หรือคู่มือทำเล เพื่อเสริมบริบทของการตัดสินใจ' : 'Continue into investment, compare, or the area guide to widen the decision context.'}</span>
                     </div>
                   )}
                 </div>
-                <div className="card-actions mt-3">
+                <div className="card-actions project-related-reads-actions mt-3">
                   <Link className="btn btn-secondary" href={withLocale(locale, '/calculator')}>
                     {locale === 'th' ? 'เปิด calculator' : 'Open calculator'}
                   </Link>
@@ -933,7 +943,7 @@ export default async function ProjectDetailPage(
             </section>
 
             {(project.amenities?.length ?? 0) > 0 || investmentFacts.length > 0 || locationFacts.length > 0 ? (
-              <section id="project-trust-grid" className="signal-grid signal-grid--two-up reveal">
+              <section id="project-trust-grid" className="signal-grid signal-grid--two-up reveal project-advisory-followthrough">
                 {(project.amenities?.length ?? 0) > 0 ? (
                   <div id="project-amenities" className="authority-card">
                     <h2 className="card-title">{locale === 'th' ? 'สิ่งอำนวยความสะดวกและคุณภาพการอยู่อาศัย' : 'Amenities and livability'}</h2>
@@ -985,7 +995,7 @@ export default async function ProjectDetailPage(
                       ? 'ถ้าโครงการนี้ใกล้เคียงโจทย์ ให้เทียบต่อหรือส่งบรีฟเพื่อให้ทีมคัดรายการที่แคบลง'
                       : 'If this project is directionally right, compare it next or send the brief so the team can tighten the shortlist.'}
                   </p>
-                  <div className="card-actions mt-3">
+                  <div className="card-actions project-next-steps-actions mt-3">
                     {priorityInternalLinks.map((it) => (
                       <Link
                         key={it.href}
