@@ -768,25 +768,6 @@ export function BuyingCostEstimatorShell({ locale }: { locale: Locale }) {
           </div>
         </div>
 
-        <div className="page-rail-card decision-estimator-line-items-card mt-4">
-          <h2 className="card-title">{copy.lineItemsTitle}</h2>
-          <ul className="bullet-list decision-estimator-line-items-list mt-4">
-            {(estimate?.line_items ?? []).map((item) => (
-              <li key={item.key}>{`${item.label_key}: ${formatCurrency(locale, item.amount)}`}</li>
-            ))}
-            {!estimate?.line_items?.length ? <li>{copy.resultConditional}</li> : null}
-          </ul>
-        </div>
-
-        <div className="page-rail-card decision-estimator-active-assumptions-card mt-4">
-          <h2 className="card-title">{copy.activeAssumptionsTitle}</h2>
-          <ul className="bullet-list decision-estimator-active-assumptions-list mt-4">
-            {appliedAssumptions.map((item) => (
-              <li key={item}>{item}</li>
-            ))}
-          </ul>
-        </div>
-
         <div className="page-rail-card decision-estimator-unresolved-card mt-4">
           <h2 className="card-title">{copy.unresolvedTitle}</h2>
           <ul className="bullet-list decision-estimator-unresolved-list mt-4">
@@ -796,37 +777,60 @@ export function BuyingCostEstimatorShell({ locale }: { locale: Locale }) {
           </ul>
         </div>
 
-        <div className="page-rail-card decision-estimator-share-card mt-4">
-          <h2 className="card-title">{copy.shareTitle}</h2>
-          <p className="card-subtitle">{copy.shareBody}</p>
-          {versionMismatch ? (
-            <div className="mt-4">
-              <p className="text-caption text-danger">{copy.versionMismatchTitle}</p>
-              <p className="text-caption mt-2">{`${copy.versionMismatchBody} (${versionMismatch.assumptionSetId} / ${versionMismatch.assumptionSetVersion})`}</p>
-              <button className="btn btn-secondary mt-4" onClick={() => setVersionMismatch(null)} type="button">
-                {copy.refreshAssumptionsLabel}
-              </button>
-            </div>
-          ) : shareUrl ? (
-            <div className="mt-4">
-              <p className="text-caption">{copy.shareReady}</p>
-              <label className="form-label mt-4">
-                {copy.shareLinkLabel}
-                <input className="form-input" readOnly value={shareUrl} />
-              </label>
-            </div>
-          ) : (
-            <p className="text-caption mt-4">{copy.resultConditional}</p>
-          )}
-        </div>
+        <div className="decision-estimator-reference-deck mt-4">
+          <div className="page-rail-card decision-estimator-line-items-card decision-estimator-reference-card">
+            <h2 className="card-title">{copy.lineItemsTitle}</h2>
+            <ul className="bullet-list decision-estimator-line-items-list mt-4">
+              {(estimate?.line_items ?? []).map((item) => (
+                <li key={item.key}>{`${item.label_key}: ${formatCurrency(locale, item.amount)}`}</li>
+              ))}
+              {!estimate?.line_items?.length ? <li>{copy.resultConditional}</li> : null}
+            </ul>
+          </div>
 
-        <div className="page-rail-card decision-estimator-milestones-card mt-4">
-          <h2 className="card-title">{copy.milestoneTitle}</h2>
-          <ul className="bullet-list decision-estimator-milestones-list mt-4">
-            {copy.milestones.map((item) => (
-              <li key={item}>{item}</li>
-            ))}
-          </ul>
+          <div className="page-rail-card decision-estimator-active-assumptions-card decision-estimator-reference-card">
+            <h2 className="card-title">{copy.activeAssumptionsTitle}</h2>
+            <ul className="bullet-list decision-estimator-active-assumptions-list mt-4">
+              {appliedAssumptions.map((item) => (
+                <li key={item}>{item}</li>
+              ))}
+            </ul>
+          </div>
+
+          <div className="page-rail-card decision-estimator-share-card decision-estimator-reference-card">
+            <h2 className="card-title">{copy.shareTitle}</h2>
+            <p className="card-subtitle">{copy.shareBody}</p>
+            {versionMismatch ? (
+              <div className="decision-estimator-share-state decision-estimator-share-state--mismatch mt-4">
+                <p className="text-caption text-danger decision-estimator-share-state__title">{copy.versionMismatchTitle}</p>
+                <p className="text-caption decision-estimator-share-state__body mt-2">{`${copy.versionMismatchBody} (${versionMismatch.assumptionSetId} / ${versionMismatch.assumptionSetVersion})`}</p>
+                <button className="btn btn-secondary mt-4" onClick={() => setVersionMismatch(null)} type="button">
+                  {copy.refreshAssumptionsLabel}
+                </button>
+              </div>
+            ) : shareUrl ? (
+              <div className="decision-estimator-share-state decision-estimator-share-state--ready mt-4">
+                <p className="text-caption decision-estimator-share-state__title">{copy.shareReady}</p>
+                <label className="form-label decision-estimator-share-state__field mt-4">
+                  {copy.shareLinkLabel}
+                  <input className="form-input" readOnly value={shareUrl} />
+                </label>
+              </div>
+            ) : (
+              <div className="decision-estimator-share-state decision-estimator-share-state--pending mt-4">
+                <p className="text-caption decision-estimator-share-state__title">{copy.resultConditional}</p>
+              </div>
+            )}
+          </div>
+
+          <div className="page-rail-card decision-estimator-milestones-card decision-estimator-reference-card">
+            <h2 className="card-title">{copy.milestoneTitle}</h2>
+            <ul className="bullet-list decision-estimator-milestones-list mt-4">
+              {copy.milestones.map((item) => (
+                <li key={item}>{item}</li>
+              ))}
+            </ul>
+          </div>
         </div>
       </aside>
     </div>

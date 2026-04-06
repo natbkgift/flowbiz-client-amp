@@ -1,11 +1,11 @@
 # Public UI Aesthetic Implementation Brief
 
-อัปเดต: `2026-04-06`  
+อัปเดต: `2026-04-07`  
 บทบาทเอกสาร: `Execution brief for visual polish passes without touching business logic`
 
 ## Execution Status
 
-สถานะล่าสุดของแผนนี้ ณ `2026-04-06`:
+สถานะล่าสุดของแผนนี้ ณ `2026-04-07`:
 
 - `Pass 1: Typography Pass` เสร็จแล้ว
   อ้างอิงงาน: `eb2c6fa9`
@@ -24,7 +24,7 @@ Current QA baseline:
 
 - `100/100`
 - `elite`
-- latest summary: `admin-app/artifacts/public-visual-qa/run-20260407-005744/summary.json`
+- latest summary: `admin-app/artifacts/public-visual-qa/run-20260407-010827/summary.json`
 - latest review file: `docs/qa/public-visual-review.full.json`
 
 Route-level polish logged:
@@ -89,6 +89,10 @@ Route-level polish logged:
   สถานะ: `applied after Property mobile CTA handoff micro-polish`
   ขอบเขต: mobile CTA hierarchy, advisor-brief bridge, และ next-step compression ของ route โครงการให้ปิด mobile lower funnel แบบสงบขึ้น
   ไฟล์หลัก: `admin-app/app/(site)/[locale]/projects/[slug]/page.tsx`, `admin-app/app/globals.css`
+- `Estimator share-state reference micro-polish`
+  สถานะ: `applied after Project mobile CTA hierarchy micro-polish`
+  ขอบเขต: share state, version mismatch, active assumptions, และ milestone cards ตอนท้าย estimator rail ให้ staged เป็น reference deck เดียวกันมากขึ้น
+  ไฟล์หลัก: `admin-app/app/(site)/[locale]/buying-cost-estimator/_components/BuyingCostEstimatorShell.tsx`, `admin-app/app/globals.css`
 
 ## Purpose
 
@@ -610,10 +614,10 @@ Project detail:
 
 หลังจาก baseline ขึ้น `100/100` แล้ว งานถัดไปควรเป็น route-level micro-polish แบบแคบ ไม่ใช่ system rewrite:
 
-- `Estimator share-state reference micro-polish`
-  โฟกัส: ทำให้ share/version-mismatch/milestone cards ตอนท้าย estimator rail ดูเป็น reference deck เดียวกันมากขึ้น ไม่แตกเป็น utility cards หลายใบ
 - `Project advisory reads micro-polish`
   โฟกัส: ทำให้ `decision lens`, `related reads`, และ `advisory next steps` ของ route โครงการอ่านเป็น editorial continuation เดียวกันมากขึ้นบนทั้ง mobile และ desktop
+- `Compare desktop editorial pacing micro-polish`
+  โฟกัส: ทำให้ `compare` route บน `1366/1440` มีลำดับ section, table breathing room, และ closing cadence ที่สงบขึ้นอีกขั้นโดยไม่กลับไปเป็น utility dashboard
 
 เหตุผล:
 

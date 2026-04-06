@@ -7802,6 +7802,45 @@ html[lang='th'] .projects-page .public-hero__eyebrow {
   flex: 1 1 calc(50% - 5px);
 }
 
+.decision-page--buying-cost .decision-estimator-reference-deck {
+  position: relative;
+  display: grid;
+  gap: 12px;
+}
+
+.decision-page--buying-cost .decision-estimator-reference-deck::before {
+  content: '';
+  position: absolute;
+  inset: -6px;
+  border-radius: 24px;
+  background:
+    radial-gradient(circle at 10% 10%, rgba(232, 199, 141, 0.12), transparent 26%),
+    radial-gradient(circle at 88% 84%, rgba(10, 77, 140, 0.05), transparent 24%),
+    linear-gradient(180deg, rgba(248, 247, 243, 0.82), rgba(245, 241, 233, 0.24));
+  opacity: 0.74;
+  pointer-events: none;
+}
+
+.decision-page--buying-cost .decision-estimator-reference-card {
+  position: relative;
+  z-index: 1;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.988), rgba(248, 245, 239, 0.958)),
+    rgba(255, 255, 255, 0.95);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.78),
+    0 18px 38px rgba(7, 19, 39, 0.045);
+}
+
+.decision-page--buying-cost .decision-estimator-reference-card .card-title {
+  font-size: clamp(1.02rem, 1.42vw, 1.2rem);
+  line-height: 1.24;
+}
+
+.decision-page--buying-cost .decision-estimator-reference-card .card-subtitle {
+  max-width: 32ch;
+}
+
 .decision-page--buying-cost .decision-estimator-line-items-card,
 .decision-page--buying-cost .decision-estimator-active-assumptions-card,
 .decision-page--buying-cost .decision-estimator-share-card,
@@ -7809,6 +7848,31 @@ html[lang='th'] .projects-page .public-hero__eyebrow {
   background:
     linear-gradient(180deg, rgba(255, 255, 255, 0.986), rgba(248, 245, 239, 0.95)),
     rgba(255, 255, 255, 0.95);
+}
+
+.decision-page--buying-cost .decision-estimator-line-items-card {
+  background:
+    radial-gradient(circle at 88% 12%, rgba(10, 77, 140, 0.06), transparent 24%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.988), rgba(248, 245, 239, 0.958));
+}
+
+.decision-page--buying-cost .decision-estimator-active-assumptions-card {
+  background:
+    radial-gradient(circle at 14% 12%, rgba(232, 199, 141, 0.12), transparent 24%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.988), rgba(248, 245, 239, 0.958));
+}
+
+.decision-page--buying-cost .decision-estimator-share-card {
+  background:
+    radial-gradient(circle at 88% 12%, rgba(232, 199, 141, 0.16), transparent 26%),
+    radial-gradient(circle at 14% 86%, rgba(10, 77, 140, 0.06), transparent 24%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.992), rgba(248, 244, 238, 0.97));
+}
+
+.decision-page--buying-cost .decision-estimator-milestones-card {
+  background:
+    radial-gradient(circle at 86% 14%, rgba(10, 77, 140, 0.08), transparent 24%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.988), rgba(248, 245, 239, 0.958));
 }
 
 .decision-page--buying-cost .decision-estimator-unresolved-card {
@@ -7857,6 +7921,45 @@ html[lang='th'] .projects-page .public-hero__eyebrow {
   line-height: 1.6;
 }
 
+.decision-page--buying-cost .decision-estimator-share-state {
+  display: grid;
+  gap: 10px;
+  padding: 14px 16px;
+  border-radius: 16px;
+  border: 1px solid rgba(7, 19, 39, 0.07);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.88), rgba(250, 247, 241, 0.82)),
+    rgba(255, 255, 255, 0.84);
+}
+
+.decision-page--buying-cost .decision-estimator-share-state__title {
+  margin: 0;
+}
+
+.decision-page--buying-cost .decision-estimator-share-state__body {
+  margin: 0;
+  color: rgba(7, 19, 39, 0.7);
+}
+
+.decision-page--buying-cost .decision-estimator-share-state__field {
+  margin-top: 0;
+}
+
+.decision-page--buying-cost .decision-estimator-share-state--mismatch {
+  border-color: rgba(185, 106, 55, 0.14);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.9), rgba(250, 243, 235, 0.88)),
+    rgba(255, 255, 255, 0.88);
+}
+
+.decision-page--buying-cost .decision-estimator-share-state--ready {
+  border-color: rgba(10, 77, 140, 0.08);
+}
+
+.decision-page--buying-cost .decision-estimator-share-state--pending {
+  min-height: 0;
+}
+
 @media (max-width: 1023px) {
   .decision-page--buying-cost .decision-estimator-preview-item {
     grid-template-columns: minmax(0, 1fr);
@@ -7881,6 +7984,16 @@ html[lang='th'] .projects-page .public-hero__eyebrow {
   .decision-page--buying-cost .decision-estimator-handoff-actions > .btn,
   .decision-page--buying-cost .decision-estimator-handoff-actions > a {
     flex-basis: 100%;
+  }
+
+  .decision-page--buying-cost .decision-estimator-reference-deck::before {
+    inset: -4px;
+    border-radius: 20px;
+  }
+
+  .decision-page--buying-cost .decision-estimator-share-state {
+    padding: 13px 14px;
+    border-radius: 14px;
   }
 
   .decision-page--buying-cost .decision-estimator-unresolved-list li {
