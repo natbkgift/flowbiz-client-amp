@@ -24,7 +24,7 @@ Current QA baseline:
 
 - `100/100`
 - `elite`
-- latest summary: `admin-app/artifacts/public-visual-qa/run-20260407-082440/summary.json`
+- latest summary: `admin-app/artifacts/public-visual-qa/run-20260407-084033/summary.json`
 - latest review file: `docs/qa/public-visual-review.full.json`
 
 Route-level polish logged:
@@ -116,6 +116,14 @@ Route-level polish logged:
 - `Compare recovery-state calmness micro-polish`
   สถานะ: `applied after Project deep review editorial cadence micro-polish`
   ขอบเขต: recovery note, readiness pack, และ carried-brief handoff ของ compare recovery route ให้ดูเป็น calm fallback deck มากขึ้น ไม่อ่านเป็น warning utility state
+  ไฟล์หลัก: `admin-app/app/(site)/[locale]/compare/page.tsx`, `admin-app/app/globals.css`
+- `Project advisor rail desktop calmness micro-polish`
+  สถานะ: `applied after Compare recovery-state calmness micro-polish`
+  ขอบเขต: brief card, advisor form shell, และ side-rail mass ของ route โครงการบน desktop ให้สงบลงและรับบทเป็น supporting concierge rail ที่เบากว่า content rail ชัดขึ้น
+  ไฟล์หลัก: `admin-app/app/globals.css`
+- `Compare readiness-pack editorial hierarchy micro-polish`
+  สถานะ: `applied after Project advisor rail desktop calmness micro-polish`
+  ขอบเขต: readiness pack, carried brief card, และ opening decision hierarchy ของ compare main route ให้ staged เป็น opening deck ที่มีลำดับชั้นนิ่งขึ้นระหว่าง verified cues, next move, และ handoff
   ไฟล์หลัก: `admin-app/app/(site)/[locale]/compare/page.tsx`, `admin-app/app/globals.css`
 
 ## Purpose
@@ -638,10 +646,10 @@ Project detail:
 
 หลังจาก baseline ขึ้น `100/100` แล้ว งานถัดไปควรเป็น route-level micro-polish แบบแคบ ไม่ใช่ system rewrite:
 
-- `Project advisor rail desktop calmness micro-polish`
-  โฟกัส: ทำให้ brief card, form shell, และ agent card ใน side rail ของ route โครงการสงบขึ้นอีกขั้นบน desktop โดยลดความรู้สึกว่า side rail หนักเท่า content rail
-- `Compare readiness-pack editorial hierarchy micro-polish`
-  โฟกัส: ทำให้ readiness pack ของ compare main route มีลำดับชั้นที่นิ่งขึ้นอีกขั้นระหว่าง “เมื่อไร compare คุ้มค่า”, flow support, และ table handoff โดยไม่เปลี่ยน content logic
+- `Project rail form field calmness micro-polish`
+  โฟกัส: ทำให้ field stacks, helper text, และ action spacing ใน lead-form shell ของ route โครงการอ่านเป็น concierge form มากขึ้นบน desktop โดยไม่เปลี่ยน schema หรือ field order
+- `Compare carried-brief handoff compression micro-polish`
+  โฟกัส: บีบ carried-brief block และ closing CTA handoff ของ compare main route ให้จบ sequence สั้นลงอีกขั้นบน desktop โดยไม่เปลี่ยนข้อมูลหรือ recovery logic
 
 เหตุผล:
 

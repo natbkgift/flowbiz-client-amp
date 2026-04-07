@@ -464,8 +464,8 @@ export default async function ComparePage(
 
         <section className="section">
           <Container>
-            <div id="compare-readiness-pack" className="signal-grid signal-grid--three-up decision-pack mb-4">
-              <section className="authority-card reveal">
+            <div id="compare-readiness-pack" className="signal-grid signal-grid--three-up decision-pack compare-readiness-pack mb-4">
+              <section className="authority-card reveal compare-readiness-card compare-readiness-card--verified">
                 <h2 className="card-title">{locale === 'th' ? 'เมื่อไรหน้า compare จะเริ่มคุ้มค่า' : 'When compare becomes useful'}</h2>
                 <p className="card-subtitle">
                   {locale === 'th'
@@ -479,7 +479,7 @@ export default async function ComparePage(
                 </ul>
               </section>
 
-              <section className="authority-card reveal">
+              <section className="authority-card reveal compare-readiness-card compare-readiness-card--next">
                 <h2 className="card-title">{locale === 'th' ? 'ควรทำอะไรก่อน' : 'Best next move first'}</h2>
                 <p className="card-subtitle">
                   {locale === 'th'
@@ -493,7 +493,7 @@ export default async function ComparePage(
                 </ul>
               </section>
 
-              <section className="authority-card reveal">
+              <section className="authority-card reveal compare-readiness-card compare-readiness-card--handoff">
                 <h2 className="card-title">{locale === 'th' ? 'บริบทที่จะถูกพกต่อไป' : 'Context that carries forward'}</h2>
                 <p className="card-subtitle">
                   {locale === 'th'
@@ -509,7 +509,7 @@ export default async function ComparePage(
             </div>
 
             {investorContextPresent ? (
-              <div className="authority-card reveal compare-flow-card mb-4">
+              <div className="authority-card reveal compare-flow-card compare-readiness-brief-card mb-4">
                 <h2 className="card-title">{locale === 'th' ? 'Investment brief ที่ส่งมาจาก calculator' : 'Investment brief carried from calculator'}</h2>
                 <p className="card-subtitle">
                   {locale === 'th'
