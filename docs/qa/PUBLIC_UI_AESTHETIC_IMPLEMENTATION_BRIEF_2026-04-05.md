@@ -1,6 +1,6 @@
 # Public UI Aesthetic Implementation Brief
 
-อัปเดต: `2026-04-07`  
+อัปเดต: `2026-04-07`
 บทบาทเอกสาร: `Execution brief for visual polish passes without touching business logic`
 
 ## Execution Status
