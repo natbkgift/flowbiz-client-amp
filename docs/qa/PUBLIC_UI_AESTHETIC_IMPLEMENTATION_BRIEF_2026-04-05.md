@@ -24,7 +24,7 @@ Current QA baseline:
 
 - `100/100`
 - `elite`
-- latest summary: `admin-app/artifacts/public-visual-qa/run-20260407-092704/summary.json`
+- latest summary: `admin-app/artifacts/public-visual-qa/run-20260407-100904/summary.json`
 - latest review file: `docs/qa/public-visual-review.full.json`
 
 Route-level polish logged:
@@ -140,6 +140,22 @@ Route-level polish logged:
 - `Compare table footer closure micro-polish`
   สถานะ: `applied after Project advisor support-footer harmony micro-polish`
   ขอบเขต: closing handoff, CTA footer, และ completion note ใต้ compare table ให้จบ sequence แบบเอกสารตัดสินใจที่สั้นและสงบขึ้นบน desktop โดยไม่เปลี่ยน flow หรือ copy semantics
+  ไฟล์หลัก: `admin-app/app/globals.css`
+- `Project rail brief-to-form seam micro-polish`
+  สถานะ: `applied after Compare table footer closure micro-polish`
+  ขอบเขต: รอยต่อระหว่าง project brief card กับ form shell บน desktop ถูก compress ให้ไหลเป็น advisory stack เดียวกันมากขึ้นด้วย gap, overlap, และ seam wash เบาๆ โดยไม่แตะ markup หรือ logic
+  ไฟล์หลัก: `admin-app/app/globals.css`
+- `Compare summary-to-table seam compression micro-polish`
+  สถานะ: `applied after Project rail brief-to-form seam micro-polish`
+  ขอบเขต: transition จาก decision support summary ไปยัง compare table shell ถูกบีบให้คมขึ้นบน desktop ผ่าน shared framing, followup strip compression, และ table-card upper seam โดยไม่เปลี่ยนข้อมูลหรือ flow
+  ไฟล์หลัก: `admin-app/app/globals.css`
+- `Project rail support-footer density micro-polish`
+  สถานะ: `applied after Compare summary-to-table seam compression micro-polish`
+  ขอบเขต: reassurance footer ใต้ form shell ของ route โครงการถูกยุบ vertical weight ลงอีกขั้นผ่าน padding, line-length, และ link-cluster gap เพื่อให้ support note อ่านเบาและสั้นขึ้นบน desktop
+  ไฟล์หลัก: `admin-app/app/globals.css`
+- `Compare table title-to-grid upper-rhythm micro-polish`
+  สถานะ: `applied after Project rail support-footer density micro-polish`
+  ขอบเขต: จังหวะจาก table title/subtitle ลงสู่ compare grid ถูกเร่งให้เริ่มเร็วขึ้นผ่าน followup strip compression, table-card top padding, และ table-shell onset spacing โดยยังคง calmness และไม่ลดข้อมูล
   ไฟล์หลัก: `admin-app/app/globals.css`
 
 ## Purpose
@@ -662,10 +678,10 @@ Project detail:
 
 หลังจาก baseline ขึ้น `100/100` แล้ว งานถัดไปควรเป็น route-level micro-polish แบบแคบ ไม่ใช่ system rewrite:
 
-- `Project rail brief-to-form seam micro-polish`
-  โฟกัส: ทำให้รอยต่อระหว่าง project brief card กับ form shell บน desktop อ่านเป็น advisory stack เดียวกันมากขึ้น โดยลดความรู้สึกว่าเป็นสองก้อนที่ถูกวางต่อกัน
-- `Compare summary-to-table seam compression micro-polish`
-  โฟกัส: บีบ transition จาก decision support summary ไปยัง compare table shell ให้ลดการซ้ำของ intent strip และปิด opening sequence ให้คมขึ้นบน desktop โดยไม่เปลี่ยนข้อมูลหรือ flow
+- `Project rail support-link tone compression micro-polish`
+  โฟกัส: ลดความเด่นของ support-link cluster ใต้ form shell ของ route โครงการอีกขั้น โดยทำให้ลิงก์และ helper copy อ่านเป็น quiet utility note มากขึ้นบน desktop
+- `Compare table header scan-tempo micro-polish`
+  โฟกัส: เก็บ onset ของ header row และ field column ใน compare grid ให้ scan จาก title ลงสู่แถวแรกได้เร็วขึ้นอีกขั้น โดยไม่ลดข้อมูลหรือลดความนิ่งของตาราง
 
 เหตุผล:
 
