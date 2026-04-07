@@ -1,0 +1,351 @@
+{
+  "reviewer": "codex-public-ui-recovery",
+  "captures": [
+    {
+      "route": "/en",
+      "width": 390,
+      "checklist": [
+        {
+          "id": "hero_balance",
+          "area": "Hero Composition",
+          "status": "pass",
+          "message": "Latest mobile hero reads calmer after trimming the extra context line from the first viewport.",
+          "evidence": {
+            "screenshot": "admin-app/artifacts/public-visual-qa/run-20260407-100904/iteration-01/after/en__390.png",
+            "paragraphsInViewport": 8,
+            "smallTapTargetCount": 0
+          }
+        },
+        {
+          "id": "header_chrome_weight",
+          "area": "Header Chrome",
+          "status": "pass",
+          "message": "Header chrome stays subordinate to the hero on the latest English mobile capture.",
+          "evidence": {
+            "screenshot": "admin-app/artifacts/public-visual-qa/run-20260407-100904/iteration-01/after/en__390.png"
+          }
+        },
+        {
+          "id": "first_viewport_clarity",
+          "area": "First Viewport",
+          "status": "pass",
+          "message": "The first viewport now stays within the scan budget while keeping headline and CTAs visible.",
+          "evidence": {
+            "headingInViewport": true,
+            "paragraphsInViewport": 8,
+            "headingsInViewport": 3
+          }
+        },
+        {
+          "id": "section_anchor_strength",
+          "area": "Section Sequence",
+          "status": "pass",
+          "message": "Home narrative still steps cleanly from hero into pathways and trust.",
+          "evidence": {
+            "sectionHeadingCount": 19
+          }
+        },
+        {
+          "id": "spacing_rhythm",
+          "area": "Spacing Rhythm",
+          "status": "pass",
+          "message": "Latest mobile screenshot reads as a cohesive section stack with a cleaner shared rhythm between the advisory layers.",
+          "evidence": {
+            "screenshot": "admin-app/artifacts/public-visual-qa/run-20260407-100904/iteration-01/after/en__390.png"
+          }
+        },
+        {
+          "id": "typography_hierarchy",
+          "area": "Typography",
+          "status": "pass",
+          "message": "Headline, subtitle, and CTA hierarchy remain clear on English mobile.",
+          "evidence": {
+            "headingLength": 38
+          }
+        },
+        {
+          "id": "card_premium_feel",
+          "area": "Card Tone",
+          "status": "pass",
+          "message": "Shared warm surfaces still read premium rather than commodity listing UI.",
+          "evidence": {
+            "ctaCount": 21
+          }
+        },
+        {
+          "id": "cta_hierarchy",
+          "area": "CTA Hierarchy",
+          "status": "pass",
+          "message": "Primary and secondary hero actions remain clearly ranked.",
+          "evidence": {
+            "aboveFoldInteractiveCount": 9
+          }
+        },
+        {
+          "id": "curated_vs_inventory_feel",
+          "area": "Editorial Framing",
+          "status": "pass",
+          "message": "Homepage still reads as a guided editorial funnel rather than an inventory wall.",
+          "evidence": {
+            "sections": [
+              "hero",
+              "pathways",
+              "trust",
+              "curated",
+              "market",
+              "owner",
+              "bottomCta"
+            ]
+          }
+        },
+        {
+          "id": "portal_feel",
+          "area": "Surface Character",
+          "status": "pass",
+          "message": "Portal feel is materially reduced in the latest English mobile screenshot.",
+          "evidence": {
+            "paragraphsInViewport": 8,
+            "headingsInViewport": 3
+          }
+        },
+        {
+          "id": "owner_bridge_strength",
+          "area": "Lower Funnel Bridge",
+          "status": "pass",
+          "message": "Owner advisory still hands off coherently into the closing conversion section on mobile.",
+          "evidence": {
+            "ownerToBottomGap": 81
+          }
+        },
+        {
+          "id": "final_cta_harmony",
+          "area": "Final Conversion",
+          "status": "pass",
+          "message": "Final CTA keeps its two-column composition and form handoff intact.",
+          "evidence": {
+            "bottomCtaFormPanelPresent": true
+          }
+        },
+        {
+          "id": "detail_page_stability",
+          "area": "Detail Page Parity",
+          "status": "pass",
+          "message": "Detail routes are now present in the latest screenshot set and stay aligned with the shared public system.",
+          "evidence": {
+            "detailScreenshot": "admin-app/artifacts/public-visual-qa/run-20260407-100904/iteration-01/after/en__property__visual-qa-property__390.png",
+            "detailScore": 100
+          }
+        },
+        {
+          "id": "mobile_scan_fatigue",
+          "area": "Mobile Ergonomics",
+          "status": "pass",
+          "message": "Mobile scan fatigue is now under control on the English homepage capture.",
+          "evidence": {
+            "paragraphsInViewport": 8,
+            "smallTapTargetCount": 0
+          }
+        },
+        {
+          "id": "locale_parity",
+          "area": "Locale Integrity",
+          "status": "pass",
+          "message": "English mobile homepage stays aligned with the Thai variant after the latest pass.",
+          "evidence": {
+            "pairRoute": "/th",
+            "pairWidth": 390
+          }
+        }
+      ]
+    },
+    {
+      "route": "/th",
+      "width": 390,
+      "checklist": [
+        {
+          "id": "hero_balance",
+          "area": "Hero Composition",
+          "status": "pass",
+          "message": "Thai mobile hero now lands as a cleaner poster-like opening.",
+          "evidence": {
+            "screenshot": "admin-app/artifacts/public-visual-qa/run-20260407-100904/iteration-01/after/th__390.png",
+            "paragraphsInViewport": 7,
+            "smallTapTargetCount": 0
+          }
+        },
+        {
+          "id": "header_chrome_weight",
+          "area": "Header Chrome",
+          "status": "pass",
+          "message": "Header chrome remains subordinate to the Thai hero headline.",
+          "evidence": {
+            "screenshot": "admin-app/artifacts/public-visual-qa/run-20260407-100904/iteration-01/after/th__390.png"
+          }
+        },
+        {
+          "id": "first_viewport_clarity",
+          "area": "First Viewport",
+          "status": "pass",
+          "message": "Thai first viewport now scans cleanly while preserving headline and CTA visibility.",
+          "evidence": {
+            "paragraphsInViewport": 7,
+            "headingsInViewport": 3
+          }
+        },
+        {
+          "id": "section_anchor_strength",
+          "area": "Section Sequence",
+          "status": "pass",
+          "message": "Thai homepage keeps the same strong section anchors and sequence as English.",
+          "evidence": {
+            "sectionHeadingCount": 19
+          }
+        },
+        {
+          "id": "spacing_rhythm",
+          "area": "Spacing Rhythm",
+          "status": "pass",
+          "message": "Thai mobile cadence reads coherent in the latest screenshot set.",
+          "evidence": {
+            "screenshot": "admin-app/artifacts/public-visual-qa/run-20260407-100904/iteration-01/after/th__390.png"
+          }
+        },
+        {
+          "id": "typography_hierarchy",
+          "area": "Typography",
+          "status": "pass",
+          "message": "Thai hierarchy remains clear and readable on mobile.",
+          "evidence": {
+            "score": 92
+          }
+        },
+        {
+          "id": "card_premium_feel",
+          "area": "Card Tone",
+          "status": "pass",
+          "message": "Thai home surfaces retain the premium shared card language.",
+          "evidence": {
+            "ctaCount": 21
+          }
+        },
+        {
+          "id": "cta_hierarchy",
+          "area": "CTA Hierarchy",
+          "status": "pass",
+          "message": "Primary CTA remains the clearest action in the Thai hero.",
+          "evidence": {
+            "aboveFoldInteractiveCount": 9
+          }
+        },
+        {
+          "id": "curated_vs_inventory_feel",
+          "area": "Editorial Framing",
+          "status": "pass",
+          "message": "Thai homepage still reads as an advisory path rather than a raw listing feed.",
+          "evidence": {
+            "sections": [
+              "hero",
+              "pathways",
+              "trust",
+              "curated",
+              "market",
+              "owner",
+              "bottomCta"
+            ]
+          }
+        },
+        {
+          "id": "portal_feel",
+          "area": "Surface Character",
+          "status": "pass",
+          "message": "Portal-like density is no longer the dominant read on Thai mobile.",
+          "evidence": {
+            "paragraphsInViewport": 7
+          }
+        },
+        {
+          "id": "owner_bridge_strength",
+          "area": "Lower Funnel Bridge",
+          "status": "pass",
+          "message": "Thai owner advisory bridge remains intact on mobile.",
+          "evidence": {
+            "ownerToBottomGap": 81
+          }
+        },
+        {
+          "id": "final_cta_harmony",
+          "area": "Final Conversion",
+          "status": "pass",
+          "message": "Thai final CTA maintains a balanced closing section.",
+          "evidence": {
+            "bottomCtaFormPanelPresent": true
+          }
+        },
+        {
+          "id": "detail_page_stability",
+          "area": "Detail Page Parity",
+          "status": "pass",
+          "message": "Thai detail route now appears in the latest screenshot set and stays on-system.",
+          "evidence": {
+            "detailScreenshot": "admin-app/artifacts/public-visual-qa/run-20260407-100904/iteration-01/after/th__property__visual-qa-property__390.png",
+            "detailScore": 100
+          }
+        },
+        {
+          "id": "mobile_scan_fatigue",
+          "area": "Mobile Ergonomics",
+          "status": "pass",
+          "message": "Thai mobile scan fatigue is now controlled in the first viewport.",
+          "evidence": {
+            "paragraphsInViewport": 7,
+            "smallTapTargetCount": 0
+          }
+        },
+        {
+          "id": "locale_parity",
+          "area": "Locale Integrity",
+          "status": "pass",
+          "message": "Thai mobile homepage stays aligned with English after the latest adjustments.",
+          "evidence": {
+            "pairRoute": "/en",
+            "pairWidth": 390
+          }
+        }
+      ]
+    },
+    {
+      "route": "/en",
+      "width": 1366,
+      "checklist": [
+        {
+          "id": "desktop_editorial_balance",
+          "area": "Desktop Editorial",
+          "status": "pass",
+          "message": "Desktop homepage now carries a calmer editorial cadence with the owner bridge resolved into the closing CTA.",
+          "evidence": {
+            "screenshot": "admin-app/artifacts/public-visual-qa/run-20260407-100904/iteration-01/after/en__1366.png",
+            "paragraphsInViewport": 7,
+            "ownerToBottomGap": 90.94
+          }
+        }
+      ]
+    },
+    {
+      "route": "/th",
+      "width": 1366,
+      "checklist": [
+        {
+          "id": "desktop_editorial_balance",
+          "area": "Desktop Editorial",
+          "status": "pass",
+          "message": "Thai desktop homepage keeps the same composed editorial balance as English.",
+          "evidence": {
+            "screenshot": "admin-app/artifacts/public-visual-qa/run-20260407-100904/iteration-01/after/th__1366.png",
+            "paragraphsInViewport": 7,
+            "ownerToBottomGap": 90.94
+          }
+        }
+      ]
+    }
+  ]
+}

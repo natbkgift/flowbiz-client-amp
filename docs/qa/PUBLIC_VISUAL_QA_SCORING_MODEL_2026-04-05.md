@@ -23,6 +23,8 @@ model version: `public-visual-qa-v3`
 - section-aware homepage score
 - screenshot review checklist ที่ aggregate เข้า `summary.json`
 - manual screenshot review input ผ่าน `PUBLIC_VISUAL_REVIEW_FILE` เพื่อทำ hybrid score จริง
+- hero typography capture จากทั้ง `home hero`, `PublicAdvisoryHero`, และ primary detail headers เพื่อไม่ penalize หน้า decision/detail ที่ไม่ได้ใช้ `.home-hero-slider__title`
+- section padding spacing check จะนับเฉพาะ `padding > 0` เพื่อไม่ double-penalize section ที่ intentional zero-padding และใช้ anchor/gap rhythm เป็นตัวกำหนด spacing อยู่แล้ว
 
 ## Score Dimensions
 
@@ -36,7 +38,7 @@ model version: `public-visual-qa-v3`
 | `mediaStability` | `8` | visible broken / incomplete images |
 | `contentClarity` | `7` | heading length, above-the-fold text density, section rhythm |
 | `localeIntegrity` | `5` | route locale vs `html lang` |
-| `typographyMetrics` | `10` | hero type scale, section title scale, body readability, line-height ratios |
+| `typographyMetrics` | `10` | hero type scale (home + advisory/detail heroes), section title scale, body readability, line-height ratios |
 | `spacingRhythm` | `8` | section gap rhythm, card padding consistency, spacing scale discipline |
 | `ctaHierarchy` | `7` | hero CTA structure, primary/secondary balance, final CTA readiness |
 | `sectionAwareHomepage` | `7` | homepage section order, curated split, owner bridge, final CTA handoff |

@@ -45,7 +45,7 @@ export function HomeBottomCta({
   return (
     <section
       id={resolvedSectionId}
-      className="home-bottom-cta py-[60px] md:py-20 xl:py-24 bg-gray-900 text-white mt-3 md:mt-6"
+      className="home-bottom-cta py-12 md:py-12 xl:py-12 2xl:py-16 bg-gray-900 text-white mt-0"
       style={order != null ? { order } : undefined}
       aria-labelledby={headingId}
     >

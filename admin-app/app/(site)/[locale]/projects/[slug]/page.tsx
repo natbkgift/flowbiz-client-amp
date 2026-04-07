@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 
-import { buildLeadCaptureQuery, getAdvisoryLabels, getAdvisoryProofs, withLocaleQuery } from '@/app/_lib/public-advisory';
+import { buildAdvisorWhatsApp, buildLeadCaptureQuery, getAdvisoryLabels, getAdvisoryProofs, withLocaleQuery } from '@/app/_lib/public-advisory';
 import { Container } from '@/components/layout/Container';
 import { TrackedLink } from '@/components/analytics/TrackedLink';
 import { getDictionary, normalizeLocale } from '@/app/_lib/i18n/get-dictionary';
@@ -448,6 +448,11 @@ export default async function ProjectDetailPage(
             id: 'project_timeout_inventory_secondary',
             eventPayload: { cta: 'browse_verified_inventory', from: 'project_detail_timeout' },
           }}
+          tertiaryAction={{
+            href: buildAdvisorWhatsApp(locale, dict),
+            label: dict.cta.whatsapp,
+            id: 'project_timeout_whatsapp_tertiary',
+          }}
         />
       </main>
     );
@@ -769,25 +774,25 @@ export default async function ProjectDetailPage(
       />
       <Container>
         {projectMedia.length > 0 ? (
-          <section className="mt-6 reveal" aria-label={locale === 'th' ? 'แกลเลอรีโครงการ' : 'Project gallery'}>
-            <div className="grid gap-4 md:grid-cols-[minmax(0,1.65fr)_minmax(0,1fr)]">
+          <section className="project-gallery mt-6 reveal" aria-label={locale === 'th' ? 'แกลเลอรีโครงการ' : 'Project gallery'}>
+            <div className="project-gallery__grid grid gap-4 md:grid-cols-[minmax(0,1.65fr)_minmax(0,1fr)]">
               <LocalMediaImage
                 media={{ image_url: projectMedia[0] }}
                 alt={project.name}
-                className="media-shell rounded-3xl overflow-hidden border border-slate-200 bg-white shadow-sm"
+                className="project-gallery__lead media-shell rounded-3xl overflow-hidden border border-slate-200 bg-white shadow-sm"
                 imageClassName="media-shell__img"
                 aspectRatio="16 / 10"
                 priority
                 loading="eager"
               />
               {projectMedia.length > 1 ? (
-                <div className="grid grid-cols-2 gap-4">
+                <div className="project-gallery__rail grid grid-cols-2 gap-4">
                   {projectMedia.slice(1, 5).map((item, index) => (
                     <LocalMediaImage
                       key={`${project.id}-media-${index + 1}`}
                       media={{ image_url: item }}
                       alt={`${project.name} ${index + 2}`}
-                      className="media-shell rounded-3xl overflow-hidden border border-slate-200 bg-white shadow-sm"
+                      className="project-gallery__tile media-shell rounded-3xl overflow-hidden border border-slate-200 bg-white shadow-sm"
                       imageClassName="media-shell__img"
                       aspectRatio="4 / 3"
                     />
@@ -799,8 +804,8 @@ export default async function ProjectDetailPage(
         ) : null}
         <div className="detail-layout advisory-detail-layout mt-6">
           <div className="detail-stack">
-            <section id="project-confidence-pack" className="signal-grid signal-grid--three-up reveal decision-pack">
-              <div className="authority-card">
+            <section id="project-confidence-pack" className="signal-grid signal-grid--three-up reveal decision-pack project-confidence-pack">
+              <div className="authority-card project-confidence-card project-confidence-card--lead">
                 <h2 className="card-title">{locale === 'th' ? 'ยืนยันได้ในหน้านี้' : 'Verified on this page'}</h2>
                 <p className="card-subtitle">
                   {locale === 'th'
@@ -816,7 +821,7 @@ export default async function ProjectDetailPage(
                 </div>
               </div>
 
-              <div className="authority-card">
+              <div className="authority-card project-confidence-card project-confidence-card--availability">
                 <h2 className="card-title">{locale === 'th' ? 'ราคาและ availability context' : 'Pricing and availability context'}</h2>
                 <p className="card-subtitle">
                   {locale === 'th'
@@ -832,7 +837,7 @@ export default async function ProjectDetailPage(
                 </div>
               </div>
 
-              <div className="authority-card">
+              <div className="authority-card project-confidence-card project-confidence-card--consider">
                 <h2 className="card-title">{locale === 'th' ? 'เหตุผลที่ควรพิจารณาโครงการนี้' : 'Why this project is worth considering'}</h2>
                 <p className="card-subtitle">
                   {locale === 'th'
@@ -849,7 +854,7 @@ export default async function ProjectDetailPage(
               </div>
             </section>
 
-            <section id="project-brief-section" className="authority-card reveal">
+            <section id="project-brief-section" className="authority-card reveal project-brief-section">
               <div className="section-header">
                 <h2 className="section-title section-title--sm">{locale === 'th' ? 'สรุปโครงการเพื่อใช้คัดรายการ' : 'Project read for shortlist'}</h2>
                 <p className="section-subtitle">
@@ -860,7 +865,7 @@ export default async function ProjectDetailPage(
               </div>
 
               {projectMetrics.length ? (
-                <div className="signal-grid signal-grid--three-up">
+                <div className="signal-grid signal-grid--three-up project-brief-section__metrics">
                   {projectMetrics.map((metric) => (
                     <div key={metric.label} className="metric-card">
                       <span className="metric-card__label">{metric.label}</span>
@@ -879,10 +884,15 @@ export default async function ProjectDetailPage(
               ) : null}
             </section>
 
-            <section id="project-decision-grid" className="signal-grid signal-grid--two-up reveal">
-              <div id="project-decision-lens" className="authority-card">
+            <section id="project-decision-grid" className="signal-grid signal-grid--two-up reveal project-advisory-reads-grid">
+              <div id="project-decision-lens" className="authority-card project-decision-lens-card">
                 <h2 className="card-title">{locale === 'th' ? 'มุมมองสำหรับตัดสินใจคัดรายการ' : 'Shortlist decision lens'}</h2>
-                <div className="insight-list mt-3">
+                <p className="card-subtitle">
+                  {locale === 'th'
+                    ? 'อ่านชุดสัญญาณนี้เพื่อดูว่าโครงการควรไปต่อใน shortlist หรือเก็บไว้เป็นเพียงตัวเทียบอ้างอิง'
+                    : 'Read these signals to decide whether the project earns a shortlist slot or stays as a reference only.'}
+                </p>
+                <div className="insight-list project-decision-lens-list mt-3">
                   {projectDecisionRead.map((item) => (
                     <div key={item} className="insight-list__item">
                       <span className="insight-list__body">{item}</span>
@@ -895,7 +905,7 @@ export default async function ProjectDetailPage(
                     </div>
                   ))}
                 </div>
-                <div className="card-actions mt-3">
+                <div className="card-actions project-decision-lens-actions mt-3">
                   <Link className="btn btn-secondary" href={withLocale(locale, '/buy')}>
                     {locale === 'th' ? 'ดูรายการที่บันทึกเข้ารายการคัดไว้ได้' : 'Browse shortlist-ready listings'}
                   </Link>
@@ -905,21 +915,26 @@ export default async function ProjectDetailPage(
                 </div>
               </div>
 
-              <div id="project-related-reads" className="authority-card">
+              <div id="project-related-reads" className="authority-card project-related-reads-card">
                 <h2 className="card-title">{locale === 'th' ? 'บทความและบริบทที่เกี่ยวข้อง' : 'Related advisory reads'}</h2>
-                <div className="insight-list mt-3">
+                <p className="card-subtitle">
+                  {locale === 'th'
+                    ? 'ใช้บทความและคู่มือที่เกี่ยวข้องเพื่อขยายบริบท ก่อนเทียบต่อหรือส่งบรีฟให้ทีมช่วยคัดรายการ'
+                    : 'Use these reads to widen the context before you compare options or hand a brief to the team.'}
+                </p>
+                <div className="insight-list project-related-reads-list mt-3">
                   {relatedReads.length ? relatedReads.map((post) => (
-                    <Link key={post.slug} href={withLocale(locale, `/blog/${encodeURIComponent(post.slug)}`)} className="insight-list__item">
+                    <Link key={post.slug} href={withLocale(locale, `/blog/${encodeURIComponent(post.slug)}`)} className="insight-list__item project-related-read">
                       <span className="insight-list__title">{localizedText(locale, post.title) || post.slug}</span>
                       <span className="insight-list__body">{localizedText(locale, post.excerpt ?? null) || (locale === 'th' ? 'อ่านบทความฉบับเต็ม' : 'Open the full article.')}</span>
                     </Link>
                   )) : (
-                    <div className="insight-list__item">
+                    <div className="insight-list__item project-related-read">
                       <span className="insight-list__body">{locale === 'th' ? 'อ่านต่อที่มุมมองการลงทุน หน้าเปรียบเทียบ หรือคู่มือทำเล เพื่อเสริมบริบทของการตัดสินใจ' : 'Continue into investment, compare, or the area guide to widen the decision context.'}</span>
                     </div>
                   )}
                 </div>
-                <div className="card-actions mt-3">
+                <div className="card-actions project-related-reads-actions mt-3">
                   <Link className="btn btn-secondary" href={withLocale(locale, '/calculator')}>
                     {locale === 'th' ? 'เปิด calculator' : 'Open calculator'}
                   </Link>
@@ -928,16 +943,16 @@ export default async function ProjectDetailPage(
             </section>
 
             {(project.amenities?.length ?? 0) > 0 || investmentFacts.length > 0 || locationFacts.length > 0 ? (
-              <section id="project-trust-grid" className="signal-grid signal-grid--two-up reveal">
+              <section id="project-trust-grid" className="signal-grid signal-grid--two-up reveal project-advisory-followthrough project-supporting-facts-grid">
                 {(project.amenities?.length ?? 0) > 0 ? (
-                  <div id="project-amenities" className="authority-card">
+                  <div id="project-amenities" className="authority-card project-supporting-fact-card project-supporting-fact-card--livability">
                     <h2 className="card-title">{locale === 'th' ? 'สิ่งอำนวยความสะดวกและคุณภาพการอยู่อาศัย' : 'Amenities and livability'}</h2>
                     <p className="card-subtitle">
                       {locale === 'th'
                         ? 'อ่านสิ่งอำนวยความสะดวกเป็นบริบทการอยู่อาศัย ไม่ใช่เพียง checklist ของโครงการ'
                         : 'Read the amenity mix as a livability signal, not just a project checklist.'}
                     </p>
-                    <div className="chip-list mt-3">
+                    <div className="chip-list project-amenities-list mt-3">
                       {project.amenities?.map((item) => (
                         <span key={item} className="chip-list__item">{item}</span>
                       ))}
@@ -946,9 +961,14 @@ export default async function ProjectDetailPage(
                 ) : null}
 
                 {investmentFacts.length > 0 ? (
-                  <div id="project-investment-snapshot" className="authority-card">
+                  <div id="project-investment-snapshot" className="authority-card project-supporting-fact-card project-supporting-fact-card--investment">
                     <h2 className="card-title">{locale === 'th' ? 'ภาพรวมการลงทุนจากข้อมูลล่าสุด' : 'Investment snapshot'}</h2>
-                    <div className="insight-list mt-3">
+                    <p className="card-subtitle">
+                      {locale === 'th'
+                        ? 'ใช้ชุดตัวเลขนี้เพื่อดูความต่างเชิงผลตอบแทนและความเสี่ยง ก่อนขยับไปสู่การเทียบหรือติดต่อทีม'
+                        : 'Use these figures to read yield and risk differences before you compare further or move into the team handoff.'}
+                    </p>
+                    <div className="insight-list project-supporting-fact-list mt-3">
                       {investmentFacts.map((item) => (
                         <div key={item.label} className="insight-list__item">
                           <span className="insight-list__title">{item.label}</span>
@@ -960,9 +980,14 @@ export default async function ProjectDetailPage(
                 ) : null}
 
                 {locationFacts.length > 0 ? (
-                  <div id="project-location-context" className="authority-card">
+                  <div id="project-location-context" className="authority-card project-supporting-fact-card project-supporting-fact-card--location">
                     <h2 className="card-title">{locale === 'th' ? 'บริบทของทำเล' : 'Location context'}</h2>
-                    <div className="insight-list mt-3">
+                    <p className="card-subtitle">
+                      {locale === 'th'
+                        ? 'อ่านบริบทนี้เพื่อวางโครงการในเฟรมของย่านจริง ไม่ใช่มองเป็นตัวเลขหรือราคาเดี่ยวๆ'
+                        : 'Read this context to place the project inside the real district frame, not as a price point in isolation.'}
+                    </p>
+                    <div className="insight-list project-supporting-fact-list mt-3">
                       {locationFacts.map((item) => (
                         <div key={item.label} className="insight-list__item">
                           <span className="insight-list__title">{item.label}</span>
@@ -973,14 +998,14 @@ export default async function ProjectDetailPage(
                   </div>
                 ) : null}
 
-                <div id="project-next-steps" className="authority-card">
+                <div id="project-next-steps" className="authority-card project-next-steps-card">
                   <h2 className="card-title">{locale === 'th' ? 'ขั้นตอนถัดไปกับทีมที่ปรึกษา' : 'Advisory next steps'}</h2>
                   <p className="card-subtitle">
                     {locale === 'th'
                       ? 'ถ้าโครงการนี้ใกล้เคียงโจทย์ ให้เทียบต่อหรือส่งบรีฟเพื่อให้ทีมคัดรายการที่แคบลง'
                       : 'If this project is directionally right, compare it next or send the brief so the team can tighten the shortlist.'}
                   </p>
-                  <div className="card-actions mt-3">
+                  <div className="card-actions project-next-steps-actions mt-3">
                     {priorityInternalLinks.map((it) => (
                       <Link
                         key={it.href}
@@ -1009,56 +1034,60 @@ export default async function ProjectDetailPage(
             ) : null}
           </div>
 
-          <aside className="detail-sidebar detail-stack">
-            <div id="project-advisor-brief" className="page-rail-card reveal">
+          <aside className="detail-sidebar detail-stack project-advisor-rail">
+            <div id="project-advisor-brief" className="page-rail-card reveal project-advisor-brief">
               <h2 className="card-title">{projectDecisionCta.sidebarTitle}</h2>
               <p className="card-subtitle">
                 {projectDecisionCta.sidebarBody}
               </p>
             </div>
-            <LeadForm
-              locale={locale}
-              heading={projectDecisionCta.leadHeading}
-              defaultPurpose={hasInvestmentView ? 'invest' : 'buy'}
-              defaultPreferredArea={project.area?.name ?? undefined}
-              defaultMessage={projectDecisionCta.leadMessage}
-              inquiryIntent={projectDecisionCta.inquiryIntent}
-              inquirySource={projectDecisionCta.inquirySource}
-              inquiryTags={[
-                `project:${project.slug}`,
-                `buyer_fit:${projectDecisionCta.buyerFit}`,
-                `signal_level:${projectDecisionCta.signalLevel}`,
-              ]}
-              contextSummary={[
-                locale === 'th' ? `เส้นทางที่ต้องการ: ${projectDecisionCta.inquiryIntent}` : `Lead path: ${projectDecisionCta.inquiryIntent}`,
-                locale === 'th' ? `โครงการที่กำลังสนใจ: ${project.name}` : `Project in focus: ${project.name}`,
-                locale === 'th' ? `ต้นทางของการส่งต่อ: ${projectDecisionCta.inquirySource}` : `Handoff source: ${projectDecisionCta.inquirySource}`,
-                locale === 'th' ? `ลักษณะผู้ซื้อที่เหมาะ: ${projectDecisionCta.buyerFit}` : `Buyer fit: ${projectDecisionCta.buyerFit}`,
-                locale === 'th' ? `ระดับความชัดของสัญญาณ: ${projectDecisionCta.signalLevel}` : `Signal strength: ${projectDecisionCta.signalLevel}`,
-              ]}
-              handoff={{
-                sourceRoute: 'project',
-                ctaType: 'primary',
-                ctaLabel: projectDecisionCta.leadHeading,
-                entityType: 'project',
-                entityId: project.id,
-                entityName: project.name,
-                userIntent: hasInvestmentView ? 'invest' : 'buy',
-                location: project.area?.name ?? undefined,
-                context: {
-                  area: project.area?.name ?? undefined,
-                },
-              }}
-            />
+            <div className="project-advisor-form-shell">
+              <LeadForm
+                locale={locale}
+                heading={projectDecisionCta.leadHeading}
+                defaultPurpose={hasInvestmentView ? 'invest' : 'buy'}
+                defaultPreferredArea={project.area?.name ?? undefined}
+                defaultMessage={projectDecisionCta.leadMessage}
+                inquiryIntent={projectDecisionCta.inquiryIntent}
+                inquirySource={projectDecisionCta.inquirySource}
+                inquiryTags={[
+                  `project:${project.slug}`,
+                  `buyer_fit:${projectDecisionCta.buyerFit}`,
+                  `signal_level:${projectDecisionCta.signalLevel}`,
+                ]}
+                contextSummary={[
+                  locale === 'th' ? `เส้นทางที่ต้องการ: ${projectDecisionCta.inquiryIntent}` : `Lead path: ${projectDecisionCta.inquiryIntent}`,
+                  locale === 'th' ? `โครงการที่กำลังสนใจ: ${project.name}` : `Project in focus: ${project.name}`,
+                  locale === 'th' ? `ต้นทางของการส่งต่อ: ${projectDecisionCta.inquirySource}` : `Handoff source: ${projectDecisionCta.inquirySource}`,
+                  locale === 'th' ? `ลักษณะผู้ซื้อที่เหมาะ: ${projectDecisionCta.buyerFit}` : `Buyer fit: ${projectDecisionCta.buyerFit}`,
+                  locale === 'th' ? `ระดับความชัดของสัญญาณ: ${projectDecisionCta.signalLevel}` : `Signal strength: ${projectDecisionCta.signalLevel}`,
+                ]}
+                handoff={{
+                  sourceRoute: 'project',
+                  ctaType: 'primary',
+                  ctaLabel: projectDecisionCta.leadHeading,
+                  entityType: 'project',
+                  entityId: project.id,
+                  entityName: project.name,
+                  userIntent: hasInvestmentView ? 'invest' : 'buy',
+                  location: project.area?.name ?? undefined,
+                  context: {
+                    area: project.area?.name ?? undefined,
+                  },
+                }}
+              />
+            </div>
           </aside>
         </div>
       </Container>
       <PageOwnedMobileCTA
         id="project-mobile-cta"
+        eyebrow={locale === 'th' ? 'ส่งต่อ snapshot ไปยัง advisor' : 'Advisor snapshot handoff'}
+        variant="project"
         title={locale === 'th' ? 'พร้อมคุยต่อจาก snapshot นี้' : 'Ready to act on this project snapshot'}
         description={locale === 'th'
-          ? 'ใช้ทางลัดนี้เพื่อส่งบรีฟของโครงการให้ทีมทันที หรือเปิดหน้าเปรียบเทียบเพื่อคัดตัวเลือกใกล้เคียงต่อ.'
-          : 'Use the fast handoff to send this project brief to the team, or move into compare when you want nearby alternatives side by side.'}
+          ? 'ส่งบรีฟโครงการนี้ให้ทีมทันที หรือไปหน้าเปรียบเทียบเมื่ออยากคัดตัวเลือกใกล้เคียงต่อ.'
+          : 'Send this project brief to the team now, or move into compare when you want nearby alternatives side by side.'}
         primaryAction={{
           id: 'project_mobile_primary',
           href: projectDecisionCta.primaryHref,

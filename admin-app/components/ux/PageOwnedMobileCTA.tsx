@@ -9,10 +9,12 @@ type MobileAction = {
 
 type PageOwnedMobileCTAProps = {
   id: string;
+  eyebrow?: string;
   title: string;
   description: string;
   primaryAction: MobileAction;
   secondaryAction?: MobileAction;
+  variant?: 'property' | 'project';
 };
 
 function isExternalHref(href: string): boolean {
@@ -21,14 +23,19 @@ function isExternalHref(href: string): boolean {
 
 export function PageOwnedMobileCTA({
   id,
+  eyebrow,
   title,
   description,
   primaryAction,
   secondaryAction,
+  variant,
 }: PageOwnedMobileCTAProps) {
+  const className = variant ? `detail-mobile-cta detail-mobile-cta--${variant}` : 'detail-mobile-cta';
+
   return (
-    <div id={id} className="detail-mobile-cta" role="region" aria-label={title}>
+    <div id={id} className={className} role="region" aria-label={title}>
       <div className="detail-mobile-cta__meta">
+        {eyebrow ? <p className="detail-mobile-cta__eyebrow">{eyebrow}</p> : null}
         <p className="detail-mobile-cta__title">{title}</p>
         <p className="detail-mobile-cta__description">{description}</p>
       </div>

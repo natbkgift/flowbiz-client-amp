@@ -464,8 +464,8 @@ export default async function ComparePage(
 
         <section className="section">
           <Container>
-            <div id="compare-readiness-pack" className="signal-grid signal-grid--three-up decision-pack mb-4">
-              <section className="authority-card reveal">
+            <div id="compare-readiness-pack" className="signal-grid signal-grid--three-up decision-pack compare-readiness-pack mb-4">
+              <section className="authority-card reveal compare-readiness-card compare-readiness-card--verified">
                 <h2 className="card-title">{locale === 'th' ? 'เมื่อไรหน้า compare จะเริ่มคุ้มค่า' : 'When compare becomes useful'}</h2>
                 <p className="card-subtitle">
                   {locale === 'th'
@@ -479,7 +479,7 @@ export default async function ComparePage(
                 </ul>
               </section>
 
-              <section className="authority-card reveal">
+              <section className="authority-card reveal compare-readiness-card compare-readiness-card--next">
                 <h2 className="card-title">{locale === 'th' ? 'ควรทำอะไรก่อน' : 'Best next move first'}</h2>
                 <p className="card-subtitle">
                   {locale === 'th'
@@ -493,7 +493,7 @@ export default async function ComparePage(
                 </ul>
               </section>
 
-              <section className="authority-card reveal">
+              <section className="authority-card reveal compare-readiness-card compare-readiness-card--handoff">
                 <h2 className="card-title">{locale === 'th' ? 'บริบทที่จะถูกพกต่อไป' : 'Context that carries forward'}</h2>
                 <p className="card-subtitle">
                   {locale === 'th'
@@ -509,7 +509,7 @@ export default async function ComparePage(
             </div>
 
             {investorContextPresent ? (
-              <div className="authority-card reveal compare-flow-card mb-4">
+              <div className="authority-card reveal compare-flow-card compare-readiness-brief-card mb-4">
                 <h2 className="card-title">{locale === 'th' ? 'Investment brief ที่ส่งมาจาก calculator' : 'Investment brief carried from calculator'}</h2>
                 <p className="card-subtitle">
                   {locale === 'th'
@@ -671,11 +671,11 @@ export default async function ComparePage(
 
         <section className="section">
           <Container>
-            <div className="trust-box mb-4">
+            <div className="trust-box compare-recovery-note mb-4">
               <h2 className="trust-box__title">{recoveryCopy.title}</h2>
               <p className="section-subtitle">{recoveryCopy.body}</p>
               {missing.length ? (
-                <p className="guided-dialog__step mt-2.5">
+                <p className="guided-dialog__step compare-recovery-note__meta mt-2.5">
                   {locale === 'th'
                     ? `รายการที่ต้องเช็กใหม่: ${missing.join(', ')}`
                     : `Projects that need a fresh check: ${missing.join(', ')}`}
@@ -683,8 +683,8 @@ export default async function ComparePage(
               ) : null}
             </div>
 
-            <div id="compare-readiness-pack" className="signal-grid signal-grid--three-up decision-pack mb-4">
-              <section className="authority-card reveal">
+            <div id="compare-readiness-pack" className="signal-grid signal-grid--three-up decision-pack compare-recovery-readiness mb-4">
+              <section className="authority-card reveal compare-recovery-card compare-recovery-card--status">
                 <h2 className="card-title">{locale === 'th' ? 'เกิดอะไรขึ้นกับ compare ชุดนี้' : 'What changed in this compare set'}</h2>
                 <p className="card-subtitle">
                   {locale === 'th'
@@ -697,7 +697,7 @@ export default async function ComparePage(
                 </ul>
               </section>
 
-              <section className="authority-card reveal">
+              <section className="authority-card reveal compare-recovery-card compare-recovery-card--next">
                 <h2 className="card-title">{locale === 'th' ? 'ขั้นถัดไปที่คุ้มกว่า' : 'Higher-value next move'}</h2>
                 <p className="card-subtitle">
                   {locale === 'th'
@@ -709,7 +709,7 @@ export default async function ComparePage(
                 </ul>
               </section>
 
-              <section className="authority-card reveal">
+              <section className="authority-card reveal compare-recovery-card compare-recovery-card--handoff">
                 <h2 className="card-title">{locale === 'th' ? 'ถ้าต้องการคุยกับทีมตอนนี้' : 'If you need the team now'}</h2>
                 <p className="card-subtitle">
                   {locale === 'th'
@@ -725,7 +725,7 @@ export default async function ComparePage(
             </div>
 
             {investorContextPresent ? (
-              <div className="authority-card reveal compare-flow-card mb-4">
+              <div className="authority-card reveal compare-flow-card compare-recovery-brief-card mb-4">
                 <h2 className="card-title">{locale === 'th' ? 'Investment brief ที่ยังพกต่อได้' : 'Investment brief that still carries forward'}</h2>
                 <p className="card-subtitle">
                   {locale === 'th'
@@ -737,7 +737,7 @@ export default async function ComparePage(
                     <li key={fact}>{fact}</li>
                   ))}
                 </ul>
-                <div className="cta-row mt-4">
+                <div className="cta-row compare-recovery-actions mt-4">
                   <Link
                     className="btn btn-secondary"
                     href={compareContinuationAction.href}
@@ -878,7 +878,7 @@ export default async function ComparePage(
       <section className="section">
         <Container>
           {investorContextPresent ? (
-            <div className="authority-card reveal compare-flow-card mb-4">
+            <div className="authority-card reveal compare-flow-card compare-carried-brief-card mb-4">
               <h2 className="card-title">{locale === 'th' ? 'Investment brief ที่ใช้ประกอบการเทียบ' : 'Investment brief used in this comparison'}</h2>
               <p className="card-subtitle">
                 {locale === 'th'
@@ -901,16 +901,16 @@ export default async function ComparePage(
           ) : null}
 
           {areaComparisons.length >= 2 ? (
-            <div id="compare-area-context" className="authority-card reveal compare-flow-card mb-4">
+            <div id="compare-area-context" className="authority-card reveal compare-flow-card compare-area-context-card mb-4">
               <h2 className="card-title">{locale === 'th' ? 'ภาพรวมเปรียบเทียบระดับทำเล' : 'Area comparison read'}</h2>
               <p className="card-subtitle">
                 {locale === 'th'
                   ? 'ก่อนตัดสินใจที่ระดับโครงการ ลองอ่านบริบทของแต่ละทำเลแบบ side-by-side จากราคา ค่าเช่า และ ROI snapshot ที่มีอยู่จริง'
                   : 'Before narrowing the decision at project level, read the location context side by side using live pricing, rent, and ROI snapshots where available.'}
               </p>
-              <div className="signal-grid signal-grid--two-up mt-4">
+              <div className="signal-grid signal-grid--two-up compare-area-grid mt-4">
                 {areaComparisons.map((area) => (
-                  <section key={area.areaId} className="authority-card">
+                  <section key={area.areaId} className="authority-card compare-area-card">
                     <div className="section-header">
                       <h3 className="section-title section-title--sm">{area.areaName}</h3>
                       <p className="section-subtitle">
@@ -919,7 +919,7 @@ export default async function ComparePage(
                           : `Currently represented by ${area.projectNames.join(', ')}`}
                       </p>
                     </div>
-                    <div className="signal-grid signal-grid--two-up">
+                    <div className="signal-grid signal-grid--two-up compare-area-metrics">
                       <div className="metric-card">
                         <span className="metric-card__label">{locale === 'th' ? 'ราคาเฉลี่ย' : 'Average price'}</span>
                         <strong className="metric-card__value">{area.avgPrice ?? '—'}</strong>
@@ -937,7 +937,7 @@ export default async function ComparePage(
                         <strong className="metric-card__value">{area.totalProjects ?? '—'}</strong>
                       </div>
                     </div>
-                    <div className="insight-list mt-4">
+                    <div className="insight-list compare-area-insights mt-4">
                       <div className="insight-list__item">
                         <span className="insight-list__body">
                           {area.asOf
@@ -954,7 +954,7 @@ export default async function ComparePage(
                       </div>
                     </div>
                     {area.areaSlug ? (
-                      <div className="card-actions mt-3">
+                      <div className="card-actions compare-area-actions mt-3">
                         <Link
                           className="btn btn-secondary"
                           href={withLocale(locale, `/areas/${encodeURIComponent(area.areaSlug)}`)}
@@ -992,21 +992,21 @@ export default async function ComparePage(
             </div>
           ) : null}
 
-          <div id="compare-decision-summary" className="card reveal mb-4">
+          <div id="compare-decision-summary" className="card reveal compare-summary-card mb-4">
             <h2 className="card-title">{locale === 'th' ? 'สรุปเพื่อช่วยตัดสินใจ' : 'Decision support summary'}</h2>
             <p className="card-subtitle">
               {locale === 'th'
                 ? 'สรุปชั้นนี้มีไว้เพื่อจัดลำดับคำถามและ next step ของการเปรียบเทียบ ไม่ใช่เพื่อฟันธงการลงทุน'
                 : 'This layer is meant to organize the remaining questions and next step from the comparison, not to produce an investment verdict.'}
             </p>
-            <div className="insight-list mt-4">
+            <div className="insight-list compare-summary-list mt-4">
               {decisionSupportSummary.map((line) => (
                 <div key={line} className="insight-list__item">
                   <span className="insight-list__body">{line}</span>
                 </div>
               ))}
             </div>
-            <div className="cta-strip compare-empty-followup reveal mt-4">
+            <div className="cta-strip compare-empty-followup compare-summary-followup reveal mt-4">
               <div className="cta-strip__text">{compareContinuationAction.note}</div>
               <Link className="btn btn-tertiary" href={compareContinuationAction.href}>
                 {compareContinuationAction.label}
@@ -1014,9 +1014,9 @@ export default async function ComparePage(
             </div>
           </div>
 
-          <div className="card reveal">
+          <div className="card reveal compare-table-card">
             <h2 className="card-title">{dict.compare.comparisonTable}</h2>
-            <div className="overflow-x-auto mt-3">
+            <div className="compare-table-shell overflow-x-auto mt-3">
               <table className="compare-table" aria-label={dict.compare.comparisonTable}>
                 <caption className="sr-only">{dict.compare.comparisonTable}</caption>
                 <thead>
@@ -1099,48 +1099,50 @@ export default async function ComparePage(
               </table>
             </div>
 
-            <div className="cta-row mt-4">
-              <Link
-                className="btn btn-secondary"
-                href={compareContinuationAction.href}
-                data-amp-event-type="cta_click"
-                data-amp-event-payload={JSON.stringify({
-                  source_route: 'compare',
-                  cta_type: 'secondary',
-                  cta_label: compareContinuationAction.label,
-                  entity_type: 'route',
-                  entity_name: compareContinuationAction.href.includes('/shortlist') ? 'shortlist' : 'buy',
-                  user_intent: 'research',
-                  context: {
-                    compare_ids: ids,
-                  },
-                })}
-              >
-                {compareContinuationAction.label}
-              </Link>
-              <Link
-                className="btn btn-cta"
-                href={compareContactHref}
-                data-amp-event-type="cta_click"
-                data-amp-event-payload={JSON.stringify({
-                  source_route: 'compare',
-                  cta_type: 'primary',
-                  cta_label: dict.compare.getInvestmentPlan,
-                  entity_type: 'project',
-                  entity_name: ids.join(', '),
-                  user_intent: investorContextPresent ? 'invest' : 'compare',
-                  context: {
-                    compare_ids: ids,
-                  },
-                })}
-              >
-                {dict.compare.getInvestmentPlan}
-              </Link>
-            </div>
+            <div className="compare-closing-handoff mt-4">
+              <div className="cta-row compare-table-actions compare-table-actions--closing">
+                <Link
+                  className="btn btn-secondary"
+                  href={compareContinuationAction.href}
+                  data-amp-event-type="cta_click"
+                  data-amp-event-payload={JSON.stringify({
+                    source_route: 'compare',
+                    cta_type: 'secondary',
+                    cta_label: compareContinuationAction.label,
+                    entity_type: 'route',
+                    entity_name: compareContinuationAction.href.includes('/shortlist') ? 'shortlist' : 'buy',
+                    user_intent: 'research',
+                    context: {
+                      compare_ids: ids,
+                    },
+                  })}
+                >
+                  {compareContinuationAction.label}
+                </Link>
+                <Link
+                  className="btn btn-cta"
+                  href={compareContactHref}
+                  data-amp-event-type="cta_click"
+                  data-amp-event-payload={JSON.stringify({
+                    source_route: 'compare',
+                    cta_type: 'primary',
+                    cta_label: dict.compare.getInvestmentPlan,
+                    entity_type: 'project',
+                    entity_name: ids.join(', '),
+                    user_intent: investorContextPresent ? 'invest' : 'compare',
+                    context: {
+                      compare_ids: ids,
+                    },
+                  })}
+                >
+                  {dict.compare.getInvestmentPlan}
+                </Link>
+              </div>
 
-            <p className="guided-dialog__step mt-2.5">
-              {dict.compare.completionNote}
-            </p>
+              <p className="guided-dialog__step compare-completion-note mt-2.5">
+                {dict.compare.completionNote}
+              </p>
+            </div>
           </div>
         </Container>
       </section>

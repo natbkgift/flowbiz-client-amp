@@ -400,10 +400,10 @@ export default async function ProjectsPage(props: { params: Promise<{ locale: st
           prefetch: false,
         }}
       />
-      <section className="section">
+        <section className="section">
       <Container>
         <div className="section-header mb-6">
-          <h1 className="section-title">{locale === 'th' ? 'รายการโครงการยังไม่พร้อม' : dict.nav.projects}</h1>
+          <h2 className="section-title">{locale === 'th' ? 'รายการโครงการยังไม่พร้อม' : dict.nav.projects}</h2>
           <p className="section-subtitle">
             {locale === 'th'
               ? 'ลองใหม่อีกครั้ง หรือใช้ทีมช่วยเช็กโครงการที่สนใจให้ก่อน'

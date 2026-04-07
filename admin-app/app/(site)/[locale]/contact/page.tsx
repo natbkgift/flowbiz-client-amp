@@ -685,12 +685,12 @@ export default async function ContactPage(
       <section className="section">
         <Container>
           <div className="split split--form-priority">
-            <aside className="split__aside">
+            <aside className="split__aside contact-concierge-rail">
               <h2 className="section-title">{contactAdvisoryTitle}</h2>
               <p className="section-subtitle">{contactAdvisoryBody}</p>
 
               {hasBuyingCostContext ? (
-                <div className="trust-box">
+                <div className="trust-box contact-concierge-box">
                   <h3 className="trust-box__title">
                     {locale === 'th' ? 'สรุปการประเมิน buying cost ที่ส่งต่อมาจาก estimator' : 'Buying cost estimate carried from estimator'}
                   </h3>
@@ -703,7 +703,7 @@ export default async function ContactPage(
               ) : null}
 
               {hasInvestorContext ? (
-                <div className="trust-box">
+                <div className="trust-box contact-concierge-box">
                   <h3 className="trust-box__title">
                     {locale === 'th' ? 'สรุปบริบทนักลงทุนที่ส่งต่อมา' : 'Investor handoff summary'}
                   </h3>
@@ -716,7 +716,7 @@ export default async function ContactPage(
               ) : null}
 
               {hasLeadCaptureContext ? (
-                <div className="trust-box">
+                <div className="trust-box contact-concierge-box">
                   <h3 className="trust-box__title">
                     {locale === 'th' ? 'สรุปบริบท lead ที่ส่งต่อมา' : 'Lead handoff summary'}
                   </h3>
@@ -743,7 +743,7 @@ export default async function ContactPage(
                 </a>
               </div>
 
-              <div className="trust-box">
+              <div className="trust-box contact-concierge-box contact-concierge-box--trust">
                 <h3 className="trust-box__title">{contactTrustTitle}</h3>
                 <ul className="bullet-list">
                   {contactTrustBullets.map((b) => (
@@ -753,7 +753,7 @@ export default async function ContactPage(
               </div>
             </aside>
 
-            <div className="split__main" id="contact-form">
+            <div className="split__main contact-form-shell" id="contact-form">
               <LeadForm
                 heading={contactFormHeading}
                 description={topicPreset.description}

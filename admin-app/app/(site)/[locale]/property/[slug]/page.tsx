@@ -403,6 +403,9 @@ export default async function PropertyPage(props: PageProps) {
   const propertyActionNote = locale === 'th'
     ? 'การส่งบรีฟจากหน้านี้จะพกชื่อรายการ ราคา และบริบทของยูนิตไปกับ inquiry เดียวกัน หรือจะบันทึกลง shortlist ก่อนแล้วค่อยส่งต่อก็ได้.'
     : 'This handoff carries the listing title, price, and unit context into the same inquiry, or you can save it to the shortlist first and continue later.';
+  const propertyRailNote = locale === 'th'
+    ? 'เริ่มจากการคุยตรงกับทีมได้ทันที หรือส่งบรีฟด้านล่างเมื่ออยากให้ทีมถือบริบทของยูนิตนี้ไปต่อแบบครบกว่าเดิม.'
+    : 'Start with a direct message now, or use the brief below when you want the team to carry this unit context forward in one handoff.';
 
   const jsonLd = JSON.stringify(
     [
@@ -469,25 +472,33 @@ export default async function PropertyPage(props: PageProps) {
         />
         <div className="detail-layout">
           <div className="detail-main">
-            <div id="gallery-section">
-              <div className="gallery-main">
+            <div id="gallery-section" className="property-gallery">
+              <div className="gallery-main property-gallery__main">
                 <Image
                   src={main}
                   alt={property.title}
                   fill
                   unoptimized
                   sizes="(min-width: 1024px) 70vw, 100vw"
-                  className="object-cover"
+                  className="property-gallery__main-image object-cover"
                   priority
                 />
-                <div className="gallery-counter">1 / {Math.max(gallery.length, 1)}</div>
+                <div className="gallery-counter property-gallery__counter">1 / {Math.max(gallery.length, 1)}</div>
               </div>
 
               {gallery.length > 1 ? (
-                <div className="gallery-thumbnails">
+                <div className="gallery-thumbnails property-gallery__thumbnails">
                   {gallery.slice(0, 12).map((src, idx) => (
-                    <div key={src} className={idx === 0 ? 'gallery-thumbnail active' : 'gallery-thumbnail'}>
-                      <Image src={src} alt={`${dict.property.galleryPhoto} ${idx + 1}`} width={80} height={60} unoptimized className="object-cover" loading="lazy" />
+                    <div key={src} className={idx === 0 ? 'gallery-thumbnail property-gallery__thumb active' : 'gallery-thumbnail property-gallery__thumb'}>
+                      <Image
+                        src={src}
+                        alt={`${dict.property.galleryPhoto} ${idx + 1}`}
+                        width={80}
+                        height={60}
+                        unoptimized
+                        className="property-gallery__thumb-image object-cover"
+                        loading="lazy"
+                      />
                     </div>
                   ))}
                 </div>
@@ -498,12 +509,20 @@ export default async function PropertyPage(props: PageProps) {
               <div className="property-title">
                 <p className="public-hero__eyebrow">{dict.advisory.heroEyebrow}</p>
                 <h1>{property.title}</h1>
-                <p className="property-location">
+                <p className="property-location property-location--primary">
                   {property.address}, {property.city}
                 </p>
                 <p className="section-subtitle">{propertySummary}</p>
               </div>
-              <div className="property-price">{formatPriceTHB(Number(property.price))}</div>
+              <div className="property-price-block">
+                <p className="property-price-label">{locale === 'th' ? 'ราคาอ้างอิง' : 'Guide price'}</p>
+                <div className="property-price">{formatPriceTHB(Number(property.price))}</div>
+                <p className="property-price-note">
+                  {locale === 'th'
+                    ? 'ใช้ราคาในหน้านี้เป็นฐานก่อนเช็ก availability และยูนิตที่ยังเปิดอยู่จริง'
+                    : 'Use this price as the starting point before confirming live availability and active units.'}
+                </p>
+              </div>
             </PublicSurfaceCard>
 
             <PublicActionRow id="property-primary-actions" className="cta-row mb-6" stackOnMobile>
@@ -529,29 +548,35 @@ export default async function PropertyPage(props: PageProps) {
             </p>
 
             <div id="property-core-facts" className="property-facts">
-              <div className="flex items-center gap-2">
-                <IconBed size="sm" />
-                <div>
-                  <strong>{property.bedrooms ?? '-'}</strong>
-                  <div className="text-sm text-[var(--color-text-secondary)]">
+              <div className="property-fact-card">
+                <div className="property-fact-card__icon">
+                  <IconBed size="sm" />
+                </div>
+                <div className="property-fact-card__content">
+                  <strong className="property-fact-card__value">{property.bedrooms ?? '-'}</strong>
+                  <div className="property-fact-card__label text-sm text-[var(--color-text-secondary)]">
                     {dict.property.bedrooms}
                   </div>
                 </div>
               </div>
-              <div className="flex items-center gap-2">
-                <IconBath size="sm" />
-                <div>
-                  <strong>{property.bathrooms ?? '-'}</strong>
-                  <div className="text-sm text-[var(--color-text-secondary)]">
+              <div className="property-fact-card">
+                <div className="property-fact-card__icon">
+                  <IconBath size="sm" />
+                </div>
+                <div className="property-fact-card__content">
+                  <strong className="property-fact-card__value">{property.bathrooms ?? '-'}</strong>
+                  <div className="property-fact-card__label text-sm text-[var(--color-text-secondary)]">
                     {dict.property.bathrooms}
                   </div>
                 </div>
               </div>
-              <div className="flex items-center gap-2">
-                <IconArea size="sm" />
-                <div>
-                  <strong>{property.size ?? '-'}</strong>
-                  <div className="text-sm text-[var(--color-text-secondary)]">
+              <div className="property-fact-card">
+                <div className="property-fact-card__icon">
+                  <IconArea size="sm" />
+                </div>
+                <div className="property-fact-card__content">
+                  <strong className="property-fact-card__value">{property.size ?? '-'}</strong>
+                  <div className="property-fact-card__label text-sm text-[var(--color-text-secondary)]">
                     {dict.property.sqm}
                   </div>
                 </div>
@@ -573,7 +598,7 @@ export default async function PropertyPage(props: PageProps) {
             </div>
 
             {gallery.length <= 1 ? (
-              <div id="property-gallery-status" className="mb-4">
+              <div id="property-gallery-status" className="property-gallery__status mb-4">
                 <p className="text-caption mb-2">
                   {locale === 'th' ? 'ภาพประกอบของรายการยังมีจำกัด' : 'The listing media set is still limited'}
                 </p>
@@ -585,8 +610,8 @@ export default async function PropertyPage(props: PageProps) {
               </div>
             ) : null}
 
-            <section id="property-confidence-pack" className="signal-grid signal-grid--two-up reveal decision-pack mb-6">
-              <div className="authority-card">
+            <section id="property-confidence-pack" className="signal-grid signal-grid--two-up reveal decision-pack property-confidence-pack mb-6">
+              <div className="authority-card property-confidence-card property-confidence-card--verified">
                 <h2 className="card-title">{locale === 'th' ? 'ยืนยันได้ในหน้านี้' : 'Verified on this page'}</h2>
                 <p className="card-subtitle">
                   {locale === 'th'
@@ -602,7 +627,7 @@ export default async function PropertyPage(props: PageProps) {
                 </div>
               </div>
 
-              <div className="authority-card">
+              <div className="authority-card property-confidence-card property-confidence-card--confirm">
                 <h2 className="card-title">{locale === 'th' ? 'ควรเช็กอะไรต่อก่อนคุยเชิงลึก' : 'What to confirm before going deeper'}</h2>
                 <p className="card-subtitle">
                   {locale === 'th'
@@ -619,7 +644,7 @@ export default async function PropertyPage(props: PageProps) {
               </div>
             </section>
 
-            <section id="property-description" className="authority-card property-description-card mb-6">
+            <section id="property-description" className="authority-card property-description-card property-description-card--bridge mb-6">
               <h2 className="card-title">{dict.property.description}</h2>
               <div className="content-article mb-0">
                 {descriptionParagraphs.map((paragraph) => (
@@ -628,8 +653,8 @@ export default async function PropertyPage(props: PageProps) {
               </div>
             </section>
 
-            <section id="property-decision-grid" className="signal-grid signal-grid--two-up reveal mb-6">
-              <div id="property-decision-cues" className="authority-card">
+            <section id="property-decision-grid" className="signal-grid signal-grid--two-up reveal property-decision-grid mb-6">
+              <div id="property-decision-cues" className="authority-card property-decision-card property-decision-card--lead">
                 <h2 className="card-title">{locale === 'th' ? 'สัญญาณช่วยตัดสินใจระดับยูนิต' : 'Listing decision cues'}</h2>
                 <p className="card-subtitle">
                   {locale === 'th'
@@ -645,14 +670,14 @@ export default async function PropertyPage(props: PageProps) {
                 </div>
               </div>
 
-              <div id="property-next-tools" className="authority-card">
+              <div id="property-next-tools" className="authority-card property-decision-card property-decision-card--tools">
                 <h2 className="card-title">{locale === 'th' ? 'เครื่องมือช่วยตัดสินใจและทางไปต่อ' : 'Investor tools and next moves'}</h2>
                 <p className="card-subtitle">
                   {locale === 'th'
                     ? 'ถ้าต้องคำนวณผลตอบแทนหรือเทียบหลายทางเลือกต่อ ให้ไปยังเครื่องมือและหน้าที่ใช้ตัดสินใจต่อได้ทันที'
                     : 'If you need a yield sense-check or a multi-option comparison, move directly into the supporting tools below.'}
                 </p>
-                <div className="card-actions mt-3">
+                <div className="card-actions property-decision-card__actions mt-3">
                   <Link className="btn btn-secondary" href={withLocale(locale, '/calculator')}>
                     {locale === 'th' ? 'เปิด calculator' : 'Open calculator'}
                   </Link>
@@ -664,22 +689,22 @@ export default async function PropertyPage(props: PageProps) {
             </section>
 
             {relatedProperties.length ? (
-              <section id="property-related-listings" className="signal-grid signal-grid--three-up reveal mb-6">
+              <section id="property-related-listings" className="signal-grid signal-grid--three-up reveal property-related-listings mb-6">
                 {relatedProperties.map((item) => {
                   const relatedImage = resolveImageUrl(item.cover_image ?? item.local_images?.[0] ?? item.images?.[0]) ?? PROPERTY_DETAIL_FALLBACK;
                   const relatedHref = item.slug ? withLocale(locale, `/property/${encodeURIComponent(item.slug)}`) : withLocale(locale, item.type === 'rent' ? '/rent' : '/buy');
                   return (
-                    <Link key={item.id} href={relatedHref} className="authority-card card-interactive">
-                      <div className="card-image relative" style={{ aspectRatio: '4 / 3' }}>
-                        <Image src={relatedImage} alt={item.title} fill unoptimized sizes="(min-width: 1024px) 33vw, 100vw" className="object-cover rounded-[18px]" />
+                    <Link key={item.id} href={relatedHref} className="authority-card card-interactive property-related-listing-card">
+                      <div className="card-image property-related-listing-card__image relative" style={{ aspectRatio: '4 / 3' }}>
+                        <Image src={relatedImage} alt={item.title} fill unoptimized sizes="(min-width: 1024px) 33vw, 100vw" className="object-cover rounded-[18px] property-related-listing-card__img" />
                       </div>
-                      <div className="mt-4">
-                        <div className="editorial-card__meta">
+                      <div className="mt-4 property-related-listing-card__body">
+                        <div className="editorial-card__meta property-related-listing-card__meta">
                           <span>{formatListingType(locale, item.type)}</span>
                           {item.city ? <span>{item.city}</span> : null}
                         </div>
-                        <h3 className="card-title">{item.title}</h3>
-                        <p className="card-subtitle">{formatPriceTHB(Number(item.price))}</p>
+                        <h3 className="card-title property-related-listing-card__title">{item.title}</h3>
+                        <p className="card-subtitle property-related-listing-card__price">{formatPriceTHB(Number(item.price))}</p>
                       </div>
                     </Link>
                   );
@@ -687,10 +712,10 @@ export default async function PropertyPage(props: PageProps) {
               </section>
             ) : null}
 
-            <div id="property-next-steps" className="authority-card reveal mb-6">
+            <div id="property-next-steps" className="authority-card property-next-steps-card reveal mb-6">
               <h2 className="card-title">{dict.property.nextSteps}</h2>
               <p className="card-subtitle">{dict.property.exploreRelated}</p>
-              <div className="card-actions">
+              <div className="card-actions property-next-steps-card__actions">
                 {priorityInternalLinks.map((it) => (
                   <Link
                     key={it.href}
@@ -707,21 +732,21 @@ export default async function PropertyPage(props: PageProps) {
 
           </div>
 
-          <aside className="detail-sidebar detail-stack">
-            <div id="property-direct-channels" className="agent-card">
-              <div className="flex items-center gap-4 mb-4">
-                <div className="w-16 h-16 rounded-full bg-[var(--color-primary)] text-white flex items-center justify-center font-bold">
+          <aside className="detail-sidebar detail-stack property-advisor-rail">
+            <div id="property-direct-channels" className="agent-card property-advisor-card property-advisor-card--channels">
+              <div className="property-advisor-card__identity">
+                <div className="property-advisor-avatar">
                   {dict.brand.shortName}
                 </div>
                 <div>
                   <h3 className="mb-1">{dict.property.agentName}</h3>
-                  <p className="mb-0 text-[var(--color-text-secondary)] text-sm">
+                  <p className="mb-0 property-advisor-role">
                     {dict.property.agentRole}
                   </p>
                 </div>
               </div>
 
-              <div className="flex flex-col gap-2">
+              <div className="property-advisor-actions">
                 <a href={CTA.lineUrl} className="btn btn-primary btn-block" target="_blank" rel="noreferrer">
                   {dict.property.lineChat}
                 </a>
@@ -729,9 +754,10 @@ export default async function PropertyPage(props: PageProps) {
                   {dict.property.callAgent}
                 </a>
               </div>
+              <p className="property-advisor-note mb-0">{propertyRailNote}</p>
             </div>
 
-            <div id="property-lead-form" className="mt-6">
+            <div id="property-lead-form" className="property-advisor-form-shell mt-6">
               <LeadForm
                 locale={locale}
                 heading={dict.property.interestedHeading}
@@ -759,10 +785,12 @@ export default async function PropertyPage(props: PageProps) {
       </Container>
       <PageOwnedMobileCTA
         id="property-mobile-cta"
+        eyebrow={locale === 'th' ? 'ส่งต่อไปยัง advisor' : 'Advisor handoff'}
+        variant="property"
         title={locale === 'th' ? 'พร้อมคุยต่อเกี่ยวกับยูนิตนี้' : 'Ready to move forward on this unit'}
         description={locale === 'th'
-          ? 'กดคุยกับทีมเพื่อส่งต่อข้อมูลยูนิตชุดนี้ทันที หรือโทรหาที่ปรึกษาในจังหวะที่พร้อม.'
-          : 'Open an advisor brief with this unit context attached, or call the advisory desk when you are ready.'}
+          ? 'ส่งต่อสรุปยูนิตนี้ให้ทีมทันที หรือโทรหาที่ปรึกษาเมื่อพร้อมยืนยันขั้นถัดไป.'
+          : 'Send this unit brief to the advisory team now, or call when you are ready to confirm the next step.'}
         primaryAction={{
           id: 'property_mobile_consultation_primary',
           href: propertyConsultationHref,

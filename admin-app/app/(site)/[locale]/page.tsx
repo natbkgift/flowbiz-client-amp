@@ -747,7 +747,7 @@ export default async function HomePage({
     }
 
     return (
-      <section className="home-project-selection-section py-[60px] md:py-20 xl:py-24 2xl:py-28">
+      <section className="home-project-selection-section py-16 md:py-20 xl:py-20 2xl:py-24">
         <Container variant="wide">{content}</Container>
       </section>
     );
@@ -1100,7 +1100,7 @@ export default async function HomePage({
     }
 
     return (
-      <section className="py-16 md:py-20 xl:py-24 2xl:py-28 bg-surface">
+      <section className="py-16 md:py-20 xl:py-20 2xl:py-24 bg-surface">
         <Container variant="wide">{content}</Container>
       </section>
     );
@@ -1124,7 +1124,7 @@ export default async function HomePage({
 
     return (
       <section
-        className="home-curated-opportunities py-[60px] md:py-20 xl:py-24 2xl:py-28 bg-surface"
+        className="home-curated-opportunities py-16 md:py-20 xl:py-20 2xl:py-24 bg-surface"
         style={{ order: curatedOpportunitiesOrder }}
         aria-labelledby="home-curated-title"
       >
@@ -1323,7 +1323,7 @@ export default async function HomePage({
 
   function SectionCardSkeleton({ kind }: { kind: 'project' | 'investment' }) {
     return (
-      <div className="py-[60px] md:py-20 xl:py-24 2xl:py-28 bg-surface">
+      <div className="py-16 md:py-20 xl:py-20 2xl:py-24 bg-surface">
         <Container variant="wide">
           <LoadingCardGrid cards={kind === 'project' ? 6 : 8} />
         </Container>
@@ -1822,7 +1822,7 @@ export default async function HomePage({
       </div>
 
       {showHomeTrustLayer ? (
-        <section className="home-trust-layer-section py-12 md:py-16 xl:py-20 bg-surface" style={sectionOrderStyle('trust_micro_strip')} id="home-trust-layer" data-home-perf="trust-layer">
+        <section className="home-trust-layer-section py-12 md:py-16 xl:py-16 2xl:py-20 bg-surface" style={sectionOrderStyle('trust_micro_strip')} id="home-trust-layer" data-home-perf="trust-layer">
           <Container variant="wide">
             <PublicSurfaceCard as="div" tone="warm" className="home-trust-snapshot reveal">
               <PublicSectionHeader

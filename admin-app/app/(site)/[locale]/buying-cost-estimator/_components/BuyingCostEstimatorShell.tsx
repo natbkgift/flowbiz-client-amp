@@ -555,8 +555,8 @@ export function BuyingCostEstimatorShell({ locale }: { locale: Locale }) {
         <section className="authority-card decision-estimator-intro" aria-labelledby="buying-cost-estimator-shell-title">
           <h2 className="sr-only" id="buying-cost-estimator-shell-title">{copy.introTitle}</h2>
           <p className="guided-dialog__step mb-4">{copy.introBody}</p>
-          <div className="grid grid-2">
-            <div className="authority-card decision-mini-card">
+          <div className="grid grid-2 decision-estimator-intro__grid">
+            <div className="authority-card decision-mini-card decision-estimator-inputs-card">
               <h3 className="card-title">{copy.plannedInputsTitle}</h3>
               <p className="card-subtitle">{copy.toolLead}</p>
               <div className="form-grid-2 mt-4">
@@ -625,7 +625,7 @@ export function BuyingCostEstimatorShell({ locale }: { locale: Locale }) {
               </div>
             </div>
 
-            <div className="authority-card decision-mini-card">
+            <div className="authority-card decision-mini-card decision-estimator-outputs-card">
               <h3 className="card-title">{copy.plannedOutputsTitle}</h3>
               <p className="card-subtitle">{copy.statusBody}</p>
               <ul className="bullet-list mt-4">
@@ -636,7 +636,7 @@ export function BuyingCostEstimatorShell({ locale }: { locale: Locale }) {
             </div>
           </div>
 
-          <details className="authority-card decision-mini-card mt-6" open={purchaseContext === 'foreign'}>
+          <details className="authority-card decision-mini-card decision-estimator-advanced-card mt-6" open={purchaseContext === 'foreign'}>
             <summary className="card-title">{copy.advancedToggle}</summary>
             <p className="card-subtitle mt-3">{copy.advancedBody}</p>
             <div className="form-grid-2 mt-4">
@@ -667,7 +667,7 @@ export function BuyingCostEstimatorShell({ locale }: { locale: Locale }) {
           </details>
         </section>
 
-        <section className="authority-card decision-mini-card" aria-labelledby="buying-cost-estimator-boundary-title">
+        <section className="authority-card decision-mini-card decision-estimator-boundary-card" aria-labelledby="buying-cost-estimator-boundary-title">
           <h2 className="card-title" id="buying-cost-estimator-boundary-title">{copy.assumptionsTitle}</h2>
           <ul className="bullet-list mt-4">
             {copy.assumptions.map((item) => (
@@ -676,14 +676,14 @@ export function BuyingCostEstimatorShell({ locale }: { locale: Locale }) {
           </ul>
         </section>
 
-        <section className="authority-card decision-mini-card" aria-labelledby="buying-cost-estimator-disclaimer-title">
+        <section className="authority-card decision-mini-card decision-estimator-disclaimer-card" aria-labelledby="buying-cost-estimator-disclaimer-title">
           <h2 className="card-title" id="buying-cost-estimator-disclaimer-title">{copy.disclaimerTitle}</h2>
           <p className="card-subtitle">{copy.disclaimerBody}</p>
         </section>
       </div>
 
-      <aside className="page-rail">
-        <div className="page-rail-card">
+      <aside className="page-rail decision-estimator-rail">
+        <div className="page-rail-card decision-estimator-preview-card">
           <h2 className="card-title">{copy.previewStateTitle}</h2>
           <p className="card-subtitle">
             {parsedPrice == null
@@ -694,31 +694,31 @@ export function BuyingCostEstimatorShell({ locale }: { locale: Locale }) {
                   ? copy.resultError
                   : copy.previewReady}
           </p>
-          <div className="insight-list mt-4">
-            <div className="insight-list__item">
-              <span className="insight-list__title">{copy.propertyPrice}</span>
-              <span className="insight-list__body">{formatCurrency(locale, parsedPrice)}</span>
+          <div className="insight-list decision-estimator-preview-list mt-4">
+            <div className="insight-list__item decision-estimator-preview-item">
+              <span className="insight-list__title decision-estimator-preview-item__title">{copy.propertyPrice}</span>
+              <span className="insight-list__body decision-estimator-preview-item__body">{formatCurrency(locale, parsedPrice)}</span>
             </div>
-            <div className="insight-list__item">
-              <span className="insight-list__title">{copy.governmentFeesLabel}</span>
-              <span className="insight-list__body">{formatResultAmount(estimate?.government_fees)}</span>
+            <div className="insight-list__item decision-estimator-preview-item">
+              <span className="insight-list__title decision-estimator-preview-item__title">{copy.governmentFeesLabel}</span>
+              <span className="insight-list__body decision-estimator-preview-item__body">{formatResultAmount(estimate?.government_fees)}</span>
             </div>
-            <div className="insight-list__item">
-              <span className="insight-list__title">{copy.closingCostLabel}</span>
-              <span className="insight-list__body">{formatResultAmount(estimate?.closing_cost)}</span>
+            <div className="insight-list__item decision-estimator-preview-item">
+              <span className="insight-list__title decision-estimator-preview-item__title">{copy.closingCostLabel}</span>
+              <span className="insight-list__body decision-estimator-preview-item__body">{formatResultAmount(estimate?.closing_cost)}</span>
             </div>
-            <div className="insight-list__item">
-              <span className="insight-list__title">{copy.totalCashNeededLabel}</span>
-              <span className="insight-list__body">{formatResultAmount(estimate?.total_cash_needed)}</span>
+            <div className="insight-list__item decision-estimator-preview-item">
+              <span className="insight-list__title decision-estimator-preview-item__title">{copy.totalCashNeededLabel}</span>
+              <span className="insight-list__body decision-estimator-preview-item__body">{formatResultAmount(estimate?.total_cash_needed)}</span>
             </div>
           </div>
-          <p className="text-caption mt-4">{copy.resultLive}</p>
+          <p className="text-caption decision-estimator-preview-card__note mt-4">{copy.resultLive}</p>
         </div>
 
-        <div className="page-rail-card mt-4">
+        <div className="page-rail-card decision-estimator-handoff-card mt-4">
           <h2 className="card-title">{copy.nextStepTitle}</h2>
           <p className="card-subtitle">{copy.nextStepBody}</p>
-          <div className="cta-row mt-4">
+          <div className="cta-row decision-estimator-handoff-actions mt-4">
             <Link
               className="btn btn-cta"
               href={contactHref}
@@ -768,65 +768,69 @@ export function BuyingCostEstimatorShell({ locale }: { locale: Locale }) {
           </div>
         </div>
 
-        <div className="page-rail-card mt-4">
-          <h2 className="card-title">{copy.lineItemsTitle}</h2>
-          <ul className="bullet-list mt-4">
-            {(estimate?.line_items ?? []).map((item) => (
-              <li key={item.key}>{`${item.label_key}: ${formatCurrency(locale, item.amount)}`}</li>
-            ))}
-            {!estimate?.line_items?.length ? <li>{copy.resultConditional}</li> : null}
-          </ul>
-        </div>
-
-        <div className="page-rail-card mt-4">
-          <h2 className="card-title">{copy.activeAssumptionsTitle}</h2>
-          <ul className="bullet-list mt-4">
-            {appliedAssumptions.map((item) => (
-              <li key={item}>{item}</li>
-            ))}
-          </ul>
-        </div>
-
-        <div className="page-rail-card mt-4">
+        <div className="page-rail-card decision-estimator-unresolved-card mt-4">
           <h2 className="card-title">{copy.unresolvedTitle}</h2>
-          <ul className="bullet-list mt-4">
+          <ul className="bullet-list decision-estimator-unresolved-list mt-4">
             {renderedUnresolvedItems.map((item) => (
               <li key={item}>{item}</li>
             ))}
           </ul>
         </div>
 
-        <div className="page-rail-card mt-4">
-          <h2 className="card-title">{copy.shareTitle}</h2>
-          <p className="card-subtitle">{copy.shareBody}</p>
-          {versionMismatch ? (
-            <div className="mt-4">
-              <p className="text-caption text-danger">{copy.versionMismatchTitle}</p>
-              <p className="text-caption mt-2">{`${copy.versionMismatchBody} (${versionMismatch.assumptionSetId} / ${versionMismatch.assumptionSetVersion})`}</p>
-              <button className="btn btn-secondary mt-4" onClick={() => setVersionMismatch(null)} type="button">
-                {copy.refreshAssumptionsLabel}
-              </button>
-            </div>
-          ) : shareUrl ? (
-            <div className="mt-4">
-              <p className="text-caption">{copy.shareReady}</p>
-              <label className="form-label mt-4">
-                {copy.shareLinkLabel}
-                <input className="form-input" readOnly value={shareUrl} />
-              </label>
-            </div>
-          ) : (
-            <p className="text-caption mt-4">{copy.resultConditional}</p>
-          )}
-        </div>
+        <div className="decision-estimator-reference-deck mt-4">
+          <div className="page-rail-card decision-estimator-line-items-card decision-estimator-reference-card">
+            <h2 className="card-title">{copy.lineItemsTitle}</h2>
+            <ul className="bullet-list decision-estimator-line-items-list mt-4">
+              {(estimate?.line_items ?? []).map((item) => (
+                <li key={item.key}>{`${item.label_key}: ${formatCurrency(locale, item.amount)}`}</li>
+              ))}
+              {!estimate?.line_items?.length ? <li>{copy.resultConditional}</li> : null}
+            </ul>
+          </div>
 
-        <div className="page-rail-card mt-4">
-          <h2 className="card-title">{copy.milestoneTitle}</h2>
-          <ul className="bullet-list mt-4">
-            {copy.milestones.map((item) => (
-              <li key={item}>{item}</li>
-            ))}
-          </ul>
+          <div className="page-rail-card decision-estimator-active-assumptions-card decision-estimator-reference-card">
+            <h2 className="card-title">{copy.activeAssumptionsTitle}</h2>
+            <ul className="bullet-list decision-estimator-active-assumptions-list mt-4">
+              {appliedAssumptions.map((item) => (
+                <li key={item}>{item}</li>
+              ))}
+            </ul>
+          </div>
+
+          <div className="page-rail-card decision-estimator-share-card decision-estimator-reference-card">
+            <h2 className="card-title">{copy.shareTitle}</h2>
+            <p className="card-subtitle">{copy.shareBody}</p>
+            {versionMismatch ? (
+              <div className="decision-estimator-share-state decision-estimator-share-state--mismatch mt-4">
+                <p className="text-caption text-danger decision-estimator-share-state__title">{copy.versionMismatchTitle}</p>
+                <p className="text-caption decision-estimator-share-state__body mt-2">{`${copy.versionMismatchBody} (${versionMismatch.assumptionSetId} / ${versionMismatch.assumptionSetVersion})`}</p>
+                <button className="btn btn-secondary mt-4" onClick={() => setVersionMismatch(null)} type="button">
+                  {copy.refreshAssumptionsLabel}
+                </button>
+              </div>
+            ) : shareUrl ? (
+              <div className="decision-estimator-share-state decision-estimator-share-state--ready mt-4">
+                <p className="text-caption decision-estimator-share-state__title">{copy.shareReady}</p>
+                <label className="form-label decision-estimator-share-state__field mt-4">
+                  {copy.shareLinkLabel}
+                  <input className="form-input" readOnly value={shareUrl} />
+                </label>
+              </div>
+            ) : (
+              <div className="decision-estimator-share-state decision-estimator-share-state--pending mt-4">
+                <p className="text-caption decision-estimator-share-state__title">{copy.resultConditional}</p>
+              </div>
+            )}
+          </div>
+
+          <div className="page-rail-card decision-estimator-milestones-card decision-estimator-reference-card">
+            <h2 className="card-title">{copy.milestoneTitle}</h2>
+            <ul className="bullet-list decision-estimator-milestones-list mt-4">
+              {copy.milestones.map((item) => (
+                <li key={item}>{item}</li>
+              ))}
+            </ul>
+          </div>
         </div>
       </aside>
     </div>

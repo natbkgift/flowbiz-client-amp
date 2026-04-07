@@ -49,7 +49,7 @@ export default async function BuyingCostEstimatorPage(props: { params: Promise<{
 
       <section className="section">
         <Container>
-          <div className="section-header">
+          <div className="section-header buying-cost-estimator-header">
             <h1 className="section-title">{copy.title}</h1>
             <p className="section-subtitle">{copy.subtitle}</p>
           </div>

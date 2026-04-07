@@ -81,6 +81,12 @@ export default async function BuyPage(props: { params: Promise<{ locale: string 
   const buyFormDefaultMessage = locale === 'th'
     ? 'ต้องการให้ทีมคัดรายการคัดไว้ฝั่งผู้ซื้อที่เหมาะกับงบ ทำเล และช่วงเวลาของผม/ฉัน พร้อมบอกสิ่งที่ควรเช็กต่อเรื่องโควตาต่างชาติและค่าโอน'
     : 'I want the team to prepare a buy-side shortlist that fits my budget, area, and timing, together with the next checks on quota and transfer costs.';
+  const buyClosingEyebrow = locale === 'th'
+    ? 'ส่งต่อหลัง shortlist เริ่มชัด'
+    : 'Hand off once the shortlist is clearer';
+  const buyClosingNote = locale === 'th'
+    ? 'ทีมจะใช้บรีฟนี้กลับไปจัด shortlist พร้อมกรอบ quota ค่าโอน และประเด็นที่ควรคุยต่อในสายถัดไป โดยไม่ต้องเริ่มอธิบายใหม่ทั้งหมด.'
+    : 'The team uses this brief to return with a shortlist framed around quota, transfer costs, and the checks worth covering on the next call without restarting the conversation.';
 
   return (
     <main id="main-content" className="buy-page decision-page--confidence">
@@ -146,7 +152,7 @@ export default async function BuyPage(props: { params: Promise<{ locale: string 
 
       <section className="section">
         <Container>
-          <div className="buy-scan-note buy-scan-note--hero mb-6" aria-label={locale === 'th' ? 'โหมดสแกนก่อนตัดสินใจ' : 'Scan mode before acting'}>
+          <div className="buy-scan-note buy-scan-note--hero buy-scan-note--process mb-6" aria-label={locale === 'th' ? 'โหมดสแกนก่อนตัดสินใจ' : 'Scan mode before acting'}>
             <p className="buy-scan-note__eyebrow">
               {locale === 'th' ? 'เริ่มจากโหมดสแกน' : 'Scan mode first'}
             </p>
@@ -170,7 +176,7 @@ export default async function BuyPage(props: { params: Promise<{ locale: string 
             ))}
           </div>
 
-          <div className="buy-flow-utility" aria-label={locale === 'th' ? 'เส้นทางช่วยตัดสินใจหลังดูขั้นตอน' : 'Process support path'}>
+          <div className="buy-flow-utility buy-flow-utility--process" aria-label={locale === 'th' ? 'เส้นทางช่วยตัดสินใจหลังดูขั้นตอน' : 'Process support path'}>
             <div className="buy-flow-utility__text">
               {locale === 'th'
                 ? 'เมื่อเห็น flow ชัดแล้ว ให้เก็บการคุยกับทีมไว้หลังจาก shortlist เริ่มแคบลง จะทำให้คำแนะนำตรงกว่า'
@@ -217,12 +223,12 @@ export default async function BuyPage(props: { params: Promise<{ locale: string 
             </p>
           </div>
 
-          <div className="grid grid-2">
-            <div className="card">
+          <div className="grid grid-2 buy-reference-grid">
+            <div className="card buy-reference-card buy-reference-card--installment">
               <h3 className="card-title">
                 {locale === 'th' ? 'การผ่อนชำระ (ตัวอย่าง)' : 'Installment Plans (Example)'}
               </h3>
-                <table className="info-table">
+                <table className="info-table buy-reference-card__table">
                   <thead>
                     <tr>
                       <th>{locale === 'th' ? 'งวด' : 'Phase'}</th>
@@ -253,18 +259,18 @@ export default async function BuyPage(props: { params: Promise<{ locale: string 
                     </tr>
                   </tbody>
                 </table>
-                <p className="text-caption">
+                <p className="text-caption buy-reference-card__caption">
                   {locale === 'th'
                     ? '* เงื่อนไขแตกต่างตามโครงการ กรุณาสอบถามเพื่อรับข้อมูลเฉพาะ'
                     : '* Terms vary by project. Contact us for specific payment plans.'}
                 </p>
             </div>
 
-            <div className="card">
+            <div className="card buy-reference-card buy-reference-card--closing">
               <h3 className="card-title">
                 {locale === 'th' ? 'ค่าโอน & ค่าใช้จ่ายปิดการซื้อ' : 'Transfer & Closing Costs'}
               </h3>
-                <table className="info-table">
+                <table className="info-table buy-reference-card__table">
                   <thead>
                     <tr>
                       <th>{locale === 'th' ? 'รายการ' : 'Item'}</th>
@@ -290,7 +296,7 @@ export default async function BuyPage(props: { params: Promise<{ locale: string 
                     </tr>
                   </tbody>
                 </table>
-                <p className="text-caption">
+                <p className="text-caption buy-reference-card__caption">
                   {locale === 'th'
                     ? '* การแบ่งค่าใช้จ่ายระหว่างผู้ซื้อ/ผู้ขายขึ้นอยู่กับการเจรจา'
                     : '* Buyer/seller cost split depends on negotiation. Consult your advisor.'}
@@ -307,13 +313,13 @@ export default async function BuyPage(props: { params: Promise<{ locale: string 
             <p className="section-subtitle">{dict.buy.legalSubtitle}</p>
           </div>
 
-          <ul className="bullet-list">
+          <ul className="bullet-list buy-legal-list">
             {dict.buy.legalBullets.map((b) => (
               <li key={b}>{b}</li>
             ))}
           </ul>
 
-          <div className="buy-flow-utility mt-6" aria-label={locale === 'th' ? 'เส้นทางต่อหลัง legal checks' : 'Legal follow-up path'}>
+          <div className="buy-flow-utility buy-flow-utility--legal mt-6" aria-label={locale === 'th' ? 'เส้นทางต่อหลัง legal checks' : 'Legal follow-up path'}>
             <div className="buy-flow-utility__text">
               {locale === 'th'
                 ? 'หลัง legal checks ให้เลือกว่าจะคุยกับทีมต่อ หรือเปิดมุมมองการลงทุนเพิ่ม ไม่ต้องมีปุ่มหลักซ้ำอีกชุด'
@@ -340,7 +346,7 @@ export default async function BuyPage(props: { params: Promise<{ locale: string 
 
           {featuredItems.length ? (
             <>
-              <div className="buy-scan-note" aria-label={locale === 'th' ? 'โซนสแกนรายการซื้อ' : 'Listing scan zone'}>
+              <div className="buy-scan-note buy-scan-note--cards" aria-label={locale === 'th' ? 'โซนสแกนรายการซื้อ' : 'Listing scan zone'}>
                 <p className="buy-scan-note__eyebrow">
                   {locale === 'th' ? 'โซนตัดสินใจจากการ์ด' : 'Card decision zone'}
                 </p>
@@ -351,7 +357,7 @@ export default async function BuyPage(props: { params: Promise<{ locale: string 
                 </p>
               </div>
               <ListingGrid items={featuredItems} />
-              <div className="buy-flow-utility mt-6" aria-label={locale === 'th' ? 'เส้นทางทบทวน shortlist' : 'Shortlist review path'}>
+              <div className="buy-flow-utility buy-flow-utility--shortlist mt-6" aria-label={locale === 'th' ? 'เส้นทางทบทวน shortlist' : 'Shortlist review path'}>
                 <div className="buy-flow-utility__text">
                   {hiddenItemCount > 0
                     ? locale === 'th'
@@ -382,10 +388,11 @@ export default async function BuyPage(props: { params: Promise<{ locale: string 
         </Container>
       </section>
 
-      <section className="section section--cta">
+      <section className="section section--cta buy-closing-cta-section">
         <Container>
-          <div className="cta-panel">
-            <div>
+          <div className="cta-panel buy-closing-cta-panel">
+            <div className="buy-closing-cta-panel__copy">
+              <p className="buy-closing-cta-panel__eyebrow">{buyClosingEyebrow}</p>
               <h2 className="cta-title">
                 {locale === 'th' ? 'ส่งบรีฟให้ทีม เพื่อได้รายการคัดฝั่งซื้อที่ชัดขึ้น' : 'Brief the team for a cleaner buy-side shortlist'}
               </h2>
@@ -394,8 +401,9 @@ export default async function BuyPage(props: { params: Promise<{ locale: string 
                   ? 'ใช้บล็อกนี้เมื่อพร้อมให้ทีมคัดยูนิตที่ควรดูต่อ พร้อมสรุป quota, ค่าโอน, และ step ที่ควรเช็กก่อนคุยลึก'
                   : 'Use this block when you are ready for the team to narrow the units worth seeing next and frame the quota, fee, and diligence checks before the next call.'}
               </p>
+              <p className="buy-closing-cta-panel__note">{buyClosingNote}</p>
             </div>
-            <div className="cta-panel__form">
+            <div className="cta-panel__form buy-closing-cta-panel__form">
               <LeadForm
                 heading={buyFormHeading}
                 description={buyFormDescription}

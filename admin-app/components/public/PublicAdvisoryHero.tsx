@@ -86,7 +86,7 @@ export function PublicAdvisoryHero({
       <Container variant="wide">
         <div className="public-hero">
           <PublicSurfaceCard as="div" tone="warm" className="public-hero__content">
-            <p className="public-hero__eyebrow">{eyebrow}</p>
+            <span className="public-hero__eyebrow">{eyebrow}</span>
             <h1 className="headline public-hero__headline">{title}</h1>
             <p className="subhead public-hero__subtitle">{subtitle}</p>
 
@@ -146,14 +146,14 @@ export function PublicAdvisoryHero({
 
           {hasSignals ? (
             <PublicSurfaceCard as="aside" tone="deep" className="public-hero__rail" aria-label={guidanceLabel}>
-              {signals.map((signal) => (
+              {signals.map((signal, index) => (
                 <article key={`${signal.kicker}-${signal.title}`} className="public-hero__signal">
                   <div className="public-hero__signal-icon" aria-hidden="true">
                     {signalIcon(signal.icon)}
                   </div>
                   <div className="public-hero__signal-copy">
-                    <p className="public-hero__signal-kicker">{signal.kicker}</p>
-                    <h2>{signal.title}</h2>
+                    <span className="public-hero__signal-kicker">{signal.kicker}</span>
+                    <h2 className="public-hero__signal-title">{signal.title}</h2>
                     <p>{signal.body}</p>
                   </div>
                   <span className="public-hero__signal-arrow" aria-hidden="true">

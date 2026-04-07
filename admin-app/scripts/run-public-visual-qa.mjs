@@ -555,6 +555,14 @@ async function captureRoute(page, route, width, consoleLog, networkLog) {
         .filter(Boolean);
     }
 
+    function queryFirstVisible(selectors) {
+      for (const selector of selectors) {
+        const match = Array.from(document.querySelectorAll(selector)).find(isVisible);
+        if (match) return match;
+      }
+      return null;
+    }
+
     const main = document.querySelector("main");
     const heading = document.querySelector("main h1");
     const headings = Array.from(document.querySelectorAll("main h1, main h2, main h3")).filter(isVisible);
@@ -574,8 +582,22 @@ async function captureRoute(page, route, width, consoleLog, networkLog) {
     const visibleBrokenImages = visibleImages.filter((image) => image.complete && image.naturalWidth === 0);
     const visibleIncompleteImages = visibleImages.filter((image) => !image.complete || image.naturalWidth === 0);
     const isHomepage = Boolean(document.querySelector("main.home-page"));
-    const heroTitleMetrics = readTextMetrics(document.querySelector(".home-hero-slider__title"));
-    const heroSubtitleMetrics = readTextMetrics(document.querySelector(".home-hero-slider__subtitle"));
+    const heroTitleElement = queryFirstVisible([
+      "main .home-hero-slider__title",
+      "main .public-hero__headline",
+      "main #property-hero h1",
+      "main h1",
+    ]);
+    const heroSubtitleElement = queryFirstVisible([
+      "main .home-hero-slider__subtitle",
+      "main .public-hero__subtitle",
+      "main #property-hero .section-subtitle",
+      "main #property-hero .property-location",
+      "main .section-subtitle",
+      "main p",
+    ]);
+    const heroTitleMetrics = readTextMetrics(heroTitleElement);
+    const heroSubtitleMetrics = readTextMetrics(heroSubtitleElement);
     const sectionTitleMetrics = readTextMetricSamples("main.home-page .section-title", 16);
     const bodyTextMetrics = readTextMetricSamples("main.home-page p", 24);
     const heroPrimary = Array.from(document.querySelectorAll(".home-hero-slider .hero-cta--primary")).filter(isVisible);
@@ -1290,7 +1312,7 @@ function scoreCapture(capture) {
         }
       }
 
-      const irregularSectionPaddings = sectionPaddings.filter((value) => nearestScaleDelta(value) > 6);
+      const irregularSectionPaddings = sectionPaddings.filter((value) => value > 0 && nearestScaleDelta(value) > 6);
       if (irregularSectionPaddings.length > 0) {
         addFinding({
           severity: "minor",
