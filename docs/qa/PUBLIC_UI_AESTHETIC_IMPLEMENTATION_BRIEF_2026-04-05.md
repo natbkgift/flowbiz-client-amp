@@ -24,7 +24,7 @@ Current QA baseline:
 
 - `100/100`
 - `elite`
-- latest summary: `admin-app/artifacts/public-visual-qa/run-20260407-091652/summary.json`
+- latest summary: `admin-app/artifacts/public-visual-qa/run-20260407-092704/summary.json`
 - latest review file: `docs/qa/public-visual-review.full.json`
 
 Route-level polish logged:
@@ -133,6 +133,14 @@ Route-level polish logged:
   สถานะ: `applied after Project rail form field calmness micro-polish`
   ขอบเขต: carried brief card, closing handoff row, และ completion-note cadence ของ compare main route ให้จบ sequence สั้นลงและนิ่งขึ้นบน desktop โดยไม่เปลี่ยนข้อมูลหรือ recovery logic
   ไฟล์หลัก: `admin-app/app/(site)/[locale]/compare/page.tsx`, `admin-app/app/globals.css`
+- `Project advisor support-footer harmony micro-polish`
+  สถานะ: `applied after Compare carried-brief handoff compression micro-polish`
+  ขอบเขต: เนื่องจาก route โครงการไม่มี agent card แยกใน DOM จริง รอบนี้จึงเก็บ reassurance layer ใต้ form shell ผ่าน support-link footer, divider panel, และ link tone ให้รับบทเป็น supporting concierge note ที่เบากว่า brief/form rail โดยไม่เปลี่ยน content หรือ schema
+  ไฟล์หลัก: `admin-app/app/globals.css`
+- `Compare table footer closure micro-polish`
+  สถานะ: `applied after Project advisor support-footer harmony micro-polish`
+  ขอบเขต: closing handoff, CTA footer, และ completion note ใต้ compare table ให้จบ sequence แบบเอกสารตัดสินใจที่สั้นและสงบขึ้นบน desktop โดยไม่เปลี่ยน flow หรือ copy semantics
+  ไฟล์หลัก: `admin-app/app/globals.css`
 
 ## Purpose
 
@@ -654,10 +662,10 @@ Project detail:
 
 หลังจาก baseline ขึ้น `100/100` แล้ว งานถัดไปควรเป็น route-level micro-polish แบบแคบ ไม่ใช่ system rewrite:
 
-- `Project advisor agent-card harmony micro-polish`
-  โฟกัส: ทำให้ agent card ใต้ form shell ของ route โครงการรับบทเป็น supporting reassurance block ที่เบากว่า brief/form rail ชัดขึ้น โดยไม่เปลี่ยน content
-- `Compare table footer closure micro-polish`
-  โฟกัส: เก็บ footer closure ใต้ compare table ให้ completion note และ CTA footer จบจังหวะได้สั้นและสงบขึ้นอีกขั้นบน desktop โดยไม่เปลี่ยน flow หรือ copy semantics
+- `Project rail brief-to-form seam micro-polish`
+  โฟกัส: ทำให้รอยต่อระหว่าง project brief card กับ form shell บน desktop อ่านเป็น advisory stack เดียวกันมากขึ้น โดยลดความรู้สึกว่าเป็นสองก้อนที่ถูกวางต่อกัน
+- `Compare summary-to-table seam compression micro-polish`
+  โฟกัส: บีบ transition จาก decision support summary ไปยัง compare table shell ให้ลดการซ้ำของ intent strip และปิด opening sequence ให้คมขึ้นบน desktop โดยไม่เปลี่ยนข้อมูลหรือ flow
 
 เหตุผล:
 
