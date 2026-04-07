@@ -7938,6 +7938,92 @@ html[lang='th'] .projects-page .public-hero__eyebrow {
     color: rgba(7, 19, 39, 0.66);
   }
 
+  .decision-page--project .project-advisor-form-shell .form-grid,
+  .decision-page--project .project-advisor-form-shell .form-grid-2 {
+    gap: 12px;
+  }
+
+  .decision-page--project .project-advisor-form-shell .form-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 6px;
+    color: rgba(7, 19, 39, 0.64);
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .decision-page--project .project-advisor-form-shell .form-input,
+  .decision-page--project .project-advisor-form-shell .form-select,
+  .decision-page--project .project-advisor-form-shell .form-textarea {
+    border-width: 1px;
+    border-color: rgba(7, 19, 39, 0.1);
+    border-radius: 18px;
+    padding: 13px 15px;
+    background:
+      linear-gradient(180deg, rgba(255, 255, 255, 0.992), rgba(249, 246, 240, 0.968));
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.82),
+      0 1px 2px rgba(7, 19, 39, 0.03);
+  }
+
+  .decision-page--project .project-advisor-form-shell .form-input::placeholder,
+  .decision-page--project .project-advisor-form-shell .form-textarea::placeholder {
+    color: rgba(7, 19, 39, 0.42);
+  }
+
+  .decision-page--project .project-advisor-form-shell .form-input:focus,
+  .decision-page--project .project-advisor-form-shell .form-select:focus,
+  .decision-page--project .project-advisor-form-shell .form-textarea:focus {
+    border-color: rgba(10, 77, 140, 0.34);
+    box-shadow:
+      0 0 0 4px rgba(10, 77, 140, 0.08),
+      inset 0 1px 0 rgba(255, 255, 255, 0.84);
+  }
+
+  .decision-page--project .project-advisor-form-shell .form-textarea {
+    min-height: 128px;
+  }
+
+  .decision-page--project .project-advisor-form-shell .form-consent {
+    gap: 10px;
+    padding-top: 2px;
+  }
+
+  .decision-page--project .project-advisor-form-shell .form-consent__text {
+    color: rgba(7, 19, 39, 0.66);
+    font-size: 0.78rem;
+    line-height: 1.6;
+  }
+
+  .decision-page--project .project-advisor-form-shell .btn-block {
+    margin-top: 2px;
+    box-shadow: 0 16px 28px rgba(10, 77, 140, 0.12);
+  }
+
+  .decision-page--project .project-advisor-form-shell [aria-label='lead-form-support-links'] {
+    margin-top: 18px;
+    padding-top: 14px;
+    border-top-color: rgba(7, 19, 39, 0.08);
+  }
+
+  .decision-page--project .project-advisor-form-shell [aria-label='lead-form-support-links'] p {
+    max-width: 30ch;
+    margin-bottom: 8px;
+    color: rgba(7, 19, 39, 0.64);
+    line-height: 1.58;
+  }
+
+  .decision-page--project .project-advisor-form-shell .lead-form__support-link {
+    color: rgba(7, 19, 39, 0.72);
+  }
+
+  .decision-page--project .project-advisor-form-shell .lead-form__support-link:hover {
+    color: rgba(10, 77, 140, 0.9);
+  }
+
   .decision-page--compare .compare-readiness-pack {
     gap: 16px;
   }
@@ -7952,6 +8038,45 @@ html[lang='th'] .projects-page .public-hero__eyebrow {
 
   .decision-page--compare .compare-readiness-brief-card {
     max-width: 72rem;
+  }
+
+  .decision-page--compare .compare-carried-brief-card {
+    max-width: 43rem;
+    padding: 20px 22px 18px;
+    border-color: rgba(7, 19, 39, 0.08);
+    background:
+      radial-gradient(circle at 88% 10%, rgba(232, 199, 141, 0.12), transparent 24%),
+      linear-gradient(180deg, rgba(255, 255, 255, 0.994), rgba(247, 243, 236, 0.972));
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.84),
+      0 14px 28px rgba(7, 19, 39, 0.052);
+  }
+
+  .decision-page--compare .compare-carried-brief-card .card-subtitle {
+    max-width: 34ch;
+    color: rgba(7, 19, 39, 0.68);
+  }
+
+  .decision-page--compare .compare-carried-brief-card .bullet-list {
+    gap: 8px;
+    max-width: 38ch;
+  }
+
+  .decision-page--compare .compare-closing-handoff {
+    max-width: 43rem;
+    padding-top: 2px;
+  }
+
+  .decision-page--compare .compare-table-actions--closing {
+    align-items: center;
+    gap: 10px;
+    padding-top: 14px;
+    border-top: 1px solid rgba(7, 19, 39, 0.07);
+  }
+
+  .decision-page--compare .compare-closing-handoff .compare-completion-note {
+    max-width: 38ch;
+    margin-top: 10px;
   }
 }
 

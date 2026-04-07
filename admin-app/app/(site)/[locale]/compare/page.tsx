@@ -878,7 +878,7 @@ export default async function ComparePage(
       <section className="section">
         <Container>
           {investorContextPresent ? (
-            <div className="authority-card reveal compare-flow-card mb-4">
+            <div className="authority-card reveal compare-flow-card compare-carried-brief-card mb-4">
               <h2 className="card-title">{locale === 'th' ? 'Investment brief ที่ใช้ประกอบการเทียบ' : 'Investment brief used in this comparison'}</h2>
               <p className="card-subtitle">
                 {locale === 'th'
@@ -1099,48 +1099,50 @@ export default async function ComparePage(
               </table>
             </div>
 
-            <div className="cta-row compare-table-actions mt-4">
-              <Link
-                className="btn btn-secondary"
-                href={compareContinuationAction.href}
-                data-amp-event-type="cta_click"
-                data-amp-event-payload={JSON.stringify({
-                  source_route: 'compare',
-                  cta_type: 'secondary',
-                  cta_label: compareContinuationAction.label,
-                  entity_type: 'route',
-                  entity_name: compareContinuationAction.href.includes('/shortlist') ? 'shortlist' : 'buy',
-                  user_intent: 'research',
-                  context: {
-                    compare_ids: ids,
-                  },
-                })}
-              >
-                {compareContinuationAction.label}
-              </Link>
-              <Link
-                className="btn btn-cta"
-                href={compareContactHref}
-                data-amp-event-type="cta_click"
-                data-amp-event-payload={JSON.stringify({
-                  source_route: 'compare',
-                  cta_type: 'primary',
-                  cta_label: dict.compare.getInvestmentPlan,
-                  entity_type: 'project',
-                  entity_name: ids.join(', '),
-                  user_intent: investorContextPresent ? 'invest' : 'compare',
-                  context: {
-                    compare_ids: ids,
-                  },
-                })}
-              >
-                {dict.compare.getInvestmentPlan}
-              </Link>
-            </div>
+            <div className="compare-closing-handoff mt-4">
+              <div className="cta-row compare-table-actions compare-table-actions--closing">
+                <Link
+                  className="btn btn-secondary"
+                  href={compareContinuationAction.href}
+                  data-amp-event-type="cta_click"
+                  data-amp-event-payload={JSON.stringify({
+                    source_route: 'compare',
+                    cta_type: 'secondary',
+                    cta_label: compareContinuationAction.label,
+                    entity_type: 'route',
+                    entity_name: compareContinuationAction.href.includes('/shortlist') ? 'shortlist' : 'buy',
+                    user_intent: 'research',
+                    context: {
+                      compare_ids: ids,
+                    },
+                  })}
+                >
+                  {compareContinuationAction.label}
+                </Link>
+                <Link
+                  className="btn btn-cta"
+                  href={compareContactHref}
+                  data-amp-event-type="cta_click"
+                  data-amp-event-payload={JSON.stringify({
+                    source_route: 'compare',
+                    cta_type: 'primary',
+                    cta_label: dict.compare.getInvestmentPlan,
+                    entity_type: 'project',
+                    entity_name: ids.join(', '),
+                    user_intent: investorContextPresent ? 'invest' : 'compare',
+                    context: {
+                      compare_ids: ids,
+                    },
+                  })}
+                >
+                  {dict.compare.getInvestmentPlan}
+                </Link>
+              </div>
 
-            <p className="guided-dialog__step compare-completion-note mt-2.5">
-              {dict.compare.completionNote}
-            </p>
+              <p className="guided-dialog__step compare-completion-note mt-2.5">
+                {dict.compare.completionNote}
+              </p>
+            </div>
           </div>
         </Container>
       </section>
