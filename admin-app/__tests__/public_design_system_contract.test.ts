@@ -12,10 +12,22 @@ describe('public design system contract', () => {
     const rootStyles = read('app/root-styles.ts');
     const tokens = read('styles/public-tokens.css');
     const primitives = read('styles/public-primitives.css');
+    const tailwindConfig = read('tailwind.config.ts');
+    const globals = read('app/globals.css');
 
     expect(rootStyles).toContain("../styles/public-tokens.css");
     expect(rootStyles).toContain("../styles/public-primitives.css");
 
+    expect(tokens).toContain('--public-breakpoint-tablet: 768px;');
+    expect(tokens).toContain('--public-breakpoint-laptop: 1024px;');
+    expect(tokens).toContain('--public-breakpoint-desktop: 1280px;');
+    expect(tokens).toContain('--public-container-default: 1440px;');
+    expect(tokens).toContain('--public-container-wide: 1680px;');
+    expect(tokens).toContain('--public-container-readable: 840px;');
+    expect(tokens).toContain('--public-container-gutter-mobile: 24px;');
+    expect(tokens).toContain('--public-container-gutter-cinema: 112px;');
+    expect(tokens).toContain('--public-grid-columns: 12;');
+    expect(tokens).toContain('--public-section-space-desktop: 96px;');
     expect(tokens).toContain('--public-space-1: 8px;');
     expect(tokens).toContain('--public-space-4: 24px;');
     expect(tokens).toContain('--public-space-9: 96px;');
@@ -24,6 +36,19 @@ describe('public design system contract', () => {
     expect(tokens).toContain('--public-font-weight-regular: 400;');
     expect(tokens).toContain('--public-font-weight-semibold: 600;');
     expect(tokens).toContain('--public-font-weight-bold: 700;');
+
+    expect(tailwindConfig).toContain("tablet: '768px'");
+    expect(tailwindConfig).toContain("laptop: '1024px'");
+    expect(tailwindConfig).toContain("desktop: '1280px'");
+    expect(tailwindConfig).toContain("'public-content': 'var(--public-container-default)'");
+    expect(tailwindConfig).toContain("'public-wide': 'var(--public-container-wide)'");
+    expect(tailwindConfig).toContain("'public-readable': 'var(--public-container-readable)'");
+
+    expect(globals).toContain('--maxw: var(--public-container-default);');
+    expect(globals).toContain('--maxw-wide: var(--public-container-wide);');
+    expect(globals).toContain('--maxw-readable: var(--public-container-readable);');
+    expect(globals).toContain('.container--readable');
+    expect(globals).toContain('padding: var(--public-section-space-desktop) 0;');
 
     expect(primitives).toContain('.public-section-header');
     expect(primitives).toContain('.public-surface-card');

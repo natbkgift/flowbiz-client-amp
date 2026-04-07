@@ -120,7 +120,7 @@
   --space-xl: 32px;
 
   /* Unified padding matrix (Tailwind parity): px-6 md:px-8 xl:px-16 2xl:px-24 */
-  --container-padding: 24px;
+  --container-padding: var(--public-container-gutter-mobile);
 
   --radius-sm: 4px;
   --radius-md: 12px;
@@ -141,8 +141,11 @@
   --shadow-bar: 0 -4px 16px rgba(0, 0, 0, 0.02);
 
   --tap-target-min: 44px;
-  /* Luxury-wide container for 1920/4K while keeping content readable */
-  --maxw: 1440px;
+  /* Locked by AMP UI Foundation Spec Phase A / PR 0.1 */
+  --maxw: var(--public-container-default);
+  --maxw-wide: var(--public-container-wide);
+  --maxw-readable: var(--public-container-readable);
+  --line-readable: var(--public-content-measure);
 }
 
 @media (min-width: 768px) {
@@ -150,7 +153,7 @@
     --font-h1: 44px;
     --font-h2: 32px;
     --font-price: 32px;
-    --container-padding: 32px;
+    --container-padding: var(--public-container-gutter-tablet);
   }
 }
 
@@ -164,13 +167,13 @@
 @media (min-width: 1280px) {
   :root {
     --font-h1: 56px;
-    --container-padding: 64px;
+    --container-padding: var(--public-container-gutter-desktop);
   }
 }
 
 @media (min-width: 1536px) {
   :root {
-    --container-padding: 96px;
+    --container-padding: var(--public-container-gutter-wide);
   }
 }
 
@@ -184,7 +187,7 @@
     --font-h2: 42px;
     --font-h3: 22px;
     --font-price: 34px;
-    --container-padding: 112px;
+    --container-padding: var(--public-container-gutter-cinema);
   }
 }
 
@@ -197,7 +200,7 @@
     --font-h2: 48px;
     --font-h3: 24px;
     --font-price: 38px;
-    --container-padding: 128px;
+    --container-padding: var(--public-container-gutter-wall);
   }
 }
 
@@ -300,34 +303,29 @@ select {
 
 /* ======================== CONTAINER ======================== */
 
-.container {
-  max-width: var(--maxw);
+.container,
+.container--wide,
+.container--full,
+.container--readable {
+  width: 100%;
   margin: 0 auto;
   padding: 0 var(--container-padding);
+}
+
+.container {
+  max-width: var(--maxw);
 }
 
 .container--wide {
-  max-width: 1440px;
-  margin: 0 auto;
-  padding: 0 var(--container-padding);
-}
-
-@media (min-width: 1920px) {
-  .container--wide {
-    max-width: 1600px;
-  }
-}
-
-@media (min-width: 2560px) {
-  .container--wide {
-    max-width: 1720px;
-  }
+  max-width: var(--maxw-wide);
 }
 
 .container--full {
   max-width: 100%;
-  margin: 0 auto;
-  padding: 0 var(--container-padding);
+}
+
+.container--readable {
+  max-width: var(--maxw-readable);
 }
 
 /* ======================== SECTIONS (PHASE 5 FLUID LUXURY SPACING MATRIX) ======================== */
@@ -335,7 +333,7 @@ select {
 
 .section,
 .section--full {
-  padding: 64px 0;
+  padding: var(--public-section-space-mobile) 0;
 }
 
 .section--full {
@@ -346,7 +344,7 @@ select {
 
   .section,
   .section--full {
-    padding: 80px 0;
+    padding: var(--public-section-space-tablet) 0;
   }
 }
 
@@ -354,7 +352,15 @@ select {
 
   .section,
   .section--full {
-    padding: 96px 0;
+    padding: var(--public-section-space-desktop) 0;
+  }
+}
+
+@media (min-width: 1920px) {
+
+  .section,
+  .section--full {
+    padding: var(--public-section-space-cinema) 0;
   }
 }
 
@@ -12581,11 +12587,11 @@ html[lang='th'] .projects-page .public-hero__eyebrow {
 /* ======================== PHASE A1 SHARED FOUNDATION ======================== */
 
 :root {
-  --maxw-wide: 1680px;
-  --maxw-readable: 840px;
-  --line-readable: 68ch;
+  --maxw-wide: var(--public-container-wide);
+  --maxw-readable: var(--public-container-readable);
+  --line-readable: var(--public-content-measure);
   --measure-max: var(--line-readable);
-  --section-space-y: clamp(64px, 8vw, 112px);
+  --section-space-y: clamp(var(--public-section-space-mobile), 8vw, var(--public-section-space-cinema));
   --type-h1: var(--font-h1);
   --type-h2: var(--font-h2);
   --type-h3: var(--font-h3);
@@ -12594,23 +12600,6 @@ html[lang='th'] .projects-page .public-hero__eyebrow {
 
 .layout-shell {
   width: 100%;
-}
-
-.container,
-.container--wide,
-.container--full,
-.container--readable {
-  width: 100%;
-}
-
-.container--wide {
-  max-width: var(--maxw-wide);
-}
-
-.container--readable {
-  max-width: var(--maxw-readable);
-  margin: 0 auto;
-  padding: 0 var(--container-padding);
 }
 
 .content-readable {

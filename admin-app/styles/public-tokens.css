@@ -1,4 +1,33 @@
 :root {
+  --public-breakpoint-tablet: 768px;
+  --public-breakpoint-laptop: 1024px;
+  --public-breakpoint-desktop: 1280px;
+  --public-breakpoint-wide: 1536px;
+  --public-breakpoint-cinema: 1920px;
+  --public-breakpoint-wall: 2560px;
+
+  --public-container-default: 1440px;
+  --public-container-wide: 1680px;
+  --public-container-readable: 840px;
+  --public-content-measure: 68ch;
+
+  --public-container-gutter-mobile: 24px;
+  --public-container-gutter-tablet: 32px;
+  --public-container-gutter-desktop: 64px;
+  --public-container-gutter-wide: 96px;
+  --public-container-gutter-cinema: 112px;
+  --public-container-gutter-wall: 128px;
+
+  --public-grid-columns: 12;
+  --public-grid-gap-compact: 16px;
+  --public-grid-gap-default: 24px;
+  --public-grid-gap-relaxed: 32px;
+
+  --public-section-space-mobile: 64px;
+  --public-section-space-tablet: 80px;
+  --public-section-space-desktop: 96px;
+  --public-section-space-cinema: 112px;
+
   --public-space-1: 8px;
   --public-space-2: 12px;
   --public-space-3: 16px;

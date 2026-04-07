@@ -4,6 +4,14 @@ const config: Config = {
   content: ['./app/**/*.{js,ts,jsx,tsx}', './components/**/*.{js,ts,jsx,tsx}', './lib/**/*.{js,ts,jsx,tsx}'],
   theme: {
     extend: {
+      screens: {
+        tablet: '768px',
+        laptop: '1024px',
+        desktop: '1280px',
+        wide: '1536px',
+        cinema: '1920px',
+        wall: '2560px',
+      },
       colors: {
         admin: {
           primary: {
@@ -164,6 +172,10 @@ const config: Config = {
       },
       maxWidth: {
         'admin-content': 'var(--admin-content-max)',
+        'public-content': 'var(--public-container-default)',
+        'public-wide': 'var(--public-container-wide)',
+        'public-readable': 'var(--public-container-readable)',
+        'public-measure': 'var(--public-content-measure)',
       },
       width: {
         'admin-sidebar': 'var(--admin-sidebar-width)',
