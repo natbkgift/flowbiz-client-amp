@@ -7614,6 +7614,213 @@ html[lang='th'] .projects-page .public-hero__eyebrow {
   padding: clamp(16px, 4vw, 24px);
 }
 
+.project-deep-review-section {
+  position: relative;
+}
+
+.project-deep-review-header {
+  max-width: 44rem;
+}
+
+.project-deep-review-grid {
+  gap: clamp(14px, 2vw, 20px);
+}
+
+.project-deep-review-card {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid rgba(7, 19, 39, 0.08);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.82),
+    0 16px 34px rgba(7, 19, 39, 0.055);
+}
+
+.project-deep-review-card::before {
+  content: '';
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 3px;
+  opacity: 0.72;
+}
+
+.project-deep-review-card--verified {
+  background:
+    radial-gradient(circle at 88% 12%, rgba(10, 77, 140, 0.08), transparent 24%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.995), rgba(247, 243, 236, 0.972));
+}
+
+.project-deep-review-card--verified::before {
+  background: linear-gradient(90deg, rgba(10, 77, 140, 0.56), rgba(232, 199, 141, 0.24));
+}
+
+.project-deep-review-card--gaps {
+  background:
+    radial-gradient(circle at 88% 14%, rgba(232, 199, 141, 0.16), transparent 26%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.994), rgba(248, 244, 238, 0.97));
+}
+
+.project-deep-review-card--gaps::before {
+  background: linear-gradient(90deg, rgba(232, 199, 141, 0.6), rgba(120, 92, 47, 0.24));
+}
+
+.project-deep-review-card--risk {
+  background:
+    radial-gradient(circle at 14% 82%, rgba(10, 77, 140, 0.06), transparent 24%),
+    radial-gradient(circle at 88% 12%, rgba(232, 199, 141, 0.14), transparent 24%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.992), rgba(248, 245, 240, 0.968));
+}
+
+.project-deep-review-card--risk::before {
+  background: linear-gradient(90deg, rgba(120, 92, 47, 0.48), rgba(10, 77, 140, 0.24));
+}
+
+.project-deep-review-risk-score {
+  color: rgba(7, 19, 39, 0.88);
+  letter-spacing: -0.02em;
+}
+
+.project-deep-review-summary-card {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid rgba(7, 19, 39, 0.08);
+  background:
+    radial-gradient(circle at 90% 10%, rgba(232, 199, 141, 0.18), transparent 28%),
+    radial-gradient(circle at 12% 84%, rgba(10, 77, 140, 0.07), transparent 22%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.995), rgba(247, 243, 236, 0.972));
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.84),
+    0 20px 44px rgba(7, 19, 39, 0.06);
+}
+
+.project-deep-review-summary-card::before {
+  content: '';
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 3px;
+  background: linear-gradient(90deg, rgba(10, 77, 140, 0.54), rgba(232, 199, 141, 0.38));
+  opacity: 0.76;
+}
+
+.project-deep-review-summary-list {
+  gap: 12px;
+}
+
+.project-deep-review-summary-list .insight-list__item {
+  padding: 14px 16px;
+  border-radius: 17px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.9), rgba(249, 246, 240, 0.84));
+}
+
+.project-deep-review-fit-block,
+.project-deep-review-handoff {
+  max-width: 58ch;
+}
+
+.project-deep-review-actions {
+  gap: 10px;
+  align-items: flex-start;
+}
+
+.decision-page--compare .compare-recovery-note {
+  position: relative;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 90% 10%, rgba(232, 199, 141, 0.16), transparent 26%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.994), rgba(247, 243, 236, 0.972));
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.84),
+    0 18px 40px rgba(7, 19, 39, 0.06);
+}
+
+.decision-page--compare .compare-recovery-note::before {
+  content: '';
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 3px;
+  background: linear-gradient(90deg, rgba(232, 199, 141, 0.58), rgba(10, 77, 140, 0.22));
+  opacity: 0.72;
+}
+
+.decision-page--compare .compare-recovery-note__meta {
+  color: rgba(7, 19, 39, 0.64);
+}
+
+.decision-page--compare .compare-recovery-readiness {
+  gap: 14px;
+}
+
+.decision-page--compare .compare-recovery-card {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid rgba(7, 19, 39, 0.08);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.82),
+    0 14px 30px rgba(7, 19, 39, 0.055);
+}
+
+.decision-page--compare .compare-recovery-card::before {
+  content: '';
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 3px;
+  opacity: 0.72;
+}
+
+.decision-page--compare .compare-recovery-card--status {
+  background:
+    radial-gradient(circle at 88% 12%, rgba(10, 77, 140, 0.08), transparent 24%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.994), rgba(247, 243, 236, 0.972));
+}
+
+.decision-page--compare .compare-recovery-card--status::before {
+  background: linear-gradient(90deg, rgba(10, 77, 140, 0.56), rgba(232, 199, 141, 0.22));
+}
+
+.decision-page--compare .compare-recovery-card--next {
+  background:
+    radial-gradient(circle at 88% 12%, rgba(232, 199, 141, 0.16), transparent 24%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.994), rgba(248, 244, 238, 0.97));
+}
+
+.decision-page--compare .compare-recovery-card--next::before {
+  background: linear-gradient(90deg, rgba(232, 199, 141, 0.6), rgba(120, 92, 47, 0.24));
+}
+
+.decision-page--compare .compare-recovery-card--handoff {
+  background:
+    radial-gradient(circle at 14% 84%, rgba(10, 77, 140, 0.06), transparent 24%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.992), rgba(248, 245, 240, 0.968));
+}
+
+.decision-page--compare .compare-recovery-card--handoff::before {
+  background: linear-gradient(90deg, rgba(120, 92, 47, 0.5), rgba(10, 77, 140, 0.22));
+}
+
+.decision-page--compare .compare-recovery-brief-card {
+  position: relative;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 90% 10%, rgba(10, 77, 140, 0.08), transparent 24%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.994), rgba(247, 243, 236, 0.97));
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.84),
+    0 18px 40px rgba(7, 19, 39, 0.06);
+}
+
+.decision-page--compare .compare-recovery-brief-card::before {
+  content: '';
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 3px;
+  background: linear-gradient(90deg, rgba(10, 77, 140, 0.54), rgba(232, 199, 141, 0.3));
+  opacity: 0.74;
+}
+
+.decision-page--compare .compare-recovery-actions {
+  gap: 10px;
+  align-items: flex-start;
+}
+
 .decision-page--buying-cost .buying-cost-estimator-header {
   max-width: 48rem;
   margin-bottom: clamp(18px, 3vw, 30px);

@@ -24,7 +24,7 @@ Current QA baseline:
 
 - `100/100`
 - `elite`
-- latest summary: `admin-app/artifacts/public-visual-qa/run-20260407-014923/summary.json`
+- latest summary: `admin-app/artifacts/public-visual-qa/run-20260407-082440/summary.json`
 - latest review file: `docs/qa/public-visual-review.full.json`
 
 Route-level polish logged:
@@ -108,6 +108,14 @@ Route-level polish logged:
 - `Compare area-context continuity micro-polish`
   สถานะ: `applied after Project supporting facts editorial cadence micro-polish`
   ขอบเขต: area comparison deck, area insight cards, และ transition จาก area context ไปยัง decision summary ให้ไหลเป็น opening folio เดียวกันมากขึ้นบน desktop
+  ไฟล์หลัก: `admin-app/app/(site)/[locale]/compare/page.tsx`, `admin-app/app/globals.css`
+- `Project deep review editorial cadence micro-polish`
+  สถานะ: `applied after Compare area-context continuity micro-polish`
+  ขอบเขต: ProjectDeepReview header, top review cards, summary interpretation block, และ CTA handoff ให้ทำหน้าที่เป็น analytical epilogue ที่ยังไหลต่อจาก supporting facts อย่างกลมกลืน
+  ไฟล์หลัก: `admin-app/components/projects/ProjectDeepReview.tsx`, `admin-app/app/globals.css`
+- `Compare recovery-state calmness micro-polish`
+  สถานะ: `applied after Project deep review editorial cadence micro-polish`
+  ขอบเขต: recovery note, readiness pack, และ carried-brief handoff ของ compare recovery route ให้ดูเป็น calm fallback deck มากขึ้น ไม่อ่านเป็น warning utility state
   ไฟล์หลัก: `admin-app/app/(site)/[locale]/compare/page.tsx`, `admin-app/app/globals.css`
 
 ## Purpose
@@ -630,10 +638,10 @@ Project detail:
 
 หลังจาก baseline ขึ้น `100/100` แล้ว งานถัดไปควรเป็น route-level micro-polish แบบแคบ ไม่ใช่ system rewrite:
 
-- `Project deep review editorial cadence micro-polish`
-  โฟกัส: ทำให้ `ProjectDeepReview` อ่านต่อจาก supporting facts/next-step handoff อย่างกลมกลืนขึ้น โดยลดความรู้สึกว่าเป็น analytical module แทรกกลาง narrative
-- `Compare recovery-state calmness micro-polish`
-  โฟกัส: ทำให้ empty/recovery compare states อ่านเป็น calm decision fallback มากขึ้น และใกล้กับ main compare route ในแง่ cadence และ closing CTA behavior
+- `Project advisor rail desktop calmness micro-polish`
+  โฟกัส: ทำให้ brief card, form shell, และ agent card ใน side rail ของ route โครงการสงบขึ้นอีกขั้นบน desktop โดยลดความรู้สึกว่า side rail หนักเท่า content rail
+- `Compare readiness-pack editorial hierarchy micro-polish`
+  โฟกัส: ทำให้ readiness pack ของ compare main route มีลำดับชั้นที่นิ่งขึ้นอีกขั้นระหว่าง “เมื่อไร compare คุ้มค่า”, flow support, และ table handoff โดยไม่เปลี่ยน content logic
 
 เหตุผล:
 

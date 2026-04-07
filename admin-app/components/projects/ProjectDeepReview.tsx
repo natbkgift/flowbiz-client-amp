@@ -283,14 +283,14 @@ export function ProjectDeepReview({
   const riskLabel = score >= 70 ? dict.compare.riskHigh : score >= 35 ? dict.compare.riskMedium : dict.compare.riskLow;
 
   return (
-    <section className="section section--alt">
-      <div className="section-header">
+    <section className="section section--alt project-deep-review-section">
+      <div className="section-header project-deep-review-header">
         <h2 className="section-title">{dict.deepReview.title}</h2>
         <p className="section-subtitle">{dict.deepReview.subtitle}</p>
       </div>
 
-      <div className="grid grid-3">
-        <div className="card reveal">
+      <div className="grid grid-3 project-deep-review-grid">
+        <div className="card reveal project-deep-review-card project-deep-review-card--verified">
           <h3 className="card-title">{dict.deepReview.verifiedNow}</h3>
           <ul className="bullet-list mt-3" aria-label={dict.deepReview.verifiedNow}>
             {normalized.verified_now.map((p) => (
@@ -299,7 +299,7 @@ export function ProjectDeepReview({
           </ul>
         </div>
 
-        <div className="card reveal">
+        <div className="card reveal project-deep-review-card project-deep-review-card--gaps">
           <h3 className="card-title">{dict.deepReview.gapsToConfirm}</h3>
           <ul className="bullet-list mt-3" aria-label={dict.deepReview.gapsToConfirm}>
             {normalized.gaps_to_confirm.map((c) => (
@@ -308,14 +308,14 @@ export function ProjectDeepReview({
           </ul>
         </div>
 
-        <div className="card reveal">
+        <div className="card reveal project-deep-review-card project-deep-review-card--risk">
           <h3 className="card-title">{dict.deepReview.riskScore}</h3>
           <p className="card-subtitle">{dict.deepReview.riskExplain}</p>
-          <div className="mt-3 font-bold text-xl">{score}/100 ({riskLabel})</div>
+          <div className="mt-3 font-bold text-xl project-deep-review-risk-score">{score}/100 ({riskLabel})</div>
         </div>
       </div>
 
-      <div className="card reveal mt-4">
+      <div className="card reveal mt-4 project-deep-review-summary-card">
         <h3 className="card-title">{dict.deepReview.investTitle}</h3>
         <p className="card-subtitle">{dict.deepReview.investSubtitle}</p>
         <ul className="bullet-list mt-3">
@@ -324,7 +324,7 @@ export function ProjectDeepReview({
           ))}
         </ul>
 
-        <div className="insight-list mt-4" aria-label={locale === 'th' ? 'วิธีอ่านข้อมูลชุดนี้' : 'How to read this snapshot'}>
+        <div className="insight-list mt-4 project-deep-review-summary-list" aria-label={locale === 'th' ? 'วิธีอ่านข้อมูลชุดนี้' : 'How to read this snapshot'}>
           {snapshotExplanation.map((line) => (
             <div key={line} className="insight-list__item">
               <span className="insight-list__body">{line}</span>
@@ -332,7 +332,7 @@ export function ProjectDeepReview({
           ))}
         </div>
 
-        <div className="mt-4">
+        <div className="mt-4 project-deep-review-fit-block">
           <h4 className="card-title">{locale === 'th' ? 'เหมาะกับผู้ซื้อแบบไหน' : 'Best fit for this page'}</h4>
           <p className="card-subtitle">
             {locale === 'th'
@@ -346,12 +346,12 @@ export function ProjectDeepReview({
           </ul>
         </div>
 
-        <div className="mt-4">
+        <div className="mt-4 project-deep-review-handoff">
           <h4 className="card-title">{ctaPlan.title}</h4>
           <p className="card-subtitle">{ctaPlan.body}</p>
         </div>
 
-        <div className="cta-row mt-3">
+        <div className="cta-row mt-3 project-deep-review-actions">
           <Link className="btn btn-cta" href={ctaPlan.primaryHref}>
             {ctaPlan.primaryLabel}
           </Link>

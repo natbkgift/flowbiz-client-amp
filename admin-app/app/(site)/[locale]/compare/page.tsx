@@ -671,11 +671,11 @@ export default async function ComparePage(
 
         <section className="section">
           <Container>
-            <div className="trust-box mb-4">
+            <div className="trust-box compare-recovery-note mb-4">
               <h2 className="trust-box__title">{recoveryCopy.title}</h2>
               <p className="section-subtitle">{recoveryCopy.body}</p>
               {missing.length ? (
-                <p className="guided-dialog__step mt-2.5">
+                <p className="guided-dialog__step compare-recovery-note__meta mt-2.5">
                   {locale === 'th'
                     ? `รายการที่ต้องเช็กใหม่: ${missing.join(', ')}`
                     : `Projects that need a fresh check: ${missing.join(', ')}`}
@@ -683,8 +683,8 @@ export default async function ComparePage(
               ) : null}
             </div>
 
-            <div id="compare-readiness-pack" className="signal-grid signal-grid--three-up decision-pack mb-4">
-              <section className="authority-card reveal">
+            <div id="compare-readiness-pack" className="signal-grid signal-grid--three-up decision-pack compare-recovery-readiness mb-4">
+              <section className="authority-card reveal compare-recovery-card compare-recovery-card--status">
                 <h2 className="card-title">{locale === 'th' ? 'เกิดอะไรขึ้นกับ compare ชุดนี้' : 'What changed in this compare set'}</h2>
                 <p className="card-subtitle">
                   {locale === 'th'
@@ -697,7 +697,7 @@ export default async function ComparePage(
                 </ul>
               </section>
 
-              <section className="authority-card reveal">
+              <section className="authority-card reveal compare-recovery-card compare-recovery-card--next">
                 <h2 className="card-title">{locale === 'th' ? 'ขั้นถัดไปที่คุ้มกว่า' : 'Higher-value next move'}</h2>
                 <p className="card-subtitle">
                   {locale === 'th'
@@ -709,7 +709,7 @@ export default async function ComparePage(
                 </ul>
               </section>
 
-              <section className="authority-card reveal">
+              <section className="authority-card reveal compare-recovery-card compare-recovery-card--handoff">
                 <h2 className="card-title">{locale === 'th' ? 'ถ้าต้องการคุยกับทีมตอนนี้' : 'If you need the team now'}</h2>
                 <p className="card-subtitle">
                   {locale === 'th'
@@ -725,7 +725,7 @@ export default async function ComparePage(
             </div>
 
             {investorContextPresent ? (
-              <div className="authority-card reveal compare-flow-card mb-4">
+              <div className="authority-card reveal compare-flow-card compare-recovery-brief-card mb-4">
                 <h2 className="card-title">{locale === 'th' ? 'Investment brief ที่ยังพกต่อได้' : 'Investment brief that still carries forward'}</h2>
                 <p className="card-subtitle">
                   {locale === 'th'
@@ -737,7 +737,7 @@ export default async function ComparePage(
                     <li key={fact}>{fact}</li>
                   ))}
                 </ul>
-                <div className="cta-row mt-4">
+                <div className="cta-row compare-recovery-actions mt-4">
                   <Link
                     className="btn btn-secondary"
                     href={compareContinuationAction.href}
