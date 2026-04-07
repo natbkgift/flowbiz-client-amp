@@ -153,13 +153,7 @@ export function PublicAdvisoryHero({
                   </div>
                   <div className="public-hero__signal-copy">
                     <span className="public-hero__signal-kicker">{signal.kicker}</span>
-                    {index === 0 ? (
-                      <h2 className="public-hero__signal-title">{signal.title}</h2>
-                    ) : index === 1 ? (
-                      <h3 className="public-hero__signal-title">{signal.title}</h3>
-                    ) : (
-                      <div className="public-hero__signal-title">{signal.title}</div>
-                    )}
+                    <h2 className="public-hero__signal-title">{signal.title}</h2>
                     <p>{signal.body}</p>
                   </div>
                   <span className="public-hero__signal-arrow" aria-hidden="true">
