@@ -109,6 +109,15 @@ type ProjectDecisionCtaPlan = {
   signalLevel: string;
 };
 
+type ProjectCtaSurface = 'hero' | 'unit_summary' | 'unit_empty' | 'decision_lens' | 'next_steps' | 'mobile';
+
+type ProjectSurfaceAction = {
+  href: string;
+  label: string;
+  userIntent: 'buy' | 'invest' | 'compare';
+  context?: Record<string, unknown>;
+};
+
 type ProjectUseCaseFrame = {
   key: 'investment' | 'holiday_home' | 'end_use';
   title: string;
@@ -848,9 +857,6 @@ export default async function ProjectDetailPage(
       value: deliveryLabel ?? (locale === 'th' ? 'เช็ก handover ล่าสุด' : 'Check latest handover timing'),
     },
   ];
-  const priorityInternalLinks = internalLinks.filter((item) => (
-    item.href.endsWith('/buy') || item.href.endsWith('/invest') || item.href.endsWith('/contact')
-  ));
   const projectDecisionRead = [
     hasEvaluationSnapshot
       ? locale === 'th' ? 'มีข้อมูลล่าสุดจากโครงการและพื้นที่เพียงพอสำหรับใช้คุยเรื่องการคัดรายการต่อ' : 'There is enough live project and area snapshot data to support a shortlist discussion.'
@@ -950,38 +956,119 @@ export default async function ProjectDetailPage(
     linkedProjectProperties,
     startingPriceLabel,
   );
-  const projectHeroPrimaryPayload = {
+  const projectActionContext = {
+    area: project.area?.name ?? undefined,
+    buyer_fit: projectDecisionCta.buyerFit,
+    signal_level: projectDecisionCta.signalLevel,
+  };
+  const buildProjectCtaPayload = ({
+    ctaType,
+    ctaLabel,
+    ctaSurface,
+    userIntent,
+    context,
+  }: {
+    ctaType: 'primary' | 'secondary' | 'tertiary';
+    ctaLabel: string;
+    ctaSurface: ProjectCtaSurface;
+    userIntent: ProjectSurfaceAction['userIntent'];
+    context?: Record<string, unknown>;
+  }) => ({
     source_route: 'project',
-    cta_type: 'primary',
-    cta_label: projectDecisionCta.primaryLabel,
+    cta_type: ctaType,
+    cta_label: ctaLabel,
+    cta_surface: ctaSurface,
     entity_type: 'project',
     entity_id: project.id,
     entity_name: project.name,
-    user_intent: hasInvestmentView ? 'invest' : 'buy',
+    user_intent: userIntent,
     location: project.area?.name ?? undefined,
     context: {
-      area: project.area?.name ?? undefined,
-      buyer_fit: projectDecisionCta.buyerFit,
-      signal_level: projectDecisionCta.signalLevel,
+      ...projectActionContext,
+      ...context,
     },
-  };
-  const projectHeroSecondaryPayload = {
-    source_route: 'project',
-    cta_type: 'secondary',
-    cta_label: projectDecisionCta.secondaryLabel,
-    entity_type: 'project',
-    entity_id: project.id,
-    entity_name: project.name,
-    user_intent: projectDecisionCta.secondaryHref.includes('/compare') ? 'compare' : 'buy',
-    location: project.area?.name ?? undefined,
+  });
+  const buildSurfaceAction = (
+    action: ProjectSurfaceAction,
+    ctaSurface: ProjectCtaSurface,
+    id: string,
+    ctaType: 'primary' | 'secondary' | 'tertiary',
+  ) => ({
+    id,
+    href: action.href,
+    label: action.label,
+    eventPayload: buildProjectCtaPayload({
+      ctaType,
+      ctaLabel: action.label,
+      ctaSurface,
+      userIntent: action.userIntent,
+      context: action.context,
+    }),
+  });
+  const projectPrimaryAction: ProjectSurfaceAction = {
+    href: projectDecisionCta.primaryHref,
+    label: projectDecisionCta.primaryLabel,
+    userIntent: hasInvestmentView ? 'invest' : 'buy',
     context: {
-      area: project.area?.name ?? undefined,
-      compare_ids: projectDecisionCta.secondaryHref.includes('/compare') ? [project.slug] : undefined,
+      decision_path: projectDecisionCta.inquirySource,
     },
   };
+  const projectSecondaryIsCompare = projectDecisionCta.secondaryHref.includes('/compare');
+  const projectSecondaryAction: ProjectSurfaceAction = {
+    href: projectDecisionCta.secondaryHref,
+    label: projectDecisionCta.secondaryLabel,
+    userIntent: projectSecondaryIsCompare ? 'compare' : 'buy',
+    context: {
+      decision_path: projectSecondaryIsCompare ? 'compare' : 'inventory_catalogue',
+      compare_ids: projectSecondaryIsCompare ? [project.slug] : undefined,
+    },
+  };
+  const projectInventoryAction: ProjectSurfaceAction = {
+    href: withLocale(locale, '/buy'),
+    label: locale === 'th' ? 'ดูรายการที่พร้อมคัดต่อ' : 'Browse shortlist-ready listings',
+    userIntent: 'buy',
+    context: {
+      decision_path: 'inventory_catalogue',
+      browse_scope: 'shortlist_ready',
+    },
+  };
+  const projectCompareAction: ProjectSurfaceAction = {
+    href: withLocale(locale, '/compare'),
+    label: dict.advisory.compareOpportunities,
+    userIntent: 'compare',
+    context: {
+      decision_path: 'compare',
+      compare_ids: [project.slug],
+    },
+  };
+  const projectHeroPrimaryAction = buildSurfaceAction(projectPrimaryAction, 'hero', 'project_consultation_primary', 'primary');
+  const projectHeroSecondaryAction = buildSurfaceAction(projectSecondaryAction, 'hero', 'project_self_serve_secondary', 'secondary');
+  const projectUnitSummaryPrimaryAction = buildSurfaceAction(projectPrimaryAction, 'unit_summary', 'project_unit_summary_primary', 'primary');
+  const projectUnitSummarySecondaryAction = buildSurfaceAction(projectInventoryAction, 'unit_summary', 'project_unit_summary_inventory_secondary', 'secondary');
+  const projectUnitEmptyPrimaryAction = buildSurfaceAction(projectPrimaryAction, 'unit_empty', 'project_unit_empty_primary', 'primary');
+  const projectUnitEmptySecondaryAction = buildSurfaceAction(projectInventoryAction, 'unit_empty', 'project_unit_empty_inventory_secondary', 'secondary');
+  const projectDecisionPrimaryAction = buildSurfaceAction(projectPrimaryAction, 'decision_lens', 'project_decision_primary', 'primary');
+  const projectDecisionSecondaryAction = buildSurfaceAction(projectSecondaryAction, 'decision_lens', 'project_decision_secondary', 'secondary');
+  const projectNextStepsPrimaryAction = buildSurfaceAction(projectPrimaryAction, 'next_steps', 'project_next_steps_primary', 'primary');
+  const projectNextStepsSecondaryAction = buildSurfaceAction(projectSecondaryAction, 'next_steps', 'project_next_steps_secondary', 'secondary');
+  const projectNextStepsUtilityAction = buildSurfaceAction(
+    projectSecondaryIsCompare ? projectInventoryAction : projectCompareAction,
+    'next_steps',
+    'project_next_steps_utility',
+    'tertiary',
+  );
+  const projectMobilePrimaryAction = buildSurfaceAction(projectPrimaryAction, 'mobile', 'project_mobile_primary', 'primary');
+  const projectMobileSecondaryAction = buildSurfaceAction(projectSecondaryAction, 'mobile', 'project_mobile_secondary', 'secondary');
   const projectHeroSupportNote = locale === 'th'
     ? 'การส่งต่อจากหน้านี้จะพกชื่อโครงการ ทำเล และจังหวะถัดไปของการตัดสินใจไปใน inquiry เดียวกัน'
     : 'This handoff keeps the project, area, and next-step intent in one inquiry.';
+  const projectMobileDescription = projectSecondaryIsCompare
+    ? (locale === 'th'
+      ? 'ส่งบรีฟโครงการนี้ให้ทีมทันที หรือเปิดหน้าเปรียบเทียบเมื่ออยากดูตัวเลือกใกล้เคียงแบบวางคู่กัน'
+      : 'Send this project brief to the team now, or open compare when you want nearby options side by side.')
+    : (locale === 'th'
+      ? 'ส่งบรีฟโครงการนี้ให้ทีมทันที หรือไปต่อยังรายการที่พร้อมคัดต่อเมื่ออยากเช็ก stock ที่ขยับต่อได้เร็ว'
+      : 'Send this project brief to the team now, or browse shortlist-ready listings when you want stock you can move on quickly.');
   const projectHeroSignals: HeroSignal[] = [
     {
       kicker: locale === 'th' ? 'จุดเริ่มต้น' : 'Entry signal',
@@ -1067,18 +1154,8 @@ export default async function ProjectDetailPage(
         proofsLabel={advisoryLabels.proofsLabel}
         guidanceLabel={advisoryLabels.guidanceLabel}
         signals={projectHeroSignals}
-        primaryAction={{
-          href: projectDecisionCta.primaryHref,
-          label: projectDecisionCta.primaryLabel,
-          id: 'project_consultation_primary',
-          eventPayload: projectHeroPrimaryPayload,
-        }}
-        secondaryAction={{
-          href: projectDecisionCta.secondaryHref,
-          label: projectDecisionCta.secondaryLabel,
-          id: 'project_compare_secondary',
-          eventPayload: projectHeroSecondaryPayload,
-        }}
+        primaryAction={projectHeroPrimaryAction}
+        secondaryAction={projectHeroSecondaryAction}
       />
       <Container>
         <section id="project-confidence-pack" className="signal-grid signal-grid--three-up reveal decision-pack project-confidence-pack project-confidence-pack--topline">
@@ -1300,13 +1377,25 @@ export default async function ProjectDetailPage(
                       </div>
                     ))}
                   </div>
-                  <div className="card-actions project-unit-summary-actions mt-3">
-                    <Link className="btn btn-secondary" href={withLocale(locale, '/buy')}>
-                      {locale === 'th' ? 'ดูยูนิตที่พร้อมคัดต่อ' : 'Browse shortlist-ready units'}
-                    </Link>
-                    <Link className="btn btn-tertiary" href={projectDecisionCta.primaryHref}>
-                      {projectDecisionCta.primaryLabel}
-                    </Link>
+                  <div className="card-actions project-cta-row project-unit-summary-actions mt-3">
+                    <TrackedLink
+                      id={projectUnitSummaryPrimaryAction.id}
+                      className="btn btn-primary"
+                      href={projectUnitSummaryPrimaryAction.href}
+                      eventType="cta_click"
+                      eventPayload={projectUnitSummaryPrimaryAction.eventPayload}
+                    >
+                      {projectUnitSummaryPrimaryAction.label}
+                    </TrackedLink>
+                    <TrackedLink
+                      id={projectUnitSummarySecondaryAction.id}
+                      className="btn btn-secondary"
+                      href={projectUnitSummarySecondaryAction.href}
+                      eventType="cta_click"
+                      eventPayload={projectUnitSummarySecondaryAction.eventPayload}
+                    >
+                      {projectUnitSummarySecondaryAction.label}
+                    </TrackedLink>
                   </div>
                 </div>
               </div>
@@ -1324,13 +1413,25 @@ export default async function ProjectDetailPage(
                       ? 'ถ้ายังไม่มียูนิตผูกกับโครงการนี้บน route สาธารณะ ให้ใช้ project brief ด้านบนแล้วส่งต่อเพื่อขอ unit mix และ availability ล่าสุดจากทีม'
                       : 'If this public route is not yet surfacing linked units, keep the project brief above and hand it off to request the latest unit mix and availability from the team.'}
                   </div>
-                  <div className="card-actions project-unit-summary-actions">
-                    <Link className="btn btn-secondary" href={projectDecisionCta.primaryHref}>
-                      {projectDecisionCta.primaryLabel}
-                    </Link>
-                    <Link className="btn btn-tertiary" href={withLocale(locale, '/buy')}>
-                      {locale === 'th' ? 'ดูยูนิตในคลังหลัก' : 'Browse the main unit catalogue'}
-                    </Link>
+                  <div className="card-actions project-cta-row project-unit-summary-actions">
+                    <TrackedLink
+                      id={projectUnitEmptyPrimaryAction.id}
+                      className="btn btn-primary"
+                      href={projectUnitEmptyPrimaryAction.href}
+                      eventType="cta_click"
+                      eventPayload={projectUnitEmptyPrimaryAction.eventPayload}
+                    >
+                      {projectUnitEmptyPrimaryAction.label}
+                    </TrackedLink>
+                    <TrackedLink
+                      id={projectUnitEmptySecondaryAction.id}
+                      className="btn btn-secondary"
+                      href={projectUnitEmptySecondaryAction.href}
+                      eventType="cta_click"
+                      eventPayload={projectUnitEmptySecondaryAction.eventPayload}
+                    >
+                      {projectUnitEmptySecondaryAction.label}
+                    </TrackedLink>
                   </div>
                 </div>
               )}
@@ -1357,13 +1458,25 @@ export default async function ProjectDetailPage(
                     </div>
                   ))}
                 </div>
-                <div className="card-actions project-decision-lens-actions mt-3">
-                  <Link className="btn btn-secondary" href={withLocale(locale, '/buy')}>
-                    {locale === 'th' ? 'ดูรายการที่บันทึกเข้ารายการคัดไว้ได้' : 'Browse shortlist-ready listings'}
-                  </Link>
-                  <Link className="btn btn-tertiary" href={withLocale(locale, '/compare')}>
-                    {dict.advisory.compareOpportunities}
-                  </Link>
+                <div className="card-actions project-cta-row project-decision-lens-actions mt-3">
+                  <TrackedLink
+                    id={projectDecisionPrimaryAction.id}
+                    className="btn btn-primary"
+                    href={projectDecisionPrimaryAction.href}
+                    eventType="cta_click"
+                    eventPayload={projectDecisionPrimaryAction.eventPayload}
+                  >
+                    {projectDecisionPrimaryAction.label}
+                  </TrackedLink>
+                  <TrackedLink
+                    id={projectDecisionSecondaryAction.id}
+                    className="btn btn-secondary"
+                    href={projectDecisionSecondaryAction.href}
+                    eventType="cta_click"
+                    eventPayload={projectDecisionSecondaryAction.eventPayload}
+                  >
+                    {projectDecisionSecondaryAction.label}
+                  </TrackedLink>
                 </div>
               </div>
 
@@ -1457,18 +1570,34 @@ export default async function ProjectDetailPage(
                       ? 'ถ้าโครงการนี้ใกล้เคียงโจทย์ ให้เทียบต่อหรือส่งบรีฟเพื่อให้ทีมคัดรายการที่แคบลง'
                       : 'If this project is directionally right, compare it next or send the brief so the team can tighten the shortlist.'}
                   </p>
-                  <div className="card-actions project-next-steps-actions mt-3">
-                    {priorityInternalLinks.map((it) => (
-                      <Link
-                        key={it.href}
-                        className={it.variant === 'secondary' ? 'btn btn-secondary' : 'btn btn-tertiary'}
-                        href={it.href}
-                        data-amp-event-type={it.eventType}
-                        data-amp-event-payload={JSON.stringify(it.eventPayload)}
-                      >
-                        {it.label}
-                      </Link>
-                    ))}
+                  <div className="card-actions project-cta-row project-next-steps-actions mt-3">
+                    <TrackedLink
+                      id={projectNextStepsPrimaryAction.id}
+                      className="btn btn-primary"
+                      href={projectNextStepsPrimaryAction.href}
+                      eventType="cta_click"
+                      eventPayload={projectNextStepsPrimaryAction.eventPayload}
+                    >
+                      {projectNextStepsPrimaryAction.label}
+                    </TrackedLink>
+                    <TrackedLink
+                      id={projectNextStepsSecondaryAction.id}
+                      className="btn btn-secondary"
+                      href={projectNextStepsSecondaryAction.href}
+                      eventType="cta_click"
+                      eventPayload={projectNextStepsSecondaryAction.eventPayload}
+                    >
+                      {projectNextStepsSecondaryAction.label}
+                    </TrackedLink>
+                    <TrackedLink
+                      id={projectNextStepsUtilityAction.id}
+                      className="btn btn-tertiary"
+                      href={projectNextStepsUtilityAction.href}
+                      eventType="cta_click"
+                      eventPayload={projectNextStepsUtilityAction.eventPayload}
+                    >
+                      {projectNextStepsUtilityAction.label}
+                    </TrackedLink>
                   </div>
                 </div>
               </section>
@@ -1534,51 +1663,12 @@ export default async function ProjectDetailPage(
       </Container>
       <PageOwnedMobileCTA
         id="project-mobile-cta"
-        eyebrow={locale === 'th' ? 'ส่งต่อ snapshot ไปยัง advisor' : 'Advisor snapshot handoff'}
+        eyebrow={locale === 'th' ? 'จังหวะถัดไปจากหน้าโครงการนี้' : 'Next move from this project'}
         variant="project"
-        title={locale === 'th' ? 'พร้อมคุยต่อจาก snapshot นี้' : 'Ready to act on this project snapshot'}
-        description={locale === 'th'
-          ? 'ส่งบรีฟโครงการนี้ให้ทีมทันที หรือไปหน้าเปรียบเทียบเมื่ออยากคัดตัวเลือกใกล้เคียงต่อ.'
-          : 'Send this project brief to the team now, or move into compare when you want nearby alternatives side by side.'}
-        primaryAction={{
-          id: 'project_mobile_primary',
-          href: projectDecisionCta.primaryHref,
-          label: projectDecisionCta.primaryLabel,
-          eventPayload: {
-            source_route: 'project',
-            cta_type: 'primary',
-            cta_label: projectDecisionCta.primaryLabel,
-            entity_type: 'project',
-            entity_id: project.id,
-            entity_name: project.name,
-            user_intent: hasInvestmentView ? 'invest' : 'buy',
-            location: project.area?.name ?? undefined,
-            context: {
-              area: project.area?.name ?? undefined,
-              buyer_fit: projectDecisionCta.buyerFit,
-              signal_level: projectDecisionCta.signalLevel,
-            },
-          },
-        }}
-        secondaryAction={{
-          id: 'project_mobile_secondary',
-          href: projectDecisionCta.secondaryHref,
-          label: projectDecisionCta.secondaryLabel,
-          eventPayload: {
-            source_route: 'project',
-            cta_type: 'secondary',
-            cta_label: projectDecisionCta.secondaryLabel,
-            entity_type: 'project',
-            entity_id: project.id,
-            entity_name: project.name,
-            user_intent: projectDecisionCta.secondaryHref.includes('/compare') ? 'compare' : 'buy',
-            location: project.area?.name ?? undefined,
-            context: {
-              area: project.area?.name ?? undefined,
-              compare_ids: [project.slug],
-            },
-          },
-        }}
+        title={projectDecisionCta.title}
+        description={projectMobileDescription}
+        primaryAction={projectMobilePrimaryAction}
+        secondaryAction={projectMobileSecondaryAction}
       />
     </main>
   );

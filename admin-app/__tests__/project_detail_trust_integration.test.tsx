@@ -139,7 +139,7 @@ describe('project detail trust integration', () => {
       'href',
       '/en/contact?intent=project_consultation&source=project_availability_check&project=beta-tower&projects=beta-tower&buyer_fit=project_first_buyer&signal_level=medium&msg=I+am+interested+in+Beta+Tower+and+want+to+confirm+live+unit+availability%2C+price+bands%2C+and+nearby+alternatives+still+open+now.',
     );
-    expect(container.querySelector('#project_compare_secondary')).toHaveAttribute('href', '/en/buy');
+    expect(container.querySelector('#project_self_serve_secondary')).toHaveAttribute('href', '/en/buy');
 
     const verifiedList = screen.getByLabelText('Verified now');
     const gapsList = screen.getByLabelText('Gaps to confirm');
@@ -167,7 +167,7 @@ describe('project detail trust integration', () => {
       'href',
       '/en/contact?intent=project_consultation&source=project_investment_check&project=alpha-residence&projects=alpha-residence&buyer_fit=investor_compare&signal_level=high&msg=I+am+reviewing+Alpha+Residence+and+want+to+compare+its+price%2C+rent%2C+and+investment+context+against+nearby+alternatives.',
     );
-    expect(container.querySelector('#project_compare_secondary')).toHaveAttribute('href', '/en/compare');
+    expect(container.querySelector('#project_self_serve_secondary')).toHaveAttribute('href', '/en/compare');
     expect(screen.getByText(/market snapshot available/i)).toBeTruthy();
     expect(screen.queryByText(/confirm current rental demand and buyer fit around/i)).toBeNull();
     expect(screen.queryByRole('heading', { name: 'Pros' })).toBeNull();

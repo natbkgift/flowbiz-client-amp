@@ -235,6 +235,22 @@ describe('public design system contract', () => {
     expect(primitives).toContain('.decision-page--project .project-unit-inventory-grid .property-card');
   });
 
+  it('keeps the project CTA hierarchy on owned handoff and the page-owned mobile bar', () => {
+    const projectDetail = read('app/(site)/[locale]/projects/[slug]/page.tsx');
+    const primitives = read('styles/public-primitives.css');
+
+    expect(projectDetail).toContain('PageOwnedMobileCTA');
+    expect(projectDetail).toContain('title={projectDecisionCta.title}');
+    expect(projectDetail).toContain('description={projectMobileDescription}');
+    expect(projectDetail).toContain('project_self_serve_secondary');
+    expect(projectDetail).toContain('className="card-actions project-cta-row project-unit-summary-actions mt-3"');
+    expect(projectDetail).toContain('className="card-actions project-cta-row project-decision-lens-actions mt-3"');
+    expect(projectDetail).toContain('className="card-actions project-cta-row project-next-steps-actions mt-3"');
+
+    expect(primitives).toContain('.decision-page--project .project-cta-row');
+    expect(primitives).toContain('.decision-page--project .project-cta-row > .btn-tertiary');
+  });
+
   it('locks audited route container intent for narrative and inventory shells', () => {
     const blogArticle = read('app/(site)/[locale]/blog/[slug]/page.tsx');
     const aboutPage = read('app/(site)/[locale]/about/page.tsx');

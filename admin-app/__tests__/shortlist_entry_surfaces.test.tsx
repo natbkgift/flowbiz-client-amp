@@ -102,6 +102,9 @@ describe('shortlist entry surfaces', () => {
       }),
     );
 
-    expect(screen.getByRole('link', { name: /browse shortlist-ready listings/i }).getAttribute('href')).toBe('/en/buy');
+    const inventoryLinks = screen.getAllByRole('link', { name: /browse shortlist-ready listings/i });
+
+    expect(inventoryLinks.length).toBeGreaterThan(0);
+    expect(inventoryLinks.every((link) => link.getAttribute('href') === '/en/buy')).toBe(true);
   });
 });

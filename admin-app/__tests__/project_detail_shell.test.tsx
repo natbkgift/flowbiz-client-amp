@@ -109,7 +109,7 @@ describe('project detail shell', () => {
       'href',
       '/en/contact?intent=project_consultation&source=project_investment_check&project=alpha-residence&projects=alpha-residence&buyer_fit=investor_compare&signal_level=high&msg=I+am+reviewing+Alpha+Residence+and+want+to+compare+its+price%2C+rent%2C+and+investment+context+against+nearby+alternatives.',
     );
-    expect(container.querySelector('#project_compare_secondary')).toHaveAttribute('href', '/en/compare');
+    expect(container.querySelector('#project_self_serve_secondary')).toHaveAttribute('href', '/en/compare');
     expect(container.textContent ?? '').toContain('Market snapshot available');
     expect(container.querySelector('#project-confidence-pack')).not.toBeNull();
     expect(container.querySelector('#project-brief-section')).not.toBeNull();
@@ -123,7 +123,11 @@ describe('project detail shell', () => {
     expect(container.querySelector('.public-hero__content.public-surface-card')).not.toBeNull();
     expect(container.querySelector('.public-hero__actions .btn.btn-primary')).not.toBeNull();
     expect(container.querySelector('.project-unit-inventory-grid .property-card')).not.toBeNull();
-    expect(container.textContent ?? '').toContain('Browse shortlist-ready units');
+    expect(container.querySelector('#project_unit_summary_primary')).toHaveAttribute('href', '/en/contact?intent=project_consultation&source=project_investment_check&project=alpha-residence&projects=alpha-residence&buyer_fit=investor_compare&signal_level=high&msg=I+am+reviewing+Alpha+Residence+and+want+to+compare+its+price%2C+rent%2C+and+investment+context+against+nearby+alternatives.');
+    expect(container.querySelector('#project_unit_summary_inventory_secondary')).toHaveAttribute('href', '/en/buy');
+    expect(container.querySelector('#project_decision_secondary')).toHaveAttribute('href', '/en/compare');
+    expect(container.querySelector('#project_next_steps_utility')).toHaveAttribute('href', '/en/buy');
+    expect(container.textContent ?? '').toContain('Browse shortlist-ready listings');
     expect(container.querySelectorAll('#project-next-steps a')).toHaveLength(3);
     expect((container.querySelector('#lead-purpose') as HTMLSelectElement | null)?.value).toBe('invest');
   });
@@ -143,7 +147,8 @@ describe('project detail shell', () => {
     expect(markup).toContain('ขั้นตอนถัดไปกับทีมที่ปรึกษา');
     expect(markup).toContain('ส่งบรีฟโครงการให้ที่ปรึกษา');
     expect(markup).toContain('ขอเทียบโครงการนี้กับตัวเลือกใกล้เคียง');
-    expect(markup).toContain('ดูรายการที่บันทึกเข้ารายการคัดไว้ได้');
+    expect(markup).toContain('จังหวะถัดไปจากหน้าโครงการนี้');
+    expect(markup).toContain('ดูรายการที่พร้อมคัดต่อ');
     expect(markup).toContain('การส่งต่อจากหน้านี้จะพกชื่อโครงการ ทำเล และจังหวะถัดไปของการตัดสินใจไปใน inquiry เดียวกัน');
     expect(markup).not.toContain('listing brief');
     expect(markup).not.toContain('inventory');
