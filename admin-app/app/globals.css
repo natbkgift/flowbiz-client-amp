@@ -9679,6 +9679,51 @@ html[lang='th'] .projects-page .public-hero__eyebrow {
   box-shadow: 0 14px 30px rgba(7, 19, 39, 0.05);
 }
 
+.listing-guidance-card {
+  display: grid;
+  gap: 14px;
+  margin-bottom: 22px;
+  overflow: hidden;
+}
+
+.listing-guidance-card__copy {
+  display: grid;
+  gap: 6px;
+}
+
+.listing-guidance-card__kicker,
+.listing-guidance-card__title,
+.listing-guidance-card__body {
+  margin: 0;
+}
+
+.listing-guidance-card__body {
+  max-width: 62ch;
+}
+
+.listing-guidance-card__list {
+  gap: 10px;
+}
+
+.listing-guidance-card__list .insight-list__item {
+  padding: 14px 15px;
+  border-radius: 17px;
+}
+
+.listing-guidance-card--broad .listing-guidance-card__list .insight-list__item {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.92), rgba(248, 244, 238, 0.88));
+  border-color: rgba(7, 19, 39, 0.06);
+}
+
+.listing-guidance-card--empty .listing-guidance-card__list .insight-list__item {
+  background: linear-gradient(180deg, rgba(18, 28, 46, 0.48), rgba(11, 18, 31, 0.72));
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
+.listing-guidance-card__actions {
+  gap: 10px;
+}
+
 .buy-page .buy-scan-note,
 .buy-page .buy-flow-utility {
   border-radius: 24px;
@@ -14233,6 +14278,11 @@ html[lang='th'] .projects-page .public-hero__eyebrow {
   }
 
   .results-header__summary-chips {
+    width: 100%;
+  }
+
+  .listing-guidance-card__actions > .btn,
+  .listing-guidance-card__actions > a {
     width: 100%;
   }
 

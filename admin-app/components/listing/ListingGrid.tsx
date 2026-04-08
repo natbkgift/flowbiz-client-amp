@@ -1,17 +1,22 @@
 'use client';
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 
 import type { PropertyListItem } from '../../app/public/_shared/types';
+import { TrackedLink } from '../analytics/TrackedLink';
 import { PropertyCard } from '../cards/PropertyCard';
 import { SidebarFilter } from './SidebarFilter';
 import { IconFilter } from '../icons/SvgIcons';
+import { withLocaleQuery } from '../../app/_lib/public-advisory';
 import { en } from '../../app/_lib/i18n/en';
 import { th } from '../../app/_lib/i18n/th';
-import { localeFromPathname } from '../../app/_lib/i18n/routing';
+import { localeFromPathname, withLocale } from '../../app/_lib/i18n/routing';
 import { ShortlistStateHydrator } from '../shortlist/ShortlistStateHydrator';
+import { PublicActionRow } from '../public/PublicActionRow';
 import { PublicChip } from '../public/PublicChip';
+import { PublicSurfaceCard } from '../public/PublicSurfaceCard';
 
 type SortKey = 'newest' | 'price_asc' | 'price_desc';
 
@@ -48,6 +53,8 @@ export function ListingGrid({ items }: { items: PropertyListItem[] }) {
     if (sort === 'price_desc') out.sort((a, b) => Number(b.price) - Number(a.price));
     return out;
   }, [filtered, sort]);
+  const listingRoute = pathname.includes('/rent') ? 'rent' : 'buy';
+  const listingBaseHref = withLocale(locale, listingRoute === 'rent' ? '/rent' : '/buy');
   const sortLabel = sort === 'newest'
     ? dict.listing.newest
     : sort === 'price_asc'
@@ -62,6 +69,61 @@ export function ListingGrid({ items }: { items: PropertyListItem[] }) {
     : locale === 'th'
       ? `ยังไม่ได้ใช้ตัวกรอง • ${sortLabel}`
       : `No filters applied • ${sortLabel}`;
+  const broadResultsPromptVisible = sorted.length >= 6 && activeFilterCount < 2;
+  const noResultsPromptVisible = sorted.length === 0;
+  const smartFinderPrompt = noResultsPromptVisible
+    ? {
+        variant: 'empty' as const,
+        kicker: locale === 'th' ? 'Undecided moment' : 'Undecided moment',
+        title: locale === 'th' ? 'ตัวกรองชุดนี้ยังไม่เหลือ listing ที่พร้อมตัดสินใจต่อ' : 'This filter set is not leaving you with a decision-ready listing',
+        body: locale === 'th'
+          ? 'ถ้าโจทย์เริ่มแคบเกินไป ให้ใช้ Smart Finder เพื่อจัด intent ใหม่ก่อน แล้วค่อยกลับมาดู live inventory อีกครั้ง'
+          : 'If the brief has become too narrow, use Smart Finder to reframe the intent before you come back to the live inventory.',
+        lines: [
+          locale === 'th'
+            ? 'Smart Finder เหมาะเมื่อคุณยังไม่มั่นใจเรื่องงบ เวลา หรือกรอบการใช้งานหลักของทรัพย์ที่ต้องการ'
+            : 'Smart Finder works best when budget, timing, or primary use case is still uncertain.',
+          locale === 'th'
+            ? 'ถ้าต้องการกลับไปสแกนคลังเดิม ให้รีเซ็ตกลับสู่หน้า listing หลักของเส้นทางนี้'
+            : 'If you want the live catalogue back, reset to the base listing route for this path.',
+        ],
+        primaryHref: withLocaleQuery(locale, '/smart-finder', {
+          source: 'listing_no_results',
+          listing_route: listingRoute,
+          results: String(sorted.length),
+          active_filters: String(activeFilterCount),
+        }),
+        primaryLabel: dict.advisory.useSmartFinder,
+        secondaryHref: listingBaseHref,
+        secondaryLabel: locale === 'th' ? 'รีเซ็ตกลับสู่ listing ทั้งหมด' : 'Reset to the full listing set',
+      }
+    : broadResultsPromptVisible
+      ? {
+          variant: 'broad' as const,
+          kicker: locale === 'th' ? 'Recommendation prompt' : 'Recommendation prompt',
+          title: locale === 'th' ? 'ผลลัพธ์ยังกว้างเกินไปสำหรับเปิดการ์ดต่อแบบสุ่ม' : 'The result set is still too broad to keep opening cards at random',
+          body: locale === 'th'
+            ? 'ถ้ายังแยกไม่ออกว่าควรเริ่มจากยูนิตแบบไหน ให้ใช้ Smart Finder ช่วยบีบ intent ก่อน แล้วค่อยกลับมาสแกนการ์ดที่เหลือ'
+            : 'If you still cannot tell which unit profile deserves the next click, let Smart Finder compress the brief first and then come back to scan the remaining cards.',
+          lines: [
+            locale === 'th'
+              ? 'ใช้ Smart Finder เมื่อชุดผลลัพธ์ยังดู “ถูกทั้งหมดนิดหน่อย” มากกว่าจะมีตัวเต็งที่ชัดจริง'
+              : 'Use Smart Finder when the live set still feels vaguely right across too many options.',
+            locale === 'th'
+              ? 'กลับมาที่ listing shell นี้เมื่อ brief แคบพอสำหรับเทียบ trade-off ระดับยูนิตจริง'
+              : 'Come back to this listing shell once the brief is narrow enough for real unit-level tradeoffs.',
+          ],
+          primaryHref: withLocaleQuery(locale, '/smart-finder', {
+            source: 'listing_broad_results',
+            listing_route: listingRoute,
+            results: String(sorted.length),
+            active_filters: String(activeFilterCount),
+          }),
+          primaryLabel: dict.advisory.useSmartFinder,
+          secondaryHref: withLocale(locale, '/projects'),
+          secondaryLabel: locale === 'th' ? 'ดูโครงการที่เผยแพร่แล้ว' : 'Browse published projects',
+        }
+      : null;
 
   return (
     <>
@@ -121,6 +183,80 @@ export function ListingGrid({ items }: { items: PropertyListItem[] }) {
               </select>
             </div>
           </div>
+
+          {smartFinderPrompt ? (
+            <PublicSurfaceCard
+              as="section"
+              tone={smartFinderPrompt.variant === 'empty' ? 'deep' : 'warm'}
+              className={`listing-guidance-card listing-guidance-card--${smartFinderPrompt.variant}`}
+            >
+              <div className="listing-guidance-card__copy">
+                <p className="listing-guidance-card__kicker type-label">{smartFinderPrompt.kicker}</p>
+                <h2 className="listing-guidance-card__title type-h3">{smartFinderPrompt.title}</h2>
+                <p className="listing-guidance-card__body type-body">{smartFinderPrompt.body}</p>
+              </div>
+
+              <div className="insight-list listing-guidance-card__list" aria-label={locale === 'th' ? 'คำแนะนำถัดไป' : 'Next recommendation'}>
+                {smartFinderPrompt.lines.map((line) => (
+                  <div key={line} className="insight-list__item">
+                    <span className="insight-list__body">{line}</span>
+                  </div>
+                ))}
+              </div>
+
+              <PublicActionRow className="listing-guidance-card__actions" stackOnMobile>
+                <TrackedLink
+                  className="btn btn-primary"
+                  href={smartFinderPrompt.primaryHref}
+                  eventType="cta_click"
+                  eventPayload={{
+                    source_route: listingRoute,
+                    cta_type: 'primary',
+                    cta_label: smartFinderPrompt.primaryLabel,
+                    entity_type: 'route',
+                    entity_name: 'smart-finder',
+                    user_intent: 'research',
+                    context: {
+                      prompt_variant: smartFinderPrompt.variant,
+                      results: sorted.length,
+                      active_filters: activeFilterCount,
+                      sort,
+                    },
+                  }}
+                >
+                  {smartFinderPrompt.primaryLabel}
+                </TrackedLink>
+
+                {smartFinderPrompt.variant === 'empty' ? (
+                  <Link className="btn btn-secondary" href={smartFinderPrompt.secondaryHref}>
+                    {smartFinderPrompt.secondaryLabel}
+                  </Link>
+                ) : (
+                  <TrackedLink
+                    className="btn btn-secondary"
+                    href={smartFinderPrompt.secondaryHref}
+                    eventType="cta_click"
+                    eventPayload={{
+                      source_route: listingRoute,
+                      cta_type: 'secondary',
+                      cta_label: smartFinderPrompt.secondaryLabel,
+                      entity_type: 'route',
+                      entity_name: 'projects',
+                      user_intent: 'research',
+                      context: {
+                        prompt_variant: smartFinderPrompt.variant,
+                        results: sorted.length,
+                        active_filters: activeFilterCount,
+                        sort,
+                      },
+                    }}
+                  >
+                    {smartFinderPrompt.secondaryLabel}
+                  </TrackedLink>
+                )}
+              </PublicActionRow>
+            </PublicSurfaceCard>
+          ) : null}
 
           {sorted.length ? (
             <div className="grid grid-3" role="list" aria-label={dict.listing.results}>

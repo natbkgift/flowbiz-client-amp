@@ -178,10 +178,28 @@ describe('public design system contract', () => {
     expect(listingGrid).toContain('pattern-inline-controls');
     expect(listingGrid).toContain('PublicChip');
     expect(listingGrid).toContain('results-header__summary-chips');
+    expect(listingGrid).toContain('PublicSurfaceCard');
+    expect(listingGrid).toContain('PublicActionRow');
+    expect(listingGrid).toContain('listing-guidance-card');
     expect(sidebarFilter).toContain('filter-sidebar__summary');
     expect(sidebarFilter).toContain('listing-filter-backdrop');
     expect(stickyMobileCta).toContain('pattern-mobile-bar');
     expect(pageOwnedMobileCta).toContain('pattern-mobile-bar');
+  });
+
+  it('keeps undecided listing prompts on shared surface and action primitives with Smart Finder handoff', () => {
+    const listingGrid = read('components/listing/ListingGrid.tsx');
+    const globals = read('app/globals.css');
+
+    expect(listingGrid).toContain('withLocaleQuery(locale, \'/smart-finder\'');
+    expect(listingGrid).toContain('listing_broad_results');
+    expect(listingGrid).toContain('listing_no_results');
+    expect(listingGrid).toContain('PublicSurfaceCard');
+    expect(listingGrid).toContain('PublicActionRow');
+
+    expect(globals).toContain('.listing-guidance-card');
+    expect(globals).toContain('.listing-guidance-card__actions');
+    expect(globals).toContain('.listing-guidance-card--empty .listing-guidance-card__list .insight-list__item');
   });
 
   it('keeps decision detail routes on the shared public hero system', () => {

@@ -48,6 +48,22 @@ const items = [
   },
 ] as const;
 
+const broadItems = Array.from({ length: 6 }, (_, index) => ({
+  id: `broad-${index + 1}`,
+  slug: `broad-${index + 1}`,
+  title: `${index + 1} Bedroom Broad Residence`,
+  price: 3000000 + (index * 500000),
+  city: index % 2 === 0 ? 'Jomtien' : 'Pratumnak',
+  image: null,
+  bedrooms: (index % 3) + 1,
+  bathrooms: 1,
+  size_sqm: 40 + index,
+  property_type: 'condo',
+  listing_type: 'resale',
+  created_at: '2026-03-17T00:00:00Z',
+  updated_at: '2026-03-17T00:00:00Z',
+}));
+
 describe('V2 search filters UI', () => {
   function expectResultsCount(count: number) {
     expect(
@@ -116,6 +132,31 @@ describe('V2 search filters UI', () => {
     expect(screen.getByText(/scan the cards first/i)).toBeTruthy();
     expect(screen.getByRole('button', { name: /filters & sort/i })).toHaveClass('listing-filter-trigger');
     expect(screen.getByText(/no filters applied • newest/i)).toBeTruthy();
+  });
+
+  it('routes broad result sets into Smart Finder before more random card scanning', () => {
+    render(<ListingGrid items={broadItems} />);
+
+    expect(screen.getByRole('heading', { name: /result set is still too broad/i })).toBeTruthy();
+    expect(screen.getByRole('link', { name: /use smart finder/i }).getAttribute('href')).toBe(
+      '/en/smart-finder?source=listing_broad_results&listing_route=buy&results=6&active_filters=0',
+    );
+    expect(screen.getByRole('link', { name: /browse published projects/i }).getAttribute('href')).toBe('/en/projects');
+  });
+
+  it('uses Smart Finder as the recovery path when applied filters leave no listings', () => {
+    render(<ListingGrid items={[...items]} />);
+
+    fireEvent.change(screen.getByDisplayValue('3000000'), { target: { value: '8000000' } });
+    fireEvent.change(screen.getByDisplayValue('7000000'), { target: { value: '9000000' } });
+    fireEvent.click(screen.getByRole('button', { name: /apply filters/i }));
+
+    expectResultsCount(0);
+    expect(screen.getByRole('heading', { name: /not leaving you with a decision-ready listing/i })).toBeTruthy();
+    expect(screen.getByRole('link', { name: /use smart finder/i }).getAttribute('href')).toBe(
+      '/en/smart-finder?source=listing_no_results&listing_route=buy&results=0&active_filters=1',
+    );
+    expect(screen.getByRole('link', { name: /reset to the full listing set/i }).getAttribute('href')).toBe('/en/buy');
   });
 
   it('blocks invalid price ranges and explains the issue before apply', () => {
